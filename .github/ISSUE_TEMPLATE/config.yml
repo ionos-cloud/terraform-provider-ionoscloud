@@ -1,0 +1,5 @@
+blank_issues_enabled: false
+contact_links:
+  - name: IONOS Cloud API
+    url: https://devops.ionos.com/api/
+    about: View API documentation

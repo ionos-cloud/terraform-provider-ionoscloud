@@ -1,0 +1,99 @@
+<% wrap_layout :inner do %>
+  <% content_for :sidebar do %>
+    <div class="docs-sidebar hidden-print affix-top" role="complementary">
+      <ul class="nav docs-sidenav">
+        <li<%= sidebar_current("docs-home") %>>
+        <a href="/docs/providers/index.html">All Providers</a>
+                </li>
+
+        <li<%= sidebar_current("docs-profitbricks-index") %>>
+            <a href="/docs/providers/profitbricks/index.html">ProfitBricks Provider</a>
+        </li>
+
+        <li<%= sidebar_current("docs-profitbricks-datasource") %>>
+            <a href="#">Data Sources</a>
+                    <ul class="nav nav-visible">
+                        <li<%= sidebar_current("docs-profitbricks-datasource-datacenter") %>>
+                            <a href="/docs/providers/profitbricks/d/profitbricks_datacenter.html">profitbricks_datacenter</a>
+                        </li>
+                        <li<%= sidebar_current("docs-profitbricks-datasource-image") %>>
+                            <a href="/docs/providers/profitbricks/d/profitbricks_image.html">profitbricks_image</a>
+                        </li>
+                        <li<%= sidebar_current("docs-profitbricks-resource-location") %>>
+                            <a href="/docs/providers/profitbricks/d/profitbricks_location.html">profitbricks_location</a>
+                        </li>
+                        <li<%= sidebar_current("docs-profitbricks-resource-resource") %>>
+                            <a href="/docs/providers/profitbricks/d/profitbricks_resource.html">profitbricks_resource</a>
+                        </li>
+                        <li<%= sidebar_current("docs-profitbricks-resource-snapshot") %>>
+                            <a href="/docs/providers/profitbricks/d/profitbricks_snapshot.html">profitbricks_snapshot</a>
+                        </li>
+                </ul>
+            </a>
+        </li>
+
+        <li<%= sidebar_current("docs-profitbricks-resource") %>>
+        <a href="#">Resources</a>
+                <ul class="nav nav-visible">
+                    <li<%= sidebar_current("docs-profitbricks-resource-datacenter") %>>
+                    <a href="/docs/providers/profitbricks/r/profitbricks_datacenter.html">profitbricks_datacenter</a>
+                    </li>
+                    <li<%= sidebar_current("docs-profitbricks-resource-firewall") %>>
+                    <a href="/docs/providers/profitbricks/r/profitbricks_firewall.html">profitbricks_firewall</a>
+                    </li>
+					<li<%= sidebar_current("docs-profitbricks-resource-group") %>>
+                    <a href="/docs/providers/profitbricks/r/profitbricks_group.html">profitbricks_group</a>
+                    </li>
+                    <li<%= sidebar_current("docs-profitbricks-resource-ipblock") %>>
+                    <a href="/docs/providers/profitbricks/r/profitbricks_ipblock.html">profitbricks_ipblock</a>
+                    </li>
+					<li<%= sidebar_current("docs-profitbricks-resource-ipfailover") %>>
+                    <a href="/docs/providers/profitbricks/r/profitbricks_ipfailover.html">profitbricks_ipfailover</a>
+                    </li>
+                    <li<%= sidebar_current("docs-profitbricks-resource-k8s-cluster") %>>
+                    <a href="/docs/providers/profitbricks/r/profitbricks_k8s_cluster.html">profitbricks_k8s_cluster</a>
+                    </li>
+                    <li<%= sidebar_current("docs-profitbricks-resource-k8s-node-pool") %>>
+                    <a href="/docs/providers/profitbricks/r/profitbricks_k8s_node_pool.html">profitbricks_k8s_node_pool</a>
+                    </li>
+                    <li<%= sidebar_current("docs-profitbricks-resource-private-crossconnect") %>>
+                    <a href="/docs/providers/profitbricks/r/profitbricks_private_crossconnect.html">profitbricks_private_crossconnect</a>
+                    </li>
+                    <li<%= sidebar_current("docs-profitbricks-resource-backup-unit") %>>
+                    <a href="/docs/providers/profitbricks/r/profitbricks_backup_unit.html">profitbricks_backup_unit</a>
+                    </li>
+                    <li<%= sidebar_current("docs-profitbricks-resource-s3-key") %>>
+                    <a href="/docs/providers/profitbricks/r/profitbricks_s3_key.html">profitbricks_s3_key</a>
+                    </li>
+                    <li<%= sidebar_current("docs-profitbricks-resource-lan") %>>
+                    <a href="/docs/providers/profitbricks/r/profitbricks_lan.html">profitbricks_lan</a>
+                    </li>
+                    <li<%= sidebar_current("docs-profitbricks-resource-loadbalancer") %>>
+                    <a href="/docs/providers/profitbricks/r/profitbricks_loadbalancer.html">profitbricks_loadbalancer</a>
+                    </li>
+                    <li<%= sidebar_current("docs-profitbricks-resource-nic") %>>
+                    <a href="/docs/providers/profitbricks/r/profitbricks_nic.html">profitbricks_nic</a>
+                    </li>
+                    <li<%= sidebar_current("docs-profitbricks-resource-server") %>>
+                    <a href="/docs/providers/profitbricks/r/profitbricks_server.html">profitbricks_server</a>
+                    </li>
+					<li<%= sidebar_current("docs-profitbricks-resource-share") %>>
+                    <a href="/docs/providers/profitbricks/r/profitbricks_share.html">profitbricks_share</a>
+                    </li>
+					<li<%= sidebar_current("docs-profitbricks-resource-snapshot") %>>
+                    <a href="/docs/providers/profitbricks/r/profitbricks_snapshot.html">profitbricks_snapshot</a>
+                    </li>
+					<li<%= sidebar_current("docs-profitbricks-resource-user") %>>
+                    <a href="/docs/providers/profitbricks/r/profitbricks_user.html">profitbricks_user</a>
+                    </li>
+                    <li<%= sidebar_current("docs-profitbricks-resource-volume") %>>
+                    <a href="/docs/providers/profitbricks/r/profitbricks_volume.html">profitbricks_volume</a>
+                    </li>
+        </ul>
+        </li>
+      </ul>
+    </div>
+  <% end %>
+
+  <%= yield %>
+  <% end %>
