@@ -127,7 +127,6 @@ func resourcek8sNodePool() *schema.Resource {
 				Type:        schema.TypeList,
 				Description: "A list of fixed IPs",
 				Optional:    true,
-				MinItems:    2,
 				Elem: &schema.Schema{
 					Type: schema.TypeString,
 				},
@@ -153,15 +152,6 @@ func resourcek8sNodePoolCreate(d *schema.ResourceData, meta interface{}) error {
 			StorageSize:      uint32(d.Get("storage_size").(int)),
 			RAMSize:          uint32(d.Get("ram_size").(int)),
 		},
-	}
-
-	publicIpsProp, ok := d.GetOk("public_ips")
-	if ok {
-		publicIps := publicIpsProp.([]interface{})
-		k8sNodepool.Properties.PublicIPs = make([]string, len(publicIps), len(publicIps))
-		for i := range publicIps {
-			k8sNodepool.Properties.PublicIPs[i] = fmt.Sprint(publicIps[i])
-		}
 	}
 
 	if _, asOk := d.GetOk("auto_scaling.0"); asOk {
@@ -229,6 +219,22 @@ func resourcek8sNodePoolCreate(d *schema.ResourceData, meta interface{}) error {
 		}
 	}
 
+	publicIpsProp, ok := d.GetOk("public_ips")
+	if ok {
+		publicIps := publicIpsProp.([]interface{})
+
+		/* number of public IPs needs to be at least NodeCount + 1 */
+		if len(publicIps) > 0 && uint32(len(publicIps)) < k8sNodepool.Properties.NodeCount + 1 {
+			return fmt.Errorf("the number of public IPs must be at least %d", k8sNodepool.Properties.NodeCount + 1)
+		}
+
+		requestPublicIps := make([]string, len(publicIps), len(publicIps))
+		for i := range publicIps {
+			requestPublicIps[i] = fmt.Sprint(publicIps[i])
+		}
+		k8sNodepool.Properties.PublicIPs = &requestPublicIps
+	}
+
 	createdNodepool, err := client.CreateKubernetesNodePool(d.Get("k8s_cluster_id").(string), k8sNodepool)
 
 	if err != nil {
@@ -287,7 +293,6 @@ func resourcek8sNodePoolRead(d *schema.ResourceData, meta interface{}) error {
 	d.Set("cores_count", k8sNodepool.Properties.CoresCount)
 	d.Set("ram_size", k8sNodepool.Properties.RAMSize)
 	d.Set("storage_size", k8sNodepool.Properties.StorageSize)
-	d.Set("public_ips", k8sNodepool.Properties.PublicIPs)
 
 	if k8sNodepool.Properties.PublicIPs != nil {
 		d.Set("public_ips", k8sNodepool.Properties.PublicIPs)
@@ -313,18 +318,6 @@ func resourcek8sNodePoolUpdate(d *schema.ResourceData, meta interface{}) error {
 
 	request.Properties = &profitbricks.KubernetesNodePoolProperties{
 		NodeCount: uint32(d.Get("node_count").(int)),
-	}
-
-	if d.HasChange("public_ips") {
-		oldPublicIps, newPublicIps := d.GetChange("public_ips")
-		log.Printf("[INFO] k8s pool public IPs changed from %+v to %+v", oldPublicIps, newPublicIps)
-		if newPublicIps != nil {
-			publicIps := newPublicIps.([]interface{})
-			request.Properties.PublicIPs = make([]string, len(publicIps), len(publicIps))
-			for i := range publicIps {
-				request.Properties.PublicIPs[i] = fmt.Sprint(publicIps[i])
-			}
-		}
 	}
 
 	if d.HasChange("k8s_version") {
@@ -451,6 +444,28 @@ func resourcek8sNodePoolUpdate(d *schema.ResourceData, meta interface{}) error {
 			if updateMaintenanceWindow == true {
 				request.Properties.MaintenanceWindow = maintenanceWindow
 			}
+		}
+	}
+
+	if d.HasChange("public_ips") {
+		oldPublicIps, newPublicIps := d.GetChange("public_ips")
+		log.Printf("[INFO] k8s pool public IPs changed from %+v to %+v", oldPublicIps, newPublicIps)
+		if newPublicIps != nil {
+
+			publicIps := newPublicIps.([]interface{})
+
+			/* number of public IPs needs to be at least NodeCount + 1 */
+			if len(publicIps) > 0 && uint32(len(publicIps)) < request.Properties.NodeCount + 1 {
+				return fmt.Errorf("the number of public IPs must be at least %d", request.Properties.NodeCount + 1)
+			}
+
+			requestPublicIps := make([]string, len(publicIps), len(publicIps))
+
+			for i := range publicIps {
+				requestPublicIps[i] = fmt.Sprint(publicIps[i])
+			}
+
+			request.Properties.PublicIPs = &requestPublicIps
 		}
 	}
 

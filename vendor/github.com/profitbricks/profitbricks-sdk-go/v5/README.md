@@ -2068,7 +2068,7 @@ Retrieve details about a specific user including what groups and resources the u
 The following table describes the request arguments:
 
 | Name   | Required | Type   | Description                                                |
-| ------ | -------- | ------ | ---------------------------------------------------------- |
+| ------ | :------: | ------ | ---------------------------------------------------------- |
 | userid | **yes**  | string | The ID of the specific user to retrieve information about. |
 
 ```
@@ -2083,64 +2083,76 @@ Creates a new user under a particular contract.
 
 The following table describes the request arguments:
 
-| Name | Required | Type | Description                              |
-| ---- | -------- | ---- | ---------------------------------------- |
-| user | **yes**  | User | See [User Object](#user-resource-object) |
+| Name | Required | Type                          | Description     |
+| ---- | :------: | ----------------------------- | --------------- |
+| user | **yes**  | [User](#user-resource-object) | The user data.  |
 
 Build the `User` resource object:
 
-    var user = User{
-    	Properties: &UserProperties{
-    		Firstname:     "John",
-    		Lastname:      "Doe",
-    		Email:         email,
-    		Password:      "abc123-321CBA",
-    		Administrator: false,
-    		ForceSecAuth:  false,
-    		SecAuthActive: false,
-    	},
-    }
+```go
+user := User{
+    Properties: &UserProperties{
+        Firstname:     "John",
+        Lastname:      "Doe",
+        Email:         "test@go.com",
+        Password:      "abc123-321CBA",
+        Administrator: false,
+        ForceSecAuth:  false,
+        SecAuthActive: false,
+    },
+}
+```
 
 Pass the object to `CreateUser`:
 
-```
-CreateUser(user User)
+```go
+CreateUser(user)
 ```
 
 #### User Resource Object
 
-| Name          | Required | Type | Description                                                               |
-| ------------- | :------: | ---- | ------------------------------------------------------------------------- |
-| Firstname     | **yes**  | bool | The first name of the user.                                               |
-| Lastname      | **yes**  | bool | The last name of the user.                                                |
-| Email         | **yes**  | bool | The e-mail address of the user.                                           |
-| Password      | **yes**  | bool | A password for the user.                                                  |
-| Administrator |    no    | bool | Indicates if the user has administrative rights.                          |
-| ForceSecAuth  |    no    | bool | Indicates if secure (two-factor) authentication was enabled for the user. |
-| SecAuthActive |    no    | bool | Indicates if secure (two-factor) authentication is enabled for the user.  |
-
+| Name              | Required | Type  | Description                                                               |
+| ----------------- | :-----: | ------ | ------------------------------------------------------------------------- |
+| Firstname         | **yes** | string | The first name of the user.                                               |
+| Lastname          | **yes** | string | The last name of the user.                                                |
+| Email             | **yes** | string | The e-mail address of the user.                                           |
+| Password          | **yes** | string | A password for the user.                                                  |
+| Administrator     |    no   | bool   | Indicates if the user has administrative rights.                          |
+| ForceSecAuth      |    no   | bool   | Indicates if secure (two-factor) authentication was enabled for the user. |
+| SecAuthActive     |    no   | bool   | Indicates if secure (two-factor) authentication is enabled for the user.  |
+| Active            |    no   | *bool  | Indicates if the user is active (true) or disabled (false).               |
+| S3CanonicalUserID |    no   | string | The user's S3 ID.                                                         |
 ---
 
 #### Update a User
 
-Update details about a specific user including their privileges.
+Update details about a specific user including its privileges.
 
 The following table describes the request arguments:
 
-| Name   | Required | Type   | Description                            |
-| ------ | -------- | ------ | -------------------------------------- |
-| userid | **Yes**  | string | The ID of the specific user to update. |
+| Name   | Required | Type                          | Description                            |
+| ------ | :------: | ----------------------------- | -------------------------------------- |
+| userid | **yes**  | string                        | The ID of the specific user to update. |
+| user   | **yes**  | [User](#user-resource-object) | The user data.                         |
 
+```go
+t := true
+user := User{
+    Properties: &UserProperties{
+        Firstname:     "go sdk",
+        Lastname:      "newName",
+        Email:         "test@go.com",
+        Administrator: false,
+        ForceSecAuth:  false,
+        SecAuthActive: false,
+        Active:        &t,
+    },
+}
 ```
-user := UserProperties{
-		Firstname:     "go sdk ",
-		Lastname:      newName,
-		Email:         "test@go.com",
-		Password:      "abc123-321CBA",
-		Administrator: false,
-		ForceSecAuth:  false,
-		SecAuthActive: false,
-	}
+
+Pass the object to `UpdateUser`:
+
+```go
 UpdateUser(userid, user)
 ```
 
@@ -2153,10 +2165,10 @@ Blacklists the user, disabling them. The user is not completely purged, therefor
 The following table describes the request arguments:
 
 | Name   | Type    | Description | Required                               |
-| ------ | ------- | ----------- | -------------------------------------- |
-| userid | **Yes** | string      | The ID of the specific user to update. |
+| ------ | :-----: | ----------- | -------------------------------------- |
+| userid | **yes** | string      | The ID of the specific user to delete. |
 
-```
+```go
 DeleteUser(userid)
 ```
 
@@ -2288,7 +2300,7 @@ GetResourceByType(resourcetype, resourceId)
 | AutoScaling       |    no    | [\*AutoScaling](#AutoScaling-resource-object)                         | Whether this Node Pool should autoscale. Comprised of a minimum and a maximum number of nodes                  |
 | LANs              |  **no**  | \*\[\][KubernetesNodePoolLAN](#KubernetesNodePoolLAN-Resource-Object) | A list of Local Area Networks the nodes in the pool should be a part of                                        |
 | MaintenanceWindow |  **no**  | [MaintenanceWindow](#MaintenanceWindow-resource-object)               | An optional object with 2 keys: dayOfTheWeek and time.                                                         |
-| PublicIPs |  **no**  | \[\]string               | An optional array of strings with public IPs associated with the node pool.                                                         |
+| PublicIPs         |  **no**  | \*\[\]string                                                          | An optional array of strings with public IPs associated with the node pool.                                    |
 
 ### Create Cluster
 

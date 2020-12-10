@@ -254,7 +254,7 @@ github.com/oklog/run
 github.com/posener/complete
 github.com/posener/complete/cmd
 github.com/posener/complete/cmd/install
-# github.com/profitbricks/profitbricks-sdk-go/v5 v5.0.30
+# github.com/profitbricks/profitbricks-sdk-go/v5 v5.0.32
 ## explicit
 github.com/profitbricks/profitbricks-sdk-go/v5
 # github.com/sergi/go-diff v1.1.0
