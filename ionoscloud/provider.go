@@ -32,7 +32,7 @@ func Provider() terraform.ResourceProvider {
 			"token": {
 				Type:          schema.TypeString,
 				Optional:      true,
-				DefaultFunc:   schema.EnvDefaultFunc("ionoscloud_TOKEN", nil),
+				DefaultFunc:   schema.EnvDefaultFunc("IONOS_TOKEN", nil),
 				Description:   "IonosCloud bearer token for API operations.",
 				ConflictsWith: []string{"username", "password"},
 			},
