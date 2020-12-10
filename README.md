@@ -8,42 +8,7 @@
 
 ## Migrating from the ProfitBricks provider
 
-### Provider Name
-
-The provider name changed from `profitbricks` to `ionoscloud`.
-This reflects in the following change in your terraform file:
-`provider "profitbricks"` becomes `provider "ionoscloud"`
-
-### Resources and Datasources
-
-The migration affects resource names and datasource names.
-Every resource and datasource changed its prefix from `profitbricks_` to `ionoscloud_`.
-
-In order to accommodate that, the terraform state must be updated.
-
-The local state, in json format, can be updated with a simple find and replace procedure.
-For example, on Linux, sed can be used:
-```
-$ sed -i 's/profitbricks_/ionoscloud_/g' ./main.tf
-```
-
-On OSX the same command becomes:
-```
-$ sed -i bak 's/profitbricks_/ionoscloud_/g' ./main.tf
-```
-
-If you manage your state using remote backends you need to take the appropriate steps specific to your backend.
-
-### Environment Variables
-
-The following env variables have changed:
-
-| Old Variable Name     | New Variable Name |
-|-----------------------|-------------------|
-| PROFITBRICKS_USERNAME | IONOS_USERNAME    |
-| PROFITBRICKS_PASSWORD | IONOS_PASSWORD    |
-| PROFITBRICKS_TOKEN    | IONOS_TOKEN       |
-| PROFITBRICKS_API_URL  | IONOS_API_URL     |
+Please see the [Documentation](docs/index.md#migrating-from-the-profitbricks-provider) on how to migrate from the ProfitBricks provider.
 
 ## Requirements
 
