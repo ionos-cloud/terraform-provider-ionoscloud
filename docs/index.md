@@ -52,6 +52,15 @@ On OSX the same command becomes:
 $ sed -i bak 's/profitbricks_/ionoscloud_/g' ./terraform.tfstate
 ```
 
+The `provider` entries must also be updated. For example:
+```
+"provider": "provider[\"registry.terraform.io/hashicorp/profitbricks\"]"
+```
+becomes
+```
+"provider": "provider[\"registry.terraform.io/hashicorp/ionoscloud\"]"
+```
+
 If you manage your state using remote backends you need to take the appropriate steps specific to your backend.
 
 ### Environment Variables
