@@ -14,20 +14,20 @@ Use the navigation to the left to read about the available data sources and reso
 
 ## Migrating from the ProfitBricks provider
 
-### Provider Name
+### Provider Name in HCL files
 
 The provider name changed from `profitbricks` to `ionoscloud`.
-This reflects in the following change in your terraform file:
+This reflects in the following change in your terraform hcl files:
 `provider "profitbricks"` becomes `provider "ionoscloud"`
 
-### Resources and Datasources
+### Resources and Datasources in HCL files
 
 The migration affects resource names and datasource names.
 Every resource and datasource changed its prefix from `profitbricks_` to `ionoscloud_`.
 
-In order to accommodate that, the terraform state must be updated.
+In order to accommodate that, the terraform hcl files must be updated.
 
-The local state, in json format, can be updated with a simple find and replace procedure.
+This can be done with a simple find and replace procedure.
 For example, on Linux, sed can be used:
 ```
 $ sed -i 's/profitbricks_/ionoscloud_/g' ./main.tf
@@ -36,6 +36,20 @@ $ sed -i 's/profitbricks_/ionoscloud_/g' ./main.tf
 On OSX the same command becomes:
 ```
 $ sed -i bak 's/profitbricks_/ionoscloud_/g' ./main.tf
+```
+
+### Terraform State
+
+Because of the name changes of resources and datasources, the terraform state must also be updated.
+The local state, in json format, can be updated by replacing `profitbricks_` with `ionoscloud_` directly in the state file.
+For example, on Linux, using:
+```
+$ sed -i 's/profitbricks_/ionoscloud_/g' ./terraform.tfstate
+```
+
+On OSX the same command becomes:
+```
+$ sed -i bak 's/profitbricks_/ionoscloud_/g' ./terraform.tfstate
 ```
 
 If you manage your state using remote backends you need to take the appropriate steps specific to your backend.
