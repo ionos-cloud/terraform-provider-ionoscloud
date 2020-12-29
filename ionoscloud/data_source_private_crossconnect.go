@@ -168,11 +168,14 @@ func dataSourcePccRead(d *schema.ResourceData, meta interface{}) error {
 
 	if idOk {
 		/* search by ID */
+		fmt.Printf("searching for ID %s\n", id.(string))
 		pcc, err = client.GetPrivateCrossConnect(id.(string))
 		if err != nil {
 			return fmt.Errorf("an error occurred while fetching the pcc with ID %s: %s", id.(string), err)
 		}
-	} else {
+	}
+
+	if nameOk {
 		/* search by name */
 		var pccs *profitbricks.PrivateCrossConnects
 		pccs, err := client.ListPrivateCrossConnects()

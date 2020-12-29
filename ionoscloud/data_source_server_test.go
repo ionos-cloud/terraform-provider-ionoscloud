@@ -60,7 +60,7 @@ resource "ionoscloud_server" "test_datasource_server" {
   cores             = 2
   ram               = 2048
   availability_zone = "ZONE_1"
-  cpu_family        = "INTEL_XEON"
+  cpu_family        = "INTEL_SKYLAKE"
 
   image_name        = "ubuntu:20.04"
   image_password    = "foobar123456"
@@ -90,7 +90,7 @@ resource "ionoscloud_server" "test_datasource_server" {
   cores             = 2
   ram               = 2048
   availability_zone = "ZONE_1"
-  cpu_family        = "INTEL_XEON"
+  cpu_family        = "INTEL_SKYLAKE"
 
   image_name        = "ubuntu:20.04"
   image_password    = "foobar123456"
@@ -126,7 +126,7 @@ resource "ionoscloud_server" "test_datasource_server" {
   cores             = 2
   ram               = 2048
   availability_zone = "ZONE_1"
-  cpu_family        = "INTEL_XEON"
+  cpu_family        = "INTEL_SKYLAKE"
 
   image_name        = "ubuntu:20.04"
   image_password    = "foobar123456"
