@@ -1,3 +1,9 @@
+## 5.0.2
+
+BUG FIXES:
+
+- Correctly updating ips on a nic embedded in a server config 
+
 ## 5.0.1
 
 FEATURES:
