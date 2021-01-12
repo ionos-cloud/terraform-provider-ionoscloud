@@ -1,3 +1,8 @@
+## 5.0.3
+
+FEATURES:
+- new data sources added: k8s_cluster, k8s_node_pool
+
 ## 5.0.2
 
 BUG FIXES:

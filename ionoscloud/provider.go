@@ -79,6 +79,8 @@ func Provider() terraform.ResourceProvider {
 			"ionoscloud_lan":                  dataSourceLan(),
 			"ionoscloud_private_crossconnect": dataSourcePcc(),
 			"ionoscloud_server":               dataSourceServer(),
+			"ionoscloud_k8s_cluster":          dataSourceK8sCluster(),
+			"ionoscloud_k8s_node_pool":		   dataSourceK8sNodePool(),
 		},
 	}
 

@@ -176,7 +176,3 @@ Individual resources must opt-in to providing configurable `timeouts`, and attem
 ~> **Note:** Terraform does not automatically rollback in the face of errors.
 Instead, your Terraform state file will be partially updated with
 any resources that successfully completed.
-
-## Support
-
-You are welcome to contact us with questions or comments at [IonosCloud DevOps Central](https://devops.ionos.com/).
