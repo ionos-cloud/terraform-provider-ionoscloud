@@ -59,6 +59,10 @@ func resourceNic() *schema.Resource {
 				Required: true,
 				ForceNew: true,
 			},
+			"mac": {
+				Type:	  schema.TypeString,
+				Computed: true,
+			},
 		},
 		Timeouts: &resourceDefaultTimeouts,
 	}
@@ -129,6 +133,7 @@ func resourceNicRead(d *schema.ResourceData, meta interface{}) error {
 		d.Set("name", nic.Properties.Name)
 		d.Set("ips", nic.Properties.Ips)
 		d.Set("firewall_active", nic.Properties.FirewallActive)
+		d.Set("mac", nic.Properties.Mac)
 	}
 
 	return nil

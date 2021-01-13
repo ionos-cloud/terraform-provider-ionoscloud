@@ -25,6 +25,7 @@ func TestAccNic_Basic(t *testing.T) {
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckNICExists("ionoscloud_nic.database_nic", &nic),
 					testAccCheckNicAttributes("ionoscloud_nic.database_nic", volumeName),
+					resource.TestCheckResourceAttrSet("ionoscloud_nic.database_nic", "mac"),
 					resource.TestCheckResourceAttr("ionoscloud_nic.database_nic", "name", volumeName),
 				),
 			},
@@ -46,7 +47,7 @@ func testAccCheckNicDestroyCheck(s *terraform.State) error {
 			continue
 		}
 
-		_, err := client.GetNic(rs.Primary.Attributes["datacenter_id"], rs.Primary.Attributes["nic_id"], rs.Primary.ID)
+		_, err := client.GetNic(rs.Primary.Attributes["datacenter_id"], rs.Primary.Attributes["server_id"], rs.Primary.ID)
 
 		if apiError, ok := err.(profitbricks.ApiError); ok {
 			if apiError.HttpStatusCode() != 404 {

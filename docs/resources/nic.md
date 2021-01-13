@@ -33,6 +33,7 @@ resource "ionoscloud_nic" "example" {
 - `firewall_active` - (Optional)[Boolean] If this resource is set to true and is nested under a server resource firewall, with open SSH port, resource must be nested under the NIC.
 - `nat` - (Optional)[Boolean] Boolean value indicating if the private IP address has outbound access to the public internet.
 - `ips` - (Computed) The IP address or addresses assigned to the NIC.
+- `mac` - (Computed) The MAC address of the NIC.
 
 ## Import
 

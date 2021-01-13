@@ -1,3 +1,9 @@
+## 5.0.4
+
+BUG FIXES:
+- Importing mac info when loading nic information or server information
+- Reading PCC info when importing a lan
+
 ## 5.0.3
 
 FEATURES:

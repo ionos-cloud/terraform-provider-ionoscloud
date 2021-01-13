@@ -124,6 +124,7 @@ func resourceLanRead(d *schema.ResourceData, meta interface{}) error {
 	d.Set("name", lan.Properties.Name)
 	d.Set("ip_failover", lan.Properties.IPFailover)
 	d.Set("datacenter_id", d.Get("datacenter_id").(string))
+	d.Set("pcc", lan.Properties.PCC)
 	log.Printf("[INFO] LAN %s found: %+v", d.Id(), lan)
 	return nil
 }
