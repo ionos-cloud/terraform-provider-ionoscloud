@@ -41,7 +41,7 @@ $ make build
 
 ## Using the provider
 
-See the [IonosCloud Provider documentation](https://www.terraform.io/docs/providers/ionoscloud/index.html) to get started using the IonosCloud provider.
+See the [IonosCloud Provider documentation](https://registry.terraform.io/providers/ionos-cloud/ionoscloud/latest/docs) to get started using the IonosCloud provider.
 
 ## Developing the Provider
 
