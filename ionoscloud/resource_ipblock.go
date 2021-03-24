@@ -44,7 +44,7 @@ func resourceIPBlock() *schema.Resource {
 }
 
 func resourceIPBlockCreate(d *schema.ResourceData, meta interface{}) error {
-	client := meta.(*profitbricks.Client)
+	client := meta.(SdkBundle).LegacyClient
 	ipblock := &profitbricks.IPBlock{
 		Properties: profitbricks.IPBlockProperties{
 			Size:     d.Get("size").(int),
@@ -74,7 +74,7 @@ func resourceIPBlockCreate(d *schema.ResourceData, meta interface{}) error {
 }
 
 func resourceIPBlockRead(d *schema.ResourceData, meta interface{}) error {
-	client := meta.(*profitbricks.Client)
+	client := meta.(SdkBundle).LegacyClient
 	ipblock, err := client.GetIPBlock(d.Id())
 
 	if err != nil {
@@ -97,7 +97,7 @@ func resourceIPBlockRead(d *schema.ResourceData, meta interface{}) error {
 	return nil
 }
 func resourceIPBlockUpdate(d *schema.ResourceData, meta interface{}) error {
-	client := meta.(*profitbricks.Client)
+	client := meta.(SdkBundle).LegacyClient
 	request := profitbricks.IPBlockProperties{}
 
 	if d.HasChange("name") {
@@ -116,7 +116,7 @@ func resourceIPBlockUpdate(d *schema.ResourceData, meta interface{}) error {
 }
 
 func resourceIPBlockDelete(d *schema.ResourceData, meta interface{}) error {
-	client := meta.(*profitbricks.Client)
+	client := meta.(SdkBundle).LegacyClient
 	resp, err := client.ReleaseIPBlock(d.Id())
 	if err != nil {
 		return fmt.Errorf("An error occured while releasing an ipblock ID: %s %s", d.Id(), err)

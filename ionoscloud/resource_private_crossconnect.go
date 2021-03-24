@@ -93,7 +93,7 @@ func resourcePrivateCrossConnect() *schema.Resource {
 }
 
 func resourcePrivateCrossConnectCreate(d *schema.ResourceData, meta interface{}) error {
-	client := meta.(*profitbricks.Client)
+	client := meta.(SdkBundle).LegacyClient
 
 	pcc := profitbricks.PrivateCrossConnect{
 		Properties: &profitbricks.PrivateCrossConnectProperties{
@@ -137,7 +137,7 @@ func resourcePrivateCrossConnectCreate(d *schema.ResourceData, meta interface{})
 
 func resourcePrivateCrossConnectRead(d *schema.ResourceData, meta interface{}) error {
 
-	client := meta.(*profitbricks.Client)
+	client := meta.(SdkBundle).LegacyClient
 	pcc, err := client.GetPrivateCrossConnect(d.Id())
 
 	if err != nil {
@@ -183,7 +183,7 @@ func resourcePrivateCrossConnectRead(d *schema.ResourceData, meta interface{}) e
 }
 
 func resourcePrivateCrossConnectUpdate(d *schema.ResourceData, meta interface{}) error {
-	client := meta.(*profitbricks.Client)
+	client := meta.(SdkBundle).LegacyClient
 	request := profitbricks.PrivateCrossConnect{}
 
 	request.Properties = &profitbricks.PrivateCrossConnectProperties{
@@ -239,7 +239,7 @@ func resourcePrivateCrossConnectUpdate(d *schema.ResourceData, meta interface{})
 }
 
 func resourcePrivateCrossConnectDelete(d *schema.ResourceData, meta interface{}) error {
-	client := meta.(*profitbricks.Client)
+	client := meta.(SdkBundle).LegacyClient
 
 	_, err := client.DeletePrivateCrossConnect(d.Id())
 

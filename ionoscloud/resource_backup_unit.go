@@ -46,7 +46,7 @@ func resourceBackupUnit() *schema.Resource {
 }
 
 func resourceBackupUnitCreate(d *schema.ResourceData, meta interface{}) error {
-	client := meta.(*profitbricks.Client)
+	client := meta.(SdkBundle).LegacyClient
 
 	backupUnit := profitbricks.BackupUnit{
 		Properties: &profitbricks.BackupUnitProperties{
@@ -87,7 +87,7 @@ func resourceBackupUnitCreate(d *schema.ResourceData, meta interface{}) error {
 
 func resourceBackupUnitRead(d *schema.ResourceData, meta interface{}) error {
 
-	client := meta.(*profitbricks.Client)
+	client := meta.(SdkBundle).LegacyClient
 	backupUnit, err := client.GetBackupUnit(d.Id())
 
 	if err != nil {
@@ -119,7 +119,7 @@ func resourceBackupUnitRead(d *schema.ResourceData, meta interface{}) error {
 }
 
 func resourceBackupUnitUpdate(d *schema.ResourceData, meta interface{}) error {
-	client := meta.(*profitbricks.Client)
+	client := meta.(SdkBundle).LegacyClient
 	request := profitbricks.BackupUnit{}
 
 	request.Properties = &profitbricks.BackupUnitProperties{}
@@ -171,7 +171,7 @@ func resourceBackupUnitUpdate(d *schema.ResourceData, meta interface{}) error {
 }
 
 func resourceBackupUnitDelete(d *schema.ResourceData, meta interface{}) error {
-	client := meta.(*profitbricks.Client)
+	client := meta.(SdkBundle).LegacyClient
 
 	_, err := client.DeleteBackupUnit(d.Id())
 

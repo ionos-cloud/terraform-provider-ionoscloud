@@ -78,7 +78,7 @@ func resourceGroup() *schema.Resource {
 }
 
 func resourceGroupCreate(d *schema.ResourceData, meta interface{}) error {
-	client := meta.(*profitbricks.Client)
+	client := meta.(SdkBundle).LegacyClient
 	request := profitbricks.Group{
 		Properties: profitbricks.GroupProperties{},
 	}
@@ -134,7 +134,7 @@ func resourceGroupCreate(d *schema.ResourceData, meta interface{}) error {
 }
 
 func resourceGroupRead(d *schema.ResourceData, meta interface{}) error {
-	client := meta.(*profitbricks.Client)
+	client := meta.(SdkBundle).LegacyClient
 	group, err := client.GetGroup(d.Id())
 
 	if err != nil {
@@ -170,7 +170,7 @@ func resourceGroupRead(d *schema.ResourceData, meta interface{}) error {
 }
 
 func resourceGroupUpdate(d *schema.ResourceData, meta interface{}) error {
-	client := meta.(*profitbricks.Client)
+	client := meta.(SdkBundle).LegacyClient
 	tempCreateDataCenter := d.Get("create_datacenter").(bool)
 	tempCreateSnapshot := d.Get("create_snapshot").(bool)
 	tempReserveIp := d.Get("reserve_ip").(bool)
@@ -215,7 +215,7 @@ func resourceGroupUpdate(d *schema.ResourceData, meta interface{}) error {
 }
 
 func resourceGroupDelete(d *schema.ResourceData, meta interface{}) error {
-	client := meta.(*profitbricks.Client)
+	client := meta.(SdkBundle).LegacyClient
 	resp, err := client.DeleteGroup(d.Id())
 	if err != nil {
 		//try again in 20 seconds

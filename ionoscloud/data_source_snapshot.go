@@ -30,7 +30,7 @@ func dataSourceSnapshot() *schema.Resource {
 }
 
 func dataSourceSnapshotRead(d *schema.ResourceData, meta interface{}) error {
-	client := meta.(*profitbricks.Client)
+	client := meta.(SdkBundle).LegacyClient
 
 	snapshots, err := client.ListSnapshots()
 

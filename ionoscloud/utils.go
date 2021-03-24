@@ -38,7 +38,7 @@ func resourceServerImport(d *schema.ResourceData, meta interface{}) ([]*schema.R
 }
 
 func resourceK8sClusterImport(d *schema.ResourceData, meta interface{}) ([]*schema.ResourceData, error) {
-	client := meta.(*profitbricks.Client)
+	client := meta.(SdkBundle).LegacyClient
 	cluster, err := client.GetKubernetesCluster(d.Id())
 
 	if err != nil {
@@ -79,7 +79,7 @@ func resourceK8sNodepoolImport(d *schema.ResourceData, meta interface{}) ([]*sch
 		return nil, fmt.Errorf("Invalid import id %q. Expecting {k8sClusterId}/{k8sNodePoolId}", d.Id())
 	}
 
-	client := meta.(*profitbricks.Client)
+	client := meta.(SdkBundle).LegacyClient
 	k8sNodepool, err := client.GetKubernetesNodePool(parts[0], parts[1])
 
 	if err != nil {
@@ -148,7 +148,7 @@ func resourceK8sNodepoolImport(d *schema.ResourceData, meta interface{}) ([]*sch
 }
 
 func resourcePrivateCrossConnectImport(d *schema.ResourceData, meta interface{}) ([]*schema.ResourceData, error) {
-	client := meta.(*profitbricks.Client)
+	client := meta.(SdkBundle).LegacyClient
 	pcc, err := client.GetPrivateCrossConnect(d.Id())
 
 	if err != nil {
@@ -205,7 +205,7 @@ func resourcePrivateCrossConnectImport(d *schema.ResourceData, meta interface{})
 }
 
 func resourceBackupUnitImport(d *schema.ResourceData, meta interface{}) ([]*schema.ResourceData, error) {
-	client := meta.(*profitbricks.Client)
+	client := meta.(SdkBundle).LegacyClient
 	backupUnit, err := client.GetBackupUnit(d.Id())
 
 	if err != nil {
@@ -243,7 +243,7 @@ func resourceS3KeyImport(d *schema.ResourceData, meta interface{}) ([]*schema.Re
 		return nil, fmt.Errorf("Invalid import id %q. Expecting {userId}/{s3KeyId}", d.Id())
 	}
 
-	client := meta.(*profitbricks.Client)
+	client := meta.(SdkBundle).LegacyClient
 	s3Key, err := client.GetS3Key(parts[0], parts[1])
 
 	if err != nil {

@@ -43,7 +43,7 @@ func resourceLan() *schema.Resource {
 }
 
 func resourceLanCreate(d *schema.ResourceData, meta interface{}) error {
-	client := meta.(*profitbricks.Client)
+	client := meta.(SdkBundle).LegacyClient
 	request := profitbricks.Lan{
 		Properties: profitbricks.LanProperties{
 			Public: d.Get("public").(bool),
@@ -105,7 +105,7 @@ func resourceLanCreate(d *schema.ResourceData, meta interface{}) error {
 }
 
 func resourceLanRead(d *schema.ResourceData, meta interface{}) error {
-	client := meta.(*profitbricks.Client)
+	client := meta.(SdkBundle).LegacyClient
 	lan, err := client.GetLan(d.Get("datacenter_id").(string), d.Id())
 
 	if err != nil {
@@ -130,7 +130,7 @@ func resourceLanRead(d *schema.ResourceData, meta interface{}) error {
 }
 
 func resourceLanUpdate(d *schema.ResourceData, meta interface{}) error {
-	client := meta.(*profitbricks.Client)
+	client := meta.(SdkBundle).LegacyClient
 	properties := &profitbricks.LanProperties{}
 	newValue := d.Get("public")
 	properties.Public = newValue.(bool)
@@ -177,7 +177,7 @@ func resourceLanUpdate(d *schema.ResourceData, meta interface{}) error {
 }
 
 func resourceLanDelete(d *schema.ResourceData, meta interface{}) error {
-	client := meta.(*profitbricks.Client)
+	client := meta.(SdkBundle).LegacyClient
 	dcID := d.Get("datacenter_id").(string)
 
 	_, err := client.DeleteLan(dcID, d.Id())

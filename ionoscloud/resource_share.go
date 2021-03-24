@@ -40,7 +40,7 @@ func resourceShare() *schema.Resource {
 }
 
 func resourceShareCreate(d *schema.ResourceData, meta interface{}) error {
-	client := meta.(*profitbricks.Client)
+	client := meta.(SdkBundle).LegacyClient
 	request := profitbricks.Share{
 		Properties: profitbricks.ShareProperties{},
 	}
@@ -73,7 +73,7 @@ func resourceShareCreate(d *schema.ResourceData, meta interface{}) error {
 }
 
 func resourceShareRead(d *schema.ResourceData, meta interface{}) error {
-	client := meta.(*profitbricks.Client)
+	client := meta.(SdkBundle).LegacyClient
 	share, err := client.GetShare(d.Get("group_id").(string), d.Get("resource_id").(string))
 
 	if err != nil {
@@ -92,7 +92,7 @@ func resourceShareRead(d *schema.ResourceData, meta interface{}) error {
 }
 
 func resourceShareUpdate(d *schema.ResourceData, meta interface{}) error {
-	client := meta.(*profitbricks.Client)
+	client := meta.(SdkBundle).LegacyClient
 	tempSharePrivilege := d.Get("share_privilege").(bool)
 	tempEditPrivilege := d.Get("edit_privilege").(bool)
 	shareReq := profitbricks.Share{
@@ -117,7 +117,7 @@ func resourceShareUpdate(d *schema.ResourceData, meta interface{}) error {
 }
 
 func resourceShareDelete(d *schema.ResourceData, meta interface{}) error {
-	client := meta.(*profitbricks.Client)
+	client := meta.(SdkBundle).LegacyClient
 	resp, err := client.DeleteShare(d.Id(), d.Get("resource_id").(string))
 	if err != nil {
 		//try again in 20 seconds

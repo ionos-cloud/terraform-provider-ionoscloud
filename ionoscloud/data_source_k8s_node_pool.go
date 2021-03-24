@@ -156,7 +156,7 @@ func dataSourceK8sNodePool() *schema.Resource {
 }
 
 func dataSourceK8sReadNodePool(d *schema.ResourceData, meta interface{}) error {
-	client := meta.(*profitbricks.Client)
+	client := meta.(SdkBundle).LegacyClient
 
 	clusterId := d.Get("k8s_cluster_id")
 	id, idOk := d.GetOk("id")

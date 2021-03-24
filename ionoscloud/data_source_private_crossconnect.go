@@ -151,7 +151,7 @@ func setPccDataSource(d *schema.ResourceData, pcc *profitbricks.PrivateCrossConn
 }
 
 func dataSourcePccRead(d *schema.ResourceData, meta interface{}) error {
-	client := meta.(*profitbricks.Client)
+	client := meta.(SdkBundle).LegacyClient
 
 	id, idOk := d.GetOk("id")
 	name, nameOk := d.GetOk("name")

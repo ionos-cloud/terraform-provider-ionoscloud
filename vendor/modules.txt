@@ -212,6 +212,9 @@ github.com/hashicorp/terraform-svchost/disco
 # github.com/hashicorp/yamux v0.0.0-20200609203250-aecfd211c9ce
 ## explicit
 github.com/hashicorp/yamux
+# github.com/ionos-cloud/sdk-go/v5 v5.0.3
+## explicit
+github.com/ionos-cloud/sdk-go/v5
 # github.com/jhump/protoreflect v1.6.1
 ## explicit
 # github.com/jmespath/go-jmespath v0.3.0

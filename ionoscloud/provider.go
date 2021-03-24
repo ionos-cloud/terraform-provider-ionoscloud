@@ -2,14 +2,22 @@ package ionoscloud
 
 import (
 	"fmt"
+	"github.com/hashicorp/terraform-plugin-sdk/httpclient"
 	"log"
 	"time"
 
 	"github.com/hashicorp/terraform-plugin-sdk/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/terraform"
+	"github.com/ionos-cloud/sdk-go/v5"
 	"github.com/profitbricks/profitbricks-sdk-go/v5"
+
 )
+
+type SdkBundle struct {
+	LegacyClient *profitbricks.Client
+	Client *ionoscloud.APIClient
+}
 
 // Provider returns a schema.Provider for ionoscloud.
 func Provider() terraform.ResourceProvider {
@@ -122,15 +130,31 @@ func providerConfigure(d *schema.ResourceData, terraformVersion string) (interfa
 		}
 	}
 
+	cleanedUrl := cleanURL(d.Get("endpoint").(string))
+
 	config := Config{
 		Username: username.(string),
 		Password: password.(string),
-		Endpoint: cleanURL(d.Get("endpoint").(string)),
+		Endpoint: cleanedUrl,
 		Retries:  d.Get("retries").(int),
 		Token:    token.(string),
 	}
 
-	return config.Client(terraformVersion)
+	newConfig := ionoscloud.NewConfiguration(username.(string), password.(string), token.(string))
+	if len(cleanedUrl) > 0 {
+		newConfig.Host = cleanedUrl
+	}
+	newConfig.UserAgent = httpclient.TerraformUserAgent(terraformVersion)
+	newClient := ionoscloud.NewAPIClient(newConfig)
+
+	legacyClient, err := config.Client(terraformVersion)
+	if err != nil {
+		return nil, err
+	}
+	return SdkBundle{
+		LegacyClient: legacyClient,
+		Client:       newClient,
+	}, nil
 }
 
 // cleanURL makes sure trailing slash does not corrupt the state
@@ -174,7 +198,7 @@ func IsRequestFailed(err error) bool {
 // resourceStateRefreshFunc tracks progress of a request
 func resourceStateRefreshFunc(meta interface{}, path string) resource.StateRefreshFunc {
 	return func() (interface{}, string, error) {
-		client := meta.(*profitbricks.Client)
+		client := meta.(SdkBundle).LegacyClient
 
 		fmt.Printf("[INFO] Checking PATH %s\n", path)
 		if path == "" {

@@ -71,7 +71,7 @@ func resourceVolume() *schema.Resource {
 }
 
 func resourceVolumeCreate(d *schema.ResourceData, meta interface{}) error {
-	client := meta.(*profitbricks.Client)
+	client := meta.(SdkBundle).LegacyClient
 
 	var ssh_keypath []interface{}
 	var image_alias string
@@ -219,7 +219,7 @@ func resourceVolumeCreate(d *schema.ResourceData, meta interface{}) error {
 }
 
 func resourceVolumeRead(d *schema.ResourceData, meta interface{}) error {
-	client := meta.(*profitbricks.Client)
+	client := meta.(SdkBundle).LegacyClient
 	dcId := d.Get("datacenter_id").(string)
 	serverID := d.Get("server_id").(string)
 	volumeID := d.Id()
@@ -257,7 +257,7 @@ func resourceVolumeRead(d *schema.ResourceData, meta interface{}) error {
 }
 
 func resourceVolumeUpdate(d *schema.ResourceData, meta interface{}) error {
-	client := meta.(*profitbricks.Client)
+	client := meta.(SdkBundle).LegacyClient
 	properties := profitbricks.VolumeProperties{}
 	dcId := d.Get("datacenter_id").(string)
 
@@ -318,7 +318,7 @@ func resourceVolumeUpdate(d *schema.ResourceData, meta interface{}) error {
 }
 
 func resourceVolumeDelete(d *schema.ResourceData, meta interface{}) error {
-	client := meta.(*profitbricks.Client)
+	client := meta.(SdkBundle).LegacyClient
 	dcId := d.Get("datacenter_id").(string)
 
 	resp, err := client.DeleteVolume(dcId, d.Id())

@@ -23,6 +23,7 @@ require (
 	github.com/hashicorp/terraform-plugin-test v1.4.0 // indirect
 	github.com/hashicorp/terraform-svchost v0.0.0-20191119180714-d2e4933b9136 // indirect
 	github.com/hashicorp/yamux v0.0.0-20200609203250-aecfd211c9ce // indirect
+	github.com/ionos-cloud/sdk-go/v5 v5.0.3
 	github.com/jhump/protoreflect v1.6.1 // indirect
 	github.com/kr/pretty v0.2.0 // indirect
 	github.com/mattn/go-colorable v0.1.7 // indirect

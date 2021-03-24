@@ -524,7 +524,7 @@ func setServerData(d *schema.ResourceData, server *profitbricks.Server) error {
 }
 
 func dataSourceServerRead(d *schema.ResourceData, meta interface{}) error {
-	client := meta.(*profitbricks.Client)
+	client := meta.(SdkBundle).LegacyClient
 
 	datacenterId, dcIdOk := d.GetOk("datacenter_id")
 	if !dcIdOk {

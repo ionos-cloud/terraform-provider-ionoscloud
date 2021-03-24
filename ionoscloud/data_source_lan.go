@@ -94,7 +94,7 @@ func setLanData(d *schema.ResourceData, lan *profitbricks.Lan) error {
 }
 
 func dataSourceLanRead(d *schema.ResourceData, meta interface{}) error {
-	client := meta.(*profitbricks.Client)
+	client := meta.(SdkBundle).LegacyClient
 
 	datacenterId, dcIdOk := d.GetOk("datacenter_id")
 	if !dcIdOk {

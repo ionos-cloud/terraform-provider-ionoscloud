@@ -38,7 +38,7 @@ func resourceLanIPFailover() *schema.Resource {
 }
 
 func resourceLanIPFailoverCreate(d *schema.ResourceData, meta interface{}) error {
-	client := meta.(*profitbricks.Client)
+	client := meta.(SdkBundle).LegacyClient
 	dcid := d.Get("datacenter_id").(string)
 	lanid := d.Get("lan_id").(string)
 	if lanid == "" {
@@ -72,7 +72,7 @@ func resourceLanIPFailoverCreate(d *schema.ResourceData, meta interface{}) error
 }
 
 func resourceLanIPFailoverRead(d *schema.ResourceData, meta interface{}) error {
-	client := meta.(*profitbricks.Client)
+	client := meta.(SdkBundle).LegacyClient
 	lan, err := client.GetLan(d.Get("datacenter_id").(string), d.Id())
 
 	if err != nil {
@@ -93,7 +93,7 @@ func resourceLanIPFailoverRead(d *schema.ResourceData, meta interface{}) error {
 }
 
 func resourceLanIPFailoverUpdate(d *schema.ResourceData, meta interface{}) error {
-	client := meta.(*profitbricks.Client)
+	client := meta.(SdkBundle).LegacyClient
 	properties := &profitbricks.LanProperties{}
 	dcid := d.Get("datacenter_id").(string)
 	lanid := d.Get("lan_id").(string)
@@ -122,7 +122,7 @@ func resourceLanIPFailoverUpdate(d *schema.ResourceData, meta interface{}) error
 }
 
 func resourceLanIPFailoverDelete(d *schema.ResourceData, meta interface{}) error {
-	client := meta.(*profitbricks.Client)
+	client := meta.(SdkBundle).LegacyClient
 	dcid := d.Get("datacenter_id").(string)
 	lanid := d.Get("lan_id").(string)
 

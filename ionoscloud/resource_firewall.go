@@ -90,7 +90,7 @@ func resourceFirewall() *schema.Resource {
 }
 
 func resourceFirewallCreate(d *schema.ResourceData, meta interface{}) error {
-	client := meta.(*profitbricks.Client)
+	client := meta.(SdkBundle).LegacyClient
 	fw := &profitbricks.FirewallRule{
 		Properties: profitbricks.FirewallruleProperties{
 			Protocol: d.Get("protocol").(string),
@@ -156,7 +156,7 @@ func resourceFirewallCreate(d *schema.ResourceData, meta interface{}) error {
 }
 
 func resourceFirewallRead(d *schema.ResourceData, meta interface{}) error {
-	client := meta.(*profitbricks.Client)
+	client := meta.(SdkBundle).LegacyClient
 	fw, err := client.GetFirewallRule(d.Get("datacenter_id").(string), d.Get("server_id").(string), d.Get("nic_id").(string), d.Id())
 
 	if err != nil {
@@ -184,7 +184,7 @@ func resourceFirewallRead(d *schema.ResourceData, meta interface{}) error {
 }
 
 func resourceFirewallUpdate(d *schema.ResourceData, meta interface{}) error {
-	client := meta.(*profitbricks.Client)
+	client := meta.(SdkBundle).LegacyClient
 	properties := profitbricks.FirewallruleProperties{}
 
 	if d.HasChange("name") {
@@ -244,7 +244,7 @@ func resourceFirewallUpdate(d *schema.ResourceData, meta interface{}) error {
 }
 
 func resourceFirewallDelete(d *schema.ResourceData, meta interface{}) error {
-	client := meta.(*profitbricks.Client)
+	client := meta.(SdkBundle).LegacyClient
 	resp, err := client.DeleteFirewallRule(d.Get("datacenter_id").(string), d.Get("server_id").(string), d.Get("nic_id").(string), d.Id())
 
 	if err != nil {

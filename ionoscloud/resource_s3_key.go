@@ -40,7 +40,7 @@ func resourceS3Key() *schema.Resource {
 }
 
 func resourceS3KeyCreate(d *schema.ResourceData, meta interface{}) error {
-	client := meta.(*profitbricks.Client)
+	client := meta.(SdkBundle).LegacyClient
 
 	createdS3Key, err := client.CreateS3Key(d.Get("user_id").(string))
 
@@ -57,7 +57,7 @@ func resourceS3KeyCreate(d *schema.ResourceData, meta interface{}) error {
 
 func resourceS3KeyRead(d *schema.ResourceData, meta interface{}) error {
 
-	client := meta.(*profitbricks.Client)
+	client := meta.(SdkBundle).LegacyClient
 	s3Key, err := client.GetS3Key(d.Get("user_id").(string), d.Id())
 
 	if err != nil {
@@ -81,7 +81,7 @@ func resourceS3KeyRead(d *schema.ResourceData, meta interface{}) error {
 }
 
 func resourceS3KeyUpdate(d *schema.ResourceData, meta interface{}) error {
-	client := meta.(*profitbricks.Client)
+	client := meta.(SdkBundle).LegacyClient
 	request := profitbricks.S3Key{}
 
 	request.Properties = &profitbricks.S3KeyProperties{}
@@ -129,7 +129,7 @@ func resourceS3KeyUpdate(d *schema.ResourceData, meta interface{}) error {
 }
 
 func resourceS3KeyDelete(d *schema.ResourceData, meta interface{}) error {
-	client := meta.(*profitbricks.Client)
+	client := meta.(SdkBundle).LegacyClient
 
 	_, err := client.DeleteS3Key(d.Get("user_id").(string), d.Id())
 

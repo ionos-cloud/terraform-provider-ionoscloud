@@ -44,7 +44,7 @@ func resourceLoadbalancer() *schema.Resource {
 }
 
 func resourceLoadbalancerCreate(d *schema.ResourceData, meta interface{}) error {
-	client := meta.(*profitbricks.Client)
+	client := meta.(SdkBundle).LegacyClient
 	raw_ids := d.Get("nic_ids").([]interface{})
 	nic_ids := []profitbricks.Nic{}
 
@@ -84,7 +84,7 @@ func resourceLoadbalancerCreate(d *schema.ResourceData, meta interface{}) error 
 }
 
 func resourceLoadbalancerRead(d *schema.ResourceData, meta interface{}) error {
-	client := meta.(*profitbricks.Client)
+	client := meta.(SdkBundle).LegacyClient
 	lb, err := client.GetLoadbalancer(d.Get("datacenter_id").(string), d.Id())
 
 	if err != nil {
@@ -105,7 +105,7 @@ func resourceLoadbalancerRead(d *schema.ResourceData, meta interface{}) error {
 }
 
 func resourceLoadbalancerUpdate(d *schema.ResourceData, meta interface{}) error {
-	client := meta.(*profitbricks.Client)
+	client := meta.(SdkBundle).LegacyClient
 	properties := profitbricks.LoadbalancerProperties{}
 	if d.HasChange("name") {
 		_, new := d.GetChange("name")
@@ -161,7 +161,7 @@ func resourceLoadbalancerUpdate(d *schema.ResourceData, meta interface{}) error 
 }
 
 func resourceLoadbalancerDelete(d *schema.ResourceData, meta interface{}) error {
-	client := meta.(*profitbricks.Client)
+	client := meta.(SdkBundle).LegacyClient
 	resp, err := client.DeleteLoadbalancer(d.Get("datacenter_id").(string), d.Id())
 
 	if err != nil {

@@ -35,7 +35,7 @@ func resourceSnapshot() *schema.Resource {
 }
 
 func resourceSnapshotCreate(d *schema.ResourceData, meta interface{}) error {
-	client := meta.(*profitbricks.Client)
+	client := meta.(SdkBundle).LegacyClient
 	dcId := d.Get("datacenter_id").(string)
 	volumeId := d.Get("volume_id").(string)
 	name := d.Get("name").(string)
@@ -61,7 +61,7 @@ func resourceSnapshotCreate(d *schema.ResourceData, meta interface{}) error {
 }
 
 func resourceSnapshotRead(d *schema.ResourceData, meta interface{}) error {
-	client := meta.(*profitbricks.Client)
+	client := meta.(SdkBundle).LegacyClient
 	snapshot, err := client.GetSnapshot(d.Id())
 
 	if err != nil {
@@ -79,7 +79,7 @@ func resourceSnapshotRead(d *schema.ResourceData, meta interface{}) error {
 }
 
 func resourceSnapshotUpdate(d *schema.ResourceData, meta interface{}) error {
-	client := meta.(*profitbricks.Client)
+	client := meta.(SdkBundle).LegacyClient
 	dcId := d.Get("datacenter_id").(string)
 	volumeId := d.Get("volume_id").(string)
 
@@ -98,7 +98,7 @@ func resourceSnapshotUpdate(d *schema.ResourceData, meta interface{}) error {
 }
 
 func resourceSnapshotDelete(d *schema.ResourceData, meta interface{}) error {
-	client := meta.(*profitbricks.Client)
+	client := meta.(SdkBundle).LegacyClient
 	status, err := client.GetSnapshot(d.Id())
 	if err != nil {
 		return fmt.Errorf("An error occured while fetching a snapshot ID %s %s", d.Id(), err)

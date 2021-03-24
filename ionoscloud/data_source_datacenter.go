@@ -104,7 +104,7 @@ func getDatacenter(client *profitbricks.Client, d *schema.ResourceData) (*profit
 	return &results[0], nil
 }
 func dataSourceDataCenterRead(d *schema.ResourceData, meta interface{}) error {
-	client := meta.(*profitbricks.Client)
+	client := meta.(SdkBundle).LegacyClient
 
 	datacenter, err := getDatacenter(client, d)
 

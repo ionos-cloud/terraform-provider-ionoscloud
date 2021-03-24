@@ -42,7 +42,7 @@ func resourceDatacenter() *schema.Resource {
 }
 
 func resourceDatacenterCreate(d *schema.ResourceData, meta interface{}) error {
-	client := meta.(*profitbricks.Client)
+	client := meta.(SdkBundle).LegacyClient
 	datacenter := profitbricks.Datacenter{
 		Properties: profitbricks.DatacenterProperties{
 			Name:     d.Get("name").(string),
@@ -77,7 +77,7 @@ func resourceDatacenterCreate(d *schema.ResourceData, meta interface{}) error {
 }
 
 func resourceDatacenterRead(d *schema.ResourceData, meta interface{}) error {
-	client := meta.(*profitbricks.Client)
+	client := meta.(SdkBundle).LegacyClient
 	datacenter, err := client.GetDatacenter(d.Id())
 
 	if err != nil {
@@ -97,7 +97,7 @@ func resourceDatacenterRead(d *schema.ResourceData, meta interface{}) error {
 }
 
 func resourceDatacenterUpdate(d *schema.ResourceData, meta interface{}) error {
-	client := meta.(*profitbricks.Client)
+	client := meta.(SdkBundle).LegacyClient
 	obj := profitbricks.DatacenterProperties{}
 
 	if d.HasChange("name") {
@@ -132,7 +132,7 @@ func resourceDatacenterUpdate(d *schema.ResourceData, meta interface{}) error {
 }
 
 func resourceDatacenterDelete(d *schema.ResourceData, meta interface{}) error {
-	client := meta.(*profitbricks.Client)
+	client := meta.(SdkBundle).LegacyClient
 	dcid := d.Id()
 	resp, err := client.DeleteDatacenter(dcid)
 
