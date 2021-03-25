@@ -1,7 +1,9 @@
 package ionoscloud
 
 import (
+	"context"
 	"fmt"
+	ionoscloud "github.com/ionos-cloud/sdk-go/v5"
 	"log"
 	"time"
 
@@ -46,31 +48,43 @@ func resourceBackupUnit() *schema.Resource {
 }
 
 func resourceBackupUnitCreate(d *schema.ResourceData, meta interface{}) error {
-	client := meta.(SdkBundle).LegacyClient
+	client := meta.(SdkBundle).Client
 
-	backupUnit := profitbricks.BackupUnit{
-		Properties: &profitbricks.BackupUnitProperties{
-			Name:     d.Get("name").(string),
-			Password: d.Get("password").(string),
-			Email:    d.Get("email").(string),
+	ctx, cancel := context.WithTimeout(context.Background(), *resourceDefaultTimeouts.Create)
+
+	if cancel != nil {
+		defer cancel()
+	}
+
+	backupUnitName := d.Get("name").(string)
+	backupUnitPassword := d.Get("password").(string)
+	backupUnitEmail := d.Get("email").(string)
+
+	backupUnit := ionoscloud.BackupUnit{
+		Properties: &ionoscloud.BackupUnitProperties{
+			Name:     &backupUnitName,
+			Password: &backupUnitPassword,
+			Email:    &backupUnitEmail,
 		},
 	}
 
-	createdBackupUnit, err := client.CreateBackupUnit(backupUnit)
+	fmt.Println("backupUnit properties created")
+
+	createdBackupUnit, _, err := client.BackupUnitApi.BackupunitsPost(ctx).BackupUnit(backupUnit).Execute()
 
 	if err != nil {
 		d.SetId("")
 		return fmt.Errorf("Error creating backup unit: %s", err)
 	}
 
-	d.SetId(createdBackupUnit.ID)
+	d.SetId(*createdBackupUnit.Id)
 	log.Printf("[INFO] Created backup unit: %s", d.Id())
 
 	for {
 		log.Printf("[INFO] Waiting for backup unit %s to be ready...", d.Id())
 		time.Sleep(5 * time.Second)
 
-		backupUnitReady, rsErr := backupUnitReady(client, d)
+		backupUnitReady, rsErr := backupUnitReady(client, d, ctx)
 
 		if rsErr != nil {
 			return fmt.Errorf("Error while checking readiness status of backup unit %s: %s", d.Id(), rsErr)
@@ -87,9 +101,15 @@ func resourceBackupUnitCreate(d *schema.ResourceData, meta interface{}) error {
 
 func resourceBackupUnitRead(d *schema.ResourceData, meta interface{}) error {
 
-	client := meta.(SdkBundle).LegacyClient
-	backupUnit, err := client.GetBackupUnit(d.Id())
+	client := meta.(SdkBundle).Client
 
+	ctx, cancel := context.WithTimeout(context.Background(), *resourceDefaultTimeouts.Create)
+
+	if cancel != nil {
+		defer cancel()
+	}
+
+	backupUnit, _, err := client.BackupUnitApi.BackupunitsFindById(ctx, d.Id()).Execute()
 	if err != nil {
 		if apiError, ok := err.(profitbricks.ApiError); ok {
 			if apiError.HttpStatusCode() == 404 {
@@ -101,7 +121,7 @@ func resourceBackupUnitRead(d *schema.ResourceData, meta interface{}) error {
 		return fmt.Errorf("Error while fetching backup unit %s: %s", d.Id(), err)
 	}
 
-	contractResources, cErr := client.GetContractResources()
+	contractResources, _,  cErr := client.ContractApi.ContractsGet(ctx).Execute()
 
 	if cErr != nil {
 		return fmt.Errorf("Error while fetching contract resources for backup unit %s: %s", d.Id(), cErr)
@@ -109,9 +129,17 @@ func resourceBackupUnitRead(d *schema.ResourceData, meta interface{}) error {
 
 	log.Printf("[INFO] Successfully retreived contract resource for backup unit unit %s: %+v", d.Id(), contractResources)
 
-	d.Set("name", backupUnit.Properties.Name)
-	d.Set("email", backupUnit.Properties.Email)
-	d.Set("login", fmt.Sprintf("%s-%d", backupUnit.Properties.Name, int64(contractResources.Properties.PBContractNumber)))
+	npErr := d.Set("name", backupUnit.Properties.Name)
+	epErr := d.Set("email", backupUnit.Properties.Email)
+	cnErr := d.Set("login", fmt.Sprintf("%s-%d", *backupUnit.Properties.Name, contractResources.Properties.ContractNumber))
+
+	if npErr != nil {
+		return fmt.Errorf("Error while setting name property for backup unit %s: %s", d.Id(), cErr)
+	} else if epErr != nil {
+		return fmt.Errorf("Error while setting email property for backup unit %s: %s", d.Id(), cErr)
+	} else if cnErr != nil {
+		return fmt.Errorf("Error while setting login property for backup unit %s: %s", d.Id(), cErr)
+	}
 
 	log.Printf("[INFO] Successfully retreived backup unit %s: %+v", d.Id(), backupUnit)
 
@@ -119,26 +147,34 @@ func resourceBackupUnitRead(d *schema.ResourceData, meta interface{}) error {
 }
 
 func resourceBackupUnitUpdate(d *schema.ResourceData, meta interface{}) error {
-	client := meta.(SdkBundle).LegacyClient
-	request := profitbricks.BackupUnit{}
+	client := meta.(SdkBundle).Client
 
-	request.Properties = &profitbricks.BackupUnitProperties{}
+	request := ionoscloud.BackupUnit{}
+	request.Properties = &ionoscloud.BackupUnitProperties{}
 
 	log.Printf("[INFO] Attempting update backup unit %s", d.Id())
 
 	if d.HasChange("email") {
 		oldEmail, newEmail := d.GetChange("email")
+		newEmailStr := newEmail.(string)
 		log.Printf("[INFO] backup unit email changed from %+v to %+v", oldEmail, newEmail)
-		request.Properties.Email = newEmail.(string)
+		request.Properties.Email = &newEmailStr
 	}
 
 	if d.HasChange("password") {
 		oldPassword, newPassword := d.GetChange("password")
+		newPasswordStr := newPassword.(string)
 		log.Printf("[INFO] backup unit password changed from %+v to %+v", oldPassword, newPassword)
-		request.Properties.Password = newPassword.(string)
+		request.Properties.Password = &newPasswordStr
 	}
 
-	_, err := client.UpdateBackupUnit(d.Id(), request)
+	ctx, cancel := context.WithTimeout(context.Background(), *resourceDefaultTimeouts.Create)
+
+	if cancel != nil {
+		defer cancel()
+	}
+
+	_, _, err := client.BackupUnitApi.BackupunitsPut(ctx, d.Id()).BackupUnit(request).Execute()
 
 	if err != nil {
 		if apiError, ok := err.(profitbricks.ApiError); ok {
@@ -155,7 +191,7 @@ func resourceBackupUnitUpdate(d *schema.ResourceData, meta interface{}) error {
 		log.Printf("[INFO] Waiting for backup unit %s to be ready...", d.Id())
 		time.Sleep(5 * time.Second)
 
-		backupUnitReady, rsErr := backupUnitReady(client, d)
+		backupUnitReady, rsErr := backupUnitReady(client, d, ctx)
 
 		if rsErr != nil {
 			return fmt.Errorf("Error while checking readiness status of backup unit %s: %s", d.Id(), rsErr)
@@ -171,9 +207,14 @@ func resourceBackupUnitUpdate(d *schema.ResourceData, meta interface{}) error {
 }
 
 func resourceBackupUnitDelete(d *schema.ResourceData, meta interface{}) error {
-	client := meta.(SdkBundle).LegacyClient
+	client := meta.(SdkBundle).Client
 
-	_, err := client.DeleteBackupUnit(d.Id())
+	ctx, cancel := context.WithTimeout(context.Background(), *resourceDefaultTimeouts.Create)
+
+	if cancel != nil {
+		defer cancel()
+	}
+	_, _, err := client.BackupUnitApi.BackupunitsDelete(ctx, d.Id()).Execute()
 
 	if err != nil {
 		if apiError, ok := err.(profitbricks.ApiError); ok {
@@ -191,7 +232,7 @@ func resourceBackupUnitDelete(d *schema.ResourceData, meta interface{}) error {
 		log.Printf("[INFO] Waiting for backupUnit %s to be deleted...", d.Id())
 		time.Sleep(5 * time.Second)
 
-		backupUnitDeleted, dsErr := backupUnitDeleted(client, d)
+		backupUnitDeleted, dsErr := backupUnitDeleted(client, d, ctx)
 
 		if dsErr != nil {
 			return fmt.Errorf("Error while checking deletion status of backup unit %s: %s", d.Id(), dsErr)
@@ -206,25 +247,25 @@ func resourceBackupUnitDelete(d *schema.ResourceData, meta interface{}) error {
 	return nil
 }
 
-func backupUnitReady(client *profitbricks.Client, d *schema.ResourceData) (bool, error) {
-	subjectBackupUnit, err := client.GetBackupUnit(d.Id())
+func backupUnitReady(client *ionoscloud.APIClient, d *schema.ResourceData, c context.Context) (bool, error) {
+	backupUnit, _, err := client.BackupUnitApi.BackupunitsFindById(c, d.Id()).Execute()
 
 	if err != nil {
 		return true, fmt.Errorf("Error checking backup unit status: %s", err)
 	}
-	return subjectBackupUnit.Metadata.State == "AVAILABLE", nil
+	return *backupUnit.Metadata.State == "AVAILABLE", nil
 }
 
-func backupUnitDeleted(client *profitbricks.Client, d *schema.ResourceData) (bool, error) {
-	_, err := client.GetBackupUnit(d.Id())
+func backupUnitDeleted(client *ionoscloud.APIClient, d *schema.ResourceData, c context.Context) (bool, error) {
+	_, _, err := client.BackupUnitApi.BackupunitsFindById(c, d.Id()).Execute()
 
 	if err != nil {
 		if apiError, ok := err.(profitbricks.ApiError); ok {
 			if apiError.HttpStatusCode() == 404 {
 				return true, nil
 			}
-			return true, fmt.Errorf("Error checking backup unit deletion status: %s", err)
+			return false, fmt.Errorf("Error checking backup unit deletion status: %s", err)
 		}
 	}
-	return false, nil
+	return true, nil
 }
