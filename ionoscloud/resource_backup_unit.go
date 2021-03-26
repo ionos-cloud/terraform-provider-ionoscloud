@@ -68,8 +68,6 @@ func resourceBackupUnitCreate(d *schema.ResourceData, meta interface{}) error {
 		},
 	}
 
-	fmt.Println("backupUnit properties created")
-
 	createdBackupUnit, _, err := client.BackupUnitApi.BackupunitsPost(ctx).BackupUnit(backupUnit).Execute()
 
 	if err != nil {
@@ -103,13 +101,14 @@ func resourceBackupUnitRead(d *schema.ResourceData, meta interface{}) error {
 
 	client := meta.(SdkBundle).Client
 
-	ctx, cancel := context.WithTimeout(context.Background(), *resourceDefaultTimeouts.Create)
+	ctx, cancel := context.WithTimeout(context.Background(), *resourceDefaultTimeouts.Default)
 
 	if cancel != nil {
 		defer cancel()
 	}
 
 	backupUnit, _, err := client.BackupUnitApi.BackupunitsFindById(ctx, d.Id()).Execute()
+
 	if err != nil {
 		if apiError, ok := err.(profitbricks.ApiError); ok {
 			if apiError.HttpStatusCode() == 404 {
@@ -121,7 +120,7 @@ func resourceBackupUnitRead(d *schema.ResourceData, meta interface{}) error {
 		return fmt.Errorf("Error while fetching backup unit %s: %s", d.Id(), err)
 	}
 
-	contractResources, _,  cErr := client.ContractApi.ContractsGet(ctx).Execute()
+	contractResources, _, cErr := client.ContractApi.ContractsGet(ctx).Execute()
 
 	if cErr != nil {
 		return fmt.Errorf("Error while fetching contract resources for backup unit %s: %s", d.Id(), cErr)
@@ -156,19 +155,21 @@ func resourceBackupUnitUpdate(d *schema.ResourceData, meta interface{}) error {
 
 	if d.HasChange("email") {
 		oldEmail, newEmail := d.GetChange("email")
-		newEmailStr := newEmail.(string)
 		log.Printf("[INFO] backup unit email changed from %+v to %+v", oldEmail, newEmail)
+
+		newEmailStr := newEmail.(string)
 		request.Properties.Email = &newEmailStr
 	}
 
 	if d.HasChange("password") {
 		oldPassword, newPassword := d.GetChange("password")
-		newPasswordStr := newPassword.(string)
 		log.Printf("[INFO] backup unit password changed from %+v to %+v", oldPassword, newPassword)
+
+		newPasswordStr := newPassword.(string)
 		request.Properties.Password = &newPasswordStr
 	}
 
-	ctx, cancel := context.WithTimeout(context.Background(), *resourceDefaultTimeouts.Create)
+	ctx, cancel := context.WithTimeout(context.Background(), *resourceDefaultTimeouts.Update)
 
 	if cancel != nil {
 		defer cancel()
@@ -209,7 +210,7 @@ func resourceBackupUnitUpdate(d *schema.ResourceData, meta interface{}) error {
 func resourceBackupUnitDelete(d *schema.ResourceData, meta interface{}) error {
 	client := meta.(SdkBundle).Client
 
-	ctx, cancel := context.WithTimeout(context.Background(), *resourceDefaultTimeouts.Create)
+	ctx, cancel := context.WithTimeout(context.Background(), *resourceDefaultTimeouts.Delete)
 
 	if cancel != nil {
 		defer cancel()
