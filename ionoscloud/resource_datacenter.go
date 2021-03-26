@@ -1,7 +1,9 @@
 package ionoscloud
 
 import (
+	"context"
 	"fmt"
+	ionoscloud "github.com/ionos-cloud/sdk-go/v5"
 	"log"
 	"regexp"
 	"strings"
@@ -42,29 +44,75 @@ func resourceDatacenter() *schema.Resource {
 }
 
 func resourceDatacenterCreate(d *schema.ResourceData, meta interface{}) error {
-	client := meta.(SdkBundle).LegacyClient
-	datacenter := profitbricks.Datacenter{
-		Properties: profitbricks.DatacenterProperties{
-			Name:     d.Get("name").(string),
-			Location: d.Get("location").(string),
+	//client := meta.(SdkBundle).LegacyClient
+	//datacenter := profitbricks.Datacenter{
+	//	Properties: profitbricks.DatacenterProperties{
+	//		Name:     d.Get("name").(string),
+	//		Location: d.Get("location").(string),
+	//	},
+	//}
+	//
+	//if attr, ok := d.GetOk("description"); ok {
+	//	datacenter.Properties.Description = attr.(string)
+	//}
+	//dc, err := client.CreateDatacenter(datacenter)
+	//
+	//if err != nil {
+	//	return fmt.Errorf(
+	//		"Error creating data center (%s) (%s)", d.Id(), err)
+	//}
+	//d.SetId(dc.ID)
+	//
+	//log.Printf("[INFO] DataCenter Id: %s", d.Id())
+	//
+	//// Wait, catching any errors
+	//_, errState := getStateChangeConf(meta, d, dc.Headers.Get("Location"), schema.TimeoutCreate).WaitForState()
+	//if errState != nil {
+	//	if IsRequestFailed(err) {
+	//		// Request failed, so resource was not created, delete resource from state file
+	//		d.SetId("")
+	//	}
+	//	return errState
+	//}
+	//
+	//return resourceDatacenterRead(d, meta)
+
+	client := meta.(SdkBundle).Client
+
+	datacenterName := d.Get("name").(string)
+	datacenterLocation := d.Get("location").(string)
+
+	datacenter := ionoscloud.Datacenter{
+		Properties: &ionoscloud.DatacenterProperties{
+			Name:     &datacenterName,
+			Location: &datacenterLocation,
 		},
 	}
 
 	if attr, ok := d.GetOk("description"); ok {
-		datacenter.Properties.Description = attr.(string)
+		attrStr := attr.(string)
+		datacenter.Properties.Description = &attrStr
 	}
-	dc, err := client.CreateDatacenter(datacenter)
+
+	ctx, cancel := context.WithTimeout(context.Background(), *resourceDefaultTimeouts.Create)
+
+	if cancel != nil {
+		defer cancel()
+	}
+
+	createdDatacenter, apiResponse, err := client.DataCenterApi.DatacentersPost(ctx).Datacenter(datacenter).Execute()
 
 	if err != nil {
 		return fmt.Errorf(
 			"Error creating data center (%s) (%s)", d.Id(), err)
 	}
-	d.SetId(dc.ID)
+	d.SetId(*createdDatacenter.Id)
 
 	log.Printf("[INFO] DataCenter Id: %s", d.Id())
 
 	// Wait, catching any errors
-	_, errState := getStateChangeConf(meta, d, dc.Headers.Get("Location"), schema.TimeoutCreate).WaitForState()
+	_, errState := getStateChangeConf(meta, d, apiResponse.Header.Get("Location"), schema.TimeoutCreate).WaitForState()
+
 	if errState != nil {
 		if IsRequestFailed(err) {
 			// Request failed, so resource was not created, delete resource from state file
@@ -77,12 +125,20 @@ func resourceDatacenterCreate(d *schema.ResourceData, meta interface{}) error {
 }
 
 func resourceDatacenterRead(d *schema.ResourceData, meta interface{}) error {
-	client := meta.(SdkBundle).LegacyClient
-	datacenter, err := client.GetDatacenter(d.Id())
+
+	client := meta.(SdkBundle).Client
+
+	ctx, cancel := context.WithTimeout(context.Background(), *resourceDefaultTimeouts.Default)
+
+	if cancel != nil {
+		defer cancel()
+	}
+
+	datacenter, apiResponse, err := client.DataCenterApi.DatacentersFindById(ctx, d.Id()).Execute()
 
 	if err != nil {
-		if apiError, ok := err.(profitbricks.ApiError); ok {
-			if apiError.HttpStatusCode() == 404 {
+		if _, ok := err.(ionoscloud.GenericOpenAPIError); ok {
+			if apiResponse.Response.StatusCode == 404 {
 				d.SetId("")
 				return nil
 			}
@@ -90,25 +146,40 @@ func resourceDatacenterRead(d *schema.ResourceData, meta interface{}) error {
 		return fmt.Errorf("Error while fetching a data center ID %s %s", d.Id(), err)
 	}
 
-	d.Set("name", datacenter.Properties.Name)
-	d.Set("location", datacenter.Properties.Location)
-	d.Set("description", datacenter.Properties.Description)
+	npErr := d.Set("name", datacenter.Properties.Name)
+	lpErr := d.Set("location", datacenter.Properties.Location)
+	dpErr := d.Set("description", datacenter.Properties.Description)
+
+	if npErr != nil {
+		return fmt.Errorf("Error while setting name property for backup unit %s: %s", d.Id(), npErr)
+	}
+
+	if lpErr != nil {
+		return fmt.Errorf("Error while setting location property for backup unit %s: %s", d.Id(), lpErr)
+	}
+
+	if dpErr != nil {
+		return fmt.Errorf("Error while setting description property for backup unit %s: %s", d.Id(), dpErr)
+	}
+
 	return nil
 }
 
 func resourceDatacenterUpdate(d *schema.ResourceData, meta interface{}) error {
-	client := meta.(SdkBundle).LegacyClient
-	obj := profitbricks.DatacenterProperties{}
+
+	client := meta.(SdkBundle).Client
+	obj := ionoscloud.DatacenterProperties{}
 
 	if d.HasChange("name") {
 		_, newName := d.GetChange("name")
-
-		obj.Name = newName.(string)
+		newNameStr := newName.(string)
+		obj.Name = &newNameStr
 	}
 
 	if d.HasChange("description") {
 		_, newDescription := d.GetChange("description")
-		obj.Description = newDescription.(string)
+		newDescriptionStr := newDescription.(string)
+		obj.Description = &newDescriptionStr
 	}
 
 	if d.HasChange("location") {
@@ -116,14 +187,20 @@ func resourceDatacenterUpdate(d *schema.ResourceData, meta interface{}) error {
 		return fmt.Errorf("Data center is created in %s location. You can not change location of the data center to %s. It requires recreation of the data center.", oldLocation, newLocation)
 	}
 
-	dc, err := client.UpdateDataCenter(d.Id(), obj)
+	ctx, cancel := context.WithTimeout(context.Background(), *resourceDefaultTimeouts.Update)
+
+	if cancel != nil {
+		defer cancel()
+	}
+
+	_, apiResponse, err := client.DataCenterApi.DatacentersPatch(ctx, d.Id()).Datacenter(obj).Execute()
 
 	if err != nil {
 		return fmt.Errorf("An error occured while update the data center ID %s %s", d.Id(), err)
 	}
 
 	// Wait, catching any errors
-	_, errState := getStateChangeConf(meta, d, dc.Headers.Get("Location"), schema.TimeoutUpdate).WaitForState()
+	_, errState := getStateChangeConf(meta, d, apiResponse.Header.Get("Location"), schema.TimeoutUpdate).WaitForState()
 	if errState != nil {
 		return errState
 	}
@@ -132,16 +209,23 @@ func resourceDatacenterUpdate(d *schema.ResourceData, meta interface{}) error {
 }
 
 func resourceDatacenterDelete(d *schema.ResourceData, meta interface{}) error {
-	client := meta.(SdkBundle).LegacyClient
-	dcid := d.Id()
-	resp, err := client.DeleteDatacenter(dcid)
+
+	client := meta.(SdkBundle).Client
+
+	ctx, cancel := context.WithTimeout(context.Background(), *resourceDefaultTimeouts.Delete)
+
+	if cancel != nil {
+		defer cancel()
+	}
+
+	_, apiResponse, err := client.DataCenterApi.DatacentersDelete(ctx, d.Id()).Execute()
 
 	if err != nil {
 		return fmt.Errorf("An error occured while deleting the data center ID %s %s", d.Id(), err)
 	}
 
 	// Wait, catching any errors
-	_, errState := getStateChangeConf(meta, d, resp.Get("Location"), schema.TimeoutDelete).WaitForState()
+	_, errState := getStateChangeConf(meta, d, apiResponse.Header.Get("Location"), schema.TimeoutDelete).WaitForState()
 	if errState != nil {
 		return errState
 	}
@@ -150,6 +234,7 @@ func resourceDatacenterDelete(d *schema.ResourceData, meta interface{}) error {
 	return nil
 }
 
+// to be modified when server and volume resources will be changed
 func getImage(client *profitbricks.Client, dcId string, imageName string, imageType string) (*profitbricks.Image, error) {
 	if imageName == "" {
 		return nil, fmt.Errorf("imageName not suplied")
@@ -190,6 +275,7 @@ func getImage(client *profitbricks.Client, dcId string, imageName string, imageT
 	return nil, err
 }
 
+// to be modified when server and volume resources will be changed
 func getSnapshotId(client *profitbricks.Client, snapshotName string) string {
 	if snapshotName == "" {
 		return ""
@@ -214,6 +300,7 @@ func getSnapshotId(client *profitbricks.Client, snapshotName string) string {
 	return ""
 }
 
+// to be modified when server and volume resources will be changed
 func getImageAlias(client *profitbricks.Client, imageAlias string, location string) string {
 	if imageAlias == "" {
 		return ""
