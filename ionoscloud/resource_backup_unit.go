@@ -134,9 +134,13 @@ func resourceBackupUnitRead(d *schema.ResourceData, meta interface{}) error {
 
 	if npErr != nil {
 		return fmt.Errorf("Error while setting name property for backup unit %s: %s", d.Id(), cErr)
-	} else if epErr != nil {
+	}
+	
+	if epErr != nil {
 		return fmt.Errorf("Error while setting email property for backup unit %s: %s", d.Id(), cErr)
-	} else if cnErr != nil {
+	}
+
+	if cnErr != nil {
 		return fmt.Errorf("Error while setting login property for backup unit %s: %s", d.Id(), cErr)
 	}
 
