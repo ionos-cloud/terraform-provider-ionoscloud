@@ -44,38 +44,6 @@ func resourceDatacenter() *schema.Resource {
 }
 
 func resourceDatacenterCreate(d *schema.ResourceData, meta interface{}) error {
-	//client := meta.(SdkBundle).LegacyClient
-	//datacenter := profitbricks.Datacenter{
-	//	Properties: profitbricks.DatacenterProperties{
-	//		Name:     d.Get("name").(string),
-	//		Location: d.Get("location").(string),
-	//	},
-	//}
-	//
-	//if attr, ok := d.GetOk("description"); ok {
-	//	datacenter.Properties.Description = attr.(string)
-	//}
-	//dc, err := client.CreateDatacenter(datacenter)
-	//
-	//if err != nil {
-	//	return fmt.Errorf(
-	//		"Error creating data center (%s) (%s)", d.Id(), err)
-	//}
-	//d.SetId(dc.ID)
-	//
-	//log.Printf("[INFO] DataCenter Id: %s", d.Id())
-	//
-	//// Wait, catching any errors
-	//_, errState := getStateChangeConf(meta, d, dc.Headers.Get("Location"), schema.TimeoutCreate).WaitForState()
-	//if errState != nil {
-	//	if IsRequestFailed(err) {
-	//		// Request failed, so resource was not created, delete resource from state file
-	//		d.SetId("")
-	//	}
-	//	return errState
-	//}
-	//
-	//return resourceDatacenterRead(d, meta)
 
 	client := meta.(SdkBundle).Client
 
