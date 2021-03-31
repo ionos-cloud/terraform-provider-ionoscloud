@@ -8,7 +8,6 @@ import (
 	"time"
 
 	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
-	"github.com/profitbricks/profitbricks-sdk-go/v5"
 )
 
 func resourceBackupUnit() *schema.Resource {
@@ -111,7 +110,7 @@ func resourceBackupUnitRead(d *schema.ResourceData, meta interface{}) error {
 
 	if err != nil {
 		if _, ok := err.(ionoscloud.GenericOpenAPIError); ok {
-			if  apiResponse.Response.StatusCode == 404 {
+			if apiResponse.Response.StatusCode == 404 {
 				d.SetId("")
 				return nil
 			}
@@ -128,20 +127,25 @@ func resourceBackupUnitRead(d *schema.ResourceData, meta interface{}) error {
 
 	log.Printf("[INFO] Successfully retreived contract resource for backup unit unit %s: %+v", d.Id(), contractResources)
 
-	npErr := d.Set("name", backupUnit.Properties.Name)
-	epErr := d.Set("email", backupUnit.Properties.Email)
-	lpErr := d.Set("login", fmt.Sprintf("%s-%d", *backupUnit.Properties.Name, contractResources.Properties.ContractNumber))
-
-	if npErr != nil {
-		return fmt.Errorf("Error while setting name property for backup unit %s: %s", d.Id(), npErr)
+	if backupUnit.Properties.Name != nil {
+		err := d.Set("name", *backupUnit.Properties.Name)
+		if err != nil {
+			return fmt.Errorf("Error while setting name property for backup unit %s: %s", d.Id(), err)
+		}
 	}
 
-	if epErr != nil {
-		return fmt.Errorf("Error while setting email property for backup unit %s: %s", d.Id(), epErr)
+	if backupUnit.Properties.Email != nil {
+		epErr := d.Set("email", backupUnit.Properties.Email)
+		if epErr != nil {
+			return fmt.Errorf("Error while setting email property for backup unit %s: %s", d.Id(), epErr)
+		}
 	}
 
-	if lpErr != nil {
-		return fmt.Errorf("Error while setting login property for backup unit %s: %s", d.Id(), lpErr)
+	if backupUnit.Properties.Name != nil && contractResources.Properties.ContractNumber != nil {
+		err := d.Set("login", fmt.Sprintf("%s-%d", *backupUnit.Properties.Name, *contractResources.Properties.ContractNumber))
+		if err != nil {
+			return fmt.Errorf("Error while setting login property for backup unit %s: %s", d.Id(), err)
+		}
 	}
 
 	log.Printf("[INFO] Successfully retreived backup unit %s: %+v", d.Id(), backupUnit)
@@ -171,6 +175,12 @@ func resourceBackupUnitUpdate(d *schema.ResourceData, meta interface{}) error {
 
 		newPasswordStr := newPassword.(string)
 		request.Properties.Password = &newPasswordStr
+
+		if !d.HasChange("email") {
+			oldEmail, _ := d.GetChange("email")
+			oldEmailStr := oldEmail.(string)
+			request.Properties.Email = &oldEmailStr
+		}
 	}
 
 	ctx, cancel := context.WithTimeout(context.Background(), *resourceDefaultTimeouts.Update)
@@ -182,7 +192,7 @@ func resourceBackupUnitUpdate(d *schema.ResourceData, meta interface{}) error {
 	_, apiResponse, err := client.BackupUnitApi.BackupunitsPut(ctx, d.Id()).BackupUnit(request).Execute()
 
 	if err != nil {
-		if _, ok := err.(profitbricks.ApiError); ok {
+		if _, ok := err.(ionoscloud.GenericOpenAPIError); ok {
 			if apiResponse.Response.StatusCode == 404 {
 				d.SetId("")
 				return nil
@@ -222,7 +232,7 @@ func resourceBackupUnitDelete(d *schema.ResourceData, meta interface{}) error {
 	_, apiResponse, err := client.BackupUnitApi.BackupunitsDelete(ctx, d.Id()).Execute()
 
 	if err != nil {
-		if _, ok := err.(profitbricks.ApiError); ok {
+		if _, ok := err.(ionoscloud.GenericOpenAPIError); ok {
 			if apiResponse.Response.StatusCode == 404 {
 				d.SetId("")
 				return nil
@@ -266,7 +276,7 @@ func backupUnitDeleted(client *ionoscloud.APIClient, d *schema.ResourceData, c c
 
 	if err != nil {
 		if _, ok := err.(ionoscloud.GenericOpenAPIError); ok {
-			if  apiResponse.Response.StatusCode == 404  {
+			if apiResponse.Response.StatusCode == 404 {
 				return true, nil
 			}
 			return true, fmt.Errorf("Error checking backup unit deletion status: %s", err)

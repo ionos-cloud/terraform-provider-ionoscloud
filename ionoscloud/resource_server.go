@@ -11,7 +11,6 @@ import (
 	"strings"
 
 	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
-	"github.com/profitbricks/profitbricks-sdk-go/v5"
 	"golang.org/x/crypto/ssh"
 )
 
@@ -422,7 +421,7 @@ func resourceServerCreate(d *schema.ResourceData, meta interface{}) error {
 		if err != nil {
 			return err
 		}
-		if img != nil  {
+		if img != nil {
 			image = *img.Id
 		}
 		// if no image id was found with that name we look for a matching snapshot
@@ -532,13 +531,13 @@ func resourceServerCreate(d *schema.ResourceData, meta interface{}) error {
 
 	if image_alias != "" {
 		volume.ImageAlias = &image_alias
-	}else {
+	} else {
 		volume.ImageAlias = nil
 	}
 
 	if image != "" {
 		volume.Image = &image
-	}else {
+	} else {
 		volume.Image = nil
 	}
 
@@ -655,14 +654,13 @@ func resourceServerCreate(d *schema.ResourceData, meta interface{}) error {
 		}
 	}
 
-
 	server, apiResponse, err := client.ServerApi.DatacentersServersPost(ctx, d.Get("datacenter_id").(string)).Server(request).Execute()
 
 	b := make([]byte, 1000)
 	_, _ = apiResponse.Body.Read(b)
 	if err != nil {
 		return fmt.Errorf(
-			"Error creating server: (%s)" , err)
+			"Error creating server: (%s)", err)
 	}
 	d.SetId(*server.Id)
 
@@ -696,13 +694,14 @@ func resourceServerCreate(d *schema.ResourceData, meta interface{}) error {
 		return fmt.Errorf("Error while setting primary nic %s: %s", d.Id(), prnErr)
 	}
 	if *(*server.Entities.Nics.Items)[0].Properties.Ips != nil {
-	if len(*(*server.Entities.Nics.Items)[0].Properties.Ips) > 0 {
-		d.SetConnInfo(map[string]string{
-			"type":     "ssh",
-			"host":     (*(*server.Entities.Nics.Items)[0].Properties.Ips)[0],
-			"password": *(*request.Entities.Volumes.Items)[0].Properties.ImagePassword,
-		})
-	}}
+		if len(*(*server.Entities.Nics.Items)[0].Properties.Ips) > 0 {
+			d.SetConnInfo(map[string]string{
+				"type":     "ssh",
+				"host":     (*(*server.Entities.Nics.Items)[0].Properties.Ips)[0],
+				"password": *(*request.Entities.Volumes.Items)[0].Properties.ImagePassword,
+			})
+		}
+	}
 	return resourceServerRead(d, meta)
 }
 
@@ -776,10 +775,10 @@ func resourceServerRead(d *schema.ResourceData, meta interface{}) error {
 		defer cancel()
 	}
 
-	server, _, err := client.ServerApi.DatacentersServersFindById(ctx, dcId, serverId).Execute()
+	server, apiResponse, err := client.ServerApi.DatacentersServersFindById(ctx, dcId, serverId).Execute()
 	if err != nil {
-		if apiError, ok := err.(profitbricks.ApiError); ok {
-			if apiError.HttpStatusCode() == 404 {
+		if _, ok := err.(ionoscloud.GenericOpenAPIError); ok {
+			if apiResponse.Response.StatusCode == 404 {
 				d.SetId("")
 				return nil
 			}
@@ -909,8 +908,8 @@ func resourceServerRead(d *schema.ResourceData, meta interface{}) error {
 				volumeItem["name"] = *volumeObj.Properties.Name
 			}
 
-			if  volumeObj.Properties.Type != nil {
-				volumeItem["disk_type"] =  *volumeObj.Properties.Type
+			if volumeObj.Properties.Type != nil {
+				volumeItem["disk_type"] = *volumeObj.Properties.Type
 			}
 
 			if volumeObj.Properties.Size != nil {
@@ -985,7 +984,6 @@ func resourceServerUpdate(d *schema.ResourceData, meta interface{}) error {
 		nStr := n.(string)
 		request.CpuFamily = &nStr
 	}
-
 
 	ctx, cancel := context.WithTimeout(context.Background(), *resourceDefaultTimeouts.Update)
 
