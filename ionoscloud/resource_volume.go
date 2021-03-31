@@ -1,11 +1,12 @@
 package ionoscloud
 
 import (
+	"context"
 	"fmt"
+	ionoscloud "github.com/ionos-cloud/sdk-go/v5"
 	"log"
 
 	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
-	"github.com/profitbricks/profitbricks-sdk-go/v5"
 )
 
 func resourceVolume() *schema.Resource {
@@ -71,7 +72,8 @@ func resourceVolume() *schema.Resource {
 }
 
 func resourceVolumeCreate(d *schema.ResourceData, meta interface{}) error {
-	client := meta.(SdkBundle).LegacyClient
+
+	client := meta.(SdkBundle).Client
 
 	var ssh_keypath []interface{}
 	var image_alias string
@@ -96,6 +98,12 @@ func resourceVolumeCreate(d *schema.ResourceData, meta interface{}) error {
 		}
 	}
 
+	ctx, cancel := context.WithTimeout(context.Background(), *resourceDefaultTimeouts.Default)
+
+	if cancel != nil {
+		defer cancel()
+	}
+
 	var image string
 	if image_alias == "" && image_name != "" {
 		if !IsValidUUID(image_name) {
@@ -104,7 +112,7 @@ func resourceVolumeCreate(d *schema.ResourceData, meta interface{}) error {
 				return err
 			}
 			if img != nil {
-				image = img.ID
+				image = *img.Id
 			}
 			//if no image id was found with that name we look for a matching snapshot
 			if image == "" {
@@ -112,32 +120,31 @@ func resourceVolumeCreate(d *schema.ResourceData, meta interface{}) error {
 				if image != "" {
 					isSnapshot = true
 				} else {
-					dc, err := client.GetDatacenter(dcId)
+					dc, _, err := client.DataCenterApi.DatacentersFindById(ctx, dcId).Execute()
 
 					if err != nil {
 						return fmt.Errorf("An error occured while fetching a Datacenter ID %s %s", dcId, err)
 					}
-
-					image_alias = getImageAlias(client, image_name, dc.Properties.Location)
+					image_alias = getImageAlias(client, image_name, *dc.Properties.Location)
 				}
 			}
 
 			if image == "" && image_alias == "" {
 				return fmt.Errorf("Could not find an image/imagealias/snapshot that matches %s ", image_name)
 			}
-			if imagePassword == "" && len(ssh_keypath) == 0 && isSnapshot == false && img != nil && img.Properties.Public {
+			if imagePassword == "" && len(ssh_keypath) == 0 && isSnapshot == false && img != nil && *img.Properties.Public {
 				return fmt.Errorf("Either 'image_password' or 'sshkey' must be provided.")
 			}
 		} else {
-			img, err := client.GetImage(image_name)
+			img, _, err := client.ImageApi.ImagesFindById(ctx, image_name).Execute()
 			if err != nil {
-				_, err := client.GetSnapshot(image_name)
+				_, _, err := client.SnapshotApi.SnapshotsFindById(ctx, image_name).Execute()
 				if err != nil {
 					return fmt.Errorf("Error fetching image/snapshot: %s", err)
 				}
 				isSnapshot = true
 			}
-			if img.Properties.Public == true && isSnapshot == false {
+			if *img.Properties.Public == true && isSnapshot == false {
 				if imagePassword == "" && len(ssh_keypath) == 0 {
 					return fmt.Errorf("Either 'image_password' or 'sshkey' must be provided.")
 				}
@@ -156,41 +163,56 @@ func resourceVolumeCreate(d *schema.ResourceData, meta interface{}) error {
 		return fmt.Errorf("You can't pass 'image_password' and/or 'ssh keys' when creating a volume from a snapshot")
 	}
 
-	volume := &profitbricks.Volume{
-		Properties: profitbricks.VolumeProperties{
-			Name:          d.Get("name").(string),
-			Size:          d.Get("size").(int),
-			Type:          d.Get("disk_type").(string),
-			ImagePassword: imagePassword,
-			Image:         image,
-			ImageAlias:    image_alias,
-			Bus:           d.Get("bus").(string),
-			LicenceType:   licenceType,
+	volumeName := d.Get("name").(string)
+	volumeSize := float32(d.Get("size").(int))
+	volumeType := d.Get("disk_type").(string)
+	volumeBus := d.Get("bus").(string)
+
+	volume := ionoscloud.Volume{
+		Properties: &ionoscloud.VolumeProperties{
+			Name:          &volumeName,
+			Size:          &volumeSize,
+			Type:          &volumeType,
+			ImagePassword: &imagePassword,
+			Bus:           &volumeBus,
+			LicenceType:   &licenceType,
 		},
 	}
 
+	if image != "" {
+		volume.Properties.Image = &image
+	}else {
+		volume.Properties.Image = nil
+	}
+
+	if image_alias != "" {
+		volume.Properties.ImageAlias = &image_alias
+	}else {
+		volume.Properties.ImageAlias = nil
+	}
+
 	if len(publicKeys) != 0 {
-		volume.Properties.SSHKeys = publicKeys
+		volume.Properties.SshKeys = &publicKeys
 
 	} else {
-		volume.Properties.SSHKeys = nil
+		volume.Properties.SshKeys = nil
 	}
 
 	if _, ok := d.GetOk("availability_zone"); ok {
 		raw := d.Get("availability_zone").(string)
-		volume.Properties.AvailabilityZone = raw
+		volume.Properties.AvailabilityZone = &raw
 	}
 
-	volume, err := client.CreateVolume(dcId, *volume)
+	volume, apiResponse, err := client.VolumeApi.DatacentersVolumesPost(ctx, dcId).Volume(volume).Execute()
 
 	if err != nil {
-		return fmt.Errorf("An error occured while creating a volume: %s", err)
+		return fmt.Errorf( "An error occured while creating a volume: %s", err)
 	}
 
-	d.SetId(volume.ID)
+	d.SetId(*volume.Id)
 
 	// Wait, catching any errors
-	_, errState := getStateChangeConf(meta, d, volume.Headers.Get("Location"), schema.TimeoutCreate).WaitForState()
+	_, errState := getStateChangeConf(meta, d, apiResponse.Header.Get("Location"), schema.TimeoutCreate).WaitForState()
 	if errState != nil {
 		if IsRequestFailed(err) {
 			// Request failed, so resource was not created, delete resource from state file
@@ -199,18 +221,26 @@ func resourceVolumeCreate(d *schema.ResourceData, meta interface{}) error {
 		return errState
 	}
 
-	volume, err = client.AttachVolume(dcId, serverId, volume.ID)
+	volume, apiResponse, err = client.ServerApi.DatacentersServersVolumesPost(ctx, dcId, serverId).Volume(volume).Execute()
 	if err != nil {
-		return fmt.Errorf("An error occured while attaching a volume dcId: %s server_id: %s ID: %s Response: %s", dcId, serverId, volume.ID, err)
+		return fmt.Errorf("An error occured while attaching a volume dcId: %s server_id: %s ID: %s Response: %s", dcId, serverId, volume.Id, err)
 	}
 
-	d.Set("server_id", serverId)
+	sErr := d.Set("server_id", serverId)
+
+	if sErr != nil {
+		return fmt.Errorf("Error while setting serverId %s: %s", serverId, sErr)
+	}
+
 	// Wait, catching any errors
-	_, errState = getStateChangeConf(meta, d, volume.Headers.Get("Location"), schema.TimeoutCreate).WaitForState()
+	_, errState = getStateChangeConf(meta, d, apiResponse.Header.Get("Location"), schema.TimeoutCreate).WaitForState()
 	if errState != nil {
 		if IsRequestFailed(err) {
 			// Request failed, so resource was not created, delete resource from state file
-			d.Set("server_id", "")
+			sErr := d.Set("server_id", "")
+			if sErr != nil {
+				return fmt.Errorf("Error while setting serverId: %s", sErr)
+			}
 		}
 		return errState
 	}
@@ -219,16 +249,23 @@ func resourceVolumeCreate(d *schema.ResourceData, meta interface{}) error {
 }
 
 func resourceVolumeRead(d *schema.ResourceData, meta interface{}) error {
-	client := meta.(SdkBundle).LegacyClient
+
+	client := meta.(SdkBundle).Client
 	dcId := d.Get("datacenter_id").(string)
 	serverID := d.Get("server_id").(string)
 	volumeID := d.Id()
 
-	volume, err := client.GetVolume(dcId, d.Id())
+	ctx, cancel := context.WithTimeout(context.Background(), *resourceDefaultTimeouts.Default)
+
+	if cancel != nil {
+		defer cancel()
+	}
+
+	volume, apiResponse, err := client.VolumeApi.DatacentersVolumesFindById(ctx, dcId, volumeID).Execute()
 
 	if err != nil {
-		if apiError, ok := err.(profitbricks.ApiError); ok {
-			if apiError.HttpStatusCode() == 404 {
+		if _, ok := err.(ionoscloud.GenericOpenAPIError); ok {
+			if apiResponse.Response.StatusCode == 404 {
 				d.SetId("")
 				return nil
 			}
@@ -236,79 +273,125 @@ func resourceVolumeRead(d *schema.ResourceData, meta interface{}) error {
 		return fmt.Errorf("Error occured while fetching a volume ID %s %s", d.Id(), err)
 	}
 
-	if volume.StatusCode > 299 {
-		return fmt.Errorf("An error occured while fetching a volume ID %s %s", d.Id(), volume.Response)
+	if apiResponse.Response.StatusCode > 299 {
+		return fmt.Errorf("An error occured while fetching a volume ID %s %s", d.Id(), apiResponse.Response)
 
 	}
 
-	_, err = client.GetAttachedVolume(dcId, serverID, volumeID)
+	_, _, err = client.ServerApi.DatacentersServersVolumesFindById(ctx, dcId, serverID, volumeID).Execute()
 	if err != nil {
 		d.Set("server_id", "")
 	}
 
-	d.Set("name", volume.Properties.Name)
-	d.Set("disk_type", volume.Properties.Type)
-	d.Set("size", volume.Properties.Size)
-	d.Set("bus", volume.Properties.Bus)
-	d.Set("image_name", volume.Properties.Image)
-	d.Set("image_alias", volume.Properties.ImageAlias)
+	if volume.Properties.Name != nil {
+		err := d.Set("name", *volume.Properties.Name)
+		if err != nil {
+			return fmt.Errorf("Error while setting name property for volume %s: %s", d.Id(), err)
+		}
+	}
+
+	if volume.Properties.Type != nil {
+		err :=  d.Set("disk_type", *volume.Properties.Type)
+		if err != nil {
+			return fmt.Errorf("Error while setting type property for volume %s: %s", d.Id(), err)
+		}
+	}
+
+	if volume.Properties.Size != nil {
+		err := d.Set("size", *volume.Properties.Size)
+		if err != nil {
+			return fmt.Errorf("Error while setting size property for volume %s: %s", d.Id(), err)
+		}
+	}
+
+	if volume.Properties.Bus != nil {
+		err := d.Set("bus", *volume.Properties.Bus)
+		if err != nil {
+			return fmt.Errorf("Error while setting bus property for volume %s: %s", d.Id(), err)
+		}
+	}
+
+	if volume.Properties.Image != nil {
+		err := d.Set("image_name", *volume.Properties.Image)
+		if err != nil {
+			return fmt.Errorf("Error while setting image_name property for volume %s: %s", d.Id(), err)
+		}
+	}
+
+	if volume.Properties.Image != nil {
+		err := d.Set("image_alias", *volume.Properties.ImageAlias)
+		if err != nil {
+			return fmt.Errorf("Error while setting image_alias property for volume %s: %s", d.Id(), err)
+		}
+	}
 
 	return nil
 }
 
 func resourceVolumeUpdate(d *schema.ResourceData, meta interface{}) error {
-	client := meta.(SdkBundle).LegacyClient
-	properties := profitbricks.VolumeProperties{}
+	client := meta.(SdkBundle).Client
+	properties := ionoscloud.VolumeProperties{}
 	dcId := d.Get("datacenter_id").(string)
 
 	if d.HasChange("name") {
 		_, newValue := d.GetChange("name")
-		properties.Name = newValue.(string)
+		newValueStr := newValue.(string)
+		properties.Name = &newValueStr
 	}
 	if d.HasChange("disk_type") {
 		_, newValue := d.GetChange("disk_type")
-		properties.Type = newValue.(string)
+		newValueStr := newValue.(string)
+		properties.Type = &newValueStr
 	}
 	if d.HasChange("size") {
 		_, newValue := d.GetChange("size")
-		properties.Size = newValue.(int)
+		newValueFloat32 := float32(newValue.(int))
+		properties.Size = &newValueFloat32
 	}
 	if d.HasChange("bus") {
 		_, newValue := d.GetChange("bus")
-		properties.Bus = newValue.(string)
+		newValueStr := newValue.(string)
+		properties.Bus = &newValueStr
 	}
 	if d.HasChange("availability_zone") {
 		_, newValue := d.GetChange("availability_zone")
-		properties.AvailabilityZone = newValue.(string)
+		newValueStr := newValue.(string)
+		properties.AvailabilityZone = &newValueStr
 	}
 
-	volume, err := client.UpdateVolume(dcId, d.Id(), properties)
+	ctx, cancel := context.WithTimeout(context.Background(), *resourceDefaultTimeouts.Update)
+
+	if cancel != nil {
+		defer cancel()
+	}
+
+	volume, apiResponse, err := client.VolumeApi.DatacentersVolumesPatch(ctx, dcId, d.Id()).Volume(properties).Execute()
 
 	if err != nil {
 		return fmt.Errorf("An error occured while updating a volume ID %s %s", d.Id(), err)
 	}
 
 	// Wait, catching any errors
-	_, errState := getStateChangeConf(meta, d, volume.Headers.Get("Location"), schema.TimeoutUpdate).WaitForState()
+	_, errState := getStateChangeConf(meta, d, apiResponse.Header.Get("Location"), schema.TimeoutUpdate).WaitForState()
 	if errState != nil {
 		return errState
 	}
 
-	if volume.StatusCode > 299 {
-		return fmt.Errorf("An error occured while updating a volume ID %s %s", d.Id(), volume.Response)
+	if apiResponse.Response.StatusCode > 299 {
+		return fmt.Errorf("An error occured while updating a volume ID %s %s", d.Id(), apiResponse.Response)
 
 	}
 
 	if d.HasChange("server_id") {
 		_, newValue := d.GetChange("server_id")
 		serverID := newValue.(string)
-		volumeAttach, err := client.AttachVolume(dcId, serverID, volume.ID)
+		volumeAttach, apiResponse, err := client.ServerApi.DatacentersServersVolumesPost(ctx, dcId, serverID).Volume(volume).Execute()
 		if err != nil {
-			return fmt.Errorf("An error occured while attaching a volume dcId: %s server_id: %s ID: %s Response: %s", dcId, serverID, volumeAttach.ID, err)
+			return fmt.Errorf("An error occured while attaching a volume dcId: %s server_id: %s ID: %s Response: %s", dcId, serverID, volumeAttach.Id, err)
 		}
 
 		// Wait, catching any errors
-		_, errState = getStateChangeConf(meta, d, volumeAttach.Headers.Get("Location"), schema.TimeoutCreate).WaitForState()
+		_, errState = getStateChangeConf(meta, d, apiResponse.Header.Get("Location"), schema.TimeoutCreate).WaitForState()
 		if errState != nil {
 			return errState
 		}
@@ -318,17 +401,23 @@ func resourceVolumeUpdate(d *schema.ResourceData, meta interface{}) error {
 }
 
 func resourceVolumeDelete(d *schema.ResourceData, meta interface{}) error {
-	client := meta.(SdkBundle).LegacyClient
+	client := meta.(SdkBundle).Client
 	dcId := d.Get("datacenter_id").(string)
 
-	resp, err := client.DeleteVolume(dcId, d.Id())
+	ctx, cancel := context.WithTimeout(context.Background(), *resourceDefaultTimeouts.Delete)
+
+	if cancel != nil {
+		defer cancel()
+	}
+
+	_, apiResponse, err := client.VolumeApi.DatacentersVolumesDelete(ctx, dcId, d.Id()).Execute()
 	if err != nil {
 		return fmt.Errorf("An error occured while deleting a volume ID %s %s", d.Id(), err)
 
 	}
 
 	// Wait, catching any errors
-	_, errState := getStateChangeConf(meta, d, resp.Get("Location"), schema.TimeoutDelete).WaitForState()
+	_, errState := getStateChangeConf(meta, d, apiResponse.Header.Get("Location"), schema.TimeoutDelete).WaitForState()
 	if errState != nil {
 		return errState
 	}
