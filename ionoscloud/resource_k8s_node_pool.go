@@ -1,13 +1,14 @@
 package ionoscloud
 
 import (
+	"context"
 	"encoding/json"
 	"fmt"
+	ionoscloud "github.com/ionos-cloud/sdk-go/v5"
 	"log"
 	"time"
 
 	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
-	"github.com/profitbricks/profitbricks-sdk-go/v5"
 )
 
 func resourcek8sNodePool() *schema.Resource {
@@ -137,74 +138,92 @@ func resourcek8sNodePool() *schema.Resource {
 }
 
 func resourcek8sNodePoolCreate(d *schema.ResourceData, meta interface{}) error {
-	client := meta.(SdkBundle).LegacyClient
+	client := meta.(SdkBundle).Client
 
-	k8sNodepool := profitbricks.KubernetesNodePool{
-		Properties: &profitbricks.KubernetesNodePoolProperties{
-			Name:             d.Get("name").(string),
-			DatacenterID:     d.Get("datacenter_id").(string),
-			K8sVersion:       d.Get("k8s_version").(string),
-			AvailabilityZone: d.Get("availability_zone").(string),
-			CPUFamily:        d.Get("cpu_family").(string),
-			StorageType:      d.Get("storage_type").(string),
-			NodeCount:        uint32(d.Get("node_count").(int)),
-			CoresCount:       uint32(d.Get("cores_count").(int)),
-			StorageSize:      uint32(d.Get("storage_size").(int)),
-			RAMSize:          uint32(d.Get("ram_size").(int)),
+	name := d.Get("name").(string)
+	datacenterId := d.Get("datacenter_id").(string)
+	k8sVersion := d.Get("k8s_version").(string)
+	availabilityZone := d.Get("availability_zone").(string)
+	cpuFamily := d.Get("cpu_family").(string)
+	storageType := d.Get("storage_type").(string)
+	nodeCount := int32(d.Get("node_count").(int))
+	coresCount := int32(d.Get("cores_count").(int))
+	storageSize := int32(d.Get("storage_size").(int))
+	ramSize := int32(d.Get("ram_size").(int))
+
+	k8sNodepool := ionoscloud.KubernetesNodePool{
+		Properties: &ionoscloud.KubernetesNodePoolProperties{
+			Name:             &name,
+			DatacenterId:     &datacenterId,
+			K8sVersion:       &k8sVersion,
+			AvailabilityZone: &availabilityZone,
+			CpuFamily:        &cpuFamily,
+			StorageType:      &storageType,
+			NodeCount:        &nodeCount,
+			CoresCount:       &coresCount,
+			StorageSize:      &storageSize,
+			RamSize:          &ramSize,
 		},
 	}
 
 	if _, asOk := d.GetOk("auto_scaling.0"); asOk {
-		k8sNodepool.Properties.AutoScaling = &profitbricks.AutoScaling{}
+		k8sNodepool.Properties.AutoScaling = &ionoscloud.KubernetesAutoScaling{}
 	}
 
 	if asmnVal, asmnOk := d.GetOk("auto_scaling.0.min_node_count"); asmnOk {
 		log.Printf("[INFO] Setting Autoscaling minimum node count to : %d", uint32(asmnVal.(int)))
-		k8sNodepool.Properties.AutoScaling.MinNodeCount = uint32(asmnVal.(int))
+		asmnVal := int32(asmnVal.(int))
+		k8sNodepool.Properties.AutoScaling.MinNodeCount = &asmnVal
 	}
 
 	if asmxnVal, asmxnOk := d.GetOk("auto_scaling.0.max_node_count"); asmxnOk {
 		log.Printf("[INFO] Setting Autoscaling maximum node count to : %d", uint32(asmxnVal.(int)))
-		k8sNodepool.Properties.AutoScaling.MaxNodeCount = uint32(asmxnVal.(int))
+		asmxnVal := int32(asmxnVal.(int))
+		k8sNodepool.Properties.AutoScaling.MaxNodeCount = &asmxnVal
 	}
 
-	if k8sNodepool.Properties.AutoScaling != nil && k8sNodepool.Properties.AutoScaling.MinNodeCount != 0 && k8sNodepool.Properties.AutoScaling.MaxNodeCount != 0 && k8sNodepool.Properties.AutoScaling.MinNodeCount != k8sNodepool.Properties.AutoScaling.MaxNodeCount {
+	if k8sNodepool.Properties.AutoScaling != nil && k8sNodepool.Properties.AutoScaling.MinNodeCount != nil &&
+		k8sNodepool.Properties.AutoScaling.MaxNodeCount != nil && *k8sNodepool.Properties.AutoScaling.MinNodeCount != 0 &&
+		*k8sNodepool.Properties.AutoScaling.MaxNodeCount != 0 && *k8sNodepool.Properties.AutoScaling.MinNodeCount != *k8sNodepool.Properties.AutoScaling.MaxNodeCount {
 		log.Printf("[INFO] Autoscaling is on, doing some extra checks for k8s node pool")
 
-		if k8sNodepool.Properties.NodeCount < k8sNodepool.Properties.AutoScaling.MinNodeCount {
+		if *k8sNodepool.Properties.NodeCount < *k8sNodepool.Properties.AutoScaling.MinNodeCount {
 			d.SetId("")
 			return fmt.Errorf("Error creating k8s node pool: node_count cannot be lower than min_node_count")
 		}
 
-		if k8sNodepool.Properties.AutoScaling.MaxNodeCount < k8sNodepool.Properties.AutoScaling.MinNodeCount {
+		if *k8sNodepool.Properties.AutoScaling.MaxNodeCount < *k8sNodepool.Properties.AutoScaling.MinNodeCount {
 			d.SetId("")
 			return fmt.Errorf("Error creating k8s node pool: max_node_count cannot be lower than min_node_count")
 		}
 	}
 
 	if _, mwOk := d.GetOk("maintenance_window.0"); mwOk {
-		k8sNodepool.Properties.MaintenanceWindow = &profitbricks.MaintenanceWindow{}
+		k8sNodepool.Properties.MaintenanceWindow = &ionoscloud.KubernetesMaintenanceWindow{}
 	}
 
 	if mtVal, mtOk := d.GetOk("maintenance_window.0.time"); mtOk {
 		log.Printf("[INFO] Setting Maintenance Window Time to : %s", mtVal.(string))
-		k8sNodepool.Properties.MaintenanceWindow.Time = mtVal.(string)
+		mtVal := mtVal.(string)
+		k8sNodepool.Properties.MaintenanceWindow.Time = &mtVal
 	}
 
 	if mdVal, mdOk := d.GetOk("maintenance_window.0.day_of_the_week"); mdOk {
-		k8sNodepool.Properties.MaintenanceWindow.DayOfTheWeek = mdVal.(string)
+		mdVal := mdVal.(string)
+		k8sNodepool.Properties.MaintenanceWindow.DayOfTheWeek = &mdVal
 	}
 
 	if lansVal, lansOK := d.GetOk("lans"); lansOK {
 		if lansVal.([]interface{}) != nil {
 			updateLans := false
 
-			lans := []profitbricks.KubernetesNodePoolLAN{}
+			lans := []ionoscloud.KubernetesNodePoolLan{}
 
 			for lanIndex := range lansVal.([]interface{}) {
 				if lanID, lanIDOk := d.GetOk(fmt.Sprintf("lans.%d", lanIndex)); lanIDOk {
 					log.Printf("[INFO] Adding k8s node pool to LAN %+v...", lanID)
-					lans = append(lans, profitbricks.KubernetesNodePoolLAN{ID: uint32(lanID.(int))})
+					lanID := int32(lanID.(int))
+					lans = append(lans, ionoscloud.KubernetesNodePoolLan{Id: &lanID})
 				}
 			}
 
@@ -214,7 +233,7 @@ func resourcek8sNodePoolCreate(d *schema.ResourceData, meta interface{}) error {
 
 			if updateLans == true {
 				log.Printf("[INFO] k8s node pool LANs set to %+v", lans)
-				k8sNodepool.Properties.LANs = &lans
+				k8sNodepool.Properties.Lans = &lans
 			}
 		}
 	}
@@ -224,25 +243,31 @@ func resourcek8sNodePoolCreate(d *schema.ResourceData, meta interface{}) error {
 		publicIps := publicIpsProp.([]interface{})
 
 		/* number of public IPs needs to be at least NodeCount + 1 */
-		if len(publicIps) > 0 && uint32(len(publicIps)) < k8sNodepool.Properties.NodeCount + 1 {
-			return fmt.Errorf("the number of public IPs must be at least %d", k8sNodepool.Properties.NodeCount + 1)
+		if len(publicIps) > 0 && int32(len(publicIps)) < *k8sNodepool.Properties.NodeCount+1 {
+			return fmt.Errorf("the number of public IPs must be at least %d", *k8sNodepool.Properties.NodeCount+1)
 		}
 
 		requestPublicIps := make([]string, len(publicIps), len(publicIps))
 		for i := range publicIps {
 			requestPublicIps[i] = fmt.Sprint(publicIps[i])
 		}
-		k8sNodepool.Properties.PublicIPs = &requestPublicIps
+		k8sNodepool.Properties.PublicIps = &requestPublicIps
 	}
 
-	createdNodepool, err := client.CreateKubernetesNodePool(d.Get("k8s_cluster_id").(string), k8sNodepool)
+	ctx, cancel := context.WithTimeout(context.Background(), *resourceDefaultTimeouts.Create)
+
+	if cancel != nil {
+		defer cancel()
+	}
+
+	createdNodepool, _, err := client.KubernetesApi.K8sNodepoolsPost(ctx, d.Get("k8s_cluster_id").(string)).KubernetesNodePool(k8sNodepool).Execute()
 
 	if err != nil {
 		d.SetId("")
 		return fmt.Errorf("Error creating k8s node pool: %s", err)
 	}
 
-	d.SetId(createdNodepool.ID)
+	d.SetId(*createdNodepool.Id)
 
 	log.Printf("[INFO] Successfully created k8s node pool: %s", d.Id())
 
@@ -256,7 +281,7 @@ func resourcek8sNodePoolCreate(d *schema.ResourceData, meta interface{}) error {
 			return fmt.Errorf("Error while checking readiness status of k8s node pool %s: %s", d.Id(), rsErr)
 		}
 
-		if nodepoolReady && rsErr == nil {
+		if nodepoolReady {
 			log.Printf("[INFO] k8s node pool ready: %s", d.Id())
 			break
 		}
@@ -267,13 +292,20 @@ func resourcek8sNodePoolCreate(d *schema.ResourceData, meta interface{}) error {
 
 func resourcek8sNodePoolRead(d *schema.ResourceData, meta interface{}) error {
 
-	client := meta.(SdkBundle).LegacyClient
-	k8sNodepool, err := client.GetKubernetesNodePool(d.Get("k8s_cluster_id").(string), d.Id())
+	client := meta.(SdkBundle).Client
+
+	ctx, cancel := context.WithTimeout(context.Background(), *resourceDefaultTimeouts.Create)
+
+	if cancel != nil {
+		defer cancel()
+	}
+
+	k8sNodepool, apiResponse, err := client.KubernetesApi.K8sNodepoolsFindById(ctx, d.Get("k8s_cluster_id").(string), d.Id()).Execute()
 
 	if err != nil {
 		log.Printf("[INFO] Resource %s not found: %+v", d.Id(), err)
-		if apiError, ok := err.(profitbricks.ApiError); ok {
-			if apiError.HttpStatusCode() == 404 {
+		if _, ok := err.(ionoscloud.GenericOpenAPIError); ok {
+			if apiResponse.Response.StatusCode == 404 {
 				d.SetId("")
 				return nil
 			}
@@ -282,30 +314,108 @@ func resourcek8sNodePoolRead(d *schema.ResourceData, meta interface{}) error {
 
 	log.Printf("[INFO] Successfully retreived k8s node pool %s: %+v", d.Id(), k8sNodepool)
 
-	d.SetId(k8sNodepool.ID)
-	d.Set("name", k8sNodepool.Properties.Name)
-	d.Set("k8s_version", k8sNodepool.Properties.K8sVersion)
-	d.Set("datacenter_id", k8sNodepool.Properties.DatacenterID)
-	d.Set("cpu_family", k8sNodepool.Properties.CPUFamily)
-	d.Set("availability_zone", k8sNodepool.Properties.AvailabilityZone)
-	d.Set("storage_type", k8sNodepool.Properties.StorageType)
-	d.Set("node_count", k8sNodepool.Properties.NodeCount)
-	d.Set("cores_count", k8sNodepool.Properties.CoresCount)
-	d.Set("ram_size", k8sNodepool.Properties.RAMSize)
-	d.Set("storage_size", k8sNodepool.Properties.StorageSize)
+	d.SetId(*k8sNodepool.Id)
 
-	if k8sNodepool.Properties.PublicIPs != nil {
-		d.Set("public_ips", k8sNodepool.Properties.PublicIPs)
+	if k8sNodepool.Properties.Name != nil {
+		err := d.Set("name", *k8sNodepool.Properties.Name)
+		if err != nil {
+			return fmt.Errorf("Error while setting name property for k8sNodepool %s: %s", d.Id(), err)
+		}
+
 	}
 
-	if k8sNodepool.Properties.AutoScaling != nil && (k8sNodepool.Properties.AutoScaling.MinNodeCount != 0 && k8sNodepool.Properties.AutoScaling.MaxNodeCount != 0) {
-		d.Set("auto_scaling", []map[string]uint32{
+	if k8sNodepool.Properties.K8sVersion != nil {
+		err := d.Set("k8s_version", *k8sNodepool.Properties.K8sVersion)
+		if err != nil {
+			return fmt.Errorf("Error while setting k8s_version property for k8sNodepool %s: %s", d.Id(), err)
+		}
+
+	}
+
+	if k8sNodepool.Properties.DatacenterId != nil {
+		err := d.Set("datacenter_id", *k8sNodepool.Properties.DatacenterId)
+		if err != nil {
+			return fmt.Errorf("Error while setting datacenter_id property for k8sNodepool %s: %s", d.Id(), err)
+		}
+
+	}
+
+	if k8sNodepool.Properties.CpuFamily != nil {
+		err := d.Set("cpu_family", *k8sNodepool.Properties.CpuFamily)
+		if err != nil {
+			return fmt.Errorf("Error while setting cpu_family property for k8sNodepool %s: %s", d.Id(), err)
+		}
+
+	}
+
+	if k8sNodepool.Properties.AvailabilityZone != nil {
+		err := d.Set("availability_zone", *k8sNodepool.Properties.AvailabilityZone)
+		if err != nil {
+			return fmt.Errorf("Error while setting availability_zone property for k8sNodepool %s: %s", d.Id(), err)
+		}
+
+	}
+
+	if k8sNodepool.Properties.StorageType != nil {
+		err := d.Set("storage_type", *k8sNodepool.Properties.StorageType)
+		if err != nil {
+			return fmt.Errorf("Error while setting storage_type property for k8sNodepool %s: %s", d.Id(), err)
+		}
+
+	}
+
+	if k8sNodepool.Properties.NodeCount != nil {
+		err := d.Set("node_count", *k8sNodepool.Properties.NodeCount)
+		if err != nil {
+			return fmt.Errorf("Error while setting node_count property for k8sNodepool %s: %s", d.Id(), err)
+		}
+
+	}
+
+	if k8sNodepool.Properties.CoresCount != nil {
+		err := d.Set("cores_count", *k8sNodepool.Properties.CoresCount)
+		if err != nil {
+			return fmt.Errorf("Error while setting cores_count property for k8sNodepool %s: %s", d.Id(), err)
+		}
+
+	}
+
+	if k8sNodepool.Properties.RamSize != nil {
+		err := d.Set("ram_size", *k8sNodepool.Properties.RamSize)
+		if err != nil {
+			return fmt.Errorf("Error while setting ram_size property for k8sNodepool %s: %s", d.Id(), err)
+		}
+
+	}
+
+	if k8sNodepool.Properties.StorageSize != nil {
+		err := d.Set("storage_size", *k8sNodepool.Properties.StorageSize)
+		if err != nil {
+			return fmt.Errorf("Error while setting storage_size property for k8sNodepool %s: %s", d.Id(), err)
+		}
+
+	}
+
+	if k8sNodepool.Properties.PublicIps != nil {
+		err := d.Set("public_ips", *k8sNodepool.Properties.PublicIps)
+		if err != nil {
+			return fmt.Errorf("Error while setting public_ips property for k8sNodepool %s: %s", d.Id(), err)
+		}
+	}
+
+	if k8sNodepool.Properties.AutoScaling != nil && k8sNodepool.Properties.AutoScaling.MinNodeCount != nil &&
+		k8sNodepool.Properties.AutoScaling.MaxNodeCount != nil && (*k8sNodepool.Properties.AutoScaling.MinNodeCount != 0 &&
+		*k8sNodepool.Properties.AutoScaling.MaxNodeCount != 0) {
+		err := d.Set("auto_scaling", []map[string]int32{
 			{
-				"min_node_count": k8sNodepool.Properties.AutoScaling.MinNodeCount,
-				"max_node_count": k8sNodepool.Properties.AutoScaling.MaxNodeCount,
+				"min_node_count": *k8sNodepool.Properties.AutoScaling.MinNodeCount,
+				"max_node_count": *k8sNodepool.Properties.AutoScaling.MaxNodeCount,
 			},
 		})
-		log.Printf("[INFO] Setting AutoScaling for k8s node pool %s to %+v...", d.Id(), k8sNodepool.Properties.AutoScaling)
+		if err != nil {
+			return fmt.Errorf("Error while setting auto_scaling property for k8sNodepool %s: %s", d.Id(), err)
+		}
+		log.Printf("[INFO] Setting AutoScaling for k8s node pool %s to %+v...", d.Id(), *k8sNodepool.Properties.AutoScaling)
 	}
 
 	return nil
@@ -313,18 +423,20 @@ func resourcek8sNodePoolRead(d *schema.ResourceData, meta interface{}) error {
 
 func resourcek8sNodePoolUpdate(d *schema.ResourceData, meta interface{}) error {
 
-	client := meta.(SdkBundle).LegacyClient
-	request := profitbricks.KubernetesNodePool{}
+	client := meta.(SdkBundle).Client
+	request := ionoscloud.KubernetesNodePool{}
 
-	request.Properties = &profitbricks.KubernetesNodePoolProperties{
-		NodeCount: uint32(d.Get("node_count").(int)),
+	nodeCount := int32(d.Get("node_count").(int))
+	request.Properties = &ionoscloud.KubernetesNodePoolProperties{
+		NodeCount: &nodeCount,
 	}
 
 	if d.HasChange("k8s_version") {
 		oldk8sVersion, newk8sVersion := d.GetChange("k8s_version")
 		log.Printf("[INFO] k8s pool k8s version changed from %+v to %+v", oldk8sVersion, newk8sVersion)
 		if newk8sVersion != nil {
-			request.Properties.K8sVersion = newk8sVersion.(string)
+			newk8sVersion := newk8sVersion.(string)
+			request.Properties.K8sVersion = &newk8sVersion
 		}
 	}
 
@@ -332,9 +444,11 @@ func resourcek8sNodePoolUpdate(d *schema.ResourceData, meta interface{}) error {
 		_, newAs := d.GetChange("auto_scaling.0")
 		if newAs.(map[string]interface{}) != nil {
 			updateAutoscaling := false
-			autoScaling := &profitbricks.AutoScaling{
-				MinNodeCount: uint32(d.Get("auto_scaling.0.min_node_count").(int)),
-				MaxNodeCount: uint32(d.Get("auto_scaling.0.max_node_count").(int)),
+			minNodeCount := int32(d.Get("auto_scaling.0.min_node_count").(int))
+			maxNodeCount := int32(d.Get("auto_scaling.0.max_node_count").(int))
+			autoScaling := &ionoscloud.KubernetesAutoScaling{
+				MinNodeCount: &minNodeCount,
+				MaxNodeCount: &maxNodeCount,
 			}
 
 			if d.HasChange("auto_scaling.0.min_node_count") {
@@ -342,7 +456,8 @@ func resourcek8sNodePoolUpdate(d *schema.ResourceData, meta interface{}) error {
 				if newMinNodes != 0 {
 					log.Printf("[INFO] k8s node pool autoscaling min # of nodes changed from %+v to %+v", oldMinNodes, newMinNodes)
 					updateAutoscaling = true
-					autoScaling.MinNodeCount = uint32(newMinNodes.(int))
+					newMinNodes := int32(newMinNodes.(int))
+					autoScaling.MinNodeCount = &newMinNodes
 				}
 			}
 
@@ -351,7 +466,8 @@ func resourcek8sNodePoolUpdate(d *schema.ResourceData, meta interface{}) error {
 				if newMaxNodes != 0 {
 					log.Printf("[INFO] k8s node pool autoscaling max # of nodes changed from %+v to %+v", oldMaxNodes, newMaxNodes)
 					updateAutoscaling = true
-					autoScaling.MaxNodeCount = uint32(newMaxNodes.(int))
+					newMaxNodes := int32(newMaxNodes.(int))
+					autoScaling.MaxNodeCount = &newMaxNodes
 				}
 			}
 
@@ -367,20 +483,28 @@ func resourcek8sNodePoolUpdate(d *schema.ResourceData, meta interface{}) error {
 		if d.Get("auto_scaling.0").(map[string]interface{}) != nil && (d.Get("auto_scaling.0.min_node_count").(int) != 0 || d.Get("auto_scaling.0.max_node_count").(int) != 0) {
 
 			updateNodeCount = false
-			np, npErr := client.GetKubernetesNodePool(d.Get("k8s_cluster_id").(string), d.Id())
+
+			ctx, cancel := context.WithTimeout(context.Background(), *resourceDefaultTimeouts.Create)
+
+			if cancel != nil {
+				defer cancel()
+			}
+
+			np, _, npErr := client.KubernetesApi.K8sNodepoolsFindById(ctx, d.Get("k8s_cluster_id").(string), d.Id()).Execute()
 			if npErr != nil {
 				return fmt.Errorf("Error retrieving k8s node pool %q: %s", d.Id(), npErr)
 			}
 
-			log.Printf("[INFO] Setting node_count for node pool %q from server from %d to %d instead of due to autoscaling %+v", d.Id(), uint32(d.Get("node_count").(int)), np.Properties.NodeCount, d.Get("auto_scaling.0"))
-			request.Properties.NodeCount = uint32(np.Properties.NodeCount)
+			log.Printf("[INFO] Setting node_count for node pool %q from server from %d to %d instead of due to autoscaling %+v", d.Id(), uint32(d.Get("node_count").(int)), *np.Properties.NodeCount, d.Get("auto_scaling.0"))
+			request.Properties.NodeCount = np.Properties.NodeCount
 		}
 
 		if updateNodeCount {
 			oldNc, newNc := d.GetChange("node_count")
 			log.Printf("[INFO] k8s node pool node_count changed from %+v to %+v", oldNc, newNc)
 			if oldNc.(int) != newNc.(int) {
-				request.Properties.NodeCount = uint32(newNc.(int))
+				newNc := int32(newNc.(int))
+				request.Properties.NodeCount = &newNc
 			}
 		}
 	}
@@ -390,12 +514,13 @@ func resourcek8sNodePoolUpdate(d *schema.ResourceData, meta interface{}) error {
 		if newLANs.([]interface{}) != nil {
 			updateLans := false
 
-			lans := []profitbricks.KubernetesNodePoolLAN{}
+			lans := []ionoscloud.KubernetesNodePoolLan{}
 
 			for lanIndex := range newLANs.([]interface{}) {
 				if lanID, lanIDOk := d.GetOk(fmt.Sprintf("lans.%d", lanIndex)); lanIDOk {
 					log.Printf("[INFO] Adding k8s node pool to LAN %+v...", lanID)
-					lans = append(lans, profitbricks.KubernetesNodePoolLAN{ID: uint32(lanID.(int))})
+					lanID := int32(lanID.(int))
+					lans = append(lans, ionoscloud.KubernetesNodePoolLan{Id: &lanID})
 				}
 			}
 
@@ -405,7 +530,7 @@ func resourcek8sNodePoolUpdate(d *schema.ResourceData, meta interface{}) error {
 
 			if updateLans == true {
 				log.Printf("[INFO] k8s node pool LANs changed from %+v to %+v", oldLANs, newLANs)
-				request.Properties.LANs = &lans
+				request.Properties.Lans = &lans
 			}
 		}
 	}
@@ -417,9 +542,11 @@ func resourcek8sNodePoolUpdate(d *schema.ResourceData, meta interface{}) error {
 		if newMw.(map[string]interface{}) != nil {
 
 			updateMaintenanceWindow := false
-			maintenanceWindow := &profitbricks.MaintenanceWindow{
-				DayOfTheWeek: d.Get("maintenance_window.0.day_of_the_week").(string),
-				Time:         d.Get("maintenance_window.0.time").(string),
+			dayOfTheWeek := d.Get("maintenance_window.0.day_of_the_week").(string)
+			timeS := d.Get("maintenance_window.0.time").(string)
+			maintenanceWindow := &ionoscloud.KubernetesMaintenanceWindow{
+				DayOfTheWeek: &dayOfTheWeek,
+				Time:         &timeS,
 			}
 
 			if d.HasChange("maintenance_window.0.day_of_the_week") {
@@ -428,7 +555,8 @@ func resourcek8sNodePoolUpdate(d *schema.ResourceData, meta interface{}) error {
 				if newMd.(string) != "" {
 					log.Printf("[INFO] k8s node pool maintenance window DOW changed from %+v to %+v", oldMd, newMd)
 					updateMaintenanceWindow = true
-					maintenanceWindow.DayOfTheWeek = newMd.(string)
+					newMd := newMd.(string)
+					maintenanceWindow.DayOfTheWeek = &newMd
 				}
 			}
 
@@ -437,7 +565,8 @@ func resourcek8sNodePoolUpdate(d *schema.ResourceData, meta interface{}) error {
 				if newMt.(string) != "" {
 					log.Printf("[INFO] k8s node pool maintenance window time changed from %+v to %+v", oldMt, newMt)
 					updateMaintenanceWindow = true
-					maintenanceWindow.Time = newMt.(string)
+					newMt := newMt.(string)
+					maintenanceWindow.Time = &newMt
 				}
 			}
 
@@ -455,8 +584,8 @@ func resourcek8sNodePoolUpdate(d *schema.ResourceData, meta interface{}) error {
 			publicIps := newPublicIps.([]interface{})
 
 			/* number of public IPs needs to be at least NodeCount + 1 */
-			if len(publicIps) > 0 && uint32(len(publicIps)) < request.Properties.NodeCount + 1 {
-				return fmt.Errorf("the number of public IPs must be at least %d", request.Properties.NodeCount + 1)
+			if len(publicIps) > 0 && int32(len(publicIps)) < *request.Properties.NodeCount+1 {
+				return fmt.Errorf("the number of public IPs must be at least %d", *request.Properties.NodeCount+1)
 			}
 
 			requestPublicIps := make([]string, len(publicIps), len(publicIps))
@@ -465,7 +594,7 @@ func resourcek8sNodePoolUpdate(d *schema.ResourceData, meta interface{}) error {
 				requestPublicIps[i] = fmt.Sprint(publicIps[i])
 			}
 
-			request.Properties.PublicIPs = &requestPublicIps
+			request.Properties.PublicIps = &requestPublicIps
 		}
 	}
 
@@ -475,11 +604,16 @@ func resourcek8sNodePoolUpdate(d *schema.ResourceData, meta interface{}) error {
 		log.Printf("[INFO] Update req: %s", string(b))
 	}
 
-	_, err := client.UpdateKubernetesNodePool(d.Get("k8s_cluster_id").(string), d.Id(), request)
+	ctx, cancel := context.WithTimeout(context.Background(), *resourceDefaultTimeouts.Update)
+
+	if cancel != nil {
+		defer cancel()
+	}
+	_, apiResponse, err := client.KubernetesApi.K8sNodepoolsPut(ctx, d.Get("k8s_cluster_id").(string), d.Id()).KubernetesNodePool(request).Execute()
 
 	if err != nil {
-		if apiError, ok := err.(profitbricks.ApiError); ok {
-			if apiError.HttpStatusCode() == 404 {
+		if _, ok := err.(ionoscloud.GenericOpenAPIError); ok {
+			if apiResponse.Response.StatusCode == 404 {
 				d.SetId("")
 				return nil
 			}
@@ -498,7 +632,7 @@ func resourcek8sNodePoolUpdate(d *schema.ResourceData, meta interface{}) error {
 			return fmt.Errorf("Error while checking readiness status of k8s node pool %s: %s", d.Id(), rsErr)
 		}
 
-		if nodepoolReady && rsErr == nil {
+		if nodepoolReady {
 			log.Printf("[INFO] k8s node pool ready: %s", d.Id())
 			break
 		}
@@ -508,13 +642,19 @@ func resourcek8sNodePoolUpdate(d *schema.ResourceData, meta interface{}) error {
 }
 
 func resourcek8sNodePoolDelete(d *schema.ResourceData, meta interface{}) error {
-	client := meta.(SdkBundle).LegacyClient
+	client := meta.(SdkBundle).Client
 
-	_, err := client.DeleteKubernetesNodePool(d.Get("k8s_cluster_id").(string), d.Id())
+	ctx, cancel := context.WithTimeout(context.Background(), *resourceDefaultTimeouts.Delete)
+
+	if cancel != nil {
+		defer cancel()
+	}
+
+	_, apiResponse, err := client.KubernetesApi.K8sNodepoolsDelete(ctx, d.Get("k8s_cluster_id").(string), d.Id()).Execute()
 
 	if err != nil {
-		if apiError, ok := err.(profitbricks.ApiError); ok {
-			if apiError.HttpStatusCode() == 404 {
+		if _, ok := err.(ionoscloud.GenericOpenAPIError); ok {
+			if apiResponse.Response.StatusCode == 404 {
 				d.SetId("")
 				return nil
 			}
@@ -534,7 +674,7 @@ func resourcek8sNodePoolDelete(d *schema.ResourceData, meta interface{}) error {
 			return fmt.Errorf("Error while checking deletion status of k8s node pool %s: %s", d.Id(), dsErr)
 		}
 
-		if nodepoolDeleted && dsErr == nil {
+		if nodepoolDeleted {
 			log.Printf("[INFO] Successfully deleted k8s node pool: %s", d.Id())
 			break
 		}
@@ -544,21 +684,31 @@ func resourcek8sNodePoolDelete(d *schema.ResourceData, meta interface{}) error {
 	return nil
 }
 
-func k8sNodepoolReady(client *profitbricks.Client, d *schema.ResourceData) (bool, error) {
-	subjectNodepool, err := client.GetKubernetesNodePool(d.Get("k8s_cluster_id").(string), d.Id())
+func k8sNodepoolReady(client *ionoscloud.APIClient, d *schema.ResourceData) (bool, error) {
+	ctx, cancel := context.WithTimeout(context.Background(), *resourceDefaultTimeouts.Default)
 
+	if cancel != nil {
+		defer cancel()
+	}
+
+	subjectNodepool, _, err := client.KubernetesApi.K8sNodepoolsFindById(ctx, d.Get("k8s_cluster_id").(string), d.Id()).Execute()
 	if err != nil {
 		return true, fmt.Errorf("Error checking k8s node pool status: %s", err)
 	}
-	return subjectNodepool.Metadata.State == "ACTIVE", nil
+	return *subjectNodepool.Metadata.State == "ACTIVE", nil
 }
 
-func k8sNodepoolDeleted(client *profitbricks.Client, d *schema.ResourceData) (bool, error) {
-	_, err := client.GetKubernetesNodePool(d.Get("k8s_cluster_id").(string), d.Id())
+func k8sNodepoolDeleted(client *ionoscloud.APIClient, d *schema.ResourceData) (bool, error) {
+	ctx, cancel := context.WithTimeout(context.Background(), *resourceDefaultTimeouts.Default)
+
+	if cancel != nil {
+		defer cancel()
+	}
+	_, apiResponse, err := client.KubernetesApi.K8sNodepoolsFindById(ctx, d.Get("k8s_cluster_id").(string), d.Id()).Execute()
 
 	if err != nil {
-		if apiError, ok := err.(profitbricks.ApiError); ok {
-			if apiError.HttpStatusCode() == 404 {
+		if _, ok := err.(ionoscloud.GenericOpenAPIError); ok {
+			if apiResponse.Response.StatusCode == 404 {
 				return true, nil
 			}
 			return true, fmt.Errorf("Error checking k8s node pool deletion status: %s", err)
