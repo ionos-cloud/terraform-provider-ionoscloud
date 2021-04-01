@@ -1,11 +1,12 @@
 package ionoscloud
 
 import (
+	"context"
 	"fmt"
+	ionoscloud "github.com/ionos-cloud/sdk-go/v5"
 	"time"
 
 	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
-	"github.com/profitbricks/profitbricks-sdk-go/v5"
 )
 
 func resourceLanIPFailover() *schema.Resource {
@@ -38,7 +39,7 @@ func resourceLanIPFailover() *schema.Resource {
 }
 
 func resourceLanIPFailoverCreate(d *schema.ResourceData, meta interface{}) error {
-	client := meta.(SdkBundle).LegacyClient
+	client := meta.(SdkBundle).Client
 	dcid := d.Get("datacenter_id").(string)
 	lanid := d.Get("lan_id").(string)
 	if lanid == "" {
@@ -46,38 +47,52 @@ func resourceLanIPFailoverCreate(d *schema.ResourceData, meta interface{}) error
 	}
 	ip := d.Get("ip").(string)
 	nicUuid := d.Get("nicuuid").(string)
-	properties := &profitbricks.LanProperties{}
 
-	properties.IPFailover = &[]profitbricks.IPFailover{
+	properties := &ionoscloud.LanProperties{}
+
+	properties.IpFailover = &[]ionoscloud.IPFailover{
 		{
-			IP:      ip,
-			NicUUID: nicUuid,
+			Ip:      &ip,
+			NicUuid: &nicUuid,
 		}}
 
+	ctx, cancel := context.WithTimeout(context.Background(), *resourceDefaultTimeouts.Create)
+
+	if cancel != nil {
+		defer cancel()
+	}
+
 	if properties != nil {
-		lan, err := client.UpdateLan(dcid, lanid, *properties)
+		lan, apiResponse, err := client.LanApi.DatacentersLansPatch(ctx, dcid, lanid).Lan(*properties).Execute()
 		if err != nil {
 			return fmt.Errorf("An error occured while patching a lans failover group  %s %s", lanid, err)
 		}
 
 		// Wait, catching any errors
-		_, errState := getStateChangeConf(meta, d, lan.Headers.Get("Location"), schema.TimeoutCreate).WaitForState()
+		_, errState := getStateChangeConf(meta, d, apiResponse.Header.Get("Location"), schema.TimeoutCreate).WaitForState()
 		if errState != nil {
 			return errState
 		}
 
-		d.SetId(lan.ID)
+		d.SetId(*lan.Id)
 	}
 	return resourceLanIPFailoverRead(d, meta)
 }
 
 func resourceLanIPFailoverRead(d *schema.ResourceData, meta interface{}) error {
-	client := meta.(SdkBundle).LegacyClient
-	lan, err := client.GetLan(d.Get("datacenter_id").(string), d.Id())
+	client := meta.(SdkBundle).Client
+
+	ctx, cancel := context.WithTimeout(context.Background(), *resourceDefaultTimeouts.Default)
+
+	if cancel != nil {
+		defer cancel()
+	}
+
+	lan, apiResponse, err := client.LanApi.DatacentersLansFindById(ctx, d.Get("datacenter_id").(string), d.Id()).Execute()
 
 	if err != nil {
-		if apiError, ok := err.(profitbricks.ApiError); ok {
-			if apiError.HttpStatusCode() == 404 {
+		if _, ok := err.(ionoscloud.GenericOpenAPIError); ok {
+			if apiResponse.Response.StatusCode == 404 {
 				d.SetId("")
 				return nil
 			}
@@ -85,35 +100,60 @@ func resourceLanIPFailoverRead(d *schema.ResourceData, meta interface{}) error {
 		return fmt.Errorf("An error occured while fetching a lan ID %s %s", d.Id(), err)
 	}
 
-	d.Set("public", lan.Properties.Public)
-	d.Set("name", lan.Properties.Name)
-	d.Set("ip_failover", lan.Properties.IPFailover)
+	if lan.Properties.IpFailover != nil {
+		err := d.Set("ip", *(*lan.Properties.IpFailover)[0].Ip)
+		if err != nil {
+			return fmt.Errorf("Error while setting ip property for IpFailover %s: %s", d.Id(), err)
+		}
+	}
+
+	if lan.Properties.IpFailover != nil {
+		err := d.Set("nicuuid", *(*lan.Properties.IpFailover)[0].NicUuid)
+		if err != nil {
+			return fmt.Errorf("Error while setting nicuuid property for IpFailover %s: %s", d.Id(), err)
+		}
+	}
+
+	if lan.Id != nil {
+		err := d.Set("lan_id", *lan.Id)
+		if err != nil {
+			return fmt.Errorf("Error while setting lan_id property for IpFailover %s: %s", d.Id(), err)
+		}
+	}
+
 	d.Set("datacenter_id", d.Get("datacenter_id").(string))
+
 	return nil
 }
 
 func resourceLanIPFailoverUpdate(d *schema.ResourceData, meta interface{}) error {
-	client := meta.(SdkBundle).LegacyClient
-	properties := &profitbricks.LanProperties{}
+	client := meta.(SdkBundle).Client
+	properties := &ionoscloud.LanProperties{}
 	dcid := d.Get("datacenter_id").(string)
 	lanid := d.Get("lan_id").(string)
 	ip := d.Get("ip").(string)
 	nicUuid := d.Get("nicuuid").(string)
 
-	properties.IPFailover = &[]profitbricks.IPFailover{
+	properties.IpFailover = &[]ionoscloud.IPFailover{
 		{
-			IP:      ip,
-			NicUUID: nicUuid,
+			Ip:      &ip,
+			NicUuid: &nicUuid,
 		}}
 
 	if properties != nil {
-		lan, err := client.UpdateLan(dcid, lanid, *properties)
+		ctx, cancel := context.WithTimeout(context.Background(), *resourceDefaultTimeouts.Update)
+
+		if cancel != nil {
+			defer cancel()
+		}
+
+		_, apiResponse, err := client.LanApi.DatacentersLansPatch(ctx, dcid, lanid).Lan(*properties).Execute()
 		if err != nil {
 			return fmt.Errorf("An error occured while patching a lan ID %s %s", d.Id(), err)
 		}
 
 		// Wait, catching any errors
-		_, errState := getStateChangeConf(meta, d, lan.Headers.Get("Location"), schema.TimeoutUpdate).WaitForState()
+		_, errState := getStateChangeConf(meta, d, apiResponse.Header.Get("Location"), schema.TimeoutUpdate).WaitForState()
 		if errState != nil {
 			return errState
 		}
@@ -122,24 +162,30 @@ func resourceLanIPFailoverUpdate(d *schema.ResourceData, meta interface{}) error
 }
 
 func resourceLanIPFailoverDelete(d *schema.ResourceData, meta interface{}) error {
-	client := meta.(SdkBundle).LegacyClient
+	client := meta.(SdkBundle).Client
 	dcid := d.Get("datacenter_id").(string)
 	lanid := d.Get("lan_id").(string)
 
 	//remove the failover group
-	properties := &profitbricks.LanProperties{
-		IPFailover: &[]profitbricks.IPFailover{},
+	properties := &ionoscloud.LanProperties{
+		IpFailover: &[]ionoscloud.IPFailover{},
 	}
 
-	ipfailover, err := client.UpdateLan(dcid, lanid, *properties)
+	ctx, cancel := context.WithTimeout(context.Background(), *resourceDefaultTimeouts.Update)
+
+	if cancel != nil {
+		defer cancel()
+	}
+
+	_, apiResponse, err := client.LanApi.DatacentersLansPatch(ctx, dcid, lanid).Lan(*properties).Execute()
 	if err != nil {
 		//try again in 90 seconds
 		time.Sleep(90 * time.Second)
-		ipfailover, err = client.UpdateLan(dcid, lanid, *properties)
+		_, apiResponse, err = client.LanApi.DatacentersLansPatch(ctx, dcid, lanid).Lan(*properties).Execute()
 
 		if err != nil {
-			if apiError, ok := err.(profitbricks.ApiError); ok {
-				if apiError.HttpStatusCode() != 404 {
+			if _, ok := err.(ionoscloud.GenericOpenAPIError); ok {
+				if apiResponse.Response.StatusCode != 404 {
 					return fmt.Errorf("An error occured while removing a lans ipfailover groups dcId %s ID %s %s", d.Get("datacenter_id").(string), d.Id(), err)
 				}
 			}
@@ -147,7 +193,7 @@ func resourceLanIPFailoverDelete(d *schema.ResourceData, meta interface{}) error
 	}
 
 	// Wait, catching any errors
-	_, errState := getStateChangeConf(meta, d, ipfailover.Headers.Get("Location"), schema.TimeoutDelete).WaitForState()
+	_, errState := getStateChangeConf(meta, d, apiResponse.Header.Get("Location"), schema.TimeoutDelete).WaitForState()
 	if errState != nil {
 		return errState
 	}
