@@ -656,8 +656,6 @@ func resourceServerCreate(d *schema.ResourceData, meta interface{}) error {
 
 	server, apiResponse, err := client.ServerApi.DatacentersServersPost(ctx, d.Get("datacenter_id").(string)).Server(request).Execute()
 
-	b := make([]byte, 1000)
-	_, _ = apiResponse.Body.Read(b)
 	if err != nil {
 		return fmt.Errorf(
 			"Error creating server: (%s)", err)
@@ -688,12 +686,14 @@ func resourceServerCreate(d *schema.ResourceData, meta interface{}) error {
 		}
 	}
 
-	prnErr := d.Set("primary_nic", *(*server.Entities.Nics.Items)[0].Id)
-
-	if prnErr != nil {
-		return fmt.Errorf("Error while setting primary nic %s: %s", d.Id(), prnErr)
+	if (*server.Entities.Nics.Items)[0].Id != nil {
+		err := d.Set("primary_nic", *(*server.Entities.Nics.Items)[0].Id)
+		if err != nil {
+			return fmt.Errorf("Error while setting primary nic %s: %s", d.Id(), err)
+		}
 	}
-	if *(*server.Entities.Nics.Items)[0].Properties.Ips != nil {
+
+	if (*server.Entities.Nics.Items)[0].Properties.Ips != nil {
 		if len(*(*server.Entities.Nics.Items)[0].Properties.Ips) > 0 {
 			d.SetConnInfo(map[string]string{
 				"type":     "ssh",
@@ -1004,11 +1004,13 @@ func resourceServerUpdate(d *schema.ResourceData, meta interface{}) error {
 	// Volume stuff
 	if d.HasChange("volume") {
 		boot_volume := d.Get("boot_volume").(string)
-		bootVolume, _, err := client.ServerApi.DatacentersServersVolumesFindById(ctx, dcId, d.Id(), boot_volume).Execute()
+		_, _, err := client.ServerApi.DatacentersServersVolumesFindById(ctx, dcId, d.Id(), boot_volume).Execute()
 
 		if err != nil {
-
-			_, apiResponse, err := client.ServerApi.DatacentersServersVolumesPost(ctx, dcId, d.Id()).Volume(bootVolume).Execute()
+			volume := ionoscloud.Volume{
+				Id: &boot_volume,
+			}
+			_, apiResponse, err := client.ServerApi.DatacentersServersVolumesPost(ctx, dcId, d.Id()).Volume(volume).Execute()
 			if err != nil {
 				return fmt.Errorf("An error occured while attaching a volume dcId: %s server_id: %s ID: %s Response: %s", dcId, d.Id(), boot_volume, err)
 			}
