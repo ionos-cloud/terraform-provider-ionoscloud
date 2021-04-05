@@ -95,7 +95,7 @@ func resourceLoadbalancerCreate(d *schema.ResourceData, meta interface{}) error 
 
 func resourceLoadbalancerRead(d *schema.ResourceData, meta interface{}) error {
 	client := meta.(SdkBundle).Client
-	ctx, cancel := context.WithTimeout(context.Background(), *resourceDefaultTimeouts.Default) //client.GetContext()
+	ctx, cancel := context.WithTimeout(context.Background(), *resourceDefaultTimeouts.Default)
 	if cancel != nil {
 		defer cancel()
 	}
