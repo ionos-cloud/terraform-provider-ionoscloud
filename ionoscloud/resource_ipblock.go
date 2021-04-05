@@ -67,9 +67,7 @@ func resourceIPBlockCreate(d *schema.ResourceData, meta interface{}) error {
 	if err != nil {
 		return fmt.Errorf("An error occured while reserving an ip block: %s", err)
 	}
-	//if ipblock.Id != nil {
 	d.SetId(*ipblock.Id)
-	//}
 
 	// Wait, catching any errors
 	_, errState := getStateChangeConf(meta, d, apiResponse.Header.Get("Location"), schema.TimeoutCreate).WaitForState()
