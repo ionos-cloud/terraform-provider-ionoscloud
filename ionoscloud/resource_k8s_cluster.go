@@ -1,12 +1,13 @@
 package ionoscloud
 
 import (
+	"context"
 	"fmt"
+	ionoscloud "github.com/ionos-cloud/sdk-go/v5"
 	"log"
 	"time"
 
 	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
-	"github.com/profitbricks/profitbricks-sdk-go/v5"
 )
 
 func resourcek8sCluster() *schema.Resource {
@@ -55,40 +56,50 @@ func resourcek8sCluster() *schema.Resource {
 }
 
 func resourcek8sClusterCreate(d *schema.ResourceData, meta interface{}) error {
-	client := meta.(SdkBundle).LegacyClient
+	client := meta.(SdkBundle).Client
 
-	cluster := profitbricks.KubernetesCluster{
-		Properties: &profitbricks.KubernetesClusterProperties{
-			Name: d.Get("name").(string),
+	clusterName := d.Get("name").(string)
+	cluster := ionoscloud.KubernetesCluster{
+		Properties: &ionoscloud.KubernetesClusterProperties{
+			Name: &clusterName,
 		},
 	}
 
 	if k8svVal, k8svOk := d.GetOk("k8s_version"); k8svOk {
 		log.Printf("[INFO] Setting K8s version to : %s", k8svVal.(string))
-		cluster.Properties.K8sVersion = k8svVal.(string)
+		k8svVal := k8svVal.(string)
+		cluster.Properties.K8sVersion = &k8svVal
 	}
 
 	if _, mwOk := d.GetOk("maintenance_window.0"); mwOk {
-		cluster.Properties.MaintenanceWindow = &profitbricks.MaintenanceWindow{}
+		cluster.Properties.MaintenanceWindow = &ionoscloud.KubernetesMaintenanceWindow{}
 	}
 
 	if mtVal, mtOk := d.GetOk("maintenance_window.0.time"); mtOk {
 		log.Printf("[INFO] Setting Maintenance Window Time to : %s", mtVal.(string))
-		cluster.Properties.MaintenanceWindow.Time = mtVal.(string)
+		mtVal := mtVal.(string)
+		cluster.Properties.MaintenanceWindow.Time = &mtVal
 	}
 
 	if mdVal, mdOk := d.GetOk("maintenance_window.0.day_of_the_week"); mdOk {
-		cluster.Properties.MaintenanceWindow.DayOfTheWeek = mdVal.(string)
+		mdVal := mdVal.(string)
+		cluster.Properties.MaintenanceWindow.DayOfTheWeek = &mdVal
 	}
 
-	createdCluster, err := client.CreateKubernetesCluster(cluster)
+	ctx, cancel := context.WithTimeout(context.Background(), *resourceDefaultTimeouts.Create)
+
+	if cancel != nil {
+		defer cancel()
+	}
+
+	createdCluster, apiResponse, err := client.KubernetesApi.K8sPost(ctx).KubernetesCluster(cluster).Execute()
 
 	if err != nil {
 		d.SetId("")
-		return fmt.Errorf("Error creating k8s cluster: %s", err)
+		return fmt.Errorf("Error creating k8s cluster: %s \n ApiError: %s ", err, string(apiResponse.Payload))
 	}
 
-	d.SetId(createdCluster.ID)
+	d.SetId(*createdCluster.Id)
 	log.Printf("[INFO] Created k8s cluster: %s", d.Id())
 
 	for {
@@ -112,12 +123,19 @@ func resourcek8sClusterCreate(d *schema.ResourceData, meta interface{}) error {
 
 func resourcek8sClusterRead(d *schema.ResourceData, meta interface{}) error {
 
-	client := meta.(SdkBundle).LegacyClient
-	cluster, err := client.GetKubernetesCluster(d.Id())
+	client := meta.(SdkBundle).Client
+
+	ctx, cancel := context.WithTimeout(context.Background(), *resourceDefaultTimeouts.Default)
+
+	if cancel != nil {
+		defer cancel()
+	}
+
+	cluster, apiResponse, err := client.KubernetesApi.K8sFindByClusterId(ctx, d.Id()).Execute()
 
 	if err != nil {
-		if apiError, ok := err.(profitbricks.ApiError); ok {
-			if apiError.HttpStatusCode() == 404 {
+		if _, ok := err.(ionoscloud.GenericOpenAPIError); ok {
+			if apiResponse.Response.StatusCode == 404 {
 				d.SetId("")
 				return nil
 			}
@@ -131,17 +149,19 @@ func resourcek8sClusterRead(d *schema.ResourceData, meta interface{}) error {
 }
 
 func resourcek8sClusterUpdate(d *schema.ResourceData, meta interface{}) error {
-	client := meta.(SdkBundle).LegacyClient
-	request := profitbricks.UpdatedKubernetesCluster{}
+	client := meta.(SdkBundle).Client
+	request := ionoscloud.KubernetesCluster{}
 
-	request.Properties = &profitbricks.KubernetesClusterProperties{
-		Name: d.Get("name").(string),
+	clusterName := d.Get("name").(string)
+	request.Properties = &ionoscloud.KubernetesClusterProperties{
+		Name: &clusterName,
 	}
 
 	if d.HasChange("name") {
 		oldName, newName := d.GetChange("name")
 		log.Printf("[INFO] k8s cluster name changed from %+v to %+v", oldName, newName)
-		request.Properties.Name = newName.(string)
+		newNameStr := newName.(string)
+		request.Properties.Name = &newNameStr
 	}
 
 	log.Printf("[INFO] Attempting update cluster Id %s", d.Id())
@@ -149,8 +169,9 @@ func resourcek8sClusterUpdate(d *schema.ResourceData, meta interface{}) error {
 	if d.HasChange("k8s_version") {
 		oldk8sVersion, newk8sVersion := d.GetChange("k8s_version")
 		log.Printf("[INFO] k8s version changed from %+v to %+v", oldk8sVersion, newk8sVersion)
+		newk8sVersionStr := newk8sVersion.(string)
 		if newk8sVersion != nil {
-			request.Properties.K8sVersion = newk8sVersion.(string)
+			request.Properties.K8sVersion = &newk8sVersionStr
 		}
 	}
 
@@ -161,9 +182,11 @@ func resourcek8sClusterUpdate(d *schema.ResourceData, meta interface{}) error {
 		if newMw.(map[string]interface{}) != nil {
 
 			updateMaintenanceWindow := false
-			maintenanceWindow := &profitbricks.MaintenanceWindow{
-				DayOfTheWeek: d.Get("maintenance_window.0.day_of_the_week").(string),
-				Time:         d.Get("maintenance_window.0.time").(string),
+			dayofTheWeek := d.Get("maintenance_window.0.day_of_the_week").(string)
+			time := d.Get("maintenance_window.0.time").(string)
+			maintenanceWindow := &ionoscloud.KubernetesMaintenanceWindow{
+				DayOfTheWeek: &dayofTheWeek,
+				Time:         &time,
 			}
 
 			if d.HasChange("maintenance_window.0.day_of_the_week") {
@@ -171,7 +194,8 @@ func resourcek8sClusterUpdate(d *schema.ResourceData, meta interface{}) error {
 				if newMd.(string) != "" {
 					log.Printf("[INFO] k8s maintenance window DOW changed from %+v to %+v", oldMd, newMd)
 					updateMaintenanceWindow = true
-					maintenanceWindow.DayOfTheWeek = newMd.(string)
+					newMd := newMd.(string)
+					maintenanceWindow.DayOfTheWeek = &newMd
 				}
 			}
 
@@ -181,7 +205,8 @@ func resourcek8sClusterUpdate(d *schema.ResourceData, meta interface{}) error {
 				if newMt.(string) != "" {
 					log.Printf("[INFO] k8s maintenance window time changed from %+v to %+v", oldMt, newMt)
 					updateMaintenanceWindow = true
-					maintenanceWindow.Time = newMt.(string)
+					newMt := newMt.(string)
+					maintenanceWindow.Time = &newMt
 				}
 			}
 
@@ -191,11 +216,17 @@ func resourcek8sClusterUpdate(d *schema.ResourceData, meta interface{}) error {
 		}
 	}
 
-	_, err := client.UpdateKubernetesCluster(d.Id(), request)
+	ctx, cancel := context.WithTimeout(context.Background(), *resourceDefaultTimeouts.Update)
+
+	if cancel != nil {
+		defer cancel()
+	}
+
+	_, apiResponse, err := client.KubernetesApi.K8sPut(ctx, d.Id()).KubernetesCluster(request).Execute()
 
 	if err != nil {
-		if apiError, ok := err.(profitbricks.ApiError); ok {
-			if apiError.HttpStatusCode() == 404 {
+		if _, ok := err.(ionoscloud.GenericOpenAPIError); ok {
+			if apiResponse.Response.StatusCode == 404 {
 				d.SetId("")
 				return nil
 			}
@@ -224,13 +255,19 @@ func resourcek8sClusterUpdate(d *schema.ResourceData, meta interface{}) error {
 }
 
 func resourcek8sClusterDelete(d *schema.ResourceData, meta interface{}) error {
-	client := meta.(SdkBundle).LegacyClient
+	client := meta.(SdkBundle).Client
 
-	_, err := client.DeleteKubernetesCluster(d.Id())
+	ctx, cancel := context.WithTimeout(context.Background(), *resourceDefaultTimeouts.Delete)
+
+	if cancel != nil {
+		defer cancel()
+	}
+
+	_, apiResponse, err := client.KubernetesApi.K8sDelete(ctx, d.Id()).Execute()
 
 	if err != nil {
-		if apiError, ok := err.(profitbricks.ApiError); ok {
-			if apiError.HttpStatusCode() == 404 {
+		if _, ok := err.(ionoscloud.GenericOpenAPIError); ok {
+			if apiResponse.Response.StatusCode == 404 {
 				d.SetId("")
 				return nil
 			}
@@ -259,21 +296,35 @@ func resourcek8sClusterDelete(d *schema.ResourceData, meta interface{}) error {
 	return nil
 }
 
-func k8sClusterReady(client *profitbricks.Client, d *schema.ResourceData) (bool, error) {
-	subjectCluster, err := client.GetKubernetesCluster(d.Id())
+func k8sClusterReady(client *ionoscloud.APIClient, d *schema.ResourceData) (bool, error) {
+
+	ctx, cancel := context.WithTimeout(context.Background(), *resourceDefaultTimeouts.Default)
+
+	if cancel != nil {
+		defer cancel()
+	}
+
+	subjectCluster, _, err := client.KubernetesApi.K8sFindByClusterId(ctx, d.Id()).Execute()
 
 	if err != nil {
 		return true, fmt.Errorf("Error checking k8s cluster status: %s", err)
 	}
-	return subjectCluster.Metadata.State == "ACTIVE", nil
+	return *subjectCluster.Metadata.State == "ACTIVE", nil
 }
 
-func k8sClusterDeleted(client *profitbricks.Client, d *schema.ResourceData) (bool, error) {
-	_, err := client.GetKubernetesCluster(d.Id())
+func k8sClusterDeleted(client *ionoscloud.APIClient, d *schema.ResourceData) (bool, error) {
+
+	ctx, cancel := context.WithTimeout(context.Background(), *resourceDefaultTimeouts.Default)
+
+	if cancel != nil {
+		defer cancel()
+	}
+
+	_, apiResponse, err := client.KubernetesApi.K8sFindByClusterId(ctx, d.Id()).Execute()
 
 	if err != nil {
-		if apiError, ok := err.(profitbricks.ApiError); ok {
-			if apiError.HttpStatusCode() == 404 {
+		if _, ok := err.(ionoscloud.GenericOpenAPIError); ok {
+			if apiResponse.Response.StatusCode == 404 {
 				return true, nil
 			}
 			return true, fmt.Errorf("Error checking k8s cluster deletion status: %s", err)

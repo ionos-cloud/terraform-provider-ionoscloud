@@ -1,12 +1,13 @@
 package ionoscloud
 
 import (
+	"context"
 	"fmt"
+	ionoscloud "github.com/ionos-cloud/sdk-go/v5"
 	"log"
 	"strings"
 
 	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
-	"github.com/profitbricks/profitbricks-sdk-go/v5"
 )
 
 func dataSourceDataCenter() *schema.Resource {
@@ -32,7 +33,7 @@ func dataSourceDataCenter() *schema.Resource {
 	}
 }
 
-func getDatacenter(client *profitbricks.Client, d *schema.ResourceData) (*profitbricks.Datacenter, error) {
+func getDatacenter(client *ionoscloud.APIClient, d *schema.ResourceData) (*ionoscloud.Datacenter, error) {
 	var name, location string
 	id, idOk := d.GetOk("id")
 	t, nameOk := d.GetOk("name")
@@ -47,45 +48,60 @@ func getDatacenter(client *profitbricks.Client, d *schema.ResourceData) (*profit
 		return nil, fmt.Errorf("either id, location or name must be set")
 	}
 	if idOk {
-		dc, err := client.GetDatacenter(id.(string))
+		ctx, cancel := context.WithTimeout(context.Background(), *resourceDefaultTimeouts.Default)
+
+		if cancel != nil {
+			defer cancel()
+		}
+
+		dc, _, err := client.DataCenterApi.DatacentersFindById(ctx, id.(string)).Execute()
 		if err != nil {
 			return nil, fmt.Errorf("Error getting datacenter with id %s", id.(string))
 		}
 		if nameOk {
-			if dc.Properties.Name != name {
+			if *dc.Properties.Name != name {
 				return nil, fmt.Errorf("[ERROR] Name of dc (UUID=%s, name=%s) does not match expected name: %s",
-					dc.ID, dc.Properties.Name, name)
+					dc.Id, dc.Properties.Name, name)
 			}
 		}
 		if locationOk {
-			if dc.Properties.Location != location {
+			if *dc.Properties.Location != location {
 				return nil, fmt.Errorf("[ERROR] location of dc (UUID=%s, location=%s) does not match expected location: %s",
-					dc.ID, dc.Properties.Location, location)
+					dc.Id, dc.Properties.Location, location)
 
 			}
 		}
 		log.Printf("[INFO] Got dc [Name=%s, Location=%s]", dc.Properties.Name, dc.Properties.Location)
-		return dc, nil
+		return &dc, nil
 	}
-	datacenters, err := client.ListDatacenters()
+
+	ctx, cancel := context.WithTimeout(context.Background(), *resourceDefaultTimeouts.Default)
+
+	if cancel != nil {
+		defer cancel()
+	}
+
+	datacenters, _, err := client.DataCenterApi.DatacentersGet(ctx).Execute()
 
 	if err != nil {
 		return nil, fmt.Errorf("An error occured while fetching datacenters %s", err)
 	}
 
-	results := []profitbricks.Datacenter{}
+	results := []ionoscloud.Datacenter{}
 
-	for _, dc := range datacenters.Items {
-		if dc.Properties.Name == name || strings.Contains(dc.Properties.Name, name) {
-			results = append(results, dc)
+	if datacenters.Items != nil {
+		for _, dc := range *datacenters.Items {
+			if *dc.Properties.Name == name || strings.Contains(*dc.Properties.Name, name) {
+				results = append(results, dc)
+			}
 		}
 	}
 
 	if locationOk {
 		log.Printf("[INFO] searching dcs by location***********")
-		locationResults := []profitbricks.Datacenter{}
+		locationResults := []ionoscloud.Datacenter{}
 		for _, dc := range results {
-			if dc.Properties.Location == location {
+			if *dc.Properties.Location == location {
 				locationResults = append(locationResults, dc)
 			}
 		}
@@ -103,17 +119,30 @@ func getDatacenter(client *profitbricks.Client, d *schema.ResourceData) (*profit
 	}
 	return &results[0], nil
 }
+
 func dataSourceDataCenterRead(d *schema.ResourceData, meta interface{}) error {
-	client := meta.(SdkBundle).LegacyClient
+	client := meta.(SdkBundle).Client
 
 	datacenter, err := getDatacenter(client, d)
 
 	if err != nil {
 		return fmt.Errorf("An error occured while fetching datacenters %s", err)
 	}
-	d.SetId(datacenter.ID)
-	d.Set("location", datacenter.Properties.Location)
-	d.Set("name", datacenter.Properties.Name)
+	d.SetId(*datacenter.Id)
+
+	if datacenter.Properties.Location != nil {
+		err := d.Set("location", datacenter.Properties.Location)
+		if err != nil {
+			return fmt.Errorf("Error while setting location property for datacenter %s: %s", d.Id(), err)
+		}
+	}
+
+	if datacenter.Properties.Name != nil {
+		err := d.Set("name", datacenter.Properties.Name)
+		if err != nil {
+			return fmt.Errorf("Error while setting name property for datacenter %s: %s", d.Id(), err)
+		}
+	}
 
 	return nil
 }

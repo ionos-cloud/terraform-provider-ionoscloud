@@ -9,7 +9,6 @@ import (
 	"strings"
 
 	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
-	"github.com/profitbricks/profitbricks-sdk-go/v5"
 )
 
 func resourceDatacenter() *schema.Resource {
@@ -114,20 +113,25 @@ func resourceDatacenterRead(d *schema.ResourceData, meta interface{}) error {
 		return fmt.Errorf("Error while fetching a data center ID %s %s", d.Id(), err)
 	}
 
-	npErr := d.Set("name", datacenter.Properties.Name)
-	lpErr := d.Set("location", datacenter.Properties.Location)
-	dpErr := d.Set("description", datacenter.Properties.Description)
-
-	if npErr != nil {
-		return fmt.Errorf("Error while setting name property for backup unit %s: %s", d.Id(), npErr)
+	if datacenter.Properties.Name != nil{
+		err := d.Set("name", *datacenter.Properties.Name)
+		if err != nil {
+			return fmt.Errorf("Error while setting name property for backup unit %s: %s", d.Id(), err)
+		}
 	}
 
-	if lpErr != nil {
-		return fmt.Errorf("Error while setting location property for backup unit %s: %s", d.Id(), lpErr)
+	if datacenter.Properties.Location != nil{
+		err := d.Set("location", *datacenter.Properties.Location)
+		if err != nil {
+			return fmt.Errorf("Error while setting location property for backup unit %s: %s", d.Id(), err)
+		}
 	}
 
-	if dpErr != nil {
-		return fmt.Errorf("Error while setting description property for backup unit %s: %s", d.Id(), dpErr)
+	if datacenter.Properties.Description != nil{
+		err := d.Set("description", *datacenter.Properties.Description)
+		if err != nil {
+			return fmt.Errorf("Error while setting description property for backup unit %s: %s", d.Id(), err)
+		}
 	}
 
 	return nil
@@ -202,39 +206,48 @@ func resourceDatacenterDelete(d *schema.ResourceData, meta interface{}) error {
 	return nil
 }
 
-// to be modified when server and volume resources will be changed
-func getImage(client *profitbricks.Client, dcId string, imageName string, imageType string) (*profitbricks.Image, error) {
+func getImage(client *ionoscloud.APIClient, dcId string, imageName string, imageType string) (*ionoscloud.Image, error) {
+
+	ctx, cancel := context.WithTimeout(context.Background(), *resourceDefaultTimeouts.Default)
+
+	if cancel != nil {
+		defer cancel()
+	}
+
 	if imageName == "" {
 		return nil, fmt.Errorf("imageName not suplied")
 	}
-	dc, err := client.GetDatacenter(dcId)
+
+	dc, _, err := client.DataCenterApi.DatacentersFindById(ctx, dcId).Execute()
+
 	if err != nil {
 		log.Print(fmt.Errorf("Error while fetching a data center ID %s %s", dcId, err))
 		return nil, err
 	}
 
-	images, err := client.ListImages()
+	images, _, err := client.ImageApi.ImagesGet(ctx).Execute()
+
 	if err != nil {
 		log.Print(fmt.Errorf("Error while fetching the list of images %s", err))
 		return nil, err
 	}
 
-	if len(images.Items) > 0 {
-		for _, i := range images.Items {
+	if len(*images.Items) > 0 {
+		for _, i := range *images.Items {
 			imgName := ""
-			if i.Properties.Name != "" {
-				imgName = i.Properties.Name
+			if i.Properties.Name != nil && *i.Properties.Name != "" {
+				imgName = *i.Properties.Name
 			}
 
 			if imageType == "SSD" {
 				imageType = "HDD"
 			}
 
-			if imgName != "" && strings.Contains(strings.ToLower(imgName), strings.ToLower(imageName)) && i.Properties.ImageType == imageType && i.Properties.Location == dc.Properties.Location {
+			if imgName != "" && strings.Contains(strings.ToLower(imgName), strings.ToLower(imageName)) && *i.Properties.ImageType == imageType && *i.Properties.Location == *dc.Properties.Location {
 				return &i, err
 			}
 
-			if imgName != "" && strings.ToLower(imageName) == strings.ToLower(i.ID) && i.Properties.ImageType == imageType && i.Properties.Location == dc.Properties.Location {
+			if imgName != "" && strings.ToLower(imageName) == strings.ToLower(*i.Id) && *i.Properties.ImageType == imageType && *i.Properties.Location == *dc.Properties.Location {
 				return &i, err
 			}
 
@@ -243,43 +256,64 @@ func getImage(client *profitbricks.Client, dcId string, imageName string, imageT
 	return nil, err
 }
 
-// to be modified when server and volume resources will be changed
-func getSnapshotId(client *profitbricks.Client, snapshotName string) string {
+func getSnapshotId(client *ionoscloud.APIClient, snapshotName string) string {
+
+	ctx, cancel := context.WithTimeout(context.Background(), *resourceDefaultTimeouts.Default)
+
+	if cancel != nil {
+		defer cancel()
+	}
+
 	if snapshotName == "" {
 		return ""
 	}
-	snapshots, err := client.ListSnapshots()
+
+	snapshots, _, err := client.SnapshotApi.SnapshotsGet(ctx).Execute()
+
 	if err != nil {
 		log.Print(fmt.Errorf("Error while fetching the list of snapshots %s", err))
 	}
 
-	if len(snapshots.Items) > 0 {
-		for _, i := range snapshots.Items {
+	if len(*snapshots.Items) > 0 {
+		for _, i := range *snapshots.Items {
 			imgName := ""
-			if i.Properties.Name != "" {
-				imgName = i.Properties.Name
+			if *i.Properties.Name != "" {
+				imgName = *i.Properties.Name
 			}
 
 			if imgName != "" && strings.Contains(strings.ToLower(imgName), strings.ToLower(snapshotName)) {
-				return i.ID
+				return *i.Id
 			}
 		}
 	}
 	return ""
 }
 
-// to be modified when server and volume resources will be changed
-func getImageAlias(client *profitbricks.Client, imageAlias string, location string) string {
+
+func getImageAlias(client *ionoscloud.APIClient, imageAlias string, location string) string {
+
+	ctx, cancel := context.WithTimeout(context.Background(), *resourceDefaultTimeouts.Default)
+
+	if cancel != nil {
+		defer cancel()
+	}
+
 	if imageAlias == "" {
 		return ""
 	}
-	locations, err := client.GetLocation(location)
+	parts := strings.SplitN(location, "/", 2)
+	if len(parts) != 2 {
+		log.Print(fmt.Errorf("Invalid location id %s", location))
+	}
+
+	locations, _, err := client.LocationApi.LocationsFindByRegionIdAndId(ctx, parts[0], parts[1]).Execute()
+
 	if err != nil {
 		log.Print(fmt.Errorf("Error while fetching the list of snapshots %s", err))
 	}
 
-	if len(locations.Properties.ImageAliases) > 0 {
-		for _, i := range locations.Properties.ImageAliases {
+	if len(*locations.Properties.ImageAliases) > 0 {
+		for _, i := range *locations.Properties.ImageAliases {
 			alias := ""
 			if i != "" {
 				alias = i
@@ -292,6 +326,7 @@ func getImageAlias(client *profitbricks.Client, imageAlias string, location stri
 	}
 	return ""
 }
+
 
 func IsValidUUID(uuid string) bool {
 	r := regexp.MustCompile("^[a-fA-F0-9]{8}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-[a-fA-F0-9]{12}$")
