@@ -1,9 +1,11 @@
 package ionoscloud
 
 import (
+	"context"
 	"fmt"
 
 	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
+	ionoscloud "github.com/ionos-cloud/sdk-go/v5"
 	"github.com/profitbricks/profitbricks-sdk-go/v5"
 )
 
@@ -44,34 +46,42 @@ func resourceLoadbalancer() *schema.Resource {
 }
 
 func resourceLoadbalancerCreate(d *schema.ResourceData, meta interface{}) error {
-	client := meta.(SdkBundle).LegacyClient
+	client := meta.(SdkBundle).Client
 	raw_ids := d.Get("nic_ids").([]interface{})
-	nic_ids := []profitbricks.Nic{}
+	nic_ids := []ionoscloud.Nic{}
 
 	for _, id := range raw_ids {
-		nic_ids = append(nic_ids, profitbricks.Nic{ID: id.(string)})
+		id := id.(string)
+		nic_ids = append(nic_ids, ionoscloud.Nic{Id: &id})
 	}
-
-	lb := &profitbricks.Loadbalancer{
-		Properties: profitbricks.LoadbalancerProperties{
-			Name: d.Get("name").(string),
+	name := d.Get("name").(string)
+	lb := &ionoscloud.Loadbalancer{
+		Properties: &ionoscloud.LoadbalancerProperties{
+			Name: &name,
 		},
-		Entities: profitbricks.LoadbalancerEntities{
-			Balancednics: &profitbricks.BalancedNics{
-				Items: nic_ids,
+		Entities: &ionoscloud.LoadbalancerEntities{
+			Balancednics: &ionoscloud.BalancedNics{
+				Items: &nic_ids,
 			},
 		},
 	}
 
-	lb, err := client.CreateLoadbalancer(d.Get("datacenter_id").(string), *lb)
+	dcid := d.Get("datacenter_id").(string)
+	ctx, cancel := context.WithTimeout(context.Background(), *resourceDefaultTimeouts.Create)
+	if cancel != nil {
+		defer cancel()
+	}
+
+	resp, apiResp, err := client.LoadBalancerApi.DatacentersLoadbalancersPost(ctx, dcid).Loadbalancer(*lb).Execute()
 
 	if err != nil {
 		return fmt.Errorf("Error occured while creating a loadbalancer %s", err)
 	}
-	d.SetId(lb.ID)
+
+	d.SetId(*resp.Id)
 
 	// Wait, catching any errors
-	_, errState := getStateChangeConf(meta, d, lb.Headers.Get("Location"), schema.TimeoutCreate).WaitForState()
+	_, errState := getStateChangeConf(meta, d, apiResp.Header.Get("Location"), schema.TimeoutCreate).WaitForState()
 	if errState != nil {
 		if IsRequestFailed(err) {
 			// Request failed, so resource was not created, delete resource from state file
@@ -84,8 +94,13 @@ func resourceLoadbalancerCreate(d *schema.ResourceData, meta interface{}) error 
 }
 
 func resourceLoadbalancerRead(d *schema.ResourceData, meta interface{}) error {
-	client := meta.(SdkBundle).LegacyClient
-	lb, err := client.GetLoadbalancer(d.Get("datacenter_id").(string), d.Id())
+	client := meta.(SdkBundle).Client
+	ctx, cancel := context.WithTimeout(context.Background(), *resourceDefaultTimeouts.Default)
+	if cancel != nil {
+		defer cancel()
+	}
+
+	lb, _, err := client.LoadBalancerApi.DatacentersLoadbalancersFindById(ctx, d.Get("datacenter_id").(string), d.Id()).Execute()
 
 	if err != nil {
 		if apiError, ok := err.(profitbricks.ApiError); ok {
@@ -98,26 +113,35 @@ func resourceLoadbalancerRead(d *schema.ResourceData, meta interface{}) error {
 	}
 
 	d.Set("name", lb.Properties.Name)
-	d.Set("ip", lb.Properties.IP)
+	d.Set("ip", lb.Properties.Ip)
 	d.Set("dhcp", lb.Properties.Dhcp)
 
 	return nil
 }
 
 func resourceLoadbalancerUpdate(d *schema.ResourceData, meta interface{}) error {
-	client := meta.(SdkBundle).LegacyClient
-	properties := profitbricks.LoadbalancerProperties{}
+	client := meta.(SdkBundle).Client
+	properties := ionoscloud.LoadbalancerProperties{}
+
 	if d.HasChange("name") {
 		_, new := d.GetChange("name")
-		properties.Name = new.(string)
+		name := new.(string)
+		properties.Name = &name
 	}
 	if d.HasChange("ip") {
 		_, new := d.GetChange("ip")
-		properties.IP = new.(string)
+		ip := new.(string)
+		properties.Ip = &ip
 	}
 	if d.HasChange("dhcp") {
 		_, new := d.GetChange("dhcp")
-		properties.Dhcp = new.(bool)
+		dhcp := new.(bool)
+		properties.Dhcp = &dhcp
+	}
+
+	ctx, cancel := context.WithTimeout(context.Background(), *resourceDefaultTimeouts.Update)
+	if cancel != nil {
+		defer cancel()
 	}
 
 	if d.HasChange("nic_ids") {
@@ -126,14 +150,13 @@ func resourceLoadbalancerUpdate(d *schema.ResourceData, meta interface{}) error 
 		oldList := old.([]interface{})
 
 		for _, o := range oldList {
-
-			resp, err := client.DeleteBalancedNic(d.Get("datacenter_id").(string), d.Id(), o.(string))
+			_, apiresponse, err := client.LoadBalancerApi.DatacentersLoadbalancersBalancednicsDelete(context.TODO(),
+				d.Get("datacenter_id").(string), d.Id(), o.(string)).Execute()
 			if err != nil {
 				return fmt.Errorf("Error occured while deleting a balanced nic: %s", err)
 			}
-
 			// Wait, catching any errors
-			_, errState := getStateChangeConf(meta, d, resp.Get("Location"), schema.TimeoutUpdate).WaitForState()
+			_, errState := getStateChangeConf(meta, d, apiresponse.Header.Get("location"), schema.TimeoutUpdate).WaitForState()
 			if errState != nil {
 				return errState
 			}
@@ -142,13 +165,14 @@ func resourceLoadbalancerUpdate(d *schema.ResourceData, meta interface{}) error 
 		newList := new.([]interface{})
 
 		for _, o := range newList {
-			nic, err := client.AssociateNic(d.Get("datacenter_id").(string), d.Id(), o.(string))
+			id := o.(string)
+			nic := ionoscloud.Nic{Id: &id}
+			_, apiResp, err := client.LoadBalancerApi.DatacentersLoadbalancersBalancednicsPost(ctx, d.Get("datacenter_id").(string), d.Id()).Nic(nic).Execute()
 			if err != nil {
 				return fmt.Errorf("Error occured while deleting a balanced nic: %s", err)
 			}
-
 			// Wait, catching any errors
-			_, errState := getStateChangeConf(meta, d, nic.Headers.Get("Location"), schema.TimeoutUpdate).WaitForState()
+			_, errState := getStateChangeConf(meta, d, apiResp.Header.Get("Location"), schema.TimeoutUpdate).WaitForState()
 			if errState != nil {
 				return errState
 			}
@@ -161,15 +185,20 @@ func resourceLoadbalancerUpdate(d *schema.ResourceData, meta interface{}) error 
 }
 
 func resourceLoadbalancerDelete(d *schema.ResourceData, meta interface{}) error {
-	client := meta.(SdkBundle).LegacyClient
-	resp, err := client.DeleteLoadbalancer(d.Get("datacenter_id").(string), d.Id())
+	client := meta.(SdkBundle).Client
+	ctx, cancel := context.WithTimeout(context.Background(), *resourceDefaultTimeouts.Delete)
+	if cancel != nil {
+		defer cancel()
+	}
+	dcid := d.Get("datacenter_id").(string)
+	_, apiResp, err := client.LoadBalancerApi.DatacentersLoadbalancersDelete(ctx, dcid, d.Id()).Execute()
 
 	if err != nil {
 		return fmt.Errorf("Error occured while deleting a loadbalancer: %s", err)
 	}
 
 	// Wait, catching any errors
-	_, errState := getStateChangeConf(meta, d, resp.Get("Location"), schema.TimeoutDelete).WaitForState()
+	_, errState := getStateChangeConf(meta, d, apiResp.Header.Get("Location"), schema.TimeoutDelete).WaitForState()
 	if errState != nil {
 		return errState
 	}

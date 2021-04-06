@@ -1,12 +1,13 @@
 package ionoscloud
 
 import (
+	"context"
 	"fmt"
+	ionoscloud "github.com/ionos-cloud/sdk-go/v5"
 	"log"
 	"strings"
 
 	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
-	"github.com/profitbricks/profitbricks-sdk-go/v5"
 )
 
 func resourceNic() *schema.Resource {
@@ -60,7 +61,7 @@ func resourceNic() *schema.Resource {
 				ForceNew: true,
 			},
 			"mac": {
-				Type:	  schema.TypeString,
+				Type:     schema.TypeString,
 				Computed: true,
 			},
 		},
@@ -69,16 +70,20 @@ func resourceNic() *schema.Resource {
 }
 
 func resourceNicCreate(d *schema.ResourceData, meta interface{}) error {
-	client := meta.(SdkBundle).LegacyClient
-	nic := &profitbricks.Nic{
-		Properties: &profitbricks.NicProperties{
-			Lan: d.Get("lan").(int),
+	client := meta.(SdkBundle).Client
+
+	lan := d.Get("lan").(int)
+	lanConverted := int32(lan)
+	nic := ionoscloud.Nic{
+		Properties: &ionoscloud.NicProperties{
+			Lan: &lanConverted,
 		},
 	}
 	if _, ok := d.GetOk("name"); ok {
-		nic.Properties.Name = d.Get("name").(string)
+		name := d.Get("name").(string)
+		nic.Properties.Name = &name
 	}
-	if _, ok := d.GetOkExists("dhcp"); ok {
+	if _, ok := d.GetOk("dhcp"); ok {
 		val := d.Get("dhcp").(bool)
 		nic.Properties.Dhcp = &val
 	}
@@ -86,7 +91,7 @@ func resourceNicCreate(d *schema.ResourceData, meta interface{}) error {
 	if _, ok := d.GetOk("ip"); ok {
 		raw := d.Get("ip").(string)
 		ips := strings.Split(raw, ",")
-		nic.Properties.Ips = ips
+		nic.Properties.Ips = &ips
 	}
 	if _, ok := d.GetOk("firewall_active"); ok {
 		raw := d.Get("firewall_active").(bool)
@@ -97,13 +102,22 @@ func resourceNicCreate(d *schema.ResourceData, meta interface{}) error {
 		nic.Properties.Nat = &raw
 	}
 
-	nic, err := client.CreateNic(d.Get("datacenter_id").(string), d.Get("server_id").(string), *nic)
+	ctx, cancel := context.WithTimeout(context.Background(), *resourceDefaultTimeouts.Create) //client.GetContext()
+	if cancel != nil {
+		defer cancel()
+	}
+	dcid := d.Get("datacenter_id").(string)
+	srvid := d.Get("server_id").(string)
+	nic, apiResp, err := client.NicApi.DatacentersServersNicsPost(ctx, dcid, srvid).Nic(nic).Execute()
+
 	if err != nil {
 		return fmt.Errorf("Error occured while creating a nic: %s", err)
 	}
-	d.SetId(nic.ID)
+	if nic.Id != nil {
+		d.SetId(*nic.Id)
+	}
 	// Wait, catching any errors
-	_, errState := getStateChangeConf(meta, d, nic.Headers.Get("Location"), schema.TimeoutCreate).WaitForState()
+	_, errState := getStateChangeConf(meta, d, apiResp.Header.Get("Location"), schema.TimeoutCreate).WaitForState()
 	if errState != nil {
 		if IsRequestFailed(err) {
 			// Request failed, so resource was not created, delete resource from state file
@@ -115,42 +129,53 @@ func resourceNicCreate(d *schema.ResourceData, meta interface{}) error {
 }
 
 func resourceNicRead(d *schema.ResourceData, meta interface{}) error {
-	client := meta.(SdkBundle).LegacyClient
-	nic, err := client.GetNic(d.Get("datacenter_id").(string), d.Get("server_id").(string), d.Id())
+	client := meta.(SdkBundle).Client
+
+	ctx, cancel := context.WithTimeout(context.Background(), *resourceDefaultTimeouts.Default)
+	if cancel != nil {
+		defer cancel()
+	}
+	dcid := d.Get("datacenter_id").(string)
+	srvid := d.Get("server_id").(string)
+	nicid := d.Id()
+
+	rsp, apiresponse, err := client.NicApi.DatacentersServersNicsFindById(ctx, dcid, srvid, nicid).Execute()
 	if err != nil {
-		if apiError, ok := err.(profitbricks.ApiError); ok {
-			if apiError.HttpStatusCode() == 404 {
+		if _, ok := err.(ionoscloud.GenericOpenAPIError); ok {
+			if apiresponse.Response.StatusCode == 404 {
 				d.SetId("")
 				return nil
 			}
 		}
 		return fmt.Errorf("Error occured while fetching a nic ID %s %s", d.Id(), err)
 	}
-	if nic.Properties != nil {
-		log.Printf("[INFO] LAN ON NIC: %d", nic.Properties.Lan)
-		d.Set("dhcp", nic.Properties.Dhcp)
-		d.Set("lan", nic.Properties.Lan)
-		d.Set("name", nic.Properties.Name)
-		d.Set("ips", nic.Properties.Ips)
-		d.Set("firewall_active", nic.Properties.FirewallActive)
-		d.Set("mac", nic.Properties.Mac)
+
+	if rsp.Properties != nil { // todo sa las rsp denumit ca nic???
+		log.Printf("[INFO] LAN ON NIC: %d", rsp.Properties.Lan)
+		d.Set("dhcp", *rsp.Properties.Dhcp)
+		d.Set("lan", *rsp.Properties.Lan)
+		d.Set("name", *rsp.Properties.Name)
+		d.Set("ips", *rsp.Properties.Ips)
+		d.Set("firewall_active", *rsp.Properties.FirewallActive)
+		d.Set("mac", *rsp.Properties.Mac)
 	}
 
 	return nil
 }
 
 func resourceNicUpdate(d *schema.ResourceData, meta interface{}) error {
-	client := meta.(SdkBundle).LegacyClient
-	properties := profitbricks.NicProperties{}
+	client := meta.(SdkBundle).Client
+	properties := ionoscloud.NicProperties{}
 
 	if d.HasChange("name") {
 		_, n := d.GetChange("name")
-
-		properties.Name = n.(string)
+		name := n.(string)
+		properties.Name = &name
 	}
 	if d.HasChange("lan") {
 		_, n := d.GetChange("lan")
-		properties.Lan = n.(int)
+		lan := n.(int32)
+		properties.Lan = &lan
 	}
 	n := d.Get("dhcp").(bool)
 	properties.Dhcp = &n
@@ -158,7 +183,7 @@ func resourceNicUpdate(d *schema.ResourceData, meta interface{}) error {
 	if d.HasChange("ip") {
 		_, raw := d.GetChange("ip")
 		ips := strings.Split(raw.(string), ",")
-		properties.Ips = ips
+		properties.Ips = &ips
 	}
 	if d.HasChange("nat") {
 		_, raw := d.GetChange("nat")
@@ -166,14 +191,22 @@ func resourceNicUpdate(d *schema.ResourceData, meta interface{}) error {
 		properties.Nat = &nat
 	}
 
-	nic, err := client.UpdateNic(d.Get("datacenter_id").(string), d.Get("server_id").(string), d.Id(), properties)
+	ctx, cancel := context.WithTimeout(context.Background(), *resourceDefaultTimeouts.Update)
+	if cancel != nil {
+		defer cancel()
+	}
+	dcid := d.Get("datacenter_id").(string)
+	srvid := d.Get("server_id").(string)
+	nicid := d.Id()
+
+	_, apiResponse, err := client.NicApi.DatacentersServersNicsPatch(ctx, dcid, srvid, nicid).Nic(properties).Execute()
 
 	if err != nil {
 		return fmt.Errorf("Error occured while updating a nic: %s", err)
 	}
 
 	// Wait, catching any errors
-	_, errState := getStateChangeConf(meta, d, nic.Headers.Get("Location"), schema.TimeoutUpdate).WaitForState()
+	_, errState := getStateChangeConf(meta, d, apiResponse.Header.Get("Location"), schema.TimeoutUpdate).WaitForState()
 	if errState != nil {
 		return errState
 	}
@@ -182,14 +215,23 @@ func resourceNicUpdate(d *schema.ResourceData, meta interface{}) error {
 }
 
 func resourceNicDelete(d *schema.ResourceData, meta interface{}) error {
-	client := meta.(SdkBundle).LegacyClient
-	resp, err := client.DeleteNic(d.Get("datacenter_id").(string), d.Get("server_id").(string), d.Id())
+	client := meta.(SdkBundle).Client
+
+	ctx, cancel := context.WithTimeout(context.Background(), *resourceDefaultTimeouts.Delete)
+	if cancel != nil {
+		defer cancel()
+	}
+	dcid := d.Get("datacenter_id").(string)
+	srvid := d.Get("server_id").(string)
+	nicid := d.Id()
+	//resp, err := client.DeleteNic(d.Get("datacenter_id").(string), d.Get("server_id").(string), d.Id())
+	_, apiresp, err := client.NicApi.DatacentersServersNicsDelete(ctx, dcid, srvid, nicid).Execute()
 
 	if err != nil {
 		return fmt.Errorf("An error occured while deleting a nic dcId %s ID %s %s", d.Get("datacenter_id").(string), d.Id(), err)
 	}
 	// Wait, catching any errors
-	_, errState := getStateChangeConf(meta, d, resp.Get("Location"), schema.TimeoutDelete).WaitForState()
+	_, errState := getStateChangeConf(meta, d, apiresp.Header.Get("Location"), schema.TimeoutDelete).WaitForState()
 	if errState != nil {
 		return errState
 	}

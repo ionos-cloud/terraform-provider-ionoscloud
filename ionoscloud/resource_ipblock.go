@@ -1,12 +1,13 @@
 package ionoscloud
 
 import (
+	"context"
 	"fmt"
 	"log"
 	"strings"
 
 	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
-	"github.com/profitbricks/profitbricks-sdk-go/v5"
+	ionoscloud "github.com/ionos-cloud/sdk-go/v5"
 )
 
 func resourceIPBlock() *schema.Resource {
@@ -44,24 +45,32 @@ func resourceIPBlock() *schema.Resource {
 }
 
 func resourceIPBlockCreate(d *schema.ResourceData, meta interface{}) error {
-	client := meta.(SdkBundle).LegacyClient
-	ipblock := &profitbricks.IPBlock{
-		Properties: profitbricks.IPBlockProperties{
-			Size:     d.Get("size").(int),
-			Location: d.Get("location").(string),
-			Name:     d.Get("name").(string),
+	client := meta.(SdkBundle).Client
+	size := d.Get("size").(int)
+	sizeConverted := int32(size)
+	location := d.Get("location").(string)
+	name := d.Get("name").(string)
+	ipblock := ionoscloud.IpBlock{
+		Properties: &ionoscloud.IpBlockProperties{
+			Size:     &sizeConverted,
+			Location: &location,
+			Name:     &name,
 		},
 	}
 
-	ipblock, err := client.ReserveIPBlock(*ipblock)
+	ctx, cancel := context.WithTimeout(context.Background(), *resourceDefaultTimeouts.Create)
+	if cancel != nil {
+		defer cancel()
+	}
+	ipblock, apiResponse, err := client.IPBlocksApi.IpblocksPost(ctx).Ipblock(ipblock).Execute()
 
 	if err != nil {
 		return fmt.Errorf("An error occured while reserving an ip block: %s", err)
 	}
-	d.SetId(ipblock.ID)
+	d.SetId(*ipblock.Id)
 
 	// Wait, catching any errors
-	_, errState := getStateChangeConf(meta, d, ipblock.Headers.Get("Location"), schema.TimeoutCreate).WaitForState()
+	_, errState := getStateChangeConf(meta, d, apiResponse.Header.Get("Location"), schema.TimeoutCreate).WaitForState()
 	if errState != nil {
 		if IsRequestFailed(err) {
 			// Request failed, so resource was not created, delete resource from state file
@@ -74,12 +83,16 @@ func resourceIPBlockCreate(d *schema.ResourceData, meta interface{}) error {
 }
 
 func resourceIPBlockRead(d *schema.ResourceData, meta interface{}) error {
-	client := meta.(SdkBundle).LegacyClient
-	ipblock, err := client.GetIPBlock(d.Id())
+	client := meta.(SdkBundle).Client
+	ctx, cancel := context.WithTimeout(context.Background(), *resourceDefaultTimeouts.Default)
+	if cancel != nil {
+		defer cancel()
+	}
+	ipBlock, apiResponse, err := client.IPBlocksApi.IpblocksFindById(ctx, d.Id()).Execute()
 
 	if err != nil {
-		if apiError, ok := err.(profitbricks.ApiError); ok {
-			if apiError.HttpStatusCode() == 404 {
+		if _, ok := err.(ionoscloud.GenericOpenAPIError); ok {
+			if apiResponse.Response.StatusCode == 404 {
 				d.SetId("")
 				return nil
 			}
@@ -87,25 +100,30 @@ func resourceIPBlockRead(d *schema.ResourceData, meta interface{}) error {
 		return fmt.Errorf("An error occured while fetching an ip block ID %s %s", d.Id(), err)
 	}
 
-	log.Printf("[INFO] IPS: %s", strings.Join(ipblock.Properties.IPs, ","))
+	log.Printf("[INFO] IPS: %s", strings.Join(*ipBlock.Properties.Ips, ","))
 
-	d.Set("ips", ipblock.Properties.IPs)
-	d.Set("location", ipblock.Properties.Location)
-	d.Set("size", ipblock.Properties.Size)
-	d.Set("name", ipblock.Properties.Name)
+	d.Set("ips", *ipBlock.Properties.Ips)
+	d.Set("location", *ipBlock.Properties.Location)
+	d.Set("size", *ipBlock.Properties.Size)
+	d.Set("name", *ipBlock.Properties.Name)
 
 	return nil
 }
 func resourceIPBlockUpdate(d *schema.ResourceData, meta interface{}) error {
-	client := meta.(SdkBundle).LegacyClient
-	request := profitbricks.IPBlockProperties{}
+	client := meta.(SdkBundle).Client
+	request := ionoscloud.IpBlockProperties{}
 
 	if d.HasChange("name") {
 		_, n := d.GetChange("name")
-		request.Name = n.(string)
+		name := n.(string)
+		request.Name = &name
 	}
 
-	_, err := client.UpdateIPBlock(d.Id(), request)
+	ctx, cancel := context.WithTimeout(context.Background(), *resourceDefaultTimeouts.Update)
+	if cancel != nil {
+		defer cancel()
+	}
+	_, _, err := client.IPBlocksApi.IpblocksPatch(ctx, d.Id()).Ipblock(request).Execute()
 
 	if err != nil {
 		return fmt.Errorf("An error occured while updating an ip block ID %s %s", d.Id(), err)
@@ -116,14 +134,19 @@ func resourceIPBlockUpdate(d *schema.ResourceData, meta interface{}) error {
 }
 
 func resourceIPBlockDelete(d *schema.ResourceData, meta interface{}) error {
-	client := meta.(SdkBundle).LegacyClient
-	resp, err := client.ReleaseIPBlock(d.Id())
+	client := meta.(SdkBundle).Client
+
+	ctx, cancel := context.WithTimeout(context.Background(), *resourceDefaultTimeouts.Delete)
+	if cancel != nil {
+		defer cancel()
+	}
+	_, apiResponse, err := client.IPBlocksApi.IpblocksDelete(ctx, d.Id()).Execute()
 	if err != nil {
 		return fmt.Errorf("An error occured while releasing an ipblock ID: %s %s", d.Id(), err)
 	}
 
 	// Wait, catching any errors
-	_, errState := getStateChangeConf(meta, d, resp.Get("Location"), schema.TimeoutDelete).WaitForState()
+	_, errState := getStateChangeConf(meta, d, apiResponse.Header.Get("Location"), schema.TimeoutDelete).WaitForState()
 	if errState != nil {
 		return errState
 	}
