@@ -38,6 +38,26 @@ func resourceGroup() *schema.Resource {
 				Type:     schema.TypeBool,
 				Optional: true,
 			},
+			"create_pcc": {
+				Type:     schema.TypeBool,
+				Optional: true,
+			},
+			"s3_privilege": {
+				Type:     schema.TypeBool,
+				Optional: true,
+			},
+			"create_backup_unit": {
+				Type:     schema.TypeBool,
+				Optional: true,
+			},
+			"create_internet_access": {
+				Type:     schema.TypeBool,
+				Optional: true,
+			},
+			"create_k8s_cluster": {
+				Type:     schema.TypeBool,
+				Optional: true,
+			},
 			"user_id": {
 				Type:     schema.TypeString,
 				Optional: true,
@@ -99,6 +119,16 @@ func resourceGroupCreate(d *schema.ResourceData, meta interface{}) error {
 	request.Properties.ReserveIp = &tempReserveIp
 	tempAccessActivityLog := d.Get("access_activity_log").(bool)
 	request.Properties.AccessActivityLog = &tempAccessActivityLog
+	tempCreatePcc := d.Get("create_pcc").(bool)
+	request.Properties.CreatePcc = &tempCreatePcc
+	tempS3Privilege := d.Get("s3_privilege").(bool)
+	request.Properties.S3Privilege = &tempS3Privilege
+	tempCreateBackupUnit := d.Get("create_backup_unit").(bool)
+	request.Properties.CreateBackupUnit = &tempCreateBackupUnit
+	tempCreateInternetAccess := d.Get("create_internet_access").(bool)
+	request.Properties.CreateInternetAccess = &tempCreateInternetAccess
+	tempCreateK8sCluster := d.Get("create_k8s_cluster").(bool)
+	request.Properties.CreateK8sCluster = &tempCreateK8sCluster
 
 	usertoAdd := d.Get("user_id").(string)
 
@@ -195,10 +225,45 @@ func resourceGroupRead(d *schema.ResourceData, meta interface{}) error {
 		}
 	}
 
-	if group.Properties.ReserveIp != nil {
+	if group.Properties.AccessActivityLog != nil {
 		err := d.Set("access_activity_log", *group.Properties.AccessActivityLog)
 		if err != nil {
 			return fmt.Errorf("Error while setting access_activity_log property for group %s: %s", d.Id(), err)
+		}
+	}
+
+	if group.Properties.CreatePcc != nil {
+		err := d.Set("create_pcc", *group.Properties.CreatePcc)
+		if err != nil {
+			return fmt.Errorf("Error while setting create_pcc property for group %s: %s", d.Id(), err)
+		}
+	}
+
+	if group.Properties.S3Privilege != nil {
+		err := d.Set("s3_privilege", *group.Properties.S3Privilege)
+		if err != nil {
+			return fmt.Errorf("Error while setting s3_privilege property for group %s: %s", d.Id(), err)
+		}
+	}
+
+	if group.Properties.CreateBackupUnit != nil {
+		err := d.Set("create_backup_unit", *group.Properties.CreateBackupUnit)
+		if err != nil {
+			return fmt.Errorf("Error while setting create_backup_unit property for group %s: %s", d.Id(), err)
+		}
+	}
+
+	if group.Properties.CreateInternetAccess != nil {
+		err := d.Set("create_internet_access", *group.Properties.CreateInternetAccess)
+		if err != nil {
+			return fmt.Errorf("Error while setting create_internet_access property for group %s: %s", d.Id(), err)
+		}
+	}
+
+	if group.Properties.CreateK8sCluster != nil {
+		err := d.Set("create_k8s_cluster", *group.Properties.CreateK8sCluster)
+		if err != nil {
+			return fmt.Errorf("Error while setting create_k8s_cluster property for group %s: %s", d.Id(), err)
 		}
 	}
 
@@ -225,14 +290,24 @@ func resourceGroupUpdate(d *schema.ResourceData, meta interface{}) error {
 	tempCreateSnapshot := d.Get("create_snapshot").(bool)
 	tempReserveIp := d.Get("reserve_ip").(bool)
 	tempAccessActivityLog := d.Get("access_activity_log").(bool)
+	tempCreatePcc := d.Get("create_pcc").(bool)
+	tempS3Privilege := d.Get("s3_privilege").(bool)
+	tempCreateBackupUnit := d.Get("create_backup_unit").(bool)
+	tempCreateInternatAccess := d.Get("create_internet_access").(bool)
+	tempCreateK8sCluster := d.Get("create_k8s_cluster").(bool)
 	usertoAdd := d.Get("user_id").(string)
 
 	groupReq := ionoscloud.Group{
 		Properties: &ionoscloud.GroupProperties{
-			CreateDataCenter:  &tempCreateDataCenter,
-			CreateSnapshot:    &tempCreateSnapshot,
-			ReserveIp:         &tempReserveIp,
-			AccessActivityLog: &tempAccessActivityLog,
+			CreateDataCenter:     &tempCreateDataCenter,
+			CreateSnapshot:       &tempCreateSnapshot,
+			ReserveIp:            &tempReserveIp,
+			AccessActivityLog:    &tempAccessActivityLog,
+			CreatePcc:            &tempCreatePcc,
+			S3Privilege:          &tempS3Privilege,
+			CreateBackupUnit:     &tempCreateBackupUnit,
+			CreateInternetAccess: &tempCreateInternatAccess,
+			CreateK8sCluster:     &tempCreateK8sCluster,
 		},
 	}
 
