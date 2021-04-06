@@ -1,12 +1,13 @@
 package ionoscloud
 
 import (
+	"context"
 	"errors"
 	"fmt"
+	ionoscloud "github.com/ionos-cloud/sdk-go/v5"
 	"strings"
 
 	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
-	"github.com/profitbricks/profitbricks-sdk-go/v5"
 )
 
 func dataSourceServer() *schema.Resource {
@@ -126,13 +127,6 @@ func dataSourceServer() *schema.Resource {
 							Type:     schema.TypeString,
 							Computed: true,
 						},
-						"image_aliases": {
-							Type:     schema.TypeList,
-							Computed: true,
-							Elem: &schema.Schema{
-								Type: schema.TypeString,
-							},
-						},
 						"public": {
 							Type:     schema.TypeBool,
 							Computed: true,
@@ -196,15 +190,7 @@ func dataSourceServer() *schema.Resource {
 							Type:     schema.TypeBool,
 							Computed: true,
 						},
-						"cpu_hot_unplug": {
-							Type:     schema.TypeBool,
-							Computed: true,
-						},
 						"ram_hot_plug": {
-							Type:     schema.TypeBool,
-							Computed: true,
-						},
-						"ram_hot_unplug": {
 							Type:     schema.TypeBool,
 							Computed: true,
 						},
@@ -221,14 +207,6 @@ func dataSourceServer() *schema.Resource {
 							Computed: true,
 						},
 						"disc_virtio_hot_unplug": {
-							Type:     schema.TypeBool,
-							Computed: true,
-						},
-						"disc_scsi_hot_plug": {
-							Type:     schema.TypeBool,
-							Computed: true,
-						},
-						"disc_scsi_hot_unplug": {
 							Type:     schema.TypeBool,
 							Computed: true,
 						},
@@ -349,45 +327,82 @@ func stringOrDefault(s *string, d string) string {
 	return d
 }
 
-func intOrDefault(i *int, d int) int {
+func int32OrDefault(i *int32, d int32) int32 {
 	if i != nil {
 		return *i
 	}
 	return d
 }
 
-func setServerData(d *schema.ResourceData, server *profitbricks.Server) error {
-	d.SetId(server.ID)
-	if err := d.Set("id", server.ID); err != nil {
-		return err
+func int64OrDefault(i *int64, d int64) int64 {
+	if i != nil {
+		return *i
 	}
+	return d
+}
 
-	if err := d.Set("name", server.Properties.Name); err != nil {
-		return err
+func float32OrDefault(f *float32, d float32) float32 {
+	if f != nil {
+		return *f
 	}
-	if err := d.Set("cores", server.Properties.Cores); err != nil {
-		return err
-	}
-	if err := d.Set("ram", server.Properties.RAM); err != nil {
-		return err
-	}
-	if err := d.Set("availability_zone", server.Properties.AvailabilityZone); err != nil {
-		return err
-	}
-	if err := d.Set("vm_state", server.Properties.VMState); err != nil {
-		return err
-	}
-	if err := d.Set("cpu_family", server.Properties.CPUFamily); err != nil {
-		return err
-	}
-	if server.Properties.BootCdrom != nil {
-		if err := d.Set("boot_cdrom", server.Properties.BootCdrom.ID); err != nil {
+	return d
+}
+
+func setServerData(d *schema.ResourceData, server *ionoscloud.Server) error {
+
+	if server.Id != nil {
+		d.SetId(*server.Id)
+		if err := d.Set("id", *server.Id); err != nil {
 			return err
 		}
 	}
-	if server.Properties.BootVolume != nil {
-		if err := d.Set("boot_volume", server.Properties.BootVolume.ID); err != nil {
-			return err
+
+	if server.Properties != nil {
+		if server.Properties.Name != nil {
+			if err := d.Set("name", *server.Properties.Name); err != nil {
+				return err
+			}
+		}
+
+		if server.Properties.Cores != nil {
+			if err := d.Set("cores", *server.Properties.Cores); err != nil {
+				return err
+			}
+		}
+
+		if server.Properties.Ram != nil {
+			if err := d.Set("ram", *server.Properties.Ram); err != nil {
+				return err
+			}
+		}
+
+		if server.Properties.AvailabilityZone != nil {
+			if err := d.Set("availability_zone", *server.Properties.AvailabilityZone); err != nil {
+				return err
+			}
+		}
+
+		if server.Properties.VmState != nil {
+			if err := d.Set("vm_state", *server.Properties.VmState); err != nil {
+				return err
+			}
+		}
+
+		if server.Properties.CpuFamily != nil {
+			if err := d.Set("cpu_family", *server.Properties.CpuFamily); err != nil {
+				return err
+			}
+		}
+		if server.Properties.BootCdrom != nil && server.Properties.BootCdrom.Id != nil {
+			if err := d.Set("boot_cdrom", *server.Properties.BootCdrom.Id); err != nil {
+				return err
+			}
+		}
+
+		if server.Properties.BootVolume != nil && server.Properties.BootVolume.Id != nil {
+			if err := d.Set("boot_volume", *server.Properties.BootVolume.Id); err != nil {
+				return err
+			}
 		}
 	}
 
@@ -397,29 +412,28 @@ func setServerData(d *schema.ResourceData, server *profitbricks.Server) error {
 
 	var cdroms []interface{}
 	if server.Entities.Cdroms != nil {
-		cdroms = make([]interface{}, len(server.Entities.Cdroms.Items), len(server.Entities.Cdroms.Items))
-		for i, image := range server.Entities.Cdroms.Items {
+		cdroms = make([]interface{}, len(*server.Entities.Cdroms.Items), len(*server.Entities.Cdroms.Items))
+		for i, image := range *server.Entities.Cdroms.Items {
 			entry := make(map[string]interface{})
 
-			entry["id"] = image.ID
-			entry["name"] = image.Properties.Name
-			entry["description"] = image.Properties.Description
-			entry["location"] = image.Properties.Location
-			entry["size"] = image.Properties.Size
-			entry["cpu_hot_plug"] = image.Properties.CPUHotPlug
-			entry["cpu_hot_unplug"] = image.Properties.CPUHotUnplug
-			entry["ram_hot_plug"] = image.Properties.RAMHotPlug
-			entry["ram_hot_unplug"] = image.Properties.RAMHotUnplug
-			entry["nic_hot_plug"] = image.Properties.NicHotPlug
-			entry["nic_hot_unplug"] = image.Properties.NicHotUnplug
-			entry["disc_virtio_hot_plug"] = image.Properties.DiscVirtioHotPlug
-			entry["disc_virtio_hot_unplug"] = image.Properties.DiscVirtioHotUnplug
-			entry["disc_scsi_hot_plug"] = image.Properties.DiscScsiHotPlug
-			entry["disc_scsi_hot_unplug"] = image.Properties.DiscScsiHotUnplug
-			entry["licence_type"] = image.Properties.LicenceType
-			entry["image_type"] = image.Properties.ImageType
-			entry["image_alias"] = image.Properties.ImageAliases
-			entry["public"] = image.Properties.Public
+			entry["id"] = stringOrDefault(image.Id, "")
+			entry["name"] = stringOrDefault(image.Properties.Name, "")
+			entry["description"] = stringOrDefault(image.Properties.Description, "")
+			entry["location"] = stringOrDefault(image.Properties.Location, "")
+			entry["size"] = float32OrDefault(image.Properties.Size, 0)
+			entry["cpu_hot_plug"] = boolOrDefault(image.Properties.CpuHotPlug, false)
+			entry["cpu_hot_unplug"] = boolOrDefault(image.Properties.CpuHotUnplug, false)
+			entry["ram_hot_plug"] = boolOrDefault(image.Properties.RamHotPlug, false)
+			entry["ram_hot_unplug"] = boolOrDefault(image.Properties.RamHotUnplug, false)
+			entry["nic_hot_plug"] = boolOrDefault(image.Properties.NicHotPlug, false)
+			entry["nic_hot_unplug"] = boolOrDefault(image.Properties.NicHotUnplug, false)
+			entry["disc_virtio_hot_plug"] = boolOrDefault(image.Properties.DiscVirtioHotPlug, false)
+			entry["disc_virtio_hot_unplug"] = boolOrDefault(image.Properties.DiscVirtioHotUnplug, false)
+			entry["disc_scsi_hot_plug"] = boolOrDefault(image.Properties.DiscScsiHotPlug, false)
+			entry["disc_scsi_hot_unplug"] = boolOrDefault(image.Properties.DiscScsiHotUnplug, false)
+			entry["licence_type"] = stringOrDefault(image.Properties.LicenceType, "")
+			entry["image_type"] = stringOrDefault(image.Properties.ImageType, "")
+			entry["public"] = boolOrDefault(image.Properties.Public, false)
 
 			cdroms[i] = entry
 		}
@@ -430,39 +444,37 @@ func setServerData(d *schema.ResourceData, server *profitbricks.Server) error {
 	}
 
 	var volumes = make([]interface{}, 0)
-	if server.Entities.Volumes != nil {
-		volumes = make([]interface{}, len(server.Entities.Volumes.Items), len(server.Entities.Volumes.Items))
-		for i, volume := range server.Entities.Volumes.Items {
+	if server.Entities.Volumes != nil && server.Entities.Volumes.Items != nil {
+		volumes = make([]interface{}, len(*server.Entities.Volumes.Items), len(*server.Entities.Volumes.Items))
+		for i, volume := range *server.Entities.Volumes.Items {
 			entry := make(map[string]interface{})
 
-			entry["id"] = volume.ID
-			entry["name"] = volume.Properties.Name
-			entry["type"] = volume.Properties.Type
-			entry["size"] = volume.Properties.Size
-			entry["availability_zone"] = volume.Properties.AvailabilityZone
-			entry["image"] = volume.Properties.Image
-			entry["image_alias"] = volume.Properties.ImageAlias
-			entry["image_password"] = volume.Properties.ImagePassword
+			entry["id"] = stringOrDefault(volume.Id, "")
+			entry["name"] = stringOrDefault(volume.Properties.Name, "")
+			entry["type"] = stringOrDefault(volume.Properties.Type, "")
+			entry["size"] = float32OrDefault(volume.Properties.Size, 0)
+			entry["availability_zone"] = stringOrDefault(volume.Properties.AvailabilityZone, "")
+			entry["image"] = stringOrDefault(volume.Properties.Image, "")
+			entry["image_alias"] = stringOrDefault(volume.Properties.ImageAlias, "")
+			entry["image_password"] = stringOrDefault(volume.Properties.ImagePassword, "")
 
-			sshKeys := make([]interface{}, len(volume.Properties.SSHKeys), len(volume.Properties.SSHKeys))
-			for j, sshKey := range volume.Properties.SSHKeys {
-				sshKeys[j] = sshKey
+			if volume.Properties.SshKeys != nil {
+				sshKeys := make([]interface{}, len(*volume.Properties.SshKeys), len(*volume.Properties.SshKeys))
+				for j, sshKey := range *volume.Properties.SshKeys {
+					sshKeys[j] = sshKey
+				}
+				entry["ssh_keys"] = sshKeys
 			}
-			entry["ssh_keys"] = sshKeys
 
-			entry["bus"] = volume.Properties.Bus
-			entry["licence_type"] = volume.Properties.LicenceType
-			entry["cpu_hot_plug"] = volume.Properties.CPUHotPlug
-			entry["cpu_hot_unplug"] = volume.Properties.CPUHotUnplug
-			entry["ram_hot_plug"] = volume.Properties.RAMHotPlug
-			entry["ram_hot_unplug"] = volume.Properties.RAMHotUnplug
-			entry["nic_hot_plug"] = volume.Properties.NicHotPlug
-			entry["nic_hot_unplug"] = volume.Properties.NicHotUnplug
-			entry["disc_virtio_hot_plug"] = volume.Properties.DiscVirtioHotPlug
-			entry["disc_virtio_hot_unplug"] = volume.Properties.DiscVirtioHotUnplug
-			entry["disc_scsi_hot_plug"] = volume.Properties.DiscScsiHotPlug
-			entry["disc_scsi_hot_unplug"] = volume.Properties.DiscScsiHotUnplug
-			entry["device_number"] = volume.Properties.DeviceNumber
+			entry["bus"] = stringOrDefault(volume.Properties.Bus, "")
+			entry["licence_type"] = stringOrDefault(volume.Properties.LicenceType, "")
+			entry["cpu_hot_plug"] = boolOrDefault(volume.Properties.CpuHotPlug, false)
+			entry["ram_hot_plug"] = boolOrDefault(volume.Properties.RamHotPlug, false)
+			entry["nic_hot_plug"] = boolOrDefault(volume.Properties.NicHotPlug, false)
+			entry["nic_hot_unplug"] = boolOrDefault(volume.Properties.NicHotUnplug, false)
+			entry["disc_virtio_hot_plug"] = boolOrDefault(volume.Properties.DiscVirtioHotPlug, false)
+			entry["disc_virtio_hot_unplug"] = boolOrDefault(volume.Properties.DiscVirtioHotUnplug, false)
+			entry["device_number"] = int64OrDefault(volume.Properties.DeviceNumber, 0)
 
 			volumes[i] = entry
 		}
@@ -473,40 +485,42 @@ func setServerData(d *schema.ResourceData, server *profitbricks.Server) error {
 	}
 
 	var nics = make([]interface{}, 0)
-	if server.Entities.Volumes != nil {
-		nics = make([]interface{}, len(server.Entities.Nics.Items), len(server.Entities.Nics.Items))
-		for k, nic := range server.Entities.Nics.Items {
+	if server.Entities.Nics != nil && server.Entities.Nics.Items != nil {
+		nics = make([]interface{}, len(*server.Entities.Nics.Items), len(*server.Entities.Nics.Items))
+		for k, nic := range *server.Entities.Nics.Items {
 			entry := make(map[string]interface{})
 
-			entry["id"] = nic.ID
-			entry["name"] = nic.Properties.Name
-			entry["mac"] = nic.Properties.Mac
+			entry["id"] = stringOrDefault(nic.Id, "")
+			entry["name"] = stringOrDefault(nic.Properties.Name, "")
+			entry["mac"] = stringOrDefault(nic.Properties.Mac, "")
 
-			ips := make([]interface{}, len(nic.Properties.Ips))
-			for idx, ip := range nic.Properties.Ips {
-				ips[idx] = ip
+			if nic.Properties.Ips != nil {
+				ips := make([]interface{}, len(*nic.Properties.Ips))
+				for idx, ip := range *nic.Properties.Ips {
+					ips[idx] = ip
+				}
+				entry["ips"] = ips
 			}
-			entry["ips"] = ips
 
 			entry["dhcp"] = boolOrDefault(nic.Properties.Dhcp, false)
-			entry["lan"] = nic.Properties.Lan
+			entry["lan"] = int32OrDefault(nic.Properties.Lan, 0)
 			entry["firewall_active"] = boolOrDefault(nic.Properties.FirewallActive, false)
 			entry["nat"] = boolOrDefault(nic.Properties.Nat, false)
 
 			firewallRules := make([]interface{}, 0)
-			if nic.Entities != nil && nic.Entities.FirewallRules != nil {
-				firewallRules = make([]interface{}, len(nic.Entities.FirewallRules.Items))
-				for idx, rule := range nic.Entities.FirewallRules.Items {
+			if nic.Entities != nil && nic.Entities.Firewallrules != nil && nic.Entities.Firewallrules.Items != nil {
+				firewallRules = make([]interface{}, len(*nic.Entities.Firewallrules.Items))
+				for idx, rule := range *nic.Entities.Firewallrules.Items {
 					ruleEntry := make(map[string]interface{})
 
-					ruleEntry["id"] = rule.ID
-					ruleEntry["name"] = rule.Properties.Name
-					ruleEntry["protocol"] = rule.Properties.Protocol
+					ruleEntry["id"] = stringOrDefault(rule.Id, "")
+					ruleEntry["name"] = stringOrDefault(rule.Properties.Name, "")
+					ruleEntry["protocol"] = stringOrDefault(rule.Properties.Protocol, "")
 					ruleEntry["source_mac"] = stringOrDefault(rule.Properties.SourceMac, "")
-					ruleEntry["source_ip"] = stringOrDefault(rule.Properties.SourceIP, "")
-					ruleEntry["target_ip"] = stringOrDefault(rule.Properties.TargetIP, "")
-					ruleEntry["icmp_code"] = intOrDefault(rule.Properties.IcmpCode, 0)
-					ruleEntry["icmp_type"] = intOrDefault(rule.Properties.IcmpType, 0)
+					ruleEntry["source_ip"] = stringOrDefault(rule.Properties.SourceIp, "")
+					ruleEntry["target_ip"] = stringOrDefault(rule.Properties.TargetIp, "")
+					ruleEntry["icmp_code"] = int32OrDefault(rule.Properties.IcmpCode, 0)
+					ruleEntry["icmp_type"] = int32OrDefault(rule.Properties.IcmpType, 0)
 					firewallRules[idx] = ruleEntry
 				}
 			}
@@ -524,7 +538,7 @@ func setServerData(d *schema.ResourceData, server *profitbricks.Server) error {
 }
 
 func dataSourceServerRead(d *schema.ResourceData, meta interface{}) error {
-	client := meta.(SdkBundle).LegacyClient
+	client := meta.(SdkBundle).Client
 
 	datacenterId, dcIdOk := d.GetOk("datacenter_id")
 	if !dcIdOk {
@@ -540,40 +554,46 @@ func dataSourceServerRead(d *schema.ResourceData, meta interface{}) error {
 	if !idOk && !nameOk {
 		return errors.New("please provide either the server id or name")
 	}
-	var server *profitbricks.Server
+	var server ionoscloud.Server
 	var err error
+
+	ctx, cancel := context.WithTimeout(context.Background(), *resourceDefaultTimeouts.Default)
+
+	if cancel != nil {
+		defer cancel()
+	}
 
 	if idOk {
 		/* search by ID */
-		server, err = client.GetServer(datacenterId.(string), id.(string))
+		server, _, err = client.ServerApi.DatacentersServersFindById(ctx, datacenterId.(string), id.(string)).Execute()
 		if err != nil {
 			return fmt.Errorf("an error occurred while fetching the server with ID %s: %s", id.(string), err)
 		}
 	} else {
 		/* search by name */
-		var servers *profitbricks.Servers
-		servers, err := client.ListServers(datacenterId.(string))
+		var servers ionoscloud.Servers
+		servers, _, err := client.ServerApi.DatacentersServersGet(ctx, datacenterId.(string)).Execute()
 		if err != nil {
 			return fmt.Errorf("an error occurred while fetching servers: %s", err.Error())
 		}
 
-		for _, s := range servers.Items {
-			if strings.Contains(s.Properties.Name, name.(string)) {
+		for _, s := range *servers.Items {
+			if strings.Contains(*s.Properties.Name, name.(string)) {
 				/* server found */
-				server, err = client.GetServer(datacenterId.(string), s.ID)
+				server, _, err = client.ServerApi.DatacentersServersFindById(ctx, datacenterId.(string), *s.Id).Execute()
 				if err != nil {
-					return fmt.Errorf("an error occurred while fetching the server with ID %s: %s", s.ID, err)
+					return fmt.Errorf("an error occurred while fetching the server with ID %s: %s", *s.Id, err)
 				}
 				break
 			}
 		}
 	}
 
-	if server == nil {
+	if &server == nil {
 		return errors.New("server not found")
 	}
 
-	if err = setServerData(d, server); err != nil {
+	if err = setServerData(d, &server); err != nil {
 		return err
 	}
 
