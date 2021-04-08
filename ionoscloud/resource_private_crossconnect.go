@@ -1,12 +1,13 @@
 package ionoscloud
 
 import (
+	"context"
 	"fmt"
 	"log"
 	"time"
 
 	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
-	"github.com/profitbricks/profitbricks-sdk-go/v5"
+	ionoscloud "github.com/ionos-cloud/sdk-go/v5"
 )
 
 func resourcePrivateCrossConnect() *schema.Resource {
@@ -59,12 +60,12 @@ func resourcePrivateCrossConnect() *schema.Resource {
 				Computed:    true,
 				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{
-						"lan_id": {
+						"lan_id": { // todo should I rename this key in id like in model_peer.go? + lane 171
 							Type:        schema.TypeString,
 							Description: "The id of the cross-connected LAN",
 							Computed:    true,
 						},
-						"lan_name": {
+						"lan_name": { // todo should I rename this key in id like in model_peer.go? + lane 172
 							Type:        schema.TypeString,
 							Description: "The name of the cross-connected LAN",
 							Computed:    true,
@@ -93,27 +94,33 @@ func resourcePrivateCrossConnect() *schema.Resource {
 }
 
 func resourcePrivateCrossConnectCreate(d *schema.ResourceData, meta interface{}) error {
-	client := meta.(SdkBundle).LegacyClient
+	client := meta.(SdkBundle).Client
 
-	pcc := profitbricks.PrivateCrossConnect{
-		Properties: &profitbricks.PrivateCrossConnectProperties{
-			Name: d.Get("name").(string),
+	name := d.Get("name").(string)
+	pcc := ionoscloud.PrivateCrossConnect{
+		Properties: &ionoscloud.PrivateCrossConnectProperties{
+			Name: &name,
 		},
 	}
 
 	if descVal, descOk := d.GetOk("description"); descOk {
 		log.Printf("[INFO] Setting PCC description to : %s", descVal.(string))
-		pcc.Properties.Description = descVal.(string)
+		description := descVal.(string)
+		pcc.Properties.Description = &description
 	}
 
-	createdPCC, err := client.CreatePrivateCrossConnect(pcc)
+	ctx, cancel := context.WithTimeout(context.Background(), *resourceDefaultTimeouts.Create)
+	if cancel != nil {
+		defer cancel()
+	}
+	rsp, _, err := client.PrivateCrossConnectApi.PccsPost(ctx).Pcc(pcc).Execute()
 
 	if err != nil {
 		d.SetId("")
 		return fmt.Errorf("Error creating private PCC: %s", err)
 	}
 
-	d.SetId(createdPCC.ID)
+	d.SetId(*rsp.Id)
 	log.Printf("[INFO] Created PCC: %s", d.Id())
 
 	for {
@@ -136,13 +143,17 @@ func resourcePrivateCrossConnectCreate(d *schema.ResourceData, meta interface{})
 }
 
 func resourcePrivateCrossConnectRead(d *schema.ResourceData, meta interface{}) error {
+	client := meta.(SdkBundle).Client
 
-	client := meta.(SdkBundle).LegacyClient
-	pcc, err := client.GetPrivateCrossConnect(d.Id())
+	ctx, cancel := context.WithTimeout(context.Background(), *resourceDefaultTimeouts.Default)
+	if cancel != nil {
+		defer cancel()
+	}
+	rsp, apiResponse, err := client.PrivateCrossConnectApi.PccsFindById(ctx, d.Id()).Execute()
 
 	if err != nil {
-		if apiError, ok := err.(profitbricks.ApiError); ok {
-			if apiError.HttpStatusCode() == 404 {
+		if _, ok := err.(ionoscloud.GenericOpenAPIError); ok {
+			if apiResponse.Response.StatusCode == 404 {
 				d.SetId("")
 				return nil
 			}
@@ -150,17 +161,17 @@ func resourcePrivateCrossConnectRead(d *schema.ResourceData, meta interface{}) e
 		return fmt.Errorf("Error while fetching PCC %s: %s", d.Id(), err)
 	}
 
-	log.Printf("[INFO] Successfully retreived PCC %s: %+v", d.Id(), pcc)
+	log.Printf("[INFO] Successfully retreived PCC %s: %+v", d.Id(), rsp)
 
 	peers := []map[string]string{}
 
-	for _, peer := range *pcc.Properties.Peers {
+	for _, peer := range *rsp.Properties.Peers {
 		peers = append(peers, map[string]string{
-			"lan_id":          peer.LANId,
-			"lan_name":        peer.LANName,
-			"datacenter_id":   peer.DataCenterID,
-			"datacenter_name": peer.DataCenterName,
-			"location":        peer.Location,
+			"lan_id":          *peer.Id,
+			"lan_name":        *peer.Name,
+			"datacenter_id":   *peer.DatacenterId,
+			"datacenter_name": *peer.DatacenterName,
+			"location":        *peer.Location,
 		})
 	}
 
@@ -169,11 +180,11 @@ func resourcePrivateCrossConnectRead(d *schema.ResourceData, meta interface{}) e
 
 	connectableDatacenters := []map[string]string{}
 
-	for _, connectableDC := range *pcc.Properties.ConnectableDatacenters {
+	for _, connectableDC := range *rsp.Properties.ConnectableDatacenters {
 		connectableDatacenters = append(connectableDatacenters, map[string]string{
-			"id":       connectableDC.ID,
-			"name":     connectableDC.Name,
-			"location": connectableDC.Location,
+			"id":       *connectableDC.Id,
+			"name":     *connectableDC.Name,
+			"location": *connectableDC.Location,
 		})
 	}
 
@@ -183,17 +194,19 @@ func resourcePrivateCrossConnectRead(d *schema.ResourceData, meta interface{}) e
 }
 
 func resourcePrivateCrossConnectUpdate(d *schema.ResourceData, meta interface{}) error {
-	client := meta.(SdkBundle).LegacyClient
-	request := profitbricks.PrivateCrossConnect{}
+	client := meta.(SdkBundle).Client
+	request := ionoscloud.PrivateCrossConnect{}
 
-	request.Properties = &profitbricks.PrivateCrossConnectProperties{
-		Name: d.Get("name").(string),
+	name := d.Get("name").(string)
+	request.Properties = &ionoscloud.PrivateCrossConnectProperties{
+		Name: &name,
 	}
 
 	if d.HasChange("name") {
 		oldName, newName := d.GetChange("name")
 		log.Printf("[INFO] PCC name changed from %+v to %+v", oldName, newName)
-		request.Properties.Name = newName.(string)
+		name := newName.(string)
+		request.Properties.Name = &name
 	}
 
 	log.Printf("[INFO] Attempting update PCC %s", d.Id())
@@ -201,16 +214,21 @@ func resourcePrivateCrossConnectUpdate(d *schema.ResourceData, meta interface{})
 	if d.HasChange("description") {
 		oldDesc, newDesc := d.GetChange("description")
 		log.Printf("[INFO] PCC description changed from %+v to %+v", oldDesc, newDesc)
+		descriprion := newDesc.(string)
 		if newDesc != nil {
-			request.Properties.Description = newDesc.(string)
+			request.Properties.Description = &descriprion
 		}
 	}
 
-	_, err := client.UpdatePrivateCrossConnect(d.Id(), request)
+	ctx, cancel := context.WithTimeout(context.Background(), *resourceDefaultTimeouts.Update)
+	if cancel != nil {
+		defer cancel()
+	}
+	_, apiResponse, err := client.PrivateCrossConnectApi.PccsPatch(ctx, d.Id()).Pcc(*request.Properties).Execute()
 
 	if err != nil {
-		if apiError, ok := err.(profitbricks.ApiError); ok {
-			if apiError.HttpStatusCode() == 404 {
+		if _, ok := err.(ionoscloud.GenericOpenAPIError); ok {
+			if apiResponse.Response.StatusCode == 404 {
 				d.SetId("")
 				return nil
 			}
@@ -239,13 +257,17 @@ func resourcePrivateCrossConnectUpdate(d *schema.ResourceData, meta interface{})
 }
 
 func resourcePrivateCrossConnectDelete(d *schema.ResourceData, meta interface{}) error {
-	client := meta.(SdkBundle).LegacyClient
+	client := meta.(SdkBundle).Client
 
-	_, err := client.DeletePrivateCrossConnect(d.Id())
+	ctx, cancel := context.WithTimeout(context.Background(), *resourceDefaultTimeouts.Delete)
+	if cancel != nil {
+		defer cancel()
+	}
+	_, apiResponse, err := client.PrivateCrossConnectApi.PccsDelete(ctx, d.Id()).Execute()
 
 	if err != nil {
-		if apiError, ok := err.(profitbricks.ApiError); ok {
-			if apiError.HttpStatusCode() == 404 {
+		if _, ok := err.(ionoscloud.GenericOpenAPIError); ok {
+			if apiResponse.Response.StatusCode == 404 {
 				d.SetId("")
 				return nil
 			}
@@ -274,21 +296,29 @@ func resourcePrivateCrossConnectDelete(d *schema.ResourceData, meta interface{})
 	return nil
 }
 
-func privateCrossConnectReady(client *profitbricks.Client, d *schema.ResourceData) (bool, error) {
-	subjectPCC, err := client.GetPrivateCrossConnect(d.Id())
+func privateCrossConnectReady(client *ionoscloud.APIClient, d *schema.ResourceData) (bool, error) {
+	ctx, cancel := context.WithTimeout(context.Background(), *resourceDefaultTimeouts.Default)
+	if cancel != nil {
+		defer cancel()
+	}
+	rsp, _, err := client.PrivateCrossConnectApi.PccsFindById(ctx, d.Id()).Execute()
 
 	if err != nil {
 		return true, fmt.Errorf("Error checking PCC status: %s", err)
 	}
-	return subjectPCC.Metadata.State == "AVAILABLE", nil
+	return *rsp.Metadata.State == "AVAILABLE", nil
 }
 
-func privateCrossConnectDeleted(client *profitbricks.Client, d *schema.ResourceData) (bool, error) {
-	_, err := client.GetPrivateCrossConnect(d.Id())
+func privateCrossConnectDeleted(client *ionoscloud.APIClient, d *schema.ResourceData) (bool, error) {
+	ctx, cancel := context.WithTimeout(context.Background(), *resourceDefaultTimeouts.Delete)
+	if cancel != nil {
+		defer cancel()
+	}
+	_, apiResponse, err := client.PrivateCrossConnectApi.PccsFindById(ctx, d.Id()).Execute()
 
 	if err != nil {
-		if apiError, ok := err.(profitbricks.ApiError); ok {
-			if apiError.HttpStatusCode() == 404 {
+		if _, ok := err.(ionoscloud.GenericOpenAPIError); ok {
+			if apiResponse.Response.StatusCode == 404 {
 				return true, nil
 			}
 			return true, fmt.Errorf("Error checking PCC deletion status: %s", err)
