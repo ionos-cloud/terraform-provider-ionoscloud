@@ -66,6 +66,34 @@ func resourceVolume() *schema.Resource {
 				Required: true,
 				ForceNew: true,
 			},
+			"cpu_hot_plug": {
+				Type:     schema.TypeBool,
+				Optional: true,
+			},
+			"ram_hot_plug": {
+				Type:     schema.TypeBool,
+				Optional: true,
+			},
+			"nic_hot_plug": {
+				Type:     schema.TypeBool,
+				Optional: true,
+			},
+			"nic_hot_unplug": {
+				Type:     schema.TypeBool,
+				Optional: true,
+			},
+			"disc_virtio_hot_plug": {
+				Type:     schema.TypeBool,
+				Optional: true,
+			},
+			"disc_virtio_hot_unplug": {
+				Type:     schema.TypeBool,
+				Optional: true,
+			},
+			"backup_unit_id": {
+				Type:     schema.TypeString,
+				Optional: true,
+			},
 		},
 		Timeouts: &resourceDefaultTimeouts,
 	}
@@ -167,27 +195,39 @@ func resourceVolumeCreate(d *schema.ResourceData, meta interface{}) error {
 	volumeSize := float32(d.Get("size").(int))
 	volumeType := d.Get("disk_type").(string)
 	volumeBus := d.Get("bus").(string)
+	cpuHotPlug := d.Get("cpu_hot_plug").(bool)
+	ramHotPlug := d.Get("ram_hot_plug").(bool)
+	nicHotPlug := d.Get("nic_hot_plug").(bool)
+	nicHotUnplug := d.Get("nic_hot_unplug").(bool)
+	discVirtioHotPlug := d.Get("disc_virtio_hot_plug").(bool)
+	discVirtioHotUnPlug := d.Get("disc_virtio_hot_unplug").(bool)
 
 	volume := ionoscloud.Volume{
 		Properties: &ionoscloud.VolumeProperties{
-			Name:          &volumeName,
-			Size:          &volumeSize,
-			Type:          &volumeType,
-			ImagePassword: &imagePassword,
-			Bus:           &volumeBus,
-			LicenceType:   &licenceType,
+			Name:                &volumeName,
+			Size:                &volumeSize,
+			Type:                &volumeType,
+			ImagePassword:       &imagePassword,
+			Bus:                 &volumeBus,
+			LicenceType:         &licenceType,
+			CpuHotPlug:          &cpuHotPlug,
+			RamHotPlug:          &ramHotPlug,
+			NicHotPlug:          &nicHotPlug,
+			NicHotUnplug:        &nicHotUnplug,
+			DiscVirtioHotPlug:   &discVirtioHotPlug,
+			DiscVirtioHotUnplug: &discVirtioHotUnPlug,
 		},
 	}
 
 	if image != "" {
 		volume.Properties.Image = &image
-	}else {
+	} else {
 		volume.Properties.Image = nil
 	}
 
 	if image_alias != "" {
 		volume.Properties.ImageAlias = &image_alias
-	}else {
+	} else {
 		volume.Properties.ImageAlias = nil
 	}
 
@@ -203,10 +243,21 @@ func resourceVolumeCreate(d *schema.ResourceData, meta interface{}) error {
 		volume.Properties.AvailabilityZone = &raw
 	}
 
+	backupUnitId := d.Get("backup_unit_id").(string)
+	if IsValidUUID(backupUnitId) {
+		if image == "" && image_alias == "" {
+			return fmt.Errorf("It is mandatory to provied either public image or imageAlias in conjunction with backup unit id property")
+		} else {
+			volume.Properties.BackupunitId = &backupUnitId
+		}
+	} else {
+		volume.Properties.BackupunitId = nil
+	}
+
 	volume, apiResponse, err := client.VolumeApi.DatacentersVolumesPost(ctx, dcId).Volume(volume).Execute()
 
 	if err != nil {
-		return fmt.Errorf( "An error occured while creating a volume: %s", err)
+		return fmt.Errorf("An error occured while creating a volume: %s", err)
 	}
 
 	d.SetId(*volume.Id)
@@ -221,7 +272,9 @@ func resourceVolumeCreate(d *schema.ResourceData, meta interface{}) error {
 		return errState
 	}
 
-	volume, apiResponse, err = client.ServerApi.DatacentersServersVolumesPost(ctx, dcId, serverId).Volume(volume).Execute()
+	volumeToAttach := ionoscloud.Volume{Id: volume.Id}
+	volume, apiResponse, err = client.ServerApi.DatacentersServersVolumesPost(ctx, dcId, serverId).Volume(volumeToAttach).Execute()
+
 	if err != nil {
 		return fmt.Errorf("An error occured while attaching a volume dcId: %s server_id: %s ID: %s Response: %s", dcId, serverId, volume.Id, err)
 	}
@@ -291,7 +344,7 @@ func resourceVolumeRead(d *schema.ResourceData, meta interface{}) error {
 	}
 
 	if volume.Properties.Type != nil {
-		err :=  d.Set("disk_type", *volume.Properties.Type)
+		err := d.Set("disk_type", *volume.Properties.Type)
 		if err != nil {
 			return fmt.Errorf("Error while setting type property for volume %s: %s", d.Id(), err)
 		}
@@ -318,10 +371,59 @@ func resourceVolumeRead(d *schema.ResourceData, meta interface{}) error {
 		}
 	}
 
-	if volume.Properties.Image != nil {
+	if volume.Properties.ImageAlias != nil {
 		err := d.Set("image_alias", *volume.Properties.ImageAlias)
 		if err != nil {
 			return fmt.Errorf("Error while setting image_alias property for volume %s: %s", d.Id(), err)
+		}
+	}
+
+	if volume.Properties.CpuHotPlug != nil {
+		err := d.Set("cpu_hot_plug", *volume.Properties.CpuHotPlug)
+		if err != nil {
+			return fmt.Errorf("Error while setting cpu_hot_plug property for volume %s: %s", d.Id(), err)
+		}
+	}
+
+	if volume.Properties.RamHotPlug != nil {
+		err := d.Set("ram_hot_plug", *volume.Properties.RamHotPlug)
+		if err != nil {
+			return fmt.Errorf("Error while setting ram_hot_plug property for volume %s: %s", d.Id(), err)
+		}
+	}
+
+	if volume.Properties.NicHotPlug != nil {
+		err := d.Set("nic_hot_plug", *volume.Properties.NicHotPlug)
+		if err != nil {
+			return fmt.Errorf("Error while setting nic_hot_plug property for volume %s: %s", d.Id(), err)
+		}
+	}
+
+	if volume.Properties.NicHotUnplug != nil {
+		err := d.Set("nic_hot_unplug", *volume.Properties.NicHotUnplug)
+		if err != nil {
+			return fmt.Errorf("Error while setting nic_hot_unplug property for volume %s: %s", d.Id(), err)
+		}
+	}
+
+	if volume.Properties.DiscVirtioHotPlug != nil {
+		err := d.Set("disc_virtio_hot_plug", *volume.Properties.DiscVirtioHotPlug)
+		if err != nil {
+			return fmt.Errorf("Error while setting disc_virtio_hot_plug property for volume %s: %s", d.Id(), err)
+		}
+	}
+
+	if volume.Properties.DiscVirtioHotUnplug != nil {
+		err := d.Set("disc_virtio_hot_unplug", *volume.Properties.DiscVirtioHotUnplug)
+		if err != nil {
+			return fmt.Errorf("Error while setting disc_virtio_hot_unplug property for volume %s: %s", d.Id(), err)
+		}
+	}
+
+	if volume.Properties.BackupunitId != nil {
+		err := d.Set("backup_unit_id", *volume.Properties.BackupunitId)
+		if err != nil {
+			return fmt.Errorf("Error while setting backup_unit_id property for volume %s: %s", d.Id(), err)
 		}
 	}
 
@@ -357,6 +459,46 @@ func resourceVolumeUpdate(d *schema.ResourceData, meta interface{}) error {
 		_, newValue := d.GetChange("availability_zone")
 		newValueStr := newValue.(string)
 		properties.AvailabilityZone = &newValueStr
+	}
+
+	if d.HasChange("cpu_hot_plug") {
+		_, newValue := d.GetChange("cpu_hot_plug")
+		newValueBool := newValue.(bool)
+		properties.CpuHotPlug = &newValueBool
+	}
+
+	if d.HasChange("ram_hot_plug") {
+		_, newValue := d.GetChange("ram_hot_plug")
+		newValueBool := newValue.(bool)
+		properties.RamHotPlug = &newValueBool
+	}
+
+	if d.HasChange("nic_hot_plug") {
+		_, newValue := d.GetChange("nic_hot_plug")
+		newValueBool := newValue.(bool)
+		properties.NicHotPlug = &newValueBool
+	}
+
+	if d.HasChange("nic_hot_unplug") {
+		_, newValue := d.GetChange("nic_hot_unplug")
+		newValueBool := newValue.(bool)
+		properties.NicHotUnplug = &newValueBool
+	}
+
+	if d.HasChange("disc_virtio_hot_plug") {
+		_, newValue := d.GetChange("disc_virtio_hot_plug")
+		newValueBool := newValue.(bool)
+		properties.DiscVirtioHotPlug = &newValueBool
+	}
+
+	if d.HasChange("disc_virtio_hot_unplug") {
+		_, newValue := d.GetChange("disc_virtio_hot_unplug")
+		newValueBool := newValue.(bool)
+		properties.DiscVirtioHotUnplug = &newValueBool
+	}
+
+	if d.HasChange("backup_unit_id") {
+		return fmt.Errorf("Backup unit id property is immutable")
 	}
 
 	ctx, cancel := context.WithTimeout(context.Background(), *resourceDefaultTimeouts.Update)
