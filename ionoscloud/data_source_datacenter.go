@@ -28,6 +28,10 @@ func dataSourceDataCenter() *schema.Resource {
 				Type:     schema.TypeString,
 				Optional: true,
 			},
+			"sec_auth_protection": {
+				Type:     schema.TypeBool,
+				Optional: true,
+			},
 		},
 		Timeouts: &resourceDefaultTimeouts,
 	}
@@ -141,6 +145,13 @@ func dataSourceDataCenterRead(d *schema.ResourceData, meta interface{}) error {
 		err := d.Set("name", datacenter.Properties.Name)
 		if err != nil {
 			return fmt.Errorf("Error while setting name property for datacenter %s: %s", d.Id(), err)
+		}
+	}
+
+	if datacenter.Properties.SecAuthProtection != nil {
+		err := d.Set("sec_auth_protection", datacenter.Properties.SecAuthProtection)
+		if err != nil {
+			return fmt.Errorf("Error while setting sec_auth_protection property for datacenter %s: %s", d.Id(), err)
 		}
 	}
 

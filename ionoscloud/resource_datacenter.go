@@ -37,6 +37,10 @@ func resourceDatacenter() *schema.Resource {
 				Optional: true,
 				Computed: true,
 			},
+			"sec_auth_protection": {
+				Type:     schema.TypeBool,
+				Optional: true,
+			},
 		},
 		Timeouts: &resourceDefaultTimeouts,
 	}
@@ -59,6 +63,11 @@ func resourceDatacenterCreate(d *schema.ResourceData, meta interface{}) error {
 	if attr, ok := d.GetOk("description"); ok {
 		attrStr := attr.(string)
 		datacenter.Properties.Description = &attrStr
+	}
+
+	if attr, ok := d.GetOk("sec_auth_protection"); ok {
+		attrStr := attr.(bool)
+		datacenter.Properties.SecAuthProtection = &attrStr
 	}
 
 	ctx, cancel := context.WithTimeout(context.Background(), *resourceDefaultTimeouts.Create)
@@ -113,24 +122,31 @@ func resourceDatacenterRead(d *schema.ResourceData, meta interface{}) error {
 		return fmt.Errorf("Error while fetching a data center ID %s %s", d.Id(), err)
 	}
 
-	if datacenter.Properties.Name != nil{
+	if datacenter.Properties.Name != nil {
 		err := d.Set("name", *datacenter.Properties.Name)
 		if err != nil {
-			return fmt.Errorf("Error while setting name property for backup unit %s: %s", d.Id(), err)
+			return fmt.Errorf("Error while setting name property for datacenter %s: %s", d.Id(), err)
 		}
 	}
 
-	if datacenter.Properties.Location != nil{
+	if datacenter.Properties.Location != nil {
 		err := d.Set("location", *datacenter.Properties.Location)
 		if err != nil {
-			return fmt.Errorf("Error while setting location property for backup unit %s: %s", d.Id(), err)
+			return fmt.Errorf("Error while setting location property for datacenter %s: %s", d.Id(), err)
 		}
 	}
 
-	if datacenter.Properties.Description != nil{
+	if datacenter.Properties.Description != nil {
 		err := d.Set("description", *datacenter.Properties.Description)
 		if err != nil {
-			return fmt.Errorf("Error while setting description property for backup unit %s: %s", d.Id(), err)
+			return fmt.Errorf("Error while setting description property for datacenter %s: %s", d.Id(), err)
+		}
+	}
+
+	if datacenter.Properties.SecAuthProtection != nil {
+		err := d.Set("sec_auth_protection", *datacenter.Properties.SecAuthProtection)
+		if err != nil {
+			return fmt.Errorf("Error while setting sec_auth_protection property for datacenter %s: %s", d.Id(), err)
 		}
 	}
 
@@ -157,6 +173,12 @@ func resourceDatacenterUpdate(d *schema.ResourceData, meta interface{}) error {
 	if d.HasChange("location") {
 		oldLocation, newLocation := d.GetChange("location")
 		return fmt.Errorf("Data center is created in %s location. You can not change location of the data center to %s. It requires recreation of the data center.", oldLocation, newLocation)
+	}
+
+	if d.HasChange("sec_auth_protection") {
+		_, newSecAuthProtection := d.GetChange("sec_auth_protection")
+		newSecAuthProtectionStr := newSecAuthProtection.(bool)
+		obj.SecAuthProtection = &newSecAuthProtectionStr
 	}
 
 	ctx, cancel := context.WithTimeout(context.Background(), *resourceDefaultTimeouts.Update)
@@ -289,7 +311,6 @@ func getSnapshotId(client *ionoscloud.APIClient, snapshotName string) string {
 	return ""
 }
 
-
 func getImageAlias(client *ionoscloud.APIClient, imageAlias string, location string) string {
 
 	ctx, cancel := context.WithTimeout(context.Background(), *resourceDefaultTimeouts.Default)
@@ -326,7 +347,6 @@ func getImageAlias(client *ionoscloud.APIClient, imageAlias string, location str
 	}
 	return ""
 }
-
 
 func IsValidUUID(uuid string) bool {
 	r := regexp.MustCompile("^[a-fA-F0-9]{8}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-[a-fA-F0-9]{12}$")
