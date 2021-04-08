@@ -92,8 +92,8 @@ func resourceLanCreate(d *schema.ResourceData, meta interface{}) error {
 		return fmt.Errorf("An error occured while creating LAN: %s", err)
 	}
 
-	log.Printf("[DEBUG] LAN ID: %s", rsp.Id)
-	log.Printf("[DEBUG] LAN RESPONSE: %s", apiResponse.Response)
+	log.Printf("[DEBUG] LAN ID: %s", *rsp.Id)
+	log.Printf("[DEBUG] LAN RESPONSE: %s", string(apiResponse.Payload))
 
 	d.SetId(*rsp.Id)
 
@@ -110,13 +110,13 @@ func resourceLanCreate(d *schema.ResourceData, meta interface{}) error {
 	}
 
 	for {
-		log.Printf("[INFO] Waiting for LAN %s to be available...", rsp.Id)
+		log.Printf("[INFO] Waiting for LAN %s to be available...", *rsp.Id)
 		time.Sleep(5 * time.Second)
 
 		clusterReady, rsErr := lanAvailable(client, d)
 
 		if rsErr != nil {
-			return fmt.Errorf("Error while checking readiness status of LAN %s: %s", rsp.Id, rsErr)
+			return fmt.Errorf("Error while checking readiness status of LAN %s: %s", *rsp.Id, rsErr)
 		}
 
 		if clusterReady && rsErr == nil {

@@ -276,7 +276,7 @@ func resourceVolumeCreate(d *schema.ResourceData, meta interface{}) error {
 	volume, apiResponse, err = client.ServerApi.DatacentersServersVolumesPost(ctx, dcId, serverId).Volume(volumeToAttach).Execute()
 
 	if err != nil {
-		return fmt.Errorf("An error occured while attaching a volume dcId: %s server_id: %s ID: %s Response: %s", dcId, serverId, volume.Id, err)
+		return fmt.Errorf("An error occured while attaching a volume dcId: %s server_id: %s ID: %s Response: %s", dcId, serverId, *volume.Id, err)
 	}
 
 	sErr := d.Set("server_id", serverId)
@@ -327,7 +327,7 @@ func resourceVolumeRead(d *schema.ResourceData, meta interface{}) error {
 	}
 
 	if apiResponse.Response.StatusCode > 299 {
-		return fmt.Errorf("An error occured while fetching a volume ID %s %s", d.Id(), apiResponse.Response)
+		return fmt.Errorf("An error occured while fetching a volume ID %s %s", d.Id(), string(apiResponse.Payload))
 
 	}
 
@@ -520,7 +520,7 @@ func resourceVolumeUpdate(d *schema.ResourceData, meta interface{}) error {
 	}
 
 	if apiResponse.Response.StatusCode > 299 {
-		return fmt.Errorf("An error occured while updating a volume ID %s %s", d.Id(), apiResponse.Response)
+		return fmt.Errorf("An error occured while updating a volume ID %s %s", d.Id(), string(apiResponse.Payload))
 
 	}
 
@@ -529,7 +529,7 @@ func resourceVolumeUpdate(d *schema.ResourceData, meta interface{}) error {
 		serverID := newValue.(string)
 		volumeAttach, apiResponse, err := client.ServerApi.DatacentersServersVolumesPost(ctx, dcId, serverID).Volume(volume).Execute()
 		if err != nil {
-			return fmt.Errorf("An error occured while attaching a volume dcId: %s server_id: %s ID: %s Response: %s", dcId, serverID, volumeAttach.Id, err)
+			return fmt.Errorf("An error occured while attaching a volume dcId: %s server_id: %s ID: %s Response: %s", dcId, serverID, *volumeAttach.Id, err)
 		}
 
 		// Wait, catching any errors

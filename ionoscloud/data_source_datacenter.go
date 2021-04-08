@@ -65,17 +65,17 @@ func getDatacenter(client *ionoscloud.APIClient, d *schema.ResourceData) (*ionos
 		if nameOk {
 			if *dc.Properties.Name != name {
 				return nil, fmt.Errorf("[ERROR] Name of dc (UUID=%s, name=%s) does not match expected name: %s",
-					dc.Id, dc.Properties.Name, name)
+					*dc.Id, *dc.Properties.Name, name)
 			}
 		}
 		if locationOk {
 			if *dc.Properties.Location != location {
 				return nil, fmt.Errorf("[ERROR] location of dc (UUID=%s, location=%s) does not match expected location: %s",
-					dc.Id, dc.Properties.Location, location)
+					*dc.Id, *dc.Properties.Location, location)
 
 			}
 		}
-		log.Printf("[INFO] Got dc [Name=%s, Location=%s]", dc.Properties.Name, dc.Properties.Location)
+		log.Printf("[INFO] Got dc [Name=%s, Location=%s]", *dc.Properties.Name, *dc.Properties.Location)
 		return &dc, nil
 	}
 
