@@ -3,11 +3,10 @@ package ionoscloud
 import (
 	"context"
 	"fmt"
-	"log"
-	"time"
-
 	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
 	ionoscloud "github.com/ionos-cloud/sdk-go/v5"
+	"log"
+	"time"
 )
 
 func resourcePrivateCrossConnect() *schema.Resource {

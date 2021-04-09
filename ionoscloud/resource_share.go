@@ -1,12 +1,13 @@
 package ionoscloud
 
 import (
+	"context"
 	"fmt"
 	"log"
 	"time"
 
 	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
-	"github.com/profitbricks/profitbricks-sdk-go/v5"
+	ionoscloud "github.com/ionos-cloud/sdk-go/v5"
 )
 
 func resourceShare() *schema.Resource {
@@ -40,9 +41,9 @@ func resourceShare() *schema.Resource {
 }
 
 func resourceShareCreate(d *schema.ResourceData, meta interface{}) error {
-	client := meta.(SdkBundle).LegacyClient
-	request := profitbricks.Share{
-		Properties: profitbricks.ShareProperties{},
+	client := meta.(SdkBundle).Client
+	request := ionoscloud.GroupShare{
+		Properties: &ionoscloud.GroupShareProperties{},
 	}
 
 	tempSharePrivilege := d.Get("edit_privilege").(bool)
@@ -50,17 +51,18 @@ func resourceShareCreate(d *schema.ResourceData, meta interface{}) error {
 	tempEditPrivilege := d.Get("share_privilege").(bool)
 	request.Properties.EditPrivilege = &tempEditPrivilege
 
-	share, err := client.AddShare(d.Get("group_id").(string), d.Get("resource_id").(string), request)
+	rsp, apiResponse, err := client.UserManagementApi.UmGroupsSharesPost(context.TODO(),
+		d.Get("group_id").(string), d.Get("resource_id").(string)).Resource(request).Execute()
 
-	log.Printf("[DEBUG] SHARE ID: %s", share.ID)
+	log.Printf("[DEBUG] SHARE ID: %s", rsp.Id)
 
 	if err != nil {
 		return fmt.Errorf("An error occured while creating a share: %s", err)
 	}
-	d.SetId(share.ID)
+	d.SetId(*rsp.Id)
 
 	// Wait, catching any errors
-	_, errState := getStateChangeConf(meta, d, share.Headers.Get("Location"), schema.TimeoutCreate).WaitForState()
+	_, errState := getStateChangeConf(meta, d, apiResponse.Header.Get("Location"), schema.TimeoutCreate).WaitForState()
 	if errState != nil {
 		if IsRequestFailed(err) {
 			// Request failed, so resource was not created, delete resource from state file
@@ -73,12 +75,13 @@ func resourceShareCreate(d *schema.ResourceData, meta interface{}) error {
 }
 
 func resourceShareRead(d *schema.ResourceData, meta interface{}) error {
-	client := meta.(SdkBundle).LegacyClient
-	share, err := client.GetShare(d.Get("group_id").(string), d.Get("resource_id").(string))
+	client := meta.(SdkBundle).Client
+	rsp, apiResponse, err := client.UserManagementApi.UmGroupsSharesFindByResourceId(context.TODO(),
+		d.Get("group_id").(string), d.Get("resource_id").(string)).Execute()
 
 	if err != nil {
-		if apiError, ok := err.(profitbricks.ApiError); ok {
-			if apiError.HttpStatusCode() == 404 {
+		if _, ok := err.(ionoscloud.GenericOpenAPIError); ok {
+			if apiResponse.Response.StatusCode == 404 {
 				d.SetId("")
 				return nil
 			}
@@ -86,29 +89,34 @@ func resourceShareRead(d *schema.ResourceData, meta interface{}) error {
 		return fmt.Errorf("An error occured while fetching a Share ID %s %s", d.Id(), err)
 	}
 
-	d.Set("edit_privilege", share.Properties.EditPrivilege)
-	d.Set("share_privilege", share.Properties.SharePrivilege)
+	d.Set("edit_privilege", *rsp.Properties.EditPrivilege)
+	d.Set("share_privilege", *rsp.Properties.SharePrivilege)
 	return nil
 }
 
 func resourceShareUpdate(d *schema.ResourceData, meta interface{}) error {
-	client := meta.(SdkBundle).LegacyClient
+	client := meta.(SdkBundle).Client
 	tempSharePrivilege := d.Get("share_privilege").(bool)
 	tempEditPrivilege := d.Get("edit_privilege").(bool)
-	shareReq := profitbricks.Share{
-		Properties: profitbricks.ShareProperties{
+	shareReq := ionoscloud.GroupShare{
+		Properties: &ionoscloud.GroupShareProperties{
 			EditPrivilege:  &tempEditPrivilege,
 			SharePrivilege: &tempSharePrivilege,
 		},
 	}
 
-	share, err := client.UpdateShare(d.Get("group_id").(string), d.Get("resource_id").(string), shareReq)
+	ctx, cancel := context.WithTimeout(context.Background(), *resourceDefaultTimeouts.Update)
+	if cancel != nil {
+		defer cancel()
+	}
+	_, apiResponse, err := client.UserManagementApi.UmGroupsSharesPut(ctx,
+		d.Get("group_id").(string), d.Get("resource_id").(string)).Resource(shareReq).Execute()
 	if err != nil {
 		return fmt.Errorf("An error occured while patching a share ID %s %s", d.Id(), err)
 	}
 
 	// Wait, catching any errors
-	_, errState := getStateChangeConf(meta, d, share.Headers.Get("Location"), schema.TimeoutUpdate).WaitForState()
+	_, errState := getStateChangeConf(meta, d, apiResponse.Header.Get("Location"), schema.TimeoutUpdate).WaitForState()
 	if errState != nil {
 		return errState
 	}
@@ -117,15 +125,22 @@ func resourceShareUpdate(d *schema.ResourceData, meta interface{}) error {
 }
 
 func resourceShareDelete(d *schema.ResourceData, meta interface{}) error {
-	client := meta.(SdkBundle).LegacyClient
-	resp, err := client.DeleteShare(d.Id(), d.Get("resource_id").(string))
+	client := meta.(SdkBundle).Client
+
+	ctx, cancel := context.WithTimeout(context.Background(), *resourceDefaultTimeouts.Delete)
+	if cancel != nil {
+		defer cancel()
+	}
+	_, apiResponse, err := client.UserManagementApi.UmGroupsSharesDelete(ctx,
+		d.Get("group_id").(string), d.Get("resource_id").(string)).Execute()
 	if err != nil {
 		//try again in 20 seconds
 		time.Sleep(20 * time.Second)
-		resp, err = client.DeleteShare(d.Id(), d.Get("resource_id").(string))
+		_, apiResponse, err := client.UserManagementApi.UmGroupsSharesDelete(ctx,
+			d.Get("group_id").(string), d.Get("resource_id").(string)).Execute()
 		if err != nil {
-			if apiError, ok := err.(profitbricks.ApiError); ok {
-				if apiError.HttpStatusCode() != 404 {
+			if _, ok := err.(ionoscloud.GenericOpenAPIError); ok {
+				if apiResponse.Response.StatusCode != 404 {
 					return fmt.Errorf("An error occured while deleting a share %s %s", d.Id(), err)
 				}
 			}
@@ -133,8 +148,8 @@ func resourceShareDelete(d *schema.ResourceData, meta interface{}) error {
 	}
 
 	// Wait, catching any errors
-	if resp.Get("Location") != "" {
-		_, errState := getStateChangeConf(meta, d, resp.Get("Location"), schema.TimeoutDelete).WaitForState()
+	if apiResponse.Header.Get("Location") != "" {
+		_, errState := getStateChangeConf(meta, d, apiResponse.Header.Get("Location"), schema.TimeoutDelete).WaitForState()
 		if errState != nil {
 			return errState
 		}
