@@ -35,55 +35,55 @@ func dataSourceImage() *schema.Resource {
 			},
 			"size": {
 				Type:     schema.TypeFloat,
-				Optional: true,
+				Computed: true,
 			},
 			"cpu_hot_plug": {
 				Type:     schema.TypeBool,
-				Optional: true,
+				Computed: true,
 			},
 			"cpu_hot_unplug": {
 				Type:     schema.TypeBool,
-				Optional: true,
+				Computed: true,
 			},
 			"ram_hot_plug": {
 				Type:     schema.TypeBool,
-				Optional: true,
+				Computed: true,
 			},
 			"ram_hot_unplug": {
 				Type:     schema.TypeBool,
-				Optional: true,
+				Computed: true,
 			},
 			"nic_hot_plug": {
 				Type:     schema.TypeBool,
-				Optional: true,
+				Computed: true,
 			},
 			"nic_hot_unplug": {
 				Type:     schema.TypeBool,
-				Optional: true,
+				Computed: true,
 			},
 			"disc_virtio_hot_plug": {
 				Type:     schema.TypeBool,
-				Optional: true,
+				Computed: true,
 			},
 			"disc_virtio_hot_unplug": {
 				Type:     schema.TypeBool,
-				Optional: true,
+				Computed: true,
 			},
 			"disc_scsi_hot_plug": {
 				Type:     schema.TypeBool,
-				Optional: true,
+				Computed: true,
 			},
 			"disc_scsi_hot_unplug": {
 				Type:     schema.TypeBool,
-				Optional: true,
+				Computed: true,
 			},
 			"license_type": {
 				Type:     schema.TypeString,
-				Optional: true,
+				Computed: true,
 			},
 			"public": {
 				Type:     schema.TypeBool,
-				Optional: true,
+				Computed: true,
 			},
 		},
 		Timeouts: &resourceDefaultTimeouts,

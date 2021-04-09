@@ -30,7 +30,7 @@ func dataSourceDataCenter() *schema.Resource {
 			},
 			"sec_auth_protection": {
 				Type:     schema.TypeBool,
-				Optional: true,
+				Computed: true,
 			},
 		},
 		Timeouts: &resourceDefaultTimeouts,

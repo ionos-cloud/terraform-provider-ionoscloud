@@ -145,7 +145,7 @@ func dataSourceK8sNodePool() *schema.Resource {
 			"public_ips": {
 				Type:        schema.TypeList,
 				Description: "A list of fixed IPs",
-				Optional:    true,
+				Computed:    true,
 				Elem: &schema.Schema{
 					Type: schema.TypeString,
 				},
