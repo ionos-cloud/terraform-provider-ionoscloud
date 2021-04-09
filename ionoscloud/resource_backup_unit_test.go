@@ -1,16 +1,17 @@
 package ionoscloud
 
 import (
+	"context"
 	"fmt"
+	ionoscloud "github.com/ionos-cloud/sdk-go/v5"
 	"testing"
 
 	"github.com/hashicorp/terraform-plugin-sdk/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/terraform"
-	profitbricks "github.com/profitbricks/profitbricks-sdk-go/v5"
 )
 
 func TestAccbackupUnit_Basic(t *testing.T) {
-	var backupUnit profitbricks.BackupUnit
+	var backupUnit ionoscloud.BackupUnit
 	backupUnitName := "example"
 
 	resource.Test(t, resource.TestCase{
@@ -42,17 +43,23 @@ func TestAccbackupUnit_Basic(t *testing.T) {
 }
 
 func testAccCheckbackupUnitDestroyCheck(s *terraform.State) error {
-	client := testAccProvider.Meta().(*profitbricks.Client)
+	client := testAccProvider.Meta().(SdkBundle).Client
 	for _, rs := range s.RootModule().Resources {
 		if rs.Type != "ionoscloud_backup_unit" {
 			continue
 		}
 
-		_, err := client.GetBackupUnit(rs.Primary.ID)
+		ctx, cancel := context.WithTimeout(context.Background(), *resourceDefaultTimeouts.Default)
 
-		if apiError, ok := err.(profitbricks.ApiError); ok {
-			if apiError.HttpStatusCode() != 404 {
-				return fmt.Errorf("backup unit still exists %s %s", rs.Primary.ID, apiError)
+		if cancel != nil {
+			defer cancel()
+		}
+
+		_, apiResponse, err := client.BackupUnitApi.BackupunitsFindById(ctx, rs.Primary.ID).Execute()
+
+		if _, ok := err.(ionoscloud.GenericOpenAPIError); ok {
+			if apiResponse.Response.StatusCode != 404 {
+				return fmt.Errorf("backup unit still exists %s %s", rs.Primary.ID, string(apiResponse.Payload))
 			}
 		} else {
 			return fmt.Errorf("Unable to fetch backup unit %s %s", rs.Primary.ID, err)
@@ -62,9 +69,9 @@ func testAccCheckbackupUnitDestroyCheck(s *terraform.State) error {
 	return nil
 }
 
-func testAccCheckbackupUnitExists(n string, backupUnit *profitbricks.BackupUnit) resource.TestCheckFunc {
+func testAccCheckbackupUnitExists(n string, backupUnit *ionoscloud.BackupUnit) resource.TestCheckFunc {
 	return func(s *terraform.State) error {
-		client := testAccProvider.Meta().(*profitbricks.Client)
+		client := testAccProvider.Meta().(SdkBundle).Client
 		rs, ok := s.RootModule().Resources[n]
 
 		if !ok {
@@ -75,15 +82,21 @@ func testAccCheckbackupUnitExists(n string, backupUnit *profitbricks.BackupUnit)
 			return fmt.Errorf("No Record ID is set")
 		}
 
-		foundBackupUnit, err := client.GetBackupUnit(rs.Primary.ID)
+		ctx, cancel := context.WithTimeout(context.Background(), *resourceDefaultTimeouts.Default)
+
+		if cancel != nil {
+			defer cancel()
+		}
+
+		foundBackupUnit, _, err := client.BackupUnitApi.BackupunitsFindById(ctx, rs.Primary.ID).Execute()
 
 		if err != nil {
 			return fmt.Errorf("Error occured while fetching backup unit: %s", rs.Primary.ID)
 		}
-		if foundBackupUnit.ID != rs.Primary.ID {
+		if *foundBackupUnit.Id != rs.Primary.ID {
 			return fmt.Errorf("Record not found")
 		}
-		backupUnit = foundBackupUnit
+		backupUnit = &foundBackupUnit
 
 		return nil
 	}
@@ -91,14 +104,16 @@ func testAccCheckbackupUnitExists(n string, backupUnit *profitbricks.BackupUnit)
 
 const testAccCheckbackupUnitConfigBasic = `
 resource "ionoscloud_backup_unit" "example" {
-  name        = "%s"
+	name        = "%s"
 	password    = "DemoPassword123$"
-  email       = "example@profitbricks.com"
-}`
+	email       = "example@profitbricks.com"
+}
+`
 
 const testAccCheckbackupUnitConfigUpdate = `
 resource "ionoscloud_backup_unit" "example" {
 	name        = "example"
 	email       = "example-updated@profitbricks.com"
 	password    = "DemoPassword1234$"
-}`
+}
+`

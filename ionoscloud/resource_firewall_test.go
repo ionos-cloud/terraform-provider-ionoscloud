@@ -1,16 +1,17 @@
 package ionoscloud
 
 import (
+	"context"
 	"fmt"
+	ionoscloud "github.com/ionos-cloud/sdk-go/v5"
 	"testing"
 
 	"github.com/hashicorp/terraform-plugin-sdk/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/terraform"
-	"github.com/profitbricks/profitbricks-sdk-go/v5"
 )
 
 func TestAccFirewall_Basic(t *testing.T) {
-	var firewall profitbricks.FirewallRule
+	var firewall ionoscloud.FirewallRule
 	firewallName := "firewall"
 
 	resource.Test(t, resource.TestCase{
@@ -40,16 +41,23 @@ func TestAccFirewall_Basic(t *testing.T) {
 }
 
 func testAccCheckFirewallDestroyCheck(s *terraform.State) error {
-	client := testAccProvider.Meta().(*profitbricks.Client)
+	client := testAccProvider.Meta().(SdkBundle).Client
 	for _, rs := range s.RootModule().Resources {
 		if rs.Type != "ionoscloud_firewall" {
 			continue
 		}
 
-		_, err := client.GetFirewallRule(rs.Primary.Attributes["datacenter_id"], rs.Primary.Attributes["server_id"], rs.Primary.Attributes["nic_id"], rs.Primary.ID)
+		ctx, cancel := context.WithTimeout(context.Background(), *resourceDefaultTimeouts.Default)
 
-		if apiError, ok := err.(profitbricks.ApiError); ok {
-			if apiError.HttpStatusCode() != 404 {
+		if cancel != nil {
+			defer cancel()
+		}
+
+		_, apiRsponse, err := client.NicApi.DatacentersServersNicsFirewallrulesFindById(ctx, rs.Primary.Attributes["datacenter_id"],
+			rs.Primary.Attributes["server_id"], rs.Primary.Attributes["nic_id"], rs.Primary.ID).Execute()
+
+		if apiError, ok := err.(ionoscloud.GenericOpenAPIError); ok {
+			if apiRsponse.Response.StatusCode != 404 {
 				return fmt.Errorf("Firewall still exists %s %s", rs.Primary.ID, apiError)
 			}
 		} else {
@@ -74,9 +82,9 @@ func testAccCheckFirewallAttributes(n string, name string) resource.TestCheckFun
 	}
 }
 
-func testAccCheckFirewallExists(n string, firewall *profitbricks.FirewallRule) resource.TestCheckFunc {
+func testAccCheckFirewallExists(n string, firewall *ionoscloud.FirewallRule) resource.TestCheckFunc {
 	return func(s *terraform.State) error {
-		client := testAccProvider.Meta().(*profitbricks.Client)
+		client := testAccProvider.Meta().(SdkBundle).Client
 		rs, ok := s.RootModule().Resources[n]
 
 		if !ok {
@@ -87,16 +95,23 @@ func testAccCheckFirewallExists(n string, firewall *profitbricks.FirewallRule) r
 			return fmt.Errorf("No Record ID is set")
 		}
 
-		foundServer, err := client.GetFirewallRule(rs.Primary.Attributes["datacenter_id"], rs.Primary.Attributes["server_id"], rs.Primary.Attributes["nic_id"], rs.Primary.ID)
+		ctx, cancel := context.WithTimeout(context.Background(), *resourceDefaultTimeouts.Default)
+
+		if cancel != nil {
+			defer cancel()
+		}
+
+		foundServer, _, err := client.NicApi.DatacentersServersNicsFirewallrulesFindById(ctx, rs.Primary.Attributes["datacenter_id"],
+			rs.Primary.Attributes["server_id"], rs.Primary.Attributes["nic_id"], rs.Primary.ID).Execute()
 
 		if err != nil {
 			return fmt.Errorf("Error occured while fetching Firewall rule: %s", rs.Primary.ID)
 		}
-		if foundServer.ID != rs.Primary.ID {
+		if *foundServer.Id != rs.Primary.ID {
 			return fmt.Errorf("Record not found")
 		}
 
-		firewall = foundServer
+		firewall = &foundServer
 
 		return nil
 	}
@@ -152,7 +167,8 @@ resource "ionoscloud_firewall" "webserver_http" {
   name = "%s"
   port_range_start = 80
   port_range_end = 80
-}`
+}
+`
 
 const testAccCheckFirewallConfig_update = `
 resource "ionoscloud_datacenter" "foobar" {
@@ -204,4 +220,5 @@ resource "ionoscloud_firewall" "webserver_http" {
   name = "updated"
   port_range_start = 80
   port_range_end = 80
-}`
+}
+`

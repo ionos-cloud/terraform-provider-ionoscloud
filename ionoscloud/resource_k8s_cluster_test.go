@@ -1,16 +1,17 @@
 package ionoscloud
 
 import (
+	"context"
 	"fmt"
+	ionoscloud "github.com/ionos-cloud/sdk-go/v5"
 	"testing"
 
 	"github.com/hashicorp/terraform-plugin-sdk/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/terraform"
-	"github.com/profitbricks/profitbricks-sdk-go/v5"
 )
 
 func TestAcck8sCluster_Basic(t *testing.T) {
-	var k8sCluster profitbricks.KubernetesCluster
+	var k8sCluster ionoscloud.KubernetesCluster
 	k8sClusterName := "example"
 
 	resource.Test(t, resource.TestCase{
@@ -39,17 +40,23 @@ func TestAcck8sCluster_Basic(t *testing.T) {
 }
 
 func testAccCheckk8sClusterDestroyCheck(s *terraform.State) error {
-	client := testAccProvider.Meta().(*profitbricks.Client)
+	client := testAccProvider.Meta().(SdkBundle).Client
 	for _, rs := range s.RootModule().Resources {
 		if rs.Type != "ionoscloud_k8s_cluster" {
 			continue
 		}
 
-		_, err := client.GetKubernetesCluster(rs.Primary.ID)
+		ctx, cancel := context.WithTimeout(context.Background(), *resourceDefaultTimeouts.Default)
 
-		if apiError, ok := err.(profitbricks.ApiError); ok {
-			if apiError.HttpStatusCode() != 404 {
-				return fmt.Errorf("K8s cluster still exists %s %s", rs.Primary.ID, apiError)
+		if cancel != nil {
+			defer cancel()
+		}
+
+		_, apiResponse, err := client.KubernetesApi.K8sFindByClusterId(ctx, rs.Primary.ID).Execute()
+
+		if _, ok := err.(ionoscloud.GenericOpenAPIError); ok {
+			if apiResponse.Response.StatusCode != 404 {
+				return fmt.Errorf("K8s cluster still exists %s %s", rs.Primary.ID, string(apiResponse.Payload))
 			}
 		} else {
 			return fmt.Errorf("Unable to fetch k8s cluster %s %s", rs.Primary.ID, err)
@@ -59,9 +66,9 @@ func testAccCheckk8sClusterDestroyCheck(s *terraform.State) error {
 	return nil
 }
 
-func testAccCheckk8sClusterExists(n string, k8sCluster *profitbricks.KubernetesCluster) resource.TestCheckFunc {
+func testAccCheckk8sClusterExists(n string, k8sCluster *ionoscloud.KubernetesCluster) resource.TestCheckFunc {
 	return func(s *terraform.State) error {
-		client := testAccProvider.Meta().(*profitbricks.Client)
+		client := testAccProvider.Meta().(SdkBundle).Client
 		rs, ok := s.RootModule().Resources[n]
 
 		if !ok {
@@ -72,15 +79,21 @@ func testAccCheckk8sClusterExists(n string, k8sCluster *profitbricks.KubernetesC
 			return fmt.Errorf("No Record ID is set")
 		}
 
-		foundK8sCluster, err := client.GetKubernetesCluster(rs.Primary.ID)
+		ctx, cancel := context.WithTimeout(context.Background(), *resourceDefaultTimeouts.Default)
+
+		if cancel != nil {
+			defer cancel()
+		}
+
+		foundK8sCluster, _, err := client.KubernetesApi.K8sFindByClusterId(ctx, rs.Primary.ID).Execute()
 
 		if err != nil {
 			return fmt.Errorf("Error occured while fetching k8s Cluster: %s", rs.Primary.ID)
 		}
-		if foundK8sCluster.ID != rs.Primary.ID {
+		if *foundK8sCluster.Id != rs.Primary.ID {
 			return fmt.Errorf("Record not found")
 		}
-		k8sCluster = foundK8sCluster
+		k8sCluster = &foundK8sCluster
 
 		return nil
 	}

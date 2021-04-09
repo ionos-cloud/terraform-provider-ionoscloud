@@ -1,17 +1,18 @@
 package ionoscloud
 
 import (
+	"context"
 	"fmt"
+	ionoscloud "github.com/ionos-cloud/sdk-go/v5"
 	"testing"
 
 	"github.com/hashicorp/terraform-plugin-sdk/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/terraform"
-	"github.com/profitbricks/profitbricks-sdk-go/v5"
 )
 
 func TestAccLanIPFailover_Basic(t *testing.T) {
-	var lan profitbricks.Lan
-	var ipfailover profitbricks.IPFailover
+	var lan ionoscloud.Lan
+	var ipfailover ionoscloud.IPFailover
 
 	testDeleted := func(n string) resource.TestCheckFunc {
 		return func(s *terraform.State) error {
@@ -46,9 +47,9 @@ func TestAccLanIPFailover_Basic(t *testing.T) {
 	})
 }
 
-func testAccCheckLanIPFailoverGroupExists(n string, lan *profitbricks.Lan, failover *profitbricks.IPFailover) resource.TestCheckFunc {
+func testAccCheckLanIPFailoverGroupExists(n string, lan *ionoscloud.Lan, failover *ionoscloud.IPFailover) resource.TestCheckFunc {
 	return func(s *terraform.State) error {
-		client := testAccProvider.Meta().(*profitbricks.Client)
+		client := testAccProvider.Meta().(SdkBundle).Client
 		rs, ok := s.RootModule().Resources[n]
 		if !ok {
 			return fmt.Errorf("Not found: %s", n)
@@ -58,20 +59,27 @@ func testAccCheckLanIPFailoverGroupExists(n string, lan *profitbricks.Lan, failo
 			return fmt.Errorf("No ID` is set")
 		}
 
+		dcId := rs.Primary.Attributes["datacenter_id"]
 		lanId := rs.Primary.Attributes["lan_id"]
 		nicUuid := rs.Primary.Attributes["nicuuid"]
 
-		lan, err := client.GetLan(rs.Primary.Attributes["datacenter_id"], lanId)
+		ctx, cancel := context.WithTimeout(context.Background(), *resourceDefaultTimeouts.Default)
+
+		if cancel != nil {
+			defer cancel()
+		}
+
+		lan, _, err := client.LanApi.DatacentersLansFindById(ctx, dcId, lanId).Execute()
 		if err != nil {
 			return fmt.Errorf("Lan %s not found.", lanId)
 		}
 
-		if lan.Properties.IPFailover == nil {
+		if lan.Properties.IpFailover == nil {
 			return fmt.Errorf("Lan %s has no failover groups.", lanId)
 		}
 		found := false
-		for _, fo := range *lan.Properties.IPFailover {
-			if fo.NicUUID == nicUuid {
+		for _, fo := range *lan.Properties.IpFailover {
+			if *fo.NicUuid == nicUuid {
 				found = true
 			}
 		}
@@ -84,26 +92,36 @@ func testAccCheckLanIPFailoverGroupExists(n string, lan *profitbricks.Lan, failo
 }
 
 func testAccCheckLanIPFailoverDestroyCheck(s *terraform.State) error {
-	client := testAccProvider.Meta().(*profitbricks.Client)
+	client := testAccProvider.Meta().(SdkBundle).Client
 	for _, rs := range s.RootModule().Resources {
 		if rs.Type != "ionoscloud_ipfailover" {
 			continue
 		}
+
+		dcId := rs.Primary.Attributes["datacenter_id"]
+		lanId := rs.Primary.Attributes["lan_id"]
 		nicUuid := rs.Primary.Attributes["nicuuid"]
-		lan, err := client.GetLan(rs.Primary.Attributes["datacenter_id"], rs.Primary.Attributes["lan_id"])
+
+		ctx, cancel := context.WithTimeout(context.Background(), *resourceDefaultTimeouts.Default)
+
+		if cancel != nil {
+			defer cancel()
+		}
+
+		lan, _, err := client.LanApi.DatacentersLansFindById(ctx, dcId, lanId).Execute()
 
 		if err != nil {
 			return fmt.Errorf("An error occured while fetching a Lan ID %s %s", rs.Primary.Attributes["lan_id"], err)
 		}
 
 		found := false
-		for _, fo := range *lan.Properties.IPFailover {
-			if fo.NicUUID == nicUuid {
+		for _, fo := range *lan.Properties.IpFailover {
+			if *fo.NicUuid == nicUuid {
 				found = true
 			}
 		}
 		if found {
-			_, err := client.DeleteDatacenter(rs.Primary.Attributes["datacenter_id"])
+			_, _, err := client.DataCenterApi.DatacentersDelete(ctx, dcId).Execute()
 			if err != nil {
 				return fmt.Errorf("IP failover group with nicId %s still exists %s %s, removing datacenter....", nicUuid, rs.Primary.ID, err)
 			}
@@ -157,7 +175,8 @@ resource "ionoscloud_ipfailover" "failovertest" {
   lan_id="${ionoscloud_lan.webserver_lan1.id}"
   ip ="${ionoscloud_ipblock.webserver_ip.ips[0]}"
   nicuuid= "${ionoscloud_server.webserver.primary_nic}"
-}`
+}
+`
 
 const testAccCheckLanIPFailoverConfig_update = `
 resource "ionoscloud_datacenter" "foobar" {
@@ -197,4 +216,5 @@ resource "ionoscloud_server" "webserver" {
     firewall_active = true
      ip ="${ionoscloud_ipblock.webserver_ip.ips[0]}"
   }
-}`
+}
+`

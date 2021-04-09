@@ -1057,7 +1057,7 @@ func resourceServerUpdate(d *schema.ResourceData, meta interface{}) error {
 		nic := &ionoscloud.Nic{}
 		for _, n := range *server.Entities.Nics.Items {
 			nicStr := d.Get("primary_nic").(string)
-			if n.Id == &nicStr {
+			if *n.Id == nicStr {
 				nic = &n
 				break
 			}
@@ -1133,6 +1133,7 @@ func resourceServerDelete(d *schema.ResourceData, meta interface{}) error {
 
 	if server.Properties.BootVolume != nil {
 		_, apiResponse, err := client.VolumeApi.DatacentersVolumesDelete(ctx, dcId, *server.Properties.BootVolume.Id).Execute()
+
 		if err != nil {
 			return fmt.Errorf("Error occured while delete volume %s of server ID %s %s", *server.Properties.BootVolume.Id, d.Id(), err)
 		}

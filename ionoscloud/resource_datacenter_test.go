@@ -1,16 +1,17 @@
 package ionoscloud
 
 import (
+	"context"
 	"fmt"
+	ionoscloud "github.com/ionos-cloud/sdk-go/v5"
 	"testing"
 
 	"github.com/hashicorp/terraform-plugin-sdk/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/terraform"
-	"github.com/profitbricks/profitbricks-sdk-go/v5"
 )
 
 func TestAccDataCenter_Basic(t *testing.T) {
-	var datacenter profitbricks.Datacenter
+	var datacenter ionoscloud.Datacenter
 	dc_name := "datacenter-test"
 
 	resource.Test(t, resource.TestCase{
@@ -39,17 +40,23 @@ func TestAccDataCenter_Basic(t *testing.T) {
 }
 
 func testAccCheckDatacenterDestroyCheck(s *terraform.State) error {
-	client := testAccProvider.Meta().(*profitbricks.Client)
+	client := testAccProvider.Meta().(SdkBundle).Client
 	for _, rs := range s.RootModule().Resources {
 		if rs.Type != "ionoscloud_datacenter" {
 			continue
 		}
 
-		_, err := client.GetDatacenter(rs.Primary.ID)
+		ctx, cancel := context.WithTimeout(context.Background(), *resourceDefaultTimeouts.Default)
 
-		if apiError, ok := err.(profitbricks.ApiError); ok {
-			if apiError.HttpStatusCode() != 404 {
-				return fmt.Errorf("DataCenter still exists %s %s", rs.Primary.ID, apiError)
+		if cancel != nil {
+			defer cancel()
+		}
+
+		_, apiResponse, err := client.DataCenterApi.DatacentersFindById(ctx, rs.Primary.ID).Execute()
+
+		if _, ok := err.(ionoscloud.GenericOpenAPIError); ok {
+			if apiResponse.Response.StatusCode != 404 {
+				return fmt.Errorf("DataCenter still exists %s %s", rs.Primary.ID, string(apiResponse.Payload))
 			}
 		} else {
 			return fmt.Errorf("Unable to fetching DataCenter %s %s", rs.Primary.ID, err)
@@ -59,9 +66,9 @@ func testAccCheckDatacenterDestroyCheck(s *terraform.State) error {
 	return nil
 }
 
-func testAccCheckDatacenterExists(n string, datacenter *profitbricks.Datacenter) resource.TestCheckFunc {
+func testAccCheckDatacenterExists(n string, datacenter *ionoscloud.Datacenter) resource.TestCheckFunc {
 	return func(s *terraform.State) error {
-		client := testAccProvider.Meta().(*profitbricks.Client)
+		client := testAccProvider.Meta().(SdkBundle).Client
 		rs, ok := s.RootModule().Resources[n]
 
 		if !ok {
@@ -72,15 +79,21 @@ func testAccCheckDatacenterExists(n string, datacenter *profitbricks.Datacenter)
 			return fmt.Errorf("No Record ID is set")
 		}
 
-		foundDC, err := client.GetDatacenter(rs.Primary.ID)
+		ctx, cancel := context.WithTimeout(context.Background(), *resourceDefaultTimeouts.Default)
+
+		if cancel != nil {
+			defer cancel()
+		}
+
+		foundDC, _, err := client.DataCenterApi.DatacentersFindById(ctx, rs.Primary.ID).Execute()
 
 		if err != nil {
 			return fmt.Errorf("Error occured while fetching DC: %s", rs.Primary.ID)
 		}
-		if foundDC.ID != rs.Primary.ID {
+		if *foundDC.Id != rs.Primary.ID {
 			return fmt.Errorf("Record not found")
 		}
-		datacenter = foundDC
+		datacenter = &foundDC
 
 		return nil
 	}
