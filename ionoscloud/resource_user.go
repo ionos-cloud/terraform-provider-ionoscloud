@@ -1,12 +1,13 @@
 package ionoscloud
 
 import (
+	"context"
 	"fmt"
 	"log"
 	"time"
 
 	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
-	"github.com/profitbricks/profitbricks-sdk-go/v5"
+	ionoscloud "github.com/ionos-cloud/sdk-go/v5"
 )
 
 func resourceUser() *schema.Resource {
@@ -46,40 +47,51 @@ func resourceUser() *schema.Resource {
 }
 
 func resourceUserCreate(d *schema.ResourceData, meta interface{}) error {
-	client := meta.(SdkBundle).LegacyClient
-	request := profitbricks.User{
-		Properties: &profitbricks.UserProperties{},
+	client := meta.(SdkBundle).Client
+	request := ionoscloud.User{
+		Properties: &ionoscloud.UserProperties{},
 	}
 
 	log.Printf("[DEBUG] NAME %s", d.Get("first_name"))
 
 	if d.Get("first_name") != nil {
-		request.Properties.Firstname = d.Get("first_name").(string)
+		firstName := d.Get("first_name").(string)
+		request.Properties.Firstname = &firstName
 	}
 	if d.Get("last_name") != nil {
-		request.Properties.Lastname = d.Get("last_name").(string)
+		lastName := d.Get("last_name").(string)
+		request.Properties.Lastname = &lastName
 	}
 	if d.Get("email") != nil {
-		request.Properties.Email = d.Get("email").(string)
+		email := d.Get("email").(string)
+		request.Properties.Email = &email
 	}
 	if d.Get("password") != nil {
-		request.Properties.Password = d.Get("password").(string)
+		password := d.Get("password").(string)
+		request.Properties.Password = &password
 	}
 
-	request.Properties.Administrator = d.Get("administrator").(bool)
-	request.Properties.ForceSecAuth = d.Get("force_sec_auth").(bool)
-	user, err := client.CreateUser(request)
+	administrator := d.Get("administrator").(bool)
+	forceSecAuth := d.Get("force_sec_auth").(bool)
+	request.Properties.Administrator = &administrator
+	request.Properties.ForceSecAuth = &forceSecAuth
 
-	log.Printf("[DEBUG] USER ID: %s", user.ID)
+	ctx, cancel := context.WithTimeout(context.Background(), *resourceDefaultTimeouts.Create)
+	if cancel != nil {
+		defer cancel()
+	}
+	rsp, apiResponse, err := client.UserManagementApi.UmUsersPost(ctx).User(request).Execute()
+
+	log.Printf("[DEBUG] USER ID: %s", rsp.Id)
 
 	if err != nil {
 		return fmt.Errorf("An error occured while creating a user: %s", err)
 	}
 
-	d.SetId(user.ID)
+	d.SetId(*rsp.Id)
 
 	// Wait, catching any errors
-	_, errState := getStateChangeConf(meta, d, user.Headers.Get("Location"), schema.TimeoutCreate).WaitForState()
+	_, errState := getStateChangeConf(meta, d, apiResponse.Header.Get("Location"), schema.TimeoutCreate).WaitForState()
 	if errState != nil {
 		if IsRequestFailed(err) {
 			// Request failed, so resource was not created, delete resource from state file
@@ -91,12 +103,17 @@ func resourceUserCreate(d *schema.ResourceData, meta interface{}) error {
 }
 
 func resourceUserRead(d *schema.ResourceData, meta interface{}) error {
-	client := meta.(SdkBundle).LegacyClient
-	user, err := client.GetUser(d.Id())
+	client := meta.(SdkBundle).Client
+
+	ctx, cancel := context.WithTimeout(context.Background(), *resourceDefaultTimeouts.Default)
+	if cancel != nil {
+		defer cancel()
+	}
+	rsp, apiResponse, err := client.UserManagementApi.UmUsersFindById(ctx, d.Id()).Execute()
 
 	if err != nil {
-		if apiError, ok := err.(profitbricks.ApiError); ok {
-			if apiError.HttpStatusCode() == 404 {
+		if _, ok := err.(ionoscloud.GenericOpenAPIError); ok {
+			if apiResponse.Response.StatusCode == 404 {
 				d.SetId("")
 				return nil
 			}
@@ -104,58 +121,69 @@ func resourceUserRead(d *schema.ResourceData, meta interface{}) error {
 		return fmt.Errorf("An error occured while fetching a User ID %s %s", d.Id(), err)
 	}
 
-	d.Set("first_name", user.Properties.Firstname)
-	d.Set("last_name", user.Properties.Lastname)
-	d.Set("email", user.Properties.Email)
-	d.Set("administrator", user.Properties.Administrator)
-	d.Set("force_sec_auth", user.Properties.ForceSecAuth)
+	d.Set("first_name", *rsp.Properties.Firstname)
+	d.Set("last_name", *rsp.Properties.Lastname)
+	d.Set("email", *rsp.Properties.Email)
+	d.Set("administrator", *rsp.Properties.Administrator)
+	d.Set("force_sec_auth", *rsp.Properties.ForceSecAuth)
 	return nil
 }
 
 func resourceUserUpdate(d *schema.ResourceData, meta interface{}) error {
-	client := meta.(SdkBundle).LegacyClient
-	originalUser, err := client.GetUser(d.Id())
+	client := meta.(SdkBundle).Client
+
+	ctx, cancel := context.WithTimeout(context.Background(), *resourceDefaultTimeouts.Update)
+	if cancel != nil {
+		defer cancel()
+	}
+
+	rsp, apiResponse, err := client.UserManagementApi.UmUsersFindById(ctx, d.Id()).Execute()
 
 	if err != nil {
 		return fmt.Errorf("An error occured while fetching a User ID %s %s", d.Id(), err)
 	}
 
-	userReq := profitbricks.User{
-		Properties: &profitbricks.UserProperties{
-			Administrator: d.Get("administrator").(bool),
-			ForceSecAuth:  d.Get("force_sec_auth").(bool),
+	administrator := d.Get("administrator").(bool)
+	forceSecAuth := d.Get("force_sec_auth").(bool)
+	userReq := ionoscloud.User{
+		Properties: &ionoscloud.UserProperties{
+			Administrator: &administrator,
+			ForceSecAuth:  &forceSecAuth,
 		},
 	}
 
 	if d.HasChange("first_name") {
 		_, newValue := d.GetChange("first_name")
-		userReq.Properties.Firstname = newValue.(string)
+		firstName := newValue.(string)
+		userReq.Properties.Firstname = &firstName
 
 	} else {
-		userReq.Properties.Firstname = originalUser.Properties.Firstname
+		userReq.Properties.Firstname = rsp.Properties.Firstname
 	}
 
 	if d.HasChange("last_name") {
 		_, newValue := d.GetChange("last_name")
-		userReq.Properties.Lastname = newValue.(string)
+		lastName := newValue.(string)
+		userReq.Properties.Lastname = &lastName
 	} else {
-		userReq.Properties.Lastname = originalUser.Properties.Lastname
+		userReq.Properties.Lastname = rsp.Properties.Lastname
 	}
 
 	if d.HasChange("email") {
 		_, newValue := d.GetChange("email")
-		userReq.Properties.Email = newValue.(string)
+		email := newValue.(string)
+		userReq.Properties.Email = &email
 	} else {
-		userReq.Properties.Email = originalUser.Properties.Email
+		userReq.Properties.Email = rsp.Properties.Email
 	}
 
-	user, err := client.UpdateUser(d.Id(), userReq)
+	rsp, apiResponse, err = client.UserManagementApi.UmUsersPut(ctx, d.Id()).User(userReq).Execute()
 	if err != nil {
-		return fmt.Errorf("An error occured while patching a user ID %s %s", d.Id(), err)
+		return fmt.Errorf("An error occured while patching a user ID %s %s payload: %s", d.Id(), err, apiResponse.Payload)
 	}
 
 	// Wait, catching any errors
-	_, errState := getStateChangeConf(meta, d, user.Headers.Get("Location"), schema.TimeoutUpdate).WaitForState()
+	_, errState := getStateChangeConf(meta, d, apiResponse.Header.Get("Location"), schema.TimeoutUpdate).WaitForState()
 	if errState != nil {
 		return errState
 	}
@@ -164,15 +192,20 @@ func resourceUserUpdate(d *schema.ResourceData, meta interface{}) error {
 }
 
 func resourceUserDelete(d *schema.ResourceData, meta interface{}) error {
-	client := meta.(SdkBundle).LegacyClient
-	resp, err := client.DeleteUser(d.Id())
+	client := meta.(SdkBundle).Client
+
+	ctx, cancel := context.WithTimeout(context.Background(), *resourceDefaultTimeouts.Delete)
+	if cancel != nil {
+		defer cancel()
+	}
+	_, apiResponse, err := client.UserManagementApi.UmUsersDelete(ctx, d.Id()).Execute()
 	if err != nil {
 		//try again in 20 seconds
 		time.Sleep(20 * time.Second)
-		resp, err = client.DeleteUser(d.Id())
+		_, _, err := client.UserManagementApi.UmUsersDelete(ctx, d.Id()).Execute()
 		if err != nil {
-			if apiError, ok := err.(profitbricks.ApiError); ok {
-				if apiError.HttpStatusCode() != 404 {
+			if _, ok := err.(ionoscloud.GenericOpenAPIError); ok {
+				if apiResponse.Response.StatusCode != 404 {
 					return fmt.Errorf("An error occured while deleting a user %s %s", d.Id(), err)
 				}
 			}
@@ -180,7 +213,7 @@ func resourceUserDelete(d *schema.ResourceData, meta interface{}) error {
 	}
 
 	// Wait, catching any errors
-	_, errState := getStateChangeConf(meta, d, resp.Get("Location"), schema.TimeoutDelete).WaitForState()
+	_, errState := getStateChangeConf(meta, d, apiResponse.Header.Get("Location"), schema.TimeoutDelete).WaitForState()
 	if errState != nil {
 		return errState
 	}
