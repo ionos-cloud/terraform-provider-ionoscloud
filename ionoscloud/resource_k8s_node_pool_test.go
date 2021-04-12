@@ -1,17 +1,18 @@
 package ionoscloud
 
 import (
+	"context"
 	"fmt"
+	ionoscloud "github.com/ionos-cloud/sdk-go/v5"
 	"log"
 	"testing"
 
 	"github.com/hashicorp/terraform-plugin-sdk/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/terraform"
-	"github.com/profitbricks/profitbricks-sdk-go/v5"
 )
 
 func TestAcck8sNodepool_Basic(t *testing.T) {
-	var k8sNodepool profitbricks.KubernetesNodePool
+	var k8sNodepool ionoscloud.KubernetesNodePool
 	k8sNodepoolName := "terraform_acctest"
 
 	resource.Test(t, resource.TestCase{
@@ -47,18 +48,24 @@ func TestAcck8sNodepool_Basic(t *testing.T) {
 }
 
 func testAccCheckk8sNodepoolDestroyCheck(s *terraform.State) error {
-	client := testAccProvider.Meta().(*profitbricks.Client)
+	client := testAccProvider.Meta().(SdkBundle).Client
 
 	for _, rs := range s.RootModule().Resources {
 		if rs.Type != "ionoscloud_k8s_node_pool" {
 			continue
 		}
 
-		_, err := client.GetKubernetesNodePool(rs.Primary.Attributes["k8s_cluster_id"], rs.Primary.ID)
+		ctx, cancel := context.WithTimeout(context.Background(), *resourceDefaultTimeouts.Default)
 
-		if apiError, ok := err.(profitbricks.ApiError); ok {
-			if apiError.HttpStatusCode() != 404 {
-				return fmt.Errorf("K8s node pool still exists %s %s", rs.Primary.ID, apiError)
+		if cancel != nil {
+			defer cancel()
+		}
+
+		_, apiResponse, err := client.KubernetesApi.K8sNodepoolsFindById(ctx, rs.Primary.Attributes["k8s_cluster_id"], rs.Primary.ID).Execute()
+
+		if _, ok := err.(ionoscloud.GenericOpenAPIError); ok {
+			if apiResponse.Response.StatusCode != 404 {
+				return fmt.Errorf("K8s node pool still exists %s %s", rs.Primary.ID, string(apiResponse.Payload))
 			}
 		} else {
 			return fmt.Errorf("Unable to fetch k8s node pool %s %s", rs.Primary.ID, err)
@@ -68,9 +75,9 @@ func testAccCheckk8sNodepoolDestroyCheck(s *terraform.State) error {
 	return nil
 }
 
-func testAccCheckk8sNodepoolExists(n string, k8sNodepool *profitbricks.KubernetesNodePool) resource.TestCheckFunc {
+func testAccCheckk8sNodepoolExists(n string, k8sNodepool *ionoscloud.KubernetesNodePool) resource.TestCheckFunc {
 	return func(s *terraform.State) error {
-		client := testAccProvider.Meta().(*profitbricks.Client)
+		client := testAccProvider.Meta().(SdkBundle).Client
 		rs, ok := s.RootModule().Resources[n]
 
 		if !ok {
@@ -83,15 +90,21 @@ func testAccCheckk8sNodepoolExists(n string, k8sNodepool *profitbricks.Kubernete
 
 		log.Printf("[INFO] REQ PATH: %+v/%+v", rs.Primary.Attributes["k8s_cluster_id"], rs.Primary.ID)
 
-		foundK8sNodepool, err := client.GetKubernetesNodePool(rs.Primary.Attributes["k8s_cluster_id"], rs.Primary.ID)
+		ctx, cancel := context.WithTimeout(context.Background(), *resourceDefaultTimeouts.Default)
+
+		if cancel != nil {
+			defer cancel()
+		}
+
+		foundK8sNodepool, _, err := client.KubernetesApi.K8sNodepoolsFindById(ctx, rs.Primary.Attributes["k8s_cluster_id"], rs.Primary.ID).Execute()
 
 		if err != nil {
 			return fmt.Errorf("Error occured while fetching k8s node pool: %s", rs.Primary.ID)
 		}
-		if foundK8sNodepool.ID != rs.Primary.ID {
+		if *foundK8sNodepool.Id != rs.Primary.ID {
 			return fmt.Errorf("Record not found")
 		}
-		k8sNodepool = foundK8sNodepool
+		k8sNodepool = &foundK8sNodepool
 
 		return nil
 	}
@@ -100,7 +113,7 @@ func testAccCheckk8sNodepoolExists(n string, k8sNodepool *profitbricks.Kubernete
 const testAccCheckk8sNodepoolConfigBasic = `
 resource "ionoscloud_datacenter" "terraform_acctest" {
   name        = "terraform_acctest"
-  location    = "de/fra"
+  location    = "us/las"
   description = "Datacenter created through terraform"
 }
 
@@ -129,13 +142,13 @@ resource "ionoscloud_k8s_node_pool" "terraform_acctest" {
   cores_count       = 2
   ram_size          = 2048
   storage_size      = 40
-  public_ips        = [ "157.97.108.242", "217.160.200.54" ]
+  public_ips        = [ "158.222.102.145", "158.222.102.144" ]
 }`
 
 const testAccCheckk8sNodepoolConfigUpdate = `
 resource "ionoscloud_datacenter" "terraform_acctest" {
   name        = "terraform_acctest"
-  location    = "de/fra"
+  location    = "us_las"
   description = "Datacenter created through terraform"
 }
 
@@ -168,5 +181,5 @@ resource "ionoscloud_k8s_node_pool" "terraform_acctest" {
   cores_count       = 2
   ram_size          = 2048
   storage_size      = 40
-  public_ips        = [ "157.97.108.242", "217.160.200.54", "217.160.200.55" ]
+  public_ips        = [ "158.222.102.145", "158.222.102.144", "158.222.102.179" ]
 }`

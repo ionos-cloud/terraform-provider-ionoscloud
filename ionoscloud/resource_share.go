@@ -54,7 +54,7 @@ func resourceShareCreate(d *schema.ResourceData, meta interface{}) error {
 	rsp, apiResponse, err := client.UserManagementApi.UmGroupsSharesPost(context.TODO(),
 		d.Get("group_id").(string), d.Get("resource_id").(string)).Resource(request).Execute()
 
-	log.Printf("[DEBUG] SHARE ID: %s", rsp.Id)
+	log.Printf("[DEBUG] SHARE ID: %s", *rsp.Id)
 
 	if err != nil {
 		return fmt.Errorf("An error occured while creating a share: %s", err)

@@ -163,59 +163,63 @@ func setK8sClusterData(d *schema.ResourceData, cluster *ionoscloud.KubernetesClu
 		}
 	}
 
-	if cluster.Properties.Name != nil {
-		if err := d.Set("name", *cluster.Properties.Name); err != nil {
-			return err
+	if cluster.Properties != nil {
+		if cluster.Properties.Name != nil {
+			if err := d.Set("name", *cluster.Properties.Name); err != nil {
+				return err
+			}
+		}
+
+		if cluster.Properties.K8sVersion != nil {
+			if err := d.Set("k8s_version", *cluster.Properties.K8sVersion); err != nil {
+				return err
+			}
+
+		}
+
+		if cluster.Properties.MaintenanceWindow != nil && cluster.Properties.MaintenanceWindow.Time != nil && cluster.Properties.MaintenanceWindow.DayOfTheWeek != nil {
+			if err := d.Set("maintenance_window", []map[string]string{
+				{
+					"time":            *cluster.Properties.MaintenanceWindow.Time,
+					"day_of_the_week": *cluster.Properties.MaintenanceWindow.DayOfTheWeek,
+				},
+			}); err != nil {
+				return err
+			}
+		}
+
+		if cluster.Properties.AvailableUpgradeVersions != nil {
+			availableUpgradeVersions := make([]interface{}, len(*cluster.Properties.AvailableUpgradeVersions), len(*cluster.Properties.AvailableUpgradeVersions))
+			for i, availableUpgradeVersion := range *cluster.Properties.AvailableUpgradeVersions {
+				availableUpgradeVersions[i] = availableUpgradeVersion
+			}
+			if err := d.Set("available_upgrade_versions", availableUpgradeVersions); err != nil {
+				return err
+			}
+		}
+
+		if cluster.Properties.ViableNodePoolVersions != nil {
+			viableNodePoolVersions := make([]interface{}, len(*cluster.Properties.ViableNodePoolVersions), len(*cluster.Properties.ViableNodePoolVersions))
+			for i, viableNodePoolVersion := range *cluster.Properties.ViableNodePoolVersions {
+				viableNodePoolVersions[i] = viableNodePoolVersion
+			}
+			if err := d.Set("viable_node_pool_versions", viableNodePoolVersions); err != nil {
+				return err
+			}
 		}
 	}
 
-	if cluster.Metadata.State != nil {
-		if err := d.Set("state", *cluster.Metadata.State); err != nil {
-			return err
-		}
-	}
-
-	if cluster.Properties.K8sVersion != nil {
-		if err := d.Set("k8s_version", *cluster.Properties.K8sVersion); err != nil {
-			return err
+	if cluster.Metadata != nil {
+		if cluster.Metadata.State != nil {
+			if err := d.Set("state", *cluster.Metadata.State); err != nil {
+				return err
+			}
 		}
 
-	}
-
-	if cluster.Metadata.State != nil {
-		if err := d.Set("state", *cluster.Metadata.State); err != nil {
-			return err
-		}
-	}
-
-	if cluster.Properties.MaintenanceWindow != nil && cluster.Properties.MaintenanceWindow.Time != nil && cluster.Properties.MaintenanceWindow.DayOfTheWeek != nil {
-		if err := d.Set("maintenance_window", []map[string]string{
-			{
-				"time":            *cluster.Properties.MaintenanceWindow.Time,
-				"day_of_the_week": *cluster.Properties.MaintenanceWindow.DayOfTheWeek,
-			},
-		}); err != nil {
-			return err
-		}
-	}
-
-	if cluster.Properties.AvailableUpgradeVersions != nil {
-		availableUpgradeVersions := make([]interface{}, len(*cluster.Properties.AvailableUpgradeVersions), len(*cluster.Properties.AvailableUpgradeVersions))
-		for i, availableUpgradeVersion := range *cluster.Properties.AvailableUpgradeVersions {
-			availableUpgradeVersions[i] = availableUpgradeVersion
-		}
-		if err := d.Set("available_upgrade_versions", availableUpgradeVersions); err != nil {
-			return err
-		}
-	}
-
-	if cluster.Properties.ViableNodePoolVersions != nil {
-		viableNodePoolVersions := make([]interface{}, len(*cluster.Properties.ViableNodePoolVersions), len(*cluster.Properties.ViableNodePoolVersions))
-		for i, viableNodePoolVersion := range *cluster.Properties.ViableNodePoolVersions {
-			viableNodePoolVersions[i] = viableNodePoolVersion
-		}
-		if err := d.Set("viable_node_pool_versions", viableNodePoolVersions); err != nil {
-			return err
+		if cluster.Metadata.State != nil {
+			if err := d.Set("state", *cluster.Metadata.State); err != nil {
+				return err
+			}
 		}
 	}
 

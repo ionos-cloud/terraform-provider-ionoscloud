@@ -20,7 +20,7 @@ func TestAccDataSourceK8sNodePool_matchId(t *testing.T) {
 				Config: testAccDataSourceProfitBricksK8sNodePoolMatchId,
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttr("data.ionoscloud_k8s_node_pool.test_ds_k8s_node_pool", "name", "test_nodepool"),
-					resource.TestCheckResourceAttr("data.ionoscloud_k8s_node_pool.test_ds_k8s_node_pool", "k8s_version", "1.18.12"),
+					resource.TestCheckResourceAttr("data.ionoscloud_k8s_node_pool.test_ds_k8s_node_pool", "k8s_version", "1.18.16"),
 				),
 			},
 		},
@@ -41,7 +41,7 @@ func TestAccDataSourceK8sNodePool_matchName(t *testing.T) {
 				Config: testAccDataSourceProfitBricksK8sNodePoolMatchName,
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttr("data.ionoscloud_k8s_node_pool.test_ds_k8s_node_pool", "name", "test_nodepool"),
-					resource.TestCheckResourceAttr("data.ionoscloud_k8s_node_pool.test_ds_k8s_node_pool", "k8s_version", "1.18.12"),
+					resource.TestCheckResourceAttr("data.ionoscloud_k8s_node_pool.test_ds_k8s_node_pool", "k8s_version", "1.18.16"),
 					resource.TestCheckResourceAttrSet("data.ionoscloud_k8s_node_pool.test_ds_k8s_node_pool", "id"),
 				),
 			},
@@ -73,7 +73,7 @@ resource "ionoscloud_k8s_node_pool" "test_ds_k8s_node_pool" {
 	availability_zone 		= "AUTO"
 	storage_type			= "HDD"
 	storage_size			= 10
-	k8s_version				= "1.18.12"
+	k8s_version				= "1.19.8"
 }
 `
 
@@ -100,7 +100,7 @@ resource "ionoscloud_k8s_node_pool" "test_ds_k8s_node_pool" {
 	availability_zone = "AUTO"
 	storage_type			= "HDD"
 	storage_size			= 10
-	k8s_version				= "1.18.12"
+	k8s_version				= "1.19.8"
   #	public_ips				= [ "85.184.250.211", "157.97.107.226", "157.97.107.242" ]
   # public_ips				= [ ]
   #   public_ips        = [ ]
@@ -135,7 +135,7 @@ resource "ionoscloud_k8s_node_pool" "test_ds_k8s_node_pool" {
 	availability_zone = "AUTO"
 	storage_type			= "HDD"
 	storage_size			= 10
-	k8s_version				= "1.18.12"
+	k8s_version				= "1.19.8"
   #	public_ips				= [ "85.184.250.211", "157.97.107.226", "157.97.107.242" ]
   # public_ips				= [ ]
   #   public_ips        = [ ]
