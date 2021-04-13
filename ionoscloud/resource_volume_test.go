@@ -1,16 +1,17 @@
 package ionoscloud
 
 import (
+	"context"
 	"fmt"
+	ionoscloud "github.com/ionos-cloud/sdk-go/v5"
 	"testing"
 
 	"github.com/hashicorp/terraform-plugin-sdk/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/terraform"
-	"github.com/profitbricks/profitbricks-sdk-go/v5"
 )
 
 func TestAccVolume_Basic(t *testing.T) {
-	var volume profitbricks.Volume
+	var volume ionoscloud.Volume
 	volumeName := "volume"
 
 	resource.Test(t, resource.TestCase{
@@ -38,17 +39,23 @@ func TestAccVolume_Basic(t *testing.T) {
 }
 
 func testAccCheckVolumeDestroyCheck(s *terraform.State) error {
-	client := testAccProvider.Meta().(*profitbricks.Client)
+	client := testAccProvider.Meta().(SdkBundle).Client
 	for _, rs := range s.RootModule().Resources {
 		if rs.Type != "ionoscloud_datacenter" {
 			continue
 		}
 
-		_, err := client.GetVolume(rs.Primary.Attributes["datacenter_id"], rs.Primary.ID)
+		ctx, cancel := context.WithTimeout(context.Background(), *resourceDefaultTimeouts.Delete)
 
-		if apiError, ok := err.(profitbricks.ApiError); ok {
-			if apiError.HttpStatusCode() != 404 {
-				return fmt.Errorf("Volume still exists %s %s", rs.Primary.ID, apiError)
+		if cancel != nil {
+			defer cancel()
+		}
+
+		_, apiResponse, err := client.VolumeApi.DatacentersVolumesFindById(ctx, rs.Primary.Attributes["datacenter_id"], rs.Primary.ID).Execute()
+
+		if _, ok := err.(ionoscloud.GenericOpenAPIError); ok {
+			if apiResponse.Response.StatusCode != 404 {
+				return fmt.Errorf("Volume still exists %s %s", rs.Primary.ID, string(apiResponse.Payload))
 			}
 		} else {
 			return fmt.Errorf("Unable to fetching Volume %s %s", rs.Primary.ID, err)
@@ -58,9 +65,9 @@ func testAccCheckVolumeDestroyCheck(s *terraform.State) error {
 	return nil
 }
 
-func testAccCheckVolumeExists(n string, volume *profitbricks.Volume) resource.TestCheckFunc {
+func testAccCheckVolumeExists(n string, volume *ionoscloud.Volume) resource.TestCheckFunc {
 	return func(s *terraform.State) error {
-		client := testAccProvider.Meta().(*profitbricks.Client)
+		client := testAccProvider.Meta().(SdkBundle).Client
 		rs, ok := s.RootModule().Resources[n]
 
 		if !ok {
@@ -71,16 +78,22 @@ func testAccCheckVolumeExists(n string, volume *profitbricks.Volume) resource.Te
 			return fmt.Errorf("No Record ID is set")
 		}
 
-		foundServer, err := client.GetVolume(rs.Primary.Attributes["datacenter_id"], rs.Primary.ID)
+		ctx, cancel := context.WithTimeout(context.Background(), *resourceDefaultTimeouts.Delete)
+
+		if cancel != nil {
+			defer cancel()
+		}
+
+		foundServer, _, err := client.VolumeApi.DatacentersVolumesFindById(ctx, rs.Primary.Attributes["datacenter_id"], rs.Primary.ID).Execute()
 
 		if err != nil {
 			return fmt.Errorf("Error occured while fetching Volume: %s", rs.Primary.ID)
 		}
-		if foundServer.ID != rs.Primary.ID {
+		if *foundServer.Id != rs.Primary.ID {
 			return fmt.Errorf("Record not found")
 		}
 
-		volume = foundServer
+		volume = &foundServer
 
 		return nil
 	}
@@ -105,7 +118,7 @@ resource "ionoscloud_server" "webserver" {
   ram = 1024
   availability_zone = "ZONE_1"
   cpu_family = "AMD_OPTERON"
-	image_name = "ubuntu:14.04"
+	image_name = "ubuntu:20.04"
 	image_password = "K3tTj8G14a3EgKyNeeiY"
   volume {
     name = "system"
@@ -128,6 +141,8 @@ resource "ionoscloud_volume" "database_volume" {
   size = 5
   disk_type = "HDD"
   bus = "VIRTIO"
+  image_name = "ubuntu:20.04"
+  image_password = "K3tTj8G14a3EgKyNeeiY"
 }`
 
 const testAccCheckVolumeConfig_update = `
@@ -149,7 +164,7 @@ resource "ionoscloud_server" "webserver" {
   ram = 1024
   availability_zone = "ZONE_1"
   cpu_family = "AMD_OPTERON"
-	image_name = "ubuntu:14.04"
+	image_name = "ubuntu:20.04"
 	image_password = "K3tTj8G14a3EgKyNeeiY"
   volume {
     name = "system"
@@ -172,4 +187,6 @@ resource "ionoscloud_volume" "database_volume" {
   size = 5
   disk_type = "HDD"
   bus = "VIRTIO"
+  image_name = "ubuntu:20.04"
+  image_password = "K3tTj8G14a3EgKyNeeiY"
 }`

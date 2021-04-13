@@ -69,29 +69,36 @@ func resourceVolume() *schema.Resource {
 			"cpu_hot_plug": {
 				Type:     schema.TypeBool,
 				Optional: true,
+				Computed: true,
 			},
 			"ram_hot_plug": {
 				Type:     schema.TypeBool,
 				Optional: true,
+				Computed: true,
 			},
 			"nic_hot_plug": {
 				Type:     schema.TypeBool,
 				Optional: true,
+				Computed: true,
 			},
 			"nic_hot_unplug": {
 				Type:     schema.TypeBool,
 				Optional: true,
+				Computed: true,
 			},
 			"disc_virtio_hot_plug": {
 				Type:     schema.TypeBool,
 				Optional: true,
+				Computed: true,
 			},
 			"disc_virtio_hot_unplug": {
 				Type:     schema.TypeBool,
 				Optional: true,
+				Computed: true,
 			},
 			"backup_unit_id": {
 				Type:     schema.TypeString,
+				Computed: true,
 				Optional: true,
 			},
 		},
@@ -126,12 +133,6 @@ func resourceVolumeCreate(d *schema.ResourceData, meta interface{}) error {
 		}
 	}
 
-	ctx, cancel := context.WithTimeout(context.Background(), *resourceDefaultTimeouts.Default)
-
-	if cancel != nil {
-		defer cancel()
-	}
-
 	var image string
 	if image_alias == "" && image_name != "" {
 		if !IsValidUUID(image_name) {
@@ -148,6 +149,12 @@ func resourceVolumeCreate(d *schema.ResourceData, meta interface{}) error {
 				if image != "" {
 					isSnapshot = true
 				} else {
+					ctx, cancel := context.WithTimeout(context.Background(), *resourceDefaultTimeouts.Default)
+
+					if cancel != nil {
+						defer cancel()
+					}
+
 					dc, _, err := client.DataCenterApi.DatacentersFindById(ctx, dcId).Execute()
 
 					if err != nil {
@@ -164,6 +171,12 @@ func resourceVolumeCreate(d *schema.ResourceData, meta interface{}) error {
 				return fmt.Errorf("Either 'image_password' or 'sshkey' must be provided.")
 			}
 		} else {
+			ctx, cancel := context.WithTimeout(context.Background(), *resourceDefaultTimeouts.Default)
+
+			if cancel != nil {
+				defer cancel()
+			}
+
 			img, _, err := client.ImageApi.ImagesFindById(ctx, image_name).Execute()
 			if err != nil {
 				_, _, err := client.SnapshotApi.SnapshotsFindById(ctx, image_name).Execute()
@@ -195,28 +208,46 @@ func resourceVolumeCreate(d *schema.ResourceData, meta interface{}) error {
 	volumeSize := float32(d.Get("size").(int))
 	volumeType := d.Get("disk_type").(string)
 	volumeBus := d.Get("bus").(string)
-	cpuHotPlug := d.Get("cpu_hot_plug").(bool)
-	ramHotPlug := d.Get("ram_hot_plug").(bool)
-	nicHotPlug := d.Get("nic_hot_plug").(bool)
-	nicHotUnplug := d.Get("nic_hot_unplug").(bool)
-	discVirtioHotPlug := d.Get("disc_virtio_hot_plug").(bool)
-	discVirtioHotUnPlug := d.Get("disc_virtio_hot_unplug").(bool)
 
 	volume := ionoscloud.Volume{
 		Properties: &ionoscloud.VolumeProperties{
-			Name:                &volumeName,
-			Size:                &volumeSize,
-			Type:                &volumeType,
-			ImagePassword:       &imagePassword,
-			Bus:                 &volumeBus,
-			LicenceType:         &licenceType,
-			CpuHotPlug:          &cpuHotPlug,
-			RamHotPlug:          &ramHotPlug,
-			NicHotPlug:          &nicHotPlug,
-			NicHotUnplug:        &nicHotUnplug,
-			DiscVirtioHotPlug:   &discVirtioHotPlug,
-			DiscVirtioHotUnplug: &discVirtioHotUnPlug,
+			Name:          &volumeName,
+			Size:          &volumeSize,
+			Type:          &volumeType,
+			ImagePassword: &imagePassword,
+			Bus:           &volumeBus,
+			LicenceType:   &licenceType,
 		},
+	}
+
+	if v, ok := d.GetOk("cpu_hot_plug"); ok {
+		vBool := v.(bool)
+		volume.Properties.CpuHotPlug = &vBool
+	}
+
+	if v, ok := d.GetOk("ram_hot_plug"); ok {
+		vBool := v.(bool)
+		volume.Properties.RamHotPlug = &vBool
+	}
+
+	if v, ok := d.GetOk("nic_hot_unplug"); ok {
+		vBool := v.(bool)
+		volume.Properties.NicHotPlug = &vBool
+	}
+
+	if v, ok := d.GetOk("nic_hot_unplug"); ok {
+		vBool := v.(bool)
+		volume.Properties.NicHotUnplug = &vBool
+	}
+
+	if v, ok := d.GetOk("disc_virtio_hot_plug"); ok {
+		vBool := v.(bool)
+		volume.Properties.DiscVirtioHotPlug = &vBool
+	}
+
+	if v, ok := d.GetOk("disc_virtio_hot_unplug"); ok {
+		vBool := v.(bool)
+		volume.Properties.DiscVirtioHotUnplug = &vBool
 	}
 
 	if image != "" {
@@ -253,11 +284,15 @@ func resourceVolumeCreate(d *schema.ResourceData, meta interface{}) error {
 	} else {
 		volume.Properties.BackupunitId = nil
 	}
+	ctx, cancel := context.WithTimeout(context.Background(), *resourceDefaultTimeouts.Default)
 
+	if cancel != nil {
+		defer cancel()
+	}
 	volume, apiResponse, err := client.VolumeApi.DatacentersVolumesPost(ctx, dcId).Volume(volume).Execute()
 
 	if err != nil {
-		return fmt.Errorf("An error occured while creating a volume: %s", err)
+		return fmt.Errorf("An error occured while creating a volume: %s, apiError : %s", err, string(apiResponse.Payload))
 	}
 
 	d.SetId(*volume.Id)
