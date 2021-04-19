@@ -1,12 +1,13 @@
 package ionoscloud
 
 import (
+	"context"
 	"errors"
 	"fmt"
+	ionoscloud "github.com/ionos-cloud/sdk-go/v5"
 	"strings"
 
 	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
-	"github.com/profitbricks/profitbricks-sdk-go/v5"
 )
 
 func dataSourcePcc() *schema.Resource {
@@ -87,7 +88,7 @@ func dataSourcePcc() *schema.Resource {
 	}
 }
 
-func convertPccPeers(peers *[]profitbricks.PCCPeer) []interface{} {
+func convertPccPeers(peers *[]ionoscloud.Peer) []interface{} {
 	if peers == nil {
 		return make([]interface{}, 0)
 	}
@@ -96,10 +97,10 @@ func convertPccPeers(peers *[]profitbricks.PCCPeer) []interface{} {
 	for i, peer := range *peers {
 		entry := make(map[string]interface{})
 
-		entry["lan_id"] = peer.LANId
-		entry["lan_name"] = peer.LANName
-		entry["datacenter_id"] = peer.DataCenterID
-		entry["datacenter_name"] = peer.DataCenterName
+		entry["lan_id"] = peer.Id
+		entry["lan_name"] = peer.Name
+		entry["datacenter_id"] = peer.DatacenterId
+		entry["datacenter_name"] = peer.DatacenterName
 		entry["location"] = peer.Location
 
 		ret[i] = entry
@@ -108,7 +109,7 @@ func convertPccPeers(peers *[]profitbricks.PCCPeer) []interface{} {
 	return ret
 }
 
-func convertConnectableDatacenters(dcs *[]profitbricks.PCCConnectableDataCenter) []interface{} {
+func convertConnectableDatacenters(dcs *[]ionoscloud.ConnectableDatacenter) []interface{} {
 	if dcs == nil {
 		return make([]interface{}, 0)
 	}
@@ -117,7 +118,7 @@ func convertConnectableDatacenters(dcs *[]profitbricks.PCCConnectableDataCenter)
 	for i, dc := range *dcs {
 		entry := make(map[string]interface{})
 
-		entry["id"] = dc.ID
+		entry["id"] = dc.Id
 		entry["name"] = dc.Name
 		entry["location"] = dc.Location
 
@@ -127,31 +128,40 @@ func convertConnectableDatacenters(dcs *[]profitbricks.PCCConnectableDataCenter)
 	return ret
 }
 
-func setPccDataSource(d *schema.ResourceData, pcc *profitbricks.PrivateCrossConnect) error {
-	d.SetId(pcc.ID)
+func setPccDataSource(d *schema.ResourceData, pcc *ionoscloud.PrivateCrossConnect) error {
+	d.SetId(*pcc.Id)
 
-	if err := d.Set("id", pcc.ID); err != nil {
-		return err
-	}
-
-	if err := d.Set("name", pcc.Properties.Name); err != nil {
-		return err
-	}
-	if err := d.Set("description", pcc.Properties.Description); err != nil {
-		return err
-	}
-	if err := d.Set("peers", convertPccPeers(pcc.Properties.Peers)); err != nil {
+	if err := d.Set("id", *pcc.Id); err != nil {
 		return err
 	}
 
-	if err := d.Set("connectable_datacenters", convertConnectableDatacenters(pcc.Properties.ConnectableDatacenters)); err != nil {
-		return err
+	if pcc.Properties != nil {
+		if pcc.Properties.Name != nil {
+			if err := d.Set("name", *pcc.Properties.Name); err != nil {
+				return err
+			}
+		}
+		if pcc.Properties.Description != nil {
+			if err := d.Set("description", *pcc.Properties.Description); err != nil {
+				return err
+			}
+		}
+		if pcc.Properties.Peers != nil {
+			if err := d.Set("peers", convertPccPeers(pcc.Properties.Peers)); err != nil {
+				return err
+			}
+		}
+		if pcc.Properties.ConnectableDatacenters != nil {
+			if err := d.Set("connectable_datacenters", convertConnectableDatacenters(pcc.Properties.ConnectableDatacenters)); err != nil {
+				return err
+			}
+		}
 	}
 	return nil
 }
 
 func dataSourcePccRead(d *schema.ResourceData, meta interface{}) error {
-	client := meta.(SdkBundle).LegacyClient
+	client := meta.(SdkBundle).Client
 
 	id, idOk := d.GetOk("id")
 	name, nameOk := d.GetOk("name")
@@ -163,13 +173,18 @@ func dataSourcePccRead(d *schema.ResourceData, meta interface{}) error {
 		return errors.New("please provide either the pcc id or name")
 	}
 
-	var pcc *profitbricks.PrivateCrossConnect
+	var pcc ionoscloud.PrivateCrossConnect
 	var err error
+
+	ctx, cancel := context.WithTimeout(context.Background(), *resourceDefaultTimeouts.Default)
+	if cancel != nil {
+		defer cancel()
+	}
 
 	if idOk {
 		/* search by ID */
 		fmt.Printf("searching for ID %s\n", id.(string))
-		pcc, err = client.GetPrivateCrossConnect(id.(string))
+		pcc, _, err = client.PrivateCrossConnectApi.PccsFindById(ctx, id.(string)).Execute()
 		if err != nil {
 			return fmt.Errorf("an error occurred while fetching the pcc with ID %s: %s", id.(string), err)
 		}
@@ -177,29 +192,29 @@ func dataSourcePccRead(d *schema.ResourceData, meta interface{}) error {
 
 	if nameOk {
 		/* search by name */
-		var pccs *profitbricks.PrivateCrossConnects
-		pccs, err := client.ListPrivateCrossConnects()
+		var pccs ionoscloud.PrivateCrossConnects
+		pccs, _, err := client.PrivateCrossConnectApi.PccsGet(ctx).Execute()
 		if err != nil {
 			return fmt.Errorf("an error occurred while fetching pccs: %s", err.Error())
 		}
 
-		for _, p := range pccs.Items {
-			if strings.Contains(p.Properties.Name, name.(string)) {
+		for _, p := range *pccs.Items {
+			if strings.Contains(*p.Properties.Name, name.(string)) {
 				/* lan found */
-				pcc, err = client.GetPrivateCrossConnect(p.ID)
+				pcc, _, err = client.PrivateCrossConnectApi.PccsFindById(ctx, id.(string)).Execute()
 				if err != nil {
-					return fmt.Errorf("an error occurred while fetching the pcc with ID %s: %s", p.ID, err)
+					return fmt.Errorf("an error occurred while fetching the pcc with ID %s: %s", *p.Id, err)
 				}
 				break
 			}
 		}
 	}
 
-	if pcc == nil {
+	if &pcc == nil {
 		return errors.New("pcc not found")
 	}
 
-	if err = setPccDataSource(d, pcc); err != nil {
+	if err = setPccDataSource(d, &pcc); err != nil {
 		return err
 	}
 

@@ -1,16 +1,17 @@
 package ionoscloud
 
 import (
+	"context"
 	"fmt"
+	ionoscloud "github.com/ionos-cloud/sdk-go/v5"
 	"testing"
 
 	"github.com/hashicorp/terraform-plugin-sdk/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/terraform"
-	"github.com/profitbricks/profitbricks-sdk-go/v5"
 )
 
 func TestAccNic_Basic(t *testing.T) {
-	var nic profitbricks.Nic
+	var nic ionoscloud.Nic
 	volumeName := "volume"
 
 	resource.Test(t, resource.TestCase{
@@ -41,16 +42,20 @@ func TestAccNic_Basic(t *testing.T) {
 }
 
 func testAccCheckNicDestroyCheck(s *terraform.State) error {
-	client := testAccProvider.Meta().(*profitbricks.Client)
+	client := testAccProvider.Meta().(*ionoscloud.APIClient)
+
+	ctx, _ := context.WithTimeout(context.Background(), *resourceDefaultTimeouts.Delete)
 	for _, rs := range s.RootModule().Resources {
 		if rs.Type != "ionoscloud_nic" {
 			continue
 		}
 
-		_, err := client.GetNic(rs.Primary.Attributes["datacenter_id"], rs.Primary.Attributes["server_id"], rs.Primary.ID)
+		dcId := rs.Primary.Attributes["datacenter_id"]
+		serverId := rs.Primary.Attributes["server_id"]
+		_, apiResponse, err := client.NicApi.DatacentersServersNicsFindById(ctx, dcId, serverId, rs.Primary.ID).Execute()
 
-		if apiError, ok := err.(profitbricks.ApiError); ok {
-			if apiError.HttpStatusCode() != 404 {
+		if apiError, ok := err.(ionoscloud.GenericOpenAPIError); ok {
+			if apiResponse.Response.StatusCode != 404 {
 				return fmt.Errorf("NIC still exists %s %s", rs.Primary.ID, apiError)
 			}
 		} else {
@@ -75,9 +80,9 @@ func testAccCheckNicAttributes(n string, name string) resource.TestCheckFunc {
 	}
 }
 
-func testAccCheckNICExists(n string, nic *profitbricks.Nic) resource.TestCheckFunc {
+func testAccCheckNICExists(n string, nic *ionoscloud.Nic) resource.TestCheckFunc {
 	return func(s *terraform.State) error {
-		client := testAccProvider.Meta().(*profitbricks.Client)
+		client := testAccProvider.Meta().(*ionoscloud.APIClient)
 		rs, ok := s.RootModule().Resources[n]
 
 		if !ok {
@@ -88,16 +93,19 @@ func testAccCheckNICExists(n string, nic *profitbricks.Nic) resource.TestCheckFu
 			return fmt.Errorf("No Record ID is set")
 		}
 
-		foundNic, err := client.GetNic(rs.Primary.Attributes["datacenter_id"], rs.Primary.Attributes["server_id"], rs.Primary.ID)
+		ctx, _ := context.WithTimeout(context.Background(), *resourceDefaultTimeouts.Default)
+		dcId := rs.Primary.Attributes["datacenter_id"]
+		serverId := rs.Primary.Attributes["server_id"]
+		foundNic, _, err := client.NicApi.DatacentersServersNicsFindById(ctx, dcId, serverId, rs.Primary.ID).Execute()
 
 		if err != nil {
 			return fmt.Errorf("Error occured while fetching Volume: %s", rs.Primary.ID)
 		}
-		if foundNic.ID != rs.Primary.ID {
+		if *foundNic.Id != rs.Primary.ID {
 			return fmt.Errorf("Record not found")
 		}
 
-		nic = foundNic
+		nic = &foundNic
 
 		return nil
 	}

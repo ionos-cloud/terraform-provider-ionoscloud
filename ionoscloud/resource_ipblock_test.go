@@ -1,16 +1,17 @@
 package ionoscloud
 
 import (
+	"context"
 	"fmt"
+	ionoscloud "github.com/ionos-cloud/sdk-go/v5"
 	"testing"
 
 	"github.com/hashicorp/terraform-plugin-sdk/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/terraform"
-	"github.com/profitbricks/profitbricks-sdk-go/v5"
 )
 
 func TestAccIPBlock_Basic(t *testing.T) {
-	var ipblock profitbricks.IPBlock
+	var ipblock ionoscloud.IpBlock
 	location := "us/las"
 
 	resource.Test(t, resource.TestCase{
@@ -41,16 +42,19 @@ func TestAccIPBlock_Basic(t *testing.T) {
 }
 
 func testAccCheckIPBlockDestroyCheck(s *terraform.State) error {
-	client := testAccProvider.Meta().(*profitbricks.Client)
+	client := testAccProvider.Meta().(*ionoscloud.APIClient)
+
+	ctx, _ := context.WithTimeout(context.Background(), *resourceDefaultTimeouts.Delete)
 	for _, rs := range s.RootModule().Resources {
 		if rs.Type != "ionoscloud_ipblock" {
 			continue
 		}
 
-		_, err := client.GetIPBlock(rs.Primary.ID)
+		//_, err := client.GetIPBlock(rs.Primary.ID)
+		_, apiResponse, err := client.IPBlocksApi.IpblocksFindById(ctx, rs.Primary.ID).Execute()
 
-		if apiError, ok := err.(profitbricks.ApiError); ok {
-			if apiError.HttpStatusCode() != 404 {
+		if apiError, ok := err.(ionoscloud.GenericOpenAPIError); ok {
+			if apiResponse.Response.StatusCode != 404 {
 				return fmt.Errorf("IPBlock still exists %s %s", rs.Primary.ID, apiError)
 			}
 		} else {
@@ -75,9 +79,9 @@ func testAccCheckIPBlockAttributes(n string, location string) resource.TestCheck
 	}
 }
 
-func testAccCheckIPBlockExists(n string, ipblock *profitbricks.IPBlock) resource.TestCheckFunc {
+func testAccCheckIPBlockExists(n string, ipblock *ionoscloud.IpBlock) resource.TestCheckFunc {
 	return func(s *terraform.State) error {
-		client := testAccProvider.Meta().(*profitbricks.Client)
+		client := testAccProvider.Meta().(*ionoscloud.APIClient)
 		rs, ok := s.RootModule().Resources[n]
 
 		if !ok {
@@ -88,16 +92,17 @@ func testAccCheckIPBlockExists(n string, ipblock *profitbricks.IPBlock) resource
 			return fmt.Errorf("No Record ID is set")
 		}
 
-		foundIP, err := client.GetIPBlock(rs.Primary.ID)
+		ctx, _ := context.WithTimeout(context.Background(), *resourceDefaultTimeouts.Default)
+		foundIP, _, err := client.IPBlocksApi.IpblocksFindById(ctx, rs.Primary.ID).Execute()
 
 		if err != nil {
 			return fmt.Errorf("Error occured while fetching IP Block: %s", rs.Primary.ID)
 		}
-		if foundIP.ID != rs.Primary.ID {
+		if *foundIP.Id != rs.Primary.ID {
 			return fmt.Errorf("Record not found")
 		}
 
-		ipblock = foundIP
+		ipblock = &foundIP
 
 		return nil
 	}

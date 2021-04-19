@@ -1,16 +1,17 @@
 package ionoscloud
 
 import (
+	"context"
 	"fmt"
+	ionoscloud "github.com/ionos-cloud/sdk-go/v5"
 	"testing"
 
 	"github.com/hashicorp/terraform-plugin-sdk/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/terraform"
-	"github.com/profitbricks/profitbricks-sdk-go/v5"
 )
 
 func TestAccLoadbalancer_Basic(t *testing.T) {
-	var loadbalancer profitbricks.Loadbalancer
+	var loadbalancer ionoscloud.Loadbalancer
 	lbName := "loadbalancer"
 
 	resource.Test(t, resource.TestCase{
@@ -40,19 +41,22 @@ func TestAccLoadbalancer_Basic(t *testing.T) {
 }
 
 func testAccCheckLoadbalancerDestroyCheck(s *terraform.State) error {
-	client := testAccProvider.Meta().(*profitbricks.Client)
+	client := testAccProvider.Meta().(*ionoscloud.APIClient)
+
+	ctx, _ := context.WithTimeout(context.Background(), *resourceDefaultTimeouts.Delete)
 	for _, rs := range s.RootModule().Resources {
 		if rs.Type != "ionoscloud_loadbalancer" {
 			continue
 		}
 
-		_, err := client.GetLoadbalancer(rs.Primary.Attributes["datacenter_id"], rs.Primary.ID)
+		dcId := rs.Primary.Attributes["datacenter_id"]
+		_, _, err := client.LoadBalancerApi.DatacentersLoadbalancersFindById(ctx, dcId, rs.Primary.ID).Execute()
 
 		if err != nil {
-			_, err := client.DeleteDatacenter(rs.Primary.Attributes["datacenter_id"])
+			_, apiResponse, err := client.DataCenterApi.DatacentersDelete(ctx, dcId).Execute()
 
-			if apiError, ok := err.(profitbricks.ApiError); ok {
-				if apiError.HttpStatusCode() != 404 {
+			if apiError, ok := err.(ionoscloud.GenericOpenAPIError); ok {
+				if apiResponse.Response.StatusCode != 404 {
 					return fmt.Errorf("loadbalancer still exists %s %s", rs.Primary.ID, apiError)
 				}
 			} else {
@@ -78,9 +82,9 @@ func testAccCheckLoadbalancerAttributes(n string, name string) resource.TestChec
 	}
 }
 
-func testAccCheckLoadbalancerExists(n string, loadbalancer *profitbricks.Loadbalancer) resource.TestCheckFunc {
+func testAccCheckLoadbalancerExists(n string, loadbalancer *ionoscloud.Loadbalancer) resource.TestCheckFunc {
 	return func(s *terraform.State) error {
-		client := testAccProvider.Meta().(*profitbricks.Client)
+		client := testAccProvider.Meta().(*ionoscloud.APIClient)
 		rs, ok := s.RootModule().Resources[n]
 
 		if !ok {
@@ -91,16 +95,18 @@ func testAccCheckLoadbalancerExists(n string, loadbalancer *profitbricks.Loadbal
 			return fmt.Errorf("No Record ID is set")
 		}
 
-		foundLB, err := client.GetLoadbalancer(rs.Primary.Attributes["datacenter_id"], rs.Primary.ID)
+		ctx, _ := context.WithTimeout(context.Background(), *resourceDefaultTimeouts.Default)
+		dcId := rs.Primary.Attributes["datacenter_id"]
+		foundLB, _, err := client.LoadBalancerApi.DatacentersLoadbalancersFindById(ctx, dcId, rs.Primary.ID).Execute()
 
 		if err != nil {
 			return fmt.Errorf("Error occured while fetching Loadbalancer: %s", rs.Primary.ID)
 		}
-		if foundLB.ID != rs.Primary.ID {
+		if *foundLB.Id != rs.Primary.ID {
 			return fmt.Errorf("Record not found")
 		}
 
-		loadbalancer = foundLB
+		loadbalancer = &foundLB
 
 		return nil
 	}
