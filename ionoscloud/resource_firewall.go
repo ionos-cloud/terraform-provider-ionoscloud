@@ -147,7 +147,7 @@ func resourceFirewallCreate(d *schema.ResourceData, meta interface{}) error {
 		defer cancel()
 	}
 
-	fw, apiResponse, err := client.NicApi.DatacentersServersNicsFirewallrulesPost(ctx, d.Get("datacenter_id").(string), d.Get("server_id").(string), d.Get("nic_id").(string)).Firewallrule(fw).Execute()
+	fw, apiResponse, err := client.FirewallRulesApi.DatacentersServersNicsFirewallrulesPost(ctx, d.Get("datacenter_id").(string), d.Get("server_id").(string), d.Get("nic_id").(string)).Firewallrule(fw).Execute()
 
 	if err != nil {
 		return fmt.Errorf("An error occured while creating a firewall rule: %s", err)
@@ -176,7 +176,7 @@ func resourceFirewallRead(d *schema.ResourceData, meta interface{}) error {
 		defer cancel()
 	}
 
-	fw, apiResponse, err := client.NicApi.DatacentersServersNicsFirewallrulesFindById(ctx, d.Get("datacenter_id").(string),
+	fw, apiResponse, err := client.FirewallRulesApi.DatacentersServersNicsFirewallrulesFindById(ctx, d.Get("datacenter_id").(string),
 		d.Get("server_id").(string), d.Get("nic_id").(string), d.Id()).Execute()
 
 	if err != nil {
@@ -317,7 +317,7 @@ func resourceFirewallUpdate(d *schema.ResourceData, meta interface{}) error {
 		defer cancel()
 	}
 
-	_, apiResponse, err := client.NicApi.DatacentersServersNicsFirewallrulesPatch(ctx, d.Get("datacenter_id").(string), d.Get("server_id").(string), d.Get("nic_id").(string), d.Id()).Firewallrule(properties).Execute()
+	_, apiResponse, err := client.FirewallRulesApi.DatacentersServersNicsFirewallrulesPatch(ctx, d.Get("datacenter_id").(string), d.Get("server_id").(string), d.Get("nic_id").(string), d.Id()).Firewallrule(properties).Execute()
 
 	if err != nil {
 		return fmt.Errorf("An error occured while updating a firewall rule ID %s %s", d.Id(), err)
@@ -341,7 +341,7 @@ func resourceFirewallDelete(d *schema.ResourceData, meta interface{}) error {
 		defer cancel()
 	}
 
-	_, apiResponse, err := client.NicApi.DatacentersServersNicsFirewallrulesDelete(ctx, d.Get("datacenter_id").(string), d.Get("server_id").(string), d.Get("nic_id").(string), d.Id()).Execute()
+	_, apiResponse, err := client.FirewallRulesApi.DatacentersServersNicsFirewallrulesDelete(ctx, d.Get("datacenter_id").(string), d.Get("server_id").(string), d.Get("nic_id").(string), d.Id()).Execute()
 
 	if err != nil {
 		return fmt.Errorf("An error occured while deleting a firewall rule ID %s %s", d.Id(), err)

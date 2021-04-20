@@ -44,7 +44,7 @@ func resourceSnapshotCreate(d *schema.ResourceData, meta interface{}) error {
 	if cancel != nil {
 		defer cancel()
 	}
-	rsp, apiResponse, err := client.VolumeApi.DatacentersVolumesCreateSnapshotPost(ctx, dcId, volumeId).Execute()
+	rsp, apiResponse, err := client.VolumesApi.DatacentersVolumesCreateSnapshotPost(ctx, dcId, volumeId).Execute()
 	if err != nil {
 		return fmt.Errorf("An error occured while creating a snapshot: %s message: %s", err, apiResponse.Payload)
 	}
@@ -70,7 +70,7 @@ func resourceSnapshotRead(d *schema.ResourceData, meta interface{}) error {
 	if cancel != nil {
 		defer cancel()
 	}
-	rsp, apiResponse, err := client.SnapshotApi.SnapshotsFindById(ctx, d.Id()).Execute()
+	rsp, apiResponse, err := client.SnapshotsApi.SnapshotsFindById(ctx, d.Id()).Execute()
 
 	if err != nil {
 		if _, ok := err.(ionoscloud.GenericOpenAPIError); ok {
@@ -94,7 +94,7 @@ func resourceSnapshotUpdate(d *schema.ResourceData, meta interface{}) error {
 	if cancel != nil {
 		defer cancel()
 	}
-	_, apiResponse, err := client.SnapshotApi.SnapshotsPatch(ctx, d.Id()).Snapshot(input).Execute()
+	_, apiResponse, err := client.SnapshotsApi.SnapshotsPatch(ctx, d.Id()).Snapshot(input).Execute()
 	if err != nil {
 		return fmt.Errorf("An error occured while restoring a snapshot ID %s %d", d.Id(), err)
 	}
@@ -115,14 +115,14 @@ func resourceSnapshotDelete(d *schema.ResourceData, meta interface{}) error {
 	if cancel != nil {
 		defer cancel()
 	}
-	rsp, apiResponse, err := client.SnapshotApi.SnapshotsFindById(ctx, d.Id()).Execute()
+	rsp, apiResponse, err := client.SnapshotsApi.SnapshotsFindById(ctx, d.Id()).Execute()
 	if err != nil {
 		return fmt.Errorf("An error occured while fetching a snapshot ID %s %s", d.Id(), err)
 	}
 
 	for *rsp.Metadata.State != "AVAILABLE" {
 		time.Sleep(30 * time.Second)
-		_, _, err := client.SnapshotApi.SnapshotsFindById(ctx, d.Id()).Execute()
+		_, _, err := client.SnapshotsApi.SnapshotsFindById(ctx, d.Id()).Execute()
 
 		if err != nil {
 			return fmt.Errorf("An error occured while fetching a snapshot ID %s %s", d.Id(), err)
@@ -130,7 +130,7 @@ func resourceSnapshotDelete(d *schema.ResourceData, meta interface{}) error {
 	}
 
 	dcId := d.Get("datacenter_id").(string)
-	dc, _, err := client.DataCenterApi.DatacentersFindById(ctx, dcId).Execute()
+	dc, _, err := client.DataCentersApi.DatacentersFindById(ctx, dcId).Execute()
 
 	if err != nil {
 		return fmt.Errorf("An error occured while fetching a Datacenter ID %s %s", dcId, err)
@@ -138,14 +138,14 @@ func resourceSnapshotDelete(d *schema.ResourceData, meta interface{}) error {
 
 	for *dc.Metadata.State != "AVAILABLE" {
 		time.Sleep(30 * time.Second)
-		_, _, err := client.DataCenterApi.DatacentersFindById(ctx, dcId).Execute()
+		_, _, err := client.DataCentersApi.DatacentersFindById(ctx, dcId).Execute()
 
 		if err != nil {
 			return fmt.Errorf("An error occured while fetching a Datacenter ID %s %s", dcId, err)
 		}
 	}
 
-	_, apiResponse, err = client.SnapshotApi.SnapshotsDelete(ctx, d.Id()).Execute()
+	_, apiResponse, err = client.SnapshotsApi.SnapshotsDelete(ctx, d.Id()).Execute()
 	if err != nil {
 		return fmt.Errorf("An error occured while deleting a snapshot ID %s %s", d.Id(), err)
 	}

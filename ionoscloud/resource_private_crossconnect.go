@@ -112,7 +112,7 @@ func resourcePrivateCrossConnectCreate(d *schema.ResourceData, meta interface{})
 	if cancel != nil {
 		defer cancel()
 	}
-	rsp, _, err := client.PrivateCrossConnectApi.PccsPost(ctx).Pcc(pcc).Execute()
+	rsp, _, err := client.PrivateCrossConnectsApi.PccsPost(ctx).Pcc(pcc).Execute()
 
 	if err != nil {
 		d.SetId("")
@@ -148,7 +148,7 @@ func resourcePrivateCrossConnectRead(d *schema.ResourceData, meta interface{}) e
 	if cancel != nil {
 		defer cancel()
 	}
-	rsp, apiResponse, err := client.PrivateCrossConnectApi.PccsFindById(ctx, d.Id()).Execute()
+	rsp, apiResponse, err := client.PrivateCrossConnectsApi.PccsFindById(ctx, d.Id()).Execute()
 
 	if err != nil {
 		if _, ok := err.(ionoscloud.GenericOpenAPIError); ok {
@@ -223,7 +223,7 @@ func resourcePrivateCrossConnectUpdate(d *schema.ResourceData, meta interface{})
 	if cancel != nil {
 		defer cancel()
 	}
-	_, apiResponse, err := client.PrivateCrossConnectApi.PccsPatch(ctx, d.Id()).Pcc(*request.Properties).Execute()
+	_, apiResponse, err := client.PrivateCrossConnectsApi.PccsPatch(ctx, d.Id()).Pcc(*request.Properties).Execute()
 
 	if err != nil {
 		if _, ok := err.(ionoscloud.GenericOpenAPIError); ok {
@@ -262,7 +262,7 @@ func resourcePrivateCrossConnectDelete(d *schema.ResourceData, meta interface{})
 	if cancel != nil {
 		defer cancel()
 	}
-	_, apiResponse, err := client.PrivateCrossConnectApi.PccsDelete(ctx, d.Id()).Execute()
+	_, apiResponse, err := client.PrivateCrossConnectsApi.PccsDelete(ctx, d.Id()).Execute()
 
 	if err != nil {
 		if _, ok := err.(ionoscloud.GenericOpenAPIError); ok {
@@ -300,7 +300,7 @@ func privateCrossConnectReady(client *ionoscloud.APIClient, d *schema.ResourceDa
 	if cancel != nil {
 		defer cancel()
 	}
-	rsp, _, err := client.PrivateCrossConnectApi.PccsFindById(ctx, d.Id()).Execute()
+	rsp, _, err := client.PrivateCrossConnectsApi.PccsFindById(ctx, d.Id()).Execute()
 
 	if err != nil {
 		return true, fmt.Errorf("Error checking PCC status: %s", err)
@@ -313,7 +313,7 @@ func privateCrossConnectDeleted(client *ionoscloud.APIClient, d *schema.Resource
 	if cancel != nil {
 		defer cancel()
 	}
-	_, apiResponse, err := client.PrivateCrossConnectApi.PccsFindById(ctx, d.Id()).Execute()
+	_, apiResponse, err := client.PrivateCrossConnectsApi.PccsFindById(ctx, d.Id()).Execute()
 
 	if err != nil {
 		if _, ok := err.(ionoscloud.GenericOpenAPIError); ok {

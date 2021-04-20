@@ -46,10 +46,6 @@ func resourceNic() *schema.Resource {
 				Type:     schema.TypeBool,
 				Optional: true,
 			},
-			"nat": {
-				Type:     schema.TypeBool,
-				Optional: true,
-			},
 			"server_id": {
 				Type:     schema.TypeString,
 				Required: true,
@@ -97,10 +93,6 @@ func resourceNicCreate(d *schema.ResourceData, meta interface{}) error {
 		raw := d.Get("firewall_active").(bool)
 		nic.Properties.FirewallActive = &raw
 	}
-	if _, ok := d.GetOk("nat"); ok {
-		raw := d.Get("nat").(bool)
-		nic.Properties.Nat = &raw
-	}
 
 	ctx, cancel := context.WithTimeout(context.Background(), *resourceDefaultTimeouts.Create) //client.GetContext()
 	if cancel != nil {
@@ -108,7 +100,7 @@ func resourceNicCreate(d *schema.ResourceData, meta interface{}) error {
 	}
 	dcid := d.Get("datacenter_id").(string)
 	srvid := d.Get("server_id").(string)
-	nic, apiResp, err := client.NicApi.DatacentersServersNicsPost(ctx, dcid, srvid).Nic(nic).Execute()
+	nic, apiResp, err := client.NetworkInterfacesApi.DatacentersServersNicsPost(ctx, dcid, srvid).Nic(nic).Execute()
 
 	if err != nil {
 		return fmt.Errorf("Error occured while creating a nic: %s", err)
@@ -139,7 +131,7 @@ func resourceNicRead(d *schema.ResourceData, meta interface{}) error {
 	srvid := d.Get("server_id").(string)
 	nicid := d.Id()
 
-	rsp, apiresponse, err := client.NicApi.DatacentersServersNicsFindById(ctx, dcid, srvid, nicid).Execute()
+	rsp, apiresponse, err := client.NetworkInterfacesApi.DatacentersServersNicsFindById(ctx, dcid, srvid, nicid).Execute()
 	if err != nil {
 		if _, ok := err.(ionoscloud.GenericOpenAPIError); ok {
 			if apiresponse.Response.StatusCode == 404 {
@@ -185,11 +177,6 @@ func resourceNicUpdate(d *schema.ResourceData, meta interface{}) error {
 		ips := strings.Split(raw.(string), ",")
 		properties.Ips = &ips
 	}
-	if d.HasChange("nat") {
-		_, raw := d.GetChange("nat")
-		nat := raw.(bool)
-		properties.Nat = &nat
-	}
 
 	ctx, cancel := context.WithTimeout(context.Background(), *resourceDefaultTimeouts.Update)
 	if cancel != nil {
@@ -199,7 +186,7 @@ func resourceNicUpdate(d *schema.ResourceData, meta interface{}) error {
 	srvid := d.Get("server_id").(string)
 	nicid := d.Id()
 
-	_, apiResponse, err := client.NicApi.DatacentersServersNicsPatch(ctx, dcid, srvid, nicid).Nic(properties).Execute()
+	_, apiResponse, err := client.NetworkInterfacesApi.DatacentersServersNicsPatch(ctx, dcid, srvid, nicid).Nic(properties).Execute()
 
 	if err != nil {
 		return fmt.Errorf("Error occured while updating a nic: %s", err)
@@ -225,7 +212,7 @@ func resourceNicDelete(d *schema.ResourceData, meta interface{}) error {
 	srvid := d.Get("server_id").(string)
 	nicid := d.Id()
 	//resp, err := client.DeleteNic(d.Get("datacenter_id").(string), d.Get("server_id").(string), d.Id())
-	_, apiresp, err := client.NicApi.DatacentersServersNicsDelete(ctx, dcid, srvid, nicid).Execute()
+	_, apiresp, err := client.NetworkInterfacesApi.DatacentersServersNicsDelete(ctx, dcid, srvid, nicid).Execute()
 
 	if err != nil {
 		return fmt.Errorf("An error occured while deleting a nic dcId %s ID %s %s", d.Get("datacenter_id").(string), d.Id(), err)

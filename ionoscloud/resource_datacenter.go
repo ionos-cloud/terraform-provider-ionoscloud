@@ -76,7 +76,7 @@ func resourceDatacenterCreate(d *schema.ResourceData, meta interface{}) error {
 		defer cancel()
 	}
 
-	createdDatacenter, apiResponse, err := client.DataCenterApi.DatacentersPost(ctx).Datacenter(datacenter).Execute()
+	createdDatacenter, apiResponse, err := client.DataCentersApi.DatacentersPost(ctx).Datacenter(datacenter).Execute()
 
 	if err != nil {
 		return fmt.Errorf(
@@ -110,7 +110,7 @@ func resourceDatacenterRead(d *schema.ResourceData, meta interface{}) error {
 		defer cancel()
 	}
 
-	datacenter, apiResponse, err := client.DataCenterApi.DatacentersFindById(ctx, d.Id()).Execute()
+	datacenter, apiResponse, err := client.DataCentersApi.DatacentersFindById(ctx, d.Id()).Execute()
 
 	if err != nil {
 		if _, ok := err.(ionoscloud.GenericOpenAPIError); ok {
@@ -187,7 +187,7 @@ func resourceDatacenterUpdate(d *schema.ResourceData, meta interface{}) error {
 		defer cancel()
 	}
 
-	_, apiResponse, err := client.DataCenterApi.DatacentersPatch(ctx, d.Id()).Datacenter(obj).Execute()
+	_, apiResponse, err := client.DataCentersApi.DatacentersPatch(ctx, d.Id()).Datacenter(obj).Execute()
 
 	if err != nil {
 		return fmt.Errorf("An error occured while update the data center ID %s %s", d.Id(), err)
@@ -212,7 +212,7 @@ func resourceDatacenterDelete(d *schema.ResourceData, meta interface{}) error {
 		defer cancel()
 	}
 
-	_, apiResponse, err := client.DataCenterApi.DatacentersDelete(ctx, d.Id()).Execute()
+	_, apiResponse, err := client.DataCentersApi.DatacentersDelete(ctx, d.Id()).Execute()
 
 	if err != nil {
 		return fmt.Errorf("An error occured while deleting the data center ID %s %s", d.Id(), err)
@@ -240,14 +240,14 @@ func getImage(client *ionoscloud.APIClient, dcId string, imageName string, image
 		return nil, fmt.Errorf("imageName not suplied")
 	}
 
-	dc, _, err := client.DataCenterApi.DatacentersFindById(ctx, dcId).Execute()
+	dc, _, err := client.DataCentersApi.DatacentersFindById(ctx, dcId).Execute()
 
 	if err != nil {
 		log.Print(fmt.Errorf("Error while fetching a data center ID %s %s", dcId, err))
 		return nil, err
 	}
 
-	images, _, err := client.ImageApi.ImagesGet(ctx).Execute()
+	images, _, err := client.ImagesApi.ImagesGet(ctx).Execute()
 
 	if err != nil {
 		log.Print(fmt.Errorf("Error while fetching the list of images %s", err))
@@ -290,7 +290,7 @@ func getSnapshotId(client *ionoscloud.APIClient, snapshotName string) string {
 		return ""
 	}
 
-	snapshots, _, err := client.SnapshotApi.SnapshotsGet(ctx).Execute()
+	snapshots, _, err := client.SnapshotsApi.SnapshotsGet(ctx).Execute()
 
 	if err != nil {
 		log.Print(fmt.Errorf("Error while fetching the list of snapshots %s", err))
@@ -327,7 +327,7 @@ func getImageAlias(client *ionoscloud.APIClient, imageAlias string, location str
 		log.Print(fmt.Errorf("Invalid location id %s", location))
 	}
 
-	locations, _, err := client.LocationApi.LocationsFindByRegionIdAndId(ctx, parts[0], parts[1]).Execute()
+	locations, _, err := client.LocationsApi.LocationsFindByRegionIdAndId(ctx, parts[0], parts[1]).Execute()
 
 	if err != nil {
 		log.Print(fmt.Errorf("Error while fetching the list of snapshots %s", err))

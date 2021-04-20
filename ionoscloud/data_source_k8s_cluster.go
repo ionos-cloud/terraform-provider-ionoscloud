@@ -235,11 +235,7 @@ func setK8sClusterData(d *schema.ResourceData, cluster *ionoscloud.KubernetesClu
 		return fmt.Errorf("an error occurred while fetching the kubernetes config for cluster with ID %s: %s", *cluster.Id, err)
 	}
 
-	if kubeConfig.Properties.Kubeconfig != nil {
-		if err := d.Set("kube_config", *kubeConfig.Properties.Kubeconfig); err != nil {
-			return err
-		}
-	}
+	d.Set("kube_config", kubeConfig)
 
 	/* getting node pools */
 	clusterNodePools, _, err := client.KubernetesApi.K8sNodepoolsGet(ctx, *cluster.Id).Execute()

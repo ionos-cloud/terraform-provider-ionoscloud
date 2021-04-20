@@ -55,7 +55,7 @@ func testAccCheckbackupUnitDestroyCheck(s *terraform.State) error {
 			defer cancel()
 		}
 
-		_, apiResponse, err := client.BackupUnitApi.BackupunitsFindById(ctx, rs.Primary.ID).Execute()
+		_, apiResponse, err := client.BackupUnitsApi.BackupunitsFindById(ctx, rs.Primary.ID).Execute()
 
 		if _, ok := err.(ionoscloud.GenericOpenAPIError); ok {
 			if apiResponse.Response.StatusCode != 404 {
@@ -88,7 +88,7 @@ func testAccCheckbackupUnitExists(n string, backupUnit *ionoscloud.BackupUnit) r
 			defer cancel()
 		}
 
-		foundBackupUnit, _, err := client.BackupUnitApi.BackupunitsFindById(ctx, rs.Primary.ID).Execute()
+		foundBackupUnit, _, err := client.BackupUnitsApi.BackupunitsFindById(ctx, rs.Primary.ID).Execute()
 
 		if err != nil {
 			return fmt.Errorf("Error occured while fetching backup unit: %s", rs.Primary.ID)

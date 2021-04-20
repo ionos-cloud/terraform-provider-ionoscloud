@@ -48,8 +48,8 @@ func resourceUser() *schema.Resource {
 
 func resourceUserCreate(d *schema.ResourceData, meta interface{}) error {
 	client := meta.(SdkBundle).Client
-	request := ionoscloud.User{
-		Properties: &ionoscloud.UserProperties{},
+	request := ionoscloud.UserPost{
+		Properties: &ionoscloud.UserPropertiesPost{},
 	}
 
 	log.Printf("[DEBUG] NAME %s", d.Get("first_name"))
@@ -65,10 +65,6 @@ func resourceUserCreate(d *schema.ResourceData, meta interface{}) error {
 	if d.Get("email") != nil {
 		email := d.Get("email").(string)
 		request.Properties.Email = &email
-	}
-	if d.Get("password") != nil {
-		password := d.Get("password").(string)
-		request.Properties.Password = &password
 	}
 
 	administrator := d.Get("administrator").(bool)
@@ -145,8 +141,8 @@ func resourceUserUpdate(d *schema.ResourceData, meta interface{}) error {
 
 	administrator := d.Get("administrator").(bool)
 	forceSecAuth := d.Get("force_sec_auth").(bool)
-	userReq := ionoscloud.User{
-		Properties: &ionoscloud.UserProperties{
+	userReq := ionoscloud.UserPut{
+		Properties: &ionoscloud.UserPropertiesPut{
 			Administrator: &administrator,
 			ForceSecAuth:  &forceSecAuth,
 		},

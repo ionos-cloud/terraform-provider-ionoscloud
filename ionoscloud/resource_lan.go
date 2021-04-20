@@ -85,7 +85,7 @@ func resourceLanCreate(d *schema.ResourceData, meta interface{}) error {
 		defer cancel()
 	}
 	dcid := d.Get("datacenter_id").(string)
-	rsp, apiResponse, err := client.LanApi.DatacentersLansPost(ctx, dcid).Lan(request).Execute()
+	rsp, apiResponse, err := client.LansApi.DatacentersLansPost(ctx, dcid).Lan(request).Execute()
 
 	if err != nil {
 		d.SetId("")
@@ -135,7 +135,7 @@ func resourceLanRead(d *schema.ResourceData, meta interface{}) error {
 		defer cancel()
 	}
 	dcid := d.Get("datacenter_id").(string)
-	rsp, apiResponse, err := client.LanApi.DatacentersLansFindById(ctx, dcid, d.Id()).Execute()
+	rsp, apiResponse, err := client.LansApi.DatacentersLansFindById(ctx, dcid, d.Id()).Execute()
 
 	if err != nil {
 		if _, ok := err.(ionoscloud.GenericOpenAPIError); ok {
@@ -189,7 +189,7 @@ func resourceLanUpdate(d *schema.ResourceData, meta interface{}) error {
 			defer cancel()
 		}
 		dcid := d.Get("datacenter_id").(string)
-		rsp, _, err := client.LanApi.DatacentersLansPatch(ctx, dcid, d.Id()).Lan(*properties).Execute()
+		rsp, _, err := client.LansApi.DatacentersLansPatch(ctx, dcid, d.Id()).Lan(*properties).Execute()
 		if err != nil {
 			return fmt.Errorf("An error occured while patching a lan ID %s %s", d.Id(), err)
 		}
@@ -223,12 +223,12 @@ func resourceLanDelete(d *schema.ResourceData, meta interface{}) error {
 	if cancel != nil {
 		defer cancel()
 	}
-	_, _, err := client.LanApi.DatacentersLansDelete(ctx, dcid, d.Id()).Execute()
+	_, _, err := client.LansApi.DatacentersLansDelete(ctx, dcid, d.Id()).Execute()
 
 	if err != nil {
 		//try again in 120 seconds
 		time.Sleep(120 * time.Second)
-		_, apiResponse, err := client.LanApi.DatacentersLansDelete(ctx, dcid, d.Id()).Execute()
+		_, apiResponse, err := client.LansApi.DatacentersLansDelete(ctx, dcid, d.Id()).Execute()
 
 		if err != nil {
 			if _, ok := err.(ionoscloud.GenericOpenAPIError); ok {
@@ -265,7 +265,7 @@ func lanAvailable(client *ionoscloud.APIClient, d *schema.ResourceData) (bool, e
 		defer cancel()
 	}
 	dcid := d.Get("datacenter_id").(string)
-	rsp, _, err := client.LanApi.DatacentersLansFindById(ctx, dcid, d.Id()).Execute()
+	rsp, _, err := client.LansApi.DatacentersLansFindById(ctx, dcid, d.Id()).Execute()
 
 	log.Printf("[INFO] Current status for LAN %s: %+v", d.Id(), rsp)
 
@@ -281,7 +281,7 @@ func lanDeleted(client *ionoscloud.APIClient, d *schema.ResourceData) (bool, err
 		defer cancel()
 	}
 	dcid := d.Get("datacenter_id").(string)
-	rsp, apiResponse, err := client.LanApi.DatacentersLansFindById(ctx, dcid, d.Id()).Execute()
+	rsp, apiResponse, err := client.LansApi.DatacentersLansFindById(ctx, dcid, d.Id()).Execute()
 
 	log.Printf("[INFO] Current deletion status for LAN %s: %+v", d.Id(), rsp)
 

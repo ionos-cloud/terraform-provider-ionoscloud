@@ -63,7 +63,7 @@ func resourceLanIPFailoverCreate(d *schema.ResourceData, meta interface{}) error
 	}
 
 	if properties != nil {
-		lan, apiResponse, err := client.LanApi.DatacentersLansPatch(ctx, dcid, lanid).Lan(*properties).Execute()
+		lan, apiResponse, err := client.LansApi.DatacentersLansPatch(ctx, dcid, lanid).Lan(*properties).Execute()
 		if err != nil {
 			return fmt.Errorf("An error occured while patching a lans failover group  %s %s", lanid, err)
 		}
@@ -88,7 +88,7 @@ func resourceLanIPFailoverRead(d *schema.ResourceData, meta interface{}) error {
 		defer cancel()
 	}
 
-	lan, apiResponse, err := client.LanApi.DatacentersLansFindById(ctx, d.Get("datacenter_id").(string), d.Id()).Execute()
+	lan, apiResponse, err := client.LansApi.DatacentersLansFindById(ctx, d.Get("datacenter_id").(string), d.Id()).Execute()
 
 	if err != nil {
 		if _, ok := err.(ionoscloud.GenericOpenAPIError); ok {
@@ -147,7 +147,7 @@ func resourceLanIPFailoverUpdate(d *schema.ResourceData, meta interface{}) error
 			defer cancel()
 		}
 
-		_, apiResponse, err := client.LanApi.DatacentersLansPatch(ctx, dcid, lanid).Lan(*properties).Execute()
+		_, apiResponse, err := client.LansApi.DatacentersLansPatch(ctx, dcid, lanid).Lan(*properties).Execute()
 		if err != nil {
 			return fmt.Errorf("An error occured while patching a lan ID %s %s", d.Id(), err)
 		}
@@ -177,11 +177,11 @@ func resourceLanIPFailoverDelete(d *schema.ResourceData, meta interface{}) error
 		defer cancel()
 	}
 
-	_, apiResponse, err := client.LanApi.DatacentersLansPatch(ctx, dcid, lanid).Lan(*properties).Execute()
+	_, apiResponse, err := client.LansApi.DatacentersLansPatch(ctx, dcid, lanid).Lan(*properties).Execute()
 	if err != nil {
 		//try again in 90 seconds
 		time.Sleep(90 * time.Second)
-		_, apiResponse, err = client.LanApi.DatacentersLansPatch(ctx, dcid, lanid).Lan(*properties).Execute()
+		_, apiResponse, err = client.LansApi.DatacentersLansPatch(ctx, dcid, lanid).Lan(*properties).Execute()
 
 		if err != nil {
 			if _, ok := err.(ionoscloud.GenericOpenAPIError); ok {

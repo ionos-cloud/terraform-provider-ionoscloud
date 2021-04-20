@@ -111,7 +111,6 @@ func resourceVolumeCreate(d *schema.ResourceData, meta interface{}) error {
 	client := meta.(SdkBundle).Client
 
 	var ssh_keypath []interface{}
-	var image_alias string
 	isSnapshot := false
 	dcId := d.Get("datacenter_id").(string)
 	serverId := d.Get("server_id").(string)
@@ -134,39 +133,21 @@ func resourceVolumeCreate(d *schema.ResourceData, meta interface{}) error {
 	}
 
 	var image string
-	if image_alias == "" && image_name != "" {
+	if image_name != "" {
 		if !IsValidUUID(image_name) {
 			img, err := getImage(client, dcId, image_name, d.Get("disk_type").(string))
 			if err != nil {
 				return err
 			}
 			if img != nil {
+				fmt.Printf("getImage\n")
 				image = *img.Id
 			}
 			//if no image id was found with that name we look for a matching snapshot
 			if image == "" {
 				image = getSnapshotId(client, image_name)
-				if image != "" {
-					isSnapshot = true
-				} else {
-					ctx, cancel := context.WithTimeout(context.Background(), *resourceDefaultTimeouts.Default)
-
-					if cancel != nil {
-						defer cancel()
-					}
-
-					dc, _, err := client.DataCenterApi.DatacentersFindById(ctx, dcId).Execute()
-
-					if err != nil {
-						return fmt.Errorf("An error occured while fetching a Datacenter ID %s %s", dcId, err)
-					}
-					image_alias = getImageAlias(client, image_name, *dc.Properties.Location)
-				}
 			}
 
-			if image == "" && image_alias == "" {
-				return fmt.Errorf("Could not find an image/imagealias/snapshot that matches %s ", image_name)
-			}
 			if imagePassword == "" && len(ssh_keypath) == 0 && isSnapshot == false && img != nil && *img.Properties.Public {
 				return fmt.Errorf("Either 'image_password' or 'sshkey' must be provided.")
 			}
@@ -177,9 +158,9 @@ func resourceVolumeCreate(d *schema.ResourceData, meta interface{}) error {
 				defer cancel()
 			}
 
-			img, _, err := client.ImageApi.ImagesFindById(ctx, image_name).Execute()
+			img, _, err := client.ImagesApi.ImagesFindById(ctx, image_name).Execute()
 			if err != nil {
-				_, _, err := client.SnapshotApi.SnapshotsFindById(ctx, image_name).Execute()
+				_, _, err := client.SnapshotsApi.SnapshotsFindById(ctx, image_name).Execute()
 				if err != nil {
 					return fmt.Errorf("Error fetching image/snapshot: %s", err)
 				}
@@ -256,12 +237,6 @@ func resourceVolumeCreate(d *schema.ResourceData, meta interface{}) error {
 		volume.Properties.Image = nil
 	}
 
-	if image_alias != "" {
-		volume.Properties.ImageAlias = &image_alias
-	} else {
-		volume.Properties.ImageAlias = nil
-	}
-
 	if len(publicKeys) != 0 {
 		volume.Properties.SshKeys = &publicKeys
 
@@ -276,8 +251,8 @@ func resourceVolumeCreate(d *schema.ResourceData, meta interface{}) error {
 
 	backupUnitId := d.Get("backup_unit_id").(string)
 	if IsValidUUID(backupUnitId) {
-		if image == "" && image_alias == "" {
-			return fmt.Errorf("It is mandatory to provied either public image or imageAlias in conjunction with backup unit id property")
+		if image == "" {
+			return fmt.Errorf("It is mandatory to provied public image in conjunction with backup unit id property")
 		} else {
 			volume.Properties.BackupunitId = &backupUnitId
 		}
@@ -289,7 +264,7 @@ func resourceVolumeCreate(d *schema.ResourceData, meta interface{}) error {
 	if cancel != nil {
 		defer cancel()
 	}
-	volume, apiResponse, err := client.VolumeApi.DatacentersVolumesPost(ctx, dcId).Volume(volume).Execute()
+	volume, apiResponse, err := client.VolumesApi.DatacentersVolumesPost(ctx, dcId).Volume(volume).Execute()
 
 	if err != nil {
 		return fmt.Errorf("An error occured while creating a volume: %s, apiError : %s", err, string(apiResponse.Payload))
@@ -308,7 +283,7 @@ func resourceVolumeCreate(d *schema.ResourceData, meta interface{}) error {
 	}
 
 	volumeToAttach := ionoscloud.Volume{Id: volume.Id}
-	volume, apiResponse, err = client.ServerApi.DatacentersServersVolumesPost(ctx, dcId, serverId).Volume(volumeToAttach).Execute()
+	volume, apiResponse, err = client.ServersApi.DatacentersServersVolumesPost(ctx, dcId, serverId).Volume(volumeToAttach).Execute()
 
 	if err != nil {
 		return fmt.Errorf("An error occured while attaching a volume dcId: %s server_id: %s ID: %s Response: %s", dcId, serverId, *volume.Id, err)
@@ -349,7 +324,7 @@ func resourceVolumeRead(d *schema.ResourceData, meta interface{}) error {
 		defer cancel()
 	}
 
-	volume, apiResponse, err := client.VolumeApi.DatacentersVolumesFindById(ctx, dcId, volumeID).Execute()
+	volume, apiResponse, err := client.VolumesApi.DatacentersVolumesFindById(ctx, dcId, volumeID).Execute()
 
 	if err != nil {
 		if _, ok := err.(ionoscloud.GenericOpenAPIError); ok {
@@ -366,7 +341,7 @@ func resourceVolumeRead(d *schema.ResourceData, meta interface{}) error {
 
 	}
 
-	_, _, err = client.ServerApi.DatacentersServersVolumesFindById(ctx, dcId, serverID, volumeID).Execute()
+	_, _, err = client.ServersApi.DatacentersServersVolumesFindById(ctx, dcId, serverID, volumeID).Execute()
 	if err != nil {
 		d.Set("server_id", "")
 	}
@@ -400,16 +375,10 @@ func resourceVolumeRead(d *schema.ResourceData, meta interface{}) error {
 	}
 
 	if volume.Properties.Image != nil {
-		err := d.Set("image_name", *volume.Properties.Image)
+		img, _, err := client.ImagesApi.ImagesFindById(ctx, *volume.Properties.Image).Execute()
+		err = d.Set("image_name", img.Properties.Name)
 		if err != nil {
 			return fmt.Errorf("Error while setting image_name property for volume %s: %s", d.Id(), err)
-		}
-	}
-
-	if volume.Properties.ImageAlias != nil {
-		err := d.Set("image_alias", *volume.Properties.ImageAlias)
-		if err != nil {
-			return fmt.Errorf("Error while setting image_alias property for volume %s: %s", d.Id(), err)
 		}
 	}
 
@@ -542,7 +511,7 @@ func resourceVolumeUpdate(d *schema.ResourceData, meta interface{}) error {
 		defer cancel()
 	}
 
-	volume, apiResponse, err := client.VolumeApi.DatacentersVolumesPatch(ctx, dcId, d.Id()).Volume(properties).Execute()
+	volume, apiResponse, err := client.VolumesApi.DatacentersVolumesPatch(ctx, dcId, d.Id()).Volume(properties).Execute()
 
 	if err != nil {
 		return fmt.Errorf("An error occured while updating a volume ID %s %s", d.Id(), err)
@@ -562,7 +531,7 @@ func resourceVolumeUpdate(d *schema.ResourceData, meta interface{}) error {
 	if d.HasChange("server_id") {
 		_, newValue := d.GetChange("server_id")
 		serverID := newValue.(string)
-		volumeAttach, apiResponse, err := client.ServerApi.DatacentersServersVolumesPost(ctx, dcId, serverID).Volume(volume).Execute()
+		volumeAttach, apiResponse, err := client.ServersApi.DatacentersServersVolumesPost(ctx, dcId, serverID).Volume(volume).Execute()
 		if err != nil {
 			return fmt.Errorf("An error occured while attaching a volume dcId: %s server_id: %s ID: %s Response: %s", dcId, serverID, *volumeAttach.Id, err)
 		}
@@ -587,7 +556,7 @@ func resourceVolumeDelete(d *schema.ResourceData, meta interface{}) error {
 		defer cancel()
 	}
 
-	_, apiResponse, err := client.VolumeApi.DatacentersVolumesDelete(ctx, dcId, d.Id()).Execute()
+	_, apiResponse, err := client.VolumesApi.DatacentersVolumesDelete(ctx, dcId, d.Id()).Execute()
 	if err != nil {
 		return fmt.Errorf("An error occured while deleting a volume ID %s %s", d.Id(), err)
 

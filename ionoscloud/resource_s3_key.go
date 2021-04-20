@@ -47,7 +47,7 @@ func resourceS3KeyCreate(d *schema.ResourceData, meta interface{}) error {
 	if cancel != nil {
 		defer cancel()
 	}
-	rsp, _, err := client.UserManagementApi.UmUsersS3keysPost(ctx, d.Get("user_id").(string)).Execute()
+	rsp, _, err := client.UserS3KeysApi.UmUsersS3keysPost(ctx, d.Get("user_id").(string)).Execute()
 
 	if err != nil {
 		d.SetId("")
@@ -64,7 +64,7 @@ func resourceS3KeyRead(d *schema.ResourceData, meta interface{}) error {
 
 	client := meta.(SdkBundle).Client
 	userId := d.Get("user_id").(string)
-	rsp, apiResponse, err := client.UserManagementApi.UmUsersS3keysFindByKeyId(context.TODO(), userId, d.Id()).Execute()
+	rsp, apiResponse, err := client.UserS3KeysApi.UmUsersS3keysFindByKeyId(context.TODO(), userId, d.Id()).Execute()
 
 	if err != nil {
 		if _, ok := err.(ionoscloud.GenericOpenAPIError); ok {
@@ -102,7 +102,7 @@ func resourceS3KeyUpdate(d *schema.ResourceData, meta interface{}) error {
 	}
 
 	userId := d.Get("user_id").(string)
-	_, apiResponse, err := client.UserManagementApi.UmUsersS3keysPut(context.TODO(), userId, d.Id()).S3Key(request).Execute()
+	_, apiResponse, err := client.UserS3KeysApi.UmUsersS3keysPut(context.TODO(), userId, d.Id()).S3Key(request).Execute()
 
 	time.Sleep(5 * time.Second)
 
@@ -144,7 +144,7 @@ func resourceS3KeyDelete(d *schema.ResourceData, meta interface{}) error {
 		defer cancel()
 	}
 	userId := d.Get("user_id").(string)
-	_, apiResponse, err := client.UserManagementApi.UmUsersS3keysDelete(ctx, userId, d.Id()).Execute()
+	_, apiResponse, err := client.UserS3KeysApi.UmUsersS3keysDelete(ctx, userId, d.Id()).Execute()
 
 	if err != nil {
 		if _, ok := err.(ionoscloud.GenericOpenAPIError); ok {
@@ -179,7 +179,7 @@ func resourceS3KeyDelete(d *schema.ResourceData, meta interface{}) error {
 
 func s3KeyDeleted(client *ionoscloud.APIClient, d *schema.ResourceData) (bool, error) {
 	userId := d.Get("user_id").(string)
-	_, apiResponse, err := client.UserManagementApi.UmUsersS3keysFindByKeyId(context.TODO(), userId, d.Id()).Execute()
+	_, apiResponse, err := client.UserS3KeysApi.UmUsersS3keysFindByKeyId(context.TODO(), userId, d.Id()).Execute()
 
 	if err != nil {
 		if _, ok := err.(ionoscloud.GenericOpenAPIError); ok {
@@ -194,7 +194,7 @@ func s3KeyDeleted(client *ionoscloud.APIClient, d *schema.ResourceData) (bool, e
 
 func s3Ready(client *ionoscloud.APIClient, d *schema.ResourceData) (bool, error) {
 	userId := d.Get("user_id").(string)
-	rsp, _, err := client.UserManagementApi.UmUsersS3keysFindByKeyId(context.TODO(), userId, d.Id()).Execute()
+	rsp, _, err := client.UserS3KeysApi.UmUsersS3keysFindByKeyId(context.TODO(), userId, d.Id()).Execute()
 
 	if err != nil {
 		return true, fmt.Errorf("Error checking S3 Key status: %s", err)

@@ -12,12 +12,11 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/terraform"
 	"github.com/ionos-cloud/sdk-go/v5"
 	"github.com/profitbricks/profitbricks-sdk-go/v5"
-
 )
 
 type SdkBundle struct {
 	LegacyClient *profitbricks.Client
-	Client *ionoscloud.APIClient
+	Client       *ionoscloud.APIClient
 }
 
 // Provider returns a schema.Provider for ionoscloud.
@@ -89,7 +88,7 @@ func Provider() terraform.ResourceProvider {
 			"ionoscloud_private_crossconnect": dataSourcePcc(),
 			"ionoscloud_server":               dataSourceServer(),
 			"ionoscloud_k8s_cluster":          dataSourceK8sCluster(),
-			"ionoscloud_k8s_node_pool":		   dataSourceK8sNodePool(),
+			"ionoscloud_k8s_node_pool":        dataSourceK8sNodePool(),
 		},
 	}
 

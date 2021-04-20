@@ -67,7 +67,7 @@ func resourceBackupUnitCreate(d *schema.ResourceData, meta interface{}) error {
 		},
 	}
 
-	createdBackupUnit, _, err := client.BackupUnitApi.BackupunitsPost(ctx).BackupUnit(backupUnit).Execute()
+	createdBackupUnit, _, err := client.BackupUnitsApi.BackupunitsPost(ctx).BackupUnit(backupUnit).Execute()
 
 	if err != nil {
 		d.SetId("")
@@ -106,7 +106,7 @@ func resourceBackupUnitRead(d *schema.ResourceData, meta interface{}) error {
 		defer cancel()
 	}
 
-	backupUnit, apiResponse, err := client.BackupUnitApi.BackupunitsFindById(ctx, d.Id()).Execute()
+	backupUnit, apiResponse, err := client.BackupUnitsApi.BackupunitsFindById(ctx, d.Id()).Execute()
 
 	if err != nil {
 		if _, ok := err.(ionoscloud.GenericOpenAPIError); ok {
@@ -119,7 +119,7 @@ func resourceBackupUnitRead(d *schema.ResourceData, meta interface{}) error {
 		return fmt.Errorf("Error while fetching backup unit %s: %s", d.Id(), err)
 	}
 
-	contractResources, _, cErr := client.ContractApi.ContractsGet(ctx).Execute()
+	contractResources, _, cErr := client.ContractResourcesApi.ContractsGet(ctx).Execute()
 
 	if cErr != nil {
 		return fmt.Errorf("Error while fetching contract resources for backup unit %s: %s", d.Id(), cErr)
@@ -141,8 +141,8 @@ func resourceBackupUnitRead(d *schema.ResourceData, meta interface{}) error {
 		}
 	}
 
-	if backupUnit.Properties.Name != nil && contractResources.Properties.ContractNumber != nil {
-		err := d.Set("login", fmt.Sprintf("%s-%d", *backupUnit.Properties.Name, *contractResources.Properties.ContractNumber))
+	if backupUnit.Properties.Name != nil && contractResources.Id != nil {
+		err := d.Set("login", fmt.Sprintf("%s-%d", *backupUnit.Properties.Name, (*contractResources.Items)[0].Properties.ContractNumber))
 		if err != nil {
 			return fmt.Errorf("Error while setting login property for backup unit %s: %s", d.Id(), err)
 		}
@@ -189,7 +189,7 @@ func resourceBackupUnitUpdate(d *schema.ResourceData, meta interface{}) error {
 		defer cancel()
 	}
 
-	_, apiResponse, err := client.BackupUnitApi.BackupunitsPut(ctx, d.Id()).BackupUnit(request).Execute()
+	_, apiResponse, err := client.BackupUnitsApi.BackupunitsPut(ctx, d.Id()).BackupUnit(request).Execute()
 
 	if err != nil {
 		if _, ok := err.(ionoscloud.GenericOpenAPIError); ok {
@@ -229,7 +229,7 @@ func resourceBackupUnitDelete(d *schema.ResourceData, meta interface{}) error {
 	if cancel != nil {
 		defer cancel()
 	}
-	_, apiResponse, err := client.BackupUnitApi.BackupunitsDelete(ctx, d.Id()).Execute()
+	_, apiResponse, err := client.BackupUnitsApi.BackupunitsDelete(ctx, d.Id()).Execute()
 
 	if err != nil {
 		if _, ok := err.(ionoscloud.GenericOpenAPIError); ok {
@@ -263,7 +263,7 @@ func resourceBackupUnitDelete(d *schema.ResourceData, meta interface{}) error {
 }
 
 func backupUnitReady(client *ionoscloud.APIClient, d *schema.ResourceData, c context.Context) (bool, error) {
-	backupUnit, _, err := client.BackupUnitApi.BackupunitsFindById(c, d.Id()).Execute()
+	backupUnit, _, err := client.BackupUnitsApi.BackupunitsFindById(c, d.Id()).Execute()
 
 	if err != nil {
 		return true, fmt.Errorf("Error checking backup unit status: %s", err)
@@ -272,7 +272,7 @@ func backupUnitReady(client *ionoscloud.APIClient, d *schema.ResourceData, c con
 }
 
 func backupUnitDeleted(client *ionoscloud.APIClient, d *schema.ResourceData, c context.Context) (bool, error) {
-	_, apiResponse, err := client.BackupUnitApi.BackupunitsFindById(c, d.Id()).Execute()
+	_, apiResponse, err := client.BackupUnitsApi.BackupunitsFindById(c, d.Id()).Execute()
 
 	if err != nil {
 		if _, ok := err.(ionoscloud.GenericOpenAPIError); ok {

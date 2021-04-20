@@ -72,7 +72,7 @@ func resourceLoadbalancerCreate(d *schema.ResourceData, meta interface{}) error 
 		defer cancel()
 	}
 
-	resp, apiResp, err := client.LoadBalancerApi.DatacentersLoadbalancersPost(ctx, dcid).Loadbalancer(*lb).Execute()
+	resp, apiResp, err := client.LoadBalancersApi.DatacentersLoadbalancersPost(ctx, dcid).Loadbalancer(*lb).Execute()
 
 	if err != nil {
 		return fmt.Errorf("Error occured while creating a loadbalancer %s", err)
@@ -100,7 +100,7 @@ func resourceLoadbalancerRead(d *schema.ResourceData, meta interface{}) error {
 		defer cancel()
 	}
 
-	lb, _, err := client.LoadBalancerApi.DatacentersLoadbalancersFindById(ctx, d.Get("datacenter_id").(string), d.Id()).Execute()
+	lb, _, err := client.LoadBalancersApi.DatacentersLoadbalancersFindById(ctx, d.Get("datacenter_id").(string), d.Id()).Execute()
 
 	if err != nil {
 		if apiError, ok := err.(profitbricks.ApiError); ok {
@@ -150,7 +150,7 @@ func resourceLoadbalancerUpdate(d *schema.ResourceData, meta interface{}) error 
 		oldList := old.([]interface{})
 
 		for _, o := range oldList {
-			_, apiresponse, err := client.LoadBalancerApi.DatacentersLoadbalancersBalancednicsDelete(context.TODO(),
+			_, apiresponse, err := client.LoadBalancersApi.DatacentersLoadbalancersBalancednicsDelete(context.TODO(),
 				d.Get("datacenter_id").(string), d.Id(), o.(string)).Execute()
 			if err != nil {
 				return fmt.Errorf("Error occured while deleting a balanced nic: %s", err)
@@ -167,7 +167,7 @@ func resourceLoadbalancerUpdate(d *schema.ResourceData, meta interface{}) error 
 		for _, o := range newList {
 			id := o.(string)
 			nic := ionoscloud.Nic{Id: &id}
-			_, apiResp, err := client.LoadBalancerApi.DatacentersLoadbalancersBalancednicsPost(ctx, d.Get("datacenter_id").(string), d.Id()).Nic(nic).Execute()
+			_, apiResp, err := client.LoadBalancersApi.DatacentersLoadbalancersBalancednicsPost(ctx, d.Get("datacenter_id").(string), d.Id()).Nic(nic).Execute()
 			if err != nil {
 				return fmt.Errorf("Error occured while deleting a balanced nic: %s", err)
 			}
@@ -191,7 +191,7 @@ func resourceLoadbalancerDelete(d *schema.ResourceData, meta interface{}) error 
 		defer cancel()
 	}
 	dcid := d.Get("datacenter_id").(string)
-	_, apiResp, err := client.LoadBalancerApi.DatacentersLoadbalancersDelete(ctx, dcid, d.Id()).Execute()
+	_, apiResp, err := client.LoadBalancersApi.DatacentersLoadbalancersDelete(ctx, dcid, d.Id()).Execute()
 
 	if err != nil {
 		return fmt.Errorf("Error occured while deleting a loadbalancer: %s", err)

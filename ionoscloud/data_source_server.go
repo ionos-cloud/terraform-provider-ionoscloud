@@ -455,7 +455,6 @@ func setServerData(d *schema.ResourceData, server *ionoscloud.Server) error {
 			entry["size"] = float32OrDefault(volume.Properties.Size, 0)
 			entry["availability_zone"] = stringOrDefault(volume.Properties.AvailabilityZone, "")
 			entry["image"] = stringOrDefault(volume.Properties.Image, "")
-			entry["image_alias"] = stringOrDefault(volume.Properties.ImageAlias, "")
 			entry["image_password"] = stringOrDefault(volume.Properties.ImagePassword, "")
 
 			if volume.Properties.SshKeys != nil {
@@ -505,7 +504,6 @@ func setServerData(d *schema.ResourceData, server *ionoscloud.Server) error {
 			entry["dhcp"] = boolOrDefault(nic.Properties.Dhcp, false)
 			entry["lan"] = int32OrDefault(nic.Properties.Lan, 0)
 			entry["firewall_active"] = boolOrDefault(nic.Properties.FirewallActive, false)
-			entry["nat"] = boolOrDefault(nic.Properties.Nat, false)
 
 			firewallRules := make([]interface{}, 0)
 			if nic.Entities != nil && nic.Entities.Firewallrules != nil && nic.Entities.Firewallrules.Items != nil {
@@ -565,14 +563,14 @@ func dataSourceServerRead(d *schema.ResourceData, meta interface{}) error {
 
 	if idOk {
 		/* search by ID */
-		server, _, err = client.ServerApi.DatacentersServersFindById(ctx, datacenterId.(string), id.(string)).Execute()
+		server, _, err = client.ServersApi.DatacentersServersFindById(ctx, datacenterId.(string), id.(string)).Execute()
 		if err != nil {
 			return fmt.Errorf("an error occurred while fetching the server with ID %s: %s", id.(string), err)
 		}
 	} else {
 		/* search by name */
 		var servers ionoscloud.Servers
-		servers, _, err := client.ServerApi.DatacentersServersGet(ctx, datacenterId.(string)).Execute()
+		servers, _, err := client.ServersApi.DatacentersServersGet(ctx, datacenterId.(string)).Execute()
 		if err != nil {
 			return fmt.Errorf("an error occurred while fetching servers: %s", err.Error())
 		}
@@ -580,7 +578,7 @@ func dataSourceServerRead(d *schema.ResourceData, meta interface{}) error {
 		for _, s := range *servers.Items {
 			if strings.Contains(*s.Properties.Name, name.(string)) {
 				/* server found */
-				server, _, err = client.ServerApi.DatacentersServersFindById(ctx, datacenterId.(string), *s.Id).Execute()
+				server, _, err = client.ServersApi.DatacentersServersFindById(ctx, datacenterId.(string), *s.Id).Execute()
 				if err != nil {
 					return fmt.Errorf("an error occurred while fetching the server with ID %s: %s", *s.Id, err)
 				}
