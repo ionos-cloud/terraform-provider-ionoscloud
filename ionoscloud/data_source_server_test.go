@@ -50,7 +50,7 @@ func TestAccDataSourceServer_matchName(t *testing.T) {
 const testAccDataSourceServerCreateResources = `
 resource "ionoscloud_datacenter" "test_datasource_server" {
   name              = "test_datasource_server"
-  location          = "de/fra"
+  location          = "us/las"
   description       = "datacenter for testing the server terraform data source"
 }
 resource "ionoscloud_server" "test_datasource_server" {
@@ -60,9 +60,9 @@ resource "ionoscloud_server" "test_datasource_server" {
   cores             = 2
   ram               = 2048
   availability_zone = "ZONE_1"
-  cpu_family        = "INTEL_SKYLAKE"
+  cpu_family        = "AMD_OPTERON"
 
-  image_name        = "ubuntu:20.04"
+  image_name        = "7ab978cb-870a-11eb-a1d6-72dfddd36b99"
   image_password    = "foobar123456"
 
   volume {
@@ -79,7 +79,7 @@ resource "ionoscloud_server" "test_datasource_server" {
 const testAccDataSourceServerMatchId = `
 resource "ionoscloud_datacenter" "test_datasource_server" {
   name              = "test_datasource_server"
-  location          = "de/fra"
+  location          = "us/las"
   description       = "datacenter for testing the server terraform data source"
 }
 
@@ -90,9 +90,9 @@ resource "ionoscloud_server" "test_datasource_server" {
   cores             = 2
   ram               = 2048
   availability_zone = "ZONE_1"
-  cpu_family        = "INTEL_SKYLAKE"
+  cpu_family        = "AMD_OPTERON"
 
-  image_name        = "ubuntu:20.04"
+  image_name        = "7ab978cb-870a-11eb-a1d6-72dfddd36b99"
   image_password    = "foobar123456"
 
   volume {
@@ -114,7 +114,7 @@ data "ionoscloud_server" "test_server" {
 const testAccDataSourceServerMatchName = `
 resource "ionoscloud_datacenter" "test_datasource_server" {
   name              = "test_datasource_server"
-  location          = "de/fra"
+  location          = "us/las"
   description       = "datacenter for testing the server terraform data source"
 }
 
@@ -126,9 +126,9 @@ resource "ionoscloud_server" "test_datasource_server" {
   cores             = 2
   ram               = 2048
   availability_zone = "ZONE_1"
-  cpu_family        = "INTEL_SKYLAKE"
+  cpu_family        = "AMD_OPTERON"
 
-  image_name        = "ubuntu:20.04"
+  image_name        = "7ab978cb-870a-11eb-a1d6-72dfddd36b99"
   image_password    = "foobar123456"
 
   volume {

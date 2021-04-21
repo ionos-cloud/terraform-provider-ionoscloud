@@ -181,11 +181,6 @@ func resourceServer() *schema.Resource {
 							Optional: true,
 							Computed: true,
 						},
-						"image_aliases": {
-							Type:     schema.TypeList,
-							Elem:     &schema.Schema{Type: schema.TypeString},
-							Computed: true,
-						},
 					},
 				},
 			},
@@ -333,7 +328,6 @@ func resourceServerCreate(d *schema.ResourceData, meta interface{}) error {
 			Ram:   &serverRam,
 		},
 	}
-	dcId := d.Get("datacenter_id").(string)
 
 	isSnapshot := false
 
@@ -416,31 +410,11 @@ func resourceServerCreate(d *schema.ResourceData, meta interface{}) error {
 	}
 
 	if !IsValidUUID(image_name) {
-		img, err := getImage(client, dcId, image_name, *volume.Type)
-		if err != nil {
-			return err
-		}
-		if img != nil {
-			image = *img.Id
-		}
-		// if no image id was found with that name we look for a matching snapshot
-		if image == "" {
-			image = getSnapshotId(client, image_name)
-			if image != "" {
-				isSnapshot = true
-			}
-		}
-		if image == "" {
-			return fmt.Errorf("Could not find an image/snapshot that matches %s ", image_name)
-		}
-		if volume.ImagePassword == nil && len(sshkey_path) == 0 && isSnapshot == false && img.Properties.Public != nil && *img.Properties.Public {
-			return fmt.Errorf("Either 'image_password' or 'ssh_key_path' must be provided.")
-		}
+		return fmt.Errorf("Image_name is not a valid UUID")
 	} else {
 		img, apiResponse, err := client.ImagesApi.ImagesFindById(ctx, image_name).Execute()
 
 		_, rsp := err.(ionoscloud.GenericOpenAPIError)
-
 		if err != nil {
 			return fmt.Errorf("Error fetching image %s: (%s) - %+v", image_name, err, rsp)
 		}
@@ -469,34 +443,24 @@ func resourceServerCreate(d *schema.ResourceData, meta interface{}) error {
 				return fmt.Errorf("Either 'image_password' or 'ssh_key_path' must be provided.")
 			}
 
-			img, err := getImage(client, d.Get("datacenter_id").(string), image_name, *volume.Type)
-
-			if err != nil {
-				return err
-			}
-
-			if img != nil {
-				image = *img.Id
-			}
+			image = image_name
 		} else {
-			img, _, err := client.ImagesApi.ImagesFindById(ctx, image_name).Execute()
-			if err != nil {
-				_, apiResponse, err := client.SnapshotsApi.SnapshotsFindById(ctx, image_name).Execute()
-				if err != nil {
-					return fmt.Errorf("Error fetching image/snapshot: %s", string(apiResponse.Payload))
-				}
-				isSnapshot = true
-			}
-
-			if img.Properties.Public != nil && *img.Properties.Public == true && isSnapshot == false {
-				if volume.ImagePassword == nil && len(sshkey_path) == 0 {
-					return fmt.Errorf("Either 'image_password' or 'ssh_key_path' must be provided.")
-				}
-				image = image_name
-			} else {
-				image = image_name
-			}
+			image = image_name
 		}
+	}
+
+	if image == "" && volume.LicenceType == nil && !isSnapshot {
+		return fmt.Errorf("Either 'image', 'licenceType', must be set. Asta e?")
+	}
+
+	if isSnapshot == true && (volume.ImagePassword != nil || len(sshkey_path) > 0) {
+		return fmt.Errorf("Passwords/SSH keys are not supported for snapshots.")
+	}
+
+	if image != "" {
+		volume.Image = &image
+	} else {
+		volume.Image = nil
 	}
 
 	if len(sshkey_path) != 0 {
@@ -512,20 +476,6 @@ func resourceServerCreate(d *schema.ResourceData, meta interface{}) error {
 		if len(publicKeys) > 0 {
 			volume.SshKeys = &publicKeys
 		}
-	}
-
-	if image == "" && volume.LicenceType == nil && !isSnapshot {
-		return fmt.Errorf("Either 'image', 'licenceType', must be set.")
-	}
-
-	if isSnapshot == true && (volume.ImagePassword != nil || len(sshkey_path) > 0) {
-		return fmt.Errorf("Passwords/SSH keys are not supported for snapshots.")
-	}
-
-	if image != "" {
-		volume.Image = &image
-	} else {
-		volume.Image = nil
 	}
 
 	request.Entities = &ionoscloud.ServerEntities{
