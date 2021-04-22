@@ -272,15 +272,18 @@ func resourceFirewallUpdate(d *schema.ResourceData, meta interface{}) error {
 	}
 	if d.HasChange("source_mac") {
 		_, v := d.GetChange("source_mac")
-		properties.SourceMac = v.(*string)
+		vStr := v.(string)
+		properties.SourceMac = &vStr
 	}
 	if d.HasChange("source_ip") {
 		_, v := d.GetChange("source_ip")
-		properties.SourceIp = v.(*string)
+		vStr := v.(string)
+		properties.SourceIp = &vStr
 	}
 	if d.HasChange("target_ip") {
 		_, v := d.GetChange("target_ip")
-		properties.TargetIp = v.(*string)
+		vStr := v.(string)
+		properties.TargetIp = &vStr
 	}
 	if d.HasChange("port_range_start") {
 		_, v := d.GetChange("port_range_start")
