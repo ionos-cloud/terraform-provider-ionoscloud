@@ -120,8 +120,38 @@ func dataSourceK8sNodePool() *schema.Resource {
 				Type:        schema.TypeList,
 				Description: "A list of Local Area Networks the node pool should be part of",
 				Computed:    true,
-				Elem: &schema.Schema{
-					Type: schema.TypeInt,
+				Elem: &schema.Resource{
+					Schema: map[string]*schema.Schema{
+						"id": {
+							Type:        schema.TypeInt,
+							Description: "The LAN ID of an existing LAN at the related datacenter",
+							Required:    true,
+						},
+						"dhcp": {
+							Type:        schema.TypeBool,
+							Description: "Indicates if the Kubernetes Node Pool LAN will reserve an IP using DHCP",
+							Optional:    true,
+						},
+						"routes": {
+							Type:        schema.TypeList,
+							Description: "An array of additional LANs attached to worker nodes",
+							Optional:    true,
+							Elem: &schema.Resource{
+								Schema: map[string]*schema.Schema{
+									"network": {
+										Type:        schema.TypeString,
+										Description: "IPv4 or IPv6 CIDR to be routed via the interface",
+										Required:    true,
+									},
+									"gateway_ip": {
+										Type:        schema.TypeString,
+										Description: "IPv4 or IPv6 Gateway IP for the route",
+										Required:    true,
+									},
+								},
+							},
+						},
+					},
 				},
 			},
 			"labels": {
@@ -331,9 +361,46 @@ func setK8sNodePoolData(d *schema.ResourceData, nodePool *ionoscloud.KubernetesN
 			}
 		}
 
-		if nodePool.Properties.Lans != nil {
-			if err := d.Set("lans", *nodePool.Properties.Lans); err != nil {
-				return err
+		nodePoolLans := make([]interface{}, 0)
+		if nodePool.Properties.Lans != nil && len(*nodePool.Properties.Lans) > 0 {
+			nodePoolLans = make([]interface{}, len(*nodePool.Properties.Lans))
+			for lanIndex, nodePoolLan := range *nodePool.Properties.Lans {
+				lanEntry := make(map[string]interface{})
+
+				if nodePoolLan.Id != nil {
+					lanEntry["id"] = *nodePoolLan.Id
+				}
+
+				if nodePoolLan.Dhcp != nil {
+					lanEntry["dhcp"] = *nodePoolLan.Dhcp
+				}
+
+				nodePoolRoutes := make([]interface{}, 0)
+				if len(*nodePoolLan.Routes) > 0 {
+					nodePoolRoutes = make([]interface{}, len(*nodePoolLan.Routes))
+					for routeIndex, nodePoolRoute := range *nodePoolLan.Routes {
+						routeEntry := make(map[string]string)
+						if nodePoolRoute.Network != nil {
+							routeEntry["network"] = *nodePoolRoute.Network
+						}
+						if nodePoolRoute.GatewayIp != nil {
+							routeEntry["gateway_ip"] = *nodePoolRoute.GatewayIp
+						}
+						nodePoolRoutes[routeIndex] = routeEntry
+					}
+				}
+
+				if len(nodePoolRoutes) > 0 {
+					lanEntry["routes"] = nodePoolRoutes
+				}
+
+				nodePoolLans[lanIndex] = lanEntry
+			}
+		}
+
+		if len(nodePoolLans) > 0 {
+			if err := d.Set("lans", nodePoolLans); err != nil {
+				return fmt.Errorf("Error while setting lans property for k8sNodepool %s: %s", d.Id(), err)
 			}
 		}
 	}

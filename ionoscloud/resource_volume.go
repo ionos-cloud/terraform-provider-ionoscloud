@@ -16,7 +16,7 @@ func resourceVolume() *schema.Resource {
 		Update: resourceVolumeUpdate,
 		Delete: resourceVolumeDelete,
 		Schema: map[string]*schema.Schema{
-			"image_name": {
+			"image": {
 				Type:     schema.TypeString,
 				Optional: true,
 			},
@@ -116,7 +116,7 @@ func resourceVolumeCreate(d *schema.ResourceData, meta interface{}) error {
 	serverId := d.Get("server_id").(string)
 	imagePassword := d.Get("image_password").(string)
 	ssh_keypath = d.Get("ssh_key_path").([]interface{})
-	image_name := d.Get("image_name").(string)
+	image := d.Get("image").(string)
 	licenceType := d.Get("licence_type").(string)
 
 	var publicKeys []string
@@ -131,11 +131,9 @@ func resourceVolumeCreate(d *schema.ResourceData, meta interface{}) error {
 		}
 	}
 
-	var image string
-
-	if image_name != "" {
-		if !IsValidUUID(image_name) {
-			return fmt.Errorf("Image_name is not a valid UUID")
+	if image != "" {
+		if !IsValidUUID(image) {
+			return fmt.Errorf("Image is not a valid UUID")
 		} else {
 			ctx, cancel := context.WithTimeout(context.Background(), *resourceDefaultTimeouts.Default)
 
@@ -143,16 +141,16 @@ func resourceVolumeCreate(d *schema.ResourceData, meta interface{}) error {
 				defer cancel()
 			}
 
-			img, apiResponse, err := client.ImagesApi.ImagesFindById(ctx, image_name).Execute()
+			img, apiResponse, err := client.ImagesApi.ImagesFindById(ctx, image).Execute()
 
 			_, rsp := err.(ionoscloud.GenericOpenAPIError)
 
 			if err != nil {
-				return fmt.Errorf("Error fetching image %s: (%s) - %+v", image_name, err, rsp)
+				return fmt.Errorf("Error fetching image %s: (%s) - %+v", image, err, rsp)
 			}
 
 			if apiResponse.Response.StatusCode == 404 {
-				_, _, err := client.SnapshotsApi.SnapshotsFindById(ctx, image_name).Execute()
+				_, _, err := client.SnapshotsApi.SnapshotsFindById(ctx, image).Execute()
 
 				if _, ok := err.(ionoscloud.GenericOpenAPIError); !ok {
 					if apiResponse != nil && apiResponse.Response.StatusCode == 404 {
@@ -166,15 +164,12 @@ func resourceVolumeCreate(d *schema.ResourceData, meta interface{}) error {
 				if imagePassword == "" && len(ssh_keypath) == 0 {
 					return fmt.Errorf("Either 'image_password' or 'sshkey' must be provided.")
 				}
-				image = image_name
-			} else {
-				image = image_name
 			}
 		}
 	}
 
-	if image_name == "" && licenceType == "" && isSnapshot == false {
-		return fmt.Errorf("Either 'image_name', or 'licenceType' must be set.")
+	if image == "" && licenceType == "" && isSnapshot == false {
+		return fmt.Errorf("Either 'image', or 'licenceType' must be set.")
 	}
 
 	if isSnapshot == true && (imagePassword != "" || len(publicKeys) > 0) {
@@ -377,9 +372,9 @@ func resourceVolumeRead(d *schema.ResourceData, meta interface{}) error {
 
 	if volume.Properties.Image != nil {
 		img, _, err := client.ImagesApi.ImagesFindById(ctx, *volume.Properties.Image).Execute()
-		err = d.Set("image_name", img.Properties.Name)
+		err = d.Set("image", img.Properties.Name)
 		if err != nil {
-			return fmt.Errorf("Error while setting image_name property for volume %s: %s", d.Id(), err)
+			return fmt.Errorf("Error while setting image property for volume %s: %s", d.Id(), err)
 		}
 	}
 

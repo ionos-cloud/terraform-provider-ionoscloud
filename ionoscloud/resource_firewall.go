@@ -70,6 +70,10 @@ func resourceFirewall() *schema.Resource {
 				Type:     schema.TypeString,
 				Optional: true,
 			},
+			"type": {
+				Type:     schema.TypeString,
+				Optional: true,
+			},
 			"datacenter_id": {
 				Type:     schema.TypeString,
 				Required: true,
@@ -139,6 +143,10 @@ func resourceFirewallCreate(d *schema.ResourceData, meta interface{}) error {
 		}
 		tempIcmpCodeeInt := int32(tempIcmpCodee)
 		fw.Properties.IcmpCode = &tempIcmpCodeeInt
+	}
+	if _, ok := d.GetOk("type"); ok {
+		fwType := d.Get("type").(string)
+		fw.Properties.TargetIp = &fwType
 	}
 
 	ctx, cancel := context.WithTimeout(context.Background(), *resourceDefaultTimeouts.Default)
@@ -253,6 +261,13 @@ func resourceFirewallRead(d *schema.ResourceData, meta interface{}) error {
 		}
 	}
 
+	if fw.Properties.Type != nil {
+		err := d.Set("type", *fw.Properties.Type)
+		if err != nil {
+			return fmt.Errorf("Error while setting type property for firewall %s: %s", d.Id(), err)
+		}
+	}
+
 	err = d.Set("nic_id", d.Get("nic_id").(string))
 	if err != nil {
 		return fmt.Errorf("Error while setting nic_id property for firewall %s: %s", d.Id(), err)
@@ -272,15 +287,18 @@ func resourceFirewallUpdate(d *schema.ResourceData, meta interface{}) error {
 	}
 	if d.HasChange("source_mac") {
 		_, v := d.GetChange("source_mac")
-		properties.SourceMac = v.(*string)
+		vStr := v.(string)
+		properties.SourceMac = &vStr
 	}
 	if d.HasChange("source_ip") {
 		_, v := d.GetChange("source_ip")
-		properties.SourceIp = v.(*string)
+		vStr := v.(string)
+		properties.SourceIp = &vStr
 	}
 	if d.HasChange("target_ip") {
 		_, v := d.GetChange("target_ip")
-		properties.TargetIp = v.(*string)
+		vStr := v.(string)
+		properties.TargetIp = &vStr
 	}
 	if d.HasChange("port_range_start") {
 		_, v := d.GetChange("port_range_start")
@@ -309,6 +327,12 @@ func resourceFirewallUpdate(d *schema.ResourceData, meta interface{}) error {
 		}
 		tempIcmpCodeInt := int32(tempIcmpCode)
 		properties.IcmpCode = &tempIcmpCodeInt
+	}
+
+	if d.HasChange("type") {
+		_, v := d.GetChange("type")
+		vStr := v.(string)
+		properties.Type = &vStr
 	}
 
 	ctx, cancel := context.WithTimeout(context.Background(), *resourceDefaultTimeouts.Update)

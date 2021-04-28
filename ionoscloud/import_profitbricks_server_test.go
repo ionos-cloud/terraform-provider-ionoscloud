@@ -26,7 +26,7 @@ func TestAccServer_ImportBasic(t *testing.T) {
 				ImportStateIdFunc:       testAccServerImportStateId,
 				ImportState:             true,
 				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{"image_password", "ssh_key_path.#", "image_name"},
+				ImportStateVerifyIgnore: []string{"image_password", "ssh_key_path.#", "image"},
 			},
 		},
 	})

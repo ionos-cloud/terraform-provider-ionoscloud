@@ -62,7 +62,7 @@ resource "ionoscloud_server" "test_datasource_server" {
   availability_zone = "ZONE_1"
   cpu_family        = "AMD_OPTERON"
 
-  image_name        = "7ab978cb-870a-11eb-a1d6-72dfddd36b99"
+  image        = "81e054dd-a347-11eb-b70c-7ade62b52cc0"
   image_password    = "foobar123456"
 
   volume {
@@ -92,7 +92,7 @@ resource "ionoscloud_server" "test_datasource_server" {
   availability_zone = "ZONE_1"
   cpu_family        = "AMD_OPTERON"
 
-  image_name        = "7ab978cb-870a-11eb-a1d6-72dfddd36b99"
+  image        = "81e054dd-a347-11eb-b70c-7ade62b52cc0"
   image_password    = "foobar123456"
 
   volume {
@@ -128,7 +128,7 @@ resource "ionoscloud_server" "test_datasource_server" {
   availability_zone = "ZONE_1"
   cpu_family        = "AMD_OPTERON"
 
-  image_name        = "7ab978cb-870a-11eb-a1d6-72dfddd36b99"
+  image        = "81e054dd-a347-11eb-b70c-7ade62b52cc0"
   image_password    = "foobar123456"
 
   volume {

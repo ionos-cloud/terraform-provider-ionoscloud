@@ -58,6 +58,18 @@ func resourceGroup() *schema.Resource {
 				Type:     schema.TypeBool,
 				Optional: true,
 			},
+			"create_flow_log": {
+				Type:     schema.TypeBool,
+				Optional: true,
+			},
+			"access_and_manage_monitoring": {
+				Type:     schema.TypeBool,
+				Optional: true,
+			},
+			"access_and_manage_certificates": {
+				Type:     schema.TypeBool,
+				Optional: true,
+			},
 			"user_id": {
 				Type:     schema.TypeString,
 				Optional: true,
@@ -129,6 +141,12 @@ func resourceGroupCreate(d *schema.ResourceData, meta interface{}) error {
 	request.Properties.CreateInternetAccess = &tempCreateInternetAccess
 	tempCreateK8sCluster := d.Get("create_k8s_cluster").(bool)
 	request.Properties.CreateK8sCluster = &tempCreateK8sCluster
+	tempCreateFlowLog := d.Get("create_flow_log").(bool)
+	request.Properties.CreateFlowLog = &tempCreateFlowLog
+	tempAccessAndManageMonitoring := d.Get("access_and_manage_monitoring").(bool)
+	request.Properties.AccessAndManageMonitoring = &tempAccessAndManageMonitoring
+	//tempAccessAndManageCertificates := d.Get("access_and_manage_certificates").(bool)
+	//request.Properties.AccessAndManageCertificates = &tempAccessAndManageCertificates
 
 	usertoAdd := d.Get("user_id").(string)
 
@@ -267,6 +285,27 @@ func resourceGroupRead(d *schema.ResourceData, meta interface{}) error {
 		}
 	}
 
+	if group.Properties.CreateFlowLog != nil {
+		err := d.Set("create_flow_log", *group.Properties.CreateFlowLog)
+		if err != nil {
+			return fmt.Errorf("Error while setting create_flow_log property for group %s: %s", d.Id(), err)
+		}
+	}
+
+	if group.Properties.AccessAndManageMonitoring != nil {
+		err := d.Set("access_and_manage_monitoring", *group.Properties.AccessAndManageMonitoring)
+		if err != nil {
+			return fmt.Errorf("Error while setting access_and_manage_monitoring property for group %s: %s", d.Id(), err)
+		}
+	}
+
+	//if group.Properties.AccessAndManageCertificates != nil {
+	//	err := d.Set("access_and_manage_certificates", *group.Properties.AccessAndManageCertificates)
+	//	if err != nil {
+	//		return fmt.Errorf("Error while setting access_and_manage_certificates property for group %s: %s", d.Id(), err)
+	//	}
+	//}
+
 	users, _, err := client.UserManagementApi.UmGroupsUsersGet(ctx, d.Id()).Execute()
 	if err != nil {
 		return fmt.Errorf("An error occured while ListGroupUsers %s %s", d.Id(), err)
@@ -295,19 +334,25 @@ func resourceGroupUpdate(d *schema.ResourceData, meta interface{}) error {
 	tempCreateBackupUnit := d.Get("create_backup_unit").(bool)
 	tempCreateInternatAccess := d.Get("create_internet_access").(bool)
 	tempCreateK8sCluster := d.Get("create_k8s_cluster").(bool)
+	tempCreateFlowLog := d.Get("create_flow_log").(bool)
+	tempAccessAndManageMonitoring := d.Get("access_and_manage_monitoring").(bool)
+	//tempAccessAndManageCertificates :=  d.Get("access_and_manage_certificates").(bool)
+
 	usertoAdd := d.Get("user_id").(string)
 
 	groupReq := ionoscloud.Group{
 		Properties: &ionoscloud.GroupProperties{
-			CreateDataCenter:     &tempCreateDataCenter,
-			CreateSnapshot:       &tempCreateSnapshot,
-			ReserveIp:            &tempReserveIp,
-			AccessActivityLog:    &tempAccessActivityLog,
-			CreatePcc:            &tempCreatePcc,
-			S3Privilege:          &tempS3Privilege,
-			CreateBackupUnit:     &tempCreateBackupUnit,
-			CreateInternetAccess: &tempCreateInternatAccess,
-			CreateK8sCluster:     &tempCreateK8sCluster,
+			CreateDataCenter:          &tempCreateDataCenter,
+			CreateSnapshot:            &tempCreateSnapshot,
+			ReserveIp:                 &tempReserveIp,
+			AccessActivityLog:         &tempAccessActivityLog,
+			CreatePcc:                 &tempCreatePcc,
+			S3Privilege:               &tempS3Privilege,
+			CreateBackupUnit:          &tempCreateBackupUnit,
+			CreateInternetAccess:      &tempCreateInternatAccess,
+			CreateK8sCluster:          &tempCreateK8sCluster,
+			CreateFlowLog:             &tempCreateFlowLog,
+			AccessAndManageMonitoring: &tempAccessAndManageMonitoring,
 		},
 	}
 

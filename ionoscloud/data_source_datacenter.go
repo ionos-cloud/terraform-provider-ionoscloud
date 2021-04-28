@@ -28,9 +28,44 @@ func dataSourceDataCenter() *schema.Resource {
 				Type:     schema.TypeString,
 				Optional: true,
 			},
+			"version": {
+				Type:     schema.TypeInt,
+				Computed: true,
+			},
+			"features": {
+				Type:     schema.TypeList,
+				Computed: true,
+				Elem: &schema.Schema{
+					Type: schema.TypeString,
+				},
+			},
 			"sec_auth_protection": {
 				Type:     schema.TypeBool,
 				Computed: true,
+			},
+			"cpu_architecture": {
+				Type:     schema.TypeList,
+				Computed: true,
+				Elem: &schema.Resource{
+					Schema: map[string]*schema.Schema{
+						"cpu_family": {
+							Type:     schema.TypeString,
+							Computed: true,
+						},
+						"max_cores": {
+							Type:     schema.TypeInt,
+							Computed: true,
+						},
+						"max_ram": {
+							Type:     schema.TypeInt,
+							Computed: true,
+						},
+						"vendor": {
+							Type:     schema.TypeString,
+							Computed: true,
+						},
+					},
+				},
 			},
 		},
 		Timeouts: &resourceDefaultTimeouts,
@@ -135,23 +170,68 @@ func dataSourceDataCenterRead(d *schema.ResourceData, meta interface{}) error {
 	d.SetId(*datacenter.Id)
 
 	if datacenter.Properties.Location != nil {
-		err := d.Set("location", datacenter.Properties.Location)
+		err := d.Set("location", *datacenter.Properties.Location)
 		if err != nil {
 			return fmt.Errorf("Error while setting location property for datacenter %s: %s", d.Id(), err)
 		}
 	}
 
 	if datacenter.Properties.Name != nil {
-		err := d.Set("name", datacenter.Properties.Name)
+		err := d.Set("name", *datacenter.Properties.Name)
 		if err != nil {
 			return fmt.Errorf("Error while setting name property for datacenter %s: %s", d.Id(), err)
 		}
 	}
 
+	if datacenter.Properties.Version != nil {
+		err := d.Set("version", *datacenter.Properties.Version)
+		if err != nil {
+			return fmt.Errorf("Error while setting version property for datacenter %s: %s", d.Id(), err)
+		}
+	}
+
+	if datacenter.Properties.Features != nil && len(*datacenter.Properties.Features) > 0 {
+		err := d.Set("features", *datacenter.Properties.Features)
+		if err != nil {
+			return fmt.Errorf("Error while setting features property for datacenter %s: %s", d.Id(), err)
+		}
+	}
+
 	if datacenter.Properties.SecAuthProtection != nil {
-		err := d.Set("sec_auth_protection", datacenter.Properties.SecAuthProtection)
+		err := d.Set("sec_auth_protection", *datacenter.Properties.SecAuthProtection)
 		if err != nil {
 			return fmt.Errorf("Error while setting sec_auth_protection property for datacenter %s: %s", d.Id(), err)
+		}
+	}
+
+	cpuArchitectures := make([]interface{}, 0)
+	if datacenter.Properties.CpuArchitecture != nil && len(*datacenter.Properties.CpuArchitecture) > 0 {
+		cpuArchitectures = make([]interface{}, len(*datacenter.Properties.CpuArchitecture))
+		for index, cpuArchitecture := range *datacenter.Properties.CpuArchitecture {
+			architectureEntry := make(map[string]interface{})
+
+			if cpuArchitecture.CpuFamily != nil {
+				architectureEntry["cpu_family"] = *cpuArchitecture.CpuFamily
+			}
+
+			if cpuArchitecture.MaxCores != nil {
+				architectureEntry["max_cores"] = *cpuArchitecture.MaxCores
+			}
+
+			if cpuArchitecture.MaxRam != nil {
+				architectureEntry["max_ram"] = *cpuArchitecture.MaxRam
+			}
+
+			if cpuArchitecture.Vendor != nil {
+				architectureEntry["vendor"] = *cpuArchitecture.Vendor
+			}
+
+			cpuArchitectures[index] = architectureEntry
+		}
+	}
+	if len(cpuArchitectures) > 0 {
+		if err := d.Set("cpu_architecture", cpuArchitectures); err != nil {
+			return fmt.Errorf("Error while setting cpu_architecture property for datacenter %s: %s", d.Id(), err)
 		}
 	}
 

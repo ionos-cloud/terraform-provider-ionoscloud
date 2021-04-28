@@ -55,8 +55,38 @@ func resourcek8sNodePool() *schema.Resource {
 				Type:        schema.TypeList,
 				Description: "A list of Local Area Networks the node pool should be part of",
 				Optional:    true,
-				Elem: &schema.Schema{
-					Type: schema.TypeInt,
+				Elem: &schema.Resource{
+					Schema: map[string]*schema.Schema{
+						"id": {
+							Type:        schema.TypeInt,
+							Description: "The LAN ID of an existing LAN at the related datacenter",
+							Required:    true,
+						},
+						"dhcp": {
+							Type:        schema.TypeBool,
+							Description: "Indicates if the Kubernetes Node Pool LAN will reserve an IP using DHCP",
+							Optional:    true,
+						},
+						"routes": {
+							Type:        schema.TypeList,
+							Description: "An array of additional LANs attached to worker nodes",
+							Optional:    true,
+							Elem: &schema.Resource{
+								Schema: map[string]*schema.Schema{
+									"network": {
+										Type:        schema.TypeString,
+										Description: "IPv4 or IPv6 CIDR to be routed via the interface",
+										Required:    true,
+									},
+									"gateway_ip": {
+										Type:        schema.TypeString,
+										Description: "IPv4 or IPv6 Gateway IP for the route",
+										Required:    true,
+									},
+								},
+							},
+						},
+					},
 				},
 			},
 			"maintenance_window": {
@@ -220,11 +250,59 @@ func resourcek8sNodePoolCreate(d *schema.ResourceData, meta interface{}) error {
 			lans := []ionoscloud.KubernetesNodePoolLan{}
 
 			for lanIndex := range lansVal.([]interface{}) {
-				if lanID, lanIDOk := d.GetOk(fmt.Sprintf("lans.%d", lanIndex)); lanIDOk {
+				lan := ionoscloud.KubernetesNodePoolLan{}
+				addLan := false
+				if lanID, lanIdOk := d.GetOk(fmt.Sprintf("lans.%d.id", lanIndex)); lanIdOk {
 					log.Printf("[INFO] Adding k8s node pool to LAN %+v...", lanID)
 					lanID := int32(lanID.(int))
-					lans = append(lans, ionoscloud.KubernetesNodePoolLan{Id: &lanID})
+					lan.Id = &lanID
+					addLan = true
 				}
+				if lanDhcp, lanDhcpOk := d.GetOk(fmt.Sprintf("lans.%d.dhcp", lanIndex)); lanDhcpOk {
+					lanDhcp := lanDhcp.(bool)
+					lan.Dhcp = &lanDhcp
+				}
+				if lanRoutes, lanRoutesOk := d.GetOk(fmt.Sprintf("lans.%d.routes", lanIndex)); lanRoutesOk {
+					if lanRoutes.([]interface{}) != nil {
+						updateRoutes := false
+
+						routes := []ionoscloud.KubernetesNodePoolLanRoutes{}
+
+						for routeIndex := range lanRoutes.([]interface{}) {
+
+							addRoute := false
+							route := ionoscloud.KubernetesNodePoolLanRoutes{}
+							if routeNetwork, routeNewtworkOk := d.GetOk(fmt.Sprintf("lans.%d.routes.%d.network", lanIndex, routeIndex)); routeNewtworkOk {
+								routeNetwork := routeNetwork.(string)
+								route.Network = &routeNetwork
+								addRoute = true
+							}
+
+							if routeGatewayIp, routeGatewayIpOk := d.GetOk(fmt.Sprintf("lans.%d.routes.%d.gateway_ip", lanIndex, routeIndex)); routeGatewayIpOk {
+								routeGatewayIp := routeGatewayIp.(string)
+								route.GatewayIp = &routeGatewayIp
+								addRoute = true
+							}
+
+							if addRoute {
+								routes = append(routes, route)
+							}
+						}
+
+						if len(routes) > 0 {
+							updateRoutes = true
+						}
+
+						if updateRoutes == true {
+							log.Printf("[INFO] k8s node pool LanRoutes set to %+v", routes)
+							lan.Routes = &routes
+						}
+					}
+				}
+				if addLan {
+					lans = append(lans, lan)
+				}
+
 			}
 
 			if len(lans) > 0 {
@@ -260,11 +338,11 @@ func resourcek8sNodePoolCreate(d *schema.ResourceData, meta interface{}) error {
 		defer cancel()
 	}
 
-	createdNodepool, _, err := client.KubernetesApi.K8sNodepoolsPost(ctx, d.Get("k8s_cluster_id").(string)).KubernetesNodePool(k8sNodepool).Execute()
+	createdNodepool, apiResponse, err := client.KubernetesApi.K8sNodepoolsPost(ctx, d.Get("k8s_cluster_id").(string)).KubernetesNodePool(k8sNodepool).Execute()
 
 	if err != nil {
 		d.SetId("")
-		return fmt.Errorf("Error creating k8s node pool: %s", err)
+		return fmt.Errorf("Error creating k8s node pool: %s \n ApiResponse: %v", err, string(apiResponse.Payload))
 	}
 
 	d.SetId(*createdNodepool.Id)
@@ -418,6 +496,49 @@ func resourcek8sNodePoolRead(d *schema.ResourceData, meta interface{}) error {
 		log.Printf("[INFO] Setting AutoScaling for k8s node pool %s to %+v...", d.Id(), *k8sNodepool.Properties.AutoScaling)
 	}
 
+	nodePoolLans := make([]interface{}, 0)
+	if k8sNodepool.Properties.Lans != nil && len(*k8sNodepool.Properties.Lans) > 0 {
+		nodePoolLans = make([]interface{}, len(*k8sNodepool.Properties.Lans))
+		for lanIndex, nodePoolLan := range *k8sNodepool.Properties.Lans {
+			lanEntry := make(map[string]interface{})
+
+			if nodePoolLan.Id != nil {
+				lanEntry["id"] = *nodePoolLan.Id
+			}
+
+			if nodePoolLan.Dhcp != nil {
+				lanEntry["dhcp"] = *nodePoolLan.Dhcp
+			}
+
+			nodePoolRoutes := make([]interface{}, 0)
+			if len(*nodePoolLan.Routes) > 0 {
+				nodePoolRoutes = make([]interface{}, len(*nodePoolLan.Routes))
+				for routeIndex, nodePoolRoute := range *nodePoolLan.Routes {
+					routeEntry := make(map[string]string)
+					if nodePoolRoute.Network != nil {
+						routeEntry["network"] = *nodePoolRoute.Network
+					}
+					if nodePoolRoute.GatewayIp != nil {
+						routeEntry["gateway_ip"] = *nodePoolRoute.GatewayIp
+					}
+					nodePoolRoutes[routeIndex] = routeEntry
+				}
+			}
+
+			if len(nodePoolRoutes) > 0 {
+				lanEntry["routes"] = nodePoolRoutes
+			}
+
+			nodePoolLans[lanIndex] = lanEntry
+		}
+	}
+
+	if len(nodePoolLans) > 0 {
+		if err := d.Set("lans", nodePoolLans); err != nil {
+			return fmt.Errorf("Error while setting lans property for k8sNodepool %s: %s", d.Id(), err)
+		}
+	}
+
 	return nil
 }
 
@@ -513,15 +634,61 @@ func resourcek8sNodePoolUpdate(d *schema.ResourceData, meta interface{}) error {
 		oldLANs, newLANs := d.GetChange("lans")
 		if newLANs.([]interface{}) != nil {
 			updateLans := false
-
 			lans := []ionoscloud.KubernetesNodePoolLan{}
-
 			for lanIndex := range newLANs.([]interface{}) {
-				if lanID, lanIDOk := d.GetOk(fmt.Sprintf("lans.%d", lanIndex)); lanIDOk {
+				lan := ionoscloud.KubernetesNodePoolLan{}
+				addLan := false
+				if lanID, lanIdOk := d.GetOk(fmt.Sprintf("lans.%d.id", lanIndex)); lanIdOk {
 					log.Printf("[INFO] Adding k8s node pool to LAN %+v...", lanID)
 					lanID := int32(lanID.(int))
-					lans = append(lans, ionoscloud.KubernetesNodePoolLan{Id: &lanID})
+					lan.Id = &lanID
+					addLan = true
 				}
+				if lanDhcp, lanDhcpOk := d.GetOk(fmt.Sprintf("lans.%d.dhcp", lanIndex)); lanDhcpOk {
+					lanDhcp := lanDhcp.(bool)
+					lan.Dhcp = &lanDhcp
+				}
+				if lanRoutes, lanRoutesOk := d.GetOk(fmt.Sprintf("lans.%d.routes", lanIndex)); lanRoutesOk {
+					if lanRoutes.([]interface{}) != nil {
+						updateRoutes := false
+
+						routes := []ionoscloud.KubernetesNodePoolLanRoutes{}
+
+						for routeIndex := range lanRoutes.([]interface{}) {
+
+							addRoute := false
+							route := ionoscloud.KubernetesNodePoolLanRoutes{}
+							if routeNetwork, routeNewtworkOk := d.GetOk(fmt.Sprintf("lans.%d.routes.%d.network", lanIndex, routeIndex)); routeNewtworkOk {
+								routeNetwork := routeNetwork.(string)
+								route.Network = &routeNetwork
+								addRoute = true
+							}
+
+							if routeGatewayIp, routeGatewayIpOk := d.GetOk(fmt.Sprintf("lans.%d.routes.%d.gateway_ip", lanIndex, routeIndex)); routeGatewayIpOk {
+								routeGatewayIp := routeGatewayIp.(string)
+								route.GatewayIp = &routeGatewayIp
+								addRoute = true
+							}
+
+							if addRoute {
+								routes = append(routes, route)
+							}
+						}
+
+						if len(routes) > 0 {
+							updateRoutes = true
+						}
+
+						if updateRoutes == true {
+							log.Printf("[INFO] k8s node pool LanRoutes set to %+v", routes)
+							lan.Routes = &routes
+						}
+					}
+				}
+				if addLan {
+					lans = append(lans, lan)
+				}
+
 			}
 
 			if len(lans) > 0 {

@@ -156,7 +156,7 @@ resource "ionoscloud_server" "webserver" {
   ram = 1024
   availability_zone = "ZONE_1"
   cpu_family = "AMD_OPTERON"
-	image_name = "7ab978cb-870a-11eb-a1d6-72dfddd36b99"
+	image = "81e054dd-a347-11eb-b70c-7ade62b52cc0"
 	image_password = "K3tTj8G14a3EgKyNeeiY"
   volume {
     name = "system"
@@ -203,7 +203,7 @@ resource "ionoscloud_server" "webserver" {
   ram = 1024
   availability_zone = "ZONE_1"
   cpu_family = "AMD_OPTERON"
-	image_name = "7ab978cb-870a-11eb-a1d6-72dfddd36b99"
+	image = "81e054dd-a347-11eb-b70c-7ade62b52cc0"
 	image_password = "K3tTj8G14a3EgKyNeeiY"
   volume {
     name = "system"

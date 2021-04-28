@@ -25,6 +25,10 @@ func resourceServer() *schema.Resource {
 		},
 		Schema: map[string]*schema.Schema{
 			// Server parameters
+			"template_uuid": {
+				Type:     schema.TypeString,
+				Optional: true,
+			},
 			"name": {
 				Type:     schema.TypeString,
 				Required: true,
@@ -50,12 +54,16 @@ func resourceServer() *schema.Resource {
 				Type:     schema.TypeString,
 				Computed: true,
 			},
-
 			"boot_cdrom": {
 				Type:     schema.TypeString,
 				Computed: true,
 			},
 			"cpu_family": {
+				Type:     schema.TypeString,
+				Optional: true,
+				Computed: true,
+			},
+			"type": {
 				Type:     schema.TypeString,
 				Optional: true,
 				Computed: true,
@@ -89,11 +97,11 @@ func resourceServer() *schema.Resource {
 				Computed:      true,
 				ConflictsWith: []string{"volume.0.image_password"},
 			},
-			"image_name": {
+			"image": {
 				Type:          schema.TypeString,
 				Optional:      true,
 				Computed:      true,
-				ConflictsWith: []string{"volume.0.image_name"},
+				ConflictsWith: []string{"volume.0.image"},
 			},
 			"ssh_key_path": {
 				Type:          schema.TypeList,
@@ -108,13 +116,13 @@ func resourceServer() *schema.Resource {
 				MaxItems: 1,
 				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{
-						"image_name": {
+						"image": {
 							Type:          schema.TypeString,
 							Optional:      true,
-							ConflictsWith: []string{"image_name"},
-							Deprecated:    "Please use image_name under server level",
+							ConflictsWith: []string{"image"},
+							Deprecated:    "Please use image under server level",
 							DiffSuppressFunc: func(k, old, new string, d *schema.ResourceData) bool {
-								if d.Get("image_name").(string) == new {
+								if d.Get("image").(string) == new {
 									return true
 								}
 								return false
@@ -331,6 +339,16 @@ func resourceServerCreate(d *schema.ResourceData, meta interface{}) error {
 
 	isSnapshot := false
 
+	if v, ok := d.GetOk("template_uuid"); ok {
+		vStr := v.(string)
+		request.Properties.TemplateUuid = &vStr
+	}
+
+	if v, ok := d.GetOk("type"); ok {
+		vStr := v.(string)
+		request.Properties.Type = &vStr
+	}
+
 	if v, ok := d.GetOk("availability_zone"); ok {
 		vStr := v.(string)
 		request.Properties.AvailabilityZone = &vStr
@@ -393,14 +411,14 @@ func resourceServerCreate(d *schema.ResourceData, meta interface{}) error {
 		d.Set("ssh_key_path", [][]string{})
 	}
 
-	var image, image_name string
-	if v, ok := d.GetOk("volume.0.image_name"); ok {
-		image_name = v.(string)
-		d.Set("image_name", v.(string))
-	} else if v, ok := d.GetOk("image_name"); ok {
-		image_name = v.(string)
+	var image string
+	if v, ok := d.GetOk("volume.0.image"); ok {
+		image = v.(string)
+		d.Set("image", v.(string))
+	} else if v, ok := d.GetOk("image"); ok {
+		image = v.(string)
 	} else {
-		return fmt.Errorf("Either 'image_name' or 'volume.0.image_name' must be provided.")
+		return fmt.Errorf("Either 'image' or 'volume.0.image' must be provided.")
 	}
 
 	ctx, cancel := context.WithTimeout(context.Background(), *resourceDefaultTimeouts.Default)
@@ -409,19 +427,19 @@ func resourceServerCreate(d *schema.ResourceData, meta interface{}) error {
 		defer cancel()
 	}
 
-	if !IsValidUUID(image_name) {
-		return fmt.Errorf("Image_name is not a valid UUID")
+	if !IsValidUUID(image) {
+		return fmt.Errorf("Image is not a valid UUID")
 	} else {
-		img, apiResponse, err := client.ImagesApi.ImagesFindById(ctx, image_name).Execute()
+		img, apiResponse, err := client.ImagesApi.ImagesFindById(ctx, image).Execute()
 
 		_, rsp := err.(ionoscloud.GenericOpenAPIError)
 		if err != nil {
-			return fmt.Errorf("Error fetching image %s: (%s) - %+v", image_name, err, rsp)
+			return fmt.Errorf("Error fetching image %s: (%s) - %+v", image, err, rsp)
 		}
 
 		if apiResponse.Response.StatusCode == 404 {
 
-			_, apiResponse, err := client.SnapshotsApi.SnapshotsFindById(ctx, image_name).Execute()
+			_, apiResponse, err := client.SnapshotsApi.SnapshotsFindById(ctx, image).Execute()
 
 			if _, ok := err.(ionoscloud.GenericOpenAPIError); !ok {
 				if apiResponse != nil && apiResponse.Response.StatusCode == 404 {
@@ -442,10 +460,6 @@ func resourceServerCreate(d *schema.ResourceData, meta interface{}) error {
 			if volume.ImagePassword == nil && len(sshkey_path) == 0 {
 				return fmt.Errorf("Either 'image_password' or 'ssh_key_path' must be provided.")
 			}
-
-			image = image_name
-		} else {
-			image = image_name
 		}
 	}
 
@@ -594,7 +608,7 @@ func resourceServerCreate(d *schema.ResourceData, meta interface{}) error {
 
 	if err != nil {
 		return fmt.Errorf(
-			"Error creating server: (%s)", err)
+			"Error creating server: (%s) \n apiEroor: %v", err, string(apiResponse.Payload))
 	}
 	d.SetId(*server.Id)
 
@@ -722,6 +736,10 @@ func resourceServerRead(d *schema.ResourceData, meta interface{}) error {
 		return fmt.Errorf("Error occured while fetching a server ID %s %s", d.Id(), err)
 	}
 
+	if server.Properties.TemplateUuid != nil {
+		d.Set("template_uuid", *server.Properties.TemplateUuid)
+	}
+
 	if server.Properties.Name != nil {
 		d.Set("name", *server.Properties.Name)
 	}
@@ -732,6 +750,10 @@ func resourceServerRead(d *schema.ResourceData, meta interface{}) error {
 
 	if server.Properties.Ram != nil {
 		d.Set("ram", *server.Properties.Ram)
+	}
+
+	if server.Properties.Type != nil {
+		d.Set("type", *server.Properties.Type)
 	}
 
 	if server.Properties.AvailabilityZone != nil {
@@ -894,6 +916,11 @@ func resourceServerUpdate(d *schema.ResourceData, meta interface{}) error {
 
 	request := ionoscloud.ServerProperties{}
 
+	if d.HasChange("template_uuid") {
+		_, n := d.GetChange("template_uuid")
+		nStr := n.(string)
+		request.TemplateUuid = &nStr
+	}
 	if d.HasChange("name") {
 		_, n := d.GetChange("name")
 		nStr := n.(string)
@@ -908,6 +935,11 @@ func resourceServerUpdate(d *schema.ResourceData, meta interface{}) error {
 		_, n := d.GetChange("ram")
 		nInt := int32(n.(int))
 		request.Ram = &nInt
+	}
+	if d.HasChange("type") {
+		_, n := d.GetChange("type")
+		nStr := n.(string)
+		request.Type = &nStr
 	}
 	if d.HasChange("availability_zone") {
 		_, n := d.GetChange("availability_zone")

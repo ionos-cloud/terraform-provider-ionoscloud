@@ -14,6 +14,10 @@ func dataSourceServer() *schema.Resource {
 	return &schema.Resource{
 		Read: dataSourceServerRead,
 		Schema: map[string]*schema.Schema{
+			"template_uuid": {
+				Type:     schema.TypeString,
+				Optional: true,
+			},
 			"datacenter_id": {
 				Type:     schema.TypeString,
 				Required: true,
@@ -25,6 +29,11 @@ func dataSourceServer() *schema.Resource {
 			"name": {
 				Type:     schema.TypeString,
 				Optional: true,
+			},
+			"type": {
+				Type:     schema.TypeString,
+				Optional: true,
+				Computed: true,
 			},
 			"cores": {
 				Type:     schema.TypeInt,
@@ -51,6 +60,10 @@ func dataSourceServer() *schema.Resource {
 				Computed: true,
 			},
 			"boot_volume": {
+				Type:     schema.TypeString,
+				Computed: true,
+			},
+			"token": {
 				Type:     schema.TypeString,
 				Computed: true,
 			},
@@ -163,10 +176,6 @@ func dataSourceServer() *schema.Resource {
 							Type:     schema.TypeString,
 							Computed: true,
 						},
-						"image_alias": {
-							Type:     schema.TypeString,
-							Computed: true,
-						},
 						"image_password": {
 							Type:     schema.TypeString,
 							Computed: true,
@@ -211,6 +220,10 @@ func dataSourceServer() *schema.Resource {
 							Computed: true,
 						},
 						"device_number": {
+							Type:     schema.TypeInt,
+							Computed: true,
+						},
+						"pci_slot": {
 							Type:     schema.TypeInt,
 							Computed: true,
 						},
@@ -348,7 +361,7 @@ func float32OrDefault(f *float32, d float32) float32 {
 	return d
 }
 
-func setServerData(d *schema.ResourceData, server *ionoscloud.Server) error {
+func setServerData(d *schema.ResourceData, server *ionoscloud.Server, token *ionoscloud.Token) error {
 
 	if server.Id != nil {
 		d.SetId(*server.Id)
@@ -358,6 +371,12 @@ func setServerData(d *schema.ResourceData, server *ionoscloud.Server) error {
 	}
 
 	if server.Properties != nil {
+		if server.Properties.TemplateUuid != nil {
+			if err := d.Set("template_uuid", *server.Properties.TemplateUuid); err != nil {
+				return err
+			}
+		}
+
 		if server.Properties.Name != nil {
 			if err := d.Set("name", *server.Properties.Name); err != nil {
 				return err
@@ -372,6 +391,12 @@ func setServerData(d *schema.ResourceData, server *ionoscloud.Server) error {
 
 		if server.Properties.Ram != nil {
 			if err := d.Set("ram", *server.Properties.Ram); err != nil {
+				return err
+			}
+		}
+
+		if server.Properties.Type != nil {
+			if err := d.Set("type", *server.Properties.Type); err != nil {
 				return err
 			}
 		}
@@ -474,6 +499,7 @@ func setServerData(d *schema.ResourceData, server *ionoscloud.Server) error {
 			entry["disc_virtio_hot_plug"] = boolOrDefault(volume.Properties.DiscVirtioHotPlug, true)
 			entry["disc_virtio_hot_unplug"] = boolOrDefault(volume.Properties.DiscVirtioHotUnplug, true)
 			entry["device_number"] = int64OrDefault(volume.Properties.DeviceNumber, 0)
+			entry["pci_slot"] = int32OrDefault(volume.Properties.PciSlot, 0)
 
 			volumes[i] = entry
 		}
@@ -532,6 +558,10 @@ func setServerData(d *schema.ResourceData, server *ionoscloud.Server) error {
 		return err
 	}
 
+	if token != nil {
+		d.Set("token", *token.Token)
+	}
+
 	return nil
 }
 
@@ -585,13 +615,24 @@ func dataSourceServerRead(d *schema.ResourceData, meta interface{}) error {
 				break
 			}
 		}
+
 	}
 
 	if &server == nil {
 		return errors.New("server not found")
 	}
 
-	if err = setServerData(d, &server); err != nil {
+	var token = ionoscloud.Token{}
+
+	if &server != nil && server.Id != nil {
+		token, _, err = client.ServersApi.DatacentersServersTokenGet(ctx, datacenterId.(string), *server.Id).Execute()
+
+		if err != nil {
+			return fmt.Errorf("an error occurred while fetching the server token %s: %s", *server.Id, err)
+		}
+	}
+
+	if err = setServerData(d, &server, &token); err != nil {
 		return err
 	}
 
