@@ -201,7 +201,7 @@ func dataSourcePccRead(d *schema.ResourceData, meta interface{}) error {
 		for _, p := range *pccs.Items {
 			if strings.Contains(*p.Properties.Name, name.(string)) {
 				/* lan found */
-				pcc, _, err = client.PrivateCrossConnectApi.PccsFindById(ctx, id.(string)).Execute()
+				pcc, _, err = client.PrivateCrossConnectApi.PccsFindById(ctx, *p.Id).Execute()
 				if err != nil {
 					return fmt.Errorf("an error occurred while fetching the pcc with ID %s: %s", *p.Id, err)
 				}

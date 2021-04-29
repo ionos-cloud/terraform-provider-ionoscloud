@@ -42,7 +42,7 @@ func TestAccNic_Basic(t *testing.T) {
 }
 
 func testAccCheckNicDestroyCheck(s *terraform.State) error {
-	client := testAccProvider.Meta().(*ionoscloud.APIClient)
+	client := testAccProvider.Meta().(SdkBundle).Client
 
 	ctx, _ := context.WithTimeout(context.Background(), *resourceDefaultTimeouts.Delete)
 	for _, rs := range s.RootModule().Resources {
@@ -82,9 +82,9 @@ func testAccCheckNicAttributes(n string, name string) resource.TestCheckFunc {
 
 func testAccCheckNICExists(n string, nic *ionoscloud.Nic) resource.TestCheckFunc {
 	return func(s *terraform.State) error {
-		client := testAccProvider.Meta().(*ionoscloud.APIClient)
-		rs, ok := s.RootModule().Resources[n]
+		client := testAccProvider.Meta().(SdkBundle).Client
 
+		rs, ok := s.RootModule().Resources[n]
 		if !ok {
 			return fmt.Errorf("testAccCheckVolumeExists: Not found: %s", n)
 		}

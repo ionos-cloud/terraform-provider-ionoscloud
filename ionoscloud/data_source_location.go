@@ -34,7 +34,6 @@ func dataSourceLocationRead(d *schema.ResourceData, meta interface{}) error {
 	if cancel != nil {
 		defer cancel()
 	}
-	//locations, err := client.ListLocations()
 	locations, _, err := client.LocationApi.LocationsGet(ctx).Execute()
 
 	if err != nil {

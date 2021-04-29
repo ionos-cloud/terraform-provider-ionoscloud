@@ -6,7 +6,6 @@ import (
 
 	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
 	ionoscloud "github.com/ionos-cloud/sdk-go/v5"
-	"github.com/profitbricks/profitbricks-sdk-go/v5"
 )
 
 func resourceLoadbalancer() *schema.Resource {
@@ -25,6 +24,7 @@ func resourceLoadbalancer() *schema.Resource {
 			"ip": {
 				Type:     schema.TypeString,
 				Optional: true,
+				Computed: true,
 			},
 			"dhcp": {
 				Type:     schema.TypeBool,
@@ -47,6 +47,7 @@ func resourceLoadbalancer() *schema.Resource {
 
 func resourceLoadbalancerCreate(d *schema.ResourceData, meta interface{}) error {
 	client := meta.(SdkBundle).Client
+
 	raw_ids := d.Get("nic_ids").([]interface{})
 	nic_ids := []ionoscloud.Nic{}
 
@@ -95,16 +96,16 @@ func resourceLoadbalancerCreate(d *schema.ResourceData, meta interface{}) error 
 
 func resourceLoadbalancerRead(d *schema.ResourceData, meta interface{}) error {
 	client := meta.(SdkBundle).Client
+
 	ctx, cancel := context.WithTimeout(context.Background(), *resourceDefaultTimeouts.Default)
 	if cancel != nil {
 		defer cancel()
 	}
 
-	lb, _, err := client.LoadBalancerApi.DatacentersLoadbalancersFindById(ctx, d.Get("datacenter_id").(string), d.Id()).Execute()
-
+	lb, apiResponse, err := client.LoadBalancerApi.DatacentersLoadbalancersFindById(ctx, d.Get("datacenter_id").(string), d.Id()).Execute()
 	if err != nil {
-		if apiError, ok := err.(profitbricks.ApiError); ok {
-			if apiError.HttpStatusCode() == 404 {
+		if _, ok := err.(ionoscloud.GenericOpenAPIError); ok {
+			if apiResponse.Response.StatusCode == 404 {
 				d.SetId("")
 				return nil
 			}
@@ -112,36 +113,46 @@ func resourceLoadbalancerRead(d *schema.ResourceData, meta interface{}) error {
 		return fmt.Errorf("An error occured while fetching a lan ID %s %s", d.Id(), err)
 	}
 
-	d.Set("name", lb.Properties.Name)
-	d.Set("ip", lb.Properties.Ip)
-	d.Set("dhcp", lb.Properties.Dhcp)
+	d.Set("name", *lb.Properties.Name)
+	d.Set("ip", *lb.Properties.Ip)
+	d.Set("dhcp", *lb.Properties.Dhcp)
 
 	return nil
 }
 
 func resourceLoadbalancerUpdate(d *schema.ResourceData, meta interface{}) error {
 	client := meta.(SdkBundle).Client
-	properties := ionoscloud.LoadbalancerProperties{}
+	properties := &ionoscloud.LoadbalancerProperties{}
 
+	var hasChangeCount int = 0
 	if d.HasChange("name") {
 		_, new := d.GetChange("name")
 		name := new.(string)
 		properties.Name = &name
+		hasChangeCount++
 	}
 	if d.HasChange("ip") {
 		_, new := d.GetChange("ip")
 		ip := new.(string)
 		properties.Ip = &ip
+		hasChangeCount++
 	}
 	if d.HasChange("dhcp") {
 		_, new := d.GetChange("dhcp")
 		dhcp := new.(bool)
 		properties.Dhcp = &dhcp
+		hasChangeCount++
 	}
 
 	ctx, cancel := context.WithTimeout(context.Background(), *resourceDefaultTimeouts.Update)
 	if cancel != nil {
 		defer cancel()
+	}
+	if hasChangeCount > 0 {
+		_, _, err := client.LoadBalancerApi.DatacentersLoadbalancersPatch(ctx, d.Get("datacenter_id").(string), d.Id()).Loadbalancer(*properties).Execute()
+		if err != nil {
+			return fmt.Errorf("Error while updating loadbalancer %s: %s ", d.Id(), err)
+		}
 	}
 
 	if d.HasChange("nic_ids") {

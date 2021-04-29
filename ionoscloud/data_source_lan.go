@@ -75,7 +75,7 @@ func convertIpFailoverList(ips *[]ionoscloud.IPFailover) []interface{} {
 
 func setLanData(d *schema.ResourceData, lan *ionoscloud.Lan) error {
 	d.SetId(*lan.Id)
-	if err := d.Set("id", lan.Id); err != nil {
+	if err := d.Set("id", *lan.Id); err != nil {
 		return err
 	}
 
@@ -131,9 +131,7 @@ func dataSourceLanRead(d *schema.ResourceData, meta interface{}) error {
 	}
 	if idOk {
 		/* search by ID */
-
-		//lan, err = client.GetLan(datacenterId.(string), id.(string))
-		lan, _, err = client.LanApi.DatacentersLansFindById(ctx, datacenterId.(string), d.Id()).Execute()
+		lan, _, err = client.LanApi.DatacentersLansFindById(ctx, datacenterId.(string), id.(string)).Execute()
 		if err != nil {
 			return fmt.Errorf("an error occurred while fetching lan with ID %s: %s", id.(string), err)
 		}

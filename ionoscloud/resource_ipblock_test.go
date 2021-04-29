@@ -42,7 +42,7 @@ func TestAccIPBlock_Basic(t *testing.T) {
 }
 
 func testAccCheckIPBlockDestroyCheck(s *terraform.State) error {
-	client := testAccProvider.Meta().(*ionoscloud.APIClient)
+	client := testAccProvider.Meta().(SdkBundle).Client
 
 	ctx, _ := context.WithTimeout(context.Background(), *resourceDefaultTimeouts.Delete)
 	for _, rs := range s.RootModule().Resources {
@@ -50,7 +50,6 @@ func testAccCheckIPBlockDestroyCheck(s *terraform.State) error {
 			continue
 		}
 
-		//_, err := client.GetIPBlock(rs.Primary.ID)
 		_, apiResponse, err := client.IPBlocksApi.IpblocksFindById(ctx, rs.Primary.ID).Execute()
 
 		if apiError, ok := err.(ionoscloud.GenericOpenAPIError); ok {
@@ -81,9 +80,9 @@ func testAccCheckIPBlockAttributes(n string, location string) resource.TestCheck
 
 func testAccCheckIPBlockExists(n string, ipblock *ionoscloud.IpBlock) resource.TestCheckFunc {
 	return func(s *terraform.State) error {
-		client := testAccProvider.Meta().(*ionoscloud.APIClient)
-		rs, ok := s.RootModule().Resources[n]
+		client := testAccProvider.Meta().(SdkBundle).Client
 
+		rs, ok := s.RootModule().Resources[n]
 		if !ok {
 			return fmt.Errorf("testAccCheckIPBlockExists: Not found: %s", n)
 		}

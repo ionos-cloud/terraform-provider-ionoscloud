@@ -47,14 +47,18 @@ func TestAccUser_Basic(t *testing.T) {
 }
 
 func testAccCheckUserDestroyCheck(s *terraform.State) error {
-	client := testAccProvider.Meta().(*ionoscloud.APIClient)
+	client := testAccProvider.Meta().(SdkBundle).Client
 
 	ctx, _ := context.WithTimeout(context.Background(), *resourceDefaultTimeouts.Delete)
 	for _, rs := range s.RootModule().Resources {
-		_, _, err := client.UserManagementApi.UmUsersFindById(ctx, rs.Primary.ID).Execute()
+		_, apiResponse, err := client.UserManagementApi.UmUsersFindById(ctx, rs.Primary.ID).Execute()
 
-		if err != nil {
-			return fmt.Errorf("user still exists %s %s", rs.Primary.ID, err)
+		if _, ok := err.(ionoscloud.GenericOpenAPIError); ok {
+			if apiResponse.Response.StatusCode != 404 {
+				return fmt.Errorf("user still exists %s %s", rs.Primary.ID, err)
+			}
+		} else {
+			return fmt.Errorf("Unable to find User %s %s", rs.Primary.ID, err)
 		}
 	}
 
@@ -77,7 +81,7 @@ func testAccCheckUserAttributes(n string, name string) resource.TestCheckFunc {
 
 func testAccCheckUserExists(n string, user *ionoscloud.User) resource.TestCheckFunc {
 	return func(s *terraform.State) error {
-		client := testAccProvider.Meta().(*ionoscloud.APIClient)
+		client := testAccProvider.Meta().(SdkBundle).Client
 		rs, ok := s.RootModule().Resources[n]
 
 		if !ok {

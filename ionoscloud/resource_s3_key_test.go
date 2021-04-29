@@ -42,7 +42,8 @@ func TestAccS3Key_Basic(t *testing.T) {
 }
 
 func testAccChecks3KeyDestroyCheck(s *terraform.State) error {
-	client := testAccProvider.Meta().(*ionoscloud.APIClient)
+	//client := testAccProvider.Meta().(*ionoscloud.APIClient)
+	client := testAccProvider.Meta().(SdkBundle).Client
 
 	for _, rs := range s.RootModule().Resources {
 		if rs.Type != "ionoscloud_s3_key" {
@@ -66,7 +67,9 @@ func testAccChecks3KeyDestroyCheck(s *terraform.State) error {
 
 func testAccChecks3KeyExists(n string, s3Key *ionoscloud.S3Key) resource.TestCheckFunc {
 	return func(s *terraform.State) error {
-		client := testAccProvider.Meta().(*ionoscloud.APIClient)
+		//client := testAccProvider.Meta().(*ionoscloud.APIClient)
+		client := testAccProvider.Meta().(SdkBundle).Client
+
 		rs, ok := s.RootModule().Resources[n]
 
 		if !ok {
@@ -98,7 +101,7 @@ const testAccChecks3KeyConfigBasic = `
 resource "ionoscloud_user" "example" {
   first_name = "terraform"
   last_name = "test"
-  email = "terraform-s3-acc-tester2@profitbricks.com"
+  email = "terraform-s3-acc-tester007@profitbricks.com"
   password = "abc123-321CBA"
   administrator = false
   force_sec_auth= false
@@ -113,7 +116,7 @@ const testAccChecks3KeyConfigUpdate = `
 resource "ionoscloud_user" "example" {
   first_name = "terraform"
   last_name = "test"
-  email = "terraform-s3-acc-tester2@profitbricks.com"
+  email = "terraform-s3-acc-tester007@profitbricks.com"
   password = "abc123-321CBA"
   administrator = false
   force_sec_auth= false

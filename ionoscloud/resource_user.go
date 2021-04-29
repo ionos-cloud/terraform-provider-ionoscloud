@@ -82,7 +82,9 @@ func resourceUserCreate(d *schema.ResourceData, meta interface{}) error {
 	}
 	rsp, apiResponse, err := client.UserManagementApi.UmUsersPost(ctx).User(request).Execute()
 
-	log.Printf("[DEBUG] USER ID: %s", *rsp.Id)
+	if rsp.Id != nil {
+		log.Printf("[DEBUG] USER ID: %s", *rsp.Id)
+	}
 
 	if err != nil {
 		return fmt.Errorf("An error occured while creating a user: %s", err)

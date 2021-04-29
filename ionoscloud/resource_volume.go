@@ -400,7 +400,11 @@ func resourceVolumeRead(d *schema.ResourceData, meta interface{}) error {
 	}
 
 	if volume.Properties.Image != nil {
-		err := d.Set("image_name", *volume.Properties.Image)
+		image, _, err := client.ImageApi.ImagesFindById(ctx, *volume.Properties.Image).Execute()
+		if err != nil {
+			return fmt.Errorf("Error while getting image_name property for image %s: %s", *volume.Properties.Image, err)
+		}
+		err = d.Set("image_name", *image.Properties.Name)
 		if err != nil {
 			return fmt.Errorf("Error while setting image_name property for volume %s: %s", d.Id(), err)
 		}

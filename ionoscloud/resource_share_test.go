@@ -37,16 +37,26 @@ func TestAccShare_Basic(t *testing.T) {
 }
 
 func testAccCheckShareDestroyCheck(s *terraform.State) error {
-	client := testAccProvider.Meta().(*ionoscloud.APIClient)
+	// todo fix test
+	client := testAccProvider.Meta().(SdkBundle).Client
 
+	ctx, cancel := context.WithTimeout(context.Background(), *resourceDefaultTimeouts.Delete)
+
+	if cancel != nil {
+		defer cancel()
+	}
 	for _, rs := range s.RootModule().Resources {
-
 		grpId := rs.Primary.Attributes["group_id"]
 		resourceId := rs.Primary.Attributes["resource_id"]
-		_, apiResponse, err := client.UserManagementApi.UmGroupsSharesFindByResourceId(context.TODO(), grpId, resourceId).Execute()
+		fmt.Printf("\nattributes: %s \n", rs.Primary.Attributes)
+		_, apiResponse, err := client.UserManagementApi.UmGroupsSharesFindByResourceId(ctx, grpId, resourceId).Execute()
 
-		if err != nil {
-			return fmt.Errorf("share for resource %s still exists in group %s %s", resourceId, grpId, apiResponse.Response.Status)
+		if _, ok := err.(ionoscloud.GenericOpenAPIError); ok {
+			if apiResponse.Response.StatusCode != 404 {
+				return fmt.Errorf("share for resource %s still exists in group %s %s /payload: %s", resourceId, grpId, apiResponse.Response.Status, string(apiResponse.Payload))
+			}
+		} else {
+			return fmt.Errorf("Unable to find Group Share %s %s", rs.Primary.ID, err)
 		}
 	}
 
@@ -55,7 +65,8 @@ func testAccCheckShareDestroyCheck(s *terraform.State) error {
 
 func testAccCheckShareExists(n string, share *ionoscloud.GroupShare) resource.TestCheckFunc {
 	return func(s *terraform.State) error {
-		client := testAccProvider.Meta().(*ionoscloud.APIClient)
+		client := testAccProvider.Meta().(SdkBundle).Client
+
 		rs, ok := s.RootModule().Resources[n]
 
 		if !ok {
