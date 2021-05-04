@@ -1,16 +1,17 @@
 package ionoscloud
 
 import (
+	"context"
 	"fmt"
+	ionoscloud "github.com/ionos-cloud/sdk-go/v5"
 	"testing"
 
 	"github.com/hashicorp/terraform-plugin-sdk/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/terraform"
-	"github.com/profitbricks/profitbricks-sdk-go/v5"
 )
 
 func TestAccLan_Basic(t *testing.T) {
-	var lan profitbricks.Lan
+	var lan ionoscloud.Lan
 	lanName := "lanName"
 
 	resource.Test(t, resource.TestCase{
@@ -40,16 +41,17 @@ func TestAccLan_Basic(t *testing.T) {
 }
 
 func testAccCheckLanDestroyCheck(s *terraform.State) error {
-	client := testAccProvider.Meta().(*profitbricks.Client)
+	client := testAccProvider.Meta().(SdkBundle).Client
 	for _, rs := range s.RootModule().Resources {
 		if rs.Type != "ionoscloud_datacenter" {
 			continue
 		}
 
-		_, err := client.GetLan(rs.Primary.Attributes["datacenter_id"], rs.Primary.ID)
+		ctx, _ := context.WithTimeout(context.Background(), *resourceDefaultTimeouts.Delete)
+		_, apiResponse, err := client.LanApi.DatacentersLansFindById(ctx, rs.Primary.Attributes["datacenter_id"], rs.Primary.ID).Execute()
 
-		if apiError, ok := err.(profitbricks.ApiError); ok {
-			if apiError.HttpStatusCode() != 404 {
+		if apiError, ok := err.(ionoscloud.GenericOpenAPIError); ok {
+			if apiResponse.Response.StatusCode != 404 {
 				return fmt.Errorf("LAN still exists %s %s", rs.Primary.ID, apiError)
 			}
 		} else {
@@ -74,9 +76,9 @@ func testAccCheckLanAttributes(n string, name string) resource.TestCheckFunc {
 	}
 }
 
-func testAccCheckLanExists(n string, lan *profitbricks.Lan) resource.TestCheckFunc {
+func testAccCheckLanExists(n string, lan *ionoscloud.Lan) resource.TestCheckFunc {
 	return func(s *terraform.State) error {
-		client := testAccProvider.Meta().(*profitbricks.Client)
+		client := testAccProvider.Meta().(SdkBundle).Client
 		rs, ok := s.RootModule().Resources[n]
 
 		if !ok {
@@ -87,16 +89,17 @@ func testAccCheckLanExists(n string, lan *profitbricks.Lan) resource.TestCheckFu
 			return fmt.Errorf("No Record ID is set")
 		}
 
-		foundLan, err := client.GetLan(rs.Primary.Attributes["datacenter_id"], rs.Primary.ID)
+		ctx, _ := context.WithTimeout(context.Background(), *resourceDefaultTimeouts.Default)
+		foundLan, _, err := client.LanApi.DatacentersLansFindById(ctx, rs.Primary.Attributes["datacenter_id"], rs.Primary.ID).Execute()
 
 		if err != nil {
 			return fmt.Errorf("Error occured while fetching Server: %s", rs.Primary.ID)
 		}
-		if foundLan.ID != rs.Primary.ID {
+		if *foundLan.Id != rs.Primary.ID {
 			return fmt.Errorf("Record not found")
 		}
 
-		lan = foundLan
+		lan = &foundLan
 
 		return nil
 	}

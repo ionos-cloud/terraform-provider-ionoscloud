@@ -1,12 +1,13 @@
 package ionoscloud
 
 import (
+	"context"
 	"fmt"
 	"log"
 	"strings"
 
 	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
-	"github.com/profitbricks/profitbricks-sdk-go/v5"
+	ionoscloud "github.com/ionos-cloud/sdk-go/v5"
 )
 
 func dataSourceLocation() *schema.Resource {
@@ -27,9 +28,13 @@ func dataSourceLocation() *schema.Resource {
 }
 
 func dataSourceLocationRead(d *schema.ResourceData, meta interface{}) error {
-	client := meta.(SdkBundle).LegacyClient
+	client := meta.(SdkBundle).Client
 
-	locations, err := client.ListLocations()
+	ctx, cancel := context.WithTimeout(context.Background(), *resourceDefaultTimeouts.Default)
+	if cancel != nil {
+		defer cancel()
+	}
+	locations, _, err := client.LocationApi.LocationsGet(ctx).Execute()
 
 	if err != nil {
 		return fmt.Errorf("An error occured while fetching IonosCloud locations %s", err)
@@ -41,18 +46,18 @@ func dataSourceLocationRead(d *schema.ResourceData, meta interface{}) error {
 	if !nameOk && !featureOk {
 		return fmt.Errorf("Either 'name' or 'feature' must be provided.")
 	}
-	results := []profitbricks.Location{}
+	results := []ionoscloud.Location{}
 
-	for _, loc := range locations.Items {
-		if loc.Properties.Name == name.(string) || strings.Contains(loc.Properties.Name, name.(string)) {
+	for _, loc := range *locations.Items {
+		if *loc.Properties.Name == name.(string) || strings.Contains(*loc.Properties.Name, name.(string)) {
 			results = append(results, loc)
 		}
 	}
 
 	if featureOk {
-		locationResults := []profitbricks.Location{}
+		locationResults := []ionoscloud.Location{}
 		for _, loc := range results {
-			for _, f := range loc.Properties.Features {
+			for _, f := range *loc.Properties.Features {
 				if f == feature.(string) {
 					locationResults = append(locationResults, loc)
 				}
@@ -71,7 +76,7 @@ func dataSourceLocationRead(d *schema.ResourceData, meta interface{}) error {
 		return fmt.Errorf("There are no locations that match the search criteria")
 	}
 
-	d.SetId(results[0].ID)
+	d.SetId(*results[0].Id)
 
 	return nil
 }

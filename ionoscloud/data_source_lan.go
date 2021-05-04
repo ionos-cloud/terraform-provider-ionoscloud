@@ -1,12 +1,13 @@
 package ionoscloud
 
 import (
+	"context"
 	"errors"
 	"fmt"
+	ionoscloud "github.com/ionos-cloud/sdk-go/v5"
 	"strings"
 
 	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
-	"github.com/profitbricks/profitbricks-sdk-go/v5"
 )
 
 func dataSourceLan() *schema.Resource {
@@ -54,7 +55,7 @@ func dataSourceLan() *schema.Resource {
 	}
 }
 
-func convertIpFailoverList(ips *[]profitbricks.IPFailover) []interface{} {
+func convertIpFailoverList(ips *[]ionoscloud.IPFailover) []interface{} {
 	if ips == nil {
 		return make([]interface{}, 0)
 	}
@@ -63,8 +64,8 @@ func convertIpFailoverList(ips *[]profitbricks.IPFailover) []interface{} {
 	for i, ip := range *ips {
 		entry := make(map[string]interface{})
 
-		entry["ip"] = ip.IP
-		entry["nic_uuid"] = ip.NicUUID
+		entry["ip"] = ip.Ip
+		entry["nic_uuid"] = ip.NicUuid
 
 		ret[i] = entry
 	}
@@ -72,29 +73,40 @@ func convertIpFailoverList(ips *[]profitbricks.IPFailover) []interface{} {
 	return ret
 }
 
-func setLanData(d *schema.ResourceData, lan *profitbricks.Lan) error {
-	d.SetId(lan.ID)
-	if err := d.Set("id", lan.ID); err != nil {
+func setLanData(d *schema.ResourceData, lan *ionoscloud.Lan) error {
+	d.SetId(*lan.Id)
+	if err := d.Set("id", *lan.Id); err != nil {
 		return err
 	}
 
-	if err := d.Set("name", lan.Properties.Name); err != nil {
-		return err
+	if lan.Properties != nil {
+		if lan.Properties.Name != nil {
+			if err := d.Set("name", *lan.Properties.Name); err != nil {
+				return err
+			}
+		}
+		if lan.Properties.IpFailover != nil {
+			if err := d.Set("ip_failover", convertIpFailoverList(lan.Properties.IpFailover)); err != nil {
+				return err
+			}
+		}
+		if lan.Properties.Pcc != nil {
+			if err := d.Set("pcc", *lan.Properties.Pcc); err != nil {
+				return err
+			}
+		}
+		if lan.Properties.Public != nil {
+			if err := d.Set("public", *lan.Properties.Public); err != nil {
+				return err
+			}
+		}
 	}
-	if err := d.Set("ip_failover", convertIpFailoverList(lan.Properties.IPFailover)); err != nil {
-		return err
-	}
-	if err := d.Set("pcc", lan.Properties.PCC); err != nil {
-		return err
-	}
-	if err := d.Set("public", lan.Properties.Public); err != nil {
-		return err
-	}
+
 	return nil
 }
 
 func dataSourceLanRead(d *schema.ResourceData, meta interface{}) error {
-	client := meta.(SdkBundle).LegacyClient
+	client := meta.(SdkBundle).Client
 
 	datacenterId, dcIdOk := d.GetOk("datacenter_id")
 	if !dcIdOk {
@@ -110,40 +122,45 @@ func dataSourceLanRead(d *schema.ResourceData, meta interface{}) error {
 	if !idOk && !nameOk {
 		return errors.New("please provide either the lan id or name")
 	}
-	var lan *profitbricks.Lan
+	var lan ionoscloud.Lan
 	var err error
 
+	ctx, cancel := context.WithTimeout(context.Background(), *resourceDefaultTimeouts.Default)
+	if cancel != nil {
+		defer cancel()
+	}
 	if idOk {
 		/* search by ID */
-		lan, err = client.GetLan(datacenterId.(string), id.(string))
+		lan, _, err = client.LanApi.DatacentersLansFindById(ctx, datacenterId.(string), id.(string)).Execute()
 		if err != nil {
 			return fmt.Errorf("an error occurred while fetching lan with ID %s: %s", id.(string), err)
 		}
 	} else {
 		/* search by name */
-		var lans *profitbricks.Lans
-		lans, err := client.ListLans(datacenterId.(string))
+		var lans ionoscloud.Lans
+
+		lans, _, err := client.LanApi.DatacentersLansGet(ctx, datacenterId.(string)).Execute()
 		if err != nil {
 			return fmt.Errorf("an error occurred while fetching lans: %s", err.Error())
 		}
 
-		for _, l := range lans.Items {
-			if strings.Contains(l.Properties.Name, name.(string)) {
+		for _, l := range *lans.Items {
+			if strings.Contains(*l.Properties.Name, name.(string)) {
 				/* lan found */
-				lan, err = client.GetLan(datacenterId.(string), l.ID)
+				lan, _, err = client.LanApi.DatacentersLansFindById(ctx, datacenterId.(string), *l.Id).Execute()
 				if err != nil {
-					return fmt.Errorf("an error occurred while fetching lan %s: %s", l.ID, err)
+					return fmt.Errorf("an error occurred while fetching lan %s: %s", *l.Id, err)
 				}
 				break
 			}
 		}
 	}
 
-	if lan == nil {
+	if &lan == nil {
 		return errors.New("lan not found")
 	}
 
-	if err = setLanData(d, lan); err != nil {
+	if err = setLanData(d, &lan); err != nil {
 		return err
 	}
 

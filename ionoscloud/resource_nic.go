@@ -70,6 +70,7 @@ func resourceNicCreate(d *schema.ResourceData, meta interface{}) error {
 
 	lan := d.Get("lan").(int)
 	lanConverted := int32(lan)
+
 	nic := ionoscloud.Nic{
 		Properties: &ionoscloud.NicProperties{
 			Lan: &lanConverted,
@@ -79,11 +80,10 @@ func resourceNicCreate(d *schema.ResourceData, meta interface{}) error {
 		name := d.Get("name").(string)
 		nic.Properties.Name = &name
 	}
-	if _, ok := d.GetOk("dhcp"); ok {
+	if _, ok := d.GetOkExists("dhcp"); ok {
 		val := d.Get("dhcp").(bool)
 		nic.Properties.Dhcp = &val
 	}
-
 	if _, ok := d.GetOk("ip"); ok {
 		raw := d.Get("ip").(string)
 		ips := strings.Split(raw, ",")
@@ -94,7 +94,7 @@ func resourceNicCreate(d *schema.ResourceData, meta interface{}) error {
 		nic.Properties.FirewallActive = &raw
 	}
 
-	ctx, cancel := context.WithTimeout(context.Background(), *resourceDefaultTimeouts.Create) //client.GetContext()
+	ctx, cancel := context.WithTimeout(context.Background(), *resourceDefaultTimeouts.Create)
 	if cancel != nil {
 		defer cancel()
 	}
@@ -142,14 +142,26 @@ func resourceNicRead(d *schema.ResourceData, meta interface{}) error {
 		return fmt.Errorf("Error occured while fetching a nic ID %s %s", d.Id(), err)
 	}
 
-	if rsp.Properties != nil { // todo sa las rsp denumit ca nic???
+	if rsp.Properties != nil {
 		log.Printf("[INFO] LAN ON NIC: %d", rsp.Properties.Lan)
-		d.Set("dhcp", *rsp.Properties.Dhcp)
-		d.Set("lan", *rsp.Properties.Lan)
-		d.Set("name", *rsp.Properties.Name)
-		d.Set("ips", *rsp.Properties.Ips)
-		d.Set("firewall_active", *rsp.Properties.FirewallActive)
-		d.Set("mac", *rsp.Properties.Mac)
+		if rsp.Properties.Dhcp != nil {
+			d.Set("dhcp", *rsp.Properties.Dhcp)
+		}
+		if rsp.Properties.Lan != nil {
+			d.Set("lan", *rsp.Properties.Lan)
+		}
+		if rsp.Properties.Name != nil {
+			d.Set("name", *rsp.Properties.Name)
+		}
+		if rsp.Properties.Ips != nil {
+			d.Set("ips", *rsp.Properties.Ips)
+		}
+		if rsp.Properties.FirewallActive != nil {
+			d.Set("firewall_active", *rsp.Properties.FirewallActive)
+		}
+		if rsp.Properties.Mac != nil {
+			d.Set("mac", *rsp.Properties.Mac)
+		}
 	}
 
 	return nil
@@ -169,6 +181,7 @@ func resourceNicUpdate(d *schema.ResourceData, meta interface{}) error {
 		lan := n.(int32)
 		properties.Lan = &lan
 	}
+
 	n := d.Get("dhcp").(bool)
 	properties.Dhcp = &n
 

@@ -1,16 +1,17 @@
 package ionoscloud
 
 import (
+	"context"
 	"fmt"
+	ionoscloud "github.com/ionos-cloud/sdk-go/v5"
 	"testing"
 
 	"github.com/hashicorp/terraform-plugin-sdk/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/terraform"
-	"github.com/profitbricks/profitbricks-sdk-go/v5"
 )
 
 func TestAccPrivateCrossConnect_Basic(t *testing.T) {
-	var privateCrossConnect profitbricks.PrivateCrossConnect
+	var privateCrossConnect ionoscloud.PrivateCrossConnect
 	privateCrossConnectName := "example"
 	privateCrossConnectDescription := "example-description"
 
@@ -42,16 +43,18 @@ func TestAccPrivateCrossConnect_Basic(t *testing.T) {
 }
 
 func testAccCheckprivateCrossConnectDestroyCheck(s *terraform.State) error {
-	client := testAccProvider.Meta().(*profitbricks.Client)
+	client := testAccProvider.Meta().(SdkBundle).Client
+
+	ctx, _ := context.WithTimeout(context.Background(), *resourceDefaultTimeouts.Delete)
 	for _, rs := range s.RootModule().Resources {
 		if rs.Type != "ionoscloud_private_crossconnect" {
 			continue
 		}
 
-		_, err := client.GetPrivateCrossConnect(rs.Primary.ID)
+		_, apiResponse, err := client.PrivateCrossConnectApi.PccsFindById(ctx, rs.Primary.ID).Execute()
 
-		if apiError, ok := err.(profitbricks.ApiError); ok {
-			if apiError.HttpStatusCode() != 404 {
+		if apiError, ok := err.(ionoscloud.GenericOpenAPIError); ok {
+			if apiResponse.Response.StatusCode != 404 {
 				return fmt.Errorf("private cross-connect exists %s %s", rs.Primary.ID, apiError)
 			}
 		} else {
@@ -62,10 +65,12 @@ func testAccCheckprivateCrossConnectDestroyCheck(s *terraform.State) error {
 	return nil
 }
 
-func testAccCheckprivateCrossConnectExists(n string, privateCrossConnect *profitbricks.PrivateCrossConnect) resource.TestCheckFunc {
+func testAccCheckprivateCrossConnectExists(n string, privateCrossConnect *ionoscloud.PrivateCrossConnect) resource.TestCheckFunc {
 	return func(s *terraform.State) error {
-		client := testAccProvider.Meta().(*profitbricks.Client)
+		client := testAccProvider.Meta().(SdkBundle).Client
+
 		rs, ok := s.RootModule().Resources[n]
+		ctx, _ := context.WithTimeout(context.Background(), *resourceDefaultTimeouts.Default)
 
 		if !ok {
 			return fmt.Errorf("Not found: %s", n)
@@ -75,15 +80,15 @@ func testAccCheckprivateCrossConnectExists(n string, privateCrossConnect *profit
 			return fmt.Errorf("No Record ID is set")
 		}
 
-		foundPrivateCrossConnect, err := client.GetPrivateCrossConnect(rs.Primary.ID)
+		foundPrivateCrossConnect, _, err := client.PrivateCrossConnectApi.PccsFindById(ctx, rs.Primary.ID).Execute()
 
 		if err != nil {
 			return fmt.Errorf("Error occured while fetching private cross-connect: %s", rs.Primary.ID)
 		}
-		if foundPrivateCrossConnect.ID != rs.Primary.ID {
+		if *foundPrivateCrossConnect.Id != rs.Primary.ID {
 			return fmt.Errorf("Record not found")
 		}
-		privateCrossConnect = foundPrivateCrossConnect
+		privateCrossConnect = &foundPrivateCrossConnect
 
 		return nil
 	}

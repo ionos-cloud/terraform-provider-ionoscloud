@@ -28,12 +28,10 @@ func resourceShare() *schema.Resource {
 			"group_id": {
 				Type:     schema.TypeString,
 				Required: true,
-				ForceNew: true,
 			},
 			"resource_id": {
 				Type:     schema.TypeString,
 				Required: true,
-				ForceNew: true,
 			},
 		},
 		Timeouts: &resourceDefaultTimeouts,
@@ -131,13 +129,17 @@ func resourceShareDelete(d *schema.ResourceData, meta interface{}) error {
 	if cancel != nil {
 		defer cancel()
 	}
-	_, apiResponse, err := client.UserManagementApi.UmGroupsSharesDelete(ctx,
-		d.Get("group_id").(string), d.Get("resource_id").(string)).Execute()
+	groupId := d.Get("group_id").(string)
+	resourceId := d.Get("resource_id").(string)
+
+	_, apiResponse, err := client.UserManagementApi.UmGroupsSharesDelete(ctx, groupId, resourceId).Execute()
 	if err != nil {
+		if apiResponse.Response.StatusCode == 404 {
+			return err
+		}
 		//try again in 20 seconds
 		time.Sleep(20 * time.Second)
-		_, apiResponse, err := client.UserManagementApi.UmGroupsSharesDelete(ctx,
-			d.Get("group_id").(string), d.Get("resource_id").(string)).Execute()
+		_, apiResponse, err := client.UserManagementApi.UmGroupsSharesDelete(ctx, groupId, resourceId).Execute()
 		if err != nil {
 			if _, ok := err.(ionoscloud.GenericOpenAPIError); ok {
 				if apiResponse.Response.StatusCode != 404 {

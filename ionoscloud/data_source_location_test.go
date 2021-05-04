@@ -16,8 +16,8 @@ func TestAccDataSourceLocation_basic(t *testing.T) {
 			{
 
 				Config: testAccDataSourceLocation_basic,
-				Check: resource.ComposeTestCheckFunc(resource.TestCheckResourceAttr("data.ionoscloud_location.loc", "id", "de/fkb"),
-					resource.TestCheckResourceAttr("data.ionoscloud_location.loc", "name", "karlsruhe"),
+				Check: resource.ComposeTestCheckFunc(resource.TestCheckResourceAttr("data.ionoscloud_location.loc", "id", "de/fra"),
+					resource.TestCheckResourceAttr("data.ionoscloud_location.loc", "name", "frankfurt"),
 				),
 			},
 		},
@@ -27,7 +27,7 @@ func TestAccDataSourceLocation_basic(t *testing.T) {
 
 const testAccDataSourceLocation_basic = `
 	data "ionoscloud_location" "loc" {
-	  name = "karlsruhe"
+	  name = "frankfurt"
 	  feature = "SSD"
 	}
 	`
