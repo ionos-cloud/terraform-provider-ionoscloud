@@ -75,8 +75,8 @@ func resourcek8sClusterCreate(d *schema.ResourceData, meta interface{}) error {
 	client := meta.(SdkBundle).Client
 
 	clusterName := d.Get("name").(string)
-	cluster := ionoscloud.KubernetesCluster{
-		Properties: &ionoscloud.KubernetesClusterProperties{
+	cluster := ionoscloud.KubernetesClusterForPost{
+		Properties: &ionoscloud.KubernetesClusterPropertiesForPost{
 			Name: &clusterName,
 		},
 	}
@@ -111,7 +111,6 @@ func resourcek8sClusterCreate(d *schema.ResourceData, meta interface{}) error {
 		for i := range auvVal {
 			requestAvailableUpgradeVersions[i] = fmt.Sprint(auvVal[i])
 		}
-		cluster.Properties.AvailableUpgradeVersions = &requestAvailableUpgradeVersions
 	}
 
 	vnpvVal, ok := d.GetOk("viable_node_pool_versions")
@@ -123,7 +122,6 @@ func resourcek8sClusterCreate(d *schema.ResourceData, meta interface{}) error {
 		for i := range vnpvVal {
 			requestViableNodePoolVersions[i] = fmt.Sprint(vnpvVal[i])
 		}
-		cluster.Properties.ViableNodePoolVersions = &requestViableNodePoolVersions
 	}
 
 	ctx, cancel := context.WithTimeout(context.Background(), *resourceDefaultTimeouts.Create)
@@ -190,10 +188,10 @@ func resourcek8sClusterRead(d *schema.ResourceData, meta interface{}) error {
 
 func resourcek8sClusterUpdate(d *schema.ResourceData, meta interface{}) error {
 	client := meta.(SdkBundle).Client
-	request := ionoscloud.KubernetesCluster{}
+	request := ionoscloud.KubernetesClusterForPut{}
 
 	clusterName := d.Get("name").(string)
-	request.Properties = &ionoscloud.KubernetesClusterProperties{
+	request.Properties = &ionoscloud.KubernetesClusterPropertiesForPut{
 		Name: &clusterName,
 	}
 
@@ -268,8 +266,6 @@ func resourcek8sClusterUpdate(d *schema.ResourceData, meta interface{}) error {
 			for i := range availableUpgradeVersions {
 				requestAvailableUpgradeVersions[i] = fmt.Sprint(availableUpgradeVersions[i])
 			}
-
-			request.Properties.AvailableUpgradeVersions = &requestAvailableUpgradeVersions
 		}
 	}
 
@@ -285,8 +281,6 @@ func resourcek8sClusterUpdate(d *schema.ResourceData, meta interface{}) error {
 			for i := range availableViableNodePoolVersions {
 				requestViableNodePoolVersions[i] = fmt.Sprint(availableViableNodePoolVersions[i])
 			}
-
-			request.Properties.ViableNodePoolVersions = &requestViableNodePoolVersions
 		}
 	}
 

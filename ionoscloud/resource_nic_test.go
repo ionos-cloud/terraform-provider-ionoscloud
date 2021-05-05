@@ -52,7 +52,7 @@ func testAccCheckNicDestroyCheck(s *terraform.State) error {
 
 		dcId := rs.Primary.Attributes["datacenter_id"]
 		serverId := rs.Primary.Attributes["server_id"]
-		_, apiResponse, err := client.NicApi.DatacentersServersNicsFindById(ctx, dcId, serverId, rs.Primary.ID).Execute()
+		_, apiResponse, err := client.NetworkInterfacesApi.DatacentersServersNicsFindById(ctx, dcId, serverId, rs.Primary.ID).Execute()
 
 		if apiError, ok := err.(ionoscloud.GenericOpenAPIError); ok {
 			if apiResponse.Response.StatusCode != 404 {
@@ -96,7 +96,7 @@ func testAccCheckNICExists(n string, nic *ionoscloud.Nic) resource.TestCheckFunc
 		ctx, _ := context.WithTimeout(context.Background(), *resourceDefaultTimeouts.Default)
 		dcId := rs.Primary.Attributes["datacenter_id"]
 		serverId := rs.Primary.Attributes["server_id"]
-		foundNic, _, err := client.NicApi.DatacentersServersNicsFindById(ctx, dcId, serverId, rs.Primary.ID).Execute()
+		foundNic, _, err := client.NetworkInterfacesApi.DatacentersServersNicsFindById(ctx, dcId, serverId, rs.Primary.ID).Execute()
 
 		if err != nil {
 			return fmt.Errorf("Error occured while fetching Volume: %s", rs.Primary.ID)
@@ -124,11 +124,11 @@ resource "ionoscloud_server" "webserver" {
   ram = 1024
   availability_zone = "ZONE_1"
   cpu_family = "AMD_OPTERON"
-	image_name ="ubuntu-16.04"
+    image = "81e054dd-a347-11eb-b70c-7ade62b52cc0"
 	image_password = "K3tTj8G14a3EgKyNeeiY"
   volume {
     name = "system"
-    size = 5
+    size = 14
     disk_type = "SSD"
 
 }
@@ -145,6 +145,7 @@ resource "ionoscloud_nic" "database_nic" {
   lan = 2
   dhcp = false
   firewall_active = true
+  firewall_type = "INGRESS"
   name = "%s"
 }`
 
@@ -161,11 +162,11 @@ resource "ionoscloud_server" "webserver" {
   ram = 1024
   availability_zone = "ZONE_1"
   cpu_family = "AMD_OPTERON"
-	image_name ="ubuntu-16.04"
+	image = "81e054dd-a347-11eb-b70c-7ade62b52cc0"
 	image_password = "K3tTj8G14a3EgKyNeeiY"
   volume {
     name = "system"
-    size = 5
+    size = 14
     disk_type = "SSD"
 }
   nic {
@@ -181,6 +182,7 @@ resource "ionoscloud_nic" "database_nic" {
   lan = 2
   dhcp = false
   firewall_active = true
+  firewall_type = "INGRESS"
   name = "updated"
 }
 `

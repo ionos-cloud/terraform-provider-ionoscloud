@@ -149,7 +149,7 @@ func resourceLoadbalancerUpdate(d *schema.ResourceData, meta interface{}) error 
 		defer cancel()
 	}
 	if hasChangeCount > 0 {
-		_, _, err := client.LoadBalancerApi.DatacentersLoadbalancersPatch(ctx, d.Get("datacenter_id").(string), d.Id()).Loadbalancer(*properties).Execute()
+		_, _, err := client.LoadBalancersApi.DatacentersLoadbalancersPatch(ctx, d.Get("datacenter_id").(string), d.Id()).Loadbalancer(*properties).Execute()
 		if err != nil {
 			return fmt.Errorf("Error while updating loadbalancer %s: %s ", d.Id(), err)
 		}

@@ -46,6 +46,10 @@ func resourceNic() *schema.Resource {
 				Type:     schema.TypeBool,
 				Optional: true,
 			},
+			"firewall_type": {
+				Type:     schema.TypeString,
+				Optional: true,
+			},
 			"server_id": {
 				Type:     schema.TypeString,
 				Required: true,
@@ -92,6 +96,10 @@ func resourceNicCreate(d *schema.ResourceData, meta interface{}) error {
 	if _, ok := d.GetOk("firewall_active"); ok {
 		raw := d.Get("firewall_active").(bool)
 		nic.Properties.FirewallActive = &raw
+	}
+	if _, ok := d.GetOk("firewall_type"); ok {
+		raw := d.Get("firewall_type").(string)
+		nic.Properties.FirewallType = &raw
 	}
 
 	ctx, cancel := context.WithTimeout(context.Background(), *resourceDefaultTimeouts.Create)
@@ -159,6 +167,9 @@ func resourceNicRead(d *schema.ResourceData, meta interface{}) error {
 		if rsp.Properties.FirewallActive != nil {
 			d.Set("firewall_active", *rsp.Properties.FirewallActive)
 		}
+		if rsp.Properties.FirewallType != nil {
+			d.Set("firewall_type", *rsp.Properties.FirewallType)
+		}
 		if rsp.Properties.Mac != nil {
 			d.Set("mac", *rsp.Properties.Mac)
 		}
@@ -224,7 +235,6 @@ func resourceNicDelete(d *schema.ResourceData, meta interface{}) error {
 	dcid := d.Get("datacenter_id").(string)
 	srvid := d.Get("server_id").(string)
 	nicid := d.Id()
-	//resp, err := client.DeleteNic(d.Get("datacenter_id").(string), d.Get("server_id").(string), d.Id())
 	_, apiresp, err := client.NetworkInterfacesApi.DatacentersServersNicsDelete(ctx, dcid, srvid, nicid).Execute()
 
 	if err != nil {

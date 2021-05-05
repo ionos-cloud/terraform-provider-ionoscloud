@@ -37,7 +37,7 @@ func dataSourceSnapshotRead(d *schema.ResourceData, meta interface{}) error {
 	if cancel != nil {
 		defer cancel()
 	}
-	snapshots, _, err := client.SnapshotApi.SnapshotsGet(ctx).Execute()
+	snapshots, _, err := client.SnapshotsApi.SnapshotsGet(ctx).Execute()
 
 	if err != nil {
 		return fmt.Errorf("An error occured while fetching IonosCloud locations %s", err)

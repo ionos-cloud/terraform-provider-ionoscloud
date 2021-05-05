@@ -131,7 +131,7 @@ func dataSourceLanRead(d *schema.ResourceData, meta interface{}) error {
 	}
 	if idOk {
 		/* search by ID */
-		lan, _, err = client.LanApi.DatacentersLansFindById(ctx, datacenterId.(string), id.(string)).Execute()
+		lan, _, err = client.LansApi.DatacentersLansFindById(ctx, datacenterId.(string), id.(string)).Execute()
 		if err != nil {
 			return fmt.Errorf("an error occurred while fetching lan with ID %s: %s", id.(string), err)
 		}
@@ -139,7 +139,7 @@ func dataSourceLanRead(d *schema.ResourceData, meta interface{}) error {
 		/* search by name */
 		var lans ionoscloud.Lans
 
-		lans, _, err := client.LanApi.DatacentersLansGet(ctx, datacenterId.(string)).Execute()
+		lans, _, err := client.LansApi.DatacentersLansGet(ctx, datacenterId.(string)).Execute()
 		if err != nil {
 			return fmt.Errorf("an error occurred while fetching lans: %s", err.Error())
 		}
@@ -147,7 +147,7 @@ func dataSourceLanRead(d *schema.ResourceData, meta interface{}) error {
 		for _, l := range *lans.Items {
 			if strings.Contains(*l.Properties.Name, name.(string)) {
 				/* lan found */
-				lan, _, err = client.LanApi.DatacentersLansFindById(ctx, datacenterId.(string), *l.Id).Execute()
+				lan, _, err = client.LansApi.DatacentersLansFindById(ctx, datacenterId.(string), *l.Id).Execute()
 				if err != nil {
 					return fmt.Errorf("an error occurred while fetching lan %s: %s", *l.Id, err)
 				}

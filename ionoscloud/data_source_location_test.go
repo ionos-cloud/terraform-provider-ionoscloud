@@ -26,8 +26,8 @@ func TestAccDataSourceLocation_basic(t *testing.T) {
 }
 
 const testAccDataSourceLocation_basic = `
-	data "ionoscloud_location" "loc" {
+data "ionoscloud_location" "loc" {
 	  name = "frankfurt"
 	  feature = "SSD"
-	}
-	`
+}
+`

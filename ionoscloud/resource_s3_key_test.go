@@ -51,7 +51,8 @@ func testAccChecks3KeyDestroyCheck(s *terraform.State) error {
 		}
 
 		userId := rs.Primary.Attributes["user_id"]
-		_, apiResponse, err := client.UserManagementApi.UmUsersS3keysFindByKeyId(context.TODO(), userId, rs.Primary.ID).Execute()
+		//client.UserS3KeysApi.UmUsersS3keysFindByKeyId
+		_, apiResponse, err := client.UserS3KeysApi.UmUsersS3keysFindByKeyId(context.TODO(), userId, rs.Primary.ID).Execute()
 
 		if apiError, ok := err.(ionoscloud.GenericOpenAPIError); ok {
 			if apiResponse.Response.StatusCode != 404 {
@@ -67,7 +68,6 @@ func testAccChecks3KeyDestroyCheck(s *terraform.State) error {
 
 func testAccChecks3KeyExists(n string, s3Key *ionoscloud.S3Key) resource.TestCheckFunc {
 	return func(s *terraform.State) error {
-		//client := testAccProvider.Meta().(*ionoscloud.APIClient)
 		client := testAccProvider.Meta().(SdkBundle).Client
 
 		rs, ok := s.RootModule().Resources[n]
@@ -81,7 +81,7 @@ func testAccChecks3KeyExists(n string, s3Key *ionoscloud.S3Key) resource.TestChe
 		}
 
 		userId := rs.Primary.Attributes["user_id"]
-		foundS3Key, _, err := client.UserManagementApi.UmUsersS3keysFindByKeyId(context.TODO(), userId, rs.Primary.ID).Execute()
+		foundS3Key, _, err := client.UserS3KeysApi.UmUsersS3keysFindByKeyId(context.TODO(), userId, rs.Primary.ID).Execute()
 
 		if err != nil {
 			return fmt.Errorf("Error occured while fetching S3 Key: %s", rs.Primary.ID)

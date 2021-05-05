@@ -51,10 +51,10 @@ func testAccCheckLoadbalancerDestroyCheck(s *terraform.State) error {
 		}
 
 		dcId := rs.Primary.Attributes["datacenter_id"]
-		_, _, err := client.LoadBalancerApi.DatacentersLoadbalancersFindById(ctx, dcId, rs.Primary.ID).Execute()
+		_, _, err := client.LoadBalancersApi.DatacentersLoadbalancersFindById(ctx, dcId, rs.Primary.ID).Execute()
 
 		if err != nil {
-			_, apiResponse, err := client.DataCenterApi.DatacentersDelete(ctx, dcId).Execute()
+			_, apiResponse, err := client.DataCentersApi.DatacentersDelete(ctx, dcId).Execute()
 
 			if apiError, ok := err.(ionoscloud.GenericOpenAPIError); ok {
 				if apiResponse.Response.StatusCode != 404 {
@@ -98,7 +98,7 @@ func testAccCheckLoadbalancerExists(n string, loadbalancer *ionoscloud.Loadbalan
 
 		ctx, _ := context.WithTimeout(context.Background(), *resourceDefaultTimeouts.Default)
 		dcId := rs.Primary.Attributes["datacenter_id"]
-		foundLB, _, err := client.LoadBalancerApi.DatacentersLoadbalancersFindById(ctx, dcId, rs.Primary.ID).Execute()
+		foundLB, _, err := client.LoadBalancersApi.DatacentersLoadbalancersFindById(ctx, dcId, rs.Primary.ID).Execute()
 
 		if err != nil {
 			return fmt.Errorf("Error occured while fetching Loadbalancer: %s", rs.Primary.ID)

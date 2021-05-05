@@ -22,6 +22,30 @@ func dataSourceLocation() *schema.Resource {
 				Type:     schema.TypeString,
 				Optional: true,
 			},
+			"cpu_architecture": {
+				Type:     schema.TypeList,
+				Computed: true,
+				Elem: &schema.Resource{
+					Schema: map[string]*schema.Schema{
+						"cpu_family": {
+							Type:     schema.TypeString,
+							Computed: true,
+						},
+						"max_cores": {
+							Type:     schema.TypeInt,
+							Computed: true,
+						},
+						"max_ram": {
+							Type:     schema.TypeInt,
+							Computed: true,
+						},
+						"vendor": {
+							Type:     schema.TypeString,
+							Computed: true,
+						},
+					},
+				},
+			},
 		},
 		Timeouts: &resourceDefaultTimeouts,
 	}
@@ -34,7 +58,7 @@ func dataSourceLocationRead(d *schema.ResourceData, meta interface{}) error {
 	if cancel != nil {
 		defer cancel()
 	}
-	locations, _, err := client.LocationApi.LocationsGet(ctx).Execute()
+	locations, _, err := client.LocationsApi.LocationsGet(ctx).Execute()
 
 	if err != nil {
 		return fmt.Errorf("An error occured while fetching IonosCloud locations %s", err)
@@ -66,6 +90,38 @@ func dataSourceLocationRead(d *schema.ResourceData, meta interface{}) error {
 		results = locationResults
 	}
 	log.Printf("[INFO] Results length %d *************", len(results))
+
+	cpuArchitectures := make([]interface{}, 0)
+	for _, loc := range results {
+		cpuArchitectures = make([]interface{}, len(*loc.Properties.CpuArchitecture))
+		for index, cpuArchitecture := range *loc.Properties.CpuArchitecture {
+			architectureEntry := make(map[string]interface{})
+
+			if cpuArchitecture.CpuFamily != nil {
+				architectureEntry["cpu_family"] = *cpuArchitecture.CpuFamily
+			}
+
+			if cpuArchitecture.MaxCores != nil {
+				architectureEntry["max_cores"] = *cpuArchitecture.MaxCores
+			}
+
+			if cpuArchitecture.MaxRam != nil {
+				architectureEntry["max_ram"] = *cpuArchitecture.MaxRam
+			}
+
+			if cpuArchitecture.Vendor != nil {
+				architectureEntry["vendor"] = *cpuArchitecture.Vendor
+			}
+
+			cpuArchitectures[index] = architectureEntry
+		}
+	}
+
+	if len(cpuArchitectures) > 0 {
+		if err := d.Set("cpu_architecture", cpuArchitectures); err != nil {
+			return fmt.Errorf("Error while setting cpu_architecture property for datacenter %s: %s", d.Id(), err)
+		}
+	}
 
 	if len(results) > 1 {
 		log.Printf("[INFO] Results length greater than 1")
