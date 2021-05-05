@@ -1,16 +1,17 @@
 package ionoscloud
 
 import (
+	"context"
 	"fmt"
+	ionoscloud "github.com/ionos-cloud/sdk-go/v5"
 	"testing"
 
 	"github.com/hashicorp/terraform-plugin-sdk/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/terraform"
-	"github.com/profitbricks/profitbricks-sdk-go/v5"
 )
 
 func TestAccSnapshot_Basic(t *testing.T) {
-	var snapshot profitbricks.Snapshot
+	var snapshot ionoscloud.Snapshot
 	snapshotName := "terraform_snapshot"
 
 	resource.Test(t, resource.TestCase{
@@ -38,16 +39,18 @@ func TestAccSnapshot_Basic(t *testing.T) {
 }
 
 func testAccCheckSnapshotDestroyCheck(s *terraform.State) error {
-	client := testAccProvider.Meta().(*profitbricks.Client)
+	client := testAccProvider.Meta().(SdkBundle).Client
+
+	ctx, _ := context.WithTimeout(context.Background(), *resourceDefaultTimeouts.Delete)
 	for _, rs := range s.RootModule().Resources {
 		if rs.Type != "ionoscloud_snapshot" {
 			continue
 		}
 
-		_, err := client.GetSnapshot(rs.Primary.ID)
+		_, apiResponse, err := client.SnapshotsApi.SnapshotsFindById(ctx, rs.Primary.ID).Execute()
 
-		if apiError, ok := err.(profitbricks.ApiError); ok {
-			if apiError.HttpStatusCode() != 404 {
+		if apiError, ok := err.(ionoscloud.GenericOpenAPIError); ok {
+			if apiResponse.Response.StatusCode != 404 {
 				return fmt.Errorf("Snapshot still exists %s %s", rs.Primary.ID, apiError)
 			}
 		} else {
@@ -58,9 +61,10 @@ func testAccCheckSnapshotDestroyCheck(s *terraform.State) error {
 	return nil
 }
 
-func testAccCheckSnapshotExists(n string, snapshot *profitbricks.Snapshot) resource.TestCheckFunc {
+func testAccCheckSnapshotExists(n string, snapshot *ionoscloud.Snapshot) resource.TestCheckFunc {
 	return func(s *terraform.State) error {
-		client := testAccProvider.Meta().(*profitbricks.Client)
+		client := testAccProvider.Meta().(SdkBundle).Client
+
 		rs, ok := s.RootModule().Resources[n]
 
 		if !ok {
@@ -71,16 +75,17 @@ func testAccCheckSnapshotExists(n string, snapshot *profitbricks.Snapshot) resou
 			return fmt.Errorf("No Record ID is set")
 		}
 
-		foundServer, err := client.GetSnapshot(rs.Primary.ID)
+		ctx, _ := context.WithTimeout(context.Background(), *resourceDefaultTimeouts.Default)
+		foundServer, _, err := client.SnapshotsApi.SnapshotsFindById(ctx, rs.Primary.ID).Execute()
 
 		if err != nil {
 			return fmt.Errorf("Error occured while fetching Snapshot: %s", rs.Primary.ID)
 		}
-		if foundServer.ID != rs.Primary.ID {
+		if *foundServer.Id != rs.Primary.ID {
 			return fmt.Errorf("Record not found")
 		}
 
-		snapshot = foundServer
+		snapshot = &foundServer
 
 		return nil
 	}

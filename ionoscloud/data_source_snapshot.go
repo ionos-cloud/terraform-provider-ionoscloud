@@ -1,11 +1,12 @@
 package ionoscloud
 
 import (
+	"context"
 	"fmt"
 	"strings"
 
 	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
-	"github.com/profitbricks/profitbricks-sdk-go/v5"
+	ionoscloud "github.com/ionos-cloud/sdk-go/v5"
 )
 
 func dataSourceSnapshot() *schema.Resource {
@@ -30,9 +31,13 @@ func dataSourceSnapshot() *schema.Resource {
 }
 
 func dataSourceSnapshotRead(d *schema.ResourceData, meta interface{}) error {
-	client := meta.(SdkBundle).LegacyClient
+	client := meta.(SdkBundle).Client
 
-	snapshots, err := client.ListSnapshots()
+	ctx, cancel := context.WithTimeout(context.Background(), *resourceDefaultTimeouts.Default)
+	if cancel != nil {
+		defer cancel()
+	}
+	snapshots, _, err := client.SnapshotsApi.SnapshotsGet(ctx).Execute()
 
 	if err != nil {
 		return fmt.Errorf("An error occured while fetching IonosCloud locations %s", err)
@@ -41,18 +46,18 @@ func dataSourceSnapshotRead(d *schema.ResourceData, meta interface{}) error {
 	name := d.Get("name").(string)
 	location, locationOk := d.GetOk("location")
 	size, sizeOk := d.GetOk("size")
-	results := []profitbricks.Snapshot{}
+	results := []ionoscloud.Snapshot{}
 
-	for _, snp := range snapshots.Items {
-		if strings.Contains(strings.ToLower(snp.Properties.Name), strings.ToLower(name)) {
+	for _, snp := range *snapshots.Items {
+		if strings.Contains(strings.ToLower(*snp.Properties.Name), strings.ToLower(name)) {
 			results = append(results, snp)
 		}
 	}
 
 	if locationOk {
-		locationResults := []profitbricks.Snapshot{}
+		locationResults := []ionoscloud.Snapshot{}
 		for _, snp := range results {
-			if snp.Properties.Location == location.(string) {
+			if *snp.Properties.Location == location.(string) {
 				locationResults = append(locationResults, snp)
 			}
 
@@ -61,9 +66,9 @@ func dataSourceSnapshotRead(d *schema.ResourceData, meta interface{}) error {
 	}
 
 	if sizeOk {
-		sizeResults := []profitbricks.Snapshot{}
+		sizeResults := []ionoscloud.Snapshot{}
 		for _, snp := range results {
-			if snp.Properties.Size <= size.(int) {
+			if *snp.Properties.Size <= size.(float32) {
 				sizeResults = append(sizeResults, snp)
 			}
 
@@ -72,16 +77,16 @@ func dataSourceSnapshotRead(d *schema.ResourceData, meta interface{}) error {
 	}
 
 	if len(results) > 1 {
-		return fmt.Errorf("There is more than one snapshot that match the search criteria")
+		return fmt.Errorf("There is more than one snapshot that match the search criteria ")
 	}
 
 	if len(results) == 0 {
-		return fmt.Errorf("There are no snapshots that match the search criteria")
+		return fmt.Errorf("There are no snapshots that match the search criteria ")
 	}
 
 	d.Set("name", results[0].Properties.Name)
 
-	d.SetId(results[0].ID)
+	d.SetId(*results[0].Id)
 
 	return nil
 }

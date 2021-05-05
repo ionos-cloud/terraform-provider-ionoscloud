@@ -1,7 +1,9 @@
 package ionoscloud
 
 import (
+	"context"
 	"fmt"
+	ionoscloud "github.com/ionos-cloud/sdk-go/v5"
 	"testing"
 
 	"math/rand"
@@ -10,11 +12,10 @@ import (
 
 	"github.com/hashicorp/terraform-plugin-sdk/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/terraform"
-	"github.com/profitbricks/profitbricks-sdk-go/v5"
 )
 
 func TestAccUser_Basic(t *testing.T) {
-	var user profitbricks.User
+	var user ionoscloud.User
 	s1 := rand.NewSource(time.Now().UnixNano())
 	r1 := rand.New(s1)
 	email := strconv.Itoa(r1.Intn(100000)) + "terraform_test" + strconv.Itoa(r1.Intn(100000)) + "@go.com"
@@ -46,12 +47,18 @@ func TestAccUser_Basic(t *testing.T) {
 }
 
 func testAccCheckUserDestroyCheck(s *terraform.State) error {
-	client := testAccProvider.Meta().(*profitbricks.Client)
-	for _, rs := range s.RootModule().Resources {
-		_, err := client.GetUser(rs.Primary.ID)
+	client := testAccProvider.Meta().(SdkBundle).Client
 
-		if err != nil {
-			return fmt.Errorf("user still exists %s %s", rs.Primary.ID, err)
+	ctx, _ := context.WithTimeout(context.Background(), *resourceDefaultTimeouts.Delete)
+	for _, rs := range s.RootModule().Resources {
+		_, apiResponse, err := client.UserManagementApi.UmUsersFindById(ctx, rs.Primary.ID).Execute()
+
+		if _, ok := err.(ionoscloud.GenericOpenAPIError); ok {
+			if apiResponse.Response.StatusCode != 404 {
+				return fmt.Errorf("user still exists %s %s", rs.Primary.ID, err)
+			}
+		} else {
+			return fmt.Errorf("Unable to find User %s %s", rs.Primary.ID, err)
 		}
 	}
 
@@ -72,9 +79,9 @@ func testAccCheckUserAttributes(n string, name string) resource.TestCheckFunc {
 	}
 }
 
-func testAccCheckUserExists(n string, user *profitbricks.User) resource.TestCheckFunc {
+func testAccCheckUserExists(n string, user *ionoscloud.User) resource.TestCheckFunc {
 	return func(s *terraform.State) error {
-		client := testAccProvider.Meta().(*profitbricks.Client)
+		client := testAccProvider.Meta().(SdkBundle).Client
 		rs, ok := s.RootModule().Resources[n]
 
 		if !ok {
@@ -85,16 +92,17 @@ func testAccCheckUserExists(n string, user *profitbricks.User) resource.TestChec
 			return fmt.Errorf("No Record ID is set")
 		}
 
-		founduser, err := client.GetUser(rs.Primary.ID)
+		ctx, _ := context.WithTimeout(context.Background(), *resourceDefaultTimeouts.Default)
+		founduser, _, err := client.UserManagementApi.UmUsersFindById(ctx, rs.Primary.ID).Execute()
 
 		if err != nil {
 			return fmt.Errorf("Error occured while fetching User: %s", rs.Primary.ID)
 		}
-		if founduser.ID != rs.Primary.ID {
+		if *founduser.Id != rs.Primary.ID {
 			return fmt.Errorf("Record not found")
 		}
 
-		user = founduser
+		user = &founduser
 
 		return nil
 	}

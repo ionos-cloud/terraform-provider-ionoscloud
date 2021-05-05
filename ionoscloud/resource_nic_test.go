@@ -1,16 +1,17 @@
 package ionoscloud
 
 import (
+	"context"
 	"fmt"
+	ionoscloud "github.com/ionos-cloud/sdk-go/v5"
 	"testing"
 
 	"github.com/hashicorp/terraform-plugin-sdk/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/terraform"
-	"github.com/profitbricks/profitbricks-sdk-go/v5"
 )
 
 func TestAccNic_Basic(t *testing.T) {
-	var nic profitbricks.Nic
+	var nic ionoscloud.Nic
 	volumeName := "volume"
 
 	resource.Test(t, resource.TestCase{
@@ -41,16 +42,20 @@ func TestAccNic_Basic(t *testing.T) {
 }
 
 func testAccCheckNicDestroyCheck(s *terraform.State) error {
-	client := testAccProvider.Meta().(*profitbricks.Client)
+	client := testAccProvider.Meta().(SdkBundle).Client
+
+	ctx, _ := context.WithTimeout(context.Background(), *resourceDefaultTimeouts.Delete)
 	for _, rs := range s.RootModule().Resources {
 		if rs.Type != "ionoscloud_nic" {
 			continue
 		}
 
-		_, err := client.GetNic(rs.Primary.Attributes["datacenter_id"], rs.Primary.Attributes["server_id"], rs.Primary.ID)
+		dcId := rs.Primary.Attributes["datacenter_id"]
+		serverId := rs.Primary.Attributes["server_id"]
+		_, apiResponse, err := client.NetworkInterfacesApi.DatacentersServersNicsFindById(ctx, dcId, serverId, rs.Primary.ID).Execute()
 
-		if apiError, ok := err.(profitbricks.ApiError); ok {
-			if apiError.HttpStatusCode() != 404 {
+		if apiError, ok := err.(ionoscloud.GenericOpenAPIError); ok {
+			if apiResponse.Response.StatusCode != 404 {
 				return fmt.Errorf("NIC still exists %s %s", rs.Primary.ID, apiError)
 			}
 		} else {
@@ -75,11 +80,11 @@ func testAccCheckNicAttributes(n string, name string) resource.TestCheckFunc {
 	}
 }
 
-func testAccCheckNICExists(n string, nic *profitbricks.Nic) resource.TestCheckFunc {
+func testAccCheckNICExists(n string, nic *ionoscloud.Nic) resource.TestCheckFunc {
 	return func(s *terraform.State) error {
-		client := testAccProvider.Meta().(*profitbricks.Client)
-		rs, ok := s.RootModule().Resources[n]
+		client := testAccProvider.Meta().(SdkBundle).Client
 
+		rs, ok := s.RootModule().Resources[n]
 		if !ok {
 			return fmt.Errorf("testAccCheckVolumeExists: Not found: %s", n)
 		}
@@ -88,16 +93,19 @@ func testAccCheckNICExists(n string, nic *profitbricks.Nic) resource.TestCheckFu
 			return fmt.Errorf("No Record ID is set")
 		}
 
-		foundNic, err := client.GetNic(rs.Primary.Attributes["datacenter_id"], rs.Primary.Attributes["server_id"], rs.Primary.ID)
+		ctx, _ := context.WithTimeout(context.Background(), *resourceDefaultTimeouts.Default)
+		dcId := rs.Primary.Attributes["datacenter_id"]
+		serverId := rs.Primary.Attributes["server_id"]
+		foundNic, _, err := client.NetworkInterfacesApi.DatacentersServersNicsFindById(ctx, dcId, serverId, rs.Primary.ID).Execute()
 
 		if err != nil {
 			return fmt.Errorf("Error occured while fetching Volume: %s", rs.Primary.ID)
 		}
-		if foundNic.ID != rs.Primary.ID {
+		if *foundNic.Id != rs.Primary.ID {
 			return fmt.Errorf("Record not found")
 		}
 
-		nic = foundNic
+		nic = &foundNic
 
 		return nil
 	}
@@ -116,11 +124,11 @@ resource "ionoscloud_server" "webserver" {
   ram = 1024
   availability_zone = "ZONE_1"
   cpu_family = "AMD_OPTERON"
-	image_name ="ubuntu-16.04"
+    image = "81e054dd-a347-11eb-b70c-7ade62b52cc0"
 	image_password = "K3tTj8G14a3EgKyNeeiY"
   volume {
     name = "system"
-    size = 5
+    size = 14
     disk_type = "SSD"
 
 }
@@ -137,6 +145,7 @@ resource "ionoscloud_nic" "database_nic" {
   lan = 2
   dhcp = false
   firewall_active = true
+  firewall_type = "INGRESS"
   name = "%s"
 }`
 
@@ -153,11 +162,11 @@ resource "ionoscloud_server" "webserver" {
   ram = 1024
   availability_zone = "ZONE_1"
   cpu_family = "AMD_OPTERON"
-	image_name ="ubuntu-16.04"
+	image = "81e054dd-a347-11eb-b70c-7ade62b52cc0"
 	image_password = "K3tTj8G14a3EgKyNeeiY"
   volume {
     name = "system"
-    size = 5
+    size = 14
     disk_type = "SSD"
 }
   nic {
@@ -173,6 +182,7 @@ resource "ionoscloud_nic" "database_nic" {
   lan = 2
   dhcp = false
   firewall_active = true
+  firewall_type = "INGRESS"
   name = "updated"
 }
 `

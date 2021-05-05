@@ -39,6 +39,7 @@ func resourceSnapshotCreate(d *schema.ResourceData, meta interface{}) error {
 	client := meta.(SdkBundle).Client
 	dcId := d.Get("datacenter_id").(string)
 	volumeId := d.Get("volume_id").(string)
+	//name := d.Get("name").(string)
 
 	ctx, cancel := context.WithTimeout(context.Background(), *resourceDefaultTimeouts.Create)
 	if cancel != nil {
@@ -46,7 +47,7 @@ func resourceSnapshotCreate(d *schema.ResourceData, meta interface{}) error {
 	}
 	rsp, apiResponse, err := client.VolumesApi.DatacentersVolumesCreateSnapshotPost(ctx, dcId, volumeId).Execute()
 	if err != nil {
-		return fmt.Errorf("An error occured while creating a snapshot: %s message: %s", err, apiResponse.Payload)
+		return fmt.Errorf("An error occured while creating a snapshot: %s ", err)
 	}
 
 	d.SetId(*rsp.Id)
@@ -89,12 +90,12 @@ func resourceSnapshotRead(d *schema.ResourceData, meta interface{}) error {
 func resourceSnapshotUpdate(d *schema.ResourceData, meta interface{}) error {
 	client := meta.(SdkBundle).Client
 
-	input := ionoscloud.SnapshotProperties{}
-	ctx, cancel := context.WithTimeout(context.Background(), *resourceDefaultTimeouts.Update)
-	if cancel != nil {
-		defer cancel()
+	name := d.Get("name").(string)
+	input := ionoscloud.SnapshotProperties{
+		Name: &name,
 	}
-	_, apiResponse, err := client.SnapshotsApi.SnapshotsPatch(ctx, d.Id()).Snapshot(input).Execute()
+
+	_, apiResponse, err := client.SnapshotsApi.SnapshotsPatch(context.TODO(), d.Id()).Snapshot(input).Execute()
 	if err != nil {
 		return fmt.Errorf("An error occured while restoring a snapshot ID %s %d", d.Id(), err)
 	}

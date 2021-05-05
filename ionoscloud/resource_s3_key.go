@@ -61,8 +61,8 @@ func resourceS3KeyCreate(d *schema.ResourceData, meta interface{}) error {
 }
 
 func resourceS3KeyRead(d *schema.ResourceData, meta interface{}) error {
-
 	client := meta.(SdkBundle).Client
+
 	userId := d.Get("user_id").(string)
 	rsp, apiResponse, err := client.UserS3KeysApi.UmUsersS3keysFindByKeyId(context.TODO(), userId, d.Id()).Execute()
 
