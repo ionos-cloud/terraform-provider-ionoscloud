@@ -145,8 +145,8 @@ func resourceGroupCreate(d *schema.ResourceData, meta interface{}) error {
 	request.Properties.CreateFlowLog = &tempCreateFlowLog
 	tempAccessAndManageMonitoring := d.Get("access_and_manage_monitoring").(bool)
 	request.Properties.AccessAndManageMonitoring = &tempAccessAndManageMonitoring
-	//tempAccessAndManageCertificates := d.Get("access_and_manage_certificates").(bool)
-	//request.Properties.AccessAndManageCertificates = &tempAccessAndManageCertificates
+	tempAccessAndManageCertificates := d.Get("access_and_manage_certificates").(bool)
+	request.Properties.AccessAndManageCertificates = &tempAccessAndManageCertificates
 
 	usertoAdd := d.Get("user_id").(string)
 
@@ -299,12 +299,12 @@ func resourceGroupRead(d *schema.ResourceData, meta interface{}) error {
 		}
 	}
 
-	//if group.Properties.AccessAndManageCertificates != nil {
-	//	err := d.Set("access_and_manage_certificates", *group.Properties.AccessAndManageCertificates)
-	//	if err != nil {
-	//		return fmt.Errorf("Error while setting access_and_manage_certificates property for group %s: %s", d.Id(), err)
-	//	}
-	//}
+	if group.Properties.AccessAndManageCertificates != nil {
+		err := d.Set("access_and_manage_certificates", *group.Properties.AccessAndManageCertificates)
+		if err != nil {
+			return fmt.Errorf("Error while setting access_and_manage_certificates property for group %s: %s", d.Id(), err)
+		}
+	}
 
 	users, _, err := client.UserManagementApi.UmGroupsUsersGet(ctx, d.Id()).Execute()
 	if err != nil {
@@ -336,23 +336,24 @@ func resourceGroupUpdate(d *schema.ResourceData, meta interface{}) error {
 	tempCreateK8sCluster := d.Get("create_k8s_cluster").(bool)
 	tempCreateFlowLog := d.Get("create_flow_log").(bool)
 	tempAccessAndManageMonitoring := d.Get("access_and_manage_monitoring").(bool)
-	//tempAccessAndManageCertificates :=  d.Get("access_and_manage_certificates").(bool)
+	tempAccessAndManageCertificates := d.Get("access_and_manage_certificates").(bool)
 
 	usertoAdd := d.Get("user_id").(string)
 
 	groupReq := ionoscloud.Group{
 		Properties: &ionoscloud.GroupProperties{
-			CreateDataCenter:          &tempCreateDataCenter,
-			CreateSnapshot:            &tempCreateSnapshot,
-			ReserveIp:                 &tempReserveIp,
-			AccessActivityLog:         &tempAccessActivityLog,
-			CreatePcc:                 &tempCreatePcc,
-			S3Privilege:               &tempS3Privilege,
-			CreateBackupUnit:          &tempCreateBackupUnit,
-			CreateInternetAccess:      &tempCreateInternatAccess,
-			CreateK8sCluster:          &tempCreateK8sCluster,
-			CreateFlowLog:             &tempCreateFlowLog,
-			AccessAndManageMonitoring: &tempAccessAndManageMonitoring,
+			CreateDataCenter:            &tempCreateDataCenter,
+			CreateSnapshot:              &tempCreateSnapshot,
+			ReserveIp:                   &tempReserveIp,
+			AccessActivityLog:           &tempAccessActivityLog,
+			CreatePcc:                   &tempCreatePcc,
+			S3Privilege:                 &tempS3Privilege,
+			CreateBackupUnit:            &tempCreateBackupUnit,
+			CreateInternetAccess:        &tempCreateInternatAccess,
+			CreateK8sCluster:            &tempCreateK8sCluster,
+			CreateFlowLog:               &tempCreateFlowLog,
+			AccessAndManageMonitoring:   &tempAccessAndManageMonitoring,
+			AccessAndManageCertificates: &tempAccessAndManageCertificates,
 		},
 	}
 
