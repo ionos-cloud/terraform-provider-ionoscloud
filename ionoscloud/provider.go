@@ -78,6 +78,7 @@ func Provider() terraform.ResourceProvider {
 			"ionoscloud_backup_unit":          resourceBackupUnit(),
 			"ionoscloud_s3_key":               resourceS3Key(),
 			"ionoscloud_natgateway":           resourceNatGateway(),
+			"ionoscloud_natgateway_rule":      resourceNatGatewayRule(),
 		},
 		DataSourcesMap: map[string]*schema.Resource{
 			"ionoscloud_datacenter":           dataSourceDataCenter(),

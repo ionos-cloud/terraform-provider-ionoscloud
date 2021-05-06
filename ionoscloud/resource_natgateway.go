@@ -162,7 +162,7 @@ func resourceNatGatewayRead(d *schema.ResourceData, meta interface{}) error {
 
 	dcId := d.Get("datacenter_id").(string)
 
-	ctx, cancel := context.WithTimeout(context.Background(), *resourceDefaultTimeouts.Create)
+	ctx, cancel := context.WithTimeout(context.Background(), *resourceDefaultTimeouts.Default)
 
 	if cancel != nil {
 		defer cancel()
@@ -315,7 +315,7 @@ func resourceNatGatewayUpdate(d *schema.ResourceData, meta interface{}) error {
 		return errState
 	}
 
-	return nil
+	return resourceNatGatewayRead(d, meta)
 }
 
 func resourceNatGatewayDelete(d *schema.ResourceData, meta interface{}) error {
