@@ -39,13 +39,13 @@ func resourceSnapshotCreate(d *schema.ResourceData, meta interface{}) error {
 	client := meta.(SdkBundle).Client
 	dcId := d.Get("datacenter_id").(string)
 	volumeId := d.Get("volume_id").(string)
-	//name := d.Get("name").(string)
+	name := d.Get("name").(string)
 
 	ctx, cancel := context.WithTimeout(context.Background(), *resourceDefaultTimeouts.Create)
 	if cancel != nil {
 		defer cancel()
 	}
-	rsp, apiResponse, err := client.VolumesApi.DatacentersVolumesCreateSnapshotPost(ctx, dcId, volumeId).Execute()
+	rsp, apiResponse, err := client.VolumesApi.DatacentersVolumesCreateSnapshotPost(ctx, dcId, volumeId).Name(name).Execute()
 	if err != nil {
 		return fmt.Errorf("An error occured while creating a snapshot: %s ", err)
 	}

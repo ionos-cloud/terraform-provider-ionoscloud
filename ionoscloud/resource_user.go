@@ -66,6 +66,10 @@ func resourceUserCreate(d *schema.ResourceData, meta interface{}) error {
 		email := d.Get("email").(string)
 		request.Properties.Email = &email
 	}
+	if d.Get("password") != nil {
+		password := d.Get("password").(string)
+		request.Properties.Password = &password
+	}
 
 	administrator := d.Get("administrator").(bool)
 	forceSecAuth := d.Get("force_sec_auth").(bool)
