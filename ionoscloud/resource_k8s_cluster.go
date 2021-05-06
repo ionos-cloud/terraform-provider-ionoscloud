@@ -102,28 +102,6 @@ func resourcek8sClusterCreate(d *schema.ResourceData, meta interface{}) error {
 		cluster.Properties.MaintenanceWindow.DayOfTheWeek = &mdVal
 	}
 
-	auvVal, ok := d.GetOk("available_upgrade_versions")
-	if ok {
-		auvVal := auvVal.([]interface{})
-
-		requestAvailableUpgradeVersions := make([]string, len(auvVal), len(auvVal))
-
-		for i := range auvVal {
-			requestAvailableUpgradeVersions[i] = fmt.Sprint(auvVal[i])
-		}
-	}
-
-	vnpvVal, ok := d.GetOk("viable_node_pool_versions")
-	if ok {
-		vnpvVal := vnpvVal.([]interface{})
-
-		requestViableNodePoolVersions := make([]string, len(vnpvVal), len(vnpvVal))
-
-		for i := range vnpvVal {
-			requestViableNodePoolVersions[i] = fmt.Sprint(vnpvVal[i])
-		}
-	}
-
 	ctx, cancel := context.WithTimeout(context.Background(), *resourceDefaultTimeouts.Create)
 
 	if cancel != nil {
@@ -250,36 +228,6 @@ func resourcek8sClusterUpdate(d *schema.ResourceData, meta interface{}) error {
 
 			if updateMaintenanceWindow == true {
 				request.Properties.MaintenanceWindow = maintenanceWindow
-			}
-		}
-	}
-
-	if d.HasChange("available_upgrade_versions") {
-		oldAvailableUpgradeVersions, newAvailableUpgradeVersions := d.GetChange("available_upgrade_versions")
-		log.Printf("[INFO] k8s cluster available upgrade versions changed from %+v to %+v", oldAvailableUpgradeVersions, newAvailableUpgradeVersions)
-		if newAvailableUpgradeVersions != nil {
-
-			availableUpgradeVersions := newAvailableUpgradeVersions.([]interface{})
-
-			requestAvailableUpgradeVersions := make([]string, len(availableUpgradeVersions), len(availableUpgradeVersions))
-
-			for i := range availableUpgradeVersions {
-				requestAvailableUpgradeVersions[i] = fmt.Sprint(availableUpgradeVersions[i])
-			}
-		}
-	}
-
-	if d.HasChange("viable_node_pool_versions") {
-		oldViableNodePoolVersions, newViableNodePoolVersions := d.GetChange("viable_node_pool_versions")
-		log.Printf("[INFO] k8s cluster viable node pool versions changed from %+v to %+v", oldViableNodePoolVersions, newViableNodePoolVersions)
-		if newViableNodePoolVersions != nil {
-
-			availableViableNodePoolVersions := newViableNodePoolVersions.([]interface{})
-
-			requestViableNodePoolVersions := make([]string, len(availableViableNodePoolVersions), len(availableViableNodePoolVersions))
-
-			for i := range availableViableNodePoolVersions {
-				requestViableNodePoolVersions[i] = fmt.Sprint(availableViableNodePoolVersions[i])
 			}
 		}
 	}

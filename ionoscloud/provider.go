@@ -77,6 +77,7 @@ func Provider() terraform.ResourceProvider {
 			"ionoscloud_private_crossconnect": resourcePrivateCrossConnect(),
 			"ionoscloud_backup_unit":          resourceBackupUnit(),
 			"ionoscloud_s3_key":               resourceS3Key(),
+			"ionoscloud_natgateway":           resourceNatGateway(),
 		},
 		DataSourcesMap: map[string]*schema.Resource{
 			"ionoscloud_datacenter":           dataSourceDataCenter(),
@@ -89,6 +90,7 @@ func Provider() terraform.ResourceProvider {
 			"ionoscloud_server":               dataSourceServer(),
 			"ionoscloud_k8s_cluster":          dataSourceK8sCluster(),
 			"ionoscloud_k8s_node_pool":        dataSourceK8sNodePool(),
+			"ionoscloud_natgateway":           dataSourceNatGateway(),
 		},
 	}
 
