@@ -42,7 +42,6 @@ func TestAccS3Key_Basic(t *testing.T) {
 }
 
 func testAccChecks3KeyDestroyCheck(s *terraform.State) error {
-	//client := testAccProvider.Meta().(*ionoscloud.APIClient)
 	client := testAccProvider.Meta().(SdkBundle).Client
 
 	for _, rs := range s.RootModule().Resources {
@@ -51,7 +50,6 @@ func testAccChecks3KeyDestroyCheck(s *terraform.State) error {
 		}
 
 		userId := rs.Primary.Attributes["user_id"]
-		//client.UserS3KeysApi.UmUsersS3keysFindByKeyId
 		_, apiResponse, err := client.UserS3KeysApi.UmUsersS3keysFindByKeyId(context.TODO(), userId, rs.Primary.ID).Execute()
 
 		if apiError, ok := err.(ionoscloud.GenericOpenAPIError); ok {
@@ -101,7 +99,7 @@ const testAccChecks3KeyConfigBasic = `
 resource "ionoscloud_user" "example" {
   first_name = "terraform"
   last_name = "test"
-  email = "terraform-s3-acc-tester007@profitbricks.com"
+  email = "terraform-s3-acc-tester001@profitbricks.com"
   password = "abc123-321CBA"
   administrator = false
   force_sec_auth= false
@@ -116,7 +114,7 @@ const testAccChecks3KeyConfigUpdate = `
 resource "ionoscloud_user" "example" {
   first_name = "terraform"
   last_name = "test"
-  email = "terraform-s3-acc-tester007@profitbricks.com"
+  email = "terraform-s3-acc-tester001@profitbricks.com"
   password = "abc123-321CBA"
   administrator = false
   force_sec_auth= false
