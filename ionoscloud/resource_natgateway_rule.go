@@ -6,6 +6,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
 	ionoscloud "github.com/ionos-cloud/sdk-go/v5"
 	"log"
+	"strings"
 )
 
 func resourceNatGatewayRule() *schema.Resource {
@@ -25,12 +26,14 @@ func resourceNatGatewayRule() *schema.Resource {
 				Type:        schema.TypeString,
 				Description: "Type of the NAT gateway rule.",
 				Optional:    true,
+				Computed:    true,
 			},
 			"protocol": {
 				Type: schema.TypeString,
 				Description: "Protocol of the NAT gateway rule. Defaults to ALL. If protocol is 'ICMP' then " +
 					"targetPortRange start and end cannot be set.",
 				Optional: true,
+				Computed: true,
 			},
 			"source_subnet": {
 				Type: schema.TypeString,
@@ -51,6 +54,7 @@ func resourceNatGatewayRule() *schema.Resource {
 					"packets this translation rule applies to based on the packets destination IP address. If " +
 					"none is provided, rule will match any address.",
 				Optional: true,
+				Computed: true,
 			},
 			"target_port_range": {
 				Type:     schema.TypeList,
@@ -66,11 +70,13 @@ func resourceNatGatewayRule() *schema.Resource {
 							Type:        schema.TypeInt,
 							Description: "Target port range start associated with the NAT gateway rule.",
 							Optional:    true,
+							Computed:    true,
 						},
 						"end": {
 							Type:        schema.TypeInt,
 							Description: "Target port range end associated with the NAT gateway rule.",
 							Optional:    true,
+							Computed:    true,
 						},
 					},
 				},
@@ -120,12 +126,19 @@ func resourceNatGatewayRuleCreate(d *schema.ResourceData, meta interface{}) erro
 	}
 
 	if ruleType, ruleTypeOk := d.GetOk("type"); ruleTypeOk {
-		ruleType := ionoscloud.NatGatewayRuleType(ruleType.(string))
+		if strings.ToUpper(ruleType.(string)) != "SNAT" {
+			return fmt.Errorf("Attribute value '%s' not allowed. Expected one of [SNAT]", ruleType.(string))
+		}
+		ruleType := ionoscloud.NatGatewayRuleType(strings.ToUpper(ruleType.(string)))
 		natGatewayRule.Properties.Type = &ruleType
 	}
 
 	if protocol, protocolOk := d.GetOk("protocol"); protocolOk {
-		protocol := ionoscloud.NatGatewayRuleProtocol(protocol.(string))
+		if strings.ToUpper(protocol.(string)) != "TCP" && strings.ToUpper(protocol.(string)) != "UDP" &&
+			strings.ToUpper(protocol.(string)) != "ICMP" && strings.ToUpper(protocol.(string)) != "ALL" {
+			return fmt.Errorf("Attribute value '%s' not allowed. Expected one of [TCP, UDP, ICMP, ALL]", protocol.(string))
+		}
+		protocol := ionoscloud.NatGatewayRuleProtocol(strings.ToUpper(protocol.(string)))
 		natGatewayRule.Properties.Protocol = &protocol
 	}
 
@@ -135,6 +148,9 @@ func resourceNatGatewayRuleCreate(d *schema.ResourceData, meta interface{}) erro
 	}
 
 	if _, targetPortRangeOk := d.GetOk("target_port_range.0"); targetPortRangeOk {
+		if *natGatewayRule.Properties.Protocol == "ICMP" || *natGatewayRule.Properties.Protocol == "ALL" {
+			return fmt.Errorf("TargetPortRange start/end can not be set if protocol is ICMP or ALL or not provided.")
+		}
 		natGatewayRule.Properties.TargetPortRange = &ionoscloud.TargetPortRange{}
 	}
 
@@ -348,7 +364,7 @@ func resourceNatGatewayRuleUpdate(d *schema.ResourceData, meta interface{}) erro
 	_, apiResponse, err := client.NATGatewaysApi.DatacentersNatgatewaysRulesPatch(ctx, dcId, ngId, d.Id()).NatGatewayRuleProperties(*request.Properties).Execute()
 
 	if err != nil {
-		return fmt.Errorf("An error occured while updating a nat gateway rule ID %s %s", d.Id(), err)
+		return fmt.Errorf("An error occured while updating a nat gateway rule ID %s %s \n ApiError: %s", d.Id(), err, string(apiResponse.Payload))
 	}
 
 	_, errState := getStateChangeConf(meta, d, apiResponse.Header.Get("Location"), schema.TimeoutUpdate).WaitForState()
