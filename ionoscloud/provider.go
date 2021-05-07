@@ -91,6 +91,7 @@ func Provider() terraform.ResourceProvider {
 			"ionoscloud_k8s_cluster":          dataSourceK8sCluster(),
 			"ionoscloud_k8s_node_pool":        dataSourceK8sNodePool(),
 			"ionoscloud_natgateway":           dataSourceNatGateway(),
+			"ionoscloud_template":             dataSourceTemplate(),
 		},
 	}
 
