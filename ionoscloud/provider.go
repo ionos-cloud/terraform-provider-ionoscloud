@@ -78,6 +78,8 @@ func Provider() terraform.ResourceProvider {
 			"ionoscloud_backup_unit":          resourceBackupUnit(),
 			"ionoscloud_s3_key":               resourceS3Key(),
 			"ionoscloud_natgateway":           resourceNatGateway(),
+			"ionoscloud_natgateway_rule":      resourceNatGatewayRule(),
+			"ionoscloud_network_loadbalancer": resourceNetworkLoadBalancer(),
 		},
 		DataSourcesMap: map[string]*schema.Resource{
 			"ionoscloud_datacenter":           dataSourceDataCenter(),
@@ -91,6 +93,8 @@ func Provider() terraform.ResourceProvider {
 			"ionoscloud_k8s_cluster":          dataSourceK8sCluster(),
 			"ionoscloud_k8s_node_pool":        dataSourceK8sNodePool(),
 			"ionoscloud_natgateway":           dataSourceNatGateway(),
+			"ionoscloud_natgateway_rule":      dataSourceNatGatewayRule(),
+			"ionoscloud_network_loadbalancer": dataSourceNetworkLoadBalancer(),
 			"ionoscloud_template":             dataSourceTemplate(),
 		},
 	}
