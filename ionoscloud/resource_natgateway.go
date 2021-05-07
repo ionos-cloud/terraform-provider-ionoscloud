@@ -224,7 +224,7 @@ func resourceNatGatewayRead(d *schema.ResourceData, meta interface{}) error {
 
 func resourceNatGatewayUpdate(d *schema.ResourceData, meta interface{}) error {
 	client := meta.(SdkBundle).Client
-	request := ionoscloud.NatGatewayPut{
+	request := ionoscloud.NatGateway{
 		Properties: &ionoscloud.NatGatewayProperties{},
 	}
 
@@ -240,16 +240,6 @@ func resourceNatGatewayUpdate(d *schema.ResourceData, meta interface{}) error {
 		oldPublicIps, newPublicIps := d.GetChange("public_ips")
 		log.Printf("[INFO] nat gateway public IPs changed from %+v to %+v", oldPublicIps, newPublicIps)
 		publicIpsVal := newPublicIps.([]interface{})
-		if publicIpsVal != nil {
-			publicIps := make([]string, len(publicIpsVal), len(publicIpsVal))
-			for idx := range publicIpsVal {
-				publicIps[idx] = fmt.Sprint(publicIpsVal[idx])
-			}
-			request.Properties.PublicIps = &publicIps
-		}
-	} else {
-		oldPublicIps, _ := d.GetChange("public_ips")
-		publicIpsVal := oldPublicIps.([]interface{})
 		if publicIpsVal != nil {
 			publicIps := make([]string, len(publicIpsVal), len(publicIpsVal))
 			for idx := range publicIpsVal {
@@ -304,7 +294,7 @@ func resourceNatGatewayUpdate(d *schema.ResourceData, meta interface{}) error {
 	if cancel != nil {
 		defer cancel()
 	}
-	_, apiResponse, err := client.NATGatewaysApi.DatacentersNatgatewaysPut(ctx, dcId, d.Id()).NatGateway(request).Execute()
+	_, apiResponse, err := client.NATGatewaysApi.DatacentersNatgatewaysPatch(ctx, dcId, d.Id()).NatGatewayProperties(*request.Properties).Execute()
 
 	if err != nil {
 		return fmt.Errorf("An error occured while updating a nat gateway ID %s %s", d.Id(), err)

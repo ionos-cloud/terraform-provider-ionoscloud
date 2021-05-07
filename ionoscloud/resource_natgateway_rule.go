@@ -126,6 +126,7 @@ func resourceNatGatewayRuleCreate(d *schema.ResourceData, meta interface{}) erro
 	}
 
 	if ruleType, ruleTypeOk := d.GetOk("type"); ruleTypeOk {
+
 		if strings.ToUpper(ruleType.(string)) != "SNAT" {
 			return fmt.Errorf("Attribute value '%s' not allowed. Expected one of [SNAT]", ruleType.(string))
 		}
