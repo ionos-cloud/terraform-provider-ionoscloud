@@ -97,6 +97,7 @@ func Provider() terraform.ResourceProvider {
 			"ionoscloud_natgateway_rule":                    dataSourceNatGatewayRule(),
 			"ionoscloud_networkloadbalancer":                dataSourceNetworkLoadBalancer(),
 			"ionoscloud_networkloadbalancer_forwardingrule": dataSourceNetworkLoadBalancerForwardingRule(),
+			"ionoscloud_template":                           dataSourceTemplate(),
 		},
 	}
 
