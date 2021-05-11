@@ -24,14 +24,14 @@ func TestAccNetworkLoadBalancer_Basic(t *testing.T) {
 			{
 				Config: fmt.Sprintf(testAccCheckNetworkLoadBalancerConfig_basic, networkLoadBalancerName),
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheckNetworkLoadBalancerExists("ionoscloud_network_loadbalancer.test_network_loadbalancer", &networkLoadBalancer),
-					resource.TestCheckResourceAttr("ionoscloud_network_loadbalancer.test_network_loadbalancer", "name", networkLoadBalancerName),
+					testAccCheckNetworkLoadBalancerExists("ionoscloud_networkloadbalancer.test_networkloadbalancer", &networkLoadBalancer),
+					resource.TestCheckResourceAttr("ionoscloud_networkloadbalancer.test_networkloadbalancer", "name", networkLoadBalancerName),
 				),
 			},
 			{
 				Config: testAccCheckNetworkLoadBalancerConfig_update,
 				Check: resource.ComposeTestCheckFunc(
-					resource.TestCheckResourceAttr("ionoscloud_network_loadbalancer.test_network_loadbalancer", "name", "updated"),
+					resource.TestCheckResourceAttr("ionoscloud_networkloadbalancer.test_networkloadbalancer", "name", "updated"),
 				),
 			},
 		},
@@ -119,7 +119,7 @@ resource "ionoscloud_lan" "nlb_lan_2" {
 }
 
 
-resource "ionoscloud_network_loadbalancer" "test_network_loadbalancer" {
+resource "ionoscloud_networkloadbalancer" "test_networkloadbalancer" {
   datacenter_id = ionoscloud_datacenter.datacenter.id
   name          = "%s"
   listener_lan  = ionoscloud_lan.nlb_lan_1.id
@@ -149,7 +149,7 @@ resource "ionoscloud_lan" "nlb_lan_2" {
 }
 
 
-resource "ionoscloud_network_loadbalancer" "test_network_loadbalancer" {
+resource "ionoscloud_networkloadbalancer" "test_networkloadbalancer" {
   datacenter_id = ionoscloud_datacenter.datacenter.id
   name          = "updated"
   listener_lan  = ionoscloud_lan.nlb_lan_1.id

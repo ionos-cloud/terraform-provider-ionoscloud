@@ -19,7 +19,7 @@ func TestAccDataSourceNetworkLoadBalancer_matchId(t *testing.T) {
 			{
 				Config: testAccDataSourceNetworkLoadBalancerMatchId,
 				Check: resource.ComposeTestCheckFunc(
-					resource.TestCheckResourceAttr("data.ionoscloud_network_loadbalancer.test_network_loadbalancer", "name", "test_datasource_nlb"),
+					resource.TestCheckResourceAttr("data.ionoscloud_networkloadbalancer.test_networkloadbalancer", "name", "test_datasource_nlb"),
 				),
 			},
 		},
@@ -39,7 +39,7 @@ func TestAccDataSourceNetworkLoadBalancer_matchName(t *testing.T) {
 			{
 				Config: testAccDataSourceNetworkLoadBalancerMatchName,
 				Check: resource.ComposeTestCheckFunc(
-					resource.TestCheckResourceAttr("data.ionoscloud_network_loadbalancer.test_network_loadbalancer", "name", "test_datasource_nlb"),
+					resource.TestCheckResourceAttr("data.ionoscloud_networkloadbalancer.test_networkloadbalancer", "name", "test_datasource_nlb"),
 				),
 			},
 		},
@@ -66,7 +66,7 @@ resource "ionoscloud_lan" "nlb_lan_2" {
 }
 
 
-resource "ionoscloud_network_loadbalancer" "network_loadbalancer" {
+resource "ionoscloud_networkloadbalancer" "networkloadbalancer" {
   datacenter_id = ionoscloud_datacenter.datacenter.id
   name          = "test_datasource_nlb"
   listener_lan  = ionoscloud_lan.nlb_lan_1.id
@@ -96,7 +96,7 @@ resource "ionoscloud_lan" "nlb_lan_2" {
 }
 
 
-resource "ionoscloud_network_loadbalancer" "network_loadbalancer" {
+resource "ionoscloud_networkloadbalancer" "networkloadbalancer" {
   datacenter_id = ionoscloud_datacenter.datacenter.id
   name          = "test_datasource_nlb"
   listener_lan  = ionoscloud_lan.nlb_lan_1.id
@@ -105,9 +105,9 @@ resource "ionoscloud_network_loadbalancer" "network_loadbalancer" {
   lb_private_ips = ["10.13.72.225/24"]
 }
 
-data "ionoscloud_network_loadbalancer" "test_network_loadbalancer" {
+data "ionoscloud_networkloadbalancer" "test_networkloadbalancer" {
   datacenter_id = ionoscloud_datacenter.datacenter.id
-  id			= ionoscloud_network_loadbalancer.network_loadbalancer.id
+  id			= ionoscloud_networkloadbalancer.networkloadbalancer.id
 }
 `
 
@@ -131,7 +131,7 @@ resource "ionoscloud_lan" "nlb_lan_2" {
 }
 
 
-resource "ionoscloud_network_loadbalancer" "network_loadbalancer" {
+resource "ionoscloud_networkloadbalancer" "networkloadbalancer" {
   datacenter_id = ionoscloud_datacenter.datacenter.id
   name          = "test_datasource_nlb"
   listener_lan  = ionoscloud_lan.nlb_lan_1.id
@@ -140,7 +140,7 @@ resource "ionoscloud_network_loadbalancer" "network_loadbalancer" {
   lb_private_ips = ["10.13.72.225/24"]
 }
 
-data "ionoscloud_network_loadbalancer" "test_network_loadbalancer" {
+data "ionoscloud_networkloadbalancer" "test_networkloadbalancer" {
   datacenter_id = ionoscloud_datacenter.datacenter.id
   name			= "test_datasource_"
 }

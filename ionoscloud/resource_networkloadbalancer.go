@@ -122,7 +122,7 @@ func resourceNetworkLoadBalancerCreate(d *schema.ResourceData, meta interface{})
 
 	if err != nil {
 		d.SetId("")
-		return fmt.Errorf("Error creating network loadbalancer: %s \n ApiError: %s", err, string(apiResponse.Payload))
+		return fmt.Errorf("Error creating network loadbalancer: %s", err)
 	}
 
 	d.SetId(*networkLoadBalancerResp.Id)
