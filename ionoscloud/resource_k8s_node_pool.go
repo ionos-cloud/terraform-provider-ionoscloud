@@ -151,8 +151,8 @@ func resourcek8sNodePoolCreate(d *schema.ResourceData, meta interface{}) error {
 	storageSize := int32(d.Get("storage_size").(int))
 	ramSize := int32(d.Get("ram_size").(int))
 
-	k8sNodepool := ionoscloud.KubernetesNodePool{
-		Properties: &ionoscloud.KubernetesNodePoolProperties{
+	k8sNodepool := ionoscloud.KubernetesNodePoolForPost{
+		Properties: &ionoscloud.KubernetesNodePoolPropertiesForPost{
 			Name:             &name,
 			DatacenterId:     &datacenterId,
 			K8sVersion:       &k8sVersion,
@@ -424,10 +424,10 @@ func resourcek8sNodePoolRead(d *schema.ResourceData, meta interface{}) error {
 func resourcek8sNodePoolUpdate(d *schema.ResourceData, meta interface{}) error {
 
 	client := meta.(SdkBundle).Client
-	request := ionoscloud.KubernetesNodePool{}
+	request := ionoscloud.KubernetesNodePoolForPut{}
 
 	nodeCount := int32(d.Get("node_count").(int))
-	request.Properties = &ionoscloud.KubernetesNodePoolProperties{
+	request.Properties = &ionoscloud.KubernetesNodePoolPropertiesForPut{
 		NodeCount: &nodeCount,
 	}
 
