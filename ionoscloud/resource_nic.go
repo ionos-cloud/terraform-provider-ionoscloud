@@ -49,6 +49,7 @@ func resourceNic() *schema.Resource {
 			"firewall_type": {
 				Type:     schema.TypeString,
 				Optional: true,
+				Computed: true,
 			},
 			"server_id": {
 				Type:     schema.TypeString,

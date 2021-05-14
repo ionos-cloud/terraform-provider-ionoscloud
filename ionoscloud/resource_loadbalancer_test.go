@@ -119,6 +119,7 @@ resource "ionoscloud_datacenter" "foobar" {
 	location = "us/las"
 }
 
+
 resource "ionoscloud_server" "webserver" {
   name = "webserver"
   datacenter_id = "${ionoscloud_datacenter.foobar.id}"
@@ -126,11 +127,11 @@ resource "ionoscloud_server" "webserver" {
   ram = 1024
   availability_zone = "ZONE_1"
   cpu_family = "AMD_OPTERON"
-	image_name = "ubuntu-16.04"
+	image ="81e054dd-a347-11eb-b70c-7ade62b52cc0"
 	image_password = "K3tTj8G14a3EgKyNeeiY"
   volume {
     name = "system"
-    size = 5
+    size = 14
     disk_type = "SSD"
 }
   nic {
@@ -169,11 +170,11 @@ resource "ionoscloud_server" "webserver" {
   ram = 1024
   availability_zone = "ZONE_1"
   cpu_family = "AMD_OPTERON"
-	image_name = "ubuntu-16.04"
+	image ="81e054dd-a347-11eb-b70c-7ade62b52cc0"
 	image_password = "K3tTj8G14a3EgKyNeeiY"
   volume {
     name = "system"
-    size = 5
+    size = 14
     disk_type = "SSD"
   }
   nic {

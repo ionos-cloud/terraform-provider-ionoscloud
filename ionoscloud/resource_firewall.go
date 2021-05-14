@@ -73,6 +73,7 @@ func resourceFirewall() *schema.Resource {
 			"type": {
 				Type:     schema.TypeString,
 				Optional: true,
+				Computed: true,
 			},
 			"datacenter_id": {
 				Type:     schema.TypeString,
