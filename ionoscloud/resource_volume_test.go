@@ -118,7 +118,7 @@ resource "ionoscloud_server" "webserver" {
   ram = 1024
   availability_zone = "ZONE_1"
   cpu_family = "AMD_OPTERON"
-	image_name = "ubuntu:20.04"
+	image_name = "Ubuntu-20.04-LTS-server-2021-05-01"
 	image_password = "K3tTj8G14a3EgKyNeeiY"
   volume {
     name = "system"
@@ -136,12 +136,11 @@ resource "ionoscloud_volume" "database_volume" {
   datacenter_id = "${ionoscloud_datacenter.foobar.id}"
   server_id = "${ionoscloud_server.webserver.id}"
   availability_zone = "ZONE_1"
-  licence_type = "OTHER"
   name = "%s"
   size = 5
   disk_type = "HDD"
   bus = "VIRTIO"
-  image_name = "ubuntu:20.04"
+  image_name = "Ubuntu-20.04-LTS-server-2021-05-01"
   image_password = "K3tTj8G14a3EgKyNeeiY"
 }`
 
@@ -164,7 +163,7 @@ resource "ionoscloud_server" "webserver" {
   ram = 1024
   availability_zone = "ZONE_1"
   cpu_family = "AMD_OPTERON"
-	image_name = "ubuntu:20.04"
+	image_name = "Ubuntu-20.04-LTS-server-2021-05-01"
 	image_password = "K3tTj8G14a3EgKyNeeiY"
   volume {
     name = "system"
@@ -181,12 +180,11 @@ resource "ionoscloud_server" "webserver" {
 resource "ionoscloud_volume" "database_volume" {
   datacenter_id = "${ionoscloud_datacenter.foobar.id}"
   server_id = "${ionoscloud_server.webserver.id}"
-  licence_type = "OTHER"
   availability_zone = "ZONE_1"
   name = "updated"
   size = 5
   disk_type = "HDD"
   bus = "VIRTIO"
-  image_name = "ubuntu:20.04"
+  image_name = "Ubuntu-20.04-LTS-server-2021-05-01"
   image_password = "K3tTj8G14a3EgKyNeeiY"
 }`

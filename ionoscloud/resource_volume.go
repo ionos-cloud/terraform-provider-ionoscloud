@@ -101,6 +101,11 @@ func resourceVolume() *schema.Resource {
 				Computed: true,
 				Optional: true,
 			},
+			"user_data": {
+				Type:     schema.TypeString,
+				Optional: true,
+				Computed: true,
+			},
 		},
 		Timeouts: &resourceDefaultTimeouts,
 	}
@@ -220,6 +225,12 @@ func resourceVolumeCreate(d *schema.ResourceData, meta interface{}) error {
 		},
 	}
 
+	if licenceType != "" {
+		volume.Properties.LicenceType = &licenceType
+	} else {
+		volume.Properties.LicenceType = nil
+	}
+
 	if v, ok := d.GetOk("cpu_hot_plug"); ok {
 		vBool := v.(bool)
 		volume.Properties.CpuHotPlug = &vBool
@@ -283,6 +294,17 @@ func resourceVolumeCreate(d *schema.ResourceData, meta interface{}) error {
 		}
 	} else {
 		volume.Properties.BackupunitId = nil
+	}
+
+	userData := d.Get("user_data").(string)
+	if userData != "" { // todo verify if this is ok(empty case)
+		if image == "" && image_alias == "" {
+			return fmt.Errorf("It is mandatory to provied either public image or imageAlias that has cloud-init compatibility in conjunction with backup unit id property ")
+		} else {
+			volume.Properties.UserData = &userData
+		}
+	} else {
+		volume.Properties.UserData = nil
 	}
 	ctx, cancel := context.WithTimeout(context.Background(), *resourceDefaultTimeouts.Default)
 
@@ -466,6 +488,13 @@ func resourceVolumeRead(d *schema.ResourceData, meta interface{}) error {
 		}
 	}
 
+	if volume.Properties.UserData != nil {
+		err := d.Set("user_data", *volume.Properties.UserData)
+		if err != nil {
+			return fmt.Errorf("Error while setting user_data property for volume %s: %s", d.Id(), err)
+		}
+	}
+
 	return nil
 }
 
@@ -538,6 +567,10 @@ func resourceVolumeUpdate(d *schema.ResourceData, meta interface{}) error {
 
 	if d.HasChange("backup_unit_id") {
 		return fmt.Errorf("Backup unit id property is immutable")
+	}
+
+	if d.HasChange("user_data") {
+		return fmt.Errorf("User data property of resource volume is immutable ")
 	}
 
 	ctx, cancel := context.WithTimeout(context.Background(), *resourceDefaultTimeouts.Update)
