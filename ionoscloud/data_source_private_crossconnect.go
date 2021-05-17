@@ -129,10 +129,12 @@ func convertConnectableDatacenters(dcs *[]ionoscloud.ConnectableDatacenter) []in
 }
 
 func setPccDataSource(d *schema.ResourceData, pcc *ionoscloud.PrivateCrossConnect) error {
-	d.SetId(*pcc.Id)
 
-	if err := d.Set("id", *pcc.Id); err != nil {
-		return err
+	if pcc.Id != nil {
+		d.SetId(*pcc.Id)
+		if err := d.Set("id", *pcc.Id); err != nil {
+			return err
+		}
 	}
 
 	if pcc.Properties != nil {
