@@ -1,6 +1,7 @@
 package ionoscloud
 
 import (
+	"context"
 	"fmt"
 	"github.com/hashicorp/terraform-plugin-sdk/httpclient"
 	"log"
@@ -12,12 +13,11 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/terraform"
 	"github.com/ionos-cloud/sdk-go/v5"
 	"github.com/profitbricks/profitbricks-sdk-go/v5"
-
 )
 
 type SdkBundle struct {
 	LegacyClient *profitbricks.Client
-	Client *ionoscloud.APIClient
+	Client       *ionoscloud.APIClient
 }
 
 // Provider returns a schema.Provider for ionoscloud.
@@ -89,7 +89,7 @@ func Provider() terraform.ResourceProvider {
 			"ionoscloud_private_crossconnect": dataSourcePcc(),
 			"ionoscloud_server":               dataSourceServer(),
 			"ionoscloud_k8s_cluster":          dataSourceK8sCluster(),
-			"ionoscloud_k8s_node_pool":		   dataSourceK8sNodePool(),
+			"ionoscloud_k8s_node_pool":        dataSourceK8sNodePool(),
 		},
 	}
 
@@ -205,28 +205,28 @@ func IsRequestFailed(err error) bool {
 // resourceStateRefreshFunc tracks progress of a request
 func resourceStateRefreshFunc(meta interface{}, path string) resource.StateRefreshFunc {
 	return func() (interface{}, string, error) {
-		client := meta.(SdkBundle).LegacyClient
+		client := meta.(SdkBundle).Client
 
 		fmt.Printf("[INFO] Checking PATH %s\n", path)
 		if path == "" {
 			return nil, "", fmt.Errorf("Can not check a state when path is empty")
 		}
 
-		request, err := client.GetRequestStatus(path)
+		request, _, err := client.GetRequestStatus(context.Background(), path)
 
 		if err != nil {
-			return nil, "", fmt.Errorf("Request failed with following error: %s", err)
+			return nil, "", fmt.Errorf("request failed with following error: %s", err)
 		}
 
-		if request.Metadata.Status == "FAILED" {
+		if *request.Metadata.Status == "FAILED" {
 			return nil, "", RequestFailedError{fmt.Sprintf("Request failed with following error: %s", request.Metadata.Message)}
 		}
 
-		if request.Metadata.Status == "DONE" {
+		if *request.Metadata.Status == "DONE" {
 			return request, "DONE", nil
 		}
 
-		return nil, request.Metadata.Status, nil
+		return nil, *request.Metadata.Status, nil
 	}
 }
 
