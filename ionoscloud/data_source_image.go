@@ -85,6 +85,17 @@ func dataSourceImage() *schema.Resource {
 				Type:     schema.TypeBool,
 				Computed: true,
 			},
+			"image_aliases": {
+				Type:     schema.TypeList,
+				Optional: true,
+				Elem: &schema.Schema{
+					Type: schema.TypeString,
+				},
+			},
+			"cloud_init": {
+				Type:     schema.TypeString,
+				Optional: true,
+			},
 		},
 		Timeouts: &resourceDefaultTimeouts,
 	}
@@ -109,6 +120,7 @@ func dataSourceImageRead(d *schema.ResourceData, meta interface{}) error {
 	imageType, imageTypeOk := d.GetOk("type")
 	location, locationOk := d.GetOk("location")
 	version, versionOk := d.GetOk("version")
+	cloudInit, cloudInitOk := d.GetOk("cloud_init")
 
 	results := []ionoscloud.Image{}
 
@@ -152,6 +164,16 @@ func dataSourceImageRead(d *schema.ResourceData, meta interface{}) error {
 			}
 		}
 		results = locationResults
+	}
+
+	if cloudInitOk {
+		cloudInitResults := []ionoscloud.Image{}
+		for _, img := range results {
+			if img.Properties.CloudInit != nil && *img.Properties.CloudInit == cloudInit.(string) {
+				cloudInitResults = append(cloudInitResults, img)
+			}
+		}
+		results = cloudInitResults
 	}
 
 	if len(results) > 1 {
@@ -249,6 +271,18 @@ func dataSourceImageRead(d *schema.ResourceData, meta interface{}) error {
 
 	if results[0].Properties.Public != nil {
 		if err := d.Set("public", *results[0].Properties.Public); err != nil {
+			return err
+		}
+	}
+
+	if results[0].Properties.ImageAliases != nil {
+		if err := d.Set("image_aliases", *results[0].Properties.ImageAliases); err != nil {
+			return err
+		}
+	}
+
+	if results[0].Properties.CloudInit != nil {
+		if err := d.Set("cloud_init", *results[0].Properties.CloudInit); err != nil {
 			return err
 		}
 	}

@@ -22,6 +22,7 @@ func TestAccDataSourceImage_basic(t *testing.T) {
 					resource.TestCheckResourceAttr("data.ionoscloud_image.img", "location", "us/las"),
 					resource.TestMatchResourceAttr("data.ionoscloud_image.img", "name", r),
 					resource.TestCheckResourceAttr("data.ionoscloud_image.img", "type", "HDD"),
+					resource.TestCheckResourceAttr("data.ionoscloud_image.img", "cloud_init", "NONE"),
 				),
 			},
 		},
@@ -35,5 +36,6 @@ const testAccDataSourceImage_basic = `
 	  type = "HDD"
 	  version = "16"
 	  location = "us/las"
+	  cloud_init = "NONE"
 	}
 `
