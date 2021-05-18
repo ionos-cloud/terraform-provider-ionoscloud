@@ -253,34 +253,36 @@ func setK8sClusterData(d *schema.ResourceData, cluster *ionoscloud.KubernetesClu
 	}
 
 	/* get and set the kubeconfig */
-	kubeConfig, _, err := client.KubernetesApi.K8sKubeconfigGet(ctx, *cluster.Id).Execute()
-	if err != nil {
-		return fmt.Errorf("an error occurred while fetching the kubernetes config for cluster with ID %s: %s", *cluster.Id, err)
-	}
+	if cluster.Id != nil {
+		kubeConfig, _, err := client.KubernetesApi.K8sKubeconfigGet(ctx, *cluster.Id).Execute()
+		if err != nil {
+			return fmt.Errorf("an error occurred while fetching the kubernetes config for cluster with ID %s: %s", *cluster.Id, err)
+		}
 
-	if kubeConfig.Properties.Kubeconfig != nil {
-		if err := d.Set("kube_config", *kubeConfig.Properties.Kubeconfig); err != nil {
+		if kubeConfig.Properties.Kubeconfig != nil {
+			if err := d.Set("kube_config", *kubeConfig.Properties.Kubeconfig); err != nil {
+				return err
+			}
+		}
+
+		/* getting node pools */
+		clusterNodePools, _, err := client.KubernetesApi.K8sNodepoolsGet(ctx, *cluster.Id).Execute()
+		if err != nil {
+			return fmt.Errorf("an error occurred while fetching the kubernetes cluster node pools for cluster with ID %s: %s", *cluster.Id, err)
+		}
+
+		nodePools := make([]interface{}, 0)
+
+		if clusterNodePools.Items != nil && len(*clusterNodePools.Items) > 0 {
+			nodePools = make([]interface{}, len(*clusterNodePools.Items), len(*clusterNodePools.Items))
+			for i, nodePool := range *clusterNodePools.Items {
+				nodePools[i] = *nodePool.Id
+			}
+		}
+
+		if err := d.Set("node_pools", nodePools); err != nil {
 			return err
 		}
-	}
-
-	/* getting node pools */
-	clusterNodePools, _, err := client.KubernetesApi.K8sNodepoolsGet(ctx, *cluster.Id).Execute()
-	if err != nil {
-		return fmt.Errorf("an error occurred while fetching the kubernetes cluster node pools for cluster with ID %s: %s", *cluster.Id, err)
-	}
-
-	nodePools := make([]interface{}, 0)
-
-	if clusterNodePools.Items != nil && len(*clusterNodePools.Items) > 0 {
-		nodePools = make([]interface{}, len(*clusterNodePools.Items), len(*clusterNodePools.Items))
-		for i, nodePool := range *clusterNodePools.Items {
-			nodePools[i] = *nodePool.Id
-		}
-	}
-
-	if err := d.Set("node_pools", nodePools); err != nil {
-		return err
 	}
 
 	return nil

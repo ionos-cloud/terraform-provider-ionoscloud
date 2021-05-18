@@ -4,7 +4,10 @@ import (
 	"context"
 	"fmt"
 	ionoscloud "github.com/ionos-cloud/sdk-go/v5"
+	"math/rand"
+	"strconv"
 	"testing"
+	"time"
 
 	"github.com/hashicorp/terraform-plugin-sdk/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/terraform"
@@ -13,6 +16,9 @@ import (
 func TestAccS3Key_Basic(t *testing.T) {
 	var s3Key ionoscloud.S3Key
 	s3KeyName := "example"
+	s1 := rand.NewSource(time.Now().UnixNano())
+	r1 := rand.New(s1)
+	email := strconv.Itoa(r1.Intn(100000)) + "terraform_test" + strconv.Itoa(r1.Intn(100000)) + "@go.com"
 
 	resource.Test(t, resource.TestCase{
 		PreCheck: func() {
@@ -22,7 +28,7 @@ func TestAccS3Key_Basic(t *testing.T) {
 		CheckDestroy: testAccChecks3KeyDestroyCheck,
 		Steps: []resource.TestStep{
 			{
-				Config: fmt.Sprintf(testAccChecks3KeyConfigBasic, s3KeyName),
+				Config: fmt.Sprintf(testAccChecks3KeyConfigBasic, email, s3KeyName),
 				Check: resource.ComposeTestCheckFunc(
 					testAccChecks3KeyExists("ionoscloud_s3_key.example", &s3Key),
 					resource.TestCheckResourceAttrSet("ionoscloud_s3_key.example", "secret_key"),
@@ -30,7 +36,7 @@ func TestAccS3Key_Basic(t *testing.T) {
 				),
 			},
 			{
-				Config: fmt.Sprintf(testAccChecks3KeyConfigUpdate, s3KeyName),
+				Config: fmt.Sprintf(testAccChecks3KeyConfigUpdate, email, s3KeyName),
 				Check: resource.ComposeTestCheckFunc(
 					testAccChecks3KeyExists("ionoscloud_s3_key.example", &s3Key),
 					resource.TestCheckResourceAttrSet("ionoscloud_s3_key.example", "secret_key"),
@@ -101,7 +107,7 @@ const testAccChecks3KeyConfigBasic = `
 resource "ionoscloud_user" "example" {
   first_name = "terraform"
   last_name = "test"
-  email = "terraform-s3-acc-tester007@profitbricks.com"
+  email = "%s"
   password = "abc123-321CBA"
   administrator = false
   force_sec_auth= false
@@ -116,7 +122,7 @@ const testAccChecks3KeyConfigUpdate = `
 resource "ionoscloud_user" "example" {
   first_name = "terraform"
   last_name = "test"
-  email = "terraform-s3-acc-tester007@profitbricks.com"
+  email = "%s"
   password = "abc123-321CBA"
   administrator = false
   force_sec_auth= false
