@@ -37,7 +37,6 @@ func TestAccShare_Basic(t *testing.T) {
 }
 
 func testAccCheckShareDestroyCheck(s *terraform.State) error {
-	// todo fix test
 	client := testAccProvider.Meta().(SdkBundle).Client
 
 	ctx, cancel := context.WithTimeout(context.Background(), *resourceDefaultTimeouts.Delete)

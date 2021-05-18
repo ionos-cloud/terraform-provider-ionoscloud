@@ -59,12 +59,12 @@ func resourcePrivateCrossConnect() *schema.Resource {
 				Computed:    true,
 				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{
-						"lan_id": { // todo should I rename this key in id like in model_peer.go? + lane 171
+						"lan_id": {
 							Type:        schema.TypeString,
 							Description: "The id of the cross-connected LAN",
 							Computed:    true,
 						},
-						"lan_name": { // todo should I rename this key in id like in model_peer.go? + lane 172
+						"lan_name": {
 							Type:        schema.TypeString,
 							Description: "The name of the cross-connected LAN",
 							Computed:    true,

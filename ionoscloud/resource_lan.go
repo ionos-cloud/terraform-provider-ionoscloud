@@ -40,7 +40,7 @@ func resourceLan() *schema.Resource {
 			},
 			"ip_failover": {
 				Type:     schema.TypeList,
-				Optional: true, // todo here I should see if it is Optional sau Required
+				Optional: true,
 				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{
 						"ip": {
