@@ -41,7 +41,8 @@ func TestAccLoadbalancer_Basic(t *testing.T) {
 }
 
 func testAccCheckLoadbalancerDestroyCheck(s *terraform.State) error {
-	// todo fix test error: the loadbalancer want to set the lan from nic resource 3 and the error is that the plan from nic differs from the plan from loadbalaner (diff: lan: "3" => "2")
+	// todo fix test error: the loadbalancer want to set the lan from nic resource 3 and the error is that the plan from
+	// nic differs from the plan from loadbalaner (diff: lan: "3" => "2")
 	client := testAccProvider.Meta().(SdkBundle).Client
 
 	ctx, _ := context.WithTimeout(context.Background(), *resourceDefaultTimeouts.Delete)

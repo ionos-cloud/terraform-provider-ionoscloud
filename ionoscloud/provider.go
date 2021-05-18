@@ -219,7 +219,13 @@ func resourceStateRefreshFunc(meta interface{}, path string) resource.StateRefre
 		}
 
 		if *request.Metadata.Status == "FAILED" {
-			return nil, "", RequestFailedError{fmt.Sprintf("Request failed with following error: %s", request.Metadata.Message)}
+			var msg string
+			if request.Metadata.Message != nil {
+				msg = fmt.Sprintf("Request failed with following error: %s", *request.Metadata.Message)
+			} else {
+				msg = "Request failed with an unknown error"
+			}
+			return nil, "", RequestFailedError{msg}
 		}
 
 		if *request.Metadata.Status == "DONE" {
