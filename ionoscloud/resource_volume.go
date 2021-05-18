@@ -297,7 +297,7 @@ func resourceVolumeCreate(d *schema.ResourceData, meta interface{}) error {
 	}
 
 	userData := d.Get("user_data").(string)
-	if userData != "" { // todo verify if this is ok(empty case)
+	if userData != "" {
 		if image == "" && image_alias == "" {
 			return fmt.Errorf("It is mandatory to provied either public image or imageAlias that has cloud-init compatibility in conjunction with backup unit id property ")
 		} else {
