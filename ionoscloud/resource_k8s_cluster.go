@@ -29,6 +29,7 @@ func resourcek8sCluster() *schema.Resource {
 				Type:        schema.TypeString,
 				Description: "The desired kubernetes version",
 				Optional:    true,
+				Computed:    true,
 			},
 			"maintenance_window": {
 				Type:        schema.TypeList,
