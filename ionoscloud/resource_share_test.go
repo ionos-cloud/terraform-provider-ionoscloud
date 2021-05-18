@@ -46,18 +46,28 @@ func testAccCheckShareDestroyCheck(s *terraform.State) error {
 		defer cancel()
 	}
 	for _, rs := range s.RootModule().Resources {
+
+		if rs.Type != "ionoscloud_share" {
+			continue
+		}
+
 		grpId := rs.Primary.Attributes["group_id"]
 		resourceId := rs.Primary.Attributes["resource_id"]
-		fmt.Printf("\nattributes: %s \n", rs.Primary.Attributes)
+
 		_, apiResponse, err := client.UserManagementApi.UmGroupsSharesFindByResourceId(ctx, grpId, resourceId).Execute()
 
-		if _, ok := err.(ionoscloud.GenericOpenAPIError); ok {
-			if apiResponse.Response.StatusCode != 404 {
-				return fmt.Errorf("share for resource %s still exists in group %s %s /payload: %s", resourceId, grpId, apiResponse.Response.Status, string(apiResponse.Payload))
+		if err == nil || apiResponse == nil || apiResponse.Response.StatusCode != 404 {
+			var payload string
+			var status int
+			if apiResponse != nil {
+				payload = string(apiResponse.Payload)
+				status = apiResponse.StatusCode
+			} else {
+				payload = "<nil>"
 			}
-		} else {
-			return fmt.Errorf("Unable to find Group Share %s %s", rs.Primary.ID, err)
+			return fmt.Errorf("share for resource %s still exists in group %s: http status %d / payload: %s", resourceId, grpId, status, payload)
 		}
+
 	}
 
 	return nil
@@ -130,7 +140,7 @@ resource "ionoscloud_group" "group" {
 }
 
 resource "ionoscloud_share" "share" {
-group_id = "${ionoscloud_group.group.id}"
+  group_id = "${ionoscloud_group.group.id}"
   resource_id = "${ionoscloud_datacenter.foobar.id}"
   edit_privilege = true
   share_privilege = false

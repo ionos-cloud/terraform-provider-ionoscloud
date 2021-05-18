@@ -49,16 +49,19 @@ func TestAccUser_Basic(t *testing.T) {
 func testAccCheckUserDestroyCheck(s *terraform.State) error {
 	client := testAccProvider.Meta().(SdkBundle).Client
 
-	ctx, _ := context.WithTimeout(context.Background(), *resourceDefaultTimeouts.Delete)
+	ctx, cancel := context.WithTimeout(context.Background(), *resourceDefaultTimeouts.Delete)
+	if cancel != nil {
+		defer cancel()
+	}
+
 	for _, rs := range s.RootModule().Resources {
+		if rs.Type != "ionoscloud_user" {
+			continue
+		}
 		_, apiResponse, err := client.UserManagementApi.UmUsersFindById(ctx, rs.Primary.ID).Execute()
 
-		if _, ok := err.(ionoscloud.GenericOpenAPIError); ok {
-			if apiResponse.Response.StatusCode != 404 {
-				return fmt.Errorf("user still exists %s %s", rs.Primary.ID, err)
-			}
-		} else {
-			return fmt.Errorf("Unable to find User %s %s", rs.Primary.ID, err)
+		if err == nil || apiResponse == nil || apiResponse.Response.StatusCode != 404 {
+			return fmt.Errorf("user still exists %s %s", rs.Primary.ID, err)
 		}
 	}
 
