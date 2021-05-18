@@ -32,7 +32,7 @@ func TestAcck8sCluster_Basic(t *testing.T) {
 				Config: testAccCheckk8sClusterConfigUpdate,
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckk8sClusterExists("ionoscloud_k8s_cluster.example", &k8sCluster),
-					resource.TestCheckResourceAttr("ionoscloud_k8s_cluster.example", "name", "example-renamed"),
+					resource.TestCheckResourceAttr("ionoscloud_k8s_cluster.example", "name", "updated"),
 				),
 			},
 		},
@@ -102,7 +102,7 @@ func testAccCheckk8sClusterExists(n string, k8sCluster *ionoscloud.KubernetesClu
 const testAccCheckk8sClusterConfigBasic = `
 resource "ionoscloud_k8s_cluster" "example" {
   name        = "%s"
-	k8s_version = "1.18.5"
+  k8s_version = "1.20.6"
   maintenance_window {
     day_of_the_week = "Sunday"
     time            = "09:00:00Z"
@@ -111,10 +111,11 @@ resource "ionoscloud_k8s_cluster" "example" {
 
 const testAccCheckk8sClusterConfigUpdate = `
 resource "ionoscloud_k8s_cluster" "example" {
-  name        = "example-renamed"
-  k8s_version = "1.18.5"
+  name        = "updated"
+  k8s_version = "1.20.6"
   maintenance_window {
     day_of_the_week = "Monday"
     time            = "10:30:00Z"
   }
+  
 }`

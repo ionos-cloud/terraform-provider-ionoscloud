@@ -77,6 +77,19 @@ func dataSourceK8sCluster() *schema.Resource {
 				Type:     schema.TypeString,
 				Computed: true,
 			},
+			"public": {
+				Type: schema.TypeBool,
+				Description: "The indicator if the cluster is public or private. Be aware that setting it to false is " +
+					"currently in beta phase.",
+				Optional: true,
+				Computed: true,
+			},
+			"gateway_ip": {
+				Type: schema.TypeString,
+				Description: "The IP address of the gateway used by the cluster. This is mandatory when `public` is set " +
+					"to `false` and should not be provided otherwise.",
+				Optional: true,
+			},
 		},
 		Timeouts: &resourceDefaultTimeouts,
 	}
@@ -207,6 +220,21 @@ func setK8sClusterData(d *schema.ResourceData, cluster *ionoscloud.KubernetesClu
 				return err
 			}
 		}
+
+		if cluster.Properties.Public != nil {
+			err := d.Set("public", *cluster.Properties.Public)
+			if err != nil {
+				return fmt.Errorf("Error while setting public property for cluser %s: %s", d.Id(), err)
+			}
+		}
+
+		if cluster.Properties.GatewayIp != nil {
+			err := d.Set("gateway_ip", *cluster.Properties.GatewayIp)
+			if err != nil {
+				return fmt.Errorf("Error while setting gateway_ip property for cluser %s: %s", d.Id(), err)
+			}
+		}
+
 	}
 
 	if cluster.Metadata != nil {
@@ -216,11 +244,6 @@ func setK8sClusterData(d *schema.ResourceData, cluster *ionoscloud.KubernetesClu
 			}
 		}
 
-		if cluster.Metadata.State != nil {
-			if err := d.Set("state", *cluster.Metadata.State); err != nil {
-				return err
-			}
-		}
 	}
 
 	ctx, cancel := context.WithTimeout(context.Background(), *resourceDefaultTimeouts.Default)
