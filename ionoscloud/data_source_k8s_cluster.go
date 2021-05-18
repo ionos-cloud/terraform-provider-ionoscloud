@@ -96,7 +96,7 @@ func dataSourceK8sCluster() *schema.Resource {
 }
 
 func dataSourceK8sReadCluster(d *schema.ResourceData, meta interface{}) error {
-	client := meta.(SdkBundle).Client
+	client := meta.(*ionoscloud.APIClient)
 
 	id, idOk := d.GetOk("id")
 	name, nameOk := d.GetOk("name")

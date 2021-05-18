@@ -59,12 +59,12 @@ func resourcePrivateCrossConnect() *schema.Resource {
 				Computed:    true,
 				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{
-						"lan_id": { // todo should I rename this key in id like in model_peer.go? + lane 171
+						"lan_id": {
 							Type:        schema.TypeString,
 							Description: "The id of the cross-connected LAN",
 							Computed:    true,
 						},
-						"lan_name": { // todo should I rename this key in id like in model_peer.go? + lane 172
+						"lan_name": {
 							Type:        schema.TypeString,
 							Description: "The name of the cross-connected LAN",
 							Computed:    true,
@@ -93,7 +93,7 @@ func resourcePrivateCrossConnect() *schema.Resource {
 }
 
 func resourcePrivateCrossConnectCreate(d *schema.ResourceData, meta interface{}) error {
-	client := meta.(SdkBundle).Client
+	client := meta.(*ionoscloud.APIClient)
 
 	name := d.Get("name").(string)
 	pcc := ionoscloud.PrivateCrossConnect{
@@ -112,6 +112,7 @@ func resourcePrivateCrossConnectCreate(d *schema.ResourceData, meta interface{})
 	if cancel != nil {
 		defer cancel()
 	}
+
 	rsp, _, err := client.PrivateCrossConnectApi.PccsPost(ctx).Pcc(pcc).Execute()
 
 	if err != nil {
@@ -142,12 +143,13 @@ func resourcePrivateCrossConnectCreate(d *schema.ResourceData, meta interface{})
 }
 
 func resourcePrivateCrossConnectRead(d *schema.ResourceData, meta interface{}) error {
-	client := meta.(SdkBundle).Client
+	client := meta.(*ionoscloud.APIClient)
 
 	ctx, cancel := context.WithTimeout(context.Background(), *resourceDefaultTimeouts.Default)
 	if cancel != nil {
 		defer cancel()
 	}
+
 	rsp, apiResponse, err := client.PrivateCrossConnectApi.PccsFindById(ctx, d.Id()).Execute()
 
 	if err != nil {
@@ -193,9 +195,9 @@ func resourcePrivateCrossConnectRead(d *schema.ResourceData, meta interface{}) e
 }
 
 func resourcePrivateCrossConnectUpdate(d *schema.ResourceData, meta interface{}) error {
-	client := meta.(SdkBundle).Client
-	request := ionoscloud.PrivateCrossConnect{}
+	client := meta.(*ionoscloud.APIClient)
 
+	request := ionoscloud.PrivateCrossConnect{}
 	name := d.Get("name").(string)
 	request.Properties = &ionoscloud.PrivateCrossConnectProperties{
 		Name: &name,
@@ -223,8 +225,8 @@ func resourcePrivateCrossConnectUpdate(d *schema.ResourceData, meta interface{})
 	if cancel != nil {
 		defer cancel()
 	}
-	_, apiResponse, err := client.PrivateCrossConnectApi.PccsPatch(ctx, d.Id()).Pcc(*request.Properties).Execute()
 
+	_, apiResponse, err := client.PrivateCrossConnectApi.PccsPatch(ctx, d.Id()).Pcc(*request.Properties).Execute()
 	if err != nil {
 		if _, ok := err.(ionoscloud.GenericOpenAPIError); ok {
 			if apiResponse.Response.StatusCode == 404 {
@@ -256,14 +258,14 @@ func resourcePrivateCrossConnectUpdate(d *schema.ResourceData, meta interface{})
 }
 
 func resourcePrivateCrossConnectDelete(d *schema.ResourceData, meta interface{}) error {
-	client := meta.(SdkBundle).Client
+	client := meta.(*ionoscloud.APIClient)
 
 	ctx, cancel := context.WithTimeout(context.Background(), *resourceDefaultTimeouts.Delete)
 	if cancel != nil {
 		defer cancel()
 	}
-	_, apiResponse, err := client.PrivateCrossConnectApi.PccsDelete(ctx, d.Id()).Execute()
 
+	_, apiResponse, err := client.PrivateCrossConnectApi.PccsDelete(ctx, d.Id()).Execute()
 	if err != nil {
 		if _, ok := err.(ionoscloud.GenericOpenAPIError); ok {
 			if apiResponse.Response.StatusCode == 404 {

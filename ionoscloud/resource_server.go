@@ -319,14 +319,12 @@ func resourceServer() *schema.Resource {
 }
 
 func resourceServerCreate(d *schema.ResourceData, meta interface{}) error {
-
-	client := meta.(SdkBundle).Client
+	client := meta.(*ionoscloud.APIClient)
 
 	var image_alias string
 	serverName := d.Get("name").(string)
 	serverCores := int32(d.Get("cores").(int))
 	serverRam := int32(d.Get("ram").(int))
-
 	request := ionoscloud.Server{
 		Properties: &ionoscloud.ServerProperties{
 			Name:  &serverName,
@@ -765,12 +763,12 @@ func GetFirewallResource(d *schema.ResourceData, path string) ionoscloud.Firewal
 }
 
 func resourceServerRead(d *schema.ResourceData, meta interface{}) error {
-	client := meta.(SdkBundle).Client
+	client := meta.(*ionoscloud.APIClient)
+
 	dcId := d.Get("datacenter_id").(string)
 	serverId := d.Id()
 
 	ctx, cancel := context.WithTimeout(context.Background(), *resourceDefaultTimeouts.Default)
-
 	if cancel != nil {
 		defer cancel()
 	}
@@ -954,9 +952,9 @@ func boolAddr(b bool) *bool {
 }
 
 func resourceServerUpdate(d *schema.ResourceData, meta interface{}) error {
-	client := meta.(SdkBundle).Client
-	dcId := d.Get("datacenter_id").(string)
+	client := meta.(*ionoscloud.APIClient)
 
+	dcId := d.Get("datacenter_id").(string)
 	request := ionoscloud.ServerProperties{}
 
 	if d.HasChange("name") {
@@ -986,7 +984,6 @@ func resourceServerUpdate(d *schema.ResourceData, meta interface{}) error {
 	}
 
 	ctx, cancel := context.WithTimeout(context.Background(), *resourceDefaultTimeouts.Update)
-
 	if cancel != nil {
 		defer cancel()
 	}
@@ -1116,7 +1113,7 @@ func resourceServerUpdate(d *schema.ResourceData, meta interface{}) error {
 }
 
 func resourceServerDelete(d *schema.ResourceData, meta interface{}) error {
-	client := meta.(SdkBundle).Client
+	client := meta.(*ionoscloud.APIClient)
 	dcId := d.Get("datacenter_id").(string)
 
 	ctx, cancel := context.WithTimeout(context.Background(), *resourceDefaultTimeouts.Delete)

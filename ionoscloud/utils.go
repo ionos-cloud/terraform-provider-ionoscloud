@@ -1,12 +1,14 @@
 package ionoscloud
 
 import (
+	"context"
 	"fmt"
+	ionoscloud "github.com/ionos-cloud/sdk-go/v5"
+	"github.com/profitbricks/profitbricks-sdk-go/v5"
 	"log"
 	"strings"
 
 	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
-	"github.com/profitbricks/profitbricks-sdk-go/v5"
 )
 
 func resourceResourceImport(d *schema.ResourceData, meta interface{}) ([]*schema.ResourceData, error) {
@@ -38,12 +40,18 @@ func resourceServerImport(d *schema.ResourceData, meta interface{}) ([]*schema.R
 }
 
 func resourceK8sClusterImport(d *schema.ResourceData, meta interface{}) ([]*schema.ResourceData, error) {
-	client := meta.(SdkBundle).LegacyClient
-	cluster, err := client.GetKubernetesCluster(d.Id())
+	client := meta.(*ionoscloud.APIClient)
+
+	ctx, cancel := context.WithTimeout(context.Background(), *resourceDefaultTimeouts.Default)
+	if cancel != nil {
+		defer cancel()
+	}
+
+	cluster, apiResponse, err := client.KubernetesApi.K8sFindByClusterId(ctx, d.Id()).Execute()
 
 	if err != nil {
-		if apiError, ok := err.(profitbricks.ApiError); ok {
-			if apiError.HttpStatusCode() == 404 {
+		if _, ok := err.(ionoscloud.GenericOpenAPIError); ok {
+			if apiResponse.Response.StatusCode == 404 {
 				d.SetId("")
 				return nil, fmt.Errorf("Unable to find k8s cluster %q", d.Id())
 			}
@@ -52,18 +60,18 @@ func resourceK8sClusterImport(d *schema.ResourceData, meta interface{}) ([]*sche
 	}
 
 	log.Printf("[INFO] K8s cluster found: %+v", cluster)
-	d.SetId(cluster.ID)
-	d.Set("name", cluster.Properties.Name)
-	d.Set("k8s_version", cluster.Properties.K8sVersion)
+	d.SetId(*cluster.Id)
+	d.Set("name", *cluster.Properties.Name)
+	d.Set("k8s_version", *cluster.Properties.K8sVersion)
 
 	if cluster.Properties.MaintenanceWindow != nil {
 		d.Set("maintenance_window", []map[string]string{
 			{
-				"day_of_the_week": cluster.Properties.MaintenanceWindow.DayOfTheWeek,
-				"time":            cluster.Properties.MaintenanceWindow.Time,
+				"day_of_the_week": *cluster.Properties.MaintenanceWindow.DayOfTheWeek,
+				"time":            *cluster.Properties.MaintenanceWindow.Time,
 			},
 		})
-		log.Printf("[INFO] Setting maintenance window for k8s cluster %s to %+v...", d.Id(), cluster.Properties.MaintenanceWindow)
+		log.Printf("[INFO] Setting maintenance window for k8s cluster %s to %+v...", d.Id(), *cluster.Properties.MaintenanceWindow)
 	}
 
 	log.Printf("[INFO] Importing k8s cluster %q...", d.Id())
@@ -79,12 +87,18 @@ func resourceK8sNodepoolImport(d *schema.ResourceData, meta interface{}) ([]*sch
 		return nil, fmt.Errorf("Invalid import id %q. Expecting {k8sClusterId}/{k8sNodePoolId}", d.Id())
 	}
 
-	client := meta.(SdkBundle).LegacyClient
-	k8sNodepool, err := client.GetKubernetesNodePool(parts[0], parts[1])
+	client := meta.(*ionoscloud.APIClient)
+
+	ctx, cancel := context.WithTimeout(context.Background(), *resourceDefaultTimeouts.Default)
+	if cancel != nil {
+		defer cancel()
+	}
+
+	k8sNodepool, apiResponse, err := client.KubernetesApi.K8sNodepoolsFindById(ctx, parts[0], parts[1]).Execute()
 
 	if err != nil {
-		if apiError, ok := err.(profitbricks.ApiError); ok {
-			if apiError.HttpStatusCode() == 404 {
+		if _, ok := err.(ionoscloud.GenericOpenAPIError); ok {
+			if apiResponse.Response.StatusCode == 404 {
 				d.SetId("")
 				return nil, fmt.Errorf("Unable to find k8s node pool %q", d.Id())
 			}
@@ -94,39 +108,39 @@ func resourceK8sNodepoolImport(d *schema.ResourceData, meta interface{}) ([]*sch
 
 	log.Printf("[INFO] K8s node pool found: %+v", k8sNodepool)
 
-	d.SetId(k8sNodepool.ID)
-	d.Set("name", k8sNodepool.Properties.Name)
-	d.Set("k8s_version", k8sNodepool.Properties.K8sVersion)
+	d.SetId(*k8sNodepool.Id)
+	d.Set("name", *k8sNodepool.Properties.Name)
+	d.Set("k8s_version", *k8sNodepool.Properties.K8sVersion)
 	d.Set("k8s_cluster_id", parts[0])
-	d.Set("datacenter_id", k8sNodepool.Properties.DatacenterID)
-	d.Set("cpu_family", k8sNodepool.Properties.CPUFamily)
-	d.Set("availability_zone", k8sNodepool.Properties.AvailabilityZone)
-	d.Set("storage_type", k8sNodepool.Properties.StorageType)
-	d.Set("node_count", k8sNodepool.Properties.NodeCount)
-	d.Set("cores_count", k8sNodepool.Properties.CoresCount)
-	d.Set("ram_size", k8sNodepool.Properties.RAMSize)
-	d.Set("storage_size", k8sNodepool.Properties.StorageSize)
+	d.Set("datacenter_id", *k8sNodepool.Properties.DatacenterId)
+	d.Set("cpu_family", *k8sNodepool.Properties.CpuFamily)
+	d.Set("availability_zone", *k8sNodepool.Properties.AvailabilityZone)
+	d.Set("storage_type", *k8sNodepool.Properties.StorageType)
+	d.Set("node_count", *k8sNodepool.Properties.NodeCount)
+	d.Set("cores_count", *k8sNodepool.Properties.CoresCount)
+	d.Set("ram_size", *k8sNodepool.Properties.RamSize)
+	d.Set("storage_size", *k8sNodepool.Properties.StorageSize)
 
-	if k8sNodepool.Properties.PublicIPs != nil {
-		d.Set("public_ips", k8sNodepool.Properties.PublicIPs)
+	if k8sNodepool.Properties.PublicIps != nil {
+		d.Set("public_ips", k8sNodepool.Properties.PublicIps)
 		log.Printf("[INFO] Setting Public IPs for k8s node pool %s to %+v...", d.Id(), d.Get("public_ips"))
 	}
 
-	if k8sNodepool.Properties.AutoScaling != nil && (k8sNodepool.Properties.AutoScaling.MinNodeCount != 0 && k8sNodepool.Properties.AutoScaling.MaxNodeCount != 0) {
-		d.Set("auto_scaling", []map[string]uint32{
+	if k8sNodepool.Properties.AutoScaling != nil && (*k8sNodepool.Properties.AutoScaling.MinNodeCount != 0 && *k8sNodepool.Properties.AutoScaling.MaxNodeCount != 0) {
+		d.Set("auto_scaling", []map[string]int32{
 			{
-				"min_node_count": k8sNodepool.Properties.AutoScaling.MinNodeCount,
-				"max_node_count": k8sNodepool.Properties.AutoScaling.MaxNodeCount,
+				"min_node_count": *k8sNodepool.Properties.AutoScaling.MinNodeCount,
+				"max_node_count": *k8sNodepool.Properties.AutoScaling.MaxNodeCount,
 			},
 		})
 		log.Printf("[INFO] Setting AutoScaling for k8s node pool %s to %+v...", d.Id(), k8sNodepool.Properties.AutoScaling)
 	}
 
-	if k8sNodepool.Properties.LANs != nil {
-		lans := []uint32{}
+	if k8sNodepool.Properties.Lans != nil {
+		lans := []int32{}
 
-		for _, lan := range *k8sNodepool.Properties.LANs {
-			lans = append(lans, lan.ID)
+		for _, lan := range *k8sNodepool.Properties.Lans {
+			lans = append(lans, *lan.Id)
 		}
 		d.Set("lans", lans)
 		log.Printf("[INFO] Setting LAN's for k8s node pool %s to %+v...", d.Id(), d.Get("lans"))
@@ -135,8 +149,8 @@ func resourceK8sNodepoolImport(d *schema.ResourceData, meta interface{}) ([]*sch
 	if k8sNodepool.Properties.MaintenanceWindow != nil {
 		d.Set("maintenance_window", []map[string]string{
 			{
-				"day_of_the_week": k8sNodepool.Properties.MaintenanceWindow.DayOfTheWeek,
-				"time":            k8sNodepool.Properties.MaintenanceWindow.Time,
+				"day_of_the_week": *k8sNodepool.Properties.MaintenanceWindow.DayOfTheWeek,
+				"time":            *k8sNodepool.Properties.MaintenanceWindow.Time,
 			},
 		})
 		log.Printf("[INFO] Setting maintenance window for k8s node pool %s to %+v...", d.Id(), k8sNodepool.Properties.MaintenanceWindow)
@@ -148,12 +162,18 @@ func resourceK8sNodepoolImport(d *schema.ResourceData, meta interface{}) ([]*sch
 }
 
 func resourcePrivateCrossConnectImport(d *schema.ResourceData, meta interface{}) ([]*schema.ResourceData, error) {
-	client := meta.(SdkBundle).LegacyClient
-	pcc, err := client.GetPrivateCrossConnect(d.Id())
+	client := meta.(*ionoscloud.APIClient)
+
+	ctx, cancel := context.WithTimeout(context.Background(), *resourceDefaultTimeouts.Default)
+	if cancel != nil {
+		defer cancel()
+	}
+
+	pcc, apiResponse, err := client.PrivateCrossConnectApi.PccsFindById(ctx, d.Id()).Execute()
 
 	if err != nil {
-		if apiError, ok := err.(profitbricks.ApiError); ok {
-			if apiError.HttpStatusCode() == 404 {
+		if _, ok := err.(ionoscloud.GenericOpenAPIError); ok {
+			if apiResponse.Response.StatusCode == 404 {
 				d.SetId("")
 				return nil, fmt.Errorf("Unable to find PCC %q", d.Id())
 			}
@@ -163,20 +183,20 @@ func resourcePrivateCrossConnectImport(d *schema.ResourceData, meta interface{})
 
 	log.Printf("[INFO] PCC found: %+v", pcc)
 
-	d.SetId(pcc.ID)
-	d.Set("name", pcc.Properties.Name)
-	d.Set("description", pcc.Properties.Description)
+	d.SetId(*pcc.Id)
+	d.Set("name", *pcc.Properties.Name)
+	d.Set("description", *pcc.Properties.Description)
 
 	if pcc.Properties.Peers != nil {
 		peers := []map[string]interface{}{}
 
 		for _, peer := range *pcc.Properties.Peers {
 			peers = append(peers, map[string]interface{}{
-				"lan_id":          peer.LANId,
-				"lan_name":        peer.LANName,
-				"datacenter_id":   peer.DataCenterID,
-				"datacenter_name": peer.DataCenterName,
-				"location":        peer.Location,
+				"lan_id":          *peer.Id,
+				"lan_name":        *peer.Name,
+				"datacenter_id":   *peer.DatacenterId,
+				"datacenter_name": *peer.DatacenterName,
+				"location":        *peer.Location,
 			})
 		}
 
@@ -189,9 +209,9 @@ func resourcePrivateCrossConnectImport(d *schema.ResourceData, meta interface{})
 
 		for _, connectableDatacenter := range *pcc.Properties.ConnectableDatacenters {
 			connectableDatacenters = append(connectableDatacenters, map[string]interface{}{
-				"id":       connectableDatacenter.ID,
-				"name":     connectableDatacenter.Name,
-				"location": connectableDatacenter.Location,
+				"id":       *connectableDatacenter.Id,
+				"name":     *connectableDatacenter.Name,
+				"location": *connectableDatacenter.Location,
 			})
 		}
 
@@ -205,12 +225,18 @@ func resourcePrivateCrossConnectImport(d *schema.ResourceData, meta interface{})
 }
 
 func resourceBackupUnitImport(d *schema.ResourceData, meta interface{}) ([]*schema.ResourceData, error) {
-	client := meta.(SdkBundle).LegacyClient
-	backupUnit, err := client.GetBackupUnit(d.Id())
+	client := meta.(*ionoscloud.APIClient)
+
+	ctx, cancel := context.WithTimeout(context.Background(), *resourceDefaultTimeouts.Default)
+	if cancel != nil {
+		defer cancel()
+	}
+
+	backupUnit, apiReponse, err := client.BackupUnitApi.BackupunitsFindById(ctx, d.Id()).Execute()
 
 	if err != nil {
-		if apiError, ok := err.(profitbricks.ApiError); ok {
-			if apiError.HttpStatusCode() == 404 {
+		if _, ok := err.(ionoscloud.GenericOpenAPIError); ok {
+			if apiReponse.Response.StatusCode == 404 {
 				d.SetId("")
 				return nil, fmt.Errorf("Unable to find Backup Unit %q", d.Id())
 			}
@@ -220,18 +246,18 @@ func resourceBackupUnitImport(d *schema.ResourceData, meta interface{}) ([]*sche
 
 	log.Printf("[INFO] Backup Unit found: %+v", backupUnit)
 
-	d.SetId(backupUnit.ID)
+	d.SetId(*backupUnit.Id)
 
-	d.Set("name", backupUnit.Properties.Name)
-	d.Set("email", backupUnit.Properties.Email)
+	d.Set("name", *backupUnit.Properties.Name)
+	d.Set("email", *backupUnit.Properties.Email)
 
-	contractResources, cErr := client.GetContractResources()
+	contractResources, apiReponse, cErr := client.ContractApi.ContractsGet(ctx).Execute()
 
 	if cErr != nil {
 		return nil, fmt.Errorf("Error while fetching contract resources for backup unit %q: %s", d.Id(), cErr)
 	}
 
-	d.Set("login", fmt.Sprintf("%s-%d", backupUnit.Properties.Name, int64(contractResources.Properties.PBContractNumber)))
+	d.Set("login", fmt.Sprintf("%s-%d", *backupUnit.Properties.Name, *contractResources.Properties.ContractNumber))
 
 	return []*schema.ResourceData{d}, nil
 }
@@ -243,12 +269,13 @@ func resourceS3KeyImport(d *schema.ResourceData, meta interface{}) ([]*schema.Re
 		return nil, fmt.Errorf("Invalid import id %q. Expecting {userId}/{s3KeyId}", d.Id())
 	}
 
-	client := meta.(SdkBundle).LegacyClient
-	s3Key, err := client.GetS3Key(parts[0], parts[1])
+	client := meta.(*ionoscloud.APIClient)
+
+	s3Key, apiResponse, err := client.UserManagementApi.UmUsersS3keysFindByKeyId(context.TODO(), parts[0], parts[1]).Execute()
 
 	if err != nil {
-		if apiError, ok := err.(profitbricks.ApiError); ok {
-			if apiError.HttpStatusCode() == 404 {
+		if _, ok := err.(profitbricks.ApiError); ok {
+			if apiResponse.Response.StatusCode == 404 {
 				d.SetId("")
 				return nil, fmt.Errorf("Unable to find S3 key %q", d.Id())
 			}
@@ -256,10 +283,10 @@ func resourceS3KeyImport(d *schema.ResourceData, meta interface{}) ([]*schema.Re
 		return nil, fmt.Errorf("Unable to retreive S3 key %q", d.Id())
 	}
 
-	d.SetId(s3Key.ID)
+	d.SetId(*s3Key.Id)
 	d.Set("user_id", parts[0])
-	d.Set("secret_key", s3Key.Properties.SecretKey)
-	d.Set("active", s3Key.Properties.Active)
+	d.Set("secret_key", *s3Key.Properties.SecretKey)
+	d.Set("active", *s3Key.Properties.Active)
 
 	return []*schema.ResourceData{d}, nil
 }

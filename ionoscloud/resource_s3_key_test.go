@@ -48,8 +48,7 @@ func TestAccS3Key_Basic(t *testing.T) {
 }
 
 func testAccChecks3KeyDestroyCheck(s *terraform.State) error {
-	//client := testAccProvider.Meta().(*ionoscloud.APIClient)
-	client := testAccProvider.Meta().(SdkBundle).Client
+	client := testAccProvider.Meta().(*ionoscloud.APIClient)
 
 	for _, rs := range s.RootModule().Resources {
 		if rs.Type != "ionoscloud_s3_key" {
@@ -73,8 +72,7 @@ func testAccChecks3KeyDestroyCheck(s *terraform.State) error {
 
 func testAccChecks3KeyExists(n string, s3Key *ionoscloud.S3Key) resource.TestCheckFunc {
 	return func(s *terraform.State) error {
-		//client := testAccProvider.Meta().(*ionoscloud.APIClient)
-		client := testAccProvider.Meta().(SdkBundle).Client
+		client := testAccProvider.Meta().(*ionoscloud.APIClient)
 
 		rs, ok := s.RootModule().Resources[n]
 

@@ -113,7 +113,7 @@ func resourceVolume() *schema.Resource {
 
 func resourceVolumeCreate(d *schema.ResourceData, meta interface{}) error {
 
-	client := meta.(SdkBundle).Client
+	client := meta.(*ionoscloud.APIClient)
 
 	var ssh_keypath []interface{}
 	var image_alias string
@@ -359,14 +359,13 @@ func resourceVolumeCreate(d *schema.ResourceData, meta interface{}) error {
 }
 
 func resourceVolumeRead(d *schema.ResourceData, meta interface{}) error {
+	client := meta.(*ionoscloud.APIClient)
 
-	client := meta.(SdkBundle).Client
 	dcId := d.Get("datacenter_id").(string)
 	serverID := d.Get("server_id").(string)
 	volumeID := d.Id()
 
 	ctx, cancel := context.WithTimeout(context.Background(), *resourceDefaultTimeouts.Default)
-
 	if cancel != nil {
 		defer cancel()
 	}
@@ -499,7 +498,8 @@ func resourceVolumeRead(d *schema.ResourceData, meta interface{}) error {
 }
 
 func resourceVolumeUpdate(d *schema.ResourceData, meta interface{}) error {
-	client := meta.(SdkBundle).Client
+	client := meta.(*ionoscloud.APIClient)
+
 	properties := ionoscloud.VolumeProperties{}
 	dcId := d.Get("datacenter_id").(string)
 
@@ -528,19 +528,16 @@ func resourceVolumeUpdate(d *schema.ResourceData, meta interface{}) error {
 		newValueStr := newValue.(string)
 		properties.AvailabilityZone = &newValueStr
 	}
-
 	if d.HasChange("cpu_hot_plug") {
 		_, newValue := d.GetChange("cpu_hot_plug")
 		newValueBool := newValue.(bool)
 		properties.CpuHotPlug = &newValueBool
 	}
-
 	if d.HasChange("ram_hot_plug") {
 		_, newValue := d.GetChange("ram_hot_plug")
 		newValueBool := newValue.(bool)
 		properties.RamHotPlug = &newValueBool
 	}
-
 	if d.HasChange("nic_hot_plug") {
 		_, newValue := d.GetChange("nic_hot_plug")
 		newValueBool := newValue.(bool)
@@ -615,11 +612,11 @@ func resourceVolumeUpdate(d *schema.ResourceData, meta interface{}) error {
 }
 
 func resourceVolumeDelete(d *schema.ResourceData, meta interface{}) error {
-	client := meta.(SdkBundle).Client
+	client := meta.(*ionoscloud.APIClient)
+
 	dcId := d.Get("datacenter_id").(string)
 
 	ctx, cancel := context.WithTimeout(context.Background(), *resourceDefaultTimeouts.Delete)
-
 	if cancel != nil {
 		defer cancel()
 	}
