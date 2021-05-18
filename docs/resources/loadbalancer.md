@@ -28,3 +28,11 @@ resource "ionoscloud_loadbalancer" "example" {
 * `nic_ids` - (Required)[list] A list of NIC IDs that are part of the load balancer.
 * `dhcp` - (Optional)[Boolean] Indicates if the load balancer will reserve an IP using DHCP.
 * `ip` - (Optional)[string] IPv4 address of the load balancer.
+
+## A note on nics
+
+When declaring NIC resources to be used with the load balancer, please make sure
+you use the "lifecycle meta-argument" to make sure changes to the lan attribute
+of the nic are ignored. 
+
+Please see the nic resource's documentation for an example on how to do that. 
