@@ -260,11 +260,15 @@ func resourcek8sNodePoolCreate(d *schema.ResourceData, meta interface{}) error {
 		defer cancel()
 	}
 
-	createdNodepool, _, err := client.KubernetesApi.K8sNodepoolsPost(ctx, d.Get("k8s_cluster_id").(string)).KubernetesNodePool(k8sNodepool).Execute()
+	createdNodepool, apiResponse, err := client.KubernetesApi.K8sNodepoolsPost(ctx, d.Get("k8s_cluster_id").(string)).KubernetesNodePool(k8sNodepool).Execute()
 
 	if err != nil {
 		d.SetId("")
-		return fmt.Errorf("Error creating k8s node pool: %s", err)
+		payload := "<nil>"
+		if apiResponse != nil {
+			payload = fmt.Sprintf("API response: %s", string(apiResponse.Payload))
+		}
+		return fmt.Errorf("error creating k8s node pool: %s; %s", err, payload)
 	}
 
 	d.SetId(*createdNodepool.Id)
