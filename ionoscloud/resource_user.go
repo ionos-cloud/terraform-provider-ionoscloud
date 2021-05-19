@@ -87,7 +87,11 @@ func resourceUserCreate(d *schema.ResourceData, meta interface{}) error {
 	}
 
 	if err != nil {
-		return fmt.Errorf("An error occured while creating a user: %s", err)
+		payload := "<nil>"
+		if apiResponse != nil {
+			payload = string(apiResponse.Payload)
+		}
+		return fmt.Errorf("an error occured while creating a user: %s; payload: %s", err, payload)
 	}
 
 	d.SetId(*rsp.Id)

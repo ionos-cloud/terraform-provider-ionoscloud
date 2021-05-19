@@ -3,6 +3,7 @@ package ionoscloud
 import (
 	"fmt"
 	"testing"
+	"time"
 
 	"github.com/hashicorp/terraform-plugin-sdk/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/terraform"
@@ -10,14 +11,14 @@ import (
 
 func TestAccS3Key_ImportBasic(t *testing.T) {
 	resourceName := "example"
-
+	email := fmt.Sprintf("terraform-s3-import-acc-tester-%d@mailinator.com", time.Now().Unix())
 	resource.Test(t, resource.TestCase{
 		PreCheck:     func() { testAccPreCheck(t) },
 		Providers:    testAccProviders,
 		CheckDestroy: testAccChecks3KeyDestroyCheck,
 		Steps: []resource.TestStep{
 			{
-				Config: fmt.Sprintf(testAccChecks3KeyImportConfigBasic, resourceName),
+				Config: fmt.Sprintf(testAccChecks3KeyImportConfigBasic, email, resourceName),
 			},
 			{
 				ResourceName:            fmt.Sprintf("ionoscloud_s3_key.%s", resourceName),
@@ -49,7 +50,7 @@ const testAccChecks3KeyImportConfigBasic = `
 resource "ionoscloud_user" "example" {
   first_name = "terraform"
   last_name = "test"
-  email = "terraform-s3-import-acc-tester2@profitbricks.com"
+  email = "%s"
   password = "abc123-321CBA"
   administrator = false
   force_sec_auth= false

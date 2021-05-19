@@ -4,8 +4,6 @@ import (
 	"context"
 	"fmt"
 	ionoscloud "github.com/ionos-cloud/sdk-go/v5"
-	"math/rand"
-	"strconv"
 	"testing"
 	"time"
 
@@ -16,9 +14,7 @@ import (
 func TestAccS3Key_Basic(t *testing.T) {
 	var s3Key ionoscloud.S3Key
 	s3KeyName := "example"
-	s1 := rand.NewSource(time.Now().UnixNano())
-	r1 := rand.New(s1)
-	email := strconv.Itoa(r1.Intn(100000)) + "terraform_test" + strconv.Itoa(r1.Intn(100000)) + "@go.com"
+	email := fmt.Sprintf("terraform_test-%d@mailinator.com",time.Now().Unix())
 
 	resource.Test(t, resource.TestCase{
 		PreCheck: func() {
