@@ -41,8 +41,6 @@ func TestAccLoadbalancer_Basic(t *testing.T) {
 }
 
 func testAccCheckLoadbalancerDestroyCheck(s *terraform.State) error {
-	// todo fix test error: the loadbalancer want to set the lan from nic resource 3 and the error is that the plan from
-	// nic differs from the plan from loadbalaner (diff: lan: "3" => "2")
 	client := testAccProvider.Meta().(*ionoscloud.APIClient)
 
 	ctx, _ := context.WithTimeout(context.Background(), *resourceDefaultTimeouts.Delete)
@@ -127,13 +125,13 @@ resource "ionoscloud_server" "webserver" {
   ram = 1024
   availability_zone = "ZONE_1"
   cpu_family = "AMD_OPTERON"
-	image_name = "ubuntu-16.04"
-	image_password = "K3tTj8G14a3EgKyNeeiY"
+  image_name = "ubuntu-16.04"
+  image_password = "K3tTj8G14a3EgKyNeeiY"
   volume {
     name = "system"
     size = 5
     disk_type = "SSD"
-}
+  }
   nic {
     lan = "1"
     dhcp = true
@@ -144,10 +142,13 @@ resource "ionoscloud_server" "webserver" {
 resource "ionoscloud_nic" "database_nic" {
   datacenter_id = "${ionoscloud_datacenter.foobar.id}"
   server_id = "${ionoscloud_server.webserver.id}"
-  lan = "2"
+  lan = "3"
   dhcp = true
   firewall_active = true
   name = "updated"
+  lifecycle {
+    ignore_changes = [ lan ]
+  }
 }
 
 resource "ionoscloud_loadbalancer" "example" {
@@ -191,6 +192,9 @@ resource "ionoscloud_nic" "database_nic1" {
   dhcp = true
   firewall_active = true
   name = "updated"
+  lifecycle {
+    ignore_changes = [ lan ]
+  }
 }
 
 resource "ionoscloud_nic" "database_nic2" {
@@ -200,6 +204,9 @@ resource "ionoscloud_nic" "database_nic2" {
   dhcp = true
   firewall_active = true
   name = "updated"
+  lifecycle {
+    ignore_changes = [ lan ]
+  }
 }
 
 resource "ionoscloud_loadbalancer" "example" {
