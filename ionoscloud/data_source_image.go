@@ -47,22 +47,29 @@ func dataSourceImageRead(d *schema.ResourceData, meta interface{}) error {
 	location, locationOk := d.GetOk("location")
 	version, versionOk := d.GetOk("version")
 
-	results := []profitbricks.Image{}
+	var results []profitbricks.Image
 
 	// if version value is present then concatenate name - version
 	// otherwise search by name or part of the name
 	if versionOk {
-		name_ver := fmt.Sprintf("%s-%s", name, version.(string))
+		nameVer := fmt.Sprintf("%s-%s", name, version.(string))
 		for _, img := range images.Items {
-			if strings.Contains(strings.ToLower(img.Properties.Name), strings.ToLower(name_ver)) {
+			if strings.ToLower(img.Properties.Name) == strings.ToLower(nameVer) {
 				results = append(results, img)
 			}
 		}
+		if results == nil {
+			return fmt.Errorf("could not find an image with name %s and version %s (%s)", name, version.(string), nameVer)
+		}
 	} else {
 		for _, img := range images.Items {
-			if strings.Contains(strings.ToLower(img.Properties.Name), strings.ToLower(name)) {
+			if strings.ToLower(img.Properties.Name) == strings.ToLower(name) {
 				results = append(results, img)
+				break
 			}
+		}
+		if results == nil {
+			return fmt.Errorf("could not find an image with name %s", name)
 		}
 	}
 
@@ -88,15 +95,24 @@ func dataSourceImageRead(d *schema.ResourceData, meta interface{}) error {
 		results = locationResults
 	}
 
-	if len(results) > 1 {
-		return fmt.Errorf("There is more than one image that match the search criteria")
-	}
-
 	if len(results) == 0 {
 		return fmt.Errorf("There are no images that match the search criteria")
 	}
 
-	d.Set("name", results[0].Properties.Name)
+	err = d.Set("name", results[0].Properties.Name)
+	if err != nil {
+		return err
+	}
+
+	err = d.Set("type", results[0].Properties.ImageType)
+	if err != nil {
+		return err
+	}
+
+	err = d.Set("location", results[0].Properties.Location)
+	if err != nil {
+		return err
+	}
 
 	d.SetId(results[0].ID)
 

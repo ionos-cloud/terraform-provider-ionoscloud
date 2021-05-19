@@ -3,8 +3,6 @@ package ionoscloud
 import (
 	"errors"
 	"fmt"
-	"strings"
-
 	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
 	"github.com/profitbricks/profitbricks-sdk-go/v5"
 )
@@ -190,7 +188,7 @@ func dataSourceK8sReadNodePool(d *schema.ResourceData, meta interface{}) error {
 			if err != nil {
 				return fmt.Errorf("an error occurred while fetching k8s nodePool with ID %s: %s", c.ID, err.Error())
 			}
-			if strings.Contains(tmpNodePool.Properties.Name, name.(string)) {
+			if tmpNodePool.Properties.Name == name.(string) {
 				/* lan found */
 				nodePool = tmpNodePool
 				break

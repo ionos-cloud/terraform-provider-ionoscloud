@@ -21,7 +21,7 @@ data "ionoscloud_datacenter" "dc_example" {
 
 ## Argument Reference
 
- * `name` - (Required) Name or part of the name of an existing Virtual Data Center that you want to search for.
+ * `name` - (Required) Name of an existing Virtual Data Center that you want to search for.
  * `location` - (Optional) Id of the existing Virtual Data Center's location.
 
 ## Attributes Reference

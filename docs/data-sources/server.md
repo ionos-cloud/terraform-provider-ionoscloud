@@ -20,7 +20,7 @@ data "ionoscloud_server" "server_example" {
 
 ## Argument Reference
 
-* `name` - (Optional) Name or part of the name of an existing server that you want to search for.
+* `name` - (Optional) Name of an existing server that you want to search for.
 * `id` - (Optional) ID of the server you want to search for.
 
 Either `name` or `id` must be provided. If none, or both are provided, the datasource will return an error.

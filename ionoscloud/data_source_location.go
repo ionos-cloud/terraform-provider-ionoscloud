@@ -2,11 +2,9 @@ package ionoscloud
 
 import (
 	"fmt"
-	"log"
-	"strings"
-
 	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
 	"github.com/profitbricks/profitbricks-sdk-go/v5"
+	"log"
 )
 
 func dataSourceLocation() *schema.Resource {
@@ -44,7 +42,7 @@ func dataSourceLocationRead(d *schema.ResourceData, meta interface{}) error {
 	results := []profitbricks.Location{}
 
 	for _, loc := range locations.Items {
-		if loc.Properties.Name == name.(string) || strings.Contains(loc.Properties.Name, name.(string)) {
+		if loc.Properties.Name == name.(string)  {
 			results = append(results, loc)
 		}
 	}
@@ -61,11 +59,6 @@ func dataSourceLocationRead(d *schema.ResourceData, meta interface{}) error {
 		results = locationResults
 	}
 	log.Printf("[INFO] Results length %d *************", len(results))
-
-	if len(results) > 1 {
-		log.Printf("[INFO] Results length greater than 1")
-		return fmt.Errorf("there is more than one location that match the search criteria")
-	}
 
 	if len(results) == 0 {
 		return fmt.Errorf("There are no locations that match the search criteria")

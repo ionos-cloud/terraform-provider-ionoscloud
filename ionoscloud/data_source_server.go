@@ -3,8 +3,6 @@ package ionoscloud
 import (
 	"errors"
 	"fmt"
-	"strings"
-
 	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
 	"github.com/profitbricks/profitbricks-sdk-go/v5"
 )
@@ -558,7 +556,7 @@ func dataSourceServerRead(d *schema.ResourceData, meta interface{}) error {
 		}
 
 		for _, s := range servers.Items {
-			if strings.Contains(s.Properties.Name, name.(string)) {
+			if s.Properties.Name == name.(string) {
 				/* server found */
 				server, err = client.GetServer(datacenterId.(string), s.ID)
 				if err != nil {

@@ -3,8 +3,6 @@ package ionoscloud
 import (
 	"errors"
 	"fmt"
-	"strings"
-
 	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
 	"github.com/profitbricks/profitbricks-sdk-go/v5"
 )
@@ -184,7 +182,7 @@ func dataSourcePccRead(d *schema.ResourceData, meta interface{}) error {
 		}
 
 		for _, p := range pccs.Items {
-			if strings.Contains(p.Properties.Name, name.(string)) {
+			if p.Properties.Name == name.(string) {
 				/* lan found */
 				pcc, err = client.GetPrivateCrossConnect(p.ID)
 				if err != nil {
