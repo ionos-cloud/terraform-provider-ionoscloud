@@ -69,13 +69,13 @@ func resourceS3KeyRead(d *schema.ResourceData, meta interface{}) error {
 	rsp, apiResponse, err := client.UserManagementApi.UmUsersS3keysFindByKeyId(context.TODO(), userId, d.Id()).Execute()
 	if err != nil {
 		if _, ok := err.(ionoscloud.GenericOpenAPIError); ok {
-			if apiResponse.Response.StatusCode == 404 {
+			if apiResponse != nil && apiResponse.Response.StatusCode == 404 {
 				d.SetId("")
 				return nil
 			}
 		}
 
-		return fmt.Errorf("Error while reading S3 key %s: %s, %+v", d.Id(), err, rsp)
+		return fmt.Errorf("error while reading S3 key %s: %s, %+v", d.Id(), err, rsp)
 	}
 
 	log.Printf("[INFO] Successfully retreived S3 key %s: %+v", d.Id(), rsp)
@@ -109,13 +109,13 @@ func resourceS3KeyUpdate(d *schema.ResourceData, meta interface{}) error {
 
 	if err != nil {
 		if _, ok := err.(ionoscloud.GenericOpenAPIError); ok {
-			if apiResponse.Response.StatusCode == 404 {
+			if apiResponse != nil && apiResponse.Response.StatusCode == 404 {
 				d.SetId("")
 				return nil
 			}
-			return fmt.Errorf("Error while updating S3 key: %s", err)
+			return fmt.Errorf("error while updating S3 key: %s", err)
 		}
-		return fmt.Errorf("Error while updating S3 key %s: %s", d.Id(), err)
+		return fmt.Errorf("error while updating S3 key %s: %s", d.Id(), err)
 	}
 
 	for {
@@ -149,14 +149,14 @@ func resourceS3KeyDelete(d *schema.ResourceData, meta interface{}) error {
 
 	if err != nil {
 		if _, ok := err.(ionoscloud.GenericOpenAPIError); ok {
-			if apiResponse.Response.StatusCode == 404 {
+			if apiResponse != nil && apiResponse.Response.StatusCode == 404 {
 				d.SetId("")
 				return nil
 			}
-			return fmt.Errorf("Error while deleting S3 key: %s", err)
+			return fmt.Errorf("error while deleting S3 key: %s", err)
 		}
 
-		return fmt.Errorf("Error while deleting S3 key %s: %s", d.Id(), err)
+		return fmt.Errorf("error while deleting S3 key %s: %s", d.Id(), err)
 	}
 
 	for {
@@ -184,10 +184,10 @@ func s3KeyDeleted(client *ionoscloud.APIClient, d *schema.ResourceData) (bool, e
 
 	if err != nil {
 		if _, ok := err.(ionoscloud.GenericOpenAPIError); ok {
-			if apiResponse.Response.StatusCode == 404 {
+			if apiResponse != nil && apiResponse.Response.StatusCode == 404 {
 				return true, nil
 			}
-			return true, fmt.Errorf("Error checking S3 key deletion status: %s", err)
+			return true, fmt.Errorf("error checking S3 key deletion status: %s", err)
 		}
 	}
 	return false, nil

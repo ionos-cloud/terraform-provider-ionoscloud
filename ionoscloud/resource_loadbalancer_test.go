@@ -56,7 +56,7 @@ func testAccCheckLoadbalancerDestroyCheck(s *terraform.State) error {
 			_, apiResponse, err := client.DataCenterApi.DatacentersDelete(ctx, dcId).Execute()
 
 			if apiError, ok := err.(ionoscloud.GenericOpenAPIError); ok {
-				if apiResponse.Response.StatusCode != 404 {
+				if apiResponse == nil || apiResponse.Response.StatusCode != 404 {
 					return fmt.Errorf("loadbalancer still exists %s %s", rs.Primary.ID, apiError)
 				}
 			} else {

@@ -4,7 +4,6 @@ import (
 	"context"
 	"fmt"
 	ionoscloud "github.com/ionos-cloud/sdk-go/v5"
-	"github.com/profitbricks/profitbricks-sdk-go/v5"
 	"log"
 	"strings"
 
@@ -50,11 +49,9 @@ func resourceK8sClusterImport(d *schema.ResourceData, meta interface{}) ([]*sche
 	cluster, apiResponse, err := client.KubernetesApi.K8sFindByClusterId(ctx, d.Id()).Execute()
 
 	if err != nil {
-		if _, ok := err.(ionoscloud.GenericOpenAPIError); ok {
-			if apiResponse.Response.StatusCode == 404 {
-				d.SetId("")
-				return nil, fmt.Errorf("Unable to find k8s cluster %q", d.Id())
-			}
+		if apiResponse != nil && apiResponse.Response.StatusCode == 404 {
+			d.SetId("")
+			return nil, fmt.Errorf("Unable to find k8s cluster %q", d.Id())
 		}
 		return nil, fmt.Errorf("Unable to retreive k8s cluster %q", d.Id())
 	}
@@ -274,11 +271,9 @@ func resourceS3KeyImport(d *schema.ResourceData, meta interface{}) ([]*schema.Re
 	s3Key, apiResponse, err := client.UserManagementApi.UmUsersS3keysFindByKeyId(context.TODO(), parts[0], parts[1]).Execute()
 
 	if err != nil {
-		if _, ok := err.(profitbricks.ApiError); ok {
-			if apiResponse != nil && apiResponse.Response.StatusCode == 404 {
-				d.SetId("")
-				return nil, fmt.Errorf("Unable to find S3 key %q", d.Id())
-			}
+		if apiResponse != nil && apiResponse.Response.StatusCode == 404 {
+			d.SetId("")
+			return nil, fmt.Errorf("Unable to find S3 key %q", d.Id())
 		}
 		return nil, fmt.Errorf("Unable to retreive S3 key %q", d.Id())
 	}

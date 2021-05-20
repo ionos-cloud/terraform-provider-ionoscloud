@@ -52,14 +52,16 @@ func testAccCheckNicDestroyCheck(s *terraform.State) error {
 
 		dcId := rs.Primary.Attributes["datacenter_id"]
 		serverId := rs.Primary.Attributes["server_id"]
-		_, apiResponse, err := client.NicApi.DatacentersServersNicsFindById(ctx, dcId, serverId, rs.Primary.ID).Execute()
+		_, apiResponse, _ := client.NicApi.DatacentersServersNicsFindById(ctx, dcId, serverId, rs.Primary.ID).Execute()
 
-		if apiError, ok := err.(ionoscloud.GenericOpenAPIError); ok {
-			if apiResponse.Response.StatusCode != 404 {
-				return fmt.Errorf("NIC still exists %s %s", rs.Primary.ID, apiError)
+		if apiResponse == nil || apiResponse.Response.StatusCode != 404 {
+			var payload = "<nil>"
+			var statusCode = 0
+			if apiResponse != nil {
+				payload = string(apiResponse.Payload)
+				statusCode = apiResponse.StatusCode
 			}
-		} else {
-			return fmt.Errorf("Unable to fetching NIC %s %s", rs.Primary.ID, err)
+			return fmt.Errorf("NIC still exists %s: %d %s", rs.Primary.ID, statusCode, payload)
 		}
 	}
 

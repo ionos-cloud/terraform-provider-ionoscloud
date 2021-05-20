@@ -154,12 +154,12 @@ func resourcePrivateCrossConnectRead(d *schema.ResourceData, meta interface{}) e
 
 	if err != nil {
 		if _, ok := err.(ionoscloud.GenericOpenAPIError); ok {
-			if apiResponse.Response.StatusCode == 404 {
+			if apiResponse != nil && apiResponse.Response.StatusCode == 404 {
 				d.SetId("")
 				return nil
 			}
 		}
-		return fmt.Errorf("Error while fetching PCC %s: %s", d.Id(), err)
+		return fmt.Errorf("error while fetching PCC %s: %s", d.Id(), err)
 	}
 
 	log.Printf("[INFO] Successfully retreived PCC %s: %+v", d.Id(), rsp)
@@ -229,13 +229,13 @@ func resourcePrivateCrossConnectUpdate(d *schema.ResourceData, meta interface{})
 	_, apiResponse, err := client.PrivateCrossConnectApi.PccsPatch(ctx, d.Id()).Pcc(*request.Properties).Execute()
 	if err != nil {
 		if _, ok := err.(ionoscloud.GenericOpenAPIError); ok {
-			if apiResponse.Response.StatusCode == 404 {
+			if apiResponse != nil && apiResponse.Response.StatusCode == 404 {
 				d.SetId("")
 				return nil
 			}
-			return fmt.Errorf("Error while updating PCC: %s", err)
+			return fmt.Errorf("error while updating PCC: %s", err)
 		}
-		return fmt.Errorf("Error while updating PCC %s: %s", d.Id(), err)
+		return fmt.Errorf("error while updating PCC %s: %s", d.Id(), err)
 	}
 
 	for {
@@ -268,14 +268,14 @@ func resourcePrivateCrossConnectDelete(d *schema.ResourceData, meta interface{})
 	_, apiResponse, err := client.PrivateCrossConnectApi.PccsDelete(ctx, d.Id()).Execute()
 	if err != nil {
 		if _, ok := err.(ionoscloud.GenericOpenAPIError); ok {
-			if apiResponse.Response.StatusCode == 404 {
+			if apiResponse != nil && apiResponse.Response.StatusCode == 404 {
 				d.SetId("")
 				return nil
 			}
-			return fmt.Errorf("Error while deleting PCC: %s", err)
+			return fmt.Errorf("error while deleting PCC: %s", err)
 		}
 
-		return fmt.Errorf("Error while deleting PCC %s: %s", d.Id(), err)
+		return fmt.Errorf("error while deleting PCC %s: %s", d.Id(), err)
 	}
 
 	for {
@@ -319,10 +319,10 @@ func privateCrossConnectDeleted(client *ionoscloud.APIClient, d *schema.Resource
 
 	if err != nil {
 		if _, ok := err.(ionoscloud.GenericOpenAPIError); ok {
-			if apiResponse.Response.StatusCode == 404 {
+			if apiResponse != nil && apiResponse.Response.StatusCode == 404 {
 				return true, nil
 			}
-			return true, fmt.Errorf("Error checking PCC deletion status: %s", err)
+			return true, fmt.Errorf("error checking PCC deletion status: %s", err)
 		}
 	}
 	return false, nil

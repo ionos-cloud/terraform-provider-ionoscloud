@@ -45,21 +45,23 @@ func TestAccbackupUnit_Basic(t *testing.T) {
 func testAccCheckbackupUnitDestroyCheck(s *terraform.State) error {
 	client := testAccProvider.Meta().(*ionoscloud.APIClient)
 
+	ctx, cancel := context.WithTimeout(context.Background(), *resourceDefaultTimeouts.Default)
+
+	if cancel != nil {
+		defer cancel()
+	}
+
+
 	for _, rs := range s.RootModule().Resources {
+
 		if rs.Type != "ionoscloud_backup_unit" {
 			continue
-		}
-
-		ctx, cancel := context.WithTimeout(context.Background(), *resourceDefaultTimeouts.Default)
-
-		if cancel != nil {
-			defer cancel()
 		}
 
 		_, apiResponse, err := client.BackupUnitApi.BackupunitsFindById(ctx, rs.Primary.ID).Execute()
 
 		if _, ok := err.(ionoscloud.GenericOpenAPIError); ok {
-			if apiResponse.Response.StatusCode != 404 {
+			if apiResponse != nil && apiResponse.Response.StatusCode != 404 {
 				return fmt.Errorf("backup unit still exists %s %s", rs.Primary.ID, string(apiResponse.Payload))
 			}
 		} else {

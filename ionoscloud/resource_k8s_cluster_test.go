@@ -56,8 +56,12 @@ func testAccCheckk8sClusterDestroyCheck(s *terraform.State) error {
 		_, apiResponse, err := client.KubernetesApi.K8sFindByClusterId(ctx, rs.Primary.ID).Execute()
 
 		if _, ok := err.(ionoscloud.GenericOpenAPIError); ok {
-			if apiResponse.Response.StatusCode != 404 {
-				return fmt.Errorf("K8s cluster still exists %s %s", rs.Primary.ID, string(apiResponse.Payload))
+			if apiResponse == nil || apiResponse.Response.StatusCode != 404 {
+				var payload = "<nil>"
+				if apiResponse != nil {
+					payload = string(apiResponse.Payload)
+				}
+				return fmt.Errorf("k8s cluster still exists %s %s", rs.Primary.ID, payload)
 			}
 		} else {
 			return fmt.Errorf("Unable to fetch k8s cluster %s %s", rs.Primary.ID, err)

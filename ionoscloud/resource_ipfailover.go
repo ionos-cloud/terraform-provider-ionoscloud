@@ -90,13 +90,11 @@ func resourceLanIPFailoverRead(d *schema.ResourceData, meta interface{}) error {
 	lan, apiResponse, err := client.LanApi.DatacentersLansFindById(ctx, d.Get("datacenter_id").(string), d.Id()).Execute()
 
 	if err != nil {
-		if _, ok := err.(ionoscloud.GenericOpenAPIError); ok {
-			if apiResponse.Response.StatusCode == 404 {
-				d.SetId("")
-				return nil
-			}
+		if apiResponse != nil && apiResponse.Response.StatusCode == 404 {
+			d.SetId("")
+			return nil
 		}
-		return fmt.Errorf("An error occured while fetching a lan ID %s %s", d.Id(), err)
+		return fmt.Errorf("an error occured while fetching a lan ID %s %s", d.Id(), err)
 	}
 
 	if lan.Properties.IpFailover != nil {
@@ -184,12 +182,8 @@ func resourceLanIPFailoverDelete(d *schema.ResourceData, meta interface{}) error
 		time.Sleep(90 * time.Second)
 		_, apiResponse, err = client.LanApi.DatacentersLansPatch(ctx, dcid, lanid).Lan(*properties).Execute()
 
-		if err != nil {
-			if _, ok := err.(ionoscloud.GenericOpenAPIError); ok {
-				if apiResponse.Response.StatusCode != 404 {
-					return fmt.Errorf("An error occured while removing a lans ipfailover groups dcId %s ID %s %s", d.Get("datacenter_id").(string), d.Id(), err)
-				}
-			}
+		if err != nil && (apiResponse == nil || apiResponse.Response.StatusCode != 404) {
+			return fmt.Errorf("an error occured while removing a lans ipfailover groups dcId %s ID %s %s", d.Get("datacenter_id").(string), d.Id(), err)
 		}
 	}
 

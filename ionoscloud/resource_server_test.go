@@ -68,12 +68,13 @@ func testAccCheckServerDestroyCheck(s *terraform.State) error {
 
 		_, apiResponse, err := client.ServerApi.DatacentersServersFindById(ctx, dcId, rs.Primary.ID).Execute()
 
-		if _, ok := err.(ionoscloud.GenericOpenAPIError); ok {
-			if apiResponse.Response.StatusCode != 404 {
-				return fmt.Errorf("Server still exists %s %s", rs.Primary.ID, string(apiResponse.Payload))
+		if err != nil {
+			if apiResponse == nil || apiResponse.Response.StatusCode != 404 {
+				return fmt.Errorf("unable to fetch server %s: %s", rs.Primary.ID, err)
 			}
 		} else {
-			return fmt.Errorf("Unable to fetching Server %s %s", rs.Primary.ID, err)
+			return fmt.Errorf("server still exists %s", rs.Primary.ID)
+
 		}
 	}
 

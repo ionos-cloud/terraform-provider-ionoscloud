@@ -49,12 +49,12 @@ func testAccCheckSnapshotDestroyCheck(s *terraform.State) error {
 
 		_, apiResponse, err := client.SnapshotApi.SnapshotsFindById(ctx, rs.Primary.ID).Execute()
 
-		if apiError, ok := err.(ionoscloud.GenericOpenAPIError); ok {
-			if apiResponse.Response.StatusCode != 404 {
-				return fmt.Errorf("Snapshot still exists %s %s", rs.Primary.ID, apiError)
+		if err != nil {
+			if apiResponse == nil || apiResponse.Response.StatusCode != 404 {
+				return fmt.Errorf("unable to fetch snapshot %s %s", rs.Primary.ID, err)
 			}
 		} else {
-			return fmt.Errorf("Unable to fetching Snapshot %s %s", rs.Primary.ID, err)
+			return fmt.Errorf("snapshot %s still exists", rs.Primary.ID)
 		}
 	}
 

@@ -8,7 +8,6 @@ import (
 	"time"
 
 	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
-	"github.com/profitbricks/profitbricks-sdk-go/v5"
 )
 
 func resourceGroup() *schema.Resource {
@@ -184,14 +183,12 @@ func resourceGroupRead(d *schema.ResourceData, meta interface{}) error {
 		defer cancel()
 	}
 
-	group, _, err := client.UserManagementApi.UmGroupsFindById(ctx, d.Id()).Execute()
+	group, apiResponse, err := client.UserManagementApi.UmGroupsFindById(ctx, d.Id()).Execute()
 
 	if err != nil {
-		if apiError, ok := err.(profitbricks.ApiError); ok {
-			if apiError.HttpStatusCode() == 404 {
-				d.SetId("")
-				return nil
-			}
+		if apiResponse != nil && apiResponse.Response.StatusCode == 404 {
+			d.SetId("")
+			return nil
 		}
 		return fmt.Errorf("An error occured while fetching a Group ID %s %s", d.Id(), err)
 	}
@@ -366,8 +363,8 @@ func resourceGroupDelete(d *schema.ResourceData, meta interface{}) error {
 
 		if err != nil {
 			if _, ok := err.(ionoscloud.GenericOpenAPIError); ok {
-				if apiResponse.Response.StatusCode != 404 {
-					return fmt.Errorf("An error occured while deleting a group %s %s", d.Id(), err)
+				if apiResponse == nil || apiResponse.Response.StatusCode != 404 {
+					return fmt.Errorf("an error occured while deleting a group %s %s", d.Id(), err)
 				}
 			}
 		}

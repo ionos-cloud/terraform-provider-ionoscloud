@@ -439,39 +439,30 @@ func resourceServerCreate(d *schema.ResourceData, meta interface{}) error {
 			return fmt.Errorf("Could not find an image/imagealias/snapshot that matches %s ", image_name)
 		}
 		if volume.ImagePassword == nil && len(sshkey_path) == 0 && isSnapshot == false && img.Properties.Public != nil && *img.Properties.Public {
-			return fmt.Errorf("Either 'image_password' or 'ssh_key_path' must be provided.")
+			return fmt.Errorf("either 'image_password' or 'ssh_key_path' must be provided.")
 		}
 	} else {
 		img, apiResponse, err := client.ImageApi.ImagesFindById(ctx, image_name).Execute()
 
-		_, rsp := err.(ionoscloud.GenericOpenAPIError)
+		if apiResponse != nil && apiResponse.Response.StatusCode == 404 {
 
-		if err != nil {
-			return fmt.Errorf("Error fetching image %s: (%s) - %+v", image_name, err, rsp)
-		}
+			_, apiResponse, err = client.SnapshotApi.SnapshotsFindById(ctx, image_name).Execute()
 
-		if apiResponse.Response.StatusCode == 404 {
-
-			_, apiResponse, err := client.SnapshotApi.SnapshotsFindById(ctx, image_name).Execute()
-
-			if _, ok := err.(ionoscloud.GenericOpenAPIError); !ok {
-				if apiResponse != nil && apiResponse.Response.StatusCode == 404 {
-					return fmt.Errorf("image/snapshot: %s Not Found", string(apiResponse.Payload))
-				}
+			if apiResponse != nil && apiResponse.Response.StatusCode == 404 {
+				return fmt.Errorf("image/snapshot: %s Not Found", string(apiResponse.Payload))
 			}
+
 
 			isSnapshot = true
 
-		} else {
-			if err != nil {
-				return fmt.Errorf("Error fetching image/snapshot: %s", err)
-			}
+		} else if err != nil {
+			return fmt.Errorf("error fetching image/snapshot: %s", err)
 		}
 
 		if *img.Properties.Public == true && isSnapshot == false {
 
 			if volume.ImagePassword == nil && len(sshkey_path) == 0 {
-				return fmt.Errorf("Either 'image_password' or 'ssh_key_path' must be provided.")
+				return fmt.Errorf("either 'image_password' or 'ssh_key_path' must be provided.")
 			}
 
 			img, err := getImage(client, d.Get("datacenter_id").(string), image_name, *volume.Type)
@@ -775,13 +766,11 @@ func resourceServerRead(d *schema.ResourceData, meta interface{}) error {
 
 	server, apiResponse, err := client.ServerApi.DatacentersServersFindById(ctx, dcId, serverId).Execute()
 	if err != nil {
-		if _, ok := err.(ionoscloud.GenericOpenAPIError); ok {
-			if apiResponse.Response.StatusCode == 404 {
-				d.SetId("")
-				return nil
-			}
+		if apiResponse != nil && apiResponse.Response.StatusCode == 404 {
+			d.SetId("")
+			return nil
 		}
-		return fmt.Errorf("Error occured while fetching a server ID %s %s", d.Id(), err)
+		return fmt.Errorf("error occured while fetching a server ID %s %s", d.Id(), err)
 	}
 
 	if server.Properties.Name != nil {

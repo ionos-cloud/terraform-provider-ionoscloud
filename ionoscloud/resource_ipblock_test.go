@@ -53,7 +53,7 @@ func testAccCheckIPBlockDestroyCheck(s *terraform.State) error {
 		_, apiResponse, err := client.IPBlocksApi.IpblocksFindById(ctx, rs.Primary.ID).Execute()
 
 		if apiError, ok := err.(ionoscloud.GenericOpenAPIError); ok {
-			if apiResponse.Response.StatusCode != 404 {
+			if apiResponse != nil && apiResponse.Response.StatusCode != 404 {
 				return fmt.Errorf("IPBlock still exists %s %s", rs.Primary.ID, apiError)
 			}
 		} else {

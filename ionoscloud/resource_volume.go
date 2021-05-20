@@ -374,7 +374,7 @@ func resourceVolumeRead(d *schema.ResourceData, meta interface{}) error {
 
 	if err != nil {
 		if _, ok := err.(ionoscloud.GenericOpenAPIError); ok {
-			if apiResponse.Response.StatusCode == 404 {
+			if apiResponse != nil && apiResponse.Response.StatusCode == 404 {
 				d.SetId("")
 				return nil
 			}
@@ -382,7 +382,7 @@ func resourceVolumeRead(d *schema.ResourceData, meta interface{}) error {
 		return fmt.Errorf("Error occured while fetching a volume ID %s %s", d.Id(), err)
 	}
 
-	if apiResponse.Response.StatusCode > 299 {
+	if apiResponse != nil && apiResponse.Response.StatusCode > 299 {
 		return fmt.Errorf("An error occured while fetching a volume ID %s %s", d.Id(), string(apiResponse.Payload))
 
 	}
@@ -588,7 +588,7 @@ func resourceVolumeUpdate(d *schema.ResourceData, meta interface{}) error {
 		return errState
 	}
 
-	if apiResponse.Response.StatusCode > 299 {
+	if apiResponse != nil && apiResponse.Response.StatusCode > 299 {
 		return fmt.Errorf("An error occured while updating a volume ID %s %s", d.Id(), string(apiResponse.Payload))
 
 	}

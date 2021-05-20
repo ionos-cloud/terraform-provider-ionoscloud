@@ -307,12 +307,11 @@ func resourcek8sNodePoolRead(d *schema.ResourceData, meta interface{}) error {
 
 	if err != nil {
 		log.Printf("[INFO] Resource %s not found: %+v", d.Id(), err)
-		if _, ok := err.(ionoscloud.GenericOpenAPIError); ok {
-			if apiResponse.Response.StatusCode == 404 {
-				d.SetId("")
-				return nil
-			}
+		if apiResponse != nil && apiResponse.Response.StatusCode == 404 {
+			d.SetId("")
+			return nil
 		}
+		return err
 	}
 
 	log.Printf("[INFO] Successfully retreived k8s node pool %s: %+v", d.Id(), k8sNodepool)
@@ -615,12 +614,9 @@ func resourcek8sNodePoolUpdate(d *schema.ResourceData, meta interface{}) error {
 	_, apiResponse, err := client.KubernetesApi.K8sNodepoolsPut(ctx, d.Get("k8s_cluster_id").(string), d.Id()).KubernetesNodePool(request).Execute()
 
 	if err != nil {
-		if _, ok := err.(ionoscloud.GenericOpenAPIError); ok {
-			if apiResponse.Response.StatusCode == 404 {
-				d.SetId("")
-				return nil
-			}
-			return fmt.Errorf("Error while updating k8s node pool: %s", err)
+		if apiResponse != nil && apiResponse.Response.StatusCode == 404 {
+			d.SetId("")
+			return nil
 		}
 		return fmt.Errorf("Error while updating k8s node pool %s: %s", d.Id(), err)
 	}
@@ -656,14 +652,10 @@ func resourcek8sNodePoolDelete(d *schema.ResourceData, meta interface{}) error {
 	_, apiResponse, err := client.KubernetesApi.K8sNodepoolsDelete(ctx, d.Get("k8s_cluster_id").(string), d.Id()).Execute()
 
 	if err != nil {
-		if _, ok := err.(ionoscloud.GenericOpenAPIError); ok {
-			if apiResponse.Response.StatusCode == 404 {
-				d.SetId("")
-				return nil
-			}
-			return fmt.Errorf("Error while deleting k8s node pool: %s", err)
+		if apiResponse != nil && apiResponse.Response.StatusCode == 404 {
+			d.SetId("")
+			return nil
 		}
-
 		return fmt.Errorf("Error while deleting k8s node pool %s: %s", d.Id(), err)
 	}
 
@@ -711,7 +703,7 @@ func k8sNodepoolDeleted(client *ionoscloud.APIClient, d *schema.ResourceData) (b
 
 	if err != nil {
 		if _, ok := err.(ionoscloud.GenericOpenAPIError); ok {
-			if apiResponse.Response.StatusCode == 404 {
+			if apiResponse != nil && apiResponse.Response.StatusCode == 404 {
 				return true, nil
 			}
 			return true, fmt.Errorf("Error checking k8s node pool deletion status: %s", err)

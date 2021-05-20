@@ -53,9 +53,9 @@ func testAccCheckprivateCrossConnectDestroyCheck(s *terraform.State) error {
 
 		_, apiResponse, err := client.PrivateCrossConnectApi.PccsFindById(ctx, rs.Primary.ID).Execute()
 
-		if apiError, ok := err.(ionoscloud.GenericOpenAPIError); ok {
-			if apiResponse.Response.StatusCode != 404 {
-				return fmt.Errorf("private cross-connect exists %s %s", rs.Primary.ID, apiError)
+		if err != nil {
+			if apiResponse == nil || apiResponse.Response.StatusCode != 404 {
+				return fmt.Errorf("an error occurred while checking private cross-connect %s: %s", rs.Primary.ID, err)
 			}
 		} else {
 			return fmt.Errorf("Unable to fetch private cross-connect %s %s", rs.Primary.ID, err)

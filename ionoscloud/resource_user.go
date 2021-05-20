@@ -121,7 +121,7 @@ func resourceUserRead(d *schema.ResourceData, meta interface{}) error {
 
 	if err != nil {
 		if _, ok := err.(ionoscloud.GenericOpenAPIError); ok {
-			if apiResponse.Response.StatusCode == 404 {
+			if apiResponse != nil && apiResponse.Response.StatusCode == 404 {
 				d.SetId("")
 				return nil
 			}
@@ -213,8 +213,8 @@ func resourceUserDelete(d *schema.ResourceData, meta interface{}) error {
 		_, _, err := client.UserManagementApi.UmUsersDelete(ctx, d.Id()).Execute()
 		if err != nil {
 			if _, ok := err.(ionoscloud.GenericOpenAPIError); ok {
-				if apiResponse.Response.StatusCode != 404 {
-					return fmt.Errorf("An error occured while deleting a user %s %s", d.Id(), err)
+				if apiResponse == nil || apiResponse.Response.StatusCode != 404 {
+					return fmt.Errorf("an error occured while deleting a user %s %s", d.Id(), err)
 				}
 			}
 		}

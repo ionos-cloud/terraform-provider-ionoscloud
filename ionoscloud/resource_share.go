@@ -79,11 +79,9 @@ func resourceShareRead(d *schema.ResourceData, meta interface{}) error {
 	rsp, apiResponse, err := client.UserManagementApi.UmGroupsSharesFindByResourceId(context.TODO(),
 		d.Get("group_id").(string), d.Get("resource_id").(string)).Execute()
 	if err != nil {
-		if _, ok := err.(ionoscloud.GenericOpenAPIError); ok {
-			if apiResponse.Response.StatusCode == 404 {
-				d.SetId("")
-				return nil
-			}
+		if apiResponse != nil && apiResponse.Response.StatusCode == 404 {
+			d.SetId("")
+			return nil
 		}
 		return fmt.Errorf("An error occured while fetching a Share ID %s %s", d.Id(), err)
 	}
@@ -139,7 +137,7 @@ func resourceShareDelete(d *schema.ResourceData, meta interface{}) error {
 
 	_, apiResponse, err := client.UserManagementApi.UmGroupsSharesDelete(ctx, groupId, resourceId).Execute()
 	if err != nil {
-		if apiResponse.Response.StatusCode == 404 {
+		if apiResponse != nil && apiResponse.Response.StatusCode == 404 {
 			return err
 		}
 		//try again in 20 seconds
@@ -147,8 +145,8 @@ func resourceShareDelete(d *schema.ResourceData, meta interface{}) error {
 		_, apiResponse, err := client.UserManagementApi.UmGroupsSharesDelete(ctx, groupId, resourceId).Execute()
 		if err != nil {
 			if _, ok := err.(ionoscloud.GenericOpenAPIError); ok {
-				if apiResponse.Response.StatusCode != 404 {
-					return fmt.Errorf("An error occured while deleting a share %s %s", d.Id(), err)
+				if apiResponse == nil || apiResponse.Response.StatusCode != 404 {
+					return fmt.Errorf("an error occured while deleting a share %s %s", d.Id(), err)
 				}
 			}
 		}

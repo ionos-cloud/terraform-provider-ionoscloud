@@ -109,13 +109,10 @@ func resourceBackupUnitRead(d *schema.ResourceData, meta interface{}) error {
 	backupUnit, apiResponse, err := client.BackupUnitApi.BackupunitsFindById(ctx, d.Id()).Execute()
 
 	if err != nil {
-		if _, ok := err.(ionoscloud.GenericOpenAPIError); ok {
-			if apiResponse.Response.StatusCode == 404 {
-				d.SetId("")
-				return nil
-			}
+		if apiResponse != nil && apiResponse.Response.StatusCode == 404 {
+			d.SetId("")
+			return nil
 		}
-
 		return fmt.Errorf("Error while fetching backup unit %s: %s", d.Id(), err)
 	}
 
@@ -192,12 +189,9 @@ func resourceBackupUnitUpdate(d *schema.ResourceData, meta interface{}) error {
 	_, apiResponse, err := client.BackupUnitApi.BackupunitsPut(ctx, d.Id()).BackupUnit(request).Execute()
 
 	if err != nil {
-		if _, ok := err.(ionoscloud.GenericOpenAPIError); ok {
-			if apiResponse.Response.StatusCode == 404 {
-				d.SetId("")
-				return nil
-			}
-			return fmt.Errorf("Error while updating backup unit: %s", err)
+		if apiResponse != nil && apiResponse.Response.StatusCode == 404 {
+			d.SetId("")
+			return nil
 		}
 		return fmt.Errorf("Error while updating backup unit %s: %s", d.Id(), err)
 	}
@@ -232,14 +226,10 @@ func resourceBackupUnitDelete(d *schema.ResourceData, meta interface{}) error {
 	_, apiResponse, err := client.BackupUnitApi.BackupunitsDelete(ctx, d.Id()).Execute()
 
 	if err != nil {
-		if _, ok := err.(ionoscloud.GenericOpenAPIError); ok {
-			if apiResponse.Response.StatusCode == 404 {
-				d.SetId("")
-				return nil
-			}
-			return fmt.Errorf("Error while deleting backup unit: %s", err)
+		if apiResponse != nil && apiResponse.Response.StatusCode == 404 {
+			d.SetId("")
+			return nil
 		}
-
 		return fmt.Errorf("Error while deleting backup unit %s: %s", d.Id(), err)
 	}
 
@@ -275,12 +265,10 @@ func backupUnitDeleted(client *ionoscloud.APIClient, d *schema.ResourceData, c c
 	_, apiResponse, err := client.BackupUnitApi.BackupunitsFindById(c, d.Id()).Execute()
 
 	if err != nil {
-		if _, ok := err.(ionoscloud.GenericOpenAPIError); ok {
-			if apiResponse.Response.StatusCode == 404 {
-				return true, nil
-			}
-			return true, fmt.Errorf("Error checking backup unit deletion status: %s", err)
+		if apiResponse != nil && apiResponse.Response.StatusCode == 404 {
+			return true, nil
 		}
+		return true, fmt.Errorf("error checking backup unit deletion status: %s", err)
 	}
 	return false, nil
 }
