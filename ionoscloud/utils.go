@@ -98,12 +98,12 @@ func resourceK8sNodepoolImport(d *schema.ResourceData, meta interface{}) ([]*sch
 
 	if err != nil {
 		if _, ok := err.(ionoscloud.GenericOpenAPIError); ok {
-			if apiResponse.Response.StatusCode == 404 {
+			if apiResponse != nil && apiResponse.Response.StatusCode == 404 {
 				d.SetId("")
-				return nil, fmt.Errorf("Unable to find k8s node pool %q", d.Id())
+				return nil, fmt.Errorf("unable to find k8s node pool %q", d.Id())
 			}
 		}
-		return nil, fmt.Errorf("Unable to retreive k8s node pool %q", d.Id())
+		return nil, fmt.Errorf("unable to retreive k8s node pool %q", d.Id())
 	}
 
 	log.Printf("[INFO] K8s node pool found: %+v", k8sNodepool)
@@ -173,12 +173,12 @@ func resourcePrivateCrossConnectImport(d *schema.ResourceData, meta interface{})
 
 	if err != nil {
 		if _, ok := err.(ionoscloud.GenericOpenAPIError); ok {
-			if apiResponse.Response.StatusCode == 404 {
+			if apiResponse != nil && apiResponse.Response.StatusCode == 404 {
 				d.SetId("")
-				return nil, fmt.Errorf("Unable to find PCC %q", d.Id())
+				return nil, fmt.Errorf("unable to find PCC %q", d.Id())
 			}
 		}
-		return nil, fmt.Errorf("Unable to retreive PCC %q", d.Id())
+		return nil, fmt.Errorf("unable to retreive PCC %q", d.Id())
 	}
 
 	log.Printf("[INFO] PCC found: %+v", pcc)
@@ -232,11 +232,11 @@ func resourceBackupUnitImport(d *schema.ResourceData, meta interface{}) ([]*sche
 		defer cancel()
 	}
 
-	backupUnit, apiReponse, err := client.BackupUnitApi.BackupunitsFindById(ctx, d.Id()).Execute()
+	backupUnit, apiResponse, err := client.BackupUnitApi.BackupunitsFindById(ctx, d.Id()).Execute()
 
 	if err != nil {
 		if _, ok := err.(ionoscloud.GenericOpenAPIError); ok {
-			if apiReponse.Response.StatusCode == 404 {
+			if apiResponse != nil && apiResponse.Response.StatusCode == 404 {
 				d.SetId("")
 				return nil, fmt.Errorf("Unable to find Backup Unit %q", d.Id())
 			}
@@ -251,7 +251,7 @@ func resourceBackupUnitImport(d *schema.ResourceData, meta interface{}) ([]*sche
 	d.Set("name", *backupUnit.Properties.Name)
 	d.Set("email", *backupUnit.Properties.Email)
 
-	contractResources, apiReponse, cErr := client.ContractApi.ContractsGet(ctx).Execute()
+	contractResources, apiResponse, cErr := client.ContractApi.ContractsGet(ctx).Execute()
 
 	if cErr != nil {
 		return nil, fmt.Errorf("Error while fetching contract resources for backup unit %q: %s", d.Id(), cErr)
@@ -275,7 +275,7 @@ func resourceS3KeyImport(d *schema.ResourceData, meta interface{}) ([]*schema.Re
 
 	if err != nil {
 		if _, ok := err.(profitbricks.ApiError); ok {
-			if apiResponse.Response.StatusCode == 404 {
+			if apiResponse != nil && apiResponse.Response.StatusCode == 404 {
 				d.SetId("")
 				return nil, fmt.Errorf("Unable to find S3 key %q", d.Id())
 			}
