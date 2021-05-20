@@ -14,11 +14,6 @@ import (
 	"github.com/ionos-cloud/sdk-go/v5"
 )
 
-//type SdkBundle struct {
-//	LegacyClient *profitbricks.Client
-//	Client       *ionoscloud.APIClient
-//}
-
 // Provider returns a schema.Provider for ionoscloud.
 func Provider() terraform.ResourceProvider {
 	provider := &schema.Provider{
@@ -132,14 +127,6 @@ func providerConfigure(d *schema.ResourceData, terraformVersion string) (interfa
 
 	cleanedUrl := cleanURL(d.Get("endpoint").(string))
 
-	//config := Config{
-	//	Username: username.(string),
-	//	Password: password.(string),
-	//	Endpoint: cleanedUrl,
-	//	Retries:  d.Get("retries").(int),
-	//	Token:    token.(string),
-	//}
-
 	newConfig := ionoscloud.NewConfiguration(username.(string), password.(string), token.(string))
 	if len(cleanedUrl) > 0 {
 		parts := strings.Split(cleanedUrl, "://")
@@ -153,10 +140,6 @@ func providerConfigure(d *schema.ResourceData, terraformVersion string) (interfa
 	newConfig.UserAgent = httpclient.TerraformUserAgent(terraformVersion)
 	newClient := ionoscloud.NewAPIClient(newConfig)
 
-	//legacyClient, err := config.Client(terraformVersion)
-	//if err != nil {
-	//	return nil, err
-	//}
 	return newClient, nil
 }
 

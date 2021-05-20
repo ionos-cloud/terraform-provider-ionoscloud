@@ -1,11 +1,9 @@
 package ionoscloud
 
 import (
+	"github.com/hashicorp/terraform-plugin-sdk/httpclient"
 	ionoscloud "github.com/ionos-cloud/sdk-go/v5"
 	"log"
-	"strconv"
-
-	"github.com/hashicorp/terraform-plugin-sdk/httpclient"
 )
 
 // Config represents
@@ -29,7 +27,7 @@ func (c *Config) Client(terraformVersion string) (*ionoscloud.APIClient, error) 
 
 	log.Printf("[DEBUG] Terraform client UA set to %s", client.GetConfig().UserAgent)
 
-	client.GetConfig().AddDefaultQueryParam("depth", strconv.Itoa(5))
+	client.GetConfig().AddDefaultQueryParam("depth", "5")
 
 	if len(c.Endpoint) > 0 {
 		client.GetConfig().Host = c.Endpoint
