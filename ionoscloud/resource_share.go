@@ -39,7 +39,8 @@ func resourceShare() *schema.Resource {
 }
 
 func resourceShareCreate(d *schema.ResourceData, meta interface{}) error {
-	client := meta.(SdkBundle).Client
+	client := meta.(*ionoscloud.APIClient)
+
 	request := ionoscloud.GroupShare{
 		Properties: &ionoscloud.GroupShareProperties{},
 	}
@@ -73,10 +74,10 @@ func resourceShareCreate(d *schema.ResourceData, meta interface{}) error {
 }
 
 func resourceShareRead(d *schema.ResourceData, meta interface{}) error {
-	client := meta.(SdkBundle).Client
+	client := meta.(*ionoscloud.APIClient)
+
 	rsp, apiResponse, err := client.UserManagementApi.UmGroupsSharesFindByResourceId(context.TODO(),
 		d.Get("group_id").(string), d.Get("resource_id").(string)).Execute()
-
 	if err != nil {
 		if _, ok := err.(ionoscloud.GenericOpenAPIError); ok {
 			if apiResponse.Response.StatusCode == 404 {
@@ -93,9 +94,11 @@ func resourceShareRead(d *schema.ResourceData, meta interface{}) error {
 }
 
 func resourceShareUpdate(d *schema.ResourceData, meta interface{}) error {
-	client := meta.(SdkBundle).Client
+	client := meta.(*ionoscloud.APIClient)
+
 	tempSharePrivilege := d.Get("share_privilege").(bool)
 	tempEditPrivilege := d.Get("edit_privilege").(bool)
+
 	shareReq := ionoscloud.GroupShare{
 		Properties: &ionoscloud.GroupShareProperties{
 			EditPrivilege:  &tempEditPrivilege,
@@ -107,6 +110,7 @@ func resourceShareUpdate(d *schema.ResourceData, meta interface{}) error {
 	if cancel != nil {
 		defer cancel()
 	}
+
 	_, apiResponse, err := client.UserManagementApi.UmGroupsSharesPut(ctx,
 		d.Get("group_id").(string), d.Get("resource_id").(string)).Resource(shareReq).Execute()
 	if err != nil {
@@ -123,12 +127,13 @@ func resourceShareUpdate(d *schema.ResourceData, meta interface{}) error {
 }
 
 func resourceShareDelete(d *schema.ResourceData, meta interface{}) error {
-	client := meta.(SdkBundle).Client
+	client := meta.(*ionoscloud.APIClient)
 
 	ctx, cancel := context.WithTimeout(context.Background(), *resourceDefaultTimeouts.Delete)
 	if cancel != nil {
 		defer cancel()
 	}
+
 	groupId := d.Get("group_id").(string)
 	resourceId := d.Get("resource_id").(string)
 

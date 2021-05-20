@@ -48,7 +48,7 @@ func resourceDatacenter() *schema.Resource {
 
 func resourceDatacenterCreate(d *schema.ResourceData, meta interface{}) error {
 
-	client := meta.(SdkBundle).Client
+	client := meta.(*ionoscloud.APIClient)
 
 	datacenterName := d.Get("name").(string)
 	datacenterLocation := d.Get("location").(string)
@@ -102,7 +102,7 @@ func resourceDatacenterCreate(d *schema.ResourceData, meta interface{}) error {
 
 func resourceDatacenterRead(d *schema.ResourceData, meta interface{}) error {
 
-	client := meta.(SdkBundle).Client
+	client := meta.(*ionoscloud.APIClient)
 
 	ctx, cancel := context.WithTimeout(context.Background(), *resourceDefaultTimeouts.Default)
 
@@ -155,7 +155,7 @@ func resourceDatacenterRead(d *schema.ResourceData, meta interface{}) error {
 
 func resourceDatacenterUpdate(d *schema.ResourceData, meta interface{}) error {
 
-	client := meta.(SdkBundle).Client
+	client := meta.(*ionoscloud.APIClient)
 	obj := ionoscloud.DatacenterProperties{}
 
 	if d.HasChange("name") {
@@ -204,7 +204,7 @@ func resourceDatacenterUpdate(d *schema.ResourceData, meta interface{}) error {
 
 func resourceDatacenterDelete(d *schema.ResourceData, meta interface{}) error {
 
-	client := meta.(SdkBundle).Client
+	client := meta.(*ionoscloud.APIClient)
 
 	ctx, cancel := context.WithTimeout(context.Background(), *resourceDefaultTimeouts.Delete)
 

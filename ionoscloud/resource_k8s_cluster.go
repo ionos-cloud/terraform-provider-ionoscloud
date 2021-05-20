@@ -88,7 +88,7 @@ func resourcek8sCluster() *schema.Resource {
 }
 
 func resourcek8sClusterCreate(d *schema.ResourceData, meta interface{}) error {
-	client := meta.(SdkBundle).Client
+	client := meta.(*ionoscloud.APIClient)
 
 	clusterName := d.Get("name").(string)
 	cluster := ionoscloud.KubernetesClusterForPost{
@@ -166,8 +166,7 @@ func resourcek8sClusterCreate(d *schema.ResourceData, meta interface{}) error {
 }
 
 func resourcek8sClusterRead(d *schema.ResourceData, meta interface{}) error {
-
-	client := meta.(SdkBundle).Client
+	client := meta.(*ionoscloud.APIClient)
 
 	ctx, cancel := context.WithTimeout(context.Background(), *resourceDefaultTimeouts.Default)
 
@@ -248,7 +247,8 @@ func resourcek8sClusterRead(d *schema.ResourceData, meta interface{}) error {
 }
 
 func resourcek8sClusterUpdate(d *schema.ResourceData, meta interface{}) error {
-	client := meta.(SdkBundle).Client
+	client := meta.(*ionoscloud.APIClient)
+
 	request := ionoscloud.KubernetesClusterForPut{}
 
 	clusterName := d.Get("name").(string)
@@ -354,7 +354,7 @@ func resourcek8sClusterUpdate(d *schema.ResourceData, meta interface{}) error {
 }
 
 func resourcek8sClusterDelete(d *schema.ResourceData, meta interface{}) error {
-	client := meta.(SdkBundle).Client
+	client := meta.(*ionoscloud.APIClient)
 
 	ctx, cancel := context.WithTimeout(context.Background(), *resourceDefaultTimeouts.Delete)
 

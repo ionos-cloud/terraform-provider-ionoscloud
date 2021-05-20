@@ -41,12 +41,13 @@ func resourceS3Key() *schema.Resource {
 }
 
 func resourceS3KeyCreate(d *schema.ResourceData, meta interface{}) error {
-	client := meta.(SdkBundle).Client
+	client := meta.(*ionoscloud.APIClient)
 
 	ctx, cancel := context.WithTimeout(context.Background(), *resourceDefaultTimeouts.Create)
 	if cancel != nil {
 		defer cancel()
 	}
+
 	rsp, _, err := client.UserManagementApi.UmUsersS3keysPost(ctx, d.Get("user_id").(string)).Execute()
 
 	if err != nil {
@@ -61,11 +62,11 @@ func resourceS3KeyCreate(d *schema.ResourceData, meta interface{}) error {
 }
 
 func resourceS3KeyRead(d *schema.ResourceData, meta interface{}) error {
-	client := meta.(SdkBundle).Client
+	client := meta.(*ionoscloud.APIClient)
 
 	userId := d.Get("user_id").(string)
-	rsp, apiResponse, err := client.UserManagementApi.UmUsersS3keysFindByKeyId(context.TODO(), userId, d.Id()).Execute()
 
+	rsp, apiResponse, err := client.UserManagementApi.UmUsersS3keysFindByKeyId(context.TODO(), userId, d.Id()).Execute()
 	if err != nil {
 		if _, ok := err.(ionoscloud.GenericOpenAPIError); ok {
 			if apiResponse.Response.StatusCode == 404 {
@@ -87,9 +88,9 @@ func resourceS3KeyRead(d *schema.ResourceData, meta interface{}) error {
 }
 
 func resourceS3KeyUpdate(d *schema.ResourceData, meta interface{}) error {
-	client := meta.(SdkBundle).Client
-	request := ionoscloud.S3Key{}
+	client := meta.(*ionoscloud.APIClient)
 
+	request := ionoscloud.S3Key{}
 	request.Properties = &ionoscloud.S3KeyProperties{}
 
 	log.Printf("[INFO] Attempting to update S3 key %s", d.Id())
@@ -137,7 +138,7 @@ func resourceS3KeyUpdate(d *schema.ResourceData, meta interface{}) error {
 }
 
 func resourceS3KeyDelete(d *schema.ResourceData, meta interface{}) error {
-	client := meta.(SdkBundle).Client
+	client := meta.(*ionoscloud.APIClient)
 
 	ctx, cancel := context.WithTimeout(context.Background(), *resourceDefaultTimeouts.Delete)
 	if cancel != nil {

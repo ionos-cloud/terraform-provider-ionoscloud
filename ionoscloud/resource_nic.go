@@ -70,11 +70,10 @@ func resourceNic() *schema.Resource {
 }
 
 func resourceNicCreate(d *schema.ResourceData, meta interface{}) error {
-	client := meta.(SdkBundle).Client
+	client := meta.(*ionoscloud.APIClient)
 
 	lan := d.Get("lan").(int)
 	lanConverted := int32(lan)
-
 	nic := ionoscloud.Nic{
 		Properties: &ionoscloud.NicProperties{
 			Lan: &lanConverted,
@@ -129,17 +128,19 @@ func resourceNicCreate(d *schema.ResourceData, meta interface{}) error {
 }
 
 func resourceNicRead(d *schema.ResourceData, meta interface{}) error {
-	client := meta.(SdkBundle).Client
+	client := meta.(*ionoscloud.APIClient)
 
 	ctx, cancel := context.WithTimeout(context.Background(), *resourceDefaultTimeouts.Default)
 	if cancel != nil {
 		defer cancel()
 	}
+
 	dcid := d.Get("datacenter_id").(string)
 	srvid := d.Get("server_id").(string)
 	nicid := d.Id()
 
 	rsp, apiresponse, err := client.NicApi.DatacentersServersNicsFindById(ctx, dcid, srvid, nicid).Execute()
+
 	if err != nil {
 		if _, ok := err.(ionoscloud.GenericOpenAPIError); ok {
 			if apiresponse.Response.StatusCode == 404 {
@@ -176,7 +177,8 @@ func resourceNicRead(d *schema.ResourceData, meta interface{}) error {
 }
 
 func resourceNicUpdate(d *schema.ResourceData, meta interface{}) error {
-	client := meta.(SdkBundle).Client
+	client := meta.(*ionoscloud.APIClient)
+
 	properties := ionoscloud.NicProperties{}
 
 	if d.HasChange("name") {
@@ -208,6 +210,7 @@ func resourceNicUpdate(d *schema.ResourceData, meta interface{}) error {
 	if cancel != nil {
 		defer cancel()
 	}
+
 	dcid := d.Get("datacenter_id").(string)
 	srvid := d.Get("server_id").(string)
 	nicid := d.Id()
@@ -228,12 +231,13 @@ func resourceNicUpdate(d *schema.ResourceData, meta interface{}) error {
 }
 
 func resourceNicDelete(d *schema.ResourceData, meta interface{}) error {
-	client := meta.(SdkBundle).Client
+	client := meta.(*ionoscloud.APIClient)
 
 	ctx, cancel := context.WithTimeout(context.Background(), *resourceDefaultTimeouts.Delete)
 	if cancel != nil {
 		defer cancel()
 	}
+
 	dcid := d.Get("datacenter_id").(string)
 	srvid := d.Get("server_id").(string)
 	nicid := d.Id()

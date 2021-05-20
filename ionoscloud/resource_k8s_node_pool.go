@@ -138,7 +138,7 @@ func resourcek8sNodePool() *schema.Resource {
 }
 
 func resourcek8sNodePoolCreate(d *schema.ResourceData, meta interface{}) error {
-	client := meta.(SdkBundle).Client
+	client := meta.(*ionoscloud.APIClient)
 
 	name := d.Get("name").(string)
 	datacenterId := d.Get("datacenter_id").(string)
@@ -295,8 +295,7 @@ func resourcek8sNodePoolCreate(d *schema.ResourceData, meta interface{}) error {
 }
 
 func resourcek8sNodePoolRead(d *schema.ResourceData, meta interface{}) error {
-
-	client := meta.(SdkBundle).Client
+	client := meta.(*ionoscloud.APIClient)
 
 	ctx, cancel := context.WithTimeout(context.Background(), *resourceDefaultTimeouts.Create)
 
@@ -426,8 +425,8 @@ func resourcek8sNodePoolRead(d *schema.ResourceData, meta interface{}) error {
 }
 
 func resourcek8sNodePoolUpdate(d *schema.ResourceData, meta interface{}) error {
+	client := meta.(*ionoscloud.APIClient)
 
-	client := meta.(SdkBundle).Client
 	request := ionoscloud.KubernetesNodePoolForPut{}
 
 	nodeCount := int32(d.Get("node_count").(int))
@@ -646,7 +645,7 @@ func resourcek8sNodePoolUpdate(d *schema.ResourceData, meta interface{}) error {
 }
 
 func resourcek8sNodePoolDelete(d *schema.ResourceData, meta interface{}) error {
-	client := meta.(SdkBundle).Client
+	client := meta.(*ionoscloud.APIClient)
 
 	ctx, cancel := context.WithTimeout(context.Background(), *resourceDefaultTimeouts.Delete)
 

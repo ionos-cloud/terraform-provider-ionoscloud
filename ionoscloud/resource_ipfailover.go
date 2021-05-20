@@ -39,7 +39,7 @@ func resourceLanIPFailover() *schema.Resource {
 }
 
 func resourceLanIPFailoverCreate(d *schema.ResourceData, meta interface{}) error {
-	client := meta.(SdkBundle).Client
+	client := meta.(*ionoscloud.APIClient)
 	dcid := d.Get("datacenter_id").(string)
 	lanid := d.Get("lan_id").(string)
 	if lanid == "" {
@@ -80,10 +80,9 @@ func resourceLanIPFailoverCreate(d *schema.ResourceData, meta interface{}) error
 }
 
 func resourceLanIPFailoverRead(d *schema.ResourceData, meta interface{}) error {
-	client := meta.(SdkBundle).Client
+	client := meta.(*ionoscloud.APIClient)
 
 	ctx, cancel := context.WithTimeout(context.Background(), *resourceDefaultTimeouts.Default)
-
 	if cancel != nil {
 		defer cancel()
 	}
@@ -127,7 +126,8 @@ func resourceLanIPFailoverRead(d *schema.ResourceData, meta interface{}) error {
 }
 
 func resourceLanIPFailoverUpdate(d *schema.ResourceData, meta interface{}) error {
-	client := meta.(SdkBundle).Client
+	client := meta.(*ionoscloud.APIClient)
+
 	properties := &ionoscloud.LanProperties{}
 	dcid := d.Get("datacenter_id").(string)
 	lanid := d.Get("lan_id").(string)
@@ -162,7 +162,8 @@ func resourceLanIPFailoverUpdate(d *schema.ResourceData, meta interface{}) error
 }
 
 func resourceLanIPFailoverDelete(d *schema.ResourceData, meta interface{}) error {
-	client := meta.(SdkBundle).Client
+	client := meta.(*ionoscloud.APIClient)
+
 	dcid := d.Get("datacenter_id").(string)
 	lanid := d.Get("lan_id").(string)
 

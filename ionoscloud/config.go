@@ -1,10 +1,9 @@
 package ionoscloud
 
 import (
-	"log"
-
 	"github.com/hashicorp/terraform-plugin-sdk/httpclient"
-	"github.com/profitbricks/profitbricks-sdk-go/v5"
+	ionoscloud "github.com/ionos-cloud/sdk-go/v5"
+	"log"
 )
 
 // Config represents
@@ -16,22 +15,22 @@ type Config struct {
 	Token    string
 }
 
-// Client returns a new client for accessing profitbricks.
-func (c *Config) Client(terraformVersion string) (*profitbricks.Client, error) {
-	var client *profitbricks.Client
+// Client returns a new client for accessing ionoscloud.
+func (c *Config) Client(terraformVersion string) (*ionoscloud.APIClient, error) {
+	var client *ionoscloud.APIClient
 	if c.Token != "" {
-		client = profitbricks.NewClientbyToken(c.Token)
+		client = ionoscloud.NewAPIClient(ionoscloud.NewConfiguration("", "", c.Token))
 	} else {
-		client = profitbricks.NewClient(c.Username, c.Password)
+		client = ionoscloud.NewAPIClient(ionoscloud.NewConfiguration(c.Username, c.Password, ""))
 	}
-	client.SetUserAgent(httpclient.TerraformUserAgent(terraformVersion))
+	client.GetConfig().UserAgent = httpclient.TerraformUserAgent(terraformVersion)
 
-	log.Printf("[DEBUG] Terraform client UA set to %s", client.GetUserAgent())
+	log.Printf("[DEBUG] Terraform client UA set to %s", client.GetConfig().UserAgent)
 
-	client.SetDepth(5)
+	client.GetConfig().AddDefaultQueryParam("depth", "5")
 
 	if len(c.Endpoint) > 0 {
-		client.SetHostURL(c.Endpoint)
+		client.GetConfig().Host = c.Endpoint
 	}
 	return client, nil
 }

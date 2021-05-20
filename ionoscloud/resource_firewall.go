@@ -91,9 +91,10 @@ func resourceFirewall() *schema.Resource {
 }
 
 func resourceFirewallCreate(d *schema.ResourceData, meta interface{}) error {
-	client := meta.(SdkBundle).Client
+	client := meta.(*ionoscloud.APIClient)
 
 	firewallProtocol := d.Get("protocol").(string)
+
 	fw := ionoscloud.FirewallRule{
 		Properties: &ionoscloud.FirewallruleProperties{
 			Protocol: &firewallProtocol,
@@ -142,7 +143,6 @@ func resourceFirewallCreate(d *schema.ResourceData, meta interface{}) error {
 	}
 
 	ctx, cancel := context.WithTimeout(context.Background(), *resourceDefaultTimeouts.Default)
-
 	if cancel != nil {
 		defer cancel()
 	}
@@ -168,10 +168,9 @@ func resourceFirewallCreate(d *schema.ResourceData, meta interface{}) error {
 }
 
 func resourceFirewallRead(d *schema.ResourceData, meta interface{}) error {
-	client := meta.(SdkBundle).Client
+	client := meta.(*ionoscloud.APIClient)
 
 	ctx, cancel := context.WithTimeout(context.Background(), *resourceDefaultTimeouts.Default)
-
 	if cancel != nil {
 		defer cancel()
 	}
@@ -262,7 +261,8 @@ func resourceFirewallRead(d *schema.ResourceData, meta interface{}) error {
 }
 
 func resourceFirewallUpdate(d *schema.ResourceData, meta interface{}) error {
-	client := meta.(SdkBundle).Client
+	client := meta.(*ionoscloud.APIClient)
+
 	properties := ionoscloud.FirewallruleProperties{}
 
 	if d.HasChange("name") {
@@ -336,16 +336,14 @@ func resourceFirewallUpdate(d *schema.ResourceData, meta interface{}) error {
 }
 
 func resourceFirewallDelete(d *schema.ResourceData, meta interface{}) error {
-	client := meta.(SdkBundle).Client
+	client := meta.(*ionoscloud.APIClient)
 
 	ctx, cancel := context.WithTimeout(context.Background(), *resourceDefaultTimeouts.Delete)
-
 	if cancel != nil {
 		defer cancel()
 	}
 
 	_, apiResponse, err := client.NicApi.DatacentersServersNicsFirewallrulesDelete(ctx, d.Get("datacenter_id").(string), d.Get("server_id").(string), d.Get("nic_id").(string), d.Id()).Execute()
-
 	if err != nil {
 		return fmt.Errorf("An error occured while deleting a firewall rule ID %s %s", d.Id(), err)
 	}

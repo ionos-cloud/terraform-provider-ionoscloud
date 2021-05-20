@@ -45,7 +45,7 @@ func resourceLoadbalancer() *schema.Resource {
 }
 
 func resourceLoadbalancerCreate(d *schema.ResourceData, meta interface{}) error {
-	client := meta.(SdkBundle).Client
+	client := meta.(*ionoscloud.APIClient)
 
 	raw_ids := d.Get("nic_ids").([]interface{})
 	nic_ids := []ionoscloud.Nic{}
@@ -54,6 +54,7 @@ func resourceLoadbalancerCreate(d *schema.ResourceData, meta interface{}) error 
 		id := id.(string)
 		nic_ids = append(nic_ids, ionoscloud.Nic{Id: &id})
 	}
+
 	name := d.Get("name").(string)
 	lb := &ionoscloud.Loadbalancer{
 		Properties: &ionoscloud.LoadbalancerProperties{
@@ -73,7 +74,6 @@ func resourceLoadbalancerCreate(d *schema.ResourceData, meta interface{}) error 
 	}
 
 	resp, apiResp, err := client.LoadBalancerApi.DatacentersLoadbalancersPost(ctx, dcid).Loadbalancer(*lb).Execute()
-
 	if err != nil {
 		return fmt.Errorf("Error occured while creating a loadbalancer %s", err)
 	}
@@ -94,7 +94,7 @@ func resourceLoadbalancerCreate(d *schema.ResourceData, meta interface{}) error 
 }
 
 func resourceLoadbalancerRead(d *schema.ResourceData, meta interface{}) error {
-	client := meta.(SdkBundle).Client
+	client := meta.(*ionoscloud.APIClient)
 
 	ctx, cancel := context.WithTimeout(context.Background(), *resourceDefaultTimeouts.Default)
 	if cancel != nil {
@@ -120,7 +120,8 @@ func resourceLoadbalancerRead(d *schema.ResourceData, meta interface{}) error {
 }
 
 func resourceLoadbalancerUpdate(d *schema.ResourceData, meta interface{}) error {
-	client := meta.(SdkBundle).Client
+	client := meta.(*ionoscloud.APIClient)
+
 	properties := &ionoscloud.LoadbalancerProperties{}
 
 	var hasChangeCount int = 0
@@ -202,11 +203,13 @@ func resourceLoadbalancerUpdate(d *schema.ResourceData, meta interface{}) error 
 }
 
 func resourceLoadbalancerDelete(d *schema.ResourceData, meta interface{}) error {
-	client := meta.(SdkBundle).Client
+	client := meta.(*ionoscloud.APIClient)
+
 	ctx, cancel := context.WithTimeout(context.Background(), *resourceDefaultTimeouts.Delete)
 	if cancel != nil {
 		defer cancel()
 	}
+
 	dcid := d.Get("datacenter_id").(string)
 	_, apiResp, err := client.LoadBalancerApi.DatacentersLoadbalancersDelete(ctx, dcid, d.Id()).Execute()
 

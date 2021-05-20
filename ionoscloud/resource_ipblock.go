@@ -45,7 +45,8 @@ func resourceIPBlock() *schema.Resource {
 }
 
 func resourceIPBlockCreate(d *schema.ResourceData, meta interface{}) error {
-	client := meta.(SdkBundle).Client
+	client := meta.(*ionoscloud.APIClient)
+
 	size := d.Get("size").(int)
 	sizeConverted := int32(size)
 	location := d.Get("location").(string)
@@ -62,6 +63,7 @@ func resourceIPBlockCreate(d *schema.ResourceData, meta interface{}) error {
 	if cancel != nil {
 		defer cancel()
 	}
+
 	ipblock, apiResponse, err := client.IPBlocksApi.IpblocksPost(ctx).Ipblock(ipblock).Execute()
 
 	if err != nil {
@@ -83,7 +85,8 @@ func resourceIPBlockCreate(d *schema.ResourceData, meta interface{}) error {
 }
 
 func resourceIPBlockRead(d *schema.ResourceData, meta interface{}) error {
-	client := meta.(SdkBundle).Client
+	client := meta.(*ionoscloud.APIClient)
+
 	ctx, cancel := context.WithTimeout(context.Background(), *resourceDefaultTimeouts.Default)
 	if cancel != nil {
 		defer cancel()
@@ -110,7 +113,8 @@ func resourceIPBlockRead(d *schema.ResourceData, meta interface{}) error {
 	return nil
 }
 func resourceIPBlockUpdate(d *schema.ResourceData, meta interface{}) error {
-	client := meta.(SdkBundle).Client
+	client := meta.(*ionoscloud.APIClient)
+
 	request := ionoscloud.IpBlockProperties{}
 
 	if d.HasChange("name") {
@@ -123,6 +127,7 @@ func resourceIPBlockUpdate(d *schema.ResourceData, meta interface{}) error {
 	if cancel != nil {
 		defer cancel()
 	}
+
 	_, _, err := client.IPBlocksApi.IpblocksPatch(ctx, d.Id()).Ipblock(request).Execute()
 
 	if err != nil {
@@ -134,12 +139,13 @@ func resourceIPBlockUpdate(d *schema.ResourceData, meta interface{}) error {
 }
 
 func resourceIPBlockDelete(d *schema.ResourceData, meta interface{}) error {
-	client := meta.(SdkBundle).Client
+	client := meta.(*ionoscloud.APIClient)
 
 	ctx, cancel := context.WithTimeout(context.Background(), *resourceDefaultTimeouts.Delete)
 	if cancel != nil {
 		defer cancel()
 	}
+
 	_, apiResponse, err := client.IPBlocksApi.IpblocksDelete(ctx, d.Id()).Execute()
 	if err != nil {
 		return fmt.Errorf("An error occured while releasing an ipblock ID: %s %s", d.Id(), err)
