@@ -20,7 +20,7 @@ data "ionoscloud_server" "server_example" {
 
 ## Argument Reference
 
-* `name` - (Optional) Name or part of the name of an existing server that you want to search for.
+* `name` - (Optional) Name of an existing server that you want to search for.
 * `id` - (Optional) ID of the server you want to search for.
 
 Either `name` or `id` must be provided. If none, or both are provided, the datasource will return an error.
@@ -33,12 +33,14 @@ The following attributes are returned by the datasource:
 * `name`
 * `datacenter_id`
 * `cores`
+* `cpu_family`
 * `ram`
 * `availability_zone`
 * `vm_state`
-* `cpu_family`
+* `image_name`
 * `boot_cdrom`
 * `boot_volume`
+* `ssh_key_path`
 * `cdroms` - list of
   * `id`
   * `name`
@@ -91,7 +93,7 @@ The following attributes are returned by the datasource:
   * `lan`
   * `firewall_active`
   * `nat`
-  * `firewall_rules` - list of 
+  * `firewall_rules` - list of
     * `id`
     * `name`
     * `protocol`

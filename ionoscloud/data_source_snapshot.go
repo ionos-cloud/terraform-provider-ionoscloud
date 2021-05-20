@@ -3,8 +3,6 @@ package ionoscloud
 import (
 	"context"
 	"fmt"
-	"strings"
-
 	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
 	ionoscloud "github.com/ionos-cloud/sdk-go/v5"
 )
@@ -49,7 +47,7 @@ func dataSourceSnapshotRead(d *schema.ResourceData, meta interface{}) error {
 	results := []ionoscloud.Snapshot{}
 
 	for _, snp := range *snapshots.Items {
-		if strings.Contains(strings.ToLower(*snp.Properties.Name), strings.ToLower(name)) {
+		if snp.Properties.Name == name {
 			results = append(results, snp)
 		}
 	}
@@ -74,10 +72,6 @@ func dataSourceSnapshotRead(d *schema.ResourceData, meta interface{}) error {
 
 		}
 		results = sizeResults
-	}
-
-	if len(results) > 1 {
-		return fmt.Errorf("There is more than one snapshot that match the search criteria ")
 	}
 
 	if len(results) == 0 {

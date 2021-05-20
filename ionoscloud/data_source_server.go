@@ -6,7 +6,6 @@ import (
 	"fmt"
 	ionoscloud "github.com/ionos-cloud/sdk-go/v5"
 	"strings"
-
 	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
 )
 
@@ -578,7 +577,7 @@ func dataSourceServerRead(d *schema.ResourceData, meta interface{}) error {
 		}
 
 		for _, s := range *servers.Items {
-			if strings.Contains(*s.Properties.Name, name.(string)) {
+			if s.Properties.Name == name.(string) {
 				/* server found */
 				server, _, err = client.ServerApi.DatacentersServersFindById(ctx, datacenterId.(string), *s.Id).Execute()
 				if err != nil {

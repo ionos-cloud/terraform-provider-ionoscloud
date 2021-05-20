@@ -23,7 +23,7 @@ data "ionoscloud_image" "image_example" {
 
 ## Argument Reference
 
- * `name` - (Required) Name or part of the name of an existing image that you want to search for.
+ * `name` - (Required) Name of an existing image that you want to search for.
  * `version` - (Optional) Version of the image (see details below).
  * `location` - (Optional) Id of the existing image's location.
  * `type` - (Optional) The image type, HDD or CD-ROM.

@@ -1,57 +1,76 @@
-# Introduction
 
-## Overview
+[![Gitter](https://img.shields.io/gitter/room/ionos-cloud/sdk-general)](https://gitter.im/ionos-cloud/sdk-general)
+[![Quality Gate Status](https://sonarcloud.io/api/project_badges/measure?project=terraform-provider&metric=alert_status)](https://sonarcloud.io/dashboard?id=terraform-provider)
+[![Bugs](https://sonarcloud.io/api/project_badges/measure?project=terraform-provider&metric=bugs)](https://sonarcloud.io/dashboard?id=terraform-provider)
+[![Maintainability Rating](https://sonarcloud.io/api/project_badges/measure?project=terraform-provider&metric=sqale_rating)](https://sonarcloud.io/dashboard?id=terraform-provider)
+[![Reliability Rating](https://sonarcloud.io/api/project_badges/measure?project=terraform-provider&metric=reliability_rating)](https://sonarcloud.io/dashboard?id=terraform-provider)
+[![Security Rating](https://sonarcloud.io/api/project_badges/measure?project=terraform-provider&metric=security_rating)](https://sonarcloud.io/dashboard?id=terraform-provider)
+[![Vulnerabilities](https://sonarcloud.io/api/project_badges/measure?project=terraform-provider&metric=vulnerabilities)](https://sonarcloud.io/dashboard?id=terraform-provider)
 
-The Terraform IonosCloud Provider provides you with access to the IONOS Cloud. The provider supports both simple and complex requests.
-It is designed for devops engineers and developers who are building their infrastructure in the IONOS Cloud . The provider wraps the IONOS Cloud GO SDK. 
-All operations are performed over SSL and authenticated using your IONOS Cloud portal credentials. 
-The provider can be used within an instance running in IONOS Cloud or directly over the Internet from any application that can send an HTTPS request and receive an HTTPS response.
+![Alt text](.github/IONOS.CLOUD.BLU.svg?raw=true "Title")
 
-## Getting Started
+# IONOS Cloud Terraform Provider
 
-An IONOS account is required for access to the Ionos Cloud via the ionoscloud terraform provider; credentials from your registration are used to authenticate against the IONOS Cloud API.
+## Migrating from the ProfitBricks provider
 
-### Installation
+Please see the [Documentation](docs/index.md#migrating-from-the-profitbricks-provider) on how to migrate from the ProfitBricks provider.
 
-Terraform is needed to operate the ionoscloud provider:
+## Requirements
+
 - [Terraform](https://www.terraform.io/downloads.html) 0.12.x
+- [Go](https://golang.org/doc/install) 1.13 (to build the provider plugin)
 
 **NOTE:** In order to use a speciffic version of this provider, please include the following block at the beginning of your terraform config files [details](https://www.terraform.io/docs/configuration/terraform.html#specifying-a-required-terraform-version):
 
 ```terraform
 provider "ionoscloud" {
-  version = "~> 5.0.4"
+  version = "~> 5.0.0"
 }
 ```
 
-### Authentication
+## Building The Provider
 
-The username, password and optionally the api endpoint can be manually specified when initializing the provider 
+Clone repository to: `$GOPATH/src/github.com/ionos-cloud/terraform-provider-ionoscloud`
 
-```terraform
-provider "ionoscloud" {
-  username          = var.ionos_username
-  password          = var.ionos_password
-  endpoint          = var.ionos_api_endpoint
-}
+```sh
+$ mkdir -p $GOPATH/src/github.com/ionos-cloud; cd $GOPATH/src/github.com/ionos-cloud
+$ git clone git@github.com:ionos-cloud/terraform-provider-ionoscloud
 ```
 
-Environment variables can also be used; the provider uses the following variables:
+Enter the provider directory and build the provider
 
-* IONOS\_USERNAME - to specify the username used to login
-* IONOS\_PASSWORD - to specify the password
-* IONOS\_API\_URL - to specify the Ionos Cloud API endpoint (to be used for development/testing purposes only)
+```sh
+$ cd $GOPATH/src/github.com/ionos-cloud/terraform-provider-ionoscloud
+$ make build
+```
 
-**Warning**: Make sure to follow the Information Security Best Practices when using credentials within your terraform configuration files.
+## Using the provider
 
-## FAQ
+See the [IonosCloud Provider documentation](https://registry.terraform.io/providers/ionos-cloud/ionoscloud/latest/docs) to get started using the IonosCloud provider.
 
-1. How can I open a bug report/feature request? 
+## Developing the Provider
 
-Bug reports and feature requests can be opened in the Issues repository: [https://github.com/ionos-cloud/terraform-provider-ionoscloud/issues/new/choose](https://github.com/ionos-cloud/terraform-provider-ionoscloud/issues/new/choose)
+If you wish to work on the provider, you'll first need [Go](http://www.golang.org) installed on your machine (version 1.13+ is _required_). You'll also need to correctly setup a [GOPATH](http://golang.org/doc/code.html#GOPATH), as well as adding `$GOPATH/bin` to your `$PATH`.
 
-2. Can I contribute to the provider?
+To compile the provider, run `make build`. This will build the provider and put the provider binary in the `$GOPATH/bin` directory.
 
-Pull requests can be open in the https://github.com/ionos-cloud/terraform-provider-ionoscloud repository.
+```sh
+$ make bin
+...
+$ $GOPATH/bin/terraform-provider-ionoscloud
+...
+```
 
+In order to test the provider, you can simply run `make test`.
 
+```sh
+$ make test
+```
+
+In order to run the full suite of Acceptance tests, run `make testacc`.
+
+_Note:_ Acceptance tests create real resources, and often cost money to run.
+
+```sh
+$ make testacc
+```

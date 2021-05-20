@@ -20,7 +20,7 @@ data "ionoscloud_k8s_node_pool" "k8s_node_pool_example" {
 
 ## Argument Reference
 
-* `name` - (Optional) Name or part of the name of an existing node pool that you want to search for.
+* `name` - (Optional) Name of an existing node pool that you want to search for.
 * `id` - (Optional) ID of the node pool you want to search for.
 
 Either `name` or `id` must be provided. If none, or both are provided, the datasource will return an error.

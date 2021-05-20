@@ -6,7 +6,6 @@ import (
 	"fmt"
 	ionoscloud "github.com/ionos-cloud/sdk-go/v5"
 	"strings"
-
 	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
 )
 
@@ -143,12 +142,10 @@ func dataSourceK8sReadCluster(d *schema.ResourceData, meta interface{}) error {
 				if err != nil {
 					return fmt.Errorf("an error occurred while fetching k8s cluster with ID %s: %s", *c.Id, err.Error())
 				}
-				if tmpCluster.Properties.Name != nil {
-					if strings.Contains(*tmpCluster.Properties.Name, name.(string)) {
-						/* lan found */
-						cluster = tmpCluster
-						break
-					}
+				if tmpCluster.Properties.Name != nil && *tmpCluster.Properties.Name == name.(string) {
+					/* lan found */
+					cluster = tmpCluster
+					break
 				}
 
 			}

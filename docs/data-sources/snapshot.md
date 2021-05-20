@@ -22,7 +22,7 @@ data "ionoscloud_snapshot" "snapshot_example" {
 
 ## Argument Reference
 
- * `name` - (Required) Name or part of the name of an existing snapshot that you want to search for.
+ * `name` - (Required) Name of an existing snapshot that you want to search for.
  * `location` - (Optional) Id of the existing snapshot's location.
  * `size` - (Optional) The size of the snapshot to look for.
 

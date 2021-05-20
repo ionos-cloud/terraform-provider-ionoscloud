@@ -6,7 +6,6 @@ import (
 	"fmt"
 	ionoscloud "github.com/ionos-cloud/sdk-go/v5"
 	"strings"
-
 	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
 )
 
@@ -145,7 +144,7 @@ func dataSourceLanRead(d *schema.ResourceData, meta interface{}) error {
 		}
 
 		for _, l := range *lans.Items {
-			if strings.Contains(*l.Properties.Name, name.(string)) {
+			if l.Properties.Name == name.(string) {
 				/* lan found */
 				lan, _, err = client.LanApi.DatacentersLansFindById(ctx, datacenterId.(string), *l.Id).Execute()
 				if err != nil {

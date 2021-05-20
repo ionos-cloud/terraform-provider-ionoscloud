@@ -20,7 +20,7 @@ data "ionoscloud_k8s_cluster" "k8s_cluster_example" {
 
 ## Argument Reference
 
-* `name` - (Optional) Name or part of the name of an existing cluster that you want to search for.
+* `name` - (Optional) Name or an existing cluster that you want to search for.
 * `id` - (Optional) ID of the cluster you want to search for.
 
 Either `name` or `id` must be provided. If none, or both are provided, the datasource will return an error.

@@ -6,7 +6,6 @@ import (
 	"fmt"
 	ionoscloud "github.com/ionos-cloud/sdk-go/v5"
 	"strings"
-
 	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
 )
 
@@ -201,7 +200,7 @@ func dataSourcePccRead(d *schema.ResourceData, meta interface{}) error {
 		}
 
 		for _, p := range *pccs.Items {
-			if strings.Contains(*p.Properties.Name, name.(string)) {
+			if p.Properties.Name == name.(string) {
 				/* lan found */
 				pcc, _, err = client.PrivateCrossConnectApi.PccsFindById(ctx, *p.Id).Execute()
 				if err != nil {
