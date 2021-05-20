@@ -113,7 +113,7 @@ func dataSourceImageRead(d *schema.ResourceData, meta interface{}) error {
 	images, _, err := client.ImageApi.ImagesGet(ctx).Execute()
 
 	if err != nil {
-		return fmt.Errorf("An error occured while fetching IonosCloud images %s", err)
+		return fmt.Errorf("an error occured while fetching IonosCloud images %s", err)
 	}
 
 	name := d.Get("name").(string)
@@ -122,25 +122,29 @@ func dataSourceImageRead(d *schema.ResourceData, meta interface{}) error {
 	version, versionOk := d.GetOk("version")
 	cloudInit, cloudInitOk := d.GetOk("cloud_init")
 
-	var results []profitbricks.Image
+	var results []ionoscloud.Image
 
 	// if version value is present then concatenate name - version
 	// otherwise search by name or part of the name
 	if versionOk {
 		nameVer := fmt.Sprintf("%s-%s", name, version.(string))
-		for _, img := range images.Items {
-			if strings.ToLower(img.Properties.Name) == strings.ToLower(nameVer) {
-				results = append(results, img)
+		if images.Items != nil {
+			for _, img := range *images.Items {
+				if img.Properties.Name != nil && strings.ToLower(*img.Properties.Name) == strings.ToLower(nameVer) {
+					results = append(results, img)
+				}
 			}
 		}
 		if results == nil {
 			return fmt.Errorf("could not find an image with name %s and version %s (%s)", name, version.(string), nameVer)
 		}
 	} else {
-		for _, img := range images.Items {
-			if strings.ToLower(img.Properties.Name) == strings.ToLower(name) {
-				results = append(results, img)
-				break
+		if images.Items != nil {
+		for _, img := range *images.Items {
+			if img.Properties.Name != nil && strings.ToLower(*img.Properties.Name) == strings.ToLower(name) {
+					results = append(results, img)
+					break
+				}
 			}
 		}
 		if results == nil {
@@ -180,13 +184,13 @@ func dataSourceImageRead(d *schema.ResourceData, meta interface{}) error {
 	}
 
 	if len(results) == 0 {
-		return fmt.Errorf("There are no images that match the search criteria")
+		return fmt.Errorf("there are no images that match the search criteria")
 	}
 
 	if results[0].Properties.Name != nil {
 		err := d.Set("name", *results[0].Properties.Name)
 		if err != nil {
-			return fmt.Errorf("Error while setting name property for image %s: %s", d.Id(), err)
+			return fmt.Errorf("error while setting name property for image %s: %s", d.Id(), err)
 		}
 	}
 

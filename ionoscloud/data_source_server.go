@@ -4,9 +4,8 @@ import (
 	"context"
 	"errors"
 	"fmt"
-	ionoscloud "github.com/ionos-cloud/sdk-go/v5"
-	"strings"
 	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
+	ionoscloud "github.com/ionos-cloud/sdk-go/v5"
 )
 
 func dataSourceServer() *schema.Resource {
@@ -576,14 +575,16 @@ func dataSourceServerRead(d *schema.ResourceData, meta interface{}) error {
 			return fmt.Errorf("an error occurred while fetching servers: %s", err.Error())
 		}
 
-		for _, s := range *servers.Items {
-			if s.Properties.Name == name.(string) {
-				/* server found */
-				server, _, err = client.ServerApi.DatacentersServersFindById(ctx, datacenterId.(string), *s.Id).Execute()
-				if err != nil {
-					return fmt.Errorf("an error occurred while fetching the server with ID %s: %s", *s.Id, err)
+		if servers.Items != nil {
+			for _, s := range *servers.Items {
+				if s.Properties.Name != nil && *s.Properties.Name == name.(string) {
+					/* server found */
+					server, _, err = client.ServerApi.DatacentersServersFindById(ctx, datacenterId.(string), *s.Id).Execute()
+					if err != nil {
+						return fmt.Errorf("an error occurred while fetching the server with ID %s: %s", *s.Id, err)
+					}
+					break
 				}
-				break
 			}
 		}
 	}

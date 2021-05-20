@@ -4,9 +4,8 @@ import (
 	"context"
 	"errors"
 	"fmt"
-	ionoscloud "github.com/ionos-cloud/sdk-go/v5"
-	"strings"
 	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
+	ionoscloud "github.com/ionos-cloud/sdk-go/v5"
 )
 
 func dataSourceLan() *schema.Resource {
@@ -143,14 +142,16 @@ func dataSourceLanRead(d *schema.ResourceData, meta interface{}) error {
 			return fmt.Errorf("an error occurred while fetching lans: %s", err.Error())
 		}
 
-		for _, l := range *lans.Items {
-			if l.Properties.Name == name.(string) {
-				/* lan found */
-				lan, _, err = client.LanApi.DatacentersLansFindById(ctx, datacenterId.(string), *l.Id).Execute()
-				if err != nil {
-					return fmt.Errorf("an error occurred while fetching lan %s: %s", *l.Id, err)
+		if lans.Items != nil {
+			for _, l := range *lans.Items {
+				if l.Properties.Name != nil && *l.Properties.Name == name.(string) {
+					/* lan found */
+					lan, _, err = client.LanApi.DatacentersLansFindById(ctx, datacenterId.(string), *l.Id).Execute()
+					if err != nil {
+						return fmt.Errorf("an error occurred while fetching lan %s: %s", *l.Id, err)
+					}
+					break
 				}
-				break
 			}
 		}
 	}

@@ -5,7 +5,6 @@ import (
 	"fmt"
 	ionoscloud "github.com/ionos-cloud/sdk-go/v5"
 	"log"
-	"strings"
 
 	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
 )
@@ -90,7 +89,7 @@ func getDatacenter(client *ionoscloud.APIClient, d *schema.ResourceData) (*ionos
 		return nil, fmt.Errorf("an error occured while fetching datacenters: %s", err)
 	}
 
-	var results []profitbricks.Datacenter
+	var results []ionoscloud.Datacenter
 
 	if nameOk && datacenters.Items != nil {
 		for _, dc := range *datacenters.Items {

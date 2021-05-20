@@ -4,9 +4,8 @@ import (
 	"context"
 	"errors"
 	"fmt"
-	ionoscloud "github.com/ionos-cloud/sdk-go/v5"
-	"strings"
 	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
+	ionoscloud "github.com/ionos-cloud/sdk-go/v5"
 )
 
 func dataSourceK8sCluster() *schema.Resource {
@@ -221,14 +220,14 @@ func setK8sClusterData(d *schema.ResourceData, cluster *ionoscloud.KubernetesClu
 		if cluster.Properties.Public != nil {
 			err := d.Set("public", *cluster.Properties.Public)
 			if err != nil {
-				return fmt.Errorf("Error while setting public property for cluser %s: %s", d.Id(), err)
+				return fmt.Errorf("error while setting public property for cluser %s: %s", d.Id(), err)
 			}
 		}
 
 		if cluster.Properties.GatewayIp != nil {
 			err := d.Set("gateway_ip", *cluster.Properties.GatewayIp)
 			if err != nil {
-				return fmt.Errorf("Error while setting gateway_ip property for cluser %s: %s", d.Id(), err)
+				return fmt.Errorf("error while setting gateway_ip property for cluser %s: %s", d.Id(), err)
 			}
 		}
 

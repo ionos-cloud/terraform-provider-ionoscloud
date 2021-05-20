@@ -41,7 +41,7 @@ func dataSourceResourceRead(d *schema.ResourceData, meta interface{}) error {
 	if resourceType != "" && resourceId != "" {
 		result, _, err := client.UserManagementApi.UmResourcesFindByTypeAndId(ctx, resourceType, resourceId).Execute()
 		if err != nil {
-			return fmt.Errorf("An error occured while fetching resource by type %s", err)
+			return fmt.Errorf("an error occured while fetching resource by type %s", err)
 		}
 		results = append(results, result)
 
@@ -51,7 +51,7 @@ func dataSourceResourceRead(d *schema.ResourceData, meta interface{}) error {
 		//items, err := client.ListResourcesByType(resource_type)
 		items, _, err := client.UserManagementApi.UmResourcesFindByType(ctx, resourceType).Execute()
 		if err != nil {
-			return fmt.Errorf("An error occured while fetching resources by type %s", err)
+			return fmt.Errorf("an error occured while fetching resources by type %s", err)
 		}
 
 		results = *items.Items
@@ -60,13 +60,13 @@ func dataSourceResourceRead(d *schema.ResourceData, meta interface{}) error {
 		//items, err := client.ListResources()
 		items, _, err := client.UserManagementApi.UmResourcesGet(ctx).Execute()
 		if err != nil {
-			return fmt.Errorf("An error occured while fetching resources %s", err)
+			return fmt.Errorf("an error occured while fetching resources %s", err)
 		}
 		results = *items.Items
 	}
 
 	if len(results) == 0 {
-		return fmt.Errorf("There are no resources that match the search criteria")
+		return fmt.Errorf("there are no resources that match the search criteria")
 	}
 
 	d.SetId(*results[0].Id)

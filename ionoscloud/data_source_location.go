@@ -35,20 +35,22 @@ func dataSourceLocationRead(d *schema.ResourceData, meta interface{}) error {
 	locations, _, err := client.LocationApi.LocationsGet(ctx).Execute()
 
 	if err != nil {
-		return fmt.Errorf("An error occured while fetching IonosCloud locations %s", err)
+		return fmt.Errorf("an error occured while fetching IonosCloud locations %s", err)
 	}
 
 	name, nameOk := d.GetOk("name")
 	feature, featureOk := d.GetOk("features")
 
 	if !nameOk && !featureOk {
-		return fmt.Errorf("Either 'name' or 'feature' must be provided.")
+		return fmt.Errorf("either 'name' or 'feature' must be provided")
 	}
 	results := []ionoscloud.Location{}
 
-	for _, loc := range *locations.Items {
-		if loc.Properties.Name == name.(string)  {
-			results = append(results, loc)
+	if locations.Items != nil {
+		for _, loc := range *locations.Items {
+			if loc.Properties.Name != nil && *loc.Properties.Name == name.(string)  {
+				results = append(results, loc)
+			}
 		}
 	}
 
@@ -66,7 +68,7 @@ func dataSourceLocationRead(d *schema.ResourceData, meta interface{}) error {
 	log.Printf("[INFO] Results length %d *************", len(results))
 
 	if len(results) == 0 {
-		return fmt.Errorf("There are no locations that match the search criteria")
+		return fmt.Errorf("there are no locations that match the search criteria")
 	}
 
 	d.SetId(*results[0].Id)

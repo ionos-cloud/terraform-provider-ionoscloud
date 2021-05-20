@@ -38,7 +38,7 @@ func dataSourceSnapshotRead(d *schema.ResourceData, meta interface{}) error {
 	snapshots, _, err := client.SnapshotApi.SnapshotsGet(ctx).Execute()
 
 	if err != nil {
-		return fmt.Errorf("An error occured while fetching IonosCloud locations %s", err)
+		return fmt.Errorf("an error occured while fetching IonosCloud locations %s", err)
 	}
 
 	name := d.Get("name").(string)
@@ -46,9 +46,11 @@ func dataSourceSnapshotRead(d *schema.ResourceData, meta interface{}) error {
 	size, sizeOk := d.GetOk("size")
 	results := []ionoscloud.Snapshot{}
 
-	for _, snp := range *snapshots.Items {
-		if snp.Properties.Name == name {
-			results = append(results, snp)
+	if snapshots.Items != nil {
+		for _, snp := range *snapshots.Items {
+			if snp.Properties.Name != nil && *snp.Properties.Name == name {
+				results = append(results, snp)
+			}
 		}
 	}
 
@@ -78,7 +80,10 @@ func dataSourceSnapshotRead(d *schema.ResourceData, meta interface{}) error {
 		return fmt.Errorf("There are no snapshots that match the search criteria ")
 	}
 
-	d.Set("name", results[0].Properties.Name)
+	err = d.Set("name", results[0].Properties.Name)
+	if err != nil {
+		return err
+	}
 
 	d.SetId(*results[0].Id)
 

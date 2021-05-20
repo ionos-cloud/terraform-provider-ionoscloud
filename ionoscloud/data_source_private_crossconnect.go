@@ -4,9 +4,8 @@ import (
 	"context"
 	"errors"
 	"fmt"
-	ionoscloud "github.com/ionos-cloud/sdk-go/v5"
-	"strings"
 	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
+	ionoscloud "github.com/ionos-cloud/sdk-go/v5"
 )
 
 func dataSourcePcc() *schema.Resource {
@@ -199,14 +198,16 @@ func dataSourcePccRead(d *schema.ResourceData, meta interface{}) error {
 			return fmt.Errorf("an error occurred while fetching pccs: %s", err.Error())
 		}
 
-		for _, p := range *pccs.Items {
-			if p.Properties.Name == name.(string) {
-				/* lan found */
-				pcc, _, err = client.PrivateCrossConnectApi.PccsFindById(ctx, *p.Id).Execute()
-				if err != nil {
-					return fmt.Errorf("an error occurred while fetching the pcc with ID %s: %s", *p.Id, err)
+		if pccs.Items != nil {
+			for _, p := range *pccs.Items {
+				if p.Properties.Name != nil && *p.Properties.Name == name.(string) {
+					/* lan found */
+					pcc, _, err = client.PrivateCrossConnectApi.PccsFindById(ctx, *p.Id).Execute()
+					if err != nil {
+						return fmt.Errorf("an error occurred while fetching the pcc with ID %s: %s", *p.Id, err)
+					}
+					break
 				}
-				break
 			}
 		}
 	}
