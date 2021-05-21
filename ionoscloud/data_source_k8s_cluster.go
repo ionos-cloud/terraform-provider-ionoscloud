@@ -87,6 +87,7 @@ func dataSourceK8sCluster() *schema.Resource {
 				Description: "The IP address of the gateway used by the cluster. This is mandatory when `public` is set " +
 					"to `false` and should not be provided otherwise.",
 				Optional: true,
+				Computed: true,
 			},
 		},
 		Timeouts: &resourceDefaultTimeouts,

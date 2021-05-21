@@ -40,3 +40,5 @@ resource "ionoscloud_volume" "example" {
 * `licence_type` - [string] Required if `image_name` is not provided.
 * `name` - (Optional)[string] The name of the volume.
 * `availability_zone` - (Optional)[string] The storage availability zone assigned to the volume: AUTO, ZONE_1, ZONE_2, or ZONE_3.
+* `user_data` - (Optional) The cloud-init configuration for the volume as base64 encoded string. The property is immutable and is only allowed to be set on a new volume creation.
+This option will work only with cloud-init compatible images.

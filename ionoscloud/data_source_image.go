@@ -87,14 +87,14 @@ func dataSourceImage() *schema.Resource {
 			},
 			"image_aliases": {
 				Type:     schema.TypeList,
-				Optional: true,
+				Computed: true,
 				Elem: &schema.Schema{
 					Type: schema.TypeString,
 				},
 			},
 			"cloud_init": {
 				Type:     schema.TypeString,
-				Optional: true,
+				Computed: true,
 			},
 		},
 		Timeouts: &resourceDefaultTimeouts,
