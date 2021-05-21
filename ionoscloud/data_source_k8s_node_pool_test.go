@@ -1,3 +1,5 @@
+// +build k8s
+
 package ionoscloud
 
 import (
@@ -143,6 +145,6 @@ resource "ionoscloud_k8s_node_pool" "test_ds_k8s_node_pool" {
 
 data "ionoscloud_k8s_node_pool" "test_ds_k8s_node_pool" {
 	k8s_cluster_id 	= ionoscloud_k8s_cluster.test_ds_k8s_cluster.id
-	name			= "_nodepool"
+	name			= "test_nodepool"
 }
 `

@@ -142,6 +142,7 @@ func dataSourceLanRead(d *schema.ResourceData, meta interface{}) error {
 			return fmt.Errorf("an error occurred while fetching lans: %s", err.Error())
 		}
 
+		found := false
 		if lans.Items != nil {
 			for _, l := range *lans.Items {
 				if l.Properties.Name != nil && *l.Properties.Name == name.(string) {
@@ -150,14 +151,15 @@ func dataSourceLanRead(d *schema.ResourceData, meta interface{}) error {
 					if err != nil {
 						return fmt.Errorf("an error occurred while fetching lan %s: %s", *l.Id, err)
 					}
+					found = true
 					break
 				}
 			}
 		}
-	}
 
-	if &lan == nil {
-		return errors.New("lan not found")
+		if !found {
+			return fmt.Errorf("lan not found")
+		}
 	}
 
 	if err = setLanData(d, &lan); err != nil {

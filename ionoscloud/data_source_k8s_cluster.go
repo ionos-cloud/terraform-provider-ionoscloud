@@ -135,6 +135,7 @@ func dataSourceK8sReadCluster(d *schema.ResourceData, meta interface{}) error {
 			return fmt.Errorf("an error occurred while fetching k8s clusters: %s", err.Error())
 		}
 
+		found := false
 		if clusters.Items != nil {
 			for _, c := range *clusters.Items {
 				tmpCluster, _, err := client.KubernetesApi.K8sFindByClusterId(ctx, *c.Id).Execute()
@@ -144,16 +145,16 @@ func dataSourceK8sReadCluster(d *schema.ResourceData, meta interface{}) error {
 				if tmpCluster.Properties.Name != nil && *tmpCluster.Properties.Name == name.(string) {
 					/* lan found */
 					cluster = tmpCluster
+					found = true
 					break
 				}
 
 			}
 		}
+		if !found {
+			return errors.New("k8s cluster not found")
+		}
 
-	}
-
-	if &cluster == nil {
-		return errors.New("k8s cluster not found")
 	}
 
 	if err = setK8sClusterData(d, &cluster, client); err != nil {

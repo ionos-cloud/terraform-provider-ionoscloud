@@ -72,6 +72,6 @@ resource "ionoscloud_private_crossconnect" "test_ds_pcc" {
   description		= "test_ds_pcc description"
 }
 data "ionoscloud_private_crossconnect" "test_pcc" {
-  name			= "test_ds_"
+  name			= "test_ds_pcc"
 }
 `

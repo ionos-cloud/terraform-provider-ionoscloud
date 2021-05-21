@@ -1,3 +1,5 @@
+// +build k8s
+
 package ionoscloud
 
 import (
@@ -19,14 +21,17 @@ func TestAcck8sNodepool_Basic(t *testing.T) {
 	publicIp1 := os.Getenv("TF_ACC_IONOS_PUBLIC_IP_1")
 	if publicIp1 == "" {
 		t.Errorf("TF_ACC_IONOS_PUBLIC_1 not set; please set it to a valid public IP for the us/las zone")
+		t.FailNow()
 	}
 	publicIp2 := os.Getenv("TF_ACC_IONOS_PUBLIC_IP_2")
 	if publicIp2 == "" {
 		t.Errorf("TF_ACC_IONOS_PUBLIC_2 not set; please set it to a valid public IP for the us/las zone")
+		t.FailNow()
 	}
 	publicIp3 := os.Getenv("TF_ACC_IONOS_PUBLIC_IP_3")
 	if publicIp3 == "" {
 		t.Errorf("TF_ACC_IONOS_PUBLIC_3 not set; please set it to a valid public IP for the us/las zone")
+		t.FailNow()
 	}
 
 	resource.Test(t, resource.TestCase{

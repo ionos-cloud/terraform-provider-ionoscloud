@@ -47,6 +47,7 @@ func getDatacenter(client *ionoscloud.APIClient, d *schema.ResourceData) (*ionos
 	if locationOk {
 		location = t.(string)
 	}
+
 	if !idOk && !nameOk && !locationOk {
 		return nil, fmt.Errorf("either id, location or name must be set")
 	}

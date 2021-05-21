@@ -143,6 +143,6 @@ resource "ionoscloud_server" "test_datasource_server" {
 
 data "ionoscloud_server" "test_server" {
   datacenter_id = ionoscloud_datacenter.test_datasource_server.id
-  name			= "test_datasource_"
+  name			= "test_datasource_server"
 }
 `

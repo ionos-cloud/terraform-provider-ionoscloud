@@ -198,6 +198,7 @@ func dataSourcePccRead(d *schema.ResourceData, meta interface{}) error {
 			return fmt.Errorf("an error occurred while fetching pccs: %s", err.Error())
 		}
 
+		found := false
 		if pccs.Items != nil {
 			for _, p := range *pccs.Items {
 				if p.Properties.Name != nil && *p.Properties.Name == name.(string) {
@@ -206,14 +207,15 @@ func dataSourcePccRead(d *schema.ResourceData, meta interface{}) error {
 					if err != nil {
 						return fmt.Errorf("an error occurred while fetching the pcc with ID %s: %s", *p.Id, err)
 					}
+					found = true
 					break
 				}
 			}
 		}
-	}
+		if !found {
+			return errors.New("pcc not found")
+		}
 
-	if &pcc == nil {
-		return errors.New("pcc not found")
 	}
 
 	if err = setPccDataSource(d, &pcc); err != nil {

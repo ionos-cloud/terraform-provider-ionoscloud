@@ -575,6 +575,7 @@ func dataSourceServerRead(d *schema.ResourceData, meta interface{}) error {
 			return fmt.Errorf("an error occurred while fetching servers: %s", err.Error())
 		}
 
+		found := false
 		if servers.Items != nil {
 			for _, s := range *servers.Items {
 				if s.Properties.Name != nil && *s.Properties.Name == name.(string) {
@@ -583,14 +584,16 @@ func dataSourceServerRead(d *schema.ResourceData, meta interface{}) error {
 					if err != nil {
 						return fmt.Errorf("an error occurred while fetching the server with ID %s: %s", *s.Id, err)
 					}
+					found = true
 					break
 				}
 			}
 		}
-	}
 
-	if &server == nil {
-		return errors.New("server not found")
+		if !found {
+			return errors.New("server not found")
+		}
+
 	}
 
 	if err = setServerData(d, &server); err != nil {
