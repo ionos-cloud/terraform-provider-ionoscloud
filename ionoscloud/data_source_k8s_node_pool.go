@@ -5,6 +5,7 @@ import (
 	"errors"
 	"fmt"
 	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
+	"github.com/hashicorp/terraform-plugin-sdk/helper/validation"
 	ionoscloud "github.com/ionos-cloud/sdk-go/v5"
 )
 
@@ -13,9 +14,10 @@ func dataSourceK8sNodePool() *schema.Resource {
 		Read: dataSourceK8sReadNodePool,
 		Schema: map[string]*schema.Schema{
 			"k8s_cluster_id": {
-				Type:        schema.TypeString,
-				Required:    true,
-				Description: "The UUID of an existing kubernetes cluster",
+				Type:         schema.TypeString,
+				Required:     true,
+				Description:  "The UUID of an existing kubernetes cluster",
+				ValidateFunc: validation.All(validation.StringIsNotWhiteSpace),
 			},
 			"id": {
 				Type:     schema.TypeString,
@@ -215,7 +217,6 @@ func dataSourceK8sReadNodePool(d *schema.ResourceData, meta interface{}) error {
 		if !found {
 			return errors.New("k8s nodePool not found")
 		}
-
 
 	}
 

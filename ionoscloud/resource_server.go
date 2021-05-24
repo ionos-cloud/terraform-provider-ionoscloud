@@ -4,6 +4,7 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"github.com/hashicorp/terraform-plugin-sdk/helper/validation"
 	ionoscloud "github.com/ionos-cloud/sdk-go/v5"
 	"io/ioutil"
 	"log"
@@ -26,8 +27,9 @@ func resourceServer() *schema.Resource {
 		Schema: map[string]*schema.Schema{
 			// Server parameters
 			"name": {
-				Type:     schema.TypeString,
-				Required: true,
+				Type:         schema.TypeString,
+				Required:     true,
+				ValidateFunc: validation.All(validation.StringIsNotWhiteSpace),
 			},
 			"cores": {
 				Type:     schema.TypeInt,
@@ -78,9 +80,10 @@ func resourceServer() *schema.Resource {
 				Computed: true,
 			},
 			"datacenter_id": {
-				Type:     schema.TypeString,
-				Required: true,
-				ForceNew: true,
+				Type:         schema.TypeString,
+				Required:     true,
+				ForceNew:     true,
+				ValidateFunc: validation.All(validation.StringIsNotWhiteSpace),
 			},
 			"image_password": {
 				Type:          schema.TypeString,
@@ -125,8 +128,9 @@ func resourceServer() *schema.Resource {
 							Required: true,
 						},
 						"disk_type": {
-							Type:     schema.TypeString,
-							Required: true,
+							Type:         schema.TypeString,
+							Required:     true,
+							ValidateFunc: validation.All(validation.StringIsNotWhiteSpace),
 						},
 						"image_password": {
 							Type:          schema.TypeString,
@@ -255,6 +259,7 @@ func resourceServer() *schema.Resource {
 											}
 											return false
 										},
+										ValidateFunc: validation.All(validation.StringIsNotWhiteSpace),
 									},
 									"source_mac": {
 										Type:     schema.TypeString,
@@ -451,7 +456,6 @@ func resourceServerCreate(d *schema.ResourceData, meta interface{}) error {
 			if apiResponse != nil && apiResponse.Response.StatusCode == 404 {
 				return fmt.Errorf("image/snapshot: %s Not Found", string(apiResponse.Payload))
 			}
-
 
 			isSnapshot = true
 

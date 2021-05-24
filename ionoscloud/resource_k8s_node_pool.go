@@ -4,6 +4,7 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"github.com/hashicorp/terraform-plugin-sdk/helper/validation"
 	ionoscloud "github.com/ionos-cloud/sdk-go/v5"
 	"log"
 	"time"
@@ -22,14 +23,16 @@ func resourcek8sNodePool() *schema.Resource {
 		},
 		Schema: map[string]*schema.Schema{
 			"name": {
-				Type:        schema.TypeString,
-				Description: "The desired name for the node pool",
-				Required:    true,
+				Type:         schema.TypeString,
+				Description:  "The desired name for the node pool",
+				Required:     true,
+				ValidateFunc: validation.All(validation.StringIsNotWhiteSpace),
 			},
 			"k8s_version": {
-				Type:        schema.TypeString,
-				Description: "The desired kubernetes version",
-				Required:    true,
+				Type:         schema.TypeString,
+				Description:  "The desired kubernetes version",
+				Required:     true,
+				ValidateFunc: validation.All(validation.StringIsNotWhiteSpace),
 			},
 			"auto_scaling": {
 				Type:        schema.TypeList,
@@ -80,29 +83,34 @@ func resourcek8sNodePool() *schema.Resource {
 				},
 			},
 			"datacenter_id": {
-				Type:        schema.TypeString,
-				Description: "The UUID of the VDC",
-				Required:    true,
+				Type:         schema.TypeString,
+				Description:  "The UUID of the VDC",
+				Required:     true,
+				ValidateFunc: validation.All(validation.StringIsNotWhiteSpace),
 			},
 			"k8s_cluster_id": {
-				Type:        schema.TypeString,
-				Description: "The UUID of an existing kubernetes cluster",
-				Required:    true,
+				Type:         schema.TypeString,
+				Description:  "The UUID of an existing kubernetes cluster",
+				Required:     true,
+				ValidateFunc: validation.All(validation.StringIsNotWhiteSpace),
 			},
 			"cpu_family": {
-				Type:        schema.TypeString,
-				Description: "CPU Family",
-				Required:    true,
+				Type:         schema.TypeString,
+				Description:  "CPU Family",
+				Required:     true,
+				ValidateFunc: validation.All(validation.StringIsNotWhiteSpace),
 			},
 			"availability_zone": {
-				Type:        schema.TypeString,
-				Description: "The compute availability zone in which the nodes should exist",
-				Required:    true,
+				Type:         schema.TypeString,
+				Description:  "The compute availability zone in which the nodes should exist",
+				Required:     true,
+				ValidateFunc: validation.All(validation.StringIsNotWhiteSpace),
 			},
 			"storage_type": {
-				Type:        schema.TypeString,
-				Description: "Storage type to use",
-				Required:    true,
+				Type:         schema.TypeString,
+				Description:  "Storage type to use",
+				Required:     true,
+				ValidateFunc: validation.All(validation.StringIsNotWhiteSpace),
 			},
 			"node_count": {
 				Type:        schema.TypeInt,

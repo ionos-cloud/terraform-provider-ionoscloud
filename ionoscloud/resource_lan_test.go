@@ -63,7 +63,6 @@ func testAccCheckLanDestroyCheck(s *terraform.State) error {
 			return fmt.Errorf("LAN still exists %s", rs.Primary.ID)
 		}
 
-
 	}
 
 	return nil

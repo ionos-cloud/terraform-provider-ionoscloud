@@ -3,6 +3,7 @@ package ionoscloud
 import (
 	"context"
 	"fmt"
+	"github.com/hashicorp/terraform-plugin-sdk/helper/validation"
 	ionoscloud "github.com/ionos-cloud/sdk-go/v5"
 	"log"
 	"time"
@@ -18,8 +19,9 @@ func resourceGroup() *schema.Resource {
 		Delete: resourceGroupDelete,
 		Schema: map[string]*schema.Schema{
 			"name": {
-				Type:     schema.TypeString,
-				Required: true,
+				Type:         schema.TypeString,
+				Required:     true,
+				ValidateFunc: validation.All(validation.StringIsNotWhiteSpace),
 			},
 			"create_datacenter": {
 				Type:     schema.TypeBool,
@@ -139,11 +141,11 @@ func resourceGroupCreate(d *schema.ResourceData, meta interface{}) error {
 
 	group, apiRsponse, err := client.UserManagementApi.UmGroupsPost(ctx).Group(request).Execute()
 
-	log.Printf("[DEBUG] GROUP ID: %s", *group.Id)
-
 	if err != nil {
 		return fmt.Errorf("An error occured while creating a group: %s", err)
 	}
+
+	log.Printf("[DEBUG] GROUP ID: %s", *group.Id)
 
 	d.SetId(*group.Id)
 

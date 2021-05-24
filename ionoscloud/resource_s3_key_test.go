@@ -14,7 +14,7 @@ import (
 func TestAccS3Key_Basic(t *testing.T) {
 	var s3Key ionoscloud.S3Key
 	s3KeyName := "example"
-	email := fmt.Sprintf("terraform_test-%d@mailinator.com",time.Now().Unix())
+	email := fmt.Sprintf("terraform_test-%d@mailinator.com", time.Now().Unix())
 
 	resource.Test(t, resource.TestCase{
 		PreCheck: func() {

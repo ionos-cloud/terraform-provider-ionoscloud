@@ -94,6 +94,7 @@ func dataSourceImage() *schema.Resource {
 			},
 			"cloud_init": {
 				Type:     schema.TypeString,
+				Optional: true,
 				Computed: true,
 			},
 		},
@@ -140,8 +141,8 @@ func dataSourceImageRead(d *schema.ResourceData, meta interface{}) error {
 		}
 	} else {
 		if images.Items != nil {
-		for _, img := range *images.Items {
-			if img.Properties.Name != nil && strings.ToLower(*img.Properties.Name) == strings.ToLower(name) {
+			for _, img := range *images.Items {
+				if img.Properties.Name != nil && strings.ToLower(*img.Properties.Name) == strings.ToLower(name) {
 					results = append(results, img)
 					break
 				}
