@@ -51,7 +51,6 @@ func testAccCheckbackupUnitDestroyCheck(s *terraform.State) error {
 		defer cancel()
 	}
 
-
 	for _, rs := range s.RootModule().Resources {
 
 		if rs.Type != "ionoscloud_backup_unit" {

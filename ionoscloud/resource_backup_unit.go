@@ -3,6 +3,7 @@ package ionoscloud
 import (
 	"context"
 	"fmt"
+	"github.com/hashicorp/terraform-plugin-sdk/helper/validation"
 	ionoscloud "github.com/ionos-cloud/sdk-go/v5"
 	"log"
 	"time"
@@ -21,20 +22,23 @@ func resourceBackupUnit() *schema.Resource {
 		},
 		Schema: map[string]*schema.Schema{
 			"name": {
-				Type:        schema.TypeString,
-				Description: "Alphanumeric name you want assigned to the backup unit.",
-				Required:    true,
+				Type:         schema.TypeString,
+				Description:  "Alphanumeric name you want assigned to the backup unit.",
+				Required:     true,
+				ValidateFunc: validation.All(validation.StringIsNotWhiteSpace),
 			},
 			"password": {
-				Type:        schema.TypeString,
-				Description: "The password you want assigned to the backup unit.",
-				Required:    true,
-				Sensitive:   true,
+				Type:         schema.TypeString,
+				Description:  "The password you want assigned to the backup unit.",
+				Required:     true,
+				Sensitive:    true,
+				ValidateFunc: validation.All(validation.StringIsNotWhiteSpace),
 			},
 			"email": {
-				Type:        schema.TypeString,
-				Description: "The e-mail address you want assigned to the backup unit.",
-				Required:    true,
+				Type:         schema.TypeString,
+				Description:  "The e-mail address you want assigned to the backup unit.",
+				Required:     true,
+				ValidateFunc: validation.All(validation.StringIsNotWhiteSpace),
 			},
 			"login": {
 				Type:        schema.TypeString,

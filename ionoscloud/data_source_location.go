@@ -48,7 +48,7 @@ func dataSourceLocationRead(d *schema.ResourceData, meta interface{}) error {
 
 	if locations.Items != nil {
 		for _, loc := range *locations.Items {
-			if loc.Properties.Name != nil && *loc.Properties.Name == name.(string)  {
+			if loc.Properties.Name != nil && *loc.Properties.Name == name.(string) {
 				results = append(results, loc)
 			}
 		}

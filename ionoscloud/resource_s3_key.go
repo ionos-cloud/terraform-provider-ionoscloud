@@ -3,6 +3,7 @@ package ionoscloud
 import (
 	"context"
 	"fmt"
+	"github.com/hashicorp/terraform-plugin-sdk/helper/validation"
 	"log"
 	"time"
 
@@ -21,9 +22,10 @@ func resourceS3Key() *schema.Resource {
 		},
 		Schema: map[string]*schema.Schema{
 			"user_id": {
-				Type:        schema.TypeString,
-				Description: "The ID of the user that owns the key.",
-				Required:    true,
+				Type:         schema.TypeString,
+				Description:  "The ID of the user that owns the key.",
+				Required:     true,
+				ValidateFunc: validation.All(validation.StringIsNotWhiteSpace),
 			},
 			"secret_key": {
 				Type:        schema.TypeString,

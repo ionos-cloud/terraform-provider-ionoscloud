@@ -3,10 +3,10 @@ package ionoscloud
 import (
 	"context"
 	"fmt"
+	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
+	"github.com/hashicorp/terraform-plugin-sdk/helper/validation"
 	ionoscloud "github.com/ionos-cloud/sdk-go/v5"
 	"strconv"
-
-	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
 )
 
 func resourceFirewall() *schema.Resource {
@@ -46,7 +46,7 @@ func resourceFirewall() *schema.Resource {
 				Optional: true,
 				ValidateFunc: func(v interface{}, k string) (ws []string, errors []error) {
 					if v.(int) < 1 && v.(int) > 65534 {
-						errors = append(errors, fmt.Errorf("Port start range must be between 1 and 65534"))
+						errors = append(errors, fmt.Errorf("port start range must be between 1 and 65534"))
 					}
 					return
 				},
@@ -57,7 +57,7 @@ func resourceFirewall() *schema.Resource {
 				Optional: true,
 				ValidateFunc: func(v interface{}, k string) (ws []string, errors []error) {
 					if v.(int) < 1 && v.(int) > 65534 {
-						errors = append(errors, fmt.Errorf("Port end range must be between 1 and 65534"))
+						errors = append(errors, fmt.Errorf("port end range must be between 1 and 65534"))
 					}
 					return
 				},
@@ -71,19 +71,22 @@ func resourceFirewall() *schema.Resource {
 				Optional: true,
 			},
 			"datacenter_id": {
-				Type:     schema.TypeString,
-				Required: true,
-				ForceNew: true,
+				Type:         schema.TypeString,
+				Required:     true,
+				ForceNew:     true,
+				ValidateFunc: validation.All(validation.StringIsNotWhiteSpace),
 			},
 			"server_id": {
-				Type:     schema.TypeString,
-				Required: true,
-				ForceNew: true,
+				Type:         schema.TypeString,
+				Required:     true,
+				ForceNew:     true,
+				ValidateFunc: validation.All(validation.StringIsNotWhiteSpace),
 			},
 			"nic_id": {
-				Type:     schema.TypeString,
-				Required: true,
-				ForceNew: true,
+				Type:         schema.TypeString,
+				Required:     true,
+				ForceNew:     true,
+				ValidateFunc: validation.All(validation.StringIsNotWhiteSpace),
 			},
 		},
 		Timeouts: &resourceDefaultTimeouts,
