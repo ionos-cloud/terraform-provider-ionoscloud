@@ -7,7 +7,7 @@ import (
 	"log"
 	"strings"
 
-	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 )
 
 func resourceResourceImport(d *schema.ResourceData, meta interface{}) ([]*schema.ResourceData, error) {
@@ -221,7 +221,7 @@ func resourcePrivateCrossConnectImport(d *schema.ResourceData, meta interface{})
 	return []*schema.ResourceData{d}, nil
 }
 
-func resourceBackupUnitImport(d *schema.ResourceData, meta interface{}) ([]*schema.ResourceData, error) {
+func resourceBackupUnitImport(ctx context.Context, d *schema.ResourceData, meta interface{}) ([]*schema.ResourceData, error) {
 	client := meta.(*ionoscloud.APIClient)
 
 	ctx, cancel := context.WithTimeout(context.Background(), *resourceDefaultTimeouts.Default)
