@@ -3,7 +3,6 @@ package ionoscloud
 import (
 	"context"
 	"fmt"
-	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 	ionoscloud "github.com/ionos-cloud/sdk-go/v5"
 	"log"
@@ -14,12 +13,12 @@ import (
 
 func resourceNic() *schema.Resource {
 	return &schema.Resource{
-		CreateContext: resourceNicCreate,
-		ReadContext:   resourceNicRead,
-		UpdateContext: resourceNicUpdate,
-		DeleteContext: resourceNicDelete,
+		Create: resourceNicCreate,
+		Read:   resourceNicRead,
+		Update: resourceNicUpdate,
+		Delete: resourceNicDelete,
 		Importer: &schema.ResourceImporter{
-			StateContext: resourceNicImport,
+			State: resourceNicImport,
 		},
 		Schema: map[string]*schema.Schema{
 
@@ -73,7 +72,7 @@ func resourceNic() *schema.Resource {
 	}
 }
 
-func resourceNicCreate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func resourceNicCreate(d *schema.ResourceData, meta interface{}) error {
 	client := meta.(*ionoscloud.APIClient)
 
 	lan := d.Get("lan").(int)
@@ -105,94 +104,82 @@ func resourceNicCreate(ctx context.Context, d *schema.ResourceData, meta interfa
 		nic.Properties.Nat = &raw
 	}
 
+	ctx, cancel := context.WithTimeout(context.Background(), *resourceDefaultTimeouts.Create)
+	if cancel != nil {
+		defer cancel()
+	}
 	dcid := d.Get("datacenter_id").(string)
 	srvid := d.Get("server_id").(string)
-	nic, apiResponse, err := client.NicApi.DatacentersServersNicsPost(ctx, dcid, srvid).Nic(nic).Execute()
+	nic, apiResp, err := client.NicApi.DatacentersServersNicsPost(ctx, dcid, srvid).Nic(nic).Execute()
 
 	if err != nil {
-		diags := diag.FromErr(fmt.Errorf("error occured while creating a nic: %s", err))
-		return diags
+		return fmt.Errorf("Error occured while creating a nic: %s payload: %s ", err, string(apiResp.Payload))
 	}
 	if nic.Id != nil {
 		d.SetId(*nic.Id)
 	}
 	// Wait, catching any errors
-	_, errState := getStateChangeConf(meta, d, apiResponse.Header.Get("Location"), schema.TimeoutCreate).WaitForStateContext(ctx)
+	_, errState := getStateChangeConf(meta, d, apiResp.Header.Get("Location"), schema.TimeoutCreate).WaitForState()
 	if errState != nil {
 		if IsRequestFailed(err) {
 			// Request failed, so resource was not created, delete resource from state file
 			d.SetId("")
 		}
-		diags := diag.FromErr(errState)
-		return diags
+		return errState
 	}
-	return resourceNicRead(ctx, d, meta)
+	return resourceNicRead(d, meta)
 }
 
-func resourceNicRead(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func resourceNicRead(d *schema.ResourceData, meta interface{}) error {
 	client := meta.(*ionoscloud.APIClient)
+
+	ctx, cancel := context.WithTimeout(context.Background(), *resourceDefaultTimeouts.Default)
+	if cancel != nil {
+		defer cancel()
+	}
 
 	dcid := d.Get("datacenter_id").(string)
 	srvid := d.Get("server_id").(string)
 	nicid := d.Id()
 
-	rsp, apiResponse, err := client.NicApi.DatacentersServersNicsFindById(ctx, dcid, srvid, nicid).Execute()
+	rsp, apiresponse, err := client.NicApi.DatacentersServersNicsFindById(ctx, dcid, srvid, nicid).Execute()
 
 	if err != nil {
 		if _, ok := err.(ionoscloud.GenericOpenAPIError); ok {
-			if apiResponse != nil && apiResponse.StatusCode == 404 {
+			if apiresponse.Response.StatusCode == 404 {
 				d.SetId("")
 				return nil
 			}
 		}
-		diags := diag.FromErr(fmt.Errorf("error occured while fetching a nic ID %s %s", d.Id(), err))
-		return diags
+		return fmt.Errorf("Error occured while fetching a nic ID %s %s", d.Id(), err)
 	}
 
 	if rsp.Properties != nil {
 		log.Printf("[INFO] LAN ON NIC: %d", rsp.Properties.Lan)
 		if rsp.Properties.Dhcp != nil {
-			if err := d.Set("dhcp", *rsp.Properties.Dhcp); err != nil {
-				diags := diag.FromErr(err)
-				return diags
-			}
+			d.Set("dhcp", *rsp.Properties.Dhcp)
 		}
 		if rsp.Properties.Lan != nil {
-			if err := d.Set("lan", *rsp.Properties.Lan); err != nil {
-				diags := diag.FromErr(err)
-				return diags
-			}
+			d.Set("lan", *rsp.Properties.Lan)
 		}
 		if rsp.Properties.Name != nil {
-			if err := d.Set("name", *rsp.Properties.Name); err != nil {
-				diags := diag.FromErr(err)
-				return diags
-			}
+			d.Set("name", *rsp.Properties.Name)
 		}
 		if rsp.Properties.Ips != nil {
-			if err := d.Set("ips", *rsp.Properties.Ips); err != nil {
-				diags := diag.FromErr(err)
-				return diags
-			}
+			d.Set("ips", *rsp.Properties.Ips)
 		}
 		if rsp.Properties.FirewallActive != nil {
-			if err := d.Set("firewall_active", *rsp.Properties.FirewallActive); err != nil {
-				diags := diag.FromErr(err)
-				return diags
-			}
+			d.Set("firewall_active", *rsp.Properties.FirewallActive)
 		}
 		if rsp.Properties.Mac != nil {
-			if err := d.Set("mac", *rsp.Properties.Mac); err != nil {
-				diags := diag.FromErr(err)
-				return diags
-			}
+			d.Set("mac", *rsp.Properties.Mac)
 		}
 	}
 
 	return nil
 }
 
-func resourceNicUpdate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func resourceNicUpdate(d *schema.ResourceData, meta interface{}) error {
 	client := meta.(*ionoscloud.APIClient)
 
 	properties := ionoscloud.NicProperties{}
@@ -222,6 +209,11 @@ func resourceNicUpdate(ctx context.Context, d *schema.ResourceData, meta interfa
 		properties.Nat = &nat
 	}
 
+	ctx, cancel := context.WithTimeout(context.Background(), *resourceDefaultTimeouts.Update)
+	if cancel != nil {
+		defer cancel()
+	}
+
 	dcid := d.Get("datacenter_id").(string)
 	srvid := d.Get("server_id").(string)
 	nicid := d.Id()
@@ -229,22 +221,25 @@ func resourceNicUpdate(ctx context.Context, d *schema.ResourceData, meta interfa
 	_, apiResponse, err := client.NicApi.DatacentersServersNicsPatch(ctx, dcid, srvid, nicid).Nic(properties).Execute()
 
 	if err != nil {
-		diags := diag.FromErr(fmt.Errorf("error occured while updating a nic: %s", err))
-		return diags
+		return fmt.Errorf("Error occured while updating a nic: %s", err)
 	}
 
 	// Wait, catching any errors
-	_, errState := getStateChangeConf(meta, d, apiResponse.Header.Get("Location"), schema.TimeoutUpdate).WaitForStateContext(ctx)
+	_, errState := getStateChangeConf(meta, d, apiResponse.Header.Get("Location"), schema.TimeoutUpdate).WaitForState()
 	if errState != nil {
-		diags := diag.FromErr(errState)
-		return diags
+		return errState
 	}
 
-	return resourceNicRead(ctx, d, meta)
+	return resourceNicRead(d, meta)
 }
 
-func resourceNicDelete(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func resourceNicDelete(d *schema.ResourceData, meta interface{}) error {
 	client := meta.(*ionoscloud.APIClient)
+
+	ctx, cancel := context.WithTimeout(context.Background(), *resourceDefaultTimeouts.Delete)
+	if cancel != nil {
+		defer cancel()
+	}
 
 	dcid := d.Get("datacenter_id").(string)
 	srvid := d.Get("server_id").(string)
@@ -253,14 +248,12 @@ func resourceNicDelete(ctx context.Context, d *schema.ResourceData, meta interfa
 	_, apiresp, err := client.NicApi.DatacentersServersNicsDelete(ctx, dcid, srvid, nicid).Execute()
 
 	if err != nil {
-		diags := diag.FromErr(fmt.Errorf("an error occured while deleting a nic dcId %s ID %s %s", d.Get("datacenter_id").(string), d.Id(), err))
-		return diags
+		return fmt.Errorf("An error occured while deleting a nic dcId %s ID %s %s", d.Get("datacenter_id").(string), d.Id(), err)
 	}
 	// Wait, catching any errors
-	_, errState := getStateChangeConf(meta, d, apiresp.Header.Get("Location"), schema.TimeoutDelete).WaitForStateContext(ctx)
+	_, errState := getStateChangeConf(meta, d, apiresp.Header.Get("Location"), schema.TimeoutDelete).WaitForState()
 	if errState != nil {
-		diags := diag.FromErr(errState)
-		return diags
+		return errState
 	}
 
 	d.SetId("")

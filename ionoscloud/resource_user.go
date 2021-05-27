@@ -3,7 +3,6 @@ package ionoscloud
 import (
 	"context"
 	"fmt"
-	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 	"log"
 	"time"
@@ -14,10 +13,10 @@ import (
 
 func resourceUser() *schema.Resource {
 	return &schema.Resource{
-		CreateContext: resourceUserCreate,
-		ReadContext:   resourceUserRead,
-		UpdateContext: resourceUserUpdate,
-		DeleteContext: resourceUserDelete,
+		Create: resourceUserCreate,
+		Read:   resourceUserRead,
+		Update: resourceUserUpdate,
+		Delete: resourceUserDelete,
 		Schema: map[string]*schema.Schema{
 			"first_name": {
 				Type:         schema.TypeString,
@@ -52,7 +51,7 @@ func resourceUser() *schema.Resource {
 	}
 }
 
-func resourceUserCreate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func resourceUserCreate(d *schema.ResourceData, meta interface{}) error {
 	client := meta.(*ionoscloud.APIClient)
 
 	request := ionoscloud.UserPost{
@@ -83,93 +82,78 @@ func resourceUserCreate(ctx context.Context, d *schema.ResourceData, meta interf
 	request.Properties.Administrator = &administrator
 	request.Properties.ForceSecAuth = &forceSecAuth
 
+	ctx, cancel := context.WithTimeout(context.Background(), *resourceDefaultTimeouts.Create)
+	if cancel != nil {
+		defer cancel()
+	}
+
 	rsp, apiResponse, err := client.UserManagementApi.UmUsersPost(ctx).User(request).Execute()
+	if rsp.Id != nil {
+		log.Printf("[DEBUG] USER ID: %s", *rsp.Id)
+	}
 
 	if err != nil {
 		payload := "<nil>"
 		if apiResponse != nil {
 			payload = string(apiResponse.Payload)
 		}
-		diags := diag.FromErr(fmt.Errorf("an error occured while creating a user: %s; payload: %s", err, payload))
-		return diags
-	}
-	if rsp.Id != nil {
-		log.Printf("[DEBUG] USER ID: %s", *rsp.Id)
-		d.SetId(*rsp.Id)
+		return fmt.Errorf("an error occured while creating a user: %s; payload: %s", err, payload)
 	}
 
+	d.SetId(*rsp.Id)
+
 	// Wait, catching any errors
-	_, errState := getStateChangeConf(meta, d, apiResponse.Header.Get("Location"), schema.TimeoutCreate).WaitForStateContext(ctx)
+	_, errState := getStateChangeConf(meta, d, apiResponse.Header.Get("Location"), schema.TimeoutCreate).WaitForState()
 	if errState != nil {
 		if IsRequestFailed(err) {
 			// Request failed, so resource was not created, delete resource from state file
 			d.SetId("")
 		}
-		diags := diag.FromErr(errState)
-		return diags
+		return errState
 	}
-	return resourceUserRead(ctx, d, meta)
+	return resourceUserRead(d, meta)
 }
 
-func resourceUserRead(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func resourceUserRead(d *schema.ResourceData, meta interface{}) error {
 	client := meta.(*ionoscloud.APIClient)
+
+	ctx, cancel := context.WithTimeout(context.Background(), *resourceDefaultTimeouts.Default)
+	if cancel != nil {
+		defer cancel()
+	}
 
 	rsp, apiResponse, err := client.UserManagementApi.UmUsersFindById(ctx, d.Id()).Execute()
 
 	if err != nil {
 		if _, ok := err.(ionoscloud.GenericOpenAPIError); ok {
-			if apiResponse != nil && apiResponse.StatusCode == 404 {
+			if apiResponse != nil && apiResponse.Response.StatusCode == 404 {
 				d.SetId("")
 				return nil
 			}
 		}
-		diags := diag.FromErr(fmt.Errorf("an error occured while fetching a User ID %s %s", d.Id(), err))
-		return diags
+		return fmt.Errorf("An error occured while fetching a User ID %s %s", d.Id(), err)
 	}
 
-	if rsp.Properties.Firstname != nil {
-		if err := d.Set("first_name", *rsp.Properties.Firstname); err != nil {
-			diags := diag.FromErr(err)
-			return diags
-		}
-	}
-
-	if rsp.Properties.Lastname != nil {
-		if err := d.Set("last_name", *rsp.Properties.Lastname); err != nil {
-			diags := diag.FromErr(err)
-			return diags
-		}
-	}
-	if rsp.Properties.Email != nil {
-		if err := d.Set("email", *rsp.Properties.Email); err != nil {
-			diags := diag.FromErr(err)
-			return diags
-		}
-	}
-	if rsp.Properties.Administrator != nil {
-		if err := d.Set("administrator", *rsp.Properties.Administrator); err != nil {
-			diags := diag.FromErr(err)
-			return diags
-		}
-	}
-	if rsp.Properties.ForceSecAuth != nil {
-		if err := d.Set("force_sec_auth", *rsp.Properties.ForceSecAuth); err != nil {
-			diags := diag.FromErr(err)
-			return diags
-		}
-	}
-
+	d.Set("first_name", *rsp.Properties.Firstname)
+	d.Set("last_name", *rsp.Properties.Lastname)
+	d.Set("email", *rsp.Properties.Email)
+	d.Set("administrator", *rsp.Properties.Administrator)
+	d.Set("force_sec_auth", *rsp.Properties.ForceSecAuth)
 	return nil
 }
 
-func resourceUserUpdate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func resourceUserUpdate(d *schema.ResourceData, meta interface{}) error {
 	client := meta.(*ionoscloud.APIClient)
+
+	ctx, cancel := context.WithTimeout(context.Background(), *resourceDefaultTimeouts.Update)
+	if cancel != nil {
+		defer cancel()
+	}
 
 	rsp, apiResponse, err := client.UserManagementApi.UmUsersFindById(ctx, d.Id()).Execute()
 
 	if err != nil {
-		diags := diag.FromErr(fmt.Errorf("an error occured while fetching a User ID %s %s", d.Id(), err))
-		return diags
+		return fmt.Errorf("An error occured while fetching a User ID %s %s", d.Id(), err)
 	}
 
 	administrator := d.Get("administrator").(bool)
@@ -207,29 +191,26 @@ func resourceUserUpdate(ctx context.Context, d *schema.ResourceData, meta interf
 	}
 
 	rsp, apiResponse, err = client.UserManagementApi.UmUsersPut(ctx, d.Id()).User(userReq).Execute()
-
 	if err != nil {
-		payload := "<nil>"
-		if apiResponse != nil {
-			payload = string(apiResponse.Payload)
-		}
-		diags := diag.FromErr(fmt.Errorf("an error occured while patching a user ID %s %s payload: %s", d.Id(), err, payload))
-		return diags
+		return fmt.Errorf("An error occured while patching a user ID %s %s payload: %s", d.Id(), err, apiResponse.Payload)
 	}
 
 	// Wait, catching any errors
-	_, errState := getStateChangeConf(meta, d, apiResponse.Header.Get("Location"), schema.TimeoutUpdate).WaitForStateContext(ctx)
+	_, errState := getStateChangeConf(meta, d, apiResponse.Header.Get("Location"), schema.TimeoutUpdate).WaitForState()
 	if errState != nil {
-		diags := diag.FromErr(errState)
-		return diags
+		return errState
 	}
 
-	return resourceUserRead(ctx, d, meta)
+	return resourceUserRead(d, meta)
 }
 
-func resourceUserDelete(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func resourceUserDelete(d *schema.ResourceData, meta interface{}) error {
 	client := meta.(*ionoscloud.APIClient)
 
+	ctx, cancel := context.WithTimeout(context.Background(), *resourceDefaultTimeouts.Delete)
+	if cancel != nil {
+		defer cancel()
+	}
 	_, apiResponse, err := client.UserManagementApi.UmUsersDelete(ctx, d.Id()).Execute()
 	if err != nil {
 		//try again in 20 seconds
@@ -237,21 +218,17 @@ func resourceUserDelete(ctx context.Context, d *schema.ResourceData, meta interf
 		_, _, err := client.UserManagementApi.UmUsersDelete(ctx, d.Id()).Execute()
 		if err != nil {
 			if _, ok := err.(ionoscloud.GenericOpenAPIError); ok {
-				if apiResponse == nil || apiResponse.StatusCode != 404 {
-					diags := diag.FromErr(fmt.Errorf("an error occured while deleting a user %s %s", d.Id(), err))
-					return diags
+				if apiResponse == nil || apiResponse.Response.StatusCode != 404 {
+					return fmt.Errorf("an error occured while deleting a user %s %s", d.Id(), err)
 				}
 			}
 		}
 	}
 
 	// Wait, catching any errors
-	if apiResponse != nil {
-		_, errState := getStateChangeConf(meta, d, apiResponse.Header.Get("Location"), schema.TimeoutDelete).WaitForStateContext(ctx)
-		if errState != nil {
-			diags := diag.FromErr(errState)
-			return diags
-		}
+	_, errState := getStateChangeConf(meta, d, apiResponse.Header.Get("Location"), schema.TimeoutDelete).WaitForState()
+	if errState != nil {
+		return errState
 	}
 
 	d.SetId("")

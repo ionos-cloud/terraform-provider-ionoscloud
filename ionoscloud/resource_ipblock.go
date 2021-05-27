@@ -3,7 +3,6 @@ package ionoscloud
 import (
 	"context"
 	"fmt"
-	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 	"log"
 	"strings"
@@ -14,12 +13,12 @@ import (
 
 func resourceIPBlock() *schema.Resource {
 	return &schema.Resource{
-		CreateContext: resourceIPBlockCreate,
-		ReadContext:   resourceIPBlockRead,
-		UpdateContext: resourceIPBlockUpdate,
-		DeleteContext: resourceIPBlockDelete,
+		Create: resourceIPBlockCreate,
+		Read:   resourceIPBlockRead,
+		Update: resourceIPBlockUpdate,
+		Delete: resourceIPBlockDelete,
 		Importer: &schema.ResourceImporter{
-			StateContext: schema.ImportStatePassthroughContext,
+			State: schema.ImportStatePassthrough,
 		},
 		Schema: map[string]*schema.Schema{
 			"name": {
@@ -47,7 +46,7 @@ func resourceIPBlock() *schema.Resource {
 	}
 }
 
-func resourceIPBlockCreate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func resourceIPBlockCreate(d *schema.ResourceData, meta interface{}) error {
 	client := meta.(*ionoscloud.APIClient)
 
 	size := d.Get("size").(int)
@@ -62,75 +61,58 @@ func resourceIPBlockCreate(ctx context.Context, d *schema.ResourceData, meta int
 		},
 	}
 
+	ctx, cancel := context.WithTimeout(context.Background(), *resourceDefaultTimeouts.Create)
+	if cancel != nil {
+		defer cancel()
+	}
+
 	ipblock, apiResponse, err := client.IPBlocksApi.IpblocksPost(ctx).Ipblock(ipblock).Execute()
 
 	if err != nil {
-		diags := diag.FromErr(fmt.Errorf("an error occured while reserving an ip block: %s", err))
-		return diags
+		return fmt.Errorf("An error occured while reserving an ip block: %s", err)
 	}
 	d.SetId(*ipblock.Id)
 
 	// Wait, catching any errors
-	_, errState := getStateChangeConf(meta, d, apiResponse.Header.Get("Location"), schema.TimeoutCreate).WaitForStateContext(ctx)
+	_, errState := getStateChangeConf(meta, d, apiResponse.Header.Get("Location"), schema.TimeoutCreate).WaitForState()
 	if errState != nil {
 		if IsRequestFailed(err) {
 			// Request failed, so resource was not created, delete resource from state file
 			d.SetId("")
 		}
-		diags := diag.FromErr(errState)
-		return diags
+		return errState
 	}
 
-	return resourceIPBlockRead(ctx, d, meta)
+	return resourceIPBlockRead(d, meta)
 }
 
-func resourceIPBlockRead(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func resourceIPBlockRead(d *schema.ResourceData, meta interface{}) error {
 	client := meta.(*ionoscloud.APIClient)
 
+	ctx, cancel := context.WithTimeout(context.Background(), *resourceDefaultTimeouts.Default)
+	if cancel != nil {
+		defer cancel()
+	}
 	ipBlock, apiResponse, err := client.IPBlocksApi.IpblocksFindById(ctx, d.Id()).Execute()
 
 	if err != nil {
-		if apiResponse != nil && apiResponse.StatusCode == 404 {
+		if apiResponse != nil && apiResponse.Response.StatusCode == 404 {
 			d.SetId("")
 			return nil
 		}
-		diags := diag.FromErr(fmt.Errorf("an error occured while fetching an ip block ID %s %s", d.Id(), err))
-		return diags
+		return fmt.Errorf("an error occured while fetching an ip block ID %s %s", d.Id(), err)
 	}
 
 	log.Printf("[INFO] IPS: %s", strings.Join(*ipBlock.Properties.Ips, ","))
 
-	if ipBlock.Properties.Ips != nil {
-		if err := d.Set("ips", *ipBlock.Properties.Ips); err != nil {
-			diags := diag.FromErr(err)
-			return diags
-		}
-	}
-
-	if ipBlock.Properties.Location != nil {
-		if err := d.Set("location", *ipBlock.Properties.Location); err != nil {
-			diags := diag.FromErr(err)
-			return diags
-		}
-	}
-
-	if ipBlock.Properties.Size != nil {
-		if err := d.Set("size", *ipBlock.Properties.Size); err != nil {
-			diags := diag.FromErr(err)
-			return diags
-		}
-	}
-
-	if ipBlock.Properties.Name != nil {
-		if err := d.Set("name", *ipBlock.Properties.Name); err != nil {
-			diags := diag.FromErr(err)
-			return diags
-		}
-	}
+	d.Set("ips", *ipBlock.Properties.Ips)
+	d.Set("location", *ipBlock.Properties.Location)
+	d.Set("size", *ipBlock.Properties.Size)
+	d.Set("name", *ipBlock.Properties.Name)
 
 	return nil
 }
-func resourceIPBlockUpdate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func resourceIPBlockUpdate(d *schema.ResourceData, meta interface{}) error {
 	client := meta.(*ionoscloud.APIClient)
 
 	request := ionoscloud.IpBlockProperties{}
@@ -141,30 +123,38 @@ func resourceIPBlockUpdate(ctx context.Context, d *schema.ResourceData, meta int
 		request.Name = &name
 	}
 
+	ctx, cancel := context.WithTimeout(context.Background(), *resourceDefaultTimeouts.Update)
+	if cancel != nil {
+		defer cancel()
+	}
+
 	_, _, err := client.IPBlocksApi.IpblocksPatch(ctx, d.Id()).Ipblock(request).Execute()
 
 	if err != nil {
-		diags := diag.FromErr(fmt.Errorf("an error occured while updating an ip block ID %s %s", d.Id(), err))
-		return diags
+		return fmt.Errorf("An error occured while updating an ip block ID %s %s", d.Id(), err)
 	}
 
 	return nil
+
 }
 
-func resourceIPBlockDelete(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func resourceIPBlockDelete(d *schema.ResourceData, meta interface{}) error {
 	client := meta.(*ionoscloud.APIClient)
+
+	ctx, cancel := context.WithTimeout(context.Background(), *resourceDefaultTimeouts.Delete)
+	if cancel != nil {
+		defer cancel()
+	}
 
 	_, apiResponse, err := client.IPBlocksApi.IpblocksDelete(ctx, d.Id()).Execute()
 	if err != nil {
-		diags := diag.FromErr(fmt.Errorf("an error occured while releasing an ipblock ID: %s %s", d.Id(), err))
-		return diags
+		return fmt.Errorf("An error occured while releasing an ipblock ID: %s %s", d.Id(), err)
 	}
 
 	// Wait, catching any errors
-	_, errState := getStateChangeConf(meta, d, apiResponse.Header.Get("Location"), schema.TimeoutDelete).WaitForStateContext(ctx)
+	_, errState := getStateChangeConf(meta, d, apiResponse.Header.Get("Location"), schema.TimeoutDelete).WaitForState()
 	if errState != nil {
-		diags := diag.FromErr(errState)
-		return diags
+		return errState
 	}
 
 	d.SetId("")

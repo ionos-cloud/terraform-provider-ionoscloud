@@ -3,7 +3,6 @@ package ionoscloud
 import (
 	"context"
 	"fmt"
-	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 	ionoscloud "github.com/ionos-cloud/sdk-go/v5"
 	"log"
@@ -14,10 +13,10 @@ import (
 
 func resourceGroup() *schema.Resource {
 	return &schema.Resource{
-		CreateContext: resourceGroupCreate,
-		ReadContext:   resourceGroupRead,
-		UpdateContext: resourceGroupUpdate,
-		DeleteContext: resourceGroupDelete,
+		Create: resourceGroupCreate,
+		Read:   resourceGroupRead,
+		Update: resourceGroupUpdate,
+		Delete: resourceGroupDelete,
 		Schema: map[string]*schema.Schema{
 			"name": {
 				Type:         schema.TypeString,
@@ -101,7 +100,7 @@ func resourceGroup() *schema.Resource {
 	}
 }
 
-func resourceGroupCreate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func resourceGroupCreate(d *schema.ResourceData, meta interface{}) error {
 	client := meta.(*ionoscloud.APIClient)
 
 	request := ionoscloud.Group{
@@ -133,13 +132,17 @@ func resourceGroupCreate(ctx context.Context, d *schema.ResourceData, meta inter
 	tempCreateK8sCluster := d.Get("create_k8s_cluster").(bool)
 	request.Properties.CreateK8sCluster = &tempCreateK8sCluster
 
-	userToAdd := d.Get("user_id").(string)
+	usertoAdd := d.Get("user_id").(string)
 
-	group, apiResponse, err := client.UserManagementApi.UmGroupsPost(ctx).Group(request).Execute()
+	ctx, cancel := context.WithTimeout(context.Background(), *resourceDefaultTimeouts.Create)
+	if cancel != nil {
+		defer cancel()
+	}
+
+	group, apiRsponse, err := client.UserManagementApi.UmGroupsPost(ctx).Group(request).Execute()
 
 	if err != nil {
-		diags := diag.FromErr(fmt.Errorf("an error occured while creating a group: %s", err))
-		return diags
+		return fmt.Errorf("An error occured while creating a group: %s", err)
 	}
 
 	log.Printf("[DEBUG] GROUP ID: %s", *group.Id)
@@ -147,152 +150,138 @@ func resourceGroupCreate(ctx context.Context, d *schema.ResourceData, meta inter
 	d.SetId(*group.Id)
 
 	// Wait, catching any errors
-	_, errState := getStateChangeConf(meta, d, apiResponse.Header.Get("Location"), schema.TimeoutCreate).WaitForStateContext(ctx)
+	_, errState := getStateChangeConf(meta, d, apiRsponse.Header.Get("Location"), schema.TimeoutCreate).WaitForState()
 	if errState != nil {
 		if IsRequestFailed(err) {
 			// Request failed, so resource was not created, delete resource from state file
 			d.SetId("")
 		}
-		diags := diag.FromErr(errState)
-		return diags
+		return errState
 	}
 
 	//add users to group if any is provided
-	if userToAdd != "" {
+	if usertoAdd != "" {
 		user := ionoscloud.User{
-			Id: &userToAdd,
+			Id: &usertoAdd,
 		}
 		_, apiResponse, err := client.UserManagementApi.UmGroupsUsersPost(ctx, d.Id()).User(user).Execute()
 		if err != nil {
-			diags := diag.FromErr(fmt.Errorf("an error occured while adding %s user to group ID %s %s", userToAdd, d.Id(), err))
-			return diags
+			return fmt.Errorf("An error occured while adding %s user to group ID %s %s", usertoAdd, d.Id(), err)
 		}
 		// Wait, catching any errors
-		_, errState := getStateChangeConf(meta, d, apiResponse.Header.Get("Location"), schema.TimeoutCreate).WaitForStateContext(ctx)
+		_, errState := getStateChangeConf(meta, d, apiResponse.Header.Get("Location"), schema.TimeoutCreate).WaitForState()
 		if errState != nil {
-			diags := diag.FromErr(errState)
-			return diags
+			return errState
 		}
 	}
-	return resourceGroupRead(ctx, d, meta)
+	return resourceGroupRead(d, meta)
 }
 
-func resourceGroupRead(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func resourceGroupRead(d *schema.ResourceData, meta interface{}) error {
 	client := meta.(*ionoscloud.APIClient)
+
+	ctx, cancel := context.WithTimeout(context.Background(), *resourceDefaultTimeouts.Default)
+	if cancel != nil {
+		defer cancel()
+	}
 
 	group, apiResponse, err := client.UserManagementApi.UmGroupsFindById(ctx, d.Id()).Execute()
 
 	if err != nil {
-		if apiResponse != nil && apiResponse.StatusCode == 404 {
+		if apiResponse != nil && apiResponse.Response.StatusCode == 404 {
 			d.SetId("")
 			return nil
 		}
-		diags := diag.FromErr(fmt.Errorf("an error occured while fetching a Group ID %s %s", d.Id(), err))
-		return diags
+		return fmt.Errorf("An error occured while fetching a Group ID %s %s", d.Id(), err)
 	}
 
 	if group.Properties.Name != nil {
 		err := d.Set("name", *group.Properties.Name)
 		if err != nil {
-			diags := diag.FromErr(fmt.Errorf("error while setting name property for group %s: %s", d.Id(), err))
-			return diags
+			return fmt.Errorf("Error while setting name property for group %s: %s", d.Id(), err)
 		}
 	}
 
 	if group.Properties.CreateDataCenter != nil {
 		err := d.Set("create_datacenter", *group.Properties.CreateDataCenter)
 		if err != nil {
-			diags := diag.FromErr(fmt.Errorf("error while setting create_datacenter property for group %s: %s", d.Id(), err))
-			return diags
+			return fmt.Errorf("Error while setting create_datacenter property for group %s: %s", d.Id(), err)
 		}
 	}
 
 	if group.Properties.CreateSnapshot != nil {
 		err := d.Set("create_snapshot", *group.Properties.CreateSnapshot)
 		if err != nil {
-			diags := diag.FromErr(fmt.Errorf("error while setting create_snapshot property for group %s: %s", d.Id(), err))
-			return diags
+			return fmt.Errorf("Error while setting create_snapshot property for group %s: %s", d.Id(), err)
 		}
 	}
 
 	if group.Properties.ReserveIp != nil {
 		err := d.Set("reserve_ip", *group.Properties.ReserveIp)
 		if err != nil {
-			diags := diag.FromErr(fmt.Errorf("error while setting reserve_ip property for group %s: %s", d.Id(), err))
-			return diags
+			return fmt.Errorf("Error while setting reserve_ip property for group %s: %s", d.Id(), err)
 		}
 	}
 
 	if group.Properties.AccessActivityLog != nil {
 		err := d.Set("access_activity_log", *group.Properties.AccessActivityLog)
 		if err != nil {
-			diags := diag.FromErr(fmt.Errorf("error while setting access_activity_log property for group %s: %s", d.Id(), err))
-			return diags
+			return fmt.Errorf("Error while setting access_activity_log property for group %s: %s", d.Id(), err)
 		}
 	}
 
 	if group.Properties.CreatePcc != nil {
 		err := d.Set("create_pcc", *group.Properties.CreatePcc)
 		if err != nil {
-			diags := diag.FromErr(fmt.Errorf("error while setting create_pcc property for group %s: %s", d.Id(), err))
-			return diags
+			return fmt.Errorf("Error while setting create_pcc property for group %s: %s", d.Id(), err)
 		}
 	}
 
 	if group.Properties.S3Privilege != nil {
 		err := d.Set("s3_privilege", *group.Properties.S3Privilege)
 		if err != nil {
-			diags := diag.FromErr(fmt.Errorf("error while setting s3_privilege property for group %s: %s", d.Id(), err))
-			return diags
+			return fmt.Errorf("Error while setting s3_privilege property for group %s: %s", d.Id(), err)
 		}
 	}
 
 	if group.Properties.CreateBackupUnit != nil {
 		err := d.Set("create_backup_unit", *group.Properties.CreateBackupUnit)
 		if err != nil {
-			diags := diag.FromErr(fmt.Errorf("error while setting create_backup_unit property for group %s: %s", d.Id(), err))
-			return diags
+			return fmt.Errorf("Error while setting create_backup_unit property for group %s: %s", d.Id(), err)
 		}
 	}
 
 	if group.Properties.CreateInternetAccess != nil {
 		err := d.Set("create_internet_access", *group.Properties.CreateInternetAccess)
 		if err != nil {
-			diags := diag.FromErr(fmt.Errorf("error while setting create_internet_access property for group %s: %s", d.Id(), err))
-			return diags
+			return fmt.Errorf("Error while setting create_internet_access property for group %s: %s", d.Id(), err)
 		}
 	}
 
 	if group.Properties.CreateK8sCluster != nil {
 		err := d.Set("create_k8s_cluster", *group.Properties.CreateK8sCluster)
 		if err != nil {
-			diags := diag.FromErr(fmt.Errorf("error while setting create_k8s_cluster property for group %s: %s", d.Id(), err))
-			return diags
+			return fmt.Errorf("Error while setting create_k8s_cluster property for group %s: %s", d.Id(), err)
 		}
 	}
 
 	users, _, err := client.UserManagementApi.UmGroupsUsersGet(ctx, d.Id()).Execute()
 	if err != nil {
-		diags := diag.FromErr(fmt.Errorf("an error occured while ListGroupUsers %s %s", d.Id(), err))
-		return diags
+		return fmt.Errorf("An error occured while ListGroupUsers %s %s", d.Id(), err)
 	}
 
-	var usersArray []ionoscloud.UserProperties
+	var usersArray = []ionoscloud.UserProperties{}
 	if len(*users.Items) > 0 {
 		for _, usr := range *users.Items {
 			usersArray = append(usersArray, *usr.Properties)
 		}
-		if err := d.Set("users", usersArray); err != nil {
-			diags := diag.FromErr(err)
-			return diags
-		}
-
+		d.Set("users", usersArray)
 	}
 
 	return nil
 }
 
-func resourceGroupUpdate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func resourceGroupUpdate(d *schema.ResourceData, meta interface{}) error {
 	client := meta.(*ionoscloud.APIClient)
 
 	tempCreateDataCenter := d.Get("create_datacenter").(bool)
@@ -324,16 +313,19 @@ func resourceGroupUpdate(ctx context.Context, d *schema.ResourceData, meta inter
 	newValueStr := newValue.(string)
 	groupReq.Properties.Name = &newValueStr
 
+	ctx, cancel := context.WithTimeout(context.Background(), *resourceDefaultTimeouts.Update)
+	if cancel != nil {
+		defer cancel()
+	}
+
 	_, apiResponse, err := client.UserManagementApi.UmGroupsPut(ctx, d.Id()).Group(groupReq).Execute()
 	if err != nil {
-		diags := diag.FromErr(fmt.Errorf("an error occured while patching a group ID %s %s", d.Id(), err))
-		return diags
+		return fmt.Errorf("An error occured while patching a group ID %s %s", d.Id(), err)
 	}
 	// Wait, catching any errors
-	_, errState := getStateChangeConf(meta, d, apiResponse.Header.Get("Location"), schema.TimeoutUpdate).WaitForStateContext(ctx)
+	_, errState := getStateChangeConf(meta, d, apiResponse.Header.Get("Location"), schema.TimeoutUpdate).WaitForState()
 	if errState != nil {
-		diags := diag.FromErr(errState)
-		return diags
+		return errState
 	}
 
 	//add users to group if any is provided
@@ -345,22 +337,25 @@ func resourceGroupUpdate(ctx context.Context, d *schema.ResourceData, meta inter
 
 		_, apiResponse, err := client.UserManagementApi.UmGroupsUsersPost(ctx, d.Id()).User(user).Execute()
 		if err != nil {
-			diags := diag.FromErr(fmt.Errorf("an error occured while adding %s user to group ID %s %s", usertoAdd, d.Id(), err))
-			return diags
+			return fmt.Errorf("An error occured while adding %s user to group ID %s %s", usertoAdd, d.Id(), err)
 		}
 
 		// Wait, catching any errors
-		_, errState := getStateChangeConf(meta, d, apiResponse.Header.Get("Location"), schema.TimeoutCreate).WaitForStateContext(ctx)
+		_, errState := getStateChangeConf(meta, d, apiResponse.Header.Get("Location"), schema.TimeoutCreate).WaitForState()
 		if errState != nil {
-			diags := diag.FromErr(errState)
-			return diags
+			return errState
 		}
 	}
-	return resourceGroupRead(ctx, d, meta)
+	return resourceGroupRead(d, meta)
 }
 
-func resourceGroupDelete(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func resourceGroupDelete(d *schema.ResourceData, meta interface{}) error {
 	client := meta.(*ionoscloud.APIClient)
+
+	ctx, cancel := context.WithTimeout(context.Background(), *resourceDefaultTimeouts.Delete)
+	if cancel != nil {
+		defer cancel()
+	}
 
 	_, apiResponse, err := client.UserManagementApi.UmGroupsDelete(ctx, d.Id()).Execute()
 	if err != nil {
@@ -370,21 +365,17 @@ func resourceGroupDelete(ctx context.Context, d *schema.ResourceData, meta inter
 
 		if err != nil {
 			if _, ok := err.(ionoscloud.GenericOpenAPIError); ok {
-				if apiResponse == nil || apiResponse.StatusCode != 404 {
-					diags := diag.FromErr(fmt.Errorf("an error occured while deleting a group %s %s", d.Id(), err))
-					return diags
+				if apiResponse == nil || apiResponse.Response.StatusCode != 404 {
+					return fmt.Errorf("an error occured while deleting a group %s %s", d.Id(), err)
 				}
 			}
 		}
 	}
 
 	// Wait, catching any errors
-	if apiResponse != nil {
-		_, errState := getStateChangeConf(meta, d, apiResponse.Header.Get("Location"), schema.TimeoutDelete).WaitForStateContext(ctx)
-		if errState != nil {
-			diags := diag.FromErr(errState)
-			return diags
-		}
+	_, errState := getStateChangeConf(meta, d, apiResponse.Header.Get("Location"), schema.TimeoutDelete).WaitForState()
+	if errState != nil {
+		return errState
 	}
 
 	d.SetId("")

@@ -109,23 +109,25 @@ func Provider() *schema.Provider {
 
 func providerConfigure(d *schema.ResourceData, terraformVersion string) (interface{}, diag.Diagnostics) {
 
+	var diags diag.Diagnostics
+
 	username, usernameOk := d.GetOk("username")
 	password, passwordOk := d.GetOk("password")
 	token, tokenOk := d.GetOk("token")
 
 	if !tokenOk {
 		if !usernameOk {
-			diags := diag.FromErr(fmt.Errorf("neither IonosCloud token, nor IonosCloud username has been provided"))
+			diags = diag.FromErr(fmt.Errorf("Neither IonosCloud token, nor IonosCloud username has been provided"))
 			return nil, diags
 		}
 
 		if !passwordOk {
-			diags := diag.FromErr(fmt.Errorf("neither IonosCloud token, nor IonosCloud password has been provided"))
+			diags = diag.FromErr(fmt.Errorf("Neither IonosCloud token, nor IonosCloud password has been provided"))
 			return nil, diags
 		}
 	} else {
 		if usernameOk || passwordOk {
-			diags := diag.FromErr(fmt.Errorf("only provide IonosCloud token OR IonosCloud username/password"))
+			diags = diag.FromErr(fmt.Errorf("Only provide IonosCloud token OR IonosCloud username/password."))
 			return nil, diags
 		}
 	}
@@ -142,11 +144,10 @@ func providerConfigure(d *schema.ResourceData, terraformVersion string) (interfa
 			newConfig.Host = parts[2]
 		}
 	}
-	// todo: add sdk version and provider version
 	newConfig.UserAgent = fmt.Sprintf("HashiCorp Terraform/%s (+https://www.terraform.io) Terraform Plugin SDK/%s", terraformVersion, meta.SDKVersionString())
 	newClient := ionoscloud.NewAPIClient(newConfig)
 
-	return newClient, nil
+	return newClient, diags
 }
 
 // cleanURL makes sure trailing slash does not corrupt the state
@@ -194,7 +195,7 @@ func resourceStateRefreshFunc(meta interface{}, path string) resource.StateRefre
 
 		fmt.Printf("[INFO] Checking PATH %s\n", path)
 		if path == "" {
-			return nil, "", fmt.Errorf("can not check a state when path is empty")
+			return nil, "", fmt.Errorf("Can not check a state when path is empty")
 		}
 
 		request, _, err := client.GetRequestStatus(context.Background(), path)
