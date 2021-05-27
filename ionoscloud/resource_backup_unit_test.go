@@ -6,8 +6,8 @@ import (
 	ionoscloud "github.com/ionos-cloud/sdk-go/v5"
 	"testing"
 
-	"github.com/hashicorp/terraform-plugin-sdk/helper/resource"
-	"github.com/hashicorp/terraform-plugin-sdk/terraform"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
 )
 
 func TestAccbackupUnit_Basic(t *testing.T) {
@@ -26,7 +26,7 @@ func TestAccbackupUnit_Basic(t *testing.T) {
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckbackupUnitExists("ionoscloud_backup_unit.example", &backupUnit),
 					resource.TestCheckResourceAttr("ionoscloud_backup_unit.example", "name", backupUnitName),
-					resource.TestCheckResourceAttr("ionoscloud_backup_unit.example", "email", "example@profitbricks.com"),
+					resource.TestCheckResourceAttr("ionoscloud_backup_unit.example", "email", "example@ionoscloud.com"),
 					resource.TestCheckResourceAttr("ionoscloud_backup_unit.example", "password", "DemoPassword123$"),
 				),
 			},
@@ -34,7 +34,7 @@ func TestAccbackupUnit_Basic(t *testing.T) {
 				Config: testAccCheckbackupUnitConfigUpdate,
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckbackupUnitExists("ionoscloud_backup_unit.example", &backupUnit),
-					resource.TestCheckResourceAttr("ionoscloud_backup_unit.example", "email", "example-updated@profitbricks.com"),
+					resource.TestCheckResourceAttr("ionoscloud_backup_unit.example", "email", "example-updated@ionoscloud.com"),
 					resource.TestCheckResourceAttr("ionoscloud_backup_unit.example", "password", "DemoPassword1234$"),
 				),
 			},
@@ -109,14 +109,14 @@ const testAccCheckbackupUnitConfigBasic = `
 resource "ionoscloud_backup_unit" "example" {
 	name        = "%s"
 	password    = "DemoPassword123$"
-	email       = "example@profitbricks.com"
+	email       = "example@ionoscloud.com"
 }
 `
 
 const testAccCheckbackupUnitConfigUpdate = `
 resource "ionoscloud_backup_unit" "example" {
 	name        = "example"
-	email       = "example-updated@profitbricks.com"
+	email       = "example-updated@ionoscloud.com"
 	password    = "DemoPassword1234$"
 }
 `

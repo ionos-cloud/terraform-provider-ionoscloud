@@ -3,19 +3,22 @@ package ionoscloud
 import (
 	"context"
 	"fmt"
-	"github.com/hashicorp/terraform-plugin-sdk/httpclient"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/meta"
+
+	//"github.com/hashicorp/terraform-plugin-sdk/v2/httpclient"
 	"log"
 	"strings"
 	"time"
 
-	"github.com/hashicorp/terraform-plugin-sdk/helper/resource"
-	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
-	"github.com/hashicorp/terraform-plugin-sdk/terraform"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
+
 	"github.com/ionos-cloud/sdk-go/v5"
 )
 
 // Provider returns a schema.Provider for ionoscloud.
-func Provider() terraform.ResourceProvider {
+func Provider() *schema.Provider {
 	provider := &schema.Provider{
 		Schema: map[string]*schema.Schema{
 			"username": {
@@ -86,8 +89,7 @@ func Provider() terraform.ResourceProvider {
 			"ionoscloud_k8s_node_pool":        dataSourceK8sNodePool(),
 		},
 	}
-
-	provider.ConfigureFunc = func(d *schema.ResourceData) (interface{}, error) {
+	provider.ConfigureContextFunc = func(ctx context.Context, d *schema.ResourceData) (interface{}, diag.Diagnostics) {
 
 		terraformVersion := provider.TerraformVersion
 
@@ -105,7 +107,9 @@ func Provider() terraform.ResourceProvider {
 	return provider
 }
 
-func providerConfigure(d *schema.ResourceData, terraformVersion string) (interface{}, error) {
+func providerConfigure(d *schema.ResourceData, terraformVersion string) (interface{}, diag.Diagnostics) {
+
+	var diags diag.Diagnostics
 
 	username, usernameOk := d.GetOk("username")
 	password, passwordOk := d.GetOk("password")
@@ -113,15 +117,18 @@ func providerConfigure(d *schema.ResourceData, terraformVersion string) (interfa
 
 	if !tokenOk {
 		if !usernameOk {
-			return nil, fmt.Errorf("Neither IonosCloud token, nor IonosCloud username has been provided")
+			diags = diag.FromErr(fmt.Errorf("Neither IonosCloud token, nor IonosCloud username has been provided"))
+			return nil, diags
 		}
 
 		if !passwordOk {
-			return nil, fmt.Errorf("Neither IonosCloud token, nor IonosCloud password has been provided")
+			diags = diag.FromErr(fmt.Errorf("Neither IonosCloud token, nor IonosCloud password has been provided"))
+			return nil, diags
 		}
 	} else {
 		if usernameOk || passwordOk {
-			return nil, fmt.Errorf("Only provide IonosCloud token OR IonosCloud username/password.")
+			diags = diag.FromErr(fmt.Errorf("Only provide IonosCloud token OR IonosCloud username/password."))
+			return nil, diags
 		}
 	}
 
@@ -137,10 +144,10 @@ func providerConfigure(d *schema.ResourceData, terraformVersion string) (interfa
 			newConfig.Host = parts[2]
 		}
 	}
-	newConfig.UserAgent = httpclient.TerraformUserAgent(terraformVersion)
+	newConfig.UserAgent = fmt.Sprintf("HashiCorp Terraform/%s (+https://www.terraform.io) Terraform Plugin SDK/%s", terraformVersion, meta.SDKVersionString())
 	newClient := ionoscloud.NewAPIClient(newConfig)
 
-	return newClient, nil
+	return newClient, diags
 }
 
 // cleanURL makes sure trailing slash does not corrupt the state
