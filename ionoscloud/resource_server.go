@@ -673,6 +673,10 @@ func resourceServerCreate(d *schema.ResourceData, meta interface{}) error {
 	firewallRules, _, err := client.NicApi.DatacentersServersNicsFirewallrulesGet(ctx, d.Get("datacenter_id").(string),
 		*server.Id, *(*server.Entities.Nics.Items)[0].Id).Execute()
 
+	if err != nil {
+		return fmt.Errorf("an error occurred while fetching firewall rules: %s", err)
+	}
+
 	if firewallRules.Items != nil {
 		if len(*firewallRules.Items) > 0 {
 			d.Set("firewallrule_id", *(*firewallRules.Items)[0].Id)
@@ -682,19 +686,24 @@ func resourceServerCreate(d *schema.ResourceData, meta interface{}) error {
 	if (*server.Entities.Nics.Items)[0].Id != nil {
 		err := d.Set("primary_nic", *(*server.Entities.Nics.Items)[0].Id)
 		if err != nil {
-			return fmt.Errorf("Error while setting primary nic %s: %s", d.Id(), err)
+			return fmt.Errorf("error while setting primary nic %s: %s", d.Id(), err)
 		}
 	}
 
-	if (*server.Entities.Nics.Items)[0].Properties.Ips != nil {
-		if len(*(*server.Entities.Nics.Items)[0].Properties.Ips) > 0 {
-			d.SetConnInfo(map[string]string{
-				"type":     "ssh",
-				"host":     (*(*server.Entities.Nics.Items)[0].Properties.Ips)[0],
-				"password": *(*request.Entities.Volumes.Items)[0].Properties.ImagePassword,
-			})
-		}
+	if (*server.Entities.Nics.Items)[0].Properties.Ips != nil &&
+		len(*(*server.Entities.Nics.Items)[0].Properties.Ips) > 0 &&
+		request.Entities.Volumes.Items != nil &&
+		len(*request.Entities.Volumes.Items) > 0 &&
+		(*request.Entities.Volumes.Items)[0].Properties != nil &&
+		(*request.Entities.Volumes.Items)[0].Properties.ImagePassword != nil {
+
+		d.SetConnInfo(map[string]string{
+			"type":     "ssh",
+			"host":     (*(*server.Entities.Nics.Items)[0].Properties.Ips)[0],
+			"password": *(*request.Entities.Volumes.Items)[0].Properties.ImagePassword,
+		})
 	}
+
 	return resourceServerRead(d, meta)
 }
 
