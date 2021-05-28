@@ -54,12 +54,6 @@ func resourceBackupUnit() *schema.Resource {
 func resourceBackupUnitCreate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	client := meta.(*ionoscloud.APIClient)
 
-	ctx, cancel := context.WithTimeout(context.Background(), *resourceDefaultTimeouts.Create)
-
-	if cancel != nil {
-		defer cancel()
-	}
-
 	backupUnitName := d.Get("name").(string)
 	backupUnitPassword := d.Get("password").(string)
 	backupUnitEmail := d.Get("email").(string)
@@ -106,12 +100,6 @@ func resourceBackupUnitCreate(ctx context.Context, d *schema.ResourceData, meta 
 func resourceBackupUnitRead(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 
 	client := meta.(*ionoscloud.APIClient)
-
-	ctx, cancel := context.WithTimeout(context.Background(), *resourceDefaultTimeouts.Default)
-
-	if cancel != nil {
-		defer cancel()
-	}
 
 	backupUnit, apiResponse, err := client.BackupUnitApi.BackupunitsFindById(ctx, d.Id()).Execute()
 
@@ -164,7 +152,6 @@ func resourceBackupUnitRead(ctx context.Context, d *schema.ResourceData, meta in
 
 func resourceBackupUnitUpdate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	client := meta.(*ionoscloud.APIClient)
-	var diags diag.Diagnostics
 
 	request := ionoscloud.BackupUnit{}
 	request.Properties = &ionoscloud.BackupUnitProperties{}
@@ -193,12 +180,6 @@ func resourceBackupUnitUpdate(ctx context.Context, d *schema.ResourceData, meta 
 		}
 	}
 
-	ctx, cancel := context.WithTimeout(context.Background(), *resourceDefaultTimeouts.Update)
-
-	if cancel != nil {
-		defer cancel()
-	}
-
 	_, apiResponse, err := client.BackupUnitApi.BackupunitsPut(ctx, d.Id()).BackupUnit(request).Execute()
 
 	if err != nil {
@@ -206,7 +187,8 @@ func resourceBackupUnitUpdate(ctx context.Context, d *schema.ResourceData, meta 
 			d.SetId("")
 			return nil
 		}
-		return diag.FromErr(fmt.Errorf("Error while updating backup unit %s: %s", d.Id(), err))
+		diags := diag.FromErr(fmt.Errorf("Error while updating backup unit %s: %s", d.Id(), err))
+		return diags
 	}
 
 	for {
@@ -216,7 +198,7 @@ func resourceBackupUnitUpdate(ctx context.Context, d *schema.ResourceData, meta 
 		backupUnitReady, rsErr := backupUnitReady(client, d, ctx)
 
 		if rsErr != nil {
-			diags = diag.FromErr(fmt.Errorf("Error while checking readiness status of backup unit %s: %s", d.Id(), rsErr))
+			diags := diag.FromErr(fmt.Errorf("Error while checking readiness status of backup unit %s: %s", d.Id(), rsErr))
 			return diags
 		}
 
@@ -232,11 +214,6 @@ func resourceBackupUnitUpdate(ctx context.Context, d *schema.ResourceData, meta 
 func resourceBackupUnitDelete(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	client := meta.(*ionoscloud.APIClient)
 
-	ctx, cancel := context.WithTimeout(context.Background(), *resourceDefaultTimeouts.Delete)
-
-	if cancel != nil {
-		defer cancel()
-	}
 	_, apiResponse, err := client.BackupUnitApi.BackupunitsDelete(ctx, d.Id()).Execute()
 
 	if err != nil {
