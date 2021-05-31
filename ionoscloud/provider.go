@@ -115,17 +115,17 @@ func providerConfigure(d *schema.ResourceData, terraformVersion string) (interfa
 
 	if !tokenOk {
 		if !usernameOk {
-			diags := diag.FromErr(fmt.Errorf("Neither IonosCloud token, nor IonosCloud username has been provided"))
+			diags := diag.FromErr(fmt.Errorf("neither IonosCloud token, nor IonosCloud username has been provided"))
 			return nil, diags
 		}
 
 		if !passwordOk {
-			diags := diag.FromErr(fmt.Errorf("Neither IonosCloud token, nor IonosCloud password has been provided"))
+			diags := diag.FromErr(fmt.Errorf("neither IonosCloud token, nor IonosCloud password has been provided"))
 			return nil, diags
 		}
 	} else {
 		if usernameOk || passwordOk {
-			diags := diag.FromErr(fmt.Errorf("Only provide IonosCloud token OR IonosCloud username/password."))
+			diags := diag.FromErr(fmt.Errorf("only provide IonosCloud token OR IonosCloud username/password"))
 			return nil, diags
 		}
 	}
@@ -194,7 +194,7 @@ func resourceStateRefreshFunc(meta interface{}, path string) resource.StateRefre
 
 		fmt.Printf("[INFO] Checking PATH %s\n", path)
 		if path == "" {
-			return nil, "", fmt.Errorf("Can not check a state when path is empty")
+			return nil, "", fmt.Errorf("can not check a state when path is empty")
 		}
 
 		request, _, err := client.GetRequestStatus(context.Background(), path)

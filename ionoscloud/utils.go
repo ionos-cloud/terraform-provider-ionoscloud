@@ -10,7 +10,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 )
 
-func resourceResourceImport(d *schema.ResourceData, meta interface{}) ([]*schema.ResourceData, error) {
+func resourceResourceImport(ctx context.Context, d *schema.ResourceData, meta interface{}) ([]*schema.ResourceData, error) {
 	parts := strings.Split(d.Id(), "/")
 	if len(parts) != 2 || parts[0] == "" || parts[1] == "" {
 		return nil, fmt.Errorf("Invalid import id %q. Expecting {datacenter}/{resource}", d.Id())
@@ -38,13 +38,8 @@ func resourceServerImport(d *schema.ResourceData, meta interface{}) ([]*schema.R
 	return []*schema.ResourceData{d}, nil
 }
 
-func resourceK8sClusterImport(d *schema.ResourceData, meta interface{}) ([]*schema.ResourceData, error) {
+func resourceK8sClusterImport(ctx context.Context, d *schema.ResourceData, meta interface{}) ([]*schema.ResourceData, error) {
 	client := meta.(*ionoscloud.APIClient)
-
-	ctx, cancel := context.WithTimeout(context.Background(), *resourceDefaultTimeouts.Default)
-	if cancel != nil {
-		defer cancel()
-	}
 
 	cluster, apiResponse, err := client.KubernetesApi.K8sFindByClusterId(ctx, d.Id()).Execute()
 
@@ -158,13 +153,8 @@ func resourceK8sNodepoolImport(d *schema.ResourceData, meta interface{}) ([]*sch
 	return []*schema.ResourceData{d}, nil
 }
 
-func resourcePrivateCrossConnectImport(d *schema.ResourceData, meta interface{}) ([]*schema.ResourceData, error) {
+func resourcePrivateCrossConnectImport(ctx context.Context, d *schema.ResourceData, meta interface{}) ([]*schema.ResourceData, error) {
 	client := meta.(*ionoscloud.APIClient)
-
-	ctx, cancel := context.WithTimeout(context.Background(), *resourceDefaultTimeouts.Default)
-	if cancel != nil {
-		defer cancel()
-	}
 
 	pcc, apiResponse, err := client.PrivateCrossConnectApi.PccsFindById(ctx, d.Id()).Execute()
 
@@ -259,7 +249,7 @@ func resourceBackupUnitImport(ctx context.Context, d *schema.ResourceData, meta 
 	return []*schema.ResourceData{d}, nil
 }
 
-func resourceS3KeyImport(d *schema.ResourceData, meta interface{}) ([]*schema.ResourceData, error) {
+func resourceS3KeyImport(ctx context.Context, d *schema.ResourceData, meta interface{}) ([]*schema.ResourceData, error) {
 	parts := strings.Split(d.Id(), "/")
 
 	if len(parts) != 2 || parts[0] == "" || parts[1] == "" {
@@ -286,7 +276,7 @@ func resourceS3KeyImport(d *schema.ResourceData, meta interface{}) ([]*schema.Re
 	return []*schema.ResourceData{d}, nil
 }
 
-func resourceFirewallImport(d *schema.ResourceData, meta interface{}) ([]*schema.ResourceData, error) {
+func resourceFirewallImport(ctx context.Context, d *schema.ResourceData, meta interface{}) ([]*schema.ResourceData, error) {
 	parts := strings.Split(d.Id(), "/")
 	if len(parts) != 4 || parts[0] == "" || parts[1] == "" {
 		return nil, fmt.Errorf("Invalid import id %q. Expecting {datacenter}/{server}/{nic}/{firewall}", d.Id())
@@ -300,7 +290,7 @@ func resourceFirewallImport(d *schema.ResourceData, meta interface{}) ([]*schema
 	return []*schema.ResourceData{d}, nil
 }
 
-func resourceNicImport(d *schema.ResourceData, meta interface{}) ([]*schema.ResourceData, error) {
+func resourceNicImport(ctx context.Context, d *schema.ResourceData, meta interface{}) ([]*schema.ResourceData, error) {
 	parts := strings.Split(d.Id(), "/")
 	if len(parts) != 3 || parts[0] == "" || parts[1] == "" {
 		return nil, fmt.Errorf("Invalid import id %q. Expecting {datacenter}/{server}/{nic}", d.Id())
