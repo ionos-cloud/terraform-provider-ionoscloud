@@ -60,7 +60,7 @@ func testAccCheckUserDestroyCheck(s *terraform.State) error {
 		}
 		_, apiResponse, err := client.UserManagementApi.UmUsersFindById(ctx, rs.Primary.ID).Execute()
 
-		if err == nil || apiResponse == nil || apiResponse.Response.StatusCode != 404 {
+		if err == nil || apiResponse == nil || apiResponse.StatusCode != 404 {
 			return fmt.Errorf("user still exists %s %s", rs.Primary.ID, err)
 		}
 	}

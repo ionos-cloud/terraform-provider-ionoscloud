@@ -55,7 +55,7 @@ func testAccCheckShareDestroyCheck(s *terraform.State) error {
 
 		_, apiResponse, err := client.UserManagementApi.UmGroupsSharesFindByResourceId(ctx, grpId, resourceId).Execute()
 
-		if err == nil || apiResponse == nil || apiResponse.Response.StatusCode != 404 {
+		if err == nil || apiResponse == nil || apiResponse.StatusCode != 404 {
 			var payload string
 			var status int
 			if apiResponse != nil {

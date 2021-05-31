@@ -54,7 +54,7 @@ func testAccCheckGroupDestroyCheck(s *terraform.State) error {
 		}
 		_, apiResponse, err := client.UserManagementApi.UmGroupsFindById(ctx, rs.Primary.ID).Execute()
 
-		if err == nil || apiResponse == nil || apiResponse.Response.StatusCode != 404 {
+		if err == nil || apiResponse == nil || apiResponse.StatusCode != 404 {
 			var payload string
 			if apiResponse != nil {
 				payload = string(apiResponse.Payload)

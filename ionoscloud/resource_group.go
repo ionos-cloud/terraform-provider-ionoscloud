@@ -183,7 +183,7 @@ func resourceGroupRead(ctx context.Context, d *schema.ResourceData, meta interfa
 	group, apiResponse, err := client.UserManagementApi.UmGroupsFindById(ctx, d.Id()).Execute()
 
 	if err != nil {
-		if apiResponse != nil && apiResponse.Response.StatusCode == 404 {
+		if apiResponse != nil && apiResponse.StatusCode == 404 {
 			d.SetId("")
 			return nil
 		}
@@ -370,7 +370,7 @@ func resourceGroupDelete(ctx context.Context, d *schema.ResourceData, meta inter
 
 		if err != nil {
 			if _, ok := err.(ionoscloud.GenericOpenAPIError); ok {
-				if apiResponse == nil || apiResponse.Response.StatusCode != 404 {
+				if apiResponse == nil || apiResponse.StatusCode != 404 {
 					diags := diag.FromErr(fmt.Errorf("an error occured while deleting a group %s %s", d.Id(), err))
 					return diags
 				}
