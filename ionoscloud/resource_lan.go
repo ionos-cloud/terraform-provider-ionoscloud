@@ -3,6 +3,7 @@ package ionoscloud
 import (
 	"context"
 	"fmt"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 	"log"
 	"time"
@@ -13,12 +14,12 @@ import (
 
 func resourceLan() *schema.Resource {
 	return &schema.Resource{
-		Create: resourceLanCreate,
-		Read:   resourceLanRead,
-		Update: resourceLanUpdate,
-		Delete: resourceLanDelete,
+		CreateContext: resourceLanCreate,
+		ReadContext:   resourceLanRead,
+		UpdateContext: resourceLanUpdate,
+		DeleteContext: resourceLanDelete,
 		Importer: &schema.ResourceImporter{
-			State: resourceResourceImport,
+			StateContext: resourceResourceImport,
 		},
 		Schema: map[string]*schema.Schema{
 
@@ -43,14 +44,17 @@ func resourceLan() *schema.Resource {
 			"ip_failover": {
 				Type:     schema.TypeList,
 				Optional: true,
+				Computed: true,
 				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{
 						"ip": {
 							Type:     schema.TypeString,
+							Optional: true,
 							Computed: true,
 						},
 						"nic_uuid": {
 							Type:     schema.TypeString,
+							Optional: true,
 							Computed: true,
 						},
 					},
@@ -61,7 +65,7 @@ func resourceLan() *schema.Resource {
 	}
 }
 
-func resourceLanCreate(d *schema.ResourceData, meta interface{}) error {
+func resourceLanCreate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	client := meta.(*ionoscloud.APIClient)
 	public := d.Get("public").(bool)
 	request := ionoscloud.LanPost{
@@ -82,16 +86,13 @@ func resourceLanCreate(d *schema.ResourceData, meta interface{}) error {
 		request.Properties.Pcc = &pccID
 	}
 
-	ctx, cancel := context.WithTimeout(context.Background(), *resourceDefaultTimeouts.Create)
-	if cancel != nil {
-		defer cancel()
-	}
 	dcid := d.Get("datacenter_id").(string)
 	rsp, apiResponse, err := client.LanApi.DatacentersLansPost(ctx, dcid).Lan(request).Execute()
 
 	if err != nil {
 		d.SetId("")
-		return fmt.Errorf("An error occured while creating LAN: %s", err)
+		diags := diag.FromErr(fmt.Errorf("an error occured while creating LAN: %s", err))
+		return diags
 	}
 
 	log.Printf("[DEBUG] LAN ID: %s", *rsp.Id)
@@ -102,40 +103,39 @@ func resourceLanCreate(d *schema.ResourceData, meta interface{}) error {
 	log.Printf("[INFO] LAN ID: %s", d.Id())
 
 	// Wait, catching any errors
-	_, errState := getStateChangeConf(meta, d, apiResponse.Header.Get("Location"), schema.TimeoutCreate).WaitForState()
+	_, errState := getStateChangeConf(meta, d, apiResponse.Header.Get("Location"), schema.TimeoutCreate).WaitForStateContext(ctx)
 	if errState != nil {
 		if IsRequestFailed(err) {
 			// Request failed, so resource was not created, delete resource from state file
 			d.SetId("")
 		}
-		return errState
+		diags := diag.FromErr(errState)
+		return diags
 	}
 
 	for {
 		log.Printf("[INFO] Waiting for LAN %s to be available...", *rsp.Id)
 		time.Sleep(5 * time.Second)
 
-		clusterReady, rsErr := lanAvailable(client, d)
+		clusterReady, rsErr := lanAvailable(ctx, client, d)
 
 		if rsErr != nil {
-			return fmt.Errorf("Error while checking readiness status of LAN %s: %s", *rsp.Id, rsErr)
+			diags := diag.FromErr(fmt.Errorf("error while checking readiness status of LAN %s: %s", *rsp.Id, rsErr))
+			return diags
 		}
 
-		if clusterReady && rsErr == nil {
+		if clusterReady {
 			log.Printf("[INFO] LAN ready: %s", d.Id())
 			break
 		}
 	}
 
-	return resourceLanRead(d, meta)
+	return resourceLanRead(ctx, d, meta)
 }
 
-func resourceLanRead(d *schema.ResourceData, meta interface{}) error {
+func resourceLanRead(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	client := meta.(*ionoscloud.APIClient)
-	ctx, cancel := context.WithTimeout(context.Background(), *resourceDefaultTimeouts.Default)
-	if cancel != nil {
-		defer cancel()
-	}
+
 	dcid := d.Get("datacenter_id").(string)
 	rsp, apiResponse, err := client.LanApi.DatacentersLansFindById(ctx, dcid, d.Id()).Execute()
 
@@ -147,22 +147,52 @@ func resourceLanRead(d *schema.ResourceData, meta interface{}) error {
 				return nil
 			}
 		}
-
-		return fmt.Errorf("An error occured while fetching a LAN %s: %s", d.Id(), err)
+		diags := diag.FromErr(fmt.Errorf("an error occured while fetching a LAN %s: %s", d.Id(), err))
+		return diags
 	}
 
-	d.Set("public", *rsp.Properties.Public)
-	d.Set("name", *rsp.Properties.Name)
-	d.Set("ip_failover", *rsp.Properties.IpFailover)
-	d.Set("datacenter_id", d.Get("datacenter_id").(string))
+	if rsp.Properties.Public != nil {
+		if err := d.Set("public", *rsp.Properties.Public); err != nil {
+			diags := diag.FromErr(err)
+			return diags
+		}
+	}
+
+	if rsp.Properties.Name != nil {
+		if err := d.Set("name", *rsp.Properties.Name); err != nil {
+			diags := diag.FromErr(err)
+			return diags
+		}
+	}
+
+	if rsp.Properties.IpFailover != nil && len(*rsp.Properties.IpFailover) > 0 {
+		if err := d.Set("ip_failover", []map[string]string{
+			{
+				"ip":       *(*rsp.Properties.IpFailover)[0].Ip,
+				"nic_uuid": *(*rsp.Properties.IpFailover)[0].NicUuid,
+			},
+		}); err != nil {
+			diags := diag.FromErr(err)
+			return diags
+		}
+	}
+
+	if err := d.Set("datacenter_id", d.Get("datacenter_id").(string)); err != nil {
+		diags := diag.FromErr(err)
+		return diags
+	}
+
 	if rsp.Properties.Pcc != nil {
-		d.Set("pcc", *rsp.Properties.Pcc)
+		if err := d.Set("pcc", *rsp.Properties.Pcc); err != nil {
+			diags := diag.FromErr(err)
+			return diags
+		}
 	}
 	log.Printf("[INFO] LAN %s found: %+v", d.Id(), rsp)
 	return nil
 }
 
-func resourceLanUpdate(d *schema.ResourceData, meta interface{}) error {
+func resourceLanUpdate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	client := meta.(*ionoscloud.APIClient)
 	properties := &ionoscloud.LanProperties{}
 	newValue := d.Get("public")
@@ -185,46 +215,37 @@ func resourceLanUpdate(d *schema.ResourceData, meta interface{}) error {
 		}
 	}
 
-	if properties != nil {
-		ctx, cancel := context.WithTimeout(context.Background(), *resourceDefaultTimeouts.Update)
-		if cancel != nil {
-			defer cancel()
-		}
-		dcid := d.Get("datacenter_id").(string)
-		rsp, _, err := client.LanApi.DatacentersLansPatch(ctx, dcid, d.Id()).Lan(*properties).Execute()
-		if err != nil {
-			return fmt.Errorf("An error occured while patching a lan ID %s %s", d.Id(), err)
-		}
-
-		for {
-			log.Printf("[INFO] Waiting for LAN %s to be available...", d.Id())
-			time.Sleep(5 * time.Second)
-
-			clusterReady, rsErr := lanAvailable(client, d)
-
-			if rsErr != nil {
-				return fmt.Errorf("Error while checking readiness status of LAN %s: %s", d.Id(), rsErr)
-			}
-
-			if clusterReady && rsErr == nil {
-				log.Printf("[INFO] LAN %s ready: %+v", d.Id(), rsp)
-				break
-			}
-		}
-
+	dcid := d.Get("datacenter_id").(string)
+	rsp, _, err := client.LanApi.DatacentersLansPatch(ctx, dcid, d.Id()).Lan(*properties).Execute()
+	if err != nil {
+		diags := diag.FromErr(fmt.Errorf("an error occured while patching a lan ID %s %s", d.Id(), err))
+		return diags
 	}
 
-	return resourceLanRead(d, meta)
+	for {
+		log.Printf("[INFO] Waiting for LAN %s to be available...", d.Id())
+		time.Sleep(5 * time.Second)
+
+		clusterReady, rsErr := lanAvailable(ctx, client, d)
+
+		if rsErr != nil {
+			diags := diag.FromErr(fmt.Errorf("error while checking readiness status of LAN %s: %s", d.Id(), rsErr))
+			return diags
+		}
+
+		if clusterReady {
+			log.Printf("[INFO] LAN %s ready: %+v", d.Id(), rsp)
+			break
+		}
+	}
+
+	return resourceLanRead(ctx, d, meta)
 }
 
-func resourceLanDelete(d *schema.ResourceData, meta interface{}) error {
+func resourceLanDelete(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	client := meta.(*ionoscloud.APIClient)
 	dcid := d.Get("datacenter_id").(string)
 
-	ctx, cancel := context.WithTimeout(context.Background(), *resourceDefaultTimeouts.Delete)
-	if cancel != nil {
-		defer cancel()
-	}
 	_, _, err := client.LanApi.DatacentersLansDelete(ctx, dcid, d.Id()).Execute()
 
 	if err != nil {
@@ -234,7 +255,8 @@ func resourceLanDelete(d *schema.ResourceData, meta interface{}) error {
 
 		if err != nil {
 			if apiResponse == nil || apiResponse.Response.StatusCode != 404 {
-				return fmt.Errorf("an error occured while deleting a lan dcId %s ID %s %s", d.Get("datacenter_id").(string), d.Id(), err)
+				diags := diag.FromErr(fmt.Errorf("an error occured while deleting a lan dcId %s ID %s %s", d.Get("datacenter_id").(string), d.Id(), err))
+				return diags
 			}
 		}
 	}
@@ -243,13 +265,14 @@ func resourceLanDelete(d *schema.ResourceData, meta interface{}) error {
 		log.Printf("[INFO] Waiting for LAN %s to be deleted...", d.Id())
 		time.Sleep(5 * time.Second)
 
-		lDeleted, dsErr := lanDeleted(client, d)
+		lDeleted, dsErr := lanDeleted(ctx, client, d)
 
 		if dsErr != nil {
-			return fmt.Errorf("Error while checking deletion status of LAN %s: %s", d.Id(), dsErr)
+			diags := diag.FromErr(fmt.Errorf("error while checking deletion status of LAN %s: %s", d.Id(), dsErr))
+			return diags
 		}
 
-		if lDeleted && dsErr == nil {
+		if lDeleted {
 			log.Printf("[INFO] Successfully deleted LAN: %s", d.Id())
 			break
 		}
@@ -259,27 +282,20 @@ func resourceLanDelete(d *schema.ResourceData, meta interface{}) error {
 	return nil
 }
 
-func lanAvailable(client *ionoscloud.APIClient, d *schema.ResourceData) (bool, error) {
-	ctx, cancel := context.WithTimeout(context.Background(), *resourceDefaultTimeouts.Default)
-	if cancel != nil {
-		defer cancel()
-	}
+func lanAvailable(ctx context.Context, client *ionoscloud.APIClient, d *schema.ResourceData) (bool, error) {
+
 	dcid := d.Get("datacenter_id").(string)
 	rsp, _, err := client.LanApi.DatacentersLansFindById(ctx, dcid, d.Id()).Execute()
 
 	log.Printf("[INFO] Current status for LAN %s: %+v", d.Id(), rsp)
 
 	if err != nil {
-		return true, fmt.Errorf("Error checking LAN status: %s", err)
+		return true, fmt.Errorf("error checking LAN status: %s", err)
 	}
 	return *rsp.Metadata.State == "AVAILABLE", nil
 }
 
-func lanDeleted(client *ionoscloud.APIClient, d *schema.ResourceData) (bool, error) {
-	ctx, cancel := context.WithTimeout(context.Background(), *resourceDefaultTimeouts.Default)
-	if cancel != nil {
-		defer cancel()
-	}
+func lanDeleted(ctx context.Context, client *ionoscloud.APIClient, d *schema.ResourceData) (bool, error) {
 	dcid := d.Get("datacenter_id").(string)
 	rsp, apiResponse, err := client.LanApi.DatacentersLansFindById(ctx, dcid, d.Id()).Execute()
 
