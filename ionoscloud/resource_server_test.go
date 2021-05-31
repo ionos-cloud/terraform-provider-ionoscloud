@@ -3,7 +3,7 @@ package ionoscloud
 import (
 	"context"
 	"fmt"
-	ionoscloud "github.com/ionos-cloud/sdk-go/v5"
+	ionoscloud "github.com/ionos-cloud/sdk-go/v6"
 	"testing"
 
 	"github.com/hashicorp/terraform-plugin-sdk/helper/resource"
@@ -51,7 +51,8 @@ func TestAccServer_Basic(t *testing.T) {
 }
 
 func testAccCheckServerDestroyCheck(s *terraform.State) error {
-	client := testAccProvider.Meta().(SdkBundle).Client
+	client := testAccProvider.Meta().(*ionoscloud.APIClient)
+
 	for _, rs := range s.RootModule().Resources {
 		if rs.Type != "ionoscloud_datacenter" {
 			continue
@@ -67,12 +68,13 @@ func testAccCheckServerDestroyCheck(s *terraform.State) error {
 
 		_, apiResponse, err := client.ServersApi.DatacentersServersFindById(ctx, dcId, rs.Primary.ID).Execute()
 
-		if _, ok := err.(ionoscloud.GenericOpenAPIError); ok {
-			if apiResponse.Response.StatusCode != 404 {
-				return fmt.Errorf("Server still exists %s %s", rs.Primary.ID, string(apiResponse.Payload))
+		if err != nil {
+			if apiResponse == nil || apiResponse.Response.StatusCode != 404 {
+				return fmt.Errorf("unable to fetch server %s: %s", rs.Primary.ID, err)
 			}
 		} else {
-			return fmt.Errorf("Unable to fetching Server %s %s", rs.Primary.ID, err)
+			return fmt.Errorf("server still exists %s", rs.Primary.ID)
+
 		}
 	}
 
@@ -86,7 +88,7 @@ func testAccCheckServerAttributes(n string, name string) resource.TestCheckFunc 
 			return fmt.Errorf("testAccCheckServerAttributes: Not found: %s", n)
 		}
 		if rs.Primary.Attributes["name"] != name {
-			return fmt.Errorf("Bad name: %s", rs.Primary.Attributes["name"])
+			return fmt.Errorf("bad name: %s", rs.Primary.Attributes["name"])
 		}
 
 		return nil
@@ -95,7 +97,8 @@ func testAccCheckServerAttributes(n string, name string) resource.TestCheckFunc 
 
 func testAccCheckServerExists(n string, server *ionoscloud.Server) resource.TestCheckFunc {
 	return func(s *terraform.State) error {
-		client := testAccProvider.Meta().(SdkBundle).Client
+		client := testAccProvider.Meta().(*ionoscloud.APIClient)
+
 		rs, ok := s.RootModule().Resources[n]
 
 		if !ok {
@@ -103,7 +106,7 @@ func testAccCheckServerExists(n string, server *ionoscloud.Server) resource.Test
 		}
 
 		if rs.Primary.ID == "" {
-			return fmt.Errorf("No Record ID is set")
+			return fmt.Errorf("no Record ID is set")
 		}
 
 		ctx, cancel := context.WithTimeout(context.Background(), *resourceDefaultTimeouts.Default)
@@ -115,7 +118,7 @@ func testAccCheckServerExists(n string, server *ionoscloud.Server) resource.Test
 		foundServer, _, err := client.ServersApi.DatacentersServersFindById(ctx, rs.Primary.Attributes["datacenter_id"], rs.Primary.ID).Execute()
 
 		if err != nil {
-			return fmt.Errorf("Error occured while fetching Server: %s", rs.Primary.ID)
+			return fmt.Errorf("error occured while fetching Server: %s", rs.Primary.ID)
 		}
 		if *foundServer.Id != rs.Primary.ID {
 			return fmt.Errorf("Record not found")

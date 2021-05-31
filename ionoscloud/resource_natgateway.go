@@ -4,7 +4,7 @@ import (
 	"context"
 	"fmt"
 	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
-	ionoscloud "github.com/ionos-cloud/sdk-go/v5"
+	ionoscloud "github.com/ionos-cloud/sdk-go/v6"
 	"log"
 )
 
@@ -64,7 +64,7 @@ func resourceNatGateway() *schema.Resource {
 }
 
 func resourceNatGatewayCreate(d *schema.ResourceData, meta interface{}) error {
-	client := meta.(SdkBundle).Client
+	client := meta.(*ionoscloud.APIClient)
 
 	name := d.Get("name").(string)
 
@@ -139,7 +139,7 @@ func resourceNatGatewayCreate(d *schema.ResourceData, meta interface{}) error {
 
 	if err != nil {
 		d.SetId("")
-		return fmt.Errorf("Error creating natGateway: %s", err)
+		return fmt.Errorf("error creating natGateway: %s", err)
 	}
 
 	d.SetId(*natGatewayResp.Id)
@@ -158,7 +158,7 @@ func resourceNatGatewayCreate(d *schema.ResourceData, meta interface{}) error {
 }
 
 func resourceNatGatewayRead(d *schema.ResourceData, meta interface{}) error {
-	client := meta.(SdkBundle).Client
+	client := meta.(*ionoscloud.APIClient)
 
 	dcId := d.Get("datacenter_id").(string)
 
@@ -185,14 +185,14 @@ func resourceNatGatewayRead(d *schema.ResourceData, meta interface{}) error {
 	if natGateway.Properties.Name != nil {
 		err := d.Set("name", *natGateway.Properties.Name)
 		if err != nil {
-			return fmt.Errorf("Error while setting name property for nat gateway %s: %s", d.Id(), err)
+			return fmt.Errorf("error while setting name property for nat gateway %s: %s", d.Id(), err)
 		}
 	}
 
 	if natGateway.Properties.PublicIps != nil {
 		err := d.Set("public_ips", *natGateway.Properties.PublicIps)
 		if err != nil {
-			return fmt.Errorf("Error while setting public_ips property for nat gateway %s: %s", d.Id(), err)
+			return fmt.Errorf("error while setting public_ips property for nat gateway %s: %s", d.Id(), err)
 		}
 	}
 
@@ -216,14 +216,14 @@ func resourceNatGatewayRead(d *schema.ResourceData, meta interface{}) error {
 
 	if len(natGatewayLans) > 0 {
 		if err := d.Set("lans", natGatewayLans); err != nil {
-			return fmt.Errorf("Error while setting lans property for nat gateway %s: %s", d.Id(), err)
+			return fmt.Errorf("error while setting lans property for nat gateway %s: %s", d.Id(), err)
 		}
 	}
 	return nil
 }
 
 func resourceNatGatewayUpdate(d *schema.ResourceData, meta interface{}) error {
-	client := meta.(SdkBundle).Client
+	client := meta.(*ionoscloud.APIClient)
 	request := ionoscloud.NatGateway{
 		Properties: &ionoscloud.NatGatewayProperties{},
 	}
@@ -297,7 +297,7 @@ func resourceNatGatewayUpdate(d *schema.ResourceData, meta interface{}) error {
 	_, apiResponse, err := client.NATGatewaysApi.DatacentersNatgatewaysPatch(ctx, dcId, d.Id()).NatGatewayProperties(*request.Properties).Execute()
 
 	if err != nil {
-		return fmt.Errorf("An error occured while updating a nat gateway ID %s %s", d.Id(), err)
+		return fmt.Errorf("an error occured while updating a nat gateway ID %s %s", d.Id(), err)
 	}
 
 	_, errState := getStateChangeConf(meta, d, apiResponse.Header.Get("Location"), schema.TimeoutUpdate).WaitForState()
@@ -309,7 +309,7 @@ func resourceNatGatewayUpdate(d *schema.ResourceData, meta interface{}) error {
 }
 
 func resourceNatGatewayDelete(d *schema.ResourceData, meta interface{}) error {
-	client := meta.(SdkBundle).Client
+	client := meta.(*ionoscloud.APIClient)
 
 	dcId := d.Get("datacenter_id").(string)
 
@@ -322,7 +322,7 @@ func resourceNatGatewayDelete(d *schema.ResourceData, meta interface{}) error {
 	_, apiResponse, err := client.NATGatewaysApi.DatacentersNatgatewaysDelete(ctx, dcId, d.Id()).Execute()
 
 	if err != nil {
-		return fmt.Errorf("An error occured while deleting a nat gateway %s %s", d.Id(), err)
+		return fmt.Errorf("an error occured while deleting a nat gateway %s %s", d.Id(), err)
 	}
 
 	// Wait, catching any errors

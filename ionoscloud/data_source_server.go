@@ -4,10 +4,9 @@ import (
 	"context"
 	"errors"
 	"fmt"
-	ionoscloud "github.com/ionos-cloud/sdk-go/v5"
-	"strings"
-
 	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
+	"github.com/hashicorp/terraform-plugin-sdk/helper/validation"
+	ionoscloud "github.com/ionos-cloud/sdk-go/v6"
 )
 
 func dataSourceServer() *schema.Resource {
@@ -19,8 +18,9 @@ func dataSourceServer() *schema.Resource {
 				Optional: true,
 			},
 			"datacenter_id": {
-				Type:     schema.TypeString,
-				Required: true,
+				Type:         schema.TypeString,
+				Required:     true,
+				ValidateFunc: validation.All(validation.StringIsNotWhiteSpace),
 			},
 			"id": {
 				Type:     schema.TypeString,
@@ -559,14 +559,16 @@ func setServerData(d *schema.ResourceData, server *ionoscloud.Server, token *ion
 	}
 
 	if token != nil {
-		d.Set("token", *token.Token)
+		if err := d.Set("token", *token.Token); err != nil {
+			return err
+		}
 	}
 
 	return nil
 }
 
 func dataSourceServerRead(d *schema.ResourceData, meta interface{}) error {
-	client := meta.(SdkBundle).Client
+	client := meta.(*ionoscloud.APIClient)
 
 	datacenterId, dcIdOk := d.GetOk("datacenter_id")
 	if !dcIdOk {
@@ -605,21 +607,25 @@ func dataSourceServerRead(d *schema.ResourceData, meta interface{}) error {
 			return fmt.Errorf("an error occurred while fetching servers: %s", err.Error())
 		}
 
-		for _, s := range *servers.Items {
-			if strings.Contains(*s.Properties.Name, name.(string)) {
-				/* server found */
-				server, _, err = client.ServersApi.DatacentersServersFindById(ctx, datacenterId.(string), *s.Id).Execute()
-				if err != nil {
-					return fmt.Errorf("an error occurred while fetching the server with ID %s: %s", *s.Id, err)
+		found := false
+		if servers.Items != nil {
+			for _, s := range *servers.Items {
+				if s.Properties.Name != nil && *s.Properties.Name == name.(string) {
+					/* server found */
+					server, _, err = client.ServersApi.DatacentersServersFindById(ctx, datacenterId.(string), *s.Id).Execute()
+					if err != nil {
+						return fmt.Errorf("an error occurred while fetching the server with ID %s: %s", *s.Id, err)
+					}
+					found = true
+					break
 				}
-				break
 			}
 		}
 
-	}
+		if !found {
+			return errors.New("server not found")
+		}
 
-	if &server == nil {
-		return errors.New("server not found")
 	}
 
 	var token = ionoscloud.Token{}

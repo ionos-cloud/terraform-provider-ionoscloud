@@ -3,7 +3,7 @@ package ionoscloud
 import (
 	"context"
 	"fmt"
-	ionoscloud "github.com/ionos-cloud/sdk-go/v5"
+	ionoscloud "github.com/ionos-cloud/sdk-go/v6"
 	"testing"
 
 	"github.com/hashicorp/terraform-plugin-sdk/helper/resource"
@@ -41,8 +41,7 @@ func TestAccLoadbalancer_Basic(t *testing.T) {
 }
 
 func testAccCheckLoadbalancerDestroyCheck(s *terraform.State) error {
-	// todo fix test error: the loadbalancer want to set the lan from nic resource 3 and the error is that the plan from nic differs from the plan from loadbalaner (diff: lan: "3" => "2")
-	client := testAccProvider.Meta().(SdkBundle).Client
+	client := testAccProvider.Meta().(*ionoscloud.APIClient)
 
 	ctx, _ := context.WithTimeout(context.Background(), *resourceDefaultTimeouts.Delete)
 	for _, rs := range s.RootModule().Resources {
@@ -57,11 +56,11 @@ func testAccCheckLoadbalancerDestroyCheck(s *terraform.State) error {
 			_, apiResponse, err := client.DataCentersApi.DatacentersDelete(ctx, dcId).Execute()
 
 			if apiError, ok := err.(ionoscloud.GenericOpenAPIError); ok {
-				if apiResponse.Response.StatusCode != 404 {
+				if apiResponse == nil || apiResponse.Response.StatusCode != 404 {
 					return fmt.Errorf("loadbalancer still exists %s %s", rs.Primary.ID, apiError)
 				}
 			} else {
-				return fmt.Errorf("Unable to fetching loadbalancer %s %s", rs.Primary.ID, err)
+				return fmt.Errorf("unable to fetching loadbalancer %s %s", rs.Primary.ID, err)
 			}
 		}
 	}
@@ -76,7 +75,7 @@ func testAccCheckLoadbalancerAttributes(n string, name string) resource.TestChec
 			return fmt.Errorf("testAccCheckLoadbalancerAttributes: Not found: %s", n)
 		}
 		if rs.Primary.Attributes["name"] != name {
-			return fmt.Errorf("Bad name: %s", rs.Primary.Attributes["name"])
+			return fmt.Errorf("bad name: %s", rs.Primary.Attributes["name"])
 		}
 
 		return nil
@@ -85,7 +84,7 @@ func testAccCheckLoadbalancerAttributes(n string, name string) resource.TestChec
 
 func testAccCheckLoadbalancerExists(n string, loadbalancer *ionoscloud.Loadbalancer) resource.TestCheckFunc {
 	return func(s *terraform.State) error {
-		client := testAccProvider.Meta().(SdkBundle).Client
+		client := testAccProvider.Meta().(*ionoscloud.APIClient)
 		rs, ok := s.RootModule().Resources[n]
 
 		if !ok {
@@ -93,7 +92,7 @@ func testAccCheckLoadbalancerExists(n string, loadbalancer *ionoscloud.Loadbalan
 		}
 
 		if rs.Primary.ID == "" {
-			return fmt.Errorf("No Record ID is set")
+			return fmt.Errorf("no Record ID is set")
 		}
 
 		ctx, _ := context.WithTimeout(context.Background(), *resourceDefaultTimeouts.Default)
@@ -101,7 +100,7 @@ func testAccCheckLoadbalancerExists(n string, loadbalancer *ionoscloud.Loadbalan
 		foundLB, _, err := client.LoadBalancersApi.DatacentersLoadbalancersFindById(ctx, dcId, rs.Primary.ID).Execute()
 
 		if err != nil {
-			return fmt.Errorf("Error occured while fetching Loadbalancer: %s", rs.Primary.ID)
+			return fmt.Errorf("error occured while fetching Loadbalancer: %s", rs.Primary.ID)
 		}
 		if *foundLB.Id != rs.Primary.ID {
 			return fmt.Errorf("Record not found")
@@ -127,13 +126,18 @@ resource "ionoscloud_server" "webserver" {
   ram = 1024
   availability_zone = "ZONE_1"
   cpu_family = "AMD_OPTERON"
+<<<<<<< HEAD
 	image ="81e054dd-a347-11eb-b70c-7ade62b52cc0"
 	image_password = "K3tTj8G14a3EgKyNeeiY"
+=======
+  image_name = "ubuntu-16.04"
+  image_password = "K3tTj8G14a3EgKyNeeiY"
+>>>>>>> master
   volume {
     name = "system"
     size = 14
     disk_type = "SSD"
-}
+  }
   nic {
     lan = "1"
     dhcp = true
@@ -144,10 +148,13 @@ resource "ionoscloud_server" "webserver" {
 resource "ionoscloud_nic" "database_nic" {
   datacenter_id = "${ionoscloud_datacenter.foobar.id}"
   server_id = "${ionoscloud_server.webserver.id}"
-  lan = "2"
+  lan = "3"
   dhcp = true
   firewall_active = true
   name = "updated"
+  lifecycle {
+    ignore_changes = [ lan ]
+  }
 }
 
 resource "ionoscloud_loadbalancer" "example" {
@@ -191,6 +198,9 @@ resource "ionoscloud_nic" "database_nic1" {
   dhcp = true
   firewall_active = true
   name = "updated"
+  lifecycle {
+    ignore_changes = [ lan ]
+  }
 }
 
 resource "ionoscloud_nic" "database_nic2" {
@@ -200,6 +210,9 @@ resource "ionoscloud_nic" "database_nic2" {
   dhcp = true
   firewall_active = true
   name = "updated"
+  lifecycle {
+    ignore_changes = [ lan ]
+  }
 }
 
 resource "ionoscloud_loadbalancer" "example" {

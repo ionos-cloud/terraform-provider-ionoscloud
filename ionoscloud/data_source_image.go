@@ -3,7 +3,7 @@ package ionoscloud
 import (
 	"context"
 	"fmt"
-	ionoscloud "github.com/ionos-cloud/sdk-go/v5"
+	ionoscloud "github.com/ionos-cloud/sdk-go/v6"
 	"strings"
 
 	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
@@ -85,13 +85,25 @@ func dataSourceImage() *schema.Resource {
 				Type:     schema.TypeBool,
 				Computed: true,
 			},
+			"image_aliases": {
+				Type:     schema.TypeList,
+				Computed: true,
+				Elem: &schema.Schema{
+					Type: schema.TypeString,
+				},
+			},
+			"cloud_init": {
+				Type:     schema.TypeString,
+				Optional: true,
+				Computed: true,
+			},
 		},
 		Timeouts: &resourceDefaultTimeouts,
 	}
 }
 
 func dataSourceImageRead(d *schema.ResourceData, meta interface{}) error {
-	client := meta.(SdkBundle).Client
+	client := meta.(*ionoscloud.APIClient)
 
 	ctx, cancel := context.WithTimeout(context.Background(), *resourceDefaultTimeouts.Default)
 
@@ -102,34 +114,42 @@ func dataSourceImageRead(d *schema.ResourceData, meta interface{}) error {
 	images, _, err := client.ImagesApi.ImagesGet(ctx).Execute()
 
 	if err != nil {
-		return fmt.Errorf("An error occured while fetching IonosCloud images %s", err)
+		return fmt.Errorf("an error occured while fetching IonosCloud images %s", err)
 	}
 
 	name := d.Get("name").(string)
 	imageType, imageTypeOk := d.GetOk("type")
 	location, locationOk := d.GetOk("location")
 	version, versionOk := d.GetOk("version")
+	cloudInit, cloudInitOk := d.GetOk("cloud_init")
 
-	results := []ionoscloud.Image{}
+	var results []ionoscloud.Image
 
 	// if version value is present then concatenate name - version
 	// otherwise search by name or part of the name
 	if versionOk {
-		name_ver := fmt.Sprintf("%s-%s", name, version.(string))
+		nameVer := fmt.Sprintf("%s-%s", name, version.(string))
 		if images.Items != nil {
 			for _, img := range *images.Items {
-				if strings.Contains(strings.ToLower(*img.Properties.Name), strings.ToLower(name_ver)) {
+				if img.Properties.Name != nil && strings.ToLower(*img.Properties.Name) == strings.ToLower(nameVer) {
 					results = append(results, img)
 				}
 			}
 		}
+		if results == nil {
+			return fmt.Errorf("could not find an image with name %s and version %s (%s)", name, version.(string), nameVer)
+		}
 	} else {
 		if images.Items != nil {
 			for _, img := range *images.Items {
-				if strings.Contains(strings.ToLower(*img.Properties.Name), strings.ToLower(name)) {
+				if img.Properties.Name != nil && strings.ToLower(*img.Properties.Name) == strings.ToLower(name) {
 					results = append(results, img)
+					break
 				}
 			}
+		}
+		if results == nil {
+			return fmt.Errorf("could not find an image with name %s", name)
 		}
 	}
 
@@ -154,18 +174,24 @@ func dataSourceImageRead(d *schema.ResourceData, meta interface{}) error {
 		results = locationResults
 	}
 
-	if len(results) > 1 {
-		return fmt.Errorf("There is more than one image that match the search criteria")
+	if cloudInitOk {
+		cloudInitResults := []ionoscloud.Image{}
+		for _, img := range results {
+			if img.Properties.CloudInit != nil && *img.Properties.CloudInit == cloudInit.(string) {
+				cloudInitResults = append(cloudInitResults, img)
+			}
+		}
+		results = cloudInitResults
 	}
 
 	if len(results) == 0 {
-		return fmt.Errorf("There are no images that match the search criteria")
+		return fmt.Errorf("there are no images that match the search criteria")
 	}
 
 	if results[0].Properties.Name != nil {
 		err := d.Set("name", *results[0].Properties.Name)
 		if err != nil {
-			return fmt.Errorf("Error while setting name property for image %s: %s", d.Id(), err)
+			return fmt.Errorf("error while setting name property for image %s: %s", d.Id(), err)
 		}
 	}
 
@@ -253,6 +279,31 @@ func dataSourceImageRead(d *schema.ResourceData, meta interface{}) error {
 		}
 	}
 
+	if results[0].Properties.ImageAliases != nil {
+		if err := d.Set("image_aliases", *results[0].Properties.ImageAliases); err != nil {
+			return err
+		}
+	}
+
+	if results[0].Properties.CloudInit != nil {
+		if err := d.Set("cloud_init", *results[0].Properties.CloudInit); err != nil {
+			return err
+		}
+	}
+
+	if results[0].Properties.ImageType != nil {
+		err = d.Set("type", *results[0].Properties.ImageType)
+		if err != nil {
+			return err
+		}
+	}
+
+	if results[0].Properties.Location != nil {
+		err = d.Set("location", *results[0].Properties.Location)
+		if err != nil {
+			return err
+		}
+	}
 	d.SetId(*results[0].Id)
 
 	return nil

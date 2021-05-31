@@ -3,7 +3,7 @@ package ionoscloud
 import (
 	"context"
 	"fmt"
-	ionoscloud "github.com/ionos-cloud/sdk-go/v5"
+	ionoscloud "github.com/ionos-cloud/sdk-go/v6"
 	"testing"
 
 	"math/rand"
@@ -47,18 +47,21 @@ func TestAccUser_Basic(t *testing.T) {
 }
 
 func testAccCheckUserDestroyCheck(s *terraform.State) error {
-	client := testAccProvider.Meta().(SdkBundle).Client
+	client := testAccProvider.Meta().(*ionoscloud.APIClient)
 
-	ctx, _ := context.WithTimeout(context.Background(), *resourceDefaultTimeouts.Delete)
+	ctx, cancel := context.WithTimeout(context.Background(), *resourceDefaultTimeouts.Delete)
+	if cancel != nil {
+		defer cancel()
+	}
+
 	for _, rs := range s.RootModule().Resources {
+		if rs.Type != "ionoscloud_user" {
+			continue
+		}
 		_, apiResponse, err := client.UserManagementApi.UmUsersFindById(ctx, rs.Primary.ID).Execute()
 
-		if _, ok := err.(ionoscloud.GenericOpenAPIError); ok {
-			if apiResponse.Response.StatusCode != 404 {
-				return fmt.Errorf("user still exists %s %s", rs.Primary.ID, err)
-			}
-		} else {
-			return fmt.Errorf("Unable to find User %s %s", rs.Primary.ID, err)
+		if err == nil || apiResponse == nil || apiResponse.Response.StatusCode != 404 {
+			return fmt.Errorf("user still exists %s %s", rs.Primary.ID, err)
 		}
 	}
 
@@ -72,7 +75,7 @@ func testAccCheckUserAttributes(n string, name string) resource.TestCheckFunc {
 			return fmt.Errorf("testAccCheckUserAttributes: Not found: %s", n)
 		}
 		if rs.Primary.Attributes["first_name"] != name {
-			return fmt.Errorf("Bad first_name: %s", rs.Primary.Attributes["first_name"])
+			return fmt.Errorf("bad first_name: %s", rs.Primary.Attributes["first_name"])
 		}
 
 		return nil
@@ -81,7 +84,7 @@ func testAccCheckUserAttributes(n string, name string) resource.TestCheckFunc {
 
 func testAccCheckUserExists(n string, user *ionoscloud.User) resource.TestCheckFunc {
 	return func(s *terraform.State) error {
-		client := testAccProvider.Meta().(SdkBundle).Client
+		client := testAccProvider.Meta().(*ionoscloud.APIClient)
 		rs, ok := s.RootModule().Resources[n]
 
 		if !ok {
@@ -89,14 +92,14 @@ func testAccCheckUserExists(n string, user *ionoscloud.User) resource.TestCheckF
 		}
 
 		if rs.Primary.ID == "" {
-			return fmt.Errorf("No Record ID is set")
+			return fmt.Errorf("no Record ID is set")
 		}
 
 		ctx, _ := context.WithTimeout(context.Background(), *resourceDefaultTimeouts.Default)
 		founduser, _, err := client.UserManagementApi.UmUsersFindById(ctx, rs.Primary.ID).Execute()
 
 		if err != nil {
-			return fmt.Errorf("Error occured while fetching User: %s", rs.Primary.ID)
+			return fmt.Errorf("error occured while fetching User: %s", rs.Primary.ID)
 		}
 		if *founduser.Id != rs.Primary.ID {
 			return fmt.Errorf("Record not found")

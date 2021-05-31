@@ -97,6 +97,6 @@ resource "ionoscloud_lan" "test_ds_lan" {
 
 data "ionoscloud_lan" "test_lan" {
   datacenter_id = ionoscloud_datacenter.test_ds_lan.id
-  name			= "test_ds_"
+  name			= "test_ds_lan"
 }
 `

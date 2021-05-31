@@ -1,0 +1,4 @@
+root: gitbook_docs
+structure:
+  readme: README.md
+  summary: summary.md

@@ -3,7 +3,7 @@ package ionoscloud
 import (
 	"context"
 	"fmt"
-	ionoscloud "github.com/ionos-cloud/sdk-go/v5"
+	ionoscloud "github.com/ionos-cloud/sdk-go/v6"
 	"testing"
 
 	"github.com/hashicorp/terraform-plugin-sdk/helper/resource"
@@ -41,7 +41,8 @@ func TestAccFirewall_Basic(t *testing.T) {
 }
 
 func testAccCheckFirewallDestroyCheck(s *terraform.State) error {
-	client := testAccProvider.Meta().(SdkBundle).Client
+	client := testAccProvider.Meta().(*ionoscloud.APIClient)
+
 	for _, rs := range s.RootModule().Resources {
 		if rs.Type != "ionoscloud_firewall" {
 			continue
@@ -61,7 +62,7 @@ func testAccCheckFirewallDestroyCheck(s *terraform.State) error {
 				return fmt.Errorf("Firewall still exists %s %s", rs.Primary.ID, apiError)
 			}
 		} else {
-			return fmt.Errorf("Unable to fetching Firewall %s %s", rs.Primary.ID, err)
+			return fmt.Errorf("unable to fetching Firewall %s %s", rs.Primary.ID, err)
 		}
 	}
 
@@ -75,7 +76,7 @@ func testAccCheckFirewallAttributes(n string, name string) resource.TestCheckFun
 			return fmt.Errorf("testAccCheckFirewallAttributes: Not found: %s", n)
 		}
 		if rs.Primary.Attributes["name"] != name {
-			return fmt.Errorf("Bad name: %s", rs.Primary.Attributes["name"])
+			return fmt.Errorf("bad name: %s", rs.Primary.Attributes["name"])
 		}
 
 		return nil
@@ -84,7 +85,8 @@ func testAccCheckFirewallAttributes(n string, name string) resource.TestCheckFun
 
 func testAccCheckFirewallExists(n string, firewall *ionoscloud.FirewallRule) resource.TestCheckFunc {
 	return func(s *terraform.State) error {
-		client := testAccProvider.Meta().(SdkBundle).Client
+		client := testAccProvider.Meta().(*ionoscloud.APIClient)
+
 		rs, ok := s.RootModule().Resources[n]
 
 		if !ok {
@@ -92,7 +94,7 @@ func testAccCheckFirewallExists(n string, firewall *ionoscloud.FirewallRule) res
 		}
 
 		if rs.Primary.ID == "" {
-			return fmt.Errorf("No Record ID is set")
+			return fmt.Errorf("no Record ID is set")
 		}
 
 		ctx, cancel := context.WithTimeout(context.Background(), *resourceDefaultTimeouts.Default)
@@ -105,7 +107,7 @@ func testAccCheckFirewallExists(n string, firewall *ionoscloud.FirewallRule) res
 			rs.Primary.Attributes["server_id"], rs.Primary.Attributes["nic_id"], rs.Primary.ID).Execute()
 
 		if err != nil {
-			return fmt.Errorf("Error occured while fetching Firewall rule: %s", rs.Primary.ID)
+			return fmt.Errorf("error occured while fetching Firewall rule: %s", rs.Primary.ID)
 		}
 		if *foundServer.Id != rs.Primary.ID {
 			return fmt.Errorf("Record not found")

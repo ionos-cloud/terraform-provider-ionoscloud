@@ -3,7 +3,7 @@ package ionoscloud
 import (
 	"context"
 	"fmt"
-	ionoscloud "github.com/ionos-cloud/sdk-go/v5"
+	ionoscloud "github.com/ionos-cloud/sdk-go/v6"
 	"testing"
 
 	"github.com/hashicorp/terraform-plugin-sdk/helper/resource"
@@ -58,7 +58,7 @@ func testAccCheckNatGatewayDestroyCheck(s *terraform.State) error {
 				return fmt.Errorf("Nat gateway still exists %s %s", rs.Primary.ID, string(apiResponse.Payload))
 			}
 		} else {
-			return fmt.Errorf("Unable to fetch nat gateway %s %s", rs.Primary.ID, err)
+			return fmt.Errorf("unable to fetch nat gateway %s %s", rs.Primary.ID, err)
 		}
 	}
 
@@ -75,7 +75,7 @@ func testAccCheckNatGatewayExists(n string, natGateway *ionoscloud.NatGateway) r
 		}
 
 		if rs.Primary.ID == "" {
-			return fmt.Errorf("No Record ID is set")
+			return fmt.Errorf("no Record ID is set")
 		}
 
 		ctx, cancel := context.WithTimeout(context.Background(), *resourceDefaultTimeouts.Delete)
@@ -87,7 +87,7 @@ func testAccCheckNatGatewayExists(n string, natGateway *ionoscloud.NatGateway) r
 		foundNatGateway, _, err := client.NATGatewaysApi.DatacentersNatgatewaysFindByNatGatewayId(ctx, rs.Primary.Attributes["datacenter_id"], rs.Primary.ID).Execute()
 
 		if err != nil {
-			return fmt.Errorf("Error occured while fetching NatGateway: %s", rs.Primary.ID)
+			return fmt.Errorf("error occured while fetching NatGateway: %s", rs.Primary.ID)
 		}
 		if *foundNatGateway.Id != rs.Primary.ID {
 			return fmt.Errorf("Record not found")

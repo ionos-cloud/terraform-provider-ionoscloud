@@ -5,7 +5,7 @@ import (
 	"errors"
 	"fmt"
 	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
-	ionoscloud "github.com/ionos-cloud/sdk-go/v5"
+	ionoscloud "github.com/ionos-cloud/sdk-go/v6"
 	"strings"
 )
 
@@ -149,7 +149,7 @@ func dataSourceNetworkLoadBalancerForwardingRule() *schema.Resource {
 }
 
 func dataSourceNetworkLoadBalancerForwardingRuleRead(d *schema.ResourceData, meta interface{}) error {
-	client := meta.(SdkBundle).Client
+	client := meta.(*ionoscloud.APIClient)
 
 	datacenterId, dcIdOk := d.GetOk("datacenter_id")
 	if !dcIdOk {
@@ -243,35 +243,35 @@ func setNetworkLoadBalancerForwardingRuleData(d *schema.ResourceData, networkLoa
 		if networkLoadBalancerForwardingRule.Properties.Name != nil {
 			err := d.Set("name", *networkLoadBalancerForwardingRule.Properties.Name)
 			if err != nil {
-				return fmt.Errorf("Error while setting name property for network load balancer forwarding rule %s: %s", d.Id(), err)
+				return fmt.Errorf("error while setting name property for network load balancer forwarding rule %s: %s", d.Id(), err)
 			}
 		}
 
 		if networkLoadBalancerForwardingRule.Properties.Algorithm != nil {
 			err := d.Set("algorithm", *networkLoadBalancerForwardingRule.Properties.Algorithm)
 			if err != nil {
-				return fmt.Errorf("Error while setting algorithm property for network load balancer forwarding rule %s: %s", d.Id(), err)
+				return fmt.Errorf("error while setting algorithm property for network load balancer forwarding rule %s: %s", d.Id(), err)
 			}
 		}
 
 		if networkLoadBalancerForwardingRule.Properties.Protocol != nil {
 			err := d.Set("protocol", *networkLoadBalancerForwardingRule.Properties.Protocol)
 			if err != nil {
-				return fmt.Errorf("Error while setting protocol property for network load balancer forwarding rule %s: %s", d.Id(), err)
+				return fmt.Errorf("error while setting protocol property for network load balancer forwarding rule %s: %s", d.Id(), err)
 			}
 		}
 
 		if networkLoadBalancerForwardingRule.Properties.ListenerIp != nil {
 			err := d.Set("listener_ip", *networkLoadBalancerForwardingRule.Properties.ListenerIp)
 			if err != nil {
-				return fmt.Errorf("Error while setting listener_ip property for network load balancer forwarding rule %s: %s", d.Id(), err)
+				return fmt.Errorf("error while setting listener_ip property for network load balancer forwarding rule %s: %s", d.Id(), err)
 			}
 		}
 
 		if networkLoadBalancerForwardingRule.Properties.ListenerPort != nil {
 			err := d.Set("listener_port", *networkLoadBalancerForwardingRule.Properties.ListenerPort)
 			if err != nil {
-				return fmt.Errorf("Error while setting listener_port property for network load balancer forwarding rule %s: %s", d.Id(), err)
+				return fmt.Errorf("error while setting listener_port property for network load balancer forwarding rule %s: %s", d.Id(), err)
 			}
 		}
 
@@ -302,7 +302,7 @@ func setNetworkLoadBalancerForwardingRuleData(d *schema.ResourceData, networkLoa
 			healthCheck[0] = healthCheckEntry
 			err := d.Set("health_check", healthCheck)
 			if err != nil {
-				return fmt.Errorf("Error while setting health_check property for network load balancer forwarding rule %s: %s", d.Id(), err)
+				return fmt.Errorf("error while setting health_check property for network load balancer forwarding rule %s: %s", d.Id(), err)
 			}
 
 		}
@@ -352,7 +352,7 @@ func setNetworkLoadBalancerForwardingRuleData(d *schema.ResourceData, networkLoa
 
 		if len(forwardingRuleTargets) > 0 {
 			if err := d.Set("targets", forwardingRuleTargets); err != nil {
-				return fmt.Errorf("Error while setting targets property for network load balancer forwarding rule  %s: %s", d.Id(), err)
+				return fmt.Errorf("error while setting targets property for network load balancer forwarding rule  %s: %s", d.Id(), err)
 			}
 		}
 

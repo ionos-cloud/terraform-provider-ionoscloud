@@ -5,7 +5,7 @@ import (
 	"errors"
 	"fmt"
 	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
-	ionoscloud "github.com/ionos-cloud/sdk-go/v5"
+	ionoscloud "github.com/ionos-cloud/sdk-go/v6"
 	"strings"
 )
 
@@ -63,7 +63,7 @@ func dataSourceNatGateway() *schema.Resource {
 }
 
 func dataSourceNatGatewayRead(d *schema.ResourceData, meta interface{}) error {
-	client := meta.(SdkBundle).Client
+	client := meta.(*ionoscloud.APIClient)
 
 	datacenterId, dcIdOk := d.GetOk("datacenter_id")
 	if !dcIdOk {
@@ -131,14 +131,14 @@ func dataSourceNatGatewayRead(d *schema.ResourceData, meta interface{}) error {
 		return errors.New("nat gateway not found")
 	}
 
-	if err = setNatGatewayData(d, &natGateway, client); err != nil {
+	if err = setNatGatewayData(d, &natGateway); err != nil {
 		return err
 	}
 
 	return nil
 }
 
-func setNatGatewayData(d *schema.ResourceData, natGateway *ionoscloud.NatGateway, client *ionoscloud.APIClient) error {
+func setNatGatewayData(d *schema.ResourceData, natGateway *ionoscloud.NatGateway) error {
 
 	if natGateway.Id != nil {
 		d.SetId(*natGateway.Id)
@@ -151,14 +151,14 @@ func setNatGatewayData(d *schema.ResourceData, natGateway *ionoscloud.NatGateway
 		if natGateway.Properties.Name != nil {
 			err := d.Set("name", *natGateway.Properties.Name)
 			if err != nil {
-				return fmt.Errorf("Error while setting name property for nat gateway %s: %s", d.Id(), err)
+				return fmt.Errorf("error while setting name property for nat gateway %s: %s", d.Id(), err)
 			}
 		}
 
 		if natGateway.Properties.PublicIps != nil {
 			err := d.Set("public_ips", *natGateway.Properties.PublicIps)
 			if err != nil {
-				return fmt.Errorf("Error while setting public_ips property for nat gateway %s: %s", d.Id(), err)
+				return fmt.Errorf("error while setting public_ips property for nat gateway %s: %s", d.Id(), err)
 			}
 		}
 
@@ -190,7 +190,7 @@ func setNatGatewayData(d *schema.ResourceData, natGateway *ionoscloud.NatGateway
 
 		if len(natGatewayLans) > 0 {
 			if err := d.Set("lans", natGatewayLans); err != nil {
-				return fmt.Errorf("Error while setting lans property for nat gateway %s: %s", d.Id(), err)
+				return fmt.Errorf("error while setting lans property for nat gateway %s: %s", d.Id(), err)
 			}
 		}
 	}

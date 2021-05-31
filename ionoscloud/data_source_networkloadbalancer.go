@@ -5,7 +5,7 @@ import (
 	"errors"
 	"fmt"
 	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
-	ionoscloud "github.com/ionos-cloud/sdk-go/v5"
+	ionoscloud "github.com/ionos-cloud/sdk-go/v6"
 	"strings"
 )
 
@@ -62,7 +62,7 @@ func dataSourceNetworkLoadBalancer() *schema.Resource {
 }
 
 func dataSourceNetworkLoadBalancerRead(d *schema.ResourceData, meta interface{}) error {
-	client := meta.(SdkBundle).Client
+	client := meta.(*ionoscloud.APIClient)
 
 	datacenterId, dcIdOk := d.GetOk("datacenter_id")
 	if !dcIdOk {
@@ -130,14 +130,14 @@ func dataSourceNetworkLoadBalancerRead(d *schema.ResourceData, meta interface{})
 		return errors.New("network loadbalancer not found")
 	}
 
-	if err = setNetworkLoadBalancerData(d, &networkLoadBalancer, client); err != nil {
+	if err = setNetworkLoadBalancerData(d, &networkLoadBalancer); err != nil {
 		return err
 	}
 
 	return nil
 }
 
-func setNetworkLoadBalancerData(d *schema.ResourceData, networkLoadBalancer *ionoscloud.NetworkLoadBalancer, client *ionoscloud.APIClient) error {
+func setNetworkLoadBalancerData(d *schema.ResourceData, networkLoadBalancer *ionoscloud.NetworkLoadBalancer) error {
 
 	if networkLoadBalancer.Id != nil {
 		d.SetId(*networkLoadBalancer.Id)
@@ -150,35 +150,35 @@ func setNetworkLoadBalancerData(d *schema.ResourceData, networkLoadBalancer *ion
 		if networkLoadBalancer.Properties.Name != nil {
 			err := d.Set("name", *networkLoadBalancer.Properties.Name)
 			if err != nil {
-				return fmt.Errorf("Error while setting name property for network load balancer %s: %s", d.Id(), err)
+				return fmt.Errorf("error while setting name property for network load balancer %s: %s", d.Id(), err)
 			}
 		}
 
 		if networkLoadBalancer.Properties.ListenerLan != nil {
 			err := d.Set("listener_lan", *networkLoadBalancer.Properties.ListenerLan)
 			if err != nil {
-				return fmt.Errorf("Error while setting listener_lan property for network load balancer %s: %s", d.Id(), err)
+				return fmt.Errorf("error while setting listener_lan property for network load balancer %s: %s", d.Id(), err)
 			}
 		}
 
 		if networkLoadBalancer.Properties.TargetLan != nil {
 			err := d.Set("target_lan", *networkLoadBalancer.Properties.TargetLan)
 			if err != nil {
-				return fmt.Errorf("Error while setting target_lan property for network load balancer %s: %s", d.Id(), err)
+				return fmt.Errorf("error while setting target_lan property for network load balancer %s: %s", d.Id(), err)
 			}
 		}
 
 		if networkLoadBalancer.Properties.Ips != nil {
 			err := d.Set("ips", *networkLoadBalancer.Properties.Ips)
 			if err != nil {
-				return fmt.Errorf("Error while setting ips property for network load balancer %s: %s", d.Id(), err)
+				return fmt.Errorf("error while setting ips property for network load balancer %s: %s", d.Id(), err)
 			}
 		}
 
 		if networkLoadBalancer.Properties.LbPrivateIps != nil {
 			err := d.Set("lb_private_ips", *networkLoadBalancer.Properties.LbPrivateIps)
 			if err != nil {
-				return fmt.Errorf("Error while setting lb_private_ips property for network load balancer %s: %s", d.Id(), err)
+				return fmt.Errorf("error while setting lb_private_ips property for network load balancer %s: %s", d.Id(), err)
 			}
 		}
 

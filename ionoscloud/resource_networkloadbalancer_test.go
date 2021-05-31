@@ -3,7 +3,7 @@ package ionoscloud
 import (
 	"context"
 	"fmt"
-	ionoscloud "github.com/ionos-cloud/sdk-go/v5"
+	ionoscloud "github.com/ionos-cloud/sdk-go/v6"
 	"testing"
 
 	"github.com/hashicorp/terraform-plugin-sdk/helper/resource"
@@ -58,7 +58,7 @@ func testAccCheckNetworkLoadBalancerDestroyCheck(s *terraform.State) error {
 				return fmt.Errorf("Network loadbalancer still exists %s %s", rs.Primary.ID, string(apiResponse.Payload))
 			}
 		} else {
-			return fmt.Errorf("Unable to fetch network loadbalancer %s %s", rs.Primary.ID, err)
+			return fmt.Errorf("unable to fetch network loadbalancer %s %s", rs.Primary.ID, err)
 		}
 	}
 
@@ -75,7 +75,7 @@ func testAccCheckNetworkLoadBalancerExists(n string, networkLoadBalancer *ionosc
 		}
 
 		if rs.Primary.ID == "" {
-			return fmt.Errorf("No Record ID is set")
+			return fmt.Errorf("no Record ID is set")
 		}
 
 		ctx, cancel := context.WithTimeout(context.Background(), *resourceDefaultTimeouts.Delete)
@@ -87,7 +87,7 @@ func testAccCheckNetworkLoadBalancerExists(n string, networkLoadBalancer *ionosc
 		foundNetworkLoadBalancer, _, err := client.NetworkLoadBalancersApi.DatacentersNetworkloadbalancersFindByNetworkLoadBalancerId(ctx, rs.Primary.Attributes["datacenter_id"], rs.Primary.ID).Execute()
 
 		if err != nil {
-			return fmt.Errorf("Error occured while fetching NetworkLoadBalancer: %s", rs.Primary.ID)
+			return fmt.Errorf("error occured while fetching NetworkLoadBalancer: %s", rs.Primary.ID)
 		}
 		if *foundNetworkLoadBalancer.Id != rs.Primary.ID {
 			return fmt.Errorf("Record not found")

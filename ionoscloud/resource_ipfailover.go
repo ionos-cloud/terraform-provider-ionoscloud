@@ -3,7 +3,8 @@ package ionoscloud
 import (
 	"context"
 	"fmt"
-	ionoscloud "github.com/ionos-cloud/sdk-go/v5"
+	"github.com/hashicorp/terraform-plugin-sdk/helper/validation"
+	ionoscloud "github.com/ionos-cloud/sdk-go/v6"
 	"time"
 
 	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
@@ -17,21 +18,25 @@ func resourceLanIPFailover() *schema.Resource {
 		Delete: resourceLanIPFailoverDelete,
 		Schema: map[string]*schema.Schema{
 			"ip": {
-				Type:     schema.TypeString,
-				Required: true,
+				Type:         schema.TypeString,
+				Required:     true,
+				ValidateFunc: validation.All(validation.StringIsNotWhiteSpace),
 			},
 			"nicuuid": {
-				Type:     schema.TypeString,
-				Required: true,
+				Type:         schema.TypeString,
+				Required:     true,
+				ValidateFunc: validation.All(validation.StringIsNotWhiteSpace),
 			},
 			"lan_id": {
-				Type:     schema.TypeString,
-				Required: true,
+				Type:         schema.TypeString,
+				Required:     true,
+				ValidateFunc: validation.All(validation.StringIsNotWhiteSpace),
 			},
 			"datacenter_id": {
-				Type:     schema.TypeString,
-				Required: true,
-				ForceNew: true,
+				Type:         schema.TypeString,
+				Required:     true,
+				ForceNew:     true,
+				ValidateFunc: validation.All(validation.StringIsNotWhiteSpace),
 			},
 		},
 		Timeouts: &resourceDefaultTimeouts,
@@ -39,7 +44,7 @@ func resourceLanIPFailover() *schema.Resource {
 }
 
 func resourceLanIPFailoverCreate(d *schema.ResourceData, meta interface{}) error {
-	client := meta.(SdkBundle).Client
+	client := meta.(*ionoscloud.APIClient)
 	dcid := d.Get("datacenter_id").(string)
 	lanid := d.Get("lan_id").(string)
 	if lanid == "" {
@@ -65,7 +70,7 @@ func resourceLanIPFailoverCreate(d *schema.ResourceData, meta interface{}) error
 	if properties != nil {
 		lan, apiResponse, err := client.LansApi.DatacentersLansPatch(ctx, dcid, lanid).Lan(*properties).Execute()
 		if err != nil {
-			return fmt.Errorf("An error occured while patching a lans failover group  %s %s", lanid, err)
+			return fmt.Errorf("an error occured while patching a lans failover group  %s %s", lanid, err)
 		}
 
 		// Wait, catching any errors
@@ -80,10 +85,9 @@ func resourceLanIPFailoverCreate(d *schema.ResourceData, meta interface{}) error
 }
 
 func resourceLanIPFailoverRead(d *schema.ResourceData, meta interface{}) error {
-	client := meta.(SdkBundle).Client
+	client := meta.(*ionoscloud.APIClient)
 
 	ctx, cancel := context.WithTimeout(context.Background(), *resourceDefaultTimeouts.Default)
-
 	if cancel != nil {
 		defer cancel()
 	}
@@ -91,33 +95,31 @@ func resourceLanIPFailoverRead(d *schema.ResourceData, meta interface{}) error {
 	lan, apiResponse, err := client.LansApi.DatacentersLansFindById(ctx, d.Get("datacenter_id").(string), d.Id()).Execute()
 
 	if err != nil {
-		if _, ok := err.(ionoscloud.GenericOpenAPIError); ok {
-			if apiResponse.Response.StatusCode == 404 {
-				d.SetId("")
-				return nil
-			}
+		if apiResponse != nil && apiResponse.Response.StatusCode == 404 {
+			d.SetId("")
+			return nil
 		}
-		return fmt.Errorf("An error occured while fetching a lan ID %s %s", d.Id(), err)
+		return fmt.Errorf("an error occured while fetching a lan ID %s %s", d.Id(), err)
 	}
 
 	if lan.Properties.IpFailover != nil {
 		err := d.Set("ip", *(*lan.Properties.IpFailover)[0].Ip)
 		if err != nil {
-			return fmt.Errorf("Error while setting ip property for IpFailover %s: %s", d.Id(), err)
+			return fmt.Errorf("error while setting ip property for IpFailover %s: %s", d.Id(), err)
 		}
 	}
 
 	if lan.Properties.IpFailover != nil {
 		err := d.Set("nicuuid", *(*lan.Properties.IpFailover)[0].NicUuid)
 		if err != nil {
-			return fmt.Errorf("Error while setting nicuuid property for IpFailover %s: %s", d.Id(), err)
+			return fmt.Errorf("error while setting nicuuid property for IpFailover %s: %s", d.Id(), err)
 		}
 	}
 
 	if lan.Id != nil {
 		err := d.Set("lan_id", *lan.Id)
 		if err != nil {
-			return fmt.Errorf("Error while setting lan_id property for IpFailover %s: %s", d.Id(), err)
+			return fmt.Errorf("error while setting lan_id property for IpFailover %s: %s", d.Id(), err)
 		}
 	}
 
@@ -127,7 +129,8 @@ func resourceLanIPFailoverRead(d *schema.ResourceData, meta interface{}) error {
 }
 
 func resourceLanIPFailoverUpdate(d *schema.ResourceData, meta interface{}) error {
-	client := meta.(SdkBundle).Client
+	client := meta.(*ionoscloud.APIClient)
+
 	properties := &ionoscloud.LanProperties{}
 	dcid := d.Get("datacenter_id").(string)
 	lanid := d.Get("lan_id").(string)
@@ -149,7 +152,7 @@ func resourceLanIPFailoverUpdate(d *schema.ResourceData, meta interface{}) error
 
 		_, apiResponse, err := client.LansApi.DatacentersLansPatch(ctx, dcid, lanid).Lan(*properties).Execute()
 		if err != nil {
-			return fmt.Errorf("An error occured while patching a lan ID %s %s", d.Id(), err)
+			return fmt.Errorf("an error occured while patching a lan ID %s %s", d.Id(), err)
 		}
 
 		// Wait, catching any errors
@@ -162,7 +165,8 @@ func resourceLanIPFailoverUpdate(d *schema.ResourceData, meta interface{}) error
 }
 
 func resourceLanIPFailoverDelete(d *schema.ResourceData, meta interface{}) error {
-	client := meta.(SdkBundle).Client
+	client := meta.(*ionoscloud.APIClient)
+
 	dcid := d.Get("datacenter_id").(string)
 	lanid := d.Get("lan_id").(string)
 
@@ -183,12 +187,8 @@ func resourceLanIPFailoverDelete(d *schema.ResourceData, meta interface{}) error
 		time.Sleep(90 * time.Second)
 		_, apiResponse, err = client.LansApi.DatacentersLansPatch(ctx, dcid, lanid).Lan(*properties).Execute()
 
-		if err != nil {
-			if _, ok := err.(ionoscloud.GenericOpenAPIError); ok {
-				if apiResponse.Response.StatusCode != 404 {
-					return fmt.Errorf("An error occured while removing a lans ipfailover groups dcId %s ID %s %s", d.Get("datacenter_id").(string), d.Id(), err)
-				}
-			}
+		if err != nil && (apiResponse == nil || apiResponse.Response.StatusCode != 404) {
+			return fmt.Errorf("an error occured while removing a lans ipfailover groups dcId %s ID %s %s", d.Get("datacenter_id").(string), d.Id(), err)
 		}
 	}
 

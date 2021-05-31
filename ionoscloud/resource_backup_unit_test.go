@@ -3,7 +3,7 @@ package ionoscloud
 import (
 	"context"
 	"fmt"
-	ionoscloud "github.com/ionos-cloud/sdk-go/v5"
+	ionoscloud "github.com/ionos-cloud/sdk-go/v6"
 	"testing"
 
 	"github.com/hashicorp/terraform-plugin-sdk/helper/resource"
@@ -43,12 +43,21 @@ func TestAccbackupUnit_Basic(t *testing.T) {
 }
 
 func testAccCheckbackupUnitDestroyCheck(s *terraform.State) error {
-	client := testAccProvider.Meta().(SdkBundle).Client
+	client := testAccProvider.Meta().(*ionoscloud.APIClient)
+
+	ctx, cancel := context.WithTimeout(context.Background(), *resourceDefaultTimeouts.Default)
+
+	if cancel != nil {
+		defer cancel()
+	}
+
 	for _, rs := range s.RootModule().Resources {
+
 		if rs.Type != "ionoscloud_backup_unit" {
 			continue
 		}
 
+<<<<<<< HEAD
 		ctx, cancel := context.WithTimeout(context.Background(), *resourceDefaultTimeouts.Default)
 
 		if cancel != nil {
@@ -56,13 +65,16 @@ func testAccCheckbackupUnitDestroyCheck(s *terraform.State) error {
 		}
 
 		_, apiResponse, err := client.BackupUnitsApi.BackupunitsFindById(ctx, rs.Primary.ID).Execute()
+=======
+		_, apiResponse, err := client.BackupUnitApi.BackupunitsFindById(ctx, rs.Primary.ID).Execute()
+>>>>>>> master
 
 		if _, ok := err.(ionoscloud.GenericOpenAPIError); ok {
-			if apiResponse.Response.StatusCode != 404 {
+			if apiResponse != nil && apiResponse.Response.StatusCode != 404 {
 				return fmt.Errorf("backup unit still exists %s %s", rs.Primary.ID, string(apiResponse.Payload))
 			}
 		} else {
-			return fmt.Errorf("Unable to fetch backup unit %s %s", rs.Primary.ID, err)
+			return fmt.Errorf("unable to fetch backup unit %s %s", rs.Primary.ID, err)
 		}
 	}
 
@@ -71,15 +83,16 @@ func testAccCheckbackupUnitDestroyCheck(s *terraform.State) error {
 
 func testAccCheckbackupUnitExists(n string, backupUnit *ionoscloud.BackupUnit) resource.TestCheckFunc {
 	return func(s *terraform.State) error {
-		client := testAccProvider.Meta().(SdkBundle).Client
+		client := testAccProvider.Meta().(*ionoscloud.APIClient)
+
 		rs, ok := s.RootModule().Resources[n]
 
 		if !ok {
-			return fmt.Errorf("Not found: %s", n)
+			return fmt.Errorf("not found: %s", n)
 		}
 
 		if rs.Primary.ID == "" {
-			return fmt.Errorf("No Record ID is set")
+			return fmt.Errorf("no Record ID is set")
 		}
 
 		ctx, cancel := context.WithTimeout(context.Background(), *resourceDefaultTimeouts.Default)
@@ -91,7 +104,7 @@ func testAccCheckbackupUnitExists(n string, backupUnit *ionoscloud.BackupUnit) r
 		foundBackupUnit, _, err := client.BackupUnitsApi.BackupunitsFindById(ctx, rs.Primary.ID).Execute()
 
 		if err != nil {
-			return fmt.Errorf("Error occured while fetching backup unit: %s", rs.Primary.ID)
+			return fmt.Errorf("error occured while fetching backup unit: %s", rs.Primary.ID)
 		}
 		if *foundBackupUnit.Id != rs.Primary.ID {
 			return fmt.Errorf("Record not found")

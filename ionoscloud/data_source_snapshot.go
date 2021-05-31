@@ -3,10 +3,9 @@ package ionoscloud
 import (
 	"context"
 	"fmt"
-	"strings"
-
 	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
-	ionoscloud "github.com/ionos-cloud/sdk-go/v5"
+	"github.com/hashicorp/terraform-plugin-sdk/helper/validation"
+	ionoscloud "github.com/ionos-cloud/sdk-go/v6"
 )
 
 func dataSourceSnapshot() *schema.Resource {
@@ -14,8 +13,9 @@ func dataSourceSnapshot() *schema.Resource {
 		Read: dataSourceSnapshotRead,
 		Schema: map[string]*schema.Schema{
 			"name": {
-				Type:     schema.TypeString,
-				Required: true,
+				Type:         schema.TypeString,
+				Required:     true,
+				ValidateFunc: validation.All(validation.StringIsNotWhiteSpace),
 			},
 			"size": {
 				Type:     schema.TypeInt,
@@ -31,7 +31,7 @@ func dataSourceSnapshot() *schema.Resource {
 }
 
 func dataSourceSnapshotRead(d *schema.ResourceData, meta interface{}) error {
-	client := meta.(SdkBundle).Client
+	client := meta.(*ionoscloud.APIClient)
 
 	ctx, cancel := context.WithTimeout(context.Background(), *resourceDefaultTimeouts.Default)
 	if cancel != nil {
@@ -40,7 +40,7 @@ func dataSourceSnapshotRead(d *schema.ResourceData, meta interface{}) error {
 	snapshots, _, err := client.SnapshotsApi.SnapshotsGet(ctx).Execute()
 
 	if err != nil {
-		return fmt.Errorf("An error occured while fetching IonosCloud locations %s", err)
+		return fmt.Errorf("an error occured while fetching IonosCloud locations %s", err)
 	}
 
 	name := d.Get("name").(string)
@@ -48,9 +48,11 @@ func dataSourceSnapshotRead(d *schema.ResourceData, meta interface{}) error {
 	size, sizeOk := d.GetOk("size")
 	results := []ionoscloud.Snapshot{}
 
-	for _, snp := range *snapshots.Items {
-		if strings.Contains(strings.ToLower(*snp.Properties.Name), strings.ToLower(name)) {
-			results = append(results, snp)
+	if snapshots.Items != nil {
+		for _, snp := range *snapshots.Items {
+			if snp.Properties.Name != nil && *snp.Properties.Name == name {
+				results = append(results, snp)
+			}
 		}
 	}
 
@@ -76,15 +78,14 @@ func dataSourceSnapshotRead(d *schema.ResourceData, meta interface{}) error {
 		results = sizeResults
 	}
 
-	if len(results) > 1 {
-		return fmt.Errorf("There is more than one snapshot that match the search criteria ")
-	}
-
 	if len(results) == 0 {
 		return fmt.Errorf("There are no snapshots that match the search criteria ")
 	}
 
-	d.Set("name", results[0].Properties.Name)
+	err = d.Set("name", results[0].Properties.Name)
+	if err != nil {
+		return err
+	}
 
 	d.SetId(*results[0].Id)
 

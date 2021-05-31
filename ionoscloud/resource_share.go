@@ -3,11 +3,12 @@ package ionoscloud
 import (
 	"context"
 	"fmt"
+	"github.com/hashicorp/terraform-plugin-sdk/helper/validation"
 	"log"
 	"time"
 
 	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
-	ionoscloud "github.com/ionos-cloud/sdk-go/v5"
+	ionoscloud "github.com/ionos-cloud/sdk-go/v6"
 )
 
 func resourceShare() *schema.Resource {
@@ -26,12 +27,14 @@ func resourceShare() *schema.Resource {
 				Required: true,
 			},
 			"group_id": {
-				Type:     schema.TypeString,
-				Required: true,
+				Type:         schema.TypeString,
+				Required:     true,
+				ValidateFunc: validation.All(validation.StringIsNotWhiteSpace),
 			},
 			"resource_id": {
-				Type:     schema.TypeString,
-				Required: true,
+				Type:         schema.TypeString,
+				Required:     true,
+				ValidateFunc: validation.All(validation.StringIsNotWhiteSpace),
 			},
 		},
 		Timeouts: &resourceDefaultTimeouts,
@@ -39,7 +42,8 @@ func resourceShare() *schema.Resource {
 }
 
 func resourceShareCreate(d *schema.ResourceData, meta interface{}) error {
-	client := meta.(SdkBundle).Client
+	client := meta.(*ionoscloud.APIClient)
+
 	request := ionoscloud.GroupShare{
 		Properties: &ionoscloud.GroupShareProperties{},
 	}
@@ -55,7 +59,7 @@ func resourceShareCreate(d *schema.ResourceData, meta interface{}) error {
 	log.Printf("[DEBUG] SHARE ID: %s", *rsp.Id)
 
 	if err != nil {
-		return fmt.Errorf("An error occured while creating a share: %s", err)
+		return fmt.Errorf("an error occured while creating a share: %s", err)
 	}
 	d.SetId(*rsp.Id)
 
@@ -73,18 +77,16 @@ func resourceShareCreate(d *schema.ResourceData, meta interface{}) error {
 }
 
 func resourceShareRead(d *schema.ResourceData, meta interface{}) error {
-	client := meta.(SdkBundle).Client
+	client := meta.(*ionoscloud.APIClient)
+
 	rsp, apiResponse, err := client.UserManagementApi.UmGroupsSharesFindByResourceId(context.TODO(),
 		d.Get("group_id").(string), d.Get("resource_id").(string)).Execute()
-
 	if err != nil {
-		if _, ok := err.(ionoscloud.GenericOpenAPIError); ok {
-			if apiResponse.Response.StatusCode == 404 {
-				d.SetId("")
-				return nil
-			}
+		if apiResponse != nil && apiResponse.Response.StatusCode == 404 {
+			d.SetId("")
+			return nil
 		}
-		return fmt.Errorf("An error occured while fetching a Share ID %s %s", d.Id(), err)
+		return fmt.Errorf("an error occured while fetching a Share ID %s %s", d.Id(), err)
 	}
 
 	d.Set("edit_privilege", *rsp.Properties.EditPrivilege)
@@ -93,9 +95,11 @@ func resourceShareRead(d *schema.ResourceData, meta interface{}) error {
 }
 
 func resourceShareUpdate(d *schema.ResourceData, meta interface{}) error {
-	client := meta.(SdkBundle).Client
+	client := meta.(*ionoscloud.APIClient)
+
 	tempSharePrivilege := d.Get("share_privilege").(bool)
 	tempEditPrivilege := d.Get("edit_privilege").(bool)
+
 	shareReq := ionoscloud.GroupShare{
 		Properties: &ionoscloud.GroupShareProperties{
 			EditPrivilege:  &tempEditPrivilege,
@@ -107,10 +111,11 @@ func resourceShareUpdate(d *schema.ResourceData, meta interface{}) error {
 	if cancel != nil {
 		defer cancel()
 	}
+
 	_, apiResponse, err := client.UserManagementApi.UmGroupsSharesPut(ctx,
 		d.Get("group_id").(string), d.Get("resource_id").(string)).Resource(shareReq).Execute()
 	if err != nil {
-		return fmt.Errorf("An error occured while patching a share ID %s %s", d.Id(), err)
+		return fmt.Errorf("an error occured while patching a share ID %s %s", d.Id(), err)
 	}
 
 	// Wait, catching any errors
@@ -123,18 +128,19 @@ func resourceShareUpdate(d *schema.ResourceData, meta interface{}) error {
 }
 
 func resourceShareDelete(d *schema.ResourceData, meta interface{}) error {
-	client := meta.(SdkBundle).Client
+	client := meta.(*ionoscloud.APIClient)
 
 	ctx, cancel := context.WithTimeout(context.Background(), *resourceDefaultTimeouts.Delete)
 	if cancel != nil {
 		defer cancel()
 	}
+
 	groupId := d.Get("group_id").(string)
 	resourceId := d.Get("resource_id").(string)
 
 	_, apiResponse, err := client.UserManagementApi.UmGroupsSharesDelete(ctx, groupId, resourceId).Execute()
 	if err != nil {
-		if apiResponse.Response.StatusCode == 404 {
+		if apiResponse != nil && apiResponse.Response.StatusCode == 404 {
 			return err
 		}
 		//try again in 20 seconds
@@ -142,8 +148,8 @@ func resourceShareDelete(d *schema.ResourceData, meta interface{}) error {
 		_, apiResponse, err := client.UserManagementApi.UmGroupsSharesDelete(ctx, groupId, resourceId).Execute()
 		if err != nil {
 			if _, ok := err.(ionoscloud.GenericOpenAPIError); ok {
-				if apiResponse.Response.StatusCode != 404 {
-					return fmt.Errorf("An error occured while deleting a share %s %s", d.Id(), err)
+				if apiResponse == nil || apiResponse.Response.StatusCode != 404 {
+					return fmt.Errorf("an error occured while deleting a share %s %s", d.Id(), err)
 				}
 			}
 		}

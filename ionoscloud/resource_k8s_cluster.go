@@ -3,7 +3,8 @@ package ionoscloud
 import (
 	"context"
 	"fmt"
-	ionoscloud "github.com/ionos-cloud/sdk-go/v5"
+	"github.com/hashicorp/terraform-plugin-sdk/helper/validation"
+	ionoscloud "github.com/ionos-cloud/sdk-go/v6"
 	"log"
 	"time"
 
@@ -21,14 +22,16 @@ func resourcek8sCluster() *schema.Resource {
 		},
 		Schema: map[string]*schema.Schema{
 			"name": {
-				Type:        schema.TypeString,
-				Description: "The desired name for the cluster",
-				Required:    true,
+				Type:         schema.TypeString,
+				Description:  "The desired name for the cluster",
+				Required:     true,
+				ValidateFunc: validation.All(validation.StringIsNotWhiteSpace),
 			},
 			"k8s_version": {
 				Type:        schema.TypeString,
 				Description: "The desired kubernetes version",
 				Optional:    true,
+				Computed:    true,
 			},
 			"maintenance_window": {
 				Type:        schema.TypeList,
@@ -54,6 +57,7 @@ func resourcek8sCluster() *schema.Resource {
 				Type:        schema.TypeList,
 				Description: "List of available versions for upgrading the cluster",
 				Optional:    true,
+				Computed:    true,
 				Elem: &schema.Schema{
 					Type: schema.TypeString,
 				},
@@ -62,9 +66,23 @@ func resourcek8sCluster() *schema.Resource {
 				Type:        schema.TypeList,
 				Description: "List of versions that may be used for node pools under this cluster",
 				Optional:    true,
+				Computed:    true,
 				Elem: &schema.Schema{
 					Type: schema.TypeString,
 				},
+			},
+			"public": {
+				Type: schema.TypeBool,
+				Description: "The indicator if the cluster is public or private. Be aware that setting it to false is " +
+					"currently in beta phase.",
+				Optional: true,
+				Computed: true,
+			},
+			"gateway_ip": {
+				Type: schema.TypeString,
+				Description: "The IP address of the gateway used by the cluster. This is mandatory when `public` is set " +
+					"to `false` and should not be provided otherwise.",
+				Optional: true,
 			},
 		},
 		Timeouts: &resourceDefaultTimeouts,
@@ -72,7 +90,7 @@ func resourcek8sCluster() *schema.Resource {
 }
 
 func resourcek8sClusterCreate(d *schema.ResourceData, meta interface{}) error {
-	client := meta.(SdkBundle).Client
+	client := meta.(*ionoscloud.APIClient)
 
 	clusterName := d.Get("name").(string)
 	cluster := ionoscloud.KubernetesClusterForPost{
@@ -102,6 +120,21 @@ func resourcek8sClusterCreate(d *schema.ResourceData, meta interface{}) error {
 		cluster.Properties.MaintenanceWindow.DayOfTheWeek = &mdVal
 	}
 
+<<<<<<< HEAD
+=======
+	if public, publicOk := d.GetOkExists("public"); publicOk {
+		public := public.(bool)
+		fmt.Printf("Value %v", public)
+		cluster.Properties.Public = &public
+		fmt.Printf("Value %v", *cluster.Properties.Public)
+	}
+
+	if gatewayIp, gatewayIpOk := d.GetOk("gateway_ip"); gatewayIpOk {
+		gatewayIp := gatewayIp.(string)
+		cluster.Properties.GatewayIp = &gatewayIp
+	}
+
+>>>>>>> master
 	ctx, cancel := context.WithTimeout(context.Background(), *resourceDefaultTimeouts.Create)
 
 	if cancel != nil {
@@ -112,7 +145,7 @@ func resourcek8sClusterCreate(d *schema.ResourceData, meta interface{}) error {
 
 	if err != nil {
 		d.SetId("")
-		return fmt.Errorf("Error creating k8s cluster: %s \n ApiError: %s ", err, string(apiResponse.Payload))
+		return fmt.Errorf("error creating k8s cluster: %s \n ApiError: %s ", err, string(apiResponse.Payload))
 	}
 
 	d.SetId(*createdCluster.Id)
@@ -125,7 +158,7 @@ func resourcek8sClusterCreate(d *schema.ResourceData, meta interface{}) error {
 		clusterReady, rsErr := k8sClusterReady(client, d)
 
 		if rsErr != nil {
-			return fmt.Errorf("Error while checking readiness status of k8s cluster %s: %s", d.Id(), rsErr)
+			return fmt.Errorf("error while checking readiness status of k8s cluster %s: %s", d.Id(), rsErr)
 		}
 
 		if clusterReady {
@@ -138,8 +171,7 @@ func resourcek8sClusterCreate(d *schema.ResourceData, meta interface{}) error {
 }
 
 func resourcek8sClusterRead(d *schema.ResourceData, meta interface{}) error {
-
-	client := meta.(SdkBundle).Client
+	client := meta.(*ionoscloud.APIClient)
 
 	ctx, cancel := context.WithTimeout(context.Background(), *resourceDefaultTimeouts.Default)
 
@@ -150,22 +182,80 @@ func resourcek8sClusterRead(d *schema.ResourceData, meta interface{}) error {
 	cluster, apiResponse, err := client.KubernetesApi.K8sFindByClusterId(ctx, d.Id()).Execute()
 
 	if err != nil {
-		if _, ok := err.(ionoscloud.GenericOpenAPIError); ok {
-			if apiResponse.Response.StatusCode == 404 {
-				d.SetId("")
-				return nil
-			}
+		if apiResponse != nil && apiResponse.Response.StatusCode == 404 {
+			d.SetId("")
+			return nil
 		}
-		return fmt.Errorf("Error while fetching k8s cluster %s: %s", d.Id(), err)
+		return fmt.Errorf("error while fetching k8s cluster %s: %s", d.Id(), err)
 	}
 
 	log.Printf("[INFO] Successfully retreived cluster %s: %+v", d.Id(), cluster)
+
+	if cluster.Properties.Name != nil {
+		err := d.Set("name", *cluster.Properties.Name)
+		if err != nil {
+			return fmt.Errorf("error while setting name property for cluser %s: %s", d.Id(), err)
+		}
+	}
+
+	if cluster.Properties.K8sVersion != nil {
+		err := d.Set("k8s_version", *cluster.Properties.K8sVersion)
+		if err != nil {
+			return fmt.Errorf("error while setting k8s_version property for cluser %s: %s", d.Id(), err)
+		}
+	}
+
+	if cluster.Properties.Name != nil {
+		err := d.Set("name", *cluster.Properties.Name)
+		if err != nil {
+			return fmt.Errorf("error while setting name property for cluser %s: %s", d.Id(), err)
+		}
+	}
+
+	if cluster.Properties.AvailableUpgradeVersions != nil {
+		availableUpgradeVersions := make([]interface{}, len(*cluster.Properties.AvailableUpgradeVersions), len(*cluster.Properties.AvailableUpgradeVersions))
+		for i, availableUpgradeVersion := range *cluster.Properties.AvailableUpgradeVersions {
+			availableUpgradeVersions[i] = availableUpgradeVersion
+		}
+		if err := d.Set("available_upgrade_versions", availableUpgradeVersions); err != nil {
+			return err
+		}
+	}
+
+	if cluster.Properties.ViableNodePoolVersions != nil {
+		viableNodePoolVersions := make([]interface{}, len(*cluster.Properties.ViableNodePoolVersions), len(*cluster.Properties.ViableNodePoolVersions))
+		for i, viableNodePoolVersion := range *cluster.Properties.ViableNodePoolVersions {
+			viableNodePoolVersions[i] = viableNodePoolVersion
+		}
+		if err := d.Set("viable_node_pool_versions", viableNodePoolVersions); err != nil {
+			return err
+		}
+	}
+
+	if cluster.Properties.Public != nil {
+		err := d.Set("public", *cluster.Properties.Public)
+		if err != nil {
+			return fmt.Errorf("error while setting public property for cluser %s: %s", d.Id(), err)
+		}
+	}
+
+	if cluster.Properties.GatewayIp != nil {
+		err := d.Set("gateway_ip", *cluster.Properties.GatewayIp)
+		if err != nil {
+			return fmt.Errorf("error while setting gateway_ip property for cluser %s: %s", d.Id(), err)
+		}
+	}
 
 	return nil
 }
 
 func resourcek8sClusterUpdate(d *schema.ResourceData, meta interface{}) error {
-	client := meta.(SdkBundle).Client
+<<<<<<< HEAD
+	client := meta.(*ionoscloud.APIClient)
+=======
+	client := meta.(*ionoscloud.APIClient)
+
+>>>>>>> master
 	request := ionoscloud.KubernetesClusterForPut{}
 
 	clusterName := d.Get("name").(string)
@@ -242,13 +332,13 @@ func resourcek8sClusterUpdate(d *schema.ResourceData, meta interface{}) error {
 
 	if err != nil {
 		if _, ok := err.(ionoscloud.GenericOpenAPIError); ok {
-			if apiResponse.Response.StatusCode == 404 {
+			if apiResponse != nil && apiResponse.Response.StatusCode == 404 {
 				d.SetId("")
 				return nil
 			}
-			return fmt.Errorf("Error while updating k8s cluster: %s", err)
+			return fmt.Errorf("error while updating k8s cluster: %s", err)
 		}
-		return fmt.Errorf("Error while updating k8s cluster %s: %s", d.Id(), err)
+		return fmt.Errorf("error while updating k8s cluster %s: %s", d.Id(), err)
 	}
 
 	for {
@@ -258,7 +348,7 @@ func resourcek8sClusterUpdate(d *schema.ResourceData, meta interface{}) error {
 		clusterReady, rsErr := k8sClusterReady(client, d)
 
 		if rsErr != nil {
-			return fmt.Errorf("Error while checking readiness status of k8s cluster %s: %s", d.Id(), rsErr)
+			return fmt.Errorf("error while checking readiness status of k8s cluster %s: %s", d.Id(), rsErr)
 		}
 
 		if clusterReady {
@@ -271,7 +361,7 @@ func resourcek8sClusterUpdate(d *schema.ResourceData, meta interface{}) error {
 }
 
 func resourcek8sClusterDelete(d *schema.ResourceData, meta interface{}) error {
-	client := meta.(SdkBundle).Client
+	client := meta.(*ionoscloud.APIClient)
 
 	ctx, cancel := context.WithTimeout(context.Background(), *resourceDefaultTimeouts.Delete)
 
@@ -283,14 +373,14 @@ func resourcek8sClusterDelete(d *schema.ResourceData, meta interface{}) error {
 
 	if err != nil {
 		if _, ok := err.(ionoscloud.GenericOpenAPIError); ok {
-			if apiResponse.Response.StatusCode == 404 {
+			if apiResponse != nil && apiResponse.Response.StatusCode == 404 {
 				d.SetId("")
 				return nil
 			}
-			return fmt.Errorf("Error while deleting k8s cluster: %s", err)
+			return fmt.Errorf("error while deleting k8s cluster: %s", err)
 		}
 
-		return fmt.Errorf("Error while deleting k8s cluster %s: %s", d.Id(), err)
+		return fmt.Errorf("error while deleting k8s cluster %s: %s", d.Id(), err)
 	}
 
 	for {
@@ -300,7 +390,7 @@ func resourcek8sClusterDelete(d *schema.ResourceData, meta interface{}) error {
 		clusterdDeleted, dsErr := k8sClusterDeleted(client, d)
 
 		if dsErr != nil {
-			return fmt.Errorf("Error while checking deletion status of k8s cluster %s: %s", d.Id(), dsErr)
+			return fmt.Errorf("error while checking deletion status of k8s cluster %s: %s", d.Id(), dsErr)
 		}
 
 		if clusterdDeleted {
@@ -325,7 +415,7 @@ func k8sClusterReady(client *ionoscloud.APIClient, d *schema.ResourceData) (bool
 	subjectCluster, _, err := client.KubernetesApi.K8sFindByClusterId(ctx, d.Id()).Execute()
 
 	if err != nil {
-		return true, fmt.Errorf("Error checking k8s cluster status: %s", err)
+		return true, fmt.Errorf("error checking k8s cluster status: %s", err)
 	}
 	return *subjectCluster.Metadata.State == "ACTIVE", nil
 }
@@ -342,10 +432,10 @@ func k8sClusterDeleted(client *ionoscloud.APIClient, d *schema.ResourceData) (bo
 
 	if err != nil {
 		if _, ok := err.(ionoscloud.GenericOpenAPIError); ok {
-			if apiResponse.Response.StatusCode == 404 {
+			if apiResponse != nil && apiResponse.Response.StatusCode == 404 {
 				return true, nil
 			}
-			return true, fmt.Errorf("Error checking k8s cluster deletion status: %s", err)
+			return true, fmt.Errorf("error checking k8s cluster deletion status: %s", err)
 		}
 	}
 	return false, nil

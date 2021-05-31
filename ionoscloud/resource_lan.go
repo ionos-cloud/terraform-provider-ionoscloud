@@ -3,11 +3,12 @@ package ionoscloud
 import (
 	"context"
 	"fmt"
+	"github.com/hashicorp/terraform-plugin-sdk/helper/validation"
 	"log"
 	"time"
 
 	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
-	ionoscloud "github.com/ionos-cloud/sdk-go/v5"
+	ionoscloud "github.com/ionos-cloud/sdk-go/v6"
 )
 
 func resourceLan() *schema.Resource {
@@ -30,9 +31,10 @@ func resourceLan() *schema.Resource {
 				Optional: true,
 			},
 			"datacenter_id": {
-				Type:     schema.TypeString,
-				Required: true,
-				ForceNew: true,
+				Type:         schema.TypeString,
+				Required:     true,
+				ForceNew:     true,
+				ValidateFunc: validation.All(validation.StringIsNotWhiteSpace),
 			},
 			"pcc": {
 				Type:     schema.TypeString,
@@ -60,7 +62,7 @@ func resourceLan() *schema.Resource {
 }
 
 func resourceLanCreate(d *schema.ResourceData, meta interface{}) error {
-	client := meta.(SdkBundle).Client
+	client := meta.(*ionoscloud.APIClient)
 	public := d.Get("public").(bool)
 	request := ionoscloud.LanPost{
 		Properties: &ionoscloud.LanPropertiesPost{
@@ -89,7 +91,7 @@ func resourceLanCreate(d *schema.ResourceData, meta interface{}) error {
 
 	if err != nil {
 		d.SetId("")
-		return fmt.Errorf("An error occured while creating LAN: %s", err)
+		return fmt.Errorf("an error occured while creating LAN: %s", err)
 	}
 
 	log.Printf("[DEBUG] LAN ID: %s", *rsp.Id)
@@ -116,7 +118,7 @@ func resourceLanCreate(d *schema.ResourceData, meta interface{}) error {
 		clusterReady, rsErr := lanAvailable(client, d)
 
 		if rsErr != nil {
-			return fmt.Errorf("Error while checking readiness status of LAN %s: %s", *rsp.Id, rsErr)
+			return fmt.Errorf("error while checking readiness status of LAN %s: %s", *rsp.Id, rsErr)
 		}
 
 		if clusterReady && rsErr == nil {
@@ -129,7 +131,7 @@ func resourceLanCreate(d *schema.ResourceData, meta interface{}) error {
 }
 
 func resourceLanRead(d *schema.ResourceData, meta interface{}) error {
-	client := meta.(SdkBundle).Client
+	client := meta.(*ionoscloud.APIClient)
 	ctx, cancel := context.WithTimeout(context.Background(), *resourceDefaultTimeouts.Default)
 	if cancel != nil {
 		defer cancel()
@@ -139,14 +141,14 @@ func resourceLanRead(d *schema.ResourceData, meta interface{}) error {
 
 	if err != nil {
 		if _, ok := err.(ionoscloud.GenericOpenAPIError); ok {
-			if apiResponse.Response.StatusCode == 404 {
+			if apiResponse != nil && apiResponse.Response.StatusCode == 404 {
 				log.Printf("[INFO] LAN %s not found", d.Id())
 				d.SetId("")
 				return nil
 			}
 		}
 
-		return fmt.Errorf("An error occured while fetching a LAN %s: %s", d.Id(), err)
+		return fmt.Errorf("an error occured while fetching a LAN %s: %s", d.Id(), err)
 	}
 
 	d.Set("public", *rsp.Properties.Public)
@@ -161,7 +163,7 @@ func resourceLanRead(d *schema.ResourceData, meta interface{}) error {
 }
 
 func resourceLanUpdate(d *schema.ResourceData, meta interface{}) error {
-	client := meta.(SdkBundle).Client
+	client := meta.(*ionoscloud.APIClient)
 	properties := &ionoscloud.LanProperties{}
 	newValue := d.Get("public")
 	public := newValue.(bool)
@@ -191,7 +193,7 @@ func resourceLanUpdate(d *schema.ResourceData, meta interface{}) error {
 		dcid := d.Get("datacenter_id").(string)
 		rsp, _, err := client.LansApi.DatacentersLansPatch(ctx, dcid, d.Id()).Lan(*properties).Execute()
 		if err != nil {
-			return fmt.Errorf("An error occured while patching a lan ID %s %s", d.Id(), err)
+			return fmt.Errorf("an error occured while patching a lan ID %s %s", d.Id(), err)
 		}
 
 		for {
@@ -201,7 +203,7 @@ func resourceLanUpdate(d *schema.ResourceData, meta interface{}) error {
 			clusterReady, rsErr := lanAvailable(client, d)
 
 			if rsErr != nil {
-				return fmt.Errorf("Error while checking readiness status of LAN %s: %s", d.Id(), rsErr)
+				return fmt.Errorf("error while checking readiness status of LAN %s: %s", d.Id(), rsErr)
 			}
 
 			if clusterReady && rsErr == nil {
@@ -216,7 +218,7 @@ func resourceLanUpdate(d *schema.ResourceData, meta interface{}) error {
 }
 
 func resourceLanDelete(d *schema.ResourceData, meta interface{}) error {
-	client := meta.(SdkBundle).Client
+	client := meta.(*ionoscloud.APIClient)
 	dcid := d.Get("datacenter_id").(string)
 
 	ctx, cancel := context.WithTimeout(context.Background(), *resourceDefaultTimeouts.Delete)
@@ -231,10 +233,8 @@ func resourceLanDelete(d *schema.ResourceData, meta interface{}) error {
 		_, apiResponse, err := client.LansApi.DatacentersLansDelete(ctx, dcid, d.Id()).Execute()
 
 		if err != nil {
-			if _, ok := err.(ionoscloud.GenericOpenAPIError); ok {
-				if apiResponse.Response.StatusCode != 404 {
-					return fmt.Errorf("An error occured while deleting a lan dcId %s ID %s %s", d.Get("datacenter_id").(string), d.Id(), err)
-				}
+			if apiResponse == nil || apiResponse.Response.StatusCode != 404 {
+				return fmt.Errorf("an error occured while deleting a lan dcId %s ID %s %s", d.Get("datacenter_id").(string), d.Id(), err)
 			}
 		}
 	}
@@ -246,7 +246,7 @@ func resourceLanDelete(d *schema.ResourceData, meta interface{}) error {
 		lDeleted, dsErr := lanDeleted(client, d)
 
 		if dsErr != nil {
-			return fmt.Errorf("Error while checking deletion status of LAN %s: %s", d.Id(), dsErr)
+			return fmt.Errorf("error while checking deletion status of LAN %s: %s", d.Id(), dsErr)
 		}
 
 		if lDeleted && dsErr == nil {
@@ -270,7 +270,7 @@ func lanAvailable(client *ionoscloud.APIClient, d *schema.ResourceData) (bool, e
 	log.Printf("[INFO] Current status for LAN %s: %+v", d.Id(), rsp)
 
 	if err != nil {
-		return true, fmt.Errorf("Error checking LAN status: %s", err)
+		return true, fmt.Errorf("error checking LAN status: %s", err)
 	}
 	return *rsp.Metadata.State == "AVAILABLE", nil
 }
@@ -287,10 +287,10 @@ func lanDeleted(client *ionoscloud.APIClient, d *schema.ResourceData) (bool, err
 
 	if err != nil {
 		if _, ok := err.(ionoscloud.GenericOpenAPIError); ok {
-			if apiResponse.Response.StatusCode == 404 {
+			if apiResponse != nil && apiResponse.Response.StatusCode == 404 {
 				return true, nil
 			}
-			return true, fmt.Errorf("Error checking LAN deletion status: %s", err)
+			return true, fmt.Errorf("error checking LAN deletion status: %s", err)
 		}
 	}
 	log.Printf("[INFO] LAN %s not deleted yet deleted LAN: %+v", d.Id(), rsp)

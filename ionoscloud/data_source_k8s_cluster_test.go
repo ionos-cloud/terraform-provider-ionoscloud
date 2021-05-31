@@ -1,3 +1,5 @@
+// +build k8s
+
 package ionoscloud
 
 import (
@@ -77,6 +79,6 @@ resource "ionoscloud_k8s_cluster" "test_ds_k8s_cluster" {
 }
 
 data "ionoscloud_k8s_cluster" "test_ds_k8s_cluster" {
-  name	= "test_"
+  name	= "test_cluster"
 }
 `

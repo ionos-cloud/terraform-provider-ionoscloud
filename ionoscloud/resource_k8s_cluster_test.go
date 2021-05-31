@@ -1,9 +1,11 @@
+// +build k8s
+
 package ionoscloud
 
 import (
 	"context"
 	"fmt"
-	ionoscloud "github.com/ionos-cloud/sdk-go/v5"
+	ionoscloud "github.com/ionos-cloud/sdk-go/v6"
 	"testing"
 
 	"github.com/hashicorp/terraform-plugin-sdk/helper/resource"
@@ -32,7 +34,7 @@ func TestAcck8sCluster_Basic(t *testing.T) {
 				Config: testAccCheckk8sClusterConfigUpdate,
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckk8sClusterExists("ionoscloud_k8s_cluster.example", &k8sCluster),
-					resource.TestCheckResourceAttr("ionoscloud_k8s_cluster.example", "name", "example-renamed"),
+					resource.TestCheckResourceAttr("ionoscloud_k8s_cluster.example", "name", "updated"),
 				),
 			},
 		},
@@ -40,7 +42,8 @@ func TestAcck8sCluster_Basic(t *testing.T) {
 }
 
 func testAccCheckk8sClusterDestroyCheck(s *terraform.State) error {
-	client := testAccProvider.Meta().(SdkBundle).Client
+	client := testAccProvider.Meta().(*ionoscloud.APIClient)
+
 	for _, rs := range s.RootModule().Resources {
 		if rs.Type != "ionoscloud_k8s_cluster" {
 			continue
@@ -55,11 +58,15 @@ func testAccCheckk8sClusterDestroyCheck(s *terraform.State) error {
 		_, apiResponse, err := client.KubernetesApi.K8sFindByClusterId(ctx, rs.Primary.ID).Execute()
 
 		if _, ok := err.(ionoscloud.GenericOpenAPIError); ok {
-			if apiResponse.Response.StatusCode != 404 {
-				return fmt.Errorf("K8s cluster still exists %s %s", rs.Primary.ID, string(apiResponse.Payload))
+			if apiResponse == nil || apiResponse.Response.StatusCode != 404 {
+				var payload = "<nil>"
+				if apiResponse != nil {
+					payload = string(apiResponse.Payload)
+				}
+				return fmt.Errorf("k8s cluster still exists %s %s", rs.Primary.ID, payload)
 			}
 		} else {
-			return fmt.Errorf("Unable to fetch k8s cluster %s %s", rs.Primary.ID, err)
+			return fmt.Errorf("unable to fetch k8s cluster %s %s", rs.Primary.ID, err)
 		}
 	}
 
@@ -68,15 +75,16 @@ func testAccCheckk8sClusterDestroyCheck(s *terraform.State) error {
 
 func testAccCheckk8sClusterExists(n string, k8sCluster *ionoscloud.KubernetesCluster) resource.TestCheckFunc {
 	return func(s *terraform.State) error {
-		client := testAccProvider.Meta().(SdkBundle).Client
+		client := testAccProvider.Meta().(*ionoscloud.APIClient)
+
 		rs, ok := s.RootModule().Resources[n]
 
 		if !ok {
-			return fmt.Errorf("Not found: %s", n)
+			return fmt.Errorf("not found: %s", n)
 		}
 
 		if rs.Primary.ID == "" {
-			return fmt.Errorf("No Record ID is set")
+			return fmt.Errorf("no Record ID is set")
 		}
 
 		ctx, cancel := context.WithTimeout(context.Background(), *resourceDefaultTimeouts.Default)
@@ -88,7 +96,7 @@ func testAccCheckk8sClusterExists(n string, k8sCluster *ionoscloud.KubernetesClu
 		foundK8sCluster, _, err := client.KubernetesApi.K8sFindByClusterId(ctx, rs.Primary.ID).Execute()
 
 		if err != nil {
-			return fmt.Errorf("Error occured while fetching k8s Cluster: %s", rs.Primary.ID)
+			return fmt.Errorf("error occured while fetching k8s Cluster: %s", rs.Primary.ID)
 		}
 		if *foundK8sCluster.Id != rs.Primary.ID {
 			return fmt.Errorf("Record not found")
@@ -102,7 +110,11 @@ func testAccCheckk8sClusterExists(n string, k8sCluster *ionoscloud.KubernetesClu
 const testAccCheckk8sClusterConfigBasic = `
 resource "ionoscloud_k8s_cluster" "example" {
   name        = "%s"
+<<<<<<< HEAD
 	k8s_version = "1.20.6"
+=======
+  k8s_version = "1.20.6"
+>>>>>>> master
   maintenance_window {
     day_of_the_week = "Sunday"
     time            = "09:00:00Z"
@@ -111,10 +123,15 @@ resource "ionoscloud_k8s_cluster" "example" {
 
 const testAccCheckk8sClusterConfigUpdate = `
 resource "ionoscloud_k8s_cluster" "example" {
+<<<<<<< HEAD
   name        = "example-renamed"
+=======
+  name        = "updated"
+>>>>>>> master
   k8s_version = "1.20.6"
   maintenance_window {
     day_of_the_week = "Monday"
     time            = "10:30:00Z"
   }
+  
 }`

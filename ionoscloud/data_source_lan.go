@@ -4,10 +4,9 @@ import (
 	"context"
 	"errors"
 	"fmt"
-	ionoscloud "github.com/ionos-cloud/sdk-go/v5"
-	"strings"
-
 	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
+	"github.com/hashicorp/terraform-plugin-sdk/helper/validation"
+	ionoscloud "github.com/ionos-cloud/sdk-go/v6"
 )
 
 func dataSourceLan() *schema.Resource {
@@ -23,8 +22,9 @@ func dataSourceLan() *schema.Resource {
 				Optional: true,
 			},
 			"datacenter_id": {
-				Type:     schema.TypeString,
-				Required: true,
+				Type:         schema.TypeString,
+				Required:     true,
+				ValidateFunc: validation.All(validation.StringIsNotWhiteSpace),
 			},
 			"ip_failover": {
 				Type:     schema.TypeList,
@@ -106,7 +106,7 @@ func setLanData(d *schema.ResourceData, lan *ionoscloud.Lan) error {
 }
 
 func dataSourceLanRead(d *schema.ResourceData, meta interface{}) error {
-	client := meta.(SdkBundle).Client
+	client := meta.(*ionoscloud.APIClient)
 
 	datacenterId, dcIdOk := d.GetOk("datacenter_id")
 	if !dcIdOk {
@@ -144,20 +144,24 @@ func dataSourceLanRead(d *schema.ResourceData, meta interface{}) error {
 			return fmt.Errorf("an error occurred while fetching lans: %s", err.Error())
 		}
 
-		for _, l := range *lans.Items {
-			if strings.Contains(*l.Properties.Name, name.(string)) {
-				/* lan found */
-				lan, _, err = client.LansApi.DatacentersLansFindById(ctx, datacenterId.(string), *l.Id).Execute()
-				if err != nil {
-					return fmt.Errorf("an error occurred while fetching lan %s: %s", *l.Id, err)
+		found := false
+		if lans.Items != nil {
+			for _, l := range *lans.Items {
+				if l.Properties.Name != nil && *l.Properties.Name == name.(string) {
+					/* lan found */
+					lan, _, err = client.LansApi.DatacentersLansFindById(ctx, datacenterId.(string), *l.Id).Execute()
+					if err != nil {
+						return fmt.Errorf("an error occurred while fetching lan %s: %s", *l.Id, err)
+					}
+					found = true
+					break
 				}
-				break
 			}
 		}
-	}
 
-	if &lan == nil {
-		return errors.New("lan not found")
+		if !found {
+			return fmt.Errorf("lan not found")
+		}
 	}
 
 	if err = setLanData(d, &lan); err != nil {

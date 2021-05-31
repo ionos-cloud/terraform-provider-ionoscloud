@@ -4,7 +4,7 @@ import (
 	"context"
 	"fmt"
 	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
-	ionoscloud "github.com/ionos-cloud/sdk-go/v5"
+	ionoscloud "github.com/ionos-cloud/sdk-go/v6"
 	"log"
 )
 
@@ -62,7 +62,7 @@ func resourceNetworkLoadBalancer() *schema.Resource {
 }
 
 func resourceNetworkLoadBalancerCreate(d *schema.ResourceData, meta interface{}) error {
-	client := meta.(SdkBundle).Client
+	client := meta.(*ionoscloud.APIClient)
 
 	networkLoadBalancer := ionoscloud.NetworkLoadBalancer{
 		Properties: &ionoscloud.NetworkLoadBalancerProperties{},
@@ -122,7 +122,7 @@ func resourceNetworkLoadBalancerCreate(d *schema.ResourceData, meta interface{})
 
 	if err != nil {
 		d.SetId("")
-		return fmt.Errorf("Error creating network loadbalancer: %s", err)
+		return fmt.Errorf("error creating network loadbalancer: %s", err)
 	}
 
 	d.SetId(*networkLoadBalancerResp.Id)
@@ -141,7 +141,7 @@ func resourceNetworkLoadBalancerCreate(d *schema.ResourceData, meta interface{})
 }
 
 func resourceNetworkLoadBalancerRead(d *schema.ResourceData, meta interface{}) error {
-	client := meta.(SdkBundle).Client
+	client := meta.(*ionoscloud.APIClient)
 
 	dcId := d.Get("datacenter_id").(string)
 
@@ -168,35 +168,35 @@ func resourceNetworkLoadBalancerRead(d *schema.ResourceData, meta interface{}) e
 	if networkLoadBalancer.Properties.Name != nil {
 		err := d.Set("name", *networkLoadBalancer.Properties.Name)
 		if err != nil {
-			return fmt.Errorf("Error while setting name property for network load balancer %s: %s", d.Id(), err)
+			return fmt.Errorf("error while setting name property for network load balancer %s: %s", d.Id(), err)
 		}
 	}
 
 	if networkLoadBalancer.Properties.ListenerLan != nil {
 		err := d.Set("listener_lan", *networkLoadBalancer.Properties.ListenerLan)
 		if err != nil {
-			return fmt.Errorf("Error while setting listener_lan property for network load balancer %s: %s", d.Id(), err)
+			return fmt.Errorf("error while setting listener_lan property for network load balancer %s: %s", d.Id(), err)
 		}
 	}
 
 	if networkLoadBalancer.Properties.TargetLan != nil {
 		err := d.Set("target_lan", *networkLoadBalancer.Properties.TargetLan)
 		if err != nil {
-			return fmt.Errorf("Error while setting target_lan property for network load balancer %s: %s", d.Id(), err)
+			return fmt.Errorf("error while setting target_lan property for network load balancer %s: %s", d.Id(), err)
 		}
 	}
 
 	if networkLoadBalancer.Properties.Ips != nil {
 		err := d.Set("ips", *networkLoadBalancer.Properties.Ips)
 		if err != nil {
-			return fmt.Errorf("Error while setting ips property for network load balancer %s: %s", d.Id(), err)
+			return fmt.Errorf("error while setting ips property for network load balancer %s: %s", d.Id(), err)
 		}
 	}
 
 	if networkLoadBalancer.Properties.LbPrivateIps != nil {
 		err := d.Set("lb_private_ips", *networkLoadBalancer.Properties.LbPrivateIps)
 		if err != nil {
-			return fmt.Errorf("Error while setting lb_private_ips property for network load balancer %s: %s", d.Id(), err)
+			return fmt.Errorf("error while setting lb_private_ips property for network load balancer %s: %s", d.Id(), err)
 		}
 	}
 
@@ -204,7 +204,7 @@ func resourceNetworkLoadBalancerRead(d *schema.ResourceData, meta interface{}) e
 }
 
 func resourceNetworkLoadBalancerUpdate(d *schema.ResourceData, meta interface{}) error {
-	client := meta.(SdkBundle).Client
+	client := meta.(*ionoscloud.APIClient)
 	request := ionoscloud.NetworkLoadBalancer{
 		Properties: &ionoscloud.NetworkLoadBalancerProperties{},
 	}
@@ -263,7 +263,7 @@ func resourceNetworkLoadBalancerUpdate(d *schema.ResourceData, meta interface{})
 	_, apiResponse, err := client.NetworkLoadBalancersApi.DatacentersNetworkloadbalancersPatch(ctx, dcId, d.Id()).NetworkLoadBalancerProperties(*request.Properties).Execute()
 
 	if err != nil {
-		return fmt.Errorf("An error occured while updating a network loadbalancer ID %s %s \n ApiError: %s", d.Id(), err, string(apiResponse.Payload))
+		return fmt.Errorf("an error occured while updating a network loadbalancer ID %s %s \n ApiError: %s", d.Id(), err, string(apiResponse.Payload))
 	}
 
 	_, errState := getStateChangeConf(meta, d, apiResponse.Header.Get("Location"), schema.TimeoutUpdate).WaitForState()
@@ -275,7 +275,7 @@ func resourceNetworkLoadBalancerUpdate(d *schema.ResourceData, meta interface{})
 }
 
 func resourceNetworkLoadBalancerDelete(d *schema.ResourceData, meta interface{}) error {
-	client := meta.(SdkBundle).Client
+	client := meta.(*ionoscloud.APIClient)
 
 	dcId := d.Get("datacenter_id").(string)
 
@@ -288,7 +288,7 @@ func resourceNetworkLoadBalancerDelete(d *schema.ResourceData, meta interface{})
 	_, apiResponse, err := client.NetworkLoadBalancersApi.DatacentersNetworkloadbalancersDelete(ctx, dcId, d.Id()).Execute()
 
 	if err != nil {
-		return fmt.Errorf("An error occured while deleting a network loadbalancer %s %s", d.Id(), err)
+		return fmt.Errorf("an error occured while deleting a network loadbalancer %s %s", d.Id(), err)
 	}
 
 	// Wait, catching any errors

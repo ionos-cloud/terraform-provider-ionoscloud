@@ -3,7 +3,7 @@ package ionoscloud
 import (
 	"context"
 	"fmt"
-	ionoscloud "github.com/ionos-cloud/sdk-go/v5"
+	ionoscloud "github.com/ionos-cloud/sdk-go/v6"
 	"testing"
 
 	"github.com/hashicorp/terraform-plugin-sdk/helper/resource"
@@ -42,7 +42,7 @@ func TestAccNic_Basic(t *testing.T) {
 }
 
 func testAccCheckNicDestroyCheck(s *terraform.State) error {
-	client := testAccProvider.Meta().(SdkBundle).Client
+	client := testAccProvider.Meta().(*ionoscloud.APIClient)
 
 	ctx, _ := context.WithTimeout(context.Background(), *resourceDefaultTimeouts.Delete)
 	for _, rs := range s.RootModule().Resources {
@@ -52,14 +52,24 @@ func testAccCheckNicDestroyCheck(s *terraform.State) error {
 
 		dcId := rs.Primary.Attributes["datacenter_id"]
 		serverId := rs.Primary.Attributes["server_id"]
+<<<<<<< HEAD
 		_, apiResponse, err := client.NetworkInterfacesApi.DatacentersServersNicsFindById(ctx, dcId, serverId, rs.Primary.ID).Execute()
 
 		if apiError, ok := err.(ionoscloud.GenericOpenAPIError); ok {
 			if apiResponse.Response.StatusCode != 404 {
 				return fmt.Errorf("NIC still exists %s %s", rs.Primary.ID, apiError)
+=======
+		_, apiResponse, _ := client.NicApi.DatacentersServersNicsFindById(ctx, dcId, serverId, rs.Primary.ID).Execute()
+
+		if apiResponse == nil || apiResponse.Response.StatusCode != 404 {
+			var payload = "<nil>"
+			var statusCode = 0
+			if apiResponse != nil {
+				payload = string(apiResponse.Payload)
+				statusCode = apiResponse.StatusCode
+>>>>>>> master
 			}
-		} else {
-			return fmt.Errorf("Unable to fetching NIC %s %s", rs.Primary.ID, err)
+			return fmt.Errorf("NIC still exists %s: %d %s", rs.Primary.ID, statusCode, payload)
 		}
 	}
 
@@ -73,7 +83,7 @@ func testAccCheckNicAttributes(n string, name string) resource.TestCheckFunc {
 			return fmt.Errorf("testAccCheckNicAttributes: Not found: %s", n)
 		}
 		if rs.Primary.Attributes["name"] != name {
-			return fmt.Errorf("Bad name: %s", rs.Primary.Attributes["name"])
+			return fmt.Errorf("bad name: %s", rs.Primary.Attributes["name"])
 		}
 
 		return nil
@@ -82,7 +92,7 @@ func testAccCheckNicAttributes(n string, name string) resource.TestCheckFunc {
 
 func testAccCheckNICExists(n string, nic *ionoscloud.Nic) resource.TestCheckFunc {
 	return func(s *terraform.State) error {
-		client := testAccProvider.Meta().(SdkBundle).Client
+		client := testAccProvider.Meta().(*ionoscloud.APIClient)
 
 		rs, ok := s.RootModule().Resources[n]
 		if !ok {
@@ -90,7 +100,7 @@ func testAccCheckNICExists(n string, nic *ionoscloud.Nic) resource.TestCheckFunc
 		}
 
 		if rs.Primary.ID == "" {
-			return fmt.Errorf("No Record ID is set")
+			return fmt.Errorf("no Record ID is set")
 		}
 
 		ctx, _ := context.WithTimeout(context.Background(), *resourceDefaultTimeouts.Default)
@@ -99,7 +109,7 @@ func testAccCheckNICExists(n string, nic *ionoscloud.Nic) resource.TestCheckFunc
 		foundNic, _, err := client.NetworkInterfacesApi.DatacentersServersNicsFindById(ctx, dcId, serverId, rs.Primary.ID).Execute()
 
 		if err != nil {
-			return fmt.Errorf("Error occured while fetching Volume: %s", rs.Primary.ID)
+			return fmt.Errorf("error occured while fetching Volume: %s", rs.Primary.ID)
 		}
 		if *foundNic.Id != rs.Primary.ID {
 			return fmt.Errorf("Record not found")

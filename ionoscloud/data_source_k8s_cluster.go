@@ -4,10 +4,8 @@ import (
 	"context"
 	"errors"
 	"fmt"
-	ionoscloud "github.com/ionos-cloud/sdk-go/v5"
-	"strings"
-
 	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
+	ionoscloud "github.com/ionos-cloud/sdk-go/v6"
 )
 
 func dataSourceK8sCluster() *schema.Resource {
@@ -77,13 +75,27 @@ func dataSourceK8sCluster() *schema.Resource {
 				Type:     schema.TypeString,
 				Computed: true,
 			},
+			"public": {
+				Type: schema.TypeBool,
+				Description: "The indicator if the cluster is public or private. Be aware that setting it to false is " +
+					"currently in beta phase.",
+				Optional: true,
+				Computed: true,
+			},
+			"gateway_ip": {
+				Type: schema.TypeString,
+				Description: "The IP address of the gateway used by the cluster. This is mandatory when `public` is set " +
+					"to `false` and should not be provided otherwise.",
+				Optional: true,
+				Computed: true,
+			},
 		},
 		Timeouts: &resourceDefaultTimeouts,
 	}
 }
 
 func dataSourceK8sReadCluster(d *schema.ResourceData, meta interface{}) error {
-	client := meta.(SdkBundle).Client
+	client := meta.(*ionoscloud.APIClient)
 
 	id, idOk := d.GetOk("id")
 	name, nameOk := d.GetOk("name")
@@ -124,27 +136,26 @@ func dataSourceK8sReadCluster(d *schema.ResourceData, meta interface{}) error {
 			return fmt.Errorf("an error occurred while fetching k8s clusters: %s", err.Error())
 		}
 
+		found := false
 		if clusters.Items != nil {
 			for _, c := range *clusters.Items {
 				tmpCluster, _, err := client.KubernetesApi.K8sFindByClusterId(ctx, *c.Id).Execute()
 				if err != nil {
 					return fmt.Errorf("an error occurred while fetching k8s cluster with ID %s: %s", *c.Id, err.Error())
 				}
-				if tmpCluster.Properties.Name != nil {
-					if strings.Contains(*tmpCluster.Properties.Name, name.(string)) {
-						/* lan found */
-						cluster = tmpCluster
-						break
-					}
+				if tmpCluster.Properties.Name != nil && *tmpCluster.Properties.Name == name.(string) {
+					/* lan found */
+					cluster = tmpCluster
+					found = true
+					break
 				}
 
 			}
 		}
+		if !found {
+			return errors.New("k8s cluster not found")
+		}
 
-	}
-
-	if &cluster == nil {
-		return errors.New("k8s cluster not found")
 	}
 
 	if err = setK8sClusterData(d, &cluster, client); err != nil {
@@ -207,6 +218,21 @@ func setK8sClusterData(d *schema.ResourceData, cluster *ionoscloud.KubernetesClu
 				return err
 			}
 		}
+
+		if cluster.Properties.Public != nil {
+			err := d.Set("public", *cluster.Properties.Public)
+			if err != nil {
+				return fmt.Errorf("error while setting public property for cluser %s: %s", d.Id(), err)
+			}
+		}
+
+		if cluster.Properties.GatewayIp != nil {
+			err := d.Set("gateway_ip", *cluster.Properties.GatewayIp)
+			if err != nil {
+				return fmt.Errorf("error while setting gateway_ip property for cluser %s: %s", d.Id(), err)
+			}
+		}
+
 	}
 
 	if cluster.Metadata != nil {
@@ -216,11 +242,6 @@ func setK8sClusterData(d *schema.ResourceData, cluster *ionoscloud.KubernetesClu
 			}
 		}
 
-		if cluster.Metadata.State != nil {
-			if err := d.Set("state", *cluster.Metadata.State); err != nil {
-				return err
-			}
-		}
 	}
 
 	ctx, cancel := context.WithTimeout(context.Background(), *resourceDefaultTimeouts.Default)
@@ -230,30 +251,34 @@ func setK8sClusterData(d *schema.ResourceData, cluster *ionoscloud.KubernetesClu
 	}
 
 	/* get and set the kubeconfig */
-	kubeConfig, _, err := client.KubernetesApi.K8sKubeconfigGet(ctx, *cluster.Id).Execute()
-	if err != nil {
-		return fmt.Errorf("an error occurred while fetching the kubernetes config for cluster with ID %s: %s", *cluster.Id, err)
-	}
-
-	d.Set("kube_config", kubeConfig)
-
-	/* getting node pools */
-	clusterNodePools, _, err := client.KubernetesApi.K8sNodepoolsGet(ctx, *cluster.Id).Execute()
-	if err != nil {
-		return fmt.Errorf("an error occurred while fetching the kubernetes cluster node pools for cluster with ID %s: %s", *cluster.Id, err)
-	}
-
-	nodePools := make([]interface{}, 0)
-
-	if clusterNodePools.Items != nil && len(*clusterNodePools.Items) > 0 {
-		nodePools = make([]interface{}, len(*clusterNodePools.Items), len(*clusterNodePools.Items))
-		for i, nodePool := range *clusterNodePools.Items {
-			nodePools[i] = *nodePool.Id
+	if cluster.Id != nil {
+		kubeConfig, _, err := client.KubernetesApi.K8sKubeconfigGet(ctx, *cluster.Id).Execute()
+		if err != nil {
+			return fmt.Errorf("an error occurred while fetching the kubernetes config for cluster with ID %s: %s", *cluster.Id, err)
 		}
-	}
 
-	if err := d.Set("node_pools", nodePools); err != nil {
-		return err
+		if err := d.Set("kube_config", kubeConfig); err != nil {
+				return err
+			}
+
+		/* getting node pools */
+		clusterNodePools, _, err := client.KubernetesApi.K8sNodepoolsGet(ctx, *cluster.Id).Execute()
+		if err != nil {
+			return fmt.Errorf("an error occurred while fetching the kubernetes cluster node pools for cluster with ID %s: %s", *cluster.Id, err)
+		}
+
+		nodePools := make([]interface{}, 0)
+
+		if clusterNodePools.Items != nil && len(*clusterNodePools.Items) > 0 {
+			nodePools = make([]interface{}, len(*clusterNodePools.Items), len(*clusterNodePools.Items))
+			for i, nodePool := range *clusterNodePools.Items {
+				nodePools[i] = *nodePool.Id
+			}
+		}
+
+		if err := d.Set("node_pools", nodePools); err != nil {
+			return err
+		}
 	}
 
 	return nil

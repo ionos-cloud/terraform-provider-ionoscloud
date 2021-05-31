@@ -4,7 +4,7 @@ import (
 	"context"
 	"fmt"
 	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
-	ionoscloud "github.com/ionos-cloud/sdk-go/v5"
+	ionoscloud "github.com/ionos-cloud/sdk-go/v6"
 	"strings"
 )
 
@@ -38,7 +38,7 @@ func dataSourceTemplate() *schema.Resource {
 }
 
 func dataSourceTemplateRead(d *schema.ResourceData, meta interface{}) error {
-	client := meta.(SdkBundle).Client
+	client := meta.(*ionoscloud.APIClient)
 
 	ctx, cancel := context.WithTimeout(context.Background(), *resourceDefaultTimeouts.Default)
 	if cancel != nil {
@@ -47,7 +47,7 @@ func dataSourceTemplateRead(d *schema.ResourceData, meta interface{}) error {
 	templates, _, err := client.TemplatesApi.TemplatesGet(ctx).Execute()
 
 	if err != nil {
-		return fmt.Errorf("An error occured while fetching IonosCloud templates %s ", err)
+		return fmt.Errorf("an error occured while fetching IonosCloud templates %s ", err)
 	}
 
 	name := d.Get("name").(string)
@@ -109,7 +109,7 @@ func dataSourceTemplateRead(d *schema.ResourceData, meta interface{}) error {
 	if results[0].Properties.Name != nil {
 		err := d.Set("name", *results[0].Properties.Name)
 		if err != nil {
-			return fmt.Errorf("Error while setting name property for image %s: %s", d.Id(), err)
+			return fmt.Errorf("error while setting name property for image %s: %s", d.Id(), err)
 		}
 	}
 

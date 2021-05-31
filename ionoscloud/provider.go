@@ -1,6 +1,7 @@
 package ionoscloud
 
 import (
+	"context"
 	"fmt"
 	"github.com/hashicorp/terraform-plugin-sdk/httpclient"
 	"log"
@@ -10,14 +11,8 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/terraform"
-	"github.com/ionos-cloud/sdk-go/v5"
-	"github.com/profitbricks/profitbricks-sdk-go/v5"
+	"github.com/ionos-cloud/sdk-go/v6"
 )
-
-type SdkBundle struct {
-	LegacyClient *profitbricks.Client
-	Client       *ionoscloud.APIClient
-}
 
 // Provider returns a schema.Provider for ionoscloud.
 func Provider() terraform.ResourceProvider {
@@ -127,27 +122,19 @@ func providerConfigure(d *schema.ResourceData, terraformVersion string) (interfa
 
 	if !tokenOk {
 		if !usernameOk {
-			return nil, fmt.Errorf("Neither IonosCloud token, nor IonosCloud username has been provided")
+			return nil, fmt.Errorf("neither IonosCloud token, nor IonosCloud username has been provided")
 		}
 
 		if !passwordOk {
-			return nil, fmt.Errorf("Neither IonosCloud token, nor IonosCloud password has been provided")
+			return nil, fmt.Errorf("neither IonosCloud token, nor IonosCloud password has been provided")
 		}
 	} else {
 		if usernameOk || passwordOk {
-			return nil, fmt.Errorf("Only provide IonosCloud token OR IonosCloud username/password.")
+			return nil, fmt.Errorf("only provide IonosCloud token OR IonosCloud username/password")
 		}
 	}
 
 	cleanedUrl := cleanURL(d.Get("endpoint").(string))
-
-	config := Config{
-		Username: username.(string),
-		Password: password.(string),
-		Endpoint: cleanedUrl,
-		Retries:  d.Get("retries").(int),
-		Token:    token.(string),
-	}
 
 	newConfig := ionoscloud.NewConfiguration(username.(string), password.(string), token.(string))
 	if len(cleanedUrl) > 0 {
@@ -162,14 +149,7 @@ func providerConfigure(d *schema.ResourceData, terraformVersion string) (interfa
 	newConfig.UserAgent = httpclient.TerraformUserAgent(terraformVersion)
 	newClient := ionoscloud.NewAPIClient(newConfig)
 
-	legacyClient, err := config.Client(terraformVersion)
-	if err != nil {
-		return nil, err
-	}
-	return SdkBundle{
-		LegacyClient: legacyClient,
-		Client:       newClient,
-	}, nil
+	return newClient, nil
 }
 
 // cleanURL makes sure trailing slash does not corrupt the state
@@ -213,28 +193,34 @@ func IsRequestFailed(err error) bool {
 // resourceStateRefreshFunc tracks progress of a request
 func resourceStateRefreshFunc(meta interface{}, path string) resource.StateRefreshFunc {
 	return func() (interface{}, string, error) {
-		client := meta.(SdkBundle).LegacyClient
+		client := meta.(*ionoscloud.APIClient)
 
 		fmt.Printf("[INFO] Checking PATH %s\n", path)
 		if path == "" {
-			return nil, "", fmt.Errorf("Can not check a state when path is empty")
+			return nil, "", fmt.Errorf("can not check a state when path is empty")
 		}
 
-		request, err := client.GetRequestStatus(path)
+		request, _, err := client.GetRequestStatus(context.Background(), path)
 
 		if err != nil {
-			return nil, "", fmt.Errorf("Request failed with following error: %s", err)
+			return nil, "", fmt.Errorf("request failed with following error: %s", err)
 		}
 
-		if request.Metadata.Status == "FAILED" {
-			return nil, "", RequestFailedError{fmt.Sprintf("Request failed with following error: %s", request.Metadata.Message)}
+		if *request.Metadata.Status == "FAILED" {
+			var msg string
+			if request.Metadata.Message != nil {
+				msg = fmt.Sprintf("Request failed with following error: %s", *request.Metadata.Message)
+			} else {
+				msg = "Request failed with an unknown error"
+			}
+			return nil, "", RequestFailedError{msg}
 		}
 
-		if request.Metadata.Status == "DONE" {
+		if *request.Metadata.Status == "DONE" {
 			return request, "DONE", nil
 		}
 
-		return nil, request.Metadata.Status, nil
+		return nil, *request.Metadata.Status, nil
 	}
 }
 

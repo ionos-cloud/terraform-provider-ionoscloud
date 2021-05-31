@@ -1,3 +1,5 @@
+// +build k8s
+
 package ionoscloud
 
 import (
@@ -72,7 +74,7 @@ resource "ionoscloud_k8s_node_pool" "test_ds_k8s_node_pool" {
 	ram_size				= 2048
 	availability_zone 		= "AUTO"
 	storage_type			= "HDD"
-	storage_size			= 10
+	storage_size			= 15
 	k8s_version				= "1.20.6"
 }
 `
@@ -99,9 +101,9 @@ resource "ionoscloud_k8s_node_pool" "test_ds_k8s_node_pool" {
 	ram_size					= 2048
 	availability_zone = "AUTO"
 	storage_type			= "HDD"
-	storage_size			= 10
+	storage_size			= 15
 	k8s_version				= "1.20.6"
-  #	public_ips				= [ "85.184.250.211", "157.97.107.226", "157.97.107.242" ]
+  #	public_ips				= [ "158.222.102.239", "158.222.102.241", "158.222.102.242" ]
   # public_ips				= [ ]
   #   public_ips        = [ ]
 }
@@ -115,7 +117,7 @@ data "ionoscloud_k8s_node_pool" "test_ds_k8s_node_pool" {
 const testAccDataSourceProfitBricksK8sNodePoolMatchName = `
 resource "ionoscloud_datacenter" "test_ds_k8s_datacenter" {
   name              = "test_datacenter"
-  location          = "de/fra"
+  location          = "us/las"
   description       = "test datacenter"
 }
 
@@ -134,15 +136,15 @@ resource "ionoscloud_k8s_node_pool" "test_ds_k8s_node_pool" {
 	ram_size					= 2048
 	availability_zone = "AUTO"
 	storage_type			= "HDD"
-	storage_size			= 10
+	storage_size			= 15
 	k8s_version				= "1.20.6"
-  #	public_ips				= [ "85.184.250.211", "157.97.107.226", "157.97.107.242" ]
+  #	public_ips				= [ "158.222.102.239", "158.222.102.241", "158.222.102.242" ]
   # public_ips				= [ ]
   #   public_ips        = [ ]
 }
 
 data "ionoscloud_k8s_node_pool" "test_ds_k8s_node_pool" {
 	k8s_cluster_id 	= ionoscloud_k8s_cluster.test_ds_k8s_cluster.id
-	name			= "_nodepool"
+	name			= "test_nodepool"
 }
 `

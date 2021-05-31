@@ -5,7 +5,7 @@ import (
 	"errors"
 	"fmt"
 	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
-	ionoscloud "github.com/ionos-cloud/sdk-go/v5"
+	ionoscloud "github.com/ionos-cloud/sdk-go/v6"
 	"strings"
 )
 
@@ -90,7 +90,7 @@ func dataSourceNatGatewayRule() *schema.Resource {
 }
 
 func dataSourceNatGatewayRuleRead(d *schema.ResourceData, meta interface{}) error {
-	client := meta.(SdkBundle).Client
+	client := meta.(*ionoscloud.APIClient)
 
 	datacenterId, dcIdOk := d.GetOk("datacenter_id")
 	if !dcIdOk {
@@ -164,14 +164,14 @@ func dataSourceNatGatewayRuleRead(d *schema.ResourceData, meta interface{}) erro
 		return errors.New("nat gateway rule not found")
 	}
 
-	if err = setNatGatewayRuleData(d, &natGatewayRule, client); err != nil {
+	if err = setNatGatewayRuleData(d, &natGatewayRule); err != nil {
 		return err
 	}
 
 	return nil
 }
 
-func setNatGatewayRuleData(d *schema.ResourceData, natGatewayRule *ionoscloud.NatGatewayRule, client *ionoscloud.APIClient) error {
+func setNatGatewayRuleData(d *schema.ResourceData, natGatewayRule *ionoscloud.NatGatewayRule) error {
 
 	if natGatewayRule.Id != nil {
 		d.SetId(*natGatewayRule.Id)
@@ -184,42 +184,42 @@ func setNatGatewayRuleData(d *schema.ResourceData, natGatewayRule *ionoscloud.Na
 		if natGatewayRule.Properties.Name != nil {
 			err := d.Set("name", *natGatewayRule.Properties.Name)
 			if err != nil {
-				return fmt.Errorf("Error while setting name property for nat gateway %s: %s", d.Id(), err)
+				return fmt.Errorf("error while setting name property for nat gateway %s: %s", d.Id(), err)
 			}
 		}
 
 		if natGatewayRule.Properties.Type != nil {
 			err := d.Set("type", *natGatewayRule.Properties.Type)
 			if err != nil {
-				return fmt.Errorf("Error while setting type property for nat gateway %s: %s", d.Id(), err)
+				return fmt.Errorf("error while setting type property for nat gateway %s: %s", d.Id(), err)
 			}
 		}
 
 		if natGatewayRule.Properties.Protocol != nil {
 			err := d.Set("protocol", *natGatewayRule.Properties.Protocol)
 			if err != nil {
-				return fmt.Errorf("Error while setting protocol property for nat gateway %s: %s", d.Id(), err)
+				return fmt.Errorf("error while setting protocol property for nat gateway %s: %s", d.Id(), err)
 			}
 		}
 
 		if natGatewayRule.Properties.SourceSubnet != nil {
 			err := d.Set("source_subnet", *natGatewayRule.Properties.SourceSubnet)
 			if err != nil {
-				return fmt.Errorf("Error while setting source_subnet property for nat gateway %s: %s", d.Id(), err)
+				return fmt.Errorf("error while setting source_subnet property for nat gateway %s: %s", d.Id(), err)
 			}
 		}
 
 		if natGatewayRule.Properties.PublicIp != nil {
 			err := d.Set("public_ip", *natGatewayRule.Properties.PublicIp)
 			if err != nil {
-				return fmt.Errorf("Error while setting public_ip property for nat gateway %s: %s", d.Id(), err)
+				return fmt.Errorf("error while setting public_ip property for nat gateway %s: %s", d.Id(), err)
 			}
 		}
 
 		if natGatewayRule.Properties.TargetSubnet != nil {
 			err := d.Set("target_subnet", *natGatewayRule.Properties.TargetSubnet)
 			if err != nil {
-				return fmt.Errorf("Error while setting target_subnet property for nat gateway %s: %s", d.Id(), err)
+				return fmt.Errorf("error while setting target_subnet property for nat gateway %s: %s", d.Id(), err)
 			}
 		}
 
@@ -231,7 +231,7 @@ func setNatGatewayRuleData(d *schema.ResourceData, natGatewayRule *ionoscloud.Na
 			},
 			})
 			if err != nil {
-				return fmt.Errorf("Error while setting target_port_range property for nat gateway %s: %s", d.Id(), err)
+				return fmt.Errorf("error while setting target_port_range property for nat gateway %s: %s", d.Id(), err)
 			}
 		}
 	}

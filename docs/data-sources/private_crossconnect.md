@@ -20,7 +20,7 @@ data "ionoscloud_private_crossconnect" "pcc_example" {
 
 ## Argument Reference
 
-* `name` - (Optional) Name or part of the name of an existing private crossconnect that you want to search for.
+* `name` - (Optional) Name of an existing private crossconnect that you want to search for.
 * `id` - (Optional) ID of the private crossconnect you want to search for.
 
 Either `name` or `id` must be provided. If none, or both are provided, the datasource will return an error.

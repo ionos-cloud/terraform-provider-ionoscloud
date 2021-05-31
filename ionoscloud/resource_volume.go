@@ -3,7 +3,8 @@ package ionoscloud
 import (
 	"context"
 	"fmt"
-	ionoscloud "github.com/ionos-cloud/sdk-go/v5"
+	"github.com/hashicorp/terraform-plugin-sdk/helper/validation"
+	ionoscloud "github.com/ionos-cloud/sdk-go/v6"
 	"log"
 
 	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
@@ -25,8 +26,9 @@ func resourceVolume() *schema.Resource {
 				Required: true,
 			},
 			"disk_type": {
-				Type:     schema.TypeString,
-				Required: true,
+				Type:         schema.TypeString,
+				Required:     true,
+				ValidateFunc: validation.All(validation.StringIsNotWhiteSpace),
 			},
 			"image_password": {
 				Type:     schema.TypeString,
@@ -58,13 +60,15 @@ func resourceVolume() *schema.Resource {
 				Optional: true,
 			},
 			"server_id": {
-				Type:     schema.TypeString,
-				Required: true,
+				Type:         schema.TypeString,
+				Required:     true,
+				ValidateFunc: validation.All(validation.StringIsNotWhiteSpace),
 			},
 			"datacenter_id": {
-				Type:     schema.TypeString,
-				Required: true,
-				ForceNew: true,
+				Type:         schema.TypeString,
+				Required:     true,
+				ForceNew:     true,
+				ValidateFunc: validation.All(validation.StringIsNotWhiteSpace),
 			},
 			"cpu_hot_plug": {
 				Type:     schema.TypeBool,
@@ -101,6 +105,11 @@ func resourceVolume() *schema.Resource {
 				Computed: true,
 				Optional: true,
 			},
+			"user_data": {
+				Type:     schema.TypeString,
+				Optional: true,
+				Computed: true,
+			},
 		},
 		Timeouts: &resourceDefaultTimeouts,
 	}
@@ -108,7 +117,7 @@ func resourceVolume() *schema.Resource {
 
 func resourceVolumeCreate(d *schema.ResourceData, meta interface{}) error {
 
-	client := meta.(SdkBundle).Client
+	client := meta.(*ionoscloud.APIClient)
 
 	var ssh_keypath []interface{}
 	isSnapshot := false
@@ -125,7 +134,7 @@ func resourceVolumeCreate(d *schema.ResourceData, meta interface{}) error {
 			log.Printf("[DEBUG] Reading file %s", path)
 			publicKey, err := readPublicKey(path.(string))
 			if err != nil {
-				return fmt.Errorf("Error fetching sshkey from file (%s) (%s)", path, err.Error())
+				return fmt.Errorf("error fetching sshkey from file (%s) (%s)", path, err.Error())
 			}
 			publicKeys = append(publicKeys, publicKey)
 		}
@@ -146,7 +155,7 @@ func resourceVolumeCreate(d *schema.ResourceData, meta interface{}) error {
 			_, rsp := err.(ionoscloud.GenericOpenAPIError)
 
 			if err != nil {
-				return fmt.Errorf("Error fetching image %s: (%s) - %+v", image, err, rsp)
+				return fmt.Errorf("error fetching image %s: (%s) - %+v", image, err, rsp)
 			}
 
 			if apiResponse.Response.StatusCode == 404 {
@@ -255,6 +264,17 @@ func resourceVolumeCreate(d *schema.ResourceData, meta interface{}) error {
 	} else {
 		volume.Properties.BackupunitId = nil
 	}
+
+	userData := d.Get("user_data").(string)
+	if userData != "" {
+		if image == "" && image_alias == "" {
+			return fmt.Errorf("It is mandatory to provied either public image or imageAlias that has cloud-init compatibility in conjunction with backup unit id property ")
+		} else {
+			volume.Properties.UserData = &userData
+		}
+	} else {
+		volume.Properties.UserData = nil
+	}
 	ctx, cancel := context.WithTimeout(context.Background(), *resourceDefaultTimeouts.Default)
 
 	if cancel != nil {
@@ -263,7 +283,7 @@ func resourceVolumeCreate(d *schema.ResourceData, meta interface{}) error {
 	volume, apiResponse, err := client.VolumesApi.DatacentersVolumesPost(ctx, dcId).Volume(volume).Execute()
 
 	if err != nil {
-		return fmt.Errorf("An error occured while creating a volume: %s", err)
+		return fmt.Errorf("an error occured while creating a volume: %s", err)
 	}
 
 	d.SetId(*volume.Id)
@@ -282,13 +302,13 @@ func resourceVolumeCreate(d *schema.ResourceData, meta interface{}) error {
 	volume, apiResponse, err = client.ServersApi.DatacentersServersVolumesPost(ctx, dcId, serverId).Volume(volumeToAttach).Execute()
 
 	if err != nil {
-		return fmt.Errorf("An error occured while attaching a volume dcId: %s server_id: %s ID: %s Response: %s", dcId, serverId, *volume.Id, err)
+		return fmt.Errorf("an error occured while attaching a volume dcId: %s server_id: %s ID: %s Response: %s", dcId, serverId, *volume.Id, err)
 	}
 
 	sErr := d.Set("server_id", serverId)
 
 	if sErr != nil {
-		return fmt.Errorf("Error while setting serverId %s: %s", serverId, sErr)
+		return fmt.Errorf("error while setting serverId %s: %s", serverId, sErr)
 	}
 
 	// Wait, catching any errors
@@ -298,7 +318,7 @@ func resourceVolumeCreate(d *schema.ResourceData, meta interface{}) error {
 			// Request failed, so resource was not created, delete resource from state file
 			sErr := d.Set("server_id", "")
 			if sErr != nil {
-				return fmt.Errorf("Error while setting serverId: %s", sErr)
+				return fmt.Errorf("error while setting serverId: %s", sErr)
 			}
 		}
 		return errState
@@ -308,14 +328,13 @@ func resourceVolumeCreate(d *schema.ResourceData, meta interface{}) error {
 }
 
 func resourceVolumeRead(d *schema.ResourceData, meta interface{}) error {
+	client := meta.(*ionoscloud.APIClient)
 
-	client := meta.(SdkBundle).Client
 	dcId := d.Get("datacenter_id").(string)
 	serverID := d.Get("server_id").(string)
 	volumeID := d.Id()
 
 	ctx, cancel := context.WithTimeout(context.Background(), *resourceDefaultTimeouts.Default)
-
 	if cancel != nil {
 		defer cancel()
 	}
@@ -324,16 +343,21 @@ func resourceVolumeRead(d *schema.ResourceData, meta interface{}) error {
 
 	if err != nil {
 		if _, ok := err.(ionoscloud.GenericOpenAPIError); ok {
-			if apiResponse.Response.StatusCode == 404 {
+			if apiResponse != nil && apiResponse.Response.StatusCode == 404 {
 				d.SetId("")
 				return nil
 			}
 		}
-		return fmt.Errorf("Error occured while fetching a volume ID %s %s", d.Id(), err)
+		return fmt.Errorf("error occured while fetching a volume ID %s %s", d.Id(), err)
 	}
 
+<<<<<<< HEAD
 	if apiResponse.Response.StatusCode > 299 {
-		return fmt.Errorf("An error occured while fetching a volume ID %s", d.Id())
+		return fmt.Errorf("an error occured while fetching a volume ID %s", d.Id())
+=======
+	if apiResponse != nil && apiResponse.Response.StatusCode > 299 {
+		return fmt.Errorf("an error occured while fetching a volume ID %s %s", d.Id(), string(apiResponse.Payload))
+>>>>>>> master
 
 	}
 
@@ -345,84 +369,91 @@ func resourceVolumeRead(d *schema.ResourceData, meta interface{}) error {
 	if volume.Properties.Name != nil {
 		err := d.Set("name", *volume.Properties.Name)
 		if err != nil {
-			return fmt.Errorf("Error while setting name property for volume %s: %s", d.Id(), err)
+			return fmt.Errorf("error while setting name property for volume %s: %s", d.Id(), err)
 		}
 	}
 
 	if volume.Properties.Type != nil {
 		err := d.Set("disk_type", *volume.Properties.Type)
 		if err != nil {
-			return fmt.Errorf("Error while setting type property for volume %s: %s", d.Id(), err)
+			return fmt.Errorf("error while setting type property for volume %s: %s", d.Id(), err)
 		}
 	}
 
 	if volume.Properties.Size != nil {
 		err := d.Set("size", *volume.Properties.Size)
 		if err != nil {
-			return fmt.Errorf("Error while setting size property for volume %s: %s", d.Id(), err)
+			return fmt.Errorf("error while setting size property for volume %s: %s", d.Id(), err)
 		}
 	}
 
 	if volume.Properties.Bus != nil {
 		err := d.Set("bus", *volume.Properties.Bus)
 		if err != nil {
-			return fmt.Errorf("Error while setting bus property for volume %s: %s", d.Id(), err)
+			return fmt.Errorf("error while setting bus property for volume %s: %s", d.Id(), err)
 		}
 	}
 
 	if volume.Properties.Image != nil {
 		err = d.Set("image", *volume.Properties.Image)
 		if err != nil {
-			return fmt.Errorf("Error while setting image property for volume %s: %s", d.Id(), err)
+			return fmt.Errorf("error while setting image property for volume %s: %s", d.Id(), err)
 		}
 	}
 
 	if volume.Properties.CpuHotPlug != nil {
 		err := d.Set("cpu_hot_plug", *volume.Properties.CpuHotPlug)
 		if err != nil {
-			return fmt.Errorf("Error while setting cpu_hot_plug property for volume %s: %s", d.Id(), err)
+			return fmt.Errorf("error while setting cpu_hot_plug property for volume %s: %s", d.Id(), err)
 		}
 	}
 
 	if volume.Properties.RamHotPlug != nil {
 		err := d.Set("ram_hot_plug", *volume.Properties.RamHotPlug)
 		if err != nil {
-			return fmt.Errorf("Error while setting ram_hot_plug property for volume %s: %s", d.Id(), err)
+			return fmt.Errorf("error while setting ram_hot_plug property for volume %s: %s", d.Id(), err)
 		}
 	}
 
 	if volume.Properties.NicHotPlug != nil {
 		err := d.Set("nic_hot_plug", *volume.Properties.NicHotPlug)
 		if err != nil {
-			return fmt.Errorf("Error while setting nic_hot_plug property for volume %s: %s", d.Id(), err)
+			return fmt.Errorf("error while setting nic_hot_plug property for volume %s: %s", d.Id(), err)
 		}
 	}
 
 	if volume.Properties.NicHotUnplug != nil {
 		err := d.Set("nic_hot_unplug", *volume.Properties.NicHotUnplug)
 		if err != nil {
-			return fmt.Errorf("Error while setting nic_hot_unplug property for volume %s: %s", d.Id(), err)
+			return fmt.Errorf("error while setting nic_hot_unplug property for volume %s: %s", d.Id(), err)
 		}
 	}
 
 	if volume.Properties.DiscVirtioHotPlug != nil {
 		err := d.Set("disc_virtio_hot_plug", *volume.Properties.DiscVirtioHotPlug)
 		if err != nil {
-			return fmt.Errorf("Error while setting disc_virtio_hot_plug property for volume %s: %s", d.Id(), err)
+			return fmt.Errorf("error while setting disc_virtio_hot_plug property for volume %s: %s", d.Id(), err)
 		}
 	}
 
 	if volume.Properties.DiscVirtioHotUnplug != nil {
 		err := d.Set("disc_virtio_hot_unplug", *volume.Properties.DiscVirtioHotUnplug)
 		if err != nil {
-			return fmt.Errorf("Error while setting disc_virtio_hot_unplug property for volume %s: %s", d.Id(), err)
+			return fmt.Errorf("error while setting disc_virtio_hot_unplug property for volume %s: %s", d.Id(), err)
 		}
 	}
 
 	if volume.Properties.BackupunitId != nil {
 		err := d.Set("backup_unit_id", *volume.Properties.BackupunitId)
 		if err != nil {
-			return fmt.Errorf("Error while setting backup_unit_id property for volume %s: %s", d.Id(), err)
+			return fmt.Errorf("error while setting backup_unit_id property for volume %s: %s", d.Id(), err)
+		}
+	}
+
+	if volume.Properties.UserData != nil {
+		err := d.Set("user_data", *volume.Properties.UserData)
+		if err != nil {
+			return fmt.Errorf("error while setting user_data property for volume %s: %s", d.Id(), err)
 		}
 	}
 
@@ -430,7 +461,8 @@ func resourceVolumeRead(d *schema.ResourceData, meta interface{}) error {
 }
 
 func resourceVolumeUpdate(d *schema.ResourceData, meta interface{}) error {
-	client := meta.(SdkBundle).Client
+	client := meta.(*ionoscloud.APIClient)
+
 	properties := ionoscloud.VolumeProperties{}
 	dcId := d.Get("datacenter_id").(string)
 
@@ -459,19 +491,16 @@ func resourceVolumeUpdate(d *schema.ResourceData, meta interface{}) error {
 		newValueStr := newValue.(string)
 		properties.AvailabilityZone = &newValueStr
 	}
-
 	if d.HasChange("cpu_hot_plug") {
 		_, newValue := d.GetChange("cpu_hot_plug")
 		newValueBool := newValue.(bool)
 		properties.CpuHotPlug = &newValueBool
 	}
-
 	if d.HasChange("ram_hot_plug") {
 		_, newValue := d.GetChange("ram_hot_plug")
 		newValueBool := newValue.(bool)
 		properties.RamHotPlug = &newValueBool
 	}
-
 	if d.HasChange("nic_hot_plug") {
 		_, newValue := d.GetChange("nic_hot_plug")
 		newValueBool := newValue.(bool)
@@ -500,6 +529,10 @@ func resourceVolumeUpdate(d *schema.ResourceData, meta interface{}) error {
 		return fmt.Errorf("Backup unit id property is immutable")
 	}
 
+	if d.HasChange("user_data") {
+		return fmt.Errorf("User data property of resource volume is immutable ")
+	}
+
 	ctx, cancel := context.WithTimeout(context.Background(), *resourceDefaultTimeouts.Update)
 
 	if cancel != nil {
@@ -509,7 +542,7 @@ func resourceVolumeUpdate(d *schema.ResourceData, meta interface{}) error {
 	volume, apiResponse, err := client.VolumesApi.DatacentersVolumesPatch(ctx, dcId, d.Id()).Volume(properties).Execute()
 
 	if err != nil {
-		return fmt.Errorf("An error occured while updating a volume ID %s %s", d.Id(), err)
+		return fmt.Errorf("an error occured while updating a volume ID %s %s", d.Id(), err)
 	}
 
 	// Wait, catching any errors
@@ -518,8 +551,13 @@ func resourceVolumeUpdate(d *schema.ResourceData, meta interface{}) error {
 		return errState
 	}
 
+<<<<<<< HEAD
 	if apiResponse.Response.StatusCode > 299 {
-		return fmt.Errorf("An error occured while updating a volume ID %s", d.Id())
+		return fmt.Errorf("an error occured while updating a volume ID %s", d.Id())
+=======
+	if apiResponse != nil && apiResponse.Response.StatusCode > 299 {
+		return fmt.Errorf("an error occured while updating a volume ID %s %s", d.Id(), string(apiResponse.Payload))
+>>>>>>> master
 
 	}
 
@@ -528,7 +566,7 @@ func resourceVolumeUpdate(d *schema.ResourceData, meta interface{}) error {
 		serverID := newValue.(string)
 		volumeAttach, apiResponse, err := client.ServersApi.DatacentersServersVolumesPost(ctx, dcId, serverID).Volume(volume).Execute()
 		if err != nil {
-			return fmt.Errorf("An error occured while attaching a volume dcId: %s server_id: %s ID: %s Response: %s", dcId, serverID, *volumeAttach.Id, err)
+			return fmt.Errorf("an error occured while attaching a volume dcId: %s server_id: %s ID: %s Response: %s", dcId, serverID, *volumeAttach.Id, err)
 		}
 
 		// Wait, catching any errors
@@ -542,18 +580,18 @@ func resourceVolumeUpdate(d *schema.ResourceData, meta interface{}) error {
 }
 
 func resourceVolumeDelete(d *schema.ResourceData, meta interface{}) error {
-	client := meta.(SdkBundle).Client
+	client := meta.(*ionoscloud.APIClient)
+
 	dcId := d.Get("datacenter_id").(string)
 
 	ctx, cancel := context.WithTimeout(context.Background(), *resourceDefaultTimeouts.Delete)
-
 	if cancel != nil {
 		defer cancel()
 	}
 
 	_, apiResponse, err := client.VolumesApi.DatacentersVolumesDelete(ctx, dcId, d.Id()).Execute()
 	if err != nil {
-		return fmt.Errorf("An error occured while deleting a volume ID %s %s", d.Id(), err)
+		return fmt.Errorf("an error occured while deleting a volume ID %s %s", d.Id(), err)
 
 	}
 

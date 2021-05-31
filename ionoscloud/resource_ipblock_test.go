@@ -3,7 +3,7 @@ package ionoscloud
 import (
 	"context"
 	"fmt"
-	ionoscloud "github.com/ionos-cloud/sdk-go/v5"
+	ionoscloud "github.com/ionos-cloud/sdk-go/v6"
 	"testing"
 
 	"github.com/hashicorp/terraform-plugin-sdk/helper/resource"
@@ -42,7 +42,7 @@ func TestAccIPBlock_Basic(t *testing.T) {
 }
 
 func testAccCheckIPBlockDestroyCheck(s *terraform.State) error {
-	client := testAccProvider.Meta().(SdkBundle).Client
+	client := testAccProvider.Meta().(*ionoscloud.APIClient)
 
 	ctx, _ := context.WithTimeout(context.Background(), *resourceDefaultTimeouts.Delete)
 	for _, rs := range s.RootModule().Resources {
@@ -53,11 +53,11 @@ func testAccCheckIPBlockDestroyCheck(s *terraform.State) error {
 		_, apiResponse, err := client.IPBlocksApi.IpblocksFindById(ctx, rs.Primary.ID).Execute()
 
 		if apiError, ok := err.(ionoscloud.GenericOpenAPIError); ok {
-			if apiResponse.Response.StatusCode != 404 {
+			if apiResponse != nil && apiResponse.Response.StatusCode != 404 {
 				return fmt.Errorf("IPBlock still exists %s %s", rs.Primary.ID, apiError)
 			}
 		} else {
-			return fmt.Errorf("Unable to fetching IPBlock %s %s", rs.Primary.ID, err)
+			return fmt.Errorf("unable to fetching IPBlock %s %s", rs.Primary.ID, err)
 		}
 	}
 
@@ -71,7 +71,7 @@ func testAccCheckIPBlockAttributes(n string, location string) resource.TestCheck
 			return fmt.Errorf("testAccCheckLanAttributes: Not found: %s", n)
 		}
 		if rs.Primary.Attributes["location"] != location {
-			return fmt.Errorf("Bad name: %s", rs.Primary.Attributes["location"])
+			return fmt.Errorf("bad name: %s", rs.Primary.Attributes["location"])
 		}
 
 		return nil
@@ -80,7 +80,7 @@ func testAccCheckIPBlockAttributes(n string, location string) resource.TestCheck
 
 func testAccCheckIPBlockExists(n string, ipblock *ionoscloud.IpBlock) resource.TestCheckFunc {
 	return func(s *terraform.State) error {
-		client := testAccProvider.Meta().(SdkBundle).Client
+		client := testAccProvider.Meta().(*ionoscloud.APIClient)
 
 		rs, ok := s.RootModule().Resources[n]
 		if !ok {
@@ -88,14 +88,14 @@ func testAccCheckIPBlockExists(n string, ipblock *ionoscloud.IpBlock) resource.T
 		}
 
 		if rs.Primary.ID == "" {
-			return fmt.Errorf("No Record ID is set")
+			return fmt.Errorf("no Record ID is set")
 		}
 
 		ctx, _ := context.WithTimeout(context.Background(), *resourceDefaultTimeouts.Default)
 		foundIP, _, err := client.IPBlocksApi.IpblocksFindById(ctx, rs.Primary.ID).Execute()
 
 		if err != nil {
-			return fmt.Errorf("Error occured while fetching IP Block: %s", rs.Primary.ID)
+			return fmt.Errorf("error occured while fetching IP Block: %s", rs.Primary.ID)
 		}
 		if *foundIP.Id != rs.Primary.ID {
 			return fmt.Errorf("Record not found")

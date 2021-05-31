@@ -4,10 +4,9 @@ import (
 	"context"
 	"errors"
 	"fmt"
-	ionoscloud "github.com/ionos-cloud/sdk-go/v5"
-	"strings"
-
 	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
+	"github.com/hashicorp/terraform-plugin-sdk/helper/validation"
+	ionoscloud "github.com/ionos-cloud/sdk-go/v6"
 )
 
 func dataSourceK8sNodePool() *schema.Resource {
@@ -15,9 +14,10 @@ func dataSourceK8sNodePool() *schema.Resource {
 		Read: dataSourceK8sReadNodePool,
 		Schema: map[string]*schema.Schema{
 			"k8s_cluster_id": {
-				Type:        schema.TypeString,
-				Required:    true,
-				Description: "The UUID of an existing kubernetes cluster",
+				Type:         schema.TypeString,
+				Required:     true,
+				Description:  "The UUID of an existing kubernetes cluster",
+				ValidateFunc: validation.All(validation.StringIsNotWhiteSpace),
 			},
 			"id": {
 				Type:     schema.TypeString,
@@ -186,7 +186,7 @@ func dataSourceK8sNodePool() *schema.Resource {
 }
 
 func dataSourceK8sReadNodePool(d *schema.ResourceData, meta interface{}) error {
-	client := meta.(SdkBundle).Client
+	client := meta.(*ionoscloud.APIClient)
 
 	clusterId := d.Get("k8s_cluster_id")
 	id, idOk := d.GetOk("id")
@@ -228,24 +228,26 @@ func dataSourceK8sReadNodePool(d *schema.ResourceData, meta interface{}) error {
 			return fmt.Errorf("an error occurred while fetching k8s nodepools: %s", err.Error())
 		}
 
+		found := false
 		if clusters.Items != nil {
 			for _, c := range *clusters.Items {
 				tmpNodePool, _, err := client.KubernetesApi.K8sNodepoolsFindById(ctx, clusterId.(string), *c.Id).Execute()
 				if err != nil {
 					return fmt.Errorf("an error occurred while fetching k8s nodePool with ID %s: %s", *c.Id, err.Error())
 				}
-				if tmpNodePool.Properties.Name != nil && strings.Contains(*tmpNodePool.Properties.Name, name.(string)) {
+				if tmpNodePool.Properties.Name != nil && *tmpNodePool.Properties.Name == name.(string) {
 					/* lan found */
 					nodePool = tmpNodePool
+					found = true
 					break
 				}
 			}
 		}
 
-	}
+		if !found {
+			return errors.New("k8s nodePool not found")
+		}
 
-	if &nodePool == nil {
-		return errors.New("k8s nodePool not found")
 	}
 
 	if err = setK8sNodePoolData(d, &nodePool); err != nil {
@@ -400,7 +402,7 @@ func setK8sNodePoolData(d *schema.ResourceData, nodePool *ionoscloud.KubernetesN
 
 		if len(nodePoolLans) > 0 {
 			if err := d.Set("lans", nodePoolLans); err != nil {
-				return fmt.Errorf("Error while setting lans property for k8sNodepool %s: %s", d.Id(), err)
+				return fmt.Errorf("error while setting lans property for k8sNodepool %s: %s", d.Id(), err)
 			}
 		}
 	}

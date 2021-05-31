@@ -4,10 +4,8 @@ import (
 	"context"
 	"errors"
 	"fmt"
-	ionoscloud "github.com/ionos-cloud/sdk-go/v5"
-	"strings"
-
 	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
+	ionoscloud "github.com/ionos-cloud/sdk-go/v6"
 )
 
 func dataSourcePcc() *schema.Resource {
@@ -163,7 +161,7 @@ func setPccDataSource(d *schema.ResourceData, pcc *ionoscloud.PrivateCrossConnec
 }
 
 func dataSourcePccRead(d *schema.ResourceData, meta interface{}) error {
-	client := meta.(SdkBundle).Client
+	client := meta.(*ionoscloud.APIClient)
 
 	id, idOk := d.GetOk("id")
 	name, nameOk := d.GetOk("name")
@@ -200,20 +198,24 @@ func dataSourcePccRead(d *schema.ResourceData, meta interface{}) error {
 			return fmt.Errorf("an error occurred while fetching pccs: %s", err.Error())
 		}
 
-		for _, p := range *pccs.Items {
-			if strings.Contains(*p.Properties.Name, name.(string)) {
-				/* lan found */
-				pcc, _, err = client.PrivateCrossConnectsApi.PccsFindById(ctx, *p.Id).Execute()
-				if err != nil {
-					return fmt.Errorf("an error occurred while fetching the pcc with ID %s: %s", *p.Id, err)
+		found := false
+		if pccs.Items != nil {
+			for _, p := range *pccs.Items {
+				if p.Properties.Name != nil && *p.Properties.Name == name.(string) {
+					/* lan found */
+					pcc, _, err = client.PrivateCrossConnectsApi.PccsFindById(ctx, *p.Id).Execute()
+					if err != nil {
+						return fmt.Errorf("an error occurred while fetching the pcc with ID %s: %s", *p.Id, err)
+					}
+					found = true
+					break
 				}
-				break
 			}
 		}
-	}
+		if !found {
+			return errors.New("pcc not found")
+		}
 
-	if &pcc == nil {
-		return errors.New("pcc not found")
 	}
 
 	if err = setPccDataSource(d, &pcc); err != nil {

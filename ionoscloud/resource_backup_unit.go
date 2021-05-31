@@ -3,7 +3,8 @@ package ionoscloud
 import (
 	"context"
 	"fmt"
-	ionoscloud "github.com/ionos-cloud/sdk-go/v5"
+	"github.com/hashicorp/terraform-plugin-sdk/helper/validation"
+	ionoscloud "github.com/ionos-cloud/sdk-go/v6"
 	"log"
 	"time"
 
@@ -21,20 +22,23 @@ func resourceBackupUnit() *schema.Resource {
 		},
 		Schema: map[string]*schema.Schema{
 			"name": {
-				Type:        schema.TypeString,
-				Description: "Alphanumeric name you want assigned to the backup unit.",
-				Required:    true,
+				Type:         schema.TypeString,
+				Description:  "Alphanumeric name you want assigned to the backup unit.",
+				Required:     true,
+				ValidateFunc: validation.All(validation.StringIsNotWhiteSpace),
 			},
 			"password": {
-				Type:        schema.TypeString,
-				Description: "The password you want assigned to the backup unit.",
-				Required:    true,
-				Sensitive:   true,
+				Type:         schema.TypeString,
+				Description:  "The password you want assigned to the backup unit.",
+				Required:     true,
+				Sensitive:    true,
+				ValidateFunc: validation.All(validation.StringIsNotWhiteSpace),
 			},
 			"email": {
-				Type:        schema.TypeString,
-				Description: "The e-mail address you want assigned to the backup unit.",
-				Required:    true,
+				Type:         schema.TypeString,
+				Description:  "The e-mail address you want assigned to the backup unit.",
+				Required:     true,
+				ValidateFunc: validation.All(validation.StringIsNotWhiteSpace),
 			},
 			"login": {
 				Type:        schema.TypeString,
@@ -47,7 +51,7 @@ func resourceBackupUnit() *schema.Resource {
 }
 
 func resourceBackupUnitCreate(d *schema.ResourceData, meta interface{}) error {
-	client := meta.(SdkBundle).Client
+	client := meta.(*ionoscloud.APIClient)
 
 	ctx, cancel := context.WithTimeout(context.Background(), *resourceDefaultTimeouts.Create)
 
@@ -71,7 +75,7 @@ func resourceBackupUnitCreate(d *schema.ResourceData, meta interface{}) error {
 
 	if err != nil {
 		d.SetId("")
-		return fmt.Errorf("Error creating backup unit: %s", err)
+		return fmt.Errorf("error creating backup unit: %s", err)
 	}
 
 	d.SetId(*createdBackupUnit.Id)
@@ -84,7 +88,7 @@ func resourceBackupUnitCreate(d *schema.ResourceData, meta interface{}) error {
 		backupUnitReady, rsErr := backupUnitReady(client, d, ctx)
 
 		if rsErr != nil {
-			return fmt.Errorf("Error while checking readiness status of backup unit %s: %s", d.Id(), rsErr)
+			return fmt.Errorf("error while checking readiness status of backup unit %s: %s", d.Id(), rsErr)
 		}
 
 		if backupUnitReady && rsErr == nil {
@@ -98,7 +102,7 @@ func resourceBackupUnitCreate(d *schema.ResourceData, meta interface{}) error {
 
 func resourceBackupUnitRead(d *schema.ResourceData, meta interface{}) error {
 
-	client := meta.(SdkBundle).Client
+	client := meta.(*ionoscloud.APIClient)
 
 	ctx, cancel := context.WithTimeout(context.Background(), *resourceDefaultTimeouts.Default)
 
@@ -109,20 +113,17 @@ func resourceBackupUnitRead(d *schema.ResourceData, meta interface{}) error {
 	backupUnit, apiResponse, err := client.BackupUnitsApi.BackupunitsFindById(ctx, d.Id()).Execute()
 
 	if err != nil {
-		if _, ok := err.(ionoscloud.GenericOpenAPIError); ok {
-			if apiResponse.Response.StatusCode == 404 {
-				d.SetId("")
-				return nil
-			}
+		if apiResponse != nil && apiResponse.Response.StatusCode == 404 {
+			d.SetId("")
+			return nil
 		}
-
-		return fmt.Errorf("Error while fetching backup unit %s: %s", d.Id(), err)
+		return fmt.Errorf("error while fetching backup unit %s: %s", d.Id(), err)
 	}
 
 	contractResources, _, cErr := client.ContractResourcesApi.ContractsGet(ctx).Execute()
 
 	if cErr != nil {
-		return fmt.Errorf("Error while fetching contract resources for backup unit %s: %s", d.Id(), cErr)
+		return fmt.Errorf("error while fetching contract resources for backup unit %s: %s", d.Id(), cErr)
 	}
 
 	log.Printf("[INFO] Successfully retreived contract resource for backup unit unit %s: %+v", d.Id(), contractResources)
@@ -130,21 +131,21 @@ func resourceBackupUnitRead(d *schema.ResourceData, meta interface{}) error {
 	if backupUnit.Properties.Name != nil {
 		err := d.Set("name", *backupUnit.Properties.Name)
 		if err != nil {
-			return fmt.Errorf("Error while setting name property for backup unit %s: %s", d.Id(), err)
+			return fmt.Errorf("error while setting name property for backup unit %s: %s", d.Id(), err)
 		}
 	}
 
 	if backupUnit.Properties.Email != nil {
 		epErr := d.Set("email", backupUnit.Properties.Email)
 		if epErr != nil {
-			return fmt.Errorf("Error while setting email property for backup unit %s: %s", d.Id(), epErr)
+			return fmt.Errorf("error while setting email property for backup unit %s: %s", d.Id(), epErr)
 		}
 	}
 
 	if backupUnit.Properties.Name != nil && contractResources.Id != nil {
 		err := d.Set("login", fmt.Sprintf("%s-%d", *backupUnit.Properties.Name, (*contractResources.Items)[0].Properties.ContractNumber))
 		if err != nil {
-			return fmt.Errorf("Error while setting login property for backup unit %s: %s", d.Id(), err)
+			return fmt.Errorf("error while setting login property for backup unit %s: %s", d.Id(), err)
 		}
 	}
 
@@ -154,7 +155,7 @@ func resourceBackupUnitRead(d *schema.ResourceData, meta interface{}) error {
 }
 
 func resourceBackupUnitUpdate(d *schema.ResourceData, meta interface{}) error {
-	client := meta.(SdkBundle).Client
+	client := meta.(*ionoscloud.APIClient)
 
 	request := ionoscloud.BackupUnit{}
 	request.Properties = &ionoscloud.BackupUnitProperties{}
@@ -192,14 +193,11 @@ func resourceBackupUnitUpdate(d *schema.ResourceData, meta interface{}) error {
 	_, apiResponse, err := client.BackupUnitsApi.BackupunitsPut(ctx, d.Id()).BackupUnit(request).Execute()
 
 	if err != nil {
-		if _, ok := err.(ionoscloud.GenericOpenAPIError); ok {
-			if apiResponse.Response.StatusCode == 404 {
-				d.SetId("")
-				return nil
-			}
-			return fmt.Errorf("Error while updating backup unit: %s", err)
+		if apiResponse != nil && apiResponse.Response.StatusCode == 404 {
+			d.SetId("")
+			return nil
 		}
-		return fmt.Errorf("Error while updating backup unit %s: %s", d.Id(), err)
+		return fmt.Errorf("error while updating backup unit %s: %s", d.Id(), err)
 	}
 
 	for {
@@ -209,7 +207,7 @@ func resourceBackupUnitUpdate(d *schema.ResourceData, meta interface{}) error {
 		backupUnitReady, rsErr := backupUnitReady(client, d, ctx)
 
 		if rsErr != nil {
-			return fmt.Errorf("Error while checking readiness status of backup unit %s: %s", d.Id(), rsErr)
+			return fmt.Errorf("error while checking readiness status of backup unit %s: %s", d.Id(), rsErr)
 		}
 
 		if backupUnitReady && rsErr == nil {
@@ -222,7 +220,7 @@ func resourceBackupUnitUpdate(d *schema.ResourceData, meta interface{}) error {
 }
 
 func resourceBackupUnitDelete(d *schema.ResourceData, meta interface{}) error {
-	client := meta.(SdkBundle).Client
+	client := meta.(*ionoscloud.APIClient)
 
 	ctx, cancel := context.WithTimeout(context.Background(), *resourceDefaultTimeouts.Delete)
 
@@ -232,15 +230,11 @@ func resourceBackupUnitDelete(d *schema.ResourceData, meta interface{}) error {
 	_, apiResponse, err := client.BackupUnitsApi.BackupunitsDelete(ctx, d.Id()).Execute()
 
 	if err != nil {
-		if _, ok := err.(ionoscloud.GenericOpenAPIError); ok {
-			if apiResponse.Response.StatusCode == 404 {
-				d.SetId("")
-				return nil
-			}
-			return fmt.Errorf("Error while deleting backup unit: %s", err)
+		if apiResponse != nil && apiResponse.Response.StatusCode == 404 {
+			d.SetId("")
+			return nil
 		}
-
-		return fmt.Errorf("Error while deleting backup unit %s: %s", d.Id(), err)
+		return fmt.Errorf("error while deleting backup unit %s: %s", d.Id(), err)
 	}
 
 	for {
@@ -250,7 +244,7 @@ func resourceBackupUnitDelete(d *schema.ResourceData, meta interface{}) error {
 		backupUnitDeleted, dsErr := backupUnitDeleted(client, d, ctx)
 
 		if dsErr != nil {
-			return fmt.Errorf("Error while checking deletion status of backup unit %s: %s", d.Id(), dsErr)
+			return fmt.Errorf("error while checking deletion status of backup unit %s: %s", d.Id(), dsErr)
 		}
 
 		if backupUnitDeleted && dsErr == nil {
@@ -266,7 +260,7 @@ func backupUnitReady(client *ionoscloud.APIClient, d *schema.ResourceData, c con
 	backupUnit, _, err := client.BackupUnitsApi.BackupunitsFindById(c, d.Id()).Execute()
 
 	if err != nil {
-		return true, fmt.Errorf("Error checking backup unit status: %s", err)
+		return true, fmt.Errorf("error checking backup unit status: %s", err)
 	}
 	return *backupUnit.Metadata.State == "AVAILABLE", nil
 }
@@ -275,12 +269,10 @@ func backupUnitDeleted(client *ionoscloud.APIClient, d *schema.ResourceData, c c
 	_, apiResponse, err := client.BackupUnitsApi.BackupunitsFindById(c, d.Id()).Execute()
 
 	if err != nil {
-		if _, ok := err.(ionoscloud.GenericOpenAPIError); ok {
-			if apiResponse.Response.StatusCode == 404 {
-				return true, nil
-			}
-			return true, fmt.Errorf("Error checking backup unit deletion status: %s", err)
+		if apiResponse != nil && apiResponse.Response.StatusCode == 404 {
+			return true, nil
 		}
+		return true, fmt.Errorf("error checking backup unit deletion status: %s", err)
 	}
 	return false, nil
 }

@@ -3,7 +3,7 @@ package ionoscloud
 import (
 	"context"
 	"fmt"
-	ionoscloud "github.com/ionos-cloud/sdk-go/v5"
+	ionoscloud "github.com/ionos-cloud/sdk-go/v6"
 	"testing"
 
 	"github.com/hashicorp/terraform-plugin-sdk/helper/resource"
@@ -58,7 +58,7 @@ func testAccCheckNetworkLoadBalancerForwardingRuleDestroyCheck(s *terraform.Stat
 				return fmt.Errorf("Network loadbalancer forwarding rule still exists %s %s", rs.Primary.ID, string(apiResponse.Payload))
 			}
 		} else {
-			return fmt.Errorf("Unable to fetch network loadbalancer forwarding rule %s %s", rs.Primary.ID, err)
+			return fmt.Errorf("unable to fetch network loadbalancer forwarding rule %s %s", rs.Primary.ID, err)
 		}
 	}
 
@@ -75,7 +75,7 @@ func testAccCheckNetworkLoadBalancerForwardingRuleExists(n string, networkLoadBa
 		}
 
 		if rs.Primary.ID == "" {
-			return fmt.Errorf("No Record ID is set")
+			return fmt.Errorf("no Record ID is set")
 		}
 
 		ctx, cancel := context.WithTimeout(context.Background(), *resourceDefaultTimeouts.Delete)
@@ -87,7 +87,7 @@ func testAccCheckNetworkLoadBalancerForwardingRuleExists(n string, networkLoadBa
 		foundNetworkLoadBalancerForwardingRule, _, err := client.NetworkLoadBalancersApi.DatacentersNetworkloadbalancersForwardingrulesFindByForwardingRuleId(ctx, rs.Primary.Attributes["datacenter_id"], rs.Primary.Attributes["networkloadbalancer_id"], rs.Primary.ID).Execute()
 
 		if err != nil {
-			return fmt.Errorf("Error occured while fetching NetworkLoadBalancerForwardingRule: %s", rs.Primary.ID)
+			return fmt.Errorf("error occured while fetching NetworkLoadBalancerForwardingRule: %s", rs.Primary.ID)
 		}
 		if *foundNetworkLoadBalancerForwardingRule.Id != rs.Primary.ID {
 			return fmt.Errorf("Record not found")

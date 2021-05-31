@@ -3,7 +3,7 @@ package ionoscloud
 import (
 	"context"
 	"fmt"
-	ionoscloud "github.com/ionos-cloud/sdk-go/v5"
+	ionoscloud "github.com/ionos-cloud/sdk-go/v6"
 	"testing"
 
 	"github.com/hashicorp/terraform-plugin-sdk/helper/resource"
@@ -41,24 +41,29 @@ func TestAccGroup_Basic(t *testing.T) {
 }
 
 func testAccCheckGroupDestroyCheck(s *terraform.State) error {
-	client := testAccProvider.Meta().(SdkBundle).Client
+	client := testAccProvider.Meta().(*ionoscloud.APIClient)
+	ctx, cancel := context.WithTimeout(context.Background(), *resourceDefaultTimeouts.Default)
+
+	if cancel != nil {
+		defer cancel()
+	}
 	for _, rs := range s.RootModule().Resources {
 
-		ctx, cancel := context.WithTimeout(context.Background(), *resourceDefaultTimeouts.Default)
-
-		if cancel != nil {
-			defer cancel()
+		if rs.Type != "ionoscloud_group" {
+			continue
 		}
-
 		_, apiResponse, err := client.UserManagementApi.UmGroupsFindById(ctx, rs.Primary.ID).Execute()
 
-		if _, ok := err.(ionoscloud.GenericOpenAPIError); ok {
-			if apiResponse.Response.StatusCode != 404 {
-				return fmt.Errorf("group still exists %s %s", rs.Primary.ID, string(apiResponse.Payload))
+		if err == nil || apiResponse == nil || apiResponse.Response.StatusCode != 404 {
+			var payload string
+			if apiResponse != nil {
+				payload = string(apiResponse.Payload)
+			} else {
+				payload = "<nil>"
 			}
-		} else {
-			return fmt.Errorf("Unable to fetching Group %s %s", rs.Primary.ID, err)
+			return fmt.Errorf("group still exists %s %s", rs.Primary.ID, payload)
 		}
+
 	}
 
 	return nil
@@ -71,7 +76,7 @@ func testAccCheckGroupAttributes(n string, name string) resource.TestCheckFunc {
 			return fmt.Errorf("testAccCheckGroupAttributes: Not found: %s", n)
 		}
 		if rs.Primary.Attributes["name"] != name {
-			return fmt.Errorf("Bad name: %s", rs.Primary.Attributes["name"])
+			return fmt.Errorf("bad name: %s", rs.Primary.Attributes["name"])
 		}
 
 		return nil
@@ -80,7 +85,8 @@ func testAccCheckGroupAttributes(n string, name string) resource.TestCheckFunc {
 
 func testAccCheckGroupExists(n string, group *ionoscloud.Group) resource.TestCheckFunc {
 	return func(s *terraform.State) error {
-		client := testAccProvider.Meta().(SdkBundle).Client
+		client := testAccProvider.Meta().(*ionoscloud.APIClient)
+
 		rs, ok := s.RootModule().Resources[n]
 
 		if !ok {
@@ -88,7 +94,7 @@ func testAccCheckGroupExists(n string, group *ionoscloud.Group) resource.TestChe
 		}
 
 		if rs.Primary.ID == "" {
-			return fmt.Errorf("No Record ID is set")
+			return fmt.Errorf("no Record ID is set")
 		}
 
 		ctx, cancel := context.WithTimeout(context.Background(), *resourceDefaultTimeouts.Default)
@@ -100,7 +106,7 @@ func testAccCheckGroupExists(n string, group *ionoscloud.Group) resource.TestChe
 		foundgroup, _, err := client.UserManagementApi.UmGroupsFindById(ctx, rs.Primary.ID).Execute()
 
 		if err != nil {
-			return fmt.Errorf("Error occured while fetching Group: %s", rs.Primary.ID)
+			return fmt.Errorf("error occured while fetching Group: %s", rs.Primary.ID)
 		}
 		if *foundgroup.Id != rs.Primary.ID {
 			return fmt.Errorf("Record not found")

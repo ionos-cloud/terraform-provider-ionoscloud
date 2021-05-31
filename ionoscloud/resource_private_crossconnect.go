@@ -4,7 +4,8 @@ import (
 	"context"
 	"fmt"
 	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
-	ionoscloud "github.com/ionos-cloud/sdk-go/v5"
+	"github.com/hashicorp/terraform-plugin-sdk/helper/validation"
+	ionoscloud "github.com/ionos-cloud/sdk-go/v6"
 	"log"
 	"time"
 )
@@ -20,9 +21,10 @@ func resourcePrivateCrossConnect() *schema.Resource {
 		},
 		Schema: map[string]*schema.Schema{
 			"name": {
-				Type:        schema.TypeString,
-				Description: "The desired name for the private cross-connect",
-				Required:    true,
+				Type:         schema.TypeString,
+				Description:  "The desired name for the private cross-connect",
+				Required:     true,
+				ValidateFunc: validation.All(validation.StringIsNotWhiteSpace),
 			},
 			"description": {
 				Type:        schema.TypeString,
@@ -93,7 +95,7 @@ func resourcePrivateCrossConnect() *schema.Resource {
 }
 
 func resourcePrivateCrossConnectCreate(d *schema.ResourceData, meta interface{}) error {
-	client := meta.(SdkBundle).Client
+	client := meta.(*ionoscloud.APIClient)
 
 	name := d.Get("name").(string)
 	pcc := ionoscloud.PrivateCrossConnect{
@@ -112,11 +114,16 @@ func resourcePrivateCrossConnectCreate(d *schema.ResourceData, meta interface{})
 	if cancel != nil {
 		defer cancel()
 	}
+<<<<<<< HEAD
 	rsp, _, err := client.PrivateCrossConnectsApi.PccsPost(ctx).Pcc(pcc).Execute()
+=======
+
+	rsp, _, err := client.PrivateCrossConnectApi.PccsPost(ctx).Pcc(pcc).Execute()
+>>>>>>> master
 
 	if err != nil {
 		d.SetId("")
-		return fmt.Errorf("Error creating private PCC: %s", err)
+		return fmt.Errorf("error creating private PCC: %s", err)
 	}
 
 	d.SetId(*rsp.Id)
@@ -129,7 +136,7 @@ func resourcePrivateCrossConnectCreate(d *schema.ResourceData, meta interface{})
 		pccReady, rsErr := privateCrossConnectReady(client, d)
 
 		if rsErr != nil {
-			return fmt.Errorf("Error while checking readiness status of PCC %s: %s", d.Id(), rsErr)
+			return fmt.Errorf("error while checking readiness status of PCC %s: %s", d.Id(), rsErr)
 		}
 
 		if pccReady && rsErr == nil {
@@ -142,22 +149,27 @@ func resourcePrivateCrossConnectCreate(d *schema.ResourceData, meta interface{})
 }
 
 func resourcePrivateCrossConnectRead(d *schema.ResourceData, meta interface{}) error {
-	client := meta.(SdkBundle).Client
+	client := meta.(*ionoscloud.APIClient)
 
 	ctx, cancel := context.WithTimeout(context.Background(), *resourceDefaultTimeouts.Default)
 	if cancel != nil {
 		defer cancel()
 	}
+<<<<<<< HEAD
 	rsp, apiResponse, err := client.PrivateCrossConnectsApi.PccsFindById(ctx, d.Id()).Execute()
+=======
+
+	rsp, apiResponse, err := client.PrivateCrossConnectApi.PccsFindById(ctx, d.Id()).Execute()
+>>>>>>> master
 
 	if err != nil {
 		if _, ok := err.(ionoscloud.GenericOpenAPIError); ok {
-			if apiResponse.Response.StatusCode == 404 {
+			if apiResponse != nil && apiResponse.Response.StatusCode == 404 {
 				d.SetId("")
 				return nil
 			}
 		}
-		return fmt.Errorf("Error while fetching PCC %s: %s", d.Id(), err)
+		return fmt.Errorf("error while fetching PCC %s: %s", d.Id(), err)
 	}
 
 	log.Printf("[INFO] Successfully retreived PCC %s: %+v", d.Id(), rsp)
@@ -193,9 +205,9 @@ func resourcePrivateCrossConnectRead(d *schema.ResourceData, meta interface{}) e
 }
 
 func resourcePrivateCrossConnectUpdate(d *schema.ResourceData, meta interface{}) error {
-	client := meta.(SdkBundle).Client
-	request := ionoscloud.PrivateCrossConnect{}
+	client := meta.(*ionoscloud.APIClient)
 
+	request := ionoscloud.PrivateCrossConnect{}
 	name := d.Get("name").(string)
 	request.Properties = &ionoscloud.PrivateCrossConnectProperties{
 		Name: &name,
@@ -223,17 +235,21 @@ func resourcePrivateCrossConnectUpdate(d *schema.ResourceData, meta interface{})
 	if cancel != nil {
 		defer cancel()
 	}
+<<<<<<< HEAD
 	_, apiResponse, err := client.PrivateCrossConnectsApi.PccsPatch(ctx, d.Id()).Pcc(*request.Properties).Execute()
+=======
+>>>>>>> master
 
+	_, apiResponse, err := client.PrivateCrossConnectApi.PccsPatch(ctx, d.Id()).Pcc(*request.Properties).Execute()
 	if err != nil {
 		if _, ok := err.(ionoscloud.GenericOpenAPIError); ok {
-			if apiResponse.Response.StatusCode == 404 {
+			if apiResponse != nil && apiResponse.Response.StatusCode == 404 {
 				d.SetId("")
 				return nil
 			}
-			return fmt.Errorf("Error while updating PCC: %s", err)
+			return fmt.Errorf("error while updating PCC: %s", err)
 		}
-		return fmt.Errorf("Error while updating PCC %s: %s", d.Id(), err)
+		return fmt.Errorf("error while updating PCC %s: %s", d.Id(), err)
 	}
 
 	for {
@@ -243,7 +259,7 @@ func resourcePrivateCrossConnectUpdate(d *schema.ResourceData, meta interface{})
 		pccReady, rsErr := privateCrossConnectReady(client, d)
 
 		if rsErr != nil {
-			return fmt.Errorf("Error while checking readiness status of PCC %s: %s", d.Id(), rsErr)
+			return fmt.Errorf("error while checking readiness status of PCC %s: %s", d.Id(), rsErr)
 		}
 
 		if pccReady && rsErr == nil {
@@ -256,24 +272,28 @@ func resourcePrivateCrossConnectUpdate(d *schema.ResourceData, meta interface{})
 }
 
 func resourcePrivateCrossConnectDelete(d *schema.ResourceData, meta interface{}) error {
-	client := meta.(SdkBundle).Client
+	client := meta.(*ionoscloud.APIClient)
 
 	ctx, cancel := context.WithTimeout(context.Background(), *resourceDefaultTimeouts.Delete)
 	if cancel != nil {
 		defer cancel()
 	}
+<<<<<<< HEAD
 	_, apiResponse, err := client.PrivateCrossConnectsApi.PccsDelete(ctx, d.Id()).Execute()
+=======
+>>>>>>> master
 
+	_, apiResponse, err := client.PrivateCrossConnectApi.PccsDelete(ctx, d.Id()).Execute()
 	if err != nil {
 		if _, ok := err.(ionoscloud.GenericOpenAPIError); ok {
-			if apiResponse.Response.StatusCode == 404 {
+			if apiResponse != nil && apiResponse.Response.StatusCode == 404 {
 				d.SetId("")
 				return nil
 			}
-			return fmt.Errorf("Error while deleting PCC: %s", err)
+			return fmt.Errorf("error while deleting PCC: %s", err)
 		}
 
-		return fmt.Errorf("Error while deleting PCC %s: %s", d.Id(), err)
+		return fmt.Errorf("error while deleting PCC %s: %s", d.Id(), err)
 	}
 
 	for {
@@ -283,7 +303,7 @@ func resourcePrivateCrossConnectDelete(d *schema.ResourceData, meta interface{})
 		pccDeleted, dsErr := privateCrossConnectDeleted(client, d)
 
 		if dsErr != nil {
-			return fmt.Errorf("Error while checking deletion status of PCC %s: %s", d.Id(), dsErr)
+			return fmt.Errorf("error while checking deletion status of PCC %s: %s", d.Id(), dsErr)
 		}
 
 		if pccDeleted && dsErr == nil {
@@ -303,7 +323,7 @@ func privateCrossConnectReady(client *ionoscloud.APIClient, d *schema.ResourceDa
 	rsp, _, err := client.PrivateCrossConnectsApi.PccsFindById(ctx, d.Id()).Execute()
 
 	if err != nil {
-		return true, fmt.Errorf("Error checking PCC status: %s", err)
+		return true, fmt.Errorf("error checking PCC status: %s", err)
 	}
 	return *rsp.Metadata.State == "AVAILABLE", nil
 }
@@ -317,10 +337,10 @@ func privateCrossConnectDeleted(client *ionoscloud.APIClient, d *schema.Resource
 
 	if err != nil {
 		if _, ok := err.(ionoscloud.GenericOpenAPIError); ok {
-			if apiResponse.Response.StatusCode == 404 {
+			if apiResponse != nil && apiResponse.Response.StatusCode == 404 {
 				return true, nil
 			}
-			return true, fmt.Errorf("Error checking PCC deletion status: %s", err)
+			return true, fmt.Errorf("error checking PCC deletion status: %s", err)
 		}
 	}
 	return false, nil

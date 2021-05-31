@@ -3,9 +3,9 @@ package ionoscloud
 import (
 	"context"
 	"fmt"
-
 	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
-	ionoscloud "github.com/ionos-cloud/sdk-go/v5"
+	"github.com/hashicorp/terraform-plugin-sdk/helper/validation"
+	ionoscloud "github.com/ionos-cloud/sdk-go/v6"
 )
 
 func resourceLoadbalancer() *schema.Resource {
@@ -17,8 +17,9 @@ func resourceLoadbalancer() *schema.Resource {
 		Schema: map[string]*schema.Schema{
 
 			"name": {
-				Type:     schema.TypeString,
-				Required: true,
+				Type:         schema.TypeString,
+				Required:     true,
+				ValidateFunc: validation.All(validation.StringIsNotWhiteSpace),
 			},
 
 			"ip": {
@@ -38,7 +39,9 @@ func resourceLoadbalancer() *schema.Resource {
 			"nic_ids": {
 				Type:     schema.TypeList,
 				Required: true,
-				Elem:     &schema.Schema{Type: schema.TypeString},
+				Elem: &schema.Schema{
+					Type:         schema.TypeString,
+					ValidateFunc: validation.All(validation.StringIsNotWhiteSpace)},
 			},
 		},
 		Timeouts: &resourceDefaultTimeouts,
@@ -46,7 +49,7 @@ func resourceLoadbalancer() *schema.Resource {
 }
 
 func resourceLoadbalancerCreate(d *schema.ResourceData, meta interface{}) error {
-	client := meta.(SdkBundle).Client
+	client := meta.(*ionoscloud.APIClient)
 
 	raw_ids := d.Get("nic_ids").([]interface{})
 	nic_ids := []ionoscloud.Nic{}
@@ -55,6 +58,7 @@ func resourceLoadbalancerCreate(d *schema.ResourceData, meta interface{}) error 
 		id := id.(string)
 		nic_ids = append(nic_ids, ionoscloud.Nic{Id: &id})
 	}
+
 	name := d.Get("name").(string)
 	lb := &ionoscloud.Loadbalancer{
 		Properties: &ionoscloud.LoadbalancerProperties{
@@ -73,10 +77,14 @@ func resourceLoadbalancerCreate(d *schema.ResourceData, meta interface{}) error 
 		defer cancel()
 	}
 
+<<<<<<< HEAD
 	resp, apiResp, err := client.LoadBalancersApi.DatacentersLoadbalancersPost(ctx, dcid).Loadbalancer(*lb).Execute()
 
+=======
+	resp, apiResp, err := client.LoadBalancerApi.DatacentersLoadbalancersPost(ctx, dcid).Loadbalancer(*lb).Execute()
+>>>>>>> master
 	if err != nil {
-		return fmt.Errorf("Error occured while creating a loadbalancer %s", err)
+		return fmt.Errorf("error occured while creating a loadbalancer %s", err)
 	}
 
 	d.SetId(*resp.Id)
@@ -95,7 +103,7 @@ func resourceLoadbalancerCreate(d *schema.ResourceData, meta interface{}) error 
 }
 
 func resourceLoadbalancerRead(d *schema.ResourceData, meta interface{}) error {
-	client := meta.(SdkBundle).Client
+	client := meta.(*ionoscloud.APIClient)
 
 	ctx, cancel := context.WithTimeout(context.Background(), *resourceDefaultTimeouts.Default)
 	if cancel != nil {
@@ -104,13 +112,11 @@ func resourceLoadbalancerRead(d *schema.ResourceData, meta interface{}) error {
 
 	lb, apiResponse, err := client.LoadBalancersApi.DatacentersLoadbalancersFindById(ctx, d.Get("datacenter_id").(string), d.Id()).Execute()
 	if err != nil {
-		if _, ok := err.(ionoscloud.GenericOpenAPIError); ok {
-			if apiResponse.Response.StatusCode == 404 {
-				d.SetId("")
-				return nil
-			}
+		if apiResponse != nil && apiResponse.Response.StatusCode == 404 {
+			d.SetId("")
+			return nil
 		}
-		return fmt.Errorf("An error occured while fetching a lan ID %s %s", d.Id(), err)
+		return fmt.Errorf("an error occured while fetching a lan ID %s %s", d.Id(), err)
 	}
 
 	d.Set("name", *lb.Properties.Name)
@@ -121,7 +127,8 @@ func resourceLoadbalancerRead(d *schema.ResourceData, meta interface{}) error {
 }
 
 func resourceLoadbalancerUpdate(d *schema.ResourceData, meta interface{}) error {
-	client := meta.(SdkBundle).Client
+	client := meta.(*ionoscloud.APIClient)
+
 	properties := &ionoscloud.LoadbalancerProperties{}
 
 	var hasChangeCount int = 0
@@ -151,36 +158,43 @@ func resourceLoadbalancerUpdate(d *schema.ResourceData, meta interface{}) error 
 	if hasChangeCount > 0 {
 		_, _, err := client.LoadBalancersApi.DatacentersLoadbalancersPatch(ctx, d.Get("datacenter_id").(string), d.Id()).Loadbalancer(*properties).Execute()
 		if err != nil {
-			return fmt.Errorf("Error while updating loadbalancer %s: %s ", d.Id(), err)
+			return fmt.Errorf("error while updating loadbalancer %s: %s ", d.Id(), err)
 		}
 	}
 
 	if d.HasChange("nic_ids") {
-		old, new := d.GetChange("nic_ids")
+		oldNicIds, newNicIds := d.GetChange("nic_ids")
 
-		oldList := old.([]interface{})
+		oldList := oldNicIds.([]interface{})
 
 		for _, o := range oldList {
 			_, apiresponse, err := client.LoadBalancersApi.DatacentersLoadbalancersBalancednicsDelete(context.TODO(),
 				d.Get("datacenter_id").(string), d.Id(), o.(string)).Execute()
 			if err != nil {
-				return fmt.Errorf("Error occured while deleting a balanced nic: %s", err)
-			}
-			// Wait, catching any errors
-			_, errState := getStateChangeConf(meta, d, apiresponse.Header.Get("location"), schema.TimeoutUpdate).WaitForState()
-			if errState != nil {
-				return errState
+				if apiresponse != nil && apiresponse.Response.StatusCode == 404 {
+					/* 404 - nic was not found - in case the nic is removed, VDC removes the nic from load balancers
+					that contain it, behind the scenes - therefore our call will yield 404 */
+					fmt.Printf("[WARNING] nic ID %s already removed from load balancer %s\n", o.(string), d.Id())
+				} else {
+					return fmt.Errorf("[load balancer update] an error occured while deleting a balanced nic: %s", err)
+				}
+			} else {
+				// Wait, catching any errors
+				_, errState := getStateChangeConf(meta, d, apiresponse.Header.Get("location"), schema.TimeoutUpdate).WaitForState()
+				if errState != nil {
+					return errState
+				}
 			}
 		}
 
-		newList := new.([]interface{})
+		newList := newNicIds.([]interface{})
 
 		for _, o := range newList {
 			id := o.(string)
 			nic := ionoscloud.Nic{Id: &id}
 			_, apiResp, err := client.LoadBalancersApi.DatacentersLoadbalancersBalancednicsPost(ctx, d.Get("datacenter_id").(string), d.Id()).Nic(nic).Execute()
 			if err != nil {
-				return fmt.Errorf("Error occured while deleting a balanced nic: %s", err)
+				return fmt.Errorf("[load balancer update] an error occured while creating a balanced nic: %s", err)
 			}
 			// Wait, catching any errors
 			_, errState := getStateChangeConf(meta, d, apiResp.Header.Get("Location"), schema.TimeoutUpdate).WaitForState()
@@ -196,16 +210,18 @@ func resourceLoadbalancerUpdate(d *schema.ResourceData, meta interface{}) error 
 }
 
 func resourceLoadbalancerDelete(d *schema.ResourceData, meta interface{}) error {
-	client := meta.(SdkBundle).Client
+	client := meta.(*ionoscloud.APIClient)
+
 	ctx, cancel := context.WithTimeout(context.Background(), *resourceDefaultTimeouts.Delete)
 	if cancel != nil {
 		defer cancel()
 	}
+
 	dcid := d.Get("datacenter_id").(string)
 	_, apiResp, err := client.LoadBalancersApi.DatacentersLoadbalancersDelete(ctx, dcid, d.Id()).Execute()
 
 	if err != nil {
-		return fmt.Errorf("Error occured while deleting a loadbalancer: %s", err)
+		return fmt.Errorf("[load balancer delete] an error occured while deleting a loadbalancer: %s", err)
 	}
 
 	// Wait, catching any errors

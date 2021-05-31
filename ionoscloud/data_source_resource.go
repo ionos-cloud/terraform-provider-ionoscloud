@@ -5,7 +5,7 @@ import (
 	"fmt"
 
 	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
-	ionoscloud "github.com/ionos-cloud/sdk-go/v5"
+	ionoscloud "github.com/ionos-cloud/sdk-go/v6"
 )
 
 func dataSourceResource() *schema.Resource {
@@ -26,51 +26,56 @@ func dataSourceResource() *schema.Resource {
 }
 
 func dataSourceResourceRead(d *schema.ResourceData, meta interface{}) error {
-	client := meta.(SdkBundle).Client
+	client := meta.(*ionoscloud.APIClient)
 
 	var results []ionoscloud.Resource
 
-	resource_type := d.Get("resource_type").(string)
-	resource_id := d.Get("resource_id").(string)
+	resourceType := d.Get("resource_type").(string)
+	resourceId := d.Get("resource_id").(string)
 
 	ctx, cancel := context.WithTimeout(context.Background(), *resourceDefaultTimeouts.Default)
 	if cancel != nil {
 		defer cancel()
 	}
 
-	if resource_type != "" && resource_id != "" {
-		result, _, err := client.UserManagementApi.UmResourcesFindByTypeAndId(ctx, resource_type, resource_id).Execute()
+	if resourceType != "" && resourceId != "" {
+		result, _, err := client.UserManagementApi.UmResourcesFindByTypeAndId(ctx, resourceType, resourceId).Execute()
 		if err != nil {
-			return fmt.Errorf("An error occured while fetching resource by type %s", err)
+			return fmt.Errorf("an error occured while fetching resource by type %s", err)
 		}
 		results = append(results, result)
 
-		d.Set("resource_type", result.Type)
-		d.Set("resource_id", result.Id)
-	} else if resource_type != "" {
-		//items, err := client.ListResourcesByType(resource_type)
-		items, _, err := client.UserManagementApi.UmResourcesFindByType(ctx, resource_type).Execute()
+		err = d.Set("resource_type", result.Type)
 		if err != nil {
-			return fmt.Errorf("An error occured while fetching resources by type %s", err)
+			return err
+		}
+		err = d.Set("resource_id", result.Id)
+		if err != nil {
+			return err
+		}
+	} else if resourceType != "" {
+		//items, err := client.ListResourcesByType(resource_type)
+		items, _, err := client.UserManagementApi.UmResourcesFindByType(ctx, resourceType).Execute()
+		if err != nil {
+			return fmt.Errorf("an error occured while fetching resources by type %s", err)
 		}
 
 		results = *items.Items
-		d.Set("resource_type", results[0].Type)
+		err = d.Set("resource_type", results[0].Type)
+		if err != nil {
+			return err
+		}
 	} else {
 		//items, err := client.ListResources()
 		items, _, err := client.UserManagementApi.UmResourcesGet(ctx).Execute()
 		if err != nil {
-			return fmt.Errorf("An error occured while fetching resources %s", err)
+			return fmt.Errorf("an error occured while fetching resources %s", err)
 		}
 		results = *items.Items
 	}
 
-	if len(results) > 1 {
-		return fmt.Errorf("There is more than one resource that match the search criteria")
-	}
-
 	if len(results) == 0 {
-		return fmt.Errorf("There are no resources that match the search criteria")
+		return fmt.Errorf("there are no resources that match the search criteria")
 	}
 
 	d.SetId(*results[0].Id)

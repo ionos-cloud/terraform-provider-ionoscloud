@@ -4,7 +4,7 @@ import (
 	"context"
 	"fmt"
 	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
-	ionoscloud "github.com/ionos-cloud/sdk-go/v5"
+	ionoscloud "github.com/ionos-cloud/sdk-go/v6"
 	"log"
 )
 
@@ -159,7 +159,7 @@ func resourceNetworkLoadBalancerForwardingRule() *schema.Resource {
 }
 
 func resourceNetworkLoadBalancerForwardingRuleCreate(d *schema.ResourceData, meta interface{}) error {
-	client := meta.(SdkBundle).Client
+	client := meta.(*ionoscloud.APIClient)
 
 	networkLoadBalancerForwardingRule := ionoscloud.NetworkLoadBalancerForwardingRule{
 		Properties: &ionoscloud.NetworkLoadBalancerForwardingRuleProperties{},
@@ -305,7 +305,7 @@ func resourceNetworkLoadBalancerForwardingRuleCreate(d *schema.ResourceData, met
 
 	if err != nil {
 		d.SetId("")
-		return fmt.Errorf("Error creating network loadbalancer: %s \n ApiError: %s", err, string(apiResponse.Payload))
+		return fmt.Errorf("error creating network loadbalancer: %s \n ApiError: %s", err, string(apiResponse.Payload))
 	}
 
 	d.SetId(*networkLoadBalancerForwardingRuleResp.Id)
@@ -325,7 +325,7 @@ func resourceNetworkLoadBalancerForwardingRuleCreate(d *schema.ResourceData, met
 
 func resourceNetworkLoadBalancerForwardingRuleRead(d *schema.ResourceData, meta interface{}) error {
 
-	client := meta.(SdkBundle).Client
+	client := meta.(*ionoscloud.APIClient)
 
 	dcId := d.Get("datacenter_id").(string)
 
@@ -354,35 +354,35 @@ func resourceNetworkLoadBalancerForwardingRuleRead(d *schema.ResourceData, meta 
 	if networkLoadBalancerForwardingRule.Properties.Name != nil {
 		err := d.Set("name", *networkLoadBalancerForwardingRule.Properties.Name)
 		if err != nil {
-			return fmt.Errorf("Error while setting name property for network load balancer forwarding rule %s: %s", d.Id(), err)
+			return fmt.Errorf("error while setting name property for network load balancer forwarding rule %s: %s", d.Id(), err)
 		}
 	}
 
 	if networkLoadBalancerForwardingRule.Properties.Algorithm != nil {
 		err := d.Set("algorithm", *networkLoadBalancerForwardingRule.Properties.Algorithm)
 		if err != nil {
-			return fmt.Errorf("Error while setting algorithm property for network load balancer forwarding rule %s: %s", d.Id(), err)
+			return fmt.Errorf("error while setting algorithm property for network load balancer forwarding rule %s: %s", d.Id(), err)
 		}
 	}
 
 	if networkLoadBalancerForwardingRule.Properties.Protocol != nil {
 		err := d.Set("protocol", *networkLoadBalancerForwardingRule.Properties.Protocol)
 		if err != nil {
-			return fmt.Errorf("Error while setting protocol property for network load balancer forwarding rule %s: %s", d.Id(), err)
+			return fmt.Errorf("error while setting protocol property for network load balancer forwarding rule %s: %s", d.Id(), err)
 		}
 	}
 
 	if networkLoadBalancerForwardingRule.Properties.ListenerIp != nil {
 		err := d.Set("listener_ip", *networkLoadBalancerForwardingRule.Properties.ListenerIp)
 		if err != nil {
-			return fmt.Errorf("Error while setting listener_ip property for network load balancer forwarding rule %s: %s", d.Id(), err)
+			return fmt.Errorf("error while setting listener_ip property for network load balancer forwarding rule %s: %s", d.Id(), err)
 		}
 	}
 
 	if networkLoadBalancerForwardingRule.Properties.ListenerPort != nil {
 		err := d.Set("listener_port", *networkLoadBalancerForwardingRule.Properties.ListenerPort)
 		if err != nil {
-			return fmt.Errorf("Error while setting listener_port property for network load balancer forwarding rule %s: %s", d.Id(), err)
+			return fmt.Errorf("error while setting listener_port property for network load balancer forwarding rule %s: %s", d.Id(), err)
 		}
 	}
 
@@ -413,7 +413,7 @@ func resourceNetworkLoadBalancerForwardingRuleRead(d *schema.ResourceData, meta 
 		healthCheck[0] = healthCheckEntry
 		err := d.Set("health_check", healthCheck)
 		if err != nil {
-			return fmt.Errorf("Error while setting health_check property for network load balancer forwarding rule %s: %s", d.Id(), err)
+			return fmt.Errorf("error while setting health_check property for network load balancer forwarding rule %s: %s", d.Id(), err)
 		}
 
 	}
@@ -463,7 +463,7 @@ func resourceNetworkLoadBalancerForwardingRuleRead(d *schema.ResourceData, meta 
 
 	if len(forwardingRuleTargets) > 0 {
 		if err := d.Set("targets", forwardingRuleTargets); err != nil {
-			return fmt.Errorf("Error while setting targets property for network load balancer forwarding rule  %s: %s", d.Id(), err)
+			return fmt.Errorf("error while setting targets property for network load balancer forwarding rule  %s: %s", d.Id(), err)
 		}
 	}
 
@@ -471,7 +471,7 @@ func resourceNetworkLoadBalancerForwardingRuleRead(d *schema.ResourceData, meta 
 }
 
 func resourceNetworkLoadBalancerForwardingRuleUpdate(d *schema.ResourceData, meta interface{}) error {
-	client := meta.(SdkBundle).Client
+	client := meta.(*ionoscloud.APIClient)
 
 	request := ionoscloud.NetworkLoadBalancerForwardingRule{
 		Properties: &ionoscloud.NetworkLoadBalancerForwardingRuleProperties{},
@@ -632,7 +632,7 @@ func resourceNetworkLoadBalancerForwardingRuleUpdate(d *schema.ResourceData, met
 	_, apiResponse, err := client.NetworkLoadBalancersApi.DatacentersNetworkloadbalancersForwardingrulesPatch(ctx, dcId, nlbID, d.Id()).NetworkLoadBalancerForwardingRuleProperties(*request.Properties).Execute()
 
 	if err != nil {
-		return fmt.Errorf("An error occured while updating a network loadbalancer forwarding rule ID %s %s \n ApiError: %s", d.Id(), err, string(apiResponse.Payload))
+		return fmt.Errorf("an error occured while updating a network loadbalancer forwarding rule ID %s %s \n ApiError: %s", d.Id(), err, string(apiResponse.Payload))
 	}
 
 	_, errState := getStateChangeConf(meta, d, apiResponse.Header.Get("Location"), schema.TimeoutUpdate).WaitForState()
@@ -644,7 +644,7 @@ func resourceNetworkLoadBalancerForwardingRuleUpdate(d *schema.ResourceData, met
 }
 
 func resourceNetworkLoadBalancerForwardingRuleDelete(d *schema.ResourceData, meta interface{}) error {
-	client := meta.(SdkBundle).Client
+	client := meta.(*ionoscloud.APIClient)
 
 	dcId := d.Get("datacenter_id").(string)
 	nlbID := d.Get("networkloadbalancer_id").(string)
@@ -658,7 +658,7 @@ func resourceNetworkLoadBalancerForwardingRuleDelete(d *schema.ResourceData, met
 	_, apiResponse, err := client.NetworkLoadBalancersApi.DatacentersNetworkloadbalancersForwardingrulesDelete(ctx, dcId, nlbID, d.Id()).Execute()
 
 	if err != nil {
-		return fmt.Errorf("An error occured while deleting a network loadbalancer forwarding rule %s %s", d.Id(), err)
+		return fmt.Errorf("an error occured while deleting a network loadbalancer forwarding rule %s %s", d.Id(), err)
 	}
 
 	// Wait, catching any errors

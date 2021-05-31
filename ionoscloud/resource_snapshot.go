@@ -3,10 +3,11 @@ package ionoscloud
 import (
 	"context"
 	"fmt"
+	"github.com/hashicorp/terraform-plugin-sdk/helper/validation"
 	"time"
 
 	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
-	ionoscloud "github.com/ionos-cloud/sdk-go/v5"
+	ionoscloud "github.com/ionos-cloud/sdk-go/v6"
 )
 
 func resourceSnapshot() *schema.Resource {
@@ -17,18 +18,21 @@ func resourceSnapshot() *schema.Resource {
 		Delete: resourceSnapshotDelete,
 		Schema: map[string]*schema.Schema{
 			"name": {
-				Type:     schema.TypeString,
-				Required: true,
+				Type:         schema.TypeString,
+				Required:     true,
+				ValidateFunc: validation.All(validation.StringIsNotWhiteSpace),
 			},
 			"volume_id": {
-				Type:     schema.TypeString,
-				Required: true,
-				ForceNew: true,
+				Type:         schema.TypeString,
+				Required:     true,
+				ForceNew:     true,
+				ValidateFunc: validation.All(validation.StringIsNotWhiteSpace),
 			},
 			"datacenter_id": {
-				Type:     schema.TypeString,
-				Required: true,
-				ForceNew: true,
+				Type:         schema.TypeString,
+				Required:     true,
+				ForceNew:     true,
+				ValidateFunc: validation.All(validation.StringIsNotWhiteSpace),
 			},
 		},
 		Timeouts: &resourceDefaultTimeouts,
@@ -36,7 +40,8 @@ func resourceSnapshot() *schema.Resource {
 }
 
 func resourceSnapshotCreate(d *schema.ResourceData, meta interface{}) error {
-	client := meta.(SdkBundle).Client
+	client := meta.(*ionoscloud.APIClient)
+
 	dcId := d.Get("datacenter_id").(string)
 	volumeId := d.Get("volume_id").(string)
 	name := d.Get("name").(string)
@@ -47,7 +52,7 @@ func resourceSnapshotCreate(d *schema.ResourceData, meta interface{}) error {
 	}
 	rsp, apiResponse, err := client.VolumesApi.DatacentersVolumesCreateSnapshotPost(ctx, dcId, volumeId).Name(name).Execute()
 	if err != nil {
-		return fmt.Errorf("An error occured while creating a snapshot: %s ", err)
+		return fmt.Errorf("an error occured while creating a snapshot: %s ", err)
 	}
 
 	d.SetId(*rsp.Id)
@@ -65,7 +70,7 @@ func resourceSnapshotCreate(d *schema.ResourceData, meta interface{}) error {
 }
 
 func resourceSnapshotRead(d *schema.ResourceData, meta interface{}) error {
-	client := meta.(SdkBundle).Client
+	client := meta.(*ionoscloud.APIClient)
 
 	ctx, cancel := context.WithTimeout(context.Background(), *resourceDefaultTimeouts.Default)
 	if cancel != nil {
@@ -74,13 +79,11 @@ func resourceSnapshotRead(d *schema.ResourceData, meta interface{}) error {
 	rsp, apiResponse, err := client.SnapshotsApi.SnapshotsFindById(ctx, d.Id()).Execute()
 
 	if err != nil {
-		if _, ok := err.(ionoscloud.GenericOpenAPIError); ok {
-			if apiResponse.Response.StatusCode == 404 {
-				d.SetId("")
-				return nil
-			}
+		if apiResponse != nil && apiResponse.Response.StatusCode == 404 {
+			d.SetId("")
+			return nil
 		}
-		return fmt.Errorf("Error occured while fetching a snapshot ID %s %s", d.Id(), err)
+		return fmt.Errorf("error occured while fetching a snapshot ID %s %s", d.Id(), err)
 	}
 
 	d.Set("name", rsp.Properties.Name)
@@ -88,16 +91,20 @@ func resourceSnapshotRead(d *schema.ResourceData, meta interface{}) error {
 }
 
 func resourceSnapshotUpdate(d *schema.ResourceData, meta interface{}) error {
-	client := meta.(SdkBundle).Client
+	client := meta.(*ionoscloud.APIClient)
 
 	name := d.Get("name").(string)
 	input := ionoscloud.SnapshotProperties{
 		Name: &name,
 	}
 
+<<<<<<< HEAD
 	_, apiResponse, err := client.SnapshotsApi.SnapshotsPatch(context.TODO(), d.Id()).Snapshot(input).Execute()
+=======
+	_, apiResponse, err := client.SnapshotApi.SnapshotsPatch(context.TODO(), d.Id()).Snapshot(input).Execute()
+>>>>>>> master
 	if err != nil {
-		return fmt.Errorf("An error occured while restoring a snapshot ID %s %d", d.Id(), err)
+		return fmt.Errorf("an error occured while restoring a snapshot ID %s %d", d.Id(), err)
 	}
 
 	// Wait, catching any errors
@@ -110,15 +117,20 @@ func resourceSnapshotUpdate(d *schema.ResourceData, meta interface{}) error {
 }
 
 func resourceSnapshotDelete(d *schema.ResourceData, meta interface{}) error {
-	client := meta.(SdkBundle).Client
+	client := meta.(*ionoscloud.APIClient)
 
 	ctx, cancel := context.WithTimeout(context.Background(), *resourceDefaultTimeouts.Delete)
 	if cancel != nil {
 		defer cancel()
 	}
+<<<<<<< HEAD
 	rsp, apiResponse, err := client.SnapshotsApi.SnapshotsFindById(ctx, d.Id()).Execute()
+=======
+
+	rsp, apiResponse, err := client.SnapshotApi.SnapshotsFindById(ctx, d.Id()).Execute()
+>>>>>>> master
 	if err != nil {
-		return fmt.Errorf("An error occured while fetching a snapshot ID %s %s", d.Id(), err)
+		return fmt.Errorf("an error occured while fetching a snapshot ID %s %s", d.Id(), err)
 	}
 
 	for *rsp.Metadata.State != "AVAILABLE" {
@@ -126,7 +138,7 @@ func resourceSnapshotDelete(d *schema.ResourceData, meta interface{}) error {
 		_, _, err := client.SnapshotsApi.SnapshotsFindById(ctx, d.Id()).Execute()
 
 		if err != nil {
-			return fmt.Errorf("An error occured while fetching a snapshot ID %s %s", d.Id(), err)
+			return fmt.Errorf("an error occured while fetching a snapshot ID %s %s", d.Id(), err)
 		}
 	}
 
@@ -134,7 +146,7 @@ func resourceSnapshotDelete(d *schema.ResourceData, meta interface{}) error {
 	dc, _, err := client.DataCentersApi.DatacentersFindById(ctx, dcId).Execute()
 
 	if err != nil {
-		return fmt.Errorf("An error occured while fetching a Datacenter ID %s %s", dcId, err)
+		return fmt.Errorf("an error occured while fetching a Datacenter ID %s %s", dcId, err)
 	}
 
 	for *dc.Metadata.State != "AVAILABLE" {
@@ -142,13 +154,13 @@ func resourceSnapshotDelete(d *schema.ResourceData, meta interface{}) error {
 		_, _, err := client.DataCentersApi.DatacentersFindById(ctx, dcId).Execute()
 
 		if err != nil {
-			return fmt.Errorf("An error occured while fetching a Datacenter ID %s %s", dcId, err)
+			return fmt.Errorf("an error occured while fetching a Datacenter ID %s %s", dcId, err)
 		}
 	}
 
 	_, apiResponse, err = client.SnapshotsApi.SnapshotsDelete(ctx, d.Id()).Execute()
 	if err != nil {
-		return fmt.Errorf("An error occured while deleting a snapshot ID %s %s", d.Id(), err)
+		return fmt.Errorf("an error occured while deleting a snapshot ID %s %s", d.Id(), err)
 	}
 
 	// Wait, catching any errors

@@ -21,7 +21,7 @@ data "ionoscloud_location" "loc1" {
 
 ## Argument Reference
 
- * `name` - (Required) Name or part of the location name to search for.
+ * `name` - (Required) Name of the location to search for.
  * `feature` - (Optional) A desired feature that the location must be able to provide.
 
 ## Attributes Reference

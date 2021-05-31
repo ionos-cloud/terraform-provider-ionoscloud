@@ -3,7 +3,8 @@ package ionoscloud
 import (
 	"context"
 	"fmt"
-	ionoscloud "github.com/ionos-cloud/sdk-go/v5"
+	"github.com/hashicorp/terraform-plugin-sdk/helper/validation"
+	ionoscloud "github.com/ionos-cloud/sdk-go/v6"
 	"log"
 	"strings"
 
@@ -52,14 +53,16 @@ func resourceNic() *schema.Resource {
 				Computed: true,
 			},
 			"server_id": {
-				Type:     schema.TypeString,
-				Required: true,
-				ForceNew: true,
+				Type:         schema.TypeString,
+				Required:     true,
+				ForceNew:     true,
+				ValidateFunc: validation.All(validation.StringIsNotWhiteSpace),
 			},
 			"datacenter_id": {
-				Type:     schema.TypeString,
-				Required: true,
-				ForceNew: true,
+				Type:         schema.TypeString,
+				Required:     true,
+				ForceNew:     true,
+				ValidateFunc: validation.All(validation.StringIsNotWhiteSpace),
 			},
 			"mac": {
 				Type:     schema.TypeString,
@@ -71,11 +74,10 @@ func resourceNic() *schema.Resource {
 }
 
 func resourceNicCreate(d *schema.ResourceData, meta interface{}) error {
-	client := meta.(SdkBundle).Client
+	client := meta.(*ionoscloud.APIClient)
 
 	lan := d.Get("lan").(int)
 	lanConverted := int32(lan)
-
 	nic := ionoscloud.Nic{
 		Properties: &ionoscloud.NicProperties{
 			Lan: &lanConverted,
@@ -112,7 +114,7 @@ func resourceNicCreate(d *schema.ResourceData, meta interface{}) error {
 	nic, apiResp, err := client.NetworkInterfacesApi.DatacentersServersNicsPost(ctx, dcid, srvid).Nic(nic).Execute()
 
 	if err != nil {
-		return fmt.Errorf("Error occured while creating a nic: %s", err)
+		return fmt.Errorf("error occured while creating a nic: %s", err)
 	}
 	if nic.Id != nil {
 		d.SetId(*nic.Id)
@@ -130,17 +132,19 @@ func resourceNicCreate(d *schema.ResourceData, meta interface{}) error {
 }
 
 func resourceNicRead(d *schema.ResourceData, meta interface{}) error {
-	client := meta.(SdkBundle).Client
+	client := meta.(*ionoscloud.APIClient)
 
 	ctx, cancel := context.WithTimeout(context.Background(), *resourceDefaultTimeouts.Default)
 	if cancel != nil {
 		defer cancel()
 	}
+
 	dcid := d.Get("datacenter_id").(string)
 	srvid := d.Get("server_id").(string)
 	nicid := d.Id()
 
 	rsp, apiresponse, err := client.NetworkInterfacesApi.DatacentersServersNicsFindById(ctx, dcid, srvid, nicid).Execute()
+
 	if err != nil {
 		if _, ok := err.(ionoscloud.GenericOpenAPIError); ok {
 			if apiresponse.Response.StatusCode == 404 {
@@ -148,7 +152,7 @@ func resourceNicRead(d *schema.ResourceData, meta interface{}) error {
 				return nil
 			}
 		}
-		return fmt.Errorf("Error occured while fetching a nic ID %s %s", d.Id(), err)
+		return fmt.Errorf("error occured while fetching a nic ID %s %s", d.Id(), err)
 	}
 
 	if rsp.Properties != nil {
@@ -180,7 +184,8 @@ func resourceNicRead(d *schema.ResourceData, meta interface{}) error {
 }
 
 func resourceNicUpdate(d *schema.ResourceData, meta interface{}) error {
-	client := meta.(SdkBundle).Client
+	client := meta.(*ionoscloud.APIClient)
+
 	properties := ionoscloud.NicProperties{}
 
 	if d.HasChange("name") {
@@ -207,6 +212,7 @@ func resourceNicUpdate(d *schema.ResourceData, meta interface{}) error {
 	if cancel != nil {
 		defer cancel()
 	}
+
 	dcid := d.Get("datacenter_id").(string)
 	srvid := d.Get("server_id").(string)
 	nicid := d.Id()
@@ -214,7 +220,7 @@ func resourceNicUpdate(d *schema.ResourceData, meta interface{}) error {
 	_, apiResponse, err := client.NetworkInterfacesApi.DatacentersServersNicsPatch(ctx, dcid, srvid, nicid).Nic(properties).Execute()
 
 	if err != nil {
-		return fmt.Errorf("Error occured while updating a nic: %s", err)
+		return fmt.Errorf("error occured while updating a nic: %s", err)
 	}
 
 	// Wait, catching any errors
@@ -227,19 +233,20 @@ func resourceNicUpdate(d *schema.ResourceData, meta interface{}) error {
 }
 
 func resourceNicDelete(d *schema.ResourceData, meta interface{}) error {
-	client := meta.(SdkBundle).Client
+	client := meta.(*ionoscloud.APIClient)
 
 	ctx, cancel := context.WithTimeout(context.Background(), *resourceDefaultTimeouts.Delete)
 	if cancel != nil {
 		defer cancel()
 	}
+
 	dcid := d.Get("datacenter_id").(string)
 	srvid := d.Get("server_id").(string)
 	nicid := d.Id()
-	_, apiresp, err := client.NetworkInterfacesApi.DatacentersServersNicsDelete(ctx, dcid, srvid, nicid).Execute()
+	apiresp, err := client.NetworkInterfacesApi.DatacentersServersNicsDelete(ctx, dcid, srvid, nicid).Execute()
 
 	if err != nil {
-		return fmt.Errorf("An error occured while deleting a nic dcId %s ID %s %s", d.Get("datacenter_id").(string), d.Id(), err)
+		return fmt.Errorf("an error occured while deleting a nic dcId %s ID %s %s", d.Get("datacenter_id").(string), d.Id(), err)
 	}
 	// Wait, catching any errors
 	_, errState := getStateChangeConf(meta, d, apiresp.Header.Get("Location"), schema.TimeoutDelete).WaitForState()

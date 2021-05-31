@@ -3,11 +3,9 @@ package ionoscloud
 import (
 	"context"
 	"fmt"
-	"log"
-	"strings"
-
 	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
-	ionoscloud "github.com/ionos-cloud/sdk-go/v5"
+	ionoscloud "github.com/ionos-cloud/sdk-go/v6"
+	"log"
 )
 
 func dataSourceLocation() *schema.Resource {
@@ -52,7 +50,7 @@ func dataSourceLocation() *schema.Resource {
 }
 
 func dataSourceLocationRead(d *schema.ResourceData, meta interface{}) error {
-	client := meta.(SdkBundle).Client
+	client := meta.(*ionoscloud.APIClient)
 
 	ctx, cancel := context.WithTimeout(context.Background(), *resourceDefaultTimeouts.Default)
 	if cancel != nil {
@@ -61,20 +59,22 @@ func dataSourceLocationRead(d *schema.ResourceData, meta interface{}) error {
 	locations, _, err := client.LocationsApi.LocationsGet(ctx).Execute()
 
 	if err != nil {
-		return fmt.Errorf("An error occured while fetching IonosCloud locations %s", err)
+		return fmt.Errorf("an error occured while fetching IonosCloud locations %s", err)
 	}
 
 	name, nameOk := d.GetOk("name")
 	feature, featureOk := d.GetOk("features")
 
 	if !nameOk && !featureOk {
-		return fmt.Errorf("Either 'name' or 'feature' must be provided.")
+		return fmt.Errorf("either 'name' or 'feature' must be provided")
 	}
 	results := []ionoscloud.Location{}
 
-	for _, loc := range *locations.Items {
-		if *loc.Properties.Name == name.(string) || strings.Contains(*loc.Properties.Name, name.(string)) {
-			results = append(results, loc)
+	if locations.Items != nil {
+		for _, loc := range *locations.Items {
+			if loc.Properties.Name != nil && *loc.Properties.Name == name.(string) {
+				results = append(results, loc)
+			}
 		}
 	}
 
@@ -119,17 +119,12 @@ func dataSourceLocationRead(d *schema.ResourceData, meta interface{}) error {
 
 	if len(cpuArchitectures) > 0 {
 		if err := d.Set("cpu_architecture", cpuArchitectures); err != nil {
-			return fmt.Errorf("Error while setting cpu_architecture property for datacenter %s: %s", d.Id(), err)
+			return fmt.Errorf("error while setting cpu_architecture property for datacenter %s: %s", d.Id(), err)
 		}
 	}
 
-	if len(results) > 1 {
-		log.Printf("[INFO] Results length greater than 1")
-		return fmt.Errorf("there is more than one location that match the search criteria")
-	}
-
 	if len(results) == 0 {
-		return fmt.Errorf("There are no locations that match the search criteria")
+		return fmt.Errorf("there are no locations that match the search criteria")
 	}
 
 	d.SetId(*results[0].Id)

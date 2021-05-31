@@ -3,11 +3,12 @@ package ionoscloud
 import (
 	"context"
 	"fmt"
+	"github.com/hashicorp/terraform-plugin-sdk/helper/validation"
 	"log"
 	"time"
 
 	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
-	ionoscloud "github.com/ionos-cloud/sdk-go/v5"
+	ionoscloud "github.com/ionos-cloud/sdk-go/v6"
 )
 
 func resourceUser() *schema.Resource {
@@ -18,20 +19,24 @@ func resourceUser() *schema.Resource {
 		Delete: resourceUserDelete,
 		Schema: map[string]*schema.Schema{
 			"first_name": {
-				Type:     schema.TypeString,
-				Required: true,
+				Type:         schema.TypeString,
+				Required:     true,
+				ValidateFunc: validation.All(validation.StringIsNotWhiteSpace),
 			},
 			"last_name": {
-				Type:     schema.TypeString,
-				Required: true,
+				Type:         schema.TypeString,
+				Required:     true,
+				ValidateFunc: validation.All(validation.StringIsNotWhiteSpace),
 			},
 			"email": {
-				Type:     schema.TypeString,
-				Required: true,
+				Type:         schema.TypeString,
+				Required:     true,
+				ValidateFunc: validation.All(validation.StringIsNotWhiteSpace),
 			},
 			"password": {
-				Type:     schema.TypeString,
-				Required: true,
+				Type:         schema.TypeString,
+				Required:     true,
+				ValidateFunc: validation.All(validation.StringIsNotWhiteSpace),
 			},
 			"administrator": {
 				Type:     schema.TypeBool,
@@ -47,7 +52,12 @@ func resourceUser() *schema.Resource {
 }
 
 func resourceUserCreate(d *schema.ResourceData, meta interface{}) error {
-	client := meta.(SdkBundle).Client
+<<<<<<< HEAD
+	client := meta.(*ionoscloud.APIClient)
+=======
+	client := meta.(*ionoscloud.APIClient)
+
+>>>>>>> master
 	request := ionoscloud.UserPost{
 		Properties: &ionoscloud.UserPropertiesPost{},
 	}
@@ -80,14 +90,18 @@ func resourceUserCreate(d *schema.ResourceData, meta interface{}) error {
 	if cancel != nil {
 		defer cancel()
 	}
-	rsp, apiResponse, err := client.UserManagementApi.UmUsersPost(ctx).User(request).Execute()
 
+	rsp, apiResponse, err := client.UserManagementApi.UmUsersPost(ctx).User(request).Execute()
 	if rsp.Id != nil {
 		log.Printf("[DEBUG] USER ID: %s", *rsp.Id)
 	}
 
 	if err != nil {
-		return fmt.Errorf("An error occured while creating a user: %s", err)
+		payload := "<nil>"
+		if apiResponse != nil {
+			payload = string(apiResponse.Payload)
+		}
+		return fmt.Errorf("an error occured while creating a user: %s; payload: %s", err, payload)
 	}
 
 	d.SetId(*rsp.Id)
@@ -105,22 +119,23 @@ func resourceUserCreate(d *schema.ResourceData, meta interface{}) error {
 }
 
 func resourceUserRead(d *schema.ResourceData, meta interface{}) error {
-	client := meta.(SdkBundle).Client
+	client := meta.(*ionoscloud.APIClient)
 
 	ctx, cancel := context.WithTimeout(context.Background(), *resourceDefaultTimeouts.Default)
 	if cancel != nil {
 		defer cancel()
 	}
+
 	rsp, apiResponse, err := client.UserManagementApi.UmUsersFindById(ctx, d.Id()).Execute()
 
 	if err != nil {
 		if _, ok := err.(ionoscloud.GenericOpenAPIError); ok {
-			if apiResponse.Response.StatusCode == 404 {
+			if apiResponse != nil && apiResponse.Response.StatusCode == 404 {
 				d.SetId("")
 				return nil
 			}
 		}
-		return fmt.Errorf("An error occured while fetching a User ID %s %s", d.Id(), err)
+		return fmt.Errorf("an error occured while fetching a User ID %s %s", d.Id(), err)
 	}
 
 	d.Set("first_name", *rsp.Properties.Firstname)
@@ -132,7 +147,7 @@ func resourceUserRead(d *schema.ResourceData, meta interface{}) error {
 }
 
 func resourceUserUpdate(d *schema.ResourceData, meta interface{}) error {
-	client := meta.(SdkBundle).Client
+	client := meta.(*ionoscloud.APIClient)
 
 	ctx, cancel := context.WithTimeout(context.Background(), *resourceDefaultTimeouts.Update)
 	if cancel != nil {
@@ -142,7 +157,7 @@ func resourceUserUpdate(d *schema.ResourceData, meta interface{}) error {
 	rsp, apiResponse, err := client.UserManagementApi.UmUsersFindById(ctx, d.Id()).Execute()
 
 	if err != nil {
-		return fmt.Errorf("An error occured while fetching a User ID %s %s", d.Id(), err)
+		return fmt.Errorf("an error occured while fetching a User ID %s %s", d.Id(), err)
 	}
 
 	administrator := d.Get("administrator").(bool)
@@ -181,7 +196,7 @@ func resourceUserUpdate(d *schema.ResourceData, meta interface{}) error {
 
 	rsp, apiResponse, err = client.UserManagementApi.UmUsersPut(ctx, d.Id()).User(userReq).Execute()
 	if err != nil {
-		return fmt.Errorf("An error occured while patching a user ID %s %s payload: %s", d.Id(), err, apiResponse.Payload)
+		return fmt.Errorf("an error occured while patching a user ID %s %s payload: %s", d.Id(), err, apiResponse.Payload)
 	}
 
 	// Wait, catching any errors
@@ -194,7 +209,7 @@ func resourceUserUpdate(d *schema.ResourceData, meta interface{}) error {
 }
 
 func resourceUserDelete(d *schema.ResourceData, meta interface{}) error {
-	client := meta.(SdkBundle).Client
+	client := meta.(*ionoscloud.APIClient)
 
 	ctx, cancel := context.WithTimeout(context.Background(), *resourceDefaultTimeouts.Delete)
 	if cancel != nil {
@@ -207,8 +222,8 @@ func resourceUserDelete(d *schema.ResourceData, meta interface{}) error {
 		_, _, err := client.UserManagementApi.UmUsersDelete(ctx, d.Id()).Execute()
 		if err != nil {
 			if _, ok := err.(ionoscloud.GenericOpenAPIError); ok {
-				if apiResponse.Response.StatusCode != 404 {
-					return fmt.Errorf("An error occured while deleting a user %s %s", d.Id(), err)
+				if apiResponse == nil || apiResponse.Response.StatusCode != 404 {
+					return fmt.Errorf("an error occured while deleting a user %s %s", d.Id(), err)
 				}
 			}
 		}

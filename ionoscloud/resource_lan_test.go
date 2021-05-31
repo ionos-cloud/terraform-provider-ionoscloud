@@ -3,7 +3,7 @@ package ionoscloud
 import (
 	"context"
 	"fmt"
-	ionoscloud "github.com/ionos-cloud/sdk-go/v5"
+	ionoscloud "github.com/ionos-cloud/sdk-go/v6"
 	"testing"
 
 	"github.com/hashicorp/terraform-plugin-sdk/helper/resource"
@@ -41,22 +41,33 @@ func TestAccLan_Basic(t *testing.T) {
 }
 
 func testAccCheckLanDestroyCheck(s *terraform.State) error {
-	client := testAccProvider.Meta().(SdkBundle).Client
+	client := testAccProvider.Meta().(*ionoscloud.APIClient)
+	ctx, cancel := context.WithTimeout(context.Background(), *resourceDefaultTimeouts.Delete)
+
+	if cancel != nil {
+		defer cancel()
+	}
+
 	for _, rs := range s.RootModule().Resources {
 		if rs.Type != "ionoscloud_datacenter" {
 			continue
 		}
 
+<<<<<<< HEAD
 		ctx, _ := context.WithTimeout(context.Background(), *resourceDefaultTimeouts.Delete)
 		_, apiResponse, err := client.LansApi.DatacentersLansFindById(ctx, rs.Primary.Attributes["datacenter_id"], rs.Primary.ID).Execute()
+=======
+		_, apiResponse, err := client.LanApi.DatacentersLansFindById(ctx, rs.Primary.Attributes["datacenter_id"], rs.Primary.ID).Execute()
+>>>>>>> master
 
-		if apiError, ok := err.(ionoscloud.GenericOpenAPIError); ok {
-			if apiResponse.Response.StatusCode != 404 {
-				return fmt.Errorf("LAN still exists %s %s", rs.Primary.ID, apiError)
+		if err != nil {
+			if apiResponse == nil || apiResponse.Response.StatusCode != 404 {
+				return fmt.Errorf("an error occurred while looking for lan %s: %s", rs.Primary.ID, err)
 			}
 		} else {
-			return fmt.Errorf("Unable to fetching LAN %s %s", rs.Primary.ID, err)
+			return fmt.Errorf("LAN still exists %s", rs.Primary.ID)
 		}
+
 	}
 
 	return nil
@@ -69,7 +80,7 @@ func testAccCheckLanAttributes(n string, name string) resource.TestCheckFunc {
 			return fmt.Errorf("testAccCheckLanAttributes: Not found: %s", n)
 		}
 		if rs.Primary.Attributes["name"] != name {
-			return fmt.Errorf("Bad name: %s", rs.Primary.Attributes["name"])
+			return fmt.Errorf("bad name: %s", rs.Primary.Attributes["name"])
 		}
 
 		return nil
@@ -78,7 +89,8 @@ func testAccCheckLanAttributes(n string, name string) resource.TestCheckFunc {
 
 func testAccCheckLanExists(n string, lan *ionoscloud.Lan) resource.TestCheckFunc {
 	return func(s *terraform.State) error {
-		client := testAccProvider.Meta().(SdkBundle).Client
+		client := testAccProvider.Meta().(*ionoscloud.APIClient)
+
 		rs, ok := s.RootModule().Resources[n]
 
 		if !ok {
@@ -86,14 +98,14 @@ func testAccCheckLanExists(n string, lan *ionoscloud.Lan) resource.TestCheckFunc
 		}
 
 		if rs.Primary.ID == "" {
-			return fmt.Errorf("No Record ID is set")
+			return fmt.Errorf("no Record ID is set")
 		}
 
 		ctx, _ := context.WithTimeout(context.Background(), *resourceDefaultTimeouts.Default)
 		foundLan, _, err := client.LansApi.DatacentersLansFindById(ctx, rs.Primary.Attributes["datacenter_id"], rs.Primary.ID).Execute()
 
 		if err != nil {
-			return fmt.Errorf("Error occured while fetching Server: %s", rs.Primary.ID)
+			return fmt.Errorf("error occured while fetching Server: %s", rs.Primary.ID)
 		}
 		if *foundLan.Id != rs.Primary.ID {
 			return fmt.Errorf("Record not found")
