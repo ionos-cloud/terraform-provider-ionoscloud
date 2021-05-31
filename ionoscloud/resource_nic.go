@@ -222,11 +222,6 @@ func resourceNicUpdate(ctx context.Context, d *schema.ResourceData, meta interfa
 		properties.Nat = &nat
 	}
 
-	ctx, cancel := context.WithTimeout(context.Background(), *resourceDefaultTimeouts.Update)
-	if cancel != nil {
-		defer cancel()
-	}
-
 	dcid := d.Get("datacenter_id").(string)
 	srvid := d.Get("server_id").(string)
 	nicid := d.Id()
@@ -250,11 +245,6 @@ func resourceNicUpdate(ctx context.Context, d *schema.ResourceData, meta interfa
 
 func resourceNicDelete(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	client := meta.(*ionoscloud.APIClient)
-
-	ctx, cancel := context.WithTimeout(context.Background(), *resourceDefaultTimeouts.Delete)
-	if cancel != nil {
-		defer cancel()
-	}
 
 	dcid := d.Get("datacenter_id").(string)
 	srvid := d.Get("server_id").(string)

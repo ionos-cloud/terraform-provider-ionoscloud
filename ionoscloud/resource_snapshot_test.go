@@ -50,7 +50,7 @@ func testAccCheckSnapshotDestroyCheck(s *terraform.State) error {
 		_, apiResponse, err := client.SnapshotApi.SnapshotsFindById(ctx, rs.Primary.ID).Execute()
 
 		if err != nil {
-			if apiResponse == nil || apiResponse.Response.StatusCode != 404 {
+			if apiResponse == nil || apiResponse.StatusCode != 404 {
 				return fmt.Errorf("unable to fetch snapshot %s %s", rs.Primary.ID, err)
 			}
 		} else {

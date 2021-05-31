@@ -107,7 +107,7 @@ func resourceDatacenterRead(ctx context.Context, d *schema.ResourceData, meta in
 	datacenter, apiResponse, err := client.DataCenterApi.DatacentersFindById(ctx, d.Id()).Execute()
 
 	if err != nil {
-		if apiResponse != nil && apiResponse.Response.StatusCode == 404 {
+		if apiResponse != nil && apiResponse.StatusCode == 404 {
 			d.SetId("")
 			return nil
 		}
@@ -218,14 +218,7 @@ func resourceDatacenterDelete(ctx context.Context, d *schema.ResourceData, meta 
 	return nil
 }
 
-//todo: add ctx in signature
-func getImage(client *ionoscloud.APIClient, dcId string, imageName string, imageType string) (*ionoscloud.Image, error) {
-
-	ctx, cancel := context.WithTimeout(context.Background(), *resourceDefaultTimeouts.Default)
-
-	if cancel != nil {
-		defer cancel()
-	}
+func getImage(ctx context.Context, client *ionoscloud.APIClient, dcId string, imageName string, imageType string) (*ionoscloud.Image, error) {
 
 	if imageName == "" {
 		return nil, fmt.Errorf("imageName not suplied")
@@ -269,13 +262,7 @@ func getImage(client *ionoscloud.APIClient, dcId string, imageName string, image
 	return nil, err
 }
 
-func getSnapshotId(client *ionoscloud.APIClient, snapshotName string) string {
-
-	ctx, cancel := context.WithTimeout(context.Background(), *resourceDefaultTimeouts.Default)
-
-	if cancel != nil {
-		defer cancel()
-	}
+func getSnapshotId(ctx context.Context, client *ionoscloud.APIClient, snapshotName string) string {
 
 	if snapshotName == "" {
 		return ""
@@ -302,13 +289,7 @@ func getSnapshotId(client *ionoscloud.APIClient, snapshotName string) string {
 	return ""
 }
 
-func getImageAlias(client *ionoscloud.APIClient, imageAlias string, location string) string {
-
-	ctx, cancel := context.WithTimeout(context.Background(), *resourceDefaultTimeouts.Default)
-
-	if cancel != nil {
-		defer cancel()
-	}
+func getImageAlias(ctx context.Context, client *ionoscloud.APIClient, imageAlias string, location string) string {
 
 	if imageAlias == "" {
 		return ""

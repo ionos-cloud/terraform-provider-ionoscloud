@@ -54,7 +54,7 @@ func testAccCheckVolumeDestroyCheck(s *terraform.State) error {
 		_, apiResponse, err := client.VolumeApi.DatacentersVolumesFindById(ctx, rs.Primary.Attributes["datacenter_id"], rs.Primary.ID).Execute()
 
 		if err != nil {
-			if apiResponse == nil || apiResponse.Response.StatusCode != 404 {
+			if apiResponse == nil || apiResponse.StatusCode != 404 {
 				return fmt.Errorf("unable to fetch volume %s: %s", rs.Primary.ID, err)
 			}
 		} else {

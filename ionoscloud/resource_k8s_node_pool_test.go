@@ -81,7 +81,7 @@ func testAccCheckk8sNodepoolDestroyCheck(s *terraform.State) error {
 		_, apiResponse, err := client.KubernetesApi.K8sNodepoolsFindById(ctx, rs.Primary.Attributes["k8s_cluster_id"], rs.Primary.ID).Execute()
 
 		if _, ok := err.(ionoscloud.GenericOpenAPIError); ok {
-			if apiResponse == nil || apiResponse.Response.StatusCode != 404 {
+			if apiResponse == nil || apiResponse.StatusCode != 404 {
 				var payload = "<nil>"
 				if apiResponse != nil {
 					payload = string(apiResponse.Payload)
@@ -170,7 +170,7 @@ resource "ionoscloud_k8s_node_pool" "terraform_acctest" {
 const testAccCheckk8sNodepoolConfigUpdate = `
 resource "ionoscloud_datacenter" "terraform_acctest" {
   name        = "terraform_acctest"
-  location    = "us_las"
+  location    = "us/las"
   description = "Datacenter created through terraform"
 }
 

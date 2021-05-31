@@ -56,7 +56,7 @@ func testAccCheckDatacenterDestroyCheck(s *terraform.State) error {
 		_, apiResponse, err := client.DataCenterApi.DatacentersFindById(ctx, rs.Primary.ID).Execute()
 
 		if _, ok := err.(ionoscloud.GenericOpenAPIError); ok {
-			if apiResponse == nil || apiResponse.Response.StatusCode != 404 {
+			if apiResponse == nil || apiResponse.StatusCode != 404 {
 				var payload = "<nil>"
 				if apiResponse != nil {
 					payload = string(apiResponse.Payload)

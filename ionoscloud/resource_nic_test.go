@@ -54,7 +54,7 @@ func testAccCheckNicDestroyCheck(s *terraform.State) error {
 		serverId := rs.Primary.Attributes["server_id"]
 		_, apiResponse, _ := client.NicApi.DatacentersServersNicsFindById(ctx, dcId, serverId, rs.Primary.ID).Execute()
 
-		if apiResponse == nil || apiResponse.Response.StatusCode != 404 {
+		if apiResponse == nil || apiResponse.StatusCode != 404 {
 			var payload = "<nil>"
 			var statusCode = 0
 			if apiResponse != nil {
