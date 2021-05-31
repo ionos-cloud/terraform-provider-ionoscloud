@@ -4,6 +4,7 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 	ionoscloud "github.com/ionos-cloud/sdk-go/v5"
 	"io/ioutil"
@@ -835,7 +836,10 @@ func resourceServerRead(ctx context.Context, d *schema.ResourceData, meta interf
 	}
 
 	if server.Properties.AvailabilityZone != nil {
-		d.Set("availability_zone", *server.Properties.AvailabilityZone)
+		if err := d.Set("availability_zone", *server.Properties.AvailabilityZone); err != nil {
+			diags := diag.FromErr(err)
+			return diags
+		}
 	}
 
 	if server.Properties.CpuFamily != nil {

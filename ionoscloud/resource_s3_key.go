@@ -70,7 +70,7 @@ func resourceS3KeyRead(ctx context.Context, d *schema.ResourceData, meta interfa
 	rsp, apiResponse, err := client.UserManagementApi.UmUsersS3keysFindByKeyId(ctx, userId, d.Id()).Execute()
 	if err != nil {
 		if _, ok := err.(ionoscloud.GenericOpenAPIError); ok {
-			if apiResponse != nil && apiResponse.Response.StatusCode == 404 {
+			if apiResponse != nil && apiResponse.StatusCode == 404 {
 				d.SetId("")
 				return nil
 			}
@@ -124,7 +124,7 @@ func resourceS3KeyUpdate(ctx context.Context, d *schema.ResourceData, meta inter
 
 	if err != nil {
 		if _, ok := err.(ionoscloud.GenericOpenAPIError); ok {
-			if apiResponse != nil && apiResponse.Response.StatusCode == 404 {
+			if apiResponse != nil && apiResponse.StatusCode == 404 {
 				d.SetId("")
 				return nil
 			}
@@ -158,16 +158,12 @@ func resourceS3KeyUpdate(ctx context.Context, d *schema.ResourceData, meta inter
 func resourceS3KeyDelete(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	client := meta.(*ionoscloud.APIClient)
 
-	ctx, cancel := context.WithTimeout(context.Background(), *resourceDefaultTimeouts.Delete)
-	if cancel != nil {
-		defer cancel()
-	}
 	userId := d.Get("user_id").(string)
 	_, apiResponse, err := client.UserManagementApi.UmUsersS3keysDelete(ctx, userId, d.Id()).Execute()
 
 	if err != nil {
 		if _, ok := err.(ionoscloud.GenericOpenAPIError); ok {
-			if apiResponse != nil && apiResponse.Response.StatusCode == 404 {
+			if apiResponse != nil && apiResponse.StatusCode == 404 {
 				d.SetId("")
 				return nil
 			}
@@ -204,7 +200,7 @@ func s3KeyDeleted(ctx context.Context, client *ionoscloud.APIClient, d *schema.R
 
 	if err != nil {
 		if _, ok := err.(ionoscloud.GenericOpenAPIError); ok {
-			if apiResponse != nil && apiResponse.Response.StatusCode == 404 {
+			if apiResponse != nil && apiResponse.StatusCode == 404 {
 				return true, nil
 			}
 			return true, fmt.Errorf("error checking S3 key deletion status: %s", err)

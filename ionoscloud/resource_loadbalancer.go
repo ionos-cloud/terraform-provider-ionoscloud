@@ -101,7 +101,7 @@ func resourceLoadbalancerRead(ctx context.Context, d *schema.ResourceData, meta 
 
 	lb, apiResponse, err := client.LoadBalancerApi.DatacentersLoadbalancersFindById(ctx, d.Get("datacenter_id").(string), d.Id()).Execute()
 	if err != nil {
-		if apiResponse != nil && apiResponse.Response.StatusCode == 404 {
+		if apiResponse != nil && apiResponse.StatusCode == 404 {
 			d.SetId("")
 			return nil
 		}
@@ -172,10 +172,10 @@ func resourceLoadbalancerUpdate(ctx context.Context, d *schema.ResourceData, met
 		oldList := oldNicIds.([]interface{})
 
 		for _, o := range oldList {
-			_, apiresponse, err := client.LoadBalancerApi.DatacentersLoadbalancersBalancednicsDelete(context.TODO(),
+			_, apiResponse, err := client.LoadBalancerApi.DatacentersLoadbalancersBalancednicsDelete(context.TODO(),
 				d.Get("datacenter_id").(string), d.Id(), o.(string)).Execute()
 			if err != nil {
-				if apiresponse != nil && apiresponse.Response.StatusCode == 404 {
+				if apiResponse != nil && apiResponse.StatusCode == 404 {
 					/* 404 - nic was not found - in case the nic is removed, VDC removes the nic from load balancers
 					that contain it, behind the scenes - therefore our call will yield 404 */
 					fmt.Printf("[WARNING] nic ID %s already removed from load balancer %s\n", o.(string), d.Id())
@@ -185,7 +185,7 @@ func resourceLoadbalancerUpdate(ctx context.Context, d *schema.ResourceData, met
 				}
 			} else {
 				// Wait, catching any errors
-				_, errState := getStateChangeConf(meta, d, apiresponse.Header.Get("location"), schema.TimeoutUpdate).WaitForStateContext(ctx)
+				_, errState := getStateChangeConf(meta, d, apiResponse.Header.Get("location"), schema.TimeoutUpdate).WaitForStateContext(ctx)
 				if errState != nil {
 					diags := diag.FromErr(errState)
 					return diags
