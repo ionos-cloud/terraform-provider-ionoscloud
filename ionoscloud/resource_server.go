@@ -410,7 +410,7 @@ func resourceServerCreate(d *schema.ResourceData, meta interface{}) error {
 	} else if v, ok := d.GetOk("image_name"); ok {
 		image_name = v.(string)
 	} else {
-		return fmt.Errorf("Either 'image_name' or 'volume.0.image_name' must be provided.")
+		return fmt.Errorf("either 'image_name' or 'volume.0.image_name' must be provided")
 	}
 
 	ctx, cancel := context.WithTimeout(context.Background(), *resourceDefaultTimeouts.Default)
@@ -466,7 +466,7 @@ func resourceServerCreate(d *schema.ResourceData, meta interface{}) error {
 		if *img.Properties.Public == true && isSnapshot == false {
 
 			if volume.ImagePassword == nil && len(sshkey_path) == 0 {
-				return fmt.Errorf("either 'image_password' or 'ssh_key_path' must be provided.")
+				return fmt.Errorf("either 'image_password' or 'ssh_key_path' must be provided")
 			}
 
 			img, err := getImage(client, d.Get("datacenter_id").(string), image_name, *volume.Type)
@@ -490,7 +490,7 @@ func resourceServerCreate(d *schema.ResourceData, meta interface{}) error {
 
 			if img.Properties.Public != nil && *img.Properties.Public == true && isSnapshot == false {
 				if volume.ImagePassword == nil && len(sshkey_path) == 0 {
-					return fmt.Errorf("Either 'image_password' or 'ssh_key_path' must be provided.")
+					return fmt.Errorf("either 'image_password' or 'ssh_key_path' must be provided")
 				}
 				image = image_name
 			} else {
@@ -650,8 +650,9 @@ func resourceServerCreate(d *schema.ResourceData, meta interface{}) error {
 	server, apiResponse, err := client.ServerApi.DatacentersServersPost(ctx, d.Get("datacenter_id").(string)).Server(request).Execute()
 
 	if err != nil {
+		log.Printf("%s", apiResponse.Payload)
 		return fmt.Errorf(
-			"Error creating server: (%s)", err)
+			"error creating server: (%s)", err)
 	}
 	d.SetId(*server.Id)
 
@@ -993,7 +994,12 @@ func resourceServerUpdate(d *schema.ResourceData, meta interface{}) error {
 	server, apiResponse, err := client.ServerApi.DatacentersServersPatch(ctx, dcId, d.Id()).Server(request).Execute()
 
 	if err != nil {
-		return fmt.Errorf("Error occured while updating server ID %s %s", d.Id(), err)
+		var payload string
+		if apiResponse != nil {
+			payload = string(apiResponse.Payload)
+		}
+
+		return fmt.Errorf("error occured while updating server ID %s: %s ; API Error: %s", d.Id(), err, payload)
 	}
 
 	_, errState := getStateChangeConf(meta, d, apiResponse.Header.Get("Location"), schema.TimeoutUpdate).WaitForState()

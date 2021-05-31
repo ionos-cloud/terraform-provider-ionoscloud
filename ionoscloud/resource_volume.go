@@ -223,10 +223,13 @@ func resourceVolumeCreate(d *schema.ResourceData, meta interface{}) error {
 			Name:          &volumeName,
 			Size:          &volumeSize,
 			Type:          &volumeType,
-			ImagePassword: &imagePassword,
 			Bus:           &volumeBus,
 			LicenceType:   &licenceType,
 		},
+	}
+
+	if imagePassword != "" {
+		volume.Properties.ImagePassword = &imagePassword
 	}
 
 	if licenceType != "" {
