@@ -807,7 +807,9 @@ func resourceServerRead(d *schema.ResourceData, meta interface{}) error {
 		d.Set("cpu_family", *server.Properties.CpuFamily)
 	}
 
-	if server.Entities.Volumes != nil && len(*server.Entities.Volumes.Items) > 0 {
+	if server.Entities.Volumes != nil &&
+		len(*server.Entities.Volumes.Items) > 0 &&
+		(*server.Entities.Volumes.Items)[0].Properties.Image != nil {
 		d.Set("boot_image", *(*server.Entities.Volumes.Items)[0].Properties.Image)
 	}
 

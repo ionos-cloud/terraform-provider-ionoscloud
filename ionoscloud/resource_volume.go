@@ -206,11 +206,11 @@ func resourceVolumeCreate(d *schema.ResourceData, meta interface{}) error {
 	}
 
 	if image_name == "" && licenceType == "" && isSnapshot == false {
-		return fmt.Errorf("Either 'image_name', or 'licenceType' must be set.")
+		return fmt.Errorf("either 'image_name', or 'licenceType' must be set")
 	}
 
 	if isSnapshot == true && (imagePassword != "" || len(publicKeys) > 0) {
-		return fmt.Errorf("You can't pass 'image_password' and/or 'ssh keys' when creating a volume from a snapshot")
+		return fmt.Errorf("you can't pass 'image_password' and/or 'ssh keys' when creating a volume from a snapshot")
 	}
 
 	volumeName := d.Get("name").(string)
@@ -295,7 +295,7 @@ func resourceVolumeCreate(d *schema.ResourceData, meta interface{}) error {
 	backupUnitId := d.Get("backup_unit_id").(string)
 	if IsValidUUID(backupUnitId) {
 		if image == "" && image_alias == "" {
-			return fmt.Errorf("It is mandatory to provied either public image or imageAlias in conjunction with backup unit id property")
+			return fmt.Errorf("it is mandatory to provied either public image or imageAlias in conjunction with backup unit id property")
 		} else {
 			volume.Properties.BackupunitId = &backupUnitId
 		}
@@ -306,7 +306,7 @@ func resourceVolumeCreate(d *schema.ResourceData, meta interface{}) error {
 	userData := d.Get("user_data").(string)
 	if userData != "" {
 		if image == "" && image_alias == "" {
-			return fmt.Errorf("It is mandatory to provied either public image or imageAlias that has cloud-init compatibility in conjunction with backup unit id property ")
+			return fmt.Errorf("it is mandatory to provied either public image or imageAlias that has cloud-init compatibility in conjunction with backup unit id property ")
 		} else {
 			volume.Properties.UserData = &userData
 		}
@@ -321,7 +321,7 @@ func resourceVolumeCreate(d *schema.ResourceData, meta interface{}) error {
 	volume, apiResponse, err := client.VolumeApi.DatacentersVolumesPost(ctx, dcId).Volume(volume).Execute()
 
 	if err != nil {
-		return fmt.Errorf("An error occured while creating a volume: %s, apiError : %s", err, string(apiResponse.Payload))
+		return fmt.Errorf("an error occured while creating a volume: %s, apiError : %s", err, string(apiResponse.Payload))
 	}
 
 	d.SetId(*volume.Id)
