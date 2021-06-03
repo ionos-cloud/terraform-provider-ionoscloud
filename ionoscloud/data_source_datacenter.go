@@ -58,9 +58,13 @@ func getDatacenter(client *ionoscloud.APIClient, d *schema.ResourceData) (*ionos
 			defer cancel()
 		}
 
-		dc, _, err := client.DataCenterApi.DatacentersFindById(ctx, id.(string)).Execute()
+		dc, apiResponse, err := client.DataCenterApi.DatacentersFindById(ctx, id.(string)).Execute()
 		if err != nil {
-			return nil, fmt.Errorf("error getting datacenter with id %s", id.(string))
+			payload := ""
+			if apiResponse != nil {
+				payload = fmt.Sprintf("API response: %s", string(apiResponse.Payload))
+			}
+			return nil, fmt.Errorf("error getting datacenter with id %s %s %s", id.(string), err, payload)
 		}
 		if nameOk {
 			if *dc.Properties.Name != name {
@@ -84,10 +88,14 @@ func getDatacenter(client *ionoscloud.APIClient, d *schema.ResourceData) (*ionos
 		defer cancel()
 	}
 
-	datacenters, _, err := client.DataCenterApi.DatacentersGet(ctx).Execute()
+	datacenters, apiResponse, err := client.DataCenterApi.DatacentersGet(ctx).Execute()
 
 	if err != nil {
-		return nil, fmt.Errorf("an error occured while fetching datacenters: %s", err)
+		payload := ""
+		if apiResponse != nil {
+			payload = fmt.Sprintf("API response: %s", string(apiResponse.Payload))
+		}
+		return nil, fmt.Errorf("an error occured while fetching datacenters: %s %s ", err, payload)
 	}
 
 	var results []ionoscloud.Datacenter

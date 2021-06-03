@@ -37,16 +37,20 @@ func dataSourceSnapshotRead(d *schema.ResourceData, meta interface{}) error {
 	if cancel != nil {
 		defer cancel()
 	}
-	snapshots, _, err := client.SnapshotApi.SnapshotsGet(ctx).Execute()
+	snapshots, apiResponse, err := client.SnapshotApi.SnapshotsGet(ctx).Execute()
 
 	if err != nil {
-		return fmt.Errorf("an error occured while fetching IonosCloud locations %s", err)
+		payload := ""
+		if apiResponse != nil {
+			payload = fmt.Sprintf("API response: %s", string(apiResponse.Payload))
+		}
+		return fmt.Errorf("an error occured while fetching IonosCloud locations %s %s", err, payload)
 	}
 
 	name := d.Get("name").(string)
 	location, locationOk := d.GetOk("location")
 	size, sizeOk := d.GetOk("size")
-	results := []ionoscloud.Snapshot{}
+	var results []ionoscloud.Snapshot
 
 	if snapshots.Items != nil {
 		for _, snp := range *snapshots.Items {
@@ -57,7 +61,7 @@ func dataSourceSnapshotRead(d *schema.ResourceData, meta interface{}) error {
 	}
 
 	if locationOk {
-		locationResults := []ionoscloud.Snapshot{}
+		var locationResults []ionoscloud.Snapshot
 		for _, snp := range results {
 			if *snp.Properties.Location == location.(string) {
 				locationResults = append(locationResults, snp)
@@ -68,7 +72,7 @@ func dataSourceSnapshotRead(d *schema.ResourceData, meta interface{}) error {
 	}
 
 	if sizeOk {
-		sizeResults := []ionoscloud.Snapshot{}
+		var sizeResults []ionoscloud.Snapshot
 		for _, snp := range results {
 			if *snp.Properties.Size <= size.(float32) {
 				sizeResults = append(sizeResults, snp)

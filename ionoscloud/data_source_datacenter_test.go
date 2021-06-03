@@ -15,10 +15,10 @@ func TestAccDataSourceDatacenter_matching(t *testing.T) {
 		Steps: []resource.TestStep{
 			{
 
-				Config: testAccDataSourceDataCenter_matching,
+				Config: testaccdatasourcedatacenterMatching,
 			},
 			{
-				Config: testAccDataSourceDataCenter_matchingWithDataSource,
+				Config: testaccdatasourcedatacenterMatchingwithdatasource,
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttr("data.ionoscloud_datacenter.foobar", "name", "test_name"),
 					resource.TestCheckResourceAttr("data.ionoscloud_datacenter.foobar", "location", "us/las"),
@@ -29,14 +29,14 @@ func TestAccDataSourceDatacenter_matching(t *testing.T) {
 
 }
 
-const testAccDataSourceDataCenter_matching = `
+const testaccdatasourcedatacenterMatching = `
 resource "ionoscloud_datacenter" "foobar" {
     name       = "test_name"
     location = "us/las"
 }
 `
 
-const testAccDataSourceDataCenter_matchingWithDataSource = `
+const testaccdatasourcedatacenterMatchingwithdatasource = `
 resource "ionoscloud_datacenter" "foobar" {
     name       = "test_name"
     location = "us/las"

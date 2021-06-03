@@ -86,11 +86,11 @@ func resourceUserCreate(ctx context.Context, d *schema.ResourceData, meta interf
 	rsp, apiResponse, err := client.UserManagementApi.UmUsersPost(ctx).User(request).Execute()
 
 	if err != nil {
-		payload := "<nil>"
+		payload := ""
 		if apiResponse != nil {
-			payload = string(apiResponse.Payload)
+			payload = fmt.Sprintf("API response: %s", string(apiResponse.Payload))
 		}
-		diags := diag.FromErr(fmt.Errorf("an error occured while creating a user: %s; payload: %s", err, payload))
+		diags := diag.FromErr(fmt.Errorf("an error occured while creating a user: %s %s", err, payload))
 		return diags
 	}
 	if rsp.Id != nil {
@@ -117,13 +117,15 @@ func resourceUserRead(ctx context.Context, d *schema.ResourceData, meta interfac
 	rsp, apiResponse, err := client.UserManagementApi.UmUsersFindById(ctx, d.Id()).Execute()
 
 	if err != nil {
-		if _, ok := err.(ionoscloud.GenericOpenAPIError); ok {
-			if apiResponse != nil && apiResponse.StatusCode == 404 {
-				d.SetId("")
-				return nil
-			}
+		if apiResponse != nil && apiResponse.StatusCode == 404 {
+			d.SetId("")
+			return nil
 		}
-		diags := diag.FromErr(fmt.Errorf("an error occured while fetching a User ID %s %s", d.Id(), err))
+		payload := ""
+		if apiResponse != nil {
+			payload = fmt.Sprintf("API response: %s", string(apiResponse.Payload))
+		}
+		diags := diag.FromErr(fmt.Errorf("an error occured while fetching a User ID %s %s %s", d.Id(), err, payload))
 		return diags
 	}
 
@@ -168,7 +170,11 @@ func resourceUserUpdate(ctx context.Context, d *schema.ResourceData, meta interf
 	rsp, apiResponse, err := client.UserManagementApi.UmUsersFindById(ctx, d.Id()).Execute()
 
 	if err != nil {
-		diags := diag.FromErr(fmt.Errorf("an error occured while fetching a User ID %s %s", d.Id(), err))
+		payload := ""
+		if apiResponse != nil {
+			payload = fmt.Sprintf("API response: %s", string(apiResponse.Payload))
+		}
+		diags := diag.FromErr(fmt.Errorf("an error occured while fetching a User ID %s %s %s", d.Id(), err, payload))
 		return diags
 	}
 
@@ -209,11 +215,11 @@ func resourceUserUpdate(ctx context.Context, d *schema.ResourceData, meta interf
 	rsp, apiResponse, err = client.UserManagementApi.UmUsersPut(ctx, d.Id()).User(userReq).Execute()
 
 	if err != nil {
-		payload := "<nil>"
+		payload := ""
 		if apiResponse != nil {
-			payload = string(apiResponse.Payload)
+			payload = fmt.Sprintf("API response: %s", string(apiResponse.Payload))
 		}
-		diags := diag.FromErr(fmt.Errorf("an error occured while patching a user ID %s %s payload: %s", d.Id(), err, payload))
+		diags := diag.FromErr(fmt.Errorf("an error occured while patching a user ID %s %s %s", d.Id(), err, payload))
 		return diags
 	}
 
@@ -238,7 +244,11 @@ func resourceUserDelete(ctx context.Context, d *schema.ResourceData, meta interf
 		if err != nil {
 			if _, ok := err.(ionoscloud.GenericOpenAPIError); ok {
 				if apiResponse == nil || apiResponse.StatusCode != 404 {
-					diags := diag.FromErr(fmt.Errorf("an error occured while deleting a user %s %s", d.Id(), err))
+					payload := ""
+					if apiResponse != nil {
+						payload = fmt.Sprintf("API response: %s", string(apiResponse.Payload))
+					}
+					diags := diag.FromErr(fmt.Errorf("an error occured while deleting a user %s %s %s", d.Id(), err, payload))
 					return diags
 				}
 			}

@@ -15,7 +15,7 @@ func TestAccDataSourceImage_basic(t *testing.T) {
 		Steps: []resource.TestStep{
 			{
 
-				Config: testAccDataSourceImage_basic,
+				Config: testaccdatasourceimageBasic,
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttr("data.ionoscloud_image.img", "cloud_init", "NONE"),
 					resource.TestCheckResourceAttr("data.ionoscloud_image.img", "location", "de/fkb"),
@@ -28,7 +28,7 @@ func TestAccDataSourceImage_basic(t *testing.T) {
 
 }
 
-const testAccDataSourceImage_basic = `
+const testaccdatasourceimageBasic = `
 	data "ionoscloud_image" "img" {
 	  name = "ubuntu"
 	  type = "CDROM"

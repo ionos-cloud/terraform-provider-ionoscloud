@@ -151,7 +151,11 @@ func resourceFirewallCreate(ctx context.Context, d *schema.ResourceData, meta in
 	fw, apiResponse, err := client.NicApi.DatacentersServersNicsFirewallrulesPost(ctx, d.Get("datacenter_id").(string), d.Get("server_id").(string), d.Get("nic_id").(string)).Firewallrule(fw).Execute()
 
 	if err != nil {
-		diags := diag.FromErr(fmt.Errorf("an error occured while creating a firewall rule: %s", err))
+		payload := ""
+		if apiResponse != nil {
+			payload = fmt.Sprintf("API response: %s", string(apiResponse.Payload))
+		}
+		diags := diag.FromErr(fmt.Errorf("an error occured while creating a firewall rule: %s %s \n", err, payload))
 		return diags
 	}
 	d.SetId(*fw.Id)
@@ -181,7 +185,11 @@ func resourceFirewallRead(ctx context.Context, d *schema.ResourceData, meta inte
 			d.SetId("")
 			return nil
 		}
-		diags := diag.FromErr(fmt.Errorf("an error occured while fetching a firewall rule  dcId: %s server_id: %s  nic_id: %s ID: %s %s", d.Get("datacenter_id").(string), d.Get("server_id").(string), d.Get("nic_id").(string), d.Id(), err))
+		payload := ""
+		if apiResponse != nil {
+			payload = fmt.Sprintf("API response: %s", string(apiResponse.Payload))
+		}
+		diags := diag.FromErr(fmt.Errorf("an error occured while fetching a firewall rule  dcId: %s server_id: %s  nic_id: %s ID: %s %s %s", d.Get("datacenter_id").(string), d.Get("server_id").(string), d.Get("nic_id").(string), d.Id(), err, payload))
 		return diags
 	}
 
@@ -326,7 +334,11 @@ func resourceFirewallUpdate(ctx context.Context, d *schema.ResourceData, meta in
 	_, apiResponse, err := client.NicApi.DatacentersServersNicsFirewallrulesPatch(ctx, d.Get("datacenter_id").(string), d.Get("server_id").(string), d.Get("nic_id").(string), d.Id()).Firewallrule(properties).Execute()
 
 	if err != nil {
-		diags := diag.FromErr(fmt.Errorf("an error occured while updating a firewall rule ID %s %s", d.Id(), err))
+		payload := ""
+		if apiResponse != nil {
+			payload = fmt.Sprintf("API response: %s", string(apiResponse.Payload))
+		}
+		diags := diag.FromErr(fmt.Errorf("an error occured while updating a firewall rule ID %s %s %s", d.Id(), err, payload))
 		return diags
 	}
 
@@ -345,7 +357,11 @@ func resourceFirewallDelete(ctx context.Context, d *schema.ResourceData, meta in
 
 	_, apiResponse, err := client.NicApi.DatacentersServersNicsFirewallrulesDelete(ctx, d.Get("datacenter_id").(string), d.Get("server_id").(string), d.Get("nic_id").(string), d.Id()).Execute()
 	if err != nil {
-		diags := diag.FromErr(fmt.Errorf("an error occured while deleting a firewall rule ID %s %s", d.Id(), err))
+		payload := ""
+		if apiResponse != nil {
+			payload = fmt.Sprintf("API response: %s", string(apiResponse.Payload))
+		}
+		diags := diag.FromErr(fmt.Errorf("an error occured while deleting a firewall rule ID %s %s %s", d.Id(), err, payload))
 		return diags
 	}
 

@@ -45,7 +45,12 @@ func TestAccPrivateCrossConnect_Basic(t *testing.T) {
 func testAccCheckprivateCrossConnectDestroyCheck(s *terraform.State) error {
 	client := testAccProvider.Meta().(*ionoscloud.APIClient)
 
-	ctx, _ := context.WithTimeout(context.Background(), *resourceDefaultTimeouts.Delete)
+	ctx, cancel := context.WithTimeout(context.Background(), *resourceDefaultTimeouts.Delete)
+
+	if cancel != nil {
+		defer cancel()
+	}
+
 	for _, rs := range s.RootModule().Resources {
 		if rs.Type != "ionoscloud_private_crossconnect" {
 			continue
@@ -55,10 +60,14 @@ func testAccCheckprivateCrossConnectDestroyCheck(s *terraform.State) error {
 
 		if err != nil {
 			if apiResponse == nil || apiResponse.StatusCode != 404 {
-				return fmt.Errorf("an error occurred while checking private cross-connect %s: %s", rs.Primary.ID, err)
+				payload := ""
+				if apiResponse != nil {
+					payload = fmt.Sprintf("API response: %s", string(apiResponse.Payload))
+				}
+				return fmt.Errorf("private cross connect still exists  %s - an error occurred while checking it %s %s", rs.Primary.ID, err, payload)
 			}
 		} else {
-			return fmt.Errorf("Unable to fetch private cross-connect %s %s", rs.Primary.ID, err)
+			return fmt.Errorf("private cross connect still exists  %s", rs.Primary.ID)
 		}
 	}
 
@@ -70,23 +79,31 @@ func testAccCheckprivateCrossConnectExists(n string, privateCrossConnect *ionosc
 		client := testAccProvider.Meta().(*ionoscloud.APIClient)
 
 		rs, ok := s.RootModule().Resources[n]
-		ctx, _ := context.WithTimeout(context.Background(), *resourceDefaultTimeouts.Default)
+		ctx, cancel := context.WithTimeout(context.Background(), *resourceDefaultTimeouts.Default)
+
+		if cancel != nil {
+			defer cancel()
+		}
 
 		if !ok {
-			return fmt.Errorf("Not found: %s", n)
+			return fmt.Errorf("not found: %s", n)
 		}
 
 		if rs.Primary.ID == "" {
-			return fmt.Errorf("No Record ID is set")
+			return fmt.Errorf("no Record ID is set")
 		}
 
-		foundPrivateCrossConnect, _, err := client.PrivateCrossConnectApi.PccsFindById(ctx, rs.Primary.ID).Execute()
+		foundPrivateCrossConnect, apiResponse, err := client.PrivateCrossConnectApi.PccsFindById(ctx, rs.Primary.ID).Execute()
 
 		if err != nil {
-			return fmt.Errorf("Error occured while fetching private cross-connect: %s", rs.Primary.ID)
+			payload := ""
+			if apiResponse != nil {
+				payload = fmt.Sprintf("API response: %s", string(apiResponse.Payload))
+			}
+			return fmt.Errorf("error occured while fetching private cross-connect: %s %s", rs.Primary.ID, payload)
 		}
 		if *foundPrivateCrossConnect.Id != rs.Primary.ID {
-			return fmt.Errorf("Record not found")
+			return fmt.Errorf("record not found")
 		}
 		privateCrossConnect = &foundPrivateCrossConnect
 

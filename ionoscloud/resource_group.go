@@ -81,10 +81,6 @@ func resourceGroup() *schema.Resource {
 							Type:     schema.TypeString,
 							Computed: true,
 						},
-						"password": {
-							Type:     schema.TypeString,
-							Computed: true,
-						},
 						"administrator": {
 							Type:     schema.TypeBool,
 							Computed: true,
@@ -138,7 +134,11 @@ func resourceGroupCreate(ctx context.Context, d *schema.ResourceData, meta inter
 	group, apiResponse, err := client.UserManagementApi.UmGroupsPost(ctx).Group(request).Execute()
 
 	if err != nil {
-		diags := diag.FromErr(fmt.Errorf("an error occured while creating a group: %s", err))
+		payload := ""
+		if apiResponse != nil {
+			payload = fmt.Sprintf("API response: %s", string(apiResponse.Payload))
+		}
+		diags := diag.FromErr(fmt.Errorf("an error occured while creating a group: %s %s", err, payload))
 		return diags
 	}
 
@@ -164,7 +164,11 @@ func resourceGroupCreate(ctx context.Context, d *schema.ResourceData, meta inter
 		}
 		_, apiResponse, err := client.UserManagementApi.UmGroupsUsersPost(ctx, d.Id()).User(user).Execute()
 		if err != nil {
-			diags := diag.FromErr(fmt.Errorf("an error occured while adding %s user to group ID %s %s", userToAdd, d.Id(), err))
+			payload := ""
+			if apiResponse != nil {
+				payload = fmt.Sprintf("API response: %s", string(apiResponse.Payload))
+			}
+			diags := diag.FromErr(fmt.Errorf("an error occured while adding %s user to group ID %s %s %s", userToAdd, d.Id(), err, payload))
 			return diags
 		}
 		// Wait, catching any errors
@@ -187,7 +191,11 @@ func resourceGroupRead(ctx context.Context, d *schema.ResourceData, meta interfa
 			d.SetId("")
 			return nil
 		}
-		diags := diag.FromErr(fmt.Errorf("an error occured while fetching a Group ID %s %s", d.Id(), err))
+		payload := ""
+		if apiResponse != nil {
+			payload = fmt.Sprintf("API response: %s", string(apiResponse.Payload))
+		}
+		diags := diag.FromErr(fmt.Errorf("an error occured while fetching a Group ID %s %s %s", d.Id(), err, payload))
 		return diags
 	}
 
@@ -273,20 +281,49 @@ func resourceGroupRead(ctx context.Context, d *schema.ResourceData, meta interfa
 
 	users, _, err := client.UserManagementApi.UmGroupsUsersGet(ctx, d.Id()).Execute()
 	if err != nil {
-		diags := diag.FromErr(fmt.Errorf("an error occured while ListGroupUsers %s %s", d.Id(), err))
+		payload := ""
+		if apiResponse != nil {
+			payload = fmt.Sprintf("API response: %s", string(apiResponse.Payload))
+		}
+		diags := diag.FromErr(fmt.Errorf("an error occured while ListGroupUsers %s %s %s", d.Id(), err, payload))
 		return diags
 	}
 
-	var usersArray []ionoscloud.UserProperties
-	if len(*users.Items) > 0 {
-		for _, usr := range *users.Items {
-			usersArray = append(usersArray, *usr.Properties)
-		}
-		if err := d.Set("users", usersArray); err != nil {
-			diags := diag.FromErr(err)
-			return diags
+	usersEntries := make([]interface{}, 0)
+	if users.Items != nil && len(*users.Items) > 0 {
+		usersEntries = make([]interface{}, len(*users.Items))
+		for userIndex, user := range *users.Items {
+			userEntry := make(map[string]interface{})
+
+			if user.Properties.Firstname != nil {
+				userEntry["first_name"] = *user.Properties.Firstname
+			}
+
+			if user.Properties.Lastname != nil {
+				userEntry["last_name"] = *user.Properties.Lastname
+			}
+
+			if user.Properties.Email != nil {
+				userEntry["email"] = *user.Properties.Email
+			}
+
+			if user.Properties.Administrator != nil {
+				userEntry["administrator"] = *user.Properties.Administrator
+			}
+
+			if user.Properties.ForceSecAuth != nil {
+				userEntry["force_sec_auth"] = *user.Properties.ForceSecAuth
+			}
+
+			usersEntries[userIndex] = userEntry
 		}
 
+		if len(usersEntries) > 0 {
+			if err := d.Set("users", usersEntries); err != nil {
+				diags := diag.FromErr(err)
+				return diags
+			}
+		}
 	}
 
 	return nil
@@ -326,7 +363,11 @@ func resourceGroupUpdate(ctx context.Context, d *schema.ResourceData, meta inter
 
 	_, apiResponse, err := client.UserManagementApi.UmGroupsPut(ctx, d.Id()).Group(groupReq).Execute()
 	if err != nil {
-		diags := diag.FromErr(fmt.Errorf("an error occured while patching a group ID %s %s", d.Id(), err))
+		payload := ""
+		if apiResponse != nil {
+			payload = fmt.Sprintf("API response: %s", string(apiResponse.Payload))
+		}
+		diags := diag.FromErr(fmt.Errorf("an error occured while patching a group ID %s %s %s", d.Id(), err, payload))
 		return diags
 	}
 	// Wait, catching any errors
@@ -345,7 +386,11 @@ func resourceGroupUpdate(ctx context.Context, d *schema.ResourceData, meta inter
 
 		_, apiResponse, err := client.UserManagementApi.UmGroupsUsersPost(ctx, d.Id()).User(user).Execute()
 		if err != nil {
-			diags := diag.FromErr(fmt.Errorf("an error occured while adding %s user to group ID %s %s", usertoAdd, d.Id(), err))
+			payload := ""
+			if apiResponse != nil {
+				payload = fmt.Sprintf("API response: %s", string(apiResponse.Payload))
+			}
+			diags := diag.FromErr(fmt.Errorf("an error occured while adding %s user to group ID %s %s %s", usertoAdd, d.Id(), err, payload))
 			return diags
 		}
 
@@ -371,7 +416,11 @@ func resourceGroupDelete(ctx context.Context, d *schema.ResourceData, meta inter
 		if err != nil {
 			if _, ok := err.(ionoscloud.GenericOpenAPIError); ok {
 				if apiResponse == nil || apiResponse.StatusCode != 404 {
-					diags := diag.FromErr(fmt.Errorf("an error occured while deleting a group %s %s", d.Id(), err))
+					payload := ""
+					if apiResponse != nil {
+						payload = fmt.Sprintf("API response: %s", string(apiResponse.Payload))
+					}
+					diags := diag.FromErr(fmt.Errorf("an error occured while deleting a group %s %s %s", d.Id(), err, payload))
 					return diags
 				}
 			}

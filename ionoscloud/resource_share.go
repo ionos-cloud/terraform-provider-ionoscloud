@@ -58,7 +58,11 @@ func resourceShareCreate(ctx context.Context, d *schema.ResourceData, meta inter
 		d.Get("group_id").(string), d.Get("resource_id").(string)).Resource(request).Execute()
 
 	if err != nil {
-		diags := diag.FromErr(fmt.Errorf("an error occured while creating a share: %s", err))
+		payload := ""
+		if apiResponse != nil {
+			payload = fmt.Sprintf("API response: %s", string(apiResponse.Payload))
+		}
+		diags := diag.FromErr(fmt.Errorf("an error occured while creating a share: %s %s", err, payload))
 		return diags
 	}
 
@@ -91,7 +95,11 @@ func resourceShareRead(ctx context.Context, d *schema.ResourceData, meta interfa
 			d.SetId("")
 			return nil
 		}
-		diags := diag.FromErr(fmt.Errorf("an error occured while fetching a Share ID %s %s", d.Id(), err))
+		payload := ""
+		if apiResponse != nil {
+			payload = fmt.Sprintf("API response: %s", string(apiResponse.Payload))
+		}
+		diags := diag.FromErr(fmt.Errorf("an error occured while fetching a Share ID %s %s %s", d.Id(), err, payload))
 		return diags
 	}
 
@@ -128,7 +136,11 @@ func resourceShareUpdate(ctx context.Context, d *schema.ResourceData, meta inter
 	_, apiResponse, err := client.UserManagementApi.UmGroupsSharesPut(ctx,
 		d.Get("group_id").(string), d.Get("resource_id").(string)).Resource(shareReq).Execute()
 	if err != nil {
-		diags := diag.FromErr(fmt.Errorf("an error occured while patching a share ID %s %s", d.Id(), err))
+		payload := ""
+		if apiResponse != nil {
+			payload = fmt.Sprintf("API response: %s", string(apiResponse.Payload))
+		}
+		diags := diag.FromErr(fmt.Errorf("an error occured while patching a share ID %s %s %s", d.Id(), err, payload))
 		return diags
 	}
 
@@ -159,7 +171,11 @@ func resourceShareDelete(ctx context.Context, d *schema.ResourceData, meta inter
 		if err != nil {
 			if _, ok := err.(ionoscloud.GenericOpenAPIError); ok {
 				if apiResponse == nil || apiResponse.StatusCode != 404 {
-					diags := diag.FromErr(fmt.Errorf("an error occured while deleting a share %s %s", d.Id(), err))
+					payload := ""
+					if apiResponse != nil {
+						payload = fmt.Sprintf("API response: %s", string(apiResponse.Payload))
+					}
+					diags := diag.FromErr(fmt.Errorf("an error occured while deleting a share %s %s %s", d.Id(), err, payload))
 					return diags
 				}
 			}

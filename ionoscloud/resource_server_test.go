@@ -22,7 +22,7 @@ func TestAccServer_Basic(t *testing.T) {
 		CheckDestroy: testAccCheckServerDestroyCheck,
 		Steps: []resource.TestStep{
 			{
-				Config: fmt.Sprintf(testAccCheckServerConfig_basic, serverName),
+				Config: fmt.Sprintf(testacccheckserverconfigBasic, serverName),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckServerExists("ionoscloud_server.webserver", &server),
 					testAccCheckServerAttributes("ionoscloud_server.webserver", serverName),
@@ -30,7 +30,7 @@ func TestAccServer_Basic(t *testing.T) {
 				),
 			},
 			{
-				Config: fmt.Sprintf(testAccCheckServerConfig_basicdep, serverName),
+				Config: fmt.Sprintf(testacccheckserverconfigBasicdep, serverName),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckServerExists("ionoscloud_server.webserver", &server),
 					testAccCheckServerAttributes("ionoscloud_server.webserver", serverName),
@@ -38,7 +38,7 @@ func TestAccServer_Basic(t *testing.T) {
 				),
 			},
 			{
-				Config: testAccCheckServerConfig_update,
+				Config: testacccheckserverconfigUpdate,
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckServerAttributes("ionoscloud_server.webserver", "updated"),
 					resource.TestCheckResourceAttr("ionoscloud_server.webserver", "name", "updated"),
@@ -53,15 +53,15 @@ func TestAccServer_Basic(t *testing.T) {
 func testAccCheckServerDestroyCheck(s *terraform.State) error {
 	client := testAccProvider.Meta().(*ionoscloud.APIClient)
 
+	ctx, cancel := context.WithTimeout(context.Background(), *resourceDefaultTimeouts.Default)
+
+	if cancel != nil {
+		defer cancel()
+	}
+
 	for _, rs := range s.RootModule().Resources {
 		if rs.Type != "ionoscloud_datacenter" {
 			continue
-		}
-
-		ctx, cancel := context.WithTimeout(context.Background(), *resourceDefaultTimeouts.Default)
-
-		if cancel != nil {
-			defer cancel()
 		}
 
 		dcId := rs.Primary.Attributes["datacenter_id"]
@@ -70,7 +70,11 @@ func testAccCheckServerDestroyCheck(s *terraform.State) error {
 
 		if err != nil {
 			if apiResponse == nil || apiResponse.StatusCode != 404 {
-				return fmt.Errorf("unable to fetch server %s: %s", rs.Primary.ID, err)
+				payload := ""
+				if apiResponse != nil {
+					payload = fmt.Sprintf("API response: %s", string(apiResponse.Payload))
+				}
+				return fmt.Errorf("server still exists %s - an error occurred while checking it %s %s", rs.Primary.ID, err, payload)
 			}
 		} else {
 			return fmt.Errorf("server still exists %s", rs.Primary.ID)
@@ -88,7 +92,7 @@ func testAccCheckServerAttributes(n string, name string) resource.TestCheckFunc 
 			return fmt.Errorf("testAccCheckServerAttributes: Not found: %s", n)
 		}
 		if rs.Primary.Attributes["name"] != name {
-			return fmt.Errorf("Bad name: %s", rs.Primary.Attributes["name"])
+			return fmt.Errorf("bad name: %s", rs.Primary.Attributes["name"])
 		}
 
 		return nil
@@ -106,7 +110,7 @@ func testAccCheckServerExists(n string, server *ionoscloud.Server) resource.Test
 		}
 
 		if rs.Primary.ID == "" {
-			return fmt.Errorf("No Record ID is set")
+			return fmt.Errorf("no Record ID is set")
 		}
 
 		ctx, cancel := context.WithTimeout(context.Background(), *resourceDefaultTimeouts.Default)
@@ -115,13 +119,17 @@ func testAccCheckServerExists(n string, server *ionoscloud.Server) resource.Test
 			defer cancel()
 		}
 
-		foundServer, _, err := client.ServerApi.DatacentersServersFindById(ctx, rs.Primary.Attributes["datacenter_id"], rs.Primary.ID).Execute()
+		foundServer, apiResponse, err := client.ServerApi.DatacentersServersFindById(ctx, rs.Primary.Attributes["datacenter_id"], rs.Primary.ID).Execute()
 
 		if err != nil {
-			return fmt.Errorf("Error occured while fetching Server: %s", rs.Primary.ID)
+			payload := ""
+			if apiResponse != nil {
+				payload = fmt.Sprintf("API response: %s", string(apiResponse.Payload))
+			}
+			return fmt.Errorf("error occured while fetching Server: %s %s %s", rs.Primary.ID, err, payload)
 		}
 		if *foundServer.Id != rs.Primary.ID {
-			return fmt.Errorf("Record not found")
+			return fmt.Errorf("record not found")
 		}
 
 		server = &foundServer
@@ -130,7 +138,7 @@ func testAccCheckServerExists(n string, server *ionoscloud.Server) resource.Test
 	}
 }
 
-const testAccCheckServerConfig_basic = `
+const testacccheckserverconfigBasic = `
 resource "ionoscloud_datacenter" "foobar" {
 	name       = "server-test"
 	location = "us/las"
@@ -169,7 +177,7 @@ resource "ionoscloud_server" "webserver" {
   }
 }`
 
-const testAccCheckServerConfig_basicdep = `
+const testacccheckserverconfigBasicdep = `
 resource "ionoscloud_datacenter" "foobar" {
 	name       = "server-test"
 	location = "us/las"
@@ -208,7 +216,7 @@ resource "ionoscloud_server" "webserver" {
   }
 }`
 
-const testAccCheckServerConfig_update = `
+const testacccheckserverconfigUpdate = `
 resource "ionoscloud_datacenter" "foobar" {
 	name       = "server-test"
 	location = "us/las"

@@ -59,13 +59,15 @@ func testAccCheckbackupUnitDestroyCheck(s *terraform.State) error {
 
 		_, apiResponse, err := client.BackupUnitApi.BackupunitsFindById(ctx, rs.Primary.ID).Execute()
 
-		if _, ok := err.(ionoscloud.GenericOpenAPIError); ok {
+		if err != nil {
 			if apiResponse != nil && apiResponse.StatusCode != 404 {
-				return fmt.Errorf("backup unit still exists %s %s", rs.Primary.ID, string(apiResponse.Payload))
+				payload := fmt.Sprintf("API response: %s", string(apiResponse.Payload))
+				return fmt.Errorf("backup unit still exists %s - an error occurred while checking it %s %s", rs.Primary.ID, err, payload)
 			}
 		} else {
-			return fmt.Errorf("Unable to fetch backup unit %s %s", rs.Primary.ID, err)
+			return fmt.Errorf("backup unit still exists %s", rs.Primary.ID)
 		}
+
 	}
 
 	return nil
@@ -78,11 +80,11 @@ func testAccCheckbackupUnitExists(n string, backupUnit *ionoscloud.BackupUnit) r
 		rs, ok := s.RootModule().Resources[n]
 
 		if !ok {
-			return fmt.Errorf("Not found: %s", n)
+			return fmt.Errorf("not found: %s", n)
 		}
 
 		if rs.Primary.ID == "" {
-			return fmt.Errorf("No Record ID is set")
+			return fmt.Errorf("no Record ID is set")
 		}
 
 		ctx, cancel := context.WithTimeout(context.Background(), *resourceDefaultTimeouts.Default)
@@ -91,13 +93,17 @@ func testAccCheckbackupUnitExists(n string, backupUnit *ionoscloud.BackupUnit) r
 			defer cancel()
 		}
 
-		foundBackupUnit, _, err := client.BackupUnitApi.BackupunitsFindById(ctx, rs.Primary.ID).Execute()
+		foundBackupUnit, apiResponse, err := client.BackupUnitApi.BackupunitsFindById(ctx, rs.Primary.ID).Execute()
 
 		if err != nil {
-			return fmt.Errorf("Error occured while fetching backup unit: %s", rs.Primary.ID)
+			payload := ""
+			if apiResponse != nil {
+				payload = fmt.Sprintf("API response: %s", string(apiResponse.Payload))
+			}
+			return fmt.Errorf("error occured while fetching backup unit: %s %s", rs.Primary.ID, payload)
 		}
 		if *foundBackupUnit.Id != rs.Primary.ID {
-			return fmt.Errorf("Record not found")
+			return fmt.Errorf("record not found")
 		}
 		backupUnit = &foundBackupUnit
 

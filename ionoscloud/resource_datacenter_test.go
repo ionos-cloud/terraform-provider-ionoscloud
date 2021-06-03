@@ -12,7 +12,7 @@ import (
 
 func TestAccDataCenter_Basic(t *testing.T) {
 	var datacenter ionoscloud.Datacenter
-	dc_name := "datacenter-test"
+	dcName := "datacenter-test"
 
 	resource.Test(t, resource.TestCase{
 		PreCheck: func() {
@@ -22,14 +22,14 @@ func TestAccDataCenter_Basic(t *testing.T) {
 		CheckDestroy: testAccCheckDatacenterDestroyCheck,
 		Steps: []resource.TestStep{
 			{
-				Config: fmt.Sprintf(testAccCheckDatacenterConfig_basic, dc_name),
+				Config: fmt.Sprintf(testacccheckdatacenterconfigBasic, dcName),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckDatacenterExists("ionoscloud_datacenter.foobar", &datacenter),
-					resource.TestCheckResourceAttr("ionoscloud_datacenter.foobar", "name", dc_name),
+					resource.TestCheckResourceAttr("ionoscloud_datacenter.foobar", "name", dcName),
 				),
 			},
 			{
-				Config: testAccCheckDatacenterConfig_update,
+				Config: testacccheckdatacenterconfigUpdate,
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckDatacenterExists("ionoscloud_datacenter.foobar", &datacenter),
 					resource.TestCheckResourceAttr("ionoscloud_datacenter.foobar", "name", "updated"),
@@ -42,29 +42,29 @@ func TestAccDataCenter_Basic(t *testing.T) {
 func testAccCheckDatacenterDestroyCheck(s *terraform.State) error {
 	client := testAccProvider.Meta().(*ionoscloud.APIClient)
 
+	ctx, cancel := context.WithTimeout(context.Background(), *resourceDefaultTimeouts.Default)
+
+	if cancel != nil {
+		defer cancel()
+	}
+
 	for _, rs := range s.RootModule().Resources {
 		if rs.Type != "ionoscloud_datacenter" {
 			continue
 		}
 
-		ctx, cancel := context.WithTimeout(context.Background(), *resourceDefaultTimeouts.Default)
-
-		if cancel != nil {
-			defer cancel()
-		}
-
 		_, apiResponse, err := client.DataCenterApi.DatacentersFindById(ctx, rs.Primary.ID).Execute()
 
-		if _, ok := err.(ionoscloud.GenericOpenAPIError); ok {
+		if err != nil {
 			if apiResponse == nil || apiResponse.StatusCode != 404 {
-				var payload = "<nil>"
+				payload := ""
 				if apiResponse != nil {
-					payload = string(apiResponse.Payload)
+					payload = fmt.Sprintf("API response: %s", string(apiResponse.Payload))
 				}
-				return fmt.Errorf("DataCenter still exists %s %s", rs.Primary.ID, payload)
+				return fmt.Errorf("datacenter still exists %s - an error occurred while checking it %s %s", rs.Primary.ID, err, payload)
 			}
 		} else {
-			return fmt.Errorf("Unable to fetching DataCenter %s %s", rs.Primary.ID, err)
+			return fmt.Errorf("datacenter still exists %s", rs.Primary.ID)
 		}
 	}
 
@@ -78,11 +78,11 @@ func testAccCheckDatacenterExists(n string, datacenter *ionoscloud.Datacenter) r
 		rs, ok := s.RootModule().Resources[n]
 
 		if !ok {
-			return fmt.Errorf("Not found: %s", n)
+			return fmt.Errorf("not found: %s", n)
 		}
 
 		if rs.Primary.ID == "" {
-			return fmt.Errorf("No Record ID is set")
+			return fmt.Errorf("no Record ID is set")
 		}
 
 		ctx, cancel := context.WithTimeout(context.Background(), *resourceDefaultTimeouts.Default)
@@ -91,13 +91,17 @@ func testAccCheckDatacenterExists(n string, datacenter *ionoscloud.Datacenter) r
 			defer cancel()
 		}
 
-		foundDC, _, err := client.DataCenterApi.DatacentersFindById(ctx, rs.Primary.ID).Execute()
+		foundDC, apiResponse, err := client.DataCenterApi.DatacentersFindById(ctx, rs.Primary.ID).Execute()
 
 		if err != nil {
-			return fmt.Errorf("Error occured while fetching DC: %s", rs.Primary.ID)
+			payload := ""
+			if apiResponse != nil {
+				payload = fmt.Sprintf("API response: %s", string(apiResponse.Payload))
+			}
+			return fmt.Errorf("error occured while fetching DC: %s %s", rs.Primary.ID, payload)
 		}
 		if *foundDC.Id != rs.Primary.ID {
-			return fmt.Errorf("Record not found")
+			return fmt.Errorf("record not found")
 		}
 		datacenter = &foundDC
 
@@ -105,13 +109,13 @@ func testAccCheckDatacenterExists(n string, datacenter *ionoscloud.Datacenter) r
 	}
 }
 
-const testAccCheckDatacenterConfig_basic = `
+const testacccheckdatacenterconfigBasic = `
 resource "ionoscloud_datacenter" "foobar" {
 	name       = "%s"
 	location = "us/las"
 }`
 
-const testAccCheckDatacenterConfig_update = `
+const testacccheckdatacenterconfigUpdate = `
 resource "ionoscloud_datacenter" "foobar" {
 	name       =  "updated"
 	location = "us/las"

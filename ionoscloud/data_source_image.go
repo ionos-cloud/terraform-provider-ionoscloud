@@ -111,10 +111,14 @@ func dataSourceImageRead(d *schema.ResourceData, meta interface{}) error {
 		defer cancel()
 	}
 
-	images, _, err := client.ImageApi.ImagesGet(ctx).Execute()
+	images, apiResponse, err := client.ImageApi.ImagesGet(ctx).Execute()
 
 	if err != nil {
-		return fmt.Errorf("an error occured while fetching IonosCloud images %s", err)
+		payload := ""
+		if apiResponse != nil {
+			payload = fmt.Sprintf("API response: %s", string(apiResponse.Payload))
+		}
+		return fmt.Errorf("an error occured while fetching IonosCloud images %s %s", err, payload)
 	}
 
 	name := d.Get("name").(string)
@@ -154,7 +158,7 @@ func dataSourceImageRead(d *schema.ResourceData, meta interface{}) error {
 	}
 
 	if imageTypeOk {
-		imageTypeResults := []ionoscloud.Image{}
+		var imageTypeResults []ionoscloud.Image
 		for _, img := range results {
 			if img.Properties.ImageType != nil && *img.Properties.ImageType == imageType.(string) {
 				imageTypeResults = append(imageTypeResults, img)
@@ -165,7 +169,7 @@ func dataSourceImageRead(d *schema.ResourceData, meta interface{}) error {
 	}
 
 	if locationOk {
-		locationResults := []ionoscloud.Image{}
+		var locationResults []ionoscloud.Image
 		for _, img := range results {
 			if img.Properties.Location != nil && *img.Properties.Location == location.(string) {
 				locationResults = append(locationResults, img)
@@ -175,7 +179,7 @@ func dataSourceImageRead(d *schema.ResourceData, meta interface{}) error {
 	}
 
 	if cloudInitOk {
-		cloudInitResults := []ionoscloud.Image{}
+		var cloudInitResults []ionoscloud.Image
 		for _, img := range results {
 			if img.Properties.CloudInit != nil && *img.Properties.CloudInit == cloudInit.(string) {
 				cloudInitResults = append(cloudInitResults, img)

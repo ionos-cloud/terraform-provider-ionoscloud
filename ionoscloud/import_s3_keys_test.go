@@ -32,7 +32,7 @@ func TestAccS3Key_ImportBasic(t *testing.T) {
 }
 
 func testAccS3KeyImportStateID(s *terraform.State) (string, error) {
-	var importID string = ""
+	importID := ""
 
 	for _, rs := range s.RootModule().Resources {
 		if rs.Type != "ionoscloud_s3_key" {

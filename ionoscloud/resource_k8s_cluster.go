@@ -133,11 +133,15 @@ func resourcek8sClusterCreate(ctx context.Context, d *schema.ResourceData, meta 
 		cluster.Properties.GatewayIp = &gatewayIp
 	}
 
-	createdCluster, _, err := client.KubernetesApi.K8sPost(ctx).KubernetesCluster(cluster).Execute()
+	createdCluster, apiResponse, err := client.KubernetesApi.K8sPost(ctx).KubernetesCluster(cluster).Execute()
 
 	if err != nil {
 		d.SetId("")
-		diags := diag.FromErr(fmt.Errorf("error creating k8s cluster: %s", err))
+		payload := ""
+		if apiResponse != nil {
+			payload = fmt.Sprintf("API response: %s", string(apiResponse.Payload))
+		}
+		diags := diag.FromErr(fmt.Errorf("error creating k8s cluster: %s %s", err, payload))
 		return diags
 	}
 
@@ -174,7 +178,11 @@ func resourcek8sClusterRead(ctx context.Context, d *schema.ResourceData, meta in
 			d.SetId("")
 			return nil
 		}
-		diags := diag.FromErr(fmt.Errorf("error while fetching k8s cluster %s: %s", d.Id(), err))
+		payload := ""
+		if apiResponse != nil {
+			payload = fmt.Sprintf("API response: %s", string(apiResponse.Payload))
+		}
+		diags := diag.FromErr(fmt.Errorf("error while fetching k8s cluster %s: %s %s", d.Id(), err, payload))
 		return diags
 	}
 
@@ -322,7 +330,11 @@ func resourcek8sClusterUpdate(ctx context.Context, d *schema.ResourceData, meta 
 				d.SetId("")
 				return nil
 			}
-			diags := diag.FromErr(fmt.Errorf("error while updating k8s cluster: %s", err))
+			payload := ""
+			if apiResponse != nil {
+				payload = fmt.Sprintf("API response: %s", string(apiResponse.Payload))
+			}
+			diags := diag.FromErr(fmt.Errorf("error while updating k8s cluster: %s %s", err, payload))
 			return diags
 		}
 		diags := diag.FromErr(fmt.Errorf("error while updating k8s cluster %s: %s", d.Id(), err))
@@ -355,15 +367,15 @@ func resourcek8sClusterDelete(ctx context.Context, d *schema.ResourceData, meta 
 	_, apiResponse, err := client.KubernetesApi.K8sDelete(ctx, d.Id()).Execute()
 
 	if err != nil {
-		if _, ok := err.(ionoscloud.GenericOpenAPIError); ok {
-			if apiResponse != nil && apiResponse.StatusCode == 404 {
-				d.SetId("")
-				return nil
-			}
-			diags := diag.FromErr(fmt.Errorf("error while deleting k8s cluster: %s", err))
-			return diags
+		if apiResponse != nil && apiResponse.StatusCode == 404 {
+			d.SetId("")
+			return nil
 		}
-		diags := diag.FromErr(fmt.Errorf("error while deleting k8s cluster %s: %s", d.Id(), err))
+		payload := ""
+		if apiResponse != nil {
+			payload = fmt.Sprintf("API response: %s", string(apiResponse.Payload))
+		}
+		diags := diag.FromErr(fmt.Errorf("error while deleting k8s cluster: %s %s", err, payload))
 		return diags
 	}
 
@@ -389,10 +401,14 @@ func resourcek8sClusterDelete(ctx context.Context, d *schema.ResourceData, meta 
 
 func k8sClusterReady(ctx context.Context, client *ionoscloud.APIClient, d *schema.ResourceData) (bool, error) {
 
-	subjectCluster, _, err := client.KubernetesApi.K8sFindByClusterId(ctx, d.Id()).Execute()
+	subjectCluster, apiResponse, err := client.KubernetesApi.K8sFindByClusterId(ctx, d.Id()).Execute()
 
 	if err != nil {
-		return true, fmt.Errorf("error checking k8s cluster status: %s", err)
+		payload := ""
+		if apiResponse != nil {
+			payload = fmt.Sprintf("API response: %s", string(apiResponse.Payload))
+		}
+		return true, fmt.Errorf("error checking k8s cluster status: %s %s", err, payload)
 	}
 	return *subjectCluster.Metadata.State == "ACTIVE", nil
 }
@@ -406,7 +422,11 @@ func k8sClusterDeleted(ctx context.Context, client *ionoscloud.APIClient, d *sch
 			if apiResponse != nil && apiResponse.StatusCode == 404 {
 				return true, nil
 			}
-			return true, fmt.Errorf("error checking k8s cluster deletion status: %s", err)
+			payload := ""
+			if apiResponse != nil {
+				payload = fmt.Sprintf("API response: %s", string(apiResponse.Payload))
+			}
+			return true, fmt.Errorf("error checking k8s cluster deletion status: %s %s", err, payload)
 		}
 	}
 	return false, nil

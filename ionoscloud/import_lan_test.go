@@ -18,7 +18,7 @@ func TestAccLan_ImportBasic(t *testing.T) {
 		CheckDestroy: testAccCheckLanDestroyCheck,
 		Steps: []resource.TestStep{
 			{
-				Config: fmt.Sprintf(testAccCheckLanConfig_basic, lanName),
+				Config: fmt.Sprintf(testaccchecklanconfigBasic, lanName),
 			},
 
 			{
@@ -32,7 +32,7 @@ func TestAccLan_ImportBasic(t *testing.T) {
 }
 
 func testAccLanImportStateId(s *terraform.State) (string, error) {
-	var importID string = ""
+	importID := ""
 
 	for _, rs := range s.RootModule().Resources {
 		if rs.Type != "ionoscloud_lan" {

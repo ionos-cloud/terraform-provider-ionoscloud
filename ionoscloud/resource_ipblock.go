@@ -65,7 +65,11 @@ func resourceIPBlockCreate(ctx context.Context, d *schema.ResourceData, meta int
 	ipblock, apiResponse, err := client.IPBlocksApi.IpblocksPost(ctx).Ipblock(ipblock).Execute()
 
 	if err != nil {
-		diags := diag.FromErr(fmt.Errorf("an error occured while reserving an ip block: %s", err))
+		payload := ""
+		if apiResponse != nil {
+			payload = fmt.Sprintf("API response: %s", string(apiResponse.Payload))
+		}
+		diags := diag.FromErr(fmt.Errorf("an error occured while reserving an ip block: %s %s", err, payload))
 		return diags
 	}
 	d.SetId(*ipblock.Id)
@@ -94,7 +98,11 @@ func resourceIPBlockRead(ctx context.Context, d *schema.ResourceData, meta inter
 			d.SetId("")
 			return nil
 		}
-		diags := diag.FromErr(fmt.Errorf("an error occured while fetching an ip block ID %s %s", d.Id(), err))
+		payload := ""
+		if apiResponse != nil {
+			payload = fmt.Sprintf("API response: %s", string(apiResponse.Payload))
+		}
+		diags := diag.FromErr(fmt.Errorf("an error occured while fetching an ip block ID %s %s %s", d.Id(), err, payload))
 		return diags
 	}
 
@@ -141,10 +149,14 @@ func resourceIPBlockUpdate(ctx context.Context, d *schema.ResourceData, meta int
 		request.Name = &name
 	}
 
-	_, _, err := client.IPBlocksApi.IpblocksPatch(ctx, d.Id()).Ipblock(request).Execute()
+	_, apiResponse, err := client.IPBlocksApi.IpblocksPatch(ctx, d.Id()).Ipblock(request).Execute()
 
 	if err != nil {
-		diags := diag.FromErr(fmt.Errorf("an error occured while updating an ip block ID %s %s", d.Id(), err))
+		payload := ""
+		if apiResponse != nil {
+			payload = fmt.Sprintf("API response: %s", string(apiResponse.Payload))
+		}
+		diags := diag.FromErr(fmt.Errorf("an error occured while updating an ip block ID %s %s %s", d.Id(), err, payload))
 		return diags
 	}
 
@@ -156,13 +168,18 @@ func resourceIPBlockDelete(ctx context.Context, d *schema.ResourceData, meta int
 
 	_, apiResponse, err := client.IPBlocksApi.IpblocksDelete(ctx, d.Id()).Execute()
 	if err != nil {
-		diags := diag.FromErr(fmt.Errorf("an error occured while releasing an ipblock ID: %s %s", d.Id(), err))
+		payload := ""
+		if apiResponse != nil {
+			payload = fmt.Sprintf("API response: %s", string(apiResponse.Payload))
+		}
+		diags := diag.FromErr(fmt.Errorf("an error occured while releasing an ipblock ID: %s %s %s", d.Id(), err, payload))
 		return diags
 	}
 
 	// Wait, catching any errors
 	_, errState := getStateChangeConf(meta, d, apiResponse.Header.Get("Location"), schema.TimeoutDelete).WaitForStateContext(ctx)
 	if errState != nil {
+
 		diags := diag.FromErr(errState)
 		return diags
 	}

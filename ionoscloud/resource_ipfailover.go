@@ -65,7 +65,11 @@ func resourceLanIPFailoverCreate(ctx context.Context, d *schema.ResourceData, me
 
 	lan, apiResponse, err := client.LanApi.DatacentersLansPatch(ctx, dcid, lanid).Lan(*properties).Execute()
 	if err != nil {
-		diags := diag.FromErr(fmt.Errorf("An error occured while patching a lans failover group  %s %s", lanid, err))
+		payload := ""
+		if apiResponse != nil {
+			payload = fmt.Sprintf("API response: %s", string(apiResponse.Payload))
+		}
+		diags := diag.FromErr(fmt.Errorf("An error occured while patching a lans failover group  %s %s %s", lanid, err, payload))
 		return diags
 	}
 
@@ -91,7 +95,11 @@ func resourceLanIPFailoverRead(ctx context.Context, d *schema.ResourceData, meta
 			d.SetId("")
 			return nil
 		}
-		diags := diag.FromErr(fmt.Errorf("an error occured while fetching a lan ID %s %s", d.Id(), err))
+		payload := ""
+		if apiResponse != nil {
+			payload = fmt.Sprintf("API response: %s", string(apiResponse.Payload))
+		}
+		diags := diag.FromErr(fmt.Errorf("an error occured while fetching a lan ID %s %s %s", d.Id(), err, payload))
 		return diags
 	}
 
@@ -144,7 +152,11 @@ func resourceLanIPFailoverUpdate(ctx context.Context, d *schema.ResourceData, me
 
 	_, apiResponse, err := client.LanApi.DatacentersLansPatch(ctx, dcid, lanid).Lan(*properties).Execute()
 	if err != nil {
-		diags := diag.FromErr(fmt.Errorf("an error occured while patching a lan ID %s %s", d.Id(), err))
+		payload := ""
+		if apiResponse != nil {
+			payload = fmt.Sprintf("API response: %s", string(apiResponse.Payload))
+		}
+		diags := diag.FromErr(fmt.Errorf("an error occured while patching a lan ID %s %s %s", d.Id(), err, payload))
 		return diags
 	}
 
@@ -176,7 +188,11 @@ func resourceLanIPFailoverDelete(ctx context.Context, d *schema.ResourceData, me
 		_, apiResponse, err = client.LanApi.DatacentersLansPatch(ctx, dcid, lanid).Lan(*properties).Execute()
 
 		if err != nil && (apiResponse == nil || apiResponse.StatusCode != 404) {
-			diags := diag.FromErr(fmt.Errorf("an error occured while removing a lans ipfailover groups dcId %s ID %s %s", d.Get("datacenter_id").(string), d.Id(), err))
+			payload := ""
+			if apiResponse != nil {
+				payload = fmt.Sprintf("API response: %s", string(apiResponse.Payload))
+			}
+			diags := diag.FromErr(fmt.Errorf("an error occured while removing a lans ipfailover groups dcId %s ID %s %s %s", d.Get("datacenter_id").(string), d.Id(), err, payload))
 			return diags
 		}
 	}

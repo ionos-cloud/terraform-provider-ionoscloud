@@ -14,7 +14,7 @@ func TestAccResource_basic(t *testing.T) {
 		Providers: testAccProviders,
 		Steps: []resource.TestStep{
 			{
-				Config: testAccDataSourceResource_basic,
+				Config: testaccdatasourceresourceBasic,
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttr("data.ionoscloud_resource.res", "resource_type", "datacenter"),
 				),
@@ -24,7 +24,7 @@ func TestAccResource_basic(t *testing.T) {
 
 }
 
-const testAccDataSourceResource_basic = `
+const testaccdatasourceresourceBasic = `
 resource "ionoscloud_datacenter" "foobar" {
   name       = "test_name"
   location = "us/las"

@@ -112,11 +112,15 @@ func resourcePrivateCrossConnectCreate(ctx context.Context, d *schema.ResourceDa
 		pcc.Properties.Description = &description
 	}
 
-	rsp, _, err := client.PrivateCrossConnectApi.PccsPost(ctx).Pcc(pcc).Execute()
+	rsp, apiResponse, err := client.PrivateCrossConnectApi.PccsPost(ctx).Pcc(pcc).Execute()
 
 	if err != nil {
 		d.SetId("")
-		diags := diag.FromErr(fmt.Errorf("error creating private PCC: %s", err))
+		payload := ""
+		if apiResponse != nil {
+			payload = fmt.Sprintf("API response: %s", string(apiResponse.Payload))
+		}
+		diags := diag.FromErr(fmt.Errorf("error creating private PCC: %s %s", err, payload))
 		return diags
 	}
 
@@ -149,13 +153,15 @@ func resourcePrivateCrossConnectRead(ctx context.Context, d *schema.ResourceData
 	rsp, apiResponse, err := client.PrivateCrossConnectApi.PccsFindById(ctx, d.Id()).Execute()
 
 	if err != nil {
-		if _, ok := err.(ionoscloud.GenericOpenAPIError); ok {
-			if apiResponse != nil && apiResponse.StatusCode == 404 {
-				d.SetId("")
-				return nil
-			}
+		if apiResponse != nil && apiResponse.StatusCode == 404 {
+			d.SetId("")
+			return nil
 		}
-		diags := diag.FromErr(fmt.Errorf("error while fetching PCC %s: %s", d.Id(), err))
+		payload := ""
+		if apiResponse != nil {
+			payload = fmt.Sprintf("API response: %s", string(apiResponse.Payload))
+		}
+		diags := diag.FromErr(fmt.Errorf("error while fetching PCC %s: %s  %s", d.Id(), err, payload))
 		return diags
 	}
 
@@ -226,15 +232,15 @@ func resourcePrivateCrossConnectUpdate(ctx context.Context, d *schema.ResourceDa
 
 	_, apiResponse, err := client.PrivateCrossConnectApi.PccsPatch(ctx, d.Id()).Pcc(*request.Properties).Execute()
 	if err != nil {
-		if _, ok := err.(ionoscloud.GenericOpenAPIError); ok {
-			if apiResponse != nil && apiResponse.StatusCode == 404 {
-				d.SetId("")
-				return nil
-			}
-			diags := diag.FromErr(fmt.Errorf("error while updating PCC: %s", err))
-			return diags
+		if apiResponse != nil && apiResponse.StatusCode == 404 {
+			d.SetId("")
+			return nil
 		}
-		diags := diag.FromErr(fmt.Errorf("error while updating PCC %s: %s", d.Id(), err))
+		payload := ""
+		if apiResponse != nil {
+			payload = fmt.Sprintf("API response: %s", string(apiResponse.Payload))
+		}
+		diags := diag.FromErr(fmt.Errorf("error while updating PCC: %s %s", err, payload))
 		return diags
 	}
 
@@ -263,15 +269,15 @@ func resourcePrivateCrossConnectDelete(ctx context.Context, d *schema.ResourceDa
 
 	_, apiResponse, err := client.PrivateCrossConnectApi.PccsDelete(ctx, d.Id()).Execute()
 	if err != nil {
-		if _, ok := err.(ionoscloud.GenericOpenAPIError); ok {
-			if apiResponse != nil && apiResponse.StatusCode == 404 {
-				d.SetId("")
-				return nil
-			}
-			diags := diag.FromErr(fmt.Errorf("error while deleting PCC: %s", err))
-			return diags
+		if apiResponse != nil && apiResponse.StatusCode == 404 {
+			d.SetId("")
+			return nil
 		}
-		diags := diag.FromErr(fmt.Errorf("error while deleting PCC %s: %s", d.Id(), err))
+		payload := ""
+		if apiResponse != nil {
+			payload = fmt.Sprintf("API response: %s", string(apiResponse.Payload))
+		}
+		diags := diag.FromErr(fmt.Errorf("error while deleting PCC: %s %s", err, payload))
 		return diags
 	}
 
@@ -296,10 +302,14 @@ func resourcePrivateCrossConnectDelete(ctx context.Context, d *schema.ResourceDa
 }
 
 func privateCrossConnectReady(ctx context.Context, client *ionoscloud.APIClient, d *schema.ResourceData) (bool, error) {
-	rsp, _, err := client.PrivateCrossConnectApi.PccsFindById(ctx, d.Id()).Execute()
+	rsp, apiResponse, err := client.PrivateCrossConnectApi.PccsFindById(ctx, d.Id()).Execute()
 
 	if err != nil {
-		return true, fmt.Errorf("error checking PCC status: %s", err)
+		payload := ""
+		if apiResponse != nil {
+			payload = fmt.Sprintf("API response: %s", string(apiResponse.Payload))
+		}
+		return true, fmt.Errorf("error checking PCC status: %s %s", err, payload)
 	}
 	return *rsp.Metadata.State == "AVAILABLE", nil
 }
@@ -308,12 +318,14 @@ func privateCrossConnectDeleted(ctx context.Context, client *ionoscloud.APIClien
 	_, apiResponse, err := client.PrivateCrossConnectApi.PccsFindById(ctx, d.Id()).Execute()
 
 	if err != nil {
-		if _, ok := err.(ionoscloud.GenericOpenAPIError); ok {
-			if apiResponse != nil && apiResponse.StatusCode == 404 {
-				return true, nil
-			}
-			return true, fmt.Errorf("error checking PCC deletion status: %s", err)
+		if apiResponse != nil && apiResponse.StatusCode == 404 {
+			return true, nil
 		}
+		payload := ""
+		if apiResponse != nil {
+			payload = fmt.Sprintf("API response: %s", string(apiResponse.Payload))
+		}
+		return true, fmt.Errorf("error checking PCC deletion status: %s %s", err, payload)
 	}
 	return false, nil
 }

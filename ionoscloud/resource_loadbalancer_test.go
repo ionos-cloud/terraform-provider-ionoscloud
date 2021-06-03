@@ -1,3 +1,5 @@
+// +build lb
+
 package ionoscloud
 
 import (
@@ -22,7 +24,7 @@ func TestAccLoadbalancer_Basic(t *testing.T) {
 		CheckDestroy: testAccCheckLoadbalancerDestroyCheck,
 		Steps: []resource.TestStep{
 			{
-				Config: fmt.Sprintf(testAccCheckLoadbalancerConfig_basic, lbName),
+				Config: fmt.Sprintf(testacccheckloadbalancerconfigBasic, lbName),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckLoadbalancerExists("ionoscloud_loadbalancer.example", &loadbalancer),
 					testAccCheckLoadbalancerAttributes("ionoscloud_loadbalancer.example", lbName),
@@ -30,7 +32,7 @@ func TestAccLoadbalancer_Basic(t *testing.T) {
 				),
 			},
 			{
-				Config: testAccCheckLoadbalancerConfig_update,
+				Config: testacccheckloadbalancerconfigUpdate,
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckLoadbalancerAttributes("ionoscloud_loadbalancer.example", "updated"),
 					resource.TestCheckResourceAttr("ionoscloud_loadbalancer.example", "name", "updated"),
@@ -43,7 +45,11 @@ func TestAccLoadbalancer_Basic(t *testing.T) {
 func testAccCheckLoadbalancerDestroyCheck(s *terraform.State) error {
 	client := testAccProvider.Meta().(*ionoscloud.APIClient)
 
-	ctx, _ := context.WithTimeout(context.Background(), *resourceDefaultTimeouts.Delete)
+	ctx, cancel := context.WithTimeout(context.Background(), *resourceDefaultTimeouts.Delete)
+	if cancel != nil {
+		defer cancel()
+	}
+
 	for _, rs := range s.RootModule().Resources {
 		if rs.Type != "ionoscloud_loadbalancer" {
 			continue
@@ -55,12 +61,16 @@ func testAccCheckLoadbalancerDestroyCheck(s *terraform.State) error {
 		if err != nil {
 			_, apiResponse, err := client.DataCenterApi.DatacentersDelete(ctx, dcId).Execute()
 
-			if apiError, ok := err.(ionoscloud.GenericOpenAPIError); ok {
+			if err != nil {
 				if apiResponse == nil || apiResponse.StatusCode != 404 {
-					return fmt.Errorf("loadbalancer still exists %s %s", rs.Primary.ID, apiError)
+					payload := ""
+					if apiResponse != nil {
+						payload = fmt.Sprintf("API response: %s", string(apiResponse.Payload))
+					}
+					return fmt.Errorf("loadbalancer still exists %s - an error occurred while checking it %s %s", rs.Primary.ID, err, payload)
 				}
 			} else {
-				return fmt.Errorf("Unable to fetching loadbalancer %s %s", rs.Primary.ID, err)
+				return fmt.Errorf("loadbalancer still exists %s", rs.Primary.ID)
 			}
 		}
 	}
@@ -75,7 +85,7 @@ func testAccCheckLoadbalancerAttributes(n string, name string) resource.TestChec
 			return fmt.Errorf("testAccCheckLoadbalancerAttributes: Not found: %s", n)
 		}
 		if rs.Primary.Attributes["name"] != name {
-			return fmt.Errorf("Bad name: %s", rs.Primary.Attributes["name"])
+			return fmt.Errorf("bad name: %s", rs.Primary.Attributes["name"])
 		}
 
 		return nil
@@ -92,18 +102,27 @@ func testAccCheckLoadbalancerExists(n string, loadbalancer *ionoscloud.Loadbalan
 		}
 
 		if rs.Primary.ID == "" {
-			return fmt.Errorf("No Record ID is set")
+			return fmt.Errorf("no Record ID is set")
 		}
 
-		ctx, _ := context.WithTimeout(context.Background(), *resourceDefaultTimeouts.Default)
+		ctx, cancel := context.WithTimeout(context.Background(), *resourceDefaultTimeouts.Default)
+
+		if cancel != nil {
+			defer cancel()
+		}
+
 		dcId := rs.Primary.Attributes["datacenter_id"]
-		foundLB, _, err := client.LoadBalancerApi.DatacentersLoadbalancersFindById(ctx, dcId, rs.Primary.ID).Execute()
+		foundLB, apiResponse, err := client.LoadBalancerApi.DatacentersLoadbalancersFindById(ctx, dcId, rs.Primary.ID).Execute()
 
 		if err != nil {
-			return fmt.Errorf("Error occured while fetching Loadbalancer: %s", rs.Primary.ID)
+			payload := ""
+			if apiResponse != nil {
+				payload = fmt.Sprintf("API response: %s", string(apiResponse.Payload))
+			}
+			return fmt.Errorf("error occured while fetching Loadbalancer: %s %s", rs.Primary.ID, payload)
 		}
 		if *foundLB.Id != rs.Primary.ID {
-			return fmt.Errorf("Record not found")
+			return fmt.Errorf("record not found")
 		}
 
 		loadbalancer = &foundLB
@@ -112,7 +131,7 @@ func testAccCheckLoadbalancerExists(n string, loadbalancer *ionoscloud.Loadbalan
 	}
 }
 
-const testAccCheckLoadbalancerConfig_basic = `
+const testacccheckloadbalancerconfigBasic = `
 resource "ionoscloud_datacenter" "foobar" {
 	name       = "loadbalancer-test"
 	location = "us/las"
@@ -158,7 +177,7 @@ resource "ionoscloud_loadbalancer" "example" {
   dhcp = true
 }`
 
-const testAccCheckLoadbalancerConfig_update = `
+const testacccheckloadbalancerconfigUpdate = `
 resource "ionoscloud_datacenter" "foobar" {
 	name       = "loadbalancer-test"
 	location = "us/las"

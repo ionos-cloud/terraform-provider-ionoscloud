@@ -39,28 +39,38 @@ func dataSourceResourceRead(d *schema.ResourceData, meta interface{}) error {
 	}
 
 	if resourceType != "" && resourceId != "" {
-		result, _, err := client.UserManagementApi.UmResourcesFindByTypeAndId(ctx, resourceType, resourceId).Execute()
+		result, apiResponse, err := client.UserManagementApi.UmResourcesFindByTypeAndId(ctx, resourceType, resourceId).Execute()
 		if err != nil {
-			return fmt.Errorf("an error occured while fetching resource by type %s", err)
+			payload := ""
+			if apiResponse != nil {
+				payload = fmt.Sprintf("API response: %s", string(apiResponse.Payload))
+			}
+			return fmt.Errorf("an error occured while fetching resource by type %s %s", err, payload)
 		}
 		results = append(results, result)
 
 		d.Set("resource_type", result.Type)
 		d.Set("resource_id", result.Id)
 	} else if resourceType != "" {
-		//items, err := client.ListResourcesByType(resource_type)
-		items, _, err := client.UserManagementApi.UmResourcesFindByType(ctx, resourceType).Execute()
+		items, apiResponse, err := client.UserManagementApi.UmResourcesFindByType(ctx, resourceType).Execute()
 		if err != nil {
-			return fmt.Errorf("an error occured while fetching resources by type %s", err)
+			payload := ""
+			if apiResponse != nil {
+				payload = fmt.Sprintf("API response: %s", string(apiResponse.Payload))
+			}
+			return fmt.Errorf("an error occured while fetching resources by type %s %s", err, payload)
 		}
 
 		results = *items.Items
 		d.Set("resource_type", results[0].Type)
 	} else {
-		//items, err := client.ListResources()
-		items, _, err := client.UserManagementApi.UmResourcesGet(ctx).Execute()
+		items, apiResponse, err := client.UserManagementApi.UmResourcesGet(ctx).Execute()
 		if err != nil {
-			return fmt.Errorf("an error occured while fetching resources %s", err)
+			payload := ""
+			if apiResponse != nil {
+				payload = fmt.Sprintf("API response: %s", string(apiResponse.Payload))
+			}
+			return fmt.Errorf("an error occured while fetching resources %s %s", err, payload)
 		}
 		results = *items.Items
 	}

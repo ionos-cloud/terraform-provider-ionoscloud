@@ -44,7 +44,7 @@ func TestAcck8sNodepool_ImportBasic(t *testing.T) {
 }
 
 func testAcck8sNodepoolImportStateID(s *terraform.State) (string, error) {
-	var importID string = ""
+	importID := ""
 
 	for _, rs := range s.RootModule().Resources {
 		if rs.Type != "ionoscloud_k8s_node_pool" {

@@ -270,11 +270,11 @@ func resourcek8sNodePoolCreate(ctx context.Context, d *schema.ResourceData, meta
 
 	if err != nil {
 		d.SetId("")
-		payload := "<nil>"
+		payload := ""
 		if apiResponse != nil {
 			payload = fmt.Sprintf("API response: %s", string(apiResponse.Payload))
 		}
-		diags := diag.FromErr(fmt.Errorf("error creating k8s node pool: %s; %s", err, payload))
+		diags := diag.FromErr(fmt.Errorf("error creating k8s node pool: %s \n Payload API: %s \n", err, payload))
 		return diags
 	}
 
@@ -307,12 +307,15 @@ func resourcek8sNodePoolRead(ctx context.Context, d *schema.ResourceData, meta i
 	k8sNodepool, apiResponse, err := client.KubernetesApi.K8sNodepoolsFindById(ctx, d.Get("k8s_cluster_id").(string), d.Id()).Execute()
 
 	if err != nil {
-		log.Printf("[INFO] Resource %s not found: %+v", d.Id(), err)
 		if apiResponse != nil && apiResponse.StatusCode == 404 {
 			d.SetId("")
 			return nil
 		}
-		diags := diag.FromErr(err)
+		payload := ""
+		if apiResponse != nil {
+			payload = fmt.Sprintf("API response: %s", string(apiResponse.Payload))
+		}
+		diags := diag.FromErr(fmt.Errorf("error while fetching k8s node pool %s: %s %s", d.Id(), err, payload))
 		return diags
 	}
 
@@ -506,9 +509,13 @@ func resourcek8sNodePoolUpdate(ctx context.Context, d *schema.ResourceData, meta
 				defer cancel()
 			}
 
-			np, _, npErr := client.KubernetesApi.K8sNodepoolsFindById(ctx, d.Get("k8s_cluster_id").(string), d.Id()).Execute()
+			np, apiResponse, npErr := client.KubernetesApi.K8sNodepoolsFindById(ctx, d.Get("k8s_cluster_id").(string), d.Id()).Execute()
 			if npErr != nil {
-				diags := diag.FromErr(fmt.Errorf("error retrieving k8s node pool %q: %s", d.Id(), npErr))
+				payload := ""
+				if apiResponse != nil {
+					payload = fmt.Sprintf("API response: %s", string(apiResponse.Payload))
+				}
+				diags := diag.FromErr(fmt.Errorf("error retrieving k8s node pool %q: %s %s", d.Id(), npErr, payload))
 				return diags
 			}
 
@@ -629,7 +636,11 @@ func resourcek8sNodePoolUpdate(ctx context.Context, d *schema.ResourceData, meta
 			d.SetId("")
 			return nil
 		}
-		diags := diag.FromErr(fmt.Errorf("error while updating k8s node pool %s: %s", d.Id(), err))
+		payload := ""
+		if apiResponse != nil {
+			payload = fmt.Sprintf("API response: %s", string(apiResponse.Payload))
+		}
+		diags := diag.FromErr(fmt.Errorf("error while updating k8s node pool %s: %s %s", d.Id(), err, payload))
 		return diags
 	}
 
@@ -663,11 +674,11 @@ func resourcek8sNodePoolDelete(ctx context.Context, d *schema.ResourceData, meta
 			d.SetId("")
 			return nil
 		}
-		payload := "<nil>"
+		payload := ""
 		if apiResponse != nil {
-			payload = string(apiResponse.Payload)
+			payload = fmt.Sprintf("API response: %s", string(apiResponse.Payload))
 		}
-		diags := diag.FromErr(fmt.Errorf("error while deleting k8s node pool %s: %s, apiResponse: %s", d.Id(), err, payload))
+		diags := diag.FromErr(fmt.Errorf("error while deleting k8s node pool %s: %s %s", d.Id(), err, payload))
 		return diags
 	}
 
@@ -699,9 +710,13 @@ func k8sNodepoolReady(client *ionoscloud.APIClient, d *schema.ResourceData) (boo
 		defer cancel()
 	}
 
-	subjectNodepool, _, err := client.KubernetesApi.K8sNodepoolsFindById(ctx, d.Get("k8s_cluster_id").(string), d.Id()).Execute()
+	subjectNodepool, apiResponse, err := client.KubernetesApi.K8sNodepoolsFindById(ctx, d.Get("k8s_cluster_id").(string), d.Id()).Execute()
 	if err != nil {
-		return true, fmt.Errorf("error checking k8s node pool status: %s", err)
+		payload := ""
+		if apiResponse != nil {
+			payload = fmt.Sprintf("API response: %s", string(apiResponse.Payload))
+		}
+		return true, fmt.Errorf("error checking k8s node pool status: %s %s", err, payload)
 	}
 	return *subjectNodepool.Metadata.State == "ACTIVE", nil
 }
@@ -715,12 +730,14 @@ func k8sNodepoolDeleted(client *ionoscloud.APIClient, d *schema.ResourceData) (b
 	_, apiResponse, err := client.KubernetesApi.K8sNodepoolsFindById(ctx, d.Get("k8s_cluster_id").(string), d.Id()).Execute()
 
 	if err != nil {
-		if _, ok := err.(ionoscloud.GenericOpenAPIError); ok {
-			if apiResponse != nil && apiResponse.StatusCode == 404 {
-				return true, nil
-			}
-			return true, fmt.Errorf("error checking k8s node pool deletion status: %s", err)
+		if apiResponse != nil && apiResponse.StatusCode == 404 {
+			return true, nil
 		}
+		payload := ""
+		if apiResponse != nil {
+			payload = fmt.Sprintf("API response: %s", string(apiResponse.Payload))
+		}
+		return true, fmt.Errorf("error checking k8s node pool deletion status: %s %s", err, payload)
 	}
 	return false, nil
 }

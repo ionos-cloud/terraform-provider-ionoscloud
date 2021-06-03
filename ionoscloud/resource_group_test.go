@@ -22,7 +22,7 @@ func TestAccGroup_Basic(t *testing.T) {
 		CheckDestroy: testAccCheckGroupDestroyCheck,
 		Steps: []resource.TestStep{
 			{
-				Config: fmt.Sprintf(testAccCheckGroupConfig_basic, groupName),
+				Config: fmt.Sprintf(testacccheckgroupconfigBasic, groupName),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckGroupExists("ionoscloud_group.group", &group),
 					testAccCheckGroupAttributes("ionoscloud_group.group", groupName),
@@ -30,7 +30,7 @@ func TestAccGroup_Basic(t *testing.T) {
 				),
 			},
 			{
-				Config: testAccCheckGroupConfig_update,
+				Config: testacccheckgroupconfigUpdate,
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckGroupAttributes("ionoscloud_group.group", "updated"),
 					resource.TestCheckResourceAttr("ionoscloud_group.group", "name", "updated"),
@@ -54,14 +54,13 @@ func testAccCheckGroupDestroyCheck(s *terraform.State) error {
 		}
 		_, apiResponse, err := client.UserManagementApi.UmGroupsFindById(ctx, rs.Primary.ID).Execute()
 
-		if err == nil || apiResponse == nil || apiResponse.StatusCode != 404 {
-			var payload string
-			if apiResponse != nil {
-				payload = string(apiResponse.Payload)
-			} else {
-				payload = "<nil>"
+		if err != nil {
+			if apiResponse != nil && apiResponse.StatusCode != 404 {
+				payload := fmt.Sprintf("API response: %s", string(apiResponse.Payload))
+				return fmt.Errorf("group still exists %s - an error occurred while checking it %s %s", rs.Primary.ID, err, payload)
 			}
-			return fmt.Errorf("group still exists %s %s", rs.Primary.ID, payload)
+		} else {
+			return fmt.Errorf("group still exists %s", rs.Primary.ID)
 		}
 
 	}
@@ -76,7 +75,7 @@ func testAccCheckGroupAttributes(n string, name string) resource.TestCheckFunc {
 			return fmt.Errorf("testAccCheckGroupAttributes: Not found: %s", n)
 		}
 		if rs.Primary.Attributes["name"] != name {
-			return fmt.Errorf("Bad name: %s", rs.Primary.Attributes["name"])
+			return fmt.Errorf("bad name: %s", rs.Primary.Attributes["name"])
 		}
 
 		return nil
@@ -94,7 +93,7 @@ func testAccCheckGroupExists(n string, group *ionoscloud.Group) resource.TestChe
 		}
 
 		if rs.Primary.ID == "" {
-			return fmt.Errorf("No Record ID is set")
+			return fmt.Errorf("no Record ID is set")
 		}
 
 		ctx, cancel := context.WithTimeout(context.Background(), *resourceDefaultTimeouts.Default)
@@ -103,22 +102,26 @@ func testAccCheckGroupExists(n string, group *ionoscloud.Group) resource.TestChe
 			defer cancel()
 		}
 
-		foundgroup, _, err := client.UserManagementApi.UmGroupsFindById(ctx, rs.Primary.ID).Execute()
+		foundGroup, apiResponse, err := client.UserManagementApi.UmGroupsFindById(ctx, rs.Primary.ID).Execute()
 
 		if err != nil {
-			return fmt.Errorf("Error occured while fetching Group: %s", rs.Primary.ID)
+			payload := ""
+			if apiResponse != nil {
+				payload = fmt.Sprintf("API response: %s", string(apiResponse.Payload))
+			}
+			return fmt.Errorf("error occured while fetching Group: %s %s", rs.Primary.ID, payload)
 		}
-		if *foundgroup.Id != rs.Primary.ID {
-			return fmt.Errorf("Record not found")
+		if *foundGroup.Id != rs.Primary.ID {
+			return fmt.Errorf("record not found")
 		}
 
-		group = &foundgroup
+		group = &foundGroup
 
 		return nil
 	}
 }
 
-const testAccCheckGroupConfig_basic = `
+const testacccheckgroupconfigBasic = `
 resource "ionoscloud_group" "group" {
   name = "%s"
   create_datacenter = true
@@ -128,7 +131,7 @@ resource "ionoscloud_group" "group" {
 }
 `
 
-const testAccCheckGroupConfig_update = `
+const testacccheckgroupconfigUpdate = `
 resource "ionoscloud_group" "group" {
   name = "updated"
   create_datacenter = true

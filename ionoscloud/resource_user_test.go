@@ -28,7 +28,7 @@ func TestAccUser_Basic(t *testing.T) {
 		CheckDestroy: testAccCheckUserDestroyCheck,
 		Steps: []resource.TestStep{
 			{
-				Config: fmt.Sprintf(testAccCheckUserConfig_basic, email),
+				Config: fmt.Sprintf(testacccheckuserconfigBasic, email),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckUserExists("ionoscloud_user.user", &user),
 					testAccCheckUserAttributes("ionoscloud_user.user", "terraform"),
@@ -36,7 +36,7 @@ func TestAccUser_Basic(t *testing.T) {
 				),
 			},
 			{
-				Config: fmt.Sprintf(testAccCheckUserConfig_update, email),
+				Config: fmt.Sprintf(testacccheckuserconfigUpdate, email),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckUserAttributes("ionoscloud_user.user", "updated"),
 					resource.TestCheckResourceAttr("ionoscloud_user.user", "first_name", "updated"),
@@ -60,8 +60,16 @@ func testAccCheckUserDestroyCheck(s *terraform.State) error {
 		}
 		_, apiResponse, err := client.UserManagementApi.UmUsersFindById(ctx, rs.Primary.ID).Execute()
 
-		if err == nil || apiResponse == nil || apiResponse.StatusCode != 404 {
-			return fmt.Errorf("user still exists %s %s", rs.Primary.ID, err)
+		if err != nil {
+			if apiResponse == nil || apiResponse.StatusCode != 404 {
+				payload := ""
+				if apiResponse != nil {
+					payload = fmt.Sprintf("API response: %s", string(apiResponse.Payload))
+				}
+				return fmt.Errorf("user still exists %s - an error occurred while checking it %s %s", rs.Primary.ID, err, payload)
+			}
+		} else {
+			return fmt.Errorf("user still exists %s", rs.Primary.ID)
 		}
 	}
 
@@ -75,7 +83,7 @@ func testAccCheckUserAttributes(n string, name string) resource.TestCheckFunc {
 			return fmt.Errorf("testAccCheckUserAttributes: Not found: %s", n)
 		}
 		if rs.Primary.Attributes["first_name"] != name {
-			return fmt.Errorf("Bad first_name: %s", rs.Primary.Attributes["first_name"])
+			return fmt.Errorf("bad first_name: %s", rs.Primary.Attributes["first_name"])
 		}
 
 		return nil
@@ -92,27 +100,35 @@ func testAccCheckUserExists(n string, user *ionoscloud.User) resource.TestCheckF
 		}
 
 		if rs.Primary.ID == "" {
-			return fmt.Errorf("No Record ID is set")
+			return fmt.Errorf("no Record ID is set")
 		}
 
-		ctx, _ := context.WithTimeout(context.Background(), *resourceDefaultTimeouts.Default)
-		founduser, _, err := client.UserManagementApi.UmUsersFindById(ctx, rs.Primary.ID).Execute()
+		ctx, cancel := context.WithTimeout(context.Background(), *resourceDefaultTimeouts.Default)
+
+		if cancel != nil {
+			defer cancel()
+		}
+
+		foundUser, apiResponse, err := client.UserManagementApi.UmUsersFindById(ctx, rs.Primary.ID).Execute()
 
 		if err != nil {
-			return fmt.Errorf("Error occured while fetching User: %s", rs.Primary.ID)
+			payload := ""
+			if apiResponse != nil {
+				payload = fmt.Sprintf("API response: %s", string(apiResponse.Payload))
+			}
+			return fmt.Errorf("error occured while fetching User: %s %s %s", rs.Primary.ID, err, payload)
 		}
-		if *founduser.Id != rs.Primary.ID {
-			return fmt.Errorf("Record not found")
+		if *foundUser.Id != rs.Primary.ID {
+			return fmt.Errorf("record not found")
 		}
 
-		user = &founduser
+		user = &foundUser
 
 		return nil
 	}
 }
 
-const testAccCheckUserConfig_basic = `
-
+const testacccheckuserconfigBasic = `
 resource "ionoscloud_group" "group" {
   name = "terraform user group"
   create_datacenter = true
@@ -130,9 +146,7 @@ resource "ionoscloud_user" "user" {
   force_sec_auth= false
 }`
 
-const testAccCheckUserConfig_update = `
-
-
+const testacccheckuserconfigUpdate = `
 resource "ionoscloud_user" "user" {
   first_name = "updated"
   last_name = "test"

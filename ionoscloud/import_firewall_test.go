@@ -18,7 +18,7 @@ func TestAccFirewall_ImportBasic(t *testing.T) {
 		CheckDestroy: testAccCheckFirewallDestroyCheck,
 		Steps: []resource.TestStep{
 			{
-				Config: fmt.Sprintf(testAccCheckFirewallConfig_basic, firewallName),
+				Config: fmt.Sprintf(testacccheckfirewallconfigBasic, firewallName),
 			},
 
 			{
@@ -32,7 +32,7 @@ func TestAccFirewall_ImportBasic(t *testing.T) {
 }
 
 func testAccFirewallImportStateId(s *terraform.State) (string, error) {
-	var importID string = ""
+	importID := ""
 
 	for _, rs := range s.RootModule().Resources {
 		if rs.Type != "ionoscloud_firewall" {

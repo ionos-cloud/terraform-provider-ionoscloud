@@ -67,29 +67,29 @@ func TestAcck8sNodepool_Basic(t *testing.T) {
 func testAccCheckk8sNodepoolDestroyCheck(s *terraform.State) error {
 	client := testAccProvider.Meta().(*ionoscloud.APIClient)
 
+	ctx, cancel := context.WithTimeout(context.Background(), *resourceDefaultTimeouts.Default)
+
+	if cancel != nil {
+		defer cancel()
+	}
+
 	for _, rs := range s.RootModule().Resources {
 		if rs.Type != "ionoscloud_k8s_node_pool" {
 			continue
 		}
 
-		ctx, cancel := context.WithTimeout(context.Background(), *resourceDefaultTimeouts.Default)
-
-		if cancel != nil {
-			defer cancel()
-		}
-
 		_, apiResponse, err := client.KubernetesApi.K8sNodepoolsFindById(ctx, rs.Primary.Attributes["k8s_cluster_id"], rs.Primary.ID).Execute()
 
-		if _, ok := err.(ionoscloud.GenericOpenAPIError); ok {
+		if err != nil {
 			if apiResponse == nil || apiResponse.StatusCode != 404 {
-				var payload = "<nil>"
+				payload := ""
 				if apiResponse != nil {
-					payload = string(apiResponse.Payload)
+					payload = fmt.Sprintf("API response: %s", string(apiResponse.Payload))
 				}
-				return fmt.Errorf("K8s node pool still exists %s %s", rs.Primary.ID, payload)
+				return fmt.Errorf("k8s node pool still exists %s - an error occurred while checking it %s %s", rs.Primary.ID, err, payload)
 			}
 		} else {
-			return fmt.Errorf("Unable to fetch k8s node pool %s %s", rs.Primary.ID, err)
+			return fmt.Errorf("k8s node pool still exists %s", rs.Primary.ID)
 		}
 	}
 
@@ -103,11 +103,11 @@ func testAccCheckk8sNodepoolExists(n string, k8sNodepool *ionoscloud.KubernetesN
 		rs, ok := s.RootModule().Resources[n]
 
 		if !ok {
-			return fmt.Errorf("Not found: %s", n)
+			return fmt.Errorf("not found: %s", n)
 		}
 
 		if rs.Primary.ID == "" {
-			return fmt.Errorf("No Record ID is set")
+			return fmt.Errorf("no Record ID is set")
 		}
 
 		log.Printf("[INFO] REQ PATH: %+v/%+v", rs.Primary.Attributes["k8s_cluster_id"], rs.Primary.ID)
@@ -118,13 +118,17 @@ func testAccCheckk8sNodepoolExists(n string, k8sNodepool *ionoscloud.KubernetesN
 			defer cancel()
 		}
 
-		foundK8sNodepool, _, err := client.KubernetesApi.K8sNodepoolsFindById(ctx, rs.Primary.Attributes["k8s_cluster_id"], rs.Primary.ID).Execute()
+		foundK8sNodepool, apiResponse, err := client.KubernetesApi.K8sNodepoolsFindById(ctx, rs.Primary.Attributes["k8s_cluster_id"], rs.Primary.ID).Execute()
 
 		if err != nil {
-			return fmt.Errorf("Error occured while fetching k8s node pool: %s", rs.Primary.ID)
+			payload := ""
+			if apiResponse != nil {
+				payload = fmt.Sprintf("API response: %s", string(apiResponse.Payload))
+			}
+			return fmt.Errorf("error occured while fetching k8s node pool: %s %s", rs.Primary.ID, payload)
 		}
 		if *foundK8sNodepool.Id != rs.Primary.ID {
-			return fmt.Errorf("Record not found")
+			return fmt.Errorf("record not found")
 		}
 		k8sNodepool = &foundK8sNodepool
 

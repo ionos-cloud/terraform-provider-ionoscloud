@@ -167,6 +167,7 @@ func dataSourceK8sReadNodePool(d *schema.ResourceData, meta interface{}) error {
 		return errors.New("please provide either the lan id or name")
 	}
 	var nodePool ionoscloud.KubernetesNodePool
+	var apiResponse *ionoscloud.APIResponse
 	var err error
 
 	if idOk {
@@ -177,9 +178,13 @@ func dataSourceK8sReadNodePool(d *schema.ResourceData, meta interface{}) error {
 			defer cancel()
 		}
 
-		nodePool, _, err = client.KubernetesApi.K8sNodepoolsFindById(ctx, clusterId.(string), id.(string)).Execute()
+		nodePool, apiResponse, err = client.KubernetesApi.K8sNodepoolsFindById(ctx, clusterId.(string), id.(string)).Execute()
 		if err != nil {
-			return fmt.Errorf("an error occurred while fetching the k8s nodePool with ID %s: %s", id.(string), err)
+			payload := ""
+			if apiResponse != nil {
+				payload = fmt.Sprintf("API response: %s", string(apiResponse.Payload))
+			}
+			return fmt.Errorf("an error occurred while fetching the k8s nodePool with ID %s: %s %s", id.(string), err, payload)
 		}
 	} else {
 		/* search by name */
@@ -191,9 +196,13 @@ func dataSourceK8sReadNodePool(d *schema.ResourceData, meta interface{}) error {
 			defer cancel()
 		}
 
-		clusters, _, err := client.KubernetesApi.K8sNodepoolsGet(ctx, clusterId.(string)).Execute()
+		clusters, apiResponse, err := client.KubernetesApi.K8sNodepoolsGet(ctx, clusterId.(string)).Execute()
 		if err != nil {
-			return fmt.Errorf("an error occurred while fetching k8s nodepools: %s", err.Error())
+			payload := ""
+			if apiResponse != nil {
+				payload = fmt.Sprintf("API response: %s", string(apiResponse.Payload))
+			}
+			return fmt.Errorf("an error occurred while fetching k8s nodepools: %s %s", err.Error(), payload)
 		}
 
 		found := false
@@ -201,7 +210,11 @@ func dataSourceK8sReadNodePool(d *schema.ResourceData, meta interface{}) error {
 			for _, c := range *clusters.Items {
 				tmpNodePool, _, err := client.KubernetesApi.K8sNodepoolsFindById(ctx, clusterId.(string), *c.Id).Execute()
 				if err != nil {
-					return fmt.Errorf("an error occurred while fetching k8s nodePool with ID %s: %s", *c.Id, err.Error())
+					payload := ""
+					if apiResponse != nil {
+						payload = fmt.Sprintf("API response: %s", string(apiResponse.Payload))
+					}
+					return fmt.Errorf("an error occurred while fetching k8s nodePool with ID %s: %s %s", *c.Id, err.Error(), payload)
 				}
 				if tmpNodePool.Properties.Name != nil && *tmpNodePool.Properties.Name == name.(string) {
 					/* lan found */

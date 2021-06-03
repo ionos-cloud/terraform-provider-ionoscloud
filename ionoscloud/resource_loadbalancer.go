@@ -74,16 +74,20 @@ func resourceLoadbalancerCreate(ctx context.Context, d *schema.ResourceData, met
 
 	dcid := d.Get("datacenter_id").(string)
 
-	resp, apiResp, err := client.LoadBalancerApi.DatacentersLoadbalancersPost(ctx, dcid).Loadbalancer(*lb).Execute()
+	resp, apiResponse, err := client.LoadBalancerApi.DatacentersLoadbalancersPost(ctx, dcid).Loadbalancer(*lb).Execute()
 	if err != nil {
-		diags := diag.FromErr(fmt.Errorf("error occured while creating a loadbalancer %s", err))
+		payload := ""
+		if apiResponse != nil {
+			payload = fmt.Sprintf("API response: %s", string(apiResponse.Payload))
+		}
+		diags := diag.FromErr(fmt.Errorf("error occured while creating a loadbalancer %s %s", err, payload))
 		return diags
 	}
 
 	d.SetId(*resp.Id)
 
 	// Wait, catching any errors
-	_, errState := getStateChangeConf(meta, d, apiResp.Header.Get("Location"), schema.TimeoutCreate).WaitForStateContext(ctx)
+	_, errState := getStateChangeConf(meta, d, apiResponse.Header.Get("Location"), schema.TimeoutCreate).WaitForStateContext(ctx)
 	if errState != nil {
 		if IsRequestFailed(err) {
 			// Request failed, so resource was not created, delete resource from state file
@@ -105,7 +109,11 @@ func resourceLoadbalancerRead(ctx context.Context, d *schema.ResourceData, meta 
 			d.SetId("")
 			return nil
 		}
-		diags := diag.FromErr(fmt.Errorf("an error occured while fetching a lan ID %s %s", d.Id(), err))
+		payload := ""
+		if apiResponse != nil {
+			payload = fmt.Sprintf("API response: %s", string(apiResponse.Payload))
+		}
+		diags := diag.FromErr(fmt.Errorf("an error occured while fetching a lan ID %s %s \n API Response: %s \n", d.Id(), err, payload))
 		return diags
 	}
 
@@ -159,9 +167,13 @@ func resourceLoadbalancerUpdate(ctx context.Context, d *schema.ResourceData, met
 	}
 
 	if hasChangeCount > 0 {
-		_, _, err := client.LoadBalancerApi.DatacentersLoadbalancersPatch(ctx, d.Get("datacenter_id").(string), d.Id()).Loadbalancer(*properties).Execute()
+		_, apiResponse, err := client.LoadBalancerApi.DatacentersLoadbalancersPatch(ctx, d.Get("datacenter_id").(string), d.Id()).Loadbalancer(*properties).Execute()
 		if err != nil {
-			diags := diag.FromErr(fmt.Errorf("error while updating loadbalancer %s: %s ", d.Id(), err))
+			payload := ""
+			if apiResponse != nil {
+				payload = fmt.Sprintf("API response: %s", string(apiResponse.Payload))
+			}
+			diags := diag.FromErr(fmt.Errorf("error while updating loadbalancer %s: %s \n API Response: %s \n", d.Id(), err, payload))
 			return diags
 		}
 	}
@@ -180,7 +192,11 @@ func resourceLoadbalancerUpdate(ctx context.Context, d *schema.ResourceData, met
 					that contain it, behind the scenes - therefore our call will yield 404 */
 					fmt.Printf("[WARNING] nic ID %s already removed from load balancer %s\n", o.(string), d.Id())
 				} else {
-					diags := diag.FromErr(fmt.Errorf("[load balancer update] an error occured while deleting a balanced nic: %s", err))
+					payload := ""
+					if apiResponse != nil {
+						payload = fmt.Sprintf("API response: %s", string(apiResponse.Payload))
+					}
+					diags := diag.FromErr(fmt.Errorf("[load balancer update] an error occured while deleting a balanced nic: %s \n API Response: %s \n", err, payload))
 					return diags
 				}
 			} else {
@@ -198,13 +214,17 @@ func resourceLoadbalancerUpdate(ctx context.Context, d *schema.ResourceData, met
 		for _, o := range newList {
 			id := o.(string)
 			nic := ionoscloud.Nic{Id: &id}
-			_, apiResp, err := client.LoadBalancerApi.DatacentersLoadbalancersBalancednicsPost(ctx, d.Get("datacenter_id").(string), d.Id()).Nic(nic).Execute()
+			_, apiResponse, err := client.LoadBalancerApi.DatacentersLoadbalancersBalancednicsPost(ctx, d.Get("datacenter_id").(string), d.Id()).Nic(nic).Execute()
 			if err != nil {
-				diags := diag.FromErr(fmt.Errorf("[load balancer update] an error occured while creating a balanced nic: %s", err))
+				payload := ""
+				if apiResponse != nil {
+					payload = fmt.Sprintf("API response: %s", string(apiResponse.Payload))
+				}
+				diags := diag.FromErr(fmt.Errorf("[load balancer update] an error occured while creating a balanced nic: %s \n API Response: %s \n", err, payload))
 				return diags
 			}
 			// Wait, catching any errors
-			_, errState := getStateChangeConf(meta, d, apiResp.Header.Get("Location"), schema.TimeoutUpdate).WaitForStateContext(ctx)
+			_, errState := getStateChangeConf(meta, d, apiResponse.Header.Get("Location"), schema.TimeoutUpdate).WaitForStateContext(ctx)
 			if errState != nil {
 				diags := diag.FromErr(errState)
 				return diags
@@ -221,15 +241,19 @@ func resourceLoadbalancerDelete(ctx context.Context, d *schema.ResourceData, met
 	client := meta.(*ionoscloud.APIClient)
 
 	dcid := d.Get("datacenter_id").(string)
-	_, apiResp, err := client.LoadBalancerApi.DatacentersLoadbalancersDelete(ctx, dcid, d.Id()).Execute()
+	_, apiResponse, err := client.LoadBalancerApi.DatacentersLoadbalancersDelete(ctx, dcid, d.Id()).Execute()
 
 	if err != nil {
-		diags := diag.FromErr(fmt.Errorf("[load balancer delete] an error occured while deleting a loadbalancer: %s", err))
+		payload := ""
+		if apiResponse != nil {
+			payload = fmt.Sprintf("API response: %s", string(apiResponse.Payload))
+		}
+		diags := diag.FromErr(fmt.Errorf("[load balancer delete] an error occured while deleting a loadbalancer: %s \n API Reponse: %s \n", err, payload))
 		return diags
 	}
 
 	// Wait, catching any errors
-	_, errState := getStateChangeConf(meta, d, apiResp.Header.Get("Location"), schema.TimeoutDelete).WaitForStateContext(ctx)
+	_, errState := getStateChangeConf(meta, d, apiResponse.Header.Get("Location"), schema.TimeoutDelete).WaitForStateContext(ctx)
 	if errState != nil {
 		diags := diag.FromErr(errState)
 		return diags

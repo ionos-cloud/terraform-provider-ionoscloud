@@ -110,7 +110,11 @@ func resourceNicCreate(ctx context.Context, d *schema.ResourceData, meta interfa
 	nic, apiResponse, err := client.NicApi.DatacentersServersNicsPost(ctx, dcid, srvid).Nic(nic).Execute()
 
 	if err != nil {
-		diags := diag.FromErr(fmt.Errorf("error occured while creating a nic: %s", err))
+		payload := ""
+		if apiResponse != nil {
+			payload = fmt.Sprintf("API response: %s", string(apiResponse.Payload))
+		}
+		diags := diag.FromErr(fmt.Errorf("error occured while creating a nic: %s %s ", err, payload))
 		return diags
 	}
 	if nic.Id != nil {
@@ -145,7 +149,11 @@ func resourceNicRead(ctx context.Context, d *schema.ResourceData, meta interface
 				return nil
 			}
 		}
-		diags := diag.FromErr(fmt.Errorf("error occured while fetching a nic ID %s %s", d.Id(), err))
+		payload := ""
+		if apiResponse != nil {
+			payload = fmt.Sprintf("API response: %s", string(apiResponse.Payload))
+		}
+		diags := diag.FromErr(fmt.Errorf("error occured while fetching a nic ID %s %s %s", d.Id(), err, payload))
 		return diags
 	}
 
@@ -229,7 +237,11 @@ func resourceNicUpdate(ctx context.Context, d *schema.ResourceData, meta interfa
 	_, apiResponse, err := client.NicApi.DatacentersServersNicsPatch(ctx, dcid, srvid, nicid).Nic(properties).Execute()
 
 	if err != nil {
-		diags := diag.FromErr(fmt.Errorf("error occured while updating a nic: %s", err))
+		payload := ""
+		if apiResponse != nil {
+			payload = fmt.Sprintf("API response: %s", string(apiResponse.Payload))
+		}
+		diags := diag.FromErr(fmt.Errorf("error occured while updating a nic: %s %s", err, payload))
 		return diags
 	}
 
@@ -250,14 +262,18 @@ func resourceNicDelete(ctx context.Context, d *schema.ResourceData, meta interfa
 	srvid := d.Get("server_id").(string)
 	nicid := d.Id()
 
-	_, apiresp, err := client.NicApi.DatacentersServersNicsDelete(ctx, dcid, srvid, nicid).Execute()
+	_, apiResponse, err := client.NicApi.DatacentersServersNicsDelete(ctx, dcid, srvid, nicid).Execute()
 
 	if err != nil {
-		diags := diag.FromErr(fmt.Errorf("an error occured while deleting a nic dcId %s ID %s %s", d.Get("datacenter_id").(string), d.Id(), err))
+		payload := ""
+		if apiResponse != nil {
+			payload = fmt.Sprintf("API response: %s", string(apiResponse.Payload))
+		}
+		diags := diag.FromErr(fmt.Errorf("an error occured while deleting a nic dcId %s ID %s %s %s", d.Get("datacenter_id").(string), d.Id(), err, payload))
 		return diags
 	}
 	// Wait, catching any errors
-	_, errState := getStateChangeConf(meta, d, apiresp.Header.Get("Location"), schema.TimeoutDelete).WaitForStateContext(ctx)
+	_, errState := getStateChangeConf(meta, d, apiResponse.Header.Get("Location"), schema.TimeoutDelete).WaitForStateContext(ctx)
 	if errState != nil {
 		diags := diag.FromErr(errState)
 		return diags

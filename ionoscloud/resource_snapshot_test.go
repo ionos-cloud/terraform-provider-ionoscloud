@@ -22,14 +22,14 @@ func TestAccSnapshot_Basic(t *testing.T) {
 		CheckDestroy: testAccCheckSnapshotDestroyCheck,
 		Steps: []resource.TestStep{
 			{
-				Config: fmt.Sprintf(testAccCheckSnapshotConfig_basic, snapshotName),
+				Config: fmt.Sprintf(testaccchecksnapshotconfigBasic, snapshotName),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckSnapshotExists("ionoscloud_snapshot.test_snapshot", &snapshot),
 					resource.TestCheckResourceAttr("ionoscloud_snapshot.test_snapshot", "name", snapshotName),
 				),
 			},
 			{
-				Config: testAccCheckSnapshotConfig_update,
+				Config: testaccchecksnapshotconfigUpdate,
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttr("ionoscloud_snapshot.test_snapshot", "name", snapshotName),
 				),
@@ -41,7 +41,12 @@ func TestAccSnapshot_Basic(t *testing.T) {
 func testAccCheckSnapshotDestroyCheck(s *terraform.State) error {
 	client := testAccProvider.Meta().(*ionoscloud.APIClient)
 
-	ctx, _ := context.WithTimeout(context.Background(), *resourceDefaultTimeouts.Delete)
+	ctx, cancel := context.WithTimeout(context.Background(), *resourceDefaultTimeouts.Delete)
+
+	if cancel != nil {
+		defer cancel()
+	}
+
 	for _, rs := range s.RootModule().Resources {
 		if rs.Type != "ionoscloud_snapshot" {
 			continue
@@ -51,10 +56,14 @@ func testAccCheckSnapshotDestroyCheck(s *terraform.State) error {
 
 		if err != nil {
 			if apiResponse == nil || apiResponse.StatusCode != 404 {
-				return fmt.Errorf("unable to fetch snapshot %s %s", rs.Primary.ID, err)
+				payload := ""
+				if apiResponse != nil {
+					payload = fmt.Sprintf("API response: %s", string(apiResponse.Payload))
+				}
+				return fmt.Errorf("snapshot still exists %s - an error occurred while checking it %s %s", rs.Primary.ID, err, payload)
 			}
 		} else {
-			return fmt.Errorf("snapshot %s still exists", rs.Primary.ID)
+			return fmt.Errorf("snapshot still exists %s", rs.Primary.ID)
 		}
 	}
 
@@ -72,17 +81,26 @@ func testAccCheckSnapshotExists(n string, snapshot *ionoscloud.Snapshot) resourc
 		}
 
 		if rs.Primary.ID == "" {
-			return fmt.Errorf("No Record ID is set")
+			return fmt.Errorf("no Record ID is set")
 		}
 
-		ctx, _ := context.WithTimeout(context.Background(), *resourceDefaultTimeouts.Default)
-		foundServer, _, err := client.SnapshotApi.SnapshotsFindById(ctx, rs.Primary.ID).Execute()
+		ctx, cancel := context.WithTimeout(context.Background(), *resourceDefaultTimeouts.Default)
+
+		if cancel != nil {
+			defer cancel()
+		}
+
+		foundServer, apiResponse, err := client.SnapshotApi.SnapshotsFindById(ctx, rs.Primary.ID).Execute()
 
 		if err != nil {
-			return fmt.Errorf("Error occured while fetching Snapshot: %s", rs.Primary.ID)
+			payload := ""
+			if apiResponse != nil {
+				payload = fmt.Sprintf("API response: %s", string(apiResponse.Payload))
+			}
+			return fmt.Errorf("error occured while fetching Snapshot: %s %s", rs.Primary.ID, payload)
 		}
 		if *foundServer.Id != rs.Primary.ID {
-			return fmt.Errorf("Record not found")
+			return fmt.Errorf("record not found")
 		}
 
 		snapshot = &foundServer
@@ -91,7 +109,7 @@ func testAccCheckSnapshotExists(n string, snapshot *ionoscloud.Snapshot) resourc
 	}
 }
 
-const testAccCheckSnapshotConfig_basic = `
+const testaccchecksnapshotconfigBasic = `
 resource "ionoscloud_datacenter" "foobar" {
 	name       = "snapshot-test"
 	location = "us/las"
@@ -131,7 +149,7 @@ resource "ionoscloud_snapshot" "test_snapshot" {
 }
 `
 
-const testAccCheckSnapshotConfig_update = `
+const testaccchecksnapshotconfigUpdate = `
 resource "ionoscloud_datacenter" "foobar" {
 	name       = "snapshot-test"
 	location = "us/las"

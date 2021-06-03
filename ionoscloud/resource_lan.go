@@ -91,7 +91,11 @@ func resourceLanCreate(ctx context.Context, d *schema.ResourceData, meta interfa
 
 	if err != nil {
 		d.SetId("")
-		diags := diag.FromErr(fmt.Errorf("an error occured while creating LAN: %s", err))
+		payload := ""
+		if apiResponse != nil {
+			payload = fmt.Sprintf("API response: %s", string(apiResponse.Payload))
+		}
+		diags := diag.FromErr(fmt.Errorf("an error occured while creating LAN: %s %s", err, payload))
 		return diags
 	}
 
@@ -140,14 +144,16 @@ func resourceLanRead(ctx context.Context, d *schema.ResourceData, meta interface
 	rsp, apiResponse, err := client.LanApi.DatacentersLansFindById(ctx, dcid, d.Id()).Execute()
 
 	if err != nil {
-		if _, ok := err.(ionoscloud.GenericOpenAPIError); ok {
-			if apiResponse != nil && apiResponse.StatusCode == 404 {
-				log.Printf("[INFO] LAN %s not found", d.Id())
-				d.SetId("")
-				return nil
-			}
+		if apiResponse != nil && apiResponse.StatusCode == 404 {
+			log.Printf("[INFO] LAN %s not found", d.Id())
+			d.SetId("")
+			return nil
 		}
-		diags := diag.FromErr(fmt.Errorf("an error occured while fetching a LAN %s: %s", d.Id(), err))
+		payload := ""
+		if apiResponse != nil {
+			payload = fmt.Sprintf("API response: %s", string(apiResponse.Payload))
+		}
+		diags := diag.FromErr(fmt.Errorf("an error occured while fetching a LAN %s: %s %s", d.Id(), err, payload))
 		return diags
 	}
 
@@ -216,9 +222,13 @@ func resourceLanUpdate(ctx context.Context, d *schema.ResourceData, meta interfa
 	}
 
 	dcid := d.Get("datacenter_id").(string)
-	rsp, _, err := client.LanApi.DatacentersLansPatch(ctx, dcid, d.Id()).Lan(*properties).Execute()
+	rsp, apiResponse, err := client.LanApi.DatacentersLansPatch(ctx, dcid, d.Id()).Lan(*properties).Execute()
 	if err != nil {
-		diags := diag.FromErr(fmt.Errorf("an error occured while patching a lan ID %s %s", d.Id(), err))
+		payload := ""
+		if apiResponse != nil {
+			payload = fmt.Sprintf("API response: %s", string(apiResponse.Payload))
+		}
+		diags := diag.FromErr(fmt.Errorf("an error occured while patching a lan ID %s %s %s", d.Id(), err, payload))
 		return diags
 	}
 
@@ -255,7 +265,11 @@ func resourceLanDelete(ctx context.Context, d *schema.ResourceData, meta interfa
 
 		if err != nil {
 			if apiResponse == nil || apiResponse.StatusCode != 404 {
-				diags := diag.FromErr(fmt.Errorf("an error occured while deleting a lan dcId %s ID %s %s", d.Get("datacenter_id").(string), d.Id(), err))
+				payload := ""
+				if apiResponse != nil {
+					payload = fmt.Sprintf("API response: %s", string(apiResponse.Payload))
+				}
+				diags := diag.FromErr(fmt.Errorf("an error occured while deleting a lan dcId %s ID %s %s %s", d.Get("datacenter_id").(string), d.Id(), err, payload))
 				return diags
 			}
 		}
@@ -285,12 +299,16 @@ func resourceLanDelete(ctx context.Context, d *schema.ResourceData, meta interfa
 func lanAvailable(ctx context.Context, client *ionoscloud.APIClient, d *schema.ResourceData) (bool, error) {
 
 	dcid := d.Get("datacenter_id").(string)
-	rsp, _, err := client.LanApi.DatacentersLansFindById(ctx, dcid, d.Id()).Execute()
+	rsp, apiResponse, err := client.LanApi.DatacentersLansFindById(ctx, dcid, d.Id()).Execute()
 
 	log.Printf("[INFO] Current status for LAN %s: %+v", d.Id(), rsp)
 
 	if err != nil {
-		return true, fmt.Errorf("error checking LAN status: %s", err)
+		payload := ""
+		if apiResponse != nil {
+			payload = fmt.Sprintf("API response: %s", string(apiResponse.Payload))
+		}
+		return true, fmt.Errorf("%s %s", err, payload)
 	}
 	return *rsp.Metadata.State == "AVAILABLE", nil
 }
@@ -302,12 +320,15 @@ func lanDeleted(ctx context.Context, client *ionoscloud.APIClient, d *schema.Res
 	log.Printf("[INFO] Current deletion status for LAN %s: %+v", d.Id(), rsp)
 
 	if err != nil {
-		if _, ok := err.(ionoscloud.GenericOpenAPIError); ok {
-			if apiResponse != nil && apiResponse.StatusCode == 404 {
-				return true, nil
-			}
-			return true, fmt.Errorf("error checking LAN deletion status: %s", err)
+		if apiResponse != nil && apiResponse.StatusCode == 404 {
+			return true, nil
 		}
+		payload := ""
+		if apiResponse != nil {
+			payload = fmt.Sprintf("API response: %s", string(apiResponse.Payload))
+		}
+		return true, fmt.Errorf("%s %s", err, payload)
+
 	}
 	log.Printf("[INFO] LAN %s not deleted yet deleted LAN: %+v", d.Id(), rsp)
 	return false, nil

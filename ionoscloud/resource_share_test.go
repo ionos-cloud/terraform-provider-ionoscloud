@@ -20,14 +20,14 @@ func TestAccShare_Basic(t *testing.T) {
 		CheckDestroy: testAccCheckShareDestroyCheck,
 		Steps: []resource.TestStep{
 			{
-				Config: fmt.Sprintf(testAccCheckShareConfig_basic),
+				Config: fmt.Sprintf(testacccheckshareconfigBasic),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckShareExists("ionoscloud_share.share", &share),
 					resource.TestCheckResourceAttr("ionoscloud_share.share", "share_privilege", "true"),
 				),
 			},
 			{
-				Config: testAccCheckShareConfig_update,
+				Config: testacccheckshareconfigUpdate,
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttr("ionoscloud_share.share", "share_privilege", "false"),
 				),
@@ -55,16 +55,16 @@ func testAccCheckShareDestroyCheck(s *terraform.State) error {
 
 		_, apiResponse, err := client.UserManagementApi.UmGroupsSharesFindByResourceId(ctx, grpId, resourceId).Execute()
 
-		if err == nil || apiResponse == nil || apiResponse.StatusCode != 404 {
-			var payload string
-			var status int
-			if apiResponse != nil {
-				payload = string(apiResponse.Payload)
-				status = apiResponse.StatusCode
-			} else {
-				payload = "<nil>"
+		if err != nil {
+			if apiResponse == nil || apiResponse.StatusCode != 404 {
+				payload := ""
+				if apiResponse != nil {
+					payload = fmt.Sprintf("API response: %s", string(apiResponse.Payload))
+				}
+				return fmt.Errorf("share still exists %s - an error occurred while checking it %s %s", rs.Primary.ID, err, payload)
 			}
-			return fmt.Errorf("share for resource %s still exists in group %s: http status %d / payload: %s", resourceId, grpId, status, payload)
+		} else {
+			return fmt.Errorf("share still exists %s", rs.Primary.ID)
 		}
 
 	}
@@ -83,27 +83,31 @@ func testAccCheckShareExists(n string, share *ionoscloud.GroupShare) resource.Te
 		}
 
 		if rs.Primary.ID == "" {
-			return fmt.Errorf("No Record ID is set")
+			return fmt.Errorf("no Record ID is set")
 		}
 
 		grpId := rs.Primary.Attributes["group_id"]
 		resourceId := rs.Primary.Attributes["resource_id"]
-		foundshare, _, err := client.UserManagementApi.UmGroupsSharesFindByResourceId(context.TODO(), grpId, resourceId).Execute()
+		foundShare, apiResponse, err := client.UserManagementApi.UmGroupsSharesFindByResourceId(context.TODO(), grpId, resourceId).Execute()
 
 		if err != nil {
-			return fmt.Errorf("Error occured while fetching Share of resource  %s in group %s", rs.Primary.Attributes["resource_id"], rs.Primary.Attributes["group_id"])
+			payload := ""
+			if apiResponse != nil {
+				payload = fmt.Sprintf("API response: %s", string(apiResponse.Payload))
+			}
+			return fmt.Errorf("error occured while fetching Share of resource  %s in group %s %s", rs.Primary.Attributes["resource_id"], rs.Primary.Attributes["group_id"], payload)
 		}
-		if *foundshare.Id != rs.Primary.ID {
-			return fmt.Errorf("Record not found")
+		if *foundShare.Id != rs.Primary.ID {
+			return fmt.Errorf("record not found")
 		}
 
-		share = &foundshare
+		share = &foundShare
 
 		return nil
 	}
 }
 
-const testAccCheckShareConfig_basic = `
+const testacccheckshareconfigBasic = `
 resource "ionoscloud_datacenter" "foobar" {
 	name       = "terraform test"
 	location = "us/las"
@@ -124,7 +128,7 @@ resource "ionoscloud_share" "share" {
   share_privilege = true
 }`
 
-const testAccCheckShareConfig_update = `
+const testacccheckshareconfigUpdate = `
 resource "ionoscloud_datacenter" "foobar" {
 	name       = "terraform test"
 	location = "us/las"

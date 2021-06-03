@@ -32,10 +32,14 @@ func dataSourceLocationRead(d *schema.ResourceData, meta interface{}) error {
 	if cancel != nil {
 		defer cancel()
 	}
-	locations, _, err := client.LocationApi.LocationsGet(ctx).Execute()
+	locations, apiResponse, err := client.LocationApi.LocationsGet(ctx).Execute()
 
 	if err != nil {
-		return fmt.Errorf("an error occured while fetching IonosCloud locations %s", err)
+		payload := ""
+		if apiResponse != nil {
+			payload = fmt.Sprintf("API response: %s", string(apiResponse.Payload))
+		}
+		return fmt.Errorf("an error occured while fetching IonosCloud locations %s %s", err, payload)
 	}
 
 	name, nameOk := d.GetOk("name")
@@ -44,7 +48,7 @@ func dataSourceLocationRead(d *schema.ResourceData, meta interface{}) error {
 	if !nameOk && !featureOk {
 		return fmt.Errorf("either 'name' or 'feature' must be provided")
 	}
-	results := []ionoscloud.Location{}
+	var results []ionoscloud.Location
 
 	if locations.Items != nil {
 		for _, loc := range *locations.Items {
