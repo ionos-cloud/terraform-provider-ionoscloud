@@ -110,11 +110,7 @@ func testAccCheckk8sClusterExists(n string, k8sCluster *ionoscloud.KubernetesClu
 const testAccCheckk8sClusterConfigBasic = `
 resource "ionoscloud_k8s_cluster" "example" {
   name        = "%s"
-<<<<<<< HEAD
-	k8s_version = "1.20.6"
-=======
   k8s_version = "1.20.6"
->>>>>>> master
   maintenance_window {
     day_of_the_week = "Sunday"
     time            = "09:00:00Z"
@@ -123,11 +119,7 @@ resource "ionoscloud_k8s_cluster" "example" {
 
 const testAccCheckk8sClusterConfigUpdate = `
 resource "ionoscloud_k8s_cluster" "example" {
-<<<<<<< HEAD
-  name        = "example-renamed"
-=======
   name        = "updated"
->>>>>>> master
   k8s_version = "1.20.6"
   maintenance_window {
     day_of_the_week = "Monday"
