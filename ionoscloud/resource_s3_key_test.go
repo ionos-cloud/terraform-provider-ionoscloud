@@ -20,8 +20,8 @@ func TestAccS3Key_Basic(t *testing.T) {
 		PreCheck: func() {
 			testAccPreCheck(t)
 		},
-		Providers:    testAccProviders,
-		CheckDestroy: testAccChecks3KeyDestroyCheck,
+		ProviderFactories: testAccProviderFactories,
+		CheckDestroy:      testAccChecks3KeyDestroyCheck,
 		Steps: []resource.TestStep{
 			{
 				Config: fmt.Sprintf(testAccChecks3KeyConfigBasic, email, s3KeyName),

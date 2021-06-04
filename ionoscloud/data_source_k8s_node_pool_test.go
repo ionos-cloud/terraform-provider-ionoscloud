@@ -13,7 +13,7 @@ func TestAccDataSourceK8sNodePool_matchId(t *testing.T) {
 		PreCheck: func() {
 			testAccPreCheck(t)
 		},
-		Providers: testAccProviders,
+		ProviderFactories: testAccProviderFactories,
 		Steps: []resource.TestStep{
 			{
 				Config: testAccDataSourceProfitBricksK8sNodePoolCreateResources,
@@ -34,7 +34,7 @@ func TestAccDataSourceK8sNodePool_matchName(t *testing.T) {
 		PreCheck: func() {
 			testAccPreCheck(t)
 		},
-		Providers: testAccProviders,
+		ProviderFactories: testAccProviderFactories,
 		Steps: []resource.TestStep{
 			{
 				Config: testAccDataSourceProfitBricksK8sNodePoolCreateResources,

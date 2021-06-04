@@ -697,6 +697,7 @@ func resourcek8sNodePoolDelete(ctx context.Context, d *schema.ResourceData, meta
 			log.Printf("[INFO] Successfully deleted k8s node pool: %s", d.Id())
 			break
 		}
+
 	}
 
 	d.SetId("")

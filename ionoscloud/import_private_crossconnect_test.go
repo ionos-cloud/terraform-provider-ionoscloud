@@ -12,9 +12,9 @@ func TestAccprivateCrossConnect_ImportBasic(t *testing.T) {
 	resourceDescription := "example-description"
 
 	resource.Test(t, resource.TestCase{
-		PreCheck:     func() { testAccPreCheck(t) },
-		Providers:    testAccProviders,
-		CheckDestroy: testAccCheckprivateCrossConnectDestroyCheck,
+		PreCheck:          func() { testAccPreCheck(t) },
+		ProviderFactories: testAccProviderFactories,
+		CheckDestroy:      testAccCheckprivateCrossConnectDestroyCheck,
 		Steps: []resource.TestStep{
 			{
 				Config: fmt.Sprintf(testAccCheckprivateCrossConnectConfigBasic, resourceName, resourceDescription),

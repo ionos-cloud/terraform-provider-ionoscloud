@@ -13,9 +13,9 @@ func TestAccS3Key_ImportBasic(t *testing.T) {
 	resourceName := "example"
 	email := fmt.Sprintf("terraform-s3-import-acc-tester-%d@mailinator.com", time.Now().Unix())
 	resource.Test(t, resource.TestCase{
-		PreCheck:     func() { testAccPreCheck(t) },
-		Providers:    testAccProviders,
-		CheckDestroy: testAccChecks3KeyDestroyCheck,
+		PreCheck:          func() { testAccPreCheck(t) },
+		ProviderFactories: testAccProviderFactories,
+		CheckDestroy:      testAccChecks3KeyDestroyCheck,
 		Steps: []resource.TestStep{
 			{
 				Config: fmt.Sprintf(testAccChecks3KeyImportConfigBasic, email, resourceName),

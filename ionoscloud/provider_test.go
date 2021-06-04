@@ -1,19 +1,27 @@
 package ionoscloud
 
 import (
+	"context"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
 	"os"
 	"testing"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 )
 
-var testAccProviders map[string]*schema.Provider
 var testAccProvider *schema.Provider
+var testAccProviderFactories = map[string]func() (*schema.Provider, error){
+	"kubernetes": func() (*schema.Provider, error) {
+		return Provider(), nil
+	},
+}
 
 func init() {
 	testAccProvider = Provider()
-	testAccProviders = map[string]*schema.Provider{
-		"ionoscloud": testAccProvider,
+	testAccProviderFactories = map[string]func() (*schema.Provider, error){
+		"ionoscloud": func() (*schema.Provider, error) {
+			return Provider(), nil
+		},
 	}
 }
 
@@ -24,7 +32,7 @@ func TestProvider(t *testing.T) {
 }
 
 func TestProvider_impl(t *testing.T) {
-	var _ *schema.Provider = Provider()
+	var _ = Provider()
 }
 
 func testAccPreCheck(t *testing.T) {
@@ -41,4 +49,9 @@ func testAccPreCheck(t *testing.T) {
 		}
 
 	}
+	diags := testAccProvider.Configure(context.TODO(), terraform.NewResourceConfigRaw(nil))
+	if diags.HasError() {
+		t.Fatal(diags[0].Summary)
+	}
+	return
 }
