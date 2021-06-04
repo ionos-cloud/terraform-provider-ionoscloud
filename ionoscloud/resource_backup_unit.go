@@ -91,7 +91,7 @@ func resourceBackupUnitCreate(d *schema.ResourceData, meta interface{}) error {
 			return fmt.Errorf("error while checking readiness status of backup unit %s: %s", d.Id(), rsErr)
 		}
 
-		if backupUnitReady && rsErr == nil {
+		if backupUnitReady {
 			log.Printf("[INFO] backup unit ready: %s", d.Id())
 			break
 		}
@@ -210,7 +210,7 @@ func resourceBackupUnitUpdate(d *schema.ResourceData, meta interface{}) error {
 			return fmt.Errorf("error while checking readiness status of backup unit %s: %s", d.Id(), rsErr)
 		}
 
-		if backupUnitReady && rsErr == nil {
+		if backupUnitReady {
 			log.Printf("[INFO] backup unit ready: %s", d.Id())
 			break
 		}
@@ -227,7 +227,7 @@ func resourceBackupUnitDelete(d *schema.ResourceData, meta interface{}) error {
 	if cancel != nil {
 		defer cancel()
 	}
-	_, apiResponse, err := client.BackupUnitsApi.BackupunitsDelete(ctx, d.Id()).Execute()
+	apiResponse, err := client.BackupUnitsApi.BackupunitsDelete(ctx, d.Id()).Execute()
 
 	if err != nil {
 		if apiResponse != nil && apiResponse.Response.StatusCode == 404 {
@@ -247,7 +247,7 @@ func resourceBackupUnitDelete(d *schema.ResourceData, meta interface{}) error {
 			return fmt.Errorf("error while checking deletion status of backup unit %s: %s", d.Id(), dsErr)
 		}
 
-		if backupUnitDeleted && dsErr == nil {
+		if backupUnitDeleted {
 			log.Printf("[INFO] Successfully deleted backup unit: %s", d.Id())
 			break
 		}

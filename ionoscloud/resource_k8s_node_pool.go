@@ -189,8 +189,8 @@ func resourcek8sNodePoolCreate(d *schema.ResourceData, meta interface{}) error {
 	storageSize := int32(d.Get("storage_size").(int))
 	ramSize := int32(d.Get("ram_size").(int))
 
-	k8sNodepool := ionoscloud.KubernetesNodePoolForPost{
-		Properties: &ionoscloud.KubernetesNodePoolPropertiesForPost{
+	k8sNodepool := ionoscloud.KubernetesNodePool{
+		Properties: &ionoscloud.KubernetesNodePoolProperties{
 			Name:             &name,
 			DatacenterId:     &datacenterId,
 			K8sVersion:       &k8sVersion,
@@ -346,19 +346,18 @@ func resourcek8sNodePoolCreate(d *schema.ResourceData, meta interface{}) error {
 		defer cancel()
 	}
 
-	createdNodepool, apiResponse, err := client.KubernetesApi.K8sNodepoolsPost(ctx, d.Get("k8s_cluster_id").(string)).KubernetesNodePool(k8sNodepool).Execute()
+	createdNodepool, apiResponse, err := client.KubernetesApi.
+											K8sNodepoolsPost(ctx, d.Get("k8s_cluster_id").(string)).
+											KubernetesNodePool(k8sNodepool).
+											Execute()
 
 	if err != nil {
 		d.SetId("")
-<<<<<<< HEAD
-		return fmt.Errorf("error creating k8s node pool: %s \n ApiResponse: %v", err, string(apiResponse.Payload))
-=======
 		payload := "<nil>"
 		if apiResponse != nil {
 			payload = fmt.Sprintf("API response: %s", string(apiResponse.Payload))
 		}
 		return fmt.Errorf("error creating k8s node pool: %s; %s", err, payload)
->>>>>>> master
 	}
 
 	d.SetId(*createdNodepool.Id)
@@ -559,10 +558,10 @@ func resourcek8sNodePoolRead(d *schema.ResourceData, meta interface{}) error {
 func resourcek8sNodePoolUpdate(d *schema.ResourceData, meta interface{}) error {
 	client := meta.(*ionoscloud.APIClient)
 
-	request := ionoscloud.KubernetesNodePoolForPut{}
+	request := ionoscloud.KubernetesNodePool{}
 
 	nodeCount := int32(d.Get("node_count").(int))
-	request.Properties = &ionoscloud.KubernetesNodePoolPropertiesForPut{
+	request.Properties = &ionoscloud.KubernetesNodePoolProperties{
 		NodeCount: &nodeCount,
 	}
 
@@ -828,7 +827,7 @@ func resourcek8sNodePoolDelete(d *schema.ResourceData, meta interface{}) error {
 		defer cancel()
 	}
 
-	_, apiResponse, err := client.KubernetesApi.K8sNodepoolsDelete(ctx, d.Get("k8s_cluster_id").(string), d.Id()).Execute()
+	apiResponse, err := client.KubernetesApi.K8sNodepoolsDelete(ctx, d.Get("k8s_cluster_id").(string), d.Id()).Execute()
 
 	if err != nil {
 		if apiResponse != nil && apiResponse.Response.StatusCode == 404 {

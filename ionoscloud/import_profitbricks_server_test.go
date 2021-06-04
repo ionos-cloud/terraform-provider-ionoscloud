@@ -18,7 +18,7 @@ func TestAccServer_ImportBasic(t *testing.T) {
 		CheckDestroy: testAccCheckServerDestroyCheck,
 		Steps: []resource.TestStep{
 			{
-				Config: fmt.Sprintf(testAccCheckServerConfig_basic, resourceName),
+				Config: fmt.Sprintf(testAccCheckServerConfigBasic, resourceName),
 			},
 
 			{

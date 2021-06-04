@@ -119,18 +119,19 @@ func resourceVolumeCreate(d *schema.ResourceData, meta interface{}) error {
 
 	client := meta.(*ionoscloud.APIClient)
 
-	var ssh_keypath []interface{}
+	var imageAlias string
+	var sshKeyPath []interface{}
 	isSnapshot := false
 	dcId := d.Get("datacenter_id").(string)
 	serverId := d.Get("server_id").(string)
 	imagePassword := d.Get("image_password").(string)
-	ssh_keypath = d.Get("ssh_key_path").([]interface{})
+	sshKeyPath = d.Get("ssh_key_path").([]interface{})
 	image := d.Get("image").(string)
 	licenceType := d.Get("licence_type").(string)
 
 	var publicKeys []string
-	if len(ssh_keypath) != 0 {
-		for _, path := range ssh_keypath {
+	if len(sshKeyPath) != 0 {
+		for _, path := range sshKeyPath {
 			log.Printf("[DEBUG] Reading file %s", path)
 			publicKey, err := readPublicKey(path.(string))
 			if err != nil {
@@ -142,7 +143,7 @@ func resourceVolumeCreate(d *schema.ResourceData, meta interface{}) error {
 
 	if image != "" {
 		if !IsValidUUID(image) {
-			return fmt.Errorf("Image is not a valid UUID")
+			return fmt.Errorf("image is not a valid UUID")
 		} else {
 			ctx, cancel := context.WithTimeout(context.Background(), *resourceDefaultTimeouts.Default)
 
@@ -170,19 +171,19 @@ func resourceVolumeCreate(d *schema.ResourceData, meta interface{}) error {
 				isSnapshot = true
 			}
 			if *img.Properties.Public == true && isSnapshot == false {
-				if imagePassword == "" && len(ssh_keypath) == 0 {
-					return fmt.Errorf("Either 'image_password' or 'sshkey' must be provided.")
+				if imagePassword == "" && len(sshKeyPath) == 0 {
+					return fmt.Errorf("either 'image_password' or 'sshkey' must be provided")
 				}
 			}
 		}
 	}
 
 	if image == "" && licenceType == "" && isSnapshot == false {
-		return fmt.Errorf("Either 'image', or 'licenceType' must be set.")
+		return fmt.Errorf("either 'image', or 'licenceType' must be set")
 	}
 
 	if isSnapshot == true && (imagePassword != "" || len(publicKeys) > 0) {
-		return fmt.Errorf("You can't pass 'image_password' and/or 'ssh keys' when creating a volume from a snapshot")
+		return fmt.Errorf("you can't pass 'image_password' and/or 'ssh keys' when creating a volume from a snapshot")
 	}
 
 	volumeName := d.Get("name").(string)
@@ -195,9 +196,12 @@ func resourceVolumeCreate(d *schema.ResourceData, meta interface{}) error {
 			Name:          &volumeName,
 			Size:          &volumeSize,
 			Type:          &volumeType,
-			ImagePassword: &imagePassword,
 			Bus:           &volumeBus,
 		},
+	}
+
+	if imagePassword != "" {
+		volume.Properties.ImagePassword = &imagePassword
 	}
 
 	if licenceType != "" {
@@ -257,7 +261,7 @@ func resourceVolumeCreate(d *schema.ResourceData, meta interface{}) error {
 	backupUnitId := d.Get("backup_unit_id").(string)
 	if IsValidUUID(backupUnitId) {
 		if image == "" {
-			return fmt.Errorf("It is mandatory to provied public image in conjunction with backup unit id property")
+			return fmt.Errorf("it is mandatory to provied public image in conjunction with backup unit id property")
 		} else {
 			volume.Properties.BackupunitId = &backupUnitId
 		}
@@ -267,8 +271,8 @@ func resourceVolumeCreate(d *schema.ResourceData, meta interface{}) error {
 
 	userData := d.Get("user_data").(string)
 	if userData != "" {
-		if image == "" && image_alias == "" {
-			return fmt.Errorf("It is mandatory to provied either public image or imageAlias that has cloud-init compatibility in conjunction with backup unit id property ")
+		if image == "" && imageAlias == "" {
+			return fmt.Errorf("it is mandatory to provied either public image that has cloud-init compatibility in conjunction with backup unit id property ")
 		} else {
 			volume.Properties.UserData = &userData
 		}
@@ -302,7 +306,8 @@ func resourceVolumeCreate(d *schema.ResourceData, meta interface{}) error {
 	volume, apiResponse, err = client.ServersApi.DatacentersServersVolumesPost(ctx, dcId, serverId).Volume(volumeToAttach).Execute()
 
 	if err != nil {
-		return fmt.Errorf("an error occured while attaching a volume dcId: %s server_id: %s ID: %s Response: %s", dcId, serverId, *volume.Id, err)
+		return fmt.Errorf("an error occured while attaching a volume dcId: %s server_id: %s ID: %s Response: %s",
+			dcId, serverId, *volumeToAttach.Id, err)
 	}
 
 	sErr := d.Set("server_id", serverId)
@@ -351,19 +356,16 @@ func resourceVolumeRead(d *schema.ResourceData, meta interface{}) error {
 		return fmt.Errorf("error occured while fetching a volume ID %s %s", d.Id(), err)
 	}
 
-<<<<<<< HEAD
-	if apiResponse.Response.StatusCode > 299 {
-		return fmt.Errorf("an error occured while fetching a volume ID %s", d.Id())
-=======
+
 	if apiResponse != nil && apiResponse.Response.StatusCode > 299 {
 		return fmt.Errorf("an error occured while fetching a volume ID %s %s", d.Id(), string(apiResponse.Payload))
->>>>>>> master
-
 	}
 
 	_, _, err = client.ServersApi.DatacentersServersVolumesFindById(ctx, dcId, serverID, volumeID).Execute()
 	if err != nil {
-		d.Set("server_id", "")
+		if err2 := d.Set("server_id", ""); err2 != nil {
+			return err2
+		}
 	}
 
 	if volume.Properties.Name != nil {
@@ -526,7 +528,7 @@ func resourceVolumeUpdate(d *schema.ResourceData, meta interface{}) error {
 	}
 
 	if d.HasChange("backup_unit_id") {
-		return fmt.Errorf("Backup unit id property is immutable")
+		return fmt.Errorf("backup unit id property is immutable")
 	}
 
 	if d.HasChange("user_data") {
@@ -551,22 +553,17 @@ func resourceVolumeUpdate(d *schema.ResourceData, meta interface{}) error {
 		return errState
 	}
 
-<<<<<<< HEAD
-	if apiResponse.Response.StatusCode > 299 {
-		return fmt.Errorf("an error occured while updating a volume ID %s", d.Id())
-=======
 	if apiResponse != nil && apiResponse.Response.StatusCode > 299 {
 		return fmt.Errorf("an error occured while updating a volume ID %s %s", d.Id(), string(apiResponse.Payload))
->>>>>>> master
-
 	}
 
 	if d.HasChange("server_id") {
 		_, newValue := d.GetChange("server_id")
 		serverID := newValue.(string)
-		volumeAttach, apiResponse, err := client.ServersApi.DatacentersServersVolumesPost(ctx, dcId, serverID).Volume(volume).Execute()
+		_, apiResponse, err := client.ServersApi.DatacentersServersVolumesPost(ctx, dcId, serverID).Volume(volume).Execute()
 		if err != nil {
-			return fmt.Errorf("an error occured while attaching a volume dcId: %s server_id: %s ID: %s Response: %s", dcId, serverID, *volumeAttach.Id, err)
+			return fmt.Errorf("an error occured while attaching a volume dcId: %s server_id: %s ID: %s Response: %s",
+				dcId, serverID, *volume.Id, err)
 		}
 
 		// Wait, catching any errors
@@ -589,7 +586,7 @@ func resourceVolumeDelete(d *schema.ResourceData, meta interface{}) error {
 		defer cancel()
 	}
 
-	_, apiResponse, err := client.VolumesApi.DatacentersVolumesDelete(ctx, dcId, d.Id()).Execute()
+	apiResponse, err := client.VolumesApi.DatacentersVolumesDelete(ctx, dcId, d.Id()).Execute()
 	if err != nil {
 		return fmt.Errorf("an error occured while deleting a volume ID %s %s", d.Id(), err)
 

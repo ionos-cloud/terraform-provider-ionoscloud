@@ -169,35 +169,35 @@ func resourceNetworkLoadBalancerForwardingRuleCreate(d *schema.ResourceData, met
 		name := name.(string)
 		networkLoadBalancerForwardingRule.Properties.Name = &name
 	} else {
-		return fmt.Errorf("Name must be provided for network loadbalancer forwarding rule")
+		return fmt.Errorf("name must be provided for network loadbalancer forwarding rule")
 	}
 
 	if algorithm, algorithmOk := d.GetOk("algorithm"); algorithmOk {
 		algorithm := algorithm.(string)
 		networkLoadBalancerForwardingRule.Properties.Algorithm = &algorithm
 	} else {
-		return fmt.Errorf("Algorithm must be provided for network loadbalancer forwarding rule")
+		return fmt.Errorf("algorithm must be provided for network loadbalancer forwarding rule")
 	}
 
 	if protocol, protocolOk := d.GetOk("protocol"); protocolOk {
 		protocol := protocol.(string)
 		networkLoadBalancerForwardingRule.Properties.Protocol = &protocol
 	} else {
-		return fmt.Errorf("Protocol must be provided for network loadbalancer forwarding rule")
+		return fmt.Errorf("protocol must be provided for network loadbalancer forwarding rule")
 	}
 
 	if listenerIp, listenerIpOk := d.GetOk("listener_ip"); listenerIpOk {
 		listenerIp := listenerIp.(string)
 		networkLoadBalancerForwardingRule.Properties.ListenerIp = &listenerIp
 	} else {
-		return fmt.Errorf("Listner ip must be provided for network loadbalancer forwarding rule")
+		return fmt.Errorf("listner ip must be provided for network loadbalancer forwarding rule")
 	}
 
 	if listenerPort, listenerPortOk := d.GetOk("listener_port"); listenerPortOk {
 		listenerPort := int32(listenerPort.(int))
 		networkLoadBalancerForwardingRule.Properties.ListenerPort = &listenerPort
 	} else {
-		return fmt.Errorf("Listner port must be provided for network loadbalancer forwarding rule")
+		return fmt.Errorf("listner port must be provided for network loadbalancer forwarding rule")
 	}
 
 	if _, healthCheckOk := d.GetOk("health_check.0"); healthCheckOk {
@@ -243,21 +243,21 @@ func resourceNetworkLoadBalancerForwardingRuleCreate(d *schema.ResourceData, met
 					ip := ip.(string)
 					target.Ip = &ip
 				} else {
-					return fmt.Errorf("Ip must be provided for network loadbalancer forwarding rule target")
+					return fmt.Errorf("ip must be provided for network loadbalancer forwarding rule target")
 				}
 
 				if port, portOk := d.GetOk(fmt.Sprintf("targets.%d.port", targetIndex)); portOk {
 					port := int32(port.(int))
 					target.Port = &port
 				} else {
-					return fmt.Errorf("Port must be provided for network loadbalancer forwarding rule target")
+					return fmt.Errorf("port must be provided for network loadbalancer forwarding rule target")
 				}
 
 				if weight, weightOk := d.GetOk(fmt.Sprintf("targets.%d.weight", targetIndex)); weightOk {
 					weight := int32(weight.(int))
 					target.Weight = &weight
 				} else {
-					return fmt.Errorf("Weight must be provided for network loadbalancer forwarding rule target")
+					return fmt.Errorf("weight must be provided for network loadbalancer forwarding rule target")
 				}
 
 				if _, healthCheckOk := d.GetOk(fmt.Sprintf("targets.%d.health_check.0", targetIndex)); healthCheckOk {
@@ -305,7 +305,7 @@ func resourceNetworkLoadBalancerForwardingRuleCreate(d *schema.ResourceData, met
 
 	if err != nil {
 		d.SetId("")
-		return fmt.Errorf("error creating network loadbalancer: %s \n ApiError: %s", err, string(apiResponse.Payload))
+		return fmt.Errorf("error creating network loadbalancer: %s \n ApiError: %s", err, responseBody(apiResponse))
 	}
 
 	d.SetId(*networkLoadBalancerForwardingRuleResp.Id)
@@ -632,7 +632,8 @@ func resourceNetworkLoadBalancerForwardingRuleUpdate(d *schema.ResourceData, met
 	_, apiResponse, err := client.NetworkLoadBalancersApi.DatacentersNetworkloadbalancersForwardingrulesPatch(ctx, dcId, nlbID, d.Id()).NetworkLoadBalancerForwardingRuleProperties(*request.Properties).Execute()
 
 	if err != nil {
-		return fmt.Errorf("an error occured while updating a network loadbalancer forwarding rule ID %s %s \n ApiError: %s", d.Id(), err, string(apiResponse.Payload))
+		return fmt.Errorf("an error occured while updating a network loadbalancer forwarding rule ID %s %s \n ApiError: %s",
+			d.Id(), err, responseBody(apiResponse))
 	}
 
 	_, errState := getStateChangeConf(meta, d, apiResponse.Header.Get("Location"), schema.TimeoutUpdate).WaitForState()
@@ -655,7 +656,7 @@ func resourceNetworkLoadBalancerForwardingRuleDelete(d *schema.ResourceData, met
 		defer cancel()
 	}
 
-	_, apiResponse, err := client.NetworkLoadBalancersApi.DatacentersNetworkloadbalancersForwardingrulesDelete(ctx, dcId, nlbID, d.Id()).Execute()
+	apiResponse, err := client.NetworkLoadBalancersApi.DatacentersNetworkloadbalancersForwardingrulesDelete(ctx, dcId, nlbID, d.Id()).Execute()
 
 	if err != nil {
 		return fmt.Errorf("an error occured while deleting a network loadbalancer forwarding rule %s %s", d.Id(), err)

@@ -120,8 +120,6 @@ func resourcek8sClusterCreate(d *schema.ResourceData, meta interface{}) error {
 		cluster.Properties.MaintenanceWindow.DayOfTheWeek = &mdVal
 	}
 
-<<<<<<< HEAD
-=======
 	if public, publicOk := d.GetOkExists("public"); publicOk {
 		public := public.(bool)
 		fmt.Printf("Value %v", public)
@@ -134,7 +132,6 @@ func resourcek8sClusterCreate(d *schema.ResourceData, meta interface{}) error {
 		cluster.Properties.GatewayIp = &gatewayIp
 	}
 
->>>>>>> master
 	ctx, cancel := context.WithTimeout(context.Background(), *resourceDefaultTimeouts.Create)
 
 	if cancel != nil {
@@ -145,7 +142,11 @@ func resourcek8sClusterCreate(d *schema.ResourceData, meta interface{}) error {
 
 	if err != nil {
 		d.SetId("")
-		return fmt.Errorf("error creating k8s cluster: %s \n ApiError: %s ", err, string(apiResponse.Payload))
+		var payload string
+		if apiResponse != nil {
+			payload = string(apiResponse.Payload)
+		}
+		return fmt.Errorf("error creating k8s cluster: %s \n ApiError: %s ", err, payload)
 	}
 
 	d.SetId(*createdCluster.Id)
@@ -250,12 +251,9 @@ func resourcek8sClusterRead(d *schema.ResourceData, meta interface{}) error {
 }
 
 func resourcek8sClusterUpdate(d *schema.ResourceData, meta interface{}) error {
-<<<<<<< HEAD
-	client := meta.(*ionoscloud.APIClient)
-=======
+
 	client := meta.(*ionoscloud.APIClient)
 
->>>>>>> master
 	request := ionoscloud.KubernetesClusterForPut{}
 
 	clusterName := d.Get("name").(string)
@@ -369,7 +367,7 @@ func resourcek8sClusterDelete(d *schema.ResourceData, meta interface{}) error {
 		defer cancel()
 	}
 
-	_, apiResponse, err := client.KubernetesApi.K8sDelete(ctx, d.Id()).Execute()
+	apiResponse, err := client.KubernetesApi.K8sDelete(ctx, d.Id()).Execute()
 
 	if err != nil {
 		if _, ok := err.(ionoscloud.GenericOpenAPIError); ok {

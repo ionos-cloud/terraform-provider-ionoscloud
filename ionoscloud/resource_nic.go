@@ -147,7 +147,7 @@ func resourceNicRead(d *schema.ResourceData, meta interface{}) error {
 
 	if err != nil {
 		if _, ok := err.(ionoscloud.GenericOpenAPIError); ok {
-			if apiresponse.Response.StatusCode == 404 {
+			if apiresponse != nil && apiresponse.Response.StatusCode == 404 {
 				d.SetId("")
 				return nil
 			}
@@ -158,25 +158,39 @@ func resourceNicRead(d *schema.ResourceData, meta interface{}) error {
 	if rsp.Properties != nil {
 		log.Printf("[INFO] LAN ON NIC: %d", rsp.Properties.Lan)
 		if rsp.Properties.Dhcp != nil {
-			d.Set("dhcp", *rsp.Properties.Dhcp)
+			if err := d.Set("dhcp", *rsp.Properties.Dhcp); err != nil {
+				return err
+			}
 		}
 		if rsp.Properties.Lan != nil {
-			d.Set("lan", *rsp.Properties.Lan)
+			if err := d.Set("lan", *rsp.Properties.Lan); err != nil {
+				return err
+			}
 		}
 		if rsp.Properties.Name != nil {
-			d.Set("name", *rsp.Properties.Name)
+			if err := d.Set("name", *rsp.Properties.Name); err != nil {
+				return err
+			}
 		}
 		if rsp.Properties.Ips != nil {
-			d.Set("ips", *rsp.Properties.Ips)
+			if err := d.Set("ips", *rsp.Properties.Ips); err != nil {
+				return err
+			}
 		}
 		if rsp.Properties.FirewallActive != nil {
-			d.Set("firewall_active", *rsp.Properties.FirewallActive)
+			if err := d.Set("firewall_active", *rsp.Properties.FirewallActive); err != nil {
+				return err
+			}
 		}
 		if rsp.Properties.FirewallType != nil {
-			d.Set("firewall_type", *rsp.Properties.FirewallType)
+			if err := d.Set("firewall_type", *rsp.Properties.FirewallType); err != nil {
+				return err
+			}
 		}
 		if rsp.Properties.Mac != nil {
-			d.Set("mac", *rsp.Properties.Mac)
+			if err := d.Set("mac", *rsp.Properties.Mac); err != nil {
+				return err
+			}
 		}
 	}
 

@@ -108,27 +108,27 @@ func resourceNatGatewayRuleCreate(d *schema.ResourceData, meta interface{}) erro
 		name := name.(string)
 		natGatewayRule.Properties.Name = &name
 	} else {
-		return fmt.Errorf("Name must be provided for nat gateway rule")
+		return fmt.Errorf("name must be provided for nat gateway rule")
 	}
 
 	if sourceSubnet, sourceSubnetOk := d.GetOk("source_subnet"); sourceSubnetOk {
 		sourceSubnet := sourceSubnet.(string)
 		natGatewayRule.Properties.SourceSubnet = &sourceSubnet
 	} else {
-		return fmt.Errorf("Source subnet must be provided for nat gateway rule")
+		return fmt.Errorf("source subnet must be provided for nat gateway rule")
 	}
 
 	if publicIp, publicIpOk := d.GetOk("public_ip"); publicIpOk {
 		publicIp := publicIp.(string)
 		natGatewayRule.Properties.PublicIp = &publicIp
 	} else {
-		return fmt.Errorf("Public Ip must be provided for nat gateway rule")
+		return fmt.Errorf("public Ip must be provided for nat gateway rule")
 	}
 
 	if ruleType, ruleTypeOk := d.GetOk("type"); ruleTypeOk {
 
 		if strings.ToUpper(ruleType.(string)) != "SNAT" {
-			return fmt.Errorf("Attribute value '%s' not allowed. Expected one of [SNAT]", ruleType.(string))
+			return fmt.Errorf("attribute value '%s' not allowed. Expected one of [SNAT]", ruleType.(string))
 		}
 		ruleType := ionoscloud.NatGatewayRuleType(strings.ToUpper(ruleType.(string)))
 		natGatewayRule.Properties.Type = &ruleType
@@ -137,7 +137,7 @@ func resourceNatGatewayRuleCreate(d *schema.ResourceData, meta interface{}) erro
 	if protocol, protocolOk := d.GetOk("protocol"); protocolOk {
 		if strings.ToUpper(protocol.(string)) != "TCP" && strings.ToUpper(protocol.(string)) != "UDP" &&
 			strings.ToUpper(protocol.(string)) != "ICMP" && strings.ToUpper(protocol.(string)) != "ALL" {
-			return fmt.Errorf("Attribute value '%s' not allowed. Expected one of [TCP, UDP, ICMP, ALL]", protocol.(string))
+			return fmt.Errorf("attribute value '%s' not allowed. Expected one of [TCP, UDP, ICMP, ALL]", protocol.(string))
 		}
 		protocol := ionoscloud.NatGatewayRuleProtocol(strings.ToUpper(protocol.(string)))
 		natGatewayRule.Properties.Protocol = &protocol
@@ -150,7 +150,7 @@ func resourceNatGatewayRuleCreate(d *schema.ResourceData, meta interface{}) erro
 
 	if _, targetPortRangeOk := d.GetOk("target_port_range.0"); targetPortRangeOk {
 		if *natGatewayRule.Properties.Protocol == "ICMP" || *natGatewayRule.Properties.Protocol == "ALL" {
-			return fmt.Errorf("TargetPortRange start/end can not be set if protocol is ICMP or ALL or not provided.")
+			return fmt.Errorf("target_port_range start/end can not be set if protocol is ICMP or ALL or not provided")
 		}
 		natGatewayRule.Properties.TargetPortRange = &ionoscloud.TargetPortRange{}
 	}
@@ -177,7 +177,7 @@ func resourceNatGatewayRuleCreate(d *schema.ResourceData, meta interface{}) erro
 
 	if err != nil {
 		d.SetId("")
-		return fmt.Errorf("error creating nat gateway rule: %s \n ApiError %s", err, string(apiResponse.Payload))
+		return fmt.Errorf("error creating nat gateway rule: %s \n ApiError %s", err, responseBody(apiResponse))
 	}
 
 	d.SetId(*natGatewayRuleResp.Id)
@@ -362,10 +362,13 @@ func resourceNatGatewayRuleUpdate(d *schema.ResourceData, meta interface{}) erro
 	if cancel != nil {
 		defer cancel()
 	}
-	_, apiResponse, err := client.NATGatewaysApi.DatacentersNatgatewaysRulesPatch(ctx, dcId, ngId, d.Id()).NatGatewayRuleProperties(*request.Properties).Execute()
+	_, apiResponse, err := client.NATGatewaysApi.
+		DatacentersNatgatewaysRulesPatch(ctx, dcId, ngId, d.Id()).
+		NatGatewayRuleProperties(*request.Properties).
+		Execute()
 
 	if err != nil {
-		return fmt.Errorf("an error occured while updating a nat gateway rule ID %s %s \n ApiError: %s", d.Id(), err, string(apiResponse.Payload))
+		return fmt.Errorf("an error occured while updating a nat gateway rule ID %s %s \n ApiError: %s", d.Id(), err, responseBody(apiResponse))
 	}
 
 	_, errState := getStateChangeConf(meta, d, apiResponse.Header.Get("Location"), schema.TimeoutUpdate).WaitForState()
@@ -388,7 +391,7 @@ func resourceNatGatewayRuleDelete(d *schema.ResourceData, meta interface{}) erro
 		defer cancel()
 	}
 
-	_, apiResponse, err := client.NATGatewaysApi.DatacentersNatgatewaysRulesDelete(ctx, dcId, ngId, d.Id()).Execute()
+	apiResponse, err := client.NATGatewaysApi.DatacentersNatgatewaysRulesDelete(ctx, dcId, ngId, d.Id()).Execute()
 
 	if err != nil {
 		return fmt.Errorf("an error occured while deleting a nat gateway rule %s %s", d.Id(), err)

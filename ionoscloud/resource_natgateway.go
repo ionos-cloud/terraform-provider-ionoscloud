@@ -319,7 +319,7 @@ func resourceNatGatewayDelete(d *schema.ResourceData, meta interface{}) error {
 		defer cancel()
 	}
 
-	_, apiResponse, err := client.NATGatewaysApi.DatacentersNatgatewaysDelete(ctx, dcId, d.Id()).Execute()
+	apiResponse, err := client.NATGatewaysApi.DatacentersNatgatewaysDelete(ctx, dcId, d.Id()).Execute()
 
 	if err != nil {
 		return fmt.Errorf("an error occured while deleting a nat gateway %s %s", d.Id(), err)

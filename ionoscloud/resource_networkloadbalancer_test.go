@@ -22,14 +22,14 @@ func TestAccNetworkLoadBalancer_Basic(t *testing.T) {
 		CheckDestroy: testAccCheckNetworkLoadBalancerDestroyCheck,
 		Steps: []resource.TestStep{
 			{
-				Config: fmt.Sprintf(testAccCheckNetworkLoadBalancerConfig_basic, networkLoadBalancerName),
+				Config: fmt.Sprintf(testAccCheckNetworkLoadBalancerConfigBasic, networkLoadBalancerName),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckNetworkLoadBalancerExists("ionoscloud_networkloadbalancer.test_networkloadbalancer", &networkLoadBalancer),
 					resource.TestCheckResourceAttr("ionoscloud_networkloadbalancer.test_networkloadbalancer", "name", networkLoadBalancerName),
 				),
 			},
 			{
-				Config: testAccCheckNetworkLoadBalancerConfig_update,
+				Config: testAccCheckNetworkLoadBalancerConfigUpdate,
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttr("ionoscloud_networkloadbalancer.test_networkloadbalancer", "name", "updated"),
 				),
@@ -39,23 +39,24 @@ func TestAccNetworkLoadBalancer_Basic(t *testing.T) {
 }
 
 func testAccCheckNetworkLoadBalancerDestroyCheck(s *terraform.State) error {
-	client := testAccProvider.Meta().(SdkBundle).Client
+	client := testAccProvider.Meta().(*ionoscloud.APIClient)
+
+	ctx, cancel := context.WithTimeout(context.Background(), *resourceDefaultTimeouts.Delete)
+
+	if cancel != nil {
+		defer cancel()
+	}
+
 	for _, rs := range s.RootModule().Resources {
 		if rs.Type != "ionoscloud_datacenter" {
 			continue
 		}
 
-		ctx, cancel := context.WithTimeout(context.Background(), *resourceDefaultTimeouts.Delete)
-
-		if cancel != nil {
-			defer cancel()
-		}
-
 		_, apiResponse, err := client.NetworkLoadBalancersApi.DatacentersNetworkloadbalancersFindByNetworkLoadBalancerId(ctx, rs.Primary.Attributes["datacenter_id"], rs.Primary.ID).Execute()
 
 		if _, ok := err.(ionoscloud.GenericOpenAPIError); ok {
-			if apiResponse.Response.StatusCode != 404 {
-				return fmt.Errorf("Network loadbalancer still exists %s %s", rs.Primary.ID, string(apiResponse.Payload))
+			if apiResponse == nil || apiResponse.Response.StatusCode != 404 {
+				return fmt.Errorf("network loadbalancer still exists %s %s", rs.Primary.ID, responseBody(apiResponse))
 			}
 		} else {
 			return fmt.Errorf("unable to fetch network loadbalancer %s %s", rs.Primary.ID, err)
@@ -67,7 +68,7 @@ func testAccCheckNetworkLoadBalancerDestroyCheck(s *terraform.State) error {
 
 func testAccCheckNetworkLoadBalancerExists(n string, networkLoadBalancer *ionoscloud.NetworkLoadBalancer) resource.TestCheckFunc {
 	return func(s *terraform.State) error {
-		client := testAccProvider.Meta().(SdkBundle).Client
+		client := testAccProvider.Meta().(*ionoscloud.APIClient)
 		rs, ok := s.RootModule().Resources[n]
 
 		if !ok {
@@ -90,7 +91,7 @@ func testAccCheckNetworkLoadBalancerExists(n string, networkLoadBalancer *ionosc
 			return fmt.Errorf("error occured while fetching NetworkLoadBalancer: %s", rs.Primary.ID)
 		}
 		if *foundNetworkLoadBalancer.Id != rs.Primary.ID {
-			return fmt.Errorf("Record not found")
+			return fmt.Errorf("record not found")
 		}
 
 		networkLoadBalancer = &foundNetworkLoadBalancer
@@ -99,7 +100,7 @@ func testAccCheckNetworkLoadBalancerExists(n string, networkLoadBalancer *ionosc
 	}
 }
 
-const testAccCheckNetworkLoadBalancerConfig_basic = `
+const testAccCheckNetworkLoadBalancerConfigBasic = `
 resource "ionoscloud_datacenter" "datacenter" {
   name              = "test_nbl"
   location          = "gb/lhr"
@@ -129,7 +130,7 @@ resource "ionoscloud_networkloadbalancer" "test_networkloadbalancer" {
 }
 `
 
-const testAccCheckNetworkLoadBalancerConfig_update = `
+const testAccCheckNetworkLoadBalancerConfigUpdate = `
 resource "ionoscloud_datacenter" "datacenter" {
   name              = "test_nbl"
   location          = "gb/lhr"

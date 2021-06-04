@@ -46,13 +46,8 @@ func TestAcck8sNodepool_Basic(t *testing.T) {
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckk8sNodepoolExists("ionoscloud_k8s_node_pool.terraform_acctest", &k8sNodepool),
 					resource.TestCheckResourceAttr("ionoscloud_k8s_node_pool.terraform_acctest", "name", k8sNodepoolName),
-<<<<<<< HEAD
-					resource.TestCheckResourceAttr("ionoscloud_k8s_node_pool.terraform_acctest", "public_ips.0", "158.222.102.145"),
-					resource.TestCheckResourceAttr("ionoscloud_k8s_node_pool.terraform_acctest", "public_ips.1", "158.222.102.144"),
-=======
 					resource.TestCheckResourceAttr("ionoscloud_k8s_node_pool.terraform_acctest", "public_ips.0", publicIp1),
 					resource.TestCheckResourceAttr("ionoscloud_k8s_node_pool.terraform_acctest", "public_ips.1", publicIp2),
->>>>>>> master
 				),
 			},
 			{
@@ -60,17 +55,9 @@ func TestAcck8sNodepool_Basic(t *testing.T) {
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckk8sNodepoolExists("ionoscloud_k8s_node_pool.terraform_acctest", &k8sNodepool),
 					resource.TestCheckResourceAttr("ionoscloud_k8s_node_pool.terraform_acctest", "name", k8sNodepoolName),
-<<<<<<< HEAD
-					resource.TestCheckResourceAttr("ionoscloud_k8s_node_pool.terraform_acctest", "public_ips.0", "158.222.102.145"),
-					resource.TestCheckResourceAttr("ionoscloud_k8s_node_pool.terraform_acctest", "public_ips.1", "158.222.102.144"),
-					resource.TestCheckResourceAttr("ionoscloud_k8s_node_pool.terraform_acctest", "public_ips.2", "158.222.102.179"),
-					//					resource.TestCheckResourceAttr("ionoscloud_k8s_node_pool.terraform_acctest", "maintenance_window.0.day_of_the_week", "Tuesday"),
-					//					resource.TestCheckResourceAttr("ionoscloud_k8s_node_pool.terraform_acctest", "maintenance_window.0.time", "11:00:00Z"),
-=======
 					resource.TestCheckResourceAttr("ionoscloud_k8s_node_pool.terraform_acctest", "public_ips.0", publicIp1),
 					resource.TestCheckResourceAttr("ionoscloud_k8s_node_pool.terraform_acctest", "public_ips.1", publicIp2),
 					resource.TestCheckResourceAttr("ionoscloud_k8s_node_pool.terraform_acctest", "public_ips.2", publicIp3),
->>>>>>> master
 				),
 			},
 		},

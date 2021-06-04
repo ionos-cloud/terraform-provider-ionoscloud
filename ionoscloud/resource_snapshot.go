@@ -86,7 +86,9 @@ func resourceSnapshotRead(d *schema.ResourceData, meta interface{}) error {
 		return fmt.Errorf("error occured while fetching a snapshot ID %s %s", d.Id(), err)
 	}
 
-	d.Set("name", rsp.Properties.Name)
+	if err := d.Set("name", rsp.Properties.Name); err != nil {
+		return err
+	}
 	return nil
 }
 
@@ -98,11 +100,7 @@ func resourceSnapshotUpdate(d *schema.ResourceData, meta interface{}) error {
 		Name: &name,
 	}
 
-<<<<<<< HEAD
 	_, apiResponse, err := client.SnapshotsApi.SnapshotsPatch(context.TODO(), d.Id()).Snapshot(input).Execute()
-=======
-	_, apiResponse, err := client.SnapshotApi.SnapshotsPatch(context.TODO(), d.Id()).Snapshot(input).Execute()
->>>>>>> master
 	if err != nil {
 		return fmt.Errorf("an error occured while restoring a snapshot ID %s %d", d.Id(), err)
 	}
@@ -123,12 +121,7 @@ func resourceSnapshotDelete(d *schema.ResourceData, meta interface{}) error {
 	if cancel != nil {
 		defer cancel()
 	}
-<<<<<<< HEAD
 	rsp, apiResponse, err := client.SnapshotsApi.SnapshotsFindById(ctx, d.Id()).Execute()
-=======
-
-	rsp, apiResponse, err := client.SnapshotApi.SnapshotsFindById(ctx, d.Id()).Execute()
->>>>>>> master
 	if err != nil {
 		return fmt.Errorf("an error occured while fetching a snapshot ID %s %s", d.Id(), err)
 	}
@@ -158,7 +151,7 @@ func resourceSnapshotDelete(d *schema.ResourceData, meta interface{}) error {
 		}
 	}
 
-	_, apiResponse, err = client.SnapshotsApi.SnapshotsDelete(ctx, d.Id()).Execute()
+	apiResponse, err = client.SnapshotsApi.SnapshotsDelete(ctx, d.Id()).Execute()
 	if err != nil {
 		return fmt.Errorf("an error occured while deleting a snapshot ID %s %s", d.Id(), err)
 	}

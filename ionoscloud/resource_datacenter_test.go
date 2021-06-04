@@ -12,7 +12,7 @@ import (
 
 func TestAccDataCenter_Basic(t *testing.T) {
 	var datacenter ionoscloud.Datacenter
-	dc_name := "datacenter-test"
+	dcName := "datacenter-test"
 
 	resource.Test(t, resource.TestCase{
 		PreCheck: func() {
@@ -22,10 +22,10 @@ func TestAccDataCenter_Basic(t *testing.T) {
 		CheckDestroy: testAccCheckDatacenterDestroyCheck,
 		Steps: []resource.TestStep{
 			{
-				Config: fmt.Sprintf(testAccCheckDatacenterConfig_basic, dc_name),
+				Config: fmt.Sprintf(testAccCheckDatacenterConfig_basic, dcName),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckDatacenterExists("ionoscloud_datacenter.foobar", &datacenter),
-					resource.TestCheckResourceAttr("ionoscloud_datacenter.foobar", "name", dc_name),
+					resource.TestCheckResourceAttr("ionoscloud_datacenter.foobar", "name", dcName),
 				),
 			},
 			{

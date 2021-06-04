@@ -17,7 +17,7 @@ func TestAccIPBlock_ImportBasic(t *testing.T) {
 		CheckDestroy: testAccCheckIPBlockDestroyCheck,
 		Steps: []resource.TestStep{
 			{
-				Config: fmt.Sprintf(testAccCheckIPBlockConfig_basic, location),
+				Config: fmt.Sprintf(testAccCheckIPBlockConfigBasic, location),
 			},
 
 			{

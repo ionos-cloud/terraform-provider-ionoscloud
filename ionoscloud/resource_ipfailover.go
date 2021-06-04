@@ -67,20 +67,19 @@ func resourceLanIPFailoverCreate(d *schema.ResourceData, meta interface{}) error
 		defer cancel()
 	}
 
-	if properties != nil {
-		lan, apiResponse, err := client.LansApi.DatacentersLansPatch(ctx, dcid, lanid).Lan(*properties).Execute()
-		if err != nil {
-			return fmt.Errorf("an error occured while patching a lans failover group  %s %s", lanid, err)
-		}
-
-		// Wait, catching any errors
-		_, errState := getStateChangeConf(meta, d, apiResponse.Header.Get("Location"), schema.TimeoutCreate).WaitForState()
-		if errState != nil {
-			return errState
-		}
-
-		d.SetId(*lan.Id)
+	lan, apiResponse, err := client.LansApi.DatacentersLansPatch(ctx, dcid, lanid).Lan(*properties).Execute()
+	if err != nil {
+		return fmt.Errorf("an error occured while patching a lans failover group  %s %s", lanid, err)
 	}
+
+	// Wait, catching any errors
+	_, errState := getStateChangeConf(meta, d, apiResponse.Header.Get("Location"), schema.TimeoutCreate).WaitForState()
+	if errState != nil {
+		return errState
+	}
+
+	d.SetId(*lan.Id)
+
 	return resourceLanIPFailoverRead(d, meta)
 }
 
@@ -123,7 +122,9 @@ func resourceLanIPFailoverRead(d *schema.ResourceData, meta interface{}) error {
 		}
 	}
 
-	d.Set("datacenter_id", d.Get("datacenter_id").(string))
+	if err := d.Set("datacenter_id", d.Get("datacenter_id").(string)); err != nil {
+		return err
+	}
 
 	return nil
 }

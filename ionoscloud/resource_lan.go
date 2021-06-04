@@ -225,18 +225,14 @@ func resourceLanDelete(d *schema.ResourceData, meta interface{}) error {
 	if cancel != nil {
 		defer cancel()
 	}
-	_, _, err := client.LansApi.DatacentersLansDelete(ctx, dcid, d.Id()).Execute()
+	apiResponse, err := client.LansApi.DatacentersLansDelete(ctx, dcid, d.Id()).Execute()
 
 	if err != nil {
-		//try again in 120 seconds
-		time.Sleep(120 * time.Second)
-		_, apiResponse, err := client.LansApi.DatacentersLansDelete(ctx, dcid, d.Id()).Execute()
-
-		if err != nil {
-			if apiResponse == nil || apiResponse.Response.StatusCode != 404 {
-				return fmt.Errorf("an error occured while deleting a lan dcId %s ID %s %s", d.Get("datacenter_id").(string), d.Id(), err)
-			}
+		var payload string = "<nil>"
+		if apiResponse != nil {
+			payload = string(apiResponse.Payload)
 		}
+		return fmt.Errorf("an error occured while deleting lan dcId %s ID %s %s: %s", dcid, d.Id(), err, payload)
 	}
 
 	for {
@@ -249,7 +245,7 @@ func resourceLanDelete(d *schema.ResourceData, meta interface{}) error {
 			return fmt.Errorf("error while checking deletion status of LAN %s: %s", d.Id(), dsErr)
 		}
 
-		if lDeleted && dsErr == nil {
+		if lDeleted {
 			log.Printf("[INFO] Successfully deleted LAN: %s", d.Id())
 			break
 		}

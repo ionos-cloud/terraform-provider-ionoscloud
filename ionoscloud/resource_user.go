@@ -3,12 +3,10 @@ package ionoscloud
 import (
 	"context"
 	"fmt"
-	"github.com/hashicorp/terraform-plugin-sdk/helper/validation"
-	"log"
-	"time"
-
 	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
+	"github.com/hashicorp/terraform-plugin-sdk/helper/validation"
 	ionoscloud "github.com/ionos-cloud/sdk-go/v6"
+	"log"
 )
 
 func resourceUser() *schema.Resource {
@@ -52,12 +50,7 @@ func resourceUser() *schema.Resource {
 }
 
 func resourceUserCreate(d *schema.ResourceData, meta interface{}) error {
-<<<<<<< HEAD
 	client := meta.(*ionoscloud.APIClient)
-=======
-	client := meta.(*ionoscloud.APIClient)
-
->>>>>>> master
 	request := ionoscloud.UserPost{
 		Properties: &ionoscloud.UserPropertiesPost{},
 	}
@@ -92,16 +85,13 @@ func resourceUserCreate(d *schema.ResourceData, meta interface{}) error {
 	}
 
 	rsp, apiResponse, err := client.UserManagementApi.UmUsersPost(ctx).User(request).Execute()
-	if rsp.Id != nil {
-		log.Printf("[DEBUG] USER ID: %s", *rsp.Id)
-	}
 
 	if err != nil {
-		payload := "<nil>"
-		if apiResponse != nil {
-			payload = string(apiResponse.Payload)
-		}
-		return fmt.Errorf("an error occured while creating a user: %s; payload: %s", err, payload)
+		return fmt.Errorf("an error occured while creating a user: %s; payload: %s", err, responseBody(apiResponse))
+	}
+
+	if rsp.Id != nil {
+		log.Printf("[DEBUG] USER ID: %s", *rsp.Id)
 	}
 
 	d.SetId(*rsp.Id)
@@ -138,11 +128,21 @@ func resourceUserRead(d *schema.ResourceData, meta interface{}) error {
 		return fmt.Errorf("an error occured while fetching a User ID %s %s", d.Id(), err)
 	}
 
-	d.Set("first_name", *rsp.Properties.Firstname)
-	d.Set("last_name", *rsp.Properties.Lastname)
-	d.Set("email", *rsp.Properties.Email)
-	d.Set("administrator", *rsp.Properties.Administrator)
-	d.Set("force_sec_auth", *rsp.Properties.ForceSecAuth)
+	if err := d.Set("first_name", *rsp.Properties.Firstname); err != nil {
+		return err
+	}
+	if err := d.Set("last_name", *rsp.Properties.Lastname); err != nil {
+		return err
+	}
+	if err := d.Set("email", *rsp.Properties.Email); err != nil {
+		return err
+	}
+	if err := d.Set("administrator", *rsp.Properties.Administrator); err != nil {
+		return err
+	}
+	if err := d.Set("force_sec_auth", *rsp.Properties.ForceSecAuth); err != nil {
+		return err
+	}
 	return nil
 }
 
@@ -196,7 +196,7 @@ func resourceUserUpdate(d *schema.ResourceData, meta interface{}) error {
 
 	rsp, apiResponse, err = client.UserManagementApi.UmUsersPut(ctx, d.Id()).User(userReq).Execute()
 	if err != nil {
-		return fmt.Errorf("an error occured while patching a user ID %s %s payload: %s", d.Id(), err, apiResponse.Payload)
+		return fmt.Errorf("an error occured while patching a user ID %s %s payload: %s", d.Id(), err, responseBody(apiResponse))
 	}
 
 	// Wait, catching any errors
@@ -215,18 +215,17 @@ func resourceUserDelete(d *schema.ResourceData, meta interface{}) error {
 	if cancel != nil {
 		defer cancel()
 	}
-	_, apiResponse, err := client.UserManagementApi.UmUsersDelete(ctx, d.Id()).Execute()
-	if err != nil {
-		//try again in 20 seconds
+	apiResponse, err := client.UserManagementApi.UmUsersDelete(ctx, d.Id()).Execute()
+	if apiResponse == nil || err != nil {
+		/* //try again in 20 seconds
 		time.Sleep(20 * time.Second)
-		_, _, err := client.UserManagementApi.UmUsersDelete(ctx, d.Id()).Execute()
-		if err != nil {
-			if _, ok := err.(ionoscloud.GenericOpenAPIError); ok {
-				if apiResponse == nil || apiResponse.Response.StatusCode != 404 {
-					return fmt.Errorf("an error occured while deleting a user %s %s", d.Id(), err)
-				}
+		apiResponse, err := client.UserManagementApi.UmUsersDelete(ctx, d.Id()).Execute()
+		if err != nil { */
+			if apiResponse == nil || apiResponse.Response.StatusCode != 404 {
+				return fmt.Errorf("an error occured while deleting a user %s %s, %s",
+					d.Id(), err, responseBody(apiResponse))
 			}
-		}
+		// }
 	}
 
 	// Wait, catching any errors

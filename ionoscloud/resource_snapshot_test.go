@@ -22,14 +22,14 @@ func TestAccSnapshot_Basic(t *testing.T) {
 		CheckDestroy: testAccCheckSnapshotDestroyCheck,
 		Steps: []resource.TestStep{
 			{
-				Config: fmt.Sprintf(testAccCheckSnapshotConfig_basic, snapshotName),
+				Config: fmt.Sprintf(testAccCheckSnapshotConfigBasic, snapshotName),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckSnapshotExists("ionoscloud_snapshot.test_snapshot", &snapshot),
 					resource.TestCheckResourceAttr("ionoscloud_snapshot.test_snapshot", "name", snapshotName),
 				),
 			},
 			{
-				Config: testAccCheckSnapshotConfig_update,
+				Config: testAccCheckSnapshotConfigUpdate,
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttr("ionoscloud_snapshot.test_snapshot", "name", snapshotName),
 				),
@@ -41,7 +41,11 @@ func TestAccSnapshot_Basic(t *testing.T) {
 func testAccCheckSnapshotDestroyCheck(s *terraform.State) error {
 	client := testAccProvider.Meta().(*ionoscloud.APIClient)
 
-	ctx, _ := context.WithTimeout(context.Background(), *resourceDefaultTimeouts.Delete)
+	ctx, cancel := context.WithTimeout(context.Background(), *resourceDefaultTimeouts.Delete)
+	if cancel != nil {
+		defer cancel()
+	}
+
 	for _, rs := range s.RootModule().Resources {
 		if rs.Type != "ionoscloud_snapshot" {
 			continue
@@ -75,14 +79,17 @@ func testAccCheckSnapshotExists(n string, snapshot *ionoscloud.Snapshot) resourc
 			return fmt.Errorf("no Record ID is set")
 		}
 
-		ctx, _ := context.WithTimeout(context.Background(), *resourceDefaultTimeouts.Default)
+		ctx, cancel := context.WithTimeout(context.Background(), *resourceDefaultTimeouts.Default)
+		if cancel != nil {
+			defer cancel()
+		}
 		foundServer, _, err := client.SnapshotsApi.SnapshotsFindById(ctx, rs.Primary.ID).Execute()
 
 		if err != nil {
 			return fmt.Errorf("error occured while fetching Snapshot: %s", rs.Primary.ID)
 		}
 		if *foundServer.Id != rs.Primary.ID {
-			return fmt.Errorf("Record not found")
+			return fmt.Errorf("record not found")
 		}
 
 		snapshot = &foundServer
@@ -91,7 +98,7 @@ func testAccCheckSnapshotExists(n string, snapshot *ionoscloud.Snapshot) resourc
 	}
 }
 
-const testAccCheckSnapshotConfig_basic = `
+const testAccCheckSnapshotConfigBasic = `
 resource "ionoscloud_datacenter" "foobar" {
 	name       = "snapshot-test"
 	location = "us/las"
@@ -131,7 +138,7 @@ resource "ionoscloud_snapshot" "test_snapshot" {
 }
 `
 
-const testAccCheckSnapshotConfig_update = `
+const testAccCheckSnapshotConfigUpdate = `
 resource "ionoscloud_datacenter" "foobar" {
 	name       = "snapshot-test"
 	location = "us/las"

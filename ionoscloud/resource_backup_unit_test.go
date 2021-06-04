@@ -57,17 +57,7 @@ func testAccCheckbackupUnitDestroyCheck(s *terraform.State) error {
 			continue
 		}
 
-<<<<<<< HEAD
-		ctx, cancel := context.WithTimeout(context.Background(), *resourceDefaultTimeouts.Default)
-
-		if cancel != nil {
-			defer cancel()
-		}
-
 		_, apiResponse, err := client.BackupUnitsApi.BackupunitsFindById(ctx, rs.Primary.ID).Execute()
-=======
-		_, apiResponse, err := client.BackupUnitApi.BackupunitsFindById(ctx, rs.Primary.ID).Execute()
->>>>>>> master
 
 		if _, ok := err.(ionoscloud.GenericOpenAPIError); ok {
 			if apiResponse != nil && apiResponse.Response.StatusCode != 404 {

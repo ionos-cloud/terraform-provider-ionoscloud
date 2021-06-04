@@ -77,12 +77,8 @@ func resourceLoadbalancerCreate(d *schema.ResourceData, meta interface{}) error 
 		defer cancel()
 	}
 
-<<<<<<< HEAD
 	resp, apiResp, err := client.LoadBalancersApi.DatacentersLoadbalancersPost(ctx, dcid).Loadbalancer(*lb).Execute()
 
-=======
-	resp, apiResp, err := client.LoadBalancerApi.DatacentersLoadbalancersPost(ctx, dcid).Loadbalancer(*lb).Execute()
->>>>>>> master
 	if err != nil {
 		return fmt.Errorf("error occured while creating a loadbalancer %s", err)
 	}
@@ -133,20 +129,20 @@ func resourceLoadbalancerUpdate(d *schema.ResourceData, meta interface{}) error 
 
 	var hasChangeCount int = 0
 	if d.HasChange("name") {
-		_, new := d.GetChange("name")
-		name := new.(string)
+		_, newVal := d.GetChange("name")
+		name := newVal.(string)
 		properties.Name = &name
 		hasChangeCount++
 	}
 	if d.HasChange("ip") {
-		_, new := d.GetChange("ip")
-		ip := new.(string)
+		_, newVal := d.GetChange("ip")
+		ip := newVal.(string)
 		properties.Ip = &ip
 		hasChangeCount++
 	}
 	if d.HasChange("dhcp") {
-		_, new := d.GetChange("dhcp")
-		dhcp := new.(bool)
+		_, newVal := d.GetChange("dhcp")
+		dhcp := newVal.(bool)
 		properties.Dhcp = &dhcp
 		hasChangeCount++
 	}
@@ -168,7 +164,7 @@ func resourceLoadbalancerUpdate(d *schema.ResourceData, meta interface{}) error 
 		oldList := oldNicIds.([]interface{})
 
 		for _, o := range oldList {
-			_, apiresponse, err := client.LoadBalancersApi.DatacentersLoadbalancersBalancednicsDelete(context.TODO(),
+			apiresponse, err := client.LoadBalancersApi.DatacentersLoadbalancersBalancednicsDelete(context.TODO(),
 				d.Get("datacenter_id").(string), d.Id(), o.(string)).Execute()
 			if err != nil {
 				if apiresponse != nil && apiresponse.Response.StatusCode == 404 {
@@ -218,10 +214,14 @@ func resourceLoadbalancerDelete(d *schema.ResourceData, meta interface{}) error 
 	}
 
 	dcid := d.Get("datacenter_id").(string)
-	_, apiResp, err := client.LoadBalancersApi.DatacentersLoadbalancersDelete(ctx, dcid, d.Id()).Execute()
+	apiResp, err := client.LoadBalancersApi.DatacentersLoadbalancersDelete(ctx, dcid, d.Id()).Execute()
 
 	if err != nil {
-		return fmt.Errorf("[load balancer delete] an error occured while deleting a loadbalancer: %s", err)
+		payload := "<nil>"
+		if apiResp != nil {
+			payload = string(apiResp.Payload)
+		}
+		return fmt.Errorf("[load balancer delete] an error occured while deleting a loadbalancer: %s: %s", err, payload)
 	}
 
 	// Wait, catching any errors

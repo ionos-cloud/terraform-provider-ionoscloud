@@ -22,14 +22,14 @@ func TestAccNetworkLoadBalancerForwardingRule_Basic(t *testing.T) {
 		CheckDestroy: testAccCheckNetworkLoadBalancerForwardingRuleDestroyCheck,
 		Steps: []resource.TestStep{
 			{
-				Config: fmt.Sprintf(testAccCheckNetworkLoadBalancerForwardingRuleConfig_basic, networkLoadBalancerForwardingRuleName),
+				Config: fmt.Sprintf(testAccCheckNetworkLoadBalancerForwardingRuleConfigBasic, networkLoadBalancerForwardingRuleName),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckNetworkLoadBalancerForwardingRuleExists("ionoscloud_networkloadbalancer_forwardingrule.forwarding_rule", &networkLoadBalancerForwardingRule),
 					resource.TestCheckResourceAttr("ionoscloud_networkloadbalancer_forwardingrule.forwarding_rule", "name", networkLoadBalancerForwardingRuleName),
 				),
 			},
 			{
-				Config: testAccCheckNetworkLoadBalancerForwardingRuleConfig_update,
+				Config: testAccCheckNetworkLoadBalancerForwardingRuleConfigUpdate,
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttr("ionoscloud_networkloadbalancer_forwardingrule.forwarding_rule", "name", "updated"),
 				),
@@ -39,23 +39,24 @@ func TestAccNetworkLoadBalancerForwardingRule_Basic(t *testing.T) {
 }
 
 func testAccCheckNetworkLoadBalancerForwardingRuleDestroyCheck(s *terraform.State) error {
-	client := testAccProvider.Meta().(SdkBundle).Client
+	client := testAccProvider.Meta().(*ionoscloud.APIClient)
+
+	ctx, cancel := context.WithTimeout(context.Background(), *resourceDefaultTimeouts.Delete)
+
+	if cancel != nil {
+		defer cancel()
+	}
+
 	for _, rs := range s.RootModule().Resources {
 		if rs.Type != "ionoscloud_datacenter" {
 			continue
 		}
 
-		ctx, cancel := context.WithTimeout(context.Background(), *resourceDefaultTimeouts.Delete)
-
-		if cancel != nil {
-			defer cancel()
-		}
-
-		_, apiResponse, err := client.NetworkLoadBalancersApi.DatacentersNetworkloadbalancersForwardingrulesDelete(ctx, rs.Primary.Attributes["datacenter_id"], rs.Primary.Attributes["networkloadbalancer_id"], rs.Primary.ID).Execute()
+		apiResponse, err := client.NetworkLoadBalancersApi.DatacentersNetworkloadbalancersForwardingrulesDelete(ctx, rs.Primary.Attributes["datacenter_id"], rs.Primary.Attributes["networkloadbalancer_id"], rs.Primary.ID).Execute()
 
 		if _, ok := err.(ionoscloud.GenericOpenAPIError); ok {
-			if apiResponse.Response.StatusCode != 404 {
-				return fmt.Errorf("Network loadbalancer forwarding rule still exists %s %s", rs.Primary.ID, string(apiResponse.Payload))
+			if apiResponse == nil || apiResponse.Response.StatusCode != 404 {
+				return fmt.Errorf("network loadbalancer forwarding rule still exists %s %s", rs.Primary.ID, responseBody(apiResponse))
 			}
 		} else {
 			return fmt.Errorf("unable to fetch network loadbalancer forwarding rule %s %s", rs.Primary.ID, err)
@@ -67,7 +68,7 @@ func testAccCheckNetworkLoadBalancerForwardingRuleDestroyCheck(s *terraform.Stat
 
 func testAccCheckNetworkLoadBalancerForwardingRuleExists(n string, networkLoadBalancerForwardingRule *ionoscloud.NetworkLoadBalancerForwardingRule) resource.TestCheckFunc {
 	return func(s *terraform.State) error {
-		client := testAccProvider.Meta().(SdkBundle).Client
+		client := testAccProvider.Meta().(*ionoscloud.APIClient)
 		rs, ok := s.RootModule().Resources[n]
 
 		if !ok {
@@ -90,7 +91,7 @@ func testAccCheckNetworkLoadBalancerForwardingRuleExists(n string, networkLoadBa
 			return fmt.Errorf("error occured while fetching NetworkLoadBalancerForwardingRule: %s", rs.Primary.ID)
 		}
 		if *foundNetworkLoadBalancerForwardingRule.Id != rs.Primary.ID {
-			return fmt.Errorf("Record not found")
+			return fmt.Errorf("record not found")
 		}
 
 		networkLoadBalancerForwardingRule = &foundNetworkLoadBalancerForwardingRule
@@ -99,7 +100,7 @@ func testAccCheckNetworkLoadBalancerForwardingRuleExists(n string, networkLoadBa
 	}
 }
 
-const testAccCheckNetworkLoadBalancerForwardingRuleConfig_basic = `
+const testAccCheckNetworkLoadBalancerForwardingRuleConfigBasic = `
 resource "ionoscloud_datacenter" "nlb_fr_datacenter" {
   name              = "test_nlb_fr"
   location          = "gb/lhr"
@@ -148,7 +149,7 @@ resource "ionoscloud_networkloadbalancer_forwardingrule" "forwarding_rule" {
 }
 `
 
-const testAccCheckNetworkLoadBalancerForwardingRuleConfig_update = `
+const testAccCheckNetworkLoadBalancerForwardingRuleConfigUpdate = `
 resource "ionoscloud_datacenter" "nlb_fr_datacenter" {
   name              = "test_nlb_fr"
   location          = "gb/lhr"

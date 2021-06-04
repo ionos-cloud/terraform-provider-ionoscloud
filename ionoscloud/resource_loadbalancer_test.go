@@ -22,7 +22,7 @@ func TestAccLoadbalancer_Basic(t *testing.T) {
 		CheckDestroy: testAccCheckLoadbalancerDestroyCheck,
 		Steps: []resource.TestStep{
 			{
-				Config: fmt.Sprintf(testAccCheckLoadbalancerConfig_basic, lbName),
+				Config: fmt.Sprintf(testAccCheckLoadbalancerConfigBasic, lbName),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckLoadbalancerExists("ionoscloud_loadbalancer.example", &loadbalancer),
 					testAccCheckLoadbalancerAttributes("ionoscloud_loadbalancer.example", lbName),
@@ -30,7 +30,7 @@ func TestAccLoadbalancer_Basic(t *testing.T) {
 				),
 			},
 			{
-				Config: testAccCheckLoadbalancerConfig_update,
+				Config: testAccCheckLoadbalancerConfigUpdate,
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckLoadbalancerAttributes("ionoscloud_loadbalancer.example", "updated"),
 					resource.TestCheckResourceAttr("ionoscloud_loadbalancer.example", "name", "updated"),
@@ -43,7 +43,10 @@ func TestAccLoadbalancer_Basic(t *testing.T) {
 func testAccCheckLoadbalancerDestroyCheck(s *terraform.State) error {
 	client := testAccProvider.Meta().(*ionoscloud.APIClient)
 
-	ctx, _ := context.WithTimeout(context.Background(), *resourceDefaultTimeouts.Delete)
+	ctx, cancel := context.WithTimeout(context.Background(), *resourceDefaultTimeouts.Delete)
+	if cancel != nil {
+		defer cancel()
+	}
 	for _, rs := range s.RootModule().Resources {
 		if rs.Type != "ionoscloud_loadbalancer" {
 			continue
@@ -53,7 +56,7 @@ func testAccCheckLoadbalancerDestroyCheck(s *terraform.State) error {
 		_, _, err := client.LoadBalancersApi.DatacentersLoadbalancersFindById(ctx, dcId, rs.Primary.ID).Execute()
 
 		if err != nil {
-			_, apiResponse, err := client.DataCentersApi.DatacentersDelete(ctx, dcId).Execute()
+			apiResponse, err := client.DataCentersApi.DatacentersDelete(ctx, dcId).Execute()
 
 			if apiError, ok := err.(ionoscloud.GenericOpenAPIError); ok {
 				if apiResponse == nil || apiResponse.Response.StatusCode != 404 {
@@ -95,7 +98,10 @@ func testAccCheckLoadbalancerExists(n string, loadbalancer *ionoscloud.Loadbalan
 			return fmt.Errorf("no Record ID is set")
 		}
 
-		ctx, _ := context.WithTimeout(context.Background(), *resourceDefaultTimeouts.Default)
+		ctx, cancel := context.WithTimeout(context.Background(), *resourceDefaultTimeouts.Default)
+		if cancel != nil {
+			defer cancel()
+		}
 		dcId := rs.Primary.Attributes["datacenter_id"]
 		foundLB, _, err := client.LoadBalancersApi.DatacentersLoadbalancersFindById(ctx, dcId, rs.Primary.ID).Execute()
 
@@ -103,7 +109,7 @@ func testAccCheckLoadbalancerExists(n string, loadbalancer *ionoscloud.Loadbalan
 			return fmt.Errorf("error occured while fetching Loadbalancer: %s", rs.Primary.ID)
 		}
 		if *foundLB.Id != rs.Primary.ID {
-			return fmt.Errorf("Record not found")
+			return fmt.Errorf("record not found")
 		}
 
 		loadbalancer = &foundLB
@@ -112,7 +118,7 @@ func testAccCheckLoadbalancerExists(n string, loadbalancer *ionoscloud.Loadbalan
 	}
 }
 
-const testAccCheckLoadbalancerConfig_basic = `
+const testAccCheckLoadbalancerConfigBasic = `
 resource "ionoscloud_datacenter" "foobar" {
 	name       = "loadbalancer-test"
 	location = "us/las"
@@ -126,13 +132,8 @@ resource "ionoscloud_server" "webserver" {
   ram = 1024
   availability_zone = "ZONE_1"
   cpu_family = "AMD_OPTERON"
-<<<<<<< HEAD
-	image ="81e054dd-a347-11eb-b70c-7ade62b52cc0"
-	image_password = "K3tTj8G14a3EgKyNeeiY"
-=======
   image_name = "ubuntu-16.04"
   image_password = "K3tTj8G14a3EgKyNeeiY"
->>>>>>> master
   volume {
     name = "system"
     size = 14
@@ -164,7 +165,7 @@ resource "ionoscloud_loadbalancer" "example" {
   dhcp = true
 }`
 
-const testAccCheckLoadbalancerConfig_update = `
+const testAccCheckLoadbalancerConfigUpdate = `
 resource "ionoscloud_datacenter" "foobar" {
 	name       = "loadbalancer-test"
 	location = "us/las"
@@ -177,8 +178,8 @@ resource "ionoscloud_server" "webserver" {
   ram = 1024
   availability_zone = "ZONE_1"
   cpu_family = "AMD_OPTERON"
-	image ="81e054dd-a347-11eb-b70c-7ade62b52cc0"
-	image_password = "K3tTj8G14a3EgKyNeeiY"
+  image_name = "ubuntu-16.04"
+  image_password = "K3tTj8G14a3EgKyNeeiY"
   volume {
     name = "system"
     size = 14

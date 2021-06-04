@@ -22,7 +22,7 @@ func TestAccNic_Basic(t *testing.T) {
 		CheckDestroy: testAccCheckNicDestroyCheck,
 		Steps: []resource.TestStep{
 			{
-				Config: fmt.Sprintf(testAccCheckNicConfig_basic, volumeName),
+				Config: fmt.Sprintf(testAccCheckNicConfigBasic, volumeName),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckNICExists("ionoscloud_nic.database_nic", &nic),
 					testAccCheckNicAttributes("ionoscloud_nic.database_nic", volumeName),
@@ -31,7 +31,7 @@ func TestAccNic_Basic(t *testing.T) {
 				),
 			},
 			{
-				Config: testAccCheckNicConfig_update,
+				Config: testAccCheckNicConfigUpdate,
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckNicAttributes("ionoscloud_nic.database_nic", "updated"),
 					resource.TestCheckResourceAttr("ionoscloud_nic.database_nic", "name", "updated"),
@@ -44,7 +44,11 @@ func TestAccNic_Basic(t *testing.T) {
 func testAccCheckNicDestroyCheck(s *terraform.State) error {
 	client := testAccProvider.Meta().(*ionoscloud.APIClient)
 
-	ctx, _ := context.WithTimeout(context.Background(), *resourceDefaultTimeouts.Delete)
+	ctx, cancel := context.WithTimeout(context.Background(), *resourceDefaultTimeouts.Delete)
+	if cancel != nil {
+		defer cancel()
+	}
+
 	for _, rs := range s.RootModule().Resources {
 		if rs.Type != "ionoscloud_nic" {
 			continue
@@ -52,24 +56,18 @@ func testAccCheckNicDestroyCheck(s *terraform.State) error {
 
 		dcId := rs.Primary.Attributes["datacenter_id"]
 		serverId := rs.Primary.Attributes["server_id"]
-<<<<<<< HEAD
+
 		_, apiResponse, err := client.NetworkInterfacesApi.DatacentersServersNicsFindById(ctx, dcId, serverId, rs.Primary.ID).Execute()
-
-		if apiError, ok := err.(ionoscloud.GenericOpenAPIError); ok {
-			if apiResponse.Response.StatusCode != 404 {
-				return fmt.Errorf("NIC still exists %s %s", rs.Primary.ID, apiError)
-=======
-		_, apiResponse, _ := client.NicApi.DatacentersServersNicsFindById(ctx, dcId, serverId, rs.Primary.ID).Execute()
-
-		if apiResponse == nil || apiResponse.Response.StatusCode != 404 {
-			var payload = "<nil>"
-			var statusCode = 0
+		if err != nil {
 			if apiResponse != nil {
-				payload = string(apiResponse.Payload)
-				statusCode = apiResponse.StatusCode
->>>>>>> master
+				if apiResponse.Response.StatusCode != 404 {
+					return fmt.Errorf("error fetching nic with id %s: %s, %s", rs.Primary.ID, err, responseBody(apiResponse))
+				}
+			} else {
+				return err
 			}
-			return fmt.Errorf("NIC still exists %s: %d %s", rs.Primary.ID, statusCode, payload)
+		} else {
+			return fmt.Errorf("nic with ID %s still exists", rs.Primary.ID)
 		}
 	}
 
@@ -103,7 +101,10 @@ func testAccCheckNICExists(n string, nic *ionoscloud.Nic) resource.TestCheckFunc
 			return fmt.Errorf("no Record ID is set")
 		}
 
-		ctx, _ := context.WithTimeout(context.Background(), *resourceDefaultTimeouts.Default)
+		ctx, cancel := context.WithTimeout(context.Background(), *resourceDefaultTimeouts.Default)
+		if cancel != nil {
+			defer cancel()
+		}
 		dcId := rs.Primary.Attributes["datacenter_id"]
 		serverId := rs.Primary.Attributes["server_id"]
 		foundNic, _, err := client.NetworkInterfacesApi.DatacentersServersNicsFindById(ctx, dcId, serverId, rs.Primary.ID).Execute()
@@ -112,7 +113,7 @@ func testAccCheckNICExists(n string, nic *ionoscloud.Nic) resource.TestCheckFunc
 			return fmt.Errorf("error occured while fetching Volume: %s", rs.Primary.ID)
 		}
 		if *foundNic.Id != rs.Primary.ID {
-			return fmt.Errorf("Record not found")
+			return fmt.Errorf("record not found")
 		}
 
 		nic = &foundNic
@@ -121,7 +122,7 @@ func testAccCheckNICExists(n string, nic *ionoscloud.Nic) resource.TestCheckFunc
 	}
 }
 
-const testAccCheckNicConfig_basic = `
+const testAccCheckNicConfigBasic = `
 resource "ionoscloud_datacenter" "foobar" {
 	name       = "nic-test"
 	location = "us/las"
@@ -159,7 +160,7 @@ resource "ionoscloud_nic" "database_nic" {
   name = "%s"
 }`
 
-const testAccCheckNicConfig_update = `
+const testAccCheckNicConfigUpdate = `
 resource "ionoscloud_datacenter" "foobar" {
 	name       = "nic-test"
 	location = "us/las"

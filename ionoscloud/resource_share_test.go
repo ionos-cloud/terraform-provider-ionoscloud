@@ -20,14 +20,14 @@ func TestAccShare_Basic(t *testing.T) {
 		CheckDestroy: testAccCheckShareDestroyCheck,
 		Steps: []resource.TestStep{
 			{
-				Config: fmt.Sprintf(testAccCheckShareConfig_basic),
+				Config: fmt.Sprintf(testAccCheckShareConfigBasic),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckShareExists("ionoscloud_share.share", &share),
 					resource.TestCheckResourceAttr("ionoscloud_share.share", "share_privilege", "true"),
 				),
 			},
 			{
-				Config: testAccCheckShareConfig_update,
+				Config: testAccCheckShareConfigUpdate,
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttr("ionoscloud_share.share", "share_privilege", "false"),
 				),
@@ -94,7 +94,7 @@ func testAccCheckShareExists(n string, share *ionoscloud.GroupShare) resource.Te
 			return fmt.Errorf("error occured while fetching Share of resource  %s in group %s", rs.Primary.Attributes["resource_id"], rs.Primary.Attributes["group_id"])
 		}
 		if *foundshare.Id != rs.Primary.ID {
-			return fmt.Errorf("Record not found")
+			return fmt.Errorf("record not found")
 		}
 
 		share = &foundshare
@@ -103,7 +103,7 @@ func testAccCheckShareExists(n string, share *ionoscloud.GroupShare) resource.Te
 	}
 }
 
-const testAccCheckShareConfig_basic = `
+const testAccCheckShareConfigBasic = `
 resource "ionoscloud_datacenter" "foobar" {
 	name       = "terraform test"
 	location = "us/las"
@@ -124,7 +124,7 @@ resource "ionoscloud_share" "share" {
   share_privilege = true
 }`
 
-const testAccCheckShareConfig_update = `
+const testAccCheckShareConfigUpdate = `
 resource "ionoscloud_datacenter" "foobar" {
 	name       = "terraform test"
 	location = "us/las"

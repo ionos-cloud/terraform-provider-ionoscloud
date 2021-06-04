@@ -22,14 +22,14 @@ func TestAccNatGateway_Basic(t *testing.T) {
 		CheckDestroy: testAccCheckNatGatewayDestroyCheck,
 		Steps: []resource.TestStep{
 			{
-				Config: fmt.Sprintf(testAccCheckNatGatewayConfig_basic, natGatewayName),
+				Config: fmt.Sprintf(testAccCheckNatGatewayConfigBasic, natGatewayName),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckNatGatewayExists("ionoscloud_natgateway.natgateway", &natGateway),
 					resource.TestCheckResourceAttr("ionoscloud_natgateway.natgateway", "name", natGatewayName),
 				),
 			},
 			{
-				Config: testAccCheckNatGatewayConfig_update,
+				Config: testAccCheckNatGatewayConfigUpdate,
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttr("ionoscloud_natgateway.natgateway", "name", "updated"),
 				),
@@ -39,23 +39,23 @@ func TestAccNatGateway_Basic(t *testing.T) {
 }
 
 func testAccCheckNatGatewayDestroyCheck(s *terraform.State) error {
-	client := testAccProvider.Meta().(SdkBundle).Client
+	client := testAccProvider.Meta().(*ionoscloud.APIClient)
+	ctx, cancel := context.WithTimeout(context.Background(), *resourceDefaultTimeouts.Delete)
+
+	if cancel != nil {
+		defer cancel()
+	}
+
 	for _, rs := range s.RootModule().Resources {
 		if rs.Type != "ionoscloud_datacenter" {
 			continue
 		}
 
-		ctx, cancel := context.WithTimeout(context.Background(), *resourceDefaultTimeouts.Delete)
-
-		if cancel != nil {
-			defer cancel()
-		}
-
 		_, apiResponse, err := client.NATGatewaysApi.DatacentersNatgatewaysFindByNatGatewayId(ctx, rs.Primary.Attributes["datacenter_id"], rs.Primary.ID).Execute()
 
 		if _, ok := err.(ionoscloud.GenericOpenAPIError); ok {
-			if apiResponse.Response.StatusCode != 404 {
-				return fmt.Errorf("Nat gateway still exists %s %s", rs.Primary.ID, string(apiResponse.Payload))
+			if apiResponse == nil || apiResponse.Response.StatusCode != 404 {
+				return fmt.Errorf("nat gateway still exists %s %s", rs.Primary.ID, responseBody(apiResponse))
 			}
 		} else {
 			return fmt.Errorf("unable to fetch nat gateway %s %s", rs.Primary.ID, err)
@@ -67,7 +67,7 @@ func testAccCheckNatGatewayDestroyCheck(s *terraform.State) error {
 
 func testAccCheckNatGatewayExists(n string, natGateway *ionoscloud.NatGateway) resource.TestCheckFunc {
 	return func(s *terraform.State) error {
-		client := testAccProvider.Meta().(SdkBundle).Client
+		client := testAccProvider.Meta().(*ionoscloud.APIClient)
 		rs, ok := s.RootModule().Resources[n]
 
 		if !ok {
@@ -90,7 +90,7 @@ func testAccCheckNatGatewayExists(n string, natGateway *ionoscloud.NatGateway) r
 			return fmt.Errorf("error occured while fetching NatGateway: %s", rs.Primary.ID)
 		}
 		if *foundNatGateway.Id != rs.Primary.ID {
-			return fmt.Errorf("Record not found")
+			return fmt.Errorf("record not found")
 		}
 
 		natGateway = &foundNatGateway
@@ -99,7 +99,7 @@ func testAccCheckNatGatewayExists(n string, natGateway *ionoscloud.NatGateway) r
 	}
 }
 
-const testAccCheckNatGatewayConfig_basic = `
+const testAccCheckNatGatewayConfigBasic = `
 resource "ionoscloud_datacenter" "natgateway_datacenter" {
   name              = "test_natgateway"
   location          = "gb/lhr"
@@ -121,7 +121,7 @@ resource "ionoscloud_natgateway" "natgateway" {
   }
 }`
 
-const testAccCheckNatGatewayConfig_update = `
+const testAccCheckNatGatewayConfigUpdate = `
 resource "ionoscloud_datacenter" "natgateway_datacenter" {
   name              = "test_natgateway"
   location          = "gb/lhr"

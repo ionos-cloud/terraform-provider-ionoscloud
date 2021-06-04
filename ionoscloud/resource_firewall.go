@@ -366,12 +366,12 @@ func resourceFirewallDelete(d *schema.ResourceData, meta interface{}) error {
 		defer cancel()
 	}
 
-<<<<<<< HEAD
-	_, apiResponse, err := client.FirewallRulesApi.DatacentersServersNicsFirewallrulesDelete(ctx, d.Get("datacenter_id").(string), d.Get("server_id").(string), d.Get("nic_id").(string), d.Id()).Execute()
+	apiResponse, err := client.FirewallRulesApi.
+							DatacentersServersNicsFirewallrulesDelete(
+								ctx, d.Get("datacenter_id").(string),
+								d.Get("server_id").(string), d.Get("nic_id").(string), d.Id()).
+							Execute()
 
-=======
-	_, apiResponse, err := client.NicApi.DatacentersServersNicsFirewallrulesDelete(ctx, d.Get("datacenter_id").(string), d.Get("server_id").(string), d.Get("nic_id").(string), d.Id()).Execute()
->>>>>>> master
 	if err != nil {
 		return fmt.Errorf("an error occured while deleting a firewall rule ID %s %s", d.Id(), err)
 	}

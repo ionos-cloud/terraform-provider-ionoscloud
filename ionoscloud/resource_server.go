@@ -169,10 +169,10 @@ func resourceServer() *schema.Resource {
 									}
 								}
 
-								ssh_key_path := d.Get("volume.0.ssh_key_path").([]interface{})
-								old_ssh_key_path := d.Get("ssh_key_path").([]interface{})
+								sshKeyPath := d.Get("volume.0.ssh_key_path").([]interface{})
+								oldSshKeyPath := d.Get("ssh_key_path").([]interface{})
 
-								if len(diffSlice(convertSlice(ssh_key_path), convertSlice(old_ssh_key_path))) == 0 {
+								if len(diffSlice(convertSlice(sshKeyPath), convertSlice(oldSshKeyPath))) == 0 {
 									return true
 								}
 
@@ -291,7 +291,7 @@ func resourceServer() *schema.Resource {
 										Optional: true,
 										ValidateFunc: func(v interface{}, k string) (ws []string, errors []error) {
 											if v.(int) < 1 && v.(int) > 65534 {
-												errors = append(errors, fmt.Errorf("Port start range must be between 1 and 65534"))
+												errors = append(errors, fmt.Errorf("port start range must be between 1 and 65534"))
 											}
 											return
 										},
@@ -302,7 +302,7 @@ func resourceServer() *schema.Resource {
 										Optional: true,
 										ValidateFunc: func(v interface{}, k string) (ws []string, errors []error) {
 											if v.(int) < 1 && v.(int) > 65534 {
-												errors = append(errors, fmt.Errorf("Port end range must be between 1 and 65534"))
+												errors = append(errors, fmt.Errorf("port end range must be between 1 and 65534"))
 											}
 											return
 										},
@@ -329,6 +329,7 @@ func resourceServer() *schema.Resource {
 func resourceServerCreate(d *schema.ResourceData, meta interface{}) error {
 	client := meta.(*ionoscloud.APIClient)
 
+	datacenterId := d.Get("datacenter_id").(string)
 	serverName := d.Get("name").(string)
 	serverCores := int32(d.Get("cores").(int))
 	serverRam := int32(d.Get("ram").(int))
@@ -374,7 +375,9 @@ func resourceServerCreate(d *schema.ResourceData, meta interface{}) error {
 	if v, ok := d.GetOk("volume.0.image_password"); ok {
 		vStr := v.(string)
 		volume.ImagePassword = &vStr
-		d.Set("image_password", vStr)
+		if err := d.Set("image_password", vStr); err != nil {
+			return err
+		}
 	}
 
 	if v, ok := d.GetOk("image_password"); ok {
@@ -402,26 +405,36 @@ func resourceServerCreate(d *schema.ResourceData, meta interface{}) error {
 		volume.Bus = &vStr
 	}
 
-	var sshkey_path []interface{}
+	var sshKeyPath []interface{}
 
 	if v, ok := d.GetOk("volume.0.ssh_key_path"); ok {
-		sshkey_path = v.([]interface{})
-		d.Set("ssh_key_path", v.([]interface{}))
+		sshKeyPath = v.([]interface{})
+		if err := d.Set("ssh_key_path", v.([]interface{})); err != nil {
+			return err
+		}
 	} else if v, ok := d.GetOk("ssh_key_path"); ok {
-		sshkey_path = v.([]interface{})
-		d.Set("ssh_key_path", v.([]interface{}))
+		sshKeyPath = v.([]interface{})
+		if err := d.Set("ssh_key_path", v.([]interface{})); err != nil {
+			return err
+		}
 	} else {
-		d.Set("ssh_key_path", [][]string{})
+		if err := d.Set("ssh_key_path", [][]string{}); err != nil {
+			return err
+		}
 	}
 
 	var image string
+	var imageInput string
+
 	if v, ok := d.GetOk("volume.0.image"); ok {
-		image = v.(string)
-		d.Set("image", v.(string))
+		imageInput = v.(string)
+		if err := d.Set("image", v.(string)); err != nil {
+			return err
+		}
 	} else if v, ok := d.GetOk("image"); ok {
-		image = v.(string)
+		imageInput = v.(string)
 	} else {
-		return fmt.Errorf("Either 'image' or 'volume.0.image' must be provided.")
+		return fmt.Errorf("either 'image' or 'volume.0.image' must be provided")
 	}
 
 	ctx, cancel := context.WithTimeout(context.Background(), *resourceDefaultTimeouts.Default)
@@ -430,12 +443,8 @@ func resourceServerCreate(d *schema.ResourceData, meta interface{}) error {
 		defer cancel()
 	}
 
-<<<<<<< HEAD
-	if !IsValidUUID(image) {
-		return fmt.Errorf("Image is not a valid UUID")
-=======
-	if !IsValidUUID(image_name) {
-		img, err := getImage(client, dcId, image_name, *volume.Type)
+	if !IsValidUUID(imageInput) {
+		img, err := getImage(client, datacenterId, imageInput, *volume.Type)
 		if err != nil {
 			return err
 		}
@@ -444,77 +453,60 @@ func resourceServerCreate(d *schema.ResourceData, meta interface{}) error {
 		}
 		// if no image id was found with that name we look for a matching snapshot
 		if image == "" {
-			image = getSnapshotId(client, image_name)
+			image = getSnapshotId(client, imageInput)
 			if image != "" {
 				isSnapshot = true
 			} else {
-				dc, _, err := client.DataCenterApi.DatacentersFindById(ctx, dcId).Execute()
-				if err != nil {
-					return fmt.Errorf("error fetching datacenter %s: (%s)", dcId, err)
-				}
-				image_alias = getImageAlias(client, image_name, *dc.Properties.Location)
+				return fmt.Errorf("no image or snapshot with id %s found", imageInput)
 			}
 		}
-		if image == "" && image_alias == "" {
-			return fmt.Errorf("Could not find an image/imagealias/snapshot that matches %s ", image_name)
-		}
-		if volume.ImagePassword == nil && len(sshkey_path) == 0 && isSnapshot == false && img.Properties.Public != nil && *img.Properties.Public {
-			return fmt.Errorf("either 'image_password' or 'ssh_key_path' must be provided.")
-		}
->>>>>>> master
-	} else {
-		img, apiResponse, err := client.ImagesApi.ImagesFindById(ctx, image).Execute()
 
-<<<<<<< HEAD
-		_, rsp := err.(ionoscloud.GenericOpenAPIError)
+		if volume.ImagePassword == nil && len(sshKeyPath) == 0 && isSnapshot == false && img.Properties.Public != nil && *img.Properties.Public {
+			return fmt.Errorf("either 'image_password' or 'ssh_key_path' must be provided")
+		}
+	} else {
+		img, apiResponse, err := client.ImagesApi.ImagesFindById(ctx, imageInput).Execute()
+
 		if err != nil {
-			return fmt.Errorf("error fetching image %s: (%s) - %+v", image, err, rsp)
-		}
-
-		if apiResponse.Response.StatusCode == 404 {
-
-			_, apiResponse, err := client.SnapshotsApi.SnapshotsFindById(ctx, image).Execute()
-=======
-		if apiResponse != nil && apiResponse.Response.StatusCode == 404 {
-
-			_, apiResponse, err = client.SnapshotApi.SnapshotsFindById(ctx, image_name).Execute()
->>>>>>> master
-
 			if apiResponse != nil && apiResponse.Response.StatusCode == 404 {
-				return fmt.Errorf("image/snapshot: %s Not Found", string(apiResponse.Payload))
+
+				log.Printf("[DEBUG] image %s not found; trying snapshots\n", imageInput)
+				snap, apiResponse, err := client.SnapshotsApi.SnapshotsFindById(ctx, imageInput).Execute()
+
+				if apiResponse != nil && apiResponse.Response.StatusCode == 404 {
+					return fmt.Errorf("image/snapshot: %s Not Found", string(apiResponse.Payload))
+				} else if err != nil {
+					return fmt.Errorf("error fetching image/snapshot info: %s, %s", err, responseBody(apiResponse))
+				}
+
+				isSnapshot = true
+
+				image = *snap.Id
+
+			} else {
+				return fmt.Errorf("error fetching image info: %s, %s", err, responseBody(apiResponse))
+			}
+		} else {
+			if img.Properties != nil && img.Properties.Public != nil && *img.Properties.Public == true && isSnapshot == false {
+				if volume.ImagePassword == nil && len(sshKeyPath) == 0 {
+					return fmt.Errorf("either 'image_password' or 'ssh_key_path' must be provided")
+				}
 			}
 
-			isSnapshot = true
+			image = *img.Id
 
-		} else if err != nil {
-			return fmt.Errorf("error fetching image/snapshot: %s", err)
-		}
-
-		if *img.Properties.Public == true && isSnapshot == false {
-
-			if volume.ImagePassword == nil && len(sshkey_path) == 0 {
-				return fmt.Errorf("either 'image_password' or 'ssh_key_path' must be provided.")
-			}
 		}
 	}
 
-	if image == "" && volume.LicenceType == nil && !isSnapshot {
-		return fmt.Errorf("Either 'image', 'licenceType', must be set. Asta e?")
+	if isSnapshot == true && (volume.ImagePassword != nil || len(sshKeyPath) > 0) {
+		return fmt.Errorf("passwords/SSH keys are not supported for snapshots")
 	}
 
-	if isSnapshot == true && (volume.ImagePassword != nil || len(sshkey_path) > 0) {
-		return fmt.Errorf("Passwords/SSH keys are not supported for snapshots.")
-	}
+	volume.Image = &image
 
-	if image != "" {
-		volume.Image = &image
-	} else {
-		volume.Image = nil
-	}
-
-	if len(sshkey_path) != 0 {
+	if len(sshKeyPath) != 0 {
 		var publicKeys []string
-		for _, path := range sshkey_path {
+		for _, path := range sshKeyPath {
 			log.Printf("[DEBUG] Reading file %s", path)
 			publicKey, err := readPublicKey(path.(string))
 			if err != nil {
@@ -643,7 +635,7 @@ func resourceServerCreate(d *schema.ResourceData, meta interface{}) error {
 
 	if err != nil {
 		return fmt.Errorf(
-			"Error creating server: (%s) \n apiEroor: %v", err, string(apiResponse.Payload))
+			"Error creating server: (%s) \n apiEroor: %v", err, responseBody(apiResponse))
 	}
 	d.SetId(*server.Id)
 
@@ -671,7 +663,9 @@ func resourceServerCreate(d *schema.ResourceData, meta interface{}) error {
 
 	if firewallRules.Items != nil {
 		if len(*firewallRules.Items) > 0 {
-			d.Set("firewallrule_id", *(*firewallRules.Items)[0].Id)
+			if err := d.Set("firewallrule_id", *(*firewallRules.Items)[0].Id); err != nil {
+				return err
+			}
 		}
 	}
 
@@ -779,39 +773,57 @@ func resourceServerRead(d *schema.ResourceData, meta interface{}) error {
 	}
 
 	if server.Properties.TemplateUuid != nil {
-		d.Set("template_uuid", *server.Properties.TemplateUuid)
+		if err := d.Set("template_uuid", *server.Properties.TemplateUuid); err != nil {
+			return err
+		}
 	}
 
 	if server.Properties.Name != nil {
-		d.Set("name", *server.Properties.Name)
+		if err := d.Set("name", *server.Properties.Name); err != nil {
+			return err
+		}
 	}
 
 	if server.Properties.Cores != nil {
-		d.Set("cores", *server.Properties.Cores)
+		if err := d.Set("cores", *server.Properties.Cores); err != nil {
+			return err
+		}
 	}
 
 	if server.Properties.Ram != nil {
-		d.Set("ram", *server.Properties.Ram)
+		if err := d.Set("ram", *server.Properties.Ram); err != nil {
+			return err
+		}
 	}
 
 	if server.Properties.Type != nil {
-		d.Set("type", *server.Properties.Type)
+		if err := d.Set("type", *server.Properties.Type); err != nil {
+			return err
+		}
 	}
 
 	if server.Properties.AvailabilityZone != nil {
-		d.Set("availability_zone", *server.Properties.AvailabilityZone)
+		if err := d.Set("availability_zone", *server.Properties.AvailabilityZone); err != nil {
+			return err
+		}
 	}
 
 	if server.Properties.CpuFamily != nil {
-		d.Set("cpu_family", *server.Properties.CpuFamily)
+		if err := d.Set("cpu_family", *server.Properties.CpuFamily); err != nil {
+			return err
+		}
 	}
 
 	if server.Entities.Volumes != nil && len(*server.Entities.Volumes.Items) > 0 {
-		d.Set("boot_image", *(*server.Entities.Volumes.Items)[0].Properties.Image)
+		if err := d.Set("boot_image", *(*server.Entities.Volumes.Items)[0].Properties.Image); err != nil {
+			return err
+		}
 	}
 
 	if primarynic, ok := d.GetOk("primary_nic"); ok {
-		d.Set("primary_nic", primarynic.(string))
+		if err := d.Set("primary_nic", primarynic.(string)); err != nil {
+			return err
+		}
 
 		nic, _, err := client.NetworkInterfacesApi.DatacentersServersNicsFindById(ctx, dcId, serverId, primarynic.(string)).Execute()
 		if err != nil {
@@ -819,7 +831,9 @@ func resourceServerRead(d *schema.ResourceData, meta interface{}) error {
 		}
 
 		if len(*nic.Properties.Ips) > 0 {
-			d.Set("primary_ip", (*nic.Properties.Ips)[0])
+			if err := d.Set("primary_ip", (*nic.Properties.Ips)[0]); err != nil {
+				return err
+			}
 		}
 
 		network := map[string]interface{}{
@@ -847,10 +861,10 @@ func resourceServerRead(d *schema.ResourceData, meta interface{}) error {
 			network["ip"] = (*nic.Properties.Ips)[0]
 		}
 
-		if firewall_id, ok := d.GetOk("firewallrule_id"); ok {
-			firewall, _, err := client.FirewallRulesApi.DatacentersServersNicsFirewallrulesFindById(ctx, dcId, serverId, primarynic.(string), firewall_id.(string)).Execute()
+		if firewallId, ok := d.GetOk("firewallrule_id"); ok {
+			firewall, _, err := client.FirewallRulesApi.DatacentersServersNicsFirewallrulesFindById(ctx, dcId, serverId, primarynic.(string), firewallId.(string)).Execute()
 			if err != nil {
-				return fmt.Errorf("error occured while fetching firewallrule %s for server ID %s %s", firewall_id.(string), serverId, err)
+				return fmt.Errorf("error occured while fetching firewallrule %s for server ID %s %s", firewallId.(string), serverId, err)
 			}
 
 			fw := map[string]interface{}{
@@ -897,7 +911,9 @@ func resourceServerRead(d *schema.ResourceData, meta interface{}) error {
 
 	if server.Properties.BootVolume != nil {
 		if server.Properties.BootVolume.Id != nil {
-			d.Set("boot_volume", *server.Properties.BootVolume.Id)
+			if err := d.Set("boot_volume", *server.Properties.BootVolume.Id); err != nil {
+				return err
+			}
 		}
 		volumeObj, _, err := client.ServersApi.DatacentersServersVolumesFindById(ctx, dcId, serverId, *server.Properties.BootVolume.Id).Execute()
 		if err == nil {
@@ -938,12 +954,16 @@ func resourceServerRead(d *schema.ResourceData, meta interface{}) error {
 	if ok && len(bootVolume.(string)) > 0 {
 		_, _, err = client.ServersApi.DatacentersServersVolumesFindById(ctx, dcId, d.Id(), bootVolume.(string)).Execute()
 		if err != nil {
-			d.Set("volume", nil)
+			if err := d.Set("volume", nil); err != nil {
+				return err
+			}
 		}
 	}
 
 	if server.Properties.BootCdrom != nil {
-		d.Set("boot_cdrom", *server.Properties.BootCdrom.Id)
+		if err := d.Set("boot_cdrom", *server.Properties.BootCdrom.Id); err != nil {
+			return err
+		}
 	}
 	return nil
 }
@@ -1011,16 +1031,16 @@ func resourceServerUpdate(d *schema.ResourceData, meta interface{}) error {
 	}
 	// Volume stuff
 	if d.HasChange("volume") {
-		boot_volume := d.Get("boot_volume").(string)
-		_, _, err := client.ServersApi.DatacentersServersVolumesFindById(ctx, dcId, d.Id(), boot_volume).Execute()
+		bootVolume := d.Get("boot_volume").(string)
+		_, _, err := client.ServersApi.DatacentersServersVolumesFindById(ctx, dcId, d.Id(), bootVolume).Execute()
 
 		if err != nil {
 			volume := ionoscloud.Volume{
-				Id: &boot_volume,
+				Id: &bootVolume,
 			}
 			_, apiResponse, err := client.ServersApi.DatacentersServersVolumesPost(ctx, dcId, d.Id()).Volume(volume).Execute()
 			if err != nil {
-				return fmt.Errorf("an error occured while attaching a volume dcId: %s server_id: %s ID: %s Response: %s", dcId, d.Id(), boot_volume, err)
+				return fmt.Errorf("an error occured while attaching a volume dcId: %s server_id: %s ID: %s Response: %s", dcId, d.Id(), bootVolume, err)
 			}
 
 			// Wait, catching any errors
@@ -1047,7 +1067,7 @@ func resourceServerUpdate(d *schema.ResourceData, meta interface{}) error {
 			properties.Bus = &vStr
 		}
 
-		_, apiResponse, err := client.VolumesApi.DatacentersVolumesPatch(ctx, d.Get("datacenter_id").(string), boot_volume).Volume(properties).Execute()
+		_, apiResponse, err := client.VolumesApi.DatacentersVolumesPatch(ctx, d.Get("datacenter_id").(string), bootVolume).Volume(properties).Execute()
 
 		if err != nil {
 			return fmt.Errorf("error patching volume (%s) (%s)", d.Id(), err)
@@ -1108,7 +1128,7 @@ func resourceServerUpdate(d *schema.ResourceData, meta interface{}) error {
 		_, apiResponse, err := client.NetworkInterfacesApi.DatacentersServersNicsPatch(ctx, d.Get("datacenter_id").(string), *server.Id, *nic.Id).Nic(properties).Execute()
 		if err != nil {
 			return fmt.Errorf(
-				"Error updating nic (%s)", err)
+				"error updating nic (%s)", err)
 		}
 
 		// Wait, catching any errors
@@ -1139,7 +1159,7 @@ func resourceServerDelete(d *schema.ResourceData, meta interface{}) error {
 	}
 
 	if server.Properties.BootVolume != nil {
-		_, apiResponse, err := client.VolumesApi.DatacentersVolumesDelete(ctx, dcId, *server.Properties.BootVolume.Id).Execute()
+		apiResponse, err := client.VolumesApi.DatacentersVolumesDelete(ctx, dcId, *server.Properties.BootVolume.Id).Execute()
 
 		if err != nil {
 			return fmt.Errorf("error occured while delete volume %s of server ID %s %s", *server.Properties.BootVolume.Id, d.Id(), err)
@@ -1151,7 +1171,7 @@ func resourceServerDelete(d *schema.ResourceData, meta interface{}) error {
 		}
 	}
 
-	_, apiResponse, err := client.ServersApi.DatacentersServersDelete(ctx, dcId, d.Id()).Execute()
+	apiResponse, err := client.ServersApi.DatacentersServersDelete(ctx, dcId, d.Id()).Execute()
 	if err != nil {
 		return fmt.Errorf("an error occured while deleting a server ID %s %s", d.Id(), err)
 

@@ -44,11 +44,8 @@ func TestAccS3Key_Basic(t *testing.T) {
 }
 
 func testAccChecks3KeyDestroyCheck(s *terraform.State) error {
-<<<<<<< HEAD
-	client := testAccProvider.Meta().(SdkBundle).Client
-=======
+
 	client := testAccProvider.Meta().(*ionoscloud.APIClient)
->>>>>>> master
 
 	for _, rs := range s.RootModule().Resources {
 		if rs.Type != "ionoscloud_s3_key" {
@@ -72,11 +69,8 @@ func testAccChecks3KeyDestroyCheck(s *terraform.State) error {
 
 func testAccChecks3KeyExists(n string, s3Key *ionoscloud.S3Key) resource.TestCheckFunc {
 	return func(s *terraform.State) error {
-<<<<<<< HEAD
-		client := testAccProvider.Meta().(SdkBundle).Client
-=======
+
 		client := testAccProvider.Meta().(*ionoscloud.APIClient)
->>>>>>> master
 
 		rs, ok := s.RootModule().Resources[n]
 
@@ -96,7 +90,7 @@ func testAccChecks3KeyExists(n string, s3Key *ionoscloud.S3Key) resource.TestChe
 		}
 
 		if *foundS3Key.Id != rs.Primary.ID {
-			return fmt.Errorf("Record not found")
+			return fmt.Errorf("record not found")
 		}
 
 		s3Key = &foundS3Key

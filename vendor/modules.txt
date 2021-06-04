@@ -278,9 +278,6 @@ github.com/hashicorp/terraform-svchost/disco
 github.com/hashicorp/yamux
 # github.com/imdario/mergo v0.3.9
 github.com/imdario/mergo
-# github.com/ionos-cloud/sdk-go/v5 v5.1.0
-## explicit
-github.com/ionos-cloud/sdk-go/v5
 # github.com/ionos-cloud/sdk-go/v6 v6.0.0-beta.1
 ## explicit
 github.com/ionos-cloud/sdk-go/v6

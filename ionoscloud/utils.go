@@ -166,7 +166,7 @@ func resourcePrivateCrossConnectImport(d *schema.ResourceData, meta interface{})
 		defer cancel()
 	}
 
-	pcc, apiResponse, err := client.PrivateCrossConnectApi.PccsFindById(ctx, d.Id()).Execute()
+	pcc, apiResponse, err := client.PrivateCrossConnectsApi.PccsFindById(ctx, d.Id()).Execute()
 
 	if err != nil {
 		if _, ok := err.(ionoscloud.GenericOpenAPIError); ok {
@@ -229,7 +229,7 @@ func resourceBackupUnitImport(d *schema.ResourceData, meta interface{}) ([]*sche
 		defer cancel()
 	}
 
-	backupUnit, apiResponse, err := client.BackupUnitApi.BackupunitsFindById(ctx, d.Id()).Execute()
+	backupUnit, apiResponse, err := client.BackupUnitsApi.BackupunitsFindById(ctx, d.Id()).Execute()
 
 	if err != nil {
 		if _, ok := err.(ionoscloud.GenericOpenAPIError); ok {
@@ -248,13 +248,28 @@ func resourceBackupUnitImport(d *schema.ResourceData, meta interface{}) ([]*sche
 	d.Set("name", *backupUnit.Properties.Name)
 	d.Set("email", *backupUnit.Properties.Email)
 
-	contractResources, apiResponse, cErr := client.ContractApi.ContractsGet(ctx).Execute()
+	contractResources, apiResponse, cErr := client.ContractResourcesApi.ContractsGet(ctx).Execute()
 
 	if cErr != nil {
 		return nil, fmt.Errorf("error while fetching contract resources for backup unit %q: %s", d.Id(), cErr)
 	}
 
-	d.Set("login", fmt.Sprintf("%s-%d", *backupUnit.Properties.Name, *contractResources.Properties.ContractNumber))
+	if contractResources.Items == nil || len(*contractResources.Items) == 0 {
+		return nil, fmt.Errorf("no contracts found for user")
+	}
+
+	props := (*contractResources.Items)[0].Properties
+	if props == nil {
+		return nil, fmt.Errorf("could not get first contract properties")
+	}
+
+	if props.ContractNumber == nil {
+		return nil, fmt.Errorf("contract number not set")
+	}
+
+	if err := d.Set("login", fmt.Sprintf("%s-%d", *backupUnit.Properties.Name, *props.ContractNumber)); err != nil {
+		return nil, err
+	}
 
 	return []*schema.ResourceData{d}, nil
 }
@@ -268,7 +283,7 @@ func resourceS3KeyImport(d *schema.ResourceData, meta interface{}) ([]*schema.Re
 
 	client := meta.(*ionoscloud.APIClient)
 
-	s3Key, apiResponse, err := client.UserManagementApi.UmUsersS3keysFindByKeyId(context.TODO(), parts[0], parts[1]).Execute()
+	s3Key, apiResponse, err := client.UserS3KeysApi.UmUsersS3keysFindByKeyId(context.TODO(), parts[0], parts[1]).Execute()
 
 	if err != nil {
 		if apiResponse != nil && apiResponse.Response.StatusCode == 404 {
@@ -347,4 +362,13 @@ func diffSlice(slice1 []string, slice2 []string) []string {
 	}
 
 	return diff
+}
+
+func responseBody(resp *ionoscloud.APIResponse) string {
+	ret := "<nil>"
+	if resp != nil {
+		ret = string(resp.Payload)
+	}
+
+	return ret
 }

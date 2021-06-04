@@ -3,12 +3,10 @@ package ionoscloud
 import (
 	"context"
 	"fmt"
+	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/helper/validation"
 	ionoscloud "github.com/ionos-cloud/sdk-go/v6"
 	"log"
-	"time"
-
-	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
 )
 
 func resourceGroup() *schema.Resource {
@@ -403,19 +401,9 @@ func resourceGroupDelete(d *schema.ResourceData, meta interface{}) error {
 		defer cancel()
 	}
 
-	_, apiResponse, err := client.UserManagementApi.UmGroupsDelete(ctx, d.Id()).Execute()
+	apiResponse, err := client.UserManagementApi.UmGroupsDelete(ctx, d.Id()).Execute()
 	if err != nil {
-		//try again in 20 seconds
-		time.Sleep(20 * time.Second)
-		_, apiResponse, err = client.UserManagementApi.UmGroupsDelete(ctx, d.Id()).Execute()
-
-		if err != nil {
-			if _, ok := err.(ionoscloud.GenericOpenAPIError); ok {
-				if apiResponse == nil || apiResponse.Response.StatusCode != 404 {
-					return fmt.Errorf("an error occured while deleting a group %s %s", d.Id(), err)
-				}
-			}
-		}
+		return err
 	}
 
 	// Wait, catching any errors

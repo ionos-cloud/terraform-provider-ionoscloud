@@ -4,7 +4,6 @@ import (
 	"context"
 	"fmt"
 	"github.com/hashicorp/terraform-plugin-sdk/helper/validation"
-	"log"
 	"time"
 
 	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
@@ -56,8 +55,6 @@ func resourceShareCreate(d *schema.ResourceData, meta interface{}) error {
 	rsp, apiResponse, err := client.UserManagementApi.UmGroupsSharesPost(context.TODO(),
 		d.Get("group_id").(string), d.Get("resource_id").(string)).Resource(request).Execute()
 
-	log.Printf("[DEBUG] SHARE ID: %s", *rsp.Id)
-
 	if err != nil {
 		return fmt.Errorf("an error occured while creating a share: %s", err)
 	}
@@ -89,8 +86,12 @@ func resourceShareRead(d *schema.ResourceData, meta interface{}) error {
 		return fmt.Errorf("an error occured while fetching a Share ID %s %s", d.Id(), err)
 	}
 
-	d.Set("edit_privilege", *rsp.Properties.EditPrivilege)
-	d.Set("share_privilege", *rsp.Properties.SharePrivilege)
+	if err := d.Set("edit_privilege", *rsp.Properties.EditPrivilege); err != nil {
+		return err
+	}
+	if err := d.Set("share_privilege", *rsp.Properties.SharePrivilege); err != nil {
+		return err
+	}
 	return nil
 }
 
@@ -138,14 +139,15 @@ func resourceShareDelete(d *schema.ResourceData, meta interface{}) error {
 	groupId := d.Get("group_id").(string)
 	resourceId := d.Get("resource_id").(string)
 
-	_, apiResponse, err := client.UserManagementApi.UmGroupsSharesDelete(ctx, groupId, resourceId).Execute()
+	apiResponse, err := client.UserManagementApi.UmGroupsSharesDelete(ctx, groupId, resourceId).Execute()
 	if err != nil {
 		if apiResponse != nil && apiResponse.Response.StatusCode == 404 {
 			return err
 		}
 		//try again in 20 seconds
+		// todo: get rid of this retry
 		time.Sleep(20 * time.Second)
-		_, apiResponse, err := client.UserManagementApi.UmGroupsSharesDelete(ctx, groupId, resourceId).Execute()
+		apiResponse, err := client.UserManagementApi.UmGroupsSharesDelete(ctx, groupId, resourceId).Execute()
 		if err != nil {
 			if _, ok := err.(ionoscloud.GenericOpenAPIError); ok {
 				if apiResponse == nil || apiResponse.Response.StatusCode != 404 {
@@ -156,7 +158,7 @@ func resourceShareDelete(d *schema.ResourceData, meta interface{}) error {
 	}
 
 	// Wait, catching any errors
-	if apiResponse.Header.Get("Location") != "" {
+	if apiResponse != nil && apiResponse.Header.Get("Location") != "" {
 		_, errState := getStateChangeConf(meta, d, apiResponse.Header.Get("Location"), schema.TimeoutDelete).WaitForState()
 		if errState != nil {
 			return errState

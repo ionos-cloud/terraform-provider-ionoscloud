@@ -18,7 +18,7 @@ func TestAccLan_ImportBasic(t *testing.T) {
 		CheckDestroy: testAccCheckLanDestroyCheck,
 		Steps: []resource.TestStep{
 			{
-				Config: fmt.Sprintf(testAccCheckLanConfig_basic, lanName),
+				Config: fmt.Sprintf(testAccCheckLanConfigBasic, lanName),
 			},
 
 			{

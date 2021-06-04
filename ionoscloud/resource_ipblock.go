@@ -146,7 +146,7 @@ func resourceIPBlockDelete(d *schema.ResourceData, meta interface{}) error {
 		defer cancel()
 	}
 
-	_, apiResponse, err := client.IPBlocksApi.IpblocksDelete(ctx, d.Id()).Execute()
+	apiResponse, err := client.IPBlocksApi.IpblocksDelete(ctx, d.Id()).Execute()
 	if err != nil {
 		return fmt.Errorf("an error occured while releasing an ipblock ID: %s %s", d.Id(), err)
 	}

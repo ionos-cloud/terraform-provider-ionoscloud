@@ -22,7 +22,7 @@ func TestAccIPBlock_Basic(t *testing.T) {
 		CheckDestroy: testAccCheckIPBlockDestroyCheck,
 		Steps: []resource.TestStep{
 			{
-				Config: fmt.Sprintf(testAccCheckIPBlockConfig_basic, location),
+				Config: fmt.Sprintf(testAccCheckIPBlockConfigBasic, location),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckIPBlockExists("ionoscloud_ipblock.webserver_ip", &ipblock),
 					testAccCheckIPBlockAttributes("ionoscloud_ipblock.webserver_ip", location),
@@ -30,7 +30,7 @@ func TestAccIPBlock_Basic(t *testing.T) {
 				),
 			},
 			{
-				Config: fmt.Sprintf(testAccCheckIPBlockConfig_update, location),
+				Config: fmt.Sprintf(testAccCheckIPBlockConfigUpdate, location),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckIPBlockExists("ionoscloud_ipblock.webserver_ip", &ipblock),
 					testAccCheckIPBlockAttributes("ionoscloud_ipblock.webserver_ip", location),
@@ -44,7 +44,10 @@ func TestAccIPBlock_Basic(t *testing.T) {
 func testAccCheckIPBlockDestroyCheck(s *terraform.State) error {
 	client := testAccProvider.Meta().(*ionoscloud.APIClient)
 
-	ctx, _ := context.WithTimeout(context.Background(), *resourceDefaultTimeouts.Delete)
+	ctx, cancel := context.WithTimeout(context.Background(), *resourceDefaultTimeouts.Delete)
+	if cancel != nil {
+		defer cancel()
+	}
 	for _, rs := range s.RootModule().Resources {
 		if rs.Type != "ionoscloud_ipblock" {
 			continue
@@ -91,14 +94,17 @@ func testAccCheckIPBlockExists(n string, ipblock *ionoscloud.IpBlock) resource.T
 			return fmt.Errorf("no Record ID is set")
 		}
 
-		ctx, _ := context.WithTimeout(context.Background(), *resourceDefaultTimeouts.Default)
+		ctx, cancel := context.WithTimeout(context.Background(), *resourceDefaultTimeouts.Default)
+		if cancel != nil {
+			defer cancel()
+		}
 		foundIP, _, err := client.IPBlocksApi.IpblocksFindById(ctx, rs.Primary.ID).Execute()
 
 		if err != nil {
 			return fmt.Errorf("error occured while fetching IP Block: %s", rs.Primary.ID)
 		}
 		if *foundIP.Id != rs.Primary.ID {
-			return fmt.Errorf("Record not found")
+			return fmt.Errorf("record not found")
 		}
 
 		ipblock = &foundIP
@@ -107,14 +113,14 @@ func testAccCheckIPBlockExists(n string, ipblock *ionoscloud.IpBlock) resource.T
 	}
 }
 
-const testAccCheckIPBlockConfig_basic = `
+const testAccCheckIPBlockConfigBasic = `
 resource "ionoscloud_ipblock" "webserver_ip" {
   location = "%s"
   size = 1
   name = "ipblock TF test"
 }`
 
-const testAccCheckIPBlockConfig_update = `
+const testAccCheckIPBlockConfigUpdate = `
 resource "ionoscloud_ipblock" "webserver_ip" {
   location = "%s"
   size = 1

@@ -45,7 +45,11 @@ func TestAccPrivateCrossConnect_Basic(t *testing.T) {
 func testAccCheckprivateCrossConnectDestroyCheck(s *terraform.State) error {
 	client := testAccProvider.Meta().(*ionoscloud.APIClient)
 
-	ctx, _ := context.WithTimeout(context.Background(), *resourceDefaultTimeouts.Delete)
+	ctx, cancel := context.WithTimeout(context.Background(), *resourceDefaultTimeouts.Delete)
+	if cancel != nil {
+		defer cancel()
+	}
+
 	for _, rs := range s.RootModule().Resources {
 		if rs.Type != "ionoscloud_private_crossconnect" {
 			continue
@@ -70,7 +74,10 @@ func testAccCheckprivateCrossConnectExists(n string, privateCrossConnect *ionosc
 		client := testAccProvider.Meta().(*ionoscloud.APIClient)
 
 		rs, ok := s.RootModule().Resources[n]
-		ctx, _ := context.WithTimeout(context.Background(), *resourceDefaultTimeouts.Default)
+		ctx, cancel := context.WithTimeout(context.Background(), *resourceDefaultTimeouts.Default)
+		if cancel != nil {
+			defer cancel()
+		}
 
 		if !ok {
 			return fmt.Errorf("not found: %s", n)
@@ -86,7 +93,7 @@ func testAccCheckprivateCrossConnectExists(n string, privateCrossConnect *ionosc
 			return fmt.Errorf("error occured while fetching private cross-connect: %s", rs.Primary.ID)
 		}
 		if *foundPrivateCrossConnect.Id != rs.Primary.ID {
-			return fmt.Errorf("Record not found")
+			return fmt.Errorf("record not found")
 		}
 		privateCrossConnect = &foundPrivateCrossConnect
 

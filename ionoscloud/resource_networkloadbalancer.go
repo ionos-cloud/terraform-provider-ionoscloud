@@ -72,21 +72,21 @@ func resourceNetworkLoadBalancerCreate(d *schema.ResourceData, meta interface{})
 		name := name.(string)
 		networkLoadBalancer.Properties.Name = &name
 	} else {
-		return fmt.Errorf("Name must be provided for network loadbalancer")
+		return fmt.Errorf("name must be provided for network loadbalancer")
 	}
 
 	if listenerLan, listenerLanOk := d.GetOk("listener_lan"); listenerLanOk {
 		listenerLan := int32(listenerLan.(int))
 		networkLoadBalancer.Properties.ListenerLan = &listenerLan
 	} else {
-		return fmt.Errorf("Listener lan must be provided for network loadbalancer")
+		return fmt.Errorf("listener lan must be provided for network loadbalancer")
 	}
 
 	if targetLan, targetLanOk := d.GetOk("target_lan"); targetLanOk {
 		targetLan := int32(targetLan.(int))
 		networkLoadBalancer.Properties.TargetLan = &targetLan
 	} else {
-		return fmt.Errorf("Target lan must be provided for network loadbalancer")
+		return fmt.Errorf("target lan must be provided for network loadbalancer")
 	}
 
 	if ipsVal, ipsOk := d.GetOk("ips"); ipsOk {
@@ -263,7 +263,7 @@ func resourceNetworkLoadBalancerUpdate(d *schema.ResourceData, meta interface{})
 	_, apiResponse, err := client.NetworkLoadBalancersApi.DatacentersNetworkloadbalancersPatch(ctx, dcId, d.Id()).NetworkLoadBalancerProperties(*request.Properties).Execute()
 
 	if err != nil {
-		return fmt.Errorf("an error occured while updating a network loadbalancer ID %s %s \n ApiError: %s", d.Id(), err, string(apiResponse.Payload))
+		return fmt.Errorf("an error occured while updating a network loadbalancer ID %s %s \n ApiError: %s", d.Id(), err, responseBody(apiResponse))
 	}
 
 	_, errState := getStateChangeConf(meta, d, apiResponse.Header.Get("Location"), schema.TimeoutUpdate).WaitForState()
@@ -285,7 +285,7 @@ func resourceNetworkLoadBalancerDelete(d *schema.ResourceData, meta interface{})
 		defer cancel()
 	}
 
-	_, apiResponse, err := client.NetworkLoadBalancersApi.DatacentersNetworkloadbalancersDelete(ctx, dcId, d.Id()).Execute()
+	apiResponse, err := client.NetworkLoadBalancersApi.DatacentersNetworkloadbalancersDelete(ctx, dcId, d.Id()).Execute()
 
 	if err != nil {
 		return fmt.Errorf("an error occured while deleting a network loadbalancer %s %s", d.Id(), err)
