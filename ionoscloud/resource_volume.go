@@ -193,10 +193,10 @@ func resourceVolumeCreate(d *schema.ResourceData, meta interface{}) error {
 
 	volume := ionoscloud.Volume{
 		Properties: &ionoscloud.VolumeProperties{
-			Name:          &volumeName,
-			Size:          &volumeSize,
-			Type:          &volumeType,
-			Bus:           &volumeBus,
+			Name: &volumeName,
+			Size: &volumeSize,
+			Type: &volumeType,
+			Bus:  &volumeBus,
 		},
 	}
 
@@ -355,7 +355,6 @@ func resourceVolumeRead(d *schema.ResourceData, meta interface{}) error {
 		}
 		return fmt.Errorf("error occured while fetching a volume ID %s %s", d.Id(), err)
 	}
-
 
 	if apiResponse != nil && apiResponse.Response.StatusCode > 299 {
 		return fmt.Errorf("an error occured while fetching a volume ID %s %s", d.Id(), string(apiResponse.Payload))

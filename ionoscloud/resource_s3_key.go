@@ -125,7 +125,6 @@ func resourceS3KeyUpdate(d *schema.ResourceData, meta interface{}) error {
 		return fmt.Errorf("error while updating S3 key %s: %s", d.Id(), err)
 	}
 
-
 	for {
 		log.Printf("[INFO] Waiting for S3 Key %s to be ready...", d.Id())
 

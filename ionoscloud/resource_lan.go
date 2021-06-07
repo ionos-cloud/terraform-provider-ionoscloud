@@ -225,7 +225,6 @@ func resourceLanUpdate(d *schema.ResourceData, meta interface{}) error {
 		}
 	}
 
-
 	return resourceLanRead(d, meta)
 }
 

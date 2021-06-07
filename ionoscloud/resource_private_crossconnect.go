@@ -275,7 +275,6 @@ func resourcePrivateCrossConnectUpdate(d *schema.ResourceData, meta interface{})
 			return fmt.Errorf("pcc update timed out! WARNING: your pcc will still probably be updated after some time but the terraform state wont reflect that; check your Ionos Cloud account to see the updates")
 		}
 
-
 	}
 
 	return resourcePrivateCrossConnectRead(d, meta)

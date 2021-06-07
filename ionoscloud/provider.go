@@ -170,8 +170,8 @@ func getStateChangeConf(meta interface{}, d *schema.ResourceData, location strin
 		Refresh:        resourceStateRefreshFunc(meta, location),
 		Timeout:        d.Timeout(timeoutType),
 		MinTimeout:     5 * time.Second,
-		Delay:          0, // Don't delay the start
-		NotFoundChecks: 600,              //Setting high number, to support long timeouts
+		Delay:          0,   // Don't delay the start
+		NotFoundChecks: 600, //Setting high number, to support long timeouts
 	}
 
 	return stateConf

@@ -126,7 +126,7 @@ func testAccCheckLanIPFailoverDestroyCheck(s *terraform.State) error {
 			_, err := client.DataCentersApi.DatacentersDelete(ctx, dcId).Execute()
 			if err != nil {
 				return fmt.Errorf("failed to remove IP failover group with nicId %s still exists %s %s, removing datacenter",
-									nicUuid, rs.Primary.ID, err)
+					nicUuid, rs.Primary.ID, err)
 			}
 		}
 	}

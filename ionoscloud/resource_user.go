@@ -221,10 +221,10 @@ func resourceUserDelete(d *schema.ResourceData, meta interface{}) error {
 		time.Sleep(20 * time.Second)
 		apiResponse, err := client.UserManagementApi.UmUsersDelete(ctx, d.Id()).Execute()
 		if err != nil { */
-			if apiResponse == nil || apiResponse.Response.StatusCode != 404 {
-				return fmt.Errorf("an error occured while deleting a user %s %s, %s",
-					d.Id(), err, responseBody(apiResponse))
-			}
+		if apiResponse == nil || apiResponse.Response.StatusCode != 404 {
+			return fmt.Errorf("an error occured while deleting a user %s %s, %s",
+				d.Id(), err, responseBody(apiResponse))
+		}
 		// }
 	}
 

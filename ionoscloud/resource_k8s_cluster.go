@@ -176,7 +176,6 @@ func resourcek8sClusterCreate(d *schema.ResourceData, meta interface{}) error {
 
 	}
 
-
 	return resourcek8sClusterRead(d, meta)
 }
 

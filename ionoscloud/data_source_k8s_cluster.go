@@ -258,8 +258,8 @@ func setK8sClusterData(d *schema.ResourceData, cluster *ionoscloud.KubernetesClu
 		}
 
 		if err := d.Set("kube_config", kubeConfig); err != nil {
-				return err
-			}
+			return err
+		}
 
 		/* getting node pools */
 		clusterNodePools, _, err := client.KubernetesApi.K8sNodepoolsGet(ctx, *cluster.Id).Execute()

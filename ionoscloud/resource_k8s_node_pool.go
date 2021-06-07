@@ -347,9 +347,9 @@ func resourcek8sNodePoolCreate(d *schema.ResourceData, meta interface{}) error {
 	}
 
 	createdNodepool, apiResponse, err := client.KubernetesApi.
-											K8sNodepoolsPost(ctx, d.Get("k8s_cluster_id").(string)).
-											KubernetesNodePool(k8sNodepool).
-											Execute()
+		K8sNodepoolsPost(ctx, d.Get("k8s_cluster_id").(string)).
+		KubernetesNodePool(k8sNodepool).
+		Execute()
 
 	if err != nil {
 		d.SetId("")
@@ -379,9 +379,9 @@ func resourcek8sNodePoolCreate(d *schema.ResourceData, meta interface{}) error {
 		}
 
 		select {
-		case <- time.After(10 * time.Second):
+		case <-time.After(10 * time.Second):
 			log.Printf("[INFO] trying again ...")
-		case <- ctx.Done():
+		case <-ctx.Done():
 			log.Printf("[INFO] timed out")
 			return fmt.Errorf("k8s creation timed out")
 		}
