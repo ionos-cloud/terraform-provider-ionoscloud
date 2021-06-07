@@ -3,11 +3,9 @@ package ionoscloud
 import (
 	"context"
 	"fmt"
+	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/helper/validation"
 	ionoscloud "github.com/ionos-cloud/sdk-go/v6"
-	"time"
-
-	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
 )
 
 func resourceLanIPFailover() *schema.Resource {
@@ -184,6 +182,7 @@ func resourceLanIPFailoverDelete(d *schema.ResourceData, meta interface{}) error
 
 	_, apiResponse, err := client.LansApi.DatacentersLansPatch(ctx, dcid, lanid).Lan(*properties).Execute()
 	if err != nil {
+		/*
 		//try again in 90 seconds
 		time.Sleep(90 * time.Second)
 		_, apiResponse, err = client.LansApi.DatacentersLansPatch(ctx, dcid, lanid).Lan(*properties).Execute()
@@ -191,6 +190,8 @@ func resourceLanIPFailoverDelete(d *schema.ResourceData, meta interface{}) error
 		if err != nil && (apiResponse == nil || apiResponse.Response.StatusCode != 404) {
 			return fmt.Errorf("an error occured while removing a lans ipfailover groups dcId %s ID %s %s", d.Get("datacenter_id").(string), d.Id(), err)
 		}
+		 */
+		return fmt.Errorf("an error occured while removing a lans ipfailover groups dcId %s ID %s %s", d.Get("datacenter_id").(string), d.Id(), err)
 	}
 
 	// Wait, catching any errors

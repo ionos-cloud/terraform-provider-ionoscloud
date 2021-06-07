@@ -154,7 +154,6 @@ func resourcek8sClusterCreate(d *schema.ResourceData, meta interface{}) error {
 
 	for {
 		log.Printf("[INFO] Waiting for cluster %s to be ready...", d.Id())
-		time.Sleep(5 * time.Second)
 
 		clusterReady, rsErr := k8sClusterReady(client, d)
 
@@ -166,7 +165,17 @@ func resourcek8sClusterCreate(d *schema.ResourceData, meta interface{}) error {
 			log.Printf("[INFO] k8s cluster ready: %s", d.Id())
 			break
 		}
+
+		select {
+		case <-time.After(SleepInterval):
+			log.Printf("[INFO] trying again ...")
+		case <-ctx.Done():
+			log.Printf("[INFO] create timed out")
+			return fmt.Errorf("k8s cluster creation timed out! WARNING: your k8s cluster will still probably be created after some time but the terraform state wont reflect that; check your Ionos Cloud account for updates")
+		}
+
 	}
+
 
 	return resourcek8sClusterRead(d, meta)
 }
@@ -341,7 +350,6 @@ func resourcek8sClusterUpdate(d *schema.ResourceData, meta interface{}) error {
 
 	for {
 		log.Printf("[INFO] Waiting for cluster %s to be ready...", d.Id())
-		time.Sleep(5 * time.Second)
 
 		clusterReady, rsErr := k8sClusterReady(client, d)
 
@@ -353,6 +361,14 @@ func resourcek8sClusterUpdate(d *schema.ResourceData, meta interface{}) error {
 			log.Printf("[INFO] k8s cluster ready: %s", d.Id())
 			break
 		}
+
+		select {
+		case <-time.After(SleepInterval):
+			log.Printf("[INFO] trying again ...")
+		case <-ctx.Done():
+			return fmt.Errorf("k8s cluster update timed out! WARNING: your k8s cluster will still probably be created after some time but the terraform state won't reflect that; check your Ionos Cloud account for updates")
+		}
+
 	}
 
 	return resourcek8sClusterRead(d, meta)
@@ -383,7 +399,6 @@ func resourcek8sClusterDelete(d *schema.ResourceData, meta interface{}) error {
 
 	for {
 		log.Printf("[INFO] Waiting for cluster %s to be deleted...", d.Id())
-		time.Sleep(5 * time.Second)
 
 		clusterdDeleted, dsErr := k8sClusterDeleted(client, d)
 
@@ -394,6 +409,13 @@ func resourcek8sClusterDelete(d *schema.ResourceData, meta interface{}) error {
 		if clusterdDeleted {
 			log.Printf("[INFO] Successfully deleted k8s cluster: %s", d.Id())
 			break
+		}
+
+		select {
+		case <-time.After(SleepInterval):
+			log.Printf("[INFO] trying again ...")
+		case <-ctx.Done():
+			return fmt.Errorf("k8s cluster deletion timed out! WARNING: your k8s cluster will still probably be deleted after some time but the terraform state won't reflect that; check your Ionos Cloud account for updates")
 		}
 	}
 

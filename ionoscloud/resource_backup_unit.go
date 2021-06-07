@@ -83,7 +83,6 @@ func resourceBackupUnitCreate(d *schema.ResourceData, meta interface{}) error {
 
 	for {
 		log.Printf("[INFO] Waiting for backup unit %s to be ready...", d.Id())
-		time.Sleep(5 * time.Second)
 
 		backupUnitReady, rsErr := backupUnitReady(client, d, ctx)
 
@@ -94,6 +93,13 @@ func resourceBackupUnitCreate(d *schema.ResourceData, meta interface{}) error {
 		if backupUnitReady {
 			log.Printf("[INFO] backup unit ready: %s", d.Id())
 			break
+		}
+
+		select {
+		case <-time.After(SleepInterval):
+			log.Printf("[INFO] trying again ...")
+		case <-ctx.Done():
+			return fmt.Errorf("backup unit creation timed out! WARNING: your backup unit will still probably be created after some time but the terraform state won't reflect that; check your Ionos Cloud account for updates")
 		}
 	}
 
@@ -202,7 +208,6 @@ func resourceBackupUnitUpdate(d *schema.ResourceData, meta interface{}) error {
 
 	for {
 		log.Printf("[INFO] Waiting for backup unit %s to be ready...", d.Id())
-		time.Sleep(5 * time.Second)
 
 		backupUnitReady, rsErr := backupUnitReady(client, d, ctx)
 
@@ -213,6 +218,13 @@ func resourceBackupUnitUpdate(d *schema.ResourceData, meta interface{}) error {
 		if backupUnitReady {
 			log.Printf("[INFO] backup unit ready: %s", d.Id())
 			break
+		}
+
+		select {
+		case <-time.After(SleepInterval):
+			log.Printf("[INFO] trying again ...")
+		case <-ctx.Done():
+			return fmt.Errorf("backup unit update timed out! WARNING: your backup unit will still probably be updated after some time but the terraform state won't reflect that; check your Ionos Cloud account for updates")
 		}
 	}
 
@@ -239,7 +251,6 @@ func resourceBackupUnitDelete(d *schema.ResourceData, meta interface{}) error {
 
 	for {
 		log.Printf("[INFO] Waiting for backupUnit %s to be deleted...", d.Id())
-		time.Sleep(5 * time.Second)
 
 		backupUnitDeleted, dsErr := backupUnitDeleted(client, d, ctx)
 
@@ -250,6 +261,13 @@ func resourceBackupUnitDelete(d *schema.ResourceData, meta interface{}) error {
 		if backupUnitDeleted {
 			log.Printf("[INFO] Successfully deleted backup unit: %s", d.Id())
 			break
+		}
+
+		select {
+		case <-time.After(SleepInterval):
+			log.Printf("[INFO] trying again ...")
+		case <-ctx.Done():
+			return fmt.Errorf("backup unit deletion timed out! WARNING: your backup unit will still probably be deleted after some time but the terraform state won't reflect that; check your Ionos Cloud account for updates")
 		}
 	}
 
