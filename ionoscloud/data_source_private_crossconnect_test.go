@@ -40,9 +40,12 @@ func TestAccDataSourcePcc_matchName(t *testing.T) {
 			{
 				Config: testAccDataSourcePccMatchName,
 				Check: resource.ComposeTestCheckFunc(
-					resource.TestCheckResourceAttr("data.ionoscloud_private_crossconnect.test_pcc", "name", "test_ds_pcc"),
-					resource.TestCheckResourceAttr("data.ionoscloud_private_crossconnect.test_pcc", "description", "test_ds_pcc description"),
+					resource.TestCheckResourceAttr("data.ionoscloud_private_crossconnect.test_foo_pcc", "name", "test_ds_pcc"),
+					resource.TestCheckResourceAttr("data.ionoscloud_private_crossconnect.test_foo_pcc", "description", "test_ds_pcc description"),
 				),
+			},
+			{
+				Config: `/* this config intentionally left blank */`,
 			},
 		},
 	})
@@ -71,7 +74,7 @@ resource "ionoscloud_private_crossconnect" "test_ds_pcc" {
   name              = "test_ds_pcc"
   description		= "test_ds_pcc description"
 }
-data "ionoscloud_private_crossconnect" "test_pcc" {
+data "ionoscloud_private_crossconnect" "test_foo_pcc" {
   name			= "test_ds_pcc"
 }
 `

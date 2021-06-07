@@ -49,7 +49,7 @@ func TestAccDataSourceNatGatewayRule_matchName(t *testing.T) {
 const testAccDataSourceNatGatewayRuleCreateResources = `
 resource "ionoscloud_datacenter" "natgateway_datacenter" {
   name              = "test_natgateway"
-  location          = "gb/lhr"
+  location          = "de/fra"
   description       = "datacenter for hosting "
 }
 resource "ionoscloud_lan" "natgateway_lan" {
@@ -86,7 +86,7 @@ resource "ionoscloud_natgateway_rule" "natgateway_rule" {
 const testAccDataSourceNatGatewayRuleMatchId = `
 resource "ionoscloud_datacenter" "natgateway_datacenter" {
   name              = "test_natgateway"
-  location          = "gb/lhr"
+  location          = "de/fra"
   description       = "datacenter for hosting "
 }
 resource "ionoscloud_lan" "natgateway_lan" {
@@ -129,7 +129,7 @@ data "ionoscloud_natgateway_rule" "test_natgateway_rule" {
 const testAccDataSourceNatGatewayRuleMatchName = `
 resource "ionoscloud_datacenter" "natgateway_datacenter" {
   name              = "test_natgateway"
-  location          = "gb/lhr"
+  location          = "de/fra"
   description       = "datacenter for hosting "
 }
 resource "ionoscloud_lan" "natgateway_lan" {

@@ -139,7 +139,7 @@ func resourceNatGatewayCreate(d *schema.ResourceData, meta interface{}) error {
 
 	if err != nil {
 		d.SetId("")
-		return fmt.Errorf("error creating natGateway: %s", err)
+		return fmt.Errorf("error creating natGateway: %s, %s", err, responseBody(apiResponse))
 	}
 
 	d.SetId(*natGatewayResp.Id)
