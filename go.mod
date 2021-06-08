@@ -14,7 +14,7 @@ require (
 	github.com/hashicorp/terraform-config-inspect v0.0.0-20200526195750-d43f12b82861 // indirect
 	github.com/hashicorp/terraform-plugin-sdk v1.16.1
 	github.com/hashicorp/yamux v0.0.0-20200609203250-aecfd211c9ce // indirect
-	github.com/ionos-cloud/sdk-go/v5 v5.1.2 // indirect
+	github.com/ionos-cloud/sdk-go/v5 v5.1.2
 	github.com/jhump/protoreflect v1.6.1 // indirect
 	github.com/kr/pretty v0.2.0 // indirect
 	github.com/mattn/go-colorable v0.1.7 // indirect
