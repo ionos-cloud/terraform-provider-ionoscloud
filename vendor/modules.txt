@@ -278,7 +278,7 @@ github.com/hashicorp/terraform-svchost/disco
 github.com/hashicorp/yamux
 # github.com/imdario/mergo v0.3.9
 github.com/imdario/mergo
-# github.com/ionos-cloud/sdk-go/v5 v5.1.0 => /Users/florin/work/projects/sdk/tmp/go
+# github.com/ionos-cloud/sdk-go/v5 v5.1.0
 ## explicit
 github.com/ionos-cloud/sdk-go/v5
 # github.com/jbenet/go-context v0.0.0-20150711004518-d14ea06fba99
@@ -578,4 +578,3 @@ google.golang.org/protobuf/types/pluginpb
 gopkg.in/warnings.v0
 # gopkg.in/yaml.v3 v3.0.0-20200615113413-eeeca48fe776
 ## explicit
-# github.com/ionos-cloud/sdk-go/v5 => /Users/florin/work/projects/sdk/tmp/go

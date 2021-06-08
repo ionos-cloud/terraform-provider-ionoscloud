@@ -42,21 +42,25 @@ func TestAccDataCenter_Basic(t *testing.T) {
 func testAccCheckDatacenterDestroyCheck(s *terraform.State) error {
 	client := testAccProvider.Meta().(*ionoscloud.APIClient)
 
+	ctx, cancel := context.WithTimeout(context.Background(), *resourceDefaultTimeouts.Default)
+
+	if cancel != nil {
+		defer cancel()
+	}
+
 	for _, rs := range s.RootModule().Resources {
 		if rs.Type != "ionoscloud_datacenter" {
 			continue
 		}
 
-		ctx, cancel := context.WithTimeout(context.Background(), *resourceDefaultTimeouts.Default)
-
-		if cancel != nil {
-			defer cancel()
-		}
-
 		_, apiResponse, err := client.DataCenterApi.DatacentersFindById(ctx, rs.Primary.ID).Execute()
 
-		if err != nil && (apiResponse == nil || apiResponse.StatusCode != 404) {
-			return fmt.Errorf("Unable to fetching DataCenter %s %s", rs.Primary.ID, err)
+		if err != nil {
+			if apiResponse == nil || apiResponse.StatusCode != 404 {
+				return fmt.Errorf("an error occurred while checking the destruction of datacenter %s: %s", rs.Primary.ID, err)
+			}
+		} else {
+			return fmt.Errorf("datacenter %s still exists", rs.Primary.ID)
 		}
 	}
 
