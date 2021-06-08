@@ -188,7 +188,7 @@ func resourceStateRefreshFunc(meta interface{}, path string) resource.StateRefre
 
 		fmt.Printf("[INFO] Checking PATH %s\n", path)
 		if path == "" {
-			return nil, "", fmt.Errorf("Can not check a state when path is empty")
+			return nil, "", fmt.Errorf("can not check a state when path is empty")
 		}
 
 		request, _, err := client.GetRequestStatus(context.Background(), path)

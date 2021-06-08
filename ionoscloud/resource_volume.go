@@ -321,7 +321,7 @@ func resourceVolumeCreate(d *schema.ResourceData, meta interface{}) error {
 	volume, apiResponse, err := client.VolumeApi.DatacentersVolumesPost(ctx, dcId).Volume(volume).Execute()
 
 	if err != nil {
-		return fmt.Errorf("an error occured while creating a volume: %s, apiError : %s", err, string(apiResponse.Payload))
+		return fmt.Errorf("an error occured while creating a volume: %s", err)
 	}
 
 	d.SetId(*volume.Id)
@@ -380,18 +380,13 @@ func resourceVolumeRead(d *schema.ResourceData, meta interface{}) error {
 	volume, apiResponse, err := client.VolumeApi.DatacentersVolumesFindById(ctx, dcId, volumeID).Execute()
 
 	if err != nil {
-		if _, ok := err.(ionoscloud.GenericOpenAPIError); ok {
-			if apiResponse != nil && apiResponse.Response.StatusCode == 404 {
-				d.SetId("")
-				return nil
-			}
+
+		if apiResponse != nil && apiResponse.Response.StatusCode == 404 {
+			d.SetId("")
+			return nil
 		}
-		return fmt.Errorf("Error occured while fetching a volume ID %s %s", d.Id(), err)
-	}
 
-	if apiResponse != nil && apiResponse.Response.StatusCode > 299 {
-		return fmt.Errorf("An error occured while fetching a volume ID %s %s", d.Id(), string(apiResponse.Payload))
-
+		return fmt.Errorf("error occured while fetching volume with ID %s: %s", d.Id(), err)
 	}
 
 	_, _, err = client.ServerApi.DatacentersServersVolumesFindById(ctx, dcId, serverID, volumeID).Execute()
@@ -586,18 +581,13 @@ func resourceVolumeUpdate(d *schema.ResourceData, meta interface{}) error {
 	volume, apiResponse, err := client.VolumeApi.DatacentersVolumesPatch(ctx, dcId, d.Id()).Volume(properties).Execute()
 
 	if err != nil {
-		return fmt.Errorf("An error occured while updating a volume ID %s %s", d.Id(), err)
+		return fmt.Errorf("an error occured while updating volume with ID %s: %s", d.Id(), err)
 	}
 
 	// Wait, catching any errors
 	_, errState := getStateChangeConf(meta, d, apiResponse.Header.Get("Location"), schema.TimeoutUpdate).WaitForState()
 	if errState != nil {
 		return errState
-	}
-
-	if apiResponse != nil && apiResponse.Response.StatusCode > 299 {
-		return fmt.Errorf("An error occured while updating a volume ID %s %s", d.Id(), string(apiResponse.Payload))
-
 	}
 
 	if d.HasChange("server_id") {

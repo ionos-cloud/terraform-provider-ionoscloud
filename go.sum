@@ -224,8 +224,6 @@ github.com/hashicorp/yamux v0.0.0-20200609203250-aecfd211c9ce/go.mod h1:+NfK9FKe
 github.com/ianlancetaylor/demangle v0.0.0-20181102032728-5e5cf60278f6/go.mod h1:aSSvb/t6k1mPoxDqO4vJh6VOCGPwU4O0C2/Eqndh1Sc=
 github.com/imdario/mergo v0.3.9 h1:UauaLniWCFHWd+Jp9oCEkTBj8VO/9DKg3PV3VCNMDIg=
 github.com/imdario/mergo v0.3.9/go.mod h1:2EnlNZ0deacrJVfApfmtdGgDfMuh/nq6Ok1EcJh5FfA=
-github.com/ionos-cloud/sdk-go/v5 v5.1.0 h1:q6KWvirQ2td8f+w3sltWzQ7w1Sl9TbiSOcFRdarfSPo=
-github.com/ionos-cloud/sdk-go/v5 v5.1.0/go.mod h1:dU3BVZgiBDAKyo41hFk7D5KWHfqyp4YL4rePIAi2JyM=
 github.com/jbenet/go-context v0.0.0-20150711004518-d14ea06fba99 h1:BQSFePA1RWJOlocH6Fxy8MmwDt+yVQYULKfN0RoTN8A=
 github.com/jbenet/go-context v0.0.0-20150711004518-d14ea06fba99/go.mod h1:1lJo3i6rXxKeerYnT8Nvf0QmHCRC1n8sfWVwXF2Frvo=
 github.com/jessevdk/go-flags v1.4.0/go.mod h1:4FA24M0QyGHXBuZZK/XkWh8h0e1EYbRYJSGM75WSRxI=
