@@ -142,8 +142,8 @@ func providerConfigure(d *schema.ResourceData, terraformVersion string) (interfa
 			newConfig.Host = parts[2]
 		}
 	}
-	// todo: add sdk version and provider version
-	newConfig.UserAgent = fmt.Sprintf("HashiCorp Terraform/%s (+https://www.terraform.io) Terraform Plugin SDK/%s", terraformVersion, meta.SDKVersionString())
+	// todo: add sdk version
+	newConfig.UserAgent = fmt.Sprintf("HashiCorp Terraform/%s (+https://www.terraform.io) Terraform Plugin SDK/%s Terraform Provider/%s", terraformVersion, meta.SDKVersionString(), Version)
 	newClient := ionoscloud.NewAPIClient(newConfig)
 
 	return newClient, nil
