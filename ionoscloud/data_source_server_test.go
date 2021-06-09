@@ -22,6 +22,9 @@ func TestAccDataSourceServer_matchId(t *testing.T) {
 					resource.TestCheckResourceAttr("data.ionoscloud_server.test_server", "name", "test_datasource_server"),
 				),
 			},
+			{
+				Config: "/* intentionally left blank to ensure proper datasource removal from the plan */",
+			},
 		},
 	})
 }
@@ -42,6 +45,9 @@ func TestAccDataSourceServer_matchName(t *testing.T) {
 					resource.TestCheckResourceAttr("data.ionoscloud_server.test_server", "name", "test_datasource_server"),
 				),
 			},
+			{
+				Config: "/* intentionally left blank to ensure proper datasource removal from the plan */",
+			},
 		},
 	})
 
@@ -54,7 +60,6 @@ resource "ionoscloud_datacenter" "test_datasource_server" {
   description       = "datacenter for testing the server terraform data source"
 }
 resource "ionoscloud_server" "test_datasource_server" {
-  depends_on        = [ionoscloud_datacenter.test_datasource_server]
   datacenter_id     = ionoscloud_datacenter.test_datasource_server.id
   name              = "test_datasource_server"
   cores             = 2
@@ -62,7 +67,7 @@ resource "ionoscloud_server" "test_datasource_server" {
   availability_zone = "ZONE_1"
   cpu_family        = "AMD_OPTERON"
 
-  image        = "81e054dd-a347-11eb-b70c-7ade62b52cc0"
+  image        		= "Ubuntu-20.04-LTS-server-2021-06-01"
   image_password    = "foobar123456"
 
   volume {
@@ -84,7 +89,6 @@ resource "ionoscloud_datacenter" "test_datasource_server" {
 }
 
 resource "ionoscloud_server" "test_datasource_server" {
-  depends_on        = [ionoscloud_datacenter.test_datasource_server]
   datacenter_id     = ionoscloud_datacenter.test_datasource_server.id
   name              = "test_datasource_server"
   cores             = 2
@@ -92,7 +96,7 @@ resource "ionoscloud_server" "test_datasource_server" {
   availability_zone = "ZONE_1"
   cpu_family        = "AMD_OPTERON"
 
-  image        = "81e054dd-a347-11eb-b70c-7ade62b52cc0"
+  image        		= "Ubuntu-20.04-LTS-server-2021-06-01"
   image_password    = "foobar123456"
 
   volume {
@@ -128,7 +132,7 @@ resource "ionoscloud_server" "test_datasource_server" {
   availability_zone = "ZONE_1"
   cpu_family        = "AMD_OPTERON"
 
-  image        = "81e054dd-a347-11eb-b70c-7ade62b52cc0"
+  image        		= "Ubuntu-20.04-LTS-server-2021-06-01"
   image_password    = "foobar123456"
 
   volume {
