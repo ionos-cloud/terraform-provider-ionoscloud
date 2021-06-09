@@ -59,12 +59,13 @@ func testAccCheckbackupUnitDestroyCheck(s *terraform.State) error {
 
 		_, apiResponse, err := client.BackupUnitApi.BackupunitsFindById(ctx, rs.Primary.ID).Execute()
 
-		if _, ok := err.(ionoscloud.GenericOpenAPIError); ok {
-			if apiResponse != nil && apiResponse.Response.StatusCode != 404 {
-				return fmt.Errorf("backup unit still exists %s %s", rs.Primary.ID, string(apiResponse.Payload))
+		if err != nil {
+			if apiResponse == nil || apiResponse.StatusCode != 404 {
+				return fmt.Errorf("an error occurred while checking for the destruction of backup unit %s: %s",
+					rs.Primary.ID, err)
 			}
 		} else {
-			return fmt.Errorf("Unable to fetch backup unit %s %s", rs.Primary.ID, err)
+			return fmt.Errorf("backup unit %s still exists", rs.Primary.ID)
 		}
 	}
 

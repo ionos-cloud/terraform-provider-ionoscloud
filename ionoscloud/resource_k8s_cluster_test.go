@@ -44,30 +44,27 @@ func TestAcck8sCluster_Basic(t *testing.T) {
 func testAccCheckk8sClusterDestroyCheck(s *terraform.State) error {
 	client := testAccProvider.Meta().(*ionoscloud.APIClient)
 
+	ctx, cancel := context.WithTimeout(context.Background(), *resourceDefaultTimeouts.Default)
+
+	if cancel != nil {
+		defer cancel()
+	}
+
 	for _, rs := range s.RootModule().Resources {
 		if rs.Type != "ionoscloud_k8s_cluster" {
 			continue
 		}
 
-		ctx, cancel := context.WithTimeout(context.Background(), *resourceDefaultTimeouts.Default)
-
-		if cancel != nil {
-			defer cancel()
-		}
-
 		_, apiResponse, err := client.KubernetesApi.K8sFindByClusterId(ctx, rs.Primary.ID).Execute()
 
-		if _, ok := err.(ionoscloud.GenericOpenAPIError); ok {
-			if apiResponse == nil || apiResponse.Response.StatusCode != 404 {
-				var payload = "<nil>"
-				if apiResponse != nil {
-					payload = string(apiResponse.Payload)
-				}
-				return fmt.Errorf("k8s cluster still exists %s %s", rs.Primary.ID, payload)
+		if err != nil {
+			if apiResponse == nil || apiResponse.StatusCode != 404 {
+				return fmt.Errorf("an error occurred while checking the destruction of k8s cluster %s: %s", rs.Primary.ID, err)
 			}
 		} else {
-			return fmt.Errorf("Unable to fetch k8s cluster %s %s", rs.Primary.ID, err)
+			return fmt.Errorf("k8s cluster %s still exists", rs.Primary.ID)
 		}
+
 	}
 
 	return nil
@@ -96,7 +93,7 @@ func testAccCheckk8sClusterExists(n string, k8sCluster *ionoscloud.KubernetesClu
 		foundK8sCluster, _, err := client.KubernetesApi.K8sFindByClusterId(ctx, rs.Primary.ID).Execute()
 
 		if err != nil {
-			return fmt.Errorf("Error occured while fetching k8s Cluster: %s", rs.Primary.ID)
+			return fmt.Errorf("an error occured while fetching k8s Cluster %s: %s", rs.Primary.ID, err)
 		}
 		if *foundK8sCluster.Id != rs.Primary.ID {
 			return fmt.Errorf("Record not found")

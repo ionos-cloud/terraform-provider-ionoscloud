@@ -91,11 +91,8 @@ func resourceLanCreate(d *schema.ResourceData, meta interface{}) error {
 
 	if err != nil {
 		d.SetId("")
-		return fmt.Errorf("An error occured while creating LAN: %s", err)
+		return fmt.Errorf("an error occured while creating LAN: %s", err)
 	}
-
-	log.Printf("[DEBUG] LAN ID: %s", *rsp.Id)
-	log.Printf("[DEBUG] LAN RESPONSE: %s", string(apiResponse.Payload))
 
 	d.SetId(*rsp.Id)
 

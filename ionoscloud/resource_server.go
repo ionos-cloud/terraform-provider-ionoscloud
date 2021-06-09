@@ -435,7 +435,7 @@ func resourceServerCreate(d *schema.ResourceData, meta interface{}) error {
 			} else {
 				dc, _, err := client.DataCenterApi.DatacentersFindById(ctx, dcId).Execute()
 				if err != nil {
-					return fmt.Errorf("Error fetching datacenter %s: (%s)", dcId, err)
+					return fmt.Errorf("error fetching datacenter %s: (%s)", dcId, err)
 				}
 				image_alias = getImageAlias(client, image_name, *dc.Properties.Location)
 			}
@@ -444,7 +444,7 @@ func resourceServerCreate(d *schema.ResourceData, meta interface{}) error {
 			return fmt.Errorf("Could not find an image/imagealias/snapshot that matches %s ", image_name)
 		}
 		if volume.ImagePassword == nil && len(sshkey_path) == 0 && isSnapshot == false && img.Properties.Public != nil && *img.Properties.Public {
-			return fmt.Errorf("either 'image_password' or 'ssh_key_path' must be provided.")
+			return fmt.Errorf("either 'image_password' or 'ssh_key_path' must be provided")
 		}
 	} else {
 		img, apiResponse, err := client.ImageApi.ImagesFindById(ctx, image_name).Execute()
@@ -453,8 +453,8 @@ func resourceServerCreate(d *schema.ResourceData, meta interface{}) error {
 
 			_, apiResponse, err = client.SnapshotApi.SnapshotsFindById(ctx, image_name).Execute()
 
-			if apiResponse != nil && apiResponse.Response.StatusCode == 404 {
-				return fmt.Errorf("image/snapshot: %s Not Found", string(apiResponse.Payload))
+			if err != nil {
+				return fmt.Errorf("could not fetch image/snapshot: %s", err)
 			}
 
 			isSnapshot = true
@@ -481,9 +481,9 @@ func resourceServerCreate(d *schema.ResourceData, meta interface{}) error {
 		} else {
 			img, _, err := client.ImageApi.ImagesFindById(ctx, image_name).Execute()
 			if err != nil {
-				_, apiResponse, err := client.SnapshotApi.SnapshotsFindById(ctx, image_name).Execute()
+				_, _, err := client.SnapshotApi.SnapshotsFindById(ctx, image_name).Execute()
 				if err != nil {
-					return fmt.Errorf("Error fetching image/snapshot: %s", string(apiResponse.Payload))
+					return fmt.Errorf("error fetching image/snapshot: %s", err)
 				}
 				isSnapshot = true
 			}
@@ -650,7 +650,6 @@ func resourceServerCreate(d *schema.ResourceData, meta interface{}) error {
 	server, apiResponse, err := client.ServerApi.DatacentersServersPost(ctx, d.Get("datacenter_id").(string)).Server(request).Execute()
 
 	if err != nil {
-		log.Printf("%s", apiResponse.Payload)
 		return fmt.Errorf(
 			"error creating server: (%s)", err)
 	}
@@ -996,12 +995,7 @@ func resourceServerUpdate(d *schema.ResourceData, meta interface{}) error {
 	server, apiResponse, err := client.ServerApi.DatacentersServersPatch(ctx, dcId, d.Id()).Server(request).Execute()
 
 	if err != nil {
-		var payload string
-		if apiResponse != nil {
-			payload = string(apiResponse.Payload)
-		}
-
-		return fmt.Errorf("error occured while updating server ID %s: %s ; API Error: %s", d.Id(), err, payload)
+		return fmt.Errorf("error occured while updating server ID %s: %s", d.Id(), err)
 	}
 
 	_, errState := getStateChangeConf(meta, d, apiResponse.Header.Get("Location"), schema.TimeoutUpdate).WaitForState()

@@ -202,7 +202,7 @@ func resourcek8sNodePoolCreate(d *schema.ResourceData, meta interface{}) error {
 
 		if *k8sNodepool.Properties.AutoScaling.MaxNodeCount < *k8sNodepool.Properties.AutoScaling.MinNodeCount {
 			d.SetId("")
-			return fmt.Errorf("Error creating k8s node pool: max_node_count cannot be lower than min_node_count")
+			return fmt.Errorf("error creating k8s node pool: max_node_count cannot be lower than min_node_count")
 		}
 	}
 
@@ -268,15 +268,11 @@ func resourcek8sNodePoolCreate(d *schema.ResourceData, meta interface{}) error {
 		defer cancel()
 	}
 
-	createdNodepool, apiResponse, err := client.KubernetesApi.K8sNodepoolsPost(ctx, d.Get("k8s_cluster_id").(string)).KubernetesNodePool(k8sNodepool).Execute()
+	createdNodepool, _, err := client.KubernetesApi.K8sNodepoolsPost(ctx, d.Get("k8s_cluster_id").(string)).KubernetesNodePool(k8sNodepool).Execute()
 
 	if err != nil {
 		d.SetId("")
-		payload := "<nil>"
-		if apiResponse != nil {
-			payload = fmt.Sprintf("API response: %s", string(apiResponse.Payload))
-		}
-		return fmt.Errorf("error creating k8s node pool: %s; %s", err, payload)
+		return fmt.Errorf("error creating k8s node pool: %s", err)
 	}
 
 	d.SetId(*createdNodepool.Id)

@@ -44,7 +44,11 @@ func TestAccNic_Basic(t *testing.T) {
 func testAccCheckNicDestroyCheck(s *terraform.State) error {
 	client := testAccProvider.Meta().(*ionoscloud.APIClient)
 
-	ctx, _ := context.WithTimeout(context.Background(), *resourceDefaultTimeouts.Delete)
+	ctx, cancel := context.WithTimeout(context.Background(), *resourceDefaultTimeouts.Delete)
+	if cancel != nil {
+		defer cancel()
+	}
+
 	for _, rs := range s.RootModule().Resources {
 		if rs.Type != "ionoscloud_nic" {
 			continue
@@ -52,16 +56,14 @@ func testAccCheckNicDestroyCheck(s *terraform.State) error {
 
 		dcId := rs.Primary.Attributes["datacenter_id"]
 		serverId := rs.Primary.Attributes["server_id"]
-		_, apiResponse, _ := client.NicApi.DatacentersServersNicsFindById(ctx, dcId, serverId, rs.Primary.ID).Execute()
+		_, apiResponse, err := client.NicApi.DatacentersServersNicsFindById(ctx, dcId, serverId, rs.Primary.ID).Execute()
 
-		if apiResponse == nil || apiResponse.Response.StatusCode != 404 {
-			var payload = "<nil>"
-			var statusCode = 0
-			if apiResponse != nil {
-				payload = string(apiResponse.Payload)
-				statusCode = apiResponse.StatusCode
+		if err != nil {
+			if apiResponse == nil || apiResponse.StatusCode != 404 {
+				return fmt.Errorf("an error occurred while checking the destruction of nic %s: %s", rs.Primary.ID, err)
 			}
-			return fmt.Errorf("NIC still exists %s: %d %s", rs.Primary.ID, statusCode, payload)
+		} else {
+			return fmt.Errorf("nic %s still exists", rs.Primary.ID)
 		}
 	}
 
