@@ -149,8 +149,8 @@ resource "ionoscloud_server" "webserver" {
   ram = 1024
   availability_zone = "ZONE_1"
   cpu_family = "AMD_OPTERON"
-	image ="81e054dd-a347-11eb-b70c-7ade62b52cc0"
-	image_password = "K3tTj8G14a3EgKyNeeiY"
+  image = "Ubuntu-20.04-LTS-server-2021-06-01"
+  image_password = "K3tTj8G14a3EgKyNeeiY"
   volume {
     name = "system"
     size = 15
@@ -189,8 +189,8 @@ resource "ionoscloud_server" "webserver" {
   availability_zone = "ZONE_1"
   cpu_family = "AMD_OPTERON"
   volume {
-		image ="81e054dd-a347-11eb-b70c-7ade62b52cc0"
-		image_password = "K3tTj8G14a3EgKyNeeiY"
+	image = "Ubuntu-20.04-LTS-server-2021-06-01"
+	image_password = "K3tTj8G14a3EgKyNeeiY"
     name = "system"
     size = 15
     disk_type = "HDD"
@@ -227,8 +227,8 @@ resource "ionoscloud_server" "webserver" {
   ram = 1024
   availability_zone = "ZONE_1"
   cpu_family = "AMD_OPTERON"
-	image = "81e054dd-a347-11eb-b70c-7ade62b52cc0"
-	image_password = "K3tTj8G14a3EgKyNeeiY"
+  image = "Ubuntu-20.04-LTS-server-2021-06-01"
+  image_password = "K3tTj8G14a3EgKyNeeiY"
   volume {
     name = "system"
     size = 20
