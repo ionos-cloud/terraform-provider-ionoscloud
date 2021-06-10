@@ -43,6 +43,9 @@ func TestAccLanIPFailover_Basic(t *testing.T) {
 					testDeleted("ionoscloud_ipfailover.failovertest"),
 				),
 			},
+			{
+				Config: `/* */`,
+			},
 		},
 	})
 }
@@ -159,7 +162,7 @@ resource "ionoscloud_server" "webserver" {
   ram = 1024
   availability_zone = "ZONE_1"
   cpu_family = "AMD_OPTERON"
-  image = "Ubuntu-20.04-LTS-server-2021-06-01"
+  image_name = "Ubuntu-20.04-LTS-server-2021-06-01"
   image_password = "K3tTj8G14a3EgKyNeeiY"
   volume {
     name = "system"
@@ -174,6 +177,7 @@ resource "ionoscloud_server" "webserver" {
   }
 }
 resource "ionoscloud_ipfailover" "failovertest" {
+  depends_on = [ ionoscloud_lan.webserver_lan1 ]
   datacenter_id = "${ionoscloud_datacenter.foobar.id}"
   lan_id="${ionoscloud_lan.webserver_lan1.id}"
   ip ="${ionoscloud_ipblock.webserver_ip.ips[0]}"
@@ -206,7 +210,7 @@ resource "ionoscloud_server" "webserver" {
   ram = 1024
   availability_zone = "ZONE_1"
   cpu_family = "AMD_OPTERON"
-  image = "Ubuntu-20.04-LTS-server-2021-06-01"
+  image_name = "Ubuntu-20.04-LTS-server-2021-06-01"
   image_password = "K3tTj8G14a3EgKyNeeiY"
   volume {
     name = "system"
