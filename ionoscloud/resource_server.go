@@ -100,11 +100,11 @@ func resourceServer() *schema.Resource {
 				Computed:      true,
 				ConflictsWith: []string{"volume.0.image_password"},
 			},
-			"image": {
+			"image_name": {
 				Type:          schema.TypeString,
 				Optional:      true,
 				Computed:      true,
-				ConflictsWith: []string{"volume.0.image"},
+				ConflictsWith: []string{"volume.0.image_name"},
 			},
 			"ssh_key_path": {
 				Type:          schema.TypeList,
@@ -119,13 +119,13 @@ func resourceServer() *schema.Resource {
 				MaxItems: 1,
 				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{
-						"image": {
+						"image_name": {
 							Type:          schema.TypeString,
 							Optional:      true,
-							ConflictsWith: []string{"image"},
-							Deprecated:    "Please use image under server level",
+							ConflictsWith: []string{"image_name"},
+							Deprecated:    "Please use image_name under server level",
 							DiffSuppressFunc: func(k, old, new string, d *schema.ResourceData) bool {
-								if d.Get("image").(string) == new {
+								if d.Get("image_name").(string) == new {
 									return true
 								}
 								return false
@@ -426,15 +426,15 @@ func resourceServerCreate(d *schema.ResourceData, meta interface{}) error {
 	var image string
 	var imageInput string
 
-	if v, ok := d.GetOk("volume.0.image"); ok {
+	if v, ok := d.GetOk("volume.0.image_name"); ok {
 		imageInput = v.(string)
-		if err := d.Set("image", v.(string)); err != nil {
+		if err := d.Set("image_name", v.(string)); err != nil {
 			return err
 		}
-	} else if v, ok := d.GetOk("image"); ok {
+	} else if v, ok := d.GetOk("image_name"); ok {
 		imageInput = v.(string)
 	} else {
-		return fmt.Errorf("either 'image' or 'volume.0.image' must be provided")
+		return fmt.Errorf("either 'image_name' or 'volume.0.image_name' must be provided")
 	}
 
 	ctx, cancel := context.WithTimeout(context.Background(), *resourceDefaultTimeouts.Default)
@@ -474,7 +474,8 @@ func resourceServerCreate(d *schema.ResourceData, meta interface{}) error {
 				snap, apiResponse, err := client.SnapshotsApi.SnapshotsFindById(ctx, imageInput).Execute()
 
 				if apiResponse != nil && apiResponse.Response.StatusCode == 404 {
-					return fmt.Errorf("image/snapshot: %s Not Found", string(apiResponse.Payload))
+					return fmt.Errorf("error creating server: image/snapshot %s not found: %s",
+						imageInput, string(apiResponse.Payload))
 				} else if err != nil {
 					return fmt.Errorf("error fetching image/snapshot info: %s, %s", err, responseBody(apiResponse))
 				}

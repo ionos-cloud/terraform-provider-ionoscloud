@@ -17,7 +17,7 @@ func resourceVolume() *schema.Resource {
 		Update: resourceVolumeUpdate,
 		Delete: resourceVolumeDelete,
 		Schema: map[string]*schema.Schema{
-			"image": {
+			"image_name": {
 				Type:     schema.TypeString,
 				Optional: true,
 			},
@@ -126,8 +126,9 @@ func resourceVolumeCreate(d *schema.ResourceData, meta interface{}) error {
 	serverId := d.Get("server_id").(string)
 	imagePassword := d.Get("image_password").(string)
 	sshKeyPath = d.Get("ssh_key_path").([]interface{})
-	image := d.Get("image").(string)
+	imageInput := d.Get("image_name").(string)
 	licenceType := d.Get("licence_type").(string)
+	diskType := d.Get("disk_type").(string)
 
 	var publicKeys []string
 	if len(sshKeyPath) != 0 {
@@ -141,9 +142,30 @@ func resourceVolumeCreate(d *schema.ResourceData, meta interface{}) error {
 		}
 	}
 
-	if image != "" {
-		if !IsValidUUID(image) {
-			return fmt.Errorf("image is not a valid UUID")
+	var image string
+	if imageInput != "" {
+		if !IsValidUUID(imageInput) {
+			img, err := getImage(client, dcId, imageInput, diskType)
+			if err != nil {
+				return err
+			}
+			if img != nil {
+				image = *img.Id
+			}
+			// if no image id was found with that name we look for a matching snapshot
+			if image == "" {
+				image = getSnapshotId(client, imageInput)
+				if image != "" {
+					isSnapshot = true
+				} else {
+					return fmt.Errorf("no image or snapshot with id %s found", imageInput)
+				}
+			}
+
+			if imagePassword == "" && len(sshKeyPath) == 0 && isSnapshot == false && img.Properties.Public != nil && *img.Properties.Public {
+				return fmt.Errorf("either 'image_password' or 'ssh_key_path' must be provided")
+			}
+
 		} else {
 			ctx, cancel := context.WithTimeout(context.Background(), *resourceDefaultTimeouts.Default)
 
@@ -151,35 +173,38 @@ func resourceVolumeCreate(d *schema.ResourceData, meta interface{}) error {
 				defer cancel()
 			}
 
-			img, apiResponse, err := client.ImagesApi.ImagesFindById(ctx, image).Execute()
-
-			_, rsp := err.(ionoscloud.GenericOpenAPIError)
+			img, apiResponse, err := client.ImagesApi.ImagesFindById(ctx, imageInput).Execute()
 
 			if err != nil {
-				return fmt.Errorf("error fetching image %s: (%s) - %+v", image, err, rsp)
-			}
 
-			if apiResponse.Response.StatusCode == 404 {
-				_, _, err := client.SnapshotsApi.SnapshotsFindById(ctx, image).Execute()
+				if apiResponse != nil && apiResponse.Response.StatusCode == 404 {
+					snapshot, apiResponse, err := client.SnapshotsApi.SnapshotsFindById(ctx, imageInput).Execute()
 
-				if _, ok := err.(ionoscloud.GenericOpenAPIError); !ok {
-					if apiResponse != nil && apiResponse.Response.StatusCode == 404 {
-						return fmt.Errorf("image/snapshot: %s Not Found", string(apiResponse.Payload))
+					if err != nil {
+						if apiResponse != nil && apiResponse.Response.StatusCode == 404 {
+							return fmt.Errorf("image/snapshot %s not found: %s", imageInput, string(apiResponse.Payload))
+						} else {
+							return fmt.Errorf("an error occured while fetching snapshot %s: %s", imageInput, err)
+						}
+					}
+					image = *snapshot.Id
+					isSnapshot = true
+				} else {
+					return fmt.Errorf("error fetching image %s: %s", imageInput, err)
+				}
+			} else {
+				if isSnapshot == false && *img.Properties.Public == true {
+					if imagePassword == "" && len(sshKeyPath) == 0 {
+						return fmt.Errorf("either 'image_password' or 'sshkey' must be provided")
 					}
 				}
-
-				isSnapshot = true
-			}
-			if *img.Properties.Public == true && isSnapshot == false {
-				if imagePassword == "" && len(sshKeyPath) == 0 {
-					return fmt.Errorf("either 'image_password' or 'sshkey' must be provided")
-				}
+				image = *img.Id
 			}
 		}
 	}
 
 	if image == "" && licenceType == "" && isSnapshot == false {
-		return fmt.Errorf("either 'image', or 'licenceType' must be set")
+		return fmt.Errorf("either 'image_name', or 'licenceType' must be set")
 	}
 
 	if isSnapshot == true && (imagePassword != "" || len(publicKeys) > 0) {
@@ -395,12 +420,14 @@ func resourceVolumeRead(d *schema.ResourceData, meta interface{}) error {
 		}
 	}
 
+	/*
 	if volume.Properties.Image != nil {
-		err = d.Set("image", *volume.Properties.Image)
+		err = d.Set("image_name", *volume.Properties.Image)
 		if err != nil {
 			return fmt.Errorf("error while setting image property for volume %s: %s", d.Id(), err)
 		}
 	}
+	*/
 
 	if volume.Properties.CpuHotPlug != nil {
 		err := d.Set("cpu_hot_plug", *volume.Properties.CpuHotPlug)
