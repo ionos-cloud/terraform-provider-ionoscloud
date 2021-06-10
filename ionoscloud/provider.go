@@ -17,6 +17,8 @@ import (
 	"github.com/ionos-cloud/sdk-go/v5"
 )
 
+var Version = "development"
+
 // Provider returns a schema.Provider for ionoscloud.
 func Provider() *schema.Provider {
 	provider := &schema.Provider{
@@ -138,13 +140,13 @@ func providerConfigure(d *schema.ResourceData, terraformVersion string) (interfa
 		if len(parts) == 1 {
 			newConfig.Host = cleanedUrl
 		} else {
-			newConfig.Scheme = parts[1]
-			newConfig.Host = parts[2]
+			newConfig.Scheme = parts[0]
+			newConfig.Host = parts[1]
 		}
 	}
-	// todo: add sdk version
-	newConfig.UserAgent = fmt.Sprintf("HashiCorp Terraform/%s (+https://www.terraform.io) Terraform Plugin SDK/%s Terraform Provider/%s", terraformVersion, meta.SDKVersionString(), Version)
+
 	newClient := ionoscloud.NewAPIClient(newConfig)
+	newConfig.UserAgent = fmt.Sprintf("HashiCorp Terraform/%s Terraform Plugin SDK/%s Terraform Provider Ionoscloud/%s Ionoscloud SDK Go/%s", terraformVersion, meta.SDKVersionString(), Version, newClient.Version)
 
 	return newClient, nil
 }

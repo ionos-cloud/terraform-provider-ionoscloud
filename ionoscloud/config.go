@@ -18,18 +18,16 @@ type Config struct {
 
 // Client returns a new client for accessing ionoscloud.
 
-var Version = "development"
-
 func (c *Config) Client(terraformVersion string) (*ionoscloud.APIClient, error) {
 	var client *ionoscloud.APIClient
+
 	if c.Token != "" {
 		client = ionoscloud.NewAPIClient(ionoscloud.NewConfiguration("", "", c.Token))
 	} else {
 		client = ionoscloud.NewAPIClient(ionoscloud.NewConfiguration(c.Username, c.Password, ""))
 	}
 
-	// todo: add sdk version
-	client.GetConfig().UserAgent = fmt.Sprintf("HashiCorp Terraform/%s (+https://www.terraform.io) Terraform Plugin SDK/%s Terraform Provider/%s", terraformVersion, meta.SDKVersionString(), Version)
+	client.GetConfig().UserAgent = fmt.Sprintf("HashiCorp Terraform/%s Terraform Plugin SDK/%s Terraform Provider Ionoscloud/%s Ionoscloud SDK Go/%s", terraformVersion, meta.SDKVersionString(), Version, client.Version)
 
 	log.Printf("[DEBUG] Terraform client UA set to %s", client.GetConfig().UserAgent)
 
