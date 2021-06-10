@@ -8,7 +8,6 @@ import (
 
 	//"github.com/hashicorp/terraform-plugin-sdk/v2/httpclient"
 	"log"
-	"strings"
 	"time"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
@@ -136,13 +135,7 @@ func providerConfigure(d *schema.ResourceData, terraformVersion string) (interfa
 
 	newConfig := ionoscloud.NewConfiguration(username.(string), password.(string), token.(string))
 	if len(cleanedUrl) > 0 {
-		parts := strings.Split(cleanedUrl, "://")
-		if len(parts) == 1 {
-			newConfig.Host = cleanedUrl
-		} else {
-			newConfig.Scheme = parts[0]
-			newConfig.Host = parts[1]
-		}
+		newConfig.Servers[0].URL = cleanedUrl
 	}
 
 	newClient := ionoscloud.NewAPIClient(newConfig)
