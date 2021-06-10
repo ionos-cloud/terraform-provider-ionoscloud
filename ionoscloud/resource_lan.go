@@ -197,32 +197,15 @@ func resourceLanUpdate(d *schema.ResourceData, meta interface{}) error {
 		defer cancel()
 	}
 	dcid := d.Get("datacenter_id").(string)
-	rsp, _, err := client.LansApi.DatacentersLansPatch(ctx, dcid, d.Id()).Lan(*properties).Execute()
+	_, apiResponse, err := client.LansApi.DatacentersLansPatch(ctx, dcid, d.Id()).Lan(*properties).Execute()
 	if err != nil {
 		return fmt.Errorf("an error occured while patching a lan ID %s %s", d.Id(), err)
 	}
 
-	for {
-		log.Printf("[INFO] Waiting for LAN %s to be available...", d.Id())
-
-		clusterReady, rsErr := lanAvailable(client, d)
-
-		if rsErr != nil {
-			return fmt.Errorf("error while checking readiness status of LAN %s: %s", d.Id(), rsErr)
-		}
-
-		if clusterReady {
-			log.Printf("[INFO] LAN %s ready: %+v", d.Id(), rsp)
-			break
-		}
-
-		select {
-		case <-time.After(SleepInterval):
-			log.Printf("[INFO] trying again ...")
-		case <-ctx.Done():
-			log.Printf("[INFO] update timed out")
-			return fmt.Errorf("lan update timed out! WARNING: your lan will still probably be created after some time but the terraform state won't reflect that; check your Ionos Cloud account for updates")
-		}
+	// Wait, catching any errors
+	_, errState := getStateChangeConf(meta, d, apiResponse.Header.Get("Location"), schema.TimeoutUpdate).WaitForState()
+	if errState != nil {
+		return errState
 	}
 
 	return resourceLanRead(d, meta)
