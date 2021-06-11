@@ -214,36 +214,20 @@ func resourceLanUpdate(ctx context.Context, d *schema.ResourceData, meta interfa
 		}
 	}
 
-	if properties != nil {
-		ctx, cancel := context.WithTimeout(context.Background(), *resourceDefaultTimeouts.Update)
-		if cancel != nil {
-			defer cancel()
-		}
-		dcid := d.Get("datacenter_id").(string)
-		rsp, _, err := client.LanApi.DatacentersLansPatch(ctx, dcid, d.Id()).Lan(*properties).Execute()
-		if err != nil {
-			return fmt.Errorf("An error occured while patching a lan ID %s %s", d.Id(), err)
-		}
-
-		for {
-			log.Printf("[INFO] Waiting for LAN %s to be available...", d.Id())
-			time.Sleep(5 * time.Second)
-
-			clusterReady, rsErr := lanAvailable(client, d)
-
-			if rsErr != nil {
-				return fmt.Errorf("Error while checking readiness status of LAN %s: %s", d.Id(), rsErr)
-			}
-
-			if clusterReady && rsErr == nil {
-				log.Printf("[INFO] LAN %s ready: %+v", d.Id(), rsp)
-				break
-			}
-		}
-
+	dcid := d.Get("datacenter_id").(string)
+	_, apiResponse, err := client.LanApi.DatacentersLansPatch(ctx, dcid, d.Id()).Lan(*properties).Execute()
+	if err != nil {
+		diags := diag.FromErr(fmt.Errorf("an error occured while patching a lan ID %s %s", d.Id(), err))
+		return diags
 	}
 
-	return resourceLanRead(d, meta)
+	_, errState := getStateChangeConf(meta, d, apiResponse.Header.Get("Location"), schema.TimeoutUpdate).WaitForStateContext(ctx)
+	if errState != nil {
+		diags := diag.FromErr(errState)
+		return diags
+	}
+
+	return resourceLanRead(ctx, d, meta)
 }
 
 func resourceLanDelete(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
