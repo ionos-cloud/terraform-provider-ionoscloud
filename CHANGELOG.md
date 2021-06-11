@@ -1,3 +1,12 @@
+## 5.1.5
+
+- fixes #12 - correctly setting up a custom Ionos Cloud API url
+
+## 5.1.4
+
+- error handling improvements 
+- always displaying the full response body from the API in case of an error
+
 ## 5.0.4
 
 BUG FIXES:
