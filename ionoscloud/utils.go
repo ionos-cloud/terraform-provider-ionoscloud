@@ -5,6 +5,7 @@ import (
 	"fmt"
 	ionoscloud "github.com/ionos-cloud/sdk-go/v5"
 	"log"
+	"reflect"
 	"strings"
 
 	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
@@ -25,7 +26,7 @@ func resourceResourceImport(d *schema.ResourceData, meta interface{}) ([]*schema
 func resourceServerImport(d *schema.ResourceData, meta interface{}) ([]*schema.ResourceData, error) {
 	parts := strings.Split(d.Id(), "/")
 	if len(parts) > 4 || len(parts) < 3 || parts[0] == "" || parts[1] == "" {
-		return nil, fmt.Errorf("Invalid import id %q. Expecting {datacenter}/{server}/{primary_nic} or {datacenter}/{server}/{primary_nic}/{firewall}", d.Id())
+		return nil, fmt.Errorf("invalid import id %q. Expecting {datacenter}/{server}/{primary_nic} or {datacenter}/{server}/{primary_nic}/{firewall}", d.Id())
 	}
 
 	d.Set("datacenter_id", parts[0])
@@ -347,4 +348,16 @@ func diffSlice(slice1 []string, slice2 []string) []string {
 	}
 
 	return diff
+}
+
+func setPropWithNilCheck(m map[string]interface{}, prop string, v interface{}) {
+
+	rVal := reflect.ValueOf(v)
+	if rVal.Kind() == reflect.Ptr {
+		if !rVal.IsNil() {
+			m[prop] = rVal.Elem().Interface()
+		}
+	} else {
+		m[prop] = v
+	}
 }

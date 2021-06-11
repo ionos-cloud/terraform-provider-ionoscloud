@@ -1,3 +1,7 @@
+## 5.1.6
+
+- fixes #5 - correctly dereferencing possibly nil properties received from the api
+
 ## 5.1.5
 
 - fixes #12 - correctly setting up a custom Ionos Cloud API url
