@@ -1,4 +1,4 @@
-// +build lb
+// +build waiting_for_vdc
 
 package ionoscloud
 
@@ -56,22 +56,15 @@ func testAccCheckLoadbalancerDestroyCheck(s *terraform.State) error {
 		}
 
 		dcId := rs.Primary.Attributes["datacenter_id"]
-		_, _, err := client.LoadBalancerApi.DatacentersLoadbalancersFindById(ctx, dcId, rs.Primary.ID).Execute()
+		_, apiResponse, err := client.LoadBalancerApi.DatacentersLoadbalancersFindById(ctx, dcId, rs.Primary.ID).Execute()
 
 		if err != nil {
-			_, apiResponse, err := client.DataCenterApi.DatacentersDelete(ctx, dcId).Execute()
-
-			if err != nil {
-				if apiResponse == nil || apiResponse.StatusCode != 404 {
-					payload := ""
-					if apiResponse != nil {
-						payload = fmt.Sprintf("API response: %s", string(apiResponse.Payload))
-					}
-					return fmt.Errorf("loadbalancer still exists %s - an error occurred while checking it %s %s", rs.Primary.ID, err, payload)
-				}
-			} else {
-				return fmt.Errorf("loadbalancer still exists %s", rs.Primary.ID)
+			if apiResponse == nil || apiResponse.StatusCode != 404 {
+				return fmt.Errorf("an error occurred while checking the destruction of load balancer %s: %s",
+					rs.Primary.ID, err)
 			}
+		} else {
+			return fmt.Errorf("load balancer %s still exists", rs.Primary.ID)
 		}
 	}
 

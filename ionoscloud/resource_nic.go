@@ -110,12 +110,7 @@ func resourceNicCreate(ctx context.Context, d *schema.ResourceData, meta interfa
 	nic, apiResponse, err := client.NicApi.DatacentersServersNicsPost(ctx, dcid, srvid).Nic(nic).Execute()
 
 	if err != nil {
-		payload := ""
-		if apiResponse != nil {
-			payload = fmt.Sprintf("API response: %s", string(apiResponse.Payload))
-		}
-		diags := diag.FromErr(fmt.Errorf("error occured while creating a nic: %s %s ", err, payload))
-		return diags
+		return fmt.Errorf("error occured while creating a nic: %s", err)
 	}
 	if nic.Id != nil {
 		d.SetId(*nic.Id)

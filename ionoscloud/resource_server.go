@@ -444,14 +444,9 @@ func resourceServerCreate(ctx context.Context, d *schema.ResourceData, meta inte
 			if image != "" {
 				isSnapshot = true
 			} else {
-				dc, apiResponse, err := client.DataCenterApi.DatacentersFindById(ctx, dcId).Execute()
+				dc, _, err := client.DataCenterApi.DatacentersFindById(ctx, dcId).Execute()
 				if err != nil {
-					payload := ""
-					if apiResponse != nil {
-						payload = fmt.Sprintf("API response: %s", string(apiResponse.Payload))
-					}
-					diags := diag.FromErr(fmt.Errorf("error fetching datacenter %s: (%s) %s", dcId, err, payload))
-					return diags
+					return fmt.Errorf("error fetching datacenter %s: (%s)", dcId, err)
 				}
 				imageAlias = getImageAlias(ctx, client, imageName, *dc.Properties.Location)
 			}
@@ -460,9 +455,8 @@ func resourceServerCreate(ctx context.Context, d *schema.ResourceData, meta inte
 			diags := diag.FromErr(fmt.Errorf("could not find an image/imagealias/snapshot that matches %s ", imageName))
 			return diags
 		}
-		if volume.ImagePassword == nil && len(sshkeyPath) == 0 && isSnapshot == false && img.Properties.Public != nil && *img.Properties.Public {
-			diags := diag.FromErr(fmt.Errorf("either 'image_password' or 'ssh_key_path' must be provided"))
-			return diags
+		if volume.ImagePassword == nil && len(sshkey_path) == 0 && isSnapshot == false && img.Properties.Public != nil && *img.Properties.Public {
+			return fmt.Errorf("either 'image_password' or 'ssh_key_path' must be provided")
 		}
 	} else {
 		img, apiResponse, err := client.ImageApi.ImagesFindById(ctx, imageName).Execute()
@@ -471,9 +465,8 @@ func resourceServerCreate(ctx context.Context, d *schema.ResourceData, meta inte
 
 			_, apiResponse, err = client.SnapshotApi.SnapshotsFindById(ctx, imageName).Execute()
 
-			if apiResponse != nil && apiResponse.StatusCode == 404 {
-				diags := diag.FromErr(fmt.Errorf("image/snapshot: %s Not Found", string(apiResponse.Payload)))
-				return diags
+			if err != nil {
+				return fmt.Errorf("could not fetch image/snapshot: %s", err)
 			}
 
 			isSnapshot = true
@@ -507,14 +500,9 @@ func resourceServerCreate(ctx context.Context, d *schema.ResourceData, meta inte
 		} else {
 			img, _, err := client.ImageApi.ImagesFindById(ctx, imageName).Execute()
 			if err != nil {
-				_, apiResponse, err := client.SnapshotApi.SnapshotsFindById(ctx, imageName).Execute()
+				_, _, err := client.SnapshotApi.SnapshotsFindById(ctx, image_name).Execute()
 				if err != nil {
-					payload := ""
-					if apiResponse != nil {
-						payload = fmt.Sprintf("API response: %s", string(apiResponse.Payload))
-					}
-					diags := diag.FromErr(fmt.Errorf("error fetching image/snapshot: %s %s", string(apiResponse.Payload), payload))
-					return diags
+					return fmt.Errorf("error fetching image/snapshot: %s", err)
 				}
 				isSnapshot = true
 			}
@@ -685,12 +673,8 @@ func resourceServerCreate(ctx context.Context, d *schema.ResourceData, meta inte
 	server, apiResponse, err := client.ServerApi.DatacentersServersPost(ctx, d.Get("datacenter_id").(string)).Server(request).Execute()
 
 	if err != nil {
-		payload := ""
-		if apiResponse != nil {
-			payload = fmt.Sprintf("API response: %s", string(apiResponse.Payload))
-		}
-		diags := diag.FromErr(fmt.Errorf("error creating server: (%s), %s", err, payload))
-		return diags
+		return fmt.Errorf(
+			"error creating server: (%s)", err)
 	}
 
 	if server.Id != nil {
@@ -1091,12 +1075,7 @@ func resourceServerUpdate(ctx context.Context, d *schema.ResourceData, meta inte
 	server, apiResponse, err := client.ServerApi.DatacentersServersPatch(ctx, dcId, d.Id()).Server(request).Execute()
 
 	if err != nil {
-		payload := ""
-		if apiResponse != nil {
-			payload = fmt.Sprintf("API response: %s", string(apiResponse.Payload))
-		}
-		diags := diag.FromErr(fmt.Errorf("error occured while updating server ID %s: %s %s", d.Id(), err, payload))
-		return diags
+		return fmt.Errorf("error occured while updating server ID %s: %s", d.Id(), err)
 	}
 
 	_, errState := getStateChangeConf(meta, d, apiResponse.Header.Get("Location"), schema.TimeoutUpdate).WaitForStateContext(ctx)

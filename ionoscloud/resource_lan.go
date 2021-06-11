@@ -91,16 +91,8 @@ func resourceLanCreate(ctx context.Context, d *schema.ResourceData, meta interfa
 
 	if err != nil {
 		d.SetId("")
-		payload := ""
-		if apiResponse != nil {
-			payload = fmt.Sprintf("API response: %s", string(apiResponse.Payload))
-		}
-		diags := diag.FromErr(fmt.Errorf("an error occured while creating LAN: %s %s", err, payload))
-		return diags
+		return fmt.Errorf("an error occured while creating LAN: %s", err)
 	}
-
-	log.Printf("[DEBUG] LAN ID: %s", *rsp.Id)
-	log.Printf("[DEBUG] LAN RESPONSE: %s", string(apiResponse.Payload))
 
 	d.SetId(*rsp.Id)
 

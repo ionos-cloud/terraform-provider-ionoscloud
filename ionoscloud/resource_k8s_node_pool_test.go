@@ -82,15 +82,12 @@ func testAccCheckk8sNodepoolDestroyCheck(s *terraform.State) error {
 
 		if err != nil {
 			if apiResponse == nil || apiResponse.StatusCode != 404 {
-				payload := ""
-				if apiResponse != nil {
-					payload = fmt.Sprintf("API response: %s", string(apiResponse.Payload))
-				}
-				return fmt.Errorf("k8s node pool still exists %s - an error occurred while checking it %s %s", rs.Primary.ID, err, payload)
+				return fmt.Errorf("an error occurred while checking the destruction of k8s node pool %s: %s", rs.Primary.ID, err)
 			}
 		} else {
-			return fmt.Errorf("k8s node pool still exists %s", rs.Primary.ID)
+			return fmt.Errorf("k8s node pool %s still exists", rs.Primary.ID)
 		}
+
 	}
 
 	return nil

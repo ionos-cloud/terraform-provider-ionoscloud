@@ -57,14 +57,10 @@ func testAccCheckDatacenterDestroyCheck(s *terraform.State) error {
 
 		if err != nil {
 			if apiResponse == nil || apiResponse.StatusCode != 404 {
-				payload := ""
-				if apiResponse != nil {
-					payload = fmt.Sprintf("API response: %s", string(apiResponse.Payload))
-				}
-				return fmt.Errorf("datacenter still exists %s - an error occurred while checking it %s %s", rs.Primary.ID, err, payload)
+				return fmt.Errorf("an error occurred while checking the destruction of datacenter %s: %s", rs.Primary.ID, err)
 			}
 		} else {
-			return fmt.Errorf("datacenter still exists %s", rs.Primary.ID)
+			return fmt.Errorf("datacenter %s still exists", rs.Primary.ID)
 		}
 	}
 

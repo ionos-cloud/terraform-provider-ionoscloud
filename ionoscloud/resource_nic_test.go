@@ -45,7 +45,6 @@ func testAccCheckNicDestroyCheck(s *terraform.State) error {
 	client := testAccProvider.Meta().(*ionoscloud.APIClient)
 
 	ctx, cancel := context.WithTimeout(context.Background(), *resourceDefaultTimeouts.Delete)
-
 	if cancel != nil {
 		defer cancel()
 	}
@@ -61,14 +60,10 @@ func testAccCheckNicDestroyCheck(s *terraform.State) error {
 
 		if err != nil {
 			if apiResponse == nil || apiResponse.StatusCode != 404 {
-				payload := ""
-				if apiResponse != nil {
-					payload = fmt.Sprintf("API response: %s", string(apiResponse.Payload))
-				}
-				return fmt.Errorf("NIC still exists %s - an error occurred while checking it %s %s", rs.Primary.ID, err, payload)
+				return fmt.Errorf("an error occurred while checking the destruction of nic %s: %s", rs.Primary.ID, err)
 			}
 		} else {
-			return fmt.Errorf("NIC still exists %s", rs.Primary.ID)
+			return fmt.Errorf("nic %s still exists", rs.Primary.ID)
 		}
 
 	}

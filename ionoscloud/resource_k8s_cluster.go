@@ -137,12 +137,7 @@ func resourcek8sClusterCreate(ctx context.Context, d *schema.ResourceData, meta 
 
 	if err != nil {
 		d.SetId("")
-		payload := ""
-		if apiResponse != nil {
-			payload = fmt.Sprintf("API response: %s", string(apiResponse.Payload))
-		}
-		diags := diag.FromErr(fmt.Errorf("error creating k8s cluster: %s %s", err, payload))
-		return diags
+		return fmt.Errorf("Error creating k8s cluster: %s \n ApiError: %s ", err, string(apiResponse.Payload))
 	}
 
 	d.SetId(*createdCluster.Id)

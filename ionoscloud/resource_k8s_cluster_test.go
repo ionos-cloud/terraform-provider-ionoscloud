@@ -59,15 +59,12 @@ func testAccCheckk8sClusterDestroyCheck(s *terraform.State) error {
 
 		if err != nil {
 			if apiResponse == nil || apiResponse.StatusCode != 404 {
-				payload := ""
-				if apiResponse != nil {
-					payload = fmt.Sprintf("API response: %s", string(apiResponse.Payload))
-				}
-				return fmt.Errorf("k8s cluster still exists %s - an error occurred while checking it %s %s", rs.Primary.ID, err, payload)
+				return fmt.Errorf("an error occurred while checking the destruction of k8s cluster %s: %s", rs.Primary.ID, err)
 			}
 		} else {
-			return fmt.Errorf("k8s cluster still exists %s", rs.Primary.ID)
+			return fmt.Errorf("k8s cluster %s still exists", rs.Primary.ID)
 		}
+
 	}
 
 	return nil
@@ -96,11 +93,7 @@ func testAccCheckk8sClusterExists(n string, k8sCluster *ionoscloud.KubernetesClu
 		foundK8sCluster, apiResponse, err := client.KubernetesApi.K8sFindByClusterId(ctx, rs.Primary.ID).Execute()
 
 		if err != nil {
-			payload := ""
-			if apiResponse != nil {
-				payload = fmt.Sprintf("API response: %s", string(apiResponse.Payload))
-			}
-			return fmt.Errorf("error occured while fetching k8s Cluster: %s %s", rs.Primary.ID, payload)
+			return fmt.Errorf("an error occured while fetching k8s Cluster %s: %s", rs.Primary.ID, err)
 		}
 		if *foundK8sCluster.Id != rs.Primary.ID {
 			return fmt.Errorf("record not found")

@@ -321,12 +321,7 @@ func resourceVolumeCreate(ctx context.Context, d *schema.ResourceData, meta inte
 	volume, apiResponse, err := client.VolumeApi.DatacentersVolumesPost(ctx, dcId).Volume(volume).Execute()
 
 	if err != nil {
-		payload := ""
-		if apiResponse != nil {
-			payload = fmt.Sprintf("API response: %s", string(apiResponse.Payload))
-		}
-		diags := diag.FromErr(fmt.Errorf("an error occured while creating a volume: %s %s", err, payload))
-		return diags
+		return fmt.Errorf("an error occured while creating a volume: %s", err)
 	}
 
 	var volumeId string
@@ -393,22 +388,13 @@ func resourceVolumeRead(ctx context.Context, d *schema.ResourceData, meta interf
 	volume, apiResponse, err := client.VolumeApi.DatacentersVolumesFindById(ctx, dcId, volumeID).Execute()
 
 	if err != nil {
-		if apiResponse != nil && apiResponse.StatusCode == 404 {
+
+		if apiResponse != nil && apiResponse.Response.StatusCode == 404 {
 			d.SetId("")
 			return nil
 		}
-		payload := ""
-		if apiResponse != nil {
-			payload = fmt.Sprintf("API response: %s", string(apiResponse.Payload))
-		}
-		diags := diag.FromErr(fmt.Errorf("error occured while fetching a volume ID %s %s %s", d.Id(), err, payload))
-		return diags
-	}
 
-	if apiResponse != nil && apiResponse.StatusCode > 299 {
-		diags := diag.FromErr(fmt.Errorf("an error occured while fetching a volume ID %s %s", d.Id(), string(apiResponse.Payload)))
-		return diags
-
+		return fmt.Errorf("error occured while fetching volume with ID %s: %s", d.Id(), err)
 	}
 
 	_, _, err = client.ServerApi.DatacentersServersVolumesFindById(ctx, dcId, serverID, volumeID).Execute()
@@ -605,12 +591,7 @@ func resourceVolumeUpdate(ctx context.Context, d *schema.ResourceData, meta inte
 	volume, apiResponse, err := client.VolumeApi.DatacentersVolumesPatch(ctx, dcId, d.Id()).Volume(properties).Execute()
 
 	if err != nil {
-		payload := ""
-		if apiResponse != nil {
-			payload = fmt.Sprintf("API response: %s", string(apiResponse.Payload))
-		}
-		diags := diag.FromErr(fmt.Errorf("an error occured while updating a volume ID %s %s %s", d.Id(), err, payload))
-		return diags
+		return fmt.Errorf("an error occured while updating volume with ID %s: %s", d.Id(), err)
 	}
 
 	// Wait, catching any errors
@@ -618,12 +599,6 @@ func resourceVolumeUpdate(ctx context.Context, d *schema.ResourceData, meta inte
 	if errState != nil {
 		diags := diag.FromErr(errState)
 		return diags
-	}
-
-	if apiResponse != nil && apiResponse.StatusCode > 299 {
-		diags := diag.FromErr(fmt.Errorf("an error occured while updating a volume ID %s %s", d.Id(), string(apiResponse.Payload)))
-		return diags
-
 	}
 
 	if d.HasChange("server_id") {
