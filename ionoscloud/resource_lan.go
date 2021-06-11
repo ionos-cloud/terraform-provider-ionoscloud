@@ -91,7 +91,8 @@ func resourceLanCreate(ctx context.Context, d *schema.ResourceData, meta interfa
 
 	if err != nil {
 		d.SetId("")
-		return fmt.Errorf("an error occured while creating LAN: %s", err)
+		diags := diag.FromErr(fmt.Errorf("an error occured while creating LAN: %s", err))
+		return diags
 	}
 
 	d.SetId(*rsp.Id)

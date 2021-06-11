@@ -98,7 +98,8 @@ func resourceUserCreate(ctx context.Context, d *schema.ResourceData, meta interf
 	}
 
 	if err != nil {
-		return fmt.Errorf("an error occured while creating a user: %s", err)
+		diags := diag.FromErr(fmt.Errorf("an error occured while creating a user: %s", err))
+		return diags
 	}
 
 	d.SetId(*rsp.Id)
@@ -220,7 +221,8 @@ func resourceUserUpdate(ctx context.Context, d *schema.ResourceData, meta interf
 	rsp, apiResponse, err = client.UserManagementApi.UmUsersPut(ctx, d.Id()).User(userReq).Execute()
 
 	if err != nil {
-		return fmt.Errorf("an error occured while patching a user ID %s %s", d.Id(), err)
+		diags := diag.FromErr(fmt.Errorf("an error occured while patching a user ID %s %s", d.Id(), err))
+		return diags
 	}
 
 	// Wait, catching any errors

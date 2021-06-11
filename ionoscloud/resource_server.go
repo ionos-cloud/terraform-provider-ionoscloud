@@ -446,7 +446,8 @@ func resourceServerCreate(ctx context.Context, d *schema.ResourceData, meta inte
 			} else {
 				dc, _, err := client.DataCenterApi.DatacentersFindById(ctx, dcId).Execute()
 				if err != nil {
-					return fmt.Errorf("error fetching datacenter %s: (%s)", dcId, err)
+					diags := diag.FromErr(fmt.Errorf("error fetching datacenter %s: (%s)", dcId, err))
+					return diags
 				}
 				imageAlias = getImageAlias(ctx, client, imageName, *dc.Properties.Location)
 			}
@@ -455,8 +456,9 @@ func resourceServerCreate(ctx context.Context, d *schema.ResourceData, meta inte
 			diags := diag.FromErr(fmt.Errorf("could not find an image/imagealias/snapshot that matches %s ", imageName))
 			return diags
 		}
-		if volume.ImagePassword == nil && len(sshkey_path) == 0 && isSnapshot == false && img.Properties.Public != nil && *img.Properties.Public {
-			return fmt.Errorf("either 'image_password' or 'ssh_key_path' must be provided")
+		if volume.ImagePassword == nil && len(sshkeyPath) == 0 && isSnapshot == false && img.Properties.Public != nil && *img.Properties.Public {
+			diags := diag.FromErr(fmt.Errorf("either 'image_password' or 'ssh_key_path' must be provided"))
+			return diags
 		}
 	} else {
 		img, apiResponse, err := client.ImageApi.ImagesFindById(ctx, imageName).Execute()
@@ -466,7 +468,8 @@ func resourceServerCreate(ctx context.Context, d *schema.ResourceData, meta inte
 			_, apiResponse, err = client.SnapshotApi.SnapshotsFindById(ctx, imageName).Execute()
 
 			if err != nil {
-				return fmt.Errorf("could not fetch image/snapshot: %s", err)
+				diags := diag.FromErr(fmt.Errorf("could not fetch image/snapshot: %s", err))
+				return diags
 			}
 
 			isSnapshot = true
@@ -500,9 +503,10 @@ func resourceServerCreate(ctx context.Context, d *schema.ResourceData, meta inte
 		} else {
 			img, _, err := client.ImageApi.ImagesFindById(ctx, imageName).Execute()
 			if err != nil {
-				_, _, err := client.SnapshotApi.SnapshotsFindById(ctx, image_name).Execute()
+				_, _, err := client.SnapshotApi.SnapshotsFindById(ctx, imageName).Execute()
 				if err != nil {
-					return fmt.Errorf("error fetching image/snapshot: %s", err)
+					diags := diag.FromErr(fmt.Errorf("error fetching image/snapshot: %s", err))
+					return diags
 				}
 				isSnapshot = true
 			}
@@ -673,8 +677,8 @@ func resourceServerCreate(ctx context.Context, d *schema.ResourceData, meta inte
 	server, apiResponse, err := client.ServerApi.DatacentersServersPost(ctx, d.Get("datacenter_id").(string)).Server(request).Execute()
 
 	if err != nil {
-		return fmt.Errorf(
-			"error creating server: (%s)", err)
+		diags := diag.FromErr(fmt.Errorf("error creating server: (%s)", err))
+		return diags
 	}
 
 	if server.Id != nil {
@@ -1075,7 +1079,8 @@ func resourceServerUpdate(ctx context.Context, d *schema.ResourceData, meta inte
 	server, apiResponse, err := client.ServerApi.DatacentersServersPatch(ctx, dcId, d.Id()).Server(request).Execute()
 
 	if err != nil {
-		return fmt.Errorf("error occured while updating server ID %s: %s", d.Id(), err)
+		diags := diag.FromErr(fmt.Errorf("error occured while updating server ID %s: %s", d.Id(), err))
+		return diags
 	}
 
 	_, errState := getStateChangeConf(meta, d, apiResponse.Header.Get("Location"), schema.TimeoutUpdate).WaitForStateContext(ctx)

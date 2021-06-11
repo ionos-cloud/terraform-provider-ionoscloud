@@ -321,7 +321,8 @@ func resourceVolumeCreate(ctx context.Context, d *schema.ResourceData, meta inte
 	volume, apiResponse, err := client.VolumeApi.DatacentersVolumesPost(ctx, dcId).Volume(volume).Execute()
 
 	if err != nil {
-		return fmt.Errorf("an error occured while creating a volume: %s", err)
+		diags := diag.FromErr(fmt.Errorf("an error occured while creating a volume: %s", err))
+		return diags
 	}
 
 	var volumeId string
@@ -394,7 +395,8 @@ func resourceVolumeRead(ctx context.Context, d *schema.ResourceData, meta interf
 			return nil
 		}
 
-		return fmt.Errorf("error occured while fetching volume with ID %s: %s", d.Id(), err)
+		diags := diag.FromErr(fmt.Errorf("error occured while fetching volume with ID %s: %s", d.Id(), err))
+		return diags
 	}
 
 	_, _, err = client.ServerApi.DatacentersServersVolumesFindById(ctx, dcId, serverID, volumeID).Execute()
@@ -591,7 +593,8 @@ func resourceVolumeUpdate(ctx context.Context, d *schema.ResourceData, meta inte
 	volume, apiResponse, err := client.VolumeApi.DatacentersVolumesPatch(ctx, dcId, d.Id()).Volume(properties).Execute()
 
 	if err != nil {
-		return fmt.Errorf("an error occured while updating volume with ID %s: %s", d.Id(), err)
+		diags := diag.FromErr(fmt.Errorf("an error occured while updating volume with ID %s: %s", d.Id(), err))
+		return diags
 	}
 
 	// Wait, catching any errors

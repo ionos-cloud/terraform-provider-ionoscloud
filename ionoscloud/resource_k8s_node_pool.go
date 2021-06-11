@@ -270,7 +270,8 @@ func resourcek8sNodePoolCreate(ctx context.Context, d *schema.ResourceData, meta
 
 	if err != nil {
 		d.SetId("")
-		return fmt.Errorf("error creating k8s node pool: %s", err)
+		diags := diag.FromErr(fmt.Errorf("error creating k8s node pool: %s", err))
+		return diags
 	}
 
 	d.SetId(*createdNodepool.Id)

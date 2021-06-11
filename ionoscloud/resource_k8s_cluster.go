@@ -133,16 +133,16 @@ func resourcek8sClusterCreate(ctx context.Context, d *schema.ResourceData, meta 
 		cluster.Properties.GatewayIp = &gatewayIp
 	}
 
-	createdCluster, apiResponse, err := client.KubernetesApi.K8sPost(ctx).KubernetesCluster(cluster).Execute()
+	createdCluster, _, err := client.KubernetesApi.K8sPost(ctx).KubernetesCluster(cluster).Execute()
 
 	if err != nil {
 		d.SetId("")
-		return fmt.Errorf("Error creating k8s cluster: %s \n ApiError: %s ", err, string(apiResponse.Payload))
+		diags := diag.FromErr(fmt.Errorf("error creating k8s cluster: %s \n", err))
+		return diags
 	}
 
 	d.SetId(*createdCluster.Id)
 	log.Printf("[INFO] Created k8s cluster: %s", d.Id())
-
 	for {
 		log.Printf("[INFO] Waiting for cluster %s to be ready...", d.Id())
 		time.Sleep(5 * time.Second)
