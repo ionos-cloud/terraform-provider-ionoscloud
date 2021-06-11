@@ -1,3 +1,29 @@
+## 5.1.5
+
+- fixes #12 - correctly setting up a custom Ionos Cloud API url
+
+## 5.1.4
+
+- error handling improvements 
+- always displaying the full response body from the API in case of an error
+
+## 5.1.3
+
+- Bug fix: correctly checking for nil the image volume 
+
+## 5.1.2
+
+- Bug fix: avoid sending an empty image password to the API if 
+  no image password is set
+
+## 5.1.1
+
+- Bug fix: nil check for image password when creating a server 
+
+## 5.1.0
+
+- Using the latest Ionos Cloud GO SDK v5.1.0
+
 ## 5.0.4
 
 BUG FIXES:

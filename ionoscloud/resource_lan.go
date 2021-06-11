@@ -214,35 +214,36 @@ func resourceLanUpdate(ctx context.Context, d *schema.ResourceData, meta interfa
 		}
 	}
 
-	dcid := d.Get("datacenter_id").(string)
-	rsp, apiResponse, err := client.LanApi.DatacentersLansPatch(ctx, dcid, d.Id()).Lan(*properties).Execute()
-	if err != nil {
-		payload := ""
-		if apiResponse != nil {
-			payload = fmt.Sprintf("API response: %s", string(apiResponse.Payload))
+	if properties != nil {
+		ctx, cancel := context.WithTimeout(context.Background(), *resourceDefaultTimeouts.Update)
+		if cancel != nil {
+			defer cancel()
 		}
-		diags := diag.FromErr(fmt.Errorf("an error occured while patching a lan ID %s %s %s", d.Id(), err, payload))
-		return diags
+		dcid := d.Get("datacenter_id").(string)
+		rsp, _, err := client.LanApi.DatacentersLansPatch(ctx, dcid, d.Id()).Lan(*properties).Execute()
+		if err != nil {
+			return fmt.Errorf("An error occured while patching a lan ID %s %s", d.Id(), err)
+		}
+
+		for {
+			log.Printf("[INFO] Waiting for LAN %s to be available...", d.Id())
+			time.Sleep(5 * time.Second)
+
+			clusterReady, rsErr := lanAvailable(client, d)
+
+			if rsErr != nil {
+				return fmt.Errorf("Error while checking readiness status of LAN %s: %s", d.Id(), rsErr)
+			}
+
+			if clusterReady && rsErr == nil {
+				log.Printf("[INFO] LAN %s ready: %+v", d.Id(), rsp)
+				break
+			}
+		}
+
 	}
 
-	for {
-		log.Printf("[INFO] Waiting for LAN %s to be available...", d.Id())
-		time.Sleep(5 * time.Second)
-
-		clusterReady, rsErr := lanAvailable(ctx, client, d)
-
-		if rsErr != nil {
-			diags := diag.FromErr(fmt.Errorf("error while checking readiness status of LAN %s: %s", d.Id(), rsErr))
-			return diags
-		}
-
-		if clusterReady {
-			log.Printf("[INFO] LAN %s ready: %+v", d.Id(), rsp)
-			break
-		}
-	}
-
-	return resourceLanRead(ctx, d, meta)
+	return resourceLanRead(d, meta)
 }
 
 func resourceLanDelete(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
@@ -292,16 +293,12 @@ func resourceLanDelete(ctx context.Context, d *schema.ResourceData, meta interfa
 func lanAvailable(ctx context.Context, client *ionoscloud.APIClient, d *schema.ResourceData) (bool, error) {
 
 	dcid := d.Get("datacenter_id").(string)
-	rsp, apiResponse, err := client.LanApi.DatacentersLansFindById(ctx, dcid, d.Id()).Execute()
+	rsp, _, err := client.LanApi.DatacentersLansFindById(ctx, dcid, d.Id()).Execute()
 
 	log.Printf("[INFO] Current status for LAN %s: %+v", d.Id(), rsp)
 
 	if err != nil {
-		payload := ""
-		if apiResponse != nil {
-			payload = fmt.Sprintf("API response: %s", string(apiResponse.Payload))
-		}
-		return true, fmt.Errorf("%s %s", err, payload)
+		return true, fmt.Errorf("error checking LAN status: %s", err)
 	}
 	return *rsp.Metadata.State == "AVAILABLE", nil
 }
