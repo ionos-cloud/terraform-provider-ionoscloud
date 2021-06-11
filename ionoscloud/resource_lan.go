@@ -115,10 +115,10 @@ func resourceLanCreate(d *schema.ResourceData, meta interface{}) error {
 		clusterReady, rsErr := lanAvailable(client, d)
 
 		if rsErr != nil {
-			return fmt.Errorf("Error while checking readiness status of LAN %s: %s", *rsp.Id, rsErr)
+			return fmt.Errorf("error while checking readiness status of LAN %s: %s", *rsp.Id, rsErr)
 		}
 
-		if clusterReady && rsErr == nil {
+		if clusterReady {
 			log.Printf("[INFO] LAN ready: %s", d.Id())
 			break
 		}
@@ -145,7 +145,7 @@ func resourceLanRead(d *schema.ResourceData, meta interface{}) error {
 			}
 		}
 
-		return fmt.Errorf("An error occured while fetching a LAN %s: %s", d.Id(), err)
+		return fmt.Errorf("an error occured while fetching a LAN %s: %s", d.Id(), err)
 	}
 
 	d.Set("public", *rsp.Properties.Public)
@@ -182,33 +182,19 @@ func resourceLanUpdate(d *schema.ResourceData, meta interface{}) error {
 		}
 	}
 
-	if properties != nil {
-		ctx, cancel := context.WithTimeout(context.Background(), *resourceDefaultTimeouts.Update)
-		if cancel != nil {
-			defer cancel()
-		}
-		dcid := d.Get("datacenter_id").(string)
-		rsp, _, err := client.LanApi.DatacentersLansPatch(ctx, dcid, d.Id()).Lan(*properties).Execute()
-		if err != nil {
-			return fmt.Errorf("An error occured while patching a lan ID %s %s", d.Id(), err)
-		}
+	ctx, cancel := context.WithTimeout(context.Background(), *resourceDefaultTimeouts.Update)
+	if cancel != nil {
+		defer cancel()
+	}
+	dcid := d.Get("datacenter_id").(string)
+	_, apiResponse, err := client.LanApi.DatacentersLansPatch(ctx, dcid, d.Id()).Lan(*properties).Execute()
+	if err != nil {
+		return fmt.Errorf("an error occured while patching a lan ID %s %s", d.Id(), err)
+	}
 
-		for {
-			log.Printf("[INFO] Waiting for LAN %s to be available...", d.Id())
-			time.Sleep(5 * time.Second)
-
-			clusterReady, rsErr := lanAvailable(client, d)
-
-			if rsErr != nil {
-				return fmt.Errorf("Error while checking readiness status of LAN %s: %s", d.Id(), rsErr)
-			}
-
-			if clusterReady && rsErr == nil {
-				log.Printf("[INFO] LAN %s ready: %+v", d.Id(), rsp)
-				break
-			}
-		}
-
+	_, errState := getStateChangeConf(meta, d, apiResponse.Header.Get("Location"), schema.TimeoutUpdate).WaitForState()
+	if errState != nil {
+		return errState
 	}
 
 	return resourceLanRead(d, meta)
@@ -243,10 +229,10 @@ func resourceLanDelete(d *schema.ResourceData, meta interface{}) error {
 		lDeleted, dsErr := lanDeleted(client, d)
 
 		if dsErr != nil {
-			return fmt.Errorf("Error while checking deletion status of LAN %s: %s", d.Id(), dsErr)
+			return fmt.Errorf("error while checking deletion status of LAN %s: %s", d.Id(), dsErr)
 		}
 
-		if lDeleted && dsErr == nil {
+		if lDeleted {
 			log.Printf("[INFO] Successfully deleted LAN: %s", d.Id())
 			break
 		}
@@ -267,7 +253,7 @@ func lanAvailable(client *ionoscloud.APIClient, d *schema.ResourceData) (bool, e
 	log.Printf("[INFO] Current status for LAN %s: %+v", d.Id(), rsp)
 
 	if err != nil {
-		return true, fmt.Errorf("Error checking LAN status: %s", err)
+		return true, fmt.Errorf("error checking LAN status: %s", err)
 	}
 	return *rsp.Metadata.State == "AVAILABLE", nil
 }
