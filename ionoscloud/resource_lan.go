@@ -94,9 +94,6 @@ func resourceLanCreate(d *schema.ResourceData, meta interface{}) error {
 		return fmt.Errorf("an error occured while creating LAN: %s", err)
 	}
 
-	log.Printf("[DEBUG] LAN ID: %s", *rsp.Id)
-	log.Printf("[DEBUG] LAN RESPONSE: %s", string(apiResponse.Payload))
-
 	d.SetId(*rsp.Id)
 
 	log.Printf("[INFO] LAN ID: %s", d.Id())
@@ -197,12 +194,13 @@ func resourceLanUpdate(d *schema.ResourceData, meta interface{}) error {
 		defer cancel()
 	}
 	dcid := d.Get("datacenter_id").(string)
+
 	_, apiResponse, err := client.LansApi.DatacentersLansPatch(ctx, dcid, d.Id()).Lan(*properties).Execute()
+
 	if err != nil {
 		return fmt.Errorf("an error occured while patching a lan ID %s %s", d.Id(), err)
 	}
 
-	// Wait, catching any errors
 	_, errState := getStateChangeConf(meta, d, apiResponse.Header.Get("Location"), schema.TimeoutUpdate).WaitForState()
 	if errState != nil {
 		return errState

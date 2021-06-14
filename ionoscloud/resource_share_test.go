@@ -55,16 +55,12 @@ func testAccCheckShareDestroyCheck(s *terraform.State) error {
 
 		_, apiResponse, err := client.UserManagementApi.UmGroupsSharesFindByResourceId(ctx, grpId, resourceId).Execute()
 
-		if err == nil || apiResponse == nil || apiResponse.Response.StatusCode != 404 {
-			var payload string
-			var status int
-			if apiResponse != nil {
-				payload = string(apiResponse.Payload)
-				status = apiResponse.StatusCode
-			} else {
-				payload = "<nil>"
+		if err != nil {
+			if apiResponse == nil || apiResponse.StatusCode != 404 {
+				return fmt.Errorf("an error occurred while checking the destruction of resource %s in group %s: %s", resourceId, grpId, err)
 			}
-			return fmt.Errorf("share for resource %s still exists in group %s: http status %d / payload: %s", resourceId, grpId, status, payload)
+		} else {
+			return fmt.Errorf("share for resource %s still exists in group %s", resourceId, grpId)
 		}
 
 	}

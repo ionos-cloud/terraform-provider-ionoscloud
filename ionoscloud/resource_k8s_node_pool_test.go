@@ -80,17 +80,14 @@ func testAccCheckk8sNodepoolDestroyCheck(s *terraform.State) error {
 
 		_, apiResponse, err := client.KubernetesApi.K8sNodepoolsFindById(ctx, rs.Primary.Attributes["k8s_cluster_id"], rs.Primary.ID).Execute()
 
-		if _, ok := err.(ionoscloud.GenericOpenAPIError); ok {
-			if apiResponse == nil || apiResponse.Response.StatusCode != 404 {
-				var payload = "<nil>"
-				if apiResponse != nil {
-					payload = string(apiResponse.Payload)
-				}
-				return fmt.Errorf("K8s node pool still exists %s %s", rs.Primary.ID, payload)
+		if err != nil {
+			if apiResponse == nil || apiResponse.StatusCode != 404 {
+				return fmt.Errorf("an error occurred while checking the destruction of k8s node pool %s: %s", rs.Primary.ID, err)
 			}
 		} else {
-			return fmt.Errorf("unable to fetch k8s node pool %s %s", rs.Primary.ID, err)
+			return fmt.Errorf("k8s node pool %s still exists", rs.Primary.ID)
 		}
+
 	}
 
 	return nil

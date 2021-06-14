@@ -138,15 +138,11 @@ func resourcek8sClusterCreate(d *schema.ResourceData, meta interface{}) error {
 		defer cancel()
 	}
 
-	createdCluster, apiResponse, err := client.KubernetesApi.K8sPost(ctx).KubernetesCluster(cluster).Execute()
+	createdCluster, _, err := client.KubernetesApi.K8sPost(ctx).KubernetesCluster(cluster).Execute()
 
 	if err != nil {
 		d.SetId("")
-		var payload string
-		if apiResponse != nil {
-			payload = string(apiResponse.Payload)
-		}
-		return fmt.Errorf("error creating k8s cluster: %s \n ApiError: %s ", err, payload)
+		return fmt.Errorf("error creating k8s cluster: %s", err)
 	}
 
 	d.SetId(*createdCluster.Id)

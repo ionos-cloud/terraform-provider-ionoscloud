@@ -234,10 +234,6 @@ func resourceServer() *schema.Resource {
 							Elem:     &schema.Schema{Type: schema.TypeString},
 							Computed: true,
 						},
-						"nat": {
-							Type:     schema.TypeBool,
-							Optional: true,
-						},
 						"firewall_active": {
 							Type:     schema.TypeBool,
 							Optional: true,
@@ -467,40 +463,52 @@ func resourceServerCreate(d *schema.ResourceData, meta interface{}) error {
 	} else {
 		img, apiResponse, err := client.ImagesApi.ImagesFindById(ctx, imageInput).Execute()
 
-		if err != nil {
-			if apiResponse != nil && apiResponse.Response.StatusCode == 404 {
+		if apiResponse != nil && apiResponse.Response.StatusCode == 404 {
 
-				log.Printf("[DEBUG] image %s not found; trying snapshots\n", imageInput)
-				snap, apiResponse, err := client.SnapshotsApi.SnapshotsFindById(ctx, imageInput).Execute()
+			_, apiResponse, err = client.SnapshotsApi.SnapshotsFindById(ctx, imageInput).Execute()
 
-				if apiResponse != nil && apiResponse.Response.StatusCode == 404 {
-					return fmt.Errorf("error creating server: image/snapshot %s not found: %s",
-						imageInput, string(apiResponse.Payload))
-				} else if err != nil {
-					return fmt.Errorf("error fetching image/snapshot info: %s, %s", err, responseBody(apiResponse))
-				}
+			if err != nil {
+				return fmt.Errorf("could not fetch image/snapshot: %s", err)
+			}
 
-				isSnapshot = true
+			isSnapshot = true
 
-				image = *snap.Id
+		} else if err != nil {
+			return fmt.Errorf("error fetching image/snapshot: %s", err)
+		}
 
-			} else {
-				return fmt.Errorf("error fetching image info: %s, %s", err, responseBody(apiResponse))
+		if *img.Properties.Public == true && isSnapshot == false {
+
+			if volume.ImagePassword == nil && len(sshKeyPath) == 0 {
+				return fmt.Errorf("either 'image_password' or 'ssh_key_path' must be provided")
+			}
+
+			img, err := getImage(client, d.Get("datacenter_id").(string), imageInput, *volume.Type)
+
+			if err != nil {
+				return err
+			}
+
+			if img != nil {
+				image = *img.Id
 			}
 		} else {
-			if img.Properties != nil && img.Properties.Public != nil && *img.Properties.Public == true && isSnapshot == false {
-				if volume.ImagePassword == nil && len(sshKeyPath) == 0 {
+			img, _, err := client.ImagesApi.ImagesFindById(ctx, imageInput).Execute()
+			if err != nil {
+				snap, _, err := client.SnapshotsApi.SnapshotsFindById(ctx, imageInput).Execute()
+				if err != nil {
+					return fmt.Errorf("error fetching image/snapshot: %s", err)
+				}
+				isSnapshot = true
+				image = *snap.Id
+			} else {
+				if img.Properties.Public != nil && *img.Properties.Public == true && isSnapshot == false &&
+					volume.ImagePassword == nil && len(sshKeyPath) == 0 {
 					return fmt.Errorf("either 'image_password' or 'ssh_key_path' must be provided")
 				}
+				image = imageInput
 			}
-
-			image = *img.Id
-
 		}
-	}
-
-	if isSnapshot == true && (volume.ImagePassword != nil || len(sshKeyPath) > 0) {
-		return fmt.Errorf("passwords/SSH keys are not supported for snapshots")
 	}
 
 	volume.Image = &image
@@ -635,8 +643,7 @@ func resourceServerCreate(d *schema.ResourceData, meta interface{}) error {
 	server, apiResponse, err := client.ServersApi.DatacentersServersPost(ctx, d.Get("datacenter_id").(string)).Server(request).Execute()
 
 	if err != nil {
-		return fmt.Errorf(
-			"Error creating server: (%s) \n apiEroor: %v", err, responseBody(apiResponse))
+		return fmt.Errorf("error creating server: (%s)", err)
 	}
 	d.SetId(*server.Id)
 
@@ -815,10 +822,13 @@ func resourceServerRead(d *schema.ResourceData, meta interface{}) error {
 		}
 	}
 
-	if server.Entities.Volumes != nil && len(*server.Entities.Volumes.Items) > 0 {
+	if server.Entities.Volumes != nil &&
+		len(*server.Entities.Volumes.Items) > 0 &&
+		(*server.Entities.Volumes.Items)[0].Properties.Image != nil {
 		if err := d.Set("boot_image", *(*server.Entities.Volumes.Items)[0].Properties.Image); err != nil {
 			return err
 		}
+
 	}
 
 	if primarynic, ok := d.GetOk("primary_nic"); ok {
@@ -837,28 +847,17 @@ func resourceServerRead(d *schema.ResourceData, meta interface{}) error {
 			}
 		}
 
-		network := map[string]interface{}{
-			"dhcp":            *nic.Properties.Dhcp,
-			"firewall_active": *nic.Properties.FirewallActive,
-		}
+		network := map[string]interface{}{}
 
-		if nic.Properties.Lan != nil {
-			network["lan"] = *nic.Properties.Lan
-		}
+		setPropWithNilCheck(network, "dhcp", nic.Properties.Dhcp)
+		setPropWithNilCheck(network, "firewall_active", nic.Properties.FirewallActive)
 
-		if nic.Properties.Name != nil {
-			network["name"] = *nic.Properties.Name
-		}
+		setPropWithNilCheck(network, "lan", nic.Properties.Lan)
+		setPropWithNilCheck(network, "name", nic.Properties.Name)
+		setPropWithNilCheck(network, "ips", nic.Properties.Ips)
+		setPropWithNilCheck(network, "mac", nic.Properties.Mac)
 
-		if nic.Properties.Ips != nil {
-			network["ips"] = *nic.Properties.Ips
-		}
-
-		if nic.Properties.Mac != nil {
-			network["mac"] = *nic.Properties.Mac
-		}
-
-		if len(*nic.Properties.Ips) > 0 {
+		if nic.Properties.Ips != nil && len(*nic.Properties.Ips) > 0 {
 			network["ip"] = (*nic.Properties.Ips)[0]
 		}
 
@@ -868,38 +867,20 @@ func resourceServerRead(d *schema.ResourceData, meta interface{}) error {
 				return fmt.Errorf("error occured while fetching firewallrule %s for server ID %s %s", firewallId.(string), serverId, err)
 			}
 
-			fw := map[string]interface{}{
+			fw := map[string]interface{}{}
+			/*
 				"protocol": *firewall.Properties.Protocol,
 				"name":     *firewall.Properties.Name,
-			}
-
-			if firewall.Properties.SourceMac != nil {
-				fw["source_mac"] = *firewall.Properties.SourceMac
-			}
-
-			if firewall.Properties.SourceIp != nil {
-				fw["source_ip"] = *firewall.Properties.SourceIp
-			}
-
-			if firewall.Properties.TargetIp != nil {
-				fw["target_ip"] = *firewall.Properties.TargetIp
-			}
-
-			if firewall.Properties.PortRangeStart != nil {
-				fw["port_range_start"] = *firewall.Properties.PortRangeStart
-			}
-
-			if firewall.Properties.PortRangeEnd != nil {
-				fw["port_range_end"] = *firewall.Properties.PortRangeEnd
-			}
-
-			if firewall.Properties.IcmpType != nil {
-				fw["icmp_type"] = *firewall.Properties.IcmpType
-			}
-
-			if firewall.Properties.IcmpCode != nil {
-				fw["icmp_code"] = *firewall.Properties.IcmpCode
-			}
+			*/
+			setPropWithNilCheck(fw, "protocol", firewall.Properties.Protocol)
+			setPropWithNilCheck(fw, "name", firewall.Properties.Name)
+			setPropWithNilCheck(fw, "source_mac", firewall.Properties.SourceMac)
+			setPropWithNilCheck(fw, "source_ip", firewall.Properties.SourceIp)
+			setPropWithNilCheck(fw, "target_ip", firewall.Properties.TargetIp)
+			setPropWithNilCheck(fw, "port_range_start", firewall.Properties.PortRangeStart)
+			setPropWithNilCheck(fw, "port_range_end", firewall.Properties.PortRangeEnd)
+			setPropWithNilCheck(fw, "icmp_type", firewall.Properties.IcmpType)
+			setPropWithNilCheck(fw, "icmp_code", firewall.Properties.IcmpCode)
 
 			network["firewall"] = []map[string]interface{}{fw}
 		}
@@ -920,29 +901,12 @@ func resourceServerRead(d *schema.ResourceData, meta interface{}) error {
 		if err == nil {
 			volumeItem := map[string]interface{}{}
 
-			if volumeObj.Properties.Name != nil {
-				volumeItem["name"] = *volumeObj.Properties.Name
-			}
-
-			if volumeObj.Properties.Type != nil {
-				volumeItem["disk_type"] = *volumeObj.Properties.Type
-			}
-
-			if volumeObj.Properties.Size != nil {
-				volumeItem["size"] = *volumeObj.Properties.Size
-			}
-
-			if volumeObj.Properties.LicenceType != nil {
-				volumeItem["licence_type"] = *volumeObj.Properties.LicenceType
-			}
-
-			if volumeObj.Properties.Bus != nil {
-				volumeItem["bus"] = *volumeObj.Properties.Bus
-			}
-
-			if volumeObj.Properties.AvailabilityZone != nil {
-				volumeItem["availability_zone"] = *volumeObj.Properties.AvailabilityZone
-			}
+			setPropWithNilCheck(volumeItem, "name", volumeObj.Properties.Name)
+			setPropWithNilCheck(volumeItem, "disk_type", volumeObj.Properties.Type)
+			setPropWithNilCheck(volumeItem, "size", volumeObj.Properties.Size)
+			setPropWithNilCheck(volumeItem, "licence_type", volumeObj.Properties.LicenceType)
+			setPropWithNilCheck(volumeItem, "bus", volumeObj.Properties.Bus)
+			setPropWithNilCheck(volumeItem, "availability_zone", volumeObj.Properties.AvailabilityZone)
 
 			volumesList := []map[string]interface{}{volumeItem}
 			if err := d.Set("volume", volumesList); err != nil {
@@ -1023,7 +987,7 @@ func resourceServerUpdate(d *schema.ResourceData, meta interface{}) error {
 	server, apiResponse, err := client.ServersApi.DatacentersServersPatch(ctx, dcId, d.Id()).Server(request).Execute()
 
 	if err != nil {
-		return fmt.Errorf("error occured while updating server ID %s %s", d.Id(), err)
+		return fmt.Errorf("error occured while updating server ID %s: %s", d.Id(), err)
 	}
 
 	_, errState := getStateChangeConf(meta, d, apiResponse.Header.Get("Location"), schema.TimeoutUpdate).WaitForState()

@@ -57,17 +57,16 @@ func testAccCheckNicDestroyCheck(s *terraform.State) error {
 		dcId := rs.Primary.Attributes["datacenter_id"]
 		serverId := rs.Primary.Attributes["server_id"]
 
-		_, apiResponse, err := client.NetworkInterfacesApi.DatacentersServersNicsFindById(ctx, dcId, serverId, rs.Primary.ID).Execute()
+		_, apiResponse, err := client.NetworkInterfacesApi.
+			DatacentersServersNicsFindById(ctx, dcId, serverId, rs.Primary.ID).
+			Execute()
+
 		if err != nil {
-			if apiResponse != nil {
-				if apiResponse.Response.StatusCode != 404 {
-					return fmt.Errorf("error fetching nic with id %s: %s, %s", rs.Primary.ID, err, responseBody(apiResponse))
-				}
-			} else {
-				return err
+			if apiResponse == nil || apiResponse.StatusCode != 404 {
+				return fmt.Errorf("an error occurred while checking the destruction of nic %s: %s", rs.Primary.ID, err)
 			}
 		} else {
-			return fmt.Errorf("nic with ID %s still exists", rs.Primary.ID)
+			return fmt.Errorf("nic %s still exists", rs.Primary.ID)
 		}
 	}
 

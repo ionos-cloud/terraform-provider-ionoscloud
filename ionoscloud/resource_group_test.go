@@ -54,14 +54,12 @@ func testAccCheckGroupDestroyCheck(s *terraform.State) error {
 		}
 		_, apiResponse, err := client.UserManagementApi.UmGroupsFindById(ctx, rs.Primary.ID).Execute()
 
-		if err == nil || apiResponse == nil || apiResponse.Response.StatusCode != 404 {
-			var payload string
-			if apiResponse != nil {
-				payload = string(apiResponse.Payload)
-			} else {
-				payload = "<nil>"
+		if err != nil {
+			if apiResponse == nil || apiResponse.StatusCode != 404 {
+				return fmt.Errorf("an error occurred while checking the destruction of group %s: %s", rs.Primary.ID, err)
 			}
-			return fmt.Errorf("group still exists %s %s", rs.Primary.ID, payload)
+		} else {
+			return fmt.Errorf("group %s still exists", rs.Primary.ID)
 		}
 
 	}

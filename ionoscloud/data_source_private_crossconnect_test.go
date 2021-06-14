@@ -45,7 +45,7 @@ func TestAccDataSourcePcc_matchName(t *testing.T) {
 				),
 			},
 			{
-				Config: `/* this config intentionally left blank */`,
+				Config: `/* intentionally left blank - to ensure resources are destroyed in the right order */`,
 			},
 		},
 	})

@@ -5,6 +5,7 @@ import (
 	"fmt"
 	ionoscloud "github.com/ionos-cloud/sdk-go/v6"
 	"log"
+	"reflect"
 	"strings"
 	"time"
 
@@ -367,6 +368,7 @@ func diffSlice(slice1 []string, slice2 []string) []string {
 	return diff
 }
 
+
 func responseBody(resp *ionoscloud.APIResponse) string {
 	ret := "<nil>"
 	if resp != nil {
@@ -375,3 +377,16 @@ func responseBody(resp *ionoscloud.APIResponse) string {
 
 	return ret
 }
+
+func setPropWithNilCheck(m map[string]interface{}, prop string, v interface{}) {
+
+	rVal := reflect.ValueOf(v)
+	if rVal.Kind() == reflect.Ptr {
+		if !rVal.IsNil() {
+			m[prop] = rVal.Elem().Interface()
+		}
+	} else {
+		m[prop] = v
+	}
+}
+

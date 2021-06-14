@@ -203,10 +203,6 @@ func resourceVolumeCreate(d *schema.ResourceData, meta interface{}) error {
 		}
 	}
 
-	if image == "" && licenceType == "" && isSnapshot == false {
-		return fmt.Errorf("either 'image_name', or 'licenceType' must be set")
-	}
-
 	if isSnapshot == true && (imagePassword != "" || len(publicKeys) > 0) {
 		return fmt.Errorf("you can't pass 'image_password' and/or 'ssh keys' when creating a volume from a snapshot")
 	}
@@ -218,10 +214,11 @@ func resourceVolumeCreate(d *schema.ResourceData, meta interface{}) error {
 
 	volume := ionoscloud.Volume{
 		Properties: &ionoscloud.VolumeProperties{
-			Name: &volumeName,
-			Size: &volumeSize,
-			Type: &volumeType,
-			Bus:  &volumeBus,
+			Name:          &volumeName,
+			Size:          &volumeSize,
+			Type:          &volumeType,
+			Bus:           &volumeBus,
+			LicenceType:   &licenceType,
 		},
 	}
 
@@ -285,8 +282,8 @@ func resourceVolumeCreate(d *schema.ResourceData, meta interface{}) error {
 
 	backupUnitId := d.Get("backup_unit_id").(string)
 	if IsValidUUID(backupUnitId) {
-		if image == "" {
-			return fmt.Errorf("it is mandatory to provied public image in conjunction with backup unit id property")
+		if image == "" && imageAlias == "" {
+			return fmt.Errorf("it is mandatory to provied either public image or imageAlias in conjunction with backup unit id property")
 		} else {
 			volume.Properties.BackupunitId = &backupUnitId
 		}
@@ -372,17 +369,11 @@ func resourceVolumeRead(d *schema.ResourceData, meta interface{}) error {
 	volume, apiResponse, err := client.VolumesApi.DatacentersVolumesFindById(ctx, dcId, volumeID).Execute()
 
 	if err != nil {
-		if _, ok := err.(ionoscloud.GenericOpenAPIError); ok {
-			if apiResponse != nil && apiResponse.Response.StatusCode == 404 {
-				d.SetId("")
-				return nil
-			}
+		if apiResponse != nil && apiResponse.Response.StatusCode == 404 {
+			d.SetId("")
+			return nil
 		}
-		return fmt.Errorf("error occured while fetching a volume ID %s %s", d.Id(), err)
-	}
-
-	if apiResponse != nil && apiResponse.Response.StatusCode > 299 {
-		return fmt.Errorf("an error occured while fetching a volume ID %s %s", d.Id(), string(apiResponse.Payload))
+		return fmt.Errorf("error occured while fetching volume with ID %s: %s", d.Id(), err)
 	}
 
 	_, _, err = client.ServersApi.DatacentersServersVolumesFindById(ctx, dcId, serverID, volumeID).Execute()
@@ -570,7 +561,8 @@ func resourceVolumeUpdate(d *schema.ResourceData, meta interface{}) error {
 	volume, apiResponse, err := client.VolumesApi.DatacentersVolumesPatch(ctx, dcId, d.Id()).Volume(properties).Execute()
 
 	if err != nil {
-		return fmt.Errorf("an error occured while updating a volume ID %s %s", d.Id(), err)
+		return fmt.Errorf("an error occured while updating volume with ID %s: %s", d.Id(), err)
+
 	}
 
 	// Wait, catching any errors
