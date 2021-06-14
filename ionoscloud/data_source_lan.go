@@ -123,7 +123,6 @@ func dataSourceLanRead(d *schema.ResourceData, meta interface{}) error {
 		return errors.New("please provide either the lan id or name")
 	}
 	var lan ionoscloud.Lan
-	var apiResponse *ionoscloud.APIResponse
 	var err error
 
 	ctx, cancel := context.WithTimeout(context.Background(), *resourceDefaultTimeouts.Default)
@@ -132,25 +131,17 @@ func dataSourceLanRead(d *schema.ResourceData, meta interface{}) error {
 	}
 	if idOk {
 		/* search by ID */
-		lan, apiResponse, err = client.LanApi.DatacentersLansFindById(ctx, datacenterId.(string), id.(string)).Execute()
+		lan, _, err = client.LanApi.DatacentersLansFindById(ctx, datacenterId.(string), id.(string)).Execute()
 		if err != nil {
-			payload := ""
-			if apiResponse != nil {
-				payload = fmt.Sprintf("API response: %s", string(apiResponse.Payload))
-			}
-			return fmt.Errorf("an error occurred while fetching lan with ID %s: %s %s", id.(string), err, payload)
+			return fmt.Errorf("an error occurred while fetching lan with ID %s: %s", id.(string), err)
 		}
 	} else {
 		/* search by name */
 		var lans ionoscloud.Lans
 
-		lans, apiResponse, err := client.LanApi.DatacentersLansGet(ctx, datacenterId.(string)).Execute()
+		lans, _, err := client.LanApi.DatacentersLansGet(ctx, datacenterId.(string)).Execute()
 		if err != nil {
-			payload := ""
-			if apiResponse != nil {
-				payload = fmt.Sprintf("API response: %s", string(apiResponse.Payload))
-			}
-			return fmt.Errorf("an error occurred while fetching lans: %s %s", err.Error(), payload)
+			return fmt.Errorf("an error occurred while fetching lans: %s", err.Error())
 		}
 
 		found := false
@@ -158,13 +149,9 @@ func dataSourceLanRead(d *schema.ResourceData, meta interface{}) error {
 			for _, l := range *lans.Items {
 				if l.Properties.Name != nil && *l.Properties.Name == name.(string) {
 					/* lan found */
-					lan, apiResponse, err = client.LanApi.DatacentersLansFindById(ctx, datacenterId.(string), *l.Id).Execute()
+					lan, _, err = client.LanApi.DatacentersLansFindById(ctx, datacenterId.(string), *l.Id).Execute()
 					if err != nil {
-						payload := ""
-						if apiResponse != nil {
-							payload = fmt.Sprintf("API response: %s", string(apiResponse.Payload))
-						}
-						return fmt.Errorf("an error occurred while fetching lan %s: %s %s", *l.Id, err, payload)
+						return fmt.Errorf("an error occurred while fetching lan %s: %s", *l.Id, err)
 					}
 					found = true
 					break

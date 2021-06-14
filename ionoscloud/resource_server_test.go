@@ -70,11 +70,7 @@ func testAccCheckServerDestroyCheck(s *terraform.State) error {
 
 		if err != nil {
 			if apiResponse == nil || apiResponse.StatusCode != 404 {
-				payload := ""
-				if apiResponse != nil {
-					payload = fmt.Sprintf("API response: %s", string(apiResponse.Payload))
-				}
-				return fmt.Errorf("server still exists %s - an error occurred while checking it %s %s", rs.Primary.ID, err, payload)
+				return fmt.Errorf("server still exists %s - an error occurred while checking it %s", rs.Primary.ID, err)
 			}
 		} else {
 			return fmt.Errorf("server still exists %s", rs.Primary.ID)
@@ -119,14 +115,10 @@ func testAccCheckServerExists(n string, server *ionoscloud.Server) resource.Test
 			defer cancel()
 		}
 
-		foundServer, apiResponse, err := client.ServerApi.DatacentersServersFindById(ctx, rs.Primary.Attributes["datacenter_id"], rs.Primary.ID).Execute()
+		foundServer, _, err := client.ServerApi.DatacentersServersFindById(ctx, rs.Primary.Attributes["datacenter_id"], rs.Primary.ID).Execute()
 
 		if err != nil {
-			payload := ""
-			if apiResponse != nil {
-				payload = fmt.Sprintf("API response: %s", string(apiResponse.Payload))
-			}
-			return fmt.Errorf("error occured while fetching Server: %s %s %s", rs.Primary.ID, err, payload)
+			return fmt.Errorf("error occured while fetching Server: %s %s", rs.Primary.ID, err)
 		}
 		if *foundServer.Id != rs.Primary.ID {
 			return fmt.Errorf("record not found")

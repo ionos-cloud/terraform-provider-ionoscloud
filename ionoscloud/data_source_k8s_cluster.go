@@ -106,7 +106,6 @@ func dataSourceK8sReadCluster(d *schema.ResourceData, meta interface{}) error {
 		return errors.New("please provide either the lan id or name")
 	}
 	var cluster ionoscloud.KubernetesCluster
-	var apiResponse *ionoscloud.APIResponse
 	var err error
 
 	ctx, cancel := context.WithTimeout(context.Background(), *resourceDefaultTimeouts.Default)
@@ -117,13 +116,9 @@ func dataSourceK8sReadCluster(d *schema.ResourceData, meta interface{}) error {
 
 	if idOk {
 		/* search by ID */
-		cluster, apiResponse, err = client.KubernetesApi.K8sFindByClusterId(ctx, id.(string)).Execute()
+		cluster, _, err = client.KubernetesApi.K8sFindByClusterId(ctx, id.(string)).Execute()
 		if err != nil {
-			payload := ""
-			if apiResponse != nil {
-				payload = fmt.Sprintf("API response: %s", string(apiResponse.Payload))
-			}
-			return fmt.Errorf("an error occurred while fetching the k8s cluster with ID %s: %s %s", id.(string), err, payload)
+			return fmt.Errorf("an error occurred while fetching the k8s cluster with ID %s: %s", id.(string), err)
 		}
 	} else {
 		/* search by name */
@@ -135,25 +130,17 @@ func dataSourceK8sReadCluster(d *schema.ResourceData, meta interface{}) error {
 			defer cancel()
 		}
 
-		clusters, apiResponse, err := client.KubernetesApi.K8sGet(ctx).Execute()
+		clusters, _, err := client.KubernetesApi.K8sGet(ctx).Execute()
 		if err != nil {
-			payload := ""
-			if apiResponse != nil {
-				payload = fmt.Sprintf("API response: %s", string(apiResponse.Payload))
-			}
-			return fmt.Errorf("an error occurred while fetching k8s clusters: %s %s", err.Error(), payload)
+			return fmt.Errorf("an error occurred while fetching k8s clusters: %s", err.Error())
 		}
 
 		found := false
 		if clusters.Items != nil {
 			for _, c := range *clusters.Items {
-				tmpCluster, apiResponse, err := client.KubernetesApi.K8sFindByClusterId(ctx, *c.Id).Execute()
+				tmpCluster, _, err := client.KubernetesApi.K8sFindByClusterId(ctx, *c.Id).Execute()
 				if err != nil {
-					payload := ""
-					if apiResponse != nil {
-						payload = fmt.Sprintf("API response: %s", string(apiResponse.Payload))
-					}
-					return fmt.Errorf("an error occurred while fetching k8s cluster with ID %s: %s %s", *c.Id, err.Error(), payload)
+					return fmt.Errorf("an error occurred while fetching k8s cluster with ID %s: %s", *c.Id, err.Error())
 				}
 				if tmpCluster.Properties.Name != nil && *tmpCluster.Properties.Name == name.(string) {
 					/* lan found */
@@ -264,13 +251,9 @@ func setK8sClusterData(d *schema.ResourceData, cluster *ionoscloud.KubernetesClu
 
 	/* get and set the kubeconfig */
 	if cluster.Id != nil {
-		kubeConfig, apiResponse, err := client.KubernetesApi.K8sKubeconfigGet(ctx, *cluster.Id).Execute()
+		kubeConfig, _, err := client.KubernetesApi.K8sKubeconfigGet(ctx, *cluster.Id).Execute()
 		if err != nil {
-			payload := ""
-			if apiResponse != nil {
-				payload = fmt.Sprintf("API response: %s", string(apiResponse.Payload))
-			}
-			return fmt.Errorf("an error occurred while fetching the kubernetes config for cluster with ID %s: %s %s", *cluster.Id, err, payload)
+			return fmt.Errorf("an error occurred while fetching the kubernetes config for cluster with ID %s: %s", *cluster.Id, err)
 		}
 
 		if kubeConfig.Properties.Kubeconfig != nil {
@@ -280,13 +263,9 @@ func setK8sClusterData(d *schema.ResourceData, cluster *ionoscloud.KubernetesClu
 		}
 
 		/* getting node pools */
-		clusterNodePools, apiResponse, err := client.KubernetesApi.K8sNodepoolsGet(ctx, *cluster.Id).Execute()
+		clusterNodePools, _, err := client.KubernetesApi.K8sNodepoolsGet(ctx, *cluster.Id).Execute()
 		if err != nil {
-			payload := ""
-			if apiResponse != nil {
-				payload = fmt.Sprintf("API response: %s", string(apiResponse.Payload))
-			}
-			return fmt.Errorf("an error occurred while fetching the kubernetes cluster node pools for cluster with ID %s: %s %s", *cluster.Id, err, payload)
+			return fmt.Errorf("an error occurred while fetching the kubernetes cluster node pools for cluster with ID %s: %s", *cluster.Id, err)
 		}
 
 		nodePools := make([]interface{}, 0)

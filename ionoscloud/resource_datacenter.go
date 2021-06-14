@@ -77,12 +77,8 @@ func resourceDatacenterCreate(ctx context.Context, d *schema.ResourceData, meta 
 	createdDatacenter, apiResponse, err := client.DataCenterApi.DatacentersPost(ctx).Datacenter(datacenter).Execute()
 
 	if err != nil {
-		payload := ""
-		if apiResponse != nil {
-			payload = fmt.Sprintf("API response: %s", string(apiResponse.Payload))
-		}
 		diags := diag.FromErr(fmt.Errorf(
-			"error creating data center (%s) (%s) %s", d.Id(), err, payload))
+			"error creating data center (%s) (%s)", d.Id(), err))
 		return diags
 	}
 	d.SetId(*createdDatacenter.Id)
@@ -115,11 +111,7 @@ func resourceDatacenterRead(ctx context.Context, d *schema.ResourceData, meta in
 			d.SetId("")
 			return nil
 		}
-		payload := ""
-		if apiResponse != nil {
-			payload = fmt.Sprintf("API response: %s", string(apiResponse.Payload))
-		}
-		diags := diag.FromErr(fmt.Errorf("error while fetching a data center ID %s %s %s", d.Id(), err, payload))
+		diags := diag.FromErr(fmt.Errorf("error while fetching a data center ID %s %s", d.Id(), err))
 		return diags
 	}
 
@@ -190,11 +182,7 @@ func resourceDatacenterUpdate(ctx context.Context, d *schema.ResourceData, meta 
 	_, apiResponse, err := client.DataCenterApi.DatacentersPatch(ctx, d.Id()).Datacenter(obj).Execute()
 
 	if err != nil {
-		payload := ""
-		if apiResponse != nil {
-			payload = fmt.Sprintf("API response: %s", string(apiResponse.Payload))
-		}
-		diags := diag.FromErr(fmt.Errorf("an error occured while update the data center ID %s %s %s", d.Id(), err, payload))
+		diags := diag.FromErr(fmt.Errorf("an error occured while update the data center ID %s %s", d.Id(), err))
 		return diags
 	}
 
@@ -215,11 +203,7 @@ func resourceDatacenterDelete(ctx context.Context, d *schema.ResourceData, meta 
 	_, apiResponse, err := client.DataCenterApi.DatacentersDelete(ctx, d.Id()).Execute()
 
 	if err != nil {
-		payload := ""
-		if apiResponse != nil {
-			payload = fmt.Sprintf("API response: %s", string(apiResponse.Payload))
-		}
-		diags := diag.FromErr(fmt.Errorf("an error occured while deleting the data center ID %s %s %s", d.Id(), err, payload))
+		diags := diag.FromErr(fmt.Errorf("an error occured while deleting the data center ID %s %s", d.Id(), err))
 		return diags
 	}
 
@@ -240,25 +224,17 @@ func getImage(ctx context.Context, client *ionoscloud.APIClient, dcId string, im
 		return nil, fmt.Errorf("imageName not suplied")
 	}
 
-	dc, apiResponse, err := client.DataCenterApi.DatacentersFindById(ctx, dcId).Execute()
+	dc, _, err := client.DataCenterApi.DatacentersFindById(ctx, dcId).Execute()
 
 	if err != nil {
-		payload := ""
-		if apiResponse != nil {
-			payload = fmt.Sprintf("API response: %s", string(apiResponse.Payload))
-		}
-		log.Print(fmt.Errorf("error while fetching a data center ID %s %s %s", dcId, err, payload))
+		log.Print(fmt.Errorf("error while fetching a data center ID %s %s", dcId, err))
 		return nil, err
 	}
 
-	images, apiResponse, err := client.ImageApi.ImagesGet(ctx).Execute()
+	images, _, err := client.ImageApi.ImagesGet(ctx).Execute()
 
 	if err != nil {
-		payload := ""
-		if apiResponse != nil {
-			payload = fmt.Sprintf("API response: %s", string(apiResponse.Payload))
-		}
-		log.Print(fmt.Errorf("error while fetching the list of images %s %s", err, payload))
+		log.Print(fmt.Errorf("error while fetching the list of images %s", err))
 		return nil, err
 	}
 
@@ -292,14 +268,10 @@ func getSnapshotId(ctx context.Context, client *ionoscloud.APIClient, snapshotNa
 		return ""
 	}
 
-	snapshots, apiResponse, err := client.SnapshotApi.SnapshotsGet(ctx).Execute()
+	snapshots, _, err := client.SnapshotApi.SnapshotsGet(ctx).Execute()
 
 	if err != nil {
-		payload := ""
-		if apiResponse != nil {
-			payload = fmt.Sprintf("API response: %s", string(apiResponse.Payload))
-		}
-		log.Print(fmt.Errorf("error while fetching the list of snapshots %s %s", err, payload))
+		log.Print(fmt.Errorf("error while fetching the list of snapshots %s", err))
 	}
 
 	if len(*snapshots.Items) > 0 {
@@ -327,14 +299,10 @@ func getImageAlias(ctx context.Context, client *ionoscloud.APIClient, imageAlias
 		log.Print(fmt.Errorf("invalid location id %s", location))
 	}
 
-	locations, apiResponse, err := client.LocationApi.LocationsFindByRegionIdAndId(ctx, parts[0], parts[1]).Execute()
+	locations, _, err := client.LocationApi.LocationsFindByRegionIdAndId(ctx, parts[0], parts[1]).Execute()
 
 	if err != nil {
-		payload := ""
-		if apiResponse != nil {
-			payload = fmt.Sprintf("API response: %s", string(apiResponse.Payload))
-		}
-		log.Print(fmt.Errorf("error while fetching the list of snapshots %s %s", err, payload))
+		log.Print(fmt.Errorf("error while fetching the list of snapshots %s", err))
 	}
 
 	if len(*locations.Properties.ImageAliases) > 0 {

@@ -134,11 +134,7 @@ func resourceGroupCreate(ctx context.Context, d *schema.ResourceData, meta inter
 	group, apiResponse, err := client.UserManagementApi.UmGroupsPost(ctx).Group(request).Execute()
 
 	if err != nil {
-		payload := ""
-		if apiResponse != nil {
-			payload = fmt.Sprintf("API response: %s", string(apiResponse.Payload))
-		}
-		diags := diag.FromErr(fmt.Errorf("an error occured while creating a group: %s %s", err, payload))
+		diags := diag.FromErr(fmt.Errorf("an error occured while creating a group: %s", err))
 		return diags
 	}
 
@@ -164,11 +160,7 @@ func resourceGroupCreate(ctx context.Context, d *schema.ResourceData, meta inter
 		}
 		_, apiResponse, err := client.UserManagementApi.UmGroupsUsersPost(ctx, d.Id()).User(user).Execute()
 		if err != nil {
-			payload := ""
-			if apiResponse != nil {
-				payload = fmt.Sprintf("API response: %s", string(apiResponse.Payload))
-			}
-			diags := diag.FromErr(fmt.Errorf("an error occured while adding %s user to group ID %s %s %s", userToAdd, d.Id(), err, payload))
+			diags := diag.FromErr(fmt.Errorf("an error occured while adding %s user to group ID %s %s", userToAdd, d.Id(), err))
 			return diags
 		}
 		// Wait, catching any errors
@@ -191,11 +183,7 @@ func resourceGroupRead(ctx context.Context, d *schema.ResourceData, meta interfa
 			d.SetId("")
 			return nil
 		}
-		payload := ""
-		if apiResponse != nil {
-			payload = fmt.Sprintf("API response: %s", string(apiResponse.Payload))
-		}
-		diags := diag.FromErr(fmt.Errorf("an error occured while fetching a Group ID %s %s %s", d.Id(), err, payload))
+		diags := diag.FromErr(fmt.Errorf("an error occured while fetching a Group ID %s %s", d.Id(), err))
 		return diags
 	}
 
@@ -281,11 +269,7 @@ func resourceGroupRead(ctx context.Context, d *schema.ResourceData, meta interfa
 
 	users, _, err := client.UserManagementApi.UmGroupsUsersGet(ctx, d.Id()).Execute()
 	if err != nil {
-		payload := ""
-		if apiResponse != nil {
-			payload = fmt.Sprintf("API response: %s", string(apiResponse.Payload))
-		}
-		diags := diag.FromErr(fmt.Errorf("an error occured while ListGroupUsers %s %s %s", d.Id(), err, payload))
+		diags := diag.FromErr(fmt.Errorf("an error occured while ListGroupUsers %s %s", d.Id(), err))
 		return diags
 	}
 
@@ -363,11 +347,7 @@ func resourceGroupUpdate(ctx context.Context, d *schema.ResourceData, meta inter
 
 	_, apiResponse, err := client.UserManagementApi.UmGroupsPut(ctx, d.Id()).Group(groupReq).Execute()
 	if err != nil {
-		payload := ""
-		if apiResponse != nil {
-			payload = fmt.Sprintf("API response: %s", string(apiResponse.Payload))
-		}
-		diags := diag.FromErr(fmt.Errorf("an error occured while patching a group ID %s %s %s", d.Id(), err, payload))
+		diags := diag.FromErr(fmt.Errorf("an error occured while patching a group ID %s %s", d.Id(), err))
 		return diags
 	}
 	// Wait, catching any errors
@@ -386,11 +366,7 @@ func resourceGroupUpdate(ctx context.Context, d *schema.ResourceData, meta inter
 
 		_, apiResponse, err := client.UserManagementApi.UmGroupsUsersPost(ctx, d.Id()).User(user).Execute()
 		if err != nil {
-			payload := ""
-			if apiResponse != nil {
-				payload = fmt.Sprintf("API response: %s", string(apiResponse.Payload))
-			}
-			diags := diag.FromErr(fmt.Errorf("an error occured while adding %s user to group ID %s %s %s", usertoAdd, d.Id(), err, payload))
+			diags := diag.FromErr(fmt.Errorf("an error occured while adding %s user to group ID %s %s", usertoAdd, d.Id(), err))
 			return diags
 		}
 
@@ -416,11 +392,7 @@ func resourceGroupDelete(ctx context.Context, d *schema.ResourceData, meta inter
 		if err != nil {
 			if _, ok := err.(ionoscloud.GenericOpenAPIError); ok {
 				if apiResponse == nil || apiResponse.StatusCode != 404 {
-					payload := ""
-					if apiResponse != nil {
-						payload = fmt.Sprintf("API response: %s", string(apiResponse.Payload))
-					}
-					diags := diag.FromErr(fmt.Errorf("an error occured while deleting a group %s %s %s", d.Id(), err, payload))
+					diags := diag.FromErr(fmt.Errorf("an error occured while deleting a group %s %s", d.Id(), err))
 					return diags
 				}
 			}

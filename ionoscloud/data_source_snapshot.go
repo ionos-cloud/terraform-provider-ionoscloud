@@ -37,14 +37,10 @@ func dataSourceSnapshotRead(d *schema.ResourceData, meta interface{}) error {
 	if cancel != nil {
 		defer cancel()
 	}
-	snapshots, apiResponse, err := client.SnapshotApi.SnapshotsGet(ctx).Execute()
+	snapshots, _, err := client.SnapshotApi.SnapshotsGet(ctx).Execute()
 
 	if err != nil {
-		payload := ""
-		if apiResponse != nil {
-			payload = fmt.Sprintf("API response: %s", string(apiResponse.Payload))
-		}
-		return fmt.Errorf("an error occured while fetching IonosCloud locations %s %s", err, payload)
+		return fmt.Errorf("an error occured while fetching IonosCloud locations %s", err)
 	}
 
 	name := d.Get("name").(string)

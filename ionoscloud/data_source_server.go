@@ -555,7 +555,6 @@ func dataSourceServerRead(d *schema.ResourceData, meta interface{}) error {
 		return errors.New("please provide either the server id or name")
 	}
 	var server ionoscloud.Server
-	var apiResponse *ionoscloud.APIResponse
 	var err error
 
 	ctx, cancel := context.WithTimeout(context.Background(), *resourceDefaultTimeouts.Default)
@@ -566,24 +565,16 @@ func dataSourceServerRead(d *schema.ResourceData, meta interface{}) error {
 
 	if idOk {
 		/* search by ID */
-		server, apiResponse, err = client.ServerApi.DatacentersServersFindById(ctx, datacenterId.(string), id.(string)).Execute()
+		server, _, err = client.ServerApi.DatacentersServersFindById(ctx, datacenterId.(string), id.(string)).Execute()
 		if err != nil {
-			payload := ""
-			if apiResponse != nil {
-				payload = fmt.Sprintf("API response: %s", string(apiResponse.Payload))
-			}
-			return fmt.Errorf("an error occurred while fetching the server with ID %s: %s %s", id.(string), err, payload)
+			return fmt.Errorf("an error occurred while fetching the server with ID %s: %s", id.(string), err)
 		}
 	} else {
 		/* search by name */
 		var servers ionoscloud.Servers
-		servers, apiResponse, err := client.ServerApi.DatacentersServersGet(ctx, datacenterId.(string)).Execute()
+		servers, _, err := client.ServerApi.DatacentersServersGet(ctx, datacenterId.(string)).Execute()
 		if err != nil {
-			payload := ""
-			if apiResponse != nil {
-				payload = fmt.Sprintf("API response: %s", string(apiResponse.Payload))
-			}
-			return fmt.Errorf("an error occurred while fetching servers: %s %s", err.Error(), payload)
+			return fmt.Errorf("an error occurred while fetching servers: %s", err.Error())
 		}
 
 		found := false
@@ -591,13 +582,9 @@ func dataSourceServerRead(d *schema.ResourceData, meta interface{}) error {
 			for _, s := range *servers.Items {
 				if s.Properties.Name != nil && *s.Properties.Name == name.(string) {
 					/* server found */
-					server, apiResponse, err = client.ServerApi.DatacentersServersFindById(ctx, datacenterId.(string), *s.Id).Execute()
+					server, _, err = client.ServerApi.DatacentersServersFindById(ctx, datacenterId.(string), *s.Id).Execute()
 					if err != nil {
-						payload := ""
-						if apiResponse != nil {
-							payload = fmt.Sprintf("API response: %s", string(apiResponse.Payload))
-						}
-						return fmt.Errorf("an error occurred while fetching the server with ID %s: %s %s", *s.Id, err, payload)
+						return fmt.Errorf("an error occurred while fetching the server with ID %s: %s", *s.Id, err)
 					}
 					found = true
 					break

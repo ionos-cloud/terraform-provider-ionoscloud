@@ -475,11 +475,7 @@ func resourceServerCreate(ctx context.Context, d *schema.ResourceData, meta inte
 			isSnapshot = true
 
 		} else if err != nil {
-			payload := ""
-			if apiResponse != nil {
-				payload = fmt.Sprintf("API response: %s", string(apiResponse.Payload))
-			}
-			diags := diag.FromErr(fmt.Errorf("error fetching image/snapshot: %s %s", err, payload))
+			diags := diag.FromErr(fmt.Errorf("error fetching image/snapshot: %s", err))
 			return diags
 		}
 
@@ -698,11 +694,7 @@ func resourceServerCreate(ctx context.Context, d *schema.ResourceData, meta inte
 	server, _, err = client.ServerApi.DatacentersServersFindById(ctx, d.Get("datacenter_id").(string), *server.Id).Execute()
 
 	if err != nil {
-		payload := ""
-		if apiResponse != nil {
-			payload = fmt.Sprintf("API response: %s", string(apiResponse.Payload))
-		}
-		diags := diag.FromErr(fmt.Errorf("error fetching server: (%s) %s", err, payload))
+		diags := diag.FromErr(fmt.Errorf("error fetching server: %s", err))
 		return diags
 	}
 
@@ -710,11 +702,7 @@ func resourceServerCreate(ctx context.Context, d *schema.ResourceData, meta inte
 		*server.Id, *(*server.Entities.Nics.Items)[0].Id).Execute()
 
 	if err != nil {
-		payload := ""
-		if apiResponse != nil {
-			payload = fmt.Sprintf("API response: %s", string(apiResponse.Payload))
-		}
-		diags := diag.FromErr(fmt.Errorf("an error occurred while fetching firewall rules: %s %s", err, payload))
+		diags := diag.FromErr(fmt.Errorf("an error occurred while fetching firewall rules: %s", err))
 		return diags
 	}
 
@@ -822,11 +810,7 @@ func resourceServerRead(ctx context.Context, d *schema.ResourceData, meta interf
 			d.SetId("")
 			return nil
 		}
-		payload := ""
-		if apiResponse != nil {
-			payload = fmt.Sprintf("API response: %s", string(apiResponse.Payload))
-		}
-		diags := diag.FromErr(fmt.Errorf("error occured while fetching a server ID %s %s %s", d.Id(), err, payload))
+		diags := diag.FromErr(fmt.Errorf("error occured while fetching a server ID %s %s", d.Id(), err))
 		return diags
 	}
 
@@ -880,13 +864,9 @@ func resourceServerRead(ctx context.Context, d *schema.ResourceData, meta interf
 			return diags
 		}
 
-		nic, apiResponse, err := client.NicApi.DatacentersServersNicsFindById(ctx, dcId, serverId, primarynic.(string)).Execute()
+		nic, _, err := client.NicApi.DatacentersServersNicsFindById(ctx, dcId, serverId, primarynic.(string)).Execute()
 		if err != nil {
-			payload := ""
-			if apiResponse != nil {
-				payload = fmt.Sprintf("API response: %s", string(apiResponse.Payload))
-			}
-			diags := diag.FromErr(fmt.Errorf("error occured while fetching nic %s for server ID %s %s %s", primarynic.(string), d.Id(), err, payload))
+			diags := diag.FromErr(fmt.Errorf("error occured while fetching nic %s for server ID %s %s", primarynic.(string), d.Id(), err))
 			return diags
 		}
 
@@ -926,11 +906,7 @@ func resourceServerRead(ctx context.Context, d *schema.ResourceData, meta interf
 		if firewallId, ok := d.GetOk("firewallrule_id"); ok {
 			firewall, _, err := client.NicApi.DatacentersServersNicsFirewallrulesFindById(ctx, dcId, serverId, primarynic.(string), firewallId.(string)).Execute()
 			if err != nil {
-				payload := ""
-				if apiResponse != nil {
-					payload = fmt.Sprintf("API response: %s", string(apiResponse.Payload))
-				}
-				diags := diag.FromErr(fmt.Errorf("error occured while fetching firewallrule %s for server ID %s %s %s", firewallId.(string), serverId, err, payload))
+				diags := diag.FromErr(fmt.Errorf("error occured while fetching firewallrule %s for server ID %s %s", firewallId.(string), serverId, err))
 				return diags
 			}
 
@@ -1099,11 +1075,7 @@ func resourceServerUpdate(ctx context.Context, d *schema.ResourceData, meta inte
 			}
 			_, apiResponse, err := client.ServerApi.DatacentersServersVolumesPost(ctx, dcId, d.Id()).Volume(volume).Execute()
 			if err != nil {
-				payload := ""
-				if apiResponse != nil {
-					payload = fmt.Sprintf("API response: %s", string(apiResponse.Payload))
-				}
-				diags := diag.FromErr(fmt.Errorf("an error occured while attaching a volume dcId: %s server_id: %s ID: %s %s %s", dcId, d.Id(), bootVolume, err, payload))
+				diags := diag.FromErr(fmt.Errorf("an error occured while attaching a volume dcId: %s server_id: %s ID: %s %s", dcId, d.Id(), bootVolume, err))
 				return diags
 			}
 
@@ -1135,11 +1107,7 @@ func resourceServerUpdate(ctx context.Context, d *schema.ResourceData, meta inte
 		_, apiResponse, err := client.VolumeApi.DatacentersVolumesPatch(ctx, d.Get("datacenter_id").(string), bootVolume).Volume(properties).Execute()
 
 		if err != nil {
-			payload := ""
-			if apiResponse != nil {
-				payload = fmt.Sprintf("API response: %s", string(apiResponse.Payload))
-			}
-			diags := diag.FromErr(fmt.Errorf("error patching volume (%s) (%s) %s", d.Id(), err, payload))
+			diags := diag.FromErr(fmt.Errorf("error patching volume %s %s", d.Id(), err))
 			return diags
 		}
 
@@ -1199,11 +1167,7 @@ func resourceServerUpdate(ctx context.Context, d *schema.ResourceData, meta inte
 		log.Printf("[DEBUG] Updating props: %s", string(mProp))
 		_, apiResponse, err := client.NicApi.DatacentersServersNicsPatch(ctx, d.Get("datacenter_id").(string), *server.Id, *nic.Id).Nic(properties).Execute()
 		if err != nil {
-			payload := ""
-			if apiResponse != nil {
-				payload = fmt.Sprintf("API response: %s", string(apiResponse.Payload))
-			}
-			diags := diag.FromErr(fmt.Errorf("error updating nic (%s) %s", err, payload))
+			diags := diag.FromErr(fmt.Errorf("error updating nic %s", err))
 			return diags
 		}
 
@@ -1226,11 +1190,7 @@ func resourceServerDelete(ctx context.Context, d *schema.ResourceData, meta inte
 	server, apiResponse, err := client.ServerApi.DatacentersServersFindById(ctx, dcId, d.Id()).Execute()
 
 	if err != nil {
-		payload := ""
-		if apiResponse != nil {
-			payload = fmt.Sprintf("API response: %s", string(apiResponse.Payload))
-		}
-		diags := diag.FromErr(fmt.Errorf("error occured while fetching a server ID %s %s %s", d.Id(), err, payload))
+		diags := diag.FromErr(fmt.Errorf("error occured while fetching a server ID %s %s", d.Id(), err))
 		return diags
 	}
 
@@ -1238,11 +1198,7 @@ func resourceServerDelete(ctx context.Context, d *schema.ResourceData, meta inte
 		_, apiResponse, err := client.VolumeApi.DatacentersVolumesDelete(ctx, dcId, *server.Properties.BootVolume.Id).Execute()
 
 		if err != nil {
-			payload := ""
-			if apiResponse != nil {
-				payload = fmt.Sprintf("API response: %s", string(apiResponse.Payload))
-			}
-			diags := diag.FromErr(fmt.Errorf("error occured while delete volume %s of server ID %s %s %s", *server.Properties.BootVolume.Id, d.Id(), err, payload))
+			diags := diag.FromErr(fmt.Errorf("error occured while delete volume %s of server ID %s %s", *server.Properties.BootVolume.Id, d.Id(), err))
 			return diags
 		}
 		// Wait, catching any errors
@@ -1255,11 +1211,7 @@ func resourceServerDelete(ctx context.Context, d *schema.ResourceData, meta inte
 
 	_, apiResponse, err = client.ServerApi.DatacentersServersDelete(ctx, dcId, d.Id()).Execute()
 	if err != nil {
-		payload := ""
-		if apiResponse != nil {
-			payload = fmt.Sprintf("API response: %s", string(apiResponse.Payload))
-		}
-		diags := diag.FromErr(fmt.Errorf("an error occured while deleting a server ID %s %s %s", d.Id(), err, payload))
+		diags := diag.FromErr(fmt.Errorf("an error occured while deleting a server ID %s %s", d.Id(), err))
 		return diags
 	}
 

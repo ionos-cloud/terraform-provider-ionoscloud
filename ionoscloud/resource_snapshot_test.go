@@ -56,11 +56,7 @@ func testAccCheckSnapshotDestroyCheck(s *terraform.State) error {
 
 		if err != nil {
 			if apiResponse == nil || apiResponse.StatusCode != 404 {
-				payload := ""
-				if apiResponse != nil {
-					payload = fmt.Sprintf("API response: %s", string(apiResponse.Payload))
-				}
-				return fmt.Errorf("snapshot still exists %s - an error occurred while checking it %s %s", rs.Primary.ID, err, payload)
+				return fmt.Errorf("snapshot still exists %s - an error occurred while checking it %s", rs.Primary.ID, err)
 			}
 		} else {
 			return fmt.Errorf("snapshot still exists %s", rs.Primary.ID)
@@ -90,14 +86,10 @@ func testAccCheckSnapshotExists(n string, snapshot *ionoscloud.Snapshot) resourc
 			defer cancel()
 		}
 
-		foundServer, apiResponse, err := client.SnapshotApi.SnapshotsFindById(ctx, rs.Primary.ID).Execute()
+		foundServer, _, err := client.SnapshotApi.SnapshotsFindById(ctx, rs.Primary.ID).Execute()
 
 		if err != nil {
-			payload := ""
-			if apiResponse != nil {
-				payload = fmt.Sprintf("API response: %s", string(apiResponse.Payload))
-			}
-			return fmt.Errorf("error occured while fetching Snapshot: %s %s", rs.Primary.ID, payload)
+			return fmt.Errorf("error occured while fetching Snapshot: %s", rs.Primary.ID)
 		}
 		if *foundServer.Id != rs.Primary.ID {
 			return fmt.Errorf("record not found")

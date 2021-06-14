@@ -62,11 +62,7 @@ func testAccCheckUserDestroyCheck(s *terraform.State) error {
 
 		if err != nil {
 			if apiResponse == nil || apiResponse.StatusCode != 404 {
-				payload := ""
-				if apiResponse != nil {
-					payload = fmt.Sprintf("API response: %s", string(apiResponse.Payload))
-				}
-				return fmt.Errorf("user still exists %s - an error occurred while checking it %s %s", rs.Primary.ID, err, payload)
+				return fmt.Errorf("user still exists %s - an error occurred while checking it %s", rs.Primary.ID, err)
 			}
 		} else {
 			return fmt.Errorf("user still exists %s", rs.Primary.ID)
@@ -109,14 +105,10 @@ func testAccCheckUserExists(n string, user *ionoscloud.User) resource.TestCheckF
 			defer cancel()
 		}
 
-		foundUser, apiResponse, err := client.UserManagementApi.UmUsersFindById(ctx, rs.Primary.ID).Execute()
+		foundUser, _, err := client.UserManagementApi.UmUsersFindById(ctx, rs.Primary.ID).Execute()
 
 		if err != nil {
-			payload := ""
-			if apiResponse != nil {
-				payload = fmt.Sprintf("API response: %s", string(apiResponse.Payload))
-			}
-			return fmt.Errorf("error occured while fetching User: %s %s %s", rs.Primary.ID, err, payload)
+			return fmt.Errorf("error occured while fetching User: %s %s", rs.Primary.ID, err)
 		}
 		if *foundUser.Id != rs.Primary.ID {
 			return fmt.Errorf("record not found")

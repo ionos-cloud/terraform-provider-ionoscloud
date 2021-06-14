@@ -66,15 +66,11 @@ func resourceBackupUnitCreate(ctx context.Context, d *schema.ResourceData, meta 
 		},
 	}
 
-	createdBackupUnit, apiResponse, err := client.BackupUnitApi.BackupunitsPost(ctx).BackupUnit(backupUnit).Execute()
+	createdBackupUnit, _, err := client.BackupUnitApi.BackupunitsPost(ctx).BackupUnit(backupUnit).Execute()
 
 	if err != nil {
 		d.SetId("")
-		payload := ""
-		if apiResponse != nil {
-			payload = fmt.Sprintf("API response: %s", string(apiResponse.Payload))
-		}
-		diags := diag.FromErr(fmt.Errorf("error creating backup unit: %s %s", err, payload))
+		diags := diag.FromErr(fmt.Errorf("error creating backup unit: %s", err))
 		return diags
 	}
 
@@ -112,22 +108,14 @@ func resourceBackupUnitRead(ctx context.Context, d *schema.ResourceData, meta in
 			d.SetId("")
 			return nil
 		}
-		payload := ""
-		if apiResponse != nil {
-			payload = fmt.Sprintf("API response: %s", string(apiResponse.Payload))
-		}
-		diags := diag.FromErr(fmt.Errorf("error while fetching backup unit %s: %s %s", d.Id(), err, payload))
+		diags := diag.FromErr(fmt.Errorf("error while fetching backup unit %s: %s", d.Id(), err))
 		return diags
 	}
 
 	contractResources, apiResponse, cErr := client.ContractApi.ContractsGet(ctx).Execute()
 
 	if cErr != nil {
-		payload := ""
-		if apiResponse != nil {
-			payload = fmt.Sprintf("API response: %s", string(apiResponse.Payload))
-		}
-		diags := diag.FromErr(fmt.Errorf("error while fetching contract resources for backup unit %s: %s %s", d.Id(), cErr, payload))
+		diags := diag.FromErr(fmt.Errorf("error while fetching contract resources for backup unit %s: %s", d.Id(), cErr))
 		return diags
 	}
 
@@ -199,11 +187,7 @@ func resourceBackupUnitUpdate(ctx context.Context, d *schema.ResourceData, meta 
 			d.SetId("")
 			return nil
 		}
-		payload := ""
-		if apiResponse != nil {
-			payload = fmt.Sprintf("API response: %s", string(apiResponse.Payload))
-		}
-		diags := diag.FromErr(fmt.Errorf("error while updating backup unit %s: %s %s", d.Id(), err, payload))
+		diags := diag.FromErr(fmt.Errorf("error while updating backup unit %s: %s", d.Id(), err))
 		return diags
 	}
 
@@ -237,11 +221,7 @@ func resourceBackupUnitDelete(ctx context.Context, d *schema.ResourceData, meta 
 			d.SetId("")
 			return nil
 		}
-		payload := ""
-		if apiResponse != nil {
-			payload = fmt.Sprintf("API response: %s", string(apiResponse.Payload))
-		}
-		diags := diag.FromErr(fmt.Errorf("error while deleting backup unit %s: %s %s", d.Id(), err, payload))
+		diags := diag.FromErr(fmt.Errorf("error while deleting backup unit %s: %s", d.Id(), err))
 		return diags
 	}
 
@@ -266,14 +246,10 @@ func resourceBackupUnitDelete(ctx context.Context, d *schema.ResourceData, meta 
 }
 
 func backupUnitReady(client *ionoscloud.APIClient, d *schema.ResourceData, c context.Context) (bool, error) {
-	backupUnit, apiResponse, err := client.BackupUnitApi.BackupunitsFindById(c, d.Id()).Execute()
+	backupUnit, _, err := client.BackupUnitApi.BackupunitsFindById(c, d.Id()).Execute()
 
 	if err != nil {
-		payload := ""
-		if apiResponse != nil {
-			payload = fmt.Sprintf("API response: %s", string(apiResponse.Payload))
-		}
-		return true, fmt.Errorf("error checking backup unit status: %s %s", err, payload)
+		return true, fmt.Errorf("error checking backup unit status: %s", err)
 	}
 	return *backupUnit.Metadata.State == "AVAILABLE", nil
 }
@@ -285,11 +261,7 @@ func backupUnitDeleted(client *ionoscloud.APIClient, d *schema.ResourceData, c c
 		if apiResponse != nil && apiResponse.StatusCode == 404 {
 			return true, nil
 		}
-		payload := ""
-		if apiResponse != nil {
-			payload = fmt.Sprintf("API response: %s", string(apiResponse.Payload))
-		}
-		return true, fmt.Errorf("error checking backup unit deletion status: %s %s", err, payload)
+		return true, fmt.Errorf("error checking backup unit deletion status: %s", err)
 	}
 	return false, nil
 }

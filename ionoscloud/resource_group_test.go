@@ -101,14 +101,10 @@ func testAccCheckGroupExists(n string, group *ionoscloud.Group) resource.TestChe
 			defer cancel()
 		}
 
-		foundGroup, apiResponse, err := client.UserManagementApi.UmGroupsFindById(ctx, rs.Primary.ID).Execute()
+		foundGroup, _, err := client.UserManagementApi.UmGroupsFindById(ctx, rs.Primary.ID).Execute()
 
 		if err != nil {
-			payload := ""
-			if apiResponse != nil {
-				payload = fmt.Sprintf("API response: %s", string(apiResponse.Payload))
-			}
-			return fmt.Errorf("error occured while fetching Group: %s %s", rs.Primary.ID, payload)
+			return fmt.Errorf("error occured while fetching Group: %s", rs.Primary.ID)
 		}
 		if *foundGroup.Id != rs.Primary.ID {
 			return fmt.Errorf("record not found")

@@ -56,11 +56,7 @@ func testAccCheckVolumeDestroyCheck(s *terraform.State) error {
 
 		if err != nil {
 			if apiResponse == nil || apiResponse.StatusCode != 404 {
-				payload := ""
-				if apiResponse != nil {
-					payload = fmt.Sprintf("API response: %s", string(apiResponse.Payload))
-				}
-				return fmt.Errorf("volume still exists %s - an error occurred while checking it %s %s", rs.Primary.ID, err, payload)
+				return fmt.Errorf("volume still exists %s - an error occurred while checking it %s", rs.Primary.ID, err)
 			}
 		} else {
 			return fmt.Errorf("volume still exists %s", rs.Primary.ID)
@@ -90,14 +86,10 @@ func testAccCheckVolumeExists(n string, volume *ionoscloud.Volume) resource.Test
 			defer cancel()
 		}
 
-		foundServer, apiResponse, err := client.VolumeApi.DatacentersVolumesFindById(ctx, rs.Primary.Attributes["datacenter_id"], rs.Primary.ID).Execute()
+		foundServer, _, err := client.VolumeApi.DatacentersVolumesFindById(ctx, rs.Primary.Attributes["datacenter_id"], rs.Primary.ID).Execute()
 
 		if err != nil {
-			payload := ""
-			if apiResponse != nil {
-				payload = fmt.Sprintf("API response: %s", string(apiResponse.Payload))
-			}
-			return fmt.Errorf("error occured while fetching Volume: %s %s", rs.Primary.ID, payload)
+			return fmt.Errorf("error occured while fetching Volume: %s", rs.Primary.ID)
 		}
 		if *foundServer.Id != rs.Primary.ID {
 			return fmt.Errorf("record not found")

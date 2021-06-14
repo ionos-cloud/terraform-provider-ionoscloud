@@ -105,14 +105,10 @@ func testAccCheckLoadbalancerExists(n string, loadbalancer *ionoscloud.Loadbalan
 		}
 
 		dcId := rs.Primary.Attributes["datacenter_id"]
-		foundLB, apiResponse, err := client.LoadBalancerApi.DatacentersLoadbalancersFindById(ctx, dcId, rs.Primary.ID).Execute()
+		foundLB, _, err := client.LoadBalancerApi.DatacentersLoadbalancersFindById(ctx, dcId, rs.Primary.ID).Execute()
 
 		if err != nil {
-			payload := ""
-			if apiResponse != nil {
-				payload = fmt.Sprintf("API response: %s", string(apiResponse.Payload))
-			}
-			return fmt.Errorf("error occured while fetching Loadbalancer: %s %s", rs.Primary.ID, payload)
+			return fmt.Errorf("error occured while fetching Loadbalancer: %s", rs.Primary.ID)
 		}
 		if *foundLB.Id != rs.Primary.ID {
 			return fmt.Errorf("record not found")

@@ -59,8 +59,7 @@ func testAccCheckIPBlockDestroyCheck(s *terraform.State) error {
 
 		if err != nil {
 			if apiResponse != nil && apiResponse.StatusCode != 404 {
-				payload := fmt.Sprintf("API response: %s", string(apiResponse.Payload))
-				return fmt.Errorf("IPBlock still exists %s - an error occurred while checking it %s %s", rs.Primary.ID, err, payload)
+				return fmt.Errorf("IPBlock still exists %s - an error occurred while checking it %s", rs.Primary.ID, err)
 			}
 		} else {
 			return fmt.Errorf("IPBlock still exists %s", rs.Primary.ID)
@@ -103,14 +102,10 @@ func testAccCheckIPBlockExists(n string, ipblock *ionoscloud.IpBlock) resource.T
 			defer cancel()
 		}
 
-		foundIP, apiResponse, err := client.IPBlocksApi.IpblocksFindById(ctx, rs.Primary.ID).Execute()
+		foundIP, _, err := client.IPBlocksApi.IpblocksFindById(ctx, rs.Primary.ID).Execute()
 
 		if err != nil {
-			payload := ""
-			if apiResponse != nil {
-				payload = fmt.Sprintf("API response: %s", string(apiResponse.Payload))
-			}
-			return fmt.Errorf("error occured while fetching IP Block: %s %s", rs.Primary.ID, payload)
+			return fmt.Errorf("error occured while fetching IP Block: %s", rs.Primary.ID)
 		}
 		if *foundIP.Id != rs.Primary.ID {
 			return fmt.Errorf("record not found")

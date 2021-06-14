@@ -86,23 +86,13 @@ func resourceUserCreate(ctx context.Context, d *schema.ResourceData, meta interf
 	rsp, apiResponse, err := client.UserManagementApi.UmUsersPost(ctx).User(request).Execute()
 
 	if err != nil {
-		payload := ""
-		if apiResponse != nil {
-			payload = fmt.Sprintf("API response: %s", string(apiResponse.Payload))
-		}
-		diags := diag.FromErr(fmt.Errorf("an error occured while creating a user: %s %s", err, payload))
+		diags := diag.FromErr(fmt.Errorf("an error occured while creating a user: %s", err))
 		return diags
 	}
 	if rsp.Id != nil {
 		log.Printf("[DEBUG] USER ID: %s", *rsp.Id)
+		d.SetId(*rsp.Id)
 	}
-
-	if err != nil {
-		diags := diag.FromErr(fmt.Errorf("an error occured while creating a user: %s", err))
-		return diags
-	}
-
-	d.SetId(*rsp.Id)
 
 	// Wait, catching any errors
 	_, errState := getStateChangeConf(meta, d, apiResponse.Header.Get("Location"), schema.TimeoutCreate).WaitForStateContext(ctx)
@@ -127,11 +117,7 @@ func resourceUserRead(ctx context.Context, d *schema.ResourceData, meta interfac
 			d.SetId("")
 			return nil
 		}
-		payload := ""
-		if apiResponse != nil {
-			payload = fmt.Sprintf("API response: %s", string(apiResponse.Payload))
-		}
-		diags := diag.FromErr(fmt.Errorf("an error occured while fetching a User ID %s %s %s", d.Id(), err, payload))
+		diags := diag.FromErr(fmt.Errorf("an error occured while fetching a User ID %s %s", d.Id(), err))
 		return diags
 	}
 
@@ -176,11 +162,7 @@ func resourceUserUpdate(ctx context.Context, d *schema.ResourceData, meta interf
 	rsp, apiResponse, err := client.UserManagementApi.UmUsersFindById(ctx, d.Id()).Execute()
 
 	if err != nil {
-		payload := ""
-		if apiResponse != nil {
-			payload = fmt.Sprintf("API response: %s", string(apiResponse.Payload))
-		}
-		diags := diag.FromErr(fmt.Errorf("an error occured while fetching a User ID %s %s %s", d.Id(), err, payload))
+		diags := diag.FromErr(fmt.Errorf("an error occured while fetching a User ID %s %s", d.Id(), err))
 		return diags
 	}
 
@@ -246,11 +228,7 @@ func resourceUserDelete(ctx context.Context, d *schema.ResourceData, meta interf
 		if err != nil {
 			if _, ok := err.(ionoscloud.GenericOpenAPIError); ok {
 				if apiResponse == nil || apiResponse.StatusCode != 404 {
-					payload := ""
-					if apiResponse != nil {
-						payload = fmt.Sprintf("API response: %s", string(apiResponse.Payload))
-					}
-					diags := diag.FromErr(fmt.Errorf("an error occured while deleting a user %s %s %s", d.Id(), err, payload))
+					diags := diag.FromErr(fmt.Errorf("an error occured while deleting a user %s %s", d.Id(), err))
 					return diags
 				}
 			}

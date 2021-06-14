@@ -174,7 +174,6 @@ func dataSourcePccRead(d *schema.ResourceData, meta interface{}) error {
 	}
 
 	var pcc ionoscloud.PrivateCrossConnect
-	var apiResponse *ionoscloud.APIResponse
 	var err error
 
 	ctx, cancel := context.WithTimeout(context.Background(), *resourceDefaultTimeouts.Default)
@@ -185,26 +184,18 @@ func dataSourcePccRead(d *schema.ResourceData, meta interface{}) error {
 	if idOk {
 		/* search by ID */
 		fmt.Printf("searching for ID %s\n", id.(string))
-		pcc, apiResponse, err = client.PrivateCrossConnectApi.PccsFindById(ctx, id.(string)).Execute()
+		pcc, _, err = client.PrivateCrossConnectApi.PccsFindById(ctx, id.(string)).Execute()
 		if err != nil {
-			payload := ""
-			if apiResponse != nil {
-				payload = fmt.Sprintf("API response: %s", string(apiResponse.Payload))
-			}
-			return fmt.Errorf("an error occurred while fetching the pcc with ID %s: %s %s", id.(string), err, payload)
+			return fmt.Errorf("an error occurred while fetching the pcc with ID %s: %s", id.(string), err)
 		}
 	}
 
 	if nameOk {
 		/* search by name */
 		var pccs ionoscloud.PrivateCrossConnects
-		pccs, apiResponse, err := client.PrivateCrossConnectApi.PccsGet(ctx).Execute()
+		pccs, _, err := client.PrivateCrossConnectApi.PccsGet(ctx).Execute()
 		if err != nil {
-			payload := ""
-			if apiResponse != nil {
-				payload = fmt.Sprintf("API response: %s", string(apiResponse.Payload))
-			}
-			return fmt.Errorf("an error occurred while fetching pccs: %s %s", err.Error(), payload)
+			return fmt.Errorf("an error occurred while fetching pccs: %s", err.Error())
 		}
 
 		found := false
@@ -212,13 +203,9 @@ func dataSourcePccRead(d *schema.ResourceData, meta interface{}) error {
 			for _, p := range *pccs.Items {
 				if p.Properties.Name != nil && *p.Properties.Name == name.(string) {
 					/* lan found */
-					pcc, apiResponse, err = client.PrivateCrossConnectApi.PccsFindById(ctx, *p.Id).Execute()
+					pcc, _, err = client.PrivateCrossConnectApi.PccsFindById(ctx, *p.Id).Execute()
 					if err != nil {
-						payload := ""
-						if apiResponse != nil {
-							payload = fmt.Sprintf("API response: %s", string(apiResponse.Payload))
-						}
-						return fmt.Errorf("an error occurred while fetching the pcc with ID %s: %s %s", *p.Id, err, payload)
+						return fmt.Errorf("an error occurred while fetching the pcc with ID %s: %s", *p.Id, err)
 					}
 					found = true
 					break

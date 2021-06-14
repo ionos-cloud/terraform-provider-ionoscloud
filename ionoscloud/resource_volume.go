@@ -161,14 +161,10 @@ func resourceVolumeCreate(ctx context.Context, d *schema.ResourceData, meta inte
 				if image != "" {
 					isSnapshot = true
 				} else {
-					dc, apiResponse, err := client.DataCenterApi.DatacentersFindById(ctx, dcId).Execute()
+					dc, _, err := client.DataCenterApi.DatacentersFindById(ctx, dcId).Execute()
 
 					if err != nil {
-						payload := ""
-						if apiResponse != nil {
-							payload = fmt.Sprintf("API response: %s", string(apiResponse.Payload))
-						}
-						diags := diag.FromErr(fmt.Errorf("an error occured while fetching a Datacenter ID %s %s %s", dcId, err, payload))
+						diags := diag.FromErr(fmt.Errorf("an error occured while fetching a Datacenter ID %s %s", dcId, err))
 						return diags
 					}
 					imageAlias = getImageAlias(ctx, client, imageName, *dc.Properties.Location)
@@ -186,13 +182,9 @@ func resourceVolumeCreate(ctx context.Context, d *schema.ResourceData, meta inte
 		} else {
 			img, _, err := client.ImageApi.ImagesFindById(ctx, imageName).Execute()
 			if err != nil {
-				_, apiResponse, err := client.SnapshotApi.SnapshotsFindById(ctx, imageName).Execute()
+				_, _, err := client.SnapshotApi.SnapshotsFindById(ctx, imageName).Execute()
 				if err != nil {
-					payload := ""
-					if apiResponse != nil {
-						payload = fmt.Sprintf("API response: %s", string(apiResponse.Payload))
-					}
-					diags := diag.FromErr(fmt.Errorf("error fetching image/snapshot: %s %s", err, payload))
+					diags := diag.FromErr(fmt.Errorf("error fetching image/snapshot: %s", err))
 					return diags
 				}
 				isSnapshot = true
@@ -346,11 +338,7 @@ func resourceVolumeCreate(ctx context.Context, d *schema.ResourceData, meta inte
 	volume, apiResponse, err = client.ServerApi.DatacentersServersVolumesPost(ctx, dcId, serverId).Volume(volumeToAttach).Execute()
 
 	if err != nil {
-		payload := ""
-		if apiResponse != nil {
-			payload = fmt.Sprintf("API response: %s", string(apiResponse.Payload))
-		}
-		diags := diag.FromErr(fmt.Errorf("an error occured while attaching a volume dcId: %s server_id: %s ID: %s %s %s", dcId, serverId, volumeId, err, payload))
+		diags := diag.FromErr(fmt.Errorf("an error occured while attaching a volume dcId: %s server_id: %s ID: %s %s", dcId, serverId, volumeId, err))
 		return diags
 	}
 
@@ -609,11 +597,7 @@ func resourceVolumeUpdate(ctx context.Context, d *schema.ResourceData, meta inte
 		serverID := newValue.(string)
 		_, apiResponse, err := client.ServerApi.DatacentersServersVolumesPost(ctx, dcId, serverID).Volume(volume).Execute()
 		if err != nil {
-			payload := ""
-			if apiResponse != nil {
-				payload = fmt.Sprintf("API response: %s", string(apiResponse.Payload))
-			}
-			diags := diag.FromErr(fmt.Errorf("an error occured while attaching a volume dcId: %s server_id: %s ID: %s %s %s", dcId, serverID, *volume.Id, err, payload))
+			diags := diag.FromErr(fmt.Errorf("an error occured while attaching a volume dcId: %s server_id: %s ID: %s %s", dcId, serverID, *volume.Id, err))
 			return diags
 		}
 
@@ -635,11 +619,7 @@ func resourceVolumeDelete(ctx context.Context, d *schema.ResourceData, meta inte
 
 	_, apiResponse, err := client.VolumeApi.DatacentersVolumesDelete(ctx, dcId, d.Id()).Execute()
 	if err != nil {
-		payload := ""
-		if apiResponse != nil {
-			payload = fmt.Sprintf("API response: %s", string(apiResponse.Payload))
-		}
-		diags := diag.FromErr(fmt.Errorf("an error occured while deleting a volume ID %s %s %s", d.Id(), err, payload))
+		diags := diag.FromErr(fmt.Errorf("an error occured while deleting a volume ID %s %s", d.Id(), err))
 		return diags
 
 	}

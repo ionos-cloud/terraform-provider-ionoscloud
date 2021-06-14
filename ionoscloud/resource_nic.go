@@ -8,6 +8,7 @@ import (
 	ionoscloud "github.com/ionos-cloud/sdk-go/v5"
 	"log"
 	"strings"
+	"time"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 )
@@ -145,11 +146,7 @@ func resourceNicRead(ctx context.Context, d *schema.ResourceData, meta interface
 				return nil
 			}
 		}
-		payload := ""
-		if apiResponse != nil {
-			payload = fmt.Sprintf("API response: %s", string(apiResponse.Payload))
-		}
-		diags := diag.FromErr(fmt.Errorf("error occured while fetching a nic ID %s %s %s", d.Id(), err, payload))
+		diags := diag.FromErr(fmt.Errorf("error occured while fetching a nic ID %s %s", d.Id(), err))
 		return diags
 	}
 
@@ -233,11 +230,7 @@ func resourceNicUpdate(ctx context.Context, d *schema.ResourceData, meta interfa
 	_, apiResponse, err := client.NicApi.DatacentersServersNicsPatch(ctx, dcid, srvid, nicid).Nic(properties).Execute()
 
 	if err != nil {
-		payload := ""
-		if apiResponse != nil {
-			payload = fmt.Sprintf("API response: %s", string(apiResponse.Payload))
-		}
-		diags := diag.FromErr(fmt.Errorf("error occured while updating a nic: %s %s", err, payload))
+		diags := diag.FromErr(fmt.Errorf("error occured while updating a nic: %s", err))
 		return diags
 	}
 
@@ -261,11 +254,7 @@ func resourceNicDelete(ctx context.Context, d *schema.ResourceData, meta interfa
 	_, apiResponse, err := client.NicApi.DatacentersServersNicsDelete(ctx, dcid, srvid, nicid).Execute()
 
 	if err != nil {
-		payload := ""
-		if apiResponse != nil {
-			payload = fmt.Sprintf("API response: %s", string(apiResponse.Payload))
-		}
-		diags := diag.FromErr(fmt.Errorf("an error occured while deleting a nic dcId %s ID %s %s %s", d.Get("datacenter_id").(string), d.Id(), err, payload))
+		diags := diag.FromErr(fmt.Errorf("an error occured while deleting a nic dcId %s ID %s %s", d.Get("datacenter_id").(string), d.Id(), err))
 		return diags
 	}
 	// Wait, catching any errors
@@ -275,6 +264,41 @@ func resourceNicDelete(ctx context.Context, d *schema.ResourceData, meta interfa
 		return diags
 	}
 
+	for {
+		log.Printf("[INFO] Waiting for nic  %s to be deleted...", d.Id())
+		time.Sleep(5 * time.Second)
+
+		nDeleted, dsErr := nicDeleted(ctx, client, d)
+
+		if dsErr != nil {
+			diags := diag.FromErr(fmt.Errorf("error while checking deletion status of nic %s: %s", d.Id(), dsErr))
+			return diags
+		}
+
+		if nDeleted {
+			log.Printf("[INFO] Successfully deleted nic: %s", d.Id())
+			break
+		}
+	}
+
 	d.SetId("")
 	return nil
+}
+
+func nicDeleted(ctx context.Context, client *ionoscloud.APIClient, d *schema.ResourceData) (bool, error) {
+	dcid := d.Get("datacenter_id").(string)
+	srvid := d.Get("server_id").(string)
+	rsp, apiResponse, err := client.NicApi.DatacentersServersNicsFindById(ctx, dcid, srvid, d.Id()).Execute()
+
+	log.Printf("[INFO] Current deletion status for nic %s: %+v", d.Id(), rsp)
+
+	if err != nil {
+		if apiResponse != nil && apiResponse.StatusCode == 404 {
+			return true, nil
+		}
+		return true, err
+
+	}
+	log.Printf("[INFO] Nic %s not deleted yet deleted nic: %+v", d.Id(), rsp)
+	return false, nil
 }

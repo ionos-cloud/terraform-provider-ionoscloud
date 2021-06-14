@@ -76,11 +76,7 @@ func resourceLoadbalancerCreate(ctx context.Context, d *schema.ResourceData, met
 
 	resp, apiResponse, err := client.LoadBalancerApi.DatacentersLoadbalancersPost(ctx, dcid).Loadbalancer(*lb).Execute()
 	if err != nil {
-		payload := ""
-		if apiResponse != nil {
-			payload = fmt.Sprintf("API response: %s", string(apiResponse.Payload))
-		}
-		diags := diag.FromErr(fmt.Errorf("error occured while creating a loadbalancer %s %s", err, payload))
+		diags := diag.FromErr(fmt.Errorf("error occured while creating a loadbalancer %s", err))
 		return diags
 	}
 
@@ -109,11 +105,7 @@ func resourceLoadbalancerRead(ctx context.Context, d *schema.ResourceData, meta 
 			d.SetId("")
 			return nil
 		}
-		payload := ""
-		if apiResponse != nil {
-			payload = fmt.Sprintf("API response: %s", string(apiResponse.Payload))
-		}
-		diags := diag.FromErr(fmt.Errorf("an error occured while fetching a lan ID %s %s \n API Response: %s \n", d.Id(), err, payload))
+		diags := diag.FromErr(fmt.Errorf("an error occured while fetching a lan ID %s %s", d.Id(), err))
 		return diags
 	}
 
@@ -167,13 +159,9 @@ func resourceLoadbalancerUpdate(ctx context.Context, d *schema.ResourceData, met
 	}
 
 	if hasChangeCount > 0 {
-		_, apiResponse, err := client.LoadBalancerApi.DatacentersLoadbalancersPatch(ctx, d.Get("datacenter_id").(string), d.Id()).Loadbalancer(*properties).Execute()
+		_, _, err := client.LoadBalancerApi.DatacentersLoadbalancersPatch(ctx, d.Get("datacenter_id").(string), d.Id()).Loadbalancer(*properties).Execute()
 		if err != nil {
-			payload := ""
-			if apiResponse != nil {
-				payload = fmt.Sprintf("API response: %s", string(apiResponse.Payload))
-			}
-			diags := diag.FromErr(fmt.Errorf("error while updating loadbalancer %s: %s \n API Response: %s \n", d.Id(), err, payload))
+			diags := diag.FromErr(fmt.Errorf("error while updating loadbalancer %s: %s \n", d.Id(), err))
 			return diags
 		}
 	}
@@ -192,11 +180,7 @@ func resourceLoadbalancerUpdate(ctx context.Context, d *schema.ResourceData, met
 					that contain it, behind the scenes - therefore our call will yield 404 */
 					fmt.Printf("[WARNING] nic ID %s already removed from load balancer %s\n", o.(string), d.Id())
 				} else {
-					payload := ""
-					if apiResponse != nil {
-						payload = fmt.Sprintf("API response: %s", string(apiResponse.Payload))
-					}
-					diags := diag.FromErr(fmt.Errorf("[load balancer update] an error occured while deleting a balanced nic: %s \n API Response: %s \n", err, payload))
+					diags := diag.FromErr(fmt.Errorf("[load balancer update] an error occured while deleting a balanced nic: %s", err))
 					return diags
 				}
 			} else {
@@ -216,11 +200,7 @@ func resourceLoadbalancerUpdate(ctx context.Context, d *schema.ResourceData, met
 			nic := ionoscloud.Nic{Id: &id}
 			_, apiResponse, err := client.LoadBalancerApi.DatacentersLoadbalancersBalancednicsPost(ctx, d.Get("datacenter_id").(string), d.Id()).Nic(nic).Execute()
 			if err != nil {
-				payload := ""
-				if apiResponse != nil {
-					payload = fmt.Sprintf("API response: %s", string(apiResponse.Payload))
-				}
-				diags := diag.FromErr(fmt.Errorf("[load balancer update] an error occured while creating a balanced nic: %s \n API Response: %s \n", err, payload))
+				diags := diag.FromErr(fmt.Errorf("[load balancer update] an error occured while creating a balanced nic: %s", err))
 				return diags
 			}
 			// Wait, catching any errors
@@ -244,11 +224,7 @@ func resourceLoadbalancerDelete(ctx context.Context, d *schema.ResourceData, met
 	_, apiResponse, err := client.LoadBalancerApi.DatacentersLoadbalancersDelete(ctx, dcid, d.Id()).Execute()
 
 	if err != nil {
-		payload := ""
-		if apiResponse != nil {
-			payload = fmt.Sprintf("API response: %s", string(apiResponse.Payload))
-		}
-		diags := diag.FromErr(fmt.Errorf("[load balancer delete] an error occured while deleting a loadbalancer: %s \n API Reponse: %s \n", err, payload))
+		diags := diag.FromErr(fmt.Errorf("[load balancer delete] an error occured while deleting a loadbalancer: %s", err))
 		return diags
 	}
 

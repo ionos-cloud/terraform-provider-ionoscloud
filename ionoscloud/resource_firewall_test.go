@@ -59,8 +59,7 @@ func testAccCheckFirewallDestroyCheck(s *terraform.State) error {
 
 		if err != nil {
 			if apiResponse != nil && apiResponse.StatusCode != 404 {
-				payload := fmt.Sprintf("API response: %s", string(apiResponse.Payload))
-				return fmt.Errorf("firewall still exists %s - an error occurred while checking it %s %s", rs.Primary.ID, err, payload)
+				return fmt.Errorf("firewall still exists %s - an error occurred while checking it %s", rs.Primary.ID, err)
 			}
 		} else {
 			return fmt.Errorf("firewall still exists %s", rs.Primary.ID)
@@ -104,15 +103,11 @@ func testAccCheckFirewallExists(n string, firewall *ionoscloud.FirewallRule) res
 			defer cancel()
 		}
 
-		foundServer, apiResponse, err := client.NicApi.DatacentersServersNicsFirewallrulesFindById(ctx, rs.Primary.Attributes["datacenter_id"],
+		foundServer, _, err := client.NicApi.DatacentersServersNicsFirewallrulesFindById(ctx, rs.Primary.Attributes["datacenter_id"],
 			rs.Primary.Attributes["server_id"], rs.Primary.Attributes["nic_id"], rs.Primary.ID).Execute()
 
 		if err != nil {
-			payload := ""
-			if apiResponse != nil {
-				payload = fmt.Sprintf("API response: %s", string(apiResponse.Payload))
-			}
-			return fmt.Errorf("error occured while fetching Firewall rule: %s %s", rs.Primary.ID, payload)
+			return fmt.Errorf("error occured while fetching Firewall rule: %s", rs.Primary.ID)
 		}
 		if *foundServer.Id != rs.Primary.ID {
 			return fmt.Errorf("record not found")

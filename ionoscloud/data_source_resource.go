@@ -39,38 +39,32 @@ func dataSourceResourceRead(d *schema.ResourceData, meta interface{}) error {
 	}
 
 	if resourceType != "" && resourceId != "" {
-		result, apiResponse, err := client.UserManagementApi.UmResourcesFindByTypeAndId(ctx, resourceType, resourceId).Execute()
+		result, _, err := client.UserManagementApi.UmResourcesFindByTypeAndId(ctx, resourceType, resourceId).Execute()
 		if err != nil {
-			payload := ""
-			if apiResponse != nil {
-				payload = fmt.Sprintf("API response: %s", string(apiResponse.Payload))
-			}
-			return fmt.Errorf("an error occured while fetching resource by type %s %s", err, payload)
+			return fmt.Errorf("an error occured while fetching resource by type %s", err)
 		}
 		results = append(results, result)
 
-		d.Set("resource_type", result.Type)
-		d.Set("resource_id", result.Id)
+		if err := d.Set("resource_type", result.Type); err != nil {
+			return err
+		}
+		if err := d.Set("resource_id", result.Id); err != nil {
+			return err
+		}
 	} else if resourceType != "" {
-		items, apiResponse, err := client.UserManagementApi.UmResourcesFindByType(ctx, resourceType).Execute()
+		items, _, err := client.UserManagementApi.UmResourcesFindByType(ctx, resourceType).Execute()
 		if err != nil {
-			payload := ""
-			if apiResponse != nil {
-				payload = fmt.Sprintf("API response: %s", string(apiResponse.Payload))
-			}
-			return fmt.Errorf("an error occured while fetching resources by type %s %s", err, payload)
+			return fmt.Errorf("an error occured while fetching resources by type %s", err)
 		}
 
 		results = *items.Items
-		d.Set("resource_type", results[0].Type)
+		if err := d.Set("resource_type", results[0].Type); err != nil {
+			return err
+		}
 	} else {
-		items, apiResponse, err := client.UserManagementApi.UmResourcesGet(ctx).Execute()
+		items, _, err := client.UserManagementApi.UmResourcesGet(ctx).Execute()
 		if err != nil {
-			payload := ""
-			if apiResponse != nil {
-				payload = fmt.Sprintf("API response: %s", string(apiResponse.Payload))
-			}
-			return fmt.Errorf("an error occured while fetching resources %s %s", err, payload)
+			return fmt.Errorf("an error occured while fetching resources %s", err)
 		}
 		results = *items.Items
 	}

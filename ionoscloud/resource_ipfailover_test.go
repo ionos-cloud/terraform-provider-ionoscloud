@@ -70,14 +70,10 @@ func testAccCheckLanIPFailoverGroupExists(n string, _ *ionoscloud.Lan, _ *ionosc
 			defer cancel()
 		}
 
-		lan, apiResponse, err := client.LanApi.DatacentersLansFindById(ctx, dcId, lanId).Execute()
+		lan, _, err := client.LanApi.DatacentersLansFindById(ctx, dcId, lanId).Execute()
 
 		if err != nil {
-			payload := ""
-			if apiResponse != nil {
-				payload = fmt.Sprintf("API response: %s", string(apiResponse.Payload))
-			}
-			return fmt.Errorf("lan %s not found %s", lanId, payload)
+			return fmt.Errorf("lan %s not found %s", lanId, err)
 		}
 
 		if lan.Properties.IpFailover == nil {
@@ -115,14 +111,10 @@ func testAccCheckLanIPFailoverDestroyCheck(s *terraform.State) error {
 		lanId := rs.Primary.Attributes["lan_id"]
 		nicUuid := rs.Primary.Attributes["nicuuid"]
 
-		lan, apiResponse, err := client.LanApi.DatacentersLansFindById(ctx, dcId, lanId).Execute()
+		lan, _, err := client.LanApi.DatacentersLansFindById(ctx, dcId, lanId).Execute()
 
 		if err != nil {
-			payload := ""
-			if apiResponse != nil {
-				payload = fmt.Sprintf("API response: %s", string(apiResponse.Payload))
-			}
-			return fmt.Errorf("an error occured while fetching a Lan ID %s %s %s", rs.Primary.Attributes["lan_id"], err, payload)
+			return fmt.Errorf("an error occured while fetching a Lan ID %s %s", rs.Primary.Attributes["lan_id"], err)
 		}
 
 		found := false

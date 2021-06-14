@@ -115,14 +115,10 @@ func testAccCheckk8sNodepoolExists(n string, k8sNodepool *ionoscloud.KubernetesN
 			defer cancel()
 		}
 
-		foundK8sNodepool, apiResponse, err := client.KubernetesApi.K8sNodepoolsFindById(ctx, rs.Primary.Attributes["k8s_cluster_id"], rs.Primary.ID).Execute()
+		foundK8sNodepool, _, err := client.KubernetesApi.K8sNodepoolsFindById(ctx, rs.Primary.Attributes["k8s_cluster_id"], rs.Primary.ID).Execute()
 
 		if err != nil {
-			payload := ""
-			if apiResponse != nil {
-				payload = fmt.Sprintf("API response: %s", string(apiResponse.Payload))
-			}
-			return fmt.Errorf("error occured while fetching k8s node pool: %s %s", rs.Primary.ID, payload)
+			return fmt.Errorf("error occured while fetching k8s node pool: %s", rs.Primary.ID)
 		}
 		if *foundK8sNodepool.Id != rs.Primary.ID {
 			return fmt.Errorf("record not found")

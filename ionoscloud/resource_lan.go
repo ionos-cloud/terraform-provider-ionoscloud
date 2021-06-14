@@ -142,11 +142,7 @@ func resourceLanRead(ctx context.Context, d *schema.ResourceData, meta interface
 			d.SetId("")
 			return nil
 		}
-		payload := ""
-		if apiResponse != nil {
-			payload = fmt.Sprintf("API response: %s", string(apiResponse.Payload))
-		}
-		diags := diag.FromErr(fmt.Errorf("an error occured while fetching a LAN %s: %s %s", d.Id(), err, payload))
+		diags := diag.FromErr(fmt.Errorf("an error occured while fetching a LAN %s: %s", d.Id(), err))
 		return diags
 	}
 
@@ -243,11 +239,7 @@ func resourceLanDelete(ctx context.Context, d *schema.ResourceData, meta interfa
 
 		if err != nil {
 			if apiResponse == nil || apiResponse.StatusCode != 404 {
-				payload := ""
-				if apiResponse != nil {
-					payload = fmt.Sprintf("API response: %s", string(apiResponse.Payload))
-				}
-				diags := diag.FromErr(fmt.Errorf("an error occured while deleting a lan dcId %s ID %s %s %s", d.Get("datacenter_id").(string), d.Id(), err, payload))
+				diags := diag.FromErr(fmt.Errorf("an error occured while deleting a lan dcId %s ID %s %s", d.Get("datacenter_id").(string), d.Id(), err))
 				return diags
 			}
 		}
@@ -297,11 +289,7 @@ func lanDeleted(ctx context.Context, client *ionoscloud.APIClient, d *schema.Res
 		if apiResponse != nil && apiResponse.StatusCode == 404 {
 			return true, nil
 		}
-		payload := ""
-		if apiResponse != nil {
-			payload = fmt.Sprintf("API response: %s", string(apiResponse.Payload))
-		}
-		return true, fmt.Errorf("%s %s", err, payload)
+		return true, err
 
 	}
 	log.Printf("[INFO] LAN %s not deleted yet deleted LAN: %+v", d.Id(), rsp)

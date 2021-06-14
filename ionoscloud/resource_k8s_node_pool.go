@@ -307,11 +307,7 @@ func resourcek8sNodePoolRead(ctx context.Context, d *schema.ResourceData, meta i
 			d.SetId("")
 			return nil
 		}
-		payload := ""
-		if apiResponse != nil {
-			payload = fmt.Sprintf("API response: %s", string(apiResponse.Payload))
-		}
-		diags := diag.FromErr(fmt.Errorf("error while fetching k8s node pool %s: %s %s", d.Id(), err, payload))
+		diags := diag.FromErr(fmt.Errorf("error while fetching k8s node pool %s: %s", d.Id(), err))
 		return diags
 	}
 
@@ -505,13 +501,9 @@ func resourcek8sNodePoolUpdate(ctx context.Context, d *schema.ResourceData, meta
 				defer cancel()
 			}
 
-			np, apiResponse, npErr := client.KubernetesApi.K8sNodepoolsFindById(ctx, d.Get("k8s_cluster_id").(string), d.Id()).Execute()
+			np, _, npErr := client.KubernetesApi.K8sNodepoolsFindById(ctx, d.Get("k8s_cluster_id").(string), d.Id()).Execute()
 			if npErr != nil {
-				payload := ""
-				if apiResponse != nil {
-					payload = fmt.Sprintf("API response: %s", string(apiResponse.Payload))
-				}
-				diags := diag.FromErr(fmt.Errorf("error retrieving k8s node pool %q: %s %s", d.Id(), npErr, payload))
+				diags := diag.FromErr(fmt.Errorf("error retrieving k8s node pool %q: %s", d.Id(), npErr))
 				return diags
 			}
 
@@ -632,11 +624,7 @@ func resourcek8sNodePoolUpdate(ctx context.Context, d *schema.ResourceData, meta
 			d.SetId("")
 			return nil
 		}
-		payload := ""
-		if apiResponse != nil {
-			payload = fmt.Sprintf("API response: %s", string(apiResponse.Payload))
-		}
-		diags := diag.FromErr(fmt.Errorf("error while updating k8s node pool %s: %s %s", d.Id(), err, payload))
+		diags := diag.FromErr(fmt.Errorf("error while updating k8s node pool %s: %s", d.Id(), err))
 		return diags
 	}
 
@@ -670,11 +658,7 @@ func resourcek8sNodePoolDelete(ctx context.Context, d *schema.ResourceData, meta
 			d.SetId("")
 			return nil
 		}
-		payload := ""
-		if apiResponse != nil {
-			payload = fmt.Sprintf("API response: %s", string(apiResponse.Payload))
-		}
-		diags := diag.FromErr(fmt.Errorf("error while deleting k8s node pool %s: %s %s", d.Id(), err, payload))
+		diags := diag.FromErr(fmt.Errorf("error while deleting k8s node pool %s: %s", d.Id(), err))
 		return diags
 	}
 
@@ -707,13 +691,9 @@ func k8sNodepoolReady(client *ionoscloud.APIClient, d *schema.ResourceData) (boo
 		defer cancel()
 	}
 
-	subjectNodepool, apiResponse, err := client.KubernetesApi.K8sNodepoolsFindById(ctx, d.Get("k8s_cluster_id").(string), d.Id()).Execute()
+	subjectNodepool, _, err := client.KubernetesApi.K8sNodepoolsFindById(ctx, d.Get("k8s_cluster_id").(string), d.Id()).Execute()
 	if err != nil {
-		payload := ""
-		if apiResponse != nil {
-			payload = fmt.Sprintf("API response: %s", string(apiResponse.Payload))
-		}
-		return true, fmt.Errorf("error checking k8s node pool status: %s %s", err, payload)
+		return true, fmt.Errorf("error checking k8s node pool status: %s", err)
 	}
 	return *subjectNodepool.Metadata.State == "ACTIVE", nil
 }
@@ -730,11 +710,7 @@ func k8sNodepoolDeleted(client *ionoscloud.APIClient, d *schema.ResourceData) (b
 		if apiResponse != nil && apiResponse.StatusCode == 404 {
 			return true, nil
 		}
-		payload := ""
-		if apiResponse != nil {
-			payload = fmt.Sprintf("API response: %s", string(apiResponse.Payload))
-		}
-		return true, fmt.Errorf("error checking k8s node pool deletion status: %s %s", err, payload)
+		return true, fmt.Errorf("error checking k8s node pool deletion status: %s", err)
 	}
 	return false, nil
 }

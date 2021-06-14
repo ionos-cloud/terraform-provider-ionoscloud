@@ -50,11 +50,7 @@ func resourceSnapshotCreate(ctx context.Context, d *schema.ResourceData, meta in
 	rsp, apiResponse, err := client.VolumeApi.DatacentersVolumesCreateSnapshotPost(ctx, dcId, volumeId).Name(name).Execute()
 
 	if err != nil {
-		payload := ""
-		if apiResponse != nil {
-			payload = fmt.Sprintf("API response: %s", string(apiResponse.Payload))
-		}
-		diags := diag.FromErr(fmt.Errorf("An error occured while creating a snapshot: %s %s", err, payload))
+		diags := diag.FromErr(fmt.Errorf("an error occured while creating a snapshot: %s", err))
 		return diags
 	}
 
@@ -83,11 +79,7 @@ func resourceSnapshotRead(ctx context.Context, d *schema.ResourceData, meta inte
 			d.SetId("")
 			return nil
 		}
-		payload := ""
-		if apiResponse != nil {
-			payload = fmt.Sprintf("API response: %s", string(apiResponse.Payload))
-		}
-		diags := diag.FromErr(fmt.Errorf("error occured while fetching a snapshot ID %s %s %s", d.Id(), err, payload))
+		diags := diag.FromErr(fmt.Errorf("error occured while fetching a snapshot ID %s %s", d.Id(), err))
 		return diags
 	}
 
@@ -108,11 +100,7 @@ func resourceSnapshotUpdate(ctx context.Context, d *schema.ResourceData, meta in
 
 	_, apiResponse, err := client.SnapshotApi.SnapshotsPatch(context.TODO(), d.Id()).Snapshot(input).Execute()
 	if err != nil {
-		payload := ""
-		if apiResponse != nil {
-			payload = fmt.Sprintf("API response: %s", string(apiResponse.Payload))
-		}
-		diags := diag.FromErr(fmt.Errorf("an error occured while restoring a snapshot ID %s %d %s", d.Id(), err, payload))
+		diags := diag.FromErr(fmt.Errorf("an error occured while restoring a snapshot ID %s %d", d.Id(), err))
 		return diags
 	}
 
@@ -136,11 +124,7 @@ func resourceSnapshotDelete(ctx context.Context, d *schema.ResourceData, meta in
 
 	rsp, apiResponse, err := client.SnapshotApi.SnapshotsFindById(ctx, d.Id()).Execute()
 	if err != nil {
-		payload := ""
-		if apiResponse != nil {
-			payload = fmt.Sprintf("API response: %s", string(apiResponse.Payload))
-		}
-		diags := diag.FromErr(fmt.Errorf("an error occured while fetching a snapshot ID %s %s %s", d.Id(), err, payload))
+		diags := diag.FromErr(fmt.Errorf("an error occured while fetching a snapshot ID %s %s", d.Id(), err))
 		return diags
 	}
 
@@ -149,11 +133,7 @@ func resourceSnapshotDelete(ctx context.Context, d *schema.ResourceData, meta in
 		_, _, err := client.SnapshotApi.SnapshotsFindById(ctx, d.Id()).Execute()
 
 		if err != nil {
-			payload := ""
-			if apiResponse != nil {
-				payload = fmt.Sprintf("API response: %s", string(apiResponse.Payload))
-			}
-			diags := diag.FromErr(fmt.Errorf("an error occured while fetching a snapshot ID %s %s %s", d.Id(), err, payload))
+			diags := diag.FromErr(fmt.Errorf("an error occured while fetching a snapshot ID %s %s", d.Id(), err))
 			return diags
 		}
 	}
@@ -162,11 +142,7 @@ func resourceSnapshotDelete(ctx context.Context, d *schema.ResourceData, meta in
 	dc, _, err := client.DataCenterApi.DatacentersFindById(ctx, dcId).Execute()
 
 	if err != nil {
-		payload := ""
-		if apiResponse != nil {
-			payload = fmt.Sprintf("API response: %s", string(apiResponse.Payload))
-		}
-		diags := diag.FromErr(fmt.Errorf("an error occured while fetching a Datacenter ID %s %s %s", dcId, err, payload))
+		diags := diag.FromErr(fmt.Errorf("an error occured while fetching a Datacenter ID %s %s", dcId, err))
 		return diags
 	}
 
@@ -175,22 +151,14 @@ func resourceSnapshotDelete(ctx context.Context, d *schema.ResourceData, meta in
 		_, _, err := client.DataCenterApi.DatacentersFindById(ctx, dcId).Execute()
 
 		if err != nil {
-			payload := ""
-			if apiResponse != nil {
-				payload = fmt.Sprintf("API response: %s", string(apiResponse.Payload))
-			}
-			diags := diag.FromErr(fmt.Errorf("an error occured while fetching a Datacenter ID %s %s %s", dcId, err, payload))
+			diags := diag.FromErr(fmt.Errorf("an error occured while fetching a Datacenter ID %s %s", dcId, err))
 			return diags
 		}
 	}
 
 	_, apiResponse, err = client.SnapshotApi.SnapshotsDelete(ctx, d.Id()).Execute()
 	if err != nil {
-		payload := ""
-		if apiResponse != nil {
-			payload = fmt.Sprintf("API response: %s", string(apiResponse.Payload))
-		}
-		diags := diag.FromErr(fmt.Errorf("an error occured while deleting a snapshot ID %s %s %s", d.Id(), err, payload))
+		diags := diag.FromErr(fmt.Errorf("an error occured while deleting a snapshot ID %s %s", d.Id(), err))
 		return diags
 	}
 

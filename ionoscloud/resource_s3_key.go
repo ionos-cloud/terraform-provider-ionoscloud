@@ -46,15 +46,11 @@ func resourceS3Key() *schema.Resource {
 func resourceS3KeyCreate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	client := meta.(*ionoscloud.APIClient)
 
-	rsp, apiResponse, err := client.UserManagementApi.UmUsersS3keysPost(ctx, d.Get("user_id").(string)).Execute()
+	rsp, _, err := client.UserManagementApi.UmUsersS3keysPost(ctx, d.Get("user_id").(string)).Execute()
 
 	if err != nil {
 		d.SetId("")
-		payload := ""
-		if apiResponse != nil {
-			payload = fmt.Sprintf("API response: %s", string(apiResponse.Payload))
-		}
-		diags := diag.FromErr(fmt.Errorf("error creating S3 key: %s %s", err, payload))
+		diags := diag.FromErr(fmt.Errorf("error creating S3 key: %s", err))
 		return diags
 	}
 
@@ -77,11 +73,7 @@ func resourceS3KeyRead(ctx context.Context, d *schema.ResourceData, meta interfa
 			d.SetId("")
 			return nil
 		}
-		payload := ""
-		if apiResponse != nil {
-			payload = fmt.Sprintf("API response: %s", string(apiResponse.Payload))
-		}
-		diags := diag.FromErr(fmt.Errorf("error while reading S3 key %s: %s, %+v %s", d.Id(), err, rsp, payload))
+		diags := diag.FromErr(fmt.Errorf("error while reading S3 key %s: %s, %+v", d.Id(), err, rsp))
 		return diags
 	}
 
@@ -133,11 +125,7 @@ func resourceS3KeyUpdate(ctx context.Context, d *schema.ResourceData, meta inter
 			d.SetId("")
 			return nil
 		}
-		payload := ""
-		if apiResponse != nil {
-			payload = fmt.Sprintf("API response: %s", string(apiResponse.Payload))
-		}
-		diags := diag.FromErr(fmt.Errorf("error while updating S3 key: %s %s", err, payload))
+		diags := diag.FromErr(fmt.Errorf("error while updating S3 key: %s", err))
 		return diags
 	}
 
@@ -172,11 +160,7 @@ func resourceS3KeyDelete(ctx context.Context, d *schema.ResourceData, meta inter
 			d.SetId("")
 			return nil
 		}
-		payload := ""
-		if apiResponse != nil {
-			payload = fmt.Sprintf("API response: %s", string(apiResponse.Payload))
-		}
-		diags := diag.FromErr(fmt.Errorf("error while deleting S3 key: %s %s", err, payload))
+		diags := diag.FromErr(fmt.Errorf("error while deleting S3 key: %s", err))
 		return diags
 	}
 
@@ -208,25 +192,17 @@ func s3KeyDeleted(ctx context.Context, client *ionoscloud.APIClient, d *schema.R
 		if apiResponse != nil && apiResponse.StatusCode == 404 {
 			return true, nil
 		}
-		payload := ""
-		if apiResponse != nil {
-			payload = fmt.Sprintf("API response: %s", string(apiResponse.Payload))
-		}
-		return true, fmt.Errorf("%s %s", err, payload)
+		return true, err
 	}
 	return false, nil
 }
 
 func s3Ready(ctx context.Context, client *ionoscloud.APIClient, d *schema.ResourceData) (bool, error) {
 	userId := d.Get("user_id").(string)
-	rsp, apiResponse, err := client.UserManagementApi.UmUsersS3keysFindByKeyId(ctx, userId, d.Id()).Execute()
+	rsp, _, err := client.UserManagementApi.UmUsersS3keysFindByKeyId(ctx, userId, d.Id()).Execute()
 
 	if err != nil {
-		payload := ""
-		if apiResponse != nil {
-			payload = fmt.Sprintf("API response: %s", string(apiResponse.Payload))
-		}
-		return true, fmt.Errorf("%s %s", err, payload)
+		return true, err
 	}
 	active := d.Get("active").(bool)
 	return *rsp.Properties.Active == active, nil

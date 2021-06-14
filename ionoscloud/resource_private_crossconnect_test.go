@@ -60,11 +60,7 @@ func testAccCheckprivateCrossConnectDestroyCheck(s *terraform.State) error {
 
 		if err != nil {
 			if apiResponse == nil || apiResponse.StatusCode != 404 {
-				payload := ""
-				if apiResponse != nil {
-					payload = fmt.Sprintf("API response: %s", string(apiResponse.Payload))
-				}
-				return fmt.Errorf("private cross connect still exists  %s - an error occurred while checking it %s %s", rs.Primary.ID, err, payload)
+				return fmt.Errorf("private cross connect still exists  %s - an error occurred while checking it %s", rs.Primary.ID, err)
 			}
 		} else {
 			return fmt.Errorf("private cross connect still exists  %s", rs.Primary.ID)
@@ -93,14 +89,10 @@ func testAccCheckprivateCrossConnectExists(n string, privateCrossConnect *ionosc
 			return fmt.Errorf("no Record ID is set")
 		}
 
-		foundPrivateCrossConnect, apiResponse, err := client.PrivateCrossConnectApi.PccsFindById(ctx, rs.Primary.ID).Execute()
+		foundPrivateCrossConnect, _, err := client.PrivateCrossConnectApi.PccsFindById(ctx, rs.Primary.ID).Execute()
 
 		if err != nil {
-			payload := ""
-			if apiResponse != nil {
-				payload = fmt.Sprintf("API response: %s", string(apiResponse.Payload))
-			}
-			return fmt.Errorf("error occured while fetching private cross-connect: %s %s", rs.Primary.ID, payload)
+			return fmt.Errorf("error occured while fetching private cross-connect: %s", rs.Primary.ID)
 		}
 		if *foundPrivateCrossConnect.Id != rs.Primary.ID {
 			return fmt.Errorf("record not found")

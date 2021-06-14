@@ -87,14 +87,10 @@ func testAccCheckDatacenterExists(n string, datacenter *ionoscloud.Datacenter) r
 			defer cancel()
 		}
 
-		foundDC, apiResponse, err := client.DataCenterApi.DatacentersFindById(ctx, rs.Primary.ID).Execute()
+		foundDC, _, err := client.DataCenterApi.DatacentersFindById(ctx, rs.Primary.ID).Execute()
 
 		if err != nil {
-			payload := ""
-			if apiResponse != nil {
-				payload = fmt.Sprintf("API response: %s", string(apiResponse.Payload))
-			}
-			return fmt.Errorf("error occured while fetching DC: %s %s", rs.Primary.ID, payload)
+			return fmt.Errorf("error occured while fetching DC: %s", rs.Primary.ID)
 		}
 		if *foundDC.Id != rs.Primary.ID {
 			return fmt.Errorf("record not found")

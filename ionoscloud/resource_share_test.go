@@ -84,14 +84,10 @@ func testAccCheckShareExists(n string, share *ionoscloud.GroupShare) resource.Te
 
 		grpId := rs.Primary.Attributes["group_id"]
 		resourceId := rs.Primary.Attributes["resource_id"]
-		foundShare, apiResponse, err := client.UserManagementApi.UmGroupsSharesFindByResourceId(context.TODO(), grpId, resourceId).Execute()
+		foundShare, _, err := client.UserManagementApi.UmGroupsSharesFindByResourceId(context.TODO(), grpId, resourceId).Execute()
 
 		if err != nil {
-			payload := ""
-			if apiResponse != nil {
-				payload = fmt.Sprintf("API response: %s", string(apiResponse.Payload))
-			}
-			return fmt.Errorf("error occured while fetching Share of resource  %s in group %s %s", rs.Primary.Attributes["resource_id"], rs.Primary.Attributes["group_id"], payload)
+			return fmt.Errorf("error occured while fetching Share of resource  %s in group %s", rs.Primary.Attributes["resource_id"], rs.Primary.Attributes["group_id"])
 		}
 		if *foundShare.Id != rs.Primary.ID {
 			return fmt.Errorf("record not found")
