@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"github.com/hashicorp/terraform-plugin-sdk/httpclient"
 	"log"
+	"os"
 	"time"
 
 	"github.com/hashicorp/terraform-plugin-sdk/helper/resource"
@@ -140,7 +141,13 @@ func providerConfigure(d *schema.ResourceData, terraformVersion string) (interfa
 		newConfig.Servers[0].URL = cleanedUrl
 	}
 	newConfig.UserAgent = httpclient.TerraformUserAgent(terraformVersion)
+	if os.Getenv("IONOS_DEBUG") != "" {
+		newConfig.Debug = true
+	}
+
 	newClient := ionoscloud.NewAPIClient(newConfig)
+
+
 
 	return newClient, nil
 }

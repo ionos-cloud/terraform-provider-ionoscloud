@@ -135,6 +135,7 @@ func resourceNatGatewayCreate(d *schema.ResourceData, meta interface{}) error {
 		defer cancel()
 	}
 
+	log.Printf("[*****] %+v\n", natGateway)
 	natGatewayResp, apiResponse, err := client.NATGatewaysApi.DatacentersNatgatewaysPost(ctx, dcId).NatGateway(natGateway).Execute()
 
 	if err != nil {

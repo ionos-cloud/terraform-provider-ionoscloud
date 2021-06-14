@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	ionoscloud "github.com/ionos-cloud/sdk-go/v6"
+	"os"
 	"testing"
 
 	"github.com/hashicorp/terraform-plugin-sdk/helper/resource"
@@ -14,6 +15,12 @@ func TestAccNatGateway_Basic(t *testing.T) {
 	var natGateway ionoscloud.NatGateway
 	natGatewayName := "natGateway"
 
+	publicIp1 := os.Getenv("TF_ACC_IONOS_PUBLIC_IP_1")
+	if publicIp1 == "" {
+		t.Errorf("TF_ACC_IONOS_PUBLIC_IP_1 not set; please set it to a valid public IP for the de/fra zone")
+		t.FailNow()
+	}
+
 	resource.Test(t, resource.TestCase{
 		PreCheck: func() {
 			testAccPreCheck(t)
@@ -22,14 +29,14 @@ func TestAccNatGateway_Basic(t *testing.T) {
 		CheckDestroy: testAccCheckNatGatewayDestroyCheck,
 		Steps: []resource.TestStep{
 			{
-				Config: fmt.Sprintf(testAccCheckNatGatewayConfigBasic, natGatewayName),
+				Config: fmt.Sprintf(testAccCheckNatGatewayConfigBasic, natGatewayName, publicIp1),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckNatGatewayExists("ionoscloud_natgateway.natgateway", &natGateway),
 					resource.TestCheckResourceAttr("ionoscloud_natgateway.natgateway", "name", natGatewayName),
 				),
 			},
 			{
-				Config: testAccCheckNatGatewayConfigUpdate,
+				Config: fmt.Sprintf(testAccCheckNatGatewayConfigUpdate, publicIp1),
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttr("ionoscloud_natgateway.natgateway", "name", "updated"),
 				),
@@ -102,7 +109,7 @@ func testAccCheckNatGatewayExists(n string, natGateway *ionoscloud.NatGateway) r
 const testAccCheckNatGatewayConfigBasic = `
 resource "ionoscloud_datacenter" "natgateway_datacenter" {
   name              = "test_natgateway"
-  location          = "gb/lhr"
+  location          = "de/fra"
   description       = "datacenter for hosting "
 }
 
@@ -114,8 +121,8 @@ resource "ionoscloud_lan" "natgateway_lan" {
 
 resource "ionoscloud_natgateway" "natgateway" { 
   datacenter_id = ionoscloud_datacenter.natgateway_datacenter.id
-  name          = "%s" 
-  public_ips    = [ "77.68.66.153" ]
+  name          = "%s"
+  public_ips    = [ "%s" ]
   lans {
      id          = ionoscloud_lan.natgateway_lan.id
   }
@@ -124,7 +131,7 @@ resource "ionoscloud_natgateway" "natgateway" {
 const testAccCheckNatGatewayConfigUpdate = `
 resource "ionoscloud_datacenter" "natgateway_datacenter" {
   name              = "test_natgateway"
-  location          = "gb/lhr"
+  location          = "de/fra"
   description       = "datacenter for hosting "
 }
 
@@ -137,7 +144,7 @@ resource "ionoscloud_lan" "natgateway_lan" {
 resource "ionoscloud_natgateway" "natgateway" { 
   datacenter_id = ionoscloud_datacenter.natgateway_datacenter.id
   name          = "updated" 
-  public_ips    = [ "77.68.66.153"]
+  public_ips    = [ "%s"]
   lans {
      id          = ionoscloud_lan.natgateway_lan.id
   }
