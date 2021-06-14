@@ -81,6 +81,7 @@ func resourceBackupUnitCreate(d *schema.ResourceData, meta interface{}) error {
 	d.SetId(*createdBackupUnit.Id)
 	log.Printf("[INFO] Created backup unit: %s", d.Id())
 
+
 	for {
 		log.Printf("[INFO] Waiting for backup unit %s to be ready...", d.Id())
 
@@ -142,14 +143,14 @@ func resourceBackupUnitRead(d *schema.ResourceData, meta interface{}) error {
 	}
 
 	if backupUnit.Properties.Email != nil {
-		epErr := d.Set("email", backupUnit.Properties.Email)
+		epErr := d.Set("email", *backupUnit.Properties.Email)
 		if epErr != nil {
 			return fmt.Errorf("error while setting email property for backup unit %s: %s", d.Id(), epErr)
 		}
 	}
 
 	if backupUnit.Properties.Name != nil && contractResources.Id != nil {
-		err := d.Set("login", fmt.Sprintf("%s-%d", *backupUnit.Properties.Name, (*contractResources.Items)[0].Properties.ContractNumber))
+		err := d.Set("login", fmt.Sprintf("%s-%d", *backupUnit.Properties.Name, *(*contractResources.Items)[0].Properties.ContractNumber))
 		if err != nil {
 			return fmt.Errorf("error while setting login property for backup unit %s: %s", d.Id(), err)
 		}
