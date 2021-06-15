@@ -112,19 +112,26 @@ func resourceLanCreate(ctx context.Context, d *schema.ResourceData, meta interfa
 
 	for {
 		log.Printf("[INFO] Waiting for LAN %s to be available...", *rsp.Id)
-		time.Sleep(5 * time.Second)
 
-		clusterReady, rsErr := lanAvailable(ctx, client, d)
+		lanReady, rsErr := lanAvailable(client, d)
 
 		if rsErr != nil {
 			diags := diag.FromErr(fmt.Errorf("error while checking readiness status of LAN %s: %s", *rsp.Id, rsErr))
 			return diags
 		}
 
-		if clusterReady {
+		if lanReady {
 			log.Printf("[INFO] LAN ready: %s", d.Id())
 			break
 		}
+
+		select {
+		case <-time.After(SleepInterval):
+			log.Printf("[INFO] trying again ...")
+		case <-ctx.Done():
+			log.Printf("[INFO] lan creation timed out")
+			diags := diag.FromErr(fmt.Errorf("lan creation timed out! WARNING: your lan will still probably be created after some time but the terraform state won't reflect that; check your Ionos Cloud account for updates"))
+			return diags}
 	}
 
 	return resourceLanRead(ctx, d, meta)
@@ -233,21 +240,11 @@ func resourceLanDelete(ctx context.Context, d *schema.ResourceData, meta interfa
 	_, _, err := client.LanApi.DatacentersLansDelete(ctx, dcid, d.Id()).Execute()
 
 	if err != nil {
-		//try again in 120 seconds
-		time.Sleep(120 * time.Second)
-		_, apiResponse, err := client.LanApi.DatacentersLansDelete(ctx, dcid, d.Id()).Execute()
-
-		if err != nil {
-			if apiResponse == nil || apiResponse.StatusCode != 404 {
-				diags := diag.FromErr(fmt.Errorf("an error occured while deleting a lan dcId %s ID %s %s", d.Get("datacenter_id").(string), d.Id(), err))
-				return diags
-			}
-		}
+		return fmt.Errorf("an error occured while deleting a lan dcId %s ID %s %s", d.Get("datacenter_id").(string), d.Id(), err)
 	}
 
 	for {
 		log.Printf("[INFO] Waiting for LAN %s to be deleted...", d.Id())
-		time.Sleep(5 * time.Second)
 
 		lDeleted, dsErr := lanDeleted(ctx, client, d)
 
@@ -260,6 +257,16 @@ func resourceLanDelete(ctx context.Context, d *schema.ResourceData, meta interfa
 			log.Printf("[INFO] Successfully deleted LAN: %s", d.Id())
 			break
 		}
+
+		select {
+		case <-time.After(SleepInterval):
+			log.Printf("[INFO] trying again ...")
+		case <-ctx.Done():
+			log.Printf("[INFO] lan deletion timed out")
+			diags := diag.FromErr(fmt.Errorf("lan deletion timed out! WARNING: your lan will still probably be deleted after some" +
+				" time but the terraform state won't reflect that; check your Ionos Cloud account for updates"))
+			return diags}
+
 	}
 
 	d.SetId("")

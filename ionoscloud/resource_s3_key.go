@@ -115,10 +115,13 @@ func resourceS3KeyUpdate(ctx context.Context, d *schema.ResourceData, meta inter
 		request.Properties.Active = &active
 	}
 
-	userId := d.Get("user_id").(string)
-	_, apiResponse, err := client.UserManagementApi.UmUsersS3keysPut(context.TODO(), userId, d.Id()).S3Key(request).Execute()
+	ctx, cancel := context.WithTimeout(context.Background(), *resourceDefaultTimeouts.Update)
+	if cancel != nil {
+		defer cancel()
+	}
 
-	time.Sleep(5 * time.Second)
+	userId := d.Get("user_id").(string)
+	_, apiResponse, err := client.UserManagementApi.UmUsersS3keysPut(ctx, userId, d.Id()).S3Key(request).Execute()
 
 	if err != nil {
 		if apiResponse != nil && apiResponse.StatusCode == 404 {
@@ -131,7 +134,6 @@ func resourceS3KeyUpdate(ctx context.Context, d *schema.ResourceData, meta inter
 
 	for {
 		log.Printf("[INFO] Waiting for S3 Key %s to be ready...", d.Id())
-		time.Sleep(5 * time.Second)
 
 		s3KeyReady, rsErr := s3Ready(ctx, client, d)
 
@@ -144,6 +146,14 @@ func resourceS3KeyUpdate(ctx context.Context, d *schema.ResourceData, meta inter
 			log.Printf("[INFO] S3 Key ready: %s", d.Id())
 			break
 		}
+
+		select {
+		case <-time.After(SleepInterval):
+			log.Printf("[INFO] trying again ...")
+		case <-ctx.Done():
+			log.Printf("[INFO] s3 key update timed out")
+			diags := diag.FromErr(fmt.Errorf("s3 key update timed out! WARNING: your s3 key will still probably be updated after some time but the terraform state won't reflect that; check your Ionos Cloud account for updates"))
+			return diags}
 	}
 
 	return resourceS3KeyRead(ctx, d, meta)
@@ -166,7 +176,6 @@ func resourceS3KeyDelete(ctx context.Context, d *schema.ResourceData, meta inter
 
 	for {
 		log.Printf("[INFO] Waiting for s3Key %s to be deleted...", d.Id())
-		time.Sleep(5 * time.Second)
 
 		s3KeyDeleted, dsErr := s3KeyDeleted(ctx, client, d)
 
@@ -179,6 +188,14 @@ func resourceS3KeyDelete(ctx context.Context, d *schema.ResourceData, meta inter
 			log.Printf("[INFO] Successfully deleted S3 key: %s", d.Id())
 			break
 		}
+
+		select {
+		case <-time.After(SleepInterval):
+			log.Printf("[INFO] trying again ...")
+		case <-ctx.Done():
+			log.Printf("[INFO] delete timed out")
+			diags := diag.FromErr(fmt.Errorf("s3 key delete timed out! WARNING: your s3 key will still probably be deleted after some time but the terraform state won't reflect that; check your Ionos Cloud account for updates"))
+			return diags}
 	}
 
 	return nil

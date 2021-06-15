@@ -125,7 +125,6 @@ func resourcePrivateCrossConnectCreate(ctx context.Context, d *schema.ResourceDa
 
 	for {
 		log.Printf("[INFO] Waiting for PCC %s to be ready...", d.Id())
-		time.Sleep(5 * time.Second)
 
 		pccReady, rsErr := privateCrossConnectReady(ctx, client, d)
 
@@ -137,6 +136,14 @@ func resourcePrivateCrossConnectCreate(ctx context.Context, d *schema.ResourceDa
 		if pccReady {
 			log.Printf("[INFO] PCC ready: %s", d.Id())
 			break
+		}
+
+		select {
+		case <-time.After(SleepInterval):
+			log.Printf("[INFO] trying again ...")
+		case <-ctx.Done():
+			log.Printf("[INFO] timed out")
+			return fmt.Errorf("pcc creation timed out; WARNING: your pcc will still probably be created after some time; check for duplicate resources")
 		}
 	}
 
@@ -234,7 +241,6 @@ func resourcePrivateCrossConnectUpdate(ctx context.Context, d *schema.ResourceDa
 
 	for {
 		log.Printf("[INFO] Waiting for PCC %s to be ready...", d.Id())
-		time.Sleep(5 * time.Second)
 
 		pccReady, rsErr := privateCrossConnectReady(ctx, client, d)
 
@@ -246,6 +252,15 @@ func resourcePrivateCrossConnectUpdate(ctx context.Context, d *schema.ResourceDa
 		if pccReady {
 			log.Printf("[INFO] PCC ready: %s", d.Id())
 			break
+		}
+
+		select {
+		case <-time.After(SleepInterval):
+			log.Printf("[INFO] trying again ...")
+		case <-ctx.Done():
+			log.Printf("[INFO] update timed out")
+			return fmt.Errorf("pcc update timed out! WARNING: your pcc will still probably be updated after some time " +
+				"but the terraform state wont reflect that; check your Ionos Cloud account to see the updates")
 		}
 	}
 
@@ -267,7 +282,6 @@ func resourcePrivateCrossConnectDelete(ctx context.Context, d *schema.ResourceDa
 
 	for {
 		log.Printf("[INFO] Waiting for PCC %s to be deleted...", d.Id())
-		time.Sleep(5 * time.Second)
 
 		pccDeleted, dsErr := privateCrossConnectDeleted(ctx, client, d)
 
@@ -279,6 +293,15 @@ func resourcePrivateCrossConnectDelete(ctx context.Context, d *schema.ResourceDa
 		if pccDeleted {
 			log.Printf("[INFO] Successfully deleted PCC: %s", d.Id())
 			break
+		}
+
+		select {
+		case <-time.After(SleepInterval):
+			log.Printf("[INFO] trying again ...")
+		case <-ctx.Done():
+			log.Printf("[INFO] delete timed out")
+			return fmt.Errorf("pcc removal timed out! WARNING: your pcc will still probably be removed after some " +
+				"time but the terraform state wont reflect that; check the updates in your Ionos Cloud account")
 		}
 	}
 

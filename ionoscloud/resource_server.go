@@ -877,29 +877,18 @@ func resourceServerRead(ctx context.Context, d *schema.ResourceData, meta interf
 			}
 		}
 
-		network := map[string]interface{}{
-			"dhcp":            *nic.Properties.Dhcp,
-			"nat":             *nic.Properties.Nat,
-			"firewall_active": *nic.Properties.FirewallActive,
-		}
+		network := map[string]interface{}{}
 
-		if nic.Properties.Lan != nil {
-			network["lan"] = *nic.Properties.Lan
-		}
+		setPropWithNilCheck(network, "dhcp", nic.Properties.Dhcp)
+		setPropWithNilCheck(network, "nat", nic.Properties.Nat)
+		setPropWithNilCheck(network, "firewall_active", nic.Properties.FirewallActive)
 
-		if nic.Properties.Name != nil {
-			network["name"] = *nic.Properties.Name
-		}
+		setPropWithNilCheck(network, "lan", nic.Properties.Lan)
+		setPropWithNilCheck(network, "name", nic.Properties.Name)
+		setPropWithNilCheck(network, "ips", nic.Properties.Ips)
+		setPropWithNilCheck(network, "mac", nic.Properties.Mac)
 
-		if nic.Properties.Ips != nil {
-			network["ips"] = *nic.Properties.Ips
-		}
-
-		if nic.Properties.Mac != nil {
-			network["mac"] = *nic.Properties.Mac
-		}
-
-		if len(*nic.Properties.Ips) > 0 {
+		if nic.Properties.Ips != nil && len(*nic.Properties.Ips) > 0 {
 			network["ip"] = (*nic.Properties.Ips)[0]
 		}
 
@@ -910,38 +899,20 @@ func resourceServerRead(ctx context.Context, d *schema.ResourceData, meta interf
 				return diags
 			}
 
-			fw := map[string]interface{}{
+			fw := map[string]interface{}{}
+			/*
 				"protocol": *firewall.Properties.Protocol,
 				"name":     *firewall.Properties.Name,
-			}
-
-			if firewall.Properties.SourceMac != nil {
-				fw["source_mac"] = *firewall.Properties.SourceMac
-			}
-
-			if firewall.Properties.SourceIp != nil {
-				fw["source_ip"] = *firewall.Properties.SourceIp
-			}
-
-			if firewall.Properties.TargetIp != nil {
-				fw["target_ip"] = *firewall.Properties.TargetIp
-			}
-
-			if firewall.Properties.PortRangeStart != nil {
-				fw["port_range_start"] = *firewall.Properties.PortRangeStart
-			}
-
-			if firewall.Properties.PortRangeEnd != nil {
-				fw["port_range_end"] = *firewall.Properties.PortRangeEnd
-			}
-
-			if firewall.Properties.IcmpType != nil {
-				fw["icmp_type"] = *firewall.Properties.IcmpType
-			}
-
-			if firewall.Properties.IcmpCode != nil {
-				fw["icmp_code"] = *firewall.Properties.IcmpCode
-			}
+			*/
+			setPropWithNilCheck(fw, "protocol", firewall.Properties.Protocol)
+			setPropWithNilCheck(fw, "name", firewall.Properties.Name)
+			setPropWithNilCheck(fw, "source_mac", firewall.Properties.SourceMac)
+			setPropWithNilCheck(fw, "source_ip", firewall.Properties.SourceIp)
+			setPropWithNilCheck(fw, "target_ip", firewall.Properties.TargetIp)
+			setPropWithNilCheck(fw, "port_range_start", firewall.Properties.PortRangeStart)
+			setPropWithNilCheck(fw, "port_range_end", firewall.Properties.PortRangeEnd)
+			setPropWithNilCheck(fw, "icmp_type", firewall.Properties.IcmpType)
+			setPropWithNilCheck(fw, "icmp_code", firewall.Properties.IcmpCode)
 
 			network["firewall"] = []map[string]interface{}{fw}
 		}
@@ -964,29 +935,12 @@ func resourceServerRead(ctx context.Context, d *schema.ResourceData, meta interf
 		if err == nil {
 			volumeItem := map[string]interface{}{}
 
-			if volumeObj.Properties.Name != nil {
-				volumeItem["name"] = *volumeObj.Properties.Name
-			}
-
-			if volumeObj.Properties.Type != nil {
-				volumeItem["disk_type"] = *volumeObj.Properties.Type
-			}
-
-			if volumeObj.Properties.Size != nil {
-				volumeItem["size"] = *volumeObj.Properties.Size
-			}
-
-			if volumeObj.Properties.LicenceType != nil {
-				volumeItem["licence_type"] = *volumeObj.Properties.LicenceType
-			}
-
-			if volumeObj.Properties.Bus != nil {
-				volumeItem["bus"] = *volumeObj.Properties.Bus
-			}
-
-			if volumeObj.Properties.AvailabilityZone != nil {
-				volumeItem["availability_zone"] = *volumeObj.Properties.AvailabilityZone
-			}
+			setPropWithNilCheck(volumeItem, "name", volumeObj.Properties.Name)
+			setPropWithNilCheck(volumeItem, "disk_type", volumeObj.Properties.Type)
+			setPropWithNilCheck(volumeItem, "size", volumeObj.Properties.Size)
+			setPropWithNilCheck(volumeItem, "licence_type", volumeObj.Properties.LicenceType)
+			setPropWithNilCheck(volumeItem, "bus", volumeObj.Properties.Bus)
+			setPropWithNilCheck(volumeItem, "availability_zone", volumeObj.Properties.AvailabilityZone)
 
 			volumesList := []map[string]interface{}{volumeItem}
 			if err := d.Set("volume", volumesList); err != nil {

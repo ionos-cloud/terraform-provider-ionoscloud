@@ -43,6 +43,9 @@ func TestAccLanIPFailover_Basic(t *testing.T) {
 					testDeleted("ionoscloud_ipfailover.failovertest"),
 				),
 			},
+			{
+				Config: `/* */`,
+			},
 		},
 	})
 }

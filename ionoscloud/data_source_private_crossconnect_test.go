@@ -23,6 +23,9 @@ func TestAccDataSourcePcc_matchId(t *testing.T) {
 					resource.TestCheckResourceAttr("data.ionoscloud_private_crossconnect.test_pcc", "description", "test_ds_pcc description"),
 				),
 			},
+			{
+				Config: `/* this config intentionally left blank */`,
+			},
 		},
 	})
 }

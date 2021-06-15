@@ -6,7 +6,6 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 	ionoscloud "github.com/ionos-cloud/sdk-go/v5"
-	"time"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 )
@@ -171,14 +170,8 @@ func resourceLanIPFailoverDelete(ctx context.Context, d *schema.ResourceData, me
 
 	_, apiResponse, err := client.LanApi.DatacentersLansPatch(ctx, dcid, lanid).Lan(*properties).Execute()
 	if err != nil {
-		//try again in 90 seconds
-		time.Sleep(90 * time.Second)
-		_, apiResponse, err = client.LanApi.DatacentersLansPatch(ctx, dcid, lanid).Lan(*properties).Execute()
-
-		if err != nil && (apiResponse == nil || apiResponse.StatusCode != 404) {
-			diags := diag.FromErr(fmt.Errorf("an error occured while removing a lans ipfailover groups dcId %s ID %s %s", d.Get("datacenter_id").(string), d.Id(), err))
-			return diags
-		}
+		diags := diag.FromErr(fmt.Errorf("an error occured while removing a lans ipfailover groups dcId %s ID %s %s", d.Get("datacenter_id").(string), d.Id(), err))
+		return diags
 	}
 
 	// Wait, catching any errors

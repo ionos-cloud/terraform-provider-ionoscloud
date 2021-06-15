@@ -5,10 +5,13 @@ import (
 	"fmt"
 	ionoscloud "github.com/ionos-cloud/sdk-go/v5"
 	"log"
+	"reflect"
 	"strings"
+	"time"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 )
+const SleepInterval = 5 * time.Second
 
 func resourceResourceImport(_ context.Context, d *schema.ResourceData, _ interface{}) ([]*schema.ResourceData, error) {
 	parts := strings.Split(d.Id(), "/")
@@ -405,4 +408,16 @@ func diffSlice(slice1 []string, slice2 []string) []string {
 	}
 
 	return diff
+}
+
+func setPropWithNilCheck(m map[string]interface{}, prop string, v interface{}) {
+
+	rVal := reflect.ValueOf(v)
+	if rVal.Kind() == reflect.Ptr {
+		if !rVal.IsNil() {
+			m[prop] = rVal.Elem().Interface()
+		}
+	} else {
+		m[prop] = v
+	}
 }
