@@ -143,7 +143,8 @@ func resourcePrivateCrossConnectCreate(ctx context.Context, d *schema.ResourceDa
 			log.Printf("[INFO] trying again ...")
 		case <-ctx.Done():
 			log.Printf("[INFO] timed out")
-			return fmt.Errorf("pcc creation timed out; WARNING: your pcc will still probably be created after some time; check for duplicate resources")
+			diags := diag.FromErr(fmt.Errorf("pcc creation timed out; WARNING: your pcc will still probably be created after some time; check for duplicate resources"))
+			return diags
 		}
 	}
 
@@ -259,8 +260,9 @@ func resourcePrivateCrossConnectUpdate(ctx context.Context, d *schema.ResourceDa
 			log.Printf("[INFO] trying again ...")
 		case <-ctx.Done():
 			log.Printf("[INFO] update timed out")
-			return fmt.Errorf("pcc update timed out! WARNING: your pcc will still probably be updated after some time " +
-				"but the terraform state wont reflect that; check your Ionos Cloud account to see the updates")
+			diags := diag.FromErr(fmt.Errorf("pcc update timed out! WARNING: your pcc will still probably be updated after some time " +
+				"but the terraform state wont reflect that; check your Ionos Cloud account to see the updates"))
+			return diags
 		}
 	}
 
@@ -300,8 +302,9 @@ func resourcePrivateCrossConnectDelete(ctx context.Context, d *schema.ResourceDa
 			log.Printf("[INFO] trying again ...")
 		case <-ctx.Done():
 			log.Printf("[INFO] delete timed out")
-			return fmt.Errorf("pcc removal timed out! WARNING: your pcc will still probably be removed after some " +
-				"time but the terraform state wont reflect that; check the updates in your Ionos Cloud account")
+			diags := diag.FromErr(fmt.Errorf("pcc removal timed out! WARNING: your pcc will still probably be removed after some " +
+				"time but the terraform state wont reflect that; check the updates in your Ionos Cloud account"))
+			return diags
 		}
 	}
 

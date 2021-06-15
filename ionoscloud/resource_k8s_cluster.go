@@ -163,8 +163,9 @@ func resourcek8sClusterCreate(ctx context.Context, d *schema.ResourceData, meta 
 			log.Printf("[INFO] trying again ...")
 		case <-ctx.Done():
 			log.Printf("[INFO] create timed out")
-			return fmt.Errorf("k8s cluster creation timed out! WARNING: your k8s cluster will still probably be created " +
-				"after some time but the terraform state wont reflect that; check your Ionos Cloud account for updates")
+			diags := diag.FromErr(fmt.Errorf("k8s cluster creation timed out! WARNING: your k8s cluster will still probably be created " +
+				"after some time but the terraform state wont reflect that; check your Ionos Cloud account for updates"))
+			return diags
 		}
 	}
 
@@ -355,8 +356,9 @@ func resourcek8sClusterUpdate(ctx context.Context, d *schema.ResourceData, meta 
 		case <-time.After(SleepInterval):
 			log.Printf("[INFO] trying again ...")
 		case <-ctx.Done():
-			return fmt.Errorf("k8s cluster update timed out! WARNING: your k8s cluster will still probably be created " +
-				"after some time but the terraform state won't reflect that; check your Ionos Cloud account for updates")
+			diags := diag.FromErr(fmt.Errorf("k8s cluster update timed out! WARNING: your k8s cluster will still probably be created " +
+				"after some time but the terraform state won't reflect that; check your Ionos Cloud account for updates"))
+			return diags
 		}
 	}
 
@@ -396,8 +398,9 @@ func resourcek8sClusterDelete(ctx context.Context, d *schema.ResourceData, meta 
 		case <-time.After(SleepInterval):
 			log.Printf("[INFO] trying again ...")
 		case <-ctx.Done():
-			return fmt.Errorf("k8s cluster deletion timed out! WARNING: your k8s cluster will still probably be deleted " +
-				"after some time but the terraform state won't reflect that; check your Ionos Cloud account for updates")
+			diags := diag.FromErr(fmt.Errorf("k8s cluster deletion timed out! WARNING: your k8s cluster will still probably be deleted " +
+				"after some time but the terraform state won't reflect that; check your Ionos Cloud account for updates"))
+			return diags
 		}
 	}
 

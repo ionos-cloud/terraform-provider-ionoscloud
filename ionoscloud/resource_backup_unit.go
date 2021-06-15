@@ -96,8 +96,9 @@ func resourceBackupUnitCreate(ctx context.Context, d *schema.ResourceData, meta 
 		case <-time.After(SleepInterval):
 			log.Printf("[INFO] trying again ...")
 		case <-ctx.Done():
-			return fmt.Errorf("backup unit creation timed out! WARNING: your backup unit will still probably be " +
-				"created after some time but the terraform state won't reflect that; check your Ionos Cloud account for updates")
+			diags := diag.FromErr(fmt.Errorf("backup unit creation timed out! WARNING: your backup unit will still probably be " +
+				"created after some time but the terraform state won't reflect that; check your Ionos Cloud account for updates"))
+			return diags
 		}
 	}
 
@@ -217,8 +218,9 @@ func resourceBackupUnitUpdate(ctx context.Context, d *schema.ResourceData, meta 
 		case <-time.After(SleepInterval):
 			log.Printf("[INFO] trying again ...")
 		case <-ctx.Done():
-			return fmt.Errorf("backup unit update timed out! WARNING: your backup unit will still probably be updated " +
-				"after some time but the terraform state won't reflect that; check your Ionos Cloud account for updates")
+			diags := diag.FromErr(fmt.Errorf("backup unit update timed out! WARNING: your backup unit will still probably be updated " +
+				"after some time but the terraform state won't reflect that; check your Ionos Cloud account for updates"))
+			return diags
 		}
 	}
 
@@ -258,8 +260,9 @@ func resourceBackupUnitDelete(ctx context.Context, d *schema.ResourceData, meta 
 		case <-time.After(SleepInterval):
 			log.Printf("[INFO] trying again ...")
 		case <-ctx.Done():
-			return fmt.Errorf("backup unit deletion timed out! WARNING: your backup unit will still probably be deleted " +
-				"after some time but the terraform state won't reflect that; check your Ionos Cloud account for updates")
+			diags := diag.FromErr(fmt.Errorf("backup unit deletion timed out! WARNING: your backup unit will still probably be deleted " +
+				"after some time but the terraform state won't reflect that; check your Ionos Cloud account for updates"))
+			return diags
 		}
 	}
 

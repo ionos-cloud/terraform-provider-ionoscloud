@@ -113,7 +113,7 @@ func resourceLanCreate(ctx context.Context, d *schema.ResourceData, meta interfa
 	for {
 		log.Printf("[INFO] Waiting for LAN %s to be available...", *rsp.Id)
 
-		lanReady, rsErr := lanAvailable(client, d)
+		lanReady, rsErr := lanAvailable(ctx, client, d)
 
 		if rsErr != nil {
 			diags := diag.FromErr(fmt.Errorf("error while checking readiness status of LAN %s: %s", *rsp.Id, rsErr))
@@ -131,7 +131,8 @@ func resourceLanCreate(ctx context.Context, d *schema.ResourceData, meta interfa
 		case <-ctx.Done():
 			log.Printf("[INFO] lan creation timed out")
 			diags := diag.FromErr(fmt.Errorf("lan creation timed out! WARNING: your lan will still probably be created after some time but the terraform state won't reflect that; check your Ionos Cloud account for updates"))
-			return diags}
+			return diags
+		}
 	}
 
 	return resourceLanRead(ctx, d, meta)
@@ -240,7 +241,8 @@ func resourceLanDelete(ctx context.Context, d *schema.ResourceData, meta interfa
 	_, _, err := client.LanApi.DatacentersLansDelete(ctx, dcid, d.Id()).Execute()
 
 	if err != nil {
-		return fmt.Errorf("an error occured while deleting a lan dcId %s ID %s %s", d.Get("datacenter_id").(string), d.Id(), err)
+		diags := diag.FromErr(fmt.Errorf("an error occured while deleting a lan dcId %s ID %s %s", d.Get("datacenter_id").(string), d.Id(), err))
+		return diags
 	}
 
 	for {
@@ -265,7 +267,8 @@ func resourceLanDelete(ctx context.Context, d *schema.ResourceData, meta interfa
 			log.Printf("[INFO] lan deletion timed out")
 			diags := diag.FromErr(fmt.Errorf("lan deletion timed out! WARNING: your lan will still probably be deleted after some" +
 				" time but the terraform state won't reflect that; check your Ionos Cloud account for updates"))
-			return diags}
+			return diags
+		}
 
 	}
 

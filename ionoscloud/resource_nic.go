@@ -4,13 +4,11 @@ import (
 	"context"
 	"fmt"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 	ionoscloud "github.com/ionos-cloud/sdk-go/v5"
 	"log"
 	"strings"
-	"time"
-
-	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 )
 
 func resourceNic() *schema.Resource {
@@ -264,41 +262,6 @@ func resourceNicDelete(ctx context.Context, d *schema.ResourceData, meta interfa
 		return diags
 	}
 
-	for {
-		log.Printf("[INFO] Waiting for nic  %s to be deleted...", d.Id())
-		time.Sleep(5 * time.Second)
-
-		nDeleted, dsErr := nicDeleted(ctx, client, d)
-
-		if dsErr != nil {
-			diags := diag.FromErr(fmt.Errorf("error while checking deletion status of nic %s: %s", d.Id(), dsErr))
-			return diags
-		}
-
-		if nDeleted {
-			log.Printf("[INFO] Successfully deleted nic: %s", d.Id())
-			break
-		}
-	}
-
 	d.SetId("")
 	return nil
-}
-
-func nicDeleted(ctx context.Context, client *ionoscloud.APIClient, d *schema.ResourceData) (bool, error) {
-	dcid := d.Get("datacenter_id").(string)
-	srvid := d.Get("server_id").(string)
-	rsp, apiResponse, err := client.NicApi.DatacentersServersNicsFindById(ctx, dcid, srvid, d.Id()).Execute()
-
-	log.Printf("[INFO] Current deletion status for nic %s: %+v", d.Id(), rsp)
-
-	if err != nil {
-		if apiResponse != nil && apiResponse.StatusCode == 404 {
-			return true, nil
-		}
-		return true, err
-
-	}
-	log.Printf("[INFO] Nic %s not deleted yet deleted nic: %+v", d.Id(), rsp)
-	return false, nil
 }
