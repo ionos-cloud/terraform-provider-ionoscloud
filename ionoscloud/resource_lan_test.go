@@ -75,7 +75,7 @@ func testAccCheckLanAttributes(n string, name string) resource.TestCheckFunc {
 			return fmt.Errorf("testAccCheckLanAttributes: Not found: %s", n)
 		}
 		if rs.Primary.Attributes["name"] != name {
-			return fmt.Errorf("Bad name: %s", rs.Primary.Attributes["name"])
+			return fmt.Errorf("bad name: %s != %s", rs.Primary.Attributes["name"], name)
 		}
 
 		return nil

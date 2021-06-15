@@ -7,9 +7,12 @@ import (
 	"log"
 	"reflect"
 	"strings"
+	"time"
 
 	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
 )
+
+const SleepInterval = 5 * time.Second
 
 func resourceResourceImport(d *schema.ResourceData, meta interface{}) ([]*schema.ResourceData, error) {
 	parts := strings.Split(d.Id(), "/")
