@@ -153,9 +153,9 @@ func getStateChangeConf(meta interface{}, d *schema.ResourceData, location strin
 		Target:         resourceTargetStates,
 		Refresh:        resourceStateRefreshFunc(meta, location),
 		Timeout:        d.Timeout(timeoutType),
-		MinTimeout:     10 * time.Second,
-		Delay:          10 * time.Second, // Wait 10 secs before starting
-		NotFoundChecks: 600,              //Setting high number, to support long timeouts
+		MinTimeout:     5 * time.Second,
+		Delay:          0,   // Don't delay the start
+		NotFoundChecks: 600, //Setting high number, to support long timeouts
 	}
 
 	return stateConf

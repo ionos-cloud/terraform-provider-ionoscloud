@@ -281,7 +281,6 @@ func resourcek8sNodePoolCreate(d *schema.ResourceData, meta interface{}) error {
 
 	for {
 		log.Printf("[INFO] Waiting for k8s node pool %s to be ready...", d.Id())
-		time.Sleep(10 * time.Second)
 
 		nodepoolReady, rsErr := k8sNodepoolReady(client, d)
 
@@ -292,6 +291,14 @@ func resourcek8sNodePoolCreate(d *schema.ResourceData, meta interface{}) error {
 		if nodepoolReady {
 			log.Printf("[INFO] k8s node pool ready: %s", d.Id())
 			break
+		}
+
+		select {
+		case <-time.After(SleepInterval):
+			log.Printf("[INFO] trying again ...")
+		case <-ctx.Done():
+			return fmt.Errorf("k8s node pool creation timed out! WARNING: your k8s nodepool will still probably be " +
+				"created after some time but the terraform state won't reflect that; check your Ionos Cloud account for updates")
 		}
 	}
 
@@ -627,7 +634,6 @@ func resourcek8sNodePoolUpdate(d *schema.ResourceData, meta interface{}) error {
 
 	for {
 		log.Printf("[INFO] Waiting for k8s node pool %s to be ready...", d.Id())
-		time.Sleep(10 * time.Second)
 
 		nodepoolReady, rsErr := k8sNodepoolReady(client, d)
 
@@ -638,6 +644,14 @@ func resourcek8sNodePoolUpdate(d *schema.ResourceData, meta interface{}) error {
 		if nodepoolReady {
 			log.Printf("[INFO] k8s node pool ready: %s", d.Id())
 			break
+		}
+
+		select {
+		case <-time.After(SleepInterval):
+			log.Printf("[INFO] trying again ...")
+		case <-ctx.Done():
+			return fmt.Errorf("k8s node pool update timed out! WARNING: your k8s nodepool will still probably be " +
+				"updated after some time but the terraform state won't reflect that; check your Ionos Cloud account for updates")
 		}
 	}
 
@@ -665,7 +679,6 @@ func resourcek8sNodePoolDelete(d *schema.ResourceData, meta interface{}) error {
 
 	for {
 		log.Printf("[INFO] Waiting for k8s node pool %s to be deleted...", d.Id())
-		time.Sleep(10 * time.Second)
 
 		nodepoolDeleted, dsErr := k8sNodepoolDeleted(client, d)
 
@@ -676,6 +689,14 @@ func resourcek8sNodePoolDelete(d *schema.ResourceData, meta interface{}) error {
 		if nodepoolDeleted {
 			log.Printf("[INFO] Successfully deleted k8s node pool: %s", d.Id())
 			break
+		}
+
+		select {
+		case <-time.After(SleepInterval):
+			log.Printf("[INFO] trying again ...")
+		case <-ctx.Done():
+			return fmt.Errorf("k8s node pool deletion timed out! WARNING: your k8s nodepool will still probably be " +
+				"deleted after some time but the terraform state won't reflect that; check your Ionos Cloud account for updates")
 		}
 	}
 

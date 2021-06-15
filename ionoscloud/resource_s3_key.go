@@ -104,25 +104,24 @@ func resourceS3KeyUpdate(d *schema.ResourceData, meta interface{}) error {
 		request.Properties.Active = &active
 	}
 
-	userId := d.Get("user_id").(string)
-	_, apiResponse, err := client.UserManagementApi.UmUsersS3keysPut(context.TODO(), userId, d.Id()).S3Key(request).Execute()
+	ctx, cancel := context.WithTimeout(context.Background(), *resourceDefaultTimeouts.Update)
+	if cancel != nil {
+		defer cancel()
+	}
 
-	time.Sleep(5 * time.Second)
+	userId := d.Get("user_id").(string)
+	_, apiResponse, err := client.UserManagementApi.UmUsersS3keysPut(ctx, userId, d.Id()).S3Key(request).Execute()
 
 	if err != nil {
-		if _, ok := err.(ionoscloud.GenericOpenAPIError); ok {
-			if apiResponse != nil && apiResponse.Response.StatusCode == 404 {
-				d.SetId("")
-				return nil
-			}
-			return fmt.Errorf("error while updating S3 key: %s", err)
+		if apiResponse != nil && apiResponse.Response.StatusCode == 404 {
+			d.SetId("")
+			return nil
 		}
-		return fmt.Errorf("error while updating S3 key %s: %s", d.Id(), err)
+		return fmt.Errorf("error while updating S3 key: %s", err)
 	}
 
 	for {
 		log.Printf("[INFO] Waiting for S3 Key %s to be ready...", d.Id())
-		time.Sleep(5 * time.Second)
 
 		s3KeyReady, rsErr := s3Ready(client, d)
 
@@ -133,6 +132,14 @@ func resourceS3KeyUpdate(d *schema.ResourceData, meta interface{}) error {
 		if s3KeyReady && rsErr == nil {
 			log.Printf("[INFO] S3 Key ready: %s", d.Id())
 			break
+		}
+
+		select {
+		case <-time.After(SleepInterval):
+			log.Printf("[INFO] trying again ...")
+		case <-ctx.Done():
+			log.Printf("[INFO] s3 key update timed out")
+			return fmt.Errorf("s3 key update timed out! WARNING: your s3 key will still probably be updated after some time but the terraform state won't reflect that; check your Ionos Cloud account for updates")
 		}
 	}
 
@@ -163,7 +170,6 @@ func resourceS3KeyDelete(d *schema.ResourceData, meta interface{}) error {
 
 	for {
 		log.Printf("[INFO] Waiting for s3Key %s to be deleted...", d.Id())
-		time.Sleep(5 * time.Second)
 
 		s3KeyDeleted, dsErr := s3KeyDeleted(client, d)
 
@@ -174,6 +180,14 @@ func resourceS3KeyDelete(d *schema.ResourceData, meta interface{}) error {
 		if s3KeyDeleted && dsErr == nil {
 			log.Printf("[INFO] Successfully deleted S3 key: %s", d.Id())
 			break
+		}
+
+		select {
+		case <-time.After(SleepInterval):
+			log.Printf("[INFO] trying again ...")
+		case <-ctx.Done():
+			log.Printf("[INFO] delete timed out")
+			return fmt.Errorf("s3 key delete timed out! WARNING: your s3 key will still probably be deleted after some time but the terraform state won't reflect that; check your Ionos Cloud account for updates")
 		}
 	}
 
