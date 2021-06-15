@@ -55,7 +55,7 @@ func resourceServer() *schema.Resource {
 
 			"boot_cdrom": {
 				Type:     schema.TypeString,
-				Computed: true,
+				Optional: true,
 			},
 			"cpu_family": {
 				Type:     schema.TypeString,
@@ -429,21 +429,25 @@ func resourceServerCreate(d *schema.ResourceData, meta interface{}) error {
 		}
 		// if no image id was found with that name we look for a matching snapshot
 		if image == "" {
+			log.Printf("[*****] looking for a snapshot with id %s\n", image_name)
 			image = getSnapshotId(client, image_name)
 			if image != "" {
 				isSnapshot = true
 			} else {
+				log.Printf("[*****] lookig for an image alias for %s\n", image_name)
 				dc, _, err := client.DataCenterApi.DatacentersFindById(ctx, dcId).Execute()
 				if err != nil {
 					return fmt.Errorf("error fetching datacenter %s: (%s)", dcId, err)
 				}
 				image_alias = getImageAlias(client, image_name, *dc.Properties.Location)
+				if image_alias == "" {
+					return fmt.Errorf("Could not find an image/imagealias/snapshot that matches %s ", image_name)
+				}
 			}
 		}
-		if image == "" && image_alias == "" {
-			return fmt.Errorf("Could not find an image/imagealias/snapshot that matches %s ", image_name)
-		}
-		if volume.ImagePassword == nil && len(sshkey_path) == 0 && isSnapshot == false && img.Properties.Public != nil && *img.Properties.Public {
+
+		if volume.ImagePassword == nil && len(sshkey_path) == 0 && isSnapshot == false &&
+			(img == nil || (img.Properties.Public != nil && *img.Properties.Public)) {
 			return fmt.Errorf("either 'image_password' or 'ssh_key_path' must be provided")
 		}
 	} else {
@@ -644,6 +648,13 @@ func resourceServerCreate(d *schema.ResourceData, meta interface{}) error {
 	if (*request.Entities.Nics.Items)[0].Properties.Ips != nil {
 		if len(*(*request.Entities.Nics.Items)[0].Properties.Ips) == 0 {
 			*(*request.Entities.Nics.Items)[0].Properties.Ips = nil
+		}
+	}
+
+	if _, ok := d.GetOk("boot_cdrom"); ok {
+		resId := d.Get("boot_cdrom").(string)
+		request.Properties.BootCdrom = &ionoscloud.ResourceReference{
+			Id: &resId,
 		}
 	}
 
@@ -939,6 +950,17 @@ func resourceServerUpdate(d *schema.ResourceData, meta interface{}) error {
 		_, n := d.GetChange("cpu_family")
 		nStr := n.(string)
 		request.CpuFamily = &nStr
+	}
+
+	if d.HasChange("boot_cdrom") {
+		_, n := d.GetChange("boot_cdrom")
+		nStr := n.(string)
+		if nStr != "" {
+			request.BootCdrom = &ionoscloud.ResourceReference{
+				Id: &nStr,
+			}
+		} /* todo: figure out a way of sending a nil bootCdrom to the API (the sdk's omitempty doesn't let us) */
+
 	}
 
 	ctx, cancel := context.WithTimeout(context.Background(), *resourceDefaultTimeouts.Update)
