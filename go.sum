@@ -236,6 +236,8 @@ github.com/ionos-cloud/sdk-go/v5 v5.1.0 h1:q6KWvirQ2td8f+w3sltWzQ7w1Sl9TbiSOcFRd
 github.com/ionos-cloud/sdk-go/v5 v5.1.0/go.mod h1:dU3BVZgiBDAKyo41hFk7D5KWHfqyp4YL4rePIAi2JyM=
 github.com/ionos-cloud/sdk-go/v5 v5.1.3-0.20210609100001-d9a3292edad3 h1:5uZssyRCu9ByWqFICKhN5QtO9y0DUANiC0YaX29ZN/c=
 github.com/ionos-cloud/sdk-go/v5 v5.1.3-0.20210609100001-d9a3292edad3/go.mod h1:dU3BVZgiBDAKyo41hFk7D5KWHfqyp4YL4rePIAi2JyM=
+github.com/ionos-cloud/sdk-go/v5 v5.1.3 h1:lGSe183g3SyrE2Uu7P/Svxdmo4l4aHBRq9oc7QAz5IU=
+github.com/ionos-cloud/sdk-go/v5 v5.1.3/go.mod h1:dU3BVZgiBDAKyo41hFk7D5KWHfqyp4YL4rePIAi2JyM=
 github.com/jbenet/go-context v0.0.0-20150711004518-d14ea06fba99 h1:BQSFePA1RWJOlocH6Fxy8MmwDt+yVQYULKfN0RoTN8A=
 github.com/jbenet/go-context v0.0.0-20150711004518-d14ea06fba99/go.mod h1:1lJo3i6rXxKeerYnT8Nvf0QmHCRC1n8sfWVwXF2Frvo=
 github.com/jessevdk/go-flags v1.4.0/go.mod h1:4FA24M0QyGHXBuZZK/XkWh8h0e1EYbRYJSGM75WSRxI=
