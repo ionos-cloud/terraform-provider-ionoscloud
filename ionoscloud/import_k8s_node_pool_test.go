@@ -7,8 +7,8 @@ import (
 	"os"
 	"testing"
 
-	"github.com/hashicorp/terraform-plugin-sdk/helper/resource"
-	"github.com/hashicorp/terraform-plugin-sdk/terraform"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
 )
 
 func TestAcck8sNodepool_ImportBasic(t *testing.T) {
@@ -25,9 +25,9 @@ func TestAcck8sNodepool_ImportBasic(t *testing.T) {
 	}
 
 	resource.Test(t, resource.TestCase{
-		PreCheck:     func() { testAccPreCheck(t) },
-		Providers:    testAccProviders,
-		CheckDestroy: testAccCheckk8sNodepoolDestroyCheck,
+		PreCheck:          func() { testAccPreCheck(t) },
+		ProviderFactories: testAccProviderFactories,
+		CheckDestroy:      testAccCheckk8sNodepoolDestroyCheck,
 		Steps: []resource.TestStep{
 			{
 				Config: fmt.Sprintf(testAccCheckk8sNodepoolConfigBasic, resourceName, publicIp1, publicIp2),
@@ -44,7 +44,7 @@ func TestAcck8sNodepool_ImportBasic(t *testing.T) {
 }
 
 func testAcck8sNodepoolImportStateID(s *terraform.State) (string, error) {
-	var importID string = ""
+	importID := ""
 
 	for _, rs := range s.RootModule().Resources {
 		if rs.Type != "ionoscloud_k8s_node_pool" {

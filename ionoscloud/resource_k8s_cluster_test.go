@@ -8,8 +8,8 @@ import (
 	ionoscloud "github.com/ionos-cloud/sdk-go/v5"
 	"testing"
 
-	"github.com/hashicorp/terraform-plugin-sdk/helper/resource"
-	"github.com/hashicorp/terraform-plugin-sdk/terraform"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
 )
 
 func TestAcck8sCluster_Basic(t *testing.T) {
@@ -20,8 +20,8 @@ func TestAcck8sCluster_Basic(t *testing.T) {
 		PreCheck: func() {
 			testAccPreCheck(t)
 		},
-		Providers:    testAccProviders,
-		CheckDestroy: testAccCheckk8sClusterDestroyCheck,
+		ProviderFactories: testAccProviderFactories,
+		CheckDestroy:      testAccCheckk8sClusterDestroyCheck,
 		Steps: []resource.TestStep{
 			{
 				Config: fmt.Sprintf(testAccCheckk8sClusterConfigBasic, k8sClusterName),
@@ -77,11 +77,11 @@ func testAccCheckk8sClusterExists(n string, k8sCluster *ionoscloud.KubernetesClu
 		rs, ok := s.RootModule().Resources[n]
 
 		if !ok {
-			return fmt.Errorf("Not found: %s", n)
+			return fmt.Errorf("not found: %s", n)
 		}
 
 		if rs.Primary.ID == "" {
-			return fmt.Errorf("No Record ID is set")
+			return fmt.Errorf("no Record ID is set")
 		}
 
 		ctx, cancel := context.WithTimeout(context.Background(), *resourceDefaultTimeouts.Default)
@@ -96,7 +96,7 @@ func testAccCheckk8sClusterExists(n string, k8sCluster *ionoscloud.KubernetesClu
 			return fmt.Errorf("an error occured while fetching k8s Cluster %s: %s", rs.Primary.ID, err)
 		}
 		if *foundK8sCluster.Id != rs.Primary.ID {
-			return fmt.Errorf("Record not found")
+			return fmt.Errorf("record not found")
 		}
 		k8sCluster = &foundK8sCluster
 

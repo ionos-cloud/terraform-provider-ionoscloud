@@ -3,7 +3,7 @@ package ionoscloud
 import (
 	"context"
 	"fmt"
-	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	ionoscloud "github.com/ionos-cloud/sdk-go/v5"
 	"log"
 )
@@ -44,7 +44,7 @@ func dataSourceLocationRead(d *schema.ResourceData, meta interface{}) error {
 	if !nameOk && !featureOk {
 		return fmt.Errorf("either 'name' or 'feature' must be provided")
 	}
-	results := []ionoscloud.Location{}
+	var results []ionoscloud.Location
 
 	if locations.Items != nil {
 		for _, loc := range *locations.Items {
@@ -55,7 +55,7 @@ func dataSourceLocationRead(d *schema.ResourceData, meta interface{}) error {
 	}
 
 	if featureOk {
-		locationResults := []ionoscloud.Location{}
+		var locationResults []ionoscloud.Location
 		for _, loc := range results {
 			for _, f := range *loc.Properties.Features {
 				if f == feature.(string) {

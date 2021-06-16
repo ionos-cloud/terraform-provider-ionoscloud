@@ -6,30 +6,30 @@ import (
 	ionoscloud "github.com/ionos-cloud/sdk-go/v5"
 	"testing"
 
-	"github.com/hashicorp/terraform-plugin-sdk/helper/resource"
-	"github.com/hashicorp/terraform-plugin-sdk/terraform"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
 )
 
 func TestAccDataCenter_Basic(t *testing.T) {
 	var datacenter ionoscloud.Datacenter
-	dc_name := "datacenter-test"
+	dcName := "datacenter-test"
 
 	resource.Test(t, resource.TestCase{
 		PreCheck: func() {
 			testAccPreCheck(t)
 		},
-		Providers:    testAccProviders,
-		CheckDestroy: testAccCheckDatacenterDestroyCheck,
+		ProviderFactories: testAccProviderFactories,
+		CheckDestroy:      testAccCheckDatacenterDestroyCheck,
 		Steps: []resource.TestStep{
 			{
-				Config: fmt.Sprintf(testAccCheckDatacenterConfig_basic, dc_name),
+				Config: fmt.Sprintf(testacccheckdatacenterconfigBasic, dcName),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckDatacenterExists("ionoscloud_datacenter.foobar", &datacenter),
-					resource.TestCheckResourceAttr("ionoscloud_datacenter.foobar", "name", dc_name),
+					resource.TestCheckResourceAttr("ionoscloud_datacenter.foobar", "name", dcName),
 				),
 			},
 			{
-				Config: testAccCheckDatacenterConfig_update,
+				Config: testacccheckdatacenterconfigUpdate,
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckDatacenterExists("ionoscloud_datacenter.foobar", &datacenter),
 					resource.TestCheckResourceAttr("ionoscloud_datacenter.foobar", "name", "updated"),
@@ -74,11 +74,11 @@ func testAccCheckDatacenterExists(n string, datacenter *ionoscloud.Datacenter) r
 		rs, ok := s.RootModule().Resources[n]
 
 		if !ok {
-			return fmt.Errorf("Not found: %s", n)
+			return fmt.Errorf("not found: %s", n)
 		}
 
 		if rs.Primary.ID == "" {
-			return fmt.Errorf("No Record ID is set")
+			return fmt.Errorf("no Record ID is set")
 		}
 
 		ctx, cancel := context.WithTimeout(context.Background(), *resourceDefaultTimeouts.Default)
@@ -90,10 +90,10 @@ func testAccCheckDatacenterExists(n string, datacenter *ionoscloud.Datacenter) r
 		foundDC, _, err := client.DataCenterApi.DatacentersFindById(ctx, rs.Primary.ID).Execute()
 
 		if err != nil {
-			return fmt.Errorf("Error occured while fetching DC: %s", rs.Primary.ID)
+			return fmt.Errorf("error occured while fetching DC: %s", rs.Primary.ID)
 		}
 		if *foundDC.Id != rs.Primary.ID {
-			return fmt.Errorf("Record not found")
+			return fmt.Errorf("record not found")
 		}
 		datacenter = &foundDC
 
@@ -101,13 +101,13 @@ func testAccCheckDatacenterExists(n string, datacenter *ionoscloud.Datacenter) r
 	}
 }
 
-const testAccCheckDatacenterConfig_basic = `
+const testacccheckdatacenterconfigBasic = `
 resource "ionoscloud_datacenter" "foobar" {
 	name       = "%s"
 	location = "us/las"
 }`
 
-const testAccCheckDatacenterConfig_update = `
+const testacccheckdatacenterconfigUpdate = `
 resource "ionoscloud_datacenter" "foobar" {
 	name       =  "updated"
 	location = "us/las"

@@ -6,7 +6,7 @@ import (
 	ionoscloud "github.com/ionos-cloud/sdk-go/v5"
 	"log"
 
-	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 )
 
 func dataSourceDataCenter() *schema.Resource {
@@ -60,7 +60,7 @@ func getDatacenter(client *ionoscloud.APIClient, d *schema.ResourceData) (*ionos
 
 		dc, _, err := client.DataCenterApi.DatacentersFindById(ctx, id.(string)).Execute()
 		if err != nil {
-			return nil, fmt.Errorf("error getting datacenter with id %s", id.(string))
+			return nil, fmt.Errorf("error getting datacenter with id %s %s", id.(string), err)
 		}
 		if nameOk {
 			if *dc.Properties.Name != name {
@@ -87,7 +87,7 @@ func getDatacenter(client *ionoscloud.APIClient, d *schema.ResourceData) (*ionos
 	datacenters, _, err := client.DataCenterApi.DatacentersGet(ctx).Execute()
 
 	if err != nil {
-		return nil, fmt.Errorf("an error occured while fetching datacenters: %s", err)
+		return nil, fmt.Errorf("an error occured while fetching datacenters: %s ", err)
 	}
 
 	var results []ionoscloud.Datacenter

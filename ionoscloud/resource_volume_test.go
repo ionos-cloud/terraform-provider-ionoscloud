@@ -6,8 +6,8 @@ import (
 	ionoscloud "github.com/ionos-cloud/sdk-go/v5"
 	"testing"
 
-	"github.com/hashicorp/terraform-plugin-sdk/helper/resource"
-	"github.com/hashicorp/terraform-plugin-sdk/terraform"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
 )
 
 func TestAccVolume_Basic(t *testing.T) {
@@ -18,18 +18,18 @@ func TestAccVolume_Basic(t *testing.T) {
 		PreCheck: func() {
 			testAccPreCheck(t)
 		},
-		Providers:    testAccProviders,
-		CheckDestroy: testAccCheckVolumeDestroyCheck,
+		ProviderFactories: testAccProviderFactories,
+		CheckDestroy:      testAccCheckVolumeDestroyCheck,
 		Steps: []resource.TestStep{
 			{
-				Config: fmt.Sprintf(testAccCheckVolumeConfig_basic, volumeName),
+				Config: fmt.Sprintf(testacccheckvolumeconfigBasic, volumeName),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckVolumeExists("ionoscloud_volume.database_volume", &volume),
 					resource.TestCheckResourceAttr("ionoscloud_volume.database_volume", "name", volumeName),
 				),
 			},
 			{
-				Config: testAccCheckVolumeConfig_update,
+				Config: testacccheckvolumeconfigUpdate,
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttr("ionoscloud_volume.database_volume", "name", "updated"),
 				),
@@ -40,25 +40,26 @@ func TestAccVolume_Basic(t *testing.T) {
 
 func testAccCheckVolumeDestroyCheck(s *terraform.State) error {
 	client := testAccProvider.Meta().(*ionoscloud.APIClient)
+
+	ctx, cancel := context.WithTimeout(context.Background(), *resourceDefaultTimeouts.Delete)
+
+	if cancel != nil {
+		defer cancel()
+	}
+
 	for _, rs := range s.RootModule().Resources {
 		if rs.Type != "ionoscloud_datacenter" {
 			continue
 		}
 
-		ctx, cancel := context.WithTimeout(context.Background(), *resourceDefaultTimeouts.Delete)
-
-		if cancel != nil {
-			defer cancel()
-		}
-
 		_, apiResponse, err := client.VolumeApi.DatacentersVolumesFindById(ctx, rs.Primary.Attributes["datacenter_id"], rs.Primary.ID).Execute()
 
 		if err != nil {
-			if apiResponse == nil || apiResponse.Response.StatusCode != 404 {
-				return fmt.Errorf("unable to fetch volume %s: %s", rs.Primary.ID, err)
+			if apiResponse == nil || apiResponse.StatusCode != 404 {
+				return fmt.Errorf("volume still exists %s - an error occurred while checking it %s", rs.Primary.ID, err)
 			}
 		} else {
-			return fmt.Errorf("volume %s still exists", rs.Primary.ID)
+			return fmt.Errorf("volume still exists %s", rs.Primary.ID)
 		}
 	}
 
@@ -76,7 +77,7 @@ func testAccCheckVolumeExists(n string, volume *ionoscloud.Volume) resource.Test
 		}
 
 		if rs.Primary.ID == "" {
-			return fmt.Errorf("No Record ID is set")
+			return fmt.Errorf("no Record ID is set")
 		}
 
 		ctx, cancel := context.WithTimeout(context.Background(), *resourceDefaultTimeouts.Delete)
@@ -88,10 +89,10 @@ func testAccCheckVolumeExists(n string, volume *ionoscloud.Volume) resource.Test
 		foundServer, _, err := client.VolumeApi.DatacentersVolumesFindById(ctx, rs.Primary.Attributes["datacenter_id"], rs.Primary.ID).Execute()
 
 		if err != nil {
-			return fmt.Errorf("Error occured while fetching Volume: %s", rs.Primary.ID)
+			return fmt.Errorf("error occured while fetching Volume: %s", rs.Primary.ID)
 		}
 		if *foundServer.Id != rs.Primary.ID {
-			return fmt.Errorf("Record not found")
+			return fmt.Errorf("record not found")
 		}
 
 		volume = &foundServer
@@ -100,7 +101,7 @@ func testAccCheckVolumeExists(n string, volume *ionoscloud.Volume) resource.Test
 	}
 }
 
-const testAccCheckVolumeConfig_basic = `
+const testacccheckvolumeconfigBasic = `
 resource "ionoscloud_datacenter" "foobar" {
 	name       = "volume-test"
 	location = "us/las"
@@ -119,7 +120,7 @@ resource "ionoscloud_server" "webserver" {
   ram = 1024
   availability_zone = "ZONE_1"
   cpu_family = "AMD_OPTERON"
-	image_name = "Ubuntu-20.04-LTS-server-2021-06-01"
+	image_name = "ubuntu:latest"
 	image_password = "K3tTj8G14a3EgKyNeeiY"
   volume {
     name = "system"
@@ -141,11 +142,11 @@ resource "ionoscloud_volume" "database_volume" {
   size = 5
   disk_type = "HDD"
   bus = "VIRTIO"
-  image_name = "Ubuntu-20.04-LTS-server-2021-06-01"
+  image_name = "ubuntu:latest"
   image_password = "K3tTj8G14a3EgKyNeeiY"
 }`
 
-const testAccCheckVolumeConfig_update = `
+const testacccheckvolumeconfigUpdate = `
 resource "ionoscloud_datacenter" "foobar" {
 	name       = "volume-test"
 	location = "us/las"
@@ -164,7 +165,7 @@ resource "ionoscloud_server" "webserver" {
   ram = 1024
   availability_zone = "ZONE_1"
   cpu_family = "AMD_OPTERON"
-	image_name = "Ubuntu-20.04-LTS-server-2021-06-01"
+	image_name = "ubuntu:latest"
 	image_password = "K3tTj8G14a3EgKyNeeiY"
   volume {
     name = "system"
@@ -186,6 +187,6 @@ resource "ionoscloud_volume" "database_volume" {
   size = 5
   disk_type = "HDD"
   bus = "VIRTIO"
-  image_name = "Ubuntu-20.04-LTS-server-2021-06-01"
+  image_name = "ubuntu:latest"
   image_password = "K3tTj8G14a3EgKyNeeiY"
 }`

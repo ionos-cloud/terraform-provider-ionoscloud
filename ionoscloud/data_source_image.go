@@ -6,7 +6,7 @@ import (
 	ionoscloud "github.com/ionos-cloud/sdk-go/v5"
 	"strings"
 
-	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 )
 
 func dataSourceImage() *schema.Resource {
@@ -154,7 +154,7 @@ func dataSourceImageRead(d *schema.ResourceData, meta interface{}) error {
 	}
 
 	if imageTypeOk {
-		imageTypeResults := []ionoscloud.Image{}
+		var imageTypeResults []ionoscloud.Image
 		for _, img := range results {
 			if img.Properties.ImageType != nil && *img.Properties.ImageType == imageType.(string) {
 				imageTypeResults = append(imageTypeResults, img)
@@ -165,7 +165,7 @@ func dataSourceImageRead(d *schema.ResourceData, meta interface{}) error {
 	}
 
 	if locationOk {
-		locationResults := []ionoscloud.Image{}
+		var locationResults []ionoscloud.Image
 		for _, img := range results {
 			if img.Properties.Location != nil && *img.Properties.Location == location.(string) {
 				locationResults = append(locationResults, img)
@@ -175,7 +175,7 @@ func dataSourceImageRead(d *schema.ResourceData, meta interface{}) error {
 	}
 
 	if cloudInitOk {
-		cloudInitResults := []ionoscloud.Image{}
+		var cloudInitResults []ionoscloud.Image
 		for _, img := range results {
 			if img.Properties.CloudInit != nil && *img.Properties.CloudInit == cloudInit.(string) {
 				cloudInitResults = append(cloudInitResults, img)

@@ -3,19 +3,20 @@ package ionoscloud
 import (
 	"context"
 	"fmt"
-	"github.com/hashicorp/terraform-plugin-sdk/helper/validation"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 	"time"
 
-	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	ionoscloud "github.com/ionos-cloud/sdk-go/v5"
 )
 
 func resourceSnapshot() *schema.Resource {
 	return &schema.Resource{
-		Create: resourceSnapshotCreate,
-		Read:   resourceSnapshotRead,
-		Update: resourceSnapshotUpdate,
-		Delete: resourceSnapshotDelete,
+		CreateContext: resourceSnapshotCreate,
+		ReadContext:   resourceSnapshotRead,
+		UpdateContext: resourceSnapshotUpdate,
+		DeleteContext: resourceSnapshotDelete,
 		Schema: map[string]*schema.Schema{
 			"name": {
 				Type:         schema.TypeString,
@@ -39,60 +40,57 @@ func resourceSnapshot() *schema.Resource {
 	}
 }
 
-func resourceSnapshotCreate(d *schema.ResourceData, meta interface{}) error {
+func resourceSnapshotCreate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	client := meta.(*ionoscloud.APIClient)
 
 	dcId := d.Get("datacenter_id").(string)
 	volumeId := d.Get("volume_id").(string)
 	name := d.Get("name").(string)
 
-	ctx, cancel := context.WithTimeout(context.Background(), *resourceDefaultTimeouts.Create)
-	if cancel != nil {
-		defer cancel()
-	}
-
 	rsp, apiResponse, err := client.VolumeApi.DatacentersVolumesCreateSnapshotPost(ctx, dcId, volumeId).Name(name).Execute()
 
 	if err != nil {
-		return fmt.Errorf("An error occured while creating a snapshot: %s ", err)
+		diags := diag.FromErr(fmt.Errorf("an error occured while creating a snapshot: %s", err))
+		return diags
 	}
 
 	d.SetId(*rsp.Id)
 	// Wait, catching any errors
-	_, errState := getStateChangeConf(meta, d, apiResponse.Header.Get("Location"), schema.TimeoutCreate).WaitForState()
+	_, errState := getStateChangeConf(meta, d, apiResponse.Header.Get("Location"), schema.TimeoutCreate).WaitForStateContext(ctx)
 	if errState != nil {
 		if IsRequestFailed(err) {
 			// Request failed, so resource was not created, delete resource from state file
 			d.SetId("")
 		}
-		return errState
+		diags := diag.FromErr(errState)
+		return diags
 	}
 
-	return resourceSnapshotRead(d, meta)
+	return resourceSnapshotRead(ctx, d, meta)
 }
 
-func resourceSnapshotRead(d *schema.ResourceData, meta interface{}) error {
+func resourceSnapshotRead(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	client := meta.(*ionoscloud.APIClient)
 
-	ctx, cancel := context.WithTimeout(context.Background(), *resourceDefaultTimeouts.Default)
-	if cancel != nil {
-		defer cancel()
-	}
 	rsp, apiResponse, err := client.SnapshotApi.SnapshotsFindById(ctx, d.Id()).Execute()
 
 	if err != nil {
-		if apiResponse != nil && apiResponse.Response.StatusCode == 404 {
+		if apiResponse != nil && apiResponse.StatusCode == 404 {
 			d.SetId("")
 			return nil
 		}
-		return fmt.Errorf("error occured while fetching a snapshot ID %s %s", d.Id(), err)
+		diags := diag.FromErr(fmt.Errorf("error occured while fetching a snapshot ID %s %s", d.Id(), err))
+		return diags
 	}
 
-	d.Set("name", rsp.Properties.Name)
+	if err := d.Set("name", rsp.Properties.Name); err != nil {
+		diags := diag.FromErr(err)
+		return diags
+	}
 	return nil
 }
 
-func resourceSnapshotUpdate(d *schema.ResourceData, meta interface{}) error {
+func resourceSnapshotUpdate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	client := meta.(*ionoscloud.APIClient)
 
 	name := d.Get("name").(string)
@@ -102,19 +100,21 @@ func resourceSnapshotUpdate(d *schema.ResourceData, meta interface{}) error {
 
 	_, apiResponse, err := client.SnapshotApi.SnapshotsPatch(context.TODO(), d.Id()).Snapshot(input).Execute()
 	if err != nil {
-		return fmt.Errorf("An error occured while restoring a snapshot ID %s %d", d.Id(), err)
+		diags := diag.FromErr(fmt.Errorf("an error occured while restoring a snapshot ID %s %d", d.Id(), err))
+		return diags
 	}
 
 	// Wait, catching any errors
-	_, errState := getStateChangeConf(meta, d, apiResponse.Header.Get("Location"), schema.TimeoutUpdate).WaitForState()
+	_, errState := getStateChangeConf(meta, d, apiResponse.Header.Get("Location"), schema.TimeoutUpdate).WaitForStateContext(ctx)
 	if errState != nil {
-		return errState
+		diags := diag.FromErr(errState)
+		return diags
 	}
 
-	return resourceSnapshotRead(d, meta)
+	return resourceSnapshotRead(ctx, d, meta)
 }
 
-func resourceSnapshotDelete(d *schema.ResourceData, meta interface{}) error {
+func resourceSnapshotDelete(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	client := meta.(*ionoscloud.APIClient)
 
 	ctx, cancel := context.WithTimeout(context.Background(), *resourceDefaultTimeouts.Delete)
@@ -124,7 +124,8 @@ func resourceSnapshotDelete(d *schema.ResourceData, meta interface{}) error {
 
 	rsp, apiResponse, err := client.SnapshotApi.SnapshotsFindById(ctx, d.Id()).Execute()
 	if err != nil {
-		return fmt.Errorf("An error occured while fetching a snapshot ID %s %s", d.Id(), err)
+		diags := diag.FromErr(fmt.Errorf("an error occured while fetching a snapshot ID %s %s", d.Id(), err))
+		return diags
 	}
 
 	for *rsp.Metadata.State != "AVAILABLE" {
@@ -132,7 +133,8 @@ func resourceSnapshotDelete(d *schema.ResourceData, meta interface{}) error {
 		_, _, err := client.SnapshotApi.SnapshotsFindById(ctx, d.Id()).Execute()
 
 		if err != nil {
-			return fmt.Errorf("An error occured while fetching a snapshot ID %s %s", d.Id(), err)
+			diags := diag.FromErr(fmt.Errorf("an error occured while fetching a snapshot ID %s %s", d.Id(), err))
+			return diags
 		}
 	}
 
@@ -140,7 +142,8 @@ func resourceSnapshotDelete(d *schema.ResourceData, meta interface{}) error {
 	dc, _, err := client.DataCenterApi.DatacentersFindById(ctx, dcId).Execute()
 
 	if err != nil {
-		return fmt.Errorf("An error occured while fetching a Datacenter ID %s %s", dcId, err)
+		diags := diag.FromErr(fmt.Errorf("an error occured while fetching a Datacenter ID %s %s", dcId, err))
+		return diags
 	}
 
 	for *dc.Metadata.State != "AVAILABLE" {
@@ -148,19 +151,22 @@ func resourceSnapshotDelete(d *schema.ResourceData, meta interface{}) error {
 		_, _, err := client.DataCenterApi.DatacentersFindById(ctx, dcId).Execute()
 
 		if err != nil {
-			return fmt.Errorf("An error occured while fetching a Datacenter ID %s %s", dcId, err)
+			diags := diag.FromErr(fmt.Errorf("an error occured while fetching a Datacenter ID %s %s", dcId, err))
+			return diags
 		}
 	}
 
 	_, apiResponse, err = client.SnapshotApi.SnapshotsDelete(ctx, d.Id()).Execute()
 	if err != nil {
-		return fmt.Errorf("An error occured while deleting a snapshot ID %s %s", d.Id(), err)
+		diags := diag.FromErr(fmt.Errorf("an error occured while deleting a snapshot ID %s %s", d.Id(), err))
+		return diags
 	}
 
 	// Wait, catching any errors
-	_, errState := getStateChangeConf(meta, d, apiResponse.Header.Get("Location"), schema.TimeoutDelete).WaitForState()
+	_, errState := getStateChangeConf(meta, d, apiResponse.Header.Get("Location"), schema.TimeoutDelete).WaitForStateContext(ctx)
 	if errState != nil {
-		return errState
+		diags := diag.FromErr(errState)
+		return diags
 	}
 
 	d.SetId("")

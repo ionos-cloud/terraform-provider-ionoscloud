@@ -5,19 +5,19 @@ import (
 
 	"testing"
 
-	"github.com/hashicorp/terraform-plugin-sdk/helper/resource"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 )
 
 func TestAccIPBlock_ImportBasic(t *testing.T) {
 	location := "us/las"
 
 	resource.Test(t, resource.TestCase{
-		PreCheck:     func() { testAccPreCheck(t) },
-		Providers:    testAccProviders,
-		CheckDestroy: testAccCheckIPBlockDestroyCheck,
+		PreCheck:          func() { testAccPreCheck(t) },
+		ProviderFactories: testAccProviderFactories,
+		CheckDestroy:      testAccCheckIPBlockDestroyCheck,
 		Steps: []resource.TestStep{
 			{
-				Config: fmt.Sprintf(testAccCheckIPBlockConfig_basic, location),
+				Config: fmt.Sprintf(testacccheckipblockconfigBasic, location),
 			},
 
 			{

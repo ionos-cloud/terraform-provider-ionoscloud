@@ -3,7 +3,7 @@ package ionoscloud
 import (
 	"testing"
 
-	"github.com/hashicorp/terraform-plugin-sdk/helper/resource"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 )
 
 func TestAccDataSourceLocation_basic(t *testing.T) {
@@ -11,11 +11,11 @@ func TestAccDataSourceLocation_basic(t *testing.T) {
 		PreCheck: func() {
 			testAccPreCheck(t)
 		},
-		Providers: testAccProviders,
+		ProviderFactories: testAccProviderFactories,
 		Steps: []resource.TestStep{
 			{
 
-				Config: testAccDataSourceLocation_basic,
+				Config: testaccdatasourcelocationBasic,
 				Check: resource.ComposeTestCheckFunc(resource.TestCheckResourceAttr("data.ionoscloud_location.loc", "id", "de/fra"),
 					resource.TestCheckResourceAttr("data.ionoscloud_location.loc", "name", "frankfurt"),
 				),
@@ -25,7 +25,7 @@ func TestAccDataSourceLocation_basic(t *testing.T) {
 
 }
 
-const testAccDataSourceLocation_basic = `
+const testaccdatasourcelocationBasic = `
 	data "ionoscloud_location" "loc" {
 	  name = "frankfurt"
 	  feature = "SSD"

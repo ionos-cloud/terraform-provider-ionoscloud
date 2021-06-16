@@ -3,8 +3,9 @@ package ionoscloud
 import (
 	"context"
 	"fmt"
-	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
-	"github.com/hashicorp/terraform-plugin-sdk/helper/validation"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 	ionoscloud "github.com/ionos-cloud/sdk-go/v5"
 	"log"
 	"time"
@@ -12,12 +13,12 @@ import (
 
 func resourcePrivateCrossConnect() *schema.Resource {
 	return &schema.Resource{
-		Create: resourcePrivateCrossConnectCreate,
-		Read:   resourcePrivateCrossConnectRead,
-		Update: resourcePrivateCrossConnectUpdate,
-		Delete: resourcePrivateCrossConnectDelete,
+		CreateContext: resourcePrivateCrossConnectCreate,
+		ReadContext:   resourcePrivateCrossConnectRead,
+		UpdateContext: resourcePrivateCrossConnectUpdate,
+		DeleteContext: resourcePrivateCrossConnectDelete,
 		Importer: &schema.ResourceImporter{
-			State: resourcePrivateCrossConnectImport,
+			StateContext: resourcePrivateCrossConnectImport,
 		},
 		Schema: map[string]*schema.Schema{
 			"name": {
@@ -94,10 +95,11 @@ func resourcePrivateCrossConnect() *schema.Resource {
 	}
 }
 
-func resourcePrivateCrossConnectCreate(d *schema.ResourceData, meta interface{}) error {
+func resourcePrivateCrossConnectCreate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	client := meta.(*ionoscloud.APIClient)
 
 	name := d.Get("name").(string)
+
 	pcc := ionoscloud.PrivateCrossConnect{
 		Properties: &ionoscloud.PrivateCrossConnectProperties{
 			Name: &name,
@@ -110,16 +112,12 @@ func resourcePrivateCrossConnectCreate(d *schema.ResourceData, meta interface{})
 		pcc.Properties.Description = &description
 	}
 
-	ctx, cancel := context.WithTimeout(context.Background(), *resourceDefaultTimeouts.Create)
-	if cancel != nil {
-		defer cancel()
-	}
-
 	rsp, _, err := client.PrivateCrossConnectApi.PccsPost(ctx).Pcc(pcc).Execute()
 
 	if err != nil {
 		d.SetId("")
-		return fmt.Errorf("Error creating private PCC: %s", err)
+		diags := diag.FromErr(fmt.Errorf("error creating private PCC: %s", err))
+		return diags
 	}
 
 	d.SetId(*rsp.Id)
@@ -128,13 +126,14 @@ func resourcePrivateCrossConnectCreate(d *schema.ResourceData, meta interface{})
 	for {
 		log.Printf("[INFO] Waiting for PCC %s to be ready...", d.Id())
 
-		pccReady, rsErr := privateCrossConnectReady(client, d)
+		pccReady, rsErr := privateCrossConnectReady(ctx, client, d)
 
 		if rsErr != nil {
-			return fmt.Errorf("Error while checking readiness status of PCC %s: %s", d.Id(), rsErr)
+			diags := diag.FromErr(fmt.Errorf("error while checking readiness status of PCC %s: %s", d.Id(), rsErr))
+			return diags
 		}
 
-		if pccReady && rsErr == nil {
+		if pccReady {
 			log.Printf("[INFO] PCC ready: %s", d.Id())
 			break
 		}
@@ -144,36 +143,31 @@ func resourcePrivateCrossConnectCreate(d *schema.ResourceData, meta interface{})
 			log.Printf("[INFO] trying again ...")
 		case <-ctx.Done():
 			log.Printf("[INFO] timed out")
-			return fmt.Errorf("pcc creation timed out; WARNING: your pcc will still probably be created after some time; check for duplicate resources")
+			diags := diag.FromErr(fmt.Errorf("pcc creation timed out; WARNING: your pcc will still probably be created after some time; check for duplicate resources"))
+			return diags
 		}
 	}
 
-	return resourcePrivateCrossConnectRead(d, meta)
+	return resourcePrivateCrossConnectRead(ctx, d, meta)
 }
 
-func resourcePrivateCrossConnectRead(d *schema.ResourceData, meta interface{}) error {
+func resourcePrivateCrossConnectRead(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	client := meta.(*ionoscloud.APIClient)
-
-	ctx, cancel := context.WithTimeout(context.Background(), *resourceDefaultTimeouts.Default)
-	if cancel != nil {
-		defer cancel()
-	}
 
 	rsp, apiResponse, err := client.PrivateCrossConnectApi.PccsFindById(ctx, d.Id()).Execute()
 
 	if err != nil {
-		if _, ok := err.(ionoscloud.GenericOpenAPIError); ok {
-			if apiResponse != nil && apiResponse.Response.StatusCode == 404 {
-				d.SetId("")
-				return nil
-			}
+		if apiResponse != nil && apiResponse.StatusCode == 404 {
+			d.SetId("")
+			return nil
 		}
-		return fmt.Errorf("error while fetching PCC %s: %s", d.Id(), err)
+		diags := diag.FromErr(fmt.Errorf("error while fetching PCC %s: %s", d.Id(), err))
+		return diags
 	}
 
 	log.Printf("[INFO] Successfully retreived PCC %s: %+v", d.Id(), rsp)
 
-	peers := []map[string]string{}
+	var peers []map[string]string
 
 	for _, peer := range *rsp.Properties.Peers {
 		peers = append(peers, map[string]string{
@@ -185,10 +179,13 @@ func resourcePrivateCrossConnectRead(d *schema.ResourceData, meta interface{}) e
 		})
 	}
 
-	d.Set("peers", peers)
+	if err := d.Set("peers", peers); err != nil {
+		diags := diag.FromErr(err)
+		return diags
+	}
 	log.Printf("[INFO] Setting peers for PCC %s to %+v...", d.Id(), d.Get("peers"))
 
-	connectableDatacenters := []map[string]string{}
+	var connectableDatacenters []map[string]string
 
 	for _, connectableDC := range *rsp.Properties.ConnectableDatacenters {
 		connectableDatacenters = append(connectableDatacenters, map[string]string{
@@ -198,12 +195,15 @@ func resourcePrivateCrossConnectRead(d *schema.ResourceData, meta interface{}) e
 		})
 	}
 
-	d.Set("connectable_datacenters", connectableDatacenters)
+	if err := d.Set("connectable_datacenters", connectableDatacenters); err != nil {
+		diags := diag.FromErr(err)
+		return diags
+	}
 
 	return nil
 }
 
-func resourcePrivateCrossConnectUpdate(d *schema.ResourceData, meta interface{}) error {
+func resourcePrivateCrossConnectUpdate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	client := meta.(*ionoscloud.APIClient)
 
 	request := ionoscloud.PrivateCrossConnect{}
@@ -230,33 +230,27 @@ func resourcePrivateCrossConnectUpdate(d *schema.ResourceData, meta interface{})
 		}
 	}
 
-	ctx, cancel := context.WithTimeout(context.Background(), *resourceDefaultTimeouts.Update)
-	if cancel != nil {
-		defer cancel()
-	}
-
 	_, apiResponse, err := client.PrivateCrossConnectApi.PccsPatch(ctx, d.Id()).Pcc(*request.Properties).Execute()
 	if err != nil {
-		if _, ok := err.(ionoscloud.GenericOpenAPIError); ok {
-			if apiResponse != nil && apiResponse.Response.StatusCode == 404 {
-				d.SetId("")
-				return nil
-			}
-			return fmt.Errorf("error while updating PCC: %s", err)
+		if apiResponse != nil && apiResponse.StatusCode == 404 {
+			d.SetId("")
+			return nil
 		}
-		return fmt.Errorf("error while updating PCC %s: %s", d.Id(), err)
+		diags := diag.FromErr(fmt.Errorf("error while updating PCC: %s", err))
+		return diags
 	}
 
 	for {
 		log.Printf("[INFO] Waiting for PCC %s to be ready...", d.Id())
 
-		pccReady, rsErr := privateCrossConnectReady(client, d)
+		pccReady, rsErr := privateCrossConnectReady(ctx, client, d)
 
 		if rsErr != nil {
-			return fmt.Errorf("Error while checking readiness status of PCC %s: %s", d.Id(), rsErr)
+			diags := diag.FromErr(fmt.Errorf("error while checking readiness status of PCC %s: %s", d.Id(), rsErr))
+			return diags
 		}
 
-		if pccReady && rsErr == nil {
+		if pccReady {
 			log.Printf("[INFO] PCC ready: %s", d.Id())
 			break
 		}
@@ -266,45 +260,39 @@ func resourcePrivateCrossConnectUpdate(d *schema.ResourceData, meta interface{})
 			log.Printf("[INFO] trying again ...")
 		case <-ctx.Done():
 			log.Printf("[INFO] update timed out")
-			return fmt.Errorf("pcc update timed out! WARNING: your pcc will still probably be updated after some time " +
-				"but the terraform state wont reflect that; check your Ionos Cloud account to see the updates")
+			diags := diag.FromErr(fmt.Errorf("pcc update timed out! WARNING: your pcc will still probably be updated after some time " +
+				"but the terraform state wont reflect that; check your Ionos Cloud account to see the updates"))
+			return diags
 		}
 	}
 
-	return resourcePrivateCrossConnectRead(d, meta)
+	return resourcePrivateCrossConnectRead(ctx, d, meta)
 }
 
-func resourcePrivateCrossConnectDelete(d *schema.ResourceData, meta interface{}) error {
+func resourcePrivateCrossConnectDelete(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	client := meta.(*ionoscloud.APIClient)
-
-	ctx, cancel := context.WithTimeout(context.Background(), *resourceDefaultTimeouts.Delete)
-	if cancel != nil {
-		defer cancel()
-	}
 
 	_, apiResponse, err := client.PrivateCrossConnectApi.PccsDelete(ctx, d.Id()).Execute()
 	if err != nil {
-		if _, ok := err.(ionoscloud.GenericOpenAPIError); ok {
-			if apiResponse != nil && apiResponse.Response.StatusCode == 404 {
-				d.SetId("")
-				return nil
-			}
-			return fmt.Errorf("error while deleting PCC: %s", err)
+		if apiResponse != nil && apiResponse.StatusCode == 404 {
+			d.SetId("")
+			return nil
 		}
-
-		return fmt.Errorf("error while deleting PCC %s: %s", d.Id(), err)
+		diags := diag.FromErr(fmt.Errorf("error while deleting PCC: %s", err))
+		return diags
 	}
 
 	for {
 		log.Printf("[INFO] Waiting for PCC %s to be deleted...", d.Id())
 
-		pccDeleted, dsErr := privateCrossConnectDeleted(client, d)
+		pccDeleted, dsErr := privateCrossConnectDeleted(ctx, client, d)
 
 		if dsErr != nil {
-			return fmt.Errorf("Error while checking deletion status of PCC %s: %s", d.Id(), dsErr)
+			diags := diag.FromErr(fmt.Errorf("error while checking deletion status of PCC %s: %s", d.Id(), dsErr))
+			return diags
 		}
 
-		if pccDeleted && dsErr == nil {
+		if pccDeleted {
 			log.Printf("[INFO] Successfully deleted PCC: %s", d.Id())
 			break
 		}
@@ -314,41 +302,32 @@ func resourcePrivateCrossConnectDelete(d *schema.ResourceData, meta interface{})
 			log.Printf("[INFO] trying again ...")
 		case <-ctx.Done():
 			log.Printf("[INFO] delete timed out")
-			return fmt.Errorf("pcc removal timed out! WARNING: your pcc will still probably be removed after some " +
-				"time but the terraform state wont reflect that; check the updates in your Ionos Cloud account")
+			diags := diag.FromErr(fmt.Errorf("pcc removal timed out! WARNING: your pcc will still probably be removed after some " +
+				"time but the terraform state wont reflect that; check the updates in your Ionos Cloud account"))
+			return diags
 		}
 	}
 
 	return nil
 }
 
-func privateCrossConnectReady(client *ionoscloud.APIClient, d *schema.ResourceData) (bool, error) {
-	ctx, cancel := context.WithTimeout(context.Background(), *resourceDefaultTimeouts.Default)
-	if cancel != nil {
-		defer cancel()
-	}
+func privateCrossConnectReady(ctx context.Context, client *ionoscloud.APIClient, d *schema.ResourceData) (bool, error) {
 	rsp, _, err := client.PrivateCrossConnectApi.PccsFindById(ctx, d.Id()).Execute()
 
 	if err != nil {
-		return true, fmt.Errorf("Error checking PCC status: %s", err)
+		return true, fmt.Errorf("error checking PCC status: %s", err)
 	}
 	return *rsp.Metadata.State == "AVAILABLE", nil
 }
 
-func privateCrossConnectDeleted(client *ionoscloud.APIClient, d *schema.ResourceData) (bool, error) {
-	ctx, cancel := context.WithTimeout(context.Background(), *resourceDefaultTimeouts.Delete)
-	if cancel != nil {
-		defer cancel()
-	}
+func privateCrossConnectDeleted(ctx context.Context, client *ionoscloud.APIClient, d *schema.ResourceData) (bool, error) {
 	_, apiResponse, err := client.PrivateCrossConnectApi.PccsFindById(ctx, d.Id()).Execute()
 
 	if err != nil {
-		if _, ok := err.(ionoscloud.GenericOpenAPIError); ok {
-			if apiResponse != nil && apiResponse.Response.StatusCode == 404 {
-				return true, nil
-			}
-			return true, fmt.Errorf("error checking PCC deletion status: %s", err)
+		if apiResponse != nil && apiResponse.StatusCode == 404 {
+			return true, nil
 		}
+		return true, fmt.Errorf("error checking PCC deletion status: %s", err)
 	}
 	return false, nil
 }

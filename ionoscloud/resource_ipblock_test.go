@@ -6,8 +6,8 @@ import (
 	ionoscloud "github.com/ionos-cloud/sdk-go/v5"
 	"testing"
 
-	"github.com/hashicorp/terraform-plugin-sdk/helper/resource"
-	"github.com/hashicorp/terraform-plugin-sdk/terraform"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
 )
 
 func TestAccIPBlock_Basic(t *testing.T) {
@@ -18,11 +18,11 @@ func TestAccIPBlock_Basic(t *testing.T) {
 		PreCheck: func() {
 			testAccPreCheck(t)
 		},
-		Providers:    testAccProviders,
-		CheckDestroy: testAccCheckIPBlockDestroyCheck,
+		ProviderFactories: testAccProviderFactories,
+		CheckDestroy:      testAccCheckIPBlockDestroyCheck,
 		Steps: []resource.TestStep{
 			{
-				Config: fmt.Sprintf(testAccCheckIPBlockConfig_basic, location),
+				Config: fmt.Sprintf(testacccheckipblockconfigBasic, location),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckIPBlockExists("ionoscloud_ipblock.webserver_ip", &ipblock),
 					testAccCheckIPBlockAttributes("ionoscloud_ipblock.webserver_ip", location),
@@ -30,7 +30,7 @@ func TestAccIPBlock_Basic(t *testing.T) {
 				),
 			},
 			{
-				Config: fmt.Sprintf(testAccCheckIPBlockConfig_update, location),
+				Config: fmt.Sprintf(testacccheckipblockconfigUpdate, location),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckIPBlockExists("ionoscloud_ipblock.webserver_ip", &ipblock),
 					testAccCheckIPBlockAttributes("ionoscloud_ipblock.webserver_ip", location),
@@ -44,7 +44,12 @@ func TestAccIPBlock_Basic(t *testing.T) {
 func testAccCheckIPBlockDestroyCheck(s *terraform.State) error {
 	client := testAccProvider.Meta().(*ionoscloud.APIClient)
 
-	ctx, _ := context.WithTimeout(context.Background(), *resourceDefaultTimeouts.Delete)
+	ctx, cancel := context.WithTimeout(context.Background(), *resourceDefaultTimeouts.Delete)
+
+	if cancel != nil {
+		defer cancel()
+	}
+
 	for _, rs := range s.RootModule().Resources {
 		if rs.Type != "ionoscloud_ipblock" {
 			continue
@@ -52,12 +57,12 @@ func testAccCheckIPBlockDestroyCheck(s *terraform.State) error {
 
 		_, apiResponse, err := client.IPBlocksApi.IpblocksFindById(ctx, rs.Primary.ID).Execute()
 
-		if apiError, ok := err.(ionoscloud.GenericOpenAPIError); ok {
-			if apiResponse != nil && apiResponse.Response.StatusCode != 404 {
-				return fmt.Errorf("IPBlock still exists %s %s", rs.Primary.ID, apiError)
+		if err != nil {
+			if apiResponse != nil && apiResponse.StatusCode != 404 {
+				return fmt.Errorf("IPBlock still exists %s - an error occurred while checking it %s", rs.Primary.ID, err)
 			}
 		} else {
-			return fmt.Errorf("Unable to fetching IPBlock %s %s", rs.Primary.ID, err)
+			return fmt.Errorf("IPBlock still exists %s", rs.Primary.ID)
 		}
 	}
 
@@ -71,7 +76,7 @@ func testAccCheckIPBlockAttributes(n string, location string) resource.TestCheck
 			return fmt.Errorf("testAccCheckLanAttributes: Not found: %s", n)
 		}
 		if rs.Primary.Attributes["location"] != location {
-			return fmt.Errorf("Bad name: %s", rs.Primary.Attributes["location"])
+			return fmt.Errorf("bad name: %s", rs.Primary.Attributes["location"])
 		}
 
 		return nil
@@ -88,17 +93,22 @@ func testAccCheckIPBlockExists(n string, ipblock *ionoscloud.IpBlock) resource.T
 		}
 
 		if rs.Primary.ID == "" {
-			return fmt.Errorf("No Record ID is set")
+			return fmt.Errorf("no Record ID is set")
 		}
 
-		ctx, _ := context.WithTimeout(context.Background(), *resourceDefaultTimeouts.Default)
+		ctx, cancel := context.WithTimeout(context.Background(), *resourceDefaultTimeouts.Default)
+
+		if cancel != nil {
+			defer cancel()
+		}
+
 		foundIP, _, err := client.IPBlocksApi.IpblocksFindById(ctx, rs.Primary.ID).Execute()
 
 		if err != nil {
-			return fmt.Errorf("Error occured while fetching IP Block: %s", rs.Primary.ID)
+			return fmt.Errorf("error occured while fetching IP Block: %s", rs.Primary.ID)
 		}
 		if *foundIP.Id != rs.Primary.ID {
-			return fmt.Errorf("Record not found")
+			return fmt.Errorf("record not found")
 		}
 
 		ipblock = &foundIP
@@ -107,14 +117,14 @@ func testAccCheckIPBlockExists(n string, ipblock *ionoscloud.IpBlock) resource.T
 	}
 }
 
-const testAccCheckIPBlockConfig_basic = `
+const testacccheckipblockconfigBasic = `
 resource "ionoscloud_ipblock" "webserver_ip" {
   location = "%s"
   size = 1
   name = "ipblock TF test"
 }`
 
-const testAccCheckIPBlockConfig_update = `
+const testacccheckipblockconfigUpdate = `
 resource "ionoscloud_ipblock" "webserver_ip" {
   location = "%s"
   size = 1

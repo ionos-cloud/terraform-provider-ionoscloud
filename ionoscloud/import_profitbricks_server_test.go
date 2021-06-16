@@ -5,20 +5,20 @@ import (
 
 	"testing"
 
-	"github.com/hashicorp/terraform-plugin-sdk/helper/resource"
-	"github.com/hashicorp/terraform-plugin-sdk/terraform"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
 )
 
 func TestAccServer_ImportBasic(t *testing.T) {
 	resourceName := "server-importtest"
 
 	resource.Test(t, resource.TestCase{
-		PreCheck:     func() { testAccPreCheck(t) },
-		Providers:    testAccProviders,
-		CheckDestroy: testAccCheckServerDestroyCheck,
+		PreCheck:          func() { testAccPreCheck(t) },
+		ProviderFactories: testAccProviderFactories,
+		CheckDestroy:      testAccCheckServerDestroyCheck,
 		Steps: []resource.TestStep{
 			{
-				Config: fmt.Sprintf(testAccCheckServerConfig_basic, resourceName),
+				Config: fmt.Sprintf(testacccheckserverconfigBasic, resourceName),
 			},
 
 			{
@@ -33,7 +33,7 @@ func TestAccServer_ImportBasic(t *testing.T) {
 }
 
 func testAccServerImportStateId(s *terraform.State) (string, error) {
-	var importID string = ""
+	importID := ""
 
 	for _, rs := range s.RootModule().Resources {
 		if rs.Type != "ionoscloud_server" {

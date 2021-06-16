@@ -6,8 +6,8 @@ import (
 	ionoscloud "github.com/ionos-cloud/sdk-go/v5"
 	"testing"
 
-	"github.com/hashicorp/terraform-plugin-sdk/helper/resource"
-	"github.com/hashicorp/terraform-plugin-sdk/terraform"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
 )
 
 func TestAccFirewall_Basic(t *testing.T) {
@@ -18,11 +18,11 @@ func TestAccFirewall_Basic(t *testing.T) {
 		PreCheck: func() {
 			testAccPreCheck(t)
 		},
-		Providers:    testAccProviders,
-		CheckDestroy: testAccCheckFirewallDestroyCheck,
+		ProviderFactories: testAccProviderFactories,
+		CheckDestroy:      testAccCheckFirewallDestroyCheck,
 		Steps: []resource.TestStep{
 			{
-				Config: fmt.Sprintf(testAccCheckFirewallConfig_basic, firewallName),
+				Config: fmt.Sprintf(testacccheckfirewallconfigBasic, firewallName),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckFirewallExists("ionoscloud_firewall.webserver_http", &firewall),
 					testAccCheckFirewallAttributes("ionoscloud_firewall.webserver_http", firewallName),
@@ -30,7 +30,7 @@ func TestAccFirewall_Basic(t *testing.T) {
 				),
 			},
 			{
-				Config: testAccCheckFirewallConfig_update,
+				Config: testacccheckfirewallconfigUpdate,
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckFirewallAttributes("ionoscloud_firewall.webserver_http", "updated"),
 					resource.TestCheckResourceAttr("ionoscloud_firewall.webserver_http", "name", "updated"),
@@ -43,26 +43,26 @@ func TestAccFirewall_Basic(t *testing.T) {
 func testAccCheckFirewallDestroyCheck(s *terraform.State) error {
 	client := testAccProvider.Meta().(*ionoscloud.APIClient)
 
+	ctx, cancel := context.WithTimeout(context.Background(), *resourceDefaultTimeouts.Default)
+
+	if cancel != nil {
+		defer cancel()
+	}
+
 	for _, rs := range s.RootModule().Resources {
 		if rs.Type != "ionoscloud_firewall" {
 			continue
 		}
 
-		ctx, cancel := context.WithTimeout(context.Background(), *resourceDefaultTimeouts.Default)
-
-		if cancel != nil {
-			defer cancel()
-		}
-
-		_, apiRsponse, err := client.NicApi.DatacentersServersNicsFirewallrulesFindById(ctx, rs.Primary.Attributes["datacenter_id"],
+		_, apiResponse, err := client.NicApi.DatacentersServersNicsFirewallrulesFindById(ctx, rs.Primary.Attributes["datacenter_id"],
 			rs.Primary.Attributes["server_id"], rs.Primary.Attributes["nic_id"], rs.Primary.ID).Execute()
 
-		if apiError, ok := err.(ionoscloud.GenericOpenAPIError); ok {
-			if apiRsponse.Response.StatusCode != 404 {
-				return fmt.Errorf("Firewall still exists %s %s", rs.Primary.ID, apiError)
+		if err != nil {
+			if apiResponse != nil && apiResponse.StatusCode != 404 {
+				return fmt.Errorf("firewall still exists %s - an error occurred while checking it %s", rs.Primary.ID, err)
 			}
 		} else {
-			return fmt.Errorf("Unable to fetching Firewall %s %s", rs.Primary.ID, err)
+			return fmt.Errorf("firewall still exists %s", rs.Primary.ID)
 		}
 	}
 
@@ -76,7 +76,7 @@ func testAccCheckFirewallAttributes(n string, name string) resource.TestCheckFun
 			return fmt.Errorf("testAccCheckFirewallAttributes: Not found: %s", n)
 		}
 		if rs.Primary.Attributes["name"] != name {
-			return fmt.Errorf("Bad name: %s", rs.Primary.Attributes["name"])
+			return fmt.Errorf("bad name: %s", rs.Primary.Attributes["name"])
 		}
 
 		return nil
@@ -94,7 +94,7 @@ func testAccCheckFirewallExists(n string, firewall *ionoscloud.FirewallRule) res
 		}
 
 		if rs.Primary.ID == "" {
-			return fmt.Errorf("No Record ID is set")
+			return fmt.Errorf("no Record ID is set")
 		}
 
 		ctx, cancel := context.WithTimeout(context.Background(), *resourceDefaultTimeouts.Default)
@@ -107,10 +107,10 @@ func testAccCheckFirewallExists(n string, firewall *ionoscloud.FirewallRule) res
 			rs.Primary.Attributes["server_id"], rs.Primary.Attributes["nic_id"], rs.Primary.ID).Execute()
 
 		if err != nil {
-			return fmt.Errorf("Error occured while fetching Firewall rule: %s", rs.Primary.ID)
+			return fmt.Errorf("error occured while fetching Firewall rule: %s", rs.Primary.ID)
 		}
 		if *foundServer.Id != rs.Primary.ID {
-			return fmt.Errorf("Record not found")
+			return fmt.Errorf("record not found")
 		}
 
 		firewall = &foundServer
@@ -119,7 +119,7 @@ func testAccCheckFirewallExists(n string, firewall *ionoscloud.FirewallRule) res
 	}
 }
 
-const testAccCheckFirewallConfig_basic = `
+const testacccheckfirewallconfigBasic = `
 resource "ionoscloud_datacenter" "foobar" {
 	name       = "firewall-test"
 	location = "us/las"
@@ -172,7 +172,7 @@ resource "ionoscloud_firewall" "webserver_http" {
 }
 `
 
-const testAccCheckFirewallConfig_update = `
+const testacccheckfirewallconfigUpdate = `
 resource "ionoscloud_datacenter" "foobar" {
 	name       = "firewall-test"
 	location = "us/las"

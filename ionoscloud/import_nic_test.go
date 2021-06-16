@@ -5,20 +5,20 @@ import (
 
 	"testing"
 
-	"github.com/hashicorp/terraform-plugin-sdk/helper/resource"
-	"github.com/hashicorp/terraform-plugin-sdk/terraform"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
 )
 
 func TestAccNic_ImportBasic(t *testing.T) {
 	volumeName := "volume"
 
 	resource.Test(t, resource.TestCase{
-		PreCheck:     func() { testAccPreCheck(t) },
-		Providers:    testAccProviders,
-		CheckDestroy: testAccCheckNicDestroyCheck,
+		PreCheck:          func() { testAccPreCheck(t) },
+		ProviderFactories: testAccProviderFactories,
+		CheckDestroy:      testAccCheckNicDestroyCheck,
 		Steps: []resource.TestStep{
 			{
-				Config: fmt.Sprintf(testAccCheckNicConfig_basic, volumeName),
+				Config: fmt.Sprintf(testaccchecknicconfigBasic, volumeName),
 			},
 
 			{
@@ -32,7 +32,7 @@ func TestAccNic_ImportBasic(t *testing.T) {
 }
 
 func testAccNicImportStateId(s *terraform.State) (string, error) {
-	var importID string = ""
+	importID := ""
 
 	for _, rs := range s.RootModule().Resources {
 		if rs.Type != "ionoscloud_nic" && rs.Primary.ID != "database_nic" {

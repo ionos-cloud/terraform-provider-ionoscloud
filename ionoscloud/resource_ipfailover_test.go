@@ -6,8 +6,8 @@ import (
 	ionoscloud "github.com/ionos-cloud/sdk-go/v5"
 	"testing"
 
-	"github.com/hashicorp/terraform-plugin-sdk/helper/resource"
-	"github.com/hashicorp/terraform-plugin-sdk/terraform"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
 )
 
 func TestAccLanIPFailover_Basic(t *testing.T) {
@@ -28,17 +28,17 @@ func TestAccLanIPFailover_Basic(t *testing.T) {
 		PreCheck: func() {
 			testAccPreCheck(t)
 		},
-		Providers:    testAccProviders,
-		CheckDestroy: testAccCheckLanIPFailoverDestroyCheck,
+		ProviderFactories: testAccProviderFactories,
+		CheckDestroy:      testAccCheckLanIPFailoverDestroyCheck,
 		Steps: []resource.TestStep{
 			{
-				Config: fmt.Sprintf(testAccCheckLanIPFailoverConfig_basic),
+				Config: fmt.Sprintf(testaccchecklanipfailoverconfigBasic),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckLanIPFailoverGroupExists("ionoscloud_ipfailover.failovertest", &lan, &ipfailover),
 				),
 			},
 			{
-				Config: testAccCheckLanIPFailoverConfig_update,
+				Config: testaccchecklanipfailoverconfigUpdate,
 				Check: resource.ComposeTestCheckFunc(
 					testDeleted("ionoscloud_ipfailover.failovertest"),
 				),
@@ -50,17 +50,17 @@ func TestAccLanIPFailover_Basic(t *testing.T) {
 	})
 }
 
-func testAccCheckLanIPFailoverGroupExists(n string, lan *ionoscloud.Lan, failover *ionoscloud.IPFailover) resource.TestCheckFunc {
+func testAccCheckLanIPFailoverGroupExists(n string, _ *ionoscloud.Lan, _ *ionoscloud.IPFailover) resource.TestCheckFunc {
 	return func(s *terraform.State) error {
 		client := testAccProvider.Meta().(*ionoscloud.APIClient)
 
 		rs, ok := s.RootModule().Resources[n]
 		if !ok {
-			return fmt.Errorf("Not found: %s", n)
+			return fmt.Errorf("not found: %s", n)
 		}
 
 		if rs.Primary.ID == "" {
-			return fmt.Errorf("No ID` is set")
+			return fmt.Errorf("no ID` is set")
 		}
 
 		dcId := rs.Primary.Attributes["datacenter_id"]
@@ -74,12 +74,13 @@ func testAccCheckLanIPFailoverGroupExists(n string, lan *ionoscloud.Lan, failove
 		}
 
 		lan, _, err := client.LanApi.DatacentersLansFindById(ctx, dcId, lanId).Execute()
+
 		if err != nil {
-			return fmt.Errorf("Lan %s not found.", lanId)
+			return fmt.Errorf("lan %s not found %s", lanId, err)
 		}
 
 		if lan.Properties.IpFailover == nil {
-			return fmt.Errorf("Lan %s has no failover groups.", lanId)
+			return fmt.Errorf("lan %s has no failover groups", lanId)
 		}
 		found := false
 		for _, fo := range *lan.Properties.IpFailover {
@@ -88,7 +89,7 @@ func testAccCheckLanIPFailoverGroupExists(n string, lan *ionoscloud.Lan, failove
 			}
 		}
 		if !found {
-			return fmt.Errorf("Expected NIC %s to be a part of a failover group, but not found in lans %s failover groups", nicUuid, lanId)
+			return fmt.Errorf("expected NIC %s to be a part of a failover group, but not found in lans %s failover groups", nicUuid, lanId)
 		}
 
 		return nil
@@ -97,6 +98,12 @@ func testAccCheckLanIPFailoverGroupExists(n string, lan *ionoscloud.Lan, failove
 
 func testAccCheckLanIPFailoverDestroyCheck(s *terraform.State) error {
 	client := testAccProvider.Meta().(*ionoscloud.APIClient)
+
+	ctx, cancel := context.WithTimeout(context.Background(), *resourceDefaultTimeouts.Default)
+
+	if cancel != nil {
+		defer cancel()
+	}
 
 	for _, rs := range s.RootModule().Resources {
 		if rs.Type != "ionoscloud_ipfailover" {
@@ -107,16 +114,10 @@ func testAccCheckLanIPFailoverDestroyCheck(s *terraform.State) error {
 		lanId := rs.Primary.Attributes["lan_id"]
 		nicUuid := rs.Primary.Attributes["nicuuid"]
 
-		ctx, cancel := context.WithTimeout(context.Background(), *resourceDefaultTimeouts.Default)
-
-		if cancel != nil {
-			defer cancel()
-		}
-
 		lan, _, err := client.LanApi.DatacentersLansFindById(ctx, dcId, lanId).Execute()
 
 		if err != nil {
-			return fmt.Errorf("An error occured while fetching a Lan ID %s %s", rs.Primary.Attributes["lan_id"], err)
+			return fmt.Errorf("an error occured while fetching a Lan ID %s %s", rs.Primary.Attributes["lan_id"], err)
 		}
 
 		found := false
@@ -128,7 +129,7 @@ func testAccCheckLanIPFailoverDestroyCheck(s *terraform.State) error {
 		if found {
 			_, _, err := client.DataCenterApi.DatacentersDelete(ctx, dcId).Execute()
 			if err != nil {
-				return fmt.Errorf("IP failover group with nicId %s still exists %s %s, removing datacenter....", nicUuid, rs.Primary.ID, err)
+				return fmt.Errorf("IP failover group with nicId %s still exists %s %s, removing datacenter", nicUuid, rs.Primary.ID, err)
 			}
 		}
 	}
@@ -136,7 +137,7 @@ func testAccCheckLanIPFailoverDestroyCheck(s *terraform.State) error {
 	return nil
 }
 
-const testAccCheckLanIPFailoverConfig_basic = `
+const testaccchecklanipfailoverconfigBasic = `
 resource "ionoscloud_datacenter" "foobar" {
 	name       = "ipfailover-test"
 	location = "us/las"
@@ -183,7 +184,7 @@ resource "ionoscloud_ipfailover" "failovertest" {
 }
 `
 
-const testAccCheckLanIPFailoverConfig_update = `
+const testaccchecklanipfailoverconfigUpdate = `
 resource "ionoscloud_datacenter" "foobar" {
 	name       = "ipfailover-test"
 	location = "us/las"

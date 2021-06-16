@@ -6,8 +6,8 @@ import (
 	ionoscloud "github.com/ionos-cloud/sdk-go/v5"
 	"testing"
 
-	"github.com/hashicorp/terraform-plugin-sdk/helper/resource"
-	"github.com/hashicorp/terraform-plugin-sdk/terraform"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
 )
 
 func TestAccShare_Basic(t *testing.T) {
@@ -16,18 +16,18 @@ func TestAccShare_Basic(t *testing.T) {
 		PreCheck: func() {
 			testAccPreCheck(t)
 		},
-		Providers:    testAccProviders,
-		CheckDestroy: testAccCheckShareDestroyCheck,
+		ProviderFactories: testAccProviderFactories,
+		CheckDestroy:      testAccCheckShareDestroyCheck,
 		Steps: []resource.TestStep{
 			{
-				Config: fmt.Sprintf(testAccCheckShareConfig_basic),
+				Config: fmt.Sprintf(testacccheckshareconfigBasic),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckShareExists("ionoscloud_share.share", &share),
 					resource.TestCheckResourceAttr("ionoscloud_share.share", "share_privilege", "true"),
 				),
 			},
 			{
-				Config: testAccCheckShareConfig_update,
+				Config: testacccheckshareconfigUpdate,
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttr("ionoscloud_share.share", "share_privilege", "false"),
 				),
@@ -79,27 +79,27 @@ func testAccCheckShareExists(n string, share *ionoscloud.GroupShare) resource.Te
 		}
 
 		if rs.Primary.ID == "" {
-			return fmt.Errorf("No Record ID is set")
+			return fmt.Errorf("no Record ID is set")
 		}
 
 		grpId := rs.Primary.Attributes["group_id"]
 		resourceId := rs.Primary.Attributes["resource_id"]
-		foundshare, _, err := client.UserManagementApi.UmGroupsSharesFindByResourceId(context.TODO(), grpId, resourceId).Execute()
+		foundShare, _, err := client.UserManagementApi.UmGroupsSharesFindByResourceId(context.TODO(), grpId, resourceId).Execute()
 
 		if err != nil {
-			return fmt.Errorf("Error occured while fetching Share of resource  %s in group %s", rs.Primary.Attributes["resource_id"], rs.Primary.Attributes["group_id"])
+			return fmt.Errorf("error occured while fetching Share of resource  %s in group %s", rs.Primary.Attributes["resource_id"], rs.Primary.Attributes["group_id"])
 		}
-		if *foundshare.Id != rs.Primary.ID {
-			return fmt.Errorf("Record not found")
+		if *foundShare.Id != rs.Primary.ID {
+			return fmt.Errorf("record not found")
 		}
 
-		share = &foundshare
+		share = &foundShare
 
 		return nil
 	}
 }
 
-const testAccCheckShareConfig_basic = `
+const testacccheckshareconfigBasic = `
 resource "ionoscloud_datacenter" "foobar" {
 	name       = "terraform test"
 	location = "us/las"
@@ -120,7 +120,7 @@ resource "ionoscloud_share" "share" {
   share_privilege = true
 }`
 
-const testAccCheckShareConfig_update = `
+const testacccheckshareconfigUpdate = `
 resource "ionoscloud_datacenter" "foobar" {
 	name       = "terraform test"
 	location = "us/las"

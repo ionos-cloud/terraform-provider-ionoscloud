@@ -3,7 +3,7 @@ package ionoscloud
 import (
 	"testing"
 
-	"github.com/hashicorp/terraform-plugin-sdk/helper/resource"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 )
 
 func TestAccResource_basic(t *testing.T) {
@@ -11,10 +11,10 @@ func TestAccResource_basic(t *testing.T) {
 		PreCheck: func() {
 			testAccPreCheck(t)
 		},
-		Providers: testAccProviders,
+		ProviderFactories: testAccProviderFactories,
 		Steps: []resource.TestStep{
 			{
-				Config: testAccDataSourceResource_basic,
+				Config: testaccdatasourceresourceBasic,
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttr("data.ionoscloud_resource.res", "resource_type", "datacenter"),
 				),
@@ -24,7 +24,7 @@ func TestAccResource_basic(t *testing.T) {
 
 }
 
-const testAccDataSourceResource_basic = `
+const testaccdatasourceresourceBasic = `
 resource "ionoscloud_datacenter" "foobar" {
   name       = "test_name"
   location = "us/las"

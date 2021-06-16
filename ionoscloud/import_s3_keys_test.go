@@ -5,17 +5,17 @@ import (
 	"testing"
 	"time"
 
-	"github.com/hashicorp/terraform-plugin-sdk/helper/resource"
-	"github.com/hashicorp/terraform-plugin-sdk/terraform"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
 )
 
 func TestAccS3Key_ImportBasic(t *testing.T) {
 	resourceName := "example"
 	email := fmt.Sprintf("terraform-s3-import-acc-tester-%d@mailinator.com", time.Now().Unix())
 	resource.Test(t, resource.TestCase{
-		PreCheck:     func() { testAccPreCheck(t) },
-		Providers:    testAccProviders,
-		CheckDestroy: testAccChecks3KeyDestroyCheck,
+		PreCheck:          func() { testAccPreCheck(t) },
+		ProviderFactories: testAccProviderFactories,
+		CheckDestroy:      testAccChecks3KeyDestroyCheck,
 		Steps: []resource.TestStep{
 			{
 				Config: fmt.Sprintf(testAccChecks3KeyImportConfigBasic, email, resourceName),
@@ -32,7 +32,7 @@ func TestAccS3Key_ImportBasic(t *testing.T) {
 }
 
 func testAccS3KeyImportStateID(s *terraform.State) (string, error) {
-	var importID string = ""
+	importID := ""
 
 	for _, rs := range s.RootModule().Resources {
 		if rs.Type != "ionoscloud_s3_key" {

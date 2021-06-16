@@ -6,8 +6,8 @@ import (
 	ionoscloud "github.com/ionos-cloud/sdk-go/v5"
 	"testing"
 
-	"github.com/hashicorp/terraform-plugin-sdk/helper/resource"
-	"github.com/hashicorp/terraform-plugin-sdk/terraform"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
 )
 
 func TestAccNic_Basic(t *testing.T) {
@@ -18,11 +18,11 @@ func TestAccNic_Basic(t *testing.T) {
 		PreCheck: func() {
 			testAccPreCheck(t)
 		},
-		Providers:    testAccProviders,
-		CheckDestroy: testAccCheckNicDestroyCheck,
+		ProviderFactories: testAccProviderFactories,
+		CheckDestroy:      testAccCheckNicDestroyCheck,
 		Steps: []resource.TestStep{
 			{
-				Config: fmt.Sprintf(testAccCheckNicConfig_basic, volumeName),
+				Config: fmt.Sprintf(testaccchecknicconfigBasic, volumeName),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckNICExists("ionoscloud_nic.database_nic", &nic),
 					testAccCheckNicAttributes("ionoscloud_nic.database_nic", volumeName),
@@ -31,7 +31,7 @@ func TestAccNic_Basic(t *testing.T) {
 				),
 			},
 			{
-				Config: testAccCheckNicConfig_update,
+				Config: testaccchecknicconfigUpdate,
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckNicAttributes("ionoscloud_nic.database_nic", "updated"),
 					resource.TestCheckResourceAttr("ionoscloud_nic.database_nic", "name", "updated"),
@@ -65,6 +65,7 @@ func testAccCheckNicDestroyCheck(s *terraform.State) error {
 		} else {
 			return fmt.Errorf("nic %s still exists", rs.Primary.ID)
 		}
+
 	}
 
 	return nil
@@ -77,7 +78,7 @@ func testAccCheckNicAttributes(n string, name string) resource.TestCheckFunc {
 			return fmt.Errorf("testAccCheckNicAttributes: Not found: %s", n)
 		}
 		if rs.Primary.Attributes["name"] != name {
-			return fmt.Errorf("Bad name: %s", rs.Primary.Attributes["name"])
+			return fmt.Errorf("bad name: %s", rs.Primary.Attributes["name"])
 		}
 
 		return nil
@@ -94,19 +95,24 @@ func testAccCheckNICExists(n string, nic *ionoscloud.Nic) resource.TestCheckFunc
 		}
 
 		if rs.Primary.ID == "" {
-			return fmt.Errorf("No Record ID is set")
+			return fmt.Errorf("no Record ID is set")
 		}
 
-		ctx, _ := context.WithTimeout(context.Background(), *resourceDefaultTimeouts.Default)
+		ctx, cancel := context.WithTimeout(context.Background(), *resourceDefaultTimeouts.Default)
+
+		if cancel != nil {
+			defer cancel()
+		}
+
 		dcId := rs.Primary.Attributes["datacenter_id"]
 		serverId := rs.Primary.Attributes["server_id"]
 		foundNic, _, err := client.NicApi.DatacentersServersNicsFindById(ctx, dcId, serverId, rs.Primary.ID).Execute()
 
 		if err != nil {
-			return fmt.Errorf("Error occured while fetching Volume: %s", rs.Primary.ID)
+			return fmt.Errorf("error occured while fetching Volume: %s", rs.Primary.ID)
 		}
 		if *foundNic.Id != rs.Primary.ID {
-			return fmt.Errorf("Record not found")
+			return fmt.Errorf("record not found")
 		}
 
 		nic = &foundNic
@@ -115,7 +121,7 @@ func testAccCheckNICExists(n string, nic *ionoscloud.Nic) resource.TestCheckFunc
 	}
 }
 
-const testAccCheckNicConfig_basic = `
+const testaccchecknicconfigBasic = `
 resource "ionoscloud_datacenter" "foobar" {
 	name       = "nic-test"
 	location = "us/las"
@@ -152,7 +158,7 @@ resource "ionoscloud_nic" "database_nic" {
   name = "%s"
 }`
 
-const testAccCheckNicConfig_update = `
+const testaccchecknicconfigUpdate = `
 resource "ionoscloud_datacenter" "foobar" {
 	name       = "nic-test"
 	location = "us/las"

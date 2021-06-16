@@ -4,7 +4,7 @@ import (
 	"context"
 	"fmt"
 
-	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	ionoscloud "github.com/ionos-cloud/sdk-go/v5"
 )
 
@@ -45,19 +45,23 @@ func dataSourceResourceRead(d *schema.ResourceData, meta interface{}) error {
 		}
 		results = append(results, result)
 
-		d.Set("resource_type", result.Type)
-		d.Set("resource_id", result.Id)
+		if err := d.Set("resource_type", result.Type); err != nil {
+			return err
+		}
+		if err := d.Set("resource_id", result.Id); err != nil {
+			return err
+		}
 	} else if resourceType != "" {
-		//items, err := client.ListResourcesByType(resource_type)
 		items, _, err := client.UserManagementApi.UmResourcesFindByType(ctx, resourceType).Execute()
 		if err != nil {
 			return fmt.Errorf("an error occured while fetching resources by type %s", err)
 		}
 
 		results = *items.Items
-		d.Set("resource_type", results[0].Type)
+		if err := d.Set("resource_type", results[0].Type); err != nil {
+			return err
+		}
 	} else {
-		//items, err := client.ListResources()
 		items, _, err := client.UserManagementApi.UmResourcesGet(ctx).Execute()
 		if err != nil {
 			return fmt.Errorf("an error occured while fetching resources %s", err)

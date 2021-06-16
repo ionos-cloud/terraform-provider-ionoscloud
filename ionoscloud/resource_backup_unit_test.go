@@ -6,8 +6,8 @@ import (
 	ionoscloud "github.com/ionos-cloud/sdk-go/v5"
 	"testing"
 
-	"github.com/hashicorp/terraform-plugin-sdk/helper/resource"
-	"github.com/hashicorp/terraform-plugin-sdk/terraform"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
 )
 
 func TestAccbackupUnit_Basic(t *testing.T) {
@@ -18,15 +18,15 @@ func TestAccbackupUnit_Basic(t *testing.T) {
 		PreCheck: func() {
 			testAccPreCheck(t)
 		},
-		Providers:    testAccProviders,
-		CheckDestroy: testAccCheckbackupUnitDestroyCheck,
+		ProviderFactories: testAccProviderFactories,
+		CheckDestroy:      testAccCheckbackupUnitDestroyCheck,
 		Steps: []resource.TestStep{
 			{
 				Config: fmt.Sprintf(testAccCheckbackupUnitConfigBasic, backupUnitName),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckbackupUnitExists("ionoscloud_backup_unit.example", &backupUnit),
 					resource.TestCheckResourceAttr("ionoscloud_backup_unit.example", "name", backupUnitName),
-					resource.TestCheckResourceAttr("ionoscloud_backup_unit.example", "email", "example@profitbricks.com"),
+					resource.TestCheckResourceAttr("ionoscloud_backup_unit.example", "email", "example@ionoscloud.com"),
 					resource.TestCheckResourceAttr("ionoscloud_backup_unit.example", "password", "DemoPassword123$"),
 				),
 			},
@@ -34,7 +34,7 @@ func TestAccbackupUnit_Basic(t *testing.T) {
 				Config: testAccCheckbackupUnitConfigUpdate,
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckbackupUnitExists("ionoscloud_backup_unit.example", &backupUnit),
-					resource.TestCheckResourceAttr("ionoscloud_backup_unit.example", "email", "example-updated@profitbricks.com"),
+					resource.TestCheckResourceAttr("ionoscloud_backup_unit.example", "email", "example-updated@ionoscloud.com"),
 					resource.TestCheckResourceAttr("ionoscloud_backup_unit.example", "password", "DemoPassword1234$"),
 				),
 			},
@@ -67,6 +67,7 @@ func testAccCheckbackupUnitDestroyCheck(s *terraform.State) error {
 		} else {
 			return fmt.Errorf("backup unit %s still exists", rs.Primary.ID)
 		}
+
 	}
 
 	return nil
@@ -79,11 +80,11 @@ func testAccCheckbackupUnitExists(n string, backupUnit *ionoscloud.BackupUnit) r
 		rs, ok := s.RootModule().Resources[n]
 
 		if !ok {
-			return fmt.Errorf("Not found: %s", n)
+			return fmt.Errorf("not found: %s", n)
 		}
 
 		if rs.Primary.ID == "" {
-			return fmt.Errorf("No Record ID is set")
+			return fmt.Errorf("no Record ID is set")
 		}
 
 		ctx, cancel := context.WithTimeout(context.Background(), *resourceDefaultTimeouts.Default)
@@ -95,10 +96,10 @@ func testAccCheckbackupUnitExists(n string, backupUnit *ionoscloud.BackupUnit) r
 		foundBackupUnit, _, err := client.BackupUnitApi.BackupunitsFindById(ctx, rs.Primary.ID).Execute()
 
 		if err != nil {
-			return fmt.Errorf("Error occured while fetching backup unit: %s", rs.Primary.ID)
+			return fmt.Errorf("error occured while fetching backup unit: %s", rs.Primary.ID)
 		}
 		if *foundBackupUnit.Id != rs.Primary.ID {
-			return fmt.Errorf("Record not found")
+			return fmt.Errorf("record not found")
 		}
 		backupUnit = &foundBackupUnit
 
@@ -110,14 +111,14 @@ const testAccCheckbackupUnitConfigBasic = `
 resource "ionoscloud_backup_unit" "example" {
 	name        = "%s"
 	password    = "DemoPassword123$"
-	email       = "example@profitbricks.com"
+	email       = "example@ionoscloud.com"
 }
 `
 
 const testAccCheckbackupUnitConfigUpdate = `
 resource "ionoscloud_backup_unit" "example" {
 	name        = "example"
-	email       = "example-updated@profitbricks.com"
+	email       = "example-updated@ionoscloud.com"
 	password    = "DemoPassword1234$"
 }
 `
