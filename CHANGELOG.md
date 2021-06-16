@@ -1,3 +1,7 @@
+## 5.2.0-beta.1
+
+- terraform sdk upgrade to v2.4.3
+
 ## 5.1.7
 
 - fixes #22 - ability to specify boot_cdrom when creating a server
