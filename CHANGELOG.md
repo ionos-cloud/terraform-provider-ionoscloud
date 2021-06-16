@@ -1,3 +1,10 @@
+## 5.1.7
+
+- fixes #22 - ability to specify boot_cdrom when creating a server
+- fix: respecting resource timeouts when waiting for requests to be fullfiled
+- ability to debug sdk requests by setting the IONOS_DEBUG=1 env var and TF_LOG=1
+
+
 ## 5.1.6
 
 - fixes #5 - correctly dereferencing possibly nil properties received from the api
