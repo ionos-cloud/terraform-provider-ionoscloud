@@ -1,7 +1,8 @@
 package ionoscloud
 
 import (
-	"github.com/hashicorp/terraform-plugin-sdk/httpclient"
+	"fmt"
+	"github.com/hashicorp/terraform-plugin-sdk/meta"
 	ionoscloud "github.com/ionos-cloud/sdk-go/v6"
 	"log"
 )
@@ -23,7 +24,7 @@ func (c *Config) Client(terraformVersion string) (*ionoscloud.APIClient, error) 
 	} else {
 		client = ionoscloud.NewAPIClient(ionoscloud.NewConfiguration(c.Username, c.Password, ""))
 	}
-	client.GetConfig().UserAgent = httpclient.TerraformUserAgent(terraformVersion)
+	client.GetConfig().UserAgent = fmt.Sprintf("HashiCorp Terraform/%s Terraform Plugin SDK/%s Terraform Provider Ionoscloud/%s", terraformVersion, meta.SDKVersionString(), Version)
 
 	log.Printf("[DEBUG] Terraform client UA set to %s", client.GetConfig().UserAgent)
 

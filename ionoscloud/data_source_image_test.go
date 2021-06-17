@@ -3,7 +3,7 @@ package ionoscloud
 import (
 	"testing"
 
-	"github.com/hashicorp/terraform-plugin-sdk/helper/resource"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 )
 
 func TestAccDataSourceImage_basic(t *testing.T) {
@@ -11,11 +11,11 @@ func TestAccDataSourceImage_basic(t *testing.T) {
 		PreCheck: func() {
 			testAccPreCheck(t)
 		},
-		Providers: testAccProviders,
+		ProviderFactories: testAccProviderFactories,
 		Steps: []resource.TestStep{
 			{
 
-				Config: testAccDataSourceImage_basic,
+				Config: testaccdatasourceimageBasic,
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttr("data.ionoscloud_image.img", "cloud_init", "NONE"),
 					resource.TestCheckResourceAttr("data.ionoscloud_image.img", "location", "de/fkb"),
@@ -28,7 +28,7 @@ func TestAccDataSourceImage_basic(t *testing.T) {
 
 }
 
-const testAccDataSourceImage_basic = `
+const testaccdatasourceimageBasic = `
 	data "ionoscloud_image" "img" {
 	  name = "ubuntu"
 	  type = "CDROM"

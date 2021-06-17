@@ -3,8 +3,8 @@ package ionoscloud
 import (
 	"context"
 	"fmt"
-	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
-	"github.com/hashicorp/terraform-plugin-sdk/helper/validation"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 	ionoscloud "github.com/ionos-cloud/sdk-go/v6"
 )
 
@@ -46,7 +46,7 @@ func dataSourceSnapshotRead(d *schema.ResourceData, meta interface{}) error {
 	name := d.Get("name").(string)
 	location, locationOk := d.GetOk("location")
 	size, sizeOk := d.GetOk("size")
-	results := []ionoscloud.Snapshot{}
+	var results []ionoscloud.Snapshot
 
 	if snapshots.Items != nil {
 		for _, snp := range *snapshots.Items {
@@ -57,7 +57,7 @@ func dataSourceSnapshotRead(d *schema.ResourceData, meta interface{}) error {
 	}
 
 	if locationOk {
-		locationResults := []ionoscloud.Snapshot{}
+		var locationResults []ionoscloud.Snapshot
 		for _, snp := range results {
 			if *snp.Properties.Location == location.(string) {
 				locationResults = append(locationResults, snp)
@@ -68,7 +68,7 @@ func dataSourceSnapshotRead(d *schema.ResourceData, meta interface{}) error {
 	}
 
 	if sizeOk {
-		sizeResults := []ionoscloud.Snapshot{}
+		var sizeResults []ionoscloud.Snapshot
 		for _, snp := range results {
 			if *snp.Properties.Size <= size.(float32) {
 				sizeResults = append(sizeResults, snp)

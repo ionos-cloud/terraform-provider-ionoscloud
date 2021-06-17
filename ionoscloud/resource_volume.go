@@ -3,19 +3,20 @@ package ionoscloud
 import (
 	"context"
 	"fmt"
-	"github.com/hashicorp/terraform-plugin-sdk/helper/validation"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 	ionoscloud "github.com/ionos-cloud/sdk-go/v6"
 	"log"
 
-	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 )
 
 func resourceVolume() *schema.Resource {
 	return &schema.Resource{
-		Create: resourceVolumeCreate,
-		Read:   resourceVolumeRead,
-		Update: resourceVolumeUpdate,
-		Delete: resourceVolumeDelete,
+		CreateContext: resourceVolumeCreate,
+		ReadContext:   resourceVolumeRead,
+		UpdateContext: resourceVolumeUpdate,
+		DeleteContext: resourceVolumeDelete,
 		Schema: map[string]*schema.Schema{
 			"image_name": {
 				Type:     schema.TypeString,
@@ -115,7 +116,7 @@ func resourceVolume() *schema.Resource {
 	}
 }
 
-func resourceVolumeCreate(d *schema.ResourceData, meta interface{}) error {
+func resourceVolumeCreate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 
 	client := meta.(*ionoscloud.APIClient)
 
@@ -136,7 +137,8 @@ func resourceVolumeCreate(d *schema.ResourceData, meta interface{}) error {
 			log.Printf("[DEBUG] Reading file %s", path)
 			publicKey, err := readPublicKey(path.(string))
 			if err != nil {
-				return fmt.Errorf("error fetching sshkey from file (%s) (%s)", path, err.Error())
+				diags := diag.FromErr(fmt.Errorf("error fetching sshkey from file (%s) (%s)", path, err.Error()))
+				return diags
 			}
 			publicKeys = append(publicKeys, publicKey)
 		}
@@ -147,7 +149,8 @@ func resourceVolumeCreate(d *schema.ResourceData, meta interface{}) error {
 		if !IsValidUUID(imageInput) {
 			img, err := getImage(client, dcId, imageInput, diskType)
 			if err != nil {
-				return err
+				diags := diag.FromErr(err)
+				return diags
 			}
 			if img != nil {
 				image = *img.Id
@@ -158,20 +161,17 @@ func resourceVolumeCreate(d *schema.ResourceData, meta interface{}) error {
 				if image != "" {
 					isSnapshot = true
 				} else {
-					return fmt.Errorf("no image or snapshot with id %s found", imageInput)
+					diags := diag.FromErr(fmt.Errorf("no image or snapshot with id %s found", imageInput))
+					return diags
 				}
 			}
 
 			if imagePassword == "" && len(sshKeyPath) == 0 && isSnapshot == false && img.Properties.Public != nil && *img.Properties.Public {
-				return fmt.Errorf("either 'image_password' or 'ssh_key_path' must be provided")
+				diags := diag.FromErr(fmt.Errorf("either 'image_password' or 'ssh_key_path' must be provided"))
+				return diags
 			}
 
 		} else {
-			ctx, cancel := context.WithTimeout(context.Background(), *resourceDefaultTimeouts.Default)
-
-			if cancel != nil {
-				defer cancel()
-			}
 
 			img, apiResponse, err := client.ImagesApi.ImagesFindById(ctx, imageInput).Execute()
 
@@ -182,20 +182,24 @@ func resourceVolumeCreate(d *schema.ResourceData, meta interface{}) error {
 
 					if err != nil {
 						if apiResponse != nil && apiResponse.Response.StatusCode == 404 {
-							return fmt.Errorf("image/snapshot %s not found: %s", imageInput, string(apiResponse.Payload))
+							diags := diag.FromErr(fmt.Errorf("image/snapshot %s not found: %s", imageInput, err))
+							return diags
 						} else {
-							return fmt.Errorf("an error occured while fetching snapshot %s: %s", imageInput, err)
+							diags := diag.FromErr(fmt.Errorf("an error occured while fetching snapshot %s: %s", imageInput, err))
+							return diags
 						}
 					}
 					image = *snapshot.Id
 					isSnapshot = true
 				} else {
-					return fmt.Errorf("error fetching image %s: %s", imageInput, err)
+					diags := diag.FromErr(fmt.Errorf("error fetching image %s: %s", imageInput, err))
+					return diags
 				}
 			} else {
 				if isSnapshot == false && *img.Properties.Public == true {
 					if imagePassword == "" && len(sshKeyPath) == 0 {
-						return fmt.Errorf("either 'image_password' or 'sshkey' must be provided")
+						diags := diag.FromErr(fmt.Errorf("either 'image_password' or 'sshkey' must be provided"))
+						return diags
 					}
 				}
 				image = *img.Id
@@ -204,7 +208,8 @@ func resourceVolumeCreate(d *schema.ResourceData, meta interface{}) error {
 	}
 
 	if isSnapshot == true && (imagePassword != "" || len(publicKeys) > 0) {
-		return fmt.Errorf("you can't pass 'image_password' and/or 'ssh keys' when creating a volume from a snapshot")
+		diags := diag.FromErr(fmt.Errorf("you can't pass 'image_password' and/or 'ssh keys' when creating a volume from a snapshot"))
+		return diags
 	}
 
 	volumeName := d.Get("name").(string)
@@ -214,11 +219,11 @@ func resourceVolumeCreate(d *schema.ResourceData, meta interface{}) error {
 
 	volume := ionoscloud.Volume{
 		Properties: &ionoscloud.VolumeProperties{
-			Name:          &volumeName,
-			Size:          &volumeSize,
-			Type:          &volumeType,
-			Bus:           &volumeBus,
-			LicenceType:   &licenceType,
+			Name:        &volumeName,
+			Size:        &volumeSize,
+			Type:        &volumeType,
+			Bus:         &volumeBus,
+			LicenceType: &licenceType,
 		},
 	}
 
@@ -283,7 +288,8 @@ func resourceVolumeCreate(d *schema.ResourceData, meta interface{}) error {
 	backupUnitId := d.Get("backup_unit_id").(string)
 	if IsValidUUID(backupUnitId) {
 		if image == "" && imageAlias == "" {
-			return fmt.Errorf("it is mandatory to provied either public image or imageAlias in conjunction with backup unit id property")
+			diags := diag.FromErr(fmt.Errorf("it is mandatory to provied either public image or imageAlias in conjunction with backup unit id property"))
+			return diags
 		} else {
 			volume.Properties.BackupunitId = &backupUnitId
 		}
@@ -294,77 +300,74 @@ func resourceVolumeCreate(d *schema.ResourceData, meta interface{}) error {
 	userData := d.Get("user_data").(string)
 	if userData != "" {
 		if image == "" && imageAlias == "" {
-			return fmt.Errorf("it is mandatory to provied either public image that has cloud-init compatibility in conjunction with backup unit id property ")
+			diags := diag.FromErr(fmt.Errorf("it is mandatory to provied either public image that has cloud-init compatibility in conjunction with backup unit id property "))
+			return diags
 		} else {
 			volume.Properties.UserData = &userData
 		}
 	} else {
 		volume.Properties.UserData = nil
 	}
-	ctx, cancel := context.WithTimeout(context.Background(), *resourceDefaultTimeouts.Default)
 
-	if cancel != nil {
-		defer cancel()
-	}
 	volume, apiResponse, err := client.VolumesApi.DatacentersVolumesPost(ctx, dcId).Volume(volume).Execute()
 
 	if err != nil {
-		return fmt.Errorf("an error occured while creating a volume: %s", err)
+		diags := diag.FromErr(fmt.Errorf("an error occured while creating a volume: %s", err))
+		return diags
 	}
 
 	d.SetId(*volume.Id)
 
 	// Wait, catching any errors
-	_, errState := getStateChangeConf(meta, d, apiResponse.Header.Get("Location"), schema.TimeoutCreate).WaitForState()
+	_, errState := getStateChangeConf(meta, d, apiResponse.Header.Get("Location"), schema.TimeoutCreate).WaitForStateContext(ctx)
 	if errState != nil {
 		if IsRequestFailed(err) {
 			// Request failed, so resource was not created, delete resource from state file
 			d.SetId("")
 		}
-		return errState
+		diags := diag.FromErr(errState)
+		return diags
 	}
 
 	volumeToAttach := ionoscloud.Volume{Id: volume.Id}
 	volume, apiResponse, err = client.ServersApi.DatacentersServersVolumesPost(ctx, dcId, serverId).Volume(volumeToAttach).Execute()
 
 	if err != nil {
-		return fmt.Errorf("an error occured while attaching a volume dcId: %s server_id: %s ID: %s Response: %s",
-			dcId, serverId, *volumeToAttach.Id, err)
+		diags := diag.FromErr(fmt.Errorf("an error occured while attaching a volume dcId: %s server_id: %s ID: %s Response: %s", dcId, serverId, *volumeToAttach.Id, err))
+		return diags
 	}
 
 	sErr := d.Set("server_id", serverId)
 
 	if sErr != nil {
-		return fmt.Errorf("error while setting serverId %s: %s", serverId, sErr)
+		diags := diag.FromErr(fmt.Errorf("error while setting serverId %s: %s", serverId, sErr))
+		return diags
 	}
 
 	// Wait, catching any errors
-	_, errState = getStateChangeConf(meta, d, apiResponse.Header.Get("Location"), schema.TimeoutCreate).WaitForState()
+	_, errState = getStateChangeConf(meta, d, apiResponse.Header.Get("Location"), schema.TimeoutCreate).WaitForStateContext(ctx)
 	if errState != nil {
 		if IsRequestFailed(err) {
 			// Request failed, so resource was not created, delete resource from state file
 			sErr := d.Set("server_id", "")
 			if sErr != nil {
-				return fmt.Errorf("error while setting serverId: %s", sErr)
+				diags := diag.FromErr(fmt.Errorf("error while setting serverId: %s", sErr))
+				return diags
 			}
 		}
-		return errState
+		diags := diag.FromErr(errState)
+		return diags
 	}
 
-	return resourceVolumeRead(d, meta)
+	return resourceVolumeRead(ctx, d, meta)
 }
 
-func resourceVolumeRead(d *schema.ResourceData, meta interface{}) error {
+func resourceVolumeRead(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	client := meta.(*ionoscloud.APIClient)
 
 	dcId := d.Get("datacenter_id").(string)
 	serverID := d.Get("server_id").(string)
 	volumeID := d.Id()
-
-	ctx, cancel := context.WithTimeout(context.Background(), *resourceDefaultTimeouts.Default)
-	if cancel != nil {
-		defer cancel()
-	}
 
 	volume, apiResponse, err := client.VolumesApi.DatacentersVolumesFindById(ctx, dcId, volumeID).Execute()
 
@@ -373,113 +376,127 @@ func resourceVolumeRead(d *schema.ResourceData, meta interface{}) error {
 			d.SetId("")
 			return nil
 		}
-		return fmt.Errorf("error occured while fetching volume with ID %s: %s", d.Id(), err)
+		diags := diag.FromErr(fmt.Errorf("error occured while fetching volume with ID %s: %s", d.Id(), err))
+		return diags
 	}
 
 	_, _, err = client.ServersApi.DatacentersServersVolumesFindById(ctx, dcId, serverID, volumeID).Execute()
 	if err != nil {
 		if err2 := d.Set("server_id", ""); err2 != nil {
-			return err2
+			diags := diag.FromErr(err2)
+			return diags
 		}
 	}
 
 	if volume.Properties.Name != nil {
 		err := d.Set("name", *volume.Properties.Name)
 		if err != nil {
-			return fmt.Errorf("error while setting name property for volume %s: %s", d.Id(), err)
+			diags := diag.FromErr(fmt.Errorf("error while setting name property for volume %s: %s", d.Id(), err))
+			return diags
 		}
 	}
 
 	if volume.Properties.Type != nil {
 		err := d.Set("disk_type", *volume.Properties.Type)
 		if err != nil {
-			return fmt.Errorf("error while setting type property for volume %s: %s", d.Id(), err)
+			diags := diag.FromErr(fmt.Errorf("error while setting type property for volume %s: %s", d.Id(), err))
+			return diags
 		}
 	}
 
 	if volume.Properties.Size != nil {
 		err := d.Set("size", *volume.Properties.Size)
 		if err != nil {
-			return fmt.Errorf("error while setting size property for volume %s: %s", d.Id(), err)
+			diags := diag.FromErr(fmt.Errorf("error while setting size property for volume %s: %s", d.Id(), err))
+			return diags
 		}
 	}
 
 	if volume.Properties.Bus != nil {
 		err := d.Set("bus", *volume.Properties.Bus)
 		if err != nil {
-			return fmt.Errorf("error while setting bus property for volume %s: %s", d.Id(), err)
+			diags := diag.FromErr(fmt.Errorf("error while setting bus property for volume %s: %s", d.Id(), err))
+			return diags
 		}
 	}
 
 	/*
-	if volume.Properties.Image != nil {
-		err = d.Set("image_name", *volume.Properties.Image)
-		if err != nil {
-			return fmt.Errorf("error while setting image property for volume %s: %s", d.Id(), err)
+		if volume.Properties.Image != nil {
+			err = d.Set("image_name", *volume.Properties.Image)
+			if err != nil {
+				return fmt.Errorf("error while setting image property for volume %s: %s", d.Id(), err)
+			}
 		}
-	}
 	*/
 
 	if volume.Properties.CpuHotPlug != nil {
 		err := d.Set("cpu_hot_plug", *volume.Properties.CpuHotPlug)
 		if err != nil {
-			return fmt.Errorf("error while setting cpu_hot_plug property for volume %s: %s", d.Id(), err)
+			diags := diag.FromErr(fmt.Errorf("error while setting cpu_hot_plug property for volume %s: %s", d.Id(), err))
+			return diags
 		}
 	}
 
 	if volume.Properties.RamHotPlug != nil {
 		err := d.Set("ram_hot_plug", *volume.Properties.RamHotPlug)
 		if err != nil {
-			return fmt.Errorf("error while setting ram_hot_plug property for volume %s: %s", d.Id(), err)
+			diags := diag.FromErr(fmt.Errorf("error while setting ram_hot_plug property for volume %s: %s", d.Id(), err))
+			return diags
 		}
 	}
 
 	if volume.Properties.NicHotPlug != nil {
 		err := d.Set("nic_hot_plug", *volume.Properties.NicHotPlug)
 		if err != nil {
-			return fmt.Errorf("error while setting nic_hot_plug property for volume %s: %s", d.Id(), err)
+			diags := diag.FromErr(fmt.Errorf("error while setting nic_hot_plug property for volume %s: %s", d.Id(), err))
+			return diags
 		}
 	}
 
 	if volume.Properties.NicHotUnplug != nil {
 		err := d.Set("nic_hot_unplug", *volume.Properties.NicHotUnplug)
 		if err != nil {
-			return fmt.Errorf("error while setting nic_hot_unplug property for volume %s: %s", d.Id(), err)
+			diags := diag.FromErr(fmt.Errorf("error while setting nic_hot_unplug property for volume %s: %s", d.Id(), err))
+			return diags
 		}
 	}
 
 	if volume.Properties.DiscVirtioHotPlug != nil {
 		err := d.Set("disc_virtio_hot_plug", *volume.Properties.DiscVirtioHotPlug)
 		if err != nil {
-			return fmt.Errorf("error while setting disc_virtio_hot_plug property for volume %s: %s", d.Id(), err)
+			diags := diag.FromErr(fmt.Errorf("error while setting disc_virtio_hot_plug property for volume %s: %s", d.Id(), err))
+			return diags
 		}
 	}
 
 	if volume.Properties.DiscVirtioHotUnplug != nil {
 		err := d.Set("disc_virtio_hot_unplug", *volume.Properties.DiscVirtioHotUnplug)
 		if err != nil {
-			return fmt.Errorf("error while setting disc_virtio_hot_unplug property for volume %s: %s", d.Id(), err)
+			diags := diag.FromErr(fmt.Errorf("error while setting disc_virtio_hot_unplug property for volume %s: %s", d.Id(), err))
+			return diags
 		}
 	}
 
 	if volume.Properties.BackupunitId != nil {
 		err := d.Set("backup_unit_id", *volume.Properties.BackupunitId)
 		if err != nil {
-			return fmt.Errorf("error while setting backup_unit_id property for volume %s: %s", d.Id(), err)
+			diags := diag.FromErr(fmt.Errorf("error while setting backup_unit_id property for volume %s: %s", d.Id(), err))
+			return diags
 		}
 	}
 
 	if volume.Properties.UserData != nil {
 		err := d.Set("user_data", *volume.Properties.UserData)
 		if err != nil {
-			return fmt.Errorf("error while setting user_data property for volume %s: %s", d.Id(), err)
+			diags := diag.FromErr(fmt.Errorf("error while setting user_data property for volume %s: %s", d.Id(), err))
+			return diags
 		}
 	}
 
 	return nil
 }
 
-func resourceVolumeUpdate(d *schema.ResourceData, meta interface{}) error {
+func resourceVolumeUpdate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	client := meta.(*ionoscloud.APIClient)
 
 	properties := ionoscloud.VolumeProperties{}
@@ -545,34 +562,33 @@ func resourceVolumeUpdate(d *schema.ResourceData, meta interface{}) error {
 	}
 
 	if d.HasChange("backup_unit_id") {
-		return fmt.Errorf("backup unit id property is immutable")
+		diags := diag.FromErr(fmt.Errorf("backup unit id property is immutable"))
+		return diags
 	}
 
 	if d.HasChange("user_data") {
-		return fmt.Errorf("User data property of resource volume is immutable ")
-	}
-
-	ctx, cancel := context.WithTimeout(context.Background(), *resourceDefaultTimeouts.Update)
-
-	if cancel != nil {
-		defer cancel()
+		diags := diag.FromErr(fmt.Errorf("User data property of resource volume is immutable "))
+		return diags
 	}
 
 	volume, apiResponse, err := client.VolumesApi.DatacentersVolumesPatch(ctx, dcId, d.Id()).Volume(properties).Execute()
 
 	if err != nil {
-		return fmt.Errorf("an error occured while updating volume with ID %s: %s", d.Id(), err)
+		diags := diag.FromErr(fmt.Errorf("an error occured while updating volume with ID %s: %s", d.Id(), err))
+		return diags
 
 	}
 
 	// Wait, catching any errors
-	_, errState := getStateChangeConf(meta, d, apiResponse.Header.Get("Location"), schema.TimeoutUpdate).WaitForState()
+	_, errState := getStateChangeConf(meta, d, apiResponse.Header.Get("Location"), schema.TimeoutUpdate).WaitForStateContext(ctx)
 	if errState != nil {
-		return errState
+		diags := diag.FromErr(errState)
+		return diags
 	}
 
 	if apiResponse != nil && apiResponse.Response.StatusCode > 299 {
-		return fmt.Errorf("an error occured while updating a volume ID %s %s", d.Id(), string(apiResponse.Payload))
+		diags := diag.FromErr(fmt.Errorf("an error occured while updating a volume ID %s %s", d.Id(), err))
+		return diags
 	}
 
 	if d.HasChange("server_id") {
@@ -580,40 +596,39 @@ func resourceVolumeUpdate(d *schema.ResourceData, meta interface{}) error {
 		serverID := newValue.(string)
 		_, apiResponse, err := client.ServersApi.DatacentersServersVolumesPost(ctx, dcId, serverID).Volume(volume).Execute()
 		if err != nil {
-			return fmt.Errorf("an error occured while attaching a volume dcId: %s server_id: %s ID: %s Response: %s",
-				dcId, serverID, *volume.Id, err)
+			diags := diag.FromErr(fmt.Errorf("an error occured while attaching a volume dcId: %s server_id: %s ID: %s Response: %s",
+				dcId, serverID, *volume.Id, err))
+			return diags
 		}
 
 		// Wait, catching any errors
-		_, errState = getStateChangeConf(meta, d, apiResponse.Header.Get("Location"), schema.TimeoutCreate).WaitForState()
+		_, errState = getStateChangeConf(meta, d, apiResponse.Header.Get("Location"), schema.TimeoutCreate).WaitForStateContext(ctx)
 		if errState != nil {
-			return errState
+			diags := diag.FromErr(errState)
+			return diags
 		}
 	}
 
-	return resourceVolumeRead(d, meta)
+	return resourceVolumeRead(ctx, d, meta)
 }
 
-func resourceVolumeDelete(d *schema.ResourceData, meta interface{}) error {
+func resourceVolumeDelete(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	client := meta.(*ionoscloud.APIClient)
 
 	dcId := d.Get("datacenter_id").(string)
 
-	ctx, cancel := context.WithTimeout(context.Background(), *resourceDefaultTimeouts.Delete)
-	if cancel != nil {
-		defer cancel()
-	}
-
 	apiResponse, err := client.VolumesApi.DatacentersVolumesDelete(ctx, dcId, d.Id()).Execute()
 	if err != nil {
-		return fmt.Errorf("an error occured while deleting a volume ID %s %s", d.Id(), err)
+		diags := diag.FromErr(fmt.Errorf("an error occured while deleting a volume ID %s %s", d.Id(), err))
+		return diags
 
 	}
 
 	// Wait, catching any errors
-	_, errState := getStateChangeConf(meta, d, apiResponse.Header.Get("Location"), schema.TimeoutDelete).WaitForState()
+	_, errState := getStateChangeConf(meta, d, apiResponse.Header.Get("Location"), schema.TimeoutDelete).WaitForStateContext(ctx)
 	if errState != nil {
-		return errState
+		diags := diag.FromErr(errState)
+		return diags
 	}
 
 	d.SetId("")

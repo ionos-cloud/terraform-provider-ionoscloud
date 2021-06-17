@@ -5,7 +5,7 @@ import (
 	"os"
 	"testing"
 
-	"github.com/hashicorp/terraform-plugin-sdk/helper/resource"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 )
 
 func TestAccDataSourceNatGatewayRule_matchId(t *testing.T) {
@@ -20,7 +20,7 @@ func TestAccDataSourceNatGatewayRule_matchId(t *testing.T) {
 		PreCheck: func() {
 			testAccPreCheck(t)
 		},
-		Providers: testAccProviders,
+		ProviderFactories: testAccProviderFactories,
 		Steps: []resource.TestStep{
 			{
 				Config: fmt.Sprintf(testAccDataSourceNatGatewayRuleCreateResources, publicIp1, publicIp1),
@@ -47,7 +47,7 @@ func TestAccDataSourceNatGatewayRule_matchName(t *testing.T) {
 		PreCheck: func() {
 			testAccPreCheck(t)
 		},
-		Providers: testAccProviders,
+		ProviderFactories: testAccProviderFactories,
 		Steps: []resource.TestStep{
 			{
 				Config: fmt.Sprintf(testAccDataSourceNatGatewayRuleCreateResources, publicIp1, publicIp1),

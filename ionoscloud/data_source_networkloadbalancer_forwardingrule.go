@@ -4,7 +4,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
-	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	ionoscloud "github.com/ionos-cloud/sdk-go/v6"
 	"strings"
 )
@@ -43,7 +43,6 @@ func dataSourceNetworkLoadBalancerForwardingRule() *schema.Resource {
 			},
 			"health_check": {
 				Type:        schema.TypeList,
-				MaxItems:    1,
 				Description: "Health check attributes for Network Load Balancer forwarding rule",
 				Computed:    true,
 				Elem: &schema.Resource{
@@ -106,7 +105,6 @@ func dataSourceNetworkLoadBalancerForwardingRule() *schema.Resource {
 						},
 						"health_check": {
 							Type:        schema.TypeList,
-							MaxItems:    1,
 							Description: "Health check attributes for Network Load Balancer forwarding rule target",
 							Computed:    true,
 							Elem: &schema.Resource{
@@ -229,7 +227,7 @@ func dataSourceNetworkLoadBalancerForwardingRuleRead(d *schema.ResourceData, met
 	return nil
 }
 
-func setNetworkLoadBalancerForwardingRuleData(d *schema.ResourceData, networkLoadBalancerForwardingRule *ionoscloud.NetworkLoadBalancerForwardingRule, client *ionoscloud.APIClient) error {
+func setNetworkLoadBalancerForwardingRuleData(d *schema.ResourceData, networkLoadBalancerForwardingRule *ionoscloud.NetworkLoadBalancerForwardingRule, _ *ionoscloud.APIClient) error {
 
 	if networkLoadBalancerForwardingRule.Id != nil {
 		d.SetId(*networkLoadBalancerForwardingRule.Id)

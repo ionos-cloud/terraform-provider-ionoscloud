@@ -3,7 +3,8 @@ package ionoscloud
 import (
 	"context"
 	"fmt"
-	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	ionoscloud "github.com/ionos-cloud/sdk-go/v6"
 	"log"
 	"strings"
@@ -11,10 +12,10 @@ import (
 
 func resourceNatGatewayRule() *schema.Resource {
 	return &schema.Resource{
-		Create: resourceNatGatewayRuleCreate,
-		Read:   resourceNatGatewayRuleRead,
-		Update: resourceNatGatewayRuleUpdate,
-		Delete: resourceNatGatewayRuleDelete,
+		CreateContext: resourceNatGatewayRuleCreate,
+		ReadContext:   resourceNatGatewayRuleRead,
+		UpdateContext: resourceNatGatewayRuleUpdate,
+		DeleteContext: resourceNatGatewayRuleDelete,
 		Schema: map[string]*schema.Schema{
 
 			"name": {
@@ -96,7 +97,7 @@ func resourceNatGatewayRule() *schema.Resource {
 	}
 }
 
-func resourceNatGatewayRuleCreate(d *schema.ResourceData, meta interface{}) error {
+func resourceNatGatewayRuleCreate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 
 	client := meta.(*ionoscloud.APIClient)
 
@@ -108,27 +109,31 @@ func resourceNatGatewayRuleCreate(d *schema.ResourceData, meta interface{}) erro
 		name := name.(string)
 		natGatewayRule.Properties.Name = &name
 	} else {
-		return fmt.Errorf("name must be provided for nat gateway rule")
+		diags := diag.FromErr(fmt.Errorf("name must be provided for nat gateway rule"))
+		return diags
 	}
 
 	if sourceSubnet, sourceSubnetOk := d.GetOk("source_subnet"); sourceSubnetOk {
 		sourceSubnet := sourceSubnet.(string)
 		natGatewayRule.Properties.SourceSubnet = &sourceSubnet
 	} else {
-		return fmt.Errorf("source subnet must be provided for nat gateway rule")
+		diags := diag.FromErr(fmt.Errorf("source subnet must be provided for nat gateway rule"))
+		return diags
 	}
 
 	if publicIp, publicIpOk := d.GetOk("public_ip"); publicIpOk {
 		publicIp := publicIp.(string)
 		natGatewayRule.Properties.PublicIp = &publicIp
 	} else {
-		return fmt.Errorf("public Ip must be provided for nat gateway rule")
+		diags := diag.FromErr(fmt.Errorf("public Ip must be provided for nat gateway rule"))
+		return diags
 	}
 
 	if ruleType, ruleTypeOk := d.GetOk("type"); ruleTypeOk {
 
 		if strings.ToUpper(ruleType.(string)) != "SNAT" {
-			return fmt.Errorf("attribute value '%s' not allowed. Expected one of [SNAT]", ruleType.(string))
+			diags := diag.FromErr(fmt.Errorf("attribute value '%s' not allowed. Expected one of [SNAT]", ruleType.(string)))
+			return diags
 		}
 		ruleType := ionoscloud.NatGatewayRuleType(strings.ToUpper(ruleType.(string)))
 		natGatewayRule.Properties.Type = &ruleType
@@ -137,7 +142,8 @@ func resourceNatGatewayRuleCreate(d *schema.ResourceData, meta interface{}) erro
 	if protocol, protocolOk := d.GetOk("protocol"); protocolOk {
 		if strings.ToUpper(protocol.(string)) != "TCP" && strings.ToUpper(protocol.(string)) != "UDP" &&
 			strings.ToUpper(protocol.(string)) != "ICMP" && strings.ToUpper(protocol.(string)) != "ALL" {
-			return fmt.Errorf("attribute value '%s' not allowed. Expected one of [TCP, UDP, ICMP, ALL]", protocol.(string))
+			diags := diag.FromErr(fmt.Errorf("attribute value '%s' not allowed. Expected one of [TCP, UDP, ICMP, ALL]", protocol.(string)))
+			return diags
 		}
 		protocol := ionoscloud.NatGatewayRuleProtocol(strings.ToUpper(protocol.(string)))
 		natGatewayRule.Properties.Protocol = &protocol
@@ -150,7 +156,8 @@ func resourceNatGatewayRuleCreate(d *schema.ResourceData, meta interface{}) erro
 
 	if _, targetPortRangeOk := d.GetOk("target_port_range.0"); targetPortRangeOk {
 		if *natGatewayRule.Properties.Protocol == "ICMP" || *natGatewayRule.Properties.Protocol == "ALL" {
-			return fmt.Errorf("target_port_range start/end can not be set if protocol is ICMP or ALL or not provided")
+			diags := diag.FromErr(fmt.Errorf("target_port_range start/end can not be set if protocol is ICMP or ALL or not provided"))
+			return diags
 		}
 		natGatewayRule.Properties.TargetPortRange = &ionoscloud.TargetPortRange{}
 	}
@@ -168,54 +175,43 @@ func resourceNatGatewayRuleCreate(d *schema.ResourceData, meta interface{}) erro
 	ngId := d.Get("natgateway_id").(string)
 	dcId := d.Get("datacenter_id").(string)
 
-	ctx, cancel := context.WithTimeout(context.Background(), *resourceDefaultTimeouts.Create)
-	if cancel != nil {
-		defer cancel()
-	}
-
 	natGatewayRuleResp, apiResponse, err := client.NATGatewaysApi.DatacentersNatgatewaysRulesPost(ctx, dcId, ngId).NatGatewayRule(natGatewayRule).Execute()
 
 	if err != nil {
 		d.SetId("")
-		return fmt.Errorf("error creating nat gateway rule: %s \n ApiError %s", err, responseBody(apiResponse))
+		diags := diag.FromErr(fmt.Errorf("error creating nat gateway rule: %s \n ApiError %s", err, responseBody(apiResponse)))
+		return diags
 	}
 
 	d.SetId(*natGatewayRuleResp.Id)
 
 	// Wait, catching any errors
-	_, errState := getStateChangeConf(meta, d, apiResponse.Header.Get("Location"), schema.TimeoutCreate).WaitForState()
+	_, errState := getStateChangeConf(meta, d, apiResponse.Header.Get("Location"), schema.TimeoutCreate).WaitForStateContext(ctx)
 	if errState != nil {
 		if IsRequestFailed(err) {
 			// Request failed, so resource was not created, delete resource from state file
 			d.SetId("")
 		}
-		return errState
+		diags := diag.FromErr(errState)
+		return diags
 	}
 
-	return resourceNatGatewayRuleRead(d, meta)
+	return resourceNatGatewayRuleRead(ctx, d, meta)
 }
 
-func resourceNatGatewayRuleRead(d *schema.ResourceData, meta interface{}) error {
+func resourceNatGatewayRuleRead(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	client := meta.(*ionoscloud.APIClient)
 
 	dcId := d.Get("datacenter_id").(string)
 	ngId := d.Get("natgateway_id").(string)
 
-	ctx, cancel := context.WithTimeout(context.Background(), *resourceDefaultTimeouts.Default)
-
-	if cancel != nil {
-		defer cancel()
-	}
-
 	natGatewayRule, apiResponse, err := client.NATGatewaysApi.DatacentersNatgatewaysRulesFindByNatGatewayRuleId(ctx, dcId, ngId, d.Id()).Execute()
 
 	if err != nil {
 		log.Printf("[INFO] Resource %s not found: %+v", d.Id(), err)
-		if _, ok := err.(ionoscloud.GenericOpenAPIError); ok {
-			if apiResponse.Response.StatusCode == 404 {
-				d.SetId("")
-				return nil
-			}
+		if apiResponse.Response.StatusCode == 404 {
+			d.SetId("")
+			return nil
 		}
 	}
 
@@ -224,42 +220,48 @@ func resourceNatGatewayRuleRead(d *schema.ResourceData, meta interface{}) error 
 	if natGatewayRule.Properties.Name != nil {
 		err := d.Set("name", *natGatewayRule.Properties.Name)
 		if err != nil {
-			return fmt.Errorf("error while setting name property for nat gateway %s: %s", d.Id(), err)
+			diags := diag.FromErr(fmt.Errorf("error while setting name property for nat gateway %s: %s", d.Id(), err))
+			return diags
 		}
 	}
 
 	if natGatewayRule.Properties.Type != nil {
 		err := d.Set("type", *natGatewayRule.Properties.Type)
 		if err != nil {
-			return fmt.Errorf("error while setting type property for nat gateway %s: %s", d.Id(), err)
+			diags := diag.FromErr(fmt.Errorf("error while setting type property for nat gateway %s: %s", d.Id(), err))
+			return diags
 		}
 	}
 
 	if natGatewayRule.Properties.Protocol != nil {
 		err := d.Set("protocol", *natGatewayRule.Properties.Protocol)
 		if err != nil {
-			return fmt.Errorf("error while setting protocol property for nat gateway %s: %s", d.Id(), err)
+			diags := diag.FromErr(fmt.Errorf("error while setting protocol property for nat gateway %s: %s", d.Id(), err))
+			return diags
 		}
 	}
 
 	if natGatewayRule.Properties.SourceSubnet != nil {
 		err := d.Set("source_subnet", *natGatewayRule.Properties.SourceSubnet)
 		if err != nil {
-			return fmt.Errorf("error while setting source_subnet property for nat gateway %s: %s", d.Id(), err)
+			diags := diag.FromErr(fmt.Errorf("error while setting source_subnet property for nat gateway %s: %s", d.Id(), err))
+			return diags
 		}
 	}
 
 	if natGatewayRule.Properties.PublicIp != nil {
 		err := d.Set("public_ip", *natGatewayRule.Properties.PublicIp)
 		if err != nil {
-			return fmt.Errorf("error while setting public_ip property for nat gateway %s: %s", d.Id(), err)
+			diags := diag.FromErr(fmt.Errorf("error while setting public_ip property for nat gateway %s: %s", d.Id(), err))
+			return diags
 		}
 	}
 
 	if natGatewayRule.Properties.TargetSubnet != nil {
 		err := d.Set("target_subnet", *natGatewayRule.Properties.TargetSubnet)
 		if err != nil {
-			return fmt.Errorf("error while setting target_subnet property for nat gateway %s: %s", d.Id(), err)
+			diags := diag.FromErr(fmt.Errorf("error while setting target_subnet property for nat gateway %s: %s", d.Id(), err))
+			return diags
 		}
 	}
 
@@ -271,13 +273,14 @@ func resourceNatGatewayRuleRead(d *schema.ResourceData, meta interface{}) error 
 		},
 		})
 		if err != nil {
-			return fmt.Errorf("error while setting target_port_range property for nat gateway %s: %s", d.Id(), err)
+			diags := diag.FromErr(fmt.Errorf("error while setting target_port_range property for nat gateway %s: %s", d.Id(), err))
+			return diags
 		}
 	}
 
 	return nil
 }
-func resourceNatGatewayRuleUpdate(d *schema.ResourceData, meta interface{}) error {
+func resourceNatGatewayRuleUpdate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	client := meta.(*ionoscloud.APIClient)
 	request := ionoscloud.NatGatewayRule{
 		Properties: &ionoscloud.NatGatewayRuleProperties{},
@@ -357,50 +360,43 @@ func resourceNatGatewayRuleUpdate(d *schema.ResourceData, meta interface{}) erro
 		}
 	}
 
-	ctx, cancel := context.WithTimeout(context.Background(), *resourceDefaultTimeouts.Update)
-
-	if cancel != nil {
-		defer cancel()
-	}
 	_, apiResponse, err := client.NATGatewaysApi.
 		DatacentersNatgatewaysRulesPatch(ctx, dcId, ngId, d.Id()).
 		NatGatewayRuleProperties(*request.Properties).
 		Execute()
 
 	if err != nil {
-		return fmt.Errorf("an error occured while updating a nat gateway rule ID %s %s \n ApiError: %s", d.Id(), err, responseBody(apiResponse))
+		diags := diag.FromErr(fmt.Errorf("an error occured while updating a nat gateway rule ID %s %s \n ApiError: %s", d.Id(), err, responseBody(apiResponse)))
+		return diags
 	}
 
-	_, errState := getStateChangeConf(meta, d, apiResponse.Header.Get("Location"), schema.TimeoutUpdate).WaitForState()
+	_, errState := getStateChangeConf(meta, d, apiResponse.Header.Get("Location"), schema.TimeoutUpdate).WaitForStateContext(ctx)
 	if errState != nil {
-		return errState
+		diags := diag.FromErr(errState)
+		return diags
 	}
 
-	return resourceNatGatewayRuleRead(d, meta)
+	return resourceNatGatewayRuleRead(ctx, d, meta)
 }
 
-func resourceNatGatewayRuleDelete(d *schema.ResourceData, meta interface{}) error {
+func resourceNatGatewayRuleDelete(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	client := meta.(*ionoscloud.APIClient)
 
 	dcId := d.Get("datacenter_id").(string)
 	ngId := d.Get("natgateway_id").(string)
 
-	ctx, cancel := context.WithTimeout(context.Background(), *resourceDefaultTimeouts.Delete)
-
-	if cancel != nil {
-		defer cancel()
-	}
-
 	apiResponse, err := client.NATGatewaysApi.DatacentersNatgatewaysRulesDelete(ctx, dcId, ngId, d.Id()).Execute()
 
 	if err != nil {
-		return fmt.Errorf("an error occured while deleting a nat gateway rule %s %s", d.Id(), err)
+		diags := diag.FromErr(fmt.Errorf("an error occured while deleting a nat gateway rule %s %s", d.Id(), err))
+		return diags
 	}
 
 	// Wait, catching any errors
-	_, errState := getStateChangeConf(meta, d, apiResponse.Header.Get("Location"), schema.TimeoutDelete).WaitForState()
+	_, errState := getStateChangeConf(meta, d, apiResponse.Header.Get("Location"), schema.TimeoutDelete).WaitForStateContext(ctx)
 	if errState != nil {
-		return errState
+		diags := diag.FromErr(errState)
+		return diags
 	}
 
 	d.SetId("")

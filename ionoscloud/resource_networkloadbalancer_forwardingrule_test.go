@@ -6,8 +6,8 @@ import (
 	ionoscloud "github.com/ionos-cloud/sdk-go/v6"
 	"testing"
 
-	"github.com/hashicorp/terraform-plugin-sdk/helper/resource"
-	"github.com/hashicorp/terraform-plugin-sdk/terraform"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
 )
 
 func TestAccNetworkLoadBalancerForwardingRule_Basic(t *testing.T) {
@@ -18,8 +18,8 @@ func TestAccNetworkLoadBalancerForwardingRule_Basic(t *testing.T) {
 		PreCheck: func() {
 			testAccPreCheck(t)
 		},
-		Providers:    testAccProviders,
-		CheckDestroy: testAccCheckNetworkLoadBalancerForwardingRuleDestroyCheck,
+		ProviderFactories: testAccProviderFactories,
+		CheckDestroy:      testAccCheckNetworkLoadBalancerForwardingRuleDestroyCheck,
 		Steps: []resource.TestStep{
 			{
 				Config: fmt.Sprintf(testAccCheckNetworkLoadBalancerForwardingRuleConfigBasic, networkLoadBalancerForwardingRuleName),
@@ -54,12 +54,12 @@ func testAccCheckNetworkLoadBalancerForwardingRuleDestroyCheck(s *terraform.Stat
 
 		apiResponse, err := client.NetworkLoadBalancersApi.DatacentersNetworkloadbalancersForwardingrulesDelete(ctx, rs.Primary.Attributes["datacenter_id"], rs.Primary.Attributes["networkloadbalancer_id"], rs.Primary.ID).Execute()
 
-		if _, ok := err.(ionoscloud.GenericOpenAPIError); ok {
+		if err != nil {
 			if apiResponse == nil || apiResponse.Response.StatusCode != 404 {
-				return fmt.Errorf("network loadbalancer forwarding rule still exists %s %s", rs.Primary.ID, responseBody(apiResponse))
+				return fmt.Errorf("an error occured at checking deletion of forwarding rule %s %s", rs.Primary.ID, err)
 			}
 		} else {
-			return fmt.Errorf("unable to fetch network loadbalancer forwarding rule %s %s", rs.Primary.ID, err)
+			return fmt.Errorf("network loadbalancer forwarding rule still exists %s %s", rs.Primary.ID, err)
 		}
 	}
 

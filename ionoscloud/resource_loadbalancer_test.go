@@ -1,4 +1,4 @@
-// +build waiting_for_vdc
+//+build waiting_for_vdc
 
 package ionoscloud
 
@@ -8,8 +8,8 @@ import (
 	ionoscloud "github.com/ionos-cloud/sdk-go/v6"
 	"testing"
 
-	"github.com/hashicorp/terraform-plugin-sdk/helper/resource"
-	"github.com/hashicorp/terraform-plugin-sdk/terraform"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
 )
 
 func TestAccLoadbalancer_Basic(t *testing.T) {
@@ -20,8 +20,8 @@ func TestAccLoadbalancer_Basic(t *testing.T) {
 		PreCheck: func() {
 			testAccPreCheck(t)
 		},
-		Providers:    testAccProviders,
-		CheckDestroy: testAccCheckLoadbalancerDestroyCheck,
+		ProviderFactories: testAccProviderFactories,
+		CheckDestroy:      testAccCheckLoadbalancerDestroyCheck,
 		Steps: []resource.TestStep{
 			{
 				Config: fmt.Sprintf(testAccCheckLoadbalancerConfigBasic, lbName),
@@ -57,7 +57,7 @@ func testAccCheckLoadbalancerDestroyCheck(s *terraform.State) error {
 
 		dcId := rs.Primary.Attributes["datacenter_id"]
 
-		_, apiResponse, err := client.LoadBalancerApi.DatacentersLoadbalancersFindById(ctx, dcId, rs.Primary.ID).Execute()
+		_, apiResponse, err := client.LoadBalancersApi.DatacentersLoadbalancersFindById(ctx, dcId, rs.Primary.ID).Execute()
 
 		if err != nil {
 			if apiResponse == nil || apiResponse.StatusCode != 404 {

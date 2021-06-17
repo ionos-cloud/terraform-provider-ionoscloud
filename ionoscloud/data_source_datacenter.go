@@ -6,7 +6,7 @@ import (
 	ionoscloud "github.com/ionos-cloud/sdk-go/v6"
 	"log"
 
-	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 )
 
 func dataSourceDataCenter() *schema.Resource {

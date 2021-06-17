@@ -4,7 +4,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
-	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	ionoscloud "github.com/ionos-cloud/sdk-go/v6"
 )
 
@@ -32,7 +32,6 @@ func dataSourceK8sCluster() *schema.Resource {
 				Type:        schema.TypeList,
 				Description: "A maintenance window comprise of a day of the week and a time for maintenance to be allowed",
 				Computed:    true,
-				MaxItems:    1,
 				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{
 						"time": {

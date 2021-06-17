@@ -3,17 +3,18 @@ package ionoscloud
 import (
 	"context"
 	"fmt"
-	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	ionoscloud "github.com/ionos-cloud/sdk-go/v6"
 	"log"
 )
 
 func resourceNetworkLoadBalancer() *schema.Resource {
 	return &schema.Resource{
-		Create: resourceNetworkLoadBalancerCreate,
-		Read:   resourceNetworkLoadBalancerRead,
-		Update: resourceNetworkLoadBalancerUpdate,
-		Delete: resourceNetworkLoadBalancerDelete,
+		CreateContext: resourceNetworkLoadBalancerCreate,
+		ReadContext:   resourceNetworkLoadBalancerRead,
+		UpdateContext: resourceNetworkLoadBalancerUpdate,
+		DeleteContext: resourceNetworkLoadBalancerDelete,
 		Schema: map[string]*schema.Schema{
 
 			"name": {
@@ -61,7 +62,7 @@ func resourceNetworkLoadBalancer() *schema.Resource {
 	}
 }
 
-func resourceNetworkLoadBalancerCreate(d *schema.ResourceData, meta interface{}) error {
+func resourceNetworkLoadBalancerCreate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	client := meta.(*ionoscloud.APIClient)
 
 	networkLoadBalancer := ionoscloud.NetworkLoadBalancer{
@@ -72,21 +73,24 @@ func resourceNetworkLoadBalancerCreate(d *schema.ResourceData, meta interface{})
 		name := name.(string)
 		networkLoadBalancer.Properties.Name = &name
 	} else {
-		return fmt.Errorf("name must be provided for network loadbalancer")
+		diags := diag.FromErr(fmt.Errorf("name must be provided for network loadbalancer"))
+		return diags
 	}
 
 	if listenerLan, listenerLanOk := d.GetOk("listener_lan"); listenerLanOk {
 		listenerLan := int32(listenerLan.(int))
 		networkLoadBalancer.Properties.ListenerLan = &listenerLan
 	} else {
-		return fmt.Errorf("listener lan must be provided for network loadbalancer")
+		diags := diag.FromErr(fmt.Errorf("listener lan must be provided for network loadbalancer"))
+		return diags
 	}
 
 	if targetLan, targetLanOk := d.GetOk("target_lan"); targetLanOk {
 		targetLan := int32(targetLan.(int))
 		networkLoadBalancer.Properties.TargetLan = &targetLan
 	} else {
-		return fmt.Errorf("target lan must be provided for network loadbalancer")
+		diags := diag.FromErr(fmt.Errorf("target lan must be provided for network loadbalancer"))
+		return diags
 	}
 
 	if ipsVal, ipsOk := d.GetOk("ips"); ipsOk {
@@ -113,53 +117,42 @@ func resourceNetworkLoadBalancerCreate(d *schema.ResourceData, meta interface{})
 
 	dcId := d.Get("datacenter_id").(string)
 
-	ctx, cancel := context.WithTimeout(context.Background(), *resourceDefaultTimeouts.Create)
-	if cancel != nil {
-		defer cancel()
-	}
-
 	networkLoadBalancerResp, apiResponse, err := client.NetworkLoadBalancersApi.DatacentersNetworkloadbalancersPost(ctx, dcId).NetworkLoadBalancer(networkLoadBalancer).Execute()
 
 	if err != nil {
 		d.SetId("")
-		return fmt.Errorf("error creating network loadbalancer: %s, %s", err, responseBody(apiResponse))
+		diags := diag.FromErr(fmt.Errorf("error creating network loadbalancer: %s, %s", err, responseBody(apiResponse)))
+		return diags
 	}
 
 	d.SetId(*networkLoadBalancerResp.Id)
 
 	// Wait, catching any errors
-	_, errState := getStateChangeConf(meta, d, apiResponse.Header.Get("Location"), schema.TimeoutCreate).WaitForState()
+	_, errState := getStateChangeConf(meta, d, apiResponse.Header.Get("Location"), schema.TimeoutCreate).WaitForStateContext(ctx)
 	if errState != nil {
 		if IsRequestFailed(err) {
 			// Request failed, so resource was not created, delete resource from state file
 			d.SetId("")
 		}
-		return errState
+		diags := diag.FromErr(errState)
+		return diags
 	}
 
-	return resourceNetworkLoadBalancerRead(d, meta)
+	return resourceNetworkLoadBalancerRead(ctx, d, meta)
 }
 
-func resourceNetworkLoadBalancerRead(d *schema.ResourceData, meta interface{}) error {
+func resourceNetworkLoadBalancerRead(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	client := meta.(*ionoscloud.APIClient)
 
 	dcId := d.Get("datacenter_id").(string)
-
-	ctx, cancel := context.WithTimeout(context.Background(), *resourceDefaultTimeouts.Default)
-
-	if cancel != nil {
-		defer cancel()
-	}
 
 	networkLoadBalancer, apiResponse, err := client.NetworkLoadBalancersApi.DatacentersNetworkloadbalancersFindByNetworkLoadBalancerId(ctx, dcId, d.Id()).Execute()
 
 	if err != nil {
 		log.Printf("[INFO] Resource %s not found: %+v", d.Id(), err)
-		if _, ok := err.(ionoscloud.GenericOpenAPIError); ok {
-			if apiResponse.Response.StatusCode == 404 {
-				d.SetId("")
-				return nil
-			}
+		if apiResponse.Response.StatusCode == 404 {
+			d.SetId("")
+			return nil
 		}
 	}
 
@@ -168,42 +161,47 @@ func resourceNetworkLoadBalancerRead(d *schema.ResourceData, meta interface{}) e
 	if networkLoadBalancer.Properties.Name != nil {
 		err := d.Set("name", *networkLoadBalancer.Properties.Name)
 		if err != nil {
-			return fmt.Errorf("error while setting name property for network load balancer %s: %s", d.Id(), err)
+			diags := diag.FromErr(fmt.Errorf("error while setting name property for network load balancer %s: %s", d.Id(), err))
+			return diags
 		}
 	}
 
 	if networkLoadBalancer.Properties.ListenerLan != nil {
 		err := d.Set("listener_lan", *networkLoadBalancer.Properties.ListenerLan)
 		if err != nil {
-			return fmt.Errorf("error while setting listener_lan property for network load balancer %s: %s", d.Id(), err)
+			diags := diag.FromErr(fmt.Errorf("error while setting listener_lan property for network load balancer %s: %s", d.Id(), err))
+			return diags
 		}
 	}
 
 	if networkLoadBalancer.Properties.TargetLan != nil {
 		err := d.Set("target_lan", *networkLoadBalancer.Properties.TargetLan)
 		if err != nil {
-			return fmt.Errorf("error while setting target_lan property for network load balancer %s: %s", d.Id(), err)
+			diags := diag.FromErr(fmt.Errorf("error while setting target_lan property for network load balancer %s: %s", d.Id(), err))
+			return diags
 		}
 	}
 
 	if networkLoadBalancer.Properties.Ips != nil {
 		err := d.Set("ips", *networkLoadBalancer.Properties.Ips)
 		if err != nil {
-			return fmt.Errorf("error while setting ips property for network load balancer %s: %s", d.Id(), err)
+			diags := diag.FromErr(fmt.Errorf("error while setting ips property for network load balancer %s: %s", d.Id(), err))
+			return diags
 		}
 	}
 
 	if networkLoadBalancer.Properties.LbPrivateIps != nil {
 		err := d.Set("lb_private_ips", *networkLoadBalancer.Properties.LbPrivateIps)
 		if err != nil {
-			return fmt.Errorf("error while setting lb_private_ips property for network load balancer %s: %s", d.Id(), err)
+			diags := diag.FromErr(fmt.Errorf("error while setting lb_private_ips property for network load balancer %s: %s", d.Id(), err))
+			return diags
 		}
 	}
 
 	return nil
 }
 
-func resourceNetworkLoadBalancerUpdate(d *schema.ResourceData, meta interface{}) error {
+func resourceNetworkLoadBalancerUpdate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	client := meta.(*ionoscloud.APIClient)
 	request := ionoscloud.NetworkLoadBalancer{
 		Properties: &ionoscloud.NetworkLoadBalancerProperties{},
@@ -254,47 +252,39 @@ func resourceNetworkLoadBalancerUpdate(d *schema.ResourceData, meta interface{})
 			request.Properties.LbPrivateIps = &lbPrivateIps
 		}
 	}
-
-	ctx, cancel := context.WithTimeout(context.Background(), *resourceDefaultTimeouts.Update)
-
-	if cancel != nil {
-		defer cancel()
-	}
 	_, apiResponse, err := client.NetworkLoadBalancersApi.DatacentersNetworkloadbalancersPatch(ctx, dcId, d.Id()).NetworkLoadBalancerProperties(*request.Properties).Execute()
 
 	if err != nil {
-		return fmt.Errorf("an error occured while updating a network loadbalancer ID %s %s \n ApiError: %s", d.Id(), err, responseBody(apiResponse))
+		diags := diag.FromErr(fmt.Errorf("an error occured while updating a network loadbalancer ID %s %s \n ApiError: %s", d.Id(), err, responseBody(apiResponse)))
+		return diags
 	}
 
-	_, errState := getStateChangeConf(meta, d, apiResponse.Header.Get("Location"), schema.TimeoutUpdate).WaitForState()
+	_, errState := getStateChangeConf(meta, d, apiResponse.Header.Get("Location"), schema.TimeoutUpdate).WaitForStateContext(ctx)
 	if errState != nil {
-		return errState
+		diags := diag.FromErr(errState)
+		return diags
 	}
 
-	return resourceNetworkLoadBalancerRead(d, meta)
+	return resourceNetworkLoadBalancerRead(ctx, d, meta)
 }
 
-func resourceNetworkLoadBalancerDelete(d *schema.ResourceData, meta interface{}) error {
+func resourceNetworkLoadBalancerDelete(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	client := meta.(*ionoscloud.APIClient)
 
 	dcId := d.Get("datacenter_id").(string)
 
-	ctx, cancel := context.WithTimeout(context.Background(), *resourceDefaultTimeouts.Delete)
-
-	if cancel != nil {
-		defer cancel()
-	}
-
 	apiResponse, err := client.NetworkLoadBalancersApi.DatacentersNetworkloadbalancersDelete(ctx, dcId, d.Id()).Execute()
 
 	if err != nil {
-		return fmt.Errorf("an error occured while deleting a network loadbalancer %s %s", d.Id(), err)
+		diags := diag.FromErr(fmt.Errorf("an error occured while deleting a network loadbalancer %s %s", d.Id(), err))
+		return diags
 	}
 
 	// Wait, catching any errors
-	_, errState := getStateChangeConf(meta, d, apiResponse.Header.Get("Location"), schema.TimeoutDelete).WaitForState()
+	_, errState := getStateChangeConf(meta, d, apiResponse.Header.Get("Location"), schema.TimeoutDelete).WaitForStateContext(ctx)
 	if errState != nil {
-		return errState
+		diags := diag.FromErr(errState)
+		return diags
 	}
 
 	d.SetId("")

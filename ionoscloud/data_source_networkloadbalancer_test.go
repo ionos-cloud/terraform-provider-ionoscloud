@@ -3,7 +3,7 @@ package ionoscloud
 import (
 	"testing"
 
-	"github.com/hashicorp/terraform-plugin-sdk/helper/resource"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 )
 
 func TestAccDataSourceNetworkLoadBalancer_matchId(t *testing.T) {
@@ -11,7 +11,7 @@ func TestAccDataSourceNetworkLoadBalancer_matchId(t *testing.T) {
 		PreCheck: func() {
 			testAccPreCheck(t)
 		},
-		Providers: testAccProviders,
+		ProviderFactories: testAccProviderFactories,
 		Steps: []resource.TestStep{
 			{
 				Config: testAccDataSourceNetworkLoadBalancerCreateResources,
@@ -31,7 +31,7 @@ func TestAccDataSourceNetworkLoadBalancer_matchName(t *testing.T) {
 		PreCheck: func() {
 			testAccPreCheck(t)
 		},
-		Providers: testAccProviders,
+		ProviderFactories: testAccProviderFactories,
 		Steps: []resource.TestStep{
 			{
 				Config: testAccDataSourceNetworkLoadBalancerCreateResources,
