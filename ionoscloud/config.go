@@ -24,6 +24,7 @@ func (c *Config) Client(terraformVersion string) (*ionoscloud.APIClient, error) 
 	} else {
 		client = ionoscloud.NewAPIClient(ionoscloud.NewConfiguration(c.Username, c.Password, ""))
 	}
+	// todo: add ionoscloud.Version when introduced in sdk-go/v6
 	client.GetConfig().UserAgent = fmt.Sprintf("HashiCorp Terraform/%s Terraform Plugin SDK/%s Terraform Provider Ionoscloud/%s", terraformVersion, meta.SDKVersionString(), Version)
 
 	log.Printf("[DEBUG] Terraform client UA set to %s", client.GetConfig().UserAgent)
