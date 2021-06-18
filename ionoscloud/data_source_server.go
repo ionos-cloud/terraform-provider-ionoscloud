@@ -172,7 +172,7 @@ func dataSourceServer() *schema.Resource {
 							Type:     schema.TypeString,
 							Computed: true,
 						},
-						"image": {
+						"image_name": {
 							Type:     schema.TypeString,
 							Computed: true,
 						},
@@ -479,7 +479,7 @@ func setServerData(d *schema.ResourceData, server *ionoscloud.Server, token *ion
 			entry["type"] = stringOrDefault(volume.Properties.Type, "")
 			entry["size"] = float32OrDefault(volume.Properties.Size, 0)
 			entry["availability_zone"] = stringOrDefault(volume.Properties.AvailabilityZone, "")
-			entry["image"] = stringOrDefault(volume.Properties.Image, "")
+			entry["image_name"] = stringOrDefault(volume.Properties.Image, "")
 			entry["image_password"] = stringOrDefault(volume.Properties.ImagePassword, "")
 
 			if volume.Properties.SshKeys != nil {
