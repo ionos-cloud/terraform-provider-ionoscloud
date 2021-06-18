@@ -50,6 +50,54 @@ func TestAccServer_Basic(t *testing.T) {
 	})
 }
 
+func TestAccServer_NoImage(t *testing.T) {
+	var server ionoscloud.Server
+	serverName := "webserver"
+
+	resource.Test(t, resource.TestCase{
+		PreCheck: func() {
+			testAccPreCheck(t)
+		},
+		Providers:    testAccProviders,
+		CheckDestroy: testAccCheckServerDestroyCheck,
+		Steps: []resource.TestStep{
+			{
+				Config: fmt.Sprintf(testacccheckserverconfigNoImage, serverName),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckServerExists("ionoscloud_server.webserver", &server),
+					testAccCheckServerAttributes("ionoscloud_server.webserver", serverName),
+					resource.TestCheckResourceAttr("ionoscloud_server.webserver", "name", serverName),
+				),
+			},
+		},
+	})
+}
+
+func TestAccServer_BootCdromNoImage(t *testing.T) {
+	var server ionoscloud.Server
+	serverName := "webserver"
+	bootCdromImageId := "83f21679-3321-11eb-a681-1e659523cb7b"
+
+	resource.Test(t, resource.TestCase{
+		PreCheck: func() {
+			testAccPreCheck(t)
+		},
+		Providers:    testAccProviders,
+		CheckDestroy: testAccCheckServerDestroyCheck,
+		Steps: []resource.TestStep{
+			{
+				Config: fmt.Sprintf(testacccheckserverconfigBootCdromNoImage, serverName, bootCdromImageId),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckServerExists("ionoscloud_server.webserver", &server),
+					testAccCheckServerAttributes("ionoscloud_server.webserver", serverName),
+					resource.TestCheckResourceAttr("ionoscloud_server.webserver", "name", serverName),
+					resource.TestCheckResourceAttr("ionoscloud_server.webserver", "boot_cdrom", bootCdromImageId),
+				),
+			},
+		},
+	})
+}
+
 func testAccCheckServerDestroyCheck(s *terraform.State) error {
 	client := testAccProvider.Meta().(*ionoscloud.APIClient)
 
@@ -239,6 +287,79 @@ resource "ionoscloud_server" "webserver" {
     dhcp = false
     firewall_active = false
 		firewall {
+      protocol = "TCP"
+      name = "SSH"
+      port_range_start = 22
+      port_range_end = 22
+    }
+  }
+}`
+
+const testacccheckserverconfigNoImage = `
+resource "ionoscloud_datacenter" "foobar" {
+	name       = "server-test"
+	location = "us/las"
+}
+resource "ionoscloud_lan" "webserver_lan" {
+  datacenter_id = "${ionoscloud_datacenter.foobar.id}"
+  public = true
+  name = "public"
+}
+resource "ionoscloud_server" "webserver" {
+  name = "%s"
+  datacenter_id = "${ionoscloud_datacenter.foobar.id}"
+  cores = 1
+  ram = 1024
+  availability_zone = "ZONE_1"
+  cpu_family = "AMD_OPTERON"
+  volume {
+    name = "system"
+    size = 5
+    disk_type = "SSD"
+	licence_type = "OTHER"
+  }
+  nic {
+    lan = "${ionoscloud_lan.webserver_lan.id}"
+    dhcp = true
+    firewall_active = true
+    firewall {
+      protocol = "TCP"
+      name = "SSH"
+      port_range_start = 22
+      port_range_end = 22
+    }
+  }
+}`
+
+const testacccheckserverconfigBootCdromNoImage = `
+resource "ionoscloud_datacenter" "foobar" {
+	name       = "server-test"
+	location   = "de/fra"
+}
+resource "ionoscloud_lan" "webserver_lan" {
+  datacenter_id = "${ionoscloud_datacenter.foobar.id}"
+  public = true
+  name = "public"
+}
+resource "ionoscloud_server" "webserver" {
+  name = "%s"
+  datacenter_id = "${ionoscloud_datacenter.foobar.id}"
+  cores = 1
+  ram = 1024
+  availability_zone = "ZONE_1"
+  cpu_family = "INTEL_SKYLAKE"
+  boot_cdrom = "%s" 
+  volume {
+    name = "system"
+    size = 5
+    disk_type = "SSD"
+	licence_type = "OTHER"
+  }
+  nic {
+    lan = "${ionoscloud_lan.webserver_lan.id}"
+    dhcp = true
+    firewall_active = true
+    firewall {
       protocol = "TCP"
       name = "SSH"
       port_range_start = 22
