@@ -1,3 +1,7 @@
+## 5.2.0
+
+- fixes #17 - documentation updates
+
 ## 5.2.0-beta.2
 
 - fixes #24 - ability to create servers without an image
