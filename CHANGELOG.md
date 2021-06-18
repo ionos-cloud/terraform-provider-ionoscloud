@@ -1,3 +1,18 @@
+## 6.0.0-alpha.3
+
+- documentation updates
+
+## 6.0.0-alpha.2
+
+- IONOS_DEBUG env var support for debugging sdk/api request payloads
+- fix: contract number correctly computed when generating backup-unit names
+- fix: segfault avoided on missing volume image
+- test suite improvements
+
+## 6.0.0-alpha.1
+
+- initial v6 version supporting Ionos Cloud API v6
+
 ## 5.1.6
 
 - fixes #5 - correctly dereferencing possibly nil properties received from the api

@@ -89,6 +89,16 @@ Or you can provide your credentials in a `.tf` configuration file as shown in th
 ## Example Usage
 
 ```hcl
+
+terraform {
+  required_providers {
+    ionoscloud = {
+      source = "ionos-cloud/ionoscloud"
+      version = "= 6.0.0-alpha.3"
+    }
+  }
+}
+
 provider "ionoscloud" {
   username = "ionoscloud_username"
   password = "ionoscloud_password"
@@ -100,7 +110,12 @@ resource "ionoscloud_datacenter" "main" {
 }
 ```
 
-**Note**: The credentials provided in a `.tf` file will override the credentials from environment variables.
+### Important Notes
+* The `required_providers` section needs to be specified in order for terraform to be
+  able to find and download the ionoscloud provider
+* The credentials provided in a `.tf` file will override the credentials from environment variables.
+* Note that there are two major versions `v5` for the Ionos Cloud API v5 and `v6` that works with API v6 - unless you
+  specify a strict version constraint, the latest, which is `v6` will be used
 
 ## Configuration Reference
 
