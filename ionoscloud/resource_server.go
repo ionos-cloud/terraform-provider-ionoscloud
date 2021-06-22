@@ -435,93 +435,102 @@ func resourceServerCreate(ctx context.Context, d *schema.ResourceData, meta inte
 		}
 	} else if v, ok := d.GetOk("image_name"); ok {
 		imageInput = v.(string)
-	} else {
-		diags := diag.FromErr(fmt.Errorf("either 'image_name' or 'volume.0.image_name' must be provided"))
-		return diags
 	}
 
-	if !IsValidUUID(imageInput) {
-		img, err := getImage(client, datacenterId, imageInput, *volume.Type)
-		if err != nil {
-			diags := diag.FromErr(err)
-			return diags
-		}
-		if img != nil {
-			image = *img.Id
-		}
-		// if no image id was found with that name we look for a matching snapshot
-		if image == "" {
-			image = getSnapshotId(client, imageInput)
-			if image != "" {
-				isSnapshot = true
-			} else {
-				diags := diag.FromErr(fmt.Errorf("no image or snapshot with id %s found", imageInput))
-				return diags
-			}
-		}
+	ctx, cancel := context.WithTimeout(context.Background(), *resourceDefaultTimeouts.Default)
 
-		if volume.ImagePassword == nil && len(sshKeyPath) == 0 && isSnapshot == false && img.Properties.Public != nil && *img.Properties.Public {
-			diags := diag.FromErr(fmt.Errorf("either 'image_password' or 'ssh_key_path' must be provided"))
-			return diags
-		}
-	} else {
-		img, apiResponse, err := client.ImagesApi.ImagesFindById(ctx, imageInput).Execute()
+	if cancel != nil {
+		defer cancel()
+	}
 
-		if apiResponse != nil && apiResponse.Response.StatusCode == 404 {
-
-			_, apiResponse, err = client.SnapshotsApi.SnapshotsFindById(ctx, imageInput).Execute()
-
-			if err != nil {
-				diags := diag.FromErr(fmt.Errorf("could not fetch image/snapshot: %s", err))
-				return diags
-			}
-
-			isSnapshot = true
-
-		} else if err != nil {
-			diags := diag.FromErr(fmt.Errorf("error fetching image/snapshot: %s", err))
-			return diags
-		}
-
-		if *img.Properties.Public == true && isSnapshot == false {
-
-			if volume.ImagePassword == nil && len(sshKeyPath) == 0 {
-				diags := diag.FromErr(fmt.Errorf("either 'image_password' or 'ssh_key_path' must be provided"))
-				return diags
-			}
-
-			img, err := getImage(client, d.Get("datacenter_id").(string), imageInput, *volume.Type)
-
+	if imageInput != "" {
+		if !IsValidUUID(imageInput) {
+			img, err := getImage(client, datacenterId, imageInput, *volume.Type)
 			if err != nil {
 				diags := diag.FromErr(err)
 				return diags
 			}
-
 			if img != nil {
 				image = *img.Id
 			}
-		} else {
-			img, _, err := client.ImagesApi.ImagesFindById(ctx, imageInput).Execute()
-			if err != nil {
-				snap, _, err := client.SnapshotsApi.SnapshotsFindById(ctx, imageInput).Execute()
-				if err != nil {
-					diags := diag.FromErr(fmt.Errorf("error fetching image/snapshot: %s", err))
+			// if no image id was found with that name we look for a matching snapshot
+			if image == "" {
+				image = getSnapshotId(client, imageInput)
+				if image != "" {
+					isSnapshot = true
+				} else {
+					diags := diag.FromErr(fmt.Errorf("no image or snapshot with id %s found", imageInput))
 					return diags
 				}
+			}
+
+			if volume.ImagePassword == nil && len(sshKeyPath) == 0 && isSnapshot == false && img.Properties.Public != nil && *img.Properties.Public {
+				diags := diag.FromErr(fmt.Errorf("either 'image_password' or 'ssh_key_path' must be provided"))
+				return diags
+			}
+		} else {
+			img, apiResponse, err := client.ImagesApi.ImagesFindById(ctx, imageInput).Execute()
+
+			if apiResponse != nil && apiResponse.Response.StatusCode == 404 {
+
+				_, apiResponse, err = client.SnapshotsApi.SnapshotsFindById(ctx, imageInput).Execute()
+
+				if err != nil {
+					diags := diag.FromErr(fmt.Errorf("could not fetch image/snapshot: %s", err))
+					return diags
+				}
+
 				isSnapshot = true
-				image = *snap.Id
-			} else {
-				if img.Properties.Public != nil && *img.Properties.Public == true && isSnapshot == false &&
-					volume.ImagePassword == nil && len(sshKeyPath) == 0 {
+
+			} else if err != nil {
+				diags := diag.FromErr(fmt.Errorf("error fetching image/snapshot: %s", err))
+				return diags
+			}
+
+			if *img.Properties.Public == true && isSnapshot == false {
+
+				if volume.ImagePassword == nil && len(sshKeyPath) == 0 {
 					diags := diag.FromErr(fmt.Errorf("either 'image_password' or 'ssh_key_path' must be provided"))
 					return diags
 				}
-				image = imageInput
+
+				img, err := getImage(client, d.Get("datacenter_id").(string), imageInput, *volume.Type)
+
+				if err != nil {
+					diags := diag.FromErr(err)
+					return diags
+				}
+
+				if img != nil {
+					image = *img.Id
+				}
+			} else {
+				img, _, err := client.ImagesApi.ImagesFindById(ctx, imageInput).Execute()
+				if err != nil {
+					snap, _, err := client.SnapshotsApi.SnapshotsFindById(ctx, imageInput).Execute()
+					if err != nil {
+						diags := diag.FromErr(fmt.Errorf("error fetching image/snapshot: %s", err))
+						return diags
+					}
+					isSnapshot = true
+					image = *snap.Id
+				} else {
+					if img.Properties.Public != nil && *img.Properties.Public == true && isSnapshot == false &&
+						volume.ImagePassword == nil && len(sshKeyPath) == 0 {
+						diags := diag.FromErr(fmt.Errorf("either 'image_password' or 'ssh_key_path' must be provided"))
+						return diags
+					}
+					image = imageInput
+				}
 			}
 		}
 	}
 
-	volume.Image = &image
+	if image != "" {
+		volume.Image = &image
+	} else {
+		volume.Image = nil
+	}
 
 	if len(sshKeyPath) != 0 {
 		var publicKeys []string
