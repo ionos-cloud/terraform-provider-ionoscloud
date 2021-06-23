@@ -6,8 +6,8 @@ import (
 	ionoscloud "github.com/ionos-cloud/sdk-go/v6"
 	"testing"
 
-	"github.com/hashicorp/terraform-plugin-sdk/helper/resource"
-	"github.com/hashicorp/terraform-plugin-sdk/terraform"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
 )
 
 func TestAccLan_Basic(t *testing.T) {
@@ -18,8 +18,8 @@ func TestAccLan_Basic(t *testing.T) {
 		PreCheck: func() {
 			testAccPreCheck(t)
 		},
-		Providers:    testAccProviders,
-		CheckDestroy: testAccCheckLanDestroyCheck,
+		ProviderFactories: testAccProviderFactories,
+		CheckDestroy:      testAccCheckLanDestroyCheck,
 		Steps: []resource.TestStep{
 			{
 				Config: fmt.Sprintf(testAccCheckLanConfigBasic, lanName),
@@ -57,11 +57,7 @@ func testAccCheckLanDestroyCheck(s *terraform.State) error {
 
 		if err != nil {
 			if apiResponse == nil || apiResponse.Response.StatusCode != 404 {
-				payload := "<nil>"
-				if apiResponse != nil {
-					payload = string(apiResponse.Payload)
-				}
-				return fmt.Errorf("an error occurred while looking for lan %s: %s: %s", rs.Primary.ID, err, payload)
+				return fmt.Errorf("an error occurred while looking for lan %s: %s", rs.Primary.ID, err)
 			}
 		} else {
 			return fmt.Errorf("LAN still exists %s", rs.Primary.ID)

@@ -4,22 +4,23 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
-	"github.com/hashicorp/terraform-plugin-sdk/helper/validation"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 	ionoscloud "github.com/ionos-cloud/sdk-go/v6"
 	"log"
 	"time"
 
-	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 )
 
 func resourcek8sNodePool() *schema.Resource {
 	return &schema.Resource{
-		Create: resourcek8sNodePoolCreate,
-		Read:   resourcek8sNodePoolRead,
-		Update: resourcek8sNodePoolUpdate,
-		Delete: resourcek8sNodePoolDelete,
+		CreateContext: resourcek8sNodePoolCreate,
+		ReadContext:   resourcek8sNodePoolRead,
+		UpdateContext: resourcek8sNodePoolUpdate,
+		DeleteContext: resourcek8sNodePoolDelete,
 		Importer: &schema.ResourceImporter{
-			State: resourceK8sNodepoolImport,
+			StateContext: resourceK8sNodepoolImport,
 		},
 		Schema: map[string]*schema.Schema{
 			"name": {
@@ -175,7 +176,7 @@ func resourcek8sNodePool() *schema.Resource {
 	}
 }
 
-func resourcek8sNodePoolCreate(d *schema.ResourceData, meta interface{}) error {
+func resourcek8sNodePoolCreate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	client := meta.(*ionoscloud.APIClient)
 
 	name := d.Get("name").(string)
@@ -227,12 +228,14 @@ func resourcek8sNodePoolCreate(d *schema.ResourceData, meta interface{}) error {
 
 		if *k8sNodepool.Properties.NodeCount < *k8sNodepool.Properties.AutoScaling.MinNodeCount {
 			d.SetId("")
-			return fmt.Errorf("error creating k8s node pool: node_count cannot be lower than min_node_count")
+			diags := diag.FromErr(fmt.Errorf("error creating k8s node pool: node_count cannot be lower than min_node_count"))
+			return diags
 		}
 
 		if *k8sNodepool.Properties.AutoScaling.MaxNodeCount < *k8sNodepool.Properties.AutoScaling.MinNodeCount {
 			d.SetId("")
-			return fmt.Errorf("error creating k8s node pool: max_node_count cannot be lower than min_node_count")
+			diags := diag.FromErr(fmt.Errorf("error creating k8s node pool: max_node_count cannot be lower than min_node_count"))
+			return diags
 		}
 	}
 
@@ -255,7 +258,7 @@ func resourcek8sNodePoolCreate(d *schema.ResourceData, meta interface{}) error {
 		if lansVal.([]interface{}) != nil {
 			updateLans := false
 
-			lans := []ionoscloud.KubernetesNodePoolLan{}
+			var lans []ionoscloud.KubernetesNodePoolLan
 
 			for lanIndex := range lansVal.([]interface{}) {
 				lan := ionoscloud.KubernetesNodePoolLan{}
@@ -274,7 +277,7 @@ func resourcek8sNodePoolCreate(d *schema.ResourceData, meta interface{}) error {
 					if lanRoutes.([]interface{}) != nil {
 						updateRoutes := false
 
-						routes := []ionoscloud.KubernetesNodePoolLanRoutes{}
+						var routes []ionoscloud.KubernetesNodePoolLanRoutes
 
 						for routeIndex := range lanRoutes.([]interface{}) {
 
@@ -330,7 +333,8 @@ func resourcek8sNodePoolCreate(d *schema.ResourceData, meta interface{}) error {
 
 		/* number of public IPs needs to be at least NodeCount + 1 */
 		if len(publicIps) > 0 && int32(len(publicIps)) < *k8sNodepool.Properties.NodeCount+1 {
-			return fmt.Errorf("the number of public IPs must be at least %d", *k8sNodepool.Properties.NodeCount+1)
+			diags := diag.FromErr(fmt.Errorf("the number of public IPs must be at least %d", *k8sNodepool.Properties.NodeCount+1))
+			return diags
 		}
 
 		requestPublicIps := make([]string, len(publicIps), len(publicIps))
@@ -340,12 +344,6 @@ func resourcek8sNodePoolCreate(d *schema.ResourceData, meta interface{}) error {
 		k8sNodepool.Properties.PublicIps = &requestPublicIps
 	}
 
-	ctx, cancel := context.WithTimeout(context.Background(), *resourceDefaultTimeouts.Create)
-
-	if cancel != nil {
-		defer cancel()
-	}
-
 	createdNodepool, _, err := client.KubernetesApi.
 		K8sNodepoolsPost(ctx, d.Get("k8s_cluster_id").(string)).
 		KubernetesNodePool(k8sNodepool).
@@ -353,7 +351,8 @@ func resourcek8sNodePoolCreate(d *schema.ResourceData, meta interface{}) error {
 
 	if err != nil {
 		d.SetId("")
-		return fmt.Errorf("error creating k8s node pool: %s", err)
+		diags := diag.FromErr(fmt.Errorf("error creating k8s node pool: %s", err))
+		return diags
 	}
 
 	d.SetId(*createdNodepool.Id)
@@ -363,10 +362,11 @@ func resourcek8sNodePoolCreate(d *schema.ResourceData, meta interface{}) error {
 	for {
 		log.Printf("[INFO] Waiting for k8s node pool %s to be ready...", d.Id())
 
-		nodepoolReady, rsErr := k8sNodepoolReady(client, d)
+		nodepoolReady, rsErr := k8sNodepoolReady(ctx, client, d)
 
 		if rsErr != nil {
-			return fmt.Errorf("error while checking readiness status of k8s node pool %s: %s", d.Id(), rsErr)
+			diags := diag.FromErr(fmt.Errorf("error while checking readiness status of k8s node pool %s: %s", d.Id(), rsErr))
+			return diags
 		}
 
 		if nodepoolReady {
@@ -379,21 +379,16 @@ func resourcek8sNodePoolCreate(d *schema.ResourceData, meta interface{}) error {
 			log.Printf("[INFO] trying again ...")
 		case <-ctx.Done():
 			log.Printf("[INFO] timed out")
-			return fmt.Errorf("k8s creation timed out")
+			diags := diag.FromErr(fmt.Errorf("k8s creation timed out"))
+			return diags
 		}
 	}
 
-	return resourcek8sNodePoolRead(d, meta)
+	return resourcek8sNodePoolRead(ctx, d, meta)
 }
 
-func resourcek8sNodePoolRead(d *schema.ResourceData, meta interface{}) error {
+func resourcek8sNodePoolRead(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	client := meta.(*ionoscloud.APIClient)
-
-	ctx, cancel := context.WithTimeout(context.Background(), *resourceDefaultTimeouts.Create)
-
-	if cancel != nil {
-		defer cancel()
-	}
 
 	k8sNodepool, apiResponse, err := client.KubernetesApi.K8sNodepoolsFindById(ctx, d.Get("k8s_cluster_id").(string), d.Id()).Execute()
 
@@ -403,7 +398,8 @@ func resourcek8sNodePoolRead(d *schema.ResourceData, meta interface{}) error {
 			d.SetId("")
 			return nil
 		}
-		return err
+		diags := diag.FromErr(err)
+		return diags
 	}
 
 	log.Printf("[INFO] Successfully retreived k8s node pool %s: %+v", d.Id(), k8sNodepool)
@@ -413,7 +409,8 @@ func resourcek8sNodePoolRead(d *schema.ResourceData, meta interface{}) error {
 	if k8sNodepool.Properties.Name != nil {
 		err := d.Set("name", *k8sNodepool.Properties.Name)
 		if err != nil {
-			return fmt.Errorf("error while setting name property for k8sNodepool %s: %s", d.Id(), err)
+			diags := diag.FromErr(fmt.Errorf("error while setting name property for k8sNodepool %s: %s", d.Id(), err))
+			return diags
 		}
 
 	}
@@ -421,7 +418,8 @@ func resourcek8sNodePoolRead(d *schema.ResourceData, meta interface{}) error {
 	if k8sNodepool.Properties.K8sVersion != nil {
 		err := d.Set("k8s_version", *k8sNodepool.Properties.K8sVersion)
 		if err != nil {
-			return fmt.Errorf("error while setting k8s_version property for k8sNodepool %s: %s", d.Id(), err)
+			diags := diag.FromErr(fmt.Errorf("error while setting k8s_version property for k8sNodepool %s: %s", d.Id(), err))
+			return diags
 		}
 
 	}
@@ -429,7 +427,8 @@ func resourcek8sNodePoolRead(d *schema.ResourceData, meta interface{}) error {
 	if k8sNodepool.Properties.DatacenterId != nil {
 		err := d.Set("datacenter_id", *k8sNodepool.Properties.DatacenterId)
 		if err != nil {
-			return fmt.Errorf("error while setting datacenter_id property for k8sNodepool %s: %s", d.Id(), err)
+			diags := diag.FromErr(fmt.Errorf("error while setting datacenter_id property for k8sNodepool %s: %s", d.Id(), err))
+			return diags
 		}
 
 	}
@@ -437,7 +436,8 @@ func resourcek8sNodePoolRead(d *schema.ResourceData, meta interface{}) error {
 	if k8sNodepool.Properties.CpuFamily != nil {
 		err := d.Set("cpu_family", *k8sNodepool.Properties.CpuFamily)
 		if err != nil {
-			return fmt.Errorf("error while setting cpu_family property for k8sNodepool %s: %s", d.Id(), err)
+			diags := diag.FromErr(fmt.Errorf("error while setting cpu_family property for k8sNodepool %s: %s", d.Id(), err))
+			return diags
 		}
 
 	}
@@ -445,7 +445,8 @@ func resourcek8sNodePoolRead(d *schema.ResourceData, meta interface{}) error {
 	if k8sNodepool.Properties.AvailabilityZone != nil {
 		err := d.Set("availability_zone", *k8sNodepool.Properties.AvailabilityZone)
 		if err != nil {
-			return fmt.Errorf("error while setting availability_zone property for k8sNodepool %s: %s", d.Id(), err)
+			diags := diag.FromErr(fmt.Errorf("error while setting availability_zone property for k8sNodepool %s: %s", d.Id(), err))
+			return diags
 		}
 
 	}
@@ -453,7 +454,8 @@ func resourcek8sNodePoolRead(d *schema.ResourceData, meta interface{}) error {
 	if k8sNodepool.Properties.StorageType != nil {
 		err := d.Set("storage_type", *k8sNodepool.Properties.StorageType)
 		if err != nil {
-			return fmt.Errorf("error while setting storage_type property for k8sNodepool %s: %s", d.Id(), err)
+			diags := diag.FromErr(fmt.Errorf("error while setting storage_type property for k8sNodepool %s: %s", d.Id(), err))
+			return diags
 		}
 
 	}
@@ -461,7 +463,8 @@ func resourcek8sNodePoolRead(d *schema.ResourceData, meta interface{}) error {
 	if k8sNodepool.Properties.NodeCount != nil {
 		err := d.Set("node_count", *k8sNodepool.Properties.NodeCount)
 		if err != nil {
-			return fmt.Errorf("error while setting node_count property for k8sNodepool %s: %s", d.Id(), err)
+			diags := diag.FromErr(fmt.Errorf("error while setting node_count property for k8sNodepool %s: %s", d.Id(), err))
+			return diags
 		}
 
 	}
@@ -469,7 +472,8 @@ func resourcek8sNodePoolRead(d *schema.ResourceData, meta interface{}) error {
 	if k8sNodepool.Properties.CoresCount != nil {
 		err := d.Set("cores_count", *k8sNodepool.Properties.CoresCount)
 		if err != nil {
-			return fmt.Errorf("error while setting cores_count property for k8sNodepool %s: %s", d.Id(), err)
+			diags := diag.FromErr(fmt.Errorf("error while setting cores_count property for k8sNodepool %s: %s", d.Id(), err))
+			return diags
 		}
 
 	}
@@ -477,7 +481,8 @@ func resourcek8sNodePoolRead(d *schema.ResourceData, meta interface{}) error {
 	if k8sNodepool.Properties.RamSize != nil {
 		err := d.Set("ram_size", *k8sNodepool.Properties.RamSize)
 		if err != nil {
-			return fmt.Errorf("error while setting ram_size property for k8sNodepool %s: %s", d.Id(), err)
+			diags := diag.FromErr(fmt.Errorf("error while setting ram_size property for k8sNodepool %s: %s", d.Id(), err))
+			return diags
 		}
 
 	}
@@ -485,7 +490,8 @@ func resourcek8sNodePoolRead(d *schema.ResourceData, meta interface{}) error {
 	if k8sNodepool.Properties.StorageSize != nil {
 		err := d.Set("storage_size", *k8sNodepool.Properties.StorageSize)
 		if err != nil {
-			return fmt.Errorf("error while setting storage_size property for k8sNodepool %s: %s", d.Id(), err)
+			diags := diag.FromErr(fmt.Errorf("error while setting storage_size property for k8sNodepool %s: %s", d.Id(), err))
+			return diags
 		}
 
 	}
@@ -493,7 +499,8 @@ func resourcek8sNodePoolRead(d *schema.ResourceData, meta interface{}) error {
 	if k8sNodepool.Properties.PublicIps != nil {
 		err := d.Set("public_ips", *k8sNodepool.Properties.PublicIps)
 		if err != nil {
-			return fmt.Errorf("error while setting public_ips property for k8sNodepool %s: %s", d.Id(), err)
+			diags := diag.FromErr(fmt.Errorf("error while setting public_ips property for k8sNodepool %s: %s", d.Id(), err))
+			return diags
 		}
 	}
 
@@ -507,7 +514,8 @@ func resourcek8sNodePoolRead(d *schema.ResourceData, meta interface{}) error {
 			},
 		})
 		if err != nil {
-			return fmt.Errorf("error while setting auto_scaling property for k8sNodepool %s: %s", d.Id(), err)
+			diags := diag.FromErr(fmt.Errorf("error while setting auto_scaling property for k8sNodepool %s: %s", d.Id(), err))
+			return diags
 		}
 		log.Printf("[INFO] Setting AutoScaling for k8s node pool %s to %+v...", d.Id(), *k8sNodepool.Properties.AutoScaling)
 	}
@@ -551,14 +559,15 @@ func resourcek8sNodePoolRead(d *schema.ResourceData, meta interface{}) error {
 
 	if len(nodePoolLans) > 0 {
 		if err := d.Set("lans", nodePoolLans); err != nil {
-			return fmt.Errorf("error while setting lans property for k8sNodepool %s: %s", d.Id(), err)
+			diags := diag.FromErr(fmt.Errorf("error while setting lans property for k8sNodepool %s: %s", d.Id(), err))
+			return diags
 		}
 	}
 
 	return nil
 }
 
-func resourcek8sNodePoolUpdate(d *schema.ResourceData, meta interface{}) error {
+func resourcek8sNodePoolUpdate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	client := meta.(*ionoscloud.APIClient)
 
 	request := ionoscloud.KubernetesNodePool{}
@@ -621,15 +630,10 @@ func resourcek8sNodePoolUpdate(d *schema.ResourceData, meta interface{}) error {
 
 			updateNodeCount = false
 
-			ctx, cancel := context.WithTimeout(context.Background(), *resourceDefaultTimeouts.Create)
-
-			if cancel != nil {
-				defer cancel()
-			}
-
 			np, _, npErr := client.KubernetesApi.K8sNodepoolsFindById(ctx, d.Get("k8s_cluster_id").(string), d.Id()).Execute()
 			if npErr != nil {
-				return fmt.Errorf("error retrieving k8s node pool %q: %s", d.Id(), npErr)
+				diags := diag.FromErr(fmt.Errorf("error retrieving k8s node pool %q: %s", d.Id(), npErr))
+				return diags
 			}
 
 			log.Printf("[INFO] Setting node_count for node pool %q from server from %d to %d instead of due to autoscaling %+v", d.Id(), uint32(d.Get("node_count").(int)), *np.Properties.NodeCount, d.Get("auto_scaling.0"))
@@ -650,7 +654,7 @@ func resourcek8sNodePoolUpdate(d *schema.ResourceData, meta interface{}) error {
 		oldLANs, newLANs := d.GetChange("lans")
 		if newLANs.([]interface{}) != nil {
 			updateLans := false
-			lans := []ionoscloud.KubernetesNodePoolLan{}
+			var lans []ionoscloud.KubernetesNodePoolLan
 			for lanIndex := range newLANs.([]interface{}) {
 				lan := ionoscloud.KubernetesNodePoolLan{}
 				addLan := false
@@ -668,7 +672,7 @@ func resourcek8sNodePoolUpdate(d *schema.ResourceData, meta interface{}) error {
 					if lanRoutes.([]interface{}) != nil {
 						updateRoutes := false
 
-						routes := []ionoscloud.KubernetesNodePoolLanRoutes{}
+						var routes []ionoscloud.KubernetesNodePoolLanRoutes
 
 						for routeIndex := range lanRoutes.([]interface{}) {
 
@@ -768,7 +772,8 @@ func resourcek8sNodePoolUpdate(d *schema.ResourceData, meta interface{}) error {
 
 			/* number of public IPs needs to be at least NodeCount + 1 */
 			if len(publicIps) > 0 && int32(len(publicIps)) < *request.Properties.NodeCount+1 {
-				return fmt.Errorf("the number of public IPs must be at least %d", *request.Properties.NodeCount+1)
+				diags := diag.FromErr(fmt.Errorf("the number of public IPs must be at least %d", *request.Properties.NodeCount+1))
+				return diags
 			}
 
 			requestPublicIps := make([]string, len(publicIps), len(publicIps))
@@ -787,11 +792,6 @@ func resourcek8sNodePoolUpdate(d *schema.ResourceData, meta interface{}) error {
 		log.Printf("[INFO] Update req: %s", string(b))
 	}
 
-	ctx, cancel := context.WithTimeout(context.Background(), *resourceDefaultTimeouts.Update)
-
-	if cancel != nil {
-		defer cancel()
-	}
 	_, apiResponse, err := client.KubernetesApi.K8sNodepoolsPut(ctx, d.Get("k8s_cluster_id").(string), d.Id()).KubernetesNodePool(request).Execute()
 
 	if err != nil {
@@ -799,16 +799,18 @@ func resourcek8sNodePoolUpdate(d *schema.ResourceData, meta interface{}) error {
 			d.SetId("")
 			return nil
 		}
-		return fmt.Errorf("error while updating k8s node pool %s: %s", d.Id(), err)
+		diags := diag.FromErr(fmt.Errorf("error while updating k8s node pool %s: %s", d.Id(), err))
+		return diags
 	}
 
 	for {
 		log.Printf("[INFO] Waiting for k8s node pool %s to be ready...", d.Id())
 
-		nodepoolReady, rsErr := k8sNodepoolReady(client, d)
+		nodepoolReady, rsErr := k8sNodepoolReady(ctx, client, d)
 
 		if rsErr != nil {
-			return fmt.Errorf("error while checking readiness status of k8s node pool %s: %s", d.Id(), rsErr)
+			diags := diag.FromErr(fmt.Errorf("error while checking readiness status of k8s node pool %s: %s", d.Id(), rsErr))
+			return diags
 		}
 
 		if nodepoolReady {
@@ -820,21 +822,16 @@ func resourcek8sNodePoolUpdate(d *schema.ResourceData, meta interface{}) error {
 		case <-time.After(SleepInterval):
 			log.Printf("[DEBUG] retrying ...")
 		case <-ctx.Done():
-			return fmt.Errorf("k8s node pool update timed out! WARNING: your k8s node pool will still probably be updated after some time but the terraform state won't reflect that; check your Ionos Cloud account for updates")
+			diags := diag.FromErr(fmt.Errorf("k8s node pool update timed out! WARNING: your k8s node pool will still probably be updated after some time but the terraform state won't reflect that; check your Ionos Cloud account for updates"))
+			return diags
 		}
 	}
 
-	return resourcek8sNodePoolRead(d, meta)
+	return resourcek8sNodePoolRead(ctx, d, meta)
 }
 
-func resourcek8sNodePoolDelete(d *schema.ResourceData, meta interface{}) error {
+func resourcek8sNodePoolDelete(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	client := meta.(*ionoscloud.APIClient)
-
-	ctx, cancel := context.WithTimeout(context.Background(), *resourceDefaultTimeouts.Delete)
-
-	if cancel != nil {
-		defer cancel()
-	}
 
 	apiResponse, err := client.KubernetesApi.K8sNodepoolsDelete(ctx, d.Get("k8s_cluster_id").(string), d.Id()).Execute()
 
@@ -843,16 +840,18 @@ func resourcek8sNodePoolDelete(d *schema.ResourceData, meta interface{}) error {
 			d.SetId("")
 			return nil
 		}
-		return fmt.Errorf("error while deleting k8s node pool %s: %s", d.Id(), err)
+		diags := diag.FromErr(fmt.Errorf("error while deleting k8s node pool %s: %s", d.Id(), err))
+		return diags
 	}
 
 	for {
 		log.Printf("[INFO] Waiting for k8s node pool %s to be deleted...", d.Id())
 
-		nodepoolDeleted, dsErr := k8sNodepoolDeleted(client, d)
+		nodepoolDeleted, dsErr := k8sNodepoolDeleted(ctx, client, d)
 
 		if dsErr != nil {
-			return fmt.Errorf("error while checking deletion status of k8s node pool %s: %s", d.Id(), dsErr)
+			diags := diag.FromErr(fmt.Errorf("error while checking deletion status of k8s node pool %s: %s", d.Id(), dsErr))
+			return diags
 		}
 
 		if nodepoolDeleted {
@@ -864,7 +863,8 @@ func resourcek8sNodePoolDelete(d *schema.ResourceData, meta interface{}) error {
 		case <-time.After(SleepInterval):
 			log.Printf("[DEBUG] retrying ...")
 		case <-ctx.Done():
-			return fmt.Errorf("k8s node pool deletion timed out! WARNING: your k8s node pool will still probably be deleted after some time but the terraform state won't reflect that; check your Ionos Cloud account for updates")
+			diags := diag.FromErr(fmt.Errorf("k8s node pool deletion timed out! WARNING: your k8s node pool will still probably be deleted after some time but the terraform state won't reflect that; check your Ionos Cloud account for updates"))
+			return diags
 		}
 	}
 
@@ -872,13 +872,7 @@ func resourcek8sNodePoolDelete(d *schema.ResourceData, meta interface{}) error {
 	return nil
 }
 
-func k8sNodepoolReady(client *ionoscloud.APIClient, d *schema.ResourceData) (bool, error) {
-	ctx, cancel := context.WithTimeout(context.Background(), *resourceDefaultTimeouts.Default)
-
-	if cancel != nil {
-		defer cancel()
-	}
-
+func k8sNodepoolReady(ctx context.Context, client *ionoscloud.APIClient, d *schema.ResourceData) (bool, error) {
 	subjectNodepool, _, err := client.KubernetesApi.K8sNodepoolsFindById(ctx, d.Get("k8s_cluster_id").(string), d.Id()).Execute()
 	if err != nil {
 		return true, fmt.Errorf("error checking k8s node pool status: %s", err)
@@ -886,21 +880,14 @@ func k8sNodepoolReady(client *ionoscloud.APIClient, d *schema.ResourceData) (boo
 	return *subjectNodepool.Metadata.State == "ACTIVE", nil
 }
 
-func k8sNodepoolDeleted(client *ionoscloud.APIClient, d *schema.ResourceData) (bool, error) {
-	ctx, cancel := context.WithTimeout(context.Background(), *resourceDefaultTimeouts.Default)
-
-	if cancel != nil {
-		defer cancel()
-	}
+func k8sNodepoolDeleted(ctx context.Context, client *ionoscloud.APIClient, d *schema.ResourceData) (bool, error) {
 	_, apiResponse, err := client.KubernetesApi.K8sNodepoolsFindById(ctx, d.Get("k8s_cluster_id").(string), d.Id()).Execute()
 
 	if err != nil {
-		if _, ok := err.(ionoscloud.GenericOpenAPIError); ok {
-			if apiResponse != nil && apiResponse.Response.StatusCode == 404 {
-				return true, nil
-			}
-			return true, fmt.Errorf("error checking k8s node pool deletion status: %s", err)
+		if apiResponse != nil && apiResponse.Response.StatusCode == 404 {
+			return true, nil
 		}
+		return true, fmt.Errorf("error checking k8s node pool deletion status: %s", err)
 	}
 	return false, nil
 }

@@ -5,7 +5,7 @@ package ionoscloud
 import (
 	"testing"
 
-	"github.com/hashicorp/terraform-plugin-sdk/helper/resource"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 )
 
 func TestAccDataSourceK8sCluster_matchId(t *testing.T) {
@@ -13,7 +13,7 @@ func TestAccDataSourceK8sCluster_matchId(t *testing.T) {
 		PreCheck: func() {
 			testAccPreCheck(t)
 		},
-		Providers: testAccProviders,
+		ProviderFactories: testAccProviderFactories,
 		Steps: []resource.TestStep{
 			{
 				Config: testAccDataSourceProfitBricksK8sClusterCreateResources,
@@ -35,7 +35,7 @@ func TestAccDataSourceK8sCluster_matchName(t *testing.T) {
 		PreCheck: func() {
 			testAccPreCheck(t)
 		},
-		Providers: testAccProviders,
+		ProviderFactories: testAccProviderFactories,
 		Steps: []resource.TestStep{
 			{
 				Config: testAccDataSourceProfitBricksK8sClusterCreateResources,

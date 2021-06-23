@@ -7,8 +7,8 @@ import (
 	"os"
 	"testing"
 
-	"github.com/hashicorp/terraform-plugin-sdk/helper/resource"
-	"github.com/hashicorp/terraform-plugin-sdk/terraform"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
 )
 
 func TestAccNatGateway_Basic(t *testing.T) {
@@ -25,8 +25,8 @@ func TestAccNatGateway_Basic(t *testing.T) {
 		PreCheck: func() {
 			testAccPreCheck(t)
 		},
-		Providers:    testAccProviders,
-		CheckDestroy: testAccCheckNatGatewayDestroyCheck,
+		ProviderFactories: testAccProviderFactories,
+		CheckDestroy:      testAccCheckNatGatewayDestroyCheck,
 		Steps: []resource.TestStep{
 			{
 				Config: fmt.Sprintf(testAccCheckNatGatewayConfigBasic, natGatewayName, publicIp1),
@@ -60,12 +60,12 @@ func testAccCheckNatGatewayDestroyCheck(s *terraform.State) error {
 
 		_, apiResponse, err := client.NATGatewaysApi.DatacentersNatgatewaysFindByNatGatewayId(ctx, rs.Primary.Attributes["datacenter_id"], rs.Primary.ID).Execute()
 
-		if _, ok := err.(ionoscloud.GenericOpenAPIError); ok {
+		if err != nil {
 			if apiResponse == nil || apiResponse.Response.StatusCode != 404 {
-				return fmt.Errorf("nat gateway still exists %s %s", rs.Primary.ID, responseBody(apiResponse))
+				return fmt.Errorf("an error occured and checking deletion of nat gateway %s %s", rs.Primary.ID, responseBody(apiResponse))
 			}
 		} else {
-			return fmt.Errorf("unable to fetch nat gateway %s %s", rs.Primary.ID, err)
+			return fmt.Errorf("nat gateway still exists %s %s", rs.Primary.ID, err)
 		}
 	}
 

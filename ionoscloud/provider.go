@@ -3,19 +3,21 @@ package ionoscloud
 import (
 	"context"
 	"fmt"
-	"github.com/hashicorp/terraform-plugin-sdk/httpclient"
+	"github.com/hashicorp/terraform-plugin-sdk/meta"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"log"
 	"os"
 	"time"
 
-	"github.com/hashicorp/terraform-plugin-sdk/helper/resource"
-	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
-	"github.com/hashicorp/terraform-plugin-sdk/terraform"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/ionos-cloud/sdk-go/v6"
 )
 
+var Version = "development"
+
 // Provider returns a schema.Provider for ionoscloud.
-func Provider() terraform.ResourceProvider {
+func Provider() *schema.Provider {
 	provider := &schema.Provider{
 		Schema: map[string]*schema.Schema{
 			"username": {
@@ -96,7 +98,7 @@ func Provider() terraform.ResourceProvider {
 		},
 	}
 
-	provider.ConfigureFunc = func(d *schema.ResourceData) (interface{}, error) {
+	provider.ConfigureContextFunc = func(ctx context.Context, d *schema.ResourceData) (interface{}, diag.Diagnostics) {
 
 		terraformVersion := provider.TerraformVersion
 
@@ -114,7 +116,7 @@ func Provider() terraform.ResourceProvider {
 	return provider
 }
 
-func providerConfigure(d *schema.ResourceData, terraformVersion string) (interface{}, error) {
+func providerConfigure(d *schema.ResourceData, terraformVersion string) (interface{}, diag.Diagnostics) {
 
 	username, usernameOk := d.GetOk("username")
 	password, passwordOk := d.GetOk("password")
@@ -122,15 +124,18 @@ func providerConfigure(d *schema.ResourceData, terraformVersion string) (interfa
 
 	if !tokenOk {
 		if !usernameOk {
-			return nil, fmt.Errorf("neither IonosCloud token, nor IonosCloud username has been provided")
+			diags := diag.FromErr(fmt.Errorf("neither IonosCloud token, nor IonosCloud username has been provided"))
+			return nil, diags
 		}
 
 		if !passwordOk {
-			return nil, fmt.Errorf("neither IonosCloud token, nor IonosCloud password has been provided")
+			diags := diag.FromErr(fmt.Errorf("neither IonosCloud token, nor IonosCloud password has been provided"))
+			return nil, diags
 		}
 	} else {
 		if usernameOk || passwordOk {
-			return nil, fmt.Errorf("only provide IonosCloud token OR IonosCloud username/password")
+			diags := diag.FromErr(fmt.Errorf("only provide IonosCloud token OR IonosCloud username/password"))
+			return nil, diags
 		}
 	}
 
@@ -140,14 +145,15 @@ func providerConfigure(d *schema.ResourceData, terraformVersion string) (interfa
 	if len(cleanedUrl) > 0 {
 		newConfig.Servers[0].URL = cleanedUrl
 	}
-	newConfig.UserAgent = httpclient.TerraformUserAgent(terraformVersion)
 	if os.Getenv("IONOS_DEBUG") != "" {
 		newConfig.Debug = true
 	}
 
 	newClient := ionoscloud.NewAPIClient(newConfig)
 
-
+	// todo: add ionoscloud.Version when added to sdk-go/v6
+	//newConfig.UserAgent = fmt.Sprintf("HashiCorp Terraform/%s Terraform Plugin SDK/%s Terraform Provider Ionoscloud/%s Ionoscloud SDK Go/%s", terraformVersion, meta.SDKVersionString(), Version, newClient.Version)
+	newConfig.UserAgent = fmt.Sprintf("HashiCorp Terraform/%s Terraform Plugin SDK/%s Terraform Provider Ionoscloud/%s", terraformVersion, meta.SDKVersionString(), Version)
 
 	return newClient, nil
 }

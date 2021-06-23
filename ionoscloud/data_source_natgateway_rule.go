@@ -4,7 +4,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
-	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	ionoscloud "github.com/ionos-cloud/sdk-go/v6"
 	"strings"
 )
@@ -53,8 +53,7 @@ func dataSourceNatGatewayRule() *schema.Resource {
 				Computed: true,
 			},
 			"target_port_range": {
-				Type:     schema.TypeList,
-				MaxItems: 1,
+				Type: schema.TypeList,
 				Description: "Target port range of the NAT gateway rule. For SNAT rules it specifies which packets this " +
 					"translation rule applies to based on destination port. If none is provided, rule will " +
 					"match any port",

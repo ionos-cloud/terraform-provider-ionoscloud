@@ -3,7 +3,7 @@ package ionoscloud
 import (
 	"context"
 	"fmt"
-	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	ionoscloud "github.com/ionos-cloud/sdk-go/v6"
 	"strings"
 )
@@ -55,7 +55,7 @@ func dataSourceTemplateRead(d *schema.ResourceData, meta interface{}) error {
 	ram, ramOk := d.GetOk("ram")
 	storageSize, storageSizeOk := d.GetOk("storage_size")
 
-	results := []ionoscloud.Template{}
+	var results []ionoscloud.Template
 
 	if templates.Items != nil {
 		for _, tmp := range *templates.Items {
@@ -66,7 +66,7 @@ func dataSourceTemplateRead(d *schema.ResourceData, meta interface{}) error {
 	}
 
 	if coresOk {
-		coresResults := []ionoscloud.Template{}
+		var coresResults []ionoscloud.Template
 		for _, tmp := range results {
 			cores := float32(cores.(float64))
 			if tmp.Properties.Cores != nil && *tmp.Properties.Cores == cores {
@@ -77,7 +77,7 @@ func dataSourceTemplateRead(d *schema.ResourceData, meta interface{}) error {
 	}
 
 	if ramOk {
-		ramResults := []ionoscloud.Template{}
+		var ramResults []ionoscloud.Template
 		for _, tmp := range results {
 			ram := float32(ram.(float64))
 			if tmp.Properties.Ram != nil && *tmp.Properties.Ram == ram {
@@ -88,7 +88,7 @@ func dataSourceTemplateRead(d *schema.ResourceData, meta interface{}) error {
 	}
 
 	if storageSizeOk {
-		storageSizeResults := []ionoscloud.Template{}
+		var storageSizeResults []ionoscloud.Template
 		storageSize := float32(storageSize.(float64))
 		for _, tmp := range results {
 			if tmp.Properties.StorageSize != nil && *tmp.Properties.StorageSize == storageSize {

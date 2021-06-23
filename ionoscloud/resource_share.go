@@ -3,19 +3,20 @@ package ionoscloud
 import (
 	"context"
 	"fmt"
-	"github.com/hashicorp/terraform-plugin-sdk/helper/validation"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 	"time"
 
-	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	ionoscloud "github.com/ionos-cloud/sdk-go/v6"
 )
 
 func resourceShare() *schema.Resource {
 	return &schema.Resource{
-		Create: resourceShareCreate,
-		Read:   resourceShareRead,
-		Update: resourceShareUpdate,
-		Delete: resourceShareDelete,
+		CreateContext: resourceShareCreate,
+		ReadContext:   resourceShareRead,
+		UpdateContext: resourceShareUpdate,
+		DeleteContext: resourceShareDelete,
 		Schema: map[string]*schema.Schema{
 			"edit_privilege": {
 				Type:     schema.TypeBool,
@@ -40,7 +41,7 @@ func resourceShare() *schema.Resource {
 	}
 }
 
-func resourceShareCreate(d *schema.ResourceData, meta interface{}) error {
+func resourceShareCreate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	client := meta.(*ionoscloud.APIClient)
 
 	request := ionoscloud.GroupShare{
@@ -52,50 +53,53 @@ func resourceShareCreate(d *schema.ResourceData, meta interface{}) error {
 	tempEditPrivilege := d.Get("share_privilege").(bool)
 	request.Properties.EditPrivilege = &tempEditPrivilege
 
-	rsp, apiResponse, err := client.UserManagementApi.UmGroupsSharesPost(context.TODO(),
-		d.Get("group_id").(string), d.Get("resource_id").(string)).Resource(request).Execute()
+	rsp, apiResponse, err := client.UserManagementApi.UmGroupsSharesPost(ctx, d.Get("group_id").(string), d.Get("resource_id").(string)).Resource(request).Execute()
 
 	if err != nil {
-		return fmt.Errorf("an error occured while creating a share: %s", err)
+		diags := diag.FromErr(fmt.Errorf("an error occured while creating a share: %s", err))
+		return diags
 	}
 	d.SetId(*rsp.Id)
 
 	// Wait, catching any errors
-	_, errState := getStateChangeConf(meta, d, apiResponse.Header.Get("Location"), schema.TimeoutCreate).WaitForState()
+	_, errState := getStateChangeConf(meta, d, apiResponse.Header.Get("Location"), schema.TimeoutCreate).WaitForStateContext(ctx)
 	if errState != nil {
 		if IsRequestFailed(err) {
 			// Request failed, so resource was not created, delete resource from state file
 			d.SetId("")
 		}
-		return errState
+		diags := diag.FromErr(errState)
+		return diags
 	}
 
-	return resourceShareRead(d, meta)
+	return resourceShareRead(ctx, d, meta)
 }
 
-func resourceShareRead(d *schema.ResourceData, meta interface{}) error {
+func resourceShareRead(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	client := meta.(*ionoscloud.APIClient)
 
-	rsp, apiResponse, err := client.UserManagementApi.UmGroupsSharesFindByResourceId(context.TODO(),
-		d.Get("group_id").(string), d.Get("resource_id").(string)).Execute()
+	rsp, apiResponse, err := client.UserManagementApi.UmGroupsSharesFindByResourceId(ctx, d.Get("group_id").(string), d.Get("resource_id").(string)).Execute()
 	if err != nil {
 		if apiResponse != nil && apiResponse.Response.StatusCode == 404 {
 			d.SetId("")
 			return nil
 		}
-		return fmt.Errorf("an error occured while fetching a Share ID %s %s", d.Id(), err)
+		diags := diag.FromErr(fmt.Errorf("an error occured while fetching a Share ID %s %s", d.Id(), err))
+		return diags
 	}
 
 	if err := d.Set("edit_privilege", *rsp.Properties.EditPrivilege); err != nil {
-		return err
+		diags := diag.FromErr(err)
+		return diags
 	}
 	if err := d.Set("share_privilege", *rsp.Properties.SharePrivilege); err != nil {
-		return err
+		diags := diag.FromErr(err)
+		return diags
 	}
 	return nil
 }
 
-func resourceShareUpdate(d *schema.ResourceData, meta interface{}) error {
+func resourceShareUpdate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	client := meta.(*ionoscloud.APIClient)
 
 	tempSharePrivilege := d.Get("share_privilege").(bool)
@@ -108,33 +112,25 @@ func resourceShareUpdate(d *schema.ResourceData, meta interface{}) error {
 		},
 	}
 
-	ctx, cancel := context.WithTimeout(context.Background(), *resourceDefaultTimeouts.Update)
-	if cancel != nil {
-		defer cancel()
-	}
-
 	_, apiResponse, err := client.UserManagementApi.UmGroupsSharesPut(ctx,
 		d.Get("group_id").(string), d.Get("resource_id").(string)).Resource(shareReq).Execute()
 	if err != nil {
-		return fmt.Errorf("an error occured while patching a share ID %s %s", d.Id(), err)
+		diags := diag.FromErr(fmt.Errorf("an error occured while patching a share ID %s %s", d.Id(), err))
+		return diags
 	}
 
 	// Wait, catching any errors
-	_, errState := getStateChangeConf(meta, d, apiResponse.Header.Get("Location"), schema.TimeoutUpdate).WaitForState()
+	_, errState := getStateChangeConf(meta, d, apiResponse.Header.Get("Location"), schema.TimeoutUpdate).WaitForStateContext(ctx)
 	if errState != nil {
-		return errState
+		diags := diag.FromErr(errState)
+		return diags
 	}
 
-	return resourceShareRead(d, meta)
+	return resourceShareRead(ctx, d, meta)
 }
 
-func resourceShareDelete(d *schema.ResourceData, meta interface{}) error {
+func resourceShareDelete(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	client := meta.(*ionoscloud.APIClient)
-
-	ctx, cancel := context.WithTimeout(context.Background(), *resourceDefaultTimeouts.Delete)
-	if cancel != nil {
-		defer cancel()
-	}
 
 	groupId := d.Get("group_id").(string)
 	resourceId := d.Get("resource_id").(string)
@@ -142,26 +138,27 @@ func resourceShareDelete(d *schema.ResourceData, meta interface{}) error {
 	apiResponse, err := client.UserManagementApi.UmGroupsSharesDelete(ctx, groupId, resourceId).Execute()
 	if err != nil {
 		if apiResponse != nil && apiResponse.Response.StatusCode == 404 {
-			return err
+			diags := diag.FromErr(err)
+			return diags
 		}
 		//try again in 20 seconds
 		// todo: get rid of this retry
 		time.Sleep(20 * time.Second)
 		apiResponse, err := client.UserManagementApi.UmGroupsSharesDelete(ctx, groupId, resourceId).Execute()
 		if err != nil {
-			if _, ok := err.(ionoscloud.GenericOpenAPIError); ok {
-				if apiResponse == nil || apiResponse.Response.StatusCode != 404 {
-					return fmt.Errorf("an error occured while deleting a share %s %s", d.Id(), err)
-				}
+			if apiResponse == nil || apiResponse.Response.StatusCode != 404 {
+				diags := diag.FromErr(fmt.Errorf("an error occured while deleting a share %s %s", d.Id(), err))
+				return diags
 			}
 		}
 	}
 
 	// Wait, catching any errors
 	if apiResponse != nil && apiResponse.Header.Get("Location") != "" {
-		_, errState := getStateChangeConf(meta, d, apiResponse.Header.Get("Location"), schema.TimeoutDelete).WaitForState()
+		_, errState := getStateChangeConf(meta, d, apiResponse.Header.Get("Location"), schema.TimeoutDelete).WaitForStateContext(ctx)
 		if errState != nil {
-			return errState
+			diags := diag.FromErr(errState)
+			return diags
 		}
 	}
 

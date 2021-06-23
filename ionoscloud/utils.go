@@ -9,46 +9,49 @@ import (
 	"strings"
 	"time"
 
-	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 )
 
 const SleepInterval = 5 * time.Second
 
-func resourceResourceImport(d *schema.ResourceData, meta interface{}) ([]*schema.ResourceData, error) {
+func resourceResourceImport(_ context.Context, d *schema.ResourceData, _ interface{}) ([]*schema.ResourceData, error) {
 	parts := strings.Split(d.Id(), "/")
 	if len(parts) != 2 || parts[0] == "" || parts[1] == "" {
 		return nil, fmt.Errorf("invalid import id %q. Expecting {datacenter}/{resource}", d.Id())
 	}
 
-	d.Set("datacenter_id", parts[0])
+	if err := d.Set("datacenter_id", parts[0]); err != nil {
+		return nil, err
+	}
 	d.SetId(parts[1])
 
 	return []*schema.ResourceData{d}, nil
 }
 
-func resourceServerImport(d *schema.ResourceData, meta interface{}) ([]*schema.ResourceData, error) {
+func resourceServerImport(_ context.Context, d *schema.ResourceData, _ interface{}) ([]*schema.ResourceData, error) {
 	parts := strings.Split(d.Id(), "/")
 	if len(parts) > 4 || len(parts) < 3 || parts[0] == "" || parts[1] == "" {
 		return nil, fmt.Errorf("invalid import id %q. Expecting {datacenter}/{server}/{primary_nic} or {datacenter}/{server}/{primary_nic}/{firewall}", d.Id())
 	}
 
-	d.Set("datacenter_id", parts[0])
-	d.Set("primary_nic", parts[2])
+	if err := d.Set("datacenter_id", parts[0]); err != nil {
+		return nil, err
+	}
+	if err := d.Set("primary_nic", parts[2]); err != nil {
+		return nil, err
+	}
 	if len(parts) > 3 {
-		d.Set("firewallrule_id", parts[3])
+		if err := d.Set("firewallrule_id", parts[3]); err != nil {
+			return nil, err
+		}
 	}
 	d.SetId(parts[1])
 
 	return []*schema.ResourceData{d}, nil
 }
 
-func resourceK8sClusterImport(d *schema.ResourceData, meta interface{}) ([]*schema.ResourceData, error) {
+func resourceK8sClusterImport(ctx context.Context, d *schema.ResourceData, meta interface{}) ([]*schema.ResourceData, error) {
 	client := meta.(*ionoscloud.APIClient)
-
-	ctx, cancel := context.WithTimeout(context.Background(), *resourceDefaultTimeouts.Default)
-	if cancel != nil {
-		defer cancel()
-	}
 
 	cluster, apiResponse, err := client.KubernetesApi.K8sFindByClusterId(ctx, d.Id()).Execute()
 
@@ -62,16 +65,22 @@ func resourceK8sClusterImport(d *schema.ResourceData, meta interface{}) ([]*sche
 
 	log.Printf("[INFO] K8s cluster found: %+v", cluster)
 	d.SetId(*cluster.Id)
-	d.Set("name", *cluster.Properties.Name)
-	d.Set("k8s_version", *cluster.Properties.K8sVersion)
+	if err := d.Set("name", *cluster.Properties.Name); err != nil {
+		return nil, err
+	}
+	if err := d.Set("k8s_version", *cluster.Properties.K8sVersion); err != nil {
+		return nil, err
+	}
 
 	if cluster.Properties.MaintenanceWindow != nil {
-		d.Set("maintenance_window", []map[string]string{
+		if err := d.Set("maintenance_window", []map[string]string{
 			{
 				"day_of_the_week": *cluster.Properties.MaintenanceWindow.DayOfTheWeek,
 				"time":            *cluster.Properties.MaintenanceWindow.Time,
 			},
-		})
+		}); err != nil {
+			return nil, err
+		}
 		log.Printf("[INFO] Setting maintenance window for k8s cluster %s to %+v...", d.Id(), *cluster.Properties.MaintenanceWindow)
 	}
 
@@ -80,7 +89,7 @@ func resourceK8sClusterImport(d *schema.ResourceData, meta interface{}) ([]*sche
 	return []*schema.ResourceData{d}, nil
 }
 
-func resourceK8sNodepoolImport(d *schema.ResourceData, meta interface{}) ([]*schema.ResourceData, error) {
+func resourceK8sNodepoolImport(ctx context.Context, d *schema.ResourceData, meta interface{}) ([]*schema.ResourceData, error) {
 
 	parts := strings.Split(d.Id(), "/")
 
@@ -90,19 +99,12 @@ func resourceK8sNodepoolImport(d *schema.ResourceData, meta interface{}) ([]*sch
 
 	client := meta.(*ionoscloud.APIClient)
 
-	ctx, cancel := context.WithTimeout(context.Background(), *resourceDefaultTimeouts.Default)
-	if cancel != nil {
-		defer cancel()
-	}
-
 	k8sNodepool, apiResponse, err := client.KubernetesApi.K8sNodepoolsFindById(ctx, parts[0], parts[1]).Execute()
 
 	if err != nil {
-		if _, ok := err.(ionoscloud.GenericOpenAPIError); ok {
-			if apiResponse != nil && apiResponse.Response.StatusCode == 404 {
-				d.SetId("")
-				return nil, fmt.Errorf("unable to find k8s node pool %q", d.Id())
-			}
+		if apiResponse != nil && apiResponse.Response.StatusCode == 404 {
+			d.SetId("")
+			return nil, fmt.Errorf("unable to find k8s node pool %q", d.Id())
 		}
 		return nil, fmt.Errorf("unable to retreive k8s node pool %q", d.Id())
 	}
@@ -110,50 +112,81 @@ func resourceK8sNodepoolImport(d *schema.ResourceData, meta interface{}) ([]*sch
 	log.Printf("[INFO] K8s node pool found: %+v", k8sNodepool)
 
 	d.SetId(*k8sNodepool.Id)
-	d.Set("name", *k8sNodepool.Properties.Name)
-	d.Set("k8s_version", *k8sNodepool.Properties.K8sVersion)
-	d.Set("k8s_cluster_id", parts[0])
-	d.Set("datacenter_id", *k8sNodepool.Properties.DatacenterId)
-	d.Set("cpu_family", *k8sNodepool.Properties.CpuFamily)
-	d.Set("availability_zone", *k8sNodepool.Properties.AvailabilityZone)
-	d.Set("storage_type", *k8sNodepool.Properties.StorageType)
-	d.Set("node_count", *k8sNodepool.Properties.NodeCount)
-	d.Set("cores_count", *k8sNodepool.Properties.CoresCount)
-	d.Set("ram_size", *k8sNodepool.Properties.RamSize)
-	d.Set("storage_size", *k8sNodepool.Properties.StorageSize)
+	if err := d.Set("name", *k8sNodepool.Properties.Name); err != nil {
+		return nil, err
+	}
+	if err := d.Set("k8s_version", *k8sNodepool.Properties.K8sVersion); err != nil {
+		return nil, err
+	}
+	if err := d.Set("k8s_cluster_id", parts[0]); err != nil {
+		return nil, err
+	}
+	if err := d.Set("datacenter_id", *k8sNodepool.Properties.DatacenterId); err != nil {
+		return nil, err
+	}
+	if err := d.Set("cpu_family", *k8sNodepool.Properties.CpuFamily); err != nil {
+		return nil, err
+	}
+	if err := d.Set("availability_zone", *k8sNodepool.Properties.AvailabilityZone); err != nil {
+		return nil, err
+	}
+	if err := d.Set("storage_type", *k8sNodepool.Properties.StorageType); err != nil {
+		return nil, err
+	}
+	if err := d.Set("node_count", *k8sNodepool.Properties.NodeCount); err != nil {
+		return nil, err
+	}
+	if err := d.Set("cores_count", *k8sNodepool.Properties.CoresCount); err != nil {
+		return nil, err
+	}
+	if err := d.Set("ram_size", *k8sNodepool.Properties.RamSize); err != nil {
+		return nil, err
+	}
+	if err := d.Set("storage_size", *k8sNodepool.Properties.StorageSize); err != nil {
+		return nil, err
+	}
 
 	if k8sNodepool.Properties.PublicIps != nil {
-		d.Set("public_ips", k8sNodepool.Properties.PublicIps)
+		if err := d.Set("public_ips", k8sNodepool.Properties.PublicIps); err != nil {
+			return nil, err
+		}
 		log.Printf("[INFO] Setting Public IPs for k8s node pool %s to %+v...", d.Id(), d.Get("public_ips"))
 	}
 
-	if k8sNodepool.Properties.AutoScaling != nil && (*k8sNodepool.Properties.AutoScaling.MinNodeCount != 0 && *k8sNodepool.Properties.AutoScaling.MaxNodeCount != 0) {
-		d.Set("auto_scaling", []map[string]int32{
+	if k8sNodepool.Properties.AutoScaling != nil && k8sNodepool.Properties.AutoScaling.MinNodeCount != nil && k8sNodepool.Properties.AutoScaling.MaxNodeCount != nil &&
+		(*k8sNodepool.Properties.AutoScaling.MinNodeCount != 0 && *k8sNodepool.Properties.AutoScaling.MaxNodeCount != 0) {
+		if err := d.Set("auto_scaling", []map[string]int32{
 			{
 				"min_node_count": *k8sNodepool.Properties.AutoScaling.MinNodeCount,
 				"max_node_count": *k8sNodepool.Properties.AutoScaling.MaxNodeCount,
 			},
-		})
+		}); err != nil {
+			return nil, err
+		}
 		log.Printf("[INFO] Setting AutoScaling for k8s node pool %s to %+v...", d.Id(), k8sNodepool.Properties.AutoScaling)
 	}
 
 	if k8sNodepool.Properties.Lans != nil {
-		lans := []int32{}
+		var lans []int32
 
 		for _, lan := range *k8sNodepool.Properties.Lans {
 			lans = append(lans, *lan.Id)
 		}
-		d.Set("lans", lans)
+		if err := d.Set("lans", lans); err != nil {
+			return nil, err
+		}
 		log.Printf("[INFO] Setting LAN's for k8s node pool %s to %+v...", d.Id(), d.Get("lans"))
 	}
 
 	if k8sNodepool.Properties.MaintenanceWindow != nil {
-		d.Set("maintenance_window", []map[string]string{
+		if err := d.Set("maintenance_window", []map[string]string{
 			{
 				"day_of_the_week": *k8sNodepool.Properties.MaintenanceWindow.DayOfTheWeek,
 				"time":            *k8sNodepool.Properties.MaintenanceWindow.Time,
 			},
-		})
+		}); err != nil {
+			return nil, err
+		}
 		log.Printf("[INFO] Setting maintenance window for k8s node pool %s to %+v...", d.Id(), k8sNodepool.Properties.MaintenanceWindow)
 	}
 
@@ -162,22 +195,15 @@ func resourceK8sNodepoolImport(d *schema.ResourceData, meta interface{}) ([]*sch
 	return []*schema.ResourceData{d}, nil
 }
 
-func resourcePrivateCrossConnectImport(d *schema.ResourceData, meta interface{}) ([]*schema.ResourceData, error) {
+func resourcePrivateCrossConnectImport(ctx context.Context, d *schema.ResourceData, meta interface{}) ([]*schema.ResourceData, error) {
 	client := meta.(*ionoscloud.APIClient)
-
-	ctx, cancel := context.WithTimeout(context.Background(), *resourceDefaultTimeouts.Default)
-	if cancel != nil {
-		defer cancel()
-	}
 
 	pcc, apiResponse, err := client.PrivateCrossConnectsApi.PccsFindById(ctx, d.Id()).Execute()
 
 	if err != nil {
-		if _, ok := err.(ionoscloud.GenericOpenAPIError); ok {
-			if apiResponse != nil && apiResponse.Response.StatusCode == 404 {
-				d.SetId("")
-				return nil, fmt.Errorf("unable to find PCC %q", d.Id())
-			}
+		if apiResponse != nil && apiResponse.Response.StatusCode == 404 {
+			d.SetId("")
+			return nil, fmt.Errorf("unable to find PCC %q", d.Id())
 		}
 		return nil, fmt.Errorf("unable to retreive PCC %q", d.Id())
 	}
@@ -185,11 +211,15 @@ func resourcePrivateCrossConnectImport(d *schema.ResourceData, meta interface{})
 	log.Printf("[INFO] PCC found: %+v", pcc)
 
 	d.SetId(*pcc.Id)
-	d.Set("name", *pcc.Properties.Name)
-	d.Set("description", *pcc.Properties.Description)
+	if err := d.Set("name", *pcc.Properties.Name); err != nil {
+		return nil, err
+	}
+	if err := d.Set("description", *pcc.Properties.Description); err != nil {
+		return nil, err
+	}
 
 	if pcc.Properties.Peers != nil {
-		peers := []map[string]interface{}{}
+		var peers []map[string]interface{}
 
 		for _, peer := range *pcc.Properties.Peers {
 			peers = append(peers, map[string]interface{}{
@@ -201,12 +231,14 @@ func resourcePrivateCrossConnectImport(d *schema.ResourceData, meta interface{})
 			})
 		}
 
-		d.Set("peers", peers)
+		if err := d.Set("peers", peers); err != nil {
+			return nil, err
+		}
 		log.Printf("[INFO] Setting peers for PCC %s to %+v...", d.Id(), d.Get("peers"))
 	}
 
 	if pcc.Properties.ConnectableDatacenters != nil {
-		connectableDatacenters := []map[string]interface{}{}
+		var connectableDatacenters []map[string]interface{}
 
 		for _, connectableDatacenter := range *pcc.Properties.ConnectableDatacenters {
 			connectableDatacenters = append(connectableDatacenters, map[string]interface{}{
@@ -216,7 +248,9 @@ func resourcePrivateCrossConnectImport(d *schema.ResourceData, meta interface{})
 			})
 		}
 
-		d.Set("connectable_datacenters", connectableDatacenters)
+		if err := d.Set("connectable_datacenters", connectableDatacenters); err != nil {
+			return nil, err
+		}
 		log.Printf("[INFO] Setting peers for PCC %s to %+v...", d.Id(), d.Get("peers"))
 	}
 
@@ -225,22 +259,15 @@ func resourcePrivateCrossConnectImport(d *schema.ResourceData, meta interface{})
 	return []*schema.ResourceData{d}, nil
 }
 
-func resourceBackupUnitImport(d *schema.ResourceData, meta interface{}) ([]*schema.ResourceData, error) {
+func resourceBackupUnitImport(ctx context.Context, d *schema.ResourceData, meta interface{}) ([]*schema.ResourceData, error) {
 	client := meta.(*ionoscloud.APIClient)
-
-	ctx, cancel := context.WithTimeout(context.Background(), *resourceDefaultTimeouts.Default)
-	if cancel != nil {
-		defer cancel()
-	}
 
 	backupUnit, apiResponse, err := client.BackupUnitsApi.BackupunitsFindById(ctx, d.Id()).Execute()
 
 	if err != nil {
-		if _, ok := err.(ionoscloud.GenericOpenAPIError); ok {
-			if apiResponse != nil && apiResponse.Response.StatusCode == 404 {
-				d.SetId("")
-				return nil, fmt.Errorf("unable to find Backup Unit %q", d.Id())
-			}
+		if apiResponse != nil && apiResponse.Response.StatusCode == 404 {
+			d.SetId("")
+			return nil, fmt.Errorf("unable to find Backup Unit %q", d.Id())
 		}
 		return nil, fmt.Errorf("unable to retreive Backup Unit %q", d.Id())
 	}
@@ -249,8 +276,12 @@ func resourceBackupUnitImport(d *schema.ResourceData, meta interface{}) ([]*sche
 
 	d.SetId(*backupUnit.Id)
 
-	d.Set("name", *backupUnit.Properties.Name)
-	d.Set("email", *backupUnit.Properties.Email)
+	if err := d.Set("name", *backupUnit.Properties.Name); err != nil {
+		return nil, err
+	}
+	if err := d.Set("email", *backupUnit.Properties.Email); err != nil {
+		return nil, err
+	}
 
 	contractResources, apiResponse, cErr := client.ContractResourcesApi.ContractsGet(ctx).Execute()
 
@@ -278,7 +309,7 @@ func resourceBackupUnitImport(d *schema.ResourceData, meta interface{}) ([]*sche
 	return []*schema.ResourceData{d}, nil
 }
 
-func resourceS3KeyImport(d *schema.ResourceData, meta interface{}) ([]*schema.ResourceData, error) {
+func resourceS3KeyImport(_ context.Context, d *schema.ResourceData, meta interface{}) ([]*schema.ResourceData, error) {
 	parts := strings.Split(d.Id(), "/")
 
 	if len(parts) != 2 || parts[0] == "" || parts[1] == "" {
@@ -298,35 +329,51 @@ func resourceS3KeyImport(d *schema.ResourceData, meta interface{}) ([]*schema.Re
 	}
 
 	d.SetId(*s3Key.Id)
-	d.Set("user_id", parts[0])
-	d.Set("secret_key", *s3Key.Properties.SecretKey)
-	d.Set("active", *s3Key.Properties.Active)
+	if err := d.Set("user_id", parts[0]); err != nil {
+		return nil, err
+	}
+	if err := d.Set("secret_key", *s3Key.Properties.SecretKey); err != nil {
+		return nil, err
+	}
+	if err := d.Set("active", *s3Key.Properties.Active); err != nil {
+		return nil, err
+	}
 
 	return []*schema.ResourceData{d}, nil
 }
 
-func resourceFirewallImport(d *schema.ResourceData, meta interface{}) ([]*schema.ResourceData, error) {
+func resourceFirewallImport(_ context.Context, d *schema.ResourceData, _ interface{}) ([]*schema.ResourceData, error) {
 	parts := strings.Split(d.Id(), "/")
 	if len(parts) != 4 || parts[0] == "" || parts[1] == "" {
 		return nil, fmt.Errorf("invalid import id %q. Expecting {datacenter}/{server}/{nic}/{firewall}", d.Id())
 	}
 
-	d.Set("datacenter_id", parts[0])
-	d.Set("server_id", parts[1])
-	d.Set("nic_id", parts[2])
+	if err := d.Set("datacenter_id", parts[0]); err != nil {
+		return nil, err
+	}
+	if err := d.Set("server_id", parts[1]); err != nil {
+		return nil, err
+	}
+	if err := d.Set("nic_id", parts[2]); err != nil {
+		return nil, err
+	}
 	d.SetId(parts[3])
 
 	return []*schema.ResourceData{d}, nil
 }
 
-func resourceNicImport(d *schema.ResourceData, meta interface{}) ([]*schema.ResourceData, error) {
+func resourceNicImport(_ context.Context, d *schema.ResourceData, _ interface{}) ([]*schema.ResourceData, error) {
 	parts := strings.Split(d.Id(), "/")
 	if len(parts) != 3 || parts[0] == "" || parts[1] == "" {
 		return nil, fmt.Errorf("invalid import id %q. Expecting {datacenter}/{server}/{nic}", d.Id())
 	}
 
-	d.Set("datacenter_id", parts[0])
-	d.Set("server_id", parts[1])
+	if err := d.Set("datacenter_id", parts[0]); err != nil {
+		return nil, err
+	}
+	if err := d.Set("server_id", parts[1]); err != nil {
+		return nil, err
+	}
 	d.SetId(parts[2])
 
 	return []*schema.ResourceData{d}, nil
@@ -368,7 +415,6 @@ func diffSlice(slice1 []string, slice2 []string) []string {
 	return diff
 }
 
-
 func responseBody(resp *ionoscloud.APIResponse) string {
 	ret := "<nil>"
 	if resp != nil {
@@ -389,4 +435,3 @@ func setPropWithNilCheck(m map[string]interface{}, prop string, v interface{}) {
 		m[prop] = v
 	}
 }
-

@@ -3,17 +3,18 @@ package ionoscloud
 import (
 	"context"
 	"fmt"
-	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	ionoscloud "github.com/ionos-cloud/sdk-go/v6"
 	"log"
 )
 
 func resourceNatGateway() *schema.Resource {
 	return &schema.Resource{
-		Create: resourceNatGatewayCreate,
-		Read:   resourceNatGatewayRead,
-		Update: resourceNatGatewayUpdate,
-		Delete: resourceNatGatewayDelete,
+		CreateContext: resourceNatGatewayCreate,
+		ReadContext:   resourceNatGatewayRead,
+		UpdateContext: resourceNatGatewayUpdate,
+		DeleteContext: resourceNatGatewayDelete,
 		Schema: map[string]*schema.Schema{
 
 			"name": {
@@ -63,7 +64,7 @@ func resourceNatGateway() *schema.Resource {
 	}
 }
 
-func resourceNatGatewayCreate(d *schema.ResourceData, meta interface{}) error {
+func resourceNatGatewayCreate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	client := meta.(*ionoscloud.APIClient)
 
 	name := d.Get("name").(string)
@@ -83,14 +84,15 @@ func resourceNatGatewayCreate(d *schema.ResourceData, meta interface{}) error {
 			}
 			natGateway.Properties.PublicIps = &publicIps
 		} else {
-			return fmt.Errorf("You must provide public_ips for nat gateway resource \n")
+			diags := diag.FromErr(fmt.Errorf("you must provide public_ips for nat gateway resource \n"))
+			return diags
 		}
 	}
 
 	if lansVal, lansOK := d.GetOk("lans"); lansOK {
 		if lansVal.([]interface{}) != nil {
 			updateLans := false
-			lans := []ionoscloud.NatGatewayLanProperties{}
+			var lans []ionoscloud.NatGatewayLanProperties
 
 			for lanIndex := range lansVal.([]interface{}) {
 				lan := ionoscloud.NatGatewayLanProperties{}
@@ -123,61 +125,51 @@ func resourceNatGatewayCreate(d *schema.ResourceData, meta interface{}) error {
 				log.Printf("[INFO] NatGateway LANs set to %+v", lans)
 				natGateway.Properties.Lans = &lans
 			} else {
-				return fmt.Errorf("You must provide lans for the nat gateway resource \n")
+				diags := diag.FromErr(fmt.Errorf("you must provide lans for the nat gateway resource \n"))
+				return diags
 			}
 		}
 	}
 
 	dcId := d.Get("datacenter_id").(string)
-
-	ctx, cancel := context.WithTimeout(context.Background(), *resourceDefaultTimeouts.Create)
-	if cancel != nil {
-		defer cancel()
-	}
 
 	log.Printf("[*****] %+v\n", natGateway)
 	natGatewayResp, apiResponse, err := client.NATGatewaysApi.DatacentersNatgatewaysPost(ctx, dcId).NatGateway(natGateway).Execute()
 
 	if err != nil {
 		d.SetId("")
-		return fmt.Errorf("error creating natGateway: %s, %s", err, responseBody(apiResponse))
+		diags := diag.FromErr(fmt.Errorf("error creating natGateway: %s, %s", err, responseBody(apiResponse)))
+		return diags
 	}
 
 	d.SetId(*natGatewayResp.Id)
 
 	// Wait, catching any errors
-	_, errState := getStateChangeConf(meta, d, apiResponse.Header.Get("Location"), schema.TimeoutCreate).WaitForState()
+	_, errState := getStateChangeConf(meta, d, apiResponse.Header.Get("Location"), schema.TimeoutCreate).WaitForStateContext(ctx)
 	if errState != nil {
 		if IsRequestFailed(err) {
 			// Request failed, so resource was not created, delete resource from state file
 			d.SetId("")
 		}
-		return errState
+		diags := diag.FromErr(errState)
+		return diags
 	}
 
-	return resourceNatGatewayRead(d, meta)
+	return resourceNatGatewayRead(ctx, d, meta)
 }
 
-func resourceNatGatewayRead(d *schema.ResourceData, meta interface{}) error {
+func resourceNatGatewayRead(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	client := meta.(*ionoscloud.APIClient)
 
 	dcId := d.Get("datacenter_id").(string)
-
-	ctx, cancel := context.WithTimeout(context.Background(), *resourceDefaultTimeouts.Default)
-
-	if cancel != nil {
-		defer cancel()
-	}
 
 	natGateway, apiResponse, err := client.NATGatewaysApi.DatacentersNatgatewaysFindByNatGatewayId(ctx, dcId, d.Id()).Execute()
 
 	if err != nil {
 		log.Printf("[INFO] Resource %s not found: %+v", d.Id(), err)
-		if _, ok := err.(ionoscloud.GenericOpenAPIError); ok {
-			if apiResponse.Response.StatusCode == 404 {
-				d.SetId("")
-				return nil
-			}
+		if apiResponse.Response.StatusCode == 404 {
+			d.SetId("")
+			return nil
 		}
 	}
 
@@ -186,14 +178,16 @@ func resourceNatGatewayRead(d *schema.ResourceData, meta interface{}) error {
 	if natGateway.Properties.Name != nil {
 		err := d.Set("name", *natGateway.Properties.Name)
 		if err != nil {
-			return fmt.Errorf("error while setting name property for nat gateway %s: %s", d.Id(), err)
+			diags := diag.FromErr(fmt.Errorf("error while setting name property for nat gateway %s: %s", d.Id(), err))
+			return diags
 		}
 	}
 
 	if natGateway.Properties.PublicIps != nil {
 		err := d.Set("public_ips", *natGateway.Properties.PublicIps)
 		if err != nil {
-			return fmt.Errorf("error while setting public_ips property for nat gateway %s: %s", d.Id(), err)
+			diags := diag.FromErr(fmt.Errorf("error while setting public_ips property for nat gateway %s: %s", d.Id(), err))
+			return diags
 		}
 	}
 
@@ -217,13 +211,14 @@ func resourceNatGatewayRead(d *schema.ResourceData, meta interface{}) error {
 
 	if len(natGatewayLans) > 0 {
 		if err := d.Set("lans", natGatewayLans); err != nil {
-			return fmt.Errorf("error while setting lans property for nat gateway %s: %s", d.Id(), err)
+			diags := diag.FromErr(fmt.Errorf("error while setting lans property for nat gateway %s: %s", d.Id(), err))
+			return diags
 		}
 	}
 	return nil
 }
 
-func resourceNatGatewayUpdate(d *schema.ResourceData, meta interface{}) error {
+func resourceNatGatewayUpdate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	client := meta.(*ionoscloud.APIClient)
 	request := ionoscloud.NatGateway{
 		Properties: &ionoscloud.NatGatewayProperties{},
@@ -254,7 +249,7 @@ func resourceNatGatewayUpdate(d *schema.ResourceData, meta interface{}) error {
 		oldLANs, newLANs := d.GetChange("lans")
 		if newLANs.([]interface{}) != nil {
 			updateLans := false
-			lans := []ionoscloud.NatGatewayLanProperties{}
+			var lans []ionoscloud.NatGatewayLanProperties
 
 			for lanIndex := range newLANs.([]interface{}) {
 				lan := ionoscloud.NatGatewayLanProperties{}
@@ -290,46 +285,39 @@ func resourceNatGatewayUpdate(d *schema.ResourceData, meta interface{}) error {
 		}
 	}
 
-	ctx, cancel := context.WithTimeout(context.Background(), *resourceDefaultTimeouts.Update)
-
-	if cancel != nil {
-		defer cancel()
-	}
 	_, apiResponse, err := client.NATGatewaysApi.DatacentersNatgatewaysPatch(ctx, dcId, d.Id()).NatGatewayProperties(*request.Properties).Execute()
 
 	if err != nil {
-		return fmt.Errorf("an error occured while updating a nat gateway ID %s %s", d.Id(), err)
+		diags := diag.FromErr(fmt.Errorf("an error occured while updating a nat gateway ID %s %s", d.Id(), err))
+		return diags
 	}
 
-	_, errState := getStateChangeConf(meta, d, apiResponse.Header.Get("Location"), schema.TimeoutUpdate).WaitForState()
+	_, errState := getStateChangeConf(meta, d, apiResponse.Header.Get("Location"), schema.TimeoutUpdate).WaitForStateContext(ctx)
 	if errState != nil {
-		return errState
+		diags := diag.FromErr(errState)
+		return diags
 	}
 
-	return resourceNatGatewayRead(d, meta)
+	return resourceNatGatewayRead(ctx, d, meta)
 }
 
-func resourceNatGatewayDelete(d *schema.ResourceData, meta interface{}) error {
+func resourceNatGatewayDelete(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	client := meta.(*ionoscloud.APIClient)
 
 	dcId := d.Get("datacenter_id").(string)
 
-	ctx, cancel := context.WithTimeout(context.Background(), *resourceDefaultTimeouts.Delete)
-
-	if cancel != nil {
-		defer cancel()
-	}
-
 	apiResponse, err := client.NATGatewaysApi.DatacentersNatgatewaysDelete(ctx, dcId, d.Id()).Execute()
 
 	if err != nil {
-		return fmt.Errorf("an error occured while deleting a nat gateway %s %s", d.Id(), err)
+		diags := diag.FromErr(fmt.Errorf("an error occured while deleting a nat gateway %s %s", d.Id(), err))
+		return diags
 	}
 
 	// Wait, catching any errors
-	_, errState := getStateChangeConf(meta, d, apiResponse.Header.Get("Location"), schema.TimeoutDelete).WaitForState()
+	_, errState := getStateChangeConf(meta, d, apiResponse.Header.Get("Location"), schema.TimeoutDelete).WaitForStateContext(ctx)
 	if errState != nil {
-		return errState
+		diags := diag.FromErr(errState)
+		return diags
 	}
 
 	d.SetId("")

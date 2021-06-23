@@ -7,8 +7,8 @@ import (
 	"os"
 	"testing"
 
-	"github.com/hashicorp/terraform-plugin-sdk/helper/resource"
-	"github.com/hashicorp/terraform-plugin-sdk/terraform"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
 )
 
 func TestAccNatGatewayRule_Basic(t *testing.T) {
@@ -25,8 +25,8 @@ func TestAccNatGatewayRule_Basic(t *testing.T) {
 		PreCheck: func() {
 			testAccPreCheck(t)
 		},
-		Providers:    testAccProviders,
-		CheckDestroy: testAccCheckNatGatewayRuleDestroyCheck,
+		ProviderFactories: testAccProviderFactories,
+		CheckDestroy:      testAccCheckNatGatewayRuleDestroyCheck,
 		Steps: []resource.TestStep{
 			{
 				Config: fmt.Sprintf(testAccCheckNatGatewayRuleConfigBasic, publicIp1, natGatewayRuleName, publicIp1),
@@ -61,12 +61,12 @@ func testAccCheckNatGatewayRuleDestroyCheck(s *terraform.State) error {
 
 		apiResponse, err := client.NATGatewaysApi.DatacentersNatgatewaysRulesDelete(ctx, rs.Primary.Attributes["datacenter_id"], rs.Primary.Attributes["natgateway_id"], rs.Primary.ID).Execute()
 
-		if _, ok := err.(ionoscloud.GenericOpenAPIError); ok {
+		if err != nil {
 			if apiResponse == nil || apiResponse.Response.StatusCode != 404 {
-				return fmt.Errorf("nat gateway rule still exists %s %s", rs.Primary.ID, responseBody(apiResponse))
+				return fmt.Errorf("an error occured at checking deletion of nat gateway rule %s %s", rs.Primary.ID, responseBody(apiResponse))
 			}
 		} else {
-			return fmt.Errorf("unable to fetch nat gateway rule %s %s", rs.Primary.ID, err)
+			return fmt.Errorf("nat gateway rule still exists %s %s", rs.Primary.ID, err)
 		}
 	}
 

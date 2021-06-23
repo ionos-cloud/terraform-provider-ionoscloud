@@ -3,20 +3,21 @@ package ionoscloud
 import (
 	"context"
 	"fmt"
-	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
-	"github.com/hashicorp/terraform-plugin-sdk/helper/validation"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 	ionoscloud "github.com/ionos-cloud/sdk-go/v6"
 	"strconv"
 )
 
 func resourceFirewall() *schema.Resource {
 	return &schema.Resource{
-		Create: resourceFirewallCreate,
-		Read:   resourceFirewallRead,
-		Update: resourceFirewallUpdate,
-		Delete: resourceFirewallDelete,
+		CreateContext: resourceFirewallCreate,
+		ReadContext:   resourceFirewallRead,
+		UpdateContext: resourceFirewallUpdate,
+		DeleteContext: resourceFirewallDelete,
 		Importer: &schema.ResourceImporter{
-			State: resourceFirewallImport,
+			StateContext: resourceFirewallImport,
 		},
 		Schema: map[string]*schema.Schema{
 
@@ -98,7 +99,7 @@ func resourceFirewall() *schema.Resource {
 	}
 }
 
-func resourceFirewallCreate(d *schema.ResourceData, meta interface{}) error {
+func resourceFirewallCreate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	client := meta.(*ionoscloud.APIClient)
 
 	firewallProtocol := d.Get("protocol").(string)
@@ -136,7 +137,8 @@ func resourceFirewallCreate(d *schema.ResourceData, meta interface{}) error {
 	if _, ok := d.GetOk("icmp_type"); ok {
 		tempIcmpType, err := strconv.Atoi(d.Get("icmp_type").(string))
 		if err != nil {
-			return fmt.Errorf("an error occured while creating a firewall rule: %s", err)
+			diags := diag.FromErr(fmt.Errorf("an error occured while creating a firewall rule: %s", err))
+			return diags
 		}
 		tempIcmpTypeInt := int32(tempIcmpType)
 		fw.Properties.IcmpType = &tempIcmpTypeInt
@@ -144,7 +146,8 @@ func resourceFirewallCreate(d *schema.ResourceData, meta interface{}) error {
 	if _, ok := d.GetOk("icmp_code"); ok {
 		tempIcmpCodee, err := strconv.Atoi(d.Get("icmp_code").(string))
 		if err != nil {
-			return fmt.Errorf("an error occured while creating a firewall rule: %s", err)
+			diags := diag.FromErr(fmt.Errorf("an error occured while creating a firewall rule: %s", err))
+			return diags
 		}
 		tempIcmpCodeeInt := int32(tempIcmpCodee)
 		fw.Properties.IcmpCode = &tempIcmpCodeeInt
@@ -154,38 +157,30 @@ func resourceFirewallCreate(d *schema.ResourceData, meta interface{}) error {
 		fw.Properties.TargetIp = &fwType
 	}
 
-	ctx, cancel := context.WithTimeout(context.Background(), *resourceDefaultTimeouts.Default)
-	if cancel != nil {
-		defer cancel()
-	}
-
 	fw, apiResponse, err := client.FirewallRulesApi.DatacentersServersNicsFirewallrulesPost(ctx, d.Get("datacenter_id").(string), d.Get("server_id").(string), d.Get("nic_id").(string)).Firewallrule(fw).Execute()
 
 	if err != nil {
-		return fmt.Errorf("an error occured while creating a firewall rule: %s", err)
+		diags := diag.FromErr(fmt.Errorf("an error occured while creating a firewall rule: %s", err))
+		return diags
 	}
 	d.SetId(*fw.Id)
 
 	// Wait, catching any errors
-	_, errState := getStateChangeConf(meta, d, apiResponse.Header.Get("Location"), schema.TimeoutCreate).WaitForState()
+	_, errState := getStateChangeConf(meta, d, apiResponse.Header.Get("Location"), schema.TimeoutCreate).WaitForStateContext(ctx)
 	if errState != nil {
 		if IsRequestFailed(err) {
 			// Request failed, so resource was not created, delete resource from state file
 			d.SetId("")
 		}
-		return errState
+		diags := diag.FromErr(errState)
+		return diags
 	}
 
-	return resourceFirewallRead(d, meta)
+	return resourceFirewallRead(ctx, d, meta)
 }
 
-func resourceFirewallRead(d *schema.ResourceData, meta interface{}) error {
+func resourceFirewallRead(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	client := meta.(*ionoscloud.APIClient)
-
-	ctx, cancel := context.WithTimeout(context.Background(), *resourceDefaultTimeouts.Default)
-	if cancel != nil {
-		defer cancel()
-	}
 
 	fw, apiResponse, err := client.FirewallRulesApi.DatacentersServersNicsFirewallrulesFindById(ctx, d.Get("datacenter_id").(string),
 		d.Get("server_id").(string), d.Get("nic_id").(string), d.Id()).Execute()
@@ -195,20 +190,23 @@ func resourceFirewallRead(d *schema.ResourceData, meta interface{}) error {
 			d.SetId("")
 			return nil
 		}
-		return fmt.Errorf("an error occured while fetching a firewall rule  dcId: %s server_id: %s  nic_id: %s ID: %s %s", d.Get("datacenter_id").(string), d.Get("server_id").(string), d.Get("nic_id").(string), d.Id(), err)
+		diags := diag.FromErr(fmt.Errorf("an error occured while fetching a firewall rule  dcId: %s server_id: %s  nic_id: %s ID: %s %s", d.Get("datacenter_id").(string), d.Get("server_id").(string), d.Get("nic_id").(string), d.Id(), err))
+		return diags
 	}
 
 	if fw.Properties.Protocol != nil {
 		err := d.Set("protocol", *fw.Properties.Protocol)
 		if err != nil {
-			return fmt.Errorf("error while setting protocol property for firewall %s: %s", d.Id(), err)
+			diags := diag.FromErr(fmt.Errorf("error while setting protocol property for firewall %s: %s", d.Id(), err))
+			return diags
 		}
 	}
 
 	if fw.Properties.Name != nil {
 		err := d.Set("name", *fw.Properties.Name)
 		if err != nil {
-			return fmt.Errorf("error while setting name property for firewall %s: %s", d.Id(), err)
+			diags := diag.FromErr(fmt.Errorf("error while setting name property for firewall %s: %s", d.Id(), err))
+			return diags
 		}
 
 	}
@@ -216,68 +214,77 @@ func resourceFirewallRead(d *schema.ResourceData, meta interface{}) error {
 	if fw.Properties.SourceMac != nil {
 		err := d.Set("source_mac", *fw.Properties.SourceMac)
 		if err != nil {
-			return fmt.Errorf("error while setting source_mac property for firewall %s: %s", d.Id(), err)
+			diags := diag.FromErr(fmt.Errorf("error while setting source_mac property for firewall %s: %s", d.Id(), err))
+			return diags
 		}
 	}
 
 	if fw.Properties.SourceIp != nil {
 		err := d.Set("source_ip", *fw.Properties.SourceIp)
 		if err != nil {
-			return fmt.Errorf("error while setting source_ip property for firewall %s: %s", d.Id(), err)
+			diags := diag.FromErr(fmt.Errorf("error while setting source_ip property for firewall %s: %s", d.Id(), err))
+			return diags
 		}
 	}
 
 	if fw.Properties.TargetIp != nil {
 		err := d.Set("target_ip", *fw.Properties.TargetIp)
 		if err != nil {
-			return fmt.Errorf("error while setting target_ip property for firewall %s: %s", d.Id(), err)
+			diags := diag.FromErr(fmt.Errorf("error while setting target_ip property for firewall %s: %s", d.Id(), err))
+			return diags
 		}
 	}
 
 	if fw.Properties.PortRangeStart != nil {
 		err := d.Set("port_range_start", *fw.Properties.PortRangeStart)
 		if err != nil {
-			return fmt.Errorf("error while setting port_range_start property for firewall %s: %s", d.Id(), err)
+			diags := diag.FromErr(fmt.Errorf("error while setting port_range_start property for firewall %s: %s", d.Id(), err))
+			return diags
 		}
 	}
 
 	if fw.Properties.PortRangeEnd != nil {
 		err := d.Set("port_range_end", *fw.Properties.PortRangeEnd)
 		if err != nil {
-			return fmt.Errorf("error while setting port_range_end property for firewall %s: %s", d.Id(), err)
+			diags := diag.FromErr(fmt.Errorf("error while setting port_range_end property for firewall %s: %s", d.Id(), err))
+			return diags
 		}
 	}
 
 	if fw.Properties.IcmpType != nil {
 		err := d.Set("icmp_type", *fw.Properties.IcmpType)
 		if err != nil {
-			return fmt.Errorf("error while setting icmp_type property for firewall %s: %s", d.Id(), err)
+			diags := diag.FromErr(fmt.Errorf("error while setting icmp_type property for firewall %s: %s", d.Id(), err))
+			return diags
 		}
 	}
 
 	if fw.Properties.IcmpCode != nil {
 		err := d.Set("icmp_code", *fw.Properties.IcmpCode)
 		if err != nil {
-			return fmt.Errorf("error while setting icmp_code property for firewall %s: %s", d.Id(), err)
+			diags := diag.FromErr(fmt.Errorf("error while setting icmp_code property for firewall %s: %s", d.Id(), err))
+			return diags
 		}
 	}
 
 	if fw.Properties.Type != nil {
 		err := d.Set("type", *fw.Properties.Type)
 		if err != nil {
-			return fmt.Errorf("error while setting type property for firewall %s: %s", d.Id(), err)
+			diags := diag.FromErr(fmt.Errorf("error while setting type property for firewall %s: %s", d.Id(), err))
+			return diags
 		}
 	}
 
 	err = d.Set("nic_id", d.Get("nic_id").(string))
 	if err != nil {
-		return fmt.Errorf("error while setting nic_id property for firewall %s: %s", d.Id(), err)
+		diags := diag.FromErr(fmt.Errorf("error while setting nic_id property for firewall %s: %s", d.Id(), err))
+		return diags
 	}
 
 	return nil
 }
 
-func resourceFirewallUpdate(d *schema.ResourceData, meta interface{}) error {
+func resourceFirewallUpdate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	client := meta.(*ionoscloud.APIClient)
 
 	properties := ionoscloud.FirewallruleProperties{}
@@ -316,7 +323,8 @@ func resourceFirewallUpdate(d *schema.ResourceData, meta interface{}) error {
 		_, v := d.GetChange("icmp_type")
 		tempIcmpType, err := strconv.Atoi(v.(string))
 		if err != nil {
-			return fmt.Errorf("an error occured while updating a firewall rule: %s", err)
+			diags := diag.FromErr(fmt.Errorf("an error occured while updating a firewall rule: %s", err))
+			return diags
 		}
 		tempIcmpTypeInt := int32(tempIcmpType)
 		properties.IcmpType = &tempIcmpTypeInt
@@ -325,7 +333,8 @@ func resourceFirewallUpdate(d *schema.ResourceData, meta interface{}) error {
 		_, v := d.GetChange("icmp_code")
 		tempIcmpCode, err := strconv.Atoi(v.(string))
 		if err != nil {
-			return fmt.Errorf("an error occured while updating a firewall rule: %s", err)
+			diags := diag.FromErr(fmt.Errorf("an error occured while updating a firewall rule: %s", err))
+			return diags
 		}
 		tempIcmpCodeInt := int32(tempIcmpCode)
 		properties.IcmpCode = &tempIcmpCodeInt
@@ -337,34 +346,25 @@ func resourceFirewallUpdate(d *schema.ResourceData, meta interface{}) error {
 		properties.Type = &vStr
 	}
 
-	ctx, cancel := context.WithTimeout(context.Background(), *resourceDefaultTimeouts.Update)
-
-	if cancel != nil {
-		defer cancel()
-	}
-
 	_, apiResponse, err := client.FirewallRulesApi.DatacentersServersNicsFirewallrulesPatch(ctx, d.Get("datacenter_id").(string), d.Get("server_id").(string), d.Get("nic_id").(string), d.Id()).Firewallrule(properties).Execute()
 
 	if err != nil {
-		return fmt.Errorf("an error occured while updating a firewall rule ID %s %s", d.Id(), err)
+		diags := diag.FromErr(fmt.Errorf("an error occured while updating a firewall rule ID %s %s", d.Id(), err))
+		return diags
 	}
 
 	// Wait, catching any errors
-	_, errState := getStateChangeConf(meta, d, apiResponse.Header.Get("Location"), schema.TimeoutUpdate).WaitForState()
+	_, errState := getStateChangeConf(meta, d, apiResponse.Header.Get("Location"), schema.TimeoutUpdate).WaitForStateContext(ctx)
 	if errState != nil {
-		return errState
+		diags := diag.FromErr(errState)
+		return diags
 	}
 
-	return resourceFirewallRead(d, meta)
+	return resourceFirewallRead(ctx, d, meta)
 }
 
-func resourceFirewallDelete(d *schema.ResourceData, meta interface{}) error {
+func resourceFirewallDelete(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	client := meta.(*ionoscloud.APIClient)
-
-	ctx, cancel := context.WithTimeout(context.Background(), *resourceDefaultTimeouts.Delete)
-	if cancel != nil {
-		defer cancel()
-	}
 
 	apiResponse, err := client.FirewallRulesApi.
 		DatacentersServersNicsFirewallrulesDelete(
@@ -373,13 +373,15 @@ func resourceFirewallDelete(d *schema.ResourceData, meta interface{}) error {
 		Execute()
 
 	if err != nil {
-		return fmt.Errorf("an error occured while deleting a firewall rule ID %s %s", d.Id(), err)
+		diags := diag.FromErr(fmt.Errorf("an error occured while deleting a firewall rule ID %s %s", d.Id(), err))
+		return diags
 	}
 
 	// Wait, catching any errors
-	_, errState := getStateChangeConf(meta, d, apiResponse.Header.Get("Location"), schema.TimeoutDelete).WaitForState()
+	_, errState := getStateChangeConf(meta, d, apiResponse.Header.Get("Location"), schema.TimeoutDelete).WaitForStateContext(ctx)
 	if errState != nil {
-		return errState
+		diags := diag.FromErr(errState)
+		return diags
 	}
 
 	d.SetId("")

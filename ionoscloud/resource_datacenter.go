@@ -3,8 +3,9 @@ package ionoscloud
 import (
 	"context"
 	"fmt"
-	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
-	"github.com/hashicorp/terraform-plugin-sdk/helper/validation"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 	ionoscloud "github.com/ionos-cloud/sdk-go/v6"
 	"log"
 	"regexp"
@@ -13,12 +14,12 @@ import (
 
 func resourceDatacenter() *schema.Resource {
 	return &schema.Resource{
-		Create: resourceDatacenterCreate,
-		Read:   resourceDatacenterRead,
-		Update: resourceDatacenterUpdate,
-		Delete: resourceDatacenterDelete,
+		CreateContext: resourceDatacenterCreate,
+		ReadContext:   resourceDatacenterRead,
+		UpdateContext: resourceDatacenterUpdate,
+		DeleteContext: resourceDatacenterDelete,
 		Importer: &schema.ResourceImporter{
-			State: schema.ImportStatePassthrough,
+			StateContext: schema.ImportStatePassthroughContext,
 		},
 		Schema: map[string]*schema.Schema{
 
@@ -48,7 +49,7 @@ func resourceDatacenter() *schema.Resource {
 	}
 }
 
-func resourceDatacenterCreate(d *schema.ResourceData, meta interface{}) error {
+func resourceDatacenterCreate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 
 	client := meta.(*ionoscloud.APIClient)
 
@@ -72,45 +73,34 @@ func resourceDatacenterCreate(d *schema.ResourceData, meta interface{}) error {
 		datacenter.Properties.SecAuthProtection = &attrStr
 	}
 
-	ctx, cancel := context.WithTimeout(context.Background(), *resourceDefaultTimeouts.Create)
-
-	if cancel != nil {
-		defer cancel()
-	}
-
 	createdDatacenter, apiResponse, err := client.DataCentersApi.DatacentersPost(ctx).Datacenter(datacenter).Execute()
 
 	if err != nil {
-		return fmt.Errorf(
-			"error creating data center (%s) (%s)", d.Id(), err)
+		diags := diag.FromErr(fmt.Errorf("error creating data center (%s) (%s)", d.Id(), err))
+		return diags
 	}
 	d.SetId(*createdDatacenter.Id)
 
 	log.Printf("[INFO] DataCenter Id: %s", d.Id())
 
 	// Wait, catching any errors
-	_, errState := getStateChangeConf(meta, d, apiResponse.Header.Get("Location"), schema.TimeoutCreate).WaitForState()
+	_, errState := getStateChangeConf(meta, d, apiResponse.Header.Get("Location"), schema.TimeoutCreate).WaitForStateContext(ctx)
 
 	if errState != nil {
 		if IsRequestFailed(err) {
 			// Request failed, so resource was not created, delete resource from state file
 			d.SetId("")
 		}
-		return errState
+		diags := diag.FromErr(errState)
+		return diags
 	}
 
-	return resourceDatacenterRead(d, meta)
+	return resourceDatacenterRead(ctx, d, meta)
 }
 
-func resourceDatacenterRead(d *schema.ResourceData, meta interface{}) error {
+func resourceDatacenterRead(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 
 	client := meta.(*ionoscloud.APIClient)
-
-	ctx, cancel := context.WithTimeout(context.Background(), *resourceDefaultTimeouts.Default)
-
-	if cancel != nil {
-		defer cancel()
-	}
 
 	datacenter, apiResponse, err := client.DataCentersApi.DatacentersFindById(ctx, d.Id()).Execute()
 
@@ -119,41 +109,46 @@ func resourceDatacenterRead(d *schema.ResourceData, meta interface{}) error {
 			d.SetId("")
 			return nil
 		}
-		return fmt.Errorf("error while fetching a data center ID %s %s", d.Id(), err)
+		diags := diag.FromErr(fmt.Errorf("error while fetching a data center ID %s %s", d.Id(), err))
+		return diags
 	}
 
 	if datacenter.Properties.Name != nil {
 		err := d.Set("name", *datacenter.Properties.Name)
 		if err != nil {
-			return fmt.Errorf("error while setting name property for datacenter %s: %s", d.Id(), err)
+			diags := diag.FromErr(fmt.Errorf("error while setting name property for datacenter %s: %s", d.Id(), err))
+			return diags
 		}
 	}
 
 	if datacenter.Properties.Location != nil {
 		err := d.Set("location", *datacenter.Properties.Location)
 		if err != nil {
-			return fmt.Errorf("error while setting location property for datacenter %s: %s", d.Id(), err)
+			diags := diag.FromErr(fmt.Errorf("error while setting location property for datacenter %s: %s", d.Id(), err))
+			return diags
 		}
 	}
 
 	if datacenter.Properties.Description != nil {
 		err := d.Set("description", *datacenter.Properties.Description)
 		if err != nil {
-			return fmt.Errorf("error while setting description property for datacenter %s: %s", d.Id(), err)
+			diags := diag.FromErr(fmt.Errorf("error while setting description property for datacenter %s: %s", d.Id(), err))
+			return diags
 		}
 	}
 
 	if datacenter.Properties.SecAuthProtection != nil {
 		err := d.Set("sec_auth_protection", *datacenter.Properties.SecAuthProtection)
 		if err != nil {
-			return fmt.Errorf("error while setting sec_auth_protection property for datacenter %s: %s", d.Id(), err)
+			diags := diag.FromErr(fmt.Errorf("error while setting sec_auth_protection property for datacenter %s: %s", d.Id(), err))
+			return diags
 		}
 	}
 
 	return nil
 }
 
-func resourceDatacenterUpdate(d *schema.ResourceData, meta interface{}) error {
+func resourceDatacenterUpdate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 
 	client := meta.(*ionoscloud.APIClient)
 	obj := ionoscloud.DatacenterProperties{}
@@ -172,7 +167,8 @@ func resourceDatacenterUpdate(d *schema.ResourceData, meta interface{}) error {
 
 	if d.HasChange("location") {
 		oldLocation, newLocation := d.GetChange("location")
-		return fmt.Errorf("data center is created in %s location. You can not change location of the data center to %s; it requires recreation of the data center", oldLocation, newLocation)
+		diags := diag.FromErr(fmt.Errorf("data center is created in %s location. You can not change location of the data center to %s; it requires recreation of the data center", oldLocation, newLocation))
+		return diags
 	}
 
 	if d.HasChange("sec_auth_protection") {
@@ -180,48 +176,39 @@ func resourceDatacenterUpdate(d *schema.ResourceData, meta interface{}) error {
 		newSecAuthProtectionStr := newSecAuthProtection.(bool)
 		obj.SecAuthProtection = &newSecAuthProtectionStr
 	}
-
-	ctx, cancel := context.WithTimeout(context.Background(), *resourceDefaultTimeouts.Update)
-
-	if cancel != nil {
-		defer cancel()
-	}
-
 	_, apiResponse, err := client.DataCentersApi.DatacentersPatch(ctx, d.Id()).Datacenter(obj).Execute()
 
 	if err != nil {
-		return fmt.Errorf("an error occured while update the data center ID %s %s", d.Id(), err)
+		diags := diag.FromErr(fmt.Errorf("an error occured while update the data center ID %s %s", d.Id(), err))
+		return diags
 	}
 
 	// Wait, catching any errors
-	_, errState := getStateChangeConf(meta, d, apiResponse.Header.Get("Location"), schema.TimeoutUpdate).WaitForState()
+	_, errState := getStateChangeConf(meta, d, apiResponse.Header.Get("Location"), schema.TimeoutUpdate).WaitForStateContext(ctx)
 	if errState != nil {
-		return errState
+		diags := diag.FromErr(errState)
+		return diags
 	}
 
-	return resourceDatacenterRead(d, meta)
+	return resourceDatacenterRead(ctx, d, meta)
 }
 
-func resourceDatacenterDelete(d *schema.ResourceData, meta interface{}) error {
+func resourceDatacenterDelete(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 
 	client := meta.(*ionoscloud.APIClient)
-
-	ctx, cancel := context.WithTimeout(context.Background(), *resourceDefaultTimeouts.Delete)
-
-	if cancel != nil {
-		defer cancel()
-	}
 
 	apiResponse, err := client.DataCentersApi.DatacentersDelete(ctx, d.Id()).Execute()
 
 	if err != nil {
-		return err
+		diags := diag.FromErr(err)
+		return diags
 	}
 
 	// Wait, catching any errors
-	_, errState := getStateChangeConf(meta, d, apiResponse.Header.Get("Location"), schema.TimeoutDelete).WaitForState()
+	_, errState := getStateChangeConf(meta, d, apiResponse.Header.Get("Location"), schema.TimeoutDelete).WaitForStateContext(ctx)
 	if errState != nil {
-		return errState
+		diags := diag.FromErr(errState)
+		return diags
 	}
 
 	d.SetId("")

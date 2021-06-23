@@ -6,8 +6,8 @@ import (
 	ionoscloud "github.com/ionos-cloud/sdk-go/v6"
 	"testing"
 
-	"github.com/hashicorp/terraform-plugin-sdk/helper/resource"
-	"github.com/hashicorp/terraform-plugin-sdk/terraform"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
 )
 
 func TestAccIPBlock_Basic(t *testing.T) {
@@ -18,8 +18,8 @@ func TestAccIPBlock_Basic(t *testing.T) {
 		PreCheck: func() {
 			testAccPreCheck(t)
 		},
-		Providers:    testAccProviders,
-		CheckDestroy: testAccCheckIPBlockDestroyCheck,
+		ProviderFactories: testAccProviderFactories,
+		CheckDestroy:      testAccCheckIPBlockDestroyCheck,
 		Steps: []resource.TestStep{
 			{
 				Config: fmt.Sprintf(testAccCheckIPBlockConfigBasic, location),
@@ -55,12 +55,12 @@ func testAccCheckIPBlockDestroyCheck(s *terraform.State) error {
 
 		_, apiResponse, err := client.IPBlocksApi.IpblocksFindById(ctx, rs.Primary.ID).Execute()
 
-		if apiError, ok := err.(ionoscloud.GenericOpenAPIError); ok {
+		if err != nil {
 			if apiResponse != nil && apiResponse.Response.StatusCode != 404 {
-				return fmt.Errorf("IPBlock still exists %s %s", rs.Primary.ID, apiError)
+				return fmt.Errorf("an error occured while checking deletion of IPBlock %s %s", rs.Primary.ID, err)
 			}
 		} else {
-			return fmt.Errorf("unable to fetching IPBlock %s %s", rs.Primary.ID, err)
+			return fmt.Errorf("IPBlock still exists %s %s", rs.Primary.ID, err)
 		}
 	}
 
