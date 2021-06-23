@@ -201,7 +201,7 @@ func resourceVolumeCreate(ctx context.Context, d *schema.ResourceData, meta inte
 	}
 
 	if imageName == "" && licenceType == "" && isSnapshot == false {
-		diags := diag.FromErr(fmt.Errorf("either 'image_name', or 'licenceType' must be set"))
+		diags := diag.FromErr(fmt.Errorf("either 'image_name', or 'licence_type' must be set"))
 		return diags
 	}
 
