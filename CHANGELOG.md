@@ -1,3 +1,8 @@
+## 5.2.1
+
+- issue #29 - corrected parameter name in volume error message
+- issue #30 - creation of volume without password + default value for bus
+
 ## 5.2.0
 
 - fixes #17 - documentation updates
