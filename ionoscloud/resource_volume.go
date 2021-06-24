@@ -51,6 +51,7 @@ func resourceVolume() *schema.Resource {
 			"bus": {
 				Type:     schema.TypeString,
 				Optional: true,
+				Computed: true,
 			},
 			"name": {
 				Type:     schema.TypeString,
@@ -222,13 +223,20 @@ func resourceVolumeCreate(ctx context.Context, d *schema.ResourceData, meta inte
 			Name:        &volumeName,
 			Size:        &volumeSize,
 			Type:        &volumeType,
-			Bus:         &volumeBus,
 			LicenceType: &licenceType,
 		},
 	}
 
 	if imagePassword != "" {
 		volume.Properties.ImagePassword = &imagePassword
+	} else {
+		volume.Properties.ImagePassword = nil
+	}
+
+	if volumeBus != "" {
+		volume.Properties.Bus = &volumeBus
+	} else {
+		volume.Properties.Bus = nil
 	}
 
 	if licenceType != "" {

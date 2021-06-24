@@ -38,6 +38,27 @@ func TestAccVolume_Basic(t *testing.T) {
 	})
 }
 
+func TestAccVolume_NoPassword(t *testing.T) {
+	var volume ionoscloud.Volume
+
+	resource.Test(t, resource.TestCase{
+		PreCheck: func() {
+			testAccPreCheck(t)
+		},
+		ProviderFactories: testAccProviderFactories,
+		CheckDestroy:      testAccCheckVolumeDestroyCheck,
+		Steps: []resource.TestStep{
+			{
+				Config: fmt.Sprintf(testacccheckvolumeconfigNoPassword),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckVolumeExists("ionoscloud_volume.no_password_volume", &volume),
+					resource.TestCheckResourceAttr("ionoscloud_volume.no_password_volume", "name", "no_password"),
+				),
+			},
+		},
+	})
+}
+
 func testAccCheckVolumeDestroyCheck(s *terraform.State) error {
 	client := testAccProvider.Meta().(*ionoscloud.APIClient)
 	ctx, cancel := context.WithTimeout(context.Background(), *resourceDefaultTimeouts.Delete)
@@ -187,4 +208,46 @@ resource "ionoscloud_volume" "database_volume" {
   bus = "VIRTIO"
   image_name = "Ubuntu-20.04-LTS-server-2021-06-01"
   image_password = "K3tTj8G14a3EgKyNeeiY"
+}`
+
+const testacccheckvolumeconfigNoPassword = `
+resource "ionoscloud_datacenter" "foobar" {
+	name       = "volume-test"
+	location = "us/las"
+}
+
+resource "ionoscloud_lan" "webserver_lan" {
+  datacenter_id = "${ionoscloud_datacenter.foobar.id}"
+  public = true
+  name = "public"
+}
+
+resource "ionoscloud_server" "webserver" {
+  name = "webserver"
+  datacenter_id = "${ionoscloud_datacenter.foobar.id}"
+  cores = 1
+  ram = 1024
+  availability_zone = "ZONE_1"
+  cpu_family = "AMD_OPTERON"
+	image_name = "Ubuntu-20.04-LTS-server-2021-06-01"
+	image_password = "K3tTj8G14a3EgKyNeeiY"
+  volume {
+    name = "system"
+    size = 5
+    disk_type = "HDD"
+}
+  nic {
+    lan = "${ionoscloud_lan.webserver_lan.id}"
+    dhcp = true
+    firewall_active = true
+  }
+}
+
+resource "ionoscloud_volume" "no_password_volume" {
+  datacenter_id = "${ionoscloud_datacenter.foobar.id}"
+  server_id = "${ionoscloud_server.webserver.id}"
+  name = "no_password"
+  size           = 4
+  disk_type      = "HDD"
+  licence_type   =  "other"
 }`
