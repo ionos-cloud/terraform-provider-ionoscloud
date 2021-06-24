@@ -1,3 +1,7 @@
+## 5.2.2
+
+- issue #36 - correctly setting the value of the active property when creating an s3 resource
+
 ## 5.2.1
 
 - issue #29 - corrected parameter name in volume error message
