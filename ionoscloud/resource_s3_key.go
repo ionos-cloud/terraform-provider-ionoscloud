@@ -37,6 +37,7 @@ func resourceS3Key() *schema.Resource {
 				Type:        schema.TypeBool,
 				Description: "Whether this key should be active or not.",
 				Optional:    true,
+				Default: 	 true,
 			},
 		},
 		Timeouts: &resourceDefaultTimeouts,
@@ -46,7 +47,8 @@ func resourceS3Key() *schema.Resource {
 func resourceS3KeyCreate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	client := meta.(*ionoscloud.APIClient)
 
-	rsp, _, err := client.UserManagementApi.UmUsersS3keysPost(ctx, d.Get("user_id").(string)).Execute()
+	userId := d.Get("user_id").(string)
+	rsp, apiResponse, err := client.UserManagementApi.UmUsersS3keysPost(ctx, userId).Execute()
 
 	if err != nil {
 		d.SetId("")
@@ -54,10 +56,37 @@ func resourceS3KeyCreate(ctx context.Context, d *schema.ResourceData, meta inter
 		return diags
 	}
 
-	if rsp.Id != nil {
-		d.SetId(*rsp.Id)
+	if rsp.Id == nil {
+		return diag.FromErr(fmt.Errorf("the API didn't return an s3 key ID"))
 	}
+	keyId := *rsp.Id
+	d.SetId(keyId)
+
+	_, errState := getStateChangeConf(meta, d, apiResponse.Header.Get("Location"), schema.TimeoutCreate).WaitForStateContext(ctx)
+	if errState != nil {
+		diags := diag.FromErr(errState)
+		return diags
+	}
+
 	log.Printf("[INFO] Created S3 key: %s", d.Id())
+
+	active := d.Get("active").(bool)
+	s3Key := ionoscloud.S3Key{
+		Properties: &ionoscloud.S3KeyProperties{
+			Active: &active,
+		},
+	}
+	log.Printf("[INFO] Setting key active status to %+v", active)
+	_, apiResponse, err = client.UserManagementApi.UmUsersS3keysPut(ctx, userId, keyId).S3Key(s3Key).Execute()
+	if err != nil {
+		return diag.FromErr(fmt.Errorf("error saving key data %s: %s", keyId, err.Error()))
+	}
+
+	_, errState = getStateChangeConf(meta, d, apiResponse.Header.Get("Location"), schema.TimeoutCreate).WaitForStateContext(ctx)
+	if errState != nil {
+		diags := diag.FromErr(errState)
+		return diags
+	}
 
 	return resourceS3KeyRead(ctx, d, meta)
 }
@@ -91,6 +120,7 @@ func resourceS3KeyRead(ctx context.Context, d *schema.ResourceData, meta interfa
 	}
 
 	if rsp.Properties.Active != nil {
+		log.Printf("[INFO] SETTING ACTIVE TO %+v", *rsp.Properties.Active)
 		if err := d.Set("active", *rsp.Properties.Active); err != nil {
 			diags := diag.FromErr(err)
 			return diags
@@ -132,28 +162,10 @@ func resourceS3KeyUpdate(ctx context.Context, d *schema.ResourceData, meta inter
 		return diags
 	}
 
-	for {
-		log.Printf("[INFO] Waiting for S3 Key %s to be ready...", d.Id())
-
-		s3KeyReady, rsErr := s3Ready(ctx, client, d)
-
-		if rsErr != nil {
-			diags := diag.FromErr(fmt.Errorf("error while checking readiness status of S3 Key %s: %s", d.Id(), rsErr))
-			return diags
-		}
-
-		if s3KeyReady {
-			log.Printf("[INFO] S3 Key ready: %s", d.Id())
-			break
-		}
-
-		select {
-		case <-time.After(SleepInterval):
-			log.Printf("[INFO] trying again ...")
-		case <-ctx.Done():
-			log.Printf("[INFO] s3 key update timed out")
-			diags := diag.FromErr(fmt.Errorf("s3 key update timed out! WARNING: your s3 key will still probably be updated after some time but the terraform state won't reflect that; check your Ionos Cloud account for updates"))
-			return diags}
+	_, errState := getStateChangeConf(meta, d, apiResponse.Header.Get("Location"), schema.TimeoutUpdate).WaitForStateContext(ctx)
+	if errState != nil {
+		diags := diag.FromErr(errState)
+		return diags
 	}
 
 	return resourceS3KeyRead(ctx, d, meta)
