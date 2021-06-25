@@ -20,7 +20,10 @@ resource "ionoscloud_k8s_node_pool" "demo" {
     min_node_count = 1
     max_node_count = 3
   }
-  lans = [1, 2, 3]
+  lans {
+    id   = ionoscloud_lan.terraform_acctest.id
+    dhcp = false
+   }
   maintenance_window {
     day_of_the_week = "Sunday"
     time            = "10:30:00Z"
@@ -46,7 +49,7 @@ The following arguments are supported:
 - `name` - (Required)[string] The name of the Kubernetes Cluster.
 - `k8s_version` - (Optional)[string] The desired Kubernetes Version. for supported values, please check the API documentation.
 - `auto_scaling` - (Optional)[string] Wether the Node Pool should autoscale. For more details, please check the API documentation
-- `lans` - (Optional)[list] A list of numeric LAN id's you want this node pool to be part of. For more details, please check the API documentation, as well as the example above
+- `lans` - (Optional)[list] A list of additional LANs attached to worker nodes. For more details, please check the API documentation, as well as the example above
 - `maintenance_window` - (Optional) See the **maintenance_window** section in the example above
 - `datacenter_id` - (Required)[string] A Datacenter's UUID
 - `k8s_cluster_id`- (Required)[string] A k8s cluster's UUID
@@ -57,7 +60,11 @@ The following arguments are supported:
 - `cores_count` -(Required)[int] - The CPU cores count for each node of the node pool
 - `ram_size` -(Required)[int] - The desired amount of RAM, in MB
 - `storage_size` -(Required)[int] - The desired amount of storage for each node, in GB
-- `public_ips` - (Optional)[list] A list of public IPs associated with the node pool; must have at least `node_count + 1` elements;  
+- `public_ips` - (Optional)[list] A list of public IPs associated with the node pool; must have at least `node_count + 1` elements  
+- `labels` - (Optional)[list] A map of labels attached to node pool. For more details, please check the API documentation
+- `annotations` - (Optional)[list] A map of annotations attached to node pool. For more details, please check the API documentation
+- `available_upgrade_versions` - (Optional)[list] A list of available versions for upgrading the node pool. For more details, please check the API documentation
+
 ## Import
 
 A Kubernetes Node Pool resource can be imported using its Kubernetes cluster's uuid as well as its own UUID, both of which you can retreive from the cloud API: `resource id`, e.g.:
