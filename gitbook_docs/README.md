@@ -1,4 +1,4 @@
-# Terraform Provider
+# Terraform provider
 
 ## Overview
 
