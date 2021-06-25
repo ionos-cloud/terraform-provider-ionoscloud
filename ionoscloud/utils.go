@@ -11,6 +11,7 @@ import (
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 )
+
 const SleepInterval = 5 * time.Second
 
 func resourceResourceImport(_ context.Context, d *schema.ResourceData, _ interface{}) ([]*schema.ResourceData, error) {
@@ -47,6 +48,135 @@ func resourceServerImport(_ context.Context, d *schema.ResourceData, _ interface
 	}
 	d.SetId(parts[1])
 
+	return []*schema.ResourceData{d}, nil
+}
+
+func resourceVolumeImporter(ctx context.Context, d *schema.ResourceData, meta interface{}) ([]*schema.ResourceData, error) {
+	parts := strings.Split(d.Id(), "/")
+	if len(parts) != 3 || parts[0] == "" || parts[1] == "" || parts[2] == "" {
+		return nil, fmt.Errorf("invalid import id %q. Expecting {datacenter}/{server}/{volume}", d.Id())
+	}
+
+	client := meta.(*ionoscloud.APIClient)
+
+	volume, apiResponse, err := client.VolumeApi.DatacentersVolumesFindById(ctx, parts[0], parts[2]).Execute()
+
+	if err != nil {
+		if apiResponse != nil && apiResponse.StatusCode == 404 {
+			d.SetId("")
+			return nil, fmt.Errorf("volume does not exist %q", d.Id())
+		}
+		return nil, fmt.Errorf("an error occured while trying to find the volume %q", d.Id())
+	}
+
+	log.Printf("[INFO] volume found: %+v", volume)
+
+	d.SetId(*volume.Id)
+	if err := d.Set("datacenter_id", parts[0]); err != nil {
+		return nil, err
+	}
+
+	if err := d.Set("server_id", parts[1]); err != nil {
+		return nil, err
+	}
+
+	if volume.Properties.Name != nil {
+		err := d.Set("name", *volume.Properties.Name)
+		if err != nil {
+			return nil, err
+		}
+	}
+
+	if volume.Properties.Type != nil {
+		err := d.Set("disk_type", *volume.Properties.Type)
+		if err != nil {
+			return nil, err
+		}
+	}
+
+	if volume.Properties.Size != nil {
+		err := d.Set("size", *volume.Properties.Size)
+		if err != nil {
+			return nil, err
+		}
+	}
+
+	if volume.Properties.Bus != nil {
+		err := d.Set("bus", *volume.Properties.Bus)
+		if err != nil {
+			return nil, err
+		}
+	}
+
+	if volume.Properties.ImageAlias != nil {
+		err := d.Set("image_alias", *volume.Properties.ImageAlias)
+		if err != nil {
+			return nil, err
+		}
+	}
+
+	if volume.Properties.AvailabilityZone != nil {
+		err := d.Set("availability_zone", *volume.Properties.AvailabilityZone)
+		if err != nil {
+			return nil, err
+		}
+	}
+
+	if volume.Properties.CpuHotPlug != nil {
+		err := d.Set("cpu_hot_plug", *volume.Properties.CpuHotPlug)
+		if err != nil {
+			return nil, err
+		}
+	}
+
+	if volume.Properties.RamHotPlug != nil {
+		err := d.Set("ram_hot_plug", *volume.Properties.RamHotPlug)
+		if err != nil {
+			return nil, err
+		}
+	}
+
+	if volume.Properties.NicHotPlug != nil {
+		err := d.Set("nic_hot_plug", *volume.Properties.NicHotPlug)
+		if err != nil {
+			return nil, err
+		}
+	}
+
+	if volume.Properties.NicHotUnplug != nil {
+		err := d.Set("nic_hot_unplug", *volume.Properties.NicHotUnplug)
+		if err != nil {
+			return nil, err
+		}
+	}
+
+	if volume.Properties.DiscVirtioHotPlug != nil {
+		err := d.Set("disc_virtio_hot_plug", *volume.Properties.DiscVirtioHotPlug)
+		if err != nil {
+			return nil, err
+		}
+	}
+
+	if volume.Properties.DiscVirtioHotUnplug != nil {
+		err := d.Set("disc_virtio_hot_unplug", *volume.Properties.DiscVirtioHotUnplug)
+		if err != nil {
+			return nil, err
+		}
+	}
+
+	if volume.Properties.BackupunitId != nil {
+		err := d.Set("backup_unit_id", *volume.Properties.BackupunitId)
+		if err != nil {
+			return nil, err
+		}
+	}
+
+	if volume.Properties.UserData != nil {
+		err := d.Set("user_data", *volume.Properties.UserData)
+		if err != nil {
+			return nil, err
+		}
+	}
 	return []*schema.ResourceData{d}, nil
 }
 

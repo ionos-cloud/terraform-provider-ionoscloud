@@ -17,6 +17,9 @@ func resourceVolume() *schema.Resource {
 		ReadContext:   resourceVolumeRead,
 		UpdateContext: resourceVolumeUpdate,
 		DeleteContext: resourceVolumeDelete,
+		Importer: &schema.ResourceImporter{
+			StateContext: resourceVolumeImporter,
+		},
 		Schema: map[string]*schema.Schema{
 			"image_name": {
 				Type:     schema.TypeString,
