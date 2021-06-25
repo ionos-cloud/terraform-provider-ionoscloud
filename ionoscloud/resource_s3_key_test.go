@@ -28,7 +28,7 @@ func TestAccS3Key_Basic(t *testing.T) {
 				Check: resource.ComposeTestCheckFunc(
 					testAccChecks3KeyExists("ionoscloud_s3_key.example", &s3Key),
 					resource.TestCheckResourceAttrSet("ionoscloud_s3_key.example", "secret_key"),
-					resource.TestCheckResourceAttr("ionoscloud_s3_key.example", "active", "true"),
+					resource.TestCheckResourceAttr("ionoscloud_s3_key.example", "active", "false"),
 				),
 			},
 			{
@@ -57,7 +57,7 @@ func testAccChecks3KeyDestroyCheck(s *terraform.State) error {
 
 		if err != nil {
 			if apiResponse == nil || apiResponse.StatusCode != 404 {
-				return fmt.Errorf("an error occurred while fetching S3 key %s: %s", rs.Primary.ID, err)
+				return fmt.Errorf("an error occurred while fetching s3 key %s: %s", rs.Primary.ID, err)
 			}
 		} else {
 			return fmt.Errorf("s3 Key still exists %s", rs.Primary.ID)
@@ -111,7 +111,7 @@ resource "ionoscloud_user" "example" {
 
 resource "ionoscloud_s3_key" "%s" {
   user_id    = ionoscloud_user.example.id
-  active     = true
+  active     = false
 }`
 
 const testAccChecks3KeyConfigUpdate = `
@@ -126,5 +126,5 @@ resource "ionoscloud_user" "example" {
 
 resource "ionoscloud_s3_key" "%s" {
   user_id    = ionoscloud_user.example.id
-  active     = false
+  active     = true
 }`

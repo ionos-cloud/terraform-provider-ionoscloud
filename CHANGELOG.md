@@ -6,7 +6,8 @@
 - fix: ability to create server without image
 - fix: fixes #25 correctly set of dhcp + nil check + added firewall_type field in server resource
 - fix: fixes #39 - new imports for volume, user, group, share, IPfailover and loadbalancer
-- fix: fixes issue #47 - corrected nic resource to accept a list of strings for ips parameter
+- fix: fixes #47 - corrected nic resource to accept a list of strings for ips parameter
+- fix: fixes #36 - correctly setting the active property of the s3 key upon creation
 
 ## 6.0.0-alpha.3
 

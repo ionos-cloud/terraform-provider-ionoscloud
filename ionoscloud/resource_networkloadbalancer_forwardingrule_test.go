@@ -192,7 +192,7 @@ resource "ionoscloud_networkloadbalancer_forwardingrule" "forwarding_rule" {
    weight = "123"
    health_check {
      check = true
-     check_interval = 1000
+     check_interval = 1500
    }
  }
 }`
