@@ -27,3 +27,11 @@ resource "ionoscloud_ipfailover" "failovertest" {
 * `ip` - (Required)[string] The reserved IP address to be used in the IP failover group.
 * `lan_id` - (Required)[string] The ID of a LAN.
 * `nicuuid` - (Required)[string] The ID of a NIC.
+
+## Import
+
+Resource IpFailover can be imported using the `resource id`, e.g.
+
+```shell
+terraform import ionoscloud_ipfailover.myipfailover {datacenter uuid}/{lan uuid}
+```
