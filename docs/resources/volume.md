@@ -42,3 +42,11 @@ resource "ionoscloud_volume" "example" {
 * `availability_zone` - (Optional)[string] The storage availability zone assigned to the volume: AUTO, ZONE_1, ZONE_2, or ZONE_3.
 * `user_data` - (Optional) The cloud-init configuration for the volume as base64 encoded string. The property is immutable and is only allowed to be set on a new volume creation.
 This option will work only with cloud-init compatible images.
+
+## Import
+
+Resource Volume can be imported using the `resource id`, e.g.
+
+```shell
+terraform import ionoscloud_volume.myvolume {datacenter uuid}/{server uuid}/{volume uuid}
+```

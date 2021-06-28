@@ -18,6 +18,9 @@ func resourceUser() *schema.Resource {
 		ReadContext:   resourceUserRead,
 		UpdateContext: resourceUserUpdate,
 		DeleteContext: resourceUserDelete,
+		Importer: &schema.ResourceImporter{
+			StateContext: resourceUserImporter,
+		},
 		Schema: map[string]*schema.Schema{
 			"first_name": {
 				Type:         schema.TypeString,
