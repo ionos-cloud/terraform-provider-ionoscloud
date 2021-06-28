@@ -34,13 +34,13 @@ func TestAccLanIPFailover_Basic(t *testing.T) {
 			{
 				Config: fmt.Sprintf(testaccchecklanipfailoverconfigBasic),
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheckLanIPFailoverGroupExists("ionoscloud_ipfailover.failovertest", &lan, &ipfailover),
+					testAccCheckLanIPFailoverGroupExists("ionoscloud_ipfailover.failover-test", &lan, &ipfailover),
 				),
 			},
 			{
 				Config: testaccchecklanipfailoverconfigUpdate,
 				Check: resource.ComposeTestCheckFunc(
-					testDeleted("ionoscloud_ipfailover.failovertest"),
+					testDeleted("ionoscloud_ipfailover.failover-test"),
 				),
 			},
 			{
@@ -114,22 +114,26 @@ func testAccCheckLanIPFailoverDestroyCheck(s *terraform.State) error {
 		lanId := rs.Primary.Attributes["lan_id"]
 		nicUuid := rs.Primary.Attributes["nicuuid"]
 
-		lan, _, err := client.LanApi.DatacentersLansFindById(ctx, dcId, lanId).Execute()
+		lan, apiResponse, err := client.LanApi.DatacentersLansFindById(ctx, dcId, lanId).Execute()
 
 		if err != nil {
-			return fmt.Errorf("an error occured while fetching a Lan ID %s %s", rs.Primary.Attributes["lan_id"], err)
-		}
-
-		found := false
-		for _, fo := range *lan.Properties.IpFailover {
-			if *fo.NicUuid == nicUuid {
-				found = true
+			if apiResponse == nil || apiResponse.StatusCode != 404 {
+				return fmt.Errorf("an error occured while fetching a Lan ID %s %s", rs.Primary.Attributes["lan_id"], err)
 			}
-		}
-		if found {
-			_, _, err := client.DataCenterApi.DatacentersDelete(ctx, dcId).Execute()
-			if err != nil {
-				return fmt.Errorf("IP failover group with nicId %s still exists %s %s, removing datacenter", nicUuid, rs.Primary.ID, err)
+		} else {
+			found := false
+			if lan.Properties.IpFailover != nil {
+				for _, fo := range *lan.Properties.IpFailover {
+					if *fo.NicUuid == nicUuid {
+						found = true
+					}
+				}
+				if found {
+					_, _, err := client.DataCenterApi.DatacentersDelete(ctx, dcId).Execute()
+					if err != nil {
+						return fmt.Errorf("IP failover group with nicId %s still exists %s %s, removing datacenter", nicUuid, rs.Primary.ID, err)
+					}
+				}
 			}
 		}
 	}
@@ -176,7 +180,7 @@ resource "ionoscloud_server" "webserver" {
      ip ="${ionoscloud_ipblock.webserver_ip.ips[0]}"
   }
 }
-resource "ionoscloud_ipfailover" "failovertest" {
+resource "ionoscloud_ipfailover" "failover-test" {
   datacenter_id = "${ionoscloud_datacenter.foobar.id}"
   lan_id="${ionoscloud_lan.webserver_lan1.id}"
   ip ="${ionoscloud_ipblock.webserver_ip.ips[0]}"

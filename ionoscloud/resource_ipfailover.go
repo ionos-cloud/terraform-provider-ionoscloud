@@ -16,6 +16,9 @@ func resourceLanIPFailover() *schema.Resource {
 		ReadContext:   resourceLanIPFailoverRead,
 		UpdateContext: resourceLanIPFailoverUpdate,
 		DeleteContext: resourceLanIPFailoverDelete,
+		Importer: &schema.ResourceImporter{
+			StateContext: resourceIpFailoverImporter,
+		},
 		Schema: map[string]*schema.Schema{
 			"ip": {
 				Type:         schema.TypeString,
