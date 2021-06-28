@@ -16,6 +16,9 @@ func resourceUser() *schema.Resource {
 		ReadContext:   resourceUserRead,
 		UpdateContext: resourceUserUpdate,
 		DeleteContext: resourceUserDelete,
+		Importer: &schema.ResourceImporter{
+			StateContext: resourceUserImporter,
+		},
 		Schema: map[string]*schema.Schema{
 			"first_name": {
 				Type:         schema.TypeString,
@@ -208,7 +211,7 @@ func resourceUserDelete(ctx context.Context, d *schema.ResourceData, meta interf
 		time.Sleep(20 * time.Second)
 		apiResponse, err := client.UserManagementApi.UmUsersDelete(ctx, d.Id()).Execute()
 		if err != nil { */
-		if apiResponse == nil || apiResponse.Response.StatusCode != 404 {
+		if apiResponse == nil || apiResponse.StatusCode != 404 {
 			diags := diag.FromErr(fmt.Errorf("an error occured while deleting a user %s %s, %s", d.Id(), err, responseBody(apiResponse)))
 			return diags
 		}

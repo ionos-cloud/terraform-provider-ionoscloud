@@ -12,7 +12,7 @@ import (
 
 func TestAccGroup_Basic(t *testing.T) {
 	var group ionoscloud.Group
-	groupName := "terraform test"
+	groupName := "resource_group"
 
 	resource.Test(t, resource.TestCase{
 		PreCheck: func() {
@@ -117,7 +117,7 @@ func testAccCheckGroupExists(n string, group *ionoscloud.Group) resource.TestChe
 }
 
 const testacccheckgroupconfigBasic = `
-resource "ionoscloud_group" "group" {
+resource "ionoscloud_group" "resource_group" {
   name = "%s"
   create_datacenter = true
   create_snapshot = true
@@ -127,7 +127,7 @@ resource "ionoscloud_group" "group" {
 `
 
 const testacccheckgroupconfigUpdate = `
-resource "ionoscloud_group" "group" {
+resource "ionoscloud_group" "resource_group" {
   name = "updated"
   create_datacenter = true
   create_snapshot = true

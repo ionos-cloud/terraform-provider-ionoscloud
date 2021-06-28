@@ -31,3 +31,11 @@ resource "ionoscloud_group" "group" {
 * `name` - (Optional) [string] A name for the group.
 * `reserve_ip` - (Optional) [Boolean] The group will be allowed to reserve IP addresses.
 * `user_id` - (Optional) [string] The ID of the specific user to add to the group.
+
+## Import
+
+Resource Group can be imported using the `resource id`, e.g.
+
+```shell
+terraform import ionoscloud_group.mygroup {group uuid}
+```

@@ -17,6 +17,9 @@ func resourceShare() *schema.Resource {
 		ReadContext:   resourceShareRead,
 		UpdateContext: resourceShareUpdate,
 		DeleteContext: resourceShareDelete,
+		Importer: &schema.ResourceImporter{
+			StateContext: resourceShareImporter,
+		},
 		Schema: map[string]*schema.Schema{
 			"edit_privilege": {
 				Type:     schema.TypeBool,

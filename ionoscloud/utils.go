@@ -379,6 +379,351 @@ func resourceNicImport(_ context.Context, d *schema.ResourceData, _ interface{})
 	return []*schema.ResourceData{d}, nil
 }
 
+func resourceVolumeImporter(ctx context.Context, d *schema.ResourceData, meta interface{}) ([]*schema.ResourceData, error) {
+	parts := strings.Split(d.Id(), "/")
+	if len(parts) != 3 || parts[0] == "" || parts[1] == "" || parts[2] == "" {
+		return nil, fmt.Errorf("invalid import id %q. Expecting {datacenter}/{server}/{volume}", d.Id())
+	}
+
+	client := meta.(*ionoscloud.APIClient)
+
+	volume, apiResponse, err := client.VolumesApi.DatacentersVolumesFindById(ctx, parts[0], parts[2]).Execute()
+
+	if err != nil {
+		if apiResponse != nil && apiResponse.StatusCode == 404 {
+			d.SetId("")
+			return nil, fmt.Errorf("volume does not exist %q", d.Id())
+		}
+		return nil, fmt.Errorf("an error occured while trying to find the volume %q", d.Id())
+	}
+
+	log.Printf("[INFO] volume found: %+v", volume)
+
+	d.SetId(*volume.Id)
+	if err := d.Set("datacenter_id", parts[0]); err != nil {
+		return nil, err
+	}
+
+	if err := d.Set("server_id", parts[1]); err != nil {
+		return nil, err
+	}
+
+	if volume.Properties.Name != nil {
+		err := d.Set("name", *volume.Properties.Name)
+		if err != nil {
+			return nil, err
+		}
+	}
+
+	if volume.Properties.Type != nil {
+		err := d.Set("disk_type", *volume.Properties.Type)
+		if err != nil {
+			return nil, err
+		}
+	}
+
+	if volume.Properties.Size != nil {
+		err := d.Set("size", *volume.Properties.Size)
+		if err != nil {
+			return nil, err
+		}
+	}
+
+	if volume.Properties.Bus != nil {
+		err := d.Set("bus", *volume.Properties.Bus)
+		if err != nil {
+			return nil, err
+		}
+	}
+
+	if volume.Properties.AvailabilityZone != nil {
+		err := d.Set("availability_zone", *volume.Properties.AvailabilityZone)
+		if err != nil {
+			return nil, err
+		}
+	}
+
+	if volume.Properties.CpuHotPlug != nil {
+		err := d.Set("cpu_hot_plug", *volume.Properties.CpuHotPlug)
+		if err != nil {
+			return nil, err
+		}
+	}
+
+	if volume.Properties.RamHotPlug != nil {
+		err := d.Set("ram_hot_plug", *volume.Properties.RamHotPlug)
+		if err != nil {
+			return nil, err
+		}
+	}
+
+	if volume.Properties.NicHotPlug != nil {
+		err := d.Set("nic_hot_plug", *volume.Properties.NicHotPlug)
+		if err != nil {
+			return nil, err
+		}
+	}
+
+	if volume.Properties.NicHotUnplug != nil {
+		err := d.Set("nic_hot_unplug", *volume.Properties.NicHotUnplug)
+		if err != nil {
+			return nil, err
+		}
+	}
+
+	if volume.Properties.DiscVirtioHotPlug != nil {
+		err := d.Set("disc_virtio_hot_plug", *volume.Properties.DiscVirtioHotPlug)
+		if err != nil {
+			return nil, err
+		}
+	}
+
+	if volume.Properties.DiscVirtioHotUnplug != nil {
+		err := d.Set("disc_virtio_hot_unplug", *volume.Properties.DiscVirtioHotUnplug)
+		if err != nil {
+			return nil, err
+		}
+	}
+
+	if volume.Properties.BackupunitId != nil {
+		err := d.Set("backup_unit_id", *volume.Properties.BackupunitId)
+		if err != nil {
+			return nil, err
+		}
+	}
+
+	if volume.Properties.UserData != nil {
+		err := d.Set("user_data", *volume.Properties.UserData)
+		if err != nil {
+			return nil, err
+		}
+	}
+	return []*schema.ResourceData{d}, nil
+}
+
+func resourceGroupImporter(ctx context.Context, d *schema.ResourceData, meta interface{}) ([]*schema.ResourceData, error) {
+	client := meta.(*ionoscloud.APIClient)
+
+	group, apiResponse, err := client.UserManagementApi.UmGroupsFindById(ctx, d.Id()).Execute()
+
+	if err != nil {
+		if apiResponse != nil && apiResponse.StatusCode == 404 {
+			d.SetId("")
+			return nil, fmt.Errorf("an error occured while trying to fetch the group %q", d.Id())
+		}
+		return nil, fmt.Errorf("group does not exist%q", d.Id())
+	}
+
+	log.Printf("[INFO] group found: %+v", group)
+
+	d.SetId(*group.Id)
+
+	if group.Properties.Name != nil {
+		err := d.Set("name", *group.Properties.Name)
+		if err != nil {
+			return nil, err
+		}
+	}
+
+	if group.Properties.CreateDataCenter != nil {
+		err := d.Set("create_datacenter", *group.Properties.CreateDataCenter)
+		if err != nil {
+			return nil, err
+		}
+	}
+
+	if group.Properties.CreateSnapshot != nil {
+		err := d.Set("create_snapshot", *group.Properties.CreateSnapshot)
+		if err != nil {
+			return nil, err
+		}
+	}
+
+	if group.Properties.ReserveIp != nil {
+		err := d.Set("reserve_ip", *group.Properties.ReserveIp)
+		if err != nil {
+			return nil, err
+		}
+	}
+
+	if group.Properties.AccessActivityLog != nil {
+		err := d.Set("access_activity_log", *group.Properties.AccessActivityLog)
+		if err != nil {
+			return nil, err
+		}
+	}
+
+	if group.Properties.CreatePcc != nil {
+		err := d.Set("create_pcc", *group.Properties.CreatePcc)
+		if err != nil {
+			return nil, err
+		}
+	}
+
+	if group.Properties.S3Privilege != nil {
+		err := d.Set("s3_privilege", *group.Properties.S3Privilege)
+		if err != nil {
+			return nil, err
+		}
+	}
+
+	if group.Properties.CreateBackupUnit != nil {
+		err := d.Set("create_backup_unit", *group.Properties.CreateBackupUnit)
+		if err != nil {
+			return nil, err
+		}
+	}
+
+	if group.Properties.CreateInternetAccess != nil {
+		err := d.Set("create_internet_access", *group.Properties.CreateInternetAccess)
+		if err != nil {
+			return nil, err
+		}
+	}
+
+	if group.Properties.CreateK8sCluster != nil {
+		err := d.Set("create_k8s_cluster", *group.Properties.CreateK8sCluster)
+		if err != nil {
+			return nil, err
+		}
+	}
+
+	users, _, err := client.UserManagementApi.UmGroupsUsersGet(ctx, d.Id()).Execute()
+	if err != nil {
+		return nil, err
+	}
+
+	usersEntries := make([]interface{}, 0)
+	if users.Items != nil && len(*users.Items) > 0 {
+		usersEntries = make([]interface{}, len(*users.Items))
+		for userIndex, user := range *users.Items {
+			userEntry := make(map[string]interface{})
+
+			if user.Properties.Firstname != nil {
+				userEntry["first_name"] = *user.Properties.Firstname
+			}
+
+			if user.Properties.Lastname != nil {
+				userEntry["last_name"] = *user.Properties.Lastname
+			}
+
+			if user.Properties.Email != nil {
+				userEntry["email"] = *user.Properties.Email
+			}
+
+			if user.Properties.Administrator != nil {
+				userEntry["administrator"] = *user.Properties.Administrator
+			}
+
+			if user.Properties.ForceSecAuth != nil {
+				userEntry["force_sec_auth"] = *user.Properties.ForceSecAuth
+			}
+
+			usersEntries[userIndex] = userEntry
+		}
+
+		if len(usersEntries) > 0 {
+			if err := d.Set("users", usersEntries); err != nil {
+				return nil, err
+			}
+		}
+	}
+
+	return []*schema.ResourceData{d}, nil
+}
+
+func resourceUserImporter(ctx context.Context, d *schema.ResourceData, meta interface{}) ([]*schema.ResourceData, error) {
+	client := meta.(*ionoscloud.APIClient)
+
+	user, apiResponse, err := client.UserManagementApi.UmUsersFindById(ctx, d.Id()).Execute()
+
+	if err != nil {
+		if apiResponse != nil && apiResponse.StatusCode == 404 {
+			d.SetId("")
+			return nil, fmt.Errorf("an error occured while trying to fetch the user %q", d.Id())
+		}
+		return nil, fmt.Errorf("user does not exist%q", d.Id())
+	}
+
+	log.Printf("[INFO] user found: %+v", user)
+
+	d.SetId(*user.Id)
+
+	if user.Properties.Firstname != nil {
+		if err := d.Set("first_name", *user.Properties.Firstname); err != nil {
+			return nil, err
+		}
+	}
+
+	if user.Properties.Lastname != nil {
+		if err := d.Set("last_name", *user.Properties.Lastname); err != nil {
+			return nil, err
+		}
+	}
+	if user.Properties.Email != nil {
+		if err := d.Set("email", *user.Properties.Email); err != nil {
+			return nil, err
+		}
+	}
+	if user.Properties.Administrator != nil {
+		if err := d.Set("administrator", *user.Properties.Administrator); err != nil {
+			return nil, err
+		}
+	}
+	if user.Properties.ForceSecAuth != nil {
+		if err := d.Set("force_sec_auth", *user.Properties.ForceSecAuth); err != nil {
+			return nil, err
+		}
+	}
+
+	return []*schema.ResourceData{d}, nil
+}
+
+func resourceShareImporter(ctx context.Context, d *schema.ResourceData, meta interface{}) ([]*schema.ResourceData, error) {
+	parts := strings.Split(d.Id(), "/")
+	if len(parts) != 2 || parts[0] == "" || parts[1] == "" {
+		return nil, fmt.Errorf("invalid import id %q. Expecting {group}/{resource}", d.Id())
+	}
+
+	client := meta.(*ionoscloud.APIClient)
+
+	share, apiResponse, err := client.UserManagementApi.UmGroupsSharesFindByResourceId(ctx, parts[0], parts[1]).Execute()
+
+	if err != nil {
+		if apiResponse != nil && apiResponse.StatusCode == 404 {
+			d.SetId("")
+			return nil, fmt.Errorf("an error occured while trying to fetch the share %q", d.Id())
+		}
+		return nil, fmt.Errorf("share does not exist%q", d.Id())
+	}
+
+	log.Printf("[INFO] share found: %+v", share)
+
+	d.SetId(*share.Id)
+
+	if err := d.Set("group_id", parts[0]); err != nil {
+		return nil, err
+	}
+
+	if err := d.Set("resource_id", parts[1]); err != nil {
+		return nil, err
+	}
+
+	if share.Properties.EditPrivilege != nil {
+		if err := d.Set("edit_privilege", *share.Properties.EditPrivilege); err != nil {
+			return nil, err
+		}
+	}
+
+	if share.Properties.SharePrivilege != nil {
+		if err := d.Set("share_privilege", *share.Properties.SharePrivilege); err != nil {
+			return nil, err
+		}
+	}
+
+	return []*schema.ResourceData{d}, nil
+}
+
 func convertSlice(slice []interface{}) []string {
 	s := make([]string, len(slice))
 	for i, v := range slice {
