@@ -383,7 +383,11 @@ func resourceVolumeImporter(ctx context.Context, d *schema.ResourceData, meta in
 
 	client := meta.(*ionoscloud.APIClient)
 
-	volume, apiResponse, err := client.VolumeApi.DatacentersVolumesFindById(ctx, parts[0], parts[2]).Execute()
+	dcId := parts[0]
+	srvId := parts[1]
+	volumeId := parts[2]
+
+	volume, apiResponse, err := client.VolumeApi.DatacentersVolumesFindById(ctx, dcId, volumeId).Execute()
 
 	if err != nil {
 		if apiResponse != nil && apiResponse.StatusCode == 404 {
@@ -396,11 +400,11 @@ func resourceVolumeImporter(ctx context.Context, d *schema.ResourceData, meta in
 	log.Printf("[INFO] volume found: %+v", volume)
 
 	d.SetId(*volume.Id)
-	if err := d.Set("datacenter_id", parts[0]); err != nil {
+	if err := d.Set("datacenter_id", dcId); err != nil {
 		return nil, err
 	}
 
-	if err := d.Set("server_id", parts[1]); err != nil {
+	if err := d.Set("server_id", srvId); err != nil {
 		return nil, err
 	}
 
@@ -690,7 +694,10 @@ func resourceShareImporter(ctx context.Context, d *schema.ResourceData, meta int
 
 	client := meta.(*ionoscloud.APIClient)
 
-	share, apiResponse, err := client.UserManagementApi.UmGroupsSharesFindByResourceId(ctx, parts[0], parts[1]).Execute()
+	grpId := parts[0]
+	rscId := parts[1]
+
+	share, apiResponse, err := client.UserManagementApi.UmGroupsSharesFindByResourceId(ctx, grpId, rscId).Execute()
 
 	if err != nil {
 		if apiResponse != nil && apiResponse.StatusCode == 404 {
@@ -704,11 +711,11 @@ func resourceShareImporter(ctx context.Context, d *schema.ResourceData, meta int
 
 	d.SetId(*share.Id)
 
-	if err := d.Set("group_id", parts[0]); err != nil {
+	if err := d.Set("group_id", grpId); err != nil {
 		return nil, err
 	}
 
-	if err := d.Set("resource_id", parts[1]); err != nil {
+	if err := d.Set("resource_id", rscId); err != nil {
 		return nil, err
 	}
 
@@ -735,7 +742,10 @@ func resourceIpFailoverImporter(ctx context.Context, d *schema.ResourceData, met
 
 	client := meta.(*ionoscloud.APIClient)
 
-	lan, apiResponse, err := client.LanApi.DatacentersLansFindById(ctx, parts[0], parts[1]).Execute()
+	dcId := parts[0]
+	lanId := parts[1]
+
+	lan, apiResponse, err := client.LanApi.DatacentersLansFindById(ctx, dcId, lanId).Execute()
 
 	if err != nil {
 		if apiResponse != nil && apiResponse.StatusCode == 404 {
@@ -749,7 +759,7 @@ func resourceIpFailoverImporter(ctx context.Context, d *schema.ResourceData, met
 
 	d.SetId(*lan.Id)
 
-	if err := d.Set("datacenter_id", parts[0]); err != nil {
+	if err := d.Set("datacenter_id", dcId); err != nil {
 		return nil, err
 	}
 
@@ -785,7 +795,10 @@ func resourceLoadbalancerImporter(ctx context.Context, d *schema.ResourceData, m
 
 	client := meta.(*ionoscloud.APIClient)
 
-	loadbalancer, apiResponse, err := client.LoadBalancerApi.DatacentersLoadbalancersFindById(ctx, parts[0], parts[1]).Execute()
+	dcId := parts[0]
+	lbId := parts[1]
+
+	loadbalancer, apiResponse, err := client.LoadBalancerApi.DatacentersLoadbalancersFindById(ctx, dcId, lbId).Execute()
 
 	if err != nil {
 		if apiResponse != nil && apiResponse.StatusCode == 404 {
@@ -799,7 +812,7 @@ func resourceLoadbalancerImporter(ctx context.Context, d *schema.ResourceData, m
 
 	d.SetId(*loadbalancer.Id)
 
-	if err := d.Set("datacenter_id", parts[0]); err != nil {
+	if err := d.Set("datacenter_id", dcId); err != nil {
 		return nil, err
 	}
 
