@@ -535,7 +535,7 @@ func resourcek8sNodePoolRead(ctx context.Context, d *schema.ResourceData, meta i
 			}
 
 			nodePoolRoutes := make([]interface{}, 0)
-			if len(*nodePoolLan.Routes) > 0 {
+			if nodePoolLan.Routes != nil && len(*nodePoolLan.Routes) > 0 {
 				nodePoolRoutes = make([]interface{}, len(*nodePoolLan.Routes))
 				for routeIndex, nodePoolRoute := range *nodePoolLan.Routes {
 					routeEntry := make(map[string]string)
@@ -664,10 +664,10 @@ func resourcek8sNodePoolUpdate(ctx context.Context, d *schema.ResourceData, meta
 					lan.Id = &lanID
 					addLan = true
 				}
-				if lanDhcp, lanDhcpOk := d.GetOk(fmt.Sprintf("lans.%d.dhcp", lanIndex)); lanDhcpOk {
-					lanDhcp := lanDhcp.(bool)
-					lan.Dhcp = &lanDhcp
-				}
+
+				lanDhcp := d.Get(fmt.Sprintf("lans.%d.dhcp", lanIndex)).(bool)
+				lan.Dhcp = &lanDhcp
+
 				if lanRoutes, lanRoutesOk := d.GetOk(fmt.Sprintf("lans.%d.routes", lanIndex)); lanRoutesOk {
 					if lanRoutes.([]interface{}) != nil {
 						updateRoutes := false
@@ -836,7 +836,7 @@ func resourcek8sNodePoolDelete(ctx context.Context, d *schema.ResourceData, meta
 	apiResponse, err := client.KubernetesApi.K8sNodepoolsDelete(ctx, d.Get("k8s_cluster_id").(string), d.Id()).Execute()
 
 	if err != nil {
-		if apiResponse != nil && apiResponse.Response.StatusCode == 404 {
+		if apiResponse != nil && apiResponse.StatusCode == 404 {
 			d.SetId("")
 			return nil
 		}
