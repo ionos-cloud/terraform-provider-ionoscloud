@@ -665,10 +665,10 @@ func resourcek8sNodePoolUpdate(ctx context.Context, d *schema.ResourceData, meta
 					lan.Id = &lanID
 					addLan = true
 				}
-				if lanDhcp, lanDhcpOk := d.GetOk(fmt.Sprintf("lans.%d.dhcp", lanIndex)); lanDhcpOk {
-					lanDhcp := lanDhcp.(bool)
-					lan.Dhcp = &lanDhcp
-				}
+
+				lanDhcp := d.Get(fmt.Sprintf("lans.%d.dhcp", lanIndex)).(bool)
+				lan.Dhcp = &lanDhcp
+
 				if lanRoutes, lanRoutesOk := d.GetOk(fmt.Sprintf("lans.%d.routes", lanIndex)); lanRoutesOk {
 					if lanRoutes.([]interface{}) != nil {
 						updateRoutes := false
