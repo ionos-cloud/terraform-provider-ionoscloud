@@ -53,12 +53,14 @@ func resourceServerImport(_ context.Context, d *schema.ResourceData, _ interface
 func resourceK8sClusterImport(ctx context.Context, d *schema.ResourceData, meta interface{}) ([]*schema.ResourceData, error) {
 	client := meta.(*ionoscloud.APIClient)
 
-	cluster, apiResponse, err := client.KubernetesApi.K8sFindByClusterId(ctx, d.Id()).Execute()
+	clusterId := d.Id()
+
+	cluster, apiResponse, err := client.KubernetesApi.K8sFindByClusterId(ctx, clusterId).Execute()
 
 	if err != nil {
 		if apiResponse != nil && apiResponse.StatusCode == 404 {
 			d.SetId("")
-			return nil, fmt.Errorf("unable to find k8s cluster %q", d.Id())
+			return nil, fmt.Errorf("unable to find k8s cluster %q", clusterId)
 		}
 		return nil, fmt.Errorf("unable to retreive k8s cluster %q", d.Id())
 	}
@@ -97,16 +99,19 @@ func resourceK8sNodepoolImport(ctx context.Context, d *schema.ResourceData, meta
 		return nil, fmt.Errorf("invalid import id %q. Expecting {k8sClusterId}/{k8sNodePoolId}", d.Id())
 	}
 
+	clusterId := parts[0]
+	npId := parts[1]
+
 	client := meta.(*ionoscloud.APIClient)
 
-	k8sNodepool, apiResponse, err := client.KubernetesApi.K8sNodepoolsFindById(ctx, parts[0], parts[1]).Execute()
+	k8sNodepool, apiResponse, err := client.KubernetesApi.K8sNodepoolsFindById(ctx, clusterId, npId).Execute()
 
 	if err != nil {
-		if apiResponse != nil && apiResponse.Response.StatusCode == 404 {
+		if apiResponse != nil && apiResponse.StatusCode == 404 {
 			d.SetId("")
-			return nil, fmt.Errorf("unable to find k8s node pool %q", d.Id())
+			return nil, fmt.Errorf("unable to find k8s node pool %q", npId)
 		}
-		return nil, fmt.Errorf("unable to retreive k8s node pool %q", d.Id())
+		return nil, fmt.Errorf("unable to retreive k8s node pool %q", npId)
 	}
 
 	log.Printf("[INFO] K8s node pool found: %+v", k8sNodepool)
@@ -118,7 +123,7 @@ func resourceK8sNodepoolImport(ctx context.Context, d *schema.ResourceData, meta
 	if err := d.Set("k8s_version", *k8sNodepool.Properties.K8sVersion); err != nil {
 		return nil, err
 	}
-	if err := d.Set("k8s_cluster_id", parts[0]); err != nil {
+	if err := d.Set("k8s_cluster_id", clusterId); err != nil {
 		return nil, err
 	}
 	if err := d.Set("datacenter_id", *k8sNodepool.Properties.DatacenterId); err != nil {
@@ -153,8 +158,7 @@ func resourceK8sNodepoolImport(ctx context.Context, d *schema.ResourceData, meta
 		log.Printf("[INFO] Setting Public IPs for k8s node pool %s to %+v...", d.Id(), d.Get("public_ips"))
 	}
 
-	if k8sNodepool.Properties.AutoScaling != nil && k8sNodepool.Properties.AutoScaling.MinNodeCount != nil && k8sNodepool.Properties.AutoScaling.MaxNodeCount != nil &&
-		(*k8sNodepool.Properties.AutoScaling.MinNodeCount != 0 && *k8sNodepool.Properties.AutoScaling.MaxNodeCount != 0) {
+	if k8sNodepool.Properties.AutoScaling != nil && (*k8sNodepool.Properties.AutoScaling.MinNodeCount != 0 && *k8sNodepool.Properties.AutoScaling.MaxNodeCount != 0) {
 		if err := d.Set("auto_scaling", []map[string]int32{
 			{
 				"min_node_count": *k8sNodepool.Properties.AutoScaling.MinNodeCount,
@@ -198,14 +202,16 @@ func resourceK8sNodepoolImport(ctx context.Context, d *schema.ResourceData, meta
 func resourcePrivateCrossConnectImport(ctx context.Context, d *schema.ResourceData, meta interface{}) ([]*schema.ResourceData, error) {
 	client := meta.(*ionoscloud.APIClient)
 
+	pccId := d.Id()
+
 	pcc, apiResponse, err := client.PrivateCrossConnectsApi.PccsFindById(ctx, d.Id()).Execute()
 
 	if err != nil {
 		if apiResponse != nil && apiResponse.StatusCode == 404 {
 			d.SetId("")
-			return nil, fmt.Errorf("unable to find PCC %q", d.Id())
+			return nil, fmt.Errorf("unable to find PCC %q", pccId)
 		}
-		return nil, fmt.Errorf("unable to retreive PCC %q", d.Id())
+		return nil, fmt.Errorf("unable to retreive PCC %q", pccId)
 	}
 
 	log.Printf("[INFO] PCC found: %+v", pcc)
@@ -262,14 +268,16 @@ func resourcePrivateCrossConnectImport(ctx context.Context, d *schema.ResourceDa
 func resourceBackupUnitImport(ctx context.Context, d *schema.ResourceData, meta interface{}) ([]*schema.ResourceData, error) {
 	client := meta.(*ionoscloud.APIClient)
 
+	buId := d.Id()
+
 	backupUnit, apiResponse, err := client.BackupUnitsApi.BackupunitsFindById(ctx, d.Id()).Execute()
 
 	if err != nil {
-		if apiResponse != nil && apiResponse.Response.StatusCode == 404 {
+		if apiResponse != nil && apiResponse.StatusCode == 404 {
 			d.SetId("")
-			return nil, fmt.Errorf("unable to find Backup Unit %q", d.Id())
+			return nil, fmt.Errorf("unable to find Backup Unit %q", buId)
 		}
-		return nil, fmt.Errorf("unable to retreive Backup Unit %q", d.Id())
+		return nil, fmt.Errorf("unable to retreive Backup Unit %q", buId)
 	}
 
 	log.Printf("[INFO] Backup Unit found: %+v", backupUnit)
@@ -309,27 +317,30 @@ func resourceBackupUnitImport(ctx context.Context, d *schema.ResourceData, meta 
 	return []*schema.ResourceData{d}, nil
 }
 
-func resourceS3KeyImport(_ context.Context, d *schema.ResourceData, meta interface{}) ([]*schema.ResourceData, error) {
+func resourceS3KeyImport(ctx context.Context, d *schema.ResourceData, meta interface{}) ([]*schema.ResourceData, error) {
 	parts := strings.Split(d.Id(), "/")
 
 	if len(parts) != 2 || parts[0] == "" || parts[1] == "" {
 		return nil, fmt.Errorf("invalid import id %q. Expecting {userId}/{s3KeyId}", d.Id())
 	}
 
+	userId := parts[0]
+	keyId := parts[1]
+
 	client := meta.(*ionoscloud.APIClient)
 
-	s3Key, apiResponse, err := client.UserS3KeysApi.UmUsersS3keysFindByKeyId(context.TODO(), parts[0], parts[1]).Execute()
+	s3Key, apiResponse, err := client.UserS3KeysApi.UmUsersS3keysFindByKeyId(ctx, userId, keyId).Execute()
 
 	if err != nil {
 		if apiResponse != nil && apiResponse.StatusCode == 404 {
 			d.SetId("")
-			return nil, fmt.Errorf("unable to find S3 key %q", d.Id())
+			return nil, fmt.Errorf("unable to find S3 key %q", keyId)
 		}
-		return nil, fmt.Errorf("unable to retreive S3 key %q", d.Id())
+		return nil, fmt.Errorf("unable to retreive S3 key %q", keyId)
 	}
 
 	d.SetId(*s3Key.Id)
-	if err := d.Set("user_id", parts[0]); err != nil {
+	if err := d.Set("user_id", userId); err != nil {
 		return nil, err
 	}
 	if err := d.Set("secret_key", *s3Key.Properties.SecretKey); err != nil {
@@ -396,9 +407,9 @@ func resourceVolumeImporter(ctx context.Context, d *schema.ResourceData, meta in
 	if err != nil {
 		if apiResponse != nil && apiResponse.StatusCode == 404 {
 			d.SetId("")
-			return nil, fmt.Errorf("volume does not exist %q", d.Id())
+			return nil, fmt.Errorf("volume does not exist %q", volumeId)
 		}
-		return nil, fmt.Errorf("an error occured while trying to find the volume %q", d.Id())
+		return nil, fmt.Errorf("an error occured while trying to find the volume %q", volumeId)
 	}
 
 	log.Printf("[INFO] volume found: %+v", volume)
@@ -508,14 +519,16 @@ func resourceVolumeImporter(ctx context.Context, d *schema.ResourceData, meta in
 func resourceGroupImporter(ctx context.Context, d *schema.ResourceData, meta interface{}) ([]*schema.ResourceData, error) {
 	client := meta.(*ionoscloud.APIClient)
 
-	group, apiResponse, err := client.UserManagementApi.UmGroupsFindById(ctx, d.Id()).Execute()
+	grpId := d.Id()
+
+	group, apiResponse, err := client.UserManagementApi.UmGroupsFindById(ctx, grpId).Execute()
 
 	if err != nil {
 		if apiResponse != nil && apiResponse.StatusCode == 404 {
 			d.SetId("")
-			return nil, fmt.Errorf("an error occured while trying to fetch the group %q", d.Id())
+			return nil, fmt.Errorf("an error occured while trying to fetch the group %q", grpId)
 		}
-		return nil, fmt.Errorf("group does not exist%q", d.Id())
+		return nil, fmt.Errorf("group does not exist%q", grpId)
 	}
 
 	log.Printf("[INFO] group found: %+v", group)
@@ -639,14 +652,16 @@ func resourceGroupImporter(ctx context.Context, d *schema.ResourceData, meta int
 func resourceUserImporter(ctx context.Context, d *schema.ResourceData, meta interface{}) ([]*schema.ResourceData, error) {
 	client := meta.(*ionoscloud.APIClient)
 
-	user, apiResponse, err := client.UserManagementApi.UmUsersFindById(ctx, d.Id()).Execute()
+	userId := d.Id()
+
+	user, apiResponse, err := client.UserManagementApi.UmUsersFindById(ctx, userId).Execute()
 
 	if err != nil {
 		if apiResponse != nil && apiResponse.StatusCode == 404 {
 			d.SetId("")
-			return nil, fmt.Errorf("an error occured while trying to fetch the user %q", d.Id())
+			return nil, fmt.Errorf("an error occured while trying to fetch the user %q", userId)
 		}
-		return nil, fmt.Errorf("user does not exist%q", d.Id())
+		return nil, fmt.Errorf("user does not exist%q", userId)
 	}
 
 	log.Printf("[INFO] user found: %+v", user)
@@ -689,19 +704,19 @@ func resourceShareImporter(ctx context.Context, d *schema.ResourceData, meta int
 		return nil, fmt.Errorf("invalid import id %q. Expecting {group}/{resource}", d.Id())
 	}
 
-	client := meta.(*ionoscloud.APIClient)
-
 	grpId := parts[0]
 	rscId := parts[1]
+
+	client := meta.(*ionoscloud.APIClient)
 
 	share, apiResponse, err := client.UserManagementApi.UmGroupsSharesFindByResourceId(ctx, grpId, rscId).Execute()
 
 	if err != nil {
 		if apiResponse != nil && apiResponse.StatusCode == 404 {
 			d.SetId("")
-			return nil, fmt.Errorf("an error occured while trying to fetch the share %q", d.Id())
+			return nil, fmt.Errorf("an error occured while trying to fetch the share of resource %q for group %q", rscId, grpId)
 		}
-		return nil, fmt.Errorf("share does not exist%q", d.Id())
+		return nil, fmt.Errorf("share does not exist of resource %q for group %q", rscId, grpId)
 	}
 
 	log.Printf("[INFO] share found: %+v", share)
@@ -737,19 +752,19 @@ func resourceIpFailoverImporter(ctx context.Context, d *schema.ResourceData, met
 		return nil, fmt.Errorf("invalid import id %q. Expecting {datacenter}/{lan}", d.Id())
 	}
 
-	client := meta.(*ionoscloud.APIClient)
-
 	dcId := parts[0]
 	lanId := parts[1]
+
+	client := meta.(*ionoscloud.APIClient)
 
 	lan, apiResponse, err := client.LansApi.DatacentersLansFindById(ctx, dcId, lanId).Execute()
 
 	if err != nil {
 		if apiResponse != nil && apiResponse.StatusCode == 404 {
 			d.SetId("")
-			return nil, fmt.Errorf("an error occured while trying to fetch the lan %q", d.Id())
+			return nil, fmt.Errorf("an error occured while trying to fetch the lan %q", lanId)
 		}
-		return nil, fmt.Errorf("lan does not exist%q", d.Id())
+		return nil, fmt.Errorf("lan does not exist%q", lanId)
 	}
 
 	log.Printf("[INFO] lan found: %+v", lan)
@@ -790,19 +805,19 @@ func resourceLoadbalancerImporter(ctx context.Context, d *schema.ResourceData, m
 		return nil, fmt.Errorf("invalid import id %q. Expecting {datacenter}/{loadbalancer}", d.Id())
 	}
 
-	client := meta.(*ionoscloud.APIClient)
-
 	dcId := parts[0]
 	lbId := parts[1]
+
+	client := meta.(*ionoscloud.APIClient)
 
 	loadbalancer, apiResponse, err := client.LoadBalancersApi.DatacentersLoadbalancersFindById(ctx, dcId, lbId).Execute()
 
 	if err != nil {
 		if apiResponse != nil && apiResponse.StatusCode == 404 {
 			d.SetId("")
-			return nil, fmt.Errorf("an error occured while trying to fetch the loadbalancer %q", d.Id())
+			return nil, fmt.Errorf("an error occured while trying to fetch the loadbalancer %q", lbId)
 		}
-		return nil, fmt.Errorf("loadbalancer does not exist%q", d.Id())
+		return nil, fmt.Errorf("loadbalancer does not exist%q", lbId)
 	}
 
 	log.Printf("[INFO] loadbalancer found: %+v", loadbalancer)

@@ -311,7 +311,6 @@ func resourceNetworkLoadBalancerForwardingRuleCreate(ctx context.Context, d *sch
 	dcId := d.Get("datacenter_id").(string)
 	nlbId := d.Get("networkloadbalancer_id").(string)
 
-	fmt.Printf("check interval 2: %v", *(*networkLoadBalancerForwardingRule.Properties.Targets)[0].HealthCheck.CheckInterval)
 	networkLoadBalancerForwardingRuleResp, apiResponse, err := client.NetworkLoadBalancersApi.DatacentersNetworkloadbalancersForwardingrulesPost(ctx, dcId, nlbId).NetworkLoadBalancerForwardingRule(networkLoadBalancerForwardingRule).Execute()
 
 	if err != nil {
