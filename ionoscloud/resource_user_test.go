@@ -30,16 +30,16 @@ func TestAccUser_Basic(t *testing.T) {
 			{
 				Config: fmt.Sprintf(testacccheckuserconfigBasic, email),
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheckUserExists("ionoscloud_user.user", &user),
-					testAccCheckUserAttributes("ionoscloud_user.user", "terraform"),
-					resource.TestCheckResourceAttr("ionoscloud_user.user", "first_name", "terraform"),
+					testAccCheckUserExists("ionoscloud_user.resource_user", &user),
+					testAccCheckUserAttributes("ionoscloud_user.resource_user", "resource_user"),
+					resource.TestCheckResourceAttr("ionoscloud_user.resource_user", "first_name", "resource_user"),
 				),
 			},
 			{
 				Config: fmt.Sprintf(testacccheckuserconfigUpdate, email),
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheckUserAttributes("ionoscloud_user.user", "updated"),
-					resource.TestCheckResourceAttr("ionoscloud_user.user", "first_name", "updated"),
+					testAccCheckUserAttributes("ionoscloud_user.resource_user", "updated"),
+					resource.TestCheckResourceAttr("ionoscloud_user.resource_user", "first_name", "updated"),
 				),
 			},
 		},
@@ -129,8 +129,8 @@ resource "ionoscloud_group" "group" {
   access_activity_log = false
 }
 
-resource "ionoscloud_user" "user" {
-  first_name = "terraform"
+resource "ionoscloud_user" "resource_user" {
+  first_name = "resource_user"
   last_name = "test"
   email = "%s"
   password = "abc123-321CBA"
@@ -139,7 +139,7 @@ resource "ionoscloud_user" "user" {
 }`
 
 const testacccheckuserconfigUpdate = `
-resource "ionoscloud_user" "user" {
+resource "ionoscloud_user" "resource_user" {
   first_name = "updated"
   last_name = "test"
   email = "%s"
@@ -154,6 +154,6 @@ resource "ionoscloud_group" "group" {
   create_snapshot = true
   reserve_ip = true
   access_activity_log = false
-  user_id="${ionoscloud_user.user.id}"
+  user_id="${ionoscloud_user.resource_user.id}"
 }
 `

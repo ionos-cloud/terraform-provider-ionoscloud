@@ -26,16 +26,16 @@ func TestAccLoadbalancer_Basic(t *testing.T) {
 			{
 				Config: fmt.Sprintf(testacccheckloadbalancerconfigBasic, lbName),
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheckLoadbalancerExists("ionoscloud_loadbalancer.example", &loadbalancer),
-					testAccCheckLoadbalancerAttributes("ionoscloud_loadbalancer.example", lbName),
-					resource.TestCheckResourceAttr("ionoscloud_loadbalancer.example", "name", lbName),
+					testAccCheckLoadbalancerExists("ionoscloud_loadbalancer.loadbalancer", &loadbalancer),
+					testAccCheckLoadbalancerAttributes("ionoscloud_loadbalancer.loadbalancer", lbName),
+					resource.TestCheckResourceAttr("ionoscloud_loadbalancer.loadbalancer", "name", lbName),
 				),
 			},
 			{
 				Config: testacccheckloadbalancerconfigUpdate,
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheckLoadbalancerAttributes("ionoscloud_loadbalancer.example", "updated"),
-					resource.TestCheckResourceAttr("ionoscloud_loadbalancer.example", "name", "updated"),
+					testAccCheckLoadbalancerAttributes("ionoscloud_loadbalancer.loadbalancer", "updated"),
+					resource.TestCheckResourceAttr("ionoscloud_loadbalancer.loadbalancer", "name", "updated"),
 				),
 			},
 		},
@@ -159,7 +159,7 @@ resource "ionoscloud_nic" "database_nic" {
   }
 }
 
-resource "ionoscloud_loadbalancer" "example" {
+resource "ionoscloud_loadbalancer" "loadbalancer" {
   datacenter_id = "${ionoscloud_datacenter.foobar.id}"
   nic_ids = ["${ionoscloud_nic.database_nic.id}"]
   name = "%s"
@@ -217,7 +217,7 @@ resource "ionoscloud_nic" "database_nic2" {
   }
 }
 
-resource "ionoscloud_loadbalancer" "example" {
+resource "ionoscloud_loadbalancer" "loadbalancer" {
   datacenter_id = "${ionoscloud_datacenter.foobar.id}"
   nic_ids = ["${ionoscloud_nic.database_nic1.id}","${ionoscloud_nic.database_nic2.id}"]
   name = "updated"
