@@ -70,6 +70,7 @@ func resourcek8sNodePool() *schema.Resource {
 							Type:        schema.TypeBool,
 							Description: "Indicates if the Kubernetes Node Pool LAN will reserve an IP using DHCP",
 							Optional:    true,
+							Default:     true,
 						},
 						"routes": {
 							Type:        schema.TypeList,
@@ -269,10 +270,10 @@ func resourcek8sNodePoolCreate(ctx context.Context, d *schema.ResourceData, meta
 					lan.Id = &lanID
 					addLan = true
 				}
-				if lanDhcp, lanDhcpOk := d.GetOk(fmt.Sprintf("lans.%d.dhcp", lanIndex)); lanDhcpOk {
-					lanDhcp := lanDhcp.(bool)
-					lan.Dhcp = &lanDhcp
-				}
+
+				lanDhcp := d.Get(fmt.Sprintf("lans.%d.dhcp", lanIndex)).(bool)
+				lan.Dhcp = &lanDhcp
+
 				if lanRoutes, lanRoutesOk := d.GetOk(fmt.Sprintf("lans.%d.routes", lanIndex)); lanRoutesOk {
 					if lanRoutes.([]interface{}) != nil {
 						updateRoutes := false
@@ -535,7 +536,7 @@ func resourcek8sNodePoolRead(ctx context.Context, d *schema.ResourceData, meta i
 			}
 
 			nodePoolRoutes := make([]interface{}, 0)
-			if len(*nodePoolLan.Routes) > 0 {
+			if nodePoolLan.Routes != nil && len(*nodePoolLan.Routes) > 0 {
 				nodePoolRoutes = make([]interface{}, len(*nodePoolLan.Routes))
 				for routeIndex, nodePoolRoute := range *nodePoolLan.Routes {
 					routeEntry := make(map[string]string)
@@ -664,10 +665,10 @@ func resourcek8sNodePoolUpdate(ctx context.Context, d *schema.ResourceData, meta
 					lan.Id = &lanID
 					addLan = true
 				}
-				if lanDhcp, lanDhcpOk := d.GetOk(fmt.Sprintf("lans.%d.dhcp", lanIndex)); lanDhcpOk {
-					lanDhcp := lanDhcp.(bool)
-					lan.Dhcp = &lanDhcp
-				}
+
+				lanDhcp := d.Get(fmt.Sprintf("lans.%d.dhcp", lanIndex)).(bool)
+				lan.Dhcp = &lanDhcp
+
 				if lanRoutes, lanRoutesOk := d.GetOk(fmt.Sprintf("lans.%d.routes", lanIndex)); lanRoutesOk {
 					if lanRoutes.([]interface{}) != nil {
 						updateRoutes := false

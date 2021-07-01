@@ -208,7 +208,8 @@ resource "ionoscloud_server" "webserver" {
     lan = "${ionoscloud_lan.webserver_lan.id}"
     dhcp = true
     firewall_active = true
-		firewall {
+	firewall_type = "BIDIRECTIONAL"
+    firewall {
       protocol = "TCP"
       name = "SSH"
       port_range_start = 22
@@ -247,7 +248,8 @@ resource "ionoscloud_server" "webserver" {
     lan = "${ionoscloud_lan.webserver_lan.id}"
     dhcp = true
     firewall_active = true
-		firewall {
+    firewall_type = "BIDIRECTIONAL"
+	firewall {
       protocol = "TCP"
       name = "SSH"
       port_range_start = 22
@@ -286,7 +288,8 @@ resource "ionoscloud_server" "webserver" {
     lan = "${ionoscloud_lan.webserver_lan.id}"
     dhcp = false
     firewall_active = false
-		firewall {
+	firewall_type = "BIDIRECTIONAL"
+	firewall {
       protocol = "TCP"
       name = "SSH"
       port_range_start = 22
@@ -358,8 +361,8 @@ resource "ionoscloud_server" "webserver" {
   nic {
     lan = "${ionoscloud_lan.webserver_lan.id}"
     dhcp = true
-    firewall_active = true
-    firewall {
+    firewall_active = true 
+	firewall {
       protocol = "TCP"
       name = "SSH"
       port_range_start = 22

@@ -64,6 +64,37 @@ func TestAcck8sNodepool_Basic(t *testing.T) {
 	})
 }
 
+func TestAcck8sNodepool_Lan(t *testing.T) {
+	var k8sNodepool ionoscloud.KubernetesNodePool
+	k8sNodepoolName := "terraform_acctest"
+
+	resource.Test(t, resource.TestCase{
+		PreCheck: func() {
+			testAccPreCheck(t)
+		},
+		ProviderFactories: testAccProviderFactories,
+		CheckDestroy:      testAccCheckk8sNodepoolDestroyCheck,
+		Steps: []resource.TestStep{
+			{
+				Config: fmt.Sprintf(testAccCheckk8sNodepoolConfigLan, k8sNodepoolName),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckk8sNodepoolExists("ionoscloud_k8s_node_pool.terraform_acctest", &k8sNodepool),
+					resource.TestCheckResourceAttr("ionoscloud_k8s_node_pool.terraform_acctest", "name", k8sNodepoolName),
+					resource.TestCheckResourceAttr("ionoscloud_k8s_node_pool.terraform_acctest", "lans.0.dhcp", "true"),
+				),
+			},
+			{
+				Config: fmt.Sprintf(testAccCheckk8sNodepoolConfigLanUpdate, k8sNodepoolName),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckk8sNodepoolExists("ionoscloud_k8s_node_pool.terraform_acctest", &k8sNodepool),
+					resource.TestCheckResourceAttr("ionoscloud_k8s_node_pool.terraform_acctest", "name", k8sNodepoolName),
+					resource.TestCheckResourceAttr("ionoscloud_k8s_node_pool.terraform_acctest", "lans.0.dhcp", "false"),
+				),
+			},
+		},
+	})
+}
+
 func testAccCheckk8sNodepoolDestroyCheck(s *terraform.State) error {
 	client := testAccProvider.Meta().(*ionoscloud.APIClient)
 
@@ -201,4 +232,84 @@ resource "ionoscloud_k8s_node_pool" "terraform_acctest" {
   ram_size          = 2048
   storage_size      = 40
   public_ips        = [ "%s", "%s", "%s" ]
+}`
+
+const testAccCheckk8sNodepoolConfigLan = `
+resource "ionoscloud_datacenter" "terraform_acctest" {
+  name        = "terraform_acctest_lan"
+  location    = "us/las"
+  description = "Datacenter created through terraform"
+}
+
+resource "ionoscloud_lan" "terraform_acctest" {
+  datacenter_id = "${ionoscloud_datacenter.terraform_acctest.id}"
+  public = false
+  name = "terraform_acctest_lan"
+}
+
+resource "ionoscloud_k8s_cluster" "terraform_acctest" {
+  name        = "terraform_acctest_lan"
+  k8s_version = "1.20.6"
+  maintenance_window {
+    day_of_the_week = "Monday"
+    time            = "09:00:00Z"
+  }
+}
+
+resource "ionoscloud_k8s_node_pool" "terraform_acctest" {
+  name              = "%s"
+  datacenter_id     = ionoscloud_datacenter.terraform_acctest.id
+  k8s_cluster_id    = ionoscloud_k8s_cluster.terraform_acctest.id
+  k8s_version       = ionoscloud_k8s_cluster.terraform_acctest.k8s_version
+  lans {
+    id   = ionoscloud_lan.terraform_acctest.id
+    dhcp = true
+   }
+  cpu_family        = "AMD_OPTERON"
+  availability_zone = "AUTO"
+  storage_type      = "SSD"
+  node_count        = 1
+  cores_count       = 2
+  ram_size          = 2048
+  storage_size      = 40
+}`
+
+const testAccCheckk8sNodepoolConfigLanUpdate = `
+resource "ionoscloud_datacenter" "terraform_acctest" {
+  name        = "terraform_acctest_lan"
+  location    = "us/las"
+  description = "Datacenter created through terraform"
+}
+
+resource "ionoscloud_lan" "terraform_acctest" {
+  datacenter_id = "${ionoscloud_datacenter.terraform_acctest.id}"
+  public = false
+  name = "terraform_acctest_lan"
+}
+
+resource "ionoscloud_k8s_cluster" "terraform_acctest" {
+  name        = "terraform_acctest_lan"
+  k8s_version = "1.20.6"
+  maintenance_window {
+    day_of_the_week = "Monday"
+    time            = "09:00:00Z"
+  }
+}
+
+resource "ionoscloud_k8s_node_pool" "terraform_acctest" {
+  name              = "%s"
+  datacenter_id     = ionoscloud_datacenter.terraform_acctest.id
+  k8s_cluster_id    = ionoscloud_k8s_cluster.terraform_acctest.id
+  k8s_version       = ionoscloud_k8s_cluster.terraform_acctest.k8s_version
+  lans {
+    id   = ionoscloud_lan.terraform_acctest.id
+    dhcp = false
+   }
+  cpu_family        = "AMD_OPTERON"
+  availability_zone = "AUTO"
+  storage_type      = "SSD"
+  node_count        = 1
+  cores_count       = 2
+  ram_size          = 2048
+  storage_size      = 40
 }`

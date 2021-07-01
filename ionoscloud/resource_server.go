@@ -239,6 +239,11 @@ func resourceServer() *schema.Resource {
 							Type:     schema.TypeBool,
 							Optional: true,
 						},
+						"firewall_type": {
+							Type:     schema.TypeString,
+							Optional: true,
+							Computed: true,
+						},
 						"firewall": {
 							Type:     schema.TypeList,
 							Optional: true,
@@ -572,6 +577,11 @@ func resourceServerCreate(ctx context.Context, d *schema.ResourceData, meta inte
 		nic.Properties.Dhcp = boolAddr(d.Get("nic.0.dhcp").(bool))
 		nic.Properties.FirewallActive = boolAddr(d.Get("nic.0.firewall_active").(bool))
 
+		if v, ok := d.GetOk("nic.0.firewall_type"); ok {
+			v := v.(string)
+			nic.Properties.FirewallType = &v
+		}
+
 		if v, ok := d.GetOk("nic.0.ip"); ok {
 			ips := strings.Split(v.(string), ",")
 			if len(ips) > 0 {
@@ -884,7 +894,7 @@ func resourceServerRead(ctx context.Context, d *schema.ResourceData, meta interf
 
 		setPropWithNilCheck(network, "dhcp", nic.Properties.Dhcp)
 		setPropWithNilCheck(network, "firewall_active", nic.Properties.FirewallActive)
-
+		setPropWithNilCheck(network, "firewall_type", nic.Properties.FirewallType)
 		setPropWithNilCheck(network, "lan", nic.Properties.Lan)
 		setPropWithNilCheck(network, "name", nic.Properties.Name)
 		setPropWithNilCheck(network, "ips", nic.Properties.Ips)
@@ -1116,6 +1126,11 @@ func resourceServerUpdate(ctx context.Context, d *schema.ResourceData, meta inte
 		properties.Dhcp = boolAddr(d.Get("nic.0.dhcp").(bool))
 
 		properties.FirewallActive = boolAddr(d.Get("nic.0.firewall_active").(bool))
+
+		if v, ok := d.GetOk("nic.0.firewall_type"); ok {
+			vStr := v.(string)
+			properties.FirewallType = &vStr
+		}
 
 		if d.HasChange("nic.0.firewall") {
 
