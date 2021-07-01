@@ -31,3 +31,12 @@ resource "ionoscloud_user" "user" {
 * `force_sec_auth` - (Required)[Boolean] Indicates if secure (two-factor) authentication should be enabled for the user (true) or not (false).
 * `last_name` - (Required)[string] A last name for the user.
 * `password` - (Required)[string] A password for the user.
+
+
+## Import
+
+Resource User can be imported using the `resource id`, e.g.
+
+```shell
+terraform import ionoscloud_user.myuser {user uuid}
+```

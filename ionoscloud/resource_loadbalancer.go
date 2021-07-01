@@ -15,6 +15,9 @@ func resourceLoadbalancer() *schema.Resource {
 		ReadContext:   resourceLoadbalancerRead,
 		UpdateContext: resourceLoadbalancerUpdate,
 		DeleteContext: resourceLoadbalancerDelete,
+		Importer: &schema.ResourceImporter{
+			StateContext: resourceLoadbalancerImporter,
+		},
 		Schema: map[string]*schema.Schema{
 
 			"name": {
