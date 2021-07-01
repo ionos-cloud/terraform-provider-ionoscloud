@@ -44,6 +44,7 @@ func resourceLan() *schema.Resource {
 			"ip_failover": {
 				Type:     schema.TypeList,
 				Computed: true,
+				Optional: true,
 				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{
 						"ip": {

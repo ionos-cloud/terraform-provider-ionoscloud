@@ -1,3 +1,7 @@
+## 5.2.3
+
+- issue #43 - new imports for volume, user, group, share, IPfailover and loadbalancer
+
 ## 5.2.2
 
 - issue #36 - correctly setting the value of the active property when creating an s3 resource
