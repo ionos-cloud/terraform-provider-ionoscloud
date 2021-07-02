@@ -219,21 +219,11 @@ func resourceServer() *schema.Resource {
 							Type:     schema.TypeBool,
 							Optional: true,
 						},
-
-						"ip": {
-							Type:     schema.TypeString,
-							Optional: true,
-							DiffSuppressFunc: func(k, old, new string, d *schema.ResourceData) bool {
-								if new == "" {
-									return true
-								}
-								return false
-							},
-						},
 						"ips": {
 							Type:     schema.TypeList,
 							Elem:     &schema.Schema{Type: schema.TypeString},
 							Computed: true,
+							Optional: true,
 						},
 						"firewall_active": {
 							Type:     schema.TypeBool,
@@ -276,16 +266,6 @@ func resourceServer() *schema.Resource {
 									},
 									"target_ip": {
 										Type:     schema.TypeString,
-										Optional: true,
-									},
-									"ip": {
-										Type:     schema.TypeString,
-										Optional: true,
-										Computed: true,
-									},
-									"ips": {
-										Type:     schema.TypeList,
-										Elem:     &schema.Schema{Type: schema.TypeString},
 										Optional: true,
 									},
 									"port_range_start": {
@@ -582,10 +562,17 @@ func resourceServerCreate(ctx context.Context, d *schema.ResourceData, meta inte
 			nic.Properties.FirewallType = &v
 		}
 
-		if v, ok := d.GetOk("nic.0.ip"); ok {
-			ips := strings.Split(v.(string), ",")
-			if len(ips) > 0 {
-				nic.Properties.Ips = &ips
+		if v, ok := d.GetOk("nic.0.ips"); ok {
+			raw := v.([]interface{})
+			if raw != nil && len(raw) > 0 {
+				ips := make([]string, 0)
+				for _, rawIp := range raw {
+					ip := rawIp.(string)
+					ips = append(ips, ip)
+				}
+				if ips != nil && len(ips) > 0 {
+					nic.Properties.Ips = &ips
+				}
 			}
 		}
 
@@ -680,7 +667,7 @@ func resourceServerCreate(ctx context.Context, d *schema.ResourceData, meta inte
 	server, apiResponse, err := client.ServersApi.DatacentersServersPost(ctx, d.Get("datacenter_id").(string)).Server(request).Execute()
 
 	if err != nil {
-		diags := diag.FromErr(fmt.Errorf("error creating server: (%s)", err))
+		diags := diag.FromErr(fmt.Errorf("error creating server: (%s) %s", err, string(apiResponse.Payload)))
 		return diags
 	}
 	d.SetId(*server.Id)
@@ -908,7 +895,7 @@ func resourceServerRead(ctx context.Context, d *schema.ResourceData, meta interf
 		setPropWithNilCheck(network, "mac", nic.Properties.Mac)
 
 		if nic.Properties.Ips != nil && len(*nic.Properties.Ips) > 0 {
-			network["ip"] = (*nic.Properties.Ips)[0]
+			network["ips"] = *nic.Properties.Ips
 		}
 
 		if firewallId, ok := d.GetOk("firewallrule_id"); ok {
@@ -1135,10 +1122,17 @@ func resourceServerUpdate(ctx context.Context, d *schema.ResourceData, meta inte
 			properties.Name = &vStr
 		}
 
-		if v, ok := d.GetOk("nic.0.ip"); ok {
-			ips := strings.Split(v.(string), ",")
-			if len(ips) > 0 {
-				properties.Ips = &ips
+		if v, ok := d.GetOk("nic.0.ips"); ok {
+			raw := v.([]interface{})
+			if raw != nil && len(raw) > 0 {
+				ips := make([]string, 0)
+				for _, rawIp := range raw {
+					ip := rawIp.(string)
+					ips = append(ips, ip)
+				}
+				if ips != nil && len(ips) > 0 {
+					properties.Ips = &ips
+				}
 			}
 		}
 
