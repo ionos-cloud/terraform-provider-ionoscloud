@@ -1,6 +1,6 @@
 ---
 layout: "ionoscloud"
-page_title: "ProfitBricks : ionoscloud_lan"
+page_title: "IonosCloud : ionoscloud_lan"
 sidebar_current: "docs-ionoscloud-datasource-lan"
 description: |-
 Get information on a Ionos Cloud Lans
@@ -14,16 +14,18 @@ The lans data source can be used to search for and return existing lans.
 
 ```hcl
 data "ionoscloud_lan" "lan_example" {
-  name     = "My Lan"
+  datacenter_id = ionoscloud_datacenter.example.id
+  name			= "example_"
 }
 ```
 
 ## Argument Reference
 
+* `datacenter_id` - (Required) Datacenter's UUID.
 * `name` - (Optional) Name of an existing lan that you want to search for.
 * `id` - (Optional) ID of the lan you want to search for.
 
-Either `name` or `id` must be provided. If none, or both are provided, the datasource will return an error.
+`datacenter_id` and either `name` or `id` must be provided. If none, or both of `name` and `id` are provided, the datasource will return an error.
 
 ## Attributes Reference
 
