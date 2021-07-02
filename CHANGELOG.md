@@ -1,7 +1,10 @@
+## 5.2.4
+
+- issue #47 - corrected nic resource to accept a list of strings for ips parameter
+
 ## 5.2.3
 
-- issue #43 - new imports for volume, user, group, share, IPfailover and loadbalancer
-- issue #47 - corrected nic resource to accept a list of strings for ips parameter 
+- issue #39 - new imports for volume, user, group, share, IPfailover and loadbalancer
 
 ## 5.2.2
 
