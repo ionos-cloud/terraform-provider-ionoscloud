@@ -35,7 +35,7 @@ resource "ionoscloud_server" "example" {
   nic {
     lan             = "${ionoscloud_lan.example.id}"
     dhcp            = true
-    ip              = "${ionoscloud_ipblock.example.ips[0]}"
+    ips             = ["${ionoscloud_ipblock.example.ips[0]}", "${ionoscloud_ipblock.example.ips[1]}"]
     firewall_active = true
   }
 }
