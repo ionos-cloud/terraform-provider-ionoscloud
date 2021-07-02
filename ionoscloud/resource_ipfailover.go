@@ -88,7 +88,7 @@ func resourceLanIPFailoverRead(ctx context.Context, d *schema.ResourceData, meta
 	lan, apiResponse, err := client.LansApi.DatacentersLansFindById(ctx, d.Get("datacenter_id").(string), d.Id()).Execute()
 
 	if err != nil {
-		if apiResponse != nil && apiResponse.Response.StatusCode == 404 {
+		if apiResponse != nil && apiResponse.StatusCode == 404 {
 			d.SetId("")
 			return nil
 		}
@@ -177,7 +177,7 @@ func resourceLanIPFailoverDelete(ctx context.Context, d *schema.ResourceData, me
 			time.Sleep(90 * time.Second)
 			_, apiResponse, err = client.LansApi.DatacentersLansPatch(ctx, dcid, lanid).Lan(*properties).Execute()
 
-			if err != nil && (apiResponse == nil || apiResponse.Response.StatusCode != 404) {
+			if err != nil && (apiResponse == nil || apiResponse.StatusCode != 404) {
 				return fmt.Errorf("an error occured while removing a lans ipfailover groups dcId %s ID %s %s", d.Get("datacenter_id").(string), d.Id(), err)
 			}
 		*/

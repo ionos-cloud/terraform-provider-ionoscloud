@@ -58,7 +58,7 @@ func testAccCheckprivateCrossConnectDestroyCheck(s *terraform.State) error {
 		_, apiResponse, err := client.PrivateCrossConnectsApi.PccsFindById(ctx, rs.Primary.ID).Execute()
 
 		if err != nil {
-			if apiResponse == nil || apiResponse.Response.StatusCode != 404 {
+			if apiResponse == nil || apiResponse.StatusCode != 404 {
 				return fmt.Errorf("an error occurred while checking private cross-connect %s: %s", rs.Primary.ID, err)
 			}
 		} else {
