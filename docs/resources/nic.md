@@ -18,7 +18,7 @@ resource "ionoscloud_nic" "example" {
   server_id     = "${ionoscloud_server.example.id}"
   lan           = 2
   dhcp          = true
-  ip            = "${ionoscloud_ipblock.example.ips[0]}"
+  ips           = ["${ionoscloud_ipblock.example.ips[0]}", "${ionoscloud_ipblock.example.ips[1]}"]
 }
 ```
 
@@ -29,7 +29,7 @@ resource "ionoscloud_nic" "example" {
 - `lan` - (Required)[integer] The LAN ID the NIC will sit on.
 - `name` - (Optional)[string] The name of the LAN.
 - `dhcp` - (Optional)[Boolean] Indicates if the NIC should get an IP address using DHCP (true) or not (false).
-- `ip` - (Optional)[string] IP assigned to the NIC.
+- `ips` - (Optional)[list] Collection of IP addresses assigned to a nic. Explicitly assigned public IPs need to come from reserved IP blocks, Passing value null or empty array will assign an IP address automatically.
 - `firewall_active` - (Optional)[Boolean] If this resource is set to true and is nested under a server resource firewall, with open SSH port, resource must be nested under the NIC.
 - `nat` - (Optional)[Boolean] Boolean value indicating if the private IP address has outbound access to the public internet.
 - `ips` - (Computed) The IP address or addresses assigned to the NIC.
