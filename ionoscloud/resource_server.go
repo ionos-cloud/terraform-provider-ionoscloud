@@ -59,7 +59,7 @@ func resourceServer() *schema.Resource {
 			},
 			"boot_cdrom": {
 				Type:     schema.TypeString,
-				Computed: true,
+				Optional: true,
 			},
 			"cpu_family": {
 				Type:     schema.TypeString,
@@ -670,6 +670,13 @@ func resourceServerCreate(ctx context.Context, d *schema.ResourceData, meta inte
 		}
 	}
 
+	if _, ok := d.GetOk("boot_cdrom"); ok {
+		resId := d.Get("boot_cdrom").(string)
+		request.Properties.BootCdrom = &ionoscloud.ResourceReference{
+			Id: &resId,
+		}
+	}
+
 	server, apiResponse, err := client.ServersApi.DatacentersServersPost(ctx, d.Get("datacenter_id").(string)).Server(request).Execute()
 
 	if err != nil {
@@ -979,6 +986,7 @@ func resourceServerRead(ctx context.Context, d *schema.ResourceData, meta interf
 			return diags
 		}
 	}
+
 	return nil
 }
 
@@ -1026,6 +1034,17 @@ func resourceServerUpdate(ctx context.Context, d *schema.ResourceData, meta inte
 		_, n := d.GetChange("cpu_family")
 		nStr := n.(string)
 		request.CpuFamily = &nStr
+	}
+
+	if d.HasChange("boot_cdrom") {
+		_, n := d.GetChange("boot_cdrom")
+		nStr := n.(string)
+		if nStr != "" {
+			request.BootCdrom = &ionoscloud.ResourceReference{
+				Id: &nStr,
+			}
+		} /* todo: figure out a way of sending a nil bootCdrom to the API (the sdk's omitempty doesn't let us) */
+
 	}
 
 	server, apiResponse, err := client.ServersApi.DatacentersServersPatch(ctx, dcId, d.Id()).Server(request).Execute()

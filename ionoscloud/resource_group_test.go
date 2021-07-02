@@ -24,16 +24,16 @@ func TestAccGroup_Basic(t *testing.T) {
 			{
 				Config: fmt.Sprintf(testacccheckgroupconfigBasic, groupName),
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheckGroupExists("ionoscloud_group.group", &group),
-					testAccCheckGroupAttributes("ionoscloud_group.group", groupName),
-					resource.TestCheckResourceAttr("ionoscloud_group.group", "name", groupName),
+					testAccCheckGroupExists("ionoscloud_group.resource_group", &group),
+					testAccCheckGroupAttributes("ionoscloud_group.resource_group", groupName),
+					resource.TestCheckResourceAttr("ionoscloud_group.resource_group", "name", groupName),
 				),
 			},
 			{
 				Config: testacccheckgroupconfigUpdate,
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheckGroupAttributes("ionoscloud_group.group", "updated"),
-					resource.TestCheckResourceAttr("ionoscloud_group.group", "name", "updated"),
+					testAccCheckGroupAttributes("ionoscloud_group.resource_group", "updated"),
+					resource.TestCheckResourceAttr("ionoscloud_group.resource_group", "name", "updated"),
 				),
 			},
 		},
