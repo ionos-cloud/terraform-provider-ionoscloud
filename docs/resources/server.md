@@ -35,7 +35,7 @@ resource "ionoscloud_server" "example" {
   nic {
     lan             = "${ionoscloud_lan.example.id}"
     dhcp            = true
-    ip              = "${ionoscloud_ipblock.example.ips[0]}"
+    ips             = ["${ionoscloud_ipblock.example.ips[0]}", "${ionoscloud_ipblock.example.ips[1]}"]
     firewall_active = true
   }
 }
@@ -54,7 +54,7 @@ resource "ionoscloud_server" "example" {
 - `volume` - (Required) See the Volume section.
 - `nic` - (Required) See the NIC section.
 - `boot_volume` - (Computed) The associated boot volume.
-- `boot_cdrom` - (Computed) The associated boot drive, if any.
+- `boot_cdrom` - (Optional) The associated boot drive, if any.
 - `boot_image` - (Optional)[string] The image or snapshot UUID / name. May also be an image alias. It is required if `licence_type` is not provided.
 - `primary_nic` - (Computed) The associated NIC.
 - `primary_ip` - (Computed) The associated IP address.

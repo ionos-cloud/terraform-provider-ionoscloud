@@ -273,18 +273,16 @@ func resourceNetworkLoadBalancerForwardingRuleCreate(ctx context.Context, d *sch
 				if _, healthCheckOk := d.GetOk(fmt.Sprintf("targets.%d.health_check.0", targetIndex)); healthCheckOk {
 					target.HealthCheck = &ionoscloud.NetworkLoadBalancerForwardingRuleTargetHealthCheck{}
 
-					if check, checkOk := d.GetOk("targets.%d.health_check.0.check"); checkOk {
+					if check, checkOk := d.GetOk(fmt.Sprintf("targets.%d.health_check.0.check", targetIndex)); checkOk {
 						check := check.(bool)
 						target.HealthCheck.Check = &check
 					}
 
-					if checkInterval, checkIntervalOk := d.GetOk("targets.%d.health_check.0.check_interval"); checkIntervalOk {
+					if checkInterval, checkIntervalOk := d.GetOk(fmt.Sprintf("targets.%d.health_check.0.check_interval", targetIndex)); checkIntervalOk {
 						checkInterval := int32(checkInterval.(int))
-						fmt.Printf("checkInterval: %v", checkInterval)
 						target.HealthCheck.CheckInterval = &checkInterval
 					}
-
-					if maintenance, maintenanceOk := d.GetOk("targets.%d.health_check.0.maintenance"); maintenanceOk {
+					if maintenance, maintenanceOk := d.GetOk(fmt.Sprintf("targets.%d.health_check.0.maintenance", targetIndex)); maintenanceOk {
 						maintenance := maintenance.(bool)
 						target.HealthCheck.Maintenance = &maintenance
 					}
@@ -347,7 +345,7 @@ func resourceNetworkLoadBalancerForwardingRuleRead(ctx context.Context, d *schem
 
 	if err != nil {
 		log.Printf("[INFO] Resource %s not found: %+v", d.Id(), err)
-		if apiResponse.Response.StatusCode == 404 {
+		if apiResponse.StatusCode == 404 {
 			d.SetId("")
 			return nil
 		}
@@ -607,17 +605,17 @@ func resourceNetworkLoadBalancerForwardingRuleUpdate(ctx context.Context, d *sch
 				if _, healthCheckOk := d.GetOk(fmt.Sprintf("targets.%d.health_check.0", targetIndex)); healthCheckOk {
 					target.HealthCheck = &ionoscloud.NetworkLoadBalancerForwardingRuleTargetHealthCheck{}
 
-					if check, checkOk := d.GetOk("targets.%d.health_check.0.check"); checkOk {
+					if check, checkOk := d.GetOk(fmt.Sprintf("targets.%d.health_check.0.check", targetIndex)); checkOk {
 						check := check.(bool)
 						target.HealthCheck.Check = &check
 					}
 
-					if checkInterval, checkIntervalOk := d.GetOk("targets.%d.health_check.0.check_interval"); checkIntervalOk {
+					if checkInterval, checkIntervalOk := d.GetOk(fmt.Sprintf("targets.%d.health_check.0.check_interval", targetIndex)); checkIntervalOk {
 						checkInterval := int32(checkInterval.(int))
 						target.HealthCheck.CheckInterval = &checkInterval
 					}
 
-					if maintenance, maintenanceOk := d.GetOk("targets.%d.health_check.0.maintenance"); maintenanceOk {
+					if maintenance, maintenanceOk := d.GetOk(fmt.Sprintf("targets.%d.health_check.0.maintenance", targetIndex)); maintenanceOk {
 						maintenance := maintenance.(bool)
 						target.HealthCheck.Maintenance = &maintenance
 					}

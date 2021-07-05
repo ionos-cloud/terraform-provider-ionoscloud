@@ -62,7 +62,7 @@ func testAccCheckNatGatewayRuleDestroyCheck(s *terraform.State) error {
 		apiResponse, err := client.NATGatewaysApi.DatacentersNatgatewaysRulesDelete(ctx, rs.Primary.Attributes["datacenter_id"], rs.Primary.Attributes["natgateway_id"], rs.Primary.ID).Execute()
 
 		if err != nil {
-			if apiResponse == nil || apiResponse.Response.StatusCode != 404 {
+			if apiResponse == nil || apiResponse.StatusCode != 404 {
 				return fmt.Errorf("an error occured at checking deletion of nat gateway rule %s %s", rs.Primary.ID, responseBody(apiResponse))
 			}
 		} else {

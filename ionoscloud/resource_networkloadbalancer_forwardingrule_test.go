@@ -55,7 +55,7 @@ func testAccCheckNetworkLoadBalancerForwardingRuleDestroyCheck(s *terraform.Stat
 		apiResponse, err := client.NetworkLoadBalancersApi.DatacentersNetworkloadbalancersForwardingrulesDelete(ctx, rs.Primary.Attributes["datacenter_id"], rs.Primary.Attributes["networkloadbalancer_id"], rs.Primary.ID).Execute()
 
 		if err != nil {
-			if apiResponse == nil || apiResponse.Response.StatusCode != 404 {
+			if apiResponse == nil || apiResponse.StatusCode != 404 {
 				return fmt.Errorf("an error occured at checking deletion of forwarding rule %s %s", rs.Primary.ID, err)
 			}
 		} else {
@@ -192,7 +192,7 @@ resource "ionoscloud_networkloadbalancer_forwardingrule" "forwarding_rule" {
    weight = "123"
    health_check {
      check = true
-     check_interval = 1000
+     check_interval = 1500
    }
  }
 }`

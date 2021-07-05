@@ -1,6 +1,6 @@
 ---
 layout: "ionoscloud"
-page_title: "ProfitBricks : ionoscloud_server"
+page_title: "IonosCloud : ionoscloud_server"
 sidebar_current: "docs-ionoscloud-datasource-server"
 description: |-
 Get information on a Ionos Cloud Servers
@@ -8,22 +8,24 @@ Get information on a Ionos Cloud Servers
 
 # ionoscloud\_server
 
-The lans data source can be used to search for and return existing servers.
+The server data source can be used to search for and return existing servers.
 
 ## Example Usage
 
 ```hcl
 data "ionoscloud_server" "server_example" {
-  name     = "My Server"
+   datacenter_id = ionoscloud_datacenter.datacenter_example.id
+   name			 = "example_"
 }
 ```
 
 ## Argument Reference
 
+* `datacenter_id` - (Required) Datacenter's UUID.
 * `name` - (Optional) Name of an existing server that you want to search for.
 * `id` - (Optional) ID of the server you want to search for.
 
-Either `name` or `id` must be provided. If none, or both are provided, the datasource will return an error.
+`datacenter_id` and either `name` or `id` must be provided. If none, or both of `name` and `id` are provided, the datasource will return an error.
 
 ## Attributes Reference
 

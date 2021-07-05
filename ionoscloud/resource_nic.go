@@ -4,12 +4,10 @@ import (
 	"context"
 	"fmt"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 	ionoscloud "github.com/ionos-cloud/sdk-go/v6"
 	"log"
-	"strings"
-
-	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 )
 
 func resourceNic() *schema.Resource {
@@ -35,14 +33,11 @@ func resourceNic() *schema.Resource {
 				Type:     schema.TypeBool,
 				Optional: true,
 			},
-			"ip": {
-				Type:     schema.TypeString,
-				Optional: true,
-			},
 			"ips": {
 				Type:     schema.TypeList,
 				Elem:     &schema.Schema{Type: schema.TypeString},
 				Computed: true,
+				Optional: true,
 			},
 			"firewall_active": {
 				Type:     schema.TypeBool,
@@ -92,11 +87,6 @@ func resourceNicCreate(ctx context.Context, d *schema.ResourceData, meta interfa
 		val := d.Get("dhcp").(bool)
 		nic.Properties.Dhcp = &val
 	}
-	if _, ok := d.GetOk("ip"); ok {
-		raw := d.Get("ip").(string)
-		ips := strings.Split(raw, ",")
-		nic.Properties.Ips = &ips
-	}
 	if _, ok := d.GetOk("firewall_active"); ok {
 		raw := d.Get("firewall_active").(bool)
 		nic.Properties.FirewallActive = &raw
@@ -104,6 +94,20 @@ func resourceNicCreate(ctx context.Context, d *schema.ResourceData, meta interfa
 	if _, ok := d.GetOk("firewall_type"); ok {
 		raw := d.Get("firewall_type").(string)
 		nic.Properties.FirewallType = &raw
+	}
+
+	if v, ok := d.GetOk("ips"); ok {
+		raw := v.([]interface{})
+		if raw != nil && len(raw) > 0 {
+			ips := make([]string, 0)
+			for _, rawIp := range raw {
+				ip := rawIp.(string)
+				ips = append(ips, ip)
+			}
+			if ips != nil && len(ips) > 0 {
+				nic.Properties.Ips = &ips
+			}
+		}
 	}
 
 	dcid := d.Get("datacenter_id").(string)
@@ -140,7 +144,7 @@ func resourceNicRead(ctx context.Context, d *schema.ResourceData, meta interface
 	rsp, apiResponse, err := client.NetworkInterfacesApi.DatacentersServersNicsFindById(ctx, dcid, srvid, nicid).Execute()
 
 	if err != nil {
-		if apiResponse != nil && apiResponse.Response.StatusCode == 404 {
+		if apiResponse != nil && apiResponse.StatusCode == 404 {
 			d.SetId("")
 			return nil
 		}
@@ -216,10 +220,19 @@ func resourceNicUpdate(ctx context.Context, d *schema.ResourceData, meta interfa
 	n := d.Get("dhcp").(bool)
 	properties.Dhcp = &n
 
-	if d.HasChange("ip") {
-		_, raw := d.GetChange("ip")
-		ips := strings.Split(raw.(string), ",")
-		properties.Ips = &ips
+	if d.HasChange("ips") {
+		_, v := d.GetChange("ips")
+		raw := v.([]interface{})
+		if raw != nil && len(raw) > 0 {
+			ips := make([]string, 0)
+			for _, rawIp := range raw {
+				ip := rawIp.(string)
+				ips = append(ips, ip)
+			}
+			if ips != nil && len(ips) > 0 {
+				properties.Ips = &ips
+			}
+		}
 	}
 
 	dcid := d.Get("datacenter_id").(string)

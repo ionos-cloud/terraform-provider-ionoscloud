@@ -15,15 +15,17 @@ The k8s node pool data source can be used to search for and return existing k8s 
 ```hcl
 data "ionoscloud_k8s_node_pool" "k8s_node_pool_example" {
   name     = "My_Node_Pool"
+  k8s_cluster_id 	= ionoscloud_k8s_cluster.k8s_cluster_example.id
 }
 ```
 
 ## Argument Reference
 
+* `k8s_cluster_id` (Required) K8s Cluster' UUID
 * `name` - (Optional) Name of an existing node pool that you want to search for.
 * `id` - (Optional) ID of the node pool you want to search for.
 
-Either `name` or `id` must be provided. If none, or both are provided, the datasource will return an error.
+`k8s_cluster_id` and either `name` or `id` must be provided. If none, or both of `name` and `id` are provided, the datasource will return an error.
 
 ## Attributes Reference
 

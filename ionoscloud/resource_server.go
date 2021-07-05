@@ -59,7 +59,7 @@ func resourceServer() *schema.Resource {
 			},
 			"boot_cdrom": {
 				Type:     schema.TypeString,
-				Computed: true,
+				Optional: true,
 			},
 			"cpu_family": {
 				Type:     schema.TypeString,
@@ -219,21 +219,11 @@ func resourceServer() *schema.Resource {
 							Type:     schema.TypeBool,
 							Optional: true,
 						},
-
-						"ip": {
-							Type:     schema.TypeString,
-							Optional: true,
-							DiffSuppressFunc: func(k, old, new string, d *schema.ResourceData) bool {
-								if new == "" {
-									return true
-								}
-								return false
-							},
-						},
 						"ips": {
 							Type:     schema.TypeList,
 							Elem:     &schema.Schema{Type: schema.TypeString},
 							Computed: true,
+							Optional: true,
 						},
 						"firewall_active": {
 							Type:     schema.TypeBool,
@@ -276,16 +266,6 @@ func resourceServer() *schema.Resource {
 									},
 									"target_ip": {
 										Type:     schema.TypeString,
-										Optional: true,
-									},
-									"ip": {
-										Type:     schema.TypeString,
-										Optional: true,
-										Computed: true,
-									},
-									"ips": {
-										Type:     schema.TypeList,
-										Elem:     &schema.Schema{Type: schema.TypeString},
 										Optional: true,
 									},
 									"port_range_start": {
@@ -476,7 +456,7 @@ func resourceServerCreate(ctx context.Context, d *schema.ResourceData, meta inte
 		} else {
 			img, apiResponse, err := client.ImagesApi.ImagesFindById(ctx, imageInput).Execute()
 
-			if apiResponse != nil && apiResponse.Response.StatusCode == 404 {
+			if apiResponse != nil && apiResponse.StatusCode == 404 {
 
 				_, apiResponse, err = client.SnapshotsApi.SnapshotsFindById(ctx, imageInput).Execute()
 
@@ -582,10 +562,17 @@ func resourceServerCreate(ctx context.Context, d *schema.ResourceData, meta inte
 			nic.Properties.FirewallType = &v
 		}
 
-		if v, ok := d.GetOk("nic.0.ip"); ok {
-			ips := strings.Split(v.(string), ",")
-			if len(ips) > 0 {
-				nic.Properties.Ips = &ips
+		if v, ok := d.GetOk("nic.0.ips"); ok {
+			raw := v.([]interface{})
+			if raw != nil && len(raw) > 0 {
+				ips := make([]string, 0)
+				for _, rawIp := range raw {
+					ip := rawIp.(string)
+					ips = append(ips, ip)
+				}
+				if ips != nil && len(ips) > 0 {
+					nic.Properties.Ips = &ips
+				}
 			}
 		}
 
@@ -670,10 +657,17 @@ func resourceServerCreate(ctx context.Context, d *schema.ResourceData, meta inte
 		}
 	}
 
+	if _, ok := d.GetOk("boot_cdrom"); ok {
+		resId := d.Get("boot_cdrom").(string)
+		request.Properties.BootCdrom = &ionoscloud.ResourceReference{
+			Id: &resId,
+		}
+	}
+
 	server, apiResponse, err := client.ServersApi.DatacentersServersPost(ctx, d.Get("datacenter_id").(string)).Server(request).Execute()
 
 	if err != nil {
-		diags := diag.FromErr(fmt.Errorf("error creating server: (%s)", err))
+		diags := diag.FromErr(fmt.Errorf("error creating server: (%s) %s", err, string(apiResponse.Payload)))
 		return diags
 	}
 	d.SetId(*server.Id)
@@ -804,7 +798,7 @@ func resourceServerRead(ctx context.Context, d *schema.ResourceData, meta interf
 
 	server, apiResponse, err := client.ServersApi.DatacentersServersFindById(ctx, dcId, serverId).Execute()
 	if err != nil {
-		if apiResponse != nil && apiResponse.Response.StatusCode == 404 {
+		if apiResponse != nil && apiResponse.StatusCode == 404 {
 			d.SetId("")
 			return nil
 		}
@@ -901,7 +895,7 @@ func resourceServerRead(ctx context.Context, d *schema.ResourceData, meta interf
 		setPropWithNilCheck(network, "mac", nic.Properties.Mac)
 
 		if nic.Properties.Ips != nil && len(*nic.Properties.Ips) > 0 {
-			network["ip"] = (*nic.Properties.Ips)[0]
+			network["ips"] = *nic.Properties.Ips
 		}
 
 		if firewallId, ok := d.GetOk("firewallrule_id"); ok {
@@ -979,6 +973,7 @@ func resourceServerRead(ctx context.Context, d *schema.ResourceData, meta interf
 			return diags
 		}
 	}
+
 	return nil
 }
 
@@ -1026,6 +1021,17 @@ func resourceServerUpdate(ctx context.Context, d *schema.ResourceData, meta inte
 		_, n := d.GetChange("cpu_family")
 		nStr := n.(string)
 		request.CpuFamily = &nStr
+	}
+
+	if d.HasChange("boot_cdrom") {
+		_, n := d.GetChange("boot_cdrom")
+		nStr := n.(string)
+		if nStr != "" {
+			request.BootCdrom = &ionoscloud.ResourceReference{
+				Id: &nStr,
+			}
+		} /* todo: figure out a way of sending a nil bootCdrom to the API (the sdk's omitempty doesn't let us) */
+
 	}
 
 	server, apiResponse, err := client.ServersApi.DatacentersServersPatch(ctx, dcId, d.Id()).Server(request).Execute()
@@ -1116,10 +1122,17 @@ func resourceServerUpdate(ctx context.Context, d *schema.ResourceData, meta inte
 			properties.Name = &vStr
 		}
 
-		if v, ok := d.GetOk("nic.0.ip"); ok {
-			ips := strings.Split(v.(string), ",")
-			if len(ips) > 0 {
-				properties.Ips = &ips
+		if v, ok := d.GetOk("nic.0.ips"); ok {
+			raw := v.([]interface{})
+			if raw != nil && len(raw) > 0 {
+				ips := make([]string, 0)
+				for _, rawIp := range raw {
+					ip := rawIp.(string)
+					ips = append(ips, ip)
+				}
+				if ips != nil && len(ips) > 0 {
+					properties.Ips = &ips
+				}
 			}
 		}
 

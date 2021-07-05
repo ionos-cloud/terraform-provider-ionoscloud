@@ -1,6 +1,6 @@
 ---
 layout: "ionoscloud"
-page_title: "ProfitBricks : ionoscloud_private_crossconnect"
+page_title: "IonosCloud : ionoscloud_private_crossconnect"
 sidebar_current: "docs-ionoscloud-datasource-private-crossconnect"
 description: |-
 Get information on a Ionos Cloud Private Crossconnects

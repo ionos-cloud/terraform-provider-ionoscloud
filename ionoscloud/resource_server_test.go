@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	ionoscloud "github.com/ionos-cloud/sdk-go/v6"
+	"os"
 	"testing"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
@@ -98,6 +99,42 @@ func TestAccServer_BootCdromNoImage(t *testing.T) {
 	})
 }
 
+func TestAccServer_NicIps(t *testing.T) {
+	var server ionoscloud.Server
+	serverName := "webserver"
+
+	publicIp1 := os.Getenv("TF_ACC_IONOS_PUBLIC_IP_1")
+	if publicIp1 == "" {
+		t.Errorf("TF_ACC_IONOS_PUBLIC_1 not set; please set it to a valid public IP for the us/las zone")
+		t.FailNow()
+	}
+	publicIp2 := os.Getenv("TF_ACC_IONOS_PUBLIC_IP_2")
+	if publicIp2 == "" {
+		t.Errorf("TF_ACC_IONOS_PUBLIC_2 not set; please set it to a valid public IP for the us/las zone")
+		t.FailNow()
+	}
+
+	resource.Test(t, resource.TestCase{
+		PreCheck: func() {
+			testAccPreCheck(t)
+		},
+		ProviderFactories: testAccProviderFactories,
+		CheckDestroy:      testAccCheckServerDestroyCheck,
+		Steps: []resource.TestStep{
+			{
+				Config: fmt.Sprintf(testacccheckserverconfigNicIps, serverName, publicIp1, publicIp2),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckServerExists("ionoscloud_server.webserver", &server),
+					testAccCheckServerAttributes("ionoscloud_server.webserver", serverName),
+					resource.TestCheckResourceAttr("ionoscloud_server.webserver", "name", serverName),
+					resource.TestCheckResourceAttr("ionoscloud_server.webserver", "nic.0.ips.0", publicIp1),
+					resource.TestCheckResourceAttr("ionoscloud_server.webserver", "nic.0.ips.1", publicIp2),
+				),
+			},
+		},
+	})
+}
+
 func testAccCheckServerDestroyCheck(s *terraform.State) error {
 	client := testAccProvider.Meta().(*ionoscloud.APIClient)
 
@@ -117,7 +154,7 @@ func testAccCheckServerDestroyCheck(s *terraform.State) error {
 		_, apiResponse, err := client.ServersApi.DatacentersServersFindById(ctx, dcId, rs.Primary.ID).Execute()
 
 		if err != nil {
-			if apiResponse == nil || apiResponse.Response.StatusCode != 404 {
+			if apiResponse == nil || apiResponse.StatusCode != 404 {
 				return fmt.Errorf("unable to fetch server %s: %s", rs.Primary.ID, err)
 			}
 		} else {
@@ -197,7 +234,7 @@ resource "ionoscloud_server" "webserver" {
   ram = 1024
   availability_zone = "ZONE_1"
   cpu_family = "AMD_OPTERON"
-  image_name = "Ubuntu-20.04-LTS-server-2021-06-01"
+  image_name = "Ubuntu-20.04"
   image_password = "K3tTj8G14a3EgKyNeeiY"
   volume {
     name = "system"
@@ -238,7 +275,7 @@ resource "ionoscloud_server" "webserver" {
   availability_zone = "ZONE_1"
   cpu_family = "AMD_OPTERON"
   volume {
-	image_name = "Ubuntu-20.04-LTS-server-2021-06-01"
+	image_name = "Ubuntu-20.04"
 	image_password = "K3tTj8G14a3EgKyNeeiY"
     name = "system"
     size = 15
@@ -277,7 +314,7 @@ resource "ionoscloud_server" "webserver" {
   ram = 1024
   availability_zone = "ZONE_1"
   cpu_family = "AMD_OPTERON"
-  image_name = "Ubuntu-20.04-LTS-server-2021-06-01"
+  image_name = "Ubuntu-20.04"
   image_password = "K3tTj8G14a3EgKyNeeiY"
   volume {
     name = "system"
@@ -369,6 +406,44 @@ resource "ionoscloud_server" "webserver" {
       port_range_end = 22
     }
   }
+}`
+
+const testacccheckserverconfigNicIps = `
+resource "ionoscloud_datacenter" "foobar" {
+	name       = "server-test"
+	location = "de/fra"
+}
+
+resource "ionoscloud_lan" "webserver_lan" {
+  datacenter_id = "${ionoscloud_datacenter.foobar.id}"
+  public = true
+  name = "public"
+}
+
+
+resource "ionoscloud_server" "webserver" {
+  name = "%s"
+  datacenter_id = "${ionoscloud_datacenter.foobar.id}"
+  cores             = 2
+  ram               = 1024
+
+  availability_zone = "ZONE_1"
+  image_password    = "K3tTj8G14a3EgKyNeeiY"
+  image_name        = "Ubuntu-16.04"
+
+  volume {
+    name           = "new"
+    size           = 5
+    disk_type      = "SSD"
+  }
+
+  nic {
+    lan             = "${ionoscloud_lan.webserver_lan.id}"
+    dhcp            = true
+    ips            = ["%s","%s"]
+    firewall_active = false
+  }
+
 }`
 
 func Test_Update(t *testing.T) {
