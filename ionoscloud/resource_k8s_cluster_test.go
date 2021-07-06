@@ -41,6 +41,28 @@ func TestAcck8sCluster_Basic(t *testing.T) {
 	})
 }
 
+func TestAcck8sCluster_S3Subnet(t *testing.T) {
+	var k8sCluster ionoscloud.KubernetesCluster
+	k8sClusterName := "example"
+
+	resource.Test(t, resource.TestCase{
+		PreCheck: func() {
+			testAccPreCheck(t)
+		},
+		ProviderFactories: testAccProviderFactories,
+		CheckDestroy:      testAccCheckk8sClusterDestroyCheck,
+		Steps: []resource.TestStep{
+			{
+				Config: fmt.Sprintf(testAccCheckk8sClusterConfigS3Subnet, k8sClusterName),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckk8sClusterExists("ionoscloud_k8s_cluster.example", &k8sCluster),
+					resource.TestCheckResourceAttr("ionoscloud_k8s_cluster.example", "name", k8sClusterName),
+				),
+			},
+		},
+	})
+}
+
 func testAccCheckk8sClusterDestroyCheck(s *terraform.State) error {
 	client := testAccProvider.Meta().(*ionoscloud.APIClient)
 
@@ -121,6 +143,18 @@ resource "ionoscloud_k8s_cluster" "example" {
   maintenance_window {
     day_of_the_week = "Monday"
     time            = "10:30:00Z"
+  } 
+}`
+
+const testAccCheckk8sClusterConfigS3Subnet = `
+resource "ionoscloud_k8s_cluster" "example" {
+  name        = "%s"
+  api_subnet_allow_list = ["1.2.3.4/32",
+                           "2002::1234:abcd:ffff:c0a8:101/64", 
+                           "1.2.3.4", 
+                           "2002::1234:abcd:ffff:c0a8:101" ]
+  s3Buckets { 
+     name = "sdktestv6"
   }
-  
+
 }`
