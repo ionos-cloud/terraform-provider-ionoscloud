@@ -32,13 +32,13 @@ func TestAccLanIPFailover_Basic(t *testing.T) {
 		CheckDestroy:      testAccCheckLanIPFailoverDestroyCheck,
 		Steps: []resource.TestStep{
 			{
-				Config: fmt.Sprintf(testAccCheckLanIPFailoverConfig_basic),
+				Config: fmt.Sprintf(testaccchecklanipfailoverconfigBasic),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckLanIPFailoverGroupExists("ionoscloud_ipfailover.failover-test", &lan, &ipfailover),
 				),
 			},
 			{
-				Config: testAccCheckLanIPFailoverConfig_update,
+				Config: testaccchecklanipfailoverconfigUpdate,
 				Check: resource.ComposeTestCheckFunc(
 					testDeleted("ionoscloud_ipfailover.failover-test"),
 				),
@@ -75,11 +75,11 @@ func testAccCheckLanIPFailoverGroupExists(n string, _ *ionoscloud.Lan, _ *ionosc
 
 		lan, _, err := client.LansApi.DatacentersLansFindById(ctx, dcId, lanId).Execute()
 		if err != nil {
-			return fmt.Errorf("lan %s not found.", lanId)
+			return fmt.Errorf("lan %s not found", lanId)
 		}
 
 		if lan.Properties.IpFailover == nil {
-			return fmt.Errorf("lan %s has no failover groups.", lanId)
+			return fmt.Errorf("lan %s has no failover groups", lanId)
 		}
 		found := false
 		for _, fo := range *lan.Properties.IpFailover {
@@ -140,7 +140,7 @@ func testAccCheckLanIPFailoverDestroyCheck(s *terraform.State) error {
 	return nil
 }
 
-const testAccCheckLanIPFailoverConfig_basic = `
+const testaccchecklanipfailoverconfigBasic = `
 resource "ionoscloud_datacenter" "foobar" {
 	name       = "ipfailover-test"
 	location = "us/las"
@@ -188,7 +188,7 @@ resource "ionoscloud_ipfailover" "failover-test" {
 }
 `
 
-const testAccCheckLanIPFailoverConfig_update = `
+const testaccchecklanipfailoverconfigUpdate = `
 resource "ionoscloud_datacenter" "foobar" {
 	name       = "ipfailover-test"
 	location = "us/las"

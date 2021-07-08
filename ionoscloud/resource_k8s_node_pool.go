@@ -79,14 +79,16 @@ func resourcek8sNodePool() *schema.Resource {
 							Elem: &schema.Resource{
 								Schema: map[string]*schema.Schema{
 									"network": {
-										Type:        schema.TypeString,
-										Description: "IPv4 or IPv6 CIDR to be routed via the interface",
-										Required:    true,
+										Type:         schema.TypeString,
+										Description:  "IPv4 or IPv6 CIDR to be routed via the interface",
+										Required:     true,
+										ValidateFunc: validation.All(validation.StringIsNotWhiteSpace),
 									},
 									"gateway_ip": {
-										Type:        schema.TypeString,
-										Description: "IPv4 or IPv6 Gateway IP for the route",
-										Required:    true,
+										Type:         schema.TypeString,
+										Description:  "IPv4 or IPv6 Gateway IP for the route",
+										Required:     true,
+										ValidateFunc: validation.All(validation.StringIsNotWhiteSpace),
 									},
 								},
 							},
@@ -102,14 +104,16 @@ func resourcek8sNodePool() *schema.Resource {
 				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{
 						"time": {
-							Type:        schema.TypeString,
-							Description: "A clock time in the day when maintenance is allowed",
-							Required:    true,
+							Type:         schema.TypeString,
+							Description:  "A clock time in the day when maintenance is allowed",
+							Required:     true,
+							ValidateFunc: validation.All(validation.StringIsNotWhiteSpace),
 						},
 						"day_of_the_week": {
-							Type:        schema.TypeString,
-							Description: "Day of the week when maintenance is allowed",
-							Required:    true,
+							Type:         schema.TypeString,
+							Description:  "Day of the week when maintenance is allowed",
+							Required:     true,
+							ValidateFunc: validation.All(validation.StringIsNotWhiteSpace),
 						},
 					},
 				},

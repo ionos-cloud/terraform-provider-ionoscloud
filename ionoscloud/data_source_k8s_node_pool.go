@@ -85,12 +85,12 @@ func dataSourceK8sNodePool() *schema.Resource {
 						"time": {
 							Type:        schema.TypeString,
 							Description: "A clock time in the day when maintenance is allowed",
-							Required:    true,
+							Computed:    true,
 						},
 						"day_of_the_week": {
 							Type:        schema.TypeString,
 							Description: "Day of the week when maintenance is allowed",
-							Required:    true,
+							Computed:    true,
 						},
 					},
 				},
@@ -104,12 +104,12 @@ func dataSourceK8sNodePool() *schema.Resource {
 						"min_node_count": {
 							Type:        schema.TypeInt,
 							Description: "The minimum number of worker nodes the node pool can scale down to. Should be less than max_node_count",
-							Required:    true,
+							Computed:    true,
 						},
 						"max_node_count": {
 							Type:        schema.TypeInt,
 							Description: "The maximum number of worker nodes that the node pool can scale to. Should be greater than min_node_count",
-							Required:    true,
+							Computed:    true,
 						},
 					},
 				},
@@ -139,12 +139,12 @@ func dataSourceK8sNodePool() *schema.Resource {
 									"network": {
 										Type:        schema.TypeString,
 										Description: "IPv4 or IPv6 CIDR to be routed via the interface",
-										Required:    true,
+										Optional:    true,
 									},
 									"gateway_ip": {
 										Type:        schema.TypeString,
 										Description: "IPv4 or IPv6 Gateway IP for the route",
-										Required:    true,
+										Optional:    true,
 									},
 								},
 							},

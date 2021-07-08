@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 	ionoscloud "github.com/ionos-cloud/sdk-go/v6"
 	"log"
 )
@@ -18,19 +19,22 @@ func resourceApplicationLoadBalancerForwardingRule() *schema.Resource {
 		Schema: map[string]*schema.Schema{
 
 			"name": {
-				Type:        schema.TypeString,
-				Description: "A name of that Application Load Balancer forwarding rule",
-				Required:    true,
+				Type:         schema.TypeString,
+				Description:  "A name of that Application Load Balancer forwarding rule",
+				Required:     true,
+				ValidateFunc: validation.All(validation.StringIsNotWhiteSpace),
 			},
 			"protocol": {
-				Type:        schema.TypeString,
-				Description: "rotocol of the balancing.",
-				Required:    true,
+				Type:         schema.TypeString,
+				Description:  "Protocol of the balancing.",
+				Required:     true,
+				ValidateFunc: validation.All(validation.StringIsNotWhiteSpace),
 			},
 			"listener_ip": {
-				Type:        schema.TypeString,
-				Description: "Listening IP. (inbound)",
-				Required:    true,
+				Type:         schema.TypeString,
+				Description:  "Listening IP. (inbound)",
+				Required:     true,
+				ValidateFunc: validation.All(validation.StringIsNotWhiteSpace),
 			},
 			"listener_port": {
 				Type:        schema.TypeInt,
@@ -71,14 +75,16 @@ func resourceApplicationLoadBalancerForwardingRule() *schema.Resource {
 				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{
 						"name": {
-							Type:        schema.TypeString,
-							Description: "A name of that Application Load Balancer http rule",
-							Required:    true,
+							Type:         schema.TypeString,
+							Description:  "A name of that Application Load Balancer http rule",
+							Required:     true,
+							ValidateFunc: validation.All(validation.StringIsNotWhiteSpace),
 						},
 						"type": {
-							Type:        schema.TypeString,
-							Description: "Type of the Http Rule",
-							Required:    true,
+							Type:         schema.TypeString,
+							Description:  "Type of the Http Rule",
+							Required:     true,
+							ValidateFunc: validation.All(validation.StringIsNotWhiteSpace),
 						},
 						"target_group": {
 							Type:        schema.TypeString,
@@ -118,14 +124,16 @@ func resourceApplicationLoadBalancerForwardingRule() *schema.Resource {
 							Elem: &schema.Resource{
 								Schema: map[string]*schema.Schema{
 									"type": {
-										Type:        schema.TypeString,
-										Description: "Type of the Http Rule condition.",
-										Required:    true,
+										Type:         schema.TypeString,
+										Description:  "Type of the Http Rule condition.",
+										Required:     true,
+										ValidateFunc: validation.All(validation.StringIsNotWhiteSpace),
 									},
 									"condition": {
-										Type:        schema.TypeString,
-										Description: "Condition of the Http Rule condition.",
-										Required:    true,
+										Type:         schema.TypeString,
+										Description:  "Condition of the Http Rule condition.",
+										Required:     true,
+										ValidateFunc: validation.All(validation.StringIsNotWhiteSpace),
 									},
 									"negate": {
 										Type:        schema.TypeBool,
@@ -147,14 +155,16 @@ func resourceApplicationLoadBalancerForwardingRule() *schema.Resource {
 				},
 			},
 			"datacenter_id": {
-				Type:     schema.TypeString,
-				Required: true,
-				ForceNew: true,
+				Type:         schema.TypeString,
+				Required:     true,
+				ForceNew:     true,
+				ValidateFunc: validation.All(validation.StringIsNotWhiteSpace),
 			},
 			"application_loadbalancer_id": {
-				Type:     schema.TypeString,
-				Required: true,
-				ForceNew: true,
+				Type:         schema.TypeString,
+				Required:     true,
+				ForceNew:     true,
+				ValidateFunc: validation.All(validation.StringIsNotWhiteSpace),
 			},
 		},
 		Timeouts: &resourceDefaultTimeouts,

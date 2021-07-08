@@ -18,7 +18,7 @@ func TestAccIpFailover_ImportBasic(t *testing.T) {
 		CheckDestroy:      testAccCheckLanIPFailoverDestroyCheck,
 		Steps: []resource.TestStep{
 			{
-				Config: fmt.Sprintf(testAccCheckLanIPFailoverConfig_basic),
+				Config: fmt.Sprintf(testaccchecklanipfailoverconfigBasic),
 			},
 
 			{

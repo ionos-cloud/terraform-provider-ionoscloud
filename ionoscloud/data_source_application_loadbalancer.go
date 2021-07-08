@@ -11,27 +11,26 @@ import (
 
 func dataSourceApplicationLoadBalancer() *schema.Resource {
 	return &schema.Resource{
-		Read: dataSourceNatGatewayRead,
+		Read: dataSourceApplicationLoadBalancerRead,
 		Schema: map[string]*schema.Schema{
 			"id": {
 				Type:     schema.TypeString,
 				Optional: true,
 			},
 			"name": {
-				Type:        schema.TypeString,
-				Description: "Name of the application loadbalancer",
-				Required:    true,
+				Type:     schema.TypeString,
+				Optional: true,
 			},
 			"listener_lan": {
 				Type:        schema.TypeInt,
 				Description: "Id of the listening LAN. (inbound)",
-				Required:    true,
+				Computed:    true,
 			},
 			"ips": {
 				Type: schema.TypeList,
 				Description: "Collection of IP addresses of the Application Load Balancer. (inbound and outbound) IP of " +
 					"the listenerLan must be a customer reserved IP for the public load balancer and private IP for the private load balancer.",
-				Optional: true,
+				Computed: true,
 				Elem: &schema.Schema{
 					Type: schema.TypeString,
 				},
@@ -39,13 +38,13 @@ func dataSourceApplicationLoadBalancer() *schema.Resource {
 			"target_lan": {
 				Type:        schema.TypeInt,
 				Description: "Id of the balanced private target LAN. (outbound)",
-				Required:    true,
+				Computed:    true,
 			},
 			"lb_private_ips": {
 				Type: schema.TypeList,
 				Description: "Collection of private IP addresses with subnet mask of the Application Load Balancer. " +
 					"IPs must contain valid subnet mask. If user will not provide any IP then the system will generate one IP with /24 subnet.",
-				Optional: true,
+				Computed: true,
 				Elem: &schema.Schema{
 					Type: schema.TypeString,
 				},
@@ -113,8 +112,8 @@ func dataSourceApplicationLoadBalancerRead(d *schema.ResourceData, meta interfac
 				if err != nil {
 					return fmt.Errorf("an error occurred while fetching nat gateway with ID %s: %s", *c.Id, err.Error())
 				}
-				if applicationLoadBalancer.Properties.Name != nil {
-					if strings.Contains(*applicationLoadBalancer.Properties.Name, name.(string)) {
+				if tmpAlb.Properties.Name != nil {
+					if strings.Contains(*tmpAlb.Properties.Name, name.(string)) {
 						applicationLoadBalancer = tmpAlb
 						break
 					}

@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 	ionoscloud "github.com/ionos-cloud/sdk-go/v6"
 	"log"
 	"strings"
@@ -19,9 +20,10 @@ func resourceNatGatewayRule() *schema.Resource {
 		Schema: map[string]*schema.Schema{
 
 			"name": {
-				Type:        schema.TypeString,
-				Description: "Name of the NAT gateway rule",
-				Required:    true,
+				Type:         schema.TypeString,
+				Description:  "Name of the NAT gateway rule",
+				Required:     true,
+				ValidateFunc: validation.All(validation.StringIsNotWhiteSpace),
 			},
 			"type": {
 				Type:        schema.TypeString,
@@ -40,14 +42,16 @@ func resourceNatGatewayRule() *schema.Resource {
 				Type: schema.TypeString,
 				Description: "Source subnet of the NAT gateway rule. For SNAT rules it specifies which packets this " +
 					"translation rule applies to based on the packets source IP address.",
-				Required: true,
+				Required:     true,
+				ValidateFunc: validation.All(validation.StringIsNotWhiteSpace),
 			},
 			"public_ip": {
 				Type: schema.TypeString,
 				Description: "Public IP address of the NAT gateway rule. Specifies the address used for masking outgoing " +
 					"packets source address field. Should be one of the customer reserved IP address already " +
 					"configured on the NAT gateway resource",
-				Required: true,
+				Required:     true,
+				ValidateFunc: validation.All(validation.StringIsNotWhiteSpace),
 			},
 			"target_subnet": {
 				Type: schema.TypeString,
@@ -83,14 +87,16 @@ func resourceNatGatewayRule() *schema.Resource {
 				},
 			},
 			"datacenter_id": {
-				Type:     schema.TypeString,
-				Required: true,
-				ForceNew: true,
+				Type:         schema.TypeString,
+				Required:     true,
+				ForceNew:     true,
+				ValidateFunc: validation.All(validation.StringIsNotWhiteSpace),
 			},
 			"natgateway_id": {
-				Type:     schema.TypeString,
-				Required: true,
-				ForceNew: true,
+				Type:         schema.TypeString,
+				Required:     true,
+				ForceNew:     true,
+				ValidateFunc: validation.All(validation.StringIsNotWhiteSpace),
 			},
 		},
 		Timeouts: &resourceDefaultTimeouts,

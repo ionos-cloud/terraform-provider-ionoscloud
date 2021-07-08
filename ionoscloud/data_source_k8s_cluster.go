@@ -37,12 +37,12 @@ func dataSourceK8sCluster() *schema.Resource {
 						"time": {
 							Type:        schema.TypeString,
 							Description: "A clock time in the day when maintenance is allowed",
-							Required:    true,
+							Optional:    true,
 						},
 						"day_of_the_week": {
 							Type:        schema.TypeString,
 							Description: "Day of the week when maintenance is allowed",
-							Required:    true,
+							Optional:    true,
 						},
 					},
 				},

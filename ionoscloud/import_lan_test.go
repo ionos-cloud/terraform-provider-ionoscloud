@@ -32,7 +32,7 @@ func TestAccLan_ImportBasic(t *testing.T) {
 }
 
 func testAccLanImportStateId(s *terraform.State) (string, error) {
-	var importID string = ""
+	var importID = ""
 
 	for _, rs := range s.RootModule().Resources {
 		if rs.Type != "ionoscloud_lan" {
