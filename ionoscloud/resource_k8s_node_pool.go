@@ -571,10 +571,10 @@ func resourcek8sNodePoolRead(ctx context.Context, d *schema.ResourceData, meta i
 func resourcek8sNodePoolUpdate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	client := meta.(*ionoscloud.APIClient)
 
-	request := ionoscloud.KubernetesNodePool{}
+	request := ionoscloud.KubernetesNodePoolForPut{}
 
 	nodeCount := int32(d.Get("node_count").(int))
-	request.Properties = &ionoscloud.KubernetesNodePoolProperties{
+	request.Properties = &ionoscloud.KubernetesNodePoolPropertiesForPut{
 		NodeCount: &nodeCount,
 	}
 
@@ -793,7 +793,7 @@ func resourcek8sNodePoolUpdate(ctx context.Context, d *schema.ResourceData, meta
 		log.Printf("[INFO] Update req: %s", string(b))
 	}
 
-	_, apiResponse, err := client.KubernetesApi.K8sNodepoolsPut(ctx, d.Get("k8s_cluster_id").(string), d.Id()).KubernetesNodePool(request).Execute()
+	_, apiResponse, err := client.KubernetesApi.K8sNodepoolsPut(ctx, d.Get("k8s_cluster_id").(string), d.Id()).KubernetesNodePoolForPut(request).Execute()
 
 	if err != nil {
 		if apiResponse != nil && apiResponse.StatusCode == 404 {

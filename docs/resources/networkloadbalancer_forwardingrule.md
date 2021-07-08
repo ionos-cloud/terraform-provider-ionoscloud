@@ -37,7 +37,6 @@ resource "ionoscloud_networkloadbalancer_forwardingrule" "example" {
 
 - `name` - (Required)[string] A name of that Network Load Balancer forwarding rule.
 - `algorithm` - (Required)[string] Algorithm for the balancing.
-- `protocol` - (Required)[string] Protocol of the balancing.
 - `listener_ip` - (Required)[string] Listening IP. (inbound)
 - `listener_port` - (Required)[int] Listening port number. (inbound) (range: 1 to 65535)
 - `health_check` - (Optional) Health check attributes for Network Load Balancer forwarding rule.

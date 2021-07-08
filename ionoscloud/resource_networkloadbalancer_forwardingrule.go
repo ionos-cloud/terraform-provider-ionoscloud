@@ -27,11 +27,6 @@ func resourceNetworkLoadBalancerForwardingRule() *schema.Resource {
 				Description: "Algorithm for the balancing.",
 				Required:    true,
 			},
-			"protocol": {
-				Type:        schema.TypeString,
-				Description: "Protocol of the balancing.",
-				Required:    true,
-			},
 			"listener_ip": {
 				Type:        schema.TypeString,
 				Description: "Listening IP. (inbound)",
@@ -179,14 +174,6 @@ func resourceNetworkLoadBalancerForwardingRuleCreate(ctx context.Context, d *sch
 		networkLoadBalancerForwardingRule.Properties.Algorithm = &algorithm
 	} else {
 		diags := diag.FromErr(fmt.Errorf("algorithm must be provided for network loadbalancer forwarding rule"))
-		return diags
-	}
-
-	if protocol, protocolOk := d.GetOk("protocol"); protocolOk {
-		protocol := protocol.(string)
-		networkLoadBalancerForwardingRule.Properties.Protocol = &protocol
-	} else {
-		diags := diag.FromErr(fmt.Errorf("protocol must be provided for network loadbalancer forwarding rule"))
 		return diags
 	}
 
@@ -369,14 +356,6 @@ func resourceNetworkLoadBalancerForwardingRuleRead(ctx context.Context, d *schem
 		}
 	}
 
-	if networkLoadBalancerForwardingRule.Properties.Protocol != nil {
-		err := d.Set("protocol", *networkLoadBalancerForwardingRule.Properties.Protocol)
-		if err != nil {
-			diags := diag.FromErr(fmt.Errorf("error while setting protocol property for network load balancer forwarding rule %s: %s", d.Id(), err))
-			return diags
-		}
-	}
-
 	if networkLoadBalancerForwardingRule.Properties.ListenerIp != nil {
 		err := d.Set("listener_ip", *networkLoadBalancerForwardingRule.Properties.ListenerIp)
 		if err != nil {
@@ -499,12 +478,6 @@ func resourceNetworkLoadBalancerForwardingRuleUpdate(ctx context.Context, d *sch
 		_, v := d.GetChange("algorithm")
 		vStr := v.(string)
 		request.Properties.Algorithm = &vStr
-	}
-
-	if d.HasChange("protocol") {
-		_, v := d.GetChange("protocol")
-		vStr := v.(string)
-		request.Properties.Protocol = &vStr
 	}
 
 	if d.HasChange("listener_ip") {

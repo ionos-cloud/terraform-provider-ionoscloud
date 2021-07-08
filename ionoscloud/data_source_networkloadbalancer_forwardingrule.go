@@ -26,11 +26,6 @@ func dataSourceNetworkLoadBalancerForwardingRule() *schema.Resource {
 				Description: "Algorithm for the balancing.",
 				Computed:    true,
 			},
-			"protocol": {
-				Type:        schema.TypeString,
-				Description: "Protocol of the balancing.",
-				Computed:    true,
-			},
 			"listener_ip": {
 				Type:        schema.TypeString,
 				Description: "Listening IP. (inbound)",
@@ -249,13 +244,6 @@ func setNetworkLoadBalancerForwardingRuleData(d *schema.ResourceData, networkLoa
 			err := d.Set("algorithm", *networkLoadBalancerForwardingRule.Properties.Algorithm)
 			if err != nil {
 				return fmt.Errorf("error while setting algorithm property for network load balancer forwarding rule %s: %s", d.Id(), err)
-			}
-		}
-
-		if networkLoadBalancerForwardingRule.Properties.Protocol != nil {
-			err := d.Set("protocol", *networkLoadBalancerForwardingRule.Properties.Protocol)
-			if err != nil {
-				return fmt.Errorf("error while setting protocol property for network load balancer forwarding rule %s: %s", d.Id(), err)
 			}
 		}
 

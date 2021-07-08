@@ -36,7 +36,6 @@ The following attributes are returned by the datasource:
 * `id`
 * `name`
 * `algorithm`
-* `protocol`
 * `listener_ip`
 * `listener_port`
 * `health_check` - list of
