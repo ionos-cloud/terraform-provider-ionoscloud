@@ -78,7 +78,7 @@ func dataSourceNetworkLoadBalancerRead(d *schema.ResourceData, meta interface{})
 		return errors.New("id and name cannot be both specified in the same time")
 	}
 	if !idOk && !nameOk {
-		return errors.New("please provide either the lan id or name")
+		return errors.New("please provide either the network loadbalancer id or name")
 	}
 	var networkLoadBalancer ionoscloud.NetworkLoadBalancer
 	var err error

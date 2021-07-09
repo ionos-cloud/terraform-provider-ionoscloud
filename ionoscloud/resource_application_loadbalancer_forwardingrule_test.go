@@ -120,7 +120,7 @@ resource "ionoscloud_lan" "alb_lan_1" {
   name          = "test_alb_lan_1"
 }
 
-resource "ionoscloud_lan" "alb_lan_1" {
+resource "ionoscloud_lan" "alb_lan_2" {
   datacenter_id = ionoscloud_datacenter.alb_datacenter.id 
   public        = false
   name          = "test_alb_lan_2"
@@ -171,7 +171,7 @@ resource "ionoscloud_lan" "alb_lan_1" {
   name          = "test_alb_lan_1"
 }
 
-resource "ionoscloud_lan" "alb_lan_1" {
+resource "ionoscloud_lan" "alb_lan_2" {
   datacenter_id = ionoscloud_datacenter.alb_datacenter.id 
   public        = false
   name          = "test_alb_lan_2"

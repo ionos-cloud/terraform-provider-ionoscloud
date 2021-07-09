@@ -62,7 +62,7 @@ resource "ionoscloud_lan" "alb_lan_1" {
   name          = "test_alb_lan_1"
 }
 
-resource "ionoscloud_lan" "alb_lan_1" {
+resource "ionoscloud_lan" "alb_lan_2" {
   datacenter_id = ionoscloud_datacenter.alb_datacenter.id 
   public        = false
   name          = "test_alb_lan_2"
@@ -88,6 +88,7 @@ resource "ionoscloud_application_loadbalancer_forwardingrule" "forwarding_rule" 
  name = "test_datasource_forwarding_rule"
  protocol = "HTTP"
  listener_ip = "81.173.1.2"
+ listener_port = "8081"
  http_rules {
    name = "http_rule"
    type = "REDIRECT"
@@ -114,7 +115,7 @@ resource "ionoscloud_lan" "alb_lan_1" {
   name          = "test_alb_lan_1"
 }
 
-resource "ionoscloud_lan" "alb_lan_1" {
+resource "ionoscloud_lan" "alb_lan_2" {
   datacenter_id = ionoscloud_datacenter.alb_datacenter.id 
   public        = false
   name          = "test_alb_lan_2"
@@ -140,6 +141,7 @@ resource "ionoscloud_application_loadbalancer_forwardingrule" "forwarding_rule" 
  name = "test_datasource_forwarding_rule"
  protocol = "HTTP"
  listener_ip = "81.173.1.2"
+ listener_port = "8081"
  http_rules {
    name = "http_rule"
    type = "REDIRECT"
@@ -172,7 +174,7 @@ resource "ionoscloud_lan" "alb_lan_1" {
   name          = "test_alb_lan_1"
 }
 
-resource "ionoscloud_lan" "alb_lan_1" {
+resource "ionoscloud_lan" "alb_lan_2" {
   datacenter_id = ionoscloud_datacenter.alb_datacenter.id 
   public        = false
   name          = "test_alb_lan_2"
@@ -198,6 +200,7 @@ resource "ionoscloud_application_loadbalancer_forwardingrule" "forwarding_rule" 
  name = "test_datasource_forwarding_rule"
  protocol = "HTTP"
  listener_ip = "81.173.1.2"
+ listener_port = "8081"
  http_rules {
    name = "http_rule"
    type = "REDIRECT"

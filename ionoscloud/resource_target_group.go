@@ -98,7 +98,7 @@ func resourceTargetGroup() *schema.Resource {
 				Computed:    true,
 				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{
-						"check_timeout": {
+						"client_timeout": {
 							Type: schema.TypeInt,
 							Description: "ClientTimeout is expressed in milliseconds. This inactivity timeout applies " +
 								"when the client is expected to acknowledge or send data. If unset the default of 50 " +
@@ -148,6 +148,7 @@ func resourceTargetGroup() *schema.Resource {
 							Type:        schema.TypeString,
 							Description: "The method for the HTTP health check.",
 							Optional:    true,
+							Computed:    true,
 						},
 						"match_type": {
 							Type:         schema.TypeString,
@@ -280,14 +281,9 @@ func resourceTargetGroupCreate(ctx context.Context, d *schema.ResourceData, meta
 	if _, healthCheckOk := d.GetOk("health_check.0"); healthCheckOk {
 		targetGroup.Properties.HealthCheck = &ionoscloud.TargetGroupHealthCheck{}
 
-		//if clientTimeout, clientTimeoutOk := d.GetOk("health_check.0.client_timeout"); clientTimeoutOk {
-		//	clientTimeout := int32(clientTimeout.(int))
-		//	targetGroup.Properties.HealthCheck.ClientTimeout = &clientTimeout
-		//}
-
-		if checkTimeout, checkTimeoutOk := d.GetOk("health_check.0.check_timeout"); checkTimeoutOk {
-			checkTimeout := int32(checkTimeout.(int))
-			targetGroup.Properties.HealthCheck.CheckTimeout = &checkTimeout
+		if clientTimeout, clientTimeoutOk := d.GetOk("health_check.0.client_timeout"); clientTimeoutOk {
+			clientTimeout := int32(clientTimeout.(int))
+			targetGroup.Properties.HealthCheck.ClientTimeout = &clientTimeout
 		}
 
 		if connectTimeout, connectTimeoutOk := d.GetOk("health_check.0.connect_timeout"); connectTimeoutOk {
@@ -404,7 +400,7 @@ func resourceTargetGroupRead(ctx context.Context, d *schema.ResourceData, meta i
 	forwardingRuleTargets := make([]interface{}, 0)
 	if rsp.Properties.Targets != nil && len(*rsp.Properties.Targets) > 0 {
 		forwardingRuleTargets = make([]interface{}, 0)
-		for targetIndex, target := range *rsp.Properties.Targets {
+		for _, target := range *rsp.Properties.Targets {
 			targetEntry := make(map[string]interface{})
 
 			if target.Ip != nil {
@@ -440,7 +436,7 @@ func resourceTargetGroupRead(ctx context.Context, d *schema.ResourceData, meta i
 				targetEntry["health_check"] = healthCheck
 			}
 
-			forwardingRuleTargets[targetIndex] = targetEntry
+			forwardingRuleTargets = append(forwardingRuleTargets, targetEntry)
 		}
 	}
 
@@ -456,12 +452,8 @@ func resourceTargetGroupRead(ctx context.Context, d *schema.ResourceData, meta i
 
 		healthCheckEntry := make(map[string]interface{})
 
-		//if rsp.Properties.HealthCheck.ClientTimeout != nil {
-		//	healthCheckEntry["client_timeout"] = *rsp.Properties.HealthCheck.ClientTimeout
-		//}
-
-		if rsp.Properties.HealthCheck.CheckTimeout != nil {
-			healthCheckEntry["check_timeout"] = *rsp.Properties.HealthCheck.CheckTimeout
+		if rsp.Properties.HealthCheck.ClientTimeout != nil {
+			healthCheckEntry["client_timeout"] = *rsp.Properties.HealthCheck.ClientTimeout
 		}
 
 		if rsp.Properties.HealthCheck.ConnectTimeout != nil {
@@ -488,10 +480,6 @@ func resourceTargetGroupRead(ctx context.Context, d *schema.ResourceData, meta i
 		httpHealthCheck := make([]interface{}, 1)
 
 		httpHealthCheckEntry := make(map[string]interface{})
-
-		//if rsp.Properties.HealthCheck.ClientTimeout != nil {
-		//	healthCheckEntry["client_timeout"] = *rsp.Properties.HealthCheck.ClientTimeout
-		//}
 
 		if rsp.Properties.HttpHealthCheck.Path != nil {
 			httpHealthCheckEntry["path"] = *rsp.Properties.HttpHealthCheck.Path
@@ -616,21 +604,12 @@ func resourceTargetGroupUpdate(ctx context.Context, d *schema.ResourceData, meta
 
 			healthCheck := &ionoscloud.TargetGroupHealthCheck{}
 
-			//if d.HasChange("health_check.0.client_timeout") {
-			//	_, newValue := d.GetChange("health_check.0.client_timeout")
-			//	if newValue != 0 {
-			//		updateHealthCheck = true
-			//		newValue := int32(newValue.(int))
-			//		healthCheck.ClientTimeout = &newValue
-			//	}
-			//}
-
-			if d.HasChange("health_check.0.check_timeout") {
-				_, newValue := d.GetChange("health_check.0.check_timeout")
+			if d.HasChange("health_check.0.client_timeout") {
+				_, newValue := d.GetChange("health_check.0.client_timeout")
 				if newValue != 0 {
 					updateHealthCheck = true
 					newValue := int32(newValue.(int))
-					healthCheck.CheckTimeout = &newValue
+					healthCheck.ClientTimeout = &newValue
 				}
 			}
 
@@ -747,7 +726,7 @@ func resourceTargetGroupUpdate(ctx context.Context, d *schema.ResourceData, meta
 func resourceTargetGroupDelete(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	client := meta.(*ionoscloud.APIClient)
 
-	_, apiResponse, err := client.TargetGroupsApi.TargetGroupsDelete(ctx, d.Id()).Execute()
+	apiResponse, err := client.TargetGroupsApi.TargetGroupsDelete(ctx, d.Id()).Execute()
 
 	if err != nil {
 		diags := diag.FromErr(fmt.Errorf("an error occured while deleting a target group %s %s", d.Id(), err))

@@ -3,8 +3,8 @@ package ionoscloud
 import (
 	"context"
 	"fmt"
-	"github.com/hashicorp/terraform-plugin-sdk/meta"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/meta"
 	"log"
 	"os"
 	"time"
@@ -100,6 +100,7 @@ func Provider() *schema.Provider {
 			"ionoscloud_template":                                dataSourceTemplate(),
 			"ionoscloud_application_loadbalancer":                dataSourceApplicationLoadBalancer(),
 			"ionoscloud_application_loadbalancer_forwardingrule": dataSourceApplicationLoadBalancerForwardingRule(),
+			"ionoscloud_target_group":                            dataSourceTargetGroup(),
 		},
 	}
 

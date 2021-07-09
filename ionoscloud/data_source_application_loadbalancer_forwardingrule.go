@@ -39,7 +39,6 @@ func dataSourceApplicationLoadBalancerForwardingRule() *schema.Resource {
 			},
 			"health_check": {
 				Type:        schema.TypeList,
-				MaxItems:    1,
 				Description: "Health check attributes for Application Load Balancer forwarding rule",
 				Computed:    true,
 				Elem: &schema.Resource{
@@ -180,7 +179,7 @@ func dataSourceApplicationLoadBalancerForwardingRuleRead(d *schema.ResourceData,
 		return errors.New("id and name cannot be both specified in the same time")
 	}
 	if !idOk && !nameOk {
-		return errors.New("please provide either the application loadbalancer id or name")
+		return errors.New("please provide either the application loadbalancer forwarding rule id or name")
 	}
 	var applicationLoadBalancerForwardingRule ionoscloud.ApplicationLoadBalancerForwardingRule
 	var err error
@@ -279,20 +278,19 @@ func setApplicationLoadBalancerForwardingRuleData(d *schema.ResourceData, applic
 			}
 		}
 
-		//if applicationLoadBalancerForwardingRule.Properties.HealthCheck != nil {
-		//	healthCheck := make([]interface{}, 1)
-		//
-		//	healthCheckEntry := make(map[string]interface{})
-		//	if applicationLoadBalancerForwardingRule.Properties.HealthCheck.ClientTimeout != nil {
-		//		healthCheckEntry["client_timeout"] = *applicationLoadBalancerForwardingRule.Properties.HealthCheck.ClientTimeout
-		//	}
-		//	healthCheck[0] = healthCheckEntry
-		//	err := d.Set("health_check", healthCheck)
-		//	if err != nil {
-		//		diags := diag.FromErr(fmt.Errorf("error while setting health_check property for application load balancer forwarding rule %s: %s", d.Id(), err))
-		//		return diags
-		//	}
-		//}
+		if applicationLoadBalancerForwardingRule.Properties.HealthCheck != nil {
+			healthCheck := make([]interface{}, 1)
+
+			healthCheckEntry := make(map[string]interface{})
+			if applicationLoadBalancerForwardingRule.Properties.HealthCheck.ClientTimeout != nil {
+				healthCheckEntry["client_timeout"] = *applicationLoadBalancerForwardingRule.Properties.HealthCheck.ClientTimeout
+			}
+			healthCheck[0] = healthCheckEntry
+			err := d.Set("health_check", healthCheck)
+			if err != nil {
+				return fmt.Errorf("error while setting health_check property for application load balancer forwarding rule %s: %s", d.Id(), err)
+			}
+		}
 
 		if applicationLoadBalancerForwardingRule.Properties.ServerCertificates != nil {
 			err := d.Set("server_certificates", *applicationLoadBalancerForwardingRule.Properties.ServerCertificates)

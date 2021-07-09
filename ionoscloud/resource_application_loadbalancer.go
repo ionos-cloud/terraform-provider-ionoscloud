@@ -88,8 +88,8 @@ func resourceApplicationLoadBalancerCreate(ctx context.Context, d *schema.Resour
 		ipsVal := ipsVal.([]interface{})
 		if ipsVal != nil {
 			ips := make([]string, 0)
-			for idx, value := range ipsVal {
-				ips[idx] = value.(string)
+			for _, value := range ipsVal {
+				ips = append(ips, value.(string))
 			}
 			if len(ips) > 0 {
 				applicationLoadBalancer.Properties.Ips = &ips
@@ -109,8 +109,8 @@ func resourceApplicationLoadBalancerCreate(ctx context.Context, d *schema.Resour
 		privateIpsVal := privateIpsVal.([]interface{})
 		if privateIpsVal != nil {
 			privateIps := make([]string, 0)
-			for idx, value := range privateIpsVal {
-				privateIps[idx] = value.(string)
+			for _, value := range privateIpsVal {
+				privateIps = append(privateIps, value.(string))
 			}
 			if len(privateIps) > 0 {
 				applicationLoadBalancer.Properties.LbPrivateIps = &privateIps
@@ -230,8 +230,8 @@ func resourceApplicationLoadBalancerUpdate(ctx context.Context, d *schema.Resour
 		ipsVal := newIps.([]interface{})
 		if ipsVal != nil {
 			ips := make([]string, 0)
-			for idx, value := range ipsVal {
-				ips[idx] = value.(string)
+			for _, value := range ipsVal {
+				ips = append(ips, value.(string))
 			}
 			if len(ips) > 0 {
 				request.Properties.Ips = &ips
@@ -250,8 +250,8 @@ func resourceApplicationLoadBalancerUpdate(ctx context.Context, d *schema.Resour
 		privateIpsVal := newPrivateIps.([]interface{})
 		if privateIpsVal != nil {
 			privateIps := make([]string, 0)
-			for idx, value := range privateIpsVal {
-				privateIps[idx] = value.(string)
+			for _, value := range privateIpsVal {
+				privateIps = append(privateIps, value.(string))
 			}
 			if len(privateIps) > 0 {
 				request.Properties.LbPrivateIps = &privateIps
@@ -280,7 +280,7 @@ func resourceApplicationLoadBalancerDelete(ctx context.Context, d *schema.Resour
 
 	dcId := d.Get("datacenter_id").(string)
 
-	_, apiResponse, err := client.ApplicationLoadBalancersApi.DatacentersApplicationloadbalancersDelete(ctx, dcId, d.Id()).Execute()
+	apiResponse, err := client.ApplicationLoadBalancersApi.DatacentersApplicationloadbalancersDelete(ctx, dcId, d.Id()).Execute()
 
 	if err != nil {
 		diags := diag.FromErr(fmt.Errorf("an error occured while deleting an application loadbalancer %s %s", d.Id(), err))

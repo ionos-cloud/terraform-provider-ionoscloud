@@ -210,22 +210,22 @@ func resourceApplicationLoadBalancerForwardingRuleCreate(ctx context.Context, d 
 		return diags
 	}
 
-	//if _, healthCheckOk := d.GetOk("health_check.0"); healthCheckOk {
-	//	applicationLoadBalancerForwardingRule.Properties.HealthCheck = &ionoscloud.ApplicationLoadBalancerForwardingRuleHealthCheck{}
-	//
-	//	if clientTimeout, clientTimeoutOk := d.GetOk("health_check.0.client_timeout"); clientTimeoutOk {
-	//		clientTimeout := int32(clientTimeout.(int))
-	//		applicationLoadBalancerForwardingRule.Properties.HealthCheck.ClientTimeout = &clientTimeout
-	//	}
-	//
-	//}
+	if _, healthCheckOk := d.GetOk("health_check.0"); healthCheckOk {
+		applicationLoadBalancerForwardingRule.Properties.HealthCheck = &ionoscloud.ApplicationLoadBalancerForwardingRuleHealthCheck{}
+
+		if clientTimeout, clientTimeoutOk := d.GetOk("health_check.0.client_timeout"); clientTimeoutOk {
+			clientTimeout := int32(clientTimeout.(int))
+			applicationLoadBalancerForwardingRule.Properties.HealthCheck.ClientTimeout = &clientTimeout
+		}
+
+	}
 
 	if serverCertificatesVal, serverCertificatesOk := d.GetOk("server_certificates"); serverCertificatesOk {
 		serverCertificatesVal := serverCertificatesVal.([]interface{})
 		if serverCertificatesVal != nil {
 			serverCertificates := make([]string, 0)
-			for idx, value := range serverCertificatesVal {
-				serverCertificates[idx] = value.(string)
+			for _, value := range serverCertificatesVal {
+				serverCertificates = append(serverCertificates, value.(string))
 			}
 			if len(serverCertificates) > 0 {
 				applicationLoadBalancerForwardingRule.Properties.ServerCertificates = &serverCertificates
@@ -445,20 +445,20 @@ func resourceApplicationLoadBalancerForwardingRuleRead(ctx context.Context, d *s
 		}
 	}
 
-	//if applicationLoadBalancerForwardingRule.Properties.HealthCheck != nil {
-	//	healthCheck := make([]interface{}, 1)
-	//
-	//	healthCheckEntry := make(map[string]interface{})
-	//	if applicationLoadBalancerForwardingRule.Properties.HealthCheck.ClientTimeout != nil {
-	//		healthCheckEntry["client_timeout"] = *applicationLoadBalancerForwardingRule.Properties.HealthCheck.ClientTimeout
-	//	}
-	//	healthCheck[0] = healthCheckEntry
-	//	err := d.Set("health_check", healthCheck)
-	//	if err != nil {
-	//		diags := diag.FromErr(fmt.Errorf("error while setting health_check property for application load balancer forwarding rule %s: %s", d.Id(), err))
-	//		return diags
-	//	}
-	//}
+	if applicationLoadBalancerForwardingRule.Properties.HealthCheck != nil {
+		healthCheck := make([]interface{}, 1)
+
+		healthCheckEntry := make(map[string]interface{})
+		if applicationLoadBalancerForwardingRule.Properties.HealthCheck.ClientTimeout != nil {
+			healthCheckEntry["client_timeout"] = *applicationLoadBalancerForwardingRule.Properties.HealthCheck.ClientTimeout
+		}
+		healthCheck[0] = healthCheckEntry
+		err := d.Set("health_check", healthCheck)
+		if err != nil {
+			diags := diag.FromErr(fmt.Errorf("error while setting health_check property for application load balancer forwarding rule %s: %s", d.Id(), err))
+			return diags
+		}
+	}
 
 	if applicationLoadBalancerForwardingRule.Properties.ServerCertificates != nil {
 		err := d.Set("server_certificates", *applicationLoadBalancerForwardingRule.Properties.ServerCertificates)
@@ -585,34 +585,34 @@ func resourceApplicationLoadBalancerForwardingRuleUpdate(ctx context.Context, d 
 		request.Properties.ListenerPort = &vStr
 	}
 
-	//if d.HasChange("health_check.0") {
-	//	_, v := d.GetChange("health_check.0")
-	//	if v.(map[string]interface{}) != nil {
-	//		updateHealthCheck := false
-	//
-	//		healthCheck := &ionoscloud.ApplicationLoadBalancerForwardingRuleHealthCheck{}
-	//
-	//		if d.HasChange("health_check.0.client_timeout") {
-	//			_, newValue := d.GetChange("health_check.0.client_timeout")
-	//			if newValue != 0 {
-	//				updateHealthCheck = true
-	//				newValue := int32(newValue.(int))
-	//				healthCheck.ClientTimeout = &newValue
-	//			}
-	//		}
-	//
-	//		if updateHealthCheck == true {
-	//			request.Properties.HealthCheck = healthCheck
-	//		}
-	//	}
-	//}
+	if d.HasChange("health_check.0") {
+		_, v := d.GetChange("health_check.0")
+		if v.(map[string]interface{}) != nil {
+			updateHealthCheck := false
+
+			healthCheck := &ionoscloud.ApplicationLoadBalancerForwardingRuleHealthCheck{}
+
+			if d.HasChange("health_check.0.client_timeout") {
+				_, newValue := d.GetChange("health_check.0.client_timeout")
+				if newValue != 0 {
+					updateHealthCheck = true
+					newValue := int32(newValue.(int))
+					healthCheck.ClientTimeout = &newValue
+				}
+			}
+
+			if updateHealthCheck == true {
+				request.Properties.HealthCheck = healthCheck
+			}
+		}
+	}
 
 	if d.HasChange("server_certificates") {
 		_, v := d.GetChange("server_certificates")
 		if v.([]interface{}) != nil {
 			serverCertificates := make([]string, 0)
-			for idx, value := range v.([]interface{}) {
-				serverCertificates[idx] = value.(string)
+			for _, value := range v.([]interface{}) {
+				serverCertificates = append(serverCertificates, value.(string))
 			}
 			if len(serverCertificates) > 0 {
 				request.Properties.ServerCertificates = &serverCertificates
@@ -776,7 +776,7 @@ func resourceApplicationLoadBalancerForwardingRuleDelete(ctx context.Context, d 
 	dcId := d.Get("datacenter_id").(string)
 	albID := d.Get("application_loadbalancer_id").(string)
 
-	_, apiResponse, err := client.ApplicationLoadBalancersApi.DatacentersApplicationloadbalancersForwardingrulesDelete(ctx, dcId, albID, d.Id()).Execute()
+	apiResponse, err := client.ApplicationLoadBalancersApi.DatacentersApplicationloadbalancersForwardingrulesDelete(ctx, dcId, albID, d.Id()).Execute()
 
 	if err != nil {
 		diags := diag.FromErr(fmt.Errorf("an error occured while deleting a application loadbalancer forwarding rule %s %s", d.Id(), err))

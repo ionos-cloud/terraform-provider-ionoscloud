@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 	ionoscloud "github.com/ionos-cloud/sdk-go/v6"
 	"log"
 )
@@ -18,19 +19,28 @@ func resourceNetworkLoadBalancerForwardingRule() *schema.Resource {
 		Schema: map[string]*schema.Schema{
 
 			"name": {
-				Type:        schema.TypeString,
-				Description: "A name of that Network Load Balancer forwarding rule",
-				Required:    true,
+				Type:         schema.TypeString,
+				Description:  "A name of that Network Load Balancer forwarding rule",
+				Required:     true,
+				ValidateFunc: validation.All(validation.StringIsNotWhiteSpace),
 			},
 			"algorithm": {
-				Type:        schema.TypeString,
-				Description: "Algorithm for the balancing.",
-				Required:    true,
+				Type:         schema.TypeString,
+				Description:  "Algorithm for the balancing.",
+				Required:     true,
+				ValidateFunc: validation.All(validation.StringIsNotWhiteSpace),
+			},
+			"protocol": {
+				Type:         schema.TypeString,
+				Description:  "Protocol of the balancing.",
+				Required:     true,
+				ValidateFunc: validation.All(validation.StringIsNotWhiteSpace),
 			},
 			"listener_ip": {
-				Type:        schema.TypeString,
-				Description: "Listening IP. (inbound)",
-				Required:    true,
+				Type:         schema.TypeString,
+				Description:  "Listening IP. (inbound)",
+				Required:     true,
+				ValidateFunc: validation.All(validation.StringIsNotWhiteSpace),
 			},
 			"listener_port": {
 				Type:        schema.TypeInt,
@@ -50,14 +60,6 @@ func resourceNetworkLoadBalancerForwardingRule() *schema.Resource {
 							Description: "ClientTimeout is expressed in milliseconds. This inactivity timeout applies " +
 								"when the client is expected to acknowledge or send data. If unset the default of 50 " +
 								"seconds will be used.",
-							Optional: true,
-							Computed: true,
-						},
-						"check_timeout": {
-							Type: schema.TypeInt,
-							Description: "It specifies the time (in milliseconds) for a target VM in this pool to answer " +
-								"the check. If a target VM has CheckInterval set and CheckTimeout is set too, " +
-								"then the smaller value of the two is used after the TCP connection is established.",
 							Optional: true,
 							Computed: true,
 						},
@@ -177,6 +179,14 @@ func resourceNetworkLoadBalancerForwardingRuleCreate(ctx context.Context, d *sch
 		return diags
 	}
 
+	if protocol, protocolOk := d.GetOk("protocol"); protocolOk {
+		protocol := protocol.(string)
+		networkLoadBalancerForwardingRule.Properties.Protocol = &protocol
+	} else {
+		diags := diag.FromErr(fmt.Errorf("protocol must be provided for network loadbalancer forwarding rule"))
+		return diags
+	}
+
 	if listenerIp, listenerIpOk := d.GetOk("listener_ip"); listenerIpOk {
 		listenerIp := listenerIp.(string)
 		networkLoadBalancerForwardingRule.Properties.ListenerIp = &listenerIp
@@ -199,11 +209,6 @@ func resourceNetworkLoadBalancerForwardingRuleCreate(ctx context.Context, d *sch
 		if clientTimeout, clientTimeoutOk := d.GetOk("health_check.0.client_timeout"); clientTimeoutOk {
 			clientTimeout := int32(clientTimeout.(int))
 			networkLoadBalancerForwardingRule.Properties.HealthCheck.ClientTimeout = &clientTimeout
-		}
-
-		if checkTimeout, checkTimeoutOk := d.GetOk("health_check.0.check_timeout"); checkTimeoutOk {
-			checkTimeout := int32(checkTimeout.(int))
-			networkLoadBalancerForwardingRule.Properties.HealthCheck.CheckTimeout = &checkTimeout
 		}
 
 		if connectTimeout, connectTimeoutOk := d.GetOk("health_check.0.connect_timeout"); connectTimeoutOk {
@@ -356,6 +361,14 @@ func resourceNetworkLoadBalancerForwardingRuleRead(ctx context.Context, d *schem
 		}
 	}
 
+	if networkLoadBalancerForwardingRule.Properties.Protocol != nil {
+		err := d.Set("protocol", *networkLoadBalancerForwardingRule.Properties.Protocol)
+		if err != nil {
+			diags := diag.FromErr(fmt.Errorf("error while setting protocol property for network load balancer forwarding rule %s: %s", d.Id(), err))
+			return diags
+		}
+	}
+
 	if networkLoadBalancerForwardingRule.Properties.ListenerIp != nil {
 		err := d.Set("listener_ip", *networkLoadBalancerForwardingRule.Properties.ListenerIp)
 		if err != nil {
@@ -378,10 +391,6 @@ func resourceNetworkLoadBalancerForwardingRuleRead(ctx context.Context, d *schem
 		healthCheckEntry := make(map[string]interface{})
 		if networkLoadBalancerForwardingRule.Properties.HealthCheck.ClientTimeout != nil {
 			healthCheckEntry["client_timeout"] = *networkLoadBalancerForwardingRule.Properties.HealthCheck.ClientTimeout
-		}
-
-		if networkLoadBalancerForwardingRule.Properties.HealthCheck.CheckTimeout != nil {
-			healthCheckEntry["check_timeout"] = *networkLoadBalancerForwardingRule.Properties.HealthCheck.CheckTimeout
 		}
 
 		if networkLoadBalancerForwardingRule.Properties.HealthCheck.ConnectTimeout != nil {
@@ -480,6 +489,12 @@ func resourceNetworkLoadBalancerForwardingRuleUpdate(ctx context.Context, d *sch
 		request.Properties.Algorithm = &vStr
 	}
 
+	if d.HasChange("protocol") {
+		_, v := d.GetChange("protocol")
+		vStr := v.(string)
+		request.Properties.Protocol = &vStr
+	}
+
 	if d.HasChange("listener_ip") {
 		_, v := d.GetChange("listener_ip")
 		vStr := v.(string)
@@ -505,15 +520,6 @@ func resourceNetworkLoadBalancerForwardingRuleUpdate(ctx context.Context, d *sch
 					updateHealthCheck = true
 					newValue := int32(newValue.(int))
 					healthCheck.ClientTimeout = &newValue
-				}
-			}
-
-			if d.HasChange("health_check.0.check_timeout") {
-				_, newValue := d.GetChange("health_check.0.check_timeout")
-				if newValue != 0 {
-					updateHealthCheck = true
-					newValue := int32(newValue.(int))
-					healthCheck.CheckTimeout = &newValue
 				}
 			}
 

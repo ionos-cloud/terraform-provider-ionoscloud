@@ -164,7 +164,7 @@ func dataSourceNetworkLoadBalancerForwardingRuleRead(d *schema.ResourceData, met
 		return errors.New("id and name cannot be both specified in the same time")
 	}
 	if !idOk && !nameOk {
-		return errors.New("please provide either the lan id or name")
+		return errors.New("please provide either the network loadbalancer forwarding rule id or name")
 	}
 	var networkLoadBalancerForwardingRule ionoscloud.NetworkLoadBalancerForwardingRule
 	var err error
@@ -250,6 +250,13 @@ func setNetworkLoadBalancerForwardingRuleData(d *schema.ResourceData, networkLoa
 			}
 		}
 
+		if networkLoadBalancerForwardingRule.Properties.Protocol != nil {
+			err := d.Set("protocol", *networkLoadBalancerForwardingRule.Properties.Protocol)
+			if err != nil {
+				return fmt.Errorf("error while setting protocol property for network load balancer forwarding rule %s: %s", d.Id(), err)
+			}
+		}
+
 		if networkLoadBalancerForwardingRule.Properties.ListenerIp != nil {
 			err := d.Set("listener_ip", *networkLoadBalancerForwardingRule.Properties.ListenerIp)
 			if err != nil {
@@ -270,10 +277,6 @@ func setNetworkLoadBalancerForwardingRuleData(d *schema.ResourceData, networkLoa
 			healthCheckEntry := make(map[string]interface{})
 			if networkLoadBalancerForwardingRule.Properties.HealthCheck.ClientTimeout != nil {
 				healthCheckEntry["client_timeout"] = *networkLoadBalancerForwardingRule.Properties.HealthCheck.ClientTimeout
-			}
-
-			if networkLoadBalancerForwardingRule.Properties.HealthCheck.CheckTimeout != nil {
-				healthCheckEntry["check_timeout"] = *networkLoadBalancerForwardingRule.Properties.HealthCheck.CheckTimeout
 			}
 
 			if networkLoadBalancerForwardingRule.Properties.HealthCheck.ConnectTimeout != nil {
