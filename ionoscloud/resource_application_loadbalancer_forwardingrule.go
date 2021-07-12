@@ -108,7 +108,7 @@ func resourceApplicationLoadBalancerForwardingRule() *schema.Resource {
 						},
 						"response_message": {
 							Type:        schema.TypeString,
-							Description: "he response message of the request; mandatory for STATIC action",
+							Description: "The response message of the request; mandatory for STATIC action",
 							Optional:    true,
 						},
 						"content_type": {
