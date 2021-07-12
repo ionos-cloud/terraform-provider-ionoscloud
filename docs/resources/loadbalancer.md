@@ -31,7 +31,7 @@ resource "ionoscloud_loadbalancer" "example" {
 
 ## Import
 
-Resource Loadbalancer can be imported using the `resource id`, e.g.
+Resource Load Balancer can be imported using the `resource id`, e.g.
 
 ```shell
 terraform import ionoscloud_loadbalancer.myloadbalancer {datacenter uuid}/{loadbalancer uuid}

@@ -3,12 +3,12 @@ layout: "ionoscloud"
 page_title: "IonosCloud: networkloadbalancer_forwardingrule"
 sidebar_current: "docs-resource-networkloadbalancer_forwardingrule"
 description: |-
-Creates and manages Network Loadbalancer Forwarding Rule objects.
+Creates and manages Network Load Balancer Forwarding Rule objects.
 ---
 
 # ionoscloud_networkloadbalancer_forwardingrule
 
-Manages a Network Loadbalancer Forwarding Rule on IonosCloud.
+Manages a Network Load Balancer Forwarding Rule on IonosCloud.
 
 ## Example Usage
 
@@ -37,6 +37,7 @@ resource "ionoscloud_networkloadbalancer_forwardingrule" "example" {
 
 - `name` - (Required)[string] A name of that Network Load Balancer forwarding rule.
 - `algorithm` - (Required)[string] Algorithm for the balancing.
+- `protocol` - (Required)[string] Protocol of the balancing.
 - `listener_ip` - (Required)[string] Listening IP. (inbound)
 - `listener_port` - (Required)[int] Listening port number. (inbound) (range: 1 to 65535)
 - `health_check` - (Optional) Health check attributes for Network Load Balancer forwarding rule.
@@ -54,4 +55,4 @@ resource "ionoscloud_networkloadbalancer_forwardingrule" "example" {
          - `check_interval` - (Optional)[int] CheckInterval determines the duration (in milliseconds) between consecutive health checks. If unspecified a default of 2000 ms is used.
          - `maintenance` - (Optional)[boolean] Maintenance specifies if a target VM should be marked as down, even if it is not.
 - `datacenter_id` - (Required)[string] A Datacenter's UUID.
-- `natgateway_id` - (Required)[string] Network Loadbalancer's UUID.
+- `natgateway_id` - (Required)[string] Network Load Balancer's UUID.
