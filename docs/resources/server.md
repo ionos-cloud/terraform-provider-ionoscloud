@@ -58,6 +58,7 @@ resource "ionoscloud_server" "example" {
 - `boot_image` - (Optional)[string] The image or snapshot UUID / name. May also be an image alias. It is required if `licence_type` is not provided.
 - `primary_nic` - (Computed) The associated NIC.
 - `primary_ip` - (Computed) The associated IP address.
+- `firewallrule_id` - (Computed) The associated firewall rule.
 - `ssh_key_path` - (Optional)[list] List of paths to files containing a public SSH key that will be injected into IonosCloud provided Linux images. Required for IonosCloud Linux images. Required if `image_password` is not provided.
 - `image_password` - (Optional)[string] Required if `ssh_key_path` is not provided.
 

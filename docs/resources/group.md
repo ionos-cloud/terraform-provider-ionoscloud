@@ -25,11 +25,16 @@ resource "ionoscloud_group" "group" {
 
 ##Argument reference
 
-* `access_activity_log` - (Required) [Boolean] The group will be allowed to access the activity log.
+* `name` - (Required) [string] A name for the group.
 * `create_datacenter` - (Optional) [Boolean] The group will be allowed to create virtual data centers.
 * `create_snapshot` - (Optional) [Boolean] The group will be allowed to create snapshots.
-* `name` - (Optional) [string] A name for the group.
 * `reserve_ip` - (Optional) [Boolean] The group will be allowed to reserve IP addresses.
+* `access_activity_log` - (Optional) [Boolean] The group will be allowed to access the activity log.
+* `create_pcc` - (Optional) [Boolean] The group will be allowed to create pcc privilege.
+* `s3_privilege` - (Optional) [Boolean] The group will have S3 privilege.
+* `create_backup_unit` - (Optional) [Boolean] The group will be allowed to create backup unit privilege.
+* `create_internet_access` - (Optional) [Boolean] The group will be allowed to create internet access privilege.
+* `create_k8s_cluster` - (Optional) [Boolean]  The group will be allowed to create kubernetes cluster privilege.
 * `user_id` - (Optional) [string] The ID of the specific user to add to the group.
 
 ## Import

@@ -74,7 +74,6 @@ The following attributes are returned by the datasource:
   * `bus`
   * `licence_type`
   * `cpu_hot_plug`
-  * `cpu_hot_unplug`
   * `ram_hot_plug`
   * `ram_hot_unplug`
   * `nic_hot_plug`
