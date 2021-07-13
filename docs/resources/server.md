@@ -43,6 +43,7 @@ resource "ionoscloud_server" "example" {
 
 ##Argument reference
 
+- `template_uuid` - (Optional)[string] The UUID of the template for creating a CUBE server; the available templates for CUBE servers can be found on the templates resource
 - `name` - (Required)[string] The name of the server.
 - `datacenter_id` - (Required)[string] The ID of a Virtual Data Center.
 - `cores` - (Required)[integer] Number of server CPU cores.
@@ -58,8 +59,10 @@ resource "ionoscloud_server" "example" {
 - `boot_image` - (Optional)[string] The image or snapshot UUID / name. May also be an image alias. It is required if `licence_type` is not provided.
 - `primary_nic` - (Computed) The associated NIC.
 - `primary_ip` - (Computed) The associated IP address.
+- `firewallrule_id` - (Computed) The associated firewall rule.
 - `ssh_key_path` - (Optional)[list] List of paths to files containing a public SSH key that will be injected into IonosCloud provided Linux images. Required for IonosCloud Linux images. Required if `image_password` is not provided.
 - `image_password` - (Optional)[string] Required if `ssh_key_path` is not provided.
+- `type` - (Optional)[string] server usages: ENTERPRISE or CUBE
 
 ## Import
 

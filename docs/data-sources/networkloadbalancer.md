@@ -31,10 +31,10 @@ data "ionoscloud_networkloadbalancer" "example" {
 
 The following attributes are returned by the datasource:
 
-* `id`
-* `name`
-* `listener_lan`
-* `target_lan`
-* `ips`
-* `lb_private_ips` 
+* `id` - Id of that Network Load Balancer
+* `name`- Name of that Network Load Balancer
+* `listener_lan` - Id of the listening LAN. (inbound)
+* `target_lan` - Id of the balanced private target LAN. (outbound)
+* `ips` - Collection of IP addresses of the Network Load Balancer. (inbound and outbound) IP of the listenerLan must be a customer reserved IP for the public load balancer and private IP for the private load balancer.
+* `lb_private_ips` - Collection of private IP addresses with subnet mask of the Network Load Balancer. IPs must contain valid subnet mask. If user will not provide any IP then the system will generate one IP with /24 subnet.
 

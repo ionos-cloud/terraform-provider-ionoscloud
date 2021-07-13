@@ -240,7 +240,7 @@ resource "ionoscloud_server" "webserver" {
     name = "system"
     size = 15
     disk_type = "HDD"
-}
+  }
   nic {
     lan = "${ionoscloud_lan.webserver_lan.id}"
     dhcp = true

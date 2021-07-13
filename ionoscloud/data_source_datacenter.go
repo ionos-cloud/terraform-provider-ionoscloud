@@ -23,6 +23,11 @@ func dataSourceDataCenter() *schema.Resource {
 				Required: false,
 				Optional: true,
 			},
+			"description": {
+				Type:     schema.TypeString,
+				Optional: true,
+				Computed: true,
+			},
 			"location": {
 				Type:     schema.TypeString,
 				Optional: true,
@@ -185,6 +190,13 @@ func dataSourceDataCenterRead(d *schema.ResourceData, meta interface{}) error {
 		err := d.Set("name", *datacenter.Properties.Name)
 		if err != nil {
 			return fmt.Errorf("error while setting name property for datacenter %s: %s", d.Id(), err)
+		}
+	}
+
+	if datacenter.Properties.Description != nil {
+		err := d.Set("description", *datacenter.Properties.Description)
+		if err != nil {
+			return fmt.Errorf("error while setting description property for datacenter %s: %s", d.Id(), err)
 		}
 	}
 

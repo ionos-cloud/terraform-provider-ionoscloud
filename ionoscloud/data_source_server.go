@@ -545,6 +545,8 @@ func setServerData(d *schema.ResourceData, server *ionoscloud.Server, token *ion
 					ruleEntry["target_ip"] = stringOrDefault(rule.Properties.TargetIp, "")
 					ruleEntry["icmp_code"] = int32OrDefault(rule.Properties.IcmpCode, 0)
 					ruleEntry["icmp_type"] = int32OrDefault(rule.Properties.IcmpType, 0)
+					ruleEntry["port_range_start"] = int32OrDefault(rule.Properties.PortRangeStart, 0)
+					ruleEntry["port_range_end"] = int32OrDefault(rule.Properties.PortRangeEnd, 0)
 					firewallRules[idx] = ruleEntry
 				}
 			}
