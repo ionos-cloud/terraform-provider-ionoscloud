@@ -31,13 +31,13 @@ resource "ionoscloud_volume" "example" {
 * `datacenter_id` - (Required)[string] The ID of a Virtual Data Center.
 * `server_id` - (Required)[string] The ID of a server.
 * `disk_type` - (Required)[string] The volume type: HDD or SSD.
-* `bus` - (Required)[Boolean] The bus type of the volume: VIRTIO or IDE.
+* `bus` - (Optional)[Boolean] The bus type of the volume: VIRTIO or IDE.
 * `size` -  (Required)[integer] The size of the volume in GB.
-* `ssh_key_path` -  (Required)[list] List of paths to files containing a public SSH key that will be injected into IonosCloud provided Linux images. Required for IonosCloud Linux images. Required if `image_password` is not provided.
+* `ssh_key_path` -  (Optional)[list] List of paths to files containing a public SSH key that will be injected into IonosCloud provided Linux images. Required for IonosCloud Linux images. Required if `image_password` is not provided.
 * `sshkey` - (Computed) The associated public SSH key.
-* `image_password` - [string] Required if `sshkey_path` is not provided.
-* `image_name` - [string] The image or snapshot UUID. May also be an image alias. It is required if `licence_type` is not provided.
-* `licence_type` - [string] Required if `image_name` is not provided.
+* `image_password` - (Optional)[string] Required if `sshkey_path` is not provided.
+* `image_name` - (Optional)[string] The image or snapshot UUID. May also be an image alias. It is required if `licence_type` is not provided.
+* `licence_type` - (Optional)[string] Required if `image_name` is not provided.
 * `name` - (Optional)[string] The name of the volume.
 * `availability_zone` - (Optional)[string] The storage availability zone assigned to the volume: AUTO, ZONE_1, ZONE_2, or ZONE_3.
 * `user_data` - (Optional) The cloud-init configuration for the volume as base64 encoded string. The property is immutable and is only allowed to be set on a new volume creation. This option will work only with cloud-init compatible images.
