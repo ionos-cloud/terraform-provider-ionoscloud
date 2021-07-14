@@ -48,12 +48,10 @@ func resourceServer() *schema.Resource {
 				Type:     schema.TypeString,
 				Optional: true,
 			},
-
 			"boot_volume": {
 				Type:     schema.TypeString,
 				Computed: true,
 			},
-
 			"boot_cdrom": {
 				Type:     schema.TypeString,
 				Optional: true,

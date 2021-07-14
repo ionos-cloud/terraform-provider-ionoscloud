@@ -25,6 +25,7 @@ The following arguments are supported:
 
 - `user_id` - (Required)[string] The UUID of the user owning the S3 Key.
 - `active` - (Required)[boolean] Whether the S3 is active / enabled or not - Please keep in mind this is only required on create.
+- `secret_key` - (Computed) Whether this key should be active or not
 
 ## Import
 

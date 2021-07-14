@@ -26,7 +26,10 @@ resource "ionoscloud_lan" "example" {
 * `name` - (Optional)[string] The name of the LAN.
 * `public` - (Optional)[Boolean] Indicates if the LAN faces the public Internet (true) or not (false).
 * `pcc` - (Optional)[String] The unique id of a `ionoscloud_private_crossconnect` resource, in order
-
+* `ip_failover` - (Computed) IP failover configurations for lan
+  * `ip` 
+  * `nic_uuid` 
+  
 ## Import
 
 Resource Lan can be imported using the `resource id`, e.g.

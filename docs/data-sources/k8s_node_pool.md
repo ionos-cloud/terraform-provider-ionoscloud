@@ -65,3 +65,16 @@ The following attributes are returned by the datasource:
 * `annotations` - A map of annotations in the form of key -> value
 * `available_upgrade_versions` - A list of kubernetes versions available for upgrade
 * `public_ips` - The list of fixed IPs associated with this node pool
+* `state` - one of "AVAILABLE",
+  "INACTIVE",
+  "BUSY",
+  "DEPLOYING",
+  "ACTIVE",
+  "FAILED",
+  "SUSPENDED",
+  "FAILED_SUSPENDED",
+  "UPDATING",
+  "FAILED_UPDATING",
+  "DESTROYING",
+  "FAILED_DESTROYING",
+  "TERMINATED"
