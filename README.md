@@ -23,8 +23,23 @@ Please see the [Documentation](docs/index.md#migrating-from-the-profitbricks-pro
 **NOTE:** In order to use a speciffic version of this provider, please include the following block at the beginning of your terraform config files [details](https://www.terraform.io/docs/configuration/terraform.html#specifying-a-required-terraform-version):
 
 ```terraform
+terraform {
+  required_providers {
+    ionoscloud = {
+      source = "ionos-cloud/ionoscloud"
+      version = "~> 5.2.4"
+    }
+  }
+}
+
 provider "ionoscloud" {
-  version = "~> 5.0.0"
+  username = "ionoscloud_username"
+  password = "ionoscloud_password"
+  endpoint = "ionoscloud_cloud_api_url"
+}
+
+resource "ionoscloud_datacenter" "main" {
+  # ...
 }
 ```
 
