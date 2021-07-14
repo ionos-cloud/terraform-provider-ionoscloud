@@ -8,6 +8,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 	ionoscloud "github.com/ionos-cloud/sdk-go/v5"
 	"log"
+	"strings"
 	"time"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
@@ -34,6 +35,23 @@ func resourcek8sNodePool() *schema.Resource {
 				Description:  "The desired kubernetes version",
 				Required:     true,
 				ValidateFunc: validation.All(validation.StringIsNotWhiteSpace),
+				DiffSuppressFunc: func(k, old, new string, d *schema.ResourceData) bool {
+					var oldMajor, oldMinor string
+					if old != "" {
+						oldSplit := strings.Split(old, ".")
+						oldMajor = oldSplit[0]
+						oldMinor = oldSplit[1]
+
+						newSplit := strings.Split(new, ".")
+						newMajor := newSplit[0]
+						newMinor := newSplit[1]
+
+						if oldMajor == newMajor && oldMinor == newMinor {
+							return true
+						}
+					}
+					return false
+				},
 			},
 			"auto_scaling": {
 				Type:        schema.TypeList,
@@ -298,7 +316,8 @@ func resourcek8sNodePoolCreate(ctx context.Context, d *schema.ResourceData, meta
 		case <-ctx.Done():
 			diags := diag.FromErr(fmt.Errorf("k8s node pool creation timed out! WARNING: your k8s nodepool will still probably be " +
 				"created after some time but the terraform state won't reflect that; check your Ionos Cloud account for updates"))
-			return diags }
+			return diags
+		}
 	}
 
 	return resourcek8sNodePoolRead(ctx, d, meta)
@@ -656,7 +675,8 @@ func resourcek8sNodePoolUpdate(ctx context.Context, d *schema.ResourceData, meta
 		case <-ctx.Done():
 			diags := diag.FromErr(fmt.Errorf("k8s node pool update timed out! WARNING: your k8s nodepool will still probably be " +
 				"updated after some time but the terraform state won't reflect that; check your Ionos Cloud account for updates"))
-			return diags}
+			return diags
+		}
 	}
 
 	return resourcek8sNodePoolRead(ctx, d, meta)
@@ -697,7 +717,8 @@ func resourcek8sNodePoolDelete(ctx context.Context, d *schema.ResourceData, meta
 		case <-ctx.Done():
 			diags := diag.FromErr(fmt.Errorf("k8s node pool deletion timed out! WARNING: your k8s nodepool will still probably be " +
 				"deleted after some time but the terraform state won't reflect that; check your Ionos Cloud account for updates"))
-			return 	diags	}
+			return diags
+		}
 	}
 
 	d.SetId("")

@@ -44,7 +44,7 @@ resource "ionoscloud_k8s_node_pool" "demo" {
 The following arguments are supported:
 
 - `name` - (Required)[string] The name of the Kubernetes Cluster.
-- `k8s_version` - (Optional)[string] The desired Kubernetes Version. for supported values, please check the API documentation.
+- `k8s_version` - (Optional)[string] The desired Kubernetes Version. for supported values, please check the API documentation. The provider will ignore changes of patch level.
 - `auto_scaling` - (Optional)[string] Wether the Node Pool should autoscale. For more details, please check the API documentation
 - `lans` - (Optional)[list] A list of numeric LAN id's you want this node pool to be part of. For more details, please check the API documentation, as well as the example above
 - `maintenance_window` - (Optional) See the **maintenance_window** section in the example above
