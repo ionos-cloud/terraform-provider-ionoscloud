@@ -35,7 +35,6 @@ terraform {
 provider "ionoscloud" {
   username = "ionoscloud_username"
   password = "ionoscloud_password"
-  endpoint = "ionoscloud_cloud_api_url"
 }
 
 resource "ionoscloud_datacenter" "main" {
