@@ -36,7 +36,7 @@ resource "ionoscloud_group" "group" {
 * `create_internet_access` - (Optional) [Boolean] The group will be allowed to create internet access privilege.
 * `create_k8s_cluster` - (Optional) [Boolean]  The group will be allowed to create kubernetes cluster privilege.
 * `user_id` - (Optional) [string] The ID of the specific user to add to the group.
-
+* `users` - (Computed) List of users in group. See user section.
 ## Import
 
 Resource Group can be imported using the `resource id`, e.g.

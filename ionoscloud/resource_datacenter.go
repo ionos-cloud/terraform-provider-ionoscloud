@@ -30,7 +30,6 @@ func resourceDatacenter() *schema.Resource {
 				Required:     true,
 				ValidateFunc: validation.All(validation.StringIsNotWhiteSpace),
 			},
-
 			"location": {
 				Type:         schema.TypeString,
 				Required:     true,

@@ -47,14 +47,14 @@ resource "ionoscloud_server" "example" {
 - `datacenter_id` - (Required)[string] The ID of a Virtual Data Center.
 - `cores` - (Required)[integer] Number of server CPU cores.
 - `ram` - (Required)[integer] The amount of memory for the server in MB.
-- `image_name` - (Required)[string] The name or ID of the image.
+- `image_name` - (Optional)[string] The name or ID of the image.
 - `availability_zone` - (Optional)[string] The availability zone in which the server should exist.
 - `licence_type` - (Optional)[string] Sets the OS type of the server.
-- `cpu_family` - (Optional)[string] Sets the CPU type. "AMD_OPTERON", "INTEL_XEON" or "INTEL_SKYLAKE".
+- `cpu_family` - (Optional)[string]  CPU architecture on which server gets provisioned. Sets the CPU type. "AMD_OPTERON", "INTEL_XEON" or "INTEL_SKYLAKE".
 - `volume` - (Required) See the Volume section.
 - `nic` - (Required) See the NIC section.
 - `boot_volume` - (Computed) The associated boot volume.
-- `boot_cdrom` - (Computed) The associated boot drive, if any.
+- `boot_cdrom` - (Optional)[string] The associated boot drive, if any.
 - `boot_image` - (Optional)[string] The image or snapshot UUID / name. May also be an image alias. It is required if `licence_type` is not provided.
 - `primary_nic` - (Computed) The associated NIC.
 - `primary_ip` - (Computed) The associated IP address.

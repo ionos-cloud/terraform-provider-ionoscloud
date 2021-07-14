@@ -62,6 +62,7 @@ The following arguments are supported:
 - `ram_size` -(Required)[int] - The desired amount of RAM, in MB
 - `storage_size` -(Required)[int] - The desired amount of storage for each node, in GB
 - `public_ips` - (Optional)[list] A list of public IPs associated with the node pool; must have at least `node_count + 1` elements;  
+
 ## Import
 
 A Kubernetes Node Pool resource can be imported using its Kubernetes cluster's uuid as well as its own UUID, both of which you can retreive from the cloud API: `resource id`, e.g.:
