@@ -31,8 +31,7 @@ resource "ionoscloud_nic" "example" {
 - `dhcp` - (Optional)[Boolean] Indicates if the NIC should get an IP address using DHCP (true) or not (false).
 - `ips` - (Optional)[list] Collection of IP addresses assigned to a nic. Explicitly assigned public IPs need to come from reserved IP blocks, Passing value null or empty array will assign an IP address automatically.
 - `firewall_active` - (Optional)[Boolean] If this resource is set to true and is nested under a server resource firewall, with open SSH port, resource must be nested under the NIC.
-- `nat` - (Optional)[Boolean] Boolean value indicating if the private IP address has outbound access to the public internet.
-- `ips` - (Computed) The IP address or addresses assigned to the NIC.
+- `firewall_type` - (Optional) [String] The type of firewall rules that will be allowed on the NIC. If it is not specified it will take the default value INGRESS
 - `mac` - (Computed) The MAC address of the NIC.
 
 ## Import

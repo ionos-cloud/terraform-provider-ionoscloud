@@ -52,9 +52,11 @@ The following arguments are supported:
   - `min_node_count` - (Optional)[int] The minimum number of worker nodes the node pool can scale down to. Should be less than max_node_count
   - `max_node_count` - (Optional)[int] The maximum number of worker nodes that the node pool can scale to. Should be greater than min_node_count
 - `lans` - (Optional)[list] A list of numeric LAN id's you want this node pool to be part of. For more details, please check the API documentation, as well as the example above
-  - `dhcp` - (Optional)[boolean] Indicates if the Kubernetes Node Pool LAN will reserve an IP using DHCP. Default value is true
-  - `ip` - (Optional)[int] The LAN ID of an existing LAN at the related datacenter
-  - `routes` - (Optional)[list] An array of additional LANs attached to worker nodes
+  - `id` - (Required)[int] The LAN ID of an existing LAN at the related datacenter
+  - `dhcp` - (Optional)[boolean] Indicates if the Kubernetes Node Pool LAN will reserve an IP using DHCP. Default value is `true`
+  - `routes` - (Optional) An array of additional LANs attached to worker nodes
+    - `network` - (Required)[string] IPv4 or IPv6 CIDR to be routed via the interface
+    - `gateway_ip` - (Required)[string] IPv4 or IPv6 Gateway IP for the route
 - `maintenance_window` - (Optional) See the **maintenance_window** section in the example above
   - `time` - (Required)[string] A clock time in the day when maintenance is allowed
   - `day_of_the_week` - (Required)[string] Day of the week when maintenance is allowed
@@ -68,9 +70,6 @@ The following arguments are supported:
 - `ram_size` -(Required)[int] - The desired amount of RAM, in MB
 - `storage_size` -(Required)[int] - The desired amount of storage for each node, in GB
 - `public_ips` - (Optional)[list] A list of public IPs associated with the node pool; must have at least `node_count + 1` elements  
-- `labels` - (Optional)[list] A map of labels attached to node pool. For more details, please check the API documentation
-- `annotations` - (Optional)[list] A map of annotations attached to node pool. For more details, please check the API documentation
-- `available_upgrade_versions` - (Optional)[list] A list of available versions for upgrading the node pool. For more details, please check the API documentation
 
 ## Import
 

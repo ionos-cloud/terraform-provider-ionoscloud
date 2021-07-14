@@ -29,29 +29,25 @@ func dataSourcePcc() *schema.Resource {
 				Computed: true,
 				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{
-
-						// The id of the cross-connected LAN
 						"lan_id": {
-							Type:     schema.TypeString,
-							Computed: true,
+							Type:        schema.TypeString,
+							Computed:    true,
+							Description: "The id of the cross-connected LAN",
 						},
-
-						// The name of the cross-connected LAN
 						"lan_name": {
-							Type:     schema.TypeString,
-							Computed: true,
+							Type:        schema.TypeString,
+							Computed:    true,
+							Description: "The name of the cross-connected LAN",
 						},
-
-						// The id of the cross-connected VDC
 						"datacenter_id": {
-							Type:     schema.TypeString,
-							Computed: true,
+							Type:        schema.TypeString,
+							Computed:    true,
+							Description: "The id of the cross-connected VDC",
 						},
-
-						// The name of the cross-connected VDC
 						"datacenter_name": {
-							Type:     schema.TypeString,
-							Computed: true,
+							Type:        schema.TypeString,
+							Computed:    true,
+							Description: "The name of the cross-connected VDC",
 						},
 
 						"location": {

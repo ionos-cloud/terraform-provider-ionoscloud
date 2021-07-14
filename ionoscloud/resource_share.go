@@ -23,11 +23,11 @@ func resourceShare() *schema.Resource {
 		Schema: map[string]*schema.Schema{
 			"edit_privilege": {
 				Type:     schema.TypeBool,
-				Required: true,
+				Optional: true,
 			},
 			"share_privilege": {
 				Type:     schema.TypeBool,
-				Required: true,
+				Optional: true,
 			},
 			"group_id": {
 				Type:         schema.TypeString,

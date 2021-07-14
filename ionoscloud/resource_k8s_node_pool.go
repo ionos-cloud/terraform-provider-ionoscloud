@@ -30,10 +30,9 @@ func resourcek8sNodePool() *schema.Resource {
 				ValidateFunc: validation.All(validation.StringIsNotWhiteSpace),
 			},
 			"k8s_version": {
-				Type:         schema.TypeString,
-				Description:  "The desired kubernetes version",
-				Required:     true,
-				ValidateFunc: validation.All(validation.StringIsNotWhiteSpace),
+				Type:        schema.TypeString,
+				Description: "The desired kubernetes version",
+				Optional:    true,
 			},
 			"auto_scaling": {
 				Type:        schema.TypeList,

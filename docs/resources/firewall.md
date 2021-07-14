@@ -38,7 +38,7 @@ resource "ionoscloud_firewall" "example" {
 * `port_range_end` - (Optional)[string] Defines the end range of the allowed port (from 1 to 65534) if the protocol TCP or UDP is chosen.
 * `icmp_type` - (Optional)[string] Defines the allowed type (from 0 to 254) if the protocol ICMP is chosen.
 * `icmp_code` - (Optional)[string] Defines the allowed code (from 0 to 254) if protocol ICMP is chosen.
-
+* `type` - (Optional)[string] The type of firewall rule. If is not specified, it will take the default value INGRESS
 
 ## Import
 
