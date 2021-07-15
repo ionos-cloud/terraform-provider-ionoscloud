@@ -26,4 +26,6 @@ data "ionoscloud_location" "loc1" {
 
 ## Attributes Reference
 
+The following attributes are returned by the datasource:
+
  * `id` - UUID of the location

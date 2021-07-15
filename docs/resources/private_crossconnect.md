@@ -25,6 +25,17 @@ The following arguments are supported:
 
 - `name` - (Required)[string] The name of the private cross-connection.
 - `description` - (Optional)[string] A short description for the private cross-connection.
+- `peers` - (Computed) Lists LAN's joined to this private cross connect
+  - `lan_id`
+  - `lan_name`
+  - `datacenter_id`
+  - `datacenter_name`
+  - `location`
+- `connectable_datacenters` - (Computed) Lists datacenters that can be joined to this private cross connect
+  - `id`
+  - `name`
+  - `location`
+
 
 ## Import
 

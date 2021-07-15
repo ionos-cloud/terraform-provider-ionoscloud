@@ -46,8 +46,12 @@ The following arguments are supported:
 - `name` - (Required)[string] The name of the Kubernetes Cluster.
 - `k8s_version` - (Optional)[string] The desired Kubernetes Version. for supported values, please check the API documentation. The provider will ignore changes of patch level.
 - `auto_scaling` - (Optional)[string] Wether the Node Pool should autoscale. For more details, please check the API documentation
+  - `min_node_count` - (Required)[int] The minimum number of worker nodes the node pool can scale down to. Should be less than max_node_count
+  - `max_node_count` - (Required)[int] The maximum number of worker nodes that the node pool can scale to. Should be greater than min_node_count
 - `lans` - (Optional)[list] A list of numeric LAN id's you want this node pool to be part of. For more details, please check the API documentation, as well as the example above
 - `maintenance_window` - (Optional) See the **maintenance_window** section in the example above
+  - `time` - (Required)[string] A clock time in the day when maintenance is allowed
+  - `day_of_the_week` - (Required)[string] Day of the week when maintenance is allowed
 - `datacenter_id` - (Required)[string] A Datacenter's UUID
 - `k8s_cluster_id`- (Required)[string] A k8s cluster's UUID
 - `cpu_family` - (Required)[string] The desired CPU Family - See the API documentation for more information
@@ -58,6 +62,7 @@ The following arguments are supported:
 - `ram_size` -(Required)[int] - The desired amount of RAM, in MB
 - `storage_size` -(Required)[int] - The desired amount of storage for each node, in GB
 - `public_ips` - (Optional)[list] A list of public IPs associated with the node pool; must have at least `node_count + 1` elements;  
+
 ## Import
 
 A Kubernetes Node Pool resource can be imported using its Kubernetes cluster's uuid as well as its own UUID, both of which you can retreive from the cloud API: `resource id`, e.g.:

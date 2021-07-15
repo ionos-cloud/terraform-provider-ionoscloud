@@ -27,6 +27,17 @@ func dataSourceDataCenter() *schema.Resource {
 				Type:     schema.TypeString,
 				Optional: true,
 			},
+			"version": {
+				Type:     schema.TypeInt,
+				Computed: true,
+			},
+			"features": {
+				Type:     schema.TypeList,
+				Computed: true,
+				Elem: &schema.Schema{
+					Type: schema.TypeString,
+				},
+			},
 			"sec_auth_protection": {
 				Type:     schema.TypeBool,
 				Computed: true,
@@ -150,6 +161,20 @@ func dataSourceDataCenterRead(d *schema.ResourceData, meta interface{}) error {
 		err := d.Set("name", datacenter.Properties.Name)
 		if err != nil {
 			return fmt.Errorf("error while setting name property for datacenter %s: %s", d.Id(), err)
+		}
+	}
+
+	if datacenter.Properties.Version != nil {
+		err := d.Set("version", datacenter.Properties.Version)
+		if err != nil {
+			return fmt.Errorf("error while setting version property for datacenter %s: %s", d.Id(), err)
+		}
+	}
+
+	if datacenter.Properties.Features != nil {
+		err := d.Set("features", datacenter.Properties.Features)
+		if err != nil {
+			return fmt.Errorf("error while setting features property for datacenter %s: %s", d.Id(), err)
 		}
 	}
 

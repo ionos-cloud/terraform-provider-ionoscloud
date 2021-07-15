@@ -21,9 +21,21 @@ data "ionoscloud_datacenter" "dc_example" {
 
 ## Argument Reference
 
- * `name` - (Required) Name of an existing Virtual Data Center that you want to search for.
+ * `id` - (Optional) Id of an existing Virtual Data Center that you want to search for.
+ * `name` - (Optional) Name of an existing Virtual Data Center that you want to search for.
  * `location` - (Optional) Id of the existing Virtual Data Center's location.
+
+Either `name`, `location` or `id` must be provided. If none, the datasource will return an error.
 
 ## Attributes Reference
 
- * `id` - UUID of the Virtual Data Center
+The following attributes are returned by the datasource:
+
+
+* `id` - UUID of the Virtual Data Center
+* `name` - The name of the Virtual Data Center.
+* `location` - The regional location where the Virtual Data Center will be created.
+* `description` - Description for the Virtual Data Center.
+* `version` - The version of that Data Center. Gets incremented with every change
+* `features` - List of features supported by the location this data center is part of
+* `sec_auth_protection` - Boolean value representing if the data center requires extra protection e.g. two factor protection

@@ -25,7 +25,6 @@ func resourceFirewall() *schema.Resource {
 				Type:     schema.TypeString,
 				Optional: true,
 			},
-
 			"protocol": {
 				Type:     schema.TypeString,
 				Required: true,

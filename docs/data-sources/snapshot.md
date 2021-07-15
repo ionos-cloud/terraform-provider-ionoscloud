@@ -28,4 +28,6 @@ data "ionoscloud_snapshot" "snapshot_example" {
 
 ## Attributes Reference
 
+The following attributes are returned by the datasource:
+
  * `id` - UUID of the snapshot

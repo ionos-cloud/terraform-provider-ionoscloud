@@ -32,6 +32,10 @@ The following arguments are supported:
 - `maintenance_window` - (Optional) See the **maintenance_window** section in the example above
 - `public` - The indicator if the cluster is public or private. Be aware that setting it to false is currently in beta phase. Default value is true
 - `gateway_ip` - The IP address of the gateway used by the cluster. This is mandatory when `public` is set to `false` and should not be provided otherwise.
+  - `time` - (Required)[string] A clock time in the day when maintenance is allowed
+  - `day_of_the_week` - (Required)[string] Day of the week when maintenance is allowed
+- `available_upgrade_versions` - (Computed) List of available versions for upgrading the cluster
+- `viable_node_pool_versions` - (Computed) List of versions that may be used for node pools under this cluster
 
 ## Import
 
