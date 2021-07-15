@@ -48,7 +48,7 @@ resource "ionoscloud_volume" "example" {
 * `disc_virtio_hot_plug` - (Optional)[string] Is capable of Virt-IO drive hot plug (no reboot required)
 * `disc_virtio_hot_unplug` - (Optional)[string] Is capable of Virt-IO drive hot unplug (no reboot required). This works only for non-Windows virtual Machines.
 * `backup_unit_id`- (Optional)[string] he uuid of the Backup Unit that user has access to. The property is immutable and is only allowed to be set on a new volume creation. It is mandatory to provide either 'public image' or 'imageAlias' in conjunction with this property.
-
+* `device_number` - (Computed) The LUN ID of the storage volume. Null for volumes not mounted to any VM
 ## Import
 
 Resource Volume can be imported using the `resource id`, e.g.

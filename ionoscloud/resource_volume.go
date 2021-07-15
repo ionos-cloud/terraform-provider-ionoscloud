@@ -115,6 +115,10 @@ func resourceVolume() *schema.Resource {
 				Optional: true,
 				Computed: true,
 			},
+			"device_number": {
+				Type:     schema.TypeInt,
+				Computed: true,
+			},
 		},
 		Timeouts: &resourceDefaultTimeouts,
 	}
@@ -510,6 +514,14 @@ func resourceVolumeRead(ctx context.Context, d *schema.ResourceData, meta interf
 		err := d.Set("user_data", *volume.Properties.UserData)
 		if err != nil {
 			diags := diag.FromErr(fmt.Errorf("error while setting user_data property for volume %s: %s", d.Id(), err))
+			return diags
+		}
+	}
+
+	if volume.Properties.DeviceNumber != nil {
+		err := d.Set("device_number", *volume.Properties.DeviceNumber)
+		if err != nil {
+			diags := diag.FromErr(fmt.Errorf("error while setting device_number property for volume %s: %s", d.Id(), err))
 			return diags
 		}
 	}
