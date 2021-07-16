@@ -67,9 +67,7 @@ resource "ionoscloud_server" "example" {
 Resource Server can be imported using the `resource id`, e.g.
 
 ```shell
-terraform import ionoscloud_server.myserver {datacenter uuid}/{server uuid}/{primary_nic uuid}
-# or
-terraform import ionoscloud_server.myserver {datacenter uuid}/{server uuid}/{primary_nic uuid}/{firewall uuid}
+terraform import ionoscloud_server.myserver {datacenter uuid}/{server uuid}
 ```
 
 ## Notes
