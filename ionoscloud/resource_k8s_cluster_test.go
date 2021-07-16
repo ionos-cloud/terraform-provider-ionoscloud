@@ -191,7 +191,7 @@ resource "ionoscloud_k8s_cluster" "example" {
   maintenance_window {
     day_of_the_week = "Monday"
     time            = "10:30:00Z"
-  } 
+  }
 }`
 
 const testAccCheckk8sClusterConfigS3Subnet = `
@@ -208,7 +208,6 @@ const testAccCheckk8sClusterConfigS3SubnetUpdate = `
 resource "ionoscloud_k8s_cluster" "example" {
   name        = "updated"
   api_subnet_allow_list = ["1.2.3.4/32"]
-  }
 }`
 
 const testAccCheckk8sClusterConfigVersion = `

@@ -109,7 +109,6 @@ func resourcek8sCluster() *schema.Resource {
 					"affected by this restriction. If no allow list is specified, access is not restricted. If an IP " +
 					"without subnet mask is provided, the default value will be used: 32 for IPv4 and 128 for IPv6.",
 				Optional: true,
-				Computed: true,
 				Elem: &schema.Schema{
 					Type: schema.TypeString,
 				},
