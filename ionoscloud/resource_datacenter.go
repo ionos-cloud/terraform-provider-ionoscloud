@@ -28,21 +28,38 @@ func resourceDatacenter() *schema.Resource {
 			"name": {
 				Type:         schema.TypeString,
 				Required:     true,
+				Description:  "A name of that resource",
 				ValidateFunc: validation.All(validation.StringIsNotWhiteSpace),
 			},
 			"location": {
 				Type:         schema.TypeString,
 				Required:     true,
+				Description:  "The physical location where the datacenter will be created. This will be where all of your servers live. Property cannot be modified after datacenter creation (disallowed in update requests)",
 				ValidateFunc: validation.All(validation.StringIsNotWhiteSpace),
 			},
 			"description": {
-				Type:     schema.TypeString,
-				Optional: true,
-				Computed: true,
+				Type:        schema.TypeString,
+				Optional:    true,
+				Description: "A description for the datacenter, e.g. staging, production",
+				Computed:    true,
 			},
 			"sec_auth_protection": {
-				Type:     schema.TypeBool,
-				Optional: true,
+				Type:        schema.TypeBool,
+				Description: "Boolean value representing if the data center requires extra protection e.g. two factor protection",
+				Optional:    true,
+			},
+			"version": {
+				Type:        schema.TypeInt,
+				Description: "The version of that Data Center. Gets incremented with every change",
+				Computed:    true,
+			},
+			"features": {
+				Type:        schema.TypeList,
+				Computed:    true,
+				Description: "List of features supported by the location this data center is part of",
+				Elem: &schema.Schema{
+					Type: schema.TypeString,
+				},
 			},
 		},
 		Timeouts: &resourceDefaultTimeouts,
@@ -140,6 +157,22 @@ func resourceDatacenterRead(ctx context.Context, d *schema.ResourceData, meta in
 
 	if datacenter.Properties.SecAuthProtection != nil {
 		err := d.Set("sec_auth_protection", *datacenter.Properties.SecAuthProtection)
+		if err != nil {
+			diags := diag.FromErr(fmt.Errorf("error while setting sec_auth_protection property for datacenter %s: %s", d.Id(), err))
+			return diags
+		}
+	}
+
+	if datacenter.Properties.Features != nil {
+		err := d.Set("features", datacenter.Properties.Features)
+		if err != nil {
+			diags := diag.FromErr(fmt.Errorf("error while setting features property for datacenter %s: %s", d.Id(), err))
+			return diags
+		}
+	}
+
+	if datacenter.Properties.SecAuthProtection != nil {
+		err := d.Set("sec_auth_protection", datacenter.Properties.SecAuthProtection)
 		if err != nil {
 			diags := diag.FromErr(fmt.Errorf("error while setting sec_auth_protection property for datacenter %s: %s", d.Id(), err))
 			return diags

@@ -33,6 +33,7 @@ func TestAccUser_Basic(t *testing.T) {
 					testAccCheckUserExists("ionoscloud_user.resource_user", &user),
 					testAccCheckUserAttributes("ionoscloud_user.resource_user", "resource_user"),
 					resource.TestCheckResourceAttr("ionoscloud_user.resource_user", "first_name", "resource_user"),
+					resource.TestCheckResourceAttr("ionoscloud_user.resource_user", "active", "true"),
 				),
 			},
 			{
@@ -40,6 +41,7 @@ func TestAccUser_Basic(t *testing.T) {
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckUserAttributes("ionoscloud_user.resource_user", "updated"),
 					resource.TestCheckResourceAttr("ionoscloud_user.resource_user", "first_name", "updated"),
+					resource.TestCheckResourceAttr("ionoscloud_user.resource_user", "active", "false"),
 				),
 			},
 		},
@@ -136,6 +138,7 @@ resource "ionoscloud_user" "resource_user" {
   password = "abc123-321CBA"
   administrator = false
   force_sec_auth= false
+  active  = true
 }`
 
 const testacccheckuserconfigUpdate = `
@@ -146,6 +149,7 @@ resource "ionoscloud_user" "resource_user" {
   password = "abc123-321CBA"
   administrator = false
   force_sec_auth= false
+  active = false
 }
 
 resource "ionoscloud_group" "group" {
