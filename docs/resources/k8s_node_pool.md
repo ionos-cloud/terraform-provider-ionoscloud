@@ -47,7 +47,7 @@ resource "ionoscloud_k8s_node_pool" "demo" {
 The following arguments are supported:
 
 - `name` - (Required)[string] The name of the Kubernetes Cluster.
-- `k8s_version` - (Optional)[string] The desired Kubernetes Version. for supported values, please check the API documentation.
+- `k8s_version` - (Optional)[string] The desired Kubernetes Version. for supported values, please check the API documentation. The provider will ignore changes of patch level.
 - `auto_scaling` - (Optional)[string] Wether the Node Pool should autoscale. For more details, please check the API documentation
   - `min_node_count` - (Optional)[int] The minimum number of worker nodes the node pool can scale down to. Should be less than max_node_count
   - `max_node_count` - (Optional)[int] The maximum number of worker nodes that the node pool can scale to. Should be greater than min_node_count

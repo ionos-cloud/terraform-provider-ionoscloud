@@ -8,6 +8,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 	ionoscloud "github.com/ionos-cloud/sdk-go/v6"
 	"log"
+	"strings"
 	"time"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
@@ -33,6 +34,23 @@ func resourcek8sNodePool() *schema.Resource {
 				Type:        schema.TypeString,
 				Description: "The desired kubernetes version",
 				Optional:    true,
+				DiffSuppressFunc: func(k, old, new string, d *schema.ResourceData) bool {
+					var oldMajor, oldMinor string
+					if old != "" {
+						oldSplit := strings.Split(old, ".")
+						oldMajor = oldSplit[0]
+						oldMinor = oldSplit[1]
+
+						newSplit := strings.Split(new, ".")
+						newMajor := newSplit[0]
+						newMinor := newSplit[1]
+
+						if oldMajor == newMajor && oldMinor == newMinor {
+							return true
+						}
+					}
+					return false
+				},
 			},
 			"auto_scaling": {
 				Type:        schema.TypeList,
@@ -375,7 +393,7 @@ func resourcek8sNodePoolCreate(ctx context.Context, d *schema.ResourceData, meta
 		}
 
 		select {
-		case <-time.After(10 * time.Second):
+		case <-time.After(SleepInterval):
 			log.Printf("[INFO] trying again ...")
 		case <-ctx.Done():
 			log.Printf("[INFO] timed out")
