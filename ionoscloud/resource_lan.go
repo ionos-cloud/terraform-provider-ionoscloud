@@ -25,7 +25,7 @@ func resourceLan() *schema.Resource {
 
 			"public": {
 				Type:     schema.TypeBool,
-				Required: true,
+				Optional: true,
 			},
 			"name": {
 				Type:     schema.TypeString,

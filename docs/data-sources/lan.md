@@ -29,11 +29,11 @@ Either `name` or `id` must be provided. If none, or both are provided, the datas
 
 The following attributes are returned by the datasource:
 
-* `id`
-* `name`
-* `datacenter_id`
+* `id` - The id of the LAN.
+* `name` - The name of the LAN.
+* `datacenter_id` - The ID of lan's Virtual Data Center.
 * `ip_failover` - list of
     * `nic_uuid`
     * `ip`
-* `pcc`
-* `public`
+* `pcc` - The unique id of a `ionoscloud_private_crossconnect` resource, in order.
+* `public` - Indicates if the LAN faces the public Internet (true) or not (false).

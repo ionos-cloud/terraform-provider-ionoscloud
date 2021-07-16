@@ -241,12 +241,6 @@ func setK8sNodePoolData(d *schema.ResourceData, nodePool *ionoscloud.KubernetesN
 			}
 		}
 
-		if nodePool.Properties.K8sVersion != nil {
-			if err := d.Set("k8s_version", *nodePool.Properties.K8sVersion); err != nil {
-				return err
-			}
-		}
-
 		if nodePool.Properties.DatacenterId != nil {
 			if err := d.Set("datacenter_id", *nodePool.Properties.DatacenterId); err != nil {
 				return err
@@ -336,6 +330,19 @@ func setK8sNodePoolData(d *schema.ResourceData, nodePool *ionoscloud.KubernetesN
 				return err
 			}
 		}
+
+		if nodePool.Properties.AvailableUpgradeVersions != nil {
+			if err := d.Set("available_upgrade_versions", *nodePool.Properties.AvailableUpgradeVersions); err != nil {
+				return err
+			}
+		}
+
+		if nodePool.Properties.PublicIps != nil {
+			if err := d.Set("public_ips", *nodePool.Properties.PublicIps); err != nil {
+				return err
+			}
+		}
+
 	}
 
 	if nodePool.Metadata != nil && nodePool.Metadata.State != nil {

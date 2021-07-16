@@ -29,16 +29,16 @@ Either `name` or `id` must be provided. If none, or both are provided, the datas
 
 The following attributes are returned by the datasource:
 
-* `id`
-* `name`
-* `description`
-* `peers` - list of
+* `id` - The id of the private cross-connection.
+* `name` - The name of the private cross-connection.
+* `description` - The description for the private cross-connection.
+* `peers` - Lists LAN's joined to this private cross connect
     * `lan_id`
     * `lan_name`
     * `datacenter_id`
     * `datacenter_name`
     * `location`
-* `connectable_datacenters` - list of
+* `connectable_datacenters` - Lists datacenters that can be joined to this private cross connect
     * `id`
     * `name`
     * `location`

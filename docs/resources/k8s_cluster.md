@@ -27,16 +27,17 @@ resource "ionoscloud_k8s_cluster" "example" {
 
 The following arguments are supported:
 
-- `name` - (Required)[string] The name of the Kubernetes Cluster.
-- `k8s_version` - (Optional)[string] The desired Kubernetes Version. For supported values, please check the API documentation.
-- `maintenance_window` - (Optional) See the **maintenance_window** section in the example above.
-- `available_upgrade_versions` - (Optional) List of available versions for upgrading the cluster.
-- `viable_node_pool_versions` - (Optional) List of versions that may be used for node pools under this cluster.
-- `public` - (Optional)[bool] The indicator if the cluster is public or private. Be aware that setting it to false is currently in beta phase.
-- `gateway_ip` - (Optional) [string] The IP address of the gateway used by the cluster. This is mandatory when `public` is set to `false` and should not be provided otherwise.
+- `name` - (Required)[string] The name of the Kubernetes Cluster
+- `k8s_version` - (Optional)[string] The desired Kubernetes Version. For supported values, please check the API documentation
+- `maintenance_window` - (Optional) See the **maintenance_window** section in the example above
+  - `time` - (Required)[string] A clock time in the day when maintenance is allowed
+  - `day_of_the_week` - (Required)[string] Day of the week when maintenance is allowed
+- `public` - (Optional)[boolean] The indicator if the cluster is public or private. Be aware that setting it to false is currently in beta phase
+- `gateway_ip` - (Optional)[string] The IP address of the gateway used by the cluster. This is mandatory when `public` is set to `false` and should not be provided otherwise
+- `available_upgrade_versions` - (Computed) List of available versions for upgrading the cluster
+- `viable_node_pool_versions` - (Computed) List of versions that may be used for node pools under this cluster
 - `api_subnet_allow_list` - (Optional) Access to the K8s API server is restricted to these CIDRs. Cluster-internal traffic is not affected by this restriction. If no allowlist is specified, access is not restricted. If an IP without subnet mask is provided, the default value will be used: 32 for IPv4 and 128 for IPv6.
 - `s3_buckets` - (Optional) List of S3 bucket configured for K8s usage. For now it contains only an S3 bucket used to store K8s API audit logs.
-
 
 ## Import
 
