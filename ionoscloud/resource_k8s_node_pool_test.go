@@ -64,6 +64,41 @@ func TestAcck8sNodepool_Basic(t *testing.T) {
 	})
 }
 
+func TestAcck8sNodepool_Version(t *testing.T) {
+	var k8sNodepool ionoscloud.KubernetesNodePool
+
+	resource.Test(t, resource.TestCase{
+		PreCheck: func() {
+			testAccPreCheck(t)
+		},
+		ProviderFactories: testAccProviderFactories,
+		CheckDestroy:      testAccCheckk8sNodepoolDestroyCheck,
+		Steps: []resource.TestStep{
+			{
+				Config: fmt.Sprintf(testAccCheckk8sNodepoolConfigVersion),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckk8sNodepoolExists("ionoscloud_k8s_node_pool.terraform_acctest", &k8sNodepool),
+					resource.TestCheckResourceAttr("ionoscloud_k8s_node_pool.terraform_acctest", "k8s_version", "1.18.5"),
+				),
+			},
+			{
+				Config: fmt.Sprintf(testAccCheckk8sNodepoolConfigIgnoreVersion),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckk8sNodepoolExists("ionoscloud_k8s_node_pool.terraform_acctest", &k8sNodepool),
+					resource.TestCheckResourceAttr("ionoscloud_k8s_node_pool.terraform_acctest", "k8s_version", "1.18.5"),
+				),
+			},
+			{
+				Config: fmt.Sprintf(testAccCheckk8sNodepoolConfigChangeVersion),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckk8sNodepoolExists("ionoscloud_k8s_node_pool.terraform_acctest", &k8sNodepool),
+					resource.TestCheckResourceAttr("ionoscloud_k8s_node_pool.terraform_acctest", "k8s_version", "1.19.10"),
+				),
+			},
+		},
+	})
+}
+
 func testAccCheckk8sNodepoolDestroyCheck(s *terraform.State) error {
 	client := testAccProvider.Meta().(*ionoscloud.APIClient)
 
@@ -201,4 +236,82 @@ resource "ionoscloud_k8s_node_pool" "terraform_acctest" {
   ram_size          = 2048
   storage_size      = 40
   public_ips        = [ "%s", "%s", "%s" ]
+}`
+
+const testAccCheckk8sNodepoolConfigVersion = `
+resource "ionoscloud_datacenter" "terraform_acctest" {
+  name        = "terraform_acctest"
+  location    = "us/las"
+  description = "Datacenter created through terraform"
+}
+
+resource "ionoscloud_k8s_cluster" "terraform_acctest" {
+  name        = "terraform_acctest"
+  k8s_version = "1.18.5"
+}
+
+resource "ionoscloud_k8s_node_pool" "terraform_acctest" {
+  name        = "test_version"
+  k8s_version = "${ionoscloud_k8s_cluster.terraform_acctest.k8s_version}"
+  datacenter_id     = "${ionoscloud_datacenter.terraform_acctest.id}"
+  k8s_cluster_id    = "${ionoscloud_k8s_cluster.terraform_acctest.id}"
+  cpu_family        = "INTEL_XEON"
+  availability_zone = "AUTO"
+  storage_type      = "SSD"
+  node_count        = 1
+  cores_count       = 2
+  ram_size          = 2048
+  storage_size      = 40
+}`
+
+const testAccCheckk8sNodepoolConfigIgnoreVersion = `
+resource "ionoscloud_datacenter" "terraform_acctest" {
+  name        = "terraform_acctest"
+  location    = "us/las"
+  description = "Datacenter created through terraform"
+}
+
+resource "ionoscloud_k8s_cluster" "terraform_acctest" {
+  name        = "terraform_acctest"
+  k8s_version = "1.18.9"
+}
+
+resource "ionoscloud_k8s_node_pool" "terraform_acctest" {
+  name        = "test_version"
+  k8s_version = "${ionoscloud_k8s_cluster.terraform_acctest.k8s_version}"
+  datacenter_id     = "${ionoscloud_datacenter.terraform_acctest.id}"
+  k8s_cluster_id    = "${ionoscloud_k8s_cluster.terraform_acctest.id}"
+  cpu_family        = "INTEL_XEON"
+  availability_zone = "AUTO"
+  storage_type      = "SSD"
+  node_count        = 1
+  cores_count       = 2
+  ram_size          = 2048
+  storage_size      = 40
+}`
+
+const testAccCheckk8sNodepoolConfigChangeVersion = `
+resource "ionoscloud_datacenter" "terraform_acctest" {
+  name        = "terraform_acctest"
+  location    = "us/las"
+  description = "Datacenter created through terraform"
+}
+
+resource "ionoscloud_k8s_cluster" "terraform_acctest" {
+  name        = "terraform_acctest"
+  k8s_version = "1.19.10"
+}
+
+resource "ionoscloud_k8s_node_pool" "terraform_acctest" {
+  name        = "test_version"
+  k8s_version = "${ionoscloud_k8s_cluster.terraform_acctest.k8s_version}"
+  datacenter_id     = "${ionoscloud_datacenter.terraform_acctest.id}"
+  k8s_cluster_id    = "${ionoscloud_k8s_cluster.terraform_acctest.id}"
+  cpu_family        = "INTEL_XEON"
+  availability_zone = "AUTO"
+  storage_type      = "SSD"
+  node_count        = 1
+  cores_count       = 2
+  ram_size          = 2048
+  storage_size      = 40
 }`
