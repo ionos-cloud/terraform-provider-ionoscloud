@@ -732,6 +732,7 @@ func resourceServerCreate(ctx context.Context, d *schema.ResourceData, meta inte
 			"password": *(*request.Entities.Volumes.Items)[0].Properties.ImagePassword,
 		})
 	}
+
 	return resourceServerRead(ctx, d, meta)
 }
 
