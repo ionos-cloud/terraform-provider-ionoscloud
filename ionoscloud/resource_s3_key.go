@@ -37,7 +37,7 @@ func resourceS3Key() *schema.Resource {
 				Type:        schema.TypeBool,
 				Description: "Whether this key should be active or not.",
 				Optional:    true,
-				Default: 	 true,
+				Default:     true,
 			},
 		},
 		Timeouts: &resourceDefaultTimeouts,
@@ -207,7 +207,8 @@ func resourceS3KeyDelete(ctx context.Context, d *schema.ResourceData, meta inter
 		case <-ctx.Done():
 			log.Printf("[INFO] delete timed out")
 			diags := diag.FromErr(fmt.Errorf("s3 key delete timed out! WARNING: your s3 key will still probably be deleted after some time but the terraform state won't reflect that; check your Ionos Cloud account for updates"))
-			return diags}
+			return diags
+		}
 	}
 
 	return nil

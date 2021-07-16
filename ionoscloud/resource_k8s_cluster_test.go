@@ -43,7 +43,7 @@ func TestAcck8sCluster_Basic(t *testing.T) {
 
 func TestAcck8sCluster_S3Subnet(t *testing.T) {
 	var k8sCluster ionoscloud.KubernetesCluster
-	k8sClusterName := "example"
+	k8sClusterName := "test_s3_subnet"
 
 	resource.Test(t, resource.TestCase{
 		PreCheck: func() {
@@ -57,6 +57,14 @@ func TestAcck8sCluster_S3Subnet(t *testing.T) {
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckk8sClusterExists("ionoscloud_k8s_cluster.example", &k8sCluster),
 					resource.TestCheckResourceAttr("ionoscloud_k8s_cluster.example", "name", k8sClusterName),
+				),
+			},
+			{
+				Config: fmt.Sprintf(testAccCheckk8sClusterConfigS3SubnetUpdate),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckk8sClusterExists("ionoscloud_k8s_cluster.example", &k8sCluster),
+					resource.TestCheckResourceAttr("ionoscloud_k8s_cluster.example", "name", "updated"),
+					resource.TestCheckNoResourceAttr("ionoscloud_k8s_cluster.example", "s3_buckets"),
 				),
 			},
 		},
@@ -150,11 +158,14 @@ const testAccCheckk8sClusterConfigS3Subnet = `
 resource "ionoscloud_k8s_cluster" "example" {
   name        = "%s"
   api_subnet_allow_list = ["1.2.3.4/32",
-                           "2002::1234:abcd:ffff:c0a8:101/64", 
-                           "1.2.3.4", 
-                           "2002::1234:abcd:ffff:c0a8:101" ]
-  s3Buckets { 
+                           "2002::1234:abcd:ffff:c0a8:101/64"]
+  s3_buckets { 
      name = "sdktestv6"
   }
+}`
 
+const testAccCheckk8sClusterConfigS3SubnetUpdate = `
+resource "ionoscloud_k8s_cluster" "example" {
+  name        = "updated"
+  api_subnet_allow_list = ["1.2.3.4/32"]
 }`
