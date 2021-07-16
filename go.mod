@@ -4,6 +4,7 @@ go 1.14
 
 require (
 	github.com/agext/levenshtein v1.2.3 // indirect
+	github.com/alcortesm/tgz v0.0.0-20161220082320-9c5fe88206d7 // indirect
 	github.com/aws/aws-sdk-go v1.37.0 // indirect
 	github.com/fatih/color v1.9.0 // indirect
 	github.com/go-test/deep v1.0.6 // indirect
@@ -11,16 +12,15 @@ require (
 	github.com/hashicorp/go-multierror v1.1.0 // indirect
 	github.com/hashicorp/go-uuid v1.0.2 // indirect
 	github.com/hashicorp/hcl/v2 v2.8.2 // indirect
-	github.com/hashicorp/terraform-exec v0.13.3 // indirect
-	github.com/hashicorp/terraform-plugin-sdk/v2 v2.4.3
+	github.com/hashicorp/terraform-plugin-sdk/v2 v2.7.0
 	github.com/hashicorp/yamux v0.0.0-20200609203250-aecfd211c9ce // indirect
-	github.com/ionos-cloud/sdk-go/v5 v5.1.3
+	github.com/ionos-cloud/sdk-go/v5 v5.1.4
 	github.com/jhump/protoreflect v1.6.1 // indirect
 	github.com/mattn/go-colorable v0.1.7 // indirect
 	github.com/mitchellh/go-testing-interface v1.14.1 // indirect
 	github.com/mitchellh/mapstructure v1.3.2 // indirect
 	github.com/oklog/run v1.1.0 // indirect
-	golang.org/x/crypto v0.0.0-20210322153248-0c34fe9e7dc2
+	golang.org/x/crypto v0.0.0-20210421170649-83a5a9bb288b
 	golang.org/x/net v0.0.0-20210510120150-4163338589ed // indirect
 	golang.org/x/oauth2 v0.0.0-20210514164344-f6687ab2804c // indirect
 	golang.org/x/tools v0.0.0-20201028111035-eafbe7b904eb // indirect
@@ -28,5 +28,3 @@ require (
 	google.golang.org/appengine v1.6.7 // indirect
 	gopkg.in/yaml.v3 v3.0.0-20200615113413-eeeca48fe776 // indirect
 )
-
-replace github.com/ionos-cloud/sdk-go/v5 => ../sdk-go-v5
