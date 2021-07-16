@@ -855,15 +855,16 @@ func resourceServerRead(ctx context.Context, d *schema.ResourceData, meta interf
 		}
 	}
 
-	if primarynic, ok := d.GetOk("primary_nic"); ok {
-		if err := d.Set("primary_nic", primarynic.(string)); err != nil {
+	if server.Entities.Nics != nil && len(*server.Entities.Nics.Items) > 0 && (*server.Entities.Nics.Items)[0].Id != nil {
+		primaryNic := *(*server.Entities.Nics.Items)[0].Id
+		if err := d.Set("primary_nic", primaryNic); err != nil {
 			diags := diag.FromErr(err)
 			return diags
 		}
 
-		nic, _, err := client.NicApi.DatacentersServersNicsFindById(ctx, dcId, serverId, primarynic.(string)).Execute()
+		nic, _, err := client.NicApi.DatacentersServersNicsFindById(ctx, dcId, serverId, primaryNic).Execute()
 		if err != nil {
-			diags := diag.FromErr(fmt.Errorf("error occured while fetching nic %s for server ID %s %s", primarynic.(string), d.Id(), err))
+			diags := diag.FromErr(fmt.Errorf("error occured while fetching nic %s for server ID %s %s", primaryNic, d.Id(), err))
 			return diags
 		}
 
@@ -889,8 +890,24 @@ func resourceServerRead(ctx context.Context, d *schema.ResourceData, meta interf
 			network["ips"] = *nic.Properties.Ips
 		}
 
+		firewallRules, _, err := client.NicApi.DatacentersServersNicsFirewallrulesGet(ctx, dcId, serverId, primaryNic).Execute()
+
+		if err != nil {
+			diags := diag.FromErr(err)
+			return diags
+		}
+
+		if firewallRules.Items != nil {
+			if len(*firewallRules.Items) > 0 {
+				if err := d.Set("firewallrule_id", *(*firewallRules.Items)[0].Id); err != nil {
+					diags := diag.FromErr(err)
+					return diags
+				}
+			}
+		}
+
 		if firewallId, ok := d.GetOk("firewallrule_id"); ok {
-			firewall, _, err := client.NicApi.DatacentersServersNicsFirewallrulesFindById(ctx, dcId, serverId, primarynic.(string), firewallId.(string)).Execute()
+			firewall, _, err := client.NicApi.DatacentersServersNicsFirewallrulesFindById(ctx, dcId, serverId, primaryNic, firewallId.(string)).Execute()
 			if err != nil {
 				diags := diag.FromErr(fmt.Errorf("error occured while fetching firewallrule %s for server ID %s %s", firewallId.(string), serverId, err))
 				return diags
@@ -947,14 +964,10 @@ func resourceServerRead(ctx context.Context, d *schema.ResourceData, meta interf
 		}
 	}
 
-	bootVolume, ok := d.GetOk("boot_volume")
-	if ok && len(bootVolume.(string)) > 0 {
-		_, _, err = client.ServerApi.DatacentersServersVolumesFindById(ctx, dcId, d.Id(), bootVolume.(string)).Execute()
-		if err != nil {
-			if err := d.Set("volume", nil); err != nil {
-				diags := diag.FromErr(err)
-				return diags
-			}
+	if server.Properties.BootVolume != nil {
+		if err := d.Set("boot_volume", *server.Properties.BootVolume.Id); err != nil {
+			diags := diag.FromErr(err)
+			return diags
 		}
 	}
 
