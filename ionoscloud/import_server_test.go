@@ -10,7 +10,7 @@ import (
 )
 
 func TestAccServer_ImportBasic(t *testing.T) {
-	resourceName := "server-importtest"
+	resourceName := "webserver"
 
 	resource.Test(t, resource.TestCase{
 		PreCheck:          func() { testAccPreCheck(t) },
@@ -22,7 +22,7 @@ func TestAccServer_ImportBasic(t *testing.T) {
 			},
 
 			{
-				ResourceName:            "ionoscloud_server.webserver",
+				ResourceName:            fmt.Sprintf("ionoscloud_server.%s", resourceName),
 				ImportStateIdFunc:       testAccServerImportStateId,
 				ImportState:             true,
 				ImportStateVerify:       true,
@@ -40,7 +40,7 @@ func testAccServerImportStateId(s *terraform.State) (string, error) {
 			continue
 		}
 
-		importID = fmt.Sprintf("%s/%s/%s/%s", rs.Primary.Attributes["datacenter_id"], rs.Primary.Attributes["id"], rs.Primary.Attributes["primary_nic"], rs.Primary.Attributes["firewallrule_id"])
+		importID = fmt.Sprintf("%s/%s", rs.Primary.Attributes["datacenter_id"], rs.Primary.Attributes["id"])
 	}
 
 	return importID, nil
