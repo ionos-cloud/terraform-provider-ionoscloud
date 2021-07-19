@@ -205,7 +205,7 @@ func resourceServerImport(ctx context.Context, d *schema.ResourceData, meta inte
 		}
 	}
 
-	if server.Properties.BootCdrom != nil {
+	if server.Properties.BootCdrom != nil && server.Properties.BootCdrom.Id != nil {
 		if err := d.Set("boot_cdrom", *server.Properties.BootCdrom.Id); err != nil {
 			return nil, err
 		}

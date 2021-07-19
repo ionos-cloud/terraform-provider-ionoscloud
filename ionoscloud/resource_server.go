@@ -964,14 +964,7 @@ func resourceServerRead(ctx context.Context, d *schema.ResourceData, meta interf
 		}
 	}
 
-	if server.Properties.BootVolume != nil {
-		if err := d.Set("boot_volume", *server.Properties.BootVolume.Id); err != nil {
-			diags := diag.FromErr(err)
-			return diags
-		}
-	}
-
-	if server.Properties.BootCdrom != nil {
+	if server.Properties.BootCdrom != nil && server.Properties.BootCdrom.Id != nil {
 		if err := d.Set("boot_cdrom", *server.Properties.BootCdrom.Id); err != nil {
 			diags := diag.FromErr(err)
 			return diags
