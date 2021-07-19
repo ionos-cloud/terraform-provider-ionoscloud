@@ -7,6 +7,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 	ionoscloud "github.com/ionos-cloud/sdk-go/v6"
 	"log"
+	"strings"
 	"time"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
@@ -33,6 +34,23 @@ func resourcek8sCluster() *schema.Resource {
 				Description: "The desired kubernetes version",
 				Optional:    true,
 				Computed:    true,
+				DiffSuppressFunc: func(k, old, new string, d *schema.ResourceData) bool {
+					var oldMajor, oldMinor string
+					if old != "" {
+						oldSplit := strings.Split(old, ".")
+						oldMajor = oldSplit[0]
+						oldMinor = oldSplit[1]
+
+						newSplit := strings.Split(new, ".")
+						newMajor := newSplit[0]
+						newMinor := newSplit[1]
+
+						if oldMajor == newMajor && oldMinor == newMinor {
+							return true
+						}
+					}
+					return false
+				},
 			},
 			"maintenance_window": {
 				Type:        schema.TypeList,
@@ -77,7 +95,7 @@ func resourcek8sCluster() *schema.Resource {
 				Description: "The indicator if the cluster is public or private. Be aware that setting it to false is " +
 					"currently in beta phase.",
 				Optional: true,
-				Computed: true,
+				Default:  true,
 			},
 			"gateway_ip": {
 				Type: schema.TypeString,
@@ -121,12 +139,8 @@ func resourcek8sClusterCreate(ctx context.Context, d *schema.ResourceData, meta 
 		cluster.Properties.MaintenanceWindow.DayOfTheWeek = &mdVal
 	}
 
-	if public, publicOk := d.GetOkExists("public"); publicOk {
-		public := public.(bool)
-		fmt.Printf("Value %v", public)
-		cluster.Properties.Public = &public
-		fmt.Printf("Value %v", *cluster.Properties.Public)
-	}
+	public := d.Get("public").(bool)
+	cluster.Properties.Public = &public
 
 	if gatewayIp, gatewayIpOk := d.GetOk("gateway_ip"); gatewayIpOk {
 		gatewayIp := gatewayIp.(string)
