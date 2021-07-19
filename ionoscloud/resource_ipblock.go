@@ -46,6 +46,7 @@ func resourceIPBlock() *schema.Resource {
 				Type:        schema.TypeList,
 				Description: "Read-Only attribute. Lists consumption detail of an individual ip",
 				Computed:    true,
+				Optional:    true,
 				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{
 						"ip": {

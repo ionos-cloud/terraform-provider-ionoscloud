@@ -177,7 +177,7 @@ resource "ionoscloud_server" "webserver" {
     lan = "${ionoscloud_lan.webserver_lan1.id}"
     dhcp = true
     firewall_active = true
-     ip ="${ionoscloud_ipblock.webserver_ip.ips[0]}"
+     ips = ["${ionoscloud_ipblock.webserver_ip.ips[0]}"]
   }
 }
 resource "ionoscloud_ipfailover" "failover-test" {
@@ -224,7 +224,7 @@ resource "ionoscloud_server" "webserver" {
     lan = "1"
     dhcp = true
     firewall_active = true
-     ip ="${ionoscloud_ipblock.webserver_ip.ips[0]}"
+     ips =["${ionoscloud_ipblock.webserver_ip.ips[0]}"]
   }
 }
 `
