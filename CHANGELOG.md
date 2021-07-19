@@ -1,3 +1,12 @@
+## 5.2.5
+- fix: fixes #1 - usage example updates
+- documentation updates
+- fix: fixes #13 ignore changes of patch level in k8s cluster & nodepool k8sVersion
+- set public default to true to remove deprecated GetOkExists function
+- added some missing arguments
+- implemented dataport security requirements
+- fixed import server import
+
 ## 5.2.4
 
 - issue #47 - corrected nic resource to accept a list of strings for ips parameter
