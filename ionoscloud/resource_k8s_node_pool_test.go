@@ -204,7 +204,7 @@ resource "ionoscloud_datacenter" "terraform_acctest" {
 
 resource "ionoscloud_k8s_cluster" "terraform_acctest" {
   name        = "terraform_acctest2"
-  k8s_version = "1.20.6"
+  k8s_version = "1.20.8"
   maintenance_window {
     day_of_the_week = "Monday"
     time            = "09:00:00Z"
@@ -239,7 +239,7 @@ resource "ionoscloud_datacenter" "terraform_acctest" {
 
 resource "ionoscloud_k8s_cluster" "terraform_acctest" {
   name        = "terraform_acctest2"
-  k8s_version = "1.20.6"
+  k8s_version = "1.20.8"
   maintenance_window {
     day_of_the_week = "Monday"
     time            = "09:00:00Z"
@@ -284,7 +284,7 @@ resource "ionoscloud_lan" "terraform_acctest" {
 
 resource "ionoscloud_k8s_cluster" "terraform_acctest" {
   name        = "terraform_acctest_lan"
-  k8s_version = "1.20.6"
+  k8s_version = "1.20.8"
   maintenance_window {
     day_of_the_week = "Monday"
     time            = "09:00:00Z"
@@ -324,7 +324,7 @@ resource "ionoscloud_lan" "terraform_acctest" {
 
 resource "ionoscloud_k8s_cluster" "terraform_acctest" {
   name        = "terraform_acctest_lan"
-  k8s_version = "1.20.6"
+  k8s_version = "1.20.8"
   maintenance_window {
     day_of_the_week = "Monday"
     time            = "09:00:00Z"

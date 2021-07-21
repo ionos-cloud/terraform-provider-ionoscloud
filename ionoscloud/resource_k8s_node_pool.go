@@ -540,8 +540,8 @@ func resourcek8sNodePoolRead(ctx context.Context, d *schema.ResourceData, meta i
 
 	nodePoolLans := make([]interface{}, 0)
 	if k8sNodepool.Properties.Lans != nil && len(*k8sNodepool.Properties.Lans) > 0 {
-		nodePoolLans = make([]interface{}, len(*k8sNodepool.Properties.Lans))
-		for lanIndex, nodePoolLan := range *k8sNodepool.Properties.Lans {
+		nodePoolLans = make([]interface{}, 0)
+		for _, nodePoolLan := range *k8sNodepool.Properties.Lans {
 			lanEntry := make(map[string]interface{})
 
 			if nodePoolLan.Id != nil {
@@ -554,8 +554,8 @@ func resourcek8sNodePoolRead(ctx context.Context, d *schema.ResourceData, meta i
 
 			nodePoolRoutes := make([]interface{}, 0)
 			if nodePoolLan.Routes != nil && len(*nodePoolLan.Routes) > 0 {
-				nodePoolRoutes = make([]interface{}, len(*nodePoolLan.Routes))
-				for routeIndex, nodePoolRoute := range *nodePoolLan.Routes {
+				nodePoolRoutes = make([]interface{}, 0)
+				for _, nodePoolRoute := range *nodePoolLan.Routes {
 					routeEntry := make(map[string]string)
 					if nodePoolRoute.Network != nil {
 						routeEntry["network"] = *nodePoolRoute.Network
@@ -563,7 +563,7 @@ func resourcek8sNodePoolRead(ctx context.Context, d *schema.ResourceData, meta i
 					if nodePoolRoute.GatewayIp != nil {
 						routeEntry["gateway_ip"] = *nodePoolRoute.GatewayIp
 					}
-					nodePoolRoutes[routeIndex] = routeEntry
+					nodePoolRoutes = append(nodePoolRoutes, routeEntry)
 				}
 			}
 
@@ -571,7 +571,7 @@ func resourcek8sNodePoolRead(ctx context.Context, d *schema.ResourceData, meta i
 				lanEntry["routes"] = nodePoolRoutes
 			}
 
-			nodePoolLans[lanIndex] = lanEntry
+			nodePoolLans = append(nodePoolLans, lanEntry)
 		}
 	}
 
