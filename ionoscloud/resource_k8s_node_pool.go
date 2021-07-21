@@ -540,8 +540,8 @@ func resourcek8sNodePoolRead(ctx context.Context, d *schema.ResourceData, meta i
 
 	nodePoolLans := make([]interface{}, 0)
 	if k8sNodepool.Properties.Lans != nil && len(*k8sNodepool.Properties.Lans) > 0 {
-		nodePoolLans = make([]interface{}, len(*k8sNodepool.Properties.Lans))
-		for lanIndex, nodePoolLan := range *k8sNodepool.Properties.Lans {
+		nodePoolLans = make([]interface{}, 0)
+		for _, nodePoolLan := range *k8sNodepool.Properties.Lans {
 			lanEntry := make(map[string]interface{})
 
 			if nodePoolLan.Id != nil {
@@ -550,12 +550,13 @@ func resourcek8sNodePoolRead(ctx context.Context, d *schema.ResourceData, meta i
 
 			if nodePoolLan.Dhcp != nil {
 				lanEntry["dhcp"] = *nodePoolLan.Dhcp
+				fmt.Printf("dhcp in read %v \n", lanEntry["dhcp"])
 			}
 
 			nodePoolRoutes := make([]interface{}, 0)
 			if nodePoolLan.Routes != nil && len(*nodePoolLan.Routes) > 0 {
-				nodePoolRoutes = make([]interface{}, len(*nodePoolLan.Routes))
-				for routeIndex, nodePoolRoute := range *nodePoolLan.Routes {
+				nodePoolRoutes = make([]interface{}, 0)
+				for _, nodePoolRoute := range *nodePoolLan.Routes {
 					routeEntry := make(map[string]string)
 					if nodePoolRoute.Network != nil {
 						routeEntry["network"] = *nodePoolRoute.Network
@@ -563,7 +564,7 @@ func resourcek8sNodePoolRead(ctx context.Context, d *schema.ResourceData, meta i
 					if nodePoolRoute.GatewayIp != nil {
 						routeEntry["gateway_ip"] = *nodePoolRoute.GatewayIp
 					}
-					nodePoolRoutes[routeIndex] = routeEntry
+					nodePoolRoutes = append(nodePoolRoutes, routeEntry)
 				}
 			}
 
@@ -571,7 +572,7 @@ func resourcek8sNodePoolRead(ctx context.Context, d *schema.ResourceData, meta i
 				lanEntry["routes"] = nodePoolRoutes
 			}
 
-			nodePoolLans[lanIndex] = lanEntry
+			nodePoolLans = append(nodePoolLans, lanEntry)
 		}
 	}
 
@@ -669,7 +670,7 @@ func resourcek8sNodePoolUpdate(ctx context.Context, d *schema.ResourceData, meta
 	}
 
 	if d.HasChange("lans") {
-		oldLANs, newLANs := d.GetChange("lans")
+		newLANs := d.Get("lans")
 		if newLANs.([]interface{}) != nil {
 			updateLans := false
 			var lans []ionoscloud.KubernetesNodePoolLan
@@ -734,7 +735,7 @@ func resourcek8sNodePoolUpdate(ctx context.Context, d *schema.ResourceData, meta
 			}
 
 			if updateLans == true {
-				log.Printf("[INFO] k8s node pool LANs changed from %+v to %+v", oldLANs, newLANs)
+				log.Printf("[INFO] k8s node pool LANs changed to %+v", newLANs)
 				request.Properties.Lans = &lans
 			}
 		}
@@ -810,7 +811,10 @@ func resourcek8sNodePoolUpdate(ctx context.Context, d *schema.ResourceData, meta
 		log.Printf("[INFO] Update req: %s", string(b))
 	}
 
-	_, apiResponse, err := client.KubernetesApi.K8sNodepoolsPut(ctx, d.Get("k8s_cluster_id").(string), d.Id()).KubernetesNodePool(request).Execute()
+	if request.Properties.Lans != nil && len(*request.Properties.Lans) > 0 && (*request.Properties.Lans)[0].Dhcp != nil {
+		fmt.Printf("dhcp for request: %v \n ", *(*request.Properties.Lans)[0].Dhcp)
+	}
+	updatedResponse, apiResponse, err := client.KubernetesApi.K8sNodepoolsPut(ctx, d.Get("k8s_cluster_id").(string), d.Id()).KubernetesNodePool(request).Execute()
 
 	if err != nil {
 		if apiResponse != nil && apiResponse.StatusCode == 404 {
@@ -819,6 +823,10 @@ func resourcek8sNodePoolUpdate(ctx context.Context, d *schema.ResourceData, meta
 		}
 		diags := diag.FromErr(fmt.Errorf("error while updating k8s node pool %s: %s", d.Id(), err))
 		return diags
+	}
+
+	if updatedResponse.Properties.Lans != nil && len(*updatedResponse.Properties.Lans) > 0 && (*updatedResponse.Properties.Lans)[0].Dhcp != nil {
+		fmt.Printf("dhcp in response: %v \n ", *(*updatedResponse.Properties.Lans)[0].Dhcp)
 	}
 
 	for {

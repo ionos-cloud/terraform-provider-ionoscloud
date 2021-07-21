@@ -183,6 +183,8 @@ func testAccCheckk8sNodepoolExists(n string, k8sNodepool *ionoscloud.KubernetesN
 
 		foundK8sNodepool, _, err := client.KubernetesApi.K8sNodepoolsFindById(ctx, rs.Primary.Attributes["k8s_cluster_id"], rs.Primary.ID).Execute()
 
+		fmt.Printf("in test dhcp %v \n", *(*foundK8sNodepool.Properties.Lans)[0].Dhcp)
+
 		if err != nil {
 			return fmt.Errorf("error occured while fetching k8s node pool: %s", rs.Primary.ID)
 		}
@@ -204,7 +206,7 @@ resource "ionoscloud_datacenter" "terraform_acctest" {
 
 resource "ionoscloud_k8s_cluster" "terraform_acctest" {
   name        = "terraform_acctest2"
-  k8s_version = "1.20.6"
+  k8s_version = "1.20.8"
   maintenance_window {
     day_of_the_week = "Monday"
     time            = "09:00:00Z"
@@ -239,7 +241,7 @@ resource "ionoscloud_datacenter" "terraform_acctest" {
 
 resource "ionoscloud_k8s_cluster" "terraform_acctest" {
   name        = "terraform_acctest2"
-  k8s_version = "1.20.6"
+  k8s_version = "1.20.8"
   maintenance_window {
     day_of_the_week = "Monday"
     time            = "09:00:00Z"
@@ -284,7 +286,7 @@ resource "ionoscloud_lan" "terraform_acctest" {
 
 resource "ionoscloud_k8s_cluster" "terraform_acctest" {
   name        = "terraform_acctest_lan"
-  k8s_version = "1.20.6"
+  k8s_version = "1.20.8"
   maintenance_window {
     day_of_the_week = "Monday"
     time            = "09:00:00Z"
@@ -324,7 +326,7 @@ resource "ionoscloud_lan" "terraform_acctest" {
 
 resource "ionoscloud_k8s_cluster" "terraform_acctest" {
   name        = "terraform_acctest_lan"
-  k8s_version = "1.20.6"
+  k8s_version = "1.20.8"
   maintenance_window {
     day_of_the_week = "Monday"
     time            = "09:00:00Z"
