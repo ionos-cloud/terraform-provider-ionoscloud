@@ -183,8 +183,6 @@ func testAccCheckk8sNodepoolExists(n string, k8sNodepool *ionoscloud.KubernetesN
 
 		foundK8sNodepool, _, err := client.KubernetesApi.K8sNodepoolsFindById(ctx, rs.Primary.Attributes["k8s_cluster_id"], rs.Primary.ID).Execute()
 
-		fmt.Printf("in test dhcp %v \n", *(*foundK8sNodepool.Properties.Lans)[0].Dhcp)
-
 		if err != nil {
 			return fmt.Errorf("error occured while fetching k8s node pool: %s", rs.Primary.ID)
 		}
