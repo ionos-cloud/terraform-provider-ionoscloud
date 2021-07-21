@@ -4,7 +4,7 @@
 - fix: fixes #13 ignore changes of patch level in k8s cluster & nodepool k8sVersion
 - set public default to true to remove deprecated GetOkExists function
 - added some missing arguments
-- implemented dataport security requirements
+- API Kubernetes security features implemented
 - fixed import server import
 
 ## 5.2.4
