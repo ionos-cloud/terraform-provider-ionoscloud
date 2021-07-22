@@ -12,7 +12,7 @@ import (
 
 func TestAccApplicationLoadBalancerForwardingRule_Basic(t *testing.T) {
 	var applicationLoadBalancerForwardingRule ionoscloud.ApplicationLoadBalancerForwardingRule
-	applicationaLoadBalancerForwardingRuleName := "applicationLoadBalancerForwardingRule"
+	applicationLoadBalancerForwardingRuleName := "applicationLoadBalancerForwardingRule"
 
 	resource.Test(t, resource.TestCase{
 		PreCheck: func() {
@@ -22,10 +22,10 @@ func TestAccApplicationLoadBalancerForwardingRule_Basic(t *testing.T) {
 		CheckDestroy:      testAccCheckApplicationLoadBalancerForwardingRuleDestroyCheck,
 		Steps: []resource.TestStep{
 			{
-				Config: fmt.Sprintf(testAccCheckApplicationLoadBalancerForwardingRuleConfigBasic, applicationaLoadBalancerForwardingRuleName),
+				Config: fmt.Sprintf(testAccCheckApplicationLoadBalancerForwardingRuleConfigBasic, applicationLoadBalancerForwardingRuleName),
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheckApplicationLoadBalancerForwardingRuleExists("ionoscloud_application_loadbalancer.alb", &applicationLoadBalancerForwardingRule),
-					resource.TestCheckResourceAttr("ionoscloud_application_loadbalancer_forwardingrule.forwarding_rule", "name", applicationaLoadBalancerForwardingRuleName),
+					testAccCheckApplicationLoadBalancerForwardingRuleExists("ionoscloud_application_loadbalancer_forwardingrule.forwarding_rule", &applicationLoadBalancerForwardingRule),
+					resource.TestCheckResourceAttr("ionoscloud_application_loadbalancer_forwardingrule.forwarding_rule", "name", applicationLoadBalancerForwardingRuleName),
 				),
 			},
 			{
@@ -92,16 +92,17 @@ func testAccCheckApplicationLoadBalancerForwardingRuleExists(n string, alb *iono
 		albId := rs.Primary.Attributes["application_loadbalancer_id"]
 		ruleId := rs.Primary.ID
 
-		foundNatGateway, _, err := client.ApplicationLoadBalancersApi.DatacentersApplicationloadbalancersForwardingrulesFindByForwardingRuleId(ctx, dcId, albId, ruleId).Execute()
+		foundAlbFw, _, err := client.ApplicationLoadBalancersApi.DatacentersApplicationloadbalancersForwardingrulesFindByForwardingRuleId(ctx, dcId, albId, ruleId).Execute()
 
 		if err != nil {
-			return fmt.Errorf("error occured while fetching NatGateway: %s", rs.Primary.ID)
+			return fmt.Errorf("error occured while fetching Application Loadbalancer Forwarding Rule: %s %s \n\n", rs.Primary.ID, err)
 		}
-		if *foundNatGateway.Id != rs.Primary.ID {
+
+		if *foundAlbFw.Id != rs.Primary.ID {
 			return fmt.Errorf("record not found")
 		}
 
-		alb = &foundNatGateway
+		alb = &foundAlbFw
 
 		return nil
 	}
@@ -110,7 +111,7 @@ func testAccCheckApplicationLoadBalancerForwardingRuleExists(n string, alb *iono
 const testAccCheckApplicationLoadBalancerForwardingRuleConfigBasic = `
 resource "ionoscloud_datacenter" "alb_datacenter" {
   name              = "test_alb"
-  location          = "de/fra"
+  location          = "de/txl"
   description       = "datacenter for hosting "
 }
 
@@ -130,14 +131,9 @@ resource "ionoscloud_application_loadbalancer" "alb" {
   datacenter_id = ionoscloud_datacenter.alb_datacenter.id
   name          = "alb"
   listener_lan  = ionoscloud_lan.alb_lan_1.id
-  ips           = [ "81.173.1.2",
-                    "22.231.2.2",
-                    "22.231.2.3"
-                  ]
+  ips           = [ "10.12.118.224"]
   target_lan    = ionoscloud_lan.alb_lan_2.id
-  lb_private_ips= [ "81.173.1.5/24",
-                    "22.231.2.5/24"
-                  ]
+  lb_private_ips= [ "10.13.72.225/24"]
 }
 
 resource "ionoscloud_application_loadbalancer_forwardingrule" "forwarding_rule" {
@@ -145,15 +141,21 @@ resource "ionoscloud_application_loadbalancer_forwardingrule" "forwarding_rule" 
  application_loadbalancer_id = ionoscloud_application_loadbalancer.alb.id
  name = "%s"
  protocol = "HTTP"
- listener_ip = "81.173.1.2"
+ listener_ip = "10.12.118.224"
+ listener_port = 8080
+ health_check {
+     client_timeout = 1000
+ }
+ ## server_certificates = ["fb007eed-f3a8-4cbd-b529-2dba508c7599"]
  http_rules {
    name = "http_rule"
    type = "REDIRECT"
-   drop_query = "true"
+   drop_query = true
    location =  "www.ionos.com"
    conditions {
      type = "HEADER"
      condition = "EQUALS"
+     value = "something"
    }
  }
 }`
@@ -161,7 +163,7 @@ resource "ionoscloud_application_loadbalancer_forwardingrule" "forwarding_rule" 
 const testAccCheckApplicationLoadBalancerForwardingRuleConfigUpdate = `
 resource "ionoscloud_datacenter" "alb_datacenter" {
   name              = "test_alb"
-  location          = "de/fra"
+  location          = "de/txl"
   description       = "datacenter for hosting "
 }
 
@@ -181,14 +183,9 @@ resource "ionoscloud_application_loadbalancer" "alb" {
   datacenter_id = ionoscloud_datacenter.alb_datacenter.id
   name          = "alb"
   listener_lan  = ionoscloud_lan.alb_lan_1.id
-  ips           = [ "81.173.1.2",
-                    "22.231.2.2",
-                    "22.231.2.3"
-                  ]
+  ips           = [ "10.12.118.224"]
   target_lan    = ionoscloud_lan.alb_lan_2.id
-  lb_private_ips= [ "81.173.1.5/24",
-                    "22.231.2.5/24"
-                  ]
+  lb_private_ips= [ "10.13.72.225/24"]
 }
 
 resource "ionoscloud_application_loadbalancer_forwardingrule" "forwarding_rule" {
@@ -196,15 +193,21 @@ resource "ionoscloud_application_loadbalancer_forwardingrule" "forwarding_rule" 
  application_loadbalancer_id = ionoscloud_application_loadbalancer.alb.id
  name = "updated"
  protocol = "HTTP"
- listener_ip = "81.173.1.2"
+ listener_ip = "10.12.118.224"
+ listener_port = 8080
+ health_check {
+     client_timeout = 1000
+ }
+ ## server_certificates = ["fb007eed-f3a8-4cbd-b529-2dba508c7599"]
  http_rules {
    name = "http_rule"
    type = "REDIRECT"
-   drop_query = "true"
+   drop_query = true
    location =  "www.ionos.com"
    conditions {
      type = "HEADER"
      condition = "EQUALS"
+     value = "something"
    }
  }
 }`

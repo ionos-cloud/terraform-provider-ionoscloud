@@ -14,17 +14,12 @@ Manages an Application Load Balancer on IonosCloud.
 
 ```hcl
 resource "ionoscloud_application_loadbalancer" "example" { 
-  datacenter_id = ionoscloud_datacenter.example.id
+  datacenter_id = ionoscloud_datacenter.alb_datacenter.id
   name          = "example"
-  listener_lan  = ionoscloud_lan.example1.id
-  ips           = [ "81.173.1.2",
-                    "22.231.2.2",
-                    "22.231.2.3"
-                  ]
-  target_lan    = ionoscloud_lan.example2.id
-  lb_private_ips= [ "81.173.1.5/24",
-                    "22.231.2.5/24"
-                  ]
+  listener_lan  = ionoscloud_lan.alb_lan_1.id
+  ips           = [ "10.12.118.224"]
+  target_lan    = ionoscloud_lan.alb_lan_2.id
+  lb_private_ips= [ "10.13.72.225/24"]
 }
 ```
 

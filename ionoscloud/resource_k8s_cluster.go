@@ -79,7 +79,6 @@ func resourcek8sCluster() *schema.Resource {
 				Description: "The indicator if the cluster is public or private. Be aware that setting it to false is " +
 					"currently in beta phase.",
 				Optional: true,
-				Computed: true,
 				Default:  true,
 			},
 			"gateway_ip": {
@@ -149,9 +148,7 @@ func resourcek8sClusterCreate(ctx context.Context, d *schema.ResourceData, meta 
 	}
 
 	public := d.Get("public").(bool)
-	fmt.Printf("Value %v", public)
 	cluster.Properties.Public = &public
-	fmt.Printf("Value %v", *cluster.Properties.Public)
 
 	if gatewayIp, gatewayIpOk := d.GetOk("gateway_ip"); gatewayIpOk {
 		gatewayIp := gatewayIp.(string)

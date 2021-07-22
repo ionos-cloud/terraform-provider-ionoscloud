@@ -8,6 +8,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 	ionoscloud "github.com/ionos-cloud/sdk-go/v6"
 	"log"
+	"strings"
 )
 
 func resourceApplicationLoadBalancerForwardingRule() *schema.Resource {
@@ -105,6 +106,7 @@ func resourceApplicationLoadBalancerForwardingRule() *schema.Resource {
 							Type:        schema.TypeInt,
 							Description: "On REDIRECT action it can take the value 301, 302, 303, 307, 308; on STATIC action it is between 200 and 599",
 							Optional:    true,
+							Computed:    true,
 						},
 						"response_message": {
 							Type:        schema.TypeString,
@@ -128,12 +130,24 @@ func resourceApplicationLoadBalancerForwardingRule() *schema.Resource {
 										Description:  "Type of the Http Rule condition.",
 										Required:     true,
 										ValidateFunc: validation.All(validation.StringIsNotWhiteSpace),
+										DiffSuppressFunc: func(k, old, new string, d *schema.ResourceData) bool {
+											if strings.ToLower(old) == strings.ToLower(new) {
+												return true
+											}
+											return false
+										},
 									},
 									"condition": {
 										Type:         schema.TypeString,
 										Description:  "Condition of the Http Rule condition.",
 										Required:     true,
 										ValidateFunc: validation.All(validation.StringIsNotWhiteSpace),
+										DiffSuppressFunc: func(k, old, new string, d *schema.ResourceData) bool {
+											if strings.ToLower(old) == strings.ToLower(new) {
+												return true
+											}
+											return false
+										},
 									},
 									"negate": {
 										Type:        schema.TypeBool,

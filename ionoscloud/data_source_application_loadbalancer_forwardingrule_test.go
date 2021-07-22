@@ -52,7 +52,7 @@ func TestAccDataSourceApplicationLoadBalancerForwardingRule_matchName(t *testing
 const testAccDataSourceApplicationLoadBalancerForwardingRuleCreateResources = `
 resource "ionoscloud_datacenter" "alb_datacenter" {
   name              = "test_alb"
-  location          = "de/fra"
+  location          = "de/txl"
   description       = "datacenter for hosting "
 }
 
@@ -72,14 +72,9 @@ resource "ionoscloud_application_loadbalancer" "alb" {
   datacenter_id = ionoscloud_datacenter.alb_datacenter.id
   name          = "alb"
   listener_lan  = ionoscloud_lan.alb_lan_1.id
-  ips           = [ "81.173.1.2",
-                    "22.231.2.2",
-                    "22.231.2.3"
-                  ]
+  ips           = [ "10.12.118.224"]
   target_lan    = ionoscloud_lan.alb_lan_2.id
-  lb_private_ips= [ "81.173.1.5/24",
-                    "22.231.2.5/24"
-                  ]
+  lb_private_ips= [ "10.13.72.225/24"]
 }
 
 resource "ionoscloud_application_loadbalancer_forwardingrule" "forwarding_rule" {
@@ -87,16 +82,21 @@ resource "ionoscloud_application_loadbalancer_forwardingrule" "forwarding_rule" 
  application_loadbalancer_id = ionoscloud_application_loadbalancer.alb.id
  name = "test_datasource_forwarding_rule"
  protocol = "HTTP"
- listener_ip = "81.173.1.2"
- listener_port = "8081"
+ listener_ip = "10.12.118.224"
+ listener_port = 8080
+ health_check {
+     client_timeout = 1000
+ }
+ ## server_certificates = ["fb007eed-f3a8-4cbd-b529-2dba508c7599"]
  http_rules {
    name = "http_rule"
    type = "REDIRECT"
-   drop_query = "true"
+   drop_query = true
    location =  "www.ionos.com"
    conditions {
      type = "HEADER"
      condition = "EQUALS"
+     value = "something"
    }
  }
 }
@@ -105,7 +105,7 @@ resource "ionoscloud_application_loadbalancer_forwardingrule" "forwarding_rule" 
 const testAccDataSourceApplicationLoadBalancerForwardingRuleMatchId = `
 resource "ionoscloud_datacenter" "alb_datacenter" {
   name              = "test_alb"
-  location          = "de/fra"
+  location          = "de/txl"
   description       = "datacenter for hosting "
 }
 
@@ -125,14 +125,9 @@ resource "ionoscloud_application_loadbalancer" "alb" {
   datacenter_id = ionoscloud_datacenter.alb_datacenter.id
   name          = "alb"
   listener_lan  = ionoscloud_lan.alb_lan_1.id
-  ips           = [ "81.173.1.2",
-                    "22.231.2.2",
-                    "22.231.2.3"
-                  ]
+  ips           = [ "10.12.118.224"]
   target_lan    = ionoscloud_lan.alb_lan_2.id
-  lb_private_ips= [ "81.173.1.5/24",
-                    "22.231.2.5/24"
-                  ]
+  lb_private_ips= [ "10.13.72.225/24"]
 }
 
 resource "ionoscloud_application_loadbalancer_forwardingrule" "forwarding_rule" {
@@ -140,16 +135,21 @@ resource "ionoscloud_application_loadbalancer_forwardingrule" "forwarding_rule" 
  application_loadbalancer_id = ionoscloud_application_loadbalancer.alb.id
  name = "test_datasource_forwarding_rule"
  protocol = "HTTP"
- listener_ip = "81.173.1.2"
- listener_port = "8081"
+ listener_ip = "10.12.118.224"
+ listener_port = 8080
+ health_check {
+     client_timeout = 1000
+ }
+ ## server_certificates = ["fb007eed-f3a8-4cbd-b529-2dba508c7599"]
  http_rules {
    name = "http_rule"
    type = "REDIRECT"
-   drop_query = "true"
+   drop_query = true
    location =  "www.ionos.com"
    conditions {
      type = "HEADER"
      condition = "EQUALS"
+     value = "something"
    }
  }
 }
@@ -164,7 +164,7 @@ data "ionoscloud_application_loadbalancer_forwardingrule" "test_forwarding_rule"
 const testAccDataSourceApplicationLoadBalancerForwardingRuleMatchName = `
 resource "ionoscloud_datacenter" "alb_datacenter" {
   name              = "test_alb"
-  location          = "de/fra"
+  location          = "de/txl"
   description       = "datacenter for hosting "
 }
 
@@ -184,14 +184,9 @@ resource "ionoscloud_application_loadbalancer" "alb" {
   datacenter_id = ionoscloud_datacenter.alb_datacenter.id
   name          = "alb"
   listener_lan  = ionoscloud_lan.alb_lan_1.id
-  ips           = [ "81.173.1.2",
-                    "22.231.2.2",
-                    "22.231.2.3"
-                  ]
+  ips           = [ "10.12.118.224"]
   target_lan    = ionoscloud_lan.alb_lan_2.id
-  lb_private_ips= [ "81.173.1.5/24",
-                    "22.231.2.5/24"
-                  ]
+  lb_private_ips= [ "10.13.72.225/24"]
 }
 
 resource "ionoscloud_application_loadbalancer_forwardingrule" "forwarding_rule" {
@@ -199,16 +194,21 @@ resource "ionoscloud_application_loadbalancer_forwardingrule" "forwarding_rule" 
  application_loadbalancer_id = ionoscloud_application_loadbalancer.alb.id
  name = "test_datasource_forwarding_rule"
  protocol = "HTTP"
- listener_ip = "81.173.1.2"
- listener_port = "8081"
+ listener_ip = "10.12.118.224"
+ listener_port = 8080
+ health_check {
+     client_timeout = 1000
+ }
+ ## server_certificates = ["fb007eed-f3a8-4cbd-b529-2dba508c7599"]
  http_rules {
    name = "http_rule"
    type = "REDIRECT"
-   drop_query = "true"
+   drop_query = true
    location =  "www.ionos.com"
    conditions {
      type = "HEADER"
      condition = "EQUALS"
+     value = "something"
    }
  }
 }

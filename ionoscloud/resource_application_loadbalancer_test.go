@@ -108,7 +108,7 @@ func testAccCheckApplicationLoadBalancerExists(n string, alb *ionoscloud.Applica
 const testAccCheckApplicationLoadBalancerConfigBasic = `
 resource "ionoscloud_datacenter" "alb_datacenter" {
   name              = "test_alb"
-  location          = "gb/lhr"
+  location          = "de/txl"
   description       = "datacenter for hosting "
 }
 
@@ -128,20 +128,15 @@ resource "ionoscloud_application_loadbalancer" "alb" {
   datacenter_id = ionoscloud_datacenter.alb_datacenter.id
   name          = "%s"
   listener_lan  = ionoscloud_lan.alb_lan_1.id
-  ips           = [ "81.173.1.2",
-                    "22.231.2.2",
-                    "22.231.2.3"
-                  ]
+  ips           = [ "10.12.118.224"]
   target_lan    = ionoscloud_lan.alb_lan_2.id
-  lb_private_ips= [ "81.173.1.5/24",
-                    "22.231.2.5/24"
-                  ]
+  lb_private_ips= [ "10.13.72.225/24"]
 }`
 
 const testAccCheckApplicationLoadBalancerConfigUpdate = `
 resource "ionoscloud_datacenter" "alb_datacenter" {
   name              = "test_alb"
-  location          = "gb/lhr"
+  location          = "de/txl"
   description       = "datacenter for hosting "
 }
 
@@ -161,12 +156,7 @@ resource "ionoscloud_application_loadbalancer" "alb" {
   datacenter_id = ionoscloud_datacenter.alb_datacenter.id
   name          = "updated"
   listener_lan  = ionoscloud_lan.alb_lan_1.id
-  ips           = [ "81.173.1.2",
-                    "22.231.2.2",
-                    "22.231.2.3"
-                  ]
+  ips           = [ "10.12.118.224"]
   target_lan    = ionoscloud_lan.alb_lan_2.id
-  lb_private_ips= [ "81.173.1.5/24",
-                    "22.231.2.5/24"
-                  ]
+  lb_private_ips= [ "10.13.72.225/24"]
 }`

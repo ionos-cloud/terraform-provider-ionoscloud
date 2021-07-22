@@ -24,7 +24,7 @@ func dataSourceApplicationLoadBalancerForwardingRule() *schema.Resource {
 			},
 			"protocol": {
 				Type:        schema.TypeString,
-				Description: "rotocol of the balancing.",
+				Description: "Protocol of the balancing.",
 				Computed:    true,
 			},
 			"listener_ip": {

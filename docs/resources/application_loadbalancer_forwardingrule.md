@@ -18,15 +18,21 @@ resource "ionoscloud_application_loadbalancer_forwardingrule" "example" {
  application_loadbalancer_id = ionoscloud_application_loadbalancer.example.id
  name = "example"
  protocol = "HTTP"
- listener_ip = "81.173.1.2"
+ listener_ip = "10.12.118.224"
+ listener_port = 8080
+ health_check {
+     client_timeout = 1000
+ }
+ server_certificates = ["fb007eed-f3a8-4cbd-b529-2dba508c7599"]
  http_rules {
    name = "http_rule"
    type = "REDIRECT"
-   drop_query = "true"
+   drop_query = true
    location =  "www.ionos.com"
    conditions {
      type = "HEADER"
      condition = "EQUALS"
+     value = "something"
    }
  }
 }
