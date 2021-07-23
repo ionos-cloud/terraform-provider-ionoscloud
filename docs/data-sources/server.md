@@ -66,6 +66,8 @@ The following attributes are returned by the datasource:
   * `image_type` - Type of image
   * `image_aliases` - List of image aliases mapped for this Image
   * `public` - Indicates if the image is part of the public repository or not
+  * `image_aliases` - List of image aliases mapped for this Image
+  * `cloud_init` - Cloud init compatibility
 * `volumes` - list of
   * `id` - Id of the attached volume
   * `name` - Name of the attached volume
@@ -85,6 +87,8 @@ The following attributes are returned by the datasource:
   * `disc_virtio_hot_unplug` - Is capable of Virt-IO drive hot unplug (no reboot required)
   * `device_number` - The Logical Unit Number of the storage volume
   * `pci_slot` - The PCI slot number of the storage volume
+  * `backup_unit_id` - The uuid of the Backup Unit that user has access to
+  * `user_data` - The cloud-init configuration for the volume as base64 encoded string
 * `nics` - list of
   * `id` - Id of the attached nic
   * `name` - Name of the attached nid
@@ -93,6 +97,9 @@ The following attributes are returned by the datasource:
   * `dhcp` - Indicates if the nic will reserve an IP using DHCP
   * `lan` - The LAN ID the NIC will sit on
   * `firewall_active` - Activate or deactivate the firewall
+  * `firewall_type` - The type of firewall rules that will be allowed on the NIC
+  * `device_number` - The Logical Unit Number (LUN) of the storage volume
+  * `pci_slot` - The PCI slot number of the Nic
   * `firewall_rules` - list of
     * `id` - Id of the firewall rule
     * `name` - Name of the firewall rule
@@ -104,3 +111,5 @@ The following attributes are returned by the datasource:
     * `icmp_type` - Defines the allowed type (from 0 to 254) if the protocol ICMP is chosen
     * `port_range_start` - Defines the start range of the allowed port (from 1 to 65534) if protocol TCP or UDP is chosen
     * `port_range_end` - Defines the end range of the allowed port (from 1 to 65534) if the protocol TCP or UDP is chosen
+    * `type` - The type of firewall rule
+  

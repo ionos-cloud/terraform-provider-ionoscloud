@@ -108,11 +108,18 @@ func resourceVolume() *schema.Resource {
 			"backup_unit_id": {
 				Type:     schema.TypeString,
 				Computed: true,
-				Optional: true,
 			},
 			"user_data": {
 				Type:     schema.TypeString,
 				Optional: true,
+				Computed: true,
+			},
+			"device_number": {
+				Type:     schema.TypeInt,
+				Computed: true,
+			},
+			"pci_slot": {
+				Type:     schema.TypeInt,
 				Computed: true,
 			},
 		},
@@ -294,18 +301,6 @@ func resourceVolumeCreate(ctx context.Context, d *schema.ResourceData, meta inte
 	if _, ok := d.GetOk("availability_zone"); ok {
 		raw := d.Get("availability_zone").(string)
 		volume.Properties.AvailabilityZone = &raw
-	}
-
-	backupUnitId := d.Get("backup_unit_id").(string)
-	if IsValidUUID(backupUnitId) {
-		if image == "" && imageAlias == "" {
-			diags := diag.FromErr(fmt.Errorf("it is mandatory to provied either public image or imageAlias in conjunction with backup unit id property"))
-			return diags
-		} else {
-			volume.Properties.BackupunitId = &backupUnitId
-		}
-	} else {
-		volume.Properties.BackupunitId = nil
 	}
 
 	userData := d.Get("user_data").(string)
@@ -570,11 +565,6 @@ func resourceVolumeUpdate(ctx context.Context, d *schema.ResourceData, meta inte
 		_, newValue := d.GetChange("disc_virtio_hot_unplug")
 		newValueBool := newValue.(bool)
 		properties.DiscVirtioHotUnplug = &newValueBool
-	}
-
-	if d.HasChange("backup_unit_id") {
-		diags := diag.FromErr(fmt.Errorf("backup unit id property is immutable"))
-		return diags
 	}
 
 	if d.HasChange("user_data") {
