@@ -193,6 +193,11 @@ func resourceServer() *schema.Resource {
 							Optional: true,
 							Computed: true,
 						},
+						"user_data": {
+							Type:     schema.TypeString,
+							Optional: true,
+							Computed: true,
+						},
 					},
 				},
 			},
@@ -530,6 +535,13 @@ func resourceServerCreate(ctx context.Context, d *schema.ResourceData, meta inte
 		if len(publicKeys) > 0 {
 			volume.SshKeys = &publicKeys
 		}
+	}
+
+	userData := d.Get("volume.0.user_data").(string)
+	if userData != "" {
+		volume.UserData = &userData
+	} else {
+		volume.UserData = nil
 	}
 
 	request.Entities = &ionoscloud.ServerEntities{
