@@ -45,7 +45,7 @@ func resourceS3Key() *schema.Resource {
 }
 
 func resourceS3KeyCreate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
-	client := meta.(*ionoscloud.APIClient)
+	client := meta.(SdkBundle).CloudApiClient
 
 	userId := d.Get("user_id").(string)
 	rsp, apiResponse, err := client.UserManagementApi.UmUsersS3keysPost(ctx, userId).Execute()
@@ -92,7 +92,7 @@ func resourceS3KeyCreate(ctx context.Context, d *schema.ResourceData, meta inter
 }
 
 func resourceS3KeyRead(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
-	client := meta.(*ionoscloud.APIClient)
+	client := meta.(SdkBundle).CloudApiClient
 
 	userId := d.Get("user_id").(string)
 
@@ -131,7 +131,7 @@ func resourceS3KeyRead(ctx context.Context, d *schema.ResourceData, meta interfa
 }
 
 func resourceS3KeyUpdate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
-	client := meta.(*ionoscloud.APIClient)
+	client := meta.(SdkBundle).CloudApiClient
 
 	request := ionoscloud.S3Key{}
 	request.Properties = &ionoscloud.S3KeyProperties{}
@@ -172,7 +172,7 @@ func resourceS3KeyUpdate(ctx context.Context, d *schema.ResourceData, meta inter
 }
 
 func resourceS3KeyDelete(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
-	client := meta.(*ionoscloud.APIClient)
+	client := meta.(SdkBundle).CloudApiClient
 
 	userId := d.Get("user_id").(string)
 	_, apiResponse, err := client.UserManagementApi.UmUsersS3keysDelete(ctx, userId, d.Id()).Execute()

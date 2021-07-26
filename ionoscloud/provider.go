@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/meta"
+	autoscaling "github.com/ionos-cloud/sdk-go-autoscaling"
 
 	//"github.com/hashicorp/terraform-plugin-sdk/v2/httpclient"
 	"log"
@@ -16,6 +17,11 @@ import (
 
 	"github.com/ionos-cloud/sdk-go/v5"
 )
+
+type SdkBundle struct {
+	CloudApiClient    *ionoscloud.APIClient
+	AutoscalingClient *autoscaling.APIClient
+}
 
 var (
 	Version = "development"
@@ -151,7 +157,22 @@ func providerConfigure(d *schema.ResourceData, terraformVersion string) (interfa
 		"HashiCorp Terraform/%s Terraform Plugin SDK/%s IonosCloud Terraform Provider/%s/%s IonosCloud Go SDK/%s",
 		terraformVersion, meta.SDKVersionString(), Version, Commit, ionoscloud.Version)
 
-	return newClient, nil
+	// configuring autoscaling client
+	newConfigAutoscaling := autoscaling.NewConfiguration(username.(string), password.(string), token.(string))
+	if len(cleanedUrl) > 0 {
+		newConfigAutoscaling.Servers[0].URL = cleanedUrl
+	}
+
+	if os.Getenv("IONOS_DEBUG") != "" {
+		newConfigAutoscaling.Debug = true
+	}
+
+	newAutoscalingClient := autoscaling.NewAPIClient(newConfigAutoscaling)
+
+	return SdkBundle{
+		CloudApiClient:    newClient,
+		AutoscalingClient: newAutoscalingClient,
+	}, nil
 }
 
 // cleanURL makes sure trailing slash does not corrupt the state
@@ -195,7 +216,7 @@ func IsRequestFailed(err error) bool {
 // resourceStateRefreshFunc tracks progress of a request
 func resourceStateRefreshFunc(meta interface{}, path string) resource.StateRefreshFunc {
 	return func() (interface{}, string, error) {
-		client := meta.(*ionoscloud.APIClient)
+		client := meta.(SdkBundle).CloudApiClient
 
 		fmt.Printf("[INFO] Checking PATH %s\n", path)
 		if path == "" {

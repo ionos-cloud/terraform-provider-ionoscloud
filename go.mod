@@ -4,7 +4,6 @@ go 1.14
 
 require (
 	github.com/agext/levenshtein v1.2.3 // indirect
-	github.com/alcortesm/tgz v0.0.0-20161220082320-9c5fe88206d7 // indirect
 	github.com/aws/aws-sdk-go v1.37.0 // indirect
 	github.com/fatih/color v1.9.0 // indirect
 	github.com/go-test/deep v1.0.6 // indirect
@@ -14,6 +13,7 @@ require (
 	github.com/hashicorp/hcl/v2 v2.8.2 // indirect
 	github.com/hashicorp/terraform-plugin-sdk/v2 v2.7.0
 	github.com/hashicorp/yamux v0.0.0-20200609203250-aecfd211c9ce // indirect
+	github.com/ionos-cloud/sdk-go-autoscaling v1.0.0
 	github.com/ionos-cloud/sdk-go/v5 v5.1.4
 	github.com/jhump/protoreflect v1.6.1 // indirect
 	github.com/mattn/go-colorable v0.1.7 // indirect
@@ -28,3 +28,5 @@ require (
 	google.golang.org/appengine v1.6.7 // indirect
 	gopkg.in/yaml.v3 v3.0.0-20200615113413-eeeca48fe776 // indirect
 )
+
+replace github.com/ionos-cloud/sdk-go-autoscaling => ../../../../../sdk/autoscaling-sdk/autoscaling-sdk-go

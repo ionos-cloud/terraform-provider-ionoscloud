@@ -39,7 +39,7 @@ func resourceServerImport(ctx context.Context, d *schema.ResourceData, meta inte
 	datacenterId := parts[0]
 	serverId := parts[1]
 
-	client := meta.(*ionoscloud.APIClient)
+	client := meta.(SdkBundle).CloudApiClient
 
 	server, apiResponse, err := client.ServerApi.DatacentersServersFindById(ctx, datacenterId, serverId).Execute()
 
@@ -215,7 +215,7 @@ func resourceServerImport(ctx context.Context, d *schema.ResourceData, meta inte
 }
 
 func resourceK8sClusterImport(ctx context.Context, d *schema.ResourceData, meta interface{}) ([]*schema.ResourceData, error) {
-	client := meta.(*ionoscloud.APIClient)
+	client := meta.(SdkBundle).CloudApiClient
 
 	clusterId := d.Id()
 
@@ -267,7 +267,7 @@ func resourceK8sNodepoolImport(ctx context.Context, d *schema.ResourceData, meta
 	clusterId := parts[0]
 	npId := parts[1]
 
-	client := meta.(*ionoscloud.APIClient)
+	client := meta.(SdkBundle).CloudApiClient
 
 	k8sNodepool, apiResponse, err := client.KubernetesApi.K8sNodepoolsFindById(ctx, clusterId, npId).Execute()
 
@@ -369,7 +369,7 @@ func resourceK8sNodepoolImport(ctx context.Context, d *schema.ResourceData, meta
 }
 
 func resourcePrivateCrossConnectImport(ctx context.Context, d *schema.ResourceData, meta interface{}) ([]*schema.ResourceData, error) {
-	client := meta.(*ionoscloud.APIClient)
+	client := meta.(SdkBundle).CloudApiClient
 
 	pccId := d.Id()
 
@@ -435,7 +435,7 @@ func resourcePrivateCrossConnectImport(ctx context.Context, d *schema.ResourceDa
 }
 
 func resourceBackupUnitImport(ctx context.Context, d *schema.ResourceData, meta interface{}) ([]*schema.ResourceData, error) {
-	client := meta.(*ionoscloud.APIClient)
+	client := meta.(SdkBundle).CloudApiClient
 
 	buId := d.Id()
 
@@ -483,7 +483,7 @@ func resourceS3KeyImport(ctx context.Context, d *schema.ResourceData, meta inter
 	userId := parts[0]
 	keyId := parts[1]
 
-	client := meta.(*ionoscloud.APIClient)
+	client := meta.(SdkBundle).CloudApiClient
 
 	s3Key, apiResponse, err := client.UserManagementApi.UmUsersS3keysFindByKeyId(ctx, userId, keyId).Execute()
 
@@ -552,7 +552,7 @@ func resourceVolumeImporter(ctx context.Context, d *schema.ResourceData, meta in
 		return nil, fmt.Errorf("invalid import id %q. Expecting {datacenter}/{server}/{volume}", d.Id())
 	}
 
-	client := meta.(*ionoscloud.APIClient)
+	client := meta.(SdkBundle).CloudApiClient
 
 	dcId := parts[0]
 	srvId := parts[1]
@@ -680,7 +680,7 @@ func resourceVolumeImporter(ctx context.Context, d *schema.ResourceData, meta in
 }
 
 func resourceGroupImporter(ctx context.Context, d *schema.ResourceData, meta interface{}) ([]*schema.ResourceData, error) {
-	client := meta.(*ionoscloud.APIClient)
+	client := meta.(SdkBundle).CloudApiClient
 
 	grpId := d.Id()
 
@@ -813,7 +813,7 @@ func resourceGroupImporter(ctx context.Context, d *schema.ResourceData, meta int
 }
 
 func resourceUserImporter(ctx context.Context, d *schema.ResourceData, meta interface{}) ([]*schema.ResourceData, error) {
-	client := meta.(*ionoscloud.APIClient)
+	client := meta.(SdkBundle).CloudApiClient
 
 	userId := d.Id()
 
@@ -870,7 +870,7 @@ func resourceShareImporter(ctx context.Context, d *schema.ResourceData, meta int
 	grpId := parts[0]
 	rscId := parts[1]
 
-	client := meta.(*ionoscloud.APIClient)
+	client := meta.(SdkBundle).CloudApiClient
 
 	share, apiResponse, err := client.UserManagementApi.UmGroupsSharesFindByResourceId(ctx, grpId, rscId).Execute()
 
@@ -918,7 +918,7 @@ func resourceIpFailoverImporter(ctx context.Context, d *schema.ResourceData, met
 	dcId := parts[0]
 	lanId := parts[1]
 
-	client := meta.(*ionoscloud.APIClient)
+	client := meta.(SdkBundle).CloudApiClient
 
 	lan, apiResponse, err := client.LanApi.DatacentersLansFindById(ctx, dcId, lanId).Execute()
 
@@ -971,7 +971,7 @@ func resourceLoadbalancerImporter(ctx context.Context, d *schema.ResourceData, m
 	dcId := parts[0]
 	lbId := parts[1]
 
-	client := meta.(*ionoscloud.APIClient)
+	client := meta.(SdkBundle).CloudApiClient
 
 	loadbalancer, apiResponse, err := client.LoadBalancerApi.DatacentersLoadbalancersFindById(ctx, dcId, lbId).Execute()
 

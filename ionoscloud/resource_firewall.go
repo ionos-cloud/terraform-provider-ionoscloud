@@ -94,7 +94,7 @@ func resourceFirewall() *schema.Resource {
 }
 
 func resourceFirewallCreate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
-	client := meta.(*ionoscloud.APIClient)
+	client := meta.(SdkBundle).CloudApiClient
 
 	firewallProtocol := d.Get("protocol").(string)
 
@@ -170,7 +170,7 @@ func resourceFirewallCreate(ctx context.Context, d *schema.ResourceData, meta in
 }
 
 func resourceFirewallRead(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
-	client := meta.(*ionoscloud.APIClient)
+	client := meta.(SdkBundle).CloudApiClient
 
 	fw, apiResponse, err := client.NicApi.DatacentersServersNicsFirewallrulesFindById(ctx, d.Get("datacenter_id").(string),
 		d.Get("server_id").(string), d.Get("nic_id").(string), d.Id()).Execute()
@@ -267,7 +267,7 @@ func resourceFirewallRead(ctx context.Context, d *schema.ResourceData, meta inte
 }
 
 func resourceFirewallUpdate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
-	client := meta.(*ionoscloud.APIClient)
+	client := meta.(SdkBundle).CloudApiClient
 
 	properties := ionoscloud.FirewallruleProperties{}
 
@@ -340,7 +340,7 @@ func resourceFirewallUpdate(ctx context.Context, d *schema.ResourceData, meta in
 }
 
 func resourceFirewallDelete(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
-	client := meta.(*ionoscloud.APIClient)
+	client := meta.(SdkBundle).CloudApiClient
 
 	_, apiResponse, err := client.NicApi.DatacentersServersNicsFirewallrulesDelete(ctx, d.Get("datacenter_id").(string), d.Get("server_id").(string), d.Get("nic_id").(string), d.Id()).Execute()
 	if err != nil {

@@ -69,7 +69,7 @@ func resourceNic() *schema.Resource {
 }
 
 func resourceNicCreate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
-	client := meta.(*ionoscloud.APIClient)
+	client := meta.(SdkBundle).CloudApiClient
 
 	lan := d.Get("lan").(int)
 	lanConverted := int32(lan)
@@ -134,7 +134,7 @@ func resourceNicCreate(ctx context.Context, d *schema.ResourceData, meta interfa
 }
 
 func resourceNicRead(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
-	client := meta.(*ionoscloud.APIClient)
+	client := meta.(SdkBundle).CloudApiClient
 
 	dcid := d.Get("datacenter_id").(string)
 	srvid := d.Get("server_id").(string)
@@ -197,7 +197,7 @@ func resourceNicRead(ctx context.Context, d *schema.ResourceData, meta interface
 }
 
 func resourceNicUpdate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
-	client := meta.(*ionoscloud.APIClient)
+	client := meta.(SdkBundle).CloudApiClient
 
 	properties := ionoscloud.NicProperties{}
 
@@ -257,7 +257,7 @@ func resourceNicUpdate(ctx context.Context, d *schema.ResourceData, meta interfa
 }
 
 func resourceNicDelete(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
-	client := meta.(*ionoscloud.APIClient)
+	client := meta.(SdkBundle).CloudApiClient
 
 	dcid := d.Get("datacenter_id").(string)
 	srvid := d.Get("server_id").(string)
