@@ -144,6 +144,17 @@ func dataSourceServer() *schema.Resource {
 							Type:     schema.TypeBool,
 							Computed: true,
 						},
+						"image_aliases": {
+							Type:     schema.TypeList,
+							Computed: true,
+							Elem: &schema.Schema{
+								Type: schema.TypeString,
+							},
+						},
+						"cloud_init": {
+							Type:     schema.TypeString,
+							Computed: true,
+						},
 					},
 				},
 			},
@@ -227,6 +238,14 @@ func dataSourceServer() *schema.Resource {
 							Type:     schema.TypeInt,
 							Computed: true,
 						},
+						"backup_unit_id": {
+							Type:     schema.TypeString,
+							Computed: true,
+						},
+						"user_data": {
+							Type:     schema.TypeString,
+							Optional: true,
+						},
 					},
 				},
 			},
@@ -266,8 +285,16 @@ func dataSourceServer() *schema.Resource {
 							Type:     schema.TypeBool,
 							Computed: true,
 						},
-						"nat": {
-							Type:     schema.TypeBool,
+						"firewall_type": {
+							Type:     schema.TypeString,
+							Computed: true,
+						},
+						"device_number": {
+							Type:     schema.TypeInt,
+							Computed: true,
+						},
+						"pci_slot": {
+							Type:     schema.TypeInt,
 							Computed: true,
 						},
 						"firewall_rules": {
@@ -313,6 +340,10 @@ func dataSourceServer() *schema.Resource {
 									},
 									"port_range_end": {
 										Type:     schema.TypeInt,
+										Computed: true,
+									},
+									"type": {
+										Type:     schema.TypeString,
 										Computed: true,
 									},
 								},
@@ -460,6 +491,16 @@ func setServerData(d *schema.ResourceData, server *ionoscloud.Server, token *ion
 			entry["image_type"] = stringOrDefault(image.Properties.ImageType, "")
 			entry["public"] = boolOrDefault(image.Properties.Public, false)
 
+			if image.Properties.ImageAliases != nil {
+				imageAliases := make([]interface{}, 0)
+				for _, imageAlias := range *image.Properties.ImageAliases {
+					imageAliases = append(imageAliases, imageAlias)
+				}
+				entry["image_aliases"] = imageAliases
+			}
+
+			entry["cloud_init"] = stringOrDefault(image.Properties.CloudInit, "")
+
 			cdroms[i] = entry
 		}
 	}
@@ -500,6 +541,8 @@ func setServerData(d *schema.ResourceData, server *ionoscloud.Server, token *ion
 			entry["disc_virtio_hot_unplug"] = boolOrDefault(volume.Properties.DiscVirtioHotUnplug, true)
 			entry["device_number"] = int64OrDefault(volume.Properties.DeviceNumber, 0)
 			entry["pci_slot"] = int32OrDefault(volume.Properties.PciSlot, 0)
+			entry["backup_unit_id"] = stringOrDefault(volume.Properties.BackupunitId, "")
+			entry["user_data"] = stringOrDefault(volume.Properties.UserData, "")
 
 			volumes[i] = entry
 		}
@@ -530,6 +573,9 @@ func setServerData(d *schema.ResourceData, server *ionoscloud.Server, token *ion
 			entry["dhcp"] = boolOrDefault(nic.Properties.Dhcp, false)
 			entry["lan"] = int32OrDefault(nic.Properties.Lan, 0)
 			entry["firewall_active"] = boolOrDefault(nic.Properties.FirewallActive, false)
+			entry["firewall_type"] = stringOrDefault(nic.Properties.FirewallType, "")
+			entry["device_number"] = int32OrDefault(nic.Properties.DeviceNumber, 0)
+			entry["pci_slot"] = int32OrDefault(nic.Properties.PciSlot, 0)
 
 			firewallRules := make([]interface{}, 0)
 			if nic.Entities != nil && nic.Entities.Firewallrules != nil && nic.Entities.Firewallrules.Items != nil {
@@ -545,6 +591,9 @@ func setServerData(d *schema.ResourceData, server *ionoscloud.Server, token *ion
 					ruleEntry["target_ip"] = stringOrDefault(rule.Properties.TargetIp, "")
 					ruleEntry["icmp_code"] = int32OrDefault(rule.Properties.IcmpCode, 0)
 					ruleEntry["icmp_type"] = int32OrDefault(rule.Properties.IcmpType, 0)
+					ruleEntry["port_range_start"] = int32OrDefault(rule.Properties.PortRangeStart, 0)
+					ruleEntry["port_range_end"] = int32OrDefault(rule.Properties.PortRangeEnd, 0)
+					ruleEntry["type"] = stringOrDefault(rule.Properties.Type, "")
 					firewallRules[idx] = ruleEntry
 				}
 			}

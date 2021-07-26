@@ -8,6 +8,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 	ionoscloud "github.com/ionos-cloud/sdk-go/v6"
 	"log"
+	"strings"
 	"time"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
@@ -30,10 +31,26 @@ func resourcek8sNodePool() *schema.Resource {
 				ValidateFunc: validation.All(validation.StringIsNotWhiteSpace),
 			},
 			"k8s_version": {
-				Type:         schema.TypeString,
-				Description:  "The desired kubernetes version",
-				Required:     true,
-				ValidateFunc: validation.All(validation.StringIsNotWhiteSpace),
+				Type:        schema.TypeString,
+				Description: "The desired kubernetes version",
+				Optional:    true,
+				DiffSuppressFunc: func(k, old, new string, d *schema.ResourceData) bool {
+					var oldMajor, oldMinor string
+					if old != "" {
+						oldSplit := strings.Split(old, ".")
+						oldMajor = oldSplit[0]
+						oldMinor = oldSplit[1]
+
+						newSplit := strings.Split(new, ".")
+						newMajor := newSplit[0]
+						newMinor := newSplit[1]
+
+						if oldMajor == newMajor && oldMinor == newMinor {
+							return true
+						}
+					}
+					return false
+				},
 			},
 			"auto_scaling": {
 				Type:        schema.TypeList,
@@ -380,7 +397,7 @@ func resourcek8sNodePoolCreate(ctx context.Context, d *schema.ResourceData, meta
 		}
 
 		select {
-		case <-time.After(10 * time.Second):
+		case <-time.After(SleepInterval):
 			log.Printf("[INFO] trying again ...")
 		case <-ctx.Done():
 			log.Printf("[INFO] timed out")
@@ -527,8 +544,8 @@ func resourcek8sNodePoolRead(ctx context.Context, d *schema.ResourceData, meta i
 
 	nodePoolLans := make([]interface{}, 0)
 	if k8sNodepool.Properties.Lans != nil && len(*k8sNodepool.Properties.Lans) > 0 {
-		nodePoolLans = make([]interface{}, len(*k8sNodepool.Properties.Lans))
-		for lanIndex, nodePoolLan := range *k8sNodepool.Properties.Lans {
+		nodePoolLans = make([]interface{}, 0)
+		for _, nodePoolLan := range *k8sNodepool.Properties.Lans {
 			lanEntry := make(map[string]interface{})
 
 			if nodePoolLan.Id != nil {
@@ -541,8 +558,8 @@ func resourcek8sNodePoolRead(ctx context.Context, d *schema.ResourceData, meta i
 
 			nodePoolRoutes := make([]interface{}, 0)
 			if nodePoolLan.Routes != nil && len(*nodePoolLan.Routes) > 0 {
-				nodePoolRoutes = make([]interface{}, len(*nodePoolLan.Routes))
-				for routeIndex, nodePoolRoute := range *nodePoolLan.Routes {
+				nodePoolRoutes = make([]interface{}, 0)
+				for _, nodePoolRoute := range *nodePoolLan.Routes {
 					routeEntry := make(map[string]string)
 					if nodePoolRoute.Network != nil {
 						routeEntry["network"] = *nodePoolRoute.Network
@@ -550,7 +567,7 @@ func resourcek8sNodePoolRead(ctx context.Context, d *schema.ResourceData, meta i
 					if nodePoolRoute.GatewayIp != nil {
 						routeEntry["gateway_ip"] = *nodePoolRoute.GatewayIp
 					}
-					nodePoolRoutes[routeIndex] = routeEntry
+					nodePoolRoutes = append(nodePoolRoutes, routeEntry)
 				}
 			}
 
@@ -558,7 +575,7 @@ func resourcek8sNodePoolRead(ctx context.Context, d *schema.ResourceData, meta i
 				lanEntry["routes"] = nodePoolRoutes
 			}
 
-			nodePoolLans[lanIndex] = lanEntry
+			nodePoolLans = append(nodePoolLans, lanEntry)
 		}
 	}
 

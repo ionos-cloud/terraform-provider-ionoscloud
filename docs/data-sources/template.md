@@ -34,8 +34,8 @@ All arguments must be provided. If none, the datasource will return an error.
 
 The following attributes are returned by the datasource:
 
-* `id`
-* `name`
-* `cores`
-* `ram`
-* `storage_size`
+* `id` - Id of template
+* `name` - Name of template
+* `cores`- The CPU cores count
+* `ram` - The RAM size in MB
+* `storage_size` - The storage size in GB

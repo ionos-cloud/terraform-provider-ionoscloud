@@ -26,4 +26,11 @@ data "ionoscloud_location" "loc1" {
 
 ## Attributes Reference
 
+The following attributes are returned by the datasource:
+
  * `id` - UUID of the location
+ * `cpu_architecture` - Array of features and CPU families available in a location
+  * `cpu_family` - A valid CPU family name.
+  * `max_cores` - The maximum number of cores available.
+  * `max_ram` - The maximum number of RAM in MB.
+  * `vendor` - A valid CPU vendor name.

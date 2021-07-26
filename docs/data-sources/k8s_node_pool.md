@@ -63,6 +63,11 @@ The following attributes are returned by the datasource:
   * `min_node_count` - The minimum number of worker nodes the node pool can scale down to
   * `max_node_count` - The maximum number of worker nodes that the node pool can scale to
 * `lans` - A list of Local Area Networks the node pool is a part of
+  * `id` - The LAN ID of an existing LAN at the related datacenter
+  * `dhcp` - Indicates if the Kubernetes Node Pool LAN will reserve an IP using DHCP
+  * `routes` - An array of additional LANs attached to worker nodes
+    * `network` - IPv4 or IPv6 CIDR to be routed via the interface
+    * `gateway_ip` - IPv4 or IPv6 Gateway IP for the route
 * `labels` - A map of labels in the form of key -> value
 * `annotations` - A map of annotations in the form of key -> value
 * `available_upgrade_versions` - A list of kubernetes versions available for upgrade

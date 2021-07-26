@@ -31,9 +31,9 @@ data "ionoscloud_natgateway" "natgateway_example" {
 
 The following attributes are returned by the datasource:
 
-* `id`
-* `name`
-* `public_ips`
-* `lans` - list of
-    * `id`
-    * `gateway_ips`
+* `id` - Id of that natgateway
+* `name` - Name of that natgateway
+* `public_ips` - Collection of public IP addresses of the NAT gateway. Should be customer reserved IP addresses in that location
+* `lans` - Collection of LANs connected to the NAT gateway. IPs must contain valid subnet mask. If user will not provide any IP then system will generate an IP with /24 subnet.
+    * `id` - Id for the LAN connected to the NAT gateway
+    * `gateway_ips` - Collection of gateway IP addresses of the NAT gateway. Will be auto-generated if not provided. Should ideally be an IP belonging to the same subnet as the LAN

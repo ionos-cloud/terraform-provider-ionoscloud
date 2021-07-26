@@ -33,14 +33,14 @@ Both `datacenter_id` and `natgateway_id` and either `name` or `id` must be provi
 
 The following attributes are returned by the datasource:
 
-* `id`
-* `name`
-* `type`
-* `protocol`
-* `source_subnet`
-* `public_ip`
-* `target_subnet`
-* `target_port_range` - list of
+* `id` - Id of the NAT gateway rule
+* `name` - Name of the NAT gateway rule
+* `type` - ype of the NAT gateway rule.
+* `protocol` - Protocol of the NAT gateway rule. Defaults to ALL. If protocol is 'ICMP' then targetPortRange start and end cannot be set.
+* `source_subnet` - Source subnet of the NAT gateway rule. For SNAT rules it specifies which packets this translation rule applies to based on the packets source IP address.
+* `public_ip` - Public IP address of the NAT gateway rule. Specifies the address used for masking outgoing packets source address field. Should be one of the customer reserved IP address already configured on the NAT gateway resource
+* `target_subnet` - Target or destination subnet of the NAT gateway rule. For SNAT rules it specifies which packets this translation rule applies to based on the packets destination IP address. If none is provided, rule will match any address.
+* `target_port_range` - Target port range of the NAT gateway rule. For SNAT rules it specifies which packets this translation rule applies to based on destination port. If none is provided, rule will match any port
     * `start`
     * `end`
     

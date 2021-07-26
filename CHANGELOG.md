@@ -1,3 +1,13 @@
+## 6.0.0-beta.2
+
+- updated dependencies 
+- updated server, nic and volume resources with the missing arguments
+
+## 6.0.0-beta.1
+
+- documentation updates
+- fix: fixes #13 ignore changes of patch level for k8s
+
 ## 6.0.0-alpha.4
 
 - documentation updates

@@ -24,7 +24,8 @@ resource "ionoscloud_s3_key" "demo" {
 The following arguments are supported:
 
 - `user_id` - (Required)[string] The UUID of the user owning the S3 Key.
-- `active` - (Required)[boolean] Whether the S3 is active / enabled or not - Please keep in mind this is only required on create.
+- `active` - (Optional)[boolean] Whether the S3 is active / enabled or not - Please keep in mind this is only required on create. Default value in true
+- `secret_key` - (Computed)  The S3 Secret key.
 
 ## Import
 
