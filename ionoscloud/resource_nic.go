@@ -32,6 +32,7 @@ func resourceNic() *schema.Resource {
 			"dhcp": {
 				Type:     schema.TypeBool,
 				Optional: true,
+				Default:  true,
 			},
 			"ips": {
 				Type:     schema.TypeList,
@@ -64,6 +65,14 @@ func resourceNic() *schema.Resource {
 				Type:     schema.TypeString,
 				Computed: true,
 			},
+			"device_number": {
+				Type:     schema.TypeInt,
+				Computed: true,
+			},
+			"pci_slot": {
+				Type:     schema.TypeInt,
+				Computed: true,
+			},
 		},
 		Timeouts: &resourceDefaultTimeouts,
 	}
@@ -83,10 +92,10 @@ func resourceNicCreate(ctx context.Context, d *schema.ResourceData, meta interfa
 		name := d.Get("name").(string)
 		nic.Properties.Name = &name
 	}
-	if _, ok := d.GetOkExists("dhcp"); ok {
-		val := d.Get("dhcp").(bool)
-		nic.Properties.Dhcp = &val
-	}
+
+	dhcp := d.Get("dhcp").(bool)
+	nic.Properties.Dhcp = &dhcp
+
 	if _, ok := d.GetOk("firewall_active"); ok {
 		raw := d.Get("firewall_active").(bool)
 		nic.Properties.FirewallActive = &raw
@@ -192,6 +201,18 @@ func resourceNicRead(ctx context.Context, d *schema.ResourceData, meta interface
 		}
 		if rsp.Properties.Mac != nil {
 			if err := d.Set("mac", *rsp.Properties.Mac); err != nil {
+				diags := diag.FromErr(err)
+				return diags
+			}
+		}
+		if rsp.Properties.DeviceNumber != nil {
+			if err := d.Set("device_number", *rsp.Properties.DeviceNumber); err != nil {
+				diags := diag.FromErr(err)
+				return diags
+			}
+		}
+		if rsp.Properties.PciSlot != nil {
+			if err := d.Set("pci_slot", *rsp.Properties.PciSlot); err != nil {
 				diags := diag.FromErr(err)
 				return diags
 			}

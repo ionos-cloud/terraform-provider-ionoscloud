@@ -47,7 +47,9 @@ resource "ionoscloud_volume" "example" {
 * `nic_hot_unplug` - (Optional)[string] Is capable of nic hot unplug (no reboot required)
 * `disc_virtio_hot_plug` - (Optional)[string] Is capable of Virt-IO drive hot plug (no reboot required)
 * `disc_virtio_hot_unplug` - (Optional)[string] Is capable of Virt-IO drive hot unplug (no reboot required). This works only for non-Windows virtual Machines.
-* `backup_unit_id`- (Optional)[string] he uuid of the Backup Unit that user has access to. The property is immutable and is only allowed to be set on a new volume creation. It is mandatory to provide either 'public image' or 'imageAlias' in conjunction with this property.
+* `backup_unit_id`- (Computed) The uuid of the Backup Unit that user has access to. The property is immutable and is only allowed to be set on a new volume creation. It is mandatory to provide either 'public image' or 'imageAlias' in conjunction with this property.
+* `device_number`- (Computed) The Logical Unit Number of the storage volume. Null for volumes not mounted to any VM.
+* `pci_slot`- (Computed) The PCI slot number of the storage volume. Null for volumes not mounted to any VM.
 
 ## Import
 
