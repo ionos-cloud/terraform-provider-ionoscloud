@@ -1,4 +1,4 @@
-## 6.0.0-beta-2
+## 6.0.0-beta.2
 
 - updated dependencies 
 - updated server, nic and volume resources with the missing arguments
