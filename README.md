@@ -13,14 +13,14 @@
 
 ## Migrating from the ProfitBricks provider
 
-Please see the [Documentation](docs/index.md#migrating-from-the-profitbricks-provider) on how to migrate from the ProfitBricks provider.
+Please see the [documentation](docs/index.md#migrating-from-the-profitbricks-provider) on how to migrate from the ProfitBricks provider.
 
 ## Requirements
 
 - [Terraform](https://www.terraform.io/downloads.html) 0.15.x
 - [Go](https://golang.org/doc/install) 1.13 (to build the provider plugin)
 
-**NOTE:** In order to use a speciffic version of this provider, please include the following block at the beginning of your terraform config files [details](https://www.terraform.io/docs/configuration/terraform.html#specifying-a-required-terraform-version):
+**NOTE:** In order to use a specific version of this provider, please include the following block at the beginning of your terraform config files [details](https://www.terraform.io/docs/configuration/terraform.html#specifying-a-required-terraform-version):
 
 ```terraform
 terraform {
