@@ -4,7 +4,6 @@ go 1.14
 
 require (
 	github.com/agext/levenshtein v1.2.3 // indirect
-	github.com/alcortesm/tgz v0.0.0-20161220082320-9c5fe88206d7 // indirect
 	github.com/aws/aws-sdk-go v1.37.0 // indirect
 	github.com/fatih/color v1.9.0 // indirect
 	github.com/go-test/deep v1.0.6 // indirect
@@ -26,5 +25,6 @@ require (
 	golang.org/x/tools v0.0.0-20201028111035-eafbe7b904eb // indirect
 	google.golang.org/api v0.34.0 // indirect
 	google.golang.org/appengine v1.6.7 // indirect
+	gopkg.in/yaml.v2 v2.3.0
 	gopkg.in/yaml.v3 v3.0.0-20200615113413-eeeca48fe776 // indirect
 )
