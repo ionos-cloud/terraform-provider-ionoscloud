@@ -86,6 +86,8 @@ func Provider() *schema.Provider {
 			"ionoscloud_private_crossconnect": resourcePrivateCrossConnect(),
 			"ionoscloud_backup_unit":          resourceBackupUnit(),
 			"ionoscloud_s3_key":               resourceS3Key(),
+			"ionoscloud_autoscaling_group":    resourceAutoscalingGroup(),
+			"ionoscloud_autoscaling_template": resourceAutoscalingTemplate(),
 		},
 		DataSourcesMap: map[string]*schema.Resource{
 			"ionoscloud_datacenter":           dataSourceDataCenter(),
