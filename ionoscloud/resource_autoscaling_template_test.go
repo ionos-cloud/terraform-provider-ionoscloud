@@ -28,14 +28,6 @@ func TestAccAutoscalingTemplate_Basic(t *testing.T) {
 					resource.TestCheckResourceAttr("ionoscloud_autoscaling_template.autoscaling_template", "name", autoscalingTemplateName),
 				),
 			},
-			//{
-			//	Config: testAccCheckbackupUnitConfigUpdate,
-			//	Check: resource.ComposeTestCheckFunc(
-			//		testAccCheckbackupUnitExists("ionoscloud_backup_unit.example", &backupUnit),
-			//		resource.TestCheckResourceAttr("ionoscloud_backup_unit.example", "email", "example-updated@ionoscloud.com"),
-			//		resource.TestCheckResourceAttr("ionoscloud_backup_unit.example", "password", "DemoPassword1234$"),
-			//	),
-			//},
 		},
 	})
 }

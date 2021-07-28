@@ -229,15 +229,11 @@ func resourceAutoscalingGroupCreate(ctx context.Context, d *schema.ResourceData,
 		}
 	}
 
-	if maxReplicaCount, maxReplicaCountOk := d.GetOk("max_replica_count"); maxReplicaCountOk {
-		maxReplicaCount := int64(maxReplicaCount.(int))
-		group.Properties.MaxReplicaCount = &maxReplicaCount
-	}
+	maxReplicaCount := int64(d.Get("max_replica_count").(int))
+	group.Properties.MaxReplicaCount = &maxReplicaCount
 
-	if minReplicaCount, minReplicaCountOk := d.GetOk("min_replica_count"); minReplicaCountOk {
-		minReplicaCount := int64(minReplicaCount.(int))
-		group.Properties.MinReplicaCount = &minReplicaCount
-	}
+	minReplicaCount := int64(d.Get("min_replica_count").(int))
+	group.Properties.MinReplicaCount = &minReplicaCount
 
 	if name, nameOk := d.GetOk("name"); nameOk {
 		name := name.(string)
@@ -518,6 +514,129 @@ func resourceAutoscalingGroupRead(ctx context.Context, d *schema.ResourceData, m
 }
 
 func resourceAutoscalingGroupUpdate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+
+	client := meta.(SdkBundle).AutoscalingClient
+
+	group := autoscaling.Group{
+		Properties: &autoscaling.GroupProperties{},
+	}
+
+	if _, datacenterOk := d.GetOk("datacenter"); datacenterOk {
+		if id, idOk := d.GetOk("datacenter.0.id"); idOk {
+			id := id.(string)
+			group.Properties.Datacenter = &autoscaling.GroupPropertiesDatacenter{}
+			group.Properties.Datacenter.Id = &id
+		}
+	}
+
+	maxReplicaCount := int64(d.Get("max_replica_count").(int))
+	group.Properties.MaxReplicaCount = &maxReplicaCount
+
+	minReplicaCount := int64(d.Get("min_replica_count").(int))
+	group.Properties.MinReplicaCount = &minReplicaCount
+
+	if name, nameOk := d.GetOk("name"); nameOk {
+		name := name.(string)
+		group.Properties.Name = &name
+	}
+
+	if _, policyOk := d.GetOk("policy"); policyOk {
+		groupPolicy := autoscaling.GroupPolicy{}
+
+		if metric, metricOk := d.GetOk("policy.0.metric"); metricOk {
+			metric := autoscaling.Metric(metric.(string))
+			groupPolicy.Metric = &metric
+		}
+
+		if policyRange, policyRangeOk := d.GetOk("policy.0.range"); policyRangeOk {
+			policyRange := policyRange.(string)
+			groupPolicy.Range = &policyRange
+		}
+
+		if _, scaleInActionOk := d.GetOk("policy.0.scale_in_action"); scaleInActionOk {
+			groupPolicyAction := autoscaling.GroupPolicyAction{}
+
+			if amount, amountOk := d.GetOk("policy.0.scale_in_action.0.amount"); amountOk {
+				amount := float32(amount.(int))
+				groupPolicyAction.Amount = &amount
+			}
+
+			if amountType, amountTypeOk := d.GetOk("policy.0.scale_in_action.0.amount_type"); amountTypeOk {
+				amountType := autoscaling.ActionAmount(amountType.(string))
+				groupPolicyAction.AmountType = &amountType
+			}
+
+			if cooldownPeriod, cooldownPeriodOk := d.GetOk("policy.0.scale_in_action.0.cooldown_period"); cooldownPeriodOk {
+				cooldownPeriod := cooldownPeriod.(string)
+				groupPolicyAction.CooldownPeriod = &cooldownPeriod
+			}
+
+			groupPolicy.ScaleInAction = &groupPolicyAction
+		}
+
+		if scaleInThreshlod, scaleInThreshlodOk := d.GetOk("policy.0.scale_in_threshold"); scaleInThreshlodOk {
+			scaleInThreshlod := float32(scaleInThreshlod.(int))
+			groupPolicy.ScaleInThreshold = &scaleInThreshlod
+		}
+
+		if _, scaleOutActionOk := d.GetOk("policy.0.scale_out_action"); scaleOutActionOk {
+			groupPolicyAction := autoscaling.GroupPolicyAction{}
+
+			if amount, amountOk := d.GetOk("policy.0.scale_out_action.0.amount"); amountOk {
+				amount := float32(amount.(int))
+				groupPolicyAction.Amount = &amount
+			}
+
+			if amountType, amountTypeOk := d.GetOk("policy.0.scale_out_action.0.amount_type"); amountTypeOk {
+				amountType := autoscaling.ActionAmount(amountType.(string))
+				groupPolicyAction.AmountType = &amountType
+			}
+
+			if cooldownPeriod, cooldownPeriodOk := d.GetOk("policy.0.scale_out_action.0.cooldown_period"); cooldownPeriodOk {
+				cooldownPeriod := cooldownPeriod.(string)
+				groupPolicyAction.CooldownPeriod = &cooldownPeriod
+			}
+
+			groupPolicy.ScaleOutAction = &groupPolicyAction
+		}
+
+		if scaleOutThreshlod, scaleOutThreshlodOk := d.GetOk("policy.0.scale_out_threshold"); scaleOutThreshlodOk {
+			scaleOutThreshlod := float32(scaleOutThreshlod.(int))
+			groupPolicy.ScaleOutThreshold = &scaleOutThreshlod
+		}
+
+		if unit, unitOk := d.GetOk("policy.0.unit"); unitOk {
+			unit := autoscaling.QueryUnit(unit.(string))
+			groupPolicy.Unit = &unit
+		}
+
+		group.Properties.Policy = &groupPolicy
+	}
+
+	if d.HasChange("target_replica_count") {
+		diags := diag.FromErr(fmt.Errorf("target_replica_count can not pe used in update requests"))
+		return diags
+	} else {
+		if targetReplicaCount, targetReplicaCountOk := d.GetOk("target_replica_count"); targetReplicaCountOk {
+			targetReplicaCount := int64(targetReplicaCount.(int))
+			group.Properties.TargetReplicaCount = &targetReplicaCount
+		}
+	}
+
+	if _, templateOk := d.GetOk("template"); templateOk {
+		if id, idOk := d.GetOk("template.0.id"); idOk {
+			id := id.(string)
+			group.Properties.Template = &autoscaling.GroupPropertiesTemplate{}
+			group.Properties.Template.Id = &id
+		}
+	}
+
+	_, _, err := client.GroupsApi.AutoscalingGroupsPut(ctx, d.Id()).Group(group).Execute()
+
+	if err != nil {
+		diags := diag.FromErr(fmt.Errorf("an error occured while updating autoscaling group %s: %s", d.Id(), err))
+		return diags
+	}
 
 	return resourceAutoscalingGroupRead(ctx, d, meta)
 }

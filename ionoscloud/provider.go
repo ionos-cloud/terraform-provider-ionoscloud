@@ -100,6 +100,8 @@ func Provider() *schema.Provider {
 			"ionoscloud_server":               dataSourceServer(),
 			"ionoscloud_k8s_cluster":          dataSourceK8sCluster(),
 			"ionoscloud_k8s_node_pool":        dataSourceK8sNodePool(),
+			"ionoscloud_autoscaling_group":    dataSourceAutoscalingGroup(),
+			"ionoscloud_autoscaling_template": dataSourceAutoscalingTemplate(),
 		},
 	}
 	provider.ConfigureContextFunc = func(ctx context.Context, d *schema.ResourceData) (interface{}, diag.Diagnostics) {

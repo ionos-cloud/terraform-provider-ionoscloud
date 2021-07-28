@@ -413,9 +413,9 @@ func resourceAutoscalingTemplateRead(ctx context.Context, d *schema.ResourceData
 	return nil
 }
 
-func resourceAutoscalingTemplateUpdate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func resourceAutoscalingTemplateUpdate(_ context.Context, _ *schema.ResourceData, _ interface{}) diag.Diagnostics {
 
-	return resourceAutoscalingTemplateRead(ctx, d, meta)
+	return nil
 }
 
 func resourceAutoscalingTemplateDelete(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
