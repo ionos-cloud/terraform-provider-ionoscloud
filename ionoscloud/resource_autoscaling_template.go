@@ -36,14 +36,16 @@ func resourceAutoscalingTemplate() *schema.Resource {
 				},
 			},
 			"cpu_family": {
-				Type:        schema.TypeString,
-				Description: "CPU family for the VMs created using this Template. If null, the VM will be created with the default CPU family from the assigned location.",
-				Optional:    true,
+				Type:         schema.TypeString,
+				Description:  "CPU family for the VMs created using this Template. If null, the VM will be created with the default CPU family from the assigned location.",
+				Optional:     true,
+				ValidateFunc: validation.All(validation.StringIsNotWhiteSpace),
 			},
 			"location": {
-				Type:        schema.TypeString,
-				Description: "Location of the Template.",
-				Required:    true,
+				Type:         schema.TypeString,
+				Description:  "Location of the Template.",
+				Required:     true,
+				ValidateFunc: validation.All(validation.StringIsNotWhiteSpace),
 			},
 			"name": {
 				Type:         schema.TypeString,
@@ -127,9 +129,10 @@ func resourceAutoscalingTemplate() *schema.Resource {
 							},
 						},
 						"type": {
-							Type:        schema.TypeString,
-							Description: "Storage Type for this template volume (SSD or HDD).",
-							Required:    true,
+							Type:         schema.TypeString,
+							Description:  "Storage Type for this template volume (SSD or HDD).",
+							Required:     true,
+							ValidateFunc: validation.All(validation.StringIsNotWhiteSpace),
 						},
 						"user_data": {
 							Type:        schema.TypeString,

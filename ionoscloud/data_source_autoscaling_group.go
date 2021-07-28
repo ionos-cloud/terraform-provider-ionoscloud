@@ -151,7 +151,7 @@ func dataSourceAutoscalingGroup() *schema.Resource {
 			},
 			"template": {
 				Type:        schema.TypeList,
-				Description: "VMs for this Autoscaling Group will be created in this Virtual Datacenter. Please note, that it have the same `location` as the `template`.",
+				Description: "VMs for this Autoscaling Group will be created using this Template.",
 				Computed:    true,
 				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{
