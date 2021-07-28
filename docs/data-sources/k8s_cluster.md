@@ -86,7 +86,7 @@ The following attributes are returned by the datasource:
 * `server` - cluster server (same as `config[0].clusters[0].cluster.server` but provided as an attribute for ease of use)
 * `ca_crt` - base64 decoded cluster certificate authority data (provided as an attribute for direct use) 
 
-**NOTE**: The whole `config` node is marked as **sensitive** therefore any output will display `<sensitive>`.
+**NOTE**: The whole `config` node is marked as **sensitive**.
   
 ## Example of accessing a kubernetes cluster using the user's token
 
