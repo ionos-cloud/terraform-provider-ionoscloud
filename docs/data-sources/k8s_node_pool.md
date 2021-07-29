@@ -33,19 +33,6 @@ The following attributes are returned by the datasource:
 * `name` - name of the node pool
 * `k8s_cluster_id` - ID of the cluster this node pool is part of
 * `datacenter_id` - The UUID of the VDC
-* `state` - one of "AVAILABLE",
-  "INACTIVE",
-  "BUSY",
-  "DEPLOYING",
-  "ACTIVE",
-  "FAILED",
-  "SUSPENDED",
-  "FAILED_SUSPENDED",
-  "UPDATING",
-  "FAILED_UPDATING",
-  "DESTROYING",
-  "FAILED_DESTROYING",
-  "TERMINATED"
 * `node_count` - The number of nodes in this node pool
 * `cpu_family` - CPU Family
 * `cores_count` - CPU cores count
