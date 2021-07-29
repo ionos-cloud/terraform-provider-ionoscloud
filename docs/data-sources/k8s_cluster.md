@@ -35,10 +35,6 @@ The following attributes are returned by the datasource:
 * `maintenance_window` - A maintenance window comprise of a day of the week and a time for maintenance to be allowed
   * `time` - A clock time in the day when maintenance is allowed
   * `day_of_the_week` - Day of the week when maintenance is allowed
-* `available_upgrade_versions` - A list of available versions for upgrading the cluster
-* `viable_node_pool_versions` - A list of versions that may be used for node pools under this cluster
-* `public` - The indicator if the cluster is public or private. Be aware that setting it to false is currently in beta phase
-* `gateway_ip` - The IP address of the gateway used by the cluster. This is mandatory when `public` is set to `false` and should not be provided otherwise.
 * `state` - one of "AVAILABLE",
   "INACTIVE",
   "BUSY",
