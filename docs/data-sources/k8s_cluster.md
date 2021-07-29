@@ -80,7 +80,7 @@ The following attributes are returned by the datasource:
     * name - user name
     * user - map of
       * token - user token used for authentication
-* `user_tokens` - a convenience map to be search the token of a specific user
+* `user_tokens` - a convenience map to search the token of a specific user
     - key - is the user name
     - value - is the token
 * `server` - cluster server (same as `config[0].clusters[0].cluster.server` but provided as an attribute for ease of use)
