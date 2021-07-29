@@ -54,4 +54,87 @@ The following attributes are returned by the datasource:
   "TERMINATED"
 * `node_pools` - list of the IDs of the node pools in this cluster
 * `kube_config` - Kubernetes configuration
+* `config` - structured kubernetes config consisting of a list with 1 item with the following fields:
+  * api_version - Kubernetes API Version
+  * kind - "Config"
+  * current-context - string
+  * clusters - list of
+    * name - name of cluster
+    * cluster - map of
+      * certificate-authority-data - **base64 decoded** cluster CA data
+      * server -  server address in the form `https://host:port`
+  * contexts - list of
+    * name - context name
+    * context - map of
+      * cluster - cluster name
+      * user - cluster user
+  * users - list of
+    * name - user name
+    * user - map of
+      * token - user token used for authentication
+* `user_tokens` - a convenience map to be search the token of a specific user
+  - key - is the user name
+  - value - is the token
+* `server` - cluster server (same as `config[0].clusters[0].cluster.server` but provided as an attribute for ease of use)
+* `ca_crt` - base64 decoded cluster certificate authority data (provided as an attribute for direct use)
 
+**NOTE**: The whole `config` node is marked as **sensitive**.
+
+## Example of accessing a kubernetes cluster using the user's token
+
+```
+resource "ionoscloud_k8s_cluster" "test" {
+  name = "test_cluster"
+  maintenance_window {
+    day_of_the_week = "Saturday"
+    time            = "03:58:25Z"
+  }
+}
+
+data "ionoscloud_k8s_cluster" "test" {
+  name = "test_cluster"
+}
+
+provider "kubernetes" {
+  host = data.ionoscloud_k8s_cluster.test.server
+  token =  data.ionoscloud_k8s_cluster.test.user_tokens["cluster-admin"]
+}
+```
+
+## Example of accessing a kubernetes cluster using the token from the config
+
+```
+resource "ionoscloud_k8s_cluster" "test" {
+  name = "test_cluster"
+  maintenance_window {
+    day_of_the_week = "Saturday"
+    time            = "03:58:25Z"
+  }
+}
+
+data "ionoscloud_k8s_cluster" "test" {
+  name = "test_cluster"
+}
+
+provider "kubernetes" {
+  host = data.ionoscloud_k8s_cluster.test.config[0].clusters[0].cluster.server
+  token =  data.ionoscloud_k8s_cluster.test.config[0].users[0].user.token
+}
+```
+
+
+## Example of dumping the kube_config raw data into a yaml file
+
+**NOTE**: Dumping `kube_config` data into files poses a security risk.
+
+```
+data "ionoscloud_k8s_cluster" "k8s_cluster_example" {
+  name     = "k8s-demo"
+}
+
+resource "null_resource" "getcfg" {
+  provisioner "local-exec" {
+    command = "echo \"${yamlencode(data.ionoscloud_k8s_cluster.k8s_cluster_example.kube_config)}\" > kubecfg.yaml"
+  }
+}
+```
