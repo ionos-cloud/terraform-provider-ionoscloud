@@ -1,3 +1,7 @@
+## 5.2.6
+
+- issue #66 - detailed kube config attributes implemented 
+
 ## 5.2.5
 - fix: fixes #1 - usage example updates
 - documentation updates

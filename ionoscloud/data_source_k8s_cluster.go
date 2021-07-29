@@ -2,11 +2,40 @@ package ionoscloud
 
 import (
 	"context"
+	"encoding/base64"
 	"errors"
 	"fmt"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	ionoscloud "github.com/ionos-cloud/sdk-go/v5"
+	"gopkg.in/yaml.v3"
 )
+
+type KubeConfig struct{
+	ApiVersion string			`yaml:"apiVersion"`
+	Clusters []struct{
+		Name string
+		Cluster struct{
+			CaData string		`yaml:"certificate-authority-data"`
+			Server string
+		}
+	}
+	Contexts []struct{
+		Name string
+		Context struct{
+			Cluster string
+			User string
+		}
+	}
+	CurrentContext string		        `yaml:"current-context"`
+	Kind string
+	Users []struct{
+		Name string
+		User struct{
+			Token string
+		}
+	}
+	// preferences - add it when its structure is clear
+}
 
 func dataSourceK8sCluster() *schema.Resource {
 	return &schema.Resource{
@@ -72,6 +101,113 @@ func dataSourceK8sCluster() *schema.Resource {
 			},
 			"kube_config": {
 				Type:     schema.TypeString,
+				Computed: true,
+			},
+			"config": {
+				Type: schema.TypeList,
+				Computed: true,
+				Sensitive: true,
+				Elem: &schema.Resource{
+					Schema: map[string]*schema.Schema{
+						"api_version": {
+							Type: schema.TypeString,
+							Computed: true,
+							Sensitive: true,
+
+						},
+						"current_context": {
+							Type: schema.TypeString,
+							Computed: true,
+							Sensitive: true,
+						},
+						"kind": {
+							Type: schema.TypeString,
+							Computed: true,
+						},
+						"users": {
+							Type: schema.TypeList,
+							Computed: true,
+							Elem: &schema.Resource{
+								Schema: map[string]*schema.Schema{
+									"name": {
+										Type: schema.TypeString,
+										Computed: true,
+										Sensitive: true,
+
+									},
+									"user": {
+										Type: schema.TypeMap,
+										Computed: true,
+										Sensitive: true,
+										Elem: &schema.Schema{
+											Type: schema.TypeString,
+										},
+									},
+								},
+							},
+						},
+						"clusters": {
+							Type: schema.TypeList,
+							Computed: true,
+							Elem: &schema.Resource{
+								Schema: map[string]*schema.Schema{
+									"name": {
+										Type: schema.TypeString,
+										Computed: true,
+										Sensitive: true,
+									},
+									"cluster": {
+										Type: schema.TypeMap,
+										Computed: true,
+										Sensitive: true,
+										Elem: &schema.Schema{
+											Type: schema.TypeString,
+										},
+									},
+								},
+							},
+						},
+						"contexts": {
+							Type: schema.TypeList,
+							Computed: true,
+							Elem: &schema.Resource{
+								Schema: map[string]*schema.Schema{
+									"name": {
+										Type: schema.TypeString,
+										Computed: true,
+										Sensitive: true,
+									},
+									"context": {
+										Type: schema.TypeMap,
+										Computed: true,
+										Sensitive: true,
+										Elem: &schema.Schema{
+											Type: schema.TypeString,
+										},
+									},
+								},
+							},
+						},
+					},
+				},
+			},
+			"user_tokens": {
+				Type: schema.TypeMap,
+				Sensitive: true,
+				Computed: true,
+				Elem: &schema.Schema{
+					Type: schema.TypeString,
+					Sensitive: true,
+				},
+			},
+			"ca_crt": {
+				Type: schema.TypeString,
+				Sensitive: true,
+				Computed: true,
+			},
+			"server": {
+				Type: schema.TypeString,
+				Sensitive: true,
 				Computed: true,
 			},
 			"public": {
@@ -180,6 +316,96 @@ func dataSourceK8sReadCluster(d *schema.ResourceData, meta interface{}) error {
 	}
 
 	if err = setK8sClusterData(d, &cluster, client); err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func setK8sConfigData(d *schema.ResourceData, configStr string) error {
+
+	var kubeConfig KubeConfig
+	if err := yaml.Unmarshal([]byte(configStr), &kubeConfig); err != nil {
+		return err
+	}
+
+	userTokens := map[string]string{}
+
+	var server string
+	var caCrt []byte
+
+	configMap := make(map[string]interface{})
+
+	configMap["api_version"] = kubeConfig.ApiVersion
+	configMap["current_context"] = kubeConfig.CurrentContext
+	configMap["kind"] = kubeConfig.Kind
+
+	clustersList := make([]map[string]interface{}, len(kubeConfig.Clusters))
+	for i, cluster := range kubeConfig.Clusters {
+
+		/* decode ca */
+		decodedCrt := make([]byte, base64.StdEncoding.DecodedLen(len(cluster.Cluster.CaData)))
+		if _, err := base64.StdEncoding.Decode(decodedCrt, []byte(cluster.Cluster.CaData)); err != nil {
+			return err
+		}
+
+		if len(caCrt) == 0 {
+			caCrt = decodedCrt
+		}
+
+		clustersList[i] = map[string]interface{}{
+			"name": cluster.Name,
+			"cluster": map[string]string{
+				"server": cluster.Cluster.Server,
+				"certificate_authority_data": string(decodedCrt),
+			},
+		}
+	}
+
+	configMap["clusters"] = clustersList
+
+	contextsList := make([]map[string]interface{}, len(kubeConfig.Contexts))
+	for i, contextVal := range kubeConfig.Contexts {
+		contextsList[i] = map[string]interface{}{
+			"name": contextVal.Name,
+			"context": map[string]string{
+				"cluster": contextVal.Context.Cluster,
+				"user": contextVal.Context.User,
+			},
+		}
+	}
+
+	configMap["contexts"] = contextsList
+
+	userList := make([]map[string]interface{}, len(kubeConfig.Users))
+	for i, user := range kubeConfig.Users {
+		userList[i] = map[string]interface{}{
+			"name": user.Name,
+			"user": map[string]interface{}{
+				"token": user.User.Token,
+			},
+		}
+
+		userTokens[user.Name] = user.User.Token
+	}
+
+	configMap["users"] = userList
+
+	configList := []map[string]interface{}{configMap}
+
+	if err := d.Set("config", configList); err != nil {
+		return err
+	}
+
+	if err := d.Set("user_tokens", userTokens); err != nil {
+		return err
+	}
+
+	if err := d.Set("server", server); err != nil {
+		return err
+	}
+
+	if err := d.Set("ca_crt", string(caCrt)); err != nil {
 		return err
 	}
 
@@ -302,6 +528,10 @@ func setK8sClusterData(d *schema.ResourceData, cluster *ionoscloud.KubernetesClu
 
 		if kubeConfig.Properties.Kubeconfig != nil {
 			if err := d.Set("kube_config", *kubeConfig.Properties.Kubeconfig); err != nil {
+				return err
+			}
+
+			if err := setK8sConfigData(d, *kubeConfig.Properties.Kubeconfig); err != nil {
 				return err
 			}
 		}
