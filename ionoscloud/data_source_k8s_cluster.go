@@ -26,7 +26,7 @@ type KubeConfig struct{
 			User string
 		}
 	}
-	CurrentContext string		        `yaml:"currentContext"`
+	CurrentContext string		        `yaml:"current-context"`
 	Kind string
 	Users []struct{
 		Name string
