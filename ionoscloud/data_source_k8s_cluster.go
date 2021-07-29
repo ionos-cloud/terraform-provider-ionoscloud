@@ -10,42 +10,30 @@ import (
 	"gopkg.in/yaml.v2"
 )
 
-type Cluster struct {
-	Name string
-	Cluster ClusterEntry
-}
-
-type ClusterEntry struct {
-	CaData string	`yaml:"certificate-authority-data"`
-	Server string
-}
-
-type ClusterContext struct {
-	Name string
-	Context ClusterContextEntry
-}
-
-type ClusterContextEntry struct {
-	Cluster string
-	User string
-}
-
-type User struct {
-	Name string
-	User UserEntry
-}
-
-type UserEntry struct {
-	Token string
-}
-
-type KubeConfig struct {
+type KubeConfig struct{
 	ApiVersion string			`yaml:"apiVersion"`
-	Clusters []Cluster
-	Contexts []ClusterContext
-	CurrentContext string		`yaml:"currentContext"`
+	Clusters []struct{
+		Name string
+		Cluster struct{
+			CaData string		`yaml:"certificate-authority-data"`
+			Server string
+		}
+	}
+	Contexts []struct{
+		Name string
+		Context struct{
+			Cluster string
+			User string
+		}
+	}
+	CurrentContext string		        `yaml:"currentContext"`
 	Kind string
-	Users []User
+	Users []struct{
+		Name string
+		User struct{
+			Token string
+		}
+	}
 	// preferences - add it when its structure is clear
 }
 
