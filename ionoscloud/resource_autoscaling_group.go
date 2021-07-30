@@ -8,6 +8,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 	autoscaling "github.com/ionos-cloud/sdk-go-autoscaling"
 	"log"
+	"time"
 )
 
 func resourceAutoscalingGroup() *schema.Resource {
@@ -174,6 +175,13 @@ func resourceAutoscalingGroup() *schema.Resource {
 				Type:        schema.TypeInt,
 				Description: "The target number of VMs in this Group. Depending on the scaling policy, this number will be adjusted automatically. VMs will be created or destroyed automatically in order to adjust the actual number of VMs to this number. This value can be set only at Group creation time, subsequent change via update (PUT) request is not possible.",
 				Required:    true,
+				DiffSuppressFunc: func(k, old, new string, d *schema.ResourceData) bool {
+					if old != "" {
+						return true
+					}
+
+					return false
+				},
 				ValidateFunc: func(val interface{}, key string) (warns []string, errs []error) {
 					v := val.(int)
 					if v < 0 || v > 200 {
@@ -335,6 +343,49 @@ func resourceAutoscalingGroupCreate(ctx context.Context, d *schema.ResourceData,
 	}
 
 	d.SetId(*autoscalingGroup.Id)
+
+	actions, _, err := client.GroupsApi.AutoscalingGroupsActionsGet(ctx, d.Id()).Execute()
+
+	if err != nil {
+		diags := diag.FromErr(fmt.Errorf("error fetching group actions: %s", err))
+		return diags
+	}
+
+	var actionId string
+
+	if actions.Items != nil && len(*actions.Items) > 0 && (*actions.Items)[0].Id != nil {
+		actionId = *(*actions.Items)[0].Id
+	} else {
+		diags := diag.FromErr(fmt.Errorf("no action triggered for group: %s", d.Id()))
+		return diags
+	}
+
+	for {
+		log.Printf("[INFO] Waiting for action %s to be ready...", actionId)
+		fmt.Printf("[INFO] Waiting for action %s to be ready... \n", actionId)
+
+		actionSuccessful, rsErr := actionReady(ctx, client, d, actionId)
+
+		if rsErr != nil {
+			diags := diag.FromErr(fmt.Errorf("error while checking status of action %s: %s", actionId, rsErr))
+			return diags
+		}
+
+		if actionSuccessful {
+			log.Printf("[INFO] action was ready: %s", actionId)
+			break
+		}
+
+		select {
+		case <-time.After(SleepInterval):
+			log.Printf("[INFO] trying again ...")
+		case <-ctx.Done():
+			log.Printf("[INFO] create timed out")
+			diags := diag.FromErr(fmt.Errorf("group creation timed out! WARNING: your group was created but the action was not yes ready. " +
+				"Check your Ionos Cloud account for updates"))
+			return diags
+		}
+	}
 
 	return resourceAutoscalingGroupRead(ctx, d, meta)
 }
@@ -638,6 +689,56 @@ func resourceAutoscalingGroupUpdate(ctx context.Context, d *schema.ResourceData,
 		return diags
 	}
 
+	time.Sleep(SleepInterval * 20)
+
+	actions, _, err := client.GroupsApi.AutoscalingGroupsActionsGet(ctx, d.Id()).Execute()
+
+	if err != nil {
+		diags := diag.FromErr(fmt.Errorf("error fetching group actions: %s", err))
+		return diags
+	}
+
+	var actionId string
+
+	if actions.Items != nil && len(*actions.Items) > 0 && (*actions.Items)[0].Id != nil {
+		actionId = *(*actions.Items)[0].Id
+	} else {
+		diags := diag.FromErr(fmt.Errorf("no action triggered for group: %s", d.Id()))
+		return diags
+	}
+
+	for _, elem := range *actions.Items {
+		fmt.Printf("Action Item Id: %s, Status: %s, Target Replica Count %v \n", *elem.Id, *elem.Properties.ActionStatus, *elem.Properties.TargetReplicaCount)
+	}
+
+	for {
+		log.Printf("[INFO] Waiting for action %s to be ready...", actionId)
+
+		fmt.Printf("Waiting for action %s to be ready... \n", actionId)
+
+		actionSuccessful, rsErr := actionReady(ctx, client, d, actionId)
+
+		if rsErr != nil {
+			diags := diag.FromErr(fmt.Errorf("error while checking status of action %s: %s", actionId, rsErr))
+			return diags
+		}
+
+		if actionSuccessful {
+			log.Printf("[INFO] action was ready: %s", actionId)
+			break
+		}
+
+		select {
+		case <-time.After(SleepInterval):
+			log.Printf("[INFO] trying again ...")
+		case <-ctx.Done():
+			log.Printf("[INFO] update timed out")
+			diags := diag.FromErr(fmt.Errorf("group update timed out! WARNING: your group was created but the action was not yes ready. " +
+				"Check your Ionos Cloud account for updates"))
+			return diags
+		}
+	}
+
 	return resourceAutoscalingGroupRead(ctx, d, meta)
 }
 
@@ -654,4 +755,19 @@ func resourceAutoscalingGroupDelete(ctx context.Context, d *schema.ResourceData,
 	d.SetId("")
 
 	return nil
+}
+
+func actionReady(ctx context.Context, client *autoscaling.APIClient, d *schema.ResourceData, actionId string) (bool, error) {
+
+	action, _, err := client.GroupsApi.AutoscalingGroupsActionsFindById(ctx, actionId, d.Id()).Execute()
+
+	if err != nil {
+		return true, fmt.Errorf("error checking action status: %s", err)
+	}
+
+	if *action.Properties.ActionStatus == "FAILED" {
+		return false, fmt.Errorf("action failed")
+	}
+
+	return *action.Properties.ActionStatus == "SUCCESSFUL", nil
 }
