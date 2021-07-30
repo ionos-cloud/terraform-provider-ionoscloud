@@ -96,7 +96,7 @@ func resourcePrivateCrossConnect() *schema.Resource {
 }
 
 func resourcePrivateCrossConnectCreate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
-	client := meta.(*ionoscloud.APIClient)
+	client := meta.(SdkBundle).CloudApiClient
 
 	name := d.Get("name").(string)
 	pcc := ionoscloud.PrivateCrossConnect{
@@ -151,7 +151,7 @@ func resourcePrivateCrossConnectCreate(ctx context.Context, d *schema.ResourceDa
 }
 
 func resourcePrivateCrossConnectRead(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
-	client := meta.(*ionoscloud.APIClient)
+	client := meta.(SdkBundle).CloudApiClient
 
 	rsp, apiResponse, err := client.PrivateCrossConnectsApi.PccsFindById(ctx, d.Id()).Execute()
 
@@ -204,7 +204,7 @@ func resourcePrivateCrossConnectRead(ctx context.Context, d *schema.ResourceData
 }
 
 func resourcePrivateCrossConnectUpdate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
-	client := meta.(*ionoscloud.APIClient)
+	client := meta.(SdkBundle).CloudApiClient
 
 	request := ionoscloud.PrivateCrossConnect{}
 	name := d.Get("name").(string)
@@ -271,7 +271,7 @@ func resourcePrivateCrossConnectUpdate(ctx context.Context, d *schema.ResourceDa
 }
 
 func resourcePrivateCrossConnectDelete(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
-	client := meta.(*ionoscloud.APIClient)
+	client := meta.(SdkBundle).CloudApiClient
 
 	apiResponse, err := client.PrivateCrossConnectsApi.PccsDelete(ctx, d.Id()).Execute()
 

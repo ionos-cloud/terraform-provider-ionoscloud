@@ -65,7 +65,7 @@ func resourceNatGateway() *schema.Resource {
 }
 
 func resourceNatGatewayCreate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
-	client := meta.(*ionoscloud.APIClient)
+	client := meta.(SdkBundle).CloudApiClient
 
 	name := d.Get("name").(string)
 
@@ -159,7 +159,7 @@ func resourceNatGatewayCreate(ctx context.Context, d *schema.ResourceData, meta 
 }
 
 func resourceNatGatewayRead(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
-	client := meta.(*ionoscloud.APIClient)
+	client := meta.(SdkBundle).CloudApiClient
 
 	dcId := d.Get("datacenter_id").(string)
 
@@ -219,7 +219,7 @@ func resourceNatGatewayRead(ctx context.Context, d *schema.ResourceData, meta in
 }
 
 func resourceNatGatewayUpdate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
-	client := meta.(*ionoscloud.APIClient)
+	client := meta.(SdkBundle).CloudApiClient
 	request := ionoscloud.NatGateway{
 		Properties: &ionoscloud.NatGatewayProperties{},
 	}
@@ -302,7 +302,7 @@ func resourceNatGatewayUpdate(ctx context.Context, d *schema.ResourceData, meta 
 }
 
 func resourceNatGatewayDelete(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
-	client := meta.(*ionoscloud.APIClient)
+	client := meta.(SdkBundle).CloudApiClient
 
 	dcId := d.Get("datacenter_id").(string)
 

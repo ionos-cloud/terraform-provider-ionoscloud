@@ -26,7 +26,7 @@ func dataSourceResource() *schema.Resource {
 }
 
 func dataSourceResourceRead(d *schema.ResourceData, meta interface{}) error {
-	client := meta.(*ionoscloud.APIClient)
+	client := meta.(SdkBundle).CloudApiClient
 
 	var results []ionoscloud.Resource
 

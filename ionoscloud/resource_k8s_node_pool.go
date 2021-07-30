@@ -195,7 +195,7 @@ func resourcek8sNodePool() *schema.Resource {
 }
 
 func resourcek8sNodePoolCreate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
-	client := meta.(*ionoscloud.APIClient)
+	client := meta.(SdkBundle).CloudApiClient
 
 	name := d.Get("name").(string)
 	datacenterId := d.Get("datacenter_id").(string)
@@ -406,7 +406,7 @@ func resourcek8sNodePoolCreate(ctx context.Context, d *schema.ResourceData, meta
 }
 
 func resourcek8sNodePoolRead(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
-	client := meta.(*ionoscloud.APIClient)
+	client := meta.(SdkBundle).CloudApiClient
 
 	k8sNodepool, apiResponse, err := client.KubernetesApi.K8sNodepoolsFindById(ctx, d.Get("k8s_cluster_id").(string), d.Id()).Execute()
 
@@ -586,7 +586,7 @@ func resourcek8sNodePoolRead(ctx context.Context, d *schema.ResourceData, meta i
 }
 
 func resourcek8sNodePoolUpdate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
-	client := meta.(*ionoscloud.APIClient)
+	client := meta.(SdkBundle).CloudApiClient
 
 	request := ionoscloud.KubernetesNodePool{}
 
@@ -849,7 +849,7 @@ func resourcek8sNodePoolUpdate(ctx context.Context, d *schema.ResourceData, meta
 }
 
 func resourcek8sNodePoolDelete(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
-	client := meta.(*ionoscloud.APIClient)
+	client := meta.(SdkBundle).CloudApiClient
 
 	apiResponse, err := client.KubernetesApi.K8sNodepoolsDelete(ctx, d.Get("k8s_cluster_id").(string), d.Id()).Execute()
 

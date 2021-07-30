@@ -170,7 +170,7 @@ func getDatacenter(client *ionoscloud.APIClient, d *schema.ResourceData) (*ionos
 }
 
 func dataSourceDataCenterRead(d *schema.ResourceData, meta interface{}) error {
-	client := meta.(*ionoscloud.APIClient)
+	client := meta.(SdkBundle).CloudApiClient
 
 	datacenter, err := getDatacenter(client, d)
 

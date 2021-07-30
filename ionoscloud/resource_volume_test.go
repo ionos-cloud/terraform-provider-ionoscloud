@@ -60,7 +60,7 @@ func TestAccVolume_NoPassword(t *testing.T) {
 }
 
 func testAccCheckVolumeDestroyCheck(s *terraform.State) error {
-	client := testAccProvider.Meta().(*ionoscloud.APIClient)
+	client := testAccProvider.Meta().(SdkBundle).CloudApiClient
 	ctx, cancel := context.WithTimeout(context.Background(), *resourceDefaultTimeouts.Delete)
 
 	if cancel != nil {
@@ -87,7 +87,7 @@ func testAccCheckVolumeDestroyCheck(s *terraform.State) error {
 
 func testAccCheckVolumeExists(n string, volume *ionoscloud.Volume) resource.TestCheckFunc {
 	return func(s *terraform.State) error {
-		client := testAccProvider.Meta().(*ionoscloud.APIClient)
+		client := testAccProvider.Meta().(SdkBundle).CloudApiClient
 
 		rs, ok := s.RootModule().Resources[n]
 

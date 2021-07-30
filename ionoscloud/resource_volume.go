@@ -129,7 +129,7 @@ func resourceVolume() *schema.Resource {
 
 func resourceVolumeCreate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 
-	client := meta.(*ionoscloud.APIClient)
+	client := meta.(SdkBundle).CloudApiClient
 
 	var imageAlias string
 	var sshKeyPath []interface{}
@@ -369,7 +369,7 @@ func resourceVolumeCreate(ctx context.Context, d *schema.ResourceData, meta inte
 }
 
 func resourceVolumeRead(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
-	client := meta.(*ionoscloud.APIClient)
+	client := meta.(SdkBundle).CloudApiClient
 
 	dcId := d.Get("datacenter_id").(string)
 	serverID := d.Get("server_id").(string)
@@ -503,7 +503,7 @@ func resourceVolumeRead(ctx context.Context, d *schema.ResourceData, meta interf
 }
 
 func resourceVolumeUpdate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
-	client := meta.(*ionoscloud.APIClient)
+	client := meta.(SdkBundle).CloudApiClient
 
 	properties := ionoscloud.VolumeProperties{}
 	dcId := d.Get("datacenter_id").(string)
@@ -614,7 +614,7 @@ func resourceVolumeUpdate(ctx context.Context, d *schema.ResourceData, meta inte
 }
 
 func resourceVolumeDelete(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
-	client := meta.(*ionoscloud.APIClient)
+	client := meta.(SdkBundle).CloudApiClient
 
 	dcId := d.Get("datacenter_id").(string)
 

@@ -54,7 +54,7 @@ func resourceUser() *schema.Resource {
 }
 
 func resourceUserCreate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
-	client := meta.(*ionoscloud.APIClient)
+	client := meta.(SdkBundle).CloudApiClient
 	request := ionoscloud.UserPost{
 		Properties: &ionoscloud.UserPropertiesPost{},
 	}
@@ -106,7 +106,7 @@ func resourceUserCreate(ctx context.Context, d *schema.ResourceData, meta interf
 }
 
 func resourceUserRead(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
-	client := meta.(*ionoscloud.APIClient)
+	client := meta.(SdkBundle).CloudApiClient
 
 	rsp, apiResponse, err := client.UserManagementApi.UmUsersFindById(ctx, d.Id()).Execute()
 
@@ -143,7 +143,7 @@ func resourceUserRead(ctx context.Context, d *schema.ResourceData, meta interfac
 }
 
 func resourceUserUpdate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
-	client := meta.(*ionoscloud.APIClient)
+	client := meta.(SdkBundle).CloudApiClient
 
 	rsp, apiResponse, err := client.UserManagementApi.UmUsersFindById(ctx, d.Id()).Execute()
 
@@ -203,7 +203,7 @@ func resourceUserUpdate(ctx context.Context, d *schema.ResourceData, meta interf
 }
 
 func resourceUserDelete(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
-	client := meta.(*ionoscloud.APIClient)
+	client := meta.(SdkBundle).CloudApiClient
 
 	apiResponse, err := client.UserManagementApi.UmUsersDelete(ctx, d.Id()).Execute()
 	if apiResponse == nil || err != nil {

@@ -63,7 +63,7 @@ func resourceNetworkLoadBalancer() *schema.Resource {
 }
 
 func resourceNetworkLoadBalancerCreate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
-	client := meta.(*ionoscloud.APIClient)
+	client := meta.(SdkBundle).CloudApiClient
 
 	networkLoadBalancer := ionoscloud.NetworkLoadBalancer{
 		Properties: &ionoscloud.NetworkLoadBalancerProperties{},
@@ -142,7 +142,7 @@ func resourceNetworkLoadBalancerCreate(ctx context.Context, d *schema.ResourceDa
 }
 
 func resourceNetworkLoadBalancerRead(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
-	client := meta.(*ionoscloud.APIClient)
+	client := meta.(SdkBundle).CloudApiClient
 
 	dcId := d.Get("datacenter_id").(string)
 
@@ -202,7 +202,7 @@ func resourceNetworkLoadBalancerRead(ctx context.Context, d *schema.ResourceData
 }
 
 func resourceNetworkLoadBalancerUpdate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
-	client := meta.(*ionoscloud.APIClient)
+	client := meta.(SdkBundle).CloudApiClient
 	request := ionoscloud.NetworkLoadBalancer{
 		Properties: &ionoscloud.NetworkLoadBalancerProperties{},
 	}
@@ -269,7 +269,7 @@ func resourceNetworkLoadBalancerUpdate(ctx context.Context, d *schema.ResourceDa
 }
 
 func resourceNetworkLoadBalancerDelete(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
-	client := meta.(*ionoscloud.APIClient)
+	client := meta.(SdkBundle).CloudApiClient
 
 	dcId := d.Get("datacenter_id").(string)
 

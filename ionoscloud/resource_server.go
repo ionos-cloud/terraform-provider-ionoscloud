@@ -361,7 +361,7 @@ func resourceServer() *schema.Resource {
 }
 
 func resourceServerCreate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
-	client := meta.(*ionoscloud.APIClient)
+	client := meta.(SdkBundle).CloudApiClient
 
 	datacenterId := d.Get("datacenter_id").(string)
 	serverName := d.Get("name").(string)
@@ -895,7 +895,7 @@ func GetFirewallResource(d *schema.ResourceData, path string) ionoscloud.Firewal
 }
 
 func resourceServerRead(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
-	client := meta.(*ionoscloud.APIClient)
+	client := meta.(SdkBundle).CloudApiClient
 
 	dcId := d.Get("datacenter_id").(string)
 	serverId := d.Id()
@@ -1099,7 +1099,7 @@ func boolAddr(b bool) *bool {
 }
 
 func resourceServerUpdate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
-	client := meta.(*ionoscloud.APIClient)
+	client := meta.(SdkBundle).CloudApiClient
 
 	dcId := d.Get("datacenter_id").(string)
 	request := ionoscloud.ServerProperties{}
@@ -1324,7 +1324,7 @@ func resourceServerUpdate(ctx context.Context, d *schema.ResourceData, meta inte
 }
 
 func resourceServerDelete(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
-	client := meta.(*ionoscloud.APIClient)
+	client := meta.(SdkBundle).CloudApiClient
 	dcId := d.Get("datacenter_id").(string)
 
 	server, _, err := client.ServersApi.DatacentersServersFindById(ctx, dcId, d.Id()).Execute()
