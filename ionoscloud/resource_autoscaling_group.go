@@ -707,14 +707,10 @@ func resourceAutoscalingGroupUpdate(ctx context.Context, d *schema.ResourceData,
 		return diags
 	}
 
-	for _, elem := range *actions.Items {
-		fmt.Printf("Action Item Id: %s, Status: %s, Target Replica Count %v \n", *elem.Id, *elem.Properties.ActionStatus, *elem.Properties.TargetReplicaCount)
-	}
-
 	for {
 		log.Printf("[INFO] Waiting for action %s to be ready...", actionId)
 
-		fmt.Printf("Waiting for action %s to be ready... \n", actionId)
+		fmt.Printf("[INFO] Waiting for action %s to be ready... \n", actionId)
 
 		actionSuccessful, rsErr := actionReady(ctx, client, d, actionId)
 
