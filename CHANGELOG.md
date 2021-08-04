@@ -1,6 +1,6 @@
 ## 5.2.7
 
-- fix: issue #77 - recreate nodepool on change of specifications
+- fix: issue #71 - recreate nodepool on change of specifications
 
 ## 5.2.6
 
