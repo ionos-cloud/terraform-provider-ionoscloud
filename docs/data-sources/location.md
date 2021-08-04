@@ -34,3 +34,4 @@ The following attributes are returned by the datasource:
   * `max_cores` - The maximum number of cores available.
   * `max_ram` - The maximum number of RAM in MB.
   * `vendor` - A valid CPU vendor name.
+* `image_aliases` - List of image aliases available for the location
