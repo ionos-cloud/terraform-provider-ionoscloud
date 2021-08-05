@@ -1,3 +1,7 @@
+## 6.0.0-beta.4
+
+- updated arguments for datacenter, ipblock, location and user
+
 ## 6.0.0-beta.3
 
 - issue #66 - detailed kube config attributes implemented
