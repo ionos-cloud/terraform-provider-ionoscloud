@@ -80,3 +80,7 @@ terraform import ionoscloud_k8s_node_pool.demo {k8s_cluster_uuid}/{k8s_nodepool_
 ```
 
 This can be helpful when you want to import kubernetes node pools which you have already created manually or using other means, outside of terraform, towards the goal of managing them via Terraform
+
+## Notes
+
+Please note that every time the arguments of the nodepool are modified, the resource is destroyed and recreated.
