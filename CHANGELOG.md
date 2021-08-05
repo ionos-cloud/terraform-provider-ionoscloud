@@ -1,3 +1,7 @@
+## 6.0.0-beta.4
+
+- fix: issue #71 - recreate nodepool on change of specifications
+
 ## 6.0.0-beta.3
 
 - issue #66 - detailed kube config attributes implemented
