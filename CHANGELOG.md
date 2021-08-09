@@ -1,3 +1,7 @@
+## 5.2.8
+
+- rollback to the node pool behaviour before the fix of issue #71
+
 ## 5.2.7
 
 - fix: issue #71 - recreate nodepool on change of specifications

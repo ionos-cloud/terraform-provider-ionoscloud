@@ -51,10 +51,10 @@ func TestAcck8sNodepool_Basic(t *testing.T) {
 				),
 			},
 			{
-				Config: fmt.Sprintf(testAccCheckk8sNodepoolConfigUpdate, publicIp1, publicIp2, publicIp3),
+				Config: fmt.Sprintf(testAccCheckk8sNodepoolConfigUpdate, k8sNodepoolName, publicIp1, publicIp2, publicIp3),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckk8sNodepoolExists("ionoscloud_k8s_node_pool.terraform_acctest", &k8sNodepool),
-					resource.TestCheckResourceAttr("ionoscloud_k8s_node_pool.terraform_acctest", "name", "updated"),
+					resource.TestCheckResourceAttr("ionoscloud_k8s_node_pool.terraform_acctest", "name", k8sNodepoolName),
 					resource.TestCheckResourceAttr("ionoscloud_k8s_node_pool.terraform_acctest", "public_ips.0", publicIp1),
 					resource.TestCheckResourceAttr("ionoscloud_k8s_node_pool.terraform_acctest", "public_ips.1", publicIp2),
 					resource.TestCheckResourceAttr("ionoscloud_k8s_node_pool.terraform_acctest", "public_ips.2", publicIp3),
@@ -216,7 +216,7 @@ resource "ionoscloud_k8s_cluster" "terraform_acctest" {
 }
 
 resource "ionoscloud_k8s_node_pool" "terraform_acctest" {
-  name        = "updated"
+  name        = "%s"
   k8s_version = "${ionoscloud_k8s_cluster.terraform_acctest.k8s_version}"
   auto_scaling {
   	min_node_count = 1
