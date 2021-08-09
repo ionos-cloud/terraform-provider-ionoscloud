@@ -3,12 +3,12 @@ layout: "ionoscloud"
 page_title: "IonosCloud : ionoscloud_networkloadbalancer_forwardingrule"
 sidebar_current: "docs-ionoscloud-datasource-networkloadbalancer_forwardingrule"
 description: |-
-Get information on a Network Loadbalancer Forwarding Rule
+Get information on a Network Load Balancer Forwarding Rule
 ---
 
 # ionoscloud_networkloadbalancer_forwardingrule
 
-The network loadbalancer forwarding rule data source can be used to search for and return existing network forwarding rules.
+The network load balancer forwarding rule data source can be used to search for and return existing network forwarding rules.
 
 ## Example Usage
 
@@ -23,9 +23,9 @@ data "ionoscloud_networkloadbalancer_forwardingrule" "example" {
 ## Argument Reference
 
 * `datacenter_id` - (Required) Datacenter's UUID.
-* `networkloadbalancer_id` - (Required) Network Loadbalancer's UUID.
-* `name` - (Optional) Name of an existing network loadbalancer forwarding rule that you want to search for.
-* `id` - (Optional) ID of the network loadbalancer forwarding rule you want to search for.
+* `networkloadbalancer_id` - (Required) Network Load Balancer's UUID.
+* `name` - (Optional) Name of an existing network load balancer forwarding rule that you want to search for.
+* `id` - (Optional) ID of the network load balancer forwarding rule you want to search for.
 
 Both `datacenter_id` and `networkloadbalancer_id` and either `name` or `id` must be provided. If none, or both of `name` and `id` are provided, the datasource will return an error.
 
@@ -41,7 +41,6 @@ The following attributes are returned by the datasource:
 * `listener_port` - Listening port number. (inbound) (range: 1 to 65535)
 * `health_check` - Health check attributes for Network Load Balancer forwarding rule.
     * `client_timeout` - ClientTimeout is expressed in milliseconds. This inactivity timeout applies when the client is expected to acknowledge or send data. If unset the default of 50 seconds will be used.
-    * `check_timeout` - It specifies the time (in milliseconds) for a target VM in this pool to answer the check. If a target VM has CheckInterval set and CheckTimeout is set too, then the smaller value of the two is used after the TCP connection is established.
     * `connect_timeout` - It specifies the maximum time (in milliseconds) to wait for a connection attempt to a target VM to succeed. If unset, the default of 5 seconds will be used.
     * `target_timeout` - TargetTimeout specifies the maximum inactivity time (in milliseconds) on the target VM side. If unset, the default of 50 seconds will be used.
     * `retries` - Retries specifies the number of retries to perform on a target VM after a connection failure. If unset, the default value of 3 will be used.

@@ -18,7 +18,7 @@ func resourcek8sNodePool() *schema.Resource {
 	return &schema.Resource{
 		CreateContext: resourcek8sNodePoolCreate,
 		ReadContext:   resourcek8sNodePoolRead,
-		UpdateContext: nil,
+		UpdateContext: resourcek8sNodePoolUpdate,
 		DeleteContext: resourcek8sNodePoolDelete,
 		Importer: &schema.ResourceImporter{
 			StateContext: resourceK8sNodepoolImport,
@@ -29,7 +29,6 @@ func resourcek8sNodePool() *schema.Resource {
 				Description:  "The desired name for the node pool",
 				Required:     true,
 				ValidateFunc: validation.All(validation.StringIsNotWhiteSpace),
-				ForceNew:     true,
 			},
 			"k8s_version": {
 				Type:        schema.TypeString,
@@ -52,7 +51,6 @@ func resourcek8sNodePool() *schema.Resource {
 					}
 					return false
 				},
-				ForceNew: true,
 			},
 			"auto_scaling": {
 				Type:        schema.TypeList,
@@ -73,7 +71,6 @@ func resourcek8sNodePool() *schema.Resource {
 						},
 					},
 				},
-				ForceNew: true,
 			},
 			"lans": {
 				Type:        schema.TypeList,
@@ -99,21 +96,22 @@ func resourcek8sNodePool() *schema.Resource {
 							Elem: &schema.Resource{
 								Schema: map[string]*schema.Schema{
 									"network": {
-										Type:        schema.TypeString,
-										Description: "IPv4 or IPv6 CIDR to be routed via the interface",
-										Required:    true,
+										Type:         schema.TypeString,
+										Description:  "IPv4 or IPv6 CIDR to be routed via the interface",
+										Required:     true,
+										ValidateFunc: validation.All(validation.StringIsNotWhiteSpace),
 									},
 									"gateway_ip": {
-										Type:        schema.TypeString,
-										Description: "IPv4 or IPv6 Gateway IP for the route",
-										Required:    true,
+										Type:         schema.TypeString,
+										Description:  "IPv4 or IPv6 Gateway IP for the route",
+										Required:     true,
+										ValidateFunc: validation.All(validation.StringIsNotWhiteSpace),
 									},
 								},
 							},
 						},
 					},
 				},
-				ForceNew: true,
 			},
 			"maintenance_window": {
 				Type:        schema.TypeList,
@@ -123,77 +121,69 @@ func resourcek8sNodePool() *schema.Resource {
 				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{
 						"time": {
-							Type:        schema.TypeString,
-							Description: "A clock time in the day when maintenance is allowed",
-							Required:    true,
+							Type:         schema.TypeString,
+							Description:  "A clock time in the day when maintenance is allowed",
+							Required:     true,
+							ValidateFunc: validation.All(validation.StringIsNotWhiteSpace),
 						},
 						"day_of_the_week": {
-							Type:        schema.TypeString,
-							Description: "Day of the week when maintenance is allowed",
-							Required:    true,
+							Type:         schema.TypeString,
+							Description:  "Day of the week when maintenance is allowed",
+							Required:     true,
+							ValidateFunc: validation.All(validation.StringIsNotWhiteSpace),
 						},
 					},
 				},
-				ForceNew: true,
 			},
 			"datacenter_id": {
 				Type:         schema.TypeString,
 				Description:  "The UUID of the VDC",
 				Required:     true,
 				ValidateFunc: validation.All(validation.StringIsNotWhiteSpace),
-				ForceNew:     true,
 			},
 			"k8s_cluster_id": {
 				Type:         schema.TypeString,
 				Description:  "The UUID of an existing kubernetes cluster",
 				Required:     true,
 				ValidateFunc: validation.All(validation.StringIsNotWhiteSpace),
-				ForceNew:     true,
 			},
 			"cpu_family": {
 				Type:         schema.TypeString,
 				Description:  "CPU Family",
 				Required:     true,
 				ValidateFunc: validation.All(validation.StringIsNotWhiteSpace),
-				ForceNew:     true,
 			},
 			"availability_zone": {
 				Type:         schema.TypeString,
 				Description:  "The compute availability zone in which the nodes should exist",
 				Required:     true,
 				ValidateFunc: validation.All(validation.StringIsNotWhiteSpace),
-				ForceNew:     true,
 			},
 			"storage_type": {
 				Type:         schema.TypeString,
 				Description:  "Storage type to use",
 				Required:     true,
 				ValidateFunc: validation.All(validation.StringIsNotWhiteSpace),
-				ForceNew:     true,
 			},
 			"node_count": {
 				Type:        schema.TypeInt,
 				Description: "The number of nodes in this node pool",
 				Required:    true,
-				ForceNew:    true,
 			},
 			"cores_count": {
 				Type:        schema.TypeInt,
 				Description: "CPU cores count",
 				Required:    true,
-				ForceNew:    true,
 			},
 			"ram_size": {
 				Type:        schema.TypeInt,
 				Description: "The amount of RAM in MB",
 				Required:    true,
-				ForceNew:    true,
 			},
 			"storage_size": {
 				Type:        schema.TypeInt,
 				Description: "The total allocated storage capacity of a node in GB",
 				Required:    true,
-				ForceNew:    true,
 			},
 			"public_ips": {
 				Type:        schema.TypeList,
@@ -202,7 +192,6 @@ func resourcek8sNodePool() *schema.Resource {
 				Elem: &schema.Schema{
 					Type: schema.TypeString,
 				},
-				ForceNew: true,
 			},
 		},
 		Timeouts: &resourceDefaultTimeouts,
@@ -603,10 +592,10 @@ func resourcek8sNodePoolRead(ctx context.Context, d *schema.ResourceData, meta i
 func resourcek8sNodePoolUpdate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	client := meta.(*ionoscloud.APIClient)
 
-	request := ionoscloud.KubernetesNodePool{}
+	request := ionoscloud.KubernetesNodePoolForPut{}
 
 	nodeCount := int32(d.Get("node_count").(int))
-	request.Properties = &ionoscloud.KubernetesNodePoolProperties{
+	request.Properties = &ionoscloud.KubernetesNodePoolPropertiesForPut{
 		NodeCount: &nodeCount,
 	}
 
@@ -825,7 +814,7 @@ func resourcek8sNodePoolUpdate(ctx context.Context, d *schema.ResourceData, meta
 		log.Printf("[INFO] Update req: %s", string(b))
 	}
 
-	_, apiResponse, err := client.KubernetesApi.K8sNodepoolsPut(ctx, d.Get("k8s_cluster_id").(string), d.Id()).KubernetesNodePool(request).Execute()
+	_, apiResponse, err := client.KubernetesApi.K8sNodepoolsPut(ctx, d.Get("k8s_cluster_id").(string), d.Id()).KubernetesNodePoolForPut(request).Execute()
 
 	if err != nil {
 		if apiResponse != nil && apiResponse.StatusCode == 404 {

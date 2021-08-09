@@ -24,3 +24,5 @@ require (
 	google.golang.org/appengine v1.6.7 // indirect
 	gopkg.in/yaml.v3 v3.0.0-20200615113413-eeeca48fe776
 )
+
+replace github.com/ionos-cloud/sdk-go/v6 => ../../../../../sdk/v6/sdk-go

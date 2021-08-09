@@ -3,12 +3,12 @@ layout: "ionoscloud"
 page_title: "IonosCloud: networkloadbalancer"
 sidebar_current: "docs-resource-networkloadbalancer"
 description: |-
-Creates and manages Network Loadbalancer objects.
+Creates and manages Network Load Balancer objects.
 ---
 
 # ionoscloud_networkloadbalancer
 
-Manages a Network Loadbalancer  on IonosCloud.
+Manages a Network Load Balancer  on IonosCloud.
 
 ## Example Usage
 

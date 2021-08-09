@@ -10,27 +10,27 @@ import (
 	"gopkg.in/yaml.v3"
 )
 
-type KubeConfig struct{
-	ApiVersion string			`yaml:"apiVersion"`
-	Clusters []struct{
-		Name string
-		Cluster struct{
-			CaData string		`yaml:"certificate-authority-data"`
+type KubeConfig struct {
+	ApiVersion string `yaml:"apiVersion"`
+	Clusters   []struct {
+		Name    string
+		Cluster struct {
+			CaData string `yaml:"certificate-authority-data"`
 			Server string
 		}
 	}
-	Contexts []struct{
-		Name string
-		Context struct{
+	Contexts []struct {
+		Name    string
+		Context struct {
 			Cluster string
-			User string
+			User    string
 		}
 	}
-	CurrentContext string		`yaml:"current-context"`
-	Kind string
-	Users []struct{
+	CurrentContext string `yaml:"current-context"`
+	Kind           string
+	Users          []struct {
 		Name string
-		User struct{
+		User struct {
 			Token string
 		}
 	}
@@ -66,51 +66,49 @@ func dataSourceK8sCluster() *schema.Resource {
 						"time": {
 							Type:        schema.TypeString,
 							Description: "A clock time in the day when maintenance is allowed",
-							Required:    true,
+							Computed:    true,
 						},
 						"day_of_the_week": {
 							Type:        schema.TypeString,
 							Description: "Day of the week when maintenance is allowed",
-							Required:    true,
+							Computed:    true,
 						},
 					},
 				},
 			},
 			"config": {
-				Type: schema.TypeList,
-				Computed: true,
+				Type:      schema.TypeList,
+				Computed:  true,
 				Sensitive: true,
 				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{
 						"api_version": {
-							Type: schema.TypeString,
-							Computed: true,
+							Type:      schema.TypeString,
+							Computed:  true,
 							Sensitive: true,
-
 						},
 						"current_context": {
-							Type: schema.TypeString,
-							Computed: true,
+							Type:      schema.TypeString,
+							Computed:  true,
 							Sensitive: true,
 						},
 						"kind": {
-							Type: schema.TypeString,
+							Type:     schema.TypeString,
 							Computed: true,
 						},
 						"users": {
-							Type: schema.TypeList,
+							Type:     schema.TypeList,
 							Computed: true,
 							Elem: &schema.Resource{
 								Schema: map[string]*schema.Schema{
 									"name": {
-										Type: schema.TypeString,
-										Computed: true,
+										Type:      schema.TypeString,
+										Computed:  true,
 										Sensitive: true,
-
 									},
 									"user": {
-										Type: schema.TypeMap,
-										Computed: true,
+										Type:      schema.TypeMap,
+										Computed:  true,
 										Sensitive: true,
 										Elem: &schema.Schema{
 											Type: schema.TypeString,
@@ -120,18 +118,18 @@ func dataSourceK8sCluster() *schema.Resource {
 							},
 						},
 						"clusters": {
-							Type: schema.TypeList,
+							Type:     schema.TypeList,
 							Computed: true,
 							Elem: &schema.Resource{
 								Schema: map[string]*schema.Schema{
 									"name": {
-										Type: schema.TypeString,
-										Computed: true,
+										Type:      schema.TypeString,
+										Computed:  true,
 										Sensitive: true,
 									},
 									"cluster": {
-										Type: schema.TypeMap,
-										Computed: true,
+										Type:      schema.TypeMap,
+										Computed:  true,
 										Sensitive: true,
 										Elem: &schema.Schema{
 											Type: schema.TypeString,
@@ -141,18 +139,18 @@ func dataSourceK8sCluster() *schema.Resource {
 							},
 						},
 						"contexts": {
-							Type: schema.TypeList,
+							Type:     schema.TypeList,
 							Computed: true,
 							Elem: &schema.Resource{
 								Schema: map[string]*schema.Schema{
 									"name": {
-										Type: schema.TypeString,
-										Computed: true,
+										Type:      schema.TypeString,
+										Computed:  true,
 										Sensitive: true,
 									},
 									"context": {
-										Type: schema.TypeMap,
-										Computed: true,
+										Type:      schema.TypeMap,
+										Computed:  true,
 										Sensitive: true,
 										Elem: &schema.Schema{
 											Type: schema.TypeString,
@@ -165,23 +163,23 @@ func dataSourceK8sCluster() *schema.Resource {
 				},
 			},
 			"user_tokens": {
-				Type: schema.TypeMap,
+				Type:      schema.TypeMap,
 				Sensitive: true,
-				Computed: true,
+				Computed:  true,
 				Elem: &schema.Schema{
-					Type: schema.TypeString,
+					Type:      schema.TypeString,
 					Sensitive: true,
 				},
 			},
 			"ca_crt": {
-				Type: schema.TypeString,
+				Type:      schema.TypeString,
 				Sensitive: true,
-				Computed: true,
+				Computed:  true,
 			},
 			"server": {
-				Type: schema.TypeString,
+				Type:      schema.TypeString,
 				Sensitive: true,
-				Computed: true,
+				Computed:  true,
 			},
 			"available_upgrade_versions": {
 				Type:        schema.TypeList,
@@ -223,6 +221,30 @@ func dataSourceK8sCluster() *schema.Resource {
 					"to `false` and should not be provided otherwise.",
 				Optional: true,
 				Computed: true,
+			},
+			"api_subnet_allow_list": {
+				Type: schema.TypeList,
+				Description: "Access to the K8s API server is restricted to these CIDRs. Cluster-internal traffic is not " +
+					"affected by this restriction. If no allowlist is specified, access is not restricted. If an IP " +
+					"without subnet mask is provided, the default value will be used: 32 for IPv4 and 128 for IPv6.",
+				Computed: true,
+				Elem: &schema.Schema{
+					Type: schema.TypeString,
+				},
+			},
+			"s3_buckets": {
+				Type:        schema.TypeList,
+				Description: "List of S3 bucket configured for K8s usage. For now it contains only an S3 bucket used to store K8s API audit logs.",
+				Computed:    true,
+				Elem: &schema.Resource{
+					Schema: map[string]*schema.Schema{
+						"name": {
+							Type:        schema.TypeString,
+							Description: "Name of the S3 bucket",
+							Required:    true,
+						},
+					},
+				},
 			},
 		},
 		Timeouts: &resourceDefaultTimeouts,
@@ -300,7 +322,6 @@ func dataSourceK8sReadCluster(d *schema.ResourceData, meta interface{}) error {
 	return nil
 }
 
-
 func setK8sConfigData(d *schema.ResourceData, configStr string) error {
 
 	var kubeConfig KubeConfig
@@ -335,7 +356,7 @@ func setK8sConfigData(d *schema.ResourceData, configStr string) error {
 		clustersList[i] = map[string]interface{}{
 			"name": cluster.Name,
 			"cluster": map[string]string{
-				"server": cluster.Cluster.Server,
+				"server":                     cluster.Cluster.Server,
 				"certificate_authority_data": string(decodedCrt),
 			},
 		}
@@ -349,7 +370,7 @@ func setK8sConfigData(d *schema.ResourceData, configStr string) error {
 			"name": contextVal.Name,
 			"context": map[string]string{
 				"cluster": contextVal.Context.Cluster,
-				"user": contextVal.Context.User,
+				"user":    contextVal.Context.User,
 			},
 		}
 	}
@@ -390,7 +411,6 @@ func setK8sConfigData(d *schema.ResourceData, configStr string) error {
 
 	return nil
 }
-
 
 func setK8sClusterData(d *schema.ResourceData, cluster *ionoscloud.KubernetesCluster, client *ionoscloud.APIClient) error {
 
@@ -460,6 +480,28 @@ func setK8sClusterData(d *schema.ResourceData, cluster *ionoscloud.KubernetesClu
 			}
 		}
 
+		if cluster.Properties.ApiSubnetAllowList != nil {
+			apiSubnetAllowLists := make([]interface{}, len(*cluster.Properties.ApiSubnetAllowList), len(*cluster.Properties.ApiSubnetAllowList))
+			for i, apiSubnetAllowList := range *cluster.Properties.ApiSubnetAllowList {
+				apiSubnetAllowLists[i] = apiSubnetAllowList
+			}
+			if err := d.Set("api_subnet_allow_list", apiSubnetAllowLists); err != nil {
+				return fmt.Errorf("error while setting api_subnet_allow_list property for cluser %s: %s", d.Id(), err)
+			}
+		}
+
+		if cluster.Properties.S3Buckets != nil {
+			s3Buckets := make([]interface{}, len(*cluster.Properties.S3Buckets), len(*cluster.Properties.S3Buckets))
+			for i, s3Bucket := range *cluster.Properties.S3Buckets {
+				s3BucketEntry := make(map[string]interface{})
+				s3BucketEntry["name"] = *s3Bucket.Name
+				s3Buckets[i] = s3BucketEntry
+			}
+			if err := d.Set("s3_buckets", s3Buckets); err != nil {
+				return fmt.Errorf("error while setting s3_buckets property for cluser %s: %s", d.Id(), err)
+			}
+		}
+
 	}
 
 	if cluster.Metadata != nil {
@@ -487,7 +529,6 @@ func setK8sClusterData(d *schema.ResourceData, cluster *ionoscloud.KubernetesClu
 		if err := d.Set("kube_config", kubeConfig); err != nil {
 			return err
 		}
-
 
 		if err := setK8sConfigData(d, kubeConfig); err != nil {
 			return err

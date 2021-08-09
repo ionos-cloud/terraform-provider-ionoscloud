@@ -3,12 +3,12 @@ layout: "ionoscloud"
 page_title: "IonosCloud: networkloadbalancer_forwardingrule"
 sidebar_current: "docs-resource-networkloadbalancer_forwardingrule"
 description: |-
-Creates and manages Network Loadbalancer Forwarding Rule objects.
+Creates and manages Network Load Balancer Forwarding Rule objects.
 ---
 
 # ionoscloud_networkloadbalancer_forwardingrule
 
-Manages a Network Loadbalancer Forwarding Rule on IonosCloud.
+Manages a Network Load Balancer Forwarding Rule on IonosCloud.
 
 ## Example Usage
 
@@ -42,7 +42,6 @@ resource "ionoscloud_networkloadbalancer_forwardingrule" "example" {
 - `listener_port` - (Required)[int] Listening port number. (inbound) (range: 1 to 65535)
 - `health_check` - (Optional) Health check attributes for Network Load Balancer forwarding rule.
     - `client_timeout` - (Optional)[int] ClientTimeout is expressed in milliseconds. This inactivity timeout applies when the client is expected to acknowledge or send data. If unset the default of 50 seconds will be used.
-    - `check_timeout` - (Optional)[int] It specifies the time (in milliseconds) for a target VM in this pool to answer the check. If a target VM has CheckInterval set and CheckTimeout is set too, then the smaller value of the two is used after the TCP connection is established.
     - `connect_timeout` - (Optional)[int] It specifies the maximum time (in milliseconds) to wait for a connection attempt to a target VM to succeed. If unset, the default of 5 seconds will be used.
     - `target_timeout` - (Optional)[int] TargetTimeout specifies the maximum inactivity time (in milliseconds) on the target VM side. If unset, the default of 50 seconds will be used.
     - `retries` - (Optional)[int] Retries specifies the number of retries to perform on a target VM after a connection failure. If unset, the default value of 3 will be used.
@@ -55,4 +54,4 @@ resource "ionoscloud_networkloadbalancer_forwardingrule" "example" {
          - `check_interval` - (Optional)[int] CheckInterval determines the duration (in milliseconds) between consecutive health checks. If unspecified a default of 2000 ms is used.
          - `maintenance` - (Optional)[boolean] Maintenance specifies if a target VM should be marked as down, even if it is not.
 - `datacenter_id` - (Required)[string] A Datacenter's UUID.
-- `natgateway_id` - (Required)[string] Network Loadbalancer's UUID.
+- `natgateway_id` - (Required)[string] Network Load Balancer's UUID.
