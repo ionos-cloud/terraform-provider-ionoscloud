@@ -325,7 +325,7 @@ func resourceK8sNodepoolImport(ctx context.Context, d *schema.ResourceData, meta
 		log.Printf("[INFO] Setting Public IPs for k8s node pool %s to %+v...", d.Id(), d.Get("public_ips"))
 	}
 
-	if k8sNodepool.Properties.AutoScaling != nil && (*k8sNodepool.Properties.AutoScaling.MinNodeCount != 0 && *k8sNodepool.Properties.AutoScaling.MaxNodeCount != 0) {
+	if k8sNodepool.Properties.AutoScaling != nil && k8sNodepool.Properties.AutoScaling.MinNodeCount != nil && k8sNodepool.Properties.AutoScaling.MaxNodeCount != nil && (*k8sNodepool.Properties.AutoScaling.MinNodeCount != 0 && *k8sNodepool.Properties.AutoScaling.MaxNodeCount != 0) {
 		if err := d.Set("auto_scaling", []map[string]int32{
 			{
 				"min_node_count": *k8sNodepool.Properties.AutoScaling.MinNodeCount,

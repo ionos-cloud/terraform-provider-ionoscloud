@@ -619,6 +619,7 @@ func resourcek8sNodePoolUpdate(ctx context.Context, d *schema.ResourceData, meta
 		log.Printf("[INFO] k8s pool public IPs changed from %+v to %+v", oldPublicIps, newPublicIps)
 		if newPublicIps != nil {
 
+			fmt.Printf("Public ips before update %+v", newPublicIps)
 			publicIps := newPublicIps.([]interface{})
 
 			/* number of public IPs needs to be at least NodeCount + 1 */
@@ -643,7 +644,9 @@ func resourcek8sNodePoolUpdate(ctx context.Context, d *schema.ResourceData, meta
 		log.Printf("[INFO] Update req: %s", string(b))
 	}
 
-	_, apiResponse, err := client.KubernetesApi.K8sNodepoolsPut(ctx, d.Get("k8s_cluster_id").(string), d.Id()).KubernetesNodePool(request).Execute()
+	response, apiResponse, err := client.KubernetesApi.K8sNodepoolsPut(ctx, d.Get("k8s_cluster_id").(string), d.Id()).KubernetesNodePool(request).Execute()
+
+	fmt.Printf("Public ips before after %+v", *response.Properties.PublicIps)
 
 	if err != nil {
 		if apiResponse != nil && apiResponse.StatusCode == 404 {
@@ -665,10 +668,12 @@ func resourcek8sNodePoolUpdate(ctx context.Context, d *schema.ResourceData, meta
 		}
 
 		if nodepoolReady {
+			fmt.Printf("[INFO] k8s node pool ready: %s", d.Id())
 			log.Printf("[INFO] k8s node pool ready: %s", d.Id())
 			break
 		}
 
+		time.Sleep(SleepInterval * 3)
 		select {
 		case <-time.After(SleepInterval):
 			log.Printf("[INFO] trying again ...")

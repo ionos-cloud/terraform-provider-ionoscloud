@@ -1,6 +1,7 @@
 ## 5.2.8
 
 - rollback to the node pool behaviour before the fix of issue #71
+- issue #77 - fix import for k8s nodepool
 
 ## 5.2.7
 
