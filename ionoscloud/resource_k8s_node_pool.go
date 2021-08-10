@@ -18,7 +18,7 @@ func resourcek8sNodePool() *schema.Resource {
 	return &schema.Resource{
 		CreateContext: resourcek8sNodePoolCreate,
 		ReadContext:   resourcek8sNodePoolRead,
-		UpdateContext: nil,
+		UpdateContext: resourcek8sNodePoolUpdate,
 		DeleteContext: resourcek8sNodePoolDelete,
 		Importer: &schema.ResourceImporter{
 			StateContext: resourceK8sNodepoolImport,
@@ -29,7 +29,6 @@ func resourcek8sNodePool() *schema.Resource {
 				Description:  "The desired name for the node pool",
 				Required:     true,
 				ValidateFunc: validation.All(validation.StringIsNotWhiteSpace),
-				ForceNew:     true,
 			},
 			"k8s_version": {
 				Type:        schema.TypeString,
@@ -52,7 +51,6 @@ func resourcek8sNodePool() *schema.Resource {
 					}
 					return false
 				},
-				ForceNew: true,
 			},
 			"auto_scaling": {
 				Type:        schema.TypeList,
@@ -73,7 +71,6 @@ func resourcek8sNodePool() *schema.Resource {
 						},
 					},
 				},
-				ForceNew: true,
 			},
 			"lans": {
 				Type:        schema.TypeList,
@@ -113,7 +110,6 @@ func resourcek8sNodePool() *schema.Resource {
 						},
 					},
 				},
-				ForceNew: true,
 			},
 			"maintenance_window": {
 				Type:        schema.TypeList,
@@ -134,66 +130,56 @@ func resourcek8sNodePool() *schema.Resource {
 						},
 					},
 				},
-				ForceNew: true,
 			},
 			"datacenter_id": {
 				Type:         schema.TypeString,
 				Description:  "The UUID of the VDC",
 				Required:     true,
 				ValidateFunc: validation.All(validation.StringIsNotWhiteSpace),
-				ForceNew:     true,
 			},
 			"k8s_cluster_id": {
 				Type:         schema.TypeString,
 				Description:  "The UUID of an existing kubernetes cluster",
 				Required:     true,
 				ValidateFunc: validation.All(validation.StringIsNotWhiteSpace),
-				ForceNew:     true,
 			},
 			"cpu_family": {
 				Type:         schema.TypeString,
 				Description:  "CPU Family",
 				Required:     true,
 				ValidateFunc: validation.All(validation.StringIsNotWhiteSpace),
-				ForceNew:     true,
 			},
 			"availability_zone": {
 				Type:         schema.TypeString,
 				Description:  "The compute availability zone in which the nodes should exist",
 				Required:     true,
 				ValidateFunc: validation.All(validation.StringIsNotWhiteSpace),
-				ForceNew:     true,
 			},
 			"storage_type": {
 				Type:         schema.TypeString,
 				Description:  "Storage type to use",
 				Required:     true,
 				ValidateFunc: validation.All(validation.StringIsNotWhiteSpace),
-				ForceNew:     true,
 			},
 			"node_count": {
 				Type:        schema.TypeInt,
 				Description: "The number of nodes in this node pool",
 				Required:    true,
-				ForceNew:    true,
 			},
 			"cores_count": {
 				Type:        schema.TypeInt,
 				Description: "CPU cores count",
 				Required:    true,
-				ForceNew:    true,
 			},
 			"ram_size": {
 				Type:        schema.TypeInt,
 				Description: "The amount of RAM in MB",
 				Required:    true,
-				ForceNew:    true,
 			},
 			"storage_size": {
 				Type:        schema.TypeInt,
 				Description: "The total allocated storage capacity of a node in GB",
 				Required:    true,
-				ForceNew:    true,
 			},
 			"public_ips": {
 				Type:        schema.TypeList,
@@ -202,7 +188,6 @@ func resourcek8sNodePool() *schema.Resource {
 				Elem: &schema.Schema{
 					Type: schema.TypeString,
 				},
-				ForceNew: true,
 			},
 		},
 		Timeouts: &resourceDefaultTimeouts,

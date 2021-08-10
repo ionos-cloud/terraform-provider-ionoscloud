@@ -1,3 +1,8 @@
+## 6.0.0-beta.5
+
+- rollback to the node pool behaviour before the fix of issue #71
+- issue #77 - fix import for k8s nodepool
+
 ## 6.0.0-beta.4
 
 - fix: issue #71 - recreate nodepool on change of specifications
