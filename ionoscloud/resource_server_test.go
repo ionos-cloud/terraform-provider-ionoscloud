@@ -115,8 +115,8 @@ func TestAccServer_NicIps(t *testing.T) {
 					testAccCheckServerExists("ionoscloud_server.webserver", &server),
 					testAccCheckServerAttributes("ionoscloud_server.webserver", serverName),
 					resource.TestCheckResourceAttr("ionoscloud_server.webserver", "name", serverName),
-					resource.TestCheckResourceAttrPair("ionoscloud_server.webserver", "nic.0.ips.0", "ionoscloud_ipblock.webserver_lan", "ips.0"),
-					resource.TestCheckResourceAttrPair("ionoscloud_server.webserver", "nic.0.ips.1", "ionoscloud_ipblock.webserver_lan", "ips.1"),
+					resource.TestCheckResourceAttrPair("ionoscloud_server.webserver", "nic.0.ips.0", "ionoscloud_ipblock.webserver_ipblock", "ips.0"),
+					resource.TestCheckResourceAttrPair("ionoscloud_server.webserver", "nic.0.ips.1", "ionoscloud_ipblock.webserver_ipblock", "ips.1"),
 				),
 			},
 		},
@@ -433,7 +433,7 @@ resource "ionoscloud_server" "webserver" {
   nic {
     lan             = "${ionoscloud_lan.webserver_lan.id}"
     dhcp            = true
-    ips            = [ ionoscloud_ipblock.natgateway_ips.ips[0], ionoscloud_ipblock.natgateway_ips.ips[1] ]
+    ips            = [ ionoscloud_ipblock.webserver_ipblock.ips[0], ionoscloud_ipblock.webserver_ipblock.ips[1] ]
     firewall_active = false
   }
 
