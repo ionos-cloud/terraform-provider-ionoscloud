@@ -103,9 +103,6 @@ resource "ionoscloud_k8s_node_pool" "test_ds_k8s_node_pool" {
 	storage_type			= "HDD"
 	storage_size			= 15
 	k8s_version				= "1.20.8"
-  #	public_ips				= [ "158.222.102.239", "158.222.102.241", "158.222.102.242" ]
-  # public_ips				= [ ]
-  #   public_ips        = [ ]
 }
 
 data "ionoscloud_k8s_node_pool" "test_ds_k8s_node_pool" {
@@ -138,9 +135,6 @@ resource "ionoscloud_k8s_node_pool" "test_ds_k8s_node_pool" {
 	storage_type			= "HDD"
 	storage_size			= 15
 	k8s_version				= "1.20.8"
-  #	public_ips				= [ "158.222.102.239", "158.222.102.241", "158.222.102.242" ]
-  # public_ips				= [ ]
-  #   public_ips        = [ ]
 }
 
 data "ionoscloud_k8s_node_pool" "test_ds_k8s_node_pool" {

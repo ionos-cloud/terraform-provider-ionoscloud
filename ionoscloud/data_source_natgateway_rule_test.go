@@ -2,19 +2,12 @@ package ionoscloud
 
 import (
 	"fmt"
-	"os"
 	"testing"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 )
 
 func TestAccDataSourceNatGatewayRule_matchId(t *testing.T) {
-
-	publicIp1 := os.Getenv("TF_ACC_IONOS_PUBLIC_IP_1")
-	if publicIp1 == "" {
-		t.Errorf("TF_ACC_IONOS_PUBLIC_IP_1 not set; please set it to a valid public IP for the de/fra zone")
-		t.FailNow()
-	}
 
 	resource.Test(t, resource.TestCase{
 		PreCheck: func() {
@@ -23,12 +16,13 @@ func TestAccDataSourceNatGatewayRule_matchId(t *testing.T) {
 		ProviderFactories: testAccProviderFactories,
 		Steps: []resource.TestStep{
 			{
-				Config: fmt.Sprintf(testAccDataSourceNatGatewayRuleCreateResources, publicIp1, publicIp1),
+				Config: fmt.Sprintf(testAccDataSourceNatGatewayRuleCreateResources),
 			},
 			{
-				Config: fmt.Sprintf(testAccDataSourceNatGatewayRuleMatchId, publicIp1, publicIp1),
+				Config: fmt.Sprintf(testAccDataSourceNatGatewayRuleMatchId),
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttr("data.ionoscloud_natgateway_rule.test_natgateway_rule", "name", "test_datasource_natgateway_rule"),
+					resource.TestCheckResourceAttrPair("data.ionoscloud_natgateway_rule.test_natgateway_rule", "public_ip", "ionoscloud_ipblock.natgateway_ips", "ips.0"),
 				),
 			},
 		},
@@ -37,12 +31,6 @@ func TestAccDataSourceNatGatewayRule_matchId(t *testing.T) {
 
 func TestAccDataSourceNatGatewayRule_matchName(t *testing.T) {
 
-	publicIp1 := os.Getenv("TF_ACC_IONOS_PUBLIC_IP_1")
-	if publicIp1 == "" {
-		t.Errorf("TF_ACC_IONOS_PUBLIC_IP_1 not set; please set it to a valid public IP for the de/fra zone")
-		t.FailNow()
-	}
-
 	resource.Test(t, resource.TestCase{
 		PreCheck: func() {
 			testAccPreCheck(t)
@@ -50,12 +38,13 @@ func TestAccDataSourceNatGatewayRule_matchName(t *testing.T) {
 		ProviderFactories: testAccProviderFactories,
 		Steps: []resource.TestStep{
 			{
-				Config: fmt.Sprintf(testAccDataSourceNatGatewayRuleCreateResources, publicIp1, publicIp1),
+				Config: fmt.Sprintf(testAccDataSourceNatGatewayRuleCreateResources),
 			},
 			{
-				Config: fmt.Sprintf(testAccDataSourceNatGatewayRuleMatchName, publicIp1, publicIp1),
+				Config: fmt.Sprintf(testAccDataSourceNatGatewayRuleMatchName),
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttr("data.ionoscloud_natgateway_rule.test_natgateway_rule", "name", "test_datasource_natgateway_rule"),
+					resource.TestCheckResourceAttrPair("data.ionoscloud_natgateway_rule.test_natgateway_rule", "public_ip", "ionoscloud_ipblock.natgateway_ips", "ips.0"),
 				),
 			},
 		},
@@ -68,6 +57,13 @@ resource "ionoscloud_datacenter" "natgateway_datacenter" {
   location          = "de/fra"
   description       = "datacenter for hosting "
 }
+
+resource "ionoscloud_ipblock" "natgateway_ips" {
+  location = ionoscloud_datacenter.natgateway_datacenter.location
+  size = 1
+  name = "natgateway_ips"
+}
+
 resource "ionoscloud_lan" "natgateway_lan" {
   datacenter_id = ionoscloud_datacenter.natgateway_datacenter.id
   public        = false
@@ -77,7 +73,7 @@ resource "ionoscloud_natgateway" "natgateway" {
   depends_on    = [ ionoscloud_lan.natgateway_lan ]
   datacenter_id = ionoscloud_datacenter.natgateway_datacenter.id
   name          = "natgateway_test"
-  public_ips    = [ "%s" ]
+  public_ips    = [ ionoscloud_ipblock.natgateway_ips.ips[0] ]
   lans {
      id          = ionoscloud_lan.natgateway_lan.id
      gateway_ips = [ "10.12.1.2/24"]
@@ -90,7 +86,7 @@ resource "ionoscloud_natgateway_rule" "natgateway_rule" {
   type          = "SNAT"
   protocol      = "TCP"
   source_subnet = "10.0.1.0/24"
-  public_ip     = "%s"
+  public_ip     = ionoscloud_ipblock.natgateway_ips.ips[0]
   target_subnet = "10.0.1.0/24"
   target_port_range {
       start = 500
@@ -105,6 +101,13 @@ resource "ionoscloud_datacenter" "natgateway_datacenter" {
   location          = "de/fra"
   description       = "datacenter for hosting "
 }
+
+resource "ionoscloud_ipblock" "natgateway_ips" {
+  location = ionoscloud_datacenter.natgateway_datacenter.location
+  size = 1
+  name = "natgateway_ips"
+}
+
 resource "ionoscloud_lan" "natgateway_lan" {
   datacenter_id = ionoscloud_datacenter.natgateway_datacenter.id
   public        = false
@@ -114,7 +117,7 @@ resource "ionoscloud_natgateway" "natgateway" {
   depends_on    = [ ionoscloud_lan.natgateway_lan ]
   datacenter_id = ionoscloud_datacenter.natgateway_datacenter.id
   name          = "natgateway_test"
-  public_ips    = [ "%s" ]
+  public_ips    = [ ionoscloud_ipblock.natgateway_ips.ips[0] ]
   lans {
      id          = ionoscloud_lan.natgateway_lan.id
      gateway_ips = [ "10.12.1.2/24"]
@@ -127,7 +130,7 @@ resource "ionoscloud_natgateway_rule" "natgateway_rule" {
   type          = "SNAT"
   protocol      = "TCP"
   source_subnet = "10.0.1.0/24"
-  public_ip     = "%s"
+  public_ip     = ionoscloud_ipblock.natgateway_ips.ips[0]
   target_subnet = "10.0.1.0/24"
   target_port_range {
       start = 500
@@ -148,6 +151,13 @@ resource "ionoscloud_datacenter" "natgateway_datacenter" {
   location          = "de/fra"
   description       = "datacenter for hosting "
 }
+
+resource "ionoscloud_ipblock" "natgateway_ips" {
+  location = ionoscloud_datacenter.natgateway_datacenter.location
+  size = 1
+  name = "natgateway_ips"
+}
+
 resource "ionoscloud_lan" "natgateway_lan" {
   datacenter_id = ionoscloud_datacenter.natgateway_datacenter.id
   public        = false
@@ -157,7 +167,7 @@ resource "ionoscloud_natgateway" "natgateway" {
   depends_on    = [ ionoscloud_lan.natgateway_lan ]
   datacenter_id = ionoscloud_datacenter.natgateway_datacenter.id
   name          = "natgateway_test"
-  public_ips    = [ "%s" ]
+  public_ips    = [ ionoscloud_ipblock.natgateway_ips.ips[0] ]
   lans {
      id          = ionoscloud_lan.natgateway_lan.id
      gateway_ips = [ "10.12.1.2/24"]
@@ -170,14 +180,13 @@ resource "ionoscloud_natgateway_rule" "natgateway_rule" {
   type          = "SNAT"
   protocol      = "TCP"
   source_subnet = "10.0.1.0/24"
-  public_ip     = "%s"
+  public_ip     = ionoscloud_ipblock.natgateway_ips.ips[0]
   target_subnet = "10.0.1.0/24"
   target_port_range {
       start = 500
       end   = 1000
   }
 }
-
 data "ionoscloud_natgateway_rule" "test_natgateway_rule" {
   datacenter_id = ionoscloud_datacenter.natgateway_datacenter.id
   natgateway_id = ionoscloud_natgateway.natgateway.id
