@@ -514,12 +514,6 @@ func resourceServerCreate(ctx context.Context, d *schema.ResourceData, meta inte
 		imageInput = v.(string)
 	}
 
-	ctx, cancel := context.WithTimeout(context.Background(), *resourceDefaultTimeouts.Default)
-
-	if cancel != nil {
-		defer cancel()
-	}
-
 	if imageInput != "" {
 		if !IsValidUUID(imageInput) {
 			img, err := getImage(client, datacenterId, imageInput, *volume.Type)
