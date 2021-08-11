@@ -1,4 +1,4 @@
-## 6.0.0-beta.4
+## 6.0.0-beta.6
 
 - updated arguments for datacenter, ipblock, location and user
 
