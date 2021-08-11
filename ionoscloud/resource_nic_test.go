@@ -4,7 +4,6 @@ import (
 	"context"
 	"fmt"
 	ionoscloud "github.com/ionos-cloud/sdk-go/v5"
-	"os"
 	"testing"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
@@ -44,17 +43,6 @@ func TestAccNic_Basic(t *testing.T) {
 
 func TestAccNic_Ips(t *testing.T) {
 	var nic ionoscloud.Nic
-	publicIp1 := os.Getenv("TF_ACC_IONOS_PUBLIC_IP_1")
-	if publicIp1 == "" {
-		t.Errorf("TF_ACC_IONOS_PUBLIC_1 not set; please set it to a valid public IP for the us/las zone")
-		t.FailNow()
-	}
-	publicIp2 := os.Getenv("TF_ACC_IONOS_PUBLIC_IP_2")
-	if publicIp2 == "" {
-		t.Errorf("TF_ACC_IONOS_PUBLIC_2 not set; please set it to a valid public IP for the us/las zone")
-		t.FailNow()
-	}
-
 	resource.Test(t, resource.TestCase{
 		PreCheck: func() {
 			testAccPreCheck(t)
@@ -63,12 +51,12 @@ func TestAccNic_Ips(t *testing.T) {
 		CheckDestroy:      testAccCheckNicDestroyCheck,
 		Steps: []resource.TestStep{
 			{
-				Config: fmt.Sprintf(testaccchecknicconfigIps, publicIp1, publicIp2),
+				Config: fmt.Sprintf(testaccchecknicconfigIps),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckNICExists("ionoscloud_nic.database_nic", &nic),
 					resource.TestCheckResourceAttrSet("ionoscloud_nic.database_nic", "mac"),
-					resource.TestCheckResourceAttr("ionoscloud_nic.database_nic", "ips.0", publicIp1),
-					resource.TestCheckResourceAttr("ionoscloud_nic.database_nic", "ips.1", publicIp2),
+					resource.TestCheckResourceAttrPair("ionoscloud_nic.database_nic", "ips.0", "ionoscloud_ipblock.webserver", "ips.0"),
+					resource.TestCheckResourceAttrPair("ionoscloud_nic.database_nic", "ips.1", "ionoscloud_ipblock.webserver", "ips.1"),
 				),
 			},
 		},
@@ -235,6 +223,12 @@ resource "ionoscloud_datacenter" "foobar" {
 	location = "us/las"
 }
 
+resource "ionoscloud_ipblock" "webserver" {
+  location = ionoscloud_datacenter.foobar.location
+  size = 2
+  name = "webserver_ipblock"
+}
+
 resource "ionoscloud_server" "webserver" {
   name = "webserver"
   datacenter_id = "${ionoscloud_datacenter.foobar.id}"
@@ -263,6 +257,6 @@ resource "ionoscloud_nic" "database_nic" {
   lan = 2
   dhcp = false
   firewall_active = true
-  ips            = ["%s","%s"]
+  ips            = [ ionoscloud_ipblock.webserver.ips[0], ionoscloud_ipblock.webserver.ips[1] ]
   name = "test_nic"
 }`

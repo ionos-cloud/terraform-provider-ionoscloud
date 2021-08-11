@@ -7,7 +7,6 @@ import (
 	"fmt"
 	ionoscloud "github.com/ionos-cloud/sdk-go/v5"
 	"log"
-	"os"
 	"testing"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
@@ -18,22 +17,6 @@ func TestAcck8sNodepool_Basic(t *testing.T) {
 	var k8sNodepool ionoscloud.KubernetesNodePool
 	k8sNodepoolName := "terraform_acctest"
 
-	publicIp1 := os.Getenv("TF_ACC_IONOS_PUBLIC_IP_1")
-	if publicIp1 == "" {
-		t.Errorf("TF_ACC_IONOS_PUBLIC_1 not set; please set it to a valid public IP for the us/las zone")
-		t.FailNow()
-	}
-	publicIp2 := os.Getenv("TF_ACC_IONOS_PUBLIC_IP_2")
-	if publicIp2 == "" {
-		t.Errorf("TF_ACC_IONOS_PUBLIC_2 not set; please set it to a valid public IP for the us/las zone")
-		t.FailNow()
-	}
-	publicIp3 := os.Getenv("TF_ACC_IONOS_PUBLIC_IP_3")
-	if publicIp3 == "" {
-		t.Errorf("TF_ACC_IONOS_PUBLIC_3 not set; please set it to a valid public IP for the us/las zone")
-		t.FailNow()
-	}
-
 	resource.Test(t, resource.TestCase{
 		PreCheck: func() {
 			testAccPreCheck(t)
@@ -42,22 +25,22 @@ func TestAcck8sNodepool_Basic(t *testing.T) {
 		CheckDestroy:      testAccCheckk8sNodepoolDestroyCheck,
 		Steps: []resource.TestStep{
 			{
-				Config: fmt.Sprintf(testAccCheckk8sNodepoolConfigBasic, k8sNodepoolName, publicIp1, publicIp2),
+				Config: fmt.Sprintf(testAccCheckk8sNodepoolConfigBasic, k8sNodepoolName),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckk8sNodepoolExists("ionoscloud_k8s_node_pool.terraform_acctest", &k8sNodepool),
 					resource.TestCheckResourceAttr("ionoscloud_k8s_node_pool.terraform_acctest", "name", k8sNodepoolName),
-					resource.TestCheckResourceAttr("ionoscloud_k8s_node_pool.terraform_acctest", "public_ips.0", publicIp1),
-					resource.TestCheckResourceAttr("ionoscloud_k8s_node_pool.terraform_acctest", "public_ips.1", publicIp2),
+					resource.TestCheckResourceAttrPair("ionoscloud_k8s_node_pool.terraform_acctest", "public_ips.0", "ionoscloud_ipblock.terraform_acctest", "ips.0"),
+					resource.TestCheckResourceAttrPair("ionoscloud_k8s_node_pool.terraform_acctest", "public_ips.1", "ionoscloud_ipblock.terraform_acctest", "ips.1"),
 				),
 			},
 			{
-				Config: fmt.Sprintf(testAccCheckk8sNodepoolConfigUpdate, publicIp1, publicIp2, publicIp3),
+				Config: fmt.Sprintf(testAccCheckk8sNodepoolConfigUpdate, k8sNodepoolName),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckk8sNodepoolExists("ionoscloud_k8s_node_pool.terraform_acctest", &k8sNodepool),
-					resource.TestCheckResourceAttr("ionoscloud_k8s_node_pool.terraform_acctest", "name", "updated"),
-					resource.TestCheckResourceAttr("ionoscloud_k8s_node_pool.terraform_acctest", "public_ips.0", publicIp1),
-					resource.TestCheckResourceAttr("ionoscloud_k8s_node_pool.terraform_acctest", "public_ips.1", publicIp2),
-					resource.TestCheckResourceAttr("ionoscloud_k8s_node_pool.terraform_acctest", "public_ips.2", publicIp3),
+					resource.TestCheckResourceAttr("ionoscloud_k8s_node_pool.terraform_acctest", "name", k8sNodepoolName),
+					resource.TestCheckResourceAttrPair("ionoscloud_k8s_node_pool.terraform_acctest", "public_ips.0", "ionoscloud_ipblock.terraform_acctest", "ips.0"),
+					resource.TestCheckResourceAttrPair("ionoscloud_k8s_node_pool.terraform_acctest", "public_ips.1", "ionoscloud_ipblock.terraform_acctest", "ips.1"),
+					resource.TestCheckResourceAttrPair("ionoscloud_k8s_node_pool.terraform_acctest", "public_ips.2", "ionoscloud_ipblock.terraform_acctest", "ips.2"),
 				),
 			},
 		},
@@ -170,7 +153,11 @@ resource "ionoscloud_datacenter" "terraform_acctest" {
   location    = "us/las"
   description = "Datacenter created through terraform"
 }
-
+resource "ionoscloud_ipblock" "terraform_acctest" {
+  location = ionoscloud_datacenter.terraform_acctest.location
+  size = 3
+  name = "terraform_acctest"
+}
 resource "ionoscloud_k8s_cluster" "terraform_acctest" {
   name        = "terraform_acctest"
   k8s_version = "1.18.9"
@@ -179,7 +166,6 @@ resource "ionoscloud_k8s_cluster" "terraform_acctest" {
     time            = "09:00:00Z"
   }
 }
-
 resource "ionoscloud_k8s_node_pool" "terraform_acctest" {
   name        = "%s"
   k8s_version = "${ionoscloud_k8s_cluster.terraform_acctest.k8s_version}"
@@ -196,7 +182,7 @@ resource "ionoscloud_k8s_node_pool" "terraform_acctest" {
   cores_count       = 2
   ram_size          = 2048
   storage_size      = 40
-  public_ips        = [ "%s", "%s" ]
+  public_ips        = [ ionoscloud_ipblock.terraform_acctest.ips[0], ionoscloud_ipblock.terraform_acctest.ips[1] ]
 }`
 
 const testAccCheckk8sNodepoolConfigUpdate = `
@@ -205,7 +191,11 @@ resource "ionoscloud_datacenter" "terraform_acctest" {
   location    = "us/las"
   description = "Datacenter created through terraform"
 }
-
+resource "ionoscloud_ipblock" "terraform_acctest" {
+  location = ionoscloud_datacenter.terraform_acctest.location
+  size = 3
+  name = "terraform_acctest"
+}
 resource "ionoscloud_k8s_cluster" "terraform_acctest" {
   name        = "terraform_acctest"
   k8s_version = "1.18.9"
@@ -216,7 +206,7 @@ resource "ionoscloud_k8s_cluster" "terraform_acctest" {
 }
 
 resource "ionoscloud_k8s_node_pool" "terraform_acctest" {
-  name        = "updated"
+  name        = "%s"
   k8s_version = "${ionoscloud_k8s_cluster.terraform_acctest.k8s_version}"
   auto_scaling {
   	min_node_count = 1
@@ -235,7 +225,7 @@ resource "ionoscloud_k8s_node_pool" "terraform_acctest" {
   cores_count       = 2
   ram_size          = 2048
   storage_size      = 40
-  public_ips        = [ "%s", "%s", "%s" ]
+  public_ips        = [ ionoscloud_ipblock.terraform_acctest.ips[0], ionoscloud_ipblock.terraform_acctest.ips[1], ionoscloud_ipblock.terraform_acctest.ips[2] ]
 }`
 
 const testAccCheckk8sNodepoolConfigVersion = `
