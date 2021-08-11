@@ -43,6 +43,41 @@ func resourceDatacenter() *schema.Resource {
 				Type:     schema.TypeBool,
 				Optional: true,
 			},
+			"version": {
+				Type:     schema.TypeInt,
+				Computed: true,
+			},
+			"features": {
+				Type:     schema.TypeList,
+				Computed: true,
+				Elem: &schema.Schema{
+					Type: schema.TypeString,
+				},
+			},
+			"cpu_architecture": {
+				Type:     schema.TypeList,
+				Computed: true,
+				Elem: &schema.Resource{
+					Schema: map[string]*schema.Schema{
+						"cpu_family": {
+							Type:     schema.TypeString,
+							Computed: true,
+						},
+						"max_cores": {
+							Type:     schema.TypeInt,
+							Computed: true,
+						},
+						"max_ram": {
+							Type:     schema.TypeInt,
+							Computed: true,
+						},
+						"vendor": {
+							Type:     schema.TypeString,
+							Computed: true,
+						},
+					},
+				},
+			},
 		},
 		Timeouts: &resourceDefaultTimeouts,
 	}
@@ -140,6 +175,54 @@ func resourceDatacenterRead(ctx context.Context, d *schema.ResourceData, meta in
 		err := d.Set("sec_auth_protection", *datacenter.Properties.SecAuthProtection)
 		if err != nil {
 			diags := diag.FromErr(fmt.Errorf("error while setting sec_auth_protection property for datacenter %s: %s", d.Id(), err))
+			return diags
+		}
+	}
+
+	if datacenter.Properties.Version != nil {
+		err := d.Set("version", *datacenter.Properties.Version)
+		if err != nil {
+			diags := diag.FromErr(fmt.Errorf("error while setting version property for datacenter %s: %s", d.Id(), err))
+			return diags
+		}
+	}
+
+	if datacenter.Properties.Features != nil && len(*datacenter.Properties.Features) > 0 {
+		err := d.Set("features", *datacenter.Properties.Features)
+		if err != nil {
+			diags := diag.FromErr(fmt.Errorf("error while setting features property for datacenter %s: %s", d.Id(), err))
+			return diags
+		}
+	}
+
+	cpuArchitectures := make([]interface{}, 0)
+	if datacenter.Properties.CpuArchitecture != nil && len(*datacenter.Properties.CpuArchitecture) > 0 {
+		cpuArchitectures = make([]interface{}, len(*datacenter.Properties.CpuArchitecture))
+		for index, cpuArchitecture := range *datacenter.Properties.CpuArchitecture {
+			architectureEntry := make(map[string]interface{})
+
+			if cpuArchitecture.CpuFamily != nil {
+				architectureEntry["cpu_family"] = *cpuArchitecture.CpuFamily
+			}
+
+			if cpuArchitecture.MaxCores != nil {
+				architectureEntry["max_cores"] = *cpuArchitecture.MaxCores
+			}
+
+			if cpuArchitecture.MaxRam != nil {
+				architectureEntry["max_ram"] = *cpuArchitecture.MaxRam
+			}
+
+			if cpuArchitecture.Vendor != nil {
+				architectureEntry["vendor"] = *cpuArchitecture.Vendor
+			}
+
+			cpuArchitectures[index] = architectureEntry
+		}
+	}
+	if len(cpuArchitectures) > 0 {
+		if err := d.Set("cpu_architecture", cpuArchitectures); err != nil {
+			diags := diag.FromErr(fmt.Errorf("error while setting features property for datacenter %s: %s", d.Id(), err))
 			return diags
 		}
 	}
