@@ -1,3 +1,5 @@
+// +build k8s
+
 package ionoscloud
 
 import (
@@ -240,8 +242,8 @@ resource "ionoscloud_k8s_cluster" "terraform_acctest" {
 }
 
 resource "ionoscloud_k8s_node_pool" "terraform_acctest" {
-  name        = "updated"
-  k8s_version = ionoscloud_k8s_cluster.terraform_acctest.k8s_version
+  name        = "%s"
+  k8s_version = "${ionoscloud_k8s_cluster.terraform_acctest.k8s_version}"
   auto_scaling {
   	min_node_count = 1
 	max_node_count = 2
