@@ -155,7 +155,14 @@ func resourceVolumeCreate(ctx context.Context, d *schema.ResourceData, meta inte
 	var image string
 	if imageAlias == "" && imageName != "" {
 		if !IsValidUUID(imageName) {
-			img, err := getImage(ctx, client, dcId, imageName, d.Get("disk_type").(string))
+
+			dc, _, err := client.DataCenterApi.DatacentersFindById(ctx, dcId).Execute()
+			if err != nil {
+				diags := diag.FromErr(fmt.Errorf("error fetching datacenter %s: (%s)", dcId, err))
+				return diags
+			}
+
+			img, err := resolveVolumeImageName(ctx, client, imageName, *dc.Properties.Location)
 			if err != nil {
 				diags := diag.FromErr(err)
 				return diags
@@ -169,12 +176,6 @@ func resourceVolumeCreate(ctx context.Context, d *schema.ResourceData, meta inte
 				if image != "" {
 					isSnapshot = true
 				} else {
-					dc, _, err := client.DataCenterApi.DatacentersFindById(ctx, dcId).Execute()
-
-					if err != nil {
-						diags := diag.FromErr(fmt.Errorf("an error occured while fetching a Datacenter ID %s %s", dcId, err))
-						return diags
-					}
 					imageAlias = getImageAlias(ctx, client, imageName, *dc.Properties.Location)
 				}
 			}

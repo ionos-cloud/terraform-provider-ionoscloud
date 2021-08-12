@@ -250,17 +250,10 @@ func resourceDatacenterDelete(ctx context.Context, d *schema.ResourceData, meta 
 	return nil
 }
 
-func getImage(ctx context.Context, client *ionoscloud.APIClient, dcId string, imageName string, imageType string) (*ionoscloud.Image, error) {
+func resolveVolumeImageName(ctx context.Context, client *ionoscloud.APIClient, imageName string, location string) (*ionoscloud.Image, error) {
 
 	if imageName == "" {
 		return nil, fmt.Errorf("imageName not suplied")
-	}
-
-	dc, _, err := client.DataCenterApi.DatacentersFindById(ctx, dcId).Execute()
-
-	if err != nil {
-		log.Print(fmt.Errorf("error while fetching a data center ID %s %s", dcId, err))
-		return nil, err
 	}
 
 	images, _, err := client.ImageApi.ImagesGet(ctx).Execute()
@@ -277,15 +270,11 @@ func getImage(ctx context.Context, client *ionoscloud.APIClient, dcId string, im
 				imgName = *i.Properties.Name
 			}
 
-			if imageType == "SSD" {
-				imageType = "HDD"
-			}
-
-			if imgName != "" && strings.Contains(strings.ToLower(imgName), strings.ToLower(imageName)) && *i.Properties.ImageType == imageType && *i.Properties.Location == *dc.Properties.Location {
+			if imgName != "" && strings.Contains(strings.ToLower(imgName), strings.ToLower(imageName)) && *i.Properties.ImageType == "HDD" && *i.Properties.Location == location {
 				return &i, err
 			}
 
-			if imgName != "" && strings.ToLower(imageName) == strings.ToLower(*i.Id) && *i.Properties.ImageType == imageType && *i.Properties.Location == *dc.Properties.Location {
+			if imgName != "" && strings.ToLower(imageName) == strings.ToLower(*i.Id) && *i.Properties.ImageType == "HDD" && *i.Properties.Location == location {
 				return &i, err
 			}
 
