@@ -105,30 +105,6 @@ func resourcek8sCluster() *schema.Resource {
 					"to `false` and should not be provided otherwise.",
 				Optional: true,
 			},
-			"api_subnet_allow_list": {
-				Type: schema.TypeList,
-				Description: "Access to the K8s API server is restricted to these CIDRs. Cluster-internal traffic is not " +
-					"affected by this restriction. If no allowlist is specified, access is not restricted. If an IP " +
-					"without subnet mask is provided, the default value will be used: 32 for IPv4 and 128 for IPv6.",
-				Optional: true,
-				Elem: &schema.Schema{
-					Type: schema.TypeString,
-				},
-			},
-			"s3_buckets": {
-				Type:        schema.TypeList,
-				Description: "List of S3 bucket configured for K8s usage. For now it contains only an S3 bucket used to store K8s API audit logs.",
-				Optional:    true,
-				Elem: &schema.Resource{
-					Schema: map[string]*schema.Schema{
-						"name": {
-							Type:        schema.TypeString,
-							Description: "Name of the S3 bucket",
-							Required:    true,
-						},
-					},
-				},
-			},
 		},
 		Timeouts: &resourceDefaultTimeouts,
 	}
@@ -171,36 +147,6 @@ func resourcek8sClusterCreate(ctx context.Context, d *schema.ResourceData, meta 
 	if gatewayIp, gatewayIpOk := d.GetOk("gateway_ip"); gatewayIpOk {
 		gatewayIp := gatewayIp.(string)
 		cluster.Properties.GatewayIp = &gatewayIp
-	}
-
-	if apiSubnet, apiSubnetOk := d.GetOk("api_subnet_allow_list"); apiSubnetOk {
-		apiSubnet := apiSubnet.([]interface{})
-		if apiSubnet != nil && len(apiSubnet) > 0 {
-			apiSubnets := make([]string, 0)
-			for _, value := range apiSubnet {
-				valueS := value.(string)
-				apiSubnets = append(apiSubnets, valueS)
-			}
-			if len(apiSubnets) > 0 {
-				cluster.Properties.ApiSubnetAllowList = &apiSubnets
-			}
-		}
-	}
-
-	if s3Bucket, s3BucketOk := d.GetOk("s3_buckets"); s3BucketOk {
-		s3BucketValues := s3Bucket.([]interface{})
-		if s3BucketValues != nil && len(s3BucketValues) > 0 {
-			s3Buckets := make([]ionoscloud.S3Bucket, 0)
-			var s3 ionoscloud.S3Bucket
-			for _, value := range s3BucketValues {
-				valueS := value.(string)
-				s3.Name = &valueS
-				s3Buckets = append(s3Buckets, s3)
-			}
-			if len(s3Buckets) > 0 {
-				cluster.Properties.S3Buckets = &s3Buckets
-			}
-		}
 	}
 
 	createdCluster, _, err := client.KubernetesApi.K8sPost(ctx).KubernetesCluster(cluster).Execute()
@@ -321,30 +267,6 @@ func resourcek8sClusterRead(ctx context.Context, d *schema.ResourceData, meta in
 		}
 	}
 
-	if cluster.Properties.ApiSubnetAllowList != nil {
-		apiSubnetAllowLists := make([]interface{}, len(*cluster.Properties.ApiSubnetAllowList), len(*cluster.Properties.ApiSubnetAllowList))
-		for i, apiSubnetAllowList := range *cluster.Properties.ApiSubnetAllowList {
-			apiSubnetAllowLists[i] = apiSubnetAllowList
-		}
-		if err := d.Set("api_subnet_allow_list", apiSubnetAllowLists); err != nil {
-			diags := diag.FromErr(err)
-			return diags
-		}
-	}
-
-	if cluster.Properties.S3Buckets != nil {
-		s3Buckets := make([]interface{}, len(*cluster.Properties.S3Buckets), len(*cluster.Properties.S3Buckets))
-		for i, s3Bucket := range *cluster.Properties.S3Buckets {
-			s3BucketEntry := make(map[string]interface{})
-			s3BucketEntry["name"] = *s3Bucket.Name
-			s3Buckets[i] = s3BucketEntry
-		}
-		if err := d.Set("s3_buckets", s3Buckets); err != nil {
-			diags := diag.FromErr(err)
-			return diags
-		}
-	}
-
 	return nil
 }
 
@@ -414,38 +336,6 @@ func resourcek8sClusterUpdate(ctx context.Context, d *schema.ResourceData, meta 
 
 			if updateMaintenanceWindow == true {
 				request.Properties.MaintenanceWindow = maintenanceWindow
-			}
-		}
-	}
-
-	if d.HasChange("api_subnet_allow_list") {
-		_, newApiSubnet := d.GetChange("maintenance_window.0")
-		apiSubnet := newApiSubnet.([]interface{})
-		if apiSubnet != nil && len(apiSubnet) > 0 {
-			apiSubnets := make([]string, 0)
-			for _, value := range apiSubnet {
-				valueS := value.(string)
-				apiSubnets = append(apiSubnets, valueS)
-			}
-			if len(apiSubnets) > 0 {
-				request.Properties.ApiSubnetAllowList = &apiSubnets
-			}
-		}
-	}
-
-	if d.HasChange("s3_buckets") {
-		_, newS3Buckets := d.GetChange("s3_buckets.0")
-		s3BucketValues := newS3Buckets.([]interface{})
-		if s3BucketValues != nil && len(s3BucketValues) > 0 {
-			s3Buckets := make([]ionoscloud.S3Bucket, 0)
-			var s3 ionoscloud.S3Bucket
-			for _, value := range s3BucketValues {
-				valueS := value.(string)
-				s3.Name = &valueS
-				s3Buckets = append(s3Buckets, s3)
-			}
-			if len(s3Buckets) > 0 {
-				request.Properties.S3Buckets = &s3Buckets
 			}
 		}
 	}

@@ -54,5 +54,3 @@ The following attributes are returned by the datasource:
   "TERMINATED"
 * `node_pools` - list of the IDs of the node pools in this cluster
 * `kube_config` - Kubernetes configuration
-* `api_subnet_allow_list` - access to the K8s API server is restricted to these CIDRs
-* `s3_buckets` - list of S3 bucket configured for K8s usage
