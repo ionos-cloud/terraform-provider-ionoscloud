@@ -59,6 +59,27 @@ func TestAccVolume_NoPassword(t *testing.T) {
 	})
 }
 
+func TestAccVolume_ResolveImageName(t *testing.T) {
+	var volume ionoscloud.Volume
+
+	resource.Test(t, resource.TestCase{
+		PreCheck: func() {
+			testAccPreCheck(t)
+		},
+		ProviderFactories: testAccProviderFactories,
+		CheckDestroy:      testAccCheckVolumeDestroyCheck,
+		Steps: []resource.TestStep{
+			{
+				Config: fmt.Sprintf(testAccCheckVolumeResolveImageName),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckVolumeExists("ionoscloud_volume.image_name_volume", &volume),
+					resource.TestCheckResourceAttr("ionoscloud_volume.image_name_volume", "name", "image_name_volume"),
+				),
+			},
+		},
+	})
+}
+
 func testAccCheckVolumeDestroyCheck(s *terraform.State) error {
 	client := testAccProvider.Meta().(*ionoscloud.APIClient)
 
@@ -253,3 +274,49 @@ resource "ionoscloud_volume" "no_password_volume" {
   disk_type      = "HDD"
   licence_type   =  "other"
 }`
+
+const testAccCheckVolumeResolveImageName = `
+resource "ionoscloud_datacenter" "foobar" {
+	name       = "volume-test"
+	location   = "de/fra"
+}
+
+resource "ionoscloud_lan" "webserver_lan" {
+  datacenter_id = "${ionoscloud_datacenter.foobar.id}"
+  public = true
+  name = "public"
+}
+
+resource "ionoscloud_server" "webserver" {
+  name = "webserver"
+  datacenter_id = "${ionoscloud_datacenter.foobar.id}"
+  cores = 1
+  ram = 1024
+  availability_zone = "ZONE_1"
+  cpu_family = "INTEL_SKYLAKE"
+	image_name = "ubuntu:latest"
+	image_password = "K3tTj8G14a3EgKyNeeiY"
+  volume {
+    name = "system"
+    size = 5
+    disk_type = "SSD Standard"
+  }
+  nic {
+    lan = "${ionoscloud_lan.webserver_lan.id}"
+    dhcp = true
+    firewall_active = true
+  }
+}
+
+resource "ionoscloud_volume" "image_name_volume" {
+  datacenter_id = "${ionoscloud_datacenter.foobar.id}"
+  server_id = "${ionoscloud_server.webserver.id}"
+  availability_zone = "ZONE_1"
+  name = "image_name_volume"
+  size = 5
+  disk_type = "SSD Standard"
+  bus = "VIRTIO"
+  image_name = "Ubuntu-20.04-LTS"
+  image_password = "K3tTj8G14a3EgKyNeeiY"
+}
+`

@@ -462,28 +462,28 @@ resource "ionoscloud_server" "webserver" {
 }`
 
 const testAccCheckServerResolveImageName = `
-resource "ionoscloud_datacenter" "datacenter1" {
-  name        = "TF Test datacenter"
+resource "ionoscloud_datacenter" "datacenter" {
+  name        = "test_server"
   location    = "de/fra"
   description = "Test datacenter done by TF"
 }
 
 resource "ionoscloud_lan" "public_lan" {
-  datacenter_id = ionoscloud_datacenter.datacenter1.id
+  datacenter_id = ionoscloud_datacenter.datacenter.id
   public        = true
 }
 
 
 resource "ionoscloud_ipblock" "public_ip1" {
   name     = "test-ip"
-  location = ionoscloud_datacenter.datacenter1.location
+  location = ionoscloud_datacenter.datacenter.location
   size     = 1
 }
 
 
 resource "ionoscloud_server" "webserver" {
   name              = "%s"
-  datacenter_id     = ionoscloud_datacenter.datacenter1.id
+  datacenter_id     = ionoscloud_datacenter.datacenter.id
   cores             = 1
   ram               = 1024
   availability_zone = "ZONE_1"

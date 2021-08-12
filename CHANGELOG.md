@@ -1,3 +1,7 @@
+## 5.2.9
+
+- issue #72 - fixed find volume image by name
+
 ## 5.2.8
 
 - rollback to the node pool behaviour before the fix of issue #71

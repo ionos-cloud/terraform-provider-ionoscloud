@@ -4,13 +4,11 @@ import (
 	"context"
 	"fmt"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 	ionoscloud "github.com/ionos-cloud/sdk-go/v5"
 	"log"
 	"regexp"
-	"strings"
-
-	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 )
 
 func resourceDatacenter() *schema.Resource {
@@ -248,97 +246,6 @@ func resourceDatacenterDelete(ctx context.Context, d *schema.ResourceData, meta 
 
 	d.SetId("")
 	return nil
-}
-
-func resolveVolumeImageName(ctx context.Context, client *ionoscloud.APIClient, imageName string, location string) (*ionoscloud.Image, error) {
-
-	if imageName == "" {
-		return nil, fmt.Errorf("imageName not suplied")
-	}
-
-	images, _, err := client.ImageApi.ImagesGet(ctx).Execute()
-
-	if err != nil {
-		log.Print(fmt.Errorf("error while fetching the list of images %s", err))
-		return nil, err
-	}
-
-	if len(*images.Items) > 0 {
-		for _, i := range *images.Items {
-			imgName := ""
-			if i.Properties.Name != nil && *i.Properties.Name != "" {
-				imgName = *i.Properties.Name
-			}
-
-			if imgName != "" && strings.Contains(strings.ToLower(imgName), strings.ToLower(imageName)) && *i.Properties.ImageType == "HDD" && *i.Properties.Location == location {
-				return &i, err
-			}
-
-			if imgName != "" && strings.ToLower(imageName) == strings.ToLower(*i.Id) && *i.Properties.ImageType == "HDD" && *i.Properties.Location == location {
-				return &i, err
-			}
-
-		}
-	}
-	return nil, err
-}
-
-func getSnapshotId(ctx context.Context, client *ionoscloud.APIClient, snapshotName string) string {
-
-	if snapshotName == "" {
-		return ""
-	}
-
-	snapshots, _, err := client.SnapshotApi.SnapshotsGet(ctx).Execute()
-
-	if err != nil {
-		log.Print(fmt.Errorf("error while fetching the list of snapshots %s", err))
-	}
-
-	if len(*snapshots.Items) > 0 {
-		for _, i := range *snapshots.Items {
-			imgName := ""
-			if *i.Properties.Name != "" {
-				imgName = *i.Properties.Name
-			}
-
-			if imgName != "" && strings.Contains(strings.ToLower(imgName), strings.ToLower(snapshotName)) {
-				return *i.Id
-			}
-		}
-	}
-	return ""
-}
-
-func getImageAlias(ctx context.Context, client *ionoscloud.APIClient, imageAlias string, location string) string {
-
-	if imageAlias == "" {
-		return ""
-	}
-	parts := strings.SplitN(location, "/", 2)
-	if len(parts) != 2 {
-		log.Print(fmt.Errorf("invalid location id %s", location))
-	}
-
-	locations, _, err := client.LocationApi.LocationsFindByRegionIdAndId(ctx, parts[0], parts[1]).Execute()
-
-	if err != nil {
-		log.Print(fmt.Errorf("error while fetching the list of snapshots %s", err))
-	}
-
-	if len(*locations.Properties.ImageAliases) > 0 {
-		for _, i := range *locations.Properties.ImageAliases {
-			alias := ""
-			if i != "" {
-				alias = i
-			}
-
-			if alias != "" && strings.ToLower(alias) == strings.ToLower(imageAlias) {
-				return i
-			}
-		}
-	}
-	return ""
 }
 
 func IsValidUUID(uuid string) bool {
