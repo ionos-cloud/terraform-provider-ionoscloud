@@ -31,6 +31,9 @@ resource "ionoscloud_user" "user" {
 * `force_sec_auth` - (Required)[Boolean] Indicates if secure (two-factor) authentication should be enabled for the user (true) or not (false).
 * `last_name` - (Required)[string] A last name for the user.
 * `password` - (Required)[string] A password for the user.
+* `sec_auth_active` - (Optional)[Boolean] Indicates if secure authentication is active for the user or not. *it can not be used in create requests - can be used in update*
+* `s3_canonical_user_id` - (Computed) Canonical (S3) id of the user for a given identity
+* `active` - (Optional)[Boolean] Indicates if the user is active
 
 
 ## Import

@@ -1,3 +1,7 @@
+## 6.0.0-beta.6
+
+- updated arguments for datacenter, ipblock, location and user
+
 ## 6.0.0-beta.5
 
 - rollback to the node pool behaviour before the fix of issue #71

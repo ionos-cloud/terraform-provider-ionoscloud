@@ -28,6 +28,13 @@ The following arguments are supported:
 * `location` - (Required)[string] The regional location where the Virtual Data Center will be created.
 * `description` - (Optional)[string] Description for the Virtual Data Center.
 * `sec_auth_protection` - (Optional) [bool] Boolean value representing if the data center requires extra protection e.g. two factor protection
+* `version` - (Computed) The version of that Data Center. Gets incremented with every change
+* `features` - (Computed) List of features supported by the location this data center is part of
+* `cpu_architecture` - (Computed) Array of features and CPU families available in a location
+  * `cpu_family` - A valid CPU family name
+  * `max_cores` - The maximum number of cores available
+  * `max_ram` - The maximum number of RAM in MB
+  * `vendor` - A valid CPU vendor name
 
 ## Import
 
