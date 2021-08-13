@@ -516,7 +516,12 @@ func resourceServerCreate(ctx context.Context, d *schema.ResourceData, meta inte
 
 	if imageInput != "" {
 		if !IsValidUUID(imageInput) {
-			img, err := getImage(client, datacenterId, imageInput, *volume.Type)
+			dc, _, err := client.DataCentersApi.DatacentersFindById(ctx, datacenterId).Execute()
+			if err != nil {
+				diags := diag.FromErr(fmt.Errorf("error fetching datacenter %s: (%s)", datacenterId, err))
+				return diags
+			}
+			img, err := resolveImageName(client, imageInput, *dc.Properties.Location)
 			if err != nil {
 				diags := diag.FromErr(err)
 				return diags
@@ -565,7 +570,13 @@ func resourceServerCreate(ctx context.Context, d *schema.ResourceData, meta inte
 					return diags
 				}
 
-				img, err := getImage(client, d.Get("datacenter_id").(string), imageInput, *volume.Type)
+				dc, _, err := client.DataCentersApi.DatacentersFindById(ctx, datacenterId).Execute()
+				if err != nil {
+					diags := diag.FromErr(fmt.Errorf("error fetching datacenter %s: (%s)", datacenterId, err))
+					return diags
+				}
+
+				img, err := resolveImageName(client, imageInput, *dc.Properties.Location)
 
 				if err != nil {
 					diags := diag.FromErr(err)

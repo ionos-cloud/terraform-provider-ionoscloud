@@ -1,6 +1,7 @@
 ## 6.0.0-beta.6
 
 - updated arguments for datacenter, ipblock, location and user
+- issue #72 - fixed find volume image by name
 
 ## 6.0.0-beta.5
 

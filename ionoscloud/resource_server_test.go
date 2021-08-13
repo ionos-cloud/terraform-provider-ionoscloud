@@ -123,6 +123,29 @@ func TestAccServer_NicIps(t *testing.T) {
 	})
 }
 
+func TestAccServer_ResolveImageName(t *testing.T) {
+	var server ionoscloud.Server
+	serverName := "webserver"
+
+	resource.Test(t, resource.TestCase{
+		PreCheck: func() {
+			testAccPreCheck(t)
+		},
+		ProviderFactories: testAccProviderFactories,
+		CheckDestroy:      testAccCheckServerDestroyCheck,
+		Steps: []resource.TestStep{
+			{
+				Config: fmt.Sprintf(testAccCheckServerResolveImageName, serverName),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckServerExists("ionoscloud_server.webserver", &server),
+					testAccCheckServerAttributes("ionoscloud_server.webserver", serverName),
+					resource.TestCheckResourceAttr("ionoscloud_server.webserver", "name", serverName),
+				),
+			},
+		},
+	})
+}
+
 func testAccCheckServerDestroyCheck(s *terraform.State) error {
 	client := testAccProvider.Meta().(*ionoscloud.APIClient)
 
@@ -437,6 +460,50 @@ resource "ionoscloud_server" "webserver" {
     firewall_active = false
   }
 
+}`
+
+const testAccCheckServerResolveImageName = `
+resource "ionoscloud_datacenter" "datacenter" {
+  name        = "test_server"
+  location    = "de/fra"
+  description = "Test datacenter done by TF"
+}
+resource "ionoscloud_lan" "public_lan" {
+  datacenter_id = ionoscloud_datacenter.datacenter.id
+  public        = true
+}
+resource "ionoscloud_ipblock" "public_ip1" {
+  name     = "test-ip"
+  location = ionoscloud_datacenter.datacenter.location
+  size     = 1
+}
+resource "ionoscloud_server" "webserver" {
+  name              = "%s"
+  datacenter_id     = ionoscloud_datacenter.datacenter.id
+  cores             = 1
+  ram               = 1024
+  availability_zone = "ZONE_1"
+  cpu_family        = "INTEL_SKYLAKE" 
+  image_name        = "Ubuntu-20.04-LTS"
+  image_password    = "pass123456"
+  volume {
+    name           = "test1-root"
+    size              = 5
+    disk_type      = "SSD Standard"
+  }
+  nic {
+    lan             = ionoscloud_lan.public_lan.id
+    dhcp            = true
+    ips             = ionoscloud_ipblock.public_ip1.ips
+    firewall_active = true
+  
+    firewall {
+      protocol         = "TCP"
+      name             = "SSH"
+      port_range_start = 22
+      port_range_end   = 22
+    }
+  }
 }`
 
 func Test_Update(t *testing.T) {
