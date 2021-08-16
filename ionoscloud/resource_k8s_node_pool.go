@@ -595,6 +595,41 @@ func resourcek8sNodePoolUpdate(ctx context.Context, d *schema.ResourceData, meta
 		NodeCount: &nodeCount,
 	}
 
+	if d.HasChange("name") {
+		diags := diag.FromErr(fmt.Errorf("name attribute is immutable, therefore not allowed in update requests"))
+		return diags
+	}
+
+	if d.HasChange("cpu_family") {
+		diags := diag.FromErr(fmt.Errorf("cpu_family attribute is immutable, therefore not allowed in update requests"))
+		return diags
+	}
+
+	if d.HasChange("availability_zone") {
+		diags := diag.FromErr(fmt.Errorf("availability_zone attribute is immutable, therefore not allowed in update requests"))
+		return diags
+	}
+
+	if d.HasChange("cores_count") {
+		diags := diag.FromErr(fmt.Errorf("cores_count attribute is immutable, therefore not allowed in update requests"))
+		return diags
+	}
+
+	if d.HasChange("ram_size") {
+		diags := diag.FromErr(fmt.Errorf("ram_size attribute is immutable, therefore not allowed in update requests"))
+		return diags
+	}
+
+	if d.HasChange("storage_size") {
+		diags := diag.FromErr(fmt.Errorf("storage_size attribute is immutable, therefore not allowed in update requests"))
+		return diags
+	}
+
+	if d.HasChange("storage_type") {
+		diags := diag.FromErr(fmt.Errorf("storage_size attribute is immutable, therefore not allowed in update requests"))
+		return diags
+	}
+
 	if d.HasChange("k8s_version") {
 		oldk8sVersion, newk8sVersion := d.GetChange("k8s_version")
 		log.Printf("[INFO] k8s pool k8s version changed from %+v to %+v", oldk8sVersion, newk8sVersion)
