@@ -146,6 +146,26 @@ func TestAccServer_ResolveImageName(t *testing.T) {
 	})
 }
 
+func TestAccServer_WithSnapshot(t *testing.T) {
+	var server ionoscloud.Server
+
+	resource.Test(t, resource.TestCase{
+		PreCheck: func() {
+			testAccPreCheck(t)
+		},
+		ProviderFactories: testAccProviderFactories,
+		CheckDestroy:      testAccCheckServerDestroyCheck,
+		Steps: []resource.TestStep{
+			{
+				Config: fmt.Sprintf(testAccCheckServerWithSnapshot),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckServerExists("ionoscloud_server.webserver", &server),
+				),
+			},
+		},
+	})
+}
+
 func testAccCheckServerDestroyCheck(s *terraform.State) error {
 	client := testAccProvider.Meta().(*ionoscloud.APIClient)
 
@@ -510,6 +530,69 @@ resource "ionoscloud_server" "webserver" {
     }
   }
 }`
+
+const testAccCheckServerWithSnapshot = `
+
+resource "ionoscloud_datacenter" "foobar" {
+	name       = "volume-test"
+	location   = "de/fra"
+}
+
+resource "ionoscloud_lan" "webserver_lan" {
+  datacenter_id = "${ionoscloud_datacenter.foobar.id}"
+  public = true
+  name = "public"
+}
+
+
+resource "ionoscloud_server" "webserver" {
+  name = "webserver"
+  datacenter_id = "${ionoscloud_datacenter.foobar.id}"
+  cores = 1
+  ram = 1024
+  availability_zone = "ZONE_1"
+  cpu_family = "INTEL_SKYLAKE"
+	image_name = "ubuntu:latest"
+	image_password = "K3tTj8G14a3EgKyNeeiY"
+  volume {
+    name = "system"
+    size = 5
+    disk_type = "SSD Standard"
+  }
+  nic {
+    lan = "${ionoscloud_lan.webserver_lan.id}"
+    dhcp = true
+    firewall_active = true
+  }
+}
+
+resource "ionoscloud_snapshot" "test_snapshot" {
+  datacenter_id = "${ionoscloud_datacenter.foobar.id}"
+  volume_id = "${ionoscloud_server.webserver.boot_volume}"
+  name = "terraform_snapshot"
+}
+
+resource "ionoscloud_server" "webserver2" {
+  depends_on = [ionoscloud_snapshot.test_snapshot]
+  name = "webserver2"
+  datacenter_id = "${ionoscloud_datacenter.foobar.id}"
+  cores = 1
+  ram = 1024
+  availability_zone = "ZONE_1"
+  cpu_family = "INTEL_SKYLAKE"
+  image_name = ionoscloud_snapshot.test_snapshot.id
+  volume {
+    name = "system"
+    size = 5
+    disk_type = "SSD Standard"
+  }
+  nic {
+    lan = "${ionoscloud_lan.webserver_lan.id}"
+    dhcp = true
+    firewall_active = true
+  }
+}
+`
 
 func Test_Update(t *testing.T) {
 
