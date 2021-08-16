@@ -185,7 +185,7 @@ func resourceVolumeCreate(ctx context.Context, d *schema.ResourceData, meta inte
 				diags := diag.FromErr(fmt.Errorf("could not find an image/imagealias/snapshot that matches %s ", imageName))
 				return diags
 			}
-			if imagePassword == "" && len(sshKeypath) == 0 && isSnapshot == false && img != nil && *img.Properties.Public {
+			if imagePassword == "" && len(sshKeypath) == 0 && isSnapshot == false && img != nil && img.Properties.Public != nil && *img.Properties.Public {
 				diags := diag.FromErr(fmt.Errorf("either 'image_password' or 'sshkey' must be provided"))
 				return diags
 			}
@@ -198,7 +198,7 @@ func resourceVolumeCreate(ctx context.Context, d *schema.ResourceData, meta inte
 					return diags
 				}
 				isSnapshot = true
-			} else if *img.Properties.Public == true && isSnapshot == false {
+			} else if isSnapshot == false && img.Properties.Public != nil && *img.Properties.Public == true {
 				if imagePassword == "" && len(sshKeypath) == 0 {
 					diags := diag.FromErr(fmt.Errorf("either 'image_password' or 'sshkey' must be provided"))
 					return diags
