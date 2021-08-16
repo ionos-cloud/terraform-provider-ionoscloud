@@ -1,6 +1,7 @@
 ## 5.2.9
 
 - issue #72 - fixed find volume image by name
+- error messages for immutable node pool attributes
 
 ## 5.2.8
 
