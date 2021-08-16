@@ -7,6 +7,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 	ionoscloud "github.com/ionos-cloud/sdk-go/v5"
 	"log"
+	"strings"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 )
@@ -155,7 +156,14 @@ func resourceVolumeCreate(ctx context.Context, d *schema.ResourceData, meta inte
 	var image string
 	if imageAlias == "" && imageName != "" {
 		if !IsValidUUID(imageName) {
-			img, err := getImage(ctx, client, dcId, imageName, d.Get("disk_type").(string))
+
+			dc, _, err := client.DataCenterApi.DatacentersFindById(ctx, dcId).Execute()
+			if err != nil {
+				diags := diag.FromErr(fmt.Errorf("error fetching datacenter %s: (%s)", dcId, err))
+				return diags
+			}
+
+			img, err := resolveVolumeImageName(ctx, client, imageName, *dc.Properties.Location)
 			if err != nil {
 				diags := diag.FromErr(err)
 				return diags
@@ -169,12 +177,6 @@ func resourceVolumeCreate(ctx context.Context, d *schema.ResourceData, meta inte
 				if image != "" {
 					isSnapshot = true
 				} else {
-					dc, _, err := client.DataCenterApi.DatacentersFindById(ctx, dcId).Execute()
-
-					if err != nil {
-						diags := diag.FromErr(fmt.Errorf("an error occured while fetching a Datacenter ID %s %s", dcId, err))
-						return diags
-					}
 					imageAlias = getImageAlias(ctx, client, imageName, *dc.Properties.Location)
 				}
 			}
@@ -183,7 +185,7 @@ func resourceVolumeCreate(ctx context.Context, d *schema.ResourceData, meta inte
 				diags := diag.FromErr(fmt.Errorf("could not find an image/imagealias/snapshot that matches %s ", imageName))
 				return diags
 			}
-			if imagePassword == "" && len(sshKeypath) == 0 && isSnapshot == false && img != nil && *img.Properties.Public {
+			if imagePassword == "" && len(sshKeypath) == 0 && isSnapshot == false && img != nil && img.Properties.Public != nil && *img.Properties.Public {
 				diags := diag.FromErr(fmt.Errorf("either 'image_password' or 'sshkey' must be provided"))
 				return diags
 			}
@@ -196,7 +198,7 @@ func resourceVolumeCreate(ctx context.Context, d *schema.ResourceData, meta inte
 					return diags
 				}
 				isSnapshot = true
-			} else if *img.Properties.Public == true && isSnapshot == false {
+			} else if isSnapshot == false && img.Properties.Public != nil && *img.Properties.Public == true {
 				if imagePassword == "" && len(sshKeypath) == 0 {
 					diags := diag.FromErr(fmt.Errorf("either 'image_password' or 'sshkey' must be provided"))
 					return diags
@@ -659,4 +661,96 @@ func resourceVolumeDelete(ctx context.Context, d *schema.ResourceData, meta inte
 
 	d.SetId("")
 	return nil
+}
+
+func resolveVolumeImageName(ctx context.Context, client *ionoscloud.APIClient, imageName string, location string) (*ionoscloud.Image, error) {
+
+	if imageName == "" {
+		return nil, fmt.Errorf("imageName not suplied")
+	}
+
+	images, _, err := client.ImageApi.ImagesGet(ctx).Execute()
+
+	if err != nil {
+		log.Print(fmt.Errorf("error while fetching the list of images %s", err))
+		return nil, err
+	}
+
+	if len(*images.Items) > 0 {
+		for _, i := range *images.Items {
+			imgName := ""
+			if i.Properties.Name != nil && *i.Properties.Name != "" {
+				imgName = *i.Properties.Name
+			}
+
+			if imgName != "" && strings.Contains(strings.ToLower(imgName), strings.ToLower(imageName)) && *i.Properties.ImageType == "HDD" && *i.Properties.Location == location {
+				return &i, err
+			}
+
+			if imgName != "" && strings.ToLower(imageName) == strings.ToLower(*i.Id) && *i.Properties.ImageType == "HDD" && *i.Properties.Location == location {
+				return &i, err
+			}
+
+		}
+	}
+	return nil, err
+}
+
+func getSnapshotId(ctx context.Context, client *ionoscloud.APIClient, snapshotName string) string {
+
+	if snapshotName == "" {
+		return ""
+	}
+
+	snapshots, _, err := client.SnapshotApi.SnapshotsGet(ctx).Execute()
+
+	if err != nil {
+		log.Print(fmt.Errorf("error while fetching the list of snapshots %s", err))
+	}
+
+	if len(*snapshots.Items) > 0 {
+		for _, i := range *snapshots.Items {
+			imgName := ""
+			if *i.Properties.Name != "" {
+				imgName = *i.Properties.Name
+				fmt.Printf("snapshot name: %s \n\n ", *i.Properties.Name)
+			}
+
+			if imgName != "" && strings.Contains(strings.ToLower(imgName), strings.ToLower(snapshotName)) {
+				return *i.Id
+			}
+		}
+	}
+	return ""
+}
+
+func getImageAlias(ctx context.Context, client *ionoscloud.APIClient, imageAlias string, location string) string {
+
+	if imageAlias == "" {
+		return ""
+	}
+	parts := strings.SplitN(location, "/", 2)
+	if len(parts) != 2 {
+		log.Print(fmt.Errorf("invalid location id %s", location))
+	}
+
+	locations, _, err := client.LocationApi.LocationsFindByRegionIdAndId(ctx, parts[0], parts[1]).Execute()
+
+	if err != nil {
+		log.Print(fmt.Errorf("error while fetching the list of snapshots %s", err))
+	}
+
+	if len(*locations.Properties.ImageAliases) > 0 {
+		for _, i := range *locations.Properties.ImageAliases {
+			alias := ""
+			if i != "" {
+				alias = i
+			}
+
+			if alias != "" && strings.ToLower(alias) == strings.ToLower(imageAlias) {
+				return i
+			}
+		}
+	}
+	return ""
 }
