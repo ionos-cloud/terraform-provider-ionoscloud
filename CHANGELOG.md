@@ -2,6 +2,7 @@
 
 - issue #72 - fixed find volume image by name
 - error messages for immutable node pool attributes
+- issue #84 - fixed build & updated README.md
 
 ## 5.2.8
 
