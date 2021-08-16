@@ -10,27 +10,27 @@ import (
 	"gopkg.in/yaml.v3"
 )
 
-type KubeConfig struct{
-	ApiVersion string			`yaml:"apiVersion"`
-	Clusters []struct{
-		Name string
-		Cluster struct{
-			CaData string		`yaml:"certificate-authority-data"`
+type KubeConfig struct {
+	ApiVersion string `yaml:"apiVersion"`
+	Clusters   []struct {
+		Name    string
+		Cluster struct {
+			CaData string `yaml:"certificate-authority-data"`
 			Server string
 		}
 	}
-	Contexts []struct{
-		Name string
-		Context struct{
+	Contexts []struct {
+		Name    string
+		Context struct {
 			Cluster string
-			User string
+			User    string
 		}
 	}
-	CurrentContext string		        `yaml:"current-context"`
-	Kind string
-	Users []struct{
+	CurrentContext string `yaml:"current-context"`
+	Kind           string
+	Users          []struct {
 		Name string
-		User struct{
+		User struct {
 			Token string
 		}
 	}
@@ -104,40 +104,38 @@ func dataSourceK8sCluster() *schema.Resource {
 				Computed: true,
 			},
 			"config": {
-				Type: schema.TypeList,
-				Computed: true,
+				Type:      schema.TypeList,
+				Computed:  true,
 				Sensitive: true,
 				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{
 						"api_version": {
-							Type: schema.TypeString,
-							Computed: true,
+							Type:      schema.TypeString,
+							Computed:  true,
 							Sensitive: true,
-
 						},
 						"current_context": {
-							Type: schema.TypeString,
-							Computed: true,
+							Type:      schema.TypeString,
+							Computed:  true,
 							Sensitive: true,
 						},
 						"kind": {
-							Type: schema.TypeString,
+							Type:     schema.TypeString,
 							Computed: true,
 						},
 						"users": {
-							Type: schema.TypeList,
+							Type:     schema.TypeList,
 							Computed: true,
 							Elem: &schema.Resource{
 								Schema: map[string]*schema.Schema{
 									"name": {
-										Type: schema.TypeString,
-										Computed: true,
+										Type:      schema.TypeString,
+										Computed:  true,
 										Sensitive: true,
-
 									},
 									"user": {
-										Type: schema.TypeMap,
-										Computed: true,
+										Type:      schema.TypeMap,
+										Computed:  true,
 										Sensitive: true,
 										Elem: &schema.Schema{
 											Type: schema.TypeString,
@@ -147,18 +145,18 @@ func dataSourceK8sCluster() *schema.Resource {
 							},
 						},
 						"clusters": {
-							Type: schema.TypeList,
+							Type:     schema.TypeList,
 							Computed: true,
 							Elem: &schema.Resource{
 								Schema: map[string]*schema.Schema{
 									"name": {
-										Type: schema.TypeString,
-										Computed: true,
+										Type:      schema.TypeString,
+										Computed:  true,
 										Sensitive: true,
 									},
 									"cluster": {
-										Type: schema.TypeMap,
-										Computed: true,
+										Type:      schema.TypeMap,
+										Computed:  true,
 										Sensitive: true,
 										Elem: &schema.Schema{
 											Type: schema.TypeString,
@@ -168,18 +166,18 @@ func dataSourceK8sCluster() *schema.Resource {
 							},
 						},
 						"contexts": {
-							Type: schema.TypeList,
+							Type:     schema.TypeList,
 							Computed: true,
 							Elem: &schema.Resource{
 								Schema: map[string]*schema.Schema{
 									"name": {
-										Type: schema.TypeString,
-										Computed: true,
+										Type:      schema.TypeString,
+										Computed:  true,
 										Sensitive: true,
 									},
 									"context": {
-										Type: schema.TypeMap,
-										Computed: true,
+										Type:      schema.TypeMap,
+										Computed:  true,
 										Sensitive: true,
 										Elem: &schema.Schema{
 											Type: schema.TypeString,
@@ -192,23 +190,23 @@ func dataSourceK8sCluster() *schema.Resource {
 				},
 			},
 			"user_tokens": {
-				Type: schema.TypeMap,
+				Type:      schema.TypeMap,
 				Sensitive: true,
-				Computed: true,
+				Computed:  true,
 				Elem: &schema.Schema{
-					Type: schema.TypeString,
+					Type:      schema.TypeString,
 					Sensitive: true,
 				},
 			},
 			"ca_crt": {
-				Type: schema.TypeString,
+				Type:      schema.TypeString,
 				Sensitive: true,
-				Computed: true,
+				Computed:  true,
 			},
 			"server": {
-				Type: schema.TypeString,
+				Type:      schema.TypeString,
 				Sensitive: true,
-				Computed: true,
+				Computed:  true,
 			},
 			"public": {
 				Type: schema.TypeBool,
@@ -356,7 +354,7 @@ func setK8sConfigData(d *schema.ResourceData, configStr string) error {
 		clustersList[i] = map[string]interface{}{
 			"name": cluster.Name,
 			"cluster": map[string]string{
-				"server": cluster.Cluster.Server,
+				"server":                     cluster.Cluster.Server,
 				"certificate_authority_data": string(decodedCrt),
 			},
 		}
@@ -370,7 +368,7 @@ func setK8sConfigData(d *schema.ResourceData, configStr string) error {
 			"name": contextVal.Name,
 			"context": map[string]string{
 				"cluster": contextVal.Context.Cluster,
-				"user": contextVal.Context.User,
+				"user":    contextVal.Context.User,
 			},
 		}
 	}
