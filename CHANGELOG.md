@@ -1,3 +1,7 @@
+## 5.2.10
+
+- documentation updates
+
 ## 5.2.9
 
 - issue #72 - fixed find volume image by name
