@@ -1,6 +1,9 @@
 ## 6.0.0-beta.6
 
 - updated arguments for datacenter, ipblock, location and user
+- issue #72 - fixed find volume image by name
+- error message for immutable node pool attributes
+- issue #84 - fixed build & updated README.md
 
 ## 6.0.0-beta.5
 

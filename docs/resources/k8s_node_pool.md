@@ -46,7 +46,7 @@ resource "ionoscloud_k8s_node_pool" "demo" {
 
 The following arguments are supported:
 
-- `name` - (Required)[string] The name of the Kubernetes Cluster.
+- `name` - (Required)[string] The name of the Kubernetes Cluster. *This attribute is immutable*.
 - `k8s_version` - (Optional)[string] The desired Kubernetes Version. for supported values, please check the API documentation. The provider will ignore changes of patch level.
 - `auto_scaling` - (Optional)[string] Wether the Node Pool should autoscale. For more details, please check the API documentation
   - `min_node_count` - (Optional)[int] The minimum number of worker nodes the node pool can scale down to. Should be less than max_node_count
@@ -62,13 +62,13 @@ The following arguments are supported:
   - `day_of_the_week` - (Required)[string] Day of the week when maintenance is allowed
 - `datacenter_id` - (Required)[string] A Datacenter's UUID
 - `k8s_cluster_id`- (Required)[string] A k8s cluster's UUID
-- `cpu_family` - (Required)[string] The desired CPU Family - See the API documentation for more information
-- `availability_zone` - (Required)[string] - The desired Compute availability zone - See the API documentation for more information
-- `storage_type` -(Required)[string] - The desired storage type - SSD/HDD
+- `cpu_family` - (Required)[string] The desired CPU Family - See the API documentation for more information. *This attribute is immutable*.
+- `availability_zone` - (Required)[string] - The desired Compute availability zone - See the API documentation for more information. *This attribute is immutable*.
+- `storage_type` -(Required)[string] - The desired storage type - SSD/HDD. *This attribute is immutable*.
 - `node_count` -(Required)[int] - The desired number of nodes in the node pool
-- `cores_count` -(Required)[int] - The CPU cores count for each node of the node pool
-- `ram_size` -(Required)[int] - The desired amount of RAM, in MB
-- `storage_size` -(Required)[int] - The desired amount of storage for each node, in GB
+- `cores_count` -(Required)[int] - The CPU cores count for each node of the node pool. *This attribute is immutable*.
+- `ram_size` -(Required)[int] - The desired amount of RAM, in MB. *This attribute is immutable*.
+- `storage_size` -(Required)[int] - The desired amount of storage for each node, in GB. *This attribute is immutable*.
 - `public_ips` - (Optional)[list] A list of public IPs associated with the node pool; must have at least `node_count + 1` elements  
 
 ## Import
