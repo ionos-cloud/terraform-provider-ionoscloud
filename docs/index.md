@@ -29,12 +29,12 @@ In order to accommodate that, the terraform hcl files must be updated.
 
 This can be done with a simple find and replace procedure.
 For example, on Linux, sed can be used:
-```
+```bash
 $ sed -i 's/profitbricks_/ionoscloud_/g' ./main.tf
 ```
 
 On OSX the same command becomes:
-```
+```bash
 $ sed -i bak 's/profitbricks_/ionoscloud_/g' ./main.tf
 ```
 
@@ -43,12 +43,12 @@ $ sed -i bak 's/profitbricks_/ionoscloud_/g' ./main.tf
 Because of the name changes of resources and datasources, the terraform state must also be updated.
 The local state, in json format, can be updated by replacing `profitbricks_` with `ionoscloud_` directly in the state file.
 For example, on Linux, using:
-```
+```bash
 $ sed -i 's/profitbricks_/ionoscloud_/g' ./terraform.tfstate
 ```
 
 On OSX the same command becomes:
-```
+```bash
 $ sed -i bak 's/profitbricks_/ionoscloud_/g' ./terraform.tfstate
 ```
 
@@ -78,7 +78,7 @@ The following env variables have changed:
 
 The provider needs to be configured with proper credentials before it can be used.
 
-```hcl
+```bash
 $ export IONOS_USERNAME="ionoscloud_username"
 $ export IONOS_PASSWORD="ionoscloud_password"
 $ export IONOS_API_URL="ionoscloud_cloud_api_url"
@@ -98,14 +98,12 @@ $ terraform apply
 ```
 now you can see the response body incl. api error message:
 ```json
-... other log entries
 {
   "httpStatus" : 422,
   "messages" : [ {
     "errorCode" : "200",
     "message" : "[VDC-yy-xxxx] Operation cannot be executed since this Kubernetes Nodepool is already marked for deletion. Current state of the resource is FAILED_DESTROYING."
   } ]
-... other log entries
 ```
 
 
