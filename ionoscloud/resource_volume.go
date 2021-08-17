@@ -212,7 +212,7 @@ func resourceVolumeCreate(ctx context.Context, d *schema.ResourceData, meta inte
 					return diags
 				}
 			} else {
-				if isSnapshot == false && *img.Properties.Public == true {
+				if isSnapshot == false && img.Properties.Public != nil && *img.Properties.Public == true {
 					if imagePassword == "" && len(sshKeyPath) == 0 {
 						diags := diag.FromErr(fmt.Errorf("either 'image_password' or 'sshkey' must be provided"))
 						return diags

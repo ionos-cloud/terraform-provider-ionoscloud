@@ -563,7 +563,7 @@ func resourceServerCreate(ctx context.Context, d *schema.ResourceData, meta inte
 				return diags
 			}
 
-			if *img.Properties.Public == true && isSnapshot == false {
+			if isSnapshot == false && img.Properties.Public != nil && *img.Properties.Public == true {
 
 				if volume.ImagePassword == nil && len(sshKeyPath) == 0 {
 					diags := diag.FromErr(fmt.Errorf("either 'image_password' or 'ssh_key_path' must be provided"))
@@ -597,7 +597,7 @@ func resourceServerCreate(ctx context.Context, d *schema.ResourceData, meta inte
 					isSnapshot = true
 					image = *snap.Id
 				} else {
-					if img.Properties.Public != nil && *img.Properties.Public == true && isSnapshot == false &&
+					if isSnapshot == false && img.Properties.Public != nil && *img.Properties.Public == true &&
 						volume.ImagePassword == nil && len(sshKeyPath) == 0 {
 						diags := diag.FromErr(fmt.Errorf("either 'image_password' or 'ssh_key_path' must be provided"))
 						return diags
