@@ -86,6 +86,29 @@ $ export IONOS_API_URL="ionoscloud_cloud_api_url"
 
 Or you can provide your credentials in a `.tf` configuration file as shown in this example.
 
+
+## Debuging
+
+In the default mode, the Terraform provider returns only HTTP client errors. These usually consist only of the HTTP status code. There is no clear description of the problem. But if you want to see the API call error messages as well, you need to tell the SDK and Terraform provider environment variables.
+
+```bash
+$ export TF_LOG=debug
+$ export IONOS_DEBUG=true
+$ terraform apply
+```
+now you can see the response body incl. api error message:
+```json
+... other log entries
+{
+  "httpStatus" : 422,
+  "messages" : [ {
+    "errorCode" : "200",
+    "message" : "[VDC-yy-xxxx] Operation cannot be executed since this Kubernetes Nodepool is already marked for deletion. Current state of the resource is FAILED_DESTROYING."
+  } ]
+... other log entries
+```
+
+
 ## Example Usage
 
 ```hcl
