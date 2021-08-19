@@ -1,3 +1,7 @@
+## 5.2.10
+
+- fixed set of empty array in terraform state instead of null
+
 ## 5.2.9
 
 - issue #72 - fixed find volume image by name

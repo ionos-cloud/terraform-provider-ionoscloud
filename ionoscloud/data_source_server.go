@@ -411,9 +411,8 @@ func setServerData(d *schema.ResourceData, server *ionoscloud.Server) error {
 	}
 
 	var cdroms []interface{}
-	if server.Entities.Cdroms != nil {
-		cdroms = make([]interface{}, len(*server.Entities.Cdroms.Items), len(*server.Entities.Cdroms.Items))
-		for i, image := range *server.Entities.Cdroms.Items {
+	if server.Entities.Cdroms != nil && server.Entities.Cdroms.Items != nil && len(*server.Entities.Cdroms.Items) > 0 {
+		for _, image := range *server.Entities.Cdroms.Items {
 			entry := make(map[string]interface{})
 
 			entry["id"] = stringOrDefault(image.Id, "")
@@ -435,18 +434,16 @@ func setServerData(d *schema.ResourceData, server *ionoscloud.Server) error {
 			entry["image_type"] = stringOrDefault(image.Properties.ImageType, "")
 			entry["public"] = boolOrDefault(image.Properties.Public, false)
 
-			cdroms[i] = entry
+			cdroms = append(cdroms, entry)
+		}
+		if err := d.Set("cdroms", cdroms); err != nil {
+			return err
 		}
 	}
 
-	if err := d.Set("cdroms", cdroms); err != nil {
-		return err
-	}
-
-	var volumes = make([]interface{}, 0)
-	if server.Entities.Volumes != nil && server.Entities.Volumes.Items != nil {
-		volumes = make([]interface{}, len(*server.Entities.Volumes.Items), len(*server.Entities.Volumes.Items))
-		for i, volume := range *server.Entities.Volumes.Items {
+	var volumes []interface{}
+	if server.Entities.Volumes != nil && server.Entities.Volumes.Items != nil && len(*server.Entities.Volumes.Items) > 0 {
+		for _, volume := range *server.Entities.Volumes.Items {
 			entry := make(map[string]interface{})
 
 			entry["id"] = stringOrDefault(volume.Id, "")
@@ -458,10 +455,10 @@ func setServerData(d *schema.ResourceData, server *ionoscloud.Server) error {
 			entry["image_alias"] = stringOrDefault(volume.Properties.ImageAlias, "")
 			entry["image_password"] = stringOrDefault(volume.Properties.ImagePassword, "")
 
-			if volume.Properties.SshKeys != nil {
-				sshKeys := make([]interface{}, len(*volume.Properties.SshKeys), len(*volume.Properties.SshKeys))
-				for j, sshKey := range *volume.Properties.SshKeys {
-					sshKeys[j] = sshKey
+			if volume.Properties.SshKeys != nil && len(*volume.Properties.SshKeys) > 0 {
+				var sshKeys []interface{}
+				for _, sshKey := range *volume.Properties.SshKeys {
+					sshKeys = append(sshKeys, sshKey)
 				}
 				entry["ssh_keys"] = sshKeys
 			}
@@ -476,18 +473,17 @@ func setServerData(d *schema.ResourceData, server *ionoscloud.Server) error {
 			entry["disc_virtio_hot_unplug"] = boolOrDefault(volume.Properties.DiscVirtioHotUnplug, true)
 			entry["device_number"] = int64OrDefault(volume.Properties.DeviceNumber, 0)
 
-			volumes[i] = entry
+			volumes = append(volumes, entry)
+		}
+
+		if err := d.Set("volumes", volumes); err != nil {
+			return err
 		}
 	}
 
-	if err := d.Set("volumes", volumes); err != nil {
-		return err
-	}
-
-	var nics = make([]interface{}, 0)
-	if server.Entities.Nics != nil && server.Entities.Nics.Items != nil {
-		nics = make([]interface{}, len(*server.Entities.Nics.Items), len(*server.Entities.Nics.Items))
-		for k, nic := range *server.Entities.Nics.Items {
+	var nics []interface{}
+	if server.Entities.Nics != nil && server.Entities.Nics.Items != nil && len(*server.Entities.Nics.Items) > 0 {
+		for _, nic := range *server.Entities.Nics.Items {
 			entry := make(map[string]interface{})
 
 			entry["id"] = stringOrDefault(nic.Id, "")
@@ -495,9 +491,9 @@ func setServerData(d *schema.ResourceData, server *ionoscloud.Server) error {
 			entry["mac"] = stringOrDefault(nic.Properties.Mac, "")
 
 			if nic.Properties.Ips != nil {
-				ips := make([]interface{}, len(*nic.Properties.Ips))
-				for idx, ip := range *nic.Properties.Ips {
-					ips[idx] = ip
+				var ips []interface{}
+				for _, ip := range *nic.Properties.Ips {
+					ips = append(ips, ip)
 				}
 				entry["ips"] = ips
 			}
@@ -507,7 +503,7 @@ func setServerData(d *schema.ResourceData, server *ionoscloud.Server) error {
 			entry["firewall_active"] = boolOrDefault(nic.Properties.FirewallActive, false)
 			entry["nat"] = boolOrDefault(nic.Properties.Nat, false)
 
-			firewallRules := make([]interface{}, 0)
+			var firewallRules []interface{}
 			if nic.Entities != nil && nic.Entities.Firewallrules != nil && nic.Entities.Firewallrules.Items != nil {
 				firewallRules = make([]interface{}, len(*nic.Entities.Firewallrules.Items))
 				for idx, rule := range *nic.Entities.Firewallrules.Items {
@@ -526,12 +522,12 @@ func setServerData(d *schema.ResourceData, server *ionoscloud.Server) error {
 			}
 			entry["firewall_rules"] = firewallRules
 
-			nics[k] = entry
+			nics = append(nics, entry)
 		}
-	}
 
-	if err := d.Set("nics", nics); err != nil {
-		return err
+		if err := d.Set("nics", nics); err != nil {
+			return err
+		}
 	}
 
 	return nil
