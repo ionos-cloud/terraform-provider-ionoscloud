@@ -1,3 +1,7 @@
+## 5.2.11
+
+- documentation updates
+
 ## 5.2.10
 
 - fixed set of empty array in terraform state instead of null
