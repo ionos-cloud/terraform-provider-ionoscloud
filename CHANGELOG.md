@@ -1,3 +1,7 @@
+## 6.0.0-beta.7
+
+- k8s security features implemented
+
 ## 6.0.0-beta.6
 
 - updated arguments for datacenter, ipblock, location and user
