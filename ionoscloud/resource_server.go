@@ -107,7 +107,6 @@ func resourceServer() *schema.Resource {
 				Elem:          &schema.Schema{Type: schema.TypeString},
 				ConflictsWith: []string{"volume.0.ssh_key_path"},
 				Optional:      true,
-				Computed:      true,
 			},
 			"volume": {
 				Type:     schema.TypeList,
@@ -662,7 +661,7 @@ func resourceServerCreate(ctx context.Context, d *schema.ResourceData, meta inte
 		if v, ok := d.GetOk("nic.0.ips"); ok {
 			raw := v.([]interface{})
 			if raw != nil && len(raw) > 0 {
-				ips := make([]string, 0)
+				var ips []string
 				for _, rawIp := range raw {
 					ip := rawIp.(string)
 					ips = append(ips, ip)
@@ -964,8 +963,7 @@ func resourceServerRead(ctx context.Context, d *schema.ResourceData, meta interf
 		}
 	}
 
-	if server.Entities.Volumes != nil &&
-		len(*server.Entities.Volumes.Items) > 0 &&
+	if server.Entities.Volumes != nil && server.Entities.Volumes.Items != nil && len(*server.Entities.Volumes.Items) > 0 &&
 		(*server.Entities.Volumes.Items)[0].Properties.Image != nil {
 		if err := d.Set("boot_image", *(*server.Entities.Volumes.Items)[0].Properties.Image); err != nil {
 			diags := diag.FromErr(err)

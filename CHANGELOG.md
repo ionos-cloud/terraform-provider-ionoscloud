@@ -1,3 +1,7 @@
+## 6.0.0-beta.7
+
+- fixed set of empty array in terraform state instead of null
+
 ## 6.0.0-beta.6
 
 - updated arguments for datacenter, ipblock, location and user

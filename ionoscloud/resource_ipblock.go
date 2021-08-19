@@ -145,7 +145,7 @@ func resourceIPBlockRead(ctx context.Context, d *schema.ResourceData, meta inter
 
 	log.Printf("[INFO] IPS: %s", strings.Join(*ipBlock.Properties.Ips, ","))
 
-	if ipBlock.Properties.Ips != nil {
+	if ipBlock.Properties.Ips != nil && len(*ipBlock.Properties.Ips) > 0 {
 		if err := d.Set("ips", *ipBlock.Properties.Ips); err != nil {
 			diags := diag.FromErr(err)
 			return diags
@@ -174,7 +174,7 @@ func resourceIPBlockRead(ctx context.Context, d *schema.ResourceData, meta inter
 	}
 
 	if ipBlock.Properties.IpConsumers != nil && len(*ipBlock.Properties.IpConsumers) > 0 {
-		ipConsumers := make([]interface{}, 0)
+		var ipConsumers []interface{}
 		for _, ipConsumer := range *ipBlock.Properties.IpConsumers {
 			ipConsumerEntry := make(map[string]interface{})
 
