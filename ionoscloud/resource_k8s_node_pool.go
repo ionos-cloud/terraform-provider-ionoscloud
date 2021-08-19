@@ -96,14 +96,16 @@ func resourcek8sNodePool() *schema.Resource {
 							Elem: &schema.Resource{
 								Schema: map[string]*schema.Schema{
 									"network": {
-										Type:        schema.TypeString,
-										Description: "IPv4 or IPv6 CIDR to be routed via the interface",
-										Required:    true,
+										Type:         schema.TypeString,
+										Description:  "IPv4 or IPv6 CIDR to be routed via the interface",
+										Required:     true,
+										ValidateFunc: validation.All(validation.StringIsNotWhiteSpace),
 									},
 									"gateway_ip": {
-										Type:        schema.TypeString,
-										Description: "IPv4 or IPv6 Gateway IP for the route",
-										Required:    true,
+										Type:         schema.TypeString,
+										Description:  "IPv4 or IPv6 Gateway IP for the route",
+										Required:     true,
+										ValidateFunc: validation.All(validation.StringIsNotWhiteSpace),
 									},
 								},
 							},
@@ -119,14 +121,16 @@ func resourcek8sNodePool() *schema.Resource {
 				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{
 						"time": {
-							Type:        schema.TypeString,
-							Description: "A clock time in the day when maintenance is allowed",
-							Required:    true,
+							Type:         schema.TypeString,
+							Description:  "A clock time in the day when maintenance is allowed",
+							Required:     true,
+							ValidateFunc: validation.All(validation.StringIsNotWhiteSpace),
 						},
 						"day_of_the_week": {
-							Type:        schema.TypeString,
-							Description: "Day of the week when maintenance is allowed",
-							Required:    true,
+							Type:         schema.TypeString,
+							Description:  "Day of the week when maintenance is allowed",
+							Required:     true,
+							ValidateFunc: validation.All(validation.StringIsNotWhiteSpace),
 						},
 					},
 				},
@@ -588,10 +592,10 @@ func resourcek8sNodePoolRead(ctx context.Context, d *schema.ResourceData, meta i
 func resourcek8sNodePoolUpdate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	client := meta.(*ionoscloud.APIClient)
 
-	request := ionoscloud.KubernetesNodePool{}
+	request := ionoscloud.KubernetesNodePoolForPut{}
 
 	nodeCount := int32(d.Get("node_count").(int))
-	request.Properties = &ionoscloud.KubernetesNodePoolProperties{
+	request.Properties = &ionoscloud.KubernetesNodePoolPropertiesForPut{
 		NodeCount: &nodeCount,
 	}
 
@@ -845,7 +849,7 @@ func resourcek8sNodePoolUpdate(ctx context.Context, d *schema.ResourceData, meta
 		log.Printf("[INFO] Update req: %s", string(b))
 	}
 
-	_, apiResponse, err := client.KubernetesApi.K8sNodepoolsPut(ctx, d.Get("k8s_cluster_id").(string), d.Id()).KubernetesNodePool(request).Execute()
+	_, apiResponse, err := client.KubernetesApi.K8sNodepoolsPut(ctx, d.Get("k8s_cluster_id").(string), d.Id()).KubernetesNodePoolForPut(request).Execute()
 
 	if err != nil {
 		if apiResponse != nil && apiResponse.StatusCode == 404 {

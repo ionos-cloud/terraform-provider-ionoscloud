@@ -81,6 +81,36 @@ func TestAcck8sCluster_Version(t *testing.T) {
 	})
 }
 
+func TestAcck8sCluster_S3Subnet(t *testing.T) {
+	var k8sCluster ionoscloud.KubernetesCluster
+	k8sClusterName := "test_s3_subnet"
+
+	resource.Test(t, resource.TestCase{
+		PreCheck: func() {
+			testAccPreCheck(t)
+		},
+		ProviderFactories: testAccProviderFactories,
+		CheckDestroy:      testAccCheckk8sClusterDestroyCheck,
+		Steps: []resource.TestStep{
+			{
+				Config: fmt.Sprintf(testAccCheckk8sClusterConfigS3Subnet, k8sClusterName),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckk8sClusterExists("ionoscloud_k8s_cluster.example", &k8sCluster),
+					resource.TestCheckResourceAttr("ionoscloud_k8s_cluster.example", "name", k8sClusterName),
+				),
+			},
+			{
+				Config: fmt.Sprintf(testAccCheckk8sClusterConfigS3SubnetUpdate),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckk8sClusterExists("ionoscloud_k8s_cluster.example", &k8sCluster),
+					resource.TestCheckResourceAttr("ionoscloud_k8s_cluster.example", "name", "updated"),
+					resource.TestCheckNoResourceAttr("ionoscloud_k8s_cluster.example", "s3_buckets"),
+				),
+			},
+		},
+	})
+}
+
 func testAccCheckk8sClusterDestroyCheck(s *terraform.State) error {
 	client := testAccProvider.Meta().(*ionoscloud.APIClient)
 
@@ -180,4 +210,20 @@ const testAccCheckk8sClusterConfigChangeVersion = `
 resource "ionoscloud_k8s_cluster" "example" {
   name        = "test_version_change"
   k8s_version = "1.19.10"
+}`
+
+const testAccCheckk8sClusterConfigS3Subnet = `
+resource "ionoscloud_k8s_cluster" "example" {
+  name        = "%s"
+  api_subnet_allow_list = ["1.2.3.4/32",
+                           "2002::1234:abcd:ffff:c0a8:101/64"]
+  s3_buckets { 
+     name = "sdktestv6"
+  }
+}`
+
+const testAccCheckk8sClusterConfigS3SubnetUpdate = `
+resource "ionoscloud_k8s_cluster" "example" {
+  name        = "updated"
+  api_subnet_allow_list = ["1.2.3.4/32"]
 }`
