@@ -291,9 +291,9 @@ func resourcek8sClusterRead(ctx context.Context, d *schema.ResourceData, meta in
 	}
 
 	if cluster.Properties.AvailableUpgradeVersions != nil {
-		availableUpgradeVersions := make([]interface{}, len(*cluster.Properties.AvailableUpgradeVersions), len(*cluster.Properties.AvailableUpgradeVersions))
-		for i, availableUpgradeVersion := range *cluster.Properties.AvailableUpgradeVersions {
-			availableUpgradeVersions[i] = availableUpgradeVersion
+		var availableUpgradeVersions []interface{}
+		for _, availableUpgradeVersion := range *cluster.Properties.AvailableUpgradeVersions {
+			availableUpgradeVersions = append(availableUpgradeVersions, availableUpgradeVersion)
 		}
 		if err := d.Set("available_upgrade_versions", availableUpgradeVersions); err != nil {
 			diags := diag.FromErr(err)
@@ -301,10 +301,10 @@ func resourcek8sClusterRead(ctx context.Context, d *schema.ResourceData, meta in
 		}
 	}
 
-	if cluster.Properties.ViableNodePoolVersions != nil {
-		viableNodePoolVersions := make([]interface{}, len(*cluster.Properties.ViableNodePoolVersions), len(*cluster.Properties.ViableNodePoolVersions))
-		for i, viableNodePoolVersion := range *cluster.Properties.ViableNodePoolVersions {
-			viableNodePoolVersions[i] = viableNodePoolVersion
+	if cluster.Properties.ViableNodePoolVersions != nil && len(*cluster.Properties.ViableNodePoolVersions) > 0 {
+		var viableNodePoolVersions []interface{}
+		for _, viableNodePoolVersion := range *cluster.Properties.ViableNodePoolVersions {
+			viableNodePoolVersions = append(viableNodePoolVersions, viableNodePoolVersion)
 		}
 		if err := d.Set("viable_node_pool_versions", viableNodePoolVersions); err != nil {
 			diags := diag.FromErr(err)
@@ -328,10 +328,10 @@ func resourcek8sClusterRead(ctx context.Context, d *schema.ResourceData, meta in
 		}
 	}
 
-	if cluster.Properties.ApiSubnetAllowList != nil {
-		apiSubnetAllowLists := make([]interface{}, len(*cluster.Properties.ApiSubnetAllowList), len(*cluster.Properties.ApiSubnetAllowList))
-		for i, apiSubnetAllowList := range *cluster.Properties.ApiSubnetAllowList {
-			apiSubnetAllowLists[i] = apiSubnetAllowList
+	if cluster.Properties.ApiSubnetAllowList != nil && len(*cluster.Properties.ApiSubnetAllowList) > 0 {
+		var apiSubnetAllowLists []interface{}
+		for _, apiSubnetAllowList := range *cluster.Properties.ApiSubnetAllowList {
+			apiSubnetAllowLists = append(apiSubnetAllowLists, apiSubnetAllowList)
 		}
 		if err := d.Set("api_subnet_allow_list", apiSubnetAllowLists); err != nil {
 			diags := diag.FromErr(err)
@@ -339,12 +339,12 @@ func resourcek8sClusterRead(ctx context.Context, d *schema.ResourceData, meta in
 		}
 	}
 
-	if cluster.Properties.S3Buckets != nil {
-		s3Buckets := make([]interface{}, len(*cluster.Properties.S3Buckets), len(*cluster.Properties.S3Buckets))
-		for i, s3Bucket := range *cluster.Properties.S3Buckets {
+	if cluster.Properties.S3Buckets != nil && len(*cluster.Properties.S3Buckets) > 0 {
+		var s3Buckets []interface{}
+		for _, s3Bucket := range *cluster.Properties.S3Buckets {
 			s3BucketEntry := make(map[string]interface{})
 			s3BucketEntry["name"] = *s3Bucket.Name
-			s3Buckets[i] = s3BucketEntry
+			s3Buckets = append(s3Buckets, s3BucketEntry)
 		}
 		if err := d.Set("s3_buckets", s3Buckets); err != nil {
 			diags := diag.FromErr(err)

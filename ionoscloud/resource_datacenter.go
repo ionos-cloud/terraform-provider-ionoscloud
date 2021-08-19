@@ -161,18 +161,10 @@ func resourceDatacenterRead(ctx context.Context, d *schema.ResourceData, meta in
 		}
 	}
 
-	if datacenter.Properties.Features != nil {
-		err := d.Set("features", datacenter.Properties.Features)
+	if datacenter.Properties.Features != nil && len(*datacenter.Properties.Features) > 0 {
+		err := d.Set("features", *datacenter.Properties.Features)
 		if err != nil {
 			diags := diag.FromErr(fmt.Errorf("error while setting features property for datacenter %s: %s", d.Id(), err))
-			return diags
-		}
-	}
-
-	if datacenter.Properties.SecAuthProtection != nil {
-		err := d.Set("sec_auth_protection", datacenter.Properties.SecAuthProtection)
-		if err != nil {
-			diags := diag.FromErr(fmt.Errorf("error while setting sec_auth_protection property for datacenter %s: %s", d.Id(), err))
 			return diags
 		}
 	}
