@@ -85,7 +85,7 @@ func setLanData(d *schema.ResourceData, lan *ionoscloud.Lan) error {
 				return err
 			}
 		}
-		if lan.Properties.IpFailover != nil {
+		if lan.Properties.IpFailover != nil && len(*lan.Properties.IpFailover) > 0 {
 			if err := d.Set("ip_failover", convertIpFailoverList(lan.Properties.IpFailover)); err != nil {
 				return err
 			}

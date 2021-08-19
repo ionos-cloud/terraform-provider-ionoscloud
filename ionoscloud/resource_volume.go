@@ -713,7 +713,6 @@ func getSnapshotId(ctx context.Context, client *ionoscloud.APIClient, snapshotNa
 			imgName := ""
 			if *i.Properties.Name != "" {
 				imgName = *i.Properties.Name
-				fmt.Printf("snapshot name: %s \n\n ", *i.Properties.Name)
 			}
 
 			if imgName != "" && strings.Contains(strings.ToLower(imgName), strings.ToLower(snapshotName)) {

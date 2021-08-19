@@ -489,14 +489,16 @@ func setK8sClusterData(d *schema.ResourceData, cluster *ionoscloud.KubernetesClu
 		}
 
 		if cluster.Properties.S3Buckets != nil {
-			s3Buckets := make([]interface{}, len(*cluster.Properties.S3Buckets), len(*cluster.Properties.S3Buckets))
-			for i, s3Bucket := range *cluster.Properties.S3Buckets {
+			var s3Buckets []interface{}
+			for _, s3Bucket := range *cluster.Properties.S3Buckets {
 				s3BucketEntry := make(map[string]interface{})
 				s3BucketEntry["name"] = *s3Bucket.Name
-				s3Buckets[i] = s3BucketEntry
+				s3Buckets = append(s3Buckets, s3BucketEntry)
 			}
-			if err := d.Set("s3_buckets", s3Buckets); err != nil {
-				return fmt.Errorf("error while setting s3_buckets property for cluser %s: %s", d.Id(), err)
+			if s3Buckets != nil && len(s3Buckets) > 0 {
+				if err := d.Set("s3_buckets", s3Buckets); err != nil {
+					return fmt.Errorf("error while setting s3_buckets property for cluser %s: %s", d.Id(), err)
+				}
 			}
 		}
 
@@ -540,18 +542,16 @@ func setK8sClusterData(d *schema.ResourceData, cluster *ionoscloud.KubernetesClu
 			return fmt.Errorf("an error occurred while fetching the kubernetes cluster node pools for cluster with ID %s: %s", *cluster.Id, err)
 		}
 
-		nodePools := make([]interface{}, 0)
-
 		if clusterNodePools.Items != nil && len(*clusterNodePools.Items) > 0 {
-			nodePools = make([]interface{}, len(*clusterNodePools.Items), len(*clusterNodePools.Items))
-			for i, nodePool := range *clusterNodePools.Items {
-				nodePools[i] = *nodePool.Id
+			var nodePools []interface{}
+			for _, nodePool := range *clusterNodePools.Items {
+				nodePools = append(nodePools, *nodePool.Id)
+			}
+			if err := d.Set("node_pools", nodePools); err != nil {
+				return err
 			}
 		}
 
-		if err := d.Set("node_pools", nodePools); err != nil {
-			return err
-		}
 	}
 
 	return nil

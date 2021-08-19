@@ -295,7 +295,7 @@ func setK8sNodePoolData(d *schema.ResourceData, nodePool *ionoscloud.KubernetesN
 			}
 		}
 
-		if nodePool.Properties.PublicIps != nil {
+		if nodePool.Properties.PublicIps != nil && len(*nodePool.Properties.PublicIps) > 0 {
 			if err := d.Set("public_ips", *nodePool.Properties.PublicIps); err != nil {
 				return err
 			}
@@ -325,19 +325,19 @@ func setK8sNodePoolData(d *schema.ResourceData, nodePool *ionoscloud.KubernetesN
 			}
 		}
 
-		if nodePool.Properties.Lans != nil {
+		if nodePool.Properties.Lans != nil && len(*nodePool.Properties.Lans) > 0 {
 			if err := d.Set("lans", *nodePool.Properties.Lans); err != nil {
 				return err
 			}
 		}
 
-		if nodePool.Properties.AvailableUpgradeVersions != nil {
+		if nodePool.Properties.AvailableUpgradeVersions != nil && len(*nodePool.Properties.AvailableUpgradeVersions) > 0 {
 			if err := d.Set("available_upgrade_versions", *nodePool.Properties.AvailableUpgradeVersions); err != nil {
 				return err
 			}
 		}
 
-		if nodePool.Properties.PublicIps != nil {
+		if nodePool.Properties.PublicIps != nil && len(*nodePool.Properties.PublicIps) > 0 {
 			if err := d.Set("public_ips", *nodePool.Properties.PublicIps); err != nil {
 				return err
 			}
