@@ -8,7 +8,6 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 	ionoscloud "github.com/ionos-cloud/sdk-go/v5"
 	"log"
-	"regexp"
 )
 
 func resourceDatacenter() *schema.Resource {
@@ -239,4 +238,3 @@ func resourceDatacenterDelete(ctx context.Context, d *schema.ResourceData, meta 
 	d.SetId("")
 	return nil
 }
-

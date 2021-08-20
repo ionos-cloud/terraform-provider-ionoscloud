@@ -431,4 +431,5 @@ google.golang.org/protobuf/types/known/timestamppb
 google.golang.org/protobuf/types/pluginpb
 # gopkg.in/yaml.v3 v3.0.0-20200615113413-eeeca48fe776
 ## explicit
+gopkg.in/yaml.v3
 # github.com/ionos-cloud/sdk-go-autoscaling => ../../../../../sdk/autoscaling-sdk/autoscaling-sdk-go
