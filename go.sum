@@ -246,6 +246,8 @@ github.com/ianlancetaylor/demangle v0.0.0-20181102032728-5e5cf60278f6/go.mod h1:
 github.com/imdario/mergo v0.3.11/go.mod h1:jmQim1M+e3UYxmgPu/WyfjB3N3VflVyUjjjwH0dnCYA=
 github.com/imdario/mergo v0.3.12 h1:b6R2BslTbIEToALKP7LxUvijTsNI9TAe80pLWN2g/HU=
 github.com/imdario/mergo v0.3.12/go.mod h1:jmQim1M+e3UYxmgPu/WyfjB3N3VflVyUjjjwH0dnCYA=
+github.com/ionos-cloud/sdk-go/v6 v6.0.0-beta.1 h1:Sa+pcHsu5PLC5FCqEVCP4kIEm8irzqlqqc/+JopcxBI=
+github.com/ionos-cloud/sdk-go/v6 v6.0.0-beta.1/go.mod h1:CpaxdDlFRKVg2SXTp7yfGkdErMouoJKs/Wvb/VcLp8U=
 github.com/ionos-cloud/sdk-go/v6 v6.0.0-beta.3 h1:QlFqeHNOLjfmK1DncWlTxcoRVLCTM7cQiHzmlPlcSxQ=
 github.com/ionos-cloud/sdk-go/v6 v6.0.0-beta.3/go.mod h1:CpaxdDlFRKVg2SXTp7yfGkdErMouoJKs/Wvb/VcLp8U=
 github.com/jbenet/go-context v0.0.0-20150711004518-d14ea06fba99 h1:BQSFePA1RWJOlocH6Fxy8MmwDt+yVQYULKfN0RoTN8A=
