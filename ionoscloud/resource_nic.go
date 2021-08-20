@@ -98,7 +98,7 @@ func resourceNicCreate(ctx context.Context, d *schema.ResourceData, meta interfa
 	if v, ok := d.GetOk("ips"); ok {
 		raw := v.([]interface{})
 		if raw != nil && len(raw) > 0 {
-			ips := make([]string, 0)
+			var ips []string
 			for _, rawIp := range raw {
 				ip := rawIp.(string)
 				ips = append(ips, ip)
@@ -173,7 +173,7 @@ func resourceNicRead(ctx context.Context, d *schema.ResourceData, meta interface
 				return diags
 			}
 		}
-		if rsp.Properties.Ips != nil {
+		if rsp.Properties.Ips != nil && len(*rsp.Properties.Ips) > 0 {
 			if err := d.Set("ips", *rsp.Properties.Ips); err != nil {
 				diags := diag.FromErr(err)
 				return diags
@@ -219,7 +219,7 @@ func resourceNicUpdate(ctx context.Context, d *schema.ResourceData, meta interfa
 		_, v := d.GetChange("ips")
 		raw := v.([]interface{})
 		if raw != nil && len(raw) > 0 {
-			ips := make([]string, 0)
+			var ips []string
 			for _, rawIp := range raw {
 				ip := rawIp.(string)
 				ips = append(ips, ip)

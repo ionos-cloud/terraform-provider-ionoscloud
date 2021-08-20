@@ -1,3 +1,30 @@
+## 5.2.11
+
+- documentation updates
+
+## 5.2.10
+
+- fixed set of empty array in terraform state instead of null
+
+## 5.2.9
+
+- issue #72 - fixed find volume image by name
+- error messages for immutable node pool attributes
+- issue #84 - fixed build & updated README.md
+
+## 5.2.8
+
+- rollback to the node pool behaviour before the fix of issue #71
+- issue #77 - fix import for k8s nodepool
+
+## 5.2.7
+
+- fix: issue #71 - recreate nodepool on change of specifications
+
+## 5.2.6
+
+- issue #66 - detailed kube config attributes implemented 
+
 ## 5.2.5
 - fix: fixes #1 - usage example updates
 - documentation updates

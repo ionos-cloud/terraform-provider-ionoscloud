@@ -277,9 +277,9 @@ func resourcek8sNodePoolCreate(ctx context.Context, d *schema.ResourceData, meta
 			return diags
 		}
 
-		requestPublicIps := make([]string, len(publicIps), len(publicIps))
+		var requestPublicIps []string
 		for i := range publicIps {
-			requestPublicIps[i] = fmt.Sprint(publicIps[i])
+			requestPublicIps = append(requestPublicIps, fmt.Sprint(publicIps[i]))
 		}
 		k8sNodepool.Properties.PublicIps = &requestPublicIps
 	}
@@ -431,7 +431,7 @@ func resourcek8sNodePoolRead(ctx context.Context, d *schema.ResourceData, meta i
 
 	}
 
-	if k8sNodepool.Properties.PublicIps != nil {
+	if k8sNodepool.Properties.PublicIps != nil && len(*k8sNodepool.Properties.PublicIps) > 0 {
 		err := d.Set("public_ips", *k8sNodepool.Properties.PublicIps)
 		if err != nil {
 			diags := diag.FromErr(fmt.Errorf("error while setting public_ips property for k8sNodepool %s: %s", d.Id(), err))
@@ -455,6 +455,14 @@ func resourcek8sNodePoolRead(ctx context.Context, d *schema.ResourceData, meta i
 		log.Printf("[INFO] Setting AutoScaling for k8s node pool %s to %+v...", d.Id(), *k8sNodepool.Properties.AutoScaling)
 	}
 
+	if k8sNodepool.Properties.Lans != nil && len(*k8sNodepool.Properties.Lans) > 0 {
+		err := d.Set("lans", *k8sNodepool.Properties.PublicIps)
+		if err != nil {
+			diags := diag.FromErr(fmt.Errorf("error while setting lans property for k8sNodepool %s: %s", d.Id(), err))
+			return diags
+		}
+	}
+
 	return nil
 }
 
@@ -466,6 +474,41 @@ func resourcek8sNodePoolUpdate(ctx context.Context, d *schema.ResourceData, meta
 	nodeCount := int32(d.Get("node_count").(int))
 	request.Properties = &ionoscloud.KubernetesNodePoolPropertiesForPut{
 		NodeCount: &nodeCount,
+	}
+
+	if d.HasChange("name") {
+		diags := diag.FromErr(fmt.Errorf("name attribute is immutable, therefore not allowed in update requests"))
+		return diags
+	}
+
+	if d.HasChange("cpu_family") {
+		diags := diag.FromErr(fmt.Errorf("cpu_family attribute is immutable, therefore not allowed in update requests"))
+		return diags
+	}
+
+	if d.HasChange("availability_zone") {
+		diags := diag.FromErr(fmt.Errorf("availability_zone attribute is immutable, therefore not allowed in update requests"))
+		return diags
+	}
+
+	if d.HasChange("cores_count") {
+		diags := diag.FromErr(fmt.Errorf("cores_count attribute is immutable, therefore not allowed in update requests"))
+		return diags
+	}
+
+	if d.HasChange("ram_size") {
+		diags := diag.FromErr(fmt.Errorf("ram_size attribute is immutable, therefore not allowed in update requests"))
+		return diags
+	}
+
+	if d.HasChange("storage_size") {
+		diags := diag.FromErr(fmt.Errorf("storage_size attribute is immutable, therefore not allowed in update requests"))
+		return diags
+	}
+
+	if d.HasChange("storage_type") {
+		diags := diag.FromErr(fmt.Errorf("storage_size attribute is immutable, therefore not allowed in update requests"))
+		return diags
 	}
 
 	if d.HasChange("k8s_version") {
@@ -669,6 +712,7 @@ func resourcek8sNodePoolUpdate(ctx context.Context, d *schema.ResourceData, meta
 			break
 		}
 
+		time.Sleep(SleepInterval * 3)
 		select {
 		case <-time.After(SleepInterval):
 			log.Printf("[INFO] trying again ...")

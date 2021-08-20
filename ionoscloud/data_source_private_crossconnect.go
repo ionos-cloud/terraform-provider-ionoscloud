@@ -151,7 +151,7 @@ func setPccDataSource(d *schema.ResourceData, pcc *ionoscloud.PrivateCrossConnec
 				return err
 			}
 		}
-		if pcc.Properties.ConnectableDatacenters != nil {
+		if pcc.Properties.ConnectableDatacenters != nil && len(*pcc.Properties.ConnectableDatacenters) > 0 {
 			if err := d.Set("connectable_datacenters", convertConnectableDatacenters(pcc.Properties.ConnectableDatacenters)); err != nil {
 				return err
 			}
@@ -183,7 +183,6 @@ func dataSourcePccRead(d *schema.ResourceData, meta interface{}) error {
 
 	if idOk {
 		/* search by ID */
-		fmt.Printf("searching for ID %s\n", id.(string))
 		pcc, _, err = client.PrivateCrossConnectApi.PccsFindById(ctx, id.(string)).Execute()
 		if err != nil {
 			return fmt.Errorf("an error occurred while fetching the pcc with ID %s: %s", id.(string), err)

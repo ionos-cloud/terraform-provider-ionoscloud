@@ -146,7 +146,7 @@ func resourceIPBlockRead(ctx context.Context, d *schema.ResourceData, meta inter
 
 	log.Printf("[INFO] IPS: %s", strings.Join(*ipBlock.Properties.Ips, ","))
 
-	if ipBlock.Properties.Ips != nil {
+	if ipBlock.Properties.Ips != nil && len(*ipBlock.Properties.Ips) > 0 {
 		if err := d.Set("ips", *ipBlock.Properties.Ips); err != nil {
 			diags := diag.FromErr(err)
 			return diags
