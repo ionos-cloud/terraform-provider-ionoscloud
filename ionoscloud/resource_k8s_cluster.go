@@ -294,9 +294,9 @@ func resourcek8sClusterRead(ctx context.Context, d *schema.ResourceData, meta in
 	}
 
 	if cluster.Properties.AvailableUpgradeVersions != nil {
-		availableUpgradeVersions := make([]interface{}, len(*cluster.Properties.AvailableUpgradeVersions), len(*cluster.Properties.AvailableUpgradeVersions))
-		for i, availableUpgradeVersion := range *cluster.Properties.AvailableUpgradeVersions {
-			availableUpgradeVersions[i] = availableUpgradeVersion
+		var availableUpgradeVersions []interface{}
+		for _, availableUpgradeVersion := range *cluster.Properties.AvailableUpgradeVersions {
+			availableUpgradeVersions = append(availableUpgradeVersions, availableUpgradeVersion)
 		}
 		if err := d.Set("available_upgrade_versions", availableUpgradeVersions); err != nil {
 			diags := diag.FromErr(err)
@@ -304,10 +304,10 @@ func resourcek8sClusterRead(ctx context.Context, d *schema.ResourceData, meta in
 		}
 	}
 
-	if cluster.Properties.ViableNodePoolVersions != nil {
-		viableNodePoolVersions := make([]interface{}, len(*cluster.Properties.ViableNodePoolVersions), len(*cluster.Properties.ViableNodePoolVersions))
-		for i, viableNodePoolVersion := range *cluster.Properties.ViableNodePoolVersions {
-			viableNodePoolVersions[i] = viableNodePoolVersion
+	if cluster.Properties.ViableNodePoolVersions != nil && len(*cluster.Properties.ViableNodePoolVersions) > 0 {
+		var viableNodePoolVersions []interface{}
+		for _, viableNodePoolVersion := range *cluster.Properties.ViableNodePoolVersions {
+			viableNodePoolVersions = append(viableNodePoolVersions, viableNodePoolVersion)
 		}
 		if err := d.Set("viable_node_pool_versions", viableNodePoolVersions); err != nil {
 			diags := diag.FromErr(err)

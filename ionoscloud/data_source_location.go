@@ -98,12 +98,9 @@ func dataSourceLocationRead(d *schema.ResourceData, meta interface{}) error {
 	}
 	log.Printf("[INFO] Results length %d *************", len(results))
 
-	cpuArchitectures := make([]interface{}, 0)
-	imageAliases := make([]string, 0)
-
 	for _, loc := range results {
-		cpuArchitectures = make([]interface{}, len(*loc.Properties.CpuArchitecture))
-		for index, cpuArchitecture := range *loc.Properties.CpuArchitecture {
+		var cpuArchitectures []interface{}
+		for _, cpuArchitecture := range *loc.Properties.CpuArchitecture {
 			architectureEntry := make(map[string]interface{})
 
 			if cpuArchitecture.CpuFamily != nil {
@@ -122,45 +119,24 @@ func dataSourceLocationRead(d *schema.ResourceData, meta interface{}) error {
 				architectureEntry["vendor"] = *cpuArchitecture.Vendor
 			}
 
-			cpuArchitectures[index] = architectureEntry
+			cpuArchitectures = append(cpuArchitectures, architectureEntry)
 		}
 
-		for index, cpuArchitecture := range *loc.Properties.CpuArchitecture {
-			architectureEntry := make(map[string]interface{})
-
-			if cpuArchitecture.CpuFamily != nil {
-				architectureEntry["cpu_family"] = *cpuArchitecture.CpuFamily
+		if len(cpuArchitectures) > 0 {
+			if err := d.Set("cpu_architecture", cpuArchitectures); err != nil {
+				return fmt.Errorf("error while setting cpu_architecture property for datacenter %s: %s", d.Id(), err)
 			}
-
-			if cpuArchitecture.MaxCores != nil {
-				architectureEntry["max_cores"] = *cpuArchitecture.MaxCores
-			}
-
-			if cpuArchitecture.MaxRam != nil {
-				architectureEntry["max_ram"] = *cpuArchitecture.MaxRam
-			}
-
-			if cpuArchitecture.Vendor != nil {
-				architectureEntry["vendor"] = *cpuArchitecture.Vendor
-			}
-
-			cpuArchitectures[index] = architectureEntry
 		}
 
+		var imageAliases []string
 		for _, imageAlias := range *loc.Properties.ImageAliases {
 			imageAliases = append(imageAliases, imageAlias)
 		}
-	}
 
-	if len(cpuArchitectures) > 0 {
-		if err := d.Set("cpu_architecture", cpuArchitectures); err != nil {
-			return fmt.Errorf("error while setting cpu_architecture property for datacenter %s: %s", d.Id(), err)
-		}
-	}
-
-	if len(imageAliases) > 0 {
-		if err := d.Set("image_aliases", imageAliases); err != nil {
-			return fmt.Errorf("error while setting image_aliases property for datacenter %s: %s", d.Id(), err)
+		if len(imageAliases) > 0 {
+			if err := d.Set("image_aliases", imageAliases); err != nil {
+				return fmt.Errorf("error while setting image_aliases property for datacenter %s: %s", d.Id(), err)
+			}
 		}
 	}
 

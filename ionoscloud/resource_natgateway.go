@@ -191,10 +191,9 @@ func resourceNatGatewayRead(ctx context.Context, d *schema.ResourceData, meta in
 		}
 	}
 
-	natGatewayLans := make([]interface{}, 0)
 	if natGateway.Properties.Lans != nil && len(*natGateway.Properties.Lans) > 0 {
-		natGatewayLans = make([]interface{}, len(*natGateway.Properties.Lans))
-		for lanIndex, lan := range *natGateway.Properties.Lans {
+		var natGatewayLans []interface{}
+		for _, lan := range *natGateway.Properties.Lans {
 			lanEntry := make(map[string]interface{})
 
 			if lan.Id != nil {
@@ -205,16 +204,17 @@ func resourceNatGatewayRead(ctx context.Context, d *schema.ResourceData, meta in
 				lanEntry["gateway_ips"] = *lan.GatewayIps
 			}
 
-			natGatewayLans[lanIndex] = lanEntry
+			natGatewayLans = append(natGatewayLans, lanEntry)
+		}
+
+		if len(natGatewayLans) > 0 {
+			if err := d.Set("lans", natGatewayLans); err != nil {
+				diags := diag.FromErr(fmt.Errorf("error while setting lans property for nat gateway %s: %s", d.Id(), err))
+				return diags
+			}
 		}
 	}
 
-	if len(natGatewayLans) > 0 {
-		if err := d.Set("lans", natGatewayLans); err != nil {
-			diags := diag.FromErr(fmt.Errorf("error while setting lans property for nat gateway %s: %s", d.Id(), err))
-			return diags
-		}
-	}
 	return nil
 }
 

@@ -194,10 +194,9 @@ func resourceDatacenterRead(ctx context.Context, d *schema.ResourceData, meta in
 		}
 	}
 
-	cpuArchitectures := make([]interface{}, 0)
 	if datacenter.Properties.CpuArchitecture != nil && len(*datacenter.Properties.CpuArchitecture) > 0 {
-		cpuArchitectures = make([]interface{}, len(*datacenter.Properties.CpuArchitecture))
-		for index, cpuArchitecture := range *datacenter.Properties.CpuArchitecture {
+		var cpuArchitectures []interface{}
+		for _, cpuArchitecture := range *datacenter.Properties.CpuArchitecture {
 			architectureEntry := make(map[string]interface{})
 
 			if cpuArchitecture.CpuFamily != nil {
@@ -216,13 +215,13 @@ func resourceDatacenterRead(ctx context.Context, d *schema.ResourceData, meta in
 				architectureEntry["vendor"] = *cpuArchitecture.Vendor
 			}
 
-			cpuArchitectures[index] = architectureEntry
+			cpuArchitectures = append(cpuArchitectures, architectureEntry)
 		}
-	}
-	if len(cpuArchitectures) > 0 {
-		if err := d.Set("cpu_architecture", cpuArchitectures); err != nil {
-			diags := diag.FromErr(fmt.Errorf("error while setting features property for datacenter %s: %s", d.Id(), err))
-			return diags
+		if len(cpuArchitectures) > 0 {
+			if err := d.Set("cpu_architecture", cpuArchitectures); err != nil {
+				diags := diag.FromErr(fmt.Errorf("error while setting features property for datacenter %s: %s", d.Id(), err))
+				return diags
+			}
 		}
 	}
 

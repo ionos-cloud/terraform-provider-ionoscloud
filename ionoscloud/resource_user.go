@@ -241,7 +241,7 @@ func resourceUserUpdate(ctx context.Context, d *schema.ResourceData, meta interf
 		active := newValue.(bool)
 		userReq.Properties.SecAuthActive = &active
 	} else {
-		userReq.Properties.Active = rsp.Properties.SecAuthActive
+		userReq.Properties.SecAuthActive = rsp.Properties.SecAuthActive
 	}
 
 	rsp, apiResponse, err = client.UserManagementApi.UmUsersPut(ctx, d.Id()).User(userReq).Execute()

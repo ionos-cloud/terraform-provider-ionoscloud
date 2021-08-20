@@ -381,7 +381,7 @@ func resourceNetworkLoadBalancerForwardingRuleRead(ctx context.Context, d *schem
 	}
 
 	if networkLoadBalancerForwardingRule.Properties.HealthCheck != nil {
-		healthCheck := make([]interface{}, 1)
+		var healthCheck []interface{}
 
 		healthCheckEntry := make(map[string]interface{})
 		if networkLoadBalancerForwardingRule.Properties.HealthCheck.ClientTimeout != nil {
@@ -400,7 +400,7 @@ func resourceNetworkLoadBalancerForwardingRuleRead(ctx context.Context, d *schem
 			healthCheckEntry["retries"] = *networkLoadBalancerForwardingRule.Properties.HealthCheck.Retries
 		}
 
-		healthCheck[0] = healthCheckEntry
+		healthCheck = append(healthCheck, healthCheckEntry)
 		err := d.Set("health_check", healthCheck)
 		if err != nil {
 			diags := diag.FromErr(fmt.Errorf("error while setting health_check property for network load balancer forwarding rule %s: %s", d.Id(), err))
@@ -409,10 +409,9 @@ func resourceNetworkLoadBalancerForwardingRuleRead(ctx context.Context, d *schem
 
 	}
 
-	forwardingRuleTargets := make([]interface{}, 0)
 	if networkLoadBalancerForwardingRule.Properties.Targets != nil && len(*networkLoadBalancerForwardingRule.Properties.Targets) > 0 {
-		forwardingRuleTargets = make([]interface{}, len(*networkLoadBalancerForwardingRule.Properties.Targets))
-		for targetIndex, target := range *networkLoadBalancerForwardingRule.Properties.Targets {
+		var forwardingRuleTargets []interface{}
+		for _, target := range *networkLoadBalancerForwardingRule.Properties.Targets {
 			targetEntry := make(map[string]interface{})
 
 			if target.Ip != nil {
@@ -428,7 +427,7 @@ func resourceNetworkLoadBalancerForwardingRuleRead(ctx context.Context, d *schem
 			}
 
 			if target.HealthCheck != nil {
-				healthCheck := make([]interface{}, 1)
+				var healthCheck []interface{}
 
 				healthCheckEntry := make(map[string]interface{})
 
@@ -444,18 +443,17 @@ func resourceNetworkLoadBalancerForwardingRuleRead(ctx context.Context, d *schem
 					healthCheckEntry["maintenance"] = *target.HealthCheck.Maintenance
 				}
 
-				healthCheck[0] = healthCheckEntry
+				healthCheck = append(healthCheck, healthCheckEntry)
 				targetEntry["health_check"] = healthCheck
 			}
 
-			forwardingRuleTargets[targetIndex] = targetEntry
+			forwardingRuleTargets = append(forwardingRuleTargets, targetEntry)
 		}
-	}
-
-	if len(forwardingRuleTargets) > 0 {
-		if err := d.Set("targets", forwardingRuleTargets); err != nil {
-			diags := diag.FromErr(fmt.Errorf("error while setting targets property for network load balancer forwarding rule  %s: %s", d.Id(), err))
-			return diags
+		if len(forwardingRuleTargets) > 0 {
+			if err := d.Set("targets", forwardingRuleTargets); err != nil {
+				diags := diag.FromErr(fmt.Errorf("error while setting targets property for network load balancer forwarding rule  %s: %s", d.Id(), err))
+				return diags
+			}
 		}
 	}
 

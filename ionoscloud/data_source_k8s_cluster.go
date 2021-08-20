@@ -447,19 +447,19 @@ func setK8sClusterData(d *schema.ResourceData, cluster *ionoscloud.KubernetesClu
 		}
 
 		if cluster.Properties.AvailableUpgradeVersions != nil {
-			availableUpgradeVersions := make([]interface{}, len(*cluster.Properties.AvailableUpgradeVersions), len(*cluster.Properties.AvailableUpgradeVersions))
-			for i, availableUpgradeVersion := range *cluster.Properties.AvailableUpgradeVersions {
-				availableUpgradeVersions[i] = availableUpgradeVersion
+			var availableUpgradeVersions []interface{}
+			for _, availableUpgradeVersion := range *cluster.Properties.AvailableUpgradeVersions {
+				availableUpgradeVersions = append(availableUpgradeVersions, availableUpgradeVersion)
 			}
 			if err := d.Set("available_upgrade_versions", availableUpgradeVersions); err != nil {
 				return err
 			}
 		}
 
-		if cluster.Properties.ViableNodePoolVersions != nil {
-			viableNodePoolVersions := make([]interface{}, len(*cluster.Properties.ViableNodePoolVersions), len(*cluster.Properties.ViableNodePoolVersions))
-			for i, viableNodePoolVersion := range *cluster.Properties.ViableNodePoolVersions {
-				viableNodePoolVersions[i] = viableNodePoolVersion
+		if cluster.Properties.ViableNodePoolVersions != nil && len(*cluster.Properties.ViableNodePoolVersions) > 0 {
+			var viableNodePoolVersions []interface{}
+			for _, viableNodePoolVersion := range *cluster.Properties.ViableNodePoolVersions {
+				viableNodePoolVersions = append(viableNodePoolVersions, viableNodePoolVersion)
 			}
 			if err := d.Set("viable_node_pool_versions", viableNodePoolVersions); err != nil {
 				return err
@@ -540,18 +540,16 @@ func setK8sClusterData(d *schema.ResourceData, cluster *ionoscloud.KubernetesClu
 			return fmt.Errorf("an error occurred while fetching the kubernetes cluster node pools for cluster with ID %s: %s", *cluster.Id, err)
 		}
 
-		nodePools := make([]interface{}, 0)
-
 		if clusterNodePools.Items != nil && len(*clusterNodePools.Items) > 0 {
-			nodePools = make([]interface{}, len(*clusterNodePools.Items), len(*clusterNodePools.Items))
-			for i, nodePool := range *clusterNodePools.Items {
-				nodePools[i] = *nodePool.Id
+			var nodePools []interface{}
+			for _, nodePool := range *clusterNodePools.Items {
+				nodePools = append(nodePools, *nodePool.Id)
+			}
+			if err := d.Set("node_pools", nodePools); err != nil {
+				return err
 			}
 		}
 
-		if err := d.Set("node_pools", nodePools); err != nil {
-			return err
-		}
 	}
 
 	return nil

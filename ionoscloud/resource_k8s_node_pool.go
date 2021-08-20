@@ -359,9 +359,9 @@ func resourcek8sNodePoolCreate(ctx context.Context, d *schema.ResourceData, meta
 			return diags
 		}
 
-		requestPublicIps := make([]string, len(publicIps), len(publicIps))
+		var requestPublicIps []string
 		for i := range publicIps {
-			requestPublicIps[i] = fmt.Sprint(publicIps[i])
+			requestPublicIps = append(requestPublicIps, fmt.Sprint(publicIps[i]))
 		}
 		k8sNodepool.Properties.PublicIps = &requestPublicIps
 	}
@@ -518,7 +518,7 @@ func resourcek8sNodePoolRead(ctx context.Context, d *schema.ResourceData, meta i
 
 	}
 
-	if k8sNodepool.Properties.PublicIps != nil {
+	if k8sNodepool.Properties.PublicIps != nil && len(*k8sNodepool.Properties.PublicIps) > 0 {
 		err := d.Set("public_ips", *k8sNodepool.Properties.PublicIps)
 		if err != nil {
 			diags := diag.FromErr(fmt.Errorf("error while setting public_ips property for k8sNodepool %s: %s", d.Id(), err))
@@ -542,9 +542,8 @@ func resourcek8sNodePoolRead(ctx context.Context, d *schema.ResourceData, meta i
 		log.Printf("[INFO] Setting AutoScaling for k8s node pool %s to %+v...", d.Id(), *k8sNodepool.Properties.AutoScaling)
 	}
 
-	nodePoolLans := make([]interface{}, 0)
 	if k8sNodepool.Properties.Lans != nil && len(*k8sNodepool.Properties.Lans) > 0 {
-		nodePoolLans = make([]interface{}, 0)
+		var nodePoolLans []interface{}
 		for _, nodePoolLan := range *k8sNodepool.Properties.Lans {
 			lanEntry := make(map[string]interface{})
 
@@ -556,9 +555,8 @@ func resourcek8sNodePoolRead(ctx context.Context, d *schema.ResourceData, meta i
 				lanEntry["dhcp"] = *nodePoolLan.Dhcp
 			}
 
-			nodePoolRoutes := make([]interface{}, 0)
 			if nodePoolLan.Routes != nil && len(*nodePoolLan.Routes) > 0 {
-				nodePoolRoutes = make([]interface{}, 0)
+				var nodePoolRoutes []interface{}
 				for _, nodePoolRoute := range *nodePoolLan.Routes {
 					routeEntry := make(map[string]string)
 					if nodePoolRoute.Network != nil {
@@ -569,20 +567,20 @@ func resourcek8sNodePoolRead(ctx context.Context, d *schema.ResourceData, meta i
 					}
 					nodePoolRoutes = append(nodePoolRoutes, routeEntry)
 				}
-			}
 
-			if len(nodePoolRoutes) > 0 {
-				lanEntry["routes"] = nodePoolRoutes
+				if len(nodePoolRoutes) > 0 {
+					lanEntry["routes"] = nodePoolRoutes
+				}
 			}
 
 			nodePoolLans = append(nodePoolLans, lanEntry)
 		}
-	}
 
-	if len(nodePoolLans) > 0 {
-		if err := d.Set("lans", nodePoolLans); err != nil {
-			diags := diag.FromErr(fmt.Errorf("error while setting lans property for k8sNodepool %s: %s", d.Id(), err))
-			return diags
+		if len(nodePoolLans) > 0 {
+			if err := d.Set("lans", nodePoolLans); err != nil {
+				diags := diag.FromErr(fmt.Errorf("error while setting lans property for k8sNodepool %s: %s", d.Id(), err))
+				return diags
+			}
 		}
 	}
 
