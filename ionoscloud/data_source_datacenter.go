@@ -221,10 +221,9 @@ func dataSourceDataCenterRead(d *schema.ResourceData, meta interface{}) error {
 		}
 	}
 
-	cpuArchitectures := make([]interface{}, 0)
 	if datacenter.Properties.CpuArchitecture != nil && len(*datacenter.Properties.CpuArchitecture) > 0 {
-		cpuArchitectures = make([]interface{}, len(*datacenter.Properties.CpuArchitecture))
-		for index, cpuArchitecture := range *datacenter.Properties.CpuArchitecture {
+		var cpuArchitectures []interface{}
+		for _, cpuArchitecture := range *datacenter.Properties.CpuArchitecture {
 			architectureEntry := make(map[string]interface{})
 
 			if cpuArchitecture.CpuFamily != nil {
@@ -243,12 +242,13 @@ func dataSourceDataCenterRead(d *schema.ResourceData, meta interface{}) error {
 				architectureEntry["vendor"] = *cpuArchitecture.Vendor
 			}
 
-			cpuArchitectures[index] = architectureEntry
-		}
-	}
-	if len(cpuArchitectures) > 0 {
-		if err := d.Set("cpu_architecture", cpuArchitectures); err != nil {
-			return fmt.Errorf("error while setting cpu_architecture property for datacenter %s: %s", d.Id(), err)
+			cpuArchitectures = append(cpuArchitectures, architectureEntry)
+
+			if len(cpuArchitectures) > 0 {
+				if err := d.Set("cpu_architecture", cpuArchitectures); err != nil {
+					return fmt.Errorf("error while setting cpu_architecture property for datacenter %s: %s", d.Id(), err)
+				}
+			}
 		}
 	}
 

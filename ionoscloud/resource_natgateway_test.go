@@ -4,7 +4,6 @@ import (
 	"context"
 	"fmt"
 	ionoscloud "github.com/ionos-cloud/sdk-go/v6"
-	"os"
 	"testing"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
@@ -15,12 +14,6 @@ func TestAccNatGateway_Basic(t *testing.T) {
 	var natGateway ionoscloud.NatGateway
 	natGatewayName := "natGateway"
 
-	publicIp1 := os.Getenv("TF_ACC_IONOS_PUBLIC_IP_1")
-	if publicIp1 == "" {
-		t.Errorf("TF_ACC_IONOS_PUBLIC_IP_1 not set; please set it to a valid public IP for the de/fra zone")
-		t.FailNow()
-	}
-
 	resource.Test(t, resource.TestCase{
 		PreCheck: func() {
 			testAccPreCheck(t)
@@ -29,16 +22,18 @@ func TestAccNatGateway_Basic(t *testing.T) {
 		CheckDestroy:      testAccCheckNatGatewayDestroyCheck,
 		Steps: []resource.TestStep{
 			{
-				Config: fmt.Sprintf(testAccCheckNatGatewayConfigBasic, natGatewayName, publicIp1),
+				Config: fmt.Sprintf(testAccCheckNatGatewayConfigBasic, natGatewayName),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckNatGatewayExists("ionoscloud_natgateway.natgateway", &natGateway),
 					resource.TestCheckResourceAttr("ionoscloud_natgateway.natgateway", "name", natGatewayName),
+					resource.TestCheckResourceAttrPair("ionoscloud_natgateway.natgateway", "public_ips.0", "ionoscloud_ipblock.natgateway_ips", "ips.0"),
 				),
 			},
 			{
-				Config: fmt.Sprintf(testAccCheckNatGatewayConfigUpdate, publicIp1),
+				Config: fmt.Sprintf(testAccCheckNatGatewayConfigUpdate),
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttr("ionoscloud_natgateway.natgateway", "name", "updated"),
+					resource.TestCheckResourceAttrPair("ionoscloud_natgateway.natgateway", "public_ips.0", "ionoscloud_ipblock.natgateway_ips", "ips.0"),
 				),
 			},
 		},
@@ -113,6 +108,12 @@ resource "ionoscloud_datacenter" "natgateway_datacenter" {
   description       = "datacenter for hosting "
 }
 
+resource "ionoscloud_ipblock" "natgateway_ips" {
+  location = ionoscloud_datacenter.natgateway_datacenter.location
+  size = 1
+  name = "natgateway_ips"
+}
+
 resource "ionoscloud_lan" "natgateway_lan" {
   datacenter_id = ionoscloud_datacenter.natgateway_datacenter.id 
   public        = false
@@ -122,7 +123,7 @@ resource "ionoscloud_lan" "natgateway_lan" {
 resource "ionoscloud_natgateway" "natgateway" { 
   datacenter_id = ionoscloud_datacenter.natgateway_datacenter.id
   name          = "%s"
-  public_ips    = [ "%s" ]
+  public_ips    = [ ionoscloud_ipblock.natgateway_ips.ips[0] ]
   lans {
      id          = ionoscloud_lan.natgateway_lan.id
   }
@@ -135,6 +136,12 @@ resource "ionoscloud_datacenter" "natgateway_datacenter" {
   description       = "datacenter for hosting "
 }
 
+resource "ionoscloud_ipblock" "natgateway_ips" {
+  location = ionoscloud_datacenter.natgateway_datacenter.location
+  size = 1
+  name = "natgateway_ips"
+}
+
 resource "ionoscloud_lan" "natgateway_lan" {
   datacenter_id = ionoscloud_datacenter.natgateway_datacenter.id 
   public        = false
@@ -144,7 +151,7 @@ resource "ionoscloud_lan" "natgateway_lan" {
 resource "ionoscloud_natgateway" "natgateway" { 
   datacenter_id = ionoscloud_datacenter.natgateway_datacenter.id
   name          = "updated" 
-  public_ips    = [ "%s"]
+  public_ips    = [ ionoscloud_ipblock.natgateway_ips.ips[0] ]
   lans {
      id          = ionoscloud_lan.natgateway_lan.id
   }

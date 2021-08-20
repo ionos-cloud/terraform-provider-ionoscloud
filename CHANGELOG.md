@@ -1,3 +1,27 @@
+## 6.0.0-beta.8
+
+- fixed set of empty array in terraform state instead of null
+
+## 6.0.0-beta.7
+
+- k8s security features implemented
+
+## 6.0.0-beta.6
+
+- updated arguments for datacenter, ipblock, location and user
+- issue #72 - fixed find volume image by name
+- error message for immutable node pool attributes
+- issue #84 - fixed build & updated README.md
+
+## 6.0.0-beta.5
+
+- rollback to the node pool behaviour before the fix of issue #71
+- issue #77 - fix import for k8s nodepool
+
+## 6.0.0-beta.4
+
+- fix: issue #71 - recreate nodepool on change of specifications
+
 ## 6.0.0-beta.3
 
 - issue #66 - detailed kube config attributes implemented

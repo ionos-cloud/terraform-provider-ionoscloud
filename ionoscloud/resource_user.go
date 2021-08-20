@@ -48,6 +48,18 @@ func resourceUser() *schema.Resource {
 				Type:     schema.TypeBool,
 				Required: true,
 			},
+			"sec_auth_active": {
+				Type:     schema.TypeBool,
+				Computed: true,
+			},
+			"s3_canonical_user_id": {
+				Type:     schema.TypeString,
+				Computed: true,
+			},
+			"active": {
+				Type:     schema.TypeBool,
+				Optional: true,
+			},
 		},
 		Timeouts: &resourceDefaultTimeouts,
 	}
@@ -82,6 +94,14 @@ func resourceUserCreate(ctx context.Context, d *schema.ResourceData, meta interf
 	forceSecAuth := d.Get("force_sec_auth").(bool)
 	request.Properties.Administrator = &administrator
 	request.Properties.ForceSecAuth = &forceSecAuth
+
+	active := d.Get("active").(bool)
+	request.Properties.Active = &active
+
+	if _, ok := d.GetOk("sec_auth_active"); ok {
+		diags := diag.FromErr(fmt.Errorf("sec_auth_active attribute is not allowed in create requests"))
+		return diags
+	}
 
 	rsp, apiResponse, err := client.UserManagementApi.UmUsersPost(ctx).User(request).Execute()
 
@@ -139,6 +159,28 @@ func resourceUserRead(ctx context.Context, d *schema.ResourceData, meta interfac
 		diags := diag.FromErr(err)
 		return diags
 	}
+
+	if rsp.Properties.SecAuthActive != nil {
+		if err := d.Set("sec_auth_active", *rsp.Properties.SecAuthActive); err != nil {
+			diags := diag.FromErr(err)
+			return diags
+		}
+	}
+
+	if rsp.Properties.S3CanonicalUserId != nil {
+		if err := d.Set("s3_canonical_user_id", *rsp.Properties.S3CanonicalUserId); err != nil {
+			diags := diag.FromErr(err)
+			return diags
+		}
+	}
+
+	if rsp.Properties.Active != nil {
+		if err := d.Set("active", *rsp.Properties.Active); err != nil {
+			diags := diag.FromErr(err)
+			return diags
+		}
+	}
+
 	return nil
 }
 
@@ -184,6 +226,22 @@ func resourceUserUpdate(ctx context.Context, d *schema.ResourceData, meta interf
 		userReq.Properties.Email = &email
 	} else {
 		userReq.Properties.Email = rsp.Properties.Email
+	}
+
+	if d.HasChange("active") {
+		_, newValue := d.GetChange("active")
+		active := newValue.(bool)
+		userReq.Properties.Active = &active
+	} else {
+		userReq.Properties.Active = rsp.Properties.Active
+	}
+
+	if d.HasChange("sec_auth_active") {
+		_, newValue := d.GetChange("sec_auth_active")
+		active := newValue.(bool)
+		userReq.Properties.SecAuthActive = &active
+	} else {
+		userReq.Properties.SecAuthActive = rsp.Properties.SecAuthActive
 	}
 
 	rsp, apiResponse, err = client.UserManagementApi.UmUsersPut(ctx, d.Id()).User(userReq).Execute()

@@ -159,7 +159,7 @@ func resourceK8sNodepoolImport(ctx context.Context, d *schema.ResourceData, meta
 		log.Printf("[INFO] Setting Public IPs for k8s node pool %s to %+v...", d.Id(), d.Get("public_ips"))
 	}
 
-	if k8sNodepool.Properties.AutoScaling != nil && (*k8sNodepool.Properties.AutoScaling.MinNodeCount != 0 && *k8sNodepool.Properties.AutoScaling.MaxNodeCount != 0) {
+	if k8sNodepool.Properties.AutoScaling != nil && k8sNodepool.Properties.AutoScaling.MinNodeCount != nil && k8sNodepool.Properties.AutoScaling.MaxNodeCount != nil && (*k8sNodepool.Properties.AutoScaling.MinNodeCount != 0 && *k8sNodepool.Properties.AutoScaling.MaxNodeCount != 0) {
 		if err := d.Set("auto_scaling", []map[string]int32{
 			{
 				"min_node_count": *k8sNodepool.Properties.AutoScaling.MinNodeCount,
@@ -611,10 +611,9 @@ func resourceGroupImporter(ctx context.Context, d *schema.ResourceData, meta int
 		return nil, err
 	}
 
-	usersEntries := make([]interface{}, 0)
 	if users.Items != nil && len(*users.Items) > 0 {
-		usersEntries = make([]interface{}, len(*users.Items))
-		for userIndex, user := range *users.Items {
+		var usersEntries []interface{}
+		for _, user := range *users.Items {
 			userEntry := make(map[string]interface{})
 
 			if user.Properties.Firstname != nil {
@@ -637,7 +636,7 @@ func resourceGroupImporter(ctx context.Context, d *schema.ResourceData, meta int
 				userEntry["force_sec_auth"] = *user.Properties.ForceSecAuth
 			}
 
-			usersEntries[userIndex] = userEntry
+			usersEntries = append(usersEntries, userEntry)
 		}
 
 		if len(usersEntries) > 0 {

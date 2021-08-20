@@ -5,6 +5,7 @@ import (
 	"errors"
 	"fmt"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 	ionoscloud "github.com/ionos-cloud/sdk-go/v6"
 	"strings"
 )
@@ -52,13 +53,6 @@ func dataSourceNetworkLoadBalancerForwardingRule() *schema.Resource {
 							Description: "ClientTimeout is expressed in milliseconds. This inactivity timeout applies " +
 								"when the client is expected to acknowledge or send data. If unset the default of 50 " +
 								"seconds will be used.",
-							Computed: true,
-						},
-						"check_timeout": {
-							Type: schema.TypeInt,
-							Description: "It specifies the time (in milliseconds) for a target VM in this pool to answer " +
-								"the check. If a target VM has CheckInterval set and CheckTimeout is set too, " +
-								"then the smaller value of the two is used after the TCP connection is established.",
 							Computed: true,
 						},
 						"connect_timeout": {
@@ -132,14 +126,16 @@ func dataSourceNetworkLoadBalancerForwardingRule() *schema.Resource {
 				},
 			},
 			"datacenter_id": {
-				Type:     schema.TypeString,
-				Required: true,
-				ForceNew: true,
+				Type:         schema.TypeString,
+				Required:     true,
+				ForceNew:     true,
+				ValidateFunc: validation.All(validation.StringIsNotWhiteSpace),
 			},
 			"networkloadbalancer_id": {
-				Type:     schema.TypeString,
-				Required: true,
-				ForceNew: true,
+				Type:         schema.TypeString,
+				Required:     true,
+				ForceNew:     true,
+				ValidateFunc: validation.All(validation.StringIsNotWhiteSpace),
 			},
 		},
 		Timeouts: &resourceDefaultTimeouts,
@@ -274,15 +270,11 @@ func setNetworkLoadBalancerForwardingRuleData(d *schema.ResourceData, networkLoa
 		}
 
 		if networkLoadBalancerForwardingRule.Properties.HealthCheck != nil {
-			healthCheck := make([]interface{}, 1)
+			var healthCheck []interface{}
 
 			healthCheckEntry := make(map[string]interface{})
 			if networkLoadBalancerForwardingRule.Properties.HealthCheck.ClientTimeout != nil {
 				healthCheckEntry["client_timeout"] = *networkLoadBalancerForwardingRule.Properties.HealthCheck.ClientTimeout
-			}
-
-			if networkLoadBalancerForwardingRule.Properties.HealthCheck.CheckTimeout != nil {
-				healthCheckEntry["check_timeout"] = *networkLoadBalancerForwardingRule.Properties.HealthCheck.CheckTimeout
 			}
 
 			if networkLoadBalancerForwardingRule.Properties.HealthCheck.ConnectTimeout != nil {
@@ -297,7 +289,8 @@ func setNetworkLoadBalancerForwardingRuleData(d *schema.ResourceData, networkLoa
 				healthCheckEntry["retries"] = *networkLoadBalancerForwardingRule.Properties.HealthCheck.Retries
 			}
 
-			healthCheck[0] = healthCheckEntry
+			healthCheck = append(healthCheck, healthCheckEntry)
+
 			err := d.Set("health_check", healthCheck)
 			if err != nil {
 				return fmt.Errorf("error while setting health_check property for network load balancer forwarding rule %s: %s", d.Id(), err)
@@ -305,10 +298,9 @@ func setNetworkLoadBalancerForwardingRuleData(d *schema.ResourceData, networkLoa
 
 		}
 
-		forwardingRuleTargets := make([]interface{}, 0)
 		if networkLoadBalancerForwardingRule.Properties.Targets != nil && len(*networkLoadBalancerForwardingRule.Properties.Targets) > 0 {
-			forwardingRuleTargets = make([]interface{}, len(*networkLoadBalancerForwardingRule.Properties.Targets))
-			for targetIndex, target := range *networkLoadBalancerForwardingRule.Properties.Targets {
+			var forwardingRuleTargets []interface{}
+			for _, target := range *networkLoadBalancerForwardingRule.Properties.Targets {
 				targetEntry := make(map[string]interface{})
 
 				if target.Ip != nil {
@@ -324,7 +316,7 @@ func setNetworkLoadBalancerForwardingRuleData(d *schema.ResourceData, networkLoa
 				}
 
 				if target.HealthCheck != nil {
-					healthCheck := make([]interface{}, 1)
+					var healthCheck []interface{}
 
 					healthCheckEntry := make(map[string]interface{})
 
@@ -340,17 +332,17 @@ func setNetworkLoadBalancerForwardingRuleData(d *schema.ResourceData, networkLoa
 						healthCheckEntry["maintenance"] = *target.HealthCheck.Maintenance
 					}
 
-					healthCheck[0] = healthCheckEntry
+					healthCheck = append(healthCheck, healthCheckEntry)
 					targetEntry["health_check"] = healthCheck
 				}
 
-				forwardingRuleTargets[targetIndex] = targetEntry
+				forwardingRuleTargets = append(forwardingRuleTargets, targetEntry)
 			}
-		}
 
-		if len(forwardingRuleTargets) > 0 {
-			if err := d.Set("targets", forwardingRuleTargets); err != nil {
-				return fmt.Errorf("error while setting targets property for network load balancer forwarding rule  %s: %s", d.Id(), err)
+			if len(forwardingRuleTargets) > 0 {
+				if err := d.Set("targets", forwardingRuleTargets); err != nil {
+					return fmt.Errorf("error while setting targets property for network load balancer forwarding rule  %s: %s", d.Id(), err)
+				}
 			}
 		}
 

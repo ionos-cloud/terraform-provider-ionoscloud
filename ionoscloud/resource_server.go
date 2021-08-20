@@ -107,7 +107,6 @@ func resourceServer() *schema.Resource {
 				Elem:          &schema.Schema{Type: schema.TypeString},
 				ConflictsWith: []string{"volume.0.ssh_key_path"},
 				Optional:      true,
-				Computed:      true,
 			},
 			"volume": {
 				Type:     schema.TypeList,
@@ -514,15 +513,14 @@ func resourceServerCreate(ctx context.Context, d *schema.ResourceData, meta inte
 		imageInput = v.(string)
 	}
 
-	ctx, cancel := context.WithTimeout(context.Background(), *resourceDefaultTimeouts.Default)
-
-	if cancel != nil {
-		defer cancel()
-	}
-
 	if imageInput != "" {
 		if !IsValidUUID(imageInput) {
-			img, err := getImage(client, datacenterId, imageInput, *volume.Type)
+			dc, _, err := client.DataCentersApi.DatacentersFindById(ctx, datacenterId).Execute()
+			if err != nil {
+				diags := diag.FromErr(fmt.Errorf("error fetching datacenter %s: (%s)", datacenterId, err))
+				return diags
+			}
+			img, err := resolveImageName(client, imageInput, *dc.Properties.Location)
 			if err != nil {
 				diags := diag.FromErr(err)
 				return diags
@@ -564,14 +562,20 @@ func resourceServerCreate(ctx context.Context, d *schema.ResourceData, meta inte
 				return diags
 			}
 
-			if *img.Properties.Public == true && isSnapshot == false {
+			if isSnapshot == false && img.Properties.Public != nil && *img.Properties.Public == true {
 
 				if volume.ImagePassword == nil && len(sshKeyPath) == 0 {
 					diags := diag.FromErr(fmt.Errorf("either 'image_password' or 'ssh_key_path' must be provided"))
 					return diags
 				}
 
-				img, err := getImage(client, d.Get("datacenter_id").(string), imageInput, *volume.Type)
+				dc, _, err := client.DataCentersApi.DatacentersFindById(ctx, datacenterId).Execute()
+				if err != nil {
+					diags := diag.FromErr(fmt.Errorf("error fetching datacenter %s: (%s)", datacenterId, err))
+					return diags
+				}
+
+				img, err := resolveImageName(client, imageInput, *dc.Properties.Location)
 
 				if err != nil {
 					diags := diag.FromErr(err)
@@ -592,7 +596,7 @@ func resourceServerCreate(ctx context.Context, d *schema.ResourceData, meta inte
 					isSnapshot = true
 					image = *snap.Id
 				} else {
-					if img.Properties.Public != nil && *img.Properties.Public == true && isSnapshot == false &&
+					if isSnapshot == false && img.Properties.Public != nil && *img.Properties.Public == true &&
 						volume.ImagePassword == nil && len(sshKeyPath) == 0 {
 						diags := diag.FromErr(fmt.Errorf("either 'image_password' or 'ssh_key_path' must be provided"))
 						return diags
@@ -657,7 +661,7 @@ func resourceServerCreate(ctx context.Context, d *schema.ResourceData, meta inte
 		if v, ok := d.GetOk("nic.0.ips"); ok {
 			raw := v.([]interface{})
 			if raw != nil && len(raw) > 0 {
-				ips := make([]string, 0)
+				var ips []string
 				for _, rawIp := range raw {
 					ip := rawIp.(string)
 					ips = append(ips, ip)
@@ -959,8 +963,7 @@ func resourceServerRead(ctx context.Context, d *schema.ResourceData, meta interf
 		}
 	}
 
-	if server.Entities.Volumes != nil &&
-		len(*server.Entities.Volumes.Items) > 0 &&
+	if server.Entities.Volumes != nil && server.Entities.Volumes.Items != nil && len(*server.Entities.Volumes.Items) > 0 &&
 		(*server.Entities.Volumes.Items)[0].Properties.Image != nil {
 		if err := d.Set("boot_image", *(*server.Entities.Volumes.Items)[0].Properties.Image); err != nil {
 			diags := diag.FromErr(err)

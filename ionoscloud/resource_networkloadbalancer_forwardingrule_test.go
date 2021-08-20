@@ -137,6 +137,9 @@ resource "ionoscloud_networkloadbalancer_forwardingrule" "forwarding_rule" {
  protocol = "TCP"
  listener_ip = "10.12.118.224"
  listener_port = "8081"
+ health_check {
+     client_timeout = 1000
+ }
  targets {
    ip = "22.231.2.2"
    port = "8080"
@@ -186,6 +189,9 @@ resource "ionoscloud_networkloadbalancer_forwardingrule" "forwarding_rule" {
  protocol = "TCP"
  listener_ip = "10.12.118.224"
  listener_port = "8081"
+ health_check {
+     client_timeout = 1000
+ }
  targets {
    ip = "22.231.2.2"
    port = "8080"

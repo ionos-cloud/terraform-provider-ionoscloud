@@ -1,12 +1,13 @@
 ## What does this fix or implement?
 
-_Please add a short description of the problem this PR fixes or the feature it implements_
+<!-- Enter details of the change here. Include additional tests that have been done, reference to the issue for tracking, etc. -->
 
 ## Checklist
 
-_Write an `x` in the boxes that apply._
+<!-- Please check the completed items below -->
+<!-- Not all changes require documentation updates or tests to be added or updated -->
 
-[ ] Tests added or updated
-[ ] Documentation updated
-[ ] Changelog updated and version incremented
-[ ] Github Issue linked if any
+- [ ] Tests added or updated
+- [ ] Documentation updated
+- [ ] Changelog updated and version incremented
+- [ ] Github Issue linked if any

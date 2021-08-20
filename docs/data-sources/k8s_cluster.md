@@ -53,6 +53,8 @@ The following attributes are returned by the datasource:
   "FAILED_DESTROYING",
   "TERMINATED"
 * `node_pools` - list of the IDs of the node pools in this cluster
+* `api_subnet_allow_list` - access to the K8s API server is restricted to these CIDRs
+* `s3_buckets` - list of S3 bucket configured for K8s usage
 * `kube_config` - Kubernetes configuration
 * `config` - structured kubernetes config consisting of a list with 1 item with the following fields:
   * api_version - Kubernetes API Version
