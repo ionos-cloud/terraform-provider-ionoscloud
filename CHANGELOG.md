@@ -1,6 +1,10 @@
-## 6.0.0-beta.7
+## 6.0.0-beta.8
 
 - fixed set of empty array in terraform state instead of null
+
+## 6.0.0-beta.7
+
+- k8s security features implemented
 
 ## 6.0.0-beta.6
 

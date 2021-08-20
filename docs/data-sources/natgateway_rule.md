@@ -24,8 +24,8 @@ data "ionoscloud_natgateway_rule" "natgateway_rule_example" {
 
 * `datacenter_id` - (Required) Datacenter's UUID.
 * `natgateway_id` - (Required) Nat Gateway's UUID.
-* `name` - (Optional) Name of an existing network loadbalancer forwarding rule that you want to search for.
-* `id` - (Optional) ID of the network loadbalancer forwarding rule you want to search for.
+* `name` - (Optional) Name of an existing network load balancer forwarding rule that you want to search for.
+* `id` - (Optional) ID of the network load balancer forwarding rule you want to search for.
 
 Both `datacenter_id` and `natgateway_id` and either `name` or `id` must be provided. If none, or both of `name` and `id` are provided, the datasource will return an error.
 
