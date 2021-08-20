@@ -228,8 +228,9 @@ func setAutoscalingTemplateData(d *schema.ResourceData, template *autoscaling.Te
 			}
 		}
 
-		nics := make([]interface{}, 0)
 		if template.Properties.Nics != nil && len(*template.Properties.Nics) > 0 {
+			var nics []interface{}
+
 			for _, nic := range *template.Properties.Nics {
 				nicEntry := make(map[string]interface{})
 				if nic.Lan != nil {
@@ -240,12 +241,12 @@ func setAutoscalingTemplateData(d *schema.ResourceData, template *autoscaling.Te
 				}
 				nics = append(nics, nicEntry)
 			}
-		}
 
-		if len(nics) > 0 {
-			if err := d.Set("nics", nics); err != nil {
-				diags := diag.FromErr(fmt.Errorf("error while setting nics property for autoscaling template %s: %s", d.Id(), err))
-				return diags
+			if len(nics) > 0 {
+				if err := d.Set("nics", nics); err != nil {
+					diags := diag.FromErr(fmt.Errorf("error while setting nics property for autoscaling template %s: %s", d.Id(), err))
+					return diags
+				}
 			}
 		}
 
@@ -256,8 +257,8 @@ func setAutoscalingTemplateData(d *schema.ResourceData, template *autoscaling.Te
 			}
 		}
 
-		volumes := make([]interface{}, 0)
 		if template.Properties.Volumes != nil && len(*template.Properties.Volumes) > 0 {
+			var volumes []interface{}
 			for _, volume := range *template.Properties.Volumes {
 				volumeEntry := make(map[string]interface{})
 				if volume.Image != nil {
@@ -282,6 +283,12 @@ func setAutoscalingTemplateData(d *schema.ResourceData, template *autoscaling.Te
 					volumeEntry["user_data"] = *volume.UserData
 				}
 				volumes = append(volumes, volumeEntry)
+			}
+			if len(volumes) > 0 {
+				if err := d.Set("volumes", volumes); err != nil {
+					diags := diag.FromErr(fmt.Errorf("error while setting volumes property for autoscaling template %s: %s", d.Id(), err))
+					return diags
+				}
 			}
 		}
 	}
