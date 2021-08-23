@@ -1,3 +1,7 @@
+## 5.2.12
+
+- issue #19 - fixed update ssh_key_path although not changed
+
 ## 5.2.11
 
 - documentation updates
