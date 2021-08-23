@@ -102,6 +102,7 @@ func resourceServer() *schema.Resource {
 				Elem:          &schema.Schema{Type: schema.TypeString},
 				ConflictsWith: []string{"volume.0.ssh_key_path"},
 				Optional:      true,
+				Computed:      true,
 			},
 			"volume": {
 				Type:     schema.TypeList,
@@ -152,6 +153,7 @@ func resourceServer() *schema.Resource {
 							Elem:       &schema.Schema{Type: schema.TypeString},
 							Optional:   true,
 							Deprecated: "Please use ssh_key_path under server level",
+							Computed:   true,
 							DiffSuppressFunc: func(k, old, new string, d *schema.ResourceData) bool {
 								if k == "volume.0.ssh_key_path.#" {
 									if d.Get("ssh_key_path.#") == new {
