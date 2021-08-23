@@ -1,3 +1,7 @@
+## 5.2.12
+
+- implemented data source for backup unit
+
 ## 5.2.11
 
 - documentation updates
