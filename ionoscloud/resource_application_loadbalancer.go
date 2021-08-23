@@ -177,7 +177,7 @@ func resourceApplicationLoadBalancerRead(ctx context.Context, d *schema.Resource
 		}
 	}
 
-	if applicationLoadbalancer.Properties.Ips != nil {
+	if applicationLoadbalancer.Properties.Ips != nil && len(*applicationLoadbalancer.Properties.Ips) > 0 {
 		err := d.Set("ips", *applicationLoadbalancer.Properties.Ips)
 		if err != nil {
 			diags := diag.FromErr(fmt.Errorf("error while setting ips property for application loadbalancer %s: %s", d.Id(), err))
@@ -193,7 +193,7 @@ func resourceApplicationLoadBalancerRead(ctx context.Context, d *schema.Resource
 		}
 	}
 
-	if applicationLoadbalancer.Properties.LbPrivateIps != nil {
+	if applicationLoadbalancer.Properties.LbPrivateIps != nil && len(*applicationLoadbalancer.Properties.LbPrivateIps) > 0 {
 		err := d.Set("lb_private_ips", *applicationLoadbalancer.Properties.LbPrivateIps)
 		if err != nil {
 			diags := diag.FromErr(fmt.Errorf("error while setting lb_private_ips property for application loadbalancer %s: %s", d.Id(), err))

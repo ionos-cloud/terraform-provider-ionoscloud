@@ -482,9 +482,8 @@ func resourceApplicationLoadBalancerForwardingRuleRead(ctx context.Context, d *s
 		}
 	}
 
-	httpRules := make([]interface{}, 0)
 	if applicationLoadBalancerForwardingRule.Properties.HttpRules != nil && len(*applicationLoadBalancerForwardingRule.Properties.HttpRules) > 0 {
-		httpRules = make([]interface{}, 0)
+		var httpRules []interface{}
 		for _, rule := range *applicationLoadBalancerForwardingRule.Properties.HttpRules {
 			ruleEntry := make(map[string]interface{})
 
@@ -521,7 +520,7 @@ func resourceApplicationLoadBalancerForwardingRuleRead(ctx context.Context, d *s
 			}
 
 			if rule.Conditions != nil {
-				conditions := make([]interface{}, 0)
+				var conditions []interface{}
 				for _, condition := range *rule.Conditions {
 					conditionEntry := make(map[string]interface{})
 
@@ -553,12 +552,12 @@ func resourceApplicationLoadBalancerForwardingRuleRead(ctx context.Context, d *s
 
 			httpRules = append(httpRules, ruleEntry)
 		}
-	}
 
-	if len(httpRules) > 0 {
-		if err := d.Set("http_rules", httpRules); err != nil {
-			diags := diag.FromErr(fmt.Errorf("error while setting http_rules property for application load balancer forwarding rule  %s: %s", d.Id(), err))
-			return diags
+		if len(httpRules) > 0 {
+			if err := d.Set("http_rules", httpRules); err != nil {
+				diags := diag.FromErr(fmt.Errorf("error while setting http_rules property for application load balancer forwarding rule  %s: %s", d.Id(), err))
+				return diags
+			}
 		}
 	}
 
