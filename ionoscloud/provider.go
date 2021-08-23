@@ -92,6 +92,7 @@ func Provider() *schema.Provider {
 			"ionoscloud_server":               dataSourceServer(),
 			"ionoscloud_k8s_cluster":          dataSourceK8sCluster(),
 			"ionoscloud_k8s_node_pool":        dataSourceK8sNodePool(),
+			"ionoscloud_backup_unit":          dataSourceBackupUnit(),
 		},
 	}
 	provider.ConfigureContextFunc = func(ctx context.Context, d *schema.ResourceData) (interface{}, diag.Diagnostics) {
