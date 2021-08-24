@@ -1,6 +1,6 @@
 ## 5.2.12
 
-- implemented data source for backup unit
+- implemented data source for backup unit and firewall
 
 ## 5.2.11
 
