@@ -275,10 +275,15 @@ func resourcek8sClusterRead(ctx context.Context, d *schema.ResourceData, meta in
 	}
 
 	if cluster.Properties.K8sVersion != nil {
-		err := d.Set("k8s_version", *cluster.Properties.K8sVersion)
-		if err != nil {
-			diags := diag.FromErr(fmt.Errorf("error while setting k8s_version property for cluser %s: %s", d.Id(), err))
-			return diags
+		currentVersion := d.Get("k8s_version")
+		if currentVersion != "" && currentVersion != *cluster.Properties.K8sVersion {
+			log.Printf("ignoring k8s version drift: local %s => remote %s\n", currentVersion, *cluster.Properties.K8sVersion)
+		} else {
+			err := d.Set("k8s_version", *cluster.Properties.K8sVersion)
+			if err != nil {
+				diags := diag.FromErr(fmt.Errorf("error while setting k8s_version property for cluser %s: %s", d.Id(), err))
+				return diags
+			}
 		}
 	}
 
@@ -499,7 +504,7 @@ func resourcek8sClusterUpdate(ctx context.Context, d *schema.ResourceData, meta 
 		case <-time.After(SleepInterval):
 			log.Printf("[INFO] trying again ...")
 		case <-ctx.Done():
-			diags := diag.FromErr(fmt.Errorf("k8s cluster update timed out! WARNING: your k8s cluster will still probably be created " +
+			diags := diag.FromErr(fmt.Errorf("k8s cluster update timed out! WARNING: your k8s cluster will still probably be updated " +
 				"after some time but the terraform state won't reflect that; check your Ionos Cloud account for updates"))
 			return diags
 		}
