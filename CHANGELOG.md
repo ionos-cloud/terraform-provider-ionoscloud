@@ -1,3 +1,7 @@
+## 5.2.12
+
+- ignoring k8s version drift for k8s clusters updated remotely
+
 ## 5.2.11
 
 - documentation updates

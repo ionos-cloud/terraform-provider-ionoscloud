@@ -31,7 +31,9 @@ The following attributes are returned by the datasource:
 
 * `id` - id of the cluster
 * `name` - name of the cluster
-* `k8s_version` - Kubernetes version
+* `k8s_version` - Kubernetes version - please note that this attribute ignores 
+   drift - i.e. if the remote cluster's k8s version is changed, this will not trigger
+   a plan diff.
 * `maintenance_window` - A maintenance window comprise of a day of the week and a time for maintenance to be allowed
   * `time` - A clock time in the day when maintenance is allowed
   * `day_of_the_week` - Day of the week when maintenance is allowed
