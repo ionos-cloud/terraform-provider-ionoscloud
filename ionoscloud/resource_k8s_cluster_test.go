@@ -177,7 +177,7 @@ func testAccCheckk8sClusterExists(n string, k8sCluster *ionoscloud.KubernetesClu
 const testAccCheckk8sClusterConfigBasic = `
 resource "ionoscloud_k8s_cluster" "example" {
   name        = "%s"
-  k8s_version = "1.20.8"
+  k8s_version = "1.20.10"
   maintenance_window {
     day_of_the_week = "Sunday"
     time            = "09:00:00Z"
@@ -187,7 +187,7 @@ resource "ionoscloud_k8s_cluster" "example" {
 const testAccCheckk8sClusterConfigUpdate = `
 resource "ionoscloud_k8s_cluster" "example" {
   name        = "updated"
-  k8s_version = "1.20.8"
+  k8s_version = "1.20.10"
   maintenance_window {
     day_of_the_week = "Monday"
     time            = "10:30:00Z"
@@ -213,17 +213,17 @@ resource "ionoscloud_k8s_cluster" "example" {
 const testAccCheckk8sClusterConfigVersion = `
 resource "ionoscloud_k8s_cluster" "example" {
   name        = "test_version"
-  k8s_version = "1.18.5"
+  k8s_version = "1.20.10"
 }`
 
 const testAccCheckk8sClusterConfigIgnoreVersion = `
 resource "ionoscloud_k8s_cluster" "example" {
   name        = "test_version_ignore"
-  k8s_version = "1.18.9"
+  k8s_version = "1.20.11"
 }`
 
 const testAccCheckk8sClusterConfigChangeVersion = `
 resource "ionoscloud_k8s_cluster" "example" {
   name        = "test_version_change"
-  k8s_version = "1.19.10"
+  k8s_version = "1.21.4"
 }`
