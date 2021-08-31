@@ -1,3 +1,7 @@
+## 5.2.12
+
+- fix: correctly saving lans when reading a k8s node pool
+
 ## 5.2.11
 
 - documentation updates

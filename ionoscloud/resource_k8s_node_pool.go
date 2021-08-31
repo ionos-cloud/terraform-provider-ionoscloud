@@ -456,7 +456,13 @@ func resourcek8sNodePoolRead(ctx context.Context, d *schema.ResourceData, meta i
 	}
 
 	if k8sNodepool.Properties.Lans != nil && len(*k8sNodepool.Properties.Lans) > 0 {
-		err := d.Set("lans", *k8sNodepool.Properties.PublicIps)
+		lans := make([]int32, 0, 0)
+		for _, lan := range *k8sNodepool.Properties.Lans {
+			if lan.Id != nil {
+				lans = append(lans, *lan.Id)
+			}
+		}
+		err := d.Set("lans", lans)
 		if err != nil {
 			diags := diag.FromErr(fmt.Errorf("error while setting lans property for k8sNodepool %s: %s", d.Id(), err))
 			return diags
