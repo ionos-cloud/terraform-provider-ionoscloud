@@ -153,11 +153,19 @@ resource "ionoscloud_datacenter" "terraform_acctest" {
   location    = "us/las"
   description = "Datacenter created through terraform"
 }
+
+resource "ionoscloud_lan" "terraform_acctest" {
+  datacenter_id = "${ionoscloud_datacenter.terraform_acctest.id}"
+  public = false
+  name = "terraform_acctest"
+}
+
 resource "ionoscloud_ipblock" "terraform_acctest" {
   location = ionoscloud_datacenter.terraform_acctest.location
   size = 3
   name = "terraform_acctest"
 }
+
 resource "ionoscloud_k8s_cluster" "terraform_acctest" {
   name        = "terraform_acctest"
   k8s_version = "1.18.9"
@@ -166,6 +174,7 @@ resource "ionoscloud_k8s_cluster" "terraform_acctest" {
     time            = "09:00:00Z"
   }
 }
+
 resource "ionoscloud_k8s_node_pool" "terraform_acctest" {
   name        = "%s"
   k8s_version = "${ionoscloud_k8s_cluster.terraform_acctest.k8s_version}"
@@ -183,6 +192,7 @@ resource "ionoscloud_k8s_node_pool" "terraform_acctest" {
   ram_size          = 2048
   storage_size      = 40
   public_ips        = [ ionoscloud_ipblock.terraform_acctest.ips[0], ionoscloud_ipblock.terraform_acctest.ips[1] ]
+  lans 	            = [ 1 ]
 }`
 
 const testAccCheckk8sNodepoolConfigUpdate = `
@@ -191,11 +201,19 @@ resource "ionoscloud_datacenter" "terraform_acctest" {
   location    = "us/las"
   description = "Datacenter created through terraform"
 }
+
+resource "ionoscloud_lan" "terraform_acctest" {
+  datacenter_id = "${ionoscloud_datacenter.terraform_acctest.id}"
+  public = false
+  name = "terraform_acctest"
+}
+
 resource "ionoscloud_ipblock" "terraform_acctest" {
   location = ionoscloud_datacenter.terraform_acctest.location
   size = 3
   name = "terraform_acctest"
 }
+
 resource "ionoscloud_k8s_cluster" "terraform_acctest" {
   name        = "terraform_acctest"
   k8s_version = "1.18.9"
@@ -226,6 +244,8 @@ resource "ionoscloud_k8s_node_pool" "terraform_acctest" {
   ram_size          = 2048
   storage_size      = 40
   public_ips        = [ ionoscloud_ipblock.terraform_acctest.ips[0], ionoscloud_ipblock.terraform_acctest.ips[1], ionoscloud_ipblock.terraform_acctest.ips[2] ]
+  lans 	            = [ 1 ]
+
 }`
 
 const testAccCheckk8sNodepoolConfigVersion = `
