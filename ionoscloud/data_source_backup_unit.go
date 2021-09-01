@@ -6,7 +6,6 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	ionoscloud "github.com/ionos-cloud/sdk-go/v5"
-	"strings"
 )
 
 func dataSourceBackupUnit() *schema.Resource {
@@ -75,11 +74,9 @@ func dataSourceBackupUnitRead(ctx context.Context, d *schema.ResourceData, meta 
 				if err != nil {
 					return diag.FromErr(fmt.Errorf("an error occurred while fetching backup unit with ID %s: %s", *bu.Id, err.Error()))
 				}
-				if tmpBackupUnit.Properties.Name != nil {
-					if strings.Contains(*tmpBackupUnit.Properties.Name, name.(string)) {
-						backupUnit = tmpBackupUnit
-						break
-					}
+				if tmpBackupUnit.Properties.Name != nil && *tmpBackupUnit.Properties.Name == name.(string) {
+					backupUnit = tmpBackupUnit
+					break
 				}
 
 			}

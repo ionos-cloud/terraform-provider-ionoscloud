@@ -14,7 +14,7 @@ The backup unit data source can be used to search for and return an existing Bac
 
 ```hcl
 data "ionoscloud_backup_unit" "test_backup_unit" {
-  name			= "test ds"
+  name			= "test backup unit"
 }
 ```
 

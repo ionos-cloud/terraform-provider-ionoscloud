@@ -7,7 +7,6 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 	ionoscloud "github.com/ionos-cloud/sdk-go/v5"
-	"strings"
 )
 
 func dataSourceFirewall() *schema.Resource {
@@ -115,11 +114,9 @@ func dataSourceFirewallRead(ctx context.Context, d *schema.ResourceData, meta in
 				if err != nil {
 					return diag.FromErr(fmt.Errorf("an error occurred while fetching firewall rule with ID %s: %s", *fr.Id, err.Error()))
 				}
-				if tmpFirewall.Properties.Name != nil {
-					if strings.Contains(*tmpFirewall.Properties.Name, name.(string)) {
-						firewall = tmpFirewall
-						break
-					}
+				if tmpFirewall.Properties.Name != nil && *tmpFirewall.Properties.Name == name.(string) {
+					firewall = tmpFirewall
+					break
 				}
 
 			}

@@ -75,6 +75,6 @@ resource "ionoscloud_backup_unit" "test_ds_backup_unit" {
 }
 
 data "ionoscloud_backup_unit" "test_backup_unit" {
-  name			= "test ds"
+  name			= "test ds backup unit"
 }
 `

@@ -214,6 +214,6 @@ data "ionoscloud_firewall" "test_firewall" {
   datacenter_id = "${ionoscloud_datacenter.foobar.id}"
   server_id = "${ionoscloud_server.webserver.id}"
   nic_id = "${ionoscloud_nic.database_nic.id}"
-  name	= "test_ds"
+  name	= "test_ds_firewall_rule"
 }
 `
