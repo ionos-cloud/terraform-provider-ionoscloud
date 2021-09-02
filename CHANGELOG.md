@@ -1,3 +1,7 @@
+## 5.2.13
+
+- issue #93 - updated documentation for image data source
+
 ## 5.2.12
 
 - fix: correctly saving lans when reading a k8s node pool
