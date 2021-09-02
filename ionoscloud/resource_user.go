@@ -239,6 +239,14 @@ func resourceUserUpdate(ctx context.Context, d *schema.ResourceData, meta interf
 		userReq.Properties.Email = rsp.Properties.Email
 	}
 
+	if d.HasChange("password") {
+		_, newValue := d.GetChange("password")
+		password := newValue.(string)
+		userReq.Properties.Email = &password
+	} else {
+		userReq.Properties.Email = rsp.Properties.Email
+	}
+
 	if d.HasChange("active") {
 		_, newValue := d.GetChange("active")
 		active := newValue.(bool)
