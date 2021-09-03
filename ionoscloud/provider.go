@@ -11,10 +11,16 @@ import (
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
+	dbaas "github.com/ionos-cloud/sdk-go-autoscaling"
 	"github.com/ionos-cloud/sdk-go/v6"
 )
 
 var Version = "development"
+
+type SdkBundle struct {
+	CloudApiClient *ionoscloud.APIClient
+	DbaasClient    *dbaas.APIClient
+}
 
 // Provider returns a schema.Provider for ionoscloud.
 func Provider() *schema.Provider {
@@ -155,7 +161,21 @@ func providerConfigure(d *schema.ResourceData, terraformVersion string) (interfa
 	//newConfig.UserAgent = fmt.Sprintf("HashiCorp Terraform/%s Terraform Plugin SDK/%s Terraform Provider Ionoscloud/%s Ionoscloud SDK Go/%s", terraformVersion, meta.SDKVersionString(), Version, newClient.Version)
 	newConfig.UserAgent = fmt.Sprintf("HashiCorp Terraform/%s Terraform Plugin SDK/%s Terraform Provider Ionoscloud/%s", terraformVersion, meta.SDKVersionString(), Version)
 
-	return newClient, nil
+	newConfigDbaas := dbaas.NewConfiguration(username.(string), password.(string), token.(string))
+	if len(cleanedUrl) > 0 {
+		newConfigDbaas.Servers[0].URL = cleanedUrl
+	}
+
+	if os.Getenv("IONOS_DEBUG") != "" {
+		newConfigDbaas.Debug = true
+	}
+
+	newDbaasClient := dbaas.NewAPIClient(newConfigDbaas)
+
+	return SdkBundle{
+		CloudApiClient: newClient,
+		DbaasClient:    newDbaasClient,
+	}, nil
 }
 
 // cleanURL makes sure trailing slash does not corrupt the state
@@ -199,7 +219,7 @@ func IsRequestFailed(err error) bool {
 // resourceStateRefreshFunc tracks progress of a request
 func resourceStateRefreshFunc(meta interface{}, path string) resource.StateRefreshFunc {
 	return func() (interface{}, string, error) {
-		client := meta.(*ionoscloud.APIClient)
+		client := meta.(SdkBundle).CloudApiClient
 
 		fmt.Printf("[INFO] Checking PATH %s\n", path)
 		if path == "" {

@@ -67,7 +67,7 @@ func TestAccNic_Ips(t *testing.T) {
 }
 
 func testAccCheckNicDestroyCheck(s *terraform.State) error {
-	client := testAccProvider.Meta().(*ionoscloud.APIClient)
+	client := testAccProvider.Meta().(SdkBundle).CloudApiClient
 
 	ctx, cancel := context.WithTimeout(context.Background(), *resourceDefaultTimeouts.Delete)
 	if cancel != nil {
@@ -114,7 +114,7 @@ func testAccCheckNicAttributes(n string, name string) resource.TestCheckFunc {
 
 func testAccCheckNICExists(n string, nic *ionoscloud.Nic) resource.TestCheckFunc {
 	return func(s *terraform.State) error {
-		client := testAccProvider.Meta().(*ionoscloud.APIClient)
+		client := testAccProvider.Meta().(SdkBundle).CloudApiClient
 
 		rs, ok := s.RootModule().Resources[n]
 		if !ok {
