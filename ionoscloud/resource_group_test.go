@@ -12,7 +12,7 @@ import (
 
 func TestAccGroup_Basic(t *testing.T) {
 	var group ionoscloud.Group
-	groupName := "terraform test"
+	groupName := "resource_group"
 
 	resource.Test(t, resource.TestCase{
 		PreCheck: func() {
@@ -24,16 +24,16 @@ func TestAccGroup_Basic(t *testing.T) {
 			{
 				Config: fmt.Sprintf(testacccheckgroupconfigBasic, groupName),
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheckGroupExists("ionoscloud_group.group", &group),
-					testAccCheckGroupAttributes("ionoscloud_group.group", groupName),
-					resource.TestCheckResourceAttr("ionoscloud_group.group", "name", groupName),
+					testAccCheckGroupExists("ionoscloud_group.resource_group", &group),
+					testAccCheckGroupAttributes("ionoscloud_group.resource_group", groupName),
+					resource.TestCheckResourceAttr("ionoscloud_group.resource_group", "name", groupName),
 				),
 			},
 			{
 				Config: testacccheckgroupconfigUpdate,
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheckGroupAttributes("ionoscloud_group.group", "updated"),
-					resource.TestCheckResourceAttr("ionoscloud_group.group", "name", "updated"),
+					testAccCheckGroupAttributes("ionoscloud_group.resource_group", "updated"),
+					resource.TestCheckResourceAttr("ionoscloud_group.resource_group", "name", "updated"),
 				),
 			},
 		},
@@ -117,7 +117,7 @@ func testAccCheckGroupExists(n string, group *ionoscloud.Group) resource.TestChe
 }
 
 const testacccheckgroupconfigBasic = `
-resource "ionoscloud_group" "group" {
+resource "ionoscloud_group" "resource_group" {
   name = "%s"
   create_datacenter = true
   create_snapshot = true
@@ -127,7 +127,7 @@ resource "ionoscloud_group" "group" {
 `
 
 const testacccheckgroupconfigUpdate = `
-resource "ionoscloud_group" "group" {
+resource "ionoscloud_group" "resource_group" {
   name = "updated"
   create_datacenter = true
   create_snapshot = true

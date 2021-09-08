@@ -21,10 +21,21 @@ resource "ionoscloud_ipblock" "example" {
 
 ## Argument reference
 
+* `name` - (Optional)[string] The name of Ip Block
 * `location` - (Required)[string] The regional location for this IP Block: us/las, us/ewr, de/fra, de/fkb.
 * `size` - (Required)[integer] The number of IP addresses to reserve for this block.
 * `ips` - (Computed)[integer] The list of IP addresses associated with this block.
-
+* `ip_consumers` (Computed) Read-Only attribute. Lists consumption detail of an individual ip
+  * `ip`
+  * `mac`
+  * `nic_uuid`
+  * `server_id`
+  * `server_name`
+  * `datacenter_id`
+  * `datacenter_name`
+  * `k8s_nodepool_uuid`
+  * `k8s_cluster_uuid`
+  
 ## Import
 
 Resource Ipblock can be imported using the `resource id`, e.g.

@@ -1,3 +1,52 @@
+## 6.0.0-beta.8
+
+- fixed set of empty array in terraform state instead of null
+
+## 6.0.0-beta.7
+
+- k8s security features implemented
+
+## 6.0.0-beta.6
+
+- updated arguments for datacenter, ipblock, location and user
+- issue #72 - fixed find volume image by name
+- error message for immutable node pool attributes
+- issue #84 - fixed build & updated README.md
+
+## 6.0.0-beta.5
+
+- rollback to the node pool behaviour before the fix of issue #71
+- issue #77 - fix import for k8s nodepool
+
+## 6.0.0-beta.4
+
+- fix: issue #71 - recreate nodepool on change of specifications
+
+## 6.0.0-beta.3
+
+- issue #66 - detailed kube config attributes implemented
+
+## 6.0.0-beta.2
+
+- updated dependencies 
+- updated server, nic and volume resources with the missing arguments
+
+## 6.0.0-beta.1
+
+- documentation updates
+- fix: fixes #13 ignore changes of patch level for k8s
+
+## 6.0.0-alpha.4
+
+- documentation updates
+- terraform plugin sdk upgrade to v2.4.3
+- fix: create volume without password
+- fix: ability to create server without image
+- fix: fixes #25 correctly set of dhcp + nil check + added firewall_type field in server resource
+- fix: fixes #39 - new imports for volume, user, group, share, IPfailover and loadbalancer
+- fix: fixes #47 - corrected nic resource to accept a list of strings for ips parameter
+- fix: fixes #36 - correctly setting the active property of the s3 key upon creation
+
 ## 6.0.0-alpha.3
 
 - documentation updates

@@ -156,7 +156,7 @@ func resourcePrivateCrossConnectRead(ctx context.Context, d *schema.ResourceData
 	rsp, apiResponse, err := client.PrivateCrossConnectsApi.PccsFindById(ctx, d.Id()).Execute()
 
 	if err != nil {
-		if apiResponse != nil && apiResponse.Response.StatusCode == 404 {
+		if apiResponse != nil && apiResponse.StatusCode == 404 {
 			d.SetId("")
 			return nil
 		}
@@ -166,38 +166,39 @@ func resourcePrivateCrossConnectRead(ctx context.Context, d *schema.ResourceData
 
 	log.Printf("[INFO] Successfully retreived PCC %s: %+v", d.Id(), rsp)
 
-	var peers []map[string]string
+	if rsp.Properties.Peers != nil {
+		var peers []map[string]string
+		for _, peer := range *rsp.Properties.Peers {
+			peers = append(peers, map[string]string{
+				"lan_id":          *peer.Id,
+				"lan_name":        *peer.Name,
+				"datacenter_id":   *peer.DatacenterId,
+				"datacenter_name": *peer.DatacenterName,
+				"location":        *peer.Location,
+			})
+		}
 
-	for _, peer := range *rsp.Properties.Peers {
-		peers = append(peers, map[string]string{
-			"lan_id":          *peer.Id,
-			"lan_name":        *peer.Name,
-			"datacenter_id":   *peer.DatacenterId,
-			"datacenter_name": *peer.DatacenterName,
-			"location":        *peer.Location,
-		})
-	}
-
-	if err := d.Set("peers", peers); err != nil {
-		diags := diag.FromErr(err)
-		return diags
+		if err := d.Set("peers", peers); err != nil {
+			diags := diag.FromErr(err)
+			return diags
+		}
 	}
 
 	log.Printf("[INFO] Setting peers for PCC %s to %+v...", d.Id(), d.Get("peers"))
 
-	var connectableDatacenters []map[string]string
-
-	for _, connectableDC := range *rsp.Properties.ConnectableDatacenters {
-		connectableDatacenters = append(connectableDatacenters, map[string]string{
-			"id":       *connectableDC.Id,
-			"name":     *connectableDC.Name,
-			"location": *connectableDC.Location,
-		})
-	}
-
-	if err := d.Set("connectable_datacenters", connectableDatacenters); err != nil {
-		diags := diag.FromErr(err)
-		return diags
+	if rsp.Properties.ConnectableDatacenters != nil && len(*rsp.Properties.ConnectableDatacenters) > 0 {
+		var connectableDatacenters []map[string]string
+		for _, connectableDC := range *rsp.Properties.ConnectableDatacenters {
+			connectableDatacenters = append(connectableDatacenters, map[string]string{
+				"id":       *connectableDC.Id,
+				"name":     *connectableDC.Name,
+				"location": *connectableDC.Location,
+			})
+		}
+		if err := d.Set("connectable_datacenters", connectableDatacenters); err != nil {
+			diags := diag.FromErr(err)
+			return diags
+		}
 	}
 
 	return nil
@@ -233,7 +234,7 @@ func resourcePrivateCrossConnectUpdate(ctx context.Context, d *schema.ResourceDa
 	_, apiResponse, err := client.PrivateCrossConnectsApi.PccsPatch(ctx, d.Id()).Pcc(*request.Properties).Execute()
 
 	if err != nil {
-		if apiResponse != nil && apiResponse.Response.StatusCode == 404 {
+		if apiResponse != nil && apiResponse.StatusCode == 404 {
 			d.SetId("")
 			return nil
 		}
@@ -276,7 +277,7 @@ func resourcePrivateCrossConnectDelete(ctx context.Context, d *schema.ResourceDa
 	apiResponse, err := client.PrivateCrossConnectsApi.PccsDelete(ctx, d.Id()).Execute()
 
 	if err != nil {
-		if apiResponse != nil && apiResponse.Response.StatusCode == 404 {
+		if apiResponse != nil && apiResponse.StatusCode == 404 {
 			d.SetId("")
 			return nil
 		}
@@ -325,7 +326,7 @@ func privateCrossConnectDeleted(ctx context.Context, client *ionoscloud.APIClien
 	_, apiResponse, err := client.PrivateCrossConnectsApi.PccsFindById(ctx, d.Id()).Execute()
 
 	if err != nil {
-		if apiResponse != nil && apiResponse.Response.StatusCode == 404 {
+		if apiResponse != nil && apiResponse.StatusCode == 404 {
 			return true, nil
 		}
 		return true, fmt.Errorf("error checking PCC deletion status: %s", err)

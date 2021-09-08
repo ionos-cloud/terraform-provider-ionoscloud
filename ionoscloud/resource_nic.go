@@ -4,12 +4,10 @@ import (
 	"context"
 	"fmt"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 	ionoscloud "github.com/ionos-cloud/sdk-go/v6"
 	"log"
-	"strings"
-
-	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 )
 
 func resourceNic() *schema.Resource {
@@ -34,15 +32,13 @@ func resourceNic() *schema.Resource {
 			"dhcp": {
 				Type:     schema.TypeBool,
 				Optional: true,
-			},
-			"ip": {
-				Type:     schema.TypeString,
-				Optional: true,
+				Default:  true,
 			},
 			"ips": {
 				Type:     schema.TypeList,
 				Elem:     &schema.Schema{Type: schema.TypeString},
 				Computed: true,
+				Optional: true,
 			},
 			"firewall_active": {
 				Type:     schema.TypeBool,
@@ -69,6 +65,14 @@ func resourceNic() *schema.Resource {
 				Type:     schema.TypeString,
 				Computed: true,
 			},
+			"device_number": {
+				Type:     schema.TypeInt,
+				Computed: true,
+			},
+			"pci_slot": {
+				Type:     schema.TypeInt,
+				Computed: true,
+			},
 		},
 		Timeouts: &resourceDefaultTimeouts,
 	}
@@ -88,15 +92,10 @@ func resourceNicCreate(ctx context.Context, d *schema.ResourceData, meta interfa
 		name := d.Get("name").(string)
 		nic.Properties.Name = &name
 	}
-	if _, ok := d.GetOkExists("dhcp"); ok {
-		val := d.Get("dhcp").(bool)
-		nic.Properties.Dhcp = &val
-	}
-	if _, ok := d.GetOk("ip"); ok {
-		raw := d.Get("ip").(string)
-		ips := strings.Split(raw, ",")
-		nic.Properties.Ips = &ips
-	}
+
+	dhcp := d.Get("dhcp").(bool)
+	nic.Properties.Dhcp = &dhcp
+
 	if _, ok := d.GetOk("firewall_active"); ok {
 		raw := d.Get("firewall_active").(bool)
 		nic.Properties.FirewallActive = &raw
@@ -104,6 +103,20 @@ func resourceNicCreate(ctx context.Context, d *schema.ResourceData, meta interfa
 	if _, ok := d.GetOk("firewall_type"); ok {
 		raw := d.Get("firewall_type").(string)
 		nic.Properties.FirewallType = &raw
+	}
+
+	if v, ok := d.GetOk("ips"); ok {
+		raw := v.([]interface{})
+		if raw != nil && len(raw) > 0 {
+			var ips []string
+			for _, rawIp := range raw {
+				ip := rawIp.(string)
+				ips = append(ips, ip)
+			}
+			if ips != nil && len(ips) > 0 {
+				nic.Properties.Ips = &ips
+			}
+		}
 	}
 
 	dcid := d.Get("datacenter_id").(string)
@@ -140,7 +153,7 @@ func resourceNicRead(ctx context.Context, d *schema.ResourceData, meta interface
 	rsp, apiResponse, err := client.NetworkInterfacesApi.DatacentersServersNicsFindById(ctx, dcid, srvid, nicid).Execute()
 
 	if err != nil {
-		if apiResponse != nil && apiResponse.Response.StatusCode == 404 {
+		if apiResponse != nil && apiResponse.StatusCode == 404 {
 			d.SetId("")
 			return nil
 		}
@@ -168,7 +181,7 @@ func resourceNicRead(ctx context.Context, d *schema.ResourceData, meta interface
 				return diags
 			}
 		}
-		if rsp.Properties.Ips != nil {
+		if rsp.Properties.Ips != nil && len(*rsp.Properties.Ips) > 0 {
 			if err := d.Set("ips", *rsp.Properties.Ips); err != nil {
 				diags := diag.FromErr(err)
 				return diags
@@ -188,6 +201,18 @@ func resourceNicRead(ctx context.Context, d *schema.ResourceData, meta interface
 		}
 		if rsp.Properties.Mac != nil {
 			if err := d.Set("mac", *rsp.Properties.Mac); err != nil {
+				diags := diag.FromErr(err)
+				return diags
+			}
+		}
+		if rsp.Properties.DeviceNumber != nil {
+			if err := d.Set("device_number", *rsp.Properties.DeviceNumber); err != nil {
+				diags := diag.FromErr(err)
+				return diags
+			}
+		}
+		if rsp.Properties.PciSlot != nil {
+			if err := d.Set("pci_slot", *rsp.Properties.PciSlot); err != nil {
 				diags := diag.FromErr(err)
 				return diags
 			}
@@ -216,10 +241,19 @@ func resourceNicUpdate(ctx context.Context, d *schema.ResourceData, meta interfa
 	n := d.Get("dhcp").(bool)
 	properties.Dhcp = &n
 
-	if d.HasChange("ip") {
-		_, raw := d.GetChange("ip")
-		ips := strings.Split(raw.(string), ",")
-		properties.Ips = &ips
+	if d.HasChange("ips") {
+		_, v := d.GetChange("ips")
+		raw := v.([]interface{})
+		if raw != nil && len(raw) > 0 {
+			var ips []string
+			for _, rawIp := range raw {
+				ip := rawIp.(string)
+				ips = append(ips, ip)
+			}
+			if ips != nil && len(ips) > 0 {
+				properties.Ips = &ips
+			}
+		}
 	}
 
 	dcid := d.Get("datacenter_id").(string)

@@ -9,7 +9,6 @@ import (
 	ionoscloud "github.com/ionos-cloud/sdk-go/v6"
 	"log"
 	"regexp"
-	"strings"
 )
 
 func resourceDatacenter() *schema.Resource {
@@ -29,7 +28,6 @@ func resourceDatacenter() *schema.Resource {
 				Required:     true,
 				ValidateFunc: validation.All(validation.StringIsNotWhiteSpace),
 			},
-
 			"location": {
 				Type:         schema.TypeString,
 				Required:     true,
@@ -43,6 +41,41 @@ func resourceDatacenter() *schema.Resource {
 			"sec_auth_protection": {
 				Type:     schema.TypeBool,
 				Optional: true,
+			},
+			"version": {
+				Type:     schema.TypeInt,
+				Computed: true,
+			},
+			"features": {
+				Type:     schema.TypeList,
+				Computed: true,
+				Elem: &schema.Schema{
+					Type: schema.TypeString,
+				},
+			},
+			"cpu_architecture": {
+				Type:     schema.TypeList,
+				Computed: true,
+				Elem: &schema.Resource{
+					Schema: map[string]*schema.Schema{
+						"cpu_family": {
+							Type:     schema.TypeString,
+							Computed: true,
+						},
+						"max_cores": {
+							Type:     schema.TypeInt,
+							Computed: true,
+						},
+						"max_ram": {
+							Type:     schema.TypeInt,
+							Computed: true,
+						},
+						"vendor": {
+							Type:     schema.TypeString,
+							Computed: true,
+						},
+					},
+				},
 			},
 		},
 		Timeouts: &resourceDefaultTimeouts,
@@ -105,7 +138,7 @@ func resourceDatacenterRead(ctx context.Context, d *schema.ResourceData, meta in
 	datacenter, apiResponse, err := client.DataCentersApi.DatacentersFindById(ctx, d.Id()).Execute()
 
 	if err != nil {
-		if apiResponse != nil && apiResponse.Response.StatusCode == 404 {
+		if apiResponse != nil && apiResponse.StatusCode == 404 {
 			d.SetId("")
 			return nil
 		}
@@ -142,6 +175,53 @@ func resourceDatacenterRead(ctx context.Context, d *schema.ResourceData, meta in
 		if err != nil {
 			diags := diag.FromErr(fmt.Errorf("error while setting sec_auth_protection property for datacenter %s: %s", d.Id(), err))
 			return diags
+		}
+	}
+
+	if datacenter.Properties.Version != nil {
+		err := d.Set("version", *datacenter.Properties.Version)
+		if err != nil {
+			diags := diag.FromErr(fmt.Errorf("error while setting version property for datacenter %s: %s", d.Id(), err))
+			return diags
+		}
+	}
+
+	if datacenter.Properties.Features != nil && len(*datacenter.Properties.Features) > 0 {
+		err := d.Set("features", *datacenter.Properties.Features)
+		if err != nil {
+			diags := diag.FromErr(fmt.Errorf("error while setting features property for datacenter %s: %s", d.Id(), err))
+			return diags
+		}
+	}
+
+	if datacenter.Properties.CpuArchitecture != nil && len(*datacenter.Properties.CpuArchitecture) > 0 {
+		var cpuArchitectures []interface{}
+		for _, cpuArchitecture := range *datacenter.Properties.CpuArchitecture {
+			architectureEntry := make(map[string]interface{})
+
+			if cpuArchitecture.CpuFamily != nil {
+				architectureEntry["cpu_family"] = *cpuArchitecture.CpuFamily
+			}
+
+			if cpuArchitecture.MaxCores != nil {
+				architectureEntry["max_cores"] = *cpuArchitecture.MaxCores
+			}
+
+			if cpuArchitecture.MaxRam != nil {
+				architectureEntry["max_ram"] = *cpuArchitecture.MaxRam
+			}
+
+			if cpuArchitecture.Vendor != nil {
+				architectureEntry["vendor"] = *cpuArchitecture.Vendor
+			}
+
+			cpuArchitectures = append(cpuArchitectures, architectureEntry)
+		}
+		if len(cpuArchitectures) > 0 {
+			if err := d.Set("cpu_architecture", cpuArchitectures); err != nil {
+				diags := diag.FromErr(fmt.Errorf("error while setting features property for datacenter %s: %s", d.Id(), err))
+				return diags
+			}
 		}
 	}
 
@@ -213,126 +293,6 @@ func resourceDatacenterDelete(ctx context.Context, d *schema.ResourceData, meta 
 
 	d.SetId("")
 	return nil
-}
-
-func getImage(client *ionoscloud.APIClient, dcId string, imageName string, imageType string) (*ionoscloud.Image, error) {
-
-	ctx, cancel := context.WithTimeout(context.Background(), *resourceDefaultTimeouts.Default)
-
-	if cancel != nil {
-		defer cancel()
-	}
-
-	if imageName == "" {
-		return nil, fmt.Errorf("imageName not suplied")
-	}
-
-	dc, _, err := client.DataCentersApi.DatacentersFindById(ctx, dcId).Execute()
-
-	if err != nil {
-		log.Print(fmt.Errorf("error while fetching a data center ID %s %s", dcId, err))
-		return nil, err
-	}
-
-	images, _, err := client.ImagesApi.ImagesGet(ctx).Execute()
-
-	if err != nil {
-		log.Print(fmt.Errorf("error while fetching the list of images %s", err))
-		return nil, err
-	}
-
-	if len(*images.Items) > 0 {
-		for _, i := range *images.Items {
-			imgName := ""
-			if i.Properties.Name != nil && *i.Properties.Name != "" {
-				imgName = *i.Properties.Name
-			}
-
-			if imageType == "SSD" {
-				imageType = "HDD"
-			}
-
-			if imgName != "" && strings.Contains(strings.ToLower(imgName), strings.ToLower(imageName)) && *i.Properties.ImageType == imageType && *i.Properties.Location == *dc.Properties.Location {
-				return &i, err
-			}
-
-			if imgName != "" && strings.ToLower(imageName) == strings.ToLower(*i.Id) && *i.Properties.ImageType == imageType && *i.Properties.Location == *dc.Properties.Location {
-				return &i, err
-			}
-
-		}
-	}
-	return nil, err
-}
-
-func getSnapshotId(client *ionoscloud.APIClient, snapshotName string) string {
-
-	ctx, cancel := context.WithTimeout(context.Background(), *resourceDefaultTimeouts.Default)
-
-	if cancel != nil {
-		defer cancel()
-	}
-
-	if snapshotName == "" {
-		return ""
-	}
-
-	snapshots, _, err := client.SnapshotsApi.SnapshotsGet(ctx).Execute()
-
-	if err != nil {
-		log.Print(fmt.Errorf("error while fetching the list of snapshots %s", err))
-	}
-
-	if len(*snapshots.Items) > 0 {
-		for _, i := range *snapshots.Items {
-			imgName := ""
-			if *i.Properties.Name != "" {
-				imgName = *i.Properties.Name
-			}
-
-			if imgName != "" && strings.Contains(strings.ToLower(imgName), strings.ToLower(snapshotName)) {
-				return *i.Id
-			}
-		}
-	}
-	return ""
-}
-
-func getImageAlias(client *ionoscloud.APIClient, imageAlias string, location string) string {
-
-	ctx, cancel := context.WithTimeout(context.Background(), *resourceDefaultTimeouts.Default)
-
-	if cancel != nil {
-		defer cancel()
-	}
-
-	if imageAlias == "" {
-		return ""
-	}
-	parts := strings.SplitN(location, "/", 2)
-	if len(parts) != 2 {
-		log.Print(fmt.Errorf("invalid location id %s", location))
-	}
-
-	locations, _, err := client.LocationsApi.LocationsFindByRegionIdAndId(ctx, parts[0], parts[1]).Execute()
-
-	if err != nil {
-		log.Print(fmt.Errorf("error while fetching the list of locations %s", err))
-	}
-
-	if len(*locations.Properties.ImageAliases) > 0 {
-		for _, i := range *locations.Properties.ImageAliases {
-			alias := ""
-			if i != "" {
-				alias = i
-			}
-
-			if alias != "" && strings.ToLower(alias) == strings.ToLower(imageAlias) {
-				return i
-			}
-		}
-	}
-	return ""
 }
 
 func IsValidUUID(uuid string) bool {

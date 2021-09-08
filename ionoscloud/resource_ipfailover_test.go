@@ -34,13 +34,13 @@ func TestAccLanIPFailover_Basic(t *testing.T) {
 			{
 				Config: fmt.Sprintf(testAccCheckLanIPFailoverConfig_basic),
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheckLanIPFailoverGroupExists("ionoscloud_ipfailover.failovertest", &lan, &ipfailover),
+					testAccCheckLanIPFailoverGroupExists("ionoscloud_ipfailover.failover-test", &lan, &ipfailover),
 				),
 			},
 			{
 				Config: testAccCheckLanIPFailoverConfig_update,
 				Check: resource.ComposeTestCheckFunc(
-					testDeleted("ionoscloud_ipfailover.failovertest"),
+					testDeleted("ionoscloud_ipfailover.failover-test"),
 				),
 			},
 			{
@@ -75,11 +75,11 @@ func testAccCheckLanIPFailoverGroupExists(n string, _ *ionoscloud.Lan, _ *ionosc
 
 		lan, _, err := client.LansApi.DatacentersLansFindById(ctx, dcId, lanId).Execute()
 		if err != nil {
-			return fmt.Errorf("Lan %s not found.", lanId)
+			return fmt.Errorf("lan %s not found.", lanId)
 		}
 
 		if lan.Properties.IpFailover == nil {
-			return fmt.Errorf("Lan %s has no failover groups.", lanId)
+			return fmt.Errorf("lan %s has no failover groups.", lanId)
 		}
 		found := false
 		for _, fo := range *lan.Properties.IpFailover {
@@ -88,7 +88,7 @@ func testAccCheckLanIPFailoverGroupExists(n string, _ *ionoscloud.Lan, _ *ionosc
 			}
 		}
 		if !found {
-			return fmt.Errorf("Expected NIC %s to be a part of a failover group, but not found in lans %s failover groups", nicUuid, lanId)
+			return fmt.Errorf("expected NIC %s to be a part of a failover group, but not found in lans %s failover groups", nicUuid, lanId)
 		}
 
 		return nil
@@ -113,23 +113,26 @@ func testAccCheckLanIPFailoverDestroyCheck(s *terraform.State) error {
 		lanId := rs.Primary.Attributes["lan_id"]
 		nicUuid := rs.Primary.Attributes["nicuuid"]
 
-		lan, _, err := client.LansApi.DatacentersLansFindById(ctx, dcId, lanId).Execute()
+		lan, apiResponse, err := client.LansApi.DatacentersLansFindById(ctx, dcId, lanId).Execute()
 
 		if err != nil {
-			return fmt.Errorf("an error occured while fetching a Lan ID %s %s", rs.Primary.Attributes["lan_id"], err)
-		}
-
-		found := false
-		for _, fo := range *lan.Properties.IpFailover {
-			if *fo.NicUuid == nicUuid {
-				found = true
+			if apiResponse == nil || apiResponse.StatusCode != 404 {
+				return fmt.Errorf("an error occured while fetching a Lan ID %s %s", rs.Primary.Attributes["lan_id"], err)
 			}
-		}
-		if found {
-			_, err := client.DataCentersApi.DatacentersDelete(ctx, dcId).Execute()
-			if err != nil {
-				return fmt.Errorf("failed to remove IP failover group with nicId %s still exists %s %s, removing datacenter",
-					nicUuid, rs.Primary.ID, err)
+		} else {
+			found := false
+			if lan.Properties.IpFailover != nil {
+				for _, fo := range *lan.Properties.IpFailover {
+					if *fo.NicUuid == nicUuid {
+						found = true
+					}
+				}
+				if found {
+					_, err := client.DataCentersApi.DatacentersDelete(ctx, dcId).Execute()
+					if err != nil {
+						return fmt.Errorf("IP failover group with nicId %s still exists %s %s, removing datacenter", nicUuid, rs.Primary.ID, err)
+					}
+				}
 			}
 		}
 	}
@@ -162,7 +165,7 @@ resource "ionoscloud_server" "webserver" {
   ram = 1024
   availability_zone = "ZONE_1"
   cpu_family = "AMD_OPTERON"
-  image_name = "Ubuntu-20.04-LTS-server-2021-06-01"
+  image_name = "Ubuntu-20.04"
   image_password = "K3tTj8G14a3EgKyNeeiY"
   volume {
     name = "system"
@@ -173,10 +176,10 @@ resource "ionoscloud_server" "webserver" {
     lan = "${ionoscloud_lan.webserver_lan1.id}"
     dhcp = true
     firewall_active = true
-     ip ="${ionoscloud_ipblock.webserver_ip.ips[0]}"
+     ips =["${ionoscloud_ipblock.webserver_ip.ips[0]}"]
   }
 }
-resource "ionoscloud_ipfailover" "failovertest" {
+resource "ionoscloud_ipfailover" "failover-test" {
   depends_on = [ ionoscloud_lan.webserver_lan1 ]
   datacenter_id = "${ionoscloud_datacenter.foobar.id}"
   lan_id="${ionoscloud_lan.webserver_lan1.id}"
@@ -210,7 +213,7 @@ resource "ionoscloud_server" "webserver" {
   ram = 1024
   availability_zone = "ZONE_1"
   cpu_family = "AMD_OPTERON"
-  image_name = "Ubuntu-20.04-LTS-server-2021-06-01"
+  image_name = "Ubuntu-20.04"
   image_password = "K3tTj8G14a3EgKyNeeiY"
   volume {
     name = "system"
@@ -221,7 +224,7 @@ resource "ionoscloud_server" "webserver" {
     lan = "1"
     dhcp = true
     firewall_active = true
-     ip ="${ionoscloud_ipblock.webserver_ip.ips[0]}"
+     ips =["${ionoscloud_ipblock.webserver_ip.ips[0]}"]
   }
 }
 `

@@ -29,6 +29,14 @@ resource "ionoscloud_loadbalancer" "example" {
 * `dhcp` - (Optional)[Boolean] Indicates if the load balancer will reserve an IP using DHCP.
 * `ip` - (Optional)[string] IPv4 address of the load balancer.
 
+## Import
+
+Resource Load Balancer can be imported using the `resource id`, e.g.
+
+```shell
+terraform import ionoscloud_loadbalancer.myloadbalancer {datacenter uuid}/{loadbalancer uuid}
+```
+
 ## A note on nics
 
 When declaring NIC resources to be used with the load balancer, please make sure

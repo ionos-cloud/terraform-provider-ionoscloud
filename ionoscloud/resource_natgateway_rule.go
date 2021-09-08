@@ -209,7 +209,7 @@ func resourceNatGatewayRuleRead(ctx context.Context, d *schema.ResourceData, met
 
 	if err != nil {
 		log.Printf("[INFO] Resource %s not found: %+v", d.Id(), err)
-		if apiResponse.Response.StatusCode == 404 {
+		if apiResponse.StatusCode == 404 {
 			d.SetId("")
 			return nil
 		}

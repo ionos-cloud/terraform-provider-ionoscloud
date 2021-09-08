@@ -16,6 +16,9 @@ func resourceGroup() *schema.Resource {
 		ReadContext:   resourceGroupRead,
 		UpdateContext: resourceGroupUpdate,
 		DeleteContext: resourceGroupDelete,
+		Importer: &schema.ResourceImporter{
+			StateContext: resourceGroupImporter,
+		},
 		Schema: map[string]*schema.Schema{
 			"name": {
 				Type:         schema.TypeString,
@@ -199,7 +202,7 @@ func resourceGroupRead(ctx context.Context, d *schema.ResourceData, meta interfa
 	group, apiResponse, err := client.UserManagementApi.UmGroupsFindById(ctx, d.Id()).Execute()
 
 	if err != nil {
-		if apiResponse != nil && apiResponse.Response.StatusCode == 404 {
+		if apiResponse != nil && apiResponse.StatusCode == 404 {
 			d.SetId("")
 			return nil
 		}
@@ -317,10 +320,9 @@ func resourceGroupRead(ctx context.Context, d *schema.ResourceData, meta interfa
 		return diags
 	}
 
-	usersEntries := make([]interface{}, 0)
 	if users.Items != nil && len(*users.Items) > 0 {
-		usersEntries = make([]interface{}, len(*users.Items))
-		for userIndex, user := range *users.Items {
+		var usersEntries []interface{}
+		for _, user := range *users.Items {
 			userEntry := make(map[string]interface{})
 
 			if user.Properties.Firstname != nil {
@@ -343,7 +345,7 @@ func resourceGroupRead(ctx context.Context, d *schema.ResourceData, meta interfa
 				userEntry["force_sec_auth"] = *user.Properties.ForceSecAuth
 			}
 
-			usersEntries[userIndex] = userEntry
+			usersEntries = append(usersEntries, userEntry)
 		}
 
 		if len(usersEntries) > 0 {

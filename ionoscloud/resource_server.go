@@ -48,18 +48,13 @@ func resourceServer() *schema.Resource {
 				Type:     schema.TypeString,
 				Optional: true,
 			},
-			"licence_type": {
-				Type:     schema.TypeString,
-				Optional: true,
-			},
-
 			"boot_volume": {
 				Type:     schema.TypeString,
 				Computed: true,
 			},
 			"boot_cdrom": {
 				Type:     schema.TypeString,
-				Computed: true,
+				Optional: true,
 			},
 			"cpu_family": {
 				Type:     schema.TypeString,
@@ -112,7 +107,6 @@ func resourceServer() *schema.Resource {
 				Elem:          &schema.Schema{Type: schema.TypeString},
 				ConflictsWith: []string{"volume.0.ssh_key_path"},
 				Optional:      true,
-				Computed:      true,
 			},
 			"volume": {
 				Type:     schema.TypeList,
@@ -194,6 +188,52 @@ func resourceServer() *schema.Resource {
 							Optional: true,
 							Computed: true,
 						},
+						"cpu_hot_plug": {
+							Type:     schema.TypeBool,
+							Optional: true,
+							Computed: true,
+						},
+						"ram_hot_plug": {
+							Type:     schema.TypeBool,
+							Optional: true,
+							Computed: true,
+						},
+						"nic_hot_plug": {
+							Type:     schema.TypeBool,
+							Optional: true,
+							Computed: true,
+						},
+						"nic_hot_unplug": {
+							Type:     schema.TypeBool,
+							Optional: true,
+							Computed: true,
+						},
+						"disc_virtio_hot_plug": {
+							Type:     schema.TypeBool,
+							Optional: true,
+							Computed: true,
+						},
+						"disc_virtio_hot_unplug": {
+							Type:     schema.TypeBool,
+							Optional: true,
+							Computed: true,
+						},
+						"device_number": {
+							Type:     schema.TypeInt,
+							Computed: true,
+						},
+						"pci_slot": {
+							Type:     schema.TypeInt,
+							Computed: true,
+						},
+						"backup_unit_id": {
+							Type:     schema.TypeString,
+							Computed: true,
+						},
+						"user_data": {
+							Type:     schema.TypeString,
+							Optional: true,
+						},
 					},
 				},
 			},
@@ -219,25 +259,28 @@ func resourceServer() *schema.Resource {
 							Type:     schema.TypeBool,
 							Optional: true,
 						},
-
-						"ip": {
-							Type:     schema.TypeString,
-							Optional: true,
-							DiffSuppressFunc: func(k, old, new string, d *schema.ResourceData) bool {
-								if new == "" {
-									return true
-								}
-								return false
-							},
-						},
 						"ips": {
 							Type:     schema.TypeList,
 							Elem:     &schema.Schema{Type: schema.TypeString},
 							Computed: true,
+							Optional: true,
 						},
 						"firewall_active": {
 							Type:     schema.TypeBool,
 							Optional: true,
+						},
+						"firewall_type": {
+							Type:     schema.TypeString,
+							Optional: true,
+							Computed: true,
+						},
+						"device_number": {
+							Type:     schema.TypeInt,
+							Computed: true,
+						},
+						"pci_slot": {
+							Type:     schema.TypeInt,
+							Computed: true,
 						},
 						"firewall": {
 							Type:     schema.TypeList,
@@ -249,7 +292,6 @@ func resourceServer() *schema.Resource {
 										Type:     schema.TypeString,
 										Optional: true,
 									},
-
 									"protocol": {
 										Type:     schema.TypeString,
 										Required: true,
@@ -273,16 +315,6 @@ func resourceServer() *schema.Resource {
 										Type:     schema.TypeString,
 										Optional: true,
 									},
-									"ip": {
-										Type:     schema.TypeString,
-										Optional: true,
-										Computed: true,
-									},
-									"ips": {
-										Type:     schema.TypeList,
-										Elem:     &schema.Schema{Type: schema.TypeString},
-										Optional: true,
-									},
 									"port_range_start": {
 										Type:     schema.TypeInt,
 										Optional: true,
@@ -293,7 +325,6 @@ func resourceServer() *schema.Resource {
 											return
 										},
 									},
-
 									"port_range_end": {
 										Type:     schema.TypeInt,
 										Optional: true,
@@ -311,6 +342,11 @@ func resourceServer() *schema.Resource {
 									"icmp_code": {
 										Type:     schema.TypeString,
 										Optional: true,
+									},
+									"type": {
+										Type:     schema.TypeString,
+										Optional: true,
+										Computed: true,
 									},
 								},
 							},
@@ -403,6 +439,46 @@ func resourceServerCreate(ctx context.Context, d *schema.ResourceData, meta inte
 		volume.Bus = &vStr
 	}
 
+	if v, ok := d.GetOk("volume.0.cpu_hot_plug"); ok {
+		vBool := v.(bool)
+		volume.CpuHotPlug = &vBool
+	}
+
+	if v, ok := d.GetOk("volume.0.ram_hot_plug"); ok {
+		vBool := v.(bool)
+		volume.RamHotPlug = &vBool
+	}
+
+	if v, ok := d.GetOk("volume.0.nic_hot_plug"); ok {
+		vBool := v.(bool)
+		volume.NicHotUnplug = &vBool
+	}
+
+	if v, ok := d.GetOk("volume.0.nic_hot_unplug"); ok {
+		vBool := v.(bool)
+		volume.NicHotUnplug = &vBool
+	}
+
+	if v, ok := d.GetOk("volume.0.disc_virtio_hot_plug"); ok {
+		vBool := v.(bool)
+		volume.DiscVirtioHotPlug = &vBool
+	}
+
+	if v, ok := d.GetOk("volume.0.disc_virtio_hot_unplug"); ok {
+		vBool := v.(bool)
+		volume.DiscVirtioHotUnplug = &vBool
+	}
+
+	if v, ok := d.GetOk("volume.0.backup_unit_id"); ok {
+		vStr := v.(string)
+		volume.BackupunitId = &vStr
+	}
+
+	if v, ok := d.GetOk("volume.0.user_data"); ok {
+		vStr := v.(string)
+		volume.UserData = &vStr
+	}
+
 	var sshKeyPath []interface{}
 
 	if v, ok := d.GetOk("volume.0.ssh_key_path"); ok {
@@ -437,15 +513,14 @@ func resourceServerCreate(ctx context.Context, d *schema.ResourceData, meta inte
 		imageInput = v.(string)
 	}
 
-	ctx, cancel := context.WithTimeout(context.Background(), *resourceDefaultTimeouts.Default)
-
-	if cancel != nil {
-		defer cancel()
-	}
-
 	if imageInput != "" {
 		if !IsValidUUID(imageInput) {
-			img, err := getImage(client, datacenterId, imageInput, *volume.Type)
+			dc, _, err := client.DataCentersApi.DatacentersFindById(ctx, datacenterId).Execute()
+			if err != nil {
+				diags := diag.FromErr(fmt.Errorf("error fetching datacenter %s: (%s)", datacenterId, err))
+				return diags
+			}
+			img, err := resolveImageName(client, imageInput, *dc.Properties.Location)
 			if err != nil {
 				diags := diag.FromErr(err)
 				return diags
@@ -471,7 +546,7 @@ func resourceServerCreate(ctx context.Context, d *schema.ResourceData, meta inte
 		} else {
 			img, apiResponse, err := client.ImagesApi.ImagesFindById(ctx, imageInput).Execute()
 
-			if apiResponse != nil && apiResponse.Response.StatusCode == 404 {
+			if apiResponse != nil && apiResponse.StatusCode == 404 {
 
 				_, apiResponse, err = client.SnapshotsApi.SnapshotsFindById(ctx, imageInput).Execute()
 
@@ -487,14 +562,20 @@ func resourceServerCreate(ctx context.Context, d *schema.ResourceData, meta inte
 				return diags
 			}
 
-			if *img.Properties.Public == true && isSnapshot == false {
+			if isSnapshot == false && img.Properties.Public != nil && *img.Properties.Public == true {
 
 				if volume.ImagePassword == nil && len(sshKeyPath) == 0 {
 					diags := diag.FromErr(fmt.Errorf("either 'image_password' or 'ssh_key_path' must be provided"))
 					return diags
 				}
 
-				img, err := getImage(client, d.Get("datacenter_id").(string), imageInput, *volume.Type)
+				dc, _, err := client.DataCentersApi.DatacentersFindById(ctx, datacenterId).Execute()
+				if err != nil {
+					diags := diag.FromErr(fmt.Errorf("error fetching datacenter %s: (%s)", datacenterId, err))
+					return diags
+				}
+
+				img, err := resolveImageName(client, imageInput, *dc.Properties.Location)
 
 				if err != nil {
 					diags := diag.FromErr(err)
@@ -515,7 +596,7 @@ func resourceServerCreate(ctx context.Context, d *schema.ResourceData, meta inte
 					isSnapshot = true
 					image = *snap.Id
 				} else {
-					if img.Properties.Public != nil && *img.Properties.Public == true && isSnapshot == false &&
+					if isSnapshot == false && img.Properties.Public != nil && *img.Properties.Public == true &&
 						volume.ImagePassword == nil && len(sshKeyPath) == 0 {
 						diags := diag.FromErr(fmt.Errorf("either 'image_password' or 'ssh_key_path' must be provided"))
 						return diags
@@ -572,10 +653,22 @@ func resourceServerCreate(ctx context.Context, d *schema.ResourceData, meta inte
 		nic.Properties.Dhcp = boolAddr(d.Get("nic.0.dhcp").(bool))
 		nic.Properties.FirewallActive = boolAddr(d.Get("nic.0.firewall_active").(bool))
 
-		if v, ok := d.GetOk("nic.0.ip"); ok {
-			ips := strings.Split(v.(string), ",")
-			if len(ips) > 0 {
-				nic.Properties.Ips = &ips
+		if v, ok := d.GetOk("nic.0.firewall_type"); ok {
+			v := v.(string)
+			nic.Properties.FirewallType = &v
+		}
+
+		if v, ok := d.GetOk("nic.0.ips"); ok {
+			raw := v.([]interface{})
+			if raw != nil && len(raw) > 0 {
+				var ips []string
+				for _, rawIp := range raw {
+					ip := rawIp.(string)
+					ips = append(ips, ip)
+				}
+				if ips != nil && len(ips) > 0 {
+					nic.Properties.Ips = &ips
+				}
 			}
 		}
 
@@ -644,6 +737,12 @@ func resourceServerCreate(ctx context.Context, d *schema.ResourceData, meta inte
 					firewall.Properties.IcmpCode = &iInt32
 				}
 			}
+
+			if v, ok := d.GetOk("nic.0.firewall.0.type"); ok {
+				val := v.(string)
+				firewall.Properties.Type = &val
+			}
+
 			(*request.Entities.Nics.Items)[0].Entities = &ionoscloud.NicEntities{
 				Firewallrules: &ionoscloud.FirewallRules{
 					Items: &[]ionoscloud.FirewallRule{
@@ -660,10 +759,17 @@ func resourceServerCreate(ctx context.Context, d *schema.ResourceData, meta inte
 		}
 	}
 
+	if _, ok := d.GetOk("boot_cdrom"); ok {
+		resId := d.Get("boot_cdrom").(string)
+		request.Properties.BootCdrom = &ionoscloud.ResourceReference{
+			Id: &resId,
+		}
+	}
+
 	server, apiResponse, err := client.ServersApi.DatacentersServersPost(ctx, d.Get("datacenter_id").(string)).Server(request).Execute()
 
 	if err != nil {
-		diags := diag.FromErr(fmt.Errorf("error creating server: (%s)", err))
+		diags := diag.FromErr(fmt.Errorf("error creating server: (%s) %s", err, string(apiResponse.Payload)))
 		return diags
 	}
 	d.SetId(*server.Id)
@@ -783,6 +889,12 @@ func GetFirewallResource(d *schema.ResourceData, path string) ionoscloud.Firewal
 			firewall.Properties.IcmpCode = &iInt32
 		}
 	}
+
+	if v, ok := d.GetOk(path + ".type"); ok {
+		val := v.(string)
+		firewall.Properties.Type = &val
+	}
+
 	return firewall
 }
 
@@ -794,7 +906,7 @@ func resourceServerRead(ctx context.Context, d *schema.ResourceData, meta interf
 
 	server, apiResponse, err := client.ServersApi.DatacentersServersFindById(ctx, dcId, serverId).Execute()
 	if err != nil {
-		if apiResponse != nil && apiResponse.Response.StatusCode == 404 {
+		if apiResponse != nil && apiResponse.StatusCode == 404 {
 			d.SetId("")
 			return nil
 		}
@@ -851,8 +963,7 @@ func resourceServerRead(ctx context.Context, d *schema.ResourceData, meta interf
 		}
 	}
 
-	if server.Entities.Volumes != nil &&
-		len(*server.Entities.Volumes.Items) > 0 &&
+	if server.Entities.Volumes != nil && server.Entities.Volumes.Items != nil && len(*server.Entities.Volumes.Items) > 0 &&
 		(*server.Entities.Volumes.Items)[0].Properties.Image != nil {
 		if err := d.Set("boot_image", *(*server.Entities.Volumes.Items)[0].Properties.Image); err != nil {
 			diags := diag.FromErr(err)
@@ -884,14 +995,16 @@ func resourceServerRead(ctx context.Context, d *schema.ResourceData, meta interf
 
 		setPropWithNilCheck(network, "dhcp", nic.Properties.Dhcp)
 		setPropWithNilCheck(network, "firewall_active", nic.Properties.FirewallActive)
-
+		setPropWithNilCheck(network, "firewall_type", nic.Properties.FirewallType)
 		setPropWithNilCheck(network, "lan", nic.Properties.Lan)
 		setPropWithNilCheck(network, "name", nic.Properties.Name)
 		setPropWithNilCheck(network, "ips", nic.Properties.Ips)
 		setPropWithNilCheck(network, "mac", nic.Properties.Mac)
+		setPropWithNilCheck(network, "device_number", nic.Properties.DeviceNumber)
+		setPropWithNilCheck(network, "pci_slot", nic.Properties.PciSlot)
 
 		if nic.Properties.Ips != nil && len(*nic.Properties.Ips) > 0 {
-			network["ip"] = (*nic.Properties.Ips)[0]
+			network["ips"] = *nic.Properties.Ips
 		}
 
 		if firewallId, ok := d.GetOk("firewallrule_id"); ok {
@@ -915,6 +1028,7 @@ func resourceServerRead(ctx context.Context, d *schema.ResourceData, meta interf
 			setPropWithNilCheck(fw, "port_range_end", firewall.Properties.PortRangeEnd)
 			setPropWithNilCheck(fw, "icmp_type", firewall.Properties.IcmpType)
 			setPropWithNilCheck(fw, "icmp_code", firewall.Properties.IcmpCode)
+			setPropWithNilCheck(fw, "type", firewall.Properties.Type)
 
 			network["firewall"] = []map[string]interface{}{fw}
 		}
@@ -934,6 +1048,7 @@ func resourceServerRead(ctx context.Context, d *schema.ResourceData, meta interf
 			}
 		}
 		volumeObj, _, err := client.ServersApi.DatacentersServersVolumesFindById(ctx, dcId, serverId, *server.Properties.BootVolume.Id).Execute()
+
 		if err == nil {
 			volumeItem := map[string]interface{}{}
 
@@ -943,6 +1058,15 @@ func resourceServerRead(ctx context.Context, d *schema.ResourceData, meta interf
 			setPropWithNilCheck(volumeItem, "licence_type", volumeObj.Properties.LicenceType)
 			setPropWithNilCheck(volumeItem, "bus", volumeObj.Properties.Bus)
 			setPropWithNilCheck(volumeItem, "availability_zone", volumeObj.Properties.AvailabilityZone)
+			setPropWithNilCheck(volumeItem, "cpu_hot_plug", volumeObj.Properties.CpuHotPlug)
+			setPropWithNilCheck(volumeItem, "ram_hot_plug", volumeObj.Properties.CpuHotPlug)
+			setPropWithNilCheck(volumeItem, "nic_hot_plug", volumeObj.Properties.CpuHotPlug)
+			setPropWithNilCheck(volumeItem, "nic_hot_unplug", volumeObj.Properties.CpuHotPlug)
+			setPropWithNilCheck(volumeItem, "disc_virtio_hot_plug", volumeObj.Properties.CpuHotPlug)
+			setPropWithNilCheck(volumeItem, "disc_virtio_hot_unplug", volumeObj.Properties.CpuHotPlug)
+			setPropWithNilCheck(volumeItem, "device_number", volumeObj.Properties.DeviceNumber)
+			setPropWithNilCheck(volumeItem, "pci_slot", volumeObj.Properties.PciSlot)
+			setPropWithNilCheck(volumeItem, "user_data", volumeObj.Properties.UserData)
 
 			volumesList := []map[string]interface{}{volumeItem}
 			if err := d.Set("volume", volumesList); err != nil {
@@ -969,6 +1093,7 @@ func resourceServerRead(ctx context.Context, d *schema.ResourceData, meta interf
 			return diags
 		}
 	}
+
 	return nil
 }
 
@@ -1016,6 +1141,17 @@ func resourceServerUpdate(ctx context.Context, d *schema.ResourceData, meta inte
 		_, n := d.GetChange("cpu_family")
 		nStr := n.(string)
 		request.CpuFamily = &nStr
+	}
+
+	if d.HasChange("boot_cdrom") {
+		_, n := d.GetChange("boot_cdrom")
+		nStr := n.(string)
+		if nStr != "" {
+			request.BootCdrom = &ionoscloud.ResourceReference{
+				Id: &nStr,
+			}
+		} /* todo: figure out a way of sending a nil bootCdrom to the API (the sdk's omitempty doesn't let us) */
+
 	}
 
 	server, apiResponse, err := client.ServersApi.DatacentersServersPatch(ctx, dcId, d.Id()).Server(request).Execute()
@@ -1070,6 +1206,36 @@ func resourceServerUpdate(ctx context.Context, d *schema.ResourceData, meta inte
 			properties.Bus = &vStr
 		}
 
+		if v, ok := d.GetOk("volume.0.cpu_hot_plug"); ok {
+			vBool := v.(bool)
+			properties.CpuHotPlug = &vBool
+		}
+
+		if v, ok := d.GetOk("volume.0.ram_hot_plug"); ok {
+			vBool := v.(bool)
+			properties.RamHotPlug = &vBool
+		}
+
+		if v, ok := d.GetOk("volume.0.nic_hot_plug"); ok {
+			vBool := v.(bool)
+			properties.NicHotUnplug = &vBool
+		}
+
+		if v, ok := d.GetOk("volume.0.nic_hot_unplug"); ok {
+			vBool := v.(bool)
+			properties.NicHotUnplug = &vBool
+		}
+
+		if v, ok := d.GetOk("volume.0.disc_virtio_hot_plug"); ok {
+			vBool := v.(bool)
+			properties.DiscVirtioHotPlug = &vBool
+		}
+
+		if v, ok := d.GetOk("volume.0.disc_virtio_hot_unplug"); ok {
+			vBool := v.(bool)
+			properties.DiscVirtioHotUnplug = &vBool
+		}
+
 		_, apiResponse, err := client.VolumesApi.DatacentersVolumesPatch(ctx, d.Get("datacenter_id").(string), bootVolume).Volume(properties).Execute()
 
 		if err != nil {
@@ -1106,16 +1272,28 @@ func resourceServerUpdate(ctx context.Context, d *schema.ResourceData, meta inte
 			properties.Name = &vStr
 		}
 
-		if v, ok := d.GetOk("nic.0.ip"); ok {
-			ips := strings.Split(v.(string), ",")
-			if len(ips) > 0 {
-				properties.Ips = &ips
+		if v, ok := d.GetOk("nic.0.ips"); ok {
+			raw := v.([]interface{})
+			if raw != nil && len(raw) > 0 {
+				ips := make([]string, 0)
+				for _, rawIp := range raw {
+					ip := rawIp.(string)
+					ips = append(ips, ip)
+				}
+				if ips != nil && len(ips) > 0 {
+					properties.Ips = &ips
+				}
 			}
 		}
 
 		properties.Dhcp = boolAddr(d.Get("nic.0.dhcp").(bool))
 
 		properties.FirewallActive = boolAddr(d.Get("nic.0.firewall_active").(bool))
+
+		if v, ok := d.GetOk("nic.0.firewall_type"); ok {
+			vStr := v.(string)
+			properties.FirewallType = &vStr
+		}
 
 		if d.HasChange("nic.0.firewall") {
 

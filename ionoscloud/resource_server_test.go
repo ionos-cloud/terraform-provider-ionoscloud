@@ -98,6 +98,74 @@ func TestAccServer_BootCdromNoImage(t *testing.T) {
 	})
 }
 
+func TestAccServer_NicIps(t *testing.T) {
+	var server ionoscloud.Server
+	serverName := "webserver"
+
+	resource.Test(t, resource.TestCase{
+		PreCheck: func() {
+			testAccPreCheck(t)
+		},
+		ProviderFactories: testAccProviderFactories,
+		CheckDestroy:      testAccCheckServerDestroyCheck,
+		Steps: []resource.TestStep{
+			{
+				Config: fmt.Sprintf(testacccheckserverconfigNicIps, serverName),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckServerExists("ionoscloud_server.webserver", &server),
+					testAccCheckServerAttributes("ionoscloud_server.webserver", serverName),
+					resource.TestCheckResourceAttr("ionoscloud_server.webserver", "name", serverName),
+					resource.TestCheckResourceAttrPair("ionoscloud_server.webserver", "nic.0.ips.0", "ionoscloud_ipblock.webserver_ipblock", "ips.0"),
+					resource.TestCheckResourceAttrPair("ionoscloud_server.webserver", "nic.0.ips.1", "ionoscloud_ipblock.webserver_ipblock", "ips.1"),
+				),
+			},
+		},
+	})
+}
+
+func TestAccServer_ResolveImageName(t *testing.T) {
+	var server ionoscloud.Server
+	serverName := "webserver"
+
+	resource.Test(t, resource.TestCase{
+		PreCheck: func() {
+			testAccPreCheck(t)
+		},
+		ProviderFactories: testAccProviderFactories,
+		CheckDestroy:      testAccCheckServerDestroyCheck,
+		Steps: []resource.TestStep{
+			{
+				Config: fmt.Sprintf(testAccCheckServerResolveImageName, serverName),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckServerExists("ionoscloud_server.webserver", &server),
+					testAccCheckServerAttributes("ionoscloud_server.webserver", serverName),
+					resource.TestCheckResourceAttr("ionoscloud_server.webserver", "name", serverName),
+				),
+			},
+		},
+	})
+}
+
+func TestAccServer_WithSnapshot(t *testing.T) {
+	var server ionoscloud.Server
+
+	resource.Test(t, resource.TestCase{
+		PreCheck: func() {
+			testAccPreCheck(t)
+		},
+		ProviderFactories: testAccProviderFactories,
+		CheckDestroy:      testAccCheckServerDestroyCheck,
+		Steps: []resource.TestStep{
+			{
+				Config: fmt.Sprintf(testAccCheckServerWithSnapshot),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckServerExists("ionoscloud_server.webserver", &server),
+				),
+			},
+		},
+	})
+}
+
 func testAccCheckServerDestroyCheck(s *terraform.State) error {
 	client := testAccProvider.Meta().(*ionoscloud.APIClient)
 
@@ -117,7 +185,7 @@ func testAccCheckServerDestroyCheck(s *terraform.State) error {
 		_, apiResponse, err := client.ServersApi.DatacentersServersFindById(ctx, dcId, rs.Primary.ID).Execute()
 
 		if err != nil {
-			if apiResponse == nil || apiResponse.Response.StatusCode != 404 {
+			if apiResponse == nil || apiResponse.StatusCode != 404 {
 				return fmt.Errorf("unable to fetch server %s: %s", rs.Primary.ID, err)
 			}
 		} else {
@@ -197,18 +265,19 @@ resource "ionoscloud_server" "webserver" {
   ram = 1024
   availability_zone = "ZONE_1"
   cpu_family = "AMD_OPTERON"
-  image_name = "Ubuntu-20.04-LTS-server-2021-06-01"
+  image_name = "Ubuntu-20.04"
   image_password = "K3tTj8G14a3EgKyNeeiY"
   volume {
     name = "system"
     size = 15
     disk_type = "HDD"
-}
+  }
   nic {
     lan = "${ionoscloud_lan.webserver_lan.id}"
     dhcp = true
     firewall_active = true
-		firewall {
+	firewall_type = "BIDIRECTIONAL"
+    firewall {
       protocol = "TCP"
       name = "SSH"
       port_range_start = 22
@@ -237,7 +306,7 @@ resource "ionoscloud_server" "webserver" {
   availability_zone = "ZONE_1"
   cpu_family = "AMD_OPTERON"
   volume {
-	image_name = "Ubuntu-20.04-LTS-server-2021-06-01"
+	image_name = "Ubuntu-20.04"
 	image_password = "K3tTj8G14a3EgKyNeeiY"
     name = "system"
     size = 15
@@ -247,7 +316,8 @@ resource "ionoscloud_server" "webserver" {
     lan = "${ionoscloud_lan.webserver_lan.id}"
     dhcp = true
     firewall_active = true
-		firewall {
+    firewall_type = "BIDIRECTIONAL"
+	firewall {
       protocol = "TCP"
       name = "SSH"
       port_range_start = 22
@@ -275,7 +345,7 @@ resource "ionoscloud_server" "webserver" {
   ram = 1024
   availability_zone = "ZONE_1"
   cpu_family = "AMD_OPTERON"
-  image_name = "Ubuntu-20.04-LTS-server-2021-06-01"
+  image_name = "Ubuntu-20.04"
   image_password = "K3tTj8G14a3EgKyNeeiY"
   volume {
     name = "system"
@@ -286,7 +356,8 @@ resource "ionoscloud_server" "webserver" {
     lan = "${ionoscloud_lan.webserver_lan.id}"
     dhcp = false
     firewall_active = false
-		firewall {
+	firewall_type = "BIDIRECTIONAL"
+	firewall {
       protocol = "TCP"
       name = "SSH"
       port_range_start = 22
@@ -358,8 +429,8 @@ resource "ionoscloud_server" "webserver" {
   nic {
     lan = "${ionoscloud_lan.webserver_lan.id}"
     dhcp = true
-    firewall_active = true
-    firewall {
+    firewall_active = true 
+	firewall {
       protocol = "TCP"
       name = "SSH"
       port_range_start = 22
@@ -367,6 +438,150 @@ resource "ionoscloud_server" "webserver" {
     }
   }
 }`
+
+const testacccheckserverconfigNicIps = `
+resource "ionoscloud_datacenter" "foobar" {
+	name       = "server-test"
+	location = "de/fra"
+}
+
+resource "ionoscloud_ipblock" "webserver_ipblock" {
+  location = ionoscloud_datacenter.foobar.location
+  size = 2
+  name = "webserver_ipblock"
+}
+
+resource "ionoscloud_lan" "webserver_lan" {
+  datacenter_id = "${ionoscloud_datacenter.foobar.id}"
+  public = true
+  name = "public"
+}
+
+resource "ionoscloud_server" "webserver" {
+  name = "%s"
+  datacenter_id = "${ionoscloud_datacenter.foobar.id}"
+  cores             = 2
+  ram               = 1024
+
+  availability_zone = "ZONE_1"
+  image_password    = "K3tTj8G14a3EgKyNeeiY"
+  image_name        = "Ubuntu-16.04"
+
+  volume {
+    name           = "new"
+    size           = 5
+    disk_type      = "SSD"
+  }
+
+  nic {
+    lan             = "${ionoscloud_lan.webserver_lan.id}"
+    dhcp            = true
+    ips            = [ ionoscloud_ipblock.webserver_ipblock.ips[0], ionoscloud_ipblock.webserver_ipblock.ips[1] ]
+    firewall_active = false
+  }
+
+}`
+
+const testAccCheckServerResolveImageName = `
+resource "ionoscloud_datacenter" "datacenter" {
+  name        = "test_server"
+  location    = "de/fra"
+  description = "Test datacenter done by TF"
+}
+resource "ionoscloud_lan" "public_lan" {
+  datacenter_id = ionoscloud_datacenter.datacenter.id
+  public        = true
+}
+resource "ionoscloud_ipblock" "public_ip1" {
+  name     = "test-ip"
+  location = ionoscloud_datacenter.datacenter.location
+  size     = 1
+}
+resource "ionoscloud_server" "webserver" {
+  name              = "%s"
+  datacenter_id     = ionoscloud_datacenter.datacenter.id
+  cores             = 1
+  ram               = 1024
+  availability_zone = "ZONE_1"
+  cpu_family        = "INTEL_SKYLAKE" 
+  image_name        = "Ubuntu-20.04-LTS"
+  image_password    = "pass123456"
+  volume {
+    name           = "test1-root"
+    size              = 5
+    disk_type      = "SSD Standard"
+  }
+  nic {
+    lan             = ionoscloud_lan.public_lan.id
+    dhcp            = true
+    ips             = ionoscloud_ipblock.public_ip1.ips
+    firewall_active = true
+  
+    firewall {
+      protocol         = "TCP"
+      name             = "SSH"
+      port_range_start = 22
+      port_range_end   = 22
+    }
+  }
+}`
+
+const testAccCheckServerWithSnapshot = `
+resource "ionoscloud_datacenter" "foobar" {
+	name       = "volume-test"
+	location   = "de/fra"
+}
+resource "ionoscloud_lan" "webserver_lan" {
+  datacenter_id = "${ionoscloud_datacenter.foobar.id}"
+  public = true
+  name = "public"
+}
+resource "ionoscloud_server" "webserver" {
+  name = "webserver"
+  datacenter_id = "${ionoscloud_datacenter.foobar.id}"
+  cores = 1
+  ram = 1024
+  availability_zone = "ZONE_1"
+  cpu_family = "INTEL_SKYLAKE"
+	image_name = "Ubuntu-20.04-LTS"
+	image_password = "K3tTj8G14a3EgKyNeeiY"
+  volume {
+    name = "system"
+    size = 5
+    disk_type = "SSD Standard"
+  }
+  nic {
+    lan = "${ionoscloud_lan.webserver_lan.id}"
+    dhcp = true
+    firewall_active = true
+  }
+}
+resource "ionoscloud_snapshot" "test_snapshot" {
+  datacenter_id = "${ionoscloud_datacenter.foobar.id}"
+  volume_id = "${ionoscloud_server.webserver.boot_volume}"
+  name = "terraform_snapshot"
+}
+resource "ionoscloud_server" "webserver2" {
+  depends_on = [ionoscloud_snapshot.test_snapshot]
+  name = "webserver2"
+  datacenter_id = "${ionoscloud_datacenter.foobar.id}"
+  cores = 1
+  ram = 1024
+  availability_zone = "ZONE_1"
+  cpu_family = "INTEL_SKYLAKE"
+  image_name = "terraform_snapshot"
+  volume {
+    name = "system"
+    size = 5
+    disk_type = "SSD Standard"
+  }
+  nic {
+    lan = "${ionoscloud_lan.webserver_lan.id}"
+    dhcp = true
+    firewall_active = true
+  }
+}
+`
 
 func Test_Update(t *testing.T) {
 

@@ -29,29 +29,25 @@ func dataSourcePcc() *schema.Resource {
 				Computed: true,
 				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{
-
-						// The id of the cross-connected LAN
 						"lan_id": {
-							Type:     schema.TypeString,
-							Computed: true,
+							Type:        schema.TypeString,
+							Computed:    true,
+							Description: "The id of the cross-connected LAN",
 						},
-
-						// The name of the cross-connected LAN
 						"lan_name": {
-							Type:     schema.TypeString,
-							Computed: true,
+							Type:        schema.TypeString,
+							Computed:    true,
+							Description: "The name of the cross-connected LAN",
 						},
-
-						// The id of the cross-connected VDC
 						"datacenter_id": {
-							Type:     schema.TypeString,
-							Computed: true,
+							Type:        schema.TypeString,
+							Computed:    true,
+							Description: "The id of the cross-connected VDC",
 						},
-
-						// The name of the cross-connected VDC
 						"datacenter_name": {
-							Type:     schema.TypeString,
-							Computed: true,
+							Type:        schema.TypeString,
+							Computed:    true,
+							Description: "The name of the cross-connected VDC",
 						},
 
 						"location": {
@@ -151,7 +147,7 @@ func setPccDataSource(d *schema.ResourceData, pcc *ionoscloud.PrivateCrossConnec
 				return err
 			}
 		}
-		if pcc.Properties.ConnectableDatacenters != nil {
+		if pcc.Properties.ConnectableDatacenters != nil && len(*pcc.Properties.ConnectableDatacenters) > 0 {
 			if err := d.Set("connectable_datacenters", convertConnectableDatacenters(pcc.Properties.ConnectableDatacenters)); err != nil {
 				return err
 			}

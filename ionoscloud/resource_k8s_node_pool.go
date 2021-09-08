@@ -8,6 +8,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 	ionoscloud "github.com/ionos-cloud/sdk-go/v6"
 	"log"
+	"strings"
 	"time"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
@@ -30,10 +31,26 @@ func resourcek8sNodePool() *schema.Resource {
 				ValidateFunc: validation.All(validation.StringIsNotWhiteSpace),
 			},
 			"k8s_version": {
-				Type:         schema.TypeString,
-				Description:  "The desired kubernetes version",
-				Required:     true,
-				ValidateFunc: validation.All(validation.StringIsNotWhiteSpace),
+				Type:        schema.TypeString,
+				Description: "The desired kubernetes version",
+				Optional:    true,
+				DiffSuppressFunc: func(k, old, new string, d *schema.ResourceData) bool {
+					var oldMajor, oldMinor string
+					if old != "" {
+						oldSplit := strings.Split(old, ".")
+						oldMajor = oldSplit[0]
+						oldMinor = oldSplit[1]
+
+						newSplit := strings.Split(new, ".")
+						newMajor := newSplit[0]
+						newMinor := newSplit[1]
+
+						if oldMajor == newMajor && oldMinor == newMinor {
+							return true
+						}
+					}
+					return false
+				},
 			},
 			"auto_scaling": {
 				Type:        schema.TypeList,
@@ -70,6 +87,7 @@ func resourcek8sNodePool() *schema.Resource {
 							Type:        schema.TypeBool,
 							Description: "Indicates if the Kubernetes Node Pool LAN will reserve an IP using DHCP",
 							Optional:    true,
+							Default:     true,
 						},
 						"routes": {
 							Type:        schema.TypeList,
@@ -78,14 +96,16 @@ func resourcek8sNodePool() *schema.Resource {
 							Elem: &schema.Resource{
 								Schema: map[string]*schema.Schema{
 									"network": {
-										Type:        schema.TypeString,
-										Description: "IPv4 or IPv6 CIDR to be routed via the interface",
-										Required:    true,
+										Type:         schema.TypeString,
+										Description:  "IPv4 or IPv6 CIDR to be routed via the interface",
+										Required:     true,
+										ValidateFunc: validation.All(validation.StringIsNotWhiteSpace),
 									},
 									"gateway_ip": {
-										Type:        schema.TypeString,
-										Description: "IPv4 or IPv6 Gateway IP for the route",
-										Required:    true,
+										Type:         schema.TypeString,
+										Description:  "IPv4 or IPv6 Gateway IP for the route",
+										Required:     true,
+										ValidateFunc: validation.All(validation.StringIsNotWhiteSpace),
 									},
 								},
 							},
@@ -101,14 +121,16 @@ func resourcek8sNodePool() *schema.Resource {
 				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{
 						"time": {
-							Type:        schema.TypeString,
-							Description: "A clock time in the day when maintenance is allowed",
-							Required:    true,
+							Type:         schema.TypeString,
+							Description:  "A clock time in the day when maintenance is allowed",
+							Required:     true,
+							ValidateFunc: validation.All(validation.StringIsNotWhiteSpace),
 						},
 						"day_of_the_week": {
-							Type:        schema.TypeString,
-							Description: "Day of the week when maintenance is allowed",
-							Required:    true,
+							Type:         schema.TypeString,
+							Description:  "Day of the week when maintenance is allowed",
+							Required:     true,
+							ValidateFunc: validation.All(validation.StringIsNotWhiteSpace),
 						},
 					},
 				},
@@ -279,10 +301,10 @@ func resourcek8sNodePoolCreate(ctx context.Context, d *schema.ResourceData, meta
 					lan.Id = &lanID
 					addLan = true
 				}
-				if lanDhcp, lanDhcpOk := d.GetOk(fmt.Sprintf("lans.%d.dhcp", lanIndex)); lanDhcpOk {
-					lanDhcp := lanDhcp.(bool)
-					lan.Dhcp = &lanDhcp
-				}
+
+				lanDhcp := d.Get(fmt.Sprintf("lans.%d.dhcp", lanIndex)).(bool)
+				lan.Dhcp = &lanDhcp
+
 				if lanRoutes, lanRoutesOk := d.GetOk(fmt.Sprintf("lans.%d.routes", lanIndex)); lanRoutesOk {
 					if lanRoutes.([]interface{}) != nil {
 						updateRoutes := false
@@ -347,9 +369,9 @@ func resourcek8sNodePoolCreate(ctx context.Context, d *schema.ResourceData, meta
 			return diags
 		}
 
-		requestPublicIps := make([]string, len(publicIps), len(publicIps))
+		var requestPublicIps []string
 		for i := range publicIps {
-			requestPublicIps[i] = fmt.Sprint(publicIps[i])
+			requestPublicIps = append(requestPublicIps, fmt.Sprint(publicIps[i]))
 		}
 		k8sNodepool.Properties.PublicIps = &requestPublicIps
 	}
@@ -403,7 +425,7 @@ func resourcek8sNodePoolCreate(ctx context.Context, d *schema.ResourceData, meta
 		}
 
 		select {
-		case <-time.After(10 * time.Second):
+		case <-time.After(SleepInterval):
 			log.Printf("[INFO] trying again ...")
 		case <-ctx.Done():
 			log.Printf("[INFO] timed out")
@@ -422,7 +444,7 @@ func resourcek8sNodePoolRead(ctx context.Context, d *schema.ResourceData, meta i
 
 	if err != nil {
 		log.Printf("[INFO] Resource %s not found: %+v", d.Id(), err)
-		if apiResponse != nil && apiResponse.Response.StatusCode == 404 {
+		if apiResponse != nil && apiResponse.StatusCode == 404 {
 			d.SetId("")
 			return nil
 		}
@@ -524,7 +546,7 @@ func resourcek8sNodePoolRead(ctx context.Context, d *schema.ResourceData, meta i
 
 	}
 
-	if k8sNodepool.Properties.PublicIps != nil {
+	if k8sNodepool.Properties.PublicIps != nil && len(*k8sNodepool.Properties.PublicIps) > 0 {
 		err := d.Set("public_ips", *k8sNodepool.Properties.PublicIps)
 		if err != nil {
 			diags := diag.FromErr(fmt.Errorf("error while setting public_ips property for k8sNodepool %s: %s", d.Id(), err))
@@ -548,10 +570,9 @@ func resourcek8sNodePoolRead(ctx context.Context, d *schema.ResourceData, meta i
 		log.Printf("[INFO] Setting AutoScaling for k8s node pool %s to %+v...", d.Id(), *k8sNodepool.Properties.AutoScaling)
 	}
 
-	nodePoolLans := make([]interface{}, 0)
 	if k8sNodepool.Properties.Lans != nil && len(*k8sNodepool.Properties.Lans) > 0 {
-		nodePoolLans = make([]interface{}, len(*k8sNodepool.Properties.Lans))
-		for lanIndex, nodePoolLan := range *k8sNodepool.Properties.Lans {
+		var nodePoolLans []interface{}
+		for _, nodePoolLan := range *k8sNodepool.Properties.Lans {
 			lanEntry := make(map[string]interface{})
 
 			if nodePoolLan.Id != nil {
@@ -562,10 +583,9 @@ func resourcek8sNodePoolRead(ctx context.Context, d *schema.ResourceData, meta i
 				lanEntry["dhcp"] = *nodePoolLan.Dhcp
 			}
 
-			nodePoolRoutes := make([]interface{}, 0)
-			if len(*nodePoolLan.Routes) > 0 {
-				nodePoolRoutes = make([]interface{}, len(*nodePoolLan.Routes))
-				for routeIndex, nodePoolRoute := range *nodePoolLan.Routes {
+			if nodePoolLan.Routes != nil && len(*nodePoolLan.Routes) > 0 {
+				var nodePoolRoutes []interface{}
+				for _, nodePoolRoute := range *nodePoolLan.Routes {
 					routeEntry := make(map[string]string)
 					if nodePoolRoute.Network != nil {
 						routeEntry["network"] = *nodePoolRoute.Network
@@ -573,21 +593,22 @@ func resourcek8sNodePoolRead(ctx context.Context, d *schema.ResourceData, meta i
 					if nodePoolRoute.GatewayIp != nil {
 						routeEntry["gateway_ip"] = *nodePoolRoute.GatewayIp
 					}
-					nodePoolRoutes[routeIndex] = routeEntry
+					nodePoolRoutes = append(nodePoolRoutes, routeEntry)
+				}
+
+				if len(nodePoolRoutes) > 0 {
+					lanEntry["routes"] = nodePoolRoutes
 				}
 			}
 
-			if len(nodePoolRoutes) > 0 {
-				lanEntry["routes"] = nodePoolRoutes
-			}
-
-			nodePoolLans[lanIndex] = lanEntry
+			nodePoolLans = append(nodePoolLans, lanEntry)
 		}
-	}
 
-	if err := d.Set("lans", nodePoolLans); err != nil {
-		diags := diag.FromErr(fmt.Errorf("error while setting lans property for k8sNodepool %s: %s", d.Id(), err))
-		return diags
+	if len(nodePoolLans) > 0 {
+		if err := d.Set("lans", nodePoolLans); err != nil {
+			diags := diag.FromErr(fmt.Errorf("error while setting lans property for k8sNodepool %s: %s", d.Id(), err))
+			return diags
+		}
 	}
 
 	labels := make(map[string]interface{})
@@ -609,8 +630,6 @@ func resourcek8sNodePoolRead(ctx context.Context, d *schema.ResourceData, meta i
 		}
 	}
 
-	log.Printf("[INFO] ******** setting annotations to %+v", annotations)
-
 	if err := d.Set("annotations", annotations); err != nil {
 		diags := diag.FromErr(fmt.Errorf("error while setting the annotations property for k8sNodepool %s: %s", d.Id(), err))
 		return diags
@@ -622,11 +641,46 @@ func resourcek8sNodePoolRead(ctx context.Context, d *schema.ResourceData, meta i
 func resourcek8sNodePoolUpdate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	client := meta.(*ionoscloud.APIClient)
 
-	request := ionoscloud.KubernetesNodePool{}
+	request := ionoscloud.KubernetesNodePoolForPut{}
 
 	nodeCount := int32(d.Get("node_count").(int))
-	request.Properties = &ionoscloud.KubernetesNodePoolProperties{
+	request.Properties = &ionoscloud.KubernetesNodePoolPropertiesForPut{
 		NodeCount: &nodeCount,
+	}
+
+	if d.HasChange("name") {
+		diags := diag.FromErr(fmt.Errorf("name attribute is immutable, therefore not allowed in update requests"))
+		return diags
+	}
+
+	if d.HasChange("cpu_family") {
+		diags := diag.FromErr(fmt.Errorf("cpu_family attribute is immutable, therefore not allowed in update requests"))
+		return diags
+	}
+
+	if d.HasChange("availability_zone") {
+		diags := diag.FromErr(fmt.Errorf("availability_zone attribute is immutable, therefore not allowed in update requests"))
+		return diags
+	}
+
+	if d.HasChange("cores_count") {
+		diags := diag.FromErr(fmt.Errorf("cores_count attribute is immutable, therefore not allowed in update requests"))
+		return diags
+	}
+
+	if d.HasChange("ram_size") {
+		diags := diag.FromErr(fmt.Errorf("ram_size attribute is immutable, therefore not allowed in update requests"))
+		return diags
+	}
+
+	if d.HasChange("storage_size") {
+		diags := diag.FromErr(fmt.Errorf("storage_size attribute is immutable, therefore not allowed in update requests"))
+		return diags
+	}
+
+	if d.HasChange("storage_type") {
+		diags := diag.FromErr(fmt.Errorf("storage_size attribute is immutable, therefore not allowed in update requests"))
+		return diags
 	}
 
 	if d.HasChange("k8s_version") {
@@ -716,10 +770,10 @@ func resourcek8sNodePoolUpdate(ctx context.Context, d *schema.ResourceData, meta
 					lan.Id = &lanID
 					addLan = true
 				}
-				if lanDhcp, lanDhcpOk := d.GetOk(fmt.Sprintf("lans.%d.dhcp", lanIndex)); lanDhcpOk {
-					lanDhcp := lanDhcp.(bool)
-					lan.Dhcp = &lanDhcp
-				}
+
+				lanDhcp := d.Get(fmt.Sprintf("lans.%d.dhcp", lanIndex)).(bool)
+				lan.Dhcp = &lanDhcp
+
 				if lanRoutes, lanRoutesOk := d.GetOk(fmt.Sprintf("lans.%d.routes", lanIndex)); lanRoutesOk {
 					if lanRoutes.([]interface{}) != nil {
 						updateRoutes := false
@@ -868,10 +922,10 @@ func resourcek8sNodePoolUpdate(ctx context.Context, d *schema.ResourceData, meta
 		log.Printf("[INFO] Update req: %s", string(b))
 	}
 
-	_, apiResponse, err := client.KubernetesApi.K8sNodepoolsPut(ctx, d.Get("k8s_cluster_id").(string), d.Id()).KubernetesNodePool(request).Execute()
+	_, apiResponse, err := client.KubernetesApi.K8sNodepoolsPut(ctx, d.Get("k8s_cluster_id").(string), d.Id()).KubernetesNodePoolForPut(request).Execute()
 
 	if err != nil {
-		if apiResponse != nil && apiResponse.Response.StatusCode == 404 {
+		if apiResponse != nil && apiResponse.StatusCode == 404 {
 			d.SetId("")
 			return nil
 		}
@@ -912,7 +966,7 @@ func resourcek8sNodePoolDelete(ctx context.Context, d *schema.ResourceData, meta
 	apiResponse, err := client.KubernetesApi.K8sNodepoolsDelete(ctx, d.Get("k8s_cluster_id").(string), d.Id()).Execute()
 
 	if err != nil {
-		if apiResponse != nil && apiResponse.Response.StatusCode == 404 {
+		if apiResponse != nil && apiResponse.StatusCode == 404 {
 			d.SetId("")
 			return nil
 		}
@@ -960,7 +1014,7 @@ func k8sNodepoolDeleted(ctx context.Context, client *ionoscloud.APIClient, d *sc
 	_, apiResponse, err := client.KubernetesApi.K8sNodepoolsFindById(ctx, d.Get("k8s_cluster_id").(string), d.Id()).Execute()
 
 	if err != nil {
-		if apiResponse != nil && apiResponse.Response.StatusCode == 404 {
+		if apiResponse != nil && apiResponse.StatusCode == 404 {
 			return true, nil
 		}
 		return true, fmt.Errorf("error checking k8s node pool deletion status: %s", err)

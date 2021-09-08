@@ -25,9 +25,26 @@ resource "ionoscloud_group" "group" {
 
 ##Argument reference
 
-* `access_activity_log` - (Required) [Boolean] The group will be allowed to access the activity log.
+* `name` - (Required) [string] A name for the group.
 * `create_datacenter` - (Optional) [Boolean] The group will be allowed to create virtual data centers.
 * `create_snapshot` - (Optional) [Boolean] The group will be allowed to create snapshots.
-* `name` - (Optional) [string] A name for the group.
 * `reserve_ip` - (Optional) [Boolean] The group will be allowed to reserve IP addresses.
+* `access_activity_log` - (Optional) [Boolean] The group will be allowed to access the activity log.
+* `create_pcc` - (Optional) [Boolean] The group will be allowed to create pcc privilege.
+* `s3_privilege` - (Optional) [Boolean] The group will have S3 privilege.
+* `create_backup_unit` - (Optional) [Boolean] The group will be allowed to create backup unit privilege.
+* `create_internet_access` - (Optional) [Boolean] The group will be allowed to create internet access privilege.
+* `create_k8s_cluster` - (Optional) [Boolean]  The group will be allowed to create kubernetes cluster privilege.
+* `create_flow_log` - (Optional) [Boolean]  The group will be allowed to create flow log.
+* `access_and_manage_monitoring` - (Optional) [Boolean]  The group will be allowed to access and manage monitoring.
+* `access_and_manage_certificates` - (Optional) [Boolean]  The group will be allowed to access and manage certificates.
 * `user_id` - (Optional) [string] The ID of the specific user to add to the group.
+* `users` - (Computed) List of users - See the user section
+
+## Import
+
+Resource Group can be imported using the `resource id`, e.g.
+
+```shell
+terraform import ionoscloud_group.mygroup {group uuid}
+```

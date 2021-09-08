@@ -85,12 +85,12 @@ func dataSourceK8sNodePool() *schema.Resource {
 						"time": {
 							Type:        schema.TypeString,
 							Description: "A clock time in the day when maintenance is allowed",
-							Required:    true,
+							Computed:    true,
 						},
 						"day_of_the_week": {
 							Type:        schema.TypeString,
 							Description: "Day of the week when maintenance is allowed",
-							Required:    true,
+							Computed:    true,
 						},
 					},
 				},
@@ -104,12 +104,12 @@ func dataSourceK8sNodePool() *schema.Resource {
 						"min_node_count": {
 							Type:        schema.TypeInt,
 							Description: "The minimum number of worker nodes the node pool can scale down to. Should be less than max_node_count",
-							Required:    true,
+							Computed:    true,
 						},
 						"max_node_count": {
 							Type:        schema.TypeInt,
 							Description: "The maximum number of worker nodes that the node pool can scale to. Should be greater than min_node_count",
-							Required:    true,
+							Computed:    true,
 						},
 					},
 				},
@@ -123,12 +123,12 @@ func dataSourceK8sNodePool() *schema.Resource {
 						"id": {
 							Type:        schema.TypeInt,
 							Description: "The LAN ID of an existing LAN at the related datacenter",
-							Required:    true,
+							Computed:    true,
 						},
 						"dhcp": {
 							Type:        schema.TypeBool,
 							Description: "Indicates if the Kubernetes Node Pool LAN will reserve an IP using DHCP",
-							Optional:    true,
+							Computed:    true,
 						},
 						"routes": {
 							Type:        schema.TypeList,
@@ -139,12 +139,12 @@ func dataSourceK8sNodePool() *schema.Resource {
 									"network": {
 										Type:        schema.TypeString,
 										Description: "IPv4 or IPv6 CIDR to be routed via the interface",
-										Required:    true,
+										Computed:    true,
 									},
 									"gateway_ip": {
 										Type:        schema.TypeString,
 										Description: "IPv4 or IPv6 Gateway IP for the route",
-										Required:    true,
+										Computed:    true,
 									},
 								},
 							},
@@ -271,12 +271,6 @@ func setK8sNodePoolData(d *schema.ResourceData, nodePool *ionoscloud.KubernetesN
 			}
 		}
 
-		if nodePool.Properties.K8sVersion != nil {
-			if err := d.Set("k8s_version", *nodePool.Properties.K8sVersion); err != nil {
-				return err
-			}
-		}
-
 		if nodePool.Properties.DatacenterId != nil {
 			if err := d.Set("datacenter_id", *nodePool.Properties.DatacenterId); err != nil {
 				return err
@@ -331,7 +325,7 @@ func setK8sNodePoolData(d *schema.ResourceData, nodePool *ionoscloud.KubernetesN
 			}
 		}
 
-		if nodePool.Properties.PublicIps != nil {
+		if nodePool.Properties.PublicIps != nil && len(*nodePool.Properties.PublicIps) > 0 {
 			if err := d.Set("public_ips", *nodePool.Properties.PublicIps); err != nil {
 				return err
 			}
@@ -361,10 +355,9 @@ func setK8sNodePoolData(d *schema.ResourceData, nodePool *ionoscloud.KubernetesN
 			}
 		}
 
-		nodePoolLans := make([]interface{}, 0)
+		var nodePoolLans []interface{}
 		if nodePool.Properties.Lans != nil && len(*nodePool.Properties.Lans) > 0 {
-			nodePoolLans = make([]interface{}, len(*nodePool.Properties.Lans))
-			for lanIndex, nodePoolLan := range *nodePool.Properties.Lans {
+			for _, nodePoolLan := range *nodePool.Properties.Lans {
 				lanEntry := make(map[string]interface{})
 
 				if nodePoolLan.Id != nil {
@@ -375,10 +368,9 @@ func setK8sNodePoolData(d *schema.ResourceData, nodePool *ionoscloud.KubernetesN
 					lanEntry["dhcp"] = *nodePoolLan.Dhcp
 				}
 
-				nodePoolRoutes := make([]interface{}, 0)
 				if len(*nodePoolLan.Routes) > 0 {
-					nodePoolRoutes = make([]interface{}, len(*nodePoolLan.Routes))
-					for routeIndex, nodePoolRoute := range *nodePoolLan.Routes {
+					var nodePoolRoutes []interface{}
+					for _, nodePoolRoute := range *nodePoolLan.Routes {
 						routeEntry := make(map[string]string)
 						if nodePoolRoute.Network != nil {
 							routeEntry["network"] = *nodePoolRoute.Network
@@ -386,15 +378,15 @@ func setK8sNodePoolData(d *schema.ResourceData, nodePool *ionoscloud.KubernetesN
 						if nodePoolRoute.GatewayIp != nil {
 							routeEntry["gateway_ip"] = *nodePoolRoute.GatewayIp
 						}
-						nodePoolRoutes[routeIndex] = routeEntry
+						nodePoolRoutes = append(nodePoolRoutes, routeEntry)
+					}
+
+					if len(nodePoolRoutes) > 0 {
+						lanEntry["routes"] = nodePoolRoutes
 					}
 				}
 
-				if len(nodePoolRoutes) > 0 {
-					lanEntry["routes"] = nodePoolRoutes
-				}
-
-				nodePoolLans[lanIndex] = lanEntry
+				nodePoolLans = append(nodePoolLans, lanEntry)
 			}
 		}
 
@@ -403,6 +395,19 @@ func setK8sNodePoolData(d *schema.ResourceData, nodePool *ionoscloud.KubernetesN
 				return fmt.Errorf("error while setting lans property for k8sNodepool %s: %s", d.Id(), err)
 			}
 		}
+
+		if nodePool.Properties.AvailableUpgradeVersions != nil && len(*nodePool.Properties.AvailableUpgradeVersions) > 0 {
+			if err := d.Set("available_upgrade_versions", *nodePool.Properties.AvailableUpgradeVersions); err != nil {
+				return err
+			}
+		}
+
+		if nodePool.Properties.PublicIps != nil && len(*nodePool.Properties.PublicIps) > 0 {
+			if err := d.Set("public_ips", *nodePool.Properties.PublicIps); err != nil {
+				return err
+			}
+		}
+
 	}
 
 	if nodePool.Metadata != nil && nodePool.Metadata.State != nil {

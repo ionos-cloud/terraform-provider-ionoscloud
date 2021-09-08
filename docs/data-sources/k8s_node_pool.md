@@ -15,15 +15,17 @@ The k8s node pool data source can be used to search for and return existing k8s 
 ```hcl
 data "ionoscloud_k8s_node_pool" "k8s_node_pool_example" {
   name     = "My_Node_Pool"
+  k8s_cluster_id 	= ionoscloud_k8s_cluster.k8s_cluster_example.id
 }
 ```
 
 ## Argument Reference
 
+* `k8s_cluster_id` (Required) K8s Cluster' UUID
 * `name` - (Optional) Name of an existing node pool that you want to search for.
 * `id` - (Optional) ID of the node pool you want to search for.
 
-Either `name` or `id` must be provided. If none, or both are provided, the datasource will return an error.
+`k8s_cluster_id` and either `name` or `id` must be provided. If none, or both of `name` and `id` are provided, the datasource will return an error.
 
 ## Attributes Reference
 
@@ -61,6 +63,11 @@ The following attributes are returned by the datasource:
   * `min_node_count` - The minimum number of worker nodes the node pool can scale down to
   * `max_node_count` - The maximum number of worker nodes that the node pool can scale to
 * `lans` - A list of Local Area Networks the node pool is a part of
+  * `id` - The LAN ID of an existing LAN at the related datacenter
+  * `dhcp` - Indicates if the Kubernetes Node Pool LAN will reserve an IP using DHCP
+  * `routes` - An array of additional LANs attached to worker nodes
+    * `network` - IPv4 or IPv6 CIDR to be routed via the interface
+    * `gateway_ip` - IPv4 or IPv6 Gateway IP for the route
 * `labels` - A map of labels in the form of key -> value
 * `annotations` - A map of annotations in the form of key -> value
 * `available_upgrade_versions` - A list of kubernetes versions available for upgrade

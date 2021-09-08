@@ -42,6 +42,51 @@ func resourceIPBlock() *schema.Resource {
 				Elem:     &schema.Schema{Type: schema.TypeString},
 				Computed: true,
 			},
+			"ip_consumers": {
+				Type:     schema.TypeList,
+				Computed: true,
+				Optional: true,
+				Elem: &schema.Resource{
+					Schema: map[string]*schema.Schema{
+						"ip": {
+							Type:     schema.TypeString,
+							Computed: true,
+						},
+						"mac": {
+							Type:     schema.TypeString,
+							Computed: true,
+						},
+						"nic_id": {
+							Type:     schema.TypeString,
+							Computed: true,
+						},
+						"server_id": {
+							Type:     schema.TypeString,
+							Computed: true,
+						},
+						"server_name": {
+							Type:     schema.TypeString,
+							Computed: true,
+						},
+						"datacenter_id": {
+							Type:     schema.TypeString,
+							Computed: true,
+						},
+						"datacenter_name": {
+							Type:     schema.TypeString,
+							Computed: true,
+						},
+						"k8s_node_pool_uuid": {
+							Type:     schema.TypeString,
+							Computed: true,
+						},
+						"k8s_cluster_uuid": {
+							Type:     schema.TypeString,
+							Computed: true,
+						},
+					},
+				},
+			},
 		},
 		Timeouts: &resourceDefaultTimeouts,
 	}
@@ -90,7 +135,7 @@ func resourceIPBlockRead(ctx context.Context, d *schema.ResourceData, meta inter
 	ipBlock, apiResponse, err := client.IPBlocksApi.IpblocksFindById(ctx, d.Id()).Execute()
 
 	if err != nil {
-		if apiResponse != nil && apiResponse.Response.StatusCode == 404 {
+		if apiResponse != nil && apiResponse.StatusCode == 404 {
 			d.SetId("")
 			return nil
 		}
@@ -100,7 +145,7 @@ func resourceIPBlockRead(ctx context.Context, d *schema.ResourceData, meta inter
 
 	log.Printf("[INFO] IPS: %s", strings.Join(*ipBlock.Properties.Ips, ","))
 
-	if ipBlock.Properties.Ips != nil {
+	if ipBlock.Properties.Ips != nil && len(*ipBlock.Properties.Ips) > 0 {
 		if err := d.Set("ips", *ipBlock.Properties.Ips); err != nil {
 			diags := diag.FromErr(err)
 			return diags
@@ -125,6 +170,50 @@ func resourceIPBlockRead(ctx context.Context, d *schema.ResourceData, meta inter
 		if err := d.Set("name", *ipBlock.Properties.Name); err != nil {
 			diags := diag.FromErr(err)
 			return diags
+		}
+	}
+
+	if ipBlock.Properties.IpConsumers != nil && len(*ipBlock.Properties.IpConsumers) > 0 {
+		var ipConsumers []interface{}
+		for _, ipConsumer := range *ipBlock.Properties.IpConsumers {
+			ipConsumerEntry := make(map[string]interface{})
+
+			if ipConsumer.Ip != nil {
+				ipConsumerEntry["ip"] = *ipConsumer.Ip
+			}
+			if ipConsumer.Mac != nil {
+				ipConsumerEntry["mac"] = *ipConsumer.Mac
+			}
+			if ipConsumer.NicId != nil {
+				ipConsumerEntry["nic_id"] = *ipConsumer.NicId
+			}
+			if ipConsumer.ServerId != nil {
+				ipConsumerEntry["server_id"] = *ipConsumer.ServerId
+			}
+			if ipConsumer.ServerName != nil {
+				ipConsumerEntry["server_name"] = *ipConsumer.ServerName
+			}
+			if ipConsumer.DatacenterId != nil {
+				ipConsumerEntry["datacenter_id"] = *ipConsumer.DatacenterId
+			}
+			if ipConsumer.DatacenterName != nil {
+				ipConsumerEntry["datacenter_name"] = *ipConsumer.DatacenterName
+			}
+			if ipConsumer.K8sNodePoolUuid != nil {
+				ipConsumerEntry["k8s_nodepool_uuid"] = *ipConsumer.K8sNodePoolUuid
+			}
+			if ipConsumer.K8sClusterUuid != nil {
+				ipConsumerEntry["k8s_cluster_uuid"] = *ipConsumer.K8sClusterUuid
+			}
+
+			ipConsumers = append(ipConsumers, ipConsumerEntry)
+		}
+
+		if len(ipConsumers) > 0 {
+			if err := d.Set("ip_consumers", ipConsumers); err != nil {
+				diags := diag.FromErr(err)
+				return diags
+			}
 		}
 	}
 

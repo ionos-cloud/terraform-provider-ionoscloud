@@ -58,14 +58,6 @@ func resourceNetworkLoadBalancerForwardingRule() *schema.Resource {
 							Optional: true,
 							Computed: true,
 						},
-						"check_timeout": {
-							Type: schema.TypeInt,
-							Description: "It specifies the time (in milliseconds) for a target VM in this pool to answer " +
-								"the check. If a target VM has CheckInterval set and CheckTimeout is set too, " +
-								"then the smaller value of the two is used after the TCP connection is established.",
-							Optional: true,
-							Computed: true,
-						},
 						"connect_timeout": {
 							Type: schema.TypeInt,
 							Description: "It specifies the maximum time (in milliseconds) to wait for a connection " +
@@ -214,11 +206,6 @@ func resourceNetworkLoadBalancerForwardingRuleCreate(ctx context.Context, d *sch
 			networkLoadBalancerForwardingRule.Properties.HealthCheck.ClientTimeout = &clientTimeout
 		}
 
-		if checkTimeout, checkTimeoutOk := d.GetOk("health_check.0.check_timeout"); checkTimeoutOk {
-			checkTimeout := int32(checkTimeout.(int))
-			networkLoadBalancerForwardingRule.Properties.HealthCheck.CheckTimeout = &checkTimeout
-		}
-
 		if connectTimeout, connectTimeoutOk := d.GetOk("health_check.0.connect_timeout"); connectTimeoutOk {
 			connectTimeout := int32(connectTimeout.(int))
 			networkLoadBalancerForwardingRule.Properties.HealthCheck.ConnectTimeout = &connectTimeout
@@ -273,18 +260,16 @@ func resourceNetworkLoadBalancerForwardingRuleCreate(ctx context.Context, d *sch
 				if _, healthCheckOk := d.GetOk(fmt.Sprintf("targets.%d.health_check.0", targetIndex)); healthCheckOk {
 					target.HealthCheck = &ionoscloud.NetworkLoadBalancerForwardingRuleTargetHealthCheck{}
 
-					if check, checkOk := d.GetOk("targets.%d.health_check.0.check"); checkOk {
+					if check, checkOk := d.GetOk(fmt.Sprintf("targets.%d.health_check.0.check", targetIndex)); checkOk {
 						check := check.(bool)
 						target.HealthCheck.Check = &check
 					}
 
-					if checkInterval, checkIntervalOk := d.GetOk("targets.%d.health_check.0.check_interval"); checkIntervalOk {
+					if checkInterval, checkIntervalOk := d.GetOk(fmt.Sprintf("targets.%d.health_check.0.check_interval", targetIndex)); checkIntervalOk {
 						checkInterval := int32(checkInterval.(int))
-						fmt.Printf("checkInterval: %v", checkInterval)
 						target.HealthCheck.CheckInterval = &checkInterval
 					}
-
-					if maintenance, maintenanceOk := d.GetOk("targets.%d.health_check.0.maintenance"); maintenanceOk {
+					if maintenance, maintenanceOk := d.GetOk(fmt.Sprintf("targets.%d.health_check.0.maintenance", targetIndex)); maintenanceOk {
 						maintenance := maintenance.(bool)
 						target.HealthCheck.Maintenance = &maintenance
 					}
@@ -311,7 +296,6 @@ func resourceNetworkLoadBalancerForwardingRuleCreate(ctx context.Context, d *sch
 	dcId := d.Get("datacenter_id").(string)
 	nlbId := d.Get("networkloadbalancer_id").(string)
 
-	fmt.Printf("check interval 2: %v", *(*networkLoadBalancerForwardingRule.Properties.Targets)[0].HealthCheck.CheckInterval)
 	networkLoadBalancerForwardingRuleResp, apiResponse, err := client.NetworkLoadBalancersApi.DatacentersNetworkloadbalancersForwardingrulesPost(ctx, dcId, nlbId).NetworkLoadBalancerForwardingRule(networkLoadBalancerForwardingRule).Execute()
 
 	if err != nil {
@@ -348,7 +332,7 @@ func resourceNetworkLoadBalancerForwardingRuleRead(ctx context.Context, d *schem
 
 	if err != nil {
 		log.Printf("[INFO] Resource %s not found: %+v", d.Id(), err)
-		if apiResponse.Response.StatusCode == 404 {
+		if apiResponse.StatusCode == 404 {
 			d.SetId("")
 			return nil
 		}
@@ -397,15 +381,11 @@ func resourceNetworkLoadBalancerForwardingRuleRead(ctx context.Context, d *schem
 	}
 
 	if networkLoadBalancerForwardingRule.Properties.HealthCheck != nil {
-		healthCheck := make([]interface{}, 1)
+		var healthCheck []interface{}
 
 		healthCheckEntry := make(map[string]interface{})
 		if networkLoadBalancerForwardingRule.Properties.HealthCheck.ClientTimeout != nil {
 			healthCheckEntry["client_timeout"] = *networkLoadBalancerForwardingRule.Properties.HealthCheck.ClientTimeout
-		}
-
-		if networkLoadBalancerForwardingRule.Properties.HealthCheck.CheckTimeout != nil {
-			healthCheckEntry["check_timeout"] = *networkLoadBalancerForwardingRule.Properties.HealthCheck.CheckTimeout
 		}
 
 		if networkLoadBalancerForwardingRule.Properties.HealthCheck.ConnectTimeout != nil {
@@ -420,7 +400,7 @@ func resourceNetworkLoadBalancerForwardingRuleRead(ctx context.Context, d *schem
 			healthCheckEntry["retries"] = *networkLoadBalancerForwardingRule.Properties.HealthCheck.Retries
 		}
 
-		healthCheck[0] = healthCheckEntry
+		healthCheck = append(healthCheck, healthCheckEntry)
 		err := d.Set("health_check", healthCheck)
 		if err != nil {
 			diags := diag.FromErr(fmt.Errorf("error while setting health_check property for network load balancer forwarding rule %s: %s", d.Id(), err))
@@ -429,10 +409,9 @@ func resourceNetworkLoadBalancerForwardingRuleRead(ctx context.Context, d *schem
 
 	}
 
-	forwardingRuleTargets := make([]interface{}, 0)
 	if networkLoadBalancerForwardingRule.Properties.Targets != nil && len(*networkLoadBalancerForwardingRule.Properties.Targets) > 0 {
-		forwardingRuleTargets = make([]interface{}, len(*networkLoadBalancerForwardingRule.Properties.Targets))
-		for targetIndex, target := range *networkLoadBalancerForwardingRule.Properties.Targets {
+		var forwardingRuleTargets []interface{}
+		for _, target := range *networkLoadBalancerForwardingRule.Properties.Targets {
 			targetEntry := make(map[string]interface{})
 
 			if target.Ip != nil {
@@ -448,7 +427,7 @@ func resourceNetworkLoadBalancerForwardingRuleRead(ctx context.Context, d *schem
 			}
 
 			if target.HealthCheck != nil {
-				healthCheck := make([]interface{}, 1)
+				var healthCheck []interface{}
 
 				healthCheckEntry := make(map[string]interface{})
 
@@ -464,18 +443,17 @@ func resourceNetworkLoadBalancerForwardingRuleRead(ctx context.Context, d *schem
 					healthCheckEntry["maintenance"] = *target.HealthCheck.Maintenance
 				}
 
-				healthCheck[0] = healthCheckEntry
+				healthCheck = append(healthCheck, healthCheckEntry)
 				targetEntry["health_check"] = healthCheck
 			}
 
-			forwardingRuleTargets[targetIndex] = targetEntry
+			forwardingRuleTargets = append(forwardingRuleTargets, targetEntry)
 		}
-	}
-
-	if len(forwardingRuleTargets) > 0 {
-		if err := d.Set("targets", forwardingRuleTargets); err != nil {
-			diags := diag.FromErr(fmt.Errorf("error while setting targets property for network load balancer forwarding rule  %s: %s", d.Id(), err))
-			return diags
+		if len(forwardingRuleTargets) > 0 {
+			if err := d.Set("targets", forwardingRuleTargets); err != nil {
+				diags := diag.FromErr(fmt.Errorf("error while setting targets property for network load balancer forwarding rule  %s: %s", d.Id(), err))
+				return diags
+			}
 		}
 	}
 
@@ -535,15 +513,6 @@ func resourceNetworkLoadBalancerForwardingRuleUpdate(ctx context.Context, d *sch
 					updateHealthCheck = true
 					newValue := int32(newValue.(int))
 					healthCheck.ClientTimeout = &newValue
-				}
-			}
-
-			if d.HasChange("health_check.0.check_timeout") {
-				_, newValue := d.GetChange("health_check.0.check_timeout")
-				if newValue != 0 {
-					updateHealthCheck = true
-					newValue := int32(newValue.(int))
-					healthCheck.CheckTimeout = &newValue
 				}
 			}
 
@@ -608,17 +577,17 @@ func resourceNetworkLoadBalancerForwardingRuleUpdate(ctx context.Context, d *sch
 				if _, healthCheckOk := d.GetOk(fmt.Sprintf("targets.%d.health_check.0", targetIndex)); healthCheckOk {
 					target.HealthCheck = &ionoscloud.NetworkLoadBalancerForwardingRuleTargetHealthCheck{}
 
-					if check, checkOk := d.GetOk("targets.%d.health_check.0.check"); checkOk {
+					if check, checkOk := d.GetOk(fmt.Sprintf("targets.%d.health_check.0.check", targetIndex)); checkOk {
 						check := check.(bool)
 						target.HealthCheck.Check = &check
 					}
 
-					if checkInterval, checkIntervalOk := d.GetOk("targets.%d.health_check.0.check_interval"); checkIntervalOk {
+					if checkInterval, checkIntervalOk := d.GetOk(fmt.Sprintf("targets.%d.health_check.0.check_interval", targetIndex)); checkIntervalOk {
 						checkInterval := int32(checkInterval.(int))
 						target.HealthCheck.CheckInterval = &checkInterval
 					}
 
-					if maintenance, maintenanceOk := d.GetOk("targets.%d.health_check.0.maintenance"); maintenanceOk {
+					if maintenance, maintenanceOk := d.GetOk(fmt.Sprintf("targets.%d.health_check.0.maintenance", targetIndex)); maintenanceOk {
 						maintenance := maintenance.(bool)
 						target.HealthCheck.Maintenance = &maintenance
 					}
