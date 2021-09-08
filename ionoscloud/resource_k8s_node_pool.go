@@ -604,11 +604,14 @@ func resourcek8sNodePoolRead(ctx context.Context, d *schema.ResourceData, meta i
 			nodePoolLans = append(nodePoolLans, lanEntry)
 		}
 
-	if len(nodePoolLans) > 0 {
-		if err := d.Set("lans", nodePoolLans); err != nil {
-			diags := diag.FromErr(fmt.Errorf("error while setting lans property for k8sNodepool %s: %s", d.Id(), err))
-			return diags
+		if len(nodePoolLans) > 0 {
+			if err := d.Set("lans", nodePoolLans); err != nil {
+				diags := diag.FromErr(fmt.Errorf("error while setting lans property for k8sNodepool %s: %s", d.Id(), err))
+				return diags
+			}
 		}
+
+
 	}
 
 	labels := make(map[string]interface{})
