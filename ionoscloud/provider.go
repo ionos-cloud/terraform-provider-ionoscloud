@@ -84,6 +84,7 @@ func Provider() *schema.Provider {
 			"ionoscloud_natgateway_rule":                    resourceNatGatewayRule(),
 			"ionoscloud_networkloadbalancer":                resourceNetworkLoadBalancer(),
 			"ionoscloud_networkloadbalancer_forwardingrule": resourceNetworkLoadBalancerForwardingRule(),
+			"ionoscloud_dbaas_cluster":                      resourceDbaasCluster(),
 		},
 		DataSourcesMap: map[string]*schema.Resource{
 			"ionoscloud_datacenter":                         dataSourceDataCenter(),
