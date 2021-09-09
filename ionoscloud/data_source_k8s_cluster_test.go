@@ -16,10 +16,10 @@ func TestAccDataSourceK8sCluster_matchId(t *testing.T) {
 		ProviderFactories: testAccProviderFactories,
 		Steps: []resource.TestStep{
 			{
-				Config: testAccDataSourceProfitBricksK8sClusterCreateResources,
+				Config: testAccDataSourceK8sClusterCreateResources,
 			},
 			{
-				Config: testAccDataSourceProfitBricksK8sClusterMatchId,
+				Config: testAccDataSourceK8sClusterMatchId,
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttr("data.ionoscloud_k8s_cluster.test_ds_k8s_cluster", "name", "test_cluster"),
 					resource.TestCheckResourceAttr("data.ionoscloud_k8s_cluster.test_ds_k8s_cluster", "k8s_version", "1.20.8"),
@@ -38,10 +38,10 @@ func TestAccDataSourceK8sCluster_matchName(t *testing.T) {
 		ProviderFactories: testAccProviderFactories,
 		Steps: []resource.TestStep{
 			{
-				Config: testAccDataSourceProfitBricksK8sClusterCreateResources,
+				Config: testAccDataSourceK8sClusterCreateResources,
 			},
 			{
-				Config: testAccDataSourceProfitBricksK8sClusterMatchName,
+				Config: testAccDataSourceK8sClusterMatchName,
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttr("data.ionoscloud_k8s_cluster.test_ds_k8s_cluster", "name", "test_cluster"),
 					resource.TestCheckResourceAttr("data.ionoscloud_k8s_cluster.test_ds_k8s_cluster", "k8s_version", "1.20.8"),
@@ -54,14 +54,14 @@ func TestAccDataSourceK8sCluster_matchName(t *testing.T) {
 
 }
 
-const testAccDataSourceProfitBricksK8sClusterCreateResources = `
+const testAccDataSourceK8sClusterCreateResources = `
 resource "ionoscloud_k8s_cluster" "test_ds_k8s_cluster" {
   name         = "test_cluster"
   k8s_version  = "1.20.8"
 }
 `
 
-const testAccDataSourceProfitBricksK8sClusterMatchId = `
+const testAccDataSourceK8sClusterMatchId = `
 resource "ionoscloud_k8s_cluster" "test_ds_k8s_cluster" {
   name         = "test_cluster"
   k8s_version  = "1.20.8"
@@ -72,7 +72,7 @@ data "ionoscloud_k8s_cluster" "test_ds_k8s_cluster" {
 }
 `
 
-const testAccDataSourceProfitBricksK8sClusterMatchName = `
+const testAccDataSourceK8sClusterMatchName = `
 resource "ionoscloud_k8s_cluster" "test_ds_k8s_cluster" {
   name         = "test_cluster"
   k8s_version  = "1.20.8"

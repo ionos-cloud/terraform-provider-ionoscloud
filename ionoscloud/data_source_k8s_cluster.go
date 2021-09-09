@@ -261,7 +261,7 @@ func dataSourceK8sReadCluster(d *schema.ResourceData, meta interface{}) error {
 		return errors.New("id and name cannot be both specified in the same time")
 	}
 	if !idOk && !nameOk {
-		return errors.New("please provide either the lan id or name")
+		return errors.New("please provide either the k8s cluster id or name")
 	}
 	var cluster ionoscloud.KubernetesCluster
 	var err error
@@ -282,12 +282,6 @@ func dataSourceK8sReadCluster(d *schema.ResourceData, meta interface{}) error {
 		/* search by name */
 		var clusters ionoscloud.KubernetesClusters
 
-		ctx, cancel := context.WithTimeout(context.Background(), *resourceDefaultTimeouts.Default)
-
-		if cancel != nil {
-			defer cancel()
-		}
-
 		clusters, _, err := client.KubernetesApi.K8sGet(ctx).Execute()
 		if err != nil {
 			return fmt.Errorf("an error occurred while fetching k8s clusters: %s", err.Error())
@@ -301,7 +295,6 @@ func dataSourceK8sReadCluster(d *schema.ResourceData, meta interface{}) error {
 					return fmt.Errorf("an error occurred while fetching k8s cluster with ID %s: %s", *c.Id, err.Error())
 				}
 				if tmpCluster.Properties.Name != nil && *tmpCluster.Properties.Name == name.(string) {
-					/* lan found */
 					cluster = tmpCluster
 					found = true
 					break
