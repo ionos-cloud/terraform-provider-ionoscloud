@@ -43,6 +43,9 @@ func TestAcck8sNodepool_Basic(t *testing.T) {
 					resource.TestCheckResourceAttrPair("ionoscloud_k8s_node_pool.terraform_acctest", "public_ips.2", "ionoscloud_ipblock.terraform_acctest", "ips.2"),
 				),
 			},
+			{
+				Config: "",
+			},
 		},
 	})
 }
@@ -192,8 +195,9 @@ resource "ionoscloud_ipblock" "terraform_acctest" {
 }
 
 resource "ionoscloud_k8s_cluster" "terraform_acctest" {
+  depends_on = [ ionoscloud_datacenter.terraform_acctest ]
   name        = "terraform_acctest2"
-  k8s_version = "1.20.8"
+  k8s_version = "1.20.10"
   maintenance_window {
     day_of_the_week = "Monday"
     time            = "09:00:00Z"
@@ -234,7 +238,7 @@ resource "ionoscloud_ipblock" "terraform_acctest" {
 
 resource "ionoscloud_k8s_cluster" "terraform_acctest" {
   name        = "terraform_acctest2"
-  k8s_version = "1.20.8"
+  k8s_version = "1.20.10"
   maintenance_window {
     day_of_the_week = "Monday"
     time            = "09:00:00Z"
@@ -279,7 +283,7 @@ resource "ionoscloud_lan" "terraform_acctest" {
 
 resource "ionoscloud_k8s_cluster" "terraform_acctest" {
   name        = "terraform_acctest_lan"
-  k8s_version = "1.20.8"
+  k8s_version = "1.20.10"
   maintenance_window {
     day_of_the_week = "Monday"
     time            = "09:00:00Z"
@@ -319,7 +323,7 @@ resource "ionoscloud_lan" "terraform_acctest" {
 
 resource "ionoscloud_k8s_cluster" "terraform_acctest" {
   name        = "terraform_acctest_lan"
-  k8s_version = "1.20.8"
+  k8s_version = "1.20.10"
   maintenance_window {
     day_of_the_week = "Monday"
     time            = "09:00:00Z"

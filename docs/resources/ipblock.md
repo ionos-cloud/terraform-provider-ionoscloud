@@ -33,7 +33,7 @@ resource "ionoscloud_ipblock" "example" {
   * `server_name`
   * `datacenter_id`
   * `datacenter_name`
-  * `k8s_nodepool_uuid`
+  * `k8s_node_pool_uuid`
   * `k8s_cluster_uuid`
   
 ## Import

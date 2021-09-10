@@ -135,7 +135,7 @@ func resourceIPBlockRead(ctx context.Context, d *schema.ResourceData, meta inter
 	ipBlock, apiResponse, err := client.IPBlocksApi.IpblocksFindById(ctx, d.Id()).Execute()
 
 	if err != nil {
-		if apiResponse != nil && apiResponse.StatusCode == 404 {
+		if apiResponse != nil && apiResponse.Response != nil && apiResponse.StatusCode== 404 {
 			d.SetId("")
 			return nil
 		}
@@ -200,7 +200,7 @@ func resourceIPBlockRead(ctx context.Context, d *schema.ResourceData, meta inter
 				ipConsumerEntry["datacenter_name"] = *ipConsumer.DatacenterName
 			}
 			if ipConsumer.K8sNodePoolUuid != nil {
-				ipConsumerEntry["k8s_nodepool_uuid"] = *ipConsumer.K8sNodePoolUuid
+				ipConsumerEntry["k8s_node_pool_uuid"] = *ipConsumer.K8sNodePoolUuid
 			}
 			if ipConsumer.K8sClusterUuid != nil {
 				ipConsumerEntry["k8s_cluster_uuid"] = *ipConsumer.K8sClusterUuid
