@@ -76,7 +76,7 @@ func resourceIPBlock() *schema.Resource {
 							Type:     schema.TypeString,
 							Computed: true,
 						},
-						"k8s_node_pool_uuid": {
+						"k8s_nodepool_uuid": {
 							Type:     schema.TypeString,
 							Computed: true,
 						},
@@ -200,7 +200,7 @@ func resourceIPBlockRead(ctx context.Context, d *schema.ResourceData, meta inter
 				ipConsumerEntry["datacenter_name"] = *ipConsumer.DatacenterName
 			}
 			if ipConsumer.K8sNodePoolUuid != nil {
-				ipConsumerEntry["k8s_node_pool_uuid"] = *ipConsumer.K8sNodePoolUuid
+				ipConsumerEntry["k8s_nodepool_uuid"] = *ipConsumer.K8sNodePoolUuid
 			}
 			if ipConsumer.K8sClusterUuid != nil {
 				ipConsumerEntry["k8s_cluster_uuid"] = *ipConsumer.K8sClusterUuid
