@@ -178,7 +178,7 @@ func dataSourcedbaasReadCluster(ctx context.Context, d *schema.ResourceData, met
 
 	}
 
-	if diags := setdbaasClusterData(d, &cluster); diags != nil {
+	if diags := setDbaasClusterData(d, &cluster); diags != nil {
 		return diags
 	}
 
@@ -186,7 +186,7 @@ func dataSourcedbaasReadCluster(ctx context.Context, d *schema.ResourceData, met
 
 }
 
-func setdbaasClusterData(d *schema.ResourceData, cluster *dbaas.Cluster) diag.Diagnostics {
+func setDbaasClusterData(d *schema.ResourceData, cluster *dbaas.Cluster) diag.Diagnostics {
 
 	if cluster.Id != nil {
 		d.SetId(*cluster.Id)
