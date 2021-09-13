@@ -1,3 +1,7 @@
+## 6.0.0-beta.9
+
+- issue #31 - k8s node pool labels and annotations implemented
+
 ## 6.0.0-beta.8
 
 - fixed set of empty array in terraform state instead of null
