@@ -1,3 +1,7 @@
+## 6.0.0-beta.9
+
+- correctly importing private lans from k8s node pools
+
 ## 6.0.0-beta.8
 
 - fixed set of empty array in terraform state instead of null
