@@ -38,6 +38,12 @@ resource "ionoscloud_k8s_node_pool" "demo" {
   ram_size          = 2048
   storage_size      = 40
   public_ips        = [ "85.184.251.100", "157.97.106.15", "157.97.106.25" ]
+  labels = {
+    foo = "bar"
+  }
+  annotations = {
+    foo = "bar"
+  }
 }
 
 ```
