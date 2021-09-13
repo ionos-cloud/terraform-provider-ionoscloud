@@ -6,7 +6,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 )
 
-func TestAccDataSourceDbaasCluster_matchId(t *testing.T) {
+func TestAccDataSourceDbaasPgsqlCluster_matchId(t *testing.T) {
 	resource.Test(t, resource.TestCase{
 		PreCheck: func() {
 			testAccPreCheck(t)
@@ -14,10 +14,10 @@ func TestAccDataSourceDbaasCluster_matchId(t *testing.T) {
 		ProviderFactories: testAccProviderFactories,
 		Steps: []resource.TestStep{
 			{
-				Config: testAccDataSourceDbaasClusterCreateResources,
+				Config: testAccDataSourceDbaasPgsqlClusterCreateResources,
 			},
 			{
-				Config: testAccDataSourceDbaasClusterMatchId,
+				Config: testAccDataSourceDbaasPgSqlClusterMatchId,
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttr("data.ionoscloud_dbaas_pgsql_cluster.test_ds_dbaas_cluster", "display_name", "PostgreSQL_cluster"),
 				),
@@ -26,7 +26,7 @@ func TestAccDataSourceDbaasCluster_matchId(t *testing.T) {
 	})
 }
 
-func TestAccDataSourceDbaasCluster_matchName(t *testing.T) {
+func TestAccDataSourceDbaasPgSqlCluster_matchName(t *testing.T) {
 	resource.Test(t, resource.TestCase{
 		PreCheck: func() {
 			testAccPreCheck(t)
@@ -34,10 +34,10 @@ func TestAccDataSourceDbaasCluster_matchName(t *testing.T) {
 		ProviderFactories: testAccProviderFactories,
 		Steps: []resource.TestStep{
 			{
-				Config: testAccDataSourceDbaasClusterCreateResources,
+				Config: testAccDataSourceDbaasPgsqlClusterCreateResources,
 			},
 			{
-				Config: testAccDataSourceDbaasClusterMatchName,
+				Config: testAccDataSourceDbaasPgSqlClusterMatchName,
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttr("data.ionoscloud_dbaas_pgsql_cluster.test_ds_dbaas_cluster", "display_name", "PostgreSQL_cluster"),
 				),
@@ -47,7 +47,7 @@ func TestAccDataSourceDbaasCluster_matchName(t *testing.T) {
 
 }
 
-const testAccDataSourceDbaasClusterCreateResources = `
+const testAccDataSourceDbaasPgsqlClusterCreateResources = `
 resource "ionoscloud_datacenter" "test_dbaas_cluster" {
   name        = "test_dbaas_cluster"
   location    = "de/txl"
@@ -92,7 +92,7 @@ resource "ionoscloud_dbaas_pgsql_cluster" "test_dbaas_cluster" {
 }
 `
 
-const testAccDataSourceDbaasClusterMatchId = `
+const testAccDataSourceDbaasPgSqlClusterMatchId = `
 resource "ionoscloud_datacenter" "test_dbaas_cluster" {
   name        = "test_dbaas_cluster"
   location    = "de/txl"
@@ -141,7 +141,7 @@ data "ionoscloud_dbaas_pgsql_cluster" "test_ds_dbaas_cluster" {
 }
 `
 
-const testAccDataSourceDbaasClusterMatchName = `
+const testAccDataSourceDbaasPgSqlClusterMatchName = `
 resource "ionoscloud_datacenter" "test_dbaas_cluster" {
   name        = "test_dbaas_cluster"
   location    = "de/txl"

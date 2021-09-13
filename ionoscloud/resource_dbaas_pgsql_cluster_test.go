@@ -9,7 +9,7 @@ import (
 	"testing"
 )
 
-func TestAccDbaasCluster_Basic(t *testing.T) {
+func TestAccDbaasPgSqlCluster_Basic(t *testing.T) {
 	var dbaasCluster dbaas.Cluster
 
 	resource.Test(t, resource.TestCase{
@@ -17,18 +17,18 @@ func TestAccDbaasCluster_Basic(t *testing.T) {
 			testAccPreCheck(t)
 		},
 		ProviderFactories: testAccProviderFactories,
-		CheckDestroy:      testAccCheckDbaasClusterDestroyCheck,
+		CheckDestroy:      testAccCheckDbaasPgSqlClusterDestroyCheck,
 		Steps: []resource.TestStep{
 			{
-				Config: testAccCheckDbaasClusterConfigBasic,
+				Config: testAccCheckDbaasPgSqlClusterConfigBasic,
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheckDbaasClusterExists("ionoscloud_dbaas_pgsql_cluster.test_dbaas_cluster", &dbaasCluster),
+					testAccCheckDbaasPgSqlClusterExists("ionoscloud_dbaas_pgsql_cluster.test_dbaas_cluster", &dbaasCluster),
 				),
 			},
 			{
-				Config: testAccCheckDbaasClusterConfigUpdate,
+				Config: testAccCheckDbaasPgSqlClusterConfigUpdate,
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheckDbaasClusterExists("ionoscloud_dbaas_pgsql_cluster.test_dbaas_cluster", &dbaasCluster),
+					testAccCheckDbaasPgSqlClusterExists("ionoscloud_dbaas_pgsql_cluster.test_dbaas_cluster", &dbaasCluster),
 					resource.TestCheckResourceAttr("ionoscloud_dbaas_pgsql_cluster.test_dbaas_cluster", "postgres_version", "13"),
 					resource.TestCheckResourceAttr("ionoscloud_dbaas_pgsql_cluster.test_dbaas_cluster", "storage_size", "1.5Gi"),
 					resource.TestCheckResourceAttr("ionoscloud_dbaas_pgsql_cluster.test_dbaas_cluster", "display_name", "PostgreSQL_cluster_update"),
@@ -41,7 +41,7 @@ func TestAccDbaasCluster_Basic(t *testing.T) {
 	})
 }
 
-func testAccCheckDbaasClusterDestroyCheck(s *terraform.State) error {
+func testAccCheckDbaasPgSqlClusterDestroyCheck(s *terraform.State) error {
 	client := testAccProvider.Meta().(SdkBundle).DbaasClient
 
 	ctx, cancel := context.WithTimeout(context.Background(), *resourceDefaultTimeouts.Default)
@@ -70,7 +70,7 @@ func testAccCheckDbaasClusterDestroyCheck(s *terraform.State) error {
 	return nil
 }
 
-func testAccCheckDbaasClusterExists(n string, cluster *dbaas.Cluster) resource.TestCheckFunc {
+func testAccCheckDbaasPgSqlClusterExists(n string, cluster *dbaas.Cluster) resource.TestCheckFunc {
 	return func(s *terraform.State) error {
 		client := testAccProvider.Meta().(SdkBundle).DbaasClient
 
@@ -104,7 +104,7 @@ func testAccCheckDbaasClusterExists(n string, cluster *dbaas.Cluster) resource.T
 	}
 }
 
-const testAccCheckDbaasClusterConfigBasic = `
+const testAccCheckDbaasPgSqlClusterConfigBasic = `
 resource "ionoscloud_datacenter" "test_dbaas_cluster" {
   name        = "test_dbaas_cluster"
   location    = "de/txl"
@@ -148,7 +148,7 @@ resource "ionoscloud_dbaas_pgsql_cluster" "test_dbaas_cluster" {
   }
 }`
 
-const testAccCheckDbaasClusterConfigUpdate = `
+const testAccCheckDbaasPgSqlClusterConfigUpdate = `
 resource "ionoscloud_datacenter" "test_dbaas_cluster" {
   name        = "test_dbaas_cluster"
   location    = "de/txl"

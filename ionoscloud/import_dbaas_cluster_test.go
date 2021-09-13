@@ -9,20 +9,20 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
 )
 
-func TestAccDbaasCluster_ImportBasic(t *testing.T) {
+func TestAccDbaasPgSqlCluster_ImportBasic(t *testing.T) {
 	resourceName := "ionoscloud_dbaas_pgsql_cluster.test_dbaas_cluster"
 	resource.Test(t, resource.TestCase{
 		PreCheck:          func() { testAccPreCheck(t) },
 		ProviderFactories: testAccProviderFactories,
-		CheckDestroy:      testAccCheckDbaasClusterDestroyCheck,
+		CheckDestroy:      testAccCheckDbaasPgSqlClusterDestroyCheck,
 		Steps: []resource.TestStep{
 			{
-				Config: fmt.Sprintf(testAccCheckDbaasClusterConfigBasic),
+				Config: fmt.Sprintf(testAccCheckDbaasPgSqlClusterConfigBasic),
 			},
 
 			{
 				ResourceName:      resourceName,
-				ImportStateIdFunc: testAccDbaasClusterImportStateId,
+				ImportStateIdFunc: testAccDbaasPgSqlClusterImportStateId,
 				ImportState:       true,
 				ImportStateVerify: true,
 			},
@@ -30,7 +30,7 @@ func TestAccDbaasCluster_ImportBasic(t *testing.T) {
 	})
 }
 
-func testAccDbaasClusterImportStateId(s *terraform.State) (string, error) {
+func testAccDbaasPgSqlClusterImportStateId(s *terraform.State) (string, error) {
 	importID := ""
 
 	for _, rs := range s.RootModule().Resources {

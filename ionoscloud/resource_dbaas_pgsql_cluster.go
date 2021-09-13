@@ -12,14 +12,14 @@ import (
 	"time"
 )
 
-func resourceDbaasCluster() *schema.Resource {
+func resourceDbaasPgSqlCluster() *schema.Resource {
 	return &schema.Resource{
-		CreateContext: resourceDbaasClusterCreate,
-		ReadContext:   resourceDbaasClusterRead,
-		UpdateContext: resourceDbaasClusterUpdate,
-		DeleteContext: resourceDbaasClusterDelete,
+		CreateContext: resourceDbaasPgSqlClusterCreate,
+		ReadContext:   resourceDbaasPgSqlClusterRead,
+		UpdateContext: resourceDbaasPgSqlClusterUpdate,
+		DeleteContext: resourceDbaasPgSqlClusterDelete,
 		Importer: &schema.ResourceImporter{
-			StateContext: resourceDbaasClusterImport,
+			StateContext: resourceDbaasPgSqlClusterImport,
 		},
 		Schema: map[string]*schema.Schema{
 			"postgres_version": {
@@ -164,7 +164,7 @@ func resourceDbaasCluster() *schema.Resource {
 	}
 }
 
-func resourceDbaasClusterCreate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func resourceDbaasPgSqlClusterCreate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	client := meta.(SdkBundle).DbaasClient
 
 	dbaasCluster := dbaas.CreateClusterRequest{}
@@ -308,10 +308,10 @@ func resourceDbaasClusterCreate(ctx context.Context, d *schema.ResourceData, met
 
 	}
 
-	return resourceDbaasClusterRead(ctx, d, meta)
+	return resourceDbaasPgSqlClusterRead(ctx, d, meta)
 }
 
-func resourceDbaasClusterRead(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func resourceDbaasPgSqlClusterRead(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 
 	client := meta.(SdkBundle).DbaasClient
 
@@ -328,12 +328,12 @@ func resourceDbaasClusterRead(ctx context.Context, d *schema.ResourceData, meta 
 
 	log.Printf("[INFO] Successfully retreived cluster %s: %+v", d.Id(), cluster)
 
-	setDbaasClusterData(d, &cluster)
+	setDbaasPgsqlClusterData(d, &cluster)
 
 	return nil
 }
 
-func resourceDbaasClusterUpdate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func resourceDbaasPgSqlClusterUpdate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	fmt.Printf("\n________________UPDATE________________\n")
 
 	client := meta.(SdkBundle).DbaasClient
@@ -432,10 +432,10 @@ func resourceDbaasClusterUpdate(ctx context.Context, d *schema.ResourceData, met
 
 	}
 
-	return resourceDbaasClusterRead(ctx, d, meta)
+	return resourceDbaasPgSqlClusterRead(ctx, d, meta)
 }
 
-func resourceDbaasClusterDelete(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func resourceDbaasPgSqlClusterDelete(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	client := meta.(SdkBundle).DbaasClient
 
 	_, apiResponse, err := client.ClustersApi.ClustersDelete(ctx, d.Id()).Execute()
@@ -478,7 +478,7 @@ func resourceDbaasClusterDelete(ctx context.Context, d *schema.ResourceData, met
 	return nil
 }
 
-func resourceDbaasClusterImport(ctx context.Context, d *schema.ResourceData, meta interface{}) ([]*schema.ResourceData, error) {
+func resourceDbaasPgSqlClusterImport(ctx context.Context, d *schema.ResourceData, meta interface{}) ([]*schema.ResourceData, error) {
 	client := meta.(SdkBundle).DbaasClient
 
 	clusterId := d.Id()
@@ -495,7 +495,7 @@ func resourceDbaasClusterImport(ctx context.Context, d *schema.ResourceData, met
 
 	log.Printf("[INFO] dbaas cluster found: %+v", dbaasCluster)
 
-	setDbaasClusterData(d, &dbaasCluster)
+	setDbaasPgsqlClusterData(d, &dbaasCluster)
 
 	return []*schema.ResourceData{d}, nil
 }
