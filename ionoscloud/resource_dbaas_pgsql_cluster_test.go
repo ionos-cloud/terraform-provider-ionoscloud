@@ -22,19 +22,19 @@ func TestAccDbaasCluster_Basic(t *testing.T) {
 			{
 				Config: testAccCheckDbaasClusterConfigBasic,
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheckDbaasClusterExists("ionoscloud_dbaas_cluster.test_dbaas_cluster", &dbaasCluster),
+					testAccCheckDbaasClusterExists("ionoscloud_dbaas_pgsql_cluster.test_dbaas_cluster", &dbaasCluster),
 				),
 			},
 			{
 				Config: testAccCheckDbaasClusterConfigUpdate,
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheckDbaasClusterExists("ionoscloud_dbaas_cluster.test_dbaas_cluster", &dbaasCluster),
-					resource.TestCheckResourceAttr("ionoscloud_dbaas_cluster.test_dbaas_cluster", "postgres_version", "13"),
-					resource.TestCheckResourceAttr("ionoscloud_dbaas_cluster.test_dbaas_cluster", "storage_size", "1.5Gi"),
-					resource.TestCheckResourceAttr("ionoscloud_dbaas_cluster.test_dbaas_cluster", "display_name", "PostgreSQL_cluster_update"),
-					resource.TestCheckResourceAttr("ionoscloud_dbaas_cluster.test_dbaas_cluster", "backup_enabled", "true"),
-					resource.TestCheckResourceAttr("ionoscloud_dbaas_cluster.test_dbaas_cluster", "maintenance_window.0.time", "10:00:00"),
-					resource.TestCheckResourceAttr("ionoscloud_dbaas_cluster.test_dbaas_cluster", "maintenance_window.0.weekday", "Saturday"),
+					testAccCheckDbaasClusterExists("ionoscloud_dbaas_pgsql_cluster.test_dbaas_cluster", &dbaasCluster),
+					resource.TestCheckResourceAttr("ionoscloud_dbaas_pgsql_cluster.test_dbaas_cluster", "postgres_version", "13"),
+					resource.TestCheckResourceAttr("ionoscloud_dbaas_pgsql_cluster.test_dbaas_cluster", "storage_size", "1.5Gi"),
+					resource.TestCheckResourceAttr("ionoscloud_dbaas_pgsql_cluster.test_dbaas_cluster", "display_name", "PostgreSQL_cluster_update"),
+					resource.TestCheckResourceAttr("ionoscloud_dbaas_pgsql_cluster.test_dbaas_cluster", "backup_enabled", "true"),
+					resource.TestCheckResourceAttr("ionoscloud_dbaas_pgsql_cluster.test_dbaas_cluster", "maintenance_window.0.time", "10:00:00"),
+					resource.TestCheckResourceAttr("ionoscloud_dbaas_pgsql_cluster.test_dbaas_cluster", "maintenance_window.0.weekday", "Saturday"),
 				),
 			},
 		},
@@ -51,7 +51,7 @@ func testAccCheckDbaasClusterDestroyCheck(s *terraform.State) error {
 	}
 
 	for _, rs := range s.RootModule().Resources {
-		if rs.Type != "ionoscloud_dbaas_cluster" {
+		if rs.Type != "ionoscloud_dbaas_pgsql_cluster" {
 			continue
 		}
 
@@ -123,7 +123,7 @@ resource "ionoscloud_lan" "test_dbaas_cluster" {
   name          = "test_dbaas_cluster"
 }
 
-resource "ionoscloud_dbaas_cluster" "test_dbaas_cluster" {
+resource "ionoscloud_dbaas_pgsql_cluster" "test_dbaas_cluster" {
   postgres_version   = 12
   replicas           = 2
   cpu_core_count     = 4
@@ -168,7 +168,7 @@ resource "ionoscloud_ipblock" "test_dbaas_cluster" {
 }
 
 
-resource "ionoscloud_dbaas_cluster" "test_dbaas_cluster" {
+resource "ionoscloud_dbaas_pgsql_cluster" "test_dbaas_cluster" {
   postgres_version   = 13
   replicas           = 2
   cpu_core_count     = 4

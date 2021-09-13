@@ -19,7 +19,7 @@ func TestAccDataSourceDbaasCluster_matchId(t *testing.T) {
 			{
 				Config: testAccDataSourceDbaasClusterMatchId,
 				Check: resource.ComposeTestCheckFunc(
-					resource.TestCheckResourceAttr("data.ionoscloud_dbaas_cluster.test_ds_dbaas_cluster", "display_name", "PostgreSQL_cluster"),
+					resource.TestCheckResourceAttr("data.ionoscloud_dbaas_pgsql_cluster.test_ds_dbaas_cluster", "display_name", "PostgreSQL_cluster"),
 				),
 			},
 		},
@@ -39,7 +39,7 @@ func TestAccDataSourceDbaasCluster_matchName(t *testing.T) {
 			{
 				Config: testAccDataSourceDbaasClusterMatchName,
 				Check: resource.ComposeTestCheckFunc(
-					resource.TestCheckResourceAttr("data.ionoscloud_dbaas_cluster.test_ds_dbaas_cluster", "display_name", "PostgreSQL_cluster"),
+					resource.TestCheckResourceAttr("data.ionoscloud_dbaas_pgsql_cluster.test_ds_dbaas_cluster", "display_name", "PostgreSQL_cluster"),
 				),
 			},
 		},
@@ -66,7 +66,7 @@ resource "ionoscloud_lan" "test_dbaas_cluster" {
   name          = "test_dbaas_cluster"
 }
 
-resource "ionoscloud_dbaas_cluster" "test_dbaas_cluster" {
+resource "ionoscloud_dbaas_pgsql_cluster" "test_dbaas_cluster" {
   postgres_version   = 12
   replicas           = 2
   cpu_core_count     = 4
@@ -111,7 +111,7 @@ resource "ionoscloud_lan" "test_dbaas_cluster" {
   name          = "test_dbaas_cluster"
 }
 
-resource "ionoscloud_dbaas_cluster" "test_dbaas_cluster" {
+resource "ionoscloud_dbaas_pgsql_cluster" "test_dbaas_cluster" {
   postgres_version   = 12
   replicas           = 2
   cpu_core_count     = 4
@@ -136,8 +136,8 @@ resource "ionoscloud_dbaas_cluster" "test_dbaas_cluster" {
   }
 }
 
-data "ionoscloud_dbaas_cluster" "test_ds_dbaas_cluster" {
-  id	= ionoscloud_dbaas_cluster.test_dbaas_cluster.id
+data "ionoscloud_dbaas_pgsql_cluster" "test_ds_dbaas_cluster" {
+  id	= ionoscloud_dbaas_pgsql_cluster.test_dbaas_cluster.id
 }
 `
 
@@ -160,7 +160,7 @@ resource "ionoscloud_lan" "test_dbaas_cluster" {
   name          = "test_dbaas_cluster"
 }
 
-resource "ionoscloud_dbaas_cluster" "test_dbaas_cluster" {
+resource "ionoscloud_dbaas_pgsql_cluster" "test_dbaas_cluster" {
   postgres_version   = 12
   replicas           = 2
   cpu_core_count     = 4
@@ -185,7 +185,7 @@ resource "ionoscloud_dbaas_cluster" "test_dbaas_cluster" {
   }
 }
 
-data "ionoscloud_dbaas_cluster" "test_ds_dbaas_cluster" {
+data "ionoscloud_dbaas_pgsql_cluster" "test_ds_dbaas_cluster" {
   display_name	= "PostgreSQL_cluster"
 }
 `

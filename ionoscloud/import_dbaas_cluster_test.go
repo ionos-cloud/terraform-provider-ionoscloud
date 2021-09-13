@@ -10,7 +10,7 @@ import (
 )
 
 func TestAccDbaasCluster_ImportBasic(t *testing.T) {
-	resourceName := "ionoscloud_dbaas_cluster.test_dbaas_cluster"
+	resourceName := "ionoscloud_dbaas_pgsql_cluster.test_dbaas_cluster"
 	resource.Test(t, resource.TestCase{
 		PreCheck:          func() { testAccPreCheck(t) },
 		ProviderFactories: testAccProviderFactories,
@@ -34,7 +34,7 @@ func testAccDbaasClusterImportStateId(s *terraform.State) (string, error) {
 	importID := ""
 
 	for _, rs := range s.RootModule().Resources {
-		if rs.Type != "ionoscloud_dbaas_cluster" {
+		if rs.Type != "ionoscloud_dbaas_pgsql_cluster" {
 			continue
 		}
 
