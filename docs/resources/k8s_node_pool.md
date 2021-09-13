@@ -70,6 +70,8 @@ The following arguments are supported:
 - `ram_size` -(Required)[int] - The desired amount of RAM, in MB. *This attribute is immutable*.
 - `storage_size` -(Required)[int] - The desired amount of storage for each node, in GB. *This attribute is immutable*.
 - `public_ips` - (Optional)[list] A list of public IPs associated with the node pool; must have at least `node_count + 1` elements  
+- `labels` - (Optional)[map] A key/value map of labels
+- `annotations` - (Optional)[map] A key/value map of annotations
 
 ## Import
 
