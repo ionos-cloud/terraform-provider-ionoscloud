@@ -9,9 +9,9 @@ import (
 	dbaas "github.com/ionos-cloud/sdk-go-autoscaling"
 )
 
-func dataSourceDbaasPgsqlCluster() *schema.Resource {
+func dataSourceDbaasPgSqlCluster() *schema.Resource {
 	return &schema.Resource{
-		ReadContext: dataSourceDbaasPgsqlReadCluster,
+		ReadContext: dataSourceDbaasPgSqlReadCluster,
 		Schema: map[string]*schema.Schema{
 			"id": {
 				Type:     schema.TypeString,
@@ -124,7 +124,7 @@ func dataSourceDbaasPgsqlCluster() *schema.Resource {
 	}
 }
 
-func dataSourceDbaasPgsqlReadCluster(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func dataSourceDbaasPgSqlReadCluster(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	client := meta.(SdkBundle).DbaasClient
 
 	id, idOk := d.GetOk("id")
@@ -178,7 +178,7 @@ func dataSourceDbaasPgsqlReadCluster(ctx context.Context, d *schema.ResourceData
 
 	}
 
-	if diags := setDbaasPgsqlClusterData(d, &cluster); diags != nil {
+	if diags := setDbaasPgSqlClusterData(d, &cluster); diags != nil {
 		return diags
 	}
 
@@ -186,7 +186,7 @@ func dataSourceDbaasPgsqlReadCluster(ctx context.Context, d *schema.ResourceData
 
 }
 
-func setDbaasPgsqlClusterData(d *schema.ResourceData, cluster *dbaas.Cluster) diag.Diagnostics {
+func setDbaasPgSqlClusterData(d *schema.ResourceData, cluster *dbaas.Cluster) diag.Diagnostics {
 
 	if cluster.Id != nil {
 		d.SetId(*cluster.Id)

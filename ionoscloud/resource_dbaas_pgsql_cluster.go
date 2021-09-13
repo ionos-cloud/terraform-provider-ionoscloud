@@ -328,7 +328,7 @@ func resourceDbaasPgSqlClusterRead(ctx context.Context, d *schema.ResourceData, 
 
 	log.Printf("[INFO] Successfully retreived cluster %s: %+v", d.Id(), cluster)
 
-	setDbaasPgsqlClusterData(d, &cluster)
+	setDbaasPgSqlClusterData(d, &cluster)
 
 	return nil
 }
@@ -473,8 +473,6 @@ func resourceDbaasPgSqlClusterDelete(ctx context.Context, d *schema.ResourceData
 		}
 	}
 
-	d.SetId("")
-
 	return nil
 }
 
@@ -495,7 +493,7 @@ func resourceDbaasPgSqlClusterImport(ctx context.Context, d *schema.ResourceData
 
 	log.Printf("[INFO] dbaas cluster found: %+v", dbaasCluster)
 
-	setDbaasPgsqlClusterData(d, &dbaasCluster)
+	setDbaasPgSqlClusterData(d, &dbaasCluster)
 
 	return []*schema.ResourceData{d}, nil
 }

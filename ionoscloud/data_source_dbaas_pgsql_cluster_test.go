@@ -6,7 +6,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 )
 
-func TestAccDataSourceDbaasPgsqlCluster_matchId(t *testing.T) {
+func TestAccDataSourceDbaasPgSqlCluster_matchId(t *testing.T) {
 	resource.Test(t, resource.TestCase{
 		PreCheck: func() {
 			testAccPreCheck(t)
@@ -14,7 +14,7 @@ func TestAccDataSourceDbaasPgsqlCluster_matchId(t *testing.T) {
 		ProviderFactories: testAccProviderFactories,
 		Steps: []resource.TestStep{
 			{
-				Config: testAccDataSourceDbaasPgsqlClusterCreateResources,
+				Config: testAccDataSourceDbaasPgSqlClusterCreateResources,
 			},
 			{
 				Config: testAccDataSourceDbaasPgSqlClusterMatchId,
@@ -34,7 +34,7 @@ func TestAccDataSourceDbaasPgSqlCluster_matchName(t *testing.T) {
 		ProviderFactories: testAccProviderFactories,
 		Steps: []resource.TestStep{
 			{
-				Config: testAccDataSourceDbaasPgsqlClusterCreateResources,
+				Config: testAccDataSourceDbaasPgSqlClusterCreateResources,
 			},
 			{
 				Config: testAccDataSourceDbaasPgSqlClusterMatchName,
@@ -47,7 +47,7 @@ func TestAccDataSourceDbaasPgSqlCluster_matchName(t *testing.T) {
 
 }
 
-const testAccDataSourceDbaasPgsqlClusterCreateResources = `
+const testAccDataSourceDbaasPgSqlClusterCreateResources = `
 resource "ionoscloud_datacenter" "test_dbaas_cluster" {
   name        = "test_dbaas_cluster"
   location    = "de/txl"

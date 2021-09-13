@@ -102,7 +102,9 @@ func Provider() *schema.Provider {
 			"ionoscloud_networkloadbalancer":                dataSourceNetworkLoadBalancer(),
 			"ionoscloud_networkloadbalancer_forwardingrule": dataSourceNetworkLoadBalancerForwardingRule(),
 			"ionoscloud_template":                           dataSourceTemplate(),
-			"ionoscloud_dbaas_pgsql_cluster":                dataSourceDbaasPgsqlCluster(),
+			"ionoscloud_dbaas_pgsql_cluster":                dataSourceDbaasPgSqlCluster(),
+			"ionoscloud_dbaas_pgsql_versions":               dataSourceDbaasPgSqlVersions(),
+			"ionoscloud_dbaas_pgsql_backups":                dataSourceDbaasPgSqlBackups(),
 		},
 	}
 
