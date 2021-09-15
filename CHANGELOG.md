@@ -1,4 +1,4 @@
-## 5.2.12
+## 5.2.13
 
 - added user_data and backup_unit_id in the volume entity from server
 - fix issue #19 - fixed update ssh_key_path although not changed
