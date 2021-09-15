@@ -112,7 +112,7 @@ func resourceBackupUnitRead(ctx context.Context, d *schema.ResourceData, meta in
 	backupUnit, apiResponse, err := client.BackupUnitApi.BackupunitsFindById(ctx, d.Id()).Execute()
 
 	if err != nil {
-		if apiResponse != nil && apiResponse.StatusCode == 404 {
+		if apiResponse != nil && apiResponse.Response != nil && apiResponse.StatusCode == 404 {
 			d.SetId("")
 			return nil
 		}
@@ -191,7 +191,7 @@ func resourceBackupUnitUpdate(ctx context.Context, d *schema.ResourceData, meta 
 	_, apiResponse, err := client.BackupUnitApi.BackupunitsPut(ctx, d.Id()).BackupUnit(request).Execute()
 
 	if err != nil {
-		if apiResponse != nil && apiResponse.StatusCode == 404 {
+		if apiResponse != nil && apiResponse.Response != nil && apiResponse.StatusCode == 404 {
 			d.SetId("")
 			return nil
 		}
@@ -233,7 +233,7 @@ func resourceBackupUnitDelete(ctx context.Context, d *schema.ResourceData, meta 
 	_, apiResponse, err := client.BackupUnitApi.BackupunitsDelete(ctx, d.Id()).Execute()
 
 	if err != nil {
-		if apiResponse != nil && apiResponse.StatusCode == 404 {
+		if apiResponse != nil && apiResponse.Response != nil && apiResponse.StatusCode == 404 {
 			d.SetId("")
 			return nil
 		}
@@ -282,7 +282,7 @@ func backupUnitDeleted(client *ionoscloud.APIClient, d *schema.ResourceData, c c
 	_, apiResponse, err := client.BackupUnitApi.BackupunitsFindById(c, d.Id()).Execute()
 
 	if err != nil {
-		if apiResponse != nil && apiResponse.StatusCode == 404 {
+		if apiResponse != nil && apiResponse.Response != nil && apiResponse.StatusCode == 404 {
 			return true, nil
 		}
 		return true, fmt.Errorf("error checking backup unit deletion status: %s", err)

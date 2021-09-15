@@ -40,15 +40,16 @@ resource "ionoscloud_volume" "example" {
 * `licence_type` - (Optional)[string] Required if `image_name` is not provided.
 * `name` - (Optional)[string] The name of the volume.
 * `availability_zone` - (Optional)[string] The storage availability zone assigned to the volume: AUTO, ZONE_1, ZONE_2, or ZONE_3.
-* `user_data` - (Optional) The cloud-init configuration for the volume as base64 encoded string. The property is immutable and is only allowed to be set on a new volume creation. This option will work only with cloud-init compatible images.
-* `cpu_hot_plug` - (Optional)[string] Is capable of CPU hot plug (no reboot required)
-* `ram_hot_plug` - (Optional)[string] Is capable of memory hot plug (no reboot required)
-* `nic_hot_plug` - (Optional)[string] Is capable of nic hot plug (no reboot required)
-* `nic_hot_unplug` - (Optional)[string] Is capable of nic hot unplug (no reboot required)
-* `disc_virtio_hot_plug` - (Optional)[string] Is capable of Virt-IO drive hot plug (no reboot required)
-* `disc_virtio_hot_unplug` - (Optional)[string] Is capable of Virt-IO drive hot unplug (no reboot required). This works only for non-Windows virtual Machines.
+* `user_data` - (Optional)[string] The cloud-init configuration for the volume as base64 encoded string. The property is immutable and is only allowed to be set on a new volume creation. This option will work only with cloud-init compatible images.
 * `backup_unit_id`- (Optional)[string] he uuid of the Backup Unit that user has access to. The property is immutable and is only allowed to be set on a new volume creation. It is mandatory to provide either 'public image' or 'imageAlias' in conjunction with this property.
 * `device_number` - (Computed) The LUN ID of the storage volume. Null for volumes not mounted to any VM
+* `cpu_hot_plug` - (Computed)[string] Is capable of CPU hot plug (no reboot required)
+* `ram_hot_plug` - (Computed)[string] Is capable of memory hot plug (no reboot required)
+* `nic_hot_plug` - (Computed)[string] Is capable of nic hot plug (no reboot required)
+* `nic_hot_unplug` - (Computed)[string] Is capable of nic hot unplug (no reboot required)
+* `disc_virtio_hot_plug` - (Computed)[string] Is capable of Virt-IO drive hot plug (no reboot required)
+* `disc_virtio_hot_unplug` - (Computed)[string] Is capable of Virt-IO drive hot unplug (no reboot required). This works only for non-Windows virtual Machines.
+
 ## Import
 
 Resource Volume can be imported using the `resource id`, e.g.

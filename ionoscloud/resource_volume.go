@@ -78,32 +78,26 @@ func resourceVolume() *schema.Resource {
 			},
 			"cpu_hot_plug": {
 				Type:     schema.TypeBool,
-				Optional: true,
 				Computed: true,
 			},
 			"ram_hot_plug": {
 				Type:     schema.TypeBool,
-				Optional: true,
 				Computed: true,
 			},
 			"nic_hot_plug": {
 				Type:     schema.TypeBool,
-				Optional: true,
 				Computed: true,
 			},
 			"nic_hot_unplug": {
 				Type:     schema.TypeBool,
-				Optional: true,
 				Computed: true,
 			},
 			"disc_virtio_hot_plug": {
 				Type:     schema.TypeBool,
-				Optional: true,
 				Computed: true,
 			},
 			"disc_virtio_hot_unplug": {
 				Type:     schema.TypeBool,
-				Optional: true,
 				Computed: true,
 			},
 			"backup_unit_id": {
@@ -250,36 +244,6 @@ func resourceVolumeCreate(ctx context.Context, d *schema.ResourceData, meta inte
 		volume.Properties.LicenceType = &licenceType
 	} else {
 		volume.Properties.LicenceType = nil
-	}
-
-	if v, ok := d.GetOk("cpu_hot_plug"); ok {
-		vBool := v.(bool)
-		volume.Properties.CpuHotPlug = &vBool
-	}
-
-	if v, ok := d.GetOk("ram_hot_plug"); ok {
-		vBool := v.(bool)
-		volume.Properties.RamHotPlug = &vBool
-	}
-
-	if v, ok := d.GetOk("nic_hot_unplug"); ok {
-		vBool := v.(bool)
-		volume.Properties.NicHotPlug = &vBool
-	}
-
-	if v, ok := d.GetOk("nic_hot_unplug"); ok {
-		vBool := v.(bool)
-		volume.Properties.NicHotUnplug = &vBool
-	}
-
-	if v, ok := d.GetOk("disc_virtio_hot_plug"); ok {
-		vBool := v.(bool)
-		volume.Properties.DiscVirtioHotPlug = &vBool
-	}
-
-	if v, ok := d.GetOk("disc_virtio_hot_unplug"); ok {
-		vBool := v.(bool)
-		volume.Properties.DiscVirtioHotUnplug = &vBool
 	}
 
 	if image != "" {
@@ -561,39 +525,6 @@ func resourceVolumeUpdate(ctx context.Context, d *schema.ResourceData, meta inte
 		_, newValue := d.GetChange("availability_zone")
 		newValueStr := newValue.(string)
 		properties.AvailabilityZone = &newValueStr
-	}
-	if d.HasChange("cpu_hot_plug") {
-		_, newValue := d.GetChange("cpu_hot_plug")
-		newValueBool := newValue.(bool)
-		properties.CpuHotPlug = &newValueBool
-	}
-	if d.HasChange("ram_hot_plug") {
-		_, newValue := d.GetChange("ram_hot_plug")
-		newValueBool := newValue.(bool)
-		properties.RamHotPlug = &newValueBool
-	}
-	if d.HasChange("nic_hot_plug") {
-		_, newValue := d.GetChange("nic_hot_plug")
-		newValueBool := newValue.(bool)
-		properties.NicHotPlug = &newValueBool
-	}
-
-	if d.HasChange("nic_hot_unplug") {
-		_, newValue := d.GetChange("nic_hot_unplug")
-		newValueBool := newValue.(bool)
-		properties.NicHotUnplug = &newValueBool
-	}
-
-	if d.HasChange("disc_virtio_hot_plug") {
-		_, newValue := d.GetChange("disc_virtio_hot_plug")
-		newValueBool := newValue.(bool)
-		properties.DiscVirtioHotPlug = &newValueBool
-	}
-
-	if d.HasChange("disc_virtio_hot_unplug") {
-		_, newValue := d.GetChange("disc_virtio_hot_unplug")
-		newValueBool := newValue.(bool)
-		properties.DiscVirtioHotUnplug = &newValueBool
 	}
 
 	if d.HasChange("backup_unit_id") {

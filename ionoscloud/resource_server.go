@@ -102,6 +102,7 @@ func resourceServer() *schema.Resource {
 				Elem:          &schema.Schema{Type: schema.TypeString},
 				ConflictsWith: []string{"volume.0.ssh_key_path"},
 				Optional:      true,
+				Computed:      true,
 			},
 			"volume": {
 				Type:     schema.TypeList,
@@ -152,6 +153,7 @@ func resourceServer() *schema.Resource {
 							Elem:       &schema.Schema{Type: schema.TypeString},
 							Optional:   true,
 							Deprecated: "Please use ssh_key_path under server level",
+							Computed:   true,
 							DiffSuppressFunc: func(k, old, new string, d *schema.ResourceData) bool {
 								if k == "volume.0.ssh_key_path.#" {
 									if d.Get("ssh_key_path.#") == new {
@@ -187,6 +189,46 @@ func resourceServer() *schema.Resource {
 							Type:     schema.TypeList,
 							Elem:     &schema.Schema{Type: schema.TypeString},
 							Computed: true,
+						},
+						"cpu_hot_plug": {
+							Type:     schema.TypeBool,
+							Computed: true,
+						},
+						"ram_hot_plug": {
+							Type:     schema.TypeBool,
+							Computed: true,
+						},
+						"nic_hot_plug": {
+							Type:     schema.TypeBool,
+							Computed: true,
+						},
+						"nic_hot_unplug": {
+							Type:     schema.TypeBool,
+							Computed: true,
+						},
+						"disc_virtio_hot_plug": {
+							Type:     schema.TypeBool,
+							Computed: true,
+						},
+						"disc_virtio_hot_unplug": {
+							Type:     schema.TypeBool,
+							Computed: true,
+						},
+						"device_number": {
+							Type:     schema.TypeInt,
+							Computed: true,
+						},
+						"backup_unit_id": {
+							Type:        schema.TypeString,
+							Description: "The uuid of the Backup Unit that user has access to. The property is immutable and is only allowed to be set on a new volume creation. It is mandatory to provide either 'public image' or 'imageAlias' in conjunction with this property.",
+							Optional:    true,
+							Computed:    true,
+						},
+						"user_data": {
+							Type:        schema.TypeString,
+							Description: "The cloud-init configuration for the volume as base64 encoded string. The property is immutable and is only allowed to be set on a new volume creation. It is mandatory to provide either 'public image' or 'imageAlias' that has cloud-init compatibility in conjunction with this property.",
+							Optional:    true,
+							Computed:    true,
 						},
 					},
 				},
@@ -270,7 +312,6 @@ func resourceServer() *schema.Resource {
 											return
 										},
 									},
-
 									"port_range_end": {
 										Type:     schema.TypeInt,
 										Optional: true,
@@ -443,7 +484,7 @@ func resourceServerCreate(ctx context.Context, d *schema.ResourceData, meta inte
 		} else {
 			img, apiResponse, err := client.ImageApi.ImagesFindById(ctx, imageName).Execute()
 
-			if apiResponse != nil && apiResponse.StatusCode == 404 {
+			if apiResponse != nil && apiResponse.Response != nil && apiResponse.StatusCode == 404 {
 
 				_, apiResponse, err = client.SnapshotApi.SnapshotsFindById(ctx, imageName).Execute()
 
@@ -542,6 +583,28 @@ func resourceServerCreate(ctx context.Context, d *schema.ResourceData, meta inte
 		volume.Image = &image
 	} else {
 		volume.Image = nil
+	}
+
+	if backupUnitId, ok := d.GetOk("backup_unit_id"); ok {
+		if IsValidUUID(backupUnitId.(string)) {
+			if image == "" && imageAlias == "" {
+				diags := diag.FromErr(fmt.Errorf("it is mandatory to provied either public image or imageAlias in conjunction with backup unit id property"))
+				return diags
+			} else {
+				backupUnitId := backupUnitId.(string)
+				volume.BackupunitId = &backupUnitId
+			}
+		}
+	}
+
+	if userData, ok := d.GetOk("user_data"); ok {
+		if image == "" && imageAlias == "" {
+			diags := diag.FromErr(fmt.Errorf("it is mandatory to provied either public image or imageAlias that has cloud-init compatibility in conjunction with backup unit id property "))
+			return diags
+		} else {
+			userData := userData.(string)
+			volume.UserData = &userData
+		}
 	}
 
 	request.Entities = &ionoscloud.ServerEntities{
@@ -808,7 +871,7 @@ func resourceServerRead(ctx context.Context, d *schema.ResourceData, meta interf
 
 	server, apiResponse, err := client.ServerApi.DatacentersServersFindById(ctx, dcId, serverId).Execute()
 	if err != nil {
-		if apiResponse != nil && apiResponse.StatusCode == 404 {
+		if apiResponse != nil && apiResponse.Response != nil && apiResponse.StatusCode == 404 {
 			d.SetId("")
 			return nil
 		}
@@ -942,6 +1005,19 @@ func resourceServerRead(ctx context.Context, d *schema.ResourceData, meta interf
 			setPropWithNilCheck(volumeItem, "licence_type", volumeObj.Properties.LicenceType)
 			setPropWithNilCheck(volumeItem, "bus", volumeObj.Properties.Bus)
 			setPropWithNilCheck(volumeItem, "availability_zone", volumeObj.Properties.AvailabilityZone)
+			setPropWithNilCheck(volumeItem, "cpu_hot_plug", volumeObj.Properties.CpuHotPlug)
+			setPropWithNilCheck(volumeItem, "ram_hot_plug", volumeObj.Properties.RamHotPlug)
+			setPropWithNilCheck(volumeItem, "nic_hot_plug", volumeObj.Properties.NicHotPlug)
+			setPropWithNilCheck(volumeItem, "nic_hot_unplug", volumeObj.Properties.NicHotUnplug)
+			setPropWithNilCheck(volumeItem, "disc_virtio_hot_plug", volumeObj.Properties.DiscVirtioHotPlug)
+			setPropWithNilCheck(volumeItem, "disc_virtio_hot_unplug", volumeObj.Properties.DiscVirtioHotUnplug)
+			setPropWithNilCheck(volumeItem, "device_number", volumeObj.Properties.DeviceNumber)
+
+			userData := d.Get("volume.0.user_data")
+			volumeItem["user_data"] = userData
+
+			backupUnit := d.Get("volume.0.backup_unit_id")
+			volumeItem["backup_unit_id"] = backupUnit
 
 			volumesList := []map[string]interface{}{volumeItem}
 			if err := d.Set("volume", volumesList); err != nil {
@@ -1036,6 +1112,16 @@ func resourceServerUpdate(ctx context.Context, d *schema.ResourceData, meta inte
 		return diags
 	}
 	// Volume stuff
+
+	if d.HasChange("volume.0.user_data") {
+		diags := diag.FromErr(fmt.Errorf("user_data is immutable and is only allowed to be set on a new volume creation"))
+		return diags
+	}
+
+	if d.HasChange("volume.0.backup_unit_id") {
+		diags := diag.FromErr(fmt.Errorf("backup_unit_id is immutable and is only allowed to be set on a new volume creation"))
+		return diags
+	}
 	if d.HasChange("volume") {
 		bootVolume := d.Get("boot_volume").(string)
 		_, _, err := client.ServerApi.DatacentersServersVolumesFindById(ctx, dcId, d.Id(), bootVolume).Execute()

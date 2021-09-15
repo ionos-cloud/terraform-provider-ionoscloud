@@ -145,7 +145,7 @@ func resourceLanRead(ctx context.Context, d *schema.ResourceData, meta interface
 	rsp, apiResponse, err := client.LanApi.DatacentersLansFindById(ctx, dcid, d.Id()).Execute()
 
 	if err != nil {
-		if apiResponse != nil && apiResponse.StatusCode == 404 {
+		if apiResponse != nil && apiResponse.Response != nil && apiResponse.StatusCode == 404 {
 			log.Printf("[INFO] LAN %s not found", d.Id())
 			d.SetId("")
 			return nil
@@ -296,7 +296,7 @@ func lanDeleted(ctx context.Context, client *ionoscloud.APIClient, d *schema.Res
 	log.Printf("[INFO] Current deletion status for LAN %s: %+v", d.Id(), rsp)
 
 	if err != nil {
-		if apiResponse != nil && apiResponse.StatusCode == 404 {
+		if apiResponse != nil && apiResponse.Response != nil && apiResponse.StatusCode == 404 {
 			return true, nil
 		}
 		return true, err

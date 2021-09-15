@@ -149,6 +149,12 @@ resource "ionoscloud_datacenter" "foobar" {
 	location = "us/las"
 }
 
+resource "ionoscloud_backup_unit" "example" {
+	name        = "serverTest"
+	password    = "DemoPassword123$"
+	email       = "example@ionoscloud.com"
+}
+
 resource "ionoscloud_lan" "webserver_lan" {
   datacenter_id = "${ionoscloud_datacenter.foobar.id}"
   public = true
@@ -177,15 +183,17 @@ resource "ionoscloud_server" "webserver" {
 }
 
 resource "ionoscloud_volume" "database_volume" {
-  datacenter_id = "${ionoscloud_datacenter.foobar.id}"
-  server_id = "${ionoscloud_server.webserver.id}"
-  availability_zone = "ZONE_1"
-  name = "%s"
-  size = 5
-  disk_type = "HDD"
-  bus = "VIRTIO"
-  image_name = "ubuntu:latest"
-  image_password = "K3tTj8G14a3EgKyNeeiY"
+	datacenter_id = "${ionoscloud_datacenter.foobar.id}"
+	server_id = "${ionoscloud_server.webserver.id}"
+	availability_zone = "ZONE_1"
+	name = "%s"
+	size = 5
+	disk_type = "HDD"
+	bus = "VIRTIO"
+	image_name ="Debian-10-cloud-init.qcow2"
+	image_password = "K3tTj8G14a3EgKyNeeiY"
+	backup_unit_id = ionoscloud_backup_unit.example.id
+	user_data = "foo"
 }`
 
 const testacccheckvolumeconfigUpdate = `
@@ -194,6 +202,13 @@ resource "ionoscloud_datacenter" "foobar" {
 	location = "us/las"
 }
 
+resource "ionoscloud_backup_unit" "example" {
+	name        = "serverTest"
+	password    = "DemoPassword123$"
+	email       = "example@ionoscloud.com"
+}
+
+
 resource "ionoscloud_lan" "webserver_lan" {
   datacenter_id = "${ionoscloud_datacenter.foobar.id}"
   public = true
@@ -222,15 +237,17 @@ resource "ionoscloud_server" "webserver" {
 }
 
 resource "ionoscloud_volume" "database_volume" {
-  datacenter_id = "${ionoscloud_datacenter.foobar.id}"
-  server_id = "${ionoscloud_server.webserver.id}"
-  availability_zone = "ZONE_1"
-  name = "updated"
-  size = 5
-  disk_type = "HDD"
-  bus = "VIRTIO"
-  image_name = "ubuntu:latest"
-  image_password = "K3tTj8G14a3EgKyNeeiY"
+	datacenter_id = "${ionoscloud_datacenter.foobar.id}"
+	server_id = "${ionoscloud_server.webserver.id}"
+	availability_zone = "ZONE_1"
+	name = "updated"
+	size = 5
+	disk_type = "HDD"
+	bus = "VIRTIO"
+	image_name ="Debian-10-cloud-init.qcow2"
+	image_password = "K3tTj8G14a3EgKyNeeiY"
+	backup_unit_id = ionoscloud_backup_unit.example.id
+	user_data = "foo"
 }`
 
 const testacccheckvolumeconfigNoPassword = `
