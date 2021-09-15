@@ -36,6 +36,7 @@ func resourcePrivateCrossConnect() *schema.Resource {
 				Type:        schema.TypeList,
 				Description: "A list containing all the connectable datacenters",
 				Computed:    true,
+				Optional:    true,
 				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{
 						"id": {
@@ -60,6 +61,7 @@ func resourcePrivateCrossConnect() *schema.Resource {
 				Type:        schema.TypeList,
 				Description: "A list containing the details of all datacenter cross-connected through this private cross-connect",
 				Computed:    true,
+				Optional:    true,
 				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{
 						"lan_id": {

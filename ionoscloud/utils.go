@@ -187,6 +187,15 @@ func resourceServerImport(ctx context.Context, d *schema.ResourceData, meta inte
 			setPropWithNilCheck(volumeItem, "licence_type", volumeObj.Properties.LicenceType)
 			setPropWithNilCheck(volumeItem, "bus", volumeObj.Properties.Bus)
 			setPropWithNilCheck(volumeItem, "availability_zone", volumeObj.Properties.AvailabilityZone)
+			setPropWithNilCheck(volumeItem, "cpu_hot_plug", volumeObj.Properties.CpuHotPlug)
+			setPropWithNilCheck(volumeItem, "ram_hot_plug", volumeObj.Properties.RamHotPlug)
+			setPropWithNilCheck(volumeItem, "nic_hot_plug", volumeObj.Properties.NicHotPlug)
+			setPropWithNilCheck(volumeItem, "nic_hot_unplug", volumeObj.Properties.NicHotUnplug)
+			setPropWithNilCheck(volumeItem, "disc_virtio_hot_plug", volumeObj.Properties.DiscVirtioHotPlug)
+			setPropWithNilCheck(volumeItem, "disc_virtio_hot_unplug", volumeObj.Properties.DiscVirtioHotUnplug)
+			setPropWithNilCheck(volumeItem, "device_number", volumeObj.Properties.DeviceNumber)
+			setPropWithNilCheck(volumeItem, "user_data", volumeObj.Properties.UserData)
+			setPropWithNilCheck(volumeItem, "backup_unit_id", volumeObj.Properties.BackupunitId)
 
 			volumesList := []map[string]interface{}{volumeItem}
 			if err := d.Set("volume", volumesList); err != nil {
