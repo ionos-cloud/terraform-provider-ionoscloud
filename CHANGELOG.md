@@ -1,3 +1,8 @@
+## 5.2.14
+
+- fixed typo in setting user_data and backup_unit_id in the volume entity from server
+- test updates
+
 ## 5.2.13
 
 - added user_data and backup_unit_id in the volume entity from server
