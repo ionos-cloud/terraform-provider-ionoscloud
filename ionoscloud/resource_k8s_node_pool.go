@@ -543,38 +543,8 @@ func resourcek8sNodePoolRead(ctx context.Context, d *schema.ResourceData, meta i
 	}
 
 	if k8sNodepool.Properties.Lans != nil && len(*k8sNodepool.Properties.Lans) > 0 {
-		var nodePoolLans []interface{}
-		for _, nodePoolLan := range *k8sNodepool.Properties.Lans {
-			lanEntry := make(map[string]interface{})
 
-			if nodePoolLan.Id != nil {
-				lanEntry["id"] = *nodePoolLan.Id
-			}
-
-			if nodePoolLan.Dhcp != nil {
-				lanEntry["dhcp"] = *nodePoolLan.Dhcp
-			}
-
-			if nodePoolLan.Routes != nil && len(*nodePoolLan.Routes) > 0 {
-				var nodePoolRoutes []interface{}
-				for _, nodePoolRoute := range *nodePoolLan.Routes {
-					routeEntry := make(map[string]string)
-					if nodePoolRoute.Network != nil {
-						routeEntry["network"] = *nodePoolRoute.Network
-					}
-					if nodePoolRoute.GatewayIp != nil {
-						routeEntry["gateway_ip"] = *nodePoolRoute.GatewayIp
-					}
-					nodePoolRoutes = append(nodePoolRoutes, routeEntry)
-				}
-
-				if len(nodePoolRoutes) > 0 {
-					lanEntry["routes"] = nodePoolRoutes
-				}
-			}
-
-			nodePoolLans = append(nodePoolLans, lanEntry)
-		}
+		nodePoolLans := getK8sNodePoolLans(*k8sNodepool.Properties.Lans)
 
 		if len(nodePoolLans) > 0 {
 			if err := d.Set("lans", nodePoolLans); err != nil {
@@ -945,4 +915,43 @@ func k8sNodepoolDeleted(ctx context.Context, client *ionoscloud.APIClient, d *sc
 		return true, fmt.Errorf("error checking k8s node pool deletion status: %s", err)
 	}
 	return false, nil
+}
+
+func getK8sNodePoolLans(lans []ionoscloud.KubernetesNodePoolLan) []interface{} {
+
+	var nodePoolLans []interface{}
+	for _, nodePoolLan := range lans {
+		lanEntry := make(map[string]interface{})
+
+		if nodePoolLan.Id != nil {
+			lanEntry["id"] = *nodePoolLan.Id
+		}
+
+		if nodePoolLan.Dhcp != nil {
+			lanEntry["dhcp"] = *nodePoolLan.Dhcp
+		}
+
+		if nodePoolLan.Routes != nil && len(*nodePoolLan.Routes) > 0 {
+			var nodePoolRoutes []interface{}
+			for _, nodePoolRoute := range *nodePoolLan.Routes {
+				routeEntry := make(map[string]string)
+				if nodePoolRoute.Network != nil {
+					routeEntry["network"] = *nodePoolRoute.Network
+				}
+				if nodePoolRoute.GatewayIp != nil {
+					routeEntry["gateway_ip"] = *nodePoolRoute.GatewayIp
+				}
+				nodePoolRoutes = append(nodePoolRoutes, routeEntry)
+			}
+
+			if len(nodePoolRoutes) > 0 {
+				lanEntry["routes"] = nodePoolRoutes
+			}
+		}
+
+		nodePoolLans = append(nodePoolLans, lanEntry)
+	}
+
+	return nodePoolLans
+
 }

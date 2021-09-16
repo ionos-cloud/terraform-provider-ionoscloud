@@ -171,14 +171,15 @@ func resourceK8sNodepoolImport(ctx context.Context, d *schema.ResourceData, meta
 	}
 
 	if k8sNodepool.Properties.Lans != nil {
-		var lans []int32
 
-		for _, lan := range *k8sNodepool.Properties.Lans {
-			lans = append(lans, *lan.Id)
+		nodePoolLans := getK8sNodePoolLans(*k8sNodepool.Properties.Lans)
+
+		if len(nodePoolLans) > 0 {
+			if err := d.Set("lans", nodePoolLans); err != nil {
+				return nil, err
+			}
 		}
-		if err := d.Set("lans", lans); err != nil {
-			return nil, err
-		}
+
 		log.Printf("[INFO] Setting LAN's for k8s node pool %s to %+v...", d.Id(), d.Get("lans"))
 	}
 

@@ -357,36 +357,13 @@ func setK8sNodePoolData(d *schema.ResourceData, nodePool *ionoscloud.KubernetesN
 
 		var nodePoolLans []interface{}
 		if nodePool.Properties.Lans != nil && len(*nodePool.Properties.Lans) > 0 {
-			for _, nodePoolLan := range *nodePool.Properties.Lans {
-				lanEntry := make(map[string]interface{})
 
-				if nodePoolLan.Id != nil {
-					lanEntry["id"] = *nodePoolLan.Id
+			nodePoolLans = getK8sNodePoolLans(*nodePool.Properties.Lans)
+
+			if len(nodePoolLans) > 0 {
+				if err := d.Set("lans", nodePoolLans); err != nil {
+					return err
 				}
-
-				if nodePoolLan.Dhcp != nil {
-					lanEntry["dhcp"] = *nodePoolLan.Dhcp
-				}
-
-				if len(*nodePoolLan.Routes) > 0 {
-					var nodePoolRoutes []interface{}
-					for _, nodePoolRoute := range *nodePoolLan.Routes {
-						routeEntry := make(map[string]string)
-						if nodePoolRoute.Network != nil {
-							routeEntry["network"] = *nodePoolRoute.Network
-						}
-						if nodePoolRoute.GatewayIp != nil {
-							routeEntry["gateway_ip"] = *nodePoolRoute.GatewayIp
-						}
-						nodePoolRoutes = append(nodePoolRoutes, routeEntry)
-					}
-
-					if len(nodePoolRoutes) > 0 {
-						lanEntry["routes"] = nodePoolRoutes
-					}
-				}
-
-				nodePoolLans = append(nodePoolLans, lanEntry)
 			}
 		}
 
