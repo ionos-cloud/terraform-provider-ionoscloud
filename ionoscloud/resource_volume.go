@@ -193,11 +193,11 @@ func resourceVolumeCreate(ctx context.Context, d *schema.ResourceData, meta inte
 
 			if err != nil {
 
-				if apiResponse != nil && apiResponse.StatusCode == 404 {
+				if apiResponse != nil && apiResponse.Response != nil && apiResponse.StatusCode== 404 {
 					snapshot, apiResponse, err := client.SnapshotsApi.SnapshotsFindById(ctx, imageInput).Execute()
 
 					if err != nil {
-						if apiResponse != nil && apiResponse.StatusCode == 404 {
+						if apiResponse != nil && apiResponse.Response != nil && apiResponse.StatusCode== 404 {
 							diags := diag.FromErr(fmt.Errorf("image/snapshot %s not found: %s", imageInput, err))
 							return diags
 						} else {
@@ -383,7 +383,7 @@ func resourceVolumeRead(ctx context.Context, d *schema.ResourceData, meta interf
 	volume, apiResponse, err := client.VolumesApi.DatacentersVolumesFindById(ctx, dcId, volumeID).Execute()
 
 	if err != nil {
-		if apiResponse != nil && apiResponse.StatusCode == 404 {
+		if apiResponse != nil && apiResponse.Response != nil && apiResponse.StatusCode== 404 {
 			d.SetId("")
 			return nil
 		}
@@ -592,7 +592,7 @@ func resourceVolumeUpdate(ctx context.Context, d *schema.ResourceData, meta inte
 		return diags
 	}
 
-	if apiResponse != nil && apiResponse.StatusCode > 299 {
+	if apiResponse != nil && apiResponse.Response != nil && apiResponse.StatusCode> 299 {
 		diags := diag.FromErr(fmt.Errorf("an error occured while updating a volume ID %s %s", d.Id(), err))
 		return diags
 	}

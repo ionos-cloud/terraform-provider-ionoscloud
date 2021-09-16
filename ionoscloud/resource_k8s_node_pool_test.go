@@ -53,6 +53,9 @@ func TestAcck8sNodepool_Basic(t *testing.T) {
 					resource.TestCheckResourceAttr("ionoscloud_k8s_node_pool.terraform_acctest", "annotations.ann3", "newValue"),
 				),
 			},
+			{
+				Config: "",
+			},
 		},
 	})
 }
@@ -202,6 +205,7 @@ resource "ionoscloud_ipblock" "terraform_acctest" {
 }
 
 resource "ionoscloud_k8s_cluster" "terraform_acctest" {
+  depends_on = [ ionoscloud_datacenter.terraform_acctest ]
   name        = "terraform_acctest2"
   k8s_version = "1.20.10"
   maintenance_window {
