@@ -82,10 +82,10 @@ func resourceNicCreate(ctx context.Context, d *schema.ResourceData, meta interfa
 		name := d.Get("name").(string)
 		nic.Properties.Name = &name
 	}
-	if _, ok := d.GetOkExists("dhcp"); ok {
-		val := d.Get("dhcp").(bool)
-		nic.Properties.Dhcp = &val
-	}
+
+	val := d.Get("dhcp").(bool)
+	nic.Properties.Dhcp = &val
+
 	if _, ok := d.GetOk("firewall_active"); ok {
 		raw := d.Get("firewall_active").(bool)
 		nic.Properties.FirewallActive = &raw
