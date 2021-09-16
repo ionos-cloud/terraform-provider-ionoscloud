@@ -1065,6 +1065,7 @@ func resourceServerRead(ctx context.Context, d *schema.ResourceData, meta interf
 			setPropWithNilCheck(volumeItem, "disc_virtio_hot_plug", volumeObj.Properties.CpuHotPlug)
 			setPropWithNilCheck(volumeItem, "disc_virtio_hot_unplug", volumeObj.Properties.CpuHotPlug)
 			setPropWithNilCheck(volumeItem, "device_number", volumeObj.Properties.DeviceNumber)
+			setPropWithNilCheck(volumeItem, "pci_slot", volumeObj.Properties.PciSlot)
 
 			userData := d.Get("volume.0.user_data")
 			volumeItem["user_data"] = userData
