@@ -76,7 +76,7 @@ func resourceIPBlock() *schema.Resource {
 							Type:     schema.TypeString,
 							Computed: true,
 						},
-						"k8s_node_pool_uuid": {
+						"k8s_nodepool_uuid": {
 							Type:     schema.TypeString,
 							Computed: true,
 						},
@@ -135,7 +135,7 @@ func resourceIPBlockRead(ctx context.Context, d *schema.ResourceData, meta inter
 	ipBlock, apiResponse, err := client.IPBlocksApi.IpblocksFindById(ctx, d.Id()).Execute()
 
 	if err != nil {
-		if apiResponse != nil && apiResponse.StatusCode == 404 {
+		if apiResponse != nil && apiResponse.Response != nil && apiResponse.StatusCode== 404 {
 			d.SetId("")
 			return nil
 		}

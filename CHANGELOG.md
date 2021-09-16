@@ -1,5 +1,6 @@
 ## 6.0.0-beta.9
 
+- ipblock `k8s_nodepool_uuid` attribute fixed
 - correctly importing private lans from k8s node pools
 
 ## 6.0.0-beta.8
