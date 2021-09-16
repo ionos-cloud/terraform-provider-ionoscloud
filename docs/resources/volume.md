@@ -41,7 +41,7 @@ resource "ionoscloud_volume" "example" {
 * `name` - (Optional)[string] The name of the volume.
 * `availability_zone` - (Optional)[string] The storage availability zone assigned to the volume: AUTO, ZONE_1, ZONE_2, or ZONE_3.
 * `user_data` - (Optional)[string] The cloud-init configuration for the volume as base64 encoded string. The property is immutable and is only allowed to be set on a new volume creation. This option will work only with cloud-init compatible images.
-* `backup_unit_id`- (Computed)[string] The uuid of the Backup Unit that user has access to. The property is immutable and is only allowed to be set on a new volume creation. It is mandatory to provide either 'public image' or 'imageAlias' in conjunction with this property.
+* `backup_unit_id`- (Optional)[string] The uuid of the Backup Unit that user has access to. The property is immutable and is only allowed to be set on a new volume creation. It is mandatory to provide either 'public image' or 'imageAlias' in conjunction with this property.
 * `device_number`- (Computed) The Logical Unit Number of the storage volume. Null for volumes not mounted to any VM.
 * `pci_slot`- (Computed) The PCI slot number of the storage volume. Null for volumes not mounted to any VM.
 * `cpu_hot_plug` - (Computed)[string] Is capable of CPU hot plug (no reboot required)

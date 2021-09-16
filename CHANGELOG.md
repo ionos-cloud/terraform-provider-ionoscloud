@@ -2,6 +2,7 @@
 
 - fix issue #19 - fixed update ssh_key_path although not changed
 - issue #93 - updated documentation for image data source
+- made backup_unit_id configurable for volume
 
 ## 6.0.0-beta.8
 
