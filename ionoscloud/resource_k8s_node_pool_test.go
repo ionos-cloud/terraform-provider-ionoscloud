@@ -31,6 +31,10 @@ func TestAcck8sNodepool_Basic(t *testing.T) {
 					resource.TestCheckResourceAttr("ionoscloud_k8s_node_pool.terraform_acctest", "name", k8sNodepoolName),
 					resource.TestCheckResourceAttrPair("ionoscloud_k8s_node_pool.terraform_acctest", "public_ips.0", "ionoscloud_ipblock.terraform_acctest", "ips.0"),
 					resource.TestCheckResourceAttrPair("ionoscloud_k8s_node_pool.terraform_acctest", "public_ips.1", "ionoscloud_ipblock.terraform_acctest", "ips.1"),
+					resource.TestCheckResourceAttr("ionoscloud_k8s_node_pool.terraform_acctest", "labels.foo", "bar"),
+					resource.TestCheckResourceAttr("ionoscloud_k8s_node_pool.terraform_acctest", "labels.color", "green"),
+					resource.TestCheckResourceAttr("ionoscloud_k8s_node_pool.terraform_acctest", "annotations.ann1", "value1"),
+					resource.TestCheckResourceAttr("ionoscloud_k8s_node_pool.terraform_acctest", "annotations.ann2", "value2"),
 				),
 			},
 			{
@@ -41,6 +45,12 @@ func TestAcck8sNodepool_Basic(t *testing.T) {
 					resource.TestCheckResourceAttrPair("ionoscloud_k8s_node_pool.terraform_acctest", "public_ips.0", "ionoscloud_ipblock.terraform_acctest", "ips.0"),
 					resource.TestCheckResourceAttrPair("ionoscloud_k8s_node_pool.terraform_acctest", "public_ips.1", "ionoscloud_ipblock.terraform_acctest", "ips.1"),
 					resource.TestCheckResourceAttrPair("ionoscloud_k8s_node_pool.terraform_acctest", "public_ips.2", "ionoscloud_ipblock.terraform_acctest", "ips.2"),
+					resource.TestCheckResourceAttr("ionoscloud_k8s_node_pool.terraform_acctest", "labels.foo", "baz"),
+					resource.TestCheckResourceAttr("ionoscloud_k8s_node_pool.terraform_acctest", "labels.color", "red"),
+					resource.TestCheckResourceAttr("ionoscloud_k8s_node_pool.terraform_acctest", "labels.third", "thirdValue"),
+					resource.TestCheckResourceAttr("ionoscloud_k8s_node_pool.terraform_acctest", "annotations.ann1", "value1Changed"),
+					resource.TestCheckResourceAttr("ionoscloud_k8s_node_pool.terraform_acctest", "annotations.ann2", "value2Changed"),
+					resource.TestCheckResourceAttr("ionoscloud_k8s_node_pool.terraform_acctest", "annotations.ann3", "newValue"),
 				),
 			},
 			{
@@ -221,6 +231,14 @@ resource "ionoscloud_k8s_node_pool" "terraform_acctest" {
   ram_size          = 2048
   storage_size      = 40
   public_ips        = [ ionoscloud_ipblock.terraform_acctest.ips[0], ionoscloud_ipblock.terraform_acctest.ips[1] ]
+  labels = {
+    foo = "bar"
+    color = "green"
+  }
+  annotations = {
+    ann1 = "value1"
+    ann2 = "value2"
+  }
 }`
 
 const testAccCheckk8sNodepoolConfigUpdate = `
@@ -266,6 +284,16 @@ resource "ionoscloud_k8s_node_pool" "terraform_acctest" {
   ram_size          = 2048
   storage_size      = 40
   public_ips        = [ ionoscloud_ipblock.terraform_acctest.ips[0], ionoscloud_ipblock.terraform_acctest.ips[1], ionoscloud_ipblock.terraform_acctest.ips[2] ]
+  labels = {
+    foo = "baz"
+    color = "red"
+    third = "thirdValue"
+  }
+  annotations = {
+    ann1 = "value1Changed"
+    ann2 = "value2Changed"
+    ann3 = "newValue"
+  }
 }`
 
 const testAccCheckk8sNodepoolConfigLan = `

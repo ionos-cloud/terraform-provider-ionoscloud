@@ -195,6 +195,28 @@ func resourceK8sNodepoolImport(ctx context.Context, d *schema.ResourceData, meta
 		log.Printf("[INFO] Setting maintenance window for k8s node pool %s to %+v...", d.Id(), k8sNodepool.Properties.MaintenanceWindow)
 	}
 
+	labels := make(map[string]interface{})
+	if k8sNodepool.Properties.Labels != nil && len(*k8sNodepool.Properties.Labels) > 0 {
+		for k, v := range *k8sNodepool.Properties.Labels {
+			labels[k] = v
+		}
+	}
+
+	if err := d.Set("labels", labels); err != nil {
+		return nil, fmt.Errorf("error while setting the labels property for k8sNodepool %s: %s", d.Id(), err)
+	}
+
+	annotations := make(map[string]interface{})
+	if k8sNodepool.Properties.Annotations != nil && len(*k8sNodepool.Properties.Annotations) > 0 {
+		for k, v := range *k8sNodepool.Properties.Annotations {
+			annotations[k] = v
+		}
+	}
+
+	if err := d.Set("annotations", annotations); err != nil {
+		return nil, fmt.Errorf("error while setting the annotations property for k8sNodepool %s: %s", d.Id(), err)
+	}
+
 	log.Printf("[INFO] Importing k8s node pool %q...", d.Id())
 
 	return []*schema.ResourceData{d}, nil
