@@ -1,3 +1,8 @@
+## 6.0.1
+
+- fix issue #19 - fixed update ssh_key_path although not changed
+- issue #93 - updated documentation for image data source
+
 ## 6.0.0-beta.8
 
 - fixed set of empty array in terraform state instead of null

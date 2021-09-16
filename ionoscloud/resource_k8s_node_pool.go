@@ -415,7 +415,6 @@ func resourcek8sNodePoolRead(ctx context.Context, d *schema.ResourceData, meta i
 	k8sNodepool, apiResponse, err := client.KubernetesApi.K8sNodepoolsFindById(ctx, d.Get("k8s_cluster_id").(string), d.Id()).Execute()
 
 	if err != nil {
-		log.Printf("[INFO] Resource %s not found: %+v", d.Id(), err)
 		if apiResponse != nil && apiResponse.StatusCode == 404 {
 			d.SetId("")
 			return nil
