@@ -176,7 +176,7 @@ func resourceFirewallRead(ctx context.Context, d *schema.ResourceData, meta inte
 		d.Get("server_id").(string), d.Get("nic_id").(string), d.Id()).Execute()
 
 	if err != nil {
-		if apiResponse != nil && apiResponse.StatusCode == 404 {
+		if apiResponse != nil && apiResponse.Response != nil && apiResponse.StatusCode == 404 {
 			d.SetId("")
 			return nil
 		}

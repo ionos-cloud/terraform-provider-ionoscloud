@@ -36,6 +36,7 @@ func resourcePrivateCrossConnect() *schema.Resource {
 				Type:        schema.TypeList,
 				Description: "A list containing all the connectable datacenters",
 				Computed:    true,
+				Optional:    true,
 				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{
 						"id": {
@@ -60,6 +61,7 @@ func resourcePrivateCrossConnect() *schema.Resource {
 				Type:        schema.TypeList,
 				Description: "A list containing the details of all datacenter cross-connected through this private cross-connect",
 				Computed:    true,
+				Optional:    true,
 				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{
 						"lan_id": {
@@ -157,7 +159,7 @@ func resourcePrivateCrossConnectRead(ctx context.Context, d *schema.ResourceData
 	rsp, apiResponse, err := client.PrivateCrossConnectApi.PccsFindById(ctx, d.Id()).Execute()
 
 	if err != nil {
-		if apiResponse != nil && apiResponse.StatusCode == 404 {
+		if apiResponse != nil && apiResponse.Response != nil && apiResponse.StatusCode == 404 {
 			d.SetId("")
 			return nil
 		}
@@ -234,7 +236,7 @@ func resourcePrivateCrossConnectUpdate(ctx context.Context, d *schema.ResourceDa
 
 	_, apiResponse, err := client.PrivateCrossConnectApi.PccsPatch(ctx, d.Id()).Pcc(*request.Properties).Execute()
 	if err != nil {
-		if apiResponse != nil && apiResponse.StatusCode == 404 {
+		if apiResponse != nil && apiResponse.Response != nil && apiResponse.StatusCode == 404 {
 			d.SetId("")
 			return nil
 		}
@@ -276,7 +278,7 @@ func resourcePrivateCrossConnectDelete(ctx context.Context, d *schema.ResourceDa
 
 	_, apiResponse, err := client.PrivateCrossConnectApi.PccsDelete(ctx, d.Id()).Execute()
 	if err != nil {
-		if apiResponse != nil && apiResponse.StatusCode == 404 {
+		if apiResponse != nil && apiResponse.Response != nil && apiResponse.StatusCode == 404 {
 			d.SetId("")
 			return nil
 		}
@@ -326,7 +328,7 @@ func privateCrossConnectDeleted(ctx context.Context, client *ionoscloud.APIClien
 	_, apiResponse, err := client.PrivateCrossConnectApi.PccsFindById(ctx, d.Id()).Execute()
 
 	if err != nil {
-		if apiResponse != nil && apiResponse.StatusCode == 404 {
+		if apiResponse != nil && apiResponse.Response != nil && apiResponse.StatusCode == 404 {
 			return true, nil
 		}
 		return true, fmt.Errorf("error checking PCC deletion status: %s", err)

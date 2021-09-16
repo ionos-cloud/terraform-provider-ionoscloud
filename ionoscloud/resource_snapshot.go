@@ -75,7 +75,7 @@ func resourceSnapshotRead(ctx context.Context, d *schema.ResourceData, meta inte
 	rsp, apiResponse, err := client.SnapshotApi.SnapshotsFindById(ctx, d.Id()).Execute()
 
 	if err != nil {
-		if apiResponse != nil && apiResponse.StatusCode == 404 {
+		if apiResponse != nil && apiResponse.Response != nil && apiResponse.StatusCode == 404 {
 			d.SetId("")
 			return nil
 		}

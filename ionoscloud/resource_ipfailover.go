@@ -89,7 +89,7 @@ func resourceLanIPFailoverRead(ctx context.Context, d *schema.ResourceData, meta
 	lan, apiResponse, err := client.LanApi.DatacentersLansFindById(ctx, d.Get("datacenter_id").(string), d.Id()).Execute()
 
 	if err != nil {
-		if apiResponse != nil && apiResponse.StatusCode == 404 {
+		if apiResponse != nil && apiResponse.Response != nil && apiResponse.StatusCode == 404 {
 			d.SetId("")
 			return nil
 		}

@@ -1,3 +1,9 @@
+## 5.2.13
+
+- added user_data and backup_unit_id in the volume entity from server
+- fix issue #19 - fixed update ssh_key_path although not changed
+- issue #93 - updated documentation for image data source
+
 ## 5.2.12
 
 - fix: correctly saving lans when reading a k8s node pool

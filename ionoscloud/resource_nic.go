@@ -144,7 +144,7 @@ func resourceNicRead(ctx context.Context, d *schema.ResourceData, meta interface
 
 	if err != nil {
 		if _, ok := err.(ionoscloud.GenericOpenAPIError); ok {
-			if apiResponse != nil && apiResponse.StatusCode == 404 {
+			if apiResponse != nil && apiResponse.Response != nil && apiResponse.StatusCode == 404 {
 				d.SetId("")
 				return nil
 			}

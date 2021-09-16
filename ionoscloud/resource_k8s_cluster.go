@@ -256,7 +256,7 @@ func resourcek8sClusterRead(ctx context.Context, d *schema.ResourceData, meta in
 	cluster, apiResponse, err := client.KubernetesApi.K8sFindByClusterId(ctx, d.Id()).Execute()
 
 	if err != nil {
-		if apiResponse != nil && apiResponse.StatusCode == 404 {
+		if apiResponse != nil && apiResponse.Response != nil && apiResponse.StatusCode == 404 {
 			d.SetId("")
 			return nil
 		}
@@ -469,7 +469,7 @@ func resourcek8sClusterUpdate(ctx context.Context, d *schema.ResourceData, meta 
 
 	if err != nil {
 		if _, ok := err.(ionoscloud.GenericOpenAPIError); ok {
-			if apiResponse != nil && apiResponse.StatusCode == 404 {
+			if apiResponse != nil && apiResponse.Response != nil && apiResponse.StatusCode == 404 {
 				d.SetId("")
 				return nil
 			}
@@ -514,7 +514,7 @@ func resourcek8sClusterDelete(ctx context.Context, d *schema.ResourceData, meta 
 	_, apiResponse, err := client.KubernetesApi.K8sDelete(ctx, d.Id()).Execute()
 
 	if err != nil {
-		if apiResponse != nil && apiResponse.StatusCode == 404 {
+		if apiResponse != nil && apiResponse.Response != nil && apiResponse.StatusCode == 404 {
 			d.SetId("")
 			return nil
 		}
@@ -566,7 +566,7 @@ func k8sClusterDeleted(ctx context.Context, client *ionoscloud.APIClient, d *sch
 
 	if err != nil {
 		if _, ok := err.(ionoscloud.GenericOpenAPIError); ok {
-			if apiResponse != nil && apiResponse.StatusCode == 404 {
+			if apiResponse != nil && apiResponse.Response != nil && apiResponse.StatusCode == 404 {
 				return true, nil
 			}
 			return true, fmt.Errorf("error checking k8s cluster deletion status: %s", err)
