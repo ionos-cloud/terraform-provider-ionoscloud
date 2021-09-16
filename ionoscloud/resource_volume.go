@@ -273,7 +273,7 @@ func resourceVolumeCreate(ctx context.Context, d *schema.ResourceData, meta inte
 	backupUnitId := d.Get("backup_unit_id").(string)
 	if IsValidUUID(backupUnitId) {
 		if image == "" && imageAlias == "" {
-			diags := diag.FromErr(fmt.Errorf("it is mandatory to provied either public image or imageAlias in conjunction with backup unit id property"))
+			diags := diag.FromErr(fmt.Errorf("it is mandatory to provide either public image or imageAlias in conjunction with backup unit id property"))
 			return diags
 		} else {
 			volume.Properties.BackupunitId = &backupUnitId
@@ -285,7 +285,7 @@ func resourceVolumeCreate(ctx context.Context, d *schema.ResourceData, meta inte
 	userData := d.Get("user_data").(string)
 	if userData != "" {
 		if image == "" && imageAlias == "" {
-			diags := diag.FromErr(fmt.Errorf("it is mandatory to provied either public image or imageAlias that has cloud-init compatibility in conjunction with backup unit id property "))
+			diags := diag.FromErr(fmt.Errorf("it is mandatory to provide either public image or imageAlias that has cloud-init compatibility in conjunction with backup unit id property "))
 			return diags
 		} else {
 			volume.Properties.UserData = &userData

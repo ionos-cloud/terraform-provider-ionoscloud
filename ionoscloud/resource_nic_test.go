@@ -28,6 +28,7 @@ func TestAccNic_Basic(t *testing.T) {
 					testAccCheckNicAttributes("ionoscloud_nic.database_nic", volumeName),
 					resource.TestCheckResourceAttrSet("ionoscloud_nic.database_nic", "mac"),
 					resource.TestCheckResourceAttr("ionoscloud_nic.database_nic", "name", volumeName),
+					resource.TestCheckResourceAttr("ionoscloud_nic.database_nic", "dhcp", "false"),
 				),
 			},
 			{
@@ -35,6 +36,7 @@ func TestAccNic_Basic(t *testing.T) {
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckNicAttributes("ionoscloud_nic.database_nic", "updated"),
 					resource.TestCheckResourceAttr("ionoscloud_nic.database_nic", "name", "updated"),
+					resource.TestCheckResourceAttr("ionoscloud_nic.database_nic", "dhcp", "true"),
 				),
 			},
 		},
@@ -211,7 +213,7 @@ resource "ionoscloud_nic" "database_nic" {
   datacenter_id = "${ionoscloud_datacenter.foobar.id}"
   server_id = "${ionoscloud_server.webserver.id}"
   lan = 2
-  dhcp = false
+  dhcp = true
   firewall_active = true
   name = "updated"
 }
