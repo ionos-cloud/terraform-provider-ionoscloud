@@ -102,6 +102,7 @@ func resourceVolume() *schema.Resource {
 			},
 			"backup_unit_id": {
 				Type:     schema.TypeString,
+				Optional: true,
 				Computed: true,
 			},
 			"user_data": {
@@ -272,16 +273,29 @@ func resourceVolumeCreate(ctx context.Context, d *schema.ResourceData, meta inte
 		volume.Properties.AvailabilityZone = &raw
 	}
 
-	userData := d.Get("user_data").(string)
-	if userData != "" {
+	if userData, ok := d.GetOk("user_data"); ok {
 		if image == "" && imageAlias == "" {
-			diags := diag.FromErr(fmt.Errorf("it is mandatory to provied either public image that has cloud-init compatibility in conjunction with backup unit id property "))
+			diags := diag.FromErr(fmt.Errorf("it is mandatory to provide either public image that has cloud-init compatibility in conjunction with user_data property "))
 			return diags
 		} else {
+			userData := userData.(string)
 			volume.Properties.UserData = &userData
 		}
-	} else {
-		volume.Properties.UserData = nil
+	}
+
+	if backupUnitId, ok := d.GetOk("backup_unit_id"); ok {
+		if IsValidUUID(backupUnitId.(string)) {
+			if image == "" && imageAlias == "" {
+				diags := diag.FromErr(fmt.Errorf("it is mandatory to provide either public image that has cloud-init compatibility in conjunction with backup_unit_id property "))
+				return diags
+			} else {
+				backupUnitId := backupUnitId.(string)
+				volume.Properties.BackupunitId = &backupUnitId
+			}
+		} else {
+			diags := diag.FromErr(fmt.Errorf("the backup_unit_id that you specified is not a valid UUID"))
+			return diags
+		}
 	}
 
 	volume, apiResponse, err := client.VolumesApi.DatacentersVolumesPost(ctx, dcId).Volume(volume).Execute()
@@ -504,7 +518,12 @@ func resourceVolumeUpdate(ctx context.Context, d *schema.ResourceData, meta inte
 	}
 
 	if d.HasChange("user_data") {
-		diags := diag.FromErr(fmt.Errorf("User data property of resource volume is immutable "))
+		diags := diag.FromErr(fmt.Errorf("user_data property of resource volume is immutable "))
+		return diags
+	}
+
+	if d.HasChange("backup_unit_id") {
+		diags := diag.FromErr(fmt.Errorf("backup_unit_id property of resource volume is immutable "))
 		return diags
 	}
 

@@ -40,7 +40,7 @@ func testAccServerImportStateId(s *terraform.State) (string, error) {
 			continue
 		}
 
-		importID = fmt.Sprintf("%s/%s/%s/%s", rs.Primary.Attributes["datacenter_id"], rs.Primary.Attributes["id"], rs.Primary.Attributes["primary_nic"], rs.Primary.Attributes["firewallrule_id"])
+		importID = fmt.Sprintf("%s/%s", rs.Primary.Attributes["datacenter_id"], rs.Primary.Attributes["id"])
 	}
 
 	return importID, nil
