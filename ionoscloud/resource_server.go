@@ -439,36 +439,6 @@ func resourceServerCreate(ctx context.Context, d *schema.ResourceData, meta inte
 		volume.Bus = &vStr
 	}
 
-	if v, ok := d.GetOk("volume.0.cpu_hot_plug"); ok {
-		vBool := v.(bool)
-		volume.CpuHotPlug = &vBool
-	}
-
-	if v, ok := d.GetOk("volume.0.ram_hot_plug"); ok {
-		vBool := v.(bool)
-		volume.RamHotPlug = &vBool
-	}
-
-	if v, ok := d.GetOk("volume.0.nic_hot_plug"); ok {
-		vBool := v.(bool)
-		volume.NicHotUnplug = &vBool
-	}
-
-	if v, ok := d.GetOk("volume.0.nic_hot_unplug"); ok {
-		vBool := v.(bool)
-		volume.NicHotUnplug = &vBool
-	}
-
-	if v, ok := d.GetOk("volume.0.disc_virtio_hot_plug"); ok {
-		vBool := v.(bool)
-		volume.DiscVirtioHotPlug = &vBool
-	}
-
-	if v, ok := d.GetOk("volume.0.disc_virtio_hot_unplug"); ok {
-		vBool := v.(bool)
-		volume.DiscVirtioHotUnplug = &vBool
-	}
-
 	if v, ok := d.GetOk("volume.0.backup_unit_id"); ok {
 		vStr := v.(string)
 		volume.BackupunitId = &vStr
@@ -1219,36 +1189,6 @@ func resourceServerUpdate(ctx context.Context, d *schema.ResourceData, meta inte
 		if v, ok := d.GetOk("volume.0.bus"); ok {
 			vStr := v.(string)
 			properties.Bus = &vStr
-		}
-
-		if v, ok := d.GetOk("volume.0.cpu_hot_plug"); ok {
-			vBool := v.(bool)
-			properties.CpuHotPlug = &vBool
-		}
-
-		if v, ok := d.GetOk("volume.0.ram_hot_plug"); ok {
-			vBool := v.(bool)
-			properties.RamHotPlug = &vBool
-		}
-
-		if v, ok := d.GetOk("volume.0.nic_hot_plug"); ok {
-			vBool := v.(bool)
-			properties.NicHotUnplug = &vBool
-		}
-
-		if v, ok := d.GetOk("volume.0.nic_hot_unplug"); ok {
-			vBool := v.(bool)
-			properties.NicHotUnplug = &vBool
-		}
-
-		if v, ok := d.GetOk("volume.0.disc_virtio_hot_plug"); ok {
-			vBool := v.(bool)
-			properties.DiscVirtioHotPlug = &vBool
-		}
-
-		if v, ok := d.GetOk("volume.0.disc_virtio_hot_unplug"); ok {
-			vBool := v.(bool)
-			properties.DiscVirtioHotUnplug = &vBool
 		}
 
 		_, apiResponse, err := client.VolumesApi.DatacentersVolumesPatch(ctx, d.Get("datacenter_id").(string), bootVolume).Volume(properties).Execute()
