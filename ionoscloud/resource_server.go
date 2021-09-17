@@ -107,6 +107,7 @@ func resourceServer() *schema.Resource {
 				Elem:          &schema.Schema{Type: schema.TypeString},
 				ConflictsWith: []string{"volume.0.ssh_key_path"},
 				Optional:      true,
+				Computed:      true,
 			},
 			"volume": {
 				Type:     schema.TypeList,
@@ -157,6 +158,7 @@ func resourceServer() *schema.Resource {
 							Elem:       &schema.Schema{Type: schema.TypeString},
 							Optional:   true,
 							Deprecated: "Please use ssh_key_path under server level",
+							Computed:   true,
 							DiffSuppressFunc: func(k, old, new string, d *schema.ResourceData) bool {
 								if k == "volume.0.ssh_key_path.#" {
 									if d.Get("ssh_key_path.#") == new {
@@ -190,49 +192,47 @@ func resourceServer() *schema.Resource {
 						},
 						"cpu_hot_plug": {
 							Type:     schema.TypeBool,
-							Optional: true,
 							Computed: true,
 						},
 						"ram_hot_plug": {
 							Type:     schema.TypeBool,
-							Optional: true,
 							Computed: true,
 						},
 						"nic_hot_plug": {
 							Type:     schema.TypeBool,
-							Optional: true,
 							Computed: true,
 						},
 						"nic_hot_unplug": {
 							Type:     schema.TypeBool,
-							Optional: true,
 							Computed: true,
 						},
 						"disc_virtio_hot_plug": {
 							Type:     schema.TypeBool,
-							Optional: true,
 							Computed: true,
 						},
 						"disc_virtio_hot_unplug": {
 							Type:     schema.TypeBool,
-							Optional: true,
 							Computed: true,
 						},
 						"device_number": {
 							Type:     schema.TypeInt,
 							Computed: true,
 						},
+						"backup_unit_id": {
+							Type:        schema.TypeString,
+							Description: "The uuid of the Backup Unit that user has access to. The property is immutable and is only allowed to be set on a new volume creation. It is mandatory to provide either 'public image' or 'imageAlias' in conjunction with this property.",
+							Optional:    true,
+							Computed:    true,
+						},
+						"user_data": {
+							Type:        schema.TypeString,
+							Description: "The cloud-init configuration for the volume as base64 encoded string. The property is immutable and is only allowed to be set on a new volume creation. It is mandatory to provide either 'public image' or 'imageAlias' that has cloud-init compatibility in conjunction with this property.",
+							Optional:    true,
+							Computed:    true,
+						},
 						"pci_slot": {
 							Type:     schema.TypeInt,
 							Computed: true,
-						},
-						"backup_unit_id": {
-							Type:     schema.TypeString,
-							Computed: true,
-						},
-						"user_data": {
-							Type:     schema.TypeString,
-							Optional: true,
 						},
 					},
 				},
@@ -437,36 +437,6 @@ func resourceServerCreate(ctx context.Context, d *schema.ResourceData, meta inte
 	if v, ok := d.GetOk("volume.0.bus"); ok {
 		vStr := v.(string)
 		volume.Bus = &vStr
-	}
-
-	if v, ok := d.GetOk("volume.0.cpu_hot_plug"); ok {
-		vBool := v.(bool)
-		volume.CpuHotPlug = &vBool
-	}
-
-	if v, ok := d.GetOk("volume.0.ram_hot_plug"); ok {
-		vBool := v.(bool)
-		volume.RamHotPlug = &vBool
-	}
-
-	if v, ok := d.GetOk("volume.0.nic_hot_plug"); ok {
-		vBool := v.(bool)
-		volume.NicHotUnplug = &vBool
-	}
-
-	if v, ok := d.GetOk("volume.0.nic_hot_unplug"); ok {
-		vBool := v.(bool)
-		volume.NicHotUnplug = &vBool
-	}
-
-	if v, ok := d.GetOk("volume.0.disc_virtio_hot_plug"); ok {
-		vBool := v.(bool)
-		volume.DiscVirtioHotPlug = &vBool
-	}
-
-	if v, ok := d.GetOk("volume.0.disc_virtio_hot_unplug"); ok {
-		vBool := v.(bool)
-		volume.DiscVirtioHotUnplug = &vBool
 	}
 
 	if v, ok := d.GetOk("volume.0.backup_unit_id"); ok {
@@ -1066,7 +1036,12 @@ func resourceServerRead(ctx context.Context, d *schema.ResourceData, meta interf
 			setPropWithNilCheck(volumeItem, "disc_virtio_hot_unplug", volumeObj.Properties.CpuHotPlug)
 			setPropWithNilCheck(volumeItem, "device_number", volumeObj.Properties.DeviceNumber)
 			setPropWithNilCheck(volumeItem, "pci_slot", volumeObj.Properties.PciSlot)
-			setPropWithNilCheck(volumeItem, "user_data", volumeObj.Properties.UserData)
+
+			userData := d.Get("volume.0.user_data")
+			volumeItem["user_data"] = userData
+
+			backupUnit := d.Get("volume.0.backup_unit_id")
+			volumeItem["backup_unit_id"] = backupUnit
 
 			volumesList := []map[string]interface{}{volumeItem}
 			if err := d.Set("volume", volumesList); err != nil {
@@ -1167,6 +1142,16 @@ func resourceServerUpdate(ctx context.Context, d *schema.ResourceData, meta inte
 		return diags
 	}
 	// Volume stuff
+
+	if d.HasChange("volume.0.user_data") {
+		diags := diag.FromErr(fmt.Errorf("user_data is immutable and is only allowed to be set on a new volume creation"))
+		return diags
+	}
+
+	if d.HasChange("volume.0.backup_unit_id") {
+		diags := diag.FromErr(fmt.Errorf("backup_unit_id is immutable and is only allowed to be set on a new volume creation"))
+		return diags
+	}
 	if d.HasChange("volume") {
 		bootVolume := d.Get("boot_volume").(string)
 		_, _, err := client.ServersApi.DatacentersServersVolumesFindById(ctx, dcId, d.Id(), bootVolume).Execute()
@@ -1204,36 +1189,6 @@ func resourceServerUpdate(ctx context.Context, d *schema.ResourceData, meta inte
 		if v, ok := d.GetOk("volume.0.bus"); ok {
 			vStr := v.(string)
 			properties.Bus = &vStr
-		}
-
-		if v, ok := d.GetOk("volume.0.cpu_hot_plug"); ok {
-			vBool := v.(bool)
-			properties.CpuHotPlug = &vBool
-		}
-
-		if v, ok := d.GetOk("volume.0.ram_hot_plug"); ok {
-			vBool := v.(bool)
-			properties.RamHotPlug = &vBool
-		}
-
-		if v, ok := d.GetOk("volume.0.nic_hot_plug"); ok {
-			vBool := v.(bool)
-			properties.NicHotUnplug = &vBool
-		}
-
-		if v, ok := d.GetOk("volume.0.nic_hot_unplug"); ok {
-			vBool := v.(bool)
-			properties.NicHotUnplug = &vBool
-		}
-
-		if v, ok := d.GetOk("volume.0.disc_virtio_hot_plug"); ok {
-			vBool := v.(bool)
-			properties.DiscVirtioHotPlug = &vBool
-		}
-
-		if v, ok := d.GetOk("volume.0.disc_virtio_hot_unplug"); ok {
-			vBool := v.(bool)
-			properties.DiscVirtioHotUnplug = &vBool
 		}
 
 		_, apiResponse, err := client.VolumesApi.DatacentersVolumesPatch(ctx, d.Get("datacenter_id").(string), bootVolume).Volume(properties).Execute()

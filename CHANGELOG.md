@@ -1,3 +1,10 @@
+## 6.0.0-beta.10
+
+- issue #19 - fixed update ssh_key_path although not changed
+- issue #93 - updated documentation for image data source
+- made backup_unit_id configurable for volume
+- fixed server import 
+
 ## 6.0.0-beta.9
 
 - issue #31 - k8s node pool labels and annotations implemented

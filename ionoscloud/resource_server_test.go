@@ -252,6 +252,12 @@ resource "ionoscloud_datacenter" "foobar" {
 	location = "us/las"
 }
 
+resource "ionoscloud_backup_unit" "example" {
+	name        = "serverTest"
+	password    = "DemoPassword123$"
+	email       = "example@ionoscloud.com"
+}
+
 resource "ionoscloud_lan" "webserver_lan" {
   datacenter_id = "${ionoscloud_datacenter.foobar.id}"
   public = true
@@ -265,13 +271,15 @@ resource "ionoscloud_server" "webserver" {
   ram = 1024
   availability_zone = "ZONE_1"
   cpu_family = "AMD_OPTERON"
-  image_name = "Ubuntu-20.04"
-  image_password = "K3tTj8G14a3EgKyNeeiY"
+	image_name ="Debian-10-cloud-init.qcow2"
+	image_password = "K3tTj8G14a3EgKyNeeiY"
   volume {
     name = "system"
-    size = 15
-    disk_type = "HDD"
-  }
+    size = 5
+    disk_type = "SSD"
+	backup_unit_id = ionoscloud_backup_unit.example.id
+    user_data = "foo"
+}
   nic {
     lan = "${ionoscloud_lan.webserver_lan.id}"
     dhcp = true
@@ -292,6 +300,12 @@ resource "ionoscloud_datacenter" "foobar" {
 	location = "us/las"
 }
 
+resource "ionoscloud_backup_unit" "example" {
+	name        = "serverTest"
+	password    = "DemoPassword123$"
+	email       = "example@ionoscloud.com"
+}
+
 resource "ionoscloud_lan" "webserver_lan" {
   datacenter_id = "${ionoscloud_datacenter.foobar.id}"
   public = true
@@ -306,11 +320,13 @@ resource "ionoscloud_server" "webserver" {
   availability_zone = "ZONE_1"
   cpu_family = "AMD_OPTERON"
   volume {
-	image_name = "Ubuntu-20.04"
+	image_name ="Debian-10-cloud-init.qcow2"
 	image_password = "K3tTj8G14a3EgKyNeeiY"
     name = "system"
-    size = 15
-    disk_type = "HDD"
+    size = 5
+    disk_type = "SSD"
+	backup_unit_id = ionoscloud_backup_unit.example.id
+    user_data = "foo"
   }
   nic {
     lan = "${ionoscloud_lan.webserver_lan.id}"
@@ -332,6 +348,12 @@ resource "ionoscloud_datacenter" "foobar" {
 	location = "us/las"
 }
 
+resource "ionoscloud_backup_unit" "example" {
+	name        = "serverTest"
+	password    = "DemoPassword123$"
+	email       = "example@ionoscloud.com"
+}
+
 resource "ionoscloud_lan" "webserver_lan" {
   datacenter_id = "${ionoscloud_datacenter.foobar.id}"
   public = true
@@ -345,13 +367,16 @@ resource "ionoscloud_server" "webserver" {
   ram = 1024
   availability_zone = "ZONE_1"
   cpu_family = "AMD_OPTERON"
-  image_name = "Ubuntu-20.04"
+  image_name = "Debian-10-cloud-init.qcow2"
   image_password = "K3tTj8G14a3EgKyNeeiY"
   volume {
     name = "system"
-    size = 20
-    disk_type = "HDD"
-}
+    size = 5
+    disk_type = "SSD"
+	backup_unit_id = ionoscloud_backup_unit.example.id
+    user_data = "foo"
+  }
+
   nic {
     lan = "${ionoscloud_lan.webserver_lan.id}"
     dhcp = false

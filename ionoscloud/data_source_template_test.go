@@ -16,9 +16,9 @@ func TestAccDataSourceTemplate_matching(t *testing.T) {
 
 				Config: testaccdatasourcetemplateMatchingwithdatasource,
 				Check: resource.ComposeTestCheckFunc(
-					resource.TestCheckResourceAttr("data.ionoscloud_template.template", "name", "BETA CUBES S"),
-					resource.TestCheckResourceAttr("data.ionoscloud_template.template", "cores", "1"),
-					resource.TestCheckResourceAttr("data.ionoscloud_template.template", "ram", "2048"),
+					resource.TestCheckResourceAttr("data.ionoscloud_template.template", "name", "CUBES L"),
+					resource.TestCheckResourceAttr("data.ionoscloud_template.template", "cores", "4"),
+					resource.TestCheckResourceAttr("data.ionoscloud_template.template", "ram", "8192"),
 				),
 			},
 		},
@@ -28,8 +28,8 @@ func TestAccDataSourceTemplate_matching(t *testing.T) {
 
 const testaccdatasourcetemplateMatchingwithdatasource = `
 data "ionoscloud_template" "template" {
-	name = "BETA CUBES S"
-	cores = 1
-	ram			= 2048
-	storage_size = 50
+	name = "CUBES L"
+	cores = 4
+	ram	= 8192
+	storage_size = 160
 }`
