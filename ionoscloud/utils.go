@@ -210,7 +210,7 @@ func resourceK8sClusterImport(ctx context.Context, d *schema.ResourceData, meta 
 	cluster, apiResponse, err := client.KubernetesApi.K8sFindByClusterId(ctx, clusterId).Execute()
 
 	if err != nil {
-		if apiResponse != nil && apiResponse.StatusCode == 404 {
+		if apiResponse != nil && apiResponse.Response != nil && apiResponse.StatusCode== 404 {
 			d.SetId("")
 			return nil, fmt.Errorf("unable to find k8s cluster %q", clusterId)
 		}
@@ -259,7 +259,7 @@ func resourceK8sNodepoolImport(ctx context.Context, d *schema.ResourceData, meta
 	k8sNodepool, apiResponse, err := client.KubernetesApi.K8sNodepoolsFindById(ctx, clusterId, npId).Execute()
 
 	if err != nil {
-		if apiResponse != nil && apiResponse.StatusCode == 404 {
+		if apiResponse != nil && apiResponse.Response != nil && apiResponse.StatusCode== 404 {
 			d.SetId("")
 			return nil, fmt.Errorf("unable to find k8s node pool %q", npId)
 		}
@@ -323,14 +323,15 @@ func resourceK8sNodepoolImport(ctx context.Context, d *schema.ResourceData, meta
 	}
 
 	if k8sNodepool.Properties.Lans != nil {
-		var lans []int32
 
-		for _, lan := range *k8sNodepool.Properties.Lans {
-			lans = append(lans, *lan.Id)
+		nodePoolLans := getK8sNodePoolLans(*k8sNodepool.Properties.Lans)
+
+		if len(nodePoolLans) > 0 {
+			if err := d.Set("lans", nodePoolLans); err != nil {
+				return nil, err
+			}
 		}
-		if err := d.Set("lans", lans); err != nil {
-			return nil, err
-		}
+
 		log.Printf("[INFO] Setting LAN's for k8s node pool %s to %+v...", d.Id(), d.Get("lans"))
 	}
 
@@ -346,6 +347,28 @@ func resourceK8sNodepoolImport(ctx context.Context, d *schema.ResourceData, meta
 		log.Printf("[INFO] Setting maintenance window for k8s node pool %s to %+v...", d.Id(), k8sNodepool.Properties.MaintenanceWindow)
 	}
 
+	labels := make(map[string]interface{})
+	if k8sNodepool.Properties.Labels != nil && len(*k8sNodepool.Properties.Labels) > 0 {
+		for k, v := range *k8sNodepool.Properties.Labels {
+			labels[k] = v
+		}
+	}
+
+	if err := d.Set("labels", labels); err != nil {
+		return nil, fmt.Errorf("error while setting the labels property for k8sNodepool %s: %s", d.Id(), err)
+	}
+
+	annotations := make(map[string]interface{})
+	if k8sNodepool.Properties.Annotations != nil && len(*k8sNodepool.Properties.Annotations) > 0 {
+		for k, v := range *k8sNodepool.Properties.Annotations {
+			annotations[k] = v
+		}
+	}
+
+	if err := d.Set("annotations", annotations); err != nil {
+		return nil, fmt.Errorf("error while setting the annotations property for k8sNodepool %s: %s", d.Id(), err)
+	}
+
 	log.Printf("[INFO] Importing k8s node pool %q...", d.Id())
 
 	return []*schema.ResourceData{d}, nil
@@ -359,7 +382,7 @@ func resourcePrivateCrossConnectImport(ctx context.Context, d *schema.ResourceDa
 	pcc, apiResponse, err := client.PrivateCrossConnectsApi.PccsFindById(ctx, d.Id()).Execute()
 
 	if err != nil {
-		if apiResponse != nil && apiResponse.StatusCode == 404 {
+		if apiResponse != nil && apiResponse.Response != nil && apiResponse.StatusCode== 404 {
 			d.SetId("")
 			return nil, fmt.Errorf("unable to find PCC %q", pccId)
 		}
@@ -425,7 +448,7 @@ func resourceBackupUnitImport(ctx context.Context, d *schema.ResourceData, meta 
 	backupUnit, apiResponse, err := client.BackupUnitsApi.BackupunitsFindById(ctx, d.Id()).Execute()
 
 	if err != nil {
-		if apiResponse != nil && apiResponse.StatusCode == 404 {
+		if apiResponse != nil && apiResponse.Response != nil && apiResponse.StatusCode== 404 {
 			d.SetId("")
 			return nil, fmt.Errorf("unable to find Backup Unit %q", buId)
 		}
@@ -484,7 +507,7 @@ func resourceS3KeyImport(ctx context.Context, d *schema.ResourceData, meta inter
 	s3Key, apiResponse, err := client.UserS3KeysApi.UmUsersS3keysFindByKeyId(ctx, userId, keyId).Execute()
 
 	if err != nil {
-		if apiResponse != nil && apiResponse.StatusCode == 404 {
+		if apiResponse != nil && apiResponse.Response != nil && apiResponse.StatusCode== 404 {
 			d.SetId("")
 			return nil, fmt.Errorf("unable to find S3 key %q", keyId)
 		}
@@ -557,7 +580,7 @@ func resourceVolumeImporter(ctx context.Context, d *schema.ResourceData, meta in
 	volume, apiResponse, err := client.VolumesApi.DatacentersVolumesFindById(ctx, dcId, volumeId).Execute()
 
 	if err != nil {
-		if apiResponse != nil && apiResponse.StatusCode == 404 {
+		if apiResponse != nil && apiResponse.Response != nil && apiResponse.StatusCode== 404 {
 			d.SetId("")
 			return nil, fmt.Errorf("volume does not exist %q", volumeId)
 		}
@@ -676,7 +699,7 @@ func resourceGroupImporter(ctx context.Context, d *schema.ResourceData, meta int
 	group, apiResponse, err := client.UserManagementApi.UmGroupsFindById(ctx, grpId).Execute()
 
 	if err != nil {
-		if apiResponse != nil && apiResponse.StatusCode == 404 {
+		if apiResponse != nil && apiResponse.Response != nil && apiResponse.StatusCode== 404 {
 			d.SetId("")
 			return nil, fmt.Errorf("an error occured while trying to fetch the group %q", grpId)
 		}
@@ -808,7 +831,7 @@ func resourceUserImporter(ctx context.Context, d *schema.ResourceData, meta inte
 	user, apiResponse, err := client.UserManagementApi.UmUsersFindById(ctx, userId).Execute()
 
 	if err != nil {
-		if apiResponse != nil && apiResponse.StatusCode == 404 {
+		if apiResponse != nil && apiResponse.Response != nil && apiResponse.StatusCode== 404 {
 			d.SetId("")
 			return nil, fmt.Errorf("an error occured while trying to fetch the user %q", userId)
 		}
@@ -863,7 +886,7 @@ func resourceShareImporter(ctx context.Context, d *schema.ResourceData, meta int
 	share, apiResponse, err := client.UserManagementApi.UmGroupsSharesFindByResourceId(ctx, grpId, rscId).Execute()
 
 	if err != nil {
-		if apiResponse != nil && apiResponse.StatusCode == 404 {
+		if apiResponse != nil && apiResponse.Response != nil && apiResponse.StatusCode== 404 {
 			d.SetId("")
 			return nil, fmt.Errorf("an error occured while trying to fetch the share of resource %q for group %q", rscId, grpId)
 		}
@@ -911,7 +934,7 @@ func resourceIpFailoverImporter(ctx context.Context, d *schema.ResourceData, met
 	lan, apiResponse, err := client.LansApi.DatacentersLansFindById(ctx, dcId, lanId).Execute()
 
 	if err != nil {
-		if apiResponse != nil && apiResponse.StatusCode == 404 {
+		if apiResponse != nil && apiResponse.Response != nil && apiResponse.StatusCode== 404 {
 			d.SetId("")
 			return nil, fmt.Errorf("an error occured while trying to fetch the lan %q", lanId)
 		}
@@ -964,7 +987,7 @@ func resourceLoadbalancerImporter(ctx context.Context, d *schema.ResourceData, m
 	loadbalancer, apiResponse, err := client.LoadBalancersApi.DatacentersLoadbalancersFindById(ctx, dcId, lbId).Execute()
 
 	if err != nil {
-		if apiResponse != nil && apiResponse.StatusCode == 404 {
+		if apiResponse != nil && apiResponse.Response != nil && apiResponse.StatusCode== 404 {
 			d.SetId("")
 			return nil, fmt.Errorf("an error occured while trying to fetch the loadbalancer %q", lbId)
 		}

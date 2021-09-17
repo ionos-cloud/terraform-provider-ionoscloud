@@ -105,7 +105,7 @@ func resourceLoadbalancerRead(ctx context.Context, d *schema.ResourceData, meta 
 
 	lb, apiResponse, err := client.LoadBalancersApi.DatacentersLoadbalancersFindById(ctx, d.Get("datacenter_id").(string), d.Id()).Execute()
 	if err != nil {
-		if apiResponse != nil && apiResponse.StatusCode == 404 {
+		if apiResponse != nil && apiResponse.Response != nil && apiResponse.StatusCode== 404 {
 			d.SetId("")
 			return nil
 		}

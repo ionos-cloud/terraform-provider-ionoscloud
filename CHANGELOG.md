@@ -4,6 +4,12 @@
 - issue #93 - updated documentation for image data source
 - made backup_unit_id configurable for volume
 
+## 6.0.0-beta.9
+
+- issue #31 - k8s node pool labels and annotations implemented
+- ipblock `k8s_nodepool_uuid` attribute fixed
+- correctly importing private lans from k8s node pools
+
 ## 6.0.0-beta.8
 
 - fixed set of empty array in terraform state instead of null

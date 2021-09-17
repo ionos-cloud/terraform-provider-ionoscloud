@@ -516,7 +516,7 @@ func resourceServerCreate(ctx context.Context, d *schema.ResourceData, meta inte
 		} else {
 			img, apiResponse, err := client.ImagesApi.ImagesFindById(ctx, imageInput).Execute()
 
-			if apiResponse != nil && apiResponse.StatusCode == 404 {
+			if apiResponse != nil && apiResponse.Response != nil && apiResponse.StatusCode== 404 {
 
 				_, apiResponse, err = client.SnapshotsApi.SnapshotsFindById(ctx, imageInput).Execute()
 
@@ -876,7 +876,7 @@ func resourceServerRead(ctx context.Context, d *schema.ResourceData, meta interf
 
 	server, apiResponse, err := client.ServersApi.DatacentersServersFindById(ctx, dcId, serverId).Execute()
 	if err != nil {
-		if apiResponse != nil && apiResponse.StatusCode == 404 {
+		if apiResponse != nil && apiResponse.Response != nil && apiResponse.StatusCode== 404 {
 			d.SetId("")
 			return nil
 		}
