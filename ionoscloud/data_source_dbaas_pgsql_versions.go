@@ -3,10 +3,10 @@ package ionoscloud
 import (
 	"context"
 	"fmt"
-	"github.com/google/uuid"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	dbaas "github.com/ionos-cloud/sdk-go-autoscaling"
+	dbaasService "github.com/ionos-cloud/terraform-provider-ionoscloud/services/dbaas"
 )
 
 func dataSourceDbaasPgSqlVersions() *schema.Resource {
@@ -40,35 +40,20 @@ func dataSourceDbaasPgSqlReadVersions(ctx context.Context, d *schema.ResourceDat
 
 	if idOk {
 		/* search by ID */
-		postgresVersions, _, err = client.ClustersApi.ClusterPostgresVersionsGet(ctx, id.(string)).Execute()
+		postgresVersions, _, err = client.GetClusterVersions(ctx, id.(string))
 		if err != nil {
 			diags := diag.FromErr(fmt.Errorf("an error occurred while fetching postgres versions for cluster with ID %s: %s", id.(string), err))
 			return diags
 		}
 	} else {
-		postgresVersions, _, err = client.ClustersApi.PostgresVersionsGet(ctx).Execute()
+		postgresVersions, _, err = client.GetAllVersions(ctx)
 		if err != nil {
 			diags := diag.FromErr(fmt.Errorf("an error occurred while fetching postgres versions: %s", err.Error()))
 			return diags
 		}
 	}
 
-	if postgresVersions.Data != nil {
-		var versions []string
-		for _, version := range *postgresVersions.Data {
-			if version.Name != nil {
-				versions = append(versions, *version.Name)
-			}
-		}
-		err := d.Set("postgres_versions", versions)
-		if err != nil {
-			diags := diag.FromErr(fmt.Errorf("error while setting postgres_versions: %s", err))
-			return diags
-		}
-	}
-
-	resourceId := uuid.New()
-	d.SetId(resourceId.String())
+	dbaasService.SetPgSqlVersionsData(d, postgresVersions)
 
 	return nil
 

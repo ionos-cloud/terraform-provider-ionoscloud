@@ -13,13 +13,14 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	dbaas "github.com/ionos-cloud/sdk-go-autoscaling"
 	"github.com/ionos-cloud/sdk-go/v6"
+	dbaasService "github.com/ionos-cloud/terraform-provider-ionoscloud/services/dbaas"
 )
 
 var Version = "development"
 
 type SdkBundle struct {
 	CloudApiClient *ionoscloud.APIClient
-	DbaasClient    *dbaas.APIClient
+	DbaasClient    *dbaasService.Client
 }
 
 // Provider returns a schema.Provider for ionoscloud.
@@ -174,11 +175,12 @@ func providerConfigure(d *schema.ResourceData, terraformVersion string) (interfa
 		newConfigDbaas.Debug = true
 	}
 
-	newDbaasClient := dbaas.NewAPIClient(newConfigDbaas)
+	//newDbaasClient := dbaas.NewAPIClient(newConfigDbaas)
 
+	client := dbaasService.NewClientService(username.(string), password.(string), token.(string), cleanedUrl)
 	return SdkBundle{
 		CloudApiClient: newClient,
-		DbaasClient:    newDbaasClient,
+		DbaasClient:    client.Get(),
 	}, nil
 }
 

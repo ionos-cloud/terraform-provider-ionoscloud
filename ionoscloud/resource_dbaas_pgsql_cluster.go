@@ -6,7 +6,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
-	dbaas "github.com/ionos-cloud/sdk-go-autoscaling"
+	dbaasService "github.com/ionos-cloud/terraform-provider-ionoscloud/services/dbaas"
 	"log"
 	"net"
 	"time"
@@ -167,113 +167,9 @@ func resourceDbaasPgSqlCluster() *schema.Resource {
 func resourceDbaasPgSqlClusterCreate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	client := meta.(SdkBundle).DbaasClient
 
-	dbaasCluster := dbaas.CreateClusterRequest{}
+	dbaasCluster := dbaasService.GetDbaasPgSqlClusterDataCreate(d)
 
-	if postgresVersion, ok := d.GetOk("postgres_version"); ok {
-		postgresVersion := postgresVersion.(string)
-		dbaasCluster.PostgresVersion = &postgresVersion
-	}
-
-	if replicas, ok := d.GetOk("replicas"); ok {
-		replicas := float32(replicas.(int))
-		dbaasCluster.Replicas = &replicas
-	}
-
-	if cpuCoreCount, ok := d.GetOk("cpu_core_count"); ok {
-		cpuCoreCount := float32(cpuCoreCount.(int))
-		dbaasCluster.CpuCoreCount = &cpuCoreCount
-	}
-
-	if ramSize, ok := d.GetOk("ram_size"); ok {
-		ramSize := ramSize.(string)
-		dbaasCluster.RamSize = &ramSize
-	}
-
-	if storageSize, ok := d.GetOk("storage_size"); ok {
-		storageSize := storageSize.(string)
-		dbaasCluster.StorageSize = &storageSize
-	}
-
-	if storageType, ok := d.GetOk("storage_type"); ok {
-		storageType := dbaas.StorageType(storageType.(string))
-		dbaasCluster.StorageType = &storageType
-	}
-
-	if vdcConnection, ok := d.GetOk("vdc_connections"); ok {
-		if vdcConnection.([]interface{}) != nil {
-
-			var vdcConnections []dbaas.VDCConnection
-
-			for vdcIndex := range vdcConnection.([]interface{}) {
-
-				connection := dbaas.VDCConnection{}
-
-				if vdcId, ok := d.GetOk(fmt.Sprintf("vdc_connections.%d.vdc_id", vdcIndex)); ok {
-					vdcId := vdcId.(string)
-					connection.VdcId = &vdcId
-				}
-
-				if lanId, ok := d.GetOk(fmt.Sprintf("vdc_connections.%d.lan_id", vdcIndex)); ok {
-					lanId := lanId.(string)
-					connection.LanId = &lanId
-				}
-
-				if ipAddress, ok := d.GetOk(fmt.Sprintf("vdc_connections.%d.ip_address", vdcIndex)); ok {
-					ipAddress := ipAddress.(string)
-					connection.IpAddress = &ipAddress
-				}
-
-				vdcConnections = append(vdcConnections, connection)
-
-			}
-
-			if len(vdcConnections) > 0 {
-				dbaasCluster.VdcConnections = &vdcConnections
-			}
-		}
-	}
-
-	if location, ok := d.GetOk("location"); ok {
-		location := location.(string)
-		dbaasCluster.Location = &location
-	}
-
-	if displayName, ok := d.GetOk("display_name"); ok {
-		displayName := displayName.(string)
-		dbaasCluster.DisplayName = &displayName
-	}
-
-	backupEnabled := d.Get("backup_enabled").(bool)
-	dbaasCluster.BackupEnabled = &backupEnabled
-
-	if _, ok := d.GetOk("maintenance_window.0"); ok {
-		dbaasCluster.MaintenanceWindow = &dbaas.MaintenanceWindow{}
-
-		if timeV, ok := d.GetOk("maintenance_window.0.time"); ok {
-			timeV := timeV.(string)
-			dbaasCluster.MaintenanceWindow.Time = &timeV
-		}
-
-		if weekday, ok := d.GetOk("maintenance_window.0.weekday"); ok {
-			weekday := weekday.(string)
-			dbaasCluster.MaintenanceWindow.Weekday = &weekday
-		}
-	}
-
-	if _, ok := d.GetOk("credentials.0"); ok {
-		dbaasCluster.Credentials = &dbaas.DBUser{}
-		if username, ok := d.GetOk("credentials.0.username"); ok {
-			username := username.(string)
-			dbaasCluster.Credentials.Username = &username
-		}
-
-		if password, ok := d.GetOk("credentials.0.password"); ok {
-			password := password.(string)
-			dbaasCluster.Credentials.Password = &password
-		}
-	}
-
-	dbaasClusterResponse, _, err := client.ClustersApi.ClustersPost(ctx).Cluster(dbaasCluster).Execute()
+	dbaasClusterResponse, _, err := client.CreateCluster(ctx, *dbaasCluster)
 
 	if err != nil {
 		diags := diag.FromErr(fmt.Errorf("an error occured while creating a dbaas cluster: %s", err))
@@ -315,7 +211,7 @@ func resourceDbaasPgSqlClusterRead(ctx context.Context, d *schema.ResourceData, 
 
 	client := meta.(SdkBundle).DbaasClient
 
-	cluster, apiResponse, err := client.ClustersApi.ClustersFindById(ctx, d.Id()).Execute()
+	cluster, apiResponse, err := client.GetCluster(ctx, d.Id())
 
 	if err != nil {
 		if apiResponse != nil && apiResponse.StatusCode == 404 {
@@ -328,76 +224,21 @@ func resourceDbaasPgSqlClusterRead(ctx context.Context, d *schema.ResourceData, 
 
 	log.Printf("[INFO] Successfully retreived cluster %s: %+v", d.Id(), cluster)
 
-	setDbaasPgSqlClusterData(d, &cluster)
+	dbaasService.SetDbaasPgSqlClusterData(d, cluster)
 
 	return nil
 }
 
 func resourceDbaasPgSqlClusterUpdate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
-	fmt.Printf("\n________________UPDATE________________\n")
-
 	client := meta.(SdkBundle).DbaasClient
 
-	cluster := dbaas.PatchClusterRequest{}
+	cluster, diags := dbaasService.GetDbaasPgSqlClusterDataUpdate(d)
 
-	if d.HasChange("postgres_version") {
-		_, v := d.GetChange("postgres_version")
-		vStr := v.(string)
-		cluster.PostgresVersion = &vStr
-	}
-
-	if d.HasChange("replicas") {
-		diags := diag.FromErr(fmt.Errorf("replicas parameter is immutable"))
+	if diags != nil {
 		return diags
 	}
 
-	if d.HasChange("cpu_core_count") {
-		diags := diag.FromErr(fmt.Errorf("cpu_core_count parameter is immutable"))
-		return diags
-	}
-
-	if d.HasChange("ram_size") {
-		diags := diag.FromErr(fmt.Errorf("ram_size parameter is immutable"))
-		return diags
-	}
-
-	if d.HasChange("storage_size") {
-		_, v := d.GetChange("storage_size")
-		vStr := v.(string)
-		cluster.StorageSize = &vStr
-	}
-
-	if d.HasChange("vdc_connections") {
-		diags := diag.FromErr(fmt.Errorf("vdc_connections parameter is immutable"))
-		return diags
-	}
-
-	if d.HasChange("display_name") {
-		_, v := d.GetChange("display_name")
-		vStr := v.(string)
-		cluster.DisplayName = &vStr
-	}
-
-	if d.HasChange("backup_enabled") {
-		vBool := d.Get("backup_enabled").(bool)
-		cluster.BackupEnabled = &vBool
-	}
-
-	if d.HasChange("maintenance_window") {
-		cluster.MaintenanceWindow = &dbaas.MaintenanceWindow{}
-
-		if timeV, ok := d.GetOk("maintenance_window.0.time"); ok {
-			timeV := timeV.(string)
-			cluster.MaintenanceWindow.Time = &timeV
-		}
-
-		if weekday, ok := d.GetOk("maintenance_window.0.weekday"); ok {
-			weekday := weekday.(string)
-			cluster.MaintenanceWindow.Weekday = &weekday
-		}
-	}
-
-	dbaasClusterResponse, _, err := client.ClustersApi.ClustersPatch(ctx, d.Id()).Cluster(cluster).Execute()
+	dbaasClusterResponse, _, err := client.ClustersApi.ClustersPatch(ctx, d.Id()).Cluster(*cluster).Execute()
 
 	if err != nil {
 		diags := diag.FromErr(fmt.Errorf("an error occured while updating a dbaas cluster: %s", err))
@@ -438,7 +279,7 @@ func resourceDbaasPgSqlClusterUpdate(ctx context.Context, d *schema.ResourceData
 func resourceDbaasPgSqlClusterDelete(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	client := meta.(SdkBundle).DbaasClient
 
-	_, apiResponse, err := client.ClustersApi.ClustersDelete(ctx, d.Id()).Execute()
+	_, apiResponse, err := client.DeleteCluster(ctx, d.Id())
 
 	if err != nil {
 		if apiResponse != nil && apiResponse.StatusCode == 404 {
@@ -481,7 +322,7 @@ func resourceDbaasPgSqlClusterImport(ctx context.Context, d *schema.ResourceData
 
 	clusterId := d.Id()
 
-	dbaasCluster, apiResponse, err := client.ClustersApi.ClustersFindById(ctx, clusterId).Execute()
+	dbaasCluster, apiResponse, err := client.GetCluster(ctx, clusterId)
 
 	if err != nil {
 		if apiResponse != nil && apiResponse.StatusCode == 404 {
@@ -493,27 +334,27 @@ func resourceDbaasPgSqlClusterImport(ctx context.Context, d *schema.ResourceData
 
 	log.Printf("[INFO] dbaas cluster found: %+v", dbaasCluster)
 
-	setDbaasPgSqlClusterData(d, &dbaasCluster)
+	dbaasService.SetDbaasPgSqlClusterData(d, dbaasCluster)
 
 	return []*schema.ResourceData{d}, nil
 }
 
-func dbaasClusterReady(ctx context.Context, client *dbaas.APIClient, d *schema.ResourceData) (bool, error) {
-	subjectCluster, _, err := client.ClustersApi.ClustersFindById(ctx, d.Id()).Execute()
+func dbaasClusterReady(ctx context.Context, client *dbaasService.Client, d *schema.ResourceData) (bool, error) {
+	subjectCluster, _, err := client.GetCluster(ctx, d.Id())
 
 	if err != nil {
 		return true, fmt.Errorf("error checking dbaas cluster status: %s", err)
 	}
 
-	if *subjectCluster.LifecycleStatus == "FAILED" {
-		return false, fmt.Errorf("dbaas cluster has failed")
-	}
+	//if *subjectCluster.LifecycleStatus == "FAILED" {
+	//	return false, fmt.Errorf("dbaas cluster has failed")
+	//}
 	return *subjectCluster.LifecycleStatus == "AVAILABLE", nil
 }
 
-func dbaasClusterDeleted(ctx context.Context, client *dbaas.APIClient, d *schema.ResourceData) (bool, error) {
+func dbaasClusterDeleted(ctx context.Context, client *dbaasService.Client, d *schema.ResourceData) (bool, error) {
 
-	_, apiResponse, err := client.ClustersApi.ClustersFindById(ctx, d.Id()).Execute()
+	_, apiResponse, err := client.GetCluster(ctx, d.Id())
 
 	if err != nil {
 		if apiResponse != nil && apiResponse.StatusCode == 404 {

@@ -7,6 +7,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	dbaas "github.com/ionos-cloud/sdk-go-autoscaling"
+	dbaasService "github.com/ionos-cloud/terraform-provider-ionoscloud/services/dbaas"
 )
 
 func dataSourceDbaasPgSqlCluster() *schema.Resource {
@@ -138,18 +139,19 @@ func dataSourceDbaasPgSqlReadCluster(ctx context.Context, d *schema.ResourceData
 		diags := diag.FromErr(errors.New("please provide either the dbaas cluster id or display_name"))
 		return diags
 	}
+
 	var cluster dbaas.Cluster
 	var err error
 
 	if idOk {
 		/* search by ID */
-		cluster, _, err = client.ClustersApi.ClustersFindById(ctx, id.(string)).Execute()
+		cluster, _, err = client.GetCluster(ctx, id.(string))
 		if err != nil {
 			diags := diag.FromErr(fmt.Errorf("an error occurred while fetching the dbaas cluster with ID %s: %s", id.(string), err))
 			return diags
 		}
 	} else {
-		clusters, _, err := client.ClustersApi.ClustersGet(ctx).Execute()
+		clusters, _, err := client.ListClusters(ctx)
 		if err != nil {
 			diags := diag.FromErr(fmt.Errorf("an error occurred while fetching dbaas clusters: %s", err.Error()))
 			return diags
@@ -158,7 +160,7 @@ func dataSourceDbaasPgSqlReadCluster(ctx context.Context, d *schema.ResourceData
 		found := false
 		if clusters.Data != nil {
 			for _, c := range *clusters.Data {
-				tmpCluster, _, err := client.ClustersApi.ClustersFindById(ctx, *c.Id).Execute()
+				tmpCluster, _, err := client.GetCluster(ctx, id.(string))
 				if err != nil {
 					diags := diag.FromErr(fmt.Errorf("an error occurred while fetching dbaas cluster with ID %s: %s", *c.Id, err.Error()))
 					return diags
@@ -178,133 +180,10 @@ func dataSourceDbaasPgSqlReadCluster(ctx context.Context, d *schema.ResourceData
 
 	}
 
-	if diags := setDbaasPgSqlClusterData(d, &cluster); diags != nil {
+	if diags := dbaasService.SetDbaasPgSqlClusterData(d, cluster); diags != nil {
 		return diags
 	}
 
 	return nil
 
-}
-
-func setDbaasPgSqlClusterData(d *schema.ResourceData, cluster *dbaas.Cluster) diag.Diagnostics {
-
-	if cluster.Id != nil {
-		d.SetId(*cluster.Id)
-		if err := d.Set("id", *cluster.Id); err != nil {
-			return diag.FromErr(err)
-		}
-	}
-
-	if cluster.PostgresVersion != nil {
-		if err := d.Set("postgres_version", *cluster.PostgresVersion); err != nil {
-			diags := diag.FromErr(fmt.Errorf("error while setting postgres_version property for dbaas cluster %s: %s", d.Id(), err))
-			return diags
-		}
-	}
-
-	if cluster.Replicas != nil {
-		if err := d.Set("replicas", *cluster.Replicas); err != nil {
-			diags := diag.FromErr(fmt.Errorf("error while setting replicas property for dbaas cluster %s: %s", d.Id(), err))
-			return diags
-		}
-	}
-
-	if cluster.CpuCoreCount != nil {
-		if err := d.Set("cpu_core_count", *cluster.CpuCoreCount); err != nil {
-			diags := diag.FromErr(fmt.Errorf("error while setting cpu_core_count for dbaas cluster %s: %s", d.Id(), err))
-			return diags
-		}
-	}
-
-	if cluster.RamSize != nil {
-		if err := d.Set("ram_size", *cluster.RamSize); err != nil {
-			diags := diag.FromErr(fmt.Errorf("error while setting ram_size property for dbaas cluster %s: %s", d.Id(), err))
-			return diags
-		}
-	}
-
-	if cluster.StorageSize != nil {
-		if err := d.Set("storage_size", *cluster.StorageSize); err != nil {
-			diags := diag.FromErr(fmt.Errorf("error while setting storage_size property for dbaas cluster %s: %s", d.Id(), err))
-			return diags
-		}
-	}
-
-	if cluster.StorageType != nil {
-		if err := d.Set("storage_type", *cluster.StorageType); err != nil {
-			diags := diag.FromErr(fmt.Errorf("error while setting storage_type property for dbaas cluster %s: %s", d.Id(), err))
-			return diags
-		}
-	}
-
-	if cluster.VdcConnections != nil && len(*cluster.VdcConnections) > 0 {
-		var connections []interface{}
-		for _, connection := range *cluster.VdcConnections {
-			connectionEntry := make(map[string]interface{})
-
-			if connection.VdcId != nil {
-				connectionEntry["vdc_id"] = *connection.VdcId
-			}
-
-			if connection.LanId != nil {
-				connectionEntry["lan_id"] = *connection.LanId
-			}
-
-			if connection.IpAddress != nil {
-				connectionEntry["ip_address"] = *connection.IpAddress
-			}
-
-			connections = append(connections, connectionEntry)
-		}
-		if len(connections) > 0 {
-			if err := d.Set("vdc_connections", connections); err != nil {
-				diags := diag.FromErr(fmt.Errorf("error while setting vdc_connections property for dbaas cluster  %s: %s", d.Id(), err))
-				return diags
-			}
-		}
-	}
-
-	if cluster.Location != nil {
-		if err := d.Set("location", *cluster.Location); err != nil {
-			diags := diag.FromErr(fmt.Errorf("error while setting location property for dbaas cluster %s: %s", d.Id(), err))
-			return diags
-		}
-	}
-
-	if cluster.DisplayName != nil {
-		if err := d.Set("display_name", *cluster.DisplayName); err != nil {
-			diags := diag.FromErr(fmt.Errorf("error while setting display_name property for dbaas cluster %s: %s", d.Id(), err))
-			return diags
-		}
-	}
-
-	if cluster.BackupEnabled != nil {
-		if err := d.Set("backup_enabled", *cluster.BackupEnabled); err != nil {
-			diags := diag.FromErr(fmt.Errorf("error while setting backup_enabled property for dbaas cluster %s: %s", d.Id(), err))
-			return diags
-		}
-	}
-
-	if cluster.MaintenanceWindow != nil {
-		var maintenanceWindow []interface{}
-
-		maintenanceWindowEntry := make(map[string]interface{})
-
-		if cluster.MaintenanceWindow.Time != nil {
-			maintenanceWindowEntry["time"] = *cluster.MaintenanceWindow.Time
-		}
-
-		if cluster.MaintenanceWindow.Weekday != nil {
-			maintenanceWindowEntry["weekday"] = *cluster.MaintenanceWindow.Weekday
-		}
-
-		maintenanceWindow = append(maintenanceWindow, maintenanceWindowEntry)
-		err := d.Set("maintenance_window", maintenanceWindow)
-		if err != nil {
-			diags := diag.FromErr(fmt.Errorf("error while setting maintenance_window property for dbaas cluster %s: %s", d.Id(), err))
-			return diags
-		}
-	}
-
-	return nil
 }
