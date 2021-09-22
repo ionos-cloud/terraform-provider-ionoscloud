@@ -16,7 +16,7 @@ func TestAccDataSourceDbaasPgSqlBackups_All(t *testing.T) {
 			{
 				Config: testAccDataSourceDbaasPgSqlAllBackups,
 				Check: resource.ComposeTestCheckFunc(
-					resource.TestCheckResourceAttr("data.ionoscloud_dbaas_pgsql_backups.test_ds_dbaas_backups", "cluster_backups.0.cluster_id", "f841e240-149d-11ec-953a-ea197349f9c0"),
+					resource.TestCheckResourceAttrPair("data.ionoscloud_dbaas_pgsql_backups.test_ds_dbaas_backups", "cluster_backups.0.cluster_id", "data.ionoscloud_dbaas_pgsql_backups.test_ds_dbaas_backups", "cluster_id"),
 				),
 			},
 		},
@@ -24,7 +24,51 @@ func TestAccDataSourceDbaasPgSqlBackups_All(t *testing.T) {
 }
 
 const testAccDataSourceDbaasPgSqlAllBackups = `
+
+resource "ionoscloud_datacenter" "test_dbaas_cluster" {
+  name        = "test_dbaas_cluster"
+  location    = "de/txl"
+  description = "Datacenter for testing dbaas cluster"
+}
+
+resource "ionoscloud_ipblock" "test_dbaas_cluster" {
+  location = ionoscloud_datacenter.test_dbaas_cluster.location
+  size = 1
+  name = "test_dbaas_cluster"
+}
+
+resource "ionoscloud_lan" "test_dbaas_cluster" {
+  datacenter_id = ionoscloud_datacenter.test_dbaas_cluster.id 
+  public        = false
+  name          = "test_dbaas_cluster"
+}
+
+resource "ionoscloud_dbaas_pgsql_cluster" "test_dbaas_cluster" {
+  postgres_version   = 12
+  replicas           = 2
+  cpu_core_count     = 4
+  ram_size           = "2Gi"
+  storage_size       = "1Gi"
+  storage_type       = "HDD"
+  vdc_connections   {
+	vdc_id          =  ionoscloud_datacenter.test_dbaas_cluster.id 
+    lan_id          =  ionoscloud_lan.test_dbaas_cluster.id 
+    ip_address      =  "192.168.1.100/24"
+  }
+  location = ionoscloud_datacenter.test_dbaas_cluster.location
+  display_name = "PostgreSQL_cluster"
+  backup_enabled = true
+  maintenance_window {
+    weekday = "Sunday"
+    time            = "09:00:00"
+  }
+  credentials {
+  	username = "username"
+	password = "password"
+  }
+}
+
 data "ionoscloud_dbaas_pgsql_backups" "test_ds_dbaas_backups" {
-	cluster_id = "f841e240-149d-11ec-953a-ea197349f9c0"
+	cluster_id = ionoscloud_dbaas_pgsql_cluster.test_dbaas_cluster.id
 }
 `

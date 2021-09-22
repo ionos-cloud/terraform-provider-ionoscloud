@@ -160,7 +160,7 @@ func dataSourceDbaasPgSqlReadCluster(ctx context.Context, d *schema.ResourceData
 		found := false
 		if clusters.Data != nil {
 			for _, c := range *clusters.Data {
-				tmpCluster, _, err := client.GetCluster(ctx, id.(string))
+				tmpCluster, _, err := client.GetCluster(ctx, *c.Id)
 				if err != nil {
 					diags := diag.FromErr(fmt.Errorf("an error occurred while fetching dbaas cluster with ID %s: %s", *c.Id, err.Error()))
 					return diags
@@ -178,6 +178,12 @@ func dataSourceDbaasPgSqlReadCluster(ctx context.Context, d *schema.ResourceData
 			return diag.FromErr(errors.New("dbaas cluster not found"))
 		}
 
+	}
+
+	if cluster.Id != nil {
+		if err := d.Set("id", *cluster.Id); err != nil {
+			return nil
+		}
 	}
 
 	if diags := dbaasService.SetDbaasPgSqlClusterData(d, cluster); diags != nil {

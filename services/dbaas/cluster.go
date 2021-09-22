@@ -236,9 +236,6 @@ func SetDbaasPgSqlClusterData(d *schema.ResourceData, cluster dbaas.Cluster) dia
 
 	if cluster.Id != nil {
 		d.SetId(*cluster.Id)
-		if err := d.Set("id", *cluster.Id); err != nil {
-			return diag.FromErr(err)
-		}
 	}
 
 	if cluster.PostgresVersion != nil {

@@ -334,6 +334,11 @@ func resourceDbaasPgSqlClusterImport(ctx context.Context, d *schema.ResourceData
 
 	log.Printf("[INFO] dbaas cluster found: %+v", dbaasCluster)
 
+	if dbaasCluster.Id != nil {
+		if err := d.Set("id", *dbaasCluster.Id); err != nil {
+			return nil, err
+		}
+	}
 	dbaasService.SetDbaasPgSqlClusterData(d, dbaasCluster)
 
 	return []*schema.ResourceData{d}, nil
