@@ -23,6 +23,22 @@ func TestAccDbaasPgSqlCluster_Basic(t *testing.T) {
 				Config: testAccCheckDbaasPgSqlClusterConfigBasic,
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckDbaasPgSqlClusterExists("ionoscloud_dbaas_pgsql_cluster.test_dbaas_cluster", &dbaasCluster),
+					resource.TestCheckResourceAttr("ionoscloud_dbaas_pgsql_cluster.test_dbaas_cluster", "postgres_version", "12"),
+					resource.TestCheckResourceAttr("ionoscloud_dbaas_pgsql_cluster.test_dbaas_cluster", "replicas", "2"),
+					resource.TestCheckResourceAttr("ionoscloud_dbaas_pgsql_cluster.test_dbaas_cluster", "cpu_core_count", "4"),
+					resource.TestCheckResourceAttr("ionoscloud_dbaas_pgsql_cluster.test_dbaas_cluster", "ram_size", "3Gi"),
+					resource.TestCheckResourceAttr("ionoscloud_dbaas_pgsql_cluster.test_dbaas_cluster", "storage_size", "1Gi"),
+					resource.TestCheckResourceAttr("ionoscloud_dbaas_pgsql_cluster.test_dbaas_cluster", "storage_type", "HDD"),
+					resource.TestCheckResourceAttrPair("ionoscloud_dbaas_pgsql_cluster.test_dbaas_cluster", "vdc_connections.0.vdc_id", "ionoscloud_datacenter.test_dbaas_cluster", "id"),
+					resource.TestCheckResourceAttrPair("ionoscloud_dbaas_pgsql_cluster.test_dbaas_cluster", "vdc_connections.0.lan_id", "ionoscloud_lan.test_dbaas_cluster", "id"),
+					resource.TestCheckResourceAttr("ionoscloud_dbaas_pgsql_cluster.test_dbaas_cluster", "vdc_connections.0.ip_address", "192.168.1.100/24"),
+					resource.TestCheckResourceAttrPair("ionoscloud_dbaas_pgsql_cluster.test_dbaas_cluster", "location", "ionoscloud_datacenter.test_dbaas_cluster", "location"),
+					resource.TestCheckResourceAttr("ionoscloud_dbaas_pgsql_cluster.test_dbaas_cluster", "display_name", "PostgreSQL_cluster"),
+					resource.TestCheckResourceAttr("ionoscloud_dbaas_pgsql_cluster.test_dbaas_cluster", "backup_enabled", "true"),
+					resource.TestCheckResourceAttr("ionoscloud_dbaas_pgsql_cluster.test_dbaas_cluster", "maintenance_window.0.time", "09:00:00"),
+					resource.TestCheckResourceAttr("ionoscloud_dbaas_pgsql_cluster.test_dbaas_cluster", "maintenance_window.0.weekday", "Sunday"),
+					resource.TestCheckResourceAttr("ionoscloud_dbaas_pgsql_cluster.test_dbaas_cluster", "credentials.0.username", "username"),
+					resource.TestCheckResourceAttr("ionoscloud_dbaas_pgsql_cluster.test_dbaas_cluster", "credentials.0.password", "password"),
 				),
 			},
 			{
@@ -30,11 +46,21 @@ func TestAccDbaasPgSqlCluster_Basic(t *testing.T) {
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckDbaasPgSqlClusterExists("ionoscloud_dbaas_pgsql_cluster.test_dbaas_cluster", &dbaasCluster),
 					resource.TestCheckResourceAttr("ionoscloud_dbaas_pgsql_cluster.test_dbaas_cluster", "postgres_version", "13"),
-					resource.TestCheckResourceAttr("ionoscloud_dbaas_pgsql_cluster.test_dbaas_cluster", "storage_size", "1.5Gi"),
+					resource.TestCheckResourceAttr("ionoscloud_dbaas_pgsql_cluster.test_dbaas_cluster", "replicas", "2"),
+					resource.TestCheckResourceAttr("ionoscloud_dbaas_pgsql_cluster.test_dbaas_cluster", "cpu_core_count", "4"),
+					resource.TestCheckResourceAttr("ionoscloud_dbaas_pgsql_cluster.test_dbaas_cluster", "ram_size", "3Gi"),
+					resource.TestCheckResourceAttr("ionoscloud_dbaas_pgsql_cluster.test_dbaas_cluster", "storage_size", "2Gi"),
+					resource.TestCheckResourceAttr("ionoscloud_dbaas_pgsql_cluster.test_dbaas_cluster", "storage_type", "HDD"),
+					resource.TestCheckResourceAttrPair("ionoscloud_dbaas_pgsql_cluster.test_dbaas_cluster", "vdc_connections.0.vdc_id", "ionoscloud_datacenter.test_dbaas_cluster", "id"),
+					resource.TestCheckResourceAttrPair("ionoscloud_dbaas_pgsql_cluster.test_dbaas_cluster", "vdc_connections.0.lan_id", "ionoscloud_lan.test_dbaas_cluster", "id"),
+					resource.TestCheckResourceAttr("ionoscloud_dbaas_pgsql_cluster.test_dbaas_cluster", "vdc_connections.0.ip_address", "192.168.1.100/24"),
+					resource.TestCheckResourceAttrPair("ionoscloud_dbaas_pgsql_cluster.test_dbaas_cluster", "location", "ionoscloud_datacenter.test_dbaas_cluster", "location"),
 					resource.TestCheckResourceAttr("ionoscloud_dbaas_pgsql_cluster.test_dbaas_cluster", "display_name", "PostgreSQL_cluster_update"),
 					resource.TestCheckResourceAttr("ionoscloud_dbaas_pgsql_cluster.test_dbaas_cluster", "backup_enabled", "true"),
 					resource.TestCheckResourceAttr("ionoscloud_dbaas_pgsql_cluster.test_dbaas_cluster", "maintenance_window.0.time", "10:00:00"),
 					resource.TestCheckResourceAttr("ionoscloud_dbaas_pgsql_cluster.test_dbaas_cluster", "maintenance_window.0.weekday", "Saturday"),
+					resource.TestCheckResourceAttr("ionoscloud_dbaas_pgsql_cluster.test_dbaas_cluster", "credentials.0.username", "username"),
+					resource.TestCheckResourceAttr("ionoscloud_dbaas_pgsql_cluster.test_dbaas_cluster", "credentials.0.password", "password"),
 				),
 			},
 		},
@@ -127,7 +153,7 @@ resource "ionoscloud_dbaas_pgsql_cluster" "test_dbaas_cluster" {
   postgres_version   = 12
   replicas           = 2
   cpu_core_count     = 4
-  ram_size           = "2Gi"
+  ram_size           = "3Gi"
   storage_size       = "1Gi"
   storage_type       = "HDD"
   vdc_connections   {
@@ -172,8 +198,8 @@ resource "ionoscloud_dbaas_pgsql_cluster" "test_dbaas_cluster" {
   postgres_version   = 13
   replicas           = 2
   cpu_core_count     = 4
-  ram_size           = "2Gi"
-  storage_size       = "1.5Gi"
+  ram_size           = "3Gi"
+  storage_size       = "2Gi"
   storage_type       = "HDD"
   vdc_connections   {
 	vdc_id          =  ionoscloud_datacenter.test_dbaas_cluster.id 
