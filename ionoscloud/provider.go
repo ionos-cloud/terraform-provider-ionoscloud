@@ -11,7 +11,6 @@ import (
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
-	dbaas "github.com/ionos-cloud/sdk-go-autoscaling"
 	"github.com/ionos-cloud/sdk-go/v6"
 	dbaasService "github.com/ionos-cloud/terraform-provider-ionoscloud/services/dbaas"
 )
@@ -166,21 +165,11 @@ func providerConfigure(d *schema.ResourceData, terraformVersion string) (interfa
 	//newConfig.UserAgent = fmt.Sprintf("HashiCorp Terraform/%s Terraform Plugin SDK/%s Terraform Provider Ionoscloud/%s Ionoscloud SDK Go/%s", terraformVersion, meta.SDKVersionString(), Version, newClient.Version)
 	newConfig.UserAgent = fmt.Sprintf("HashiCorp Terraform/%s Terraform Plugin SDK/%s Terraform Provider Ionoscloud/%s", terraformVersion, meta.SDKVersionString(), Version)
 
-	newConfigDbaas := dbaas.NewConfiguration(username.(string), password.(string), token.(string))
-	if len(cleanedUrl) > 0 {
-		newConfigDbaas.Servers[0].URL = cleanedUrl
-	}
+	dbaasClient := dbaasService.NewClientService(username.(string), password.(string), token.(string), cleanedUrl)
 
-	if os.Getenv("IONOS_DEBUG") != "" {
-		newConfigDbaas.Debug = true
-	}
-
-	//newDbaasClient := dbaas.NewAPIClient(newConfigDbaas)
-
-	client := dbaasService.NewClientService(username.(string), password.(string), token.(string), cleanedUrl)
 	return SdkBundle{
 		CloudApiClient: newClient,
-		DbaasClient:    client.Get(),
+		DbaasClient:    dbaasClient.Get(),
 	}, nil
 }
 
