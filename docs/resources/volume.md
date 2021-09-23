@@ -36,7 +36,7 @@ resource "ionoscloud_volume" "example" {
 * `ssh_key_path` -  (Optional)[list] List of paths to files containing a public SSH key that will be injected into IonosCloud provided Linux images. Required for IonosCloud Linux images. Required if `image_password` is not provided.
 * `sshkey` - (Computed) The associated public SSH key.
 * `image_password` - (Optional)[string] Required if `sshkey_path` is not provided.
-* `image_name` - (Optional)[string] The image or snapshot UUID. May also be an image alias. It is required if `licence_type` is not provided.
+* `image_name` - (Optional)[string] The name, ID or alias of the image. May also be a snapshot ID. It is required if `licence_type` is not provided. Attribute is immutable.
 * `licence_type` - (Optional)[string] Required if `image_name` is not provided.
 * `name` - (Optional)[string] The name of the volume.
 * `availability_zone` - (Optional)[string] The storage availability zone assigned to the volume: AUTO, ZONE_1, ZONE_2, or ZONE_3.
