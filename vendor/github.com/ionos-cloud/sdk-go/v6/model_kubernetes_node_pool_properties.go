@@ -1,7 +1,7 @@
 /*
  * CLOUD API
  *
- * An enterprise-grade Infrastructure is provided as a Service (IaaS) solution that can be managed through a browser-based \"Data Center Designer\" (DCD) tool or via an easy to use API.   The API allows you to perform a variety of management tasks such as spinning up additional servers, adding volumes, adjusting networking, and so forth. It is designed to allow users to leverage the same power and flexibility found within the DCD visual tool. Both tools are consistent with their concepts and lend well to making the experience smooth and intuitive.
+ * IONOS Enterprise-grade Infrastructure as a Service (IaaS) solutions can be managed through the Cloud API, in addition or as an alternative to the \"Data Center Designer\" (DCD) browser-based tool.    Both methods employ consistent concepts and features, deliver similar power and flexibility, and can be used to perform a multitude of management tasks, including adding servers, volumes, configuring networks, and so on.
  *
  * API version: 6.0-SDK.3
  */
@@ -48,6 +48,8 @@ type KubernetesNodePoolProperties struct {
 	PublicIps *[]string `json:"publicIps,omitempty"`
 	// List of available versions for upgrading the node pool
 	AvailableUpgradeVersions *[]string `json:"availableUpgradeVersions,omitempty"`
+	// Public IP address for the gateway performing source NAT for the node pool's nodes belonging to a private cluster. Required only if the node pool belongs to a private cluster.
+	GatewayIp *string `json:"gatewayIp,omitempty"`
 }
 
 
@@ -782,6 +784,49 @@ func (o *KubernetesNodePoolProperties) HasAvailableUpgradeVersions() bool {
 }
 
 
+
+// GetGatewayIp returns the GatewayIp field value
+// If the value is explicit nil, the zero value for string will be returned
+func (o *KubernetesNodePoolProperties) GetGatewayIp() *string {
+	if o == nil {
+		return nil
+	}
+
+
+	return o.GatewayIp
+
+}
+
+// GetGatewayIpOk returns a tuple with the GatewayIp field value
+// and a boolean to check if the value has been set.
+// NOTE: If the value is an explicit nil, `nil, true` will be returned
+func (o *KubernetesNodePoolProperties) GetGatewayIpOk() (*string, bool) {
+	if o == nil {
+		return nil, false
+	}
+
+
+	return o.GatewayIp, true
+}
+
+// SetGatewayIp sets field value
+func (o *KubernetesNodePoolProperties) SetGatewayIp(v string) {
+
+
+	o.GatewayIp = &v
+
+}
+
+// HasGatewayIp returns a boolean if a field has been set.
+func (o *KubernetesNodePoolProperties) HasGatewayIp() bool {
+	if o != nil && o.GatewayIp != nil {
+		return true
+	}
+
+	return false
+}
+
+
 func (o KubernetesNodePoolProperties) MarshalJSON() ([]byte, error) {
 	toSerialize := map[string]interface{}{}
 
@@ -867,6 +912,11 @@ func (o KubernetesNodePoolProperties) MarshalJSON() ([]byte, error) {
 
 	if o.AvailableUpgradeVersions != nil {
 		toSerialize["availableUpgradeVersions"] = o.AvailableUpgradeVersions
+	}
+	
+
+	if o.GatewayIp != nil {
+		toSerialize["gatewayIp"] = o.GatewayIp
 	}
 	
 	return json.Marshal(toSerialize)
