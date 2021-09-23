@@ -362,7 +362,14 @@ func resourceServer() *schema.Resource {
 func resourceServerCreate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	client := meta.(*ionoscloud.APIClient)
 
-	datacenterId := d.Get("datacenter_id").(string)
+	var sshKeyPath []interface{}
+	var publicKeys []string
+	var image, imageAlias, imageInput string
+	var isSnapshot bool
+	var diags diag.Diagnostics
+	var password, licenceType string
+
+	dcId := d.Get("datacenter_id").(string)
 	serverName := d.Get("name").(string)
 	serverCores := int32(d.Get("cores").(int))
 	serverRam := int32(d.Get("ram").(int))
@@ -373,8 +380,6 @@ func resourceServerCreate(ctx context.Context, d *schema.ResourceData, meta inte
 			Ram:   &serverRam,
 		},
 	}
-
-	isSnapshot := false
 
 	if v, ok := d.GetOk("template_uuid"); ok {
 		vStr := v.(string)
@@ -408,20 +413,20 @@ func resourceServerCreate(ctx context.Context, d *schema.ResourceData, meta inte
 	if v, ok := d.GetOk("volume.0.image_password"); ok {
 		vStr := v.(string)
 		volume.ImagePassword = &vStr
-		if err := d.Set("image_password", vStr); err != nil {
+		if err := d.Set("image_password", password); err != nil {
 			diags := diag.FromErr(err)
 			return diags
 		}
 	}
 
 	if v, ok := d.GetOk("image_password"); ok {
-		vStr := v.(string)
-		volume.ImagePassword = &vStr
+		password = v.(string)
+		volume.ImagePassword = &password
 	}
 
 	if v, ok := d.GetOk("volume.0.licence_type"); ok {
-		vStr := v.(string)
-		volume.LicenceType = &vStr
+		licenceType = v.(string)
+		volume.LicenceType = &licenceType
 	}
 
 	if v, ok := d.GetOk("volume.0.availability_zone"); ok {
@@ -449,8 +454,6 @@ func resourceServerCreate(ctx context.Context, d *schema.ResourceData, meta inte
 		volume.UserData = &vStr
 	}
 
-	var sshKeyPath []interface{}
-
 	if v, ok := d.GetOk("volume.0.ssh_key_path"); ok {
 		sshKeyPath = v.([]interface{})
 		if err := d.Set("ssh_key_path", v.([]interface{})); err != nil {
@@ -470,121 +473,7 @@ func resourceServerCreate(ctx context.Context, d *schema.ResourceData, meta inte
 		}
 	}
 
-	var image string
-	var imageInput string
-
-	if v, ok := d.GetOk("volume.0.image_name"); ok {
-		imageInput = v.(string)
-		if err := d.Set("image_name", v.(string)); err != nil {
-			diags := diag.FromErr(err)
-			return diags
-		}
-	} else if v, ok := d.GetOk("image_name"); ok {
-		imageInput = v.(string)
-	}
-
-	if imageInput != "" {
-		if !IsValidUUID(imageInput) {
-			dc, _, err := client.DataCentersApi.DatacentersFindById(ctx, datacenterId).Execute()
-			if err != nil {
-				diags := diag.FromErr(fmt.Errorf("error fetching datacenter %s: (%s)", datacenterId, err))
-				return diags
-			}
-			img, err := resolveImageName(client, imageInput, *dc.Properties.Location)
-			if err != nil {
-				diags := diag.FromErr(err)
-				return diags
-			}
-			if img != nil {
-				image = *img.Id
-			}
-			// if no image id was found with that name we look for a matching snapshot
-			if image == "" {
-				image = getSnapshotId(client, imageInput)
-				if image != "" {
-					isSnapshot = true
-				} else {
-					diags := diag.FromErr(fmt.Errorf("no image or snapshot with id %s found", imageInput))
-					return diags
-				}
-			}
-
-			if volume.ImagePassword == nil && len(sshKeyPath) == 0 && isSnapshot == false && img.Properties.Public != nil && *img.Properties.Public {
-				diags := diag.FromErr(fmt.Errorf("either 'image_password' or 'ssh_key_path' must be provided"))
-				return diags
-			}
-		} else {
-			img, apiResponse, err := client.ImagesApi.ImagesFindById(ctx, imageInput).Execute()
-
-			if apiResponse != nil && apiResponse.Response != nil && apiResponse.StatusCode== 404 {
-
-				_, apiResponse, err = client.SnapshotsApi.SnapshotsFindById(ctx, imageInput).Execute()
-
-				if err != nil {
-					diags := diag.FromErr(fmt.Errorf("could not fetch image/snapshot: %s", err))
-					return diags
-				}
-
-				isSnapshot = true
-
-			} else if err != nil {
-				diags := diag.FromErr(fmt.Errorf("error fetching image/snapshot: %s", err))
-				return diags
-			}
-
-			if isSnapshot == false && img.Properties.Public != nil && *img.Properties.Public == true {
-
-				if volume.ImagePassword == nil && len(sshKeyPath) == 0 {
-					diags := diag.FromErr(fmt.Errorf("either 'image_password' or 'ssh_key_path' must be provided"))
-					return diags
-				}
-
-				dc, _, err := client.DataCentersApi.DatacentersFindById(ctx, datacenterId).Execute()
-				if err != nil {
-					diags := diag.FromErr(fmt.Errorf("error fetching datacenter %s: (%s)", datacenterId, err))
-					return diags
-				}
-
-				img, err := resolveImageName(client, imageInput, *dc.Properties.Location)
-
-				if err != nil {
-					diags := diag.FromErr(err)
-					return diags
-				}
-
-				if img != nil {
-					image = *img.Id
-				}
-			} else {
-				img, _, err := client.ImagesApi.ImagesFindById(ctx, imageInput).Execute()
-				if err != nil {
-					snap, _, err := client.SnapshotsApi.SnapshotsFindById(ctx, imageInput).Execute()
-					if err != nil {
-						diags := diag.FromErr(fmt.Errorf("error fetching image/snapshot: %s", err))
-						return diags
-					}
-					isSnapshot = true
-					image = *snap.Id
-				} else {
-					if isSnapshot == false && img.Properties.Public != nil && *img.Properties.Public == true &&
-						volume.ImagePassword == nil && len(sshKeyPath) == 0 {
-						diags := diag.FromErr(fmt.Errorf("either 'image_password' or 'ssh_key_path' must be provided"))
-						return diags
-					}
-					image = imageInput
-				}
-			}
-		}
-	}
-
-	if image != "" {
-		volume.Image = &image
-	} else {
-		volume.Image = nil
-	}
-
 	if len(sshKeyPath) != 0 {
-		var publicKeys []string
 		for _, path := range sshKeyPath {
 			log.Printf("[DEBUG] Reading file %s", path)
 			publicKey, err := readPublicKey(path.(string))
@@ -597,6 +486,40 @@ func resourceServerCreate(ctx context.Context, d *schema.ResourceData, meta inte
 		if len(publicKeys) > 0 {
 			volume.SshKeys = &publicKeys
 		}
+	}
+
+	if v, ok := d.GetOk("volume.0.image_name"); ok {
+		imageInput = v.(string)
+		if err := d.Set("image_name", v.(string)); err != nil {
+			diags := diag.FromErr(err)
+			return diags
+		}
+	} else if v, ok := d.GetOk("image_name"); ok {
+		imageInput = v.(string)
+	}
+
+	if imageInput != "" {
+		image, imageAlias, isSnapshot, diags = checkImage(ctx, client, imageInput, password, licenceType, dcId, sshKeyPath)
+		if diags != nil {
+			return diags
+		}
+	}
+
+	if isSnapshot == true && (volume.ImagePassword != nil && *volume.ImagePassword != "" || len(publicKeys) > 0) {
+		diags := diag.FromErr(fmt.Errorf("you can't pass 'image_password' and/or 'ssh keys' when creating a volume from a snapshot"))
+		return diags
+	}
+
+	if image != "" {
+		volume.Image = &image
+	} else {
+		volume.Image = nil
+	}
+
+	if imageAlias != "" {
+		volume.ImageAlias = &imageAlias
+	} else {
+		volume.ImageAlias = nil
 	}
 
 	request.Entities = &ionoscloud.ServerEntities{
@@ -876,7 +799,7 @@ func resourceServerRead(ctx context.Context, d *schema.ResourceData, meta interf
 
 	server, apiResponse, err := client.ServersApi.DatacentersServersFindById(ctx, dcId, serverId).Execute()
 	if err != nil {
-		if apiResponse != nil && apiResponse.Response != nil && apiResponse.StatusCode== 404 {
+		if apiResponse != nil && apiResponse.Response != nil && apiResponse.StatusCode == 404 {
 			d.SetId("")
 			return nil
 		}
@@ -939,7 +862,6 @@ func resourceServerRead(ctx context.Context, d *schema.ResourceData, meta interf
 			diags := diag.FromErr(err)
 			return diags
 		}
-
 	}
 
 	if primarynic, ok := d.GetOk("primary_nic"); ok {
@@ -1118,6 +1040,11 @@ func resourceServerUpdate(ctx context.Context, d *schema.ResourceData, meta inte
 		request.CpuFamily = &nStr
 	}
 
+	if d.HasChange("image_name") {
+		diags := diag.FromErr(fmt.Errorf("image_name is immutable"))
+		return diags
+	}
+
 	if d.HasChange("boot_cdrom") {
 		_, n := d.GetChange("boot_cdrom")
 		nStr := n.(string)
@@ -1152,6 +1079,12 @@ func resourceServerUpdate(ctx context.Context, d *schema.ResourceData, meta inte
 		diags := diag.FromErr(fmt.Errorf("backup_unit_id is immutable and is only allowed to be set on a new volume creation"))
 		return diags
 	}
+
+	if d.HasChange("volume.0.image_name") {
+		diags := diag.FromErr(fmt.Errorf("image_name is immutable"))
+		return diags
+	}
+
 	if d.HasChange("volume") {
 		bootVolume := d.Get("boot_volume").(string)
 		_, _, err := client.ServersApi.DatacentersServersVolumesFindById(ctx, dcId, d.Id(), bootVolume).Execute()
