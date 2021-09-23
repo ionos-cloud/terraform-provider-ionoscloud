@@ -64,7 +64,7 @@ resource "ionoscloud_server" "example" {
 - `image_password` - (Optional)[string] Required if `ssh_key_path` is not provided.
 - `type` - (Optional)[string] server usages: ENTERPRISE or CUBE
 
-*!!! image_name under volume level is deprecated, please use image_name under server level*
+*note: image_name under volume level is deprecated, please use image_name under server level*
 
 ## Import
 
