@@ -1,6 +1,9 @@
 package ionoscloud
 
 import (
+	"fmt"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
 	"testing"
 )
 
@@ -48,4 +51,22 @@ func TestSetPropWithNilCheck(t *testing.T) {
 		t.Errorf("string_simple != %+v", s2)
 	}
 
+}
+
+func testNotEmptySlice(resource, attribute string) resource.TestCheckFunc {
+	return func(s *terraform.State) error {
+		for _, rs := range s.RootModule().Resources {
+			if rs.Type != resource {
+				fmt.Printf("rs.Type: %v \n", rs.Type)
+				continue
+			}
+
+			lengthOfSlice := rs.Primary.Attributes[attribute]
+
+			if lengthOfSlice == "0" {
+				return fmt.Errorf("returned version slice is empty")
+			}
+		}
+		return nil
+	}
 }

@@ -16,7 +16,7 @@ func TestAccDataSourceDbaasPgSqlVersions_All(t *testing.T) {
 			{
 				Config: testAccDataSourceDbaasPgSqlAllVersions,
 				Check: resource.ComposeTestCheckFunc(
-					resource.TestCheckNoResourceAttr("data.ionoscloud_dbaas_pgsql_versions.test_ds_dbaas_versions", "cluster_id"),
+					testNotEmptySlice("ionoscloud_dbaas_pgsql_versions", "postgres_versions.#"),
 				),
 			},
 		},
@@ -36,7 +36,7 @@ func TestAccDataSourceDbaasPgSqlVersions_ClusterId(t *testing.T) {
 			{
 				Config: testAccDataSourceDbaasPgSqlVersionsByClusterId,
 				Check: resource.ComposeTestCheckFunc(
-					resource.TestCheckResourceAttr("data.ionoscloud_dbaas_pgsql_cluster.test_ds_dbaas_cluster", "display_name", "PostgreSQL_cluster"),
+					testNotEmptySlice("ionoscloud_dbaas_pgsql_versions", "postgres_versions.#"),
 				),
 			},
 		},
