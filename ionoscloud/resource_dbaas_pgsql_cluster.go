@@ -282,7 +282,7 @@ func resourceDbaasPgSqlClusterDelete(ctx context.Context, d *schema.ResourceData
 	_, apiResponse, err := client.DeleteCluster(ctx, d.Id())
 
 	if err != nil {
-		if apiResponse != nil && apiResponse.StatusCode == 404 {
+		if apiResponse != nil && apiResponse.Response != nil && apiResponse.StatusCode == 404 {
 			d.SetId("")
 			return nil
 		}
@@ -325,7 +325,7 @@ func resourceDbaasPgSqlClusterImport(ctx context.Context, d *schema.ResourceData
 	dbaasCluster, apiResponse, err := client.GetCluster(ctx, clusterId)
 
 	if err != nil {
-		if apiResponse != nil && apiResponse.StatusCode == 404 {
+		if apiResponse != nil && apiResponse.Response != nil && apiResponse.StatusCode == 404 {
 			d.SetId("")
 			return nil, fmt.Errorf("an error occured while trying to fetch the import of dbaas cluster %q", clusterId)
 		}
@@ -362,7 +362,7 @@ func dbaasClusterDeleted(ctx context.Context, client *dbaasService.Client, d *sc
 	_, apiResponse, err := client.GetCluster(ctx, d.Id())
 
 	if err != nil {
-		if apiResponse != nil && apiResponse.StatusCode == 404 {
+		if apiResponse != nil && apiResponse.Response != nil && apiResponse.StatusCode == 404 {
 			return true, nil
 		}
 		return true, fmt.Errorf("error checking dbaas cluster deletion status: %s", err)

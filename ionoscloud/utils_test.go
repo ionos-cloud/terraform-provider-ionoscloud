@@ -57,7 +57,6 @@ func testNotEmptySlice(resource, attribute string) resource.TestCheckFunc {
 	return func(s *terraform.State) error {
 		for _, rs := range s.RootModule().Resources {
 			if rs.Type != resource {
-				fmt.Printf("rs.Type: %v \n", rs.Type)
 				continue
 			}
 

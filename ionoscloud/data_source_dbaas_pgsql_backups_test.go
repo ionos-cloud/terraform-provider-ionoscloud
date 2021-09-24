@@ -6,7 +6,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 )
 
-func TestAccDataSourceDbaasPgSqlBackups_All(t *testing.T) {
+func TestAccDataSourceDbaasPgSqlClusterBackups(t *testing.T) {
 	resource.Test(t, resource.TestCase{
 		PreCheck: func() {
 			testAccPreCheck(t)
@@ -14,16 +14,17 @@ func TestAccDataSourceDbaasPgSqlBackups_All(t *testing.T) {
 		ProviderFactories: testAccProviderFactories,
 		Steps: []resource.TestStep{
 			{
-				Config: testAccDataSourceDbaasPgSqlAllBackups,
+				Config: testAccDataSourceDbaasPgSqlClusterBackups,
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttrPair("data.ionoscloud_dbaas_pgsql_backups.test_ds_dbaas_backups", "cluster_backups.0.cluster_id", "data.ionoscloud_dbaas_pgsql_backups.test_ds_dbaas_backups", "cluster_id"),
+					testNotEmptySlice("ionoscloud_dbaas_pgsql_backups", "cluster_backups.#"),
 				),
 			},
 		},
 	})
 }
 
-const testAccDataSourceDbaasPgSqlAllBackups = `
+const testAccDataSourceDbaasPgSqlClusterBackups = `
 
 resource "ionoscloud_datacenter" "test_dbaas_cluster" {
   name        = "test_dbaas_cluster"
