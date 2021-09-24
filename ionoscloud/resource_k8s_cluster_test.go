@@ -28,7 +28,6 @@ func TestAcck8sCluster_Basic(t *testing.T) {
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckk8sClusterExists("ionoscloud_k8s_cluster.example", &k8sCluster),
 					resource.TestCheckResourceAttr("ionoscloud_k8s_cluster.example", "name", k8sClusterName),
-					resource.TestCheckResourceAttr("ionoscloud_k8s_cluster.example", "public", "true"),
 				),
 			},
 			{
@@ -36,7 +35,6 @@ func TestAcck8sCluster_Basic(t *testing.T) {
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckk8sClusterExists("ionoscloud_k8s_cluster.example", &k8sCluster),
 					resource.TestCheckResourceAttr("ionoscloud_k8s_cluster.example", "name", "updated"),
-					resource.TestCheckResourceAttr("ionoscloud_k8s_cluster.example", "public", "true"),
 				),
 			},
 		},

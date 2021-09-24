@@ -31,7 +31,6 @@ The following attributes are returned by the datasource:
 
 * `id` - id of the cluster
 * `name` - name of the cluster
-* `k8s_version` - Kubernetes version
 * `maintenance_window` - A maintenance window comprise of a day of the week and a time for maintenance to be allowed
   * `time` - A clock time in the day when maintenance is allowed
   * `day_of_the_week` - Day of the week when maintenance is allowed
@@ -49,13 +48,10 @@ The following attributes are returned by the datasource:
   "FAILED_DESTROYING",
   "TERMINATED"
 * `k8s_version` - Kubernetes version. The provider will ignore changes of patch level.
-* `maintenance_window`
 * `available_upgrade_versions` - list of available versions for upgrading the cluster
 * `viable_node_pool_versions` - list of versions that may be used for node pools under this cluster
 * `node_pools` - list of the IDs of the node pools in this cluster
 * `kube_config` - Raw Kubernetes configuration; use `yamlencode` or `jsonencode` when dumping this to a file
-* `public` - the indicator if the cluster is public or private
-* `gateway_ip` - the IP address of the gateway used by the cluster
 * `api_subnet_allow_list` - access to the K8s API server is restricted to these CIDRs
 * `s3_buckets` - list of S3 bucket configured for K8s usage
 * `config` - structured kubernetes config consisting of a list with 1 item with the following fields:
