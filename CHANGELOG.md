@@ -1,3 +1,8 @@
+## 6.0.0-beta.11
+
+- added image_alias to volume
+- removed public and gateway_ip properties from k8s_ccluster
+
 ## 6.0.0-beta.10
 
 - issue #19 - fixed update ssh_key_path although not changed
