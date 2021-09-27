@@ -351,9 +351,21 @@ func dbaasClusterReady(ctx context.Context, client *dbaasService.Client, d *sche
 		return true, fmt.Errorf("error checking dbaas cluster status: %s", err)
 	}
 
-	//if *subjectCluster.LifecycleStatus == "FAILED" {
-	//	return false, fmt.Errorf("dbaas cluster has failed")
-	//}
+	fmt.Printf("[INFO] Getting state of cluster: %s - %s \n", d.Id(), *subjectCluster.LifecycleStatus)
+
+	if *subjectCluster.LifecycleStatus == "FAILED" {
+		time.Sleep(time.Second * 3)
+
+		subjectCluster, _, err = client.GetCluster(ctx, d.Id())
+
+		if err != nil {
+			return true, fmt.Errorf("error checking dbaas cluster status: %s", err)
+		}
+
+		if *subjectCluster.LifecycleStatus == "FAILED" {
+			return false, fmt.Errorf("dbaas cluster has failed. WARNING: your k8s cluster may still  after some time but the terraform state won't reflect that; check your Ionos Cloud account for updates")
+		}
+	}
 	return *subjectCluster.LifecycleStatus == "AVAILABLE", nil
 }
 

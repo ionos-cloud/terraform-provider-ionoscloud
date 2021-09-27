@@ -24,7 +24,7 @@ func TestAccDbaasPgSqlCluster_Basic(t *testing.T) {
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckDbaasPgSqlClusterExists("ionoscloud_dbaas_pgsql_cluster.test_dbaas_cluster", &dbaasCluster),
 					resource.TestCheckResourceAttr("ionoscloud_dbaas_pgsql_cluster.test_dbaas_cluster", "postgres_version", "12"),
-					resource.TestCheckResourceAttr("ionoscloud_dbaas_pgsql_cluster.test_dbaas_cluster", "replicas", "2"),
+					resource.TestCheckResourceAttr("ionoscloud_dbaas_pgsql_cluster.test_dbaas_cluster", "replicas", "1"),
 					resource.TestCheckResourceAttr("ionoscloud_dbaas_pgsql_cluster.test_dbaas_cluster", "cpu_core_count", "4"),
 					resource.TestCheckResourceAttr("ionoscloud_dbaas_pgsql_cluster.test_dbaas_cluster", "ram_size", "3Gi"),
 					resource.TestCheckResourceAttr("ionoscloud_dbaas_pgsql_cluster.test_dbaas_cluster", "storage_size", "1Gi"),
@@ -46,7 +46,7 @@ func TestAccDbaasPgSqlCluster_Basic(t *testing.T) {
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckDbaasPgSqlClusterExists("ionoscloud_dbaas_pgsql_cluster.test_dbaas_cluster", &dbaasCluster),
 					resource.TestCheckResourceAttr("ionoscloud_dbaas_pgsql_cluster.test_dbaas_cluster", "postgres_version", "13"),
-					resource.TestCheckResourceAttr("ionoscloud_dbaas_pgsql_cluster.test_dbaas_cluster", "replicas", "2"),
+					resource.TestCheckResourceAttr("ionoscloud_dbaas_pgsql_cluster.test_dbaas_cluster", "replicas", "1"),
 					resource.TestCheckResourceAttr("ionoscloud_dbaas_pgsql_cluster.test_dbaas_cluster", "cpu_core_count", "4"),
 					resource.TestCheckResourceAttr("ionoscloud_dbaas_pgsql_cluster.test_dbaas_cluster", "ram_size", "3Gi"),
 					resource.TestCheckResourceAttr("ionoscloud_dbaas_pgsql_cluster.test_dbaas_cluster", "storage_size", "2Gi"),
@@ -151,7 +151,7 @@ resource "ionoscloud_lan" "test_dbaas_cluster" {
 
 resource "ionoscloud_dbaas_pgsql_cluster" "test_dbaas_cluster" {
   postgres_version   = 12
-  replicas           = 2
+  replicas           = 1
   cpu_core_count     = 4
   ram_size           = "3Gi"
   storage_size       = "1Gi"
@@ -196,7 +196,7 @@ resource "ionoscloud_ipblock" "test_dbaas_cluster" {
 
 resource "ionoscloud_dbaas_pgsql_cluster" "test_dbaas_cluster" {
   postgres_version   = 13
-  replicas           = 2
+  replicas           = 1
   cpu_core_count     = 4
   ram_size           = "3Gi"
   storage_size       = "2Gi"

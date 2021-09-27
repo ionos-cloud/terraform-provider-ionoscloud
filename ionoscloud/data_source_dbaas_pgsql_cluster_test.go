@@ -68,7 +68,7 @@ resource "ionoscloud_lan" "test_dbaas_cluster" {
 
 resource "ionoscloud_dbaas_pgsql_cluster" "test_dbaas_cluster" {
   postgres_version   = 12
-  replicas           = 2
+  replicas           = 1
   cpu_core_count     = 4
   ram_size           = "2Gi"
   storage_size       = "1Gi"
@@ -113,7 +113,7 @@ resource "ionoscloud_lan" "test_dbaas_cluster" {
 
 resource "ionoscloud_dbaas_pgsql_cluster" "test_dbaas_cluster" {
   postgres_version   = 12
-  replicas           = 2
+  replicas           = 1
   cpu_core_count     = 4
   ram_size           = "2Gi"
   storage_size       = "1Gi"
@@ -162,7 +162,7 @@ resource "ionoscloud_lan" "test_dbaas_cluster" {
 
 resource "ionoscloud_dbaas_pgsql_cluster" "test_dbaas_cluster" {
   postgres_version   = 12
-  replicas           = 2
+  replicas           = 1
   cpu_core_count     = 4
   ram_size           = "2Gi"
   storage_size       = "1Gi"
