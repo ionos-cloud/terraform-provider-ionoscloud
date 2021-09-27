@@ -1,3 +1,7 @@
+## 5.2.15
+
+- removed public and gateway_ip properties from k8s cluster
+
 ## 5.2.14
 
 - fixed typo in setting user_data and backup_unit_id in the volume entity from server
