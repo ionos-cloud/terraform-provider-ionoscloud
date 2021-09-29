@@ -60,6 +60,7 @@ resource "ionoscloud_dbaas_pgsql_cluster" "example" {
 * `credentials` - (Required)[string] Credentials for the database user to be created.
     * `username` - (Required)[string] The username for the initial postgres user. some system usernames are restricted (e.g. "postgres", "admin", "standby")
     * `password` - (Required)[string]
+* `from_backup` - (Required)[string] The unique ID of the backup you want to restore.
     
 ## Import
 

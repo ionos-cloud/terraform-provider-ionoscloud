@@ -6,6 +6,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
+	dbaas "github.com/ionos-cloud/sdk-go-autoscaling"
 	dbaasService "github.com/ionos-cloud/terraform-provider-ionoscloud/services/dbaas"
 	"log"
 	"net"
@@ -123,6 +124,7 @@ func resourceDbaasPgSqlCluster() *schema.Resource {
 				MaxItems:    1,
 				Description: "a weekly 4 hour-long window, during which maintenance might occur",
 				Optional:    true,
+				Computed:    true,
 				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{
 						"time": {
@@ -159,6 +161,12 @@ func resourceDbaasPgSqlCluster() *schema.Resource {
 					},
 				},
 			},
+			"from_backup": {
+				Type:        schema.TypeString,
+				Description: "The PostgreSQL version of your cluster.",
+				Optional:    true,
+				ForceNew:    true,
+			},
 		},
 		Timeouts: &resourceDefaultTimeouts,
 	}
@@ -167,9 +175,16 @@ func resourceDbaasPgSqlCluster() *schema.Resource {
 func resourceDbaasPgSqlClusterCreate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	client := meta.(SdkBundle).DbaasClient
 
+	var err error
+	var dbaasClusterResponse dbaas.Cluster
+
 	dbaasCluster := dbaasService.GetDbaasPgSqlClusterDataCreate(d)
 
-	dbaasClusterResponse, _, err := client.CreateCluster(ctx, *dbaasCluster)
+	if backupId, ok := d.GetOk("from_backup"); ok {
+		dbaasClusterResponse, _, err = client.CreateClusterFromBackup(ctx, *dbaasCluster, backupId.(string))
+	} else {
+		dbaasClusterResponse, _, err = client.CreateCluster(ctx, *dbaasCluster)
+	}
 
 	if err != nil {
 		diags := diag.FromErr(fmt.Errorf("an error occured while creating a dbaas cluster: %s", err))
@@ -351,9 +366,8 @@ func dbaasClusterReady(ctx context.Context, client *dbaasService.Client, d *sche
 		return true, fmt.Errorf("error checking dbaas cluster status: %s", err)
 	}
 
-	fmt.Printf("[INFO] Getting state of cluster: %s - %s \n", d.Id(), *subjectCluster.LifecycleStatus)
-
 	if *subjectCluster.LifecycleStatus == "FAILED" {
+
 		time.Sleep(time.Second * 3)
 
 		subjectCluster, _, err = client.GetCluster(ctx, d.Id())
@@ -363,7 +377,7 @@ func dbaasClusterReady(ctx context.Context, client *dbaasService.Client, d *sche
 		}
 
 		if *subjectCluster.LifecycleStatus == "FAILED" {
-			return false, fmt.Errorf("dbaas cluster has failed. WARNING: your k8s cluster may still  after some time but the terraform state won't reflect that; check your Ionos Cloud account for updates")
+			return false, fmt.Errorf("dbaas cluster has failed. WARNING: your k8s cluster may still recover after some time but the terraform state won't reflect that; check your Ionos Cloud account for updates")
 		}
 	}
 	return *subjectCluster.LifecycleStatus == "AVAILABLE", nil

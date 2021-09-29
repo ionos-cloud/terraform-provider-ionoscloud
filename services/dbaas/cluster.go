@@ -12,6 +12,7 @@ type ClusterService interface {
 	GetCluster(ctx context.Context, clusterId string) (dbaas.Cluster, *dbaas.APIResponse, error)
 	ListClusters(ctx context.Context) (dbaas.ClusterList, *dbaas.APIResponse, error)
 	CreateCluster(ctx context.Context, cluster dbaas.CreateClusterRequest) (dbaas.Cluster, *dbaas.APIResponse, error)
+	CreateClusterFromBackup(ctx context.Context, cluster dbaas.CreateClusterRequest, backupId string) (dbaas.Cluster, *dbaas.APIResponse, error)
 	UpdateCluster(ctx context.Context, clusterId string, cluster dbaas.PatchClusterRequest) (dbaas.Cluster, *dbaas.APIResponse, error)
 	DeleteCluster(ctx context.Context, clusterId string) (dbaas.Cluster, *dbaas.APIResponse, error)
 }
@@ -35,6 +36,17 @@ func (c *Client) ListClusters(ctx context.Context) (dbaas.ClusterList, *dbaas.AP
 
 func (c *Client) CreateCluster(ctx context.Context, cluster dbaas.CreateClusterRequest) (dbaas.Cluster, *dbaas.APIResponse, error) {
 	clusterResponse, apiResponse, err := c.ClustersApi.ClustersPost(ctx).Cluster(cluster).Execute()
+	if apiResponse != nil {
+		return clusterResponse, apiResponse, err
+	}
+	return clusterResponse, nil, err
+}
+
+func (c *Client) CreateClusterFromBackup(ctx context.Context, cluster dbaas.CreateClusterRequest, backupId string) (dbaas.Cluster, *dbaas.APIResponse, error) {
+	clusterResponse, apiResponse, err := c.ClustersApi.ClustersPost(ctx).Cluster(cluster).FromBackup(backupId).Execute()
+	if err != nil {
+		fmt.Printf("error while creating from backup: %v", err)
+	}
 	if apiResponse != nil {
 		return clusterResponse, apiResponse, err
 	}

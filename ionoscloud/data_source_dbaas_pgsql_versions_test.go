@@ -56,12 +56,6 @@ resource "ionoscloud_datacenter" "test_dbaas_cluster" {
   description = "Datacenter for testing dbaas cluster"
 }
 
-resource "ionoscloud_ipblock" "test_dbaas_cluster" {
-  location = ionoscloud_datacenter.test_dbaas_cluster.location
-  size = 1
-  name = "test_dbaas_cluster"
-}
-
 resource "ionoscloud_lan" "test_dbaas_cluster" {
   datacenter_id = ionoscloud_datacenter.test_dbaas_cluster.id 
   public        = false
@@ -99,12 +93,6 @@ resource "ionoscloud_datacenter" "test_dbaas_cluster" {
   name        = "test_dbaas_cluster"
   location    = "de/txl"
   description = "Datacenter for testing dbaas cluster"
-}
-
-resource "ionoscloud_ipblock" "test_dbaas_cluster" {
-  location = ionoscloud_datacenter.test_dbaas_cluster.location
-  size = 1
-  name = "test_dbaas_cluster"
 }
 
 resource "ionoscloud_lan" "test_dbaas_cluster" {
