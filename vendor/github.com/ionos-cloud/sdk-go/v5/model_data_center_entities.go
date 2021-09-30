@@ -66,7 +66,6 @@ func (o *DataCenterEntities) HasServers() bool {
 }
 
 
-
 // GetVolumes returns the Volumes field value
 // If the value is explicit nil, the zero value for Volumes will be returned
 func (o *DataCenterEntities) GetVolumes() *Volumes {
@@ -107,7 +106,6 @@ func (o *DataCenterEntities) HasVolumes() bool {
 
 	return false
 }
-
 
 
 // GetLoadbalancers returns the Loadbalancers field value
@@ -152,7 +150,6 @@ func (o *DataCenterEntities) HasLoadbalancers() bool {
 }
 
 
-
 // GetLans returns the Lans field value
 // If the value is explicit nil, the zero value for Lans will be returned
 func (o *DataCenterEntities) GetLans() *Lans {
@@ -194,29 +191,24 @@ func (o *DataCenterEntities) HasLans() bool {
 	return false
 }
 
-
 func (o DataCenterEntities) MarshalJSON() ([]byte, error) {
 	toSerialize := map[string]interface{}{}
 
 	if o.Servers != nil {
 		toSerialize["servers"] = o.Servers
 	}
-	
 
 	if o.Volumes != nil {
 		toSerialize["volumes"] = o.Volumes
 	}
-	
 
 	if o.Loadbalancers != nil {
 		toSerialize["loadbalancers"] = o.Loadbalancers
 	}
-	
 
 	if o.Lans != nil {
 		toSerialize["lans"] = o.Lans
 	}
-	
 	return json.Marshal(toSerialize)
 }
 

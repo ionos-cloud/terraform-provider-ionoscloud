@@ -65,7 +65,6 @@ func (o *Contract) HasType() bool {
 }
 
 
-
 // GetProperties returns the Properties field value
 // If the value is explicit nil, the zero value for ContractProperties will be returned
 func (o *Contract) GetProperties() *ContractProperties {
@@ -107,19 +106,16 @@ func (o *Contract) HasProperties() bool {
 	return false
 }
 
-
 func (o Contract) MarshalJSON() ([]byte, error) {
 	toSerialize := map[string]interface{}{}
 
 	if o.Type != nil {
 		toSerialize["type"] = o.Type
 	}
-	
 
 	if o.Properties != nil {
 		toSerialize["properties"] = o.Properties
 	}
-	
 	return json.Marshal(toSerialize)
 }
 

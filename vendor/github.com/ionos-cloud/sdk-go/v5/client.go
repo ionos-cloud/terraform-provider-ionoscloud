@@ -50,7 +50,7 @@ const (
    RequestStatusFailed  = "FAILED"
    RequestStatusDone    = "DONE"
 
-   Version              = "5.1.4"
+   Version              = "5.1.7"
 )
 
 // APIClient manages communication with the CLOUD API API v5.0
@@ -223,10 +223,11 @@ func parameterToJson(obj interface{}) (string, error) {
 
 
 // callAPI do the request.
-func (c *APIClient) callAPI(request *http.Request) (*http.Response, error) {
+func (c *APIClient) callAPI(request *http.Request) (*http.Response, time.Duration, error) {
     retryCount := 0
 
     var resp *http.Response
+    var httpRequestTime time.Duration
     var err error
 
     for {
@@ -238,28 +239,30 @@ func (c *APIClient) callAPI(request *http.Request) (*http.Response, error) {
         if request.Body != nil {
             clonedRequest.Body, err = request.GetBody()
             if err != nil {
-                return nil, err
+                return nil, httpRequestTime, err
             }
         }
 
         if c.cfg.Debug {
             dump, err := httputil.DumpRequestOut(clonedRequest, true)
             if err != nil {
-                return nil, err
+                return nil, httpRequestTime, err
             }
             log.Printf("\ntry no: %d\n", retryCount)
             log.Printf("%s\n", string(dump))
         }
 
+        httpRequestStartTime := time.Now()
         resp, err = c.cfg.HTTPClient.Do(clonedRequest)
+        httpRequestTime = time.Since(httpRequestStartTime)
         if err != nil {
-            return resp, err
+            return resp, httpRequestTime, err
         }
 
         if c.cfg.Debug {
             dump, err := httputil.DumpResponse(resp, true)
             if err != nil {
-                return resp, err
+                return resp, httpRequestTime, err
             }
             log.Printf("\n%s\n", string(dump))
         }
@@ -276,14 +279,14 @@ func (c *APIClient) callAPI(request *http.Request) (*http.Response, error) {
             if retryAfterSeconds := resp.Header.Get("Retry-After"); retryAfterSeconds != "" {
                 waitTime, err := time.ParseDuration(retryAfterSeconds + "s")
                 if err != nil {
-                    return resp, err
+                    return resp, httpRequestTime, err
                 }
                 backoffTime = waitTime
             } else {
                 backoffTime = c.GetConfig().WaitTime
             }
         default:
-            return resp, err
+            return resp, httpRequestTime, err
 
         }
 
@@ -297,7 +300,7 @@ func (c *APIClient) callAPI(request *http.Request) (*http.Response, error) {
         }
     }
 
-    return resp, err
+    return resp, httpRequestTime, err
 }
 
 func (c *APIClient) backOff(t time.Duration) {
@@ -537,7 +540,7 @@ func (c *APIClient) GetRequestStatus(ctx context.Context, path string) (*Request
         return nil, nil, err
     }
 
-    resp, err := c.callAPI(r)
+    resp, httpRequestTime, err := c.callAPI(r)
 
     var responseBody = make([]byte, 0)
     if resp != nil {
@@ -553,6 +556,7 @@ func (c *APIClient) GetRequestStatus(ctx context.Context, path string) (*Request
     apiResponse := &APIResponse {
         Response: resp,
         Method: http.MethodGet,
+        RequestTime: httpRequestTime,
         RequestURL: path,
         Operation: "GetRequestStatus",
     }
@@ -596,7 +600,7 @@ func (c *APIClient) WaitForRequest(ctx context.Context, path string) (*APIRespon
     ticker := time.NewTicker(1 * time.Second)
     defer ticker.Stop()
     for {
-        resp, err := c.callAPI(r)
+        resp, httpRequestTime, err := c.callAPI(r)
 
         var localVarBody = make([]byte, 0)
         if resp != nil {
@@ -612,6 +616,7 @@ func (c *APIClient) WaitForRequest(ctx context.Context, path string) (*APIRespon
         localVarAPIResponse := &APIResponse {
             Response: resp,
             Method: localVarHTTPMethod,
+            RequestTime: httpRequestTime,
             RequestURL: path,
             Operation: "WaitForRequest",
         }

@@ -68,7 +68,6 @@ func (o *PaginationLinks) HasPrev() bool {
 }
 
 
-
 // GetSelf returns the Self field value
 // If the value is explicit nil, the zero value for string will be returned
 func (o *PaginationLinks) GetSelf() *string {
@@ -109,7 +108,6 @@ func (o *PaginationLinks) HasSelf() bool {
 
 	return false
 }
-
 
 
 // GetNext returns the Next field value
@@ -153,24 +151,20 @@ func (o *PaginationLinks) HasNext() bool {
 	return false
 }
 
-
 func (o PaginationLinks) MarshalJSON() ([]byte, error) {
 	toSerialize := map[string]interface{}{}
 
 	if o.Prev != nil {
 		toSerialize["prev"] = o.Prev
 	}
-	
 
 	if o.Self != nil {
 		toSerialize["self"] = o.Self
 	}
-	
 
 	if o.Next != nil {
 		toSerialize["next"] = o.Next
 	}
-	
 	return json.Marshal(toSerialize)
 }
 

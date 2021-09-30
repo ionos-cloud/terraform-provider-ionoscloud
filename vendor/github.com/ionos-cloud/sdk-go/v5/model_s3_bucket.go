@@ -63,14 +63,12 @@ func (o *S3Bucket) HasName() bool {
 	return false
 }
 
-
 func (o S3Bucket) MarshalJSON() ([]byte, error) {
 	toSerialize := map[string]interface{}{}
 
 	if o.Name != nil {
 		toSerialize["name"] = o.Name
 	}
-	
 	return json.Marshal(toSerialize)
 }
 

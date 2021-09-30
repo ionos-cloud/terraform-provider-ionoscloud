@@ -62,14 +62,12 @@ func (o *ResourceEntities) HasGroups() bool {
 	return false
 }
 
-
 func (o ResourceEntities) MarshalJSON() ([]byte, error) {
 	toSerialize := map[string]interface{}{}
 
 	if o.Groups != nil {
 		toSerialize["groups"] = o.Groups
 	}
-	
 	return json.Marshal(toSerialize)
 }
 

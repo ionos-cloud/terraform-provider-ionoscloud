@@ -71,7 +71,6 @@ func (o *KubernetesClusterPropertiesForPut) HasName() bool {
 }
 
 
-
 // GetK8sVersion returns the K8sVersion field value
 // If the value is explicit nil, the zero value for string will be returned
 func (o *KubernetesClusterPropertiesForPut) GetK8sVersion() *string {
@@ -112,7 +111,6 @@ func (o *KubernetesClusterPropertiesForPut) HasK8sVersion() bool {
 
 	return false
 }
-
 
 
 // GetMaintenanceWindow returns the MaintenanceWindow field value
@@ -157,7 +155,6 @@ func (o *KubernetesClusterPropertiesForPut) HasMaintenanceWindow() bool {
 }
 
 
-
 // GetApiSubnetAllowList returns the ApiSubnetAllowList field value
 // If the value is explicit nil, the zero value for []string will be returned
 func (o *KubernetesClusterPropertiesForPut) GetApiSubnetAllowList() *[]string {
@@ -198,7 +195,6 @@ func (o *KubernetesClusterPropertiesForPut) HasApiSubnetAllowList() bool {
 
 	return false
 }
-
 
 
 // GetS3Buckets returns the S3Buckets field value
@@ -242,34 +238,28 @@ func (o *KubernetesClusterPropertiesForPut) HasS3Buckets() bool {
 	return false
 }
 
-
 func (o KubernetesClusterPropertiesForPut) MarshalJSON() ([]byte, error) {
 	toSerialize := map[string]interface{}{}
 
 	if o.Name != nil {
 		toSerialize["name"] = o.Name
 	}
-	
 
 	if o.K8sVersion != nil {
 		toSerialize["k8sVersion"] = o.K8sVersion
 	}
-	
 
 	if o.MaintenanceWindow != nil {
 		toSerialize["maintenanceWindow"] = o.MaintenanceWindow
 	}
-	
 
 	if o.ApiSubnetAllowList != nil {
 		toSerialize["apiSubnetAllowList"] = o.ApiSubnetAllowList
 	}
-	
 
 	if o.S3Buckets != nil {
 		toSerialize["s3Buckets"] = o.S3Buckets
 	}
-	
 	return json.Marshal(toSerialize)
 }
 

@@ -71,7 +71,6 @@ func (o *LanPost) HasId() bool {
 }
 
 
-
 // GetType returns the Type field value
 // If the value is explicit nil, the zero value for Type will be returned
 func (o *LanPost) GetType() *Type {
@@ -112,7 +111,6 @@ func (o *LanPost) HasType() bool {
 
 	return false
 }
-
 
 
 // GetHref returns the Href field value
@@ -157,7 +155,6 @@ func (o *LanPost) HasHref() bool {
 }
 
 
-
 // GetMetadata returns the Metadata field value
 // If the value is explicit nil, the zero value for DatacenterElementMetadata will be returned
 func (o *LanPost) GetMetadata() *DatacenterElementMetadata {
@@ -198,7 +195,6 @@ func (o *LanPost) HasMetadata() bool {
 
 	return false
 }
-
 
 
 // GetEntities returns the Entities field value
@@ -243,7 +239,6 @@ func (o *LanPost) HasEntities() bool {
 }
 
 
-
 // GetProperties returns the Properties field value
 // If the value is explicit nil, the zero value for LanPropertiesPost will be returned
 func (o *LanPost) GetProperties() *LanPropertiesPost {
@@ -285,39 +280,32 @@ func (o *LanPost) HasProperties() bool {
 	return false
 }
 
-
 func (o LanPost) MarshalJSON() ([]byte, error) {
 	toSerialize := map[string]interface{}{}
 
 	if o.Id != nil {
 		toSerialize["id"] = o.Id
 	}
-	
 
 	if o.Type != nil {
 		toSerialize["type"] = o.Type
 	}
-	
 
 	if o.Href != nil {
 		toSerialize["href"] = o.Href
 	}
-	
 
 	if o.Metadata != nil {
 		toSerialize["metadata"] = o.Metadata
 	}
-	
 
 	if o.Entities != nil {
 		toSerialize["entities"] = o.Entities
 	}
-	
 
 	if o.Properties != nil {
 		toSerialize["properties"] = o.Properties
 	}
-	
 	return json.Marshal(toSerialize)
 }
 

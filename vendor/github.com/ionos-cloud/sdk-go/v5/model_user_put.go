@@ -65,7 +65,6 @@ func (o *UserPut) HasId() bool {
 }
 
 
-
 // GetProperties returns the Properties field value
 // If the value is explicit nil, the zero value for UserPropertiesPut will be returned
 func (o *UserPut) GetProperties() *UserPropertiesPut {
@@ -107,19 +106,16 @@ func (o *UserPut) HasProperties() bool {
 	return false
 }
 
-
 func (o UserPut) MarshalJSON() ([]byte, error) {
 	toSerialize := map[string]interface{}{}
 
 	if o.Id != nil {
 		toSerialize["id"] = o.Id
 	}
-	
 
 	if o.Properties != nil {
 		toSerialize["properties"] = o.Properties
 	}
-	
 	return json.Marshal(toSerialize)
 }
 

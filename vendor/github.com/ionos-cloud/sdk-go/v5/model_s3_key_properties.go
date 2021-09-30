@@ -66,7 +66,6 @@ func (o *S3KeyProperties) HasSecretKey() bool {
 }
 
 
-
 // GetActive returns the Active field value
 // If the value is explicit nil, the zero value for bool will be returned
 func (o *S3KeyProperties) GetActive() *bool {
@@ -108,19 +107,16 @@ func (o *S3KeyProperties) HasActive() bool {
 	return false
 }
 
-
 func (o S3KeyProperties) MarshalJSON() ([]byte, error) {
 	toSerialize := map[string]interface{}{}
 
 	if o.SecretKey != nil {
 		toSerialize["secretKey"] = o.SecretKey
 	}
-	
 
 	if o.Active != nil {
 		toSerialize["active"] = o.Active
 	}
-	
 	return json.Marshal(toSerialize)
 }
 

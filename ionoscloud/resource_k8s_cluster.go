@@ -90,19 +90,19 @@ func resourcek8sCluster() *schema.Resource {
 					Type: schema.TypeString,
 				},
 			},
-			"public": {
-				Type: schema.TypeBool,
-				Description: "The indicator if the cluster is public or private. Be aware that setting it to false is " +
-					"currently in beta phase.",
-				Optional: true,
-				Default:  true,
-			},
-			"gateway_ip": {
-				Type: schema.TypeString,
-				Description: "The IP address of the gateway used by the cluster. This is mandatory when `public` is set " +
-					"to `false` and should not be provided otherwise.",
-				Optional: true,
-			},
+			//"public": {
+			//	Type: schema.TypeBool,
+			//	Description: "The indicator if the cluster is public or private. Be aware that setting it to false is " +
+			//		"currently in beta phase.",
+			//	Optional: true,
+			//	Default:  true,
+			//},
+			//"gateway_ip": {
+			//	Type: schema.TypeString,
+			//	Description: "The IP address of the gateway used by the cluster. This is mandatory when `public` is set " +
+			//		"to `false` and should not be provided otherwise.",
+			//	Optional: true,
+			//},
 			"api_subnet_allow_list": {
 				Type: schema.TypeList,
 				Description: "Access to the K8s API server is restricted to these CIDRs. Cluster-internal traffic is not " +
@@ -164,13 +164,13 @@ func resourcek8sClusterCreate(ctx context.Context, d *schema.ResourceData, meta 
 		cluster.Properties.MaintenanceWindow.DayOfTheWeek = &mdVal
 	}
 
-	public := d.Get("public").(bool)
-	cluster.Properties.Public = &public
-
-	if gatewayIp, gatewayIpOk := d.GetOk("gateway_ip"); gatewayIpOk {
-		gatewayIp := gatewayIp.(string)
-		cluster.Properties.GatewayIp = &gatewayIp
-	}
+	//public := d.Get("public").(bool)
+	//cluster.Properties.Public = &public
+	//
+	//if gatewayIp, gatewayIpOk := d.GetOk("gateway_ip"); gatewayIpOk {
+	//	gatewayIp := gatewayIp.(string)
+	//	cluster.Properties.GatewayIp = &gatewayIp
+	//}
 
 	if apiSubnet, apiSubnetOk := d.GetOk("api_subnet_allow_list"); apiSubnetOk {
 		apiSubnet := apiSubnet.([]interface{})
@@ -312,21 +312,21 @@ func resourcek8sClusterRead(ctx context.Context, d *schema.ResourceData, meta in
 		}
 	}
 
-	if cluster.Properties.Public != nil {
-		err := d.Set("public", *cluster.Properties.Public)
-		if err != nil {
-			diags := diag.FromErr(fmt.Errorf("error while setting public property for cluser %s: %s", d.Id(), err))
-			return diags
-		}
-	}
-
-	if cluster.Properties.GatewayIp != nil {
-		err := d.Set("gateway_ip", *cluster.Properties.GatewayIp)
-		if err != nil {
-			diags := diag.FromErr(fmt.Errorf("error while setting gateway_ip property for cluser %s: %s", d.Id(), err))
-			return diags
-		}
-	}
+	//if cluster.Properties.Public != nil {
+	//	err := d.Set("public", *cluster.Properties.Public)
+	//	if err != nil {
+	//		diags := diag.FromErr(fmt.Errorf("error while setting public property for cluser %s: %s", d.Id(), err))
+	//		return diags
+	//	}
+	//}
+	//
+	//if cluster.Properties.GatewayIp != nil {
+	//	err := d.Set("gateway_ip", *cluster.Properties.GatewayIp)
+	//	if err != nil {
+	//		diags := diag.FromErr(fmt.Errorf("error while setting gateway_ip property for cluser %s: %s", d.Id(), err))
+	//		return diags
+	//	}
+	//}
 
 	if cluster.Properties.ApiSubnetAllowList != nil && len(*cluster.Properties.ApiSubnetAllowList) > 0 {
 		var apiSubnetAllowLists []interface{}

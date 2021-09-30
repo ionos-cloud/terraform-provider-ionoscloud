@@ -76,7 +76,6 @@ func (o *UserPropertiesPut) HasFirstname() bool {
 }
 
 
-
 // GetLastname returns the Lastname field value
 // If the value is explicit nil, the zero value for string will be returned
 func (o *UserPropertiesPut) GetLastname() *string {
@@ -117,7 +116,6 @@ func (o *UserPropertiesPut) HasLastname() bool {
 
 	return false
 }
-
 
 
 // GetEmail returns the Email field value
@@ -162,7 +160,6 @@ func (o *UserPropertiesPut) HasEmail() bool {
 }
 
 
-
 // GetAdministrator returns the Administrator field value
 // If the value is explicit nil, the zero value for bool will be returned
 func (o *UserPropertiesPut) GetAdministrator() *bool {
@@ -203,7 +200,6 @@ func (o *UserPropertiesPut) HasAdministrator() bool {
 
 	return false
 }
-
 
 
 // GetForceSecAuth returns the ForceSecAuth field value
@@ -248,7 +244,6 @@ func (o *UserPropertiesPut) HasForceSecAuth() bool {
 }
 
 
-
 // GetSecAuthActive returns the SecAuthActive field value
 // If the value is explicit nil, the zero value for bool will be returned
 func (o *UserPropertiesPut) GetSecAuthActive() *bool {
@@ -289,7 +284,6 @@ func (o *UserPropertiesPut) HasSecAuthActive() bool {
 
 	return false
 }
-
 
 
 // GetActive returns the Active field value
@@ -333,44 +327,36 @@ func (o *UserPropertiesPut) HasActive() bool {
 	return false
 }
 
-
 func (o UserPropertiesPut) MarshalJSON() ([]byte, error) {
 	toSerialize := map[string]interface{}{}
 
 	if o.Firstname != nil {
 		toSerialize["firstname"] = o.Firstname
 	}
-	
 
 	if o.Lastname != nil {
 		toSerialize["lastname"] = o.Lastname
 	}
-	
 
 	if o.Email != nil {
 		toSerialize["email"] = o.Email
 	}
-	
 
 	if o.Administrator != nil {
 		toSerialize["administrator"] = o.Administrator
 	}
-	
 
 	if o.ForceSecAuth != nil {
 		toSerialize["forceSecAuth"] = o.ForceSecAuth
 	}
-	
 
 	if o.SecAuthActive != nil {
 		toSerialize["secAuthActive"] = o.SecAuthActive
 	}
-	
 
 	if o.Active != nil {
 		toSerialize["active"] = o.Active
 	}
-	
 	return json.Marshal(toSerialize)
 }
 

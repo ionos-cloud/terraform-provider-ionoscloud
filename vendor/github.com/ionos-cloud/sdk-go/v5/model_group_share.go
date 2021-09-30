@@ -69,7 +69,6 @@ func (o *GroupShare) HasId() bool {
 }
 
 
-
 // GetType returns the Type field value
 // If the value is explicit nil, the zero value for Type will be returned
 func (o *GroupShare) GetType() *Type {
@@ -110,7 +109,6 @@ func (o *GroupShare) HasType() bool {
 
 	return false
 }
-
 
 
 // GetHref returns the Href field value
@@ -155,7 +153,6 @@ func (o *GroupShare) HasHref() bool {
 }
 
 
-
 // GetProperties returns the Properties field value
 // If the value is explicit nil, the zero value for GroupShareProperties will be returned
 func (o *GroupShare) GetProperties() *GroupShareProperties {
@@ -197,29 +194,24 @@ func (o *GroupShare) HasProperties() bool {
 	return false
 }
 
-
 func (o GroupShare) MarshalJSON() ([]byte, error) {
 	toSerialize := map[string]interface{}{}
 
 	if o.Id != nil {
 		toSerialize["id"] = o.Id
 	}
-	
 
 	if o.Type != nil {
 		toSerialize["type"] = o.Type
 	}
-	
 
 	if o.Href != nil {
 		toSerialize["href"] = o.Href
 	}
-	
 
 	if o.Properties != nil {
 		toSerialize["properties"] = o.Properties
 	}
-	
 	return json.Marshal(toSerialize)
 }
 

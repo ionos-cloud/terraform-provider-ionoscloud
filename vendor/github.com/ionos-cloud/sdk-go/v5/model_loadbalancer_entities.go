@@ -62,14 +62,12 @@ func (o *LoadbalancerEntities) HasBalancednics() bool {
 	return false
 }
 
-
 func (o LoadbalancerEntities) MarshalJSON() ([]byte, error) {
 	toSerialize := map[string]interface{}{}
 
 	if o.Balancednics != nil {
 		toSerialize["balancednics"] = o.Balancednics
 	}
-	
 	return json.Marshal(toSerialize)
 }
 

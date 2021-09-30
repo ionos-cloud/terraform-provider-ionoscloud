@@ -76,7 +76,6 @@ func (o *NicProperties) HasName() bool {
 }
 
 
-
 // GetMac returns the Mac field value
 // If the value is explicit nil, the zero value for string will be returned
 func (o *NicProperties) GetMac() *string {
@@ -117,7 +116,6 @@ func (o *NicProperties) HasMac() bool {
 
 	return false
 }
-
 
 
 // GetIps returns the Ips field value
@@ -162,7 +160,6 @@ func (o *NicProperties) HasIps() bool {
 }
 
 
-
 // GetDhcp returns the Dhcp field value
 // If the value is explicit nil, the zero value for bool will be returned
 func (o *NicProperties) GetDhcp() *bool {
@@ -203,7 +200,6 @@ func (o *NicProperties) HasDhcp() bool {
 
 	return false
 }
-
 
 
 // GetLan returns the Lan field value
@@ -248,7 +244,6 @@ func (o *NicProperties) HasLan() bool {
 }
 
 
-
 // GetFirewallActive returns the FirewallActive field value
 // If the value is explicit nil, the zero value for bool will be returned
 func (o *NicProperties) GetFirewallActive() *bool {
@@ -289,7 +284,6 @@ func (o *NicProperties) HasFirewallActive() bool {
 
 	return false
 }
-
 
 
 // GetNat returns the Nat field value
@@ -333,44 +327,36 @@ func (o *NicProperties) HasNat() bool {
 	return false
 }
 
-
 func (o NicProperties) MarshalJSON() ([]byte, error) {
 	toSerialize := map[string]interface{}{}
 
 	if o.Name != nil {
 		toSerialize["name"] = o.Name
 	}
-	
 
 	if o.Mac != nil {
 		toSerialize["mac"] = o.Mac
 	}
-	
 
 	if o.Ips != nil {
 		toSerialize["ips"] = o.Ips
 	}
-	
 
 	if o.Dhcp != nil {
 		toSerialize["dhcp"] = o.Dhcp
 	}
-	
 
 	if o.Lan != nil {
 		toSerialize["lan"] = o.Lan
 	}
-	
 
 	if o.FirewallActive != nil {
 		toSerialize["firewallActive"] = o.FirewallActive
 	}
-	
 
 	if o.Nat != nil {
 		toSerialize["nat"] = o.Nat
 	}
-	
 	return json.Marshal(toSerialize)
 }
 

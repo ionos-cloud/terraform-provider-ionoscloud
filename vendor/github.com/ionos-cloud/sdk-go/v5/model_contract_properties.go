@@ -71,7 +71,6 @@ func (o *ContractProperties) HasContractNumber() bool {
 }
 
 
-
 // GetOwner returns the Owner field value
 // If the value is explicit nil, the zero value for string will be returned
 func (o *ContractProperties) GetOwner() *string {
@@ -112,7 +111,6 @@ func (o *ContractProperties) HasOwner() bool {
 
 	return false
 }
-
 
 
 // GetStatus returns the Status field value
@@ -157,7 +155,6 @@ func (o *ContractProperties) HasStatus() bool {
 }
 
 
-
 // GetRegDomain returns the RegDomain field value
 // If the value is explicit nil, the zero value for string will be returned
 func (o *ContractProperties) GetRegDomain() *string {
@@ -198,7 +195,6 @@ func (o *ContractProperties) HasRegDomain() bool {
 
 	return false
 }
-
 
 
 // GetResourceLimits returns the ResourceLimits field value
@@ -242,34 +238,28 @@ func (o *ContractProperties) HasResourceLimits() bool {
 	return false
 }
 
-
 func (o ContractProperties) MarshalJSON() ([]byte, error) {
 	toSerialize := map[string]interface{}{}
 
 	if o.ContractNumber != nil {
 		toSerialize["contractNumber"] = o.ContractNumber
 	}
-	
 
 	if o.Owner != nil {
 		toSerialize["owner"] = o.Owner
 	}
-	
 
 	if o.Status != nil {
 		toSerialize["status"] = o.Status
 	}
-	
 
 	if o.RegDomain != nil {
 		toSerialize["regDomain"] = o.RegDomain
 	}
-	
 
 	if o.ResourceLimits != nil {
 		toSerialize["resourceLimits"] = o.ResourceLimits
 	}
-	
 	return json.Marshal(toSerialize)
 }
 

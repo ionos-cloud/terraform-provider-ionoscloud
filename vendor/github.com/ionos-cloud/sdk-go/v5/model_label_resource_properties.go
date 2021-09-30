@@ -66,7 +66,6 @@ func (o *LabelResourceProperties) HasKey() bool {
 }
 
 
-
 // GetValue returns the Value field value
 // If the value is explicit nil, the zero value for string will be returned
 func (o *LabelResourceProperties) GetValue() *string {
@@ -108,19 +107,16 @@ func (o *LabelResourceProperties) HasValue() bool {
 	return false
 }
 
-
 func (o LabelResourceProperties) MarshalJSON() ([]byte, error) {
 	toSerialize := map[string]interface{}{}
 
 	if o.Key != nil {
 		toSerialize["key"] = o.Key
 	}
-	
 
 	if o.Value != nil {
 		toSerialize["value"] = o.Value
 	}
-	
 	return json.Marshal(toSerialize)
 }
 

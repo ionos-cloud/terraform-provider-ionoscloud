@@ -72,7 +72,6 @@ func (o *IpBlockProperties) HasIps() bool {
 }
 
 
-
 // GetLocation returns the Location field value
 // If the value is explicit nil, the zero value for string will be returned
 func (o *IpBlockProperties) GetLocation() *string {
@@ -113,7 +112,6 @@ func (o *IpBlockProperties) HasLocation() bool {
 
 	return false
 }
-
 
 
 // GetSize returns the Size field value
@@ -158,7 +156,6 @@ func (o *IpBlockProperties) HasSize() bool {
 }
 
 
-
 // GetName returns the Name field value
 // If the value is explicit nil, the zero value for string will be returned
 func (o *IpBlockProperties) GetName() *string {
@@ -199,7 +196,6 @@ func (o *IpBlockProperties) HasName() bool {
 
 	return false
 }
-
 
 
 // GetIpConsumers returns the IpConsumers field value
@@ -243,34 +239,28 @@ func (o *IpBlockProperties) HasIpConsumers() bool {
 	return false
 }
 
-
 func (o IpBlockProperties) MarshalJSON() ([]byte, error) {
 	toSerialize := map[string]interface{}{}
 
 	if o.Ips != nil {
 		toSerialize["ips"] = o.Ips
 	}
-	
 
 	if o.Location != nil {
 		toSerialize["location"] = o.Location
 	}
-	
 
 	if o.Size != nil {
 		toSerialize["size"] = o.Size
 	}
-	
 
 	if o.Name != nil {
 		toSerialize["name"] = o.Name
 	}
-	
 
 	if o.IpConsumers != nil {
 		toSerialize["ipConsumers"] = o.IpConsumers
 	}
-	
 	return json.Marshal(toSerialize)
 }
 

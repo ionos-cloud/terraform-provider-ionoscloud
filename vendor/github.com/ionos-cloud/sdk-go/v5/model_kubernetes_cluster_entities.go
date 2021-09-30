@@ -62,14 +62,12 @@ func (o *KubernetesClusterEntities) HasNodepools() bool {
 	return false
 }
 
-
 func (o KubernetesClusterEntities) MarshalJSON() ([]byte, error) {
 	toSerialize := map[string]interface{}{}
 
 	if o.Nodepools != nil {
 		toSerialize["nodepools"] = o.Nodepools
 	}
-	
 	return json.Marshal(toSerialize)
 }
 

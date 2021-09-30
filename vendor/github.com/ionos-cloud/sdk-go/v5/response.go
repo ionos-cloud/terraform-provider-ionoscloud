@@ -12,6 +12,7 @@ package ionoscloud
 
 import (
 	"net/http"
+	"time"
 )
 
 // APIResponse stores the API response returned by the server.
@@ -23,6 +24,9 @@ type APIResponse struct {
 	// RequestURL is the request URL. This value is always available, even if the
 	// embedded *http.Response is nil.
 	RequestURL string `json:"url,omitempty"`
+	// RequestTime is the time duration from the moment the APIClient sends
+	// the HTTP request to the moment it receives an HTTP response.
+	RequestTime time.Duration `json:"duration,omitempty"`
 	// Method is the HTTP method used for the request.  This value is always
 	// available, even if the embedded *http.Response is nil.
 	Method string `json:"method,omitempty"`

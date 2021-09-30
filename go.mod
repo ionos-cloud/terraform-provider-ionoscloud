@@ -13,7 +13,7 @@ require (
 	github.com/hashicorp/hcl/v2 v2.8.2 // indirect
 	github.com/hashicorp/terraform-plugin-sdk/v2 v2.7.0
 	github.com/hashicorp/yamux v0.0.0-20200609203250-aecfd211c9ce // indirect
-	github.com/ionos-cloud/sdk-go/v5 v5.1.4
+	github.com/ionos-cloud/sdk-go/v5 v5.1.7
 	github.com/jhump/protoreflect v1.6.1 // indirect
 	github.com/mattn/go-colorable v0.1.7 // indirect
 	github.com/mitchellh/go-testing-interface v1.14.1 // indirect

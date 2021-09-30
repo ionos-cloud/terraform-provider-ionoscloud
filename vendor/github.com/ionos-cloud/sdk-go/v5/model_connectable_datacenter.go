@@ -65,7 +65,6 @@ func (o *ConnectableDatacenter) HasId() bool {
 }
 
 
-
 // GetName returns the Name field value
 // If the value is explicit nil, the zero value for string will be returned
 func (o *ConnectableDatacenter) GetName() *string {
@@ -106,7 +105,6 @@ func (o *ConnectableDatacenter) HasName() bool {
 
 	return false
 }
-
 
 
 // GetLocation returns the Location field value
@@ -150,24 +148,20 @@ func (o *ConnectableDatacenter) HasLocation() bool {
 	return false
 }
 
-
 func (o ConnectableDatacenter) MarshalJSON() ([]byte, error) {
 	toSerialize := map[string]interface{}{}
 
 	if o.Id != nil {
 		toSerialize["id"] = o.Id
 	}
-	
 
 	if o.Name != nil {
 		toSerialize["name"] = o.Name
 	}
-	
 
 	if o.Location != nil {
 		toSerialize["location"] = o.Location
 	}
-	
 	return json.Marshal(toSerialize)
 }
 

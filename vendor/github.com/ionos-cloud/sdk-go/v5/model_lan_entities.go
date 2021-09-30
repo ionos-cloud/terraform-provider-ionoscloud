@@ -62,14 +62,12 @@ func (o *LanEntities) HasNics() bool {
 	return false
 }
 
-
 func (o LanEntities) MarshalJSON() ([]byte, error) {
 	toSerialize := map[string]interface{}{}
 
 	if o.Nics != nil {
 		toSerialize["nics"] = o.Nics
 	}
-	
 	return json.Marshal(toSerialize)
 }
 

@@ -62,14 +62,12 @@ func (o *NicEntities) HasFirewallrules() bool {
 	return false
 }
 
-
 func (o NicEntities) MarshalJSON() ([]byte, error) {
 	toSerialize := map[string]interface{}{}
 
 	if o.Firewallrules != nil {
 		toSerialize["firewallrules"] = o.Firewallrules
 	}
-	
 	return json.Marshal(toSerialize)
 }
 
