@@ -66,7 +66,6 @@ func (o *ResourceProperties) HasName() bool {
 }
 
 
-
 // GetSecAuthProtection returns the SecAuthProtection field value
 // If the value is explicit nil, the zero value for bool will be returned
 func (o *ResourceProperties) GetSecAuthProtection() *bool {
@@ -108,19 +107,16 @@ func (o *ResourceProperties) HasSecAuthProtection() bool {
 	return false
 }
 
-
 func (o ResourceProperties) MarshalJSON() ([]byte, error) {
 	toSerialize := map[string]interface{}{}
 
 	if o.Name != nil {
 		toSerialize["name"] = o.Name
 	}
-	
 
 	if o.SecAuthProtection != nil {
 		toSerialize["secAuthProtection"] = o.SecAuthProtection
 	}
-	
 	return json.Marshal(toSerialize)
 }
 

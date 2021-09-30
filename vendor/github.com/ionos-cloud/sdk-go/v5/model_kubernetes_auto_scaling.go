@@ -66,7 +66,6 @@ func (o *KubernetesAutoScaling) HasMinNodeCount() bool {
 }
 
 
-
 // GetMaxNodeCount returns the MaxNodeCount field value
 // If the value is explicit nil, the zero value for int32 will be returned
 func (o *KubernetesAutoScaling) GetMaxNodeCount() *int32 {
@@ -108,19 +107,16 @@ func (o *KubernetesAutoScaling) HasMaxNodeCount() bool {
 	return false
 }
 
-
 func (o KubernetesAutoScaling) MarshalJSON() ([]byte, error) {
 	toSerialize := map[string]interface{}{}
 
 	if o.MinNodeCount != nil {
 		toSerialize["minNodeCount"] = o.MinNodeCount
 	}
-	
 
 	if o.MaxNodeCount != nil {
 		toSerialize["maxNodeCount"] = o.MaxNodeCount
 	}
-	
 	return json.Marshal(toSerialize)
 }
 

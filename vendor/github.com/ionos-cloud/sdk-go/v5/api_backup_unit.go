@@ -139,12 +139,13 @@ func (a *BackupUnitApiService) BackupunitsDeleteExecute(r ApiBackupunitsDeleteRe
 		return localVarReturnValue, nil, err
 	}
 
-	localVarHTTPResponse, err := a.client.callAPI(req)
+	localVarHTTPResponse, httpRequestTime, err := a.client.callAPI(req)
 
 	localVarAPIResponse := &APIResponse {
 		Response: localVarHTTPResponse,
 		Method: localVarHTTPMethod,
 		RequestURL: localVarPath,
+		RequestTime: httpRequestTime,
 		Operation: "BackupunitsDelete",
 	}
 
@@ -300,12 +301,13 @@ func (a *BackupUnitApiService) BackupunitsFindByIdExecute(r ApiBackupunitsFindBy
 		return localVarReturnValue, nil, err
 	}
 
-	localVarHTTPResponse, err := a.client.callAPI(req)
+	localVarHTTPResponse, httpRequestTime, err := a.client.callAPI(req)
 
 	localVarAPIResponse := &APIResponse {
 		Response: localVarHTTPResponse,
 		Method: localVarHTTPMethod,
 		RequestURL: localVarPath,
+		RequestTime: httpRequestTime,
 		Operation: "BackupunitsFindById",
 	}
 
@@ -457,12 +459,13 @@ func (a *BackupUnitApiService) BackupunitsGetExecute(r ApiBackupunitsGetRequest)
 		return localVarReturnValue, nil, err
 	}
 
-	localVarHTTPResponse, err := a.client.callAPI(req)
+	localVarHTTPResponse, httpRequestTime, err := a.client.callAPI(req)
 
 	localVarAPIResponse := &APIResponse {
 		Response: localVarHTTPResponse,
 		Method: localVarHTTPMethod,
 		RequestURL: localVarPath,
+		RequestTime: httpRequestTime,
 		Operation: "BackupunitsGet",
 	}
 
@@ -628,12 +631,13 @@ func (a *BackupUnitApiService) BackupunitsPatchExecute(r ApiBackupunitsPatchRequ
 		return localVarReturnValue, nil, err
 	}
 
-	localVarHTTPResponse, err := a.client.callAPI(req)
+	localVarHTTPResponse, httpRequestTime, err := a.client.callAPI(req)
 
 	localVarAPIResponse := &APIResponse {
 		Response: localVarHTTPResponse,
 		Method: localVarHTTPMethod,
 		RequestURL: localVarPath,
+		RequestTime: httpRequestTime,
 		Operation: "BackupunitsPatch",
 	}
 
@@ -795,12 +799,13 @@ func (a *BackupUnitApiService) BackupunitsPostExecute(r ApiBackupunitsPostReques
 		return localVarReturnValue, nil, err
 	}
 
-	localVarHTTPResponse, err := a.client.callAPI(req)
+	localVarHTTPResponse, httpRequestTime, err := a.client.callAPI(req)
 
 	localVarAPIResponse := &APIResponse {
 		Response: localVarHTTPResponse,
 		Method: localVarHTTPMethod,
 		RequestURL: localVarPath,
+		RequestTime: httpRequestTime,
 		Operation: "BackupunitsPost",
 	}
 
@@ -966,12 +971,13 @@ func (a *BackupUnitApiService) BackupunitsPutExecute(r ApiBackupunitsPutRequest)
 		return localVarReturnValue, nil, err
 	}
 
-	localVarHTTPResponse, err := a.client.callAPI(req)
+	localVarHTTPResponse, httpRequestTime, err := a.client.callAPI(req)
 
 	localVarAPIResponse := &APIResponse {
 		Response: localVarHTTPResponse,
 		Method: localVarHTTPMethod,
 		RequestURL: localVarPath,
+		RequestTime: httpRequestTime,
 		Operation: "BackupunitsPut",
 	}
 
@@ -1119,12 +1125,13 @@ func (a *BackupUnitApiService) BackupunitsSsourlGetExecute(r ApiBackupunitsSsour
 		return localVarReturnValue, nil, err
 	}
 
-	localVarHTTPResponse, err := a.client.callAPI(req)
+	localVarHTTPResponse, httpRequestTime, err := a.client.callAPI(req)
 
 	localVarAPIResponse := &APIResponse {
 		Response: localVarHTTPResponse,
 		Method: localVarHTTPMethod,
 		RequestURL: localVarPath,
+		RequestTime: httpRequestTime,
 		Operation: "BackupunitsSsourlGet",
 	}
 

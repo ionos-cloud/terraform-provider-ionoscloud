@@ -78,7 +78,6 @@ func (o *UserPropertiesPost) HasFirstname() bool {
 }
 
 
-
 // GetLastname returns the Lastname field value
 // If the value is explicit nil, the zero value for string will be returned
 func (o *UserPropertiesPost) GetLastname() *string {
@@ -119,7 +118,6 @@ func (o *UserPropertiesPost) HasLastname() bool {
 
 	return false
 }
-
 
 
 // GetEmail returns the Email field value
@@ -164,7 +162,6 @@ func (o *UserPropertiesPost) HasEmail() bool {
 }
 
 
-
 // GetAdministrator returns the Administrator field value
 // If the value is explicit nil, the zero value for bool will be returned
 func (o *UserPropertiesPost) GetAdministrator() *bool {
@@ -205,7 +202,6 @@ func (o *UserPropertiesPost) HasAdministrator() bool {
 
 	return false
 }
-
 
 
 // GetForceSecAuth returns the ForceSecAuth field value
@@ -250,7 +246,6 @@ func (o *UserPropertiesPost) HasForceSecAuth() bool {
 }
 
 
-
 // GetSecAuthActive returns the SecAuthActive field value
 // If the value is explicit nil, the zero value for bool will be returned
 func (o *UserPropertiesPost) GetSecAuthActive() *bool {
@@ -291,7 +286,6 @@ func (o *UserPropertiesPost) HasSecAuthActive() bool {
 
 	return false
 }
-
 
 
 // GetPassword returns the Password field value
@@ -336,7 +330,6 @@ func (o *UserPropertiesPost) HasPassword() bool {
 }
 
 
-
 // GetActive returns the Active field value
 // If the value is explicit nil, the zero value for bool will be returned
 func (o *UserPropertiesPost) GetActive() *bool {
@@ -378,49 +371,40 @@ func (o *UserPropertiesPost) HasActive() bool {
 	return false
 }
 
-
 func (o UserPropertiesPost) MarshalJSON() ([]byte, error) {
 	toSerialize := map[string]interface{}{}
 
 	if o.Firstname != nil {
 		toSerialize["firstname"] = o.Firstname
 	}
-	
 
 	if o.Lastname != nil {
 		toSerialize["lastname"] = o.Lastname
 	}
-	
 
 	if o.Email != nil {
 		toSerialize["email"] = o.Email
 	}
-	
 
 	if o.Administrator != nil {
 		toSerialize["administrator"] = o.Administrator
 	}
-	
 
 	if o.ForceSecAuth != nil {
 		toSerialize["forceSecAuth"] = o.ForceSecAuth
 	}
-	
 
 	if o.SecAuthActive != nil {
 		toSerialize["secAuthActive"] = o.SecAuthActive
 	}
-	
 
 	if o.Password != nil {
 		toSerialize["password"] = o.Password
 	}
-	
 
 	if o.Active != nil {
 		toSerialize["active"] = o.Active
 	}
-	
 	return json.Marshal(toSerialize)
 }
 

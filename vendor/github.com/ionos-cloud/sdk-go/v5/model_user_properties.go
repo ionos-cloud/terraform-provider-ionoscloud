@@ -78,7 +78,6 @@ func (o *UserProperties) HasFirstname() bool {
 }
 
 
-
 // GetLastname returns the Lastname field value
 // If the value is explicit nil, the zero value for string will be returned
 func (o *UserProperties) GetLastname() *string {
@@ -119,7 +118,6 @@ func (o *UserProperties) HasLastname() bool {
 
 	return false
 }
-
 
 
 // GetEmail returns the Email field value
@@ -164,7 +162,6 @@ func (o *UserProperties) HasEmail() bool {
 }
 
 
-
 // GetAdministrator returns the Administrator field value
 // If the value is explicit nil, the zero value for bool will be returned
 func (o *UserProperties) GetAdministrator() *bool {
@@ -205,7 +202,6 @@ func (o *UserProperties) HasAdministrator() bool {
 
 	return false
 }
-
 
 
 // GetForceSecAuth returns the ForceSecAuth field value
@@ -250,7 +246,6 @@ func (o *UserProperties) HasForceSecAuth() bool {
 }
 
 
-
 // GetSecAuthActive returns the SecAuthActive field value
 // If the value is explicit nil, the zero value for bool will be returned
 func (o *UserProperties) GetSecAuthActive() *bool {
@@ -291,7 +286,6 @@ func (o *UserProperties) HasSecAuthActive() bool {
 
 	return false
 }
-
 
 
 // GetS3CanonicalUserId returns the S3CanonicalUserId field value
@@ -336,7 +330,6 @@ func (o *UserProperties) HasS3CanonicalUserId() bool {
 }
 
 
-
 // GetActive returns the Active field value
 // If the value is explicit nil, the zero value for bool will be returned
 func (o *UserProperties) GetActive() *bool {
@@ -378,49 +371,40 @@ func (o *UserProperties) HasActive() bool {
 	return false
 }
 
-
 func (o UserProperties) MarshalJSON() ([]byte, error) {
 	toSerialize := map[string]interface{}{}
 
 	if o.Firstname != nil {
 		toSerialize["firstname"] = o.Firstname
 	}
-	
 
 	if o.Lastname != nil {
 		toSerialize["lastname"] = o.Lastname
 	}
-	
 
 	if o.Email != nil {
 		toSerialize["email"] = o.Email
 	}
-	
 
 	if o.Administrator != nil {
 		toSerialize["administrator"] = o.Administrator
 	}
-	
 
 	if o.ForceSecAuth != nil {
 		toSerialize["forceSecAuth"] = o.ForceSecAuth
 	}
-	
 
 	if o.SecAuthActive != nil {
 		toSerialize["secAuthActive"] = o.SecAuthActive
 	}
-	
 
 	if o.S3CanonicalUserId != nil {
 		toSerialize["s3CanonicalUserId"] = o.S3CanonicalUserId
 	}
-	
 
 	if o.Active != nil {
 		toSerialize["active"] = o.Active
 	}
-	
 	return json.Marshal(toSerialize)
 }
 

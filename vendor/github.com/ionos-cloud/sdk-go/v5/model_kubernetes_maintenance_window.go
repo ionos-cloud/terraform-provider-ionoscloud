@@ -66,7 +66,6 @@ func (o *KubernetesMaintenanceWindow) HasDayOfTheWeek() bool {
 }
 
 
-
 // GetTime returns the Time field value
 // If the value is explicit nil, the zero value for string will be returned
 func (o *KubernetesMaintenanceWindow) GetTime() *string {
@@ -108,19 +107,16 @@ func (o *KubernetesMaintenanceWindow) HasTime() bool {
 	return false
 }
 
-
 func (o KubernetesMaintenanceWindow) MarshalJSON() ([]byte, error) {
 	toSerialize := map[string]interface{}{}
 
 	if o.DayOfTheWeek != nil {
 		toSerialize["dayOfTheWeek"] = o.DayOfTheWeek
 	}
-	
 
 	if o.Time != nil {
 		toSerialize["time"] = o.Time
 	}
-	
 	return json.Marshal(toSerialize)
 }
 

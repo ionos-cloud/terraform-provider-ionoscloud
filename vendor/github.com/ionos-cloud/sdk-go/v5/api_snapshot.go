@@ -139,12 +139,13 @@ func (a *SnapshotApiService) SnapshotsDeleteExecute(r ApiSnapshotsDeleteRequest)
 		return localVarReturnValue, nil, err
 	}
 
-	localVarHTTPResponse, err := a.client.callAPI(req)
+	localVarHTTPResponse, httpRequestTime, err := a.client.callAPI(req)
 
 	localVarAPIResponse := &APIResponse {
 		Response: localVarHTTPResponse,
 		Method: localVarHTTPMethod,
 		RequestURL: localVarPath,
+		RequestTime: httpRequestTime,
 		Operation: "SnapshotsDelete",
 	}
 
@@ -300,12 +301,13 @@ func (a *SnapshotApiService) SnapshotsFindByIdExecute(r ApiSnapshotsFindByIdRequ
 		return localVarReturnValue, nil, err
 	}
 
-	localVarHTTPResponse, err := a.client.callAPI(req)
+	localVarHTTPResponse, httpRequestTime, err := a.client.callAPI(req)
 
 	localVarAPIResponse := &APIResponse {
 		Response: localVarHTTPResponse,
 		Method: localVarHTTPMethod,
 		RequestURL: localVarPath,
+		RequestTime: httpRequestTime,
 		Operation: "SnapshotsFindById",
 	}
 
@@ -457,12 +459,13 @@ func (a *SnapshotApiService) SnapshotsGetExecute(r ApiSnapshotsGetRequest) (Snap
 		return localVarReturnValue, nil, err
 	}
 
-	localVarHTTPResponse, err := a.client.callAPI(req)
+	localVarHTTPResponse, httpRequestTime, err := a.client.callAPI(req)
 
 	localVarAPIResponse := &APIResponse {
 		Response: localVarHTTPResponse,
 		Method: localVarHTTPMethod,
 		RequestURL: localVarPath,
+		RequestTime: httpRequestTime,
 		Operation: "SnapshotsGet",
 	}
 
@@ -628,12 +631,13 @@ func (a *SnapshotApiService) SnapshotsPatchExecute(r ApiSnapshotsPatchRequest) (
 		return localVarReturnValue, nil, err
 	}
 
-	localVarHTTPResponse, err := a.client.callAPI(req)
+	localVarHTTPResponse, httpRequestTime, err := a.client.callAPI(req)
 
 	localVarAPIResponse := &APIResponse {
 		Response: localVarHTTPResponse,
 		Method: localVarHTTPMethod,
 		RequestURL: localVarPath,
+		RequestTime: httpRequestTime,
 		Operation: "SnapshotsPatch",
 	}
 
@@ -799,12 +803,13 @@ func (a *SnapshotApiService) SnapshotsPutExecute(r ApiSnapshotsPutRequest) (Snap
 		return localVarReturnValue, nil, err
 	}
 
-	localVarHTTPResponse, err := a.client.callAPI(req)
+	localVarHTTPResponse, httpRequestTime, err := a.client.callAPI(req)
 
 	localVarAPIResponse := &APIResponse {
 		Response: localVarHTTPResponse,
 		Method: localVarHTTPMethod,
 		RequestURL: localVarPath,
+		RequestTime: httpRequestTime,
 		Operation: "SnapshotsPut",
 	}
 

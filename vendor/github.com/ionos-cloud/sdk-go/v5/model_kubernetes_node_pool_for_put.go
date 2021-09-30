@@ -70,7 +70,6 @@ func (o *KubernetesNodePoolForPut) HasId() bool {
 }
 
 
-
 // GetType returns the Type field value
 // If the value is explicit nil, the zero value for string will be returned
 func (o *KubernetesNodePoolForPut) GetType() *string {
@@ -111,7 +110,6 @@ func (o *KubernetesNodePoolForPut) HasType() bool {
 
 	return false
 }
-
 
 
 // GetHref returns the Href field value
@@ -156,7 +154,6 @@ func (o *KubernetesNodePoolForPut) HasHref() bool {
 }
 
 
-
 // GetMetadata returns the Metadata field value
 // If the value is explicit nil, the zero value for DatacenterElementMetadata will be returned
 func (o *KubernetesNodePoolForPut) GetMetadata() *DatacenterElementMetadata {
@@ -197,7 +194,6 @@ func (o *KubernetesNodePoolForPut) HasMetadata() bool {
 
 	return false
 }
-
 
 
 // GetProperties returns the Properties field value
@@ -241,34 +237,28 @@ func (o *KubernetesNodePoolForPut) HasProperties() bool {
 	return false
 }
 
-
 func (o KubernetesNodePoolForPut) MarshalJSON() ([]byte, error) {
 	toSerialize := map[string]interface{}{}
 
 	if o.Id != nil {
 		toSerialize["id"] = o.Id
 	}
-	
 
 	if o.Type != nil {
 		toSerialize["type"] = o.Type
 	}
-	
 
 	if o.Href != nil {
 		toSerialize["href"] = o.Href
 	}
-	
 
 	if o.Metadata != nil {
 		toSerialize["metadata"] = o.Metadata
 	}
-	
 
 	if o.Properties != nil {
 		toSerialize["properties"] = o.Properties
 	}
-	
 	return json.Marshal(toSerialize)
 }
 

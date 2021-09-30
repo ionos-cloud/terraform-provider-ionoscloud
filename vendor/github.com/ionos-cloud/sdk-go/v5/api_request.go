@@ -139,12 +139,13 @@ func (a *RequestApiService) RequestsFindByIdExecute(r ApiRequestsFindByIdRequest
 		return localVarReturnValue, nil, err
 	}
 
-	localVarHTTPResponse, err := a.client.callAPI(req)
+	localVarHTTPResponse, httpRequestTime, err := a.client.callAPI(req)
 
 	localVarAPIResponse := &APIResponse {
 		Response: localVarHTTPResponse,
 		Method: localVarHTTPMethod,
 		RequestURL: localVarPath,
+		RequestTime: httpRequestTime,
 		Operation: "RequestsFindById",
 	}
 
@@ -400,12 +401,13 @@ func (a *RequestApiService) RequestsGetExecute(r ApiRequestsGetRequest) (Request
 		return localVarReturnValue, nil, err
 	}
 
-	localVarHTTPResponse, err := a.client.callAPI(req)
+	localVarHTTPResponse, httpRequestTime, err := a.client.callAPI(req)
 
 	localVarAPIResponse := &APIResponse {
 		Response: localVarHTTPResponse,
 		Method: localVarHTTPMethod,
 		RequestURL: localVarPath,
+		RequestTime: httpRequestTime,
 		Operation: "RequestsGet",
 	}
 
@@ -561,12 +563,13 @@ func (a *RequestApiService) RequestsStatusGetExecute(r ApiRequestsStatusGetReque
 		return localVarReturnValue, nil, err
 	}
 
-	localVarHTTPResponse, err := a.client.callAPI(req)
+	localVarHTTPResponse, httpRequestTime, err := a.client.callAPI(req)
 
 	localVarAPIResponse := &APIResponse {
 		Response: localVarHTTPResponse,
 		Method: localVarHTTPMethod,
 		RequestURL: localVarPath,
+		RequestTime: httpRequestTime,
 		Operation: "RequestsStatusGet",
 	}
 

@@ -64,7 +64,6 @@ func (o *GroupEntities) HasUsers() bool {
 }
 
 
-
 // GetResources returns the Resources field value
 // If the value is explicit nil, the zero value for ResourceGroups will be returned
 func (o *GroupEntities) GetResources() *ResourceGroups {
@@ -106,19 +105,16 @@ func (o *GroupEntities) HasResources() bool {
 	return false
 }
 
-
 func (o GroupEntities) MarshalJSON() ([]byte, error) {
 	toSerialize := map[string]interface{}{}
 
 	if o.Users != nil {
 		toSerialize["users"] = o.Users
 	}
-	
 
 	if o.Resources != nil {
 		toSerialize["resources"] = o.Resources
 	}
-	
 	return json.Marshal(toSerialize)
 }
 

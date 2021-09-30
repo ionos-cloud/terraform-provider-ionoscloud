@@ -175,12 +175,13 @@ func (a *VolumeApiService) DatacentersVolumesCreateSnapshotPostExecute(r ApiData
 		return localVarReturnValue, nil, err
 	}
 
-	localVarHTTPResponse, err := a.client.callAPI(req)
+	localVarHTTPResponse, httpRequestTime, err := a.client.callAPI(req)
 
 	localVarAPIResponse := &APIResponse {
 		Response: localVarHTTPResponse,
 		Method: localVarHTTPMethod,
 		RequestURL: localVarPath,
+		RequestTime: httpRequestTime,
 		Operation: "DatacentersVolumesCreateSnapshotPost",
 	}
 
@@ -340,12 +341,13 @@ func (a *VolumeApiService) DatacentersVolumesDeleteExecute(r ApiDatacentersVolum
 		return localVarReturnValue, nil, err
 	}
 
-	localVarHTTPResponse, err := a.client.callAPI(req)
+	localVarHTTPResponse, httpRequestTime, err := a.client.callAPI(req)
 
 	localVarAPIResponse := &APIResponse {
 		Response: localVarHTTPResponse,
 		Method: localVarHTTPMethod,
 		RequestURL: localVarPath,
+		RequestTime: httpRequestTime,
 		Operation: "DatacentersVolumesDelete",
 	}
 
@@ -505,12 +507,13 @@ func (a *VolumeApiService) DatacentersVolumesFindByIdExecute(r ApiDatacentersVol
 		return localVarReturnValue, nil, err
 	}
 
-	localVarHTTPResponse, err := a.client.callAPI(req)
+	localVarHTTPResponse, httpRequestTime, err := a.client.callAPI(req)
 
 	localVarAPIResponse := &APIResponse {
 		Response: localVarHTTPResponse,
 		Method: localVarHTTPMethod,
 		RequestURL: localVarPath,
+		RequestTime: httpRequestTime,
 		Operation: "DatacentersVolumesFindById",
 	}
 
@@ -682,12 +685,13 @@ func (a *VolumeApiService) DatacentersVolumesGetExecute(r ApiDatacentersVolumesG
 		return localVarReturnValue, nil, err
 	}
 
-	localVarHTTPResponse, err := a.client.callAPI(req)
+	localVarHTTPResponse, httpRequestTime, err := a.client.callAPI(req)
 
 	localVarAPIResponse := &APIResponse {
 		Response: localVarHTTPResponse,
 		Method: localVarHTTPMethod,
 		RequestURL: localVarPath,
+		RequestTime: httpRequestTime,
 		Operation: "DatacentersVolumesGet",
 	}
 
@@ -857,12 +861,13 @@ func (a *VolumeApiService) DatacentersVolumesPatchExecute(r ApiDatacentersVolume
 		return localVarReturnValue, nil, err
 	}
 
-	localVarHTTPResponse, err := a.client.callAPI(req)
+	localVarHTTPResponse, httpRequestTime, err := a.client.callAPI(req)
 
 	localVarAPIResponse := &APIResponse {
 		Response: localVarHTTPResponse,
 		Method: localVarHTTPMethod,
 		RequestURL: localVarPath,
+		RequestTime: httpRequestTime,
 		Operation: "DatacentersVolumesPatch",
 	}
 
@@ -1028,12 +1033,13 @@ func (a *VolumeApiService) DatacentersVolumesPostExecute(r ApiDatacentersVolumes
 		return localVarReturnValue, nil, err
 	}
 
-	localVarHTTPResponse, err := a.client.callAPI(req)
+	localVarHTTPResponse, httpRequestTime, err := a.client.callAPI(req)
 
 	localVarAPIResponse := &APIResponse {
 		Response: localVarHTTPResponse,
 		Method: localVarHTTPMethod,
 		RequestURL: localVarPath,
+		RequestTime: httpRequestTime,
 		Operation: "DatacentersVolumesPost",
 	}
 
@@ -1203,12 +1209,13 @@ func (a *VolumeApiService) DatacentersVolumesPutExecute(r ApiDatacentersVolumesP
 		return localVarReturnValue, nil, err
 	}
 
-	localVarHTTPResponse, err := a.client.callAPI(req)
+	localVarHTTPResponse, httpRequestTime, err := a.client.callAPI(req)
 
 	localVarAPIResponse := &APIResponse {
 		Response: localVarHTTPResponse,
 		Method: localVarHTTPMethod,
 		RequestURL: localVarPath,
+		RequestTime: httpRequestTime,
 		Operation: "DatacentersVolumesPut",
 	}
 
@@ -1376,12 +1383,13 @@ func (a *VolumeApiService) DatacentersVolumesRestoreSnapshotPostExecute(r ApiDat
 		return localVarReturnValue, nil, err
 	}
 
-	localVarHTTPResponse, err := a.client.callAPI(req)
+	localVarHTTPResponse, httpRequestTime, err := a.client.callAPI(req)
 
 	localVarAPIResponse := &APIResponse {
 		Response: localVarHTTPResponse,
 		Method: localVarHTTPMethod,
 		RequestURL: localVarPath,
+		RequestTime: httpRequestTime,
 		Operation: "DatacentersVolumesRestoreSnapshotPost",
 	}
 

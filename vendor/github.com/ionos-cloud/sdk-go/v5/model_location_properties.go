@@ -68,7 +68,6 @@ func (o *LocationProperties) HasName() bool {
 }
 
 
-
 // GetFeatures returns the Features field value
 // If the value is explicit nil, the zero value for []string will be returned
 func (o *LocationProperties) GetFeatures() *[]string {
@@ -109,7 +108,6 @@ func (o *LocationProperties) HasFeatures() bool {
 
 	return false
 }
-
 
 
 // GetImageAliases returns the ImageAliases field value
@@ -153,24 +151,20 @@ func (o *LocationProperties) HasImageAliases() bool {
 	return false
 }
 
-
 func (o LocationProperties) MarshalJSON() ([]byte, error) {
 	toSerialize := map[string]interface{}{}
 
 	if o.Name != nil {
 		toSerialize["name"] = o.Name
 	}
-	
 
 	if o.Features != nil {
 		toSerialize["features"] = o.Features
 	}
-	
 
 	if o.ImageAliases != nil {
 		toSerialize["imageAliases"] = o.ImageAliases
 	}
-	
 	return json.Marshal(toSerialize)
 }
 

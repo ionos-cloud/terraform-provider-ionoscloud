@@ -70,7 +70,6 @@ func (o *KubernetesNodeProperties) HasName() bool {
 }
 
 
-
 // GetPublicIP returns the PublicIP field value
 // If the value is explicit nil, the zero value for string will be returned
 func (o *KubernetesNodeProperties) GetPublicIP() *string {
@@ -111,7 +110,6 @@ func (o *KubernetesNodeProperties) HasPublicIP() bool {
 
 	return false
 }
-
 
 
 // GetPrivateIP returns the PrivateIP field value
@@ -156,7 +154,6 @@ func (o *KubernetesNodeProperties) HasPrivateIP() bool {
 }
 
 
-
 // GetK8sVersion returns the K8sVersion field value
 // If the value is explicit nil, the zero value for string will be returned
 func (o *KubernetesNodeProperties) GetK8sVersion() *string {
@@ -198,29 +195,24 @@ func (o *KubernetesNodeProperties) HasK8sVersion() bool {
 	return false
 }
 
-
 func (o KubernetesNodeProperties) MarshalJSON() ([]byte, error) {
 	toSerialize := map[string]interface{}{}
 
 	if o.Name != nil {
 		toSerialize["name"] = o.Name
 	}
-	
 
 	if o.PublicIP != nil {
 		toSerialize["publicIP"] = o.PublicIP
 	}
-	
 
 	if o.PrivateIP != nil {
 		toSerialize["privateIP"] = o.PrivateIP
 	}
-	
 
 	if o.K8sVersion != nil {
 		toSerialize["k8sVersion"] = o.K8sVersion
 	}
-	
 	return json.Marshal(toSerialize)
 }
 

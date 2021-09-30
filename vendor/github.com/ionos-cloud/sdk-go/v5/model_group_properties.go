@@ -82,7 +82,6 @@ func (o *GroupProperties) HasName() bool {
 }
 
 
-
 // GetCreateDataCenter returns the CreateDataCenter field value
 // If the value is explicit nil, the zero value for bool will be returned
 func (o *GroupProperties) GetCreateDataCenter() *bool {
@@ -123,7 +122,6 @@ func (o *GroupProperties) HasCreateDataCenter() bool {
 
 	return false
 }
-
 
 
 // GetCreateSnapshot returns the CreateSnapshot field value
@@ -168,7 +166,6 @@ func (o *GroupProperties) HasCreateSnapshot() bool {
 }
 
 
-
 // GetReserveIp returns the ReserveIp field value
 // If the value is explicit nil, the zero value for bool will be returned
 func (o *GroupProperties) GetReserveIp() *bool {
@@ -209,7 +206,6 @@ func (o *GroupProperties) HasReserveIp() bool {
 
 	return false
 }
-
 
 
 // GetAccessActivityLog returns the AccessActivityLog field value
@@ -254,7 +250,6 @@ func (o *GroupProperties) HasAccessActivityLog() bool {
 }
 
 
-
 // GetCreatePcc returns the CreatePcc field value
 // If the value is explicit nil, the zero value for bool will be returned
 func (o *GroupProperties) GetCreatePcc() *bool {
@@ -295,7 +290,6 @@ func (o *GroupProperties) HasCreatePcc() bool {
 
 	return false
 }
-
 
 
 // GetS3Privilege returns the S3Privilege field value
@@ -340,7 +334,6 @@ func (o *GroupProperties) HasS3Privilege() bool {
 }
 
 
-
 // GetCreateBackupUnit returns the CreateBackupUnit field value
 // If the value is explicit nil, the zero value for bool will be returned
 func (o *GroupProperties) GetCreateBackupUnit() *bool {
@@ -381,7 +374,6 @@ func (o *GroupProperties) HasCreateBackupUnit() bool {
 
 	return false
 }
-
 
 
 // GetCreateInternetAccess returns the CreateInternetAccess field value
@@ -426,7 +418,6 @@ func (o *GroupProperties) HasCreateInternetAccess() bool {
 }
 
 
-
 // GetCreateK8sCluster returns the CreateK8sCluster field value
 // If the value is explicit nil, the zero value for bool will be returned
 func (o *GroupProperties) GetCreateK8sCluster() *bool {
@@ -468,59 +459,48 @@ func (o *GroupProperties) HasCreateK8sCluster() bool {
 	return false
 }
 
-
 func (o GroupProperties) MarshalJSON() ([]byte, error) {
 	toSerialize := map[string]interface{}{}
 
 	if o.Name != nil {
 		toSerialize["name"] = o.Name
 	}
-	
 
 	if o.CreateDataCenter != nil {
 		toSerialize["createDataCenter"] = o.CreateDataCenter
 	}
-	
 
 	if o.CreateSnapshot != nil {
 		toSerialize["createSnapshot"] = o.CreateSnapshot
 	}
-	
 
 	if o.ReserveIp != nil {
 		toSerialize["reserveIp"] = o.ReserveIp
 	}
-	
 
 	if o.AccessActivityLog != nil {
 		toSerialize["accessActivityLog"] = o.AccessActivityLog
 	}
-	
 
 	if o.CreatePcc != nil {
 		toSerialize["createPcc"] = o.CreatePcc
 	}
-	
 
 	if o.S3Privilege != nil {
 		toSerialize["s3Privilege"] = o.S3Privilege
 	}
-	
 
 	if o.CreateBackupUnit != nil {
 		toSerialize["createBackupUnit"] = o.CreateBackupUnit
 	}
-	
 
 	if o.CreateInternetAccess != nil {
 		toSerialize["createInternetAccess"] = o.CreateInternetAccess
 	}
-	
 
 	if o.CreateK8sCluster != nil {
 		toSerialize["createK8sCluster"] = o.CreateK8sCluster
 	}
-	
 	return json.Marshal(toSerialize)
 }
 

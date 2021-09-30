@@ -80,7 +80,6 @@ func (o *FirewallruleProperties) HasName() bool {
 }
 
 
-
 // GetProtocol returns the Protocol field value
 // If the value is explicit nil, the zero value for string will be returned
 func (o *FirewallruleProperties) GetProtocol() *string {
@@ -121,7 +120,6 @@ func (o *FirewallruleProperties) HasProtocol() bool {
 
 	return false
 }
-
 
 
 // GetSourceMac returns the SourceMac field value
@@ -166,7 +164,6 @@ func (o *FirewallruleProperties) HasSourceMac() bool {
 }
 
 
-
 // GetSourceIp returns the SourceIp field value
 // If the value is explicit nil, the zero value for string will be returned
 func (o *FirewallruleProperties) GetSourceIp() *string {
@@ -207,7 +204,6 @@ func (o *FirewallruleProperties) HasSourceIp() bool {
 
 	return false
 }
-
 
 
 // GetTargetIp returns the TargetIp field value
@@ -252,7 +248,6 @@ func (o *FirewallruleProperties) HasTargetIp() bool {
 }
 
 
-
 // GetIcmpCode returns the IcmpCode field value
 // If the value is explicit nil, the zero value for int32 will be returned
 func (o *FirewallruleProperties) GetIcmpCode() *int32 {
@@ -293,7 +288,6 @@ func (o *FirewallruleProperties) HasIcmpCode() bool {
 
 	return false
 }
-
 
 
 // GetIcmpType returns the IcmpType field value
@@ -338,7 +332,6 @@ func (o *FirewallruleProperties) HasIcmpType() bool {
 }
 
 
-
 // GetPortRangeStart returns the PortRangeStart field value
 // If the value is explicit nil, the zero value for int32 will be returned
 func (o *FirewallruleProperties) GetPortRangeStart() *int32 {
@@ -379,7 +372,6 @@ func (o *FirewallruleProperties) HasPortRangeStart() bool {
 
 	return false
 }
-
 
 
 // GetPortRangeEnd returns the PortRangeEnd field value
@@ -423,54 +415,44 @@ func (o *FirewallruleProperties) HasPortRangeEnd() bool {
 	return false
 }
 
-
 func (o FirewallruleProperties) MarshalJSON() ([]byte, error) {
 	toSerialize := map[string]interface{}{}
 
 	if o.Name != nil {
 		toSerialize["name"] = o.Name
 	}
-	
 
 	if o.Protocol != nil {
 		toSerialize["protocol"] = o.Protocol
 	}
-	
 
 	if o.SourceMac != nil {
 		toSerialize["sourceMac"] = o.SourceMac
 	}
-	
 
 	if o.SourceIp != nil {
 		toSerialize["sourceIp"] = o.SourceIp
 	}
-	
 
 	if o.TargetIp != nil {
 		toSerialize["targetIp"] = o.TargetIp
 	}
-	
 
 	if o.IcmpCode != nil {
 		toSerialize["icmpCode"] = o.IcmpCode
 	}
-	
 
 	if o.IcmpType != nil {
 		toSerialize["icmpType"] = o.IcmpType
 	}
-	
 
 	if o.PortRangeStart != nil {
 		toSerialize["portRangeStart"] = o.PortRangeStart
 	}
-	
 
 	if o.PortRangeEnd != nil {
 		toSerialize["portRangeEnd"] = o.PortRangeEnd
 	}
-	
 	return json.Marshal(toSerialize)
 }
 

@@ -63,14 +63,12 @@ func (o *KubernetesConfigProperties) HasKubeconfig() bool {
 	return false
 }
 
-
 func (o KubernetesConfigProperties) MarshalJSON() ([]byte, error) {
 	toSerialize := map[string]interface{}{}
 
 	if o.Kubeconfig != nil {
 		toSerialize["kubeconfig"] = o.Kubeconfig
 	}
-	
 	return json.Marshal(toSerialize)
 }
 

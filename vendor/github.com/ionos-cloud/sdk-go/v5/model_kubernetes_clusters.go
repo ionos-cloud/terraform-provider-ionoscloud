@@ -70,7 +70,6 @@ func (o *KubernetesClusters) HasId() bool {
 }
 
 
-
 // GetType returns the Type field value
 // If the value is explicit nil, the zero value for string will be returned
 func (o *KubernetesClusters) GetType() *string {
@@ -111,7 +110,6 @@ func (o *KubernetesClusters) HasType() bool {
 
 	return false
 }
-
 
 
 // GetHref returns the Href field value
@@ -156,7 +154,6 @@ func (o *KubernetesClusters) HasHref() bool {
 }
 
 
-
 // GetItems returns the Items field value
 // If the value is explicit nil, the zero value for []KubernetesCluster will be returned
 func (o *KubernetesClusters) GetItems() *[]KubernetesCluster {
@@ -198,29 +195,24 @@ func (o *KubernetesClusters) HasItems() bool {
 	return false
 }
 
-
 func (o KubernetesClusters) MarshalJSON() ([]byte, error) {
 	toSerialize := map[string]interface{}{}
 
 	if o.Id != nil {
 		toSerialize["id"] = o.Id
 	}
-	
 
 	if o.Type != nil {
 		toSerialize["type"] = o.Type
 	}
-	
 
 	if o.Href != nil {
 		toSerialize["href"] = o.Href
 	}
-	
 
 	if o.Items != nil {
 		toSerialize["items"] = o.Items
 	}
-	
 	return json.Marshal(toSerialize)
 }
 

@@ -68,7 +68,6 @@ func (o *LoadbalancerProperties) HasName() bool {
 }
 
 
-
 // GetIp returns the Ip field value
 // If the value is explicit nil, the zero value for string will be returned
 func (o *LoadbalancerProperties) GetIp() *string {
@@ -109,7 +108,6 @@ func (o *LoadbalancerProperties) HasIp() bool {
 
 	return false
 }
-
 
 
 // GetDhcp returns the Dhcp field value
@@ -153,24 +151,20 @@ func (o *LoadbalancerProperties) HasDhcp() bool {
 	return false
 }
 
-
 func (o LoadbalancerProperties) MarshalJSON() ([]byte, error) {
 	toSerialize := map[string]interface{}{}
 
 	if o.Name != nil {
 		toSerialize["name"] = o.Name
 	}
-	
 
 	if o.Ip != nil {
 		toSerialize["ip"] = o.Ip
 	}
-	
 
 	if o.Dhcp != nil {
 		toSerialize["dhcp"] = o.Dhcp
 	}
-	
 	return json.Marshal(toSerialize)
 }
 

@@ -67,7 +67,6 @@ func (o *RequestStatusMetadata) HasStatus() bool {
 }
 
 
-
 // GetMessage returns the Message field value
 // If the value is explicit nil, the zero value for string will be returned
 func (o *RequestStatusMetadata) GetMessage() *string {
@@ -108,7 +107,6 @@ func (o *RequestStatusMetadata) HasMessage() bool {
 
 	return false
 }
-
 
 
 // GetEtag returns the Etag field value
@@ -153,7 +151,6 @@ func (o *RequestStatusMetadata) HasEtag() bool {
 }
 
 
-
 // GetTargets returns the Targets field value
 // If the value is explicit nil, the zero value for []RequestTarget will be returned
 func (o *RequestStatusMetadata) GetTargets() *[]RequestTarget {
@@ -195,29 +192,24 @@ func (o *RequestStatusMetadata) HasTargets() bool {
 	return false
 }
 
-
 func (o RequestStatusMetadata) MarshalJSON() ([]byte, error) {
 	toSerialize := map[string]interface{}{}
 
 	if o.Status != nil {
 		toSerialize["status"] = o.Status
 	}
-	
 
 	if o.Message != nil {
 		toSerialize["message"] = o.Message
 	}
-	
 
 	if o.Etag != nil {
 		toSerialize["etag"] = o.Etag
 	}
-	
 
 	if o.Targets != nil {
 		toSerialize["targets"] = o.Targets
 	}
-	
 	return json.Marshal(toSerialize)
 }
 

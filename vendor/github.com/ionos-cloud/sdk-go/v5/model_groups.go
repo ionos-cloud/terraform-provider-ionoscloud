@@ -70,7 +70,6 @@ func (o *Groups) HasId() bool {
 }
 
 
-
 // GetType returns the Type field value
 // If the value is explicit nil, the zero value for Type will be returned
 func (o *Groups) GetType() *Type {
@@ -111,7 +110,6 @@ func (o *Groups) HasType() bool {
 
 	return false
 }
-
 
 
 // GetHref returns the Href field value
@@ -156,7 +154,6 @@ func (o *Groups) HasHref() bool {
 }
 
 
-
 // GetItems returns the Items field value
 // If the value is explicit nil, the zero value for []Group will be returned
 func (o *Groups) GetItems() *[]Group {
@@ -198,29 +195,24 @@ func (o *Groups) HasItems() bool {
 	return false
 }
 
-
 func (o Groups) MarshalJSON() ([]byte, error) {
 	toSerialize := map[string]interface{}{}
 
 	if o.Id != nil {
 		toSerialize["id"] = o.Id
 	}
-	
 
 	if o.Type != nil {
 		toSerialize["type"] = o.Type
 	}
-	
 
 	if o.Href != nil {
 		toSerialize["href"] = o.Href
 	}
-	
 
 	if o.Items != nil {
 		toSerialize["items"] = o.Items
 	}
-	
 	return json.Marshal(toSerialize)
 }
 

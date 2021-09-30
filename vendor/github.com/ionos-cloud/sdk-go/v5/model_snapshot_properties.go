@@ -94,7 +94,6 @@ func (o *SnapshotProperties) HasName() bool {
 }
 
 
-
 // GetDescription returns the Description field value
 // If the value is explicit nil, the zero value for string will be returned
 func (o *SnapshotProperties) GetDescription() *string {
@@ -135,7 +134,6 @@ func (o *SnapshotProperties) HasDescription() bool {
 
 	return false
 }
-
 
 
 // GetLocation returns the Location field value
@@ -180,7 +178,6 @@ func (o *SnapshotProperties) HasLocation() bool {
 }
 
 
-
 // GetSize returns the Size field value
 // If the value is explicit nil, the zero value for float32 will be returned
 func (o *SnapshotProperties) GetSize() *float32 {
@@ -221,7 +218,6 @@ func (o *SnapshotProperties) HasSize() bool {
 
 	return false
 }
-
 
 
 // GetSecAuthProtection returns the SecAuthProtection field value
@@ -266,7 +262,6 @@ func (o *SnapshotProperties) HasSecAuthProtection() bool {
 }
 
 
-
 // GetCpuHotPlug returns the CpuHotPlug field value
 // If the value is explicit nil, the zero value for bool will be returned
 func (o *SnapshotProperties) GetCpuHotPlug() *bool {
@@ -307,7 +302,6 @@ func (o *SnapshotProperties) HasCpuHotPlug() bool {
 
 	return false
 }
-
 
 
 // GetCpuHotUnplug returns the CpuHotUnplug field value
@@ -352,7 +346,6 @@ func (o *SnapshotProperties) HasCpuHotUnplug() bool {
 }
 
 
-
 // GetRamHotPlug returns the RamHotPlug field value
 // If the value is explicit nil, the zero value for bool will be returned
 func (o *SnapshotProperties) GetRamHotPlug() *bool {
@@ -393,7 +386,6 @@ func (o *SnapshotProperties) HasRamHotPlug() bool {
 
 	return false
 }
-
 
 
 // GetRamHotUnplug returns the RamHotUnplug field value
@@ -438,7 +430,6 @@ func (o *SnapshotProperties) HasRamHotUnplug() bool {
 }
 
 
-
 // GetNicHotPlug returns the NicHotPlug field value
 // If the value is explicit nil, the zero value for bool will be returned
 func (o *SnapshotProperties) GetNicHotPlug() *bool {
@@ -479,7 +470,6 @@ func (o *SnapshotProperties) HasNicHotPlug() bool {
 
 	return false
 }
-
 
 
 // GetNicHotUnplug returns the NicHotUnplug field value
@@ -524,7 +514,6 @@ func (o *SnapshotProperties) HasNicHotUnplug() bool {
 }
 
 
-
 // GetDiscVirtioHotPlug returns the DiscVirtioHotPlug field value
 // If the value is explicit nil, the zero value for bool will be returned
 func (o *SnapshotProperties) GetDiscVirtioHotPlug() *bool {
@@ -565,7 +554,6 @@ func (o *SnapshotProperties) HasDiscVirtioHotPlug() bool {
 
 	return false
 }
-
 
 
 // GetDiscVirtioHotUnplug returns the DiscVirtioHotUnplug field value
@@ -610,7 +598,6 @@ func (o *SnapshotProperties) HasDiscVirtioHotUnplug() bool {
 }
 
 
-
 // GetDiscScsiHotPlug returns the DiscScsiHotPlug field value
 // If the value is explicit nil, the zero value for bool will be returned
 func (o *SnapshotProperties) GetDiscScsiHotPlug() *bool {
@@ -651,7 +638,6 @@ func (o *SnapshotProperties) HasDiscScsiHotPlug() bool {
 
 	return false
 }
-
 
 
 // GetDiscScsiHotUnplug returns the DiscScsiHotUnplug field value
@@ -696,7 +682,6 @@ func (o *SnapshotProperties) HasDiscScsiHotUnplug() bool {
 }
 
 
-
 // GetLicenceType returns the LicenceType field value
 // If the value is explicit nil, the zero value for string will be returned
 func (o *SnapshotProperties) GetLicenceType() *string {
@@ -738,89 +723,72 @@ func (o *SnapshotProperties) HasLicenceType() bool {
 	return false
 }
 
-
 func (o SnapshotProperties) MarshalJSON() ([]byte, error) {
 	toSerialize := map[string]interface{}{}
 
 	if o.Name != nil {
 		toSerialize["name"] = o.Name
 	}
-	
 
 	if o.Description != nil {
 		toSerialize["description"] = o.Description
 	}
-	
 
 	if o.Location != nil {
 		toSerialize["location"] = o.Location
 	}
-	
 
 	if o.Size != nil {
 		toSerialize["size"] = o.Size
 	}
-	
 
 	if o.SecAuthProtection != nil {
 		toSerialize["secAuthProtection"] = o.SecAuthProtection
 	}
-	
 
 	if o.CpuHotPlug != nil {
 		toSerialize["cpuHotPlug"] = o.CpuHotPlug
 	}
-	
 
 	if o.CpuHotUnplug != nil {
 		toSerialize["cpuHotUnplug"] = o.CpuHotUnplug
 	}
-	
 
 	if o.RamHotPlug != nil {
 		toSerialize["ramHotPlug"] = o.RamHotPlug
 	}
-	
 
 	if o.RamHotUnplug != nil {
 		toSerialize["ramHotUnplug"] = o.RamHotUnplug
 	}
-	
 
 	if o.NicHotPlug != nil {
 		toSerialize["nicHotPlug"] = o.NicHotPlug
 	}
-	
 
 	if o.NicHotUnplug != nil {
 		toSerialize["nicHotUnplug"] = o.NicHotUnplug
 	}
-	
 
 	if o.DiscVirtioHotPlug != nil {
 		toSerialize["discVirtioHotPlug"] = o.DiscVirtioHotPlug
 	}
-	
 
 	if o.DiscVirtioHotUnplug != nil {
 		toSerialize["discVirtioHotUnplug"] = o.DiscVirtioHotUnplug
 	}
-	
 
 	if o.DiscScsiHotPlug != nil {
 		toSerialize["discScsiHotPlug"] = o.DiscScsiHotPlug
 	}
-	
 
 	if o.DiscScsiHotUnplug != nil {
 		toSerialize["discScsiHotUnplug"] = o.DiscScsiHotUnplug
 	}
-	
 
 	if o.LicenceType != nil {
 		toSerialize["licenceType"] = o.LicenceType
 	}
-	
 	return json.Marshal(toSerialize)
 }
 

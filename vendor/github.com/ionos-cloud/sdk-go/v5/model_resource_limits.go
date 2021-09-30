@@ -96,7 +96,6 @@ func (o *ResourceLimits) HasCoresPerServer() bool {
 }
 
 
-
 // GetCoresPerContract returns the CoresPerContract field value
 // If the value is explicit nil, the zero value for int32 will be returned
 func (o *ResourceLimits) GetCoresPerContract() *int32 {
@@ -137,7 +136,6 @@ func (o *ResourceLimits) HasCoresPerContract() bool {
 
 	return false
 }
-
 
 
 // GetCoresProvisioned returns the CoresProvisioned field value
@@ -182,7 +180,6 @@ func (o *ResourceLimits) HasCoresProvisioned() bool {
 }
 
 
-
 // GetRamPerServer returns the RamPerServer field value
 // If the value is explicit nil, the zero value for int32 will be returned
 func (o *ResourceLimits) GetRamPerServer() *int32 {
@@ -223,7 +220,6 @@ func (o *ResourceLimits) HasRamPerServer() bool {
 
 	return false
 }
-
 
 
 // GetRamPerContract returns the RamPerContract field value
@@ -268,7 +264,6 @@ func (o *ResourceLimits) HasRamPerContract() bool {
 }
 
 
-
 // GetRamProvisioned returns the RamProvisioned field value
 // If the value is explicit nil, the zero value for int32 will be returned
 func (o *ResourceLimits) GetRamProvisioned() *int32 {
@@ -309,7 +304,6 @@ func (o *ResourceLimits) HasRamProvisioned() bool {
 
 	return false
 }
-
 
 
 // GetHddLimitPerVolume returns the HddLimitPerVolume field value
@@ -354,7 +348,6 @@ func (o *ResourceLimits) HasHddLimitPerVolume() bool {
 }
 
 
-
 // GetHddLimitPerContract returns the HddLimitPerContract field value
 // If the value is explicit nil, the zero value for int64 will be returned
 func (o *ResourceLimits) GetHddLimitPerContract() *int64 {
@@ -395,7 +388,6 @@ func (o *ResourceLimits) HasHddLimitPerContract() bool {
 
 	return false
 }
-
 
 
 // GetHddVolumeProvisioned returns the HddVolumeProvisioned field value
@@ -440,7 +432,6 @@ func (o *ResourceLimits) HasHddVolumeProvisioned() bool {
 }
 
 
-
 // GetSsdLimitPerVolume returns the SsdLimitPerVolume field value
 // If the value is explicit nil, the zero value for int64 will be returned
 func (o *ResourceLimits) GetSsdLimitPerVolume() *int64 {
@@ -481,7 +472,6 @@ func (o *ResourceLimits) HasSsdLimitPerVolume() bool {
 
 	return false
 }
-
 
 
 // GetSsdLimitPerContract returns the SsdLimitPerContract field value
@@ -526,7 +516,6 @@ func (o *ResourceLimits) HasSsdLimitPerContract() bool {
 }
 
 
-
 // GetSsdVolumeProvisioned returns the SsdVolumeProvisioned field value
 // If the value is explicit nil, the zero value for int64 will be returned
 func (o *ResourceLimits) GetSsdVolumeProvisioned() *int64 {
@@ -567,7 +556,6 @@ func (o *ResourceLimits) HasSsdVolumeProvisioned() bool {
 
 	return false
 }
-
 
 
 // GetReservableIps returns the ReservableIps field value
@@ -612,7 +600,6 @@ func (o *ResourceLimits) HasReservableIps() bool {
 }
 
 
-
 // GetReservedIpsOnContract returns the ReservedIpsOnContract field value
 // If the value is explicit nil, the zero value for int32 will be returned
 func (o *ResourceLimits) GetReservedIpsOnContract() *int32 {
@@ -653,7 +640,6 @@ func (o *ResourceLimits) HasReservedIpsOnContract() bool {
 
 	return false
 }
-
 
 
 // GetReservedIpsInUse returns the ReservedIpsInUse field value
@@ -698,7 +684,6 @@ func (o *ResourceLimits) HasReservedIpsInUse() bool {
 }
 
 
-
 // GetK8sClusterLimitTotal returns the K8sClusterLimitTotal field value
 // If the value is explicit nil, the zero value for int32 will be returned
 func (o *ResourceLimits) GetK8sClusterLimitTotal() *int32 {
@@ -739,7 +724,6 @@ func (o *ResourceLimits) HasK8sClusterLimitTotal() bool {
 
 	return false
 }
-
 
 
 // GetK8sClustersProvisioned returns the K8sClustersProvisioned field value
@@ -783,94 +767,76 @@ func (o *ResourceLimits) HasK8sClustersProvisioned() bool {
 	return false
 }
 
-
 func (o ResourceLimits) MarshalJSON() ([]byte, error) {
 	toSerialize := map[string]interface{}{}
 
 	if o.CoresPerServer != nil {
 		toSerialize["coresPerServer"] = o.CoresPerServer
 	}
-	
 
 	if o.CoresPerContract != nil {
 		toSerialize["coresPerContract"] = o.CoresPerContract
 	}
-	
 
 	if o.CoresProvisioned != nil {
 		toSerialize["coresProvisioned"] = o.CoresProvisioned
 	}
-	
 
 	if o.RamPerServer != nil {
 		toSerialize["ramPerServer"] = o.RamPerServer
 	}
-	
 
 	if o.RamPerContract != nil {
 		toSerialize["ramPerContract"] = o.RamPerContract
 	}
-	
 
 	if o.RamProvisioned != nil {
 		toSerialize["ramProvisioned"] = o.RamProvisioned
 	}
-	
 
 	if o.HddLimitPerVolume != nil {
 		toSerialize["hddLimitPerVolume"] = o.HddLimitPerVolume
 	}
-	
 
 	if o.HddLimitPerContract != nil {
 		toSerialize["hddLimitPerContract"] = o.HddLimitPerContract
 	}
-	
 
 	if o.HddVolumeProvisioned != nil {
 		toSerialize["hddVolumeProvisioned"] = o.HddVolumeProvisioned
 	}
-	
 
 	if o.SsdLimitPerVolume != nil {
 		toSerialize["ssdLimitPerVolume"] = o.SsdLimitPerVolume
 	}
-	
 
 	if o.SsdLimitPerContract != nil {
 		toSerialize["ssdLimitPerContract"] = o.SsdLimitPerContract
 	}
-	
 
 	if o.SsdVolumeProvisioned != nil {
 		toSerialize["ssdVolumeProvisioned"] = o.SsdVolumeProvisioned
 	}
-	
 
 	if o.ReservableIps != nil {
 		toSerialize["reservableIps"] = o.ReservableIps
 	}
-	
 
 	if o.ReservedIpsOnContract != nil {
 		toSerialize["reservedIpsOnContract"] = o.ReservedIpsOnContract
 	}
-	
 
 	if o.ReservedIpsInUse != nil {
 		toSerialize["reservedIpsInUse"] = o.ReservedIpsInUse
 	}
-	
 
 	if o.K8sClusterLimitTotal != nil {
 		toSerialize["k8sClusterLimitTotal"] = o.K8sClusterLimitTotal
 	}
-	
 
 	if o.K8sClustersProvisioned != nil {
 		toSerialize["k8sClustersProvisioned"] = o.K8sClustersProvisioned
 	}
-	
 	return json.Marshal(toSerialize)
 }
 

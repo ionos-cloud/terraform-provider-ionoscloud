@@ -71,7 +71,6 @@ func (o *Loadbalancer) HasId() bool {
 }
 
 
-
 // GetType returns the Type field value
 // If the value is explicit nil, the zero value for Type will be returned
 func (o *Loadbalancer) GetType() *Type {
@@ -112,7 +111,6 @@ func (o *Loadbalancer) HasType() bool {
 
 	return false
 }
-
 
 
 // GetHref returns the Href field value
@@ -157,7 +155,6 @@ func (o *Loadbalancer) HasHref() bool {
 }
 
 
-
 // GetMetadata returns the Metadata field value
 // If the value is explicit nil, the zero value for DatacenterElementMetadata will be returned
 func (o *Loadbalancer) GetMetadata() *DatacenterElementMetadata {
@@ -198,7 +195,6 @@ func (o *Loadbalancer) HasMetadata() bool {
 
 	return false
 }
-
 
 
 // GetProperties returns the Properties field value
@@ -243,7 +239,6 @@ func (o *Loadbalancer) HasProperties() bool {
 }
 
 
-
 // GetEntities returns the Entities field value
 // If the value is explicit nil, the zero value for LoadbalancerEntities will be returned
 func (o *Loadbalancer) GetEntities() *LoadbalancerEntities {
@@ -285,39 +280,32 @@ func (o *Loadbalancer) HasEntities() bool {
 	return false
 }
 
-
 func (o Loadbalancer) MarshalJSON() ([]byte, error) {
 	toSerialize := map[string]interface{}{}
 
 	if o.Id != nil {
 		toSerialize["id"] = o.Id
 	}
-	
 
 	if o.Type != nil {
 		toSerialize["type"] = o.Type
 	}
-	
 
 	if o.Href != nil {
 		toSerialize["href"] = o.Href
 	}
-	
 
 	if o.Metadata != nil {
 		toSerialize["metadata"] = o.Metadata
 	}
-	
 
 	if o.Properties != nil {
 		toSerialize["properties"] = o.Properties
 	}
-	
 
 	if o.Entities != nil {
 		toSerialize["entities"] = o.Entities
 	}
-	
 	return json.Marshal(toSerialize)
 }
 

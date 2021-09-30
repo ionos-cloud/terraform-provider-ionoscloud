@@ -70,7 +70,6 @@ func (o *S3Keys) HasId() bool {
 }
 
 
-
 // GetType returns the Type field value
 // If the value is explicit nil, the zero value for Type will be returned
 func (o *S3Keys) GetType() *Type {
@@ -111,7 +110,6 @@ func (o *S3Keys) HasType() bool {
 
 	return false
 }
-
 
 
 // GetHref returns the Href field value
@@ -156,7 +154,6 @@ func (o *S3Keys) HasHref() bool {
 }
 
 
-
 // GetItems returns the Items field value
 // If the value is explicit nil, the zero value for []S3Key will be returned
 func (o *S3Keys) GetItems() *[]S3Key {
@@ -198,29 +195,24 @@ func (o *S3Keys) HasItems() bool {
 	return false
 }
 
-
 func (o S3Keys) MarshalJSON() ([]byte, error) {
 	toSerialize := map[string]interface{}{}
 
 	if o.Id != nil {
 		toSerialize["id"] = o.Id
 	}
-	
 
 	if o.Type != nil {
 		toSerialize["type"] = o.Type
 	}
-	
 
 	if o.Href != nil {
 		toSerialize["href"] = o.Href
 	}
-	
 
 	if o.Items != nil {
 		toSerialize["items"] = o.Items
 	}
-	
 	return json.Marshal(toSerialize)
 }
 

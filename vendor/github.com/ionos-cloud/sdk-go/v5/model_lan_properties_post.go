@@ -70,7 +70,6 @@ func (o *LanPropertiesPost) HasName() bool {
 }
 
 
-
 // GetIpFailover returns the IpFailover field value
 // If the value is explicit nil, the zero value for []IPFailover will be returned
 func (o *LanPropertiesPost) GetIpFailover() *[]IPFailover {
@@ -111,7 +110,6 @@ func (o *LanPropertiesPost) HasIpFailover() bool {
 
 	return false
 }
-
 
 
 // GetPcc returns the Pcc field value
@@ -156,7 +154,6 @@ func (o *LanPropertiesPost) HasPcc() bool {
 }
 
 
-
 // GetPublic returns the Public field value
 // If the value is explicit nil, the zero value for bool will be returned
 func (o *LanPropertiesPost) GetPublic() *bool {
@@ -198,29 +195,24 @@ func (o *LanPropertiesPost) HasPublic() bool {
 	return false
 }
 
-
 func (o LanPropertiesPost) MarshalJSON() ([]byte, error) {
 	toSerialize := map[string]interface{}{}
 
 	if o.Name != nil {
 		toSerialize["name"] = o.Name
 	}
-	
 
 	if o.IpFailover != nil {
 		toSerialize["ipFailover"] = o.IpFailover
 	}
-	
 
 	if o.Pcc != nil {
 		toSerialize["pcc"] = o.Pcc
 	}
-	
 
 	if o.Public != nil {
 		toSerialize["public"] = o.Public
 	}
-	
 	return json.Marshal(toSerialize)
 }
 

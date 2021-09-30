@@ -143,12 +143,13 @@ func (a *LabelApiService) DatacentersLabelsDeleteExecute(r ApiDatacentersLabelsD
 		return localVarReturnValue, nil, err
 	}
 
-	localVarHTTPResponse, err := a.client.callAPI(req)
+	localVarHTTPResponse, httpRequestTime, err := a.client.callAPI(req)
 
 	localVarAPIResponse := &APIResponse {
 		Response: localVarHTTPResponse,
 		Method: localVarHTTPMethod,
 		RequestURL: localVarPath,
+		RequestTime: httpRequestTime,
 		Operation: "DatacentersLabelsDelete",
 	}
 
@@ -308,12 +309,13 @@ func (a *LabelApiService) DatacentersLabelsFindByKeyExecute(r ApiDatacentersLabe
 		return localVarReturnValue, nil, err
 	}
 
-	localVarHTTPResponse, err := a.client.callAPI(req)
+	localVarHTTPResponse, httpRequestTime, err := a.client.callAPI(req)
 
 	localVarAPIResponse := &APIResponse {
 		Response: localVarHTTPResponse,
 		Method: localVarHTTPMethod,
 		RequestURL: localVarPath,
+		RequestTime: httpRequestTime,
 		Operation: "DatacentersLabelsFindByKey",
 	}
 
@@ -485,12 +487,13 @@ func (a *LabelApiService) DatacentersLabelsGetExecute(r ApiDatacentersLabelsGetR
 		return localVarReturnValue, nil, err
 	}
 
-	localVarHTTPResponse, err := a.client.callAPI(req)
+	localVarHTTPResponse, httpRequestTime, err := a.client.callAPI(req)
 
 	localVarAPIResponse := &APIResponse {
 		Response: localVarHTTPResponse,
 		Method: localVarHTTPMethod,
 		RequestURL: localVarPath,
+		RequestTime: httpRequestTime,
 		Operation: "DatacentersLabelsGet",
 	}
 
@@ -656,12 +659,13 @@ func (a *LabelApiService) DatacentersLabelsPostExecute(r ApiDatacentersLabelsPos
 		return localVarReturnValue, nil, err
 	}
 
-	localVarHTTPResponse, err := a.client.callAPI(req)
+	localVarHTTPResponse, httpRequestTime, err := a.client.callAPI(req)
 
 	localVarAPIResponse := &APIResponse {
 		Response: localVarHTTPResponse,
 		Method: localVarHTTPMethod,
 		RequestURL: localVarPath,
+		RequestTime: httpRequestTime,
 		Operation: "DatacentersLabelsPost",
 	}
 
@@ -831,12 +835,13 @@ func (a *LabelApiService) DatacentersLabelsPutExecute(r ApiDatacentersLabelsPutR
 		return localVarReturnValue, nil, err
 	}
 
-	localVarHTTPResponse, err := a.client.callAPI(req)
+	localVarHTTPResponse, httpRequestTime, err := a.client.callAPI(req)
 
 	localVarAPIResponse := &APIResponse {
 		Response: localVarHTTPResponse,
 		Method: localVarHTTPMethod,
 		RequestURL: localVarPath,
+		RequestTime: httpRequestTime,
 		Operation: "DatacentersLabelsPut",
 	}
 
@@ -1000,12 +1005,13 @@ func (a *LabelApiService) DatacentersServersLabelsDeleteExecute(r ApiDatacenters
 		return localVarReturnValue, nil, err
 	}
 
-	localVarHTTPResponse, err := a.client.callAPI(req)
+	localVarHTTPResponse, httpRequestTime, err := a.client.callAPI(req)
 
 	localVarAPIResponse := &APIResponse {
 		Response: localVarHTTPResponse,
 		Method: localVarHTTPMethod,
 		RequestURL: localVarPath,
+		RequestTime: httpRequestTime,
 		Operation: "DatacentersServersLabelsDelete",
 	}
 
@@ -1169,12 +1175,13 @@ func (a *LabelApiService) DatacentersServersLabelsFindByKeyExecute(r ApiDatacent
 		return localVarReturnValue, nil, err
 	}
 
-	localVarHTTPResponse, err := a.client.callAPI(req)
+	localVarHTTPResponse, httpRequestTime, err := a.client.callAPI(req)
 
 	localVarAPIResponse := &APIResponse {
 		Response: localVarHTTPResponse,
 		Method: localVarHTTPMethod,
 		RequestURL: localVarPath,
+		RequestTime: httpRequestTime,
 		Operation: "DatacentersServersLabelsFindByKey",
 	}
 
@@ -1350,12 +1357,13 @@ func (a *LabelApiService) DatacentersServersLabelsGetExecute(r ApiDatacentersSer
 		return localVarReturnValue, nil, err
 	}
 
-	localVarHTTPResponse, err := a.client.callAPI(req)
+	localVarHTTPResponse, httpRequestTime, err := a.client.callAPI(req)
 
 	localVarAPIResponse := &APIResponse {
 		Response: localVarHTTPResponse,
 		Method: localVarHTTPMethod,
 		RequestURL: localVarPath,
+		RequestTime: httpRequestTime,
 		Operation: "DatacentersServersLabelsGet",
 	}
 
@@ -1525,12 +1533,13 @@ func (a *LabelApiService) DatacentersServersLabelsPostExecute(r ApiDatacentersSe
 		return localVarReturnValue, nil, err
 	}
 
-	localVarHTTPResponse, err := a.client.callAPI(req)
+	localVarHTTPResponse, httpRequestTime, err := a.client.callAPI(req)
 
 	localVarAPIResponse := &APIResponse {
 		Response: localVarHTTPResponse,
 		Method: localVarHTTPMethod,
 		RequestURL: localVarPath,
+		RequestTime: httpRequestTime,
 		Operation: "DatacentersServersLabelsPost",
 	}
 
@@ -1704,12 +1713,13 @@ func (a *LabelApiService) DatacentersServersLabelsPutExecute(r ApiDatacentersSer
 		return localVarReturnValue, nil, err
 	}
 
-	localVarHTTPResponse, err := a.client.callAPI(req)
+	localVarHTTPResponse, httpRequestTime, err := a.client.callAPI(req)
 
 	localVarAPIResponse := &APIResponse {
 		Response: localVarHTTPResponse,
 		Method: localVarHTTPMethod,
 		RequestURL: localVarPath,
+		RequestTime: httpRequestTime,
 		Operation: "DatacentersServersLabelsPut",
 	}
 
@@ -1873,12 +1883,13 @@ func (a *LabelApiService) DatacentersVolumesLabelsDeleteExecute(r ApiDatacenters
 		return localVarReturnValue, nil, err
 	}
 
-	localVarHTTPResponse, err := a.client.callAPI(req)
+	localVarHTTPResponse, httpRequestTime, err := a.client.callAPI(req)
 
 	localVarAPIResponse := &APIResponse {
 		Response: localVarHTTPResponse,
 		Method: localVarHTTPMethod,
 		RequestURL: localVarPath,
+		RequestTime: httpRequestTime,
 		Operation: "DatacentersVolumesLabelsDelete",
 	}
 
@@ -2042,12 +2053,13 @@ func (a *LabelApiService) DatacentersVolumesLabelsFindByKeyExecute(r ApiDatacent
 		return localVarReturnValue, nil, err
 	}
 
-	localVarHTTPResponse, err := a.client.callAPI(req)
+	localVarHTTPResponse, httpRequestTime, err := a.client.callAPI(req)
 
 	localVarAPIResponse := &APIResponse {
 		Response: localVarHTTPResponse,
 		Method: localVarHTTPMethod,
 		RequestURL: localVarPath,
+		RequestTime: httpRequestTime,
 		Operation: "DatacentersVolumesLabelsFindByKey",
 	}
 
@@ -2223,12 +2235,13 @@ func (a *LabelApiService) DatacentersVolumesLabelsGetExecute(r ApiDatacentersVol
 		return localVarReturnValue, nil, err
 	}
 
-	localVarHTTPResponse, err := a.client.callAPI(req)
+	localVarHTTPResponse, httpRequestTime, err := a.client.callAPI(req)
 
 	localVarAPIResponse := &APIResponse {
 		Response: localVarHTTPResponse,
 		Method: localVarHTTPMethod,
 		RequestURL: localVarPath,
+		RequestTime: httpRequestTime,
 		Operation: "DatacentersVolumesLabelsGet",
 	}
 
@@ -2398,12 +2411,13 @@ func (a *LabelApiService) DatacentersVolumesLabelsPostExecute(r ApiDatacentersVo
 		return localVarReturnValue, nil, err
 	}
 
-	localVarHTTPResponse, err := a.client.callAPI(req)
+	localVarHTTPResponse, httpRequestTime, err := a.client.callAPI(req)
 
 	localVarAPIResponse := &APIResponse {
 		Response: localVarHTTPResponse,
 		Method: localVarHTTPMethod,
 		RequestURL: localVarPath,
+		RequestTime: httpRequestTime,
 		Operation: "DatacentersVolumesLabelsPost",
 	}
 
@@ -2577,12 +2591,13 @@ func (a *LabelApiService) DatacentersVolumesLabelsPutExecute(r ApiDatacentersVol
 		return localVarReturnValue, nil, err
 	}
 
-	localVarHTTPResponse, err := a.client.callAPI(req)
+	localVarHTTPResponse, httpRequestTime, err := a.client.callAPI(req)
 
 	localVarAPIResponse := &APIResponse {
 		Response: localVarHTTPResponse,
 		Method: localVarHTTPMethod,
 		RequestURL: localVarPath,
+		RequestTime: httpRequestTime,
 		Operation: "DatacentersVolumesLabelsPut",
 	}
 
@@ -2742,12 +2757,13 @@ func (a *LabelApiService) IpblocksLabelsDeleteExecute(r ApiIpblocksLabelsDeleteR
 		return localVarReturnValue, nil, err
 	}
 
-	localVarHTTPResponse, err := a.client.callAPI(req)
+	localVarHTTPResponse, httpRequestTime, err := a.client.callAPI(req)
 
 	localVarAPIResponse := &APIResponse {
 		Response: localVarHTTPResponse,
 		Method: localVarHTTPMethod,
 		RequestURL: localVarPath,
+		RequestTime: httpRequestTime,
 		Operation: "IpblocksLabelsDelete",
 	}
 
@@ -2907,12 +2923,13 @@ func (a *LabelApiService) IpblocksLabelsFindByKeyExecute(r ApiIpblocksLabelsFind
 		return localVarReturnValue, nil, err
 	}
 
-	localVarHTTPResponse, err := a.client.callAPI(req)
+	localVarHTTPResponse, httpRequestTime, err := a.client.callAPI(req)
 
 	localVarAPIResponse := &APIResponse {
 		Response: localVarHTTPResponse,
 		Method: localVarHTTPMethod,
 		RequestURL: localVarPath,
+		RequestTime: httpRequestTime,
 		Operation: "IpblocksLabelsFindByKey",
 	}
 
@@ -3068,12 +3085,13 @@ func (a *LabelApiService) IpblocksLabelsGetExecute(r ApiIpblocksLabelsGetRequest
 		return localVarReturnValue, nil, err
 	}
 
-	localVarHTTPResponse, err := a.client.callAPI(req)
+	localVarHTTPResponse, httpRequestTime, err := a.client.callAPI(req)
 
 	localVarAPIResponse := &APIResponse {
 		Response: localVarHTTPResponse,
 		Method: localVarHTTPMethod,
 		RequestURL: localVarPath,
+		RequestTime: httpRequestTime,
 		Operation: "IpblocksLabelsGet",
 	}
 
@@ -3239,12 +3257,13 @@ func (a *LabelApiService) IpblocksLabelsPostExecute(r ApiIpblocksLabelsPostReque
 		return localVarReturnValue, nil, err
 	}
 
-	localVarHTTPResponse, err := a.client.callAPI(req)
+	localVarHTTPResponse, httpRequestTime, err := a.client.callAPI(req)
 
 	localVarAPIResponse := &APIResponse {
 		Response: localVarHTTPResponse,
 		Method: localVarHTTPMethod,
 		RequestURL: localVarPath,
+		RequestTime: httpRequestTime,
 		Operation: "IpblocksLabelsPost",
 	}
 
@@ -3414,12 +3433,13 @@ func (a *LabelApiService) IpblocksLabelsPutExecute(r ApiIpblocksLabelsPutRequest
 		return localVarReturnValue, nil, err
 	}
 
-	localVarHTTPResponse, err := a.client.callAPI(req)
+	localVarHTTPResponse, httpRequestTime, err := a.client.callAPI(req)
 
 	localVarAPIResponse := &APIResponse {
 		Response: localVarHTTPResponse,
 		Method: localVarHTTPMethod,
 		RequestURL: localVarPath,
+		RequestTime: httpRequestTime,
 		Operation: "IpblocksLabelsPut",
 	}
 
@@ -3575,12 +3595,13 @@ func (a *LabelApiService) LabelsFindByUrnExecute(r ApiLabelsFindByUrnRequest) (L
 		return localVarReturnValue, nil, err
 	}
 
-	localVarHTTPResponse, err := a.client.callAPI(req)
+	localVarHTTPResponse, httpRequestTime, err := a.client.callAPI(req)
 
 	localVarAPIResponse := &APIResponse {
 		Response: localVarHTTPResponse,
 		Method: localVarHTTPMethod,
 		RequestURL: localVarPath,
+		RequestTime: httpRequestTime,
 		Operation: "LabelsFindByUrn",
 	}
 
@@ -3732,12 +3753,13 @@ func (a *LabelApiService) LabelsGetExecute(r ApiLabelsGetRequest) (Labels, *APIR
 		return localVarReturnValue, nil, err
 	}
 
-	localVarHTTPResponse, err := a.client.callAPI(req)
+	localVarHTTPResponse, httpRequestTime, err := a.client.callAPI(req)
 
 	localVarAPIResponse := &APIResponse {
 		Response: localVarHTTPResponse,
 		Method: localVarHTTPMethod,
 		RequestURL: localVarPath,
+		RequestTime: httpRequestTime,
 		Operation: "LabelsGet",
 	}
 
@@ -3897,12 +3919,13 @@ func (a *LabelApiService) SnapshotsLabelsDeleteExecute(r ApiSnapshotsLabelsDelet
 		return localVarReturnValue, nil, err
 	}
 
-	localVarHTTPResponse, err := a.client.callAPI(req)
+	localVarHTTPResponse, httpRequestTime, err := a.client.callAPI(req)
 
 	localVarAPIResponse := &APIResponse {
 		Response: localVarHTTPResponse,
 		Method: localVarHTTPMethod,
 		RequestURL: localVarPath,
+		RequestTime: httpRequestTime,
 		Operation: "SnapshotsLabelsDelete",
 	}
 
@@ -4062,12 +4085,13 @@ func (a *LabelApiService) SnapshotsLabelsFindByKeyExecute(r ApiSnapshotsLabelsFi
 		return localVarReturnValue, nil, err
 	}
 
-	localVarHTTPResponse, err := a.client.callAPI(req)
+	localVarHTTPResponse, httpRequestTime, err := a.client.callAPI(req)
 
 	localVarAPIResponse := &APIResponse {
 		Response: localVarHTTPResponse,
 		Method: localVarHTTPMethod,
 		RequestURL: localVarPath,
+		RequestTime: httpRequestTime,
 		Operation: "SnapshotsLabelsFindByKey",
 	}
 
@@ -4223,12 +4247,13 @@ func (a *LabelApiService) SnapshotsLabelsGetExecute(r ApiSnapshotsLabelsGetReque
 		return localVarReturnValue, nil, err
 	}
 
-	localVarHTTPResponse, err := a.client.callAPI(req)
+	localVarHTTPResponse, httpRequestTime, err := a.client.callAPI(req)
 
 	localVarAPIResponse := &APIResponse {
 		Response: localVarHTTPResponse,
 		Method: localVarHTTPMethod,
 		RequestURL: localVarPath,
+		RequestTime: httpRequestTime,
 		Operation: "SnapshotsLabelsGet",
 	}
 
@@ -4394,12 +4419,13 @@ func (a *LabelApiService) SnapshotsLabelsPostExecute(r ApiSnapshotsLabelsPostReq
 		return localVarReturnValue, nil, err
 	}
 
-	localVarHTTPResponse, err := a.client.callAPI(req)
+	localVarHTTPResponse, httpRequestTime, err := a.client.callAPI(req)
 
 	localVarAPIResponse := &APIResponse {
 		Response: localVarHTTPResponse,
 		Method: localVarHTTPMethod,
 		RequestURL: localVarPath,
+		RequestTime: httpRequestTime,
 		Operation: "SnapshotsLabelsPost",
 	}
 
@@ -4569,12 +4595,13 @@ func (a *LabelApiService) SnapshotsLabelsPutExecute(r ApiSnapshotsLabelsPutReque
 		return localVarReturnValue, nil, err
 	}
 
-	localVarHTTPResponse, err := a.client.callAPI(req)
+	localVarHTTPResponse, httpRequestTime, err := a.client.callAPI(req)
 
 	localVarAPIResponse := &APIResponse {
 		Response: localVarHTTPResponse,
 		Method: localVarHTTPMethod,
 		RequestURL: localVarPath,
+		RequestTime: httpRequestTime,
 		Operation: "SnapshotsLabelsPut",
 	}
 

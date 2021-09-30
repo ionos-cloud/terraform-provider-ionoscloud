@@ -68,7 +68,6 @@ func (o *BackupUnitProperties) HasName() bool {
 }
 
 
-
 // GetPassword returns the Password field value
 // If the value is explicit nil, the zero value for string will be returned
 func (o *BackupUnitProperties) GetPassword() *string {
@@ -109,7 +108,6 @@ func (o *BackupUnitProperties) HasPassword() bool {
 
 	return false
 }
-
 
 
 // GetEmail returns the Email field value
@@ -153,24 +151,20 @@ func (o *BackupUnitProperties) HasEmail() bool {
 	return false
 }
 
-
 func (o BackupUnitProperties) MarshalJSON() ([]byte, error) {
 	toSerialize := map[string]interface{}{}
 
 	if o.Name != nil {
 		toSerialize["name"] = o.Name
 	}
-	
 
 	if o.Password != nil {
 		toSerialize["password"] = o.Password
 	}
-	
 
 	if o.Email != nil {
 		toSerialize["email"] = o.Email
 	}
-	
 	return json.Marshal(toSerialize)
 }
 

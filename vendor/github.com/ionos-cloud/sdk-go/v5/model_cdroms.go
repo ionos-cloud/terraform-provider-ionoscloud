@@ -75,7 +75,6 @@ func (o *Cdroms) HasId() bool {
 }
 
 
-
 // GetType returns the Type field value
 // If the value is explicit nil, the zero value for Type will be returned
 func (o *Cdroms) GetType() *Type {
@@ -116,7 +115,6 @@ func (o *Cdroms) HasType() bool {
 
 	return false
 }
-
 
 
 // GetHref returns the Href field value
@@ -161,7 +159,6 @@ func (o *Cdroms) HasHref() bool {
 }
 
 
-
 // GetItems returns the Items field value
 // If the value is explicit nil, the zero value for []Image will be returned
 func (o *Cdroms) GetItems() *[]Image {
@@ -202,7 +199,6 @@ func (o *Cdroms) HasItems() bool {
 
 	return false
 }
-
 
 
 // GetOffset returns the Offset field value
@@ -247,7 +243,6 @@ func (o *Cdroms) HasOffset() bool {
 }
 
 
-
 // GetLimit returns the Limit field value
 // If the value is explicit nil, the zero value for float32 will be returned
 func (o *Cdroms) GetLimit() *float32 {
@@ -288,7 +283,6 @@ func (o *Cdroms) HasLimit() bool {
 
 	return false
 }
-
 
 
 // GetLinks returns the Links field value
@@ -332,44 +326,36 @@ func (o *Cdroms) HasLinks() bool {
 	return false
 }
 
-
 func (o Cdroms) MarshalJSON() ([]byte, error) {
 	toSerialize := map[string]interface{}{}
 
 	if o.Id != nil {
 		toSerialize["id"] = o.Id
 	}
-	
 
 	if o.Type != nil {
 		toSerialize["type"] = o.Type
 	}
-	
 
 	if o.Href != nil {
 		toSerialize["href"] = o.Href
 	}
-	
 
 	if o.Items != nil {
 		toSerialize["items"] = o.Items
 	}
-	
 
 	if o.Offset != nil {
 		toSerialize["offset"] = o.Offset
 	}
-	
 
 	if o.Limit != nil {
 		toSerialize["limit"] = o.Limit
 	}
-	
 
 	if o.Links != nil {
 		toSerialize["_links"] = o.Links
 	}
-	
 	return json.Marshal(toSerialize)
 }
 
