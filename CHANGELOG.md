@@ -1,3 +1,7 @@
+## 5.2.15
+
+- implemented data source for backup unit and firewall rule
+
 ## 5.2.14
 
 - fixed typo in setting user_data and backup_unit_id in the volume entity from server
