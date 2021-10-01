@@ -95,6 +95,8 @@ func Provider() *schema.Provider {
 			"ionoscloud_networkloadbalancer":                dataSourceNetworkLoadBalancer(),
 			"ionoscloud_networkloadbalancer_forwardingrule": dataSourceNetworkLoadBalancerForwardingRule(),
 			"ionoscloud_template":                           dataSourceTemplate(),
+			"ionoscloud_backup_unit":                        dataSourceBackupUnit(),
+			"ionoscloud_firewall":                           dataSourceFirewall(),
 		},
 	}
 
