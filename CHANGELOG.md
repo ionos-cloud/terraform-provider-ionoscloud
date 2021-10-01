@@ -2,6 +2,8 @@
 
 - added image_alias to volume
 - removed public and gateway_ip properties from k8s_ccluster
+- added data_sources for backup_unit and firewall_rule
+- added import for natgateway, natgateway_rule, networkloadbalancer and networkloadbalancer_forwardingrule
 
 ## 6.0.0-beta.10
 
