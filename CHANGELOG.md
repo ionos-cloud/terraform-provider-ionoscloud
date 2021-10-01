@@ -1,17 +1,17 @@
 ## 6.0.0-beta.11
 
-- added image_alias to volume
-- removed public and gateway_ip properties from k8s_ccluster
-- added data_sources for backup_unit and firewall_rule
-- added import for natgateway, natgateway_rule, networkloadbalancer and networkloadbalancer_forwardingrule
-- updated sdk-go to v6.0.0-beta.7
+- added `image_alias` to volume
+- removed `public` and `gateway_ip` properties from `k8s_cluster`
+- added `data_sources for `backup_unit` and `firewall_rule`
+- added import for `natgateway`, `natgateway_rule`, `networkloadbalancer` and `networkloadbalancer_forwardingrule`
+- updated sdk-go to `v6.0.0-beta.7`
 
 ## 6.0.0-beta.10
 
-- issue #19 - fixed update ssh_key_path although not changed
-- issue #93 - updated documentation for image data source
-- made backup_unit_id configurable for volume
-- fixed server import 
+- issue #19 - fixed update `ssh_key_path` although not changed
+- issue #93 - updated `documentation` for image data source
+- made `backup_unit_id` configurable for volume
+- fixed `server import`
 
 ## 6.0.0-beta.9
 
