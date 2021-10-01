@@ -27,7 +27,6 @@ type NetworkLoadBalancerForwardingRuleHealthCheck struct {
 }
 
 
-
 // GetClientTimeout returns the ClientTimeout field value
 // If the value is explicit nil, the zero value for int32 will be returned
 func (o *NetworkLoadBalancerForwardingRuleHealthCheck) GetClientTimeout() *int32 {
@@ -68,8 +67,6 @@ func (o *NetworkLoadBalancerForwardingRuleHealthCheck) HasClientTimeout() bool {
 
 	return false
 }
-
-
 
 // GetConnectTimeout returns the ConnectTimeout field value
 // If the value is explicit nil, the zero value for int32 will be returned
@@ -112,8 +109,6 @@ func (o *NetworkLoadBalancerForwardingRuleHealthCheck) HasConnectTimeout() bool 
 	return false
 }
 
-
-
 // GetTargetTimeout returns the TargetTimeout field value
 // If the value is explicit nil, the zero value for int32 will be returned
 func (o *NetworkLoadBalancerForwardingRuleHealthCheck) GetTargetTimeout() *int32 {
@@ -154,8 +149,6 @@ func (o *NetworkLoadBalancerForwardingRuleHealthCheck) HasTargetTimeout() bool {
 
 	return false
 }
-
-
 
 // GetRetries returns the Retries field value
 // If the value is explicit nil, the zero value for int32 will be returned
@@ -198,32 +191,26 @@ func (o *NetworkLoadBalancerForwardingRuleHealthCheck) HasRetries() bool {
 	return false
 }
 
-
 func (o NetworkLoadBalancerForwardingRuleHealthCheck) MarshalJSON() ([]byte, error) {
 	toSerialize := map[string]interface{}{}
 
 	if o.ClientTimeout != nil {
 		toSerialize["clientTimeout"] = o.ClientTimeout
 	}
-	
 
 	if o.ConnectTimeout != nil {
 		toSerialize["connectTimeout"] = o.ConnectTimeout
 	}
-	
 
 	if o.TargetTimeout != nil {
 		toSerialize["targetTimeout"] = o.TargetTimeout
 	}
-	
 
 	if o.Retries != nil {
 		toSerialize["retries"] = o.Retries
 	}
-	
 	return json.Marshal(toSerialize)
 }
-
 type NullableNetworkLoadBalancerForwardingRuleHealthCheck struct {
 	value *NetworkLoadBalancerForwardingRuleHealthCheck
 	isSet bool

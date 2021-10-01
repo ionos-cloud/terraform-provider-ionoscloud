@@ -23,7 +23,6 @@ type ErrorMessage struct {
 }
 
 
-
 // GetErrorCode returns the ErrorCode field value
 // If the value is explicit nil, the zero value for string will be returned
 func (o *ErrorMessage) GetErrorCode() *string {
@@ -64,8 +63,6 @@ func (o *ErrorMessage) HasErrorCode() bool {
 
 	return false
 }
-
-
 
 // GetMessage returns the Message field value
 // If the value is explicit nil, the zero value for string will be returned
@@ -108,22 +105,18 @@ func (o *ErrorMessage) HasMessage() bool {
 	return false
 }
 
-
 func (o ErrorMessage) MarshalJSON() ([]byte, error) {
 	toSerialize := map[string]interface{}{}
 
 	if o.ErrorCode != nil {
 		toSerialize["errorCode"] = o.ErrorCode
 	}
-	
 
 	if o.Message != nil {
 		toSerialize["message"] = o.Message
 	}
-	
 	return json.Marshal(toSerialize)
 }
-
 type NullableErrorMessage struct {
 	value *ErrorMessage
 	isSet bool

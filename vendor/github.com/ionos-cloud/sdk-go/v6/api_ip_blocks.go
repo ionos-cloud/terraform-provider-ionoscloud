@@ -345,6 +345,8 @@ type ApiIpblocksGetRequest struct {
 	pretty *bool
 	depth *int32
 	xContractNumber *int32
+	offset *int32
+	limit *int32
 }
 
 func (r ApiIpblocksGetRequest) Pretty(pretty bool) ApiIpblocksGetRequest {
@@ -357,6 +359,14 @@ func (r ApiIpblocksGetRequest) Depth(depth int32) ApiIpblocksGetRequest {
 }
 func (r ApiIpblocksGetRequest) XContractNumber(xContractNumber int32) ApiIpblocksGetRequest {
 	r.xContractNumber = &xContractNumber
+	return r
+}
+func (r ApiIpblocksGetRequest) Offset(offset int32) ApiIpblocksGetRequest {
+	r.offset = &offset
+	return r
+}
+func (r ApiIpblocksGetRequest) Limit(limit int32) ApiIpblocksGetRequest {
+	r.limit = &limit
 	return r
 }
 
@@ -407,6 +417,12 @@ func (a *IPBlocksApiService) IpblocksGetExecute(r ApiIpblocksGetRequest) (IpBloc
 	}
 	if r.depth != nil {
 		localVarQueryParams.Add("depth", parameterToString(*r.depth, ""))
+	}
+	if r.offset != nil {
+		localVarQueryParams.Add("offset", parameterToString(*r.offset, ""))
+	}
+	if r.limit != nil {
+		localVarQueryParams.Add("limit", parameterToString(*r.limit, ""))
 	}
 	// to determine the Content-Type header
 	localVarHTTPContentTypes := []string{}

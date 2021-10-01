@@ -20,7 +20,6 @@ type ResourceEntities struct {
 }
 
 
-
 // GetGroups returns the Groups field value
 // If the value is explicit nil, the zero value for ResourceGroups will be returned
 func (o *ResourceEntities) GetGroups() *ResourceGroups {
@@ -62,17 +61,14 @@ func (o *ResourceEntities) HasGroups() bool {
 	return false
 }
 
-
 func (o ResourceEntities) MarshalJSON() ([]byte, error) {
 	toSerialize := map[string]interface{}{}
 
 	if o.Groups != nil {
 		toSerialize["groups"] = o.Groups
 	}
-	
 	return json.Marshal(toSerialize)
 }
-
 type NullableResourceEntities struct {
 	value *ResourceEntities
 	isSet bool

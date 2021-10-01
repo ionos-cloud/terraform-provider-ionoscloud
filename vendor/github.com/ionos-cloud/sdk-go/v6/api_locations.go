@@ -54,8 +54,8 @@ func (r ApiLocationsFindByRegionIdRequest) Execute() (Locations, *APIResponse, e
 }
 
 /*
- * LocationsFindByRegionId List Locations within a region
- * Retrieve a list of Locations within a world's region
+ * LocationsFindByRegionId List locations within regions
+ * List locations by region ID.
  * @param ctx _context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
  * @param regionId
  * @return ApiLocationsFindByRegionIdRequest
@@ -217,7 +217,7 @@ func (r ApiLocationsFindByRegionIdAndIdRequest) Execute() (Location, *APIRespons
 }
 
 /*
- * LocationsFindByRegionIdAndId Retrieve a Location
+ * LocationsFindByRegionIdAndId Retrieve specified locations
  * Retrieves the attributes of a given location
  * @param ctx _context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
  * @param regionId
@@ -381,8 +381,8 @@ func (r ApiLocationsGetRequest) Execute() (Locations, *APIResponse, error) {
 }
 
 /*
- * LocationsGet List Locations
- * Retrieve a list of Locations. This list represents where you can provision your virtual data centers
+ * LocationsGet List locations
+ * List the available locations for provisioning your virtual data centers.
  * @param ctx _context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
  * @return ApiLocationsGetRequest
  */

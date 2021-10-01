@@ -59,7 +59,7 @@ func (r ApiDatacentersServersCdromsDeleteRequest) Execute() (*APIResponse, error
  * DatacentersServersCdromsDelete Detach a CD-ROM
  * This will detach a CD-ROM from the server
  * @param ctx _context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
- * @param datacenterId The unique ID of the Datacenter
+ * @param datacenterId The unique ID of the data center.
  * @param serverId The unique ID of the Server
  * @param cdromId The unique ID of the CD-ROM
  * @return ApiDatacentersServersCdromsDeleteRequest
@@ -217,7 +217,7 @@ func (r ApiDatacentersServersCdromsFindByIdRequest) Execute() (Image, *APIRespon
  * DatacentersServersCdromsFindById Retrieve an attached CD-ROM
  * You can retrieve a specific CD-ROM attached to the server
  * @param ctx _context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
- * @param datacenterId The unique ID of the Datacenter
+ * @param datacenterId The unique ID of the data center.
  * @param serverId The unique ID of the Server
  * @param cdromId The unique ID of the CD-ROM
  * @return ApiDatacentersServersCdromsFindByIdRequest
@@ -396,7 +396,7 @@ func (r ApiDatacentersServersCdromsGetRequest) Execute() (Cdroms, *APIResponse, 
  * DatacentersServersCdromsGet List attached CD-ROMs 
  * You can retrieve a list of CD-ROMs attached to the server.
  * @param ctx _context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
- * @param datacenterId The unique ID of the Datacenter
+ * @param datacenterId The unique ID of the data center.
  * @param serverId The unique ID of the Server
  * @return ApiDatacentersServersCdromsGetRequest
  */
@@ -573,7 +573,7 @@ func (r ApiDatacentersServersCdromsPostRequest) Execute() (Image, *APIResponse, 
  * DatacentersServersCdromsPost Attach a CD-ROM
  * You can attach a CD-ROM to an existing server. You can attach up to 2 CD-ROMs to one server. 
  * @param ctx _context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
- * @param datacenterId The unique ID of the Datacenter
+ * @param datacenterId The unique ID of the data center.
  * @param serverId The unique ID of the Server
  * @return ApiDatacentersServersCdromsPostRequest
  */
@@ -744,7 +744,7 @@ func (r ApiDatacentersServersDeleteRequest) Execute() (*APIResponse, error) {
  * DatacentersServersDelete Delete a Server
  * This will remove a server from your datacenter; however, it will not remove the storage volumes attached to the server. You will need to make a separate API call to perform that action
  * @param ctx _context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
- * @param datacenterId The unique ID of the datacenter
+ * @param datacenterId The unique ID of the data center.
  * @param serverId The unique ID of the Server
  * @return ApiDatacentersServersDeleteRequest
  */
@@ -898,7 +898,7 @@ func (r ApiDatacentersServersFindByIdRequest) Execute() (Server, *APIResponse, e
  * DatacentersServersFindById Retrieve a Server
  * Returns information about a server such as its configuration, provisioning status, etc.
  * @param ctx _context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
- * @param datacenterId The unique ID of the datacenter
+ * @param datacenterId The unique ID of the data center.
  * @param serverId The unique ID of the Server
  * @return ApiDatacentersServersFindByIdRequest
  */
@@ -1078,7 +1078,7 @@ func (r ApiDatacentersServersGetRequest) Execute() (Servers, *APIResponse, error
  * DatacentersServersGet List Servers 
  * You can retrieve a list of servers within a datacenter
  * @param ctx _context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
- * @param datacenterId The unique ID of the datacenter
+ * @param datacenterId The unique ID of the data center.
  * @return ApiDatacentersServersGetRequest
  */
 func (a *ServersApiService) DatacentersServersGet(ctx _context.Context, datacenterId string) ApiDatacentersServersGetRequest {
@@ -1255,7 +1255,7 @@ func (r ApiDatacentersServersPatchRequest) Execute() (Server, *APIResponse, erro
  * DatacentersServersPatch Partially modify a Server
  * You can use update attributes of a server
  * @param ctx _context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
- * @param datacenterId The unique ID of the datacenter
+ * @param datacenterId The unique ID of the data center.
  * @param serverId The unique ID of the server
  * @return ApiDatacentersServersPatchRequest
  */
@@ -1430,7 +1430,7 @@ func (r ApiDatacentersServersPostRequest) Execute() (Server, *APIResponse, error
  * DatacentersServersPost Create a Server
  * Creates a server within an existing datacenter. You can configure the boot volume and connect the server to an existing LAN.
  * @param ctx _context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
- * @param datacenterId The unique ID of the datacenter
+ * @param datacenterId The unique ID of the data center.
  * @return ApiDatacentersServersPostRequest
  */
 func (a *ServersApiService) DatacentersServersPost(ctx _context.Context, datacenterId string) ApiDatacentersServersPostRequest {
@@ -1603,7 +1603,7 @@ func (r ApiDatacentersServersPutRequest) Execute() (Server, *APIResponse, error)
  * DatacentersServersPut Modify a Server
  * Allows to modify the attributes of a Server. From v5 onwards 'allowReboot' attribute will no longer be available. For certain server property change it was earlier forced to be provided. Now this behaviour is implicit and backend will do this automatically e.g. in earlier versions, when CPU family changes, the 'allowReboot' property was required to be set to true which will no longer be the case and the server will be rebooted automatically
  * @param ctx _context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
- * @param datacenterId The unique ID of the datacenter
+ * @param datacenterId The unique ID of the data center.
  * @param serverId The unique ID of the server
  * @return ApiDatacentersServersPutRequest
  */
@@ -1774,7 +1774,7 @@ func (r ApiDatacentersServersRebootPostRequest) Execute() (*APIResponse, error) 
  * DatacentersServersRebootPost Reboot a Server
  * This will force a hard reboot of the server. Do not use this method if you want to gracefully reboot the machine. This is the equivalent of powering off the machine and turning it back on.
  * @param ctx _context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
- * @param datacenterId The unique ID of the datacenter
+ * @param datacenterId The unique ID of the data center.
  * @param serverId The unique ID of the Server
  * @return ApiDatacentersServersRebootPostRequest
  */
@@ -1928,7 +1928,7 @@ func (r ApiDatacentersServersRemoteConsoleGetRequest) Execute() (RemoteConsoleUr
  * DatacentersServersRemoteConsoleGet Get the server remote console link
  * Returns the link with the jwToken to access the server remote console
  * @param ctx _context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
- * @param datacenterId The unique ID of the datacenter
+ * @param datacenterId The unique ID of the data center.
  * @param serverId The unique ID of the Server
  * @return ApiDatacentersServersRemoteConsoleGetRequest
  */
@@ -2094,7 +2094,7 @@ func (r ApiDatacentersServersResumePostRequest) Execute() (*APIResponse, error) 
  * DatacentersServersResumePost Resume a Cube Server
  * This will resume a suspended server. The operation can only be applied to suspended Cube servers. No billing event will be generated.
  * @param ctx _context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
- * @param datacenterId The unique ID of the datacenter
+ * @param datacenterId The unique ID of the data center.
  * @param serverId The unique ID of the Server
  * @return ApiDatacentersServersResumePostRequest
  */
@@ -2248,7 +2248,7 @@ func (r ApiDatacentersServersStartPostRequest) Execute() (*APIResponse, error) {
  * DatacentersServersStartPost Start a Server
  * This will start a server. If the server's public IP was deallocated then a new IP will be assigned
  * @param ctx _context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
- * @param datacenterId The unique ID of the datacenter
+ * @param datacenterId The unique ID of the data center.
  * @param serverId The unique ID of the Server
  * @return ApiDatacentersServersStartPostRequest
  */
@@ -2402,7 +2402,7 @@ func (r ApiDatacentersServersStopPostRequest) Execute() (*APIResponse, error) {
  * DatacentersServersStopPost Stop a Server
  * This will stop a server. The machine will be forcefully powered off, billing will cease, and the public IP, if one is allocated, will be deallocated. The operation is not supported for Cube servers.
  * @param ctx _context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
- * @param datacenterId The unique ID of the datacenter
+ * @param datacenterId The unique ID of the data center.
  * @param serverId The unique ID of the Server
  * @return ApiDatacentersServersStopPostRequest
  */
@@ -2556,7 +2556,7 @@ func (r ApiDatacentersServersSuspendPostRequest) Execute() (*APIResponse, error)
  * DatacentersServersSuspendPost Suspend a Cube Server
  * This will suspend a server. The operation can only be applied to Cube servers. Note: The virtual machine will not be deleted, and the consumed resources will continue to be billed.
  * @param ctx _context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
- * @param datacenterId The unique ID of the datacenter
+ * @param datacenterId The unique ID of the data center.
  * @param serverId The unique ID of the Server
  * @return ApiDatacentersServersSuspendPostRequest
  */
@@ -2710,7 +2710,7 @@ func (r ApiDatacentersServersTokenGetRequest) Execute() (Token, *APIResponse, er
  * DatacentersServersTokenGet Get the server's jwToken
  * Returns the server json web token to be used for login operations (ex: accessing the server console)
  * @param ctx _context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
- * @param datacenterId The unique ID of the datacenter
+ * @param datacenterId The unique ID of the data center.
  * @param serverId The unique ID of the Server
  * @return ApiDatacentersServersTokenGetRequest
  */
@@ -2876,7 +2876,7 @@ func (r ApiDatacentersServersUpgradePostRequest) Execute() (*APIResponse, error)
  * DatacentersServersUpgradePost Upgrade a Server
  * This will upgrade the version of the server, if needed. To verify if there is an upgrade available for a server, call '/datacenters/{datacenterId}/servers?upgradeNeeded=true'
  * @param ctx _context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
- * @param datacenterId The unique ID of the datacenter
+ * @param datacenterId The unique ID of the data center.
  * @param serverId The unique ID of the Server
  * @return ApiDatacentersServersUpgradePostRequest
  */
@@ -3031,7 +3031,7 @@ func (r ApiDatacentersServersVolumesDeleteRequest) Execute() (*APIResponse, erro
  * DatacentersServersVolumesDelete Detach a volume
  * This will detach the volume from the server. This will not delete the volume from your datacenter. You will need to make a separate request to perform a deletion
  * @param ctx _context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
- * @param datacenterId The unique ID of the Datacenter
+ * @param datacenterId The unique ID of the data center.
  * @param serverId The unique ID of the Server
  * @param volumeId The unique ID of the Volume
  * @return ApiDatacentersServersVolumesDeleteRequest
@@ -3189,7 +3189,7 @@ func (r ApiDatacentersServersVolumesFindByIdRequest) Execute() (Volume, *APIResp
  * DatacentersServersVolumesFindById Retrieve an attached volume
  * This will retrieve the properties of an attached volume.
  * @param ctx _context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
- * @param datacenterId The unique ID of the Datacenter
+ * @param datacenterId The unique ID of the data center.
  * @param serverId The unique ID of the Server
  * @param volumeId The unique ID of the Volume
  * @return ApiDatacentersServersVolumesFindByIdRequest
@@ -3368,7 +3368,7 @@ func (r ApiDatacentersServersVolumesGetRequest) Execute() (AttachedVolumes, *API
  * DatacentersServersVolumesGet List Attached Volumes
  * You can retrieve a list of volumes attached to the server
  * @param ctx _context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
- * @param datacenterId The unique ID of the Datacenter
+ * @param datacenterId The unique ID of the data center.
  * @param serverId The unique ID of the Server
  * @return ApiDatacentersServersVolumesGetRequest
  */
@@ -3531,7 +3531,7 @@ func (r ApiDatacentersServersVolumesPostRequest) Execute() (Volume, *APIResponse
  * DatacentersServersVolumesPost Attach a volume
  * This will attach a pre-existing storage volume to the server. It is also possible to create and attach a volume in one step just by providing a new volume description as payload. Combine count of Nics and volumes attached to the server should not exceed size 24.
  * @param ctx _context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
- * @param datacenterId The unique ID of the Datacenter
+ * @param datacenterId The unique ID of the data center.
  * @param serverId The unique ID of the Server
  * @return ApiDatacentersServersVolumesPostRequest
  */

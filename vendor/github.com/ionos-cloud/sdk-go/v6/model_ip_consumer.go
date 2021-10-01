@@ -28,7 +28,6 @@ type IpConsumer struct {
 }
 
 
-
 // GetIp returns the Ip field value
 // If the value is explicit nil, the zero value for string will be returned
 func (o *IpConsumer) GetIp() *string {
@@ -69,8 +68,6 @@ func (o *IpConsumer) HasIp() bool {
 
 	return false
 }
-
-
 
 // GetMac returns the Mac field value
 // If the value is explicit nil, the zero value for string will be returned
@@ -113,8 +110,6 @@ func (o *IpConsumer) HasMac() bool {
 	return false
 }
 
-
-
 // GetNicId returns the NicId field value
 // If the value is explicit nil, the zero value for string will be returned
 func (o *IpConsumer) GetNicId() *string {
@@ -155,8 +150,6 @@ func (o *IpConsumer) HasNicId() bool {
 
 	return false
 }
-
-
 
 // GetServerId returns the ServerId field value
 // If the value is explicit nil, the zero value for string will be returned
@@ -199,8 +192,6 @@ func (o *IpConsumer) HasServerId() bool {
 	return false
 }
 
-
-
 // GetServerName returns the ServerName field value
 // If the value is explicit nil, the zero value for string will be returned
 func (o *IpConsumer) GetServerName() *string {
@@ -241,8 +232,6 @@ func (o *IpConsumer) HasServerName() bool {
 
 	return false
 }
-
-
 
 // GetDatacenterId returns the DatacenterId field value
 // If the value is explicit nil, the zero value for string will be returned
@@ -285,8 +274,6 @@ func (o *IpConsumer) HasDatacenterId() bool {
 	return false
 }
 
-
-
 // GetDatacenterName returns the DatacenterName field value
 // If the value is explicit nil, the zero value for string will be returned
 func (o *IpConsumer) GetDatacenterName() *string {
@@ -327,8 +314,6 @@ func (o *IpConsumer) HasDatacenterName() bool {
 
 	return false
 }
-
-
 
 // GetK8sNodePoolUuid returns the K8sNodePoolUuid field value
 // If the value is explicit nil, the zero value for string will be returned
@@ -371,8 +356,6 @@ func (o *IpConsumer) HasK8sNodePoolUuid() bool {
 	return false
 }
 
-
-
 // GetK8sClusterUuid returns the K8sClusterUuid field value
 // If the value is explicit nil, the zero value for string will be returned
 func (o *IpConsumer) GetK8sClusterUuid() *string {
@@ -414,57 +397,46 @@ func (o *IpConsumer) HasK8sClusterUuid() bool {
 	return false
 }
 
-
 func (o IpConsumer) MarshalJSON() ([]byte, error) {
 	toSerialize := map[string]interface{}{}
 
 	if o.Ip != nil {
 		toSerialize["ip"] = o.Ip
 	}
-	
 
 	if o.Mac != nil {
 		toSerialize["mac"] = o.Mac
 	}
-	
 
 	if o.NicId != nil {
 		toSerialize["nicId"] = o.NicId
 	}
-	
 
 	if o.ServerId != nil {
 		toSerialize["serverId"] = o.ServerId
 	}
-	
 
 	if o.ServerName != nil {
 		toSerialize["serverName"] = o.ServerName
 	}
-	
 
 	if o.DatacenterId != nil {
 		toSerialize["datacenterId"] = o.DatacenterId
 	}
-	
 
 	if o.DatacenterName != nil {
 		toSerialize["datacenterName"] = o.DatacenterName
 	}
-	
 
 	if o.K8sNodePoolUuid != nil {
 		toSerialize["k8sNodePoolUuid"] = o.K8sNodePoolUuid
 	}
-	
 
 	if o.K8sClusterUuid != nil {
 		toSerialize["k8sClusterUuid"] = o.K8sClusterUuid
 	}
-	
 	return json.Marshal(toSerialize)
 }
-
 type NullableIpConsumer struct {
 	value *IpConsumer
 	isSet bool

@@ -35,7 +35,6 @@ type UserProperties struct {
 }
 
 
-
 // GetFirstname returns the Firstname field value
 // If the value is explicit nil, the zero value for string will be returned
 func (o *UserProperties) GetFirstname() *string {
@@ -76,8 +75,6 @@ func (o *UserProperties) HasFirstname() bool {
 
 	return false
 }
-
-
 
 // GetLastname returns the Lastname field value
 // If the value is explicit nil, the zero value for string will be returned
@@ -120,8 +117,6 @@ func (o *UserProperties) HasLastname() bool {
 	return false
 }
 
-
-
 // GetEmail returns the Email field value
 // If the value is explicit nil, the zero value for string will be returned
 func (o *UserProperties) GetEmail() *string {
@@ -162,8 +157,6 @@ func (o *UserProperties) HasEmail() bool {
 
 	return false
 }
-
-
 
 // GetAdministrator returns the Administrator field value
 // If the value is explicit nil, the zero value for bool will be returned
@@ -206,8 +199,6 @@ func (o *UserProperties) HasAdministrator() bool {
 	return false
 }
 
-
-
 // GetForceSecAuth returns the ForceSecAuth field value
 // If the value is explicit nil, the zero value for bool will be returned
 func (o *UserProperties) GetForceSecAuth() *bool {
@@ -248,8 +239,6 @@ func (o *UserProperties) HasForceSecAuth() bool {
 
 	return false
 }
-
-
 
 // GetSecAuthActive returns the SecAuthActive field value
 // If the value is explicit nil, the zero value for bool will be returned
@@ -292,8 +281,6 @@ func (o *UserProperties) HasSecAuthActive() bool {
 	return false
 }
 
-
-
 // GetS3CanonicalUserId returns the S3CanonicalUserId field value
 // If the value is explicit nil, the zero value for string will be returned
 func (o *UserProperties) GetS3CanonicalUserId() *string {
@@ -334,8 +321,6 @@ func (o *UserProperties) HasS3CanonicalUserId() bool {
 
 	return false
 }
-
-
 
 // GetActive returns the Active field value
 // If the value is explicit nil, the zero value for bool will be returned
@@ -378,52 +363,42 @@ func (o *UserProperties) HasActive() bool {
 	return false
 }
 
-
 func (o UserProperties) MarshalJSON() ([]byte, error) {
 	toSerialize := map[string]interface{}{}
 
 	if o.Firstname != nil {
 		toSerialize["firstname"] = o.Firstname
 	}
-	
 
 	if o.Lastname != nil {
 		toSerialize["lastname"] = o.Lastname
 	}
-	
 
 	if o.Email != nil {
 		toSerialize["email"] = o.Email
 	}
-	
 
 	if o.Administrator != nil {
 		toSerialize["administrator"] = o.Administrator
 	}
-	
 
 	if o.ForceSecAuth != nil {
 		toSerialize["forceSecAuth"] = o.ForceSecAuth
 	}
-	
 
 	if o.SecAuthActive != nil {
 		toSerialize["secAuthActive"] = o.SecAuthActive
 	}
-	
 
 	if o.S3CanonicalUserId != nil {
 		toSerialize["s3CanonicalUserId"] = o.S3CanonicalUserId
 	}
-	
 
 	if o.Active != nil {
 		toSerialize["active"] = o.Active
 	}
-	
 	return json.Marshal(toSerialize)
 }
-
 type NullableUserProperties struct {
 	value *UserProperties
 	isSet bool

@@ -27,7 +27,6 @@ type Request struct {
 }
 
 
-
 // GetId returns the Id field value
 // If the value is explicit nil, the zero value for string will be returned
 func (o *Request) GetId() *string {
@@ -68,8 +67,6 @@ func (o *Request) HasId() bool {
 
 	return false
 }
-
-
 
 // GetType returns the Type field value
 // If the value is explicit nil, the zero value for Type will be returned
@@ -112,8 +109,6 @@ func (o *Request) HasType() bool {
 	return false
 }
 
-
-
 // GetHref returns the Href field value
 // If the value is explicit nil, the zero value for string will be returned
 func (o *Request) GetHref() *string {
@@ -154,8 +149,6 @@ func (o *Request) HasHref() bool {
 
 	return false
 }
-
-
 
 // GetMetadata returns the Metadata field value
 // If the value is explicit nil, the zero value for RequestMetadata will be returned
@@ -198,8 +191,6 @@ func (o *Request) HasMetadata() bool {
 	return false
 }
 
-
-
 // GetProperties returns the Properties field value
 // If the value is explicit nil, the zero value for RequestProperties will be returned
 func (o *Request) GetProperties() *RequestProperties {
@@ -241,37 +232,30 @@ func (o *Request) HasProperties() bool {
 	return false
 }
 
-
 func (o Request) MarshalJSON() ([]byte, error) {
 	toSerialize := map[string]interface{}{}
 
 	if o.Id != nil {
 		toSerialize["id"] = o.Id
 	}
-	
 
 	if o.Type != nil {
 		toSerialize["type"] = o.Type
 	}
-	
 
 	if o.Href != nil {
 		toSerialize["href"] = o.Href
 	}
-	
 
 	if o.Metadata != nil {
 		toSerialize["metadata"] = o.Metadata
 	}
-	
 
 	if o.Properties != nil {
 		toSerialize["properties"] = o.Properties
 	}
-	
 	return json.Marshal(toSerialize)
 }
-
 type NullableRequest struct {
 	value *Request
 	isSet bool

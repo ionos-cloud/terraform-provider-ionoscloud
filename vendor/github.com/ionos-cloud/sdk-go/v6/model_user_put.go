@@ -22,7 +22,6 @@ type UserPut struct {
 }
 
 
-
 // GetId returns the Id field value
 // If the value is explicit nil, the zero value for string will be returned
 func (o *UserPut) GetId() *string {
@@ -63,8 +62,6 @@ func (o *UserPut) HasId() bool {
 
 	return false
 }
-
-
 
 // GetProperties returns the Properties field value
 // If the value is explicit nil, the zero value for UserPropertiesPut will be returned
@@ -107,22 +104,18 @@ func (o *UserPut) HasProperties() bool {
 	return false
 }
 
-
 func (o UserPut) MarshalJSON() ([]byte, error) {
 	toSerialize := map[string]interface{}{}
 
 	if o.Id != nil {
 		toSerialize["id"] = o.Id
 	}
-	
 
 	if o.Properties != nil {
 		toSerialize["properties"] = o.Properties
 	}
-	
 	return json.Marshal(toSerialize)
 }
-
 type NullableUserPut struct {
 	value *UserPut
 	isSet bool

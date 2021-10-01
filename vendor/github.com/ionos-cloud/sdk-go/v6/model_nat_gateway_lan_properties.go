@@ -23,7 +23,6 @@ type NatGatewayLanProperties struct {
 }
 
 
-
 // GetId returns the Id field value
 // If the value is explicit nil, the zero value for int32 will be returned
 func (o *NatGatewayLanProperties) GetId() *int32 {
@@ -64,8 +63,6 @@ func (o *NatGatewayLanProperties) HasId() bool {
 
 	return false
 }
-
-
 
 // GetGatewayIps returns the GatewayIps field value
 // If the value is explicit nil, the zero value for []string will be returned
@@ -108,22 +105,18 @@ func (o *NatGatewayLanProperties) HasGatewayIps() bool {
 	return false
 }
 
-
 func (o NatGatewayLanProperties) MarshalJSON() ([]byte, error) {
 	toSerialize := map[string]interface{}{}
 
 	if o.Id != nil {
 		toSerialize["id"] = o.Id
 	}
-	
 
 	if o.GatewayIps != nil {
 		toSerialize["gatewayIps"] = o.GatewayIps
 	}
-	
 	return json.Marshal(toSerialize)
 }
-
 type NullableNatGatewayLanProperties struct {
 	value *NatGatewayLanProperties
 	isSet bool

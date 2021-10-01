@@ -27,7 +27,6 @@ type FlowLogProperties struct {
 }
 
 
-
 // GetName returns the Name field value
 // If the value is explicit nil, the zero value for string will be returned
 func (o *FlowLogProperties) GetName() *string {
@@ -68,8 +67,6 @@ func (o *FlowLogProperties) HasName() bool {
 
 	return false
 }
-
-
 
 // GetAction returns the Action field value
 // If the value is explicit nil, the zero value for string will be returned
@@ -112,8 +109,6 @@ func (o *FlowLogProperties) HasAction() bool {
 	return false
 }
 
-
-
 // GetDirection returns the Direction field value
 // If the value is explicit nil, the zero value for string will be returned
 func (o *FlowLogProperties) GetDirection() *string {
@@ -154,8 +149,6 @@ func (o *FlowLogProperties) HasDirection() bool {
 
 	return false
 }
-
-
 
 // GetBucket returns the Bucket field value
 // If the value is explicit nil, the zero value for string will be returned
@@ -198,32 +191,26 @@ func (o *FlowLogProperties) HasBucket() bool {
 	return false
 }
 
-
 func (o FlowLogProperties) MarshalJSON() ([]byte, error) {
 	toSerialize := map[string]interface{}{}
 
 	if o.Name != nil {
 		toSerialize["name"] = o.Name
 	}
-	
 
 	if o.Action != nil {
 		toSerialize["action"] = o.Action
 	}
-	
 
 	if o.Direction != nil {
 		toSerialize["direction"] = o.Direction
 	}
-	
 
 	if o.Bucket != nil {
 		toSerialize["bucket"] = o.Bucket
 	}
-	
 	return json.Marshal(toSerialize)
 }
-
 type NullableFlowLogProperties struct {
 	value *FlowLogProperties
 	isSet bool

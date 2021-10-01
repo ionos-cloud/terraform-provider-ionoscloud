@@ -27,7 +27,6 @@ type Image struct {
 }
 
 
-
 // GetId returns the Id field value
 // If the value is explicit nil, the zero value for string will be returned
 func (o *Image) GetId() *string {
@@ -68,8 +67,6 @@ func (o *Image) HasId() bool {
 
 	return false
 }
-
-
 
 // GetType returns the Type field value
 // If the value is explicit nil, the zero value for Type will be returned
@@ -112,8 +109,6 @@ func (o *Image) HasType() bool {
 	return false
 }
 
-
-
 // GetHref returns the Href field value
 // If the value is explicit nil, the zero value for string will be returned
 func (o *Image) GetHref() *string {
@@ -154,8 +149,6 @@ func (o *Image) HasHref() bool {
 
 	return false
 }
-
-
 
 // GetMetadata returns the Metadata field value
 // If the value is explicit nil, the zero value for DatacenterElementMetadata will be returned
@@ -198,8 +191,6 @@ func (o *Image) HasMetadata() bool {
 	return false
 }
 
-
-
 // GetProperties returns the Properties field value
 // If the value is explicit nil, the zero value for ImageProperties will be returned
 func (o *Image) GetProperties() *ImageProperties {
@@ -241,37 +232,30 @@ func (o *Image) HasProperties() bool {
 	return false
 }
 
-
 func (o Image) MarshalJSON() ([]byte, error) {
 	toSerialize := map[string]interface{}{}
 
 	if o.Id != nil {
 		toSerialize["id"] = o.Id
 	}
-	
 
 	if o.Type != nil {
 		toSerialize["type"] = o.Type
 	}
-	
 
 	if o.Href != nil {
 		toSerialize["href"] = o.Href
 	}
-	
 
 	if o.Metadata != nil {
 		toSerialize["metadata"] = o.Metadata
 	}
-	
 
 	if o.Properties != nil {
 		toSerialize["properties"] = o.Properties
 	}
-	
 	return json.Marshal(toSerialize)
 }
-
 type NullableImage struct {
 	value *Image
 	isSet bool

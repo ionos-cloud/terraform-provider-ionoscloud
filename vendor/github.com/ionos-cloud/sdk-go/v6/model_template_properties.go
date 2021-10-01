@@ -27,7 +27,6 @@ type TemplateProperties struct {
 }
 
 
-
 // GetName returns the Name field value
 // If the value is explicit nil, the zero value for string will be returned
 func (o *TemplateProperties) GetName() *string {
@@ -68,8 +67,6 @@ func (o *TemplateProperties) HasName() bool {
 
 	return false
 }
-
-
 
 // GetCores returns the Cores field value
 // If the value is explicit nil, the zero value for float32 will be returned
@@ -112,8 +109,6 @@ func (o *TemplateProperties) HasCores() bool {
 	return false
 }
 
-
-
 // GetRam returns the Ram field value
 // If the value is explicit nil, the zero value for float32 will be returned
 func (o *TemplateProperties) GetRam() *float32 {
@@ -154,8 +149,6 @@ func (o *TemplateProperties) HasRam() bool {
 
 	return false
 }
-
-
 
 // GetStorageSize returns the StorageSize field value
 // If the value is explicit nil, the zero value for float32 will be returned
@@ -198,32 +191,26 @@ func (o *TemplateProperties) HasStorageSize() bool {
 	return false
 }
 
-
 func (o TemplateProperties) MarshalJSON() ([]byte, error) {
 	toSerialize := map[string]interface{}{}
 
 	if o.Name != nil {
 		toSerialize["name"] = o.Name
 	}
-	
 
 	if o.Cores != nil {
 		toSerialize["cores"] = o.Cores
 	}
-	
 
 	if o.Ram != nil {
 		toSerialize["ram"] = o.Ram
 	}
-	
 
 	if o.StorageSize != nil {
 		toSerialize["storageSize"] = o.StorageSize
 	}
-	
 	return json.Marshal(toSerialize)
 }
-
 type NullableTemplateProperties struct {
 	value *TemplateProperties
 	isSet bool

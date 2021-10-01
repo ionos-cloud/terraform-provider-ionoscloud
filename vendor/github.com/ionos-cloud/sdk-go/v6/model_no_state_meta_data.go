@@ -34,7 +34,6 @@ type NoStateMetaData struct {
 }
 
 
-
 // GetEtag returns the Etag field value
 // If the value is explicit nil, the zero value for string will be returned
 func (o *NoStateMetaData) GetEtag() *string {
@@ -75,8 +74,6 @@ func (o *NoStateMetaData) HasEtag() bool {
 
 	return false
 }
-
-
 
 // GetCreatedDate returns the CreatedDate field value
 // If the value is explicit nil, the zero value for time.Time will be returned
@@ -125,8 +122,6 @@ func (o *NoStateMetaData) HasCreatedDate() bool {
 	return false
 }
 
-
-
 // GetCreatedBy returns the CreatedBy field value
 // If the value is explicit nil, the zero value for string will be returned
 func (o *NoStateMetaData) GetCreatedBy() *string {
@@ -168,8 +163,6 @@ func (o *NoStateMetaData) HasCreatedBy() bool {
 	return false
 }
 
-
-
 // GetCreatedByUserId returns the CreatedByUserId field value
 // If the value is explicit nil, the zero value for string will be returned
 func (o *NoStateMetaData) GetCreatedByUserId() *string {
@@ -210,8 +203,6 @@ func (o *NoStateMetaData) HasCreatedByUserId() bool {
 
 	return false
 }
-
-
 
 // GetLastModifiedDate returns the LastModifiedDate field value
 // If the value is explicit nil, the zero value for time.Time will be returned
@@ -260,8 +251,6 @@ func (o *NoStateMetaData) HasLastModifiedDate() bool {
 	return false
 }
 
-
-
 // GetLastModifiedBy returns the LastModifiedBy field value
 // If the value is explicit nil, the zero value for string will be returned
 func (o *NoStateMetaData) GetLastModifiedBy() *string {
@@ -302,8 +291,6 @@ func (o *NoStateMetaData) HasLastModifiedBy() bool {
 
 	return false
 }
-
-
 
 // GetLastModifiedByUserId returns the LastModifiedByUserId field value
 // If the value is explicit nil, the zero value for string will be returned
@@ -346,47 +333,38 @@ func (o *NoStateMetaData) HasLastModifiedByUserId() bool {
 	return false
 }
 
-
 func (o NoStateMetaData) MarshalJSON() ([]byte, error) {
 	toSerialize := map[string]interface{}{}
 
 	if o.Etag != nil {
 		toSerialize["etag"] = o.Etag
 	}
-	
 
 	if o.CreatedDate != nil {
 		toSerialize["createdDate"] = o.CreatedDate
 	}
-	
 
 	if o.CreatedBy != nil {
 		toSerialize["createdBy"] = o.CreatedBy
 	}
-	
 
 	if o.CreatedByUserId != nil {
 		toSerialize["createdByUserId"] = o.CreatedByUserId
 	}
-	
 
 	if o.LastModifiedDate != nil {
 		toSerialize["lastModifiedDate"] = o.LastModifiedDate
 	}
-	
 
 	if o.LastModifiedBy != nil {
 		toSerialize["lastModifiedBy"] = o.LastModifiedBy
 	}
-	
 
 	if o.LastModifiedByUserId != nil {
 		toSerialize["lastModifiedByUserId"] = o.LastModifiedByUserId
 	}
-	
 	return json.Marshal(toSerialize)
 }
-
 type NullableNoStateMetaData struct {
 	value *NoStateMetaData
 	isSet bool

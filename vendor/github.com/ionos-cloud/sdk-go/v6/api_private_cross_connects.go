@@ -55,7 +55,7 @@ func (r ApiPccsDeleteRequest) Execute() (*APIResponse, error) {
 
 /*
  * PccsDelete Delete a Private Cross-Connect
- * Delete a private cross-connect if no datacenters are joined to the given PCC
+ * Delete a private cross-connect if no data centers are joined to the given PCC
  * @param ctx _context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
  * @param pccId The unique ID of the private cross-connect
  * @return ApiPccsDeleteRequest

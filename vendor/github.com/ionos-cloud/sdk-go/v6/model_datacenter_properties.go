@@ -33,7 +33,6 @@ type DatacenterProperties struct {
 }
 
 
-
 // GetName returns the Name field value
 // If the value is explicit nil, the zero value for string will be returned
 func (o *DatacenterProperties) GetName() *string {
@@ -74,8 +73,6 @@ func (o *DatacenterProperties) HasName() bool {
 
 	return false
 }
-
-
 
 // GetDescription returns the Description field value
 // If the value is explicit nil, the zero value for string will be returned
@@ -118,8 +115,6 @@ func (o *DatacenterProperties) HasDescription() bool {
 	return false
 }
 
-
-
 // GetLocation returns the Location field value
 // If the value is explicit nil, the zero value for string will be returned
 func (o *DatacenterProperties) GetLocation() *string {
@@ -160,8 +155,6 @@ func (o *DatacenterProperties) HasLocation() bool {
 
 	return false
 }
-
-
 
 // GetVersion returns the Version field value
 // If the value is explicit nil, the zero value for int32 will be returned
@@ -204,8 +197,6 @@ func (o *DatacenterProperties) HasVersion() bool {
 	return false
 }
 
-
-
 // GetFeatures returns the Features field value
 // If the value is explicit nil, the zero value for []string will be returned
 func (o *DatacenterProperties) GetFeatures() *[]string {
@@ -246,8 +237,6 @@ func (o *DatacenterProperties) HasFeatures() bool {
 
 	return false
 }
-
-
 
 // GetSecAuthProtection returns the SecAuthProtection field value
 // If the value is explicit nil, the zero value for bool will be returned
@@ -290,8 +279,6 @@ func (o *DatacenterProperties) HasSecAuthProtection() bool {
 	return false
 }
 
-
-
 // GetCpuArchitecture returns the CpuArchitecture field value
 // If the value is explicit nil, the zero value for []CpuArchitectureProperties will be returned
 func (o *DatacenterProperties) GetCpuArchitecture() *[]CpuArchitectureProperties {
@@ -333,47 +320,38 @@ func (o *DatacenterProperties) HasCpuArchitecture() bool {
 	return false
 }
 
-
 func (o DatacenterProperties) MarshalJSON() ([]byte, error) {
 	toSerialize := map[string]interface{}{}
 
 	if o.Name != nil {
 		toSerialize["name"] = o.Name
 	}
-	
 
 	if o.Description != nil {
 		toSerialize["description"] = o.Description
 	}
-	
 
 	if o.Location != nil {
 		toSerialize["location"] = o.Location
 	}
-	
 
 	if o.Version != nil {
 		toSerialize["version"] = o.Version
 	}
-	
 
 	if o.Features != nil {
 		toSerialize["features"] = o.Features
 	}
-	
 
 	if o.SecAuthProtection != nil {
 		toSerialize["secAuthProtection"] = o.SecAuthProtection
 	}
-	
 
 	if o.CpuArchitecture != nil {
 		toSerialize["cpuArchitecture"] = o.CpuArchitecture
 	}
-	
 	return json.Marshal(toSerialize)
 }
-
 type NullableDatacenterProperties struct {
 	value *DatacenterProperties
 	isSet bool

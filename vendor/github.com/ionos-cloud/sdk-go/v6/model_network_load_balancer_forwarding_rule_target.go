@@ -26,7 +26,6 @@ type NetworkLoadBalancerForwardingRuleTarget struct {
 }
 
 
-
 // GetIp returns the Ip field value
 // If the value is explicit nil, the zero value for string will be returned
 func (o *NetworkLoadBalancerForwardingRuleTarget) GetIp() *string {
@@ -67,8 +66,6 @@ func (o *NetworkLoadBalancerForwardingRuleTarget) HasIp() bool {
 
 	return false
 }
-
-
 
 // GetPort returns the Port field value
 // If the value is explicit nil, the zero value for int32 will be returned
@@ -111,8 +108,6 @@ func (o *NetworkLoadBalancerForwardingRuleTarget) HasPort() bool {
 	return false
 }
 
-
-
 // GetWeight returns the Weight field value
 // If the value is explicit nil, the zero value for int32 will be returned
 func (o *NetworkLoadBalancerForwardingRuleTarget) GetWeight() *int32 {
@@ -153,8 +148,6 @@ func (o *NetworkLoadBalancerForwardingRuleTarget) HasWeight() bool {
 
 	return false
 }
-
-
 
 // GetHealthCheck returns the HealthCheck field value
 // If the value is explicit nil, the zero value for NetworkLoadBalancerForwardingRuleTargetHealthCheck will be returned
@@ -197,32 +190,26 @@ func (o *NetworkLoadBalancerForwardingRuleTarget) HasHealthCheck() bool {
 	return false
 }
 
-
 func (o NetworkLoadBalancerForwardingRuleTarget) MarshalJSON() ([]byte, error) {
 	toSerialize := map[string]interface{}{}
 
 	if o.Ip != nil {
 		toSerialize["ip"] = o.Ip
 	}
-	
 
 	if o.Port != nil {
 		toSerialize["port"] = o.Port
 	}
-	
 
 	if o.Weight != nil {
 		toSerialize["weight"] = o.Weight
 	}
-	
 
 	if o.HealthCheck != nil {
 		toSerialize["healthCheck"] = o.HealthCheck
 	}
-	
 	return json.Marshal(toSerialize)
 }
-
 type NullableNetworkLoadBalancerForwardingRuleTarget struct {
 	value *NetworkLoadBalancerForwardingRuleTarget
 	isSet bool

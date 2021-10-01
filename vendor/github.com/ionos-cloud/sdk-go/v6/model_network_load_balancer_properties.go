@@ -29,7 +29,6 @@ type NetworkLoadBalancerProperties struct {
 }
 
 
-
 // GetName returns the Name field value
 // If the value is explicit nil, the zero value for string will be returned
 func (o *NetworkLoadBalancerProperties) GetName() *string {
@@ -70,8 +69,6 @@ func (o *NetworkLoadBalancerProperties) HasName() bool {
 
 	return false
 }
-
-
 
 // GetListenerLan returns the ListenerLan field value
 // If the value is explicit nil, the zero value for int32 will be returned
@@ -114,8 +111,6 @@ func (o *NetworkLoadBalancerProperties) HasListenerLan() bool {
 	return false
 }
 
-
-
 // GetIps returns the Ips field value
 // If the value is explicit nil, the zero value for []string will be returned
 func (o *NetworkLoadBalancerProperties) GetIps() *[]string {
@@ -156,8 +151,6 @@ func (o *NetworkLoadBalancerProperties) HasIps() bool {
 
 	return false
 }
-
-
 
 // GetTargetLan returns the TargetLan field value
 // If the value is explicit nil, the zero value for int32 will be returned
@@ -200,8 +193,6 @@ func (o *NetworkLoadBalancerProperties) HasTargetLan() bool {
 	return false
 }
 
-
-
 // GetLbPrivateIps returns the LbPrivateIps field value
 // If the value is explicit nil, the zero value for []string will be returned
 func (o *NetworkLoadBalancerProperties) GetLbPrivateIps() *[]string {
@@ -243,37 +234,30 @@ func (o *NetworkLoadBalancerProperties) HasLbPrivateIps() bool {
 	return false
 }
 
-
 func (o NetworkLoadBalancerProperties) MarshalJSON() ([]byte, error) {
 	toSerialize := map[string]interface{}{}
 
 	if o.Name != nil {
 		toSerialize["name"] = o.Name
 	}
-	
 
 	if o.ListenerLan != nil {
 		toSerialize["listenerLan"] = o.ListenerLan
 	}
-	
 
 	if o.Ips != nil {
 		toSerialize["ips"] = o.Ips
 	}
-	
 
 	if o.TargetLan != nil {
 		toSerialize["targetLan"] = o.TargetLan
 	}
-	
 
 	if o.LbPrivateIps != nil {
 		toSerialize["lbPrivateIps"] = o.LbPrivateIps
 	}
-	
 	return json.Marshal(toSerialize)
 }
-
 type NullableNetworkLoadBalancerProperties struct {
 	value *NetworkLoadBalancerProperties
 	isSet bool

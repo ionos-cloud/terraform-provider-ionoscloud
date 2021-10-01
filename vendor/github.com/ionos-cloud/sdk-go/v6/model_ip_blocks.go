@@ -24,8 +24,12 @@ type IpBlocks struct {
 	Href *string `json:"href,omitempty"`
 	// Array of items in that collection
 	Items *[]IpBlock `json:"items,omitempty"`
+	// the offset specified in the request (or, if none was specified, the default offset of 0)
+	Offset *float32 `json:"offset,omitempty"`
+	// the limit specified in the request (or, if none was specified use the endpoint's default pagination limit)
+	Limit *float32 `json:"limit,omitempty"`
+	Links *PaginationLinks `json:"_links,omitempty"`
 }
-
 
 
 // GetId returns the Id field value
@@ -69,8 +73,6 @@ func (o *IpBlocks) HasId() bool {
 	return false
 }
 
-
-
 // GetType returns the Type field value
 // If the value is explicit nil, the zero value for Type will be returned
 func (o *IpBlocks) GetType() *Type {
@@ -111,8 +113,6 @@ func (o *IpBlocks) HasType() bool {
 
 	return false
 }
-
-
 
 // GetHref returns the Href field value
 // If the value is explicit nil, the zero value for string will be returned
@@ -155,8 +155,6 @@ func (o *IpBlocks) HasHref() bool {
 	return false
 }
 
-
-
 // GetItems returns the Items field value
 // If the value is explicit nil, the zero value for []IpBlock will be returned
 func (o *IpBlocks) GetItems() *[]IpBlock {
@@ -198,6 +196,128 @@ func (o *IpBlocks) HasItems() bool {
 	return false
 }
 
+// GetOffset returns the Offset field value
+// If the value is explicit nil, the zero value for float32 will be returned
+func (o *IpBlocks) GetOffset() *float32 {
+	if o == nil {
+		return nil
+	}
+
+
+	return o.Offset
+
+}
+
+// GetOffsetOk returns a tuple with the Offset field value
+// and a boolean to check if the value has been set.
+// NOTE: If the value is an explicit nil, `nil, true` will be returned
+func (o *IpBlocks) GetOffsetOk() (*float32, bool) {
+	if o == nil {
+		return nil, false
+	}
+
+
+	return o.Offset, true
+}
+
+// SetOffset sets field value
+func (o *IpBlocks) SetOffset(v float32) {
+
+
+	o.Offset = &v
+
+}
+
+// HasOffset returns a boolean if a field has been set.
+func (o *IpBlocks) HasOffset() bool {
+	if o != nil && o.Offset != nil {
+		return true
+	}
+
+	return false
+}
+
+// GetLimit returns the Limit field value
+// If the value is explicit nil, the zero value for float32 will be returned
+func (o *IpBlocks) GetLimit() *float32 {
+	if o == nil {
+		return nil
+	}
+
+
+	return o.Limit
+
+}
+
+// GetLimitOk returns a tuple with the Limit field value
+// and a boolean to check if the value has been set.
+// NOTE: If the value is an explicit nil, `nil, true` will be returned
+func (o *IpBlocks) GetLimitOk() (*float32, bool) {
+	if o == nil {
+		return nil, false
+	}
+
+
+	return o.Limit, true
+}
+
+// SetLimit sets field value
+func (o *IpBlocks) SetLimit(v float32) {
+
+
+	o.Limit = &v
+
+}
+
+// HasLimit returns a boolean if a field has been set.
+func (o *IpBlocks) HasLimit() bool {
+	if o != nil && o.Limit != nil {
+		return true
+	}
+
+	return false
+}
+
+// GetLinks returns the Links field value
+// If the value is explicit nil, the zero value for PaginationLinks will be returned
+func (o *IpBlocks) GetLinks() *PaginationLinks {
+	if o == nil {
+		return nil
+	}
+
+
+	return o.Links
+
+}
+
+// GetLinksOk returns a tuple with the Links field value
+// and a boolean to check if the value has been set.
+// NOTE: If the value is an explicit nil, `nil, true` will be returned
+func (o *IpBlocks) GetLinksOk() (*PaginationLinks, bool) {
+	if o == nil {
+		return nil, false
+	}
+
+
+	return o.Links, true
+}
+
+// SetLinks sets field value
+func (o *IpBlocks) SetLinks(v PaginationLinks) {
+
+
+	o.Links = &v
+
+}
+
+// HasLinks returns a boolean if a field has been set.
+func (o *IpBlocks) HasLinks() bool {
+	if o != nil && o.Links != nil {
+		return true
+	}
+
+	return false
+}
 
 func (o IpBlocks) MarshalJSON() ([]byte, error) {
 	toSerialize := map[string]interface{}{}
@@ -205,25 +325,32 @@ func (o IpBlocks) MarshalJSON() ([]byte, error) {
 	if o.Id != nil {
 		toSerialize["id"] = o.Id
 	}
-	
 
 	if o.Type != nil {
 		toSerialize["type"] = o.Type
 	}
-	
 
 	if o.Href != nil {
 		toSerialize["href"] = o.Href
 	}
-	
 
 	if o.Items != nil {
 		toSerialize["items"] = o.Items
 	}
-	
+
+	if o.Offset != nil {
+		toSerialize["offset"] = o.Offset
+	}
+
+	if o.Limit != nil {
+		toSerialize["limit"] = o.Limit
+	}
+
+	if o.Links != nil {
+		toSerialize["_links"] = o.Links
+	}
 	return json.Marshal(toSerialize)
 }
-
 type NullableIpBlocks struct {
 	value *IpBlocks
 	isSet bool

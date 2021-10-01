@@ -28,7 +28,6 @@ type KubernetesClusterPropertiesForPut struct {
 }
 
 
-
 // GetName returns the Name field value
 // If the value is explicit nil, the zero value for string will be returned
 func (o *KubernetesClusterPropertiesForPut) GetName() *string {
@@ -69,8 +68,6 @@ func (o *KubernetesClusterPropertiesForPut) HasName() bool {
 
 	return false
 }
-
-
 
 // GetK8sVersion returns the K8sVersion field value
 // If the value is explicit nil, the zero value for string will be returned
@@ -113,8 +110,6 @@ func (o *KubernetesClusterPropertiesForPut) HasK8sVersion() bool {
 	return false
 }
 
-
-
 // GetMaintenanceWindow returns the MaintenanceWindow field value
 // If the value is explicit nil, the zero value for KubernetesMaintenanceWindow will be returned
 func (o *KubernetesClusterPropertiesForPut) GetMaintenanceWindow() *KubernetesMaintenanceWindow {
@@ -155,8 +150,6 @@ func (o *KubernetesClusterPropertiesForPut) HasMaintenanceWindow() bool {
 
 	return false
 }
-
-
 
 // GetApiSubnetAllowList returns the ApiSubnetAllowList field value
 // If the value is explicit nil, the zero value for []string will be returned
@@ -199,8 +192,6 @@ func (o *KubernetesClusterPropertiesForPut) HasApiSubnetAllowList() bool {
 	return false
 }
 
-
-
 // GetS3Buckets returns the S3Buckets field value
 // If the value is explicit nil, the zero value for []S3Bucket will be returned
 func (o *KubernetesClusterPropertiesForPut) GetS3Buckets() *[]S3Bucket {
@@ -242,37 +233,30 @@ func (o *KubernetesClusterPropertiesForPut) HasS3Buckets() bool {
 	return false
 }
 
-
 func (o KubernetesClusterPropertiesForPut) MarshalJSON() ([]byte, error) {
 	toSerialize := map[string]interface{}{}
 
 	if o.Name != nil {
 		toSerialize["name"] = o.Name
 	}
-	
 
 	if o.K8sVersion != nil {
 		toSerialize["k8sVersion"] = o.K8sVersion
 	}
-	
 
 	if o.MaintenanceWindow != nil {
 		toSerialize["maintenanceWindow"] = o.MaintenanceWindow
 	}
-	
 
 	if o.ApiSubnetAllowList != nil {
 		toSerialize["apiSubnetAllowList"] = o.ApiSubnetAllowList
 	}
-	
 
 	if o.S3Buckets != nil {
 		toSerialize["s3Buckets"] = o.S3Buckets
 	}
-	
 	return json.Marshal(toSerialize)
 }
-
 type NullableKubernetesClusterPropertiesForPut struct {
 	value *KubernetesClusterPropertiesForPut
 	isSet bool

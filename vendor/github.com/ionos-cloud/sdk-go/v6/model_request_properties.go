@@ -23,7 +23,6 @@ type RequestProperties struct {
 }
 
 
-
 // GetMethod returns the Method field value
 // If the value is explicit nil, the zero value for string will be returned
 func (o *RequestProperties) GetMethod() *string {
@@ -64,8 +63,6 @@ func (o *RequestProperties) HasMethod() bool {
 
 	return false
 }
-
-
 
 // GetHeaders returns the Headers field value
 // If the value is explicit nil, the zero value for map[string]string will be returned
@@ -108,8 +105,6 @@ func (o *RequestProperties) HasHeaders() bool {
 	return false
 }
 
-
-
 // GetBody returns the Body field value
 // If the value is explicit nil, the zero value for string will be returned
 func (o *RequestProperties) GetBody() *string {
@@ -150,8 +145,6 @@ func (o *RequestProperties) HasBody() bool {
 
 	return false
 }
-
-
 
 // GetUrl returns the Url field value
 // If the value is explicit nil, the zero value for string will be returned
@@ -194,32 +187,26 @@ func (o *RequestProperties) HasUrl() bool {
 	return false
 }
 
-
 func (o RequestProperties) MarshalJSON() ([]byte, error) {
 	toSerialize := map[string]interface{}{}
 
 	if o.Method != nil {
 		toSerialize["method"] = o.Method
 	}
-	
 
 	if o.Headers != nil {
 		toSerialize["headers"] = o.Headers
 	}
-	
 
 	if o.Body != nil {
 		toSerialize["body"] = o.Body
 	}
-	
 
 	if o.Url != nil {
 		toSerialize["url"] = o.Url
 	}
-	
 	return json.Marshal(toSerialize)
 }
-
 type NullableRequestProperties struct {
 	value *RequestProperties
 	isSet bool

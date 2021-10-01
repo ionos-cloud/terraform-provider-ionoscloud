@@ -27,7 +27,6 @@ type S3Keys struct {
 }
 
 
-
 // GetId returns the Id field value
 // If the value is explicit nil, the zero value for string will be returned
 func (o *S3Keys) GetId() *string {
@@ -68,8 +67,6 @@ func (o *S3Keys) HasId() bool {
 
 	return false
 }
-
-
 
 // GetType returns the Type field value
 // If the value is explicit nil, the zero value for Type will be returned
@@ -112,8 +109,6 @@ func (o *S3Keys) HasType() bool {
 	return false
 }
 
-
-
 // GetHref returns the Href field value
 // If the value is explicit nil, the zero value for string will be returned
 func (o *S3Keys) GetHref() *string {
@@ -154,8 +149,6 @@ func (o *S3Keys) HasHref() bool {
 
 	return false
 }
-
-
 
 // GetItems returns the Items field value
 // If the value is explicit nil, the zero value for []S3Key will be returned
@@ -198,32 +191,26 @@ func (o *S3Keys) HasItems() bool {
 	return false
 }
 
-
 func (o S3Keys) MarshalJSON() ([]byte, error) {
 	toSerialize := map[string]interface{}{}
 
 	if o.Id != nil {
 		toSerialize["id"] = o.Id
 	}
-	
 
 	if o.Type != nil {
 		toSerialize["type"] = o.Type
 	}
-	
 
 	if o.Href != nil {
 		toSerialize["href"] = o.Href
 	}
-	
 
 	if o.Items != nil {
 		toSerialize["items"] = o.Items
 	}
-	
 	return json.Marshal(toSerialize)
 }
-
 type NullableS3Keys struct {
 	value *S3Keys
 	isSet bool

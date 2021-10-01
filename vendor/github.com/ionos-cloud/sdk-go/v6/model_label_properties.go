@@ -29,7 +29,6 @@ type LabelProperties struct {
 }
 
 
-
 // GetKey returns the Key field value
 // If the value is explicit nil, the zero value for string will be returned
 func (o *LabelProperties) GetKey() *string {
@@ -70,8 +69,6 @@ func (o *LabelProperties) HasKey() bool {
 
 	return false
 }
-
-
 
 // GetValue returns the Value field value
 // If the value is explicit nil, the zero value for string will be returned
@@ -114,8 +111,6 @@ func (o *LabelProperties) HasValue() bool {
 	return false
 }
 
-
-
 // GetResourceId returns the ResourceId field value
 // If the value is explicit nil, the zero value for string will be returned
 func (o *LabelProperties) GetResourceId() *string {
@@ -156,8 +151,6 @@ func (o *LabelProperties) HasResourceId() bool {
 
 	return false
 }
-
-
 
 // GetResourceType returns the ResourceType field value
 // If the value is explicit nil, the zero value for string will be returned
@@ -200,8 +193,6 @@ func (o *LabelProperties) HasResourceType() bool {
 	return false
 }
 
-
-
 // GetResourceHref returns the ResourceHref field value
 // If the value is explicit nil, the zero value for string will be returned
 func (o *LabelProperties) GetResourceHref() *string {
@@ -243,37 +234,30 @@ func (o *LabelProperties) HasResourceHref() bool {
 	return false
 }
 
-
 func (o LabelProperties) MarshalJSON() ([]byte, error) {
 	toSerialize := map[string]interface{}{}
 
 	if o.Key != nil {
 		toSerialize["key"] = o.Key
 	}
-	
 
 	if o.Value != nil {
 		toSerialize["value"] = o.Value
 	}
-	
 
 	if o.ResourceId != nil {
 		toSerialize["resourceId"] = o.ResourceId
 	}
-	
 
 	if o.ResourceType != nil {
 		toSerialize["resourceType"] = o.ResourceType
 	}
-	
 
 	if o.ResourceHref != nil {
 		toSerialize["resourceHref"] = o.ResourceHref
 	}
-	
 	return json.Marshal(toSerialize)
 }
-
 type NullableLabelProperties struct {
 	value *LabelProperties
 	isSet bool

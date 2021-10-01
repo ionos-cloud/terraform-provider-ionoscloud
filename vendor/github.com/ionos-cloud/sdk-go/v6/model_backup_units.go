@@ -27,7 +27,6 @@ type BackupUnits struct {
 }
 
 
-
 // GetId returns the Id field value
 // If the value is explicit nil, the zero value for string will be returned
 func (o *BackupUnits) GetId() *string {
@@ -68,8 +67,6 @@ func (o *BackupUnits) HasId() bool {
 
 	return false
 }
-
-
 
 // GetType returns the Type field value
 // If the value is explicit nil, the zero value for string will be returned
@@ -112,8 +109,6 @@ func (o *BackupUnits) HasType() bool {
 	return false
 }
 
-
-
 // GetHref returns the Href field value
 // If the value is explicit nil, the zero value for string will be returned
 func (o *BackupUnits) GetHref() *string {
@@ -154,8 +149,6 @@ func (o *BackupUnits) HasHref() bool {
 
 	return false
 }
-
-
 
 // GetItems returns the Items field value
 // If the value is explicit nil, the zero value for []BackupUnit will be returned
@@ -198,32 +191,26 @@ func (o *BackupUnits) HasItems() bool {
 	return false
 }
 
-
 func (o BackupUnits) MarshalJSON() ([]byte, error) {
 	toSerialize := map[string]interface{}{}
 
 	if o.Id != nil {
 		toSerialize["id"] = o.Id
 	}
-	
 
 	if o.Type != nil {
 		toSerialize["type"] = o.Type
 	}
-	
 
 	if o.Href != nil {
 		toSerialize["href"] = o.Href
 	}
-	
 
 	if o.Items != nil {
 		toSerialize["items"] = o.Items
 	}
-	
 	return json.Marshal(toSerialize)
 }
-
 type NullableBackupUnits struct {
 	value *BackupUnits
 	isSet bool

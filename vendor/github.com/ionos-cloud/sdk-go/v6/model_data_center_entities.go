@@ -25,7 +25,6 @@ type DataCenterEntities struct {
 }
 
 
-
 // GetServers returns the Servers field value
 // If the value is explicit nil, the zero value for Servers will be returned
 func (o *DataCenterEntities) GetServers() *Servers {
@@ -66,8 +65,6 @@ func (o *DataCenterEntities) HasServers() bool {
 
 	return false
 }
-
-
 
 // GetVolumes returns the Volumes field value
 // If the value is explicit nil, the zero value for Volumes will be returned
@@ -110,8 +107,6 @@ func (o *DataCenterEntities) HasVolumes() bool {
 	return false
 }
 
-
-
 // GetLoadbalancers returns the Loadbalancers field value
 // If the value is explicit nil, the zero value for Loadbalancers will be returned
 func (o *DataCenterEntities) GetLoadbalancers() *Loadbalancers {
@@ -152,8 +147,6 @@ func (o *DataCenterEntities) HasLoadbalancers() bool {
 
 	return false
 }
-
-
 
 // GetLans returns the Lans field value
 // If the value is explicit nil, the zero value for Lans will be returned
@@ -196,8 +189,6 @@ func (o *DataCenterEntities) HasLans() bool {
 	return false
 }
 
-
-
 // GetNetworkloadbalancers returns the Networkloadbalancers field value
 // If the value is explicit nil, the zero value for NetworkLoadBalancers will be returned
 func (o *DataCenterEntities) GetNetworkloadbalancers() *NetworkLoadBalancers {
@@ -238,8 +229,6 @@ func (o *DataCenterEntities) HasNetworkloadbalancers() bool {
 
 	return false
 }
-
-
 
 // GetNatgateways returns the Natgateways field value
 // If the value is explicit nil, the zero value for NatGateways will be returned
@@ -282,42 +271,34 @@ func (o *DataCenterEntities) HasNatgateways() bool {
 	return false
 }
 
-
 func (o DataCenterEntities) MarshalJSON() ([]byte, error) {
 	toSerialize := map[string]interface{}{}
 
 	if o.Servers != nil {
 		toSerialize["servers"] = o.Servers
 	}
-	
 
 	if o.Volumes != nil {
 		toSerialize["volumes"] = o.Volumes
 	}
-	
 
 	if o.Loadbalancers != nil {
 		toSerialize["loadbalancers"] = o.Loadbalancers
 	}
-	
 
 	if o.Lans != nil {
 		toSerialize["lans"] = o.Lans
 	}
-	
 
 	if o.Networkloadbalancers != nil {
 		toSerialize["networkloadbalancers"] = o.Networkloadbalancers
 	}
-	
 
 	if o.Natgateways != nil {
 		toSerialize["natgateways"] = o.Natgateways
 	}
-	
 	return json.Marshal(toSerialize)
 }
-
 type NullableDataCenterEntities struct {
 	value *DataCenterEntities
 	isSet bool

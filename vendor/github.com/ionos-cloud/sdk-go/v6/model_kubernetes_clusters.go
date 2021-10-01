@@ -27,7 +27,6 @@ type KubernetesClusters struct {
 }
 
 
-
 // GetId returns the Id field value
 // If the value is explicit nil, the zero value for string will be returned
 func (o *KubernetesClusters) GetId() *string {
@@ -68,8 +67,6 @@ func (o *KubernetesClusters) HasId() bool {
 
 	return false
 }
-
-
 
 // GetType returns the Type field value
 // If the value is explicit nil, the zero value for string will be returned
@@ -112,8 +109,6 @@ func (o *KubernetesClusters) HasType() bool {
 	return false
 }
 
-
-
 // GetHref returns the Href field value
 // If the value is explicit nil, the zero value for string will be returned
 func (o *KubernetesClusters) GetHref() *string {
@@ -154,8 +149,6 @@ func (o *KubernetesClusters) HasHref() bool {
 
 	return false
 }
-
-
 
 // GetItems returns the Items field value
 // If the value is explicit nil, the zero value for []KubernetesCluster will be returned
@@ -198,32 +191,26 @@ func (o *KubernetesClusters) HasItems() bool {
 	return false
 }
 
-
 func (o KubernetesClusters) MarshalJSON() ([]byte, error) {
 	toSerialize := map[string]interface{}{}
 
 	if o.Id != nil {
 		toSerialize["id"] = o.Id
 	}
-	
 
 	if o.Type != nil {
 		toSerialize["type"] = o.Type
 	}
-	
 
 	if o.Href != nil {
 		toSerialize["href"] = o.Href
 	}
-	
 
 	if o.Items != nil {
 		toSerialize["items"] = o.Items
 	}
-	
 	return json.Marshal(toSerialize)
 }
-
 type NullableKubernetesClusters struct {
 	value *KubernetesClusters
 	isSet bool

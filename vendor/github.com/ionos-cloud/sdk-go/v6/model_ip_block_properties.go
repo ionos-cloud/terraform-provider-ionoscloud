@@ -29,7 +29,6 @@ type IpBlockProperties struct {
 }
 
 
-
 // GetIps returns the Ips field value
 // If the value is explicit nil, the zero value for []string will be returned
 func (o *IpBlockProperties) GetIps() *[]string {
@@ -70,8 +69,6 @@ func (o *IpBlockProperties) HasIps() bool {
 
 	return false
 }
-
-
 
 // GetLocation returns the Location field value
 // If the value is explicit nil, the zero value for string will be returned
@@ -114,8 +111,6 @@ func (o *IpBlockProperties) HasLocation() bool {
 	return false
 }
 
-
-
 // GetSize returns the Size field value
 // If the value is explicit nil, the zero value for int32 will be returned
 func (o *IpBlockProperties) GetSize() *int32 {
@@ -156,8 +151,6 @@ func (o *IpBlockProperties) HasSize() bool {
 
 	return false
 }
-
-
 
 // GetName returns the Name field value
 // If the value is explicit nil, the zero value for string will be returned
@@ -200,8 +193,6 @@ func (o *IpBlockProperties) HasName() bool {
 	return false
 }
 
-
-
 // GetIpConsumers returns the IpConsumers field value
 // If the value is explicit nil, the zero value for []IpConsumer will be returned
 func (o *IpBlockProperties) GetIpConsumers() *[]IpConsumer {
@@ -243,37 +234,30 @@ func (o *IpBlockProperties) HasIpConsumers() bool {
 	return false
 }
 
-
 func (o IpBlockProperties) MarshalJSON() ([]byte, error) {
 	toSerialize := map[string]interface{}{}
 
 	if o.Ips != nil {
 		toSerialize["ips"] = o.Ips
 	}
-	
 
 	if o.Location != nil {
 		toSerialize["location"] = o.Location
 	}
-	
 
 	if o.Size != nil {
 		toSerialize["size"] = o.Size
 	}
-	
 
 	if o.Name != nil {
 		toSerialize["name"] = o.Name
 	}
-	
 
 	if o.IpConsumers != nil {
 		toSerialize["ipConsumers"] = o.IpConsumers
 	}
-	
 	return json.Marshal(toSerialize)
 }
-
 type NullableIpBlockProperties struct {
 	value *IpBlockProperties
 	isSet bool

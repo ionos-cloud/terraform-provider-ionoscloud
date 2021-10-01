@@ -55,7 +55,7 @@ func (r ApiDatacentersServersNicsFlowlogsDeleteRequest) Execute() (*APIResponse,
  * DatacentersServersNicsFlowlogsDelete Delete a Flow Log
  * Removes the specified Flow Log.
  * @param ctx _context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
- * @param datacenterId The unique ID of the datacenter
+ * @param datacenterId The unique ID of the data center.
  * @param serverId The unique ID of the Server
  * @param nicId The unique ID of the NIC
  * @param flowlogId The unique ID of the Flow Log
@@ -209,7 +209,7 @@ func (r ApiDatacentersServersNicsFlowlogsFindByIdRequest) Execute() (FlowLog, *A
  * DatacentersServersNicsFlowlogsFindById Retrieve a Flow Log
  * Retrieves the attributes of a given Flow Log.
  * @param ctx _context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
- * @param datacenterId The unique ID of the datacenter
+ * @param datacenterId The unique ID of the data center.
  * @param serverId The unique ID of the Server
  * @param nicId The unique ID of the NIC
  * @param flowlogId The unique ID of the Flow Log
@@ -384,7 +384,7 @@ func (r ApiDatacentersServersNicsFlowlogsGetRequest) Execute() (FlowLogs, *APIRe
  * DatacentersServersNicsFlowlogsGet List Flow Logs
  * Retrieves a list of Flow Logs associated with a particular network interface.
  * @param ctx _context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
- * @param datacenterId The unique ID of the datacenter
+ * @param datacenterId The unique ID of the data center.
  * @param serverId The unique ID of the Server
  * @param nicId The unique ID of the NIC
  * @return ApiDatacentersServersNicsFlowlogsGetRequest
@@ -558,7 +558,7 @@ func (r ApiDatacentersServersNicsFlowlogsPatchRequest) Execute() (FlowLog, *APIR
  * DatacentersServersNicsFlowlogsPatch Partially update a Flow Log
  * This will partially update a Flow Log record.
  * @param ctx _context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
- * @param datacenterId The unique ID of the datacenter
+ * @param datacenterId The unique ID of the data center.
  * @param serverId The unique ID of the server
  * @param nicId The unique ID of the NIC
  * @param flowlogId The unique ID of the Flow Log
@@ -733,7 +733,7 @@ func (r ApiDatacentersServersNicsFlowlogsPostRequest) Execute() (FlowLog, *APIRe
  * DatacentersServersNicsFlowlogsPost Create a Flow Log
  * This will add a Flow Log to the network interface.
  * @param ctx _context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
- * @param datacenterId The unique ID of the datacenter
+ * @param datacenterId The unique ID of the data center.
  * @param serverId The unique ID of the server
  * @param nicId The unique ID of the NIC
  * @return ApiDatacentersServersNicsFlowlogsPostRequest
@@ -906,7 +906,7 @@ func (r ApiDatacentersServersNicsFlowlogsPutRequest) Execute() (FlowLog, *APIRes
  * DatacentersServersNicsFlowlogsPut Modify a Flow Log
  * This will update a Flow Log record.
  * @param ctx _context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
- * @param datacenterId The unique ID of the datacenter
+ * @param datacenterId The unique ID of the data center.
  * @param serverId The unique ID of the server
  * @param nicId The unique ID of the NIC
  * @param flowlogId The unique ID of the Flow Log

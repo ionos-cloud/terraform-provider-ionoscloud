@@ -59,7 +59,7 @@ func (r ApiDatacentersServersNicsDeleteRequest) Execute() (*APIResponse, error) 
  * DatacentersServersNicsDelete Delete a Network Interface
  * Deletes the specified network interface.
  * @param ctx _context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
- * @param datacenterId The unique ID of the datacenter
+ * @param datacenterId The unique ID of the data center.
  * @param serverId The unique ID of the Server
  * @param nicId The unique ID of the NIC
  * @return ApiDatacentersServersNicsDeleteRequest
@@ -217,7 +217,7 @@ func (r ApiDatacentersServersNicsFindByIdRequest) Execute() (Nic, *APIResponse, 
  * DatacentersServersNicsFindById Retrieve a Network Interface
  * Retrieves the attributes of a given network interface.
  * @param ctx _context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
- * @param datacenterId The unique ID of the datacenter
+ * @param datacenterId The unique ID of the data center.
  * @param serverId The unique ID of the Server
  * @param nicId The unique ID of the NIC
  * @return ApiDatacentersServersNicsFindByIdRequest
@@ -396,7 +396,7 @@ func (r ApiDatacentersServersNicsGetRequest) Execute() (Nics, *APIResponse, erro
  * DatacentersServersNicsGet List Network Interfaces
  * Retrieves a list of network interfaces.
  * @param ctx _context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
- * @param datacenterId The unique ID of the datacenter
+ * @param datacenterId The unique ID of the data center.
  * @param serverId The unique ID of the Server
  * @return ApiDatacentersServersNicsGetRequest
  */
@@ -574,7 +574,7 @@ func (r ApiDatacentersServersNicsPatchRequest) Execute() (Nic, *APIResponse, err
  * DatacentersServersNicsPatch Partially Modify a Network Interface
  * You can use update attributes of a network interface.
  * @param ctx _context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
- * @param datacenterId The unique ID of the datacenter
+ * @param datacenterId The unique ID of the data center.
  * @param serverId The unique ID of the Server
  * @param nicId The unique ID of the NIC
  * @return ApiDatacentersServersNicsPatchRequest
@@ -753,7 +753,7 @@ func (r ApiDatacentersServersNicsPostRequest) Execute() (Nic, *APIResponse, erro
  * DatacentersServersNicsPost Create a Network Interface
  * Adds a network interface to the target server. Combined count of network interfaces and volumes attached to the server should not exceed size 24.
  * @param ctx _context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
- * @param datacenterId The unique ID of the datacenter
+ * @param datacenterId The unique ID of the data center.
  * @param serverId The unique ID of the Server
  * @return ApiDatacentersServersNicsPostRequest
  */
@@ -930,7 +930,7 @@ func (r ApiDatacentersServersNicsPutRequest) Execute() (Nic, *APIResponse, error
  * DatacentersServersNicsPut Modify a Network Interface
  * You can use update attributes of a network interface.
  * @param ctx _context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
- * @param datacenterId The unique ID of the datacenter
+ * @param datacenterId The unique ID of the data center.
  * @param serverId The unique ID of the Server
  * @param nicId The unique ID of the NIC
  * @return ApiDatacentersServersNicsPutRequest

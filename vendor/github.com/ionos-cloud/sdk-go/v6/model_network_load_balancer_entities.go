@@ -21,7 +21,6 @@ type NetworkLoadBalancerEntities struct {
 }
 
 
-
 // GetFlowlogs returns the Flowlogs field value
 // If the value is explicit nil, the zero value for FlowLogs will be returned
 func (o *NetworkLoadBalancerEntities) GetFlowlogs() *FlowLogs {
@@ -62,8 +61,6 @@ func (o *NetworkLoadBalancerEntities) HasFlowlogs() bool {
 
 	return false
 }
-
-
 
 // GetForwardingrules returns the Forwardingrules field value
 // If the value is explicit nil, the zero value for NetworkLoadBalancerForwardingRules will be returned
@@ -106,22 +103,18 @@ func (o *NetworkLoadBalancerEntities) HasForwardingrules() bool {
 	return false
 }
 
-
 func (o NetworkLoadBalancerEntities) MarshalJSON() ([]byte, error) {
 	toSerialize := map[string]interface{}{}
 
 	if o.Flowlogs != nil {
 		toSerialize["flowlogs"] = o.Flowlogs
 	}
-	
 
 	if o.Forwardingrules != nil {
 		toSerialize["forwardingrules"] = o.Forwardingrules
 	}
-	
 	return json.Marshal(toSerialize)
 }
-
 type NullableNetworkLoadBalancerEntities struct {
 	value *NetworkLoadBalancerEntities
 	isSet bool

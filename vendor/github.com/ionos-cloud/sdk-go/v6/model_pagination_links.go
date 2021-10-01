@@ -25,7 +25,6 @@ type PaginationLinks struct {
 }
 
 
-
 // GetPrev returns the Prev field value
 // If the value is explicit nil, the zero value for string will be returned
 func (o *PaginationLinks) GetPrev() *string {
@@ -66,8 +65,6 @@ func (o *PaginationLinks) HasPrev() bool {
 
 	return false
 }
-
-
 
 // GetSelf returns the Self field value
 // If the value is explicit nil, the zero value for string will be returned
@@ -110,8 +107,6 @@ func (o *PaginationLinks) HasSelf() bool {
 	return false
 }
 
-
-
 // GetNext returns the Next field value
 // If the value is explicit nil, the zero value for string will be returned
 func (o *PaginationLinks) GetNext() *string {
@@ -153,27 +148,22 @@ func (o *PaginationLinks) HasNext() bool {
 	return false
 }
 
-
 func (o PaginationLinks) MarshalJSON() ([]byte, error) {
 	toSerialize := map[string]interface{}{}
 
 	if o.Prev != nil {
 		toSerialize["prev"] = o.Prev
 	}
-	
 
 	if o.Self != nil {
 		toSerialize["self"] = o.Self
 	}
-	
 
 	if o.Next != nil {
 		toSerialize["next"] = o.Next
 	}
-	
 	return json.Marshal(toSerialize)
 }
-
 type NullablePaginationLinks struct {
 	value *PaginationLinks
 	isSet bool

@@ -37,7 +37,6 @@ type NicProperties struct {
 }
 
 
-
 // GetName returns the Name field value
 // If the value is explicit nil, the zero value for string will be returned
 func (o *NicProperties) GetName() *string {
@@ -78,8 +77,6 @@ func (o *NicProperties) HasName() bool {
 
 	return false
 }
-
-
 
 // GetMac returns the Mac field value
 // If the value is explicit nil, the zero value for string will be returned
@@ -122,8 +119,6 @@ func (o *NicProperties) HasMac() bool {
 	return false
 }
 
-
-
 // GetIps returns the Ips field value
 // If the value is explicit nil, the zero value for []string will be returned
 func (o *NicProperties) GetIps() *[]string {
@@ -164,8 +159,6 @@ func (o *NicProperties) HasIps() bool {
 
 	return false
 }
-
-
 
 // GetDhcp returns the Dhcp field value
 // If the value is explicit nil, the zero value for bool will be returned
@@ -208,8 +201,6 @@ func (o *NicProperties) HasDhcp() bool {
 	return false
 }
 
-
-
 // GetLan returns the Lan field value
 // If the value is explicit nil, the zero value for int32 will be returned
 func (o *NicProperties) GetLan() *int32 {
@@ -250,8 +241,6 @@ func (o *NicProperties) HasLan() bool {
 
 	return false
 }
-
-
 
 // GetFirewallActive returns the FirewallActive field value
 // If the value is explicit nil, the zero value for bool will be returned
@@ -294,8 +283,6 @@ func (o *NicProperties) HasFirewallActive() bool {
 	return false
 }
 
-
-
 // GetFirewallType returns the FirewallType field value
 // If the value is explicit nil, the zero value for string will be returned
 func (o *NicProperties) GetFirewallType() *string {
@@ -336,8 +323,6 @@ func (o *NicProperties) HasFirewallType() bool {
 
 	return false
 }
-
-
 
 // GetDeviceNumber returns the DeviceNumber field value
 // If the value is explicit nil, the zero value for int32 will be returned
@@ -380,8 +365,6 @@ func (o *NicProperties) HasDeviceNumber() bool {
 	return false
 }
 
-
-
 // GetPciSlot returns the PciSlot field value
 // If the value is explicit nil, the zero value for int32 will be returned
 func (o *NicProperties) GetPciSlot() *int32 {
@@ -423,57 +406,46 @@ func (o *NicProperties) HasPciSlot() bool {
 	return false
 }
 
-
 func (o NicProperties) MarshalJSON() ([]byte, error) {
 	toSerialize := map[string]interface{}{}
 
 	if o.Name != nil {
 		toSerialize["name"] = o.Name
 	}
-	
 
 	if o.Mac != nil {
 		toSerialize["mac"] = o.Mac
 	}
-	
 
 	if o.Ips != nil {
 		toSerialize["ips"] = o.Ips
 	}
-	
 
 	if o.Dhcp != nil {
 		toSerialize["dhcp"] = o.Dhcp
 	}
-	
 
 	if o.Lan != nil {
 		toSerialize["lan"] = o.Lan
 	}
-	
 
 	if o.FirewallActive != nil {
 		toSerialize["firewallActive"] = o.FirewallActive
 	}
-	
 
 	if o.FirewallType != nil {
 		toSerialize["firewallType"] = o.FirewallType
 	}
-	
 
 	if o.DeviceNumber != nil {
 		toSerialize["deviceNumber"] = o.DeviceNumber
 	}
-	
 
 	if o.PciSlot != nil {
 		toSerialize["pciSlot"] = o.PciSlot
 	}
-	
 	return json.Marshal(toSerialize)
 }
-
 type NullableNicProperties struct {
 	value *NicProperties
 	isSet bool

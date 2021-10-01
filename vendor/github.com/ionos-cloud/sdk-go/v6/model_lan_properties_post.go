@@ -27,7 +27,6 @@ type LanPropertiesPost struct {
 }
 
 
-
 // GetName returns the Name field value
 // If the value is explicit nil, the zero value for string will be returned
 func (o *LanPropertiesPost) GetName() *string {
@@ -68,8 +67,6 @@ func (o *LanPropertiesPost) HasName() bool {
 
 	return false
 }
-
-
 
 // GetIpFailover returns the IpFailover field value
 // If the value is explicit nil, the zero value for []IPFailover will be returned
@@ -112,8 +109,6 @@ func (o *LanPropertiesPost) HasIpFailover() bool {
 	return false
 }
 
-
-
 // GetPcc returns the Pcc field value
 // If the value is explicit nil, the zero value for string will be returned
 func (o *LanPropertiesPost) GetPcc() *string {
@@ -154,8 +149,6 @@ func (o *LanPropertiesPost) HasPcc() bool {
 
 	return false
 }
-
-
 
 // GetPublic returns the Public field value
 // If the value is explicit nil, the zero value for bool will be returned
@@ -198,32 +191,26 @@ func (o *LanPropertiesPost) HasPublic() bool {
 	return false
 }
 
-
 func (o LanPropertiesPost) MarshalJSON() ([]byte, error) {
 	toSerialize := map[string]interface{}{}
 
 	if o.Name != nil {
 		toSerialize["name"] = o.Name
 	}
-	
 
 	if o.IpFailover != nil {
 		toSerialize["ipFailover"] = o.IpFailover
 	}
-	
 
 	if o.Pcc != nil {
 		toSerialize["pcc"] = o.Pcc
 	}
-	
 
 	if o.Public != nil {
 		toSerialize["public"] = o.Public
 	}
-	
 	return json.Marshal(toSerialize)
 }
-
 type NullableLanPropertiesPost struct {
 	value *LanPropertiesPost
 	isSet bool

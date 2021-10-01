@@ -28,7 +28,6 @@ type ContractProperties struct {
 }
 
 
-
 // GetContractNumber returns the ContractNumber field value
 // If the value is explicit nil, the zero value for int64 will be returned
 func (o *ContractProperties) GetContractNumber() *int64 {
@@ -69,8 +68,6 @@ func (o *ContractProperties) HasContractNumber() bool {
 
 	return false
 }
-
-
 
 // GetOwner returns the Owner field value
 // If the value is explicit nil, the zero value for string will be returned
@@ -113,8 +110,6 @@ func (o *ContractProperties) HasOwner() bool {
 	return false
 }
 
-
-
 // GetStatus returns the Status field value
 // If the value is explicit nil, the zero value for string will be returned
 func (o *ContractProperties) GetStatus() *string {
@@ -155,8 +150,6 @@ func (o *ContractProperties) HasStatus() bool {
 
 	return false
 }
-
-
 
 // GetRegDomain returns the RegDomain field value
 // If the value is explicit nil, the zero value for string will be returned
@@ -199,8 +192,6 @@ func (o *ContractProperties) HasRegDomain() bool {
 	return false
 }
 
-
-
 // GetResourceLimits returns the ResourceLimits field value
 // If the value is explicit nil, the zero value for ResourceLimits will be returned
 func (o *ContractProperties) GetResourceLimits() *ResourceLimits {
@@ -242,37 +233,30 @@ func (o *ContractProperties) HasResourceLimits() bool {
 	return false
 }
 
-
 func (o ContractProperties) MarshalJSON() ([]byte, error) {
 	toSerialize := map[string]interface{}{}
 
 	if o.ContractNumber != nil {
 		toSerialize["contractNumber"] = o.ContractNumber
 	}
-	
 
 	if o.Owner != nil {
 		toSerialize["owner"] = o.Owner
 	}
-	
 
 	if o.Status != nil {
 		toSerialize["status"] = o.Status
 	}
-	
 
 	if o.RegDomain != nil {
 		toSerialize["regDomain"] = o.RegDomain
 	}
-	
 
 	if o.ResourceLimits != nil {
 		toSerialize["resourceLimits"] = o.ResourceLimits
 	}
-	
 	return json.Marshal(toSerialize)
 }
-
 type NullableContractProperties struct {
 	value *ContractProperties
 	isSet bool

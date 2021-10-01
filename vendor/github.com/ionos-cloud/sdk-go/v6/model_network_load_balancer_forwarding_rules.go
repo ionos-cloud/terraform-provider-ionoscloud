@@ -32,7 +32,6 @@ type NetworkLoadBalancerForwardingRules struct {
 }
 
 
-
 // GetId returns the Id field value
 // If the value is explicit nil, the zero value for string will be returned
 func (o *NetworkLoadBalancerForwardingRules) GetId() *string {
@@ -73,8 +72,6 @@ func (o *NetworkLoadBalancerForwardingRules) HasId() bool {
 
 	return false
 }
-
-
 
 // GetType returns the Type field value
 // If the value is explicit nil, the zero value for Type will be returned
@@ -117,8 +114,6 @@ func (o *NetworkLoadBalancerForwardingRules) HasType() bool {
 	return false
 }
 
-
-
 // GetHref returns the Href field value
 // If the value is explicit nil, the zero value for string will be returned
 func (o *NetworkLoadBalancerForwardingRules) GetHref() *string {
@@ -159,8 +154,6 @@ func (o *NetworkLoadBalancerForwardingRules) HasHref() bool {
 
 	return false
 }
-
-
 
 // GetItems returns the Items field value
 // If the value is explicit nil, the zero value for []NetworkLoadBalancerForwardingRule will be returned
@@ -203,8 +196,6 @@ func (o *NetworkLoadBalancerForwardingRules) HasItems() bool {
 	return false
 }
 
-
-
 // GetOffset returns the Offset field value
 // If the value is explicit nil, the zero value for float32 will be returned
 func (o *NetworkLoadBalancerForwardingRules) GetOffset() *float32 {
@@ -245,8 +236,6 @@ func (o *NetworkLoadBalancerForwardingRules) HasOffset() bool {
 
 	return false
 }
-
-
 
 // GetLimit returns the Limit field value
 // If the value is explicit nil, the zero value for float32 will be returned
@@ -289,8 +278,6 @@ func (o *NetworkLoadBalancerForwardingRules) HasLimit() bool {
 	return false
 }
 
-
-
 // GetLinks returns the Links field value
 // If the value is explicit nil, the zero value for PaginationLinks will be returned
 func (o *NetworkLoadBalancerForwardingRules) GetLinks() *PaginationLinks {
@@ -332,47 +319,38 @@ func (o *NetworkLoadBalancerForwardingRules) HasLinks() bool {
 	return false
 }
 
-
 func (o NetworkLoadBalancerForwardingRules) MarshalJSON() ([]byte, error) {
 	toSerialize := map[string]interface{}{}
 
 	if o.Id != nil {
 		toSerialize["id"] = o.Id
 	}
-	
 
 	if o.Type != nil {
 		toSerialize["type"] = o.Type
 	}
-	
 
 	if o.Href != nil {
 		toSerialize["href"] = o.Href
 	}
-	
 
 	if o.Items != nil {
 		toSerialize["items"] = o.Items
 	}
-	
 
 	if o.Offset != nil {
 		toSerialize["offset"] = o.Offset
 	}
-	
 
 	if o.Limit != nil {
 		toSerialize["limit"] = o.Limit
 	}
-	
 
 	if o.Links != nil {
 		toSerialize["_links"] = o.Links
 	}
-	
 	return json.Marshal(toSerialize)
 }
-
 type NullableNetworkLoadBalancerForwardingRules struct {
 	value *NetworkLoadBalancerForwardingRules
 	isSet bool

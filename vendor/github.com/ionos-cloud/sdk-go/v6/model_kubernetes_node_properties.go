@@ -27,7 +27,6 @@ type KubernetesNodeProperties struct {
 }
 
 
-
 // GetName returns the Name field value
 // If the value is explicit nil, the zero value for string will be returned
 func (o *KubernetesNodeProperties) GetName() *string {
@@ -68,8 +67,6 @@ func (o *KubernetesNodeProperties) HasName() bool {
 
 	return false
 }
-
-
 
 // GetPublicIP returns the PublicIP field value
 // If the value is explicit nil, the zero value for string will be returned
@@ -112,8 +109,6 @@ func (o *KubernetesNodeProperties) HasPublicIP() bool {
 	return false
 }
 
-
-
 // GetPrivateIP returns the PrivateIP field value
 // If the value is explicit nil, the zero value for string will be returned
 func (o *KubernetesNodeProperties) GetPrivateIP() *string {
@@ -154,8 +149,6 @@ func (o *KubernetesNodeProperties) HasPrivateIP() bool {
 
 	return false
 }
-
-
 
 // GetK8sVersion returns the K8sVersion field value
 // If the value is explicit nil, the zero value for string will be returned
@@ -198,32 +191,26 @@ func (o *KubernetesNodeProperties) HasK8sVersion() bool {
 	return false
 }
 
-
 func (o KubernetesNodeProperties) MarshalJSON() ([]byte, error) {
 	toSerialize := map[string]interface{}{}
 
 	if o.Name != nil {
 		toSerialize["name"] = o.Name
 	}
-	
 
 	if o.PublicIP != nil {
 		toSerialize["publicIP"] = o.PublicIP
 	}
-	
 
 	if o.PrivateIP != nil {
 		toSerialize["privateIP"] = o.PrivateIP
 	}
-	
 
 	if o.K8sVersion != nil {
 		toSerialize["k8sVersion"] = o.K8sVersion
 	}
-	
 	return json.Marshal(toSerialize)
 }
-
 type NullableKubernetesNodeProperties struct {
 	value *KubernetesNodeProperties
 	isSet bool

@@ -26,7 +26,6 @@ type NatGatewayRulePut struct {
 }
 
 
-
 // GetId returns the Id field value
 // If the value is explicit nil, the zero value for string will be returned
 func (o *NatGatewayRulePut) GetId() *string {
@@ -67,8 +66,6 @@ func (o *NatGatewayRulePut) HasId() bool {
 
 	return false
 }
-
-
 
 // GetType returns the Type field value
 // If the value is explicit nil, the zero value for Type will be returned
@@ -111,8 +108,6 @@ func (o *NatGatewayRulePut) HasType() bool {
 	return false
 }
 
-
-
 // GetHref returns the Href field value
 // If the value is explicit nil, the zero value for string will be returned
 func (o *NatGatewayRulePut) GetHref() *string {
@@ -153,8 +148,6 @@ func (o *NatGatewayRulePut) HasHref() bool {
 
 	return false
 }
-
-
 
 // GetProperties returns the Properties field value
 // If the value is explicit nil, the zero value for NatGatewayRuleProperties will be returned
@@ -197,32 +190,26 @@ func (o *NatGatewayRulePut) HasProperties() bool {
 	return false
 }
 
-
 func (o NatGatewayRulePut) MarshalJSON() ([]byte, error) {
 	toSerialize := map[string]interface{}{}
 
 	if o.Id != nil {
 		toSerialize["id"] = o.Id
 	}
-	
 
 	if o.Type != nil {
 		toSerialize["type"] = o.Type
 	}
-	
 
 	if o.Href != nil {
 		toSerialize["href"] = o.Href
 	}
-	
 
 	if o.Properties != nil {
 		toSerialize["properties"] = o.Properties
 	}
-	
 	return json.Marshal(toSerialize)
 }
-
 type NullableNatGatewayRulePut struct {
 	value *NatGatewayRulePut
 	isSet bool

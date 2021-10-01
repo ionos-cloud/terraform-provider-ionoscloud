@@ -23,7 +23,6 @@ type TargetPortRange struct {
 }
 
 
-
 // GetStart returns the Start field value
 // If the value is explicit nil, the zero value for int32 will be returned
 func (o *TargetPortRange) GetStart() *int32 {
@@ -64,8 +63,6 @@ func (o *TargetPortRange) HasStart() bool {
 
 	return false
 }
-
-
 
 // GetEnd returns the End field value
 // If the value is explicit nil, the zero value for int32 will be returned
@@ -108,22 +105,18 @@ func (o *TargetPortRange) HasEnd() bool {
 	return false
 }
 
-
 func (o TargetPortRange) MarshalJSON() ([]byte, error) {
 	toSerialize := map[string]interface{}{}
 
 	if o.Start != nil {
 		toSerialize["start"] = o.Start
 	}
-	
 
 	if o.End != nil {
 		toSerialize["end"] = o.End
 	}
-	
 	return json.Marshal(toSerialize)
 }
-
 type NullableTargetPortRange struct {
 	value *TargetPortRange
 	isSet bool

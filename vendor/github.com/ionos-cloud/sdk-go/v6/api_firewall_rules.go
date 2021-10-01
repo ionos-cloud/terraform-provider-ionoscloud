@@ -60,7 +60,7 @@ func (r ApiDatacentersServersNicsFirewallrulesDeleteRequest) Execute() (*APIResp
  * DatacentersServersNicsFirewallrulesDelete Delete a Firewall Rule
  * Removes the specified firewall rule.
  * @param ctx _context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
- * @param datacenterId The unique ID of the datacenter
+ * @param datacenterId The unique ID of the data center.
  * @param serverId The unique ID of the Server
  * @param nicId The unique ID of the NIC
  * @param firewallruleId The unique ID of the Firewall Rule
@@ -222,7 +222,7 @@ func (r ApiDatacentersServersNicsFirewallrulesFindByIdRequest) Execute() (Firewa
  * DatacentersServersNicsFirewallrulesFindById Retrieve a Firewall Rule
  * Retrieves the attributes of a given firewall rule.
  * @param ctx _context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
- * @param datacenterId The unique ID of the datacenter
+ * @param datacenterId The unique ID of the data center.
  * @param serverId The unique ID of the Server
  * @param nicId The unique ID of the NIC
  * @param firewallruleId The unique ID of the Firewall Rule
@@ -405,7 +405,7 @@ func (r ApiDatacentersServersNicsFirewallrulesGetRequest) Execute() (FirewallRul
  * DatacentersServersNicsFirewallrulesGet List Firewall Rules
  * Retrieves a list of firewall rules associated with a particular network interface.
  * @param ctx _context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
- * @param datacenterId The unique ID of the datacenter
+ * @param datacenterId The unique ID of the data center.
  * @param serverId The unique ID of the Server
  * @param nicId The unique ID of the NIC
  * @return ApiDatacentersServersNicsFirewallrulesGetRequest
@@ -587,7 +587,7 @@ func (r ApiDatacentersServersNicsFirewallrulesPatchRequest) Execute() (FirewallR
  * DatacentersServersNicsFirewallrulesPatch Partially Modify a Firewall Rule
  * You can use update attributes of a resource.
  * @param ctx _context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
- * @param datacenterId The unique ID of the datacenter
+ * @param datacenterId The unique ID of the data center.
  * @param serverId The unique ID of the Server
  * @param nicId The unique ID of the NIC
  * @param firewallruleId The unique ID of the Firewall Rule
@@ -770,7 +770,7 @@ func (r ApiDatacentersServersNicsFirewallrulesPostRequest) Execute() (FirewallRu
  * DatacentersServersNicsFirewallrulesPost Create a Firewall Rule
  * This will add a Firewall Rule to the network interface.
  * @param ctx _context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
- * @param datacenterId The unique ID of the datacenter
+ * @param datacenterId The unique ID of the data center.
  * @param serverId The unique ID of the server
  * @param nicId The unique ID of the NIC
  * @return ApiDatacentersServersNicsFirewallrulesPostRequest
@@ -951,7 +951,7 @@ func (r ApiDatacentersServersNicsFirewallrulesPutRequest) Execute() (FirewallRul
  * DatacentersServersNicsFirewallrulesPut Modify a Firewall Rule
  * You can use update attributes of a resource.
  * @param ctx _context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
- * @param datacenterId The unique ID of the datacenter
+ * @param datacenterId The unique ID of the data center.
  * @param serverId The unique ID of the Server
  * @param nicId The unique ID of the NIC
  * @param firewallruleId The unique ID of the Firewall Rule

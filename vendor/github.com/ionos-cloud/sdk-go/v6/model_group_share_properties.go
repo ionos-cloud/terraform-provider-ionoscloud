@@ -23,7 +23,6 @@ type GroupShareProperties struct {
 }
 
 
-
 // GetEditPrivilege returns the EditPrivilege field value
 // If the value is explicit nil, the zero value for bool will be returned
 func (o *GroupShareProperties) GetEditPrivilege() *bool {
@@ -64,8 +63,6 @@ func (o *GroupShareProperties) HasEditPrivilege() bool {
 
 	return false
 }
-
-
 
 // GetSharePrivilege returns the SharePrivilege field value
 // If the value is explicit nil, the zero value for bool will be returned
@@ -108,22 +105,18 @@ func (o *GroupShareProperties) HasSharePrivilege() bool {
 	return false
 }
 
-
 func (o GroupShareProperties) MarshalJSON() ([]byte, error) {
 	toSerialize := map[string]interface{}{}
 
 	if o.EditPrivilege != nil {
 		toSerialize["editPrivilege"] = o.EditPrivilege
 	}
-	
 
 	if o.SharePrivilege != nil {
 		toSerialize["sharePrivilege"] = o.SharePrivilege
 	}
-	
 	return json.Marshal(toSerialize)
 }
-
 type NullableGroupShareProperties struct {
 	value *GroupShareProperties
 	isSet bool

@@ -27,7 +27,6 @@ type Group struct {
 }
 
 
-
 // GetId returns the Id field value
 // If the value is explicit nil, the zero value for string will be returned
 func (o *Group) GetId() *string {
@@ -68,8 +67,6 @@ func (o *Group) HasId() bool {
 
 	return false
 }
-
-
 
 // GetType returns the Type field value
 // If the value is explicit nil, the zero value for Type will be returned
@@ -112,8 +109,6 @@ func (o *Group) HasType() bool {
 	return false
 }
 
-
-
 // GetHref returns the Href field value
 // If the value is explicit nil, the zero value for string will be returned
 func (o *Group) GetHref() *string {
@@ -154,8 +149,6 @@ func (o *Group) HasHref() bool {
 
 	return false
 }
-
-
 
 // GetProperties returns the Properties field value
 // If the value is explicit nil, the zero value for GroupProperties will be returned
@@ -198,8 +191,6 @@ func (o *Group) HasProperties() bool {
 	return false
 }
 
-
-
 // GetEntities returns the Entities field value
 // If the value is explicit nil, the zero value for GroupEntities will be returned
 func (o *Group) GetEntities() *GroupEntities {
@@ -241,37 +232,30 @@ func (o *Group) HasEntities() bool {
 	return false
 }
 
-
 func (o Group) MarshalJSON() ([]byte, error) {
 	toSerialize := map[string]interface{}{}
 
 	if o.Id != nil {
 		toSerialize["id"] = o.Id
 	}
-	
 
 	if o.Type != nil {
 		toSerialize["type"] = o.Type
 	}
-	
 
 	if o.Href != nil {
 		toSerialize["href"] = o.Href
 	}
-	
 
 	if o.Properties != nil {
 		toSerialize["properties"] = o.Properties
 	}
-	
 
 	if o.Entities != nil {
 		toSerialize["entities"] = o.Entities
 	}
-	
 	return json.Marshal(toSerialize)
 }
-
 type NullableGroup struct {
 	value *Group
 	isSet bool

@@ -20,7 +20,6 @@ type UserPost struct {
 }
 
 
-
 // GetProperties returns the Properties field value
 // If the value is explicit nil, the zero value for UserPropertiesPost will be returned
 func (o *UserPost) GetProperties() *UserPropertiesPost {
@@ -62,17 +61,14 @@ func (o *UserPost) HasProperties() bool {
 	return false
 }
 
-
 func (o UserPost) MarshalJSON() ([]byte, error) {
 	toSerialize := map[string]interface{}{}
 
 	if o.Properties != nil {
 		toSerialize["properties"] = o.Properties
 	}
-	
 	return json.Marshal(toSerialize)
 }
-
 type NullableUserPost struct {
 	value *UserPost
 	isSet bool

@@ -21,7 +21,6 @@ type Token struct {
 }
 
 
-
 // GetToken returns the Token field value
 // If the value is explicit nil, the zero value for string will be returned
 func (o *Token) GetToken() *string {
@@ -63,17 +62,14 @@ func (o *Token) HasToken() bool {
 	return false
 }
 
-
 func (o Token) MarshalJSON() ([]byte, error) {
 	toSerialize := map[string]interface{}{}
 
 	if o.Token != nil {
 		toSerialize["token"] = o.Token
 	}
-	
 	return json.Marshal(toSerialize)
 }
-
 type NullableToken struct {
 	value *Token
 	isSet bool

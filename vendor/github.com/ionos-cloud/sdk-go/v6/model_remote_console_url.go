@@ -21,7 +21,6 @@ type RemoteConsoleUrl struct {
 }
 
 
-
 // GetUrl returns the Url field value
 // If the value is explicit nil, the zero value for string will be returned
 func (o *RemoteConsoleUrl) GetUrl() *string {
@@ -63,17 +62,14 @@ func (o *RemoteConsoleUrl) HasUrl() bool {
 	return false
 }
 
-
 func (o RemoteConsoleUrl) MarshalJSON() ([]byte, error) {
 	toSerialize := map[string]interface{}{}
 
 	if o.Url != nil {
 		toSerialize["url"] = o.Url
 	}
-	
 	return json.Marshal(toSerialize)
 }
-
 type NullableRemoteConsoleUrl struct {
 	value *RemoteConsoleUrl
 	isSet bool

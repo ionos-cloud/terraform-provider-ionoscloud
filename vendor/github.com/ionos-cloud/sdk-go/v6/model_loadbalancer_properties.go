@@ -25,7 +25,6 @@ type LoadbalancerProperties struct {
 }
 
 
-
 // GetName returns the Name field value
 // If the value is explicit nil, the zero value for string will be returned
 func (o *LoadbalancerProperties) GetName() *string {
@@ -66,8 +65,6 @@ func (o *LoadbalancerProperties) HasName() bool {
 
 	return false
 }
-
-
 
 // GetIp returns the Ip field value
 // If the value is explicit nil, the zero value for string will be returned
@@ -110,8 +107,6 @@ func (o *LoadbalancerProperties) HasIp() bool {
 	return false
 }
 
-
-
 // GetDhcp returns the Dhcp field value
 // If the value is explicit nil, the zero value for bool will be returned
 func (o *LoadbalancerProperties) GetDhcp() *bool {
@@ -153,27 +148,22 @@ func (o *LoadbalancerProperties) HasDhcp() bool {
 	return false
 }
 
-
 func (o LoadbalancerProperties) MarshalJSON() ([]byte, error) {
 	toSerialize := map[string]interface{}{}
 
 	if o.Name != nil {
 		toSerialize["name"] = o.Name
 	}
-	
 
 	if o.Ip != nil {
 		toSerialize["ip"] = o.Ip
 	}
-	
 
 	if o.Dhcp != nil {
 		toSerialize["dhcp"] = o.Dhcp
 	}
-	
 	return json.Marshal(toSerialize)
 }
-
 type NullableLoadbalancerProperties struct {
 	value *LoadbalancerProperties
 	isSet bool
