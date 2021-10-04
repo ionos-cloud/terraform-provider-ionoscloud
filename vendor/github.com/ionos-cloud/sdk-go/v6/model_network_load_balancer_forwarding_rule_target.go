@@ -1,7 +1,7 @@
 /*
  * CLOUD API
  *
- * An enterprise-grade Infrastructure is provided as a Service (IaaS) solution that can be managed through a browser-based \"Data Center Designer\" (DCD) tool or via an easy to use API.   The API allows you to perform a variety of management tasks such as spinning up additional servers, adding volumes, adjusting networking, and so forth. It is designed to allow users to leverage the same power and flexibility found within the DCD visual tool. Both tools are consistent with their concepts and lend well to making the experience smooth and intuitive.
+ * IONOS Enterprise-grade Infrastructure as a Service (IaaS) solutions can be managed through the Cloud API, in addition or as an alternative to the \"Data Center Designer\" (DCD) browser-based tool.    Both methods employ consistent concepts and features, deliver similar power and flexibility, and can be used to perform a multitude of management tasks, including adding servers, volumes, configuring networks, and so on.
  *
  * API version: 6.0-SDK.3
  */
@@ -24,7 +24,6 @@ type NetworkLoadBalancerForwardingRuleTarget struct {
 	Weight *int32 `json:"weight"`
 	HealthCheck *NetworkLoadBalancerForwardingRuleTargetHealthCheck `json:"healthCheck,omitempty"`
 }
-
 
 
 // GetIp returns the Ip field value
@@ -68,8 +67,6 @@ func (o *NetworkLoadBalancerForwardingRuleTarget) HasIp() bool {
 	return false
 }
 
-
-
 // GetPort returns the Port field value
 // If the value is explicit nil, the zero value for int32 will be returned
 func (o *NetworkLoadBalancerForwardingRuleTarget) GetPort() *int32 {
@@ -110,8 +107,6 @@ func (o *NetworkLoadBalancerForwardingRuleTarget) HasPort() bool {
 
 	return false
 }
-
-
 
 // GetWeight returns the Weight field value
 // If the value is explicit nil, the zero value for int32 will be returned
@@ -154,8 +149,6 @@ func (o *NetworkLoadBalancerForwardingRuleTarget) HasWeight() bool {
 	return false
 }
 
-
-
 // GetHealthCheck returns the HealthCheck field value
 // If the value is explicit nil, the zero value for NetworkLoadBalancerForwardingRuleTargetHealthCheck will be returned
 func (o *NetworkLoadBalancerForwardingRuleTarget) GetHealthCheck() *NetworkLoadBalancerForwardingRuleTargetHealthCheck {
@@ -197,32 +190,26 @@ func (o *NetworkLoadBalancerForwardingRuleTarget) HasHealthCheck() bool {
 	return false
 }
 
-
 func (o NetworkLoadBalancerForwardingRuleTarget) MarshalJSON() ([]byte, error) {
 	toSerialize := map[string]interface{}{}
 
 	if o.Ip != nil {
 		toSerialize["ip"] = o.Ip
 	}
-	
 
 	if o.Port != nil {
 		toSerialize["port"] = o.Port
 	}
-	
 
 	if o.Weight != nil {
 		toSerialize["weight"] = o.Weight
 	}
-	
 
 	if o.HealthCheck != nil {
 		toSerialize["healthCheck"] = o.HealthCheck
 	}
-	
 	return json.Marshal(toSerialize)
 }
-
 type NullableNetworkLoadBalancerForwardingRuleTarget struct {
 	value *NetworkLoadBalancerForwardingRuleTarget
 	isSet bool

@@ -48,7 +48,7 @@ resource "ionoscloud_server" "example" {
 - `datacenter_id` - (Required)[string] The ID of a Virtual Data Center.
 - `cores` - (Required)[integer] Number of server CPU cores.
 - `ram` - (Required)[integer] The amount of memory for the server in MB.
-- `image_name` - (Optional)[string] The name or ID of the image.
+- `image_name` - (Optional)[string] The name, ID or alias of the image. May also be a snapshot ID. It is required if `licence_type` is not provided. Attribute is immutable.
 - `availability_zone` - (Optional)[string] The availability zone in which the server should exist.
 - `licence_type` - (Optional)[string] Sets the OS type of the server.
 - `cpu_family` - (Optional)[string] Sets the CPU type. "AMD_OPTERON", "INTEL_XEON" or "INTEL_SKYLAKE".
@@ -63,6 +63,8 @@ resource "ionoscloud_server" "example" {
 - `ssh_key_path` - (Optional)[list] List of paths to files containing a public SSH key that will be injected into IonosCloud provided Linux images. Required for IonosCloud Linux images. Required if `image_password` is not provided.
 - `image_password` - (Optional)[string] Required if `ssh_key_path` is not provided.
 - `type` - (Optional)[string] server usages: ENTERPRISE or CUBE
+
+*note: image_name under volume level is deprecated, please use image_name under server level*
 
 ## Import
 

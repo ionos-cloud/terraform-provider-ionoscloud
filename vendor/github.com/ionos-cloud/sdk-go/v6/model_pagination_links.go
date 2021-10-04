@@ -1,7 +1,7 @@
 /*
  * CLOUD API
  *
- * An enterprise-grade Infrastructure is provided as a Service (IaaS) solution that can be managed through a browser-based \"Data Center Designer\" (DCD) tool or via an easy to use API.   The API allows you to perform a variety of management tasks such as spinning up additional servers, adding volumes, adjusting networking, and so forth. It is designed to allow users to leverage the same power and flexibility found within the DCD visual tool. Both tools are consistent with their concepts and lend well to making the experience smooth and intuitive.
+ * IONOS Enterprise-grade Infrastructure as a Service (IaaS) solutions can be managed through the Cloud API, in addition or as an alternative to the \"Data Center Designer\" (DCD) browser-based tool.    Both methods employ consistent concepts and features, deliver similar power and flexibility, and can be used to perform a multitude of management tasks, including adding servers, volumes, configuring networks, and so on.
  *
  * API version: 6.0-SDK.3
  */
@@ -23,7 +23,6 @@ type PaginationLinks struct {
 	// URL (with offset and limit parameters) of the next page; only present if offset + limit is less than the total number of elements
 	Next *string `json:"next,omitempty"`
 }
-
 
 
 // GetPrev returns the Prev field value
@@ -67,8 +66,6 @@ func (o *PaginationLinks) HasPrev() bool {
 	return false
 }
 
-
-
 // GetSelf returns the Self field value
 // If the value is explicit nil, the zero value for string will be returned
 func (o *PaginationLinks) GetSelf() *string {
@@ -109,8 +106,6 @@ func (o *PaginationLinks) HasSelf() bool {
 
 	return false
 }
-
-
 
 // GetNext returns the Next field value
 // If the value is explicit nil, the zero value for string will be returned
@@ -153,27 +148,22 @@ func (o *PaginationLinks) HasNext() bool {
 	return false
 }
 
-
 func (o PaginationLinks) MarshalJSON() ([]byte, error) {
 	toSerialize := map[string]interface{}{}
 
 	if o.Prev != nil {
 		toSerialize["prev"] = o.Prev
 	}
-	
 
 	if o.Self != nil {
 		toSerialize["self"] = o.Self
 	}
-	
 
 	if o.Next != nil {
 		toSerialize["next"] = o.Next
 	}
-	
 	return json.Marshal(toSerialize)
 }
-
 type NullablePaginationLinks struct {
 	value *PaginationLinks
 	isSet bool

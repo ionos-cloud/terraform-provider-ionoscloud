@@ -1,7 +1,7 @@
 /*
  * CLOUD API
  *
- * An enterprise-grade Infrastructure is provided as a Service (IaaS) solution that can be managed through a browser-based \"Data Center Designer\" (DCD) tool or via an easy to use API.   The API allows you to perform a variety of management tasks such as spinning up additional servers, adding volumes, adjusting networking, and so forth. It is designed to allow users to leverage the same power and flexibility found within the DCD visual tool. Both tools are consistent with their concepts and lend well to making the experience smooth and intuitive.
+ * IONOS Enterprise-grade Infrastructure as a Service (IaaS) solutions can be managed through the Cloud API, in addition or as an alternative to the \"Data Center Designer\" (DCD) browser-based tool.    Both methods employ consistent concepts and features, deliver similar power and flexibility, and can be used to perform a multitude of management tasks, including adding servers, volumes, configuring networks, and so on.
  *
  * API version: 6.0-SDK.3
  */
@@ -35,7 +35,6 @@ type NicProperties struct {
 	// The PCI slot number of the Nic.
 	PciSlot *int32 `json:"pciSlot,omitempty"`
 }
-
 
 
 // GetName returns the Name field value
@@ -79,8 +78,6 @@ func (o *NicProperties) HasName() bool {
 	return false
 }
 
-
-
 // GetMac returns the Mac field value
 // If the value is explicit nil, the zero value for string will be returned
 func (o *NicProperties) GetMac() *string {
@@ -121,8 +118,6 @@ func (o *NicProperties) HasMac() bool {
 
 	return false
 }
-
-
 
 // GetIps returns the Ips field value
 // If the value is explicit nil, the zero value for []string will be returned
@@ -165,8 +160,6 @@ func (o *NicProperties) HasIps() bool {
 	return false
 }
 
-
-
 // GetDhcp returns the Dhcp field value
 // If the value is explicit nil, the zero value for bool will be returned
 func (o *NicProperties) GetDhcp() *bool {
@@ -207,8 +200,6 @@ func (o *NicProperties) HasDhcp() bool {
 
 	return false
 }
-
-
 
 // GetLan returns the Lan field value
 // If the value is explicit nil, the zero value for int32 will be returned
@@ -251,8 +242,6 @@ func (o *NicProperties) HasLan() bool {
 	return false
 }
 
-
-
 // GetFirewallActive returns the FirewallActive field value
 // If the value is explicit nil, the zero value for bool will be returned
 func (o *NicProperties) GetFirewallActive() *bool {
@@ -293,8 +282,6 @@ func (o *NicProperties) HasFirewallActive() bool {
 
 	return false
 }
-
-
 
 // GetFirewallType returns the FirewallType field value
 // If the value is explicit nil, the zero value for string will be returned
@@ -337,8 +324,6 @@ func (o *NicProperties) HasFirewallType() bool {
 	return false
 }
 
-
-
 // GetDeviceNumber returns the DeviceNumber field value
 // If the value is explicit nil, the zero value for int32 will be returned
 func (o *NicProperties) GetDeviceNumber() *int32 {
@@ -379,8 +364,6 @@ func (o *NicProperties) HasDeviceNumber() bool {
 
 	return false
 }
-
-
 
 // GetPciSlot returns the PciSlot field value
 // If the value is explicit nil, the zero value for int32 will be returned
@@ -423,57 +406,46 @@ func (o *NicProperties) HasPciSlot() bool {
 	return false
 }
 
-
 func (o NicProperties) MarshalJSON() ([]byte, error) {
 	toSerialize := map[string]interface{}{}
 
 	if o.Name != nil {
 		toSerialize["name"] = o.Name
 	}
-	
 
 	if o.Mac != nil {
 		toSerialize["mac"] = o.Mac
 	}
-	
 
 	if o.Ips != nil {
 		toSerialize["ips"] = o.Ips
 	}
-	
 
 	if o.Dhcp != nil {
 		toSerialize["dhcp"] = o.Dhcp
 	}
-	
 
 	if o.Lan != nil {
 		toSerialize["lan"] = o.Lan
 	}
-	
 
 	if o.FirewallActive != nil {
 		toSerialize["firewallActive"] = o.FirewallActive
 	}
-	
 
 	if o.FirewallType != nil {
 		toSerialize["firewallType"] = o.FirewallType
 	}
-	
 
 	if o.DeviceNumber != nil {
 		toSerialize["deviceNumber"] = o.DeviceNumber
 	}
-	
 
 	if o.PciSlot != nil {
 		toSerialize["pciSlot"] = o.PciSlot
 	}
-	
 	return json.Marshal(toSerialize)
 }
-
 type NullableNicProperties struct {
 	value *NicProperties
 	isSet bool

@@ -1,7 +1,7 @@
 /*
  * CLOUD API
  *
- * An enterprise-grade Infrastructure is provided as a Service (IaaS) solution that can be managed through a browser-based \"Data Center Designer\" (DCD) tool or via an easy to use API.   The API allows you to perform a variety of management tasks such as spinning up additional servers, adding volumes, adjusting networking, and so forth. It is designed to allow users to leverage the same power and flexibility found within the DCD visual tool. Both tools are consistent with their concepts and lend well to making the experience smooth and intuitive.
+ * IONOS Enterprise-grade Infrastructure as a Service (IaaS) solutions can be managed through the Cloud API, in addition or as an alternative to the \"Data Center Designer\" (DCD) browser-based tool.    Both methods employ consistent concepts and features, deliver similar power and flexibility, and can be used to perform a multitude of management tasks, including adding servers, volumes, configuring networks, and so on.
  *
  * API version: 6.0-SDK.3
  */
@@ -30,7 +30,6 @@ type NatGatewayRuleProperties struct {
 	TargetSubnet *string `json:"targetSubnet,omitempty"`
 	TargetPortRange *TargetPortRange `json:"targetPortRange,omitempty"`
 }
-
 
 
 // GetName returns the Name field value
@@ -74,8 +73,6 @@ func (o *NatGatewayRuleProperties) HasName() bool {
 	return false
 }
 
-
-
 // GetType returns the Type field value
 // If the value is explicit nil, the zero value for NatGatewayRuleType will be returned
 func (o *NatGatewayRuleProperties) GetType() *NatGatewayRuleType {
@@ -116,8 +113,6 @@ func (o *NatGatewayRuleProperties) HasType() bool {
 
 	return false
 }
-
-
 
 // GetProtocol returns the Protocol field value
 // If the value is explicit nil, the zero value for NatGatewayRuleProtocol will be returned
@@ -160,8 +155,6 @@ func (o *NatGatewayRuleProperties) HasProtocol() bool {
 	return false
 }
 
-
-
 // GetSourceSubnet returns the SourceSubnet field value
 // If the value is explicit nil, the zero value for string will be returned
 func (o *NatGatewayRuleProperties) GetSourceSubnet() *string {
@@ -202,8 +195,6 @@ func (o *NatGatewayRuleProperties) HasSourceSubnet() bool {
 
 	return false
 }
-
-
 
 // GetPublicIp returns the PublicIp field value
 // If the value is explicit nil, the zero value for string will be returned
@@ -246,8 +237,6 @@ func (o *NatGatewayRuleProperties) HasPublicIp() bool {
 	return false
 }
 
-
-
 // GetTargetSubnet returns the TargetSubnet field value
 // If the value is explicit nil, the zero value for string will be returned
 func (o *NatGatewayRuleProperties) GetTargetSubnet() *string {
@@ -288,8 +277,6 @@ func (o *NatGatewayRuleProperties) HasTargetSubnet() bool {
 
 	return false
 }
-
-
 
 // GetTargetPortRange returns the TargetPortRange field value
 // If the value is explicit nil, the zero value for TargetPortRange will be returned
@@ -332,47 +319,38 @@ func (o *NatGatewayRuleProperties) HasTargetPortRange() bool {
 	return false
 }
 
-
 func (o NatGatewayRuleProperties) MarshalJSON() ([]byte, error) {
 	toSerialize := map[string]interface{}{}
 
 	if o.Name != nil {
 		toSerialize["name"] = o.Name
 	}
-	
 
 	if o.Type != nil {
 		toSerialize["type"] = o.Type
 	}
-	
 
 	if o.Protocol != nil {
 		toSerialize["protocol"] = o.Protocol
 	}
-	
 
 	if o.SourceSubnet != nil {
 		toSerialize["sourceSubnet"] = o.SourceSubnet
 	}
-	
 
 	if o.PublicIp != nil {
 		toSerialize["publicIp"] = o.PublicIp
 	}
-	
 
 	if o.TargetSubnet != nil {
 		toSerialize["targetSubnet"] = o.TargetSubnet
 	}
-	
 
 	if o.TargetPortRange != nil {
 		toSerialize["targetPortRange"] = o.TargetPortRange
 	}
-	
 	return json.Marshal(toSerialize)
 }
-
 type NullableNatGatewayRuleProperties struct {
 	value *NatGatewayRuleProperties
 	isSet bool

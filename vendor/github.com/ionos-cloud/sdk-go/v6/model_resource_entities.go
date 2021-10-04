@@ -1,7 +1,7 @@
 /*
  * CLOUD API
  *
- * An enterprise-grade Infrastructure is provided as a Service (IaaS) solution that can be managed through a browser-based \"Data Center Designer\" (DCD) tool or via an easy to use API.   The API allows you to perform a variety of management tasks such as spinning up additional servers, adding volumes, adjusting networking, and so forth. It is designed to allow users to leverage the same power and flexibility found within the DCD visual tool. Both tools are consistent with their concepts and lend well to making the experience smooth and intuitive.
+ * IONOS Enterprise-grade Infrastructure as a Service (IaaS) solutions can be managed through the Cloud API, in addition or as an alternative to the \"Data Center Designer\" (DCD) browser-based tool.    Both methods employ consistent concepts and features, deliver similar power and flexibility, and can be used to perform a multitude of management tasks, including adding servers, volumes, configuring networks, and so on.
  *
  * API version: 6.0-SDK.3
  */
@@ -18,7 +18,6 @@ import (
 type ResourceEntities struct {
 	Groups *ResourceGroups `json:"groups,omitempty"`
 }
-
 
 
 // GetGroups returns the Groups field value
@@ -62,17 +61,14 @@ func (o *ResourceEntities) HasGroups() bool {
 	return false
 }
 
-
 func (o ResourceEntities) MarshalJSON() ([]byte, error) {
 	toSerialize := map[string]interface{}{}
 
 	if o.Groups != nil {
 		toSerialize["groups"] = o.Groups
 	}
-	
 	return json.Marshal(toSerialize)
 }
-
 type NullableResourceEntities struct {
 	value *ResourceEntities
 	isSet bool

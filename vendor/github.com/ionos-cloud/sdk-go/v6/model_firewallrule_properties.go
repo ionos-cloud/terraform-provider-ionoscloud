@@ -1,7 +1,7 @@
 /*
  * CLOUD API
  *
- * An enterprise-grade Infrastructure is provided as a Service (IaaS) solution that can be managed through a browser-based \"Data Center Designer\" (DCD) tool or via an easy to use API.   The API allows you to perform a variety of management tasks such as spinning up additional servers, adding volumes, adjusting networking, and so forth. It is designed to allow users to leverage the same power and flexibility found within the DCD visual tool. Both tools are consistent with their concepts and lend well to making the experience smooth and intuitive.
+ * IONOS Enterprise-grade Infrastructure as a Service (IaaS) solutions can be managed through the Cloud API, in addition or as an alternative to the \"Data Center Designer\" (DCD) browser-based tool.    Both methods employ consistent concepts and features, deliver similar power and flexibility, and can be used to perform a multitude of management tasks, including adding servers, volumes, configuring networks, and so on.
  *
  * API version: 6.0-SDK.3
  */
@@ -37,7 +37,6 @@ type FirewallruleProperties struct {
 	// The type of firewall rule. If is not specified, it will take the default value INGRESS
 	Type *string `json:"type,omitempty"`
 }
-
 
 
 // GetName returns the Name field value
@@ -81,8 +80,6 @@ func (o *FirewallruleProperties) HasName() bool {
 	return false
 }
 
-
-
 // GetProtocol returns the Protocol field value
 // If the value is explicit nil, the zero value for string will be returned
 func (o *FirewallruleProperties) GetProtocol() *string {
@@ -123,8 +120,6 @@ func (o *FirewallruleProperties) HasProtocol() bool {
 
 	return false
 }
-
-
 
 // GetSourceMac returns the SourceMac field value
 // If the value is explicit nil, the zero value for string will be returned
@@ -167,8 +162,6 @@ func (o *FirewallruleProperties) HasSourceMac() bool {
 	return false
 }
 
-
-
 // GetSourceIp returns the SourceIp field value
 // If the value is explicit nil, the zero value for string will be returned
 func (o *FirewallruleProperties) GetSourceIp() *string {
@@ -209,8 +202,6 @@ func (o *FirewallruleProperties) HasSourceIp() bool {
 
 	return false
 }
-
-
 
 // GetTargetIp returns the TargetIp field value
 // If the value is explicit nil, the zero value for string will be returned
@@ -253,8 +244,6 @@ func (o *FirewallruleProperties) HasTargetIp() bool {
 	return false
 }
 
-
-
 // GetIcmpCode returns the IcmpCode field value
 // If the value is explicit nil, the zero value for int32 will be returned
 func (o *FirewallruleProperties) GetIcmpCode() *int32 {
@@ -295,8 +284,6 @@ func (o *FirewallruleProperties) HasIcmpCode() bool {
 
 	return false
 }
-
-
 
 // GetIcmpType returns the IcmpType field value
 // If the value is explicit nil, the zero value for int32 will be returned
@@ -339,8 +326,6 @@ func (o *FirewallruleProperties) HasIcmpType() bool {
 	return false
 }
 
-
-
 // GetPortRangeStart returns the PortRangeStart field value
 // If the value is explicit nil, the zero value for int32 will be returned
 func (o *FirewallruleProperties) GetPortRangeStart() *int32 {
@@ -381,8 +366,6 @@ func (o *FirewallruleProperties) HasPortRangeStart() bool {
 
 	return false
 }
-
-
 
 // GetPortRangeEnd returns the PortRangeEnd field value
 // If the value is explicit nil, the zero value for int32 will be returned
@@ -425,8 +408,6 @@ func (o *FirewallruleProperties) HasPortRangeEnd() bool {
 	return false
 }
 
-
-
 // GetType returns the Type field value
 // If the value is explicit nil, the zero value for string will be returned
 func (o *FirewallruleProperties) GetType() *string {
@@ -468,62 +449,50 @@ func (o *FirewallruleProperties) HasType() bool {
 	return false
 }
 
-
 func (o FirewallruleProperties) MarshalJSON() ([]byte, error) {
 	toSerialize := map[string]interface{}{}
 
 	if o.Name != nil {
 		toSerialize["name"] = o.Name
 	}
-	
 
 	if o.Protocol != nil {
 		toSerialize["protocol"] = o.Protocol
 	}
-	
 
 	if o.SourceMac != nil {
 		toSerialize["sourceMac"] = o.SourceMac
 	}
-	
 
 	if o.SourceIp != nil {
 		toSerialize["sourceIp"] = o.SourceIp
 	}
-	
 
 	if o.TargetIp != nil {
 		toSerialize["targetIp"] = o.TargetIp
 	}
-	
 
 	if o.IcmpCode != nil {
 		toSerialize["icmpCode"] = o.IcmpCode
 	}
-	
 
 	if o.IcmpType != nil {
 		toSerialize["icmpType"] = o.IcmpType
 	}
-	
 
 	if o.PortRangeStart != nil {
 		toSerialize["portRangeStart"] = o.PortRangeStart
 	}
-	
 
 	if o.PortRangeEnd != nil {
 		toSerialize["portRangeEnd"] = o.PortRangeEnd
 	}
-	
 
 	if o.Type != nil {
 		toSerialize["type"] = o.Type
 	}
-	
 	return json.Marshal(toSerialize)
 }
-
 type NullableFirewallruleProperties struct {
 	value *FirewallruleProperties
 	isSet bool

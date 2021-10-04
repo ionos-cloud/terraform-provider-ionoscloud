@@ -1,7 +1,7 @@
 /*
  * CLOUD API
  *
- * An enterprise-grade Infrastructure is provided as a Service (IaaS) solution that can be managed through a browser-based \"Data Center Designer\" (DCD) tool or via an easy to use API.   The API allows you to perform a variety of management tasks such as spinning up additional servers, adding volumes, adjusting networking, and so forth. It is designed to allow users to leverage the same power and flexibility found within the DCD visual tool. Both tools are consistent with their concepts and lend well to making the experience smooth and intuitive.
+ * IONOS Enterprise-grade Infrastructure as a Service (IaaS) solutions can be managed through the Cloud API, in addition or as an alternative to the \"Data Center Designer\" (DCD) browser-based tool.    Both methods employ consistent concepts and features, deliver similar power and flexibility, and can be used to perform a multitude of management tasks, including adding servers, volumes, configuring networks, and so on.
  *
  * API version: 6.0-SDK.3
  */
@@ -51,7 +51,6 @@ type SnapshotProperties struct {
 }
 
 
-
 // GetName returns the Name field value
 // If the value is explicit nil, the zero value for string will be returned
 func (o *SnapshotProperties) GetName() *string {
@@ -92,8 +91,6 @@ func (o *SnapshotProperties) HasName() bool {
 
 	return false
 }
-
-
 
 // GetDescription returns the Description field value
 // If the value is explicit nil, the zero value for string will be returned
@@ -136,8 +133,6 @@ func (o *SnapshotProperties) HasDescription() bool {
 	return false
 }
 
-
-
 // GetLocation returns the Location field value
 // If the value is explicit nil, the zero value for string will be returned
 func (o *SnapshotProperties) GetLocation() *string {
@@ -178,8 +173,6 @@ func (o *SnapshotProperties) HasLocation() bool {
 
 	return false
 }
-
-
 
 // GetSize returns the Size field value
 // If the value is explicit nil, the zero value for float32 will be returned
@@ -222,8 +215,6 @@ func (o *SnapshotProperties) HasSize() bool {
 	return false
 }
 
-
-
 // GetSecAuthProtection returns the SecAuthProtection field value
 // If the value is explicit nil, the zero value for bool will be returned
 func (o *SnapshotProperties) GetSecAuthProtection() *bool {
@@ -264,8 +255,6 @@ func (o *SnapshotProperties) HasSecAuthProtection() bool {
 
 	return false
 }
-
-
 
 // GetCpuHotPlug returns the CpuHotPlug field value
 // If the value is explicit nil, the zero value for bool will be returned
@@ -308,8 +297,6 @@ func (o *SnapshotProperties) HasCpuHotPlug() bool {
 	return false
 }
 
-
-
 // GetCpuHotUnplug returns the CpuHotUnplug field value
 // If the value is explicit nil, the zero value for bool will be returned
 func (o *SnapshotProperties) GetCpuHotUnplug() *bool {
@@ -350,8 +337,6 @@ func (o *SnapshotProperties) HasCpuHotUnplug() bool {
 
 	return false
 }
-
-
 
 // GetRamHotPlug returns the RamHotPlug field value
 // If the value is explicit nil, the zero value for bool will be returned
@@ -394,8 +379,6 @@ func (o *SnapshotProperties) HasRamHotPlug() bool {
 	return false
 }
 
-
-
 // GetRamHotUnplug returns the RamHotUnplug field value
 // If the value is explicit nil, the zero value for bool will be returned
 func (o *SnapshotProperties) GetRamHotUnplug() *bool {
@@ -436,8 +419,6 @@ func (o *SnapshotProperties) HasRamHotUnplug() bool {
 
 	return false
 }
-
-
 
 // GetNicHotPlug returns the NicHotPlug field value
 // If the value is explicit nil, the zero value for bool will be returned
@@ -480,8 +461,6 @@ func (o *SnapshotProperties) HasNicHotPlug() bool {
 	return false
 }
 
-
-
 // GetNicHotUnplug returns the NicHotUnplug field value
 // If the value is explicit nil, the zero value for bool will be returned
 func (o *SnapshotProperties) GetNicHotUnplug() *bool {
@@ -522,8 +501,6 @@ func (o *SnapshotProperties) HasNicHotUnplug() bool {
 
 	return false
 }
-
-
 
 // GetDiscVirtioHotPlug returns the DiscVirtioHotPlug field value
 // If the value is explicit nil, the zero value for bool will be returned
@@ -566,8 +543,6 @@ func (o *SnapshotProperties) HasDiscVirtioHotPlug() bool {
 	return false
 }
 
-
-
 // GetDiscVirtioHotUnplug returns the DiscVirtioHotUnplug field value
 // If the value is explicit nil, the zero value for bool will be returned
 func (o *SnapshotProperties) GetDiscVirtioHotUnplug() *bool {
@@ -608,8 +583,6 @@ func (o *SnapshotProperties) HasDiscVirtioHotUnplug() bool {
 
 	return false
 }
-
-
 
 // GetDiscScsiHotPlug returns the DiscScsiHotPlug field value
 // If the value is explicit nil, the zero value for bool will be returned
@@ -652,8 +625,6 @@ func (o *SnapshotProperties) HasDiscScsiHotPlug() bool {
 	return false
 }
 
-
-
 // GetDiscScsiHotUnplug returns the DiscScsiHotUnplug field value
 // If the value is explicit nil, the zero value for bool will be returned
 func (o *SnapshotProperties) GetDiscScsiHotUnplug() *bool {
@@ -694,8 +665,6 @@ func (o *SnapshotProperties) HasDiscScsiHotUnplug() bool {
 
 	return false
 }
-
-
 
 // GetLicenceType returns the LicenceType field value
 // If the value is explicit nil, the zero value for string will be returned
@@ -738,92 +707,74 @@ func (o *SnapshotProperties) HasLicenceType() bool {
 	return false
 }
 
-
 func (o SnapshotProperties) MarshalJSON() ([]byte, error) {
 	toSerialize := map[string]interface{}{}
 
 	if o.Name != nil {
 		toSerialize["name"] = o.Name
 	}
-	
 
 	if o.Description != nil {
 		toSerialize["description"] = o.Description
 	}
-	
 
 	if o.Location != nil {
 		toSerialize["location"] = o.Location
 	}
-	
 
 	if o.Size != nil {
 		toSerialize["size"] = o.Size
 	}
-	
 
 	if o.SecAuthProtection != nil {
 		toSerialize["secAuthProtection"] = o.SecAuthProtection
 	}
-	
 
 	if o.CpuHotPlug != nil {
 		toSerialize["cpuHotPlug"] = o.CpuHotPlug
 	}
-	
 
 	if o.CpuHotUnplug != nil {
 		toSerialize["cpuHotUnplug"] = o.CpuHotUnplug
 	}
-	
 
 	if o.RamHotPlug != nil {
 		toSerialize["ramHotPlug"] = o.RamHotPlug
 	}
-	
 
 	if o.RamHotUnplug != nil {
 		toSerialize["ramHotUnplug"] = o.RamHotUnplug
 	}
-	
 
 	if o.NicHotPlug != nil {
 		toSerialize["nicHotPlug"] = o.NicHotPlug
 	}
-	
 
 	if o.NicHotUnplug != nil {
 		toSerialize["nicHotUnplug"] = o.NicHotUnplug
 	}
-	
 
 	if o.DiscVirtioHotPlug != nil {
 		toSerialize["discVirtioHotPlug"] = o.DiscVirtioHotPlug
 	}
-	
 
 	if o.DiscVirtioHotUnplug != nil {
 		toSerialize["discVirtioHotUnplug"] = o.DiscVirtioHotUnplug
 	}
-	
 
 	if o.DiscScsiHotPlug != nil {
 		toSerialize["discScsiHotPlug"] = o.DiscScsiHotPlug
 	}
-	
 
 	if o.DiscScsiHotUnplug != nil {
 		toSerialize["discScsiHotUnplug"] = o.DiscScsiHotUnplug
 	}
-	
 
 	if o.LicenceType != nil {
 		toSerialize["licenceType"] = o.LicenceType
 	}
-	
 	return json.Marshal(toSerialize)
 }
-
 type NullableSnapshotProperties struct {
 	value *SnapshotProperties
 	isSet bool

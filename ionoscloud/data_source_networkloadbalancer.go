@@ -130,6 +130,10 @@ func dataSourceNetworkLoadBalancerRead(d *schema.ResourceData, meta interface{})
 		return errors.New("network loadbalancer not found")
 	}
 
+	if err := d.Set("id", *networkLoadBalancer.Id); err != nil {
+		return err
+	}
+
 	if err = setNetworkLoadBalancerData(d, &networkLoadBalancer); err != nil {
 		return err
 	}
@@ -141,9 +145,6 @@ func setNetworkLoadBalancerData(d *schema.ResourceData, networkLoadBalancer *ion
 
 	if networkLoadBalancer.Id != nil {
 		d.SetId(*networkLoadBalancer.Id)
-		if err := d.Set("id", *networkLoadBalancer.Id); err != nil {
-			return err
-		}
 	}
 
 	if networkLoadBalancer.Properties != nil {

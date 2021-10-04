@@ -1,7 +1,7 @@
 /*
  * CLOUD API
  *
- * An enterprise-grade Infrastructure is provided as a Service (IaaS) solution that can be managed through a browser-based \"Data Center Designer\" (DCD) tool or via an easy to use API.   The API allows you to perform a variety of management tasks such as spinning up additional servers, adding volumes, adjusting networking, and so forth. It is designed to allow users to leverage the same power and flexibility found within the DCD visual tool. Both tools are consistent with their concepts and lend well to making the experience smooth and intuitive.
+ * IONOS Enterprise-grade Infrastructure as a Service (IaaS) solutions can be managed through the Cloud API, in addition or as an alternative to the \"Data Center Designer\" (DCD) browser-based tool.    Both methods employ consistent concepts and features, deliver similar power and flexibility, and can be used to perform a multitude of management tasks, including adding servers, volumes, configuring networks, and so on.
  *
  * API version: 6.0-SDK.3
  */
@@ -58,7 +58,7 @@ func (r ApiDatacentersLansDeleteRequest) Execute() (*APIResponse, error) {
  * DatacentersLansDelete Delete a Lan.
  * Removes the specific LAN.
  * @param ctx _context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
- * @param datacenterId The unique ID of the datacenter
+ * @param datacenterId The unique ID of the data center.
  * @param lanId The unique ID of the LAN
  * @return ApiDatacentersLansDeleteRequest
  */
@@ -212,7 +212,7 @@ func (r ApiDatacentersLansFindByIdRequest) Execute() (Lan, *APIResponse, error) 
  * DatacentersLansFindById Retrieve a Lan
  * Retrieves the attributes of a given LAN.
  * @param ctx _context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
- * @param datacenterId The unique ID of the datacenter
+ * @param datacenterId The unique ID of the data center.
  * @param lanId The unique ID of the LAN
  * @return ApiDatacentersLansFindByIdRequest
  */
@@ -387,7 +387,7 @@ func (r ApiDatacentersLansGetRequest) Execute() (Lans, *APIResponse, error) {
  * DatacentersLansGet List Lans
  * Retrieve a list of LANs within the datacenter.
  * @param ctx _context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
- * @param datacenterId The unique ID of the datacenter
+ * @param datacenterId The unique ID of the data center.
  * @return ApiDatacentersLansGetRequest
  */
 func (a *LansApiService) DatacentersLansGet(ctx _context.Context, datacenterId string) ApiDatacentersLansGetRequest {
@@ -557,7 +557,7 @@ func (r ApiDatacentersLansNicsFindByIdRequest) Execute() (Nic, *APIResponse, err
  * DatacentersLansNicsFindById Retrieve a nic attached to lan
  * This will retrieve the properties of an attached network interface.
  * @param ctx _context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
- * @param datacenterId The unique ID of the datacenter
+ * @param datacenterId The unique ID of the data center.
  * @param lanId The unique ID of the LAN
  * @param nicId The unique ID of the NIC
  * @return ApiDatacentersLansNicsFindByIdRequest
@@ -736,7 +736,7 @@ func (r ApiDatacentersLansNicsGetRequest) Execute() (LanNics, *APIResponse, erro
  * DatacentersLansNicsGet List Lan Members 
  * You can retrieve a list of nics attached to a LAN.
  * @param ctx _context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
- * @param datacenterId The unique ID of the datacenter
+ * @param datacenterId The unique ID of the data center.
  * @param lanId The unique ID of the LAN
  * @return ApiDatacentersLansNicsGetRequest
  */
@@ -913,7 +913,7 @@ func (r ApiDatacentersLansNicsPostRequest) Execute() (Nic, *APIResponse, error) 
  * DatacentersLansNicsPost Attach a nic
  * This will attach a pre-existing nic to a LAN.
  * @param ctx _context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
- * @param datacenterId The unique ID of the datacenter
+ * @param datacenterId The unique ID of the data center.
  * @param lanId The unique ID of the LAN
  * @return ApiDatacentersLansNicsPostRequest
  */
@@ -1089,7 +1089,7 @@ func (r ApiDatacentersLansPatchRequest) Execute() (Lan, *APIResponse, error) {
  * DatacentersLansPatch Partially modify a Lan
  * You can use update attributes of a resource.
  * @param ctx _context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
- * @param datacenterId The unique ID of the datacenter
+ * @param datacenterId The unique ID of the data center.
  * @param lanId The unique ID of the LAN
  * @return ApiDatacentersLansPatchRequest
  */
@@ -1264,7 +1264,7 @@ func (r ApiDatacentersLansPostRequest) Execute() (LanPost, *APIResponse, error) 
  * DatacentersLansPost Create a Lan
  * Creates a LAN within the datacenter.
  * @param ctx _context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
- * @param datacenterId The unique ID of the datacenter
+ * @param datacenterId The unique ID of the data center.
  * @return ApiDatacentersLansPostRequest
  */
 func (a *LansApiService) DatacentersLansPost(ctx _context.Context, datacenterId string) ApiDatacentersLansPostRequest {
@@ -1437,7 +1437,7 @@ func (r ApiDatacentersLansPutRequest) Execute() (Lan, *APIResponse, error) {
  * DatacentersLansPut Modify a Lan
  * You can use update attributes of a resource.
  * @param ctx _context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
- * @param datacenterId The unique ID of the datacenter
+ * @param datacenterId The unique ID of the data center.
  * @param lanId The unique ID of the LAN
  * @return ApiDatacentersLansPutRequest
  */

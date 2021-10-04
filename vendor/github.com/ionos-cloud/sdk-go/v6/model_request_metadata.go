@@ -1,7 +1,7 @@
 /*
  * CLOUD API
  *
- * An enterprise-grade Infrastructure is provided as a Service (IaaS) solution that can be managed through a browser-based \"Data Center Designer\" (DCD) tool or via an easy to use API.   The API allows you to perform a variety of management tasks such as spinning up additional servers, adding volumes, adjusting networking, and so forth. It is designed to allow users to leverage the same power and flexibility found within the DCD visual tool. Both tools are consistent with their concepts and lend well to making the experience smooth and intuitive.
+ * IONOS Enterprise-grade Infrastructure as a Service (IaaS) solutions can be managed through the Cloud API, in addition or as an alternative to the \"Data Center Designer\" (DCD) browser-based tool.    Both methods employ consistent concepts and features, deliver similar power and flexibility, and can be used to perform a multitude of management tasks, including adding servers, volumes, configuring networks, and so on.
  *
  * API version: 6.0-SDK.3
  */
@@ -25,7 +25,6 @@ type RequestMetadata struct {
 	Etag *string `json:"etag,omitempty"`
 	RequestStatus *RequestStatus `json:"requestStatus,omitempty"`
 }
-
 
 
 // GetCreatedDate returns the CreatedDate field value
@@ -75,8 +74,6 @@ func (o *RequestMetadata) HasCreatedDate() bool {
 	return false
 }
 
-
-
 // GetCreatedBy returns the CreatedBy field value
 // If the value is explicit nil, the zero value for string will be returned
 func (o *RequestMetadata) GetCreatedBy() *string {
@@ -117,8 +114,6 @@ func (o *RequestMetadata) HasCreatedBy() bool {
 
 	return false
 }
-
-
 
 // GetEtag returns the Etag field value
 // If the value is explicit nil, the zero value for string will be returned
@@ -161,8 +156,6 @@ func (o *RequestMetadata) HasEtag() bool {
 	return false
 }
 
-
-
 // GetRequestStatus returns the RequestStatus field value
 // If the value is explicit nil, the zero value for RequestStatus will be returned
 func (o *RequestMetadata) GetRequestStatus() *RequestStatus {
@@ -204,32 +197,26 @@ func (o *RequestMetadata) HasRequestStatus() bool {
 	return false
 }
 
-
 func (o RequestMetadata) MarshalJSON() ([]byte, error) {
 	toSerialize := map[string]interface{}{}
 
 	if o.CreatedDate != nil {
 		toSerialize["createdDate"] = o.CreatedDate
 	}
-	
 
 	if o.CreatedBy != nil {
 		toSerialize["createdBy"] = o.CreatedBy
 	}
-	
 
 	if o.Etag != nil {
 		toSerialize["etag"] = o.Etag
 	}
-	
 
 	if o.RequestStatus != nil {
 		toSerialize["requestStatus"] = o.RequestStatus
 	}
-	
 	return json.Marshal(toSerialize)
 }
-
 type NullableRequestMetadata struct {
 	value *RequestMetadata
 	isSet bool

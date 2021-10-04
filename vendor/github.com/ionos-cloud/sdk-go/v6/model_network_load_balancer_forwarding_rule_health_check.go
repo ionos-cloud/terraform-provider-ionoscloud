@@ -1,7 +1,7 @@
 /*
  * CLOUD API
  *
- * An enterprise-grade Infrastructure is provided as a Service (IaaS) solution that can be managed through a browser-based \"Data Center Designer\" (DCD) tool or via an easy to use API.   The API allows you to perform a variety of management tasks such as spinning up additional servers, adding volumes, adjusting networking, and so forth. It is designed to allow users to leverage the same power and flexibility found within the DCD visual tool. Both tools are consistent with their concepts and lend well to making the experience smooth and intuitive.
+ * IONOS Enterprise-grade Infrastructure as a Service (IaaS) solutions can be managed through the Cloud API, in addition or as an alternative to the \"Data Center Designer\" (DCD) browser-based tool.    Both methods employ consistent concepts and features, deliver similar power and flexibility, and can be used to perform a multitude of management tasks, including adding servers, volumes, configuring networks, and so on.
  *
  * API version: 6.0-SDK.3
  */
@@ -25,7 +25,6 @@ type NetworkLoadBalancerForwardingRuleHealthCheck struct {
 	// Retries specifies the number of retries to perform on a target VM after a connection failure. If unset, the default value of 3 will be used. (valid range: [0, 65535])
 	Retries *int32 `json:"retries,omitempty"`
 }
-
 
 
 // GetClientTimeout returns the ClientTimeout field value
@@ -69,8 +68,6 @@ func (o *NetworkLoadBalancerForwardingRuleHealthCheck) HasClientTimeout() bool {
 	return false
 }
 
-
-
 // GetConnectTimeout returns the ConnectTimeout field value
 // If the value is explicit nil, the zero value for int32 will be returned
 func (o *NetworkLoadBalancerForwardingRuleHealthCheck) GetConnectTimeout() *int32 {
@@ -111,8 +108,6 @@ func (o *NetworkLoadBalancerForwardingRuleHealthCheck) HasConnectTimeout() bool 
 
 	return false
 }
-
-
 
 // GetTargetTimeout returns the TargetTimeout field value
 // If the value is explicit nil, the zero value for int32 will be returned
@@ -155,8 +150,6 @@ func (o *NetworkLoadBalancerForwardingRuleHealthCheck) HasTargetTimeout() bool {
 	return false
 }
 
-
-
 // GetRetries returns the Retries field value
 // If the value is explicit nil, the zero value for int32 will be returned
 func (o *NetworkLoadBalancerForwardingRuleHealthCheck) GetRetries() *int32 {
@@ -198,32 +191,26 @@ func (o *NetworkLoadBalancerForwardingRuleHealthCheck) HasRetries() bool {
 	return false
 }
 
-
 func (o NetworkLoadBalancerForwardingRuleHealthCheck) MarshalJSON() ([]byte, error) {
 	toSerialize := map[string]interface{}{}
 
 	if o.ClientTimeout != nil {
 		toSerialize["clientTimeout"] = o.ClientTimeout
 	}
-	
 
 	if o.ConnectTimeout != nil {
 		toSerialize["connectTimeout"] = o.ConnectTimeout
 	}
-	
 
 	if o.TargetTimeout != nil {
 		toSerialize["targetTimeout"] = o.TargetTimeout
 	}
-	
 
 	if o.Retries != nil {
 		toSerialize["retries"] = o.Retries
 	}
-	
 	return json.Marshal(toSerialize)
 }
-
 type NullableNetworkLoadBalancerForwardingRuleHealthCheck struct {
 	value *NetworkLoadBalancerForwardingRuleHealthCheck
 	isSet bool

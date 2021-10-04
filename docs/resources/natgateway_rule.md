@@ -42,3 +42,11 @@ resource "ionoscloud_natgateway_rule" "example" {
     - `end` - (Optional)[int] Target port range end associated with the NAT gateway rule.
 - `datacenter_id` - (Required)[string] A Datacenter's UUID.
 - `natgateway_id` - (Required)[string] Nat Gateway's UUID.
+
+## Import
+
+A Nat Gateway Rule resource can be imported using its `resource id`, the `datacenter id` and the `natgateway id , e.g.
+
+```shell
+terraform import ionoscloud_natgateway_rule.my_natgateway_rule {datacenter uuid}/{nat gateway uuid}/{nat gateway rule uuid}
+```

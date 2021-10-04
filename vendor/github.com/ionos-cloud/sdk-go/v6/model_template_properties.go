@@ -1,7 +1,7 @@
 /*
  * CLOUD API
  *
- * An enterprise-grade Infrastructure is provided as a Service (IaaS) solution that can be managed through a browser-based \"Data Center Designer\" (DCD) tool or via an easy to use API.   The API allows you to perform a variety of management tasks such as spinning up additional servers, adding volumes, adjusting networking, and so forth. It is designed to allow users to leverage the same power and flexibility found within the DCD visual tool. Both tools are consistent with their concepts and lend well to making the experience smooth and intuitive.
+ * IONOS Enterprise-grade Infrastructure as a Service (IaaS) solutions can be managed through the Cloud API, in addition or as an alternative to the \"Data Center Designer\" (DCD) browser-based tool.    Both methods employ consistent concepts and features, deliver similar power and flexibility, and can be used to perform a multitude of management tasks, including adding servers, volumes, configuring networks, and so on.
  *
  * API version: 6.0-SDK.3
  */
@@ -25,7 +25,6 @@ type TemplateProperties struct {
 	// The storage size in GB
 	StorageSize *float32 `json:"storageSize"`
 }
-
 
 
 // GetName returns the Name field value
@@ -69,8 +68,6 @@ func (o *TemplateProperties) HasName() bool {
 	return false
 }
 
-
-
 // GetCores returns the Cores field value
 // If the value is explicit nil, the zero value for float32 will be returned
 func (o *TemplateProperties) GetCores() *float32 {
@@ -111,8 +108,6 @@ func (o *TemplateProperties) HasCores() bool {
 
 	return false
 }
-
-
 
 // GetRam returns the Ram field value
 // If the value is explicit nil, the zero value for float32 will be returned
@@ -155,8 +150,6 @@ func (o *TemplateProperties) HasRam() bool {
 	return false
 }
 
-
-
 // GetStorageSize returns the StorageSize field value
 // If the value is explicit nil, the zero value for float32 will be returned
 func (o *TemplateProperties) GetStorageSize() *float32 {
@@ -198,32 +191,26 @@ func (o *TemplateProperties) HasStorageSize() bool {
 	return false
 }
 
-
 func (o TemplateProperties) MarshalJSON() ([]byte, error) {
 	toSerialize := map[string]interface{}{}
 
 	if o.Name != nil {
 		toSerialize["name"] = o.Name
 	}
-	
 
 	if o.Cores != nil {
 		toSerialize["cores"] = o.Cores
 	}
-	
 
 	if o.Ram != nil {
 		toSerialize["ram"] = o.Ram
 	}
-	
 
 	if o.StorageSize != nil {
 		toSerialize["storageSize"] = o.StorageSize
 	}
-	
 	return json.Marshal(toSerialize)
 }
-
 type NullableTemplateProperties struct {
 	value *TemplateProperties
 	isSet bool

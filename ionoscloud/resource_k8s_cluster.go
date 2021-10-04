@@ -92,19 +92,19 @@ func resourcek8sCluster() *schema.Resource {
 					Type: schema.TypeString,
 				},
 			},
-			"public": {
-				Type: schema.TypeBool,
-				Description: "The indicator if the cluster is public or private. Be aware that setting it to false is " +
-					"currently in beta phase.",
-				Optional: true,
-				Default:  true,
-			},
-			"gateway_ip": {
-				Type: schema.TypeString,
-				Description: "The IP address of the gateway used by the cluster. This is mandatory when `public` is set " +
-					"to `false` and should not be provided otherwise.",
-				Optional: true,
-			},
+			//"public": {
+			//	Type: schema.TypeBool,
+			//	Description: "The indicator if the cluster is public or private. Be aware that setting it to false is " +
+			//		"currently in beta phase.",
+			//	Optional: true,
+			//	Default:  true,
+			//},
+			//"gateway_ip": {
+			//	Type: schema.TypeString,
+			//	Description: "The IP address of the gateway used by the cluster. This is mandatory when `public` is set " +
+			//		"to `false` and should not be provided otherwise.",
+			//	Optional: true,
+			//},
 			"api_subnet_allow_list": {
 				Type: schema.TypeList,
 				Description: "Access to the K8s API server is restricted to these CIDRs. Cluster-internal traffic is not " +
@@ -165,14 +165,14 @@ func resourcek8sClusterCreate(ctx context.Context, d *schema.ResourceData, meta 
 		mdVal := mdVal.(string)
 		cluster.Properties.MaintenanceWindow.DayOfTheWeek = &mdVal
 	}
-
-	public := d.Get("public").(bool)
-	cluster.Properties.Public = &public
-
-	if gatewayIp, gatewayIpOk := d.GetOk("gateway_ip"); gatewayIpOk {
-		gatewayIp := gatewayIp.(string)
-		cluster.Properties.GatewayIp = &gatewayIp
-	}
+	//
+	//public := d.Get("public").(bool)
+	//cluster.Properties.Public = &public
+	//
+	//if gatewayIp, gatewayIpOk := d.GetOk("gateway_ip"); gatewayIpOk {
+	//	gatewayIp := gatewayIp.(string)
+	//	cluster.Properties.GatewayIp = &gatewayIp
+	//}
 
 	if apiSubnet, apiSubnetOk := d.GetOk("api_subnet_allow_list"); apiSubnetOk {
 		apiSubnet := apiSubnet.([]interface{})
@@ -259,7 +259,7 @@ func resourcek8sClusterRead(ctx context.Context, d *schema.ResourceData, meta in
 	cluster, apiResponse, err := client.KubernetesApi.K8sFindByClusterId(ctx, d.Id()).Execute()
 
 	if err != nil {
-		if apiResponse != nil && apiResponse.Response != nil && apiResponse.StatusCode== 404 {
+		if apiResponse != nil && apiResponse.Response != nil && apiResponse.StatusCode == 404 {
 			d.SetId("")
 			return nil
 		}
@@ -315,21 +315,21 @@ func resourcek8sClusterRead(ctx context.Context, d *schema.ResourceData, meta in
 		}
 	}
 
-	if cluster.Properties.Public != nil {
-		err := d.Set("public", *cluster.Properties.Public)
-		if err != nil {
-			diags := diag.FromErr(fmt.Errorf("error while setting public property for cluser %s: %s", d.Id(), err))
-			return diags
-		}
-	}
-
-	if cluster.Properties.GatewayIp != nil {
-		err := d.Set("gateway_ip", *cluster.Properties.GatewayIp)
-		if err != nil {
-			diags := diag.FromErr(fmt.Errorf("error while setting gateway_ip property for cluser %s: %s", d.Id(), err))
-			return diags
-		}
-	}
+	//if cluster.Properties.Public != nil {
+	//	err := d.Set("public", *cluster.Properties.Public)
+	//	if err != nil {
+	//		diags := diag.FromErr(fmt.Errorf("error while setting public property for cluser %s: %s", d.Id(), err))
+	//		return diags
+	//	}
+	//}
+	//
+	//if cluster.Properties.GatewayIp != nil {
+	//	err := d.Set("gateway_ip", *cluster.Properties.GatewayIp)
+	//	if err != nil {
+	//		diags := diag.FromErr(fmt.Errorf("error while setting gateway_ip property for cluser %s: %s", d.Id(), err))
+	//		return diags
+	//	}
+	//}
 
 	if cluster.Properties.ApiSubnetAllowList != nil {
 		apiSubnetAllowLists := make([]interface{}, len(*cluster.Properties.ApiSubnetAllowList), len(*cluster.Properties.ApiSubnetAllowList))
@@ -472,7 +472,7 @@ func resourcek8sClusterUpdate(ctx context.Context, d *schema.ResourceData, meta 
 	_, apiResponse, err := client.KubernetesApi.K8sPut(ctx, d.Id()).KubernetesCluster(request).Execute()
 
 	if err != nil {
-		if apiResponse != nil && apiResponse.Response != nil && apiResponse.StatusCode== 404 {
+		if apiResponse != nil && apiResponse.Response != nil && apiResponse.StatusCode == 404 {
 			d.SetId("")
 			return nil
 		}
@@ -514,7 +514,7 @@ func resourcek8sClusterDelete(ctx context.Context, d *schema.ResourceData, meta 
 	apiResponse, err := client.KubernetesApi.K8sDelete(ctx, d.Id()).Execute()
 
 	if err != nil {
-		if apiResponse != nil && apiResponse.Response != nil && apiResponse.StatusCode== 404 {
+		if apiResponse != nil && apiResponse.Response != nil && apiResponse.StatusCode == 404 {
 			d.SetId("")
 			return nil
 		}
@@ -565,7 +565,7 @@ func k8sClusterDeleted(ctx context.Context, client *ionoscloud.APIClient, d *sch
 	_, apiResponse, err := client.KubernetesApi.K8sFindByClusterId(ctx, d.Id()).Execute()
 
 	if err != nil {
-		if apiResponse != nil && apiResponse.Response != nil && apiResponse.StatusCode== 404 {
+		if apiResponse != nil && apiResponse.Response != nil && apiResponse.StatusCode == 404 {
 			return true, nil
 		}
 		return true, fmt.Errorf("error checking k8s cluster deletion status: %s", err)

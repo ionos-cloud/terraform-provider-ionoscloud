@@ -63,6 +63,10 @@ func dataSourceServer() *schema.Resource {
 				Type:     schema.TypeString,
 				Computed: true,
 			},
+			"boot_image": {
+				Type:     schema.TypeString,
+				Computed: true,
+			},
 			"token": {
 				Type:     schema.TypeString,
 				Computed: true,
@@ -457,6 +461,13 @@ func setServerData(d *schema.ResourceData, server *ionoscloud.Server, token *ion
 
 		if server.Properties.BootVolume != nil && server.Properties.BootVolume.Id != nil {
 			if err := d.Set("boot_volume", *server.Properties.BootVolume.Id); err != nil {
+				return err
+			}
+		}
+
+		if server.Entities.Volumes != nil && server.Entities.Volumes.Items != nil && len(*server.Entities.Volumes.Items) > 0 &&
+			(*server.Entities.Volumes.Items)[0].Properties.Image != nil {
+			if err := d.Set("boot_image", *(*server.Entities.Volumes.Items)[0].Properties.Image); err != nil {
 				return err
 			}
 		}

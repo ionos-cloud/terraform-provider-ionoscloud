@@ -1,7 +1,7 @@
 /*
  * CLOUD API
  *
- * An enterprise-grade Infrastructure is provided as a Service (IaaS) solution that can be managed through a browser-based \"Data Center Designer\" (DCD) tool or via an easy to use API.   The API allows you to perform a variety of management tasks such as spinning up additional servers, adding volumes, adjusting networking, and so forth. It is designed to allow users to leverage the same power and flexibility found within the DCD visual tool. Both tools are consistent with their concepts and lend well to making the experience smooth and intuitive.
+ * IONOS Enterprise-grade Infrastructure as a Service (IaaS) solutions can be managed through the Cloud API, in addition or as an alternative to the \"Data Center Designer\" (DCD) browser-based tool.    Both methods employ consistent concepts and features, deliver similar power and flexibility, and can be used to perform a multitude of management tasks, including adding servers, volumes, configuring networks, and so on.
  *
  * API version: 6.0-SDK.3
  */
@@ -21,7 +21,6 @@ type LabelResourceProperties struct {
 	// A Label Value
 	Value *string `json:"value,omitempty"`
 }
-
 
 
 // GetKey returns the Key field value
@@ -65,8 +64,6 @@ func (o *LabelResourceProperties) HasKey() bool {
 	return false
 }
 
-
-
 // GetValue returns the Value field value
 // If the value is explicit nil, the zero value for string will be returned
 func (o *LabelResourceProperties) GetValue() *string {
@@ -108,22 +105,18 @@ func (o *LabelResourceProperties) HasValue() bool {
 	return false
 }
 
-
 func (o LabelResourceProperties) MarshalJSON() ([]byte, error) {
 	toSerialize := map[string]interface{}{}
 
 	if o.Key != nil {
 		toSerialize["key"] = o.Key
 	}
-	
 
 	if o.Value != nil {
 		toSerialize["value"] = o.Value
 	}
-	
 	return json.Marshal(toSerialize)
 }
-
 type NullableLabelResourceProperties struct {
 	value *LabelResourceProperties
 	isSet bool

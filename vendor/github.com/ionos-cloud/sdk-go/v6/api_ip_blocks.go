@@ -1,7 +1,7 @@
 /*
  * CLOUD API
  *
- * An enterprise-grade Infrastructure is provided as a Service (IaaS) solution that can be managed through a browser-based \"Data Center Designer\" (DCD) tool or via an easy to use API.   The API allows you to perform a variety of management tasks such as spinning up additional servers, adding volumes, adjusting networking, and so forth. It is designed to allow users to leverage the same power and flexibility found within the DCD visual tool. Both tools are consistent with their concepts and lend well to making the experience smooth and intuitive.
+ * IONOS Enterprise-grade Infrastructure as a Service (IaaS) solutions can be managed through the Cloud API, in addition or as an alternative to the \"Data Center Designer\" (DCD) browser-based tool.    Both methods employ consistent concepts and features, deliver similar power and flexibility, and can be used to perform a multitude of management tasks, including adding servers, volumes, configuring networks, and so on.
  *
  * API version: 6.0-SDK.3
  */
@@ -345,6 +345,8 @@ type ApiIpblocksGetRequest struct {
 	pretty *bool
 	depth *int32
 	xContractNumber *int32
+	offset *int32
+	limit *int32
 }
 
 func (r ApiIpblocksGetRequest) Pretty(pretty bool) ApiIpblocksGetRequest {
@@ -357,6 +359,14 @@ func (r ApiIpblocksGetRequest) Depth(depth int32) ApiIpblocksGetRequest {
 }
 func (r ApiIpblocksGetRequest) XContractNumber(xContractNumber int32) ApiIpblocksGetRequest {
 	r.xContractNumber = &xContractNumber
+	return r
+}
+func (r ApiIpblocksGetRequest) Offset(offset int32) ApiIpblocksGetRequest {
+	r.offset = &offset
+	return r
+}
+func (r ApiIpblocksGetRequest) Limit(limit int32) ApiIpblocksGetRequest {
+	r.limit = &limit
 	return r
 }
 
@@ -407,6 +417,12 @@ func (a *IPBlocksApiService) IpblocksGetExecute(r ApiIpblocksGetRequest) (IpBloc
 	}
 	if r.depth != nil {
 		localVarQueryParams.Add("depth", parameterToString(*r.depth, ""))
+	}
+	if r.offset != nil {
+		localVarQueryParams.Add("offset", parameterToString(*r.offset, ""))
+	}
+	if r.limit != nil {
+		localVarQueryParams.Add("limit", parameterToString(*r.limit, ""))
 	}
 	// to determine the Content-Type header
 	localVarHTTPContentTypes := []string{}

@@ -1,7 +1,7 @@
 /*
  * CLOUD API
  *
- * An enterprise-grade Infrastructure is provided as a Service (IaaS) solution that can be managed through a browser-based \"Data Center Designer\" (DCD) tool or via an easy to use API.   The API allows you to perform a variety of management tasks such as spinning up additional servers, adding volumes, adjusting networking, and so forth. It is designed to allow users to leverage the same power and flexibility found within the DCD visual tool. Both tools are consistent with their concepts and lend well to making the experience smooth and intuitive.
+ * IONOS Enterprise-grade Infrastructure as a Service (IaaS) solutions can be managed through the Cloud API, in addition or as an alternative to the \"Data Center Designer\" (DCD) browser-based tool.    Both methods employ consistent concepts and features, deliver similar power and flexibility, and can be used to perform a multitude of management tasks, including adding servers, volumes, configuring networks, and so on.
  *
  * API version: 6.0-SDK.3
  */
@@ -26,7 +26,6 @@ type ContractProperties struct {
 	RegDomain *string `json:"regDomain,omitempty"`
 	ResourceLimits *ResourceLimits `json:"resourceLimits,omitempty"`
 }
-
 
 
 // GetContractNumber returns the ContractNumber field value
@@ -70,8 +69,6 @@ func (o *ContractProperties) HasContractNumber() bool {
 	return false
 }
 
-
-
 // GetOwner returns the Owner field value
 // If the value is explicit nil, the zero value for string will be returned
 func (o *ContractProperties) GetOwner() *string {
@@ -112,8 +109,6 @@ func (o *ContractProperties) HasOwner() bool {
 
 	return false
 }
-
-
 
 // GetStatus returns the Status field value
 // If the value is explicit nil, the zero value for string will be returned
@@ -156,8 +151,6 @@ func (o *ContractProperties) HasStatus() bool {
 	return false
 }
 
-
-
 // GetRegDomain returns the RegDomain field value
 // If the value is explicit nil, the zero value for string will be returned
 func (o *ContractProperties) GetRegDomain() *string {
@@ -198,8 +191,6 @@ func (o *ContractProperties) HasRegDomain() bool {
 
 	return false
 }
-
-
 
 // GetResourceLimits returns the ResourceLimits field value
 // If the value is explicit nil, the zero value for ResourceLimits will be returned
@@ -242,37 +233,30 @@ func (o *ContractProperties) HasResourceLimits() bool {
 	return false
 }
 
-
 func (o ContractProperties) MarshalJSON() ([]byte, error) {
 	toSerialize := map[string]interface{}{}
 
 	if o.ContractNumber != nil {
 		toSerialize["contractNumber"] = o.ContractNumber
 	}
-	
 
 	if o.Owner != nil {
 		toSerialize["owner"] = o.Owner
 	}
-	
 
 	if o.Status != nil {
 		toSerialize["status"] = o.Status
 	}
-	
 
 	if o.RegDomain != nil {
 		toSerialize["regDomain"] = o.RegDomain
 	}
-	
 
 	if o.ResourceLimits != nil {
 		toSerialize["resourceLimits"] = o.ResourceLimits
 	}
-	
 	return json.Marshal(toSerialize)
 }
-
 type NullableContractProperties struct {
 	value *ContractProperties
 	isSet bool

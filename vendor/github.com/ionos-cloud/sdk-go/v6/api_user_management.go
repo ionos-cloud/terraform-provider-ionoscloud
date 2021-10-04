@@ -1,7 +1,7 @@
 /*
  * CLOUD API
  *
- * An enterprise-grade Infrastructure is provided as a Service (IaaS) solution that can be managed through a browser-based \"Data Center Designer\" (DCD) tool or via an easy to use API.   The API allows you to perform a variety of management tasks such as spinning up additional servers, adding volumes, adjusting networking, and so forth. It is designed to allow users to leverage the same power and flexibility found within the DCD visual tool. Both tools are consistent with their concepts and lend well to making the experience smooth and intuitive.
+ * IONOS Enterprise-grade Infrastructure as a Service (IaaS) solutions can be managed through the Cloud API, in addition or as an alternative to the \"Data Center Designer\" (DCD) browser-based tool.    Both methods employ consistent concepts and features, deliver similar power and flexibility, and can be used to perform a multitude of management tasks, including adding servers, volumes, configuring networks, and so on.
  *
  * API version: 6.0-SDK.3
  */
@@ -3124,6 +3124,8 @@ type ApiUmUsersGetRequest struct {
 	pretty *bool
 	depth *int32
 	xContractNumber *int32
+	offset *int32
+	limit *int32
 }
 
 func (r ApiUmUsersGetRequest) Pretty(pretty bool) ApiUmUsersGetRequest {
@@ -3136,6 +3138,14 @@ func (r ApiUmUsersGetRequest) Depth(depth int32) ApiUmUsersGetRequest {
 }
 func (r ApiUmUsersGetRequest) XContractNumber(xContractNumber int32) ApiUmUsersGetRequest {
 	r.xContractNumber = &xContractNumber
+	return r
+}
+func (r ApiUmUsersGetRequest) Offset(offset int32) ApiUmUsersGetRequest {
+	r.offset = &offset
+	return r
+}
+func (r ApiUmUsersGetRequest) Limit(limit int32) ApiUmUsersGetRequest {
+	r.limit = &limit
 	return r
 }
 
@@ -3186,6 +3196,12 @@ func (a *UserManagementApiService) UmUsersGetExecute(r ApiUmUsersGetRequest) (Us
 	}
 	if r.depth != nil {
 		localVarQueryParams.Add("depth", parameterToString(*r.depth, ""))
+	}
+	if r.offset != nil {
+		localVarQueryParams.Add("offset", parameterToString(*r.offset, ""))
+	}
+	if r.limit != nil {
+		localVarQueryParams.Add("limit", parameterToString(*r.limit, ""))
 	}
 	// to determine the Content-Type header
 	localVarHTTPContentTypes := []string{}
