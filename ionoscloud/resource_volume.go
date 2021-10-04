@@ -642,7 +642,7 @@ func getImageAlias(ctx context.Context, client *ionoscloud.APIClient, imageAlias
 func checkImage(ctx context.Context, client *ionoscloud.APIClient, imageInput, imagePassword, licenceType, dcId string, sshKeyPath []interface{}) (image, imageAlias string, isSnapshot bool, diags diag.Diagnostics) {
 	isSnapshot = false
 
-	if imageInput != "" || imageAlias == "" {
+	if imageInput != "" {
 		if !IsValidUUID(imageInput) {
 			dc, _, err := client.DataCentersApi.DatacentersFindById(ctx, dcId).Execute()
 			if err != nil {
