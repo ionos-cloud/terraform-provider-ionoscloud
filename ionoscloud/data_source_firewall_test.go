@@ -103,7 +103,7 @@ resource "ionoscloud_firewall" "webserver_http" {
   source_mac = "00:0a:95:9d:68:16"
   source_ip = ionoscloud_ipblock.ipblock.ips[0]
   target_ip = ionoscloud_ipblock.ipblock.ips[1]
-  icmp_type = 0
+  icmp_type = 1
   icmp_code = 8
   type = "INGRESS"
 }
@@ -166,7 +166,7 @@ resource "ionoscloud_firewall" "webserver_http" {
   source_mac = "00:0a:95:9d:68:16"
   source_ip = ionoscloud_ipblock.ipblock.ips[0]
   target_ip = ionoscloud_ipblock.ipblock.ips[1]
-  icmp_type = 0
+  icmp_type = 1
   icmp_code = 8
   type = "INGRESS"
 }
@@ -236,7 +236,7 @@ resource "ionoscloud_firewall" "webserver_http" {
   source_mac = "00:0a:95:9d:68:16"
   source_ip = ionoscloud_ipblock.ipblock.ips[0]
   target_ip = ionoscloud_ipblock.ipblock.ips[1]
-  icmp_type = 0
+  icmp_type = 1
   icmp_code = 8
   type = "INGRESS"
 }

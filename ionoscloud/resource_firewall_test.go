@@ -30,7 +30,7 @@ func TestAccFirewallBasic(t *testing.T) {
 					resource.TestCheckResourceAttr("ionoscloud_firewall.webserver_http", "source_mac", "00:0a:95:9d:68:16"),
 					resource.TestCheckResourceAttrPair("ionoscloud_firewall.webserver_http", "source_ip", "ionoscloud_ipblock.ipblock", "ips.0"),
 					resource.TestCheckResourceAttrPair("ionoscloud_firewall.webserver_http", "target_ip", "ionoscloud_ipblock.ipblock", "ips.1"),
-					resource.TestCheckResourceAttr("ionoscloud_firewall.webserver_http", "icmp_type", "0"),
+					resource.TestCheckResourceAttr("ionoscloud_firewall.webserver_http", "icmp_type", "1"),
 					resource.TestCheckResourceAttr("ionoscloud_firewall.webserver_http", "icmp_code", "8"),
 					resource.TestCheckResourceAttr("ionoscloud_firewall.webserver_http", "type", "INGRESS"),
 				),
@@ -44,7 +44,7 @@ func TestAccFirewallBasic(t *testing.T) {
 					resource.TestCheckResourceAttr("ionoscloud_firewall.webserver_http", "source_mac", "00:0a:95:9d:68:17"),
 					resource.TestCheckResourceAttrPair("ionoscloud_firewall.webserver_http", "source_ip", "ionoscloud_ipblock.ipblock_update", "ips.0"),
 					resource.TestCheckResourceAttrPair("ionoscloud_firewall.webserver_http", "target_ip", "ionoscloud_ipblock.ipblock_update", "ips.1"),
-					resource.TestCheckResourceAttr("ionoscloud_firewall.webserver_http", "icmp_type", "1"),
+					resource.TestCheckResourceAttr("ionoscloud_firewall.webserver_http", "icmp_type", "2"),
 					resource.TestCheckResourceAttr("ionoscloud_firewall.webserver_http", "icmp_code", "7"),
 					resource.TestCheckResourceAttr("ionoscloud_firewall.webserver_http", "type", "EGRESS"),
 				),
@@ -212,7 +212,7 @@ resource "ionoscloud_firewall" "webserver_http" {
   source_mac = "00:0a:95:9d:68:16"
   source_ip = ionoscloud_ipblock.ipblock.ips[0]
   target_ip = ionoscloud_ipblock.ipblock.ips[1]
-  icmp_type = 0
+  icmp_type = 1
   icmp_code = 8
   type = "INGRESS"
 }
@@ -269,7 +269,7 @@ resource "ionoscloud_firewall" "webserver_http" {
   source_mac = "00:0a:95:9d:68:17"
   source_ip = ionoscloud_ipblock.ipblock_update.ips[0]
   target_ip = ionoscloud_ipblock.ipblock_update.ips[1]
-  icmp_type = 1
+  icmp_type = 2
   icmp_code = 7
   type = "EGRESS"
 }

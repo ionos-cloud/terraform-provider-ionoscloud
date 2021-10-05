@@ -216,8 +216,10 @@ func dataSourceNetworkLoadBalancerForwardingRuleRead(d *schema.ResourceData, met
 		return errors.New("network loadbalancer not found")
 	}
 
-	if err := d.Set("id", *networkLoadBalancerForwardingRule.Id); err != nil {
-		return err
+	if networkLoadBalancerForwardingRule.Id != nil {
+		if err := d.Set("id", *networkLoadBalancerForwardingRule.Id); err != nil {
+			return err
+		}
 	}
 
 	if err = setNetworkLoadBalancerForwardingRuleData(d, &networkLoadBalancerForwardingRule); err != nil {

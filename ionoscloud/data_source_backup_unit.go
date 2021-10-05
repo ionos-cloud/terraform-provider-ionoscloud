@@ -99,8 +99,10 @@ func dataSourceBackupUnitRead(ctx context.Context, d *schema.ResourceData, meta 
 		return diags
 	}
 
-	if err := d.Set("id", *backupUnit.Id); err != nil {
-		return diag.FromErr(err)
+	if backupUnit.Id != nil {
+		if err := d.Set("id", *backupUnit.Id); err != nil {
+			return diag.FromErr(err)
+		}
 	}
 
 	if err := setBackupUnitData(d, &backupUnit, &contractResources); err != nil {

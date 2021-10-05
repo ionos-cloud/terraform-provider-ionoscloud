@@ -9,7 +9,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
 )
 
-func TestAccFirewall_ImportBasic(t *testing.T) {
+func TestAccFirewallImportBasic(t *testing.T) {
 	firewallName := "firewall"
 
 	resource.Test(t, resource.TestCase{

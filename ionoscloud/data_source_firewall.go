@@ -53,6 +53,10 @@ func dataSourceFirewall() *schema.Resource {
 				Type:     schema.TypeInt,
 				Computed: true,
 			},
+			"type": {
+				Type:     schema.TypeString,
+				Computed: true,
+			},
 			"datacenter_id": {
 				Type:         schema.TypeString,
 				Required:     true,
@@ -128,8 +132,10 @@ func dataSourceFirewallRead(ctx context.Context, d *schema.ResourceData, meta in
 		return diag.FromErr(fmt.Errorf("firewall rule not found"))
 	}
 
-	if err := d.Set("id", *firewall.Id); err != nil {
-		return diag.FromErr(err)
+	if firewall.Id != nil {
+		if err := d.Set("id", *firewall.Id); err != nil {
+			return diag.FromErr(err)
+		}
 	}
 
 	if diags := setFirewallData(d, &firewall); diags != nil {
@@ -204,17 +210,28 @@ func setFirewallData(d *schema.ResourceData, firewall *ionoscloud.FirewallRule) 
 		}
 
 		if firewall.Properties.IcmpType != nil {
+			fmt.Printf("set icmpType %v \n", *firewall.Properties.IcmpType)
 			err := d.Set("icmp_type", *firewall.Properties.IcmpType)
 			if err != nil {
 				diags := diag.FromErr(fmt.Errorf("error while setting icmp_type property for firewall %s: %s", d.Id(), err))
 				return diags
 			}
+		} else {
+			fmt.Printf("ICMP type does not work \n")
 		}
 
 		if firewall.Properties.IcmpCode != nil {
 			err := d.Set("icmp_code", *firewall.Properties.IcmpCode)
 			if err != nil {
 				diags := diag.FromErr(fmt.Errorf("error while setting icmp_code property for firewall %s: %s", d.Id(), err))
+				return diags
+			}
+		}
+
+		if firewall.Properties.Type != nil {
+			err := d.Set("type", *firewall.Properties.Type)
+			if err != nil {
+				diags := diag.FromErr(fmt.Errorf("error while setting type property for firewall %s: %s", d.Id(), err))
 				return diags
 			}
 		}
