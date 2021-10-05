@@ -443,45 +443,6 @@ func resourcePrivateCrossConnectImport(ctx context.Context, d *schema.ResourceDa
 	return []*schema.ResourceData{d}, nil
 }
 
-func resourceBackupUnitImport(ctx context.Context, d *schema.ResourceData, meta interface{}) ([]*schema.ResourceData, error) {
-	client := meta.(*ionoscloud.APIClient)
-
-	buId := d.Id()
-
-	backupUnit, apiResponse, err := client.BackupUnitApi.BackupunitsFindById(ctx, d.Id()).Execute()
-
-	if err != nil {
-		if apiResponse != nil && apiResponse.Response != nil && apiResponse.StatusCode == 404 {
-			d.SetId("")
-			return nil, fmt.Errorf("unable to find Backup Unit %q", buId)
-		}
-		return nil, fmt.Errorf("unable to retreive Backup Unit %q", buId)
-	}
-
-	log.Printf("[INFO] Backup Unit found: %+v", backupUnit)
-
-	d.SetId(*backupUnit.Id)
-
-	if err := d.Set("name", *backupUnit.Properties.Name); err != nil {
-		return nil, err
-	}
-	if err := d.Set("email", *backupUnit.Properties.Email); err != nil {
-		return nil, err
-	}
-
-	contractResources, apiResponse, cErr := client.ContractApi.ContractsGet(ctx).Execute()
-
-	if cErr != nil {
-		return nil, fmt.Errorf("error while fetching contract resources for backup unit %q: %s", d.Id(), cErr)
-	}
-
-	if err := d.Set("login", fmt.Sprintf("%s-%d", *backupUnit.Properties.Name, *contractResources.Properties.ContractNumber)); err != nil {
-		return nil, err
-	}
-
-	return []*schema.ResourceData{d}, nil
-}
-
 func resourceS3KeyImport(ctx context.Context, d *schema.ResourceData, meta interface{}) ([]*schema.ResourceData, error) {
 	parts := strings.Split(d.Id(), "/")
 

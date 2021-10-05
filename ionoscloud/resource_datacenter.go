@@ -18,7 +18,7 @@ func resourceDatacenter() *schema.Resource {
 		UpdateContext: resourceDatacenterUpdate,
 		DeleteContext: resourceDatacenterDelete,
 		Importer: &schema.ResourceImporter{
-			StateContext: schema.ImportStatePassthroughContext,
+			StateContext: resourceDatacenterImport,
 		},
 		Schema: map[string]*schema.Schema{
 
@@ -37,8 +37,8 @@ func resourceDatacenter() *schema.Resource {
 			},
 			"description": {
 				Type:        schema.TypeString,
-				Optional:    true,
 				Description: "A description for the datacenter, e.g. staging, production",
+				Optional:    true,
 				Computed:    true,
 			},
 			"sec_auth_protection": {
@@ -129,44 +129,8 @@ func resourceDatacenterRead(ctx context.Context, d *schema.ResourceData, meta in
 		return diags
 	}
 
-	if datacenter.Properties.Name != nil {
-		err := d.Set("name", *datacenter.Properties.Name)
-		if err != nil {
-			diags := diag.FromErr(fmt.Errorf("error while setting name property for datacenter %s: %s", d.Id(), err))
-			return diags
-		}
-	}
-
-	if datacenter.Properties.Location != nil {
-		err := d.Set("location", *datacenter.Properties.Location)
-		if err != nil {
-			diags := diag.FromErr(fmt.Errorf("error while setting location property for datacenter %s: %s", d.Id(), err))
-			return diags
-		}
-	}
-
-	if datacenter.Properties.Description != nil {
-		err := d.Set("description", *datacenter.Properties.Description)
-		if err != nil {
-			diags := diag.FromErr(fmt.Errorf("error while setting description property for datacenter %s: %s", d.Id(), err))
-			return diags
-		}
-	}
-
-	if datacenter.Properties.SecAuthProtection != nil {
-		err := d.Set("sec_auth_protection", *datacenter.Properties.SecAuthProtection)
-		if err != nil {
-			diags := diag.FromErr(fmt.Errorf("error while setting sec_auth_protection property for datacenter %s: %s", d.Id(), err))
-			return diags
-		}
-	}
-
-	if datacenter.Properties.Features != nil && len(*datacenter.Properties.Features) > 0 {
-		err := d.Set("features", *datacenter.Properties.Features)
-		if err != nil {
-			diags := diag.FromErr(fmt.Errorf("error while setting features property for datacenter %s: %s", d.Id(), err))
-			return diags
-		}
+	if err := setDatacenterData(d, &datacenter); err != nil {
+		return diag.FromErr(err)
 	}
 
 	return nil
@@ -238,6 +202,30 @@ func resourceDatacenterDelete(ctx context.Context, d *schema.ResourceData, meta 
 
 	d.SetId("")
 	return nil
+}
+
+func resourceDatacenterImport(ctx context.Context, d *schema.ResourceData, meta interface{}) ([]*schema.ResourceData, error) {
+	client := meta.(*ionoscloud.APIClient)
+
+	dcId := d.Id()
+
+	datacenter, apiResponse, err := client.DataCenterApi.DatacentersFindById(ctx, d.Id()).Execute()
+
+	if err != nil {
+		if apiResponse != nil && apiResponse.Response != nil && apiResponse.StatusCode == 404 {
+			d.SetId("")
+			return nil, fmt.Errorf("unable to find datacenter %q", dcId)
+		}
+		return nil, fmt.Errorf("an error occured while retrieving the datacenter %q, %q", dcId, err)
+	}
+
+	log.Printf("[INFO] Datacenter found: %+v", datacenter)
+
+	if err := setDatacenterData(d, &datacenter); err != nil {
+		return nil, err
+	}
+
+	return []*schema.ResourceData{d}, nil
 }
 
 func IsValidUUID(uuid string) bool {

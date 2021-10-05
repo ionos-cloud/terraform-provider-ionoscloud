@@ -10,7 +10,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
 )
 
-func TestAccbackupUnit_Basic(t *testing.T) {
+func TestAccBackupUnitBasic(t *testing.T) {
 	var backupUnit ionoscloud.BackupUnit
 	backupUnitName := "example"
 
@@ -19,30 +19,31 @@ func TestAccbackupUnit_Basic(t *testing.T) {
 			testAccPreCheck(t)
 		},
 		ProviderFactories: testAccProviderFactories,
-		CheckDestroy:      testAccCheckbackupUnitDestroyCheck,
+		CheckDestroy:      testAccCheckBackupUnitDestroyCheck,
 		Steps: []resource.TestStep{
 			{
-				Config: fmt.Sprintf(testAccCheckbackupUnitConfigBasic, backupUnitName),
+				Config: fmt.Sprintf(testAccCheckBackupUnitConfigBasic, backupUnitName),
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheckbackupUnitExists("ionoscloud_backup_unit.example", &backupUnit),
+					testAccCheckBackupUnitExists("ionoscloud_backup_unit.example", &backupUnit),
 					resource.TestCheckResourceAttr("ionoscloud_backup_unit.example", "name", backupUnitName),
 					resource.TestCheckResourceAttr("ionoscloud_backup_unit.example", "email", "example@ionoscloud.com"),
 					resource.TestCheckResourceAttr("ionoscloud_backup_unit.example", "password", "DemoPassword123$"),
 				),
 			},
 			{
-				Config: testAccCheckbackupUnitConfigUpdate,
+				Config: testAccCheckBackupUnitConfigUpdate,
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheckbackupUnitExists("ionoscloud_backup_unit.example", &backupUnit),
+					testAccCheckBackupUnitExists("ionoscloud_backup_unit.example", &backupUnit),
+					resource.TestCheckResourceAttr("ionoscloud_backup_unit.example", "name", "example"),
 					resource.TestCheckResourceAttr("ionoscloud_backup_unit.example", "email", "example-updated@ionoscloud.com"),
-					resource.TestCheckResourceAttr("ionoscloud_backup_unit.example", "password", "DemoPassword1234$"),
+					resource.TestCheckResourceAttr("ionoscloud_backup_unit.example", "password", "DemoPassword1234$Updated"),
 				),
 			},
 		},
 	})
 }
 
-func testAccCheckbackupUnitDestroyCheck(s *terraform.State) error {
+func testAccCheckBackupUnitDestroyCheck(s *terraform.State) error {
 	client := testAccProvider.Meta().(*ionoscloud.APIClient)
 
 	ctx, cancel := context.WithTimeout(context.Background(), *resourceDefaultTimeouts.Default)
@@ -73,7 +74,7 @@ func testAccCheckbackupUnitDestroyCheck(s *terraform.State) error {
 	return nil
 }
 
-func testAccCheckbackupUnitExists(n string, backupUnit *ionoscloud.BackupUnit) resource.TestCheckFunc {
+func testAccCheckBackupUnitExists(n string, backupUnit *ionoscloud.BackupUnit) resource.TestCheckFunc {
 	return func(s *terraform.State) error {
 		client := testAccProvider.Meta().(*ionoscloud.APIClient)
 
@@ -107,7 +108,7 @@ func testAccCheckbackupUnitExists(n string, backupUnit *ionoscloud.BackupUnit) r
 	}
 }
 
-const testAccCheckbackupUnitConfigBasic = `
+const testAccCheckBackupUnitConfigBasic = `
 resource "ionoscloud_backup_unit" "example" {
 	name        = "%s"
 	password    = "DemoPassword123$"
@@ -115,10 +116,10 @@ resource "ionoscloud_backup_unit" "example" {
 }
 `
 
-const testAccCheckbackupUnitConfigUpdate = `
+const testAccCheckBackupUnitConfigUpdate = `
 resource "ionoscloud_backup_unit" "example" {
 	name        = "example"
 	email       = "example-updated@ionoscloud.com"
-	password    = "DemoPassword1234$"
+	password    = "DemoPassword1234$Updated"
 }
 `

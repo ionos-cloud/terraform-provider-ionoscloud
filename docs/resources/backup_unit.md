@@ -24,7 +24,7 @@ resource "ionoscloud_backup_unit" "example" {
 
 The following arguments are supported:
 
-- `name` - (Required)[string] The name of the Backup Unit
+- `name` - (Required)[string] The name of the Backup Unit. This argument is immutable.
 - `password` - (Required)[string] The desired password for the Backup Unit
 - `email` - (Required)[string] The email address assigned to the backup unit
 - `login`- (Computed) The login associated with the backup unit. Derived from the contract number
