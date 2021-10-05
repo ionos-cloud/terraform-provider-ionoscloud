@@ -18,7 +18,7 @@ func TestAccFirewall_ImportBasic(t *testing.T) {
 		CheckDestroy:      testAccCheckFirewallDestroyCheck,
 		Steps: []resource.TestStep{
 			{
-				Config: fmt.Sprintf(testacccheckfirewallconfigBasic, firewallName),
+				Config: fmt.Sprintf(testAccCheckFirewallConfigBasic, firewallName),
 			},
 
 			{

@@ -46,11 +46,11 @@ func dataSourceFirewall() *schema.Resource {
 				Computed: true,
 			},
 			"icmp_type": {
-				Type:     schema.TypeString,
+				Type:     schema.TypeInt,
 				Computed: true,
 			},
 			"icmp_code": {
-				Type:     schema.TypeString,
+				Type:     schema.TypeInt,
 				Computed: true,
 			},
 			"datacenter_id": {
@@ -161,7 +161,6 @@ func setFirewallData(d *schema.ResourceData, firewall *ionoscloud.FirewallRule) 
 				diags := diag.FromErr(fmt.Errorf("error while setting name property for firewall %s: %s", d.Id(), err))
 				return diags
 			}
-
 		}
 
 		if firewall.Properties.SourceMac != nil {
