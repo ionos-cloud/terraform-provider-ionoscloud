@@ -128,7 +128,9 @@ func resourceBackupUnitRead(ctx context.Context, d *schema.ResourceData, meta in
 
 	log.Printf("[INFO] Successfully retreived contract resource for backup unit unit %s: %+v", d.Id(), contractResources)
 
-	setBackupUnitData(d, &backupUnit, &contractResources)
+	if err := setBackupUnitData(d, &backupUnit, &contractResources); err != nil {
+		return diag.FromErr(err)
+	}
 
 	log.Printf("[INFO] Successfully retreived backup unit %s: %+v", d.Id(), backupUnit)
 
@@ -280,7 +282,9 @@ func resourceBackupUnitImport(ctx context.Context, d *schema.ResourceData, meta 
 		return nil, fmt.Errorf("contract number not set")
 	}
 
-	setBackupUnitData(d, &backupUnit, &contractResources)
+	if err := setBackupUnitData(d, &backupUnit, &contractResources); err != nil {
+		return nil, err
+	}
 
 	return []*schema.ResourceData{d}, nil
 }
