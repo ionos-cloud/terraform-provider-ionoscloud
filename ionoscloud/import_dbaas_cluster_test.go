@@ -21,10 +21,11 @@ func TestAccDbaasPgSqlClusterImportBasic(t *testing.T) {
 			},
 
 			{
-				ResourceName:      resourceName,
-				ImportStateIdFunc: testAccDbaasPgSqlClusterImportStateId,
-				ImportState:       true,
-				ImportStateVerify: true,
+				ResourceName:            resourceName,
+				ImportStateIdFunc:       testAccDbaasPgSqlClusterImportStateId,
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"credentials"},
 			},
 		},
 	})
