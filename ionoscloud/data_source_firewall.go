@@ -96,12 +96,15 @@ func dataSourceFirewallRead(ctx context.Context, d *schema.ResourceData, meta in
 	var firewall ionoscloud.FirewallRule
 	var err error
 
+	found := false
+
 	if idOk {
 		/* search by ID */
 		firewall, _, err = client.FirewallRulesApi.DatacentersServersNicsFirewallrulesFindById(ctx, datacenterId, serverId, nicId, id.(string)).Execute()
 		if err != nil {
 			return diag.FromErr(fmt.Errorf("an error occurred while fetching the firewall rule %s: %s", id.(string), err))
 		}
+		found = true
 	} else {
 		/* search by name */
 		var firewalls ionoscloud.FirewallRules
@@ -120,6 +123,7 @@ func dataSourceFirewallRead(ctx context.Context, d *schema.ResourceData, meta in
 				}
 				if tmpFirewall.Properties.Name != nil && *tmpFirewall.Properties.Name == name.(string) {
 					firewall = tmpFirewall
+					found = true
 					break
 				}
 
@@ -128,7 +132,7 @@ func dataSourceFirewallRead(ctx context.Context, d *schema.ResourceData, meta in
 
 	}
 
-	if &firewall == nil {
+	if !found {
 		return diag.FromErr(fmt.Errorf("firewall rule not found"))
 	}
 
@@ -210,7 +214,6 @@ func setFirewallData(d *schema.ResourceData, firewall *ionoscloud.FirewallRule) 
 		}
 
 		if firewall.Properties.IcmpType != nil {
-			fmt.Printf("set icmpType %v \n", *firewall.Properties.IcmpType)
 			err := d.Set("icmp_type", *firewall.Properties.IcmpType)
 			if err != nil {
 				diags := diag.FromErr(fmt.Errorf("error while setting icmp_type property for firewall %s: %s", d.Id(), err))
