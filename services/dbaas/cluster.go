@@ -11,8 +11,7 @@ import (
 type ClusterService interface {
 	GetCluster(ctx context.Context, clusterId string) (dbaas.Cluster, *dbaas.APIResponse, error)
 	ListClusters(ctx context.Context) (dbaas.ClusterList, *dbaas.APIResponse, error)
-	CreateCluster(ctx context.Context, cluster dbaas.CreateClusterRequest) (dbaas.Cluster, *dbaas.APIResponse, error)
-	CreateClusterFromBackup(ctx context.Context, cluster dbaas.CreateClusterRequest, backupId string) (dbaas.Cluster, *dbaas.APIResponse, error)
+	CreateCluster(ctx context.Context, cluster dbaas.CreateClusterRequest, backup string, recoveryTargetTime string) (dbaas.Cluster, *dbaas.APIResponse, error)
 	UpdateCluster(ctx context.Context, clusterId string, cluster dbaas.PatchClusterRequest) (dbaas.Cluster, *dbaas.APIResponse, error)
 	DeleteCluster(ctx context.Context, clusterId string) (dbaas.Cluster, *dbaas.APIResponse, error)
 }
@@ -26,27 +25,27 @@ func (c *Client) GetCluster(ctx context.Context, clusterId string) (dbaas.Cluste
 	return cluster, nil, err
 }
 
-func (c *Client) ListClusters(ctx context.Context) (dbaas.ClusterList, *dbaas.APIResponse, error) {
-	clusters, apiResponse, err := c.ClustersApi.ClustersGet(ctx).Execute()
+func (c *Client) ListClusters(ctx context.Context, filterName string) (dbaas.ClusterList, *dbaas.APIResponse, error) {
+	request := c.ClustersApi.ClustersGet(ctx)
+	if filterName != "" {
+		request = request.FilterName(filterName)
+	}
+	clusters, apiResponse, err := c.ClustersApi.ClustersGetExecute(request)
 	if apiResponse != nil {
 		return clusters, apiResponse, err
 	}
 	return clusters, nil, err
 }
 
-func (c *Client) CreateCluster(ctx context.Context, cluster dbaas.CreateClusterRequest) (dbaas.Cluster, *dbaas.APIResponse, error) {
-	clusterResponse, apiResponse, err := c.ClustersApi.ClustersPost(ctx).Cluster(cluster).Execute()
-	if apiResponse != nil {
-		return clusterResponse, apiResponse, err
+func (c *Client) CreateCluster(ctx context.Context, cluster dbaas.CreateClusterRequest, backup string, recoveryTargetTime string) (dbaas.Cluster, *dbaas.APIResponse, error) {
+	request := c.ClustersApi.ClustersPost(ctx).Cluster(cluster)
+	if backup != "" {
+		request = request.FromBackup(backup)
 	}
-	return clusterResponse, nil, err
-}
-
-func (c *Client) CreateClusterFromBackup(ctx context.Context, cluster dbaas.CreateClusterRequest, backupId string) (dbaas.Cluster, *dbaas.APIResponse, error) {
-	clusterResponse, apiResponse, err := c.ClustersApi.ClustersPost(ctx).Cluster(cluster).FromBackup(backupId).Execute()
-	if err != nil {
-		fmt.Printf("error while creating from backup: %v", err)
+	if recoveryTargetTime != " " {
+		request = request.FromRecoveryTargetTime(recoveryTargetTime)
 	}
+	clusterResponse, apiResponse, err := c.ClustersApi.ClustersPostExecute(request)
 	if apiResponse != nil {
 		return clusterResponse, apiResponse, err
 	}
@@ -147,9 +146,6 @@ func GetDbaasPgSqlClusterDataCreate(d *schema.ResourceData) *dbaas.CreateCluster
 		dbaasCluster.DisplayName = &displayName
 	}
 
-	backupEnabled := d.Get("backup_enabled").(bool)
-	dbaasCluster.BackupEnabled = &backupEnabled
-
 	if _, ok := d.GetOk("maintenance_window.0"); ok {
 		dbaasCluster.MaintenanceWindow = &dbaas.MaintenanceWindow{}
 
@@ -222,11 +218,6 @@ func GetDbaasPgSqlClusterDataUpdate(d *schema.ResourceData) (*dbaas.PatchCluster
 		cluster.DisplayName = &vStr
 	}
 
-	if d.HasChange("backup_enabled") {
-		vBool := d.Get("backup_enabled").(bool)
-		cluster.BackupEnabled = &vBool
-	}
-
 	if d.HasChange("maintenance_window") {
 		cluster.MaintenanceWindow = &dbaas.MaintenanceWindow{}
 
@@ -244,7 +235,7 @@ func GetDbaasPgSqlClusterDataUpdate(d *schema.ResourceData) (*dbaas.PatchCluster
 	return &cluster, nil
 }
 
-func SetDbaasPgSqlClusterData(d *schema.ResourceData, cluster dbaas.Cluster) diag.Diagnostics {
+func SetDbaasPgSqlClusterData(d *schema.ResourceData, cluster dbaas.Cluster) error {
 
 	if cluster.Id != nil {
 		d.SetId(*cluster.Id)
@@ -252,43 +243,37 @@ func SetDbaasPgSqlClusterData(d *schema.ResourceData, cluster dbaas.Cluster) dia
 
 	if cluster.PostgresVersion != nil {
 		if err := d.Set("postgres_version", *cluster.PostgresVersion); err != nil {
-			diags := diag.FromErr(fmt.Errorf("error while setting postgres_version property for dbaas cluster %s: %s", d.Id(), err))
-			return diags
+			return fmt.Errorf("error while setting postgres_version property for dbaas cluster %s: %s", d.Id(), err)
 		}
 	}
 
 	if cluster.Replicas != nil {
 		if err := d.Set("replicas", *cluster.Replicas); err != nil {
-			diags := diag.FromErr(fmt.Errorf("error while setting replicas property for dbaas cluster %s: %s", d.Id(), err))
-			return diags
+			return fmt.Errorf("error while setting replicas property for dbaas cluster %s: %s", d.Id(), err)
 		}
 	}
 
 	if cluster.CpuCoreCount != nil {
 		if err := d.Set("cpu_core_count", *cluster.CpuCoreCount); err != nil {
-			diags := diag.FromErr(fmt.Errorf("error while setting cpu_core_count for dbaas cluster %s: %s", d.Id(), err))
-			return diags
+			return fmt.Errorf("error while setting cpu_core_count for dbaas cluster %s: %s", d.Id(), err)
 		}
 	}
 
 	if cluster.RamSize != nil {
 		if err := d.Set("ram_size", *cluster.RamSize); err != nil {
-			diags := diag.FromErr(fmt.Errorf("error while setting ram_size property for dbaas cluster %s: %s", d.Id(), err))
-			return diags
+			return fmt.Errorf("error while setting ram_size property for dbaas cluster %s: %s", d.Id(), err)
 		}
 	}
 
 	if cluster.StorageSize != nil {
 		if err := d.Set("storage_size", *cluster.StorageSize); err != nil {
-			diags := diag.FromErr(fmt.Errorf("error while setting storage_size property for dbaas cluster %s: %s", d.Id(), err))
-			return diags
+			return fmt.Errorf("error while setting storage_size property for dbaas cluster %s: %s", d.Id(), err)
 		}
 	}
 
 	if cluster.StorageType != nil {
 		if err := d.Set("storage_type", *cluster.StorageType); err != nil {
-			diags := diag.FromErr(fmt.Errorf("error while setting storage_type property for dbaas cluster %s: %s", d.Id(), err))
-			return diags
+			return fmt.Errorf("error while setting storage_type property for dbaas cluster %s: %s", d.Id(), err)
 		}
 	}
 
@@ -313,30 +298,20 @@ func SetDbaasPgSqlClusterData(d *schema.ResourceData, cluster dbaas.Cluster) dia
 		}
 		if len(connections) > 0 {
 			if err := d.Set("vdc_connections", connections); err != nil {
-				diags := diag.FromErr(fmt.Errorf("error while setting vdc_connections property for dbaas cluster  %s: %s", d.Id(), err))
-				return diags
+				return fmt.Errorf("error while setting vdc_connections property for dbaas cluster  %s: %s", d.Id(), err)
 			}
 		}
 	}
 
 	if cluster.Location != nil {
 		if err := d.Set("location", *cluster.Location); err != nil {
-			diags := diag.FromErr(fmt.Errorf("error while setting location property for dbaas cluster %s: %s", d.Id(), err))
-			return diags
+			return fmt.Errorf("error while setting location property for dbaas cluster %s: %s", d.Id(), err)
 		}
 	}
 
 	if cluster.DisplayName != nil {
 		if err := d.Set("display_name", *cluster.DisplayName); err != nil {
-			diags := diag.FromErr(fmt.Errorf("error while setting display_name property for dbaas cluster %s: %s", d.Id(), err))
-			return diags
-		}
-	}
-
-	if cluster.BackupEnabled != nil {
-		if err := d.Set("backup_enabled", *cluster.BackupEnabled); err != nil {
-			diags := diag.FromErr(fmt.Errorf("error while setting backup_enabled property for dbaas cluster %s: %s", d.Id(), err))
-			return diags
+			return fmt.Errorf("error while setting display_name property for dbaas cluster %s: %s", d.Id(), err)
 		}
 	}
 
@@ -356,8 +331,7 @@ func SetDbaasPgSqlClusterData(d *schema.ResourceData, cluster dbaas.Cluster) dia
 		maintenanceWindow = append(maintenanceWindow, maintenanceWindowEntry)
 		err := d.Set("maintenance_window", maintenanceWindow)
 		if err != nil {
-			diags := diag.FromErr(fmt.Errorf("error while setting maintenance_window property for dbaas cluster %s: %s", d.Id(), err))
-			return diags
+			return fmt.Errorf("error while setting maintenance_window property for dbaas cluster %s: %s", d.Id(), err)
 		}
 	}
 

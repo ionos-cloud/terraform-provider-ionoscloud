@@ -6,7 +6,6 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
-	dbaas "github.com/ionos-cloud/sdk-go-autoscaling"
 	dbaasService "github.com/ionos-cloud/terraform-provider-ionoscloud/services/dbaas"
 	"log"
 	"net"
@@ -84,7 +83,7 @@ func resourceDbaasPgSqlCluster() *schema.Resource {
 						"ip_address": {
 							Type:        schema.TypeString,
 							Description: "The IP and subnet for the database.\n          Note the following unavailable IP ranges:\n          10.233.64.0/18\n          10.233.0.0/18\n          10.233.114.0/24",
-							Optional:    true,
+							Required:    true,
 							ValidateFunc: func(val interface{}, key string) (warns []string, errs []error) {
 								v := val.(string)
 								unavailableNetworks := []string{"10.233.64.0/18", "10.233.0.0/18", "10.233.114.0/24"}
@@ -112,12 +111,6 @@ func resourceDbaasPgSqlCluster() *schema.Resource {
 				Type:        schema.TypeString,
 				Description: "The friendly name of your cluster.",
 				Required:    true,
-			},
-			"backup_enabled": {
-				Type:       schema.TypeBool,
-				Deprecated: "Deprecated: backup is always enabled.\n      Enables automatic backups of your cluster.",
-				Optional:   true,
-				Default:    true,
 			},
 			"maintenance_window": {
 				Type:        schema.TypeList,
@@ -167,6 +160,12 @@ func resourceDbaasPgSqlCluster() *schema.Resource {
 				Optional:    true,
 				ForceNew:    true,
 			},
+			"from_recovery_target_time": {
+				Type:        schema.TypeString,
+				Description: "If this value is supplied as ISO 8601 timestamp, the backup will be replayed up until the given timestamp. If empty, the backup will be applied completely.",
+				Optional:    true,
+				ForceNew:    true,
+			},
 		},
 		Timeouts: &resourceDefaultTimeouts,
 	}
@@ -175,16 +174,12 @@ func resourceDbaasPgSqlCluster() *schema.Resource {
 func resourceDbaasPgSqlClusterCreate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	client := meta.(SdkBundle).DbaasClient
 
-	var err error
-	var dbaasClusterResponse dbaas.Cluster
-
 	dbaasCluster := dbaasService.GetDbaasPgSqlClusterDataCreate(d)
 
-	if backupId, ok := d.GetOk("from_backup"); ok {
-		dbaasClusterResponse, _, err = client.CreateClusterFromBackup(ctx, *dbaasCluster, backupId.(string))
-	} else {
-		dbaasClusterResponse, _, err = client.CreateCluster(ctx, *dbaasCluster)
-	}
+	backupId := d.Get("from_backup").(string)
+	recoveryTargetTime := d.Get("from_recovery_target_time").(string)
+
+	dbaasClusterResponse, _, err := client.CreateCluster(ctx, *dbaasCluster, backupId, recoveryTargetTime)
 
 	if err != nil {
 		diags := diag.FromErr(fmt.Errorf("an error occured while creating a dbaas cluster: %s", err))
@@ -239,7 +234,9 @@ func resourceDbaasPgSqlClusterRead(ctx context.Context, d *schema.ResourceData, 
 
 	log.Printf("[INFO] Successfully retreived cluster %s: %+v", d.Id(), cluster)
 
-	dbaasService.SetDbaasPgSqlClusterData(d, cluster)
+	if err := dbaasService.SetDbaasPgSqlClusterData(d, cluster); err != nil {
+		return diag.FromErr(err)
+	}
 
 	return nil
 }
@@ -349,12 +346,9 @@ func resourceDbaasPgSqlClusterImport(ctx context.Context, d *schema.ResourceData
 
 	log.Printf("[INFO] dbaas cluster found: %+v", dbaasCluster)
 
-	if dbaasCluster.Id != nil {
-		if err := d.Set("id", *dbaasCluster.Id); err != nil {
-			return nil, err
-		}
+	if err := dbaasService.SetDbaasPgSqlClusterData(d, dbaasCluster); err != nil {
+		return nil, err
 	}
-	dbaasService.SetDbaasPgSqlClusterData(d, dbaasCluster)
 
 	return []*schema.ResourceData{d}, nil
 }

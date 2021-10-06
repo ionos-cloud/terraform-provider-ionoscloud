@@ -80,11 +80,6 @@ func dataSourceDbaasPgSqlCluster() *schema.Resource {
 				Description: "The physical location where the cluster will be created. This will be where all of your instances live. Property cannot be modified after datacenter creation (disallowed in update requests)",
 				Computed:    true,
 			},
-			"backup_enabled": {
-				Type:       schema.TypeBool,
-				Deprecated: "Deprecated: backup is always enabled.\n      Enables automatic backups of your cluster.",
-				Computed:   true,
-			},
 			"maintenance_window": {
 				Type:        schema.TypeList,
 				Description: "a weekly 4 hour-long window, during which maintenance might occur",
@@ -151,33 +146,18 @@ func dataSourceDbaasPgSqlReadCluster(ctx context.Context, d *schema.ResourceData
 			return diags
 		}
 	} else {
-		clusters, _, err := client.ListClusters(ctx)
+		clusters, _, err := client.ListClusters(ctx, name.(string))
+
 		if err != nil {
 			diags := diag.FromErr(fmt.Errorf("an error occurred while fetching dbaas clusters: %s", err.Error()))
 			return diags
 		}
 
-		found := false
-		if clusters.Data != nil {
-			for _, c := range *clusters.Data {
-				tmpCluster, _, err := client.GetCluster(ctx, *c.Id)
-				if err != nil {
-					diags := diag.FromErr(fmt.Errorf("an error occurred while fetching dbaas cluster with ID %s: %s", *c.Id, err.Error()))
-					return diags
-				}
-				if tmpCluster.DisplayName != nil && *tmpCluster.DisplayName == name.(string) {
-					/* lan found */
-					cluster = tmpCluster
-					found = true
-					break
-				}
-
-			}
-		}
-		if !found {
+		if clusters.Data != nil && len(*clusters.Data) > 0 {
+			cluster = (*clusters.Data)[0]
+		} else {
 			return diag.FromErr(errors.New("dbaas cluster not found"))
 		}
-
 	}
 
 	if cluster.Id != nil {
@@ -186,8 +166,8 @@ func dataSourceDbaasPgSqlReadCluster(ctx context.Context, d *schema.ResourceData
 		}
 	}
 
-	if diags := dbaasService.SetDbaasPgSqlClusterData(d, cluster); diags != nil {
-		return diags
+	if err := dbaasService.SetDbaasPgSqlClusterData(d, cluster); err != nil {
+		return diag.FromErr(err)
 	}
 
 	return nil

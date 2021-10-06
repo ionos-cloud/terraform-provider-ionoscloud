@@ -27,7 +27,6 @@ resource "ionoscloud_dbaas_pgsql_cluster" "example" {
   }
   location = ionoscloud_datacenter.example.location
   display_name = "PostgreSQL_cluster"
-  backup_enabled = true
   maintenance_window {
     weekday = "Sunday"
     time            = "09:00:00"
@@ -44,16 +43,15 @@ resource "ionoscloud_dbaas_pgsql_cluster" "example" {
 * `postgres_version` - (Required)[string] The PostgreSQL version of your cluster.
 * `replicas` - (Required)[int] The number of replicas in your cluster.
 * `cpu_core_count` - (Required)[int] The number of CPU cores per replica.
-* `ram_size` - (Required)[string] The amount of memory per replica.
-* `storage_size` - (Required)[string] The amount of storage per replica.
+* `ram_size` - (Required)[string] The amount of memory per replica. **note that you have to use IEC format - eq: 2Gi**
+* `storage_size` - (Required)[string] The amount of storage per replica. **note that  you have to use IEC format - eq: 2Gi**
 * `storage_type` - (Required)[string] The storage type used in your cluster.
 * `vdc_connections` - (Required)[string] The VDC to connect to your cluster.
   * `vdc_id` - (Required)[true] 
-  * `lan_id` - (Required)[true]
-  * `ip_address` - (Optional)[true] The IP and subnet for the database. Note the following unavailable IP ranges: 10.233.64.0/18, 10.233.0.0/18, 10.233.114.0/24
+  * `lan_id` - (Required)[true] The **private LAN** in the datacenter
+  * `ip_address` - (Required)[true] The IP and subnet for the database. Note the following unavailable IP ranges: 10.233.64.0/18, 10.233.0.0/18, 10.233.114.0/24
 * `location` - (Required)[string] The physical location where the cluster will be created. This will be where all of your instances live. Property cannot be modified after datacenter creation (disallowed in update requests)
 * `display_name` - (Required)[string] The friendly name of your cluster.
-* `backup_enabled` - (Optional)[string] Deprecated: backup is always enabled. Enables automatic backups of your cluster.
 * `maintenance_window` - (Optional)[string] A weekly 4 hour-long window, during which maintenance might occur
   * `time` - (Required)[string]
   * `weekday` - (Required)[string]
@@ -69,3 +67,5 @@ Resource DbaaS PgSql Cluster can be imported using the `cluster_id`, e.g.
 ```shell
 terraform import ionoscloud_dbaas_pgsql_cluster.mycluser {cluster uuid}
 ```
+
+> :warning: 

@@ -9,7 +9,7 @@ import (
 	"testing"
 )
 
-func TestAccDbaasPgSqlCluster_Basic(t *testing.T) {
+func TestAccDBaaSPgSqlCluster_Basic(t *testing.T) {
 	var dbaasCluster dbaas.Cluster
 
 	resource.Test(t, resource.TestCase{
@@ -34,7 +34,6 @@ func TestAccDbaasPgSqlCluster_Basic(t *testing.T) {
 					resource.TestCheckResourceAttr("ionoscloud_dbaas_pgsql_cluster.test_dbaas_cluster", "vdc_connections.0.ip_address", "192.168.1.100/24"),
 					resource.TestCheckResourceAttrPair("ionoscloud_dbaas_pgsql_cluster.test_dbaas_cluster", "location", "ionoscloud_datacenter.test_dbaas_cluster", "location"),
 					resource.TestCheckResourceAttr("ionoscloud_dbaas_pgsql_cluster.test_dbaas_cluster", "display_name", "PostgreSQL_cluster"),
-					resource.TestCheckResourceAttr("ionoscloud_dbaas_pgsql_cluster.test_dbaas_cluster", "backup_enabled", "true"),
 					resource.TestCheckResourceAttr("ionoscloud_dbaas_pgsql_cluster.test_dbaas_cluster", "maintenance_window.0.time", "09:00:00"),
 					resource.TestCheckResourceAttr("ionoscloud_dbaas_pgsql_cluster.test_dbaas_cluster", "maintenance_window.0.weekday", "Sunday"),
 					resource.TestCheckResourceAttr("ionoscloud_dbaas_pgsql_cluster.test_dbaas_cluster", "credentials.0.username", "username"),
@@ -56,7 +55,6 @@ func TestAccDbaasPgSqlCluster_Basic(t *testing.T) {
 					resource.TestCheckResourceAttr("ionoscloud_dbaas_pgsql_cluster.test_dbaas_cluster", "vdc_connections.0.ip_address", "192.168.1.100/24"),
 					resource.TestCheckResourceAttrPair("ionoscloud_dbaas_pgsql_cluster.test_dbaas_cluster", "location", "ionoscloud_datacenter.test_dbaas_cluster", "location"),
 					resource.TestCheckResourceAttr("ionoscloud_dbaas_pgsql_cluster.test_dbaas_cluster", "display_name", "PostgreSQL_cluster_update"),
-					resource.TestCheckResourceAttr("ionoscloud_dbaas_pgsql_cluster.test_dbaas_cluster", "backup_enabled", "true"),
 					resource.TestCheckResourceAttr("ionoscloud_dbaas_pgsql_cluster.test_dbaas_cluster", "maintenance_window.0.time", "10:00:00"),
 					resource.TestCheckResourceAttr("ionoscloud_dbaas_pgsql_cluster.test_dbaas_cluster", "maintenance_window.0.weekday", "Saturday"),
 					resource.TestCheckResourceAttr("ionoscloud_dbaas_pgsql_cluster.test_dbaas_cluster", "credentials.0.username", "username"),
@@ -67,9 +65,12 @@ func TestAccDbaasPgSqlCluster_Basic(t *testing.T) {
 	})
 }
 
-func TestAccDbaasPgSqlCluster_FromBackup(t *testing.T) {
-	var dbaasCluster dbaas.Cluster
+func TestAccDBaaSPgSqlClusterAdditionalParameters(t *testing.T) {
+	// if you want to remove this line in order to test, please be sure you replace from_backup and from_recovery_target_time
+	// arguments with valid values since now they are hardcoded
+	t.Skip()
 
+	var dbaasCluster dbaas.Cluster
 	resource.Test(t, resource.TestCase{
 		PreCheck: func() {
 			testAccPreCheck(t)
@@ -190,7 +191,6 @@ resource "ionoscloud_dbaas_pgsql_cluster" "test_dbaas_cluster" {
   }
   location = ionoscloud_datacenter.test_dbaas_cluster.location
   display_name = "PostgreSQL_cluster"
-  backup_enabled = true
   maintenance_window {
     weekday = "Sunday"
     time            = "09:00:00"
@@ -233,7 +233,6 @@ resource "ionoscloud_dbaas_pgsql_cluster" "test_dbaas_cluster" {
   }
   location = ionoscloud_datacenter.test_dbaas_cluster.location
   display_name = "PostgreSQL_cluster_update"
-  backup_enabled = true
   maintenance_window {
     weekday = "Saturday"
     time            = "10:00:00"
@@ -282,5 +281,6 @@ resource "ionoscloud_dbaas_pgsql_cluster" "from_backup" {
 	password = "password"
 
   }
-  from_backup = "3273774b-2116-11ec-bd55-d6a61c20e878-4oymiqu-12"
+  from_backup = "0593557b-2698-11ec-9c30-32ede2a30faa-4oymiqu-12"
+  from_recovery_target_time = "2021-10-06T14:44:11Z"
 }`

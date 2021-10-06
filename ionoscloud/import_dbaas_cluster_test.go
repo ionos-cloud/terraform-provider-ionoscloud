@@ -9,7 +9,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
 )
 
-func TestAccDbaasPgSqlCluster_ImportBasic(t *testing.T) {
+func TestAccDbaasPgSqlClusterImportBasic(t *testing.T) {
 	resourceName := "ionoscloud_dbaas_pgsql_cluster.test_dbaas_cluster"
 	resource.Test(t, resource.TestCase{
 		PreCheck:          func() { testAccPreCheck(t) },
