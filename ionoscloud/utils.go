@@ -6,6 +6,7 @@ import (
 	ionoscloud "github.com/ionos-cloud/sdk-go/v5"
 	"log"
 	"reflect"
+	"regexp"
 	"strings"
 	"time"
 
@@ -475,26 +476,6 @@ func resourceS3KeyImport(ctx context.Context, d *schema.ResourceData, meta inter
 	if err := d.Set("active", *s3Key.Properties.Active); err != nil {
 		return nil, err
 	}
-
-	return []*schema.ResourceData{d}, nil
-}
-
-func resourceFirewallImport(_ context.Context, d *schema.ResourceData, _ interface{}) ([]*schema.ResourceData, error) {
-	parts := strings.Split(d.Id(), "/")
-	if len(parts) != 4 || parts[0] == "" || parts[1] == "" {
-		return nil, fmt.Errorf("invalid import id %q. Expecting {datacenter}/{server}/{nic}/{firewall}", d.Id())
-	}
-
-	if err := d.Set("datacenter_id", parts[0]); err != nil {
-		return nil, err
-	}
-	if err := d.Set("server_id", parts[1]); err != nil {
-		return nil, err
-	}
-	if err := d.Set("nic_id", parts[2]); err != nil {
-		return nil, err
-	}
-	d.SetId(parts[3])
 
 	return []*schema.ResourceData{d}, nil
 }
@@ -1042,4 +1023,9 @@ func setPropWithNilCheck(m map[string]interface{}, prop string, v interface{}) {
 	} else {
 		m[prop] = v
 	}
+}
+
+func IsValidUUID(uuid string) bool {
+	r := regexp.MustCompile("^[a-fA-F0-9]{8}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-[a-fA-F0-9]{12}$")
+	return r.MatchString(uuid)
 }

@@ -8,7 +8,6 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 	ionoscloud "github.com/ionos-cloud/sdk-go/v5"
 	"log"
-	"regexp"
 )
 
 func resourceDatacenter() *schema.Resource {
@@ -226,9 +225,4 @@ func resourceDatacenterImport(ctx context.Context, d *schema.ResourceData, meta 
 	}
 
 	return []*schema.ResourceData{d}, nil
-}
-
-func IsValidUUID(uuid string) bool {
-	r := regexp.MustCompile("^[a-fA-F0-9]{8}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-[a-fA-F0-9]{12}$")
-	return r.MatchString(uuid)
 }

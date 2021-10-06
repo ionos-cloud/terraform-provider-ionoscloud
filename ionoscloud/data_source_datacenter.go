@@ -145,8 +145,10 @@ func dataSourceDataCenterRead(ctx context.Context, d *schema.ResourceData, meta 
 		return diag.FromErr(fmt.Errorf("there are no datacenters that match the search criteria"))
 	}
 
-	if err := d.Set("id", *datacenter.Id); err != nil {
-		return diag.FromErr(err)
+	if datacenter.Id != nil {
+		if err := d.Set("id", *datacenter.Id); err != nil {
+			return diag.FromErr(err)
+		}
 	}
 
 	if err := setDatacenterData(d, &datacenter); err != nil {

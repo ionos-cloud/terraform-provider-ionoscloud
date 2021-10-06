@@ -8,7 +8,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 )
 
-func TestAccDataCenter_ImportBasic(t *testing.T) {
+func TestAccDataCenterImportBasic(t *testing.T) {
 	resourceName := "datacenter-importtest"
 
 	resource.Test(t, resource.TestCase{
