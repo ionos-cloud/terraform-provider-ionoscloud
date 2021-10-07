@@ -131,8 +131,10 @@ func dataSourceNatGatewayRead(d *schema.ResourceData, meta interface{}) error {
 		return errors.New("nat gateway not found")
 	}
 
-	if err := d.Set("id", *natGateway.Id); err != nil {
-		return err
+	if natGateway.Id != nil {
+		if err := d.Set("id", *natGateway.Id); err != nil {
+			return err
+		}
 	}
 
 	if err = setNatGatewayData(d, &natGateway); err != nil {

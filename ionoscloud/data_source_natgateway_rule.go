@@ -163,8 +163,10 @@ func dataSourceNatGatewayRuleRead(d *schema.ResourceData, meta interface{}) erro
 		return errors.New("nat gateway rule not found")
 	}
 
-	if err := d.Set("id", *natGatewayRule.Id); err != nil {
-		return err
+	if natGatewayRule.Id != nil {
+		if err := d.Set("id", *natGatewayRule.Id); err != nil {
+			return err
+		}
 	}
 
 	if err = setNatGatewayRuleData(d, &natGatewayRule); err != nil {

@@ -6,6 +6,7 @@ import (
 	ionoscloud "github.com/ionos-cloud/sdk-go/v6"
 	"log"
 	"reflect"
+	"regexp"
 	"strings"
 	"time"
 
@@ -13,20 +14,6 @@ import (
 )
 
 const SleepInterval = 5 * time.Second
-
-func resourceResourceImport(_ context.Context, d *schema.ResourceData, _ interface{}) ([]*schema.ResourceData, error) {
-	parts := strings.Split(d.Id(), "/")
-	if len(parts) != 2 || parts[0] == "" || parts[1] == "" {
-		return nil, fmt.Errorf("invalid import id %q. Expecting {datacenter}/{resource}", d.Id())
-	}
-
-	if err := d.Set("datacenter_id", parts[0]); err != nil {
-		return nil, err
-	}
-	d.SetId(parts[1])
-
-	return []*schema.ResourceData{d}, nil
-}
 
 func resourceServerImport(ctx context.Context, d *schema.ResourceData, meta interface{}) ([]*schema.ResourceData, error) {
 	parts := strings.Split(d.Id(), "/")
@@ -984,4 +971,9 @@ func setPropWithNilCheck(m map[string]interface{}, prop string, v interface{}) {
 	} else {
 		m[prop] = v
 	}
+}
+
+func IsValidUUID(uuid string) bool {
+	r := regexp.MustCompile("^[a-fA-F0-9]{8}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-[a-fA-F0-9]{12}$")
+	return r.MatchString(uuid)
 }
