@@ -1,3 +1,7 @@
+## 5.2.16
+
+- new data sources added: s3 key
+
 ## 5.2.15
 
 - updated sdk-go to v5.1.7
