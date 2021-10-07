@@ -56,7 +56,7 @@ func testAccChecks3KeyDestroyCheck(s *terraform.State) error {
 		_, apiResponse, err := client.UserS3KeysApi.UmUsersS3keysFindByKeyId(context.TODO(), userId, rs.Primary.ID).Execute()
 
 		if err != nil {
-			if apiResponse == nil || apiResponse.StatusCode != 404 {
+			if apiResponse == nil || apiResponse.Response != nil && apiResponse.StatusCode != 404 {
 				return fmt.Errorf("an error occurred while fetching s3 key %s: %s", rs.Primary.ID, err)
 			}
 		} else {

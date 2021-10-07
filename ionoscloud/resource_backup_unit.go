@@ -128,7 +128,9 @@ func resourceBackupUnitRead(ctx context.Context, d *schema.ResourceData, meta in
 
 	log.Printf("[INFO] Successfully retreived contract resource for backup unit unit %s: %+v", d.Id(), contractResources)
 
-	setBackupUnitData(d, &backupUnit, &contractResources)
+	if err := setBackupUnitData(d, &backupUnit, &contractResources); err != nil {
+		return diag.FromErr(err)
+	}
 
 	log.Printf("[INFO] Successfully retreived backup unit %s: %+v", d.Id(), backupUnit)
 
@@ -267,20 +269,9 @@ func resourceBackupUnitImport(ctx context.Context, d *schema.ResourceData, meta 
 		return nil, fmt.Errorf("error while fetching contract resources for backup unit %q: %s", d.Id(), cErr)
 	}
 
-	if contractResources.Items == nil || len(*contractResources.Items) == 0 {
-		return nil, fmt.Errorf("no contracts found for user")
+	if err := setBackupUnitData(d, &backupUnit, &contractResources); err != nil {
+		return nil, err
 	}
-
-	props := (*contractResources.Items)[0].Properties
-	if props == nil {
-		return nil, fmt.Errorf("could not get first contract properties")
-	}
-
-	if props.ContractNumber == nil {
-		return nil, fmt.Errorf("contract number not set")
-	}
-
-	setBackupUnitData(d, &backupUnit, &contractResources)
 
 	return []*schema.ResourceData{d}, nil
 }
@@ -304,4 +295,50 @@ func backupUnitDeleted(client *ionoscloud.APIClient, d *schema.ResourceData, c c
 		return true, fmt.Errorf("error checking backup unit deletion status: %s", err)
 	}
 	return false, nil
+}
+
+func setBackupUnitData(d *schema.ResourceData, backupUnit *ionoscloud.BackupUnit, contractResources *ionoscloud.Contracts) error {
+
+	if backupUnit.Id != nil {
+		d.SetId(*backupUnit.Id)
+	}
+
+	if backupUnit.Properties != nil {
+
+		if backupUnit.Properties.Name != nil {
+			epErr := d.Set("name", *backupUnit.Properties.Name)
+			if epErr != nil {
+				return fmt.Errorf("error while setting name property for backup unit %s: %s", d.Id(), epErr)
+			}
+		}
+
+		if backupUnit.Properties.Email != nil {
+			epErr := d.Set("email", *backupUnit.Properties.Email)
+			if epErr != nil {
+				return fmt.Errorf("error while setting email property for backup unit %s: %s", d.Id(), epErr)
+			}
+		}
+
+		if backupUnit.Properties.Name != nil && contractResources.Items != nil && len(*contractResources.Items) > 0 &&
+			(*contractResources.Items)[0].Properties.ContractNumber != nil {
+			err := d.Set("login", fmt.Sprintf("%s-%d", *backupUnit.Properties.Name, *(*contractResources.Items)[0].Properties.ContractNumber))
+			if err != nil {
+				return fmt.Errorf("error while setting login property for backup unit %s: %s", d.Id(), err)
+			}
+		} else {
+			if contractResources.Items == nil || len(*contractResources.Items) == 0 {
+				return fmt.Errorf("no contracts found for user")
+			}
+
+			props := (*contractResources.Items)[0].Properties
+			if props == nil {
+				return fmt.Errorf("could not get first contract properties")
+			}
+
+			if props.ContractNumber == nil {
+				return fmt.Errorf("contract number not set")
+			}
+		}
+	}
+	return nil
 }

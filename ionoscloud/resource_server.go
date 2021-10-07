@@ -662,7 +662,7 @@ func resourceServerCreate(ctx context.Context, d *schema.ResourceData, meta inte
 	server, apiResponse, err := client.ServersApi.DatacentersServersPost(ctx, d.Get("datacenter_id").(string)).Server(request).Execute()
 
 	if err != nil {
-		diags := diag.FromErr(fmt.Errorf("error creating server: (%s) %s", err, string(apiResponse.Payload)))
+		diags := diag.FromErr(fmt.Errorf("error creating server: %s", err))
 		return diags
 	}
 	d.SetId(*server.Id)

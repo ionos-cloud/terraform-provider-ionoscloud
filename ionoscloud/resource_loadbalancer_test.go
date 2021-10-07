@@ -60,7 +60,7 @@ func testAccCheckLoadbalancerDestroyCheck(s *terraform.State) error {
 		_, apiResponse, err := client.LoadBalancersApi.DatacentersLoadbalancersFindById(ctx, dcId, rs.Primary.ID).Execute()
 
 		if err != nil {
-			if apiResponse == nil || apiResponse.StatusCode != 404 {
+			if apiResponse == nil || apiResponse.Response != nil && apiResponse.StatusCode != 404 {
 				return fmt.Errorf("an error occurred while checking the destruction of load balancer %s: %s",
 					rs.Primary.ID, err)
 			}
