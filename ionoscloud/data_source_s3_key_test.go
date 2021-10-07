@@ -9,7 +9,7 @@ import (
 
 var email = fmt.Sprintf("terraform_test-%d@mailinator.com", time.Now().Unix())
 
-func TestAccDataSourceS3Key_matchFields_expectSuccess(t *testing.T) {
+func TestAccDataSourceS3KeyMatchFields(t *testing.T) {
 
 	resource.Test(t, resource.TestCase{
 		PreCheck: func() {
