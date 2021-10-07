@@ -11,7 +11,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
 )
 
-func TestAccS3Key_Basic(t *testing.T) {
+func TestAccS3KeyBasic(t *testing.T) {
 	var s3Key ionoscloud.S3Key
 	s3KeyName := "example"
 	email := fmt.Sprintf("terraform_test-%d@mailinator.com", time.Now().Unix())

@@ -97,6 +97,7 @@ func Provider() *schema.Provider {
 			"ionoscloud_template":                           dataSourceTemplate(),
 			"ionoscloud_backup_unit":                        dataSourceBackupUnit(),
 			"ionoscloud_firewall":                           dataSourceFirewall(),
+			"ionoscloud_s3_key":                             dataSourceS3Key(),
 		},
 	}
 
