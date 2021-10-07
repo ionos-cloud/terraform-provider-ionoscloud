@@ -38,7 +38,7 @@ func testAccBackupUnitImportStateId(s *terraform.State) (string, error) {
 			continue
 		}
 
-		importID = fmt.Sprintf("%s", rs.Primary.Attributes["id"])
+		importID = rs.Primary.Attributes["id"]
 	}
 
 	return importID, nil

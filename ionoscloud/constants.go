@@ -1,6 +1,6 @@
 package ionoscloud
 
-// LAN Constants
+// Lan Constants
 const (
 	LanResourceName     = "example_lan"
 	LanDataSourceById   = "example_lan_id"

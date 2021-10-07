@@ -6,6 +6,7 @@ import (
 	ionoscloud "github.com/ionos-cloud/sdk-go/v6"
 	"log"
 	"reflect"
+	"regexp"
 	"strings"
 	"time"
 
@@ -1006,4 +1007,9 @@ func setPropWithNilCheck(m map[string]interface{}, prop string, v interface{}) {
 	} else {
 		m[prop] = v
 	}
+}
+
+func IsValidUUID(uuid string) bool {
+	r := regexp.MustCompile("^[a-fA-F0-9]{8}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-[a-fA-F0-9]{12}$")
+	return r.MatchString(uuid)
 }

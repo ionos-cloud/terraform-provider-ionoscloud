@@ -132,10 +132,6 @@ func dataSourceLanRead(d *schema.ResourceData, meta interface{}) error {
 		}
 	}
 
-	if err := d.Set("id", *lan.Id); err != nil {
-		return err
-	}
-
 	if err = setLanData(d, &lan); err != nil {
 		return err
 	}
