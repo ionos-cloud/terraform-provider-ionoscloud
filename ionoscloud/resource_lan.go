@@ -246,6 +246,8 @@ func resourceLanDelete(ctx context.Context, d *schema.ResourceData, meta interfa
 }
 
 func resourceLanImport(ctx context.Context, d *schema.ResourceData, meta interface{}) ([]*schema.ResourceData, error) {
+	client := meta.(*ionoscloud.APIClient)
+
 	parts := strings.Split(d.Id(), "/")
 
 	if len(parts) != 2 || parts[0] == "" || parts[1] == "" {
@@ -255,43 +257,28 @@ func resourceLanImport(ctx context.Context, d *schema.ResourceData, meta interfa
 	datacenterId := parts[0]
 	lanId := parts[1]
 
+	lan, apiResponse, err := client.LansApi.DatacentersLansFindById(ctx, datacenterId, lanId).Execute()
+
+	if err != nil {
+		if apiResponse != nil && apiResponse.Response != nil && apiResponse.StatusCode == 404 {
+			d.SetId("")
+			return nil, fmt.Errorf("unable to find lan %q", lanId)
+		}
+		return nil, fmt.Errorf("an error occured while retrieving the lan %q, %q", lanId, err)
+	}
+
+	log.Printf("[INFO] LAN %s found: %+v", d.Id(), lan)
+
+	d.SetId(lanId)
+
 	if err := d.Set("datacenter_id", datacenterId); err != nil {
 		return nil, fmt.Errorf("error while setting datacenter_id property for lan %q: %q", lanId, err)
 	}
 
-	d.SetId(lanId)
-
-	resourceLanRead(ctx, d, meta)
-
+	if err := setLanData(d, &lan); err != nil {
+		return nil, err
+	}
 	return []*schema.ResourceData{d}, nil
-}
-
-func lanAvailable(ctx context.Context, client *ionoscloud.APIClient, d *schema.ResourceData) (bool, error) {
-	dcid := d.Get("datacenter_id").(string)
-	rsp, _, err := client.LansApi.DatacentersLansFindById(ctx, dcid, d.Id()).Execute()
-
-	log.Printf("[INFO] Current status for LAN %s: %+v", d.Id(), rsp)
-
-	if err != nil {
-		return true, fmt.Errorf("error checking LAN status: %s", err)
-	}
-	return *rsp.Metadata.State == "AVAILABLE", nil
-}
-
-func lanDeleted(ctx context.Context, client *ionoscloud.APIClient, d *schema.ResourceData) (bool, error) {
-	dcid := d.Get("datacenter_id").(string)
-	rsp, apiResponse, err := client.LansApi.DatacentersLansFindById(ctx, dcid, d.Id()).Execute()
-
-	log.Printf("[INFO] Current deletion status for LAN %s: %+v", d.Id(), rsp)
-
-	if err != nil {
-		if apiResponse != nil && apiResponse.Response != nil && apiResponse.StatusCode == 404 {
-			return true, nil
-		}
-		return true, fmt.Errorf("error checking LAN deletion status: %s", err)
-	}
-	log.Printf("[INFO] LAN %s not deleted yet deleted LAN: %+v", d.Id(), rsp)
-	return false, nil
 }
 
 func setLanData(d *schema.ResourceData, lan *ionoscloud.Lan) error {
@@ -321,4 +308,33 @@ func setLanData(d *schema.ResourceData, lan *ionoscloud.Lan) error {
 	}
 
 	return nil
+}
+
+func lanAvailable(ctx context.Context, client *ionoscloud.APIClient, d *schema.ResourceData) (bool, error) {
+	dcid := d.Get("datacenter_id").(string)
+	rsp, _, err := client.LansApi.DatacentersLansFindById(ctx, dcid, d.Id()).Execute()
+
+	log.Printf("[INFO] Current status for LAN %s: %+v", d.Id(), rsp)
+
+	if err != nil {
+		return true, fmt.Errorf("error checking LAN status: %s", err)
+	}
+	return *rsp.Metadata.State == "AVAILABLE", nil
+}
+
+func lanDeleted(ctx context.Context, client *ionoscloud.APIClient, d *schema.ResourceData) (bool, error) {
+	dcid := d.Get("datacenter_id").(string)
+
+	rsp, apiResponse, err := client.LansApi.DatacentersLansFindById(ctx, dcid, d.Id()).Execute()
+
+	log.Printf("[INFO] Current deletion status for LAN %s: %+v", d.Id(), rsp)
+
+	if err != nil {
+		if apiResponse != nil && apiResponse.Response != nil && apiResponse.StatusCode == 404 {
+			return true, nil
+		}
+		return true, fmt.Errorf("error checking LAN deletion status: %s", err)
+	}
+	log.Printf("[INFO] LAN %s not deleted yet deleted LAN: %+v", d.Id(), rsp)
+	return false, nil
 }

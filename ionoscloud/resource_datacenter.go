@@ -217,12 +217,30 @@ func resourceDatacenterDelete(ctx context.Context, d *schema.ResourceData, meta 
 	}
 
 	d.SetId("")
-
 	return nil
 }
 
 func resourceDatacenterImport(ctx context.Context, d *schema.ResourceData, meta interface{}) ([]*schema.ResourceData, error) {
-	resourceDatacenterRead(ctx, d, meta)
+	client := meta.(*ionoscloud.APIClient)
+
+	dcId := d.Id()
+
+	datacenter, apiResponse, err := client.DataCentersApi.DatacentersFindById(ctx, d.Id()).Execute()
+
+	if err != nil {
+		if apiResponse != nil && apiResponse.Response != nil && apiResponse.StatusCode == 404 {
+			d.SetId("")
+			return nil, fmt.Errorf("unable to find datacenter %q", dcId)
+		}
+		return nil, fmt.Errorf("an error occured while retrieving the datacenter %q, %q", dcId, err)
+	}
+
+	log.Printf("[INFO] Datacenter found: %+v", datacenter)
+
+	if err := setDatacenterData(d, &datacenter); err != nil {
+		return nil, err
+	}
+
 	return []*schema.ResourceData{d}, nil
 }
 

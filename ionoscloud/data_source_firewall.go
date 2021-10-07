@@ -136,8 +136,8 @@ func dataSourceFirewallRead(ctx context.Context, d *schema.ResourceData, meta in
 		return diag.FromErr(fmt.Errorf("firewall rule not found"))
 	}
 
-	if diags := setFirewallData(d, &firewall); diags != nil {
-		return diags
+	if err := setFirewallData(d, &firewall); err != nil {
+		return diag.FromErr(err)
 	}
 
 	return nil
