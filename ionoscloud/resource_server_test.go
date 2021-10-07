@@ -166,6 +166,26 @@ func TestAccServer_WithSnapshot(t *testing.T) {
 	})
 }
 
+func TestAccServerCubeServer(t *testing.T) {
+	var server ionoscloud.Server
+
+	resource.Test(t, resource.TestCase{
+		PreCheck: func() {
+			testAccPreCheck(t)
+		},
+		ProviderFactories: testAccProviderFactories,
+		CheckDestroy:      testAccCheckServerDestroyCheck,
+		Steps: []resource.TestStep{
+			{
+				Config: testAccCheckVolumeCubeServer,
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckServerExists("ionoscloud_server.cube1", &server),
+				),
+			},
+		},
+	})
+}
+
 func testAccCheckServerDestroyCheck(s *terraform.State) error {
 	client := testAccProvider.Meta().(*ionoscloud.APIClient)
 
@@ -608,6 +628,43 @@ resource "ionoscloud_server" "webserver2" {
 }
 `
 
-func Test_Update(t *testing.T) {
-
+const testAccCheckVolumeCubeServer = `
+data "ionoscloud_template" "cube-s" {
+    name = "CUBES S"
+    cores = 1
+    ram   = 2048
+    storage_size = 50
 }
+
+resource "ionoscloud_datacenter" "foobar" {
+	name       = "volume-test"
+	location   = "de/fra"
+}
+
+resource "ionoscloud_server" "cube1" {
+  name              = "cube1"
+  availability_zone = "ZONE_2"
+  cores             = 1
+  ram               = 2048 
+  image_name        = "ubuntu:latest"
+  type              = "CUBE"
+
+  template_uuid     = data.ionoscloud_template.cube-s.id
+  image_password = "K3tTj8G14a3EgKyNeeiY"  
+  datacenter_id     = ionoscloud_datacenter.foobar.id
+  
+  volume {
+    name            = "cube1-d1"
+    licence_type    = "LINUX" 
+    size      = 50
+    disk_type = "CUBE"
+    
+  }
+  
+  nic {
+    lan             = "2"
+    name            = "nic1"
+    dhcp            = false
+    firewall_active = false
+  }
+}`
