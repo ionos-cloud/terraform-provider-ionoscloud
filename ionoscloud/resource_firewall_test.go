@@ -110,11 +110,11 @@ func testAccCheckFirewallDestroyCheck(s *terraform.State) error {
 			continue
 		}
 
-		_, apiRsponse, err := client.FirewallRulesApi.DatacentersServersNicsFirewallrulesFindById(ctx, rs.Primary.Attributes["datacenter_id"],
+		_, apiResponse, err := client.FirewallRulesApi.DatacentersServersNicsFirewallrulesFindById(ctx, rs.Primary.Attributes["datacenter_id"],
 			rs.Primary.Attributes["server_id"], rs.Primary.Attributes["nic_id"], rs.Primary.ID).Execute()
 
 		if err != nil {
-			if apiRsponse != nil && apiRsponse.StatusCode != 404 {
+			if apiResponse != nil && apiResponse.Response != nil && apiResponse.StatusCode != 404 {
 				return fmt.Errorf("error occurent at checking deletion of firewall %s %s", rs.Primary.ID, err)
 			}
 		} else {
