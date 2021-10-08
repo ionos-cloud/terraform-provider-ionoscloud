@@ -6,6 +6,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 	"log"
+	"strings"
 	"time"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
@@ -19,7 +20,7 @@ func resourceLan() *schema.Resource {
 		UpdateContext: resourceLanUpdate,
 		DeleteContext: resourceLanDelete,
 		Importer: &schema.ResourceImporter{
-			StateContext: resourceResourceImport,
+			StateContext: resourceLanImport,
 		},
 		Schema: map[string]*schema.Schema{
 
@@ -140,7 +141,8 @@ func resourceLanRead(ctx context.Context, d *schema.ResourceData, meta interface
 	client := meta.(*ionoscloud.APIClient)
 
 	dcid := d.Get("datacenter_id").(string)
-	rsp, apiResponse, err := client.LansApi.DatacentersLansFindById(ctx, dcid, d.Id()).Execute()
+
+	lan, apiResponse, err := client.LansApi.DatacentersLansFindById(ctx, dcid, d.Id()).Execute()
 
 	if err != nil {
 		if apiResponse != nil && apiResponse.Response != nil && apiResponse.StatusCode == 404 {
@@ -153,45 +155,12 @@ func resourceLanRead(ctx context.Context, d *schema.ResourceData, meta interface
 		return diags
 	}
 
-	if rsp.Properties.Public != nil {
-		if err := d.Set("public", *rsp.Properties.Public); err != nil {
-			diags := diag.FromErr(err)
-			return diags
-		}
+	log.Printf("[INFO] LAN %s found: %+v", d.Id(), lan)
+
+	if err := setLanData(d, &lan); err != nil {
+		return diag.FromErr(err)
 	}
 
-	if rsp.Properties.Name != nil {
-		if err := d.Set("name", *rsp.Properties.Name); err != nil {
-			diags := diag.FromErr(err)
-			return diags
-		}
-	}
-
-	if rsp.Properties.IpFailover != nil && len(*rsp.Properties.IpFailover) > 0 {
-		if err := d.Set("ip_failover", []map[string]string{
-			{
-				"ip":       *(*rsp.Properties.IpFailover)[0].Ip,
-				"nic_uuid": *(*rsp.Properties.IpFailover)[0].NicUuid,
-			},
-		}); err != nil {
-			diags := diag.FromErr(err)
-			return diags
-		}
-	}
-
-	if err := d.Set("datacenter_id", d.Get("datacenter_id").(string)); err != nil {
-		diags := diag.FromErr(err)
-		return diags
-	}
-
-	if rsp.Properties.Pcc != nil {
-		if err := d.Set("pcc", *rsp.Properties.Pcc); err != nil {
-			diags := diag.FromErr(err)
-			return diags
-		}
-	}
-
-	log.Printf("[INFO] LAN %s found: %+v", d.Id(), rsp)
 	return nil
 }
 
@@ -276,6 +245,71 @@ func resourceLanDelete(ctx context.Context, d *schema.ResourceData, meta interfa
 	return nil
 }
 
+func resourceLanImport(ctx context.Context, d *schema.ResourceData, meta interface{}) ([]*schema.ResourceData, error) {
+	client := meta.(*ionoscloud.APIClient)
+
+	parts := strings.Split(d.Id(), "/")
+
+	if len(parts) != 2 || parts[0] == "" || parts[1] == "" {
+		return nil, fmt.Errorf("invalid import id %q. Expecting {datacenter}/{lan}", d.Id())
+	}
+
+	datacenterId := parts[0]
+	lanId := parts[1]
+
+	lan, apiResponse, err := client.LansApi.DatacentersLansFindById(ctx, datacenterId, lanId).Execute()
+
+	if err != nil {
+		if apiResponse != nil && apiResponse.Response != nil && apiResponse.StatusCode == 404 {
+			d.SetId("")
+			return nil, fmt.Errorf("unable to find lan %q", lanId)
+		}
+		return nil, fmt.Errorf("an error occured while retrieving the lan %q, %q", lanId, err)
+	}
+
+	log.Printf("[INFO] LAN %s found: %+v", d.Id(), lan)
+
+	d.SetId(lanId)
+
+	if err := d.Set("datacenter_id", datacenterId); err != nil {
+		return nil, fmt.Errorf("error while setting datacenter_id property for lan %q: %q", lanId, err)
+	}
+
+	if err := setLanData(d, &lan); err != nil {
+		return nil, err
+	}
+	return []*schema.ResourceData{d}, nil
+}
+
+func setLanData(d *schema.ResourceData, lan *ionoscloud.Lan) error {
+	d.SetId(*lan.Id)
+
+	if lan.Properties != nil {
+		if lan.Properties.Name != nil {
+			if err := d.Set("name", *lan.Properties.Name); err != nil {
+				return err
+			}
+		}
+		if lan.Properties.IpFailover != nil && len(*lan.Properties.IpFailover) > 0 {
+			if err := d.Set("ip_failover", convertIpFailoverList(lan.Properties.IpFailover)); err != nil {
+				return err
+			}
+		}
+		if lan.Properties.Pcc != nil {
+			if err := d.Set("pcc", *lan.Properties.Pcc); err != nil {
+				return err
+			}
+		}
+		if lan.Properties.Public != nil {
+			if err := d.Set("public", *lan.Properties.Public); err != nil {
+				return err
+			}
+		}
+	}
+
+	return nil
+}
+
 func lanAvailable(ctx context.Context, client *ionoscloud.APIClient, d *schema.ResourceData) (bool, error) {
 	dcid := d.Get("datacenter_id").(string)
 	rsp, _, err := client.LansApi.DatacentersLansFindById(ctx, dcid, d.Id()).Execute()
@@ -290,6 +324,7 @@ func lanAvailable(ctx context.Context, client *ionoscloud.APIClient, d *schema.R
 
 func lanDeleted(ctx context.Context, client *ionoscloud.APIClient, d *schema.ResourceData) (bool, error) {
 	dcid := d.Get("datacenter_id").(string)
+
 	rsp, apiResponse, err := client.LansApi.DatacentersLansFindById(ctx, dcid, d.Id()).Execute()
 
 	log.Printf("[INFO] Current deletion status for LAN %s: %+v", d.Id(), rsp)

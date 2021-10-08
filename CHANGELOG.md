@@ -1,3 +1,12 @@
+## 6.0.0-beta.12
+
+For `backupUnit`, `datacenter`, `lan` and `firewall` resources done the following:
+- made tests comprehensive
+- optimized test duration by including both match by id and by name in the same test
+- removed duplicated code from import, data_source and resource files (set parameters)
+- updated documentation 
+- improved import functions
+
 ## 6.0.0-beta.11
 
 - added `image_alias` to volume

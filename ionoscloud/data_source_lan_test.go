@@ -6,7 +6,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 )
 
-func TestAccDataSourceLan_matchId(t *testing.T) {
+func TestAccDataSourceLan(t *testing.T) {
 	resource.Test(t, resource.TestCase{
 		PreCheck: func() {
 			testAccPreCheck(t)
@@ -19,84 +19,93 @@ func TestAccDataSourceLan_matchId(t *testing.T) {
 			{
 				Config: testAccDataSourceLanMatchId,
 				Check: resource.ComposeTestCheckFunc(
-					resource.TestCheckResourceAttr("data.ionoscloud_lan.test_lan", "name", "test_ds_lan"),
+					resource.TestCheckResourceAttrPair("data.ionoscloud_lan."+LanDataSourceById, "name", "ionoscloud_lan."+LanResourceName, "name"),
+					resource.TestCheckResourceAttrPair("data.ionoscloud_lan."+LanDataSourceById, "ip_failover.nic_uuid", "ionoscloud_lan."+LanResourceName, "ip_failover.nic_uuid"),
+					resource.TestCheckResourceAttrPair("data.ionoscloud_lan."+LanDataSourceById, "ip_failover.ip", "ionoscloud_lan."+LanResourceName, "ip_failover.ip"),
+					resource.TestCheckResourceAttrPair("data.ionoscloud_lan."+LanDataSourceById, "pcc", "ionoscloud_lan."+LanResourceName, "pcc"),
+					resource.TestCheckResourceAttrPair("data.ionoscloud_lan."+LanDataSourceById, "public", "ionoscloud_lan."+LanResourceName, "public"),
 				),
-			},
-		},
-	})
-}
-
-func TestAccDataSourceLan_matchName(t *testing.T) {
-	resource.Test(t, resource.TestCase{
-		PreCheck: func() {
-			testAccPreCheck(t)
-		},
-		ProviderFactories: testAccProviderFactories,
-		Steps: []resource.TestStep{
-			{
-				Config: testAccDataSourceLanCreateResources,
 			},
 			{
 				Config: testAccDataSourceLanMatchName,
 				Check: resource.ComposeTestCheckFunc(
-					resource.TestCheckResourceAttr("data.ionoscloud_lan.test_lan", "name", "test_ds_lan"),
+					resource.TestCheckResourceAttrPair("data.ionoscloud_lan."+LanDataSourceByName, "name", "ionoscloud_lan."+LanResourceName, "name"),
+					resource.TestCheckResourceAttrPair("data.ionoscloud_lan."+LanDataSourceByName, "ip_failover.nic_uuid", "ionoscloud_lan."+LanResourceName, "ip_failover.nic_uuid"),
+					resource.TestCheckResourceAttrPair("data.ionoscloud_lan."+LanDataSourceByName, "ip_failover.ip", "ionoscloud_lan."+LanResourceName, "ip_failover.ip"),
+					resource.TestCheckResourceAttrPair("data.ionoscloud_lan."+LanDataSourceByName, "pcc", "ionoscloud_lan."+LanResourceName, "pcc"),
+					resource.TestCheckResourceAttrPair("data.ionoscloud_lan."+LanDataSourceByName, "public", "ionoscloud_lan."+LanResourceName, "public"),
 				),
 			},
 		},
 	})
-
 }
 
 const testAccDataSourceLanCreateResources = `
-resource "ionoscloud_datacenter" "test_ds_lan" {
+resource "ionoscloud_datacenter" "foobar" {
   name              = "test_datasource_lan"
   location          = "de/fra"
   description       = "datacenter for testing the lan terraform data source"
 }
-resource "ionoscloud_lan" "test_ds_lan" {
-  depends_on        = [ionoscloud_datacenter.test_ds_lan]
-  datacenter_id     = ionoscloud_datacenter.test_ds_lan.id
-  name              = "test_ds_lan"
-  public            = true
+
+resource "ionoscloud_private_crossconnect" "example" {
+  name        = "example"
+  description = "example description"
+}
+
+resource "ionoscloud_lan" ` + LanResourceName + ` {
+  datacenter_id = ionoscloud_datacenter.foobar.id
+  public = false
+  name = "` + LanResourceName + `"
+  pcc = ionoscloud_private_crossconnect.example.id
 }
 `
 
 const testAccDataSourceLanMatchId = `
-resource "ionoscloud_datacenter" "test_ds_lan" {
+resource "ionoscloud_datacenter" "foobar" {
   name              = "test_datasource_lan"
   location          = "de/fra"
   description       = "datacenter for testing the lan terraform data source"
 }
 
-resource "ionoscloud_lan" "test_ds_lan" {
-  depends_on        = [ionoscloud_datacenter.test_ds_lan]
-  datacenter_id     = ionoscloud_datacenter.test_ds_lan.id
-  name              = "test_ds_lan"
-  public            = true
+resource "ionoscloud_private_crossconnect" "example" {
+  name        = "example"
+  description = "example description"
 }
 
-data "ionoscloud_lan" "test_lan" {
-  datacenter_id = ionoscloud_datacenter.test_ds_lan.id
-  id			= ionoscloud_lan.test_ds_lan.id
+resource "ionoscloud_lan" ` + LanResourceName + ` {
+  datacenter_id = ionoscloud_datacenter.foobar.id
+  public = false
+  name = "` + LanResourceName + `"
+  pcc = ionoscloud_private_crossconnect.example.id
+}
+
+data "ionoscloud_lan" ` + LanDataSourceById + ` {
+  datacenter_id = ionoscloud_datacenter.foobar.id
+  id			= ionoscloud_lan.` + LanResourceName + `.id
 }
 `
 
 const testAccDataSourceLanMatchName = `
-resource "ionoscloud_datacenter" "test_ds_lan" {
+resource "ionoscloud_datacenter" "foobar" {
   name              = "test_datasource_lan"
   location          = "de/fra"
   description       = "datacenter for testing the lan terraform data source"
 }
 
-resource "ionoscloud_lan" "test_ds_lan" {
-  depends_on        = [ionoscloud_datacenter.test_ds_lan]
-  datacenter_id     = ionoscloud_datacenter.test_ds_lan.id
-  name              = "test_ds_lan"
-  public            = true
+resource "ionoscloud_private_crossconnect" "example" {
+  name        = "example"
+  description = "example description"
 }
 
-data "ionoscloud_lan" "test_lan" {
-  datacenter_id = ionoscloud_datacenter.test_ds_lan.id
-  name			= "test_ds_lan"
+resource "ionoscloud_lan" ` + LanResourceName + ` {
+  datacenter_id = ionoscloud_datacenter.foobar.id
+  public = false
+  name = "` + LanResourceName + `"
+  pcc = ionoscloud_private_crossconnect.example.id
+}
+
+data "ionoscloud_lan" ` + LanDataSourceByName + ` {
+  datacenter_id = ionoscloud_datacenter.foobar.id
+  name			= "` + LanResourceName + `"
 }
 `
