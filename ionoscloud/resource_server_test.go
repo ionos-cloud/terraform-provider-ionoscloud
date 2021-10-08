@@ -30,14 +30,6 @@ func TestAccServer_Basic(t *testing.T) {
 				),
 			},
 			{
-				Config: fmt.Sprintf(testAccCheckServerConfigBasicDep, serverName),
-				Check: resource.ComposeTestCheckFunc(
-					testAccCheckServerExists("ionoscloud_server.webserver", &server),
-					testAccCheckServerAttributes("ionoscloud_server.webserver", serverName),
-					resource.TestCheckResourceAttr("ionoscloud_server.webserver", "name", serverName),
-				),
-			},
-			{
 				Config: testAccCheckServerConfigUpdate,
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckServerAttributes("ionoscloud_server.webserver", "updated"),
@@ -314,54 +306,6 @@ resource "ionoscloud_server" "webserver" {
   }
 }`
 
-const testAccCheckServerConfigBasicDep = `
-resource "ionoscloud_datacenter" "foobar" {
-	name       = "server-test"
-	location = "us/las"
-}
-
-resource "ionoscloud_backup_unit" "example" {
-	name        = "serverTest"
-	password    = "DemoPassword123$"
-	email       = "example@ionoscloud.com"
-}
-
-resource "ionoscloud_lan" "webserver_lan" {
-  datacenter_id = "${ionoscloud_datacenter.foobar.id}"
-  public = true
-  name = "public"
-}
-
-resource "ionoscloud_server" "webserver" {
-  name = "%s"
-  datacenter_id = "${ionoscloud_datacenter.foobar.id}"
-  cores = 1
-  ram = 1024
-  availability_zone = "ZONE_1"
-  cpu_family = "AMD_OPTERON"
-  volume {
-	image_name ="Debian-10-cloud-init.qcow2"
-	image_password = "K3tTj8G14a3EgKyNeeiY"
-    name = "system"
-    size = 5
-    disk_type = "SSD"
-	backup_unit_id = ionoscloud_backup_unit.example.id
-    user_data = "foo"
-  }
-  nic {
-    lan = "${ionoscloud_lan.webserver_lan.id}"
-    dhcp = true
-    firewall_active = true
-    firewall_type = "BIDIRECTIONAL"
-	firewall {
-      protocol = "TCP"
-      name = "SSH"
-      port_range_start = 22
-      port_range_end = 22
-    }
-  }
-}`
-
 const testAccCheckServerConfigUpdate = `
 resource "ionoscloud_datacenter" "foobar" {
 	name       = "server-test"
@@ -630,22 +574,20 @@ resource "ionoscloud_server" "webserver2" {
 
 const testAccCheckVolumeCubeServer = `
 data "ionoscloud_template" "cube-s" {
-    name = "CUBES S"
+    name = "CUBES XS"
     cores = 1
-    ram   = 2048
-    storage_size = 50
+    ram   = 1024
+    storage_size = 30
 }
 
 resource "ionoscloud_datacenter" "foobar" {
 	name       = "volume-test"
-	location   = "de/fra"
+	location   = "de/txl"
 }
 
 resource "ionoscloud_server" "cube1" {
   name              = "cube1"
   availability_zone = "ZONE_2"
-  cores             = 1
-  ram               = 2048 
   image_name        = "ubuntu:latest"
   type              = "CUBE"
 
@@ -656,10 +598,8 @@ resource "ionoscloud_server" "cube1" {
   volume {
     name            = "cube1-d1"
     licence_type    = "LINUX" 
-    size      = 50
-    disk_type = "CUBE"
-    
-  }
+    disk_type = "DAS"
+} 
   
   nic {
     lan             = "2"

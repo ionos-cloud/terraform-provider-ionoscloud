@@ -38,11 +38,13 @@ func resourceServer() *schema.Resource {
 			},
 			"cores": {
 				Type:     schema.TypeInt,
-				Required: true,
+				Optional: true,
+				Computed: true,
 			},
 			"ram": {
 				Type:     schema.TypeInt,
-				Required: true,
+				Optional: true,
+				Computed: true,
 			},
 			"availability_zone": {
 				Type:     schema.TypeString,
@@ -129,7 +131,8 @@ func resourceServer() *schema.Resource {
 						},
 						"size": {
 							Type:     schema.TypeInt,
-							Required: true,
+							Optional: true,
+							Computed: true,
 						},
 						"disk_type": {
 							Type:         schema.TypeString,
@@ -362,34 +365,22 @@ func resourceServer() *schema.Resource {
 func resourceServerCreate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	client := meta.(*ionoscloud.APIClient)
 
+	request := ionoscloud.Server{
+		Properties: &ionoscloud.ServerProperties{},
+	}
+
 	var sshKeyPath []interface{}
 	var publicKeys []string
 	var image, imageAlias, imageInput string
 	var isSnapshot bool
 	var diags diag.Diagnostics
 	var password, licenceType string
+	var isCubeServer = false
 
 	dcId := d.Get("datacenter_id").(string)
+
 	serverName := d.Get("name").(string)
-	serverCores := int32(d.Get("cores").(int))
-	serverRam := int32(d.Get("ram").(int))
-	request := ionoscloud.Server{
-		Properties: &ionoscloud.ServerProperties{
-			Name:  &serverName,
-			Cores: &serverCores,
-			Ram:   &serverRam,
-		},
-	}
-
-	if v, ok := d.GetOk("template_uuid"); ok {
-		vStr := v.(string)
-		request.Properties.TemplateUuid = &vStr
-	}
-
-	if v, ok := d.GetOk("type"); ok {
-		vStr := v.(string)
-		request.Properties.Type = &vStr
-	}
+	request.Properties.Name = &serverName
 
 	if v, ok := d.GetOk("availability_zone"); ok {
 		vStr := v.(string)
@@ -403,11 +394,61 @@ func resourceServerCreate(ctx context.Context, d *schema.ResourceData, meta inte
 		}
 	}
 
-	volumeSize := float32(d.Get("volume.0.size").(int))
+	serverType := d.Get("type").(string)
+	if strings.ToLower(serverType) == "cube" {
+		isCubeServer = true
+	}
+
+	if serverType != "" {
+		request.Properties.Type = &serverType
+	}
+
+	if v, ok := d.GetOk("template_uuid"); ok {
+		if isCubeServer {
+			vStr := v.(string)
+			request.Properties.TemplateUuid = &vStr
+		} else {
+			diags := diag.FromErr(fmt.Errorf("template_uuid argument is required for cube type of server \n"))
+			return diags
+		}
+
+	} else {
+		if isCubeServer {
+			diags := diag.FromErr(fmt.Errorf("ram argument is required for cube type of server \n"))
+			return diags
+		}
+	}
+
+	if err := checkCubeTemplateArguments(d, "cores", isCubeServer); err == nil {
+		if v, ok := d.GetOk("cores"); ok {
+			cores := int32(v.(int))
+			request.Properties.Cores = &cores
+		}
+	} else {
+		return diag.FromErr(err)
+	}
+
+	if err := checkCubeTemplateArguments(d, "ram", isCubeServer); err == nil {
+		if v, ok := d.GetOk("ram"); ok {
+			cores := int32(v.(int))
+			request.Properties.Ram = &cores
+		}
+	} else {
+		return diag.FromErr(err)
+	}
+
+	volume := ionoscloud.VolumeProperties{}
+
 	volumeType := d.Get("volume.0.disk_type").(string)
-	volume := ionoscloud.VolumeProperties{
-		Size: &volumeSize,
-		Type: &volumeType,
+	volume.Type = &volumeType
+
+	if err := checkCubeTemplateArguments(d, "volume.0.size", isCubeServer); err == nil {
+		if v, ok := d.GetOk("volume.0.size"); ok {
+			size := float32(v.(int))
+			volume.Size = &size
+		}
+	} else {
+		return diag.FromErr(err)
 	}
 
 	if v, ok := d.GetOk("volume.0.image_password"); ok {
@@ -1269,4 +1310,18 @@ func readPublicKey(path string) (key string, err error) {
 		return "", err
 	}
 	return string(ssh.MarshalAuthorizedKey(pubKey)[:]), nil
+}
+
+//Function to be used for arguments that are in templates and can not be set for cube servers eq. ram, cores, storage_size
+func checkCubeTemplateArguments(d *schema.ResourceData, argumentName string, isCube bool) error {
+	if isCube {
+		if _, ok := d.GetOk(argumentName); ok {
+			return fmt.Errorf("%s argument is not allowed in resource definition for cube servers. Value will be taken from templates \n", argumentName)
+		}
+	} else {
+		if _, ok := d.GetOk(argumentName); !ok {
+			return fmt.Errorf("%s argument is required if the server is not of cube type \n", argumentName)
+		}
+	}
+	return nil
 }
