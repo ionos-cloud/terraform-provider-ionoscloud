@@ -6,6 +6,7 @@ For `backupUnit`, `datacenter`, `lan` and `firewall` resources done the followin
 - removed duplicated code from import, data_source and resource files (set parameters)
 - updated documentation 
 - improved import functions
+- new data source added: s3 key
 
 ## 6.0.0-beta.11
 
