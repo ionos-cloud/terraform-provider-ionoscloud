@@ -56,7 +56,7 @@ func testAccCheckIPBlockDestroyCheck(s *terraform.State) error {
 		_, apiResponse, err := client.IPBlocksApi.IpblocksFindById(ctx, rs.Primary.ID).Execute()
 
 		if err != nil {
-			if apiResponse != nil && apiResponse.Response != nil && apiResponse.StatusCode!= 404 {
+			if apiResponse != nil && apiResponse.Response != nil && apiResponse.StatusCode != 404 {
 				return fmt.Errorf("an error occured while checking deletion of IPBlock %s %s", rs.Primary.ID, err)
 			}
 		} else {

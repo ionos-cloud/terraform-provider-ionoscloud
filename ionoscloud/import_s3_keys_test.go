@@ -9,7 +9,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
 )
 
-func TestAccS3Key_ImportBasic(t *testing.T) {
+func TestAccS3KeyImportBasic(t *testing.T) {
 	resourceName := "example"
 	email := fmt.Sprintf("terraform-s3-import-acc-tester-%d@mailinator.com", time.Now().Unix())
 	resource.Test(t, resource.TestCase{
