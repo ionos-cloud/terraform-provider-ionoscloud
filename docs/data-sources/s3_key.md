@@ -33,3 +33,4 @@ The following attributes are returned by the datasource:
 * `id` - The id of the s3 key
 * `active` - The state of the s3 key
 * `user_id` - The ID of the user that owns the key
+* `secret_key` - (Computed)The S3 Secret key.
