@@ -30,7 +30,7 @@ resource "ionoscloud_volume" "example" {
 
 * `datacenter_id` - (Required)[string] The ID of a Virtual Data Center.
 * `server_id` - (Required)[string] The ID of a server.
-* `disk_type` - (Required)[string] The volume type: HDD or SSD.
+* `disk_type` - (Required)[string] The volume type: HDD or SSD. This property is immutable.
 * `bus` - (Optional)[Boolean] The bus type of the volume: VIRTIO or IDE.
 * `size` -  (Required)[integer] The size of the volume in GB.
 * `ssh_key_path` -  (Optional)[list] List of paths to files containing a public SSH key that will be injected into IonosCloud provided Linux images. Required for IonosCloud Linux images. Required if `image_password` is not provided.
@@ -39,7 +39,7 @@ resource "ionoscloud_volume" "example" {
 * `image_name` - (Optional)[string] The name, ID or alias of the image. May also be a snapshot ID. It is required if `licence_type` is not provided. Attribute is immutable.
 * `licence_type` - (Optional)[string] Required if `image_name` is not provided.
 * `name` - (Optional)[string] The name of the volume.
-* `availability_zone` - (Optional)[string] The storage availability zone assigned to the volume: AUTO, ZONE_1, ZONE_2, or ZONE_3.
+* `availability_zone` - (Optional)[string] The storage availability zone assigned to the volume: AUTO, ZONE_1, ZONE_2, or ZONE_3. This property is immutable
 * `user_data` - (Optional)[string] The cloud-init configuration for the volume as base64 encoded string. The property is immutable and is only allowed to be set on a new volume creation. This option will work only with cloud-init compatible images.
 * `backup_unit_id`- (Optional)[string] The uuid of the Backup Unit that user has access to. The property is immutable and is only allowed to be set on a new volume creation. It is mandatory to provide either 'public image' or 'imageAlias' in conjunction with this property.
 * `device_number`- (Computed) The Logical Unit Number of the storage volume. Null for volumes not mounted to any VM.

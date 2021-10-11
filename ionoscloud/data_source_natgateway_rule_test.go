@@ -7,7 +7,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 )
 
-func TestAccDataSourceNatGatewayRule_matchId(t *testing.T) {
+func TestAccDataSourceNatGatewayRule(t *testing.T) {
 
 	resource.Test(t, resource.TestCase{
 		PreCheck: func() {
@@ -21,30 +21,15 @@ func TestAccDataSourceNatGatewayRule_matchId(t *testing.T) {
 			{
 				Config: fmt.Sprintf(testAccDataSourceNatGatewayRuleMatchId),
 				Check: resource.ComposeTestCheckFunc(
-					resource.TestCheckResourceAttr("data.ionoscloud_natgateway_rule.test_natgateway_rule", "name", "test_datasource_natgateway_rule"),
-					resource.TestCheckResourceAttrPair("data.ionoscloud_natgateway_rule.test_natgateway_rule", "public_ip", "ionoscloud_ipblock.natgateway_ips", "ips.0"),
+					resource.TestCheckResourceAttr("data.ionoscloud_natgateway_rule.test_natgateway_rule_id", "name", "test_datasource_natgateway_rule"),
+					resource.TestCheckResourceAttrPair("data.ionoscloud_natgateway_rule.test_natgateway_rule_id", "public_ip", "ionoscloud_ipblock.natgateway_ips", "ips.0"),
 				),
-			},
-		},
-	})
-}
-
-func TestAccDataSourceNatGatewayRule_matchName(t *testing.T) {
-
-	resource.Test(t, resource.TestCase{
-		PreCheck: func() {
-			testAccPreCheck(t)
-		},
-		ProviderFactories: testAccProviderFactories,
-		Steps: []resource.TestStep{
-			{
-				Config: fmt.Sprintf(testAccDataSourceNatGatewayRuleCreateResources),
 			},
 			{
 				Config: fmt.Sprintf(testAccDataSourceNatGatewayRuleMatchName),
 				Check: resource.ComposeTestCheckFunc(
-					resource.TestCheckResourceAttr("data.ionoscloud_natgateway_rule.test_natgateway_rule", "name", "test_datasource_natgateway_rule"),
-					resource.TestCheckResourceAttrPair("data.ionoscloud_natgateway_rule.test_natgateway_rule", "public_ip", "ionoscloud_ipblock.natgateway_ips", "ips.0"),
+					resource.TestCheckResourceAttr("data.ionoscloud_natgateway_rule.test_natgateway_rule_name", "name", "test_datasource_natgateway_rule"),
+					resource.TestCheckResourceAttrPair("data.ionoscloud_natgateway_rule.test_natgateway_rule_name", "public_ip", "ionoscloud_ipblock.natgateway_ips", "ips.0"),
 				),
 			},
 		},
@@ -138,7 +123,7 @@ resource "ionoscloud_natgateway_rule" "natgateway_rule" {
   }
 }
 
-data "ionoscloud_natgateway_rule" "test_natgateway_rule" {
+data "ionoscloud_natgateway_rule" "test_natgateway_rule_id" {
   datacenter_id = ionoscloud_datacenter.natgateway_datacenter.id
   natgateway_id = ionoscloud_natgateway.natgateway.id
   id			= ionoscloud_natgateway_rule.natgateway_rule.id
@@ -187,7 +172,7 @@ resource "ionoscloud_natgateway_rule" "natgateway_rule" {
       end   = 1000
   }
 }
-data "ionoscloud_natgateway_rule" "test_natgateway_rule" {
+data "ionoscloud_natgateway_rule" "test_natgateway_rule_name" {
   datacenter_id = ionoscloud_datacenter.natgateway_datacenter.id
   natgateway_id = ionoscloud_natgateway.natgateway.id
   name			= "test_datasource_"

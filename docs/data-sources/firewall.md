@@ -39,7 +39,7 @@ The following attributes are returned by the datasource:
 
 * `id` - The id of the firewall rule.
 * `name` - The name of the firewall rule.
-* `protocol` - The protocol for the rule: TCP, UDP, ICMP, ANY.
+* `protocol` - The protocol for the rule: TCP, UDP, ICMP, ANY. This property is immutable.
 * `source_mac` - Only traffic originating from the respective MAC address is allowed.
 * `source_ip` - Only traffic originating from the respective IPv4 address is allowed.
 * `target_ip` - Only traffic directed to the respective IP address of the NIC is allowed.
