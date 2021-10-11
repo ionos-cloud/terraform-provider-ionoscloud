@@ -203,7 +203,7 @@ func TestAccServerCubeServer(t *testing.T) {
 
 	// this test is excluded from running due to a problem regarding cleanup order that makes the test fail. If you want to
 	// test this, please comment the line bellow and expect the test to fail at cleanup part
-	t.Skip()
+	// t.Skip()
 	var server ionoscloud.Server
 
 	resource.Test(t, resource.TestCase{
