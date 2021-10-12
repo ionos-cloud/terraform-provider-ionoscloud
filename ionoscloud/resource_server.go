@@ -1499,9 +1499,8 @@ func initializeCreateRequests(d *schema.ResourceData) (ionoscloud.Server, ionosc
 		server.Properties.Type = &serverType
 	}
 
-	switch isCubeServer := strings.ToLower(serverType) == "cube"; isCubeServer {
-
-	case true:
+	switch strings.ToLower(serverType) {
+	case "cube":
 		if v, ok := d.GetOk("template_uuid"); ok {
 			vStr := v.(string)
 			server.Properties.TemplateUuid = &vStr
@@ -1520,7 +1519,7 @@ func initializeCreateRequests(d *schema.ResourceData) (ionoscloud.Server, ionosc
 		if _, ok := d.GetOk("volume.0.size"); ok {
 			return server, volume, fmt.Errorf("cores argument can not be set for %s type of servers\n", serverType)
 		}
-	case false:
+	default:
 		if _, ok := d.GetOk("template_uuid"); ok {
 			return server, volume, fmt.Errorf("template_uuid argument can not be set only for %s type of servers\n", serverType)
 		}
