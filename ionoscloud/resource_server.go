@@ -1220,8 +1220,6 @@ func resourceServerUpdate(ctx context.Context, d *schema.ResourceData, meta inte
 				return diags
 			}
 
-			fmt.Printf("firewall name first updated %s \n", *firewall.Properties.Name)
-
 			// Wait, catching any errors
 			_, errState = getStateChangeConf(meta, d, apiResponse.Header.Get("Location"), schema.TimeoutCreate).WaitForStateContext(ctx)
 			if errState != nil {
@@ -1239,14 +1237,14 @@ func resourceServerUpdate(ctx context.Context, d *schema.ResourceData, meta inte
 
 		}
 		mProp, _ := json.Marshal(properties)
+
 		log.Printf("[DEBUG] Updating props: %s", string(mProp))
-		response, apiResponse, err := client.NetworkInterfacesApi.DatacentersServersNicsPatch(ctx, d.Get("datacenter_id").(string), *server.Id, *nic.Id).Nic(properties).Execute()
+
+		_, apiResponse, err := client.NetworkInterfacesApi.DatacentersServersNicsPatch(ctx, d.Get("datacenter_id").(string), *server.Id, *nic.Id).Nic(properties).Execute()
 		if err != nil {
 			diags := diag.FromErr(fmt.Errorf("error updating nic (%s)", err))
 			return diags
 		}
-
-		fmt.Printf("firewall name response %s \n", *(*response.Entities.Firewallrules.Items)[0].Properties.Name)
 
 		// Wait, catching any errors
 		_, errState := getStateChangeConf(meta, d, apiResponse.Header.Get("Location"), schema.TimeoutUpdate).WaitForStateContext(ctx)
@@ -1488,20 +1486,6 @@ func readPublicKey(path string) (key string, err error) {
 	return string(ssh.MarshalAuthorizedKey(pubKey)[:]), nil
 }
 
-// Checks arguments that are in templates and can not be set for CUBE servers eq. ram, cores, storage_size
-func checkCubeTemplateArguments(d *schema.ResourceData, argumentName string, isCube bool) error {
-	if isCube {
-		if _, ok := d.GetOk(argumentName); ok {
-			return fmt.Errorf("%s argument is not allowed in resource definition for CUBE servers. Value will be taken from templates \n", argumentName)
-		}
-	} else {
-		if _, ok := d.GetOk(argumentName); !ok {
-			return fmt.Errorf("%s argument is required if the server is not of CUBE type \n", argumentName)
-		}
-	}
-	return nil
-}
-
 // Initializes server and volume with the required attributes depending on the server type (CUBE or ENTERPRISE)
 func initializeCreateRequests(d *schema.ResourceData) (ionoscloud.Server, ionoscloud.VolumeProperties, error) {
 	server := ionoscloud.Server{
@@ -1509,55 +1493,58 @@ func initializeCreateRequests(d *schema.ResourceData) (ionoscloud.Server, ionosc
 	}
 	volume := ionoscloud.VolumeProperties{}
 
-	var isCubeServer = false
-
 	serverType := d.Get("type").(string)
-	if strings.ToLower(serverType) == "cube" {
-		isCubeServer = true
-	}
 
 	if serverType != "" {
 		server.Properties.Type = &serverType
 	}
 
-	if v, ok := d.GetOk("template_uuid"); ok {
-		if isCubeServer {
+	switch isCubeServer := strings.ToLower(serverType) == "cube"; isCubeServer {
+
+	case true:
+		if v, ok := d.GetOk("template_uuid"); ok {
 			vStr := v.(string)
 			server.Properties.TemplateUuid = &vStr
 		} else {
-			return server, volume, fmt.Errorf("template_uuid argument is required for CUBE type of server \n")
+			return server, volume, fmt.Errorf("template_uuid argument is required for %s type of servers\n", serverType)
 		}
-	} else {
-		if isCubeServer {
-			return server, volume, fmt.Errorf("ram argument is required for CUBE type of server \n")
-		}
-	}
 
-	if err := checkCubeTemplateArguments(d, "cores", isCubeServer); err == nil {
+		if _, ok := d.GetOk("cores"); ok {
+			return server, volume, fmt.Errorf("cores argument can not be set for %s type of servers\n", serverType)
+		}
+
+		if _, ok := d.GetOk("ram"); ok {
+			return server, volume, fmt.Errorf("cores argument can not be set for %s type of servers\n", serverType)
+		}
+
+		if _, ok := d.GetOk("volume.0.size"); ok {
+			return server, volume, fmt.Errorf("cores argument can not be set for %s type of servers\n", serverType)
+		}
+	case false:
+		if _, ok := d.GetOk("template_uuid"); ok {
+			return server, volume, fmt.Errorf("template_uuid argument can not be set only for %s type of servers\n", serverType)
+		}
+
 		if v, ok := d.GetOk("cores"); ok {
-			cores := int32(v.(int))
-			server.Properties.Cores = &cores
+			vInt := int32(v.(int))
+			server.Properties.Cores = &vInt
+		} else {
+			return server, volume, fmt.Errorf("cores argument is required for %s type of servers\n", serverType)
 		}
-	} else {
-		return server, volume, err
-	}
 
-	if err := checkCubeTemplateArguments(d, "ram", isCubeServer); err == nil {
 		if v, ok := d.GetOk("ram"); ok {
-			cores := int32(v.(int))
-			server.Properties.Ram = &cores
+			vInt := int32(v.(int))
+			server.Properties.Ram = &vInt
+		} else {
+			return server, volume, fmt.Errorf("ram argument is required for %s type of servers\n", serverType)
 		}
-	} else {
-		return server, volume, err
-	}
 
-	if err := checkCubeTemplateArguments(d, "volume.0.size", isCubeServer); err == nil {
 		if v, ok := d.GetOk("volume.0.size"); ok {
-			size := float32(v.(int))
-			volume.Size = &size
+			vInt := float32(v.(int))
+			volume.Size = &vInt
+		} else {
+			return server, volume, fmt.Errorf("volume.0.size argument is required for %s type of servers\n", serverType)
 		}
-	} else {
-		return server, volume, err
 	}
 
 	return server, volume, nil
