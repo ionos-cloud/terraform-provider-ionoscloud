@@ -1,12 +1,13 @@
 ## 6.0.0-beta.12
 
-For `backupUnit`, `datacenter`, `lan` and `firewall` resources done the following:
-- made tests comprehensive
-- optimized test duration by including both match by id and by name in the same test
-- removed duplicated code from import, data_source and resource files (set parameters)
-- updated documentation 
-- improved import functions
-- new data source added: s3 key
+- fixed bug in `server`: can not create cube server, firewall not updated
+- fixed bug in `firewall`: using type argument throws error
+- for `backupUnit`, `datacenter`, `lan`, `s3_key`, and `firewall` resources done the following:
+  - made tests comprehensive
+  - optimized test duration by including both match by id and by name in the same test
+  - removed duplicated code from import, data_source and resource files (set parameters)
+  - updated documentation 
+  - improved import functions
 
 ## 6.0.0-beta.11
 

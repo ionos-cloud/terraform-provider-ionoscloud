@@ -388,8 +388,6 @@ func setFirewallData(d *schema.ResourceData, firewall *ionoscloud.FirewallRule) 
 			if err != nil {
 				return fmt.Errorf("error while setting icmp_type property for firewall %s: %s", d.Id(), err)
 			}
-		} else {
-			fmt.Printf("ICMP type does not work \n")
 		}
 
 		if firewall.Properties.IcmpCode != nil {

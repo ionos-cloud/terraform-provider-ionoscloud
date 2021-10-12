@@ -71,17 +71,6 @@ func resourceVolume() *schema.Resource {
 				Type:     schema.TypeString,
 				Optional: true,
 			},
-			"server_id": {
-				Type:         schema.TypeString,
-				Required:     true,
-				ValidateFunc: validation.All(validation.StringIsNotWhiteSpace),
-			},
-			"datacenter_id": {
-				Type:         schema.TypeString,
-				Required:     true,
-				ForceNew:     true,
-				ValidateFunc: validation.All(validation.StringIsNotWhiteSpace),
-			},
 			"cpu_hot_plug": {
 				Type:     schema.TypeBool,
 				Computed: true,
@@ -124,6 +113,17 @@ func resourceVolume() *schema.Resource {
 				Type:     schema.TypeInt,
 				Computed: true,
 			},
+			"server_id": {
+				Type:         schema.TypeString,
+				Required:     true,
+				ValidateFunc: validation.All(validation.StringIsNotWhiteSpace),
+			},
+			"datacenter_id": {
+				Type:         schema.TypeString,
+				Required:     true,
+				ForceNew:     true,
+				ValidateFunc: validation.All(validation.StringIsNotWhiteSpace),
+			},
 		},
 		Timeouts: &resourceDefaultTimeouts,
 	}
@@ -132,6 +132,10 @@ func resourceVolume() *schema.Resource {
 func resourceVolumeCreate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 
 	client := meta.(*ionoscloud.APIClient)
+
+	volume := ionoscloud.Volume{
+		Properties: &ionoscloud.VolumeProperties{},
+	}
 
 	var sshKeyPath []interface{}
 	var publicKeys []string
@@ -170,30 +174,35 @@ func resourceVolumeCreate(ctx context.Context, d *schema.ResourceData, meta inte
 		return diags
 	}
 
-	volumeName := d.Get("name").(string)
-	volumeSize := float32(d.Get("size").(int))
-	volumeType := d.Get("disk_type").(string)
-	volumeBus := d.Get("bus").(string)
+	if v, ok := d.GetOk("name"); ok {
+		name := v.(string)
+		volume.Properties.Name = &name
+	}
 
-	volume := ionoscloud.Volume{
-		Properties: &ionoscloud.VolumeProperties{
-			Name:        &volumeName,
-			Size:        &volumeSize,
-			Type:        &volumeType,
-			LicenceType: &licenceType,
-		},
+	if v, ok := d.GetOk("size"); ok {
+		size := float32(v.(int))
+		volume.Properties.Size = &size
+	}
+
+	if v, ok := d.GetOk("disk_type"); ok {
+		diskType := v.(string)
+		volume.Properties.Type = &diskType
+	}
+
+	if v, ok := d.GetOk("bus"); ok {
+		bus := v.(string)
+		volume.Properties.Bus = &bus
+	}
+
+	if _, ok := d.GetOk("availability_zone"); ok {
+		raw := d.Get("availability_zone").(string)
+		volume.Properties.AvailabilityZone = &raw
 	}
 
 	if imagePassword != "" {
 		volume.Properties.ImagePassword = &imagePassword
 	} else {
 		volume.Properties.ImagePassword = nil
-	}
-
-	if volumeBus != "" {
-		volume.Properties.Bus = &volumeBus
-	} else {
-		volume.Properties.Bus = nil
 	}
 
 	if licenceType != "" {
@@ -219,11 +228,6 @@ func resourceVolumeCreate(ctx context.Context, d *schema.ResourceData, meta inte
 
 	} else {
 		volume.Properties.SshKeys = nil
-	}
-
-	if _, ok := d.GetOk("availability_zone"); ok {
-		raw := d.Get("availability_zone").(string)
-		volume.Properties.AvailabilityZone = &raw
 	}
 
 	if userData, ok := d.GetOk("user_data"); ok {
@@ -449,9 +453,8 @@ func resourceVolumeUpdate(ctx context.Context, d *schema.ResourceData, meta inte
 		properties.Name = &newValueStr
 	}
 	if d.HasChange("disk_type") {
-		_, newValue := d.GetChange("disk_type")
-		newValueStr := newValue.(string)
-		properties.Type = &newValueStr
+		diags := diag.FromErr(fmt.Errorf("disk_type is immutable"))
+		return diags
 	}
 	if d.HasChange("size") {
 		_, newValue := d.GetChange("size")
@@ -464,9 +467,8 @@ func resourceVolumeUpdate(ctx context.Context, d *schema.ResourceData, meta inte
 		properties.Bus = &newValueStr
 	}
 	if d.HasChange("availability_zone") {
-		_, newValue := d.GetChange("availability_zone")
-		newValueStr := newValue.(string)
-		properties.AvailabilityZone = &newValueStr
+		diags := diag.FromErr(fmt.Errorf("availability_zone is immutable"))
+		return diags
 	}
 
 	if d.HasChange("user_data") {
@@ -715,4 +717,130 @@ func checkImage(ctx context.Context, client *ionoscloud.APIClient, imageInput, i
 	}
 
 	return image, imageAlias, isSnapshot, diags
+}
+
+func resourceVolumeImporter(ctx context.Context, d *schema.ResourceData, meta interface{}) ([]*schema.ResourceData, error) {
+	parts := strings.Split(d.Id(), "/")
+	if len(parts) != 3 || parts[0] == "" || parts[1] == "" || parts[2] == "" {
+		return nil, fmt.Errorf("invalid import id %q. Expecting {datacenter}/{server}/{volume}", d.Id())
+	}
+
+	client := meta.(*ionoscloud.APIClient)
+
+	dcId := parts[0]
+	srvId := parts[1]
+	volumeId := parts[2]
+
+	volume, apiResponse, err := client.VolumesApi.DatacentersVolumesFindById(ctx, dcId, volumeId).Execute()
+
+	if err != nil {
+		if apiResponse != nil && apiResponse.Response != nil && apiResponse.StatusCode == 404 {
+			d.SetId("")
+			return nil, fmt.Errorf("volume does not exist %q", volumeId)
+		}
+		return nil, fmt.Errorf("an error occured while trying to find the volume %q", volumeId)
+	}
+
+	log.Printf("[INFO] volume found: %+v", volume)
+
+	d.SetId(*volume.Id)
+	if err := d.Set("datacenter_id", dcId); err != nil {
+		return nil, err
+	}
+
+	if err := d.Set("server_id", srvId); err != nil {
+		return nil, err
+	}
+
+	if volume.Properties.Name != nil {
+		err := d.Set("name", *volume.Properties.Name)
+		if err != nil {
+			return nil, err
+		}
+	}
+
+	if volume.Properties.Type != nil {
+		err := d.Set("disk_type", *volume.Properties.Type)
+		if err != nil {
+			return nil, err
+		}
+	}
+
+	if volume.Properties.Size != nil {
+		err := d.Set("size", *volume.Properties.Size)
+		if err != nil {
+			return nil, err
+		}
+	}
+
+	if volume.Properties.Bus != nil {
+		err := d.Set("bus", *volume.Properties.Bus)
+		if err != nil {
+			return nil, err
+		}
+	}
+
+	if volume.Properties.AvailabilityZone != nil {
+		err := d.Set("availability_zone", *volume.Properties.AvailabilityZone)
+		if err != nil {
+			return nil, err
+		}
+	}
+
+	if volume.Properties.CpuHotPlug != nil {
+		err := d.Set("cpu_hot_plug", *volume.Properties.CpuHotPlug)
+		if err != nil {
+			return nil, err
+		}
+	}
+
+	if volume.Properties.RamHotPlug != nil {
+		err := d.Set("ram_hot_plug", *volume.Properties.RamHotPlug)
+		if err != nil {
+			return nil, err
+		}
+	}
+
+	if volume.Properties.NicHotPlug != nil {
+		err := d.Set("nic_hot_plug", *volume.Properties.NicHotPlug)
+		if err != nil {
+			return nil, err
+		}
+	}
+
+	if volume.Properties.NicHotUnplug != nil {
+		err := d.Set("nic_hot_unplug", *volume.Properties.NicHotUnplug)
+		if err != nil {
+			return nil, err
+		}
+	}
+
+	if volume.Properties.DiscVirtioHotPlug != nil {
+		err := d.Set("disc_virtio_hot_plug", *volume.Properties.DiscVirtioHotPlug)
+		if err != nil {
+			return nil, err
+		}
+	}
+
+	if volume.Properties.DiscVirtioHotUnplug != nil {
+		err := d.Set("disc_virtio_hot_unplug", *volume.Properties.DiscVirtioHotUnplug)
+		if err != nil {
+			return nil, err
+		}
+	}
+
+	if volume.Properties.BackupunitId != nil {
+		err := d.Set("backup_unit_id", *volume.Properties.BackupunitId)
+		if err != nil {
+			return nil, err
+		}
+	}
+
+	if volume.Properties.UserData != nil {
+		err := d.Set("user_data", *volume.Properties.UserData)
+		if err != nil {
+			return nil, err
+		}
+	}
+	return []*schema.ResourceData{d}, nil
 }
