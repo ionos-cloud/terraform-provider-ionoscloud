@@ -51,6 +51,11 @@ resource "ionoscloud_volume" "example" {
 * `disc_virtio_hot_plug` - (Computed)[string] Is capable of Virt-IO drive hot plug (no reboot required)
 * `disc_virtio_hot_unplug` - (Computed)[string] Is capable of Virt-IO drive hot unplug (no reboot required). This works only for non-Windows virtual Machines.
 
+> **⚠ WARNING**
+>
+> If you want to create a **CUBE** server, the type of the inline volume must be set to **DAS**. In this case, you can not set the `size` argument since it is taken from the `template_uuid` you set in the server.
+
+
 ## Import
 
 Resource Volume can be imported using the `resource id`, e.g.

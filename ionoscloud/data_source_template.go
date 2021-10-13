@@ -3,6 +3,7 @@ package ionoscloud
 import (
 	"context"
 	"fmt"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	ionoscloud "github.com/ionos-cloud/sdk-go/v6"
 	"strings"
@@ -10,44 +11,46 @@ import (
 
 func dataSourceTemplate() *schema.Resource {
 	return &schema.Resource{
-		Read: dataSourceTemplateRead,
+		ReadContext: dataSourceTemplateRead,
 		Schema: map[string]*schema.Schema{
 			"id": {
 				Type:     schema.TypeString,
 				Optional: true,
+				Computed: true,
 			},
 			"name": {
 				Type:     schema.TypeString,
-				Required: true,
+				Optional: true,
+				Computed: true,
 			},
 			"cores": {
 				Type:     schema.TypeFloat,
-				Required: true,
+				Optional: true,
+				Computed: true,
 			},
 			"ram": {
 				Type:     schema.TypeFloat,
-				Required: true,
+				Optional: true,
+				Computed: true,
 			},
 			"storage_size": {
 				Type:     schema.TypeFloat,
-				Required: true,
+				Optional: true,
+				Computed: true,
 			},
 		},
 		Timeouts: &resourceDefaultTimeouts,
 	}
 }
 
-func dataSourceTemplateRead(d *schema.ResourceData, meta interface{}) error {
+func dataSourceTemplateRead(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	client := meta.(*ionoscloud.APIClient)
 
-	ctx, cancel := context.WithTimeout(context.Background(), *resourceDefaultTimeouts.Default)
-	if cancel != nil {
-		defer cancel()
-	}
 	templates, _, err := client.TemplatesApi.TemplatesGet(ctx).Execute()
 
 	if err != nil {
-		return fmt.Errorf("an error occured while fetching IonosCloud templates %s ", err)
+		diags := diag.FromErr(fmt.Errorf("an error occured while fetching IonosCloud templates %s ", err))
+		return diags
 	}
 
 	name := d.Get("name").(string)
@@ -99,33 +102,36 @@ func dataSourceTemplateRead(d *schema.ResourceData, meta interface{}) error {
 	}
 
 	if len(results) > 1 {
-		return fmt.Errorf("There is more than one template that match the search criteria ")
+		diags := diag.FromErr(fmt.Errorf("There is more than one template that match the search criteria "))
+		return diags
 	}
 
 	if len(results) == 0 {
-		return fmt.Errorf("There are no templates that match the search criteria ")
+		diags := diag.FromErr(fmt.Errorf("There are no templates that match the search criteria "))
+		return diags
 	}
 
 	if results[0].Properties.Name != nil {
 		err := d.Set("name", *results[0].Properties.Name)
 		if err != nil {
-			return fmt.Errorf("error while setting name property for image %s: %s", d.Id(), err)
+			diags := diag.FromErr(fmt.Errorf("error while setting name property for image %s: %s", d.Id(), err))
+			return diags
 		}
 	}
 
 	if results[0].Properties.Cores != nil {
 		if err := d.Set("cores", *results[0].Properties.Cores); err != nil {
-			return err
+			return diag.FromErr(err)
 		}
 	}
 	if results[0].Properties.Ram != nil {
 		if err := d.Set("ram", *results[0].Properties.Ram); err != nil {
-			return err
+			return diag.FromErr(err)
 		}
 	}
 	if results[0].Properties.StorageSize != nil {
 		if err := d.Set("storage_size", *results[0].Properties.StorageSize); err != nil {
-			return err
+			return diag.FromErr(err)
 		}
 	}
 

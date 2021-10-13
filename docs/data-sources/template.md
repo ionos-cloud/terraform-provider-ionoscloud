@@ -8,27 +8,24 @@ Get information on a Ionos Cloud Template
 
 # ionoscloud_template
 
-The template data source can be used to search for and return existing templates.
+The template data source can be used to search for and return existing templates by providing any of template properties (name, cores, ram, storage_size).
 
 ## Example Usage
 
 ```hcl
 data "ionoscloud_template" "example" {
 	name = "BETA CUBES S"
-	cores = 1
-	ram	  = 2048
-	storage_size = 50
 }
 ```
 
 ## Argument Reference
 
-* `name` - (Required) A name of that resource.
-* `cores` - (Required) The CPU cores count.
-* `ram` - (Required) The RAM size in MB.
-* `storage_size` - (Required) The storage size in GB.
+* `name` - (Optional) A name of that resource.
+* `cores` - (Optional) The CPU cores count.
+* `ram` - (Optional) The RAM size in MB.
+* `storage_size` - (Optional) The storage size in GB.
 
-All arguments must be provided. If none, the datasource will return an error.
+Any of the arguments ca be provided. If none, the datasource will return an error.
 
 ## Attributes Reference
 

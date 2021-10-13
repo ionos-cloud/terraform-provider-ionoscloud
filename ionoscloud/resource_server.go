@@ -1269,7 +1269,7 @@ func resourceServerDelete(ctx context.Context, d *schema.ResourceData, meta inte
 		return diags
 	}
 
-	if server.Properties.BootVolume != nil {
+	if server.Properties.BootVolume != nil && strings.ToLower(*server.Properties.Type) != "cube" {
 		apiResponse, err := client.VolumesApi.DatacentersVolumesDelete(ctx, dcId, *server.Properties.BootVolume.Id).Execute()
 
 		if err != nil {
@@ -1513,11 +1513,11 @@ func initializeCreateRequests(d *schema.ResourceData) (ionoscloud.Server, ionosc
 		}
 
 		if _, ok := d.GetOk("ram"); ok {
-			return server, volume, fmt.Errorf("cores argument can not be set for %s type of servers\n", serverType)
+			return server, volume, fmt.Errorf("ram argument can not be set for %s type of servers\n", serverType)
 		}
 
 		if _, ok := d.GetOk("volume.0.size"); ok {
-			return server, volume, fmt.Errorf("cores argument can not be set for %s type of servers\n", serverType)
+			return server, volume, fmt.Errorf("volume.0.size argument can not be set for %s type of servers\n", serverType)
 		}
 	default:
 		if _, ok := d.GetOk("template_uuid"); ok {
