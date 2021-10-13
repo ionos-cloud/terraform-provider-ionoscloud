@@ -48,7 +48,7 @@ resource "ionoscloud_server" "example" {
 - `cores` - (Required)[integer] Number of server CPU cores.
 - `ram` - (Required)[integer] The amount of memory for the server in MB.
 - `image_name` - (Optional)[string] The name or ID of the image.
-- `availability_zone` - (Optional)[string] The availability zone in which the server should exist.
+- `availability_zone` - (Optional)[string] The availability zone in which the server should exist. This property is immutable.
 - `licence_type` - (Optional)[string] Sets the OS type of the server.
 - `cpu_family` - (Optional)[string]  CPU architecture on which server gets provisioned. Sets the CPU type. "AMD_OPTERON", "INTEL_XEON" or "INTEL_SKYLAKE".
 - `volume` - (Required) See the Volume section.

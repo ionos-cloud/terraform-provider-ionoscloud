@@ -110,7 +110,7 @@ func testAccCheckFirewallDestroyCheck(s *terraform.State) error {
 			rs.Primary.Attributes["server_id"], rs.Primary.Attributes["nic_id"], rs.Primary.ID).Execute()
 
 		if err != nil {
-			if apiResponse != nil && apiResponse.StatusCode != 404 {
+			if apiResponse != nil && apiResponse.Response != nil && apiResponse.StatusCode != 404 {
 				return fmt.Errorf("firewall still exists %s - an error occurred while checking it %s", rs.Primary.ID, err)
 			}
 		} else {

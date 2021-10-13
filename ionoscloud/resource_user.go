@@ -274,7 +274,7 @@ func resourceUserDelete(ctx context.Context, d *schema.ResourceData, meta interf
 		_, _, err := client.UserManagementApi.UmUsersDelete(ctx, d.Id()).Execute()
 		if err != nil {
 			if _, ok := err.(ionoscloud.GenericOpenAPIError); ok {
-				if apiResponse == nil || apiResponse.StatusCode != 404 {
+				if apiResponse == nil || apiResponse.Response != nil && apiResponse.StatusCode != 404 {
 					diags := diag.FromErr(fmt.Errorf("an error occured while deleting a user %s %s", d.Id(), err))
 					return diags
 				}

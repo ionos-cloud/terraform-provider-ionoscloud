@@ -61,7 +61,7 @@ func testAccCheckBackupUnitDestroyCheck(s *terraform.State) error {
 		_, apiResponse, err := client.BackupUnitApi.BackupunitsFindById(ctx, rs.Primary.ID).Execute()
 
 		if err != nil {
-			if apiResponse == nil || apiResponse.StatusCode != 404 {
+			if apiResponse == nil || apiResponse.Response != nil && apiResponse.StatusCode != 404 {
 				return fmt.Errorf("an error occurred while checking for the destruction of backup unit %s: %s",
 					rs.Primary.ID, err)
 			}

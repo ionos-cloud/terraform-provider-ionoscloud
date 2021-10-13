@@ -226,3 +226,57 @@ func resourceDatacenterImport(ctx context.Context, d *schema.ResourceData, meta 
 
 	return []*schema.ResourceData{d}, nil
 }
+
+func setDatacenterData(d *schema.ResourceData, datacenter *ionoscloud.Datacenter) error {
+
+	if datacenter.Id != nil {
+		d.SetId(*datacenter.Id)
+	}
+
+	if datacenter.Properties != nil {
+		if datacenter.Properties.Location != nil {
+			err := d.Set("location", *datacenter.Properties.Location)
+			if err != nil {
+				return fmt.Errorf("error while setting location property for datacenter %s: %s", d.Id(), err)
+			}
+		}
+
+		if datacenter.Properties.Description != nil {
+			err := d.Set("description", *datacenter.Properties.Description)
+			if err != nil {
+				return fmt.Errorf("error while setting description property for datacenter %s: %s", d.Id(), err)
+			}
+		}
+
+		if datacenter.Properties.Name != nil {
+			err := d.Set("name", *datacenter.Properties.Name)
+			if err != nil {
+				return fmt.Errorf("error while setting name property for datacenter %s: %s", d.Id(), err)
+			}
+		}
+
+		if datacenter.Properties.Version != nil {
+			err := d.Set("version", *datacenter.Properties.Version)
+			if err != nil {
+				return fmt.Errorf("error while setting version property for datacenter %s: %s", d.Id(), err)
+			}
+		}
+
+		if datacenter.Properties.Features != nil && len(*datacenter.Properties.Features) > 0 {
+			err := d.Set("features", *datacenter.Properties.Features)
+			if err != nil {
+				return fmt.Errorf("error while setting features property for datacenter %s: %s", d.Id(), err)
+			}
+		}
+
+		if datacenter.Properties.SecAuthProtection != nil {
+			err := d.Set("sec_auth_protection", *datacenter.Properties.SecAuthProtection)
+			if err != nil {
+				return fmt.Errorf("error while setting sec_auth_protection property for datacenter %s: %s", d.Id(), err)
+			}
+		}
+
+	}
+
+	return nil
+}

@@ -97,7 +97,7 @@ func testAccCheckVolumeDestroyCheck(s *terraform.State) error {
 		_, apiResponse, err := client.VolumeApi.DatacentersVolumesFindById(ctx, rs.Primary.Attributes["datacenter_id"], rs.Primary.ID).Execute()
 
 		if err != nil {
-			if apiResponse == nil || apiResponse.StatusCode != 404 {
+			if apiResponse == nil || apiResponse.Response != nil && apiResponse.StatusCode != 404 {
 				return fmt.Errorf("volume still exists %s - an error occurred while checking it %s", rs.Primary.ID, err)
 			}
 		} else {
@@ -139,6 +139,26 @@ func testAccCheckVolumeExists(n string, volume *ionoscloud.Volume) resource.Test
 
 		volume = &foundServer
 
+		return nil
+	}
+}
+
+func testImageNotNull(resource, attribute string) resource.TestCheckFunc {
+	return func(s *terraform.State) error {
+		for _, rs := range s.RootModule().Resources {
+			if rs.Type != resource {
+				continue
+			}
+
+			image := rs.Primary.Attributes[attribute]
+
+			if image == "" {
+				return fmt.Errorf("%s is empty, expected an UUID", attribute)
+			} else if !IsValidUUID(image) {
+				return fmt.Errorf("%s should be a valid UUID, got: %#v", attribute, image)
+			}
+
+		}
 		return nil
 	}
 }

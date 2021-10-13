@@ -10,19 +10,17 @@ import (
 )
 
 func TestAccServer_ImportBasic(t *testing.T) {
-	resourceName := "webserver"
-
 	resource.Test(t, resource.TestCase{
 		PreCheck:          func() { testAccPreCheck(t) },
 		ProviderFactories: testAccProviderFactories,
 		CheckDestroy:      testAccCheckServerDestroyCheck,
 		Steps: []resource.TestStep{
 			{
-				Config: fmt.Sprintf(testacccheckserverconfigBasic, resourceName),
+				Config: testAccCheckServerConfigBasic + ServerResourceName,
 			},
 
 			{
-				ResourceName:            fmt.Sprintf("ionoscloud_server.%s", resourceName),
+				ResourceName:            "ionoscloud_server" + ServerResourceName,
 				ImportStateIdFunc:       testAccServerImportStateId,
 				ImportState:             true,
 				ImportStateVerify:       true,

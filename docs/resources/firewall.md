@@ -29,7 +29,7 @@ resource "ionoscloud_firewall" "example" {
 * `datacenter_id` - (Required)[string] The Virtual Data Center ID.
 * `server_id` - (Required)[string] The Server ID.
 * `nic_id` - (Required)[string] The NIC ID.
-* `protocol` - (Required)[string] The protocol for the rule: TCP, UDP, ICMP, ANY.
+* `protocol` - (Required)[string] The protocol for the rule: TCP, UDP, ICMP, ANY. This property is immutable.
 * `name` - (Optional)[string] The name of the firewall rule.
 * `source_mac` - (Optional)[string] Only traffic originating from the respective MAC address is allowed. Valid format: aa:bb:cc:dd:ee:ff.
 * `source_ip` - (Optional)[string] Only traffic originating from the respective IPv4 address is allowed.

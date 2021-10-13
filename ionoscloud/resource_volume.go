@@ -362,7 +362,7 @@ func resourceVolumeRead(ctx context.Context, d *schema.ResourceData, meta interf
 
 	if err != nil {
 
-		if apiResponse != nil && apiResponse.Response.StatusCode == 404 {
+		if apiResponse != nil && apiResponse.Response != nil && apiResponse.Response.StatusCode == 404 {
 			d.SetId("")
 			return nil
 		}
