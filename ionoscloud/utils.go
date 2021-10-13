@@ -444,38 +444,22 @@ func resourcePrivateCrossConnectImport(ctx context.Context, d *schema.ResourceDa
 	return []*schema.ResourceData{d}, nil
 }
 
-func resourceS3KeyImport(ctx context.Context, d *schema.ResourceData, meta interface{}) ([]*schema.ResourceData, error) {
+func resourceFirewallImport(_ context.Context, d *schema.ResourceData, _ interface{}) ([]*schema.ResourceData, error) {
 	parts := strings.Split(d.Id(), "/")
-
-	if len(parts) != 2 || parts[0] == "" || parts[1] == "" {
-		return nil, fmt.Errorf("invalid import id %q. Expecting {userId}/{s3KeyId}", d.Id())
+	if len(parts) != 4 || parts[0] == "" || parts[1] == "" {
+		return nil, fmt.Errorf("invalid import id %q. Expecting {datacenter}/{server}/{nic}/{firewall}", d.Id())
 	}
 
-	userId := parts[0]
-	keyId := parts[1]
-
-	client := meta.(*ionoscloud.APIClient)
-
-	s3Key, apiResponse, err := client.UserManagementApi.UmUsersS3keysFindByKeyId(ctx, userId, keyId).Execute()
-
-	if err != nil {
-		if apiResponse != nil && apiResponse.Response != nil && apiResponse.StatusCode == 404 {
-			d.SetId("")
-			return nil, fmt.Errorf("unable to find S3 key %q", keyId)
-		}
-		return nil, fmt.Errorf("unable to retreive S3 key %q", keyId)
-	}
-
-	d.SetId(*s3Key.Id)
-	if err := d.Set("user_id", userId); err != nil {
+	if err := d.Set("datacenter_id", parts[0]); err != nil {
 		return nil, err
 	}
-	if err := d.Set("secret_key", *s3Key.Properties.SecretKey); err != nil {
+	if err := d.Set("server_id", parts[1]); err != nil {
 		return nil, err
 	}
-	if err := d.Set("active", *s3Key.Properties.Active); err != nil {
+	if err := d.Set("nic_id", parts[2]); err != nil {
 		return nil, err
 	}
+	d.SetId(parts[3])
 
 	return []*schema.ResourceData{d}, nil
 }
