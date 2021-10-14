@@ -1,13 +1,19 @@
+## 6.0.0-beta.13
+
+- **bug fixes**: `cube server` could not be deleted
+- **functionality enhancements**: improved data_source for template - now `template` can be searched by any of its arguments
+  
 ## 6.0.0-beta.12
 
-- fixed bug in `server`: can not create cube server, firewall not updated
-- fixed bug in `firewall`: using type argument throws error
-- for `backupUnit`, `datacenter`, `lan`, `s3_key`, and `firewall` resources done the following:
+- **bug fixes**: `server`: can not create cube server, firewall not updated
+- **bug fixes**: `firewall`: using type argument throws error
+- **code enhancements**: for `backupUnit`, `datacenter`, `lan`, `s3_key`, and `firewall` resources done the following:
   - made tests comprehensive
   - optimized test duration by including both match by id and by name in the same test
   - removed duplicated code from import, data_source and resource files (set parameters)
-  - updated documentation 
+  - updated documentation
   - improved import functions
+- **new features**: data_source for `s3_key`
 
 ## 6.0.0-beta.11
 

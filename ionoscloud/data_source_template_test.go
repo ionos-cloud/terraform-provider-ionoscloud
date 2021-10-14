@@ -28,8 +28,5 @@ func TestAccDataSourceTemplate_matching(t *testing.T) {
 
 const testaccdatasourcetemplateMatchingwithdatasource = `
 data "ionoscloud_template" "template" {
-	name = "CUBES L"
 	cores = 4
-	ram	= 8192
-	storage_size = 160
 }`

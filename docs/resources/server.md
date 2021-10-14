@@ -46,8 +46,8 @@ resource "ionoscloud_server" "example" {
 - `template_uuid` - (Optional)[string] The UUID of the template for creating a CUBE server; the available templates for CUBE servers can be found on the templates resource
 - `name` - (Required)[string] The name of the server.
 - `datacenter_id` - (Required)[string] The ID of a Virtual Data Center.
-- `cores` - (Required)[integer] Number of server CPU cores.
-- `ram` - (Required)[integer] The amount of memory for the server in MB.
+- `cores` - (Optional)[integer] Number of server CPU cores.
+- `ram` - (Optional)[integer] The amount of memory for the server in MB.
 - `image_name` - (Optional)[string] The name, ID or alias of the image. May also be a snapshot ID. It is required if `licence_type` is not provided. Attribute is immutable.
 - `availability_zone` - (Optional)[string] The availability zone in which the server should exist. This property is immutable.
 - `licence_type` - (Optional)[string] Sets the OS type of the server.
@@ -64,16 +64,24 @@ resource "ionoscloud_server" "example" {
 - `image_password` - (Optional)[string] Required if `ssh_key_path` is not provided.
 - `type` - (Optional)[string] server usages: ENTERPRISE or CUBE. This property is immutable.
 
-*note: image_name under volume level is deprecated, please use image_name under server level*
+> **⚠ WARNING** 
+> 
+> Image_name under volume level is deprecated, please use image_name under server level
+
+
+> **⚠ WARNING**
+> 
+> If you want to create a **CUBE** server, you have to provide the `template_uuid`. In this case you can not set `cores`, `ram` and `volume.size` arguments, these being mutually exclusive with `template_uuid`.
+> 
+> In all the other cases (**ENTERPRISE** servers) you have to provide values for `cores`, `ram` and `volume size`.
+
 
 ## Import
 
-Resource Server can be imported using the `resource id`, e.g.
+Resource Server can be imported using the `resource id` and the `datacenter id`, e.g.
 
 ```shell
-terraform import ionoscloud_server.myserver {datacenter uuid}/{server uuid}/{primary_nic uuid}
-# or
-terraform import ionoscloud_server.myserver {datacenter uuid}/{server uuid}/{primary_nic uuid}/{firewall uuid}
+terraform import ionoscloud_server.myserver {datacenter uuid}/{server uuid}
 ```
 
 ## Notes
