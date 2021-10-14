@@ -129,28 +129,8 @@ func resourceBackupUnitRead(ctx context.Context, d *schema.ResourceData, meta in
 
 	log.Printf("[INFO] Successfully retreived contract resource for backup unit unit %s: %+v", d.Id(), contractResources)
 
-	if backupUnit.Properties.Name != nil {
-		err := d.Set("name", *backupUnit.Properties.Name)
-		if err != nil {
-			diags := diag.FromErr(fmt.Errorf("error while setting name property for backup unit %s: %s", d.Id(), err))
-			return diags
-		}
-	}
-
-	if backupUnit.Properties.Email != nil {
-		epErr := d.Set("email", backupUnit.Properties.Email)
-		if epErr != nil {
-			diags := diag.FromErr(fmt.Errorf("error while setting email property for backup unit %s: %s", d.Id(), epErr))
-			return diags
-		}
-	}
-
-	if backupUnit.Properties.Name != nil && contractResources.Properties.ContractNumber != nil {
-		err := d.Set("login", fmt.Sprintf("%s-%d", *backupUnit.Properties.Name, *contractResources.Properties.ContractNumber))
-		if err != nil {
-			diags := diag.FromErr(fmt.Errorf("error while setting login property for backup unit %s: %s", d.Id(), err))
-			return diags
-		}
+	if err := setBackupUnitData(d, &backupUnit, &contractResources); err != nil {
+		return diag.FromErr(err)
 	}
 
 	log.Printf("[INFO] Successfully retreived backup unit %s: %+v", d.Id(), backupUnit)
@@ -269,6 +249,36 @@ func resourceBackupUnitDelete(ctx context.Context, d *schema.ResourceData, meta 
 	return nil
 }
 
+func resourceBackupUnitImport(ctx context.Context, d *schema.ResourceData, meta interface{}) ([]*schema.ResourceData, error) {
+	client := meta.(*ionoscloud.APIClient)
+
+	buId := d.Id()
+
+	backupUnit, apiResponse, err := client.BackupUnitApi.BackupunitsFindById(ctx, d.Id()).Execute()
+
+	if err != nil {
+		if apiResponse != nil && apiResponse.Response != nil && apiResponse.StatusCode == 404 {
+			d.SetId("")
+			return nil, fmt.Errorf("unable to find Backup Unit %q", buId)
+		}
+		return nil, fmt.Errorf("unable to retreive Backup Unit %q", buId)
+	}
+
+	log.Printf("[INFO] Backup Unit found: %+v", backupUnit)
+
+	contractResources, apiResponse, cErr := client.ContractApi.ContractsGet(ctx).Execute()
+
+	if cErr != nil {
+		return nil, fmt.Errorf("error while fetching contract resources for backup unit %s: %s", d.Id(), cErr)
+	}
+
+	if err := setBackupUnitData(d, &backupUnit, &contractResources); err != nil {
+		return nil, err
+	}
+
+	return []*schema.ResourceData{d}, nil
+}
+
 func backupUnitReady(client *ionoscloud.APIClient, d *schema.ResourceData, c context.Context) (bool, error) {
 	backupUnit, _, err := client.BackupUnitApi.BackupunitsFindById(c, d.Id()).Execute()
 
@@ -288,4 +298,36 @@ func backupUnitDeleted(client *ionoscloud.APIClient, d *schema.ResourceData, c c
 		return true, fmt.Errorf("error checking backup unit deletion status: %s", err)
 	}
 	return false, nil
+}
+
+func setBackupUnitData(d *schema.ResourceData, backupUnit *ionoscloud.BackupUnit, contractResources *ionoscloud.Contract) error {
+
+	if backupUnit.Id != nil {
+		d.SetId(*backupUnit.Id)
+	}
+
+	if backupUnit.Properties != nil {
+
+		if backupUnit.Properties.Name != nil {
+			epErr := d.Set("name", *backupUnit.Properties.Name)
+			if epErr != nil {
+				return fmt.Errorf("error while setting name property for backup unit %s: %s", d.Id(), epErr)
+			}
+		}
+
+		if backupUnit.Properties.Email != nil {
+			epErr := d.Set("email", *backupUnit.Properties.Email)
+			if epErr != nil {
+				return fmt.Errorf("error while setting email property for backup unit %s: %s", d.Id(), epErr)
+			}
+		}
+
+		if backupUnit.Properties.Name != nil && contractResources.Properties.ContractNumber != nil {
+			err := d.Set("login", fmt.Sprintf("%s-%d", *backupUnit.Properties.Name, *contractResources.Properties.ContractNumber))
+			if err != nil {
+				return fmt.Errorf("error while setting login property for backup unit %s: %s", d.Id(), err)
+			}
+		}
+	}
+	return nil
 }

@@ -55,7 +55,7 @@ func testAccCheckSnapshotDestroyCheck(s *terraform.State) error {
 		_, apiResponse, err := client.SnapshotApi.SnapshotsFindById(ctx, rs.Primary.ID).Execute()
 
 		if err != nil {
-			if apiResponse == nil || apiResponse.StatusCode != 404 {
+			if apiResponse == nil || apiResponse.Response != nil && apiResponse.StatusCode != 404 {
 				return fmt.Errorf("snapshot still exists %s - an error occurred while checking it %s", rs.Primary.ID, err)
 			}
 		} else {

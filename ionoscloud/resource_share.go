@@ -161,7 +161,7 @@ func resourceShareDelete(ctx context.Context, d *schema.ResourceData, meta inter
 		_, apiResponse, err := client.UserManagementApi.UmGroupsSharesDelete(ctx, groupId, resourceId).Execute()
 		if err != nil {
 			if _, ok := err.(ionoscloud.GenericOpenAPIError); ok {
-				if apiResponse == nil || apiResponse.StatusCode != 404 {
+				if apiResponse == nil || apiResponse.Response != nil && apiResponse.StatusCode != 404 {
 					diags := diag.FromErr(fmt.Errorf("an error occured while deleting a share %s %s", d.Id(), err))
 					return diags
 				}

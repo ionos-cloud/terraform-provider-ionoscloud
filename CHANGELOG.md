@@ -1,6 +1,12 @@
 ## 5.2.16
 
-- new data sources added: s3 key
+- **code enhancements**: for `backupUnit`, `datacenter`, `lan`, `s3_key`, and `firewall` resources done the following:
+  - made tests comprehensive
+  - optimized test duration by including both match by id and by name in the same test
+  - removed duplicated code from import, data_source and resource files (set parameters)
+  - updated documentation
+  - improved import functions
+- **new features**: data_source for `s3_key`
 
 ## 5.2.15
 

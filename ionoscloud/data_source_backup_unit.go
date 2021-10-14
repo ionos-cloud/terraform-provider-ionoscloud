@@ -52,12 +52,15 @@ func dataSourceBackupUnitRead(ctx context.Context, d *schema.ResourceData, meta 
 	var backupUnit ionoscloud.BackupUnit
 	var err error
 
+	found := false
+
 	if idOk {
 		/* search by ID */
 		backupUnit, _, err = client.BackupUnitApi.BackupunitsFindById(ctx, id.(string)).Execute()
 		if err != nil {
 			return diag.FromErr(fmt.Errorf("an error occurred while fetching the backup unit %s: %s", id.(string), err))
 		}
+		found = true
 	} else {
 		/* search by name */
 		var backupUnits ionoscloud.BackupUnits
@@ -76,6 +79,7 @@ func dataSourceBackupUnitRead(ctx context.Context, d *schema.ResourceData, meta 
 				}
 				if tmpBackupUnit.Properties.Name != nil && *tmpBackupUnit.Properties.Name == name.(string) {
 					backupUnit = tmpBackupUnit
+					found = true
 					break
 				}
 
@@ -84,7 +88,7 @@ func dataSourceBackupUnitRead(ctx context.Context, d *schema.ResourceData, meta 
 
 	}
 
-	if &backupUnit == nil {
+	if !found {
 		return diag.FromErr(fmt.Errorf("backup unit not found"))
 	}
 
@@ -95,47 +99,9 @@ func dataSourceBackupUnitRead(ctx context.Context, d *schema.ResourceData, meta 
 		return diags
 	}
 
-	if diags := setBackupUnitData(d, &backupUnit, &contractResources); diags != nil {
-		return diags
+	if err := setBackupUnitData(d, &backupUnit, &contractResources); err != nil {
+		return diag.FromErr(err)
 	}
 
-	return nil
-}
-
-func setBackupUnitData(d *schema.ResourceData, backupUnit *ionoscloud.BackupUnit, contractResources *ionoscloud.Contract) diag.Diagnostics {
-
-	if backupUnit.Id != nil {
-		d.SetId(*backupUnit.Id)
-		if err := d.Set("id", *backupUnit.Id); err != nil {
-			return diag.FromErr(err)
-		}
-	}
-
-	if backupUnit.Properties != nil {
-
-		if backupUnit.Properties.Name != nil {
-			epErr := d.Set("name", backupUnit.Properties.Name)
-			if epErr != nil {
-				diags := diag.FromErr(fmt.Errorf("error while setting name property for backup unit %s: %s", d.Id(), epErr))
-				return diags
-			}
-		}
-
-		if backupUnit.Properties.Email != nil {
-			epErr := d.Set("email", backupUnit.Properties.Email)
-			if epErr != nil {
-				diags := diag.FromErr(fmt.Errorf("error while setting email property for backup unit %s: %s", d.Id(), epErr))
-				return diags
-			}
-		}
-
-		if backupUnit.Properties.Name != nil && contractResources.Properties.ContractNumber != nil {
-			err := d.Set("login", fmt.Sprintf("%s-%d", *backupUnit.Properties.Name, *contractResources.Properties.ContractNumber))
-			if err != nil {
-				diags := diag.FromErr(fmt.Errorf("error while setting login property for backup unit %s: %s", d.Id(), err))
-				return diags
-			}
-		}
-	}
 	return nil
 }
