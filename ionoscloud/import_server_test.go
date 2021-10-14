@@ -16,11 +16,11 @@ func TestAccServer_ImportBasic(t *testing.T) {
 		CheckDestroy:      testAccCheckServerDestroyCheck,
 		Steps: []resource.TestStep{
 			{
-				Config: testAccCheckServerConfigBasic + ServerResourceName,
+				Config: testAccCheckServerConfigBasic,
 			},
 
 			{
-				ResourceName:            "ionoscloud_server" + ServerResourceName,
+				ResourceName:            "ionoscloud_server." + ServerResourceName,
 				ImportStateIdFunc:       testAccServerImportStateId,
 				ImportState:             true,
 				ImportStateVerify:       true,
