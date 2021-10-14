@@ -1,7 +1,7 @@
 /*
  * CLOUD API
  *
- * An enterprise-grade Infrastructure is provided as a Service (IaaS) solution that can be managed through a browser-based \"Data Center Designer\" (DCD) tool or via an easy to use API.   The API allows you to perform a variety of management tasks such as spinning up additional servers, adding volumes, adjusting networking, and so forth. It is designed to allow users to leverage the same power and flexibility found within the DCD visual tool. Both tools are consistent with their concepts and lend well to making the experience smooth and intuitive.
+ * IONOS Enterprise-grade Infrastructure as a Service (IaaS) solutions can be managed through the Cloud API, in addition or as an alternative to the \"Data Center Designer\" (DCD) browser-based tool.    Both methods employ consistent concepts and features, deliver similar power and flexibility, and can be used to perform a multitude of management tasks, including adding servers, volumes, configuring networks, and so on.
  *
  * API version: 6.0-SDK.3
  */
@@ -25,7 +25,6 @@ type FlowLogProperties struct {
 	// S3 bucket name of an existing IONOS Cloud S3 bucket.
 	Bucket *string `json:"bucket"`
 }
-
 
 
 // GetName returns the Name field value
@@ -69,8 +68,6 @@ func (o *FlowLogProperties) HasName() bool {
 	return false
 }
 
-
-
 // GetAction returns the Action field value
 // If the value is explicit nil, the zero value for string will be returned
 func (o *FlowLogProperties) GetAction() *string {
@@ -111,8 +108,6 @@ func (o *FlowLogProperties) HasAction() bool {
 
 	return false
 }
-
-
 
 // GetDirection returns the Direction field value
 // If the value is explicit nil, the zero value for string will be returned
@@ -155,8 +150,6 @@ func (o *FlowLogProperties) HasDirection() bool {
 	return false
 }
 
-
-
 // GetBucket returns the Bucket field value
 // If the value is explicit nil, the zero value for string will be returned
 func (o *FlowLogProperties) GetBucket() *string {
@@ -198,32 +191,26 @@ func (o *FlowLogProperties) HasBucket() bool {
 	return false
 }
 
-
 func (o FlowLogProperties) MarshalJSON() ([]byte, error) {
 	toSerialize := map[string]interface{}{}
 
 	if o.Name != nil {
 		toSerialize["name"] = o.Name
 	}
-	
 
 	if o.Action != nil {
 		toSerialize["action"] = o.Action
 	}
-	
 
 	if o.Direction != nil {
 		toSerialize["direction"] = o.Direction
 	}
-	
 
 	if o.Bucket != nil {
 		toSerialize["bucket"] = o.Bucket
 	}
-	
 	return json.Marshal(toSerialize)
 }
-
 type NullableFlowLogProperties struct {
 	value *FlowLogProperties
 	isSet bool

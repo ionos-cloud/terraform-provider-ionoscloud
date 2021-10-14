@@ -208,20 +208,20 @@ func dataSourceK8sCluster() *schema.Resource {
 				Type:     schema.TypeString,
 				Computed: true,
 			},
-			"public": {
-				Type: schema.TypeBool,
-				Description: "The indicator if the cluster is public or private. Be aware that setting it to false is " +
-					"currently in beta phase.",
-				Optional: true,
-				Computed: true,
-			},
-			"gateway_ip": {
-				Type: schema.TypeString,
-				Description: "The IP address of the gateway used by the cluster. This is mandatory when `public` is set " +
-					"to `false` and should not be provided otherwise.",
-				Optional: true,
-				Computed: true,
-			},
+			//"public": {
+			//	Type: schema.TypeBool,
+			//	Description: "The indicator if the cluster is public or private. Be aware that setting it to false is " +
+			//		"currently in beta phase.",
+			//	Optional: true,
+			//	Computed: true,
+			//},
+			//"gateway_ip": {
+			//	Type: schema.TypeString,
+			//	Description: "The IP address of the gateway used by the cluster. This is mandatory when `public` is set " +
+			//		"to `false` and should not be provided otherwise.",
+			//	Optional: true,
+			//	Computed: true,
+			//},
 			"api_subnet_allow_list": {
 				Type: schema.TypeList,
 				Description: "Access to the K8s API server is restricted to these CIDRs. Cluster-internal traffic is not " +
@@ -459,19 +459,19 @@ func setK8sClusterData(d *schema.ResourceData, cluster *ionoscloud.KubernetesClu
 			}
 		}
 
-		if cluster.Properties.Public != nil {
-			err := d.Set("public", *cluster.Properties.Public)
-			if err != nil {
-				return fmt.Errorf("error while setting public property for cluser %s: %s", d.Id(), err)
-			}
-		}
-
-		if cluster.Properties.GatewayIp != nil {
-			err := d.Set("gateway_ip", *cluster.Properties.GatewayIp)
-			if err != nil {
-				return fmt.Errorf("error while setting gateway_ip property for cluser %s: %s", d.Id(), err)
-			}
-		}
+		//if cluster.Properties.Public != nil {
+		//	err := d.Set("public", *cluster.Properties.Public)
+		//	if err != nil {
+		//		return fmt.Errorf("error while setting public property for cluser %s: %s", d.Id(), err)
+		//	}
+		//}
+		//
+		//if cluster.Properties.GatewayIp != nil {
+		//	err := d.Set("gateway_ip", *cluster.Properties.GatewayIp)
+		//	if err != nil {
+		//		return fmt.Errorf("error while setting gateway_ip property for cluser %s: %s", d.Id(), err)
+		//	}
+		//}
 
 		if cluster.Properties.ApiSubnetAllowList != nil {
 			apiSubnetAllowLists := make([]interface{}, len(*cluster.Properties.ApiSubnetAllowList), len(*cluster.Properties.ApiSubnetAllowList))

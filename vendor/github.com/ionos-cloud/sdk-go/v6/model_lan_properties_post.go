@@ -1,7 +1,7 @@
 /*
  * CLOUD API
  *
- * An enterprise-grade Infrastructure is provided as a Service (IaaS) solution that can be managed through a browser-based \"Data Center Designer\" (DCD) tool or via an easy to use API.   The API allows you to perform a variety of management tasks such as spinning up additional servers, adding volumes, adjusting networking, and so forth. It is designed to allow users to leverage the same power and flexibility found within the DCD visual tool. Both tools are consistent with their concepts and lend well to making the experience smooth and intuitive.
+ * IONOS Enterprise-grade Infrastructure as a Service (IaaS) solutions can be managed through the Cloud API, in addition or as an alternative to the \"Data Center Designer\" (DCD) browser-based tool.    Both methods employ consistent concepts and features, deliver similar power and flexibility, and can be used to perform a multitude of management tasks, including adding servers, volumes, configuring networks, and so on.
  *
  * API version: 6.0-SDK.3
  */
@@ -25,7 +25,6 @@ type LanPropertiesPost struct {
 	// Does this LAN faces the public Internet or not
 	Public *bool `json:"public,omitempty"`
 }
-
 
 
 // GetName returns the Name field value
@@ -69,8 +68,6 @@ func (o *LanPropertiesPost) HasName() bool {
 	return false
 }
 
-
-
 // GetIpFailover returns the IpFailover field value
 // If the value is explicit nil, the zero value for []IPFailover will be returned
 func (o *LanPropertiesPost) GetIpFailover() *[]IPFailover {
@@ -111,8 +108,6 @@ func (o *LanPropertiesPost) HasIpFailover() bool {
 
 	return false
 }
-
-
 
 // GetPcc returns the Pcc field value
 // If the value is explicit nil, the zero value for string will be returned
@@ -155,8 +150,6 @@ func (o *LanPropertiesPost) HasPcc() bool {
 	return false
 }
 
-
-
 // GetPublic returns the Public field value
 // If the value is explicit nil, the zero value for bool will be returned
 func (o *LanPropertiesPost) GetPublic() *bool {
@@ -198,32 +191,26 @@ func (o *LanPropertiesPost) HasPublic() bool {
 	return false
 }
 
-
 func (o LanPropertiesPost) MarshalJSON() ([]byte, error) {
 	toSerialize := map[string]interface{}{}
 
 	if o.Name != nil {
 		toSerialize["name"] = o.Name
 	}
-	
 
 	if o.IpFailover != nil {
 		toSerialize["ipFailover"] = o.IpFailover
 	}
-	
 
 	if o.Pcc != nil {
 		toSerialize["pcc"] = o.Pcc
 	}
-	
 
 	if o.Public != nil {
 		toSerialize["public"] = o.Public
 	}
-	
 	return json.Marshal(toSerialize)
 }
-
 type NullableLanPropertiesPost struct {
 	value *LanPropertiesPost
 	isSet bool

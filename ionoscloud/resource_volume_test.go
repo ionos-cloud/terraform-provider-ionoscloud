@@ -80,6 +80,50 @@ func TestAccVolume_ResolveImageName(t *testing.T) {
 	})
 }
 
+func TestAccVolume_ImageAlias(t *testing.T) {
+	var volume ionoscloud.Volume
+	volumeName := "volume"
+
+	resource.Test(t, resource.TestCase{
+		PreCheck: func() {
+			testAccPreCheck(t)
+		},
+		ProviderFactories: testAccProviderFactories,
+		CheckDestroy:      testAccCheckVolumeDestroyCheck,
+		Steps: []resource.TestStep{
+			{
+				Config: fmt.Sprintf(testAccCheckVolumeConfigImageAlias, volumeName),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckVolumeExists("ionoscloud_volume.database_volume", &volume),
+					resource.TestCheckResourceAttr("ionoscloud_volume.database_volume", "name", volumeName),
+					testImageNotNull("ionoscloud_volume", "image_name"),
+					testImageNotNull("ionoscloud_server", "boot_image"),
+				),
+			},
+		},
+	})
+}
+
+func testImageNotNull(resource, attribute string) resource.TestCheckFunc {
+	return func(s *terraform.State) error {
+		for _, rs := range s.RootModule().Resources {
+			if rs.Type != resource {
+				continue
+			}
+
+			image := rs.Primary.Attributes[attribute]
+
+			if image == "" {
+				return fmt.Errorf("%s is empty, expected an UUID", attribute)
+			} else if !IsValidUUID(image) {
+				return fmt.Errorf("%s should be a valid UUID, got: %#v", attribute, image)
+			}
+
+		}
+		return nil
+	}
+}
+
 func testAccCheckVolumeDestroyCheck(s *terraform.State) error {
 	client := testAccProvider.Meta().(SdkBundle).CloudApiClient
 	ctx, cancel := context.WithTimeout(context.Background(), *resourceDefaultTimeouts.Delete)
@@ -95,7 +139,7 @@ func testAccCheckVolumeDestroyCheck(s *terraform.State) error {
 		_, apiResponse, err := client.VolumesApi.DatacentersVolumesFindById(ctx, rs.Primary.Attributes["datacenter_id"], rs.Primary.ID).Execute()
 
 		if err != nil {
-			if apiResponse == nil || apiResponse.StatusCode != 404 {
+			if apiResponse == nil || apiResponse.Response != nil && apiResponse.StatusCode != 404 {
 				return fmt.Errorf("unable to fetch volume %s: %s", rs.Primary.ID, err)
 			}
 		} else {
@@ -147,6 +191,12 @@ resource "ionoscloud_datacenter" "foobar" {
 	location = "us/las"
 }
 
+resource "ionoscloud_backup_unit" "example" {
+	name        = "serverTest"
+	password    = "DemoPassword123$"
+	email       = "example@ionoscloud.com"
+}
+
 resource "ionoscloud_lan" "webserver_lan" {
   datacenter_id = "${ionoscloud_datacenter.foobar.id}"
   public = true
@@ -175,15 +225,17 @@ resource "ionoscloud_server" "webserver" {
 }
 
 resource "ionoscloud_volume" "database_volume" {
-  datacenter_id = "${ionoscloud_datacenter.foobar.id}"
-  server_id = "${ionoscloud_server.webserver.id}"
-  availability_zone = "ZONE_1"
-  name = "%s"
-  size = 14
-  disk_type = "HDD"
-  bus = "VIRTIO"
-  image_name = "Ubuntu-20.04"
-  image_password = "K3tTj8G14a3EgKyNeeiY"
+	datacenter_id = "${ionoscloud_datacenter.foobar.id}"
+	server_id = "${ionoscloud_server.webserver.id}"
+	availability_zone = "ZONE_1"
+	name = "%s"
+	size = 5
+	disk_type = "HDD"
+	bus = "VIRTIO"
+	image_name ="Debian-10-cloud-init.qcow2"
+	image_password = "K3tTj8G14a3EgKyNeeiY"
+	backup_unit_id = ionoscloud_backup_unit.example.id
+	user_data = "foo"
 }`
 
 const testAccCheckVolumeConfigUpdate = `
@@ -192,6 +244,13 @@ resource "ionoscloud_datacenter" "foobar" {
 	location = "us/las"
 }
 
+resource "ionoscloud_backup_unit" "example" {
+	name        = "serverTest"
+	password    = "DemoPassword123$"
+	email       = "example@ionoscloud.com"
+}
+
+
 resource "ionoscloud_lan" "webserver_lan" {
   datacenter_id = "${ionoscloud_datacenter.foobar.id}"
   public = true
@@ -220,15 +279,17 @@ resource "ionoscloud_server" "webserver" {
 }
 
 resource "ionoscloud_volume" "database_volume" {
-  datacenter_id = "${ionoscloud_datacenter.foobar.id}"
-  server_id = "${ionoscloud_server.webserver.id}"
-  availability_zone = "ZONE_1"
-  name = "updated"
-  size = 14
-  disk_type = "HDD"
-  bus = "VIRTIO"
-  image_name = "Ubuntu-20.04"
-  image_password = "K3tTj8G14a3EgKyNeeiY"
+	datacenter_id = "${ionoscloud_datacenter.foobar.id}"
+	server_id = "${ionoscloud_server.webserver.id}"
+	availability_zone = "ZONE_1"
+	name = "updated"
+	size = 5
+	disk_type = "HDD"
+	bus = "VIRTIO"
+	image_name ="Debian-10-cloud-init.qcow2"
+	image_password = "K3tTj8G14a3EgKyNeeiY"
+	backup_unit_id = ionoscloud_backup_unit.example.id
+	user_data = "foo"
 }`
 
 const testacccheckvolumeconfigNoPassword = `
@@ -315,3 +376,49 @@ resource "ionoscloud_volume" "image_name_volume" {
   image_password = "K3tTj8G14a3EgKyNeeiY"
 }
 `
+
+const testAccCheckVolumeConfigImageAlias = `
+resource "ionoscloud_datacenter" "foobar" {
+	name       = "volume-test"
+	location = "us/las"
+}
+
+
+resource "ionoscloud_lan" "webserver_lan" {
+  datacenter_id = "${ionoscloud_datacenter.foobar.id}"
+  public = true
+  name = "public"
+}
+
+resource "ionoscloud_server" "webserver" {
+  name = "webserver"
+  datacenter_id = "${ionoscloud_datacenter.foobar.id}"
+  cores = 1
+  ram = 1024
+  availability_zone = "ZONE_1"
+  cpu_family = "AMD_OPTERON"
+  image_name = "ubuntu:latest"
+  image_password = "K3tTj8G14a3EgKyNeeiY"
+  volume {
+    name = "system"
+    size = 14
+    disk_type = "HDD"
+  }
+  nic {
+    lan = "${ionoscloud_lan.webserver_lan.id}"
+    dhcp = true
+    firewall_active = true
+  }
+}
+
+resource "ionoscloud_volume" "database_volume" {
+	datacenter_id = "${ionoscloud_datacenter.foobar.id}"
+	server_id = "${ionoscloud_server.webserver.id}"
+	availability_zone = "ZONE_1"
+	name = "%s"
+	size = 5
+	disk_type = "HDD"
+	bus = "VIRTIO"
+	image_name ="ubuntu:latest"
+	image_password = "K3tTj8G14a3EgKyNeeiY"
+}`

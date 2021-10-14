@@ -131,7 +131,7 @@ func resourceUserRead(ctx context.Context, d *schema.ResourceData, meta interfac
 	rsp, apiResponse, err := client.UserManagementApi.UmUsersFindById(ctx, d.Id()).Execute()
 
 	if err != nil {
-		if apiResponse != nil && apiResponse.StatusCode == 404 {
+		if apiResponse != nil && apiResponse.Response != nil && apiResponse.StatusCode == 404 {
 			d.SetId("")
 			return nil
 		}
@@ -269,7 +269,7 @@ func resourceUserDelete(ctx context.Context, d *schema.ResourceData, meta interf
 		time.Sleep(20 * time.Second)
 		apiResponse, err := client.UserManagementApi.UmUsersDelete(ctx, d.Id()).Execute()
 		if err != nil { */
-		if apiResponse == nil || apiResponse.StatusCode != 404 {
+		if apiResponse == nil || apiResponse.Response != nil && apiResponse.StatusCode != 404 {
 			diags := diag.FromErr(fmt.Errorf("an error occured while deleting a user %s %s, %s", d.Id(), err, responseBody(apiResponse)))
 			return diags
 		}

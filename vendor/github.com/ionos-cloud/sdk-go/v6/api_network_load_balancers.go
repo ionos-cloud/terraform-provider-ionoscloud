@@ -1,7 +1,7 @@
 /*
  * CLOUD API
  *
- * An enterprise-grade Infrastructure is provided as a Service (IaaS) solution that can be managed through a browser-based \"Data Center Designer\" (DCD) tool or via an easy to use API.   The API allows you to perform a variety of management tasks such as spinning up additional servers, adding volumes, adjusting networking, and so forth. It is designed to allow users to leverage the same power and flexibility found within the DCD visual tool. Both tools are consistent with their concepts and lend well to making the experience smooth and intuitive.
+ * IONOS Enterprise-grade Infrastructure as a Service (IaaS) solutions can be managed through the Cloud API, in addition or as an alternative to the \"Data Center Designer\" (DCD) browser-based tool.    Both methods employ consistent concepts and features, deliver similar power and flexibility, and can be used to perform a multitude of management tasks, including adding servers, volumes, configuring networks, and so on.
  *
  * API version: 6.0-SDK.3
  */
@@ -58,7 +58,7 @@ func (r ApiDatacentersNetworkloadbalancersDeleteRequest) Execute() (*APIResponse
  * DatacentersNetworkloadbalancersDelete Remove an Network Load Balancer
  * Removes the specified Network Load Balancer.
  * @param ctx _context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
- * @param datacenterId The unique ID of the datacenter
+ * @param datacenterId The unique ID of the data center.
  * @param networkLoadBalancerId The unique ID of the Network Load Balancer
  * @return ApiDatacentersNetworkloadbalancersDeleteRequest
  */
@@ -212,7 +212,7 @@ func (r ApiDatacentersNetworkloadbalancersFindByNetworkLoadBalancerIdRequest) Ex
  * DatacentersNetworkloadbalancersFindByNetworkLoadBalancerId Retrieve an Network Load Balancer
  * Retrieves the attributes of a given Network Load Balancer.
  * @param ctx _context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
- * @param datacenterId The unique ID of the datacenter
+ * @param datacenterId The unique ID of the data center.
  * @param networkLoadBalancerId The unique ID of the Network Load Balancer
  * @return ApiDatacentersNetworkloadbalancersFindByNetworkLoadBalancerIdRequest
  */
@@ -379,7 +379,7 @@ func (r ApiDatacentersNetworkloadbalancersFlowlogsDeleteRequest) Execute() (*API
  * DatacentersNetworkloadbalancersFlowlogsDelete Remove Flow Log from Network Load Balancer
  * This will remove a flow log from the network load balancer.
  * @param ctx _context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
- * @param datacenterId The unique ID of the datacenter
+ * @param datacenterId The unique ID of the data center.
  * @param networkLoadBalancerId The unique ID of the Network Load Balancer
  * @param flowLogId The unique ID of the flow log
  * @return ApiDatacentersNetworkloadbalancersFlowlogsDeleteRequest
@@ -537,7 +537,7 @@ func (r ApiDatacentersNetworkloadbalancersFlowlogsFindByFlowLogIdRequest) Execut
  * DatacentersNetworkloadbalancersFlowlogsFindByFlowLogId Retrieve a Flow Log of the Network Load Balancer
  * This will return a Flow Log of the Network Load Balancer.
  * @param ctx _context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
- * @param datacenterId The unique ID of the datacenter
+ * @param datacenterId The unique ID of the data center.
  * @param networkLoadBalancerId The unique ID of the Network Load Balancer
  * @param flowLogId The unique ID of the Flow Log
  * @return ApiDatacentersNetworkloadbalancersFlowlogsFindByFlowLogIdRequest
@@ -706,7 +706,7 @@ func (r ApiDatacentersNetworkloadbalancersFlowlogsGetRequest) Execute() (FlowLog
  * DatacentersNetworkloadbalancersFlowlogsGet List Network Load Balancer Flow Logs
  * You can retrieve a list of Flow Logs of the Network Load Balancer.
  * @param ctx _context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
- * @param datacenterId The unique ID of the datacenter
+ * @param datacenterId The unique ID of the data center.
  * @param networkLoadBalancerId The unique ID of the Network Load Balancer
  * @return ApiDatacentersNetworkloadbalancersFlowlogsGetRequest
  */
@@ -878,7 +878,7 @@ func (r ApiDatacentersNetworkloadbalancersFlowlogsPatchRequest) Execute() (FlowL
  * DatacentersNetworkloadbalancersFlowlogsPatch Partially modify a Flow Log of the Network Load Balancer
  * You can use to partially update a Flow Log of a Network Load Balancer.
  * @param ctx _context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
- * @param datacenterId The unique ID of the datacenter
+ * @param datacenterId The unique ID of the data center.
  * @param networkLoadBalancerId The unique ID of the Network Load Balancer
  * @param flowLogId The unique ID of the Flow Log
  * @return ApiDatacentersNetworkloadbalancersFlowlogsPatchRequest
@@ -1057,7 +1057,7 @@ func (r ApiDatacentersNetworkloadbalancersFlowlogsPostRequest) Execute() (FlowLo
  * DatacentersNetworkloadbalancersFlowlogsPost Add a Network Load Balancer Flow Log
  * This will add a new Flow Log to the Network Load Balancer.
  * @param ctx _context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
- * @param datacenterId The unique ID of the datacenter
+ * @param datacenterId The unique ID of the data center.
  * @param networkLoadBalancerId The unique ID of the Network Load Balancer
  * @return ApiDatacentersNetworkloadbalancersFlowlogsPostRequest
  */
@@ -1234,7 +1234,7 @@ func (r ApiDatacentersNetworkloadbalancersFlowlogsPutRequest) Execute() (FlowLog
  * DatacentersNetworkloadbalancersFlowlogsPut Modify a Flow Log of the Network Load Balancer
  * You can use to update a Flow Log of the Network Load Balancer.
  * @param ctx _context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
- * @param datacenterId The unique ID of the datacenter
+ * @param datacenterId The unique ID of the data center.
  * @param networkLoadBalancerId The unique ID of the Network Load Balancer
  * @param flowLogId The unique ID of the Flow Log
  * @return ApiDatacentersNetworkloadbalancersFlowlogsPutRequest
@@ -1409,7 +1409,7 @@ func (r ApiDatacentersNetworkloadbalancersForwardingrulesDeleteRequest) Execute(
  * DatacentersNetworkloadbalancersForwardingrulesDelete Remove Forwarding Rule from Network Load Balancer
  * This will remove a forwarding rule from the Network Load Balancer.
  * @param ctx _context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
- * @param datacenterId The unique ID of the datacenter
+ * @param datacenterId The unique ID of the data center.
  * @param networkLoadBalancerId The unique ID of the Network Load Balancer
  * @param forwardingRuleId The unique ID of the forwarding rule
  * @return ApiDatacentersNetworkloadbalancersForwardingrulesDeleteRequest
@@ -1567,7 +1567,7 @@ func (r ApiDatacentersNetworkloadbalancersForwardingrulesFindByForwardingRuleIdR
  * DatacentersNetworkloadbalancersForwardingrulesFindByForwardingRuleId Retrieve a Forwarding Rule of the Network Load Balancer
  * This will a forwarding rule of the Network Load Balancer.
  * @param ctx _context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
- * @param datacenterId The unique ID of the datacenter
+ * @param datacenterId The unique ID of the data center.
  * @param networkLoadBalancerId The unique ID of the Network Load Balancer
  * @param forwardingRuleId The unique ID of the forwarding rule
  * @return ApiDatacentersNetworkloadbalancersForwardingrulesFindByForwardingRuleIdRequest
@@ -1736,7 +1736,7 @@ func (r ApiDatacentersNetworkloadbalancersForwardingrulesGetRequest) Execute() (
  * DatacentersNetworkloadbalancersForwardingrulesGet List Network Load Balancer Forwarding Rules
  * You can retrieve a list of forwarding rules of the Network Load Balancer.
  * @param ctx _context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
- * @param datacenterId The unique ID of the datacenter
+ * @param datacenterId The unique ID of the data center.
  * @param networkLoadBalancerId The unique ID of the Network Load Balancer
  * @return ApiDatacentersNetworkloadbalancersForwardingrulesGetRequest
  */
@@ -1908,7 +1908,7 @@ func (r ApiDatacentersNetworkloadbalancersForwardingrulesPatchRequest) Execute()
  * DatacentersNetworkloadbalancersForwardingrulesPatch Partially modify a forwarding rule of the Network Load Balancer
  * You can use to partially update a forwarding rule of a Network Load Balancer.
  * @param ctx _context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
- * @param datacenterId The unique ID of the datacenter
+ * @param datacenterId The unique ID of the data center.
  * @param networkLoadBalancerId The unique ID of the Network Load Balancer
  * @param forwardingRuleId The unique ID of the forwarding rule
  * @return ApiDatacentersNetworkloadbalancersForwardingrulesPatchRequest
@@ -2087,7 +2087,7 @@ func (r ApiDatacentersNetworkloadbalancersForwardingrulesPostRequest) Execute() 
  * DatacentersNetworkloadbalancersForwardingrulesPost Add a Network Load Balancer Forwarding Rule
  * This will add a new forwarding rule to the Network Load Balancer.
  * @param ctx _context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
- * @param datacenterId The unique ID of the datacenter
+ * @param datacenterId The unique ID of the data center.
  * @param networkLoadBalancerId The unique ID of the Network Load Balancer
  * @return ApiDatacentersNetworkloadbalancersForwardingrulesPostRequest
  */
@@ -2264,7 +2264,7 @@ func (r ApiDatacentersNetworkloadbalancersForwardingrulesPutRequest) Execute() (
  * DatacentersNetworkloadbalancersForwardingrulesPut Modify a forwarding rule of the Network Load Balancer
  * You can use to update a forwarding rule of the Network Load Balancer.
  * @param ctx _context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
- * @param datacenterId The unique ID of the datacenter
+ * @param datacenterId The unique ID of the data center.
  * @param networkLoadBalancerId The unique ID of the Network Load Balancer
  * @param forwardingRuleId The unique ID of the forwarding rule
  * @return ApiDatacentersNetworkloadbalancersForwardingrulesPutRequest
@@ -2447,7 +2447,7 @@ func (r ApiDatacentersNetworkloadbalancersGetRequest) Execute() (NetworkLoadBala
  * DatacentersNetworkloadbalancersGet List Network Load Balancers
  * Retrieve a list of Network Load Balancers within the datacenter.
  * @param ctx _context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
- * @param datacenterId The unique ID of the datacenter
+ * @param datacenterId The unique ID of the data center.
  * @return ApiDatacentersNetworkloadbalancersGetRequest
  */
 func (a *NetworkLoadBalancersApiService) DatacentersNetworkloadbalancersGet(ctx _context.Context, datacenterId string) ApiDatacentersNetworkloadbalancersGetRequest {
@@ -2621,7 +2621,7 @@ func (r ApiDatacentersNetworkloadbalancersPatchRequest) Execute() (NetworkLoadBa
  * DatacentersNetworkloadbalancersPatch Partially update an Network Load Balancer
  * Partially update the attributes of a given Network Load Balancer
  * @param ctx _context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
- * @param datacenterId The unique ID of the datacenter
+ * @param datacenterId The unique ID of the data center.
  * @param networkLoadBalancerId The unique ID of the Network Load Balancer
  * @return ApiDatacentersNetworkloadbalancersPatchRequest
  */
@@ -2796,7 +2796,7 @@ func (r ApiDatacentersNetworkloadbalancersPostRequest) Execute() (NetworkLoadBal
  * DatacentersNetworkloadbalancersPost Create an Network Load Balancer
  * Creates an Network Load Balancer within the datacenter.
  * @param ctx _context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
- * @param datacenterId The unique ID of the datacenter
+ * @param datacenterId The unique ID of the data center.
  * @return ApiDatacentersNetworkloadbalancersPostRequest
  */
 func (a *NetworkLoadBalancersApiService) DatacentersNetworkloadbalancersPost(ctx _context.Context, datacenterId string) ApiDatacentersNetworkloadbalancersPostRequest {
@@ -2969,7 +2969,7 @@ func (r ApiDatacentersNetworkloadbalancersPutRequest) Execute() (NetworkLoadBala
  * DatacentersNetworkloadbalancersPut Update an Network Load Balancer
  * Update the attributes of a given Network Load Balancer
  * @param ctx _context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
- * @param datacenterId The unique ID of the datacenter
+ * @param datacenterId The unique ID of the data center.
  * @param networkLoadBalancerId The unique ID of the Network Load Balancer
  * @return ApiDatacentersNetworkloadbalancersPutRequest
  */

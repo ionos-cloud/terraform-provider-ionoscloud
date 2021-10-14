@@ -11,7 +11,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
 )
 
-func TestAccS3Key_Basic(t *testing.T) {
+func TestAccS3KeyBasic(t *testing.T) {
 	var s3Key ionoscloud.S3Key
 	s3KeyName := "example"
 	email := fmt.Sprintf("terraform_test-%d@mailinator.com", time.Now().Unix())
@@ -56,7 +56,7 @@ func testAccChecks3KeyDestroyCheck(s *terraform.State) error {
 		_, apiResponse, err := client.UserS3KeysApi.UmUsersS3keysFindByKeyId(context.TODO(), userId, rs.Primary.ID).Execute()
 
 		if err != nil {
-			if apiResponse == nil || apiResponse.StatusCode != 404 {
+			if apiResponse == nil || apiResponse.Response != nil && apiResponse.StatusCode != 404 {
 				return fmt.Errorf("an error occurred while fetching s3 key %s: %s", rs.Primary.ID, err)
 			}
 		} else {

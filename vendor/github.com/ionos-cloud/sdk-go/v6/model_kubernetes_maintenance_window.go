@@ -1,7 +1,7 @@
 /*
  * CLOUD API
  *
- * An enterprise-grade Infrastructure is provided as a Service (IaaS) solution that can be managed through a browser-based \"Data Center Designer\" (DCD) tool or via an easy to use API.   The API allows you to perform a variety of management tasks such as spinning up additional servers, adding volumes, adjusting networking, and so forth. It is designed to allow users to leverage the same power and flexibility found within the DCD visual tool. Both tools are consistent with their concepts and lend well to making the experience smooth and intuitive.
+ * IONOS Enterprise-grade Infrastructure as a Service (IaaS) solutions can be managed through the Cloud API, in addition or as an alternative to the \"Data Center Designer\" (DCD) browser-based tool.    Both methods employ consistent concepts and features, deliver similar power and flexibility, and can be used to perform a multitude of management tasks, including adding servers, volumes, configuring networks, and so on.
  *
  * API version: 6.0-SDK.3
  */
@@ -21,7 +21,6 @@ type KubernetesMaintenanceWindow struct {
 	// The time to use for a maintenance window. Accepted formats are: HH:mm:ss; HH:mm:ss\"Z\"; HH:mm:ssZ. This time may varies by 15 minutes.
 	Time *string `json:"time"`
 }
-
 
 
 // GetDayOfTheWeek returns the DayOfTheWeek field value
@@ -65,8 +64,6 @@ func (o *KubernetesMaintenanceWindow) HasDayOfTheWeek() bool {
 	return false
 }
 
-
-
 // GetTime returns the Time field value
 // If the value is explicit nil, the zero value for string will be returned
 func (o *KubernetesMaintenanceWindow) GetTime() *string {
@@ -108,22 +105,18 @@ func (o *KubernetesMaintenanceWindow) HasTime() bool {
 	return false
 }
 
-
 func (o KubernetesMaintenanceWindow) MarshalJSON() ([]byte, error) {
 	toSerialize := map[string]interface{}{}
 
 	if o.DayOfTheWeek != nil {
 		toSerialize["dayOfTheWeek"] = o.DayOfTheWeek
 	}
-	
 
 	if o.Time != nil {
 		toSerialize["time"] = o.Time
 	}
-	
 	return json.Marshal(toSerialize)
 }
-
 type NullableKubernetesMaintenanceWindow struct {
 	value *KubernetesMaintenanceWindow
 	isSet bool

@@ -1,7 +1,7 @@
 /*
  * CLOUD API
  *
- * An enterprise-grade Infrastructure is provided as a Service (IaaS) solution that can be managed through a browser-based \"Data Center Designer\" (DCD) tool or via an easy to use API.   The API allows you to perform a variety of management tasks such as spinning up additional servers, adding volumes, adjusting networking, and so forth. It is designed to allow users to leverage the same power and flexibility found within the DCD visual tool. Both tools are consistent with their concepts and lend well to making the experience smooth and intuitive.
+ * IONOS Enterprise-grade Infrastructure as a Service (IaaS) solutions can be managed through the Cloud API, in addition or as an alternative to the \"Data Center Designer\" (DCD) browser-based tool.    Both methods employ consistent concepts and features, deliver similar power and flexibility, and can be used to perform a multitude of management tasks, including adding servers, volumes, configuring networks, and so on.
  *
  * API version: 6.0-SDK.3
  */
@@ -27,7 +27,6 @@ type IpBlockProperties struct {
 	// Read-Only attribute. Lists consumption detail of an individual ip
 	IpConsumers *[]IpConsumer `json:"ipConsumers,omitempty"`
 }
-
 
 
 // GetIps returns the Ips field value
@@ -71,8 +70,6 @@ func (o *IpBlockProperties) HasIps() bool {
 	return false
 }
 
-
-
 // GetLocation returns the Location field value
 // If the value is explicit nil, the zero value for string will be returned
 func (o *IpBlockProperties) GetLocation() *string {
@@ -113,8 +110,6 @@ func (o *IpBlockProperties) HasLocation() bool {
 
 	return false
 }
-
-
 
 // GetSize returns the Size field value
 // If the value is explicit nil, the zero value for int32 will be returned
@@ -157,8 +152,6 @@ func (o *IpBlockProperties) HasSize() bool {
 	return false
 }
 
-
-
 // GetName returns the Name field value
 // If the value is explicit nil, the zero value for string will be returned
 func (o *IpBlockProperties) GetName() *string {
@@ -199,8 +192,6 @@ func (o *IpBlockProperties) HasName() bool {
 
 	return false
 }
-
-
 
 // GetIpConsumers returns the IpConsumers field value
 // If the value is explicit nil, the zero value for []IpConsumer will be returned
@@ -243,37 +234,30 @@ func (o *IpBlockProperties) HasIpConsumers() bool {
 	return false
 }
 
-
 func (o IpBlockProperties) MarshalJSON() ([]byte, error) {
 	toSerialize := map[string]interface{}{}
 
 	if o.Ips != nil {
 		toSerialize["ips"] = o.Ips
 	}
-	
 
 	if o.Location != nil {
 		toSerialize["location"] = o.Location
 	}
-	
 
 	if o.Size != nil {
 		toSerialize["size"] = o.Size
 	}
-	
 
 	if o.Name != nil {
 		toSerialize["name"] = o.Name
 	}
-	
 
 	if o.IpConsumers != nil {
 		toSerialize["ipConsumers"] = o.IpConsumers
 	}
-	
 	return json.Marshal(toSerialize)
 }
-
 type NullableIpBlockProperties struct {
 	value *IpBlockProperties
 	isSet bool

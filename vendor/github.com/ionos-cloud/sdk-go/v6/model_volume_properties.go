@@ -1,7 +1,7 @@
 /*
  * CLOUD API
  *
- * An enterprise-grade Infrastructure is provided as a Service (IaaS) solution that can be managed through a browser-based \"Data Center Designer\" (DCD) tool or via an easy to use API.   The API allows you to perform a variety of management tasks such as spinning up additional servers, adding volumes, adjusting networking, and so forth. It is designed to allow users to leverage the same power and flexibility found within the DCD visual tool. Both tools are consistent with their concepts and lend well to making the experience smooth and intuitive.
+ * IONOS Enterprise-grade Infrastructure as a Service (IaaS) solutions can be managed through the Cloud API, in addition or as an alternative to the \"Data Center Designer\" (DCD) browser-based tool.    Both methods employ consistent concepts and features, deliver similar power and flexibility, and can be used to perform a multitude of management tasks, including adding servers, volumes, configuring networks, and so on.
  *
  * API version: 6.0-SDK.3
  */
@@ -28,6 +28,7 @@ type VolumeProperties struct {
 	Image *string `json:"image,omitempty"`
 	// Initial password to be set for installed OS. Works with public images only. Not modifiable, forbidden in update requests. Password rules allows all characters from a-z, A-Z, 0-9
 	ImagePassword *string `json:"imagePassword,omitempty"`
+	ImageAlias *string `json:"imageAlias,omitempty"`
 	// Public SSH keys are set on the image as authorized keys for appropriate SSH login to the instance using the corresponding private key. This field may only be set in creation requests. When reading, it always returns null. SSH keys are only supported if a public Linux image is used for the volume creation.
 	SshKeys *[]string `json:"sshKeys,omitempty"`
 	// The bus type of the volume. Default is VIRTIO
@@ -55,7 +56,6 @@ type VolumeProperties struct {
 	// The cloud-init configuration for the volume as base64 encoded string. The property is immutable and is only allowed to be set on a new volume creation. It is mandatory to provide either 'public image' or 'imageAlias' that has cloud-init compatibility in conjunction with this property.
 	UserData *string `json:"userData,omitempty"`
 }
-
 
 
 // GetName returns the Name field value
@@ -99,8 +99,6 @@ func (o *VolumeProperties) HasName() bool {
 	return false
 }
 
-
-
 // GetType returns the Type field value
 // If the value is explicit nil, the zero value for string will be returned
 func (o *VolumeProperties) GetType() *string {
@@ -141,8 +139,6 @@ func (o *VolumeProperties) HasType() bool {
 
 	return false
 }
-
-
 
 // GetSize returns the Size field value
 // If the value is explicit nil, the zero value for float32 will be returned
@@ -185,8 +181,6 @@ func (o *VolumeProperties) HasSize() bool {
 	return false
 }
 
-
-
 // GetAvailabilityZone returns the AvailabilityZone field value
 // If the value is explicit nil, the zero value for string will be returned
 func (o *VolumeProperties) GetAvailabilityZone() *string {
@@ -227,8 +221,6 @@ func (o *VolumeProperties) HasAvailabilityZone() bool {
 
 	return false
 }
-
-
 
 // GetImage returns the Image field value
 // If the value is explicit nil, the zero value for string will be returned
@@ -271,8 +263,6 @@ func (o *VolumeProperties) HasImage() bool {
 	return false
 }
 
-
-
 // GetImagePassword returns the ImagePassword field value
 // If the value is explicit nil, the zero value for string will be returned
 func (o *VolumeProperties) GetImagePassword() *string {
@@ -314,7 +304,46 @@ func (o *VolumeProperties) HasImagePassword() bool {
 	return false
 }
 
+// GetImageAlias returns the ImageAlias field value
+// If the value is explicit nil, the zero value for string will be returned
+func (o *VolumeProperties) GetImageAlias() *string {
+	if o == nil {
+		return nil
+	}
 
+
+	return o.ImageAlias
+
+}
+
+// GetImageAliasOk returns a tuple with the ImageAlias field value
+// and a boolean to check if the value has been set.
+// NOTE: If the value is an explicit nil, `nil, true` will be returned
+func (o *VolumeProperties) GetImageAliasOk() (*string, bool) {
+	if o == nil {
+		return nil, false
+	}
+
+
+	return o.ImageAlias, true
+}
+
+// SetImageAlias sets field value
+func (o *VolumeProperties) SetImageAlias(v string) {
+
+
+	o.ImageAlias = &v
+
+}
+
+// HasImageAlias returns a boolean if a field has been set.
+func (o *VolumeProperties) HasImageAlias() bool {
+	if o != nil && o.ImageAlias != nil {
+		return true
+	}
+
+	return false
+}
 
 // GetSshKeys returns the SshKeys field value
 // If the value is explicit nil, the zero value for []string will be returned
@@ -357,8 +386,6 @@ func (o *VolumeProperties) HasSshKeys() bool {
 	return false
 }
 
-
-
 // GetBus returns the Bus field value
 // If the value is explicit nil, the zero value for string will be returned
 func (o *VolumeProperties) GetBus() *string {
@@ -399,8 +426,6 @@ func (o *VolumeProperties) HasBus() bool {
 
 	return false
 }
-
-
 
 // GetLicenceType returns the LicenceType field value
 // If the value is explicit nil, the zero value for string will be returned
@@ -443,8 +468,6 @@ func (o *VolumeProperties) HasLicenceType() bool {
 	return false
 }
 
-
-
 // GetCpuHotPlug returns the CpuHotPlug field value
 // If the value is explicit nil, the zero value for bool will be returned
 func (o *VolumeProperties) GetCpuHotPlug() *bool {
@@ -485,8 +508,6 @@ func (o *VolumeProperties) HasCpuHotPlug() bool {
 
 	return false
 }
-
-
 
 // GetRamHotPlug returns the RamHotPlug field value
 // If the value is explicit nil, the zero value for bool will be returned
@@ -529,8 +550,6 @@ func (o *VolumeProperties) HasRamHotPlug() bool {
 	return false
 }
 
-
-
 // GetNicHotPlug returns the NicHotPlug field value
 // If the value is explicit nil, the zero value for bool will be returned
 func (o *VolumeProperties) GetNicHotPlug() *bool {
@@ -571,8 +590,6 @@ func (o *VolumeProperties) HasNicHotPlug() bool {
 
 	return false
 }
-
-
 
 // GetNicHotUnplug returns the NicHotUnplug field value
 // If the value is explicit nil, the zero value for bool will be returned
@@ -615,8 +632,6 @@ func (o *VolumeProperties) HasNicHotUnplug() bool {
 	return false
 }
 
-
-
 // GetDiscVirtioHotPlug returns the DiscVirtioHotPlug field value
 // If the value is explicit nil, the zero value for bool will be returned
 func (o *VolumeProperties) GetDiscVirtioHotPlug() *bool {
@@ -657,8 +672,6 @@ func (o *VolumeProperties) HasDiscVirtioHotPlug() bool {
 
 	return false
 }
-
-
 
 // GetDiscVirtioHotUnplug returns the DiscVirtioHotUnplug field value
 // If the value is explicit nil, the zero value for bool will be returned
@@ -701,8 +714,6 @@ func (o *VolumeProperties) HasDiscVirtioHotUnplug() bool {
 	return false
 }
 
-
-
 // GetDeviceNumber returns the DeviceNumber field value
 // If the value is explicit nil, the zero value for int64 will be returned
 func (o *VolumeProperties) GetDeviceNumber() *int64 {
@@ -743,8 +754,6 @@ func (o *VolumeProperties) HasDeviceNumber() bool {
 
 	return false
 }
-
-
 
 // GetPciSlot returns the PciSlot field value
 // If the value is explicit nil, the zero value for int32 will be returned
@@ -787,8 +796,6 @@ func (o *VolumeProperties) HasPciSlot() bool {
 	return false
 }
 
-
-
 // GetBackupunitId returns the BackupunitId field value
 // If the value is explicit nil, the zero value for string will be returned
 func (o *VolumeProperties) GetBackupunitId() *string {
@@ -829,8 +836,6 @@ func (o *VolumeProperties) HasBackupunitId() bool {
 
 	return false
 }
-
-
 
 // GetUserData returns the UserData field value
 // If the value is explicit nil, the zero value for string will be returned
@@ -873,107 +878,90 @@ func (o *VolumeProperties) HasUserData() bool {
 	return false
 }
 
-
 func (o VolumeProperties) MarshalJSON() ([]byte, error) {
 	toSerialize := map[string]interface{}{}
 
 	if o.Name != nil {
 		toSerialize["name"] = o.Name
 	}
-	
 
 	if o.Type != nil {
 		toSerialize["type"] = o.Type
 	}
-	
 
 	if o.Size != nil {
 		toSerialize["size"] = o.Size
 	}
-	
 
 	if o.AvailabilityZone != nil {
 		toSerialize["availabilityZone"] = o.AvailabilityZone
 	}
-	
 
 	if o.Image != nil {
 		toSerialize["image"] = o.Image
 	}
-	
 
 	if o.ImagePassword != nil {
 		toSerialize["imagePassword"] = o.ImagePassword
 	}
-	
+
+	if o.ImageAlias != nil {
+		toSerialize["imageAlias"] = o.ImageAlias
+	}
 
 	if o.SshKeys != nil {
 		toSerialize["sshKeys"] = o.SshKeys
 	}
-	
 
 	if o.Bus != nil {
 		toSerialize["bus"] = o.Bus
 	}
-	
 
 	if o.LicenceType != nil {
 		toSerialize["licenceType"] = o.LicenceType
 	}
-	
 
 	if o.CpuHotPlug != nil {
 		toSerialize["cpuHotPlug"] = o.CpuHotPlug
 	}
-	
 
 	if o.RamHotPlug != nil {
 		toSerialize["ramHotPlug"] = o.RamHotPlug
 	}
-	
 
 	if o.NicHotPlug != nil {
 		toSerialize["nicHotPlug"] = o.NicHotPlug
 	}
-	
 
 	if o.NicHotUnplug != nil {
 		toSerialize["nicHotUnplug"] = o.NicHotUnplug
 	}
-	
 
 	if o.DiscVirtioHotPlug != nil {
 		toSerialize["discVirtioHotPlug"] = o.DiscVirtioHotPlug
 	}
-	
 
 	if o.DiscVirtioHotUnplug != nil {
 		toSerialize["discVirtioHotUnplug"] = o.DiscVirtioHotUnplug
 	}
-	
 
 	if o.DeviceNumber != nil {
 		toSerialize["deviceNumber"] = o.DeviceNumber
 	}
-	
 
 	if o.PciSlot != nil {
 		toSerialize["pciSlot"] = o.PciSlot
 	}
-	
 
 	if o.BackupunitId != nil {
 		toSerialize["backupunitId"] = o.BackupunitId
 	}
-	
 
 	if o.UserData != nil {
 		toSerialize["userData"] = o.UserData
 	}
-	
 	return json.Marshal(toSerialize)
 }
-
 type NullableVolumeProperties struct {
 	value *VolumeProperties
 	isSet bool

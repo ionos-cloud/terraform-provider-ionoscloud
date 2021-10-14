@@ -1,7 +1,7 @@
 /*
  * CLOUD API
  *
- * An enterprise-grade Infrastructure is provided as a Service (IaaS) solution that can be managed through a browser-based \"Data Center Designer\" (DCD) tool or via an easy to use API.   The API allows you to perform a variety of management tasks such as spinning up additional servers, adding volumes, adjusting networking, and so forth. It is designed to allow users to leverage the same power and flexibility found within the DCD visual tool. Both tools are consistent with their concepts and lend well to making the experience smooth and intuitive.
+ * IONOS Enterprise-grade Infrastructure as a Service (IaaS) solutions can be managed through the Cloud API, in addition or as an alternative to the \"Data Center Designer\" (DCD) browser-based tool.    Both methods employ consistent concepts and features, deliver similar power and flexibility, and can be used to perform a multitude of management tasks, including adding servers, volumes, configuring networks, and so on.
  *
  * API version: 6.0-SDK.3
  */
@@ -33,7 +33,6 @@ type UserProperties struct {
 	// indicates if the user is active
 	Active *bool `json:"active,omitempty"`
 }
-
 
 
 // GetFirstname returns the Firstname field value
@@ -77,8 +76,6 @@ func (o *UserProperties) HasFirstname() bool {
 	return false
 }
 
-
-
 // GetLastname returns the Lastname field value
 // If the value is explicit nil, the zero value for string will be returned
 func (o *UserProperties) GetLastname() *string {
@@ -119,8 +116,6 @@ func (o *UserProperties) HasLastname() bool {
 
 	return false
 }
-
-
 
 // GetEmail returns the Email field value
 // If the value is explicit nil, the zero value for string will be returned
@@ -163,8 +158,6 @@ func (o *UserProperties) HasEmail() bool {
 	return false
 }
 
-
-
 // GetAdministrator returns the Administrator field value
 // If the value is explicit nil, the zero value for bool will be returned
 func (o *UserProperties) GetAdministrator() *bool {
@@ -205,8 +198,6 @@ func (o *UserProperties) HasAdministrator() bool {
 
 	return false
 }
-
-
 
 // GetForceSecAuth returns the ForceSecAuth field value
 // If the value is explicit nil, the zero value for bool will be returned
@@ -249,8 +240,6 @@ func (o *UserProperties) HasForceSecAuth() bool {
 	return false
 }
 
-
-
 // GetSecAuthActive returns the SecAuthActive field value
 // If the value is explicit nil, the zero value for bool will be returned
 func (o *UserProperties) GetSecAuthActive() *bool {
@@ -291,8 +280,6 @@ func (o *UserProperties) HasSecAuthActive() bool {
 
 	return false
 }
-
-
 
 // GetS3CanonicalUserId returns the S3CanonicalUserId field value
 // If the value is explicit nil, the zero value for string will be returned
@@ -335,8 +322,6 @@ func (o *UserProperties) HasS3CanonicalUserId() bool {
 	return false
 }
 
-
-
 // GetActive returns the Active field value
 // If the value is explicit nil, the zero value for bool will be returned
 func (o *UserProperties) GetActive() *bool {
@@ -378,52 +363,42 @@ func (o *UserProperties) HasActive() bool {
 	return false
 }
 
-
 func (o UserProperties) MarshalJSON() ([]byte, error) {
 	toSerialize := map[string]interface{}{}
 
 	if o.Firstname != nil {
 		toSerialize["firstname"] = o.Firstname
 	}
-	
 
 	if o.Lastname != nil {
 		toSerialize["lastname"] = o.Lastname
 	}
-	
 
 	if o.Email != nil {
 		toSerialize["email"] = o.Email
 	}
-	
 
 	if o.Administrator != nil {
 		toSerialize["administrator"] = o.Administrator
 	}
-	
 
 	if o.ForceSecAuth != nil {
 		toSerialize["forceSecAuth"] = o.ForceSecAuth
 	}
-	
 
 	if o.SecAuthActive != nil {
 		toSerialize["secAuthActive"] = o.SecAuthActive
 	}
-	
 
 	if o.S3CanonicalUserId != nil {
 		toSerialize["s3CanonicalUserId"] = o.S3CanonicalUserId
 	}
-	
 
 	if o.Active != nil {
 		toSerialize["active"] = o.Active
 	}
-	
 	return json.Marshal(toSerialize)
 }
-
 type NullableUserProperties struct {
 	value *UserProperties
 	isSet bool

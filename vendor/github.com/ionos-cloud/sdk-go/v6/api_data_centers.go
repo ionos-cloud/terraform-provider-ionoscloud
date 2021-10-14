@@ -1,7 +1,7 @@
 /*
  * CLOUD API
  *
- * An enterprise-grade Infrastructure is provided as a Service (IaaS) solution that can be managed through a browser-based \"Data Center Designer\" (DCD) tool or via an easy to use API.   The API allows you to perform a variety of management tasks such as spinning up additional servers, adding volumes, adjusting networking, and so forth. It is designed to allow users to leverage the same power and flexibility found within the DCD visual tool. Both tools are consistent with their concepts and lend well to making the experience smooth and intuitive.
+ * IONOS Enterprise-grade Infrastructure as a Service (IaaS) solutions can be managed through the Cloud API, in addition or as an alternative to the \"Data Center Designer\" (DCD) browser-based tool.    Both methods employ consistent concepts and features, deliver similar power and flexibility, and can be used to perform a multitude of management tasks, including adding servers, volumes, configuring networks, and so on.
  *
  * API version: 6.0-SDK.3
  */
@@ -54,10 +54,10 @@ func (r ApiDatacentersDeleteRequest) Execute() (*APIResponse, error) {
 }
 
 /*
- * DatacentersDelete Delete a Data Center
- * Will remove all objects within the datacenter and remove the datacenter object itself, too. This is a highly destructive method which should be used with caution
+ * DatacentersDelete Delete data centers
+ * Remove the specified data center and all the elements it contains. This is method is destructive and should be used carefully.
  * @param ctx _context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
- * @param datacenterId The unique ID of the datacenter
+ * @param datacenterId The unique ID of the data center.
  * @return ApiDatacentersDeleteRequest
  */
 func (a *DataCentersApiService) DatacentersDelete(ctx _context.Context, datacenterId string) ApiDatacentersDeleteRequest {
@@ -204,10 +204,10 @@ func (r ApiDatacentersFindByIdRequest) Execute() (Datacenter, *APIResponse, erro
 }
 
 /*
- * DatacentersFindById Retrieve a Data Center
- * You can retrieve a data center by using the resource's ID. This value can be found in the response body when a datacenter is created or when you GET a list of datacenters.
+ * DatacentersFindById Retrieve data centers
+ * Retrieve data centers by resource ID. This value is in the response body when the data center is created, and in the list of the data centers, returned by GET.
  * @param ctx _context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
- * @param datacenterId The unique ID of the datacenter
+ * @param datacenterId The unique ID of the data center.
  * @return ApiDatacentersFindByIdRequest
  */
 func (a *DataCentersApiService) DatacentersFindById(ctx _context.Context, datacenterId string) ApiDatacentersFindByIdRequest {
@@ -375,8 +375,8 @@ func (r ApiDatacentersGetRequest) Execute() (Datacenters, *APIResponse, error) {
 }
 
 /*
- * DatacentersGet List Data Centers under your account
- * You can retrieve a complete list of data centers provisioned under your account
+ * DatacentersGet List your data centers
+ * List the data centers for your account. Default limit is the first 100 items; use pagination query parameters for listing more items.
  * @param ctx _context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
  * @return ApiDatacentersGetRequest
  */
@@ -545,10 +545,10 @@ func (r ApiDatacentersPatchRequest) Execute() (Datacenter, *APIResponse, error) 
 }
 
 /*
- * DatacentersPatch Partially modify a Data Center
- * You can use update datacenter to re-name the datacenter or update its description
+ * DatacentersPatch Partially modify data centers
+ * Update data centers, rename them, or change their descriptions.
  * @param ctx _context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
- * @param datacenterId The unique ID of the datacenter
+ * @param datacenterId The unique ID of the data center.
  * @return ApiDatacentersPatchRequest
  */
 func (a *DataCentersApiService) DatacentersPatch(ctx _context.Context, datacenterId string) ApiDatacentersPatchRequest {
@@ -716,8 +716,10 @@ func (r ApiDatacentersPostRequest) Execute() (Datacenter, *APIResponse, error) {
 }
 
 /*
- * DatacentersPost Create a Data Center
- * Virtual data centers are the foundation of the platform. They act as logical containers for all other objects you will be creating, e.g. servers. You can provision as many data centers as you want. Datacenters have their own private network and are logically segmented from each other to create isolation. You can use this POST method to create a simple datacenter or to create a datacenter with multiple objects under it such as servers and storage volumes.
+ * DatacentersPost Create data centers
+ * Create new data centers, and data centers that already contain elements, such as servers and storage volumes, with this POST method.
+
+Virtual data centers are the foundation of the platform; they act as logical containers for all other objects you create, such as servers and storage volumes. You can provision as many data centers as needed. Data centers have their own private networks and are logically segmented from each other to create isolation.
  * @param ctx _context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
  * @return ApiDatacentersPostRequest
  */
@@ -885,10 +887,10 @@ func (r ApiDatacentersPutRequest) Execute() (Datacenter, *APIResponse, error) {
 }
 
 /*
- * DatacentersPut Modify a Data Center
- * You can use update datacenter to re-name the datacenter or update its description
+ * DatacentersPut Modify data centers
+ * Update data centers, rename them, or change their descriptions.
  * @param ctx _context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
- * @param datacenterId The unique ID of the datacenter
+ * @param datacenterId The unique ID of the data center.
  * @return ApiDatacentersPutRequest
  */
 func (a *DataCentersApiService) DatacentersPut(ctx _context.Context, datacenterId string) ApiDatacentersPutRequest {

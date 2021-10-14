@@ -131,6 +131,12 @@ func dataSourceNatGatewayRead(d *schema.ResourceData, meta interface{}) error {
 		return errors.New("nat gateway not found")
 	}
 
+	if natGateway.Id != nil {
+		if err := d.Set("id", *natGateway.Id); err != nil {
+			return err
+		}
+	}
+
 	if err = setNatGatewayData(d, &natGateway); err != nil {
 		return err
 	}
@@ -142,9 +148,6 @@ func setNatGatewayData(d *schema.ResourceData, natGateway *ionoscloud.NatGateway
 
 	if natGateway.Id != nil {
 		d.SetId(*natGateway.Id)
-		if err := d.Set("id", *natGateway.Id); err != nil {
-			return err
-		}
 	}
 
 	if natGateway.Properties != nil {

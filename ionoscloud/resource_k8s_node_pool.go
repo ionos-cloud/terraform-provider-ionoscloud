@@ -193,6 +193,16 @@ func resourcek8sNodePool() *schema.Resource {
 					Type: schema.TypeString,
 				},
 			},
+			"labels": {
+				Type:     schema.TypeMap,
+				Optional: true,
+				Elem:     &schema.Schema{Type: schema.TypeString},
+			},
+			"annotations": {
+				Type:     schema.TypeMap,
+				Optional: true,
+				Elem:     &schema.Schema{Type: schema.TypeString},
+			},
 		},
 		Timeouts: &resourceDefaultTimeouts,
 	}
@@ -366,6 +376,24 @@ func resourcek8sNodePoolCreate(ctx context.Context, d *schema.ResourceData, meta
 		k8sNodepool.Properties.PublicIps = &requestPublicIps
 	}
 
+	labelsProp, ok := d.GetOk("labels")
+	if ok {
+		labels := make(map[string]string)
+		for k, v := range labelsProp.(map[string]interface{}) {
+			labels[k] = v.(string)
+		}
+		k8sNodepool.Properties.Labels = &labels
+	}
+
+	annotationsProp, ok := d.GetOk("annotations")
+	if ok {
+		annotations := make(map[string]string)
+		for k, v := range annotationsProp.(map[string]interface{}) {
+			annotations[k] = v.(string)
+		}
+		k8sNodepool.Properties.Annotations = &annotations
+	}
+
 	createdNodepool, _, err := client.KubernetesApi.
 		K8sNodepoolsPost(ctx, d.Get("k8s_cluster_id").(string)).
 		KubernetesNodePool(k8sNodepool).
@@ -416,7 +444,7 @@ func resourcek8sNodePoolRead(ctx context.Context, d *schema.ResourceData, meta i
 
 	if err != nil {
 		log.Printf("[INFO] Resource %s not found: %+v", d.Id(), err)
-		if apiResponse != nil && apiResponse.StatusCode == 404 {
+		if apiResponse != nil && apiResponse.Response != nil && apiResponse.StatusCode == 404 {
 			d.SetId("")
 			return nil
 		}
@@ -543,38 +571,8 @@ func resourcek8sNodePoolRead(ctx context.Context, d *schema.ResourceData, meta i
 	}
 
 	if k8sNodepool.Properties.Lans != nil && len(*k8sNodepool.Properties.Lans) > 0 {
-		var nodePoolLans []interface{}
-		for _, nodePoolLan := range *k8sNodepool.Properties.Lans {
-			lanEntry := make(map[string]interface{})
 
-			if nodePoolLan.Id != nil {
-				lanEntry["id"] = *nodePoolLan.Id
-			}
-
-			if nodePoolLan.Dhcp != nil {
-				lanEntry["dhcp"] = *nodePoolLan.Dhcp
-			}
-
-			if nodePoolLan.Routes != nil && len(*nodePoolLan.Routes) > 0 {
-				var nodePoolRoutes []interface{}
-				for _, nodePoolRoute := range *nodePoolLan.Routes {
-					routeEntry := make(map[string]string)
-					if nodePoolRoute.Network != nil {
-						routeEntry["network"] = *nodePoolRoute.Network
-					}
-					if nodePoolRoute.GatewayIp != nil {
-						routeEntry["gateway_ip"] = *nodePoolRoute.GatewayIp
-					}
-					nodePoolRoutes = append(nodePoolRoutes, routeEntry)
-				}
-
-				if len(nodePoolRoutes) > 0 {
-					lanEntry["routes"] = nodePoolRoutes
-				}
-			}
-
-			nodePoolLans = append(nodePoolLans, lanEntry)
-		}
+		nodePoolLans := getK8sNodePoolLans(*k8sNodepool.Properties.Lans)
 
 		if len(nodePoolLans) > 0 {
 			if err := d.Set("lans", nodePoolLans); err != nil {
@@ -582,6 +580,31 @@ func resourcek8sNodePoolRead(ctx context.Context, d *schema.ResourceData, meta i
 				return diags
 			}
 		}
+
+	}
+
+	labels := make(map[string]interface{})
+	if k8sNodepool.Properties.Labels != nil && len(*k8sNodepool.Properties.Labels) > 0 {
+		for k, v := range *k8sNodepool.Properties.Labels {
+			labels[k] = v
+		}
+	}
+
+	if err := d.Set("labels", labels); err != nil {
+		diags := diag.FromErr(fmt.Errorf("error while setting the labels property for k8sNodepool %s: %s", d.Id(), err))
+		return diags
+	}
+
+	annotations := make(map[string]interface{})
+	if k8sNodepool.Properties.Annotations != nil && len(*k8sNodepool.Properties.Annotations) > 0 {
+		for k, v := range *k8sNodepool.Properties.Annotations {
+			annotations[k] = v
+		}
+	}
+
+	if err := d.Set("annotations", annotations); err != nil {
+		diags := diag.FromErr(fmt.Errorf("error while setting the annotations property for k8sNodepool %s: %s", d.Id(), err))
+		return diags
 	}
 
 	return nil
@@ -841,6 +864,30 @@ func resourcek8sNodePoolUpdate(ctx context.Context, d *schema.ResourceData, meta
 		}
 	}
 
+	if d.HasChange("labels") {
+		oldLabels, newLabels := d.GetChange("labels")
+		log.Printf("[INFO] k8s pool labels changed from %+v to %+v", oldLabels, newLabels)
+		labels := make(map[string]string)
+		if newLabels != nil {
+			for k, v := range newLabels.(map[string]interface{}) {
+				labels[k] = v.(string)
+			}
+		}
+		request.Properties.Labels = &labels
+	}
+
+	if d.HasChange("annotations") {
+		oldAnnotations, newAnnotations := d.GetChange("annotations")
+		log.Printf("[INFO] k8s pool annotations changed from %+v to %+v", oldAnnotations, newAnnotations)
+		annotations := make(map[string]string)
+		if newAnnotations != nil {
+			for k, v := range newAnnotations.(map[string]interface{}) {
+				annotations[k] = v.(string)
+			}
+		}
+		request.Properties.Annotations = &annotations
+	}
+
 	b, jErr := json.Marshal(request)
 
 	if jErr == nil {
@@ -850,7 +897,7 @@ func resourcek8sNodePoolUpdate(ctx context.Context, d *schema.ResourceData, meta
 	_, apiResponse, err := client.KubernetesApi.K8sNodepoolsPut(ctx, d.Get("k8s_cluster_id").(string), d.Id()).KubernetesNodePoolForPut(request).Execute()
 
 	if err != nil {
-		if apiResponse != nil && apiResponse.StatusCode == 404 {
+		if apiResponse != nil && apiResponse.Response != nil && apiResponse.StatusCode == 404 {
 			d.SetId("")
 			return nil
 		}
@@ -891,7 +938,7 @@ func resourcek8sNodePoolDelete(ctx context.Context, d *schema.ResourceData, meta
 	apiResponse, err := client.KubernetesApi.K8sNodepoolsDelete(ctx, d.Get("k8s_cluster_id").(string), d.Id()).Execute()
 
 	if err != nil {
-		if apiResponse != nil && apiResponse.StatusCode == 404 {
+		if apiResponse != nil && apiResponse.Response != nil && apiResponse.StatusCode == 404 {
 			d.SetId("")
 			return nil
 		}
@@ -939,10 +986,49 @@ func k8sNodepoolDeleted(ctx context.Context, client *ionoscloud.APIClient, d *sc
 	_, apiResponse, err := client.KubernetesApi.K8sNodepoolsFindById(ctx, d.Get("k8s_cluster_id").(string), d.Id()).Execute()
 
 	if err != nil {
-		if apiResponse != nil && apiResponse.StatusCode == 404 {
+		if apiResponse != nil && apiResponse.Response != nil && apiResponse.StatusCode == 404 {
 			return true, nil
 		}
 		return true, fmt.Errorf("error checking k8s node pool deletion status: %s", err)
 	}
 	return false, nil
+}
+
+func getK8sNodePoolLans(lans []ionoscloud.KubernetesNodePoolLan) []interface{} {
+
+	var nodePoolLans []interface{}
+	for _, nodePoolLan := range lans {
+		lanEntry := make(map[string]interface{})
+
+		if nodePoolLan.Id != nil {
+			lanEntry["id"] = *nodePoolLan.Id
+		}
+
+		if nodePoolLan.Dhcp != nil {
+			lanEntry["dhcp"] = *nodePoolLan.Dhcp
+		}
+
+		if nodePoolLan.Routes != nil && len(*nodePoolLan.Routes) > 0 {
+			var nodePoolRoutes []interface{}
+			for _, nodePoolRoute := range *nodePoolLan.Routes {
+				routeEntry := make(map[string]string)
+				if nodePoolRoute.Network != nil {
+					routeEntry["network"] = *nodePoolRoute.Network
+				}
+				if nodePoolRoute.GatewayIp != nil {
+					routeEntry["gateway_ip"] = *nodePoolRoute.GatewayIp
+				}
+				nodePoolRoutes = append(nodePoolRoutes, routeEntry)
+			}
+
+			if len(nodePoolRoutes) > 0 {
+				lanEntry["routes"] = nodePoolRoutes
+			}
+		}
+
+		nodePoolLans = append(nodePoolLans, lanEntry)
+	}
+
+	return nodePoolLans
+
 }

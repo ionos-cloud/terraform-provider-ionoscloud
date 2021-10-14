@@ -7,6 +7,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	ionoscloud "github.com/ionos-cloud/sdk-go/v6"
 	"log"
+	"strings"
 )
 
 func resourceNatGateway() *schema.Resource {
@@ -15,6 +16,9 @@ func resourceNatGateway() *schema.Resource {
 		ReadContext:   resourceNatGatewayRead,
 		UpdateContext: resourceNatGatewayUpdate,
 		DeleteContext: resourceNatGatewayDelete,
+		Importer: &schema.ResourceImporter{
+			StateContext: resourceNatGatewayImport,
+		},
 		Schema: map[string]*schema.Schema{
 
 			"name": {
@@ -167,7 +171,7 @@ func resourceNatGatewayRead(ctx context.Context, d *schema.ResourceData, meta in
 
 	if err != nil {
 		log.Printf("[INFO] Resource %s not found: %+v", d.Id(), err)
-		if apiResponse.StatusCode == 404 {
+		if apiResponse != nil && apiResponse.Response != nil && apiResponse.StatusCode == 404 {
 			d.SetId("")
 			return nil
 		}
@@ -175,44 +179,9 @@ func resourceNatGatewayRead(ctx context.Context, d *schema.ResourceData, meta in
 
 	log.Printf("[INFO] Successfully retreived nat gateway %s: %+v", d.Id(), natGateway)
 
-	if natGateway.Properties.Name != nil {
-		err := d.Set("name", *natGateway.Properties.Name)
-		if err != nil {
-			diags := diag.FromErr(fmt.Errorf("error while setting name property for nat gateway %s: %s", d.Id(), err))
-			return diags
-		}
-	}
-
-	if natGateway.Properties.PublicIps != nil {
-		err := d.Set("public_ips", *natGateway.Properties.PublicIps)
-		if err != nil {
-			diags := diag.FromErr(fmt.Errorf("error while setting public_ips property for nat gateway %s: %s", d.Id(), err))
-			return diags
-		}
-	}
-
-	if natGateway.Properties.Lans != nil && len(*natGateway.Properties.Lans) > 0 {
-		var natGatewayLans []interface{}
-		for _, lan := range *natGateway.Properties.Lans {
-			lanEntry := make(map[string]interface{})
-
-			if lan.Id != nil {
-				lanEntry["id"] = *lan.Id
-			}
-
-			if lan.GatewayIps != nil {
-				lanEntry["gateway_ips"] = *lan.GatewayIps
-			}
-
-			natGatewayLans = append(natGatewayLans, lanEntry)
-		}
-
-		if len(natGatewayLans) > 0 {
-			if err := d.Set("lans", natGatewayLans); err != nil {
-				diags := diag.FromErr(fmt.Errorf("error while setting lans property for nat gateway %s: %s", d.Id(), err))
-				return diags
-			}
-		}
+	if err := setNatGatewayData(d, &natGateway); err != nil {
+		diags := diag.FromErr(err)
+		return diags
 	}
 
 	return nil
@@ -323,4 +292,37 @@ func resourceNatGatewayDelete(ctx context.Context, d *schema.ResourceData, meta 
 	d.SetId("")
 
 	return nil
+}
+
+func resourceNatGatewayImport(ctx context.Context, d *schema.ResourceData, meta interface{}) ([]*schema.ResourceData, error) {
+	client := meta.(*ionoscloud.APIClient)
+
+	parts := strings.Split(d.Id(), "/")
+	if len(parts) != 2 || parts[0] == "" || parts[1] == "" {
+		return nil, fmt.Errorf("invalid import id %q. Expecting {datacenter}/{natgateway}", d.Id())
+	}
+
+	dcId := parts[0]
+	natGatewayId := parts[1]
+
+	natGateway, apiResponse, err := client.NATGatewaysApi.DatacentersNatgatewaysFindByNatGatewayId(ctx, dcId, natGatewayId).Execute()
+
+	if err != nil {
+		log.Printf("[INFO] Resource %s not found: %+v", d.Id(), err)
+		if apiResponse != nil && apiResponse.Response != nil && apiResponse.StatusCode == 404 {
+			d.SetId("")
+			return nil, fmt.Errorf("unable to find nat gateway  %q", natGatewayId)
+		}
+		return nil, fmt.Errorf("an error occured while retrieving nat gateway  %q: %q ", natGatewayId, err)
+	}
+
+	if err := d.Set("datacenter_id", dcId); err != nil {
+		return nil, err
+	}
+
+	if err := setNatGatewayData(d, &natGateway); err != nil {
+		return nil, err
+	}
+
+	return []*schema.ResourceData{d}, nil
 }

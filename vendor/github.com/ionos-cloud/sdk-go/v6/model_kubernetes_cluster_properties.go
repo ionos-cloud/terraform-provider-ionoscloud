@@ -1,7 +1,7 @@
 /*
  * CLOUD API
  *
- * An enterprise-grade Infrastructure is provided as a Service (IaaS) solution that can be managed through a browser-based \"Data Center Designer\" (DCD) tool or via an easy to use API.   The API allows you to perform a variety of management tasks such as spinning up additional servers, adding volumes, adjusting networking, and so forth. It is designed to allow users to leverage the same power and flexibility found within the DCD visual tool. Both tools are consistent with their concepts and lend well to making the experience smooth and intuitive.
+ * IONOS Enterprise-grade Infrastructure as a Service (IaaS) solutions can be managed through the Cloud API, in addition or as an alternative to the \"Data Center Designer\" (DCD) browser-based tool.    Both methods employ consistent concepts and features, deliver similar power and flexibility, and can be used to perform a multitude of management tasks, including adding servers, volumes, configuring networks, and so on.
  *
  * API version: 6.0-SDK.3
  */
@@ -25,16 +25,11 @@ type KubernetesClusterProperties struct {
 	AvailableUpgradeVersions *[]string `json:"availableUpgradeVersions,omitempty"`
 	// List of versions that may be used for node pools under this cluster
 	ViableNodePoolVersions *[]string `json:"viableNodePoolVersions,omitempty"`
-	// The indicator if the cluster is public or private. Be aware that setting it to false is currently in beta phase.
-	Public *bool `json:"public,omitempty"`
-	// The IP address of the gateway used by the cluster. This is mandatory when `public` is set to `false` and should not be provided otherwise.
-	GatewayIp *string `json:"gatewayIp,omitempty"`
 	// Access to the K8s API server is restricted to these CIDRs. Cluster-internal traffic is not affected by this restriction. If no allowlist is specified, access is not restricted. If an IP without subnet mask is provided, the default value will be used: 32 for IPv4 and 128 for IPv6.
 	ApiSubnetAllowList *[]string `json:"apiSubnetAllowList,omitempty"`
 	// List of S3 bucket configured for K8s usage. For now it contains only an S3 bucket used to store K8s API audit logs
 	S3Buckets *[]S3Bucket `json:"s3Buckets,omitempty"`
 }
-
 
 
 // GetName returns the Name field value
@@ -78,8 +73,6 @@ func (o *KubernetesClusterProperties) HasName() bool {
 	return false
 }
 
-
-
 // GetK8sVersion returns the K8sVersion field value
 // If the value is explicit nil, the zero value for string will be returned
 func (o *KubernetesClusterProperties) GetK8sVersion() *string {
@@ -120,8 +113,6 @@ func (o *KubernetesClusterProperties) HasK8sVersion() bool {
 
 	return false
 }
-
-
 
 // GetMaintenanceWindow returns the MaintenanceWindow field value
 // If the value is explicit nil, the zero value for KubernetesMaintenanceWindow will be returned
@@ -164,8 +155,6 @@ func (o *KubernetesClusterProperties) HasMaintenanceWindow() bool {
 	return false
 }
 
-
-
 // GetAvailableUpgradeVersions returns the AvailableUpgradeVersions field value
 // If the value is explicit nil, the zero value for []string will be returned
 func (o *KubernetesClusterProperties) GetAvailableUpgradeVersions() *[]string {
@@ -206,8 +195,6 @@ func (o *KubernetesClusterProperties) HasAvailableUpgradeVersions() bool {
 
 	return false
 }
-
-
 
 // GetViableNodePoolVersions returns the ViableNodePoolVersions field value
 // If the value is explicit nil, the zero value for []string will be returned
@@ -250,94 +237,6 @@ func (o *KubernetesClusterProperties) HasViableNodePoolVersions() bool {
 	return false
 }
 
-
-
-// GetPublic returns the Public field value
-// If the value is explicit nil, the zero value for bool will be returned
-func (o *KubernetesClusterProperties) GetPublic() *bool {
-	if o == nil {
-		return nil
-	}
-
-
-	return o.Public
-
-}
-
-// GetPublicOk returns a tuple with the Public field value
-// and a boolean to check if the value has been set.
-// NOTE: If the value is an explicit nil, `nil, true` will be returned
-func (o *KubernetesClusterProperties) GetPublicOk() (*bool, bool) {
-	if o == nil {
-		return nil, false
-	}
-
-
-	return o.Public, true
-}
-
-// SetPublic sets field value
-func (o *KubernetesClusterProperties) SetPublic(v bool) {
-
-
-	o.Public = &v
-
-}
-
-// HasPublic returns a boolean if a field has been set.
-func (o *KubernetesClusterProperties) HasPublic() bool {
-	if o != nil && o.Public != nil {
-		return true
-	}
-
-	return false
-}
-
-
-
-// GetGatewayIp returns the GatewayIp field value
-// If the value is explicit nil, the zero value for string will be returned
-func (o *KubernetesClusterProperties) GetGatewayIp() *string {
-	if o == nil {
-		return nil
-	}
-
-
-	return o.GatewayIp
-
-}
-
-// GetGatewayIpOk returns a tuple with the GatewayIp field value
-// and a boolean to check if the value has been set.
-// NOTE: If the value is an explicit nil, `nil, true` will be returned
-func (o *KubernetesClusterProperties) GetGatewayIpOk() (*string, bool) {
-	if o == nil {
-		return nil, false
-	}
-
-
-	return o.GatewayIp, true
-}
-
-// SetGatewayIp sets field value
-func (o *KubernetesClusterProperties) SetGatewayIp(v string) {
-
-
-	o.GatewayIp = &v
-
-}
-
-// HasGatewayIp returns a boolean if a field has been set.
-func (o *KubernetesClusterProperties) HasGatewayIp() bool {
-	if o != nil && o.GatewayIp != nil {
-		return true
-	}
-
-	return false
-}
-
-
-
 // GetApiSubnetAllowList returns the ApiSubnetAllowList field value
 // If the value is explicit nil, the zero value for []string will be returned
 func (o *KubernetesClusterProperties) GetApiSubnetAllowList() *[]string {
@@ -378,8 +277,6 @@ func (o *KubernetesClusterProperties) HasApiSubnetAllowList() bool {
 
 	return false
 }
-
-
 
 // GetS3Buckets returns the S3Buckets field value
 // If the value is explicit nil, the zero value for []S3Bucket will be returned
@@ -422,57 +319,38 @@ func (o *KubernetesClusterProperties) HasS3Buckets() bool {
 	return false
 }
 
-
 func (o KubernetesClusterProperties) MarshalJSON() ([]byte, error) {
 	toSerialize := map[string]interface{}{}
 
 	if o.Name != nil {
 		toSerialize["name"] = o.Name
 	}
-	
 
 	if o.K8sVersion != nil {
 		toSerialize["k8sVersion"] = o.K8sVersion
 	}
-	
 
 	if o.MaintenanceWindow != nil {
 		toSerialize["maintenanceWindow"] = o.MaintenanceWindow
 	}
-	
 
 	if o.AvailableUpgradeVersions != nil {
 		toSerialize["availableUpgradeVersions"] = o.AvailableUpgradeVersions
 	}
-	
 
 	if o.ViableNodePoolVersions != nil {
 		toSerialize["viableNodePoolVersions"] = o.ViableNodePoolVersions
 	}
-	
-
-	if o.Public != nil {
-		toSerialize["public"] = o.Public
-	}
-	
-
-	if o.GatewayIp != nil {
-		toSerialize["gatewayIp"] = o.GatewayIp
-	}
-	
 
 	if o.ApiSubnetAllowList != nil {
 		toSerialize["apiSubnetAllowList"] = o.ApiSubnetAllowList
 	}
-	
 
 	if o.S3Buckets != nil {
 		toSerialize["s3Buckets"] = o.S3Buckets
 	}
-	
 	return json.Marshal(toSerialize)
 }
-
 type NullableKubernetesClusterProperties struct {
 	value *KubernetesClusterProperties
 	isSet bool

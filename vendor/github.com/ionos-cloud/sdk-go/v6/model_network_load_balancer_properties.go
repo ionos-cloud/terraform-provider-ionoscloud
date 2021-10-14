@@ -1,7 +1,7 @@
 /*
  * CLOUD API
  *
- * An enterprise-grade Infrastructure is provided as a Service (IaaS) solution that can be managed through a browser-based \"Data Center Designer\" (DCD) tool or via an easy to use API.   The API allows you to perform a variety of management tasks such as spinning up additional servers, adding volumes, adjusting networking, and so forth. It is designed to allow users to leverage the same power and flexibility found within the DCD visual tool. Both tools are consistent with their concepts and lend well to making the experience smooth and intuitive.
+ * IONOS Enterprise-grade Infrastructure as a Service (IaaS) solutions can be managed through the Cloud API, in addition or as an alternative to the \"Data Center Designer\" (DCD) browser-based tool.    Both methods employ consistent concepts and features, deliver similar power and flexibility, and can be used to perform a multitude of management tasks, including adding servers, volumes, configuring networks, and so on.
  *
  * API version: 6.0-SDK.3
  */
@@ -27,7 +27,6 @@ type NetworkLoadBalancerProperties struct {
 	// Collection of private IP addresses with subnet mask of the Network Load Balancer. IPs must contain valid subnet mask. If user will not provide any IP then the system will generate one IP with /24 subnet.
 	LbPrivateIps *[]string `json:"lbPrivateIps,omitempty"`
 }
-
 
 
 // GetName returns the Name field value
@@ -71,8 +70,6 @@ func (o *NetworkLoadBalancerProperties) HasName() bool {
 	return false
 }
 
-
-
 // GetListenerLan returns the ListenerLan field value
 // If the value is explicit nil, the zero value for int32 will be returned
 func (o *NetworkLoadBalancerProperties) GetListenerLan() *int32 {
@@ -113,8 +110,6 @@ func (o *NetworkLoadBalancerProperties) HasListenerLan() bool {
 
 	return false
 }
-
-
 
 // GetIps returns the Ips field value
 // If the value is explicit nil, the zero value for []string will be returned
@@ -157,8 +152,6 @@ func (o *NetworkLoadBalancerProperties) HasIps() bool {
 	return false
 }
 
-
-
 // GetTargetLan returns the TargetLan field value
 // If the value is explicit nil, the zero value for int32 will be returned
 func (o *NetworkLoadBalancerProperties) GetTargetLan() *int32 {
@@ -199,8 +192,6 @@ func (o *NetworkLoadBalancerProperties) HasTargetLan() bool {
 
 	return false
 }
-
-
 
 // GetLbPrivateIps returns the LbPrivateIps field value
 // If the value is explicit nil, the zero value for []string will be returned
@@ -243,37 +234,30 @@ func (o *NetworkLoadBalancerProperties) HasLbPrivateIps() bool {
 	return false
 }
 
-
 func (o NetworkLoadBalancerProperties) MarshalJSON() ([]byte, error) {
 	toSerialize := map[string]interface{}{}
 
 	if o.Name != nil {
 		toSerialize["name"] = o.Name
 	}
-	
 
 	if o.ListenerLan != nil {
 		toSerialize["listenerLan"] = o.ListenerLan
 	}
-	
 
 	if o.Ips != nil {
 		toSerialize["ips"] = o.Ips
 	}
-	
 
 	if o.TargetLan != nil {
 		toSerialize["targetLan"] = o.TargetLan
 	}
-	
 
 	if o.LbPrivateIps != nil {
 		toSerialize["lbPrivateIps"] = o.LbPrivateIps
 	}
-	
 	return json.Marshal(toSerialize)
 }
-
 type NullableNetworkLoadBalancerProperties struct {
 	value *NetworkLoadBalancerProperties
 	isSet bool

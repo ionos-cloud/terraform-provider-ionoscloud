@@ -1,7 +1,7 @@
 /*
  * CLOUD API
  *
- * An enterprise-grade Infrastructure is provided as a Service (IaaS) solution that can be managed through a browser-based \"Data Center Designer\" (DCD) tool or via an easy to use API.   The API allows you to perform a variety of management tasks such as spinning up additional servers, adding volumes, adjusting networking, and so forth. It is designed to allow users to leverage the same power and flexibility found within the DCD visual tool. Both tools are consistent with their concepts and lend well to making the experience smooth and intuitive.
+ * IONOS Enterprise-grade Infrastructure as a Service (IaaS) solutions can be managed through the Cloud API, in addition or as an alternative to the \"Data Center Designer\" (DCD) browser-based tool.    Both methods employ consistent concepts and features, deliver similar power and flexibility, and can be used to perform a multitude of management tasks, including adding servers, volumes, configuring networks, and so on.
  *
  * API version: 6.0-SDK.3
  */
@@ -31,7 +31,6 @@ type DatacenterProperties struct {
 	// Array of features and CPU families available in a location
 	CpuArchitecture *[]CpuArchitectureProperties `json:"cpuArchitecture,omitempty"`
 }
-
 
 
 // GetName returns the Name field value
@@ -75,8 +74,6 @@ func (o *DatacenterProperties) HasName() bool {
 	return false
 }
 
-
-
 // GetDescription returns the Description field value
 // If the value is explicit nil, the zero value for string will be returned
 func (o *DatacenterProperties) GetDescription() *string {
@@ -117,8 +114,6 @@ func (o *DatacenterProperties) HasDescription() bool {
 
 	return false
 }
-
-
 
 // GetLocation returns the Location field value
 // If the value is explicit nil, the zero value for string will be returned
@@ -161,8 +156,6 @@ func (o *DatacenterProperties) HasLocation() bool {
 	return false
 }
 
-
-
 // GetVersion returns the Version field value
 // If the value is explicit nil, the zero value for int32 will be returned
 func (o *DatacenterProperties) GetVersion() *int32 {
@@ -203,8 +196,6 @@ func (o *DatacenterProperties) HasVersion() bool {
 
 	return false
 }
-
-
 
 // GetFeatures returns the Features field value
 // If the value is explicit nil, the zero value for []string will be returned
@@ -247,8 +238,6 @@ func (o *DatacenterProperties) HasFeatures() bool {
 	return false
 }
 
-
-
 // GetSecAuthProtection returns the SecAuthProtection field value
 // If the value is explicit nil, the zero value for bool will be returned
 func (o *DatacenterProperties) GetSecAuthProtection() *bool {
@@ -289,8 +278,6 @@ func (o *DatacenterProperties) HasSecAuthProtection() bool {
 
 	return false
 }
-
-
 
 // GetCpuArchitecture returns the CpuArchitecture field value
 // If the value is explicit nil, the zero value for []CpuArchitectureProperties will be returned
@@ -333,47 +320,38 @@ func (o *DatacenterProperties) HasCpuArchitecture() bool {
 	return false
 }
 
-
 func (o DatacenterProperties) MarshalJSON() ([]byte, error) {
 	toSerialize := map[string]interface{}{}
 
 	if o.Name != nil {
 		toSerialize["name"] = o.Name
 	}
-	
 
 	if o.Description != nil {
 		toSerialize["description"] = o.Description
 	}
-	
 
 	if o.Location != nil {
 		toSerialize["location"] = o.Location
 	}
-	
 
 	if o.Version != nil {
 		toSerialize["version"] = o.Version
 	}
-	
 
 	if o.Features != nil {
 		toSerialize["features"] = o.Features
 	}
-	
 
 	if o.SecAuthProtection != nil {
 		toSerialize["secAuthProtection"] = o.SecAuthProtection
 	}
-	
 
 	if o.CpuArchitecture != nil {
 		toSerialize["cpuArchitecture"] = o.CpuArchitecture
 	}
-	
 	return json.Marshal(toSerialize)
 }
-
 type NullableDatacenterProperties struct {
 	value *DatacenterProperties
 	isSet bool

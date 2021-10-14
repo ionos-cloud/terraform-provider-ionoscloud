@@ -1,7 +1,7 @@
 /*
  * CLOUD API
  *
- * An enterprise-grade Infrastructure is provided as a Service (IaaS) solution that can be managed through a browser-based \"Data Center Designer\" (DCD) tool or via an easy to use API.   The API allows you to perform a variety of management tasks such as spinning up additional servers, adding volumes, adjusting networking, and so forth. It is designed to allow users to leverage the same power and flexibility found within the DCD visual tool. Both tools are consistent with their concepts and lend well to making the experience smooth and intuitive.
+ * IONOS Enterprise-grade Infrastructure as a Service (IaaS) solutions can be managed through the Cloud API, in addition or as an alternative to the \"Data Center Designer\" (DCD) browser-based tool.    Both methods employ consistent concepts and features, deliver similar power and flexibility, and can be used to perform a multitude of management tasks, including adding servers, volumes, configuring networks, and so on.
  *
  * API version: 6.0-SDK.3
  */
@@ -26,7 +26,6 @@ type IpConsumer struct {
 	K8sNodePoolUuid *string `json:"k8sNodePoolUuid,omitempty"`
 	K8sClusterUuid *string `json:"k8sClusterUuid,omitempty"`
 }
-
 
 
 // GetIp returns the Ip field value
@@ -70,8 +69,6 @@ func (o *IpConsumer) HasIp() bool {
 	return false
 }
 
-
-
 // GetMac returns the Mac field value
 // If the value is explicit nil, the zero value for string will be returned
 func (o *IpConsumer) GetMac() *string {
@@ -112,8 +109,6 @@ func (o *IpConsumer) HasMac() bool {
 
 	return false
 }
-
-
 
 // GetNicId returns the NicId field value
 // If the value is explicit nil, the zero value for string will be returned
@@ -156,8 +151,6 @@ func (o *IpConsumer) HasNicId() bool {
 	return false
 }
 
-
-
 // GetServerId returns the ServerId field value
 // If the value is explicit nil, the zero value for string will be returned
 func (o *IpConsumer) GetServerId() *string {
@@ -198,8 +191,6 @@ func (o *IpConsumer) HasServerId() bool {
 
 	return false
 }
-
-
 
 // GetServerName returns the ServerName field value
 // If the value is explicit nil, the zero value for string will be returned
@@ -242,8 +233,6 @@ func (o *IpConsumer) HasServerName() bool {
 	return false
 }
 
-
-
 // GetDatacenterId returns the DatacenterId field value
 // If the value is explicit nil, the zero value for string will be returned
 func (o *IpConsumer) GetDatacenterId() *string {
@@ -284,8 +273,6 @@ func (o *IpConsumer) HasDatacenterId() bool {
 
 	return false
 }
-
-
 
 // GetDatacenterName returns the DatacenterName field value
 // If the value is explicit nil, the zero value for string will be returned
@@ -328,8 +315,6 @@ func (o *IpConsumer) HasDatacenterName() bool {
 	return false
 }
 
-
-
 // GetK8sNodePoolUuid returns the K8sNodePoolUuid field value
 // If the value is explicit nil, the zero value for string will be returned
 func (o *IpConsumer) GetK8sNodePoolUuid() *string {
@@ -370,8 +355,6 @@ func (o *IpConsumer) HasK8sNodePoolUuid() bool {
 
 	return false
 }
-
-
 
 // GetK8sClusterUuid returns the K8sClusterUuid field value
 // If the value is explicit nil, the zero value for string will be returned
@@ -414,57 +397,46 @@ func (o *IpConsumer) HasK8sClusterUuid() bool {
 	return false
 }
 
-
 func (o IpConsumer) MarshalJSON() ([]byte, error) {
 	toSerialize := map[string]interface{}{}
 
 	if o.Ip != nil {
 		toSerialize["ip"] = o.Ip
 	}
-	
 
 	if o.Mac != nil {
 		toSerialize["mac"] = o.Mac
 	}
-	
 
 	if o.NicId != nil {
 		toSerialize["nicId"] = o.NicId
 	}
-	
 
 	if o.ServerId != nil {
 		toSerialize["serverId"] = o.ServerId
 	}
-	
 
 	if o.ServerName != nil {
 		toSerialize["serverName"] = o.ServerName
 	}
-	
 
 	if o.DatacenterId != nil {
 		toSerialize["datacenterId"] = o.DatacenterId
 	}
-	
 
 	if o.DatacenterName != nil {
 		toSerialize["datacenterName"] = o.DatacenterName
 	}
-	
 
 	if o.K8sNodePoolUuid != nil {
 		toSerialize["k8sNodePoolUuid"] = o.K8sNodePoolUuid
 	}
-	
 
 	if o.K8sClusterUuid != nil {
 		toSerialize["k8sClusterUuid"] = o.K8sClusterUuid
 	}
-	
 	return json.Marshal(toSerialize)
 }
-
 type NullableIpConsumer struct {
 	value *IpConsumer
 	isSet bool

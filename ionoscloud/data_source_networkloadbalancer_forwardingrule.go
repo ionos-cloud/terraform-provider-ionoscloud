@@ -216,20 +216,23 @@ func dataSourceNetworkLoadBalancerForwardingRuleRead(d *schema.ResourceData, met
 		return errors.New("network loadbalancer not found")
 	}
 
-	if err = setNetworkLoadBalancerForwardingRuleData(d, &networkLoadBalancerForwardingRule, client); err != nil {
+	if networkLoadBalancerForwardingRule.Id != nil {
+		if err := d.Set("id", *networkLoadBalancerForwardingRule.Id); err != nil {
+			return err
+		}
+	}
+
+	if err = setNetworkLoadBalancerForwardingRuleData(d, &networkLoadBalancerForwardingRule); err != nil {
 		return err
 	}
 
 	return nil
 }
 
-func setNetworkLoadBalancerForwardingRuleData(d *schema.ResourceData, networkLoadBalancerForwardingRule *ionoscloud.NetworkLoadBalancerForwardingRule, _ *ionoscloud.APIClient) error {
+func setNetworkLoadBalancerForwardingRuleData(d *schema.ResourceData, networkLoadBalancerForwardingRule *ionoscloud.NetworkLoadBalancerForwardingRule) error {
 
 	if networkLoadBalancerForwardingRule.Id != nil {
 		d.SetId(*networkLoadBalancerForwardingRule.Id)
-		if err := d.Set("id", *networkLoadBalancerForwardingRule.Id); err != nil {
-			return err
-		}
 	}
 
 	if networkLoadBalancerForwardingRule.Properties != nil {

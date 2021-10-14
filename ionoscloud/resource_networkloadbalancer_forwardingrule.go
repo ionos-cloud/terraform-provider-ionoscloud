@@ -7,6 +7,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	ionoscloud "github.com/ionos-cloud/sdk-go/v6"
 	"log"
+	"strings"
 )
 
 func resourceNetworkLoadBalancerForwardingRule() *schema.Resource {
@@ -15,6 +16,9 @@ func resourceNetworkLoadBalancerForwardingRule() *schema.Resource {
 		ReadContext:   resourceNetworkLoadBalancerForwardingRuleRead,
 		UpdateContext: resourceNetworkLoadBalancerForwardingRuleUpdate,
 		DeleteContext: resourceNetworkLoadBalancerForwardingRuleDelete,
+		Importer: &schema.ResourceImporter{
+			StateContext: resourceNetworLoadBalancerForwardingRuleImport,
+		},
 		Schema: map[string]*schema.Schema{
 
 			"name": {
@@ -332,7 +336,7 @@ func resourceNetworkLoadBalancerForwardingRuleRead(ctx context.Context, d *schem
 
 	if err != nil {
 		log.Printf("[INFO] Resource %s not found: %+v", d.Id(), err)
-		if apiResponse.StatusCode == 404 {
+		if apiResponse != nil && apiResponse.Response != nil && apiResponse.StatusCode == 404 {
 			d.SetId("")
 			return nil
 		}
@@ -340,121 +344,8 @@ func resourceNetworkLoadBalancerForwardingRuleRead(ctx context.Context, d *schem
 
 	log.Printf("[INFO] Successfully retreived network load balancer forwarding rule %s: %+v", d.Id(), networkLoadBalancerForwardingRule)
 
-	if networkLoadBalancerForwardingRule.Properties.Name != nil {
-		err := d.Set("name", *networkLoadBalancerForwardingRule.Properties.Name)
-		if err != nil {
-			diags := diag.FromErr(fmt.Errorf("error while setting name property for network load balancer forwarding rule %s: %s", d.Id(), err))
-			return diags
-		}
-	}
-
-	if networkLoadBalancerForwardingRule.Properties.Algorithm != nil {
-		err := d.Set("algorithm", *networkLoadBalancerForwardingRule.Properties.Algorithm)
-		if err != nil {
-			diags := diag.FromErr(fmt.Errorf("error while setting algorithm property for network load balancer forwarding rule %s: %s", d.Id(), err))
-			return diags
-		}
-	}
-
-	if networkLoadBalancerForwardingRule.Properties.Protocol != nil {
-		err := d.Set("protocol", *networkLoadBalancerForwardingRule.Properties.Protocol)
-		if err != nil {
-			diags := diag.FromErr(fmt.Errorf("error while setting protocol property for network load balancer forwarding rule %s: %s", d.Id(), err))
-			return diags
-		}
-	}
-
-	if networkLoadBalancerForwardingRule.Properties.ListenerIp != nil {
-		err := d.Set("listener_ip", *networkLoadBalancerForwardingRule.Properties.ListenerIp)
-		if err != nil {
-			diags := diag.FromErr(fmt.Errorf("error while setting listener_ip property for network load balancer forwarding rule %s: %s", d.Id(), err))
-			return diags
-		}
-	}
-
-	if networkLoadBalancerForwardingRule.Properties.ListenerPort != nil {
-		err := d.Set("listener_port", *networkLoadBalancerForwardingRule.Properties.ListenerPort)
-		if err != nil {
-			diags := diag.FromErr(fmt.Errorf("error while setting listener_port property for network load balancer forwarding rule %s: %s", d.Id(), err))
-			return diags
-		}
-	}
-
-	if networkLoadBalancerForwardingRule.Properties.HealthCheck != nil {
-		var healthCheck []interface{}
-
-		healthCheckEntry := make(map[string]interface{})
-		if networkLoadBalancerForwardingRule.Properties.HealthCheck.ClientTimeout != nil {
-			healthCheckEntry["client_timeout"] = *networkLoadBalancerForwardingRule.Properties.HealthCheck.ClientTimeout
-		}
-
-		if networkLoadBalancerForwardingRule.Properties.HealthCheck.ConnectTimeout != nil {
-			healthCheckEntry["connect_timeout"] = *networkLoadBalancerForwardingRule.Properties.HealthCheck.ConnectTimeout
-		}
-
-		if networkLoadBalancerForwardingRule.Properties.HealthCheck.TargetTimeout != nil {
-			healthCheckEntry["target_timeout"] = *networkLoadBalancerForwardingRule.Properties.HealthCheck.TargetTimeout
-		}
-
-		if networkLoadBalancerForwardingRule.Properties.HealthCheck.Retries != nil {
-			healthCheckEntry["retries"] = *networkLoadBalancerForwardingRule.Properties.HealthCheck.Retries
-		}
-
-		healthCheck = append(healthCheck, healthCheckEntry)
-		err := d.Set("health_check", healthCheck)
-		if err != nil {
-			diags := diag.FromErr(fmt.Errorf("error while setting health_check property for network load balancer forwarding rule %s: %s", d.Id(), err))
-			return diags
-		}
-
-	}
-
-	if networkLoadBalancerForwardingRule.Properties.Targets != nil && len(*networkLoadBalancerForwardingRule.Properties.Targets) > 0 {
-		var forwardingRuleTargets []interface{}
-		for _, target := range *networkLoadBalancerForwardingRule.Properties.Targets {
-			targetEntry := make(map[string]interface{})
-
-			if target.Ip != nil {
-				targetEntry["ip"] = *target.Ip
-			}
-
-			if target.Port != nil {
-				targetEntry["port"] = *target.Port
-			}
-
-			if target.Weight != nil {
-				targetEntry["weight"] = *target.Weight
-			}
-
-			if target.HealthCheck != nil {
-				var healthCheck []interface{}
-
-				healthCheckEntry := make(map[string]interface{})
-
-				if target.HealthCheck.Check != nil {
-					healthCheckEntry["check"] = *target.HealthCheck.Check
-				}
-
-				if target.HealthCheck.CheckInterval != nil {
-					healthCheckEntry["check_interval"] = *target.HealthCheck.CheckInterval
-				}
-
-				if target.HealthCheck.Maintenance != nil {
-					healthCheckEntry["maintenance"] = *target.HealthCheck.Maintenance
-				}
-
-				healthCheck = append(healthCheck, healthCheckEntry)
-				targetEntry["health_check"] = healthCheck
-			}
-
-			forwardingRuleTargets = append(forwardingRuleTargets, targetEntry)
-		}
-		if len(forwardingRuleTargets) > 0 {
-			if err := d.Set("targets", forwardingRuleTargets); err != nil {
-				diags := diag.FromErr(fmt.Errorf("error while setting targets property for network load balancer forwarding rule  %s: %s", d.Id(), err))
-				return diags
-			}
-		}
+	if err := setNetworkLoadBalancerForwardingRuleData(d, &networkLoadBalancerForwardingRule); err != nil {
+		return diag.FromErr(err)
 	}
 
 	return nil
@@ -646,4 +537,41 @@ func resourceNetworkLoadBalancerForwardingRuleDelete(ctx context.Context, d *sch
 	d.SetId("")
 
 	return nil
+}
+
+func resourceNetworLoadBalancerForwardingRuleImport(ctx context.Context, d *schema.ResourceData, meta interface{}) ([]*schema.ResourceData, error) {
+	client := meta.(*ionoscloud.APIClient)
+
+	parts := strings.Split(d.Id(), "/")
+	if len(parts) != 3 || parts[0] == "" || parts[1] == "" || parts[2] == "" {
+		return nil, fmt.Errorf("invalid import id %q. Expecting {datacenter}/{natgateway}/{natgateway_rule}", d.Id())
+	}
+
+	dcId := parts[0]
+	networkLoadBalancerId := parts[1]
+	networkLoadBalancerRuleId := parts[2]
+
+	networkLoadBalancerForwardingRule, apiResponse, err := client.NetworkLoadBalancersApi.DatacentersNetworkloadbalancersForwardingrulesFindByForwardingRuleId(ctx, dcId, networkLoadBalancerId, networkLoadBalancerRuleId).Execute()
+
+	if err != nil {
+		log.Printf("[INFO] Resource %s not found: %+v", d.Id(), err)
+		if apiResponse != nil && apiResponse.Response != nil && apiResponse.StatusCode == 404 {
+			d.SetId("")
+			return nil, fmt.Errorf("unable to find network load balancer rule %q", networkLoadBalancerRuleId)
+		}
+		return nil, fmt.Errorf("an error occured while retrieving network load balancer rule  %q: %q ", networkLoadBalancerRuleId, err)
+	}
+
+	if err := d.Set("datacenter_id", dcId); err != nil {
+		return nil, err
+	}
+	if err := d.Set("networkloadbalancer_id", networkLoadBalancerId); err != nil {
+		return nil, err
+	}
+
+	if err := setNetworkLoadBalancerForwardingRuleData(d, &networkLoadBalancerForwardingRule); err != nil {
+		return nil, err
+	}
+
+	return []*schema.ResourceData{d}, nil
 }

@@ -6,6 +6,7 @@ import (
 	ionoscloud "github.com/ionos-cloud/sdk-go/v6"
 	"log"
 	"reflect"
+	"regexp"
 	"strings"
 	"time"
 
@@ -13,42 +14,6 @@ import (
 )
 
 const SleepInterval = 5 * time.Second
-
-func resourceResourceImport(_ context.Context, d *schema.ResourceData, _ interface{}) ([]*schema.ResourceData, error) {
-	parts := strings.Split(d.Id(), "/")
-	if len(parts) != 2 || parts[0] == "" || parts[1] == "" {
-		return nil, fmt.Errorf("invalid import id %q. Expecting {datacenter}/{resource}", d.Id())
-	}
-
-	if err := d.Set("datacenter_id", parts[0]); err != nil {
-		return nil, err
-	}
-	d.SetId(parts[1])
-
-	return []*schema.ResourceData{d}, nil
-}
-
-func resourceServerImport(_ context.Context, d *schema.ResourceData, _ interface{}) ([]*schema.ResourceData, error) {
-	parts := strings.Split(d.Id(), "/")
-	if len(parts) > 4 || len(parts) < 3 || parts[0] == "" || parts[1] == "" {
-		return nil, fmt.Errorf("invalid import id %q. Expecting {datacenter}/{server}/{primary_nic} or {datacenter}/{server}/{primary_nic}/{firewall}", d.Id())
-	}
-
-	if err := d.Set("datacenter_id", parts[0]); err != nil {
-		return nil, err
-	}
-	if err := d.Set("primary_nic", parts[2]); err != nil {
-		return nil, err
-	}
-	if len(parts) > 3 {
-		if err := d.Set("firewallrule_id", parts[3]); err != nil {
-			return nil, err
-		}
-	}
-	d.SetId(parts[1])
-
-	return []*schema.ResourceData{d}, nil
-}
 
 func resourceK8sClusterImport(ctx context.Context, d *schema.ResourceData, meta interface{}) ([]*schema.ResourceData, error) {
 	client := meta.(SdkBundle).CloudApiClient
@@ -58,7 +23,7 @@ func resourceK8sClusterImport(ctx context.Context, d *schema.ResourceData, meta 
 	cluster, apiResponse, err := client.KubernetesApi.K8sFindByClusterId(ctx, clusterId).Execute()
 
 	if err != nil {
-		if apiResponse != nil && apiResponse.StatusCode == 404 {
+		if apiResponse != nil && apiResponse.Response != nil && apiResponse.StatusCode == 404 {
 			d.SetId("")
 			return nil, fmt.Errorf("unable to find k8s cluster %q", clusterId)
 		}
@@ -107,7 +72,7 @@ func resourceK8sNodepoolImport(ctx context.Context, d *schema.ResourceData, meta
 	k8sNodepool, apiResponse, err := client.KubernetesApi.K8sNodepoolsFindById(ctx, clusterId, npId).Execute()
 
 	if err != nil {
-		if apiResponse != nil && apiResponse.StatusCode == 404 {
+		if apiResponse != nil && apiResponse.Response != nil && apiResponse.StatusCode == 404 {
 			d.SetId("")
 			return nil, fmt.Errorf("unable to find k8s node pool %q", npId)
 		}
@@ -171,14 +136,15 @@ func resourceK8sNodepoolImport(ctx context.Context, d *schema.ResourceData, meta
 	}
 
 	if k8sNodepool.Properties.Lans != nil {
-		var lans []int32
 
-		for _, lan := range *k8sNodepool.Properties.Lans {
-			lans = append(lans, *lan.Id)
+		nodePoolLans := getK8sNodePoolLans(*k8sNodepool.Properties.Lans)
+
+		if len(nodePoolLans) > 0 {
+			if err := d.Set("lans", nodePoolLans); err != nil {
+				return nil, err
+			}
 		}
-		if err := d.Set("lans", lans); err != nil {
-			return nil, err
-		}
+
 		log.Printf("[INFO] Setting LAN's for k8s node pool %s to %+v...", d.Id(), d.Get("lans"))
 	}
 
@@ -194,6 +160,28 @@ func resourceK8sNodepoolImport(ctx context.Context, d *schema.ResourceData, meta
 		log.Printf("[INFO] Setting maintenance window for k8s node pool %s to %+v...", d.Id(), k8sNodepool.Properties.MaintenanceWindow)
 	}
 
+	labels := make(map[string]interface{})
+	if k8sNodepool.Properties.Labels != nil && len(*k8sNodepool.Properties.Labels) > 0 {
+		for k, v := range *k8sNodepool.Properties.Labels {
+			labels[k] = v
+		}
+	}
+
+	if err := d.Set("labels", labels); err != nil {
+		return nil, fmt.Errorf("error while setting the labels property for k8sNodepool %s: %s", d.Id(), err)
+	}
+
+	annotations := make(map[string]interface{})
+	if k8sNodepool.Properties.Annotations != nil && len(*k8sNodepool.Properties.Annotations) > 0 {
+		for k, v := range *k8sNodepool.Properties.Annotations {
+			annotations[k] = v
+		}
+	}
+
+	if err := d.Set("annotations", annotations); err != nil {
+		return nil, fmt.Errorf("error while setting the annotations property for k8sNodepool %s: %s", d.Id(), err)
+	}
+
 	log.Printf("[INFO] Importing k8s node pool %q...", d.Id())
 
 	return []*schema.ResourceData{d}, nil
@@ -207,7 +195,7 @@ func resourcePrivateCrossConnectImport(ctx context.Context, d *schema.ResourceDa
 	pcc, apiResponse, err := client.PrivateCrossConnectsApi.PccsFindById(ctx, d.Id()).Execute()
 
 	if err != nil {
-		if apiResponse != nil && apiResponse.StatusCode == 404 {
+		if apiResponse != nil && apiResponse.Response != nil && apiResponse.StatusCode == 404 {
 			d.SetId("")
 			return nil, fmt.Errorf("unable to find PCC %q", pccId)
 		}
@@ -265,114 +253,6 @@ func resourcePrivateCrossConnectImport(ctx context.Context, d *schema.ResourceDa
 	return []*schema.ResourceData{d}, nil
 }
 
-func resourceBackupUnitImport(ctx context.Context, d *schema.ResourceData, meta interface{}) ([]*schema.ResourceData, error) {
-	client := meta.(SdkBundle).CloudApiClient
-
-	buId := d.Id()
-
-	backupUnit, apiResponse, err := client.BackupUnitsApi.BackupunitsFindById(ctx, d.Id()).Execute()
-
-	if err != nil {
-		if apiResponse != nil && apiResponse.StatusCode == 404 {
-			d.SetId("")
-			return nil, fmt.Errorf("unable to find Backup Unit %q", buId)
-		}
-		return nil, fmt.Errorf("unable to retreive Backup Unit %q", buId)
-	}
-
-	log.Printf("[INFO] Backup Unit found: %+v", backupUnit)
-
-	d.SetId(*backupUnit.Id)
-
-	if err := d.Set("name", *backupUnit.Properties.Name); err != nil {
-		return nil, err
-	}
-	if err := d.Set("email", *backupUnit.Properties.Email); err != nil {
-		return nil, err
-	}
-
-	contractResources, apiResponse, cErr := client.ContractResourcesApi.ContractsGet(ctx).Execute()
-
-	if cErr != nil {
-		return nil, fmt.Errorf("error while fetching contract resources for backup unit %q: %s", d.Id(), cErr)
-	}
-
-	if contractResources.Items == nil || len(*contractResources.Items) == 0 {
-		return nil, fmt.Errorf("no contracts found for user")
-	}
-
-	props := (*contractResources.Items)[0].Properties
-	if props == nil {
-		return nil, fmt.Errorf("could not get first contract properties")
-	}
-
-	if props.ContractNumber == nil {
-		return nil, fmt.Errorf("contract number not set")
-	}
-
-	if err := d.Set("login", fmt.Sprintf("%s-%d", *backupUnit.Properties.Name, *props.ContractNumber)); err != nil {
-		return nil, err
-	}
-
-	return []*schema.ResourceData{d}, nil
-}
-
-func resourceS3KeyImport(ctx context.Context, d *schema.ResourceData, meta interface{}) ([]*schema.ResourceData, error) {
-	parts := strings.Split(d.Id(), "/")
-
-	if len(parts) != 2 || parts[0] == "" || parts[1] == "" {
-		return nil, fmt.Errorf("invalid import id %q. Expecting {userId}/{s3KeyId}", d.Id())
-	}
-
-	userId := parts[0]
-	keyId := parts[1]
-
-	client := meta.(SdkBundle).CloudApiClient
-
-	s3Key, apiResponse, err := client.UserS3KeysApi.UmUsersS3keysFindByKeyId(ctx, userId, keyId).Execute()
-
-	if err != nil {
-		if apiResponse != nil && apiResponse.StatusCode == 404 {
-			d.SetId("")
-			return nil, fmt.Errorf("unable to find S3 key %q", keyId)
-		}
-		return nil, fmt.Errorf("unable to retreive S3 key %q", keyId)
-	}
-
-	d.SetId(*s3Key.Id)
-	if err := d.Set("user_id", userId); err != nil {
-		return nil, err
-	}
-	if err := d.Set("secret_key", *s3Key.Properties.SecretKey); err != nil {
-		return nil, err
-	}
-	if err := d.Set("active", *s3Key.Properties.Active); err != nil {
-		return nil, err
-	}
-
-	return []*schema.ResourceData{d}, nil
-}
-
-func resourceFirewallImport(_ context.Context, d *schema.ResourceData, _ interface{}) ([]*schema.ResourceData, error) {
-	parts := strings.Split(d.Id(), "/")
-	if len(parts) != 4 || parts[0] == "" || parts[1] == "" {
-		return nil, fmt.Errorf("invalid import id %q. Expecting {datacenter}/{server}/{nic}/{firewall}", d.Id())
-	}
-
-	if err := d.Set("datacenter_id", parts[0]); err != nil {
-		return nil, err
-	}
-	if err := d.Set("server_id", parts[1]); err != nil {
-		return nil, err
-	}
-	if err := d.Set("nic_id", parts[2]); err != nil {
-		return nil, err
-	}
-	d.SetId(parts[3])
-
-	return []*schema.ResourceData{d}, nil
-}
-
 func resourceNicImport(_ context.Context, d *schema.ResourceData, _ interface{}) ([]*schema.ResourceData, error) {
 	parts := strings.Split(d.Id(), "/")
 	if len(parts) != 3 || parts[0] == "" || parts[1] == "" {
@@ -390,132 +270,6 @@ func resourceNicImport(_ context.Context, d *schema.ResourceData, _ interface{})
 	return []*schema.ResourceData{d}, nil
 }
 
-func resourceVolumeImporter(ctx context.Context, d *schema.ResourceData, meta interface{}) ([]*schema.ResourceData, error) {
-	parts := strings.Split(d.Id(), "/")
-	if len(parts) != 3 || parts[0] == "" || parts[1] == "" || parts[2] == "" {
-		return nil, fmt.Errorf("invalid import id %q. Expecting {datacenter}/{server}/{volume}", d.Id())
-	}
-
-	client := meta.(SdkBundle).CloudApiClient
-
-	dcId := parts[0]
-	srvId := parts[1]
-	volumeId := parts[2]
-
-	volume, apiResponse, err := client.VolumesApi.DatacentersVolumesFindById(ctx, dcId, volumeId).Execute()
-
-	if err != nil {
-		if apiResponse != nil && apiResponse.StatusCode == 404 {
-			d.SetId("")
-			return nil, fmt.Errorf("volume does not exist %q", volumeId)
-		}
-		return nil, fmt.Errorf("an error occured while trying to find the volume %q", volumeId)
-	}
-
-	log.Printf("[INFO] volume found: %+v", volume)
-
-	d.SetId(*volume.Id)
-	if err := d.Set("datacenter_id", dcId); err != nil {
-		return nil, err
-	}
-
-	if err := d.Set("server_id", srvId); err != nil {
-		return nil, err
-	}
-
-	if volume.Properties.Name != nil {
-		err := d.Set("name", *volume.Properties.Name)
-		if err != nil {
-			return nil, err
-		}
-	}
-
-	if volume.Properties.Type != nil {
-		err := d.Set("disk_type", *volume.Properties.Type)
-		if err != nil {
-			return nil, err
-		}
-	}
-
-	if volume.Properties.Size != nil {
-		err := d.Set("size", *volume.Properties.Size)
-		if err != nil {
-			return nil, err
-		}
-	}
-
-	if volume.Properties.Bus != nil {
-		err := d.Set("bus", *volume.Properties.Bus)
-		if err != nil {
-			return nil, err
-		}
-	}
-
-	if volume.Properties.AvailabilityZone != nil {
-		err := d.Set("availability_zone", *volume.Properties.AvailabilityZone)
-		if err != nil {
-			return nil, err
-		}
-	}
-
-	if volume.Properties.CpuHotPlug != nil {
-		err := d.Set("cpu_hot_plug", *volume.Properties.CpuHotPlug)
-		if err != nil {
-			return nil, err
-		}
-	}
-
-	if volume.Properties.RamHotPlug != nil {
-		err := d.Set("ram_hot_plug", *volume.Properties.RamHotPlug)
-		if err != nil {
-			return nil, err
-		}
-	}
-
-	if volume.Properties.NicHotPlug != nil {
-		err := d.Set("nic_hot_plug", *volume.Properties.NicHotPlug)
-		if err != nil {
-			return nil, err
-		}
-	}
-
-	if volume.Properties.NicHotUnplug != nil {
-		err := d.Set("nic_hot_unplug", *volume.Properties.NicHotUnplug)
-		if err != nil {
-			return nil, err
-		}
-	}
-
-	if volume.Properties.DiscVirtioHotPlug != nil {
-		err := d.Set("disc_virtio_hot_plug", *volume.Properties.DiscVirtioHotPlug)
-		if err != nil {
-			return nil, err
-		}
-	}
-
-	if volume.Properties.DiscVirtioHotUnplug != nil {
-		err := d.Set("disc_virtio_hot_unplug", *volume.Properties.DiscVirtioHotUnplug)
-		if err != nil {
-			return nil, err
-		}
-	}
-
-	if volume.Properties.BackupunitId != nil {
-		err := d.Set("backup_unit_id", *volume.Properties.BackupunitId)
-		if err != nil {
-			return nil, err
-		}
-	}
-
-	if volume.Properties.UserData != nil {
-		err := d.Set("user_data", *volume.Properties.UserData)
-		if err != nil {
-			return nil, err
-		}
-	}
-	return []*schema.ResourceData{d}, nil
-}
-
 func resourceGroupImporter(ctx context.Context, d *schema.ResourceData, meta interface{}) ([]*schema.ResourceData, error) {
 	client := meta.(SdkBundle).CloudApiClient
 
@@ -524,7 +278,7 @@ func resourceGroupImporter(ctx context.Context, d *schema.ResourceData, meta int
 	group, apiResponse, err := client.UserManagementApi.UmGroupsFindById(ctx, grpId).Execute()
 
 	if err != nil {
-		if apiResponse != nil && apiResponse.StatusCode == 404 {
+		if apiResponse != nil && apiResponse.Response != nil && apiResponse.StatusCode == 404 {
 			d.SetId("")
 			return nil, fmt.Errorf("an error occured while trying to fetch the group %q", grpId)
 		}
@@ -656,7 +410,7 @@ func resourceUserImporter(ctx context.Context, d *schema.ResourceData, meta inte
 	user, apiResponse, err := client.UserManagementApi.UmUsersFindById(ctx, userId).Execute()
 
 	if err != nil {
-		if apiResponse != nil && apiResponse.StatusCode == 404 {
+		if apiResponse != nil && apiResponse.Response != nil && apiResponse.StatusCode == 404 {
 			d.SetId("")
 			return nil, fmt.Errorf("an error occured while trying to fetch the user %q", userId)
 		}
@@ -711,7 +465,7 @@ func resourceShareImporter(ctx context.Context, d *schema.ResourceData, meta int
 	share, apiResponse, err := client.UserManagementApi.UmGroupsSharesFindByResourceId(ctx, grpId, rscId).Execute()
 
 	if err != nil {
-		if apiResponse != nil && apiResponse.StatusCode == 404 {
+		if apiResponse != nil && apiResponse.Response != nil && apiResponse.StatusCode == 404 {
 			d.SetId("")
 			return nil, fmt.Errorf("an error occured while trying to fetch the share of resource %q for group %q", rscId, grpId)
 		}
@@ -759,7 +513,7 @@ func resourceIpFailoverImporter(ctx context.Context, d *schema.ResourceData, met
 	lan, apiResponse, err := client.LansApi.DatacentersLansFindById(ctx, dcId, lanId).Execute()
 
 	if err != nil {
-		if apiResponse != nil && apiResponse.StatusCode == 404 {
+		if apiResponse != nil && apiResponse.Response != nil && apiResponse.StatusCode == 404 {
 			d.SetId("")
 			return nil, fmt.Errorf("an error occured while trying to fetch the lan %q", lanId)
 		}
@@ -812,7 +566,7 @@ func resourceLoadbalancerImporter(ctx context.Context, d *schema.ResourceData, m
 	loadbalancer, apiResponse, err := client.LoadBalancersApi.DatacentersLoadbalancersFindById(ctx, dcId, lbId).Execute()
 
 	if err != nil {
-		if apiResponse != nil && apiResponse.StatusCode == 404 {
+		if apiResponse != nil && apiResponse.Response != nil && apiResponse.StatusCode == 404 {
 			d.SetId("")
 			return nil, fmt.Errorf("an error occured while trying to fetch the loadbalancer %q", lbId)
 		}
@@ -917,4 +671,9 @@ func setPropWithNilCheck(m map[string]interface{}, prop string, v interface{}) {
 	} else {
 		m[prop] = v
 	}
+}
+
+func IsValidUUID(uuid string) bool {
+	r := regexp.MustCompile("^[a-fA-F0-9]{8}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-[a-fA-F0-9]{12}$")
+	return r.MatchString(uuid)
 }

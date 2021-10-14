@@ -1,7 +1,7 @@
 /*
  * CLOUD API
  *
- * An enterprise-grade Infrastructure is provided as a Service (IaaS) solution that can be managed through a browser-based \"Data Center Designer\" (DCD) tool or via an easy to use API.   The API allows you to perform a variety of management tasks such as spinning up additional servers, adding volumes, adjusting networking, and so forth. It is designed to allow users to leverage the same power and flexibility found within the DCD visual tool. Both tools are consistent with their concepts and lend well to making the experience smooth and intuitive.
+ * IONOS Enterprise-grade Infrastructure as a Service (IaaS) solutions can be managed through the Cloud API, in addition or as an alternative to the \"Data Center Designer\" (DCD) browser-based tool.    Both methods employ consistent concepts and features, deliver similar power and flexibility, and can be used to perform a multitude of management tasks, including adding servers, volumes, configuring networks, and so on.
  *
  * API version: 6.0-SDK.3
  */
@@ -58,7 +58,7 @@ func (r ApiDatacentersNatgatewaysDeleteRequest) Execute() (*APIResponse, error) 
  * DatacentersNatgatewaysDelete Remove a NAT gateway
  * Removes the specified NAT gateway.
  * @param ctx _context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
- * @param datacenterId The unique ID of the datacenter
+ * @param datacenterId The unique ID of the data center.
  * @param natGatewayId The unique ID of the NAT gateway
  * @return ApiDatacentersNatgatewaysDeleteRequest
  */
@@ -212,7 +212,7 @@ func (r ApiDatacentersNatgatewaysFindByNatGatewayIdRequest) Execute() (NatGatewa
  * DatacentersNatgatewaysFindByNatGatewayId Retrieve a NAT gateway
  * Retrieves the attributes of a given NAT gateway.
  * @param ctx _context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
- * @param datacenterId The unique ID of the datacenter
+ * @param datacenterId The unique ID of the data center.
  * @param natGatewayId The unique ID of the NAT gateway
  * @return ApiDatacentersNatgatewaysFindByNatGatewayIdRequest
  */
@@ -374,7 +374,7 @@ func (r ApiDatacentersNatgatewaysFlowlogsDeleteRequest) Execute() (*APIResponse,
  * DatacentersNatgatewaysFlowlogsDelete Remove Flow Log from NAT Gateway
  * This will remove a flow log from the NAT gateway.
  * @param ctx _context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
- * @param datacenterId The unique ID of the datacenter
+ * @param datacenterId The unique ID of the data center.
  * @param natGatewayId The unique ID of the NAT gateway
  * @param flowLogId The unique ID of the flow log
  * @return ApiDatacentersNatgatewaysFlowlogsDeleteRequest
@@ -524,7 +524,7 @@ func (r ApiDatacentersNatgatewaysFlowlogsFindByFlowLogIdRequest) Execute() (Flow
  * DatacentersNatgatewaysFlowlogsFindByFlowLogId Retrieve a Flow Log of the NAT Gateway
  * This will return a Flow Log of the NAT Gateway.
  * @param ctx _context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
- * @param datacenterId The unique ID of the datacenter
+ * @param datacenterId The unique ID of the data center.
  * @param natGatewayId The unique ID of the NAT gateway
  * @param flowLogId The unique ID of the flow log
  * @return ApiDatacentersNatgatewaysFlowlogsFindByFlowLogIdRequest
@@ -695,7 +695,7 @@ func (r ApiDatacentersNatgatewaysFlowlogsGetRequest) Execute() (FlowLogs, *APIRe
  * DatacentersNatgatewaysFlowlogsGet List NAT Gateway Flow Logs
  * You can retrieve a list of Flow Logs of the NAT Gateway.
  * @param ctx _context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
- * @param datacenterId The unique ID of the datacenter
+ * @param datacenterId The unique ID of the data center.
  * @param natGatewayId The unique ID of the NAT gateway
  * @return ApiDatacentersNatgatewaysFlowlogsGetRequest
  */
@@ -865,7 +865,7 @@ func (r ApiDatacentersNatgatewaysFlowlogsPatchRequest) Execute() (FlowLog, *APIR
  * DatacentersNatgatewaysFlowlogsPatch Partially modify a Flow Log of the NAT Gateway
  * You can use to partially update a Flow Log of a NAT Gateway.
  * @param ctx _context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
- * @param datacenterId The unique ID of the datacenter
+ * @param datacenterId The unique ID of the data center.
  * @param natGatewayId The unique ID of the NAT gateway
  * @param flowLogId The unique ID of the flow log
  * @return ApiDatacentersNatgatewaysFlowlogsPatchRequest
@@ -1036,7 +1036,7 @@ func (r ApiDatacentersNatgatewaysFlowlogsPostRequest) Execute() (FlowLog, *APIRe
  * DatacentersNatgatewaysFlowlogsPost Add a NAT Gateways Flow Log
  * This will add a new Flow Log to the NAT Gateway.
  * @param ctx _context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
- * @param datacenterId The unique ID of the datacenter
+ * @param datacenterId The unique ID of the data center.
  * @param natGatewayId The unique ID of the NAT gateway
  * @return ApiDatacentersNatgatewaysFlowlogsPostRequest
  */
@@ -1205,7 +1205,7 @@ func (r ApiDatacentersNatgatewaysFlowlogsPutRequest) Execute() (FlowLog, *APIRes
  * DatacentersNatgatewaysFlowlogsPut Modify a Flow Log of the NAT Gateway
  * You can use to update a Flow Log of the NAT Gateway.
  * @param ctx _context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
- * @param datacenterId The unique ID of the datacenter
+ * @param datacenterId The unique ID of the data center.
  * @param natGatewayId The unique ID of the NAT gateway
  * @param flowLogId The unique ID of the flow log
  * @return ApiDatacentersNatgatewaysFlowlogsPutRequest
@@ -1375,7 +1375,7 @@ func (r ApiDatacentersNatgatewaysGetRequest) Execute() (NatGateways, *APIRespons
  * DatacentersNatgatewaysGet List NAT Gateways
  * Retrieve a list of NAT Gateways within the datacenter.
  * @param ctx _context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
- * @param datacenterId The unique ID of the datacenter
+ * @param datacenterId The unique ID of the data center.
  * @return ApiDatacentersNatgatewaysGetRequest
  */
 func (a *NATGatewaysApiService) DatacentersNatgatewaysGet(ctx _context.Context, datacenterId string) ApiDatacentersNatgatewaysGetRequest {
@@ -1543,7 +1543,7 @@ func (r ApiDatacentersNatgatewaysPatchRequest) Execute() (NatGateway, *APIRespon
  * DatacentersNatgatewaysPatch Partially update a NAT gateway
  * Partially update the attributes of a given NAT gateway
  * @param ctx _context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
- * @param datacenterId The unique ID of the datacenter
+ * @param datacenterId The unique ID of the data center.
  * @param natGatewayId The unique ID of the NAT gateway
  * @return ApiDatacentersNatgatewaysPatchRequest
  */
@@ -1718,7 +1718,7 @@ func (r ApiDatacentersNatgatewaysPostRequest) Execute() (NatGateway, *APIRespons
  * DatacentersNatgatewaysPost Create a NAT Gateway
  * Creates a NAT Gateway within the datacenter. User should be the contract owner or a admin or a user with createInternetAccess privilege
  * @param ctx _context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
- * @param datacenterId The unique ID of the datacenter
+ * @param datacenterId The unique ID of the data center.
  * @return ApiDatacentersNatgatewaysPostRequest
  */
 func (a *NATGatewaysApiService) DatacentersNatgatewaysPost(ctx _context.Context, datacenterId string) ApiDatacentersNatgatewaysPostRequest {
@@ -1891,7 +1891,7 @@ func (r ApiDatacentersNatgatewaysPutRequest) Execute() (NatGateway, *APIResponse
  * DatacentersNatgatewaysPut Update a NAT gateway
  * Update the attributes of a given NAT gateway
  * @param ctx _context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
- * @param datacenterId The unique ID of the datacenter
+ * @param datacenterId The unique ID of the data center.
  * @param natGatewayId The unique ID of the NAT gateway
  * @return ApiDatacentersNatgatewaysPutRequest
  */
@@ -2063,7 +2063,7 @@ func (r ApiDatacentersNatgatewaysRulesDeleteRequest) Execute() (*APIResponse, er
  * DatacentersNatgatewaysRulesDelete Remove rule from NAT Gateway
  * This will remove a rule from the NAT gateway.
  * @param ctx _context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
- * @param datacenterId The unique ID of the datacenter
+ * @param datacenterId The unique ID of the data center.
  * @param natGatewayId The unique ID of the NAT gateway
  * @param natGatewayRuleId The unique ID of the NAT gateway rule
  * @return ApiDatacentersNatgatewaysRulesDeleteRequest
@@ -2221,7 +2221,7 @@ func (r ApiDatacentersNatgatewaysRulesFindByNatGatewayRuleIdRequest) Execute() (
  * DatacentersNatgatewaysRulesFindByNatGatewayRuleId Retrieve a NAT Gateway Rule
  * Retrieves the attributes of a given NAT gateway rule.
  * @param ctx _context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
- * @param datacenterId The unique ID of the datacenter
+ * @param datacenterId The unique ID of the data center.
  * @param natGatewayId The unique ID of the NAT gateway
  * @param natGatewayRuleId The unique ID of the NAT gateway rule
  * @return ApiDatacentersNatgatewaysRulesFindByNatGatewayRuleIdRequest
@@ -2390,7 +2390,7 @@ func (r ApiDatacentersNatgatewaysRulesGetRequest) Execute() (NatGatewayRules, *A
  * DatacentersNatgatewaysRulesGet List NAT Gateways Rules
  * Retrieve a list of rules of a NAT Gateway within the datacenter.
  * @param ctx _context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
- * @param datacenterId The unique ID of the datacenter
+ * @param datacenterId The unique ID of the data center.
  * @param natGatewayId The unique ID of the NAT gateway
  * @return ApiDatacentersNatgatewaysRulesGetRequest
  */
@@ -2562,7 +2562,7 @@ func (r ApiDatacentersNatgatewaysRulesPatchRequest) Execute() (NatGatewayRule, *
  * DatacentersNatgatewaysRulesPatch Partially modify a rule of the NAT gateway
  * You can use to partially update a rule of a NAT gateway.
  * @param ctx _context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
- * @param datacenterId The unique ID of the datacenter
+ * @param datacenterId The unique ID of the data center.
  * @param natGatewayId The unique ID of the NAT gateway
  * @param natGatewayRuleId The unique ID of the NAT gateway rule
  * @return ApiDatacentersNatgatewaysRulesPatchRequest
@@ -2741,7 +2741,7 @@ func (r ApiDatacentersNatgatewaysRulesPostRequest) Execute() (NatGatewayRule, *A
  * DatacentersNatgatewaysRulesPost Create a NAT Gateway Rule
  * Creates a rule within the NAT Gateway of a datacenter.
  * @param ctx _context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
- * @param datacenterId The unique ID of the datacenter
+ * @param datacenterId The unique ID of the data center.
  * @param natGatewayId The unique ID of the NAT gateway
  * @return ApiDatacentersNatgatewaysRulesPostRequest
  */
@@ -2918,7 +2918,7 @@ func (r ApiDatacentersNatgatewaysRulesPutRequest) Execute() (NatGatewayRule, *AP
  * DatacentersNatgatewaysRulesPut Modify a rule of the NAT gateway
  * You can use to update a rule of the NAT gateway.
  * @param ctx _context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
- * @param datacenterId The unique ID of the datacenter
+ * @param datacenterId The unique ID of the data center.
  * @param natGatewayId The unique ID of the NAT gateway
  * @param natGatewayRuleId The unique ID of the NAT gateway rule
  * @return ApiDatacentersNatgatewaysRulesPutRequest

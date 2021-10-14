@@ -10,7 +10,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
 )
 
-func TestAccDataCenter_Basic(t *testing.T) {
+func TestAccDataCenterBasic(t *testing.T) {
 	var datacenter ionoscloud.Datacenter
 	dcName := "datacenter-test"
 
@@ -22,17 +22,23 @@ func TestAccDataCenter_Basic(t *testing.T) {
 		CheckDestroy:      testAccCheckDatacenterDestroyCheck,
 		Steps: []resource.TestStep{
 			{
-				Config: fmt.Sprintf(testAccCheckDatacenterConfig_basic, dcName),
+				Config: fmt.Sprintf(testAccCheckDatacenterConfigBasic, dcName),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckDatacenterExists("ionoscloud_datacenter.foobar", &datacenter),
 					resource.TestCheckResourceAttr("ionoscloud_datacenter.foobar", "name", dcName),
+					resource.TestCheckResourceAttr("ionoscloud_datacenter.foobar", "location", "us/las"),
+					resource.TestCheckResourceAttr("ionoscloud_datacenter.foobar", "description", "Test Datacenter Description"),
+					resource.TestCheckResourceAttr("ionoscloud_datacenter.foobar", "sec_auth_protection", "false"),
 				),
 			},
 			{
-				Config: testAccCheckDatacenterConfig_update,
+				Config: testAccCheckDatacenterConfigUpdate,
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckDatacenterExists("ionoscloud_datacenter.foobar", &datacenter),
 					resource.TestCheckResourceAttr("ionoscloud_datacenter.foobar", "name", "updated"),
+					resource.TestCheckResourceAttr("ionoscloud_datacenter.foobar", "location", "us/las"),
+					resource.TestCheckResourceAttr("ionoscloud_datacenter.foobar", "description", "Test Datacenter Description Updated"),
+					resource.TestCheckResourceAttr("ionoscloud_datacenter.foobar", "sec_auth_protection", "false"),
 				),
 			},
 		},
@@ -56,7 +62,7 @@ func testAccCheckDatacenterDestroyCheck(s *terraform.State) error {
 		_, apiResponse, err := client.DataCentersApi.DatacentersFindById(ctx, rs.Primary.ID).Execute()
 
 		if err != nil {
-			if apiResponse == nil || apiResponse.StatusCode != 404 {
+			if apiResponse == nil || apiResponse.Response != nil && apiResponse.StatusCode != 404 {
 				return fmt.Errorf("an error occurred while checking the destruction of datacenter %s: %s", rs.Primary.ID, err)
 			}
 		} else {
@@ -101,14 +107,18 @@ func testAccCheckDatacenterExists(n string, datacenter *ionoscloud.Datacenter) r
 	}
 }
 
-const testAccCheckDatacenterConfig_basic = `
+const testAccCheckDatacenterConfigBasic = `
 resource "ionoscloud_datacenter" "foobar" {
 	name       = "%s"
 	location = "us/las"
+	description = "Test Datacenter Description"
+	sec_auth_protection = false
 }`
 
-const testAccCheckDatacenterConfig_update = `
+const testAccCheckDatacenterConfigUpdate = `
 resource "ionoscloud_datacenter" "foobar" {
 	name       =  "updated"
 	location = "us/las"
+	description = "Test Datacenter Description Updated"
+	sec_auth_protection = false
 }`
