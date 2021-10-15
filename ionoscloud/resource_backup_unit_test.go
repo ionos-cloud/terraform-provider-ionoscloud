@@ -43,7 +43,7 @@ func TestAccBackupUnitBasic(t *testing.T) {
 	})
 }
 
-func testAccCheckbackupUnitDestroyCheck(s *terraform.State) error {
+func testAccCheckBackupUnitDestroyCheck(s *terraform.State) error {
 	client := testAccProvider.Meta().(SdkBundle).CloudApiClient
 
 	ctx, cancel := context.WithTimeout(context.Background(), *resourceDefaultTimeouts.Default)

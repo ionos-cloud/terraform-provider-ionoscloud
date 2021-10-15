@@ -84,7 +84,7 @@ func Provider() *schema.Provider {
 			"ionoscloud_natgateway_rule":                    resourceNatGatewayRule(),
 			"ionoscloud_networkloadbalancer":                resourceNetworkLoadBalancer(),
 			"ionoscloud_networkloadbalancer_forwardingrule": resourceNetworkLoadBalancerForwardingRule(),
-			"ionoscloud_dbaas_pgsql_cluster":                resourceDbaasPgSqlCluster(),
+			DBaaSClusterResource:                            resourceDbaasPgSqlCluster(),
 		},
 		DataSourcesMap: map[string]*schema.Resource{
 			"ionoscloud_datacenter":                         dataSourceDataCenter(),
@@ -105,9 +105,9 @@ func Provider() *schema.Provider {
 			"ionoscloud_backup_unit":                        dataSourceBackupUnit(),
 			"ionoscloud_firewall":                           dataSourceFirewall(),
 			"ionoscloud_s3_key":                             dataSourceS3Key(),
-			"ionoscloud_dbaas_pgsql_cluster":                dataSourceDbaasPgSqlCluster(),
-			"ionoscloud_dbaas_pgsql_versions":               dataSourceDbaasPgSqlVersions(),
-			"ionoscloud_dbaas_pgsql_backups":                dataSourceDbaasPgSqlBackups(),
+			DBaaSClusterResource:                            dataSourceDbaasPgSqlCluster(),
+			DBaaSVersionsResource:                           dataSourceDbaasPgSqlVersions(),
+			DBaaSBackupsResource:                            dataSourceDbaasPgSqlBackups(),
 		},
 	}
 

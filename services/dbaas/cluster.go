@@ -6,12 +6,13 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	dbaas "github.com/ionos-cloud/sdk-go-autoscaling"
+	"time"
 )
 
 type ClusterService interface {
 	GetCluster(ctx context.Context, clusterId string) (dbaas.Cluster, *dbaas.APIResponse, error)
-	ListClusters(ctx context.Context) (dbaas.ClusterList, *dbaas.APIResponse, error)
-	CreateCluster(ctx context.Context, cluster dbaas.CreateClusterRequest, backup string, recoveryTargetTime string) (dbaas.Cluster, *dbaas.APIResponse, error)
+	ListClusters(ctx context.Context, filterName string) (dbaas.ClusterList, *dbaas.APIResponse, error)
+	CreateCluster(ctx context.Context, cluster dbaas.CreateClusterRequest, backup string, recoveryTargetTime *time.Time) (dbaas.Cluster, *dbaas.APIResponse, error)
 	UpdateCluster(ctx context.Context, clusterId string, cluster dbaas.PatchClusterRequest) (dbaas.Cluster, *dbaas.APIResponse, error)
 	DeleteCluster(ctx context.Context, clusterId string) (dbaas.Cluster, *dbaas.APIResponse, error)
 }
@@ -37,13 +38,13 @@ func (c *Client) ListClusters(ctx context.Context, filterName string) (dbaas.Clu
 	return clusters, nil, err
 }
 
-func (c *Client) CreateCluster(ctx context.Context, cluster dbaas.CreateClusterRequest, backup string, recoveryTargetTime string) (dbaas.Cluster, *dbaas.APIResponse, error) {
+func (c *Client) CreateCluster(ctx context.Context, cluster dbaas.CreateClusterRequest, backup string, recoveryTargetTime *time.Time) (dbaas.Cluster, *dbaas.APIResponse, error) {
 	request := c.ClustersApi.ClustersPost(ctx).Cluster(cluster)
 	if backup != "" {
 		request = request.FromBackup(backup)
 	}
-	if recoveryTargetTime != " " {
-		request = request.FromRecoveryTargetTime(recoveryTargetTime)
+	if recoveryTargetTime != nil {
+		request = request.FromRecoveryTargetTime(*recoveryTargetTime)
 	}
 	clusterResponse, apiResponse, err := c.ClustersApi.ClustersPostExecute(request)
 	if apiResponse != nil {

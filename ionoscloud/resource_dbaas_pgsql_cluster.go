@@ -176,10 +176,23 @@ func resourceDbaasPgSqlClusterCreate(ctx context.Context, d *schema.ResourceData
 
 	dbaasCluster := dbaasService.GetDbaasPgSqlClusterDataCreate(d)
 
+	var targetTime *time.Time
+
 	backupId := d.Get("from_backup").(string)
 	recoveryTargetTime := d.Get("from_recovery_target_time").(string)
+	if recoveryTargetTime != "" {
+		layout := "2006-01-02T15:04:05Z"
+		convertedTime, err := time.Parse(layout, recoveryTargetTime)
+		if err != nil {
+			diags := diag.FromErr(fmt.Errorf("an error occured while converting from_recovery_target_time to time.Time: %s", err))
+			return diags
+		}
+		targetTime = &convertedTime
+	} else {
+		targetTime = nil
+	}
 
-	dbaasClusterResponse, _, err := client.CreateCluster(ctx, *dbaasCluster, backupId, recoveryTargetTime)
+	dbaasClusterResponse, _, err := client.CreateCluster(ctx, *dbaasCluster, backupId, targetTime)
 
 	if err != nil {
 		diags := diag.FromErr(fmt.Errorf("an error occured while creating a dbaas cluster: %s", err))
@@ -208,7 +221,7 @@ func resourceDbaasPgSqlClusterCreate(ctx context.Context, d *schema.ResourceData
 			log.Printf("[INFO] trying again ...")
 		case <-ctx.Done():
 			log.Printf("[INFO] create timed out")
-			diags := diag.FromErr(fmt.Errorf("dbaas cluster creation timed out! WARNING: your dbaas cluster will still probably be created after some time but the terraform state wont reflect that; check your Ionos Cloud account for updates"))
+			diags := diag.FromErr(fmt.Errorf("dbaas cluster creation timed out! WARNING: your dbaas cluster (%s) will still probably be created after some time but the terraform state wont reflect that; check your Ionos Cloud account for updates", d.Id()))
 			return diags
 		}
 
@@ -279,7 +292,7 @@ func resourceDbaasPgSqlClusterUpdate(ctx context.Context, d *schema.ResourceData
 			log.Printf("[INFO] trying again ...")
 		case <-ctx.Done():
 			log.Printf("[INFO] create timed out")
-			diags := diag.FromErr(fmt.Errorf("dbaas cluster update timed out! WARNING: your dbaas cluster will still probably be updated after some time but the terraform state wont reflect that; check your Ionos Cloud account for updates"))
+			diags := diag.FromErr(fmt.Errorf("dbaas cluster update timed out! WARNING: your dbaas cluster (%s) will still probably be updated after some time but the terraform state wont reflect that; check your Ionos Cloud account for updates", d.Id()))
 			return diags
 		}
 
@@ -321,7 +334,7 @@ func resourceDbaasPgSqlClusterDelete(ctx context.Context, d *schema.ResourceData
 		case <-time.After(SleepInterval):
 			log.Printf("[INFO] trying again ...")
 		case <-ctx.Done():
-			diags := diag.FromErr(fmt.Errorf("dbaas cluster deletion timed out! WARNING: your k8s cluster will still probably be deleted after some time but the terraform state won't reflect that; check your Ionos Cloud account for updates"))
+			diags := diag.FromErr(fmt.Errorf("dbaas cluster deletion timed out! WARNING: your k8s cluster (%s) will still probably be deleted after some time but the terraform state won't reflect that; check your Ionos Cloud account for updates", d.Id()))
 			return diags
 		}
 	}
@@ -359,21 +372,21 @@ func dbaasClusterReady(ctx context.Context, client *dbaasService.Client, d *sche
 	if err != nil {
 		return true, fmt.Errorf("error checking dbaas cluster status: %s", err)
 	}
-
-	if *subjectCluster.LifecycleStatus == "FAILED" {
-
-		time.Sleep(time.Second * 3)
-
-		subjectCluster, _, err = client.GetCluster(ctx, d.Id())
-
-		if err != nil {
-			return true, fmt.Errorf("error checking dbaas cluster status: %s", err)
-		}
-
-		if *subjectCluster.LifecycleStatus == "FAILED" {
-			return false, fmt.Errorf("dbaas cluster has failed. WARNING: your k8s cluster may still recover after some time but the terraform state won't reflect that; check your Ionos Cloud account for updates")
-		}
-	}
+	// Removed this part since there are still
+	//if *subjectCluster.LifecycleStatus == "FAILED" {
+	//
+	//	time.Sleep(time.Second * 3)
+	//
+	//	subjectCluster, _, err = client.GetCluster(ctx, d.Id())
+	//
+	//	if err != nil {
+	//		return true, fmt.Errorf("error checking dbaas cluster status: %s", err)
+	//	}
+	//
+	//	if *subjectCluster.LifecycleStatus == "FAILED" {
+	//		return false, fmt.Errorf("dbaas cluster has failed. WARNING: your k8s cluster may still recover after some time but the terraform state won't reflect that; check your Ionos Cloud account for updates")
+	//	}
+	//}
 	return *subjectCluster.LifecycleStatus == "AVAILABLE", nil
 }
 

@@ -20,7 +20,7 @@ func TestAccLan_ImportBasic(t *testing.T) {
 			},
 
 			{
-				ResourceName:      "ionoscloud_lan." + LanResourceName,
+				ResourceName:      "ionoscloud_lan." + LanTestResource,
 				ImportStateIdFunc: testAccLanImportStateId,
 				ImportState:       true,
 				ImportStateVerify: true,

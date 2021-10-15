@@ -23,17 +23,17 @@ func TestAccLan_Basic(t *testing.T) {
 			{
 				Config: testAccCheckLanConfigBasic,
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheckLanExists("ionoscloud_lan."+LanResourceName, &lan),
-					resource.TestCheckResourceAttr("ionoscloud_lan."+LanResourceName, "name", LanResourceName),
-					resource.TestCheckResourceAttr("ionoscloud_lan."+LanResourceName, "public", "true"),
+					testAccCheckLanExists("ionoscloud_lan."+LanTestResource, &lan),
+					resource.TestCheckResourceAttr("ionoscloud_lan."+LanTestResource, "name", LanTestResource),
+					resource.TestCheckResourceAttr("ionoscloud_lan."+LanTestResource, "public", "true"),
 				),
 			},
 			{
 				Config: testAccCheckLanConfigUpdate,
 				Check: resource.ComposeTestCheckFunc(
-					resource.TestCheckResourceAttr("ionoscloud_lan."+LanResourceName, "name", UpdatedResources),
-					resource.TestCheckResourceAttr("ionoscloud_lan."+LanResourceName, "public", "false"),
-					resource.TestCheckResourceAttrPair("ionoscloud_lan."+LanResourceName, "pcc", "ionoscloud_private_crossconnect.example", "id"),
+					resource.TestCheckResourceAttr("ionoscloud_lan."+LanTestResource, "name", UpdatedResources),
+					resource.TestCheckResourceAttr("ionoscloud_lan."+LanTestResource, "public", "false"),
+					resource.TestCheckResourceAttrPair("ionoscloud_lan."+LanTestResource, "pcc", "ionoscloud_private_crossconnect.example", "id"),
 				),
 			},
 		},
@@ -112,10 +112,10 @@ resource "ionoscloud_private_crossconnect" "example" {
   description = "example description"
 }
 
-resource "ionoscloud_lan" ` + LanResourceName + ` {
+resource "ionoscloud_lan" ` + LanTestResource + ` {
   datacenter_id = ionoscloud_datacenter.foobar.id
   public = true
-  name = "` + LanResourceName + `"
+  name = "` + LanTestResource + `"
 }`
 
 const testAccCheckLanConfigUpdate = `
@@ -129,7 +129,7 @@ resource "ionoscloud_private_crossconnect" "example" {
   description = "example description"
 }
 
-resource "ionoscloud_lan" ` + LanResourceName + ` {
+resource "ionoscloud_lan" ` + LanTestResource + ` {
   datacenter_id = ionoscloud_datacenter.foobar.id
   public = false
   name = "` + UpdatedResources + `"
