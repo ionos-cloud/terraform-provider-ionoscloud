@@ -7,6 +7,14 @@ const (
 	LanDataSourceByName = "example_lan_name"
 )
 
+// K8s Constants
+const (
+	K8sClusterResource         = "ionoscloud_k8s_cluster"
+	K8sClusterTestResource     = "test_k8s_cluster"
+	K8sClusterDataSourceById   = "test_k8s_cluster_id"
+	K8sClusterDataSourceByName = "test_k8s_cluster_name"
+)
+
 // Server Constants
 const (
 	ServerResourceName     = "test_server"
@@ -16,5 +24,6 @@ const (
 
 // General Constants
 const (
+	DataSource       = "data"
 	UpdatedResources = "updated"
 )
