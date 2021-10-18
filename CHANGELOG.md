@@ -1,5 +1,6 @@
 ## 5.2.17
 
+- **bug fixes**: fixed issue #112 can't attach existing volume to server after recreating server 
 - **bug fixes**: cannot empty `api_subnet_allow_list` and `s3_buckets`
 - **code enhancements**: for `k8s_cluster`:
   - made tests comprehensive
