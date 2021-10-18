@@ -2,6 +2,11 @@
 
 - **bug fixes**: `cube server` could not be deleted
 - **functionality enhancements**: improved data_source for template - now `template` can be searched by any of its arguments
+- **bug fixes**: cannot empty `api_subnet_allow_list` and `s3_buckets`
+- **code enhancements**: for `k8s_cluster`:
+  - made tests comprehensive
+  - optimized test duration by including both match by id and by name in the same test
+  - removed duplicated code from import, data_source and resource files (set parameters)
   
 ## 6.0.0-beta.12
 

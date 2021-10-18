@@ -14,7 +14,16 @@ const (
 	ServerDataSourceByName = "test_server_name"
 )
 
+// K8s Constants
+const (
+	K8sClusterResource         = "ionoscloud_k8s_cluster"
+	K8sClusterTestResource     = "test_k8s_cluster"
+	K8sClusterDataSourceById   = "test_k8s_cluster_id"
+	K8sClusterDataSourceByName = "test_k8s_cluster_name"
+)
+
 // General Constants
 const (
+	DataSource       = "data"
 	UpdatedResources = "test_updated"
 )

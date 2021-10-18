@@ -15,47 +15,6 @@ import (
 
 const SleepInterval = 5 * time.Second
 
-func resourceK8sClusterImport(ctx context.Context, d *schema.ResourceData, meta interface{}) ([]*schema.ResourceData, error) {
-	client := meta.(*ionoscloud.APIClient)
-
-	clusterId := d.Id()
-
-	cluster, apiResponse, err := client.KubernetesApi.K8sFindByClusterId(ctx, clusterId).Execute()
-
-	if err != nil {
-		if apiResponse != nil && apiResponse.Response != nil && apiResponse.StatusCode == 404 {
-			d.SetId("")
-			return nil, fmt.Errorf("unable to find k8s cluster %q", clusterId)
-		}
-		return nil, fmt.Errorf("unable to retreive k8s cluster %q", d.Id())
-	}
-
-	log.Printf("[INFO] K8s cluster found: %+v", cluster)
-	d.SetId(*cluster.Id)
-	if err := d.Set("name", *cluster.Properties.Name); err != nil {
-		return nil, err
-	}
-	if err := d.Set("k8s_version", *cluster.Properties.K8sVersion); err != nil {
-		return nil, err
-	}
-
-	if cluster.Properties.MaintenanceWindow != nil {
-		if err := d.Set("maintenance_window", []map[string]string{
-			{
-				"day_of_the_week": *cluster.Properties.MaintenanceWindow.DayOfTheWeek,
-				"time":            *cluster.Properties.MaintenanceWindow.Time,
-			},
-		}); err != nil {
-			return nil, err
-		}
-		log.Printf("[INFO] Setting maintenance window for k8s cluster %s to %+v...", d.Id(), *cluster.Properties.MaintenanceWindow)
-	}
-
-	log.Printf("[INFO] Importing k8s cluster %q...", d.Id())
-
-	return []*schema.ResourceData{d}, nil
-}
-
 func resourceK8sNodepoolImport(ctx context.Context, d *schema.ResourceData, meta interface{}) ([]*schema.ResourceData, error) {
 
 	parts := strings.Split(d.Id(), "/")
