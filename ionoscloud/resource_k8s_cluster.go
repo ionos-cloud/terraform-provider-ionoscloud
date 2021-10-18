@@ -351,17 +351,15 @@ func resourcek8sClusterUpdate(ctx context.Context, d *schema.ResourceData, meta 
 				valueS := value.(string)
 				apiSubnets = append(apiSubnets, valueS)
 			}
-			request.Properties.ApiSubnetAllowList = &apiSubnets
-		} else {
-			request.Properties.ApiSubnetAllowList = &apiSubnets
 		}
+		request.Properties.ApiSubnetAllowList = &apiSubnets
 	}
 
 	if d.HasChange("s3_buckets") {
 		_, newS3Buckets := d.GetChange("s3_buckets")
 		s3BucketValues := newS3Buckets.([]interface{})
+		s3Buckets := make([]ionoscloud.S3Bucket, 0)
 		if s3BucketValues != nil && len(s3BucketValues) > 0 {
-			s3Buckets := make([]ionoscloud.S3Bucket, 0)
 			for index := range s3BucketValues {
 				var s3Bucket ionoscloud.S3Bucket
 				addBucket := false
@@ -374,10 +372,8 @@ func resourcek8sClusterUpdate(ctx context.Context, d *schema.ResourceData, meta 
 					s3Buckets = append(s3Buckets, s3Bucket)
 				}
 			}
-			request.Properties.S3Buckets = &s3Buckets
-		} else {
-			request.Properties.S3Buckets = nil
 		}
+		request.Properties.S3Buckets = &s3Buckets
 	}
 
 	_, apiResponse, err := client.KubernetesApi.K8sPut(ctx, d.Id()).KubernetesCluster(request).Execute()
