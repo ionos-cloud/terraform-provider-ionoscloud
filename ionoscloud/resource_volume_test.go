@@ -235,7 +235,7 @@ resource "ionoscloud_lan" "webserver_lan" {
   name = "public"
 }
 
-resource "ionoscloud_server" "webserver" {
+resource "ionoscloud_server" "webserver1" {
   name = "webserver"
   datacenter_id = "${ionoscloud_datacenter.foobar.id}"
   cores = 1
@@ -258,7 +258,7 @@ resource "ionoscloud_server" "webserver" {
 
 resource "ionoscloud_volume" "database_volume" {
 	datacenter_id = "${ionoscloud_datacenter.foobar.id}"
-	server_id = "${ionoscloud_server.webserver.id}"
+	server_id = "${ionoscloud_server.webserver1.id}"
 	availability_zone = "ZONE_1"
 	name = "updated"
 	size = 5

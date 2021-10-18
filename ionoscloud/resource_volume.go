@@ -507,9 +507,8 @@ func resourceVolumeUpdate(ctx context.Context, d *schema.ResourceData, meta inte
 		properties.Name = &newValueStr
 	}
 	if d.HasChange("disk_type") {
-		_, newValue := d.GetChange("disk_type")
-		newValueStr := newValue.(string)
-		properties.Type = &newValueStr
+		diags := diag.FromErr(fmt.Errorf("disk_type property is immutable"))
+		return diags
 	}
 	if d.HasChange("size") {
 		_, newValue := d.GetChange("size")
@@ -554,7 +553,8 @@ func resourceVolumeUpdate(ctx context.Context, d *schema.ResourceData, meta inte
 	if d.HasChange("server_id") {
 		_, newValue := d.GetChange("server_id")
 		serverID := newValue.(string)
-		_, apiResponse, err := client.ServerApi.DatacentersServersVolumesPost(ctx, dcId, serverID).Volume(volume).Execute()
+		volumeToAttach := ionoscloud.Volume{Id: volume.Id}
+		_, apiResponse, err := client.ServerApi.DatacentersServersVolumesPost(ctx, dcId, serverID).Volume(volumeToAttach).Execute()
 		if err != nil {
 			diags := diag.FromErr(fmt.Errorf("an error occured while attaching a volume dcId: %s server_id: %s ID: %s %s", dcId, serverID, *volume.Id, err))
 			return diags
