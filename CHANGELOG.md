@@ -1,3 +1,11 @@
+## 5.2.17
+
+- **bug fixes**: cannot empty `api_subnet_allow_list` and `s3_buckets`
+- **code enhancements**: for `k8s_cluster`:
+  - made tests comprehensive
+  - optimized test duration by including both match by id and by name in the same test
+  - removed duplicated code from import, data_source and resource files (set parameters)
+
 ## 5.2.16
 
 - **code enhancements**: for `backupUnit`, `datacenter`, `lan`, `s3_key`, and `firewall` resources done the following:

@@ -3,29 +3,42 @@
 package ionoscloud
 
 import (
-	"fmt"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
 	"testing"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 )
 
-func TestAcck8sCluster_ImportBasic(t *testing.T) {
-	resourceName := "example"
-
+func TestAcck8sClusterImportBasic(t *testing.T) {
 	resource.Test(t, resource.TestCase{
 		PreCheck:          func() { testAccPreCheck(t) },
 		ProviderFactories: testAccProviderFactories,
-		CheckDestroy:      testAccCheckk8sClusterDestroyCheck,
+		CheckDestroy:      testAccCheckK8sClusterDestroyCheck,
 		Steps: []resource.TestStep{
 			{
-				Config: fmt.Sprintf(testAccCheckk8sClusterConfigBasic, resourceName),
+				Config: testAccCheckK8sClusterConfigBasic,
 			},
 			{
-				ResourceName:            fmt.Sprintf("ionoscloud_k8s_cluster.%s", resourceName),
-				ImportState:             true,
-				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{"maintenance_window.0.time"},
+				ResourceName:      K8sClusterResource + "." + K8sClusterTestResource,
+				ImportStateIdFunc: testAccK8sClusterImportStateId,
+				ImportState:       true,
+				ImportStateVerify: true,
+				//ImportStateVerifyIgnore: []string{"maintenance_window.0.time"},
 			},
 		},
 	})
+}
+
+func testAccK8sClusterImportStateId(s *terraform.State) (string, error) {
+	importID := ""
+
+	for _, rs := range s.RootModule().Resources {
+		if rs.Type != K8sClusterResource {
+			continue
+		}
+
+		importID = rs.Primary.Attributes["id"]
+	}
+
+	return importID, nil
 }
