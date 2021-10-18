@@ -1,5 +1,5 @@
 ## 6.0.0-beta.13
-
+- **bug fixes**: fixed issue #112 can't attach existing volume to server after recreating server
 - **bug fixes**: `cube server` could not be deleted
 - **functionality enhancements**: improved data_source for template - now `template` can be searched by any of its arguments
 - **bug fixes**: cannot empty `api_subnet_allow_list` and `s3_buckets`
