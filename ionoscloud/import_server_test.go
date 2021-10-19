@@ -20,7 +20,7 @@ func TestAccServer_ImportBasic(t *testing.T) {
 			},
 
 			{
-				ResourceName:            "ionoscloud_server." + ServerResourceName,
+				ResourceName:            "ionoscloud_server." + ServerTestResource,
 				ImportStateIdFunc:       testAccServerImportStateId,
 				ImportState:             true,
 				ImportStateVerify:       true,

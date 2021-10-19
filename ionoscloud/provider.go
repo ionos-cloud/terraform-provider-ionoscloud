@@ -64,7 +64,7 @@ func Provider() *schema.Provider {
 		ResourcesMap: map[string]*schema.Resource{
 			DatacenterResource:                resourceDatacenter(),
 			"ionoscloud_ipblock":              resourceIPBlock(),
-			"ionoscloud_firewall":             resourceFirewall(),
+			FirewallResource:                  resourceFirewall(),
 			"ionoscloud_lan":                  resourceLan(),
 			"ionoscloud_loadbalancer":         resourceLoadbalancer(),
 			"ionoscloud_nic":                  resourceNic(),
@@ -93,7 +93,7 @@ func Provider() *schema.Provider {
 			K8sClusterResource:                dataSourceK8sCluster(),
 			"ionoscloud_k8s_node_pool":        dataSourceK8sNodePool(),
 			BackupUnitResource:                dataSourceBackupUnit(),
-			"ionoscloud_firewall":             dataSourceFirewall(),
+			FirewallResource:                  dataSourceFirewall(),
 			"ionoscloud_s3_key":               dataSourceS3Key(),
 		},
 	}

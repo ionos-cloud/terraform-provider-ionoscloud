@@ -16,11 +16,20 @@ const (
 	DatacenterDataSourceByName = "test_datacenter_name"
 )
 
+// Firewall Constants
+const (
+	FirewallResource         = "ionoscloud_firewall"
+	FirewallTestResource     = "test_firewall"
+	FirewallDataSourceById   = "test_firewall_id"
+	FirewallDataSourceByName = "test_firewall_name"
+)
+
 // Lan Constants
 const (
-	LanResourceName     = "example_lan"
-	LanDataSourceById   = "example_lan_id"
-	LanDataSourceByName = "example_lan_name"
+	LanResource         = "ionoscloud_lan"
+	LanTestResource     = "test_lan"
+	LanDataSourceById   = "test_lan_id"
+	LanDataSourceByName = "test_lan_name"
 )
 
 // K8s Constants
@@ -33,7 +42,8 @@ const (
 
 // Server Constants
 const (
-	ServerResourceName     = "test_server"
+	ServerResource         = "ionoscloud_server"
+	ServerTestResource     = "test_server"
 	ServerDataSourceById   = "test_server_id"
 	ServerDataSourceByName = "test_server_name"
 )
