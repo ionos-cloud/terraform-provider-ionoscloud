@@ -20,7 +20,7 @@ func TestAccLan_ImportBasic(t *testing.T) {
 			},
 
 			{
-				ResourceName:      "ionoscloud_lan." + LanTestResource,
+				ResourceName:      LanResource + "." + LanTestResource,
 				ImportStateIdFunc: testAccLanImportStateId,
 				ImportState:       true,
 				ImportStateVerify: true,
@@ -33,7 +33,7 @@ func testAccLanImportStateId(s *terraform.State) (string, error) {
 	var importID = ""
 
 	for _, rs := range s.RootModule().Resources {
-		if rs.Type != "ionoscloud_lan" {
+		if rs.Type != LanResource {
 			continue
 		}
 

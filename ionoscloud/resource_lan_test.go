@@ -23,17 +23,17 @@ func TestAccLan_Basic(t *testing.T) {
 			{
 				Config: testAccCheckLanConfigBasic,
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheckLanExists("ionoscloud_lan."+LanTestResource, &lan),
-					resource.TestCheckResourceAttr("ionoscloud_lan."+LanTestResource, "name", LanTestResource),
-					resource.TestCheckResourceAttr("ionoscloud_lan."+LanTestResource, "public", "true"),
+					testAccCheckLanExists(LanResource+"."+LanTestResource, &lan),
+					resource.TestCheckResourceAttr(LanResource+"."+LanTestResource, "name", LanTestResource),
+					resource.TestCheckResourceAttr(LanResource+"."+LanTestResource, "public", "true"),
 				),
 			},
 			{
 				Config: testAccCheckLanConfigUpdate,
 				Check: resource.ComposeTestCheckFunc(
-					resource.TestCheckResourceAttr("ionoscloud_lan."+LanTestResource, "name", UpdatedResources),
-					resource.TestCheckResourceAttr("ionoscloud_lan."+LanTestResource, "public", "false"),
-					resource.TestCheckResourceAttrPair("ionoscloud_lan."+LanTestResource, "pcc", "ionoscloud_private_crossconnect.example", "id"),
+					resource.TestCheckResourceAttr(LanResource+"."+LanTestResource, "name", UpdatedResources),
+					resource.TestCheckResourceAttr(LanResource+"."+LanTestResource, "public", "false"),
+					resource.TestCheckResourceAttrPair(LanResource+"."+LanTestResource, "pcc", "ionoscloud_private_crossconnect.example", "id"),
 				),
 			},
 		},
@@ -49,7 +49,7 @@ func testAccCheckLanDestroyCheck(s *terraform.State) error {
 	}
 
 	for _, rs := range s.RootModule().Resources {
-		if rs.Type != "ionoscloud_datacenter" {
+		if rs.Type != LanResource {
 			continue
 		}
 
@@ -101,32 +101,24 @@ func testAccCheckLanExists(n string, lan *ionoscloud.Lan) resource.TestCheckFunc
 	}
 }
 
-const testAccCheckLanConfigBasic = `
-resource "ionoscloud_datacenter" "foobar" {
-	name       = "lan-test"
-	location = "us/las"
-}
+const testAccCheckLanConfigBasic = testAccCheckDatacenterConfigBasic + `
 resource "ionoscloud_private_crossconnect" "example" {
   name        = "example"
   description = "example description"
 }
-resource "ionoscloud_lan" ` + LanTestResource + ` {
-  datacenter_id = ionoscloud_datacenter.foobar.id
+resource ` + LanResource + ` ` + LanTestResource + ` {
+  datacenter_id = ` + DatacenterResource + `.` + DatacenterTestResource + `.id
   public = true
   name = "` + LanTestResource + `"
 }`
 
-const testAccCheckLanConfigUpdate = `
-resource "ionoscloud_datacenter" "foobar" {
-	name       = "lan-test"
-	location = "us/las"
-}
+const testAccCheckLanConfigUpdate = testAccCheckDatacenterConfigBasic + `
 resource "ionoscloud_private_crossconnect" "example" {
   name        = "example"
   description = "example description"
 }
-resource "ionoscloud_lan" ` + LanTestResource + ` {
-  datacenter_id = ionoscloud_datacenter.foobar.id
+resource ` + LanResource + ` ` + LanTestResource + ` {
+  datacenter_id = ` + DatacenterResource + `.` + DatacenterTestResource + `.id
   public = false
   name = "` + UpdatedResources + `"
   pcc = ionoscloud_private_crossconnect.example.id
