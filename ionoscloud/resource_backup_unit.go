@@ -179,6 +179,15 @@ func resourceBackupUnitUpdate(ctx context.Context, d *schema.ResourceData, meta 
 		return diags
 	}
 
+	diagnostics, done := waitForUnitToBeReady(ctx, d, client)
+	if done {
+		return diagnostics
+	}
+
+	return resourceBackupUnitRead(ctx, d, meta)
+}
+
+func waitForUnitToBeReady(ctx context.Context, d *schema.ResourceData, client *ionoscloud.APIClient) (diag.Diagnostics, bool) {
 	for {
 		log.Printf("[INFO] Waiting for backup unit %s to be ready...", d.Id())
 
@@ -186,7 +195,7 @@ func resourceBackupUnitUpdate(ctx context.Context, d *schema.ResourceData, meta 
 
 		if rsErr != nil {
 			diags := diag.FromErr(fmt.Errorf("error while checking readiness status of backup unit %s: %s", d.Id(), rsErr))
-			return diags
+			return diags, true
 		}
 
 		if backupUnitReady {
@@ -198,13 +207,12 @@ func resourceBackupUnitUpdate(ctx context.Context, d *schema.ResourceData, meta 
 		case <-time.After(SleepInterval):
 			log.Printf("[INFO] trying again ...")
 		case <-ctx.Done():
-			diags := diag.FromErr(fmt.Errorf("backup unit update timed out! WARNING: your backup unit will still probably be updated " +
+			diags := diag.FromErr(fmt.Errorf("backup unit readiness check timed out! WARNING: your backup unit will still probably be created/updated " +
 				"after some time but the terraform state won't reflect that; check your Ionos Cloud account for updates"))
-			return diags
+			return diags, true
 		}
 	}
-
-	return resourceBackupUnitRead(ctx, d, meta)
+	return nil, false
 }
 
 func resourceBackupUnitDelete(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
