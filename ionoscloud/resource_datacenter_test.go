@@ -12,7 +12,6 @@ import (
 
 func TestAccDataCenterBasic(t *testing.T) {
 	var datacenter ionoscloud.Datacenter
-	dcName := "datacenter-test"
 
 	resource.Test(t, resource.TestCase{
 		PreCheck: func() {
@@ -22,23 +21,23 @@ func TestAccDataCenterBasic(t *testing.T) {
 		CheckDestroy:      testAccCheckDatacenterDestroyCheck,
 		Steps: []resource.TestStep{
 			{
-				Config: fmt.Sprintf(testAccCheckDatacenterConfigBasic, dcName),
+				Config: testAccCheckDatacenterConfigBasic,
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheckDatacenterExists("ionoscloud_datacenter.foobar", &datacenter),
-					resource.TestCheckResourceAttr("ionoscloud_datacenter.foobar", "name", dcName),
-					resource.TestCheckResourceAttr("ionoscloud_datacenter.foobar", "location", "us/las"),
-					resource.TestCheckResourceAttr("ionoscloud_datacenter.foobar", "description", "Test Datacenter Description"),
-					resource.TestCheckResourceAttr("ionoscloud_datacenter.foobar", "sec_auth_protection", "false"),
+					testAccCheckDatacenterExists(DatacenterResource+"."+DatacenterTestResource, &datacenter),
+					resource.TestCheckResourceAttr(DatacenterResource+"."+DatacenterTestResource, "name", DatacenterTestResource),
+					resource.TestCheckResourceAttr(DatacenterResource+"."+DatacenterTestResource, "location", "us/las"),
+					resource.TestCheckResourceAttr(DatacenterResource+"."+DatacenterTestResource, "description", "Test Datacenter Description"),
+					resource.TestCheckResourceAttr(DatacenterResource+"."+DatacenterTestResource, "sec_auth_protection", "false"),
 				),
 			},
 			{
 				Config: testAccCheckDatacenterConfigUpdate,
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheckDatacenterExists("ionoscloud_datacenter.foobar", &datacenter),
-					resource.TestCheckResourceAttr("ionoscloud_datacenter.foobar", "name", "updated"),
-					resource.TestCheckResourceAttr("ionoscloud_datacenter.foobar", "location", "us/las"),
-					resource.TestCheckResourceAttr("ionoscloud_datacenter.foobar", "description", "Test Datacenter Description Updated"),
-					resource.TestCheckResourceAttr("ionoscloud_datacenter.foobar", "sec_auth_protection", "false"),
+					testAccCheckDatacenterExists(DatacenterResource+"."+DatacenterTestResource, &datacenter),
+					resource.TestCheckResourceAttr(DatacenterResource+"."+DatacenterTestResource, "name", UpdatedResources),
+					resource.TestCheckResourceAttr(DatacenterResource+"."+DatacenterTestResource, "location", "us/las"),
+					resource.TestCheckResourceAttr(DatacenterResource+"."+DatacenterTestResource, "description", "Test Datacenter Description Updated"),
+					resource.TestCheckResourceAttr(DatacenterResource+"."+DatacenterTestResource, "sec_auth_protection", "false"),
 				),
 			},
 		},
@@ -55,7 +54,7 @@ func testAccCheckDatacenterDestroyCheck(s *terraform.State) error {
 	}
 
 	for _, rs := range s.RootModule().Resources {
-		if rs.Type != "ionoscloud_datacenter" {
+		if rs.Type != DatacenterResource {
 			continue
 		}
 
@@ -108,16 +107,16 @@ func testAccCheckDatacenterExists(n string, datacenter *ionoscloud.Datacenter) r
 }
 
 const testAccCheckDatacenterConfigBasic = `
-resource "ionoscloud_datacenter" "foobar" {
-	name       = "%s"
+resource ` + DatacenterResource + ` ` + DatacenterTestResource + ` {
+	name       = "` + DatacenterTestResource + `"
 	location = "us/las"
 	description = "Test Datacenter Description"
 	sec_auth_protection = false
 }`
 
 const testAccCheckDatacenterConfigUpdate = `
-resource "ionoscloud_datacenter" "foobar" {
-	name       =  "updated"
+resource ` + DatacenterResource + ` ` + DatacenterTestResource + ` {
+	name       =  "` + UpdatedResources + `"
 	location = "us/las"
 	description = "Test Datacenter Description Updated"
 	sec_auth_protection = false

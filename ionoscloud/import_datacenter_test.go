@@ -1,7 +1,6 @@
 package ionoscloud
 
 import (
-	"fmt"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
 	"testing"
 
@@ -9,19 +8,17 @@ import (
 )
 
 func TestAccDataCenterImportBasic(t *testing.T) {
-	resourceName := "datacenter-importtest"
-
 	resource.Test(t, resource.TestCase{
 		PreCheck:          func() { testAccPreCheck(t) },
 		ProviderFactories: testAccProviderFactories,
 		CheckDestroy:      testAccCheckDatacenterDestroyCheck,
 		Steps: []resource.TestStep{
 			{
-				Config: fmt.Sprintf(testAccCheckDatacenterConfigBasic, resourceName),
+				Config: testAccCheckDatacenterConfigBasic,
 			},
 
 			{
-				ResourceName:      fmt.Sprintf("ionoscloud_datacenter.foobar"),
+				ResourceName:      DatacenterResource + "." + DatacenterTestResource,
 				ImportStateIdFunc: testAccDatacenterImportStateId,
 				ImportState:       true,
 				ImportStateVerify: true,
@@ -34,11 +31,11 @@ func testAccDatacenterImportStateId(s *terraform.State) (string, error) {
 	importID := ""
 
 	for _, rs := range s.RootModule().Resources {
-		if rs.Type != "ionoscloud_datacenter" {
+		if rs.Type != DatacenterResource {
 			continue
 		}
 
-		importID = fmt.Sprintf("%s", rs.Primary.Attributes["id"])
+		importID = rs.Primary.Attributes["id"]
 	}
 
 	return importID, nil

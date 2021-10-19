@@ -8,6 +8,14 @@ const (
 	BackupUnitDataSourceByName = "testBackupUnitName"
 )
 
+// Datacenter Constants
+const (
+	DatacenterResource         = "ionoscloud_datacenter"
+	DatacenterTestResource     = "test_datacenter"
+	DatacenterDataSourceById   = "test_datacenter_id"
+	DatacenterDataSourceByName = "test_datacenter_name"
+)
+
 // Lan Constants
 const (
 	LanResourceName     = "example_lan"

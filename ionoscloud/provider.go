@@ -62,7 +62,7 @@ func Provider() *schema.Provider {
 		},
 
 		ResourcesMap: map[string]*schema.Resource{
-			"ionoscloud_datacenter":           resourceDatacenter(),
+			DatacenterResource:                resourceDatacenter(),
 			"ionoscloud_ipblock":              resourceIPBlock(),
 			"ionoscloud_firewall":             resourceFirewall(),
 			"ionoscloud_lan":                  resourceLan(),
@@ -82,7 +82,7 @@ func Provider() *schema.Provider {
 			"ionoscloud_s3_key":               resourceS3Key(),
 		},
 		DataSourcesMap: map[string]*schema.Resource{
-			"ionoscloud_datacenter":           dataSourceDataCenter(),
+			DatacenterResource:                dataSourceDataCenter(),
 			"ionoscloud_location":             dataSourceLocation(),
 			"ionoscloud_image":                dataSourceImage(),
 			"ionoscloud_resource":             dataSourceResource(),
