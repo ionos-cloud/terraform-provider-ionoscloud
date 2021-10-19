@@ -78,7 +78,7 @@ func Provider() *schema.Provider {
 			K8sClusterResource:                resourcek8sCluster(),
 			"ionoscloud_k8s_node_pool":        resourcek8sNodePool(),
 			"ionoscloud_private_crossconnect": resourcePrivateCrossConnect(),
-			"ionoscloud_backup_unit":          resourceBackupUnit(),
+			BackupUnitResource:                resourceBackupUnit(),
 			"ionoscloud_s3_key":               resourceS3Key(),
 		},
 		DataSourcesMap: map[string]*schema.Resource{
@@ -92,7 +92,7 @@ func Provider() *schema.Provider {
 			"ionoscloud_server":               dataSourceServer(),
 			K8sClusterResource:                dataSourceK8sCluster(),
 			"ionoscloud_k8s_node_pool":        dataSourceK8sNodePool(),
-			"ionoscloud_backup_unit":          dataSourceBackupUnit(),
+			BackupUnitResource:                dataSourceBackupUnit(),
 			"ionoscloud_firewall":             dataSourceFirewall(),
 			"ionoscloud_s3_key":               dataSourceS3Key(),
 		},

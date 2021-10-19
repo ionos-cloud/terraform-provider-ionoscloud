@@ -88,11 +88,8 @@ resource "ionoscloud_datacenter" "foobar" {
 	name       = "server-test"
 	location = "us/las"
 }
-resource "ionoscloud_backup_unit" "example" {
-	name        = "serverTest"
-	password    = "DemoPassword123$"
-	email       = "example@ionoscloud.com"
-}
+` + testAccCheckBackupUnitConfigBasic + `
+
 resource "ionoscloud_ipblock" "webserver_ipblock" {
   location = ionoscloud_datacenter.foobar.location
   size = 4
@@ -116,7 +113,7 @@ resource "ionoscloud_server" ` + ServerResourceName + ` {
     name = "` + ServerResourceName + `"
     size = 5
     disk_type = "SSD Standard"
-	backup_unit_id = ionoscloud_backup_unit.example.id
+	backup_unit_id = ` + BackupUnitResource + `.` + BackupUnitTestResource + `.id
     user_data = "foo"
     bus = "VIRTIO"
     availability_zone = "ZONE_1"
@@ -145,11 +142,7 @@ resource "ionoscloud_datacenter" "foobar" {
 	name       = "server-test"
 	location = "us/las"
 }
-resource "ionoscloud_backup_unit" "example" {
-	name        = "serverTest"
-	password    = "DemoPassword123$"
-	email       = "example@ionoscloud.com"
-}
+` + testAccCheckBackupUnitConfigBasic + `
 resource "ionoscloud_ipblock" "webserver_ipblock" {
   location = ionoscloud_datacenter.foobar.location
   size = 4
@@ -173,7 +166,7 @@ resource "ionoscloud_server" ` + ServerResourceName + ` {
     name = "` + ServerResourceName + `"
     size = 5
     disk_type = "SSD Standard"
-	backup_unit_id = ionoscloud_backup_unit.example.id
+	backup_unit_id = ` + BackupUnitResource + `.` + BackupUnitTestResource + `.id
     user_data = "foo"
     bus = "VIRTIO"
     availability_zone = "ZONE_1"
@@ -206,11 +199,7 @@ resource "ionoscloud_datacenter" "foobar" {
 	name       = "server-test"
 	location = "us/las"
 }
-resource "ionoscloud_backup_unit" "example" {
-	name        = "serverTest"
-	password    = "DemoPassword123$"
-	email       = "example@ionoscloud.com"
-}
+` + testAccCheckBackupUnitConfigBasic + `
 resource "ionoscloud_ipblock" "webserver_ipblock" {
   location = ionoscloud_datacenter.foobar.location
   size = 4
@@ -234,7 +223,7 @@ resource "ionoscloud_server" ` + ServerResourceName + ` {
     name = "` + ServerResourceName + `"
     size = 5
     disk_type = "SSD Standard"
-	backup_unit_id = ionoscloud_backup_unit.example.id
+	backup_unit_id = ` + BackupUnitResource + `.` + BackupUnitTestResource + `.id
     user_data = "foo"
     bus = "VIRTIO"
     availability_zone = "ZONE_1"

@@ -36,7 +36,7 @@ func TestAccServerBasic(t *testing.T) {
 					resource.TestCheckResourceAttr("ionoscloud_server."+ServerResourceName, "volume.0.name", "system"),
 					resource.TestCheckResourceAttr("ionoscloud_server."+ServerResourceName, "volume.0.size", "5"),
 					resource.TestCheckResourceAttr("ionoscloud_server."+ServerResourceName, "volume.0.disk_type", "SSD Standard"),
-					resource.TestCheckResourceAttrPair("ionoscloud_server."+ServerResourceName, "volume.0.backup_unit_id", "ionoscloud_backup_unit.example", "id"),
+					resource.TestCheckResourceAttrPair("ionoscloud_server."+ServerResourceName, "volume.0.backup_unit_id", BackupUnitResource+"."+BackupUnitTestResource, "id"),
 					resource.TestCheckResourceAttr("ionoscloud_server."+ServerResourceName, "volume.0.bus", "VIRTIO"),
 					resource.TestCheckResourceAttr("ionoscloud_server."+ServerResourceName, "volume.0.availability_zone", "ZONE_1"),
 					resource.TestCheckResourceAttrPair("ionoscloud_server."+ServerResourceName, "nic.0.lan", "ionoscloud_lan.webserver_lan", "id"),
@@ -68,7 +68,7 @@ func TestAccServerBasic(t *testing.T) {
 					resource.TestCheckResourceAttr("ionoscloud_server."+ServerResourceName, "volume.0.name", UpdatedResources),
 					resource.TestCheckResourceAttr("ionoscloud_server."+ServerResourceName, "volume.0.size", "6"),
 					resource.TestCheckResourceAttr("ionoscloud_server."+ServerResourceName, "volume.0.disk_type", "SSD Standard"),
-					resource.TestCheckResourceAttrPair("ionoscloud_server."+ServerResourceName, "volume.0.backup_unit_id", "ionoscloud_backup_unit.example", "id"),
+					resource.TestCheckResourceAttrPair("ionoscloud_server."+ServerResourceName, "volume.0.backup_unit_id", BackupUnitResource+"."+BackupUnitTestResource, "id"),
 					resource.TestCheckResourceAttr("ionoscloud_server."+ServerResourceName, "volume.0.bus", "IDE"),
 					resource.TestCheckResourceAttr("ionoscloud_server."+ServerResourceName, "volume.0.availability_zone", "ZONE_1"),
 					resource.TestCheckResourceAttrPair("ionoscloud_server."+ServerResourceName, "nic.0.lan", "ionoscloud_lan.webserver_lan", "id"),
@@ -265,11 +265,8 @@ resource "ionoscloud_datacenter" "foobar" {
 	name       = "server-test"
 	location = "us/las"
 }
-resource "ionoscloud_backup_unit" "example" {
-	name        = "serverTest"
-	password    = "DemoPassword123$"
-	email       = "example@ionoscloud.com"
-}
+` + testAccCheckBackupUnitConfigBasic + `
+
 resource "ionoscloud_ipblock" "webserver_ipblock" {
   location = ionoscloud_datacenter.foobar.location
   size = 4
@@ -293,7 +290,7 @@ resource "ionoscloud_server" ` + ServerResourceName + ` {
     name = "system"
     size = 5
     disk_type = "SSD Standard"
-	backup_unit_id = ionoscloud_backup_unit.example.id
+	backup_unit_id = ` + BackupUnitResource + `.` + BackupUnitTestResource + `.id
     user_data = "foo"
     bus = "VIRTIO"
     availability_zone = "ZONE_1"
@@ -321,11 +318,8 @@ resource "ionoscloud_datacenter" "foobar" {
 	name       = "server-test"
 	location = "us/las"
 }
-resource "ionoscloud_backup_unit" "example" {
-	name        = "serverTest"
-	password    = "DemoPassword123$"
-	email       = "example@ionoscloud.com"
-}
+` + testAccCheckBackupUnitConfigBasic + `
+
 resource "ionoscloud_ipblock" "webserver_ipblock" {
   location = ionoscloud_datacenter.foobar.location
   size = 4
@@ -354,7 +348,7 @@ resource "ionoscloud_server" ` + ServerResourceName + ` {
     name = "` + UpdatedResources + `"
     size = 6
     disk_type = "SSD Standard"
-	backup_unit_id = ionoscloud_backup_unit.example.id
+	backup_unit_id = ` + BackupUnitResource + `.` + BackupUnitTestResource + `.id
     user_data = "foo"
     bus = "IDE"
     availability_zone = "ZONE_1"

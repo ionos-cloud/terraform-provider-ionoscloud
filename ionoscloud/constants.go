@@ -1,5 +1,13 @@
 package ionoscloud
 
+// BackupUnit Constants
+const (
+	BackupUnitResource         = "ionoscloud_backup_unit"
+	BackupUnitTestResource     = "testBackupUnit"
+	BackupUnitDataSourceById   = "testBackupUnitId"
+	BackupUnitDataSourceByName = "testBackupUnitName"
+)
+
 // Lan Constants
 const (
 	LanResourceName     = "example_lan"

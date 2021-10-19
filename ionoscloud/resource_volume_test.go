@@ -169,11 +169,7 @@ resource "ionoscloud_datacenter" "foobar" {
 	location = "us/las"
 }
 
-resource "ionoscloud_backup_unit" "example" {
-	name        = "serverTest"
-	password    = "DemoPassword123$"
-	email       = "example@ionoscloud.com"
-}
+` + testAccCheckBackupUnitConfigBasic + `
 
 resource "ionoscloud_lan" "webserver_lan" {
   datacenter_id = "${ionoscloud_datacenter.foobar.id}"
@@ -212,7 +208,7 @@ resource "ionoscloud_volume" "database_volume" {
 	bus = "VIRTIO"
 	image_name ="Debian-10-cloud-init.qcow2"
 	image_password = "K3tTj8G14a3EgKyNeeiY"
-	backup_unit_id = ionoscloud_backup_unit.example.id
+	backup_unit_id = ` + BackupUnitResource + `.` + BackupUnitTestResource + `.id
 	user_data = "foo"
 }`
 
@@ -222,12 +218,7 @@ resource "ionoscloud_datacenter" "foobar" {
 	location = "us/las"
 }
 
-resource "ionoscloud_backup_unit" "example" {
-	name        = "serverTest"
-	password    = "DemoPassword123$"
-	email       = "example@ionoscloud.com"
-}
-
+` + testAccCheckBackupUnitConfigBasic + `
 
 resource "ionoscloud_lan" "webserver_lan" {
   datacenter_id = "${ionoscloud_datacenter.foobar.id}"
@@ -266,7 +257,7 @@ resource "ionoscloud_volume" "database_volume" {
 	bus = "VIRTIO"
 	image_name ="Debian-10-cloud-init.qcow2"
 	image_password = "K3tTj8G14a3EgKyNeeiY"
-	backup_unit_id = ionoscloud_backup_unit.example.id
+	backup_unit_id = ` + BackupUnitResource + `.` + BackupUnitTestResource + `.id
 	user_data = "foo"
 }`
 

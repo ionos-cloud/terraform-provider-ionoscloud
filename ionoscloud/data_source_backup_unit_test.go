@@ -14,56 +14,36 @@ func TestAccDataSourceBackupUnit(t *testing.T) {
 		ProviderFactories: testAccProviderFactories,
 		Steps: []resource.TestStep{
 			{
-				Config: testAccDataSourceBackupUnitCreateResources,
+				Config: testAccCheckBackupUnitConfigBasic,
 			},
 			{
 				Config: testAccDataSourceBackupUnitMatchId,
 				Check: resource.ComposeTestCheckFunc(
-					resource.TestCheckResourceAttrPair("data.ionoscloud_backup_unit.test_backup_unit_id", "name", "ionoscloud_backup_unit.test_ds_backup_unit", "name"),
-					resource.TestCheckResourceAttrPair("data.ionoscloud_backup_unit.test_backup_unit_id", "email", "ionoscloud_backup_unit.test_ds_backup_unit", "email"),
-					resource.TestCheckResourceAttrPair("data.ionoscloud_backup_unit.test_backup_unit_id", "login", "ionoscloud_backup_unit.test_ds_backup_unit", "login"),
+					resource.TestCheckResourceAttrPair(DataSource+"."+BackupUnitResource+"."+BackupUnitDataSourceById, "name", BackupUnitResource+"."+BackupUnitTestResource, "name"),
+					resource.TestCheckResourceAttrPair(DataSource+"."+BackupUnitResource+"."+BackupUnitDataSourceById, "email", BackupUnitResource+"."+BackupUnitTestResource, "email"),
+					resource.TestCheckResourceAttrPair(DataSource+"."+BackupUnitResource+"."+BackupUnitDataSourceById, "login", BackupUnitResource+"."+BackupUnitTestResource, "login"),
 				),
 			},
 			{
 				Config: testAccDataSourceBackupUnitMatchName,
 				Check: resource.ComposeTestCheckFunc(
-					resource.TestCheckResourceAttrPair("data.ionoscloud_backup_unit.test_backup_unit_name", "name", "ionoscloud_backup_unit.test_ds_backup_unit", "name"),
-					resource.TestCheckResourceAttrPair("data.ionoscloud_backup_unit.test_backup_unit_name", "email", "ionoscloud_backup_unit.test_ds_backup_unit", "email"),
-					resource.TestCheckResourceAttrPair("data.ionoscloud_backup_unit.test_backup_unit_name", "login", "ionoscloud_backup_unit.test_ds_backup_unit", "login"),
+					resource.TestCheckResourceAttrPair(DataSource+"."+BackupUnitResource+"."+BackupUnitDataSourceByName, "name", BackupUnitResource+"."+BackupUnitTestResource, "name"),
+					resource.TestCheckResourceAttrPair(DataSource+"."+BackupUnitResource+"."+BackupUnitDataSourceByName, "email", BackupUnitResource+"."+BackupUnitTestResource, "email"),
+					resource.TestCheckResourceAttrPair(DataSource+"."+BackupUnitResource+"."+BackupUnitDataSourceByName, "login", BackupUnitResource+"."+BackupUnitTestResource, "login"),
 				),
 			},
 		},
 	})
 }
 
-const testAccDataSourceBackupUnitCreateResources = `
-resource "ionoscloud_backup_unit" "test_ds_backup_unit" {
-	name        = "test ds backup unit"
-	password    = "DemoPassword123$"
-	email       = "example@ionoscloud.com"
+const testAccDataSourceBackupUnitMatchId = testAccCheckBackupUnitConfigBasic + `
+data ` + BackupUnitResource + ` ` + BackupUnitDataSourceById + ` {
+  id			= ` + BackupUnitResource + `.` + BackupUnitTestResource + `.id
 }
 `
 
-const testAccDataSourceBackupUnitMatchId = `
-resource "ionoscloud_backup_unit" "test_ds_backup_unit" {
-	name        = "test ds backup unit"
-	password    = "DemoPassword123$"
-	email       = "example@ionoscloud.com"
-}
-
-data "ionoscloud_backup_unit" "test_backup_unit_id" {
-  id			= ionoscloud_backup_unit.test_ds_backup_unit.id
-}
-`
-
-const testAccDataSourceBackupUnitMatchName = `
-resource "ionoscloud_backup_unit" "test_ds_backup_unit" {
-	name        = "test ds backup unit"
-	password    = "DemoPassword123$"
-	email       = "example@ionoscloud.com"
-}
-
-data "ionoscloud_backup_unit" "test_backup_unit_name" {
-  name			= "test ds backup unit"
+const testAccDataSourceBackupUnitMatchName = testAccCheckBackupUnitConfigBasic + `
+data ` + BackupUnitResource + ` ` + BackupUnitDataSourceByName + ` {
+  name			= "` + BackupUnitTestResource + `"
 }
 `
