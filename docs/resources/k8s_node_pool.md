@@ -35,6 +35,12 @@ resource "ionoscloud_k8s_node_pool" "demo" {
   ram_size          = 2048
   storage_size      = 40
   public_ips        = [ "85.184.251.100", "157.97.106.15", "157.97.106.25" ]
+  labels = {
+    foo = "bar"
+  }
+  annotations = {
+    foo = "bar"
+  }  
 }
 
 ```
@@ -62,7 +68,8 @@ The following arguments are supported:
 - `ram_size` -(Required)[int] - The desired amount of RAM, in MB. *This attribute is immutable.*
 - `storage_size` -(Required)[int] - The desired amount of storage for each node, in GB. *This attribute is immutable.*
 - `public_ips` - (Optional)[list] A list of public IPs associated with the node pool; must have at least `node_count + 1` elements;  
-
+- `labels` - (Optional)[map] A key/value map of labels
+- `annotations` - (Optional)[map] A key/value map of annotations
 ## Import
 
 A Kubernetes Node Pool resource can be imported using its Kubernetes cluster's uuid as well as its own UUID, both of which you can retreive from the cloud API: `resource id`, e.g.:
