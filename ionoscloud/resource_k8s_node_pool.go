@@ -8,7 +8,6 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 	ionoscloud "github.com/ionos-cloud/sdk-go/v5"
 	"log"
-	"strings"
 	"time"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
@@ -31,27 +30,11 @@ func resourcek8sNodePool() *schema.Resource {
 				ValidateFunc: validation.All(validation.StringIsNotWhiteSpace),
 			},
 			"k8s_version": {
-				Type:         schema.TypeString,
-				Description:  "The desired kubernetes version",
-				Required:     true,
-				ValidateFunc: validation.All(validation.StringIsNotWhiteSpace),
-				DiffSuppressFunc: func(k, old, new string, d *schema.ResourceData) bool {
-					var oldMajor, oldMinor string
-					if old != "" {
-						oldSplit := strings.Split(old, ".")
-						oldMajor = oldSplit[0]
-						oldMinor = oldSplit[1]
-
-						newSplit := strings.Split(new, ".")
-						newMajor := newSplit[0]
-						newMinor := newSplit[1]
-
-						if oldMajor == newMajor && oldMinor == newMinor {
-							return true
-						}
-					}
-					return false
-				},
+				Type:             schema.TypeString,
+				Description:      "The desired kubernetes version",
+				Required:         true,
+				ValidateFunc:     validation.All(validation.StringIsNotWhiteSpace),
+				DiffSuppressFunc: DiffBasedOnVersion,
 			},
 			"auto_scaling": {
 				Type:        schema.TypeList,
