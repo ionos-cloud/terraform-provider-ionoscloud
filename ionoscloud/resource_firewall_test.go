@@ -156,7 +156,7 @@ func testAccCheckFirewallExists(n string, firewall *ionoscloud.FirewallRule) res
 }
 
 const testAccCheckFirewallConfigBasic = testAccCheckDatacenterConfigBasic + `
-resource "ionoscloud_server" "webserver" {
+resource ` + ServerResource + ` ` + ServerTestResource + ` {
   name = "webserver"
   datacenter_id = ` + DatacenterResource + `.` + DatacenterTestResource + `.id
   cores = 1
@@ -179,7 +179,7 @@ resource "ionoscloud_server" "webserver" {
 
 resource "ionoscloud_nic" "database_nic" {
   datacenter_id = ` + DatacenterResource + `.` + DatacenterTestResource + `.id
-  server_id = "${ionoscloud_server.webserver.id}"
+  server_id = ` + ServerResource + `.` + ServerTestResource + `.id
   lan = 2
   dhcp = true
   firewall_active = true
@@ -194,7 +194,7 @@ resource "ionoscloud_ipblock" "ipblock" {
 
 resource ` + FirewallResource + ` ` + FirewallTestResource + ` {
   datacenter_id = ` + DatacenterResource + `.` + DatacenterTestResource + `.id
-  server_id = "${ionoscloud_server.webserver.id}"
+  server_id = ` + ServerResource + `.` + ServerTestResource + `.id
   nic_id = "${ionoscloud_nic.database_nic.id}"
   protocol = "ICMP"
   name = "` + FirewallTestResource + `"
@@ -207,7 +207,7 @@ resource ` + FirewallResource + ` ` + FirewallTestResource + ` {
 `
 
 const testAccCheckFirewallConfigUpdate = testAccCheckDatacenterConfigBasic + `
-resource "ionoscloud_server" "webserver" {
+resource ` + ServerResource + ` ` + ServerTestResource + ` {
   name = "webserver"
   datacenter_id = ` + DatacenterResource + `.` + DatacenterTestResource + `.id
   cores = 1
@@ -230,7 +230,7 @@ resource "ionoscloud_server" "webserver" {
 
 resource "ionoscloud_nic" "database_nic" {
   datacenter_id = ` + DatacenterResource + `.` + DatacenterTestResource + `.id
-  server_id = "${ionoscloud_server.webserver.id}"
+  server_id = ` + ServerResource + `.` + ServerTestResource + `.id
   lan = 2
   dhcp = true
   firewall_active = true
@@ -244,7 +244,7 @@ resource "ionoscloud_ipblock" "ipblock_update" {
 }
 resource ` + FirewallResource + ` ` + FirewallTestResource + `  {
   datacenter_id = ` + DatacenterResource + `.` + DatacenterTestResource + `.id
-  server_id = "${ionoscloud_server.webserver.id}"
+  server_id = ` + ServerResource + `.` + ServerTestResource + `.id
   nic_id = "${ionoscloud_nic.database_nic.id}"
   protocol = "ICMP"
   name = "` + UpdatedResources + `"
@@ -257,7 +257,7 @@ resource ` + FirewallResource + ` ` + FirewallTestResource + `  {
 `
 
 const testAccCheckFirewallConfigUDP = testAccCheckDatacenterConfigBasic + `
-resource "ionoscloud_server" "webserver" {
+resource ` + ServerResource + ` ` + ServerTestResource + ` {
   name = "webserver"
   datacenter_id = ` + DatacenterResource + `.` + DatacenterTestResource + `.id
   cores = 1
@@ -279,7 +279,7 @@ resource "ionoscloud_server" "webserver" {
 }
 resource "ionoscloud_nic" "database_nic" {
   datacenter_id = ` + DatacenterResource + `.` + DatacenterTestResource + `.id
-  server_id = "${ionoscloud_server.webserver.id}"
+  server_id = ` + ServerResource + `.` + ServerTestResource + `.id
   lan = 2
   dhcp = true
   firewall_active = true
@@ -292,7 +292,7 @@ resource "ionoscloud_ipblock" "ipblock" {
 }
 resource ` + FirewallResource + ` ` + FirewallTestResource + `  {
   datacenter_id = ` + DatacenterResource + `.` + DatacenterTestResource + `.id
-  server_id = "${ionoscloud_server.webserver.id}"
+  server_id = ` + ServerResource + `.` + ServerTestResource + `.id
   nic_id = "${ionoscloud_nic.database_nic.id}"
   protocol = "UDP"
   name = "` + FirewallTestResource + `"
@@ -305,7 +305,7 @@ resource ` + FirewallResource + ` ` + FirewallTestResource + `  {
 `
 
 const testAccCheckFirewallConfigUpdateUDP = testAccCheckDatacenterConfigBasic + `
-resource "ionoscloud_server" "webserver" {
+resource ` + ServerResource + ` ` + ServerTestResource + ` {
   name = "webserver"
   datacenter_id = ` + DatacenterResource + `.` + DatacenterTestResource + `.id
   cores = 1
@@ -327,7 +327,7 @@ resource "ionoscloud_server" "webserver" {
 }
 resource "ionoscloud_nic" "database_nic" {
   datacenter_id = ` + DatacenterResource + `.` + DatacenterTestResource + `.id
-  server_id = "${ionoscloud_server.webserver.id}"
+  server_id = ` + ServerResource + `.` + ServerTestResource + `.id
   lan = 2
   dhcp = true
   firewall_active = true
@@ -340,7 +340,7 @@ resource "ionoscloud_ipblock" "ipblock_update" {
 }
 resource ` + FirewallResource + ` ` + FirewallTestResource + ` {
   datacenter_id = ` + DatacenterResource + `.` + DatacenterTestResource + `.id
-  server_id = "${ionoscloud_server.webserver.id}"
+  server_id = ` + ServerResource + `.` + ServerTestResource + `.id
   nic_id = "${ionoscloud_nic.database_nic.id}"
   protocol = "UDP"
   name = "` + UpdatedResources + `"

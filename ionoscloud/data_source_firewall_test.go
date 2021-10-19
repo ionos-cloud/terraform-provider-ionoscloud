@@ -47,7 +47,7 @@ func TestAccDataSourceFirewall(t *testing.T) {
 const testAccDataSourceFirewallMatchId = testAccCheckFirewallConfigBasic + `
 data ` + FirewallResource + ` ` + FirewallDataSourceById + ` {
   datacenter_id = ` + DatacenterResource + `.` + DatacenterTestResource + `.id
-  server_id = ionoscloud_server.webserver.id
+  server_id = ` + ServerResource + `.` + ServerTestResource + `.id
   nic_id = ionoscloud_nic.database_nic.id
   id = ` + FirewallResource + `.` + FirewallTestResource + `.id
 }
@@ -56,7 +56,7 @@ data ` + FirewallResource + ` ` + FirewallDataSourceById + ` {
 const testAccDataSourceFirewallMatchName = testAccCheckFirewallConfigBasic + `
 data ` + FirewallResource + ` ` + FirewallDataSourceByName + ` {
   datacenter_id = ` + DatacenterResource + `.` + DatacenterTestResource + `.id
-  server_id = ionoscloud_server.webserver.id
+  server_id = ` + ServerResource + `.` + ServerTestResource + `.id
   nic_id = ionoscloud_nic.database_nic.id
   name	= "` + FirewallTestResource + `"
 }
