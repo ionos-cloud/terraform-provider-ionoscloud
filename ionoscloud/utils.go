@@ -636,3 +636,22 @@ func IsValidUUID(uuid string) bool {
 	r := regexp.MustCompile("^[a-fA-F0-9]{8}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-[a-fA-F0-9]{12}$")
 	return r.MatchString(uuid)
 }
+
+//used for k8 node pool and cluster
+func DiffBasedOnVersion(k, old, new string, d *schema.ResourceData) bool {
+	var oldMajor, oldMinor string
+	if old != "" {
+		oldSplit := strings.Split(old, ".")
+		oldMajor = oldSplit[0]
+		oldMinor = oldSplit[1]
+
+		newSplit := strings.Split(new, ".")
+		newMajor := newSplit[0]
+		newMinor := newSplit[1]
+
+		if oldMajor == newMajor && oldMinor == newMinor {
+			return true
+		}
+	}
+	return false
+}
