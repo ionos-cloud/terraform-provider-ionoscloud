@@ -170,7 +170,7 @@ func resourceShareDelete(ctx context.Context, d *schema.ResourceData, meta inter
 	}
 
 	// Wait, catching any errors
-	if apiResponse != nil && apiResponse.Header.Get("Location") != "" {
+	if apiResponse != nil {
 		_, errState := getStateChangeConf(meta, d, apiResponse.Header.Get("Location"), schema.TimeoutDelete).WaitForStateContext(ctx)
 		if errState != nil {
 			diags := diag.FromErr(errState)
