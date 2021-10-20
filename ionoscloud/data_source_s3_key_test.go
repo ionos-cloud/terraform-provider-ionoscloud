@@ -18,53 +18,24 @@ func TestAccDataSourceS3KeyMatchFields(t *testing.T) {
 		ProviderFactories: testAccProviderFactories,
 		Steps: []resource.TestStep{
 			{
-				Config: testAccDataSourceS3KeyCreateResource,
+				Config: testAccChecks3KeyConfigBasic,
 			},
 			{
 				Config: testAccDataSourceS3KeyMatchId,
 				Check: resource.ComposeTestCheckFunc(
-					resource.TestCheckResourceAttrSet("ionoscloud_s3_key.example_key", "id"),
-					resource.TestCheckResourceAttrPair("ionoscloud_s3_key.example_key", "id", "data.ionoscloud_s3_key.example_key_data", "id"),
-					resource.TestCheckResourceAttrPair("ionoscloud_s3_key.example_key", "secret", "data.ionoscloud_s3_key.example_key_data", "secret"),
-					resource.TestCheckResourceAttrPair("ionoscloud_s3_key.example_key", "active", "data.ionoscloud_s3_key.example_key_data", "active"),
+					resource.TestCheckResourceAttrSet(S3KeyResource+"."+S3KeyTestResource, "id"),
+					resource.TestCheckResourceAttrPair(S3KeyResource+"."+S3KeyTestResource, "id", DataSource+"."+S3KeyResource+"."+S3KeyDataSourceById, "id"),
+					resource.TestCheckResourceAttrPair(S3KeyResource+"."+S3KeyTestResource, "secret", DataSource+"."+S3KeyResource+"."+S3KeyDataSourceById, "secret"),
+					resource.TestCheckResourceAttrPair(S3KeyResource+"."+S3KeyTestResource, "active", DataSource+"."+S3KeyResource+"."+S3KeyDataSourceById, "active"),
 				),
 			},
 		},
 	})
 }
 
-var testAccDataSourceS3KeyCreateResource = `
-resource "ionoscloud_user" "example" {
-  first_name 	= "terraform"
-  last_name  	= "test"
-  email 	 	= "` + email + `"
-  password   	= "abc123-321CBA"
-  administrator = false
-  force_sec_auth= false
-}
-
-resource "ionoscloud_s3_key" "example_key" {
-  user_id    = ionoscloud_user.example.id
-  active     = false
-}`
-
-var testAccDataSourceS3KeyMatchId = `
-resource "ionoscloud_user" "example" {
- first_name 	= "terraform"
- last_name  	= "test"
- email 	 	= "` + email + `"
- password   	= "abc123-321CBA"
- administrator = false
- force_sec_auth= false
-}
-
-resource "ionoscloud_s3_key" "example_key" {
-  user_id    = ionoscloud_user.example.id
-  active     = false
-}
-
-data "ionoscloud_s3_key" "example_key_data" {
+var testAccDataSourceS3KeyMatchId = testAccChecks3KeyConfigBasic + `
+data ` + S3KeyResource + ` ` + S3KeyDataSourceById + ` {
  user_id    	= ionoscloud_user.example.id
- id			= ionoscloud_s3_key.example_key.id
+ id			= ` + S3KeyResource + `.` + S3KeyTestResource + `.id
 }
 `

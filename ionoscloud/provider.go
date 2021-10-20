@@ -79,7 +79,7 @@ func Provider() *schema.Provider {
 			"ionoscloud_k8s_node_pool":        resourcek8sNodePool(),
 			"ionoscloud_private_crossconnect": resourcePrivateCrossConnect(),
 			BackupUnitResource:                resourceBackupUnit(),
-			"ionoscloud_s3_key":               resourceS3Key(),
+			S3KeyResource:                     resourceS3Key(),
 		},
 		DataSourcesMap: map[string]*schema.Resource{
 			DatacenterResource:                dataSourceDataCenter(),
@@ -94,7 +94,7 @@ func Provider() *schema.Provider {
 			"ionoscloud_k8s_node_pool":        dataSourceK8sNodePool(),
 			BackupUnitResource:                dataSourceBackupUnit(),
 			FirewallResource:                  dataSourceFirewall(),
-			"ionoscloud_s3_key":               dataSourceS3Key(),
+			S3KeyResource:                     dataSourceS3Key(),
 		},
 	}
 	provider.ConfigureContextFunc = func(ctx context.Context, d *schema.ResourceData) (interface{}, diag.Diagnostics) {

@@ -3,18 +3,14 @@ package ionoscloud
 import (
 	"context"
 	"fmt"
-	ionoscloud "github.com/ionos-cloud/sdk-go/v5"
-	"testing"
-	"time"
-
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
+	ionoscloud "github.com/ionos-cloud/sdk-go/v5"
+	"testing"
 )
 
 func TestAccS3KeyBasic(t *testing.T) {
 	var s3Key ionoscloud.S3Key
-	s3KeyName := "example"
-	email := fmt.Sprintf("terraform_test-%d@mailinator.com", time.Now().Unix())
 
 	resource.Test(t, resource.TestCase{
 		PreCheck: func() {
@@ -24,19 +20,19 @@ func TestAccS3KeyBasic(t *testing.T) {
 		CheckDestroy:      testAccChecks3KeyDestroyCheck,
 		Steps: []resource.TestStep{
 			{
-				Config: fmt.Sprintf(testAccChecks3KeyConfigBasic, email, s3KeyName),
+				Config: testAccChecks3KeyConfigBasic,
 				Check: resource.ComposeTestCheckFunc(
-					testAccChecks3KeyExists("ionoscloud_s3_key.example", &s3Key),
-					resource.TestCheckResourceAttrSet("ionoscloud_s3_key.example", "secret_key"),
-					resource.TestCheckResourceAttr("ionoscloud_s3_key.example", "active", "false"),
+					testAccChecks3KeyExists(S3KeyResource+"."+S3KeyTestResource, &s3Key),
+					resource.TestCheckResourceAttrSet(S3KeyResource+"."+S3KeyTestResource, "secret_key"),
+					resource.TestCheckResourceAttr(S3KeyResource+"."+S3KeyTestResource, "active", "false"),
 				),
 			},
 			{
-				Config: fmt.Sprintf(testAccChecks3KeyConfigUpdate, email, s3KeyName),
+				Config: testAccChecks3KeyConfigBasic,
 				Check: resource.ComposeTestCheckFunc(
-					testAccChecks3KeyExists("ionoscloud_s3_key.example", &s3Key),
-					resource.TestCheckResourceAttrSet("ionoscloud_s3_key.example", "secret_key"),
-					resource.TestCheckResourceAttrSet("ionoscloud_s3_key.example", "active"),
+					testAccChecks3KeyExists(S3KeyResource+"."+S3KeyTestResource, &s3Key),
+					resource.TestCheckResourceAttrSet(S3KeyResource+"."+S3KeyTestResource, "secret_key"),
+					resource.TestCheckResourceAttrSet(S3KeyResource+"."+S3KeyTestResource, "active"),
 				),
 			},
 		},
@@ -47,7 +43,7 @@ func testAccChecks3KeyDestroyCheck(s *terraform.State) error {
 	client := testAccProvider.Meta().(*ionoscloud.APIClient)
 
 	for _, rs := range s.RootModule().Resources {
-		if rs.Type != "ionoscloud_s3_key" {
+		if rs.Type != S3KeyResource {
 			continue
 		}
 
@@ -97,32 +93,32 @@ func testAccChecks3KeyExists(n string, s3Key *ionoscloud.S3Key) resource.TestChe
 	}
 }
 
-const testAccChecks3KeyConfigBasic = `
+var testAccChecks3KeyConfigBasic = `
 resource "ionoscloud_user" "example" {
   first_name = "terraform"
   last_name = "test"
-  email = "%s"
+  email = "` + email + `"
   password = "abc123-321CBA"
   administrator = false
   force_sec_auth= false
 }
 
-resource "ionoscloud_s3_key" "%s" {
+resource ` + S3KeyResource + ` ` + S3KeyTestResource + ` {
   user_id    = ionoscloud_user.example.id
   active     = false
 }`
 
-const testAccChecks3KeyConfigUpdate = `
+var testAccChecks3KeyConfigUpdate = `
 resource "ionoscloud_user" "example" {
   first_name = "terraform"
   last_name = "test"
-  email = "%s"
+  email = "` + email + `"
   password = "abc123-321CBA"
   administrator = false
   force_sec_auth= false
 }
 
-resource "ionoscloud_s3_key" "%s" {
+resource ` + S3KeyResource + ` ` + S3KeyTestResource + ` {
   user_id    = ionoscloud_user.example.id
   active     = true
 }`

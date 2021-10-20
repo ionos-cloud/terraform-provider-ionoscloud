@@ -48,6 +48,13 @@ const (
 	ServerDataSourceByName = "test_server_name"
 )
 
+// S3Key Constants
+const (
+	S3KeyResource       = "ionoscloud_s3_key"
+	S3KeyTestResource   = "test_s3_key"
+	S3KeyDataSourceById = "test_s3_key_id"
+)
+
 // General Constants
 const (
 	DataSource       = "data"
