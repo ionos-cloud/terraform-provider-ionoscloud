@@ -297,8 +297,6 @@ func resourceLanImport(ctx context.Context, d *schema.ResourceData, meta interfa
 
 	log.Printf("[INFO] LAN %s found: %+v", d.Id(), lan)
 
-	d.SetId(lanId)
-
 	if err := d.Set("datacenter_id", datacenterId); err != nil {
 		return nil, fmt.Errorf("error while setting datacenter_id property for lan %q: %q", lanId, err)
 	}
