@@ -40,6 +40,14 @@ const (
 	K8sClusterDataSourceByName = "test_k8s_cluster_name"
 )
 
+// Private Crossconnect Constants
+const (
+	PCCResource         = "ionoscloud_private_crossconnect"
+	PCCTestResource     = "test_private_crossconnect"
+	PCCDataSourceById   = "test_private_crossconnect_id"
+	PCCDataSourceByName = "test_private_crossconnect_name"
+)
+
 // Server Constants
 const (
 	ServerResource         = "ionoscloud_server"

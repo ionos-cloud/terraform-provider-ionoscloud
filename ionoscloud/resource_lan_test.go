@@ -33,7 +33,7 @@ func TestAccLan_Basic(t *testing.T) {
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttr(LanResource+"."+LanTestResource, "name", UpdatedResources),
 					resource.TestCheckResourceAttr(LanResource+"."+LanTestResource, "public", "false"),
-					resource.TestCheckResourceAttrPair(LanResource+"."+LanTestResource, "pcc", "ionoscloud_private_crossconnect.example", "id"),
+					resource.TestCheckResourceAttrPair(LanResource+"."+LanTestResource, "pcc", PCCResource+"."+PCCTestResource, "id"),
 				),
 			},
 		},
@@ -102,24 +102,16 @@ func testAccCheckLanExists(n string, lan *ionoscloud.Lan) resource.TestCheckFunc
 }
 
 const testAccCheckLanConfigBasic = testAccCheckDatacenterConfigBasic + `
-resource "ionoscloud_private_crossconnect" "example" {
-  name        = "example"
-  description = "example description"
-}
 resource ` + LanResource + ` ` + LanTestResource + ` {
   datacenter_id = ` + DatacenterResource + `.` + DatacenterTestResource + `.id
   public = true
   name = "` + LanTestResource + `"
 }`
 
-const testAccCheckLanConfigUpdate = testAccCheckDatacenterConfigBasic + `
-resource "ionoscloud_private_crossconnect" "example" {
-  name        = "example"
-  description = "example description"
-}
+const testAccCheckLanConfigUpdate = testAccCheckDatacenterConfigBasic + testAccCheckPrivateCrossConnectConfigBasic + `
 resource ` + LanResource + ` ` + LanTestResource + ` {
   datacenter_id = ` + DatacenterResource + `.` + DatacenterTestResource + `.id
   public = false
   name = "` + UpdatedResources + `"
-  pcc = ionoscloud_private_crossconnect.example.id
+  pcc = ` + PCCResource + `.` + PCCTestResource + `.id
 }`
