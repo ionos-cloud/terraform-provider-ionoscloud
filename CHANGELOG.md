@@ -1,3 +1,7 @@
+## 5.2.18
+
+- **code enhancements**: added constants and removed duplicated tests to `backupUnit`, `datacenter`, `lan`, `s3_key`, `firewall`, `server`
+
 ## 5.2.17
 
 - issue #31 - k8s node pool labels and annotations implemented
