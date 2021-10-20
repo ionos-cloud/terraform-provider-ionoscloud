@@ -881,17 +881,7 @@ func resourceServerRead(ctx context.Context, d *schema.ResourceData, meta interf
 			}
 		}
 
-		network := map[string]interface{}{}
-
-		setPropWithNilCheck(network, "dhcp", nic.Properties.Dhcp)
-		setPropWithNilCheck(network, "firewall_active", nic.Properties.FirewallActive)
-		setPropWithNilCheck(network, "firewall_type", nic.Properties.FirewallType)
-		setPropWithNilCheck(network, "lan", nic.Properties.Lan)
-		setPropWithNilCheck(network, "name", nic.Properties.Name)
-		setPropWithNilCheck(network, "ips", nic.Properties.Ips)
-		setPropWithNilCheck(network, "mac", nic.Properties.Mac)
-		setPropWithNilCheck(network, "device_number", nic.Properties.DeviceNumber)
-		setPropWithNilCheck(network, "pci_slot", nic.Properties.PciSlot)
+		network := SetNetworkProperties(nic)
 
 		if nic.Properties.Ips != nil && len(*nic.Properties.Ips) > 0 {
 			network["ips"] = *nic.Properties.Ips
@@ -904,21 +894,7 @@ func resourceServerRead(ctx context.Context, d *schema.ResourceData, meta interf
 				return diags
 			}
 
-			fw := map[string]interface{}{}
-			/*
-				"protocol": *firewall.Properties.Protocol,
-				"name":     *firewall.Properties.Name,
-			*/
-			setPropWithNilCheck(fw, "protocol", firewall.Properties.Protocol)
-			setPropWithNilCheck(fw, "name", firewall.Properties.Name)
-			setPropWithNilCheck(fw, "source_mac", firewall.Properties.SourceMac)
-			setPropWithNilCheck(fw, "source_ip", firewall.Properties.SourceIp)
-			setPropWithNilCheck(fw, "target_ip", firewall.Properties.TargetIp)
-			setPropWithNilCheck(fw, "port_range_start", firewall.Properties.PortRangeStart)
-			setPropWithNilCheck(fw, "port_range_end", firewall.Properties.PortRangeEnd)
-			setPropWithNilCheck(fw, "icmp_type", firewall.Properties.IcmpType)
-			setPropWithNilCheck(fw, "icmp_code", firewall.Properties.IcmpCode)
-			setPropWithNilCheck(fw, "type", firewall.Properties.Type)
+			fw := SetFirewallProperties(firewall)
 
 			network["firewall"] = []map[string]interface{}{fw}
 		}
@@ -940,22 +916,8 @@ func resourceServerRead(ctx context.Context, d *schema.ResourceData, meta interf
 		volumeObj, _, err := client.ServersApi.DatacentersServersVolumesFindById(ctx, dcId, serverId, *server.Properties.BootVolume.Id).Execute()
 
 		if err == nil {
-			volumeItem := map[string]interface{}{}
 
-			setPropWithNilCheck(volumeItem, "name", volumeObj.Properties.Name)
-			setPropWithNilCheck(volumeItem, "disk_type", volumeObj.Properties.Type)
-			setPropWithNilCheck(volumeItem, "size", volumeObj.Properties.Size)
-			setPropWithNilCheck(volumeItem, "licence_type", volumeObj.Properties.LicenceType)
-			setPropWithNilCheck(volumeItem, "bus", volumeObj.Properties.Bus)
-			setPropWithNilCheck(volumeItem, "availability_zone", volumeObj.Properties.AvailabilityZone)
-			setPropWithNilCheck(volumeItem, "cpu_hot_plug", volumeObj.Properties.CpuHotPlug)
-			setPropWithNilCheck(volumeItem, "ram_hot_plug", volumeObj.Properties.CpuHotPlug)
-			setPropWithNilCheck(volumeItem, "nic_hot_plug", volumeObj.Properties.CpuHotPlug)
-			setPropWithNilCheck(volumeItem, "nic_hot_unplug", volumeObj.Properties.CpuHotPlug)
-			setPropWithNilCheck(volumeItem, "disc_virtio_hot_plug", volumeObj.Properties.CpuHotPlug)
-			setPropWithNilCheck(volumeItem, "disc_virtio_hot_unplug", volumeObj.Properties.CpuHotPlug)
-			setPropWithNilCheck(volumeItem, "device_number", volumeObj.Properties.DeviceNumber)
-			setPropWithNilCheck(volumeItem, "pci_slot", volumeObj.Properties.PciSlot)
+			volumeItem := SetVolumeProperties(volumeObj)
 
 			userData := d.Get("volume.0.user_data")
 			volumeItem["user_data"] = userData
@@ -990,6 +952,66 @@ func resourceServerRead(ctx context.Context, d *schema.ResourceData, meta interf
 	}
 
 	return nil
+}
+
+func SetNetworkProperties(nic ionoscloud.Nic) map[string]interface{} {
+
+	network := map[string]interface{}{}
+
+	setPropWithNilCheck(network, "dhcp", nic.Properties.Dhcp)
+	setPropWithNilCheck(network, "firewall_active", nic.Properties.FirewallActive)
+	setPropWithNilCheck(network, "lan", nic.Properties.Lan)
+	setPropWithNilCheck(network, "name", nic.Properties.Name)
+	setPropWithNilCheck(network, "ips", nic.Properties.Ips)
+	setPropWithNilCheck(network, "mac", nic.Properties.Mac)
+
+	if nic.Properties.Ips != nil && len(*nic.Properties.Ips) > 0 {
+		network["ips"] = *nic.Properties.Ips
+	}
+
+	return network
+}
+
+func SetFirewallProperties(firewall ionoscloud.FirewallRule) map[string]interface{} {
+
+	fw := map[string]interface{}{}
+	/*
+		"protocol": *firewall.Properties.Protocol,
+		"name":     *firewall.Properties.Name,
+	*/
+	setPropWithNilCheck(fw, "protocol", firewall.Properties.Protocol)
+	setPropWithNilCheck(fw, "name", firewall.Properties.Name)
+	setPropWithNilCheck(fw, "source_mac", firewall.Properties.SourceMac)
+	setPropWithNilCheck(fw, "source_ip", firewall.Properties.SourceIp)
+	setPropWithNilCheck(fw, "target_ip", firewall.Properties.TargetIp)
+	setPropWithNilCheck(fw, "port_range_start", firewall.Properties.PortRangeStart)
+	setPropWithNilCheck(fw, "port_range_end", firewall.Properties.PortRangeEnd)
+	setPropWithNilCheck(fw, "icmp_type", firewall.Properties.IcmpType)
+	setPropWithNilCheck(fw, "icmp_code", firewall.Properties.IcmpCode)
+	return fw
+}
+
+func SetVolumeProperties(volume ionoscloud.Volume) map[string]interface{} {
+
+	volumeMap := map[string]interface{}{}
+
+	setPropWithNilCheck(volumeMap, "name", volume.Properties.Name)
+	setPropWithNilCheck(volumeMap, "disk_type", volume.Properties.Type)
+	setPropWithNilCheck(volumeMap, "size", volume.Properties.Size)
+	setPropWithNilCheck(volumeMap, "licence_type", volume.Properties.LicenceType)
+	setPropWithNilCheck(volumeMap, "bus", volume.Properties.Bus)
+	setPropWithNilCheck(volumeMap, "availability_zone", volume.Properties.AvailabilityZone)
+	setPropWithNilCheck(volumeMap, "cpu_hot_plug", volume.Properties.CpuHotPlug)
+	setPropWithNilCheck(volumeMap, "ram_hot_plug", volume.Properties.RamHotPlug)
+	setPropWithNilCheck(volumeMap, "nic_hot_plug", volume.Properties.NicHotPlug)
+	setPropWithNilCheck(volumeMap, "nic_hot_unplug", volume.Properties.NicHotUnplug)
+	setPropWithNilCheck(volumeMap, "disc_virtio_hot_plug", volume.Properties.DiscVirtioHotPlug)
+	setPropWithNilCheck(volumeMap, "disc_virtio_hot_unplug", volume.Properties.DiscVirtioHotUnplug)
+	setPropWithNilCheck(volumeMap, "device_number", volume.Properties.DeviceNumber)
+	setPropWithNilCheck(volumeMap, "user_data", volume.Properties.UserData)
+	setPropWithNilCheck(volumeMap, "backup_unit_id", volume.Properties.BackupunitId)
+
+	return volumeMap
 }
 
 func boolAddr(b bool) *bool {
@@ -1385,20 +1407,7 @@ func resourceServerImport(ctx context.Context, d *schema.ResourceData, meta inte
 			}
 		}
 
-		network := map[string]interface{}{}
-
-		setPropWithNilCheck(network, "dhcp", nic.Properties.Dhcp)
-		setPropWithNilCheck(network, "firewall_active", nic.Properties.FirewallActive)
-
-		setPropWithNilCheck(network, "lan", nic.Properties.Lan)
-		setPropWithNilCheck(network, "name", nic.Properties.Name)
-		setPropWithNilCheck(network, "ips", nic.Properties.Ips)
-		setPropWithNilCheck(network, "mac", nic.Properties.Mac)
-
-		if nic.Properties.Ips != nil && len(*nic.Properties.Ips) > 0 {
-			network["ips"] = *nic.Properties.Ips
-		}
-
+		network := SetNetworkProperties(nic)
 		firewallRules, _, err := client.FirewallRulesApi.DatacentersServersNicsFirewallrulesGet(ctx, datacenterId, serverId, primaryNic).Execute()
 
 		if err != nil {
@@ -1419,17 +1428,7 @@ func resourceServerImport(ctx context.Context, d *schema.ResourceData, meta inte
 				return nil, err
 			}
 
-			fw := map[string]interface{}{}
-
-			setPropWithNilCheck(fw, "protocol", firewall.Properties.Protocol)
-			setPropWithNilCheck(fw, "name", firewall.Properties.Name)
-			setPropWithNilCheck(fw, "source_mac", firewall.Properties.SourceMac)
-			setPropWithNilCheck(fw, "source_ip", firewall.Properties.SourceIp)
-			setPropWithNilCheck(fw, "target_ip", firewall.Properties.TargetIp)
-			setPropWithNilCheck(fw, "port_range_start", firewall.Properties.PortRangeStart)
-			setPropWithNilCheck(fw, "port_range_end", firewall.Properties.PortRangeEnd)
-			setPropWithNilCheck(fw, "icmp_type", firewall.Properties.IcmpType)
-			setPropWithNilCheck(fw, "icmp_code", firewall.Properties.IcmpCode)
+			fw := SetFirewallProperties(firewall)
 
 			network["firewall"] = []map[string]interface{}{fw}
 		}
