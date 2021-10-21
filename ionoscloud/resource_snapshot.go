@@ -35,7 +35,6 @@ func resourceSnapshot() *schema.Resource {
 			},
 			"licence_type": {
 				Type:        schema.TypeString,
-				Optional:    true,
 				Computed:    true,
 				Description: "OS type of this Snapshot",
 			},
