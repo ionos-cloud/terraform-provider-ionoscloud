@@ -1,3 +1,11 @@
+## 5.2.18
+
+- **code enhancements**: added constants and removed duplicated tests to `backupUnit`, `datacenter`, `lan`, `s3_key`, `firewall`, `server`
+- **code enhancements**: for `pcc`:
+  - made tests comprehensive 
+  - optimized test duration by including both match by id and by name in the same test
+  - removed duplicated code from import, data_source, resource and tests files 
+  
 ## 5.2.17
 
 - issue #31 - k8s node pool labels and annotations implemented

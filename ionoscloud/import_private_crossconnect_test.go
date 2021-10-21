@@ -1,29 +1,41 @@
 package ionoscloud
 
 import (
-	"fmt"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
 	"testing"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 )
 
-func TestAccprivateCrossConnect_ImportBasic(t *testing.T) {
-	resourceName := "example"
-	resourceDescription := "example-description"
-
+func TestAccPrivateCrossConnectImportBasic(t *testing.T) {
 	resource.Test(t, resource.TestCase{
 		PreCheck:          func() { testAccPreCheck(t) },
 		ProviderFactories: testAccProviderFactories,
-		CheckDestroy:      testAccCheckprivateCrossConnectDestroyCheck,
+		CheckDestroy:      testAccCheckPrivateCrossConnectDestroyCheck,
 		Steps: []resource.TestStep{
 			{
-				Config: fmt.Sprintf(testAccCheckprivateCrossConnectConfigBasic, resourceName, resourceDescription),
+				Config: testAccCheckPrivateCrossConnectConfigBasic,
 			},
 			{
-				ResourceName:      fmt.Sprintf("ionoscloud_private_crossconnect.%s", resourceName),
+				ResourceName:      PCCResource + "." + PCCTestResource,
+				ImportStateIdFunc: testAccPCCImportStateID,
 				ImportState:       true,
 				ImportStateVerify: true,
 			},
 		},
 	})
+}
+
+func testAccPCCImportStateID(s *terraform.State) (string, error) {
+	importID := ""
+
+	for _, rs := range s.RootModule().Resources {
+		if rs.Type != PCCResource {
+			continue
+		}
+
+		importID = rs.Primary.ID
+	}
+
+	return importID, nil
 }

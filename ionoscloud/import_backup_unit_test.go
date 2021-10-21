@@ -1,7 +1,6 @@
 package ionoscloud
 
 import (
-	"fmt"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
 	"testing"
 
@@ -9,7 +8,6 @@ import (
 )
 
 func TestAccBackupUnitImportBasic(t *testing.T) {
-	resourceName := "example"
 
 	resource.Test(t, resource.TestCase{
 		PreCheck:          func() { testAccPreCheck(t) },
@@ -17,10 +15,10 @@ func TestAccBackupUnitImportBasic(t *testing.T) {
 		CheckDestroy:      testAccCheckBackupUnitDestroyCheck,
 		Steps: []resource.TestStep{
 			{
-				Config: fmt.Sprintf(testAccCheckBackupUnitConfigBasic, resourceName),
+				Config: testAccCheckBackupUnitConfigBasic,
 			},
 			{
-				ResourceName:            fmt.Sprintf("ionoscloud_backup_unit.%s", resourceName),
+				ResourceName:            BackupUnitResource + "." + BackupUnitTestResource,
 				ImportStateIdFunc:       testAccBackupUnitImportStateId,
 				ImportState:             true,
 				ImportStateVerify:       true,
@@ -34,11 +32,11 @@ func testAccBackupUnitImportStateId(s *terraform.State) (string, error) {
 	importID := ""
 
 	for _, rs := range s.RootModule().Resources {
-		if rs.Type != "ionoscloud_backup_unit" {
+		if rs.Type != BackupUnitResource {
 			continue
 		}
 
-		importID = fmt.Sprintf("%s", rs.Primary.Attributes["id"])
+		importID = rs.Primary.Attributes["id"]
 	}
 
 	return importID, nil

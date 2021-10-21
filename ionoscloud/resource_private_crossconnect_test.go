@@ -10,39 +10,37 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
 )
 
-func TestAccPrivateCrossConnect_Basic(t *testing.T) {
+func TestAccPrivateCrossConnectBasic(t *testing.T) {
 	var privateCrossConnect ionoscloud.PrivateCrossConnect
-	privateCrossConnectName := "example"
-	privateCrossConnectDescription := "example-description"
 
 	resource.Test(t, resource.TestCase{
 		PreCheck: func() {
 			testAccPreCheck(t)
 		},
 		ProviderFactories: testAccProviderFactories,
-		CheckDestroy:      testAccCheckprivateCrossConnectDestroyCheck,
+		CheckDestroy:      testAccCheckPrivateCrossConnectDestroyCheck,
 		Steps: []resource.TestStep{
 			{
-				Config: fmt.Sprintf(testAccCheckprivateCrossConnectConfigBasic, privateCrossConnectName, privateCrossConnectDescription),
+				Config: testAccCheckPrivateCrossConnectConfigBasic,
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheckprivateCrossConnectExists("ionoscloud_private_crossconnect.example", &privateCrossConnect),
-					resource.TestCheckResourceAttr("ionoscloud_private_crossconnect.example", "name", privateCrossConnectName),
-					resource.TestCheckResourceAttr("ionoscloud_private_crossconnect.example", "description", "example-description"),
+					testAccCheckPrivateCrossConnectExists(PCCResource+"."+PCCTestResource, &privateCrossConnect),
+					resource.TestCheckResourceAttr(PCCResource+"."+PCCTestResource, "name", PCCTestResource),
+					resource.TestCheckResourceAttr(PCCResource+"."+PCCTestResource, "description", PCCTestResource),
 				),
 			},
 			{
-				Config: testAccCheckprivateCrossConnectConfigUpdate,
+				Config: testAccCheckPrivateCrossConnectConfigUpdate,
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheckprivateCrossConnectExists("ionoscloud_private_crossconnect.example", &privateCrossConnect),
-					resource.TestCheckResourceAttr("ionoscloud_private_crossconnect.example", "name", "example-renamed"),
-					resource.TestCheckResourceAttr("ionoscloud_private_crossconnect.example", "description", "example-description-updated"),
+					testAccCheckPrivateCrossConnectExists(PCCResource+"."+PCCTestResource, &privateCrossConnect),
+					resource.TestCheckResourceAttr(PCCResource+"."+PCCTestResource, "name", UpdatedResources),
+					resource.TestCheckResourceAttr(PCCResource+"."+PCCTestResource, "description", UpdatedResources),
 				),
 			},
 		},
 	})
 }
 
-func testAccCheckprivateCrossConnectDestroyCheck(s *terraform.State) error {
+func testAccCheckPrivateCrossConnectDestroyCheck(s *terraform.State) error {
 	client := testAccProvider.Meta().(*ionoscloud.APIClient)
 
 	ctx, cancel := context.WithTimeout(context.Background(), *resourceDefaultTimeouts.Delete)
@@ -52,7 +50,7 @@ func testAccCheckprivateCrossConnectDestroyCheck(s *terraform.State) error {
 	}
 
 	for _, rs := range s.RootModule().Resources {
-		if rs.Type != "ionoscloud_private_crossconnect" {
+		if rs.Type != PCCResource {
 			continue
 		}
 
@@ -70,7 +68,7 @@ func testAccCheckprivateCrossConnectDestroyCheck(s *terraform.State) error {
 	return nil
 }
 
-func testAccCheckprivateCrossConnectExists(n string, privateCrossConnect *ionoscloud.PrivateCrossConnect) resource.TestCheckFunc {
+func testAccCheckPrivateCrossConnectExists(n string, privateCrossConnect *ionoscloud.PrivateCrossConnect) resource.TestCheckFunc {
 	return func(s *terraform.State) error {
 		client := testAccProvider.Meta().(*ionoscloud.APIClient)
 
@@ -103,14 +101,14 @@ func testAccCheckprivateCrossConnectExists(n string, privateCrossConnect *ionosc
 	}
 }
 
-const testAccCheckprivateCrossConnectConfigBasic = `
-resource "ionoscloud_private_crossconnect" "example" {
-  name        = "%s"
-  description = "%s"
+const testAccCheckPrivateCrossConnectConfigBasic = `
+resource ` + PCCResource + ` ` + PCCTestResource + ` {
+  name        = "` + PCCTestResource + `"
+  description = "` + PCCTestResource + `"
 }`
 
-const testAccCheckprivateCrossConnectConfigUpdate = `
-resource "ionoscloud_private_crossconnect" "example" {
-  name        = "example-renamed"
-  description = "example-description-updated"
+const testAccCheckPrivateCrossConnectConfigUpdate = `
+resource ` + PCCResource + ` ` + PCCTestResource + ` {
+  name        = "` + UpdatedResources + `"
+  description = "` + UpdatedResources + `"
 }`

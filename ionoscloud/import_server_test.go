@@ -20,7 +20,7 @@ func TestAccServer_ImportBasic(t *testing.T) {
 			},
 
 			{
-				ResourceName:            "ionoscloud_server." + ServerResourceName,
+				ResourceName:            ServerResource + "." + ServerTestResource,
 				ImportStateIdFunc:       testAccServerImportStateId,
 				ImportState:             true,
 				ImportStateVerify:       true,
@@ -34,7 +34,7 @@ func testAccServerImportStateId(s *terraform.State) (string, error) {
 	importID := ""
 
 	for _, rs := range s.RootModule().Resources {
-		if rs.Type != "ionoscloud_server" {
+		if rs.Type != ServerResource {
 			continue
 		}
 
