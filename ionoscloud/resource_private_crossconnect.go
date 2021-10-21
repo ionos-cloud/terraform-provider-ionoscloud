@@ -125,11 +125,9 @@ func resourcePrivateCrossConnectCreate(ctx context.Context, d *schema.ResourceDa
 	d.SetId(*rsp.Id)
 	log.Printf("[INFO] Created PCC: %s", d.Id())
 
-	diagnostics, done := waitForPCCToBeReady(ctx, d, client)
-	if done {
-		return diagnostics
+	if diags := waitForPCCToBeReady(ctx, d, client); diags != nil {
+		return diags
 	}
-
 	return resourcePrivateCrossConnectRead(ctx, d, meta)
 }
 
@@ -189,6 +187,9 @@ func resourcePrivateCrossConnectUpdate(ctx context.Context, d *schema.ResourceDa
 			return nil
 		}
 		diags := diag.FromErr(fmt.Errorf("error while updating PCC: %s", err))
+		return diags
+	}
+	if diags := waitForPCCToBeReady(ctx, d, client); diags != nil {
 		return diags
 	}
 
@@ -292,7 +293,7 @@ func privateCrossConnectDeleted(ctx context.Context, client *ionoscloud.APIClien
 	return false, nil
 }
 
-func waitForPCCToBeReady(ctx context.Context, d *schema.ResourceData, client *ionoscloud.APIClient) (diag.Diagnostics, bool) {
+func waitForPCCToBeReady(ctx context.Context, d *schema.ResourceData, client *ionoscloud.APIClient) diag.Diagnostics {
 	for {
 		log.Printf("[INFO] Waiting for PCC %s to be ready...", d.Id())
 
@@ -300,7 +301,7 @@ func waitForPCCToBeReady(ctx context.Context, d *schema.ResourceData, client *io
 
 		if rsErr != nil {
 			diags := diag.FromErr(fmt.Errorf("error while checking readiness status of PCC %s: %s", d.Id(), rsErr))
-			return diags, true
+			return diags
 		}
 
 		if pccReady {
@@ -315,8 +316,8 @@ func waitForPCCToBeReady(ctx context.Context, d *schema.ResourceData, client *io
 			log.Printf("[INFO] update timed out")
 			diags := diag.FromErr(fmt.Errorf("pcc readiness check timed out! WARNING: your pcc will still probably be created/updated after some time " +
 				"but the terraform state wont reflect that; check your Ionos Cloud account to see the updates"))
-			return diags, true
+			return diags
 		}
 	}
-	return nil, false
+	return nil
 }
