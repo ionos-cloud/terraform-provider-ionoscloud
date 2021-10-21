@@ -960,6 +960,7 @@ func SetNetworkProperties(nic ionoscloud.Nic) map[string]interface{} {
 
 	setPropWithNilCheck(network, "dhcp", nic.Properties.Dhcp)
 	setPropWithNilCheck(network, "firewall_active", nic.Properties.FirewallActive)
+	setPropWithNilCheck(network, "firewall_type", nic.Properties.FirewallType)
 	setPropWithNilCheck(network, "lan", nic.Properties.Lan)
 	setPropWithNilCheck(network, "name", nic.Properties.Name)
 	setPropWithNilCheck(network, "ips", nic.Properties.Ips)
@@ -988,6 +989,7 @@ func SetFirewallProperties(firewall ionoscloud.FirewallRule) map[string]interfac
 	setPropWithNilCheck(fw, "port_range_end", firewall.Properties.PortRangeEnd)
 	setPropWithNilCheck(fw, "icmp_type", firewall.Properties.IcmpType)
 	setPropWithNilCheck(fw, "icmp_code", firewall.Properties.IcmpCode)
+	setPropWithNilCheck(fw, "type", firewall.Properties.Type)
 	return fw
 }
 
