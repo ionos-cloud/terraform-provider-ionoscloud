@@ -63,6 +63,14 @@ const (
 	S3KeyDataSourceById = "test_s3_key_id"
 )
 
+// Snapshot Constants
+const (
+	SnapshotResource         = "ionoscloud_snapshot"
+	SnapshotTestResource     = "test_snapshot"
+	SnapshotDataSourceById   = "test_snapshot_id"
+	SnapshotDataSourceByName = "test_snapshot_name"
+)
+
 // General Constants
 const (
 	DataSource       = "data"
