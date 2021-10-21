@@ -32,6 +32,14 @@ const (
 	LanDataSourceByName = "test_lan_name"
 )
 
+// Group Constants
+const (
+	GroupResource         = "ionoscloud_group"
+	GroupTestResource     = "test_group"
+	GroupDataSourceById   = "test_group_id"
+	GroupDataSourceByName = "test_group_name"
+)
+
 // K8s Constants
 const (
 	K8sClusterResource         = "ionoscloud_k8s_cluster"

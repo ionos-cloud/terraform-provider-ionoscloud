@@ -70,7 +70,7 @@ func Provider() *schema.Provider {
 			"ionoscloud_nic":           resourceNic(),
 			ServerResource:             resourceServer(),
 			"ionoscloud_volume":        resourceVolume(),
-			"ionoscloud_group":         resourceGroup(),
+			GroupResource:              resourceGroup(),
 			"ionoscloud_share":         resourceShare(),
 			"ionoscloud_user":          resourceUser(),
 			"ionoscloud_snapshot":      resourceSnapshot(),
@@ -95,6 +95,7 @@ func Provider() *schema.Provider {
 			BackupUnitResource:         dataSourceBackupUnit(),
 			FirewallResource:           dataSourceFirewall(),
 			S3KeyResource:              dataSourceS3Key(),
+			GroupResource:              dataSourceGroup(),
 		},
 	}
 	provider.ConfigureContextFunc = func(ctx context.Context, d *schema.ResourceData) (interface{}, diag.Diagnostics) {
