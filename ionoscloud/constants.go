@@ -79,6 +79,14 @@ const (
 	SnapshotDataSourceByName = "test_snapshot_name"
 )
 
+// User Constants
+const (
+	UserResource         = "ionoscloud_user"
+	UserTestResource     = "test_user"
+	UserDataSourceById   = "test_user_id"
+	UserDataSourceByName = "test_user_name"
+)
+
 // General Constants
 const (
 	DataSource       = "data"

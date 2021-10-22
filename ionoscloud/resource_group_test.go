@@ -119,7 +119,7 @@ func testAccCheckGroupExists(n string, group *ionoscloud.Group) resource.TestChe
 }
 
 var testAccCheckGroupConfigBasic = `
-resource "ionoscloud_user" "resource_user" {
+resource ` + UserResource + ` ` + UserTestResource + ` {
   first_name = "user"
   last_name = "test"
   email = "` + email + `"
@@ -140,12 +140,12 @@ resource ` + GroupResource + ` ` + GroupTestResource + ` {
   create_backup_unit = true
   create_internet_access = true
   create_k8s_cluster = true
-  user_id = ionoscloud_user.resource_user.id
+  user_id = ` + UserResource + `.` + UserTestResource + `.id
 }
 `
 
 var testAccCheckGroupConfigUpdate = `
-resource "ionoscloud_user" "resource_user_updated" {
+resource ` + UserResource + ` resource_user_updated {
   first_name = "updated"
   last_name = "test"
   email = "updated` + email + `"
@@ -166,6 +166,6 @@ resource ` + GroupResource + ` ` + GroupTestResource + ` {
   create_backup_unit = false
   create_internet_access = false
   create_k8s_cluster = false
-  user_id = ionoscloud_user.resource_user_updated.id
+  user_id = ` + UserResource + `.resource_user_updated.id
 }
 `

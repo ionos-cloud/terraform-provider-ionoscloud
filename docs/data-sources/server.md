@@ -1,6 +1,6 @@
 ---
 layout: "ionoscloud"
-page_title: "ProfitBricks : ionoscloud_server"
+page_title: "IonosCloud : ionoscloud_server"
 sidebar_current: "docs-ionoscloud-datasource-server"
 description: |-
 Get information on a Ionos Cloud Servers

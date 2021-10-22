@@ -96,6 +96,7 @@ func Provider() *schema.Provider {
 			FirewallResource:           dataSourceFirewall(),
 			S3KeyResource:              dataSourceS3Key(),
 			GroupResource:              dataSourceGroup(),
+			UserResource:               dataSourceUser(),
 		},
 	}
 	provider.ConfigureContextFunc = func(ctx context.Context, d *schema.ResourceData) (interface{}, diag.Diagnostics) {

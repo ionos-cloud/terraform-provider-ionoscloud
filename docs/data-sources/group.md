@@ -1,6 +1,6 @@
 ---
 layout: "ionoscloud"
-page_title: "ProfitBricks : ionoscloud_group"
+page_title: "IonosCloud : ionoscloud_group"
 sidebar_current: "docs-ionoscloud-datasource-group"
 description: |-
 Get information on a Ionos Cloud Groups

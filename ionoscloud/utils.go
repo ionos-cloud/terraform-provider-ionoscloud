@@ -301,55 +301,6 @@ func resourceVolumeImporter(ctx context.Context, d *schema.ResourceData, meta in
 	return []*schema.ResourceData{d}, nil
 }
 
-func resourceUserImporter(ctx context.Context, d *schema.ResourceData, meta interface{}) ([]*schema.ResourceData, error) {
-	client := meta.(*ionoscloud.APIClient)
-
-	userId := d.Id()
-
-	user, apiResponse, err := client.UserManagementApi.UmUsersFindById(ctx, userId).Execute()
-
-	if err != nil {
-		if apiResponse != nil && apiResponse.Response != nil && apiResponse.StatusCode == 404 {
-			d.SetId("")
-			return nil, fmt.Errorf("an error occured while trying to fetch the user %q", userId)
-		}
-		return nil, fmt.Errorf("user does not exist%q", userId)
-	}
-
-	log.Printf("[INFO] user found: %+v", user)
-
-	d.SetId(*user.Id)
-
-	if user.Properties.Firstname != nil {
-		if err := d.Set("first_name", *user.Properties.Firstname); err != nil {
-			return nil, err
-		}
-	}
-
-	if user.Properties.Lastname != nil {
-		if err := d.Set("last_name", *user.Properties.Lastname); err != nil {
-			return nil, err
-		}
-	}
-	if user.Properties.Email != nil {
-		if err := d.Set("email", *user.Properties.Email); err != nil {
-			return nil, err
-		}
-	}
-	if user.Properties.Administrator != nil {
-		if err := d.Set("administrator", *user.Properties.Administrator); err != nil {
-			return nil, err
-		}
-	}
-	if user.Properties.ForceSecAuth != nil {
-		if err := d.Set("force_sec_auth", *user.Properties.ForceSecAuth); err != nil {
-			return nil, err
-		}
-	}
-
-	return []*schema.ResourceData{d}, nil
-}
-
 func resourceShareImporter(ctx context.Context, d *schema.ResourceData, meta interface{}) ([]*schema.ResourceData, error) {
 	parts := strings.Split(d.Id(), "/")
 	if len(parts) != 2 || parts[0] == "" || parts[1] == "" {

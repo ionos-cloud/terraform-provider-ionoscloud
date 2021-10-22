@@ -1,6 +1,6 @@
 ---
 layout: "ionoscloud"
-page_title: "ProfitBricks : ionoscloud_lan"
+page_title: "IonosCloud : ionoscloud_lan"
 sidebar_current: "docs-ionoscloud-datasource-lan"
 description: |-
 Get information on a Ionos Cloud Lans
