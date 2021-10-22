@@ -21,30 +21,15 @@ func TestAccDataSourceNatGateway_matchId(t *testing.T) {
 			{
 				Config: fmt.Sprintf(testAccDataSourceNatGatewayMatchId),
 				Check: resource.ComposeTestCheckFunc(
-					resource.TestCheckResourceAttr("data.ionoscloud_natgateway.test_natgateway", "name", "test_datasource_natgateway"),
-					resource.TestCheckResourceAttrPair("data.ionoscloud_natgateway.test_natgateway", "public_ips.0", "ionoscloud_ipblock.natgateway_ips", "ips.0"),
+					resource.TestCheckResourceAttr("data.ionoscloud_natgateway.test_natgateway_id", "name", "test_datasource_natgateway"),
+					resource.TestCheckResourceAttrPair("data.ionoscloud_natgateway.test_natgateway_id", "public_ips.0", "ionoscloud_ipblock.natgateway_ips", "ips.0"),
 				),
-			},
-		},
-	})
-}
-
-func TestAccDataSourceNatGateway_matchName(t *testing.T) {
-
-	resource.Test(t, resource.TestCase{
-		PreCheck: func() {
-			testAccPreCheck(t)
-		},
-		ProviderFactories: testAccProviderFactories,
-		Steps: []resource.TestStep{
-			{
-				Config: fmt.Sprintf(testAccDataSourceNatGatewayCreateResources),
 			},
 			{
 				Config: fmt.Sprintf(testAccDataSourceNatGatewayMatchName),
 				Check: resource.ComposeTestCheckFunc(
-					resource.TestCheckResourceAttr("data.ionoscloud_natgateway.test_natgateway", "name", "test_datasource_natgateway"),
-					resource.TestCheckResourceAttrPair("data.ionoscloud_natgateway.test_natgateway", "public_ips.0", "ionoscloud_ipblock.natgateway_ips", "ips.0"),
+					resource.TestCheckResourceAttr("data.ionoscloud_natgateway.test_natgateway_name", "name", "test_datasource_natgateway"),
+					resource.TestCheckResourceAttrPair("data.ionoscloud_natgateway.test_natgateway_name", "public_ips.0", "ionoscloud_ipblock.natgateway_ips", "ips.0"),
 				),
 			},
 		},
@@ -110,7 +95,7 @@ resource "ionoscloud_natgateway" "natgateway" {
   }
 }
 
-data "ionoscloud_natgateway" "test_natgateway" {
+data "ionoscloud_natgateway" "test_natgateway_id" {
   datacenter_id = ionoscloud_datacenter.natgateway_datacenter.id
   id			= ionoscloud_natgateway.natgateway.id
 }
@@ -145,7 +130,7 @@ resource "ionoscloud_natgateway" "natgateway" {
   }
 }
 
-data "ionoscloud_natgateway" "test_natgateway" {
+data "ionoscloud_natgateway" "test_natgateway_name" {
   datacenter_id = ionoscloud_datacenter.natgateway_datacenter.id
   name			= "test_datasource_"
 }

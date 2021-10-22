@@ -315,7 +315,11 @@ func dataSourceK8sReadCluster(d *schema.ResourceData, meta interface{}) error {
 
 	}
 
-	if err = setK8sClusterData(d, &cluster, client); err != nil {
+	if err = setK8sClusterData(d, &cluster); err != nil {
+		return err
+	}
+
+	if err = setAdditionalK8sClusterData(d, &cluster, client); err != nil {
 		return err
 	}
 
@@ -412,97 +416,7 @@ func setK8sConfigData(d *schema.ResourceData, configStr string) error {
 	return nil
 }
 
-func setK8sClusterData(d *schema.ResourceData, cluster *ionoscloud.KubernetesCluster, client *ionoscloud.APIClient) error {
-
-	if cluster.Id != nil {
-		d.SetId(*cluster.Id)
-		if err := d.Set("id", *cluster.Id); err != nil {
-			return err
-		}
-	}
-
-	if cluster.Properties != nil {
-		if cluster.Properties.Name != nil {
-			if err := d.Set("name", *cluster.Properties.Name); err != nil {
-				return err
-			}
-		}
-
-		if cluster.Properties.K8sVersion != nil {
-			if err := d.Set("k8s_version", *cluster.Properties.K8sVersion); err != nil {
-				return err
-			}
-
-		}
-
-		if cluster.Properties.MaintenanceWindow != nil && cluster.Properties.MaintenanceWindow.Time != nil && cluster.Properties.MaintenanceWindow.DayOfTheWeek != nil {
-			if err := d.Set("maintenance_window", []map[string]string{
-				{
-					"time":            *cluster.Properties.MaintenanceWindow.Time,
-					"day_of_the_week": *cluster.Properties.MaintenanceWindow.DayOfTheWeek,
-				},
-			}); err != nil {
-				return err
-			}
-		}
-
-		if cluster.Properties.AvailableUpgradeVersions != nil {
-			var availableUpgradeVersions []interface{}
-			for _, availableUpgradeVersion := range *cluster.Properties.AvailableUpgradeVersions {
-				availableUpgradeVersions = append(availableUpgradeVersions, availableUpgradeVersion)
-			}
-			if err := d.Set("available_upgrade_versions", availableUpgradeVersions); err != nil {
-				return err
-			}
-		}
-
-		if cluster.Properties.ViableNodePoolVersions != nil && len(*cluster.Properties.ViableNodePoolVersions) > 0 {
-			var viableNodePoolVersions []interface{}
-			for _, viableNodePoolVersion := range *cluster.Properties.ViableNodePoolVersions {
-				viableNodePoolVersions = append(viableNodePoolVersions, viableNodePoolVersion)
-			}
-			if err := d.Set("viable_node_pool_versions", viableNodePoolVersions); err != nil {
-				return err
-			}
-		}
-
-		//if cluster.Properties.Public != nil {
-		//	err := d.Set("public", *cluster.Properties.Public)
-		//	if err != nil {
-		//		return fmt.Errorf("error while setting public property for cluser %s: %s", d.Id(), err)
-		//	}
-		//}
-		//
-		//if cluster.Properties.GatewayIp != nil {
-		//	err := d.Set("gateway_ip", *cluster.Properties.GatewayIp)
-		//	if err != nil {
-		//		return fmt.Errorf("error while setting gateway_ip property for cluser %s: %s", d.Id(), err)
-		//	}
-		//}
-
-		if cluster.Properties.ApiSubnetAllowList != nil {
-			apiSubnetAllowLists := make([]interface{}, len(*cluster.Properties.ApiSubnetAllowList), len(*cluster.Properties.ApiSubnetAllowList))
-			for i, apiSubnetAllowList := range *cluster.Properties.ApiSubnetAllowList {
-				apiSubnetAllowLists[i] = apiSubnetAllowList
-			}
-			if err := d.Set("api_subnet_allow_list", apiSubnetAllowLists); err != nil {
-				return fmt.Errorf("error while setting api_subnet_allow_list property for cluser %s: %s", d.Id(), err)
-			}
-		}
-
-		if cluster.Properties.S3Buckets != nil {
-			s3Buckets := make([]interface{}, len(*cluster.Properties.S3Buckets), len(*cluster.Properties.S3Buckets))
-			for i, s3Bucket := range *cluster.Properties.S3Buckets {
-				s3BucketEntry := make(map[string]interface{})
-				s3BucketEntry["name"] = *s3Bucket.Name
-				s3Buckets[i] = s3BucketEntry
-			}
-			if err := d.Set("s3_buckets", s3Buckets); err != nil {
-				return fmt.Errorf("error while setting s3_buckets property for cluser %s: %s", d.Id(), err)
-			}
-		}
-
-	}
+func setAdditionalK8sClusterData(d *schema.ResourceData, cluster *ionoscloud.KubernetesCluster, client *ionoscloud.APIClient) error {
 
 	if cluster.Metadata != nil {
 		if cluster.Metadata.State != nil {
@@ -519,7 +433,7 @@ func setK8sClusterData(d *schema.ResourceData, cluster *ionoscloud.KubernetesClu
 		defer cancel()
 	}
 
-	/* get and set the kubeconfig */
+	/* get and set the kubeconfig and nodepools*/
 	if cluster.Id != nil {
 		kubeConfig, _, err := client.KubernetesApi.K8sKubeconfigGet(ctx, *cluster.Id).Execute()
 		if err != nil {

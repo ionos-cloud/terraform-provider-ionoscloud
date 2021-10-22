@@ -15,221 +15,6 @@ import (
 
 const SleepInterval = 5 * time.Second
 
-func resourceServerImport(ctx context.Context, d *schema.ResourceData, meta interface{}) ([]*schema.ResourceData, error) {
-	parts := strings.Split(d.Id(), "/")
-
-	if len(parts) != 2 || parts[0] == "" || parts[1] == "" {
-		return nil, fmt.Errorf("invalid import id %q. Expecting {datacenter}/{server}", d.Id())
-	}
-
-	datacenterId := parts[0]
-	serverId := parts[1]
-
-	client := meta.(*ionoscloud.APIClient)
-
-	server, apiResponse, err := client.ServersApi.DatacentersServersFindById(ctx, datacenterId, serverId).Execute()
-
-	if err != nil {
-		if apiResponse != nil && apiResponse.Response != nil && apiResponse.StatusCode == 404 {
-			d.SetId("")
-			return nil, fmt.Errorf("unable to find server %q", serverId)
-		}
-		return nil, fmt.Errorf("error occured while fetching a server ID %s %s", d.Id(), err)
-	}
-
-	d.SetId(*server.Id)
-
-	if err := d.Set("datacenter_id", datacenterId); err != nil {
-		return nil, err
-	}
-
-	if server.Properties.Name != nil {
-		if err := d.Set("name", *server.Properties.Name); err != nil {
-			return nil, err
-		}
-	}
-
-	if server.Properties.Cores != nil {
-		if err := d.Set("cores", *server.Properties.Cores); err != nil {
-			return nil, err
-		}
-	}
-
-	if server.Properties.Ram != nil {
-		if err := d.Set("ram", *server.Properties.Ram); err != nil {
-			return nil, err
-		}
-	}
-
-	if server.Properties.AvailabilityZone != nil {
-		if err := d.Set("availability_zone", *server.Properties.AvailabilityZone); err != nil {
-			return nil, err
-		}
-	}
-
-	if server.Properties.CpuFamily != nil {
-		if err := d.Set("cpu_family", *server.Properties.CpuFamily); err != nil {
-			return nil, err
-		}
-	}
-
-	if server.Entities.Volumes != nil &&
-		len(*server.Entities.Volumes.Items) > 0 &&
-		(*server.Entities.Volumes.Items)[0].Properties.Image != nil {
-		if err := d.Set("boot_image", *(*server.Entities.Volumes.Items)[0].Properties.Image); err != nil {
-			return nil, err
-		}
-	}
-
-	if server.Entities.Nics != nil && len(*server.Entities.Nics.Items) > 0 && (*server.Entities.Nics.Items)[0].Id != nil {
-		primaryNic := *(*server.Entities.Nics.Items)[0].Id
-		if err := d.Set("primary_nic", primaryNic); err != nil {
-			return nil, err
-		}
-
-		nic, _, err := client.NetworkInterfacesApi.DatacentersServersNicsFindById(ctx, datacenterId, serverId, primaryNic).Execute()
-		if err != nil {
-			return nil, err
-		}
-
-		if len(*nic.Properties.Ips) > 0 {
-			if err := d.Set("primary_ip", (*nic.Properties.Ips)[0]); err != nil {
-				return nil, err
-			}
-		}
-
-		network := map[string]interface{}{}
-
-		setPropWithNilCheck(network, "dhcp", nic.Properties.Dhcp)
-		setPropWithNilCheck(network, "firewall_active", nic.Properties.FirewallActive)
-
-		setPropWithNilCheck(network, "lan", nic.Properties.Lan)
-		setPropWithNilCheck(network, "name", nic.Properties.Name)
-		setPropWithNilCheck(network, "ips", nic.Properties.Ips)
-		setPropWithNilCheck(network, "mac", nic.Properties.Mac)
-
-		if nic.Properties.Ips != nil && len(*nic.Properties.Ips) > 0 {
-			network["ips"] = *nic.Properties.Ips
-		}
-
-		firewallRules, _, err := client.FirewallRulesApi.DatacentersServersNicsFirewallrulesGet(ctx, datacenterId, serverId, primaryNic).Execute()
-
-		if err != nil {
-			return nil, err
-		}
-
-		if firewallRules.Items != nil {
-			if len(*firewallRules.Items) > 0 {
-				if err := d.Set("firewallrule_id", *(*firewallRules.Items)[0].Id); err != nil {
-					return nil, err
-				}
-			}
-		}
-
-		if firewallId, ok := d.GetOk("firewallrule_id"); ok {
-			firewall, _, err := client.FirewallRulesApi.DatacentersServersNicsFirewallrulesFindById(ctx, datacenterId, serverId, primaryNic, firewallId.(string)).Execute()
-			if err != nil {
-				return nil, err
-			}
-
-			fw := map[string]interface{}{}
-			/*
-				"protocol": *firewall.Properties.Protocol,
-				"name":     *firewall.Properties.Name,
-			*/
-			setPropWithNilCheck(fw, "protocol", firewall.Properties.Protocol)
-			setPropWithNilCheck(fw, "name", firewall.Properties.Name)
-			setPropWithNilCheck(fw, "source_mac", firewall.Properties.SourceMac)
-			setPropWithNilCheck(fw, "source_ip", firewall.Properties.SourceIp)
-			setPropWithNilCheck(fw, "target_ip", firewall.Properties.TargetIp)
-			setPropWithNilCheck(fw, "port_range_start", firewall.Properties.PortRangeStart)
-			setPropWithNilCheck(fw, "port_range_end", firewall.Properties.PortRangeEnd)
-			setPropWithNilCheck(fw, "icmp_type", firewall.Properties.IcmpType)
-			setPropWithNilCheck(fw, "icmp_code", firewall.Properties.IcmpCode)
-
-			network["firewall"] = []map[string]interface{}{fw}
-		}
-
-		networks := []map[string]interface{}{network}
-		if err := d.Set("nic", networks); err != nil {
-			return nil, err
-		}
-	}
-
-	if server.Properties.BootVolume != nil {
-		if server.Properties.BootVolume.Id != nil {
-			if err := d.Set("boot_volume", *server.Properties.BootVolume.Id); err != nil {
-				return nil, err
-			}
-		}
-		volumeObj, _, err := client.ServersApi.DatacentersServersVolumesFindById(ctx, datacenterId, serverId, *server.Properties.BootVolume.Id).Execute()
-		if err == nil {
-			volumeItem := map[string]interface{}{}
-
-			setPropWithNilCheck(volumeItem, "name", volumeObj.Properties.Name)
-			setPropWithNilCheck(volumeItem, "disk_type", volumeObj.Properties.Type)
-			setPropWithNilCheck(volumeItem, "size", volumeObj.Properties.Size)
-			setPropWithNilCheck(volumeItem, "licence_type", volumeObj.Properties.LicenceType)
-			setPropWithNilCheck(volumeItem, "bus", volumeObj.Properties.Bus)
-			setPropWithNilCheck(volumeItem, "availability_zone", volumeObj.Properties.AvailabilityZone)
-
-			volumesList := []map[string]interface{}{volumeItem}
-			if err := d.Set("volume", volumesList); err != nil {
-				return nil, err
-			}
-		}
-	}
-	if len(parts) > 3 {
-		if err := d.Set("firewallrule_id", parts[3]); err != nil {
-			return nil, err
-		}
-	}
-	d.SetId(parts[1])
-
-	return []*schema.ResourceData{d}, nil
-}
-
-func resourceK8sClusterImport(ctx context.Context, d *schema.ResourceData, meta interface{}) ([]*schema.ResourceData, error) {
-	client := meta.(*ionoscloud.APIClient)
-
-	clusterId := d.Id()
-
-	cluster, apiResponse, err := client.KubernetesApi.K8sFindByClusterId(ctx, clusterId).Execute()
-
-	if err != nil {
-		if apiResponse != nil && apiResponse.Response != nil && apiResponse.StatusCode == 404 {
-			d.SetId("")
-			return nil, fmt.Errorf("unable to find k8s cluster %q", clusterId)
-		}
-		return nil, fmt.Errorf("unable to retreive k8s cluster %q", d.Id())
-	}
-
-	log.Printf("[INFO] K8s cluster found: %+v", cluster)
-	d.SetId(*cluster.Id)
-	if err := d.Set("name", *cluster.Properties.Name); err != nil {
-		return nil, err
-	}
-	if err := d.Set("k8s_version", *cluster.Properties.K8sVersion); err != nil {
-		return nil, err
-	}
-
-	if cluster.Properties.MaintenanceWindow != nil {
-		if err := d.Set("maintenance_window", []map[string]string{
-			{
-				"day_of_the_week": *cluster.Properties.MaintenanceWindow.DayOfTheWeek,
-				"time":            *cluster.Properties.MaintenanceWindow.Time,
-			},
-		}); err != nil {
-			return nil, err
-		}
-		log.Printf("[INFO] Setting maintenance window for k8s cluster %s to %+v...", d.Id(), *cluster.Properties.MaintenanceWindow)
-	}
-
-	log.Printf("[INFO] Importing k8s cluster %q...", d.Id())
-
-	return []*schema.ResourceData{d}, nil
-}
-
 func resourceK8sNodepoolImport(ctx context.Context, d *schema.ResourceData, meta interface{}) ([]*schema.ResourceData, error) {
 
 	parts := strings.Split(d.Id(), "/")
@@ -427,42 +212,6 @@ func resourcePrivateCrossConnectImport(ctx context.Context, d *schema.ResourceDa
 	return []*schema.ResourceData{d}, nil
 }
 
-func resourceS3KeyImport(ctx context.Context, d *schema.ResourceData, meta interface{}) ([]*schema.ResourceData, error) {
-	parts := strings.Split(d.Id(), "/")
-
-	if len(parts) != 2 || parts[0] == "" || parts[1] == "" {
-		return nil, fmt.Errorf("invalid import id %q. Expecting {userId}/{s3KeyId}", d.Id())
-	}
-
-	userId := parts[0]
-	keyId := parts[1]
-
-	client := meta.(*ionoscloud.APIClient)
-
-	s3Key, apiResponse, err := client.UserS3KeysApi.UmUsersS3keysFindByKeyId(ctx, userId, keyId).Execute()
-
-	if err != nil {
-		if apiResponse != nil && apiResponse.Response != nil && apiResponse.StatusCode == 404 {
-			d.SetId("")
-			return nil, fmt.Errorf("unable to find S3 key %q", keyId)
-		}
-		return nil, fmt.Errorf("unable to retreive S3 key %q", keyId)
-	}
-
-	d.SetId(*s3Key.Id)
-	if err := d.Set("user_id", userId); err != nil {
-		return nil, err
-	}
-	if err := d.Set("secret_key", *s3Key.Properties.SecretKey); err != nil {
-		return nil, err
-	}
-	if err := d.Set("active", *s3Key.Properties.Active); err != nil {
-		return nil, err
-	}
-
-	return []*schema.ResourceData{d}, nil
-}
-
 func resourceNicImport(_ context.Context, d *schema.ResourceData, _ interface{}) ([]*schema.ResourceData, error) {
 	parts := strings.Split(d.Id(), "/")
 	if len(parts) != 3 || parts[0] == "" || parts[1] == "" {
@@ -477,132 +226,6 @@ func resourceNicImport(_ context.Context, d *schema.ResourceData, _ interface{})
 	}
 	d.SetId(parts[2])
 
-	return []*schema.ResourceData{d}, nil
-}
-
-func resourceVolumeImporter(ctx context.Context, d *schema.ResourceData, meta interface{}) ([]*schema.ResourceData, error) {
-	parts := strings.Split(d.Id(), "/")
-	if len(parts) != 3 || parts[0] == "" || parts[1] == "" || parts[2] == "" {
-		return nil, fmt.Errorf("invalid import id %q. Expecting {datacenter}/{server}/{volume}", d.Id())
-	}
-
-	client := meta.(*ionoscloud.APIClient)
-
-	dcId := parts[0]
-	srvId := parts[1]
-	volumeId := parts[2]
-
-	volume, apiResponse, err := client.VolumesApi.DatacentersVolumesFindById(ctx, dcId, volumeId).Execute()
-
-	if err != nil {
-		if apiResponse != nil && apiResponse.Response != nil && apiResponse.StatusCode == 404 {
-			d.SetId("")
-			return nil, fmt.Errorf("volume does not exist %q", volumeId)
-		}
-		return nil, fmt.Errorf("an error occured while trying to find the volume %q", volumeId)
-	}
-
-	log.Printf("[INFO] volume found: %+v", volume)
-
-	d.SetId(*volume.Id)
-	if err := d.Set("datacenter_id", dcId); err != nil {
-		return nil, err
-	}
-
-	if err := d.Set("server_id", srvId); err != nil {
-		return nil, err
-	}
-
-	if volume.Properties.Name != nil {
-		err := d.Set("name", *volume.Properties.Name)
-		if err != nil {
-			return nil, err
-		}
-	}
-
-	if volume.Properties.Type != nil {
-		err := d.Set("disk_type", *volume.Properties.Type)
-		if err != nil {
-			return nil, err
-		}
-	}
-
-	if volume.Properties.Size != nil {
-		err := d.Set("size", *volume.Properties.Size)
-		if err != nil {
-			return nil, err
-		}
-	}
-
-	if volume.Properties.Bus != nil {
-		err := d.Set("bus", *volume.Properties.Bus)
-		if err != nil {
-			return nil, err
-		}
-	}
-
-	if volume.Properties.AvailabilityZone != nil {
-		err := d.Set("availability_zone", *volume.Properties.AvailabilityZone)
-		if err != nil {
-			return nil, err
-		}
-	}
-
-	if volume.Properties.CpuHotPlug != nil {
-		err := d.Set("cpu_hot_plug", *volume.Properties.CpuHotPlug)
-		if err != nil {
-			return nil, err
-		}
-	}
-
-	if volume.Properties.RamHotPlug != nil {
-		err := d.Set("ram_hot_plug", *volume.Properties.RamHotPlug)
-		if err != nil {
-			return nil, err
-		}
-	}
-
-	if volume.Properties.NicHotPlug != nil {
-		err := d.Set("nic_hot_plug", *volume.Properties.NicHotPlug)
-		if err != nil {
-			return nil, err
-		}
-	}
-
-	if volume.Properties.NicHotUnplug != nil {
-		err := d.Set("nic_hot_unplug", *volume.Properties.NicHotUnplug)
-		if err != nil {
-			return nil, err
-		}
-	}
-
-	if volume.Properties.DiscVirtioHotPlug != nil {
-		err := d.Set("disc_virtio_hot_plug", *volume.Properties.DiscVirtioHotPlug)
-		if err != nil {
-			return nil, err
-		}
-	}
-
-	if volume.Properties.DiscVirtioHotUnplug != nil {
-		err := d.Set("disc_virtio_hot_unplug", *volume.Properties.DiscVirtioHotUnplug)
-		if err != nil {
-			return nil, err
-		}
-	}
-
-	if volume.Properties.BackupunitId != nil {
-		err := d.Set("backup_unit_id", *volume.Properties.BackupunitId)
-		if err != nil {
-			return nil, err
-		}
-	}
-
-	if volume.Properties.UserData != nil {
-		err := d.Set("user_data", *volume.Properties.UserData)
-		if err != nil {
-			return nil, err
-		}
-	}
 	return []*schema.ResourceData{d}, nil
 }
 
@@ -1012,4 +635,23 @@ func setPropWithNilCheck(m map[string]interface{}, prop string, v interface{}) {
 func IsValidUUID(uuid string) bool {
 	r := regexp.MustCompile("^[a-fA-F0-9]{8}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-[a-fA-F0-9]{12}$")
 	return r.MatchString(uuid)
+}
+
+//used for k8 node pool and cluster
+func DiffBasedOnVersion(k, old, new string, d *schema.ResourceData) bool {
+	var oldMajor, oldMinor string
+	if old != "" {
+		oldSplit := strings.Split(old, ".")
+		oldMajor = oldSplit[0]
+		oldMinor = oldSplit[1]
+
+		newSplit := strings.Split(new, ".")
+		newMajor := newSplit[0]
+		newMinor := newSplit[1]
+
+		if oldMajor == newMajor && oldMinor == newMinor {
+			return true
+		}
+	}
+	return false
 }

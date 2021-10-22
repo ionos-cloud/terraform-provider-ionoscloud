@@ -69,7 +69,7 @@ func Provider() *schema.Provider {
 			"ionoscloud_user":                               resourceUser(),
 			"ionoscloud_snapshot":                           resourceSnapshot(),
 			"ionoscloud_ipfailover":                         resourceLanIPFailover(),
-			"ionoscloud_k8s_cluster":                        resourcek8sCluster(),
+			K8sClusterResource:                              resourcek8sCluster(),
 			"ionoscloud_k8s_node_pool":                      resourcek8sNodePool(),
 			"ionoscloud_private_crossconnect":               resourcePrivateCrossConnect(),
 			"ionoscloud_backup_unit":                        resourceBackupUnit(),
@@ -88,7 +88,7 @@ func Provider() *schema.Provider {
 			"ionoscloud_lan":                                dataSourceLan(),
 			"ionoscloud_private_crossconnect":               dataSourcePcc(),
 			"ionoscloud_server":                             dataSourceServer(),
-			"ionoscloud_k8s_cluster":                        dataSourceK8sCluster(),
+			K8sClusterResource:                              dataSourceK8sCluster(),
 			"ionoscloud_k8s_node_pool":                      dataSourceK8sNodePool(),
 			"ionoscloud_natgateway":                         dataSourceNatGateway(),
 			"ionoscloud_natgateway_rule":                    dataSourceNatGatewayRule(),
@@ -97,6 +97,7 @@ func Provider() *schema.Provider {
 			"ionoscloud_template":                           dataSourceTemplate(),
 			"ionoscloud_backup_unit":                        dataSourceBackupUnit(),
 			"ionoscloud_firewall":                           dataSourceFirewall(),
+			"ionoscloud_s3_key":                             dataSourceS3Key(),
 		},
 	}
 

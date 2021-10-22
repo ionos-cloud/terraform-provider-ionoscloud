@@ -1,11 +1,24 @@
+## 6.0.0-beta.13
+- **bug fixes**: fixed issue #112 can't attach existing volume to server after recreating server
+- **bug fixes**: `cube server` could not be deleted
+- **functionality enhancements**: improved data_source for template - now `template` can be searched by any of its arguments
+- **bug fixes**: cannot empty `api_subnet_allow_list` and `s3_buckets`
+- **code enhancements**: for `k8s_cluster`:
+  - made tests comprehensive
+  - optimized test duration by including both match by id and by name in the same test
+  - removed duplicated code from import, data_source and resource files (set parameters)
+  
 ## 6.0.0-beta.12
 
-For `backupUnit`, `datacenter`, `lan` and `firewall` resources done the following:
-- made tests comprehensive
-- optimized test duration by including both match by id and by name in the same test
-- removed duplicated code from import, data_source and resource files (set parameters)
-- updated documentation 
-- improved import functions
+- **bug fixes**: `server`: can not create cube server, firewall not updated
+- **bug fixes**: `firewall`: using type argument throws error
+- **code enhancements**: for `backupUnit`, `datacenter`, `lan`, `s3_key`, and `firewall` resources done the following:
+  - made tests comprehensive
+  - optimized test duration by including both match by id and by name in the same test
+  - removed duplicated code from import, data_source and resource files (set parameters)
+  - updated documentation
+  - improved import functions
+- **new features**: data_source for `s3_key`
 
 ## 6.0.0-beta.11
 

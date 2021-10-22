@@ -257,7 +257,7 @@ resource "ionoscloud_lan" "webserver_lan" {
   name = "public"
 }
 
-resource "ionoscloud_server" "webserver" {
+resource "ionoscloud_server" "webserver1" {
   name = "webserver"
   datacenter_id = "${ionoscloud_datacenter.foobar.id}"
   cores = 1
@@ -280,7 +280,7 @@ resource "ionoscloud_server" "webserver" {
 
 resource "ionoscloud_volume" "database_volume" {
 	datacenter_id = "${ionoscloud_datacenter.foobar.id}"
-	server_id = "${ionoscloud_server.webserver.id}"
+	server_id = "${ionoscloud_server.webserver1.id}"
 	availability_zone = "ZONE_1"
 	name = "updated"
 	size = 5
@@ -304,7 +304,7 @@ resource "ionoscloud_lan" "webserver_lan" {
   name = "public"
 }
 
-resource "ionoscloud_server" "webserver" {
+resource "ionoscloud_server" "webserver2" {
   name = "webserver"
   datacenter_id = "${ionoscloud_datacenter.foobar.id}"
   cores = 1
@@ -327,7 +327,7 @@ resource "ionoscloud_server" "webserver" {
 
 resource "ionoscloud_volume" "no_password_volume" {
   datacenter_id = "${ionoscloud_datacenter.foobar.id}"
-  server_id = "${ionoscloud_server.webserver.id}"
+  server_id = "${ionoscloud_server.webserver2.id}"
   name = "no_password"
   size           = 4
   disk_type      = "HDD"

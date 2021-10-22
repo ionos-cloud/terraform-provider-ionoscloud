@@ -77,28 +77,9 @@ func resourceBackupUnitCreate(ctx context.Context, d *schema.ResourceData, meta 
 	d.SetId(*createdBackupUnit.Id)
 	log.Printf("[INFO] Created backup unit: %s", d.Id())
 
-	for {
-		log.Printf("[INFO] Waiting for backup unit %s to be ready...", d.Id())
-
-		backupUnitReady, rsErr := backupUnitReady(client, d, ctx)
-
-		if rsErr != nil {
-			diags := diag.FromErr(fmt.Errorf("error while checking readiness status of backup unit %s: %s", d.Id(), rsErr))
-			return diags
-		}
-
-		if backupUnitReady {
-			log.Printf("[INFO] backup unit ready: %s", d.Id())
-			break
-		}
-
-		select {
-		case <-time.After(SleepInterval):
-			log.Printf("[INFO] trying again ...")
-		case <-ctx.Done():
-			diags := diag.FromErr(fmt.Errorf("backup unit creation timed out! WARNING: your backup unit will still probably be created after some time but the terraform state won't reflect that; check your Ionos Cloud account for updates"))
-			return diags
-		}
+	diags := waitForUnitToBeReady(ctx, d, client)
+	if diags != nil {
+		return diags
 	}
 
 	return resourceBackupUnitRead(ctx, d, meta)
@@ -178,6 +159,15 @@ func resourceBackupUnitUpdate(ctx context.Context, d *schema.ResourceData, meta 
 		return diags
 	}
 
+	diags := waitForUnitToBeReady(ctx, d, client)
+	if diags != nil {
+		return diags
+	}
+
+	return resourceBackupUnitRead(ctx, d, meta)
+}
+
+func waitForUnitToBeReady(ctx context.Context, d *schema.ResourceData, client *ionoscloud.APIClient) diag.Diagnostics {
 	for {
 		log.Printf("[INFO] Waiting for backup unit %s to be ready...", d.Id())
 
@@ -197,12 +187,12 @@ func resourceBackupUnitUpdate(ctx context.Context, d *schema.ResourceData, meta 
 		case <-time.After(SleepInterval):
 			log.Printf("[INFO] trying again ...")
 		case <-ctx.Done():
-			diags := diag.FromErr(fmt.Errorf("backup unit update timed out! WARNING: your backup unit will still probably be updated after some time but the terraform state won't reflect that; check your Ionos Cloud account for updates"))
+			diags := diag.FromErr(fmt.Errorf("backup unit readiness check timed out! WARNING: your backup unit will still probably be created/updated " +
+				"after some time but the terraform state won't reflect that; check your Ionos Cloud account for updates"))
 			return diags
 		}
 	}
-
-	return resourceBackupUnitRead(ctx, d, meta)
+	return nil
 }
 
 func resourceBackupUnitDelete(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
@@ -238,7 +228,8 @@ func resourceBackupUnitDelete(ctx context.Context, d *schema.ResourceData, meta 
 		case <-time.After(SleepInterval):
 			log.Printf("[INFO] trying again ...")
 		case <-ctx.Done():
-			diags := diag.FromErr(fmt.Errorf("backup unit deletion timed out! WARNING: your backup unit will still probably be deleted after some time but the terraform state won't reflect that; check your Ionos Cloud account for updates"))
+			diags := diag.FromErr(fmt.Errorf("backup unit deletion timed out! WARNING: your backup unit will still probably be deleted " +
+				"after some time but the terraform state won't reflect that; check your Ionos Cloud account for updates"))
 			return diags
 		}
 	}
