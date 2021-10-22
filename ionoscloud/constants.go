@@ -32,6 +32,14 @@ const (
 	LanDataSourceByName = "test_lan_name"
 )
 
+// Group Constants
+const (
+	GroupResource         = "ionoscloud_group"
+	GroupTestResource     = "test_group"
+	GroupDataSourceById   = "test_group_id"
+	GroupDataSourceByName = "test_group_name"
+)
+
 // K8s Constants
 const (
 	K8sClusterResource         = "ionoscloud_k8s_cluster"
@@ -61,6 +69,22 @@ const (
 	S3KeyResource       = "ionoscloud_s3_key"
 	S3KeyTestResource   = "test_s3_key"
 	S3KeyDataSourceById = "test_s3_key_id"
+)
+
+// Snapshot Constants
+const (
+	SnapshotResource         = "ionoscloud_snapshot"
+	SnapshotTestResource     = "test_snapshot"
+	SnapshotDataSourceById   = "test_snapshot_id"
+	SnapshotDataSourceByName = "test_snapshot_name"
+)
+
+// User Constants
+const (
+	UserResource         = "ionoscloud_user"
+	UserTestResource     = "test_user"
+	UserDataSourceById   = "test_user_id"
+	UserDataSourceByName = "test_user_name"
 )
 
 // General Constants

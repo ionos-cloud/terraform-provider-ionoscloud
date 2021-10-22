@@ -1,39 +1,38 @@
 package ionoscloud
 
 import (
+	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
 	"testing"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
-	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
 )
 
-func TestAccUser_ImportBasic(t *testing.T) {
-
+func TestAccSnapshotImportBasic(t *testing.T) {
 	resource.Test(t, resource.TestCase{
 		PreCheck:          func() { testAccPreCheck(t) },
 		ProviderFactories: testAccProviderFactories,
-		CheckDestroy:      testAccCheckUserDestroyCheck,
+		CheckDestroy:      testAccCheckSnapshotDestroyCheck,
 		Steps: []resource.TestStep{
 			{
-				Config: testAccCheckUserConfigBasic,
+				Config: testAccCheckSnapshotConfigBasic,
 			},
 
 			{
-				ResourceName:            UserResource + "." + UserTestResource,
-				ImportStateIdFunc:       testAccUserImportStateId,
+				ResourceName:            SnapshotResource + "." + SnapshotTestResource,
+				ImportStateIdFunc:       testAccSnapshotImportStateId,
 				ImportState:             true,
 				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{"password"},
+				ImportStateVerifyIgnore: []string{"datacenter_id", "volume_id"},
 			},
 		},
 	})
 }
 
-func testAccUserImportStateId(s *terraform.State) (string, error) {
+func testAccSnapshotImportStateId(s *terraform.State) (string, error) {
 	importID := ""
 
 	for _, rs := range s.RootModule().Resources {
-		if rs.Type != UserResource {
+		if rs.Type != SnapshotResource {
 			continue
 		}
 

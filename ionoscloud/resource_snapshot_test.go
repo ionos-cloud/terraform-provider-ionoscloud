@@ -12,7 +12,6 @@ import (
 
 func TestAccSnapshot_Basic(t *testing.T) {
 	var snapshot ionoscloud.Snapshot
-	snapshotName := "terraform_snapshot"
 
 	resource.Test(t, resource.TestCase{
 		PreCheck: func() {
@@ -22,16 +21,16 @@ func TestAccSnapshot_Basic(t *testing.T) {
 		CheckDestroy:      testAccCheckSnapshotDestroyCheck,
 		Steps: []resource.TestStep{
 			{
-				Config: fmt.Sprintf(testaccchecksnapshotconfigBasic, snapshotName),
+				Config: testAccCheckSnapshotConfigBasic,
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheckSnapshotExists("ionoscloud_snapshot.test_snapshot", &snapshot),
-					resource.TestCheckResourceAttr("ionoscloud_snapshot.test_snapshot", "name", snapshotName),
+					testAccCheckSnapshotExists(SnapshotResource+"."+SnapshotTestResource, &snapshot),
+					resource.TestCheckResourceAttr(SnapshotResource+"."+SnapshotTestResource, "name", SnapshotTestResource),
 				),
 			},
 			{
-				Config: testaccchecksnapshotconfigUpdate,
+				Config: testAccCheckSnapshotConfigUpdate,
 				Check: resource.ComposeTestCheckFunc(
-					resource.TestCheckResourceAttr("ionoscloud_snapshot.test_snapshot", "name", snapshotName),
+					resource.TestCheckResourceAttr(SnapshotResource+"."+SnapshotTestResource, "name", UpdatedResources),
 				),
 			},
 		},
@@ -48,7 +47,7 @@ func testAccCheckSnapshotDestroyCheck(s *terraform.State) error {
 	}
 
 	for _, rs := range s.RootModule().Resources {
-		if rs.Type != "ionoscloud_snapshot" {
+		if rs.Type != SnapshotResource {
 			continue
 		}
 
@@ -101,81 +100,17 @@ func testAccCheckSnapshotExists(n string, snapshot *ionoscloud.Snapshot) resourc
 	}
 }
 
-const testaccchecksnapshotconfigBasic = `
-resource "ionoscloud_datacenter" "foobar" {
-	name       = "snapshot-test"
-	location = "us/las"
-}
-
-resource "ionoscloud_lan" "webserver_lan" {
-  datacenter_id = "${ionoscloud_datacenter.foobar.id}"
-  public = true
-  name = "public"
-}
-
-resource "ionoscloud_server" "webserver" {
-  name = "webserver"
-  datacenter_id = "${ionoscloud_datacenter.foobar.id}"
-  cores = 1
-  ram = 1024
-  availability_zone = "ZONE_1"
-  cpu_family = "AMD_OPTERON"
-	image_name = "debian:9"
-	image_password = "K3tTj8G14a3EgKyNeeiY"
-  volume {
-    name = "system"
-    size = 2
-    disk_type = "HDD"
-}
-  nic {
-    lan = "${ionoscloud_lan.webserver_lan.id}"
-    dhcp = true
-    firewall_active = true
-  }
-}
-
-resource "ionoscloud_snapshot" "test_snapshot" {
-  datacenter_id = "${ionoscloud_datacenter.foobar.id}"
-  volume_id = "${ionoscloud_server.webserver.boot_volume}"
-  name = "%s"
+const testAccCheckSnapshotConfigBasic = testAccCheckServerConfigBasic + `
+resource ` + SnapshotResource + ` ` + SnapshotTestResource + ` {
+  datacenter_id = ` + DatacenterResource + `.` + DatacenterTestResource + `.id
+  volume_id = ` + ServerResource + `.` + ServerTestResource + `.boot_volume
+  name = "` + SnapshotTestResource + `"
 }
 `
 
-const testaccchecksnapshotconfigUpdate = `
-resource "ionoscloud_datacenter" "foobar" {
-	name       = "snapshot-test"
-	location = "us/las"
-}
-
-resource "ionoscloud_lan" "webserver_lan" {
-  datacenter_id = "${ionoscloud_datacenter.foobar.id}"
-  public = true
-  name = "public"
-}
-
-resource "ionoscloud_server" "webserver" {
-  name = "webserver"
-  datacenter_id = "${ionoscloud_datacenter.foobar.id}"
-  cores = 1
-  ram = 1024
-  availability_zone = "ZONE_1"
-  cpu_family = "AMD_OPTERON"
-	image_name = "debian:9"
-	image_password = "K3tTj8G14a3EgKyNeeiY"
-  volume {
-    name = "system"
-    size = 2
-    disk_type = "HDD"
-}
-  nic {
-    lan = "${ionoscloud_lan.webserver_lan.id}"
-    dhcp = true
-    firewall_active = true
-  }
-}
-
-resource "ionoscloud_snapshot" "test_snapshot" {
-  datacenter_id = "${ionoscloud_datacenter.foobar.id}"
-  volume_id = "${ionoscloud_server.webserver.boot_volume}"
-  name = "terraform_snapshot"
+const testAccCheckSnapshotConfigUpdate = testAccCheckServerConfigBasic + `
+resource ` + SnapshotResource + ` ` + SnapshotTestResource + ` {
+  datacenter_id = ` + DatacenterResource + `.` + DatacenterTestResource + `.id
+  volume_id = ` + ServerResource + `.` + ServerTestResource + `.boot_volume
+  name = "` + UpdatedResources + `"
 }`
