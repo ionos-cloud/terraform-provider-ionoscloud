@@ -12,7 +12,6 @@ import (
 
 func TestAccGroup_Basic(t *testing.T) {
 	var group ionoscloud.Group
-	groupName := "resource_group"
 
 	resource.Test(t, resource.TestCase{
 		PreCheck: func() {
@@ -22,19 +21,36 @@ func TestAccGroup_Basic(t *testing.T) {
 		CheckDestroy:      testAccCheckGroupDestroyCheck,
 		Steps: []resource.TestStep{
 			{
-				Config: fmt.Sprintf(testacccheckgroupconfigBasic, groupName),
+				Config: testAccCheckGroupConfigBasic,
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheckGroupExists("ionoscloud_group.resource_group", &group),
-					testAccCheckGroupAttributes("ionoscloud_group.resource_group", groupName),
-					resource.TestCheckResourceAttr("ionoscloud_group.resource_group", "name", groupName),
-				),
+					testAccCheckGroupExists(GroupResource+"."+GroupTestResource, &group),
+					resource.TestCheckResourceAttr(GroupResource+"."+GroupTestResource, "name", GroupTestResource),
+					resource.TestCheckResourceAttr(GroupResource+"."+GroupTestResource, "create_datacenter", "true"),
+					resource.TestCheckResourceAttr(GroupResource+"."+GroupTestResource, "create_snapshot", "true"),
+					resource.TestCheckResourceAttr(GroupResource+"."+GroupTestResource, "reserve_ip", "true"),
+					resource.TestCheckResourceAttr(GroupResource+"."+GroupTestResource, "access_activity_log", "true"),
+					resource.TestCheckResourceAttr(GroupResource+"."+GroupTestResource, "create_pcc", "true"),
+					resource.TestCheckResourceAttr(GroupResource+"."+GroupTestResource, "s3_privilege", "true"),
+					resource.TestCheckResourceAttr(GroupResource+"."+GroupTestResource, "create_backup_unit", "true"),
+					resource.TestCheckResourceAttr(GroupResource+"."+GroupTestResource, "create_internet_access", "true"),
+					resource.TestCheckResourceAttr(GroupResource+"."+GroupTestResource, "create_k8s_cluster", "true"),
+					testNotEmptySlice(GroupResource, "users")),
 			},
 			{
-				Config: testacccheckgroupconfigUpdate,
+				Config: testAccCheckGroupConfigUpdate,
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheckGroupAttributes("ionoscloud_group.resource_group", "updated"),
-					resource.TestCheckResourceAttr("ionoscloud_group.resource_group", "name", "updated"),
-				),
+					testAccCheckGroupExists(GroupResource+"."+GroupTestResource, &group),
+					resource.TestCheckResourceAttr(GroupResource+"."+GroupTestResource, "name", UpdatedResources),
+					resource.TestCheckResourceAttr(GroupResource+"."+GroupTestResource, "create_datacenter", "false"),
+					resource.TestCheckResourceAttr(GroupResource+"."+GroupTestResource, "create_snapshot", "false"),
+					resource.TestCheckResourceAttr(GroupResource+"."+GroupTestResource, "reserve_ip", "false"),
+					resource.TestCheckResourceAttr(GroupResource+"."+GroupTestResource, "access_activity_log", "false"),
+					resource.TestCheckResourceAttr(GroupResource+"."+GroupTestResource, "create_pcc", "false"),
+					resource.TestCheckResourceAttr(GroupResource+"."+GroupTestResource, "s3_privilege", "false"),
+					resource.TestCheckResourceAttr(GroupResource+"."+GroupTestResource, "create_backup_unit", "false"),
+					resource.TestCheckResourceAttr(GroupResource+"."+GroupTestResource, "create_internet_access", "false"),
+					resource.TestCheckResourceAttr(GroupResource+"."+GroupTestResource, "create_k8s_cluster", "false"),
+					testNotEmptySlice(GroupResource, "users")),
 			},
 		},
 	})
@@ -49,7 +65,7 @@ func testAccCheckGroupDestroyCheck(s *terraform.State) error {
 	}
 	for _, rs := range s.RootModule().Resources {
 
-		if rs.Type != "ionoscloud_group" {
+		if rs.Type != GroupResource {
 			continue
 		}
 		_, apiResponse, err := client.UserManagementApi.UmGroupsFindById(ctx, rs.Primary.ID).Execute()
@@ -65,20 +81,6 @@ func testAccCheckGroupDestroyCheck(s *terraform.State) error {
 	}
 
 	return nil
-}
-
-func testAccCheckGroupAttributes(n string, name string) resource.TestCheckFunc {
-	return func(s *terraform.State) error {
-		rs, ok := s.RootModule().Resources[n]
-		if !ok {
-			return fmt.Errorf("testAccCheckGroupAttributes: Not found: %s", n)
-		}
-		if rs.Primary.Attributes["name"] != name {
-			return fmt.Errorf("bad name: %s", rs.Primary.Attributes["name"])
-		}
-
-		return nil
-	}
 }
 
 func testAccCheckGroupExists(n string, group *ionoscloud.Group) resource.TestCheckFunc {
@@ -116,22 +118,54 @@ func testAccCheckGroupExists(n string, group *ionoscloud.Group) resource.TestChe
 	}
 }
 
-const testacccheckgroupconfigBasic = `
-resource "ionoscloud_group" "resource_group" {
-  name = "%s"
-  create_datacenter = true
-  create_snapshot = true
-  reserve_ip = true
-  access_activity_log = false
+var testAccCheckGroupConfigBasic = `
+resource ` + UserResource + ` ` + UserTestResource + ` {
+  first_name = "user"
+  last_name = "test"
+  email = "` + email + `"
+  password = "abc123-321CBA"
+  administrator = false
+  force_sec_auth= false
+  active = false
 }
-`
 
-const testacccheckgroupconfigUpdate = `
-resource "ionoscloud_group" "resource_group" {
-  name = "updated"
+resource ` + GroupResource + ` ` + GroupTestResource + ` {
+  name = "` + GroupTestResource + `"
   create_datacenter = true
   create_snapshot = true
   reserve_ip = true
   access_activity_log = true
+  create_pcc = true
+  s3_privilege = true
+  create_backup_unit = true
+  create_internet_access = true
+  create_k8s_cluster = true
+  user_id = ` + UserResource + `.` + UserTestResource + `.id
+}
+`
+
+var testAccCheckGroupConfigUpdate = `
+resource ` + UserResource + ` resource_user_updated {
+  first_name = "updated"
+  last_name = "test"
+  email = "updated` + email + `"
+  password = "abc123-321CBA"
+  administrator = false
+  force_sec_auth= false
+  active = false
+}
+
+resource ` + GroupResource + ` ` + GroupTestResource + ` {
+  name = "` + UpdatedResources + `"
+  create_datacenter = false
+  create_snapshot = false
+  reserve_ip = false
+  access_activity_log = false
+  create_pcc = false
+  s3_privilege = false
+  create_backup_unit = false
+  create_internet_access = false
+  create_k8s_cluster = false
+  user_id = ` + UserResource + `.resource_user_updated.id
 }
 `

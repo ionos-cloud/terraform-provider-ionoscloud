@@ -1,13 +1,9 @@
 package ionoscloud
 
 import (
-	"fmt"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"testing"
-	"time"
 )
-
-var email = fmt.Sprintf("terraform_test-%d@mailinator.com", time.Now().Unix())
 
 func TestAccDataSourceS3KeyMatchFields(t *testing.T) {
 

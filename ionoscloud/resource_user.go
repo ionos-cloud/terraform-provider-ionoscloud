@@ -42,11 +42,11 @@ func resourceUser() *schema.Resource {
 			},
 			"administrator": {
 				Type:     schema.TypeBool,
-				Required: true,
+				Optional: true,
 			},
 			"force_sec_auth": {
 				Type:     schema.TypeBool,
-				Required: true,
+				Optional: true,
 			},
 			"sec_auth_active": {
 				Type:     schema.TypeBool,
@@ -91,8 +91,9 @@ func resourceUserCreate(ctx context.Context, d *schema.ResourceData, meta interf
 	}
 
 	administrator := d.Get("administrator").(bool)
-	forceSecAuth := d.Get("force_sec_auth").(bool)
 	request.Properties.Administrator = &administrator
+
+	forceSecAuth := d.Get("force_sec_auth").(bool)
 	request.Properties.ForceSecAuth = &forceSecAuth
 
 	active := d.Get("active").(bool)
@@ -128,7 +129,7 @@ func resourceUserCreate(ctx context.Context, d *schema.ResourceData, meta interf
 func resourceUserRead(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	client := meta.(*ionoscloud.APIClient)
 
-	rsp, apiResponse, err := client.UserManagementApi.UmUsersFindById(ctx, d.Id()).Execute()
+	user, apiResponse, err := client.UserManagementApi.UmUsersFindById(ctx, d.Id()).Execute()
 
 	if err != nil {
 		if apiResponse != nil && apiResponse.Response != nil && apiResponse.StatusCode == 404 {
@@ -139,46 +140,8 @@ func resourceUserRead(ctx context.Context, d *schema.ResourceData, meta interfac
 		return diags
 	}
 
-	if err := d.Set("first_name", *rsp.Properties.Firstname); err != nil {
-		diags := diag.FromErr(err)
-		return diags
-	}
-	if err := d.Set("last_name", *rsp.Properties.Lastname); err != nil {
-		diags := diag.FromErr(err)
-		return diags
-	}
-	if err := d.Set("email", *rsp.Properties.Email); err != nil {
-		diags := diag.FromErr(err)
-		return diags
-	}
-	if err := d.Set("administrator", *rsp.Properties.Administrator); err != nil {
-		diags := diag.FromErr(err)
-		return diags
-	}
-	if err := d.Set("force_sec_auth", *rsp.Properties.ForceSecAuth); err != nil {
-		diags := diag.FromErr(err)
-		return diags
-	}
-
-	if rsp.Properties.SecAuthActive != nil {
-		if err := d.Set("sec_auth_active", *rsp.Properties.SecAuthActive); err != nil {
-			diags := diag.FromErr(err)
-			return diags
-		}
-	}
-
-	if rsp.Properties.S3CanonicalUserId != nil {
-		if err := d.Set("s3_canonical_user_id", *rsp.Properties.S3CanonicalUserId); err != nil {
-			diags := diag.FromErr(err)
-			return diags
-		}
-	}
-
-	if rsp.Properties.Active != nil {
-		if err := d.Set("active", *rsp.Properties.Active); err != nil {
-			diags := diag.FromErr(err)
-			return diags
-		}
+	if err := setUserData(d, &user); err != nil {
+		return diag.FromErr(err)
 	}
 
 	return nil
@@ -187,20 +150,8 @@ func resourceUserRead(ctx context.Context, d *schema.ResourceData, meta interfac
 func resourceUserUpdate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	client := meta.(*ionoscloud.APIClient)
 
-	rsp, apiResponse, err := client.UserManagementApi.UmUsersFindById(ctx, d.Id()).Execute()
-
-	if err != nil {
-		diags := diag.FromErr(fmt.Errorf("an error occured while fetching a User ID %s %s", d.Id(), err))
-		return diags
-	}
-
-	administrator := d.Get("administrator").(bool)
-	forceSecAuth := d.Get("force_sec_auth").(bool)
 	userReq := ionoscloud.UserPut{
-		Properties: &ionoscloud.UserPropertiesPut{
-			Administrator: &administrator,
-			ForceSecAuth:  &forceSecAuth,
-		},
+		Properties: &ionoscloud.UserPropertiesPut{},
 	}
 
 	if d.HasChange("first_name") {
@@ -208,43 +159,36 @@ func resourceUserUpdate(ctx context.Context, d *schema.ResourceData, meta interf
 		firstName := newValue.(string)
 		userReq.Properties.Firstname = &firstName
 
-	} else {
-		userReq.Properties.Firstname = rsp.Properties.Firstname
 	}
 
 	if d.HasChange("last_name") {
 		_, newValue := d.GetChange("last_name")
 		lastName := newValue.(string)
 		userReq.Properties.Lastname = &lastName
-	} else {
-		userReq.Properties.Lastname = rsp.Properties.Lastname
 	}
-
 	if d.HasChange("email") {
 		_, newValue := d.GetChange("email")
 		email := newValue.(string)
 		userReq.Properties.Email = &email
-	} else {
-		userReq.Properties.Email = rsp.Properties.Email
 	}
 
 	if d.HasChange("active") {
-		_, newValue := d.GetChange("active")
-		active := newValue.(bool)
+		active := d.Get("active").(bool)
 		userReq.Properties.Active = &active
-	} else {
-		userReq.Properties.Active = rsp.Properties.Active
 	}
 
-	if d.HasChange("sec_auth_active") {
-		_, newValue := d.GetChange("sec_auth_active")
-		active := newValue.(bool)
-		userReq.Properties.SecAuthActive = &active
-	} else {
-		userReq.Properties.SecAuthActive = rsp.Properties.SecAuthActive
+	if d.HasChange("administrator") {
+		administrator := d.Get("administrator").(bool)
+		userReq.Properties.Administrator = &administrator
 	}
 
-	rsp, apiResponse, err = client.UserManagementApi.UmUsersPut(ctx, d.Id()).User(userReq).Execute()
+	if d.HasChange("force_sec_auth") {
+		forceSecAuth := d.Get("force_sec_auth").(bool)
+		userReq.Properties.ForceSecAuth = &forceSecAuth
+	}
+
+	_, apiResponse, err := client.UserManagementApi.UmUsersPut(ctx, d.Id()).User(userReq).Execute()
+
 	if err != nil {
 		diags := diag.FromErr(fmt.Errorf("an error occured while patching a user ID %s %s", d.Id(), err))
 		return diags
@@ -264,16 +208,9 @@ func resourceUserDelete(ctx context.Context, d *schema.ResourceData, meta interf
 	client := meta.(*ionoscloud.APIClient)
 
 	apiResponse, err := client.UserManagementApi.UmUsersDelete(ctx, d.Id()).Execute()
-	if apiResponse == nil || err != nil {
-		/* //try again in 20 seconds
-		time.Sleep(20 * time.Second)
-		apiResponse, err := client.UserManagementApi.UmUsersDelete(ctx, d.Id()).Execute()
-		if err != nil { */
-		if apiResponse == nil || apiResponse.Response != nil && apiResponse.StatusCode != 404 {
-			diags := diag.FromErr(fmt.Errorf("an error occured while deleting a user %s %s, %s", d.Id(), err, responseBody(apiResponse)))
-			return diags
-		}
-		// }
+	if err != nil {
+		diags := diag.FromErr(err)
+		return diags
 	}
 
 	// Wait, catching any errors
@@ -284,5 +221,83 @@ func resourceUserDelete(ctx context.Context, d *schema.ResourceData, meta interf
 	}
 
 	d.SetId("")
+	return nil
+
+}
+
+func resourceUserImporter(ctx context.Context, d *schema.ResourceData, meta interface{}) ([]*schema.ResourceData, error) {
+	client := meta.(*ionoscloud.APIClient)
+
+	userId := d.Id()
+
+	user, apiResponse, err := client.UserManagementApi.UmUsersFindById(ctx, userId).Execute()
+
+	if err != nil {
+		if apiResponse != nil && apiResponse.Response != nil && apiResponse.StatusCode == 404 {
+			d.SetId("")
+			return nil, fmt.Errorf("an error occured while trying to fetch the user %q", userId)
+		}
+		return nil, fmt.Errorf("user does not exist%q", userId)
+	}
+
+	if err := setUserData(d, &user); err != nil {
+		return nil, err
+	}
+
+	log.Printf("[INFO] user found: %+v", user)
+
+	return []*schema.ResourceData{d}, nil
+}
+
+func setUserData(d *schema.ResourceData, user *ionoscloud.User) error {
+	d.SetId(*user.Id)
+
+	if user.Properties != nil {
+		if user.Properties.Firstname != nil {
+			if err := d.Set("first_name", *user.Properties.Firstname); err != nil {
+				return err
+			}
+		}
+
+		if user.Properties.Lastname != nil {
+			if err := d.Set("last_name", *user.Properties.Lastname); err != nil {
+				return err
+			}
+		}
+		if user.Properties.Email != nil {
+			if err := d.Set("email", *user.Properties.Email); err != nil {
+				return err
+			}
+		}
+		if user.Properties.Administrator != nil {
+			if err := d.Set("administrator", *user.Properties.Administrator); err != nil {
+				return err
+			}
+		}
+		if user.Properties.ForceSecAuth != nil {
+			if err := d.Set("force_sec_auth", *user.Properties.ForceSecAuth); err != nil {
+				return err
+			}
+		}
+
+		if user.Properties.SecAuthActive != nil {
+			if err := d.Set("sec_auth_active", *user.Properties.SecAuthActive); err != nil {
+				return err
+			}
+		}
+
+		if user.Properties.S3CanonicalUserId != nil {
+			if err := d.Set("s3_canonical_user_id", *user.Properties.S3CanonicalUserId); err != nil {
+				return err
+			}
+		}
+
+		if user.Properties.Active != nil {
+			if err := d.Set("active", *user.Properties.Active); err != nil {
+				return err
+			}
+		}
+	}
+
 	return nil
 }

@@ -6,19 +6,12 @@ import (
 	ionoscloud "github.com/ionos-cloud/sdk-go/v6"
 	"testing"
 
-	"math/rand"
-	"strconv"
-	"time"
-
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
 )
 
 func TestAccUser_Basic(t *testing.T) {
 	var user ionoscloud.User
-	s1 := rand.NewSource(time.Now().UnixNano())
-	r1 := rand.New(s1)
-	email := strconv.Itoa(r1.Intn(100000)) + "terraform_test" + strconv.Itoa(r1.Intn(100000)) + "@go.com"
 
 	resource.Test(t, resource.TestCase{
 		PreCheck: func() {
@@ -28,21 +21,26 @@ func TestAccUser_Basic(t *testing.T) {
 		CheckDestroy:      testAccCheckUserDestroyCheck,
 		Steps: []resource.TestStep{
 			{
-				Config: fmt.Sprintf(testAccCheckUserConfigBasic, email),
+				Config: testAccCheckUserConfigBasic,
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheckUserExists("ionoscloud_user.resource_user", &user),
-					testAccCheckUserAttributes("ionoscloud_user.resource_user", "resource_user"),
-					resource.TestCheckResourceAttr("ionoscloud_user.resource_user", "first_name", "resource_user"),
-					resource.TestCheckResourceAttr("ionoscloud_user.resource_user", "active", "false"),
+					testAccCheckUserExists(UserResource+"."+UserTestResource, &user),
+					resource.TestCheckResourceAttr(UserResource+"."+UserTestResource, "first_name", UserTestResource),
+					resource.TestCheckResourceAttr(UserResource+"."+UserTestResource, "last_name", UserTestResource),
+					resource.TestCheckResourceAttr(UserResource+"."+UserTestResource, "email", email),
+					resource.TestCheckResourceAttr(UserResource+"."+UserTestResource, "administrator", "true"),
+					resource.TestCheckResourceAttr(UserResource+"."+UserTestResource, "force_sec_auth", "true"),
+					resource.TestCheckResourceAttr(UserResource+"."+UserTestResource, "active", "true"),
 				),
 			},
 			{
-				Config: fmt.Sprintf(testAccCheckUserConfigUpdate, email),
+				Config: testAccCheckUserConfigUpdate,
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheckUserAttributes("ionoscloud_user.resource_user", "updated"),
-					resource.TestCheckResourceAttr("ionoscloud_user.resource_user", "first_name", "updated"),
-					resource.TestCheckResourceAttr("ionoscloud_user.resource_user", "active", "true"),
-				),
+					resource.TestCheckResourceAttr(UserResource+"."+UserTestResource, "first_name", UpdatedResources),
+					resource.TestCheckResourceAttr(UserResource+"."+UserTestResource, "last_name", UpdatedResources),
+					resource.TestCheckResourceAttr(UserResource+"."+UserTestResource, "email", "updated"+email),
+					resource.TestCheckResourceAttr(UserResource+"."+UserTestResource, "administrator", "false"),
+					resource.TestCheckResourceAttr(UserResource+"."+UserTestResource, "force_sec_auth", "false"),
+					resource.TestCheckResourceAttr(UserResource+"."+UserTestResource, "active", "false")),
 			},
 		},
 	})
@@ -57,7 +55,7 @@ func testAccCheckUserDestroyCheck(s *terraform.State) error {
 	}
 
 	for _, rs := range s.RootModule().Resources {
-		if rs.Type != "ionoscloud_user" {
+		if rs.Type != UserResource {
 			continue
 		}
 		_, apiResponse, err := client.UserManagementApi.UmUsersFindById(ctx, rs.Primary.ID).Execute()
@@ -72,20 +70,6 @@ func testAccCheckUserDestroyCheck(s *terraform.State) error {
 	}
 
 	return nil
-}
-
-func testAccCheckUserAttributes(n string, name string) resource.TestCheckFunc {
-	return func(s *terraform.State) error {
-		rs, ok := s.RootModule().Resources[n]
-		if !ok {
-			return fmt.Errorf("testAccCheckUserAttributes: Not found: %s", n)
-		}
-		if rs.Primary.Attributes["first_name"] != name {
-			return fmt.Errorf("bad first_name: %s", rs.Primary.Attributes["first_name"])
-		}
-
-		return nil
-	}
 }
 
 func testAccCheckUserExists(n string, user *ionoscloud.User) resource.TestCheckFunc {
@@ -122,43 +106,24 @@ func testAccCheckUserExists(n string, user *ionoscloud.User) resource.TestCheckF
 	}
 }
 
-const testAccCheckUserConfigBasic = `
-
-resource "ionoscloud_group" "group" {
-  name = "terraform user group"
-  create_datacenter = true
-  create_snapshot = true
-  reserve_ip = true
-  access_activity_log = false
-}
-
-resource "ionoscloud_user" "resource_user" {
-  first_name = "resource_user"
-  last_name = "test"
-  email = "%s"
+var testAccCheckUserConfigBasic = `
+resource ` + UserResource + ` ` + UserTestResource + ` {
+  first_name = "` + UserTestResource + `"
+  last_name = "` + UserTestResource + `"
+  email = "` + email + `"
   password = "abc123-321CBA"
-  administrator = false
-  force_sec_auth= false
-  active = false
+  administrator = true
+  force_sec_auth= true
+  active  = true
 }`
 
-const testAccCheckUserConfigUpdate = `
-resource "ionoscloud_user" "resource_user" {
-  first_name = "updated"
-  last_name = "test"
-  email = "%s"
-  password = "abc123-321CBA"
+var testAccCheckUserConfigUpdate = `
+resource ` + UserResource + ` ` + UserTestResource + ` {
+  first_name = "` + UpdatedResources + `"
+  last_name = "` + UpdatedResources + `"
+  email = "updated` + email + `"
+  password = "abc123-321CBAupdated"
   administrator = false
   force_sec_auth= false
-  active = true
-}
-
-resource "ionoscloud_group" "group" {
-  name = "terraform user group"
-  create_datacenter = true
-  create_snapshot = true
-  reserve_ip = true
-  access_activity_log = false
-  user_id="${ionoscloud_user.resource_user.id}"
-}
-`
+  active  = false
+}`
