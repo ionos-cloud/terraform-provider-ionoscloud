@@ -94,7 +94,7 @@ func testAccChecks3KeyExists(n string, s3Key *ionoscloud.S3Key) resource.TestChe
 }
 
 var testAccChecks3KeyConfigBasic = `
-resource "ionoscloud_user" "example" {
+resource ` + UserResource + ` "example" {
   first_name = "terraform"
   last_name = "test"
   email = "` + email + `"
@@ -104,12 +104,12 @@ resource "ionoscloud_user" "example" {
 }
 
 resource ` + S3KeyResource + ` ` + S3KeyTestResource + ` {
-  user_id    = ionoscloud_user.example.id
+  user_id    = ` + UserResource + `.example.id
   active     = false
 }`
 
 var testAccChecks3KeyConfigUpdate = `
-resource "ionoscloud_user" "example" {
+resource ` + UserResource + ` "example" {
   first_name = "terraform"
   last_name = "test"
   email = "` + email + `"
@@ -119,6 +119,6 @@ resource "ionoscloud_user" "example" {
 }
 
 resource ` + S3KeyResource + ` ` + S3KeyTestResource + ` {
-  user_id    = ionoscloud_user.example.id
+  user_id    = ` + UserResource + `.example.id
   active     = true
 }`
