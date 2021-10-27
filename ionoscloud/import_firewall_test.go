@@ -10,7 +10,6 @@ import (
 )
 
 func TestAccFirewallImportBasic(t *testing.T) {
-	firewallName := "firewall"
 
 	resource.Test(t, resource.TestCase{
 		PreCheck:          func() { testAccPreCheck(t) },
@@ -18,11 +17,11 @@ func TestAccFirewallImportBasic(t *testing.T) {
 		CheckDestroy:      testAccCheckFirewallDestroyCheck,
 		Steps: []resource.TestStep{
 			{
-				Config: fmt.Sprintf(testAccCheckFirewallConfigBasic, firewallName),
+				Config: testAccCheckFirewallConfigBasic,
 			},
 
 			{
-				ResourceName:      "ionoscloud_firewall.webserver_http",
+				ResourceName:      FirewallResource + "." + FirewallTestResource,
 				ImportStateIdFunc: testAccFirewallImportStateId,
 				ImportState:       true,
 				ImportStateVerify: true,
@@ -35,7 +34,7 @@ func testAccFirewallImportStateId(s *terraform.State) (string, error) {
 	var importID = ""
 
 	for _, rs := range s.RootModule().Resources {
-		if rs.Type != "ionoscloud_firewall" {
+		if rs.Type != FirewallResource {
 			continue
 		}
 

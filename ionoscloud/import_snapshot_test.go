@@ -7,32 +7,32 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 )
 
-func TestAccBackupUnitImportBasic(t *testing.T) {
-
+func TestAccSnapshotImportBasic(t *testing.T) {
 	resource.Test(t, resource.TestCase{
 		PreCheck:          func() { testAccPreCheck(t) },
 		ProviderFactories: testAccProviderFactories,
-		CheckDestroy:      testAccCheckBackupUnitDestroyCheck,
+		CheckDestroy:      testAccCheckSnapshotDestroyCheck,
 		Steps: []resource.TestStep{
 			{
-				Config: testAccCheckBackupUnitConfigBasic,
+				Config: testAccCheckSnapshotConfigBasic,
 			},
+
 			{
-				ResourceName:            BackupUnitResource + "." + BackupUnitTestResource,
-				ImportStateIdFunc:       testAccBackupUnitImportStateId,
+				ResourceName:            SnapshotResource + "." + SnapshotTestResource,
+				ImportStateIdFunc:       testAccSnapshotImportStateId,
 				ImportState:             true,
 				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{"password"},
+				ImportStateVerifyIgnore: []string{"datacenter_id", "volume_id"},
 			},
 		},
 	})
 }
 
-func testAccBackupUnitImportStateId(s *terraform.State) (string, error) {
+func testAccSnapshotImportStateId(s *terraform.State) (string, error) {
 	importID := ""
 
 	for _, rs := range s.RootModule().Resources {
-		if rs.Type != BackupUnitResource {
+		if rs.Type != SnapshotResource {
 			continue
 		}
 

@@ -1,3 +1,12 @@
+## 6.0.0-beta.14
+
+- **code enhancements**: added constants and removed duplicated tests to `backupUnit`, `datacenter`, `lan`, `s3_key`, `firewall`, `server`
+- **code enhancements**: for `pcc`, `group`, `user` and `snapshot`:
+  - made tests comprehensive
+  - optimized test duration by including both match by id and by name in the same test
+  - removed duplicated code from import, data_source, resource and tests files
+- **new features**: import for `snapshot`, data_source for `group`, `user`
+
 ## 6.0.0-beta.13
 - **bug fixes**: fixed issue #112 can't attach existing volume to server after recreating server
 - **bug fixes**: `cube server` could not be deleted

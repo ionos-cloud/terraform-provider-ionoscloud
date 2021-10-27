@@ -12,7 +12,6 @@ import (
 
 func TestAccFirewallBasic(t *testing.T) {
 	var firewall ionoscloud.FirewallRule
-	firewallName := "firewall"
 
 	resource.Test(t, resource.TestCase{
 		PreCheck: func() {
@@ -22,31 +21,31 @@ func TestAccFirewallBasic(t *testing.T) {
 		CheckDestroy:      testAccCheckFirewallDestroyCheck,
 		Steps: []resource.TestStep{
 			{
-				Config: fmt.Sprintf(testAccCheckFirewallConfigBasic, firewallName),
+				Config: testAccCheckFirewallConfigBasic,
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheckFirewallExists("ionoscloud_firewall.webserver_http", &firewall),
-					resource.TestCheckResourceAttr("ionoscloud_firewall.webserver_http", "name", firewallName),
-					resource.TestCheckResourceAttr("ionoscloud_firewall.webserver_http", "protocol", "ICMP"),
-					resource.TestCheckResourceAttr("ionoscloud_firewall.webserver_http", "source_mac", "00:0a:95:9d:68:16"),
-					resource.TestCheckResourceAttrPair("ionoscloud_firewall.webserver_http", "source_ip", "ionoscloud_ipblock.ipblock", "ips.0"),
-					resource.TestCheckResourceAttrPair("ionoscloud_firewall.webserver_http", "target_ip", "ionoscloud_ipblock.ipblock", "ips.1"),
-					resource.TestCheckResourceAttr("ionoscloud_firewall.webserver_http", "icmp_type", "1"),
-					resource.TestCheckResourceAttr("ionoscloud_firewall.webserver_http", "icmp_code", "8"),
-					resource.TestCheckResourceAttr("ionoscloud_firewall.webserver_http", "type", "INGRESS"),
+					testAccCheckFirewallExists(FirewallResource+"."+FirewallTestResource, &firewall),
+					resource.TestCheckResourceAttr(FirewallResource+"."+FirewallTestResource, "name", FirewallTestResource),
+					resource.TestCheckResourceAttr(FirewallResource+"."+FirewallTestResource, "protocol", "ICMP"),
+					resource.TestCheckResourceAttr(FirewallResource+"."+FirewallTestResource, "source_mac", "00:0a:95:9d:68:16"),
+					resource.TestCheckResourceAttrPair(FirewallResource+"."+FirewallTestResource, "source_ip", "ionoscloud_ipblock.ipblock", "ips.0"),
+					resource.TestCheckResourceAttrPair(FirewallResource+"."+FirewallTestResource, "target_ip", "ionoscloud_ipblock.ipblock", "ips.1"),
+					resource.TestCheckResourceAttr(FirewallResource+"."+FirewallTestResource, "icmp_type", "1"),
+					resource.TestCheckResourceAttr(FirewallResource+"."+FirewallTestResource, "icmp_code", "8"),
+					resource.TestCheckResourceAttr(FirewallResource+"."+FirewallTestResource, "type", "INGRESS"),
 				),
 			},
 			{
 				Config: testAccCheckFirewallConfigUpdate,
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheckFirewallExists("ionoscloud_firewall.webserver_http", &firewall),
-					resource.TestCheckResourceAttr("ionoscloud_firewall.webserver_http", "name", "updated"),
-					resource.TestCheckResourceAttr("ionoscloud_firewall.webserver_http", "protocol", "ICMP"),
-					resource.TestCheckResourceAttr("ionoscloud_firewall.webserver_http", "source_mac", "00:0a:95:9d:68:17"),
-					resource.TestCheckResourceAttrPair("ionoscloud_firewall.webserver_http", "source_ip", "ionoscloud_ipblock.ipblock_update", "ips.0"),
-					resource.TestCheckResourceAttrPair("ionoscloud_firewall.webserver_http", "target_ip", "ionoscloud_ipblock.ipblock_update", "ips.1"),
-					resource.TestCheckResourceAttr("ionoscloud_firewall.webserver_http", "icmp_type", "2"),
-					resource.TestCheckResourceAttr("ionoscloud_firewall.webserver_http", "icmp_code", "7"),
-					resource.TestCheckResourceAttr("ionoscloud_firewall.webserver_http", "type", "EGRESS"),
+					testAccCheckFirewallExists(FirewallResource+"."+FirewallTestResource, &firewall),
+					resource.TestCheckResourceAttr(FirewallResource+"."+FirewallTestResource, "name", UpdatedResources),
+					resource.TestCheckResourceAttr(FirewallResource+"."+FirewallTestResource, "protocol", "ICMP"),
+					resource.TestCheckResourceAttr(FirewallResource+"."+FirewallTestResource, "source_mac", "00:0a:95:9d:68:17"),
+					resource.TestCheckResourceAttrPair(FirewallResource+"."+FirewallTestResource, "source_ip", "ionoscloud_ipblock.ipblock_update", "ips.0"),
+					resource.TestCheckResourceAttrPair(FirewallResource+"."+FirewallTestResource, "target_ip", "ionoscloud_ipblock.ipblock_update", "ips.1"),
+					resource.TestCheckResourceAttr(FirewallResource+"."+FirewallTestResource, "icmp_type", "2"),
+					resource.TestCheckResourceAttr(FirewallResource+"."+FirewallTestResource, "icmp_code", "7"),
+					resource.TestCheckResourceAttr(FirewallResource+"."+FirewallTestResource, "type", "EGRESS"),
 				),
 			},
 		},
@@ -55,7 +54,6 @@ func TestAccFirewallBasic(t *testing.T) {
 
 func TestAccFirewallUDP(t *testing.T) {
 	var firewall ionoscloud.FirewallRule
-	firewallName := "firewall"
 
 	resource.Test(t, resource.TestCase{
 		PreCheck: func() {
@@ -65,31 +63,31 @@ func TestAccFirewallUDP(t *testing.T) {
 		CheckDestroy:      testAccCheckFirewallDestroyCheck,
 		Steps: []resource.TestStep{
 			{
-				Config: fmt.Sprintf(testAccCheckFirewallConfigUDP, firewallName),
+				Config: testAccCheckFirewallConfigUDP,
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheckFirewallExists("ionoscloud_firewall.webserver_http", &firewall),
-					resource.TestCheckResourceAttr("ionoscloud_firewall.webserver_http", "name", firewallName),
-					resource.TestCheckResourceAttr("ionoscloud_firewall.webserver_http", "protocol", "UDP"),
-					resource.TestCheckResourceAttr("ionoscloud_firewall.webserver_http", "source_mac", "00:0a:95:9d:68:16"),
-					resource.TestCheckResourceAttrPair("ionoscloud_firewall.webserver_http", "source_ip", "ionoscloud_ipblock.ipblock", "ips.0"),
-					resource.TestCheckResourceAttrPair("ionoscloud_firewall.webserver_http", "target_ip", "ionoscloud_ipblock.ipblock", "ips.1"),
-					resource.TestCheckResourceAttr("ionoscloud_firewall.webserver_http", "port_range_start", "80"),
-					resource.TestCheckResourceAttr("ionoscloud_firewall.webserver_http", "port_range_end", "80"),
-					resource.TestCheckResourceAttr("ionoscloud_firewall.webserver_http", "type", "INGRESS"),
+					testAccCheckFirewallExists(FirewallResource+"."+FirewallTestResource, &firewall),
+					resource.TestCheckResourceAttr(FirewallResource+"."+FirewallTestResource, "name", FirewallTestResource),
+					resource.TestCheckResourceAttr(FirewallResource+"."+FirewallTestResource, "protocol", "UDP"),
+					resource.TestCheckResourceAttr(FirewallResource+"."+FirewallTestResource, "source_mac", "00:0a:95:9d:68:16"),
+					resource.TestCheckResourceAttrPair(FirewallResource+"."+FirewallTestResource, "source_ip", "ionoscloud_ipblock.ipblock", "ips.0"),
+					resource.TestCheckResourceAttrPair(FirewallResource+"."+FirewallTestResource, "target_ip", "ionoscloud_ipblock.ipblock", "ips.1"),
+					resource.TestCheckResourceAttr(FirewallResource+"."+FirewallTestResource, "port_range_start", "80"),
+					resource.TestCheckResourceAttr(FirewallResource+"."+FirewallTestResource, "port_range_end", "80"),
+					resource.TestCheckResourceAttr(FirewallResource+"."+FirewallTestResource, "type", "INGRESS"),
 				),
 			},
 			{
 				Config: testAccCheckFirewallConfigUpdateUDP,
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheckFirewallExists("ionoscloud_firewall.webserver_http", &firewall),
-					resource.TestCheckResourceAttr("ionoscloud_firewall.webserver_http", "name", "updated"),
-					resource.TestCheckResourceAttr("ionoscloud_firewall.webserver_http", "protocol", "UDP"),
-					resource.TestCheckResourceAttr("ionoscloud_firewall.webserver_http", "source_mac", "00:0a:95:9d:68:17"),
-					resource.TestCheckResourceAttrPair("ionoscloud_firewall.webserver_http", "source_ip", "ionoscloud_ipblock.ipblock_update", "ips.0"),
-					resource.TestCheckResourceAttrPair("ionoscloud_firewall.webserver_http", "target_ip", "ionoscloud_ipblock.ipblock_update", "ips.1"),
-					resource.TestCheckResourceAttr("ionoscloud_firewall.webserver_http", "port_range_start", "81"),
-					resource.TestCheckResourceAttr("ionoscloud_firewall.webserver_http", "port_range_end", "82"),
-					resource.TestCheckResourceAttr("ionoscloud_firewall.webserver_http", "type", "EGRESS"),
+					testAccCheckFirewallExists(FirewallResource+"."+FirewallTestResource, &firewall),
+					resource.TestCheckResourceAttr(FirewallResource+"."+FirewallTestResource, "name", UpdatedResources),
+					resource.TestCheckResourceAttr(FirewallResource+"."+FirewallTestResource, "protocol", "UDP"),
+					resource.TestCheckResourceAttr(FirewallResource+"."+FirewallTestResource, "source_mac", "00:0a:95:9d:68:17"),
+					resource.TestCheckResourceAttrPair(FirewallResource+"."+FirewallTestResource, "source_ip", "ionoscloud_ipblock.ipblock_update", "ips.0"),
+					resource.TestCheckResourceAttrPair(FirewallResource+"."+FirewallTestResource, "target_ip", "ionoscloud_ipblock.ipblock_update", "ips.1"),
+					resource.TestCheckResourceAttr(FirewallResource+"."+FirewallTestResource, "port_range_start", "81"),
+					resource.TestCheckResourceAttr(FirewallResource+"."+FirewallTestResource, "port_range_end", "82"),
+					resource.TestCheckResourceAttr(FirewallResource+"."+FirewallTestResource, "type", "EGRESS"),
 				),
 			},
 		},
@@ -106,7 +104,7 @@ func testAccCheckFirewallDestroyCheck(s *terraform.State) error {
 	}
 
 	for _, rs := range s.RootModule().Resources {
-		if rs.Type != "ionoscloud_firewall" {
+		if rs.Type != FirewallResource {
 			continue
 		}
 
@@ -161,15 +159,10 @@ func testAccCheckFirewallExists(n string, firewall *ionoscloud.FirewallRule) res
 	}
 }
 
-const testAccCheckFirewallConfigBasic = `
-resource "ionoscloud_datacenter" "foobar" {
-	name       = "firewall-test"
-	location = "us/las"
-}
-
-resource "ionoscloud_server" "webserver" {
+const testAccCheckFirewallConfigBasic = testAccCheckDatacenterConfigBasic + `
+resource ` + ServerResource + ` ` + ServerTestResource + ` {
   name = "webserver"
-  datacenter_id = "${ionoscloud_datacenter.foobar.id}"
+  datacenter_id = ` + DatacenterResource + `.` + DatacenterTestResource + `.id
   cores = 1
   ram = 1024
   availability_zone = "ZONE_1"
@@ -189,8 +182,8 @@ resource "ionoscloud_server" "webserver" {
 }
 
 resource "ionoscloud_nic" "database_nic" {
-  datacenter_id = "${ionoscloud_datacenter.foobar.id}"
-  server_id = "${ionoscloud_server.webserver.id}"
+  datacenter_id = ` + DatacenterResource + `.` + DatacenterTestResource + `.id
+  server_id = ` + ServerResource + `.` + ServerTestResource + `.id
   lan = 2
   dhcp = true
   firewall_active = true
@@ -198,17 +191,17 @@ resource "ionoscloud_nic" "database_nic" {
 }
 
 resource "ionoscloud_ipblock" "ipblock" {
-  location = ionoscloud_datacenter.foobar.location
+  location = ` + DatacenterResource + `.` + DatacenterTestResource + `.location
   size = 2
   name = "firewall_ipblock"
 }
 
-resource "ionoscloud_firewall" "webserver_http" {
-  datacenter_id = "${ionoscloud_datacenter.foobar.id}"
-  server_id = "${ionoscloud_server.webserver.id}"
+resource ` + FirewallResource + ` ` + FirewallTestResource + ` {
+  datacenter_id = ` + DatacenterResource + `.` + DatacenterTestResource + `.id
+  server_id = ` + ServerResource + `.` + ServerTestResource + `.id
   nic_id = "${ionoscloud_nic.database_nic.id}"
   protocol = "ICMP"
-  name = "%s"
+  name = "` + FirewallTestResource + `"
   source_mac = "00:0a:95:9d:68:16"
   source_ip = ionoscloud_ipblock.ipblock.ips[0]
   target_ip = ionoscloud_ipblock.ipblock.ips[1]
@@ -218,15 +211,10 @@ resource "ionoscloud_firewall" "webserver_http" {
 }
 `
 
-const testAccCheckFirewallConfigUpdate = `
-resource "ionoscloud_datacenter" "foobar" {
-	name       = "firewall-test"
-	location = "us/las"
-}
-
-resource "ionoscloud_server" "webserver" {
+const testAccCheckFirewallConfigUpdate = testAccCheckDatacenterConfigBasic + `
+resource ` + ServerResource + ` ` + ServerTestResource + ` {
   name = "webserver"
-  datacenter_id = "${ionoscloud_datacenter.foobar.id}"
+  datacenter_id = ` + DatacenterResource + `.` + DatacenterTestResource + `.id
   cores = 1
   ram = 1024
   availability_zone = "ZONE_1"
@@ -246,8 +234,8 @@ resource "ionoscloud_server" "webserver" {
 }
 
 resource "ionoscloud_nic" "database_nic" {
-  datacenter_id = "${ionoscloud_datacenter.foobar.id}"
-  server_id = "${ionoscloud_server.webserver.id}"
+  datacenter_id = ` + DatacenterResource + `.` + DatacenterTestResource + `.id
+  server_id = ` + ServerResource + `.` + ServerTestResource + `.id
   lan = 2
   dhcp = true
   firewall_active = true
@@ -255,17 +243,16 @@ resource "ionoscloud_nic" "database_nic" {
 }
 
 resource "ionoscloud_ipblock" "ipblock_update" {
-  location = ionoscloud_datacenter.foobar.location
+  location = ` + DatacenterResource + `.` + DatacenterTestResource + `.location
   size = 2
   name = "firewall_ipblock"
 }
-
-resource "ionoscloud_firewall" "webserver_http" {
-  datacenter_id = "${ionoscloud_datacenter.foobar.id}"
-  server_id = "${ionoscloud_server.webserver.id}"
+resource ` + FirewallResource + ` ` + FirewallTestResource + `  {
+  datacenter_id = ` + DatacenterResource + `.` + DatacenterTestResource + `.id
+  server_id = ` + ServerResource + `.` + ServerTestResource + `.id
   nic_id = "${ionoscloud_nic.database_nic.id}"
   protocol = "ICMP"
-  name = "updated"
+  name = "` + UpdatedResources + `"
   source_mac = "00:0a:95:9d:68:17"
   source_ip = ionoscloud_ipblock.ipblock_update.ips[0]
   target_ip = ionoscloud_ipblock.ipblock_update.ips[1]
@@ -275,15 +262,10 @@ resource "ionoscloud_firewall" "webserver_http" {
 }
 `
 
-const testAccCheckFirewallConfigUDP = `
-resource "ionoscloud_datacenter" "foobar" {
-	name       = "firewall-test"
-	location = "us/las"
-}
-
-resource "ionoscloud_server" "webserver" {
+const testAccCheckFirewallConfigUDP = testAccCheckDatacenterConfigBasic + `
+resource ` + ServerResource + ` ` + ServerTestResource + ` {
   name = "webserver"
-  datacenter_id = "${ionoscloud_datacenter.foobar.id}"
+  datacenter_id = ` + DatacenterResource + `.` + DatacenterTestResource + `.id
   cores = 1
   ram = 1024
   availability_zone = "ZONE_1"
@@ -303,8 +285,8 @@ resource "ionoscloud_server" "webserver" {
 }
 
 resource "ionoscloud_nic" "database_nic" {
-  datacenter_id = "${ionoscloud_datacenter.foobar.id}"
-  server_id = "${ionoscloud_server.webserver.id}"
+  datacenter_id = ` + DatacenterResource + `.` + DatacenterTestResource + `.id
+  server_id = ` + ServerResource + `.` + ServerTestResource + `.id
   lan = 2
   dhcp = true
   firewall_active = true
@@ -312,17 +294,16 @@ resource "ionoscloud_nic" "database_nic" {
 }
 
 resource "ionoscloud_ipblock" "ipblock" {
-  location = ionoscloud_datacenter.foobar.location
+  location = ` + DatacenterResource + `.` + DatacenterTestResource + `.location
   size = 2
   name = "firewall_ipblock"
 }
-
-resource "ionoscloud_firewall" "webserver_http" {
-  datacenter_id = "${ionoscloud_datacenter.foobar.id}"
-  server_id = "${ionoscloud_server.webserver.id}"
+resource ` + FirewallResource + ` ` + FirewallTestResource + `  {
+  datacenter_id = ` + DatacenterResource + `.` + DatacenterTestResource + `.id
+  server_id = ` + ServerResource + `.` + ServerTestResource + `.id
   nic_id = "${ionoscloud_nic.database_nic.id}"
   protocol = "UDP"
-  name = "%s"
+  name = "` + FirewallTestResource + `"
   port_range_start = 80
   port_range_end = 80
   source_mac = "00:0a:95:9d:68:16"
@@ -332,15 +313,10 @@ resource "ionoscloud_firewall" "webserver_http" {
 }
 `
 
-const testAccCheckFirewallConfigUpdateUDP = `
-resource "ionoscloud_datacenter" "foobar" {
-	name       = "firewall-test"
-	location = "us/las"
-}
-
-resource "ionoscloud_server" "webserver" {
+const testAccCheckFirewallConfigUpdateUDP = testAccCheckDatacenterConfigBasic + `
+resource ` + ServerResource + ` ` + ServerTestResource + ` {
   name = "webserver"
-  datacenter_id = "${ionoscloud_datacenter.foobar.id}"
+  datacenter_id = ` + DatacenterResource + `.` + DatacenterTestResource + `.id
   cores = 1
   ram = 1024
   availability_zone = "ZONE_1"
@@ -360,8 +336,8 @@ resource "ionoscloud_server" "webserver" {
 }
 
 resource "ionoscloud_nic" "database_nic" {
-  datacenter_id = "${ionoscloud_datacenter.foobar.id}"
-  server_id = "${ionoscloud_server.webserver.id}"
+  datacenter_id = ` + DatacenterResource + `.` + DatacenterTestResource + `.id
+  server_id = ` + ServerResource + `.` + ServerTestResource + `.id
   lan = 2
   dhcp = true
   firewall_active = true
@@ -369,17 +345,16 @@ resource "ionoscloud_nic" "database_nic" {
 }
 
 resource "ionoscloud_ipblock" "ipblock_update" {
-  location = ionoscloud_datacenter.foobar.location
+  location = ` + DatacenterResource + `.` + DatacenterTestResource + `.location
   size = 2
   name = "firewall_ipblock"
 }
-
-resource "ionoscloud_firewall" "webserver_http" {
-  datacenter_id = "${ionoscloud_datacenter.foobar.id}"
-  server_id = "${ionoscloud_server.webserver.id}"
+resource ` + FirewallResource + ` ` + FirewallTestResource + ` {
+  datacenter_id = ` + DatacenterResource + `.` + DatacenterTestResource + `.id
+  server_id = ` + ServerResource + `.` + ServerTestResource + `.id
   nic_id = "${ionoscloud_nic.database_nic.id}"
   protocol = "UDP"
-  name = "updated"
+  name = "` + UpdatedResources + `"
   port_range_start = 81
   port_range_end = 82
   source_mac = "00:0a:95:9d:68:17"

@@ -25,70 +25,70 @@ func TestAccServerBasic(t *testing.T) {
 			{
 				Config: testAccCheckServerConfigBasic,
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheckServerExists("ionoscloud_server."+ServerResourceName, &server),
-					resource.TestCheckResourceAttr("ionoscloud_server."+ServerResourceName, "name", ServerResourceName),
-					resource.TestCheckResourceAttr("ionoscloud_server."+ServerResourceName, "cores", "1"),
-					resource.TestCheckResourceAttr("ionoscloud_server."+ServerResourceName, "ram", "1024"),
-					resource.TestCheckResourceAttr("ionoscloud_server."+ServerResourceName, "availability_zone", "ZONE_1"),
-					resource.TestCheckResourceAttr("ionoscloud_server."+ServerResourceName, "cpu_family", "AMD_OPTERON"),
-					testImageNotNull("ionoscloud_server", "boot_image"),
-					resource.TestCheckResourceAttr("ionoscloud_server."+ServerResourceName, "image_password", "K3tTj8G14a3EgKyNeeiY"),
-					resource.TestCheckResourceAttr("ionoscloud_server."+ServerResourceName, "type", "ENTERPRISE"),
-					resource.TestCheckResourceAttr("ionoscloud_server."+ServerResourceName, "volume.0.name", "system"),
-					resource.TestCheckResourceAttr("ionoscloud_server."+ServerResourceName, "volume.0.size", "5"),
-					resource.TestCheckResourceAttr("ionoscloud_server."+ServerResourceName, "volume.0.disk_type", "SSD Standard"),
-					resource.TestCheckResourceAttrPair("ionoscloud_server."+ServerResourceName, "volume.0.backup_unit_id", "ionoscloud_backup_unit.example", "id"),
-					resource.TestCheckResourceAttr("ionoscloud_server."+ServerResourceName, "volume.0.bus", "VIRTIO"),
-					resource.TestCheckResourceAttr("ionoscloud_server."+ServerResourceName, "volume.0.availability_zone", "ZONE_1"),
-					resource.TestCheckResourceAttrPair("ionoscloud_server."+ServerResourceName, "nic.0.lan", "ionoscloud_lan.webserver_lan", "id"),
-					resource.TestCheckResourceAttr("ionoscloud_server."+ServerResourceName, "nic.0.name", "system"),
-					resource.TestCheckResourceAttr("ionoscloud_server."+ServerResourceName, "nic.0.dhcp", "true"),
-					resource.TestCheckResourceAttr("ionoscloud_server."+ServerResourceName, "nic.0.firewall_active", "true"),
-					resource.TestCheckResourceAttr("ionoscloud_server."+ServerResourceName, "nic.0.firewall_type", "BIDIRECTIONAL"),
-					resource.TestCheckResourceAttrPair("ionoscloud_server."+ServerResourceName, "nic.0.ips.0", "ionoscloud_ipblock.webserver_ipblock", "ips.0"),
-					resource.TestCheckResourceAttrPair("ionoscloud_server."+ServerResourceName, "nic.0.ips.1", "ionoscloud_ipblock.webserver_ipblock", "ips.1"),
-					resource.TestCheckResourceAttr("ionoscloud_server."+ServerResourceName, "nic.0.firewall.0.protocol", "TCP"),
-					resource.TestCheckResourceAttr("ionoscloud_server."+ServerResourceName, "nic.0.firewall.0.name", "SSH"),
-					resource.TestCheckResourceAttr("ionoscloud_server."+ServerResourceName, "nic.0.firewall.0.port_range_start", "22"),
-					resource.TestCheckResourceAttr("ionoscloud_server."+ServerResourceName, "nic.0.firewall.0.port_range_end", "22"),
-					resource.TestCheckResourceAttr("ionoscloud_server."+ServerResourceName, "nic.0.firewall.0.source_mac", "00:0a:95:9d:68:17"),
-					resource.TestCheckResourceAttrPair("ionoscloud_server."+ServerResourceName, "nic.0.firewall.0.source_ip", "ionoscloud_ipblock.webserver_ipblock", "ips.2"),
-					resource.TestCheckResourceAttrPair("ionoscloud_server."+ServerResourceName, "nic.0.firewall.0.target_ip", "ionoscloud_ipblock.webserver_ipblock", "ips.3"),
-					resource.TestCheckResourceAttr("ionoscloud_server."+ServerResourceName, "nic.0.firewall.0.type", "EGRESS"),
+					testAccCheckServerExists(ServerResource+"."+ServerTestResource, &server),
+					resource.TestCheckResourceAttr(ServerResource+"."+ServerTestResource, "name", ServerTestResource),
+					resource.TestCheckResourceAttr(ServerResource+"."+ServerTestResource, "cores", "1"),
+					resource.TestCheckResourceAttr(ServerResource+"."+ServerTestResource, "ram", "1024"),
+					resource.TestCheckResourceAttr(ServerResource+"."+ServerTestResource, "availability_zone", "ZONE_1"),
+					resource.TestCheckResourceAttr(ServerResource+"."+ServerTestResource, "cpu_family", "AMD_OPTERON"),
+					testImageNotNull(ServerResource, "boot_image"),
+					resource.TestCheckResourceAttr(ServerResource+"."+ServerTestResource, "image_password", "K3tTj8G14a3EgKyNeeiY"),
+					resource.TestCheckResourceAttr(ServerResource+"."+ServerTestResource, "type", "ENTERPRISE"),
+					resource.TestCheckResourceAttr(ServerResource+"."+ServerTestResource, "volume.0.name", "system"),
+					resource.TestCheckResourceAttr(ServerResource+"."+ServerTestResource, "volume.0.size", "5"),
+					resource.TestCheckResourceAttr(ServerResource+"."+ServerTestResource, "volume.0.disk_type", "SSD Standard"),
+					resource.TestCheckResourceAttrPair(ServerResource+"."+ServerTestResource, "volume.0.backup_unit_id", BackupUnitResource+"."+BackupUnitTestResource, "id"),
+					resource.TestCheckResourceAttr(ServerResource+"."+ServerTestResource, "volume.0.bus", "VIRTIO"),
+					resource.TestCheckResourceAttr(ServerResource+"."+ServerTestResource, "volume.0.availability_zone", "ZONE_1"),
+					resource.TestCheckResourceAttrPair(ServerResource+"."+ServerTestResource, "nic.0.lan", LanResource+"."+LanTestResource, "id"),
+					resource.TestCheckResourceAttr(ServerResource+"."+ServerTestResource, "nic.0.name", "system"),
+					resource.TestCheckResourceAttr(ServerResource+"."+ServerTestResource, "nic.0.dhcp", "true"),
+					resource.TestCheckResourceAttr(ServerResource+"."+ServerTestResource, "nic.0.firewall_active", "true"),
+					resource.TestCheckResourceAttr(ServerResource+"."+ServerTestResource, "nic.0.firewall_type", "BIDIRECTIONAL"),
+					resource.TestCheckResourceAttrPair(ServerResource+"."+ServerTestResource, "nic.0.ips.0", "ionoscloud_ipblock.webserver_ipblock", "ips.0"),
+					resource.TestCheckResourceAttrPair(ServerResource+"."+ServerTestResource, "nic.0.ips.1", "ionoscloud_ipblock.webserver_ipblock", "ips.1"),
+					resource.TestCheckResourceAttr(ServerResource+"."+ServerTestResource, "nic.0.firewall.0.protocol", "TCP"),
+					resource.TestCheckResourceAttr(ServerResource+"."+ServerTestResource, "nic.0.firewall.0.name", "SSH"),
+					resource.TestCheckResourceAttr(ServerResource+"."+ServerTestResource, "nic.0.firewall.0.port_range_start", "22"),
+					resource.TestCheckResourceAttr(ServerResource+"."+ServerTestResource, "nic.0.firewall.0.port_range_end", "22"),
+					resource.TestCheckResourceAttr(ServerResource+"."+ServerTestResource, "nic.0.firewall.0.source_mac", "00:0a:95:9d:68:17"),
+					resource.TestCheckResourceAttrPair(ServerResource+"."+ServerTestResource, "nic.0.firewall.0.source_ip", "ionoscloud_ipblock.webserver_ipblock", "ips.2"),
+					resource.TestCheckResourceAttrPair(ServerResource+"."+ServerTestResource, "nic.0.firewall.0.target_ip", "ionoscloud_ipblock.webserver_ipblock", "ips.3"),
+					resource.TestCheckResourceAttr(ServerResource+"."+ServerTestResource, "nic.0.firewall.0.type", "EGRESS"),
 				),
 			},
 			{
 				Config: testAccCheckServerConfigUpdate,
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheckServerExists("ionoscloud_server."+ServerResourceName, &server),
-					resource.TestCheckResourceAttr("ionoscloud_server."+ServerResourceName, "name", UpdatedResources),
-					resource.TestCheckResourceAttr("ionoscloud_server."+ServerResourceName, "cores", "2"),
-					resource.TestCheckResourceAttr("ionoscloud_server."+ServerResourceName, "ram", "2048"),
-					resource.TestCheckResourceAttr("ionoscloud_server."+ServerResourceName, "availability_zone", "ZONE_1"),
-					resource.TestCheckResourceAttr("ionoscloud_server."+ServerResourceName, "cpu_family", "AMD_OPTERON"),
-					testImageNotNull("ionoscloud_server", "boot_image"),
-					resource.TestCheckResourceAttr("ionoscloud_server."+ServerResourceName, "image_password", "K3tTj8G14a3EgKyNeeiYsasad"),
-					resource.TestCheckResourceAttr("ionoscloud_server."+ServerResourceName, "type", "ENTERPRISE"),
-					resource.TestCheckResourceAttr("ionoscloud_server."+ServerResourceName, "volume.0.name", UpdatedResources),
-					resource.TestCheckResourceAttr("ionoscloud_server."+ServerResourceName, "volume.0.size", "6"),
-					resource.TestCheckResourceAttr("ionoscloud_server."+ServerResourceName, "volume.0.disk_type", "SSD Standard"),
-					resource.TestCheckResourceAttrPair("ionoscloud_server."+ServerResourceName, "volume.0.backup_unit_id", "ionoscloud_backup_unit.example", "id"),
-					resource.TestCheckResourceAttr("ionoscloud_server."+ServerResourceName, "volume.0.bus", "IDE"),
-					resource.TestCheckResourceAttr("ionoscloud_server."+ServerResourceName, "volume.0.availability_zone", "ZONE_1"),
-					resource.TestCheckResourceAttrPair("ionoscloud_server."+ServerResourceName, "nic.0.lan", "ionoscloud_lan.webserver_lan", "id"),
-					resource.TestCheckResourceAttr("ionoscloud_server."+ServerResourceName, "nic.0.name", UpdatedResources),
-					resource.TestCheckResourceAttr("ionoscloud_server."+ServerResourceName, "nic.0.dhcp", "false"),
-					resource.TestCheckResourceAttr("ionoscloud_server."+ServerResourceName, "nic.0.firewall_active", "false"),
-					resource.TestCheckResourceAttrPair("ionoscloud_server."+ServerResourceName, "nic.0.ips.0", "ionoscloud_ipblock.webserver_ipblock_update", "ips.0"),
-					resource.TestCheckResourceAttrPair("ionoscloud_server."+ServerResourceName, "nic.0.ips.1", "ionoscloud_ipblock.webserver_ipblock_update", "ips.1"),
-					resource.TestCheckResourceAttr("ionoscloud_server."+ServerResourceName, "nic.0.firewall.0.protocol", "TCP"),
-					resource.TestCheckResourceAttr("ionoscloud_server."+ServerResourceName, "nic.0.firewall.0.name", UpdatedResources),
-					resource.TestCheckResourceAttr("ionoscloud_server."+ServerResourceName, "nic.0.firewall.0.port_range_start", "21"),
-					resource.TestCheckResourceAttr("ionoscloud_server."+ServerResourceName, "nic.0.firewall.0.port_range_end", "23"),
-					resource.TestCheckResourceAttr("ionoscloud_server."+ServerResourceName, "nic.0.firewall.0.source_mac", "00:0a:95:9d:68:18"),
-					resource.TestCheckResourceAttrPair("ionoscloud_server."+ServerResourceName, "nic.0.firewall.0.source_ip", "ionoscloud_ipblock.webserver_ipblock_update", "ips.2"),
-					resource.TestCheckResourceAttrPair("ionoscloud_server."+ServerResourceName, "nic.0.firewall.0.target_ip", "ionoscloud_ipblock.webserver_ipblock_update", "ips.3"),
-					resource.TestCheckResourceAttr("ionoscloud_server."+ServerResourceName, "nic.0.firewall.0.type", "INGRESS"),
+					testAccCheckServerExists(ServerResource+"."+ServerTestResource, &server),
+					resource.TestCheckResourceAttr(ServerResource+"."+ServerTestResource, "name", UpdatedResources),
+					resource.TestCheckResourceAttr(ServerResource+"."+ServerTestResource, "cores", "2"),
+					resource.TestCheckResourceAttr(ServerResource+"."+ServerTestResource, "ram", "2048"),
+					resource.TestCheckResourceAttr(ServerResource+"."+ServerTestResource, "availability_zone", "ZONE_1"),
+					resource.TestCheckResourceAttr(ServerResource+"."+ServerTestResource, "cpu_family", "AMD_OPTERON"),
+					testImageNotNull(ServerResource, "boot_image"),
+					resource.TestCheckResourceAttr(ServerResource+"."+ServerTestResource, "image_password", "K3tTj8G14a3EgKyNeeiYsasad"),
+					resource.TestCheckResourceAttr(ServerResource+"."+ServerTestResource, "volume.0.name", UpdatedResources),
+					resource.TestCheckResourceAttr(ServerResource+"."+ServerTestResource, "type", "ENTERPRISE"),
+					resource.TestCheckResourceAttr(ServerResource+"."+ServerTestResource, "volume.0.size", "6"),
+					resource.TestCheckResourceAttr(ServerResource+"."+ServerTestResource, "volume.0.disk_type", "SSD Standard"),
+					resource.TestCheckResourceAttrPair(ServerResource+"."+ServerTestResource, "volume.0.backup_unit_id", BackupUnitResource+"."+BackupUnitTestResource, "id"),
+					resource.TestCheckResourceAttr(ServerResource+"."+ServerTestResource, "volume.0.bus", "IDE"),
+					resource.TestCheckResourceAttr(ServerResource+"."+ServerTestResource, "volume.0.availability_zone", "ZONE_1"),
+					resource.TestCheckResourceAttrPair(ServerResource+"."+ServerTestResource, "nic.0.lan", LanResource+"."+LanTestResource, "id"),
+					resource.TestCheckResourceAttr(ServerResource+"."+ServerTestResource, "nic.0.name", UpdatedResources),
+					resource.TestCheckResourceAttr(ServerResource+"."+ServerTestResource, "nic.0.dhcp", "false"),
+					resource.TestCheckResourceAttr(ServerResource+"."+ServerTestResource, "nic.0.firewall_active", "false"),
+					resource.TestCheckResourceAttrPair(ServerResource+"."+ServerTestResource, "nic.0.ips.0", "ionoscloud_ipblock.webserver_ipblock_update", "ips.0"),
+					resource.TestCheckResourceAttrPair(ServerResource+"."+ServerTestResource, "nic.0.ips.1", "ionoscloud_ipblock.webserver_ipblock_update", "ips.1"),
+					resource.TestCheckResourceAttr(ServerResource+"."+ServerTestResource, "nic.0.firewall.0.protocol", "TCP"),
+					resource.TestCheckResourceAttr(ServerResource+"."+ServerTestResource, "nic.0.firewall.0.name", UpdatedResources),
+					resource.TestCheckResourceAttr(ServerResource+"."+ServerTestResource, "nic.0.firewall.0.port_range_start", "21"),
+					resource.TestCheckResourceAttr(ServerResource+"."+ServerTestResource, "nic.0.firewall.0.port_range_end", "23"),
+					resource.TestCheckResourceAttr(ServerResource+"."+ServerTestResource, "nic.0.firewall.0.source_mac", "00:0a:95:9d:68:18"),
+					resource.TestCheckResourceAttrPair(ServerResource+"."+ServerTestResource, "nic.0.firewall.0.source_ip", "ionoscloud_ipblock.webserver_ipblock_update", "ips.2"),
+					resource.TestCheckResourceAttrPair(ServerResource+"."+ServerTestResource, "nic.0.firewall.0.target_ip", "ionoscloud_ipblock.webserver_ipblock_update", "ips.3"),
+					resource.TestCheckResourceAttr(ServerResource+"."+ServerTestResource, "nic.0.firewall.0.type", "INGRESS"),
 				),
 			},
 		},
@@ -107,23 +107,23 @@ func TestAccServerBootCdromNoImage(t *testing.T) {
 			{
 				Config: testAccCheckServerConfigBootCdromNoImage,
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheckServerExists("ionoscloud_server."+ServerResourceName, &server),
-					resource.TestCheckResourceAttr("ionoscloud_server."+ServerResourceName, "name", ServerResourceName),
-					resource.TestCheckResourceAttr("ionoscloud_server."+ServerResourceName, "cores", "1"),
-					resource.TestCheckResourceAttr("ionoscloud_server."+ServerResourceName, "ram", "1024"),
-					resource.TestCheckResourceAttr("ionoscloud_server."+ServerResourceName, "availability_zone", "ZONE_1"),
-					resource.TestCheckResourceAttr("ionoscloud_server."+ServerResourceName, "cpu_family", "INTEL_SKYLAKE"),
-					resource.TestCheckResourceAttr("ionoscloud_server."+ServerResourceName, "volume.0.name", ServerResourceName),
-					resource.TestCheckResourceAttr("ionoscloud_server."+ServerResourceName, "volume.0.size", "5"),
-					resource.TestCheckResourceAttr("ionoscloud_server."+ServerResourceName, "volume.0.disk_type", "SSD Standard"),
-					resource.TestCheckResourceAttr("ionoscloud_server."+ServerResourceName, "volume.0.licence_type", "OTHER"),
-					resource.TestCheckResourceAttrPair("ionoscloud_server."+ServerResourceName, "nic.0.lan", "ionoscloud_lan.webserver_lan", "id"),
-					resource.TestCheckResourceAttr("ionoscloud_server."+ServerResourceName, "nic.0.dhcp", "true"),
-					resource.TestCheckResourceAttr("ionoscloud_server."+ServerResourceName, "nic.0.firewall_active", "true"),
-					resource.TestCheckResourceAttr("ionoscloud_server."+ServerResourceName, "nic.0.firewall.0.protocol", "TCP"),
-					resource.TestCheckResourceAttr("ionoscloud_server."+ServerResourceName, "nic.0.firewall.0.name", ServerResourceName),
-					resource.TestCheckResourceAttr("ionoscloud_server."+ServerResourceName, "nic.0.firewall.0.port_range_start", "22"),
-					resource.TestCheckResourceAttr("ionoscloud_server."+ServerResourceName, "nic.0.firewall.0.port_range_end", "22"),
+					testAccCheckServerExists(ServerResource+"."+ServerTestResource, &server),
+					resource.TestCheckResourceAttr(ServerResource+"."+ServerTestResource, "name", ServerTestResource),
+					resource.TestCheckResourceAttr(ServerResource+"."+ServerTestResource, "cores", "1"),
+					resource.TestCheckResourceAttr(ServerResource+"."+ServerTestResource, "ram", "1024"),
+					resource.TestCheckResourceAttr(ServerResource+"."+ServerTestResource, "availability_zone", "ZONE_1"),
+					resource.TestCheckResourceAttr(ServerResource+"."+ServerTestResource, "cpu_family", "INTEL_SKYLAKE"),
+					resource.TestCheckResourceAttr(ServerResource+"."+ServerTestResource, "volume.0.name", ServerTestResource),
+					resource.TestCheckResourceAttr(ServerResource+"."+ServerTestResource, "volume.0.size", "5"),
+					resource.TestCheckResourceAttr(ServerResource+"."+ServerTestResource, "volume.0.disk_type", "SSD Standard"),
+					resource.TestCheckResourceAttr(ServerResource+"."+ServerTestResource, "volume.0.licence_type", "OTHER"),
+					resource.TestCheckResourceAttrPair(ServerResource+"."+ServerTestResource, "nic.0.lan", LanResource+"."+LanTestResource, "id"),
+					resource.TestCheckResourceAttr(ServerResource+"."+ServerTestResource, "nic.0.dhcp", "true"),
+					resource.TestCheckResourceAttr(ServerResource+"."+ServerTestResource, "nic.0.firewall_active", "true"),
+					resource.TestCheckResourceAttr(ServerResource+"."+ServerTestResource, "nic.0.firewall.0.protocol", "TCP"),
+					resource.TestCheckResourceAttr(ServerResource+"."+ServerTestResource, "nic.0.firewall.0.name", ServerTestResource),
+					resource.TestCheckResourceAttr(ServerResource+"."+ServerTestResource, "nic.0.firewall.0.port_range_start", "22"),
+					resource.TestCheckResourceAttr(ServerResource+"."+ServerTestResource, "nic.0.firewall.0.port_range_end", "22"),
 				),
 			},
 		},
@@ -143,24 +143,24 @@ func TestAccServerResolveImageName(t *testing.T) {
 			{
 				Config: testAccCheckServerResolveImageName,
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheckServerExists("ionoscloud_server."+ServerResourceName, &server),
-					resource.TestCheckResourceAttr("ionoscloud_server."+ServerResourceName, "name", ServerResourceName),
-					resource.TestCheckResourceAttr("ionoscloud_server."+ServerResourceName, "cores", "1"),
-					resource.TestCheckResourceAttr("ionoscloud_server."+ServerResourceName, "ram", "1024"),
-					resource.TestCheckResourceAttr("ionoscloud_server."+ServerResourceName, "availability_zone", "ZONE_1"),
-					resource.TestCheckResourceAttr("ionoscloud_server."+ServerResourceName, "cpu_family", "INTEL_SKYLAKE"),
-					testImageNotNull("ionoscloud_server", "boot_image"),
-					resource.TestCheckResourceAttr("ionoscloud_server."+ServerResourceName, "image_password", "pass123456"),
-					resource.TestCheckResourceAttr("ionoscloud_server."+ServerResourceName, "volume.0.name", ServerResourceName),
-					resource.TestCheckResourceAttr("ionoscloud_server."+ServerResourceName, "volume.0.size", "5"),
-					resource.TestCheckResourceAttr("ionoscloud_server."+ServerResourceName, "volume.0.disk_type", "SSD Standard"),
-					resource.TestCheckResourceAttrPair("ionoscloud_server."+ServerResourceName, "nic.0.lan", "ionoscloud_lan.webserver_lan", "id"),
-					resource.TestCheckResourceAttr("ionoscloud_server."+ServerResourceName, "nic.0.dhcp", "true"),
-					resource.TestCheckResourceAttr("ionoscloud_server."+ServerResourceName, "nic.0.firewall_active", "true"),
-					resource.TestCheckResourceAttr("ionoscloud_server."+ServerResourceName, "nic.0.firewall.0.protocol", "TCP"),
-					resource.TestCheckResourceAttr("ionoscloud_server."+ServerResourceName, "nic.0.firewall.0.name", ServerResourceName),
-					resource.TestCheckResourceAttr("ionoscloud_server."+ServerResourceName, "nic.0.firewall.0.port_range_start", "22"),
-					resource.TestCheckResourceAttr("ionoscloud_server."+ServerResourceName, "nic.0.firewall.0.port_range_end", "22"),
+					testAccCheckServerExists(ServerResource+"."+ServerTestResource, &server),
+					resource.TestCheckResourceAttr(ServerResource+"."+ServerTestResource, "name", ServerTestResource),
+					resource.TestCheckResourceAttr(ServerResource+"."+ServerTestResource, "cores", "1"),
+					resource.TestCheckResourceAttr(ServerResource+"."+ServerTestResource, "ram", "1024"),
+					resource.TestCheckResourceAttr(ServerResource+"."+ServerTestResource, "availability_zone", "ZONE_1"),
+					resource.TestCheckResourceAttr(ServerResource+"."+ServerTestResource, "cpu_family", "INTEL_SKYLAKE"),
+					testImageNotNull(ServerResource, "boot_image"),
+					resource.TestCheckResourceAttr(ServerResource+"."+ServerTestResource, "image_password", "pass123456"),
+					resource.TestCheckResourceAttr(ServerResource+"."+ServerTestResource, "volume.0.name", ServerTestResource),
+					resource.TestCheckResourceAttr(ServerResource+"."+ServerTestResource, "volume.0.size", "5"),
+					resource.TestCheckResourceAttr(ServerResource+"."+ServerTestResource, "volume.0.disk_type", "SSD Standard"),
+					resource.TestCheckResourceAttrPair(ServerResource+"."+ServerTestResource, "nic.0.lan", LanResource+"."+LanTestResource, "id"),
+					resource.TestCheckResourceAttr(ServerResource+"."+ServerTestResource, "nic.0.dhcp", "true"),
+					resource.TestCheckResourceAttr(ServerResource+"."+ServerTestResource, "nic.0.firewall_active", "true"),
+					resource.TestCheckResourceAttr(ServerResource+"."+ServerTestResource, "nic.0.firewall.0.protocol", "TCP"),
+					resource.TestCheckResourceAttr(ServerResource+"."+ServerTestResource, "nic.0.firewall.0.name", ServerTestResource),
+					resource.TestCheckResourceAttr(ServerResource+"."+ServerTestResource, "nic.0.firewall.0.port_range_start", "22"),
+					resource.TestCheckResourceAttr(ServerResource+"."+ServerTestResource, "nic.0.firewall.0.port_range_end", "22"),
 				),
 			},
 		},
@@ -180,19 +180,19 @@ func TestAccServerWithSnapshot(t *testing.T) {
 			{
 				Config: fmt.Sprintf(testAccCheckServerWithSnapshot),
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheckServerExists("ionoscloud_server."+ServerResourceName, &server),
-					resource.TestCheckResourceAttr("ionoscloud_server."+ServerResourceName, "name", ServerResourceName),
-					resource.TestCheckResourceAttr("ionoscloud_server."+ServerResourceName, "cores", "1"),
-					resource.TestCheckResourceAttr("ionoscloud_server."+ServerResourceName, "ram", "1024"),
-					resource.TestCheckResourceAttr("ionoscloud_server."+ServerResourceName, "availability_zone", "ZONE_1"),
-					resource.TestCheckResourceAttr("ionoscloud_server."+ServerResourceName, "cpu_family", "INTEL_SKYLAKE"),
-					testImageNotNull("ionoscloud_server", "boot_image"),
-					resource.TestCheckResourceAttr("ionoscloud_server."+ServerResourceName, "volume.0.name", ServerResourceName),
-					resource.TestCheckResourceAttr("ionoscloud_server."+ServerResourceName, "volume.0.size", "5"),
-					resource.TestCheckResourceAttr("ionoscloud_server."+ServerResourceName, "volume.0.disk_type", "SSD Standard"),
-					resource.TestCheckResourceAttrPair("ionoscloud_server."+ServerResourceName, "nic.0.lan", "ionoscloud_lan.webserver_lan", "id"),
-					resource.TestCheckResourceAttr("ionoscloud_server."+ServerResourceName, "nic.0.dhcp", "true"),
-					resource.TestCheckResourceAttr("ionoscloud_server."+ServerResourceName, "nic.0.firewall_active", "true"),
+					testAccCheckServerExists(ServerResource+"."+ServerTestResource, &server),
+					resource.TestCheckResourceAttr(ServerResource+"."+ServerTestResource, "name", ServerTestResource),
+					resource.TestCheckResourceAttr(ServerResource+"."+ServerTestResource, "cores", "1"),
+					resource.TestCheckResourceAttr(ServerResource+"."+ServerTestResource, "ram", "1024"),
+					resource.TestCheckResourceAttr(ServerResource+"."+ServerTestResource, "availability_zone", "ZONE_1"),
+					resource.TestCheckResourceAttr(ServerResource+"."+ServerTestResource, "cpu_family", "INTEL_SKYLAKE"),
+					testImageNotNull(ServerResource, "boot_image"),
+					resource.TestCheckResourceAttr(ServerResource+"."+ServerTestResource, "volume.0.name", ServerTestResource),
+					resource.TestCheckResourceAttr(ServerResource+"."+ServerTestResource, "volume.0.size", "5"),
+					resource.TestCheckResourceAttr(ServerResource+"."+ServerTestResource, "volume.0.disk_type", "SSD Standard"),
+					resource.TestCheckResourceAttrPair(ServerResource+"."+ServerTestResource, "nic.0.lan", LanResource+"."+LanTestResource, "id"),
+					resource.TestCheckResourceAttr(ServerResource+"."+ServerTestResource, "nic.0.dhcp", "true"),
+					resource.TestCheckResourceAttr(ServerResource+"."+ServerTestResource, "nic.0.firewall_active", "true"),
 				),
 			},
 		},
@@ -213,22 +213,22 @@ func TestAccServerCubeServer(t *testing.T) {
 			{
 				Config: testAccCheckCubeServer,
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheckServerExists("ionoscloud_server."+ServerResourceName, &server),
-					resource.TestCheckResourceAttr("ionoscloud_server."+ServerResourceName, "name", ServerResourceName),
-					resource.TestCheckResourceAttrPair("ionoscloud_server."+ServerResourceName, "cores", "data.ionoscloud_template."+ServerResourceName, "cores"),
-					resource.TestCheckResourceAttrPair("ionoscloud_server."+ServerResourceName, "ram", "data.ionoscloud_template."+ServerResourceName, "ram"),
-					resource.TestCheckResourceAttrPair("ionoscloud_server."+ServerResourceName, "template_uuid", "data.ionoscloud_template."+ServerResourceName, "id"),
-					resource.TestCheckResourceAttr("ionoscloud_server."+ServerResourceName, "availability_zone", "ZONE_2"),
-					resource.TestCheckResourceAttr("ionoscloud_server."+ServerResourceName, "type", "CUBE"),
+					testAccCheckServerExists(ServerResource+"."+ServerTestResource, &server),
+					resource.TestCheckResourceAttr(ServerResource+"."+ServerTestResource, "name", ServerTestResource),
+					resource.TestCheckResourceAttrPair(ServerResource+"."+ServerTestResource, "cores", "data.ionoscloud_template."+ServerTestResource, "cores"),
+					resource.TestCheckResourceAttrPair(ServerResource+"."+ServerTestResource, "ram", "data.ionoscloud_template."+ServerTestResource, "ram"),
+					resource.TestCheckResourceAttrPair(ServerResource+"."+ServerTestResource, "template_uuid", "data.ionoscloud_template."+ServerTestResource, "id"),
+					resource.TestCheckResourceAttr(ServerResource+"."+ServerTestResource, "availability_zone", "ZONE_2"),
+					resource.TestCheckResourceAttr(ServerResource+"."+ServerTestResource, "type", "CUBE"),
 					testImageNotNull("ionoscloud_server", "boot_image"),
-					resource.TestCheckResourceAttr("ionoscloud_server."+ServerResourceName, "volume.0.name", ServerResourceName),
-					resource.TestCheckResourceAttrPair("ionoscloud_server."+ServerResourceName, "volume.0.size", "data.ionoscloud_template."+ServerResourceName, "storage_size"),
-					resource.TestCheckResourceAttr("ionoscloud_server."+ServerResourceName, "volume.0.disk_type", "DAS"),
-					resource.TestCheckResourceAttr("ionoscloud_server."+ServerResourceName, "volume.0.licence_type", "LINUX"),
-					resource.TestCheckResourceAttrPair("ionoscloud_server."+ServerResourceName, "nic.0.lan", "ionoscloud_lan.webserver_lan", "id"),
-					resource.TestCheckResourceAttr("ionoscloud_server."+ServerResourceName, "nic.0.name", ServerResourceName),
-					resource.TestCheckResourceAttr("ionoscloud_server."+ServerResourceName, "nic.0.dhcp", "true"),
-					resource.TestCheckResourceAttr("ionoscloud_server."+ServerResourceName, "nic.0.firewall_active", "true"),
+					resource.TestCheckResourceAttr(ServerResource+"."+ServerTestResource, "volume.0.name", ServerTestResource),
+					resource.TestCheckResourceAttrPair(ServerResource+"."+ServerTestResource, "volume.0.size", "data.ionoscloud_template."+ServerTestResource, "storage_size"),
+					resource.TestCheckResourceAttr(ServerResource+"."+ServerTestResource, "volume.0.disk_type", "DAS"),
+					resource.TestCheckResourceAttr(ServerResource+"."+ServerTestResource, "volume.0.licence_type", "LINUX"),
+					resource.TestCheckResourceAttrPair(ServerResource+"."+ServerTestResource, "nic.0.lan", "ionoscloud_lan.webserver_lan", "id"),
+					resource.TestCheckResourceAttr(ServerResource+"."+ServerTestResource, "nic.0.name", ServerTestResource),
+					resource.TestCheckResourceAttr(ServerResource+"."+ServerTestResource, "nic.0.dhcp", "true"),
+					resource.TestCheckResourceAttr(ServerResource+"."+ServerTestResource, "nic.0.firewall_active", "true"),
 				),
 			},
 		},
@@ -245,7 +245,7 @@ func testAccCheckServerDestroyCheck(s *terraform.State) error {
 	}
 
 	for _, rs := range s.RootModule().Resources {
-		if rs.Type != "ionoscloud_datacenter" {
+		if rs.Type != ServerResource {
 			continue
 		}
 
@@ -302,32 +302,25 @@ func testAccCheckServerExists(n string, server *ionoscloud.Server) resource.Test
 }
 
 const testAccCheckServerConfigBasic = `
-resource "ionoscloud_datacenter" "foobar" {
+resource ` + DatacenterResource + ` ` + DatacenterTestResource + ` {
 	name       = "server-test"
 	location = "us/las"
 }
-
-resource "ionoscloud_backup_unit" "example" {
-	name        = "serverTest"
-	password    = "DemoPassword123$"
-	email       = "example@ionoscloud.com"
-}
+` + testAccCheckBackupUnitConfigBasic + `
 
 resource "ionoscloud_ipblock" "webserver_ipblock" {
-  location = ionoscloud_datacenter.foobar.location
+  location = ` + DatacenterResource + `.` + DatacenterTestResource + `.location
   size = 4
   name = "webserver_ipblock"
 }
-
-resource "ionoscloud_lan" "webserver_lan" {
-  datacenter_id = ionoscloud_datacenter.foobar.id
+resource ` + LanResource + ` ` + LanTestResource + ` {
+  datacenter_id = ` + DatacenterResource + `.` + DatacenterTestResource + `.id
   public = true
   name = "public"
 }
-
-resource "ionoscloud_server" ` + ServerResourceName + ` {
-  name = "` + ServerResourceName + `"
-  datacenter_id = ionoscloud_datacenter.foobar.id
+resource ` + ServerResource + ` ` + ServerTestResource + ` {
+  name = "` + ServerTestResource + `"
+  datacenter_id = ` + DatacenterResource + `.` + DatacenterTestResource + `.id
   cores = 1
   ram = 1024
   availability_zone = "ZONE_1"
@@ -339,13 +332,13 @@ resource "ionoscloud_server" ` + ServerResourceName + ` {
     name = "system"
     size = 5
     disk_type = "SSD Standard"
-	backup_unit_id = ionoscloud_backup_unit.example.id
+	backup_unit_id = ` + BackupUnitResource + `.` + BackupUnitTestResource + `.id
     user_data = "foo"
     bus = "VIRTIO"
     availability_zone = "ZONE_1"
 }
   nic {
-    lan = ionoscloud_lan.webserver_lan.id
+    lan = ` + LanResource + `.` + LanTestResource + `.id
     name = "system"
     dhcp = true
     firewall_active = true
@@ -365,37 +358,31 @@ resource "ionoscloud_server" ` + ServerResourceName + ` {
 }`
 
 const testAccCheckServerConfigUpdate = `
-resource "ionoscloud_datacenter" "foobar" {
+resource ` + DatacenterResource + ` ` + DatacenterTestResource + ` {
 	name       = "server-test"
 	location = "us/las"
 }
+` + testAccCheckBackupUnitConfigBasic + `
 
-resource "ionoscloud_backup_unit" "example" {
-	name        = "serverTest"
-	password    = "DemoPassword123$"
-	email       = "example@ionoscloud.com"
-}
 resource "ionoscloud_ipblock" "webserver_ipblock" {
-  location = ionoscloud_datacenter.foobar.location
+  location = ` + DatacenterResource + `.` + DatacenterTestResource + `.location
   size = 4
   name = "webserver_ipblock"
 }
 
 resource "ionoscloud_ipblock" "webserver_ipblock_update" {
-  location = ionoscloud_datacenter.foobar.location
+  location = ` + DatacenterResource + `.` + DatacenterTestResource + `.location
   size = 4
   name = "webserver_ipblock"
 }
-
-resource "ionoscloud_lan" "webserver_lan" {
-  datacenter_id = ionoscloud_datacenter.foobar.id
+resource ` + LanResource + ` ` + LanTestResource + ` {
+  datacenter_id = ` + DatacenterResource + `.` + DatacenterTestResource + `.id
   public = true
   name = "public"
 }
-
-resource "ionoscloud_server" ` + ServerResourceName + ` {
+resource ` + ServerResource + ` ` + ServerTestResource + ` {
   name = "` + UpdatedResources + `"
-  datacenter_id = ionoscloud_datacenter.foobar.id
+  datacenter_id = ` + DatacenterResource + `.` + DatacenterTestResource + `.id
   cores = 2
   ram = 2048
   availability_zone = "ZONE_1"
@@ -407,13 +394,13 @@ resource "ionoscloud_server" ` + ServerResourceName + ` {
     name = "` + UpdatedResources + `"
     size = 6
     disk_type = "SSD Standard"
-	backup_unit_id = ionoscloud_backup_unit.example.id
+	backup_unit_id = ` + BackupUnitResource + `.` + BackupUnitTestResource + `.id
     user_data = "foo"
     bus = "IDE"
     availability_zone = "ZONE_1"
 }
   nic {
-    lan = ionoscloud_lan.webserver_lan.id
+    lan = ` + LanResource + `.` + LanTestResource + `.id
     name = "` + UpdatedResources + `"
     dhcp = false
     firewall_active = false
@@ -432,36 +419,36 @@ resource "ionoscloud_server" ` + ServerResourceName + ` {
 }`
 
 const testAccCheckServerConfigBootCdromNoImage = `
-resource "ionoscloud_datacenter" "foobar" {
+resource ` + DatacenterResource + ` ` + DatacenterTestResource + ` {
 	name       = "server-test"
 	location   = "de/fra"
 }
-resource "ionoscloud_lan" "webserver_lan" {
-  datacenter_id = ionoscloud_datacenter.foobar.id
+resource ` + LanResource + ` ` + LanTestResource + ` {
+  datacenter_id = ` + DatacenterResource + `.` + DatacenterTestResource + `.id
   public = true
   name = "public"
 }
-resource "ionoscloud_server" ` + ServerResourceName + ` {
-  name = "` + ServerResourceName + `"
-  datacenter_id = ionoscloud_datacenter.foobar.id
+resource ` + ServerResource + ` ` + ServerTestResource + ` {
+  name = "` + ServerTestResource + `"
+  datacenter_id = ` + DatacenterResource + `.` + DatacenterTestResource + `.id
   cores = 1
   ram = 1024
   availability_zone = "ZONE_1"
   cpu_family = "INTEL_SKYLAKE"
   boot_cdrom = "` + bootCdromImageId + `" 
   volume {
-    name = "` + ServerResourceName + `"
+    name = "` + ServerTestResource + `"
     size = 5
     disk_type = "SSD Standard"
 	licence_type = "OTHER"
   }
   nic {
-    lan = ionoscloud_lan.webserver_lan.id
+    lan = ` + LanResource + `.` + LanTestResource + `.id
     dhcp = true
     firewall_active = true 
 	firewall {
       protocol = "TCP"
-      name = "` + ServerResourceName + `"
+      name = "` + ServerTestResource + `"
       port_range_start = 22
       port_range_end = 22
     }
@@ -469,19 +456,18 @@ resource "ionoscloud_server" ` + ServerResourceName + ` {
 }`
 
 const testAccCheckServerResolveImageName = `
-resource "ionoscloud_datacenter" "datacenter" {
+resource ` + DatacenterResource + ` ` + DatacenterTestResource + ` {
   name        = "test_server"
   location    = "de/fra"
   description = "Test datacenter done by TF"
 }
-resource "ionoscloud_lan" "webserver_lan" {
-  datacenter_id = ionoscloud_datacenter.datacenter.id
+resource ` + LanResource + ` ` + LanTestResource + ` {
+  datacenter_id = ` + DatacenterResource + `.` + DatacenterTestResource + `.id
   public        = true
 }
-
-resource "ionoscloud_server" ` + ServerResourceName + ` {
-  name              = "` + ServerResourceName + `"
-  datacenter_id     = ionoscloud_datacenter.datacenter.id
+resource ` + ServerResource + ` ` + ServerTestResource + ` {
+  name              = "` + ServerTestResource + `"
+  datacenter_id     = ` + DatacenterResource + `.` + DatacenterTestResource + `.id
   cores             = 1
   ram               = 1024
   availability_zone = "ZONE_1"
@@ -489,17 +475,17 @@ resource "ionoscloud_server" ` + ServerResourceName + ` {
   image_name        = "Ubuntu-20.04-LTS"
   image_password    = "pass123456"
   volume {
-    name           = "` + ServerResourceName + `"
+    name           = "` + ServerTestResource + `"
     size              = 5
     disk_type      = "SSD Standard"
   }
   nic {
-    lan             = ionoscloud_lan.webserver_lan.id
+    lan             = ` + LanResource + `.` + LanTestResource + `.id
     dhcp            = true
     firewall_active = true
     firewall {
       protocol         = "TCP"
-      name             = "` + ServerResourceName + `"
+      name             = "` + ServerTestResource + `"
       port_range_start = 22
       port_range_end   = 22
     }
@@ -507,18 +493,18 @@ resource "ionoscloud_server" ` + ServerResourceName + ` {
 }`
 
 const testAccCheckServerWithSnapshot = `
-resource "ionoscloud_datacenter" "foobar" {
+resource ` + DatacenterResource + ` ` + DatacenterTestResource + ` {
 	name       = "volume-test"
 	location   = "de/fra"
 }
-resource "ionoscloud_lan" "webserver_lan" {
-  datacenter_id = ionoscloud_datacenter.foobar.id
+resource ` + LanResource + ` ` + LanTestResource + ` {
+  datacenter_id = ` + DatacenterResource + `.` + DatacenterTestResource + `.id
   public = true
   name = "public"
 }
-resource "ionoscloud_server" "webserver" {
+resource ` + ServerResource + ` "webserver" {
   name = "webserver"
-  datacenter_id = ionoscloud_datacenter.foobar.id
+  datacenter_id = ` + DatacenterResource + `.` + DatacenterTestResource + `.id
   cores = 1
   ram = 1024
   availability_zone = "ZONE_1"
@@ -531,32 +517,32 @@ resource "ionoscloud_server" "webserver" {
     disk_type = "SSD Standard"
   }
   nic {
-    lan = ionoscloud_lan.webserver_lan.id
+    lan = ` + LanResource + `.` + LanTestResource + `.id
     dhcp = true
     firewall_active = true
   }
 }
 resource "ionoscloud_snapshot" "test_snapshot" {
-  datacenter_id = ionoscloud_datacenter.foobar.id
-  volume_id = ionoscloud_server.webserver.boot_volume
+  datacenter_id = ` + DatacenterResource + `.` + DatacenterTestResource + `.id
+  volume_id = ` + ServerResource + `.webserver.boot_volume
   name = "terraform_snapshot"
 }
-resource "ionoscloud_server" ` + ServerResourceName + ` {
+resource ` + ServerResource + ` ` + ServerTestResource + ` {
   depends_on = [ionoscloud_snapshot.test_snapshot]
-  name = "` + ServerResourceName + `"
-  datacenter_id = ionoscloud_datacenter.foobar.id
+  name = "` + ServerTestResource + `"
+  datacenter_id = ` + DatacenterResource + `.` + DatacenterTestResource + `.id
   cores = 1
   ram = 1024
   availability_zone = "ZONE_1"
   cpu_family = "INTEL_SKYLAKE"
   image_name = "terraform_snapshot"
   volume {
-    name = "` + ServerResourceName + `"
+    name = "` + ServerTestResource + `"
     size = 5
     disk_type = "SSD Standard"
   }
   nic {
-    lan = ionoscloud_lan.webserver_lan.id
+    lan = ` + LanResource + `.` + LanTestResource + `.id
     dhcp = true
     firewall_active = true
   }
@@ -564,7 +550,7 @@ resource "ionoscloud_server" ` + ServerResourceName + ` {
 `
 
 const testAccCheckCubeServer = `
-data "ionoscloud_template" ` + ServerResourceName + ` {
+data "ionoscloud_template" ` + ServerTestResource + ` {
     name = "CUBES XS"
     cores = 1
     ram   = 1024
@@ -582,22 +568,22 @@ resource "ionoscloud_lan" "webserver_lan" {
   name = "public"
 }
 
-resource "ionoscloud_server" ` + ServerResourceName + ` {
-  name              = "` + ServerResourceName + `"
+resource "ionoscloud_server" ` + ServerTestResource + ` {
+  name              = "` + ServerTestResource + `"
   availability_zone = "ZONE_2"
   image_name        = "ubuntu:latest"
   type              = "CUBE"
-  template_uuid     = data.ionoscloud_template.` + ServerResourceName + `.id
+  template_uuid     = data.ionoscloud_template.` + ServerTestResource + `.id
   image_password = "K3tTj8G14a3EgKyNeeiY"  
   datacenter_id     = ionoscloud_datacenter.foobar.id
   volume {
-    name            = "` + ServerResourceName + `"
+    name            = "` + ServerTestResource + `"
     licence_type    = "LINUX" 
     disk_type = "DAS"
 	}
   nic {
     lan             = ionoscloud_lan.webserver_lan.id
-    name            = "` + ServerResourceName + `"
+    name            = "` + ServerTestResource + `"
     dhcp            = true
     firewall_active = true
   }

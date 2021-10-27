@@ -77,8 +77,7 @@ func resourceBackupUnitCreate(ctx context.Context, d *schema.ResourceData, meta 
 	d.SetId(*createdBackupUnit.Id)
 	log.Printf("[INFO] Created backup unit: %s", d.Id())
 
-	diags := waitForUnitToBeReady(ctx, d, client)
-	if diags != nil {
+	if diags := waitForUnitToBeReady(ctx, d, client); diags != nil {
 		return diags
 	}
 
@@ -159,8 +158,7 @@ func resourceBackupUnitUpdate(ctx context.Context, d *schema.ResourceData, meta 
 		return diags
 	}
 
-	diags := waitForUnitToBeReady(ctx, d, client)
-	if diags != nil {
+	if diags := waitForUnitToBeReady(ctx, d, client); diags != nil {
 		return diags
 	}
 

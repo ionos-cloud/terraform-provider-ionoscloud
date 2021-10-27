@@ -15,6 +15,8 @@ import (
 
 const SleepInterval = 5 * time.Second
 
+var email = fmt.Sprintf("terraform_test-%d@mailinator.com", time.Now().Unix())
+
 func resourceK8sNodepoolImport(ctx context.Context, d *schema.ResourceData, meta interface{}) ([]*schema.ResourceData, error) {
 
 	parts := strings.Split(d.Id(), "/")
@@ -146,72 +148,6 @@ func resourceK8sNodepoolImport(ctx context.Context, d *schema.ResourceData, meta
 	return []*schema.ResourceData{d}, nil
 }
 
-func resourcePrivateCrossConnectImport(ctx context.Context, d *schema.ResourceData, meta interface{}) ([]*schema.ResourceData, error) {
-	client := meta.(*ionoscloud.APIClient)
-
-	pccId := d.Id()
-
-	pcc, apiResponse, err := client.PrivateCrossConnectsApi.PccsFindById(ctx, d.Id()).Execute()
-
-	if err != nil {
-		if apiResponse != nil && apiResponse.Response != nil && apiResponse.StatusCode == 404 {
-			d.SetId("")
-			return nil, fmt.Errorf("unable to find PCC %q", pccId)
-		}
-		return nil, fmt.Errorf("unable to retreive PCC %q", pccId)
-	}
-
-	log.Printf("[INFO] PCC found: %+v", pcc)
-
-	d.SetId(*pcc.Id)
-	if err := d.Set("name", *pcc.Properties.Name); err != nil {
-		return nil, err
-	}
-	if err := d.Set("description", *pcc.Properties.Description); err != nil {
-		return nil, err
-	}
-
-	if pcc.Properties.Peers != nil {
-		var peers []map[string]interface{}
-
-		for _, peer := range *pcc.Properties.Peers {
-			peers = append(peers, map[string]interface{}{
-				"lan_id":          *peer.Id,
-				"lan_name":        *peer.Name,
-				"datacenter_id":   *peer.DatacenterId,
-				"datacenter_name": *peer.DatacenterName,
-				"location":        *peer.Location,
-			})
-		}
-
-		if err := d.Set("peers", peers); err != nil {
-			return nil, err
-		}
-		log.Printf("[INFO] Setting peers for PCC %s to %+v...", d.Id(), d.Get("peers"))
-	}
-
-	if pcc.Properties.ConnectableDatacenters != nil {
-		var connectableDatacenters []map[string]interface{}
-
-		for _, connectableDatacenter := range *pcc.Properties.ConnectableDatacenters {
-			connectableDatacenters = append(connectableDatacenters, map[string]interface{}{
-				"id":       *connectableDatacenter.Id,
-				"name":     *connectableDatacenter.Name,
-				"location": *connectableDatacenter.Location,
-			})
-		}
-
-		if err := d.Set("connectable_datacenters", connectableDatacenters); err != nil {
-			return nil, err
-		}
-		log.Printf("[INFO] Setting peers for PCC %s to %+v...", d.Id(), d.Get("peers"))
-	}
-
-	log.Printf("[INFO] Importing PCC %q...", d.Id())
-
-	return []*schema.ResourceData{d}, nil
-}
-
 func resourceNicImport(_ context.Context, d *schema.ResourceData, _ interface{}) ([]*schema.ResourceData, error) {
 	parts := strings.Split(d.Id(), "/")
 	if len(parts) != 3 || parts[0] == "" || parts[1] == "" {
@@ -225,187 +161,6 @@ func resourceNicImport(_ context.Context, d *schema.ResourceData, _ interface{})
 		return nil, err
 	}
 	d.SetId(parts[2])
-
-	return []*schema.ResourceData{d}, nil
-}
-
-func resourceGroupImporter(ctx context.Context, d *schema.ResourceData, meta interface{}) ([]*schema.ResourceData, error) {
-	client := meta.(*ionoscloud.APIClient)
-
-	grpId := d.Id()
-
-	group, apiResponse, err := client.UserManagementApi.UmGroupsFindById(ctx, grpId).Execute()
-
-	if err != nil {
-		if apiResponse != nil && apiResponse.Response != nil && apiResponse.StatusCode == 404 {
-			d.SetId("")
-			return nil, fmt.Errorf("an error occured while trying to fetch the group %q", grpId)
-		}
-		return nil, fmt.Errorf("group does not exist%q", grpId)
-	}
-
-	log.Printf("[INFO] group found: %+v", group)
-
-	d.SetId(*group.Id)
-
-	if group.Properties.Name != nil {
-		err := d.Set("name", *group.Properties.Name)
-		if err != nil {
-			return nil, err
-		}
-	}
-
-	if group.Properties.CreateDataCenter != nil {
-		err := d.Set("create_datacenter", *group.Properties.CreateDataCenter)
-		if err != nil {
-			return nil, err
-		}
-	}
-
-	if group.Properties.CreateSnapshot != nil {
-		err := d.Set("create_snapshot", *group.Properties.CreateSnapshot)
-		if err != nil {
-			return nil, err
-		}
-	}
-
-	if group.Properties.ReserveIp != nil {
-		err := d.Set("reserve_ip", *group.Properties.ReserveIp)
-		if err != nil {
-			return nil, err
-		}
-	}
-
-	if group.Properties.AccessActivityLog != nil {
-		err := d.Set("access_activity_log", *group.Properties.AccessActivityLog)
-		if err != nil {
-			return nil, err
-		}
-	}
-
-	if group.Properties.CreatePcc != nil {
-		err := d.Set("create_pcc", *group.Properties.CreatePcc)
-		if err != nil {
-			return nil, err
-		}
-	}
-
-	if group.Properties.S3Privilege != nil {
-		err := d.Set("s3_privilege", *group.Properties.S3Privilege)
-		if err != nil {
-			return nil, err
-		}
-	}
-
-	if group.Properties.CreateBackupUnit != nil {
-		err := d.Set("create_backup_unit", *group.Properties.CreateBackupUnit)
-		if err != nil {
-			return nil, err
-		}
-	}
-
-	if group.Properties.CreateInternetAccess != nil {
-		err := d.Set("create_internet_access", *group.Properties.CreateInternetAccess)
-		if err != nil {
-			return nil, err
-		}
-	}
-
-	if group.Properties.CreateK8sCluster != nil {
-		err := d.Set("create_k8s_cluster", *group.Properties.CreateK8sCluster)
-		if err != nil {
-			return nil, err
-		}
-	}
-
-	users, _, err := client.UserManagementApi.UmGroupsUsersGet(ctx, d.Id()).Execute()
-	if err != nil {
-		return nil, err
-	}
-
-	if users.Items != nil && len(*users.Items) > 0 {
-		var usersEntries []interface{}
-		for _, user := range *users.Items {
-			userEntry := make(map[string]interface{})
-
-			if user.Properties.Firstname != nil {
-				userEntry["first_name"] = *user.Properties.Firstname
-			}
-
-			if user.Properties.Lastname != nil {
-				userEntry["last_name"] = *user.Properties.Lastname
-			}
-
-			if user.Properties.Email != nil {
-				userEntry["email"] = *user.Properties.Email
-			}
-
-			if user.Properties.Administrator != nil {
-				userEntry["administrator"] = *user.Properties.Administrator
-			}
-
-			if user.Properties.ForceSecAuth != nil {
-				userEntry["force_sec_auth"] = *user.Properties.ForceSecAuth
-			}
-
-			usersEntries = append(usersEntries, userEntry)
-		}
-
-		if len(usersEntries) > 0 {
-			if err := d.Set("users", usersEntries); err != nil {
-				return nil, err
-			}
-		}
-	}
-
-	return []*schema.ResourceData{d}, nil
-}
-
-func resourceUserImporter(ctx context.Context, d *schema.ResourceData, meta interface{}) ([]*schema.ResourceData, error) {
-	client := meta.(*ionoscloud.APIClient)
-
-	userId := d.Id()
-
-	user, apiResponse, err := client.UserManagementApi.UmUsersFindById(ctx, userId).Execute()
-
-	if err != nil {
-		if apiResponse != nil && apiResponse.Response != nil && apiResponse.StatusCode == 404 {
-			d.SetId("")
-			return nil, fmt.Errorf("an error occured while trying to fetch the user %q", userId)
-		}
-		return nil, fmt.Errorf("user does not exist%q", userId)
-	}
-
-	log.Printf("[INFO] user found: %+v", user)
-
-	d.SetId(*user.Id)
-
-	if user.Properties.Firstname != nil {
-		if err := d.Set("first_name", *user.Properties.Firstname); err != nil {
-			return nil, err
-		}
-	}
-
-	if user.Properties.Lastname != nil {
-		if err := d.Set("last_name", *user.Properties.Lastname); err != nil {
-			return nil, err
-		}
-	}
-	if user.Properties.Email != nil {
-		if err := d.Set("email", *user.Properties.Email); err != nil {
-			return nil, err
-		}
-	}
-	if user.Properties.Administrator != nil {
-		if err := d.Set("administrator", *user.Properties.Administrator); err != nil {
-			return nil, err
-		}
-	}
-	if user.Properties.ForceSecAuth != nil {
-		if err := d.Set("force_sec_auth", *user.Properties.ForceSecAuth); err != nil {
-			return nil, err
-		}
-	}
 
 	return []*schema.ResourceData{d}, nil
 }
@@ -637,8 +392,8 @@ func IsValidUUID(uuid string) bool {
 	return r.MatchString(uuid)
 }
 
-//used for k8 node pool and cluster
-func DiffBasedOnVersion(k, old, new string, d *schema.ResourceData) bool {
+// DiffBasedOnVersion used for k8 node pool and cluster
+func DiffBasedOnVersion(_, old, new string, _ *schema.ResourceData) bool {
 	var oldMajor, oldMinor string
 	if old != "" {
 		oldSplit := strings.Split(old, ".")
