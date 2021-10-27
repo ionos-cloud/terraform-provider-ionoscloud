@@ -87,6 +87,9 @@ const (
 	UserDataSourceByName = "test_user_name"
 )
 
+//Ip Block constants
+const IpBLockResource = "ionoscloud_ipblock"
+
 // General Constants
 const (
 	DataSource       = "data"
