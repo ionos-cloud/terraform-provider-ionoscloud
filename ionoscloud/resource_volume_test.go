@@ -26,7 +26,7 @@ func TestAccVolumeBasic(t *testing.T) {
 					testAccCheckVolumeExists(VolumeResource+"."+VolumeTestResource, &volume),
 					resource.TestCheckResourceAttr(VolumeResource+"."+VolumeTestResource, "name", VolumeTestResource),
 					resource.TestCheckResourceAttr(VolumeResource+"."+VolumeTestResource, "size", "5"),
-					resource.TestCheckResourceAttr(VolumeResource+"."+VolumeTestResource, "disk_type", "HDD"),
+					resource.TestCheckResourceAttr(VolumeResource+"."+VolumeTestResource, "disk_type", "SSD Standard"),
 					resource.TestCheckResourceAttr(VolumeResource+"."+VolumeTestResource, "bus", "VIRTIO"),
 					resource.TestCheckResourceAttr(VolumeResource+"."+VolumeTestResource, "availability_zone", "ZONE_1"),
 					resource.TestCheckResourceAttr(VolumeResource+"."+VolumeTestResource, "image_name", "Debian-10-cloud-init.qcow2"),
@@ -37,7 +37,7 @@ func TestAccVolumeBasic(t *testing.T) {
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttr(VolumeResource+"."+VolumeTestResource, "name", UpdatedResources),
 					resource.TestCheckResourceAttr(VolumeResource+"."+VolumeTestResource, "size", "6"),
-					resource.TestCheckResourceAttr(VolumeResource+"."+VolumeTestResource, "disk_type", "HDD"),
+					resource.TestCheckResourceAttr(VolumeResource+"."+VolumeTestResource, "disk_type", "SSD Standard"),
 					resource.TestCheckResourceAttr(VolumeResource+"."+VolumeTestResource, "bus", "VIRTIO"),
 					resource.TestCheckResourceAttr(VolumeResource+"."+VolumeTestResource, "availability_zone", "ZONE_1"),
 					resource.TestCheckResourceAttr(VolumeResource+"."+VolumeTestResource, "image_name", "Debian-10-cloud-init.qcow2"),
@@ -212,7 +212,7 @@ resource ` + VolumeResource + ` ` + VolumeTestResource + ` {
 	availability_zone = "ZONE_1"
 	name = "` + VolumeTestResource + `"
 	size = 5
-	disk_type = "HDD"
+	disk_type = "SSD Standard"
 	bus = "VIRTIO"
 	image_name ="Debian-10-cloud-init.qcow2"
 	image_password = "K3tTj8G14a3EgKyNeeiY"
@@ -248,7 +248,7 @@ resource ` + VolumeResource + ` ` + VolumeTestResource + ` {
 	availability_zone = "ZONE_1"
 	name = "` + UpdatedResources + `"
 	size = 6
-	disk_type = "HDD"
+	disk_type = "SSD Standard"
 	bus = "VIRTIO"
 	image_name ="Debian-10-cloud-init.qcow2"
 	image_password = "K3tTj8G14a3EgKyNeeiYupdated"
@@ -345,7 +345,7 @@ resource ` + VolumeResource + ` ` + VolumeTestResource + ` {
   server_id = ` + ServerResource + `.` + ServerTestResource + `.id
   availability_zone = "ZONE_1"
   name = "` + VolumeTestResource + `"
-  size = 5
+  size = 6
   disk_type = "SSD Standard"
   bus = "VIRTIO"
   image_name = "Ubuntu-20.04-LTS"
