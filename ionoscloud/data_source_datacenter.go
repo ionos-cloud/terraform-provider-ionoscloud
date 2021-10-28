@@ -125,22 +125,26 @@ func dataSourceDataCenterRead(ctx context.Context, d *schema.ResourceData, meta 
 		var results []ionoscloud.Datacenter
 
 		if nameOk && datacenters.Items != nil {
+			var resultsByDatacenter []ionoscloud.Datacenter
 			for _, dc := range *datacenters.Items {
 				if dc.Properties.Name != nil && *dc.Properties.Name == name {
-					results = append(results, dc)
+					resultsByDatacenter = append(resultsByDatacenter, dc)
 				}
 			}
 
-			if results == nil {
+			if resultsByDatacenter == nil {
 				return diag.FromErr(fmt.Errorf("could not find a datacenter with name %s", name))
+			} else {
+				results = resultsByDatacenter
 			}
 		}
 
 		if locationOk {
+			var resultsByLocation []ionoscloud.Datacenter
 			if results != nil {
 				for _, dc := range results {
 					if dc.Properties.Location != nil && *dc.Properties.Location == location {
-						results = append(results, dc)
+						resultsByLocation = append(resultsByLocation, dc)
 						break
 					}
 				}
@@ -148,11 +152,15 @@ func dataSourceDataCenterRead(ctx context.Context, d *schema.ResourceData, meta 
 				/* find the first datacenter matching the location */
 				for _, dc := range *datacenters.Items {
 					if dc.Properties.Location != nil && *dc.Properties.Location == location {
-						datacenter = dc
-						results = append(results, dc)
+						resultsByLocation = append(resultsByLocation, dc)
 						break
 					}
 				}
+			}
+			if resultsByLocation == nil {
+				return diag.FromErr(fmt.Errorf("could not find a datacenter with location %s", location))
+			} else {
+				results = resultsByLocation
 			}
 		}
 
