@@ -1,11 +1,11 @@
 ## 5.2.18
 
 - **code enhancements**: added constants and removed duplicated tests to `backupUnit`, `datacenter`, `lan`, `s3_key`, `firewall`, `server`
-- **code enhancements**: for `pcc`, `group`, `user` and `snapshot`:
+- **code enhancements**: for `pcc`, `group`, `user`,`snapshot`, `volume` and `server`:
   - made tests comprehensive 
   - optimized test duration by including both match by id and by name in the same test
   - removed duplicated code from import, data_source, resource and tests files
-- **new features**: import for `snapshot`, data_source for `group`, `user`
+- **new features**: import for `snapshot`, data_source for `group`, `user`, `volume`
 
 ## 5.2.17
 

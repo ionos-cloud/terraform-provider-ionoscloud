@@ -28,7 +28,7 @@ func TestAccS3KeyBasic(t *testing.T) {
 				),
 			},
 			{
-				Config: testAccChecks3KeyConfigBasic,
+				Config: testAccChecks3KeyConfigUpdate,
 				Check: resource.ComposeTestCheckFunc(
 					testAccChecks3KeyExists(S3KeyResource+"."+S3KeyTestResource, &s3Key),
 					resource.TestCheckResourceAttrSet(S3KeyResource+"."+S3KeyTestResource, "secret_key"),
@@ -94,31 +94,31 @@ func testAccChecks3KeyExists(n string, s3Key *ionoscloud.S3Key) resource.TestChe
 }
 
 var testAccChecks3KeyConfigBasic = `
-resource "ionoscloud_user" "example" {
+resource ` + UserResource + ` "example" {
   first_name = "terraform"
   last_name = "test"
-  email = "` + email + `"
+  email = "s3_` + email + `"
   password = "abc123-321CBA"
   administrator = false
   force_sec_auth= false
 }
 
 resource ` + S3KeyResource + ` ` + S3KeyTestResource + ` {
-  user_id    = ionoscloud_user.example.id
+  user_id    = ` + UserResource + `.example.id
   active     = false
 }`
 
 var testAccChecks3KeyConfigUpdate = `
-resource "ionoscloud_user" "example" {
+resource ` + UserResource + ` "example" {
   first_name = "terraform"
   last_name = "test"
-  email = "` + email + `"
+  email = "s3_` + email + `"
   password = "abc123-321CBA"
   administrator = false
   force_sec_auth= false
 }
 
 resource ` + S3KeyResource + ` ` + S3KeyTestResource + ` {
-  user_id    = ionoscloud_user.example.id
+  user_id    = ` + UserResource + `.example.id
   active     = true
 }`

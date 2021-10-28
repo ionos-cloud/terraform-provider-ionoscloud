@@ -96,48 +96,9 @@ func resourceFirewall() *schema.Resource {
 func resourceFirewallCreate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	client := meta.(*ionoscloud.APIClient)
 
-	firewallProtocol := d.Get("protocol").(string)
+	firewall := getFirewallData(d, "", false)
 
-	fw := ionoscloud.FirewallRule{
-		Properties: &ionoscloud.FirewallruleProperties{
-			Protocol: &firewallProtocol,
-		},
-	}
-
-	if _, ok := d.GetOk("name"); ok {
-		firewallName := d.Get("name").(string)
-		fw.Properties.Name = &firewallName
-	}
-	if _, ok := d.GetOk("source_mac"); ok {
-		tempSourceMac := d.Get("source_mac").(string)
-		fw.Properties.SourceMac = &tempSourceMac
-	}
-	if _, ok := d.GetOk("source_ip"); ok {
-		tempSourceIp := d.Get("source_ip").(string)
-		fw.Properties.SourceIp = &tempSourceIp
-	}
-	if _, ok := d.GetOk("target_ip"); ok {
-		tempTargetIp := d.Get("target_ip").(string)
-		fw.Properties.TargetIp = &tempTargetIp
-	}
-	if _, ok := d.GetOk("port_range_start"); ok {
-		tempPortRangeStart := int32(d.Get("port_range_start").(int))
-		fw.Properties.PortRangeStart = &tempPortRangeStart
-	}
-	if _, ok := d.GetOk("port_range_end"); ok {
-		tempPortRangeEnd := int32(d.Get("port_range_end").(int))
-		fw.Properties.PortRangeEnd = &tempPortRangeEnd
-	}
-	if _, ok := d.GetOk("icmp_type"); ok {
-		fwIcmpType := int32(d.Get("icmp_type").(int))
-		fw.Properties.IcmpType = &fwIcmpType
-	}
-	if _, ok := d.GetOk("icmp_code"); ok {
-		fwIcmpTypeCode := int32(d.Get("icmp_code").(int))
-		fw.Properties.IcmpCode = &fwIcmpTypeCode
-	}
-
-	fw, apiResponse, err := client.NicApi.DatacentersServersNicsFirewallrulesPost(ctx, d.Get("datacenter_id").(string), d.Get("server_id").(string), d.Get("nic_id").(string)).Firewallrule(fw).Execute()
+	fw, apiResponse, err := client.NicApi.DatacentersServersNicsFirewallrulesPost(ctx, d.Get("datacenter_id").(string), d.Get("server_id").(string), d.Get("nic_id").(string)).Firewallrule(firewall).Execute()
 
 	if err != nil {
 		diags := diag.FromErr(fmt.Errorf("an error occured while creating a firewall rule: %s\n", err))
@@ -184,46 +145,9 @@ func resourceFirewallRead(ctx context.Context, d *schema.ResourceData, meta inte
 func resourceFirewallUpdate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	client := meta.(*ionoscloud.APIClient)
 
-	properties := ionoscloud.FirewallruleProperties{}
+	firewall := getFirewallData(d, "", true)
 
-	if d.HasChange("name") {
-		_, v := d.GetChange("name")
-		vStr := v.(string)
-		properties.Name = &vStr
-	}
-	if d.HasChange("source_mac") {
-		_, v := d.GetChange("source_mac")
-		vStr := v.(string)
-		properties.SourceMac = &vStr
-	}
-	if d.HasChange("source_ip") {
-		_, v := d.GetChange("source_ip")
-		vStr := v.(string)
-		properties.SourceIp = &vStr
-	}
-	if d.HasChange("target_ip") {
-		_, v := d.GetChange("target_ip")
-		vStr := v.(string)
-		properties.TargetIp = &vStr
-	}
-	if d.HasChange("port_range_start") {
-		vInt := int32(d.Get("port_range_start").(int))
-		properties.PortRangeStart = &vInt
-	}
-	if d.HasChange("port_range_end") {
-		vInt := int32(d.Get("port_range_end").(int))
-		properties.PortRangeEnd = &vInt
-	}
-	if d.HasChange("icmp_type") {
-		vInt := int32(d.Get("icmp_type").(int))
-		properties.IcmpType = &vInt
-	}
-	if d.HasChange("icmp_code") {
-		vInt := int32(d.Get("icmp_code").(int))
-		properties.IcmpCode = &vInt
-	}
-
-	_, apiResponse, err := client.NicApi.DatacentersServersNicsFirewallrulesPatch(ctx, d.Get("datacenter_id").(string), d.Get("server_id").(string), d.Get("nic_id").(string), d.Id()).Firewallrule(properties).Execute()
+	_, apiResponse, err := client.NicApi.DatacentersServersNicsFirewallrulesPatch(ctx, d.Get("datacenter_id").(string), d.Get("server_id").(string), d.Get("nic_id").(string), d.Id()).Firewallrule(*firewall.Properties).Execute()
 
 	if err != nil {
 		diags := diag.FromErr(fmt.Errorf("an error occured while updating a firewall rule ID %s %s", d.Id(), err))
@@ -375,4 +299,60 @@ func setFirewallData(d *schema.ResourceData, firewall *ionoscloud.FirewallRule) 
 		}
 	}
 	return nil
+}
+
+func getFirewallData(d *schema.ResourceData, path string, update bool) ionoscloud.FirewallRule {
+
+	firewall := ionoscloud.FirewallRule{
+		Properties: &ionoscloud.FirewallruleProperties{},
+	}
+
+	if !update {
+		if v, ok := d.GetOk(path + "protocol"); ok {
+			vStr := v.(string)
+			firewall.Properties.Protocol = &vStr
+		}
+	}
+
+	if v, ok := d.GetOk(path + "name"); ok {
+		vStr := v.(string)
+		firewall.Properties.Name = &vStr
+	}
+
+	if v, ok := d.GetOk(path + "source_mac"); ok {
+		val := v.(string)
+		firewall.Properties.SourceMac = &val
+	}
+
+	if v, ok := d.GetOk(path + "source_ip"); ok {
+		val := v.(string)
+		firewall.Properties.SourceIp = &val
+	}
+
+	if v, ok := d.GetOk(path + "target_ip"); ok {
+		val := v.(string)
+		firewall.Properties.TargetIp = &val
+	}
+
+	if v, ok := d.GetOk(path + "port_range_start"); ok {
+		val := int32(v.(int))
+		firewall.Properties.PortRangeStart = &val
+	}
+
+	if v, ok := d.GetOk(path + "port_range_end"); ok {
+		val := int32(v.(int))
+		firewall.Properties.PortRangeEnd = &val
+	}
+
+	if v, ok := d.GetOk(path + "icmp_type"); ok {
+		tempIcmpType := int32(v.(int))
+		firewall.Properties.IcmpType = &tempIcmpType
+
+	}
+	if v, ok := d.GetOk(path + "icmp_code"); ok {
+		tempIcmpCode := int32(v.(int))
+		firewall.Properties.IcmpCode = &tempIcmpCode
+
+	}
+	return firewall
 }

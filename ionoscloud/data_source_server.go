@@ -54,7 +54,11 @@ func dataSourceServer() *schema.Resource {
 				Type:     schema.TypeString,
 				Computed: true,
 			},
-			"cdroms": {
+			"boot_image": {
+				Type:     schema.TypeString,
+				Computed: true,
+			},
+			"cdrom": {
 				Type:     schema.TypeList,
 				Computed: true,
 				Elem: &schema.Resource{
@@ -134,7 +138,7 @@ func dataSourceServer() *schema.Resource {
 					},
 				},
 			},
-			"volumes": {
+			"volume": {
 				Type:     schema.TypeList,
 				Computed: true,
 				Elem: &schema.Resource{
@@ -147,7 +151,7 @@ func dataSourceServer() *schema.Resource {
 							Type:     schema.TypeString,
 							Computed: true,
 						},
-						"type": {
+						"disk_type": {
 							Type:     schema.TypeString,
 							Computed: true,
 						},
@@ -214,10 +218,18 @@ func dataSourceServer() *schema.Resource {
 							Type:     schema.TypeInt,
 							Computed: true,
 						},
+						"backup_unit_id": {
+							Type:     schema.TypeString,
+							Computed: true,
+						},
+						"user_data": {
+							Type:     schema.TypeString,
+							Computed: true,
+						},
 					},
 				},
 			},
-			"nics": {
+			"nic": {
 				Type:     schema.TypeList,
 				Computed: true,
 				Elem: &schema.Resource{
@@ -257,7 +269,7 @@ func dataSourceServer() *schema.Resource {
 							Type:     schema.TypeBool,
 							Computed: true,
 						},
-						"firewall_rules": {
+						"firewall": {
 							Type:     schema.TypeList,
 							Computed: true,
 							Elem: &schema.Resource{
@@ -311,228 +323,6 @@ func dataSourceServer() *schema.Resource {
 		},
 		Timeouts: &resourceDefaultTimeouts,
 	}
-}
-
-func boolOrDefault(p *bool, d bool) bool {
-	if p != nil {
-		return *p
-	}
-	return d
-}
-
-func stringOrDefault(s *string, d string) string {
-	if s != nil {
-		return *s
-	}
-	return d
-}
-
-func int32OrDefault(i *int32, d int32) int32 {
-	if i != nil {
-		return *i
-	}
-	return d
-}
-
-func int64OrDefault(i *int64, d int64) int64 {
-	if i != nil {
-		return *i
-	}
-	return d
-}
-
-func float32OrDefault(f *float32, d float32) float32 {
-	if f != nil {
-		return *f
-	}
-	return d
-}
-
-func setServerData(d *schema.ResourceData, server *ionoscloud.Server) error {
-
-	if server.Id != nil {
-		d.SetId(*server.Id)
-		if err := d.Set("id", *server.Id); err != nil {
-			return err
-		}
-	}
-
-	if server.Properties != nil {
-		if server.Properties.Name != nil {
-			if err := d.Set("name", *server.Properties.Name); err != nil {
-				return err
-			}
-		}
-
-		if server.Properties.Cores != nil {
-			if err := d.Set("cores", *server.Properties.Cores); err != nil {
-				return err
-			}
-		}
-
-		if server.Properties.Ram != nil {
-			if err := d.Set("ram", *server.Properties.Ram); err != nil {
-				return err
-			}
-		}
-
-		if server.Properties.AvailabilityZone != nil {
-			if err := d.Set("availability_zone", *server.Properties.AvailabilityZone); err != nil {
-				return err
-			}
-		}
-
-		if server.Properties.VmState != nil {
-			if err := d.Set("vm_state", *server.Properties.VmState); err != nil {
-				return err
-			}
-		}
-
-		if server.Properties.CpuFamily != nil {
-			if err := d.Set("cpu_family", *server.Properties.CpuFamily); err != nil {
-				return err
-			}
-		}
-		if server.Properties.BootCdrom != nil && server.Properties.BootCdrom.Id != nil {
-			if err := d.Set("boot_cdrom", *server.Properties.BootCdrom.Id); err != nil {
-				return err
-			}
-		}
-
-		if server.Properties.BootVolume != nil && server.Properties.BootVolume.Id != nil {
-			if err := d.Set("boot_volume", *server.Properties.BootVolume.Id); err != nil {
-				return err
-			}
-		}
-	}
-
-	if server.Entities == nil {
-		return nil
-	}
-
-	var cdroms []interface{}
-	if server.Entities.Cdroms != nil && server.Entities.Cdroms.Items != nil && len(*server.Entities.Cdroms.Items) > 0 {
-		for _, image := range *server.Entities.Cdroms.Items {
-			entry := make(map[string]interface{})
-
-			entry["id"] = stringOrDefault(image.Id, "")
-			entry["name"] = stringOrDefault(image.Properties.Name, "")
-			entry["description"] = stringOrDefault(image.Properties.Description, "")
-			entry["location"] = stringOrDefault(image.Properties.Location, "")
-			entry["size"] = float32OrDefault(image.Properties.Size, 0)
-			entry["cpu_hot_plug"] = boolOrDefault(image.Properties.CpuHotPlug, true)
-			entry["cpu_hot_unplug"] = boolOrDefault(image.Properties.CpuHotUnplug, true)
-			entry["ram_hot_plug"] = boolOrDefault(image.Properties.RamHotPlug, true)
-			entry["ram_hot_unplug"] = boolOrDefault(image.Properties.RamHotUnplug, true)
-			entry["nic_hot_plug"] = boolOrDefault(image.Properties.NicHotPlug, true)
-			entry["nic_hot_unplug"] = boolOrDefault(image.Properties.NicHotUnplug, true)
-			entry["disc_virtio_hot_plug"] = boolOrDefault(image.Properties.DiscVirtioHotPlug, true)
-			entry["disc_virtio_hot_unplug"] = boolOrDefault(image.Properties.DiscVirtioHotUnplug, true)
-			entry["disc_scsi_hot_plug"] = boolOrDefault(image.Properties.DiscScsiHotPlug, true)
-			entry["disc_scsi_hot_unplug"] = boolOrDefault(image.Properties.DiscScsiHotUnplug, true)
-			entry["licence_type"] = stringOrDefault(image.Properties.LicenceType, "")
-			entry["image_type"] = stringOrDefault(image.Properties.ImageType, "")
-			entry["public"] = boolOrDefault(image.Properties.Public, false)
-
-			cdroms = append(cdroms, entry)
-		}
-		if err := d.Set("cdroms", cdroms); err != nil {
-			return err
-		}
-	}
-
-	var volumes []interface{}
-	if server.Entities.Volumes != nil && server.Entities.Volumes.Items != nil && len(*server.Entities.Volumes.Items) > 0 {
-		for _, volume := range *server.Entities.Volumes.Items {
-			entry := make(map[string]interface{})
-
-			entry["id"] = stringOrDefault(volume.Id, "")
-			entry["name"] = stringOrDefault(volume.Properties.Name, "")
-			entry["type"] = stringOrDefault(volume.Properties.Type, "")
-			entry["size"] = float32OrDefault(volume.Properties.Size, 0)
-			entry["availability_zone"] = stringOrDefault(volume.Properties.AvailabilityZone, "")
-			entry["image"] = stringOrDefault(volume.Properties.Image, "")
-			entry["image_alias"] = stringOrDefault(volume.Properties.ImageAlias, "")
-			entry["image_password"] = stringOrDefault(volume.Properties.ImagePassword, "")
-
-			if volume.Properties.SshKeys != nil && len(*volume.Properties.SshKeys) > 0 {
-				var sshKeys []interface{}
-				for _, sshKey := range *volume.Properties.SshKeys {
-					sshKeys = append(sshKeys, sshKey)
-				}
-				entry["ssh_keys"] = sshKeys
-			}
-
-			entry["bus"] = stringOrDefault(volume.Properties.Bus, "")
-			entry["licence_type"] = stringOrDefault(volume.Properties.LicenceType, "")
-			entry["cpu_hot_plug"] = boolOrDefault(volume.Properties.CpuHotPlug, true)
-			entry["ram_hot_plug"] = boolOrDefault(volume.Properties.RamHotPlug, true)
-			entry["nic_hot_plug"] = boolOrDefault(volume.Properties.NicHotPlug, true)
-			entry["nic_hot_unplug"] = boolOrDefault(volume.Properties.NicHotUnplug, true)
-			entry["disc_virtio_hot_plug"] = boolOrDefault(volume.Properties.DiscVirtioHotPlug, true)
-			entry["disc_virtio_hot_unplug"] = boolOrDefault(volume.Properties.DiscVirtioHotUnplug, true)
-			entry["device_number"] = int64OrDefault(volume.Properties.DeviceNumber, 0)
-
-			volumes = append(volumes, entry)
-		}
-
-		if err := d.Set("volumes", volumes); err != nil {
-			return err
-		}
-	}
-
-	var nics []interface{}
-	if server.Entities.Nics != nil && server.Entities.Nics.Items != nil && len(*server.Entities.Nics.Items) > 0 {
-		for _, nic := range *server.Entities.Nics.Items {
-			entry := make(map[string]interface{})
-
-			entry["id"] = stringOrDefault(nic.Id, "")
-			entry["name"] = stringOrDefault(nic.Properties.Name, "")
-			entry["mac"] = stringOrDefault(nic.Properties.Mac, "")
-
-			if nic.Properties.Ips != nil {
-				var ips []interface{}
-				for _, ip := range *nic.Properties.Ips {
-					ips = append(ips, ip)
-				}
-				entry["ips"] = ips
-			}
-
-			entry["dhcp"] = boolOrDefault(nic.Properties.Dhcp, false)
-			entry["lan"] = int32OrDefault(nic.Properties.Lan, 0)
-			entry["firewall_active"] = boolOrDefault(nic.Properties.FirewallActive, false)
-			entry["nat"] = boolOrDefault(nic.Properties.Nat, false)
-
-			var firewallRules []interface{}
-			if nic.Entities != nil && nic.Entities.Firewallrules != nil && nic.Entities.Firewallrules.Items != nil {
-				firewallRules = make([]interface{}, len(*nic.Entities.Firewallrules.Items))
-				for idx, rule := range *nic.Entities.Firewallrules.Items {
-					ruleEntry := make(map[string]interface{})
-
-					ruleEntry["id"] = stringOrDefault(rule.Id, "")
-					ruleEntry["name"] = stringOrDefault(rule.Properties.Name, "")
-					ruleEntry["protocol"] = stringOrDefault(rule.Properties.Protocol, "")
-					ruleEntry["source_mac"] = stringOrDefault(rule.Properties.SourceMac, "")
-					ruleEntry["source_ip"] = stringOrDefault(rule.Properties.SourceIp, "")
-					ruleEntry["target_ip"] = stringOrDefault(rule.Properties.TargetIp, "")
-					ruleEntry["icmp_code"] = int32OrDefault(rule.Properties.IcmpCode, 0)
-					ruleEntry["icmp_type"] = int32OrDefault(rule.Properties.IcmpType, 0)
-					ruleEntry["port_range_start"] = int32OrDefault(rule.Properties.PortRangeStart, 0)
-					ruleEntry["port_range_end"] = int32OrDefault(rule.Properties.PortRangeEnd, 0)
-					firewallRules[idx] = ruleEntry
-				}
-			}
-			entry["firewall_rules"] = firewallRules
-
-			nics = append(nics, entry)
-		}
-
-		if err := d.Set("nics", nics); err != nil {
-			return err
-		}
-	}
-
-	return nil
 }
 
 func dataSourceServerRead(d *schema.ResourceData, meta interface{}) error {
@@ -596,7 +386,7 @@ func dataSourceServerRead(d *schema.ResourceData, meta interface{}) error {
 
 	}
 
-	if err = setServerData(d, &server); err != nil {
+	if err = setServerData(ctx, client, d, &server, false); err != nil {
 		return err
 	}
 

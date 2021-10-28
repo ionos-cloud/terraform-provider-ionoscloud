@@ -9,7 +9,6 @@ import (
 	ionoscloud "github.com/ionos-cloud/sdk-go/v5"
 	"io/ioutil"
 	"log"
-	"strconv"
 	"strings"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
@@ -104,6 +103,91 @@ func resourceServer() *schema.Resource {
 				Optional:      true,
 				Computed:      true,
 			},
+			"vm_state": {
+				Type:     schema.TypeString,
+				Computed: true,
+			},
+			"cdrom": {
+				Type:     schema.TypeList,
+				Computed: true,
+				Optional: true,
+				Elem: &schema.Resource{
+					Schema: map[string]*schema.Schema{
+						"id": {
+							Type:     schema.TypeString,
+							Computed: true,
+						},
+						"name": {
+							Type:     schema.TypeString,
+							Computed: true,
+						},
+						"description": {
+							Type:     schema.TypeString,
+							Computed: true,
+						},
+						"location": {
+							Type:     schema.TypeString,
+							Computed: true,
+						},
+						"size": {
+							Type:     schema.TypeFloat,
+							Computed: true,
+						},
+						"cpu_hot_plug": {
+							Type:     schema.TypeBool,
+							Computed: true,
+						},
+						"cpu_hot_unplug": {
+							Type:     schema.TypeBool,
+							Computed: true,
+						},
+						"ram_hot_plug": {
+							Type:     schema.TypeBool,
+							Computed: true,
+						},
+						"ram_hot_unplug": {
+							Type:     schema.TypeBool,
+							Computed: true,
+						},
+						"nic_hot_plug": {
+							Type:     schema.TypeBool,
+							Computed: true,
+						},
+						"nic_hot_unplug": {
+							Type:     schema.TypeBool,
+							Computed: true,
+						},
+						"disc_virtio_hot_plug": {
+							Type:     schema.TypeBool,
+							Computed: true,
+						},
+						"disc_virtio_hot_unplug": {
+							Type:     schema.TypeBool,
+							Computed: true,
+						},
+						"disc_scsi_hot_plug": {
+							Type:     schema.TypeBool,
+							Computed: true,
+						},
+						"disc_scsi_hot_unplug": {
+							Type:     schema.TypeBool,
+							Computed: true,
+						},
+						"licence_type": {
+							Type:     schema.TypeString,
+							Computed: true,
+						},
+						"image_type": {
+							Type:     schema.TypeString,
+							Computed: true,
+						},
+						"public": {
+							Type:     schema.TypeBool,
+							Computed: true,
+						},
+					},
+				},
+			},
 			"volume": {
 				Type:     schema.TypeList,
 				Required: true,
@@ -121,6 +205,14 @@ func resourceServer() *schema.Resource {
 								}
 								return false
 							},
+						},
+						"image": {
+							Type:     schema.TypeString,
+							Computed: true,
+						},
+						"image_alias": {
+							Type:     schema.TypeString,
+							Computed: true,
 						},
 						"size": {
 							Type:     schema.TypeInt,
@@ -323,11 +415,11 @@ func resourceServer() *schema.Resource {
 										},
 									},
 									"icmp_type": {
-										Type:     schema.TypeString,
+										Type:     schema.TypeInt,
 										Optional: true,
 									},
 									"icmp_code": {
-										Type:     schema.TypeString,
+										Type:     schema.TypeInt,
 										Optional: true,
 									},
 								},
@@ -344,235 +436,27 @@ func resourceServer() *schema.Resource {
 func resourceServerCreate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	client := meta.(*ionoscloud.APIClient)
 
-	var imageAlias string
-	serverName := d.Get("name").(string)
-	serverCores := int32(d.Get("cores").(int))
-	serverRam := int32(d.Get("ram").(int))
-	request := ionoscloud.Server{
-		Properties: &ionoscloud.ServerProperties{
-			Name:  &serverName,
-			Cores: &serverCores,
-			Ram:   &serverRam,
-		},
+	nic := ionoscloud.Nic{
+		Properties: &ionoscloud.NicProperties{},
 	}
-	dcId := d.Get("datacenter_id").(string)
-
-	isSnapshot := false
-
-	if v, ok := d.GetOk("availability_zone"); ok {
-		vStr := v.(string)
-		request.Properties.AvailabilityZone = &vStr
+	firewall := ionoscloud.FirewallRule{
+		Properties: &ionoscloud.FirewallruleProperties{},
 	}
 
-	if v, ok := d.GetOk("cpu_family"); ok {
-		if v.(string) != "" {
-			vStr := v.(string)
-			request.Properties.CpuFamily = &vStr
-		}
+	// create server object
+	serverRequest, err := getServerData(d, false)
+
+	// create volume object with data to be used for image
+	volume, err := getVolumeData(d, "volume.0.", false)
+
+	if err != nil {
+		return diag.FromErr(err)
 	}
 
-	volumeSize := float32(d.Get("volume.0.size").(int))
-	volumeType := d.Get("volume.0.disk_type").(string)
-	volume := ionoscloud.VolumeProperties{
-		Size: &volumeSize,
-		Type: &volumeType,
-	}
+	// get image and imageAlias
+	image, imageAlias, err := getImage(ctx, client, d, *volume)
 
-	if v, ok := d.GetOk("volume.0.image_password"); ok {
-		vStr := v.(string)
-		volume.ImagePassword = &vStr
-		if err := d.Set("image_password", vStr); err != nil {
-			diags := diag.FromErr(err)
-			return diags
-		}
-	}
-
-	if v, ok := d.GetOk("image_password"); ok {
-		vStr := v.(string)
-		volume.ImagePassword = &vStr
-	}
-
-	if v, ok := d.GetOk("volume.0.licence_type"); ok {
-		vStr := v.(string)
-		volume.LicenceType = &vStr
-	}
-
-	if v, ok := d.GetOk("volume.0.availability_zone"); ok {
-		vStr := v.(string)
-		volume.AvailabilityZone = &vStr
-	}
-
-	if v, ok := d.GetOk("volume.0.name"); ok {
-		vStr := v.(string)
-		volume.Name = &vStr
-	}
-
-	if v, ok := d.GetOk("volume.0.bus"); ok {
-		vStr := v.(string)
-		volume.Bus = &vStr
-	}
-
-	var sshkeyPath []interface{}
-
-	if v, ok := d.GetOk("volume.0.ssh_key_path"); ok {
-		sshkeyPath = v.([]interface{})
-		if err := d.Set("ssh_key_path", v.([]interface{})); err != nil {
-			diags := diag.FromErr(err)
-			return diags
-		}
-	} else if v, ok := d.GetOk("ssh_key_path"); ok {
-		sshkeyPath = v.([]interface{})
-		if err := d.Set("ssh_key_path", v.([]interface{})); err != nil {
-			diags := diag.FromErr(err)
-			return diags
-		}
-	} else {
-		if err := d.Set("ssh_key_path", [][]string{}); err != nil {
-			diags := diag.FromErr(err)
-			return diags
-		}
-	}
-
-	var image, imageName string
-	if v, ok := d.GetOk("volume.0.image_name"); ok {
-		imageName = v.(string)
-		if err := d.Set("image_name", v.(string)); err != nil {
-			diags := diag.FromErr(err)
-			return diags
-		}
-	} else if v, ok := d.GetOk("image_name"); ok {
-		imageName = v.(string)
-	}
-
-	if imageName != "" {
-		if !IsValidUUID(imageName) {
-			dc, _, err := client.DataCenterApi.DatacentersFindById(ctx, dcId).Execute()
-			if err != nil {
-				diags := diag.FromErr(fmt.Errorf("error fetching datacenter %s: (%s)", dcId, err))
-				return diags
-			}
-
-			img, err := resolveVolumeImageName(ctx, client, imageName, *dc.Properties.Location)
-			if err != nil {
-				diags := diag.FromErr(err)
-				return diags
-			}
-			if img != nil {
-				image = *img.Id
-			}
-			// if no image id was found with that name we look for a matching snapshot
-			if image == "" {
-				log.Printf("[*****] looking for a snapshot with id %s\n", imageName)
-				image = getSnapshotId(ctx, client, imageName)
-				if image != "" {
-					isSnapshot = true
-				} else {
-					log.Printf("[*****] lookig for an image alias for %s\n", imageName)
-
-					imageAlias = getImageAlias(ctx, client, imageName, *dc.Properties.Location)
-					if imageAlias == "" {
-						return diag.FromErr(fmt.Errorf("Could not find an image/imagealias/snapshot that matches %s ", imageName))
-					}
-				}
-			}
-
-			if volume.ImagePassword == nil && len(sshkeyPath) == 0 && isSnapshot == false &&
-				(img == nil || (img.Properties.Public != nil && *img.Properties.Public)) {
-				diags := diag.FromErr(fmt.Errorf("either 'image_password' or 'ssh_key_path' must be provided"))
-				return diags
-			}
-		} else {
-			img, apiResponse, err := client.ImageApi.ImagesFindById(ctx, imageName).Execute()
-
-			if apiResponse != nil && apiResponse.Response != nil && apiResponse.StatusCode == 404 {
-
-				_, apiResponse, err = client.SnapshotApi.SnapshotsFindById(ctx, imageName).Execute()
-
-				if err != nil {
-					diags := diag.FromErr(fmt.Errorf("could not fetch image/snapshot: %s", err))
-					return diags
-				}
-
-				isSnapshot = true
-
-			} else if err != nil {
-				diags := diag.FromErr(fmt.Errorf("error fetching image/snapshot: %s", err))
-				return diags
-			}
-
-			if isSnapshot == false && img.Properties.Public != nil && *img.Properties.Public == true {
-
-				if volume.ImagePassword == nil && len(sshkeyPath) == 0 {
-					diags := diag.FromErr(fmt.Errorf("either 'image_password' or 'ssh_key_path' must be provided"))
-					return diags
-				}
-
-				dc, _, err := client.DataCenterApi.DatacentersFindById(ctx, dcId).Execute()
-				if err != nil {
-					diags := diag.FromErr(fmt.Errorf("error fetching datacenter %s: (%s)", dcId, err))
-					return diags
-				}
-
-				img, err := resolveVolumeImageName(ctx, client, imageName, *dc.Properties.Location)
-
-				if err != nil {
-					diags := diag.FromErr(err)
-					return diags
-				}
-
-				if img != nil {
-					image = *img.Id
-				}
-			} else {
-				img, _, err := client.ImageApi.ImagesFindById(ctx, imageName).Execute()
-				if err != nil {
-					_, _, err := client.SnapshotApi.SnapshotsFindById(ctx, imageName).Execute()
-					if err != nil {
-						diags := diag.FromErr(fmt.Errorf("error fetching image/snapshot: %s", err))
-						return diags
-					}
-					isSnapshot = true
-				}
-
-				if isSnapshot == false && img.Properties.Public != nil && *img.Properties.Public == true {
-					if volume.ImagePassword == nil && len(sshkeyPath) == 0 {
-						diags := diag.FromErr(fmt.Errorf("either 'image_password' or 'ssh_key_path' must be provided"))
-						return diags
-					}
-					image = imageName
-				} else {
-					image = imageName
-				}
-			}
-		}
-	}
-
-	if len(sshkeyPath) != 0 {
-		var publicKeys []string
-		for _, path := range sshkeyPath {
-			log.Printf("[DEBUG] Reading file %s", path)
-			publicKey, err := readPublicKey(path.(string))
-			if err != nil {
-				diags := diag.FromErr(fmt.Errorf("error fetching sshkey from file (%s) %s", path, err.Error()))
-				return diags
-			}
-			publicKeys = append(publicKeys, publicKey)
-		}
-		if len(publicKeys) > 0 {
-			volume.SshKeys = &publicKeys
-		}
-	}
-
-	if image == "" && volume.LicenceType == nil && imageAlias == "" && !isSnapshot {
-		diags := diag.FromErr(fmt.Errorf("either 'image_name', 'licence_type', or 'image_alias' must be set"))
-		return diags
-	}
-
-	if isSnapshot == true && (volume.ImagePassword != nil || len(sshkeyPath) > 0) {
-		diags := diag.FromErr(fmt.Errorf("passwords/SSH keys are not supported for snapshots"))
-		return diags
-	}
-
+	// add remaining properties in volume (dependent in image and imageAlias)
 	if imageAlias != "" {
 		volume.ImageAlias = &imageAlias
 	} else {
@@ -607,134 +491,47 @@ func resourceServerCreate(ctx context.Context, d *schema.ResourceData, meta inte
 		}
 	}
 
-	request.Entities = &ionoscloud.ServerEntities{
+	// add volume object to server
+	serverRequest.Entities = &ionoscloud.ServerEntities{
 		Volumes: &ionoscloud.AttachedVolumes{
 			Items: &[]ionoscloud.Volume{
 				{
-					Properties: &volume,
+					Properties: volume,
 				},
 			},
 		},
 	}
 
+	// get nic data and add object to server
 	if _, ok := d.GetOk("nic"); ok {
-		lanInt := int32(d.Get("nic.0.lan").(int))
-		nic := ionoscloud.Nic{Properties: &ionoscloud.NicProperties{
-			Lan: &lanInt,
-		}}
+		nic = getNicData(d, "nic.0.")
+	}
 
-		if v, ok := d.GetOk("nic.0.name"); ok {
-			vStr := v.(string)
-			nic.Properties.Name = &vStr
-		}
+	serverRequest.Entities.Nics = &ionoscloud.Nics{
+		Items: &[]ionoscloud.Nic{
+			nic,
+		},
+	}
 
-		nic.Properties.Dhcp = boolAddr(d.Get("nic.0.dhcp").(bool))
-		nic.Properties.FirewallActive = boolAddr(d.Get("nic.0.firewall_active").(bool))
-		nic.Properties.Nat = boolAddr(d.Get("nic.0.nat").(bool))
-
-		if v, ok := d.GetOk("nic.0.ips"); ok {
-			raw := v.([]interface{})
-			if raw != nil && len(raw) > 0 {
-				ips := make([]string, 0)
-				for _, rawIp := range raw {
-					ip := rawIp.(string)
-					ips = append(ips, ip)
-				}
-				if ips != nil && len(ips) > 0 {
-					nic.Properties.Ips = &ips
-				}
-			}
-		}
-
-		log.Printf("[DEBUG] dhcp nic before%t", *nic.Properties.Dhcp)
-
-		request.Entities.Nics = &ionoscloud.Nics{
-			Items: &[]ionoscloud.Nic{
-				nic,
+	// get firewall data and add object to server
+	if _, ok := d.GetOk("nic.0.firewall"); ok {
+		firewall = getFirewallData(d, "nic.0.firewall.0.", false)
+		(*serverRequest.Entities.Nics.Items)[0].Entities = &ionoscloud.NicEntities{
+			Firewallrules: &ionoscloud.FirewallRules{
+				Items: &[]ionoscloud.FirewallRule{
+					firewall,
+				},
 			},
 		}
+	}
 
-		log.Printf("[DEBUG] dhcp nic after %t", *nic.Properties.Dhcp)
-		log.Printf("[DEBUG] dhcp %t", *(*request.Entities.Nics.Items)[0].Properties.Dhcp)
-
-		if _, ok := d.GetOk("nic.0.firewall"); ok {
-			protocolStr := d.Get("nic.0.firewall.0.protocol").(string)
-			firewall := ionoscloud.FirewallRule{
-				Properties: &ionoscloud.FirewallruleProperties{
-					Protocol: &protocolStr,
-				},
-			}
-
-			if v, ok := d.GetOk("nic.0.firewall.0.name"); ok {
-				vStr := v.(string)
-				firewall.Properties.Name = &vStr
-			}
-
-			if v, ok := d.GetOk("nic.0.firewall.0.source_mac"); ok {
-				val := v.(string)
-				firewall.Properties.SourceMac = &val
-			}
-
-			if v, ok := d.GetOk("nic.0.firewall.0.source_ip"); ok {
-				val := v.(string)
-				firewall.Properties.SourceIp = &val
-			}
-
-			if v, ok := d.GetOk("nic.0.firewall.0.target_ip"); ok {
-				val := v.(string)
-				firewall.Properties.TargetIp = &val
-			}
-
-			if v, ok := d.GetOk("nic.0.firewall.0.port_range_start"); ok {
-				val := int32(v.(int))
-				firewall.Properties.PortRangeStart = &val
-			}
-
-			if v, ok := d.GetOk("nic.0.firewall.0.port_range_end"); ok {
-				val := int32(v.(int))
-				firewall.Properties.PortRangeEnd = &val
-			}
-
-			if v, ok := d.GetOk("nic.0.firewall.0.icmp_type"); ok {
-				tempIcmpType := v.(string)
-				if tempIcmpType != "" {
-					i, _ := strconv.Atoi(tempIcmpType)
-					iInt32 := int32(i)
-					firewall.Properties.IcmpType = &iInt32
-				}
-			}
-			if v, ok := d.GetOk("nic.0.firewall.0.icmp_code"); ok {
-				tempIcmpCode := v.(string)
-				if tempIcmpCode != "" {
-					i, _ := strconv.Atoi(tempIcmpCode)
-					iInt32 := int32(i)
-					firewall.Properties.IcmpCode = &iInt32
-				}
-			}
-			(*request.Entities.Nics.Items)[0].Entities = &ionoscloud.NicEntities{
-				Firewallrules: &ionoscloud.FirewallRules{
-					Items: &[]ionoscloud.FirewallRule{
-						firewall,
-					},
-				},
-			}
+	if (*serverRequest.Entities.Nics.Items)[0].Properties.Ips != nil {
+		if len(*(*serverRequest.Entities.Nics.Items)[0].Properties.Ips) == 0 {
+			*(*serverRequest.Entities.Nics.Items)[0].Properties.Ips = nil
 		}
 	}
 
-	if (*request.Entities.Nics.Items)[0].Properties.Ips != nil {
-		if len(*(*request.Entities.Nics.Items)[0].Properties.Ips) == 0 {
-			*(*request.Entities.Nics.Items)[0].Properties.Ips = nil
-		}
-	}
-
-	if _, ok := d.GetOk("boot_cdrom"); ok {
-		resId := d.Get("boot_cdrom").(string)
-		request.Properties.BootCdrom = &ionoscloud.ResourceReference{
-			Id: &resId,
-		}
-	}
-
-	server, apiResponse, err := client.ServerApi.DatacentersServersPost(ctx, d.Get("datacenter_id").(string)).Server(request).Execute()
+	server, apiResponse, err := client.ServerApi.DatacentersServersPost(ctx, d.Get("datacenter_id").(string)).Server(*serverRequest).Execute()
 
 	if err != nil {
 		diags := diag.FromErr(fmt.Errorf("error creating server: (%s)", err))
@@ -755,6 +552,8 @@ func resourceServerCreate(ctx context.Context, d *schema.ResourceData, meta inte
 		diags := diag.FromErr(errState)
 		return diags
 	}
+
+	// get additional data for schema
 	server, _, err = client.ServerApi.DatacentersServersFindById(ctx, d.Get("datacenter_id").(string), *server.Id).Execute()
 
 	if err != nil {
@@ -789,81 +588,19 @@ func resourceServerCreate(ctx context.Context, d *schema.ResourceData, meta inte
 
 	if (*server.Entities.Nics.Items)[0].Properties.Ips != nil &&
 		len(*(*server.Entities.Nics.Items)[0].Properties.Ips) > 0 &&
-		request.Entities.Volumes.Items != nil &&
-		len(*request.Entities.Volumes.Items) > 0 &&
-		(*request.Entities.Volumes.Items)[0].Properties != nil &&
-		(*request.Entities.Volumes.Items)[0].Properties.ImagePassword != nil {
+		serverRequest.Entities.Volumes.Items != nil &&
+		len(*serverRequest.Entities.Volumes.Items) > 0 &&
+		(*serverRequest.Entities.Volumes.Items)[0].Properties != nil &&
+		(*serverRequest.Entities.Volumes.Items)[0].Properties.ImagePassword != nil {
 
 		d.SetConnInfo(map[string]string{
 			"type":     "ssh",
 			"host":     (*(*server.Entities.Nics.Items)[0].Properties.Ips)[0],
-			"password": *(*request.Entities.Volumes.Items)[0].Properties.ImagePassword,
+			"password": *(*serverRequest.Entities.Volumes.Items)[0].Properties.ImagePassword,
 		})
 	}
 
 	return resourceServerRead(ctx, d, meta)
-}
-
-func GetFirewallResource(d *schema.ResourceData, path string, update bool) ionoscloud.FirewallRule {
-
-	firewall := ionoscloud.FirewallRule{
-		Properties: &ionoscloud.FirewallruleProperties{},
-	}
-
-	if !update {
-		if v, ok := d.GetOk(path + ".protocol"); ok {
-			vStr := v.(string)
-			firewall.Properties.Protocol = &vStr
-		}
-	}
-
-	if v, ok := d.GetOk(path + ".name"); ok {
-		vStr := v.(string)
-		firewall.Properties.Name = &vStr
-	}
-
-	if v, ok := d.GetOk(path + ".source_mac"); ok {
-		val := v.(string)
-		firewall.Properties.SourceMac = &val
-	}
-
-	if v, ok := d.GetOk(path + ".source_ip"); ok {
-		val := v.(string)
-		firewall.Properties.SourceIp = &val
-	}
-
-	if v, ok := d.GetOk(path + ".target_ip"); ok {
-		val := v.(string)
-		firewall.Properties.TargetIp = &val
-	}
-
-	if v, ok := d.GetOk(path + ".port_range_start"); ok {
-		val := int32(v.(int))
-		firewall.Properties.PortRangeStart = &val
-	}
-
-	if v, ok := d.GetOk(path + ".port_range_end"); ok {
-		val := int32(v.(int))
-		firewall.Properties.PortRangeEnd = &val
-	}
-
-	if v, ok := d.GetOk(path + ".icmp_type"); ok {
-		tempIcmpType := v.(string)
-		if tempIcmpType != "" {
-			i, _ := strconv.Atoi(tempIcmpType)
-			iInt32 := int32(i)
-			firewall.Properties.IcmpType = &iInt32
-		}
-	}
-	if v, ok := d.GetOk(path + ".icmp_code"); ok {
-		tempIcmpCode := v.(string)
-		if tempIcmpCode != "" {
-			i, _ := strconv.Atoi(tempIcmpCode)
-			iInt32 := int32(i)
-			firewall.Properties.IcmpCode = &iInt32
-		}
-	}
-	return firewall
 }
 
 func resourceServerRead(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
@@ -882,248 +619,24 @@ func resourceServerRead(ctx context.Context, d *schema.ResourceData, meta interf
 		return diags
 	}
 
-	if server.Properties.Name != nil {
-		if err := d.Set("name", *server.Properties.Name); err != nil {
-			diags := diag.FromErr(err)
-			return diags
-		}
+	if err := setServerData(ctx, client, d, &server, true); err != nil {
+		return diag.FromErr(err)
 	}
 
-	if server.Properties.Cores != nil {
-		if err := d.Set("cores", *server.Properties.Cores); err != nil {
-			diags := diag.FromErr(err)
-			return diags
-		}
-	}
-
-	if server.Properties.Ram != nil {
-		if err := d.Set("ram", *server.Properties.Ram); err != nil {
-			diags := diag.FromErr(err)
-			return diags
-		}
-	}
-
-	if server.Properties.AvailabilityZone != nil {
-		if err := d.Set("availability_zone", *server.Properties.AvailabilityZone); err != nil {
-			diags := diag.FromErr(err)
-			return diags
-		}
-	}
-
-	if server.Properties.CpuFamily != nil {
-		if err := d.Set("cpu_family", *server.Properties.CpuFamily); err != nil {
-			diags := diag.FromErr(err)
-			return diags
-		}
-	}
-
-	if server.Entities.Volumes != nil && server.Entities.Volumes.Items != nil && len(*server.Entities.Volumes.Items) > 0 &&
-		(*server.Entities.Volumes.Items)[0].Properties.Image != nil {
-		if err := d.Set("boot_image", *(*server.Entities.Volumes.Items)[0].Properties.Image); err != nil {
-			diags := diag.FromErr(err)
-			return diags
-		}
-	}
-
-	if primarynic, ok := d.GetOk("primary_nic"); ok {
-		if err := d.Set("primary_nic", primarynic.(string)); err != nil {
-			diags := diag.FromErr(err)
-			return diags
-		}
-		nic, _, err := client.NicApi.DatacentersServersNicsFindById(ctx, dcId, serverId, primarynic.(string)).Execute()
-		if err != nil {
-			diags := diag.FromErr(fmt.Errorf("error occured while fetching nic %s for server ID %s %s", primarynic.(string), d.Id(), err))
-			return diags
-		}
-
-		if len(*nic.Properties.Ips) > 0 {
-			if err := d.Set("primary_ip", (*nic.Properties.Ips)[0]); err != nil {
-				return diag.FromErr(err)
-			}
-		}
-		network := SetNetworkProperties(nic)
-
-		if firewallId, ok := d.GetOk("firewallrule_id"); ok {
-			firewall, _, err := client.NicApi.DatacentersServersNicsFirewallrulesFindById(ctx, dcId, serverId, primarynic.(string), firewallId.(string)).Execute()
-			if err != nil {
-				diags := diag.FromErr(fmt.Errorf("error occured while fetching firewallrule %s for server ID %s %s", firewallId.(string), serverId, err))
-				return diags
-			}
-
-			fw := SetFirewallProperties(firewall)
-			network["firewall"] = []map[string]interface{}{fw}
-		}
-
-		networks := []map[string]interface{}{network}
-		if err := d.Set("nic", networks); err != nil {
-			diags := diag.FromErr(fmt.Errorf("[ERROR] unable saving nic to state IonosCloud Server (%s): %s", serverId, err))
-			return diags
-		}
-	}
-
-	if server.Properties.BootVolume != nil {
-		if server.Properties.BootVolume.Id != nil {
-			if err := d.Set("boot_volume", *server.Properties.BootVolume.Id); err != nil {
-				diags := diag.FromErr(err)
-				return diags
-			}
-		}
-		volumeObj, _, err := client.ServerApi.DatacentersServersVolumesFindById(ctx, dcId, serverId, *server.Properties.BootVolume.Id).Execute()
-
-		if err == nil {
-
-			volumeItem := SetVolumeProperties(volumeObj)
-
-			userData := d.Get("volume.0.user_data")
-			volumeItem["user_data"] = userData
-
-			backupUnit := d.Get("volume.0.backup_unit_id")
-			volumeItem["backup_unit_id"] = backupUnit
-
-			volumesList := []map[string]interface{}{volumeItem}
-			if err := d.Set("volume", volumesList); err != nil {
-				diags := diag.FromErr(fmt.Errorf("[DEBUG] Error saving volume to state for IonosCloud server (%s): %s", d.Id(), err))
-				return diags
-			}
-		}
-	}
-
-	bootVolume, ok := d.GetOk("boot_volume")
-	if ok && len(bootVolume.(string)) > 0 {
-		_, _, err = client.ServerApi.DatacentersServersVolumesFindById(ctx, dcId, d.Id(), bootVolume.(string)).Execute()
-		if err != nil {
-			if err := d.Set("volume", nil); err != nil {
-				diags := diag.FromErr(err)
-				return diags
-			}
-		}
-	}
-
-	if server.Properties.BootCdrom != nil {
-		if err := d.Set("boot_cdrom", *server.Properties.BootCdrom.Id); err != nil {
-			diags := diag.FromErr(err)
-			return diags
-		}
-	}
 	return nil
-}
-
-func SetNetworkProperties(nic ionoscloud.Nic) map[string]interface{} {
-
-	network := map[string]interface{}{}
-
-	setPropWithNilCheck(network, "dhcp", nic.Properties.Dhcp)
-	setPropWithNilCheck(network, "nat", nic.Properties.Nat)
-	setPropWithNilCheck(network, "firewall_active", nic.Properties.FirewallActive)
-	setPropWithNilCheck(network, "lan", nic.Properties.Lan)
-	setPropWithNilCheck(network, "name", nic.Properties.Name)
-	setPropWithNilCheck(network, "mac", nic.Properties.Mac)
-
-	if nic.Properties.Ips != nil && len(*nic.Properties.Ips) > 0 {
-		network["ips"] = *nic.Properties.Ips
-	}
-
-	return network
-}
-
-func SetFirewallProperties(firewall ionoscloud.FirewallRule) map[string]interface{} {
-
-	fw := map[string]interface{}{}
-	/*
-		"protocol": *firewall.Properties.Protocol,
-		"name":     *firewall.Properties.Name,
-	*/
-	setPropWithNilCheck(fw, "protocol", firewall.Properties.Protocol)
-	setPropWithNilCheck(fw, "name", firewall.Properties.Name)
-	setPropWithNilCheck(fw, "source_mac", firewall.Properties.SourceMac)
-	setPropWithNilCheck(fw, "source_ip", firewall.Properties.SourceIp)
-	setPropWithNilCheck(fw, "target_ip", firewall.Properties.TargetIp)
-	setPropWithNilCheck(fw, "port_range_start", firewall.Properties.PortRangeStart)
-	setPropWithNilCheck(fw, "port_range_end", firewall.Properties.PortRangeEnd)
-	setPropWithNilCheck(fw, "icmp_type", firewall.Properties.IcmpType)
-	setPropWithNilCheck(fw, "icmp_code", firewall.Properties.IcmpCode)
-	return fw
-}
-
-func SetVolumeProperties(volume ionoscloud.Volume) map[string]interface{} {
-
-	volumeMap := map[string]interface{}{}
-
-	setPropWithNilCheck(volumeMap, "name", volume.Properties.Name)
-	setPropWithNilCheck(volumeMap, "disk_type", volume.Properties.Type)
-	setPropWithNilCheck(volumeMap, "size", volume.Properties.Size)
-	setPropWithNilCheck(volumeMap, "licence_type", volume.Properties.LicenceType)
-	setPropWithNilCheck(volumeMap, "bus", volume.Properties.Bus)
-	setPropWithNilCheck(volumeMap, "availability_zone", volume.Properties.AvailabilityZone)
-	setPropWithNilCheck(volumeMap, "cpu_hot_plug", volume.Properties.CpuHotPlug)
-	setPropWithNilCheck(volumeMap, "ram_hot_plug", volume.Properties.RamHotPlug)
-	setPropWithNilCheck(volumeMap, "nic_hot_plug", volume.Properties.NicHotPlug)
-	setPropWithNilCheck(volumeMap, "nic_hot_unplug", volume.Properties.NicHotUnplug)
-	setPropWithNilCheck(volumeMap, "disc_virtio_hot_plug", volume.Properties.DiscVirtioHotPlug)
-	setPropWithNilCheck(volumeMap, "disc_virtio_hot_unplug", volume.Properties.DiscVirtioHotUnplug)
-	setPropWithNilCheck(volumeMap, "device_number", volume.Properties.DeviceNumber)
-
-	return volumeMap
-}
-
-func boolAddr(b bool) *bool {
-	return &b
 }
 
 func resourceServerUpdate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	client := meta.(*ionoscloud.APIClient)
 
 	dcId := d.Get("datacenter_id").(string)
-	request := ionoscloud.ServerProperties{}
 
-	if d.HasChange("name") {
-		_, n := d.GetChange("name")
-		nStr := n.(string)
-		request.Name = &nStr
+	serverRequest, err := getServerData(d, true)
+
+	if err != nil {
+		return diag.FromErr(err)
 	}
-	if d.HasChange("cores") {
-		_, n := d.GetChange("cores")
-		nInt := int32(n.(int))
-		request.Cores = &nInt
-	}
-	if d.HasChange("ram") {
-		_, n := d.GetChange("ram")
-		nInt := int32(n.(int))
-		request.Ram = &nInt
-	}
-	if d.HasChange("availability_zone") {
-		diags := diag.FromErr(fmt.Errorf("availability_zone is immutable"))
-		return diags
-	}
-	if d.HasChange("cpu_family") {
-		_, n := d.GetChange("cpu_family")
-		nStr := n.(string)
-		request.CpuFamily = &nStr
-	}
-
-	if d.HasChange("boot_cdrom") {
-		_, n := d.GetChange("boot_cdrom")
-		bootCdrom := n.(string)
-
-		if IsValidUUID(bootCdrom) {
-
-			request.BootCdrom = &ionoscloud.ResourceReference{
-				Id: &bootCdrom,
-			}
-
-		} else {
-			diags := diag.FromErr(fmt.Errorf("boot_volume has to be a valid UUID, got: %s", bootCdrom))
-			return diags
-		} /* todo: figure out a way of sending a nil bootCdrom to the API (the sdk's omitempty doesn't let us) */
-
-	}
-
-	ctx, cancel := context.WithTimeout(context.Background(), *resourceDefaultTimeouts.Update)
-	if cancel != nil {
-		defer cancel()
-	}
-
-	server, apiResponse, err := client.ServerApi.DatacentersServersPatch(ctx, dcId, d.Id()).Server(request).Execute()
+	server, apiResponse, err := client.ServerApi.DatacentersServersPatch(ctx, dcId, d.Id()).Server(*serverRequest.Properties).Execute()
 
 	if err != nil {
 		diags := diag.FromErr(fmt.Errorf("error occured while updating server ID %s: %s", d.Id(), err))
@@ -1138,31 +651,6 @@ func resourceServerUpdate(ctx context.Context, d *schema.ResourceData, meta inte
 	// Volume stuff
 
 	if d.HasChange("volume") {
-
-		if d.HasChange("volume.0.user_data") {
-			diags := diag.FromErr(fmt.Errorf("user_data is immutable and is only allowed to be set on a new volume creation"))
-			return diags
-		}
-
-		if d.HasChange("volume.0.backup_unit_id") {
-			diags := diag.FromErr(fmt.Errorf("backup_unit_id is immutable and is only allowed to be set on a new volume creation"))
-			return diags
-		}
-
-		if d.HasChange("volume.0.image_name") {
-			diags := diag.FromErr(fmt.Errorf("volume.0.image_name is immutable"))
-			return diags
-		}
-
-		if d.HasChange("volume.0.disk_type") {
-			diags := diag.FromErr(fmt.Errorf("volume.0.disk_type is immutable"))
-			return diags
-		}
-
-		if d.HasChange("volume.0.availability_zone") {
-			diags := diag.FromErr(fmt.Errorf("volume.0.availability_zone is immutable"))
-			return diags
-		}
 
 		bootVolume := d.Get("boot_volume").(string)
 		_, _, err := client.ServerApi.DatacentersServersVolumesFindById(ctx, dcId, d.Id(), bootVolume).Execute()
@@ -1185,24 +673,12 @@ func resourceServerUpdate(ctx context.Context, d *schema.ResourceData, meta inte
 			}
 		}
 
-		properties := ionoscloud.VolumeProperties{}
+		volume, err := getVolumeData(d, "volume.0.", true)
 
-		if v, ok := d.GetOk("volume.0.name"); ok {
-			vStr := v.(string)
-			properties.Name = &vStr
+		if err != nil {
+			return diag.FromErr(err)
 		}
-
-		if v, ok := d.GetOk("volume.0.size"); ok {
-			vInt := float32(v.(int))
-			properties.Size = &vInt
-		}
-
-		if v, ok := d.GetOk("volume.0.bus"); ok {
-			vStr := v.(string)
-			properties.Bus = &vStr
-		}
-
-		_, apiResponse, err := client.VolumeApi.DatacentersVolumesPatch(ctx, d.Get("datacenter_id").(string), bootVolume).Volume(properties).Execute()
+		_, apiResponse, err := client.VolumeApi.DatacentersVolumesPatch(ctx, d.Get("datacenter_id").(string), bootVolume).Volume(*volume).Execute()
 
 		if err != nil {
 			diags := diag.FromErr(fmt.Errorf("error patching volume %s %s", d.Id(), err))
@@ -1219,51 +695,23 @@ func resourceServerUpdate(ctx context.Context, d *schema.ResourceData, meta inte
 
 	// Nic stuff
 	if d.HasChange("nic") {
-		nic := &ionoscloud.Nic{}
+		var nicId string
 		for _, n := range *server.Entities.Nics.Items {
 			nicStr := d.Get("primary_nic").(string)
 			if *n.Id == nicStr {
-				nic = &n
+				nicId = *n.Id
 				break
 			}
 		}
 
-		lan := int32(d.Get("nic.0.lan").(int))
-		properties := ionoscloud.NicProperties{
-			Lan: &lan,
-		}
-
-		if v, ok := d.GetOk("nic.0.name"); ok {
-			vStr := v.(string)
-			properties.Name = &vStr
-		}
-
-		if v, ok := d.GetOk("nic.0.ips"); ok {
-			raw := v.([]interface{})
-			if raw != nil && len(raw) > 0 {
-				ips := make([]string, 0)
-				for _, rawIp := range raw {
-					ip := rawIp.(string)
-					ips = append(ips, ip)
-				}
-				if ips != nil && len(ips) > 0 {
-					properties.Ips = &ips
-				}
-			}
-		}
-
-		properties.Dhcp = boolAddr(d.Get("nic.0.dhcp").(bool))
-
-		properties.Nat = boolAddr(d.Get("nic.0.nat").(bool))
-		properties.FirewallActive = boolAddr(d.Get("nic.0.firewall_active").(bool))
-
+		nic := getNicData(d, "nic.0.")
 		if d.HasChange("nic.0.firewall") {
 
-			firewall := GetFirewallResource(d, "nic.0.firewall.0", true)
+			firewall := getFirewallData(d, "nic.0.firewall.0.", true)
 
 			firewallId := d.Get("firewallrule_id").(string)
 
-			_, _, err := client.NicApi.DatacentersServersNicsFirewallrulesFindById(ctx, dcId, *server.Id, *nic.Id, firewallId).Execute()
+			_, _, err := client.NicApi.DatacentersServersNicsFirewallrulesFindById(ctx, dcId, *server.Id, nicId, firewallId).Execute()
 
 			if err != nil {
 				if apiResponse != nil && apiResponse.Response != nil && apiResponse.StatusCode != 404 {
@@ -1275,7 +723,7 @@ func resourceServerUpdate(ctx context.Context, d *schema.ResourceData, meta inte
 				}
 			}
 
-			firewall, apiResponse, err = client.NicApi.DatacentersServersNicsFirewallrulesPatch(ctx, dcId, *server.Id, *nic.Id, firewallId).Firewallrule(*firewall.Properties).Execute()
+			firewall, apiResponse, err = client.NicApi.DatacentersServersNicsFirewallrulesPatch(ctx, dcId, *server.Id, nicId, firewallId).Firewallrule(*firewall.Properties).Execute()
 			if err != nil {
 				diags := diag.FromErr(fmt.Errorf("an error occured while updating firewall rule dcId: %s server_id: %s nic_id %s ID: %s Response: %s", dcId, *server.Id, *nic.Id, firewallId, err))
 				return diags
@@ -1296,9 +744,9 @@ func resourceServerUpdate(ctx context.Context, d *schema.ResourceData, meta inte
 				},
 			}
 		}
-		mProp, _ := json.Marshal(properties)
+		mProp, _ := json.Marshal(nic.Properties)
 		log.Printf("[DEBUG] Updating props: %s", string(mProp))
-		_, apiResponse, err := client.NicApi.DatacentersServersNicsPatch(ctx, d.Get("datacenter_id").(string), *server.Id, *nic.Id).Nic(properties).Execute()
+		_, apiResponse, err := client.NicApi.DatacentersServersNicsPatch(ctx, d.Get("datacenter_id").(string), *server.Id, nicId).Nic(*nic.Properties).Execute()
 		if err != nil {
 			diags := diag.FromErr(fmt.Errorf("error updating nic %s", err))
 			return diags
@@ -1369,7 +817,6 @@ func resourceServerImport(ctx context.Context, d *schema.ResourceData, meta inte
 
 	datacenterId := parts[0]
 	serverId := parts[1]
-
 	client := meta.(*ionoscloud.APIClient)
 
 	server, apiResponse, err := client.ServerApi.DatacentersServersFindById(ctx, datacenterId, serverId).Execute()
@@ -1382,133 +829,13 @@ func resourceServerImport(ctx context.Context, d *schema.ResourceData, meta inte
 		return nil, fmt.Errorf("error occured while fetching a server ID %s %s", d.Id(), err)
 	}
 
-	d.SetId(*server.Id)
-
 	if err := d.Set("datacenter_id", datacenterId); err != nil {
 		return nil, err
 	}
 
-	if server.Properties.Name != nil {
-		if err := d.Set("name", *server.Properties.Name); err != nil {
-			return nil, err
-		}
+	if err := setServerData(ctx, client, d, &server, false); err != nil {
+		return nil, err
 	}
-
-	if server.Properties.Cores != nil {
-		if err := d.Set("cores", *server.Properties.Cores); err != nil {
-			return nil, err
-		}
-	}
-
-	if server.Properties.Ram != nil {
-		if err := d.Set("ram", *server.Properties.Ram); err != nil {
-			return nil, err
-		}
-	}
-
-	if server.Properties.AvailabilityZone != nil {
-		if err := d.Set("availability_zone", *server.Properties.AvailabilityZone); err != nil {
-			return nil, err
-		}
-	}
-
-	if server.Properties.CpuFamily != nil {
-		if err := d.Set("cpu_family", *server.Properties.CpuFamily); err != nil {
-			return nil, err
-		}
-	}
-
-	if server.Entities.Volumes != nil &&
-		len(*server.Entities.Volumes.Items) > 0 &&
-		(*server.Entities.Volumes.Items)[0].Properties.Image != nil {
-		if err := d.Set("boot_image", *(*server.Entities.Volumes.Items)[0].Properties.Image); err != nil {
-			return nil, err
-		}
-	}
-
-	if server.Entities.Nics != nil && len(*server.Entities.Nics.Items) > 0 && (*server.Entities.Nics.Items)[0].Id != nil {
-		primaryNic := *(*server.Entities.Nics.Items)[0].Id
-		if err := d.Set("primary_nic", primaryNic); err != nil {
-			return nil, err
-		}
-
-		nic, _, err := client.NicApi.DatacentersServersNicsFindById(ctx, datacenterId, serverId, primaryNic).Execute()
-		if err != nil {
-			return nil, err
-		}
-
-		if len(*nic.Properties.Ips) > 0 {
-			if err := d.Set("primary_ip", (*nic.Properties.Ips)[0]); err != nil {
-				return nil, err
-			}
-		}
-
-		network := SetNetworkProperties(nic)
-
-		firewallRules, _, err := client.NicApi.DatacentersServersNicsFirewallrulesGet(ctx, datacenterId, serverId, primaryNic).Execute()
-
-		if err != nil {
-			return nil, err
-		}
-
-		if firewallRules.Items != nil {
-			if len(*firewallRules.Items) > 0 {
-				if err := d.Set("firewallrule_id", *(*firewallRules.Items)[0].Id); err != nil {
-					return nil, err
-				}
-			}
-		}
-
-		if firewallId, ok := d.GetOk("firewallrule_id"); ok {
-			firewall, _, err := client.NicApi.DatacentersServersNicsFirewallrulesFindById(ctx, datacenterId, serverId, primaryNic, firewallId.(string)).Execute()
-			if err != nil {
-				return nil, err
-			}
-
-			fw := SetFirewallProperties(firewall)
-
-			network["firewall"] = []map[string]interface{}{fw}
-		}
-
-		networks := []map[string]interface{}{network}
-		if err := d.Set("nic", networks); err != nil {
-			return nil, err
-		}
-	}
-
-	if server.Properties.BootVolume != nil {
-		if server.Properties.BootVolume.Id != nil {
-			if err := d.Set("boot_volume", *server.Properties.BootVolume.Id); err != nil {
-				return nil, err
-			}
-		}
-		volumeObj, _, err := client.ServerApi.DatacentersServersVolumesFindById(ctx, datacenterId, serverId, *server.Properties.BootVolume.Id).Execute()
-		if err == nil {
-			volumeItem := SetVolumeProperties(volumeObj)
-
-			volumesList := []map[string]interface{}{volumeItem}
-			if err := d.Set("volume", volumesList); err != nil {
-				return nil, err
-			}
-		}
-	}
-
-	bootVolume, ok := d.GetOk("boot_volume")
-	if ok && len(bootVolume.(string)) > 0 {
-		_, _, err = client.ServerApi.DatacentersServersVolumesFindById(ctx, datacenterId, d.Id(), bootVolume.(string)).Execute()
-		if err != nil {
-			if err := d.Set("volume", nil); err != nil {
-				return nil, err
-			}
-		}
-	}
-
-	if server.Properties.BootCdrom != nil && server.Properties.BootCdrom.Id != nil {
-		if err := d.Set("boot_cdrom", *server.Properties.BootCdrom.Id); err != nil {
-			return nil, err
-		}
-	}
-
 	return []*schema.ResourceData{d}, nil
 }
 
@@ -1523,4 +850,282 @@ func readPublicKey(path string) (key string, err error) {
 		return "", err
 	}
 	return string(ssh.MarshalAuthorizedKey(pubKey)[:]), nil
+}
+
+func SetCdromProperties(image ionoscloud.Image) map[string]interface{} {
+
+	cdrom := make(map[string]interface{})
+
+	setPropWithNilCheck(cdrom, "name", image.Properties.Name)
+	setPropWithNilCheck(cdrom, "description", image.Properties.Description)
+	setPropWithNilCheck(cdrom, "location", image.Properties.Location)
+	setPropWithNilCheck(cdrom, "size", image.Properties.Size)
+	setPropWithNilCheck(cdrom, "cpu_hot_plug", image.Properties.CpuHotPlug)
+	setPropWithNilCheck(cdrom, "cpu_hot_unplug", image.Properties.CpuHotUnplug)
+	setPropWithNilCheck(cdrom, "ram_hot_plug", image.Properties.RamHotPlug)
+	setPropWithNilCheck(cdrom, "ram_hot_unplug", image.Properties.RamHotUnplug)
+	setPropWithNilCheck(cdrom, "nic_hot_plug", image.Properties.NicHotPlug)
+	setPropWithNilCheck(cdrom, "nic_hot_unplug", image.Properties.NicHotUnplug)
+	setPropWithNilCheck(cdrom, "disc_virtio_hot_plug", image.Properties.DiscVirtioHotPlug)
+	setPropWithNilCheck(cdrom, "disc_virtio_hot_unplug", image.Properties.DiscVirtioHotUnplug)
+	setPropWithNilCheck(cdrom, "disc_scsi_hot_plug", image.Properties.DiscScsiHotPlug)
+	setPropWithNilCheck(cdrom, "disc_scsi_hot_unplug", image.Properties.DiscScsiHotUnplug)
+	setPropWithNilCheck(cdrom, "licence_type", image.Properties.LicenceType)
+	setPropWithNilCheck(cdrom, "image_type", image.Properties.ImageType)
+	setPropWithNilCheck(cdrom, "public", image.Properties.Public)
+
+	return cdrom
+}
+
+func SetFirewallProperties(firewall ionoscloud.FirewallRule) map[string]interface{} {
+
+	fw := map[string]interface{}{}
+
+	setPropWithNilCheck(fw, "protocol", firewall.Properties.Protocol)
+	setPropWithNilCheck(fw, "name", firewall.Properties.Name)
+	setPropWithNilCheck(fw, "source_mac", firewall.Properties.SourceMac)
+	setPropWithNilCheck(fw, "source_ip", firewall.Properties.SourceIp)
+	setPropWithNilCheck(fw, "target_ip", firewall.Properties.TargetIp)
+	setPropWithNilCheck(fw, "port_range_start", firewall.Properties.PortRangeStart)
+	setPropWithNilCheck(fw, "port_range_end", firewall.Properties.PortRangeEnd)
+	setPropWithNilCheck(fw, "icmp_type", firewall.Properties.IcmpType)
+	setPropWithNilCheck(fw, "icmp_code", firewall.Properties.IcmpCode)
+	return fw
+}
+
+func SetVolumeProperties(volume ionoscloud.Volume) map[string]interface{} {
+
+	volumeMap := map[string]interface{}{}
+
+	setPropWithNilCheck(volumeMap, "name", volume.Properties.Name)
+	setPropWithNilCheck(volumeMap, "disk_type", volume.Properties.Type)
+	setPropWithNilCheck(volumeMap, "size", volume.Properties.Size)
+	setPropWithNilCheck(volumeMap, "licence_type", volume.Properties.LicenceType)
+	setPropWithNilCheck(volumeMap, "image", volume.Properties.Image)
+	setPropWithNilCheck(volumeMap, "image_alias", volume.Properties.ImageAlias)
+	setPropWithNilCheck(volumeMap, "bus", volume.Properties.Bus)
+	setPropWithNilCheck(volumeMap, "availability_zone", volume.Properties.AvailabilityZone)
+	setPropWithNilCheck(volumeMap, "cpu_hot_plug", volume.Properties.CpuHotPlug)
+	setPropWithNilCheck(volumeMap, "ram_hot_plug", volume.Properties.RamHotPlug)
+	setPropWithNilCheck(volumeMap, "nic_hot_plug", volume.Properties.NicHotPlug)
+	setPropWithNilCheck(volumeMap, "nic_hot_unplug", volume.Properties.NicHotUnplug)
+	setPropWithNilCheck(volumeMap, "disc_virtio_hot_plug", volume.Properties.DiscVirtioHotPlug)
+	setPropWithNilCheck(volumeMap, "disc_virtio_hot_unplug", volume.Properties.DiscVirtioHotUnplug)
+	setPropWithNilCheck(volumeMap, "device_number", volume.Properties.DeviceNumber)
+	if volume.Properties.SshKeys != nil && len(*volume.Properties.SshKeys) > 0 {
+		var sshKeys []interface{}
+		for _, sshKey := range *volume.Properties.SshKeys {
+			sshKeys = append(sshKeys, sshKey)
+		}
+		volumeMap["ssh_keys"] = sshKeys
+	}
+
+	return volumeMap
+}
+
+func SetNetworkProperties(nic ionoscloud.Nic) map[string]interface{} {
+
+	network := map[string]interface{}{}
+
+	setPropWithNilCheck(network, "dhcp", nic.Properties.Dhcp)
+	setPropWithNilCheck(network, "nat", nic.Properties.Nat)
+	setPropWithNilCheck(network, "firewall_active", nic.Properties.FirewallActive)
+	setPropWithNilCheck(network, "lan", nic.Properties.Lan)
+	setPropWithNilCheck(network, "name", nic.Properties.Name)
+	setPropWithNilCheck(network, "mac", nic.Properties.Mac)
+
+	if nic.Properties.Ips != nil && len(*nic.Properties.Ips) > 0 {
+		network["ips"] = *nic.Properties.Ips
+	}
+
+	return network
+}
+
+func getServerData(d *schema.ResourceData, update bool) (*ionoscloud.Server, error) {
+	server := ionoscloud.Server{
+		Properties: &ionoscloud.ServerProperties{},
+	}
+
+	if update {
+		if d.HasChange("availability_zone") {
+			return nil, fmt.Errorf("availability_zone is immutable")
+		}
+	} else {
+		if v, ok := d.GetOk("availability_zone"); ok {
+			vStr := v.(string)
+			server.Properties.AvailabilityZone = &vStr
+		}
+	}
+
+	serverName := d.Get("name").(string)
+	server.Properties.Name = &serverName
+
+	serverCores := int32(d.Get("cores").(int))
+	server.Properties.Cores = &serverCores
+
+	serverRam := int32(d.Get("ram").(int))
+	server.Properties.Ram = &serverRam
+
+	if v, ok := d.GetOk("cpu_family"); ok {
+		if v.(string) != "" {
+			vStr := v.(string)
+			server.Properties.CpuFamily = &vStr
+		}
+	}
+
+	if _, ok := d.GetOk("boot_cdrom"); ok {
+		bootCdrom := d.Get("boot_cdrom").(string)
+		if IsValidUUID(bootCdrom) {
+			server.Properties.BootCdrom = &ionoscloud.ResourceReference{
+				Id: &bootCdrom,
+			}
+
+		} else {
+			return nil, fmt.Errorf("boot_cdrom has to be a valid UUID, got: %s", bootCdrom)
+		}
+	}
+
+	return &server, nil
+}
+
+func setServerData(ctx context.Context, client *ionoscloud.APIClient, d *schema.ResourceData, server *ionoscloud.Server, readFromSchema bool) error {
+
+	if server.Id != nil {
+		d.SetId(*server.Id)
+	}
+
+	datacenterId := d.Get("datacenter_id").(string)
+	if server.Properties != nil {
+		if server.Properties.Name != nil {
+			if err := d.Set("name", *server.Properties.Name); err != nil {
+				return err
+			}
+		}
+
+		if server.Properties.Cores != nil {
+			if err := d.Set("cores", *server.Properties.Cores); err != nil {
+				return err
+			}
+		}
+
+		if server.Properties.Ram != nil {
+			if err := d.Set("ram", *server.Properties.Ram); err != nil {
+				return err
+			}
+		}
+
+		if server.Properties.AvailabilityZone != nil {
+			if err := d.Set("availability_zone", *server.Properties.AvailabilityZone); err != nil {
+				return err
+			}
+		}
+
+		if server.Properties.VmState != nil {
+			if err := d.Set("vm_state", *server.Properties.VmState); err != nil {
+				return err
+			}
+		}
+
+		if server.Properties.CpuFamily != nil {
+			if err := d.Set("cpu_family", *server.Properties.CpuFamily); err != nil {
+				return err
+			}
+		}
+		if server.Properties.BootCdrom != nil && server.Properties.BootCdrom.Id != nil {
+			if err := d.Set("boot_cdrom", *server.Properties.BootCdrom.Id); err != nil {
+				return err
+			}
+		}
+
+		if server.Properties.BootVolume != nil && server.Properties.BootVolume.Id != nil {
+			if err := d.Set("boot_volume", *server.Properties.BootVolume.Id); err != nil {
+				return err
+			}
+		}
+
+		if server.Entities.Volumes != nil && server.Entities.Volumes.Items != nil && len(*server.Entities.Volumes.Items) > 0 &&
+			(*server.Entities.Volumes.Items)[0].Properties.Image != nil {
+			if err := d.Set("boot_image", *(*server.Entities.Volumes.Items)[0].Properties.Image); err != nil {
+				return err
+			}
+		}
+	}
+
+	if server.Entities == nil {
+		return nil
+	}
+
+	var cdroms []interface{}
+	if server.Entities.Cdroms != nil && server.Entities.Cdroms.Items != nil && len(*server.Entities.Cdroms.Items) > 0 {
+		for _, image := range *server.Entities.Cdroms.Items {
+			entry := SetCdromProperties(image)
+			cdroms = append(cdroms, entry)
+		}
+		if err := d.Set("cdrom", cdroms); err != nil {
+			return err
+		}
+	}
+
+	if server.Properties.BootVolume != nil {
+		volume, _, err := client.ServerApi.DatacentersServersVolumesFindById(ctx, datacenterId, d.Id(), *server.Properties.BootVolume.Id).Execute()
+		if err == nil {
+			var volumes []interface{}
+			entry := SetVolumeProperties(volume)
+			userData := d.Get("volume.0.user_data")
+			entry["user_data"] = userData
+
+			backupUnit := d.Get("volume.0.backup_unit_id")
+			entry["backup_unit_id"] = backupUnit
+			volumes = append(volumes, entry)
+			if err := d.Set("volume", volumes); err != nil {
+				return err
+			}
+		}
+	}
+
+	_, primaryNicOk := d.GetOk("primary_nic")
+	_, primaryFirewallOk := d.GetOk("firewallrule_id")
+
+	// take nic and firewall from schema if set is used in resource read, else take it from entities
+	if (readFromSchema && primaryNicOk) || (!readFromSchema && server.Entities.Nics != nil && server.Entities.Nics.Items != nil && len(*server.Entities.Nics.Items) > 0 && (*server.Entities.Nics.Items)[0].Id != nil) {
+		var nicId string
+		if readFromSchema {
+			nicId = d.Get("primary_nic").(string)
+		} else {
+			nicId = *(*server.Entities.Nics.Items)[0].Id
+		}
+
+		nic, _, err := client.NicApi.DatacentersServersNicsFindById(ctx, datacenterId, d.Id(), nicId).Execute()
+		if err != nil {
+			return err
+		}
+		nicEntry := SetNetworkProperties(nic)
+
+		if (readFromSchema && primaryFirewallOk) || !readFromSchema {
+			var firewallId string
+			if readFromSchema {
+				firewallId = d.Get("firewallrule_id").(string)
+			} else {
+				firewallId = *(*nic.Entities.Firewallrules.Items)[0].Id
+			}
+
+			firewall, _, err := client.NicApi.DatacentersServersNicsFirewallrulesFindById(ctx, datacenterId, d.Id(), nicId, firewallId).Execute()
+			if err != nil {
+				return err
+			}
+
+			firewallEntry := SetFirewallProperties(firewall)
+
+			nicEntry["firewall"] = []map[string]interface{}{firewallEntry}
+
+		}
+
+		nics := []map[string]interface{}{nicEntry}
+
+		if err := d.Set("nic", nics); err != nil {
+			return err
+		}
+	}
+
+	return nil
 }

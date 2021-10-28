@@ -31,7 +31,7 @@ func TestAccDataSourceS3KeyMatchFields(t *testing.T) {
 
 var testAccDataSourceS3KeyMatchId = testAccChecks3KeyConfigBasic + `
 data ` + S3KeyResource + ` ` + S3KeyDataSourceById + ` {
- user_id    	= ionoscloud_user.example.id
+ user_id    	= ` + UserResource + `.example.id
  id			= ` + S3KeyResource + `.` + S3KeyTestResource + `.id
 }
 `

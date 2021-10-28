@@ -212,14 +212,10 @@ func resourceUserDelete(ctx context.Context, d *schema.ResourceData, meta interf
 	if err != nil {
 		//try again in 20 seconds
 		time.Sleep(20 * time.Second)
-		_, _, err := client.UserManagementApi.UmUsersDelete(ctx, d.Id()).Execute()
+		_, apiResponse, err = client.UserManagementApi.UmUsersDelete(ctx, d.Id()).Execute()
 		if err != nil {
-			if _, ok := err.(ionoscloud.GenericOpenAPIError); ok {
-				if apiResponse == nil || apiResponse.Response != nil && apiResponse.StatusCode != 404 {
-					diags := diag.FromErr(fmt.Errorf("an error occured while deleting a user %s %s", d.Id(), err))
-					return diags
-				}
-			}
+			diags := diag.FromErr(fmt.Errorf("an error occured while deleting a user %s %s", d.Id(), err))
+			return diags
 		}
 	}
 
@@ -259,8 +255,9 @@ func resourceUserImporter(ctx context.Context, d *schema.ResourceData, meta inte
 }
 
 func setUserData(d *schema.ResourceData, user *ionoscloud.User) error {
-	d.SetId(*user.Id)
-
+	if user.Id != nil {
+		d.SetId(*user.Id)
+	}
 	if user.Properties != nil {
 		if user.Properties.Firstname != nil {
 			if err := d.Set("first_name", *user.Properties.Firstname); err != nil {

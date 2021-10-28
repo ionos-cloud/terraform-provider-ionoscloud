@@ -87,6 +87,14 @@ const (
 	UserDataSourceByName = "test_user_name"
 )
 
+// Volume Constants
+const (
+	VolumeResource         = "ionoscloud_volume"
+	VolumeTestResource     = "test_volume"
+	VolumeDataSourceById   = "test_volume_id"
+	VolumeDataSourceByName = "test_volume_name"
+)
+
 // General Constants
 const (
 	DataSource       = "data"

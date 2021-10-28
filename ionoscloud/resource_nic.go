@@ -71,47 +71,11 @@ func resourceNic() *schema.Resource {
 func resourceNicCreate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	client := meta.(*ionoscloud.APIClient)
 
-	lan := d.Get("lan").(int)
-	lanConverted := int32(lan)
-	nic := ionoscloud.Nic{
-		Properties: &ionoscloud.NicProperties{
-			Lan: &lanConverted,
-		},
-	}
-	if _, ok := d.GetOk("name"); ok {
-		name := d.Get("name").(string)
-		nic.Properties.Name = &name
-	}
+	nic := getNicData(d, "")
 
-	val := d.Get("dhcp").(bool)
-	nic.Properties.Dhcp = &val
-
-	if _, ok := d.GetOk("firewall_active"); ok {
-		raw := d.Get("firewall_active").(bool)
-		nic.Properties.FirewallActive = &raw
-	}
-	if _, ok := d.GetOk("nat"); ok {
-		raw := d.Get("nat").(bool)
-		nic.Properties.Nat = &raw
-	}
-
-	if v, ok := d.GetOk("ips"); ok {
-		raw := v.([]interface{})
-		if raw != nil && len(raw) > 0 {
-			var ips []string
-			for _, rawIp := range raw {
-				ip := rawIp.(string)
-				ips = append(ips, ip)
-			}
-			if ips != nil && len(ips) > 0 {
-				nic.Properties.Ips = &ips
-			}
-		}
-	}
-
-	dcid := d.Get("datacenter_id").(string)
-	srvid := d.Get("server_id").(string)
-	nic, apiResponse, err := client.NicApi.DatacentersServersNicsPost(ctx, dcid, srvid).Nic(nic).Execute()
+	dcId := d.Get("datacenter_id").(string)
+	srvId := d.Get("server_id").(string)
+	nic, apiResponse, err := client.NicApi.DatacentersServersNicsPost(ctx, dcId, srvId).Nic(nic).Execute()
 
 	if err != nil {
 		diags := diag.FromErr(fmt.Errorf("error occured while creating a nic: %s", err))
@@ -199,47 +163,12 @@ func resourceNicRead(ctx context.Context, d *schema.ResourceData, meta interface
 func resourceNicUpdate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	client := meta.(*ionoscloud.APIClient)
 
-	properties := ionoscloud.NicProperties{}
+	dcId := d.Get("datacenter_id").(string)
+	srvId := d.Get("server_id").(string)
+	nicId := d.Id()
 
-	if d.HasChange("name") {
-		_, n := d.GetChange("name")
-		name := n.(string)
-		properties.Name = &name
-	}
-	if d.HasChange("lan") {
-		_, n := d.GetChange("lan")
-		lan := n.(int32)
-		properties.Lan = &lan
-	}
-
-	n := d.Get("dhcp").(bool)
-	properties.Dhcp = &n
-
-	if d.HasChange("ips") {
-		_, v := d.GetChange("ips")
-		raw := v.([]interface{})
-		if raw != nil && len(raw) > 0 {
-			var ips []string
-			for _, rawIp := range raw {
-				ip := rawIp.(string)
-				ips = append(ips, ip)
-			}
-			if ips != nil && len(ips) > 0 {
-				properties.Ips = &ips
-			}
-		}
-	}
-	if d.HasChange("nat") {
-		_, raw := d.GetChange("nat")
-		nat := raw.(bool)
-		properties.Nat = &nat
-	}
-
-	dcid := d.Get("datacenter_id").(string)
-	srvid := d.Get("server_id").(string)
-	nicid := d.Id()
-
-	_, apiResponse, err := client.NicApi.DatacentersServersNicsPatch(ctx, dcid, srvid, nicid).Nic(properties).Execute()
+	nic := getNicData(d, "")
+	_, apiResponse, err := client.NicApi.DatacentersServersNicsPatch(ctx, dcId, srvId, nicId).Nic(*nic.Properties).Execute()
 
 	if err != nil {
 		diags := diag.FromErr(fmt.Errorf("error occured while updating a nic: %s", err))
@@ -278,4 +207,39 @@ func resourceNicDelete(ctx context.Context, d *schema.ResourceData, meta interfa
 
 	d.SetId("")
 	return nil
+}
+
+func getNicData(d *schema.ResourceData, path string) ionoscloud.Nic {
+
+	nic := ionoscloud.Nic{
+		Properties: &ionoscloud.NicProperties{},
+	}
+
+	lanInt := int32(d.Get(path + "lan").(int))
+	nic.Properties.Lan = &lanInt
+
+	if v, ok := d.GetOk(path + "name"); ok {
+		vStr := v.(string)
+		nic.Properties.Name = &vStr
+	}
+
+	nic.Properties.Dhcp = boolAddr(d.Get(path + "dhcp").(bool))
+	nic.Properties.FirewallActive = boolAddr(d.Get(path + "firewall_active").(bool))
+	nic.Properties.Nat = boolAddr(d.Get(path + "nat").(bool))
+
+	if v, ok := d.GetOk(path + "ips"); ok {
+		raw := v.([]interface{})
+		if raw != nil && len(raw) > 0 {
+			ips := make([]string, 0)
+			for _, rawIp := range raw {
+				ip := rawIp.(string)
+				ips = append(ips, ip)
+			}
+			if ips != nil && len(ips) > 0 {
+				nic.Properties.Ips = &ips
+			}
+		}
+	}
+
+	return nic
 }
