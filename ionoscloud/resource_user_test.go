@@ -26,7 +26,7 @@ func TestAccUser_Basic(t *testing.T) {
 					testAccCheckUserExists(UserResource+"."+UserTestResource, &user),
 					resource.TestCheckResourceAttr(UserResource+"."+UserTestResource, "first_name", UserTestResource),
 					resource.TestCheckResourceAttr(UserResource+"."+UserTestResource, "last_name", UserTestResource),
-					resource.TestCheckResourceAttr(UserResource+"."+UserTestResource, "email", email),
+					resource.TestCheckResourceAttr(UserResource+"."+UserTestResource, "email", "user_"+email),
 					resource.TestCheckResourceAttr(UserResource+"."+UserTestResource, "administrator", "true"),
 					resource.TestCheckResourceAttr(UserResource+"."+UserTestResource, "force_sec_auth", "true"),
 					resource.TestCheckResourceAttr(UserResource+"."+UserTestResource, "active", "true"),
@@ -37,7 +37,7 @@ func TestAccUser_Basic(t *testing.T) {
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttr(UserResource+"."+UserTestResource, "first_name", UpdatedResources),
 					resource.TestCheckResourceAttr(UserResource+"."+UserTestResource, "last_name", UpdatedResources),
-					resource.TestCheckResourceAttr(UserResource+"."+UserTestResource, "email", "updated"+email),
+					resource.TestCheckResourceAttr(UserResource+"."+UserTestResource, "email", "updated_user"+email),
 					resource.TestCheckResourceAttr(UserResource+"."+UserTestResource, "administrator", "false"),
 					resource.TestCheckResourceAttr(UserResource+"."+UserTestResource, "force_sec_auth", "false"),
 					resource.TestCheckResourceAttr(UserResource+"."+UserTestResource, "active", "false")),
@@ -110,7 +110,7 @@ var testAccCheckUserConfigBasic = `
 resource ` + UserResource + ` ` + UserTestResource + ` {
   first_name = "` + UserTestResource + `"
   last_name = "` + UserTestResource + `"
-  email = "` + email + `"
+  email = "user_` + email + `"
   password = "abc123-321CBA"
   administrator = true
   force_sec_auth= true
@@ -121,7 +121,7 @@ var testAccCheckUserConfigUpdate = `
 resource ` + UserResource + ` ` + UserTestResource + ` {
   first_name = "` + UpdatedResources + `"
   last_name = "` + UpdatedResources + `"
-  email = "updated` + email + `"
+  email = "updated_user` + email + `"
   password = "abc123-321CBAupdated"
   administrator = false
   force_sec_auth= false

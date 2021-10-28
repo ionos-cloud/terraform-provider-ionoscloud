@@ -7,7 +7,6 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 	ionoscloud "github.com/ionos-cloud/sdk-go/v5"
-	"strconv"
 	"strings"
 )
 
@@ -346,20 +345,14 @@ func getFirewallData(d *schema.ResourceData, path string, update bool) ionosclou
 	}
 
 	if v, ok := d.GetOk(path + "icmp_type"); ok {
-		tempIcmpType := v.(string)
-		if tempIcmpType != "" {
-			i, _ := strconv.Atoi(tempIcmpType)
-			iInt32 := int32(i)
-			firewall.Properties.IcmpType = &iInt32
-		}
+		tempIcmpType := int32(v.(int))
+		firewall.Properties.IcmpType = &tempIcmpType
+
 	}
 	if v, ok := d.GetOk(path + "icmp_code"); ok {
-		tempIcmpCode := v.(string)
-		if tempIcmpCode != "" {
-			i, _ := strconv.Atoi(tempIcmpCode)
-			iInt32 := int32(i)
-			firewall.Properties.IcmpCode = &iInt32
-		}
+		tempIcmpCode := int32(v.(int))
+		firewall.Properties.IcmpCode = &tempIcmpCode
+
 	}
 	return firewall
 }

@@ -415,11 +415,11 @@ func resourceServer() *schema.Resource {
 										},
 									},
 									"icmp_type": {
-										Type:     schema.TypeString,
+										Type:     schema.TypeInt,
 										Optional: true,
 									},
 									"icmp_code": {
-										Type:     schema.TypeString,
+										Type:     schema.TypeInt,
 										Optional: true,
 									},
 								},
@@ -619,7 +619,7 @@ func resourceServerRead(ctx context.Context, d *schema.ResourceData, meta interf
 		return diags
 	}
 
-	if err := setServerData(ctx, client, d, &server); err != nil {
+	if err := setServerData(ctx, client, d, &server, true); err != nil {
 		return diag.FromErr(err)
 	}
 
@@ -833,7 +833,7 @@ func resourceServerImport(ctx context.Context, d *schema.ResourceData, meta inte
 		return nil, err
 	}
 
-	if err := setServerData(ctx, client, d, &server); err != nil {
+	if err := setServerData(ctx, client, d, &server, false); err != nil {
 		return nil, err
 	}
 	return []*schema.ResourceData{d}, nil
@@ -988,12 +988,13 @@ func getServerData(d *schema.ResourceData, update bool) (*ionoscloud.Server, err
 	return &server, nil
 }
 
-func setServerData(ctx context.Context, client *ionoscloud.APIClient, d *schema.ResourceData, server *ionoscloud.Server) error {
+func setServerData(ctx context.Context, client *ionoscloud.APIClient, d *schema.ResourceData, server *ionoscloud.Server, read bool) error {
 
 	if server.Id != nil {
 		d.SetId(*server.Id)
 	}
 
+	datacenterId := d.Get("datacenter_id").(string)
 	if server.Properties != nil {
 		if server.Properties.Name != nil {
 			if err := d.Set("name", *server.Properties.Name); err != nil {
@@ -1066,7 +1067,7 @@ func setServerData(ctx context.Context, client *ionoscloud.APIClient, d *schema.
 	}
 
 	if server.Properties.BootVolume != nil {
-		volume, _, err := client.ServerApi.DatacentersServersVolumesFindById(ctx, d.Get("datacenter_id").(string), d.Id(), *server.Properties.BootVolume.Id).Execute()
+		volume, _, err := client.ServerApi.DatacentersServersVolumesFindById(ctx, datacenterId, d.Id(), *server.Properties.BootVolume.Id).Execute()
 		if err == nil {
 			var volumes []interface{}
 			entry := SetVolumeProperties(volume)
@@ -1082,23 +1083,42 @@ func setServerData(ctx context.Context, client *ionoscloud.APIClient, d *schema.
 		}
 	}
 
-	var nics []interface{}
-	if server.Entities.Nics != nil && server.Entities.Nics.Items != nil && len(*server.Entities.Nics.Items) > 0 {
-		for _, nic := range *server.Entities.Nics.Items {
-			entry := SetNetworkProperties(nic)
-
-			var firewallRules []interface{}
-			if nic.Entities != nil && nic.Entities.Firewallrules != nil && nic.Entities.Firewallrules.Items != nil {
-				firewallRules = make([]interface{}, len(*nic.Entities.Firewallrules.Items))
-				for idx, rule := range *nic.Entities.Firewallrules.Items {
-					ruleEntry := SetFirewallProperties(rule)
-					firewallRules[idx] = ruleEntry
-				}
-			}
-			entry["firewall"] = firewallRules
-
-			nics = append(nics, entry)
+	_, primaryNicOk := d.GetOk("primary_nic")
+	_, primaryFirewallOk := d.GetOk("firewallrule_id")
+	if (read && primaryNicOk) || (!read && server.Entities.Nics != nil && server.Entities.Nics.Items != nil && len(*server.Entities.Nics.Items) > 0 && (*server.Entities.Nics.Items)[0].Id != nil) {
+		var nicId string
+		if read {
+			nicId = d.Get("primary_nic").(string)
+		} else {
+			nicId = *(*server.Entities.Nics.Items)[0].Id
 		}
+
+		nic, _, err := client.NicApi.DatacentersServersNicsFindById(ctx, datacenterId, d.Id(), nicId).Execute()
+		if err != nil {
+			return err
+		}
+		nicEntry := SetNetworkProperties(nic)
+
+		if (read && primaryFirewallOk) || !read {
+			var firewallId string
+			if read {
+				firewallId = d.Get("firewallrule_id").(string)
+			} else {
+				firewallId = *(*nic.Entities.Firewallrules.Items)[0].Id
+			}
+
+			firewall, _, err := client.NicApi.DatacentersServersNicsFirewallrulesFindById(ctx, datacenterId, d.Id(), nicId, firewallId).Execute()
+			if err != nil {
+				return err
+			}
+
+			firewallEntry := SetFirewallProperties(firewall)
+
+			nicEntry["firewall"] = []map[string]interface{}{firewallEntry}
+
+		}
+
+		nics := []map[string]interface{}{nicEntry}
 
 		if err := d.Set("nic", nics); err != nil {
 			return err

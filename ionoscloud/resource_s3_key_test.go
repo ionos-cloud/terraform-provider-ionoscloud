@@ -28,7 +28,7 @@ func TestAccS3KeyBasic(t *testing.T) {
 				),
 			},
 			{
-				Config: testAccChecks3KeyConfigBasic,
+				Config: testAccChecks3KeyConfigUpdate,
 				Check: resource.ComposeTestCheckFunc(
 					testAccChecks3KeyExists(S3KeyResource+"."+S3KeyTestResource, &s3Key),
 					resource.TestCheckResourceAttrSet(S3KeyResource+"."+S3KeyTestResource, "secret_key"),
@@ -97,7 +97,7 @@ var testAccChecks3KeyConfigBasic = `
 resource ` + UserResource + ` "example" {
   first_name = "terraform"
   last_name = "test"
-  email = "` + email + `"
+  email = "s3_` + email + `"
   password = "abc123-321CBA"
   administrator = false
   force_sec_auth= false
@@ -112,7 +112,7 @@ var testAccChecks3KeyConfigUpdate = `
 resource ` + UserResource + ` "example" {
   first_name = "terraform"
   last_name = "test"
-  email = "` + email + `"
+  email = "s3_` + email + `"
   password = "abc123-321CBA"
   administrator = false
   force_sec_auth= false

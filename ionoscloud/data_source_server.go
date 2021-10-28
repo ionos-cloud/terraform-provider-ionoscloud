@@ -386,7 +386,7 @@ func dataSourceServerRead(d *schema.ResourceData, meta interface{}) error {
 
 	}
 
-	if err = setServerData(ctx, client, d, &server); err != nil {
+	if err = setServerData(ctx, client, d, &server, false); err != nil {
 		return err
 	}
 
