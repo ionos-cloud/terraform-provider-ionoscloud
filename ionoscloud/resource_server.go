@@ -988,7 +988,7 @@ func getServerData(d *schema.ResourceData, update bool) (*ionoscloud.Server, err
 	return &server, nil
 }
 
-func setServerData(ctx context.Context, client *ionoscloud.APIClient, d *schema.ResourceData, server *ionoscloud.Server, read bool) error {
+func setServerData(ctx context.Context, client *ionoscloud.APIClient, d *schema.ResourceData, server *ionoscloud.Server, readFromSchema bool) error {
 
 	if server.Id != nil {
 		d.SetId(*server.Id)
@@ -1085,9 +1085,11 @@ func setServerData(ctx context.Context, client *ionoscloud.APIClient, d *schema.
 
 	_, primaryNicOk := d.GetOk("primary_nic")
 	_, primaryFirewallOk := d.GetOk("firewallrule_id")
-	if (read && primaryNicOk) || (!read && server.Entities.Nics != nil && server.Entities.Nics.Items != nil && len(*server.Entities.Nics.Items) > 0 && (*server.Entities.Nics.Items)[0].Id != nil) {
+
+	// take nic and firewall from schema if set is used in resource read, else take it from entities
+	if (readFromSchema && primaryNicOk) || (!readFromSchema && server.Entities.Nics != nil && server.Entities.Nics.Items != nil && len(*server.Entities.Nics.Items) > 0 && (*server.Entities.Nics.Items)[0].Id != nil) {
 		var nicId string
-		if read {
+		if readFromSchema {
 			nicId = d.Get("primary_nic").(string)
 		} else {
 			nicId = *(*server.Entities.Nics.Items)[0].Id
@@ -1099,9 +1101,9 @@ func setServerData(ctx context.Context, client *ionoscloud.APIClient, d *schema.
 		}
 		nicEntry := SetNetworkProperties(nic)
 
-		if (read && primaryFirewallOk) || !read {
+		if (readFromSchema && primaryFirewallOk) || !readFromSchema {
 			var firewallId string
-			if read {
+			if readFromSchema {
 				firewallId = d.Get("firewallrule_id").(string)
 			} else {
 				firewallId = *(*nic.Entities.Firewallrules.Items)[0].Id
