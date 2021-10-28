@@ -21,15 +21,17 @@ datasource "ionoscloud_ipblock" "example" {
 
 ## Argument reference
 
-* `id` - (Required)[string] ID of the ip block you want to search for.
+* `id` - (Optional) ID of an existing Ip Block that you want to search for.
+* `name` - (Optional) Name of an existing Ip Block that you want to search for.
+* `location` - (Optional) ID of the existing Ip Block location.
 
 ## Attributes Reference
-* `id` - (Optional)[string] The id of Ip Block
-* `name` - (Optional)[string] The name of Ip Block
-* `location` - (Required)[string] The regional location for this IP Block: us/las, us/ewr, de/fra, de/fkb.
-* `size` - (Required)[integer] The number of IP addresses to reserve for this block.
-* `ips` - (Computed)[integer] The list of IP addresses associated with this block.
-* `ip_consumers` (Computed) Read-Only attribute. Lists consumption detail of an individual ip
+* `id` - The id of Ip Block
+* `name` - The name of Ip Block
+* `location` - The regional location for this IP Block: us/las, us/ewr, de/fra, de/fkb.
+* `size` - The number of IP addresses to reserve for this block.
+* `ips` - The list of IP addresses associated with this block.
+* `ip_consumers` Read-Only attribute. Lists consumption detail of an individual ip
   * `ip`
   * `mac`
   * `nic_uuid`

@@ -223,6 +223,11 @@ func IpBlockSetData(d *schema.ResourceData, ipBlock *ionoscloud.IpBlock) (err er
 	if ipBlock == nil {
 		return fmt.Errorf("ipblock is empty")
 	}
+
+	if ipBlock.Id != nil {
+		d.SetId(*ipBlock.Id)
+	}
+
 	if ipBlock.Properties.Ips != nil && len(*ipBlock.Properties.Ips) > 0 {
 		if err := d.Set("ips", *ipBlock.Properties.Ips); err != nil {
 			return err
