@@ -56,6 +56,7 @@ func resourceVolume() *schema.Resource {
 			"licence_type": {
 				Type:     schema.TypeString,
 				Optional: true,
+				Computed: true,
 			},
 			"ssh_key_path": {
 				Type:     schema.TypeList,
