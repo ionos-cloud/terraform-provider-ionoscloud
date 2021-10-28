@@ -1,3 +1,5 @@
+// +build nlb
+
 package ionoscloud
 
 import (

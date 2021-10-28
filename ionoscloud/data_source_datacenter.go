@@ -93,8 +93,6 @@ func dataSourceDataCenterRead(ctx context.Context, d *schema.ResourceData, meta 
 	var datacenter ionoscloud.Datacenter
 	var err error
 
-	found := false
-
 	if !idOk && !nameOk && !locationOk {
 		return diag.FromErr(fmt.Errorf("either id, location or name must be set"))
 	}
@@ -117,8 +115,6 @@ func dataSourceDataCenterRead(ctx context.Context, d *schema.ResourceData, meta 
 			}
 		}
 		log.Printf("[INFO] Got dc [Name=%s, Location=%s]", *datacenter.Properties.Name, *datacenter.Properties.Location)
-
-		found = true
 	} else {
 		datacenters, _, err := client.DataCentersApi.DatacentersGet(ctx).Execute()
 
@@ -144,8 +140,7 @@ func dataSourceDataCenterRead(ctx context.Context, d *schema.ResourceData, meta 
 			if results != nil {
 				for _, dc := range results {
 					if dc.Properties.Location != nil && *dc.Properties.Location == location {
-						datacenter = dc
-						found = true
+						results = append(results, dc)
 						break
 					}
 				}
@@ -154,17 +149,19 @@ func dataSourceDataCenterRead(ctx context.Context, d *schema.ResourceData, meta 
 				for _, dc := range *datacenters.Items {
 					if dc.Properties.Location != nil && *dc.Properties.Location == location {
 						datacenter = dc
-						found = true
+						results = append(results, dc)
 						break
 					}
 				}
 			}
 		}
 
-	}
+		if results != nil {
+			datacenter = results[0]
+		} else {
+			return diag.FromErr(fmt.Errorf("there are no datacenters that match the search criteria"))
+		}
 
-	if !found {
-		return diag.FromErr(fmt.Errorf("there are no datacenters that match the search criteria"))
 	}
 
 	if err := setDatacenterData(d, &datacenter); err != nil {

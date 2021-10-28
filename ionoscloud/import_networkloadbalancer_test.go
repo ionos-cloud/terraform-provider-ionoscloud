@@ -1,3 +1,5 @@
+// +build nlb
+
 package ionoscloud
 
 import (
@@ -9,7 +11,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
 )
 
-func TestAccNetworkLoadBalancer_ImportBasic(t *testing.T) {
+func TestAccNetworkLoadBalancerImportBasic(t *testing.T) {
 	networkLoadBalancerName := "networkLoadBalancer"
 
 	resource.Test(t, resource.TestCase{
