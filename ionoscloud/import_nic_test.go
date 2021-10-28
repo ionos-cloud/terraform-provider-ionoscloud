@@ -9,7 +9,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
 )
 
-func TestAccNic_ImportBasic(t *testing.T) {
+func TestAccNicImportBasic(t *testing.T) {
 	volumeName := "volume"
 
 	resource.Test(t, resource.TestCase{

@@ -97,7 +97,7 @@ var testAccChecks3KeyConfigBasic = `
 resource ` + UserResource + ` "example" {
   first_name = "terraform"
   last_name = "test"
-  email = "s3_` + email + `"
+  email = "` + GenerateEmail() + `"
   password = "abc123-321CBA"
   administrator = false
   force_sec_auth= false
@@ -112,7 +112,7 @@ var testAccChecks3KeyConfigUpdate = `
 resource ` + UserResource + ` "example" {
   first_name = "terraform"
   last_name = "test"
-  email = "s3_` + email + `"
+  email = "` + GenerateEmail() + `"
   password = "abc123-321CBA"
   administrator = false
   force_sec_auth= false

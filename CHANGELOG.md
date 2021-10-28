@@ -1,5 +1,6 @@
 ## 5.2.18
 
+- **bug fixes**: fixed datacenter datasource
 - **code enhancements**: added constants and removed duplicated tests to `backupUnit`, `datacenter`, `lan`, `s3_key`, `firewall`, `server`
 - **code enhancements**: for `pcc`, `group`, `user`,`snapshot`, `volume` and `server`:
   - made tests comprehensive 

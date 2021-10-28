@@ -5,6 +5,7 @@ import (
 	"fmt"
 	ionoscloud "github.com/ionos-cloud/sdk-go/v5"
 	"log"
+	"math/rand"
 	"reflect"
 	"regexp"
 	"strings"
@@ -14,8 +15,6 @@ import (
 )
 
 const SleepInterval = 5 * time.Second
-
-var email = fmt.Sprintf("terraform_test-%d@mailinator.com", time.Now().Unix())
 
 func resourceK8sNodepoolImport(ctx context.Context, d *schema.ResourceData, meta interface{}) ([]*schema.ResourceData, error) {
 
@@ -406,4 +405,11 @@ func IsValidUUID(uuid string) bool {
 
 func boolAddr(b bool) *bool {
 	return &b
+}
+
+func GenerateEmail() string {
+	s1 := rand.NewSource(time.Now().UnixNano())
+	r1 := rand.New(s1)
+	email := fmt.Sprintf("terraform_test-%d@mailinator.com", r1.Intn(100000))
+	return email
 }
