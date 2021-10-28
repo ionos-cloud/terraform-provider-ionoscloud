@@ -1,5 +1,6 @@
 ## 6.0.0-beta.14
 
+- **bug fixes**: fixed datacenter datasource
 - **code enhancements**: added constants and removed duplicated tests to `backupUnit`, `datacenter`, `lan`, `s3_key`, `firewall`, `server`
 - **code enhancements**: for `pcc`, `group`, `user`, `snapshot`, and `volume` :
   - made tests comprehensive
