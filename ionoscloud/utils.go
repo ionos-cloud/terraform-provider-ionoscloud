@@ -5,7 +5,6 @@ import (
 	"fmt"
 	ionoscloud "github.com/ionos-cloud/sdk-go/v6"
 	"log"
-	"math/rand"
 	"reflect"
 	"regexp"
 	"strings"
@@ -411,8 +410,6 @@ func DiffBasedOnVersion(_, old, new string, _ *schema.ResourceData) bool {
 }
 
 func GenerateEmail() string {
-	s1 := rand.NewSource(time.Now().UnixNano())
-	r1 := rand.New(s1)
-	email := fmt.Sprintf("terraform_test-%d@mailinator.com", r1.Intn(100000))
+	email := fmt.Sprintf("terraform_test-%d@mailinator.com", time.Now().UnixNano())
 	return email
 }

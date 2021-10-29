@@ -10,7 +10,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
 )
 
-func TestAccUser_Basic(t *testing.T) {
+func TestAccUserBasic(t *testing.T) {
 	var user ionoscloud.User
 
 	resource.Test(t, resource.TestCase{

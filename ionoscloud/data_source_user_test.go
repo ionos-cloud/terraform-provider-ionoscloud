@@ -13,7 +13,7 @@ func TestAccDataSourceUser(t *testing.T) {
 		ProviderFactories: testAccProviderFactories,
 		Steps: []resource.TestStep{
 			{
-				Config: testAccCheckUserConfigBasic,
+				Config: testAccDataSourceUserConfigBasic,
 			},
 			{
 				Config: testAccDataSourceUserMatchId,
@@ -45,13 +45,24 @@ func TestAccDataSourceUser(t *testing.T) {
 	})
 }
 
-var testAccDataSourceUserMatchId = testAccCheckUserConfigBasic + `
+var testAccDataSourceUserConfigBasic = `
+resource ` + UserResource + ` ` + UserTestResource + ` {
+  first_name = "` + UserTestResource + `"
+  last_name = "` + UserTestResource + `"
+  email = "` + GenerateEmail() + `"
+  password = "abc123-321CBA"
+  administrator = true
+  force_sec_auth= true
+  active  = true
+}`
+
+var testAccDataSourceUserMatchId = testAccDataSourceUserConfigBasic + `
 data ` + UserResource + ` ` + UserDataSourceById + ` {
   id			= ` + UserResource + `.` + UserTestResource + `.id
 }
 `
 
-var testAccDataSourceUserMatchName = testAccCheckUserConfigBasic + `
+var testAccDataSourceUserMatchName = testAccDataSourceUserConfigBasic + `
 data ` + UserResource + ` ` + UserDataSourceByName + ` {
   email			= ` + UserResource + `.` + UserTestResource + `.email
 }
