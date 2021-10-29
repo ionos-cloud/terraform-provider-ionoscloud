@@ -79,6 +79,7 @@ func resourceVolume() *schema.Resource {
 			"availability_zone": {
 				Type:     schema.TypeString,
 				Optional: true,
+				Computed: true,
 			},
 			"cpu_hot_plug": {
 				Type:     schema.TypeBool,
