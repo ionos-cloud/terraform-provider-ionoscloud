@@ -21,7 +21,7 @@ func TestAccIPBlockImportBasic(t *testing.T) {
 			},
 
 			{
-				ResourceName:      "ionoscloud_ipblock.webserver_ip",
+				ResourceName:      IpBLockResource + ".webserver_ip",
 				ImportState:       true,
 				ImportStateVerify: true,
 			},
