@@ -154,39 +154,27 @@ func resourceUserUpdate(ctx context.Context, d *schema.ResourceData, meta interf
 		Properties: &ionoscloud.UserPropertiesPut{},
 	}
 
-	if d.HasChange("first_name") {
-		_, newValue := d.GetChange("first_name")
-		firstName := newValue.(string)
+	if d.Get("first_name") != nil {
+		firstName := d.Get("first_name").(string)
 		userReq.Properties.Firstname = &firstName
-
 	}
-
-	if d.HasChange("last_name") {
-		_, newValue := d.GetChange("last_name")
-		lastName := newValue.(string)
+	if d.Get("last_name") != nil {
+		lastName := d.Get("last_name").(string)
 		userReq.Properties.Lastname = &lastName
 	}
-
-	if d.HasChange("email") {
-		_, newValue := d.GetChange("email")
-		email := newValue.(string)
+	if d.Get("email") != nil {
+		email := d.Get("email").(string)
 		userReq.Properties.Email = &email
 	}
 
-	if d.HasChange("active") {
-		active := d.Get("active").(bool)
-		userReq.Properties.Active = &active
-	}
+	administrator := d.Get("administrator").(bool)
+	userReq.Properties.Administrator = &administrator
 
-	if d.HasChange("administrator") {
-		administrator := d.Get("administrator").(bool)
-		userReq.Properties.Administrator = &administrator
-	}
+	forceSecAuth := d.Get("force_sec_auth").(bool)
+	userReq.Properties.ForceSecAuth = &forceSecAuth
 
-	if d.HasChange("force_sec_auth") {
-		forceSecAuth := d.Get("force_sec_auth").(bool)
-		userReq.Properties.ForceSecAuth = &forceSecAuth
-	}
+	active := d.Get("active").(bool)
+	userReq.Properties.Active = &active
 
 	_, apiResponse, err := client.UserManagementApi.UmUsersPut(ctx, d.Id()).User(userReq).Execute()
 

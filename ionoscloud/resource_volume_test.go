@@ -345,7 +345,7 @@ resource ` + VolumeResource + ` ` + VolumeTestResource + ` {
   server_id = ` + ServerResource + `.` + ServerTestResource + `.id
   availability_zone = "ZONE_1"
   name = "` + VolumeTestResource + `"
-  size = 6
+  size = 5
   disk_type = "SSD Standard"
   bus = "VIRTIO"
   image_name = "Ubuntu-20.04-LTS"
