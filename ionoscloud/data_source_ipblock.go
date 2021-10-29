@@ -127,7 +127,6 @@ func datasourceIpBlockRead(ctx context.Context, data *schema.ResourceData, meta 
 					*ipBlock.Id, *ipBlock.Properties.Location, location))
 			}
 		}
-		ipBlock.SetId(id.(string))
 		log.Printf("[INFO] Got ip block [Name=%s, Location=%s]", *ipBlock.Properties.Name, *ipBlock.Properties.Location)
 	} else {
 
@@ -144,7 +143,9 @@ func datasourceIpBlockRead(ctx context.Context, data *schema.ResourceData, meta 
 				if block.Properties.Name != nil && *block.Properties.Name == name {
 					results = append(results, block)
 					//found based on name only, save this in case we don't find based on location
-					ipBlock = results[0]
+					if !locationOk {
+						ipBlock = results[0]
+					}
 				}
 			}
 
@@ -173,8 +174,9 @@ func datasourceIpBlockRead(ctx context.Context, data *schema.ResourceData, meta 
 		}
 
 	}
-	if &ipBlock != nil {
-		return diag.FromErr(fmt.Errorf("there are no ip blocks that match the search criteria"))
+
+	if ipBlock.Id == nil {
+		return diag.FromErr(fmt.Errorf("there are no ip blocks that match the search criteria id = %s, name = %s, location = %s", id, name, location))
 	}
 
 	if err := IpBlockSetData(data, &ipBlock); err != nil {
