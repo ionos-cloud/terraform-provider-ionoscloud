@@ -27,6 +27,7 @@ type LocationProperties struct {
 }
 
 
+
 // GetName returns the Name field value
 // If the value is explicit nil, the zero value for string will be returned
 func (o *LocationProperties) GetName() *string {
@@ -67,6 +68,8 @@ func (o *LocationProperties) HasName() bool {
 
 	return false
 }
+
+
 
 // GetFeatures returns the Features field value
 // If the value is explicit nil, the zero value for []string will be returned
@@ -109,6 +112,8 @@ func (o *LocationProperties) HasFeatures() bool {
 	return false
 }
 
+
+
 // GetImageAliases returns the ImageAliases field value
 // If the value is explicit nil, the zero value for []string will be returned
 func (o *LocationProperties) GetImageAliases() *[]string {
@@ -149,6 +154,8 @@ func (o *LocationProperties) HasImageAliases() bool {
 
 	return false
 }
+
+
 
 // GetCpuArchitecture returns the CpuArchitecture field value
 // If the value is explicit nil, the zero value for []CpuArchitectureProperties will be returned
@@ -191,26 +198,32 @@ func (o *LocationProperties) HasCpuArchitecture() bool {
 	return false
 }
 
+
 func (o LocationProperties) MarshalJSON() ([]byte, error) {
 	toSerialize := map[string]interface{}{}
 
 	if o.Name != nil {
 		toSerialize["name"] = o.Name
 	}
+	
 
 	if o.Features != nil {
 		toSerialize["features"] = o.Features
 	}
+	
 
 	if o.ImageAliases != nil {
 		toSerialize["imageAliases"] = o.ImageAliases
 	}
+	
 
 	if o.CpuArchitecture != nil {
 		toSerialize["cpuArchitecture"] = o.CpuArchitecture
 	}
+	
 	return json.Marshal(toSerialize)
 }
+
 type NullableLocationProperties struct {
 	value *LocationProperties
 	isSet bool

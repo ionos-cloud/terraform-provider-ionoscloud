@@ -25,6 +25,7 @@ type KubernetesNodePoolLan struct {
 }
 
 
+
 // GetId returns the Id field value
 // If the value is explicit nil, the zero value for int32 will be returned
 func (o *KubernetesNodePoolLan) GetId() *int32 {
@@ -65,6 +66,8 @@ func (o *KubernetesNodePoolLan) HasId() bool {
 
 	return false
 }
+
+
 
 // GetDhcp returns the Dhcp field value
 // If the value is explicit nil, the zero value for bool will be returned
@@ -107,6 +110,8 @@ func (o *KubernetesNodePoolLan) HasDhcp() bool {
 	return false
 }
 
+
+
 // GetRoutes returns the Routes field value
 // If the value is explicit nil, the zero value for []KubernetesNodePoolLanRoutes will be returned
 func (o *KubernetesNodePoolLan) GetRoutes() *[]KubernetesNodePoolLanRoutes {
@@ -148,22 +153,27 @@ func (o *KubernetesNodePoolLan) HasRoutes() bool {
 	return false
 }
 
+
 func (o KubernetesNodePoolLan) MarshalJSON() ([]byte, error) {
 	toSerialize := map[string]interface{}{}
 
 	if o.Id != nil {
 		toSerialize["id"] = o.Id
 	}
+	
 
 	if o.Dhcp != nil {
 		toSerialize["dhcp"] = o.Dhcp
 	}
+	
 
 	if o.Routes != nil {
 		toSerialize["routes"] = o.Routes
 	}
+	
 	return json.Marshal(toSerialize)
 }
+
 type NullableKubernetesNodePoolLan struct {
 	value *KubernetesNodePoolLan
 	isSet bool

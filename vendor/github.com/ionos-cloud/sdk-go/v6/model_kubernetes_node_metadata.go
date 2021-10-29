@@ -30,6 +30,7 @@ type KubernetesNodeMetadata struct {
 }
 
 
+
 // GetEtag returns the Etag field value
 // If the value is explicit nil, the zero value for string will be returned
 func (o *KubernetesNodeMetadata) GetEtag() *string {
@@ -70,6 +71,8 @@ func (o *KubernetesNodeMetadata) HasEtag() bool {
 
 	return false
 }
+
+
 
 // GetCreatedDate returns the CreatedDate field value
 // If the value is explicit nil, the zero value for time.Time will be returned
@@ -118,6 +121,8 @@ func (o *KubernetesNodeMetadata) HasCreatedDate() bool {
 	return false
 }
 
+
+
 // GetLastModifiedDate returns the LastModifiedDate field value
 // If the value is explicit nil, the zero value for time.Time will be returned
 func (o *KubernetesNodeMetadata) GetLastModifiedDate() *time.Time {
@@ -165,6 +170,8 @@ func (o *KubernetesNodeMetadata) HasLastModifiedDate() bool {
 	return false
 }
 
+
+
 // GetState returns the State field value
 // If the value is explicit nil, the zero value for string will be returned
 func (o *KubernetesNodeMetadata) GetState() *string {
@@ -205,6 +212,8 @@ func (o *KubernetesNodeMetadata) HasState() bool {
 
 	return false
 }
+
+
 
 // GetLastSoftwareUpdatedDate returns the LastSoftwareUpdatedDate field value
 // If the value is explicit nil, the zero value for time.Time will be returned
@@ -253,30 +262,37 @@ func (o *KubernetesNodeMetadata) HasLastSoftwareUpdatedDate() bool {
 	return false
 }
 
+
 func (o KubernetesNodeMetadata) MarshalJSON() ([]byte, error) {
 	toSerialize := map[string]interface{}{}
 
 	if o.Etag != nil {
 		toSerialize["etag"] = o.Etag
 	}
+	
 
 	if o.CreatedDate != nil {
 		toSerialize["createdDate"] = o.CreatedDate
 	}
+	
 
 	if o.LastModifiedDate != nil {
 		toSerialize["lastModifiedDate"] = o.LastModifiedDate
 	}
+	
 
 	if o.State != nil {
 		toSerialize["state"] = o.State
 	}
+	
 
 	if o.LastSoftwareUpdatedDate != nil {
 		toSerialize["lastSoftwareUpdatedDate"] = o.LastSoftwareUpdatedDate
 	}
+	
 	return json.Marshal(toSerialize)
 }
+
 type NullableKubernetesNodeMetadata struct {
 	value *KubernetesNodeMetadata
 	isSet bool

@@ -27,6 +27,7 @@ type NatGatewayRules struct {
 }
 
 
+
 // GetId returns the Id field value
 // If the value is explicit nil, the zero value for string will be returned
 func (o *NatGatewayRules) GetId() *string {
@@ -67,6 +68,8 @@ func (o *NatGatewayRules) HasId() bool {
 
 	return false
 }
+
+
 
 // GetType returns the Type field value
 // If the value is explicit nil, the zero value for Type will be returned
@@ -109,6 +112,8 @@ func (o *NatGatewayRules) HasType() bool {
 	return false
 }
 
+
+
 // GetHref returns the Href field value
 // If the value is explicit nil, the zero value for string will be returned
 func (o *NatGatewayRules) GetHref() *string {
@@ -149,6 +154,8 @@ func (o *NatGatewayRules) HasHref() bool {
 
 	return false
 }
+
+
 
 // GetItems returns the Items field value
 // If the value is explicit nil, the zero value for []NatGatewayRule will be returned
@@ -191,26 +198,32 @@ func (o *NatGatewayRules) HasItems() bool {
 	return false
 }
 
+
 func (o NatGatewayRules) MarshalJSON() ([]byte, error) {
 	toSerialize := map[string]interface{}{}
 
 	if o.Id != nil {
 		toSerialize["id"] = o.Id
 	}
+	
 
 	if o.Type != nil {
 		toSerialize["type"] = o.Type
 	}
+	
 
 	if o.Href != nil {
 		toSerialize["href"] = o.Href
 	}
+	
 
 	if o.Items != nil {
 		toSerialize["items"] = o.Items
 	}
+	
 	return json.Marshal(toSerialize)
 }
+
 type NullableNatGatewayRules struct {
 	value *NatGatewayRules
 	isSet bool

@@ -37,6 +37,7 @@ type ServerProperties struct {
 }
 
 
+
 // GetTemplateUuid returns the TemplateUuid field value
 // If the value is explicit nil, the zero value for string will be returned
 func (o *ServerProperties) GetTemplateUuid() *string {
@@ -77,6 +78,8 @@ func (o *ServerProperties) HasTemplateUuid() bool {
 
 	return false
 }
+
+
 
 // GetName returns the Name field value
 // If the value is explicit nil, the zero value for string will be returned
@@ -119,6 +122,8 @@ func (o *ServerProperties) HasName() bool {
 	return false
 }
 
+
+
 // GetCores returns the Cores field value
 // If the value is explicit nil, the zero value for int32 will be returned
 func (o *ServerProperties) GetCores() *int32 {
@@ -159,6 +164,8 @@ func (o *ServerProperties) HasCores() bool {
 
 	return false
 }
+
+
 
 // GetRam returns the Ram field value
 // If the value is explicit nil, the zero value for int32 will be returned
@@ -201,6 +208,8 @@ func (o *ServerProperties) HasRam() bool {
 	return false
 }
 
+
+
 // GetAvailabilityZone returns the AvailabilityZone field value
 // If the value is explicit nil, the zero value for string will be returned
 func (o *ServerProperties) GetAvailabilityZone() *string {
@@ -241,6 +250,8 @@ func (o *ServerProperties) HasAvailabilityZone() bool {
 
 	return false
 }
+
+
 
 // GetVmState returns the VmState field value
 // If the value is explicit nil, the zero value for string will be returned
@@ -283,6 +294,8 @@ func (o *ServerProperties) HasVmState() bool {
 	return false
 }
 
+
+
 // GetBootCdrom returns the BootCdrom field value
 // If the value is explicit nil, the zero value for ResourceReference will be returned
 func (o *ServerProperties) GetBootCdrom() *ResourceReference {
@@ -323,6 +336,8 @@ func (o *ServerProperties) HasBootCdrom() bool {
 
 	return false
 }
+
+
 
 // GetBootVolume returns the BootVolume field value
 // If the value is explicit nil, the zero value for ResourceReference will be returned
@@ -365,6 +380,8 @@ func (o *ServerProperties) HasBootVolume() bool {
 	return false
 }
 
+
+
 // GetCpuFamily returns the CpuFamily field value
 // If the value is explicit nil, the zero value for string will be returned
 func (o *ServerProperties) GetCpuFamily() *string {
@@ -405,6 +422,8 @@ func (o *ServerProperties) HasCpuFamily() bool {
 
 	return false
 }
+
+
 
 // GetType returns the Type field value
 // If the value is explicit nil, the zero value for string will be returned
@@ -447,50 +466,62 @@ func (o *ServerProperties) HasType() bool {
 	return false
 }
 
+
 func (o ServerProperties) MarshalJSON() ([]byte, error) {
 	toSerialize := map[string]interface{}{}
 
 	if o.TemplateUuid != nil {
 		toSerialize["templateUuid"] = o.TemplateUuid
 	}
+	
 
 	if o.Name != nil {
 		toSerialize["name"] = o.Name
 	}
+	
 
 	if o.Cores != nil {
 		toSerialize["cores"] = o.Cores
 	}
+	
 
 	if o.Ram != nil {
 		toSerialize["ram"] = o.Ram
 	}
+	
 
 	if o.AvailabilityZone != nil {
 		toSerialize["availabilityZone"] = o.AvailabilityZone
 	}
+	
 
 	if o.VmState != nil {
 		toSerialize["vmState"] = o.VmState
 	}
+	
 
 	if o.BootCdrom != nil {
 		toSerialize["bootCdrom"] = o.BootCdrom
 	}
+	
 
 	if o.BootVolume != nil {
 		toSerialize["bootVolume"] = o.BootVolume
 	}
+	
 
 	if o.CpuFamily != nil {
 		toSerialize["cpuFamily"] = o.CpuFamily
 	}
+	
 
 	if o.Type != nil {
 		toSerialize["type"] = o.Type
 	}
+	
 	return json.Marshal(toSerialize)
 }
+
 type NullableServerProperties struct {
 	value *ServerProperties
 	isSet bool

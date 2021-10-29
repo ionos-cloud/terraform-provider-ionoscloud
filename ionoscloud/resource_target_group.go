@@ -281,11 +281,6 @@ func resourceTargetGroupCreate(ctx context.Context, d *schema.ResourceData, meta
 	if _, healthCheckOk := d.GetOk("health_check.0"); healthCheckOk {
 		targetGroup.Properties.HealthCheck = &ionoscloud.TargetGroupHealthCheck{}
 
-		if clientTimeout, clientTimeoutOk := d.GetOk("health_check.0.client_timeout"); clientTimeoutOk {
-			clientTimeout := int32(clientTimeout.(int))
-			targetGroup.Properties.HealthCheck.ClientTimeout = &clientTimeout
-		}
-
 		if connectTimeout, connectTimeoutOk := d.GetOk("health_check.0.connect_timeout"); connectTimeoutOk {
 			connectTimeout := int32(connectTimeout.(int))
 			targetGroup.Properties.HealthCheck.ConnectTimeout = &connectTimeout
@@ -452,10 +447,6 @@ func resourceTargetGroupRead(ctx context.Context, d *schema.ResourceData, meta i
 
 		healthCheckEntry := make(map[string]interface{})
 
-		if rsp.Properties.HealthCheck.ClientTimeout != nil {
-			healthCheckEntry["client_timeout"] = *rsp.Properties.HealthCheck.ClientTimeout
-		}
-
 		if rsp.Properties.HealthCheck.ConnectTimeout != nil {
 			healthCheckEntry["connect_timeout"] = *rsp.Properties.HealthCheck.ConnectTimeout
 		}
@@ -603,15 +594,6 @@ func resourceTargetGroupUpdate(ctx context.Context, d *schema.ResourceData, meta
 			updateHealthCheck := false
 
 			healthCheck := &ionoscloud.TargetGroupHealthCheck{}
-
-			if d.HasChange("health_check.0.client_timeout") {
-				_, newValue := d.GetChange("health_check.0.client_timeout")
-				if newValue != 0 {
-					updateHealthCheck = true
-					newValue := int32(newValue.(int))
-					healthCheck.ClientTimeout = &newValue
-				}
-			}
 
 			if d.HasChange("health_check.0.connect_timeout") {
 				_, newValue := d.GetChange("health_check.0.connect_timeout")

@@ -22,6 +22,7 @@ type Error struct {
 }
 
 
+
 // GetHttpStatus returns the HttpStatus field value
 // If the value is explicit nil, the zero value for int32 will be returned
 func (o *Error) GetHttpStatus() *int32 {
@@ -62,6 +63,8 @@ func (o *Error) HasHttpStatus() bool {
 
 	return false
 }
+
+
 
 // GetMessages returns the Messages field value
 // If the value is explicit nil, the zero value for []ErrorMessage will be returned
@@ -104,18 +107,22 @@ func (o *Error) HasMessages() bool {
 	return false
 }
 
+
 func (o Error) MarshalJSON() ([]byte, error) {
 	toSerialize := map[string]interface{}{}
 
 	if o.HttpStatus != nil {
 		toSerialize["httpStatus"] = o.HttpStatus
 	}
+	
 
 	if o.Messages != nil {
 		toSerialize["messages"] = o.Messages
 	}
+	
 	return json.Marshal(toSerialize)
 }
+
 type NullableError struct {
 	value *Error
 	isSet bool

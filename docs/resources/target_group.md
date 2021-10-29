@@ -53,7 +53,6 @@ The following arguments are supported:
         - `check_interval` - (Optional)[int] CheckInterval determines the duration (in milliseconds) between consecutive health checks. If unspecified a default of 2000 ms is used.
         - `maintenance` - (Optional)[boolean] Maintenance specifies if a target VM should be marked as down, even if it is not.
 - `health_check` - (Optional) Health check attributes for Target Group.
-    - `client_timeout` - (Optional)[int] ClientTimeout is expressed in milliseconds. This inactivity timeout applies when the client is expected to acknowledge or send data. If unset the default of 50 seconds will be used.
     - `connect_timeout` - (Optional)[int] It specifies the maximum time (in milliseconds) to wait for a connection attempt to a target VM to succeed. If unset, the default of 5 seconds will be used.
     - `target_timeout` - (Optional)[int] TargetTimeout specifies the maximum inactivity time (in milliseconds) on the target VM side. If unset, the default of 50 seconds will be used.
     - `retries` - (Optional)[int] Retries specifies the number of retries to perform on a target VM after a connection failure. If unset, the default value of 3 will be used.

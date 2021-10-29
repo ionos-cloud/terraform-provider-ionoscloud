@@ -27,6 +27,7 @@ type Contracts struct {
 }
 
 
+
 // GetId returns the Id field value
 // If the value is explicit nil, the zero value for string will be returned
 func (o *Contracts) GetId() *string {
@@ -67,6 +68,8 @@ func (o *Contracts) HasId() bool {
 
 	return false
 }
+
+
 
 // GetType returns the Type field value
 // If the value is explicit nil, the zero value for Type will be returned
@@ -109,6 +112,8 @@ func (o *Contracts) HasType() bool {
 	return false
 }
 
+
+
 // GetHref returns the Href field value
 // If the value is explicit nil, the zero value for string will be returned
 func (o *Contracts) GetHref() *string {
@@ -149,6 +154,8 @@ func (o *Contracts) HasHref() bool {
 
 	return false
 }
+
+
 
 // GetItems returns the Items field value
 // If the value is explicit nil, the zero value for []Contract will be returned
@@ -191,26 +198,32 @@ func (o *Contracts) HasItems() bool {
 	return false
 }
 
+
 func (o Contracts) MarshalJSON() ([]byte, error) {
 	toSerialize := map[string]interface{}{}
 
 	if o.Id != nil {
 		toSerialize["id"] = o.Id
 	}
+	
 
 	if o.Type != nil {
 		toSerialize["type"] = o.Type
 	}
+	
 
 	if o.Href != nil {
 		toSerialize["href"] = o.Href
 	}
+	
 
 	if o.Items != nil {
 		toSerialize["items"] = o.Items
 	}
+	
 	return json.Marshal(toSerialize)
 }
+
 type NullableContracts struct {
 	value *Contracts
 	isSet bool

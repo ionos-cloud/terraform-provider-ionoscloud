@@ -21,6 +21,7 @@ type UsersEntities struct {
 }
 
 
+
 // GetOwns returns the Owns field value
 // If the value is explicit nil, the zero value for ResourcesUsers will be returned
 func (o *UsersEntities) GetOwns() *ResourcesUsers {
@@ -61,6 +62,8 @@ func (o *UsersEntities) HasOwns() bool {
 
 	return false
 }
+
+
 
 // GetGroups returns the Groups field value
 // If the value is explicit nil, the zero value for GroupUsers will be returned
@@ -103,18 +106,22 @@ func (o *UsersEntities) HasGroups() bool {
 	return false
 }
 
+
 func (o UsersEntities) MarshalJSON() ([]byte, error) {
 	toSerialize := map[string]interface{}{}
 
 	if o.Owns != nil {
 		toSerialize["owns"] = o.Owns
 	}
+	
 
 	if o.Groups != nil {
 		toSerialize["groups"] = o.Groups
 	}
+	
 	return json.Marshal(toSerialize)
 }
+
 type NullableUsersEntities struct {
 	value *UsersEntities
 	isSet bool

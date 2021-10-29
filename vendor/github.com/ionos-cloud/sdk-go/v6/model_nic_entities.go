@@ -21,6 +21,7 @@ type NicEntities struct {
 }
 
 
+
 // GetFlowlogs returns the Flowlogs field value
 // If the value is explicit nil, the zero value for FlowLogs will be returned
 func (o *NicEntities) GetFlowlogs() *FlowLogs {
@@ -61,6 +62,8 @@ func (o *NicEntities) HasFlowlogs() bool {
 
 	return false
 }
+
+
 
 // GetFirewallrules returns the Firewallrules field value
 // If the value is explicit nil, the zero value for FirewallRules will be returned
@@ -103,18 +106,22 @@ func (o *NicEntities) HasFirewallrules() bool {
 	return false
 }
 
+
 func (o NicEntities) MarshalJSON() ([]byte, error) {
 	toSerialize := map[string]interface{}{}
 
 	if o.Flowlogs != nil {
 		toSerialize["flowlogs"] = o.Flowlogs
 	}
+	
 
 	if o.Firewallrules != nil {
 		toSerialize["firewallrules"] = o.Firewallrules
 	}
+	
 	return json.Marshal(toSerialize)
 }
+
 type NullableNicEntities struct {
 	value *NicEntities
 	isSet bool

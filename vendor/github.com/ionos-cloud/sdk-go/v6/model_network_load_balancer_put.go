@@ -26,6 +26,7 @@ type NetworkLoadBalancerPut struct {
 }
 
 
+
 // GetId returns the Id field value
 // If the value is explicit nil, the zero value for string will be returned
 func (o *NetworkLoadBalancerPut) GetId() *string {
@@ -66,6 +67,8 @@ func (o *NetworkLoadBalancerPut) HasId() bool {
 
 	return false
 }
+
+
 
 // GetType returns the Type field value
 // If the value is explicit nil, the zero value for Type will be returned
@@ -108,6 +111,8 @@ func (o *NetworkLoadBalancerPut) HasType() bool {
 	return false
 }
 
+
+
 // GetHref returns the Href field value
 // If the value is explicit nil, the zero value for string will be returned
 func (o *NetworkLoadBalancerPut) GetHref() *string {
@@ -148,6 +153,8 @@ func (o *NetworkLoadBalancerPut) HasHref() bool {
 
 	return false
 }
+
+
 
 // GetProperties returns the Properties field value
 // If the value is explicit nil, the zero value for NetworkLoadBalancerProperties will be returned
@@ -190,26 +197,32 @@ func (o *NetworkLoadBalancerPut) HasProperties() bool {
 	return false
 }
 
+
 func (o NetworkLoadBalancerPut) MarshalJSON() ([]byte, error) {
 	toSerialize := map[string]interface{}{}
 
 	if o.Id != nil {
 		toSerialize["id"] = o.Id
 	}
+	
 
 	if o.Type != nil {
 		toSerialize["type"] = o.Type
 	}
+	
 
 	if o.Href != nil {
 		toSerialize["href"] = o.Href
 	}
+	
 
 	if o.Properties != nil {
 		toSerialize["properties"] = o.Properties
 	}
+	
 	return json.Marshal(toSerialize)
 }
+
 type NullableNetworkLoadBalancerPut struct {
 	value *NetworkLoadBalancerPut
 	isSet bool

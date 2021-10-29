@@ -21,6 +21,7 @@ type NatGatewayEntities struct {
 }
 
 
+
 // GetRules returns the Rules field value
 // If the value is explicit nil, the zero value for NatGatewayRules will be returned
 func (o *NatGatewayEntities) GetRules() *NatGatewayRules {
@@ -61,6 +62,8 @@ func (o *NatGatewayEntities) HasRules() bool {
 
 	return false
 }
+
+
 
 // GetFlowlogs returns the Flowlogs field value
 // If the value is explicit nil, the zero value for FlowLogs will be returned
@@ -103,18 +106,22 @@ func (o *NatGatewayEntities) HasFlowlogs() bool {
 	return false
 }
 
+
 func (o NatGatewayEntities) MarshalJSON() ([]byte, error) {
 	toSerialize := map[string]interface{}{}
 
 	if o.Rules != nil {
 		toSerialize["rules"] = o.Rules
 	}
+	
 
 	if o.Flowlogs != nil {
 		toSerialize["flowlogs"] = o.Flowlogs
 	}
+	
 	return json.Marshal(toSerialize)
 }
+
 type NullableNatGatewayEntities struct {
 	value *NatGatewayEntities
 	isSet bool

@@ -28,6 +28,7 @@ type NetworkLoadBalancer struct {
 }
 
 
+
 // GetId returns the Id field value
 // If the value is explicit nil, the zero value for string will be returned
 func (o *NetworkLoadBalancer) GetId() *string {
@@ -68,6 +69,8 @@ func (o *NetworkLoadBalancer) HasId() bool {
 
 	return false
 }
+
+
 
 // GetType returns the Type field value
 // If the value is explicit nil, the zero value for Type will be returned
@@ -110,6 +113,8 @@ func (o *NetworkLoadBalancer) HasType() bool {
 	return false
 }
 
+
+
 // GetHref returns the Href field value
 // If the value is explicit nil, the zero value for string will be returned
 func (o *NetworkLoadBalancer) GetHref() *string {
@@ -150,6 +155,8 @@ func (o *NetworkLoadBalancer) HasHref() bool {
 
 	return false
 }
+
+
 
 // GetMetadata returns the Metadata field value
 // If the value is explicit nil, the zero value for DatacenterElementMetadata will be returned
@@ -192,6 +199,8 @@ func (o *NetworkLoadBalancer) HasMetadata() bool {
 	return false
 }
 
+
+
 // GetProperties returns the Properties field value
 // If the value is explicit nil, the zero value for NetworkLoadBalancerProperties will be returned
 func (o *NetworkLoadBalancer) GetProperties() *NetworkLoadBalancerProperties {
@@ -232,6 +241,8 @@ func (o *NetworkLoadBalancer) HasProperties() bool {
 
 	return false
 }
+
+
 
 // GetEntities returns the Entities field value
 // If the value is explicit nil, the zero value for NetworkLoadBalancerEntities will be returned
@@ -274,34 +285,42 @@ func (o *NetworkLoadBalancer) HasEntities() bool {
 	return false
 }
 
+
 func (o NetworkLoadBalancer) MarshalJSON() ([]byte, error) {
 	toSerialize := map[string]interface{}{}
 
 	if o.Id != nil {
 		toSerialize["id"] = o.Id
 	}
+	
 
 	if o.Type != nil {
 		toSerialize["type"] = o.Type
 	}
+	
 
 	if o.Href != nil {
 		toSerialize["href"] = o.Href
 	}
+	
 
 	if o.Metadata != nil {
 		toSerialize["metadata"] = o.Metadata
 	}
+	
 
 	if o.Properties != nil {
 		toSerialize["properties"] = o.Properties
 	}
+	
 
 	if o.Entities != nil {
 		toSerialize["entities"] = o.Entities
 	}
+	
 	return json.Marshal(toSerialize)
 }
+
 type NullableNetworkLoadBalancer struct {
 	value *NetworkLoadBalancer
 	isSet bool

@@ -21,6 +21,7 @@ type S3ObjectStorageSSO struct {
 }
 
 
+
 // GetSsoUrl returns the SsoUrl field value
 // If the value is explicit nil, the zero value for string will be returned
 func (o *S3ObjectStorageSSO) GetSsoUrl() *string {
@@ -62,14 +63,17 @@ func (o *S3ObjectStorageSSO) HasSsoUrl() bool {
 	return false
 }
 
+
 func (o S3ObjectStorageSSO) MarshalJSON() ([]byte, error) {
 	toSerialize := map[string]interface{}{}
 
 	if o.SsoUrl != nil {
 		toSerialize["ssoUrl"] = o.SsoUrl
 	}
+	
 	return json.Marshal(toSerialize)
 }
+
 type NullableS3ObjectStorageSSO struct {
 	value *S3ObjectStorageSSO
 	isSet bool

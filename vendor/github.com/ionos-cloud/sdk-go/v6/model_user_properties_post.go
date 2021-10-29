@@ -35,6 +35,7 @@ type UserPropertiesPost struct {
 }
 
 
+
 // GetFirstname returns the Firstname field value
 // If the value is explicit nil, the zero value for string will be returned
 func (o *UserPropertiesPost) GetFirstname() *string {
@@ -75,6 +76,8 @@ func (o *UserPropertiesPost) HasFirstname() bool {
 
 	return false
 }
+
+
 
 // GetLastname returns the Lastname field value
 // If the value is explicit nil, the zero value for string will be returned
@@ -117,6 +120,8 @@ func (o *UserPropertiesPost) HasLastname() bool {
 	return false
 }
 
+
+
 // GetEmail returns the Email field value
 // If the value is explicit nil, the zero value for string will be returned
 func (o *UserPropertiesPost) GetEmail() *string {
@@ -157,6 +162,8 @@ func (o *UserPropertiesPost) HasEmail() bool {
 
 	return false
 }
+
+
 
 // GetAdministrator returns the Administrator field value
 // If the value is explicit nil, the zero value for bool will be returned
@@ -199,6 +206,8 @@ func (o *UserPropertiesPost) HasAdministrator() bool {
 	return false
 }
 
+
+
 // GetForceSecAuth returns the ForceSecAuth field value
 // If the value is explicit nil, the zero value for bool will be returned
 func (o *UserPropertiesPost) GetForceSecAuth() *bool {
@@ -239,6 +248,8 @@ func (o *UserPropertiesPost) HasForceSecAuth() bool {
 
 	return false
 }
+
+
 
 // GetSecAuthActive returns the SecAuthActive field value
 // If the value is explicit nil, the zero value for bool will be returned
@@ -281,6 +292,8 @@ func (o *UserPropertiesPost) HasSecAuthActive() bool {
 	return false
 }
 
+
+
 // GetPassword returns the Password field value
 // If the value is explicit nil, the zero value for string will be returned
 func (o *UserPropertiesPost) GetPassword() *string {
@@ -321,6 +334,8 @@ func (o *UserPropertiesPost) HasPassword() bool {
 
 	return false
 }
+
+
 
 // GetActive returns the Active field value
 // If the value is explicit nil, the zero value for bool will be returned
@@ -363,42 +378,52 @@ func (o *UserPropertiesPost) HasActive() bool {
 	return false
 }
 
+
 func (o UserPropertiesPost) MarshalJSON() ([]byte, error) {
 	toSerialize := map[string]interface{}{}
 
 	if o.Firstname != nil {
 		toSerialize["firstname"] = o.Firstname
 	}
+	
 
 	if o.Lastname != nil {
 		toSerialize["lastname"] = o.Lastname
 	}
+	
 
 	if o.Email != nil {
 		toSerialize["email"] = o.Email
 	}
+	
 
 	if o.Administrator != nil {
 		toSerialize["administrator"] = o.Administrator
 	}
+	
 
 	if o.ForceSecAuth != nil {
 		toSerialize["forceSecAuth"] = o.ForceSecAuth
 	}
+	
 
 	if o.SecAuthActive != nil {
 		toSerialize["secAuthActive"] = o.SecAuthActive
 	}
+	
 
 	if o.Password != nil {
 		toSerialize["password"] = o.Password
 	}
+	
 
 	if o.Active != nil {
 		toSerialize["active"] = o.Active
 	}
+	
 	return json.Marshal(toSerialize)
 }
+
 type NullableUserPropertiesPost struct {
 	value *UserPropertiesPost
 	isSet bool

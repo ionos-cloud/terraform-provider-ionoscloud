@@ -24,6 +24,7 @@ type RequestStatusMetadata struct {
 }
 
 
+
 // GetStatus returns the Status field value
 // If the value is explicit nil, the zero value for string will be returned
 func (o *RequestStatusMetadata) GetStatus() *string {
@@ -64,6 +65,8 @@ func (o *RequestStatusMetadata) HasStatus() bool {
 
 	return false
 }
+
+
 
 // GetMessage returns the Message field value
 // If the value is explicit nil, the zero value for string will be returned
@@ -106,6 +109,8 @@ func (o *RequestStatusMetadata) HasMessage() bool {
 	return false
 }
 
+
+
 // GetEtag returns the Etag field value
 // If the value is explicit nil, the zero value for string will be returned
 func (o *RequestStatusMetadata) GetEtag() *string {
@@ -146,6 +151,8 @@ func (o *RequestStatusMetadata) HasEtag() bool {
 
 	return false
 }
+
+
 
 // GetTargets returns the Targets field value
 // If the value is explicit nil, the zero value for []RequestTarget will be returned
@@ -188,26 +195,32 @@ func (o *RequestStatusMetadata) HasTargets() bool {
 	return false
 }
 
+
 func (o RequestStatusMetadata) MarshalJSON() ([]byte, error) {
 	toSerialize := map[string]interface{}{}
 
 	if o.Status != nil {
 		toSerialize["status"] = o.Status
 	}
+	
 
 	if o.Message != nil {
 		toSerialize["message"] = o.Message
 	}
+	
 
 	if o.Etag != nil {
 		toSerialize["etag"] = o.Etag
 	}
+	
 
 	if o.Targets != nil {
 		toSerialize["targets"] = o.Targets
 	}
+	
 	return json.Marshal(toSerialize)
 }
+
 type NullableRequestStatusMetadata struct {
 	value *RequestStatusMetadata
 	isSet bool

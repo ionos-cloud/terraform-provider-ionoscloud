@@ -26,6 +26,7 @@ type UserMetadata struct {
 }
 
 
+
 // GetEtag returns the Etag field value
 // If the value is explicit nil, the zero value for string will be returned
 func (o *UserMetadata) GetEtag() *string {
@@ -66,6 +67,8 @@ func (o *UserMetadata) HasEtag() bool {
 
 	return false
 }
+
+
 
 // GetCreatedDate returns the CreatedDate field value
 // If the value is explicit nil, the zero value for time.Time will be returned
@@ -114,6 +117,8 @@ func (o *UserMetadata) HasCreatedDate() bool {
 	return false
 }
 
+
+
 // GetLastLogin returns the LastLogin field value
 // If the value is explicit nil, the zero value for time.Time will be returned
 func (o *UserMetadata) GetLastLogin() *time.Time {
@@ -161,22 +166,27 @@ func (o *UserMetadata) HasLastLogin() bool {
 	return false
 }
 
+
 func (o UserMetadata) MarshalJSON() ([]byte, error) {
 	toSerialize := map[string]interface{}{}
 
 	if o.Etag != nil {
 		toSerialize["etag"] = o.Etag
 	}
+	
 
 	if o.CreatedDate != nil {
 		toSerialize["createdDate"] = o.CreatedDate
 	}
+	
 
 	if o.LastLogin != nil {
 		toSerialize["lastLogin"] = o.LastLogin
 	}
+	
 	return json.Marshal(toSerialize)
 }
+
 type NullableUserMetadata struct {
 	value *UserMetadata
 	isSet bool

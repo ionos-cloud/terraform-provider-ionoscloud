@@ -39,6 +39,7 @@ type FirewallruleProperties struct {
 }
 
 
+
 // GetName returns the Name field value
 // If the value is explicit nil, the zero value for string will be returned
 func (o *FirewallruleProperties) GetName() *string {
@@ -79,6 +80,8 @@ func (o *FirewallruleProperties) HasName() bool {
 
 	return false
 }
+
+
 
 // GetProtocol returns the Protocol field value
 // If the value is explicit nil, the zero value for string will be returned
@@ -121,6 +124,8 @@ func (o *FirewallruleProperties) HasProtocol() bool {
 	return false
 }
 
+
+
 // GetSourceMac returns the SourceMac field value
 // If the value is explicit nil, the zero value for string will be returned
 func (o *FirewallruleProperties) GetSourceMac() *string {
@@ -161,6 +166,8 @@ func (o *FirewallruleProperties) HasSourceMac() bool {
 
 	return false
 }
+
+
 
 // GetSourceIp returns the SourceIp field value
 // If the value is explicit nil, the zero value for string will be returned
@@ -203,6 +210,8 @@ func (o *FirewallruleProperties) HasSourceIp() bool {
 	return false
 }
 
+
+
 // GetTargetIp returns the TargetIp field value
 // If the value is explicit nil, the zero value for string will be returned
 func (o *FirewallruleProperties) GetTargetIp() *string {
@@ -243,6 +252,8 @@ func (o *FirewallruleProperties) HasTargetIp() bool {
 
 	return false
 }
+
+
 
 // GetIcmpCode returns the IcmpCode field value
 // If the value is explicit nil, the zero value for int32 will be returned
@@ -285,6 +296,8 @@ func (o *FirewallruleProperties) HasIcmpCode() bool {
 	return false
 }
 
+
+
 // GetIcmpType returns the IcmpType field value
 // If the value is explicit nil, the zero value for int32 will be returned
 func (o *FirewallruleProperties) GetIcmpType() *int32 {
@@ -325,6 +338,8 @@ func (o *FirewallruleProperties) HasIcmpType() bool {
 
 	return false
 }
+
+
 
 // GetPortRangeStart returns the PortRangeStart field value
 // If the value is explicit nil, the zero value for int32 will be returned
@@ -367,6 +382,8 @@ func (o *FirewallruleProperties) HasPortRangeStart() bool {
 	return false
 }
 
+
+
 // GetPortRangeEnd returns the PortRangeEnd field value
 // If the value is explicit nil, the zero value for int32 will be returned
 func (o *FirewallruleProperties) GetPortRangeEnd() *int32 {
@@ -407,6 +424,8 @@ func (o *FirewallruleProperties) HasPortRangeEnd() bool {
 
 	return false
 }
+
+
 
 // GetType returns the Type field value
 // If the value is explicit nil, the zero value for string will be returned
@@ -449,50 +468,62 @@ func (o *FirewallruleProperties) HasType() bool {
 	return false
 }
 
+
 func (o FirewallruleProperties) MarshalJSON() ([]byte, error) {
 	toSerialize := map[string]interface{}{}
 
 	if o.Name != nil {
 		toSerialize["name"] = o.Name
 	}
+	
 
 	if o.Protocol != nil {
 		toSerialize["protocol"] = o.Protocol
 	}
+	
 
 	if o.SourceMac != nil {
 		toSerialize["sourceMac"] = o.SourceMac
 	}
+	
 
 	if o.SourceIp != nil {
 		toSerialize["sourceIp"] = o.SourceIp
 	}
+	
 
 	if o.TargetIp != nil {
 		toSerialize["targetIp"] = o.TargetIp
 	}
+	
 
 	if o.IcmpCode != nil {
 		toSerialize["icmpCode"] = o.IcmpCode
 	}
+	
 
 	if o.IcmpType != nil {
 		toSerialize["icmpType"] = o.IcmpType
 	}
+	
 
 	if o.PortRangeStart != nil {
 		toSerialize["portRangeStart"] = o.PortRangeStart
 	}
+	
 
 	if o.PortRangeEnd != nil {
 		toSerialize["portRangeEnd"] = o.PortRangeEnd
 	}
+	
 
 	if o.Type != nil {
 		toSerialize["type"] = o.Type
 	}
+	
 	return json.Marshal(toSerialize)
 }
+
 type NullableFirewallruleProperties struct {
 	value *FirewallruleProperties
 	isSet bool

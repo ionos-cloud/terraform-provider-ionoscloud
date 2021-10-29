@@ -23,6 +23,7 @@ type KubernetesNodePoolLanRoutes struct {
 }
 
 
+
 // GetNetwork returns the Network field value
 // If the value is explicit nil, the zero value for string will be returned
 func (o *KubernetesNodePoolLanRoutes) GetNetwork() *string {
@@ -63,6 +64,8 @@ func (o *KubernetesNodePoolLanRoutes) HasNetwork() bool {
 
 	return false
 }
+
+
 
 // GetGatewayIp returns the GatewayIp field value
 // If the value is explicit nil, the zero value for string will be returned
@@ -105,18 +108,22 @@ func (o *KubernetesNodePoolLanRoutes) HasGatewayIp() bool {
 	return false
 }
 
+
 func (o KubernetesNodePoolLanRoutes) MarshalJSON() ([]byte, error) {
 	toSerialize := map[string]interface{}{}
 
 	if o.Network != nil {
 		toSerialize["network"] = o.Network
 	}
+	
 
 	if o.GatewayIp != nil {
 		toSerialize["gatewayIp"] = o.GatewayIp
 	}
+	
 	return json.Marshal(toSerialize)
 }
+
 type NullableKubernetesNodePoolLanRoutes struct {
 	value *KubernetesNodePoolLanRoutes
 	isSet bool

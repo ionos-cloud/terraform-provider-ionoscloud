@@ -25,6 +25,7 @@ type NetworkLoadBalancerForwardingRuleTargetHealthCheck struct {
 }
 
 
+
 // GetCheck returns the Check field value
 // If the value is explicit nil, the zero value for bool will be returned
 func (o *NetworkLoadBalancerForwardingRuleTargetHealthCheck) GetCheck() *bool {
@@ -65,6 +66,8 @@ func (o *NetworkLoadBalancerForwardingRuleTargetHealthCheck) HasCheck() bool {
 
 	return false
 }
+
+
 
 // GetCheckInterval returns the CheckInterval field value
 // If the value is explicit nil, the zero value for int32 will be returned
@@ -107,6 +110,8 @@ func (o *NetworkLoadBalancerForwardingRuleTargetHealthCheck) HasCheckInterval() 
 	return false
 }
 
+
+
 // GetMaintenance returns the Maintenance field value
 // If the value is explicit nil, the zero value for bool will be returned
 func (o *NetworkLoadBalancerForwardingRuleTargetHealthCheck) GetMaintenance() *bool {
@@ -148,22 +153,27 @@ func (o *NetworkLoadBalancerForwardingRuleTargetHealthCheck) HasMaintenance() bo
 	return false
 }
 
+
 func (o NetworkLoadBalancerForwardingRuleTargetHealthCheck) MarshalJSON() ([]byte, error) {
 	toSerialize := map[string]interface{}{}
 
 	if o.Check != nil {
 		toSerialize["check"] = o.Check
 	}
+	
 
 	if o.CheckInterval != nil {
 		toSerialize["checkInterval"] = o.CheckInterval
 	}
+	
 
 	if o.Maintenance != nil {
 		toSerialize["maintenance"] = o.Maintenance
 	}
+	
 	return json.Marshal(toSerialize)
 }
+
 type NullableNetworkLoadBalancerForwardingRuleTargetHealthCheck struct {
 	value *NetworkLoadBalancerForwardingRuleTargetHealthCheck
 	isSet bool

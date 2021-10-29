@@ -28,6 +28,7 @@ type Resource struct {
 }
 
 
+
 // GetId returns the Id field value
 // If the value is explicit nil, the zero value for string will be returned
 func (o *Resource) GetId() *string {
@@ -68,6 +69,8 @@ func (o *Resource) HasId() bool {
 
 	return false
 }
+
+
 
 // GetType returns the Type field value
 // If the value is explicit nil, the zero value for Type will be returned
@@ -110,6 +113,8 @@ func (o *Resource) HasType() bool {
 	return false
 }
 
+
+
 // GetHref returns the Href field value
 // If the value is explicit nil, the zero value for string will be returned
 func (o *Resource) GetHref() *string {
@@ -150,6 +155,8 @@ func (o *Resource) HasHref() bool {
 
 	return false
 }
+
+
 
 // GetMetadata returns the Metadata field value
 // If the value is explicit nil, the zero value for DatacenterElementMetadata will be returned
@@ -192,6 +199,8 @@ func (o *Resource) HasMetadata() bool {
 	return false
 }
 
+
+
 // GetProperties returns the Properties field value
 // If the value is explicit nil, the zero value for ResourceProperties will be returned
 func (o *Resource) GetProperties() *ResourceProperties {
@@ -232,6 +241,8 @@ func (o *Resource) HasProperties() bool {
 
 	return false
 }
+
+
 
 // GetEntities returns the Entities field value
 // If the value is explicit nil, the zero value for ResourceEntities will be returned
@@ -274,34 +285,42 @@ func (o *Resource) HasEntities() bool {
 	return false
 }
 
+
 func (o Resource) MarshalJSON() ([]byte, error) {
 	toSerialize := map[string]interface{}{}
 
 	if o.Id != nil {
 		toSerialize["id"] = o.Id
 	}
+	
 
 	if o.Type != nil {
 		toSerialize["type"] = o.Type
 	}
+	
 
 	if o.Href != nil {
 		toSerialize["href"] = o.Href
 	}
+	
 
 	if o.Metadata != nil {
 		toSerialize["metadata"] = o.Metadata
 	}
+	
 
 	if o.Properties != nil {
 		toSerialize["properties"] = o.Properties
 	}
+	
 
 	if o.Entities != nil {
 		toSerialize["entities"] = o.Entities
 	}
+	
 	return json.Marshal(toSerialize)
 }
+
 type NullableResource struct {
 	value *Resource
 	isSet bool

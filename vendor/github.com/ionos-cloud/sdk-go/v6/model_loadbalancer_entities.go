@@ -20,6 +20,7 @@ type LoadbalancerEntities struct {
 }
 
 
+
 // GetBalancednics returns the Balancednics field value
 // If the value is explicit nil, the zero value for BalancedNics will be returned
 func (o *LoadbalancerEntities) GetBalancednics() *BalancedNics {
@@ -61,14 +62,17 @@ func (o *LoadbalancerEntities) HasBalancednics() bool {
 	return false
 }
 
+
 func (o LoadbalancerEntities) MarshalJSON() ([]byte, error) {
 	toSerialize := map[string]interface{}{}
 
 	if o.Balancednics != nil {
 		toSerialize["balancednics"] = o.Balancednics
 	}
+	
 	return json.Marshal(toSerialize)
 }
+
 type NullableLoadbalancerEntities struct {
 	value *LoadbalancerEntities
 	isSet bool

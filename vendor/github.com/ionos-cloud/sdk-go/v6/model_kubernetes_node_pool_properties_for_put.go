@@ -35,6 +35,7 @@ type KubernetesNodePoolPropertiesForPut struct {
 }
 
 
+
 // GetName returns the Name field value
 // If the value is explicit nil, the zero value for string will be returned
 func (o *KubernetesNodePoolPropertiesForPut) GetName() *string {
@@ -75,6 +76,8 @@ func (o *KubernetesNodePoolPropertiesForPut) HasName() bool {
 
 	return false
 }
+
+
 
 // GetNodeCount returns the NodeCount field value
 // If the value is explicit nil, the zero value for int32 will be returned
@@ -117,6 +120,8 @@ func (o *KubernetesNodePoolPropertiesForPut) HasNodeCount() bool {
 	return false
 }
 
+
+
 // GetK8sVersion returns the K8sVersion field value
 // If the value is explicit nil, the zero value for string will be returned
 func (o *KubernetesNodePoolPropertiesForPut) GetK8sVersion() *string {
@@ -157,6 +162,8 @@ func (o *KubernetesNodePoolPropertiesForPut) HasK8sVersion() bool {
 
 	return false
 }
+
+
 
 // GetMaintenanceWindow returns the MaintenanceWindow field value
 // If the value is explicit nil, the zero value for KubernetesMaintenanceWindow will be returned
@@ -199,6 +206,8 @@ func (o *KubernetesNodePoolPropertiesForPut) HasMaintenanceWindow() bool {
 	return false
 }
 
+
+
 // GetAutoScaling returns the AutoScaling field value
 // If the value is explicit nil, the zero value for KubernetesAutoScaling will be returned
 func (o *KubernetesNodePoolPropertiesForPut) GetAutoScaling() *KubernetesAutoScaling {
@@ -239,6 +248,8 @@ func (o *KubernetesNodePoolPropertiesForPut) HasAutoScaling() bool {
 
 	return false
 }
+
+
 
 // GetLans returns the Lans field value
 // If the value is explicit nil, the zero value for []KubernetesNodePoolLan will be returned
@@ -281,6 +292,8 @@ func (o *KubernetesNodePoolPropertiesForPut) HasLans() bool {
 	return false
 }
 
+
+
 // GetLabels returns the Labels field value
 // If the value is explicit nil, the zero value for map[string]string will be returned
 func (o *KubernetesNodePoolPropertiesForPut) GetLabels() *map[string]string {
@@ -321,6 +334,8 @@ func (o *KubernetesNodePoolPropertiesForPut) HasLabels() bool {
 
 	return false
 }
+
+
 
 // GetAnnotations returns the Annotations field value
 // If the value is explicit nil, the zero value for map[string]string will be returned
@@ -363,6 +378,8 @@ func (o *KubernetesNodePoolPropertiesForPut) HasAnnotations() bool {
 	return false
 }
 
+
+
 // GetPublicIps returns the PublicIps field value
 // If the value is explicit nil, the zero value for []string will be returned
 func (o *KubernetesNodePoolPropertiesForPut) GetPublicIps() *[]string {
@@ -404,46 +421,57 @@ func (o *KubernetesNodePoolPropertiesForPut) HasPublicIps() bool {
 	return false
 }
 
+
 func (o KubernetesNodePoolPropertiesForPut) MarshalJSON() ([]byte, error) {
 	toSerialize := map[string]interface{}{}
 
 	if o.Name != nil {
 		toSerialize["name"] = o.Name
 	}
+	
 
 	if o.NodeCount != nil {
 		toSerialize["nodeCount"] = o.NodeCount
 	}
+	
 
 	if o.K8sVersion != nil {
 		toSerialize["k8sVersion"] = o.K8sVersion
 	}
+	
 
 	if o.MaintenanceWindow != nil {
 		toSerialize["maintenanceWindow"] = o.MaintenanceWindow
 	}
+	
 
 	if o.AutoScaling != nil {
 		toSerialize["autoScaling"] = o.AutoScaling
 	}
+	
 
 	if o.Lans != nil {
 		toSerialize["lans"] = o.Lans
 	}
+	
 
 	if o.Labels != nil {
 		toSerialize["labels"] = o.Labels
 	}
+	
 
 	if o.Annotations != nil {
 		toSerialize["annotations"] = o.Annotations
 	}
+	
 
 	if o.PublicIps != nil {
 		toSerialize["publicIps"] = o.PublicIps
 	}
+	
 	return json.Marshal(toSerialize)
 }
+
 type NullableKubernetesNodePoolPropertiesForPut struct {
 	value *KubernetesNodePoolPropertiesForPut
 	isSet bool

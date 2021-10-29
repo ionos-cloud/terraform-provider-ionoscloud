@@ -312,10 +312,6 @@ func setTargetGroupData(d *schema.ResourceData, targetGroup *ionoscloud.TargetGr
 
 			healthCheckEntry := make(map[string]interface{})
 
-			if targetGroup.Properties.HealthCheck.ClientTimeout != nil {
-				healthCheckEntry["client_timeout"] = *targetGroup.Properties.HealthCheck.ClientTimeout
-			}
-
 			if targetGroup.Properties.HealthCheck.ConnectTimeout != nil {
 				healthCheckEntry["connect_timeout"] = *targetGroup.Properties.HealthCheck.ConnectTimeout
 			}

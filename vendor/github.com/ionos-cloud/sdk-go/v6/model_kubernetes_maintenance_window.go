@@ -23,6 +23,7 @@ type KubernetesMaintenanceWindow struct {
 }
 
 
+
 // GetDayOfTheWeek returns the DayOfTheWeek field value
 // If the value is explicit nil, the zero value for string will be returned
 func (o *KubernetesMaintenanceWindow) GetDayOfTheWeek() *string {
@@ -63,6 +64,8 @@ func (o *KubernetesMaintenanceWindow) HasDayOfTheWeek() bool {
 
 	return false
 }
+
+
 
 // GetTime returns the Time field value
 // If the value is explicit nil, the zero value for string will be returned
@@ -105,18 +108,22 @@ func (o *KubernetesMaintenanceWindow) HasTime() bool {
 	return false
 }
 
+
 func (o KubernetesMaintenanceWindow) MarshalJSON() ([]byte, error) {
 	toSerialize := map[string]interface{}{}
 
 	if o.DayOfTheWeek != nil {
 		toSerialize["dayOfTheWeek"] = o.DayOfTheWeek
 	}
+	
 
 	if o.Time != nil {
 		toSerialize["time"] = o.Time
 	}
+	
 	return json.Marshal(toSerialize)
 }
+
 type NullableKubernetesMaintenanceWindow struct {
 	value *KubernetesMaintenanceWindow
 	isSet bool

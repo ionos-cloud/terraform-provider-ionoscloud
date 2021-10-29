@@ -27,6 +27,7 @@ type PrivateCrossConnect struct {
 }
 
 
+
 // GetId returns the Id field value
 // If the value is explicit nil, the zero value for string will be returned
 func (o *PrivateCrossConnect) GetId() *string {
@@ -67,6 +68,8 @@ func (o *PrivateCrossConnect) HasId() bool {
 
 	return false
 }
+
+
 
 // GetType returns the Type field value
 // If the value is explicit nil, the zero value for Type will be returned
@@ -109,6 +112,8 @@ func (o *PrivateCrossConnect) HasType() bool {
 	return false
 }
 
+
+
 // GetHref returns the Href field value
 // If the value is explicit nil, the zero value for string will be returned
 func (o *PrivateCrossConnect) GetHref() *string {
@@ -149,6 +154,8 @@ func (o *PrivateCrossConnect) HasHref() bool {
 
 	return false
 }
+
+
 
 // GetMetadata returns the Metadata field value
 // If the value is explicit nil, the zero value for DatacenterElementMetadata will be returned
@@ -191,6 +198,8 @@ func (o *PrivateCrossConnect) HasMetadata() bool {
 	return false
 }
 
+
+
 // GetProperties returns the Properties field value
 // If the value is explicit nil, the zero value for PrivateCrossConnectProperties will be returned
 func (o *PrivateCrossConnect) GetProperties() *PrivateCrossConnectProperties {
@@ -232,30 +241,37 @@ func (o *PrivateCrossConnect) HasProperties() bool {
 	return false
 }
 
+
 func (o PrivateCrossConnect) MarshalJSON() ([]byte, error) {
 	toSerialize := map[string]interface{}{}
 
 	if o.Id != nil {
 		toSerialize["id"] = o.Id
 	}
+	
 
 	if o.Type != nil {
 		toSerialize["type"] = o.Type
 	}
+	
 
 	if o.Href != nil {
 		toSerialize["href"] = o.Href
 	}
+	
 
 	if o.Metadata != nil {
 		toSerialize["metadata"] = o.Metadata
 	}
+	
 
 	if o.Properties != nil {
 		toSerialize["properties"] = o.Properties
 	}
+	
 	return json.Marshal(toSerialize)
 }
+
 type NullablePrivateCrossConnect struct {
 	value *PrivateCrossConnect
 	isSet bool

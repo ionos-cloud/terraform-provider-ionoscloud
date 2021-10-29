@@ -32,6 +32,7 @@ type Requests struct {
 }
 
 
+
 // GetId returns the Id field value
 // If the value is explicit nil, the zero value for string will be returned
 func (o *Requests) GetId() *string {
@@ -72,6 +73,8 @@ func (o *Requests) HasId() bool {
 
 	return false
 }
+
+
 
 // GetType returns the Type field value
 // If the value is explicit nil, the zero value for Type will be returned
@@ -114,6 +117,8 @@ func (o *Requests) HasType() bool {
 	return false
 }
 
+
+
 // GetHref returns the Href field value
 // If the value is explicit nil, the zero value for string will be returned
 func (o *Requests) GetHref() *string {
@@ -154,6 +159,8 @@ func (o *Requests) HasHref() bool {
 
 	return false
 }
+
+
 
 // GetItems returns the Items field value
 // If the value is explicit nil, the zero value for []Request will be returned
@@ -196,6 +203,8 @@ func (o *Requests) HasItems() bool {
 	return false
 }
 
+
+
 // GetOffset returns the Offset field value
 // If the value is explicit nil, the zero value for float32 will be returned
 func (o *Requests) GetOffset() *float32 {
@@ -236,6 +245,8 @@ func (o *Requests) HasOffset() bool {
 
 	return false
 }
+
+
 
 // GetLimit returns the Limit field value
 // If the value is explicit nil, the zero value for float32 will be returned
@@ -278,6 +289,8 @@ func (o *Requests) HasLimit() bool {
 	return false
 }
 
+
+
 // GetLinks returns the Links field value
 // If the value is explicit nil, the zero value for PaginationLinks will be returned
 func (o *Requests) GetLinks() *PaginationLinks {
@@ -319,38 +332,47 @@ func (o *Requests) HasLinks() bool {
 	return false
 }
 
+
 func (o Requests) MarshalJSON() ([]byte, error) {
 	toSerialize := map[string]interface{}{}
 
 	if o.Id != nil {
 		toSerialize["id"] = o.Id
 	}
+	
 
 	if o.Type != nil {
 		toSerialize["type"] = o.Type
 	}
+	
 
 	if o.Href != nil {
 		toSerialize["href"] = o.Href
 	}
+	
 
 	if o.Items != nil {
 		toSerialize["items"] = o.Items
 	}
+	
 
 	if o.Offset != nil {
 		toSerialize["offset"] = o.Offset
 	}
+	
 
 	if o.Limit != nil {
 		toSerialize["limit"] = o.Limit
 	}
+	
 
 	if o.Links != nil {
 		toSerialize["_links"] = o.Links
 	}
+	
 	return json.Marshal(toSerialize)
 }
+
 type NullableRequests struct {
 	value *Requests
 	isSet bool

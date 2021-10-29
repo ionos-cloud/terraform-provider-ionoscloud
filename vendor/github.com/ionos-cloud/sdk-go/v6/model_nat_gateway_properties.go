@@ -25,6 +25,7 @@ type NatGatewayProperties struct {
 }
 
 
+
 // GetName returns the Name field value
 // If the value is explicit nil, the zero value for string will be returned
 func (o *NatGatewayProperties) GetName() *string {
@@ -65,6 +66,8 @@ func (o *NatGatewayProperties) HasName() bool {
 
 	return false
 }
+
+
 
 // GetPublicIps returns the PublicIps field value
 // If the value is explicit nil, the zero value for []string will be returned
@@ -107,6 +110,8 @@ func (o *NatGatewayProperties) HasPublicIps() bool {
 	return false
 }
 
+
+
 // GetLans returns the Lans field value
 // If the value is explicit nil, the zero value for []NatGatewayLanProperties will be returned
 func (o *NatGatewayProperties) GetLans() *[]NatGatewayLanProperties {
@@ -148,22 +153,27 @@ func (o *NatGatewayProperties) HasLans() bool {
 	return false
 }
 
+
 func (o NatGatewayProperties) MarshalJSON() ([]byte, error) {
 	toSerialize := map[string]interface{}{}
 
 	if o.Name != nil {
 		toSerialize["name"] = o.Name
 	}
+	
 
 	if o.PublicIps != nil {
 		toSerialize["publicIps"] = o.PublicIps
 	}
+	
 
 	if o.Lans != nil {
 		toSerialize["lans"] = o.Lans
 	}
+	
 	return json.Marshal(toSerialize)
 }
+
 type NullableNatGatewayProperties struct {
 	value *NatGatewayProperties
 	isSet bool

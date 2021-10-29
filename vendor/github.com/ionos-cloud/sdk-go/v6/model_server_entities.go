@@ -22,6 +22,7 @@ type ServerEntities struct {
 }
 
 
+
 // GetCdroms returns the Cdroms field value
 // If the value is explicit nil, the zero value for Cdroms will be returned
 func (o *ServerEntities) GetCdroms() *Cdroms {
@@ -62,6 +63,8 @@ func (o *ServerEntities) HasCdroms() bool {
 
 	return false
 }
+
+
 
 // GetVolumes returns the Volumes field value
 // If the value is explicit nil, the zero value for AttachedVolumes will be returned
@@ -104,6 +107,8 @@ func (o *ServerEntities) HasVolumes() bool {
 	return false
 }
 
+
+
 // GetNics returns the Nics field value
 // If the value is explicit nil, the zero value for Nics will be returned
 func (o *ServerEntities) GetNics() *Nics {
@@ -145,22 +150,27 @@ func (o *ServerEntities) HasNics() bool {
 	return false
 }
 
+
 func (o ServerEntities) MarshalJSON() ([]byte, error) {
 	toSerialize := map[string]interface{}{}
 
 	if o.Cdroms != nil {
 		toSerialize["cdroms"] = o.Cdroms
 	}
+	
 
 	if o.Volumes != nil {
 		toSerialize["volumes"] = o.Volumes
 	}
+	
 
 	if o.Nics != nil {
 		toSerialize["nics"] = o.Nics
 	}
+	
 	return json.Marshal(toSerialize)
 }
+
 type NullableServerEntities struct {
 	value *ServerEntities
 	isSet bool

@@ -24,6 +24,7 @@ type S3KeyMetadata struct {
 }
 
 
+
 // GetEtag returns the Etag field value
 // If the value is explicit nil, the zero value for string will be returned
 func (o *S3KeyMetadata) GetEtag() *string {
@@ -64,6 +65,8 @@ func (o *S3KeyMetadata) HasEtag() bool {
 
 	return false
 }
+
+
 
 // GetCreatedDate returns the CreatedDate field value
 // If the value is explicit nil, the zero value for time.Time will be returned
@@ -112,18 +115,22 @@ func (o *S3KeyMetadata) HasCreatedDate() bool {
 	return false
 }
 
+
 func (o S3KeyMetadata) MarshalJSON() ([]byte, error) {
 	toSerialize := map[string]interface{}{}
 
 	if o.Etag != nil {
 		toSerialize["etag"] = o.Etag
 	}
+	
 
 	if o.CreatedDate != nil {
 		toSerialize["createdDate"] = o.CreatedDate
 	}
+	
 	return json.Marshal(toSerialize)
 }
+
 type NullableS3KeyMetadata struct {
 	value *S3KeyMetadata
 	isSet bool

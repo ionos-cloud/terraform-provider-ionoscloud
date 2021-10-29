@@ -26,6 +26,7 @@ type FlowLogPut struct {
 }
 
 
+
 // GetId returns the Id field value
 // If the value is explicit nil, the zero value for string will be returned
 func (o *FlowLogPut) GetId() *string {
@@ -66,6 +67,8 @@ func (o *FlowLogPut) HasId() bool {
 
 	return false
 }
+
+
 
 // GetType returns the Type field value
 // If the value is explicit nil, the zero value for Type will be returned
@@ -108,6 +111,8 @@ func (o *FlowLogPut) HasType() bool {
 	return false
 }
 
+
+
 // GetHref returns the Href field value
 // If the value is explicit nil, the zero value for string will be returned
 func (o *FlowLogPut) GetHref() *string {
@@ -148,6 +153,8 @@ func (o *FlowLogPut) HasHref() bool {
 
 	return false
 }
+
+
 
 // GetProperties returns the Properties field value
 // If the value is explicit nil, the zero value for FlowLogProperties will be returned
@@ -190,26 +197,32 @@ func (o *FlowLogPut) HasProperties() bool {
 	return false
 }
 
+
 func (o FlowLogPut) MarshalJSON() ([]byte, error) {
 	toSerialize := map[string]interface{}{}
 
 	if o.Id != nil {
 		toSerialize["id"] = o.Id
 	}
+	
 
 	if o.Type != nil {
 		toSerialize["type"] = o.Type
 	}
+	
 
 	if o.Href != nil {
 		toSerialize["href"] = o.Href
 	}
+	
 
 	if o.Properties != nil {
 		toSerialize["properties"] = o.Properties
 	}
+	
 	return json.Marshal(toSerialize)
 }
+
 type NullableFlowLogPut struct {
 	value *FlowLogPut
 	isSet bool

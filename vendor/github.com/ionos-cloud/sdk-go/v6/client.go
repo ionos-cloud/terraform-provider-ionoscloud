@@ -50,7 +50,7 @@ const (
    RequestStatusFailed  = "FAILED"
    RequestStatusDone    = "DONE"
 
-   Version              = "6.0.0-beta.6"
+   Version              = "6.0.0-beta.7"
 )
 
 // APIClient manages communication with the CLOUD API API v6.0-SDK.3
@@ -62,6 +62,8 @@ type APIClient struct {
     // API Services
 
     DefaultApi *DefaultApiService
+
+    ApplicationLoadBalancersApi *ApplicationLoadBalancersApiService
 
     BackupUnitsApi *BackupUnitsApiService
 
@@ -101,6 +103,8 @@ type APIClient struct {
 
     SnapshotsApi *SnapshotsApiService
 
+    TargetGroupsApi *TargetGroupsApiService
+
     TemplatesApi *TemplatesApiService
 
     UserManagementApi *UserManagementApiService
@@ -127,6 +131,7 @@ func NewAPIClient(cfg *Configuration) *APIClient {
 
     // API Services
     c.DefaultApi = (*DefaultApiService)(&c.common)
+    c.ApplicationLoadBalancersApi = (*ApplicationLoadBalancersApiService)(&c.common)
     c.BackupUnitsApi = (*BackupUnitsApiService)(&c.common)
     c.ContractResourcesApi = (*ContractResourcesApiService)(&c.common)
     c.DataCentersApi = (*DataCentersApiService)(&c.common)
@@ -146,6 +151,7 @@ func NewAPIClient(cfg *Configuration) *APIClient {
     c.RequestsApi = (*RequestsApiService)(&c.common)
     c.ServersApi = (*ServersApiService)(&c.common)
     c.SnapshotsApi = (*SnapshotsApiService)(&c.common)
+    c.TargetGroupsApi = (*TargetGroupsApiService)(&c.common)
     c.TemplatesApi = (*TemplatesApiService)(&c.common)
     c.UserManagementApi = (*UserManagementApiService)(&c.common)
     c.UserS3KeysApi = (*UserS3KeysApiService)(&c.common)
