@@ -8,6 +8,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 	ionoscloud "github.com/ionos-cloud/sdk-go/v6"
 	"log"
+	"strings"
 )
 
 func resourceApplicationLoadBalancer() *schema.Resource {
@@ -16,6 +17,10 @@ func resourceApplicationLoadBalancer() *schema.Resource {
 		ReadContext:   resourceApplicationLoadBalancerRead,
 		UpdateContext: resourceApplicationLoadBalancerUpdate,
 		DeleteContext: resourceApplicationLoadBalancerDelete,
+		Importer: &schema.ResourceImporter{
+			StateContext: resourceApplicationLoadBalancerImport,
+		},
+
 		Schema: map[string]*schema.Schema{
 			"name": {
 				Type:         schema.TypeString,
@@ -262,6 +267,40 @@ func resourceApplicationLoadBalancerDelete(ctx context.Context, d *schema.Resour
 	return nil
 }
 
+func resourceApplicationLoadBalancerImport(ctx context.Context, d *schema.ResourceData, meta interface{}) ([]*schema.ResourceData, error) {
+	client := meta.(*ionoscloud.APIClient)
+
+	parts := strings.Split(d.Id(), "/")
+
+	if len(parts) != 2 || parts[0] == "" || parts[1] == "" {
+		return nil, fmt.Errorf("invalid import id %q. Expecting {datacenter}/{alb}", d.Id())
+	}
+
+	datacenterId := parts[0]
+	albId := parts[1]
+
+	alb, apiResponse, err := client.ApplicationLoadBalancersApi.DatacentersApplicationloadbalancersFindByApplicationLoadBalancerId(ctx, datacenterId, albId).Execute()
+
+	if err != nil {
+		if apiResponse != nil && apiResponse.Response != nil && apiResponse.StatusCode == 404 {
+			d.SetId("")
+			return nil, fmt.Errorf("unable to find alb %q", albId)
+		}
+		return nil, fmt.Errorf("an error occured while retrieving the alb %q, %q", albId, err)
+	}
+
+	log.Printf("[DEBUG] Found application load balancer after %v", apiResponse.RequestTime)
+	log.Printf("[INFO] LAN %s found: %+v", d.Id(), alb)
+
+	if err := d.Set("datacenter_id", datacenterId); err != nil {
+		return nil, fmt.Errorf("error while setting datacenter_id property for lan %q: %q", albId, err)
+	}
+
+	if err := setApplicationLoadBalancerData(d, &alb); err != nil {
+		return nil, err
+	}
+	return []*schema.ResourceData{d}, nil
+}
 func setApplicationLoadBalancerData(d *schema.ResourceData, applicationLoadBalancer *ionoscloud.ApplicationLoadBalancer) error {
 
 	if applicationLoadBalancer.Id != nil {

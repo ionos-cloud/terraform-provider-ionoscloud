@@ -1,5 +1,13 @@
 package ionoscloud
 
+// ApplicationLoadBalancer Constants
+const (
+	ApplicationLoadBalancerResource         = "ionoscloud_application_loadbalancer"
+	ApplicationLoadBalancerTestResource     = "test_application_loadbalancer"
+	ApplicationLoadBalancerDataSourceById   = "test_application_loadbalancer_id"
+	ApplicationLoadBalancerDataSourceByName = "test_application_loadbalancer_name"
+)
+
 // BackupUnit Constants
 const (
 	BackupUnitResource         = "ionoscloud_backup_unit"
