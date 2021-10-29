@@ -10,7 +10,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
 )
 
-func TestAcck8sNodepool_ImportBasic(t *testing.T) {
+func TestAcck8sNodepoolImportBasic(t *testing.T) {
 	resourceName := "terraform_acctest"
 	resource.Test(t, resource.TestCase{
 		PreCheck:          func() { testAccPreCheck(t) },

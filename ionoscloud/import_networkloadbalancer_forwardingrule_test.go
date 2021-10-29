@@ -1,3 +1,5 @@
+// +build nlb
+
 package ionoscloud
 
 import (
@@ -9,7 +11,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
 )
 
-func TestAccNetworkLoadBalancerForwardingRule_ImportBasic(t *testing.T) {
+func TestAccNetworkLoadBalancerForwardingRuleImportBasic(t *testing.T) {
 	networkLoadBalancerForwardingRuleName := "networkLoadBalancerForwardingRule"
 
 	resource.Test(t, resource.TestCase{

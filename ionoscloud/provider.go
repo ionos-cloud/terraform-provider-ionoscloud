@@ -63,7 +63,7 @@ func Provider() *schema.Provider {
 			"ionoscloud_loadbalancer":        resourceLoadbalancer(),
 			"ionoscloud_nic":                 resourceNic(),
 			ServerResource:                   resourceServer(),
-			"ionoscloud_volume":              resourceVolume(),
+			VolumeResource:                   resourceVolume(),
 			GroupResource:                    resourceGroup(),
 			"ionoscloud_share":               resourceShare(),
 			UserResource:                     resourceUser(),
@@ -100,6 +100,7 @@ func Provider() *schema.Provider {
 			S3KeyResource:                                   dataSourceS3Key(),
 			GroupResource:                                   dataSourceGroup(),
 			UserResource:                                    dataSourceUser(),
+			VolumeResource:                                  dataSourceVolume(),
 		},
 	}
 

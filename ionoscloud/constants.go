@@ -10,10 +10,11 @@ const (
 
 // Datacenter Constants
 const (
-	DatacenterResource         = "ionoscloud_datacenter"
-	DatacenterTestResource     = "test_datacenter"
-	DatacenterDataSourceById   = "test_datacenter_id"
-	DatacenterDataSourceByName = "test_datacenter_name"
+	DatacenterResource           = "ionoscloud_datacenter"
+	DatacenterTestResource       = "test_datacenter"
+	DatacenterDataSourceById     = "test_datacenter_id"
+	DatacenterDataSourceByName   = "test_datacenter_name"
+	DatacenterDataSourceMatching = "test_datacenter_matching"
 )
 
 // Firewall Constants
@@ -85,6 +86,13 @@ const (
 	UserTestResource     = "test_user"
 	UserDataSourceById   = "test_user_id"
 	UserDataSourceByName = "test_user_name"
+)
+
+const (
+	VolumeResource         = "ionoscloud_volume"
+	VolumeTestResource     = "test_volume"
+	VolumeDataSourceById   = "test_volume_id"
+	VolumeDataSourceByName = "test_volume_name"
 )
 
 // General Constants
