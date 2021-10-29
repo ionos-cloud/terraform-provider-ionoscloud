@@ -122,7 +122,7 @@ var testAccCheckGroupConfigBasic = `
 resource ` + UserResource + ` ` + UserTestResource + ` {
   first_name = "user"
   last_name = "test"
-  email = "` + email + `"
+  email = "` + GenerateEmail() + `"
   password = "abc123-321CBA"
   administrator = false
   force_sec_auth= false
@@ -148,7 +148,7 @@ var testAccCheckGroupConfigUpdate = `
 resource ` + UserResource + ` resource_user_updated {
   first_name = "updated"
   last_name = "test"
-  email = "updated` + email + `"
+  email = "` + GenerateEmail() + `"
   password = "abc123-321CBA"
   administrator = false
   force_sec_auth= false

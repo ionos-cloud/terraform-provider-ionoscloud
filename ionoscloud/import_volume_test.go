@@ -9,20 +9,18 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
 )
 
-func TestAccVolume_ImportBasic(t *testing.T) {
-	resourceName := "database_volume"
-
+func TestAccVolumeImportBasic(t *testing.T) {
 	resource.Test(t, resource.TestCase{
 		PreCheck:          func() { testAccPreCheck(t) },
 		ProviderFactories: testAccProviderFactories,
 		CheckDestroy:      testAccCheckVolumeDestroyCheck,
 		Steps: []resource.TestStep{
 			{
-				Config: fmt.Sprintf(testAccCheckVolumeConfigBasic, resourceName),
+				Config: testAccCheckVolumeConfigBasic,
 			},
 
 			{
-				ResourceName:            fmt.Sprintf("ionoscloud_volume.%s", resourceName),
+				ResourceName:            VolumeResource + "." + VolumeTestResource,
 				ImportStateIdFunc:       testAccVolumeImportStateId,
 				ImportState:             true,
 				ImportStateVerify:       true,
@@ -36,7 +34,7 @@ func testAccVolumeImportStateId(s *terraform.State) (string, error) {
 	importID := ""
 
 	for _, rs := range s.RootModule().Resources {
-		if rs.Type != "ionoscloud_volume" {
+		if rs.Type != VolumeResource {
 			continue
 		}
 

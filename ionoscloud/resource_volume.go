@@ -32,6 +32,14 @@ func resourceVolume() *schema.Resource {
 					return false
 				},
 			},
+			"image": {
+				Type:     schema.TypeString,
+				Computed: true,
+			},
+			"image_id": {
+				Type:     schema.TypeString,
+				Computed: true,
+			},
 			"size": {
 				Type:     schema.TypeInt,
 				Required: true,
@@ -48,6 +56,7 @@ func resourceVolume() *schema.Resource {
 			"licence_type": {
 				Type:     schema.TypeString,
 				Optional: true,
+				Computed: true,
 			},
 			"ssh_key_path": {
 				Type:     schema.TypeList,
@@ -334,108 +343,8 @@ func resourceVolumeRead(ctx context.Context, d *schema.ResourceData, meta interf
 		}
 	}
 
-	if volume.Properties.Name != nil {
-		err := d.Set("name", *volume.Properties.Name)
-		if err != nil {
-			diags := diag.FromErr(fmt.Errorf("error while setting name property for volume %s: %s", d.Id(), err))
-			return diags
-		}
-	}
-
-	if volume.Properties.Type != nil {
-		err := d.Set("disk_type", *volume.Properties.Type)
-		if err != nil {
-			diags := diag.FromErr(fmt.Errorf("error while setting type property for volume %s: %s", d.Id(), err))
-			return diags
-		}
-	}
-
-	if volume.Properties.Size != nil {
-		err := d.Set("size", *volume.Properties.Size)
-		if err != nil {
-			diags := diag.FromErr(fmt.Errorf("error while setting size property for volume %s: %s", d.Id(), err))
-			return diags
-		}
-	}
-
-	if volume.Properties.Bus != nil {
-		err := d.Set("bus", *volume.Properties.Bus)
-		if err != nil {
-			diags := diag.FromErr(fmt.Errorf("error while setting bus property for volume %s: %s", d.Id(), err))
-			return diags
-		}
-	}
-
-	if volume.Properties.Image != nil {
-		err := d.Set("image_name", *volume.Properties.Image)
-		if err != nil {
-			diags := diag.FromErr(fmt.Errorf("error while setting bus property for image_name %s: %s", d.Id(), err))
-			return diags
-		}
-	}
-
-	if volume.Properties.CpuHotPlug != nil {
-		err := d.Set("cpu_hot_plug", *volume.Properties.CpuHotPlug)
-		if err != nil {
-			diags := diag.FromErr(fmt.Errorf("error while setting cpu_hot_plug property for volume %s: %s", d.Id(), err))
-			return diags
-		}
-	}
-
-	if volume.Properties.RamHotPlug != nil {
-		err := d.Set("ram_hot_plug", *volume.Properties.RamHotPlug)
-		if err != nil {
-			diags := diag.FromErr(fmt.Errorf("error while setting ram_hot_plug property for volume %s: %s", d.Id(), err))
-			return diags
-		}
-	}
-
-	if volume.Properties.NicHotPlug != nil {
-		err := d.Set("nic_hot_plug", *volume.Properties.NicHotPlug)
-		if err != nil {
-			diags := diag.FromErr(fmt.Errorf("error while setting nic_hot_plug property for volume %s: %s", d.Id(), err))
-			return diags
-		}
-	}
-
-	if volume.Properties.NicHotUnplug != nil {
-		err := d.Set("nic_hot_unplug", *volume.Properties.NicHotUnplug)
-		if err != nil {
-			diags := diag.FromErr(fmt.Errorf("error while setting nic_hot_unplug property for volume %s: %s", d.Id(), err))
-			return diags
-		}
-	}
-
-	if volume.Properties.DiscVirtioHotPlug != nil {
-		err := d.Set("disc_virtio_hot_plug", *volume.Properties.DiscVirtioHotPlug)
-		if err != nil {
-			diags := diag.FromErr(fmt.Errorf("error while setting disc_virtio_hot_plug property for volume %s: %s", d.Id(), err))
-			return diags
-		}
-	}
-
-	if volume.Properties.DiscVirtioHotUnplug != nil {
-		err := d.Set("disc_virtio_hot_unplug", *volume.Properties.DiscVirtioHotUnplug)
-		if err != nil {
-			diags := diag.FromErr(fmt.Errorf("error while setting disc_virtio_hot_unplug property for volume %s: %s", d.Id(), err))
-			return diags
-		}
-	}
-
-	if volume.Properties.BackupunitId != nil {
-		err := d.Set("backup_unit_id", *volume.Properties.BackupunitId)
-		if err != nil {
-			diags := diag.FromErr(fmt.Errorf("error while setting backup_unit_id property for volume %s: %s", d.Id(), err))
-			return diags
-		}
-	}
-
-	if volume.Properties.UserData != nil {
-		err := d.Set("user_data", *volume.Properties.UserData)
-		if err != nil {
-			diags := diag.FromErr(fmt.Errorf("error while setting user_data property for volume %s: %s", d.Id(), err))
-			return diags
-		}
+	if err := setVolumeData(d, &volume); err != nil {
+		return diag.FromErr(err)
 	}
 
 	return nil
@@ -548,6 +457,166 @@ func resourceVolumeDelete(ctx context.Context, d *schema.ResourceData, meta inte
 	}
 
 	d.SetId("")
+	return nil
+}
+
+func resourceVolumeImporter(ctx context.Context, d *schema.ResourceData, meta interface{}) ([]*schema.ResourceData, error) {
+	parts := strings.Split(d.Id(), "/")
+	if len(parts) != 3 || parts[0] == "" || parts[1] == "" || parts[2] == "" {
+		return nil, fmt.Errorf("invalid import id %q. Expecting {datacenter}/{server}/{volume}", d.Id())
+	}
+
+	client := meta.(*ionoscloud.APIClient)
+
+	dcId := parts[0]
+	srvId := parts[1]
+	volumeId := parts[2]
+
+	volume, apiResponse, err := client.VolumesApi.DatacentersVolumesFindById(ctx, dcId, volumeId).Execute()
+
+	if err != nil {
+		if apiResponse != nil && apiResponse.Response != nil && apiResponse.StatusCode == 404 {
+			d.SetId("")
+			return nil, fmt.Errorf("volume does not exist %q", volumeId)
+		}
+		return nil, fmt.Errorf("an error occured while trying to find the volume %q", volumeId)
+	}
+
+	log.Printf("[INFO] volume found: %+v", volume)
+
+	d.SetId(*volume.Id)
+	if err := d.Set("datacenter_id", dcId); err != nil {
+		return nil, err
+	}
+
+	if err := d.Set("server_id", srvId); err != nil {
+		return nil, err
+	}
+
+	if err := setVolumeData(d, &volume); err != nil {
+		return nil, err
+	}
+
+	return []*schema.ResourceData{d}, nil
+}
+
+func setVolumeData(d *schema.ResourceData, volume *ionoscloud.Volume) error {
+
+	if volume.Id != nil {
+		d.SetId(*volume.Id)
+	}
+
+	if volume.Properties.Name != nil {
+		err := d.Set("name", *volume.Properties.Name)
+		if err != nil {
+			return fmt.Errorf("error while setting name property for volume %s: %s", d.Id(), err)
+		}
+	}
+
+	if volume.Properties.Type != nil {
+		err := d.Set("disk_type", *volume.Properties.Type)
+		if err != nil {
+			return fmt.Errorf("error while setting type property for volume %s: %s", d.Id(), err)
+		}
+	}
+
+	if volume.Properties.Size != nil {
+		err := d.Set("size", *volume.Properties.Size)
+		if err != nil {
+			return fmt.Errorf("error while setting size property for volume %s: %s", d.Id(), err)
+		}
+	}
+
+	if volume.Properties.Bus != nil {
+		err := d.Set("bus", *volume.Properties.Bus)
+		if err != nil {
+			return fmt.Errorf("error while setting bus property for volume %s: %s", d.Id(), err)
+		}
+	}
+
+	if volume.Properties.Image != nil {
+		err := d.Set("image", *volume.Properties.Image)
+		if err != nil {
+			return fmt.Errorf("error while setting image property for volume %s: %s", d.Id(), err)
+		}
+	}
+
+	if volume.Properties.ImageAlias != nil {
+		err := d.Set("image_alias", *volume.Properties.ImageAlias)
+		if err != nil {
+			return fmt.Errorf("error while setting image_alias property for volume %s: %s", d.Id(), err)
+		}
+	}
+
+	if volume.Properties.AvailabilityZone != nil {
+		err := d.Set("availability_zone", *volume.Properties.AvailabilityZone)
+		if err != nil {
+			return fmt.Errorf("error while setting availability_zone property for volume %s: %s", d.Id(), err)
+		}
+	}
+
+	if volume.Properties.CpuHotPlug != nil {
+		err := d.Set("cpu_hot_plug", *volume.Properties.CpuHotPlug)
+		if err != nil {
+			return fmt.Errorf("error while setting cpu_hot_plug property for volume %s: %s", d.Id(), err)
+		}
+	}
+
+	if volume.Properties.RamHotPlug != nil {
+		err := d.Set("ram_hot_plug", *volume.Properties.RamHotPlug)
+		if err != nil {
+			return fmt.Errorf("error while setting ram_hot_plug property for volume %s: %s", d.Id(), err)
+		}
+	}
+
+	if volume.Properties.NicHotPlug != nil {
+		err := d.Set("nic_hot_plug", *volume.Properties.NicHotPlug)
+		if err != nil {
+			return fmt.Errorf("error while setting nic_hot_plug property for volume %s: %s", d.Id(), err)
+		}
+	}
+
+	if volume.Properties.NicHotUnplug != nil {
+		err := d.Set("nic_hot_unplug", *volume.Properties.NicHotUnplug)
+		if err != nil {
+			return fmt.Errorf("error while setting nic_hot_unplug property for volume %s: %s", d.Id(), err)
+		}
+	}
+
+	if volume.Properties.DiscVirtioHotPlug != nil {
+		err := d.Set("disc_virtio_hot_plug", *volume.Properties.DiscVirtioHotPlug)
+		if err != nil {
+			return fmt.Errorf("error while setting disc_virtio_hot_plug property for volume %s: %s", d.Id(), err)
+		}
+	}
+
+	if volume.Properties.DiscVirtioHotUnplug != nil {
+		err := d.Set("disc_virtio_hot_unplug", *volume.Properties.DiscVirtioHotUnplug)
+		if err != nil {
+			return fmt.Errorf("error while setting disc_virtio_hot_unplug property for volume %s: %s", d.Id(), err)
+		}
+	}
+
+	if volume.Properties.BackupunitId != nil {
+		err := d.Set("backup_unit_id", *volume.Properties.BackupunitId)
+		if err != nil {
+			return fmt.Errorf("error while setting backup_unit_id property for volume %s: %s", d.Id(), err)
+		}
+	}
+
+	if volume.Properties.UserData != nil {
+		err := d.Set("user_data", *volume.Properties.UserData)
+		if err != nil {
+			return fmt.Errorf("error while setting user_data property for volume %s: %s", d.Id(), err)
+		}
+	}
+
+	if volume.Properties.DeviceNumber != nil {
+		err := d.Set("device_number", *volume.Properties.DeviceNumber)
+		if err != nil {
+			return fmt.Errorf("error while setting device_number property for volume %s: %s", d.Id(), err)
+		}
+	}
 	return nil
 }
 
@@ -718,130 +787,4 @@ func checkImage(ctx context.Context, client *ionoscloud.APIClient, imageInput, i
 	}
 
 	return image, imageAlias, isSnapshot, diags
-}
-
-func resourceVolumeImporter(ctx context.Context, d *schema.ResourceData, meta interface{}) ([]*schema.ResourceData, error) {
-	parts := strings.Split(d.Id(), "/")
-	if len(parts) != 3 || parts[0] == "" || parts[1] == "" || parts[2] == "" {
-		return nil, fmt.Errorf("invalid import id %q. Expecting {datacenter}/{server}/{volume}", d.Id())
-	}
-
-	client := meta.(*ionoscloud.APIClient)
-
-	dcId := parts[0]
-	srvId := parts[1]
-	volumeId := parts[2]
-
-	volume, apiResponse, err := client.VolumesApi.DatacentersVolumesFindById(ctx, dcId, volumeId).Execute()
-
-	if err != nil {
-		if apiResponse != nil && apiResponse.Response != nil && apiResponse.StatusCode == 404 {
-			d.SetId("")
-			return nil, fmt.Errorf("volume does not exist %q", volumeId)
-		}
-		return nil, fmt.Errorf("an error occured while trying to find the volume %q", volumeId)
-	}
-
-	log.Printf("[INFO] volume found: %+v", volume)
-
-	d.SetId(*volume.Id)
-	if err := d.Set("datacenter_id", dcId); err != nil {
-		return nil, err
-	}
-
-	if err := d.Set("server_id", srvId); err != nil {
-		return nil, err
-	}
-
-	if volume.Properties.Name != nil {
-		err := d.Set("name", *volume.Properties.Name)
-		if err != nil {
-			return nil, err
-		}
-	}
-
-	if volume.Properties.Type != nil {
-		err := d.Set("disk_type", *volume.Properties.Type)
-		if err != nil {
-			return nil, err
-		}
-	}
-
-	if volume.Properties.Size != nil {
-		err := d.Set("size", *volume.Properties.Size)
-		if err != nil {
-			return nil, err
-		}
-	}
-
-	if volume.Properties.Bus != nil {
-		err := d.Set("bus", *volume.Properties.Bus)
-		if err != nil {
-			return nil, err
-		}
-	}
-
-	if volume.Properties.AvailabilityZone != nil {
-		err := d.Set("availability_zone", *volume.Properties.AvailabilityZone)
-		if err != nil {
-			return nil, err
-		}
-	}
-
-	if volume.Properties.CpuHotPlug != nil {
-		err := d.Set("cpu_hot_plug", *volume.Properties.CpuHotPlug)
-		if err != nil {
-			return nil, err
-		}
-	}
-
-	if volume.Properties.RamHotPlug != nil {
-		err := d.Set("ram_hot_plug", *volume.Properties.RamHotPlug)
-		if err != nil {
-			return nil, err
-		}
-	}
-
-	if volume.Properties.NicHotPlug != nil {
-		err := d.Set("nic_hot_plug", *volume.Properties.NicHotPlug)
-		if err != nil {
-			return nil, err
-		}
-	}
-
-	if volume.Properties.NicHotUnplug != nil {
-		err := d.Set("nic_hot_unplug", *volume.Properties.NicHotUnplug)
-		if err != nil {
-			return nil, err
-		}
-	}
-
-	if volume.Properties.DiscVirtioHotPlug != nil {
-		err := d.Set("disc_virtio_hot_plug", *volume.Properties.DiscVirtioHotPlug)
-		if err != nil {
-			return nil, err
-		}
-	}
-
-	if volume.Properties.DiscVirtioHotUnplug != nil {
-		err := d.Set("disc_virtio_hot_unplug", *volume.Properties.DiscVirtioHotUnplug)
-		if err != nil {
-			return nil, err
-		}
-	}
-
-	if volume.Properties.BackupunitId != nil {
-		err := d.Set("backup_unit_id", *volume.Properties.BackupunitId)
-		if err != nil {
-			return nil, err
-		}
-	}
-
-	if volume.Properties.UserData != nil {
-		err := d.Set("user_data", *volume.Properties.UserData)
-		if err != nil {
-			return nil, err
-		}
-	}
-	return []*schema.ResourceData{d}, nil
 }

@@ -1,3 +1,5 @@
+// +build natgateway
+
 package ionoscloud
 
 import (

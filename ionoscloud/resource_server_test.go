@@ -522,13 +522,13 @@ resource ` + ServerResource + ` "webserver" {
     firewall_active = true
   }
 }
-resource "ionoscloud_snapshot" "test_snapshot" {
+resource ` + SnapshotResource + ` "test_snapshot" {
   datacenter_id = ` + DatacenterResource + `.` + DatacenterTestResource + `.id
   volume_id = ` + ServerResource + `.webserver.boot_volume
   name = "terraform_snapshot"
 }
 resource ` + ServerResource + ` ` + ServerTestResource + ` {
-  depends_on = [ionoscloud_snapshot.test_snapshot]
+  depends_on = [` + SnapshotResource + `.test_snapshot]
   name = "` + ServerTestResource + `"
   datacenter_id = ` + DatacenterResource + `.` + DatacenterTestResource + `.id
   cores = 1
