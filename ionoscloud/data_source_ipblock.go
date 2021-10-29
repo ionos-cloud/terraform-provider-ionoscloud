@@ -104,7 +104,6 @@ func datasourceIpBlockRead(ctx context.Context, data *schema.ResourceData, meta 
 		location = t.(string)
 	}
 	var ipBlock ionoscloud.IpBlock
-	found := false
 	var err error
 	client := meta.(*ionoscloud.APIClient)
 
@@ -130,8 +129,6 @@ func datasourceIpBlockRead(ctx context.Context, data *schema.ResourceData, meta 
 		}
 		ipBlock.SetId(id.(string))
 		log.Printf("[INFO] Got ip block [Name=%s, Location=%s]", *ipBlock.Properties.Name, *ipBlock.Properties.Location)
-
-		found = true
 	} else {
 
 		ipBlocks, _, err := client.IPBlocksApi.IpblocksGet(ctx).Execute()
@@ -146,6 +143,8 @@ func datasourceIpBlockRead(ctx context.Context, data *schema.ResourceData, meta 
 			for _, block := range *ipBlocks.Items {
 				if block.Properties.Name != nil && *block.Properties.Name == name {
 					results = append(results, block)
+					//found based on name only, save this in case we don't find based on location
+					ipBlock = results[0]
 				}
 			}
 
@@ -159,7 +158,6 @@ func datasourceIpBlockRead(ctx context.Context, data *schema.ResourceData, meta 
 				for _, block := range results {
 					if block.Properties.Location != nil && *block.Properties.Location == location {
 						ipBlock = block
-						found = true
 						break
 					}
 				}
@@ -168,7 +166,6 @@ func datasourceIpBlockRead(ctx context.Context, data *schema.ResourceData, meta 
 				for _, block := range *ipBlocks.Items {
 					if block.Properties.Location != nil && *block.Properties.Location == location {
 						ipBlock = block
-						found = true
 						break
 					}
 				}
@@ -176,7 +173,7 @@ func datasourceIpBlockRead(ctx context.Context, data *schema.ResourceData, meta 
 		}
 
 	}
-	if !found {
+	if &ipBlock != nil {
 		return diag.FromErr(fmt.Errorf("there are no ip blocks that match the search criteria"))
 	}
 
