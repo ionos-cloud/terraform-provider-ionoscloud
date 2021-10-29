@@ -15,7 +15,7 @@ func TestAccUserImportBasic(t *testing.T) {
 		CheckDestroy:      testAccCheckUserDestroyCheck,
 		Steps: []resource.TestStep{
 			{
-				Config: testAccCheckUserConfigBasic,
+				Config: testAccImportUserConfigBasic,
 			},
 
 			{
@@ -42,3 +42,14 @@ func testAccUserImportStateId(s *terraform.State) (string, error) {
 
 	return importID, nil
 }
+
+var testAccImportUserConfigBasic = `
+resource ` + UserResource + ` ` + UserTestResource + ` {
+  first_name = "` + UserTestResource + `"
+  last_name = "` + UserTestResource + `"
+  email = "` + GenerateEmail() + `"
+  password = "abc123-321CBA"
+  administrator = true
+  force_sec_auth= true
+  active  = true
+}`
