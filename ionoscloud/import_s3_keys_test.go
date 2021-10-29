@@ -14,7 +14,7 @@ func TestAccS3KeyImportBasic(t *testing.T) {
 		CheckDestroy:      testAccChecks3KeyDestroyCheck,
 		Steps: []resource.TestStep{
 			{
-				Config: testAccChecks3KeyConfigBasic,
+				Config: testAccImportS3KeyConfigBasic,
 			},
 			{
 				ResourceName:            S3KeyResource + "." + S3KeyTestResource,
@@ -40,3 +40,18 @@ func testAccS3KeyImportStateID(s *terraform.State) (string, error) {
 
 	return importID, nil
 }
+
+var testAccImportS3KeyConfigBasic = `
+resource ` + UserResource + ` "example" {
+  first_name = "terraform"
+  last_name = "test"
+  email = "` + GenerateEmail() + `"
+  password = "abc123-321CBA"
+  administrator = false
+  force_sec_auth= false
+}
+
+resource ` + S3KeyResource + ` ` + S3KeyTestResource + ` {
+  user_id    = ` + UserResource + `.example.id
+  active     = false
+}`
