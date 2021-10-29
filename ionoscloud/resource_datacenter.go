@@ -8,8 +8,6 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 	ionoscloud "github.com/ionos-cloud/sdk-go/v6"
 	"log"
-	"regexp"
-	"strings"
 )
 
 func resourceDatacenter() *schema.Resource {
@@ -19,7 +17,7 @@ func resourceDatacenter() *schema.Resource {
 		UpdateContext: resourceDatacenterUpdate,
 		DeleteContext: resourceDatacenterDelete,
 		Importer: &schema.ResourceImporter{
-			StateContext: schema.ImportStatePassthroughContext,
+			StateContext: resourceDatacenterImport,
 		},
 		Schema: map[string]*schema.Schema{
 
@@ -35,13 +33,49 @@ func resourceDatacenter() *schema.Resource {
 				ValidateFunc: validation.All(validation.StringIsNotWhiteSpace),
 			},
 			"description": {
-				Type:     schema.TypeString,
-				Optional: true,
-				Computed: true,
+				Type:        schema.TypeString,
+				Description: "A description for the datacenter, e.g. staging, production",
+				Optional:    true,
+				Computed:    true,
 			},
 			"sec_auth_protection": {
 				Type:     schema.TypeBool,
 				Optional: true,
+			},
+			"version": {
+				Type:     schema.TypeInt,
+				Computed: true,
+			},
+			"features": {
+				Type:     schema.TypeList,
+				Computed: true,
+				Elem: &schema.Schema{
+					Type: schema.TypeString,
+				},
+			},
+			"cpu_architecture": {
+				Type:     schema.TypeList,
+				Computed: true,
+				Elem: &schema.Resource{
+					Schema: map[string]*schema.Schema{
+						"cpu_family": {
+							Type:     schema.TypeString,
+							Computed: true,
+						},
+						"max_cores": {
+							Type:     schema.TypeInt,
+							Computed: true,
+						},
+						"max_ram": {
+							Type:     schema.TypeInt,
+							Computed: true,
+						},
+						"vendor": {
+							Type:     schema.TypeString,
+							Computed: true,
+						},
+					},
+				},
 			},
 		},
 		Timeouts: &resourceDefaultTimeouts,
@@ -104,7 +138,7 @@ func resourceDatacenterRead(ctx context.Context, d *schema.ResourceData, meta in
 	datacenter, apiResponse, err := client.DataCentersApi.DatacentersFindById(ctx, d.Id()).Execute()
 
 	if err != nil {
-		if apiResponse != nil && apiResponse.StatusCode == 404 {
+		if apiResponse != nil && apiResponse.Response != nil && apiResponse.StatusCode == 404 {
 			d.SetId("")
 			return nil
 		}
@@ -112,36 +146,8 @@ func resourceDatacenterRead(ctx context.Context, d *schema.ResourceData, meta in
 		return diags
 	}
 
-	if datacenter.Properties.Name != nil {
-		err := d.Set("name", *datacenter.Properties.Name)
-		if err != nil {
-			diags := diag.FromErr(fmt.Errorf("error while setting name property for datacenter %s: %s", d.Id(), err))
-			return diags
-		}
-	}
-
-	if datacenter.Properties.Location != nil {
-		err := d.Set("location", *datacenter.Properties.Location)
-		if err != nil {
-			diags := diag.FromErr(fmt.Errorf("error while setting location property for datacenter %s: %s", d.Id(), err))
-			return diags
-		}
-	}
-
-	if datacenter.Properties.Description != nil {
-		err := d.Set("description", *datacenter.Properties.Description)
-		if err != nil {
-			diags := diag.FromErr(fmt.Errorf("error while setting description property for datacenter %s: %s", d.Id(), err))
-			return diags
-		}
-	}
-
-	if datacenter.Properties.SecAuthProtection != nil {
-		err := d.Set("sec_auth_protection", *datacenter.Properties.SecAuthProtection)
-		if err != nil {
-			diags := diag.FromErr(fmt.Errorf("error while setting sec_auth_protection property for datacenter %s: %s", d.Id(), err))
-			return diags
-		}
+	if err := setDatacenterData(d, &datacenter); err != nil {
+		return diag.FromErr(err)
 	}
 
 	return nil
@@ -214,127 +220,110 @@ func resourceDatacenterDelete(ctx context.Context, d *schema.ResourceData, meta 
 	return nil
 }
 
-func getImage(client *ionoscloud.APIClient, dcId string, imageName string, imageType string) (*ionoscloud.Image, error) {
+func resourceDatacenterImport(ctx context.Context, d *schema.ResourceData, meta interface{}) ([]*schema.ResourceData, error) {
+	client := meta.(*ionoscloud.APIClient)
 
-	ctx, cancel := context.WithTimeout(context.Background(), *resourceDefaultTimeouts.Default)
+	dcId := d.Id()
 
-	if cancel != nil {
-		defer cancel()
-	}
-
-	if imageName == "" {
-		return nil, fmt.Errorf("imageName not suplied")
-	}
-
-	dc, _, err := client.DataCentersApi.DatacentersFindById(ctx, dcId).Execute()
+	datacenter, apiResponse, err := client.DataCentersApi.DatacentersFindById(ctx, d.Id()).Execute()
 
 	if err != nil {
-		log.Print(fmt.Errorf("error while fetching a data center ID %s %s", dcId, err))
+		if apiResponse != nil && apiResponse.Response != nil && apiResponse.StatusCode == 404 {
+			d.SetId("")
+			return nil, fmt.Errorf("unable to find datacenter %q", dcId)
+		}
+		return nil, fmt.Errorf("an error occured while retrieving the datacenter %q, %q", dcId, err)
+	}
+
+	log.Printf("[INFO] Datacenter found: %+v", datacenter)
+
+	if err := setDatacenterData(d, &datacenter); err != nil {
 		return nil, err
 	}
 
-	images, _, err := client.ImagesApi.ImagesGet(ctx).Execute()
-
-	if err != nil {
-		log.Print(fmt.Errorf("error while fetching the list of images %s", err))
-		return nil, err
-	}
-
-	if len(*images.Items) > 0 {
-		for _, i := range *images.Items {
-			imgName := ""
-			if i.Properties.Name != nil && *i.Properties.Name != "" {
-				imgName = *i.Properties.Name
-			}
-
-			if imageType == "SSD" {
-				imageType = "HDD"
-			}
-
-			if imgName != "" && strings.Contains(strings.ToLower(imgName), strings.ToLower(imageName)) && *i.Properties.ImageType == imageType && *i.Properties.Location == *dc.Properties.Location {
-				return &i, err
-			}
-
-			if imgName != "" && strings.ToLower(imageName) == strings.ToLower(*i.Id) && *i.Properties.ImageType == imageType && *i.Properties.Location == *dc.Properties.Location {
-				return &i, err
-			}
-
-		}
-	}
-	return nil, err
+	return []*schema.ResourceData{d}, nil
 }
 
-func getSnapshotId(client *ionoscloud.APIClient, snapshotName string) string {
+func setDatacenterData(d *schema.ResourceData, datacenter *ionoscloud.Datacenter) error {
 
-	ctx, cancel := context.WithTimeout(context.Background(), *resourceDefaultTimeouts.Default)
-
-	if cancel != nil {
-		defer cancel()
+	if datacenter.Id != nil {
+		d.SetId(*datacenter.Id)
 	}
 
-	if snapshotName == "" {
-		return ""
-	}
-
-	snapshots, _, err := client.SnapshotsApi.SnapshotsGet(ctx).Execute()
-
-	if err != nil {
-		log.Print(fmt.Errorf("error while fetching the list of snapshots %s", err))
-	}
-
-	if len(*snapshots.Items) > 0 {
-		for _, i := range *snapshots.Items {
-			imgName := ""
-			if *i.Properties.Name != "" {
-				imgName = *i.Properties.Name
-			}
-
-			if imgName != "" && strings.Contains(strings.ToLower(imgName), strings.ToLower(snapshotName)) {
-				return *i.Id
+	if datacenter.Properties != nil {
+		if datacenter.Properties.Location != nil {
+			err := d.Set("location", *datacenter.Properties.Location)
+			if err != nil {
+				return fmt.Errorf("error while setting location property for datacenter %s: %s", d.Id(), err)
 			}
 		}
-	}
-	return ""
-}
 
-func getImageAlias(client *ionoscloud.APIClient, imageAlias string, location string) string {
-
-	ctx, cancel := context.WithTimeout(context.Background(), *resourceDefaultTimeouts.Default)
-
-	if cancel != nil {
-		defer cancel()
-	}
-
-	if imageAlias == "" {
-		return ""
-	}
-	parts := strings.SplitN(location, "/", 2)
-	if len(parts) != 2 {
-		log.Print(fmt.Errorf("invalid location id %s", location))
-	}
-
-	locations, _, err := client.LocationsApi.LocationsFindByRegionIdAndId(ctx, parts[0], parts[1]).Execute()
-
-	if err != nil {
-		log.Print(fmt.Errorf("error while fetching the list of locations %s", err))
-	}
-
-	if len(*locations.Properties.ImageAliases) > 0 {
-		for _, i := range *locations.Properties.ImageAliases {
-			alias := ""
-			if i != "" {
-				alias = i
+		if datacenter.Properties.Description != nil {
+			err := d.Set("description", *datacenter.Properties.Description)
+			if err != nil {
+				return fmt.Errorf("error while setting description property for datacenter %s: %s", d.Id(), err)
 			}
+		}
 
-			if alias != "" && strings.ToLower(alias) == strings.ToLower(imageAlias) {
-				return i
+		if datacenter.Properties.Name != nil {
+			err := d.Set("name", *datacenter.Properties.Name)
+			if err != nil {
+				return fmt.Errorf("error while setting name property for datacenter %s: %s", d.Id(), err)
+			}
+		}
+
+		if datacenter.Properties.Version != nil {
+			err := d.Set("version", *datacenter.Properties.Version)
+			if err != nil {
+				return fmt.Errorf("error while setting version property for datacenter %s: %s", d.Id(), err)
+			}
+		}
+
+		if datacenter.Properties.Features != nil && len(*datacenter.Properties.Features) > 0 {
+			err := d.Set("features", *datacenter.Properties.Features)
+			if err != nil {
+				return fmt.Errorf("error while setting features property for datacenter %s: %s", d.Id(), err)
+			}
+		}
+
+		if datacenter.Properties.SecAuthProtection != nil {
+			err := d.Set("sec_auth_protection", *datacenter.Properties.SecAuthProtection)
+			if err != nil {
+				return fmt.Errorf("error while setting sec_auth_protection property for datacenter %s: %s", d.Id(), err)
+			}
+		}
+
+		if datacenter.Properties.CpuArchitecture != nil && len(*datacenter.Properties.CpuArchitecture) > 0 {
+			var cpuArchitectures []interface{}
+			for _, cpuArchitecture := range *datacenter.Properties.CpuArchitecture {
+				architectureEntry := make(map[string]interface{})
+
+				if cpuArchitecture.CpuFamily != nil {
+					architectureEntry["cpu_family"] = *cpuArchitecture.CpuFamily
+				}
+
+				if cpuArchitecture.MaxCores != nil {
+					architectureEntry["max_cores"] = *cpuArchitecture.MaxCores
+				}
+
+				if cpuArchitecture.MaxRam != nil {
+					architectureEntry["max_ram"] = *cpuArchitecture.MaxRam
+				}
+
+				if cpuArchitecture.Vendor != nil {
+					architectureEntry["vendor"] = *cpuArchitecture.Vendor
+				}
+
+				cpuArchitectures = append(cpuArchitectures, architectureEntry)
+
+				if len(cpuArchitectures) > 0 {
+					if err := d.Set("cpu_architecture", cpuArchitectures); err != nil {
+						return fmt.Errorf("error while setting cpu_architecture property for datacenter %s: %s", d.Id(), err)
+					}
+				}
 			}
 		}
 	}
-	return ""
-}
 
-func IsValidUUID(uuid string) bool {
-	r := regexp.MustCompile("^[a-fA-F0-9]{8}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-[a-fA-F0-9]{12}$")
-	return r.MatchString(uuid)
+	return nil
 }

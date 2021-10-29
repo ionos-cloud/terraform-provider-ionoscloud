@@ -42,7 +42,6 @@ resource "ionoscloud_networkloadbalancer_forwardingrule" "example" {
 - `listener_port` - (Required)[int] Listening port number. (inbound) (range: 1 to 65535)
 - `health_check` - (Optional) Health check attributes for Network Load Balancer forwarding rule.
     - `client_timeout` - (Optional)[int] ClientTimeout is expressed in milliseconds. This inactivity timeout applies when the client is expected to acknowledge or send data. If unset the default of 50 seconds will be used.
-    - `check_timeout` - (Optional)[int] It specifies the time (in milliseconds) for a target VM in this pool to answer the check. If a target VM has CheckInterval set and CheckTimeout is set too, then the smaller value of the two is used after the TCP connection is established.
     - `connect_timeout` - (Optional)[int] It specifies the maximum time (in milliseconds) to wait for a connection attempt to a target VM to succeed. If unset, the default of 5 seconds will be used.
     - `target_timeout` - (Optional)[int] TargetTimeout specifies the maximum inactivity time (in milliseconds) on the target VM side. If unset, the default of 50 seconds will be used.
     - `retries` - (Optional)[int] Retries specifies the number of retries to perform on a target VM after a connection failure. If unset, the default value of 3 will be used.
@@ -56,3 +55,11 @@ resource "ionoscloud_networkloadbalancer_forwardingrule" "example" {
          - `maintenance` - (Optional)[boolean] Maintenance specifies if a target VM should be marked as down, even if it is not.
 - `datacenter_id` - (Required)[string] A Datacenter's UUID.
 - `natgateway_id` - (Required)[string] Network Load Balancer's UUID.
+
+## Import
+
+A Network Load Balancer Forwarding Rule resource can be imported using its `resource id`, the `datacenter id` and the `networkloadbalancer id` e.g.
+
+```shell
+terraform import ionoscloud_networkloadbalancer_forwardingrule.my_networkloadbalancer_forwardingrule {datacenter uuid}/{networkloadbalancer uuid}/{networkloadbalancer_forwardingrule uuid}
+```

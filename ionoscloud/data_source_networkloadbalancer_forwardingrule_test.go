@@ -1,3 +1,5 @@
+// +build nlb
+
 package ionoscloud
 
 import (
@@ -6,7 +8,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 )
 
-func TestAccDataSourceNetworkLoadBalancerForwardingRule_matchId(t *testing.T) {
+func TestAccDataSourceNetworkLoadBalancerForwardingRule(t *testing.T) {
 	resource.Test(t, resource.TestCase{
 		PreCheck: func() {
 			testAccPreCheck(t)
@@ -19,27 +21,13 @@ func TestAccDataSourceNetworkLoadBalancerForwardingRule_matchId(t *testing.T) {
 			{
 				Config: testAccDataSourceNetworkLoadBalancerForwardingRuleMatchId,
 				Check: resource.ComposeTestCheckFunc(
-					resource.TestCheckResourceAttr("data.ionoscloud_networkloadbalancer_forwardingrule.test_nlb_fr", "name", "test_datasource_nlb_fr"),
+					resource.TestCheckResourceAttr("data.ionoscloud_networkloadbalancer_forwardingrule.test_nlb_fr_id", "name", "test_datasource_nlb_fr"),
 				),
-			},
-		},
-	})
-}
-
-func TestAccDataSourceNetworkLoadBalancerForwardingRule_matchName(t *testing.T) {
-	resource.Test(t, resource.TestCase{
-		PreCheck: func() {
-			testAccPreCheck(t)
-		},
-		ProviderFactories: testAccProviderFactories,
-		Steps: []resource.TestStep{
-			{
-				Config: testAccDataSourceNetworkLoadBalancerForwardingRuleCreateResources,
 			},
 			{
 				Config: testAccDataSourceNetworkLoadBalancerForwardingRuleMatchName,
 				Check: resource.ComposeTestCheckFunc(
-					resource.TestCheckResourceAttr("data.ionoscloud_networkloadbalancer_forwardingrule.test_nlb_fr", "name", "test_datasource_nlb_fr"),
+					resource.TestCheckResourceAttr("data.ionoscloud_networkloadbalancer_forwardingrule.test_nlb_fr_name", "name", "test_datasource_nlb_fr"),
 				),
 			},
 		},
@@ -143,7 +131,7 @@ resource "ionoscloud_networkloadbalancer_forwardingrule" "forwarding_rule" {
  }
 }
 
-data "ionoscloud_networkloadbalancer_forwardingrule" "test_nlb_fr" {
+data "ionoscloud_networkloadbalancer_forwardingrule" "test_nlb_fr_id" {
   datacenter_id = ionoscloud_datacenter.nlb_fr_datacenter.id
   networkloadbalancer_id  = ionoscloud_networkloadbalancer.test_nbl_fr.id
   id			= ionoscloud_networkloadbalancer_forwardingrule.forwarding_rule.id
@@ -198,7 +186,7 @@ resource "ionoscloud_networkloadbalancer_forwardingrule" "forwarding_rule" {
  }
 }
 
-data "ionoscloud_networkloadbalancer_forwardingrule" "test_nlb_fr" {
+data "ionoscloud_networkloadbalancer_forwardingrule" "test_nlb_fr_name" {
   datacenter_id = ionoscloud_datacenter.nlb_fr_datacenter.id
   networkloadbalancer_id  = ionoscloud_networkloadbalancer.test_nbl_fr.id
   name			= "test_datasource_"

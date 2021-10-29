@@ -7,6 +7,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 	ionoscloud "github.com/ionos-cloud/sdk-go/v6"
 	"log"
+	"strings"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 )
@@ -24,6 +25,20 @@ func resourceVolume() *schema.Resource {
 			"image_name": {
 				Type:     schema.TypeString,
 				Optional: true,
+				DiffSuppressFunc: func(k, old, new string, d *schema.ResourceData) bool {
+					if old != "" {
+						return true
+					}
+					return false
+				},
+			},
+			"image": {
+				Type:     schema.TypeString,
+				Computed: true,
+			},
+			"image_id": {
+				Type:     schema.TypeString,
+				Computed: true,
 			},
 			"size": {
 				Type:     schema.TypeInt,
@@ -41,6 +56,7 @@ func resourceVolume() *schema.Resource {
 			"licence_type": {
 				Type:     schema.TypeString,
 				Optional: true,
+				Computed: true,
 			},
 			"ssh_key_path": {
 				Type:     schema.TypeList,
@@ -64,49 +80,33 @@ func resourceVolume() *schema.Resource {
 				Type:     schema.TypeString,
 				Optional: true,
 			},
-			"server_id": {
-				Type:         schema.TypeString,
-				Required:     true,
-				ValidateFunc: validation.All(validation.StringIsNotWhiteSpace),
-			},
-			"datacenter_id": {
-				Type:         schema.TypeString,
-				Required:     true,
-				ForceNew:     true,
-				ValidateFunc: validation.All(validation.StringIsNotWhiteSpace),
-			},
 			"cpu_hot_plug": {
 				Type:     schema.TypeBool,
-				Optional: true,
 				Computed: true,
 			},
 			"ram_hot_plug": {
 				Type:     schema.TypeBool,
-				Optional: true,
 				Computed: true,
 			},
 			"nic_hot_plug": {
 				Type:     schema.TypeBool,
-				Optional: true,
 				Computed: true,
 			},
 			"nic_hot_unplug": {
 				Type:     schema.TypeBool,
-				Optional: true,
 				Computed: true,
 			},
 			"disc_virtio_hot_plug": {
 				Type:     schema.TypeBool,
-				Optional: true,
 				Computed: true,
 			},
 			"disc_virtio_hot_unplug": {
 				Type:     schema.TypeBool,
-				Optional: true,
 				Computed: true,
 			},
 			"backup_unit_id": {
 				Type:     schema.TypeString,
+				Optional: true,
 				Computed: true,
 			},
 			"user_data": {
@@ -122,6 +122,17 @@ func resourceVolume() *schema.Resource {
 				Type:     schema.TypeInt,
 				Computed: true,
 			},
+			"server_id": {
+				Type:         schema.TypeString,
+				Required:     true,
+				ValidateFunc: validation.All(validation.StringIsNotWhiteSpace),
+			},
+			"datacenter_id": {
+				Type:         schema.TypeString,
+				Required:     true,
+				ForceNew:     true,
+				ValidateFunc: validation.All(validation.StringIsNotWhiteSpace),
+			},
 		},
 		Timeouts: &resourceDefaultTimeouts,
 	}
@@ -131,18 +142,23 @@ func resourceVolumeCreate(ctx context.Context, d *schema.ResourceData, meta inte
 
 	client := meta.(*ionoscloud.APIClient)
 
-	var imageAlias string
+	volume := ionoscloud.Volume{
+		Properties: &ionoscloud.VolumeProperties{},
+	}
+
 	var sshKeyPath []interface{}
-	isSnapshot := false
+	var publicKeys []string
+	var image, imageAlias string
+	var isSnapshot bool
+	var diags diag.Diagnostics
+
 	dcId := d.Get("datacenter_id").(string)
 	serverId := d.Get("server_id").(string)
 	imagePassword := d.Get("image_password").(string)
 	sshKeyPath = d.Get("ssh_key_path").([]interface{})
 	imageInput := d.Get("image_name").(string)
 	licenceType := d.Get("licence_type").(string)
-	diskType := d.Get("disk_type").(string)
 
-	var publicKeys []string
 	if len(sshKeyPath) != 0 {
 		for _, path := range sshKeyPath {
 			log.Printf("[DEBUG] Reading file %s", path)
@@ -155,66 +171,10 @@ func resourceVolumeCreate(ctx context.Context, d *schema.ResourceData, meta inte
 		}
 	}
 
-	var image string
 	if imageInput != "" {
-		if !IsValidUUID(imageInput) {
-			img, err := getImage(client, dcId, imageInput, diskType)
-			if err != nil {
-				diags := diag.FromErr(err)
-				return diags
-			}
-			if img != nil {
-				image = *img.Id
-			}
-			// if no image id was found with that name we look for a matching snapshot
-			if image == "" {
-				image = getSnapshotId(client, imageInput)
-				if image != "" {
-					isSnapshot = true
-				} else {
-					diags := diag.FromErr(fmt.Errorf("no image or snapshot with id %s found", imageInput))
-					return diags
-				}
-			}
-
-			if imagePassword == "" && len(sshKeyPath) == 0 && isSnapshot == false && img.Properties.Public != nil && *img.Properties.Public {
-				diags := diag.FromErr(fmt.Errorf("either 'image_password' or 'ssh_key_path' must be provided"))
-				return diags
-			}
-
-		} else {
-
-			img, apiResponse, err := client.ImagesApi.ImagesFindById(ctx, imageInput).Execute()
-
-			if err != nil {
-
-				if apiResponse != nil && apiResponse.StatusCode == 404 {
-					snapshot, apiResponse, err := client.SnapshotsApi.SnapshotsFindById(ctx, imageInput).Execute()
-
-					if err != nil {
-						if apiResponse != nil && apiResponse.StatusCode == 404 {
-							diags := diag.FromErr(fmt.Errorf("image/snapshot %s not found: %s", imageInput, err))
-							return diags
-						} else {
-							diags := diag.FromErr(fmt.Errorf("an error occured while fetching snapshot %s: %s", imageInput, err))
-							return diags
-						}
-					}
-					image = *snapshot.Id
-					isSnapshot = true
-				} else {
-					diags := diag.FromErr(fmt.Errorf("error fetching image %s: %s", imageInput, err))
-					return diags
-				}
-			} else {
-				if isSnapshot == false && *img.Properties.Public == true {
-					if imagePassword == "" && len(sshKeyPath) == 0 {
-						diags := diag.FromErr(fmt.Errorf("either 'image_password' or 'sshkey' must be provided"))
-						return diags
-					}
-				}
-				image = *img.Id
-			}
+		image, imageAlias, isSnapshot, diags = checkImage(ctx, client, imageInput, imagePassword, licenceType, dcId, sshKeyPath)
+		if diags != nil {
+			return diags
 		}
 	}
 
@@ -223,18 +183,29 @@ func resourceVolumeCreate(ctx context.Context, d *schema.ResourceData, meta inte
 		return diags
 	}
 
-	volumeName := d.Get("name").(string)
-	volumeSize := float32(d.Get("size").(int))
-	volumeType := d.Get("disk_type").(string)
-	volumeBus := d.Get("bus").(string)
+	if v, ok := d.GetOk("name"); ok {
+		name := v.(string)
+		volume.Properties.Name = &name
+	}
 
-	volume := ionoscloud.Volume{
-		Properties: &ionoscloud.VolumeProperties{
-			Name:        &volumeName,
-			Size:        &volumeSize,
-			Type:        &volumeType,
-			LicenceType: &licenceType,
-		},
+	if v, ok := d.GetOk("size"); ok {
+		size := float32(v.(int))
+		volume.Properties.Size = &size
+	}
+
+	if v, ok := d.GetOk("disk_type"); ok {
+		diskType := v.(string)
+		volume.Properties.Type = &diskType
+	}
+
+	if v, ok := d.GetOk("bus"); ok {
+		bus := v.(string)
+		volume.Properties.Bus = &bus
+	}
+
+	if _, ok := d.GetOk("availability_zone"); ok {
+		raw := d.Get("availability_zone").(string)
+		volume.Properties.AvailabilityZone = &raw
 	}
 
 	if imagePassword != "" {
@@ -243,52 +214,22 @@ func resourceVolumeCreate(ctx context.Context, d *schema.ResourceData, meta inte
 		volume.Properties.ImagePassword = nil
 	}
 
-	if volumeBus != "" {
-		volume.Properties.Bus = &volumeBus
-	} else {
-		volume.Properties.Bus = nil
-	}
-
 	if licenceType != "" {
 		volume.Properties.LicenceType = &licenceType
 	} else {
 		volume.Properties.LicenceType = nil
 	}
 
-	if v, ok := d.GetOk("cpu_hot_plug"); ok {
-		vBool := v.(bool)
-		volume.Properties.CpuHotPlug = &vBool
-	}
-
-	if v, ok := d.GetOk("ram_hot_plug"); ok {
-		vBool := v.(bool)
-		volume.Properties.RamHotPlug = &vBool
-	}
-
-	if v, ok := d.GetOk("nic_hot_unplug"); ok {
-		vBool := v.(bool)
-		volume.Properties.NicHotPlug = &vBool
-	}
-
-	if v, ok := d.GetOk("nic_hot_unplug"); ok {
-		vBool := v.(bool)
-		volume.Properties.NicHotUnplug = &vBool
-	}
-
-	if v, ok := d.GetOk("disc_virtio_hot_plug"); ok {
-		vBool := v.(bool)
-		volume.Properties.DiscVirtioHotPlug = &vBool
-	}
-
-	if v, ok := d.GetOk("disc_virtio_hot_unplug"); ok {
-		vBool := v.(bool)
-		volume.Properties.DiscVirtioHotUnplug = &vBool
-	}
-
 	if image != "" {
 		volume.Properties.Image = &image
 	} else {
 		volume.Properties.Image = nil
+	}
+
+	if imageAlias != "" {
+		volume.Properties.ImageAlias = &imageAlias
+	} else {
+		volume.Properties.ImageAlias = nil
 	}
 
 	if len(publicKeys) != 0 {
@@ -298,21 +239,29 @@ func resourceVolumeCreate(ctx context.Context, d *schema.ResourceData, meta inte
 		volume.Properties.SshKeys = nil
 	}
 
-	if _, ok := d.GetOk("availability_zone"); ok {
-		raw := d.Get("availability_zone").(string)
-		volume.Properties.AvailabilityZone = &raw
-	}
-
-	userData := d.Get("user_data").(string)
-	if userData != "" {
+	if userData, ok := d.GetOk("user_data"); ok {
 		if image == "" && imageAlias == "" {
-			diags := diag.FromErr(fmt.Errorf("it is mandatory to provied either public image that has cloud-init compatibility in conjunction with backup unit id property "))
+			diags := diag.FromErr(fmt.Errorf("it is mandatory to provide either public image that has cloud-init compatibility in conjunction with user_data property "))
 			return diags
 		} else {
+			userData := userData.(string)
 			volume.Properties.UserData = &userData
 		}
-	} else {
-		volume.Properties.UserData = nil
+	}
+
+	if backupUnitId, ok := d.GetOk("backup_unit_id"); ok {
+		if IsValidUUID(backupUnitId.(string)) {
+			if image == "" && imageAlias == "" {
+				diags := diag.FromErr(fmt.Errorf("it is mandatory to provide either public image that has cloud-init compatibility in conjunction with backup_unit_id property "))
+				return diags
+			} else {
+				backupUnitId := backupUnitId.(string)
+				volume.Properties.BackupunitId = &backupUnitId
+			}
+		} else {
+			diags := diag.FromErr(fmt.Errorf("the backup_unit_id that you specified is not a valid UUID"))
+			return diags
+		}
 	}
 
 	volume, apiResponse, err := client.VolumesApi.DatacentersVolumesPost(ctx, dcId).Volume(volume).Execute()
@@ -378,7 +327,7 @@ func resourceVolumeRead(ctx context.Context, d *schema.ResourceData, meta interf
 	volume, apiResponse, err := client.VolumesApi.DatacentersVolumesFindById(ctx, dcId, volumeID).Execute()
 
 	if err != nil {
-		if apiResponse != nil && apiResponse.StatusCode == 404 {
+		if apiResponse != nil && apiResponse.Response != nil && apiResponse.StatusCode == 404 {
 			d.SetId("")
 			return nil
 		}
@@ -394,109 +343,8 @@ func resourceVolumeRead(ctx context.Context, d *schema.ResourceData, meta interf
 		}
 	}
 
-	if volume.Properties.Name != nil {
-		err := d.Set("name", *volume.Properties.Name)
-		if err != nil {
-			diags := diag.FromErr(fmt.Errorf("error while setting name property for volume %s: %s", d.Id(), err))
-			return diags
-		}
-	}
-
-	if volume.Properties.Type != nil {
-		err := d.Set("disk_type", *volume.Properties.Type)
-		if err != nil {
-			diags := diag.FromErr(fmt.Errorf("error while setting type property for volume %s: %s", d.Id(), err))
-			return diags
-		}
-	}
-
-	if volume.Properties.Size != nil {
-		err := d.Set("size", *volume.Properties.Size)
-		if err != nil {
-			diags := diag.FromErr(fmt.Errorf("error while setting size property for volume %s: %s", d.Id(), err))
-			return diags
-		}
-	}
-
-	if volume.Properties.Bus != nil {
-		err := d.Set("bus", *volume.Properties.Bus)
-		if err != nil {
-			diags := diag.FromErr(fmt.Errorf("error while setting bus property for volume %s: %s", d.Id(), err))
-			return diags
-		}
-	}
-
-	/*
-		if volume.Properties.Image != nil {
-			err = d.Set("image_name", *volume.Properties.Image)
-			if err != nil {
-				return fmt.Errorf("error while setting image property for volume %s: %s", d.Id(), err)
-			}
-		}
-	*/
-
-	if volume.Properties.CpuHotPlug != nil {
-		err := d.Set("cpu_hot_plug", *volume.Properties.CpuHotPlug)
-		if err != nil {
-			diags := diag.FromErr(fmt.Errorf("error while setting cpu_hot_plug property for volume %s: %s", d.Id(), err))
-			return diags
-		}
-	}
-
-	if volume.Properties.RamHotPlug != nil {
-		err := d.Set("ram_hot_plug", *volume.Properties.RamHotPlug)
-		if err != nil {
-			diags := diag.FromErr(fmt.Errorf("error while setting ram_hot_plug property for volume %s: %s", d.Id(), err))
-			return diags
-		}
-	}
-
-	if volume.Properties.NicHotPlug != nil {
-		err := d.Set("nic_hot_plug", *volume.Properties.NicHotPlug)
-		if err != nil {
-			diags := diag.FromErr(fmt.Errorf("error while setting nic_hot_plug property for volume %s: %s", d.Id(), err))
-			return diags
-		}
-	}
-
-	if volume.Properties.NicHotUnplug != nil {
-		err := d.Set("nic_hot_unplug", *volume.Properties.NicHotUnplug)
-		if err != nil {
-			diags := diag.FromErr(fmt.Errorf("error while setting nic_hot_unplug property for volume %s: %s", d.Id(), err))
-			return diags
-		}
-	}
-
-	if volume.Properties.DiscVirtioHotPlug != nil {
-		err := d.Set("disc_virtio_hot_plug", *volume.Properties.DiscVirtioHotPlug)
-		if err != nil {
-			diags := diag.FromErr(fmt.Errorf("error while setting disc_virtio_hot_plug property for volume %s: %s", d.Id(), err))
-			return diags
-		}
-	}
-
-	if volume.Properties.DiscVirtioHotUnplug != nil {
-		err := d.Set("disc_virtio_hot_unplug", *volume.Properties.DiscVirtioHotUnplug)
-		if err != nil {
-			diags := diag.FromErr(fmt.Errorf("error while setting disc_virtio_hot_unplug property for volume %s: %s", d.Id(), err))
-			return diags
-		}
-	}
-
-	if volume.Properties.BackupunitId != nil {
-		err := d.Set("backup_unit_id", *volume.Properties.BackupunitId)
-		if err != nil {
-			diags := diag.FromErr(fmt.Errorf("error while setting backup_unit_id property for volume %s: %s", d.Id(), err))
-			return diags
-		}
-	}
-
-	if volume.Properties.UserData != nil {
-		err := d.Set("user_data", *volume.Properties.UserData)
-		if err != nil {
-			diags := diag.FromErr(fmt.Errorf("error while setting user_data property for volume %s: %s", d.Id(), err))
-			return diags
-		}
+	if err := setVolumeData(d, &volume); err != nil {
+		return diag.FromErr(err)
 	}
 
 	return nil
@@ -514,9 +362,8 @@ func resourceVolumeUpdate(ctx context.Context, d *schema.ResourceData, meta inte
 		properties.Name = &newValueStr
 	}
 	if d.HasChange("disk_type") {
-		_, newValue := d.GetChange("disk_type")
-		newValueStr := newValue.(string)
-		properties.Type = &newValueStr
+		diags := diag.FromErr(fmt.Errorf("disk_type is immutable"))
+		return diags
 	}
 	if d.HasChange("size") {
 		_, newValue := d.GetChange("size")
@@ -529,46 +376,22 @@ func resourceVolumeUpdate(ctx context.Context, d *schema.ResourceData, meta inte
 		properties.Bus = &newValueStr
 	}
 	if d.HasChange("availability_zone") {
-		_, newValue := d.GetChange("availability_zone")
-		newValueStr := newValue.(string)
-		properties.AvailabilityZone = &newValueStr
-	}
-	if d.HasChange("cpu_hot_plug") {
-		_, newValue := d.GetChange("cpu_hot_plug")
-		newValueBool := newValue.(bool)
-		properties.CpuHotPlug = &newValueBool
-	}
-	if d.HasChange("ram_hot_plug") {
-		_, newValue := d.GetChange("ram_hot_plug")
-		newValueBool := newValue.(bool)
-		properties.RamHotPlug = &newValueBool
-	}
-	if d.HasChange("nic_hot_plug") {
-		_, newValue := d.GetChange("nic_hot_plug")
-		newValueBool := newValue.(bool)
-		properties.NicHotPlug = &newValueBool
-	}
-
-	if d.HasChange("nic_hot_unplug") {
-		_, newValue := d.GetChange("nic_hot_unplug")
-		newValueBool := newValue.(bool)
-		properties.NicHotUnplug = &newValueBool
-	}
-
-	if d.HasChange("disc_virtio_hot_plug") {
-		_, newValue := d.GetChange("disc_virtio_hot_plug")
-		newValueBool := newValue.(bool)
-		properties.DiscVirtioHotPlug = &newValueBool
-	}
-
-	if d.HasChange("disc_virtio_hot_unplug") {
-		_, newValue := d.GetChange("disc_virtio_hot_unplug")
-		newValueBool := newValue.(bool)
-		properties.DiscVirtioHotUnplug = &newValueBool
+		diags := diag.FromErr(fmt.Errorf("availability_zone is immutable"))
+		return diags
 	}
 
 	if d.HasChange("user_data") {
-		diags := diag.FromErr(fmt.Errorf("User data property of resource volume is immutable "))
+		diags := diag.FromErr(fmt.Errorf("user_data property of resource volume is immutable "))
+		return diags
+	}
+
+	if d.HasChange("backup_unit_id") {
+		diags := diag.FromErr(fmt.Errorf("backup_unit_id property of resource volume is immutable "))
+		return diags
+	}
+
+	if d.HasChange("image_name") {
+		diags := diag.FromErr(fmt.Errorf("backup_unit_id property of resource volume is immutable "))
 		return diags
 	}
 
@@ -587,7 +410,7 @@ func resourceVolumeUpdate(ctx context.Context, d *schema.ResourceData, meta inte
 		return diags
 	}
 
-	if apiResponse != nil && apiResponse.StatusCode > 299 {
+	if apiResponse != nil && apiResponse.Response != nil && apiResponse.StatusCode > 299 {
 		diags := diag.FromErr(fmt.Errorf("an error occured while updating a volume ID %s %s", d.Id(), err))
 		return diags
 	}
@@ -595,7 +418,8 @@ func resourceVolumeUpdate(ctx context.Context, d *schema.ResourceData, meta inte
 	if d.HasChange("server_id") {
 		_, newValue := d.GetChange("server_id")
 		serverID := newValue.(string)
-		_, apiResponse, err := client.ServersApi.DatacentersServersVolumesPost(ctx, dcId, serverID).Volume(volume).Execute()
+		volumeToAttach := ionoscloud.Volume{Id: volume.Id}
+		_, apiResponse, err := client.ServersApi.DatacentersServersVolumesPost(ctx, dcId, serverID).Volume(volumeToAttach).Execute()
 		if err != nil {
 			diags := diag.FromErr(fmt.Errorf("an error occured while attaching a volume dcId: %s server_id: %s ID: %s Response: %s",
 				dcId, serverID, *volume.Id, err))
@@ -634,4 +458,333 @@ func resourceVolumeDelete(ctx context.Context, d *schema.ResourceData, meta inte
 
 	d.SetId("")
 	return nil
+}
+
+func resourceVolumeImporter(ctx context.Context, d *schema.ResourceData, meta interface{}) ([]*schema.ResourceData, error) {
+	parts := strings.Split(d.Id(), "/")
+	if len(parts) != 3 || parts[0] == "" || parts[1] == "" || parts[2] == "" {
+		return nil, fmt.Errorf("invalid import id %q. Expecting {datacenter}/{server}/{volume}", d.Id())
+	}
+
+	client := meta.(*ionoscloud.APIClient)
+
+	dcId := parts[0]
+	srvId := parts[1]
+	volumeId := parts[2]
+
+	volume, apiResponse, err := client.VolumesApi.DatacentersVolumesFindById(ctx, dcId, volumeId).Execute()
+
+	if err != nil {
+		if apiResponse != nil && apiResponse.Response != nil && apiResponse.StatusCode == 404 {
+			d.SetId("")
+			return nil, fmt.Errorf("volume does not exist %q", volumeId)
+		}
+		return nil, fmt.Errorf("an error occured while trying to find the volume %q", volumeId)
+	}
+
+	log.Printf("[INFO] volume found: %+v", volume)
+
+	d.SetId(*volume.Id)
+	if err := d.Set("datacenter_id", dcId); err != nil {
+		return nil, err
+	}
+
+	if err := d.Set("server_id", srvId); err != nil {
+		return nil, err
+	}
+
+	if err := setVolumeData(d, &volume); err != nil {
+		return nil, err
+	}
+
+	return []*schema.ResourceData{d}, nil
+}
+
+func setVolumeData(d *schema.ResourceData, volume *ionoscloud.Volume) error {
+
+	if volume.Id != nil {
+		d.SetId(*volume.Id)
+	}
+
+	if volume.Properties.Name != nil {
+		err := d.Set("name", *volume.Properties.Name)
+		if err != nil {
+			return fmt.Errorf("error while setting name property for volume %s: %s", d.Id(), err)
+		}
+	}
+
+	if volume.Properties.Type != nil {
+		err := d.Set("disk_type", *volume.Properties.Type)
+		if err != nil {
+			return fmt.Errorf("error while setting type property for volume %s: %s", d.Id(), err)
+		}
+	}
+
+	if volume.Properties.Size != nil {
+		err := d.Set("size", *volume.Properties.Size)
+		if err != nil {
+			return fmt.Errorf("error while setting size property for volume %s: %s", d.Id(), err)
+		}
+	}
+
+	if volume.Properties.Bus != nil {
+		err := d.Set("bus", *volume.Properties.Bus)
+		if err != nil {
+			return fmt.Errorf("error while setting bus property for volume %s: %s", d.Id(), err)
+		}
+	}
+
+	if volume.Properties.Image != nil {
+		err := d.Set("image", *volume.Properties.Image)
+		if err != nil {
+			return fmt.Errorf("error while setting image property for volume %s: %s", d.Id(), err)
+		}
+	}
+
+	if volume.Properties.ImageAlias != nil {
+		err := d.Set("image_alias", *volume.Properties.ImageAlias)
+		if err != nil {
+			return fmt.Errorf("error while setting image_alias property for volume %s: %s", d.Id(), err)
+		}
+	}
+
+	if volume.Properties.AvailabilityZone != nil {
+		err := d.Set("availability_zone", *volume.Properties.AvailabilityZone)
+		if err != nil {
+			return fmt.Errorf("error while setting availability_zone property for volume %s: %s", d.Id(), err)
+		}
+	}
+
+	if volume.Properties.CpuHotPlug != nil {
+		err := d.Set("cpu_hot_plug", *volume.Properties.CpuHotPlug)
+		if err != nil {
+			return fmt.Errorf("error while setting cpu_hot_plug property for volume %s: %s", d.Id(), err)
+		}
+	}
+
+	if volume.Properties.RamHotPlug != nil {
+		err := d.Set("ram_hot_plug", *volume.Properties.RamHotPlug)
+		if err != nil {
+			return fmt.Errorf("error while setting ram_hot_plug property for volume %s: %s", d.Id(), err)
+		}
+	}
+
+	if volume.Properties.NicHotPlug != nil {
+		err := d.Set("nic_hot_plug", *volume.Properties.NicHotPlug)
+		if err != nil {
+			return fmt.Errorf("error while setting nic_hot_plug property for volume %s: %s", d.Id(), err)
+		}
+	}
+
+	if volume.Properties.NicHotUnplug != nil {
+		err := d.Set("nic_hot_unplug", *volume.Properties.NicHotUnplug)
+		if err != nil {
+			return fmt.Errorf("error while setting nic_hot_unplug property for volume %s: %s", d.Id(), err)
+		}
+	}
+
+	if volume.Properties.DiscVirtioHotPlug != nil {
+		err := d.Set("disc_virtio_hot_plug", *volume.Properties.DiscVirtioHotPlug)
+		if err != nil {
+			return fmt.Errorf("error while setting disc_virtio_hot_plug property for volume %s: %s", d.Id(), err)
+		}
+	}
+
+	if volume.Properties.DiscVirtioHotUnplug != nil {
+		err := d.Set("disc_virtio_hot_unplug", *volume.Properties.DiscVirtioHotUnplug)
+		if err != nil {
+			return fmt.Errorf("error while setting disc_virtio_hot_unplug property for volume %s: %s", d.Id(), err)
+		}
+	}
+
+	if volume.Properties.BackupunitId != nil {
+		err := d.Set("backup_unit_id", *volume.Properties.BackupunitId)
+		if err != nil {
+			return fmt.Errorf("error while setting backup_unit_id property for volume %s: %s", d.Id(), err)
+		}
+	}
+
+	if volume.Properties.UserData != nil {
+		err := d.Set("user_data", *volume.Properties.UserData)
+		if err != nil {
+			return fmt.Errorf("error while setting user_data property for volume %s: %s", d.Id(), err)
+		}
+	}
+
+	if volume.Properties.DeviceNumber != nil {
+		err := d.Set("device_number", *volume.Properties.DeviceNumber)
+		if err != nil {
+			return fmt.Errorf("error while setting device_number property for volume %s: %s", d.Id(), err)
+		}
+	}
+	return nil
+}
+
+func resolveImageName(ctx context.Context, client *ionoscloud.APIClient, imageName string, location string) (*ionoscloud.Image, error) {
+
+	if imageName == "" {
+		return nil, fmt.Errorf("imageName not suplied")
+	}
+
+	images, _, err := client.ImagesApi.ImagesGet(ctx).Execute()
+
+	if err != nil {
+		log.Print(fmt.Errorf("error while fetching the list of images %s", err))
+		return nil, err
+	}
+
+	if len(*images.Items) > 0 {
+		for _, i := range *images.Items {
+			imgName := ""
+			if i.Properties.Name != nil && *i.Properties.Name != "" {
+				imgName = *i.Properties.Name
+			}
+
+			if imgName != "" && strings.Contains(strings.ToLower(imgName), strings.ToLower(imageName)) && *i.Properties.ImageType == "HDD" && *i.Properties.Location == location {
+				return &i, err
+			}
+
+			if imgName != "" && strings.ToLower(imageName) == strings.ToLower(*i.Id) && *i.Properties.ImageType == "HDD" && *i.Properties.Location == location {
+				return &i, err
+			}
+
+		}
+	}
+	return nil, err
+}
+
+func getSnapshotId(ctx context.Context, client *ionoscloud.APIClient, snapshotName string) string {
+
+	if snapshotName == "" {
+		return ""
+	}
+
+	snapshots, _, err := client.SnapshotsApi.SnapshotsGet(ctx).Execute()
+
+	if err != nil {
+		log.Print(fmt.Errorf("error while fetching the list of snapshots %s", err))
+	}
+
+	if len(*snapshots.Items) > 0 {
+		for _, i := range *snapshots.Items {
+			imgName := ""
+			if *i.Properties.Name != "" {
+				imgName = *i.Properties.Name
+			}
+
+			if imgName != "" && strings.Contains(strings.ToLower(imgName), strings.ToLower(snapshotName)) {
+				return *i.Id
+			}
+		}
+	}
+	return ""
+}
+
+func getImageAlias(ctx context.Context, client *ionoscloud.APIClient, imageAlias string, location string) string {
+
+	if imageAlias == "" {
+		return ""
+	}
+	parts := strings.SplitN(location, "/", 2)
+	if len(parts) != 2 {
+		log.Print(fmt.Errorf("invalid location id %s", location))
+	}
+
+	locations, _, err := client.LocationsApi.LocationsFindByRegionIdAndId(ctx, parts[0], parts[1]).Execute()
+
+	if err != nil {
+		log.Print(fmt.Errorf("error while fetching the list of locations %s", err))
+	}
+
+	if len(*locations.Properties.ImageAliases) > 0 {
+		for _, i := range *locations.Properties.ImageAliases {
+			alias := ""
+			if i != "" {
+				alias = i
+			}
+
+			if alias != "" && strings.ToLower(alias) == strings.ToLower(imageAlias) {
+				return i
+			}
+		}
+	}
+	return ""
+}
+
+func checkImage(ctx context.Context, client *ionoscloud.APIClient, imageInput, imagePassword, licenceType, dcId string, sshKeyPath []interface{}) (image, imageAlias string, isSnapshot bool, diags diag.Diagnostics) {
+	isSnapshot = false
+
+	if imageInput != "" {
+		if !IsValidUUID(imageInput) {
+			dc, _, err := client.DataCentersApi.DatacentersFindById(ctx, dcId).Execute()
+			if err != nil {
+				diags := diag.FromErr(fmt.Errorf("error fetching datacenter %s: (%s)", dcId, err))
+				return image, imageAlias, isSnapshot, diags
+			}
+			img, err := resolveImageName(ctx, client, imageInput, *dc.Properties.Location)
+			if err != nil {
+				diags := diag.FromErr(err)
+				return image, imageAlias, isSnapshot, diags
+			}
+			if img != nil {
+				image = *img.Id
+			}
+			// if no image id was found with that name we look for a matching snapshot
+			if image == "" {
+				image = getSnapshotId(ctx, client, imageInput)
+				if image != "" {
+					isSnapshot = true
+				} else {
+					imageAlias = getImageAlias(ctx, client, imageInput, *dc.Properties.Location)
+				}
+			}
+
+			if image == "" && imageAlias == "" {
+				diags := diag.FromErr(fmt.Errorf("could not find an image/imagealias/snapshot that matches %s ", imageInput))
+				return image, imageAlias, isSnapshot, diags
+			}
+
+			if imagePassword == "" && len(sshKeyPath) == 0 && isSnapshot == false && img.Properties.Public != nil && *img.Properties.Public {
+				diags := diag.FromErr(fmt.Errorf("either 'image_password' or 'ssh_key_path' must be provided"))
+				return image, imageAlias, isSnapshot, diags
+			}
+
+		} else {
+			img, apiResponse, err := client.ImagesApi.ImagesFindById(ctx, imageInput).Execute()
+			if err != nil {
+				if apiResponse != nil && apiResponse.Response != nil && apiResponse.StatusCode == 404 {
+					snapshot, apiResponse, err := client.SnapshotsApi.SnapshotsFindById(ctx, imageInput).Execute()
+					if err != nil {
+						if apiResponse != nil && apiResponse.Response != nil && apiResponse.StatusCode == 404 {
+							diags := diag.FromErr(fmt.Errorf("image/snapshot %s not found: %s", imageInput, err))
+							return image, imageAlias, isSnapshot, diags
+						} else {
+							diags := diag.FromErr(fmt.Errorf("an error occured while fetching snapshot %s: %s", imageInput, err))
+							return image, imageAlias, isSnapshot, diags
+						}
+					}
+					image = *snapshot.Id
+					isSnapshot = true
+				} else {
+					diags := diag.FromErr(fmt.Errorf("error fetching image %s: %s", imageInput, err))
+					return image, imageAlias, isSnapshot, diags
+				}
+			} else {
+				if isSnapshot == false && img.Properties.Public != nil && *img.Properties.Public == true {
+					if imagePassword == "" && len(sshKeyPath) == 0 {
+						diags := diag.FromErr(fmt.Errorf("either 'image_password' or 'sshkey' must be provided"))
+						return image, imageAlias, isSnapshot, diags
+					}
+				}
+				image = *img.Id
+			}
+		}
+	}
+
+	if imageInput == "" && licenceType == "" && isSnapshot == false {
+		diags := diag.FromErr(fmt.Errorf("either 'image_name', or 'licence_type' must be set"))
+		return image, imageAlias, isSnapshot, diags
+	}
+
+	return image, imageAlias, isSnapshot, diags
 }

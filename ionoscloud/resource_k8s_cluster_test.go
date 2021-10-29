@@ -12,38 +12,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
 )
 
-func TestAcck8sCluster_Basic(t *testing.T) {
-	var k8sCluster ionoscloud.KubernetesCluster
-	k8sClusterName := "example"
-
-	resource.Test(t, resource.TestCase{
-		PreCheck: func() {
-			testAccPreCheck(t)
-		},
-		ProviderFactories: testAccProviderFactories,
-		CheckDestroy:      testAccCheckk8sClusterDestroyCheck,
-		Steps: []resource.TestStep{
-			{
-				Config: fmt.Sprintf(testAccCheckk8sClusterConfigBasic, k8sClusterName),
-				Check: resource.ComposeTestCheckFunc(
-					testAccCheckk8sClusterExists("ionoscloud_k8s_cluster.example", &k8sCluster),
-					resource.TestCheckResourceAttr("ionoscloud_k8s_cluster.example", "name", k8sClusterName),
-					resource.TestCheckResourceAttr("ionoscloud_k8s_cluster.example", "public", "true"),
-				),
-			},
-			{
-				Config: testAccCheckk8sClusterConfigUpdate,
-				Check: resource.ComposeTestCheckFunc(
-					testAccCheckk8sClusterExists("ionoscloud_k8s_cluster.example", &k8sCluster),
-					resource.TestCheckResourceAttr("ionoscloud_k8s_cluster.example", "name", "updated"),
-					resource.TestCheckResourceAttr("ionoscloud_k8s_cluster.example", "public", "true"),
-				),
-			},
-		},
-	})
-}
-
-func TestAcck8sCluster_Version(t *testing.T) {
+func TestAccK8sClusterBasic(t *testing.T) {
 	var k8sCluster ionoscloud.KubernetesCluster
 
 	resource.Test(t, resource.TestCase{
@@ -51,37 +20,48 @@ func TestAcck8sCluster_Version(t *testing.T) {
 			testAccPreCheck(t)
 		},
 		ProviderFactories: testAccProviderFactories,
-		CheckDestroy:      testAccCheckk8sClusterDestroyCheck,
+		CheckDestroy:      testAccCheckK8sClusterDestroyCheck,
 		Steps: []resource.TestStep{
 			{
-				Config: fmt.Sprintf(testAccCheckk8sClusterConfigVersion),
+				Config: testAccCheckK8sClusterConfigBasic,
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheckk8sClusterExists("ionoscloud_k8s_cluster.example", &k8sCluster),
-					resource.TestCheckResourceAttr("ionoscloud_k8s_cluster.example", "name", "test_version"),
-					resource.TestCheckResourceAttr("ionoscloud_k8s_cluster.example", "k8s_version", "1.18.5"),
+					testAccCheckK8sClusterExists(K8sClusterResource+"."+K8sClusterTestResource, &k8sCluster),
+					resource.TestCheckResourceAttr(K8sClusterResource+"."+K8sClusterTestResource, "name", K8sClusterTestResource),
+					resource.TestCheckResourceAttr(K8sClusterResource+"."+K8sClusterTestResource, "k8s_version", "1.19.10"),
+					resource.TestCheckResourceAttr(K8sClusterResource+"."+K8sClusterTestResource, "maintenance_window.0.day_of_the_week", "Sunday"),
+					resource.TestCheckResourceAttr(K8sClusterResource+"."+K8sClusterTestResource, "maintenance_window.0.time", "09:00:00Z"),
+					resource.TestCheckResourceAttr(K8sClusterResource+"."+K8sClusterTestResource, "api_subnet_allow_list.0", "1.2.3.4/32"),
+					resource.TestCheckResourceAttr(K8sClusterResource+"."+K8sClusterTestResource, "s3_buckets.0.name", "sdktestv6"),
 				),
 			},
 			{
-				Config: fmt.Sprintf(testAccCheckk8sClusterConfigIgnoreVersion),
+				Config: testAccCheckK8sClusterConfigUpdate,
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheckk8sClusterExists("ionoscloud_k8s_cluster.example", &k8sCluster),
-					resource.TestCheckResourceAttr("ionoscloud_k8s_cluster.example", "name", "test_version_ignore"),
-					resource.TestCheckResourceAttr("ionoscloud_k8s_cluster.example", "k8s_version", "1.18.5"),
+					testAccCheckK8sClusterExists(K8sClusterResource+"."+K8sClusterTestResource, &k8sCluster),
+					resource.TestCheckResourceAttr(K8sClusterResource+"."+K8sClusterTestResource, "name", UpdatedResources),
+					resource.TestCheckResourceAttr(K8sClusterResource+"."+K8sClusterTestResource, "k8s_version", "1.19.10"),
+					resource.TestCheckResourceAttr(K8sClusterResource+"."+K8sClusterTestResource, "maintenance_window.0.day_of_the_week", "Monday"),
+					resource.TestCheckResourceAttr(K8sClusterResource+"."+K8sClusterTestResource, "maintenance_window.0.time", "10:30:00Z"),
+					resource.TestCheckNoResourceAttr(K8sClusterResource+"."+K8sClusterTestResource, "api_subnet_allow_list"),
+					resource.TestCheckNoResourceAttr(K8sClusterResource+"."+K8sClusterTestResource, "s3_buckets"),
 				),
 			},
 			{
-				Config: fmt.Sprintf(testAccCheckk8sClusterConfigChangeVersion),
+				Config: testAccCheckk8sClusterConfigUpdateVersion,
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheckk8sClusterExists("ionoscloud_k8s_cluster.example", &k8sCluster),
-					resource.TestCheckResourceAttr("ionoscloud_k8s_cluster.example", "name", "test_version_change"),
-					resource.TestCheckResourceAttr("ionoscloud_k8s_cluster.example", "k8s_version", "1.19.10"),
-				),
+					testAccCheckK8sClusterExists(K8sClusterResource+"."+K8sClusterTestResource, &k8sCluster),
+					resource.TestCheckResourceAttr(K8sClusterResource+"."+K8sClusterTestResource, "name", UpdatedResources),
+					resource.TestCheckResourceAttr(K8sClusterResource+"."+K8sClusterTestResource, "k8s_version", "1.20.10"),
+					resource.TestCheckResourceAttr(K8sClusterResource+"."+K8sClusterTestResource, "maintenance_window.0.day_of_the_week", "Monday"),
+					resource.TestCheckResourceAttr(K8sClusterResource+"."+K8sClusterTestResource, "maintenance_window.0.time", "10:30:00Z"),
+					resource.TestCheckNoResourceAttr(K8sClusterResource+"."+K8sClusterTestResource, "api_subnet_allow_list"),
+					resource.TestCheckNoResourceAttr(K8sClusterResource+"."+K8sClusterTestResource, "s3_buckets")),
 			},
 		},
 	})
 }
 
-func testAccCheckk8sClusterDestroyCheck(s *terraform.State) error {
+func testAccCheckK8sClusterDestroyCheck(s *terraform.State) error {
 	client := testAccProvider.Meta().(*ionoscloud.APIClient)
 
 	ctx, cancel := context.WithTimeout(context.Background(), *resourceDefaultTimeouts.Default)
@@ -91,14 +71,14 @@ func testAccCheckk8sClusterDestroyCheck(s *terraform.State) error {
 	}
 
 	for _, rs := range s.RootModule().Resources {
-		if rs.Type != "ionoscloud_k8s_cluster" {
+		if rs.Type != K8sClusterResource {
 			continue
 		}
 
 		_, apiResponse, err := client.KubernetesApi.K8sFindByClusterId(ctx, rs.Primary.ID).Execute()
 
 		if err != nil {
-			if apiResponse == nil || apiResponse.StatusCode != 404 {
+			if apiResponse == nil || apiResponse.Response != nil && apiResponse.StatusCode != 404 {
 				return fmt.Errorf("an error occurred while checking the destruction of k8s cluster %s: %s", rs.Primary.ID, err)
 			}
 		} else {
@@ -110,7 +90,7 @@ func testAccCheckk8sClusterDestroyCheck(s *terraform.State) error {
 	return nil
 }
 
-func testAccCheckk8sClusterExists(n string, k8sCluster *ionoscloud.KubernetesCluster) resource.TestCheckFunc {
+func testAccCheckK8sClusterExists(n string, k8sCluster *ionoscloud.KubernetesCluster) resource.TestCheckFunc {
 	return func(s *terraform.State) error {
 		client := testAccProvider.Meta().(*ionoscloud.APIClient)
 
@@ -144,40 +124,40 @@ func testAccCheckk8sClusterExists(n string, k8sCluster *ionoscloud.KubernetesClu
 	}
 }
 
-const testAccCheckk8sClusterConfigBasic = `
-resource "ionoscloud_k8s_cluster" "example" {
-  name        = "%s"
-  k8s_version = "1.20.8"
+const testAccCheckK8sClusterConfigBasic = `
+resource ` + K8sClusterResourcfe + ` ` + K8sClusterTestResource + ` {
+  name        = "` + K8sClusterTestResource + `"
+  k8s_version = "1.19.10"
   maintenance_window {
     day_of_the_week = "Sunday"
     time            = "09:00:00Z"
   }
+  api_subnet_allow_list = ["1.2.3.4/32"]
+  s3_buckets { 
+     name = "sdktestv6"
+  }
 }`
 
-const testAccCheckk8sClusterConfigUpdate = `
-resource "ionoscloud_k8s_cluster" "example" {
-  name        = "updated"
-  k8s_version = "1.20.8"
+const testAccCheckK8sClusterConfigUpdate = `
+resource ` + K8sClusterResource + ` ` + K8sClusterTestResource + ` {
+  name        = "` + UpdatedResources + `"
+  k8s_version = "1.19.14"
   maintenance_window {
     day_of_the_week = "Monday"
     time            = "10:30:00Z"
-  } 
+  }
+  api_subnet_allow_list = []
+  s3_buckets {}
 }`
 
-const testAccCheckk8sClusterConfigVersion = `
-resource "ionoscloud_k8s_cluster" "example" {
-  name        = "test_version"
-  k8s_version = "1.18.5"
-}`
-
-const testAccCheckk8sClusterConfigIgnoreVersion = `
-resource "ionoscloud_k8s_cluster" "example" {
-  name        = "test_version_ignore"
-  k8s_version = "1.18.9"
-}`
-
-const testAccCheckk8sClusterConfigChangeVersion = `
-resource "ionoscloud_k8s_cluster" "example" {
-  name        = "test_version_change"
-  k8s_version = "1.19.10"
+const testAccCheckk8sClusterConfigUpdateVersion = `
+resource ` + K8sClusterResource + ` ` + K8sClusterTestResource + ` {
+  name        = "` + UpdatedResources + `"
+  k8s_version = "1.20.10"
+  maintenance_window {
+    day_of_the_week = "Monday"
+    time            = "10:30:00Z"
+  }
+  api_subnet_allow_list = []
+  s3_buckets {}
 }`

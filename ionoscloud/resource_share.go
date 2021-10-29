@@ -83,7 +83,7 @@ func resourceShareRead(ctx context.Context, d *schema.ResourceData, meta interfa
 
 	rsp, apiResponse, err := client.UserManagementApi.UmGroupsSharesFindByResourceId(ctx, d.Get("group_id").(string), d.Get("resource_id").(string)).Execute()
 	if err != nil {
-		if apiResponse != nil && apiResponse.StatusCode == 404 {
+		if apiResponse != nil && apiResponse.Response != nil && apiResponse.StatusCode == 404 {
 			d.SetId("")
 			return nil
 		}
@@ -140,7 +140,7 @@ func resourceShareDelete(ctx context.Context, d *schema.ResourceData, meta inter
 
 	apiResponse, err := client.UserManagementApi.UmGroupsSharesDelete(ctx, groupId, resourceId).Execute()
 	if err != nil {
-		if apiResponse != nil && apiResponse.StatusCode == 404 {
+		if apiResponse != nil && apiResponse.Response != nil && apiResponse.StatusCode == 404 {
 			diags := diag.FromErr(err)
 			return diags
 		}
@@ -149,7 +149,7 @@ func resourceShareDelete(ctx context.Context, d *schema.ResourceData, meta inter
 		time.Sleep(20 * time.Second)
 		apiResponse, err := client.UserManagementApi.UmGroupsSharesDelete(ctx, groupId, resourceId).Execute()
 		if err != nil {
-			if apiResponse == nil || apiResponse.StatusCode != 404 {
+			if apiResponse == nil || apiResponse.Response != nil && apiResponse.StatusCode != 404 {
 				diags := diag.FromErr(fmt.Errorf("an error occured while deleting a share %s %s", d.Id(), err))
 				return diags
 			}

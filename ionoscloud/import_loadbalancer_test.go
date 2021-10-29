@@ -11,7 +11,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
 )
 
-func TestAccLoadbalancer_ImportBasic(t *testing.T) {
+func TestAccLoadbalancerImportBasic(t *testing.T) {
 	resourceName := "loadbalancer"
 
 	resource.Test(t, resource.TestCase{

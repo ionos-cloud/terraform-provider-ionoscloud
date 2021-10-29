@@ -16,7 +16,6 @@ github.com/apparentlymart/go-textseg/v12/textseg
 # github.com/apparentlymart/go-textseg/v13 v13.0.0
 github.com/apparentlymart/go-textseg/v13/textseg
 # github.com/aws/aws-sdk-go v1.37.0
-## explicit
 github.com/aws/aws-sdk-go/aws
 github.com/aws/aws-sdk-go/aws/arn
 github.com/aws/aws-sdk-go/aws/awserr
@@ -122,7 +121,6 @@ github.com/hashicorp/go-uuid
 # github.com/hashicorp/go-version v1.3.0
 github.com/hashicorp/go-version
 # github.com/hashicorp/hcl/v2 v2.8.2
-## explicit
 github.com/hashicorp/hcl/v2
 github.com/hashicorp/hcl/v2/ext/customdecode
 github.com/hashicorp/hcl/v2/hclsyntax
@@ -146,6 +144,9 @@ github.com/hashicorp/terraform-plugin-go/tfprotov6/internal/tfplugin6
 github.com/hashicorp/terraform-plugin-go/tfprotov6/internal/toproto
 github.com/hashicorp/terraform-plugin-go/tfprotov6/server
 github.com/hashicorp/terraform-plugin-go/tftypes
+# github.com/hashicorp/terraform-plugin-sdk v1.17.2
+## explicit
+github.com/hashicorp/terraform-plugin-sdk/meta
 # github.com/hashicorp/terraform-plugin-sdk/v2 v2.7.0
 ## explicit
 github.com/hashicorp/terraform-plugin-sdk/v2/diag
@@ -168,7 +169,7 @@ github.com/hashicorp/terraform-plugin-sdk/v2/terraform
 # github.com/hashicorp/yamux v0.0.0-20200609203250-aecfd211c9ce
 ## explicit
 github.com/hashicorp/yamux
-# github.com/ionos-cloud/sdk-go/v6 v6.0.0-00010101000000-000000000000 => ../../../../../sdk/sdk-go
+# github.com/ionos-cloud/sdk-go/v6 v6.0.0-beta.6
 ## explicit
 github.com/ionos-cloud/sdk-go/v6
 # github.com/jhump/protoreflect v1.6.1
@@ -293,7 +294,6 @@ golang.org/x/text/transform
 golang.org/x/text/unicode/bidi
 golang.org/x/text/unicode/norm
 # golang.org/x/tools v0.0.0-20201028111035-eafbe7b904eb
-## explicit
 golang.org/x/tools/cmd/goimports
 golang.org/x/tools/go/ast/astutil
 golang.org/x/tools/go/gcexportdata
@@ -310,7 +310,6 @@ golang.org/x/tools/internal/imports
 golang.org/x/xerrors
 golang.org/x/xerrors/internal
 # google.golang.org/api v0.34.0
-## explicit
 google.golang.org/api/googleapi
 google.golang.org/api/googleapi/transport
 google.golang.org/api/internal
@@ -428,4 +427,4 @@ google.golang.org/protobuf/types/known/timestamppb
 google.golang.org/protobuf/types/pluginpb
 # gopkg.in/yaml.v3 v3.0.0-20200615113413-eeeca48fe776
 ## explicit
-# github.com/ionos-cloud/sdk-go/v6 => ../../../../../sdk/sdk-go
+gopkg.in/yaml.v3

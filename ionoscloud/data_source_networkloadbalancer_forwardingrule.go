@@ -50,13 +50,6 @@ func dataSourceNetworkLoadBalancerForwardingRule() *schema.Resource {
 								"seconds will be used.",
 							Computed: true,
 						},
-						"check_timeout": {
-							Type: schema.TypeInt,
-							Description: "It specifies the time (in milliseconds) for a target VM in this pool to answer " +
-								"the check. If a target VM has CheckInterval set and CheckTimeout is set too, " +
-								"then the smaller value of the two is used after the TCP connection is established.",
-							Computed: true,
-						},
 						"connect_timeout": {
 							Type: schema.TypeInt,
 							Description: "It specifies the maximum time (in milliseconds) to wait for a connection " +
@@ -218,20 +211,23 @@ func dataSourceNetworkLoadBalancerForwardingRuleRead(d *schema.ResourceData, met
 		return errors.New("network loadbalancer not found")
 	}
 
-	if err = setNetworkLoadBalancerForwardingRuleData(d, &networkLoadBalancerForwardingRule, client); err != nil {
+	if networkLoadBalancerForwardingRule.Id != nil {
+		if err := d.Set("id", *networkLoadBalancerForwardingRule.Id); err != nil {
+			return err
+		}
+	}
+
+	if err = setNetworkLoadBalancerForwardingRuleData(d, &networkLoadBalancerForwardingRule); err != nil {
 		return err
 	}
 
 	return nil
 }
 
-func setNetworkLoadBalancerForwardingRuleData(d *schema.ResourceData, networkLoadBalancerForwardingRule *ionoscloud.NetworkLoadBalancerForwardingRule, _ *ionoscloud.APIClient) error {
+func setNetworkLoadBalancerForwardingRuleData(d *schema.ResourceData, networkLoadBalancerForwardingRule *ionoscloud.NetworkLoadBalancerForwardingRule) error {
 
 	if networkLoadBalancerForwardingRule.Id != nil {
 		d.SetId(*networkLoadBalancerForwardingRule.Id)
-		if err := d.Set("id", *networkLoadBalancerForwardingRule.Id); err != nil {
-			return err
-		}
 	}
 
 	if networkLoadBalancerForwardingRule.Properties != nil {
@@ -272,7 +268,7 @@ func setNetworkLoadBalancerForwardingRuleData(d *schema.ResourceData, networkLoa
 		}
 
 		if networkLoadBalancerForwardingRule.Properties.HealthCheck != nil {
-			healthCheck := make([]interface{}, 1)
+			var healthCheck []interface{}
 
 			healthCheckEntry := make(map[string]interface{})
 			if networkLoadBalancerForwardingRule.Properties.HealthCheck.ClientTimeout != nil {
@@ -291,7 +287,8 @@ func setNetworkLoadBalancerForwardingRuleData(d *schema.ResourceData, networkLoa
 				healthCheckEntry["retries"] = *networkLoadBalancerForwardingRule.Properties.HealthCheck.Retries
 			}
 
-			healthCheck[0] = healthCheckEntry
+			healthCheck = append(healthCheck, healthCheckEntry)
+
 			err := d.Set("health_check", healthCheck)
 			if err != nil {
 				return fmt.Errorf("error while setting health_check property for network load balancer forwarding rule %s: %s", d.Id(), err)
@@ -299,10 +296,9 @@ func setNetworkLoadBalancerForwardingRuleData(d *schema.ResourceData, networkLoa
 
 		}
 
-		forwardingRuleTargets := make([]interface{}, 0)
 		if networkLoadBalancerForwardingRule.Properties.Targets != nil && len(*networkLoadBalancerForwardingRule.Properties.Targets) > 0 {
-			forwardingRuleTargets = make([]interface{}, len(*networkLoadBalancerForwardingRule.Properties.Targets))
-			for targetIndex, target := range *networkLoadBalancerForwardingRule.Properties.Targets {
+			var forwardingRuleTargets []interface{}
+			for _, target := range *networkLoadBalancerForwardingRule.Properties.Targets {
 				targetEntry := make(map[string]interface{})
 
 				if target.Ip != nil {
@@ -318,7 +314,7 @@ func setNetworkLoadBalancerForwardingRuleData(d *schema.ResourceData, networkLoa
 				}
 
 				if target.HealthCheck != nil {
-					healthCheck := make([]interface{}, 1)
+					var healthCheck []interface{}
 
 					healthCheckEntry := make(map[string]interface{})
 
@@ -334,17 +330,17 @@ func setNetworkLoadBalancerForwardingRuleData(d *schema.ResourceData, networkLoa
 						healthCheckEntry["maintenance"] = *target.HealthCheck.Maintenance
 					}
 
-					healthCheck[0] = healthCheckEntry
+					healthCheck = append(healthCheck, healthCheckEntry)
 					targetEntry["health_check"] = healthCheck
 				}
 
-				forwardingRuleTargets[targetIndex] = targetEntry
+				forwardingRuleTargets = append(forwardingRuleTargets, targetEntry)
 			}
-		}
 
-		if len(forwardingRuleTargets) > 0 {
-			if err := d.Set("targets", forwardingRuleTargets); err != nil {
-				return fmt.Errorf("error while setting targets property for network load balancer forwarding rule  %s: %s", d.Id(), err)
+			if len(forwardingRuleTargets) > 0 {
+				if err := d.Set("targets", forwardingRuleTargets); err != nil {
+					return fmt.Errorf("error while setting targets property for network load balancer forwarding rule  %s: %s", d.Id(), err)
+				}
 			}
 		}
 

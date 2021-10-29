@@ -1,3 +1,5 @@
+// +build nlb
+
 package ionoscloud
 
 import (
@@ -6,7 +8,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 )
 
-func TestAccDataSourceNetworkLoadBalancer_matchId(t *testing.T) {
+func TestAccDataSourceNetworkLoadBalancer(t *testing.T) {
 	resource.Test(t, resource.TestCase{
 		PreCheck: func() {
 			testAccPreCheck(t)
@@ -19,27 +21,13 @@ func TestAccDataSourceNetworkLoadBalancer_matchId(t *testing.T) {
 			{
 				Config: testAccDataSourceNetworkLoadBalancerMatchId,
 				Check: resource.ComposeTestCheckFunc(
-					resource.TestCheckResourceAttr("data.ionoscloud_networkloadbalancer.test_networkloadbalancer", "name", "test_datasource_nlb"),
+					resource.TestCheckResourceAttr("data.ionoscloud_networkloadbalancer.test_networkloadbalancer_id", "name", "test_datasource_nlb"),
 				),
-			},
-		},
-	})
-}
-
-func TestAccDataSourceNetworkLoadBalancer_matchName(t *testing.T) {
-	resource.Test(t, resource.TestCase{
-		PreCheck: func() {
-			testAccPreCheck(t)
-		},
-		ProviderFactories: testAccProviderFactories,
-		Steps: []resource.TestStep{
-			{
-				Config: testAccDataSourceNetworkLoadBalancerCreateResources,
 			},
 			{
 				Config: testAccDataSourceNetworkLoadBalancerMatchName,
 				Check: resource.ComposeTestCheckFunc(
-					resource.TestCheckResourceAttr("data.ionoscloud_networkloadbalancer.test_networkloadbalancer", "name", "test_datasource_nlb"),
+					resource.TestCheckResourceAttr("data.ionoscloud_networkloadbalancer.test_networkloadbalancer_name", "name", "test_datasource_nlb"),
 				),
 			},
 		},
@@ -105,7 +93,7 @@ resource "ionoscloud_networkloadbalancer" "networkloadbalancer" {
   lb_private_ips = ["10.13.72.225/24"]
 }
 
-data "ionoscloud_networkloadbalancer" "test_networkloadbalancer" {
+data "ionoscloud_networkloadbalancer" "test_networkloadbalancer_id" {
   datacenter_id = ionoscloud_datacenter.datacenter.id
   id			= ionoscloud_networkloadbalancer.networkloadbalancer.id
 }
@@ -140,7 +128,7 @@ resource "ionoscloud_networkloadbalancer" "networkloadbalancer" {
   lb_private_ips = ["10.13.72.225/24"]
 }
 
-data "ionoscloud_networkloadbalancer" "test_networkloadbalancer" {
+data "ionoscloud_networkloadbalancer" "test_networkloadbalancer_name" {
   datacenter_id = ionoscloud_datacenter.datacenter.id
   name			= "test_datasource_"
 }

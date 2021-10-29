@@ -73,38 +73,6 @@ func convertIpFailoverList(ips *[]ionoscloud.IPFailover) []interface{} {
 	return ret
 }
 
-func setLanData(d *schema.ResourceData, lan *ionoscloud.Lan) error {
-	d.SetId(*lan.Id)
-	if err := d.Set("id", *lan.Id); err != nil {
-		return err
-	}
-
-	if lan.Properties != nil {
-		if lan.Properties.Name != nil {
-			if err := d.Set("name", *lan.Properties.Name); err != nil {
-				return err
-			}
-		}
-		if lan.Properties.IpFailover != nil {
-			if err := d.Set("ip_failover", convertIpFailoverList(lan.Properties.IpFailover)); err != nil {
-				return err
-			}
-		}
-		if lan.Properties.Pcc != nil {
-			if err := d.Set("pcc", *lan.Properties.Pcc); err != nil {
-				return err
-			}
-		}
-		if lan.Properties.Public != nil {
-			if err := d.Set("public", *lan.Properties.Public); err != nil {
-				return err
-			}
-		}
-	}
-
-	return nil
-}
-
 func dataSourceLanRead(d *schema.ResourceData, meta interface{}) error {
 	client := meta.(*ionoscloud.APIClient)
 

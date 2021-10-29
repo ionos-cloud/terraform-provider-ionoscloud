@@ -133,6 +133,12 @@ func dataSourceNatGatewayRead(d *schema.ResourceData, meta interface{}) error {
 		return errors.New("nat gateway not found")
 	}
 
+	if natGateway.Id != nil {
+		if err := d.Set("id", *natGateway.Id); err != nil {
+			return err
+		}
+	}
+
 	if err = setNatGatewayData(d, &natGateway); err != nil {
 		return err
 	}
@@ -144,9 +150,6 @@ func setNatGatewayData(d *schema.ResourceData, natGateway *ionoscloud.NatGateway
 
 	if natGateway.Id != nil {
 		d.SetId(*natGateway.Id)
-		if err := d.Set("id", *natGateway.Id); err != nil {
-			return err
-		}
 	}
 
 	if natGateway.Properties != nil {
@@ -164,35 +167,32 @@ func setNatGatewayData(d *schema.ResourceData, natGateway *ionoscloud.NatGateway
 			}
 		}
 
-		natGatewayLans := make([]interface{}, 0)
 		if natGateway.Properties.Lans != nil && len(*natGateway.Properties.Lans) > 0 {
-			natGatewayLans = make([]interface{}, len(*natGateway.Properties.Lans))
-			for lanIndex, lan := range *natGateway.Properties.Lans {
+			var natGatewayLans []interface{}
+			for _, lan := range *natGateway.Properties.Lans {
 				lanEntry := make(map[string]interface{})
 
 				if lan.Id != nil {
 					lanEntry["id"] = *lan.Id
 				}
 
-				gatewayIps := make([]interface{}, 0)
 				if len(*lan.GatewayIps) > 0 {
-					gatewayIps = make([]interface{}, len(*lan.GatewayIps))
-					for gatewayIpIndex, gatewayIp := range *lan.GatewayIps {
-						gatewayIps[gatewayIpIndex] = gatewayIp
+					var gatewayIps []interface{}
+					for _, gatewayIp := range *lan.GatewayIps {
+						gatewayIps = append(gatewayIps, gatewayIp)
+					}
+					if len(gatewayIps) > 0 {
+						lanEntry["gateway_ips"] = gatewayIps
 					}
 				}
 
-				if len(gatewayIps) > 0 {
-					lanEntry["gateway_ips"] = gatewayIps
-				}
-
-				natGatewayLans[lanIndex] = lanEntry
+				natGatewayLans = append(natGatewayLans, lanEntry)
 			}
-		}
 
-		if len(natGatewayLans) > 0 {
-			if err := d.Set("lans", natGatewayLans); err != nil {
-				return fmt.Errorf("error while setting lans property for nat gateway %s: %s", d.Id(), err)
+			if len(natGatewayLans) > 0 {
+				if err := d.Set("lans", natGatewayLans); err != nil {
+					return fmt.Errorf("error while setting lans property for nat gateway %s: %s", d.Id(), err)
+				}
 			}
 		}
 	}

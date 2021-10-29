@@ -279,7 +279,7 @@ func dataSourceImageRead(d *schema.ResourceData, meta interface{}) error {
 		}
 	}
 
-	if results[0].Properties.ImageAliases != nil {
+	if results[0].Properties.ImageAliases != nil && len(*results[0].Properties.ImageAliases) > 0 {
 		if err := d.Set("image_aliases", *results[0].Properties.ImageAliases); err != nil {
 			return err
 		}
