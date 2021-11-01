@@ -76,6 +76,7 @@ func resourceNicCreate(ctx context.Context, d *schema.ResourceData, meta interfa
 	dcId := d.Get("datacenter_id").(string)
 	srvId := d.Get("server_id").(string)
 	nic, apiResponse, err := client.NicApi.DatacentersServersNicsPost(ctx, dcId, srvId).Nic(nic).Execute()
+	logApiRequestTime(apiResponse)
 
 	if err != nil {
 		diags := diag.FromErr(fmt.Errorf("error occured while creating a nic: %s", err))
@@ -105,6 +106,7 @@ func resourceNicRead(ctx context.Context, d *schema.ResourceData, meta interface
 	nicid := d.Id()
 
 	rsp, apiResponse, err := client.NicApi.DatacentersServersNicsFindById(ctx, dcid, srvid, nicid).Execute()
+	logApiRequestTime(apiResponse)
 
 	if err != nil {
 		if _, ok := err.(ionoscloud.GenericOpenAPIError); ok {
@@ -169,6 +171,7 @@ func resourceNicUpdate(ctx context.Context, d *schema.ResourceData, meta interfa
 
 	nic := getNicData(d, "")
 	_, apiResponse, err := client.NicApi.DatacentersServersNicsPatch(ctx, dcId, srvId, nicId).Nic(*nic.Properties).Execute()
+	logApiRequestTime(apiResponse)
 
 	if err != nil {
 		diags := diag.FromErr(fmt.Errorf("error occured while updating a nic: %s", err))
@@ -193,6 +196,7 @@ func resourceNicDelete(ctx context.Context, d *schema.ResourceData, meta interfa
 	nicid := d.Id()
 
 	_, apiResponse, err := client.NicApi.DatacentersServersNicsDelete(ctx, dcid, srvid, nicid).Execute()
+	logApiRequestTime(apiResponse)
 
 	if err != nil {
 		diags := diag.FromErr(fmt.Errorf("an error occured while deleting a nic dcId %s ID %s %s", d.Get("datacenter_id").(string), d.Id(), err))

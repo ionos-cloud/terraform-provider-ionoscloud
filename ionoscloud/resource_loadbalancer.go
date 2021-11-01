@@ -78,6 +78,7 @@ func resourceLoadbalancerCreate(ctx context.Context, d *schema.ResourceData, met
 	dcid := d.Get("datacenter_id").(string)
 
 	resp, apiResponse, err := client.LoadBalancerApi.DatacentersLoadbalancersPost(ctx, dcid).Loadbalancer(*lb).Execute()
+	logApiRequestTime(apiResponse)
 	if err != nil {
 		diags := diag.FromErr(fmt.Errorf("error occured while creating a loadbalancer %s", err))
 		return diags
@@ -103,6 +104,7 @@ func resourceLoadbalancerRead(ctx context.Context, d *schema.ResourceData, meta 
 	client := meta.(*ionoscloud.APIClient)
 
 	lb, apiResponse, err := client.LoadBalancerApi.DatacentersLoadbalancersFindById(ctx, d.Get("datacenter_id").(string), d.Id()).Execute()
+	logApiRequestTime(apiResponse)
 	if err != nil {
 		if apiResponse != nil && apiResponse.Response != nil && apiResponse.StatusCode == 404 {
 			d.SetId("")
@@ -162,7 +164,8 @@ func resourceLoadbalancerUpdate(ctx context.Context, d *schema.ResourceData, met
 	}
 
 	if hasChangeCount > 0 {
-		_, _, err := client.LoadBalancerApi.DatacentersLoadbalancersPatch(ctx, d.Get("datacenter_id").(string), d.Id()).Loadbalancer(*properties).Execute()
+		_, apiResponse, err := client.LoadBalancerApi.DatacentersLoadbalancersPatch(ctx, d.Get("datacenter_id").(string), d.Id()).Loadbalancer(*properties).Execute()
+		logApiRequestTime(apiResponse)
 		if err != nil {
 			diags := diag.FromErr(fmt.Errorf("error while updating loadbalancer %s: %s \n", d.Id(), err))
 			return diags
@@ -177,6 +180,7 @@ func resourceLoadbalancerUpdate(ctx context.Context, d *schema.ResourceData, met
 		for _, o := range oldList {
 			_, apiResponse, err := client.LoadBalancerApi.DatacentersLoadbalancersBalancednicsDelete(context.TODO(),
 				d.Get("datacenter_id").(string), d.Id(), o.(string)).Execute()
+			logApiRequestTime(apiResponse)
 			if err != nil {
 				if apiResponse != nil && apiResponse.Response != nil && apiResponse.StatusCode == 404 {
 					/* 404 - nic was not found - in case the nic is removed, VDC removes the nic from load balancers
@@ -202,6 +206,7 @@ func resourceLoadbalancerUpdate(ctx context.Context, d *schema.ResourceData, met
 			id := o.(string)
 			nic := ionoscloud.Nic{Id: &id}
 			_, apiResponse, err := client.LoadBalancerApi.DatacentersLoadbalancersBalancednicsPost(ctx, d.Get("datacenter_id").(string), d.Id()).Nic(nic).Execute()
+			logApiRequestTime(apiResponse)
 			if err != nil {
 				diags := diag.FromErr(fmt.Errorf("[load balancer update] an error occured while creating a balanced nic: %s", err))
 				return diags
@@ -225,6 +230,7 @@ func resourceLoadbalancerDelete(ctx context.Context, d *schema.ResourceData, met
 
 	dcid := d.Get("datacenter_id").(string)
 	_, apiResponse, err := client.LoadBalancerApi.DatacentersLoadbalancersDelete(ctx, dcid, d.Id()).Execute()
+	logApiRequestTime(apiResponse)
 
 	if err != nil {
 		diags := diag.FromErr(fmt.Errorf("[load balancer delete] an error occured while deleting a loadbalancer: %s", err))

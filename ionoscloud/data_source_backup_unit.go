@@ -51,12 +51,14 @@ func dataSourceBackupUnitRead(ctx context.Context, d *schema.ResourceData, meta 
 	}
 	var backupUnit ionoscloud.BackupUnit
 	var err error
+	var apiResponse *ionoscloud.APIResponse
 
 	found := false
 
 	if idOk {
 		/* search by ID */
-		backupUnit, _, err = client.BackupUnitApi.BackupunitsFindById(ctx, id.(string)).Execute()
+		backupUnit, apiResponse, err = client.BackupUnitApi.BackupunitsFindById(ctx, id.(string)).Execute()
+		logApiRequestTime(apiResponse)
 		if err != nil {
 			return diag.FromErr(fmt.Errorf("an error occurred while fetching the backup unit %s: %s", id.(string), err))
 		}
@@ -65,7 +67,8 @@ func dataSourceBackupUnitRead(ctx context.Context, d *schema.ResourceData, meta 
 		/* search by name */
 		var backupUnits ionoscloud.BackupUnits
 
-		backupUnits, _, err := client.BackupUnitApi.BackupunitsGet(ctx).Execute()
+		backupUnits, apiResponse, err := client.BackupUnitApi.BackupunitsGet(ctx).Execute()
+		logApiRequestTime(apiResponse)
 
 		if err != nil {
 			return diag.FromErr(fmt.Errorf("an error occurred while fetching backup unit: %s", err.Error()))
@@ -73,7 +76,8 @@ func dataSourceBackupUnitRead(ctx context.Context, d *schema.ResourceData, meta 
 
 		if backupUnits.Items != nil {
 			for _, bu := range *backupUnits.Items {
-				tmpBackupUnit, _, err := client.BackupUnitApi.BackupunitsFindById(ctx, *bu.Id).Execute()
+				tmpBackupUnit, apiResponse, err := client.BackupUnitApi.BackupunitsFindById(ctx, *bu.Id).Execute()
+				logApiRequestTime(apiResponse)
 				if err != nil {
 					return diag.FromErr(fmt.Errorf("an error occurred while fetching backup unit with ID %s: %s", *bu.Id, err.Error()))
 				}
@@ -93,6 +97,7 @@ func dataSourceBackupUnitRead(ctx context.Context, d *schema.ResourceData, meta 
 	}
 
 	contractResources, _, cErr := client.ContractApi.ContractsGet(ctx).Execute()
+	logApiRequestTime(apiResponse)
 
 	if cErr != nil {
 		diags := diag.FromErr(fmt.Errorf("error while fetching contract resources for backup unit %s: %s", d.Id(), cErr))

@@ -66,7 +66,8 @@ func resourceBackupUnitCreate(ctx context.Context, d *schema.ResourceData, meta 
 		},
 	}
 
-	createdBackupUnit, _, err := client.BackupUnitApi.BackupunitsPost(ctx).BackupUnit(backupUnit).Execute()
+	createdBackupUnit, apiResponse, err := client.BackupUnitApi.BackupunitsPost(ctx).BackupUnit(backupUnit).Execute()
+	logApiRequestTime(apiResponse)
 
 	if err != nil {
 		d.SetId("")
@@ -89,6 +90,7 @@ func resourceBackupUnitRead(ctx context.Context, d *schema.ResourceData, meta in
 	client := meta.(*ionoscloud.APIClient)
 
 	backupUnit, apiResponse, err := client.BackupUnitApi.BackupunitsFindById(ctx, d.Id()).Execute()
+	logApiRequestTime(apiResponse)
 
 	if err != nil {
 		if apiResponse != nil && apiResponse.Response != nil && apiResponse.StatusCode == 404 {
@@ -100,6 +102,7 @@ func resourceBackupUnitRead(ctx context.Context, d *schema.ResourceData, meta in
 	}
 
 	contractResources, apiResponse, cErr := client.ContractApi.ContractsGet(ctx).Execute()
+	logApiRequestTime(apiResponse)
 
 	if cErr != nil {
 		diags := diag.FromErr(fmt.Errorf("error while fetching contract resources for backup unit %s: %s", d.Id(), cErr))
@@ -148,6 +151,7 @@ func resourceBackupUnitUpdate(ctx context.Context, d *schema.ResourceData, meta 
 	}
 
 	_, apiResponse, err := client.BackupUnitApi.BackupunitsPut(ctx, d.Id()).BackupUnit(request).Execute()
+	logApiRequestTime(apiResponse)
 
 	if err != nil {
 		if apiResponse != nil && apiResponse.Response != nil && apiResponse.StatusCode == 404 {
@@ -197,6 +201,7 @@ func resourceBackupUnitDelete(ctx context.Context, d *schema.ResourceData, meta 
 	client := meta.(*ionoscloud.APIClient)
 
 	_, apiResponse, err := client.BackupUnitApi.BackupunitsDelete(ctx, d.Id()).Execute()
+	logApiRequestTime(apiResponse)
 
 	if err != nil {
 		if apiResponse != nil && apiResponse.Response != nil && apiResponse.StatusCode == 404 {
@@ -241,6 +246,7 @@ func resourceBackupUnitImport(ctx context.Context, d *schema.ResourceData, meta 
 	buId := d.Id()
 
 	backupUnit, apiResponse, err := client.BackupUnitApi.BackupunitsFindById(ctx, d.Id()).Execute()
+	logApiRequestTime(apiResponse)
 
 	if err != nil {
 		if apiResponse != nil && apiResponse.Response != nil && apiResponse.StatusCode == 404 {
@@ -253,6 +259,7 @@ func resourceBackupUnitImport(ctx context.Context, d *schema.ResourceData, meta 
 	log.Printf("[INFO] Backup Unit found: %+v", backupUnit)
 
 	contractResources, apiResponse, cErr := client.ContractApi.ContractsGet(ctx).Execute()
+	logApiRequestTime(apiResponse)
 
 	if cErr != nil {
 		return nil, fmt.Errorf("error while fetching contract resources for backup unit %s: %s", d.Id(), cErr)
@@ -266,7 +273,8 @@ func resourceBackupUnitImport(ctx context.Context, d *schema.ResourceData, meta 
 }
 
 func backupUnitReady(client *ionoscloud.APIClient, d *schema.ResourceData, c context.Context) (bool, error) {
-	backupUnit, _, err := client.BackupUnitApi.BackupunitsFindById(c, d.Id()).Execute()
+	backupUnit, apiResponse, err := client.BackupUnitApi.BackupunitsFindById(c, d.Id()).Execute()
+	logApiRequestTime(apiResponse)
 
 	if err != nil {
 		return true, fmt.Errorf("error checking backup unit status: %s", err)
@@ -276,6 +284,7 @@ func backupUnitReady(client *ionoscloud.APIClient, d *schema.ResourceData, c con
 
 func backupUnitDeleted(client *ionoscloud.APIClient, d *schema.ResourceData, c context.Context) (bool, error) {
 	_, apiResponse, err := client.BackupUnitApi.BackupunitsFindById(c, d.Id()).Execute()
+	logApiRequestTime(apiResponse)
 
 	if err != nil {
 		if apiResponse != nil && apiResponse.Response != nil && apiResponse.StatusCode == 404 {

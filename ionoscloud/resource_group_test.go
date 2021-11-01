@@ -69,6 +69,7 @@ func testAccCheckGroupDestroyCheck(s *terraform.State) error {
 			continue
 		}
 		_, apiResponse, err := client.UserManagementApi.UmGroupsFindById(ctx, rs.Primary.ID).Execute()
+		logApiRequestTime(apiResponse)
 
 		if err != nil {
 			if apiResponse == nil || apiResponse.Response != nil && apiResponse.StatusCode != 404 {
@@ -103,7 +104,8 @@ func testAccCheckGroupExists(n string, group *ionoscloud.Group) resource.TestChe
 			defer cancel()
 		}
 
-		foundGroup, _, err := client.UserManagementApi.UmGroupsFindById(ctx, rs.Primary.ID).Execute()
+		foundGroup, apiResponse, err := client.UserManagementApi.UmGroupsFindById(ctx, rs.Primary.ID).Execute()
+		logApiRequestTime(apiResponse)
 
 		if err != nil {
 			return fmt.Errorf("error occured while fetching Group: %s", rs.Primary.ID)

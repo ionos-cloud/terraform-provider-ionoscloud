@@ -29,6 +29,7 @@ func resourceK8sNodepoolImport(ctx context.Context, d *schema.ResourceData, meta
 	client := meta.(*ionoscloud.APIClient)
 
 	k8sNodepool, apiResponse, err := client.KubernetesApi.K8sNodepoolsFindById(ctx, clusterId, npId).Execute()
+	logApiRequestTime(apiResponse)
 
 	if err != nil {
 		if _, ok := err.(ionoscloud.GenericOpenAPIError); ok {
@@ -177,6 +178,7 @@ func resourceShareImporter(ctx context.Context, d *schema.ResourceData, meta int
 	client := meta.(*ionoscloud.APIClient)
 
 	share, apiResponse, err := client.UserManagementApi.UmGroupsSharesFindByResourceId(ctx, grpId, rscId).Execute()
+	logApiRequestTime(apiResponse)
 
 	if err != nil {
 		if apiResponse != nil && apiResponse.Response != nil && apiResponse.StatusCode == 404 {
@@ -225,6 +227,7 @@ func resourceIpFailoverImporter(ctx context.Context, d *schema.ResourceData, met
 	client := meta.(*ionoscloud.APIClient)
 
 	lan, apiResponse, err := client.LanApi.DatacentersLansFindById(ctx, dcId, lanId).Execute()
+	logApiRequestTime(apiResponse)
 
 	if err != nil {
 		if apiResponse != nil && apiResponse.Response != nil && apiResponse.StatusCode == 404 {
@@ -278,7 +281,7 @@ func resourceLoadbalancerImporter(ctx context.Context, d *schema.ResourceData, m
 	client := meta.(*ionoscloud.APIClient)
 
 	loadbalancer, apiResponse, err := client.LoadBalancerApi.DatacentersLoadbalancersFindById(ctx, dcId, lbId).Execute()
-
+	logApiRequestTime(apiResponse)
 	if err != nil {
 		if apiResponse != nil && apiResponse.Response != nil && apiResponse.StatusCode == 404 {
 			d.SetId("")
@@ -409,4 +412,11 @@ func boolAddr(b bool) *bool {
 func GenerateEmail() string {
 	email := fmt.Sprintf("terraform_test-%d@mailinator.com", time.Now().UnixNano())
 	return email
+}
+
+func logApiRequestTime(resp *ionoscloud.APIResponse) {
+	if resp != nil {
+		log.Printf("[DEBUG] Request time : %s for operation : %s, status code : %d",
+			resp.RequestTime, resp.Operation, resp.StatusCode)
+	}
 }

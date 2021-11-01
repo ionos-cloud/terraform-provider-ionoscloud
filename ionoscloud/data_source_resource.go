@@ -39,7 +39,8 @@ func dataSourceResourceRead(d *schema.ResourceData, meta interface{}) error {
 	}
 
 	if resourceType != "" && resourceId != "" {
-		result, _, err := client.UserManagementApi.UmResourcesFindByTypeAndId(ctx, resourceType, resourceId).Execute()
+		result, apiResponse, err := client.UserManagementApi.UmResourcesFindByTypeAndId(ctx, resourceType, resourceId).Execute()
+		logApiRequestTime(apiResponse)
 		if err != nil {
 			return fmt.Errorf("an error occured while fetching resource by type %s", err)
 		}
@@ -52,7 +53,8 @@ func dataSourceResourceRead(d *schema.ResourceData, meta interface{}) error {
 			return err
 		}
 	} else if resourceType != "" {
-		items, _, err := client.UserManagementApi.UmResourcesFindByType(ctx, resourceType).Execute()
+		items, apiResponse, err := client.UserManagementApi.UmResourcesFindByType(ctx, resourceType).Execute()
+		logApiRequestTime(apiResponse)
 		if err != nil {
 			return fmt.Errorf("an error occured while fetching resources by type %s", err)
 		}
@@ -62,7 +64,8 @@ func dataSourceResourceRead(d *schema.ResourceData, meta interface{}) error {
 			return err
 		}
 	} else {
-		items, _, err := client.UserManagementApi.UmResourcesGet(ctx).Execute()
+		items, apiResponse, err := client.UserManagementApi.UmResourcesGet(ctx).Execute()
+		logApiRequestTime(apiResponse)
 		if err != nil {
 			return fmt.Errorf("an error occured while fetching resources %s", err)
 		}

@@ -91,12 +91,14 @@ func dataSourceFirewallRead(ctx context.Context, d *schema.ResourceData, meta in
 	}
 	var firewall ionoscloud.FirewallRule
 	var err error
+	var apiResponse *ionoscloud.APIResponse
 
 	found := false
 
 	if idOk {
 		/* search by ID */
-		firewall, _, err = client.NicApi.DatacentersServersNicsFirewallrulesFindById(ctx, datacenterId, serverId, nicId, id.(string)).Execute()
+		firewall, apiResponse, err = client.NicApi.DatacentersServersNicsFirewallrulesFindById(ctx, datacenterId, serverId, nicId, id.(string)).Execute()
+		logApiRequestTime(apiResponse)
 		if err != nil {
 			return diag.FromErr(fmt.Errorf("an error occurred while fetching the firewall rule %s: %s", id.(string), err))
 		}
@@ -105,7 +107,8 @@ func dataSourceFirewallRead(ctx context.Context, d *schema.ResourceData, meta in
 		/* search by name */
 		var firewalls ionoscloud.FirewallRules
 
-		firewalls, _, err := client.NicApi.DatacentersServersNicsFirewallrulesGet(ctx, datacenterId, serverId, nicId).Execute()
+		firewalls, apiResponse, err := client.NicApi.DatacentersServersNicsFirewallrulesGet(ctx, datacenterId, serverId, nicId).Execute()
+		logApiRequestTime(apiResponse)
 
 		if err != nil {
 			return diag.FromErr(fmt.Errorf("an error occurred while fetching backup unit: %s", err.Error()))
@@ -113,7 +116,8 @@ func dataSourceFirewallRead(ctx context.Context, d *schema.ResourceData, meta in
 
 		if firewalls.Items != nil {
 			for _, fr := range *firewalls.Items {
-				tmpFirewall, _, err := client.NicApi.DatacentersServersNicsFirewallrulesFindById(ctx, datacenterId, serverId, nicId, *fr.Id).Execute()
+				tmpFirewall, apiResponse, err := client.NicApi.DatacentersServersNicsFirewallrulesFindById(ctx, datacenterId, serverId, nicId, *fr.Id).Execute()
+				logApiRequestTime(apiResponse)
 				if err != nil {
 					return diag.FromErr(fmt.Errorf("an error occurred while fetching firewall rule with ID %s: %s", *fr.Id, err.Error()))
 				}

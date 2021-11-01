@@ -111,7 +111,8 @@ func dataSourceImageRead(d *schema.ResourceData, meta interface{}) error {
 		defer cancel()
 	}
 
-	images, _, err := client.ImageApi.ImagesGet(ctx).Execute()
+	images, apiResponse, err := client.ImageApi.ImagesGet(ctx).Execute()
+	logApiRequestTime(apiResponse)
 
 	if err != nil {
 		return fmt.Errorf("an error occured while fetching IonosCloud images %s", err)
