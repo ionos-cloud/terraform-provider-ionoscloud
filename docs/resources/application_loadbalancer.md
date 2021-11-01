@@ -37,7 +37,7 @@ The following arguments are supported:
 
 ## Import
 
-Resource Application Load Balancer can be imported using the `resource id`, e.g.
+Resource Application Load Balancer can be imported using the `resource id` and `datacenter id`, e.g.
 
 ```shell
 terraform import ionoscloud_application_loadbalancer.myalb {datacenter uuid}/{applicationLoadBalancer uuid}

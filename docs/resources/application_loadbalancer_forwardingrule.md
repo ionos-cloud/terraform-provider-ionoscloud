@@ -66,3 +66,11 @@ The following arguments are supported:
     - `negate` - (Optional)[bool] Specifies whether the condition is negated or not; default: false.
     - `key` - (Optional)[string] 
     - `value` - (Optional)[string]
+
+## Import
+
+Resource Application Load Balancer Forwarding Rule can be imported using the `resource id`, `alb id` and `datacenter id`, e.g.
+
+```shell
+terraform import ionoscloud_application_loadbalancer_forwarding_rule.myAlbRule {datacenter uuid}/{applicationLoadBalancer uuid}/{applicationLoadBalancerForwardingRule uuid}
+```
