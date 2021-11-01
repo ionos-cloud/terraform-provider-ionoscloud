@@ -6,7 +6,7 @@
   - made tests comprehensive 
   - optimized test duration by including both match by id and by name in the same test
   - removed duplicated code from import, data_source, resource and tests files
-- **new features**: import for `snapshot`, data_source for `group`, `user`, `volume`
+- **new features**: import for `snapshot`, `ipblock`, data_source for `group`, `user`, `volume`, `ipblock`
 
 ## 5.2.17
 
