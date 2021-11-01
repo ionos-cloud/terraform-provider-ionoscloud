@@ -185,6 +185,7 @@ func resourceNatGatewayRuleCreate(ctx context.Context, d *schema.ResourceData, m
 	dcId := d.Get("datacenter_id").(string)
 
 	natGatewayRuleResp, apiResponse, err := client.NATGatewaysApi.DatacentersNatgatewaysRulesPost(ctx, dcId, ngId).NatGatewayRule(natGatewayRule).Execute()
+	logApiRequestTime(apiResponse)
 
 	if err != nil {
 		d.SetId("")
@@ -215,6 +216,7 @@ func resourceNatGatewayRuleRead(ctx context.Context, d *schema.ResourceData, met
 	ngId := d.Get("natgateway_id").(string)
 
 	natGatewayRule, apiResponse, err := client.NATGatewaysApi.DatacentersNatgatewaysRulesFindByNatGatewayRuleId(ctx, dcId, ngId, d.Id()).Execute()
+	logApiRequestTime(apiResponse)
 
 	if err != nil {
 		log.Printf("[INFO] Resource %s not found: %+v", d.Id(), err)
@@ -338,6 +340,7 @@ func resourceNatGatewayRuleDelete(ctx context.Context, d *schema.ResourceData, m
 	ngId := d.Get("natgateway_id").(string)
 
 	apiResponse, err := client.NATGatewaysApi.DatacentersNatgatewaysRulesDelete(ctx, dcId, ngId, d.Id()).Execute()
+	logApiRequestTime(apiResponse)
 
 	if err != nil {
 		diags := diag.FromErr(fmt.Errorf("an error occured while deleting a nat gateway rule %s %s", d.Id(), err))
@@ -369,6 +372,7 @@ func resourceNatGatewayRuleImport(ctx context.Context, d *schema.ResourceData, m
 	natGatewayRuleId := parts[2]
 
 	natGatewayRule, apiResponse, err := client.NATGatewaysApi.DatacentersNatgatewaysRulesFindByNatGatewayRuleId(ctx, dcId, natGatewayId, natGatewayRuleId).Execute()
+	logApiRequestTime(apiResponse)
 
 	if err != nil {
 		log.Printf("[INFO] Resource %s not found: %+v", d.Id(), err)

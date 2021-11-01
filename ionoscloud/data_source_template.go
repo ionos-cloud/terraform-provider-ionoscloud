@@ -45,7 +45,8 @@ func dataSourceTemplate() *schema.Resource {
 func dataSourceTemplateRead(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	client := meta.(*ionoscloud.APIClient)
 
-	templates, _, err := client.TemplatesApi.TemplatesGet(ctx).Execute()
+	templates, apiResponse, err := client.TemplatesApi.TemplatesGet(ctx).Execute()
+	logApiRequestTime(apiResponse)
 
 	if err != nil {
 		diags := diag.FromErr(fmt.Errorf("an error occured while fetching IonosCloud templates %s ", err))

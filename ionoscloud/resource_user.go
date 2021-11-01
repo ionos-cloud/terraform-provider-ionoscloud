@@ -105,6 +105,7 @@ func resourceUserCreate(ctx context.Context, d *schema.ResourceData, meta interf
 	}
 
 	rsp, apiResponse, err := client.UserManagementApi.UmUsersPost(ctx).User(request).Execute()
+	logApiRequestTime(apiResponse)
 
 	if err != nil {
 		diags := diag.FromErr(fmt.Errorf("an error occured while creating a user: %s", err))
@@ -130,6 +131,7 @@ func resourceUserRead(ctx context.Context, d *schema.ResourceData, meta interfac
 	client := meta.(*ionoscloud.APIClient)
 
 	user, apiResponse, err := client.UserManagementApi.UmUsersFindById(ctx, d.Id()).Execute()
+	logApiRequestTime(apiResponse)
 
 	if err != nil {
 		if apiResponse != nil && apiResponse.Response != nil && apiResponse.StatusCode == 404 {
@@ -188,6 +190,7 @@ func resourceUserUpdate(ctx context.Context, d *schema.ResourceData, meta interf
 	}
 
 	_, apiResponse, err := client.UserManagementApi.UmUsersPut(ctx, d.Id()).User(userReq).Execute()
+	logApiRequestTime(apiResponse)
 
 	if err != nil {
 		diags := diag.FromErr(fmt.Errorf("an error occured while patching a user ID %s %s", d.Id(), err))
@@ -208,6 +211,7 @@ func resourceUserDelete(ctx context.Context, d *schema.ResourceData, meta interf
 	client := meta.(*ionoscloud.APIClient)
 
 	apiResponse, err := client.UserManagementApi.UmUsersDelete(ctx, d.Id()).Execute()
+	logApiRequestTime(apiResponse)
 	if err != nil {
 		diags := diag.FromErr(err)
 		return diags
@@ -231,6 +235,7 @@ func resourceUserImporter(ctx context.Context, d *schema.ResourceData, meta inte
 	userId := d.Id()
 
 	user, apiResponse, err := client.UserManagementApi.UmUsersFindById(ctx, userId).Execute()
+	logApiRequestTime(apiResponse)
 
 	if err != nil {
 		if apiResponse != nil && apiResponse.Response != nil && apiResponse.StatusCode == 404 {

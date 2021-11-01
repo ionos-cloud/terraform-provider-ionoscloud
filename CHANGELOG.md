@@ -1,3 +1,7 @@
+## 6.0.0-beta.15
+
+- **code enhancements**: added http request time log for api calls
+
 ## 6.0.0-beta.14
 
 - **bug fixes**: fixed datacenter datasource
