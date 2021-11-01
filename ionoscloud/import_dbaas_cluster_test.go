@@ -1,8 +1,6 @@
 package ionoscloud
 
 import (
-	"fmt"
-
 	"testing"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
@@ -10,18 +8,16 @@ import (
 )
 
 func TestAccDbaasPgSqlClusterImportBasic(t *testing.T) {
-	resourceName := "ionoscloud_dbaas_pgsql_cluster.test_dbaas_cluster"
 	resource.Test(t, resource.TestCase{
 		PreCheck:          func() { testAccPreCheck(t) },
 		ProviderFactories: testAccProviderFactories,
 		CheckDestroy:      testAccCheckDbaasPgSqlClusterDestroyCheck,
 		Steps: []resource.TestStep{
 			{
-				Config: fmt.Sprintf(testAccCheckDbaasPgSqlClusterConfigBasic),
+				Config: testAccCheckDbaasPgSqlClusterConfigBasic,
 			},
-
 			{
-				ResourceName:            resourceName,
+				ResourceName:            DBaaSClusterResource + "." + DBaaSClusterTestResource,
 				ImportStateIdFunc:       testAccDbaasPgSqlClusterImportStateId,
 				ImportState:             true,
 				ImportStateVerify:       true,
@@ -35,7 +31,7 @@ func testAccDbaasPgSqlClusterImportStateId(s *terraform.State) (string, error) {
 	importID := ""
 
 	for _, rs := range s.RootModule().Resources {
-		if rs.Type != "ionoscloud_dbaas_pgsql_cluster" {
+		if rs.Type != DBaaSClusterResource {
 			continue
 		}
 

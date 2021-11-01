@@ -154,17 +154,20 @@ func resourceDbaasPgSqlCluster() *schema.Resource {
 					},
 				},
 			},
+			"synchronization_mode": {
+				Type:        schema.TypeString,
+				Description: "Represents different modes of replication.",
+				Required:    true,
+			},
 			"from_backup": {
 				Type:        schema.TypeString,
 				Description: "The PostgreSQL version of your cluster.",
 				Optional:    true,
-				ForceNew:    true,
 			},
 			"from_recovery_target_time": {
 				Type:        schema.TypeString,
 				Description: "If this value is supplied as ISO 8601 timestamp, the backup will be replayed up until the given timestamp. If empty, the backup will be applied completely.",
 				Optional:    true,
-				ForceNew:    true,
 			},
 		},
 		Timeouts: &resourceDefaultTimeouts,

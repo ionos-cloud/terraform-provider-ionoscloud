@@ -1,9 +1,9 @@
 ---
 layout: "ionoscloud"
-page_title: "IonosCloud: dbaas_pgsql_cluster"
-sidebar_current: "docs-resource-dbaas_pgsql_cluster"
+page_title: "IonosCloud: ionoscloud_pg_cluster"
+sidebar_current: "docs-resource-pg_cluster"
 description: |-
-Creates and manages DbaaS PgSql Cluster objects.
+Creates and manages DbaaS Postgres Cluster objects.
 ---
 
 # ionoscloud\_dbaas_pgsql_cluster
@@ -13,7 +13,7 @@ Manages a DbaaS PgSql Cluster.
 ## Example Usage
 
 ```hcl
-resource "ionoscloud_dbaas_pgsql_cluster" "example" {
+resource "ionoscloud_pg_cluster" "example" {
   postgres_version   = 12
   replicas           = 1
   cpu_core_count     = 4
@@ -35,6 +35,9 @@ resource "ionoscloud_dbaas_pgsql_cluster" "example" {
   	username = "username"
 	password = "password"
   }
+  synchronization_mode = "asynchronous"
+  from_backup = <backup_uuid>
+  from_recovery_target_time = "2021-10-14T19:36:19Z"
 }
 ```
 
@@ -58,14 +61,16 @@ resource "ionoscloud_dbaas_pgsql_cluster" "example" {
 * `credentials` - (Required)[string] Credentials for the database user to be created.
     * `username` - (Required)[string] The username for the initial postgres user. some system usernames are restricted (e.g. "postgres", "admin", "standby")
     * `password` - (Required)[string]
-* `from_backup` - (Required)[string] The unique ID of the backup you want to restore.
+* `synchronization_mode` - (Required) [string] Represents different modes of replication. Can have one of the following values: asynchronous, synchronous, strictly_synchronous. This attribute is immutable
+* `from_backup` - (Optional)[string] The unique ID of the backup you want to restore.
+* `from_recovery_target_time` - (Optional)[string] If this value is supplied as ISO 8601 timestamp, the backup will be replayed up until the given timestamp. If empty, the backup will be applied completely.
     
 ## Import
 
-Resource DbaaS PgSql Cluster can be imported using the `cluster_id`, e.g.
+Resource DbaaS Postgres Cluster can be imported using the `cluster_id`, e.g.
 
 ```shell
-terraform import ionoscloud_dbaas_pgsql_cluster.mycluser {cluster uuid}
+terraform import ionoscloud_pg_cluster.mycluser {cluster uuid}
 ```
 
 > :warning: 

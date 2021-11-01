@@ -39,7 +39,7 @@ func (c *Client) ListClusters(ctx context.Context, filterName string) (dbaas.Clu
 }
 
 func (c *Client) CreateCluster(ctx context.Context, cluster dbaas.CreateClusterRequest, backup string, recoveryTargetTime *time.Time) (dbaas.Cluster, *dbaas.APIResponse, error) {
-	request := c.ClustersApi.ClustersPost(ctx).Cluster(cluster)
+	request := c.ClustersApi.ClustersPost(ctx).CreateClusterRequest(cluster)
 	if backup != "" {
 		request = request.FromBackup(backup)
 	}
@@ -79,12 +79,12 @@ func GetDbaasPgSqlClusterDataCreate(d *schema.ResourceData) *dbaas.CreateCluster
 	}
 
 	if replicas, ok := d.GetOk("replicas"); ok {
-		replicas := float32(replicas.(int))
+		replicas := int32(replicas.(int))
 		dbaasCluster.Replicas = &replicas
 	}
 
 	if cpuCoreCount, ok := d.GetOk("cpu_core_count"); ok {
-		cpuCoreCount := float32(cpuCoreCount.(int))
+		cpuCoreCount := int32(cpuCoreCount.(int))
 		dbaasCluster.CpuCoreCount = &cpuCoreCount
 	}
 
@@ -174,6 +174,11 @@ func GetDbaasPgSqlClusterDataCreate(d *schema.ResourceData) *dbaas.CreateCluster
 		}
 	}
 
+	if synchronizationMode, ok := d.GetOk("synchronization_mode"); ok {
+		synchronizationMode := dbaas.SynchronizationMode(synchronizationMode.(string))
+		dbaasCluster.SynchronizationMode = &synchronizationMode
+	}
+
 	return &dbaasCluster
 }
 
@@ -187,11 +192,6 @@ func GetDbaasPgSqlClusterDataUpdate(d *schema.ResourceData) (*dbaas.PatchCluster
 		cluster.PostgresVersion = &vStr
 	}
 
-	if d.HasChange("replicas") {
-		diags := diag.FromErr(fmt.Errorf("replicas parameter is immutable"))
-		return nil, diags
-	}
-
 	if d.HasChange("cpu_core_count") {
 		diags := diag.FromErr(fmt.Errorf("cpu_core_count parameter is immutable"))
 		return nil, diags
@@ -202,6 +202,12 @@ func GetDbaasPgSqlClusterDataUpdate(d *schema.ResourceData) (*dbaas.PatchCluster
 		return nil, diags
 	}
 
+	if d.HasChange("replicas") {
+		_, v := d.GetChange("replicas")
+		vInt := int32(v.(int))
+		cluster.Replicas = &vInt
+	}
+
 	if d.HasChange("storage_size") {
 		_, v := d.GetChange("storage_size")
 		vStr := v.(string)
@@ -210,6 +216,11 @@ func GetDbaasPgSqlClusterDataUpdate(d *schema.ResourceData) (*dbaas.PatchCluster
 
 	if d.HasChange("vdc_connections") {
 		diags := diag.FromErr(fmt.Errorf("vdc_connections parameter is immutable"))
+		return nil, diags
+	}
+
+	if d.HasChange("synchronization_mode") {
+		diags := diag.FromErr(fmt.Errorf("synchronization_mode parameter is immutable"))
 		return nil, diags
 	}
 

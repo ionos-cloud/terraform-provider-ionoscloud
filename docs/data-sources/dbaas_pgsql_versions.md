@@ -1,27 +1,27 @@
 ---
 layout: "ionoscloud"
-page_title: "IonosCloud : ionoscloud_dbaas_pgsql_versions"
-sidebar_current: "docs-ionoscloud-dbaas_pgsql_versions"
+page_title: "IonosCloud : ionoscloud_pg_versions"
+sidebar_current: "docs-ionoscloud_pg_versions"
 description: |-
 Get information on DbaaS PgSql Versions
 ---
 
-# ionoscloud\_dbaas_pgsql_versions
+# ionoscloud\_pg_versions
 
-The DbaaS PgSql Versions data source can be used to search for and retrieve list of available pgsql versions for a specific cluster or for all clusters.
+The DbaaS Postgres Versions data source can be used to search for and retrieve list of available postgres versions for a specific cluster or for all clusters.
 
 ## Example Usage
 
 ### Retrieve list of postgres versions for a specific cluster
 ```hcl
-data "ionoscloud_dbaas_pgsql_versions" "test_ds_dbaas_versions" {
-	cluster_id = ionoscloud_dbaas_pgsql_cluster.test_dbaas_cluster.id
+data "ionoscloud_pg_versions" "test_ds_dbaas_versions" {
+	cluster_id = ionoscloud_pg_cluster.test_dbaas_cluster.id
 }
 ```
 
 ### Retrieve list of postgres versions for all clusters
 ```hcl
-data "ionoscloud_dbaas_pgsql_versions" "test_ds_dbaas_versions" {
+data "ionoscloud_pg_versions" "test_ds_dbaas_versions" {
 }
 ```
 

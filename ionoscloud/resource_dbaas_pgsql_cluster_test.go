@@ -9,7 +9,7 @@ import (
 	"testing"
 )
 
-func TestAccDBaaSPgSqlCluster_Basic(t *testing.T) {
+func TestAccDBaaSPgSqlClusterBasic(t *testing.T) {
 	var dbaasCluster dbaas.Cluster
 
 	resource.Test(t, resource.TestCase{
@@ -38,6 +38,7 @@ func TestAccDBaaSPgSqlCluster_Basic(t *testing.T) {
 					resource.TestCheckResourceAttr(DBaaSClusterResource+"."+DBaaSClusterTestResource, "maintenance_window.0.weekday", "Sunday"),
 					resource.TestCheckResourceAttr(DBaaSClusterResource+"."+DBaaSClusterTestResource, "credentials.0.username", "username"),
 					resource.TestCheckResourceAttr(DBaaSClusterResource+"."+DBaaSClusterTestResource, "credentials.0.password", "password"),
+					resource.TestCheckResourceAttr(DBaaSClusterResource+"."+DBaaSClusterTestResource, "synchronization_mode", "asynchronous"),
 				),
 			},
 			{
@@ -45,7 +46,7 @@ func TestAccDBaaSPgSqlCluster_Basic(t *testing.T) {
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckDbaasPgSqlClusterExists(DBaaSClusterResource+"."+DBaaSClusterTestResource, &dbaasCluster),
 					resource.TestCheckResourceAttr(DBaaSClusterResource+"."+DBaaSClusterTestResource, "postgres_version", "13"),
-					resource.TestCheckResourceAttr(DBaaSClusterResource+"."+DBaaSClusterTestResource, "replicas", "1"),
+					resource.TestCheckResourceAttr(DBaaSClusterResource+"."+DBaaSClusterTestResource, "replicas", "2"),
 					resource.TestCheckResourceAttr(DBaaSClusterResource+"."+DBaaSClusterTestResource, "cpu_core_count", "4"),
 					resource.TestCheckResourceAttr(DBaaSClusterResource+"."+DBaaSClusterTestResource, "ram_size", "3Gi"),
 					resource.TestCheckResourceAttr(DBaaSClusterResource+"."+DBaaSClusterTestResource, "storage_size", "3Gi"),
@@ -59,6 +60,7 @@ func TestAccDBaaSPgSqlCluster_Basic(t *testing.T) {
 					resource.TestCheckResourceAttr(DBaaSClusterResource+"."+DBaaSClusterTestResource, "maintenance_window.0.weekday", "Saturday"),
 					resource.TestCheckResourceAttr(DBaaSClusterResource+"."+DBaaSClusterTestResource, "credentials.0.username", "username"),
 					resource.TestCheckResourceAttr(DBaaSClusterResource+"."+DBaaSClusterTestResource, "credentials.0.password", "password"),
+					resource.TestCheckResourceAttr(DBaaSClusterResource+"."+DBaaSClusterTestResource, "synchronization_mode", "asynchronous"),
 				),
 			},
 		},
@@ -66,10 +68,6 @@ func TestAccDBaaSPgSqlCluster_Basic(t *testing.T) {
 }
 
 func TestAccDBaaSPgSqlClusterAdditionalParameters(t *testing.T) {
-	// if you want to remove this line in order to test, please be sure you replace from_backup and from_recovery_target_time
-	// arguments with valid values since now they are hardcoded
-	//t.Skip()
-
 	var dbaasCluster dbaas.Cluster
 	resource.Test(t, resource.TestCase{
 		PreCheck: func() {
@@ -95,7 +93,7 @@ func TestAccDBaaSPgSqlClusterAdditionalParameters(t *testing.T) {
 					resource.TestCheckResourceAttr(DBaaSClusterResource+"."+DBaaSClusterTestResource, "display_name", "PostgreSQL_cluster_from_Backup"),
 					resource.TestCheckResourceAttr(DBaaSClusterResource+"."+DBaaSClusterTestResource, "credentials.0.username", "username"),
 					resource.TestCheckResourceAttr(DBaaSClusterResource+"."+DBaaSClusterTestResource, "credentials.0.password", "password"),
-				),
+					resource.TestCheckResourceAttr(DBaaSClusterResource+"."+DBaaSClusterTestResource, "synchronization_mode", "asynchronous")),
 			},
 		},
 	})
@@ -111,7 +109,7 @@ func testAccCheckDbaasPgSqlClusterDestroyCheck(s *terraform.State) error {
 	}
 
 	for _, rs := range s.RootModule().Resources {
-		if rs.Type != "ionoscloud_dbaas_pgsql_cluster" {
+		if rs.Type != DBaaSBackupsResource {
 			continue
 		}
 
@@ -199,6 +197,7 @@ resource ` + DBaaSClusterResource + ` ` + DBaaSClusterTestResource + ` {
   	username = "username"
 	password = "password"
   }
+  synchronization_mode = "asynchronous"
 }
 `
 
@@ -217,7 +216,7 @@ resource "ionoscloud_lan" ` + DBaaSClusterTestResource + ` {
 
 resource ` + DBaaSClusterResource + ` ` + DBaaSClusterTestResource + ` {
   postgres_version   = 13
-  replicas           = 1
+  replicas           = 2
   cpu_core_count     = 4
   ram_size           = "3Gi"
   storage_size       = "3Gi"
@@ -237,6 +236,7 @@ resource ` + DBaaSClusterResource + ` ` + DBaaSClusterTestResource + ` {
   	username = "username"
 	password = "password"
   }
+  synchronization_mode = "asynchronous"
 }
 `
 
@@ -275,6 +275,7 @@ resource ` + DBaaSClusterResource + ` ` + DBaaSClusterTestResource + ` {
   	username = "username"
 	password = "password"
   }
+  synchronization_mode = "asynchronous"
   from_backup = "ad7ac139-2d0b-11ec-a2e3-92fbe7e27ed1-4oymiqu-12"
   from_recovery_target_time = "2021-10-14T19:36:19Z"
 }`

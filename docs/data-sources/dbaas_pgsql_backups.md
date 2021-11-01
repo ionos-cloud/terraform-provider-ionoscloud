@@ -1,20 +1,20 @@
 ---
 layout: "ionoscloud"
-page_title: "IonosCloud : ionoscloud_dbaas_pgsql_backups"
-sidebar_current: "docs-ionoscloud-dbaas_pgsql_backups"
+page_title: "IonosCloud : ionoscloud_pg_backups"
+sidebar_current: "docs-ionoscloud_pg_backups"
 description: |-
 Get information on DbaaS PgSql Backups
 ---
 
-# ionoscloud\_dbaas_pgsql_backups
+# ionoscloud\_pg_backups
 
-The DbaaS PgSql Backups data source can be used to search for and return existing DbaaS PgSql Backups for a specific Cluster.
+The DbaaS Postgres Backups data source can be used to search for and return existing DbaaS Postgres Backups for a specific Cluster.
 
 ## Example Usage
 
 ```hcl
-data "ionoscloud_dbaas_pgsql_backups" "test_ds_dbaas_backups" {
-	cluster_id = ionoscloud_dbaas_pgsql_cluster.test_dbaas_cluster.id
+data "ionoscloud_pg_backups" "test_ds_dbaas_backups" {
+	cluster_id = ionoscloud_pg_cluster.test_dbaas_cluster.id
 }
 ```
 

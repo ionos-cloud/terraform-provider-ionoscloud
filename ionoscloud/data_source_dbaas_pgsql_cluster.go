@@ -115,6 +115,11 @@ func dataSourceDbaasPgSqlCluster() *schema.Resource {
 					},
 				},
 			},
+			"synchronization_mode": {
+				Type:        schema.TypeString,
+				Description: "Represents different modes of replication.",
+				Optional:    true,
+			},
 		},
 		Timeouts: &resourceDefaultTimeouts,
 	}

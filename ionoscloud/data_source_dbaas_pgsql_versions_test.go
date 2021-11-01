@@ -6,7 +6,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 )
 
-func TestAccDataSourceDbaasPgSqlVersions_All(t *testing.T) {
+func TestAccDataSourceDbaasPgSqlVersionsAll(t *testing.T) {
 	resource.Test(t, resource.TestCase{
 		PreCheck: func() {
 			testAccPreCheck(t)
@@ -23,7 +23,7 @@ func TestAccDataSourceDbaasPgSqlVersions_All(t *testing.T) {
 	})
 }
 
-func TestAccDataSourceDbaasPgSqlVersions_ClusterId(t *testing.T) {
+func TestAccDataSourceDbaasPgSqlVersionsClusterId(t *testing.T) {
 	resource.Test(t, resource.TestCase{
 		PreCheck: func() {
 			testAccPreCheck(t)

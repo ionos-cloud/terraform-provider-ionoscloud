@@ -1,19 +1,19 @@
 ---
 layout: "ionoscloud"
-page_title: "IonosCloud : ionoscloud_dbaas_pgsql_cluster"
-sidebar_current: "docs-ionoscloud-dbaas_pgsql_cluster"
+page_title: "IonosCloud : ionoscloud_pg_cluster"
+sidebar_current: "docs-ionoscloud_pg_cluster"
 description: |-
 Get information on a DbaaS PgSql Cluster
 ---
 
-# ionoscloud\_dbaas_pgsql_cluster
+# ionoscloud\_pg_cluster
 
-The DbaaS PgSql Cluster data source can be used to search for and return an existing DbaaS PgSql Cluster.
+The DbaaS Postgres Cluster data source can be used to search for and return an existing DbaaS Postgres Cluster.
 
 ## Example Usage
 
 ```hcl
-data "ionoscloud_dbaas_pgsql_cluster" "example" {
+data "ionoscloud_pg_cluster" "example" {
   display_name	= "PostgreSQL_cluster"
 }
 ```
@@ -49,3 +49,4 @@ The following attributes are returned by the datasource:
 * `credentials` - Credentials for the database user to be created.
     * `username` - The username for the initial postgres user.
     * `password` 
+* `synchronization_mode` - Represents different modes of replication. Can have one of the following values: asynchronous, synchronous, strictly_synchronous
