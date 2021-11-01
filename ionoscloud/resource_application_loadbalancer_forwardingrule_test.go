@@ -10,9 +10,10 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
 )
 
-func TestAccApplicationLoadBalancerForwardingRule_Basic(t *testing.T) {
+var resourceNameAlbRule = ApplicationLoadBalancerForwardingRuleResource + "." + ApplicationLoadBalancerForwardingRuleTestResource
+
+func TestAccApplicationLoadBalancerForwardingRuleBasic(t *testing.T) {
 	var applicationLoadBalancerForwardingRule ionoscloud.ApplicationLoadBalancerForwardingRule
-	applicationLoadBalancerForwardingRuleName := "applicationLoadBalancerForwardingRule"
 
 	resource.Test(t, resource.TestCase{
 		PreCheck: func() {
@@ -22,16 +23,16 @@ func TestAccApplicationLoadBalancerForwardingRule_Basic(t *testing.T) {
 		CheckDestroy:      testAccCheckApplicationLoadBalancerForwardingRuleDestroyCheck,
 		Steps: []resource.TestStep{
 			{
-				Config: fmt.Sprintf(testAccCheckApplicationLoadBalancerForwardingRuleConfigBasic, applicationLoadBalancerForwardingRuleName),
+				Config: testAccCheckApplicationLoadBalancerForwardingRuleConfigBasic,
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheckApplicationLoadBalancerForwardingRuleExists("ionoscloud_application_loadbalancer_forwardingrule.forwarding_rule", &applicationLoadBalancerForwardingRule),
-					resource.TestCheckResourceAttr("ionoscloud_application_loadbalancer_forwardingrule.forwarding_rule", "name", applicationLoadBalancerForwardingRuleName),
+					testAccCheckApplicationLoadBalancerForwardingRuleExists(resourceNameAlbRule, &applicationLoadBalancerForwardingRule),
+					resource.TestCheckResourceAttr(resourceNameAlbRule, "name", ApplicationLoadBalancerForwardingRuleTestResource),
 				),
 			},
 			{
 				Config: fmt.Sprintf(testAccCheckApplicationLoadBalancerForwardingRuleConfigUpdate),
 				Check: resource.ComposeTestCheckFunc(
-					resource.TestCheckResourceAttr("ionoscloud_application_loadbalancer_forwardingrule.forwarding_rule", "name", "updated"),
+					resource.TestCheckResourceAttr(resourceNameAlbRule, "name", UpdatedResources),
 				),
 			},
 		},
@@ -47,7 +48,7 @@ func testAccCheckApplicationLoadBalancerForwardingRuleDestroyCheck(s *terraform.
 	}
 
 	for _, rs := range s.RootModule().Resources {
-		if rs.Type != "ionoscloud_datacenter" {
+		if rs.Type != ApplicationLoadBalancerForwardingRuleResource {
 			continue
 		}
 
@@ -108,38 +109,11 @@ func testAccCheckApplicationLoadBalancerForwardingRuleExists(n string, alb *iono
 	}
 }
 
-const testAccCheckApplicationLoadBalancerForwardingRuleConfigBasic = `
-resource "ionoscloud_datacenter" "alb_datacenter" {
-  name              = "test_alb"
-  location          = "de/txl"
-  description       = "datacenter for hosting "
-}
-
-resource "ionoscloud_lan" "alb_lan_1" {
-  datacenter_id = ionoscloud_datacenter.alb_datacenter.id 
-  public        = false
-  name          = "test_alb_lan_1"
-}
-
-resource "ionoscloud_lan" "alb_lan_2" {
-  datacenter_id = ionoscloud_datacenter.alb_datacenter.id 
-  public        = false
-  name          = "test_alb_lan_2"
-}
-
-resource "ionoscloud_application_loadbalancer" "alb" { 
-  datacenter_id = ionoscloud_datacenter.alb_datacenter.id
-  name          = "alb"
-  listener_lan  = ionoscloud_lan.alb_lan_1.id
-  ips           = [ "10.12.118.224"]
-  target_lan    = ionoscloud_lan.alb_lan_2.id
-  lb_private_ips= [ "10.13.72.225/24"]
-}
-
-resource "ionoscloud_application_loadbalancer_forwardingrule" "forwarding_rule" {
- datacenter_id = ionoscloud_datacenter.alb_datacenter.id
- application_loadbalancer_id = ionoscloud_application_loadbalancer.alb.id
- name = "%s"
+const testAccCheckApplicationLoadBalancerForwardingRuleConfigBasic = testAccCheckApplicationLoadBalancerConfigBasic + `
+resource ` + ApplicationLoadBalancerForwardingRuleResource + ` ` + ApplicationLoadBalancerForwardingRuleTestResource + ` {
+ datacenter_id = ` + DatacenterResource + `.alb_datacenter.id
+ application_loadbalancer_id = ` + ApplicationLoadBalancerResource + `.` + ApplicationLoadBalancerTestResource + `.id
+ name = "` + ApplicationLoadBalancerForwardingRuleTestResource + `"
  protocol = "HTTP"
  listener_ip = "10.12.118.224"
  listener_port = 8080
@@ -160,38 +134,11 @@ resource "ionoscloud_application_loadbalancer_forwardingrule" "forwarding_rule" 
  }
 }`
 
-const testAccCheckApplicationLoadBalancerForwardingRuleConfigUpdate = `
-resource "ionoscloud_datacenter" "alb_datacenter" {
-  name              = "test_alb"
-  location          = "de/txl"
-  description       = "datacenter for hosting "
-}
-
-resource "ionoscloud_lan" "alb_lan_1" {
-  datacenter_id = ionoscloud_datacenter.alb_datacenter.id 
-  public        = false
-  name          = "test_alb_lan_1"
-}
-
-resource "ionoscloud_lan" "alb_lan_2" {
-  datacenter_id = ionoscloud_datacenter.alb_datacenter.id 
-  public        = false
-  name          = "test_alb_lan_2"
-}
-
-resource "ionoscloud_application_loadbalancer" "alb" { 
-  datacenter_id = ionoscloud_datacenter.alb_datacenter.id
-  name          = "alb"
-  listener_lan  = ionoscloud_lan.alb_lan_1.id
-  ips           = [ "10.12.118.224"]
-  target_lan    = ionoscloud_lan.alb_lan_2.id
-  lb_private_ips= [ "10.13.72.225/24"]
-}
-
-resource "ionoscloud_application_loadbalancer_forwardingrule" "forwarding_rule" {
- datacenter_id = ionoscloud_datacenter.alb_datacenter.id
- application_loadbalancer_id = ionoscloud_application_loadbalancer.alb.id
- name = "updated"
+const testAccCheckApplicationLoadBalancerForwardingRuleConfigUpdate = testAccCheckApplicationLoadBalancerConfigBasic + `
+resource ` + ApplicationLoadBalancerForwardingRuleResource + ` ` + ApplicationLoadBalancerForwardingRuleTestResource + ` {
+ datacenter_id = ` + DatacenterResource + `.alb_datacenter.id
+ application_loadbalancer_id = ` + ApplicationLoadBalancerResource + `.` + ApplicationLoadBalancerTestResource + `.id
+ name = "` + UpdatedResources + `"
  protocol = "HTTP"
  listener_ip = "10.12.118.224"
  listener_port = 8080

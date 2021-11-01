@@ -33,3 +33,12 @@ The following arguments are supported:
 - `ips` - (Optional)[list] Collection of IP addresses of the Application Load Balancer. (inbound and outbound) IP of the listenerLan must be a customer reserved IP for the public load balancer and private IP for the private load balancer.
 - `target_lan` - (Required)[int] Id of the balanced private target LAN. (outbound).
 - `lb_private_ips` - (Optional)[list] Collection of private IP addresses with subnet mask of the Application Load Balancer. IPs must contain valid subnet mask. If user will not provide any IP then the system will generate one IP with /24 subnet.
+
+
+## Import
+
+Resource Application Load Balancer can be imported using the `resource id`, e.g.
+
+```shell
+terraform import ionoscloud_application_loadbalancer.myalb {datacenter uuid}/{applicationLoadBalancer uuid}
+```

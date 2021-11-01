@@ -10,7 +10,9 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
 )
 
-func TestAccApplicationLoadBalancer_Basic(t *testing.T) {
+var resourceNameAlb = ApplicationLoadBalancerResource + "." + ApplicationLoadBalancerTestResource
+
+func TestAccApplicationLoadBalancerBasic(t *testing.T) {
 	var applicationLoadBalancer ionoscloud.ApplicationLoadBalancer
 
 	resource.Test(t, resource.TestCase{
@@ -23,14 +25,14 @@ func TestAccApplicationLoadBalancer_Basic(t *testing.T) {
 			{
 				Config: testAccCheckApplicationLoadBalancerConfigBasic,
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheckApplicationLoadBalancerExists("ionoscloud_application_loadbalancer.alb", &applicationLoadBalancer),
-					resource.TestCheckResourceAttr("ionoscloud_application_loadbalancer.alb", "name", ApplicationLoadBalancerTestResource),
+					testAccCheckApplicationLoadBalancerExists(resourceNameAlb, &applicationLoadBalancer),
+					resource.TestCheckResourceAttr(resourceNameAlb, "name", ApplicationLoadBalancerTestResource),
 				),
 			},
 			{
 				Config: testAccCheckApplicationLoadBalancerConfigUpdate,
 				Check: resource.ComposeTestCheckFunc(
-					resource.TestCheckResourceAttr("ionoscloud_application_loadbalancer.alb", "name", "updated"),
+					resource.TestCheckResourceAttr(resourceNameAlb, "name", UpdatedResources),
 				),
 			},
 		},
@@ -125,7 +127,7 @@ resource ` + LanResource + ` "alb_lan_2" {
 
 resource ` + ApplicationLoadBalancerResource + ` ` + ApplicationLoadBalancerTestResource + ` { 
   datacenter_id = ` + DatacenterResource + `.alb_datacenter.id
-  name          = ` + ApplicationLoadBalancerTestResource + `
+  name          = "` + ApplicationLoadBalancerTestResource + `"
   listener_lan  = ` + LanResource + `.alb_lan_1.id
   ips           = [ "10.12.118.224"]
   target_lan    = ` + LanResource + `.alb_lan_2.id
@@ -133,29 +135,29 @@ resource ` + ApplicationLoadBalancerResource + ` ` + ApplicationLoadBalancerTest
 }`
 
 const testAccCheckApplicationLoadBalancerConfigUpdate = `
-resource "ionoscloud_datacenter" "alb_datacenter" {
+resource ` + DatacenterResource + ` "alb_datacenter" {
   name              = "test_alb"
   location          = "de/txl"
   description       = "datacenter for hosting "
 }
 
-resource "ionoscloud_lan" "alb_lan_1" {
-  datacenter_id = ionoscloud_datacenter.alb_datacenter.id 
+resource ` + LanResource + ` "alb_lan_1" {
+  datacenter_id = ` + DatacenterResource + `.alb_datacenter.id 
   public        = false
   name          = "test_alb_lan_1"
 }
 
-resource "ionoscloud_lan" "alb_lan_2" {
-  datacenter_id = ionoscloud_datacenter.alb_datacenter.id 
+resource ` + LanResource + ` "alb_lan_2" {
+  datacenter_id = ` + DatacenterResource + `.alb_datacenter.id 
   public        = false
   name          = "test_alb_lan_2"
 }
 
-resource "ionoscloud_application_loadbalancer" "alb" { 
-  datacenter_id = ionoscloud_datacenter.alb_datacenter.id
-  name          = "updated"
-  listener_lan  = ionoscloud_lan.alb_lan_1.id
+resource ` + ApplicationLoadBalancerResource + ` ` + ApplicationLoadBalancerTestResource + ` { 
+  datacenter_id = ` + DatacenterResource + `.alb_datacenter.id
+  name          = "` + UpdatedResources + `"
+  listener_lan    = ` + LanResource + `.alb_lan_1.id
   ips           = [ "10.12.118.224"]
-  target_lan    = ionoscloud_lan.alb_lan_2.id
+  target_lan    = ` + LanResource + `.alb_lan_2.id
   lb_private_ips= [ "10.13.72.225/24"]
 }`

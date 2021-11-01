@@ -8,6 +8,14 @@ const (
 	ApplicationLoadBalancerDataSourceByName = "test_application_loadbalancer_name"
 )
 
+// ApplicationLoadBalancerForwardingRule Constants
+const (
+	ApplicationLoadBalancerForwardingRuleResource         = "ionoscloud_application_loadbalancer_forwardingrule"
+	ApplicationLoadBalancerForwardingRuleTestResource     = "test_application_loadbalancer_forwardingrule"
+	ApplicationLoadBalancerForwardingRuleDataSourceById   = "test_application_loadbalancer_forwardingrule_id"
+	ApplicationLoadBalancerForwardingRuleDataSourceByName = "test_application_loadbalancer_forwardingrule_name"
+)
+
 // BackupUnit Constants
 const (
 	BackupUnitResource         = "ionoscloud_backup_unit"

@@ -17,6 +17,9 @@ func resourceApplicationLoadBalancerForwardingRule() *schema.Resource {
 		ReadContext:   resourceApplicationLoadBalancerForwardingRuleRead,
 		UpdateContext: resourceApplicationLoadBalancerForwardingRuleUpdate,
 		DeleteContext: resourceApplicationLoadBalancerForwardingRuleDelete,
+		Importer: &schema.ResourceImporter{
+			StateContext: resourceApplicationLoadBalancerForwardingRuleImport,
+		},
 		Schema: map[string]*schema.Schema{
 
 			"name": {
@@ -427,140 +430,9 @@ func resourceApplicationLoadBalancerForwardingRuleRead(ctx context.Context, d *s
 
 	log.Printf("[INFO] Successfully retreived application load balancer forwarding rule %s: %+v", d.Id(), applicationLoadBalancerForwardingRule)
 
-	if applicationLoadBalancerForwardingRule.Properties.Name != nil {
-		err := d.Set("name", *applicationLoadBalancerForwardingRule.Properties.Name)
-		if err != nil {
-			diags := diag.FromErr(fmt.Errorf("error while setting name property for application load balancer forwarding rule %s: %s", d.Id(), err))
-			return diags
-		}
+	if err := setApplicationLoadBalancerForwardingRuleData(d, &applicationLoadBalancerForwardingRule); err != nil {
+		return diag.FromErr(err)
 	}
-
-	if applicationLoadBalancerForwardingRule.Properties.Protocol != nil {
-		err := d.Set("protocol", *applicationLoadBalancerForwardingRule.Properties.Protocol)
-		if err != nil {
-			diags := diag.FromErr(fmt.Errorf("error while setting protocol property for application load balancer forwarding rule %s: %s", d.Id(), err))
-			return diags
-		}
-	}
-
-	if applicationLoadBalancerForwardingRule.Properties.ListenerIp != nil {
-		err := d.Set("listener_ip", *applicationLoadBalancerForwardingRule.Properties.ListenerIp)
-		if err != nil {
-			diags := diag.FromErr(fmt.Errorf("error while setting listener_ip property for application load balancer forwarding rule %s: %s", d.Id(), err))
-			return diags
-		}
-	}
-
-	if applicationLoadBalancerForwardingRule.Properties.ListenerPort != nil {
-		err := d.Set("listener_port", *applicationLoadBalancerForwardingRule.Properties.ListenerPort)
-		if err != nil {
-			diags := diag.FromErr(fmt.Errorf("error while setting listener_port property for application load balancer forwarding rule %s: %s", d.Id(), err))
-			return diags
-		}
-	}
-
-	if applicationLoadBalancerForwardingRule.Properties.HealthCheck != nil {
-		healthCheck := make([]interface{}, 1)
-
-		healthCheckEntry := make(map[string]interface{})
-		if applicationLoadBalancerForwardingRule.Properties.HealthCheck.ClientTimeout != nil {
-			healthCheckEntry["client_timeout"] = *applicationLoadBalancerForwardingRule.Properties.HealthCheck.ClientTimeout
-		}
-		healthCheck[0] = healthCheckEntry
-		err := d.Set("health_check", healthCheck)
-		if err != nil {
-			diags := diag.FromErr(fmt.Errorf("error while setting health_check property for application load balancer forwarding rule %s: %s", d.Id(), err))
-			return diags
-		}
-	}
-
-	if applicationLoadBalancerForwardingRule.Properties.ServerCertificates != nil {
-		err := d.Set("server_certificates", *applicationLoadBalancerForwardingRule.Properties.ServerCertificates)
-		if err != nil {
-			diags := diag.FromErr(fmt.Errorf("error while setting server_certificates property for application load balancer forwarding rule %s: %s", d.Id(), err))
-			return diags
-		}
-	}
-
-	if applicationLoadBalancerForwardingRule.Properties.HttpRules != nil && len(*applicationLoadBalancerForwardingRule.Properties.HttpRules) > 0 {
-		var httpRules []interface{}
-		for _, rule := range *applicationLoadBalancerForwardingRule.Properties.HttpRules {
-			ruleEntry := make(map[string]interface{})
-
-			if rule.Name != nil {
-				ruleEntry["name"] = *rule.Name
-			}
-
-			if rule.Type != nil {
-				ruleEntry["type"] = *rule.Type
-			}
-
-			if rule.TargetGroup != nil {
-				ruleEntry["target_group"] = *rule.TargetGroup
-			}
-
-			if rule.DropQuery != nil {
-				ruleEntry["drop_query"] = *rule.DropQuery
-			}
-
-			if rule.Location != nil {
-				ruleEntry["location"] = *rule.Location
-			}
-
-			if rule.StatusCode != nil {
-				ruleEntry["status_code"] = *rule.StatusCode
-			}
-
-			if rule.ResponseMessage != nil {
-				ruleEntry["response_message"] = *rule.ResponseMessage
-			}
-
-			if rule.ContentType != nil {
-				ruleEntry["content_type"] = *rule.ContentType
-			}
-
-			if rule.Conditions != nil {
-				var conditions []interface{}
-				for _, condition := range *rule.Conditions {
-					conditionEntry := make(map[string]interface{})
-
-					if condition.Type != nil {
-						conditionEntry["type"] = *condition.Type
-					}
-
-					if condition.Condition != nil {
-						conditionEntry["condition"] = *condition.Condition
-					}
-
-					if condition.Negate != nil {
-						conditionEntry["negate"] = *condition.Negate
-					}
-
-					if condition.Key != nil {
-						conditionEntry["key"] = *condition.Key
-					}
-
-					if condition.Value != nil {
-						conditionEntry["value"] = *condition.Value
-					}
-
-					conditions = append(conditions, conditionEntry)
-				}
-
-				ruleEntry["conditions"] = conditions
-			}
-
-			httpRules = append(httpRules, ruleEntry)
-		}
-
-		if len(httpRules) > 0 {
-			if err := d.Set("http_rules", httpRules); err != nil {
-				diags := diag.FromErr(fmt.Errorf("error while setting http_rules property for application load balancer forwarding rule  %s: %s", d.Id(), err))
-				return diags
-			}
-		}
-	}
-
 	return nil
 }
 
@@ -805,5 +677,179 @@ func resourceApplicationLoadBalancerForwardingRuleDelete(ctx context.Context, d 
 
 	d.SetId("")
 
+	return nil
+}
+
+func resourceApplicationLoadBalancerForwardingRuleImport(ctx context.Context, d *schema.ResourceData, meta interface{}) ([]*schema.ResourceData, error) {
+	client := meta.(*ionoscloud.APIClient)
+
+	parts := strings.Split(d.Id(), "/")
+
+	if len(parts) != 3 || parts[0] == "" || parts[1] == "" || parts[2] == "" {
+		return nil, fmt.Errorf("invalid import id %q. Expecting {datacenter}/{alb}/{alb_forwarding_rule}", d.Id())
+	}
+
+	datacenterId := parts[0]
+	albId := parts[1]
+	ruleId := parts[2]
+
+	albForwardingRule, apiResponse, err := client.ApplicationLoadBalancersApi.DatacentersApplicationloadbalancersForwardingrulesFindByForwardingRuleId(ctx, datacenterId, albId, ruleId).Execute()
+
+	if err != nil {
+		if apiResponse != nil && apiResponse.Response != nil && apiResponse.StatusCode == 404 {
+			d.SetId("")
+			return nil, fmt.Errorf("unable to find alb forwarding rule %q", ruleId)
+		}
+		return nil, fmt.Errorf("an error occured while retrieving the alb forwarding rule %q, %q", ruleId, err)
+	}
+
+	if err := d.Set("datacenter_id", datacenterId); err != nil {
+		return nil, fmt.Errorf("error while setting datacenter_id property for  alb forwarding rule %q: %q", ruleId, err)
+	}
+	if err := d.Set("application_loadbalancer_id", albId); err != nil {
+		return nil, fmt.Errorf("error while setting application_loadbalancer_id property for  alb forwarding rule %q: %q", ruleId, err)
+	}
+
+	if err := setApplicationLoadBalancerForwardingRuleData(d, &albForwardingRule); err != nil {
+		return nil, err
+	}
+	return []*schema.ResourceData{d}, nil
+}
+
+func setApplicationLoadBalancerForwardingRuleData(d *schema.ResourceData, applicationLoadBalancerForwardingRule *ionoscloud.ApplicationLoadBalancerForwardingRule) error {
+
+	if applicationLoadBalancerForwardingRule.Id != nil {
+		d.SetId(*applicationLoadBalancerForwardingRule.Id)
+	}
+
+	if applicationLoadBalancerForwardingRule.Properties != nil {
+		if applicationLoadBalancerForwardingRule.Properties.Name != nil {
+			err := d.Set("name", *applicationLoadBalancerForwardingRule.Properties.Name)
+			if err != nil {
+				return fmt.Errorf("error while setting name property for application load balancer forwarding rule %s: %s", d.Id(), err)
+			}
+		}
+
+		if applicationLoadBalancerForwardingRule.Properties.Protocol != nil {
+			err := d.Set("protocol", *applicationLoadBalancerForwardingRule.Properties.Protocol)
+			if err != nil {
+				return fmt.Errorf("error while setting protocol property for application load balancer forwarding rule %s: %s", d.Id(), err)
+			}
+		}
+
+		if applicationLoadBalancerForwardingRule.Properties.ListenerIp != nil {
+			err := d.Set("listener_ip", *applicationLoadBalancerForwardingRule.Properties.ListenerIp)
+			if err != nil {
+				return fmt.Errorf("error while setting listener_ip property for application load balancer forwarding rule %s: %s", d.Id(), err)
+			}
+		}
+
+		if applicationLoadBalancerForwardingRule.Properties.ListenerPort != nil {
+			err := d.Set("listener_port", *applicationLoadBalancerForwardingRule.Properties.ListenerPort)
+			if err != nil {
+				return fmt.Errorf("error while setting listener_port property for application load balancer forwarding rule %s: %s", d.Id(), err)
+			}
+		}
+
+		if applicationLoadBalancerForwardingRule.Properties.HealthCheck != nil {
+			healthCheck := make([]interface{}, 1)
+
+			healthCheckEntry := make(map[string]interface{})
+			if applicationLoadBalancerForwardingRule.Properties.HealthCheck.ClientTimeout != nil {
+				healthCheckEntry["client_timeout"] = *applicationLoadBalancerForwardingRule.Properties.HealthCheck.ClientTimeout
+			}
+			healthCheck[0] = healthCheckEntry
+			err := d.Set("health_check", healthCheck)
+			if err != nil {
+				return fmt.Errorf("error while setting health_check property for application load balancer forwarding rule %s: %s", d.Id(), err)
+			}
+		}
+
+		if applicationLoadBalancerForwardingRule.Properties.ServerCertificates != nil {
+			err := d.Set("server_certificates", *applicationLoadBalancerForwardingRule.Properties.ServerCertificates)
+			if err != nil {
+				return fmt.Errorf("error while setting server_certificates property for application load balancer forwarding rule %s: %s", d.Id(), err)
+			}
+		}
+
+		httpRules := make([]interface{}, 0)
+		if applicationLoadBalancerForwardingRule.Properties.HttpRules != nil && len(*applicationLoadBalancerForwardingRule.Properties.HttpRules) > 0 {
+			httpRules = make([]interface{}, 0)
+			for _, rule := range *applicationLoadBalancerForwardingRule.Properties.HttpRules {
+				ruleEntry := make(map[string]interface{})
+
+				if rule.Name != nil {
+					ruleEntry["name"] = *rule.Name
+				}
+
+				if rule.Type != nil {
+					ruleEntry["type"] = *rule.Type
+				}
+
+				if rule.TargetGroup != nil {
+					ruleEntry["target_group"] = *rule.TargetGroup
+				}
+
+				if rule.DropQuery != nil {
+					ruleEntry["drop_query"] = *rule.DropQuery
+				}
+
+				if rule.Location != nil {
+					ruleEntry["location"] = *rule.Location
+				}
+
+				if rule.StatusCode != nil {
+					ruleEntry["status_code"] = *rule.StatusCode
+				}
+
+				if rule.ResponseMessage != nil {
+					ruleEntry["response_message"] = *rule.ResponseMessage
+				}
+
+				if rule.ContentType != nil {
+					ruleEntry["content_type"] = *rule.ContentType
+				}
+
+				if rule.Conditions != nil {
+					conditions := make([]interface{}, 0)
+					for _, condition := range *rule.Conditions {
+						conditionEntry := make(map[string]interface{})
+
+						if condition.Type != nil {
+							conditionEntry["type"] = *condition.Type
+						}
+
+						if condition.Condition != nil {
+							conditionEntry["condition"] = *condition.Condition
+						}
+
+						if condition.Negate != nil {
+							conditionEntry["negate"] = *condition.Negate
+						}
+
+						if condition.Key != nil {
+							conditionEntry["key"] = *condition.Key
+						}
+
+						if condition.Value != nil {
+							conditionEntry["value"] = *condition.Value
+						}
+
+						conditions = append(conditions, conditionEntry)
+					}
+
+					ruleEntry["conditions"] = conditions
+				}
+
+				httpRules = append(httpRules, ruleEntry)
+			}
+		}
+
+		if len(httpRules) > 0 {
+			if err := d.Set("http_rules", httpRules); err != nil {
+				return fmt.Errorf("error while setting http_rules property for application load balancer forwarding rule  %s: %s", d.Id(), err)
+			}
+		}
+	}
 	return nil
 }

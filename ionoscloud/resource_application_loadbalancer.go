@@ -289,11 +289,8 @@ func resourceApplicationLoadBalancerImport(ctx context.Context, d *schema.Resour
 		return nil, fmt.Errorf("an error occured while retrieving the alb %q, %q", albId, err)
 	}
 
-	log.Printf("[DEBUG] Found application load balancer after %v", apiResponse.RequestTime)
-	log.Printf("[INFO] LAN %s found: %+v", d.Id(), alb)
-
 	if err := d.Set("datacenter_id", datacenterId); err != nil {
-		return nil, fmt.Errorf("error while setting datacenter_id property for lan %q: %q", albId, err)
+		return nil, fmt.Errorf("error while setting datacenter_id property for alb %q: %q", albId, err)
 	}
 
 	if err := setApplicationLoadBalancerData(d, &alb); err != nil {
