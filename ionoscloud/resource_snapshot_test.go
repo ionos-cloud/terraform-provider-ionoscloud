@@ -51,6 +51,7 @@ func testAccCheckSnapshotDestroyCheck(s *terraform.State) error {
 		}
 
 		_, apiResponse, err := client.SnapshotsApi.SnapshotsFindById(ctx, rs.Primary.ID).Execute()
+		logApiRequestTime(apiResponse)
 
 		if err != nil {
 			if apiResponse == nil || apiResponse.Response != nil && apiResponse.StatusCode != 404 {
@@ -82,7 +83,8 @@ func testAccCheckSnapshotExists(n string, snapshot *ionoscloud.Snapshot) resourc
 		if cancel != nil {
 			defer cancel()
 		}
-		foundServer, _, err := client.SnapshotsApi.SnapshotsFindById(ctx, rs.Primary.ID).Execute()
+		foundServer, apiResponse, err := client.SnapshotsApi.SnapshotsFindById(ctx, rs.Primary.ID).Execute()
+		logApiRequestTime(apiResponse)
 
 		if err != nil {
 			return fmt.Errorf("error occured while fetching Snapshot: %s", rs.Primary.ID)

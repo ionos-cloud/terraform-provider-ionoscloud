@@ -106,12 +106,14 @@ func datasourceIpBlockRead(ctx context.Context, data *schema.ResourceData, meta 
 	var ipBlock ionoscloud.IpBlock
 	var err error
 	client := meta.(*ionoscloud.APIClient)
+	var apiResponse *ionoscloud.APIResponse
 
 	if !idOk && !nameOk && !locationOk {
 		return diag.FromErr(fmt.Errorf("either id, location or name must be set"))
 	}
 	if idOk {
-		ipBlock, _, err = client.IPBlocksApi.IpblocksFindById(ctx, id.(string)).Execute()
+		ipBlock, apiResponse, err = client.IPBlocksApi.IpblocksFindById(ctx, id.(string)).Execute()
+		logApiRequestTime(apiResponse)
 		if err != nil {
 			return diag.FromErr(fmt.Errorf("error getting ip block with id %s %s", id.(string), err))
 		}
@@ -130,7 +132,8 @@ func datasourceIpBlockRead(ctx context.Context, data *schema.ResourceData, meta 
 		log.Printf("[INFO] Got ip block [Name=%s, Location=%s]", *ipBlock.Properties.Name, *ipBlock.Properties.Location)
 	} else {
 
-		ipBlocks, _, err := client.IPBlocksApi.IpblocksGet(ctx).Execute()
+		ipBlocks, apiResponse, err := client.IPBlocksApi.IpblocksGet(ctx).Execute()
+		logApiRequestTime(apiResponse)
 
 		if err != nil {
 			return diag.FromErr(fmt.Errorf("an error occured while fetching ipBlocks: %s ", err))

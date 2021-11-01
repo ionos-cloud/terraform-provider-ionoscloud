@@ -108,6 +108,7 @@ func resourceIPBlockCreate(ctx context.Context, d *schema.ResourceData, meta int
 	}
 
 	ipblock, apiResponse, err := client.IPBlocksApi.IpblocksPost(ctx).Ipblock(ipblock).Execute()
+	logApiRequestTime(apiResponse)
 
 	if err != nil {
 		diags := diag.FromErr(fmt.Errorf("an error occured while reserving an ip block: %s", err))
@@ -133,6 +134,7 @@ func resourceIPBlockRead(ctx context.Context, d *schema.ResourceData, meta inter
 	client := meta.(*ionoscloud.APIClient)
 
 	ipBlock, apiResponse, err := client.IPBlocksApi.IpblocksFindById(ctx, d.Id()).Execute()
+	logApiRequestTime(apiResponse)
 
 	if err != nil {
 		if apiResponse != nil && apiResponse.Response != nil && apiResponse.StatusCode == 404 {
@@ -162,7 +164,8 @@ func resourceIPBlockUpdate(ctx context.Context, d *schema.ResourceData, meta int
 		request.Name = &name
 	}
 
-	_, _, err := client.IPBlocksApi.IpblocksPatch(ctx, d.Id()).Ipblock(request).Execute()
+	_, apiResponse, err := client.IPBlocksApi.IpblocksPatch(ctx, d.Id()).Ipblock(request).Execute()
+	logApiRequestTime(apiResponse)
 
 	if err != nil {
 		diags := diag.FromErr(fmt.Errorf("an error occured while updating an ip block ID %s %s", d.Id(), err))
@@ -177,6 +180,7 @@ func resourceIPBlockDelete(ctx context.Context, d *schema.ResourceData, meta int
 	client := meta.(*ionoscloud.APIClient)
 
 	apiResponse, err := client.IPBlocksApi.IpblocksDelete(ctx, d.Id()).Execute()
+	logApiRequestTime(apiResponse)
 	if err != nil {
 		diags := diag.FromErr(fmt.Errorf("an error occured while releasing an ipblock ID: %s %s", d.Id(), err))
 		return diags
@@ -199,6 +203,7 @@ func resourceIpBlockImporter(ctx context.Context, d *schema.ResourceData, meta i
 	ipBlockId := d.Id()
 
 	ipBlock, apiResponse, err := client.IPBlocksApi.IpblocksFindById(ctx, ipBlockId).Execute()
+	logApiRequestTime(apiResponse)
 
 	if err != nil {
 		if apiResponse != nil && apiResponse.Response != nil && apiResponse.StatusCode == 404 {

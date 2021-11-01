@@ -113,7 +113,9 @@ func dataSourceGroupRead(ctx context.Context, d *schema.ResourceData, meta inter
 
 	if idOk {
 		/* search by ID */
-		group, _, err = client.UserManagementApi.UmGroupsFindById(ctx, id.(string)).Execute()
+		var apiResponse *ionoscloud.APIResponse
+		group, apiResponse, err = client.UserManagementApi.UmGroupsFindById(ctx, id.(string)).Execute()
+		logApiRequestTime(apiResponse)
 		if err != nil {
 			diags := diag.FromErr(fmt.Errorf("an error occurred while fetching group with ID %s: %s", id.(string), err))
 			return diags
@@ -121,8 +123,9 @@ func dataSourceGroupRead(ctx context.Context, d *schema.ResourceData, meta inter
 	} else {
 		/* search by name */
 		var groups ionoscloud.Groups
-
-		groups, _, err := client.UserManagementApi.UmGroupsGet(ctx).Execute()
+		var apiResponse *ionoscloud.APIResponse
+		groups, apiResponse, err := client.UserManagementApi.UmGroupsGet(ctx).Execute()
+		logApiRequestTime(apiResponse)
 		if err != nil {
 			diags := diag.FromErr(fmt.Errorf("an error occurred while fetching groups: %s", err.Error()))
 			return diags
@@ -133,7 +136,8 @@ func dataSourceGroupRead(ctx context.Context, d *schema.ResourceData, meta inter
 			for _, g := range *groups.Items {
 				if g.Properties.Name != nil && *g.Properties.Name == name.(string) {
 					/* group found */
-					group, _, err = client.UserManagementApi.UmGroupsFindById(ctx, *g.Id).Execute()
+					group, apiResponse, err = client.UserManagementApi.UmGroupsFindById(ctx, *g.Id).Execute()
+					logApiRequestTime(apiResponse)
 					if err != nil {
 						diags := diag.FromErr(fmt.Errorf("an error occurred while fetching group %s: %s", *g.Id, err))
 						return diags

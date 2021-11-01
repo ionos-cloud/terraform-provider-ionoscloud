@@ -92,13 +92,15 @@ func dataSourceDataCenterRead(ctx context.Context, d *schema.ResourceData, meta 
 
 	var datacenter ionoscloud.Datacenter
 	var err error
+	var apiResponse *ionoscloud.APIResponse
 
 	if !idOk && !nameOk && !locationOk {
 		return diag.FromErr(fmt.Errorf("either id, location or name must be set"))
 	}
 
 	if idOk {
-		datacenter, _, err = client.DataCentersApi.DatacentersFindById(ctx, id.(string)).Execute()
+		datacenter, apiResponse, err = client.DataCentersApi.DatacentersFindById(ctx, id.(string)).Execute()
+		logApiRequestTime(apiResponse)
 		if err != nil {
 			return diag.FromErr(fmt.Errorf("error getting datacenter with id %s %s", id.(string), err))
 		}
@@ -116,7 +118,8 @@ func dataSourceDataCenterRead(ctx context.Context, d *schema.ResourceData, meta 
 		}
 		log.Printf("[INFO] Got dc [Name=%s, Location=%s]", *datacenter.Properties.Name, *datacenter.Properties.Location)
 	} else {
-		datacenters, _, err := client.DataCentersApi.DatacentersGet(ctx).Execute()
+		datacenters, apiResponse, err := client.DataCentersApi.DatacentersGet(ctx).Execute()
+		logApiRequestTime(apiResponse)
 
 		if err != nil {
 			return diag.FromErr(fmt.Errorf("an error occured while fetching datacenters: %s ", err))

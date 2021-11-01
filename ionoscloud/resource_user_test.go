@@ -59,6 +59,7 @@ func testAccCheckUserDestroyCheck(s *terraform.State) error {
 			continue
 		}
 		_, apiResponse, err := client.UserManagementApi.UmUsersFindById(ctx, rs.Primary.ID).Execute()
+		logApiRequestTime(apiResponse)
 
 		if err != nil {
 			if apiResponse == nil || apiResponse.Response != nil && apiResponse.StatusCode != 404 {
@@ -91,7 +92,8 @@ func testAccCheckUserExists(n string, user *ionoscloud.User) resource.TestCheckF
 			defer cancel()
 		}
 
-		foundUser, _, err := client.UserManagementApi.UmUsersFindById(ctx, rs.Primary.ID).Execute()
+		foundUser, apiResponse, err := client.UserManagementApi.UmUsersFindById(ctx, rs.Primary.ID).Execute()
+		logApiRequestTime(apiResponse)
 
 		if err != nil {
 			return fmt.Errorf("error occured while fetching User: %s %s", rs.Primary.ID, err)

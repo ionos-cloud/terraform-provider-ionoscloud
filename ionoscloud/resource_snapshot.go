@@ -118,6 +118,7 @@ func resourceSnapshotCreate(ctx context.Context, d *schema.ResourceData, meta in
 	name := d.Get("name").(string)
 
 	rsp, apiResponse, err := client.VolumesApi.DatacentersVolumesCreateSnapshotPost(ctx, dcId, volumeId).Name(name).Execute()
+	logApiRequestTime(apiResponse)
 	if err != nil {
 		diags := diag.FromErr(fmt.Errorf("an error occured while creating a snapshot: %s ", err))
 		return diags
@@ -142,6 +143,7 @@ func resourceSnapshotRead(ctx context.Context, d *schema.ResourceData, meta inte
 	client := meta.(*ionoscloud.APIClient)
 
 	snapshot, apiResponse, err := client.SnapshotsApi.SnapshotsFindById(ctx, d.Id()).Execute()
+	logApiRequestTime(apiResponse)
 
 	if err != nil {
 		if apiResponse != nil && apiResponse.Response != nil && apiResponse.StatusCode == 404 {
@@ -168,6 +170,7 @@ func resourceSnapshotUpdate(ctx context.Context, d *schema.ResourceData, meta in
 	}
 
 	_, apiResponse, err := client.SnapshotsApi.SnapshotsPatch(context.TODO(), d.Id()).Snapshot(input).Execute()
+	logApiRequestTime(apiResponse)
 	if err != nil {
 		diags := diag.FromErr(fmt.Errorf("an error occured while restoring a snapshot ID %s %d", d.Id(), err))
 		return diags
@@ -187,6 +190,7 @@ func resourceSnapshotDelete(ctx context.Context, d *schema.ResourceData, meta in
 	client := meta.(*ionoscloud.APIClient)
 
 	rsp, apiResponse, err := client.SnapshotsApi.SnapshotsFindById(ctx, d.Id()).Execute()
+	logApiRequestTime(apiResponse)
 	if err != nil {
 		diags := diag.FromErr(fmt.Errorf("an error occured while fetching a snapshot ID %s %s", d.Id(), err))
 		return diags
@@ -194,7 +198,8 @@ func resourceSnapshotDelete(ctx context.Context, d *schema.ResourceData, meta in
 
 	for *rsp.Metadata.State != "AVAILABLE" {
 		time.Sleep(30 * time.Second)
-		_, _, err := client.SnapshotsApi.SnapshotsFindById(ctx, d.Id()).Execute()
+		_, apiResponse, err := client.SnapshotsApi.SnapshotsFindById(ctx, d.Id()).Execute()
+		logApiRequestTime(apiResponse)
 
 		if err != nil {
 			diags := diag.FromErr(fmt.Errorf("an error occured while fetching a snapshot ID %s %s", d.Id(), err))
@@ -203,7 +208,8 @@ func resourceSnapshotDelete(ctx context.Context, d *schema.ResourceData, meta in
 	}
 
 	dcId := d.Get("datacenter_id").(string)
-	dc, _, err := client.DataCentersApi.DatacentersFindById(ctx, dcId).Execute()
+	dc, apiResponse, err := client.DataCentersApi.DatacentersFindById(ctx, dcId).Execute()
+	logApiRequestTime(apiResponse)
 
 	if err != nil {
 		diags := diag.FromErr(fmt.Errorf("an error occured while fetching a Datacenter ID %s %s", dcId, err))
@@ -212,7 +218,8 @@ func resourceSnapshotDelete(ctx context.Context, d *schema.ResourceData, meta in
 
 	for *dc.Metadata.State != "AVAILABLE" {
 		time.Sleep(30 * time.Second)
-		_, _, err := client.DataCentersApi.DatacentersFindById(ctx, dcId).Execute()
+		_, apiResponse, err := client.DataCentersApi.DatacentersFindById(ctx, dcId).Execute()
+		logApiRequestTime(apiResponse)
 
 		if err != nil {
 			diags := diag.FromErr(fmt.Errorf("an error occured while fetching a Datacenter ID %s %s", dcId, err))
@@ -221,6 +228,7 @@ func resourceSnapshotDelete(ctx context.Context, d *schema.ResourceData, meta in
 	}
 
 	apiResponse, err = client.SnapshotsApi.SnapshotsDelete(ctx, d.Id()).Execute()
+	logApiRequestTime(apiResponse)
 	if err != nil {
 		diags := diag.FromErr(fmt.Errorf("an error occured while deleting a snapshot ID %s %s", d.Id(), err))
 		return diags
@@ -242,6 +250,7 @@ func resourceSnapshotImport(ctx context.Context, d *schema.ResourceData, meta in
 
 	snapshotId := d.Id()
 	snapshot, apiResponse, err := client.SnapshotsApi.SnapshotsFindById(ctx, d.Id()).Execute()
+	logApiRequestTime(apiResponse)
 
 	if err != nil {
 		if apiResponse != nil && apiResponse.Response != nil && apiResponse.StatusCode == 404 {
