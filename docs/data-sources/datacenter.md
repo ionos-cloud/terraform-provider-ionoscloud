@@ -8,7 +8,7 @@ description: |-
 
 # ionoscloud\_datacenter
 
-The data centers data source can be used to search for and return an existing Virtual Data Center. You can provide a string for the name and location parameters which will be compared with provisioned Virtual Data Centers. If a single match is found, it will be returned. If your search results in multiple matches, an error will be generated. When this happens, please refine your search string so that it is specific enough to return only one result.
+The data centers data source can be used to search for and return an existing Virtual Data Center. You can provide a string for the name and location parameters which will be compared with provisioned Virtual Data Centers. If a single match is found, it will be returned.  If your search results in multiple matches, the first result found will be returned. When this happens, please refine your search string so that it is specific enough to return only one result.
 
 ## Example Usage
 
