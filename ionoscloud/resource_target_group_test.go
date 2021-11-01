@@ -53,6 +53,7 @@ func testAccCheckTargetGroupDestroyCheck(s *terraform.State) error {
 		}
 
 		apiResponse, err := client.NetworkLoadBalancersApi.DatacentersNetworkloadbalancersForwardingrulesDelete(ctx, rs.Primary.Attributes["datacenter_id"], rs.Primary.Attributes["networkloadbalancer_id"], rs.Primary.ID).Execute()
+		logApiRequestTime(apiResponse)
 
 		if err != nil {
 			if apiResponse == nil || apiResponse.StatusCode != 404 {
@@ -85,7 +86,8 @@ func testAccCheckTargetGroupExists(n string, targetGroup *ionoscloud.TargetGroup
 			defer cancel()
 		}
 
-		foundTargetGroup, _, err := client.TargetGroupsApi.TargetgroupsFindByTargetGroupId(ctx, rs.Primary.ID).Execute()
+		foundTargetGroup, apiResponse, err := client.TargetGroupsApi.TargetgroupsFindByTargetGroupId(ctx, rs.Primary.ID).Execute()
+		logApiRequestTime(apiResponse)
 
 		if err != nil {
 			return fmt.Errorf("error occured while fetching TargetGroup: %s", rs.Primary.ID)

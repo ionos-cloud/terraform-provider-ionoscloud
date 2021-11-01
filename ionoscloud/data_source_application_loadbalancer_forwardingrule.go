@@ -183,7 +183,7 @@ func dataSourceApplicationLoadBalancerForwardingRuleRead(d *schema.ResourceData,
 	}
 	var applicationLoadBalancerForwardingRule ionoscloud.ApplicationLoadBalancerForwardingRule
 	var err error
-
+	var apiResponse *ionoscloud.APIResponse
 	ctx, cancel := context.WithTimeout(context.Background(), *resourceDefaultTimeouts.Default)
 
 	if cancel != nil {
@@ -192,7 +192,8 @@ func dataSourceApplicationLoadBalancerForwardingRuleRead(d *schema.ResourceData,
 
 	if idOk {
 		/* search by ID */
-		applicationLoadBalancerForwardingRule, _, err = client.ApplicationLoadBalancersApi.DatacentersApplicationloadbalancersForwardingrulesFindByForwardingRuleId(ctx, datacenterId.(string), albId.(string), id.(string)).Execute()
+		applicationLoadBalancerForwardingRule, apiResponse, err = client.ApplicationLoadBalancersApi.DatacentersApplicationloadbalancersForwardingrulesFindByForwardingRuleId(ctx, datacenterId.(string), albId.(string), id.(string)).Execute()
+		logApiRequestTime(apiResponse)
 		if err != nil {
 			return fmt.Errorf("an error occurred while fetching the nat gateway %s: %s", id.(string), err)
 		}
@@ -206,14 +207,18 @@ func dataSourceApplicationLoadBalancerForwardingRuleRead(d *schema.ResourceData,
 			defer cancel()
 		}
 
-		applicationLoadBalancersForwardingRules, _, err := client.ApplicationLoadBalancersApi.DatacentersApplicationloadbalancersForwardingrulesGet(ctx, datacenterId.(string), albId.(string)).Execute()
+		applicationLoadBalancersForwardingRules, apiResponse, err := client.ApplicationLoadBalancersApi.DatacentersApplicationloadbalancersForwardingrulesGet(ctx, datacenterId.(string), albId.(string)).Execute()
+		logApiRequestTime(apiResponse)
+
 		if err != nil {
 			return fmt.Errorf("an error occurred while fetching application loadbalancers: %s", err.Error())
 		}
 
 		if applicationLoadBalancersForwardingRules.Items != nil {
 			for _, c := range *applicationLoadBalancersForwardingRules.Items {
-				tmpAlb, _, err := client.ApplicationLoadBalancersApi.DatacentersApplicationloadbalancersForwardingrulesFindByForwardingRuleId(ctx, datacenterId.(string), albId.(string), *c.Id).Execute()
+				tmpAlb, apiResponse, err := client.ApplicationLoadBalancersApi.DatacentersApplicationloadbalancersForwardingrulesFindByForwardingRuleId(ctx, datacenterId.(string), albId.(string), *c.Id).Execute()
+				logApiRequestTime(apiResponse)
+
 				if err != nil {
 					return fmt.Errorf("an error occurred while fetching nat gateway with ID %s: %s", *c.Id, err.Error())
 				}

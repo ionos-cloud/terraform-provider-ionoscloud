@@ -126,6 +126,7 @@ func resourceApplicationLoadBalancerCreate(ctx context.Context, d *schema.Resour
 	dcId := d.Get("datacenter_id").(string)
 
 	applicationLoadbalancer, apiResponse, err := client.ApplicationLoadBalancersApi.DatacentersApplicationloadbalancersPost(ctx, dcId).ApplicationLoadBalancer(applicationLoadBalancer).Execute()
+	logApiRequestTime(apiResponse)
 
 	if err != nil {
 		d.SetId("")
@@ -155,6 +156,7 @@ func resourceApplicationLoadBalancerRead(ctx context.Context, d *schema.Resource
 	dcId := d.Get("datacenter_id").(string)
 
 	applicationLoadBalancer, apiResponse, err := client.ApplicationLoadBalancersApi.DatacentersApplicationloadbalancersFindByApplicationLoadBalancerId(ctx, dcId, d.Id()).Execute()
+	logApiRequestTime(apiResponse)
 
 	if err != nil {
 		log.Printf("[INFO] Resource %s not found: %+v", d.Id(), err)
@@ -228,6 +230,7 @@ func resourceApplicationLoadBalancerUpdate(ctx context.Context, d *schema.Resour
 	}
 
 	_, apiResponse, err := client.ApplicationLoadBalancersApi.DatacentersApplicationloadbalancersPatch(ctx, dcId, d.Id()).ApplicationLoadBalancerProperties(*request.Properties).Execute()
+	logApiRequestTime(apiResponse)
 
 	if err != nil {
 		diags := diag.FromErr(fmt.Errorf("an error occured while updating application loadbalancer ID %s %s", d.Id(), err))
@@ -249,6 +252,7 @@ func resourceApplicationLoadBalancerDelete(ctx context.Context, d *schema.Resour
 	dcId := d.Get("datacenter_id").(string)
 
 	apiResponse, err := client.ApplicationLoadBalancersApi.DatacentersApplicationloadbalancersDelete(ctx, dcId, d.Id()).Execute()
+	logApiRequestTime(apiResponse)
 
 	if err != nil {
 		diags := diag.FromErr(fmt.Errorf("an error occured while deleting an application loadbalancer %s %s", d.Id(), err))
@@ -280,6 +284,7 @@ func resourceApplicationLoadBalancerImport(ctx context.Context, d *schema.Resour
 	albId := parts[1]
 
 	alb, apiResponse, err := client.ApplicationLoadBalancersApi.DatacentersApplicationloadbalancersFindByApplicationLoadBalancerId(ctx, datacenterId, albId).Execute()
+	logApiRequestTime(apiResponse)
 
 	if err != nil {
 		if apiResponse != nil && apiResponse.Response != nil && apiResponse.StatusCode == 404 {

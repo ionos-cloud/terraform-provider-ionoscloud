@@ -56,6 +56,7 @@ func testAccCheckApplicationLoadBalancerDestroyCheck(s *terraform.State) error {
 		albId := rs.Primary.ID
 
 		_, apiResponse, err := client.ApplicationLoadBalancersApi.DatacentersApplicationloadbalancersFindByApplicationLoadBalancerId(ctx, dcId, albId).Execute()
+		logApiRequestTime(apiResponse)
 
 		if err != nil {
 			if apiResponse == nil || apiResponse.StatusCode != 404 {
@@ -91,7 +92,8 @@ func testAccCheckApplicationLoadBalancerExists(n string, alb *ionoscloud.Applica
 		dcId := rs.Primary.Attributes["datacenter_id"]
 		albId := rs.Primary.ID
 
-		foundNatGateway, _, err := client.ApplicationLoadBalancersApi.DatacentersApplicationloadbalancersFindByApplicationLoadBalancerId(ctx, dcId, albId).Execute()
+		foundNatGateway, apiResponse, err := client.ApplicationLoadBalancersApi.DatacentersApplicationloadbalancersFindByApplicationLoadBalancerId(ctx, dcId, albId).Execute()
+		logApiRequestTime(apiResponse)
 
 		if err != nil {
 			return fmt.Errorf("error occured while fetching NatGateway: %s", rs.Primary.ID)

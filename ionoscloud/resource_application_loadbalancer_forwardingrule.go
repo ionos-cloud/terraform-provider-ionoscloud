@@ -387,6 +387,7 @@ func resourceApplicationLoadBalancerForwardingRuleCreate(ctx context.Context, d 
 	albId := d.Get("application_loadbalancer_id").(string)
 
 	albForwardingRuleResp, apiResponse, err := client.ApplicationLoadBalancersApi.DatacentersApplicationloadbalancersForwardingrulesPost(ctx, dcId, albId).ApplicationLoadBalancerForwardingRule(applicationLoadBalancerForwardingRule).Execute()
+	logApiRequestTime(apiResponse)
 
 	if err != nil {
 		d.SetId("")
@@ -639,6 +640,7 @@ func resourceApplicationLoadBalancerForwardingRuleUpdate(ctx context.Context, d 
 		}
 	}
 	_, apiResponse, err := client.ApplicationLoadBalancersApi.DatacentersApplicationloadbalancersForwardingrulesPatch(ctx, dcId, albId, d.Id()).ApplicationLoadBalancerForwardingRuleProperties(*request.Properties).Execute()
+	logApiRequestTime(apiResponse)
 
 	if err != nil {
 		diags := diag.FromErr(fmt.Errorf("an error occured while updating a application loadbalancer forwarding rule ID %s %s \n ApiError: %s",
@@ -662,6 +664,7 @@ func resourceApplicationLoadBalancerForwardingRuleDelete(ctx context.Context, d 
 	albID := d.Get("application_loadbalancer_id").(string)
 
 	apiResponse, err := client.ApplicationLoadBalancersApi.DatacentersApplicationloadbalancersForwardingrulesDelete(ctx, dcId, albID, d.Id()).Execute()
+	logApiRequestTime(apiResponse)
 
 	if err != nil {
 		diags := diag.FromErr(fmt.Errorf("an error occured while deleting a application loadbalancer forwarding rule %s %s", d.Id(), err))
@@ -694,6 +697,7 @@ func resourceApplicationLoadBalancerForwardingRuleImport(ctx context.Context, d 
 	ruleId := parts[2]
 
 	albForwardingRule, apiResponse, err := client.ApplicationLoadBalancersApi.DatacentersApplicationloadbalancersForwardingrulesFindByForwardingRuleId(ctx, datacenterId, albId, ruleId).Execute()
+	logApiRequestTime(apiResponse)
 
 	if err != nil {
 		if apiResponse != nil && apiResponse.Response != nil && apiResponse.StatusCode == 404 {

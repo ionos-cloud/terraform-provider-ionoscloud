@@ -78,7 +78,7 @@ func dataSourceApplicationLoadBalancerRead(d *schema.ResourceData, meta interfac
 	}
 	var applicationLoadBalancer ionoscloud.ApplicationLoadBalancer
 	var err error
-
+	var apiResponse *ionoscloud.APIResponse
 	ctx, cancel := context.WithTimeout(context.Background(), *resourceDefaultTimeouts.Default)
 
 	if cancel != nil {
@@ -87,7 +87,8 @@ func dataSourceApplicationLoadBalancerRead(d *schema.ResourceData, meta interfac
 
 	if idOk {
 		/* search by ID */
-		applicationLoadBalancer, _, err = client.ApplicationLoadBalancersApi.DatacentersApplicationloadbalancersFindByApplicationLoadBalancerId(ctx, datacenterId.(string), id.(string)).Execute()
+		applicationLoadBalancer, apiResponse, err = client.ApplicationLoadBalancersApi.DatacentersApplicationloadbalancersFindByApplicationLoadBalancerId(ctx, datacenterId.(string), id.(string)).Execute()
+		logApiRequestTime(apiResponse)
 		if err != nil {
 			return fmt.Errorf("an error occurred while fetching the nat gateway %s: %s", id.(string), err)
 		}
@@ -101,14 +102,17 @@ func dataSourceApplicationLoadBalancerRead(d *schema.ResourceData, meta interfac
 			defer cancel()
 		}
 
-		applicationLoadBalancers, _, err := client.ApplicationLoadBalancersApi.DatacentersApplicationloadbalancersGet(ctx, datacenterId.(string)).Execute()
+		applicationLoadBalancers, apiResponse, err := client.ApplicationLoadBalancersApi.DatacentersApplicationloadbalancersGet(ctx, datacenterId.(string)).Execute()
+		logApiRequestTime(apiResponse)
+
 		if err != nil {
 			return fmt.Errorf("an error occurred while fetching nat gateway: %s", err.Error())
 		}
 
 		if applicationLoadBalancers.Items != nil {
 			for _, c := range *applicationLoadBalancers.Items {
-				tmpAlb, _, err := client.ApplicationLoadBalancersApi.DatacentersApplicationloadbalancersFindByApplicationLoadBalancerId(ctx, datacenterId.(string), *c.Id).Execute()
+				tmpAlb, apiResponse, err := client.ApplicationLoadBalancersApi.DatacentersApplicationloadbalancersFindByApplicationLoadBalancerId(ctx, datacenterId.(string), *c.Id).Execute()
+				logApiRequestTime(apiResponse)
 				if err != nil {
 					return fmt.Errorf("an error occurred while fetching nat gateway with ID %s: %s", *c.Id, err.Error())
 				}

@@ -169,6 +169,7 @@ func dataSourceTargetGroupRead(d *schema.ResourceData, meta interface{}) error {
 	}
 	var targetGroup ionoscloud.TargetGroup
 	var err error
+	var apiResponse *ionoscloud.APIResponse
 
 	ctx, cancel := context.WithTimeout(context.Background(), *resourceDefaultTimeouts.Default)
 
@@ -178,7 +179,9 @@ func dataSourceTargetGroupRead(d *schema.ResourceData, meta interface{}) error {
 
 	if idOk {
 		/* search by ID */
-		targetGroup, _, err = client.TargetGroupsApi.TargetgroupsFindByTargetGroupId(ctx, id.(string)).Execute()
+		targetGroup, apiResponse, err = client.TargetGroupsApi.TargetgroupsFindByTargetGroupId(ctx, id.(string)).Execute()
+		logApiRequestTime(apiResponse)
+
 		if err != nil {
 			return fmt.Errorf("an error occurred while fetching the target groups %s: %s", id.(string), err)
 		}
@@ -192,14 +195,17 @@ func dataSourceTargetGroupRead(d *schema.ResourceData, meta interface{}) error {
 			defer cancel()
 		}
 
-		targetGroups, _, err := client.TargetGroupsApi.TargetgroupsGet(ctx).Execute()
+		targetGroups, apiResponse, err := client.TargetGroupsApi.TargetgroupsGet(ctx).Execute()
+		logApiRequestTime(apiResponse)
+
 		if err != nil {
 			return fmt.Errorf("an error occurred while fetching target groups: %s", err.Error())
 		}
 
 		if targetGroups.Items != nil {
 			for _, c := range *targetGroups.Items {
-				tmpTargetGroup, _, err := client.TargetGroupsApi.TargetgroupsFindByTargetGroupId(ctx, *c.Id).Execute()
+				tmpTargetGroup, apiResponse, err := client.TargetGroupsApi.TargetgroupsFindByTargetGroupId(ctx, *c.Id).Execute()
+				logApiRequestTime(apiResponse)
 				if err != nil {
 					return fmt.Errorf("an error occurred while fetching target group with ID %s: %s", *c.Id, err.Error())
 				}

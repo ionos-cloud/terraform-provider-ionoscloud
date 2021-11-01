@@ -334,6 +334,8 @@ func resourceTargetGroupCreate(ctx context.Context, d *schema.ResourceData, meta
 	}
 
 	rsp, apiResponse, err := client.TargetGroupsApi.TargetgroupsPost(ctx).TargetGroup(targetGroup).Execute()
+	logApiRequestTime(apiResponse)
+
 	if err != nil {
 		diags := diag.FromErr(fmt.Errorf("an error occured while creating a target group: %s ", err))
 		return diags
@@ -358,6 +360,7 @@ func resourceTargetGroupRead(ctx context.Context, d *schema.ResourceData, meta i
 	client := meta.(*ionoscloud.APIClient)
 
 	rsp, apiResponse, err := client.TargetGroupsApi.TargetgroupsFindByTargetGroupId(ctx, d.Id()).Execute()
+	logApiRequestTime(apiResponse)
 
 	if err != nil {
 		if apiResponse != nil && apiResponse.StatusCode == 404 {
@@ -690,6 +693,8 @@ func resourceTargetGroupUpdate(ctx context.Context, d *schema.ResourceData, meta
 	}
 
 	_, apiResponse, err := client.TargetGroupsApi.TargetgroupsPatch(ctx, d.Id()).TargetGroupProperties(input).Execute()
+	logApiRequestTime(apiResponse)
+
 	if err != nil {
 		diags := diag.FromErr(fmt.Errorf("an error occured while restoring a targetGroup ID %s %d", d.Id(), err))
 		return diags
@@ -709,6 +714,7 @@ func resourceTargetGroupDelete(ctx context.Context, d *schema.ResourceData, meta
 	client := meta.(*ionoscloud.APIClient)
 
 	apiResponse, err := client.TargetGroupsApi.TargetGroupsDelete(ctx, d.Id()).Execute()
+	logApiRequestTime(apiResponse)
 
 	if err != nil {
 		diags := diag.FromErr(fmt.Errorf("an error occured while deleting a target group %s %s", d.Id(), err))
