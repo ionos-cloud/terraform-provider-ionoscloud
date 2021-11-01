@@ -14,7 +14,7 @@ func TestAccDataSourceS3KeyMatchFields(t *testing.T) {
 		ProviderFactories: testAccProviderFactories,
 		Steps: []resource.TestStep{
 			{
-				Config: testAccChecks3KeyConfigBasic,
+				Config: testAccDataSourceS3KeyConfigBasic,
 			},
 			{
 				Config: testAccDataSourceS3KeyMatchId,
@@ -29,7 +29,22 @@ func TestAccDataSourceS3KeyMatchFields(t *testing.T) {
 	})
 }
 
-var testAccDataSourceS3KeyMatchId = testAccChecks3KeyConfigBasic + `
+var testAccDataSourceS3KeyConfigBasic = `
+resource ` + UserResource + ` "example" {
+  first_name = "terraform"
+  last_name = "test"
+  email = "` + GenerateEmail() + `"
+  password = "abc123-321CBA"
+  administrator = false
+  force_sec_auth= false
+}
+
+resource ` + S3KeyResource + ` ` + S3KeyTestResource + ` {
+  user_id    = ` + UserResource + `.example.id
+  active     = false
+}`
+
+var testAccDataSourceS3KeyMatchId = testAccDataSourceS3KeyConfigBasic + `
 data ` + S3KeyResource + ` ` + S3KeyDataSourceById + ` {
  user_id    	= ` + UserResource + `.example.id
  id			= ` + S3KeyResource + `.` + S3KeyTestResource + `.id
