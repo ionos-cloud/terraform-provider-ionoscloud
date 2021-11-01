@@ -1,3 +1,7 @@
+## 5.2.19
+
+- **code enhancements**: added http request time log for API calls
+
 ## 5.2.18
 
 - **bug fixes**: fixed datacenter datasource
