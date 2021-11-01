@@ -113,6 +113,7 @@ func dataSourceNatGatewayRuleRead(d *schema.ResourceData, meta interface{}) erro
 
 	var natGatewayRule ionoscloud.NatGatewayRule
 	var err error
+	var apiResponse *ionoscloud.APIResponse
 
 	ctx, cancel := context.WithTimeout(context.Background(), *resourceDefaultTimeouts.Default)
 
@@ -122,7 +123,8 @@ func dataSourceNatGatewayRuleRead(d *schema.ResourceData, meta interface{}) erro
 
 	if idOk {
 		/* search by ID */
-		natGatewayRule, _, err = client.NATGatewaysApi.DatacentersNatgatewaysRulesFindByNatGatewayRuleId(ctx, datacenterId.(string), natgatewayId.(string), id.(string)).Execute()
+		natGatewayRule, apiResponse, err = client.NATGatewaysApi.DatacentersNatgatewaysRulesFindByNatGatewayRuleId(ctx, datacenterId.(string), natgatewayId.(string), id.(string)).Execute()
+		logApiRequestTime(apiResponse)
 		if err != nil {
 			return fmt.Errorf("an error occurred while fetching the nat gateway rule %s: %s", id.(string), err)
 		}
@@ -136,14 +138,16 @@ func dataSourceNatGatewayRuleRead(d *schema.ResourceData, meta interface{}) erro
 			defer cancel()
 		}
 
-		natGatewayRules, _, err := client.NATGatewaysApi.DatacentersNatgatewaysRulesGet(ctx, datacenterId.(string), natgatewayId.(string)).Execute()
+		natGatewayRules, apiResponse, err := client.NATGatewaysApi.DatacentersNatgatewaysRulesGet(ctx, datacenterId.(string), natgatewayId.(string)).Execute()
+		logApiRequestTime(apiResponse)
 		if err != nil {
 			return fmt.Errorf("an error occurred while fetching nat gateway rules: %s", err.Error())
 		}
 
 		if natGatewayRules.Items != nil {
 			for _, c := range *natGatewayRules.Items {
-				tmpNatGatewayRule, _, err := client.NATGatewaysApi.DatacentersNatgatewaysRulesFindByNatGatewayRuleId(ctx, datacenterId.(string), natgatewayId.(string), *c.Id).Execute()
+				tmpNatGatewayRule, apiResponse, err := client.NATGatewaysApi.DatacentersNatgatewaysRulesFindByNatGatewayRuleId(ctx, datacenterId.(string), natgatewayId.(string), *c.Id).Execute()
+				logApiRequestTime(apiResponse)
 				if err != nil {
 					return fmt.Errorf("an error occurred while fetching nat gateway rule with ID %s: %s", *c.Id, err.Error())
 				}

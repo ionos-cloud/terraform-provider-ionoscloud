@@ -1,13 +1,9 @@
 package ionoscloud
 
 import (
-	"fmt"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"testing"
-	"time"
 )
-
-var email = fmt.Sprintf("terraform_test-%d@mailinator.com", time.Now().Unix())
 
 func TestAccDataSourceS3KeyMatchFields(t *testing.T) {
 
@@ -18,53 +14,39 @@ func TestAccDataSourceS3KeyMatchFields(t *testing.T) {
 		ProviderFactories: testAccProviderFactories,
 		Steps: []resource.TestStep{
 			{
-				Config: testAccDataSourceS3KeyCreateResource,
+				Config: testAccDataSourceS3KeyConfigBasic,
 			},
 			{
 				Config: testAccDataSourceS3KeyMatchId,
 				Check: resource.ComposeTestCheckFunc(
-					resource.TestCheckResourceAttrSet("ionoscloud_s3_key.example_key", "id"),
-					resource.TestCheckResourceAttrPair("ionoscloud_s3_key.example_key", "id", "data.ionoscloud_s3_key.example_key_data", "id"),
-					resource.TestCheckResourceAttrPair("ionoscloud_s3_key.example_key", "secret", "data.ionoscloud_s3_key.example_key_data", "secret"),
-					resource.TestCheckResourceAttrPair("ionoscloud_s3_key.example_key", "active", "data.ionoscloud_s3_key.example_key_data", "active"),
+					resource.TestCheckResourceAttrSet(S3KeyResource+"."+S3KeyTestResource, "id"),
+					resource.TestCheckResourceAttrPair(S3KeyResource+"."+S3KeyTestResource, "id", DataSource+"."+S3KeyResource+"."+S3KeyDataSourceById, "id"),
+					resource.TestCheckResourceAttrPair(S3KeyResource+"."+S3KeyTestResource, "secret", DataSource+"."+S3KeyResource+"."+S3KeyDataSourceById, "secret"),
+					resource.TestCheckResourceAttrPair(S3KeyResource+"."+S3KeyTestResource, "active", DataSource+"."+S3KeyResource+"."+S3KeyDataSourceById, "active"),
 				),
 			},
 		},
 	})
 }
 
-var testAccDataSourceS3KeyCreateResource = `
-resource "ionoscloud_user" "example" {
-  first_name 	= "terraform"
-  last_name  	= "test"
-  email 	 	= "` + email + `"
-  password   	= "abc123-321CBA"
+var testAccDataSourceS3KeyConfigBasic = `
+resource ` + UserResource + ` "example" {
+  first_name = "terraform"
+  last_name = "test"
+  email = "` + GenerateEmail() + `"
+  password = "abc123-321CBA"
   administrator = false
   force_sec_auth= false
 }
 
-resource "ionoscloud_s3_key" "example_key" {
-  user_id    = ionoscloud_user.example.id
+resource ` + S3KeyResource + ` ` + S3KeyTestResource + ` {
+  user_id    = ` + UserResource + `.example.id
   active     = false
 }`
 
-var testAccDataSourceS3KeyMatchId = `
-resource "ionoscloud_user" "example" {
- first_name 	= "terraform"
- last_name  	= "test"
- email 	 	= "` + email + `"
- password   	= "abc123-321CBA"
- administrator = false
- force_sec_auth= false
-}
-
-resource "ionoscloud_s3_key" "example_key" {
-  user_id    = ionoscloud_user.example.id
-  active     = false
-}
-
-data "ionoscloud_s3_key" "example_key_data" {
- user_id    	= ionoscloud_user.example.id
- id			= ionoscloud_s3_key.example_key.id
+var testAccDataSourceS3KeyMatchId = testAccDataSourceS3KeyConfigBasic + `
+data ` + S3KeyResource + ` ` + S3KeyDataSourceById + ` {
+ user_id    	= ` + UserResource + `.example.id
+ id			= ` + S3KeyResource + `.` + S3KeyTestResource + `.id
 }
 `

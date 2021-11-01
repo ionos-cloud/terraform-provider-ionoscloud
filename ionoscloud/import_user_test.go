@@ -1,22 +1,13 @@
 package ionoscloud
 
 import (
-	"fmt"
-	"math/rand"
-	"strconv"
-	"time"
-
 	"testing"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
 )
 
-func TestAccUser_ImportBasic(t *testing.T) {
-	resourceName := "resource_user"
-	s1 := rand.NewSource(time.Now().UnixNano())
-	r1 := rand.New(s1)
-	email := strconv.Itoa(r1.Intn(100000)) + "terraform_test" + strconv.Itoa(r1.Intn(100000)) + "@go.com"
+func TestAccUserImportBasic(t *testing.T) {
 
 	resource.Test(t, resource.TestCase{
 		PreCheck:          func() { testAccPreCheck(t) },
@@ -24,11 +15,11 @@ func TestAccUser_ImportBasic(t *testing.T) {
 		CheckDestroy:      testAccCheckUserDestroyCheck,
 		Steps: []resource.TestStep{
 			{
-				Config: fmt.Sprintf(testAccCheckUserConfigBasic, email),
+				Config: testAccImportUserConfigBasic,
 			},
 
 			{
-				ResourceName:            fmt.Sprintf("ionoscloud_user.%s", resourceName),
+				ResourceName:            UserResource + "." + UserTestResource,
 				ImportStateIdFunc:       testAccUserImportStateId,
 				ImportState:             true,
 				ImportStateVerify:       true,
@@ -42,7 +33,7 @@ func testAccUserImportStateId(s *terraform.State) (string, error) {
 	importID := ""
 
 	for _, rs := range s.RootModule().Resources {
-		if rs.Type != "ionoscloud_user" {
+		if rs.Type != UserResource {
 			continue
 		}
 
@@ -51,3 +42,14 @@ func testAccUserImportStateId(s *terraform.State) (string, error) {
 
 	return importID, nil
 }
+
+var testAccImportUserConfigBasic = `
+resource ` + UserResource + ` ` + UserTestResource + ` {
+  first_name = "` + UserTestResource + `"
+  last_name = "` + UserTestResource + `"
+  email = "` + GenerateEmail() + `"
+  password = "abc123-321CBA"
+  administrator = true
+  force_sec_auth= true
+  active  = true
+}`

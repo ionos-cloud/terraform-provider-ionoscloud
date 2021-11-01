@@ -1,7 +1,26 @@
-## 6.0.0-beta.13
+## 6.0.0-beta.15
 
+- **code enhancements**: added http request time log for api calls
+
+## 6.0.0-beta.14
+
+- **bug fixes**: fixed datacenter datasource
+- **code enhancements**: added constants and removed duplicated tests to `backupUnit`, `datacenter`, `lan`, `s3_key`, `firewall`, `server`
+- **code enhancements**: for `pcc`, `group`, `user`, `snapshot`, and `volume` :
+  - made tests comprehensive
+  - optimized test duration by including both match by id and by name in the same test
+  - removed duplicated code from import, data_source, resource and tests files
+- **new features**: import for `snapshot`, `ipblock`, data_source for `group`, `user`, `ipblock`, `volume`
+
+## 6.0.0-beta.13
+- **bug fixes**: fixed issue #112 can't attach existing volume to server after recreating server
 - **bug fixes**: `cube server` could not be deleted
 - **functionality enhancements**: improved data_source for template - now `template` can be searched by any of its arguments
+- **bug fixes**: cannot empty `api_subnet_allow_list` and `s3_buckets`
+- **code enhancements**: for `k8s_cluster`:
+  - made tests comprehensive
+  - optimized test duration by including both match by id and by name in the same test
+  - removed duplicated code from import, data_source and resource files (set parameters)
   
 ## 6.0.0-beta.12
 

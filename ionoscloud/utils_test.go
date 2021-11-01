@@ -52,6 +52,22 @@ func TestSetPropWithNilCheck(t *testing.T) {
 	}
 
 }
+func testNotEmptySlice(resource, attribute string) resource.TestCheckFunc {
+	return func(s *terraform.State) error {
+		for _, rs := range s.RootModule().Resources {
+			if rs.Type != resource {
+				continue
+			}
+
+			lengthOfSlice := rs.Primary.Attributes[attribute]
+
+			if lengthOfSlice == "0" {
+				return fmt.Errorf("returned version slice is empty")
+			}
+		}
+		return nil
+	}
+}
 
 func testNotEmptySlice(resource, attribute string) resource.TestCheckFunc {
 	return func(s *terraform.State) error {

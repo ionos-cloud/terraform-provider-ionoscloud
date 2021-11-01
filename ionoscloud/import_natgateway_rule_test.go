@@ -1,3 +1,5 @@
+// +build natgateway
+
 package ionoscloud
 
 import (
@@ -9,7 +11,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
 )
 
-func TestAccNatGatewayRule_ImportBasic(t *testing.T) {
+func TestAccNatGatewayRuleImportBasic(t *testing.T) {
 	natGatewayRuleName := "natGatewayRule"
 
 	resource.Test(t, resource.TestCase{

@@ -8,7 +8,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
 )
 
-func TestAccShare_ImportBasic(t *testing.T) {
+func TestAccShareImportBasic(t *testing.T) {
 	resourceName := "share"
 
 	resource.Test(t, resource.TestCase{

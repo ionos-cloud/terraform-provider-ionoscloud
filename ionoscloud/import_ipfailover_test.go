@@ -9,7 +9,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
 )
 
-func TestAccIpFailover_ImportBasic(t *testing.T) {
+func TestAccIpFailoverImportBasic(t *testing.T) {
 	resourceName := "failover-test"
 
 	resource.Test(t, resource.TestCase{

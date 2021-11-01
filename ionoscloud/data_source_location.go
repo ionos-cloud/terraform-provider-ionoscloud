@@ -63,7 +63,10 @@ func dataSourceLocationRead(d *schema.ResourceData, meta interface{}) error {
 	if cancel != nil {
 		defer cancel()
 	}
-	locations, _, err := client.LocationsApi.LocationsGet(ctx).Execute()
+	var apiResponse *ionoscloud.APIResponse
+
+	locations, apiResponse, err := client.LocationsApi.LocationsGet(ctx).Execute()
+	logApiRequestTime(apiResponse)
 
 	if err != nil {
 		return fmt.Errorf("an error occured while fetching IonosCloud locations %s", err)

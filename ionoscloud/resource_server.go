@@ -655,6 +655,7 @@ func resourceServerCreate(ctx context.Context, d *schema.ResourceData, meta inte
 	}
 
 	server, apiResponse, err := client.ServersApi.DatacentersServersPost(ctx, d.Get("datacenter_id").(string)).Server(server).Execute()
+	logApiRequestTime(apiResponse)
 
 	if err != nil {
 		diags := diag.FromErr(fmt.Errorf("error creating server: %s", err))
@@ -672,15 +673,17 @@ func resourceServerCreate(ctx context.Context, d *schema.ResourceData, meta inte
 		diags := diag.FromErr(errState)
 		return diags
 	}
-	server, _, err = client.ServersApi.DatacentersServersFindById(ctx, d.Get("datacenter_id").(string), *server.Id).Execute()
+	server, apiResponse, err = client.ServersApi.DatacentersServersFindById(ctx, d.Get("datacenter_id").(string), *server.Id).Execute()
+	logApiRequestTime(apiResponse)
 
 	if err != nil {
 		diags := diag.FromErr(fmt.Errorf("error fetching server: (%s)", err))
 		return diags
 	}
 
-	firewallRules, _, err := client.FirewallRulesApi.DatacentersServersNicsFirewallrulesGet(ctx, d.Get("datacenter_id").(string),
+	firewallRules, apiResponse, err := client.FirewallRulesApi.DatacentersServersNicsFirewallrulesGet(ctx, d.Get("datacenter_id").(string),
 		*server.Id, *(*server.Entities.Nics.Items)[0].Id).Execute()
+	logApiRequestTime(apiResponse)
 
 	if err != nil {
 		diags := diag.FromErr(fmt.Errorf("an error occurred while fetching firewall rules: %s", err))
@@ -796,6 +799,7 @@ func resourceServerRead(ctx context.Context, d *schema.ResourceData, meta interf
 	serverId := d.Id()
 
 	server, apiResponse, err := client.ServersApi.DatacentersServersFindById(ctx, dcId, serverId).Execute()
+	logApiRequestTime(apiResponse)
 	if err != nil {
 		if apiResponse != nil && apiResponse.Response != nil && apiResponse.StatusCode == 404 {
 			d.SetId("")
@@ -868,7 +872,8 @@ func resourceServerRead(ctx context.Context, d *schema.ResourceData, meta interf
 			return diags
 		}
 
-		nic, _, err := client.NetworkInterfacesApi.DatacentersServersNicsFindById(ctx, dcId, serverId, primarynic.(string)).Execute()
+		nic, apiResponse, err := client.NetworkInterfacesApi.DatacentersServersNicsFindById(ctx, dcId, serverId, primarynic.(string)).Execute()
+		logApiRequestTime(apiResponse)
 		if err != nil {
 			diags := diag.FromErr(fmt.Errorf("error occured while fetching nic %s for server ID %s %s", primarynic.(string), d.Id(), err))
 			return diags
@@ -881,44 +886,21 @@ func resourceServerRead(ctx context.Context, d *schema.ResourceData, meta interf
 			}
 		}
 
-		network := map[string]interface{}{}
-
-		setPropWithNilCheck(network, "dhcp", nic.Properties.Dhcp)
-		setPropWithNilCheck(network, "firewall_active", nic.Properties.FirewallActive)
-		setPropWithNilCheck(network, "firewall_type", nic.Properties.FirewallType)
-		setPropWithNilCheck(network, "lan", nic.Properties.Lan)
-		setPropWithNilCheck(network, "name", nic.Properties.Name)
-		setPropWithNilCheck(network, "ips", nic.Properties.Ips)
-		setPropWithNilCheck(network, "mac", nic.Properties.Mac)
-		setPropWithNilCheck(network, "device_number", nic.Properties.DeviceNumber)
-		setPropWithNilCheck(network, "pci_slot", nic.Properties.PciSlot)
+		network := SetNetworkProperties(nic)
 
 		if nic.Properties.Ips != nil && len(*nic.Properties.Ips) > 0 {
 			network["ips"] = *nic.Properties.Ips
 		}
 
 		if firewallId, ok := d.GetOk("firewallrule_id"); ok {
-			firewall, _, err := client.FirewallRulesApi.DatacentersServersNicsFirewallrulesFindById(ctx, dcId, serverId, primarynic.(string), firewallId.(string)).Execute()
+			firewall, apiResponse, err := client.FirewallRulesApi.DatacentersServersNicsFirewallrulesFindById(ctx, dcId, serverId, primarynic.(string), firewallId.(string)).Execute()
+			logApiRequestTime(apiResponse)
 			if err != nil {
 				diags := diag.FromErr(fmt.Errorf("error occured while fetching firewallrule %s for server ID %s %s", firewallId.(string), serverId, err))
 				return diags
 			}
 
-			fw := map[string]interface{}{}
-			/*
-				"protocol": *firewall.Properties.Protocol,
-				"name":     *firewall.Properties.Name,
-			*/
-			setPropWithNilCheck(fw, "protocol", firewall.Properties.Protocol)
-			setPropWithNilCheck(fw, "name", firewall.Properties.Name)
-			setPropWithNilCheck(fw, "source_mac", firewall.Properties.SourceMac)
-			setPropWithNilCheck(fw, "source_ip", firewall.Properties.SourceIp)
-			setPropWithNilCheck(fw, "target_ip", firewall.Properties.TargetIp)
-			setPropWithNilCheck(fw, "port_range_start", firewall.Properties.PortRangeStart)
-			setPropWithNilCheck(fw, "port_range_end", firewall.Properties.PortRangeEnd)
-			setPropWithNilCheck(fw, "icmp_type", firewall.Properties.IcmpType)
-			setPropWithNilCheck(fw, "icmp_code", firewall.Properties.IcmpCode)
-			setPropWithNilCheck(fw, "type", firewall.Properties.Type)
+			fw := SetFirewallProperties(firewall)
 
 			network["firewall"] = []map[string]interface{}{fw}
 		}
@@ -937,25 +919,12 @@ func resourceServerRead(ctx context.Context, d *schema.ResourceData, meta interf
 				return diags
 			}
 		}
-		volumeObj, _, err := client.ServersApi.DatacentersServersVolumesFindById(ctx, dcId, serverId, *server.Properties.BootVolume.Id).Execute()
+		volumeObj, apiResponse, err := client.ServersApi.DatacentersServersVolumesFindById(ctx, dcId, serverId, *server.Properties.BootVolume.Id).Execute()
+		logApiRequestTime(apiResponse)
 
 		if err == nil {
-			volumeItem := map[string]interface{}{}
 
-			setPropWithNilCheck(volumeItem, "name", volumeObj.Properties.Name)
-			setPropWithNilCheck(volumeItem, "disk_type", volumeObj.Properties.Type)
-			setPropWithNilCheck(volumeItem, "size", volumeObj.Properties.Size)
-			setPropWithNilCheck(volumeItem, "licence_type", volumeObj.Properties.LicenceType)
-			setPropWithNilCheck(volumeItem, "bus", volumeObj.Properties.Bus)
-			setPropWithNilCheck(volumeItem, "availability_zone", volumeObj.Properties.AvailabilityZone)
-			setPropWithNilCheck(volumeItem, "cpu_hot_plug", volumeObj.Properties.CpuHotPlug)
-			setPropWithNilCheck(volumeItem, "ram_hot_plug", volumeObj.Properties.CpuHotPlug)
-			setPropWithNilCheck(volumeItem, "nic_hot_plug", volumeObj.Properties.CpuHotPlug)
-			setPropWithNilCheck(volumeItem, "nic_hot_unplug", volumeObj.Properties.CpuHotPlug)
-			setPropWithNilCheck(volumeItem, "disc_virtio_hot_plug", volumeObj.Properties.CpuHotPlug)
-			setPropWithNilCheck(volumeItem, "disc_virtio_hot_unplug", volumeObj.Properties.CpuHotPlug)
-			setPropWithNilCheck(volumeItem, "device_number", volumeObj.Properties.DeviceNumber)
-			setPropWithNilCheck(volumeItem, "pci_slot", volumeObj.Properties.PciSlot)
+			volumeItem := SetVolumeProperties(volumeObj)
 
 			userData := d.Get("volume.0.user_data")
 			volumeItem["user_data"] = userData
@@ -973,7 +942,8 @@ func resourceServerRead(ctx context.Context, d *schema.ResourceData, meta interf
 
 	bootVolume, ok := d.GetOk("boot_volume")
 	if ok && len(bootVolume.(string)) > 0 {
-		_, _, err = client.ServersApi.DatacentersServersVolumesFindById(ctx, dcId, d.Id(), bootVolume.(string)).Execute()
+		_, apiResponse, err = client.ServersApi.DatacentersServersVolumesFindById(ctx, dcId, d.Id(), bootVolume.(string)).Execute()
+		logApiRequestTime(apiResponse)
 		if err != nil {
 			if err := d.Set("volume", nil); err != nil {
 				diags := diag.FromErr(err)
@@ -990,6 +960,68 @@ func resourceServerRead(ctx context.Context, d *schema.ResourceData, meta interf
 	}
 
 	return nil
+}
+
+func SetNetworkProperties(nic ionoscloud.Nic) map[string]interface{} {
+
+	network := map[string]interface{}{}
+
+	setPropWithNilCheck(network, "dhcp", nic.Properties.Dhcp)
+	setPropWithNilCheck(network, "firewall_active", nic.Properties.FirewallActive)
+	setPropWithNilCheck(network, "firewall_type", nic.Properties.FirewallType)
+	setPropWithNilCheck(network, "lan", nic.Properties.Lan)
+	setPropWithNilCheck(network, "name", nic.Properties.Name)
+	setPropWithNilCheck(network, "ips", nic.Properties.Ips)
+	setPropWithNilCheck(network, "mac", nic.Properties.Mac)
+
+	if nic.Properties.Ips != nil && len(*nic.Properties.Ips) > 0 {
+		network["ips"] = *nic.Properties.Ips
+	}
+
+	return network
+}
+
+func SetFirewallProperties(firewall ionoscloud.FirewallRule) map[string]interface{} {
+
+	fw := map[string]interface{}{}
+	/*
+		"protocol": *firewall.Properties.Protocol,
+		"name":     *firewall.Properties.Name,
+	*/
+	setPropWithNilCheck(fw, "protocol", firewall.Properties.Protocol)
+	setPropWithNilCheck(fw, "name", firewall.Properties.Name)
+	setPropWithNilCheck(fw, "source_mac", firewall.Properties.SourceMac)
+	setPropWithNilCheck(fw, "source_ip", firewall.Properties.SourceIp)
+	setPropWithNilCheck(fw, "target_ip", firewall.Properties.TargetIp)
+	setPropWithNilCheck(fw, "port_range_start", firewall.Properties.PortRangeStart)
+	setPropWithNilCheck(fw, "port_range_end", firewall.Properties.PortRangeEnd)
+	setPropWithNilCheck(fw, "icmp_type", firewall.Properties.IcmpType)
+	setPropWithNilCheck(fw, "icmp_code", firewall.Properties.IcmpCode)
+	setPropWithNilCheck(fw, "type", firewall.Properties.Type)
+	return fw
+}
+
+func SetVolumeProperties(volume ionoscloud.Volume) map[string]interface{} {
+
+	volumeMap := map[string]interface{}{}
+
+	setPropWithNilCheck(volumeMap, "name", volume.Properties.Name)
+	setPropWithNilCheck(volumeMap, "disk_type", volume.Properties.Type)
+	setPropWithNilCheck(volumeMap, "size", volume.Properties.Size)
+	setPropWithNilCheck(volumeMap, "licence_type", volume.Properties.LicenceType)
+	setPropWithNilCheck(volumeMap, "bus", volume.Properties.Bus)
+	setPropWithNilCheck(volumeMap, "availability_zone", volume.Properties.AvailabilityZone)
+	setPropWithNilCheck(volumeMap, "cpu_hot_plug", volume.Properties.CpuHotPlug)
+	setPropWithNilCheck(volumeMap, "ram_hot_plug", volume.Properties.RamHotPlug)
+	setPropWithNilCheck(volumeMap, "nic_hot_plug", volume.Properties.NicHotPlug)
+	setPropWithNilCheck(volumeMap, "nic_hot_unplug", volume.Properties.NicHotUnplug)
+	setPropWithNilCheck(volumeMap, "disc_virtio_hot_plug", volume.Properties.DiscVirtioHotPlug)
+	setPropWithNilCheck(volumeMap, "disc_virtio_hot_unplug", volume.Properties.DiscVirtioHotUnplug)
+	setPropWithNilCheck(volumeMap, "device_number", volume.Properties.DeviceNumber)
+	setPropWithNilCheck(volumeMap, "user_data", volume.Properties.UserData)
+	setPropWithNilCheck(volumeMap, "backup_unit_id", volume.Properties.BackupunitId)
+
+	return volumeMap
 }
 
 func boolAddr(b bool) *bool {
@@ -1060,6 +1092,7 @@ func resourceServerUpdate(ctx context.Context, d *schema.ResourceData, meta inte
 	}
 
 	server, apiResponse, err := client.ServersApi.DatacentersServersPatch(ctx, dcId, d.Id()).Server(request).Execute()
+	logApiRequestTime(apiResponse)
 
 	if err != nil {
 		diags := diag.FromErr(fmt.Errorf("error occured while updating server ID %s: %s", d.Id(), err))
@@ -1100,13 +1133,15 @@ func resourceServerUpdate(ctx context.Context, d *schema.ResourceData, meta inte
 		}
 
 		bootVolume := d.Get("boot_volume").(string)
-		_, _, err := client.ServersApi.DatacentersServersVolumesFindById(ctx, dcId, d.Id(), bootVolume).Execute()
+		_, apiResponse, err := client.ServersApi.DatacentersServersVolumesFindById(ctx, dcId, d.Id(), bootVolume).Execute()
+		logApiRequestTime(apiResponse)
 
 		if err != nil {
 			volume := ionoscloud.Volume{
 				Id: &bootVolume,
 			}
 			_, apiResponse, err := client.ServersApi.DatacentersServersVolumesPost(ctx, dcId, d.Id()).Volume(volume).Execute()
+			logApiRequestTime(apiResponse)
 			if err != nil {
 				diags := diag.FromErr(fmt.Errorf("an error occured while attaching a volume dcId: %s server_id: %s ID: %s Response: %s", dcId, d.Id(), bootVolume, err))
 				return diags
@@ -1137,7 +1172,8 @@ func resourceServerUpdate(ctx context.Context, d *schema.ResourceData, meta inte
 			properties.Bus = &vStr
 		}
 
-		_, apiResponse, err := client.VolumesApi.DatacentersVolumesPatch(ctx, d.Get("datacenter_id").(string), bootVolume).Volume(properties).Execute()
+		_, apiResponse, err = client.VolumesApi.DatacentersVolumesPatch(ctx, d.Get("datacenter_id").(string), bootVolume).Volume(properties).Execute()
+		logApiRequestTime(apiResponse)
 
 		if err != nil {
 			diags := diag.FromErr(fmt.Errorf("error patching volume (%s) (%s)", d.Id(), err))
@@ -1202,7 +1238,8 @@ func resourceServerUpdate(ctx context.Context, d *schema.ResourceData, meta inte
 
 			firewallId := d.Get("firewallrule_id").(string)
 
-			_, _, err := client.FirewallRulesApi.DatacentersServersNicsFirewallrulesFindById(ctx, dcId, *server.Id, *nic.Id, firewallId).Execute()
+			_, apiResponse, err := client.FirewallRulesApi.DatacentersServersNicsFirewallrulesFindById(ctx, dcId, *server.Id, *nic.Id, firewallId).Execute()
+			logApiRequestTime(apiResponse)
 
 			if err != nil {
 				if apiResponse != nil && apiResponse.Response != nil && apiResponse.StatusCode != 404 {
@@ -1215,6 +1252,7 @@ func resourceServerUpdate(ctx context.Context, d *schema.ResourceData, meta inte
 			}
 
 			firewall, apiResponse, err = client.FirewallRulesApi.DatacentersServersNicsFirewallrulesPatch(ctx, dcId, *server.Id, *nic.Id, firewallId).Firewallrule(*firewall.Properties).Execute()
+			logApiRequestTime(apiResponse)
 			if err != nil {
 				diags := diag.FromErr(fmt.Errorf("an error occured while updating firewall rule dcId: %s server_id: %s nic_id %s ID: %s Response: %s", dcId, *server.Id, *nic.Id, firewallId, err))
 				return diags
@@ -1241,6 +1279,7 @@ func resourceServerUpdate(ctx context.Context, d *schema.ResourceData, meta inte
 		log.Printf("[DEBUG] Updating props: %s", string(mProp))
 
 		_, apiResponse, err := client.NetworkInterfacesApi.DatacentersServersNicsPatch(ctx, d.Get("datacenter_id").(string), *server.Id, *nic.Id).Nic(properties).Execute()
+		logApiRequestTime(apiResponse)
 		if err != nil {
 			diags := diag.FromErr(fmt.Errorf("error updating nic (%s)", err))
 			return diags
@@ -1262,7 +1301,8 @@ func resourceServerDelete(ctx context.Context, d *schema.ResourceData, meta inte
 	client := meta.(SdkBundle).CloudApiClient
 	dcId := d.Get("datacenter_id").(string)
 
-	server, _, err := client.ServersApi.DatacentersServersFindById(ctx, dcId, d.Id()).Execute()
+	server, apiResponse, err := client.ServersApi.DatacentersServersFindById(ctx, dcId, d.Id()).Execute()
+	logApiRequestTime(apiResponse)
 
 	if err != nil {
 		diags := diag.FromErr(fmt.Errorf("error occured while fetching a server ID %s %s", d.Id(), err))
@@ -1271,6 +1311,7 @@ func resourceServerDelete(ctx context.Context, d *schema.ResourceData, meta inte
 
 	if server.Properties.BootVolume != nil && strings.ToLower(*server.Properties.Type) != "cube" {
 		apiResponse, err := client.VolumesApi.DatacentersVolumesDelete(ctx, dcId, *server.Properties.BootVolume.Id).Execute()
+		logApiRequestTime(apiResponse)
 
 		if err != nil {
 			diags := diag.FromErr(fmt.Errorf("error occured while delete volume %s of server ID %s %s", *server.Properties.BootVolume.Id, d.Id(), err))
@@ -1284,7 +1325,8 @@ func resourceServerDelete(ctx context.Context, d *schema.ResourceData, meta inte
 		}
 	}
 
-	apiResponse, err := client.ServersApi.DatacentersServersDelete(ctx, dcId, d.Id()).Execute()
+	apiResponse, err = client.ServersApi.DatacentersServersDelete(ctx, dcId, d.Id()).Execute()
+	logApiRequestTime(apiResponse)
 	if err != nil {
 		diags := diag.FromErr(fmt.Errorf("an error occured while deleting a server ID %s %s", d.Id(), err))
 		return diags
@@ -1315,6 +1357,7 @@ func resourceServerImport(ctx context.Context, d *schema.ResourceData, meta inte
 	client := meta.(*ionoscloud.APIClient)
 
 	server, apiResponse, err := client.ServersApi.DatacentersServersFindById(ctx, datacenterId, serverId).Execute()
+	logApiRequestTime(apiResponse)
 
 	if err != nil {
 		if apiResponse != nil && apiResponse.Response != nil && apiResponse.StatusCode == 404 {
@@ -1374,7 +1417,8 @@ func resourceServerImport(ctx context.Context, d *schema.ResourceData, meta inte
 			return nil, err
 		}
 
-		nic, _, err := client.NetworkInterfacesApi.DatacentersServersNicsFindById(ctx, datacenterId, serverId, primaryNic).Execute()
+		nic, apiResponse, err := client.NetworkInterfacesApi.DatacentersServersNicsFindById(ctx, datacenterId, serverId, primaryNic).Execute()
+		logApiRequestTime(apiResponse)
 		if err != nil {
 			return nil, err
 		}
@@ -1385,21 +1429,9 @@ func resourceServerImport(ctx context.Context, d *schema.ResourceData, meta inte
 			}
 		}
 
-		network := map[string]interface{}{}
-
-		setPropWithNilCheck(network, "dhcp", nic.Properties.Dhcp)
-		setPropWithNilCheck(network, "firewall_active", nic.Properties.FirewallActive)
-
-		setPropWithNilCheck(network, "lan", nic.Properties.Lan)
-		setPropWithNilCheck(network, "name", nic.Properties.Name)
-		setPropWithNilCheck(network, "ips", nic.Properties.Ips)
-		setPropWithNilCheck(network, "mac", nic.Properties.Mac)
-
-		if nic.Properties.Ips != nil && len(*nic.Properties.Ips) > 0 {
-			network["ips"] = *nic.Properties.Ips
-		}
-
-		firewallRules, _, err := client.FirewallRulesApi.DatacentersServersNicsFirewallrulesGet(ctx, datacenterId, serverId, primaryNic).Execute()
+		network := SetNetworkProperties(nic)
+		firewallRules, apiResponse, err := client.FirewallRulesApi.DatacentersServersNicsFirewallrulesGet(ctx, datacenterId, serverId, primaryNic).Execute()
+		logApiRequestTime(apiResponse)
 
 		if err != nil {
 			return nil, err
@@ -1414,22 +1446,13 @@ func resourceServerImport(ctx context.Context, d *schema.ResourceData, meta inte
 		}
 
 		if firewallId, ok := d.GetOk("firewallrule_id"); ok {
-			firewall, _, err := client.FirewallRulesApi.DatacentersServersNicsFirewallrulesFindById(ctx, datacenterId, serverId, primaryNic, firewallId.(string)).Execute()
+			firewall, apiResponse, err := client.FirewallRulesApi.DatacentersServersNicsFirewallrulesFindById(ctx, datacenterId, serverId, primaryNic, firewallId.(string)).Execute()
+			logApiRequestTime(apiResponse)
 			if err != nil {
 				return nil, err
 			}
 
-			fw := map[string]interface{}{}
-
-			setPropWithNilCheck(fw, "protocol", firewall.Properties.Protocol)
-			setPropWithNilCheck(fw, "name", firewall.Properties.Name)
-			setPropWithNilCheck(fw, "source_mac", firewall.Properties.SourceMac)
-			setPropWithNilCheck(fw, "source_ip", firewall.Properties.SourceIp)
-			setPropWithNilCheck(fw, "target_ip", firewall.Properties.TargetIp)
-			setPropWithNilCheck(fw, "port_range_start", firewall.Properties.PortRangeStart)
-			setPropWithNilCheck(fw, "port_range_end", firewall.Properties.PortRangeEnd)
-			setPropWithNilCheck(fw, "icmp_type", firewall.Properties.IcmpType)
-			setPropWithNilCheck(fw, "icmp_code", firewall.Properties.IcmpCode)
+			fw := SetFirewallProperties(firewall)
 
 			network["firewall"] = []map[string]interface{}{fw}
 		}
@@ -1446,7 +1469,8 @@ func resourceServerImport(ctx context.Context, d *schema.ResourceData, meta inte
 				return nil, err
 			}
 		}
-		volumeObj, _, err := client.ServersApi.DatacentersServersVolumesFindById(ctx, datacenterId, serverId, *server.Properties.BootVolume.Id).Execute()
+		volumeObj, apiResponse, err := client.ServersApi.DatacentersServersVolumesFindById(ctx, datacenterId, serverId, *server.Properties.BootVolume.Id).Execute()
+		logApiRequestTime(apiResponse)
 		if err == nil {
 			volumeItem := map[string]interface{}{}
 

@@ -3,12 +3,11 @@
 package ionoscloud
 
 import (
-	"testing"
-
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
+	"testing"
 )
 
-func TestAccDataSourceK8sCluster_matchId(t *testing.T) {
+func TestAccDataSourceK8sCluster(t *testing.T) {
 	resource.Test(t, resource.TestCase{
 		PreCheck: func() {
 			testAccPreCheck(t)
@@ -16,69 +15,44 @@ func TestAccDataSourceK8sCluster_matchId(t *testing.T) {
 		ProviderFactories: testAccProviderFactories,
 		Steps: []resource.TestStep{
 			{
-				Config: testAccDataSourceK8sClusterCreateResources,
+				Config: testAccCheckK8sClusterConfigBasic,
 			},
 			{
 				Config: testAccDataSourceK8sClusterMatchId,
 				Check: resource.ComposeTestCheckFunc(
-					resource.TestCheckResourceAttr("data.ionoscloud_k8s_cluster.test_ds_k8s_cluster", "name", "test_cluster"),
-					resource.TestCheckResourceAttr("data.ionoscloud_k8s_cluster.test_ds_k8s_cluster", "k8s_version", "1.20.8"),
-					resource.TestCheckResourceAttrSet("data.ionoscloud_k8s_cluster.test_ds_k8s_cluster", "kube_config"),
+					resource.TestCheckResourceAttrPair(DataSource+"."+K8sClusterResource+"."+K8sClusterDataSourceById, "name", K8sClusterResource+"."+K8sClusterTestResource, "name"),
+					resource.TestCheckResourceAttrPair(DataSource+"."+K8sClusterResource+"."+K8sClusterDataSourceById, "k8s_version", K8sClusterResource+"."+K8sClusterTestResource, "k8s_version"),
+					resource.TestCheckResourceAttrPair(DataSource+"."+K8sClusterResource+"."+K8sClusterDataSourceById, "maintenance_window.0.day_of_the_week", K8sClusterResource+"."+K8sClusterTestResource, "maintenance_window.0.day_of_the_week"),
+					resource.TestCheckResourceAttrPair(DataSource+"."+K8sClusterResource+"."+K8sClusterDataSourceById, "maintenance_window.0.time", K8sClusterResource+"."+K8sClusterTestResource, "maintenance_window.0.time"),
+					resource.TestCheckResourceAttrPair(DataSource+"."+K8sClusterResource+"."+K8sClusterDataSourceById, "maintenance_window.0.time", K8sClusterResource+"."+K8sClusterTestResource, "maintenance_window.0.time"),
+					resource.TestCheckResourceAttrPair(DataSource+"."+K8sClusterResource+"."+K8sClusterDataSourceById, "api_subnet_allow_list.0", K8sClusterResource+"."+K8sClusterTestResource, "api_subnet_allow_list.0"),
+					resource.TestCheckResourceAttrPair(DataSource+"."+K8sClusterResource+"."+K8sClusterDataSourceById, "s3_buckets.0.name", K8sClusterResource+"."+K8sClusterTestResource, "s3_buckets.0.name"),
 				),
-			},
-		},
-	})
-}
-
-func TestAccDataSourceK8sCluster_matchName(t *testing.T) {
-	resource.Test(t, resource.TestCase{
-		PreCheck: func() {
-			testAccPreCheck(t)
-		},
-		ProviderFactories: testAccProviderFactories,
-		Steps: []resource.TestStep{
-			{
-				Config: testAccDataSourceK8sClusterCreateResources,
 			},
 			{
 				Config: testAccDataSourceK8sClusterMatchName,
 				Check: resource.ComposeTestCheckFunc(
-					resource.TestCheckResourceAttr("data.ionoscloud_k8s_cluster.test_ds_k8s_cluster", "name", "test_cluster"),
-					resource.TestCheckResourceAttr("data.ionoscloud_k8s_cluster.test_ds_k8s_cluster", "k8s_version", "1.20.8"),
-					resource.TestCheckResourceAttrSet("data.ionoscloud_k8s_cluster.test_ds_k8s_cluster", "kube_config"),
-					resource.TestCheckResourceAttrSet("data.ionoscloud_k8s_cluster.test_ds_k8s_cluster", "id"),
+					resource.TestCheckResourceAttrPair(DataSource+"."+K8sClusterResource+"."+K8sClusterDataSourceByName, "name", K8sClusterResource+"."+K8sClusterTestResource, "name"),
+					resource.TestCheckResourceAttrPair(DataSource+"."+K8sClusterResource+"."+K8sClusterDataSourceByName, "k8s_version", K8sClusterResource+"."+K8sClusterTestResource, "k8s_version"),
+					resource.TestCheckResourceAttrPair(DataSource+"."+K8sClusterResource+"."+K8sClusterDataSourceByName, "maintenance_window.0.day_of_the_week", K8sClusterResource+"."+K8sClusterTestResource, "maintenance_window.0.day_of_the_week"),
+					resource.TestCheckResourceAttrPair(DataSource+"."+K8sClusterResource+"."+K8sClusterDataSourceByName, "maintenance_window.0.time", K8sClusterResource+"."+K8sClusterTestResource, "maintenance_window.0.time"),
+					resource.TestCheckResourceAttrPair(DataSource+"."+K8sClusterResource+"."+K8sClusterDataSourceByName, "maintenance_window.0.time", K8sClusterResource+"."+K8sClusterTestResource, "maintenance_window.0.time"),
+					resource.TestCheckResourceAttrPair(DataSource+"."+K8sClusterResource+"."+K8sClusterDataSourceByName, "api_subnet_allow_list.0", K8sClusterResource+"."+K8sClusterTestResource, "api_subnet_allow_list.0"),
+					resource.TestCheckResourceAttrPair(DataSource+"."+K8sClusterResource+"."+K8sClusterDataSourceByName, "s3_buckets.0.name", K8sClusterResource+"."+K8sClusterTestResource, "s3_buckets.0.name"),
 				),
 			},
 		},
 	})
-
 }
 
-const testAccDataSourceK8sClusterCreateResources = `
-resource "ionoscloud_k8s_cluster" "test_ds_k8s_cluster" {
-  name         = "test_cluster"
-  k8s_version  = "1.20.8"
+const testAccDataSourceK8sClusterMatchId = testAccCheckK8sClusterConfigBasic + `
+data ` + K8sClusterResource + ` ` + K8sClusterDataSourceById + `{
+  id	= ` + K8sClusterResource + `.` + K8sClusterTestResource + `.id
 }
 `
 
-const testAccDataSourceK8sClusterMatchId = `
-resource "ionoscloud_k8s_cluster" "test_ds_k8s_cluster" {
-  name         = "test_cluster"
-  k8s_version  = "1.20.8"
-}
-
-data "ionoscloud_k8s_cluster" "test_ds_k8s_cluster" {
-  id	= ionoscloud_k8s_cluster.test_ds_k8s_cluster.id
-}
-`
-
-const testAccDataSourceK8sClusterMatchName = `
-resource "ionoscloud_k8s_cluster" "test_ds_k8s_cluster" {
-  name         = "test_cluster"
-  k8s_version  = "1.20.8"
-}
-
-data "ionoscloud_k8s_cluster" "test_ds_k8s_cluster" {
-  name	= "test_cluster"
+const testAccDataSourceK8sClusterMatchName = testAccCheckK8sClusterConfigBasic + `
+data ` + K8sClusterResource + ` ` + K8sClusterDataSourceByName + `{
+  name	= "` + K8sClusterTestResource + `"
 }
 `

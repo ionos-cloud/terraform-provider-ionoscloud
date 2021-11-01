@@ -12,15 +12,9 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/ionos-cloud/sdk-go/v6"
-	dbaasService "github.com/ionos-cloud/terraform-provider-ionoscloud/services/dbaas"
 )
 
 var Version = "development"
-
-type SdkBundle struct {
-	CloudApiClient *ionoscloud.APIClient
-	DbaasClient    *dbaasService.Client
-}
 
 // Provider returns a schema.Provider for ionoscloud.
 func Provider() *schema.Provider {
@@ -62,52 +56,52 @@ func Provider() *schema.Provider {
 		},
 
 		ResourcesMap: map[string]*schema.Resource{
-			"ionoscloud_datacenter":                         resourceDatacenter(),
-			"ionoscloud_ipblock":                            resourceIPBlock(),
-			"ionoscloud_firewall":                           resourceFirewall(),
-			"ionoscloud_lan":                                resourceLan(),
-			"ionoscloud_loadbalancer":                       resourceLoadbalancer(),
-			"ionoscloud_nic":                                resourceNic(),
-			"ionoscloud_server":                             resourceServer(),
-			"ionoscloud_volume":                             resourceVolume(),
-			"ionoscloud_group":                              resourceGroup(),
-			"ionoscloud_share":                              resourceShare(),
-			"ionoscloud_user":                               resourceUser(),
-			"ionoscloud_snapshot":                           resourceSnapshot(),
-			"ionoscloud_ipfailover":                         resourceLanIPFailover(),
-			"ionoscloud_k8s_cluster":                        resourcek8sCluster(),
-			"ionoscloud_k8s_node_pool":                      resourcek8sNodePool(),
-			"ionoscloud_private_crossconnect":               resourcePrivateCrossConnect(),
-			"ionoscloud_backup_unit":                        resourceBackupUnit(),
-			"ionoscloud_s3_key":                             resourceS3Key(),
-			"ionoscloud_natgateway":                         resourceNatGateway(),
-			"ionoscloud_natgateway_rule":                    resourceNatGatewayRule(),
-			"ionoscloud_networkloadbalancer":                resourceNetworkLoadBalancer(),
+			DatacenterResource:               resourceDatacenter(),
+			IpBLockResource:                  resourceIPBlock(),
+			FirewallResource:                 resourceFirewall(),
+			LanResource:                      resourceLan(),
+			"ionoscloud_loadbalancer":        resourceLoadbalancer(),
+			"ionoscloud_nic":                 resourceNic(),
+			ServerResource:                   resourceServer(),
+			VolumeResource:                   resourceVolume(),
+			GroupResource:                    resourceGroup(),
+			"ionoscloud_share":               resourceShare(),
+			UserResource:                     resourceUser(),
+			SnapshotResource:                 resourceSnapshot(),
+			"ionoscloud_ipfailover":          resourceLanIPFailover(),
+			K8sClusterResource:               resourcek8sCluster(),
+			"ionoscloud_k8s_node_pool":       resourcek8sNodePool(),
+			PCCResource:                      resourcePrivateCrossConnect(),
+			BackupUnitResource:               resourceBackupUnit(),
+			S3KeyResource:                    resourceS3Key(),
+			"ionoscloud_natgateway":          resourceNatGateway(),
+			"ionoscloud_natgateway_rule":     resourceNatGatewayRule(),
+			"ionoscloud_networkloadbalancer": resourceNetworkLoadBalancer(),
 			"ionoscloud_networkloadbalancer_forwardingrule": resourceNetworkLoadBalancerForwardingRule(),
-			DBaaSClusterResource:                            resourceDbaasPgSqlCluster(),
 		},
 		DataSourcesMap: map[string]*schema.Resource{
-			"ionoscloud_datacenter":                         dataSourceDataCenter(),
+			DatacenterResource:                              dataSourceDataCenter(),
 			"ionoscloud_location":                           dataSourceLocation(),
 			"ionoscloud_image":                              dataSourceImage(),
 			"ionoscloud_resource":                           dataSourceResource(),
-			"ionoscloud_snapshot":                           dataSourceSnapshot(),
-			"ionoscloud_lan":                                dataSourceLan(),
-			"ionoscloud_private_crossconnect":               dataSourcePcc(),
-			"ionoscloud_server":                             dataSourceServer(),
-			"ionoscloud_k8s_cluster":                        dataSourceK8sCluster(),
+			SnapshotResource:                                dataSourceSnapshot(),
+			LanResource:                                     dataSourceLan(),
+			PCCResource:                                     dataSourcePcc(),
+			ServerResource:                                  dataSourceServer(),
+			K8sClusterResource:                              dataSourceK8sCluster(),
 			"ionoscloud_k8s_node_pool":                      dataSourceK8sNodePool(),
 			"ionoscloud_natgateway":                         dataSourceNatGateway(),
 			"ionoscloud_natgateway_rule":                    dataSourceNatGatewayRule(),
 			"ionoscloud_networkloadbalancer":                dataSourceNetworkLoadBalancer(),
 			"ionoscloud_networkloadbalancer_forwardingrule": dataSourceNetworkLoadBalancerForwardingRule(),
 			"ionoscloud_template":                           dataSourceTemplate(),
-			"ionoscloud_backup_unit":                        dataSourceBackupUnit(),
-			"ionoscloud_firewall":                           dataSourceFirewall(),
-			"ionoscloud_s3_key":                             dataSourceS3Key(),
-			DBaaSClusterResource:                            dataSourceDbaasPgSqlCluster(),
-			DBaaSVersionsResource:                           dataSourceDbaasPgSqlVersions(),
-			DBaaSBackupsResource:                            dataSourceDbaasPgSqlBackups(),
+			BackupUnitResource:                              dataSourceBackupUnit(),
+			FirewallResource:                                dataSourceFirewall(),
+			S3KeyResource:                                   dataSourceS3Key(),
+			GroupResource:                                   dataSourceGroup(),
+			UserResource:                                    dataSourceUser(),
+			IpBLockResource:                                 dataSourceIpBlock(),
+			VolumeResource:                                  dataSourceVolume(),
 		},
 	}
 
@@ -168,12 +162,7 @@ func providerConfigure(d *schema.ResourceData, terraformVersion string) (interfa
 	//newConfig.UserAgent = fmt.Sprintf("HashiCorp Terraform/%s Terraform Plugin SDK/%s Terraform Provider Ionoscloud/%s Ionoscloud SDK Go/%s", terraformVersion, meta.SDKVersionString(), Version, newClient.Version)
 	newConfig.UserAgent = fmt.Sprintf("HashiCorp Terraform/%s Terraform Plugin SDK/%s Terraform Provider Ionoscloud/%s", terraformVersion, meta.SDKVersionString(), Version)
 
-	dbaasClient := dbaasService.NewClientService(username.(string), password.(string), token.(string), cleanedUrl)
-
-	return SdkBundle{
-		CloudApiClient: newClient,
-		DbaasClient:    dbaasClient.Get(),
-	}, nil
+	return newClient, nil
 }
 
 // cleanURL makes sure trailing slash does not corrupt the state
@@ -217,7 +206,7 @@ func IsRequestFailed(err error) bool {
 // resourceStateRefreshFunc tracks progress of a request
 func resourceStateRefreshFunc(meta interface{}, path string) resource.StateRefreshFunc {
 	return func() (interface{}, string, error) {
-		client := meta.(SdkBundle).CloudApiClient
+		client := meta.(*ionoscloud.APIClient)
 
 		fmt.Printf("[INFO] Checking PATH %s\n", path)
 		if path == "" {

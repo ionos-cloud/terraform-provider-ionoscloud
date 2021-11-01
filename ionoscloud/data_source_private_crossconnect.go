@@ -126,9 +126,6 @@ func setPccDataSource(d *schema.ResourceData, pcc *ionoscloud.PrivateCrossConnec
 
 	if pcc.Id != nil {
 		d.SetId(*pcc.Id)
-		if err := d.Set("id", *pcc.Id); err != nil {
-			return err
-		}
 	}
 
 	if pcc.Properties != nil {
@@ -171,6 +168,7 @@ func dataSourcePccRead(d *schema.ResourceData, meta interface{}) error {
 
 	var pcc ionoscloud.PrivateCrossConnect
 	var err error
+	var apiResponse *ionoscloud.APIResponse
 
 	ctx, cancel := context.WithTimeout(context.Background(), *resourceDefaultTimeouts.Default)
 	if cancel != nil {
@@ -179,7 +177,8 @@ func dataSourcePccRead(d *schema.ResourceData, meta interface{}) error {
 
 	if idOk {
 		/* search by ID */
-		pcc, _, err = client.PrivateCrossConnectsApi.PccsFindById(ctx, id.(string)).Execute()
+		pcc, apiResponse, err = client.PrivateCrossConnectsApi.PccsFindById(ctx, id.(string)).Execute()
+		logApiRequestTime(apiResponse)
 		if err != nil {
 			return fmt.Errorf("an error occurred while fetching the pcc with ID %s: %s", id.(string), err)
 		}
@@ -188,7 +187,8 @@ func dataSourcePccRead(d *schema.ResourceData, meta interface{}) error {
 	if nameOk {
 		/* search by name */
 		var pccs ionoscloud.PrivateCrossConnects
-		pccs, _, err := client.PrivateCrossConnectsApi.PccsGet(ctx).Execute()
+		pccs, apiResponse, err := client.PrivateCrossConnectsApi.PccsGet(ctx).Execute()
+		logApiRequestTime(apiResponse)
 		if err != nil {
 			return fmt.Errorf("an error occurred while fetching pccs: %s", err.Error())
 		}
@@ -198,7 +198,8 @@ func dataSourcePccRead(d *schema.ResourceData, meta interface{}) error {
 			for _, p := range *pccs.Items {
 				if p.Properties.Name != nil && *p.Properties.Name == name.(string) {
 					/* lan found */
-					pcc, _, err = client.PrivateCrossConnectsApi.PccsFindById(ctx, *p.Id).Execute()
+					pcc, apiResponse, err = client.PrivateCrossConnectsApi.PccsFindById(ctx, *p.Id).Execute()
+					logApiRequestTime(apiResponse)
 					if err != nil {
 						return fmt.Errorf("an error occurred while fetching the pcc with ID %s: %s", *p.Id, err)
 					}

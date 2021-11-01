@@ -394,11 +394,11 @@ func resourcek8sNodePoolCreate(ctx context.Context, d *schema.ResourceData, meta
 		k8sNodepool.Properties.Annotations = &annotations
 	}
 
-	createdNodepool, _, err := client.KubernetesApi.
+	createdNodepool, apiResponse, err := client.KubernetesApi.
 		K8sNodepoolsPost(ctx, d.Get("k8s_cluster_id").(string)).
 		KubernetesNodePool(k8sNodepool).
 		Execute()
-
+	logApiRequestTime(apiResponse)
 	if err != nil {
 		d.SetId("")
 		diags := diag.FromErr(fmt.Errorf("error creating k8s node pool: %s", err))
@@ -441,6 +441,7 @@ func resourcek8sNodePoolRead(ctx context.Context, d *schema.ResourceData, meta i
 	client := meta.(SdkBundle).CloudApiClient
 
 	k8sNodepool, apiResponse, err := client.KubernetesApi.K8sNodepoolsFindById(ctx, d.Get("k8s_cluster_id").(string), d.Id()).Execute()
+	logApiRequestTime(apiResponse)
 
 	if err != nil {
 		log.Printf("[INFO] Resource %s not found: %+v", d.Id(), err)
@@ -707,8 +708,9 @@ func resourcek8sNodePoolUpdate(ctx context.Context, d *schema.ResourceData, meta
 		if d.Get("auto_scaling.0").(map[string]interface{}) != nil && (d.Get("auto_scaling.0.min_node_count").(int) != 0 || d.Get("auto_scaling.0.max_node_count").(int) != 0) {
 
 			updateNodeCount = false
-
+			var apiResponse *ionoscloud.APIResponse
 			np, _, npErr := client.KubernetesApi.K8sNodepoolsFindById(ctx, d.Get("k8s_cluster_id").(string), d.Id()).Execute()
+			logApiRequestTime(apiResponse)
 			if npErr != nil {
 				diags := diag.FromErr(fmt.Errorf("error retrieving k8s node pool %q: %s", d.Id(), npErr))
 				return diags
@@ -895,6 +897,7 @@ func resourcek8sNodePoolUpdate(ctx context.Context, d *schema.ResourceData, meta
 	}
 
 	_, apiResponse, err := client.KubernetesApi.K8sNodepoolsPut(ctx, d.Get("k8s_cluster_id").(string), d.Id()).KubernetesNodePoolForPut(request).Execute()
+	logApiRequestTime(apiResponse)
 
 	if err != nil {
 		if apiResponse != nil && apiResponse.Response != nil && apiResponse.StatusCode == 404 {
@@ -936,6 +939,7 @@ func resourcek8sNodePoolDelete(ctx context.Context, d *schema.ResourceData, meta
 	client := meta.(SdkBundle).CloudApiClient
 
 	apiResponse, err := client.KubernetesApi.K8sNodepoolsDelete(ctx, d.Get("k8s_cluster_id").(string), d.Id()).Execute()
+	logApiRequestTime(apiResponse)
 
 	if err != nil {
 		if apiResponse != nil && apiResponse.Response != nil && apiResponse.StatusCode == 404 {
@@ -975,7 +979,8 @@ func resourcek8sNodePoolDelete(ctx context.Context, d *schema.ResourceData, meta
 }
 
 func k8sNodepoolReady(ctx context.Context, client *ionoscloud.APIClient, d *schema.ResourceData) (bool, error) {
-	subjectNodepool, _, err := client.KubernetesApi.K8sNodepoolsFindById(ctx, d.Get("k8s_cluster_id").(string), d.Id()).Execute()
+	subjectNodepool, apiResponse, err := client.KubernetesApi.K8sNodepoolsFindById(ctx, d.Get("k8s_cluster_id").(string), d.Id()).Execute()
+	logApiRequestTime(apiResponse)
 	if err != nil {
 		return true, fmt.Errorf("error checking k8s node pool status: %s", err)
 	}
@@ -984,6 +989,7 @@ func k8sNodepoolReady(ctx context.Context, client *ionoscloud.APIClient, d *sche
 
 func k8sNodepoolDeleted(ctx context.Context, client *ionoscloud.APIClient, d *schema.ResourceData) (bool, error) {
 	_, apiResponse, err := client.KubernetesApi.K8sNodepoolsFindById(ctx, d.Get("k8s_cluster_id").(string), d.Id()).Execute()
+	logApiRequestTime(apiResponse)
 
 	if err != nil {
 		if apiResponse != nil && apiResponse.Response != nil && apiResponse.StatusCode == 404 {

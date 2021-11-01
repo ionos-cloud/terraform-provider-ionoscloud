@@ -10,9 +10,10 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
 )
 
-func TestAccIPBlock_Basic(t *testing.T) {
+func TestAccIPBlockBasic(t *testing.T) {
 	var ipblock ionoscloud.IpBlock
 	location := "us/las"
+	resourceName := IpBLockResource + ".webserver_ip"
 
 	resource.Test(t, resource.TestCase{
 		PreCheck: func() {
@@ -24,17 +25,20 @@ func TestAccIPBlock_Basic(t *testing.T) {
 			{
 				Config: fmt.Sprintf(testAccCheckIPBlockConfigBasic, location),
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheckIPBlockExists("ionoscloud_ipblock.webserver_ip", &ipblock),
-					testAccCheckIPBlockAttributes("ionoscloud_ipblock.webserver_ip", location),
-					resource.TestCheckResourceAttr("ionoscloud_ipblock.webserver_ip", "location", location),
+					testAccCheckIPBlockExists(resourceName, &ipblock),
+					testAccCheckIPBlockAttributes(resourceName, location),
+					resource.TestCheckResourceAttr(resourceName, "location", location),
+					resource.TestCheckResourceAttr(resourceName, "name", "ipblock TF test"),
+					resource.TestCheckResourceAttr(resourceName, "size", "1"),
 				),
 			},
 			{
 				Config: fmt.Sprintf(testAccCheckIPBlockConfigUpdate, location),
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheckIPBlockExists("ionoscloud_ipblock.webserver_ip", &ipblock),
-					testAccCheckIPBlockAttributes("ionoscloud_ipblock.webserver_ip", location),
-					resource.TestCheckResourceAttr("ionoscloud_ipblock.webserver_ip", "name", "updated"),
+					testAccCheckIPBlockExists(resourceName, &ipblock),
+					testAccCheckIPBlockAttributes(resourceName, location),
+					resource.TestCheckResourceAttr(resourceName, "name", "updated"),
+					resource.TestCheckResourceAttr(resourceName, "size", "2"),
 				),
 			},
 		},
@@ -49,11 +53,12 @@ func testAccCheckIPBlockDestroyCheck(s *terraform.State) error {
 		defer cancel()
 	}
 	for _, rs := range s.RootModule().Resources {
-		if rs.Type != "ionoscloud_ipblock" {
+		if rs.Type != IpBLockResource {
 			continue
 		}
 
 		_, apiResponse, err := client.IPBlocksApi.IpblocksFindById(ctx, rs.Primary.ID).Execute()
+		logApiRequestTime(apiResponse)
 
 		if err != nil {
 			if apiResponse != nil && apiResponse.Response != nil && apiResponse.StatusCode != 404 {
@@ -98,7 +103,8 @@ func testAccCheckIPBlockExists(n string, ipblock *ionoscloud.IpBlock) resource.T
 		if cancel != nil {
 			defer cancel()
 		}
-		foundIP, _, err := client.IPBlocksApi.IpblocksFindById(ctx, rs.Primary.ID).Execute()
+		foundIP, apiResponse, err := client.IPBlocksApi.IpblocksFindById(ctx, rs.Primary.ID).Execute()
+		logApiRequestTime(apiResponse)
 
 		if err != nil {
 			return fmt.Errorf("error occured while fetching IP Block: %s", rs.Primary.ID)
@@ -114,15 +120,15 @@ func testAccCheckIPBlockExists(n string, ipblock *ionoscloud.IpBlock) resource.T
 }
 
 const testAccCheckIPBlockConfigBasic = `
-resource "ionoscloud_ipblock" "webserver_ip" {
+resource ` + IpBLockResource + ` "webserver_ip" {
   location = "%s"
   size = 1
   name = "ipblock TF test"
 }`
 
 const testAccCheckIPBlockConfigUpdate = `
-resource "ionoscloud_ipblock" "webserver_ip" {
+resource ` + IpBLockResource + `"webserver_ip" {
   location = "%s"
-  size = 1
+  size = 2
   name = "updated"
 }`

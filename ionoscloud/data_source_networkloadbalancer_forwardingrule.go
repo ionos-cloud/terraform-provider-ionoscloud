@@ -166,6 +166,7 @@ func dataSourceNetworkLoadBalancerForwardingRuleRead(d *schema.ResourceData, met
 	}
 	var networkLoadBalancerForwardingRule ionoscloud.NetworkLoadBalancerForwardingRule
 	var err error
+	var apiResponse *ionoscloud.APIResponse
 
 	ctx, cancel := context.WithTimeout(context.Background(), *resourceDefaultTimeouts.Default)
 
@@ -175,7 +176,8 @@ func dataSourceNetworkLoadBalancerForwardingRuleRead(d *schema.ResourceData, met
 
 	if idOk {
 		/* search by ID */
-		networkLoadBalancerForwardingRule, _, err = client.NetworkLoadBalancersApi.DatacentersNetworkloadbalancersForwardingrulesFindByForwardingRuleId(ctx, datacenterId.(string), networkloadbalancerId.(string), id.(string)).Execute()
+		networkLoadBalancerForwardingRule, apiResponse, err = client.NetworkLoadBalancersApi.DatacentersNetworkloadbalancersForwardingrulesFindByForwardingRuleId(ctx, datacenterId.(string), networkloadbalancerId.(string), id.(string)).Execute()
+		logApiRequestTime(apiResponse)
 		if err != nil {
 			return fmt.Errorf("an error occurred while fetching the network loadbalancer forwarding rule %s: %s", id.(string), err)
 		}
@@ -189,14 +191,16 @@ func dataSourceNetworkLoadBalancerForwardingRuleRead(d *schema.ResourceData, met
 			defer cancel()
 		}
 
-		networkLoadBalancerForwardingRules, _, err := client.NetworkLoadBalancersApi.DatacentersNetworkloadbalancersForwardingrulesGet(ctx, datacenterId.(string), networkloadbalancerId.(string)).Execute()
+		networkLoadBalancerForwardingRules, apiResponse, err := client.NetworkLoadBalancersApi.DatacentersNetworkloadbalancersForwardingrulesGet(ctx, datacenterId.(string), networkloadbalancerId.(string)).Execute()
+		logApiRequestTime(apiResponse)
 		if err != nil {
 			return fmt.Errorf("an error occurred while fetching network loadbalancers forwarding rules: %s", err.Error())
 		}
 
 		if networkLoadBalancerForwardingRules.Items != nil {
 			for _, c := range *networkLoadBalancerForwardingRules.Items {
-				tmpNetworkLoadBalancerForwardingRule, _, err := client.NetworkLoadBalancersApi.DatacentersNetworkloadbalancersForwardingrulesFindByForwardingRuleId(ctx, datacenterId.(string), networkloadbalancerId.(string), *c.Id).Execute()
+				tmpNetworkLoadBalancerForwardingRule, apiResponse, err := client.NetworkLoadBalancersApi.DatacentersNetworkloadbalancersForwardingrulesFindByForwardingRuleId(ctx, datacenterId.(string), networkloadbalancerId.(string), *c.Id).Execute()
+				logApiRequestTime(apiResponse)
 				if err != nil {
 					return fmt.Errorf("an error occurred while fetching network loadbalancer forwarding rule with ID %s: %s", *c.Id, err.Error())
 				}

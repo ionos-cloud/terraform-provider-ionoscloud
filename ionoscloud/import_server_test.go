@@ -9,7 +9,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
 )
 
-func TestAccServer_ImportBasic(t *testing.T) {
+func TestAccServerImportBasic(t *testing.T) {
 	resource.Test(t, resource.TestCase{
 		PreCheck:          func() { testAccPreCheck(t) },
 		ProviderFactories: testAccProviderFactories,
@@ -20,11 +20,11 @@ func TestAccServer_ImportBasic(t *testing.T) {
 			},
 
 			{
-				ResourceName:            "ionoscloud_server." + ServerTestResourceName,
+				ResourceName:            ServerResource + "." + ServerTestResource,
 				ImportStateIdFunc:       testAccServerImportStateId,
 				ImportState:             true,
 				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{"image_password", "ssh_key_path.#", "image_name", "volume.0.user_data", "volume.0.backup_unit_id"},
+				ImportStateVerifyIgnore: []string{"image_password", "ssh_key_path.#", "image_name", "volume.0.user_data", "volume.0.backup_unit_id", "firewallrule_id", "primary_nic"},
 			},
 		},
 	})
@@ -34,7 +34,7 @@ func testAccServerImportStateId(s *terraform.State) (string, error) {
 	var importID string = ""
 
 	for _, rs := range s.RootModule().Resources {
-		if rs.Type != "ionoscloud_server" {
+		if rs.Type != ServerResource {
 			continue
 		}
 

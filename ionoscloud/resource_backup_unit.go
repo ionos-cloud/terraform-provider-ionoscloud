@@ -66,7 +66,8 @@ func resourceBackupUnitCreate(ctx context.Context, d *schema.ResourceData, meta 
 		},
 	}
 
-	createdBackupUnit, _, err := client.BackupUnitsApi.BackupunitsPost(ctx).BackupUnit(backupUnit).Execute()
+	createdBackupUnit, apiResponse, err := client.BackupUnitsApi.BackupunitsPost(ctx).BackupUnit(backupUnit).Execute()
+	logApiRequestTime(apiResponse)
 
 	if err != nil {
 		d.SetId("")
@@ -77,28 +78,8 @@ func resourceBackupUnitCreate(ctx context.Context, d *schema.ResourceData, meta 
 	d.SetId(*createdBackupUnit.Id)
 	log.Printf("[INFO] Created backup unit: %s", d.Id())
 
-	for {
-		log.Printf("[INFO] Waiting for backup unit %s to be ready...", d.Id())
-
-		backupUnitReady, rsErr := backupUnitReady(client, d, ctx)
-
-		if rsErr != nil {
-			diags := diag.FromErr(fmt.Errorf("error while checking readiness status of backup unit %s: %s", d.Id(), rsErr))
-			return diags
-		}
-
-		if backupUnitReady {
-			log.Printf("[INFO] backup unit ready: %s", d.Id())
-			break
-		}
-
-		select {
-		case <-time.After(SleepInterval):
-			log.Printf("[INFO] trying again ...")
-		case <-ctx.Done():
-			diags := diag.FromErr(fmt.Errorf("backup unit creation timed out! WARNING: your backup unit will still probably be created after some time but the terraform state won't reflect that; check your Ionos Cloud account for updates"))
-			return diags
-		}
+	if diags := waitForUnitToBeReady(ctx, d, client); diags != nil {
+		return diags
 	}
 
 	return resourceBackupUnitRead(ctx, d, meta)
@@ -109,6 +90,7 @@ func resourceBackupUnitRead(ctx context.Context, d *schema.ResourceData, meta in
 	client := meta.(SdkBundle).CloudApiClient
 
 	backupUnit, apiResponse, err := client.BackupUnitsApi.BackupunitsFindById(ctx, d.Id()).Execute()
+	logApiRequestTime(apiResponse)
 
 	if err != nil {
 		if apiResponse != nil && apiResponse.Response != nil && apiResponse.StatusCode == 404 {
@@ -120,6 +102,7 @@ func resourceBackupUnitRead(ctx context.Context, d *schema.ResourceData, meta in
 	}
 
 	contractResources, _, cErr := client.ContractResourcesApi.ContractsGet(ctx).Execute()
+	logApiRequestTime(apiResponse)
 
 	if cErr != nil {
 		diags := diag.FromErr(fmt.Errorf("error while fetching contract resources for backup unit %s: %s", d.Id(), cErr))
@@ -168,6 +151,7 @@ func resourceBackupUnitUpdate(ctx context.Context, d *schema.ResourceData, meta 
 	}
 
 	_, apiResponse, err := client.BackupUnitsApi.BackupunitsPut(ctx, d.Id()).BackupUnit(request).Execute()
+	logApiRequestTime(apiResponse)
 
 	if err != nil {
 		if apiResponse != nil && apiResponse.Response != nil && apiResponse.StatusCode == 404 {
@@ -178,6 +162,14 @@ func resourceBackupUnitUpdate(ctx context.Context, d *schema.ResourceData, meta 
 		return diags
 	}
 
+	if diags := waitForUnitToBeReady(ctx, d, client); diags != nil {
+		return diags
+	}
+
+	return resourceBackupUnitRead(ctx, d, meta)
+}
+
+func waitForUnitToBeReady(ctx context.Context, d *schema.ResourceData, client *ionoscloud.APIClient) diag.Diagnostics {
 	for {
 		log.Printf("[INFO] Waiting for backup unit %s to be ready...", d.Id())
 
@@ -197,18 +189,19 @@ func resourceBackupUnitUpdate(ctx context.Context, d *schema.ResourceData, meta 
 		case <-time.After(SleepInterval):
 			log.Printf("[INFO] trying again ...")
 		case <-ctx.Done():
-			diags := diag.FromErr(fmt.Errorf("backup unit update timed out! WARNING: your backup unit will still probably be updated after some time but the terraform state won't reflect that; check your Ionos Cloud account for updates"))
+			diags := diag.FromErr(fmt.Errorf("backup unit readiness check timed out! WARNING: your backup unit will still probably be created/updated " +
+				"after some time but the terraform state won't reflect that; check your Ionos Cloud account for updates"))
 			return diags
 		}
 	}
-
-	return resourceBackupUnitRead(ctx, d, meta)
+	return nil
 }
 
 func resourceBackupUnitDelete(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	client := meta.(SdkBundle).CloudApiClient
 
 	apiResponse, err := client.BackupUnitsApi.BackupunitsDelete(ctx, d.Id()).Execute()
+	logApiRequestTime(apiResponse)
 
 	if err != nil {
 		if apiResponse != nil && apiResponse.Response != nil && apiResponse.StatusCode == 404 {
@@ -238,7 +231,8 @@ func resourceBackupUnitDelete(ctx context.Context, d *schema.ResourceData, meta 
 		case <-time.After(SleepInterval):
 			log.Printf("[INFO] trying again ...")
 		case <-ctx.Done():
-			diags := diag.FromErr(fmt.Errorf("backup unit deletion timed out! WARNING: your backup unit will still probably be deleted after some time but the terraform state won't reflect that; check your Ionos Cloud account for updates"))
+			diags := diag.FromErr(fmt.Errorf("backup unit deletion timed out! WARNING: your backup unit will still probably be deleted " +
+				"after some time but the terraform state won't reflect that; check your Ionos Cloud account for updates"))
 			return diags
 		}
 	}
@@ -252,6 +246,7 @@ func resourceBackupUnitImport(ctx context.Context, d *schema.ResourceData, meta 
 	buId := d.Id()
 
 	backupUnit, apiResponse, err := client.BackupUnitsApi.BackupunitsFindById(ctx, d.Id()).Execute()
+	logApiRequestTime(apiResponse)
 
 	if err != nil {
 		if apiResponse != nil && apiResponse.Response != nil && apiResponse.StatusCode == 404 {
@@ -264,6 +259,7 @@ func resourceBackupUnitImport(ctx context.Context, d *schema.ResourceData, meta 
 	log.Printf("[INFO] Backup Unit found: %+v", backupUnit)
 
 	contractResources, apiResponse, cErr := client.ContractResourcesApi.ContractsGet(ctx).Execute()
+	logApiRequestTime(apiResponse)
 
 	if cErr != nil {
 		return nil, fmt.Errorf("error while fetching contract resources for backup unit %q: %s", d.Id(), cErr)
@@ -277,7 +273,8 @@ func resourceBackupUnitImport(ctx context.Context, d *schema.ResourceData, meta 
 }
 
 func backupUnitReady(client *ionoscloud.APIClient, d *schema.ResourceData, c context.Context) (bool, error) {
-	backupUnit, _, err := client.BackupUnitsApi.BackupunitsFindById(c, d.Id()).Execute()
+	backupUnit, apiResponse, err := client.BackupUnitsApi.BackupunitsFindById(c, d.Id()).Execute()
+	logApiRequestTime(apiResponse)
 
 	if err != nil {
 		return true, fmt.Errorf("error checking backup unit status: %s", err)
@@ -287,6 +284,7 @@ func backupUnitReady(client *ionoscloud.APIClient, d *schema.ResourceData, c con
 
 func backupUnitDeleted(client *ionoscloud.APIClient, d *schema.ResourceData, c context.Context) (bool, error) {
 	_, apiResponse, err := client.BackupUnitsApi.BackupunitsFindById(c, d.Id()).Execute()
+	logApiRequestTime(apiResponse)
 
 	if err != nil {
 		if apiResponse != nil && apiResponse.Response != nil && apiResponse.StatusCode == 404 {
