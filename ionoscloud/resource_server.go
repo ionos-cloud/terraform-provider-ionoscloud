@@ -655,6 +655,7 @@ func resourceServerCreate(ctx context.Context, d *schema.ResourceData, meta inte
 	}
 
 	server, apiResponse, err := client.ServersApi.DatacentersServersPost(ctx, d.Get("datacenter_id").(string)).Server(server).Execute()
+	logApiRequestTime(apiResponse)
 
 	if err != nil {
 		diags := diag.FromErr(fmt.Errorf("error creating server: %s", err))
@@ -672,15 +673,17 @@ func resourceServerCreate(ctx context.Context, d *schema.ResourceData, meta inte
 		diags := diag.FromErr(errState)
 		return diags
 	}
-	server, _, err = client.ServersApi.DatacentersServersFindById(ctx, d.Get("datacenter_id").(string), *server.Id).Execute()
+	server, apiResponse, err = client.ServersApi.DatacentersServersFindById(ctx, d.Get("datacenter_id").(string), *server.Id).Execute()
+	logApiRequestTime(apiResponse)
 
 	if err != nil {
 		diags := diag.FromErr(fmt.Errorf("error fetching server: (%s)", err))
 		return diags
 	}
 
-	firewallRules, _, err := client.FirewallRulesApi.DatacentersServersNicsFirewallrulesGet(ctx, d.Get("datacenter_id").(string),
+	firewallRules, apiResponse, err := client.FirewallRulesApi.DatacentersServersNicsFirewallrulesGet(ctx, d.Get("datacenter_id").(string),
 		*server.Id, *(*server.Entities.Nics.Items)[0].Id).Execute()
+	logApiRequestTime(apiResponse)
 
 	if err != nil {
 		diags := diag.FromErr(fmt.Errorf("an error occurred while fetching firewall rules: %s", err))
@@ -796,6 +799,7 @@ func resourceServerRead(ctx context.Context, d *schema.ResourceData, meta interf
 	serverId := d.Id()
 
 	server, apiResponse, err := client.ServersApi.DatacentersServersFindById(ctx, dcId, serverId).Execute()
+	logApiRequestTime(apiResponse)
 	if err != nil {
 		if apiResponse != nil && apiResponse.Response != nil && apiResponse.StatusCode == 404 {
 			d.SetId("")
@@ -868,7 +872,8 @@ func resourceServerRead(ctx context.Context, d *schema.ResourceData, meta interf
 			return diags
 		}
 
-		nic, _, err := client.NetworkInterfacesApi.DatacentersServersNicsFindById(ctx, dcId, serverId, primarynic.(string)).Execute()
+		nic, apiResponse, err := client.NetworkInterfacesApi.DatacentersServersNicsFindById(ctx, dcId, serverId, primarynic.(string)).Execute()
+		logApiRequestTime(apiResponse)
 		if err != nil {
 			diags := diag.FromErr(fmt.Errorf("error occured while fetching nic %s for server ID %s %s", primarynic.(string), d.Id(), err))
 			return diags
@@ -888,7 +893,8 @@ func resourceServerRead(ctx context.Context, d *schema.ResourceData, meta interf
 		}
 
 		if firewallId, ok := d.GetOk("firewallrule_id"); ok {
-			firewall, _, err := client.FirewallRulesApi.DatacentersServersNicsFirewallrulesFindById(ctx, dcId, serverId, primarynic.(string), firewallId.(string)).Execute()
+			firewall, apiResponse, err := client.FirewallRulesApi.DatacentersServersNicsFirewallrulesFindById(ctx, dcId, serverId, primarynic.(string), firewallId.(string)).Execute()
+			logApiRequestTime(apiResponse)
 			if err != nil {
 				diags := diag.FromErr(fmt.Errorf("error occured while fetching firewallrule %s for server ID %s %s", firewallId.(string), serverId, err))
 				return diags
@@ -913,7 +919,8 @@ func resourceServerRead(ctx context.Context, d *schema.ResourceData, meta interf
 				return diags
 			}
 		}
-		volumeObj, _, err := client.ServersApi.DatacentersServersVolumesFindById(ctx, dcId, serverId, *server.Properties.BootVolume.Id).Execute()
+		volumeObj, apiResponse, err := client.ServersApi.DatacentersServersVolumesFindById(ctx, dcId, serverId, *server.Properties.BootVolume.Id).Execute()
+		logApiRequestTime(apiResponse)
 
 		if err == nil {
 
@@ -935,7 +942,8 @@ func resourceServerRead(ctx context.Context, d *schema.ResourceData, meta interf
 
 	bootVolume, ok := d.GetOk("boot_volume")
 	if ok && len(bootVolume.(string)) > 0 {
-		_, _, err = client.ServersApi.DatacentersServersVolumesFindById(ctx, dcId, d.Id(), bootVolume.(string)).Execute()
+		_, apiResponse, err = client.ServersApi.DatacentersServersVolumesFindById(ctx, dcId, d.Id(), bootVolume.(string)).Execute()
+		logApiRequestTime(apiResponse)
 		if err != nil {
 			if err := d.Set("volume", nil); err != nil {
 				diags := diag.FromErr(err)
@@ -1084,6 +1092,7 @@ func resourceServerUpdate(ctx context.Context, d *schema.ResourceData, meta inte
 	}
 
 	server, apiResponse, err := client.ServersApi.DatacentersServersPatch(ctx, dcId, d.Id()).Server(request).Execute()
+	logApiRequestTime(apiResponse)
 
 	if err != nil {
 		diags := diag.FromErr(fmt.Errorf("error occured while updating server ID %s: %s", d.Id(), err))
@@ -1124,13 +1133,15 @@ func resourceServerUpdate(ctx context.Context, d *schema.ResourceData, meta inte
 		}
 
 		bootVolume := d.Get("boot_volume").(string)
-		_, _, err := client.ServersApi.DatacentersServersVolumesFindById(ctx, dcId, d.Id(), bootVolume).Execute()
+		_, apiResponse, err := client.ServersApi.DatacentersServersVolumesFindById(ctx, dcId, d.Id(), bootVolume).Execute()
+		logApiRequestTime(apiResponse)
 
 		if err != nil {
 			volume := ionoscloud.Volume{
 				Id: &bootVolume,
 			}
 			_, apiResponse, err := client.ServersApi.DatacentersServersVolumesPost(ctx, dcId, d.Id()).Volume(volume).Execute()
+			logApiRequestTime(apiResponse)
 			if err != nil {
 				diags := diag.FromErr(fmt.Errorf("an error occured while attaching a volume dcId: %s server_id: %s ID: %s Response: %s", dcId, d.Id(), bootVolume, err))
 				return diags
@@ -1161,7 +1172,8 @@ func resourceServerUpdate(ctx context.Context, d *schema.ResourceData, meta inte
 			properties.Bus = &vStr
 		}
 
-		_, apiResponse, err := client.VolumesApi.DatacentersVolumesPatch(ctx, d.Get("datacenter_id").(string), bootVolume).Volume(properties).Execute()
+		_, apiResponse, err = client.VolumesApi.DatacentersVolumesPatch(ctx, d.Get("datacenter_id").(string), bootVolume).Volume(properties).Execute()
+		logApiRequestTime(apiResponse)
 
 		if err != nil {
 			diags := diag.FromErr(fmt.Errorf("error patching volume (%s) (%s)", d.Id(), err))
@@ -1226,7 +1238,8 @@ func resourceServerUpdate(ctx context.Context, d *schema.ResourceData, meta inte
 
 			firewallId := d.Get("firewallrule_id").(string)
 
-			_, _, err := client.FirewallRulesApi.DatacentersServersNicsFirewallrulesFindById(ctx, dcId, *server.Id, *nic.Id, firewallId).Execute()
+			_, apiResponse, err := client.FirewallRulesApi.DatacentersServersNicsFirewallrulesFindById(ctx, dcId, *server.Id, *nic.Id, firewallId).Execute()
+			logApiRequestTime(apiResponse)
 
 			if err != nil {
 				if apiResponse != nil && apiResponse.Response != nil && apiResponse.StatusCode != 404 {
@@ -1239,6 +1252,7 @@ func resourceServerUpdate(ctx context.Context, d *schema.ResourceData, meta inte
 			}
 
 			firewall, apiResponse, err = client.FirewallRulesApi.DatacentersServersNicsFirewallrulesPatch(ctx, dcId, *server.Id, *nic.Id, firewallId).Firewallrule(*firewall.Properties).Execute()
+			logApiRequestTime(apiResponse)
 			if err != nil {
 				diags := diag.FromErr(fmt.Errorf("an error occured while updating firewall rule dcId: %s server_id: %s nic_id %s ID: %s Response: %s", dcId, *server.Id, *nic.Id, firewallId, err))
 				return diags
@@ -1265,6 +1279,7 @@ func resourceServerUpdate(ctx context.Context, d *schema.ResourceData, meta inte
 		log.Printf("[DEBUG] Updating props: %s", string(mProp))
 
 		_, apiResponse, err := client.NetworkInterfacesApi.DatacentersServersNicsPatch(ctx, d.Get("datacenter_id").(string), *server.Id, *nic.Id).Nic(properties).Execute()
+		logApiRequestTime(apiResponse)
 		if err != nil {
 			diags := diag.FromErr(fmt.Errorf("error updating nic (%s)", err))
 			return diags
@@ -1286,7 +1301,8 @@ func resourceServerDelete(ctx context.Context, d *schema.ResourceData, meta inte
 	client := meta.(*ionoscloud.APIClient)
 	dcId := d.Get("datacenter_id").(string)
 
-	server, _, err := client.ServersApi.DatacentersServersFindById(ctx, dcId, d.Id()).Execute()
+	server, apiResponse, err := client.ServersApi.DatacentersServersFindById(ctx, dcId, d.Id()).Execute()
+	logApiRequestTime(apiResponse)
 
 	if err != nil {
 		diags := diag.FromErr(fmt.Errorf("error occured while fetching a server ID %s %s", d.Id(), err))
@@ -1295,6 +1311,7 @@ func resourceServerDelete(ctx context.Context, d *schema.ResourceData, meta inte
 
 	if server.Properties.BootVolume != nil && strings.ToLower(*server.Properties.Type) != "cube" {
 		apiResponse, err := client.VolumesApi.DatacentersVolumesDelete(ctx, dcId, *server.Properties.BootVolume.Id).Execute()
+		logApiRequestTime(apiResponse)
 
 		if err != nil {
 			diags := diag.FromErr(fmt.Errorf("error occured while delete volume %s of server ID %s %s", *server.Properties.BootVolume.Id, d.Id(), err))
@@ -1308,7 +1325,8 @@ func resourceServerDelete(ctx context.Context, d *schema.ResourceData, meta inte
 		}
 	}
 
-	apiResponse, err := client.ServersApi.DatacentersServersDelete(ctx, dcId, d.Id()).Execute()
+	apiResponse, err = client.ServersApi.DatacentersServersDelete(ctx, dcId, d.Id()).Execute()
+	logApiRequestTime(apiResponse)
 	if err != nil {
 		diags := diag.FromErr(fmt.Errorf("an error occured while deleting a server ID %s %s", d.Id(), err))
 		return diags
@@ -1339,6 +1357,7 @@ func resourceServerImport(ctx context.Context, d *schema.ResourceData, meta inte
 	client := meta.(*ionoscloud.APIClient)
 
 	server, apiResponse, err := client.ServersApi.DatacentersServersFindById(ctx, datacenterId, serverId).Execute()
+	logApiRequestTime(apiResponse)
 
 	if err != nil {
 		if apiResponse != nil && apiResponse.Response != nil && apiResponse.StatusCode == 404 {
@@ -1398,7 +1417,8 @@ func resourceServerImport(ctx context.Context, d *schema.ResourceData, meta inte
 			return nil, err
 		}
 
-		nic, _, err := client.NetworkInterfacesApi.DatacentersServersNicsFindById(ctx, datacenterId, serverId, primaryNic).Execute()
+		nic, apiResponse, err := client.NetworkInterfacesApi.DatacentersServersNicsFindById(ctx, datacenterId, serverId, primaryNic).Execute()
+		logApiRequestTime(apiResponse)
 		if err != nil {
 			return nil, err
 		}
@@ -1410,7 +1430,8 @@ func resourceServerImport(ctx context.Context, d *schema.ResourceData, meta inte
 		}
 
 		network := SetNetworkProperties(nic)
-		firewallRules, _, err := client.FirewallRulesApi.DatacentersServersNicsFirewallrulesGet(ctx, datacenterId, serverId, primaryNic).Execute()
+		firewallRules, apiResponse, err := client.FirewallRulesApi.DatacentersServersNicsFirewallrulesGet(ctx, datacenterId, serverId, primaryNic).Execute()
+		logApiRequestTime(apiResponse)
 
 		if err != nil {
 			return nil, err
@@ -1425,7 +1446,8 @@ func resourceServerImport(ctx context.Context, d *schema.ResourceData, meta inte
 		}
 
 		if firewallId, ok := d.GetOk("firewallrule_id"); ok {
-			firewall, _, err := client.FirewallRulesApi.DatacentersServersNicsFirewallrulesFindById(ctx, datacenterId, serverId, primaryNic, firewallId.(string)).Execute()
+			firewall, apiResponse, err := client.FirewallRulesApi.DatacentersServersNicsFirewallrulesFindById(ctx, datacenterId, serverId, primaryNic, firewallId.(string)).Execute()
+			logApiRequestTime(apiResponse)
 			if err != nil {
 				return nil, err
 			}
@@ -1447,7 +1469,8 @@ func resourceServerImport(ctx context.Context, d *schema.ResourceData, meta inte
 				return nil, err
 			}
 		}
-		volumeObj, _, err := client.ServersApi.DatacentersServersVolumesFindById(ctx, datacenterId, serverId, *server.Properties.BootVolume.Id).Execute()
+		volumeObj, apiResponse, err := client.ServersApi.DatacentersServersVolumesFindById(ctx, datacenterId, serverId, *server.Properties.BootVolume.Id).Execute()
+		logApiRequestTime(apiResponse)
 		if err == nil {
 			volumeItem := map[string]interface{}{}
 

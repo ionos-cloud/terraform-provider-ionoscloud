@@ -198,6 +198,7 @@ func dataSourceK8sReadNodePool(d *schema.ResourceData, meta interface{}) error {
 	}
 	var nodePool ionoscloud.KubernetesNodePool
 	var err error
+	var apiResponse *ionoscloud.APIResponse
 
 	if idOk {
 		/* search by ID */
@@ -207,7 +208,8 @@ func dataSourceK8sReadNodePool(d *schema.ResourceData, meta interface{}) error {
 			defer cancel()
 		}
 
-		nodePool, _, err = client.KubernetesApi.K8sNodepoolsFindById(ctx, clusterId.(string), id.(string)).Execute()
+		nodePool, apiResponse, err = client.KubernetesApi.K8sNodepoolsFindById(ctx, clusterId.(string), id.(string)).Execute()
+		logApiRequestTime(apiResponse)
 		if err != nil {
 			return fmt.Errorf("an error occurred while fetching the k8s nodePool with ID %s: %s", id.(string), err)
 		}
@@ -221,7 +223,8 @@ func dataSourceK8sReadNodePool(d *schema.ResourceData, meta interface{}) error {
 			defer cancel()
 		}
 
-		clusters, _, err := client.KubernetesApi.K8sNodepoolsGet(ctx, clusterId.(string)).Execute()
+		clusters, apiResponse, err := client.KubernetesApi.K8sNodepoolsGet(ctx, clusterId.(string)).Execute()
+		logApiRequestTime(apiResponse)
 		if err != nil {
 			return fmt.Errorf("an error occurred while fetching k8s nodepools: %s", err.Error())
 		}
@@ -229,7 +232,8 @@ func dataSourceK8sReadNodePool(d *schema.ResourceData, meta interface{}) error {
 		found := false
 		if clusters.Items != nil {
 			for _, c := range *clusters.Items {
-				tmpNodePool, _, err := client.KubernetesApi.K8sNodepoolsFindById(ctx, clusterId.(string), *c.Id).Execute()
+				tmpNodePool, apiResponse, err := client.KubernetesApi.K8sNodepoolsFindById(ctx, clusterId.(string), *c.Id).Execute()
+				logApiRequestTime(apiResponse)
 				if err != nil {
 					return fmt.Errorf("an error occurred while fetching k8s nodePool with ID %s: %s", *c.Id, err.Error())
 				}

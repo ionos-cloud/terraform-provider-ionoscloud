@@ -65,6 +65,7 @@ func resourceLanIPFailoverCreate(ctx context.Context, d *schema.ResourceData, me
 		}}
 
 	lan, apiResponse, err := client.LansApi.DatacentersLansPatch(ctx, dcid, lanid).Lan(*properties).Execute()
+	logApiRequestTime(apiResponse)
 	if err != nil {
 		diags := diag.FromErr(fmt.Errorf("an error occured while patching a lans failover group  %s %s", lanid, err))
 		return diags
@@ -86,6 +87,7 @@ func resourceLanIPFailoverRead(ctx context.Context, d *schema.ResourceData, meta
 	client := meta.(*ionoscloud.APIClient)
 
 	lan, apiResponse, err := client.LansApi.DatacentersLansFindById(ctx, d.Get("datacenter_id").(string), d.Id()).Execute()
+	logApiRequestTime(apiResponse)
 
 	if err != nil {
 		if apiResponse != nil && apiResponse.Response != nil && apiResponse.StatusCode == 404 {
@@ -144,6 +146,7 @@ func resourceLanIPFailoverUpdate(ctx context.Context, d *schema.ResourceData, me
 		}}
 
 	_, apiResponse, err := client.LansApi.DatacentersLansPatch(ctx, dcid, lanid).Lan(*properties).Execute()
+	logApiRequestTime(apiResponse)
 	if err != nil {
 		diags := diag.FromErr(fmt.Errorf("an error occured while patching a lan ID %s %s", d.Id(), err))
 		return diags
@@ -171,15 +174,17 @@ func resourceLanIPFailoverDelete(ctx context.Context, d *schema.ResourceData, me
 	}
 
 	_, apiResponse, err := client.LansApi.DatacentersLansPatch(ctx, dcid, lanid).Lan(*properties).Execute()
+	logApiRequestTime(apiResponse)
 	if err != nil {
 		/*
-			//try again in 90 seconds
-			time.Sleep(90 * time.Second)
-			_, apiResponse, err = client.LansApi.DatacentersLansPatch(ctx, dcid, lanid).Lan(*properties).Execute()
+						//try again in 90 seconds
+						time.Sleep(90 * time.Second)
+						_, apiResponse, err = client.LansApi.DatacentersLansPatch(ctx, dcid, lanid).Lan(*properties).Execute()
+			logApiRequestTime(apiResponse)
 
-			if err != nil && (apiResponse == nil || apiResponse.StatusCode != 404) {
-				return fmt.Errorf("an error occured while removing a lans ipfailover groups dcId %s ID %s %s", d.Get("datacenter_id").(string), d.Id(), err)
-			}
+						if err != nil && (apiResponse == nil || apiResponse.StatusCode != 404) {
+							return fmt.Errorf("an error occured while removing a lans ipfailover groups dcId %s ID %s %s", d.Get("datacenter_id").(string), d.Id(), err)
+						}
 		*/
 		diags := diag.FromErr(fmt.Errorf("an error occured while removing a lans ipfailover groups dcId %s ID %s %s", d.Get("datacenter_id").(string), d.Id(), err))
 		return diags

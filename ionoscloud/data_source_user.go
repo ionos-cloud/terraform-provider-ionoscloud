@@ -70,10 +70,12 @@ func dataSourceUserRead(ctx context.Context, d *schema.ResourceData, meta interf
 	}
 	var user ionoscloud.User
 	var err error
+	var apiResponse *ionoscloud.APIResponse
 
 	if idOk {
 		/* search by ID */
-		user, _, err = client.UserManagementApi.UmUsersFindById(ctx, id.(string)).Execute()
+		user, apiResponse, err = client.UserManagementApi.UmUsersFindById(ctx, id.(string)).Execute()
+		logApiRequestTime(apiResponse)
 		if err != nil {
 			diags := diag.FromErr(fmt.Errorf("an error occurred while fetching user with ID %s: %s", id.(string), err))
 			return diags
@@ -82,7 +84,8 @@ func dataSourceUserRead(ctx context.Context, d *schema.ResourceData, meta interf
 		/* search by name */
 		var users ionoscloud.Users
 
-		users, _, err := client.UserManagementApi.UmUsersGet(ctx).Execute()
+		users, apiResponse, err := client.UserManagementApi.UmUsersGet(ctx).Execute()
+		logApiRequestTime(apiResponse)
 		if err != nil {
 			diags := diag.FromErr(fmt.Errorf("an error occurred while fetching users: %s", err.Error()))
 			return diags
@@ -93,7 +96,8 @@ func dataSourceUserRead(ctx context.Context, d *schema.ResourceData, meta interf
 			for _, u := range *users.Items {
 				if u.Properties.Email != nil && *u.Properties.Email == email.(string) {
 					/* user found */
-					user, _, err = client.UserManagementApi.UmUsersFindById(ctx, *u.Id).Execute()
+					user, apiResponse, err = client.UserManagementApi.UmUsersFindById(ctx, *u.Id).Execute()
+					logApiRequestTime(apiResponse)
 					if err != nil {
 						diags := diag.FromErr(fmt.Errorf("an error occurred while fetching user %s: %s", *u.Id, err))
 						return diags

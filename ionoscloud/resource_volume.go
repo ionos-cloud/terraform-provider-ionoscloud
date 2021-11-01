@@ -266,6 +266,7 @@ func resourceVolumeCreate(ctx context.Context, d *schema.ResourceData, meta inte
 	}
 
 	volume, apiResponse, err := client.VolumesApi.DatacentersVolumesPost(ctx, dcId).Volume(volume).Execute()
+	logApiRequestTime(apiResponse)
 
 	if err != nil {
 		diags := diag.FromErr(fmt.Errorf("an error occured while creating a volume: %s", err))
@@ -287,6 +288,7 @@ func resourceVolumeCreate(ctx context.Context, d *schema.ResourceData, meta inte
 
 	volumeToAttach := ionoscloud.Volume{Id: volume.Id}
 	volume, apiResponse, err = client.ServersApi.DatacentersServersVolumesPost(ctx, dcId, serverId).Volume(volumeToAttach).Execute()
+	logApiRequestTime(apiResponse)
 
 	if err != nil {
 		diags := diag.FromErr(fmt.Errorf("an error occured while attaching a volume dcId: %s server_id: %s ID: %s Response: %s", dcId, serverId, *volumeToAttach.Id, err))
@@ -326,6 +328,7 @@ func resourceVolumeRead(ctx context.Context, d *schema.ResourceData, meta interf
 	volumeID := d.Id()
 
 	volume, apiResponse, err := client.VolumesApi.DatacentersVolumesFindById(ctx, dcId, volumeID).Execute()
+	logApiRequestTime(apiResponse)
 
 	if err != nil {
 		if apiResponse != nil && apiResponse.Response != nil && apiResponse.StatusCode == 404 {
@@ -336,7 +339,8 @@ func resourceVolumeRead(ctx context.Context, d *schema.ResourceData, meta interf
 		return diags
 	}
 
-	_, _, err = client.ServersApi.DatacentersServersVolumesFindById(ctx, dcId, serverID, volumeID).Execute()
+	_, apiResponse, err = client.ServersApi.DatacentersServersVolumesFindById(ctx, dcId, serverID, volumeID).Execute()
+	logApiRequestTime(apiResponse)
 	if err != nil {
 		if err2 := d.Set("server_id", ""); err2 != nil {
 			diags := diag.FromErr(err2)
@@ -397,6 +401,7 @@ func resourceVolumeUpdate(ctx context.Context, d *schema.ResourceData, meta inte
 	}
 
 	volume, apiResponse, err := client.VolumesApi.DatacentersVolumesPatch(ctx, dcId, d.Id()).Volume(properties).Execute()
+	logApiRequestTime(apiResponse)
 
 	if err != nil {
 		diags := diag.FromErr(fmt.Errorf("an error occured while updating volume with ID %s: %s", d.Id(), err))
@@ -421,6 +426,7 @@ func resourceVolumeUpdate(ctx context.Context, d *schema.ResourceData, meta inte
 		serverID := newValue.(string)
 		volumeToAttach := ionoscloud.Volume{Id: volume.Id}
 		_, apiResponse, err := client.ServersApi.DatacentersServersVolumesPost(ctx, dcId, serverID).Volume(volumeToAttach).Execute()
+		logApiRequestTime(apiResponse)
 		if err != nil {
 			diags := diag.FromErr(fmt.Errorf("an error occured while attaching a volume dcId: %s server_id: %s ID: %s Response: %s",
 				dcId, serverID, *volume.Id, err))
@@ -444,6 +450,7 @@ func resourceVolumeDelete(ctx context.Context, d *schema.ResourceData, meta inte
 	dcId := d.Get("datacenter_id").(string)
 
 	apiResponse, err := client.VolumesApi.DatacentersVolumesDelete(ctx, dcId, d.Id()).Execute()
+	logApiRequestTime(apiResponse)
 	if err != nil {
 		diags := diag.FromErr(fmt.Errorf("an error occured while deleting a volume ID %s %s", d.Id(), err))
 		return diags
@@ -474,6 +481,7 @@ func resourceVolumeImporter(ctx context.Context, d *schema.ResourceData, meta in
 	volumeId := parts[2]
 
 	volume, apiResponse, err := client.VolumesApi.DatacentersVolumesFindById(ctx, dcId, volumeId).Execute()
+	logApiRequestTime(apiResponse)
 
 	if err != nil {
 		if apiResponse != nil && apiResponse.Response != nil && apiResponse.StatusCode == 404 {
@@ -627,7 +635,8 @@ func resolveImageName(ctx context.Context, client *ionoscloud.APIClient, imageNa
 		return nil, fmt.Errorf("imageName not suplied")
 	}
 
-	images, _, err := client.ImagesApi.ImagesGet(ctx).Execute()
+	images, apiResponse, err := client.ImagesApi.ImagesGet(ctx).Execute()
+	logApiRequestTime(apiResponse)
 
 	if err != nil {
 		log.Print(fmt.Errorf("error while fetching the list of images %s", err))
@@ -660,7 +669,8 @@ func getSnapshotId(ctx context.Context, client *ionoscloud.APIClient, snapshotNa
 		return ""
 	}
 
-	snapshots, _, err := client.SnapshotsApi.SnapshotsGet(ctx).Execute()
+	snapshots, apiResponse, err := client.SnapshotsApi.SnapshotsGet(ctx).Execute()
+	logApiRequestTime(apiResponse)
 
 	if err != nil {
 		log.Print(fmt.Errorf("error while fetching the list of snapshots %s", err))
@@ -691,7 +701,8 @@ func getImageAlias(ctx context.Context, client *ionoscloud.APIClient, imageAlias
 		log.Print(fmt.Errorf("invalid location id %s", location))
 	}
 
-	locations, _, err := client.LocationsApi.LocationsFindByRegionIdAndId(ctx, parts[0], parts[1]).Execute()
+	locations, apiResponse, err := client.LocationsApi.LocationsFindByRegionIdAndId(ctx, parts[0], parts[1]).Execute()
+	logApiRequestTime(apiResponse)
 
 	if err != nil {
 		log.Print(fmt.Errorf("error while fetching the list of locations %s", err))
@@ -717,7 +728,8 @@ func checkImage(ctx context.Context, client *ionoscloud.APIClient, imageInput, i
 
 	if imageInput != "" {
 		if !IsValidUUID(imageInput) {
-			dc, _, err := client.DataCentersApi.DatacentersFindById(ctx, dcId).Execute()
+			dc, apiResponse, err := client.DataCentersApi.DatacentersFindById(ctx, dcId).Execute()
+			logApiRequestTime(apiResponse)
 			if err != nil {
 				diags := diag.FromErr(fmt.Errorf("error fetching datacenter %s: (%s)", dcId, err))
 				return image, imageAlias, isSnapshot, diags
@@ -752,9 +764,11 @@ func checkImage(ctx context.Context, client *ionoscloud.APIClient, imageInput, i
 
 		} else {
 			img, apiResponse, err := client.ImagesApi.ImagesFindById(ctx, imageInput).Execute()
+			logApiRequestTime(apiResponse)
 			if err != nil {
 				if apiResponse != nil && apiResponse.Response != nil && apiResponse.StatusCode == 404 {
 					snapshot, apiResponse, err := client.SnapshotsApi.SnapshotsFindById(ctx, imageInput).Execute()
+					logApiRequestTime(apiResponse)
 					if err != nil {
 						if apiResponse != nil && apiResponse.Response != nil && apiResponse.StatusCode == 404 {
 							diags := diag.FromErr(fmt.Errorf("image/snapshot %s not found: %s", imageInput, err))

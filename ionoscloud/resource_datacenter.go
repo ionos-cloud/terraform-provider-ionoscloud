@@ -107,6 +107,7 @@ func resourceDatacenterCreate(ctx context.Context, d *schema.ResourceData, meta 
 	}
 
 	createdDatacenter, apiResponse, err := client.DataCentersApi.DatacentersPost(ctx).Datacenter(datacenter).Execute()
+	logApiRequestTime(apiResponse)
 
 	if err != nil {
 		diags := diag.FromErr(fmt.Errorf("error creating data center (%s) (%s)", d.Id(), err))
@@ -136,6 +137,7 @@ func resourceDatacenterRead(ctx context.Context, d *schema.ResourceData, meta in
 	client := meta.(*ionoscloud.APIClient)
 
 	datacenter, apiResponse, err := client.DataCentersApi.DatacentersFindById(ctx, d.Id()).Execute()
+	logApiRequestTime(apiResponse)
 
 	if err != nil {
 		if apiResponse != nil && apiResponse.Response != nil && apiResponse.StatusCode == 404 {
@@ -182,6 +184,7 @@ func resourceDatacenterUpdate(ctx context.Context, d *schema.ResourceData, meta 
 		obj.SecAuthProtection = &newSecAuthProtectionStr
 	}
 	_, apiResponse, err := client.DataCentersApi.DatacentersPatch(ctx, d.Id()).Datacenter(obj).Execute()
+	logApiRequestTime(apiResponse)
 
 	if err != nil {
 		diags := diag.FromErr(fmt.Errorf("an error occured while update the data center ID %s %s", d.Id(), err))
@@ -203,6 +206,7 @@ func resourceDatacenterDelete(ctx context.Context, d *schema.ResourceData, meta 
 	client := meta.(*ionoscloud.APIClient)
 
 	apiResponse, err := client.DataCentersApi.DatacentersDelete(ctx, d.Id()).Execute()
+	logApiRequestTime(apiResponse)
 
 	if err != nil {
 		diags := diag.FromErr(err)
@@ -226,6 +230,7 @@ func resourceDatacenterImport(ctx context.Context, d *schema.ResourceData, meta 
 	dcId := d.Id()
 
 	datacenter, apiResponse, err := client.DataCentersApi.DatacentersFindById(ctx, d.Id()).Execute()
+	logApiRequestTime(apiResponse)
 
 	if err != nil {
 		if apiResponse != nil && apiResponse.Response != nil && apiResponse.StatusCode == 404 {

@@ -101,9 +101,12 @@ func dataSourceSnapshotRead(ctx context.Context, d *schema.ResourceData, meta in
 
 	var snapshot ionoscloud.Snapshot
 	var err error
+	var apiResponse *ionoscloud.APIResponse
+
 	if idOk {
 		/* search by ID */
-		snapshot, _, err = client.SnapshotsApi.SnapshotsFindById(ctx, id.(string)).Execute()
+		snapshot, apiResponse, err = client.SnapshotsApi.SnapshotsFindById(ctx, id.(string)).Execute()
+		logApiRequestTime(apiResponse)
 		if err != nil {
 			diags := diag.FromErr(fmt.Errorf("an error occurred while fetching the snapshot with ID %s: %s", id.(string), err))
 			return diags
@@ -111,7 +114,8 @@ func dataSourceSnapshotRead(ctx context.Context, d *schema.ResourceData, meta in
 	} else {
 		var results []ionoscloud.Snapshot
 
-		snapshots, _, err := client.SnapshotsApi.SnapshotsGet(ctx).Execute()
+		snapshots, apiResponse, err := client.SnapshotsApi.SnapshotsGet(ctx).Execute()
+		logApiRequestTime(apiResponse)
 
 		if err != nil {
 			diags := diag.FromErr(fmt.Errorf("an error occured while fetching IonosCloud locations %s", err))

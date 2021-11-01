@@ -641,6 +641,7 @@ func dataSourceServerRead(d *schema.ResourceData, meta interface{}) error {
 	}
 	var server ionoscloud.Server
 	var err error
+	var apiResponse *ionoscloud.APIResponse
 
 	ctx, cancel := context.WithTimeout(context.Background(), *resourceDefaultTimeouts.Default)
 
@@ -650,14 +651,16 @@ func dataSourceServerRead(d *schema.ResourceData, meta interface{}) error {
 
 	if idOk {
 		/* search by ID */
-		server, _, err = client.ServersApi.DatacentersServersFindById(ctx, datacenterId.(string), id.(string)).Execute()
+		server, apiResponse, err = client.ServersApi.DatacentersServersFindById(ctx, datacenterId.(string), id.(string)).Execute()
+		logApiRequestTime(apiResponse)
 		if err != nil {
 			return fmt.Errorf("an error occurred while fetching the server with ID %s: %s", id.(string), err)
 		}
 	} else {
 		/* search by name */
 		var servers ionoscloud.Servers
-		servers, _, err := client.ServersApi.DatacentersServersGet(ctx, datacenterId.(string)).Execute()
+		servers, apiResponse, err := client.ServersApi.DatacentersServersGet(ctx, datacenterId.(string)).Execute()
+		logApiRequestTime(apiResponse)
 		if err != nil {
 			return fmt.Errorf("an error occurred while fetching servers: %s", err.Error())
 		}
@@ -667,7 +670,8 @@ func dataSourceServerRead(d *schema.ResourceData, meta interface{}) error {
 			for _, s := range *servers.Items {
 				if s.Properties.Name != nil && *s.Properties.Name == name.(string) {
 					/* server found */
-					server, _, err = client.ServersApi.DatacentersServersFindById(ctx, datacenterId.(string), *s.Id).Execute()
+					server, apiResponse, err = client.ServersApi.DatacentersServersFindById(ctx, datacenterId.(string), *s.Id).Execute()
+					logApiRequestTime(apiResponse)
 					if err != nil {
 						return fmt.Errorf("an error occurred while fetching the server with ID %s: %s", *s.Id, err)
 					}
@@ -686,7 +690,8 @@ func dataSourceServerRead(d *schema.ResourceData, meta interface{}) error {
 	var token = ionoscloud.Token{}
 
 	if &server != nil && server.Id != nil {
-		token, _, err = client.ServersApi.DatacentersServersTokenGet(ctx, datacenterId.(string), *server.Id).Execute()
+		token, apiResponse, err = client.ServersApi.DatacentersServersTokenGet(ctx, datacenterId.(string), *server.Id).Execute()
+		logApiRequestTime(apiResponse)
 
 		if err != nil {
 			return fmt.Errorf("an error occurred while fetching the server token %s: %s", *server.Id, err)

@@ -271,10 +271,12 @@ func dataSourceK8sReadCluster(d *schema.ResourceData, meta interface{}) error {
 	if cancel != nil {
 		defer cancel()
 	}
+	var apiResponse *ionoscloud.APIResponse
 
 	if idOk {
 		/* search by ID */
-		cluster, _, err = client.KubernetesApi.K8sFindByClusterId(ctx, id.(string)).Execute()
+		cluster, apiResponse, err = client.KubernetesApi.K8sFindByClusterId(ctx, id.(string)).Execute()
+		logApiRequestTime(apiResponse)
 		if err != nil {
 			return fmt.Errorf("an error occurred while fetching the k8s cluster with ID %s: %s", id.(string), err)
 		}
@@ -288,7 +290,8 @@ func dataSourceK8sReadCluster(d *schema.ResourceData, meta interface{}) error {
 			defer cancel()
 		}
 
-		clusters, _, err := client.KubernetesApi.K8sGet(ctx).Execute()
+		clusters, apiResponse, err := client.KubernetesApi.K8sGet(ctx).Execute()
+		logApiRequestTime(apiResponse)
 		if err != nil {
 			return fmt.Errorf("an error occurred while fetching k8s clusters: %s", err.Error())
 		}
@@ -296,7 +299,8 @@ func dataSourceK8sReadCluster(d *schema.ResourceData, meta interface{}) error {
 		found := false
 		if clusters.Items != nil {
 			for _, c := range *clusters.Items {
-				tmpCluster, _, err := client.KubernetesApi.K8sFindByClusterId(ctx, *c.Id).Execute()
+				tmpCluster, apiResponse, err := client.KubernetesApi.K8sFindByClusterId(ctx, *c.Id).Execute()
+				logApiRequestTime(apiResponse)
 				if err != nil {
 					return fmt.Errorf("an error occurred while fetching k8s cluster with ID %s: %s", *c.Id, err.Error())
 				}
@@ -435,7 +439,8 @@ func setAdditionalK8sClusterData(d *schema.ResourceData, cluster *ionoscloud.Kub
 
 	/* get and set the kubeconfig and nodepools*/
 	if cluster.Id != nil {
-		kubeConfig, _, err := client.KubernetesApi.K8sKubeconfigGet(ctx, *cluster.Id).Execute()
+		kubeConfig, apiResponse, err := client.KubernetesApi.K8sKubeconfigGet(ctx, *cluster.Id).Execute()
+		logApiRequestTime(apiResponse)
 		if err != nil {
 			return fmt.Errorf("an error occurred while fetching the kubernetes config for cluster with ID %s: %s", *cluster.Id, err)
 		}
@@ -449,7 +454,8 @@ func setAdditionalK8sClusterData(d *schema.ResourceData, cluster *ionoscloud.Kub
 		}
 
 		/* getting node pools */
-		clusterNodePools, _, err := client.KubernetesApi.K8sNodepoolsGet(ctx, *cluster.Id).Execute()
+		clusterNodePools, apiResponse, err := client.KubernetesApi.K8sNodepoolsGet(ctx, *cluster.Id).Execute()
+		logApiRequestTime(apiResponse)
 		if err != nil {
 			return fmt.Errorf("an error occurred while fetching the kubernetes cluster node pools for cluster with ID %s: %s", *cluster.Id, err)
 		}
