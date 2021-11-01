@@ -54,6 +54,7 @@ func testAccCheckLanDestroyCheck(s *terraform.State) error {
 		}
 
 		_, apiResponse, err := client.LanApi.DatacentersLansFindById(ctx, rs.Primary.Attributes["datacenter_id"], rs.Primary.ID).Execute()
+		logApiRequestTime(apiResponse)
 
 		if err != nil {
 			if apiResponse == nil || apiResponse.Response != nil && apiResponse.StatusCode != 404 {
@@ -86,7 +87,8 @@ func testAccCheckLanExists(n string, lan *ionoscloud.Lan) resource.TestCheckFunc
 		if cancel != nil {
 			defer cancel()
 		}
-		foundLan, _, err := client.LanApi.DatacentersLansFindById(ctx, rs.Primary.Attributes["datacenter_id"], rs.Primary.ID).Execute()
+		foundLan, apiResponse, err := client.LanApi.DatacentersLansFindById(ctx, rs.Primary.Attributes["datacenter_id"], rs.Primary.ID).Execute()
+		logApiRequestTime(apiResponse)
 
 		if err != nil {
 			return fmt.Errorf("error occured while fetching Server: %s", rs.Primary.ID)

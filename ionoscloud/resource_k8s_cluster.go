@@ -194,7 +194,8 @@ func resourcek8sClusterCreate(ctx context.Context, d *schema.ResourceData, meta 
 		}
 	}
 
-	createdCluster, _, err := client.KubernetesApi.K8sPost(ctx).KubernetesCluster(cluster).Execute()
+	createdCluster, apiResponse, err := client.KubernetesApi.K8sPost(ctx).KubernetesCluster(cluster).Execute()
+	logApiRequestTime(apiResponse)
 
 	if err != nil {
 		d.SetId("")
@@ -237,6 +238,7 @@ func resourcek8sClusterRead(ctx context.Context, d *schema.ResourceData, meta in
 	client := meta.(*ionoscloud.APIClient)
 
 	cluster, apiResponse, err := client.KubernetesApi.K8sFindByClusterId(ctx, d.Id()).Execute()
+	logApiRequestTime(apiResponse)
 
 	if err != nil {
 		if apiResponse != nil && apiResponse.Response != nil && apiResponse.StatusCode == 404 {
@@ -360,6 +362,7 @@ func resourcek8sClusterUpdate(ctx context.Context, d *schema.ResourceData, meta 
 	}
 
 	_, apiResponse, err := client.KubernetesApi.K8sPut(ctx, d.Id()).KubernetesCluster(request).Execute()
+	logApiRequestTime(apiResponse)
 
 	if err != nil {
 		if _, ok := err.(ionoscloud.GenericOpenAPIError); ok {
@@ -407,6 +410,7 @@ func resourcek8sClusterDelete(ctx context.Context, d *schema.ResourceData, meta 
 	client := meta.(*ionoscloud.APIClient)
 
 	_, apiResponse, err := client.KubernetesApi.K8sDelete(ctx, d.Id()).Execute()
+	logApiRequestTime(apiResponse)
 
 	if err != nil {
 		if apiResponse != nil && apiResponse.Response != nil && apiResponse.StatusCode == 404 {
@@ -451,6 +455,7 @@ func resourceK8sClusterImport(ctx context.Context, d *schema.ResourceData, meta 
 	clusterId := d.Id()
 
 	cluster, apiResponse, err := client.KubernetesApi.K8sFindByClusterId(ctx, clusterId).Execute()
+	logApiRequestTime(apiResponse)
 
 	if err != nil {
 		if apiResponse != nil && apiResponse.Response != nil && apiResponse.StatusCode == 404 {
@@ -565,7 +570,8 @@ func setK8sClusterData(d *schema.ResourceData, cluster *ionoscloud.KubernetesClu
 
 func k8sClusterReady(ctx context.Context, client *ionoscloud.APIClient, d *schema.ResourceData) (bool, error) {
 
-	subjectCluster, _, err := client.KubernetesApi.K8sFindByClusterId(ctx, d.Id()).Execute()
+	subjectCluster, apiResponse, err := client.KubernetesApi.K8sFindByClusterId(ctx, d.Id()).Execute()
+	logApiRequestTime(apiResponse)
 
 	if err != nil {
 		return true, fmt.Errorf("error checking k8s cluster status: %s", err)
@@ -576,6 +582,7 @@ func k8sClusterReady(ctx context.Context, client *ionoscloud.APIClient, d *schem
 func k8sClusterDeleted(ctx context.Context, client *ionoscloud.APIClient, d *schema.ResourceData) (bool, error) {
 
 	_, apiResponse, err := client.KubernetesApi.K8sFindByClusterId(ctx, d.Id()).Execute()
+	logApiRequestTime(apiResponse)
 
 	if err != nil {
 		if _, ok := err.(ionoscloud.GenericOpenAPIError); ok {

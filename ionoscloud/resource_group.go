@@ -135,6 +135,7 @@ func resourceGroupCreate(ctx context.Context, d *schema.ResourceData, meta inter
 	userToAdd := d.Get("user_id").(string)
 
 	group, apiResponse, err := client.UserManagementApi.UmGroupsPost(ctx).Group(request).Execute()
+	logApiRequestTime(apiResponse)
 
 	if err != nil {
 		diags := diag.FromErr(fmt.Errorf("an error occured while creating a group: %s", err))
@@ -162,6 +163,7 @@ func resourceGroupCreate(ctx context.Context, d *schema.ResourceData, meta inter
 			Id: &userToAdd,
 		}
 		_, apiResponse, err := client.UserManagementApi.UmGroupsUsersPost(ctx, d.Id()).User(user).Execute()
+		logApiRequestTime(apiResponse)
 		if err != nil {
 			diags := diag.FromErr(fmt.Errorf("an error occured while adding %s user to group ID %s %s", userToAdd, d.Id(), err))
 			return diags
@@ -180,6 +182,7 @@ func resourceGroupRead(ctx context.Context, d *schema.ResourceData, meta interfa
 	client := meta.(*ionoscloud.APIClient)
 
 	group, apiResponse, err := client.UserManagementApi.UmGroupsFindById(ctx, d.Id()).Execute()
+	logApiRequestTime(apiResponse)
 
 	if err != nil {
 		if apiResponse != nil && apiResponse.Response != nil && apiResponse.StatusCode == 404 {
@@ -230,6 +233,7 @@ func resourceGroupUpdate(ctx context.Context, d *schema.ResourceData, meta inter
 	groupReq.Properties.Name = &newValueStr
 
 	_, apiResponse, err := client.UserManagementApi.UmGroupsPut(ctx, d.Id()).Group(groupReq).Execute()
+	logApiRequestTime(apiResponse)
 	if err != nil {
 		diags := diag.FromErr(fmt.Errorf("an error occured while patching a group ID %s %s", d.Id(), err))
 		return diags
@@ -249,6 +253,7 @@ func resourceGroupUpdate(ctx context.Context, d *schema.ResourceData, meta inter
 		}
 
 		_, apiResponse, err := client.UserManagementApi.UmGroupsUsersPost(ctx, d.Id()).User(user).Execute()
+		logApiRequestTime(apiResponse)
 		if err != nil {
 			diags := diag.FromErr(fmt.Errorf("an error occured while adding %s user to group ID %s %s", userToAdd, d.Id(), err))
 			return diags
@@ -268,10 +273,12 @@ func resourceGroupDelete(ctx context.Context, d *schema.ResourceData, meta inter
 	client := meta.(*ionoscloud.APIClient)
 
 	_, apiResponse, err := client.UserManagementApi.UmGroupsDelete(ctx, d.Id()).Execute()
+	logApiRequestTime(apiResponse)
 	if err != nil {
 		//try again in 20 seconds
 		time.Sleep(20 * time.Second)
 		_, apiResponse, err = client.UserManagementApi.UmGroupsDelete(ctx, d.Id()).Execute()
+		logApiRequestTime(apiResponse)
 
 		if err != nil {
 			if _, ok := err.(ionoscloud.GenericOpenAPIError); ok {
@@ -302,6 +309,7 @@ func resourceGroupImporter(ctx context.Context, d *schema.ResourceData, meta int
 	grpId := d.Id()
 
 	group, apiResponse, err := client.UserManagementApi.UmGroupsFindById(ctx, grpId).Execute()
+	logApiRequestTime(apiResponse)
 
 	if err != nil {
 		if apiResponse != nil && apiResponse.Response != nil && apiResponse.StatusCode == 404 {
@@ -397,7 +405,8 @@ func setGroupData(ctx context.Context, client *ionoscloud.APIClient, d *schema.R
 			}
 		}
 
-		users, _, err := client.UserManagementApi.UmGroupsUsersGet(ctx, d.Id()).Execute()
+		users, apiResponse, err := client.UserManagementApi.UmGroupsUsersGet(ctx, d.Id()).Execute()
+		logApiRequestTime(apiResponse)
 		if err != nil {
 			return fmt.Errorf("an error occured while ListGroupUsers %s %s", d.Id(), err)
 		}

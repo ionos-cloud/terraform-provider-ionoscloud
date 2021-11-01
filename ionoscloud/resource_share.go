@@ -59,6 +59,7 @@ func resourceShareCreate(ctx context.Context, d *schema.ResourceData, meta inter
 
 	rsp, apiResponse, err := client.UserManagementApi.UmGroupsSharesPost(ctx,
 		d.Get("group_id").(string), d.Get("resource_id").(string)).Resource(request).Execute()
+	logApiRequestTime(apiResponse)
 
 	if err != nil {
 		diags := diag.FromErr(fmt.Errorf("an error occured while creating a share: %s", err))
@@ -89,6 +90,7 @@ func resourceShareRead(ctx context.Context, d *schema.ResourceData, meta interfa
 
 	rsp, apiResponse, err := client.UserManagementApi.UmGroupsSharesFindByResourceId(ctx,
 		d.Get("group_id").(string), d.Get("resource_id").(string)).Execute()
+	logApiRequestTime(apiResponse)
 	if err != nil {
 		if apiResponse != nil && apiResponse.Response != nil && apiResponse.StatusCode == 404 {
 			d.SetId("")
@@ -130,6 +132,7 @@ func resourceShareUpdate(ctx context.Context, d *schema.ResourceData, meta inter
 
 	_, apiResponse, err := client.UserManagementApi.UmGroupsSharesPut(ctx,
 		d.Get("group_id").(string), d.Get("resource_id").(string)).Resource(shareReq).Execute()
+	logApiRequestTime(apiResponse)
 	if err != nil {
 		diags := diag.FromErr(fmt.Errorf("an error occured while patching a share ID %s %s", d.Id(), err))
 		return diags
@@ -151,6 +154,7 @@ func resourceShareDelete(ctx context.Context, d *schema.ResourceData, meta inter
 	resourceId := d.Get("resource_id").(string)
 
 	_, apiResponse, err := client.UserManagementApi.UmGroupsSharesDelete(ctx, groupId, resourceId).Execute()
+	logApiRequestTime(apiResponse)
 	if err != nil {
 		if apiResponse != nil && apiResponse.Response != nil && apiResponse.StatusCode == 404 {
 			diags := diag.FromErr(err)
@@ -159,6 +163,7 @@ func resourceShareDelete(ctx context.Context, d *schema.ResourceData, meta inter
 		//try again in 20 seconds
 		time.Sleep(20 * time.Second)
 		_, apiResponse, err := client.UserManagementApi.UmGroupsSharesDelete(ctx, groupId, resourceId).Execute()
+		logApiRequestTime(apiResponse)
 		if err != nil {
 			if _, ok := err.(ionoscloud.GenericOpenAPIError); ok {
 				if apiResponse == nil || apiResponse.Response != nil && apiResponse.StatusCode != 404 {
