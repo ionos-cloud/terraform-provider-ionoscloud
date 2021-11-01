@@ -667,7 +667,6 @@ func resourceServerUpdate(ctx context.Context, d *schema.ResourceData, meta inte
 			}
 			_, apiResponse, err := client.ServerApi.DatacentersServersVolumesPost(ctx, dcId, d.Id()).Volume(volume).Execute()
 			logApiRequestTime(apiResponse)
-			logApiRequestTime(apiResponse)
 			if err != nil {
 				diags := diag.FromErr(fmt.Errorf("an error occured while attaching a volume dcId: %s server_id: %s ID: %s %s", dcId, d.Id(), bootVolume, err))
 				return diags
@@ -723,7 +722,6 @@ func resourceServerUpdate(ctx context.Context, d *schema.ResourceData, meta inte
 
 			_, apiResponse, err := client.NicApi.DatacentersServersNicsFirewallrulesFindById(ctx, dcId, *server.Id, nicId, firewallId).Execute()
 			logApiRequestTime(apiResponse)
-			logApiRequestTime(apiResponse)
 
 			if err != nil {
 				if apiResponse != nil && apiResponse.Response != nil && apiResponse.StatusCode != 404 {
@@ -736,7 +734,6 @@ func resourceServerUpdate(ctx context.Context, d *schema.ResourceData, meta inte
 			}
 
 			firewall, apiResponse, err = client.NicApi.DatacentersServersNicsFirewallrulesPatch(ctx, dcId, *server.Id, nicId, firewallId).Firewallrule(*firewall.Properties).Execute()
-			logApiRequestTime(apiResponse)
 			logApiRequestTime(apiResponse)
 			if err != nil {
 				diags := diag.FromErr(fmt.Errorf("an error occured while updating firewall rule dcId: %s server_id: %s nic_id %s ID: %s Response: %s", dcId, *server.Id, *nic.Id, firewallId, err))

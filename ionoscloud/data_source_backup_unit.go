@@ -96,7 +96,7 @@ func dataSourceBackupUnitRead(ctx context.Context, d *schema.ResourceData, meta 
 		return diag.FromErr(fmt.Errorf("backup unit not found"))
 	}
 
-	contractResources, _, cErr := client.ContractApi.ContractsGet(ctx).Execute()
+	contractResources, apiResponse, cErr := client.ContractApi.ContractsGet(ctx).Execute()
 	logApiRequestTime(apiResponse)
 
 	if cErr != nil {
