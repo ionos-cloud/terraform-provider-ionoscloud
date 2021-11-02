@@ -10,10 +10,10 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
 )
 
-func TestAccTargetGroup_Basic(t *testing.T) {
-	var targetGroup ionoscloud.TargetGroup
-	targetGroupName := "targetGroup"
+var resourceNameTargetGroup = TargetGroupResource + "." + TargetGroupTestResource
 
+func TestAccTargetGroupBasic(t *testing.T) {
+	var targetGroup ionoscloud.TargetGroup
 	resource.Test(t, resource.TestCase{
 		PreCheck: func() {
 			testAccPreCheck(t)
@@ -22,16 +22,16 @@ func TestAccTargetGroup_Basic(t *testing.T) {
 		CheckDestroy:      testAccCheckTargetGroupDestroyCheck,
 		Steps: []resource.TestStep{
 			{
-				Config: fmt.Sprintf(testAccCheckTargetGroupConfigBasic, targetGroupName),
+				Config: testAccCheckTargetGroupConfigBasic,
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheckTargetGroupExists("ionoscloud_target_group.target_group", &targetGroup),
-					resource.TestCheckResourceAttr("ionoscloud_target_group.target_group", "name", targetGroupName),
+					testAccCheckTargetGroupExists(resourceNameTargetGroup, &targetGroup),
+					resource.TestCheckResourceAttr(resourceNameTargetGroup, "name", TargetGroupTestResource),
 				),
 			},
 			{
 				Config: testAccCheckTargetGroupConfigUpdate,
 				Check: resource.ComposeTestCheckFunc(
-					resource.TestCheckResourceAttr("ionoscloud_target_group.target_group", "name", "updated"),
+					resource.TestCheckResourceAttr(resourceNameTargetGroup, "name", UpdatedResources),
 				),
 			},
 		},
@@ -48,7 +48,7 @@ func testAccCheckTargetGroupDestroyCheck(s *terraform.State) error {
 	}
 
 	for _, rs := range s.RootModule().Resources {
-		if rs.Type != "ionoscloud_datacenter" {
+		if rs.Type != ApplicationLoadBalancerResource {
 			continue
 		}
 
@@ -103,50 +103,62 @@ func testAccCheckTargetGroupExists(n string, targetGroup *ionoscloud.TargetGroup
 }
 
 const testAccCheckTargetGroupConfigBasic = `
-resource "ionoscloud_target_group" "target_group" {
- name = "%s"
- algorithm = "SOURCE_IP"
+resource ` + TargetGroupResource + ` ` + TargetGroupTestResource + ` {
+ name = "` + TargetGroupTestResource + `"
+ algorithm = "ROUND_ROBIN"
  protocol = "HTTP"
  targets {
    ip = "22.231.2.2"
    port = "8080"
-   weight = "123"
+   weight = "1"
    health_check {
      check = true
-     check_interval = 1000
+     check_interval = 2000
+	 maintenance = true
    }
  }
  health_check {
-     connect_timeout = 1000
+     connect_timeout = 5000
+     target_timeout = 50000
+     retries = 2
  }
  http_health_check {
-     path = "/monitoring"
-     match_type = "RESPONSE_BODY"
+     path = "/."
+     method = "GET"
+     match_type = "STATUS_CODE"
      response = "200"
+     regex = false
+     negate = false
    }
 }
 `
 
 const testAccCheckTargetGroupConfigUpdate = `
-resource "ionoscloud_target_group" "target_group" {
- name = "updated"
- algorithm = "SOURCE_IP"
+resource ` + TargetGroupResource + ` ` + TargetGroupTestResource + ` {
+ name = "` + UpdatedResources + `"
+ algorithm = "RANDOM"
  protocol = "HTTP"
  targets {
-   ip = "22.231.2.2"
-   port = "8080"
-   weight = "123"
+   ip = "22.231.2.3"
+   port = "8081"
+   weight = "124"
    health_check {
      check = true
-     check_interval = 1000
+     check_interval = 2500
+	 maintenance = true
    }
  }
  health_check {
-     connect_timeout = 1000
+     connect_timeout = 5500
+     target_timeout = 55000
+     retries = 3
  }
  http_health_check {
-     path = "/monitoring"
-     match_type = "RESPONSE_BODY"
+     path = "/."
+     method = "GET"
+     match_type = "STATUS_CODE"
      response = "200"
+     regex = false
+     negate = false
    }
 }`

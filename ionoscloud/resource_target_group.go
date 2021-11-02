@@ -16,6 +16,9 @@ func resourceTargetGroup() *schema.Resource {
 		ReadContext:   resourceTargetGroupRead,
 		UpdateContext: resourceTargetGroupUpdate,
 		DeleteContext: resourceTargetGroupDelete,
+		Importer: &schema.ResourceImporter{
+			StateContext: resourceTargetGroupImport,
+		},
 		Schema: map[string]*schema.Schema{
 			"name": {
 				Type:         schema.TypeString,
@@ -371,140 +374,8 @@ func resourceTargetGroupRead(ctx context.Context, d *schema.ResourceData, meta i
 		return diags
 	}
 
-	if rsp.Properties.Name != nil {
-		err := d.Set("name", *rsp.Properties.Name)
-		if err != nil {
-			diags := diag.FromErr(fmt.Errorf("error while setting name property for target group %s: %s", d.Id(), err))
-			return diags
-		}
-	}
-
-	if rsp.Properties.Algorithm != nil {
-		err := d.Set("algorithm", *rsp.Properties.Algorithm)
-		if err != nil {
-			diags := diag.FromErr(fmt.Errorf("error while setting algorithm property for target group %s: %s", d.Id(), err))
-			return diags
-		}
-	}
-
-	if rsp.Properties.Protocol != nil {
-		err := d.Set("protocol", *rsp.Properties.Protocol)
-		if err != nil {
-			diags := diag.FromErr(fmt.Errorf("error while setting protocol property for target group %s: %s", d.Id(), err))
-			return diags
-		}
-	}
-
-	forwardingRuleTargets := make([]interface{}, 0)
-	if rsp.Properties.Targets != nil && len(*rsp.Properties.Targets) > 0 {
-		forwardingRuleTargets = make([]interface{}, 0)
-		for _, target := range *rsp.Properties.Targets {
-			targetEntry := make(map[string]interface{})
-
-			if target.Ip != nil {
-				targetEntry["ip"] = *target.Ip
-			}
-
-			if target.Port != nil {
-				targetEntry["port"] = *target.Port
-			}
-
-			if target.Weight != nil {
-				targetEntry["weight"] = *target.Weight
-			}
-
-			if target.HealthCheck != nil {
-				healthCheck := make([]interface{}, 1)
-
-				healthCheckEntry := make(map[string]interface{})
-
-				if target.HealthCheck.Check != nil {
-					healthCheckEntry["check"] = *target.HealthCheck.Check
-				}
-
-				if target.HealthCheck.CheckInterval != nil {
-					healthCheckEntry["check_interval"] = *target.HealthCheck.CheckInterval
-				}
-
-				if target.HealthCheck.Maintenance != nil {
-					healthCheckEntry["maintenance"] = *target.HealthCheck.Maintenance
-				}
-
-				healthCheck[0] = healthCheckEntry
-				targetEntry["health_check"] = healthCheck
-			}
-
-			forwardingRuleTargets = append(forwardingRuleTargets, targetEntry)
-		}
-	}
-
-	if len(forwardingRuleTargets) > 0 {
-		if err := d.Set("targets", forwardingRuleTargets); err != nil {
-			diags := diag.FromErr(fmt.Errorf("error while setting targets property for target group  %s: %s", d.Id(), err))
-			return diags
-		}
-	}
-
-	if rsp.Properties.HealthCheck != nil {
-		healthCheck := make([]interface{}, 1)
-
-		healthCheckEntry := make(map[string]interface{})
-
-		if rsp.Properties.HealthCheck.ConnectTimeout != nil {
-			healthCheckEntry["connect_timeout"] = *rsp.Properties.HealthCheck.ConnectTimeout
-		}
-
-		if rsp.Properties.HealthCheck.TargetTimeout != nil {
-			healthCheckEntry["target_timeout"] = *rsp.Properties.HealthCheck.TargetTimeout
-		}
-
-		if rsp.Properties.HealthCheck.Retries != nil {
-			healthCheckEntry["retries"] = *rsp.Properties.HealthCheck.Retries
-		}
-
-		healthCheck[0] = healthCheckEntry
-		err := d.Set("health_check", healthCheck)
-		if err != nil {
-			diags := diag.FromErr(fmt.Errorf("error while setting health_check property for target group %s: %s", d.Id(), err))
-			return diags
-		}
-	}
-
-	if rsp.Properties.HttpHealthCheck != nil {
-		httpHealthCheck := make([]interface{}, 1)
-
-		httpHealthCheckEntry := make(map[string]interface{})
-
-		if rsp.Properties.HttpHealthCheck.Path != nil {
-			httpHealthCheckEntry["path"] = *rsp.Properties.HttpHealthCheck.Path
-		}
-
-		if rsp.Properties.HttpHealthCheck.Method != nil {
-			httpHealthCheckEntry["method"] = *rsp.Properties.HttpHealthCheck.Method
-		}
-
-		if rsp.Properties.HttpHealthCheck.MatchType != nil {
-			httpHealthCheckEntry["match_type"] = *rsp.Properties.HttpHealthCheck.MatchType
-		}
-
-		if rsp.Properties.HttpHealthCheck.Response != nil {
-			httpHealthCheckEntry["response"] = *rsp.Properties.HttpHealthCheck.Response
-		}
-
-		if rsp.Properties.HttpHealthCheck.Regex != nil {
-			httpHealthCheckEntry["regex"] = *rsp.Properties.HttpHealthCheck.Regex
-		}
-
-		if rsp.Properties.HttpHealthCheck.Negate != nil {
-			httpHealthCheckEntry["negate"] = *rsp.Properties.HttpHealthCheck.Negate
-		}
-
-		httpHealthCheck[0] = httpHealthCheckEntry
-		err := d.Set("http_health_check", httpHealthCheck)
-		if err != nil {
-			diags := diag.FromErr(fmt.Errorf("error while setting http_health_check property for target group %s: %s", d.Id(), err))
-			return diags
-		}
+	if err := setTargetGroupData(d, &rsp); err != nil {
+		return diag.FromErr(err)
 	}
 
 	return nil
@@ -730,5 +601,169 @@ func resourceTargetGroupDelete(ctx context.Context, d *schema.ResourceData, meta
 
 	d.SetId("")
 
+	return nil
+}
+
+func resourceTargetGroupImport(ctx context.Context, d *schema.ResourceData, meta interface{}) ([]*schema.ResourceData, error) {
+	client := meta.(*ionoscloud.APIClient)
+
+	groupIp := d.Id()
+
+	groupTarget, apiResponse, err := client.TargetGroupsApi.TargetgroupsFindByTargetGroupId(ctx, groupIp).Execute()
+	logApiRequestTime(apiResponse)
+
+	if err != nil {
+		if apiResponse != nil && apiResponse.Response != nil && apiResponse.StatusCode == 404 {
+			d.SetId("")
+			return nil, fmt.Errorf("unable to find target group %q", groupIp)
+		}
+		return nil, fmt.Errorf("an error occured while retrieving the target group %q, %q", groupIp, err)
+	}
+
+	if err := setTargetGroupData(d, &groupTarget); err != nil {
+		return nil, err
+	}
+	return []*schema.ResourceData{d}, nil
+}
+
+func setTargetGroupData(d *schema.ResourceData, targetGroup *ionoscloud.TargetGroup) error {
+
+	if targetGroup.Id != nil {
+		d.SetId(*targetGroup.Id)
+	}
+
+	if targetGroup.Properties != nil {
+
+		if targetGroup.Properties.Name != nil {
+			err := d.Set("name", *targetGroup.Properties.Name)
+			if err != nil {
+				return fmt.Errorf("error while setting name property for target group %s: %s", d.Id(), err)
+			}
+		}
+
+		if targetGroup.Properties.Algorithm != nil {
+			err := d.Set("algorithm", *targetGroup.Properties.Algorithm)
+			if err != nil {
+				return fmt.Errorf("error while setting algorithm property for target group %s: %s", d.Id(), err)
+			}
+		}
+
+		if targetGroup.Properties.Protocol != nil {
+			err := d.Set("protocol", *targetGroup.Properties.Protocol)
+			if err != nil {
+				return fmt.Errorf("error while setting protocol property for target group %s: %s", d.Id(), err)
+			}
+		}
+
+		forwardingRuleTargets := make([]interface{}, 0)
+		if targetGroup.Properties.Targets != nil && len(*targetGroup.Properties.Targets) > 0 {
+			forwardingRuleTargets = make([]interface{}, 0)
+			for _, target := range *targetGroup.Properties.Targets {
+				targetEntry := make(map[string]interface{})
+
+				if target.Ip != nil {
+					targetEntry["ip"] = *target.Ip
+				}
+
+				if target.Port != nil {
+					targetEntry["port"] = *target.Port
+				}
+
+				if target.Weight != nil {
+					targetEntry["weight"] = *target.Weight
+				}
+
+				if target.HealthCheck != nil {
+					healthCheck := make([]interface{}, 1)
+
+					healthCheckEntry := make(map[string]interface{})
+
+					if target.HealthCheck.Check != nil {
+						healthCheckEntry["check"] = *target.HealthCheck.Check
+					}
+
+					if target.HealthCheck.CheckInterval != nil {
+						healthCheckEntry["check_interval"] = *target.HealthCheck.CheckInterval
+					}
+
+					if target.HealthCheck.Maintenance != nil {
+						healthCheckEntry["maintenance"] = *target.HealthCheck.Maintenance
+					}
+
+					healthCheck[0] = healthCheckEntry
+					targetEntry["health_check"] = healthCheck
+				}
+
+				forwardingRuleTargets = append(forwardingRuleTargets, targetEntry)
+			}
+		}
+
+		if len(forwardingRuleTargets) > 0 {
+			if err := d.Set("targets", forwardingRuleTargets); err != nil {
+				return fmt.Errorf("error while setting targets property for target group  %s: %s", d.Id(), err)
+			}
+		}
+
+		if targetGroup.Properties.HealthCheck != nil {
+			healthCheck := make([]interface{}, 1)
+
+			healthCheckEntry := make(map[string]interface{})
+
+			if targetGroup.Properties.HealthCheck.ConnectTimeout != nil {
+				healthCheckEntry["connect_timeout"] = *targetGroup.Properties.HealthCheck.ConnectTimeout
+			}
+
+			if targetGroup.Properties.HealthCheck.TargetTimeout != nil {
+				healthCheckEntry["target_timeout"] = *targetGroup.Properties.HealthCheck.TargetTimeout
+			}
+
+			if targetGroup.Properties.HealthCheck.Retries != nil {
+				healthCheckEntry["retries"] = *targetGroup.Properties.HealthCheck.Retries
+			}
+
+			healthCheck[0] = healthCheckEntry
+			err := d.Set("health_check", healthCheck)
+			if err != nil {
+				return fmt.Errorf("error while setting health_check property for target group %s: %s", d.Id(), err)
+			}
+		}
+
+		if targetGroup.Properties.HttpHealthCheck != nil {
+			httpHealthCheck := make([]interface{}, 1)
+
+			httpHealthCheckEntry := make(map[string]interface{})
+
+			if targetGroup.Properties.HttpHealthCheck.Path != nil {
+				httpHealthCheckEntry["path"] = *targetGroup.Properties.HttpHealthCheck.Path
+			}
+
+			if targetGroup.Properties.HttpHealthCheck.Method != nil {
+				httpHealthCheckEntry["method"] = *targetGroup.Properties.HttpHealthCheck.Method
+			}
+
+			if targetGroup.Properties.HttpHealthCheck.MatchType != nil {
+				httpHealthCheckEntry["match_type"] = *targetGroup.Properties.HttpHealthCheck.MatchType
+			}
+
+			if targetGroup.Properties.HttpHealthCheck.Response != nil {
+				httpHealthCheckEntry["response"] = *targetGroup.Properties.HttpHealthCheck.Response
+			}
+
+			if targetGroup.Properties.HttpHealthCheck.Regex != nil {
+				httpHealthCheckEntry["regex"] = *targetGroup.Properties.HttpHealthCheck.Regex
+			}
+
+			if targetGroup.Properties.HttpHealthCheck.Negate != nil {
+				httpHealthCheckEntry["negate"] = *targetGroup.Properties.HttpHealthCheck.Negate
+			}
+
+			httpHealthCheck[0] = httpHealthCheckEntry
+			err := d.Set("http_health_check", httpHealthCheck)
+			if err != nil {
+				return fmt.Errorf("error while setting http_health_check property for target group %s: %s", d.Id(), err)
+			}
+		}
+
+	}
 	return nil
 }

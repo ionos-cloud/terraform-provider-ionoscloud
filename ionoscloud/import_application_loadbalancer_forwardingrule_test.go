@@ -20,7 +20,7 @@ func TestAccApplicationLoadBalancerForwardingRuleImportBasic(t *testing.T) {
 			},
 
 			{
-				ResourceName:      ApplicationLoadBalancerForwardingRuleResource + "." + ApplicationLoadBalancerForwardingRuleTestResource,
+				ResourceName:      resourceNameAlbRule,
 				ImportStateIdFunc: testAccApplicationLoadBalancerForwardingRuleImportStateId,
 				ImportState:       true,
 				ImportStateVerify: true,
