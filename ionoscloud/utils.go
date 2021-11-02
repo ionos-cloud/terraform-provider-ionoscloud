@@ -416,7 +416,7 @@ func GenerateEmail() string {
 
 func logApiRequestTime(resp *ionoscloud.APIResponse) {
 	if resp != nil {
-		log.Printf("[DEBUG] Request time : %s for operation : %s, status code : %d",
-			resp.RequestTime, resp.Operation, resp.StatusCode)
+		log.Printf("[DEBUG] Request time : %s for operation : %s",
+			resp.RequestTime, resp.Operation)
 	}
 }
