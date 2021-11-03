@@ -34,7 +34,7 @@ func testAccNicImportStateId(s *terraform.State) (string, error) {
 	var importID = ""
 
 	for _, rs := range s.RootModule().Resources {
-		if rs.Type != NicResource {
+		if rs.Type != nicResource {
 			continue
 		}
 
