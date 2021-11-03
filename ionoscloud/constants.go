@@ -91,6 +91,10 @@ const (
 //Ip Block constants
 const IpBLockResource = "ionoscloud_ipblock"
 
+const NicResource = "ionoscloud_nic"
+const fullNicResourceName = NicResource + "." + NicTestResourceName
+const NicTestResourceName = "database_nic"
+
 const (
 	VolumeResource         = "ionoscloud_volume"
 	VolumeTestResource     = "test_volume"
