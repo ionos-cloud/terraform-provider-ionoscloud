@@ -46,7 +46,7 @@ Please be aware that when using a nic in a load balancer, the load balancer will
 change the nic's ID behind the scenes, therefore the plan will always report this change
 trying to revert the state to the one specified by your terraform file.
 In order to prevent this, use the "lifecycle meta-argument" when declaring your nic,
-in order to to ignore changes to the `lan` attribute:
+in order to ignore changes to the `lan` attribute:
 
 Here's an example:
 

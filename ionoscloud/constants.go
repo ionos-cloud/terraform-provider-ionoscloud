@@ -99,6 +99,12 @@ const (
 	VolumeDataSourceByName = "test_volume_name"
 )
 
+const (
+	nicResource         = "ionoscloud_nic"
+	fullNicResourceName = nicResource + "." + nicTestResourceName
+	nicTestResourceName = "database_nic"
+)
+
 // General Constants
 const (
 	DataSource       = "data"

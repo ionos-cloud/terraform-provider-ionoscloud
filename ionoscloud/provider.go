@@ -99,6 +99,7 @@ func Provider() *schema.Provider {
 			UserResource:               dataSourceUser(),
 			IpBLockResource:            dataSourceIpBlock(),
 			VolumeResource:             dataSourceVolume(),
+			nicResource:                dataSourceNIC(),
 		},
 	}
 	provider.ConfigureContextFunc = func(ctx context.Context, d *schema.ResourceData) (interface{}, diag.Diagnostics) {

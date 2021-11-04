@@ -261,15 +261,15 @@ func IpBlockSetData(d *schema.ResourceData, ipBlock *ionoscloud.IpBlock) (err er
 		var ipConsumers []interface{}
 		for _, ipConsumer := range *ipBlock.Properties.IpConsumers {
 			ipConsumerEntry := make(map[string]interface{})
-			setPropWithNilCheck(ipConsumerEntry, "ip", *ipConsumer.Ip)
-			setPropWithNilCheck(ipConsumerEntry, "mac", *ipConsumer.Mac)
-			setPropWithNilCheck(ipConsumerEntry, "nic_id", *ipConsumer.NicId)
-			setPropWithNilCheck(ipConsumerEntry, "server_id", *ipConsumer.ServerId)
-			setPropWithNilCheck(ipConsumerEntry, "server_name", *ipConsumer.ServerName)
-			setPropWithNilCheck(ipConsumerEntry, "datacenter_id", *ipConsumer.DatacenterId)
-			setPropWithNilCheck(ipConsumerEntry, "datacenter_name", *ipConsumer.DatacenterName)
-			setPropWithNilCheck(ipConsumerEntry, "k8s_nodepool_uuid", *ipConsumer.K8sNodePoolUuid)
-			setPropWithNilCheck(ipConsumerEntry, "k8s_cluster_uuid", *ipConsumer.K8sClusterUuid)
+			setPropWithNilCheck(ipConsumerEntry, "ip", ipConsumer.Ip)
+			setPropWithNilCheck(ipConsumerEntry, "mac", ipConsumer.Mac)
+			setPropWithNilCheck(ipConsumerEntry, "nic_id", ipConsumer.NicId)
+			setPropWithNilCheck(ipConsumerEntry, "server_id", ipConsumer.ServerId)
+			setPropWithNilCheck(ipConsumerEntry, "server_name", ipConsumer.ServerName)
+			setPropWithNilCheck(ipConsumerEntry, "datacenter_id", ipConsumer.DatacenterId)
+			setPropWithNilCheck(ipConsumerEntry, "datacenter_name", ipConsumer.DatacenterName)
+			setPropWithNilCheck(ipConsumerEntry, "k8s_nodepool_uuid", ipConsumer.K8sNodePoolUuid)
+			setPropWithNilCheck(ipConsumerEntry, "k8s_cluster_uuid", ipConsumer.K8sClusterUuid)
 
 			ipConsumers = append(ipConsumers, ipConsumerEntry)
 		}
