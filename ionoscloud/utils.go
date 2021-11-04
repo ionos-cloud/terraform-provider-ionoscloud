@@ -5,6 +5,7 @@ import (
 	"fmt"
 	ionoscloud "github.com/ionos-cloud/sdk-go/v6"
 	"log"
+	"net/http"
 	"reflect"
 	"regexp"
 	"strings"
@@ -143,23 +144,6 @@ func resourceK8sNodepoolImport(ctx context.Context, d *schema.ResourceData, meta
 	}
 
 	log.Printf("[INFO] Importing k8s node pool %q...", d.Id())
-
-	return []*schema.ResourceData{d}, nil
-}
-
-func resourceNicImport(_ context.Context, d *schema.ResourceData, _ interface{}) ([]*schema.ResourceData, error) {
-	parts := strings.Split(d.Id(), "/")
-	if len(parts) != 3 || parts[0] == "" || parts[1] == "" {
-		return nil, fmt.Errorf("invalid import id %q. Expecting {datacenter}/{server}/{nic}", d.Id())
-	}
-
-	if err := d.Set("datacenter_id", parts[0]); err != nil {
-		return nil, err
-	}
-	if err := d.Set("server_id", parts[1]); err != nil {
-		return nil, err
-	}
-	d.SetId(parts[2])
 
 	return []*schema.ResourceData{d}, nil
 }
@@ -423,4 +407,11 @@ func logApiRequestTime(resp *ionoscloud.APIResponse) {
 		log.Printf("[DEBUG] Request time : %s for operation : %s",
 			resp.RequestTime, resp.Operation)
 	}
+}
+
+func httpNotFound(resp *ionoscloud.APIResponse) bool {
+	if resp != nil && resp.Response != nil && resp.StatusCode == http.StatusNotFound {
+		return true
+	}
+	return false
 }

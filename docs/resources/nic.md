@@ -33,7 +33,7 @@ resource "ionoscloud_nic" "example" {
 - `firewall_active` - (Optional)[Boolean] If this resource is set to true and is nested under a server resource firewall, with open SSH port, resource must be nested under the NIC.
 - `firewall_type` - (Optional) [String] The type of firewall rules that will be allowed on the NIC. If it is not specified it will take the default value INGRESS
 - `mac` - (Computed) The MAC address of the NIC.
-* `device_number`- (Computed) The Logical Unit Number (LUN) of the storage volume. Null if this NIC was create from CloudAPI and no DCD changes were done on the Datacenter.
+* `device_number`- (Computed) The Logical Unit Number (LUN) of the storage volume. Null if this NIC was created from CloudAPI and no DCD changes were done on the Datacenter.
 * `pci_slot`- (Computed) The PCI slot number of the Nic.
 
 ## Import
@@ -48,7 +48,7 @@ Please be aware that when using a nic in a load balancer, the load balancer will
 change the nic's ID behind the scenes, therefore the plan will always report this change
 trying to revert the state to the one specified by your terraform file.
 In order to prevent this, use the "lifecycle meta-argument" when declaring your nic,
-in order to to ignore changes to the `lan` attribute:
+in order to ignore changes to the `lan` attribute:
 
 Here's an example:
 
