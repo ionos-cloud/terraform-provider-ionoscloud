@@ -72,5 +72,3 @@ Resource DbaaS Postgres Cluster can be imported using the `cluster_id`, e.g.
 ```shell
 terraform import ionoscloud_pg_cluster.mycluser {cluster uuid}
 ```
-
-> :warning: 
