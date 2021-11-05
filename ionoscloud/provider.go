@@ -67,7 +67,7 @@ func Provider() *schema.Provider {
 			FirewallResource:           resourceFirewall(),
 			LanResource:                resourceLan(),
 			"ionoscloud_loadbalancer":  resourceLoadbalancer(),
-			"ionoscloud_nic":           resourceNic(),
+			nicResource:                resourceNic(),
 			ServerResource:             resourceServer(),
 			VolumeResource:             resourceVolume(),
 			GroupResource:              resourceGroup(),
