@@ -21,13 +21,11 @@ type Lan struct {
 	// The type of object that has been created
 	Type *Type `json:"type,omitempty"`
 	// URL to the object representation (absolute path)
-	Href *string `json:"href,omitempty"`
-	Metadata *DatacenterElementMetadata `json:"metadata,omitempty"`
-	Properties *LanProperties `json:"properties"`
-	Entities *LanEntities `json:"entities,omitempty"`
+	Href       *string                    `json:"href,omitempty"`
+	Metadata   *DatacenterElementMetadata `json:"metadata,omitempty"`
+	Properties *LanProperties             `json:"properties"`
+	Entities   *LanEntities               `json:"entities,omitempty"`
 }
-
-
 
 // GetId returns the Id field value
 // If the value is explicit nil, the zero value for string will be returned
@@ -35,7 +33,6 @@ func (o *Lan) GetId() *string {
 	if o == nil {
 		return nil
 	}
-
 
 	return o.Id
 
@@ -49,13 +46,11 @@ func (o *Lan) GetIdOk() (*string, bool) {
 		return nil, false
 	}
 
-
 	return o.Id, true
 }
 
 // SetId sets field value
 func (o *Lan) SetId(v string) {
-
 
 	o.Id = &v
 
@@ -70,14 +65,12 @@ func (o *Lan) HasId() bool {
 	return false
 }
 
-
 // GetType returns the Type field value
 // If the value is explicit nil, the zero value for Type will be returned
 func (o *Lan) GetType() *Type {
 	if o == nil {
 		return nil
 	}
-
 
 	return o.Type
 
@@ -91,13 +84,11 @@ func (o *Lan) GetTypeOk() (*Type, bool) {
 		return nil, false
 	}
 
-
 	return o.Type, true
 }
 
 // SetType sets field value
 func (o *Lan) SetType(v Type) {
-
 
 	o.Type = &v
 
@@ -112,14 +103,12 @@ func (o *Lan) HasType() bool {
 	return false
 }
 
-
 // GetHref returns the Href field value
 // If the value is explicit nil, the zero value for string will be returned
 func (o *Lan) GetHref() *string {
 	if o == nil {
 		return nil
 	}
-
 
 	return o.Href
 
@@ -133,13 +122,11 @@ func (o *Lan) GetHrefOk() (*string, bool) {
 		return nil, false
 	}
 
-
 	return o.Href, true
 }
 
 // SetHref sets field value
 func (o *Lan) SetHref(v string) {
-
 
 	o.Href = &v
 
@@ -154,14 +141,12 @@ func (o *Lan) HasHref() bool {
 	return false
 }
 
-
 // GetMetadata returns the Metadata field value
 // If the value is explicit nil, the zero value for DatacenterElementMetadata will be returned
 func (o *Lan) GetMetadata() *DatacenterElementMetadata {
 	if o == nil {
 		return nil
 	}
-
 
 	return o.Metadata
 
@@ -175,13 +160,11 @@ func (o *Lan) GetMetadataOk() (*DatacenterElementMetadata, bool) {
 		return nil, false
 	}
 
-
 	return o.Metadata, true
 }
 
 // SetMetadata sets field value
 func (o *Lan) SetMetadata(v DatacenterElementMetadata) {
-
 
 	o.Metadata = &v
 
@@ -196,14 +179,12 @@ func (o *Lan) HasMetadata() bool {
 	return false
 }
 
-
 // GetProperties returns the Properties field value
 // If the value is explicit nil, the zero value for LanProperties will be returned
 func (o *Lan) GetProperties() *LanProperties {
 	if o == nil {
 		return nil
 	}
-
 
 	return o.Properties
 
@@ -217,13 +198,11 @@ func (o *Lan) GetPropertiesOk() (*LanProperties, bool) {
 		return nil, false
 	}
 
-
 	return o.Properties, true
 }
 
 // SetProperties sets field value
 func (o *Lan) SetProperties(v LanProperties) {
-
 
 	o.Properties = &v
 
@@ -238,14 +217,12 @@ func (o *Lan) HasProperties() bool {
 	return false
 }
 
-
 // GetEntities returns the Entities field value
 // If the value is explicit nil, the zero value for LanEntities will be returned
 func (o *Lan) GetEntities() *LanEntities {
 	if o == nil {
 		return nil
 	}
-
 
 	return o.Entities
 
@@ -259,13 +236,11 @@ func (o *Lan) GetEntitiesOk() (*LanEntities, bool) {
 		return nil, false
 	}
 
-
 	return o.Entities, true
 }
 
 // SetEntities sets field value
 func (o *Lan) SetEntities(v LanEntities) {
-
 
 	o.Entities = &v
 
@@ -344,5 +319,3 @@ func (v *NullableLan) UnmarshalJSON(src []byte) error {
 	v.isSet = true
 	return json.Unmarshal(src, &v.value)
 }
-
-

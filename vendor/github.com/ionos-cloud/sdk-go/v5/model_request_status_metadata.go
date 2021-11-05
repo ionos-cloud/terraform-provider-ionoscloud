@@ -16,14 +16,12 @@ import (
 
 // RequestStatusMetadata struct for RequestStatusMetadata
 type RequestStatusMetadata struct {
-	Status *string `json:"status,omitempty"`
+	Status  *string `json:"status,omitempty"`
 	Message *string `json:"message,omitempty"`
-	// Resource's Entity Tag as defined in http://www.w3.org/Protocols/rfc2616/rfc2616-sec3.html#sec3.11 . Entity Tag is also added as an 'ETag response header to requests which don't use 'depth' parameter. 
-	Etag *string `json:"etag,omitempty"`
+	// Resource's Entity Tag as defined in http://www.w3.org/Protocols/rfc2616/rfc2616-sec3.html#sec3.11 . Entity Tag is also added as an 'ETag response header to requests which don't use 'depth' parameter.
+	Etag    *string          `json:"etag,omitempty"`
 	Targets *[]RequestTarget `json:"targets,omitempty"`
 }
-
-
 
 // GetStatus returns the Status field value
 // If the value is explicit nil, the zero value for string will be returned
@@ -31,7 +29,6 @@ func (o *RequestStatusMetadata) GetStatus() *string {
 	if o == nil {
 		return nil
 	}
-
 
 	return o.Status
 
@@ -45,13 +42,11 @@ func (o *RequestStatusMetadata) GetStatusOk() (*string, bool) {
 		return nil, false
 	}
 
-
 	return o.Status, true
 }
 
 // SetStatus sets field value
 func (o *RequestStatusMetadata) SetStatus(v string) {
-
 
 	o.Status = &v
 
@@ -66,14 +61,12 @@ func (o *RequestStatusMetadata) HasStatus() bool {
 	return false
 }
 
-
 // GetMessage returns the Message field value
 // If the value is explicit nil, the zero value for string will be returned
 func (o *RequestStatusMetadata) GetMessage() *string {
 	if o == nil {
 		return nil
 	}
-
 
 	return o.Message
 
@@ -87,13 +80,11 @@ func (o *RequestStatusMetadata) GetMessageOk() (*string, bool) {
 		return nil, false
 	}
 
-
 	return o.Message, true
 }
 
 // SetMessage sets field value
 func (o *RequestStatusMetadata) SetMessage(v string) {
-
 
 	o.Message = &v
 
@@ -108,14 +99,12 @@ func (o *RequestStatusMetadata) HasMessage() bool {
 	return false
 }
 
-
 // GetEtag returns the Etag field value
 // If the value is explicit nil, the zero value for string will be returned
 func (o *RequestStatusMetadata) GetEtag() *string {
 	if o == nil {
 		return nil
 	}
-
 
 	return o.Etag
 
@@ -129,13 +118,11 @@ func (o *RequestStatusMetadata) GetEtagOk() (*string, bool) {
 		return nil, false
 	}
 
-
 	return o.Etag, true
 }
 
 // SetEtag sets field value
 func (o *RequestStatusMetadata) SetEtag(v string) {
-
 
 	o.Etag = &v
 
@@ -150,14 +137,12 @@ func (o *RequestStatusMetadata) HasEtag() bool {
 	return false
 }
 
-
 // GetTargets returns the Targets field value
 // If the value is explicit nil, the zero value for []RequestTarget will be returned
 func (o *RequestStatusMetadata) GetTargets() *[]RequestTarget {
 	if o == nil {
 		return nil
 	}
-
 
 	return o.Targets
 
@@ -171,13 +156,11 @@ func (o *RequestStatusMetadata) GetTargetsOk() (*[]RequestTarget, bool) {
 		return nil, false
 	}
 
-
 	return o.Targets, true
 }
 
 // SetTargets sets field value
 func (o *RequestStatusMetadata) SetTargets(v []RequestTarget) {
-
 
 	o.Targets = &v
 
@@ -248,5 +231,3 @@ func (v *NullableRequestStatusMetadata) UnmarshalJSON(src []byte) error {
 	v.isSet = true
 	return json.Unmarshal(src, &v.value)
 }
-
-

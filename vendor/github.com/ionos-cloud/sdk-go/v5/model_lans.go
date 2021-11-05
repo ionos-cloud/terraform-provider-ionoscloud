@@ -27,11 +27,9 @@ type Lans struct {
 	// the offset (if specified in the request)
 	Offset *float32 `json:"offset,omitempty"`
 	// the limit (if specified in the request)
-	Limit *float32 `json:"limit,omitempty"`
+	Limit *float32         `json:"limit,omitempty"`
 	Links *PaginationLinks `json:"_links,omitempty"`
 }
-
-
 
 // GetId returns the Id field value
 // If the value is explicit nil, the zero value for string will be returned
@@ -39,7 +37,6 @@ func (o *Lans) GetId() *string {
 	if o == nil {
 		return nil
 	}
-
 
 	return o.Id
 
@@ -53,13 +50,11 @@ func (o *Lans) GetIdOk() (*string, bool) {
 		return nil, false
 	}
 
-
 	return o.Id, true
 }
 
 // SetId sets field value
 func (o *Lans) SetId(v string) {
-
 
 	o.Id = &v
 
@@ -74,14 +69,12 @@ func (o *Lans) HasId() bool {
 	return false
 }
 
-
 // GetType returns the Type field value
 // If the value is explicit nil, the zero value for Type will be returned
 func (o *Lans) GetType() *Type {
 	if o == nil {
 		return nil
 	}
-
 
 	return o.Type
 
@@ -95,13 +88,11 @@ func (o *Lans) GetTypeOk() (*Type, bool) {
 		return nil, false
 	}
 
-
 	return o.Type, true
 }
 
 // SetType sets field value
 func (o *Lans) SetType(v Type) {
-
 
 	o.Type = &v
 
@@ -116,14 +107,12 @@ func (o *Lans) HasType() bool {
 	return false
 }
 
-
 // GetHref returns the Href field value
 // If the value is explicit nil, the zero value for string will be returned
 func (o *Lans) GetHref() *string {
 	if o == nil {
 		return nil
 	}
-
 
 	return o.Href
 
@@ -137,13 +126,11 @@ func (o *Lans) GetHrefOk() (*string, bool) {
 		return nil, false
 	}
 
-
 	return o.Href, true
 }
 
 // SetHref sets field value
 func (o *Lans) SetHref(v string) {
-
 
 	o.Href = &v
 
@@ -158,14 +145,12 @@ func (o *Lans) HasHref() bool {
 	return false
 }
 
-
 // GetItems returns the Items field value
 // If the value is explicit nil, the zero value for []Lan will be returned
 func (o *Lans) GetItems() *[]Lan {
 	if o == nil {
 		return nil
 	}
-
 
 	return o.Items
 
@@ -179,13 +164,11 @@ func (o *Lans) GetItemsOk() (*[]Lan, bool) {
 		return nil, false
 	}
 
-
 	return o.Items, true
 }
 
 // SetItems sets field value
 func (o *Lans) SetItems(v []Lan) {
-
 
 	o.Items = &v
 
@@ -200,14 +183,12 @@ func (o *Lans) HasItems() bool {
 	return false
 }
 
-
 // GetOffset returns the Offset field value
 // If the value is explicit nil, the zero value for float32 will be returned
 func (o *Lans) GetOffset() *float32 {
 	if o == nil {
 		return nil
 	}
-
 
 	return o.Offset
 
@@ -221,13 +202,11 @@ func (o *Lans) GetOffsetOk() (*float32, bool) {
 		return nil, false
 	}
 
-
 	return o.Offset, true
 }
 
 // SetOffset sets field value
 func (o *Lans) SetOffset(v float32) {
-
 
 	o.Offset = &v
 
@@ -242,14 +221,12 @@ func (o *Lans) HasOffset() bool {
 	return false
 }
 
-
 // GetLimit returns the Limit field value
 // If the value is explicit nil, the zero value for float32 will be returned
 func (o *Lans) GetLimit() *float32 {
 	if o == nil {
 		return nil
 	}
-
 
 	return o.Limit
 
@@ -263,13 +240,11 @@ func (o *Lans) GetLimitOk() (*float32, bool) {
 		return nil, false
 	}
 
-
 	return o.Limit, true
 }
 
 // SetLimit sets field value
 func (o *Lans) SetLimit(v float32) {
-
 
 	o.Limit = &v
 
@@ -284,14 +259,12 @@ func (o *Lans) HasLimit() bool {
 	return false
 }
 
-
 // GetLinks returns the Links field value
 // If the value is explicit nil, the zero value for PaginationLinks will be returned
 func (o *Lans) GetLinks() *PaginationLinks {
 	if o == nil {
 		return nil
 	}
-
 
 	return o.Links
 
@@ -305,13 +278,11 @@ func (o *Lans) GetLinksOk() (*PaginationLinks, bool) {
 		return nil, false
 	}
 
-
 	return o.Links, true
 }
 
 // SetLinks sets field value
 func (o *Lans) SetLinks(v PaginationLinks) {
-
 
 	o.Links = &v
 
@@ -394,5 +365,3 @@ func (v *NullableLans) UnmarshalJSON(src []byte) error {
 	v.isSet = true
 	return json.Unmarshal(src, &v.value)
 }
-
-

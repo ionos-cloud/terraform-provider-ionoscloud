@@ -16,13 +16,11 @@ import (
 
 // DataCenterEntities struct for DataCenterEntities
 type DataCenterEntities struct {
-	Servers *Servers `json:"servers,omitempty"`
-	Volumes *Volumes `json:"volumes,omitempty"`
+	Servers       *Servers       `json:"servers,omitempty"`
+	Volumes       *Volumes       `json:"volumes,omitempty"`
 	Loadbalancers *Loadbalancers `json:"loadbalancers,omitempty"`
-	Lans *Lans `json:"lans,omitempty"`
+	Lans          *Lans          `json:"lans,omitempty"`
 }
-
-
 
 // GetServers returns the Servers field value
 // If the value is explicit nil, the zero value for Servers will be returned
@@ -30,7 +28,6 @@ func (o *DataCenterEntities) GetServers() *Servers {
 	if o == nil {
 		return nil
 	}
-
 
 	return o.Servers
 
@@ -44,13 +41,11 @@ func (o *DataCenterEntities) GetServersOk() (*Servers, bool) {
 		return nil, false
 	}
 
-
 	return o.Servers, true
 }
 
 // SetServers sets field value
 func (o *DataCenterEntities) SetServers(v Servers) {
-
 
 	o.Servers = &v
 
@@ -65,14 +60,12 @@ func (o *DataCenterEntities) HasServers() bool {
 	return false
 }
 
-
 // GetVolumes returns the Volumes field value
 // If the value is explicit nil, the zero value for Volumes will be returned
 func (o *DataCenterEntities) GetVolumes() *Volumes {
 	if o == nil {
 		return nil
 	}
-
 
 	return o.Volumes
 
@@ -86,13 +79,11 @@ func (o *DataCenterEntities) GetVolumesOk() (*Volumes, bool) {
 		return nil, false
 	}
 
-
 	return o.Volumes, true
 }
 
 // SetVolumes sets field value
 func (o *DataCenterEntities) SetVolumes(v Volumes) {
-
 
 	o.Volumes = &v
 
@@ -107,14 +98,12 @@ func (o *DataCenterEntities) HasVolumes() bool {
 	return false
 }
 
-
 // GetLoadbalancers returns the Loadbalancers field value
 // If the value is explicit nil, the zero value for Loadbalancers will be returned
 func (o *DataCenterEntities) GetLoadbalancers() *Loadbalancers {
 	if o == nil {
 		return nil
 	}
-
 
 	return o.Loadbalancers
 
@@ -128,13 +117,11 @@ func (o *DataCenterEntities) GetLoadbalancersOk() (*Loadbalancers, bool) {
 		return nil, false
 	}
 
-
 	return o.Loadbalancers, true
 }
 
 // SetLoadbalancers sets field value
 func (o *DataCenterEntities) SetLoadbalancers(v Loadbalancers) {
-
 
 	o.Loadbalancers = &v
 
@@ -149,14 +136,12 @@ func (o *DataCenterEntities) HasLoadbalancers() bool {
 	return false
 }
 
-
 // GetLans returns the Lans field value
 // If the value is explicit nil, the zero value for Lans will be returned
 func (o *DataCenterEntities) GetLans() *Lans {
 	if o == nil {
 		return nil
 	}
-
 
 	return o.Lans
 
@@ -170,13 +155,11 @@ func (o *DataCenterEntities) GetLansOk() (*Lans, bool) {
 		return nil, false
 	}
 
-
 	return o.Lans, true
 }
 
 // SetLans sets field value
 func (o *DataCenterEntities) SetLans(v Lans) {
-
 
 	o.Lans = &v
 
@@ -247,5 +230,3 @@ func (v *NullableDataCenterEntities) UnmarshalJSON(src []byte) error {
 	v.isSet = true
 	return json.Unmarshal(src, &v.value)
 }
-
-

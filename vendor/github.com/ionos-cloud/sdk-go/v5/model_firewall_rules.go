@@ -27,11 +27,9 @@ type FirewallRules struct {
 	// the offset (if specified in the request)
 	Offset *float32 `json:"offset,omitempty"`
 	// the limit (if specified in the request)
-	Limit *float32 `json:"limit,omitempty"`
+	Limit *float32         `json:"limit,omitempty"`
 	Links *PaginationLinks `json:"_links,omitempty"`
 }
-
-
 
 // GetId returns the Id field value
 // If the value is explicit nil, the zero value for string will be returned
@@ -39,7 +37,6 @@ func (o *FirewallRules) GetId() *string {
 	if o == nil {
 		return nil
 	}
-
 
 	return o.Id
 
@@ -53,13 +50,11 @@ func (o *FirewallRules) GetIdOk() (*string, bool) {
 		return nil, false
 	}
 
-
 	return o.Id, true
 }
 
 // SetId sets field value
 func (o *FirewallRules) SetId(v string) {
-
 
 	o.Id = &v
 
@@ -74,14 +69,12 @@ func (o *FirewallRules) HasId() bool {
 	return false
 }
 
-
 // GetType returns the Type field value
 // If the value is explicit nil, the zero value for Type will be returned
 func (o *FirewallRules) GetType() *Type {
 	if o == nil {
 		return nil
 	}
-
 
 	return o.Type
 
@@ -95,13 +88,11 @@ func (o *FirewallRules) GetTypeOk() (*Type, bool) {
 		return nil, false
 	}
 
-
 	return o.Type, true
 }
 
 // SetType sets field value
 func (o *FirewallRules) SetType(v Type) {
-
 
 	o.Type = &v
 
@@ -116,14 +107,12 @@ func (o *FirewallRules) HasType() bool {
 	return false
 }
 
-
 // GetHref returns the Href field value
 // If the value is explicit nil, the zero value for string will be returned
 func (o *FirewallRules) GetHref() *string {
 	if o == nil {
 		return nil
 	}
-
 
 	return o.Href
 
@@ -137,13 +126,11 @@ func (o *FirewallRules) GetHrefOk() (*string, bool) {
 		return nil, false
 	}
 
-
 	return o.Href, true
 }
 
 // SetHref sets field value
 func (o *FirewallRules) SetHref(v string) {
-
 
 	o.Href = &v
 
@@ -158,14 +145,12 @@ func (o *FirewallRules) HasHref() bool {
 	return false
 }
 
-
 // GetItems returns the Items field value
 // If the value is explicit nil, the zero value for []FirewallRule will be returned
 func (o *FirewallRules) GetItems() *[]FirewallRule {
 	if o == nil {
 		return nil
 	}
-
 
 	return o.Items
 
@@ -179,13 +164,11 @@ func (o *FirewallRules) GetItemsOk() (*[]FirewallRule, bool) {
 		return nil, false
 	}
 
-
 	return o.Items, true
 }
 
 // SetItems sets field value
 func (o *FirewallRules) SetItems(v []FirewallRule) {
-
 
 	o.Items = &v
 
@@ -200,14 +183,12 @@ func (o *FirewallRules) HasItems() bool {
 	return false
 }
 
-
 // GetOffset returns the Offset field value
 // If the value is explicit nil, the zero value for float32 will be returned
 func (o *FirewallRules) GetOffset() *float32 {
 	if o == nil {
 		return nil
 	}
-
 
 	return o.Offset
 
@@ -221,13 +202,11 @@ func (o *FirewallRules) GetOffsetOk() (*float32, bool) {
 		return nil, false
 	}
 
-
 	return o.Offset, true
 }
 
 // SetOffset sets field value
 func (o *FirewallRules) SetOffset(v float32) {
-
 
 	o.Offset = &v
 
@@ -242,14 +221,12 @@ func (o *FirewallRules) HasOffset() bool {
 	return false
 }
 
-
 // GetLimit returns the Limit field value
 // If the value is explicit nil, the zero value for float32 will be returned
 func (o *FirewallRules) GetLimit() *float32 {
 	if o == nil {
 		return nil
 	}
-
 
 	return o.Limit
 
@@ -263,13 +240,11 @@ func (o *FirewallRules) GetLimitOk() (*float32, bool) {
 		return nil, false
 	}
 
-
 	return o.Limit, true
 }
 
 // SetLimit sets field value
 func (o *FirewallRules) SetLimit(v float32) {
-
 
 	o.Limit = &v
 
@@ -284,14 +259,12 @@ func (o *FirewallRules) HasLimit() bool {
 	return false
 }
 
-
 // GetLinks returns the Links field value
 // If the value is explicit nil, the zero value for PaginationLinks will be returned
 func (o *FirewallRules) GetLinks() *PaginationLinks {
 	if o == nil {
 		return nil
 	}
-
 
 	return o.Links
 
@@ -305,13 +278,11 @@ func (o *FirewallRules) GetLinksOk() (*PaginationLinks, bool) {
 		return nil, false
 	}
 
-
 	return o.Links, true
 }
 
 // SetLinks sets field value
 func (o *FirewallRules) SetLinks(v PaginationLinks) {
-
 
 	o.Links = &v
 
@@ -394,5 +365,3 @@ func (v *NullableFirewallRules) UnmarshalJSON(src []byte) error {
 	v.isSet = true
 	return json.Unmarshal(src, &v.value)
 }
-
-

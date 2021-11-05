@@ -26,15 +26,12 @@ type GroupMembers struct {
 	Items *[]User `json:"items,omitempty"`
 }
 
-
-
 // GetId returns the Id field value
 // If the value is explicit nil, the zero value for string will be returned
 func (o *GroupMembers) GetId() *string {
 	if o == nil {
 		return nil
 	}
-
 
 	return o.Id
 
@@ -48,13 +45,11 @@ func (o *GroupMembers) GetIdOk() (*string, bool) {
 		return nil, false
 	}
 
-
 	return o.Id, true
 }
 
 // SetId sets field value
 func (o *GroupMembers) SetId(v string) {
-
 
 	o.Id = &v
 
@@ -69,14 +64,12 @@ func (o *GroupMembers) HasId() bool {
 	return false
 }
 
-
 // GetType returns the Type field value
 // If the value is explicit nil, the zero value for Type will be returned
 func (o *GroupMembers) GetType() *Type {
 	if o == nil {
 		return nil
 	}
-
 
 	return o.Type
 
@@ -90,13 +83,11 @@ func (o *GroupMembers) GetTypeOk() (*Type, bool) {
 		return nil, false
 	}
 
-
 	return o.Type, true
 }
 
 // SetType sets field value
 func (o *GroupMembers) SetType(v Type) {
-
 
 	o.Type = &v
 
@@ -111,14 +102,12 @@ func (o *GroupMembers) HasType() bool {
 	return false
 }
 
-
 // GetHref returns the Href field value
 // If the value is explicit nil, the zero value for string will be returned
 func (o *GroupMembers) GetHref() *string {
 	if o == nil {
 		return nil
 	}
-
 
 	return o.Href
 
@@ -132,13 +121,11 @@ func (o *GroupMembers) GetHrefOk() (*string, bool) {
 		return nil, false
 	}
 
-
 	return o.Href, true
 }
 
 // SetHref sets field value
 func (o *GroupMembers) SetHref(v string) {
-
 
 	o.Href = &v
 
@@ -153,14 +140,12 @@ func (o *GroupMembers) HasHref() bool {
 	return false
 }
 
-
 // GetItems returns the Items field value
 // If the value is explicit nil, the zero value for []User will be returned
 func (o *GroupMembers) GetItems() *[]User {
 	if o == nil {
 		return nil
 	}
-
 
 	return o.Items
 
@@ -174,13 +159,11 @@ func (o *GroupMembers) GetItemsOk() (*[]User, bool) {
 		return nil, false
 	}
 
-
 	return o.Items, true
 }
 
 // SetItems sets field value
 func (o *GroupMembers) SetItems(v []User) {
-
 
 	o.Items = &v
 
@@ -251,5 +234,3 @@ func (v *NullableGroupMembers) UnmarshalJSON(src []byte) error {
 	v.isSet = true
 	return json.Unmarshal(src, &v.value)
 }
-
-

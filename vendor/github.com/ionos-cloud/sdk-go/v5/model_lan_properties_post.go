@@ -26,15 +26,12 @@ type LanPropertiesPost struct {
 	Public *bool `json:"public,omitempty"`
 }
 
-
-
 // GetName returns the Name field value
 // If the value is explicit nil, the zero value for string will be returned
 func (o *LanPropertiesPost) GetName() *string {
 	if o == nil {
 		return nil
 	}
-
 
 	return o.Name
 
@@ -48,13 +45,11 @@ func (o *LanPropertiesPost) GetNameOk() (*string, bool) {
 		return nil, false
 	}
 
-
 	return o.Name, true
 }
 
 // SetName sets field value
 func (o *LanPropertiesPost) SetName(v string) {
-
 
 	o.Name = &v
 
@@ -69,14 +64,12 @@ func (o *LanPropertiesPost) HasName() bool {
 	return false
 }
 
-
 // GetIpFailover returns the IpFailover field value
 // If the value is explicit nil, the zero value for []IPFailover will be returned
 func (o *LanPropertiesPost) GetIpFailover() *[]IPFailover {
 	if o == nil {
 		return nil
 	}
-
 
 	return o.IpFailover
 
@@ -90,13 +83,11 @@ func (o *LanPropertiesPost) GetIpFailoverOk() (*[]IPFailover, bool) {
 		return nil, false
 	}
 
-
 	return o.IpFailover, true
 }
 
 // SetIpFailover sets field value
 func (o *LanPropertiesPost) SetIpFailover(v []IPFailover) {
-
 
 	o.IpFailover = &v
 
@@ -111,14 +102,12 @@ func (o *LanPropertiesPost) HasIpFailover() bool {
 	return false
 }
 
-
 // GetPcc returns the Pcc field value
 // If the value is explicit nil, the zero value for string will be returned
 func (o *LanPropertiesPost) GetPcc() *string {
 	if o == nil {
 		return nil
 	}
-
 
 	return o.Pcc
 
@@ -132,13 +121,11 @@ func (o *LanPropertiesPost) GetPccOk() (*string, bool) {
 		return nil, false
 	}
 
-
 	return o.Pcc, true
 }
 
 // SetPcc sets field value
 func (o *LanPropertiesPost) SetPcc(v string) {
-
 
 	o.Pcc = &v
 
@@ -153,14 +140,12 @@ func (o *LanPropertiesPost) HasPcc() bool {
 	return false
 }
 
-
 // GetPublic returns the Public field value
 // If the value is explicit nil, the zero value for bool will be returned
 func (o *LanPropertiesPost) GetPublic() *bool {
 	if o == nil {
 		return nil
 	}
-
 
 	return o.Public
 
@@ -174,13 +159,11 @@ func (o *LanPropertiesPost) GetPublicOk() (*bool, bool) {
 		return nil, false
 	}
 
-
 	return o.Public, true
 }
 
 // SetPublic sets field value
 func (o *LanPropertiesPost) SetPublic(v bool) {
-
 
 	o.Public = &v
 
@@ -251,5 +234,3 @@ func (v *NullableLanPropertiesPost) UnmarshalJSON(src []byte) error {
 	v.isSet = true
 	return json.Unmarshal(src, &v.value)
 }
-
-

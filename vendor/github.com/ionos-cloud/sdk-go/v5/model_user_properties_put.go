@@ -32,15 +32,12 @@ type UserPropertiesPut struct {
 	Active *bool `json:"active,omitempty"`
 }
 
-
-
 // GetFirstname returns the Firstname field value
 // If the value is explicit nil, the zero value for string will be returned
 func (o *UserPropertiesPut) GetFirstname() *string {
 	if o == nil {
 		return nil
 	}
-
 
 	return o.Firstname
 
@@ -54,13 +51,11 @@ func (o *UserPropertiesPut) GetFirstnameOk() (*string, bool) {
 		return nil, false
 	}
 
-
 	return o.Firstname, true
 }
 
 // SetFirstname sets field value
 func (o *UserPropertiesPut) SetFirstname(v string) {
-
 
 	o.Firstname = &v
 
@@ -75,14 +70,12 @@ func (o *UserPropertiesPut) HasFirstname() bool {
 	return false
 }
 
-
 // GetLastname returns the Lastname field value
 // If the value is explicit nil, the zero value for string will be returned
 func (o *UserPropertiesPut) GetLastname() *string {
 	if o == nil {
 		return nil
 	}
-
 
 	return o.Lastname
 
@@ -96,13 +89,11 @@ func (o *UserPropertiesPut) GetLastnameOk() (*string, bool) {
 		return nil, false
 	}
 
-
 	return o.Lastname, true
 }
 
 // SetLastname sets field value
 func (o *UserPropertiesPut) SetLastname(v string) {
-
 
 	o.Lastname = &v
 
@@ -117,14 +108,12 @@ func (o *UserPropertiesPut) HasLastname() bool {
 	return false
 }
 
-
 // GetEmail returns the Email field value
 // If the value is explicit nil, the zero value for string will be returned
 func (o *UserPropertiesPut) GetEmail() *string {
 	if o == nil {
 		return nil
 	}
-
 
 	return o.Email
 
@@ -138,13 +127,11 @@ func (o *UserPropertiesPut) GetEmailOk() (*string, bool) {
 		return nil, false
 	}
 
-
 	return o.Email, true
 }
 
 // SetEmail sets field value
 func (o *UserPropertiesPut) SetEmail(v string) {
-
 
 	o.Email = &v
 
@@ -159,14 +146,12 @@ func (o *UserPropertiesPut) HasEmail() bool {
 	return false
 }
 
-
 // GetAdministrator returns the Administrator field value
 // If the value is explicit nil, the zero value for bool will be returned
 func (o *UserPropertiesPut) GetAdministrator() *bool {
 	if o == nil {
 		return nil
 	}
-
 
 	return o.Administrator
 
@@ -180,13 +165,11 @@ func (o *UserPropertiesPut) GetAdministratorOk() (*bool, bool) {
 		return nil, false
 	}
 
-
 	return o.Administrator, true
 }
 
 // SetAdministrator sets field value
 func (o *UserPropertiesPut) SetAdministrator(v bool) {
-
 
 	o.Administrator = &v
 
@@ -201,14 +184,12 @@ func (o *UserPropertiesPut) HasAdministrator() bool {
 	return false
 }
 
-
 // GetForceSecAuth returns the ForceSecAuth field value
 // If the value is explicit nil, the zero value for bool will be returned
 func (o *UserPropertiesPut) GetForceSecAuth() *bool {
 	if o == nil {
 		return nil
 	}
-
 
 	return o.ForceSecAuth
 
@@ -222,13 +203,11 @@ func (o *UserPropertiesPut) GetForceSecAuthOk() (*bool, bool) {
 		return nil, false
 	}
 
-
 	return o.ForceSecAuth, true
 }
 
 // SetForceSecAuth sets field value
 func (o *UserPropertiesPut) SetForceSecAuth(v bool) {
-
 
 	o.ForceSecAuth = &v
 
@@ -243,14 +222,12 @@ func (o *UserPropertiesPut) HasForceSecAuth() bool {
 	return false
 }
 
-
 // GetSecAuthActive returns the SecAuthActive field value
 // If the value is explicit nil, the zero value for bool will be returned
 func (o *UserPropertiesPut) GetSecAuthActive() *bool {
 	if o == nil {
 		return nil
 	}
-
 
 	return o.SecAuthActive
 
@@ -264,13 +241,11 @@ func (o *UserPropertiesPut) GetSecAuthActiveOk() (*bool, bool) {
 		return nil, false
 	}
 
-
 	return o.SecAuthActive, true
 }
 
 // SetSecAuthActive sets field value
 func (o *UserPropertiesPut) SetSecAuthActive(v bool) {
-
 
 	o.SecAuthActive = &v
 
@@ -285,14 +260,12 @@ func (o *UserPropertiesPut) HasSecAuthActive() bool {
 	return false
 }
 
-
 // GetActive returns the Active field value
 // If the value is explicit nil, the zero value for bool will be returned
 func (o *UserPropertiesPut) GetActive() *bool {
 	if o == nil {
 		return nil
 	}
-
 
 	return o.Active
 
@@ -306,13 +279,11 @@ func (o *UserPropertiesPut) GetActiveOk() (*bool, bool) {
 		return nil, false
 	}
 
-
 	return o.Active, true
 }
 
 // SetActive sets field value
 func (o *UserPropertiesPut) SetActive(v bool) {
-
 
 	o.Active = &v
 
@@ -395,5 +366,3 @@ func (v *NullableUserPropertiesPut) UnmarshalJSON(src []byte) error {
 	v.isSet = true
 	return json.Unmarshal(src, &v.value)
 }
-
-

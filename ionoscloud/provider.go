@@ -29,28 +29,28 @@ func Provider() *schema.Provider {
 			"username": {
 				Type:          schema.TypeString,
 				Optional:      true,
-				DefaultFunc:   schema.EnvDefaultFunc("IONOS_USERNAME", nil),
+				DefaultFunc:   schema.EnvDefaultFunc(ionoscloud.IonosUsernameEnvVar, nil),
 				Description:   "IonosCloud username for API operations. If token is provided, token is preferred",
 				ConflictsWith: []string{"token"},
 			},
 			"password": {
 				Type:          schema.TypeString,
 				Optional:      true,
-				DefaultFunc:   schema.EnvDefaultFunc("IONOS_PASSWORD", nil),
+				DefaultFunc:   schema.EnvDefaultFunc(ionoscloud.IonosPasswordEnvVar, nil),
 				Description:   "IonosCloud password for API operations. If token is provided, token is preferred",
 				ConflictsWith: []string{"token"},
 			},
 			"token": {
 				Type:          schema.TypeString,
 				Optional:      true,
-				DefaultFunc:   schema.EnvDefaultFunc("IONOS_TOKEN", nil),
+				DefaultFunc:   schema.EnvDefaultFunc(ionoscloud.IonosTokenEnvVar, nil),
 				Description:   "IonosCloud bearer token for API operations.",
 				ConflictsWith: []string{"username", "password"},
 			},
 			"endpoint": {
 				Type:        schema.TypeString,
 				Optional:    true,
-				DefaultFunc: schema.EnvDefaultFunc("IONOS_API_URL", ""),
+				DefaultFunc: schema.EnvDefaultFunc(ionoscloud.IonosApiUrlEnvVar, ""),
 				Description: "IonosCloud REST API URL.",
 			},
 			"retries": {
@@ -145,10 +145,7 @@ func providerConfigure(d *schema.ResourceData, terraformVersion string) (interfa
 
 	cleanedUrl := cleanURL(d.Get("endpoint").(string))
 
-	newConfig := ionoscloud.NewConfiguration(username.(string), password.(string), token.(string))
-	if len(cleanedUrl) > 0 {
-		newConfig.Servers[0].URL = cleanedUrl
-	}
+	newConfig := ionoscloud.NewConfiguration(username.(string), password.(string), token.(string), cleanedUrl)
 
 	if os.Getenv("IONOS_DEBUG") != "" {
 		newConfig.Debug = true

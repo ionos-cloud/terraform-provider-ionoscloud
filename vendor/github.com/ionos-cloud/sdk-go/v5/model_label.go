@@ -21,12 +21,10 @@ type Label struct {
 	// The type of object that has been created
 	Type *string `json:"type,omitempty"`
 	// URL to the object representation (absolute path)
-	Href *string `json:"href,omitempty"`
-	Metadata *NoStateMetaData `json:"metadata,omitempty"`
+	Href       *string          `json:"href,omitempty"`
+	Metadata   *NoStateMetaData `json:"metadata,omitempty"`
 	Properties *LabelProperties `json:"properties"`
 }
-
-
 
 // GetId returns the Id field value
 // If the value is explicit nil, the zero value for string will be returned
@@ -34,7 +32,6 @@ func (o *Label) GetId() *string {
 	if o == nil {
 		return nil
 	}
-
 
 	return o.Id
 
@@ -48,13 +45,11 @@ func (o *Label) GetIdOk() (*string, bool) {
 		return nil, false
 	}
 
-
 	return o.Id, true
 }
 
 // SetId sets field value
 func (o *Label) SetId(v string) {
-
 
 	o.Id = &v
 
@@ -69,14 +64,12 @@ func (o *Label) HasId() bool {
 	return false
 }
 
-
 // GetType returns the Type field value
 // If the value is explicit nil, the zero value for string will be returned
 func (o *Label) GetType() *string {
 	if o == nil {
 		return nil
 	}
-
 
 	return o.Type
 
@@ -90,13 +83,11 @@ func (o *Label) GetTypeOk() (*string, bool) {
 		return nil, false
 	}
 
-
 	return o.Type, true
 }
 
 // SetType sets field value
 func (o *Label) SetType(v string) {
-
 
 	o.Type = &v
 
@@ -111,14 +102,12 @@ func (o *Label) HasType() bool {
 	return false
 }
 
-
 // GetHref returns the Href field value
 // If the value is explicit nil, the zero value for string will be returned
 func (o *Label) GetHref() *string {
 	if o == nil {
 		return nil
 	}
-
 
 	return o.Href
 
@@ -132,13 +121,11 @@ func (o *Label) GetHrefOk() (*string, bool) {
 		return nil, false
 	}
 
-
 	return o.Href, true
 }
 
 // SetHref sets field value
 func (o *Label) SetHref(v string) {
-
 
 	o.Href = &v
 
@@ -153,14 +140,12 @@ func (o *Label) HasHref() bool {
 	return false
 }
 
-
 // GetMetadata returns the Metadata field value
 // If the value is explicit nil, the zero value for NoStateMetaData will be returned
 func (o *Label) GetMetadata() *NoStateMetaData {
 	if o == nil {
 		return nil
 	}
-
 
 	return o.Metadata
 
@@ -174,13 +159,11 @@ func (o *Label) GetMetadataOk() (*NoStateMetaData, bool) {
 		return nil, false
 	}
 
-
 	return o.Metadata, true
 }
 
 // SetMetadata sets field value
 func (o *Label) SetMetadata(v NoStateMetaData) {
-
 
 	o.Metadata = &v
 
@@ -195,14 +178,12 @@ func (o *Label) HasMetadata() bool {
 	return false
 }
 
-
 // GetProperties returns the Properties field value
 // If the value is explicit nil, the zero value for LabelProperties will be returned
 func (o *Label) GetProperties() *LabelProperties {
 	if o == nil {
 		return nil
 	}
-
 
 	return o.Properties
 
@@ -216,13 +197,11 @@ func (o *Label) GetPropertiesOk() (*LabelProperties, bool) {
 		return nil, false
 	}
 
-
 	return o.Properties, true
 }
 
 // SetProperties sets field value
 func (o *Label) SetProperties(v LabelProperties) {
-
 
 	o.Properties = &v
 
@@ -297,5 +276,3 @@ func (v *NullableLabel) UnmarshalJSON(src []byte) error {
 	v.isSet = true
 	return json.Unmarshal(src, &v.value)
 }
-
-

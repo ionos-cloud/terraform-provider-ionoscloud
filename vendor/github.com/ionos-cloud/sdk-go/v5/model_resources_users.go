@@ -26,15 +26,12 @@ type ResourcesUsers struct {
 	Items *[]Resource `json:"items,omitempty"`
 }
 
-
-
 // GetId returns the Id field value
 // If the value is explicit nil, the zero value for string will be returned
 func (o *ResourcesUsers) GetId() *string {
 	if o == nil {
 		return nil
 	}
-
 
 	return o.Id
 
@@ -48,13 +45,11 @@ func (o *ResourcesUsers) GetIdOk() (*string, bool) {
 		return nil, false
 	}
 
-
 	return o.Id, true
 }
 
 // SetId sets field value
 func (o *ResourcesUsers) SetId(v string) {
-
 
 	o.Id = &v
 
@@ -69,14 +64,12 @@ func (o *ResourcesUsers) HasId() bool {
 	return false
 }
 
-
 // GetType returns the Type field value
 // If the value is explicit nil, the zero value for Type will be returned
 func (o *ResourcesUsers) GetType() *Type {
 	if o == nil {
 		return nil
 	}
-
 
 	return o.Type
 
@@ -90,13 +83,11 @@ func (o *ResourcesUsers) GetTypeOk() (*Type, bool) {
 		return nil, false
 	}
 
-
 	return o.Type, true
 }
 
 // SetType sets field value
 func (o *ResourcesUsers) SetType(v Type) {
-
 
 	o.Type = &v
 
@@ -111,14 +102,12 @@ func (o *ResourcesUsers) HasType() bool {
 	return false
 }
 
-
 // GetHref returns the Href field value
 // If the value is explicit nil, the zero value for string will be returned
 func (o *ResourcesUsers) GetHref() *string {
 	if o == nil {
 		return nil
 	}
-
 
 	return o.Href
 
@@ -132,13 +121,11 @@ func (o *ResourcesUsers) GetHrefOk() (*string, bool) {
 		return nil, false
 	}
 
-
 	return o.Href, true
 }
 
 // SetHref sets field value
 func (o *ResourcesUsers) SetHref(v string) {
-
 
 	o.Href = &v
 
@@ -153,14 +140,12 @@ func (o *ResourcesUsers) HasHref() bool {
 	return false
 }
 
-
 // GetItems returns the Items field value
 // If the value is explicit nil, the zero value for []Resource will be returned
 func (o *ResourcesUsers) GetItems() *[]Resource {
 	if o == nil {
 		return nil
 	}
-
 
 	return o.Items
 
@@ -174,13 +159,11 @@ func (o *ResourcesUsers) GetItemsOk() (*[]Resource, bool) {
 		return nil, false
 	}
 
-
 	return o.Items, true
 }
 
 // SetItems sets field value
 func (o *ResourcesUsers) SetItems(v []Resource) {
-
 
 	o.Items = &v
 
@@ -251,5 +234,3 @@ func (v *NullableResourcesUsers) UnmarshalJSON(src []byte) error {
 	v.isSet = true
 	return json.Unmarshal(src, &v.value)
 }
-
-
