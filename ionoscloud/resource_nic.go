@@ -8,6 +8,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 	ionoscloud "github.com/ionos-cloud/sdk-go/v5"
 	"log"
+	"strings"
 )
 
 func resourceNic() *schema.Resource {
@@ -105,7 +106,7 @@ func resourceNicRead(ctx context.Context, d *schema.ResourceData, meta interface
 	srvid := d.Get("server_id").(string)
 	nicid := d.Id()
 
-	rsp, apiResponse, err := client.NicApi.DatacentersServersNicsFindById(ctx, dcid, srvid, nicid).Execute()
+	nic, apiResponse, err := client.NicApi.DatacentersServersNicsFindById(ctx, dcid, srvid, nicid).Execute()
 	logApiRequestTime(apiResponse)
 
 	if err != nil {
@@ -119,44 +120,8 @@ func resourceNicRead(ctx context.Context, d *schema.ResourceData, meta interface
 		return diags
 	}
 
-	if rsp.Properties != nil {
-		log.Printf("[INFO] LAN ON NIC: %d", rsp.Properties.Lan)
-		if rsp.Properties.Dhcp != nil {
-			if err := d.Set("dhcp", *rsp.Properties.Dhcp); err != nil {
-				diags := diag.FromErr(err)
-				return diags
-			}
-		}
-		if rsp.Properties.Lan != nil {
-			if err := d.Set("lan", *rsp.Properties.Lan); err != nil {
-				diags := diag.FromErr(err)
-				return diags
-			}
-		}
-		if rsp.Properties.Name != nil {
-			if err := d.Set("name", *rsp.Properties.Name); err != nil {
-				diags := diag.FromErr(err)
-				return diags
-			}
-		}
-		if rsp.Properties.Ips != nil && len(*rsp.Properties.Ips) > 0 {
-			if err := d.Set("ips", *rsp.Properties.Ips); err != nil {
-				diags := diag.FromErr(err)
-				return diags
-			}
-		}
-		if rsp.Properties.FirewallActive != nil {
-			if err := d.Set("firewall_active", *rsp.Properties.FirewallActive); err != nil {
-				diags := diag.FromErr(err)
-				return diags
-			}
-		}
-		if rsp.Properties.Mac != nil {
-			if err := d.Set("mac", *rsp.Properties.Mac); err != nil {
-				diags := diag.FromErr(err)
-				return diags
-			}
-		}
+	if err := NicSetData(d, &nic); err != nil {
+		return diag.FromErr(err)
 	}
 
 	return nil
@@ -246,4 +211,90 @@ func getNicData(d *schema.ResourceData, path string) ionoscloud.Nic {
 	}
 
 	return nic
+}
+
+func NicSetData(d *schema.ResourceData, nic *ionoscloud.Nic) (err error) {
+	if nic == nil {
+		return fmt.Errorf("nic is empty")
+	}
+
+	if nic.Id != nil {
+		d.SetId(*nic.Id)
+	}
+
+	if nic.Properties != nil {
+		log.Printf("[INFO] LAN ON NIC: %d", nic.Properties.Lan)
+		if nic.Properties.Dhcp != nil {
+			if err := d.Set("dhcp", *nic.Properties.Dhcp); err != nil {
+				return err
+			}
+		}
+		if nic.Properties.Lan != nil {
+			if err := d.Set("lan", *nic.Properties.Lan); err != nil {
+				return err
+			}
+		}
+		if nic.Properties.Name != nil {
+			if err := d.Set("name", *nic.Properties.Name); err != nil {
+				return err
+			}
+		}
+		if nic.Properties.Ips != nil && len(*nic.Properties.Ips) > 0 {
+			if err := d.Set("ips", *nic.Properties.Ips); err != nil {
+				return err
+			}
+		}
+		if nic.Properties.FirewallActive != nil {
+			if err := d.Set("firewall_active", *nic.Properties.FirewallActive); err != nil {
+				return err
+			}
+		}
+		if nic.Properties.Mac != nil {
+			if err := d.Set("mac", *nic.Properties.Mac); err != nil {
+				return err
+			}
+		}
+	}
+
+	return nil
+}
+
+func resourceNicImport(ctx context.Context, d *schema.ResourceData, meta interface{}) ([]*schema.ResourceData, error) {
+	parts := strings.Split(d.Id(), "/")
+	if len(parts) != 3 || parts[0] == "" || parts[1] == "" {
+		return nil, fmt.Errorf("invalid import id %q. Expecting {datacenter}/{server}/{nic}", d.Id())
+	}
+	dcId := parts[0]
+	sId := parts[1]
+	nicId := parts[2]
+
+	client := meta.(*ionoscloud.APIClient)
+
+	nic, apiResponse, err := client.NicApi.DatacentersServersNicsFindById(ctx, dcId, sId, nicId).Execute()
+	logApiRequestTime(apiResponse)
+
+	if err != nil {
+		if !httpNotFound(apiResponse) {
+			d.SetId("")
+			return nil, fmt.Errorf("an error occured while trying to fetch the nic %q", nicId)
+		}
+		return nil, fmt.Errorf("lan does not exist%q", nicId)
+	}
+
+	err = d.Set("datacenter_id", dcId)
+	if err != nil {
+		return nil, err
+	}
+	err = d.Set("server_id", sId)
+	if err != nil {
+		return nil, err
+	}
+
+	if err := NicSetData(d, &nic); err != nil {
+		return nil, err
+	}
+
+	log.Printf("[INFO] nic found: %+v", nic)
+
+	return []*schema.ResourceData{d}, nil
 }

@@ -1,6 +1,7 @@
 ## 5.2.19
 
 - **code enhancements**: added http request time log for API calls
+- **new features**: import for `nic`, data_source for `nic`
 
 ## 5.2.18
 
