@@ -17,10 +17,8 @@ import (
 // RequestTarget struct for RequestTarget
 type RequestTarget struct {
 	Target *ResourceReference `json:"target,omitempty"`
-	Status *string `json:"status,omitempty"`
+	Status *string            `json:"status,omitempty"`
 }
-
-
 
 // GetTarget returns the Target field value
 // If the value is explicit nil, the zero value for ResourceReference will be returned
@@ -28,7 +26,6 @@ func (o *RequestTarget) GetTarget() *ResourceReference {
 	if o == nil {
 		return nil
 	}
-
 
 	return o.Target
 
@@ -42,13 +39,11 @@ func (o *RequestTarget) GetTargetOk() (*ResourceReference, bool) {
 		return nil, false
 	}
 
-
 	return o.Target, true
 }
 
 // SetTarget sets field value
 func (o *RequestTarget) SetTarget(v ResourceReference) {
-
 
 	o.Target = &v
 
@@ -63,14 +58,12 @@ func (o *RequestTarget) HasTarget() bool {
 	return false
 }
 
-
 // GetStatus returns the Status field value
 // If the value is explicit nil, the zero value for string will be returned
 func (o *RequestTarget) GetStatus() *string {
 	if o == nil {
 		return nil
 	}
-
 
 	return o.Status
 
@@ -84,13 +77,11 @@ func (o *RequestTarget) GetStatusOk() (*string, bool) {
 		return nil, false
 	}
 
-
 	return o.Status, true
 }
 
 // SetStatus sets field value
 func (o *RequestTarget) SetStatus(v string) {
-
 
 	o.Status = &v
 
@@ -153,5 +144,3 @@ func (v *NullableRequestTarget) UnmarshalJSON(src []byte) error {
 	v.isSet = true
 	return json.Unmarshal(src, &v.value)
 }
-
-

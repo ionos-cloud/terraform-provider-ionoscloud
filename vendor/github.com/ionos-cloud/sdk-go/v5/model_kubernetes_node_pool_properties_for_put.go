@@ -21,9 +21,9 @@ type KubernetesNodePoolPropertiesForPut struct {
 	// Number of nodes part of the Node Pool
 	NodeCount *int32 `json:"nodeCount"`
 	// The kubernetes version in which a nodepool is running. This imposes restrictions on what kubernetes versions can be run in a cluster's nodepools. Additionally, not all kubernetes versions are viable upgrade targets for all prior versions.
-	K8sVersion *string `json:"k8sVersion,omitempty"`
+	K8sVersion        *string                      `json:"k8sVersion,omitempty"`
 	MaintenanceWindow *KubernetesMaintenanceWindow `json:"maintenanceWindow,omitempty"`
-	AutoScaling *KubernetesAutoScaling `json:"autoScaling,omitempty"`
+	AutoScaling       *KubernetesAutoScaling       `json:"autoScaling,omitempty"`
 	// array of additional LANs attached to worker nodes
 	Lans *[]KubernetesNodePoolLan `json:"lans,omitempty"`
 	// map of labels attached to node pool
@@ -34,15 +34,12 @@ type KubernetesNodePoolPropertiesForPut struct {
 	PublicIps *[]string `json:"publicIps,omitempty"`
 }
 
-
-
 // GetName returns the Name field value
 // If the value is explicit nil, the zero value for string will be returned
 func (o *KubernetesNodePoolPropertiesForPut) GetName() *string {
 	if o == nil {
 		return nil
 	}
-
 
 	return o.Name
 
@@ -56,13 +53,11 @@ func (o *KubernetesNodePoolPropertiesForPut) GetNameOk() (*string, bool) {
 		return nil, false
 	}
 
-
 	return o.Name, true
 }
 
 // SetName sets field value
 func (o *KubernetesNodePoolPropertiesForPut) SetName(v string) {
-
 
 	o.Name = &v
 
@@ -77,14 +72,12 @@ func (o *KubernetesNodePoolPropertiesForPut) HasName() bool {
 	return false
 }
 
-
 // GetNodeCount returns the NodeCount field value
 // If the value is explicit nil, the zero value for int32 will be returned
 func (o *KubernetesNodePoolPropertiesForPut) GetNodeCount() *int32 {
 	if o == nil {
 		return nil
 	}
-
 
 	return o.NodeCount
 
@@ -98,13 +91,11 @@ func (o *KubernetesNodePoolPropertiesForPut) GetNodeCountOk() (*int32, bool) {
 		return nil, false
 	}
 
-
 	return o.NodeCount, true
 }
 
 // SetNodeCount sets field value
 func (o *KubernetesNodePoolPropertiesForPut) SetNodeCount(v int32) {
-
 
 	o.NodeCount = &v
 
@@ -119,14 +110,12 @@ func (o *KubernetesNodePoolPropertiesForPut) HasNodeCount() bool {
 	return false
 }
 
-
 // GetK8sVersion returns the K8sVersion field value
 // If the value is explicit nil, the zero value for string will be returned
 func (o *KubernetesNodePoolPropertiesForPut) GetK8sVersion() *string {
 	if o == nil {
 		return nil
 	}
-
 
 	return o.K8sVersion
 
@@ -140,13 +129,11 @@ func (o *KubernetesNodePoolPropertiesForPut) GetK8sVersionOk() (*string, bool) {
 		return nil, false
 	}
 
-
 	return o.K8sVersion, true
 }
 
 // SetK8sVersion sets field value
 func (o *KubernetesNodePoolPropertiesForPut) SetK8sVersion(v string) {
-
 
 	o.K8sVersion = &v
 
@@ -161,14 +148,12 @@ func (o *KubernetesNodePoolPropertiesForPut) HasK8sVersion() bool {
 	return false
 }
 
-
 // GetMaintenanceWindow returns the MaintenanceWindow field value
 // If the value is explicit nil, the zero value for KubernetesMaintenanceWindow will be returned
 func (o *KubernetesNodePoolPropertiesForPut) GetMaintenanceWindow() *KubernetesMaintenanceWindow {
 	if o == nil {
 		return nil
 	}
-
 
 	return o.MaintenanceWindow
 
@@ -182,13 +167,11 @@ func (o *KubernetesNodePoolPropertiesForPut) GetMaintenanceWindowOk() (*Kubernet
 		return nil, false
 	}
 
-
 	return o.MaintenanceWindow, true
 }
 
 // SetMaintenanceWindow sets field value
 func (o *KubernetesNodePoolPropertiesForPut) SetMaintenanceWindow(v KubernetesMaintenanceWindow) {
-
 
 	o.MaintenanceWindow = &v
 
@@ -203,14 +186,12 @@ func (o *KubernetesNodePoolPropertiesForPut) HasMaintenanceWindow() bool {
 	return false
 }
 
-
 // GetAutoScaling returns the AutoScaling field value
 // If the value is explicit nil, the zero value for KubernetesAutoScaling will be returned
 func (o *KubernetesNodePoolPropertiesForPut) GetAutoScaling() *KubernetesAutoScaling {
 	if o == nil {
 		return nil
 	}
-
 
 	return o.AutoScaling
 
@@ -224,13 +205,11 @@ func (o *KubernetesNodePoolPropertiesForPut) GetAutoScalingOk() (*KubernetesAuto
 		return nil, false
 	}
 
-
 	return o.AutoScaling, true
 }
 
 // SetAutoScaling sets field value
 func (o *KubernetesNodePoolPropertiesForPut) SetAutoScaling(v KubernetesAutoScaling) {
-
 
 	o.AutoScaling = &v
 
@@ -245,14 +224,12 @@ func (o *KubernetesNodePoolPropertiesForPut) HasAutoScaling() bool {
 	return false
 }
 
-
 // GetLans returns the Lans field value
 // If the value is explicit nil, the zero value for []KubernetesNodePoolLan will be returned
 func (o *KubernetesNodePoolPropertiesForPut) GetLans() *[]KubernetesNodePoolLan {
 	if o == nil {
 		return nil
 	}
-
 
 	return o.Lans
 
@@ -266,13 +243,11 @@ func (o *KubernetesNodePoolPropertiesForPut) GetLansOk() (*[]KubernetesNodePoolL
 		return nil, false
 	}
 
-
 	return o.Lans, true
 }
 
 // SetLans sets field value
 func (o *KubernetesNodePoolPropertiesForPut) SetLans(v []KubernetesNodePoolLan) {
-
 
 	o.Lans = &v
 
@@ -287,14 +262,12 @@ func (o *KubernetesNodePoolPropertiesForPut) HasLans() bool {
 	return false
 }
 
-
 // GetLabels returns the Labels field value
 // If the value is explicit nil, the zero value for map[string]string will be returned
 func (o *KubernetesNodePoolPropertiesForPut) GetLabels() *map[string]string {
 	if o == nil {
 		return nil
 	}
-
 
 	return o.Labels
 
@@ -308,13 +281,11 @@ func (o *KubernetesNodePoolPropertiesForPut) GetLabelsOk() (*map[string]string, 
 		return nil, false
 	}
 
-
 	return o.Labels, true
 }
 
 // SetLabels sets field value
 func (o *KubernetesNodePoolPropertiesForPut) SetLabels(v map[string]string) {
-
 
 	o.Labels = &v
 
@@ -329,14 +300,12 @@ func (o *KubernetesNodePoolPropertiesForPut) HasLabels() bool {
 	return false
 }
 
-
 // GetAnnotations returns the Annotations field value
 // If the value is explicit nil, the zero value for map[string]string will be returned
 func (o *KubernetesNodePoolPropertiesForPut) GetAnnotations() *map[string]string {
 	if o == nil {
 		return nil
 	}
-
 
 	return o.Annotations
 
@@ -350,13 +319,11 @@ func (o *KubernetesNodePoolPropertiesForPut) GetAnnotationsOk() (*map[string]str
 		return nil, false
 	}
 
-
 	return o.Annotations, true
 }
 
 // SetAnnotations sets field value
 func (o *KubernetesNodePoolPropertiesForPut) SetAnnotations(v map[string]string) {
-
 
 	o.Annotations = &v
 
@@ -371,14 +338,12 @@ func (o *KubernetesNodePoolPropertiesForPut) HasAnnotations() bool {
 	return false
 }
 
-
 // GetPublicIps returns the PublicIps field value
 // If the value is explicit nil, the zero value for []string will be returned
 func (o *KubernetesNodePoolPropertiesForPut) GetPublicIps() *[]string {
 	if o == nil {
 		return nil
 	}
-
 
 	return o.PublicIps
 
@@ -392,13 +357,11 @@ func (o *KubernetesNodePoolPropertiesForPut) GetPublicIpsOk() (*[]string, bool) 
 		return nil, false
 	}
 
-
 	return o.PublicIps, true
 }
 
 // SetPublicIps sets field value
 func (o *KubernetesNodePoolPropertiesForPut) SetPublicIps(v []string) {
-
 
 	o.PublicIps = &v
 
@@ -489,5 +452,3 @@ func (v *NullableKubernetesNodePoolPropertiesForPut) UnmarshalJSON(src []byte) e
 	v.isSet = true
 	return json.Unmarshal(src, &v.value)
 }
-
-

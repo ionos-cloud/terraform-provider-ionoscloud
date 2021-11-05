@@ -21,11 +21,9 @@ type RequestStatus struct {
 	// The type of object that has been created
 	Type *Type `json:"type,omitempty"`
 	// URL to the object representation (absolute path)
-	Href *string `json:"href,omitempty"`
+	Href     *string                `json:"href,omitempty"`
 	Metadata *RequestStatusMetadata `json:"metadata,omitempty"`
 }
-
-
 
 // GetId returns the Id field value
 // If the value is explicit nil, the zero value for string will be returned
@@ -33,7 +31,6 @@ func (o *RequestStatus) GetId() *string {
 	if o == nil {
 		return nil
 	}
-
 
 	return o.Id
 
@@ -47,13 +44,11 @@ func (o *RequestStatus) GetIdOk() (*string, bool) {
 		return nil, false
 	}
 
-
 	return o.Id, true
 }
 
 // SetId sets field value
 func (o *RequestStatus) SetId(v string) {
-
 
 	o.Id = &v
 
@@ -68,14 +63,12 @@ func (o *RequestStatus) HasId() bool {
 	return false
 }
 
-
 // GetType returns the Type field value
 // If the value is explicit nil, the zero value for Type will be returned
 func (o *RequestStatus) GetType() *Type {
 	if o == nil {
 		return nil
 	}
-
 
 	return o.Type
 
@@ -89,13 +82,11 @@ func (o *RequestStatus) GetTypeOk() (*Type, bool) {
 		return nil, false
 	}
 
-
 	return o.Type, true
 }
 
 // SetType sets field value
 func (o *RequestStatus) SetType(v Type) {
-
 
 	o.Type = &v
 
@@ -110,14 +101,12 @@ func (o *RequestStatus) HasType() bool {
 	return false
 }
 
-
 // GetHref returns the Href field value
 // If the value is explicit nil, the zero value for string will be returned
 func (o *RequestStatus) GetHref() *string {
 	if o == nil {
 		return nil
 	}
-
 
 	return o.Href
 
@@ -131,13 +120,11 @@ func (o *RequestStatus) GetHrefOk() (*string, bool) {
 		return nil, false
 	}
 
-
 	return o.Href, true
 }
 
 // SetHref sets field value
 func (o *RequestStatus) SetHref(v string) {
-
 
 	o.Href = &v
 
@@ -152,14 +139,12 @@ func (o *RequestStatus) HasHref() bool {
 	return false
 }
 
-
 // GetMetadata returns the Metadata field value
 // If the value is explicit nil, the zero value for RequestStatusMetadata will be returned
 func (o *RequestStatus) GetMetadata() *RequestStatusMetadata {
 	if o == nil {
 		return nil
 	}
-
 
 	return o.Metadata
 
@@ -173,13 +158,11 @@ func (o *RequestStatus) GetMetadataOk() (*RequestStatusMetadata, bool) {
 		return nil, false
 	}
 
-
 	return o.Metadata, true
 }
 
 // SetMetadata sets field value
 func (o *RequestStatus) SetMetadata(v RequestStatusMetadata) {
-
 
 	o.Metadata = &v
 
@@ -250,5 +233,3 @@ func (v *NullableRequestStatus) UnmarshalJSON(src []byte) error {
 	v.isSet = true
 	return json.Unmarshal(src, &v.value)
 }
-
-

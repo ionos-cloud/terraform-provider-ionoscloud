@@ -28,11 +28,11 @@ var (
 type KubernetesApiService service
 
 type ApiK8sDeleteRequest struct {
-	ctx _context.Context
-	ApiService *KubernetesApiService
-	k8sClusterId string
-	pretty *bool
-	depth *int32
+	ctx             _context.Context
+	ApiService      *KubernetesApiService
+	k8sClusterId    string
+	pretty          *bool
+	depth           *int32
 	xContractNumber *int32
 }
 
@@ -62,8 +62,8 @@ func (r ApiK8sDeleteRequest) Execute() (map[string]interface{}, *APIResponse, er
  */
 func (a *KubernetesApiService) K8sDelete(ctx _context.Context, k8sClusterId string) ApiK8sDeleteRequest {
 	return ApiK8sDeleteRequest{
-		ApiService: a,
-		ctx: ctx,
+		ApiService:   a,
+		ctx:          ctx,
 		k8sClusterId: k8sClusterId,
 	}
 }
@@ -100,6 +100,7 @@ func (a *KubernetesApiService) K8sDeleteExecute(r ApiK8sDeleteRequest) (map[stri
 	if r.depth != nil {
 		localVarQueryParams.Add("depth", parameterToString(*r.depth, ""))
 	}
+
 	// to determine the Content-Type header
 	localVarHTTPContentTypes := []string{}
 
@@ -141,12 +142,12 @@ func (a *KubernetesApiService) K8sDeleteExecute(r ApiK8sDeleteRequest) (map[stri
 
 	localVarHTTPResponse, httpRequestTime, err := a.client.callAPI(req)
 
-	localVarAPIResponse := &APIResponse {
-		Response: localVarHTTPResponse,
-		Method: localVarHTTPMethod,
-		RequestURL: localVarPath,
+	localVarAPIResponse := &APIResponse{
+		Response:    localVarHTTPResponse,
+		Method:      localVarHTTPMethod,
+		RequestURL:  localVarPath,
 		RequestTime: httpRequestTime,
-		Operation: "K8sDelete",
+		Operation:   "K8sDelete",
 	}
 
 	if err != nil || localVarHTTPResponse == nil {
@@ -163,16 +164,16 @@ func (a *KubernetesApiService) K8sDeleteExecute(r ApiK8sDeleteRequest) (map[stri
 	if localVarHTTPResponse.StatusCode >= 300 {
 		newErr := GenericOpenAPIError{
 			statusCode: localVarHTTPResponse.StatusCode,
-			body:  localVarBody,
-			error: fmt.Sprintf("%s: %s", localVarHTTPResponse.Status, string(localVarBody)),
+			body:       localVarBody,
+			error:      fmt.Sprintf(FormatStringErr, localVarHTTPResponse.Status, string(localVarBody)),
 		}
-			var v Error
-			err = a.client.decode(&v, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
-			if err != nil {
-				newErr.error = err.Error()
-				return localVarReturnValue, localVarAPIResponse, newErr
-			}
-			newErr.model = v
+		var v Error
+		err = a.client.decode(&v, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
+		if err != nil {
+			newErr.error = err.Error()
+			return localVarReturnValue, localVarAPIResponse, newErr
+		}
+		newErr.model = v
 		return localVarReturnValue, localVarAPIResponse, newErr
 	}
 
@@ -180,8 +181,8 @@ func (a *KubernetesApiService) K8sDeleteExecute(r ApiK8sDeleteRequest) (map[stri
 	if err != nil {
 		newErr := GenericOpenAPIError{
 			statusCode: localVarHTTPResponse.StatusCode,
-			body:  localVarBody,
-			error: err.Error(),
+			body:       localVarBody,
+			error:      err.Error(),
 		}
 		return localVarReturnValue, localVarAPIResponse, newErr
 	}
@@ -190,11 +191,11 @@ func (a *KubernetesApiService) K8sDeleteExecute(r ApiK8sDeleteRequest) (map[stri
 }
 
 type ApiK8sFindByClusterIdRequest struct {
-	ctx _context.Context
-	ApiService *KubernetesApiService
-	k8sClusterId string
-	pretty *bool
-	depth *int32
+	ctx             _context.Context
+	ApiService      *KubernetesApiService
+	k8sClusterId    string
+	pretty          *bool
+	depth           *int32
 	xContractNumber *int32
 }
 
@@ -224,8 +225,8 @@ func (r ApiK8sFindByClusterIdRequest) Execute() (KubernetesCluster, *APIResponse
  */
 func (a *KubernetesApiService) K8sFindByClusterId(ctx _context.Context, k8sClusterId string) ApiK8sFindByClusterIdRequest {
 	return ApiK8sFindByClusterIdRequest{
-		ApiService: a,
-		ctx: ctx,
+		ApiService:   a,
+		ctx:          ctx,
 		k8sClusterId: k8sClusterId,
 	}
 }
@@ -262,6 +263,7 @@ func (a *KubernetesApiService) K8sFindByClusterIdExecute(r ApiK8sFindByClusterId
 	if r.depth != nil {
 		localVarQueryParams.Add("depth", parameterToString(*r.depth, ""))
 	}
+
 	// to determine the Content-Type header
 	localVarHTTPContentTypes := []string{}
 
@@ -303,12 +305,12 @@ func (a *KubernetesApiService) K8sFindByClusterIdExecute(r ApiK8sFindByClusterId
 
 	localVarHTTPResponse, httpRequestTime, err := a.client.callAPI(req)
 
-	localVarAPIResponse := &APIResponse {
-		Response: localVarHTTPResponse,
-		Method: localVarHTTPMethod,
-		RequestURL: localVarPath,
+	localVarAPIResponse := &APIResponse{
+		Response:    localVarHTTPResponse,
+		Method:      localVarHTTPMethod,
+		RequestURL:  localVarPath,
 		RequestTime: httpRequestTime,
-		Operation: "K8sFindByClusterId",
+		Operation:   "K8sFindByClusterId",
 	}
 
 	if err != nil || localVarHTTPResponse == nil {
@@ -325,16 +327,16 @@ func (a *KubernetesApiService) K8sFindByClusterIdExecute(r ApiK8sFindByClusterId
 	if localVarHTTPResponse.StatusCode >= 300 {
 		newErr := GenericOpenAPIError{
 			statusCode: localVarHTTPResponse.StatusCode,
-			body:  localVarBody,
-			error: fmt.Sprintf("%s: %s", localVarHTTPResponse.Status, string(localVarBody)),
+			body:       localVarBody,
+			error:      fmt.Sprintf(FormatStringErr, localVarHTTPResponse.Status, string(localVarBody)),
 		}
-			var v Error
-			err = a.client.decode(&v, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
-			if err != nil {
-				newErr.error = err.Error()
-				return localVarReturnValue, localVarAPIResponse, newErr
-			}
-			newErr.model = v
+		var v Error
+		err = a.client.decode(&v, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
+		if err != nil {
+			newErr.error = err.Error()
+			return localVarReturnValue, localVarAPIResponse, newErr
+		}
+		newErr.model = v
 		return localVarReturnValue, localVarAPIResponse, newErr
 	}
 
@@ -342,8 +344,8 @@ func (a *KubernetesApiService) K8sFindByClusterIdExecute(r ApiK8sFindByClusterId
 	if err != nil {
 		newErr := GenericOpenAPIError{
 			statusCode: localVarHTTPResponse.StatusCode,
-			body:  localVarBody,
-			error: err.Error(),
+			body:       localVarBody,
+			error:      err.Error(),
 		}
 		return localVarReturnValue, localVarAPIResponse, newErr
 	}
@@ -352,10 +354,12 @@ func (a *KubernetesApiService) K8sFindByClusterIdExecute(r ApiK8sFindByClusterId
 }
 
 type ApiK8sGetRequest struct {
-	ctx _context.Context
-	ApiService *KubernetesApiService
-	pretty *bool
-	depth *int32
+	ctx             _context.Context
+	ApiService      *KubernetesApiService
+	filters         _neturl.Values
+	orderBy         *string
+	pretty          *bool
+	depth           *int32
 	xContractNumber *int32
 }
 
@@ -372,6 +376,19 @@ func (r ApiK8sGetRequest) XContractNumber(xContractNumber int32) ApiK8sGetReques
 	return r
 }
 
+// Filters query parameters limit results to those containing a matching value for a specific property.
+func (r ApiK8sGetRequest) Filter(key string, value string) ApiK8sGetRequest {
+	filterKey := fmt.Sprintf(FilterQueryParam, key)
+	r.filters[filterKey] = []string{value}
+	return r
+}
+
+// OrderBy query param sorts the results alphanumerically in ascending order based on the specified property.
+func (r ApiK8sGetRequest) OrderBy(orderBy string) ApiK8sGetRequest {
+	r.orderBy = &orderBy
+	return r
+}
+
 func (r ApiK8sGetRequest) Execute() (KubernetesClusters, *APIResponse, error) {
 	return r.ApiService.K8sGetExecute(r)
 }
@@ -385,7 +402,8 @@ func (r ApiK8sGetRequest) Execute() (KubernetesClusters, *APIResponse, error) {
 func (a *KubernetesApiService) K8sGet(ctx _context.Context) ApiK8sGetRequest {
 	return ApiK8sGetRequest{
 		ApiService: a,
-		ctx: ctx,
+		ctx:        ctx,
+		filters:    _neturl.Values{},
 	}
 }
 
@@ -420,6 +438,17 @@ func (a *KubernetesApiService) K8sGetExecute(r ApiK8sGetRequest) (KubernetesClus
 	if r.depth != nil {
 		localVarQueryParams.Add("depth", parameterToString(*r.depth, ""))
 	}
+	if r.orderBy != nil {
+		localVarQueryParams.Add("orderBy", parameterToString(*r.orderBy, ""))
+	}
+	if len(r.filters) > 0 {
+		for k, v := range r.filters {
+			for _, iv := range v {
+				localVarQueryParams.Add(k, iv)
+			}
+		}
+	}
+
 	// to determine the Content-Type header
 	localVarHTTPContentTypes := []string{}
 
@@ -461,12 +490,12 @@ func (a *KubernetesApiService) K8sGetExecute(r ApiK8sGetRequest) (KubernetesClus
 
 	localVarHTTPResponse, httpRequestTime, err := a.client.callAPI(req)
 
-	localVarAPIResponse := &APIResponse {
-		Response: localVarHTTPResponse,
-		Method: localVarHTTPMethod,
-		RequestURL: localVarPath,
+	localVarAPIResponse := &APIResponse{
+		Response:    localVarHTTPResponse,
+		Method:      localVarHTTPMethod,
+		RequestURL:  localVarPath,
 		RequestTime: httpRequestTime,
-		Operation: "K8sGet",
+		Operation:   "K8sGet",
 	}
 
 	if err != nil || localVarHTTPResponse == nil {
@@ -483,16 +512,16 @@ func (a *KubernetesApiService) K8sGetExecute(r ApiK8sGetRequest) (KubernetesClus
 	if localVarHTTPResponse.StatusCode >= 300 {
 		newErr := GenericOpenAPIError{
 			statusCode: localVarHTTPResponse.StatusCode,
-			body:  localVarBody,
-			error: fmt.Sprintf("%s: %s", localVarHTTPResponse.Status, string(localVarBody)),
+			body:       localVarBody,
+			error:      fmt.Sprintf(FormatStringErr, localVarHTTPResponse.Status, string(localVarBody)),
 		}
-			var v Error
-			err = a.client.decode(&v, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
-			if err != nil {
-				newErr.error = err.Error()
-				return localVarReturnValue, localVarAPIResponse, newErr
-			}
-			newErr.model = v
+		var v Error
+		err = a.client.decode(&v, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
+		if err != nil {
+			newErr.error = err.Error()
+			return localVarReturnValue, localVarAPIResponse, newErr
+		}
+		newErr.model = v
 		return localVarReturnValue, localVarAPIResponse, newErr
 	}
 
@@ -500,8 +529,8 @@ func (a *KubernetesApiService) K8sGetExecute(r ApiK8sGetRequest) (KubernetesClus
 	if err != nil {
 		newErr := GenericOpenAPIError{
 			statusCode: localVarHTTPResponse.StatusCode,
-			body:  localVarBody,
-			error: err.Error(),
+			body:       localVarBody,
+			error:      err.Error(),
 		}
 		return localVarReturnValue, localVarAPIResponse, newErr
 	}
@@ -510,11 +539,13 @@ func (a *KubernetesApiService) K8sGetExecute(r ApiK8sGetRequest) (KubernetesClus
 }
 
 type ApiK8sKubeconfigGetRequest struct {
-	ctx _context.Context
-	ApiService *KubernetesApiService
-	k8sClusterId string
-	pretty *bool
-	depth *int32
+	ctx             _context.Context
+	ApiService      *KubernetesApiService
+	filters         _neturl.Values
+	orderBy         *string
+	k8sClusterId    string
+	pretty          *bool
+	depth           *int32
 	xContractNumber *int32
 }
 
@@ -531,6 +562,19 @@ func (r ApiK8sKubeconfigGetRequest) XContractNumber(xContractNumber int32) ApiK8
 	return r
 }
 
+// Filters query parameters limit results to those containing a matching value for a specific property.
+func (r ApiK8sKubeconfigGetRequest) Filter(key string, value string) ApiK8sKubeconfigGetRequest {
+	filterKey := fmt.Sprintf(FilterQueryParam, key)
+	r.filters[filterKey] = []string{value}
+	return r
+}
+
+// OrderBy query param sorts the results alphanumerically in ascending order based on the specified property.
+func (r ApiK8sKubeconfigGetRequest) OrderBy(orderBy string) ApiK8sKubeconfigGetRequest {
+	r.orderBy = &orderBy
+	return r
+}
+
 func (r ApiK8sKubeconfigGetRequest) Execute() (KubernetesConfig, *APIResponse, error) {
 	return r.ApiService.K8sKubeconfigGetExecute(r)
 }
@@ -544,9 +588,10 @@ func (r ApiK8sKubeconfigGetRequest) Execute() (KubernetesConfig, *APIResponse, e
  */
 func (a *KubernetesApiService) K8sKubeconfigGet(ctx _context.Context, k8sClusterId string) ApiK8sKubeconfigGetRequest {
 	return ApiK8sKubeconfigGetRequest{
-		ApiService: a,
-		ctx: ctx,
+		ApiService:   a,
+		ctx:          ctx,
 		k8sClusterId: k8sClusterId,
+		filters:      _neturl.Values{},
 	}
 }
 
@@ -582,6 +627,17 @@ func (a *KubernetesApiService) K8sKubeconfigGetExecute(r ApiK8sKubeconfigGetRequ
 	if r.depth != nil {
 		localVarQueryParams.Add("depth", parameterToString(*r.depth, ""))
 	}
+	if r.orderBy != nil {
+		localVarQueryParams.Add("orderBy", parameterToString(*r.orderBy, ""))
+	}
+	if len(r.filters) > 0 {
+		for k, v := range r.filters {
+			for _, iv := range v {
+				localVarQueryParams.Add(k, iv)
+			}
+		}
+	}
+
 	// to determine the Content-Type header
 	localVarHTTPContentTypes := []string{}
 
@@ -623,12 +679,12 @@ func (a *KubernetesApiService) K8sKubeconfigGetExecute(r ApiK8sKubeconfigGetRequ
 
 	localVarHTTPResponse, httpRequestTime, err := a.client.callAPI(req)
 
-	localVarAPIResponse := &APIResponse {
-		Response: localVarHTTPResponse,
-		Method: localVarHTTPMethod,
-		RequestURL: localVarPath,
+	localVarAPIResponse := &APIResponse{
+		Response:    localVarHTTPResponse,
+		Method:      localVarHTTPMethod,
+		RequestURL:  localVarPath,
 		RequestTime: httpRequestTime,
-		Operation: "K8sKubeconfigGet",
+		Operation:   "K8sKubeconfigGet",
 	}
 
 	if err != nil || localVarHTTPResponse == nil {
@@ -645,16 +701,16 @@ func (a *KubernetesApiService) K8sKubeconfigGetExecute(r ApiK8sKubeconfigGetRequ
 	if localVarHTTPResponse.StatusCode >= 300 {
 		newErr := GenericOpenAPIError{
 			statusCode: localVarHTTPResponse.StatusCode,
-			body:  localVarBody,
-			error: fmt.Sprintf("%s: %s", localVarHTTPResponse.Status, string(localVarBody)),
+			body:       localVarBody,
+			error:      fmt.Sprintf(FormatStringErr, localVarHTTPResponse.Status, string(localVarBody)),
 		}
-			var v Error
-			err = a.client.decode(&v, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
-			if err != nil {
-				newErr.error = err.Error()
-				return localVarReturnValue, localVarAPIResponse, newErr
-			}
-			newErr.model = v
+		var v Error
+		err = a.client.decode(&v, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
+		if err != nil {
+			newErr.error = err.Error()
+			return localVarReturnValue, localVarAPIResponse, newErr
+		}
+		newErr.model = v
 		return localVarReturnValue, localVarAPIResponse, newErr
 	}
 
@@ -662,8 +718,8 @@ func (a *KubernetesApiService) K8sKubeconfigGetExecute(r ApiK8sKubeconfigGetRequ
 	if err != nil {
 		newErr := GenericOpenAPIError{
 			statusCode: localVarHTTPResponse.StatusCode,
-			body:  localVarBody,
-			error: err.Error(),
+			body:       localVarBody,
+			error:      err.Error(),
 		}
 		return localVarReturnValue, localVarAPIResponse, newErr
 	}
@@ -672,12 +728,12 @@ func (a *KubernetesApiService) K8sKubeconfigGetExecute(r ApiK8sKubeconfigGetRequ
 }
 
 type ApiK8sNodepoolsDeleteRequest struct {
-	ctx _context.Context
-	ApiService *KubernetesApiService
-	k8sClusterId string
-	nodepoolId string
-	pretty *bool
-	depth *int32
+	ctx             _context.Context
+	ApiService      *KubernetesApiService
+	k8sClusterId    string
+	nodepoolId      string
+	pretty          *bool
+	depth           *int32
 	xContractNumber *int32
 }
 
@@ -708,10 +764,10 @@ func (r ApiK8sNodepoolsDeleteRequest) Execute() (map[string]interface{}, *APIRes
  */
 func (a *KubernetesApiService) K8sNodepoolsDelete(ctx _context.Context, k8sClusterId string, nodepoolId string) ApiK8sNodepoolsDeleteRequest {
 	return ApiK8sNodepoolsDeleteRequest{
-		ApiService: a,
-		ctx: ctx,
+		ApiService:   a,
+		ctx:          ctx,
 		k8sClusterId: k8sClusterId,
-		nodepoolId: nodepoolId,
+		nodepoolId:   nodepoolId,
 	}
 }
 
@@ -748,6 +804,7 @@ func (a *KubernetesApiService) K8sNodepoolsDeleteExecute(r ApiK8sNodepoolsDelete
 	if r.depth != nil {
 		localVarQueryParams.Add("depth", parameterToString(*r.depth, ""))
 	}
+
 	// to determine the Content-Type header
 	localVarHTTPContentTypes := []string{}
 
@@ -789,12 +846,12 @@ func (a *KubernetesApiService) K8sNodepoolsDeleteExecute(r ApiK8sNodepoolsDelete
 
 	localVarHTTPResponse, httpRequestTime, err := a.client.callAPI(req)
 
-	localVarAPIResponse := &APIResponse {
-		Response: localVarHTTPResponse,
-		Method: localVarHTTPMethod,
-		RequestURL: localVarPath,
+	localVarAPIResponse := &APIResponse{
+		Response:    localVarHTTPResponse,
+		Method:      localVarHTTPMethod,
+		RequestURL:  localVarPath,
 		RequestTime: httpRequestTime,
-		Operation: "K8sNodepoolsDelete",
+		Operation:   "K8sNodepoolsDelete",
 	}
 
 	if err != nil || localVarHTTPResponse == nil {
@@ -811,16 +868,16 @@ func (a *KubernetesApiService) K8sNodepoolsDeleteExecute(r ApiK8sNodepoolsDelete
 	if localVarHTTPResponse.StatusCode >= 300 {
 		newErr := GenericOpenAPIError{
 			statusCode: localVarHTTPResponse.StatusCode,
-			body:  localVarBody,
-			error: fmt.Sprintf("%s: %s", localVarHTTPResponse.Status, string(localVarBody)),
+			body:       localVarBody,
+			error:      fmt.Sprintf(FormatStringErr, localVarHTTPResponse.Status, string(localVarBody)),
 		}
-			var v Error
-			err = a.client.decode(&v, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
-			if err != nil {
-				newErr.error = err.Error()
-				return localVarReturnValue, localVarAPIResponse, newErr
-			}
-			newErr.model = v
+		var v Error
+		err = a.client.decode(&v, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
+		if err != nil {
+			newErr.error = err.Error()
+			return localVarReturnValue, localVarAPIResponse, newErr
+		}
+		newErr.model = v
 		return localVarReturnValue, localVarAPIResponse, newErr
 	}
 
@@ -828,8 +885,8 @@ func (a *KubernetesApiService) K8sNodepoolsDeleteExecute(r ApiK8sNodepoolsDelete
 	if err != nil {
 		newErr := GenericOpenAPIError{
 			statusCode: localVarHTTPResponse.StatusCode,
-			body:  localVarBody,
-			error: err.Error(),
+			body:       localVarBody,
+			error:      err.Error(),
 		}
 		return localVarReturnValue, localVarAPIResponse, newErr
 	}
@@ -838,12 +895,12 @@ func (a *KubernetesApiService) K8sNodepoolsDeleteExecute(r ApiK8sNodepoolsDelete
 }
 
 type ApiK8sNodepoolsFindByIdRequest struct {
-	ctx _context.Context
-	ApiService *KubernetesApiService
-	k8sClusterId string
-	nodepoolId string
-	pretty *bool
-	depth *int32
+	ctx             _context.Context
+	ApiService      *KubernetesApiService
+	k8sClusterId    string
+	nodepoolId      string
+	pretty          *bool
+	depth           *int32
 	xContractNumber *int32
 }
 
@@ -874,10 +931,10 @@ func (r ApiK8sNodepoolsFindByIdRequest) Execute() (KubernetesNodePool, *APIRespo
  */
 func (a *KubernetesApiService) K8sNodepoolsFindById(ctx _context.Context, k8sClusterId string, nodepoolId string) ApiK8sNodepoolsFindByIdRequest {
 	return ApiK8sNodepoolsFindByIdRequest{
-		ApiService: a,
-		ctx: ctx,
+		ApiService:   a,
+		ctx:          ctx,
 		k8sClusterId: k8sClusterId,
-		nodepoolId: nodepoolId,
+		nodepoolId:   nodepoolId,
 	}
 }
 
@@ -914,6 +971,7 @@ func (a *KubernetesApiService) K8sNodepoolsFindByIdExecute(r ApiK8sNodepoolsFind
 	if r.depth != nil {
 		localVarQueryParams.Add("depth", parameterToString(*r.depth, ""))
 	}
+
 	// to determine the Content-Type header
 	localVarHTTPContentTypes := []string{}
 
@@ -955,12 +1013,12 @@ func (a *KubernetesApiService) K8sNodepoolsFindByIdExecute(r ApiK8sNodepoolsFind
 
 	localVarHTTPResponse, httpRequestTime, err := a.client.callAPI(req)
 
-	localVarAPIResponse := &APIResponse {
-		Response: localVarHTTPResponse,
-		Method: localVarHTTPMethod,
-		RequestURL: localVarPath,
+	localVarAPIResponse := &APIResponse{
+		Response:    localVarHTTPResponse,
+		Method:      localVarHTTPMethod,
+		RequestURL:  localVarPath,
 		RequestTime: httpRequestTime,
-		Operation: "K8sNodepoolsFindById",
+		Operation:   "K8sNodepoolsFindById",
 	}
 
 	if err != nil || localVarHTTPResponse == nil {
@@ -977,16 +1035,16 @@ func (a *KubernetesApiService) K8sNodepoolsFindByIdExecute(r ApiK8sNodepoolsFind
 	if localVarHTTPResponse.StatusCode >= 300 {
 		newErr := GenericOpenAPIError{
 			statusCode: localVarHTTPResponse.StatusCode,
-			body:  localVarBody,
-			error: fmt.Sprintf("%s: %s", localVarHTTPResponse.Status, string(localVarBody)),
+			body:       localVarBody,
+			error:      fmt.Sprintf(FormatStringErr, localVarHTTPResponse.Status, string(localVarBody)),
 		}
-			var v Error
-			err = a.client.decode(&v, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
-			if err != nil {
-				newErr.error = err.Error()
-				return localVarReturnValue, localVarAPIResponse, newErr
-			}
-			newErr.model = v
+		var v Error
+		err = a.client.decode(&v, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
+		if err != nil {
+			newErr.error = err.Error()
+			return localVarReturnValue, localVarAPIResponse, newErr
+		}
+		newErr.model = v
 		return localVarReturnValue, localVarAPIResponse, newErr
 	}
 
@@ -994,8 +1052,8 @@ func (a *KubernetesApiService) K8sNodepoolsFindByIdExecute(r ApiK8sNodepoolsFind
 	if err != nil {
 		newErr := GenericOpenAPIError{
 			statusCode: localVarHTTPResponse.StatusCode,
-			body:  localVarBody,
-			error: err.Error(),
+			body:       localVarBody,
+			error:      err.Error(),
 		}
 		return localVarReturnValue, localVarAPIResponse, newErr
 	}
@@ -1004,11 +1062,13 @@ func (a *KubernetesApiService) K8sNodepoolsFindByIdExecute(r ApiK8sNodepoolsFind
 }
 
 type ApiK8sNodepoolsGetRequest struct {
-	ctx _context.Context
-	ApiService *KubernetesApiService
-	k8sClusterId string
-	pretty *bool
-	depth *int32
+	ctx             _context.Context
+	ApiService      *KubernetesApiService
+	filters         _neturl.Values
+	orderBy         *string
+	k8sClusterId    string
+	pretty          *bool
+	depth           *int32
 	xContractNumber *int32
 }
 
@@ -1025,6 +1085,19 @@ func (r ApiK8sNodepoolsGetRequest) XContractNumber(xContractNumber int32) ApiK8s
 	return r
 }
 
+// Filters query parameters limit results to those containing a matching value for a specific property.
+func (r ApiK8sNodepoolsGetRequest) Filter(key string, value string) ApiK8sNodepoolsGetRequest {
+	filterKey := fmt.Sprintf(FilterQueryParam, key)
+	r.filters[filterKey] = []string{value}
+	return r
+}
+
+// OrderBy query param sorts the results alphanumerically in ascending order based on the specified property.
+func (r ApiK8sNodepoolsGetRequest) OrderBy(orderBy string) ApiK8sNodepoolsGetRequest {
+	r.orderBy = &orderBy
+	return r
+}
+
 func (r ApiK8sNodepoolsGetRequest) Execute() (KubernetesNodePools, *APIResponse, error) {
 	return r.ApiService.K8sNodepoolsGetExecute(r)
 }
@@ -1038,9 +1111,10 @@ func (r ApiK8sNodepoolsGetRequest) Execute() (KubernetesNodePools, *APIResponse,
  */
 func (a *KubernetesApiService) K8sNodepoolsGet(ctx _context.Context, k8sClusterId string) ApiK8sNodepoolsGetRequest {
 	return ApiK8sNodepoolsGetRequest{
-		ApiService: a,
-		ctx: ctx,
+		ApiService:   a,
+		ctx:          ctx,
 		k8sClusterId: k8sClusterId,
+		filters:      _neturl.Values{},
 	}
 }
 
@@ -1076,6 +1150,17 @@ func (a *KubernetesApiService) K8sNodepoolsGetExecute(r ApiK8sNodepoolsGetReques
 	if r.depth != nil {
 		localVarQueryParams.Add("depth", parameterToString(*r.depth, ""))
 	}
+	if r.orderBy != nil {
+		localVarQueryParams.Add("orderBy", parameterToString(*r.orderBy, ""))
+	}
+	if len(r.filters) > 0 {
+		for k, v := range r.filters {
+			for _, iv := range v {
+				localVarQueryParams.Add(k, iv)
+			}
+		}
+	}
+
 	// to determine the Content-Type header
 	localVarHTTPContentTypes := []string{}
 
@@ -1117,12 +1202,12 @@ func (a *KubernetesApiService) K8sNodepoolsGetExecute(r ApiK8sNodepoolsGetReques
 
 	localVarHTTPResponse, httpRequestTime, err := a.client.callAPI(req)
 
-	localVarAPIResponse := &APIResponse {
-		Response: localVarHTTPResponse,
-		Method: localVarHTTPMethod,
-		RequestURL: localVarPath,
+	localVarAPIResponse := &APIResponse{
+		Response:    localVarHTTPResponse,
+		Method:      localVarHTTPMethod,
+		RequestURL:  localVarPath,
 		RequestTime: httpRequestTime,
-		Operation: "K8sNodepoolsGet",
+		Operation:   "K8sNodepoolsGet",
 	}
 
 	if err != nil || localVarHTTPResponse == nil {
@@ -1139,16 +1224,16 @@ func (a *KubernetesApiService) K8sNodepoolsGetExecute(r ApiK8sNodepoolsGetReques
 	if localVarHTTPResponse.StatusCode >= 300 {
 		newErr := GenericOpenAPIError{
 			statusCode: localVarHTTPResponse.StatusCode,
-			body:  localVarBody,
-			error: fmt.Sprintf("%s: %s", localVarHTTPResponse.Status, string(localVarBody)),
+			body:       localVarBody,
+			error:      fmt.Sprintf(FormatStringErr, localVarHTTPResponse.Status, string(localVarBody)),
 		}
-			var v Error
-			err = a.client.decode(&v, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
-			if err != nil {
-				newErr.error = err.Error()
-				return localVarReturnValue, localVarAPIResponse, newErr
-			}
-			newErr.model = v
+		var v Error
+		err = a.client.decode(&v, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
+		if err != nil {
+			newErr.error = err.Error()
+			return localVarReturnValue, localVarAPIResponse, newErr
+		}
+		newErr.model = v
 		return localVarReturnValue, localVarAPIResponse, newErr
 	}
 
@@ -1156,8 +1241,8 @@ func (a *KubernetesApiService) K8sNodepoolsGetExecute(r ApiK8sNodepoolsGetReques
 	if err != nil {
 		newErr := GenericOpenAPIError{
 			statusCode: localVarHTTPResponse.StatusCode,
-			body:  localVarBody,
-			error: err.Error(),
+			body:       localVarBody,
+			error:      err.Error(),
 		}
 		return localVarReturnValue, localVarAPIResponse, newErr
 	}
@@ -1166,13 +1251,13 @@ func (a *KubernetesApiService) K8sNodepoolsGetExecute(r ApiK8sNodepoolsGetReques
 }
 
 type ApiK8sNodepoolsNodesDeleteRequest struct {
-	ctx _context.Context
-	ApiService *KubernetesApiService
-	k8sClusterId string
-	nodepoolId string
-	nodeId string
-	pretty *bool
-	depth *int32
+	ctx             _context.Context
+	ApiService      *KubernetesApiService
+	k8sClusterId    string
+	nodepoolId      string
+	nodeId          string
+	pretty          *bool
+	depth           *int32
 	xContractNumber *int32
 }
 
@@ -1204,11 +1289,11 @@ func (r ApiK8sNodepoolsNodesDeleteRequest) Execute() (map[string]interface{}, *A
  */
 func (a *KubernetesApiService) K8sNodepoolsNodesDelete(ctx _context.Context, k8sClusterId string, nodepoolId string, nodeId string) ApiK8sNodepoolsNodesDeleteRequest {
 	return ApiK8sNodepoolsNodesDeleteRequest{
-		ApiService: a,
-		ctx: ctx,
+		ApiService:   a,
+		ctx:          ctx,
 		k8sClusterId: k8sClusterId,
-		nodepoolId: nodepoolId,
-		nodeId: nodeId,
+		nodepoolId:   nodepoolId,
+		nodeId:       nodeId,
 	}
 }
 
@@ -1246,6 +1331,7 @@ func (a *KubernetesApiService) K8sNodepoolsNodesDeleteExecute(r ApiK8sNodepoolsN
 	if r.depth != nil {
 		localVarQueryParams.Add("depth", parameterToString(*r.depth, ""))
 	}
+
 	// to determine the Content-Type header
 	localVarHTTPContentTypes := []string{}
 
@@ -1287,12 +1373,12 @@ func (a *KubernetesApiService) K8sNodepoolsNodesDeleteExecute(r ApiK8sNodepoolsN
 
 	localVarHTTPResponse, httpRequestTime, err := a.client.callAPI(req)
 
-	localVarAPIResponse := &APIResponse {
-		Response: localVarHTTPResponse,
-		Method: localVarHTTPMethod,
-		RequestURL: localVarPath,
+	localVarAPIResponse := &APIResponse{
+		Response:    localVarHTTPResponse,
+		Method:      localVarHTTPMethod,
+		RequestURL:  localVarPath,
 		RequestTime: httpRequestTime,
-		Operation: "K8sNodepoolsNodesDelete",
+		Operation:   "K8sNodepoolsNodesDelete",
 	}
 
 	if err != nil || localVarHTTPResponse == nil {
@@ -1309,16 +1395,16 @@ func (a *KubernetesApiService) K8sNodepoolsNodesDeleteExecute(r ApiK8sNodepoolsN
 	if localVarHTTPResponse.StatusCode >= 300 {
 		newErr := GenericOpenAPIError{
 			statusCode: localVarHTTPResponse.StatusCode,
-			body:  localVarBody,
-			error: fmt.Sprintf("%s: %s", localVarHTTPResponse.Status, string(localVarBody)),
+			body:       localVarBody,
+			error:      fmt.Sprintf(FormatStringErr, localVarHTTPResponse.Status, string(localVarBody)),
 		}
-			var v Error
-			err = a.client.decode(&v, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
-			if err != nil {
-				newErr.error = err.Error()
-				return localVarReturnValue, localVarAPIResponse, newErr
-			}
-			newErr.model = v
+		var v Error
+		err = a.client.decode(&v, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
+		if err != nil {
+			newErr.error = err.Error()
+			return localVarReturnValue, localVarAPIResponse, newErr
+		}
+		newErr.model = v
 		return localVarReturnValue, localVarAPIResponse, newErr
 	}
 
@@ -1326,8 +1412,8 @@ func (a *KubernetesApiService) K8sNodepoolsNodesDeleteExecute(r ApiK8sNodepoolsN
 	if err != nil {
 		newErr := GenericOpenAPIError{
 			statusCode: localVarHTTPResponse.StatusCode,
-			body:  localVarBody,
-			error: err.Error(),
+			body:       localVarBody,
+			error:      err.Error(),
 		}
 		return localVarReturnValue, localVarAPIResponse, newErr
 	}
@@ -1336,13 +1422,13 @@ func (a *KubernetesApiService) K8sNodepoolsNodesDeleteExecute(r ApiK8sNodepoolsN
 }
 
 type ApiK8sNodepoolsNodesFindByIdRequest struct {
-	ctx _context.Context
-	ApiService *KubernetesApiService
-	k8sClusterId string
-	nodepoolId string
-	nodeId string
-	pretty *bool
-	depth *int32
+	ctx             _context.Context
+	ApiService      *KubernetesApiService
+	k8sClusterId    string
+	nodepoolId      string
+	nodeId          string
+	pretty          *bool
+	depth           *int32
 	xContractNumber *int32
 }
 
@@ -1374,11 +1460,11 @@ func (r ApiK8sNodepoolsNodesFindByIdRequest) Execute() (KubernetesNode, *APIResp
  */
 func (a *KubernetesApiService) K8sNodepoolsNodesFindById(ctx _context.Context, k8sClusterId string, nodepoolId string, nodeId string) ApiK8sNodepoolsNodesFindByIdRequest {
 	return ApiK8sNodepoolsNodesFindByIdRequest{
-		ApiService: a,
-		ctx: ctx,
+		ApiService:   a,
+		ctx:          ctx,
 		k8sClusterId: k8sClusterId,
-		nodepoolId: nodepoolId,
-		nodeId: nodeId,
+		nodepoolId:   nodepoolId,
+		nodeId:       nodeId,
 	}
 }
 
@@ -1416,6 +1502,7 @@ func (a *KubernetesApiService) K8sNodepoolsNodesFindByIdExecute(r ApiK8sNodepool
 	if r.depth != nil {
 		localVarQueryParams.Add("depth", parameterToString(*r.depth, ""))
 	}
+
 	// to determine the Content-Type header
 	localVarHTTPContentTypes := []string{}
 
@@ -1457,12 +1544,12 @@ func (a *KubernetesApiService) K8sNodepoolsNodesFindByIdExecute(r ApiK8sNodepool
 
 	localVarHTTPResponse, httpRequestTime, err := a.client.callAPI(req)
 
-	localVarAPIResponse := &APIResponse {
-		Response: localVarHTTPResponse,
-		Method: localVarHTTPMethod,
-		RequestURL: localVarPath,
+	localVarAPIResponse := &APIResponse{
+		Response:    localVarHTTPResponse,
+		Method:      localVarHTTPMethod,
+		RequestURL:  localVarPath,
 		RequestTime: httpRequestTime,
-		Operation: "K8sNodepoolsNodesFindById",
+		Operation:   "K8sNodepoolsNodesFindById",
 	}
 
 	if err != nil || localVarHTTPResponse == nil {
@@ -1479,16 +1566,16 @@ func (a *KubernetesApiService) K8sNodepoolsNodesFindByIdExecute(r ApiK8sNodepool
 	if localVarHTTPResponse.StatusCode >= 300 {
 		newErr := GenericOpenAPIError{
 			statusCode: localVarHTTPResponse.StatusCode,
-			body:  localVarBody,
-			error: fmt.Sprintf("%s: %s", localVarHTTPResponse.Status, string(localVarBody)),
+			body:       localVarBody,
+			error:      fmt.Sprintf(FormatStringErr, localVarHTTPResponse.Status, string(localVarBody)),
 		}
-			var v Error
-			err = a.client.decode(&v, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
-			if err != nil {
-				newErr.error = err.Error()
-				return localVarReturnValue, localVarAPIResponse, newErr
-			}
-			newErr.model = v
+		var v Error
+		err = a.client.decode(&v, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
+		if err != nil {
+			newErr.error = err.Error()
+			return localVarReturnValue, localVarAPIResponse, newErr
+		}
+		newErr.model = v
 		return localVarReturnValue, localVarAPIResponse, newErr
 	}
 
@@ -1496,8 +1583,8 @@ func (a *KubernetesApiService) K8sNodepoolsNodesFindByIdExecute(r ApiK8sNodepool
 	if err != nil {
 		newErr := GenericOpenAPIError{
 			statusCode: localVarHTTPResponse.StatusCode,
-			body:  localVarBody,
-			error: err.Error(),
+			body:       localVarBody,
+			error:      err.Error(),
 		}
 		return localVarReturnValue, localVarAPIResponse, newErr
 	}
@@ -1506,12 +1593,14 @@ func (a *KubernetesApiService) K8sNodepoolsNodesFindByIdExecute(r ApiK8sNodepool
 }
 
 type ApiK8sNodepoolsNodesGetRequest struct {
-	ctx _context.Context
-	ApiService *KubernetesApiService
-	k8sClusterId string
-	nodepoolId string
-	pretty *bool
-	depth *int32
+	ctx             _context.Context
+	ApiService      *KubernetesApiService
+	filters         _neturl.Values
+	orderBy         *string
+	k8sClusterId    string
+	nodepoolId      string
+	pretty          *bool
+	depth           *int32
 	xContractNumber *int32
 }
 
@@ -1525,6 +1614,19 @@ func (r ApiK8sNodepoolsNodesGetRequest) Depth(depth int32) ApiK8sNodepoolsNodesG
 }
 func (r ApiK8sNodepoolsNodesGetRequest) XContractNumber(xContractNumber int32) ApiK8sNodepoolsNodesGetRequest {
 	r.xContractNumber = &xContractNumber
+	return r
+}
+
+// Filters query parameters limit results to those containing a matching value for a specific property.
+func (r ApiK8sNodepoolsNodesGetRequest) Filter(key string, value string) ApiK8sNodepoolsNodesGetRequest {
+	filterKey := fmt.Sprintf(FilterQueryParam, key)
+	r.filters[filterKey] = []string{value}
+	return r
+}
+
+// OrderBy query param sorts the results alphanumerically in ascending order based on the specified property.
+func (r ApiK8sNodepoolsNodesGetRequest) OrderBy(orderBy string) ApiK8sNodepoolsNodesGetRequest {
+	r.orderBy = &orderBy
 	return r
 }
 
@@ -1542,10 +1644,11 @@ func (r ApiK8sNodepoolsNodesGetRequest) Execute() (KubernetesNodes, *APIResponse
  */
 func (a *KubernetesApiService) K8sNodepoolsNodesGet(ctx _context.Context, k8sClusterId string, nodepoolId string) ApiK8sNodepoolsNodesGetRequest {
 	return ApiK8sNodepoolsNodesGetRequest{
-		ApiService: a,
-		ctx: ctx,
+		ApiService:   a,
+		ctx:          ctx,
 		k8sClusterId: k8sClusterId,
-		nodepoolId: nodepoolId,
+		nodepoolId:   nodepoolId,
+		filters:      _neturl.Values{},
 	}
 }
 
@@ -1582,6 +1685,17 @@ func (a *KubernetesApiService) K8sNodepoolsNodesGetExecute(r ApiK8sNodepoolsNode
 	if r.depth != nil {
 		localVarQueryParams.Add("depth", parameterToString(*r.depth, ""))
 	}
+	if r.orderBy != nil {
+		localVarQueryParams.Add("orderBy", parameterToString(*r.orderBy, ""))
+	}
+	if len(r.filters) > 0 {
+		for k, v := range r.filters {
+			for _, iv := range v {
+				localVarQueryParams.Add(k, iv)
+			}
+		}
+	}
+
 	// to determine the Content-Type header
 	localVarHTTPContentTypes := []string{}
 
@@ -1623,12 +1737,12 @@ func (a *KubernetesApiService) K8sNodepoolsNodesGetExecute(r ApiK8sNodepoolsNode
 
 	localVarHTTPResponse, httpRequestTime, err := a.client.callAPI(req)
 
-	localVarAPIResponse := &APIResponse {
-		Response: localVarHTTPResponse,
-		Method: localVarHTTPMethod,
-		RequestURL: localVarPath,
+	localVarAPIResponse := &APIResponse{
+		Response:    localVarHTTPResponse,
+		Method:      localVarHTTPMethod,
+		RequestURL:  localVarPath,
 		RequestTime: httpRequestTime,
-		Operation: "K8sNodepoolsNodesGet",
+		Operation:   "K8sNodepoolsNodesGet",
 	}
 
 	if err != nil || localVarHTTPResponse == nil {
@@ -1645,16 +1759,16 @@ func (a *KubernetesApiService) K8sNodepoolsNodesGetExecute(r ApiK8sNodepoolsNode
 	if localVarHTTPResponse.StatusCode >= 300 {
 		newErr := GenericOpenAPIError{
 			statusCode: localVarHTTPResponse.StatusCode,
-			body:  localVarBody,
-			error: fmt.Sprintf("%s: %s", localVarHTTPResponse.Status, string(localVarBody)),
+			body:       localVarBody,
+			error:      fmt.Sprintf(FormatStringErr, localVarHTTPResponse.Status, string(localVarBody)),
 		}
-			var v Error
-			err = a.client.decode(&v, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
-			if err != nil {
-				newErr.error = err.Error()
-				return localVarReturnValue, localVarAPIResponse, newErr
-			}
-			newErr.model = v
+		var v Error
+		err = a.client.decode(&v, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
+		if err != nil {
+			newErr.error = err.Error()
+			return localVarReturnValue, localVarAPIResponse, newErr
+		}
+		newErr.model = v
 		return localVarReturnValue, localVarAPIResponse, newErr
 	}
 
@@ -1662,8 +1776,8 @@ func (a *KubernetesApiService) K8sNodepoolsNodesGetExecute(r ApiK8sNodepoolsNode
 	if err != nil {
 		newErr := GenericOpenAPIError{
 			statusCode: localVarHTTPResponse.StatusCode,
-			body:  localVarBody,
-			error: err.Error(),
+			body:       localVarBody,
+			error:      err.Error(),
 		}
 		return localVarReturnValue, localVarAPIResponse, newErr
 	}
@@ -1672,13 +1786,13 @@ func (a *KubernetesApiService) K8sNodepoolsNodesGetExecute(r ApiK8sNodepoolsNode
 }
 
 type ApiK8sNodepoolsNodesReplacePostRequest struct {
-	ctx _context.Context
-	ApiService *KubernetesApiService
-	k8sClusterId string
-	nodepoolId string
-	nodeId string
-	pretty *bool
-	depth *int32
+	ctx             _context.Context
+	ApiService      *KubernetesApiService
+	k8sClusterId    string
+	nodepoolId      string
+	nodeId          string
+	pretty          *bool
+	depth           *int32
 	xContractNumber *int32
 }
 
@@ -1709,14 +1823,14 @@ Managed Kubernetes starts a process which based on the nodepool's template creat
  * @param nodepoolId The unique ID of the Kubernetes Node Pool
  * @param nodeId The unique ID of the Kubernetes Node.
  * @return ApiK8sNodepoolsNodesReplacePostRequest
- */
+*/
 func (a *KubernetesApiService) K8sNodepoolsNodesReplacePost(ctx _context.Context, k8sClusterId string, nodepoolId string, nodeId string) ApiK8sNodepoolsNodesReplacePostRequest {
 	return ApiK8sNodepoolsNodesReplacePostRequest{
-		ApiService: a,
-		ctx: ctx,
+		ApiService:   a,
+		ctx:          ctx,
 		k8sClusterId: k8sClusterId,
-		nodepoolId: nodepoolId,
-		nodeId: nodeId,
+		nodepoolId:   nodepoolId,
+		nodeId:       nodeId,
 	}
 }
 
@@ -1754,6 +1868,7 @@ func (a *KubernetesApiService) K8sNodepoolsNodesReplacePostExecute(r ApiK8sNodep
 	if r.depth != nil {
 		localVarQueryParams.Add("depth", parameterToString(*r.depth, ""))
 	}
+
 	// to determine the Content-Type header
 	localVarHTTPContentTypes := []string{}
 
@@ -1795,12 +1910,12 @@ func (a *KubernetesApiService) K8sNodepoolsNodesReplacePostExecute(r ApiK8sNodep
 
 	localVarHTTPResponse, httpRequestTime, err := a.client.callAPI(req)
 
-	localVarAPIResponse := &APIResponse {
-		Response: localVarHTTPResponse,
-		Method: localVarHTTPMethod,
-		RequestURL: localVarPath,
+	localVarAPIResponse := &APIResponse{
+		Response:    localVarHTTPResponse,
+		Method:      localVarHTTPMethod,
+		RequestURL:  localVarPath,
 		RequestTime: httpRequestTime,
-		Operation: "K8sNodepoolsNodesReplacePost",
+		Operation:   "K8sNodepoolsNodesReplacePost",
 	}
 
 	if err != nil || localVarHTTPResponse == nil {
@@ -1817,16 +1932,16 @@ func (a *KubernetesApiService) K8sNodepoolsNodesReplacePostExecute(r ApiK8sNodep
 	if localVarHTTPResponse.StatusCode >= 300 {
 		newErr := GenericOpenAPIError{
 			statusCode: localVarHTTPResponse.StatusCode,
-			body:  localVarBody,
-			error: fmt.Sprintf("%s: %s", localVarHTTPResponse.Status, string(localVarBody)),
+			body:       localVarBody,
+			error:      fmt.Sprintf(FormatStringErr, localVarHTTPResponse.Status, string(localVarBody)),
 		}
-			var v Error
-			err = a.client.decode(&v, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
-			if err != nil {
-				newErr.error = err.Error()
-				return localVarReturnValue, localVarAPIResponse, newErr
-			}
-			newErr.model = v
+		var v Error
+		err = a.client.decode(&v, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
+		if err != nil {
+			newErr.error = err.Error()
+			return localVarReturnValue, localVarAPIResponse, newErr
+		}
+		newErr.model = v
 		return localVarReturnValue, localVarAPIResponse, newErr
 	}
 
@@ -1834,8 +1949,8 @@ func (a *KubernetesApiService) K8sNodepoolsNodesReplacePostExecute(r ApiK8sNodep
 	if err != nil {
 		newErr := GenericOpenAPIError{
 			statusCode: localVarHTTPResponse.StatusCode,
-			body:  localVarBody,
-			error: err.Error(),
+			body:       localVarBody,
+			error:      err.Error(),
 		}
 		return localVarReturnValue, localVarAPIResponse, newErr
 	}
@@ -1844,13 +1959,13 @@ func (a *KubernetesApiService) K8sNodepoolsNodesReplacePostExecute(r ApiK8sNodep
 }
 
 type ApiK8sNodepoolsPostRequest struct {
-	ctx _context.Context
-	ApiService *KubernetesApiService
-	k8sClusterId string
+	ctx                _context.Context
+	ApiService         *KubernetesApiService
+	k8sClusterId       string
 	kubernetesNodePool *KubernetesNodePoolForPost
-	pretty *bool
-	depth *int32
-	xContractNumber *int32
+	pretty             *bool
+	depth              *int32
+	xContractNumber    *int32
 }
 
 func (r ApiK8sNodepoolsPostRequest) KubernetesNodePool(kubernetesNodePool KubernetesNodePoolForPost) ApiK8sNodepoolsPostRequest {
@@ -1883,8 +1998,8 @@ func (r ApiK8sNodepoolsPostRequest) Execute() (KubernetesNodePool, *APIResponse,
  */
 func (a *KubernetesApiService) K8sNodepoolsPost(ctx _context.Context, k8sClusterId string) ApiK8sNodepoolsPostRequest {
 	return ApiK8sNodepoolsPostRequest{
-		ApiService: a,
-		ctx: ctx,
+		ApiService:   a,
+		ctx:          ctx,
 		k8sClusterId: k8sClusterId,
 	}
 }
@@ -1924,6 +2039,7 @@ func (a *KubernetesApiService) K8sNodepoolsPostExecute(r ApiK8sNodepoolsPostRequ
 	if r.depth != nil {
 		localVarQueryParams.Add("depth", parameterToString(*r.depth, ""))
 	}
+
 	// to determine the Content-Type header
 	localVarHTTPContentTypes := []string{"application/json"}
 
@@ -1967,12 +2083,12 @@ func (a *KubernetesApiService) K8sNodepoolsPostExecute(r ApiK8sNodepoolsPostRequ
 
 	localVarHTTPResponse, httpRequestTime, err := a.client.callAPI(req)
 
-	localVarAPIResponse := &APIResponse {
-		Response: localVarHTTPResponse,
-		Method: localVarHTTPMethod,
-		RequestURL: localVarPath,
+	localVarAPIResponse := &APIResponse{
+		Response:    localVarHTTPResponse,
+		Method:      localVarHTTPMethod,
+		RequestURL:  localVarPath,
 		RequestTime: httpRequestTime,
-		Operation: "K8sNodepoolsPost",
+		Operation:   "K8sNodepoolsPost",
 	}
 
 	if err != nil || localVarHTTPResponse == nil {
@@ -1989,16 +2105,16 @@ func (a *KubernetesApiService) K8sNodepoolsPostExecute(r ApiK8sNodepoolsPostRequ
 	if localVarHTTPResponse.StatusCode >= 300 {
 		newErr := GenericOpenAPIError{
 			statusCode: localVarHTTPResponse.StatusCode,
-			body:  localVarBody,
-			error: fmt.Sprintf("%s: %s", localVarHTTPResponse.Status, string(localVarBody)),
+			body:       localVarBody,
+			error:      fmt.Sprintf(FormatStringErr, localVarHTTPResponse.Status, string(localVarBody)),
 		}
-			var v Error
-			err = a.client.decode(&v, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
-			if err != nil {
-				newErr.error = err.Error()
-				return localVarReturnValue, localVarAPIResponse, newErr
-			}
-			newErr.model = v
+		var v Error
+		err = a.client.decode(&v, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
+		if err != nil {
+			newErr.error = err.Error()
+			return localVarReturnValue, localVarAPIResponse, newErr
+		}
+		newErr.model = v
 		return localVarReturnValue, localVarAPIResponse, newErr
 	}
 
@@ -2006,8 +2122,8 @@ func (a *KubernetesApiService) K8sNodepoolsPostExecute(r ApiK8sNodepoolsPostRequ
 	if err != nil {
 		newErr := GenericOpenAPIError{
 			statusCode: localVarHTTPResponse.StatusCode,
-			body:  localVarBody,
-			error: err.Error(),
+			body:       localVarBody,
+			error:      err.Error(),
 		}
 		return localVarReturnValue, localVarAPIResponse, newErr
 	}
@@ -2016,14 +2132,14 @@ func (a *KubernetesApiService) K8sNodepoolsPostExecute(r ApiK8sNodepoolsPostRequ
 }
 
 type ApiK8sNodepoolsPutRequest struct {
-	ctx _context.Context
-	ApiService *KubernetesApiService
-	k8sClusterId string
-	nodepoolId string
+	ctx                _context.Context
+	ApiService         *KubernetesApiService
+	k8sClusterId       string
+	nodepoolId         string
 	kubernetesNodePool *KubernetesNodePoolForPut
-	pretty *bool
-	depth *int32
-	xContractNumber *int32
+	pretty             *bool
+	depth              *int32
+	xContractNumber    *int32
 }
 
 func (r ApiK8sNodepoolsPutRequest) KubernetesNodePool(kubernetesNodePool KubernetesNodePoolForPut) ApiK8sNodepoolsPutRequest {
@@ -2057,10 +2173,10 @@ func (r ApiK8sNodepoolsPutRequest) Execute() (KubernetesNodePool, *APIResponse, 
  */
 func (a *KubernetesApiService) K8sNodepoolsPut(ctx _context.Context, k8sClusterId string, nodepoolId string) ApiK8sNodepoolsPutRequest {
 	return ApiK8sNodepoolsPutRequest{
-		ApiService: a,
-		ctx: ctx,
+		ApiService:   a,
+		ctx:          ctx,
 		k8sClusterId: k8sClusterId,
-		nodepoolId: nodepoolId,
+		nodepoolId:   nodepoolId,
 	}
 }
 
@@ -2100,6 +2216,7 @@ func (a *KubernetesApiService) K8sNodepoolsPutExecute(r ApiK8sNodepoolsPutReques
 	if r.depth != nil {
 		localVarQueryParams.Add("depth", parameterToString(*r.depth, ""))
 	}
+
 	// to determine the Content-Type header
 	localVarHTTPContentTypes := []string{"application/json"}
 
@@ -2143,12 +2260,12 @@ func (a *KubernetesApiService) K8sNodepoolsPutExecute(r ApiK8sNodepoolsPutReques
 
 	localVarHTTPResponse, httpRequestTime, err := a.client.callAPI(req)
 
-	localVarAPIResponse := &APIResponse {
-		Response: localVarHTTPResponse,
-		Method: localVarHTTPMethod,
-		RequestURL: localVarPath,
+	localVarAPIResponse := &APIResponse{
+		Response:    localVarHTTPResponse,
+		Method:      localVarHTTPMethod,
+		RequestURL:  localVarPath,
 		RequestTime: httpRequestTime,
-		Operation: "K8sNodepoolsPut",
+		Operation:   "K8sNodepoolsPut",
 	}
 
 	if err != nil || localVarHTTPResponse == nil {
@@ -2165,16 +2282,16 @@ func (a *KubernetesApiService) K8sNodepoolsPutExecute(r ApiK8sNodepoolsPutReques
 	if localVarHTTPResponse.StatusCode >= 300 {
 		newErr := GenericOpenAPIError{
 			statusCode: localVarHTTPResponse.StatusCode,
-			body:  localVarBody,
-			error: fmt.Sprintf("%s: %s", localVarHTTPResponse.Status, string(localVarBody)),
+			body:       localVarBody,
+			error:      fmt.Sprintf(FormatStringErr, localVarHTTPResponse.Status, string(localVarBody)),
 		}
-			var v Error
-			err = a.client.decode(&v, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
-			if err != nil {
-				newErr.error = err.Error()
-				return localVarReturnValue, localVarAPIResponse, newErr
-			}
-			newErr.model = v
+		var v Error
+		err = a.client.decode(&v, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
+		if err != nil {
+			newErr.error = err.Error()
+			return localVarReturnValue, localVarAPIResponse, newErr
+		}
+		newErr.model = v
 		return localVarReturnValue, localVarAPIResponse, newErr
 	}
 
@@ -2182,8 +2299,8 @@ func (a *KubernetesApiService) K8sNodepoolsPutExecute(r ApiK8sNodepoolsPutReques
 	if err != nil {
 		newErr := GenericOpenAPIError{
 			statusCode: localVarHTTPResponse.StatusCode,
-			body:  localVarBody,
-			error: err.Error(),
+			body:       localVarBody,
+			error:      err.Error(),
 		}
 		return localVarReturnValue, localVarAPIResponse, newErr
 	}
@@ -2192,12 +2309,12 @@ func (a *KubernetesApiService) K8sNodepoolsPutExecute(r ApiK8sNodepoolsPutReques
 }
 
 type ApiK8sPostRequest struct {
-	ctx _context.Context
-	ApiService *KubernetesApiService
+	ctx               _context.Context
+	ApiService        *KubernetesApiService
 	kubernetesCluster *KubernetesClusterForPost
-	pretty *bool
-	depth *int32
-	xContractNumber *int32
+	pretty            *bool
+	depth             *int32
+	xContractNumber   *int32
 }
 
 func (r ApiK8sPostRequest) KubernetesCluster(kubernetesCluster KubernetesClusterForPost) ApiK8sPostRequest {
@@ -2230,7 +2347,7 @@ func (r ApiK8sPostRequest) Execute() (KubernetesCluster, *APIResponse, error) {
 func (a *KubernetesApiService) K8sPost(ctx _context.Context) ApiK8sPostRequest {
 	return ApiK8sPostRequest{
 		ApiService: a,
-		ctx: ctx,
+		ctx:        ctx,
 	}
 }
 
@@ -2268,6 +2385,7 @@ func (a *KubernetesApiService) K8sPostExecute(r ApiK8sPostRequest) (KubernetesCl
 	if r.depth != nil {
 		localVarQueryParams.Add("depth", parameterToString(*r.depth, ""))
 	}
+
 	// to determine the Content-Type header
 	localVarHTTPContentTypes := []string{"application/json"}
 
@@ -2311,12 +2429,12 @@ func (a *KubernetesApiService) K8sPostExecute(r ApiK8sPostRequest) (KubernetesCl
 
 	localVarHTTPResponse, httpRequestTime, err := a.client.callAPI(req)
 
-	localVarAPIResponse := &APIResponse {
-		Response: localVarHTTPResponse,
-		Method: localVarHTTPMethod,
-		RequestURL: localVarPath,
+	localVarAPIResponse := &APIResponse{
+		Response:    localVarHTTPResponse,
+		Method:      localVarHTTPMethod,
+		RequestURL:  localVarPath,
 		RequestTime: httpRequestTime,
-		Operation: "K8sPost",
+		Operation:   "K8sPost",
 	}
 
 	if err != nil || localVarHTTPResponse == nil {
@@ -2333,16 +2451,16 @@ func (a *KubernetesApiService) K8sPostExecute(r ApiK8sPostRequest) (KubernetesCl
 	if localVarHTTPResponse.StatusCode >= 300 {
 		newErr := GenericOpenAPIError{
 			statusCode: localVarHTTPResponse.StatusCode,
-			body:  localVarBody,
-			error: fmt.Sprintf("%s: %s", localVarHTTPResponse.Status, string(localVarBody)),
+			body:       localVarBody,
+			error:      fmt.Sprintf(FormatStringErr, localVarHTTPResponse.Status, string(localVarBody)),
 		}
-			var v Error
-			err = a.client.decode(&v, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
-			if err != nil {
-				newErr.error = err.Error()
-				return localVarReturnValue, localVarAPIResponse, newErr
-			}
-			newErr.model = v
+		var v Error
+		err = a.client.decode(&v, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
+		if err != nil {
+			newErr.error = err.Error()
+			return localVarReturnValue, localVarAPIResponse, newErr
+		}
+		newErr.model = v
 		return localVarReturnValue, localVarAPIResponse, newErr
 	}
 
@@ -2350,8 +2468,8 @@ func (a *KubernetesApiService) K8sPostExecute(r ApiK8sPostRequest) (KubernetesCl
 	if err != nil {
 		newErr := GenericOpenAPIError{
 			statusCode: localVarHTTPResponse.StatusCode,
-			body:  localVarBody,
-			error: err.Error(),
+			body:       localVarBody,
+			error:      err.Error(),
 		}
 		return localVarReturnValue, localVarAPIResponse, newErr
 	}
@@ -2360,13 +2478,13 @@ func (a *KubernetesApiService) K8sPostExecute(r ApiK8sPostRequest) (KubernetesCl
 }
 
 type ApiK8sPutRequest struct {
-	ctx _context.Context
-	ApiService *KubernetesApiService
-	k8sClusterId string
+	ctx               _context.Context
+	ApiService        *KubernetesApiService
+	k8sClusterId      string
 	kubernetesCluster *KubernetesClusterForPut
-	pretty *bool
-	depth *int32
-	xContractNumber *int32
+	pretty            *bool
+	depth             *int32
+	xContractNumber   *int32
 }
 
 func (r ApiK8sPutRequest) KubernetesCluster(kubernetesCluster KubernetesClusterForPut) ApiK8sPutRequest {
@@ -2399,8 +2517,8 @@ func (r ApiK8sPutRequest) Execute() (KubernetesCluster, *APIResponse, error) {
  */
 func (a *KubernetesApiService) K8sPut(ctx _context.Context, k8sClusterId string) ApiK8sPutRequest {
 	return ApiK8sPutRequest{
-		ApiService: a,
-		ctx: ctx,
+		ApiService:   a,
+		ctx:          ctx,
 		k8sClusterId: k8sClusterId,
 	}
 }
@@ -2440,6 +2558,7 @@ func (a *KubernetesApiService) K8sPutExecute(r ApiK8sPutRequest) (KubernetesClus
 	if r.depth != nil {
 		localVarQueryParams.Add("depth", parameterToString(*r.depth, ""))
 	}
+
 	// to determine the Content-Type header
 	localVarHTTPContentTypes := []string{"application/json"}
 
@@ -2483,12 +2602,12 @@ func (a *KubernetesApiService) K8sPutExecute(r ApiK8sPutRequest) (KubernetesClus
 
 	localVarHTTPResponse, httpRequestTime, err := a.client.callAPI(req)
 
-	localVarAPIResponse := &APIResponse {
-		Response: localVarHTTPResponse,
-		Method: localVarHTTPMethod,
-		RequestURL: localVarPath,
+	localVarAPIResponse := &APIResponse{
+		Response:    localVarHTTPResponse,
+		Method:      localVarHTTPMethod,
+		RequestURL:  localVarPath,
 		RequestTime: httpRequestTime,
-		Operation: "K8sPut",
+		Operation:   "K8sPut",
 	}
 
 	if err != nil || localVarHTTPResponse == nil {
@@ -2505,16 +2624,16 @@ func (a *KubernetesApiService) K8sPutExecute(r ApiK8sPutRequest) (KubernetesClus
 	if localVarHTTPResponse.StatusCode >= 300 {
 		newErr := GenericOpenAPIError{
 			statusCode: localVarHTTPResponse.StatusCode,
-			body:  localVarBody,
-			error: fmt.Sprintf("%s: %s", localVarHTTPResponse.Status, string(localVarBody)),
+			body:       localVarBody,
+			error:      fmt.Sprintf(FormatStringErr, localVarHTTPResponse.Status, string(localVarBody)),
 		}
-			var v Error
-			err = a.client.decode(&v, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
-			if err != nil {
-				newErr.error = err.Error()
-				return localVarReturnValue, localVarAPIResponse, newErr
-			}
-			newErr.model = v
+		var v Error
+		err = a.client.decode(&v, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
+		if err != nil {
+			newErr.error = err.Error()
+			return localVarReturnValue, localVarAPIResponse, newErr
+		}
+		newErr.model = v
 		return localVarReturnValue, localVarAPIResponse, newErr
 	}
 
@@ -2522,8 +2641,8 @@ func (a *KubernetesApiService) K8sPutExecute(r ApiK8sPutRequest) (KubernetesClus
 	if err != nil {
 		newErr := GenericOpenAPIError{
 			statusCode: localVarHTTPResponse.StatusCode,
-			body:  localVarBody,
-			error: err.Error(),
+			body:       localVarBody,
+			error:      err.Error(),
 		}
 		return localVarReturnValue, localVarAPIResponse, newErr
 	}
@@ -2532,11 +2651,25 @@ func (a *KubernetesApiService) K8sPutExecute(r ApiK8sPutRequest) (KubernetesClus
 }
 
 type ApiK8sVersionsCompatibilitiesGetRequest struct {
-	ctx _context.Context
-	ApiService *KubernetesApiService
+	ctx            _context.Context
+	ApiService     *KubernetesApiService
+	filters        _neturl.Values
+	orderBy        *string
 	clusterVersion string
 }
 
+// Filters query parameters limit results to those containing a matching value for a specific property.
+func (r ApiK8sVersionsCompatibilitiesGetRequest) Filter(key string, value string) ApiK8sVersionsCompatibilitiesGetRequest {
+	filterKey := fmt.Sprintf(FilterQueryParam, key)
+	r.filters[filterKey] = []string{value}
+	return r
+}
+
+// OrderBy query param sorts the results alphanumerically in ascending order based on the specified property.
+func (r ApiK8sVersionsCompatibilitiesGetRequest) OrderBy(orderBy string) ApiK8sVersionsCompatibilitiesGetRequest {
+	r.orderBy = &orderBy
+	return r
+}
 
 func (r ApiK8sVersionsCompatibilitiesGetRequest) Execute() ([]string, *APIResponse, error) {
 	return r.ApiService.K8sVersionsCompatibilitiesGetExecute(r)
@@ -2551,9 +2684,10 @@ func (r ApiK8sVersionsCompatibilitiesGetRequest) Execute() ([]string, *APIRespon
  */
 func (a *KubernetesApiService) K8sVersionsCompatibilitiesGet(ctx _context.Context, clusterVersion string) ApiK8sVersionsCompatibilitiesGetRequest {
 	return ApiK8sVersionsCompatibilitiesGetRequest{
-		ApiService: a,
-		ctx: ctx,
+		ApiService:     a,
+		ctx:            ctx,
 		clusterVersion: clusterVersion,
+		filters:        _neturl.Values{},
 	}
 }
 
@@ -2583,6 +2717,17 @@ func (a *KubernetesApiService) K8sVersionsCompatibilitiesGetExecute(r ApiK8sVers
 	localVarQueryParams := _neturl.Values{}
 	localVarFormParams := _neturl.Values{}
 
+	if r.orderBy != nil {
+		localVarQueryParams.Add("orderBy", parameterToString(*r.orderBy, ""))
+	}
+	if len(r.filters) > 0 {
+		for k, v := range r.filters {
+			for _, iv := range v {
+				localVarQueryParams.Add(k, iv)
+			}
+		}
+	}
+
 	// to determine the Content-Type header
 	localVarHTTPContentTypes := []string{}
 
@@ -2621,12 +2766,12 @@ func (a *KubernetesApiService) K8sVersionsCompatibilitiesGetExecute(r ApiK8sVers
 
 	localVarHTTPResponse, httpRequestTime, err := a.client.callAPI(req)
 
-	localVarAPIResponse := &APIResponse {
-		Response: localVarHTTPResponse,
-		Method: localVarHTTPMethod,
-		RequestURL: localVarPath,
+	localVarAPIResponse := &APIResponse{
+		Response:    localVarHTTPResponse,
+		Method:      localVarHTTPMethod,
+		RequestURL:  localVarPath,
 		RequestTime: httpRequestTime,
-		Operation: "K8sVersionsCompatibilitiesGet",
+		Operation:   "K8sVersionsCompatibilitiesGet",
 	}
 
 	if err != nil || localVarHTTPResponse == nil {
@@ -2643,16 +2788,16 @@ func (a *KubernetesApiService) K8sVersionsCompatibilitiesGetExecute(r ApiK8sVers
 	if localVarHTTPResponse.StatusCode >= 300 {
 		newErr := GenericOpenAPIError{
 			statusCode: localVarHTTPResponse.StatusCode,
-			body:  localVarBody,
-			error: fmt.Sprintf("%s: %s", localVarHTTPResponse.Status, string(localVarBody)),
+			body:       localVarBody,
+			error:      fmt.Sprintf(FormatStringErr, localVarHTTPResponse.Status, string(localVarBody)),
 		}
-			var v Error
-			err = a.client.decode(&v, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
-			if err != nil {
-				newErr.error = err.Error()
-				return localVarReturnValue, localVarAPIResponse, newErr
-			}
-			newErr.model = v
+		var v Error
+		err = a.client.decode(&v, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
+		if err != nil {
+			newErr.error = err.Error()
+			return localVarReturnValue, localVarAPIResponse, newErr
+		}
+		newErr.model = v
 		return localVarReturnValue, localVarAPIResponse, newErr
 	}
 
@@ -2660,8 +2805,8 @@ func (a *KubernetesApiService) K8sVersionsCompatibilitiesGetExecute(r ApiK8sVers
 	if err != nil {
 		newErr := GenericOpenAPIError{
 			statusCode: localVarHTTPResponse.StatusCode,
-			body:  localVarBody,
-			error: err.Error(),
+			body:       localVarBody,
+			error:      err.Error(),
 		}
 		return localVarReturnValue, localVarAPIResponse, newErr
 	}
@@ -2670,10 +2815,24 @@ func (a *KubernetesApiService) K8sVersionsCompatibilitiesGetExecute(r ApiK8sVers
 }
 
 type ApiK8sVersionsDefaultGetRequest struct {
-	ctx _context.Context
+	ctx        _context.Context
 	ApiService *KubernetesApiService
+	filters    _neturl.Values
+	orderBy    *string
 }
 
+// Filters query parameters limit results to those containing a matching value for a specific property.
+func (r ApiK8sVersionsDefaultGetRequest) Filter(key string, value string) ApiK8sVersionsDefaultGetRequest {
+	filterKey := fmt.Sprintf(FilterQueryParam, key)
+	r.filters[filterKey] = []string{value}
+	return r
+}
+
+// OrderBy query param sorts the results alphanumerically in ascending order based on the specified property.
+func (r ApiK8sVersionsDefaultGetRequest) OrderBy(orderBy string) ApiK8sVersionsDefaultGetRequest {
+	r.orderBy = &orderBy
+	return r
+}
 
 func (r ApiK8sVersionsDefaultGetRequest) Execute() (string, *APIResponse, error) {
 	return r.ApiService.K8sVersionsDefaultGetExecute(r)
@@ -2688,7 +2847,8 @@ func (r ApiK8sVersionsDefaultGetRequest) Execute() (string, *APIResponse, error)
 func (a *KubernetesApiService) K8sVersionsDefaultGet(ctx _context.Context) ApiK8sVersionsDefaultGetRequest {
 	return ApiK8sVersionsDefaultGetRequest{
 		ApiService: a,
-		ctx: ctx,
+		ctx:        ctx,
+		filters:    _neturl.Values{},
 	}
 }
 
@@ -2717,6 +2877,17 @@ func (a *KubernetesApiService) K8sVersionsDefaultGetExecute(r ApiK8sVersionsDefa
 	localVarQueryParams := _neturl.Values{}
 	localVarFormParams := _neturl.Values{}
 
+	if r.orderBy != nil {
+		localVarQueryParams.Add("orderBy", parameterToString(*r.orderBy, ""))
+	}
+	if len(r.filters) > 0 {
+		for k, v := range r.filters {
+			for _, iv := range v {
+				localVarQueryParams.Add(k, iv)
+			}
+		}
+	}
+
 	// to determine the Content-Type header
 	localVarHTTPContentTypes := []string{}
 
@@ -2755,12 +2926,12 @@ func (a *KubernetesApiService) K8sVersionsDefaultGetExecute(r ApiK8sVersionsDefa
 
 	localVarHTTPResponse, httpRequestTime, err := a.client.callAPI(req)
 
-	localVarAPIResponse := &APIResponse {
-		Response: localVarHTTPResponse,
-		Method: localVarHTTPMethod,
-		RequestURL: localVarPath,
+	localVarAPIResponse := &APIResponse{
+		Response:    localVarHTTPResponse,
+		Method:      localVarHTTPMethod,
+		RequestURL:  localVarPath,
 		RequestTime: httpRequestTime,
-		Operation: "K8sVersionsDefaultGet",
+		Operation:   "K8sVersionsDefaultGet",
 	}
 
 	if err != nil || localVarHTTPResponse == nil {
@@ -2777,16 +2948,16 @@ func (a *KubernetesApiService) K8sVersionsDefaultGetExecute(r ApiK8sVersionsDefa
 	if localVarHTTPResponse.StatusCode >= 300 {
 		newErr := GenericOpenAPIError{
 			statusCode: localVarHTTPResponse.StatusCode,
-			body:  localVarBody,
-			error: fmt.Sprintf("%s: %s", localVarHTTPResponse.Status, string(localVarBody)),
+			body:       localVarBody,
+			error:      fmt.Sprintf(FormatStringErr, localVarHTTPResponse.Status, string(localVarBody)),
 		}
-			var v Error
-			err = a.client.decode(&v, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
-			if err != nil {
-				newErr.error = err.Error()
-				return localVarReturnValue, localVarAPIResponse, newErr
-			}
-			newErr.model = v
+		var v Error
+		err = a.client.decode(&v, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
+		if err != nil {
+			newErr.error = err.Error()
+			return localVarReturnValue, localVarAPIResponse, newErr
+		}
+		newErr.model = v
 		return localVarReturnValue, localVarAPIResponse, newErr
 	}
 
@@ -2794,8 +2965,8 @@ func (a *KubernetesApiService) K8sVersionsDefaultGetExecute(r ApiK8sVersionsDefa
 	if err != nil {
 		newErr := GenericOpenAPIError{
 			statusCode: localVarHTTPResponse.StatusCode,
-			body:  localVarBody,
-			error: err.Error(),
+			body:       localVarBody,
+			error:      err.Error(),
 		}
 		return localVarReturnValue, localVarAPIResponse, newErr
 	}
@@ -2804,10 +2975,24 @@ func (a *KubernetesApiService) K8sVersionsDefaultGetExecute(r ApiK8sVersionsDefa
 }
 
 type ApiK8sVersionsGetRequest struct {
-	ctx _context.Context
+	ctx        _context.Context
 	ApiService *KubernetesApiService
+	filters    _neturl.Values
+	orderBy    *string
 }
 
+// Filters query parameters limit results to those containing a matching value for a specific property.
+func (r ApiK8sVersionsGetRequest) Filter(key string, value string) ApiK8sVersionsGetRequest {
+	filterKey := fmt.Sprintf(FilterQueryParam, key)
+	r.filters[filterKey] = []string{value}
+	return r
+}
+
+// OrderBy query param sorts the results alphanumerically in ascending order based on the specified property.
+func (r ApiK8sVersionsGetRequest) OrderBy(orderBy string) ApiK8sVersionsGetRequest {
+	r.orderBy = &orderBy
+	return r
+}
 
 func (r ApiK8sVersionsGetRequest) Execute() ([]string, *APIResponse, error) {
 	return r.ApiService.K8sVersionsGetExecute(r)
@@ -2822,7 +3007,8 @@ func (r ApiK8sVersionsGetRequest) Execute() ([]string, *APIResponse, error) {
 func (a *KubernetesApiService) K8sVersionsGet(ctx _context.Context) ApiK8sVersionsGetRequest {
 	return ApiK8sVersionsGetRequest{
 		ApiService: a,
-		ctx: ctx,
+		ctx:        ctx,
+		filters:    _neturl.Values{},
 	}
 }
 
@@ -2851,6 +3037,17 @@ func (a *KubernetesApiService) K8sVersionsGetExecute(r ApiK8sVersionsGetRequest)
 	localVarQueryParams := _neturl.Values{}
 	localVarFormParams := _neturl.Values{}
 
+	if r.orderBy != nil {
+		localVarQueryParams.Add("orderBy", parameterToString(*r.orderBy, ""))
+	}
+	if len(r.filters) > 0 {
+		for k, v := range r.filters {
+			for _, iv := range v {
+				localVarQueryParams.Add(k, iv)
+			}
+		}
+	}
+
 	// to determine the Content-Type header
 	localVarHTTPContentTypes := []string{}
 
@@ -2889,12 +3086,12 @@ func (a *KubernetesApiService) K8sVersionsGetExecute(r ApiK8sVersionsGetRequest)
 
 	localVarHTTPResponse, httpRequestTime, err := a.client.callAPI(req)
 
-	localVarAPIResponse := &APIResponse {
-		Response: localVarHTTPResponse,
-		Method: localVarHTTPMethod,
-		RequestURL: localVarPath,
+	localVarAPIResponse := &APIResponse{
+		Response:    localVarHTTPResponse,
+		Method:      localVarHTTPMethod,
+		RequestURL:  localVarPath,
 		RequestTime: httpRequestTime,
-		Operation: "K8sVersionsGet",
+		Operation:   "K8sVersionsGet",
 	}
 
 	if err != nil || localVarHTTPResponse == nil {
@@ -2911,16 +3108,16 @@ func (a *KubernetesApiService) K8sVersionsGetExecute(r ApiK8sVersionsGetRequest)
 	if localVarHTTPResponse.StatusCode >= 300 {
 		newErr := GenericOpenAPIError{
 			statusCode: localVarHTTPResponse.StatusCode,
-			body:  localVarBody,
-			error: fmt.Sprintf("%s: %s", localVarHTTPResponse.Status, string(localVarBody)),
+			body:       localVarBody,
+			error:      fmt.Sprintf(FormatStringErr, localVarHTTPResponse.Status, string(localVarBody)),
 		}
-			var v Error
-			err = a.client.decode(&v, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
-			if err != nil {
-				newErr.error = err.Error()
-				return localVarReturnValue, localVarAPIResponse, newErr
-			}
-			newErr.model = v
+		var v Error
+		err = a.client.decode(&v, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
+		if err != nil {
+			newErr.error = err.Error()
+			return localVarReturnValue, localVarAPIResponse, newErr
+		}
+		newErr.model = v
 		return localVarReturnValue, localVarAPIResponse, newErr
 	}
 
@@ -2928,8 +3125,8 @@ func (a *KubernetesApiService) K8sVersionsGetExecute(r ApiK8sVersionsGetRequest)
 	if err != nil {
 		newErr := GenericOpenAPIError{
 			statusCode: localVarHTTPResponse.StatusCode,
-			body:  localVarBody,
-			error: err.Error(),
+			body:       localVarBody,
+			error:      err.Error(),
 		}
 		return localVarReturnValue, localVarAPIResponse, newErr
 	}

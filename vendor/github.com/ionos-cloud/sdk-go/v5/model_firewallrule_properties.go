@@ -36,15 +36,12 @@ type FirewallruleProperties struct {
 	PortRangeEnd *int32 `json:"portRangeEnd,omitempty"`
 }
 
-
-
 // GetName returns the Name field value
 // If the value is explicit nil, the zero value for string will be returned
 func (o *FirewallruleProperties) GetName() *string {
 	if o == nil {
 		return nil
 	}
-
 
 	return o.Name
 
@@ -58,13 +55,11 @@ func (o *FirewallruleProperties) GetNameOk() (*string, bool) {
 		return nil, false
 	}
 
-
 	return o.Name, true
 }
 
 // SetName sets field value
 func (o *FirewallruleProperties) SetName(v string) {
-
 
 	o.Name = &v
 
@@ -79,14 +74,12 @@ func (o *FirewallruleProperties) HasName() bool {
 	return false
 }
 
-
 // GetProtocol returns the Protocol field value
 // If the value is explicit nil, the zero value for string will be returned
 func (o *FirewallruleProperties) GetProtocol() *string {
 	if o == nil {
 		return nil
 	}
-
 
 	return o.Protocol
 
@@ -100,13 +93,11 @@ func (o *FirewallruleProperties) GetProtocolOk() (*string, bool) {
 		return nil, false
 	}
 
-
 	return o.Protocol, true
 }
 
 // SetProtocol sets field value
 func (o *FirewallruleProperties) SetProtocol(v string) {
-
 
 	o.Protocol = &v
 
@@ -121,14 +112,12 @@ func (o *FirewallruleProperties) HasProtocol() bool {
 	return false
 }
 
-
 // GetSourceMac returns the SourceMac field value
 // If the value is explicit nil, the zero value for string will be returned
 func (o *FirewallruleProperties) GetSourceMac() *string {
 	if o == nil {
 		return nil
 	}
-
 
 	return o.SourceMac
 
@@ -142,13 +131,11 @@ func (o *FirewallruleProperties) GetSourceMacOk() (*string, bool) {
 		return nil, false
 	}
 
-
 	return o.SourceMac, true
 }
 
 // SetSourceMac sets field value
 func (o *FirewallruleProperties) SetSourceMac(v string) {
-
 
 	o.SourceMac = &v
 
@@ -163,14 +150,12 @@ func (o *FirewallruleProperties) HasSourceMac() bool {
 	return false
 }
 
-
 // GetSourceIp returns the SourceIp field value
 // If the value is explicit nil, the zero value for string will be returned
 func (o *FirewallruleProperties) GetSourceIp() *string {
 	if o == nil {
 		return nil
 	}
-
 
 	return o.SourceIp
 
@@ -184,13 +169,11 @@ func (o *FirewallruleProperties) GetSourceIpOk() (*string, bool) {
 		return nil, false
 	}
 
-
 	return o.SourceIp, true
 }
 
 // SetSourceIp sets field value
 func (o *FirewallruleProperties) SetSourceIp(v string) {
-
 
 	o.SourceIp = &v
 
@@ -205,14 +188,12 @@ func (o *FirewallruleProperties) HasSourceIp() bool {
 	return false
 }
 
-
 // GetTargetIp returns the TargetIp field value
 // If the value is explicit nil, the zero value for string will be returned
 func (o *FirewallruleProperties) GetTargetIp() *string {
 	if o == nil {
 		return nil
 	}
-
 
 	return o.TargetIp
 
@@ -226,13 +207,11 @@ func (o *FirewallruleProperties) GetTargetIpOk() (*string, bool) {
 		return nil, false
 	}
 
-
 	return o.TargetIp, true
 }
 
 // SetTargetIp sets field value
 func (o *FirewallruleProperties) SetTargetIp(v string) {
-
 
 	o.TargetIp = &v
 
@@ -247,14 +226,12 @@ func (o *FirewallruleProperties) HasTargetIp() bool {
 	return false
 }
 
-
 // GetIcmpCode returns the IcmpCode field value
 // If the value is explicit nil, the zero value for int32 will be returned
 func (o *FirewallruleProperties) GetIcmpCode() *int32 {
 	if o == nil {
 		return nil
 	}
-
 
 	return o.IcmpCode
 
@@ -268,13 +245,11 @@ func (o *FirewallruleProperties) GetIcmpCodeOk() (*int32, bool) {
 		return nil, false
 	}
 
-
 	return o.IcmpCode, true
 }
 
 // SetIcmpCode sets field value
 func (o *FirewallruleProperties) SetIcmpCode(v int32) {
-
 
 	o.IcmpCode = &v
 
@@ -289,14 +264,12 @@ func (o *FirewallruleProperties) HasIcmpCode() bool {
 	return false
 }
 
-
 // GetIcmpType returns the IcmpType field value
 // If the value is explicit nil, the zero value for int32 will be returned
 func (o *FirewallruleProperties) GetIcmpType() *int32 {
 	if o == nil {
 		return nil
 	}
-
 
 	return o.IcmpType
 
@@ -310,13 +283,11 @@ func (o *FirewallruleProperties) GetIcmpTypeOk() (*int32, bool) {
 		return nil, false
 	}
 
-
 	return o.IcmpType, true
 }
 
 // SetIcmpType sets field value
 func (o *FirewallruleProperties) SetIcmpType(v int32) {
-
 
 	o.IcmpType = &v
 
@@ -331,14 +302,12 @@ func (o *FirewallruleProperties) HasIcmpType() bool {
 	return false
 }
 
-
 // GetPortRangeStart returns the PortRangeStart field value
 // If the value is explicit nil, the zero value for int32 will be returned
 func (o *FirewallruleProperties) GetPortRangeStart() *int32 {
 	if o == nil {
 		return nil
 	}
-
 
 	return o.PortRangeStart
 
@@ -352,13 +321,11 @@ func (o *FirewallruleProperties) GetPortRangeStartOk() (*int32, bool) {
 		return nil, false
 	}
 
-
 	return o.PortRangeStart, true
 }
 
 // SetPortRangeStart sets field value
 func (o *FirewallruleProperties) SetPortRangeStart(v int32) {
-
 
 	o.PortRangeStart = &v
 
@@ -373,14 +340,12 @@ func (o *FirewallruleProperties) HasPortRangeStart() bool {
 	return false
 }
 
-
 // GetPortRangeEnd returns the PortRangeEnd field value
 // If the value is explicit nil, the zero value for int32 will be returned
 func (o *FirewallruleProperties) GetPortRangeEnd() *int32 {
 	if o == nil {
 		return nil
 	}
-
 
 	return o.PortRangeEnd
 
@@ -394,13 +359,11 @@ func (o *FirewallruleProperties) GetPortRangeEndOk() (*int32, bool) {
 		return nil, false
 	}
 
-
 	return o.PortRangeEnd, true
 }
 
 // SetPortRangeEnd sets field value
 func (o *FirewallruleProperties) SetPortRangeEnd(v int32) {
-
 
 	o.PortRangeEnd = &v
 
@@ -491,5 +454,3 @@ func (v *NullableFirewallruleProperties) UnmarshalJSON(src []byte) error {
 	v.isSet = true
 	return json.Unmarshal(src, &v.value)
 }
-
-

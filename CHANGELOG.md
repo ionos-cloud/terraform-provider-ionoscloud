@@ -5,7 +5,9 @@
   - made tests comprehensive
   - optimized test duration by including both match by id and by name in the same test
   - removed duplicated code from import, data_source, resource and tests files
-  
+- **new features**: import for `nic`, data_source for `nic`
+- **dependency update**: updated sdk-go to v5.1.9
+
 ## 5.2.18
 
 - **bug fixes**: fixed datacenter datasource

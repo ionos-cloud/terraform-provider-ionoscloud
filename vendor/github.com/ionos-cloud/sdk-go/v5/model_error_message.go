@@ -22,15 +22,12 @@ type ErrorMessage struct {
 	Message *string `json:"message,omitempty"`
 }
 
-
-
 // GetErrorCode returns the ErrorCode field value
 // If the value is explicit nil, the zero value for string will be returned
 func (o *ErrorMessage) GetErrorCode() *string {
 	if o == nil {
 		return nil
 	}
-
 
 	return o.ErrorCode
 
@@ -44,13 +41,11 @@ func (o *ErrorMessage) GetErrorCodeOk() (*string, bool) {
 		return nil, false
 	}
 
-
 	return o.ErrorCode, true
 }
 
 // SetErrorCode sets field value
 func (o *ErrorMessage) SetErrorCode(v string) {
-
 
 	o.ErrorCode = &v
 
@@ -65,14 +60,12 @@ func (o *ErrorMessage) HasErrorCode() bool {
 	return false
 }
 
-
 // GetMessage returns the Message field value
 // If the value is explicit nil, the zero value for string will be returned
 func (o *ErrorMessage) GetMessage() *string {
 	if o == nil {
 		return nil
 	}
-
 
 	return o.Message
 
@@ -86,13 +79,11 @@ func (o *ErrorMessage) GetMessageOk() (*string, bool) {
 		return nil, false
 	}
 
-
 	return o.Message, true
 }
 
 // SetMessage sets field value
 func (o *ErrorMessage) SetMessage(v string) {
-
 
 	o.Message = &v
 
@@ -155,5 +146,3 @@ func (v *NullableErrorMessage) UnmarshalJSON(src []byte) error {
 	v.isSet = true
 	return json.Unmarshal(src, &v.value)
 }
-
-

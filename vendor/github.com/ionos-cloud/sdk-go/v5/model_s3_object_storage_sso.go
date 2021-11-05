@@ -20,15 +20,12 @@ type S3ObjectStorageSSO struct {
 	SsoUrl *string `json:"ssoUrl,omitempty"`
 }
 
-
-
 // GetSsoUrl returns the SsoUrl field value
 // If the value is explicit nil, the zero value for string will be returned
 func (o *S3ObjectStorageSSO) GetSsoUrl() *string {
 	if o == nil {
 		return nil
 	}
-
 
 	return o.SsoUrl
 
@@ -42,13 +39,11 @@ func (o *S3ObjectStorageSSO) GetSsoUrlOk() (*string, bool) {
 		return nil, false
 	}
 
-
 	return o.SsoUrl, true
 }
 
 // SetSsoUrl sets field value
 func (o *S3ObjectStorageSSO) SetSsoUrl(v string) {
-
 
 	o.SsoUrl = &v
 
@@ -107,5 +102,3 @@ func (v *NullableS3ObjectStorageSSO) UnmarshalJSON(src []byte) error {
 	v.isSet = true
 	return json.Unmarshal(src, &v.value)
 }
-
-

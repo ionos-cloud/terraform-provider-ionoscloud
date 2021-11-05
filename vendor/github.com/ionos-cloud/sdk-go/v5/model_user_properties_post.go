@@ -34,15 +34,12 @@ type UserPropertiesPost struct {
 	Active *bool `json:"active,omitempty"`
 }
 
-
-
 // GetFirstname returns the Firstname field value
 // If the value is explicit nil, the zero value for string will be returned
 func (o *UserPropertiesPost) GetFirstname() *string {
 	if o == nil {
 		return nil
 	}
-
 
 	return o.Firstname
 
@@ -56,13 +53,11 @@ func (o *UserPropertiesPost) GetFirstnameOk() (*string, bool) {
 		return nil, false
 	}
 
-
 	return o.Firstname, true
 }
 
 // SetFirstname sets field value
 func (o *UserPropertiesPost) SetFirstname(v string) {
-
 
 	o.Firstname = &v
 
@@ -77,14 +72,12 @@ func (o *UserPropertiesPost) HasFirstname() bool {
 	return false
 }
 
-
 // GetLastname returns the Lastname field value
 // If the value is explicit nil, the zero value for string will be returned
 func (o *UserPropertiesPost) GetLastname() *string {
 	if o == nil {
 		return nil
 	}
-
 
 	return o.Lastname
 
@@ -98,13 +91,11 @@ func (o *UserPropertiesPost) GetLastnameOk() (*string, bool) {
 		return nil, false
 	}
 
-
 	return o.Lastname, true
 }
 
 // SetLastname sets field value
 func (o *UserPropertiesPost) SetLastname(v string) {
-
 
 	o.Lastname = &v
 
@@ -119,14 +110,12 @@ func (o *UserPropertiesPost) HasLastname() bool {
 	return false
 }
 
-
 // GetEmail returns the Email field value
 // If the value is explicit nil, the zero value for string will be returned
 func (o *UserPropertiesPost) GetEmail() *string {
 	if o == nil {
 		return nil
 	}
-
 
 	return o.Email
 
@@ -140,13 +129,11 @@ func (o *UserPropertiesPost) GetEmailOk() (*string, bool) {
 		return nil, false
 	}
 
-
 	return o.Email, true
 }
 
 // SetEmail sets field value
 func (o *UserPropertiesPost) SetEmail(v string) {
-
 
 	o.Email = &v
 
@@ -161,14 +148,12 @@ func (o *UserPropertiesPost) HasEmail() bool {
 	return false
 }
 
-
 // GetAdministrator returns the Administrator field value
 // If the value is explicit nil, the zero value for bool will be returned
 func (o *UserPropertiesPost) GetAdministrator() *bool {
 	if o == nil {
 		return nil
 	}
-
 
 	return o.Administrator
 
@@ -182,13 +167,11 @@ func (o *UserPropertiesPost) GetAdministratorOk() (*bool, bool) {
 		return nil, false
 	}
 
-
 	return o.Administrator, true
 }
 
 // SetAdministrator sets field value
 func (o *UserPropertiesPost) SetAdministrator(v bool) {
-
 
 	o.Administrator = &v
 
@@ -203,14 +186,12 @@ func (o *UserPropertiesPost) HasAdministrator() bool {
 	return false
 }
 
-
 // GetForceSecAuth returns the ForceSecAuth field value
 // If the value is explicit nil, the zero value for bool will be returned
 func (o *UserPropertiesPost) GetForceSecAuth() *bool {
 	if o == nil {
 		return nil
 	}
-
 
 	return o.ForceSecAuth
 
@@ -224,13 +205,11 @@ func (o *UserPropertiesPost) GetForceSecAuthOk() (*bool, bool) {
 		return nil, false
 	}
 
-
 	return o.ForceSecAuth, true
 }
 
 // SetForceSecAuth sets field value
 func (o *UserPropertiesPost) SetForceSecAuth(v bool) {
-
 
 	o.ForceSecAuth = &v
 
@@ -245,14 +224,12 @@ func (o *UserPropertiesPost) HasForceSecAuth() bool {
 	return false
 }
 
-
 // GetSecAuthActive returns the SecAuthActive field value
 // If the value is explicit nil, the zero value for bool will be returned
 func (o *UserPropertiesPost) GetSecAuthActive() *bool {
 	if o == nil {
 		return nil
 	}
-
 
 	return o.SecAuthActive
 
@@ -266,13 +243,11 @@ func (o *UserPropertiesPost) GetSecAuthActiveOk() (*bool, bool) {
 		return nil, false
 	}
 
-
 	return o.SecAuthActive, true
 }
 
 // SetSecAuthActive sets field value
 func (o *UserPropertiesPost) SetSecAuthActive(v bool) {
-
 
 	o.SecAuthActive = &v
 
@@ -287,14 +262,12 @@ func (o *UserPropertiesPost) HasSecAuthActive() bool {
 	return false
 }
 
-
 // GetPassword returns the Password field value
 // If the value is explicit nil, the zero value for string will be returned
 func (o *UserPropertiesPost) GetPassword() *string {
 	if o == nil {
 		return nil
 	}
-
 
 	return o.Password
 
@@ -308,13 +281,11 @@ func (o *UserPropertiesPost) GetPasswordOk() (*string, bool) {
 		return nil, false
 	}
 
-
 	return o.Password, true
 }
 
 // SetPassword sets field value
 func (o *UserPropertiesPost) SetPassword(v string) {
-
 
 	o.Password = &v
 
@@ -329,14 +300,12 @@ func (o *UserPropertiesPost) HasPassword() bool {
 	return false
 }
 
-
 // GetActive returns the Active field value
 // If the value is explicit nil, the zero value for bool will be returned
 func (o *UserPropertiesPost) GetActive() *bool {
 	if o == nil {
 		return nil
 	}
-
 
 	return o.Active
 
@@ -350,13 +319,11 @@ func (o *UserPropertiesPost) GetActiveOk() (*bool, bool) {
 		return nil, false
 	}
 
-
 	return o.Active, true
 }
 
 // SetActive sets field value
 func (o *UserPropertiesPost) SetActive(v bool) {
-
 
 	o.Active = &v
 
@@ -443,5 +410,3 @@ func (v *NullableUserPropertiesPost) UnmarshalJSON(src []byte) error {
 	v.isSet = true
 	return json.Unmarshal(src, &v.value)
 }
-
-

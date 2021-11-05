@@ -21,11 +21,9 @@ type GroupShare struct {
 	// resource as generic type
 	Type *Type `json:"type,omitempty"`
 	// URL to the object representation (absolute path)
-	Href *string `json:"href,omitempty"`
+	Href       *string               `json:"href,omitempty"`
 	Properties *GroupShareProperties `json:"properties"`
 }
-
-
 
 // GetId returns the Id field value
 // If the value is explicit nil, the zero value for string will be returned
@@ -33,7 +31,6 @@ func (o *GroupShare) GetId() *string {
 	if o == nil {
 		return nil
 	}
-
 
 	return o.Id
 
@@ -47,13 +44,11 @@ func (o *GroupShare) GetIdOk() (*string, bool) {
 		return nil, false
 	}
 
-
 	return o.Id, true
 }
 
 // SetId sets field value
 func (o *GroupShare) SetId(v string) {
-
 
 	o.Id = &v
 
@@ -68,14 +63,12 @@ func (o *GroupShare) HasId() bool {
 	return false
 }
 
-
 // GetType returns the Type field value
 // If the value is explicit nil, the zero value for Type will be returned
 func (o *GroupShare) GetType() *Type {
 	if o == nil {
 		return nil
 	}
-
 
 	return o.Type
 
@@ -89,13 +82,11 @@ func (o *GroupShare) GetTypeOk() (*Type, bool) {
 		return nil, false
 	}
 
-
 	return o.Type, true
 }
 
 // SetType sets field value
 func (o *GroupShare) SetType(v Type) {
-
 
 	o.Type = &v
 
@@ -110,14 +101,12 @@ func (o *GroupShare) HasType() bool {
 	return false
 }
 
-
 // GetHref returns the Href field value
 // If the value is explicit nil, the zero value for string will be returned
 func (o *GroupShare) GetHref() *string {
 	if o == nil {
 		return nil
 	}
-
 
 	return o.Href
 
@@ -131,13 +120,11 @@ func (o *GroupShare) GetHrefOk() (*string, bool) {
 		return nil, false
 	}
 
-
 	return o.Href, true
 }
 
 // SetHref sets field value
 func (o *GroupShare) SetHref(v string) {
-
 
 	o.Href = &v
 
@@ -152,14 +139,12 @@ func (o *GroupShare) HasHref() bool {
 	return false
 }
 
-
 // GetProperties returns the Properties field value
 // If the value is explicit nil, the zero value for GroupShareProperties will be returned
 func (o *GroupShare) GetProperties() *GroupShareProperties {
 	if o == nil {
 		return nil
 	}
-
 
 	return o.Properties
 
@@ -173,13 +158,11 @@ func (o *GroupShare) GetPropertiesOk() (*GroupShareProperties, bool) {
 		return nil, false
 	}
 
-
 	return o.Properties, true
 }
 
 // SetProperties sets field value
 func (o *GroupShare) SetProperties(v GroupShareProperties) {
-
 
 	o.Properties = &v
 
@@ -250,5 +233,3 @@ func (v *NullableGroupShare) UnmarshalJSON(src []byte) error {
 	v.isSet = true
 	return json.Unmarshal(src, &v.value)
 }
-
-

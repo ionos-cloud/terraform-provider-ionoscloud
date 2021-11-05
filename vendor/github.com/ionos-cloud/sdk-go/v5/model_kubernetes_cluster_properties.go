@@ -19,7 +19,7 @@ type KubernetesClusterProperties struct {
 	// A Kubernetes Cluster Name. Valid Kubernetes Cluster name must be 63 characters or less and must be empty or begin and end with an alphanumeric character ([a-z0-9A-Z]) with dashes (-), underscores (_), dots (.), and alphanumerics between.
 	Name *string `json:"name"`
 	// The kubernetes version in which a cluster is running. This imposes restrictions on what kubernetes versions can be run in a cluster's nodepools. Additionally, not all kubernetes versions are viable upgrade targets for all prior versions.
-	K8sVersion *string `json:"k8sVersion,omitempty"`
+	K8sVersion        *string                      `json:"k8sVersion,omitempty"`
 	MaintenanceWindow *KubernetesMaintenanceWindow `json:"maintenanceWindow,omitempty"`
 	// List of available versions for upgrading the cluster
 	AvailableUpgradeVersions *[]string `json:"availableUpgradeVersions,omitempty"`
@@ -31,15 +31,12 @@ type KubernetesClusterProperties struct {
 	S3Buckets *[]S3Bucket `json:"s3Buckets,omitempty"`
 }
 
-
-
 // GetName returns the Name field value
 // If the value is explicit nil, the zero value for string will be returned
 func (o *KubernetesClusterProperties) GetName() *string {
 	if o == nil {
 		return nil
 	}
-
 
 	return o.Name
 
@@ -53,13 +50,11 @@ func (o *KubernetesClusterProperties) GetNameOk() (*string, bool) {
 		return nil, false
 	}
 
-
 	return o.Name, true
 }
 
 // SetName sets field value
 func (o *KubernetesClusterProperties) SetName(v string) {
-
 
 	o.Name = &v
 
@@ -74,14 +69,12 @@ func (o *KubernetesClusterProperties) HasName() bool {
 	return false
 }
 
-
 // GetK8sVersion returns the K8sVersion field value
 // If the value is explicit nil, the zero value for string will be returned
 func (o *KubernetesClusterProperties) GetK8sVersion() *string {
 	if o == nil {
 		return nil
 	}
-
 
 	return o.K8sVersion
 
@@ -95,13 +88,11 @@ func (o *KubernetesClusterProperties) GetK8sVersionOk() (*string, bool) {
 		return nil, false
 	}
 
-
 	return o.K8sVersion, true
 }
 
 // SetK8sVersion sets field value
 func (o *KubernetesClusterProperties) SetK8sVersion(v string) {
-
 
 	o.K8sVersion = &v
 
@@ -116,14 +107,12 @@ func (o *KubernetesClusterProperties) HasK8sVersion() bool {
 	return false
 }
 
-
 // GetMaintenanceWindow returns the MaintenanceWindow field value
 // If the value is explicit nil, the zero value for KubernetesMaintenanceWindow will be returned
 func (o *KubernetesClusterProperties) GetMaintenanceWindow() *KubernetesMaintenanceWindow {
 	if o == nil {
 		return nil
 	}
-
 
 	return o.MaintenanceWindow
 
@@ -137,13 +126,11 @@ func (o *KubernetesClusterProperties) GetMaintenanceWindowOk() (*KubernetesMaint
 		return nil, false
 	}
 
-
 	return o.MaintenanceWindow, true
 }
 
 // SetMaintenanceWindow sets field value
 func (o *KubernetesClusterProperties) SetMaintenanceWindow(v KubernetesMaintenanceWindow) {
-
 
 	o.MaintenanceWindow = &v
 
@@ -158,14 +145,12 @@ func (o *KubernetesClusterProperties) HasMaintenanceWindow() bool {
 	return false
 }
 
-
 // GetAvailableUpgradeVersions returns the AvailableUpgradeVersions field value
 // If the value is explicit nil, the zero value for []string will be returned
 func (o *KubernetesClusterProperties) GetAvailableUpgradeVersions() *[]string {
 	if o == nil {
 		return nil
 	}
-
 
 	return o.AvailableUpgradeVersions
 
@@ -179,13 +164,11 @@ func (o *KubernetesClusterProperties) GetAvailableUpgradeVersionsOk() (*[]string
 		return nil, false
 	}
 
-
 	return o.AvailableUpgradeVersions, true
 }
 
 // SetAvailableUpgradeVersions sets field value
 func (o *KubernetesClusterProperties) SetAvailableUpgradeVersions(v []string) {
-
 
 	o.AvailableUpgradeVersions = &v
 
@@ -200,14 +183,12 @@ func (o *KubernetesClusterProperties) HasAvailableUpgradeVersions() bool {
 	return false
 }
 
-
 // GetViableNodePoolVersions returns the ViableNodePoolVersions field value
 // If the value is explicit nil, the zero value for []string will be returned
 func (o *KubernetesClusterProperties) GetViableNodePoolVersions() *[]string {
 	if o == nil {
 		return nil
 	}
-
 
 	return o.ViableNodePoolVersions
 
@@ -221,13 +202,11 @@ func (o *KubernetesClusterProperties) GetViableNodePoolVersionsOk() (*[]string, 
 		return nil, false
 	}
 
-
 	return o.ViableNodePoolVersions, true
 }
 
 // SetViableNodePoolVersions sets field value
 func (o *KubernetesClusterProperties) SetViableNodePoolVersions(v []string) {
-
 
 	o.ViableNodePoolVersions = &v
 
@@ -242,14 +221,12 @@ func (o *KubernetesClusterProperties) HasViableNodePoolVersions() bool {
 	return false
 }
 
-
 // GetApiSubnetAllowList returns the ApiSubnetAllowList field value
 // If the value is explicit nil, the zero value for []string will be returned
 func (o *KubernetesClusterProperties) GetApiSubnetAllowList() *[]string {
 	if o == nil {
 		return nil
 	}
-
 
 	return o.ApiSubnetAllowList
 
@@ -263,13 +240,11 @@ func (o *KubernetesClusterProperties) GetApiSubnetAllowListOk() (*[]string, bool
 		return nil, false
 	}
 
-
 	return o.ApiSubnetAllowList, true
 }
 
 // SetApiSubnetAllowList sets field value
 func (o *KubernetesClusterProperties) SetApiSubnetAllowList(v []string) {
-
 
 	o.ApiSubnetAllowList = &v
 
@@ -284,14 +259,12 @@ func (o *KubernetesClusterProperties) HasApiSubnetAllowList() bool {
 	return false
 }
 
-
 // GetS3Buckets returns the S3Buckets field value
 // If the value is explicit nil, the zero value for []S3Bucket will be returned
 func (o *KubernetesClusterProperties) GetS3Buckets() *[]S3Bucket {
 	if o == nil {
 		return nil
 	}
-
 
 	return o.S3Buckets
 
@@ -305,13 +278,11 @@ func (o *KubernetesClusterProperties) GetS3BucketsOk() (*[]S3Bucket, bool) {
 		return nil, false
 	}
 
-
 	return o.S3Buckets, true
 }
 
 // SetS3Buckets sets field value
 func (o *KubernetesClusterProperties) SetS3Buckets(v []S3Bucket) {
-
 
 	o.S3Buckets = &v
 
@@ -394,5 +365,3 @@ func (v *NullableKubernetesClusterProperties) UnmarshalJSON(src []byte) error {
 	v.isSet = true
 	return json.Unmarshal(src, &v.value)
 }
-
-

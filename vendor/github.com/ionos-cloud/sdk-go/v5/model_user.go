@@ -21,13 +21,11 @@ type User struct {
 	// The type of object that has been created
 	Type *Type `json:"type,omitempty"`
 	// URL to the object representation (absolute path)
-	Href *string `json:"href,omitempty"`
-	Metadata *UserMetadata `json:"metadata,omitempty"`
+	Href       *string         `json:"href,omitempty"`
+	Metadata   *UserMetadata   `json:"metadata,omitempty"`
 	Properties *UserProperties `json:"properties"`
-	Entities *UsersEntities `json:"entities,omitempty"`
+	Entities   *UsersEntities  `json:"entities,omitempty"`
 }
-
-
 
 // GetId returns the Id field value
 // If the value is explicit nil, the zero value for string will be returned
@@ -35,7 +33,6 @@ func (o *User) GetId() *string {
 	if o == nil {
 		return nil
 	}
-
 
 	return o.Id
 
@@ -49,13 +46,11 @@ func (o *User) GetIdOk() (*string, bool) {
 		return nil, false
 	}
 
-
 	return o.Id, true
 }
 
 // SetId sets field value
 func (o *User) SetId(v string) {
-
 
 	o.Id = &v
 
@@ -70,14 +65,12 @@ func (o *User) HasId() bool {
 	return false
 }
 
-
 // GetType returns the Type field value
 // If the value is explicit nil, the zero value for Type will be returned
 func (o *User) GetType() *Type {
 	if o == nil {
 		return nil
 	}
-
 
 	return o.Type
 
@@ -91,13 +84,11 @@ func (o *User) GetTypeOk() (*Type, bool) {
 		return nil, false
 	}
 
-
 	return o.Type, true
 }
 
 // SetType sets field value
 func (o *User) SetType(v Type) {
-
 
 	o.Type = &v
 
@@ -112,14 +103,12 @@ func (o *User) HasType() bool {
 	return false
 }
 
-
 // GetHref returns the Href field value
 // If the value is explicit nil, the zero value for string will be returned
 func (o *User) GetHref() *string {
 	if o == nil {
 		return nil
 	}
-
 
 	return o.Href
 
@@ -133,13 +122,11 @@ func (o *User) GetHrefOk() (*string, bool) {
 		return nil, false
 	}
 
-
 	return o.Href, true
 }
 
 // SetHref sets field value
 func (o *User) SetHref(v string) {
-
 
 	o.Href = &v
 
@@ -154,14 +141,12 @@ func (o *User) HasHref() bool {
 	return false
 }
 
-
 // GetMetadata returns the Metadata field value
 // If the value is explicit nil, the zero value for UserMetadata will be returned
 func (o *User) GetMetadata() *UserMetadata {
 	if o == nil {
 		return nil
 	}
-
 
 	return o.Metadata
 
@@ -175,13 +160,11 @@ func (o *User) GetMetadataOk() (*UserMetadata, bool) {
 		return nil, false
 	}
 
-
 	return o.Metadata, true
 }
 
 // SetMetadata sets field value
 func (o *User) SetMetadata(v UserMetadata) {
-
 
 	o.Metadata = &v
 
@@ -196,14 +179,12 @@ func (o *User) HasMetadata() bool {
 	return false
 }
 
-
 // GetProperties returns the Properties field value
 // If the value is explicit nil, the zero value for UserProperties will be returned
 func (o *User) GetProperties() *UserProperties {
 	if o == nil {
 		return nil
 	}
-
 
 	return o.Properties
 
@@ -217,13 +198,11 @@ func (o *User) GetPropertiesOk() (*UserProperties, bool) {
 		return nil, false
 	}
 
-
 	return o.Properties, true
 }
 
 // SetProperties sets field value
 func (o *User) SetProperties(v UserProperties) {
-
 
 	o.Properties = &v
 
@@ -238,14 +217,12 @@ func (o *User) HasProperties() bool {
 	return false
 }
 
-
 // GetEntities returns the Entities field value
 // If the value is explicit nil, the zero value for UsersEntities will be returned
 func (o *User) GetEntities() *UsersEntities {
 	if o == nil {
 		return nil
 	}
-
 
 	return o.Entities
 
@@ -259,13 +236,11 @@ func (o *User) GetEntitiesOk() (*UsersEntities, bool) {
 		return nil, false
 	}
 
-
 	return o.Entities, true
 }
 
 // SetEntities sets field value
 func (o *User) SetEntities(v UsersEntities) {
-
 
 	o.Entities = &v
 
@@ -344,5 +319,3 @@ func (v *NullableUser) UnmarshalJSON(src []byte) error {
 	v.isSet = true
 	return json.Unmarshal(src, &v.value)
 }
-
-

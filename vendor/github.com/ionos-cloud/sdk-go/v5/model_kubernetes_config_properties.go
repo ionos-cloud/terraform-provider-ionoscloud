@@ -20,15 +20,12 @@ type KubernetesConfigProperties struct {
 	Kubeconfig *string `json:"kubeconfig,omitempty"`
 }
 
-
-
 // GetKubeconfig returns the Kubeconfig field value
 // If the value is explicit nil, the zero value for string will be returned
 func (o *KubernetesConfigProperties) GetKubeconfig() *string {
 	if o == nil {
 		return nil
 	}
-
 
 	return o.Kubeconfig
 
@@ -42,13 +39,11 @@ func (o *KubernetesConfigProperties) GetKubeconfigOk() (*string, bool) {
 		return nil, false
 	}
 
-
 	return o.Kubeconfig, true
 }
 
 // SetKubeconfig sets field value
 func (o *KubernetesConfigProperties) SetKubeconfig(v string) {
-
 
 	o.Kubeconfig = &v
 
@@ -107,5 +102,3 @@ func (v *NullableKubernetesConfigProperties) UnmarshalJSON(src []byte) error {
 	v.isSet = true
 	return json.Unmarshal(src, &v.value)
 }
-
-

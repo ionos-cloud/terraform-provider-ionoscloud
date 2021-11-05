@@ -19,15 +19,12 @@ type LoadbalancerEntities struct {
 	Balancednics *BalancedNics `json:"balancednics,omitempty"`
 }
 
-
-
 // GetBalancednics returns the Balancednics field value
 // If the value is explicit nil, the zero value for BalancedNics will be returned
 func (o *LoadbalancerEntities) GetBalancednics() *BalancedNics {
 	if o == nil {
 		return nil
 	}
-
 
 	return o.Balancednics
 
@@ -41,13 +38,11 @@ func (o *LoadbalancerEntities) GetBalancednicsOk() (*BalancedNics, bool) {
 		return nil, false
 	}
 
-
 	return o.Balancednics, true
 }
 
 // SetBalancednics sets field value
 func (o *LoadbalancerEntities) SetBalancednics(v BalancedNics) {
-
 
 	o.Balancednics = &v
 
@@ -106,5 +101,3 @@ func (v *NullableLoadbalancerEntities) UnmarshalJSON(src []byte) error {
 	v.isSet = true
 	return json.Unmarshal(src, &v.value)
 }
-
-

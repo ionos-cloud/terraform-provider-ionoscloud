@@ -28,7 +28,7 @@ type VolumeProperties struct {
 	Image *string `json:"image,omitempty"`
 	// Initial password to be set for installed OS. Works with public images only. Not modifiable, forbidden in update requests. Password rules allows all characters from a-z, A-Z, 0-9
 	ImagePassword *string `json:"imagePassword,omitempty"`
-	ImageAlias *string `json:"imageAlias,omitempty"`
+	ImageAlias    *string `json:"imageAlias,omitempty"`
 	// Public SSH keys are set on the image as authorized keys for appropriate SSH login to the instance using the corresponding private key. This field may only be set in creation requests. When reading, it always returns null. SSH keys are only supported if a public Linux image is used for the volume creation.
 	SshKeys *[]string `json:"sshKeys,omitempty"`
 	// The bus type of the volume. Default is VIRTIO
@@ -55,15 +55,12 @@ type VolumeProperties struct {
 	UserData *string `json:"userData,omitempty"`
 }
 
-
-
 // GetName returns the Name field value
 // If the value is explicit nil, the zero value for string will be returned
 func (o *VolumeProperties) GetName() *string {
 	if o == nil {
 		return nil
 	}
-
 
 	return o.Name
 
@@ -77,13 +74,11 @@ func (o *VolumeProperties) GetNameOk() (*string, bool) {
 		return nil, false
 	}
 
-
 	return o.Name, true
 }
 
 // SetName sets field value
 func (o *VolumeProperties) SetName(v string) {
-
 
 	o.Name = &v
 
@@ -98,14 +93,12 @@ func (o *VolumeProperties) HasName() bool {
 	return false
 }
 
-
 // GetType returns the Type field value
 // If the value is explicit nil, the zero value for string will be returned
 func (o *VolumeProperties) GetType() *string {
 	if o == nil {
 		return nil
 	}
-
 
 	return o.Type
 
@@ -119,13 +112,11 @@ func (o *VolumeProperties) GetTypeOk() (*string, bool) {
 		return nil, false
 	}
 
-
 	return o.Type, true
 }
 
 // SetType sets field value
 func (o *VolumeProperties) SetType(v string) {
-
 
 	o.Type = &v
 
@@ -140,14 +131,12 @@ func (o *VolumeProperties) HasType() bool {
 	return false
 }
 
-
 // GetSize returns the Size field value
 // If the value is explicit nil, the zero value for float32 will be returned
 func (o *VolumeProperties) GetSize() *float32 {
 	if o == nil {
 		return nil
 	}
-
 
 	return o.Size
 
@@ -161,13 +150,11 @@ func (o *VolumeProperties) GetSizeOk() (*float32, bool) {
 		return nil, false
 	}
 
-
 	return o.Size, true
 }
 
 // SetSize sets field value
 func (o *VolumeProperties) SetSize(v float32) {
-
 
 	o.Size = &v
 
@@ -182,14 +169,12 @@ func (o *VolumeProperties) HasSize() bool {
 	return false
 }
 
-
 // GetAvailabilityZone returns the AvailabilityZone field value
 // If the value is explicit nil, the zero value for string will be returned
 func (o *VolumeProperties) GetAvailabilityZone() *string {
 	if o == nil {
 		return nil
 	}
-
 
 	return o.AvailabilityZone
 
@@ -203,13 +188,11 @@ func (o *VolumeProperties) GetAvailabilityZoneOk() (*string, bool) {
 		return nil, false
 	}
 
-
 	return o.AvailabilityZone, true
 }
 
 // SetAvailabilityZone sets field value
 func (o *VolumeProperties) SetAvailabilityZone(v string) {
-
 
 	o.AvailabilityZone = &v
 
@@ -224,14 +207,12 @@ func (o *VolumeProperties) HasAvailabilityZone() bool {
 	return false
 }
 
-
 // GetImage returns the Image field value
 // If the value is explicit nil, the zero value for string will be returned
 func (o *VolumeProperties) GetImage() *string {
 	if o == nil {
 		return nil
 	}
-
 
 	return o.Image
 
@@ -245,13 +226,11 @@ func (o *VolumeProperties) GetImageOk() (*string, bool) {
 		return nil, false
 	}
 
-
 	return o.Image, true
 }
 
 // SetImage sets field value
 func (o *VolumeProperties) SetImage(v string) {
-
 
 	o.Image = &v
 
@@ -266,14 +245,12 @@ func (o *VolumeProperties) HasImage() bool {
 	return false
 }
 
-
 // GetImagePassword returns the ImagePassword field value
 // If the value is explicit nil, the zero value for string will be returned
 func (o *VolumeProperties) GetImagePassword() *string {
 	if o == nil {
 		return nil
 	}
-
 
 	return o.ImagePassword
 
@@ -287,13 +264,11 @@ func (o *VolumeProperties) GetImagePasswordOk() (*string, bool) {
 		return nil, false
 	}
 
-
 	return o.ImagePassword, true
 }
 
 // SetImagePassword sets field value
 func (o *VolumeProperties) SetImagePassword(v string) {
-
 
 	o.ImagePassword = &v
 
@@ -308,14 +283,12 @@ func (o *VolumeProperties) HasImagePassword() bool {
 	return false
 }
 
-
 // GetImageAlias returns the ImageAlias field value
 // If the value is explicit nil, the zero value for string will be returned
 func (o *VolumeProperties) GetImageAlias() *string {
 	if o == nil {
 		return nil
 	}
-
 
 	return o.ImageAlias
 
@@ -329,13 +302,11 @@ func (o *VolumeProperties) GetImageAliasOk() (*string, bool) {
 		return nil, false
 	}
 
-
 	return o.ImageAlias, true
 }
 
 // SetImageAlias sets field value
 func (o *VolumeProperties) SetImageAlias(v string) {
-
 
 	o.ImageAlias = &v
 
@@ -350,14 +321,12 @@ func (o *VolumeProperties) HasImageAlias() bool {
 	return false
 }
 
-
 // GetSshKeys returns the SshKeys field value
 // If the value is explicit nil, the zero value for []string will be returned
 func (o *VolumeProperties) GetSshKeys() *[]string {
 	if o == nil {
 		return nil
 	}
-
 
 	return o.SshKeys
 
@@ -371,13 +340,11 @@ func (o *VolumeProperties) GetSshKeysOk() (*[]string, bool) {
 		return nil, false
 	}
 
-
 	return o.SshKeys, true
 }
 
 // SetSshKeys sets field value
 func (o *VolumeProperties) SetSshKeys(v []string) {
-
 
 	o.SshKeys = &v
 
@@ -392,14 +359,12 @@ func (o *VolumeProperties) HasSshKeys() bool {
 	return false
 }
 
-
 // GetBus returns the Bus field value
 // If the value is explicit nil, the zero value for string will be returned
 func (o *VolumeProperties) GetBus() *string {
 	if o == nil {
 		return nil
 	}
-
 
 	return o.Bus
 
@@ -413,13 +378,11 @@ func (o *VolumeProperties) GetBusOk() (*string, bool) {
 		return nil, false
 	}
 
-
 	return o.Bus, true
 }
 
 // SetBus sets field value
 func (o *VolumeProperties) SetBus(v string) {
-
 
 	o.Bus = &v
 
@@ -434,14 +397,12 @@ func (o *VolumeProperties) HasBus() bool {
 	return false
 }
 
-
 // GetLicenceType returns the LicenceType field value
 // If the value is explicit nil, the zero value for string will be returned
 func (o *VolumeProperties) GetLicenceType() *string {
 	if o == nil {
 		return nil
 	}
-
 
 	return o.LicenceType
 
@@ -455,13 +416,11 @@ func (o *VolumeProperties) GetLicenceTypeOk() (*string, bool) {
 		return nil, false
 	}
 
-
 	return o.LicenceType, true
 }
 
 // SetLicenceType sets field value
 func (o *VolumeProperties) SetLicenceType(v string) {
-
 
 	o.LicenceType = &v
 
@@ -476,14 +435,12 @@ func (o *VolumeProperties) HasLicenceType() bool {
 	return false
 }
 
-
 // GetCpuHotPlug returns the CpuHotPlug field value
 // If the value is explicit nil, the zero value for bool will be returned
 func (o *VolumeProperties) GetCpuHotPlug() *bool {
 	if o == nil {
 		return nil
 	}
-
 
 	return o.CpuHotPlug
 
@@ -497,13 +454,11 @@ func (o *VolumeProperties) GetCpuHotPlugOk() (*bool, bool) {
 		return nil, false
 	}
 
-
 	return o.CpuHotPlug, true
 }
 
 // SetCpuHotPlug sets field value
 func (o *VolumeProperties) SetCpuHotPlug(v bool) {
-
 
 	o.CpuHotPlug = &v
 
@@ -518,14 +473,12 @@ func (o *VolumeProperties) HasCpuHotPlug() bool {
 	return false
 }
 
-
 // GetRamHotPlug returns the RamHotPlug field value
 // If the value is explicit nil, the zero value for bool will be returned
 func (o *VolumeProperties) GetRamHotPlug() *bool {
 	if o == nil {
 		return nil
 	}
-
 
 	return o.RamHotPlug
 
@@ -539,13 +492,11 @@ func (o *VolumeProperties) GetRamHotPlugOk() (*bool, bool) {
 		return nil, false
 	}
 
-
 	return o.RamHotPlug, true
 }
 
 // SetRamHotPlug sets field value
 func (o *VolumeProperties) SetRamHotPlug(v bool) {
-
 
 	o.RamHotPlug = &v
 
@@ -560,14 +511,12 @@ func (o *VolumeProperties) HasRamHotPlug() bool {
 	return false
 }
 
-
 // GetNicHotPlug returns the NicHotPlug field value
 // If the value is explicit nil, the zero value for bool will be returned
 func (o *VolumeProperties) GetNicHotPlug() *bool {
 	if o == nil {
 		return nil
 	}
-
 
 	return o.NicHotPlug
 
@@ -581,13 +530,11 @@ func (o *VolumeProperties) GetNicHotPlugOk() (*bool, bool) {
 		return nil, false
 	}
 
-
 	return o.NicHotPlug, true
 }
 
 // SetNicHotPlug sets field value
 func (o *VolumeProperties) SetNicHotPlug(v bool) {
-
 
 	o.NicHotPlug = &v
 
@@ -602,14 +549,12 @@ func (o *VolumeProperties) HasNicHotPlug() bool {
 	return false
 }
 
-
 // GetNicHotUnplug returns the NicHotUnplug field value
 // If the value is explicit nil, the zero value for bool will be returned
 func (o *VolumeProperties) GetNicHotUnplug() *bool {
 	if o == nil {
 		return nil
 	}
-
 
 	return o.NicHotUnplug
 
@@ -623,13 +568,11 @@ func (o *VolumeProperties) GetNicHotUnplugOk() (*bool, bool) {
 		return nil, false
 	}
 
-
 	return o.NicHotUnplug, true
 }
 
 // SetNicHotUnplug sets field value
 func (o *VolumeProperties) SetNicHotUnplug(v bool) {
-
 
 	o.NicHotUnplug = &v
 
@@ -644,14 +587,12 @@ func (o *VolumeProperties) HasNicHotUnplug() bool {
 	return false
 }
 
-
 // GetDiscVirtioHotPlug returns the DiscVirtioHotPlug field value
 // If the value is explicit nil, the zero value for bool will be returned
 func (o *VolumeProperties) GetDiscVirtioHotPlug() *bool {
 	if o == nil {
 		return nil
 	}
-
 
 	return o.DiscVirtioHotPlug
 
@@ -665,13 +606,11 @@ func (o *VolumeProperties) GetDiscVirtioHotPlugOk() (*bool, bool) {
 		return nil, false
 	}
 
-
 	return o.DiscVirtioHotPlug, true
 }
 
 // SetDiscVirtioHotPlug sets field value
 func (o *VolumeProperties) SetDiscVirtioHotPlug(v bool) {
-
 
 	o.DiscVirtioHotPlug = &v
 
@@ -686,14 +625,12 @@ func (o *VolumeProperties) HasDiscVirtioHotPlug() bool {
 	return false
 }
 
-
 // GetDiscVirtioHotUnplug returns the DiscVirtioHotUnplug field value
 // If the value is explicit nil, the zero value for bool will be returned
 func (o *VolumeProperties) GetDiscVirtioHotUnplug() *bool {
 	if o == nil {
 		return nil
 	}
-
 
 	return o.DiscVirtioHotUnplug
 
@@ -707,13 +644,11 @@ func (o *VolumeProperties) GetDiscVirtioHotUnplugOk() (*bool, bool) {
 		return nil, false
 	}
 
-
 	return o.DiscVirtioHotUnplug, true
 }
 
 // SetDiscVirtioHotUnplug sets field value
 func (o *VolumeProperties) SetDiscVirtioHotUnplug(v bool) {
-
 
 	o.DiscVirtioHotUnplug = &v
 
@@ -728,14 +663,12 @@ func (o *VolumeProperties) HasDiscVirtioHotUnplug() bool {
 	return false
 }
 
-
 // GetDeviceNumber returns the DeviceNumber field value
 // If the value is explicit nil, the zero value for int64 will be returned
 func (o *VolumeProperties) GetDeviceNumber() *int64 {
 	if o == nil {
 		return nil
 	}
-
 
 	return o.DeviceNumber
 
@@ -749,13 +682,11 @@ func (o *VolumeProperties) GetDeviceNumberOk() (*int64, bool) {
 		return nil, false
 	}
 
-
 	return o.DeviceNumber, true
 }
 
 // SetDeviceNumber sets field value
 func (o *VolumeProperties) SetDeviceNumber(v int64) {
-
 
 	o.DeviceNumber = &v
 
@@ -770,14 +701,12 @@ func (o *VolumeProperties) HasDeviceNumber() bool {
 	return false
 }
 
-
 // GetBackupunitId returns the BackupunitId field value
 // If the value is explicit nil, the zero value for string will be returned
 func (o *VolumeProperties) GetBackupunitId() *string {
 	if o == nil {
 		return nil
 	}
-
 
 	return o.BackupunitId
 
@@ -791,13 +720,11 @@ func (o *VolumeProperties) GetBackupunitIdOk() (*string, bool) {
 		return nil, false
 	}
 
-
 	return o.BackupunitId, true
 }
 
 // SetBackupunitId sets field value
 func (o *VolumeProperties) SetBackupunitId(v string) {
-
 
 	o.BackupunitId = &v
 
@@ -812,14 +739,12 @@ func (o *VolumeProperties) HasBackupunitId() bool {
 	return false
 }
 
-
 // GetUserData returns the UserData field value
 // If the value is explicit nil, the zero value for string will be returned
 func (o *VolumeProperties) GetUserData() *string {
 	if o == nil {
 		return nil
 	}
-
 
 	return o.UserData
 
@@ -833,13 +758,11 @@ func (o *VolumeProperties) GetUserDataOk() (*string, bool) {
 		return nil, false
 	}
 
-
 	return o.UserData, true
 }
 
 // SetUserData sets field value
 func (o *VolumeProperties) SetUserData(v string) {
-
 
 	o.UserData = &v
 
@@ -970,5 +893,3 @@ func (v *NullableVolumeProperties) UnmarshalJSON(src []byte) error {
 	v.isSet = true
 	return json.Unmarshal(src, &v.value)
 }
-
-
