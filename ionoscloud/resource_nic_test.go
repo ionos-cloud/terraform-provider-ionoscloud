@@ -152,7 +152,7 @@ resource "ionoscloud_nic" "database_nic" {
   lan = 2
   firewall_active = true
   dhcp = true
-  ips            = [ ionoscloud_ipblock.test_server.ips[0], ionoscloud_ipblock.test_server.ips[1] ]
+  ips = [ ionoscloud_ipblock.test_server.ips[0], ionoscloud_ipblock.test_server.ips[1] ]
   name = "%s"
 }
 `
@@ -164,7 +164,7 @@ resource "ionoscloud_nic" "database_nic" {
   lan = 2
   dhcp = false
   firewall_active = false
-  ips            = [ ionoscloud_ipblock.test_server.ips[0], ionoscloud_ipblock.test_server.ips[1] ]
+  ips = [ ionoscloud_ipblock.test_server.ips[0], ionoscloud_ipblock.test_server.ips[1] ]
   name = "updated"
 }
 `
