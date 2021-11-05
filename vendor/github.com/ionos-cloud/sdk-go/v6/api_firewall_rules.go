@@ -28,14 +28,14 @@ var (
 type FirewallRulesApiService service
 
 type ApiDatacentersServersNicsFirewallrulesDeleteRequest struct {
-	ctx _context.Context
-	ApiService *FirewallRulesApiService
-	datacenterId string
-	serverId string
-	nicId string
-	firewallruleId string
-	pretty *bool
-	depth *int32
+	ctx             _context.Context
+	ApiService      *FirewallRulesApiService
+	datacenterId    string
+	serverId        string
+	nicId           string
+	firewallruleId  string
+	pretty          *bool
+	depth           *int32
 	xContractNumber *int32
 }
 
@@ -68,11 +68,11 @@ func (r ApiDatacentersServersNicsFirewallrulesDeleteRequest) Execute() (*APIResp
  */
 func (a *FirewallRulesApiService) DatacentersServersNicsFirewallrulesDelete(ctx _context.Context, datacenterId string, serverId string, nicId string, firewallruleId string) ApiDatacentersServersNicsFirewallrulesDeleteRequest {
 	return ApiDatacentersServersNicsFirewallrulesDeleteRequest{
-		ApiService: a,
-		ctx: ctx,
-		datacenterId: datacenterId,
-		serverId: serverId,
-		nicId: nicId,
+		ApiService:     a,
+		ctx:            ctx,
+		datacenterId:   datacenterId,
+		serverId:       serverId,
+		nicId:          nicId,
 		firewallruleId: firewallruleId,
 	}
 }
@@ -110,6 +110,7 @@ func (a *FirewallRulesApiService) DatacentersServersNicsFirewallrulesDeleteExecu
 	if r.depth != nil {
 		localVarQueryParams.Add("depth", parameterToString(*r.depth, ""))
 	}
+
 	// to determine the Content-Type header
 	localVarHTTPContentTypes := []string{}
 
@@ -151,12 +152,12 @@ func (a *FirewallRulesApiService) DatacentersServersNicsFirewallrulesDeleteExecu
 
 	localVarHTTPResponse, httpRequestTime, err := a.client.callAPI(req)
 
-	localVarAPIResponse := &APIResponse {
-		Response: localVarHTTPResponse,
-		Method: localVarHTTPMethod,
-		RequestURL: localVarPath,
+	localVarAPIResponse := &APIResponse{
+		Response:    localVarHTTPResponse,
+		Method:      localVarHTTPMethod,
+		RequestURL:  localVarPath,
 		RequestTime: httpRequestTime,
-		Operation: "DatacentersServersNicsFirewallrulesDelete",
+		Operation:   "DatacentersServersNicsFirewallrulesDelete",
 	}
 
 	if err != nil || localVarHTTPResponse == nil {
@@ -173,16 +174,16 @@ func (a *FirewallRulesApiService) DatacentersServersNicsFirewallrulesDeleteExecu
 	if localVarHTTPResponse.StatusCode >= 300 {
 		newErr := GenericOpenAPIError{
 			statusCode: localVarHTTPResponse.StatusCode,
-			body:  localVarBody,
-			error: fmt.Sprintf("%s: %s", localVarHTTPResponse.Status, string(localVarBody)),
+			body:       localVarBody,
+			error:      fmt.Sprintf(FormatStringErr, localVarHTTPResponse.Status, string(localVarBody)),
 		}
-			var v Error
-			err = a.client.decode(&v, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
-			if err != nil {
-				newErr.error = err.Error()
-				return localVarAPIResponse, newErr
-			}
-			newErr.model = v
+		var v Error
+		err = a.client.decode(&v, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
+		if err != nil {
+			newErr.error = err.Error()
+			return localVarAPIResponse, newErr
+		}
+		newErr.model = v
 		return localVarAPIResponse, newErr
 	}
 
@@ -190,14 +191,14 @@ func (a *FirewallRulesApiService) DatacentersServersNicsFirewallrulesDeleteExecu
 }
 
 type ApiDatacentersServersNicsFirewallrulesFindByIdRequest struct {
-	ctx _context.Context
-	ApiService *FirewallRulesApiService
-	datacenterId string
-	serverId string
-	nicId string
-	firewallruleId string
-	pretty *bool
-	depth *int32
+	ctx             _context.Context
+	ApiService      *FirewallRulesApiService
+	datacenterId    string
+	serverId        string
+	nicId           string
+	firewallruleId  string
+	pretty          *bool
+	depth           *int32
 	xContractNumber *int32
 }
 
@@ -230,11 +231,11 @@ func (r ApiDatacentersServersNicsFirewallrulesFindByIdRequest) Execute() (Firewa
  */
 func (a *FirewallRulesApiService) DatacentersServersNicsFirewallrulesFindById(ctx _context.Context, datacenterId string, serverId string, nicId string, firewallruleId string) ApiDatacentersServersNicsFirewallrulesFindByIdRequest {
 	return ApiDatacentersServersNicsFirewallrulesFindByIdRequest{
-		ApiService: a,
-		ctx: ctx,
-		datacenterId: datacenterId,
-		serverId: serverId,
-		nicId: nicId,
+		ApiService:     a,
+		ctx:            ctx,
+		datacenterId:   datacenterId,
+		serverId:       serverId,
+		nicId:          nicId,
 		firewallruleId: firewallruleId,
 	}
 }
@@ -274,6 +275,7 @@ func (a *FirewallRulesApiService) DatacentersServersNicsFirewallrulesFindByIdExe
 	if r.depth != nil {
 		localVarQueryParams.Add("depth", parameterToString(*r.depth, ""))
 	}
+
 	// to determine the Content-Type header
 	localVarHTTPContentTypes := []string{}
 
@@ -315,12 +317,12 @@ func (a *FirewallRulesApiService) DatacentersServersNicsFirewallrulesFindByIdExe
 
 	localVarHTTPResponse, httpRequestTime, err := a.client.callAPI(req)
 
-	localVarAPIResponse := &APIResponse {
-		Response: localVarHTTPResponse,
-		Method: localVarHTTPMethod,
-		RequestURL: localVarPath,
+	localVarAPIResponse := &APIResponse{
+		Response:    localVarHTTPResponse,
+		Method:      localVarHTTPMethod,
+		RequestURL:  localVarPath,
 		RequestTime: httpRequestTime,
-		Operation: "DatacentersServersNicsFirewallrulesFindById",
+		Operation:   "DatacentersServersNicsFirewallrulesFindById",
 	}
 
 	if err != nil || localVarHTTPResponse == nil {
@@ -337,16 +339,16 @@ func (a *FirewallRulesApiService) DatacentersServersNicsFirewallrulesFindByIdExe
 	if localVarHTTPResponse.StatusCode >= 300 {
 		newErr := GenericOpenAPIError{
 			statusCode: localVarHTTPResponse.StatusCode,
-			body:  localVarBody,
-			error: fmt.Sprintf("%s: %s", localVarHTTPResponse.Status, string(localVarBody)),
+			body:       localVarBody,
+			error:      fmt.Sprintf(FormatStringErr, localVarHTTPResponse.Status, string(localVarBody)),
 		}
-			var v Error
-			err = a.client.decode(&v, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
-			if err != nil {
-				newErr.error = err.Error()
-				return localVarReturnValue, localVarAPIResponse, newErr
-			}
-			newErr.model = v
+		var v Error
+		err = a.client.decode(&v, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
+		if err != nil {
+			newErr.error = err.Error()
+			return localVarReturnValue, localVarAPIResponse, newErr
+		}
+		newErr.model = v
 		return localVarReturnValue, localVarAPIResponse, newErr
 	}
 
@@ -354,8 +356,8 @@ func (a *FirewallRulesApiService) DatacentersServersNicsFirewallrulesFindByIdExe
 	if err != nil {
 		newErr := GenericOpenAPIError{
 			statusCode: localVarHTTPResponse.StatusCode,
-			body:  localVarBody,
-			error: err.Error(),
+			body:       localVarBody,
+			error:      err.Error(),
 		}
 		return localVarReturnValue, localVarAPIResponse, newErr
 	}
@@ -364,16 +366,18 @@ func (a *FirewallRulesApiService) DatacentersServersNicsFirewallrulesFindByIdExe
 }
 
 type ApiDatacentersServersNicsFirewallrulesGetRequest struct {
-	ctx _context.Context
-	ApiService *FirewallRulesApiService
-	datacenterId string
-	serverId string
-	nicId string
-	pretty *bool
-	depth *int32
+	ctx             _context.Context
+	ApiService      *FirewallRulesApiService
+	filters         _neturl.Values
+	orderBy         *string
+	datacenterId    string
+	serverId        string
+	nicId           string
+	pretty          *bool
+	depth           *int32
 	xContractNumber *int32
-	offset *int32
-	limit *int32
+	offset          *int32
+	limit           *int32
 }
 
 func (r ApiDatacentersServersNicsFirewallrulesGetRequest) Pretty(pretty bool) ApiDatacentersServersNicsFirewallrulesGetRequest {
@@ -397,6 +401,19 @@ func (r ApiDatacentersServersNicsFirewallrulesGetRequest) Limit(limit int32) Api
 	return r
 }
 
+// Filters query parameters limit results to those containing a matching value for a specific property.
+func (r ApiDatacentersServersNicsFirewallrulesGetRequest) Filter(key string, value string) ApiDatacentersServersNicsFirewallrulesGetRequest {
+	filterKey := fmt.Sprintf(FilterQueryParam, key)
+	r.filters[filterKey] = []string{value}
+	return r
+}
+
+// OrderBy query param sorts the results alphanumerically in ascending order based on the specified property.
+func (r ApiDatacentersServersNicsFirewallrulesGetRequest) OrderBy(orderBy string) ApiDatacentersServersNicsFirewallrulesGetRequest {
+	r.orderBy = &orderBy
+	return r
+}
+
 func (r ApiDatacentersServersNicsFirewallrulesGetRequest) Execute() (FirewallRules, *APIResponse, error) {
 	return r.ApiService.DatacentersServersNicsFirewallrulesGetExecute(r)
 }
@@ -412,11 +429,12 @@ func (r ApiDatacentersServersNicsFirewallrulesGetRequest) Execute() (FirewallRul
  */
 func (a *FirewallRulesApiService) DatacentersServersNicsFirewallrulesGet(ctx _context.Context, datacenterId string, serverId string, nicId string) ApiDatacentersServersNicsFirewallrulesGetRequest {
 	return ApiDatacentersServersNicsFirewallrulesGetRequest{
-		ApiService: a,
-		ctx: ctx,
+		ApiService:   a,
+		ctx:          ctx,
 		datacenterId: datacenterId,
-		serverId: serverId,
-		nicId: nicId,
+		serverId:     serverId,
+		nicId:        nicId,
+		filters:      _neturl.Values{},
 	}
 }
 
@@ -460,6 +478,17 @@ func (a *FirewallRulesApiService) DatacentersServersNicsFirewallrulesGetExecute(
 	if r.limit != nil {
 		localVarQueryParams.Add("limit", parameterToString(*r.limit, ""))
 	}
+	if r.orderBy != nil {
+		localVarQueryParams.Add("orderBy", parameterToString(*r.orderBy, ""))
+	}
+	if len(r.filters) > 0 {
+		for k, v := range r.filters {
+			for _, iv := range v {
+				localVarQueryParams.Add(k, iv)
+			}
+		}
+	}
+
 	// to determine the Content-Type header
 	localVarHTTPContentTypes := []string{}
 
@@ -501,12 +530,12 @@ func (a *FirewallRulesApiService) DatacentersServersNicsFirewallrulesGetExecute(
 
 	localVarHTTPResponse, httpRequestTime, err := a.client.callAPI(req)
 
-	localVarAPIResponse := &APIResponse {
-		Response: localVarHTTPResponse,
-		Method: localVarHTTPMethod,
-		RequestURL: localVarPath,
+	localVarAPIResponse := &APIResponse{
+		Response:    localVarHTTPResponse,
+		Method:      localVarHTTPMethod,
+		RequestURL:  localVarPath,
 		RequestTime: httpRequestTime,
-		Operation: "DatacentersServersNicsFirewallrulesGet",
+		Operation:   "DatacentersServersNicsFirewallrulesGet",
 	}
 
 	if err != nil || localVarHTTPResponse == nil {
@@ -523,16 +552,16 @@ func (a *FirewallRulesApiService) DatacentersServersNicsFirewallrulesGetExecute(
 	if localVarHTTPResponse.StatusCode >= 300 {
 		newErr := GenericOpenAPIError{
 			statusCode: localVarHTTPResponse.StatusCode,
-			body:  localVarBody,
-			error: fmt.Sprintf("%s: %s", localVarHTTPResponse.Status, string(localVarBody)),
+			body:       localVarBody,
+			error:      fmt.Sprintf(FormatStringErr, localVarHTTPResponse.Status, string(localVarBody)),
 		}
-			var v Error
-			err = a.client.decode(&v, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
-			if err != nil {
-				newErr.error = err.Error()
-				return localVarReturnValue, localVarAPIResponse, newErr
-			}
-			newErr.model = v
+		var v Error
+		err = a.client.decode(&v, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
+		if err != nil {
+			newErr.error = err.Error()
+			return localVarReturnValue, localVarAPIResponse, newErr
+		}
+		newErr.model = v
 		return localVarReturnValue, localVarAPIResponse, newErr
 	}
 
@@ -540,8 +569,8 @@ func (a *FirewallRulesApiService) DatacentersServersNicsFirewallrulesGetExecute(
 	if err != nil {
 		newErr := GenericOpenAPIError{
 			statusCode: localVarHTTPResponse.StatusCode,
-			body:  localVarBody,
-			error: err.Error(),
+			body:       localVarBody,
+			error:      err.Error(),
 		}
 		return localVarReturnValue, localVarAPIResponse, newErr
 	}
@@ -550,15 +579,15 @@ func (a *FirewallRulesApiService) DatacentersServersNicsFirewallrulesGetExecute(
 }
 
 type ApiDatacentersServersNicsFirewallrulesPatchRequest struct {
-	ctx _context.Context
-	ApiService *FirewallRulesApiService
-	datacenterId string
-	serverId string
-	nicId string
-	firewallruleId string
-	firewallrule *FirewallruleProperties
-	pretty *bool
-	depth *int32
+	ctx             _context.Context
+	ApiService      *FirewallRulesApiService
+	datacenterId    string
+	serverId        string
+	nicId           string
+	firewallruleId  string
+	firewallrule    *FirewallruleProperties
+	pretty          *bool
+	depth           *int32
 	xContractNumber *int32
 }
 
@@ -595,11 +624,11 @@ func (r ApiDatacentersServersNicsFirewallrulesPatchRequest) Execute() (FirewallR
  */
 func (a *FirewallRulesApiService) DatacentersServersNicsFirewallrulesPatch(ctx _context.Context, datacenterId string, serverId string, nicId string, firewallruleId string) ApiDatacentersServersNicsFirewallrulesPatchRequest {
 	return ApiDatacentersServersNicsFirewallrulesPatchRequest{
-		ApiService: a,
-		ctx: ctx,
-		datacenterId: datacenterId,
-		serverId: serverId,
-		nicId: nicId,
+		ApiService:     a,
+		ctx:            ctx,
+		datacenterId:   datacenterId,
+		serverId:       serverId,
+		nicId:          nicId,
 		firewallruleId: firewallruleId,
 	}
 }
@@ -642,6 +671,7 @@ func (a *FirewallRulesApiService) DatacentersServersNicsFirewallrulesPatchExecut
 	if r.depth != nil {
 		localVarQueryParams.Add("depth", parameterToString(*r.depth, ""))
 	}
+
 	// to determine the Content-Type header
 	localVarHTTPContentTypes := []string{"application/json"}
 
@@ -685,12 +715,12 @@ func (a *FirewallRulesApiService) DatacentersServersNicsFirewallrulesPatchExecut
 
 	localVarHTTPResponse, httpRequestTime, err := a.client.callAPI(req)
 
-	localVarAPIResponse := &APIResponse {
-		Response: localVarHTTPResponse,
-		Method: localVarHTTPMethod,
-		RequestURL: localVarPath,
+	localVarAPIResponse := &APIResponse{
+		Response:    localVarHTTPResponse,
+		Method:      localVarHTTPMethod,
+		RequestURL:  localVarPath,
 		RequestTime: httpRequestTime,
-		Operation: "DatacentersServersNicsFirewallrulesPatch",
+		Operation:   "DatacentersServersNicsFirewallrulesPatch",
 	}
 
 	if err != nil || localVarHTTPResponse == nil {
@@ -707,16 +737,16 @@ func (a *FirewallRulesApiService) DatacentersServersNicsFirewallrulesPatchExecut
 	if localVarHTTPResponse.StatusCode >= 300 {
 		newErr := GenericOpenAPIError{
 			statusCode: localVarHTTPResponse.StatusCode,
-			body:  localVarBody,
-			error: fmt.Sprintf("%s: %s", localVarHTTPResponse.Status, string(localVarBody)),
+			body:       localVarBody,
+			error:      fmt.Sprintf(FormatStringErr, localVarHTTPResponse.Status, string(localVarBody)),
 		}
-			var v Error
-			err = a.client.decode(&v, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
-			if err != nil {
-				newErr.error = err.Error()
-				return localVarReturnValue, localVarAPIResponse, newErr
-			}
-			newErr.model = v
+		var v Error
+		err = a.client.decode(&v, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
+		if err != nil {
+			newErr.error = err.Error()
+			return localVarReturnValue, localVarAPIResponse, newErr
+		}
+		newErr.model = v
 		return localVarReturnValue, localVarAPIResponse, newErr
 	}
 
@@ -724,8 +754,8 @@ func (a *FirewallRulesApiService) DatacentersServersNicsFirewallrulesPatchExecut
 	if err != nil {
 		newErr := GenericOpenAPIError{
 			statusCode: localVarHTTPResponse.StatusCode,
-			body:  localVarBody,
-			error: err.Error(),
+			body:       localVarBody,
+			error:      err.Error(),
 		}
 		return localVarReturnValue, localVarAPIResponse, newErr
 	}
@@ -734,14 +764,14 @@ func (a *FirewallRulesApiService) DatacentersServersNicsFirewallrulesPatchExecut
 }
 
 type ApiDatacentersServersNicsFirewallrulesPostRequest struct {
-	ctx _context.Context
-	ApiService *FirewallRulesApiService
-	datacenterId string
-	serverId string
-	nicId string
-	firewallrule *FirewallRule
-	pretty *bool
-	depth *int32
+	ctx             _context.Context
+	ApiService      *FirewallRulesApiService
+	datacenterId    string
+	serverId        string
+	nicId           string
+	firewallrule    *FirewallRule
+	pretty          *bool
+	depth           *int32
 	xContractNumber *int32
 }
 
@@ -777,11 +807,11 @@ func (r ApiDatacentersServersNicsFirewallrulesPostRequest) Execute() (FirewallRu
  */
 func (a *FirewallRulesApiService) DatacentersServersNicsFirewallrulesPost(ctx _context.Context, datacenterId string, serverId string, nicId string) ApiDatacentersServersNicsFirewallrulesPostRequest {
 	return ApiDatacentersServersNicsFirewallrulesPostRequest{
-		ApiService: a,
-		ctx: ctx,
+		ApiService:   a,
+		ctx:          ctx,
 		datacenterId: datacenterId,
-		serverId: serverId,
-		nicId: nicId,
+		serverId:     serverId,
+		nicId:        nicId,
 	}
 }
 
@@ -822,6 +852,7 @@ func (a *FirewallRulesApiService) DatacentersServersNicsFirewallrulesPostExecute
 	if r.depth != nil {
 		localVarQueryParams.Add("depth", parameterToString(*r.depth, ""))
 	}
+
 	// to determine the Content-Type header
 	localVarHTTPContentTypes := []string{"application/json"}
 
@@ -865,12 +896,12 @@ func (a *FirewallRulesApiService) DatacentersServersNicsFirewallrulesPostExecute
 
 	localVarHTTPResponse, httpRequestTime, err := a.client.callAPI(req)
 
-	localVarAPIResponse := &APIResponse {
-		Response: localVarHTTPResponse,
-		Method: localVarHTTPMethod,
-		RequestURL: localVarPath,
+	localVarAPIResponse := &APIResponse{
+		Response:    localVarHTTPResponse,
+		Method:      localVarHTTPMethod,
+		RequestURL:  localVarPath,
 		RequestTime: httpRequestTime,
-		Operation: "DatacentersServersNicsFirewallrulesPost",
+		Operation:   "DatacentersServersNicsFirewallrulesPost",
 	}
 
 	if err != nil || localVarHTTPResponse == nil {
@@ -887,16 +918,16 @@ func (a *FirewallRulesApiService) DatacentersServersNicsFirewallrulesPostExecute
 	if localVarHTTPResponse.StatusCode >= 300 {
 		newErr := GenericOpenAPIError{
 			statusCode: localVarHTTPResponse.StatusCode,
-			body:  localVarBody,
-			error: fmt.Sprintf("%s: %s", localVarHTTPResponse.Status, string(localVarBody)),
+			body:       localVarBody,
+			error:      fmt.Sprintf(FormatStringErr, localVarHTTPResponse.Status, string(localVarBody)),
 		}
-			var v Error
-			err = a.client.decode(&v, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
-			if err != nil {
-				newErr.error = err.Error()
-				return localVarReturnValue, localVarAPIResponse, newErr
-			}
-			newErr.model = v
+		var v Error
+		err = a.client.decode(&v, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
+		if err != nil {
+			newErr.error = err.Error()
+			return localVarReturnValue, localVarAPIResponse, newErr
+		}
+		newErr.model = v
 		return localVarReturnValue, localVarAPIResponse, newErr
 	}
 
@@ -904,8 +935,8 @@ func (a *FirewallRulesApiService) DatacentersServersNicsFirewallrulesPostExecute
 	if err != nil {
 		newErr := GenericOpenAPIError{
 			statusCode: localVarHTTPResponse.StatusCode,
-			body:  localVarBody,
-			error: err.Error(),
+			body:       localVarBody,
+			error:      err.Error(),
 		}
 		return localVarReturnValue, localVarAPIResponse, newErr
 	}
@@ -914,15 +945,15 @@ func (a *FirewallRulesApiService) DatacentersServersNicsFirewallrulesPostExecute
 }
 
 type ApiDatacentersServersNicsFirewallrulesPutRequest struct {
-	ctx _context.Context
-	ApiService *FirewallRulesApiService
-	datacenterId string
-	serverId string
-	nicId string
-	firewallruleId string
-	firewallrule *FirewallRule
-	pretty *bool
-	depth *int32
+	ctx             _context.Context
+	ApiService      *FirewallRulesApiService
+	datacenterId    string
+	serverId        string
+	nicId           string
+	firewallruleId  string
+	firewallrule    *FirewallRule
+	pretty          *bool
+	depth           *int32
 	xContractNumber *int32
 }
 
@@ -959,11 +990,11 @@ func (r ApiDatacentersServersNicsFirewallrulesPutRequest) Execute() (FirewallRul
  */
 func (a *FirewallRulesApiService) DatacentersServersNicsFirewallrulesPut(ctx _context.Context, datacenterId string, serverId string, nicId string, firewallruleId string) ApiDatacentersServersNicsFirewallrulesPutRequest {
 	return ApiDatacentersServersNicsFirewallrulesPutRequest{
-		ApiService: a,
-		ctx: ctx,
-		datacenterId: datacenterId,
-		serverId: serverId,
-		nicId: nicId,
+		ApiService:     a,
+		ctx:            ctx,
+		datacenterId:   datacenterId,
+		serverId:       serverId,
+		nicId:          nicId,
 		firewallruleId: firewallruleId,
 	}
 }
@@ -1006,6 +1037,7 @@ func (a *FirewallRulesApiService) DatacentersServersNicsFirewallrulesPutExecute(
 	if r.depth != nil {
 		localVarQueryParams.Add("depth", parameterToString(*r.depth, ""))
 	}
+
 	// to determine the Content-Type header
 	localVarHTTPContentTypes := []string{"application/json"}
 
@@ -1049,12 +1081,12 @@ func (a *FirewallRulesApiService) DatacentersServersNicsFirewallrulesPutExecute(
 
 	localVarHTTPResponse, httpRequestTime, err := a.client.callAPI(req)
 
-	localVarAPIResponse := &APIResponse {
-		Response: localVarHTTPResponse,
-		Method: localVarHTTPMethod,
-		RequestURL: localVarPath,
+	localVarAPIResponse := &APIResponse{
+		Response:    localVarHTTPResponse,
+		Method:      localVarHTTPMethod,
+		RequestURL:  localVarPath,
 		RequestTime: httpRequestTime,
-		Operation: "DatacentersServersNicsFirewallrulesPut",
+		Operation:   "DatacentersServersNicsFirewallrulesPut",
 	}
 
 	if err != nil || localVarHTTPResponse == nil {
@@ -1071,16 +1103,16 @@ func (a *FirewallRulesApiService) DatacentersServersNicsFirewallrulesPutExecute(
 	if localVarHTTPResponse.StatusCode >= 300 {
 		newErr := GenericOpenAPIError{
 			statusCode: localVarHTTPResponse.StatusCode,
-			body:  localVarBody,
-			error: fmt.Sprintf("%s: %s", localVarHTTPResponse.Status, string(localVarBody)),
+			body:       localVarBody,
+			error:      fmt.Sprintf(FormatStringErr, localVarHTTPResponse.Status, string(localVarBody)),
 		}
-			var v Error
-			err = a.client.decode(&v, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
-			if err != nil {
-				newErr.error = err.Error()
-				return localVarReturnValue, localVarAPIResponse, newErr
-			}
-			newErr.model = v
+		var v Error
+		err = a.client.decode(&v, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
+		if err != nil {
+			newErr.error = err.Error()
+			return localVarReturnValue, localVarAPIResponse, newErr
+		}
+		newErr.model = v
 		return localVarReturnValue, localVarAPIResponse, newErr
 	}
 
@@ -1088,8 +1120,8 @@ func (a *FirewallRulesApiService) DatacentersServersNicsFirewallrulesPutExecute(
 	if err != nil {
 		newErr := GenericOpenAPIError{
 			statusCode: localVarHTTPResponse.StatusCode,
-			body:  localVarBody,
-			error: err.Error(),
+			body:       localVarBody,
+			error:      err.Error(),
 		}
 		return localVarReturnValue, localVarAPIResponse, newErr
 	}

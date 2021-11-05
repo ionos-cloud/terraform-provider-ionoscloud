@@ -24,14 +24,12 @@ type Info struct {
 	Version *string `json:"version,omitempty"`
 }
 
-
 // GetHref returns the Href field value
 // If the value is explicit nil, the zero value for string will be returned
 func (o *Info) GetHref() *string {
 	if o == nil {
 		return nil
 	}
-
 
 	return o.Href
 
@@ -45,13 +43,11 @@ func (o *Info) GetHrefOk() (*string, bool) {
 		return nil, false
 	}
 
-
 	return o.Href, true
 }
 
 // SetHref sets field value
 func (o *Info) SetHref(v string) {
-
 
 	o.Href = &v
 
@@ -73,7 +69,6 @@ func (o *Info) GetName() *string {
 		return nil
 	}
 
-
 	return o.Name
 
 }
@@ -86,13 +81,11 @@ func (o *Info) GetNameOk() (*string, bool) {
 		return nil, false
 	}
 
-
 	return o.Name, true
 }
 
 // SetName sets field value
 func (o *Info) SetName(v string) {
-
 
 	o.Name = &v
 
@@ -114,7 +107,6 @@ func (o *Info) GetVersion() *string {
 		return nil
 	}
 
-
 	return o.Version
 
 }
@@ -127,13 +119,11 @@ func (o *Info) GetVersionOk() (*string, bool) {
 		return nil, false
 	}
 
-
 	return o.Version, true
 }
 
 // SetVersion sets field value
 func (o *Info) SetVersion(v string) {
-
 
 	o.Version = &v
 
@@ -164,6 +154,7 @@ func (o Info) MarshalJSON() ([]byte, error) {
 	}
 	return json.Marshal(toSerialize)
 }
+
 type NullableInfo struct {
 	value *Info
 	isSet bool
@@ -199,5 +190,3 @@ func (v *NullableInfo) UnmarshalJSON(src []byte) error {
 	v.isSet = true
 	return json.Unmarshal(src, &v.value)
 }
-
-

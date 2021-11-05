@@ -17,12 +17,11 @@ import (
 
 // S3KeyMetadata struct for S3KeyMetadata
 type S3KeyMetadata struct {
-	// Resource's Entity Tag as defined in http://www.w3.org/Protocols/rfc2616/rfc2616-sec3.html#sec3.11 . Entity Tag is also added as an 'ETag response header to requests which don't use 'depth' parameter. 
+	// Resource's Entity Tag as defined in http://www.w3.org/Protocols/rfc2616/rfc2616-sec3.html#sec3.11 . Entity Tag is also added as an 'ETag response header to requests which don't use 'depth' parameter.
 	Etag *string `json:"etag,omitempty"`
 	// The time the S3 key was created
 	CreatedDate *IonosTime
 }
-
 
 // GetEtag returns the Etag field value
 // If the value is explicit nil, the zero value for string will be returned
@@ -30,7 +29,6 @@ func (o *S3KeyMetadata) GetEtag() *string {
 	if o == nil {
 		return nil
 	}
-
 
 	return o.Etag
 
@@ -44,13 +42,11 @@ func (o *S3KeyMetadata) GetEtagOk() (*string, bool) {
 		return nil, false
 	}
 
-
 	return o.Etag, true
 }
 
 // SetEtag sets field value
 func (o *S3KeyMetadata) SetEtag(v string) {
-
 
 	o.Etag = &v
 
@@ -77,7 +73,6 @@ func (o *S3KeyMetadata) GetCreatedDate() *time.Time {
 	}
 	return &o.CreatedDate.Time
 
-
 }
 
 // GetCreatedDateOk returns a tuple with the CreatedDate field value
@@ -99,7 +94,6 @@ func (o *S3KeyMetadata) GetCreatedDateOk() (*time.Time, bool) {
 func (o *S3KeyMetadata) SetCreatedDate(v time.Time) {
 
 	o.CreatedDate = &IonosTime{v}
-
 
 }
 
@@ -124,6 +118,7 @@ func (o S3KeyMetadata) MarshalJSON() ([]byte, error) {
 	}
 	return json.Marshal(toSerialize)
 }
+
 type NullableS3KeyMetadata struct {
 	value *S3KeyMetadata
 	isSet bool
@@ -159,5 +154,3 @@ func (v *NullableS3KeyMetadata) UnmarshalJSON(src []byte) error {
 	v.isSet = true
 	return json.Unmarshal(src, &v.value)
 }
-
-

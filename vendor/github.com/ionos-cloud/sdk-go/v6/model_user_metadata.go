@@ -17,7 +17,7 @@ import (
 
 // UserMetadata struct for UserMetadata
 type UserMetadata struct {
-	// Resource's Entity Tag as defined in http://www.w3.org/Protocols/rfc2616/rfc2616-sec3.html#sec3.11 . Entity Tag is also added as an 'ETag response header to requests which don't use 'depth' parameter. 
+	// Resource's Entity Tag as defined in http://www.w3.org/Protocols/rfc2616/rfc2616-sec3.html#sec3.11 . Entity Tag is also added as an 'ETag response header to requests which don't use 'depth' parameter.
 	Etag *string `json:"etag,omitempty"`
 	// time of creation of the user
 	CreatedDate *IonosTime
@@ -25,14 +25,12 @@ type UserMetadata struct {
 	LastLogin *IonosTime
 }
 
-
 // GetEtag returns the Etag field value
 // If the value is explicit nil, the zero value for string will be returned
 func (o *UserMetadata) GetEtag() *string {
 	if o == nil {
 		return nil
 	}
-
 
 	return o.Etag
 
@@ -46,13 +44,11 @@ func (o *UserMetadata) GetEtagOk() (*string, bool) {
 		return nil, false
 	}
 
-
 	return o.Etag, true
 }
 
 // SetEtag sets field value
 func (o *UserMetadata) SetEtag(v string) {
-
 
 	o.Etag = &v
 
@@ -79,7 +75,6 @@ func (o *UserMetadata) GetCreatedDate() *time.Time {
 	}
 	return &o.CreatedDate.Time
 
-
 }
 
 // GetCreatedDateOk returns a tuple with the CreatedDate field value
@@ -101,7 +96,6 @@ func (o *UserMetadata) GetCreatedDateOk() (*time.Time, bool) {
 func (o *UserMetadata) SetCreatedDate(v time.Time) {
 
 	o.CreatedDate = &IonosTime{v}
-
 
 }
 
@@ -126,7 +120,6 @@ func (o *UserMetadata) GetLastLogin() *time.Time {
 	}
 	return &o.LastLogin.Time
 
-
 }
 
 // GetLastLoginOk returns a tuple with the LastLogin field value
@@ -148,7 +141,6 @@ func (o *UserMetadata) GetLastLoginOk() (*time.Time, bool) {
 func (o *UserMetadata) SetLastLogin(v time.Time) {
 
 	o.LastLogin = &IonosTime{v}
-
 
 }
 
@@ -177,6 +169,7 @@ func (o UserMetadata) MarshalJSON() ([]byte, error) {
 	}
 	return json.Marshal(toSerialize)
 }
+
 type NullableUserMetadata struct {
 	value *UserMetadata
 	isSet bool
@@ -212,5 +205,3 @@ func (v *NullableUserMetadata) UnmarshalJSON(src []byte) error {
 	v.isSet = true
 	return json.Unmarshal(src, &v.value)
 }
-
-

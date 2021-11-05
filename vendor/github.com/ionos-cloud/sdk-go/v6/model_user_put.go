@@ -17,10 +17,9 @@ import (
 // UserPut struct for UserPut
 type UserPut struct {
 	// The resource's unique identifier
-	Id *string `json:"id,omitempty"`
+	Id         *string            `json:"id,omitempty"`
 	Properties *UserPropertiesPut `json:"properties"`
 }
-
 
 // GetId returns the Id field value
 // If the value is explicit nil, the zero value for string will be returned
@@ -28,7 +27,6 @@ func (o *UserPut) GetId() *string {
 	if o == nil {
 		return nil
 	}
-
 
 	return o.Id
 
@@ -42,13 +40,11 @@ func (o *UserPut) GetIdOk() (*string, bool) {
 		return nil, false
 	}
 
-
 	return o.Id, true
 }
 
 // SetId sets field value
 func (o *UserPut) SetId(v string) {
-
 
 	o.Id = &v
 
@@ -70,7 +66,6 @@ func (o *UserPut) GetProperties() *UserPropertiesPut {
 		return nil
 	}
 
-
 	return o.Properties
 
 }
@@ -83,13 +78,11 @@ func (o *UserPut) GetPropertiesOk() (*UserPropertiesPut, bool) {
 		return nil, false
 	}
 
-
 	return o.Properties, true
 }
 
 // SetProperties sets field value
 func (o *UserPut) SetProperties(v UserPropertiesPut) {
-
 
 	o.Properties = &v
 
@@ -116,6 +109,7 @@ func (o UserPut) MarshalJSON() ([]byte, error) {
 	}
 	return json.Marshal(toSerialize)
 }
+
 type NullableUserPut struct {
 	value *UserPut
 	isSet bool
@@ -151,5 +145,3 @@ func (v *NullableUserPut) UnmarshalJSON(src []byte) error {
 	v.isSet = true
 	return json.Unmarshal(src, &v.value)
 }
-
-

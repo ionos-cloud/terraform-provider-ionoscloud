@@ -28,14 +28,12 @@ type NetworkLoadBalancerProperties struct {
 	LbPrivateIps *[]string `json:"lbPrivateIps,omitempty"`
 }
 
-
 // GetName returns the Name field value
 // If the value is explicit nil, the zero value for string will be returned
 func (o *NetworkLoadBalancerProperties) GetName() *string {
 	if o == nil {
 		return nil
 	}
-
 
 	return o.Name
 
@@ -49,13 +47,11 @@ func (o *NetworkLoadBalancerProperties) GetNameOk() (*string, bool) {
 		return nil, false
 	}
 
-
 	return o.Name, true
 }
 
 // SetName sets field value
 func (o *NetworkLoadBalancerProperties) SetName(v string) {
-
 
 	o.Name = &v
 
@@ -77,7 +73,6 @@ func (o *NetworkLoadBalancerProperties) GetListenerLan() *int32 {
 		return nil
 	}
 
-
 	return o.ListenerLan
 
 }
@@ -90,13 +85,11 @@ func (o *NetworkLoadBalancerProperties) GetListenerLanOk() (*int32, bool) {
 		return nil, false
 	}
 
-
 	return o.ListenerLan, true
 }
 
 // SetListenerLan sets field value
 func (o *NetworkLoadBalancerProperties) SetListenerLan(v int32) {
-
 
 	o.ListenerLan = &v
 
@@ -118,7 +111,6 @@ func (o *NetworkLoadBalancerProperties) GetIps() *[]string {
 		return nil
 	}
 
-
 	return o.Ips
 
 }
@@ -131,13 +123,11 @@ func (o *NetworkLoadBalancerProperties) GetIpsOk() (*[]string, bool) {
 		return nil, false
 	}
 
-
 	return o.Ips, true
 }
 
 // SetIps sets field value
 func (o *NetworkLoadBalancerProperties) SetIps(v []string) {
-
 
 	o.Ips = &v
 
@@ -159,7 +149,6 @@ func (o *NetworkLoadBalancerProperties) GetTargetLan() *int32 {
 		return nil
 	}
 
-
 	return o.TargetLan
 
 }
@@ -172,13 +161,11 @@ func (o *NetworkLoadBalancerProperties) GetTargetLanOk() (*int32, bool) {
 		return nil, false
 	}
 
-
 	return o.TargetLan, true
 }
 
 // SetTargetLan sets field value
 func (o *NetworkLoadBalancerProperties) SetTargetLan(v int32) {
-
 
 	o.TargetLan = &v
 
@@ -200,7 +187,6 @@ func (o *NetworkLoadBalancerProperties) GetLbPrivateIps() *[]string {
 		return nil
 	}
 
-
 	return o.LbPrivateIps
 
 }
@@ -213,13 +199,11 @@ func (o *NetworkLoadBalancerProperties) GetLbPrivateIpsOk() (*[]string, bool) {
 		return nil, false
 	}
 
-
 	return o.LbPrivateIps, true
 }
 
 // SetLbPrivateIps sets field value
 func (o *NetworkLoadBalancerProperties) SetLbPrivateIps(v []string) {
-
 
 	o.LbPrivateIps = &v
 
@@ -258,6 +242,7 @@ func (o NetworkLoadBalancerProperties) MarshalJSON() ([]byte, error) {
 	}
 	return json.Marshal(toSerialize)
 }
+
 type NullableNetworkLoadBalancerProperties struct {
 	value *NetworkLoadBalancerProperties
 	isSet bool
@@ -293,5 +278,3 @@ func (v *NullableNetworkLoadBalancerProperties) UnmarshalJSON(src []byte) error 
 	v.isSet = true
 	return json.Unmarshal(src, &v.value)
 }
-
-

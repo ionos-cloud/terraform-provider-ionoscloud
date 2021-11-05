@@ -21,11 +21,10 @@ type KubernetesNode struct {
 	// The type of object
 	Type *string `json:"type,omitempty"`
 	// URL to the object representation (absolute path)
-	Href *string `json:"href,omitempty"`
-	Metadata *KubernetesNodeMetadata `json:"metadata,omitempty"`
+	Href       *string                   `json:"href,omitempty"`
+	Metadata   *KubernetesNodeMetadata   `json:"metadata,omitempty"`
 	Properties *KubernetesNodeProperties `json:"properties"`
 }
-
 
 // GetId returns the Id field value
 // If the value is explicit nil, the zero value for string will be returned
@@ -33,7 +32,6 @@ func (o *KubernetesNode) GetId() *string {
 	if o == nil {
 		return nil
 	}
-
 
 	return o.Id
 
@@ -47,13 +45,11 @@ func (o *KubernetesNode) GetIdOk() (*string, bool) {
 		return nil, false
 	}
 
-
 	return o.Id, true
 }
 
 // SetId sets field value
 func (o *KubernetesNode) SetId(v string) {
-
 
 	o.Id = &v
 
@@ -75,7 +71,6 @@ func (o *KubernetesNode) GetType() *string {
 		return nil
 	}
 
-
 	return o.Type
 
 }
@@ -88,13 +83,11 @@ func (o *KubernetesNode) GetTypeOk() (*string, bool) {
 		return nil, false
 	}
 
-
 	return o.Type, true
 }
 
 // SetType sets field value
 func (o *KubernetesNode) SetType(v string) {
-
 
 	o.Type = &v
 
@@ -116,7 +109,6 @@ func (o *KubernetesNode) GetHref() *string {
 		return nil
 	}
 
-
 	return o.Href
 
 }
@@ -129,13 +121,11 @@ func (o *KubernetesNode) GetHrefOk() (*string, bool) {
 		return nil, false
 	}
 
-
 	return o.Href, true
 }
 
 // SetHref sets field value
 func (o *KubernetesNode) SetHref(v string) {
-
 
 	o.Href = &v
 
@@ -157,7 +147,6 @@ func (o *KubernetesNode) GetMetadata() *KubernetesNodeMetadata {
 		return nil
 	}
 
-
 	return o.Metadata
 
 }
@@ -170,13 +159,11 @@ func (o *KubernetesNode) GetMetadataOk() (*KubernetesNodeMetadata, bool) {
 		return nil, false
 	}
 
-
 	return o.Metadata, true
 }
 
 // SetMetadata sets field value
 func (o *KubernetesNode) SetMetadata(v KubernetesNodeMetadata) {
-
 
 	o.Metadata = &v
 
@@ -198,7 +185,6 @@ func (o *KubernetesNode) GetProperties() *KubernetesNodeProperties {
 		return nil
 	}
 
-
 	return o.Properties
 
 }
@@ -211,13 +197,11 @@ func (o *KubernetesNode) GetPropertiesOk() (*KubernetesNodeProperties, bool) {
 		return nil, false
 	}
 
-
 	return o.Properties, true
 }
 
 // SetProperties sets field value
 func (o *KubernetesNode) SetProperties(v KubernetesNodeProperties) {
-
 
 	o.Properties = &v
 
@@ -256,6 +240,7 @@ func (o KubernetesNode) MarshalJSON() ([]byte, error) {
 	}
 	return json.Marshal(toSerialize)
 }
+
 type NullableKubernetesNode struct {
 	value *KubernetesNode
 	isSet bool
@@ -291,5 +276,3 @@ func (v *NullableKubernetesNode) UnmarshalJSON(src []byte) error {
 	v.isSet = true
 	return json.Unmarshal(src, &v.value)
 }
-
-

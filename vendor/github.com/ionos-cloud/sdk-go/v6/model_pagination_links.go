@@ -24,14 +24,12 @@ type PaginationLinks struct {
 	Next *string `json:"next,omitempty"`
 }
 
-
 // GetPrev returns the Prev field value
 // If the value is explicit nil, the zero value for string will be returned
 func (o *PaginationLinks) GetPrev() *string {
 	if o == nil {
 		return nil
 	}
-
 
 	return o.Prev
 
@@ -45,13 +43,11 @@ func (o *PaginationLinks) GetPrevOk() (*string, bool) {
 		return nil, false
 	}
 
-
 	return o.Prev, true
 }
 
 // SetPrev sets field value
 func (o *PaginationLinks) SetPrev(v string) {
-
 
 	o.Prev = &v
 
@@ -73,7 +69,6 @@ func (o *PaginationLinks) GetSelf() *string {
 		return nil
 	}
 
-
 	return o.Self
 
 }
@@ -86,13 +81,11 @@ func (o *PaginationLinks) GetSelfOk() (*string, bool) {
 		return nil, false
 	}
 
-
 	return o.Self, true
 }
 
 // SetSelf sets field value
 func (o *PaginationLinks) SetSelf(v string) {
-
 
 	o.Self = &v
 
@@ -114,7 +107,6 @@ func (o *PaginationLinks) GetNext() *string {
 		return nil
 	}
 
-
 	return o.Next
 
 }
@@ -127,13 +119,11 @@ func (o *PaginationLinks) GetNextOk() (*string, bool) {
 		return nil, false
 	}
 
-
 	return o.Next, true
 }
 
 // SetNext sets field value
 func (o *PaginationLinks) SetNext(v string) {
-
 
 	o.Next = &v
 
@@ -164,6 +154,7 @@ func (o PaginationLinks) MarshalJSON() ([]byte, error) {
 	}
 	return json.Marshal(toSerialize)
 }
+
 type NullablePaginationLinks struct {
 	value *PaginationLinks
 	isSet bool
@@ -199,5 +190,3 @@ func (v *NullablePaginationLinks) UnmarshalJSON(src []byte) error {
 	v.isSet = true
 	return json.Unmarshal(src, &v.value)
 }
-
-

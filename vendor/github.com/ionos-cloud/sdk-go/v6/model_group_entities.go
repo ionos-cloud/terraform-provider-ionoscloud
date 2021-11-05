@@ -16,10 +16,9 @@ import (
 
 // GroupEntities struct for GroupEntities
 type GroupEntities struct {
-	Users *GroupMembers `json:"users,omitempty"`
+	Users     *GroupMembers   `json:"users,omitempty"`
 	Resources *ResourceGroups `json:"resources,omitempty"`
 }
-
 
 // GetUsers returns the Users field value
 // If the value is explicit nil, the zero value for GroupMembers will be returned
@@ -27,7 +26,6 @@ func (o *GroupEntities) GetUsers() *GroupMembers {
 	if o == nil {
 		return nil
 	}
-
 
 	return o.Users
 
@@ -41,13 +39,11 @@ func (o *GroupEntities) GetUsersOk() (*GroupMembers, bool) {
 		return nil, false
 	}
 
-
 	return o.Users, true
 }
 
 // SetUsers sets field value
 func (o *GroupEntities) SetUsers(v GroupMembers) {
-
 
 	o.Users = &v
 
@@ -69,7 +65,6 @@ func (o *GroupEntities) GetResources() *ResourceGroups {
 		return nil
 	}
 
-
 	return o.Resources
 
 }
@@ -82,13 +77,11 @@ func (o *GroupEntities) GetResourcesOk() (*ResourceGroups, bool) {
 		return nil, false
 	}
 
-
 	return o.Resources, true
 }
 
 // SetResources sets field value
 func (o *GroupEntities) SetResources(v ResourceGroups) {
-
 
 	o.Resources = &v
 
@@ -115,6 +108,7 @@ func (o GroupEntities) MarshalJSON() ([]byte, error) {
 	}
 	return json.Marshal(toSerialize)
 }
+
 type NullableGroupEntities struct {
 	value *GroupEntities
 	isSet bool
@@ -150,5 +144,3 @@ func (v *NullableGroupEntities) UnmarshalJSON(src []byte) error {
 	v.isSet = true
 	return json.Unmarshal(src, &v.value)
 }
-
-

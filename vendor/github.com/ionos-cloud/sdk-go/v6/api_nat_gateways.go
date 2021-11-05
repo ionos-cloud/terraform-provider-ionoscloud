@@ -28,12 +28,12 @@ var (
 type NATGatewaysApiService service
 
 type ApiDatacentersNatgatewaysDeleteRequest struct {
-	ctx _context.Context
-	ApiService *NATGatewaysApiService
-	datacenterId string
-	natGatewayId string
-	pretty *bool
-	depth *int32
+	ctx             _context.Context
+	ApiService      *NATGatewaysApiService
+	datacenterId    string
+	natGatewayId    string
+	pretty          *bool
+	depth           *int32
 	xContractNumber *int32
 }
 
@@ -64,8 +64,8 @@ func (r ApiDatacentersNatgatewaysDeleteRequest) Execute() (*APIResponse, error) 
  */
 func (a *NATGatewaysApiService) DatacentersNatgatewaysDelete(ctx _context.Context, datacenterId string, natGatewayId string) ApiDatacentersNatgatewaysDeleteRequest {
 	return ApiDatacentersNatgatewaysDeleteRequest{
-		ApiService: a,
-		ctx: ctx,
+		ApiService:   a,
+		ctx:          ctx,
 		datacenterId: datacenterId,
 		natGatewayId: natGatewayId,
 	}
@@ -102,6 +102,7 @@ func (a *NATGatewaysApiService) DatacentersNatgatewaysDeleteExecute(r ApiDatacen
 	if r.depth != nil {
 		localVarQueryParams.Add("depth", parameterToString(*r.depth, ""))
 	}
+
 	// to determine the Content-Type header
 	localVarHTTPContentTypes := []string{}
 
@@ -143,12 +144,12 @@ func (a *NATGatewaysApiService) DatacentersNatgatewaysDeleteExecute(r ApiDatacen
 
 	localVarHTTPResponse, httpRequestTime, err := a.client.callAPI(req)
 
-	localVarAPIResponse := &APIResponse {
-		Response: localVarHTTPResponse,
-		Method: localVarHTTPMethod,
-		RequestURL: localVarPath,
+	localVarAPIResponse := &APIResponse{
+		Response:    localVarHTTPResponse,
+		Method:      localVarHTTPMethod,
+		RequestURL:  localVarPath,
 		RequestTime: httpRequestTime,
-		Operation: "DatacentersNatgatewaysDelete",
+		Operation:   "DatacentersNatgatewaysDelete",
 	}
 
 	if err != nil || localVarHTTPResponse == nil {
@@ -165,16 +166,16 @@ func (a *NATGatewaysApiService) DatacentersNatgatewaysDeleteExecute(r ApiDatacen
 	if localVarHTTPResponse.StatusCode >= 300 {
 		newErr := GenericOpenAPIError{
 			statusCode: localVarHTTPResponse.StatusCode,
-			body:  localVarBody,
-			error: fmt.Sprintf("%s: %s", localVarHTTPResponse.Status, string(localVarBody)),
+			body:       localVarBody,
+			error:      fmt.Sprintf(FormatStringErr, localVarHTTPResponse.Status, string(localVarBody)),
 		}
-			var v Error
-			err = a.client.decode(&v, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
-			if err != nil {
-				newErr.error = err.Error()
-				return localVarAPIResponse, newErr
-			}
-			newErr.model = v
+		var v Error
+		err = a.client.decode(&v, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
+		if err != nil {
+			newErr.error = err.Error()
+			return localVarAPIResponse, newErr
+		}
+		newErr.model = v
 		return localVarAPIResponse, newErr
 	}
 
@@ -182,12 +183,12 @@ func (a *NATGatewaysApiService) DatacentersNatgatewaysDeleteExecute(r ApiDatacen
 }
 
 type ApiDatacentersNatgatewaysFindByNatGatewayIdRequest struct {
-	ctx _context.Context
-	ApiService *NATGatewaysApiService
-	datacenterId string
-	natGatewayId string
-	pretty *bool
-	depth *int32
+	ctx             _context.Context
+	ApiService      *NATGatewaysApiService
+	datacenterId    string
+	natGatewayId    string
+	pretty          *bool
+	depth           *int32
 	xContractNumber *int32
 }
 
@@ -218,8 +219,8 @@ func (r ApiDatacentersNatgatewaysFindByNatGatewayIdRequest) Execute() (NatGatewa
  */
 func (a *NATGatewaysApiService) DatacentersNatgatewaysFindByNatGatewayId(ctx _context.Context, datacenterId string, natGatewayId string) ApiDatacentersNatgatewaysFindByNatGatewayIdRequest {
 	return ApiDatacentersNatgatewaysFindByNatGatewayIdRequest{
-		ApiService: a,
-		ctx: ctx,
+		ApiService:   a,
+		ctx:          ctx,
 		datacenterId: datacenterId,
 		natGatewayId: natGatewayId,
 	}
@@ -258,6 +259,7 @@ func (a *NATGatewaysApiService) DatacentersNatgatewaysFindByNatGatewayIdExecute(
 	if r.depth != nil {
 		localVarQueryParams.Add("depth", parameterToString(*r.depth, ""))
 	}
+
 	// to determine the Content-Type header
 	localVarHTTPContentTypes := []string{}
 
@@ -299,12 +301,12 @@ func (a *NATGatewaysApiService) DatacentersNatgatewaysFindByNatGatewayIdExecute(
 
 	localVarHTTPResponse, httpRequestTime, err := a.client.callAPI(req)
 
-	localVarAPIResponse := &APIResponse {
-		Response: localVarHTTPResponse,
-		Method: localVarHTTPMethod,
-		RequestURL: localVarPath,
+	localVarAPIResponse := &APIResponse{
+		Response:    localVarHTTPResponse,
+		Method:      localVarHTTPMethod,
+		RequestURL:  localVarPath,
 		RequestTime: httpRequestTime,
-		Operation: "DatacentersNatgatewaysFindByNatGatewayId",
+		Operation:   "DatacentersNatgatewaysFindByNatGatewayId",
 	}
 
 	if err != nil || localVarHTTPResponse == nil {
@@ -321,16 +323,16 @@ func (a *NATGatewaysApiService) DatacentersNatgatewaysFindByNatGatewayIdExecute(
 	if localVarHTTPResponse.StatusCode >= 300 {
 		newErr := GenericOpenAPIError{
 			statusCode: localVarHTTPResponse.StatusCode,
-			body:  localVarBody,
-			error: fmt.Sprintf("%s: %s", localVarHTTPResponse.Status, string(localVarBody)),
+			body:       localVarBody,
+			error:      fmt.Sprintf(FormatStringErr, localVarHTTPResponse.Status, string(localVarBody)),
 		}
-			var v Error
-			err = a.client.decode(&v, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
-			if err != nil {
-				newErr.error = err.Error()
-				return localVarReturnValue, localVarAPIResponse, newErr
-			}
-			newErr.model = v
+		var v Error
+		err = a.client.decode(&v, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
+		if err != nil {
+			newErr.error = err.Error()
+			return localVarReturnValue, localVarAPIResponse, newErr
+		}
+		newErr.model = v
 		return localVarReturnValue, localVarAPIResponse, newErr
 	}
 
@@ -338,8 +340,8 @@ func (a *NATGatewaysApiService) DatacentersNatgatewaysFindByNatGatewayIdExecute(
 	if err != nil {
 		newErr := GenericOpenAPIError{
 			statusCode: localVarHTTPResponse.StatusCode,
-			body:  localVarBody,
-			error: err.Error(),
+			body:       localVarBody,
+			error:      err.Error(),
 		}
 		return localVarReturnValue, localVarAPIResponse, newErr
 	}
@@ -348,13 +350,13 @@ func (a *NATGatewaysApiService) DatacentersNatgatewaysFindByNatGatewayIdExecute(
 }
 
 type ApiDatacentersNatgatewaysFlowlogsDeleteRequest struct {
-	ctx _context.Context
-	ApiService *NATGatewaysApiService
+	ctx          _context.Context
+	ApiService   *NATGatewaysApiService
 	datacenterId string
 	natGatewayId string
-	flowLogId string
-	pretty *bool
-	depth *int32
+	flowLogId    string
+	pretty       *bool
+	depth        *int32
 }
 
 func (r ApiDatacentersNatgatewaysFlowlogsDeleteRequest) Pretty(pretty bool) ApiDatacentersNatgatewaysFlowlogsDeleteRequest {
@@ -381,11 +383,11 @@ func (r ApiDatacentersNatgatewaysFlowlogsDeleteRequest) Execute() (*APIResponse,
  */
 func (a *NATGatewaysApiService) DatacentersNatgatewaysFlowlogsDelete(ctx _context.Context, datacenterId string, natGatewayId string, flowLogId string) ApiDatacentersNatgatewaysFlowlogsDeleteRequest {
 	return ApiDatacentersNatgatewaysFlowlogsDeleteRequest{
-		ApiService: a,
-		ctx: ctx,
+		ApiService:   a,
+		ctx:          ctx,
 		datacenterId: datacenterId,
 		natGatewayId: natGatewayId,
-		flowLogId: flowLogId,
+		flowLogId:    flowLogId,
 	}
 }
 
@@ -421,6 +423,7 @@ func (a *NATGatewaysApiService) DatacentersNatgatewaysFlowlogsDeleteExecute(r Ap
 	if r.depth != nil {
 		localVarQueryParams.Add("depth", parameterToString(*r.depth, ""))
 	}
+
 	// to determine the Content-Type header
 	localVarHTTPContentTypes := []string{}
 
@@ -459,12 +462,12 @@ func (a *NATGatewaysApiService) DatacentersNatgatewaysFlowlogsDeleteExecute(r Ap
 
 	localVarHTTPResponse, httpRequestTime, err := a.client.callAPI(req)
 
-	localVarAPIResponse := &APIResponse {
-		Response: localVarHTTPResponse,
-		Method: localVarHTTPMethod,
-		RequestURL: localVarPath,
+	localVarAPIResponse := &APIResponse{
+		Response:    localVarHTTPResponse,
+		Method:      localVarHTTPMethod,
+		RequestURL:  localVarPath,
 		RequestTime: httpRequestTime,
-		Operation: "DatacentersNatgatewaysFlowlogsDelete",
+		Operation:   "DatacentersNatgatewaysFlowlogsDelete",
 	}
 
 	if err != nil || localVarHTTPResponse == nil {
@@ -481,16 +484,16 @@ func (a *NATGatewaysApiService) DatacentersNatgatewaysFlowlogsDeleteExecute(r Ap
 	if localVarHTTPResponse.StatusCode >= 300 {
 		newErr := GenericOpenAPIError{
 			statusCode: localVarHTTPResponse.StatusCode,
-			body:  localVarBody,
-			error: fmt.Sprintf("%s: %s", localVarHTTPResponse.Status, string(localVarBody)),
+			body:       localVarBody,
+			error:      fmt.Sprintf(FormatStringErr, localVarHTTPResponse.Status, string(localVarBody)),
 		}
-			var v Error
-			err = a.client.decode(&v, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
-			if err != nil {
-				newErr.error = err.Error()
-				return localVarAPIResponse, newErr
-			}
-			newErr.model = v
+		var v Error
+		err = a.client.decode(&v, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
+		if err != nil {
+			newErr.error = err.Error()
+			return localVarAPIResponse, newErr
+		}
+		newErr.model = v
 		return localVarAPIResponse, newErr
 	}
 
@@ -498,13 +501,13 @@ func (a *NATGatewaysApiService) DatacentersNatgatewaysFlowlogsDeleteExecute(r Ap
 }
 
 type ApiDatacentersNatgatewaysFlowlogsFindByFlowLogIdRequest struct {
-	ctx _context.Context
-	ApiService *NATGatewaysApiService
+	ctx          _context.Context
+	ApiService   *NATGatewaysApiService
 	datacenterId string
 	natGatewayId string
-	flowLogId string
-	pretty *bool
-	depth *int32
+	flowLogId    string
+	pretty       *bool
+	depth        *int32
 }
 
 func (r ApiDatacentersNatgatewaysFlowlogsFindByFlowLogIdRequest) Pretty(pretty bool) ApiDatacentersNatgatewaysFlowlogsFindByFlowLogIdRequest {
@@ -531,11 +534,11 @@ func (r ApiDatacentersNatgatewaysFlowlogsFindByFlowLogIdRequest) Execute() (Flow
  */
 func (a *NATGatewaysApiService) DatacentersNatgatewaysFlowlogsFindByFlowLogId(ctx _context.Context, datacenterId string, natGatewayId string, flowLogId string) ApiDatacentersNatgatewaysFlowlogsFindByFlowLogIdRequest {
 	return ApiDatacentersNatgatewaysFlowlogsFindByFlowLogIdRequest{
-		ApiService: a,
-		ctx: ctx,
+		ApiService:   a,
+		ctx:          ctx,
 		datacenterId: datacenterId,
 		natGatewayId: natGatewayId,
-		flowLogId: flowLogId,
+		flowLogId:    flowLogId,
 	}
 }
 
@@ -573,6 +576,7 @@ func (a *NATGatewaysApiService) DatacentersNatgatewaysFlowlogsFindByFlowLogIdExe
 	if r.depth != nil {
 		localVarQueryParams.Add("depth", parameterToString(*r.depth, ""))
 	}
+
 	// to determine the Content-Type header
 	localVarHTTPContentTypes := []string{}
 
@@ -611,12 +615,12 @@ func (a *NATGatewaysApiService) DatacentersNatgatewaysFlowlogsFindByFlowLogIdExe
 
 	localVarHTTPResponse, httpRequestTime, err := a.client.callAPI(req)
 
-	localVarAPIResponse := &APIResponse {
-		Response: localVarHTTPResponse,
-		Method: localVarHTTPMethod,
-		RequestURL: localVarPath,
+	localVarAPIResponse := &APIResponse{
+		Response:    localVarHTTPResponse,
+		Method:      localVarHTTPMethod,
+		RequestURL:  localVarPath,
 		RequestTime: httpRequestTime,
-		Operation: "DatacentersNatgatewaysFlowlogsFindByFlowLogId",
+		Operation:   "DatacentersNatgatewaysFlowlogsFindByFlowLogId",
 	}
 
 	if err != nil || localVarHTTPResponse == nil {
@@ -633,16 +637,16 @@ func (a *NATGatewaysApiService) DatacentersNatgatewaysFlowlogsFindByFlowLogIdExe
 	if localVarHTTPResponse.StatusCode >= 300 {
 		newErr := GenericOpenAPIError{
 			statusCode: localVarHTTPResponse.StatusCode,
-			body:  localVarBody,
-			error: fmt.Sprintf("%s: %s", localVarHTTPResponse.Status, string(localVarBody)),
+			body:       localVarBody,
+			error:      fmt.Sprintf(FormatStringErr, localVarHTTPResponse.Status, string(localVarBody)),
 		}
-			var v Error
-			err = a.client.decode(&v, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
-			if err != nil {
-				newErr.error = err.Error()
-				return localVarReturnValue, localVarAPIResponse, newErr
-			}
-			newErr.model = v
+		var v Error
+		err = a.client.decode(&v, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
+		if err != nil {
+			newErr.error = err.Error()
+			return localVarReturnValue, localVarAPIResponse, newErr
+		}
+		newErr.model = v
 		return localVarReturnValue, localVarAPIResponse, newErr
 	}
 
@@ -650,8 +654,8 @@ func (a *NATGatewaysApiService) DatacentersNatgatewaysFlowlogsFindByFlowLogIdExe
 	if err != nil {
 		newErr := GenericOpenAPIError{
 			statusCode: localVarHTTPResponse.StatusCode,
-			body:  localVarBody,
-			error: err.Error(),
+			body:       localVarBody,
+			error:      err.Error(),
 		}
 		return localVarReturnValue, localVarAPIResponse, newErr
 	}
@@ -660,14 +664,16 @@ func (a *NATGatewaysApiService) DatacentersNatgatewaysFlowlogsFindByFlowLogIdExe
 }
 
 type ApiDatacentersNatgatewaysFlowlogsGetRequest struct {
-	ctx _context.Context
-	ApiService *NATGatewaysApiService
+	ctx          _context.Context
+	ApiService   *NATGatewaysApiService
+	filters      _neturl.Values
+	orderBy      *string
 	datacenterId string
 	natGatewayId string
-	pretty *bool
-	depth *int32
-	offset *int32
-	limit *int32
+	pretty       *bool
+	depth        *int32
+	offset       *int32
+	limit        *int32
 }
 
 func (r ApiDatacentersNatgatewaysFlowlogsGetRequest) Pretty(pretty bool) ApiDatacentersNatgatewaysFlowlogsGetRequest {
@@ -687,6 +693,19 @@ func (r ApiDatacentersNatgatewaysFlowlogsGetRequest) Limit(limit int32) ApiDatac
 	return r
 }
 
+// Filters query parameters limit results to those containing a matching value for a specific property.
+func (r ApiDatacentersNatgatewaysFlowlogsGetRequest) Filter(key string, value string) ApiDatacentersNatgatewaysFlowlogsGetRequest {
+	filterKey := fmt.Sprintf(FilterQueryParam, key)
+	r.filters[filterKey] = []string{value}
+	return r
+}
+
+// OrderBy query param sorts the results alphanumerically in ascending order based on the specified property.
+func (r ApiDatacentersNatgatewaysFlowlogsGetRequest) OrderBy(orderBy string) ApiDatacentersNatgatewaysFlowlogsGetRequest {
+	r.orderBy = &orderBy
+	return r
+}
+
 func (r ApiDatacentersNatgatewaysFlowlogsGetRequest) Execute() (FlowLogs, *APIResponse, error) {
 	return r.ApiService.DatacentersNatgatewaysFlowlogsGetExecute(r)
 }
@@ -701,10 +720,11 @@ func (r ApiDatacentersNatgatewaysFlowlogsGetRequest) Execute() (FlowLogs, *APIRe
  */
 func (a *NATGatewaysApiService) DatacentersNatgatewaysFlowlogsGet(ctx _context.Context, datacenterId string, natGatewayId string) ApiDatacentersNatgatewaysFlowlogsGetRequest {
 	return ApiDatacentersNatgatewaysFlowlogsGetRequest{
-		ApiService: a,
-		ctx: ctx,
+		ApiService:   a,
+		ctx:          ctx,
 		datacenterId: datacenterId,
 		natGatewayId: natGatewayId,
+		filters:      _neturl.Values{},
 	}
 }
 
@@ -747,6 +767,17 @@ func (a *NATGatewaysApiService) DatacentersNatgatewaysFlowlogsGetExecute(r ApiDa
 	if r.limit != nil {
 		localVarQueryParams.Add("limit", parameterToString(*r.limit, ""))
 	}
+	if r.orderBy != nil {
+		localVarQueryParams.Add("orderBy", parameterToString(*r.orderBy, ""))
+	}
+	if len(r.filters) > 0 {
+		for k, v := range r.filters {
+			for _, iv := range v {
+				localVarQueryParams.Add(k, iv)
+			}
+		}
+	}
+
 	// to determine the Content-Type header
 	localVarHTTPContentTypes := []string{}
 
@@ -785,12 +816,12 @@ func (a *NATGatewaysApiService) DatacentersNatgatewaysFlowlogsGetExecute(r ApiDa
 
 	localVarHTTPResponse, httpRequestTime, err := a.client.callAPI(req)
 
-	localVarAPIResponse := &APIResponse {
-		Response: localVarHTTPResponse,
-		Method: localVarHTTPMethod,
-		RequestURL: localVarPath,
+	localVarAPIResponse := &APIResponse{
+		Response:    localVarHTTPResponse,
+		Method:      localVarHTTPMethod,
+		RequestURL:  localVarPath,
 		RequestTime: httpRequestTime,
-		Operation: "DatacentersNatgatewaysFlowlogsGet",
+		Operation:   "DatacentersNatgatewaysFlowlogsGet",
 	}
 
 	if err != nil || localVarHTTPResponse == nil {
@@ -807,16 +838,16 @@ func (a *NATGatewaysApiService) DatacentersNatgatewaysFlowlogsGetExecute(r ApiDa
 	if localVarHTTPResponse.StatusCode >= 300 {
 		newErr := GenericOpenAPIError{
 			statusCode: localVarHTTPResponse.StatusCode,
-			body:  localVarBody,
-			error: fmt.Sprintf("%s: %s", localVarHTTPResponse.Status, string(localVarBody)),
+			body:       localVarBody,
+			error:      fmt.Sprintf(FormatStringErr, localVarHTTPResponse.Status, string(localVarBody)),
 		}
-			var v Error
-			err = a.client.decode(&v, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
-			if err != nil {
-				newErr.error = err.Error()
-				return localVarReturnValue, localVarAPIResponse, newErr
-			}
-			newErr.model = v
+		var v Error
+		err = a.client.decode(&v, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
+		if err != nil {
+			newErr.error = err.Error()
+			return localVarReturnValue, localVarAPIResponse, newErr
+		}
+		newErr.model = v
 		return localVarReturnValue, localVarAPIResponse, newErr
 	}
 
@@ -824,8 +855,8 @@ func (a *NATGatewaysApiService) DatacentersNatgatewaysFlowlogsGetExecute(r ApiDa
 	if err != nil {
 		newErr := GenericOpenAPIError{
 			statusCode: localVarHTTPResponse.StatusCode,
-			body:  localVarBody,
-			error: err.Error(),
+			body:       localVarBody,
+			error:      err.Error(),
 		}
 		return localVarReturnValue, localVarAPIResponse, newErr
 	}
@@ -834,14 +865,14 @@ func (a *NATGatewaysApiService) DatacentersNatgatewaysFlowlogsGetExecute(r ApiDa
 }
 
 type ApiDatacentersNatgatewaysFlowlogsPatchRequest struct {
-	ctx _context.Context
-	ApiService *NATGatewaysApiService
-	datacenterId string
-	natGatewayId string
-	flowLogId string
+	ctx                         _context.Context
+	ApiService                  *NATGatewaysApiService
+	datacenterId                string
+	natGatewayId                string
+	flowLogId                   string
 	natGatewayFlowLogProperties *FlowLogProperties
-	pretty *bool
-	depth *int32
+	pretty                      *bool
+	depth                       *int32
 }
 
 func (r ApiDatacentersNatgatewaysFlowlogsPatchRequest) NatGatewayFlowLogProperties(natGatewayFlowLogProperties FlowLogProperties) ApiDatacentersNatgatewaysFlowlogsPatchRequest {
@@ -872,11 +903,11 @@ func (r ApiDatacentersNatgatewaysFlowlogsPatchRequest) Execute() (FlowLog, *APIR
  */
 func (a *NATGatewaysApiService) DatacentersNatgatewaysFlowlogsPatch(ctx _context.Context, datacenterId string, natGatewayId string, flowLogId string) ApiDatacentersNatgatewaysFlowlogsPatchRequest {
 	return ApiDatacentersNatgatewaysFlowlogsPatchRequest{
-		ApiService: a,
-		ctx: ctx,
+		ApiService:   a,
+		ctx:          ctx,
 		datacenterId: datacenterId,
 		natGatewayId: natGatewayId,
-		flowLogId: flowLogId,
+		flowLogId:    flowLogId,
 	}
 }
 
@@ -917,6 +948,7 @@ func (a *NATGatewaysApiService) DatacentersNatgatewaysFlowlogsPatchExecute(r Api
 	if r.depth != nil {
 		localVarQueryParams.Add("depth", parameterToString(*r.depth, ""))
 	}
+
 	// to determine the Content-Type header
 	localVarHTTPContentTypes := []string{}
 
@@ -957,12 +989,12 @@ func (a *NATGatewaysApiService) DatacentersNatgatewaysFlowlogsPatchExecute(r Api
 
 	localVarHTTPResponse, httpRequestTime, err := a.client.callAPI(req)
 
-	localVarAPIResponse := &APIResponse {
-		Response: localVarHTTPResponse,
-		Method: localVarHTTPMethod,
-		RequestURL: localVarPath,
+	localVarAPIResponse := &APIResponse{
+		Response:    localVarHTTPResponse,
+		Method:      localVarHTTPMethod,
+		RequestURL:  localVarPath,
 		RequestTime: httpRequestTime,
-		Operation: "DatacentersNatgatewaysFlowlogsPatch",
+		Operation:   "DatacentersNatgatewaysFlowlogsPatch",
 	}
 
 	if err != nil || localVarHTTPResponse == nil {
@@ -979,16 +1011,16 @@ func (a *NATGatewaysApiService) DatacentersNatgatewaysFlowlogsPatchExecute(r Api
 	if localVarHTTPResponse.StatusCode >= 300 {
 		newErr := GenericOpenAPIError{
 			statusCode: localVarHTTPResponse.StatusCode,
-			body:  localVarBody,
-			error: fmt.Sprintf("%s: %s", localVarHTTPResponse.Status, string(localVarBody)),
+			body:       localVarBody,
+			error:      fmt.Sprintf(FormatStringErr, localVarHTTPResponse.Status, string(localVarBody)),
 		}
-			var v Error
-			err = a.client.decode(&v, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
-			if err != nil {
-				newErr.error = err.Error()
-				return localVarReturnValue, localVarAPIResponse, newErr
-			}
-			newErr.model = v
+		var v Error
+		err = a.client.decode(&v, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
+		if err != nil {
+			newErr.error = err.Error()
+			return localVarReturnValue, localVarAPIResponse, newErr
+		}
+		newErr.model = v
 		return localVarReturnValue, localVarAPIResponse, newErr
 	}
 
@@ -996,8 +1028,8 @@ func (a *NATGatewaysApiService) DatacentersNatgatewaysFlowlogsPatchExecute(r Api
 	if err != nil {
 		newErr := GenericOpenAPIError{
 			statusCode: localVarHTTPResponse.StatusCode,
-			body:  localVarBody,
-			error: err.Error(),
+			body:       localVarBody,
+			error:      err.Error(),
 		}
 		return localVarReturnValue, localVarAPIResponse, newErr
 	}
@@ -1006,13 +1038,13 @@ func (a *NATGatewaysApiService) DatacentersNatgatewaysFlowlogsPatchExecute(r Api
 }
 
 type ApiDatacentersNatgatewaysFlowlogsPostRequest struct {
-	ctx _context.Context
-	ApiService *NATGatewaysApiService
-	datacenterId string
-	natGatewayId string
+	ctx               _context.Context
+	ApiService        *NATGatewaysApiService
+	datacenterId      string
+	natGatewayId      string
 	natGatewayFlowLog *FlowLog
-	pretty *bool
-	depth *int32
+	pretty            *bool
+	depth             *int32
 }
 
 func (r ApiDatacentersNatgatewaysFlowlogsPostRequest) NatGatewayFlowLog(natGatewayFlowLog FlowLog) ApiDatacentersNatgatewaysFlowlogsPostRequest {
@@ -1042,8 +1074,8 @@ func (r ApiDatacentersNatgatewaysFlowlogsPostRequest) Execute() (FlowLog, *APIRe
  */
 func (a *NATGatewaysApiService) DatacentersNatgatewaysFlowlogsPost(ctx _context.Context, datacenterId string, natGatewayId string) ApiDatacentersNatgatewaysFlowlogsPostRequest {
 	return ApiDatacentersNatgatewaysFlowlogsPostRequest{
-		ApiService: a,
-		ctx: ctx,
+		ApiService:   a,
+		ctx:          ctx,
 		datacenterId: datacenterId,
 		natGatewayId: natGatewayId,
 	}
@@ -1085,6 +1117,7 @@ func (a *NATGatewaysApiService) DatacentersNatgatewaysFlowlogsPostExecute(r ApiD
 	if r.depth != nil {
 		localVarQueryParams.Add("depth", parameterToString(*r.depth, ""))
 	}
+
 	// to determine the Content-Type header
 	localVarHTTPContentTypes := []string{"application/json"}
 
@@ -1125,12 +1158,12 @@ func (a *NATGatewaysApiService) DatacentersNatgatewaysFlowlogsPostExecute(r ApiD
 
 	localVarHTTPResponse, httpRequestTime, err := a.client.callAPI(req)
 
-	localVarAPIResponse := &APIResponse {
-		Response: localVarHTTPResponse,
-		Method: localVarHTTPMethod,
-		RequestURL: localVarPath,
+	localVarAPIResponse := &APIResponse{
+		Response:    localVarHTTPResponse,
+		Method:      localVarHTTPMethod,
+		RequestURL:  localVarPath,
 		RequestTime: httpRequestTime,
-		Operation: "DatacentersNatgatewaysFlowlogsPost",
+		Operation:   "DatacentersNatgatewaysFlowlogsPost",
 	}
 
 	if err != nil || localVarHTTPResponse == nil {
@@ -1147,16 +1180,16 @@ func (a *NATGatewaysApiService) DatacentersNatgatewaysFlowlogsPostExecute(r ApiD
 	if localVarHTTPResponse.StatusCode >= 300 {
 		newErr := GenericOpenAPIError{
 			statusCode: localVarHTTPResponse.StatusCode,
-			body:  localVarBody,
-			error: fmt.Sprintf("%s: %s", localVarHTTPResponse.Status, string(localVarBody)),
+			body:       localVarBody,
+			error:      fmt.Sprintf(FormatStringErr, localVarHTTPResponse.Status, string(localVarBody)),
 		}
-			var v Error
-			err = a.client.decode(&v, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
-			if err != nil {
-				newErr.error = err.Error()
-				return localVarReturnValue, localVarAPIResponse, newErr
-			}
-			newErr.model = v
+		var v Error
+		err = a.client.decode(&v, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
+		if err != nil {
+			newErr.error = err.Error()
+			return localVarReturnValue, localVarAPIResponse, newErr
+		}
+		newErr.model = v
 		return localVarReturnValue, localVarAPIResponse, newErr
 	}
 
@@ -1164,8 +1197,8 @@ func (a *NATGatewaysApiService) DatacentersNatgatewaysFlowlogsPostExecute(r ApiD
 	if err != nil {
 		newErr := GenericOpenAPIError{
 			statusCode: localVarHTTPResponse.StatusCode,
-			body:  localVarBody,
-			error: err.Error(),
+			body:       localVarBody,
+			error:      err.Error(),
 		}
 		return localVarReturnValue, localVarAPIResponse, newErr
 	}
@@ -1174,14 +1207,14 @@ func (a *NATGatewaysApiService) DatacentersNatgatewaysFlowlogsPostExecute(r ApiD
 }
 
 type ApiDatacentersNatgatewaysFlowlogsPutRequest struct {
-	ctx _context.Context
-	ApiService *NATGatewaysApiService
-	datacenterId string
-	natGatewayId string
-	flowLogId string
+	ctx               _context.Context
+	ApiService        *NATGatewaysApiService
+	datacenterId      string
+	natGatewayId      string
+	flowLogId         string
 	natGatewayFlowLog *FlowLogPut
-	pretty *bool
-	depth *int32
+	pretty            *bool
+	depth             *int32
 }
 
 func (r ApiDatacentersNatgatewaysFlowlogsPutRequest) NatGatewayFlowLog(natGatewayFlowLog FlowLogPut) ApiDatacentersNatgatewaysFlowlogsPutRequest {
@@ -1212,11 +1245,11 @@ func (r ApiDatacentersNatgatewaysFlowlogsPutRequest) Execute() (FlowLog, *APIRes
  */
 func (a *NATGatewaysApiService) DatacentersNatgatewaysFlowlogsPut(ctx _context.Context, datacenterId string, natGatewayId string, flowLogId string) ApiDatacentersNatgatewaysFlowlogsPutRequest {
 	return ApiDatacentersNatgatewaysFlowlogsPutRequest{
-		ApiService: a,
-		ctx: ctx,
+		ApiService:   a,
+		ctx:          ctx,
 		datacenterId: datacenterId,
 		natGatewayId: natGatewayId,
-		flowLogId: flowLogId,
+		flowLogId:    flowLogId,
 	}
 }
 
@@ -1257,6 +1290,7 @@ func (a *NATGatewaysApiService) DatacentersNatgatewaysFlowlogsPutExecute(r ApiDa
 	if r.depth != nil {
 		localVarQueryParams.Add("depth", parameterToString(*r.depth, ""))
 	}
+
 	// to determine the Content-Type header
 	localVarHTTPContentTypes := []string{"application/json"}
 
@@ -1297,12 +1331,12 @@ func (a *NATGatewaysApiService) DatacentersNatgatewaysFlowlogsPutExecute(r ApiDa
 
 	localVarHTTPResponse, httpRequestTime, err := a.client.callAPI(req)
 
-	localVarAPIResponse := &APIResponse {
-		Response: localVarHTTPResponse,
-		Method: localVarHTTPMethod,
-		RequestURL: localVarPath,
+	localVarAPIResponse := &APIResponse{
+		Response:    localVarHTTPResponse,
+		Method:      localVarHTTPMethod,
+		RequestURL:  localVarPath,
 		RequestTime: httpRequestTime,
-		Operation: "DatacentersNatgatewaysFlowlogsPut",
+		Operation:   "DatacentersNatgatewaysFlowlogsPut",
 	}
 
 	if err != nil || localVarHTTPResponse == nil {
@@ -1319,16 +1353,16 @@ func (a *NATGatewaysApiService) DatacentersNatgatewaysFlowlogsPutExecute(r ApiDa
 	if localVarHTTPResponse.StatusCode >= 300 {
 		newErr := GenericOpenAPIError{
 			statusCode: localVarHTTPResponse.StatusCode,
-			body:  localVarBody,
-			error: fmt.Sprintf("%s: %s", localVarHTTPResponse.Status, string(localVarBody)),
+			body:       localVarBody,
+			error:      fmt.Sprintf(FormatStringErr, localVarHTTPResponse.Status, string(localVarBody)),
 		}
-			var v Error
-			err = a.client.decode(&v, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
-			if err != nil {
-				newErr.error = err.Error()
-				return localVarReturnValue, localVarAPIResponse, newErr
-			}
-			newErr.model = v
+		var v Error
+		err = a.client.decode(&v, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
+		if err != nil {
+			newErr.error = err.Error()
+			return localVarReturnValue, localVarAPIResponse, newErr
+		}
+		newErr.model = v
 		return localVarReturnValue, localVarAPIResponse, newErr
 	}
 
@@ -1336,8 +1370,8 @@ func (a *NATGatewaysApiService) DatacentersNatgatewaysFlowlogsPutExecute(r ApiDa
 	if err != nil {
 		newErr := GenericOpenAPIError{
 			statusCode: localVarHTTPResponse.StatusCode,
-			body:  localVarBody,
-			error: err.Error(),
+			body:       localVarBody,
+			error:      err.Error(),
 		}
 		return localVarReturnValue, localVarAPIResponse, newErr
 	}
@@ -1346,11 +1380,13 @@ func (a *NATGatewaysApiService) DatacentersNatgatewaysFlowlogsPutExecute(r ApiDa
 }
 
 type ApiDatacentersNatgatewaysGetRequest struct {
-	ctx _context.Context
-	ApiService *NATGatewaysApiService
-	datacenterId string
-	pretty *bool
-	depth *int32
+	ctx             _context.Context
+	ApiService      *NATGatewaysApiService
+	filters         _neturl.Values
+	orderBy         *string
+	datacenterId    string
+	pretty          *bool
+	depth           *int32
 	xContractNumber *int32
 }
 
@@ -1367,6 +1403,19 @@ func (r ApiDatacentersNatgatewaysGetRequest) XContractNumber(xContractNumber int
 	return r
 }
 
+// Filters query parameters limit results to those containing a matching value for a specific property.
+func (r ApiDatacentersNatgatewaysGetRequest) Filter(key string, value string) ApiDatacentersNatgatewaysGetRequest {
+	filterKey := fmt.Sprintf(FilterQueryParam, key)
+	r.filters[filterKey] = []string{value}
+	return r
+}
+
+// OrderBy query param sorts the results alphanumerically in ascending order based on the specified property.
+func (r ApiDatacentersNatgatewaysGetRequest) OrderBy(orderBy string) ApiDatacentersNatgatewaysGetRequest {
+	r.orderBy = &orderBy
+	return r
+}
+
 func (r ApiDatacentersNatgatewaysGetRequest) Execute() (NatGateways, *APIResponse, error) {
 	return r.ApiService.DatacentersNatgatewaysGetExecute(r)
 }
@@ -1380,9 +1429,10 @@ func (r ApiDatacentersNatgatewaysGetRequest) Execute() (NatGateways, *APIRespons
  */
 func (a *NATGatewaysApiService) DatacentersNatgatewaysGet(ctx _context.Context, datacenterId string) ApiDatacentersNatgatewaysGetRequest {
 	return ApiDatacentersNatgatewaysGetRequest{
-		ApiService: a,
-		ctx: ctx,
+		ApiService:   a,
+		ctx:          ctx,
 		datacenterId: datacenterId,
+		filters:      _neturl.Values{},
 	}
 }
 
@@ -1418,6 +1468,17 @@ func (a *NATGatewaysApiService) DatacentersNatgatewaysGetExecute(r ApiDatacenter
 	if r.depth != nil {
 		localVarQueryParams.Add("depth", parameterToString(*r.depth, ""))
 	}
+	if r.orderBy != nil {
+		localVarQueryParams.Add("orderBy", parameterToString(*r.orderBy, ""))
+	}
+	if len(r.filters) > 0 {
+		for k, v := range r.filters {
+			for _, iv := range v {
+				localVarQueryParams.Add(k, iv)
+			}
+		}
+	}
+
 	// to determine the Content-Type header
 	localVarHTTPContentTypes := []string{}
 
@@ -1459,12 +1520,12 @@ func (a *NATGatewaysApiService) DatacentersNatgatewaysGetExecute(r ApiDatacenter
 
 	localVarHTTPResponse, httpRequestTime, err := a.client.callAPI(req)
 
-	localVarAPIResponse := &APIResponse {
-		Response: localVarHTTPResponse,
-		Method: localVarHTTPMethod,
-		RequestURL: localVarPath,
+	localVarAPIResponse := &APIResponse{
+		Response:    localVarHTTPResponse,
+		Method:      localVarHTTPMethod,
+		RequestURL:  localVarPath,
 		RequestTime: httpRequestTime,
-		Operation: "DatacentersNatgatewaysGet",
+		Operation:   "DatacentersNatgatewaysGet",
 	}
 
 	if err != nil || localVarHTTPResponse == nil {
@@ -1481,16 +1542,16 @@ func (a *NATGatewaysApiService) DatacentersNatgatewaysGetExecute(r ApiDatacenter
 	if localVarHTTPResponse.StatusCode >= 300 {
 		newErr := GenericOpenAPIError{
 			statusCode: localVarHTTPResponse.StatusCode,
-			body:  localVarBody,
-			error: fmt.Sprintf("%s: %s", localVarHTTPResponse.Status, string(localVarBody)),
+			body:       localVarBody,
+			error:      fmt.Sprintf(FormatStringErr, localVarHTTPResponse.Status, string(localVarBody)),
 		}
-			var v Error
-			err = a.client.decode(&v, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
-			if err != nil {
-				newErr.error = err.Error()
-				return localVarReturnValue, localVarAPIResponse, newErr
-			}
-			newErr.model = v
+		var v Error
+		err = a.client.decode(&v, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
+		if err != nil {
+			newErr.error = err.Error()
+			return localVarReturnValue, localVarAPIResponse, newErr
+		}
+		newErr.model = v
 		return localVarReturnValue, localVarAPIResponse, newErr
 	}
 
@@ -1498,8 +1559,8 @@ func (a *NATGatewaysApiService) DatacentersNatgatewaysGetExecute(r ApiDatacenter
 	if err != nil {
 		newErr := GenericOpenAPIError{
 			statusCode: localVarHTTPResponse.StatusCode,
-			body:  localVarBody,
-			error: err.Error(),
+			body:       localVarBody,
+			error:      err.Error(),
 		}
 		return localVarReturnValue, localVarAPIResponse, newErr
 	}
@@ -1508,14 +1569,14 @@ func (a *NATGatewaysApiService) DatacentersNatgatewaysGetExecute(r ApiDatacenter
 }
 
 type ApiDatacentersNatgatewaysPatchRequest struct {
-	ctx _context.Context
-	ApiService *NATGatewaysApiService
-	datacenterId string
-	natGatewayId string
+	ctx                  _context.Context
+	ApiService           *NATGatewaysApiService
+	datacenterId         string
+	natGatewayId         string
 	natGatewayProperties *NatGatewayProperties
-	pretty *bool
-	depth *int32
-	xContractNumber *int32
+	pretty               *bool
+	depth                *int32
+	xContractNumber      *int32
 }
 
 func (r ApiDatacentersNatgatewaysPatchRequest) NatGatewayProperties(natGatewayProperties NatGatewayProperties) ApiDatacentersNatgatewaysPatchRequest {
@@ -1549,8 +1610,8 @@ func (r ApiDatacentersNatgatewaysPatchRequest) Execute() (NatGateway, *APIRespon
  */
 func (a *NATGatewaysApiService) DatacentersNatgatewaysPatch(ctx _context.Context, datacenterId string, natGatewayId string) ApiDatacentersNatgatewaysPatchRequest {
 	return ApiDatacentersNatgatewaysPatchRequest{
-		ApiService: a,
-		ctx: ctx,
+		ApiService:   a,
+		ctx:          ctx,
 		datacenterId: datacenterId,
 		natGatewayId: natGatewayId,
 	}
@@ -1592,6 +1653,7 @@ func (a *NATGatewaysApiService) DatacentersNatgatewaysPatchExecute(r ApiDatacent
 	if r.depth != nil {
 		localVarQueryParams.Add("depth", parameterToString(*r.depth, ""))
 	}
+
 	// to determine the Content-Type header
 	localVarHTTPContentTypes := []string{}
 
@@ -1635,12 +1697,12 @@ func (a *NATGatewaysApiService) DatacentersNatgatewaysPatchExecute(r ApiDatacent
 
 	localVarHTTPResponse, httpRequestTime, err := a.client.callAPI(req)
 
-	localVarAPIResponse := &APIResponse {
-		Response: localVarHTTPResponse,
-		Method: localVarHTTPMethod,
-		RequestURL: localVarPath,
+	localVarAPIResponse := &APIResponse{
+		Response:    localVarHTTPResponse,
+		Method:      localVarHTTPMethod,
+		RequestURL:  localVarPath,
 		RequestTime: httpRequestTime,
-		Operation: "DatacentersNatgatewaysPatch",
+		Operation:   "DatacentersNatgatewaysPatch",
 	}
 
 	if err != nil || localVarHTTPResponse == nil {
@@ -1657,16 +1719,16 @@ func (a *NATGatewaysApiService) DatacentersNatgatewaysPatchExecute(r ApiDatacent
 	if localVarHTTPResponse.StatusCode >= 300 {
 		newErr := GenericOpenAPIError{
 			statusCode: localVarHTTPResponse.StatusCode,
-			body:  localVarBody,
-			error: fmt.Sprintf("%s: %s", localVarHTTPResponse.Status, string(localVarBody)),
+			body:       localVarBody,
+			error:      fmt.Sprintf(FormatStringErr, localVarHTTPResponse.Status, string(localVarBody)),
 		}
-			var v Error
-			err = a.client.decode(&v, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
-			if err != nil {
-				newErr.error = err.Error()
-				return localVarReturnValue, localVarAPIResponse, newErr
-			}
-			newErr.model = v
+		var v Error
+		err = a.client.decode(&v, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
+		if err != nil {
+			newErr.error = err.Error()
+			return localVarReturnValue, localVarAPIResponse, newErr
+		}
+		newErr.model = v
 		return localVarReturnValue, localVarAPIResponse, newErr
 	}
 
@@ -1674,8 +1736,8 @@ func (a *NATGatewaysApiService) DatacentersNatgatewaysPatchExecute(r ApiDatacent
 	if err != nil {
 		newErr := GenericOpenAPIError{
 			statusCode: localVarHTTPResponse.StatusCode,
-			body:  localVarBody,
-			error: err.Error(),
+			body:       localVarBody,
+			error:      err.Error(),
 		}
 		return localVarReturnValue, localVarAPIResponse, newErr
 	}
@@ -1684,12 +1746,12 @@ func (a *NATGatewaysApiService) DatacentersNatgatewaysPatchExecute(r ApiDatacent
 }
 
 type ApiDatacentersNatgatewaysPostRequest struct {
-	ctx _context.Context
-	ApiService *NATGatewaysApiService
-	datacenterId string
-	natGateway *NatGateway
-	pretty *bool
-	depth *int32
+	ctx             _context.Context
+	ApiService      *NATGatewaysApiService
+	datacenterId    string
+	natGateway      *NatGateway
+	pretty          *bool
+	depth           *int32
 	xContractNumber *int32
 }
 
@@ -1723,8 +1785,8 @@ func (r ApiDatacentersNatgatewaysPostRequest) Execute() (NatGateway, *APIRespons
  */
 func (a *NATGatewaysApiService) DatacentersNatgatewaysPost(ctx _context.Context, datacenterId string) ApiDatacentersNatgatewaysPostRequest {
 	return ApiDatacentersNatgatewaysPostRequest{
-		ApiService: a,
-		ctx: ctx,
+		ApiService:   a,
+		ctx:          ctx,
 		datacenterId: datacenterId,
 	}
 }
@@ -1764,6 +1826,7 @@ func (a *NATGatewaysApiService) DatacentersNatgatewaysPostExecute(r ApiDatacente
 	if r.depth != nil {
 		localVarQueryParams.Add("depth", parameterToString(*r.depth, ""))
 	}
+
 	// to determine the Content-Type header
 	localVarHTTPContentTypes := []string{"application/json"}
 
@@ -1807,12 +1870,12 @@ func (a *NATGatewaysApiService) DatacentersNatgatewaysPostExecute(r ApiDatacente
 
 	localVarHTTPResponse, httpRequestTime, err := a.client.callAPI(req)
 
-	localVarAPIResponse := &APIResponse {
-		Response: localVarHTTPResponse,
-		Method: localVarHTTPMethod,
-		RequestURL: localVarPath,
+	localVarAPIResponse := &APIResponse{
+		Response:    localVarHTTPResponse,
+		Method:      localVarHTTPMethod,
+		RequestURL:  localVarPath,
 		RequestTime: httpRequestTime,
-		Operation: "DatacentersNatgatewaysPost",
+		Operation:   "DatacentersNatgatewaysPost",
 	}
 
 	if err != nil || localVarHTTPResponse == nil {
@@ -1829,16 +1892,16 @@ func (a *NATGatewaysApiService) DatacentersNatgatewaysPostExecute(r ApiDatacente
 	if localVarHTTPResponse.StatusCode >= 300 {
 		newErr := GenericOpenAPIError{
 			statusCode: localVarHTTPResponse.StatusCode,
-			body:  localVarBody,
-			error: fmt.Sprintf("%s: %s", localVarHTTPResponse.Status, string(localVarBody)),
+			body:       localVarBody,
+			error:      fmt.Sprintf(FormatStringErr, localVarHTTPResponse.Status, string(localVarBody)),
 		}
-			var v Error
-			err = a.client.decode(&v, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
-			if err != nil {
-				newErr.error = err.Error()
-				return localVarReturnValue, localVarAPIResponse, newErr
-			}
-			newErr.model = v
+		var v Error
+		err = a.client.decode(&v, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
+		if err != nil {
+			newErr.error = err.Error()
+			return localVarReturnValue, localVarAPIResponse, newErr
+		}
+		newErr.model = v
 		return localVarReturnValue, localVarAPIResponse, newErr
 	}
 
@@ -1846,8 +1909,8 @@ func (a *NATGatewaysApiService) DatacentersNatgatewaysPostExecute(r ApiDatacente
 	if err != nil {
 		newErr := GenericOpenAPIError{
 			statusCode: localVarHTTPResponse.StatusCode,
-			body:  localVarBody,
-			error: err.Error(),
+			body:       localVarBody,
+			error:      err.Error(),
 		}
 		return localVarReturnValue, localVarAPIResponse, newErr
 	}
@@ -1856,13 +1919,13 @@ func (a *NATGatewaysApiService) DatacentersNatgatewaysPostExecute(r ApiDatacente
 }
 
 type ApiDatacentersNatgatewaysPutRequest struct {
-	ctx _context.Context
-	ApiService *NATGatewaysApiService
-	datacenterId string
-	natGatewayId string
-	natGateway *NatGatewayPut
-	pretty *bool
-	depth *int32
+	ctx             _context.Context
+	ApiService      *NATGatewaysApiService
+	datacenterId    string
+	natGatewayId    string
+	natGateway      *NatGatewayPut
+	pretty          *bool
+	depth           *int32
 	xContractNumber *int32
 }
 
@@ -1897,8 +1960,8 @@ func (r ApiDatacentersNatgatewaysPutRequest) Execute() (NatGateway, *APIResponse
  */
 func (a *NATGatewaysApiService) DatacentersNatgatewaysPut(ctx _context.Context, datacenterId string, natGatewayId string) ApiDatacentersNatgatewaysPutRequest {
 	return ApiDatacentersNatgatewaysPutRequest{
-		ApiService: a,
-		ctx: ctx,
+		ApiService:   a,
+		ctx:          ctx,
 		datacenterId: datacenterId,
 		natGatewayId: natGatewayId,
 	}
@@ -1940,6 +2003,7 @@ func (a *NATGatewaysApiService) DatacentersNatgatewaysPutExecute(r ApiDatacenter
 	if r.depth != nil {
 		localVarQueryParams.Add("depth", parameterToString(*r.depth, ""))
 	}
+
 	// to determine the Content-Type header
 	localVarHTTPContentTypes := []string{"application/json"}
 
@@ -1983,12 +2047,12 @@ func (a *NATGatewaysApiService) DatacentersNatgatewaysPutExecute(r ApiDatacenter
 
 	localVarHTTPResponse, httpRequestTime, err := a.client.callAPI(req)
 
-	localVarAPIResponse := &APIResponse {
-		Response: localVarHTTPResponse,
-		Method: localVarHTTPMethod,
-		RequestURL: localVarPath,
+	localVarAPIResponse := &APIResponse{
+		Response:    localVarHTTPResponse,
+		Method:      localVarHTTPMethod,
+		RequestURL:  localVarPath,
 		RequestTime: httpRequestTime,
-		Operation: "DatacentersNatgatewaysPut",
+		Operation:   "DatacentersNatgatewaysPut",
 	}
 
 	if err != nil || localVarHTTPResponse == nil {
@@ -2005,16 +2069,16 @@ func (a *NATGatewaysApiService) DatacentersNatgatewaysPutExecute(r ApiDatacenter
 	if localVarHTTPResponse.StatusCode >= 300 {
 		newErr := GenericOpenAPIError{
 			statusCode: localVarHTTPResponse.StatusCode,
-			body:  localVarBody,
-			error: fmt.Sprintf("%s: %s", localVarHTTPResponse.Status, string(localVarBody)),
+			body:       localVarBody,
+			error:      fmt.Sprintf(FormatStringErr, localVarHTTPResponse.Status, string(localVarBody)),
 		}
-			var v Error
-			err = a.client.decode(&v, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
-			if err != nil {
-				newErr.error = err.Error()
-				return localVarReturnValue, localVarAPIResponse, newErr
-			}
-			newErr.model = v
+		var v Error
+		err = a.client.decode(&v, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
+		if err != nil {
+			newErr.error = err.Error()
+			return localVarReturnValue, localVarAPIResponse, newErr
+		}
+		newErr.model = v
 		return localVarReturnValue, localVarAPIResponse, newErr
 	}
 
@@ -2022,8 +2086,8 @@ func (a *NATGatewaysApiService) DatacentersNatgatewaysPutExecute(r ApiDatacenter
 	if err != nil {
 		newErr := GenericOpenAPIError{
 			statusCode: localVarHTTPResponse.StatusCode,
-			body:  localVarBody,
-			error: err.Error(),
+			body:       localVarBody,
+			error:      err.Error(),
 		}
 		return localVarReturnValue, localVarAPIResponse, newErr
 	}
@@ -2032,14 +2096,14 @@ func (a *NATGatewaysApiService) DatacentersNatgatewaysPutExecute(r ApiDatacenter
 }
 
 type ApiDatacentersNatgatewaysRulesDeleteRequest struct {
-	ctx _context.Context
-	ApiService *NATGatewaysApiService
-	datacenterId string
-	natGatewayId string
+	ctx              _context.Context
+	ApiService       *NATGatewaysApiService
+	datacenterId     string
+	natGatewayId     string
 	natGatewayRuleId string
-	pretty *bool
-	depth *int32
-	xContractNumber *int32
+	pretty           *bool
+	depth            *int32
+	xContractNumber  *int32
 }
 
 func (r ApiDatacentersNatgatewaysRulesDeleteRequest) Pretty(pretty bool) ApiDatacentersNatgatewaysRulesDeleteRequest {
@@ -2070,10 +2134,10 @@ func (r ApiDatacentersNatgatewaysRulesDeleteRequest) Execute() (*APIResponse, er
  */
 func (a *NATGatewaysApiService) DatacentersNatgatewaysRulesDelete(ctx _context.Context, datacenterId string, natGatewayId string, natGatewayRuleId string) ApiDatacentersNatgatewaysRulesDeleteRequest {
 	return ApiDatacentersNatgatewaysRulesDeleteRequest{
-		ApiService: a,
-		ctx: ctx,
-		datacenterId: datacenterId,
-		natGatewayId: natGatewayId,
+		ApiService:       a,
+		ctx:              ctx,
+		datacenterId:     datacenterId,
+		natGatewayId:     natGatewayId,
 		natGatewayRuleId: natGatewayRuleId,
 	}
 }
@@ -2110,6 +2174,7 @@ func (a *NATGatewaysApiService) DatacentersNatgatewaysRulesDeleteExecute(r ApiDa
 	if r.depth != nil {
 		localVarQueryParams.Add("depth", parameterToString(*r.depth, ""))
 	}
+
 	// to determine the Content-Type header
 	localVarHTTPContentTypes := []string{}
 
@@ -2151,12 +2216,12 @@ func (a *NATGatewaysApiService) DatacentersNatgatewaysRulesDeleteExecute(r ApiDa
 
 	localVarHTTPResponse, httpRequestTime, err := a.client.callAPI(req)
 
-	localVarAPIResponse := &APIResponse {
-		Response: localVarHTTPResponse,
-		Method: localVarHTTPMethod,
-		RequestURL: localVarPath,
+	localVarAPIResponse := &APIResponse{
+		Response:    localVarHTTPResponse,
+		Method:      localVarHTTPMethod,
+		RequestURL:  localVarPath,
 		RequestTime: httpRequestTime,
-		Operation: "DatacentersNatgatewaysRulesDelete",
+		Operation:   "DatacentersNatgatewaysRulesDelete",
 	}
 
 	if err != nil || localVarHTTPResponse == nil {
@@ -2173,16 +2238,16 @@ func (a *NATGatewaysApiService) DatacentersNatgatewaysRulesDeleteExecute(r ApiDa
 	if localVarHTTPResponse.StatusCode >= 300 {
 		newErr := GenericOpenAPIError{
 			statusCode: localVarHTTPResponse.StatusCode,
-			body:  localVarBody,
-			error: fmt.Sprintf("%s: %s", localVarHTTPResponse.Status, string(localVarBody)),
+			body:       localVarBody,
+			error:      fmt.Sprintf(FormatStringErr, localVarHTTPResponse.Status, string(localVarBody)),
 		}
-			var v Error
-			err = a.client.decode(&v, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
-			if err != nil {
-				newErr.error = err.Error()
-				return localVarAPIResponse, newErr
-			}
-			newErr.model = v
+		var v Error
+		err = a.client.decode(&v, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
+		if err != nil {
+			newErr.error = err.Error()
+			return localVarAPIResponse, newErr
+		}
+		newErr.model = v
 		return localVarAPIResponse, newErr
 	}
 
@@ -2190,14 +2255,14 @@ func (a *NATGatewaysApiService) DatacentersNatgatewaysRulesDeleteExecute(r ApiDa
 }
 
 type ApiDatacentersNatgatewaysRulesFindByNatGatewayRuleIdRequest struct {
-	ctx _context.Context
-	ApiService *NATGatewaysApiService
-	datacenterId string
-	natGatewayId string
+	ctx              _context.Context
+	ApiService       *NATGatewaysApiService
+	datacenterId     string
+	natGatewayId     string
 	natGatewayRuleId string
-	pretty *bool
-	depth *int32
-	xContractNumber *int32
+	pretty           *bool
+	depth            *int32
+	xContractNumber  *int32
 }
 
 func (r ApiDatacentersNatgatewaysRulesFindByNatGatewayRuleIdRequest) Pretty(pretty bool) ApiDatacentersNatgatewaysRulesFindByNatGatewayRuleIdRequest {
@@ -2228,10 +2293,10 @@ func (r ApiDatacentersNatgatewaysRulesFindByNatGatewayRuleIdRequest) Execute() (
  */
 func (a *NATGatewaysApiService) DatacentersNatgatewaysRulesFindByNatGatewayRuleId(ctx _context.Context, datacenterId string, natGatewayId string, natGatewayRuleId string) ApiDatacentersNatgatewaysRulesFindByNatGatewayRuleIdRequest {
 	return ApiDatacentersNatgatewaysRulesFindByNatGatewayRuleIdRequest{
-		ApiService: a,
-		ctx: ctx,
-		datacenterId: datacenterId,
-		natGatewayId: natGatewayId,
+		ApiService:       a,
+		ctx:              ctx,
+		datacenterId:     datacenterId,
+		natGatewayId:     natGatewayId,
 		natGatewayRuleId: natGatewayRuleId,
 	}
 }
@@ -2270,6 +2335,7 @@ func (a *NATGatewaysApiService) DatacentersNatgatewaysRulesFindByNatGatewayRuleI
 	if r.depth != nil {
 		localVarQueryParams.Add("depth", parameterToString(*r.depth, ""))
 	}
+
 	// to determine the Content-Type header
 	localVarHTTPContentTypes := []string{}
 
@@ -2311,12 +2377,12 @@ func (a *NATGatewaysApiService) DatacentersNatgatewaysRulesFindByNatGatewayRuleI
 
 	localVarHTTPResponse, httpRequestTime, err := a.client.callAPI(req)
 
-	localVarAPIResponse := &APIResponse {
-		Response: localVarHTTPResponse,
-		Method: localVarHTTPMethod,
-		RequestURL: localVarPath,
+	localVarAPIResponse := &APIResponse{
+		Response:    localVarHTTPResponse,
+		Method:      localVarHTTPMethod,
+		RequestURL:  localVarPath,
 		RequestTime: httpRequestTime,
-		Operation: "DatacentersNatgatewaysRulesFindByNatGatewayRuleId",
+		Operation:   "DatacentersNatgatewaysRulesFindByNatGatewayRuleId",
 	}
 
 	if err != nil || localVarHTTPResponse == nil {
@@ -2333,16 +2399,16 @@ func (a *NATGatewaysApiService) DatacentersNatgatewaysRulesFindByNatGatewayRuleI
 	if localVarHTTPResponse.StatusCode >= 300 {
 		newErr := GenericOpenAPIError{
 			statusCode: localVarHTTPResponse.StatusCode,
-			body:  localVarBody,
-			error: fmt.Sprintf("%s: %s", localVarHTTPResponse.Status, string(localVarBody)),
+			body:       localVarBody,
+			error:      fmt.Sprintf(FormatStringErr, localVarHTTPResponse.Status, string(localVarBody)),
 		}
-			var v Error
-			err = a.client.decode(&v, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
-			if err != nil {
-				newErr.error = err.Error()
-				return localVarReturnValue, localVarAPIResponse, newErr
-			}
-			newErr.model = v
+		var v Error
+		err = a.client.decode(&v, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
+		if err != nil {
+			newErr.error = err.Error()
+			return localVarReturnValue, localVarAPIResponse, newErr
+		}
+		newErr.model = v
 		return localVarReturnValue, localVarAPIResponse, newErr
 	}
 
@@ -2350,8 +2416,8 @@ func (a *NATGatewaysApiService) DatacentersNatgatewaysRulesFindByNatGatewayRuleI
 	if err != nil {
 		newErr := GenericOpenAPIError{
 			statusCode: localVarHTTPResponse.StatusCode,
-			body:  localVarBody,
-			error: err.Error(),
+			body:       localVarBody,
+			error:      err.Error(),
 		}
 		return localVarReturnValue, localVarAPIResponse, newErr
 	}
@@ -2360,12 +2426,14 @@ func (a *NATGatewaysApiService) DatacentersNatgatewaysRulesFindByNatGatewayRuleI
 }
 
 type ApiDatacentersNatgatewaysRulesGetRequest struct {
-	ctx _context.Context
-	ApiService *NATGatewaysApiService
-	datacenterId string
-	natGatewayId string
-	pretty *bool
-	depth *int32
+	ctx             _context.Context
+	ApiService      *NATGatewaysApiService
+	filters         _neturl.Values
+	orderBy         *string
+	datacenterId    string
+	natGatewayId    string
+	pretty          *bool
+	depth           *int32
 	xContractNumber *int32
 }
 
@@ -2379,6 +2447,19 @@ func (r ApiDatacentersNatgatewaysRulesGetRequest) Depth(depth int32) ApiDatacent
 }
 func (r ApiDatacentersNatgatewaysRulesGetRequest) XContractNumber(xContractNumber int32) ApiDatacentersNatgatewaysRulesGetRequest {
 	r.xContractNumber = &xContractNumber
+	return r
+}
+
+// Filters query parameters limit results to those containing a matching value for a specific property.
+func (r ApiDatacentersNatgatewaysRulesGetRequest) Filter(key string, value string) ApiDatacentersNatgatewaysRulesGetRequest {
+	filterKey := fmt.Sprintf(FilterQueryParam, key)
+	r.filters[filterKey] = []string{value}
+	return r
+}
+
+// OrderBy query param sorts the results alphanumerically in ascending order based on the specified property.
+func (r ApiDatacentersNatgatewaysRulesGetRequest) OrderBy(orderBy string) ApiDatacentersNatgatewaysRulesGetRequest {
+	r.orderBy = &orderBy
 	return r
 }
 
@@ -2396,10 +2477,11 @@ func (r ApiDatacentersNatgatewaysRulesGetRequest) Execute() (NatGatewayRules, *A
  */
 func (a *NATGatewaysApiService) DatacentersNatgatewaysRulesGet(ctx _context.Context, datacenterId string, natGatewayId string) ApiDatacentersNatgatewaysRulesGetRequest {
 	return ApiDatacentersNatgatewaysRulesGetRequest{
-		ApiService: a,
-		ctx: ctx,
+		ApiService:   a,
+		ctx:          ctx,
 		datacenterId: datacenterId,
 		natGatewayId: natGatewayId,
+		filters:      _neturl.Values{},
 	}
 }
 
@@ -2436,6 +2518,17 @@ func (a *NATGatewaysApiService) DatacentersNatgatewaysRulesGetExecute(r ApiDatac
 	if r.depth != nil {
 		localVarQueryParams.Add("depth", parameterToString(*r.depth, ""))
 	}
+	if r.orderBy != nil {
+		localVarQueryParams.Add("orderBy", parameterToString(*r.orderBy, ""))
+	}
+	if len(r.filters) > 0 {
+		for k, v := range r.filters {
+			for _, iv := range v {
+				localVarQueryParams.Add(k, iv)
+			}
+		}
+	}
+
 	// to determine the Content-Type header
 	localVarHTTPContentTypes := []string{}
 
@@ -2477,12 +2570,12 @@ func (a *NATGatewaysApiService) DatacentersNatgatewaysRulesGetExecute(r ApiDatac
 
 	localVarHTTPResponse, httpRequestTime, err := a.client.callAPI(req)
 
-	localVarAPIResponse := &APIResponse {
-		Response: localVarHTTPResponse,
-		Method: localVarHTTPMethod,
-		RequestURL: localVarPath,
+	localVarAPIResponse := &APIResponse{
+		Response:    localVarHTTPResponse,
+		Method:      localVarHTTPMethod,
+		RequestURL:  localVarPath,
 		RequestTime: httpRequestTime,
-		Operation: "DatacentersNatgatewaysRulesGet",
+		Operation:   "DatacentersNatgatewaysRulesGet",
 	}
 
 	if err != nil || localVarHTTPResponse == nil {
@@ -2499,16 +2592,16 @@ func (a *NATGatewaysApiService) DatacentersNatgatewaysRulesGetExecute(r ApiDatac
 	if localVarHTTPResponse.StatusCode >= 300 {
 		newErr := GenericOpenAPIError{
 			statusCode: localVarHTTPResponse.StatusCode,
-			body:  localVarBody,
-			error: fmt.Sprintf("%s: %s", localVarHTTPResponse.Status, string(localVarBody)),
+			body:       localVarBody,
+			error:      fmt.Sprintf(FormatStringErr, localVarHTTPResponse.Status, string(localVarBody)),
 		}
-			var v Error
-			err = a.client.decode(&v, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
-			if err != nil {
-				newErr.error = err.Error()
-				return localVarReturnValue, localVarAPIResponse, newErr
-			}
-			newErr.model = v
+		var v Error
+		err = a.client.decode(&v, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
+		if err != nil {
+			newErr.error = err.Error()
+			return localVarReturnValue, localVarAPIResponse, newErr
+		}
+		newErr.model = v
 		return localVarReturnValue, localVarAPIResponse, newErr
 	}
 
@@ -2516,8 +2609,8 @@ func (a *NATGatewaysApiService) DatacentersNatgatewaysRulesGetExecute(r ApiDatac
 	if err != nil {
 		newErr := GenericOpenAPIError{
 			statusCode: localVarHTTPResponse.StatusCode,
-			body:  localVarBody,
-			error: err.Error(),
+			body:       localVarBody,
+			error:      err.Error(),
 		}
 		return localVarReturnValue, localVarAPIResponse, newErr
 	}
@@ -2526,15 +2619,15 @@ func (a *NATGatewaysApiService) DatacentersNatgatewaysRulesGetExecute(r ApiDatac
 }
 
 type ApiDatacentersNatgatewaysRulesPatchRequest struct {
-	ctx _context.Context
-	ApiService *NATGatewaysApiService
-	datacenterId string
-	natGatewayId string
-	natGatewayRuleId string
+	ctx                      _context.Context
+	ApiService               *NATGatewaysApiService
+	datacenterId             string
+	natGatewayId             string
+	natGatewayRuleId         string
 	natGatewayRuleProperties *NatGatewayRuleProperties
-	pretty *bool
-	depth *int32
-	xContractNumber *int32
+	pretty                   *bool
+	depth                    *int32
+	xContractNumber          *int32
 }
 
 func (r ApiDatacentersNatgatewaysRulesPatchRequest) NatGatewayRuleProperties(natGatewayRuleProperties NatGatewayRuleProperties) ApiDatacentersNatgatewaysRulesPatchRequest {
@@ -2569,10 +2662,10 @@ func (r ApiDatacentersNatgatewaysRulesPatchRequest) Execute() (NatGatewayRule, *
  */
 func (a *NATGatewaysApiService) DatacentersNatgatewaysRulesPatch(ctx _context.Context, datacenterId string, natGatewayId string, natGatewayRuleId string) ApiDatacentersNatgatewaysRulesPatchRequest {
 	return ApiDatacentersNatgatewaysRulesPatchRequest{
-		ApiService: a,
-		ctx: ctx,
-		datacenterId: datacenterId,
-		natGatewayId: natGatewayId,
+		ApiService:       a,
+		ctx:              ctx,
+		datacenterId:     datacenterId,
+		natGatewayId:     natGatewayId,
 		natGatewayRuleId: natGatewayRuleId,
 	}
 }
@@ -2614,6 +2707,7 @@ func (a *NATGatewaysApiService) DatacentersNatgatewaysRulesPatchExecute(r ApiDat
 	if r.depth != nil {
 		localVarQueryParams.Add("depth", parameterToString(*r.depth, ""))
 	}
+
 	// to determine the Content-Type header
 	localVarHTTPContentTypes := []string{}
 
@@ -2657,12 +2751,12 @@ func (a *NATGatewaysApiService) DatacentersNatgatewaysRulesPatchExecute(r ApiDat
 
 	localVarHTTPResponse, httpRequestTime, err := a.client.callAPI(req)
 
-	localVarAPIResponse := &APIResponse {
-		Response: localVarHTTPResponse,
-		Method: localVarHTTPMethod,
-		RequestURL: localVarPath,
+	localVarAPIResponse := &APIResponse{
+		Response:    localVarHTTPResponse,
+		Method:      localVarHTTPMethod,
+		RequestURL:  localVarPath,
 		RequestTime: httpRequestTime,
-		Operation: "DatacentersNatgatewaysRulesPatch",
+		Operation:   "DatacentersNatgatewaysRulesPatch",
 	}
 
 	if err != nil || localVarHTTPResponse == nil {
@@ -2679,16 +2773,16 @@ func (a *NATGatewaysApiService) DatacentersNatgatewaysRulesPatchExecute(r ApiDat
 	if localVarHTTPResponse.StatusCode >= 300 {
 		newErr := GenericOpenAPIError{
 			statusCode: localVarHTTPResponse.StatusCode,
-			body:  localVarBody,
-			error: fmt.Sprintf("%s: %s", localVarHTTPResponse.Status, string(localVarBody)),
+			body:       localVarBody,
+			error:      fmt.Sprintf(FormatStringErr, localVarHTTPResponse.Status, string(localVarBody)),
 		}
-			var v Error
-			err = a.client.decode(&v, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
-			if err != nil {
-				newErr.error = err.Error()
-				return localVarReturnValue, localVarAPIResponse, newErr
-			}
-			newErr.model = v
+		var v Error
+		err = a.client.decode(&v, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
+		if err != nil {
+			newErr.error = err.Error()
+			return localVarReturnValue, localVarAPIResponse, newErr
+		}
+		newErr.model = v
 		return localVarReturnValue, localVarAPIResponse, newErr
 	}
 
@@ -2696,8 +2790,8 @@ func (a *NATGatewaysApiService) DatacentersNatgatewaysRulesPatchExecute(r ApiDat
 	if err != nil {
 		newErr := GenericOpenAPIError{
 			statusCode: localVarHTTPResponse.StatusCode,
-			body:  localVarBody,
-			error: err.Error(),
+			body:       localVarBody,
+			error:      err.Error(),
 		}
 		return localVarReturnValue, localVarAPIResponse, newErr
 	}
@@ -2706,13 +2800,13 @@ func (a *NATGatewaysApiService) DatacentersNatgatewaysRulesPatchExecute(r ApiDat
 }
 
 type ApiDatacentersNatgatewaysRulesPostRequest struct {
-	ctx _context.Context
-	ApiService *NATGatewaysApiService
-	datacenterId string
-	natGatewayId string
-	natGatewayRule *NatGatewayRule
-	pretty *bool
-	depth *int32
+	ctx             _context.Context
+	ApiService      *NATGatewaysApiService
+	datacenterId    string
+	natGatewayId    string
+	natGatewayRule  *NatGatewayRule
+	pretty          *bool
+	depth           *int32
 	xContractNumber *int32
 }
 
@@ -2747,8 +2841,8 @@ func (r ApiDatacentersNatgatewaysRulesPostRequest) Execute() (NatGatewayRule, *A
  */
 func (a *NATGatewaysApiService) DatacentersNatgatewaysRulesPost(ctx _context.Context, datacenterId string, natGatewayId string) ApiDatacentersNatgatewaysRulesPostRequest {
 	return ApiDatacentersNatgatewaysRulesPostRequest{
-		ApiService: a,
-		ctx: ctx,
+		ApiService:   a,
+		ctx:          ctx,
 		datacenterId: datacenterId,
 		natGatewayId: natGatewayId,
 	}
@@ -2790,6 +2884,7 @@ func (a *NATGatewaysApiService) DatacentersNatgatewaysRulesPostExecute(r ApiData
 	if r.depth != nil {
 		localVarQueryParams.Add("depth", parameterToString(*r.depth, ""))
 	}
+
 	// to determine the Content-Type header
 	localVarHTTPContentTypes := []string{"application/json"}
 
@@ -2833,12 +2928,12 @@ func (a *NATGatewaysApiService) DatacentersNatgatewaysRulesPostExecute(r ApiData
 
 	localVarHTTPResponse, httpRequestTime, err := a.client.callAPI(req)
 
-	localVarAPIResponse := &APIResponse {
-		Response: localVarHTTPResponse,
-		Method: localVarHTTPMethod,
-		RequestURL: localVarPath,
+	localVarAPIResponse := &APIResponse{
+		Response:    localVarHTTPResponse,
+		Method:      localVarHTTPMethod,
+		RequestURL:  localVarPath,
 		RequestTime: httpRequestTime,
-		Operation: "DatacentersNatgatewaysRulesPost",
+		Operation:   "DatacentersNatgatewaysRulesPost",
 	}
 
 	if err != nil || localVarHTTPResponse == nil {
@@ -2855,16 +2950,16 @@ func (a *NATGatewaysApiService) DatacentersNatgatewaysRulesPostExecute(r ApiData
 	if localVarHTTPResponse.StatusCode >= 300 {
 		newErr := GenericOpenAPIError{
 			statusCode: localVarHTTPResponse.StatusCode,
-			body:  localVarBody,
-			error: fmt.Sprintf("%s: %s", localVarHTTPResponse.Status, string(localVarBody)),
+			body:       localVarBody,
+			error:      fmt.Sprintf(FormatStringErr, localVarHTTPResponse.Status, string(localVarBody)),
 		}
-			var v Error
-			err = a.client.decode(&v, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
-			if err != nil {
-				newErr.error = err.Error()
-				return localVarReturnValue, localVarAPIResponse, newErr
-			}
-			newErr.model = v
+		var v Error
+		err = a.client.decode(&v, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
+		if err != nil {
+			newErr.error = err.Error()
+			return localVarReturnValue, localVarAPIResponse, newErr
+		}
+		newErr.model = v
 		return localVarReturnValue, localVarAPIResponse, newErr
 	}
 
@@ -2872,8 +2967,8 @@ func (a *NATGatewaysApiService) DatacentersNatgatewaysRulesPostExecute(r ApiData
 	if err != nil {
 		newErr := GenericOpenAPIError{
 			statusCode: localVarHTTPResponse.StatusCode,
-			body:  localVarBody,
-			error: err.Error(),
+			body:       localVarBody,
+			error:      err.Error(),
 		}
 		return localVarReturnValue, localVarAPIResponse, newErr
 	}
@@ -2882,15 +2977,15 @@ func (a *NATGatewaysApiService) DatacentersNatgatewaysRulesPostExecute(r ApiData
 }
 
 type ApiDatacentersNatgatewaysRulesPutRequest struct {
-	ctx _context.Context
-	ApiService *NATGatewaysApiService
-	datacenterId string
-	natGatewayId string
+	ctx              _context.Context
+	ApiService       *NATGatewaysApiService
+	datacenterId     string
+	natGatewayId     string
 	natGatewayRuleId string
-	natGatewayRule *NatGatewayRulePut
-	pretty *bool
-	depth *int32
-	xContractNumber *int32
+	natGatewayRule   *NatGatewayRulePut
+	pretty           *bool
+	depth            *int32
+	xContractNumber  *int32
 }
 
 func (r ApiDatacentersNatgatewaysRulesPutRequest) NatGatewayRule(natGatewayRule NatGatewayRulePut) ApiDatacentersNatgatewaysRulesPutRequest {
@@ -2925,10 +3020,10 @@ func (r ApiDatacentersNatgatewaysRulesPutRequest) Execute() (NatGatewayRule, *AP
  */
 func (a *NATGatewaysApiService) DatacentersNatgatewaysRulesPut(ctx _context.Context, datacenterId string, natGatewayId string, natGatewayRuleId string) ApiDatacentersNatgatewaysRulesPutRequest {
 	return ApiDatacentersNatgatewaysRulesPutRequest{
-		ApiService: a,
-		ctx: ctx,
-		datacenterId: datacenterId,
-		natGatewayId: natGatewayId,
+		ApiService:       a,
+		ctx:              ctx,
+		datacenterId:     datacenterId,
+		natGatewayId:     natGatewayId,
 		natGatewayRuleId: natGatewayRuleId,
 	}
 }
@@ -2970,6 +3065,7 @@ func (a *NATGatewaysApiService) DatacentersNatgatewaysRulesPutExecute(r ApiDatac
 	if r.depth != nil {
 		localVarQueryParams.Add("depth", parameterToString(*r.depth, ""))
 	}
+
 	// to determine the Content-Type header
 	localVarHTTPContentTypes := []string{"application/json"}
 
@@ -3013,12 +3109,12 @@ func (a *NATGatewaysApiService) DatacentersNatgatewaysRulesPutExecute(r ApiDatac
 
 	localVarHTTPResponse, httpRequestTime, err := a.client.callAPI(req)
 
-	localVarAPIResponse := &APIResponse {
-		Response: localVarHTTPResponse,
-		Method: localVarHTTPMethod,
-		RequestURL: localVarPath,
+	localVarAPIResponse := &APIResponse{
+		Response:    localVarHTTPResponse,
+		Method:      localVarHTTPMethod,
+		RequestURL:  localVarPath,
 		RequestTime: httpRequestTime,
-		Operation: "DatacentersNatgatewaysRulesPut",
+		Operation:   "DatacentersNatgatewaysRulesPut",
 	}
 
 	if err != nil || localVarHTTPResponse == nil {
@@ -3035,16 +3131,16 @@ func (a *NATGatewaysApiService) DatacentersNatgatewaysRulesPutExecute(r ApiDatac
 	if localVarHTTPResponse.StatusCode >= 300 {
 		newErr := GenericOpenAPIError{
 			statusCode: localVarHTTPResponse.StatusCode,
-			body:  localVarBody,
-			error: fmt.Sprintf("%s: %s", localVarHTTPResponse.Status, string(localVarBody)),
+			body:       localVarBody,
+			error:      fmt.Sprintf(FormatStringErr, localVarHTTPResponse.Status, string(localVarBody)),
 		}
-			var v Error
-			err = a.client.decode(&v, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
-			if err != nil {
-				newErr.error = err.Error()
-				return localVarReturnValue, localVarAPIResponse, newErr
-			}
-			newErr.model = v
+		var v Error
+		err = a.client.decode(&v, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
+		if err != nil {
+			newErr.error = err.Error()
+			return localVarReturnValue, localVarAPIResponse, newErr
+		}
+		newErr.model = v
 		return localVarReturnValue, localVarAPIResponse, newErr
 	}
 
@@ -3052,8 +3148,8 @@ func (a *NATGatewaysApiService) DatacentersNatgatewaysRulesPutExecute(r ApiDatac
 	if err != nil {
 		newErr := GenericOpenAPIError{
 			statusCode: localVarHTTPResponse.StatusCode,
-			body:  localVarBody,
-			error: err.Error(),
+			body:       localVarBody,
+			error:      err.Error(),
 		}
 		return localVarReturnValue, localVarAPIResponse, newErr
 	}

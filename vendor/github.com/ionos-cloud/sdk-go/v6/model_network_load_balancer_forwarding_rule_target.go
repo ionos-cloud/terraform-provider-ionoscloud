@@ -21,10 +21,9 @@ type NetworkLoadBalancerForwardingRuleTarget struct {
 	// Port of the balanced target service. (range: 1 to 65535)
 	Port *int32 `json:"port"`
 	// Weight parameter is used to adjust the target VM's weight relative to other target VMs. All target VMs will receive a load proportional to their weight relative to the sum of all weights, so the higher the weight, the higher the load. The default weight is 1, and the maximal value is 256. A value of 0 means the target VM will not participate in load-balancing but will still accept persistent connections. If this parameter is used to distribute the load according to target VM's capacity, it is recommended to start with values which can both grow and shrink, for instance between 10 and 100 to leave enough room above and below for later adjustments.
-	Weight *int32 `json:"weight"`
+	Weight      *int32                                              `json:"weight"`
 	HealthCheck *NetworkLoadBalancerForwardingRuleTargetHealthCheck `json:"healthCheck,omitempty"`
 }
-
 
 // GetIp returns the Ip field value
 // If the value is explicit nil, the zero value for string will be returned
@@ -32,7 +31,6 @@ func (o *NetworkLoadBalancerForwardingRuleTarget) GetIp() *string {
 	if o == nil {
 		return nil
 	}
-
 
 	return o.Ip
 
@@ -46,13 +44,11 @@ func (o *NetworkLoadBalancerForwardingRuleTarget) GetIpOk() (*string, bool) {
 		return nil, false
 	}
 
-
 	return o.Ip, true
 }
 
 // SetIp sets field value
 func (o *NetworkLoadBalancerForwardingRuleTarget) SetIp(v string) {
-
 
 	o.Ip = &v
 
@@ -74,7 +70,6 @@ func (o *NetworkLoadBalancerForwardingRuleTarget) GetPort() *int32 {
 		return nil
 	}
 
-
 	return o.Port
 
 }
@@ -87,13 +82,11 @@ func (o *NetworkLoadBalancerForwardingRuleTarget) GetPortOk() (*int32, bool) {
 		return nil, false
 	}
 
-
 	return o.Port, true
 }
 
 // SetPort sets field value
 func (o *NetworkLoadBalancerForwardingRuleTarget) SetPort(v int32) {
-
 
 	o.Port = &v
 
@@ -115,7 +108,6 @@ func (o *NetworkLoadBalancerForwardingRuleTarget) GetWeight() *int32 {
 		return nil
 	}
 
-
 	return o.Weight
 
 }
@@ -128,13 +120,11 @@ func (o *NetworkLoadBalancerForwardingRuleTarget) GetWeightOk() (*int32, bool) {
 		return nil, false
 	}
 
-
 	return o.Weight, true
 }
 
 // SetWeight sets field value
 func (o *NetworkLoadBalancerForwardingRuleTarget) SetWeight(v int32) {
-
 
 	o.Weight = &v
 
@@ -156,7 +146,6 @@ func (o *NetworkLoadBalancerForwardingRuleTarget) GetHealthCheck() *NetworkLoadB
 		return nil
 	}
 
-
 	return o.HealthCheck
 
 }
@@ -169,13 +158,11 @@ func (o *NetworkLoadBalancerForwardingRuleTarget) GetHealthCheckOk() (*NetworkLo
 		return nil, false
 	}
 
-
 	return o.HealthCheck, true
 }
 
 // SetHealthCheck sets field value
 func (o *NetworkLoadBalancerForwardingRuleTarget) SetHealthCheck(v NetworkLoadBalancerForwardingRuleTargetHealthCheck) {
-
 
 	o.HealthCheck = &v
 
@@ -210,6 +197,7 @@ func (o NetworkLoadBalancerForwardingRuleTarget) MarshalJSON() ([]byte, error) {
 	}
 	return json.Marshal(toSerialize)
 }
+
 type NullableNetworkLoadBalancerForwardingRuleTarget struct {
 	value *NetworkLoadBalancerForwardingRuleTarget
 	isSet bool
@@ -245,5 +233,3 @@ func (v *NullableNetworkLoadBalancerForwardingRuleTarget) UnmarshalJSON(src []by
 	v.isSet = true
 	return json.Unmarshal(src, &v.value)
 }
-
-

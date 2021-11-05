@@ -21,11 +21,10 @@ type KubernetesNodePoolForPut struct {
 	// The type of object
 	Type *string `json:"type,omitempty"`
 	// URL to the object representation (absolute path)
-	Href *string `json:"href,omitempty"`
-	Metadata *DatacenterElementMetadata `json:"metadata,omitempty"`
+	Href       *string                             `json:"href,omitempty"`
+	Metadata   *DatacenterElementMetadata          `json:"metadata,omitempty"`
 	Properties *KubernetesNodePoolPropertiesForPut `json:"properties"`
 }
-
 
 // GetId returns the Id field value
 // If the value is explicit nil, the zero value for string will be returned
@@ -33,7 +32,6 @@ func (o *KubernetesNodePoolForPut) GetId() *string {
 	if o == nil {
 		return nil
 	}
-
 
 	return o.Id
 
@@ -47,13 +45,11 @@ func (o *KubernetesNodePoolForPut) GetIdOk() (*string, bool) {
 		return nil, false
 	}
 
-
 	return o.Id, true
 }
 
 // SetId sets field value
 func (o *KubernetesNodePoolForPut) SetId(v string) {
-
 
 	o.Id = &v
 
@@ -75,7 +71,6 @@ func (o *KubernetesNodePoolForPut) GetType() *string {
 		return nil
 	}
 
-
 	return o.Type
 
 }
@@ -88,13 +83,11 @@ func (o *KubernetesNodePoolForPut) GetTypeOk() (*string, bool) {
 		return nil, false
 	}
 
-
 	return o.Type, true
 }
 
 // SetType sets field value
 func (o *KubernetesNodePoolForPut) SetType(v string) {
-
 
 	o.Type = &v
 
@@ -116,7 +109,6 @@ func (o *KubernetesNodePoolForPut) GetHref() *string {
 		return nil
 	}
 
-
 	return o.Href
 
 }
@@ -129,13 +121,11 @@ func (o *KubernetesNodePoolForPut) GetHrefOk() (*string, bool) {
 		return nil, false
 	}
 
-
 	return o.Href, true
 }
 
 // SetHref sets field value
 func (o *KubernetesNodePoolForPut) SetHref(v string) {
-
 
 	o.Href = &v
 
@@ -157,7 +147,6 @@ func (o *KubernetesNodePoolForPut) GetMetadata() *DatacenterElementMetadata {
 		return nil
 	}
 
-
 	return o.Metadata
 
 }
@@ -170,13 +159,11 @@ func (o *KubernetesNodePoolForPut) GetMetadataOk() (*DatacenterElementMetadata, 
 		return nil, false
 	}
 
-
 	return o.Metadata, true
 }
 
 // SetMetadata sets field value
 func (o *KubernetesNodePoolForPut) SetMetadata(v DatacenterElementMetadata) {
-
 
 	o.Metadata = &v
 
@@ -198,7 +185,6 @@ func (o *KubernetesNodePoolForPut) GetProperties() *KubernetesNodePoolProperties
 		return nil
 	}
 
-
 	return o.Properties
 
 }
@@ -211,13 +197,11 @@ func (o *KubernetesNodePoolForPut) GetPropertiesOk() (*KubernetesNodePoolPropert
 		return nil, false
 	}
 
-
 	return o.Properties, true
 }
 
 // SetProperties sets field value
 func (o *KubernetesNodePoolForPut) SetProperties(v KubernetesNodePoolPropertiesForPut) {
-
 
 	o.Properties = &v
 
@@ -256,6 +240,7 @@ func (o KubernetesNodePoolForPut) MarshalJSON() ([]byte, error) {
 	}
 	return json.Marshal(toSerialize)
 }
+
 type NullableKubernetesNodePoolForPut struct {
 	value *KubernetesNodePoolForPut
 	isSet bool
@@ -291,5 +276,3 @@ func (v *NullableKubernetesNodePoolForPut) UnmarshalJSON(src []byte) error {
 	v.isSet = true
 	return json.Unmarshal(src, &v.value)
 }
-
-

@@ -22,14 +22,12 @@ type TargetPortRange struct {
 	End *int32 `json:"end,omitempty"`
 }
 
-
 // GetStart returns the Start field value
 // If the value is explicit nil, the zero value for int32 will be returned
 func (o *TargetPortRange) GetStart() *int32 {
 	if o == nil {
 		return nil
 	}
-
 
 	return o.Start
 
@@ -43,13 +41,11 @@ func (o *TargetPortRange) GetStartOk() (*int32, bool) {
 		return nil, false
 	}
 
-
 	return o.Start, true
 }
 
 // SetStart sets field value
 func (o *TargetPortRange) SetStart(v int32) {
-
 
 	o.Start = &v
 
@@ -71,7 +67,6 @@ func (o *TargetPortRange) GetEnd() *int32 {
 		return nil
 	}
 
-
 	return o.End
 
 }
@@ -84,13 +79,11 @@ func (o *TargetPortRange) GetEndOk() (*int32, bool) {
 		return nil, false
 	}
 
-
 	return o.End, true
 }
 
 // SetEnd sets field value
 func (o *TargetPortRange) SetEnd(v int32) {
-
 
 	o.End = &v
 
@@ -117,6 +110,7 @@ func (o TargetPortRange) MarshalJSON() ([]byte, error) {
 	}
 	return json.Marshal(toSerialize)
 }
+
 type NullableTargetPortRange struct {
 	value *TargetPortRange
 	isSet bool
@@ -152,5 +146,3 @@ func (v *NullableTargetPortRange) UnmarshalJSON(src []byte) error {
 	v.isSet = true
 	return json.Unmarshal(src, &v.value)
 }
-
-

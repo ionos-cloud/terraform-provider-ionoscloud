@@ -22,14 +22,12 @@ type KubernetesNodePoolLanRoutes struct {
 	GatewayIp *string `json:"gatewayIp,omitempty"`
 }
 
-
 // GetNetwork returns the Network field value
 // If the value is explicit nil, the zero value for string will be returned
 func (o *KubernetesNodePoolLanRoutes) GetNetwork() *string {
 	if o == nil {
 		return nil
 	}
-
 
 	return o.Network
 
@@ -43,13 +41,11 @@ func (o *KubernetesNodePoolLanRoutes) GetNetworkOk() (*string, bool) {
 		return nil, false
 	}
 
-
 	return o.Network, true
 }
 
 // SetNetwork sets field value
 func (o *KubernetesNodePoolLanRoutes) SetNetwork(v string) {
-
 
 	o.Network = &v
 
@@ -71,7 +67,6 @@ func (o *KubernetesNodePoolLanRoutes) GetGatewayIp() *string {
 		return nil
 	}
 
-
 	return o.GatewayIp
 
 }
@@ -84,13 +79,11 @@ func (o *KubernetesNodePoolLanRoutes) GetGatewayIpOk() (*string, bool) {
 		return nil, false
 	}
 
-
 	return o.GatewayIp, true
 }
 
 // SetGatewayIp sets field value
 func (o *KubernetesNodePoolLanRoutes) SetGatewayIp(v string) {
-
 
 	o.GatewayIp = &v
 
@@ -117,6 +110,7 @@ func (o KubernetesNodePoolLanRoutes) MarshalJSON() ([]byte, error) {
 	}
 	return json.Marshal(toSerialize)
 }
+
 type NullableKubernetesNodePoolLanRoutes struct {
 	value *KubernetesNodePoolLanRoutes
 	isSet bool
@@ -152,5 +146,3 @@ func (v *NullableKubernetesNodePoolLanRoutes) UnmarshalJSON(src []byte) error {
 	v.isSet = true
 	return json.Unmarshal(src, &v.value)
 }
-
-

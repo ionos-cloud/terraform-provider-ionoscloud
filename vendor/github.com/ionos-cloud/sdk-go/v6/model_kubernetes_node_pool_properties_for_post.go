@@ -35,9 +35,9 @@ type KubernetesNodePoolPropertiesForPost struct {
 	// The size of the volume in GB. The size should be greater than 10GB.
 	StorageSize *int32 `json:"storageSize"`
 	// The kubernetes version in which a nodepool is running. This imposes restrictions on what kubernetes versions can be run in a cluster's nodepools. Additionally, not all kubernetes versions are viable upgrade targets for all prior versions.
-	K8sVersion *string `json:"k8sVersion,omitempty"`
+	K8sVersion        *string                      `json:"k8sVersion,omitempty"`
 	MaintenanceWindow *KubernetesMaintenanceWindow `json:"maintenanceWindow,omitempty"`
-	AutoScaling *KubernetesAutoScaling `json:"autoScaling,omitempty"`
+	AutoScaling       *KubernetesAutoScaling       `json:"autoScaling,omitempty"`
 	// array of additional LANs attached to worker nodes
 	Lans *[]KubernetesNodePoolLan `json:"lans,omitempty"`
 	// map of labels attached to node pool
@@ -48,14 +48,12 @@ type KubernetesNodePoolPropertiesForPost struct {
 	PublicIps *[]string `json:"publicIps,omitempty"`
 }
 
-
 // GetName returns the Name field value
 // If the value is explicit nil, the zero value for string will be returned
 func (o *KubernetesNodePoolPropertiesForPost) GetName() *string {
 	if o == nil {
 		return nil
 	}
-
 
 	return o.Name
 
@@ -69,13 +67,11 @@ func (o *KubernetesNodePoolPropertiesForPost) GetNameOk() (*string, bool) {
 		return nil, false
 	}
 
-
 	return o.Name, true
 }
 
 // SetName sets field value
 func (o *KubernetesNodePoolPropertiesForPost) SetName(v string) {
-
 
 	o.Name = &v
 
@@ -97,7 +93,6 @@ func (o *KubernetesNodePoolPropertiesForPost) GetDatacenterId() *string {
 		return nil
 	}
 
-
 	return o.DatacenterId
 
 }
@@ -110,13 +105,11 @@ func (o *KubernetesNodePoolPropertiesForPost) GetDatacenterIdOk() (*string, bool
 		return nil, false
 	}
 
-
 	return o.DatacenterId, true
 }
 
 // SetDatacenterId sets field value
 func (o *KubernetesNodePoolPropertiesForPost) SetDatacenterId(v string) {
-
 
 	o.DatacenterId = &v
 
@@ -138,7 +131,6 @@ func (o *KubernetesNodePoolPropertiesForPost) GetNodeCount() *int32 {
 		return nil
 	}
 
-
 	return o.NodeCount
 
 }
@@ -151,13 +143,11 @@ func (o *KubernetesNodePoolPropertiesForPost) GetNodeCountOk() (*int32, bool) {
 		return nil, false
 	}
 
-
 	return o.NodeCount, true
 }
 
 // SetNodeCount sets field value
 func (o *KubernetesNodePoolPropertiesForPost) SetNodeCount(v int32) {
-
 
 	o.NodeCount = &v
 
@@ -179,7 +169,6 @@ func (o *KubernetesNodePoolPropertiesForPost) GetCpuFamily() *string {
 		return nil
 	}
 
-
 	return o.CpuFamily
 
 }
@@ -192,13 +181,11 @@ func (o *KubernetesNodePoolPropertiesForPost) GetCpuFamilyOk() (*string, bool) {
 		return nil, false
 	}
 
-
 	return o.CpuFamily, true
 }
 
 // SetCpuFamily sets field value
 func (o *KubernetesNodePoolPropertiesForPost) SetCpuFamily(v string) {
-
 
 	o.CpuFamily = &v
 
@@ -220,7 +207,6 @@ func (o *KubernetesNodePoolPropertiesForPost) GetCoresCount() *int32 {
 		return nil
 	}
 
-
 	return o.CoresCount
 
 }
@@ -233,13 +219,11 @@ func (o *KubernetesNodePoolPropertiesForPost) GetCoresCountOk() (*int32, bool) {
 		return nil, false
 	}
 
-
 	return o.CoresCount, true
 }
 
 // SetCoresCount sets field value
 func (o *KubernetesNodePoolPropertiesForPost) SetCoresCount(v int32) {
-
 
 	o.CoresCount = &v
 
@@ -261,7 +245,6 @@ func (o *KubernetesNodePoolPropertiesForPost) GetRamSize() *int32 {
 		return nil
 	}
 
-
 	return o.RamSize
 
 }
@@ -274,13 +257,11 @@ func (o *KubernetesNodePoolPropertiesForPost) GetRamSizeOk() (*int32, bool) {
 		return nil, false
 	}
 
-
 	return o.RamSize, true
 }
 
 // SetRamSize sets field value
 func (o *KubernetesNodePoolPropertiesForPost) SetRamSize(v int32) {
-
 
 	o.RamSize = &v
 
@@ -302,7 +283,6 @@ func (o *KubernetesNodePoolPropertiesForPost) GetAvailabilityZone() *string {
 		return nil
 	}
 
-
 	return o.AvailabilityZone
 
 }
@@ -315,13 +295,11 @@ func (o *KubernetesNodePoolPropertiesForPost) GetAvailabilityZoneOk() (*string, 
 		return nil, false
 	}
 
-
 	return o.AvailabilityZone, true
 }
 
 // SetAvailabilityZone sets field value
 func (o *KubernetesNodePoolPropertiesForPost) SetAvailabilityZone(v string) {
-
 
 	o.AvailabilityZone = &v
 
@@ -343,7 +321,6 @@ func (o *KubernetesNodePoolPropertiesForPost) GetStorageType() *string {
 		return nil
 	}
 
-
 	return o.StorageType
 
 }
@@ -356,13 +333,11 @@ func (o *KubernetesNodePoolPropertiesForPost) GetStorageTypeOk() (*string, bool)
 		return nil, false
 	}
 
-
 	return o.StorageType, true
 }
 
 // SetStorageType sets field value
 func (o *KubernetesNodePoolPropertiesForPost) SetStorageType(v string) {
-
 
 	o.StorageType = &v
 
@@ -384,7 +359,6 @@ func (o *KubernetesNodePoolPropertiesForPost) GetStorageSize() *int32 {
 		return nil
 	}
 
-
 	return o.StorageSize
 
 }
@@ -397,13 +371,11 @@ func (o *KubernetesNodePoolPropertiesForPost) GetStorageSizeOk() (*int32, bool) 
 		return nil, false
 	}
 
-
 	return o.StorageSize, true
 }
 
 // SetStorageSize sets field value
 func (o *KubernetesNodePoolPropertiesForPost) SetStorageSize(v int32) {
-
 
 	o.StorageSize = &v
 
@@ -425,7 +397,6 @@ func (o *KubernetesNodePoolPropertiesForPost) GetK8sVersion() *string {
 		return nil
 	}
 
-
 	return o.K8sVersion
 
 }
@@ -438,13 +409,11 @@ func (o *KubernetesNodePoolPropertiesForPost) GetK8sVersionOk() (*string, bool) 
 		return nil, false
 	}
 
-
 	return o.K8sVersion, true
 }
 
 // SetK8sVersion sets field value
 func (o *KubernetesNodePoolPropertiesForPost) SetK8sVersion(v string) {
-
 
 	o.K8sVersion = &v
 
@@ -466,7 +435,6 @@ func (o *KubernetesNodePoolPropertiesForPost) GetMaintenanceWindow() *Kubernetes
 		return nil
 	}
 
-
 	return o.MaintenanceWindow
 
 }
@@ -479,13 +447,11 @@ func (o *KubernetesNodePoolPropertiesForPost) GetMaintenanceWindowOk() (*Kuberne
 		return nil, false
 	}
 
-
 	return o.MaintenanceWindow, true
 }
 
 // SetMaintenanceWindow sets field value
 func (o *KubernetesNodePoolPropertiesForPost) SetMaintenanceWindow(v KubernetesMaintenanceWindow) {
-
 
 	o.MaintenanceWindow = &v
 
@@ -507,7 +473,6 @@ func (o *KubernetesNodePoolPropertiesForPost) GetAutoScaling() *KubernetesAutoSc
 		return nil
 	}
 
-
 	return o.AutoScaling
 
 }
@@ -520,13 +485,11 @@ func (o *KubernetesNodePoolPropertiesForPost) GetAutoScalingOk() (*KubernetesAut
 		return nil, false
 	}
 
-
 	return o.AutoScaling, true
 }
 
 // SetAutoScaling sets field value
 func (o *KubernetesNodePoolPropertiesForPost) SetAutoScaling(v KubernetesAutoScaling) {
-
 
 	o.AutoScaling = &v
 
@@ -548,7 +511,6 @@ func (o *KubernetesNodePoolPropertiesForPost) GetLans() *[]KubernetesNodePoolLan
 		return nil
 	}
 
-
 	return o.Lans
 
 }
@@ -561,13 +523,11 @@ func (o *KubernetesNodePoolPropertiesForPost) GetLansOk() (*[]KubernetesNodePool
 		return nil, false
 	}
 
-
 	return o.Lans, true
 }
 
 // SetLans sets field value
 func (o *KubernetesNodePoolPropertiesForPost) SetLans(v []KubernetesNodePoolLan) {
-
 
 	o.Lans = &v
 
@@ -589,7 +549,6 @@ func (o *KubernetesNodePoolPropertiesForPost) GetLabels() *map[string]string {
 		return nil
 	}
 
-
 	return o.Labels
 
 }
@@ -602,13 +561,11 @@ func (o *KubernetesNodePoolPropertiesForPost) GetLabelsOk() (*map[string]string,
 		return nil, false
 	}
 
-
 	return o.Labels, true
 }
 
 // SetLabels sets field value
 func (o *KubernetesNodePoolPropertiesForPost) SetLabels(v map[string]string) {
-
 
 	o.Labels = &v
 
@@ -630,7 +587,6 @@ func (o *KubernetesNodePoolPropertiesForPost) GetAnnotations() *map[string]strin
 		return nil
 	}
 
-
 	return o.Annotations
 
 }
@@ -643,13 +599,11 @@ func (o *KubernetesNodePoolPropertiesForPost) GetAnnotationsOk() (*map[string]st
 		return nil, false
 	}
 
-
 	return o.Annotations, true
 }
 
 // SetAnnotations sets field value
 func (o *KubernetesNodePoolPropertiesForPost) SetAnnotations(v map[string]string) {
-
 
 	o.Annotations = &v
 
@@ -671,7 +625,6 @@ func (o *KubernetesNodePoolPropertiesForPost) GetPublicIps() *[]string {
 		return nil
 	}
 
-
 	return o.PublicIps
 
 }
@@ -684,13 +637,11 @@ func (o *KubernetesNodePoolPropertiesForPost) GetPublicIpsOk() (*[]string, bool)
 		return nil, false
 	}
 
-
 	return o.PublicIps, true
 }
 
 // SetPublicIps sets field value
 func (o *KubernetesNodePoolPropertiesForPost) SetPublicIps(v []string) {
-
 
 	o.PublicIps = &v
 
@@ -773,6 +724,7 @@ func (o KubernetesNodePoolPropertiesForPost) MarshalJSON() ([]byte, error) {
 	}
 	return json.Marshal(toSerialize)
 }
+
 type NullableKubernetesNodePoolPropertiesForPost struct {
 	value *KubernetesNodePoolPropertiesForPost
 	isSet bool
@@ -808,5 +760,3 @@ func (v *NullableKubernetesNodePoolPropertiesForPost) UnmarshalJSON(src []byte) 
 	v.isSet = true
 	return json.Unmarshal(src, &v.value)
 }
-
-

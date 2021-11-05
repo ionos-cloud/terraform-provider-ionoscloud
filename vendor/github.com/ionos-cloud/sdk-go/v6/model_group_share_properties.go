@@ -22,14 +22,12 @@ type GroupShareProperties struct {
 	SharePrivilege *bool `json:"sharePrivilege,omitempty"`
 }
 
-
 // GetEditPrivilege returns the EditPrivilege field value
 // If the value is explicit nil, the zero value for bool will be returned
 func (o *GroupShareProperties) GetEditPrivilege() *bool {
 	if o == nil {
 		return nil
 	}
-
 
 	return o.EditPrivilege
 
@@ -43,13 +41,11 @@ func (o *GroupShareProperties) GetEditPrivilegeOk() (*bool, bool) {
 		return nil, false
 	}
 
-
 	return o.EditPrivilege, true
 }
 
 // SetEditPrivilege sets field value
 func (o *GroupShareProperties) SetEditPrivilege(v bool) {
-
 
 	o.EditPrivilege = &v
 
@@ -71,7 +67,6 @@ func (o *GroupShareProperties) GetSharePrivilege() *bool {
 		return nil
 	}
 
-
 	return o.SharePrivilege
 
 }
@@ -84,13 +79,11 @@ func (o *GroupShareProperties) GetSharePrivilegeOk() (*bool, bool) {
 		return nil, false
 	}
 
-
 	return o.SharePrivilege, true
 }
 
 // SetSharePrivilege sets field value
 func (o *GroupShareProperties) SetSharePrivilege(v bool) {
-
 
 	o.SharePrivilege = &v
 
@@ -117,6 +110,7 @@ func (o GroupShareProperties) MarshalJSON() ([]byte, error) {
 	}
 	return json.Marshal(toSerialize)
 }
+
 type NullableGroupShareProperties struct {
 	value *GroupShareProperties
 	isSet bool
@@ -152,5 +146,3 @@ func (v *NullableGroupShareProperties) UnmarshalJSON(src []byte) error {
 	v.isSet = true
 	return json.Unmarshal(src, &v.value)
 }
-
-

@@ -22,14 +22,12 @@ type KubernetesAutoScaling struct {
 	MaxNodeCount *int32 `json:"maxNodeCount"`
 }
 
-
 // GetMinNodeCount returns the MinNodeCount field value
 // If the value is explicit nil, the zero value for int32 will be returned
 func (o *KubernetesAutoScaling) GetMinNodeCount() *int32 {
 	if o == nil {
 		return nil
 	}
-
 
 	return o.MinNodeCount
 
@@ -43,13 +41,11 @@ func (o *KubernetesAutoScaling) GetMinNodeCountOk() (*int32, bool) {
 		return nil, false
 	}
 
-
 	return o.MinNodeCount, true
 }
 
 // SetMinNodeCount sets field value
 func (o *KubernetesAutoScaling) SetMinNodeCount(v int32) {
-
 
 	o.MinNodeCount = &v
 
@@ -71,7 +67,6 @@ func (o *KubernetesAutoScaling) GetMaxNodeCount() *int32 {
 		return nil
 	}
 
-
 	return o.MaxNodeCount
 
 }
@@ -84,13 +79,11 @@ func (o *KubernetesAutoScaling) GetMaxNodeCountOk() (*int32, bool) {
 		return nil, false
 	}
 
-
 	return o.MaxNodeCount, true
 }
 
 // SetMaxNodeCount sets field value
 func (o *KubernetesAutoScaling) SetMaxNodeCount(v int32) {
-
 
 	o.MaxNodeCount = &v
 
@@ -117,6 +110,7 @@ func (o KubernetesAutoScaling) MarshalJSON() ([]byte, error) {
 	}
 	return json.Marshal(toSerialize)
 }
+
 type NullableKubernetesAutoScaling struct {
 	value *KubernetesAutoScaling
 	isSet bool
@@ -152,5 +146,3 @@ func (v *NullableKubernetesAutoScaling) UnmarshalJSON(src []byte) error {
 	v.isSet = true
 	return json.Unmarshal(src, &v.value)
 }
-
-

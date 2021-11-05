@@ -62,14 +62,12 @@ type ResourceLimits struct {
 	NatGatewayProvisioned *int32 `json:"natGatewayProvisioned"`
 }
 
-
 // GetCoresPerServer returns the CoresPerServer field value
 // If the value is explicit nil, the zero value for int32 will be returned
 func (o *ResourceLimits) GetCoresPerServer() *int32 {
 	if o == nil {
 		return nil
 	}
-
 
 	return o.CoresPerServer
 
@@ -83,13 +81,11 @@ func (o *ResourceLimits) GetCoresPerServerOk() (*int32, bool) {
 		return nil, false
 	}
 
-
 	return o.CoresPerServer, true
 }
 
 // SetCoresPerServer sets field value
 func (o *ResourceLimits) SetCoresPerServer(v int32) {
-
 
 	o.CoresPerServer = &v
 
@@ -111,7 +107,6 @@ func (o *ResourceLimits) GetCoresPerContract() *int32 {
 		return nil
 	}
 
-
 	return o.CoresPerContract
 
 }
@@ -124,13 +119,11 @@ func (o *ResourceLimits) GetCoresPerContractOk() (*int32, bool) {
 		return nil, false
 	}
 
-
 	return o.CoresPerContract, true
 }
 
 // SetCoresPerContract sets field value
 func (o *ResourceLimits) SetCoresPerContract(v int32) {
-
 
 	o.CoresPerContract = &v
 
@@ -152,7 +145,6 @@ func (o *ResourceLimits) GetCoresProvisioned() *int32 {
 		return nil
 	}
 
-
 	return o.CoresProvisioned
 
 }
@@ -165,13 +157,11 @@ func (o *ResourceLimits) GetCoresProvisionedOk() (*int32, bool) {
 		return nil, false
 	}
 
-
 	return o.CoresProvisioned, true
 }
 
 // SetCoresProvisioned sets field value
 func (o *ResourceLimits) SetCoresProvisioned(v int32) {
-
 
 	o.CoresProvisioned = &v
 
@@ -193,7 +183,6 @@ func (o *ResourceLimits) GetRamPerServer() *int32 {
 		return nil
 	}
 
-
 	return o.RamPerServer
 
 }
@@ -206,13 +195,11 @@ func (o *ResourceLimits) GetRamPerServerOk() (*int32, bool) {
 		return nil, false
 	}
 
-
 	return o.RamPerServer, true
 }
 
 // SetRamPerServer sets field value
 func (o *ResourceLimits) SetRamPerServer(v int32) {
-
 
 	o.RamPerServer = &v
 
@@ -234,7 +221,6 @@ func (o *ResourceLimits) GetRamPerContract() *int32 {
 		return nil
 	}
 
-
 	return o.RamPerContract
 
 }
@@ -247,13 +233,11 @@ func (o *ResourceLimits) GetRamPerContractOk() (*int32, bool) {
 		return nil, false
 	}
 
-
 	return o.RamPerContract, true
 }
 
 // SetRamPerContract sets field value
 func (o *ResourceLimits) SetRamPerContract(v int32) {
-
 
 	o.RamPerContract = &v
 
@@ -275,7 +259,6 @@ func (o *ResourceLimits) GetRamProvisioned() *int32 {
 		return nil
 	}
 
-
 	return o.RamProvisioned
 
 }
@@ -288,13 +271,11 @@ func (o *ResourceLimits) GetRamProvisionedOk() (*int32, bool) {
 		return nil, false
 	}
 
-
 	return o.RamProvisioned, true
 }
 
 // SetRamProvisioned sets field value
 func (o *ResourceLimits) SetRamProvisioned(v int32) {
-
 
 	o.RamProvisioned = &v
 
@@ -316,7 +297,6 @@ func (o *ResourceLimits) GetHddLimitPerVolume() *int64 {
 		return nil
 	}
 
-
 	return o.HddLimitPerVolume
 
 }
@@ -329,13 +309,11 @@ func (o *ResourceLimits) GetHddLimitPerVolumeOk() (*int64, bool) {
 		return nil, false
 	}
 
-
 	return o.HddLimitPerVolume, true
 }
 
 // SetHddLimitPerVolume sets field value
 func (o *ResourceLimits) SetHddLimitPerVolume(v int64) {
-
 
 	o.HddLimitPerVolume = &v
 
@@ -357,7 +335,6 @@ func (o *ResourceLimits) GetHddLimitPerContract() *int64 {
 		return nil
 	}
 
-
 	return o.HddLimitPerContract
 
 }
@@ -370,13 +347,11 @@ func (o *ResourceLimits) GetHddLimitPerContractOk() (*int64, bool) {
 		return nil, false
 	}
 
-
 	return o.HddLimitPerContract, true
 }
 
 // SetHddLimitPerContract sets field value
 func (o *ResourceLimits) SetHddLimitPerContract(v int64) {
-
 
 	o.HddLimitPerContract = &v
 
@@ -398,7 +373,6 @@ func (o *ResourceLimits) GetHddVolumeProvisioned() *int64 {
 		return nil
 	}
 
-
 	return o.HddVolumeProvisioned
 
 }
@@ -411,13 +385,11 @@ func (o *ResourceLimits) GetHddVolumeProvisionedOk() (*int64, bool) {
 		return nil, false
 	}
 
-
 	return o.HddVolumeProvisioned, true
 }
 
 // SetHddVolumeProvisioned sets field value
 func (o *ResourceLimits) SetHddVolumeProvisioned(v int64) {
-
 
 	o.HddVolumeProvisioned = &v
 
@@ -439,7 +411,6 @@ func (o *ResourceLimits) GetSsdLimitPerVolume() *int64 {
 		return nil
 	}
 
-
 	return o.SsdLimitPerVolume
 
 }
@@ -452,13 +423,11 @@ func (o *ResourceLimits) GetSsdLimitPerVolumeOk() (*int64, bool) {
 		return nil, false
 	}
 
-
 	return o.SsdLimitPerVolume, true
 }
 
 // SetSsdLimitPerVolume sets field value
 func (o *ResourceLimits) SetSsdLimitPerVolume(v int64) {
-
 
 	o.SsdLimitPerVolume = &v
 
@@ -480,7 +449,6 @@ func (o *ResourceLimits) GetSsdLimitPerContract() *int64 {
 		return nil
 	}
 
-
 	return o.SsdLimitPerContract
 
 }
@@ -493,13 +461,11 @@ func (o *ResourceLimits) GetSsdLimitPerContractOk() (*int64, bool) {
 		return nil, false
 	}
 
-
 	return o.SsdLimitPerContract, true
 }
 
 // SetSsdLimitPerContract sets field value
 func (o *ResourceLimits) SetSsdLimitPerContract(v int64) {
-
 
 	o.SsdLimitPerContract = &v
 
@@ -521,7 +487,6 @@ func (o *ResourceLimits) GetSsdVolumeProvisioned() *int64 {
 		return nil
 	}
 
-
 	return o.SsdVolumeProvisioned
 
 }
@@ -534,13 +499,11 @@ func (o *ResourceLimits) GetSsdVolumeProvisionedOk() (*int64, bool) {
 		return nil, false
 	}
 
-
 	return o.SsdVolumeProvisioned, true
 }
 
 // SetSsdVolumeProvisioned sets field value
 func (o *ResourceLimits) SetSsdVolumeProvisioned(v int64) {
-
 
 	o.SsdVolumeProvisioned = &v
 
@@ -562,7 +525,6 @@ func (o *ResourceLimits) GetDasVolumeProvisioned() *int64 {
 		return nil
 	}
 
-
 	return o.DasVolumeProvisioned
 
 }
@@ -575,13 +537,11 @@ func (o *ResourceLimits) GetDasVolumeProvisionedOk() (*int64, bool) {
 		return nil, false
 	}
 
-
 	return o.DasVolumeProvisioned, true
 }
 
 // SetDasVolumeProvisioned sets field value
 func (o *ResourceLimits) SetDasVolumeProvisioned(v int64) {
-
 
 	o.DasVolumeProvisioned = &v
 
@@ -603,7 +563,6 @@ func (o *ResourceLimits) GetReservableIps() *int32 {
 		return nil
 	}
 
-
 	return o.ReservableIps
 
 }
@@ -616,13 +575,11 @@ func (o *ResourceLimits) GetReservableIpsOk() (*int32, bool) {
 		return nil, false
 	}
 
-
 	return o.ReservableIps, true
 }
 
 // SetReservableIps sets field value
 func (o *ResourceLimits) SetReservableIps(v int32) {
-
 
 	o.ReservableIps = &v
 
@@ -644,7 +601,6 @@ func (o *ResourceLimits) GetReservedIpsOnContract() *int32 {
 		return nil
 	}
 
-
 	return o.ReservedIpsOnContract
 
 }
@@ -657,13 +613,11 @@ func (o *ResourceLimits) GetReservedIpsOnContractOk() (*int32, bool) {
 		return nil, false
 	}
 
-
 	return o.ReservedIpsOnContract, true
 }
 
 // SetReservedIpsOnContract sets field value
 func (o *ResourceLimits) SetReservedIpsOnContract(v int32) {
-
 
 	o.ReservedIpsOnContract = &v
 
@@ -685,7 +639,6 @@ func (o *ResourceLimits) GetReservedIpsInUse() *int32 {
 		return nil
 	}
 
-
 	return o.ReservedIpsInUse
 
 }
@@ -698,13 +651,11 @@ func (o *ResourceLimits) GetReservedIpsInUseOk() (*int32, bool) {
 		return nil, false
 	}
 
-
 	return o.ReservedIpsInUse, true
 }
 
 // SetReservedIpsInUse sets field value
 func (o *ResourceLimits) SetReservedIpsInUse(v int32) {
-
 
 	o.ReservedIpsInUse = &v
 
@@ -726,7 +677,6 @@ func (o *ResourceLimits) GetK8sClusterLimitTotal() *int32 {
 		return nil
 	}
 
-
 	return o.K8sClusterLimitTotal
 
 }
@@ -739,13 +689,11 @@ func (o *ResourceLimits) GetK8sClusterLimitTotalOk() (*int32, bool) {
 		return nil, false
 	}
 
-
 	return o.K8sClusterLimitTotal, true
 }
 
 // SetK8sClusterLimitTotal sets field value
 func (o *ResourceLimits) SetK8sClusterLimitTotal(v int32) {
-
 
 	o.K8sClusterLimitTotal = &v
 
@@ -767,7 +715,6 @@ func (o *ResourceLimits) GetK8sClustersProvisioned() *int32 {
 		return nil
 	}
 
-
 	return o.K8sClustersProvisioned
 
 }
@@ -780,13 +727,11 @@ func (o *ResourceLimits) GetK8sClustersProvisionedOk() (*int32, bool) {
 		return nil, false
 	}
 
-
 	return o.K8sClustersProvisioned, true
 }
 
 // SetK8sClustersProvisioned sets field value
 func (o *ResourceLimits) SetK8sClustersProvisioned(v int32) {
-
 
 	o.K8sClustersProvisioned = &v
 
@@ -808,7 +753,6 @@ func (o *ResourceLimits) GetNlbLimitTotal() *int32 {
 		return nil
 	}
 
-
 	return o.NlbLimitTotal
 
 }
@@ -821,13 +765,11 @@ func (o *ResourceLimits) GetNlbLimitTotalOk() (*int32, bool) {
 		return nil, false
 	}
 
-
 	return o.NlbLimitTotal, true
 }
 
 // SetNlbLimitTotal sets field value
 func (o *ResourceLimits) SetNlbLimitTotal(v int32) {
-
 
 	o.NlbLimitTotal = &v
 
@@ -849,7 +791,6 @@ func (o *ResourceLimits) GetNlbProvisioned() *int32 {
 		return nil
 	}
 
-
 	return o.NlbProvisioned
 
 }
@@ -862,13 +803,11 @@ func (o *ResourceLimits) GetNlbProvisionedOk() (*int32, bool) {
 		return nil, false
 	}
 
-
 	return o.NlbProvisioned, true
 }
 
 // SetNlbProvisioned sets field value
 func (o *ResourceLimits) SetNlbProvisioned(v int32) {
-
 
 	o.NlbProvisioned = &v
 
@@ -890,7 +829,6 @@ func (o *ResourceLimits) GetNatGatewayLimitTotal() *int32 {
 		return nil
 	}
 
-
 	return o.NatGatewayLimitTotal
 
 }
@@ -903,13 +841,11 @@ func (o *ResourceLimits) GetNatGatewayLimitTotalOk() (*int32, bool) {
 		return nil, false
 	}
 
-
 	return o.NatGatewayLimitTotal, true
 }
 
 // SetNatGatewayLimitTotal sets field value
 func (o *ResourceLimits) SetNatGatewayLimitTotal(v int32) {
-
 
 	o.NatGatewayLimitTotal = &v
 
@@ -931,7 +867,6 @@ func (o *ResourceLimits) GetNatGatewayProvisioned() *int32 {
 		return nil
 	}
 
-
 	return o.NatGatewayProvisioned
 
 }
@@ -944,13 +879,11 @@ func (o *ResourceLimits) GetNatGatewayProvisionedOk() (*int32, bool) {
 		return nil, false
 	}
 
-
 	return o.NatGatewayProvisioned, true
 }
 
 // SetNatGatewayProvisioned sets field value
 func (o *ResourceLimits) SetNatGatewayProvisioned(v int32) {
-
 
 	o.NatGatewayProvisioned = &v
 
@@ -1057,6 +990,7 @@ func (o ResourceLimits) MarshalJSON() ([]byte, error) {
 	}
 	return json.Marshal(toSerialize)
 }
+
 type NullableResourceLimits struct {
 	value *ResourceLimits
 	isSet bool
@@ -1092,5 +1026,3 @@ func (v *NullableResourceLimits) UnmarshalJSON(src []byte) error {
 	v.isSet = true
 	return json.Unmarshal(src, &v.value)
 }
-
-

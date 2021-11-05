@@ -26,14 +26,12 @@ type LanProperties struct {
 	Public *bool `json:"public,omitempty"`
 }
 
-
 // GetName returns the Name field value
 // If the value is explicit nil, the zero value for string will be returned
 func (o *LanProperties) GetName() *string {
 	if o == nil {
 		return nil
 	}
-
 
 	return o.Name
 
@@ -47,13 +45,11 @@ func (o *LanProperties) GetNameOk() (*string, bool) {
 		return nil, false
 	}
 
-
 	return o.Name, true
 }
 
 // SetName sets field value
 func (o *LanProperties) SetName(v string) {
-
 
 	o.Name = &v
 
@@ -75,7 +71,6 @@ func (o *LanProperties) GetIpFailover() *[]IPFailover {
 		return nil
 	}
 
-
 	return o.IpFailover
 
 }
@@ -88,13 +83,11 @@ func (o *LanProperties) GetIpFailoverOk() (*[]IPFailover, bool) {
 		return nil, false
 	}
 
-
 	return o.IpFailover, true
 }
 
 // SetIpFailover sets field value
 func (o *LanProperties) SetIpFailover(v []IPFailover) {
-
 
 	o.IpFailover = &v
 
@@ -116,7 +109,6 @@ func (o *LanProperties) GetPcc() *string {
 		return nil
 	}
 
-
 	return o.Pcc
 
 }
@@ -129,13 +121,11 @@ func (o *LanProperties) GetPccOk() (*string, bool) {
 		return nil, false
 	}
 
-
 	return o.Pcc, true
 }
 
 // SetPcc sets field value
 func (o *LanProperties) SetPcc(v string) {
-
 
 	o.Pcc = &v
 
@@ -157,7 +147,6 @@ func (o *LanProperties) GetPublic() *bool {
 		return nil
 	}
 
-
 	return o.Public
 
 }
@@ -170,13 +159,11 @@ func (o *LanProperties) GetPublicOk() (*bool, bool) {
 		return nil, false
 	}
 
-
 	return o.Public, true
 }
 
 // SetPublic sets field value
 func (o *LanProperties) SetPublic(v bool) {
-
 
 	o.Public = &v
 
@@ -211,6 +198,7 @@ func (o LanProperties) MarshalJSON() ([]byte, error) {
 	}
 	return json.Marshal(toSerialize)
 }
+
 type NullableLanProperties struct {
 	value *LanProperties
 	isSet bool
@@ -246,5 +234,3 @@ func (v *NullableLanProperties) UnmarshalJSON(src []byte) error {
 	v.isSet = true
 	return json.Unmarshal(src, &v.value)
 }
-
-

@@ -20,7 +20,7 @@ type SnapshotProperties struct {
 	Name *string `json:"name,omitempty"`
 	// Human readable description
 	Description *string `json:"description,omitempty"`
-	// Location of that image/snapshot. 
+	// Location of that image/snapshot.
 	Location *string `json:"location,omitempty"`
 	// The size of the image in GB
 	Size *float32 `json:"size,omitempty"`
@@ -50,14 +50,12 @@ type SnapshotProperties struct {
 	LicenceType *string `json:"licenceType,omitempty"`
 }
 
-
 // GetName returns the Name field value
 // If the value is explicit nil, the zero value for string will be returned
 func (o *SnapshotProperties) GetName() *string {
 	if o == nil {
 		return nil
 	}
-
 
 	return o.Name
 
@@ -71,13 +69,11 @@ func (o *SnapshotProperties) GetNameOk() (*string, bool) {
 		return nil, false
 	}
 
-
 	return o.Name, true
 }
 
 // SetName sets field value
 func (o *SnapshotProperties) SetName(v string) {
-
 
 	o.Name = &v
 
@@ -99,7 +95,6 @@ func (o *SnapshotProperties) GetDescription() *string {
 		return nil
 	}
 
-
 	return o.Description
 
 }
@@ -112,13 +107,11 @@ func (o *SnapshotProperties) GetDescriptionOk() (*string, bool) {
 		return nil, false
 	}
 
-
 	return o.Description, true
 }
 
 // SetDescription sets field value
 func (o *SnapshotProperties) SetDescription(v string) {
-
 
 	o.Description = &v
 
@@ -140,7 +133,6 @@ func (o *SnapshotProperties) GetLocation() *string {
 		return nil
 	}
 
-
 	return o.Location
 
 }
@@ -153,13 +145,11 @@ func (o *SnapshotProperties) GetLocationOk() (*string, bool) {
 		return nil, false
 	}
 
-
 	return o.Location, true
 }
 
 // SetLocation sets field value
 func (o *SnapshotProperties) SetLocation(v string) {
-
 
 	o.Location = &v
 
@@ -181,7 +171,6 @@ func (o *SnapshotProperties) GetSize() *float32 {
 		return nil
 	}
 
-
 	return o.Size
 
 }
@@ -194,13 +183,11 @@ func (o *SnapshotProperties) GetSizeOk() (*float32, bool) {
 		return nil, false
 	}
 
-
 	return o.Size, true
 }
 
 // SetSize sets field value
 func (o *SnapshotProperties) SetSize(v float32) {
-
 
 	o.Size = &v
 
@@ -222,7 +209,6 @@ func (o *SnapshotProperties) GetSecAuthProtection() *bool {
 		return nil
 	}
 
-
 	return o.SecAuthProtection
 
 }
@@ -235,13 +221,11 @@ func (o *SnapshotProperties) GetSecAuthProtectionOk() (*bool, bool) {
 		return nil, false
 	}
 
-
 	return o.SecAuthProtection, true
 }
 
 // SetSecAuthProtection sets field value
 func (o *SnapshotProperties) SetSecAuthProtection(v bool) {
-
 
 	o.SecAuthProtection = &v
 
@@ -263,7 +247,6 @@ func (o *SnapshotProperties) GetCpuHotPlug() *bool {
 		return nil
 	}
 
-
 	return o.CpuHotPlug
 
 }
@@ -276,13 +259,11 @@ func (o *SnapshotProperties) GetCpuHotPlugOk() (*bool, bool) {
 		return nil, false
 	}
 
-
 	return o.CpuHotPlug, true
 }
 
 // SetCpuHotPlug sets field value
 func (o *SnapshotProperties) SetCpuHotPlug(v bool) {
-
 
 	o.CpuHotPlug = &v
 
@@ -304,7 +285,6 @@ func (o *SnapshotProperties) GetCpuHotUnplug() *bool {
 		return nil
 	}
 
-
 	return o.CpuHotUnplug
 
 }
@@ -317,13 +297,11 @@ func (o *SnapshotProperties) GetCpuHotUnplugOk() (*bool, bool) {
 		return nil, false
 	}
 
-
 	return o.CpuHotUnplug, true
 }
 
 // SetCpuHotUnplug sets field value
 func (o *SnapshotProperties) SetCpuHotUnplug(v bool) {
-
 
 	o.CpuHotUnplug = &v
 
@@ -345,7 +323,6 @@ func (o *SnapshotProperties) GetRamHotPlug() *bool {
 		return nil
 	}
 
-
 	return o.RamHotPlug
 
 }
@@ -358,13 +335,11 @@ func (o *SnapshotProperties) GetRamHotPlugOk() (*bool, bool) {
 		return nil, false
 	}
 
-
 	return o.RamHotPlug, true
 }
 
 // SetRamHotPlug sets field value
 func (o *SnapshotProperties) SetRamHotPlug(v bool) {
-
 
 	o.RamHotPlug = &v
 
@@ -386,7 +361,6 @@ func (o *SnapshotProperties) GetRamHotUnplug() *bool {
 		return nil
 	}
 
-
 	return o.RamHotUnplug
 
 }
@@ -399,13 +373,11 @@ func (o *SnapshotProperties) GetRamHotUnplugOk() (*bool, bool) {
 		return nil, false
 	}
 
-
 	return o.RamHotUnplug, true
 }
 
 // SetRamHotUnplug sets field value
 func (o *SnapshotProperties) SetRamHotUnplug(v bool) {
-
 
 	o.RamHotUnplug = &v
 
@@ -427,7 +399,6 @@ func (o *SnapshotProperties) GetNicHotPlug() *bool {
 		return nil
 	}
 
-
 	return o.NicHotPlug
 
 }
@@ -440,13 +411,11 @@ func (o *SnapshotProperties) GetNicHotPlugOk() (*bool, bool) {
 		return nil, false
 	}
 
-
 	return o.NicHotPlug, true
 }
 
 // SetNicHotPlug sets field value
 func (o *SnapshotProperties) SetNicHotPlug(v bool) {
-
 
 	o.NicHotPlug = &v
 
@@ -468,7 +437,6 @@ func (o *SnapshotProperties) GetNicHotUnplug() *bool {
 		return nil
 	}
 
-
 	return o.NicHotUnplug
 
 }
@@ -481,13 +449,11 @@ func (o *SnapshotProperties) GetNicHotUnplugOk() (*bool, bool) {
 		return nil, false
 	}
 
-
 	return o.NicHotUnplug, true
 }
 
 // SetNicHotUnplug sets field value
 func (o *SnapshotProperties) SetNicHotUnplug(v bool) {
-
 
 	o.NicHotUnplug = &v
 
@@ -509,7 +475,6 @@ func (o *SnapshotProperties) GetDiscVirtioHotPlug() *bool {
 		return nil
 	}
 
-
 	return o.DiscVirtioHotPlug
 
 }
@@ -522,13 +487,11 @@ func (o *SnapshotProperties) GetDiscVirtioHotPlugOk() (*bool, bool) {
 		return nil, false
 	}
 
-
 	return o.DiscVirtioHotPlug, true
 }
 
 // SetDiscVirtioHotPlug sets field value
 func (o *SnapshotProperties) SetDiscVirtioHotPlug(v bool) {
-
 
 	o.DiscVirtioHotPlug = &v
 
@@ -550,7 +513,6 @@ func (o *SnapshotProperties) GetDiscVirtioHotUnplug() *bool {
 		return nil
 	}
 
-
 	return o.DiscVirtioHotUnplug
 
 }
@@ -563,13 +525,11 @@ func (o *SnapshotProperties) GetDiscVirtioHotUnplugOk() (*bool, bool) {
 		return nil, false
 	}
 
-
 	return o.DiscVirtioHotUnplug, true
 }
 
 // SetDiscVirtioHotUnplug sets field value
 func (o *SnapshotProperties) SetDiscVirtioHotUnplug(v bool) {
-
 
 	o.DiscVirtioHotUnplug = &v
 
@@ -591,7 +551,6 @@ func (o *SnapshotProperties) GetDiscScsiHotPlug() *bool {
 		return nil
 	}
 
-
 	return o.DiscScsiHotPlug
 
 }
@@ -604,13 +563,11 @@ func (o *SnapshotProperties) GetDiscScsiHotPlugOk() (*bool, bool) {
 		return nil, false
 	}
 
-
 	return o.DiscScsiHotPlug, true
 }
 
 // SetDiscScsiHotPlug sets field value
 func (o *SnapshotProperties) SetDiscScsiHotPlug(v bool) {
-
 
 	o.DiscScsiHotPlug = &v
 
@@ -632,7 +589,6 @@ func (o *SnapshotProperties) GetDiscScsiHotUnplug() *bool {
 		return nil
 	}
 
-
 	return o.DiscScsiHotUnplug
 
 }
@@ -645,13 +601,11 @@ func (o *SnapshotProperties) GetDiscScsiHotUnplugOk() (*bool, bool) {
 		return nil, false
 	}
 
-
 	return o.DiscScsiHotUnplug, true
 }
 
 // SetDiscScsiHotUnplug sets field value
 func (o *SnapshotProperties) SetDiscScsiHotUnplug(v bool) {
-
 
 	o.DiscScsiHotUnplug = &v
 
@@ -673,7 +627,6 @@ func (o *SnapshotProperties) GetLicenceType() *string {
 		return nil
 	}
 
-
 	return o.LicenceType
 
 }
@@ -686,13 +639,11 @@ func (o *SnapshotProperties) GetLicenceTypeOk() (*string, bool) {
 		return nil, false
 	}
 
-
 	return o.LicenceType, true
 }
 
 // SetLicenceType sets field value
 func (o *SnapshotProperties) SetLicenceType(v string) {
-
 
 	o.LicenceType = &v
 
@@ -775,6 +726,7 @@ func (o SnapshotProperties) MarshalJSON() ([]byte, error) {
 	}
 	return json.Marshal(toSerialize)
 }
+
 type NullableSnapshotProperties struct {
 	value *SnapshotProperties
 	isSet bool
@@ -810,5 +762,3 @@ func (v *NullableSnapshotProperties) UnmarshalJSON(src []byte) error {
 	v.isSet = true
 	return json.Unmarshal(src, &v.value)
 }
-
-

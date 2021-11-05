@@ -22,14 +22,12 @@ type NatGatewayLanProperties struct {
 	GatewayIps *[]string `json:"gatewayIps,omitempty"`
 }
 
-
 // GetId returns the Id field value
 // If the value is explicit nil, the zero value for int32 will be returned
 func (o *NatGatewayLanProperties) GetId() *int32 {
 	if o == nil {
 		return nil
 	}
-
 
 	return o.Id
 
@@ -43,13 +41,11 @@ func (o *NatGatewayLanProperties) GetIdOk() (*int32, bool) {
 		return nil, false
 	}
 
-
 	return o.Id, true
 }
 
 // SetId sets field value
 func (o *NatGatewayLanProperties) SetId(v int32) {
-
 
 	o.Id = &v
 
@@ -71,7 +67,6 @@ func (o *NatGatewayLanProperties) GetGatewayIps() *[]string {
 		return nil
 	}
 
-
 	return o.GatewayIps
 
 }
@@ -84,13 +79,11 @@ func (o *NatGatewayLanProperties) GetGatewayIpsOk() (*[]string, bool) {
 		return nil, false
 	}
 
-
 	return o.GatewayIps, true
 }
 
 // SetGatewayIps sets field value
 func (o *NatGatewayLanProperties) SetGatewayIps(v []string) {
-
 
 	o.GatewayIps = &v
 
@@ -117,6 +110,7 @@ func (o NatGatewayLanProperties) MarshalJSON() ([]byte, error) {
 	}
 	return json.Marshal(toSerialize)
 }
+
 type NullableNatGatewayLanProperties struct {
 	value *NatGatewayLanProperties
 	isSet bool
@@ -152,5 +146,3 @@ func (v *NullableNatGatewayLanProperties) UnmarshalJSON(src []byte) error {
 	v.isSet = true
 	return json.Unmarshal(src, &v.value)
 }
-
-

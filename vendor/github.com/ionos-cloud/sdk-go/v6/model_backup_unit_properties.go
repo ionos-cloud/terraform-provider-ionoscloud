@@ -24,14 +24,12 @@ type BackupUnitProperties struct {
 	Email *string `json:"email,omitempty"`
 }
 
-
 // GetName returns the Name field value
 // If the value is explicit nil, the zero value for string will be returned
 func (o *BackupUnitProperties) GetName() *string {
 	if o == nil {
 		return nil
 	}
-
 
 	return o.Name
 
@@ -45,13 +43,11 @@ func (o *BackupUnitProperties) GetNameOk() (*string, bool) {
 		return nil, false
 	}
 
-
 	return o.Name, true
 }
 
 // SetName sets field value
 func (o *BackupUnitProperties) SetName(v string) {
-
 
 	o.Name = &v
 
@@ -73,7 +69,6 @@ func (o *BackupUnitProperties) GetPassword() *string {
 		return nil
 	}
 
-
 	return o.Password
 
 }
@@ -86,13 +81,11 @@ func (o *BackupUnitProperties) GetPasswordOk() (*string, bool) {
 		return nil, false
 	}
 
-
 	return o.Password, true
 }
 
 // SetPassword sets field value
 func (o *BackupUnitProperties) SetPassword(v string) {
-
 
 	o.Password = &v
 
@@ -114,7 +107,6 @@ func (o *BackupUnitProperties) GetEmail() *string {
 		return nil
 	}
 
-
 	return o.Email
 
 }
@@ -127,13 +119,11 @@ func (o *BackupUnitProperties) GetEmailOk() (*string, bool) {
 		return nil, false
 	}
 
-
 	return o.Email, true
 }
 
 // SetEmail sets field value
 func (o *BackupUnitProperties) SetEmail(v string) {
-
 
 	o.Email = &v
 
@@ -164,6 +154,7 @@ func (o BackupUnitProperties) MarshalJSON() ([]byte, error) {
 	}
 	return json.Marshal(toSerialize)
 }
+
 type NullableBackupUnitProperties struct {
 	value *BackupUnitProperties
 	isSet bool
@@ -199,5 +190,3 @@ func (v *NullableBackupUnitProperties) UnmarshalJSON(src []byte) error {
 	v.isSet = true
 	return json.Unmarshal(src, &v.value)
 }
-
-

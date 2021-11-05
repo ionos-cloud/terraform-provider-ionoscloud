@@ -16,11 +16,10 @@ import (
 
 // ServerEntities struct for ServerEntities
 type ServerEntities struct {
-	Cdroms *Cdroms `json:"cdroms,omitempty"`
+	Cdroms  *Cdroms          `json:"cdroms,omitempty"`
 	Volumes *AttachedVolumes `json:"volumes,omitempty"`
-	Nics *Nics `json:"nics,omitempty"`
+	Nics    *Nics            `json:"nics,omitempty"`
 }
-
 
 // GetCdroms returns the Cdroms field value
 // If the value is explicit nil, the zero value for Cdroms will be returned
@@ -28,7 +27,6 @@ func (o *ServerEntities) GetCdroms() *Cdroms {
 	if o == nil {
 		return nil
 	}
-
 
 	return o.Cdroms
 
@@ -42,13 +40,11 @@ func (o *ServerEntities) GetCdromsOk() (*Cdroms, bool) {
 		return nil, false
 	}
 
-
 	return o.Cdroms, true
 }
 
 // SetCdroms sets field value
 func (o *ServerEntities) SetCdroms(v Cdroms) {
-
 
 	o.Cdroms = &v
 
@@ -70,7 +66,6 @@ func (o *ServerEntities) GetVolumes() *AttachedVolumes {
 		return nil
 	}
 
-
 	return o.Volumes
 
 }
@@ -83,13 +78,11 @@ func (o *ServerEntities) GetVolumesOk() (*AttachedVolumes, bool) {
 		return nil, false
 	}
 
-
 	return o.Volumes, true
 }
 
 // SetVolumes sets field value
 func (o *ServerEntities) SetVolumes(v AttachedVolumes) {
-
 
 	o.Volumes = &v
 
@@ -111,7 +104,6 @@ func (o *ServerEntities) GetNics() *Nics {
 		return nil
 	}
 
-
 	return o.Nics
 
 }
@@ -124,13 +116,11 @@ func (o *ServerEntities) GetNicsOk() (*Nics, bool) {
 		return nil, false
 	}
 
-
 	return o.Nics, true
 }
 
 // SetNics sets field value
 func (o *ServerEntities) SetNics(v Nics) {
-
 
 	o.Nics = &v
 
@@ -161,6 +151,7 @@ func (o ServerEntities) MarshalJSON() ([]byte, error) {
 	}
 	return json.Marshal(toSerialize)
 }
+
 type NullableServerEntities struct {
 	value *ServerEntities
 	isSet bool
@@ -196,5 +187,3 @@ func (v *NullableServerEntities) UnmarshalJSON(src []byte) error {
 	v.isSet = true
 	return json.Unmarshal(src, &v.value)
 }
-
-

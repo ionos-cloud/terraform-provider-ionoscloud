@@ -16,10 +16,9 @@ import (
 
 // NatGatewayEntities struct for NatGatewayEntities
 type NatGatewayEntities struct {
-	Rules *NatGatewayRules `json:"rules,omitempty"`
-	Flowlogs *FlowLogs `json:"flowlogs,omitempty"`
+	Rules    *NatGatewayRules `json:"rules,omitempty"`
+	Flowlogs *FlowLogs        `json:"flowlogs,omitempty"`
 }
-
 
 // GetRules returns the Rules field value
 // If the value is explicit nil, the zero value for NatGatewayRules will be returned
@@ -27,7 +26,6 @@ func (o *NatGatewayEntities) GetRules() *NatGatewayRules {
 	if o == nil {
 		return nil
 	}
-
 
 	return o.Rules
 
@@ -41,13 +39,11 @@ func (o *NatGatewayEntities) GetRulesOk() (*NatGatewayRules, bool) {
 		return nil, false
 	}
 
-
 	return o.Rules, true
 }
 
 // SetRules sets field value
 func (o *NatGatewayEntities) SetRules(v NatGatewayRules) {
-
 
 	o.Rules = &v
 
@@ -69,7 +65,6 @@ func (o *NatGatewayEntities) GetFlowlogs() *FlowLogs {
 		return nil
 	}
 
-
 	return o.Flowlogs
 
 }
@@ -82,13 +77,11 @@ func (o *NatGatewayEntities) GetFlowlogsOk() (*FlowLogs, bool) {
 		return nil, false
 	}
 
-
 	return o.Flowlogs, true
 }
 
 // SetFlowlogs sets field value
 func (o *NatGatewayEntities) SetFlowlogs(v FlowLogs) {
-
 
 	o.Flowlogs = &v
 
@@ -115,6 +108,7 @@ func (o NatGatewayEntities) MarshalJSON() ([]byte, error) {
 	}
 	return json.Marshal(toSerialize)
 }
+
 type NullableNatGatewayEntities struct {
 	value *NatGatewayEntities
 	isSet bool
@@ -150,5 +144,3 @@ func (v *NullableNatGatewayEntities) UnmarshalJSON(src []byte) error {
 	v.isSet = true
 	return json.Unmarshal(src, &v.value)
 }
-
-

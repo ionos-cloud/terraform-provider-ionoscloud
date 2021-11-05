@@ -21,11 +21,10 @@ type RequestMetadata struct {
 	CreatedDate *IonosTime
 	// The user who created the resource.
 	CreatedBy *string `json:"createdBy,omitempty"`
-	// Resource's Entity Tag as defined in http://www.w3.org/Protocols/rfc2616/rfc2616-sec3.html#sec3.11 . Entity Tag is also added as an 'ETag response header to requests which don't use 'depth' parameter. 
-	Etag *string `json:"etag,omitempty"`
+	// Resource's Entity Tag as defined in http://www.w3.org/Protocols/rfc2616/rfc2616-sec3.html#sec3.11 . Entity Tag is also added as an 'ETag response header to requests which don't use 'depth' parameter.
+	Etag          *string        `json:"etag,omitempty"`
 	RequestStatus *RequestStatus `json:"requestStatus,omitempty"`
 }
-
 
 // GetCreatedDate returns the CreatedDate field value
 // If the value is explicit nil, the zero value for time.Time will be returned
@@ -38,7 +37,6 @@ func (o *RequestMetadata) GetCreatedDate() *time.Time {
 		return nil
 	}
 	return &o.CreatedDate.Time
-
 
 }
 
@@ -62,7 +60,6 @@ func (o *RequestMetadata) SetCreatedDate(v time.Time) {
 
 	o.CreatedDate = &IonosTime{v}
 
-
 }
 
 // HasCreatedDate returns a boolean if a field has been set.
@@ -81,7 +78,6 @@ func (o *RequestMetadata) GetCreatedBy() *string {
 		return nil
 	}
 
-
 	return o.CreatedBy
 
 }
@@ -94,13 +90,11 @@ func (o *RequestMetadata) GetCreatedByOk() (*string, bool) {
 		return nil, false
 	}
 
-
 	return o.CreatedBy, true
 }
 
 // SetCreatedBy sets field value
 func (o *RequestMetadata) SetCreatedBy(v string) {
-
 
 	o.CreatedBy = &v
 
@@ -122,7 +116,6 @@ func (o *RequestMetadata) GetEtag() *string {
 		return nil
 	}
 
-
 	return o.Etag
 
 }
@@ -135,13 +128,11 @@ func (o *RequestMetadata) GetEtagOk() (*string, bool) {
 		return nil, false
 	}
 
-
 	return o.Etag, true
 }
 
 // SetEtag sets field value
 func (o *RequestMetadata) SetEtag(v string) {
-
 
 	o.Etag = &v
 
@@ -163,7 +154,6 @@ func (o *RequestMetadata) GetRequestStatus() *RequestStatus {
 		return nil
 	}
 
-
 	return o.RequestStatus
 
 }
@@ -176,13 +166,11 @@ func (o *RequestMetadata) GetRequestStatusOk() (*RequestStatus, bool) {
 		return nil, false
 	}
 
-
 	return o.RequestStatus, true
 }
 
 // SetRequestStatus sets field value
 func (o *RequestMetadata) SetRequestStatus(v RequestStatus) {
-
 
 	o.RequestStatus = &v
 
@@ -217,6 +205,7 @@ func (o RequestMetadata) MarshalJSON() ([]byte, error) {
 	}
 	return json.Marshal(toSerialize)
 }
+
 type NullableRequestMetadata struct {
 	value *RequestMetadata
 	isSet bool
@@ -252,5 +241,3 @@ func (v *NullableRequestMetadata) UnmarshalJSON(src []byte) error {
 	v.isSet = true
 	return json.Unmarshal(src, &v.value)
 }
-
-

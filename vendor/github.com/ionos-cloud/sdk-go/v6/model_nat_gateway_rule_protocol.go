@@ -20,10 +20,10 @@ type NatGatewayRuleProtocol string
 
 // List of NatGatewayRuleProtocol
 const (
-	TCP NatGatewayRuleProtocol = "TCP"
-	UDP NatGatewayRuleProtocol = "UDP"
+	TCP  NatGatewayRuleProtocol = "TCP"
+	UDP  NatGatewayRuleProtocol = "UDP"
 	ICMP NatGatewayRuleProtocol = "ICMP"
-	ALL NatGatewayRuleProtocol = "ALL"
+	ALL  NatGatewayRuleProtocol = "ALL"
 )
 
 func (v *NatGatewayRuleProtocol) UnmarshalJSON(src []byte) error {
@@ -33,7 +33,7 @@ func (v *NatGatewayRuleProtocol) UnmarshalJSON(src []byte) error {
 		return err
 	}
 	enumTypeValue := NatGatewayRuleProtocol(value)
-	for _, existing := range []NatGatewayRuleProtocol{ "TCP", "UDP", "ICMP", "ALL",   } {
+	for _, existing := range []NatGatewayRuleProtocol{"TCP", "UDP", "ICMP", "ALL"} {
 		if existing == enumTypeValue {
 			*v = enumTypeValue
 			return nil
@@ -83,4 +83,3 @@ func (v *NullableNatGatewayRuleProtocol) UnmarshalJSON(src []byte) error {
 	v.isSet = true
 	return json.Unmarshal(src, &v.value)
 }
-

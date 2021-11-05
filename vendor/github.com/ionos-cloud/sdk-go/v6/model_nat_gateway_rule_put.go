@@ -21,10 +21,9 @@ type NatGatewayRulePut struct {
 	// The type of object that has been created
 	Type *Type `json:"type,omitempty"`
 	// URL to the object representation (absolute path)
-	Href *string `json:"href,omitempty"`
+	Href       *string                   `json:"href,omitempty"`
 	Properties *NatGatewayRuleProperties `json:"properties"`
 }
-
 
 // GetId returns the Id field value
 // If the value is explicit nil, the zero value for string will be returned
@@ -32,7 +31,6 @@ func (o *NatGatewayRulePut) GetId() *string {
 	if o == nil {
 		return nil
 	}
-
 
 	return o.Id
 
@@ -46,13 +44,11 @@ func (o *NatGatewayRulePut) GetIdOk() (*string, bool) {
 		return nil, false
 	}
 
-
 	return o.Id, true
 }
 
 // SetId sets field value
 func (o *NatGatewayRulePut) SetId(v string) {
-
 
 	o.Id = &v
 
@@ -74,7 +70,6 @@ func (o *NatGatewayRulePut) GetType() *Type {
 		return nil
 	}
 
-
 	return o.Type
 
 }
@@ -87,13 +82,11 @@ func (o *NatGatewayRulePut) GetTypeOk() (*Type, bool) {
 		return nil, false
 	}
 
-
 	return o.Type, true
 }
 
 // SetType sets field value
 func (o *NatGatewayRulePut) SetType(v Type) {
-
 
 	o.Type = &v
 
@@ -115,7 +108,6 @@ func (o *NatGatewayRulePut) GetHref() *string {
 		return nil
 	}
 
-
 	return o.Href
 
 }
@@ -128,13 +120,11 @@ func (o *NatGatewayRulePut) GetHrefOk() (*string, bool) {
 		return nil, false
 	}
 
-
 	return o.Href, true
 }
 
 // SetHref sets field value
 func (o *NatGatewayRulePut) SetHref(v string) {
-
 
 	o.Href = &v
 
@@ -156,7 +146,6 @@ func (o *NatGatewayRulePut) GetProperties() *NatGatewayRuleProperties {
 		return nil
 	}
 
-
 	return o.Properties
 
 }
@@ -169,13 +158,11 @@ func (o *NatGatewayRulePut) GetPropertiesOk() (*NatGatewayRuleProperties, bool) 
 		return nil, false
 	}
 
-
 	return o.Properties, true
 }
 
 // SetProperties sets field value
 func (o *NatGatewayRulePut) SetProperties(v NatGatewayRuleProperties) {
-
 
 	o.Properties = &v
 
@@ -210,6 +197,7 @@ func (o NatGatewayRulePut) MarshalJSON() ([]byte, error) {
 	}
 	return json.Marshal(toSerialize)
 }
+
 type NullableNatGatewayRulePut struct {
 	value *NatGatewayRulePut
 	isSet bool
@@ -245,5 +233,3 @@ func (v *NullableNatGatewayRulePut) UnmarshalJSON(src []byte) error {
 	v.isSet = true
 	return json.Unmarshal(src, &v.value)
 }
-
-
