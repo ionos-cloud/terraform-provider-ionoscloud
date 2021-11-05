@@ -76,7 +76,7 @@ func Provider() *schema.Provider {
 			SnapshotResource:           resourceSnapshot(),
 			"ionoscloud_ipfailover":    resourceLanIPFailover(),
 			K8sClusterResource:         resourcek8sCluster(),
-			"ionoscloud_k8s_node_pool": resourcek8sNodePool(),
+			"ionoscloud_k8s_node_pool": resourceK8sNodePool(),
 			PCCResource:                resourcePrivateCrossConnect(),
 			BackupUnitResource:         resourceBackupUnit(),
 			S3KeyResource:              resourceS3Key(),

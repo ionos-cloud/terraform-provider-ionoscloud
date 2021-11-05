@@ -8,12 +8,13 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 	ionoscloud "github.com/ionos-cloud/sdk-go/v5"
 	"log"
+	"strings"
 	"time"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 )
 
-func resourcek8sNodePool() *schema.Resource {
+func resourceK8sNodePool() *schema.Resource {
 	return &schema.Resource{
 		CreateContext: resourcek8sNodePoolCreate,
 		ReadContext:   resourcek8sNodePoolRead,
@@ -151,6 +152,14 @@ func resourcek8sNodePool() *schema.Resource {
 				Type:     schema.TypeMap,
 				Optional: true,
 				Elem:     &schema.Schema{Type: schema.TypeString},
+			},
+			"available_upgrade_versions": {
+				Type:        schema.TypeList,
+				Description: "A list of kubernetes versions available for upgrade",
+				Computed:    true,
+				Elem: &schema.Schema{
+					Type: schema.TypeString,
+				},
 			},
 		},
 		Timeouts: &resourceDefaultTimeouts,
@@ -352,158 +361,8 @@ func resourcek8sNodePoolRead(ctx context.Context, d *schema.ResourceData, meta i
 
 	log.Printf("[INFO] Successfully retreived k8s node pool %s: %+v", d.Id(), k8sNodepool)
 
-	d.SetId(*k8sNodepool.Id)
-
-	if k8sNodepool.Properties.Name != nil {
-		err := d.Set("name", *k8sNodepool.Properties.Name)
-		if err != nil {
-			diags := diag.FromErr(fmt.Errorf("error while setting name property for k8sNodepool %s: %s", d.Id(), err))
-			return diags
-		}
-
-	}
-
-	if k8sNodepool.Properties.K8sVersion != nil {
-		err := d.Set("k8s_version", *k8sNodepool.Properties.K8sVersion)
-		if err != nil {
-			diags := diag.FromErr(fmt.Errorf("error while setting k8s_version property for k8sNodepool %s: %s", d.Id(), err))
-			return diags
-		}
-
-	}
-
-	if k8sNodepool.Properties.DatacenterId != nil {
-		err := d.Set("datacenter_id", *k8sNodepool.Properties.DatacenterId)
-		if err != nil {
-			diags := diag.FromErr(fmt.Errorf("error while setting datacenter_id property for k8sNodepool %s: %s", d.Id(), err))
-			return diags
-		}
-
-	}
-
-	if k8sNodepool.Properties.CpuFamily != nil {
-		err := d.Set("cpu_family", *k8sNodepool.Properties.CpuFamily)
-		if err != nil {
-			diags := diag.FromErr(fmt.Errorf("error while setting cpu_family property for k8sNodepool %s: %s", d.Id(), err))
-			return diags
-		}
-
-	}
-
-	if k8sNodepool.Properties.AvailabilityZone != nil {
-		err := d.Set("availability_zone", *k8sNodepool.Properties.AvailabilityZone)
-		if err != nil {
-			diags := diag.FromErr(fmt.Errorf("error while setting availability_zone property for k8sNodepool %s: %s", d.Id(), err))
-			return diags
-		}
-
-	}
-
-	if k8sNodepool.Properties.StorageType != nil {
-		err := d.Set("storage_type", *k8sNodepool.Properties.StorageType)
-		if err != nil {
-			diags := diag.FromErr(fmt.Errorf("error while setting storage_type property for k8sNodepool %s: %s", d.Id(), err))
-			return diags
-		}
-
-	}
-
-	if k8sNodepool.Properties.NodeCount != nil {
-		err := d.Set("node_count", *k8sNodepool.Properties.NodeCount)
-		if err != nil {
-			diags := diag.FromErr(fmt.Errorf("error while setting node_count property for k8sNodepool %s: %s", d.Id(), err))
-			return diags
-		}
-
-	}
-
-	if k8sNodepool.Properties.CoresCount != nil {
-		err := d.Set("cores_count", *k8sNodepool.Properties.CoresCount)
-		if err != nil {
-			diags := diag.FromErr(fmt.Errorf("error while setting cores_count property for k8sNodepool %s: %s", d.Id(), err))
-			return diags
-		}
-
-	}
-
-	if k8sNodepool.Properties.RamSize != nil {
-		err := d.Set("ram_size", *k8sNodepool.Properties.RamSize)
-		if err != nil {
-			diags := diag.FromErr(fmt.Errorf("error while setting ram_size property for k8sNodepool %s: %s", d.Id(), err))
-			return diags
-		}
-
-	}
-
-	if k8sNodepool.Properties.StorageSize != nil {
-		err := d.Set("storage_size", *k8sNodepool.Properties.StorageSize)
-		if err != nil {
-			diags := diag.FromErr(fmt.Errorf("error while setting storage_size property for k8sNodepool %s: %s", d.Id(), err))
-			return diags
-		}
-
-	}
-
-	if k8sNodepool.Properties.PublicIps != nil && len(*k8sNodepool.Properties.PublicIps) > 0 {
-		err := d.Set("public_ips", *k8sNodepool.Properties.PublicIps)
-		if err != nil {
-			diags := diag.FromErr(fmt.Errorf("error while setting public_ips property for k8sNodepool %s: %s", d.Id(), err))
-			return diags
-		}
-	}
-
-	if k8sNodepool.Properties.AutoScaling != nil && k8sNodepool.Properties.AutoScaling.MinNodeCount != nil &&
-		k8sNodepool.Properties.AutoScaling.MaxNodeCount != nil && (*k8sNodepool.Properties.AutoScaling.MinNodeCount != 0 &&
-		*k8sNodepool.Properties.AutoScaling.MaxNodeCount != 0) {
-		err := d.Set("auto_scaling", []map[string]int32{
-			{
-				"min_node_count": *k8sNodepool.Properties.AutoScaling.MinNodeCount,
-				"max_node_count": *k8sNodepool.Properties.AutoScaling.MaxNodeCount,
-			},
-		})
-		if err != nil {
-			diags := diag.FromErr(fmt.Errorf("error while setting auto_scaling property for k8sNodepool %s: %s", d.Id(), err))
-			return diags
-		}
-		log.Printf("[INFO] Setting AutoScaling for k8s node pool %s to %+v...", d.Id(), *k8sNodepool.Properties.AutoScaling)
-	}
-
-	if k8sNodepool.Properties.Lans != nil && len(*k8sNodepool.Properties.Lans) > 0 {
-		lans := make([]int32, 0, 0)
-		for _, lan := range *k8sNodepool.Properties.Lans {
-			if lan.Id != nil {
-				lans = append(lans, *lan.Id)
-			}
-		}
-		err := d.Set("lans", lans)
-		if err != nil {
-			diags := diag.FromErr(fmt.Errorf("error while setting lans property for k8sNodepool %s: %s", d.Id(), err))
-			return diags
-		}
-	}
-
-	labels := make(map[string]interface{})
-	if k8sNodepool.Properties.Labels != nil && len(*k8sNodepool.Properties.Labels) > 0 {
-		for k, v := range *k8sNodepool.Properties.Labels {
-			labels[k] = v
-		}
-	}
-
-	if err := d.Set("labels", labels); err != nil {
-		diags := diag.FromErr(fmt.Errorf("error while setting the labels property for k8sNodepool %s: %s", d.Id(), err))
-		return diags
-	}
-
-	annotations := make(map[string]interface{})
-	if k8sNodepool.Properties.Annotations != nil && len(*k8sNodepool.Properties.Annotations) > 0 {
-		for k, v := range *k8sNodepool.Properties.Annotations {
-			annotations[k] = v
-		}
-	}
-
-	if err := d.Set("annotations", annotations); err != nil {
-		diags := diag.FromErr(fmt.Errorf("error while setting the annotations property for k8sNodepool %s: %s", d.Id(), err))
-		return diags
+	if err := setK8sNodePoolData(d, &k8sNodepool); err != nil {
+		return diag.FromErr(err)
 	}
 
 	return nil
@@ -607,11 +466,6 @@ func resourcek8sNodePoolUpdate(ctx context.Context, d *schema.ResourceData, meta
 
 			updateNodeCount = false
 
-			ctx, cancel := context.WithTimeout(context.Background(), *resourceDefaultTimeouts.Create)
-
-			if cancel != nil {
-				defer cancel()
-			}
 			var apiResponse *ionoscloud.APIResponse
 
 			np, apiResponse, npErr := client.KubernetesApi.K8sNodepoolsFindById(ctx, d.Get("k8s_cluster_id").(string), d.Id()).Execute()
@@ -837,6 +691,192 @@ func resourcek8sNodePoolDelete(ctx context.Context, d *schema.ResourceData, meta
 	}
 
 	d.SetId("")
+	return nil
+}
+
+func resourceK8sNodepoolImport(ctx context.Context, d *schema.ResourceData, meta interface{}) ([]*schema.ResourceData, error) {
+
+	parts := strings.Split(d.Id(), "/")
+
+	if len(parts) != 2 || parts[0] == "" || parts[1] == "" {
+		return nil, fmt.Errorf("invalid import id %q. Expecting {k8sClusterId}/{k8sNodePoolId}", d.Id())
+	}
+
+	clusterId := parts[0]
+	npId := parts[1]
+
+	client := meta.(*ionoscloud.APIClient)
+
+	k8sNodepool, apiResponse, err := client.KubernetesApi.K8sNodepoolsFindById(ctx, clusterId, npId).Execute()
+	logApiRequestTime(apiResponse)
+
+	if err != nil {
+		if _, ok := err.(ionoscloud.GenericOpenAPIError); ok {
+			if apiResponse != nil && apiResponse.Response != nil && apiResponse.StatusCode == 404 {
+				d.SetId("")
+				return nil, fmt.Errorf("unable to find k8s node pool %q", npId)
+			}
+		}
+		return nil, fmt.Errorf("unable to retreive k8s node pool %q", npId)
+	}
+
+	log.Printf("[INFO] K8s node pool found: %+v", k8sNodepool)
+
+	if err := setK8sNodePoolData(d, &k8sNodepool); err != nil {
+		return nil, err
+	}
+	log.Printf("[INFO] Importing k8s node pool %q...", d.Id())
+
+	return []*schema.ResourceData{d}, nil
+}
+
+func setK8sNodePoolData(d *schema.ResourceData, nodePool *ionoscloud.KubernetesNodePool) error {
+
+	if nodePool.Id != nil {
+		d.SetId(*nodePool.Id)
+	}
+
+	if nodePool.Properties != nil {
+		if nodePool.Properties.Name != nil {
+			if err := d.Set("name", *nodePool.Properties.Name); err != nil {
+				return err
+			}
+		}
+
+		if nodePool.Properties.DatacenterId != nil {
+			if err := d.Set("datacenter_id", *nodePool.Properties.DatacenterId); err != nil {
+				return err
+			}
+		}
+
+		if nodePool.Properties.NodeCount != nil {
+			if err := d.Set("node_count", *nodePool.Properties.NodeCount); err != nil {
+				return err
+			}
+		}
+
+		if nodePool.Properties.CpuFamily != nil {
+			if err := d.Set("cpu_family", *nodePool.Properties.CpuFamily); err != nil {
+				return err
+			}
+		}
+
+		if nodePool.Properties.CoresCount != nil {
+			if err := d.Set("cores_count", *nodePool.Properties.CoresCount); err != nil {
+				return err
+			}
+		}
+
+		if nodePool.Properties.RamSize != nil {
+			if err := d.Set("ram_size", *nodePool.Properties.RamSize); err != nil {
+				return err
+			}
+		}
+
+		if nodePool.Properties.AvailabilityZone != nil {
+			if err := d.Set("availability_zone", *nodePool.Properties.AvailabilityZone); err != nil {
+				return err
+			}
+		}
+
+		if nodePool.Properties.StorageType != nil {
+			if err := d.Set("storage_type", *nodePool.Properties.StorageType); err != nil {
+				return err
+			}
+		}
+
+		if nodePool.Properties.StorageSize != nil {
+			if err := d.Set("storage_size", *nodePool.Properties.StorageSize); err != nil {
+				return err
+			}
+		}
+
+		if nodePool.Properties.K8sVersion != nil {
+			if err := d.Set("k8s_version", *nodePool.Properties.K8sVersion); err != nil {
+				return err
+			}
+		}
+
+		if nodePool.Properties.PublicIps != nil && len(*nodePool.Properties.PublicIps) > 0 {
+			if err := d.Set("public_ips", *nodePool.Properties.PublicIps); err != nil {
+				return err
+			}
+		}
+
+		if nodePool.Properties.MaintenanceWindow != nil && nodePool.Properties.MaintenanceWindow.Time != nil && nodePool.Properties.MaintenanceWindow.DayOfTheWeek != nil {
+			if err := d.Set("maintenance_window", []map[string]string{
+				{
+					"time":            *nodePool.Properties.MaintenanceWindow.Time,
+					"day_of_the_week": *nodePool.Properties.MaintenanceWindow.DayOfTheWeek,
+				},
+			}); err != nil {
+				return err
+			}
+		}
+
+		if nodePool.Properties.AutoScaling != nil && nodePool.Properties.AutoScaling.MinNodeCount != nil &&
+			nodePool.Properties.AutoScaling.MaxNodeCount != nil && (*nodePool.Properties.AutoScaling.MinNodeCount != 0 &&
+			*nodePool.Properties.AutoScaling.MaxNodeCount != 0) {
+			if err := d.Set("auto_scaling", []map[string]uint32{
+				{
+					"min_node_count": uint32(*nodePool.Properties.AutoScaling.MinNodeCount),
+					"max_node_count": uint32(*nodePool.Properties.AutoScaling.MaxNodeCount),
+				},
+			}); err != nil {
+				return err
+			}
+		}
+
+		if nodePool.Properties.Lans != nil && len(*nodePool.Properties.Lans) > 0 {
+			lans := make([]int32, 0, 0)
+			for _, lan := range *nodePool.Properties.Lans {
+				if lan.Id != nil {
+					lans = append(lans, *lan.Id)
+				}
+			}
+			err := d.Set("lans", lans)
+			if err != nil {
+				return fmt.Errorf("error while setting lans property for k8sNodepool %s: %s", d.Id(), err)
+			}
+		}
+
+		if nodePool.Properties.AvailableUpgradeVersions != nil && len(*nodePool.Properties.AvailableUpgradeVersions) > 0 {
+			if err := d.Set("available_upgrade_versions", *nodePool.Properties.AvailableUpgradeVersions); err != nil {
+				return err
+			}
+		}
+
+		if nodePool.Properties.PublicIps != nil && len(*nodePool.Properties.PublicIps) > 0 {
+			if err := d.Set("public_ips", *nodePool.Properties.PublicIps); err != nil {
+				return err
+			}
+		}
+
+		labels := make(map[string]interface{})
+		if nodePool.Properties.Labels != nil && len(*nodePool.Properties.Labels) > 0 {
+			for k, v := range *nodePool.Properties.Labels {
+				labels[k] = v
+			}
+		}
+
+		if err := d.Set("labels", labels); err != nil {
+			return fmt.Errorf("error while setting the labels property for k8sNodepool %s: %s", d.Id(), err)
+
+		}
+
+		annotations := make(map[string]interface{})
+		if nodePool.Properties.Annotations != nil && len(*nodePool.Properties.Annotations) > 0 {
+			for k, v := range *nodePool.Properties.Annotations {
+				annotations[k] = v
+			}
+		}
+
+		if err := d.Set("annotations", annotations); err != nil {
+			return fmt.Errorf("error while setting the annotations property for k8sNodepool %s: %s", d.Id(), err)
+		}
+
+	}
+
 	return nil
 }
 

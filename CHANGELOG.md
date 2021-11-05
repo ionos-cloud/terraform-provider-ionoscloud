@@ -1,7 +1,11 @@
 ## 5.2.19
 
 - **code enhancements**: added http request time log for API calls
-
+- **code enhancements**: for `k8s_node_pool`:
+  - made tests comprehensive
+  - optimized test duration by including both match by id and by name in the same test
+  - removed duplicated code from import, data_source, resource and tests files
+  
 ## 5.2.18
 
 - **bug fixes**: fixed datacenter datasource
