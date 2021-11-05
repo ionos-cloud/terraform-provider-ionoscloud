@@ -21,12 +21,10 @@ type KubernetesNodePoolForPost struct {
 	// The type of object
 	Type *string `json:"type,omitempty"`
 	// URL to the object representation (absolute path)
-	Href *string `json:"href,omitempty"`
-	Metadata *DatacenterElementMetadata `json:"metadata,omitempty"`
+	Href       *string                              `json:"href,omitempty"`
+	Metadata   *DatacenterElementMetadata           `json:"metadata,omitempty"`
 	Properties *KubernetesNodePoolPropertiesForPost `json:"properties"`
 }
-
-
 
 // GetId returns the Id field value
 // If the value is explicit nil, the zero value for string will be returned
@@ -34,7 +32,6 @@ func (o *KubernetesNodePoolForPost) GetId() *string {
 	if o == nil {
 		return nil
 	}
-
 
 	return o.Id
 
@@ -48,13 +45,11 @@ func (o *KubernetesNodePoolForPost) GetIdOk() (*string, bool) {
 		return nil, false
 	}
 
-
 	return o.Id, true
 }
 
 // SetId sets field value
 func (o *KubernetesNodePoolForPost) SetId(v string) {
-
 
 	o.Id = &v
 
@@ -69,14 +64,12 @@ func (o *KubernetesNodePoolForPost) HasId() bool {
 	return false
 }
 
-
 // GetType returns the Type field value
 // If the value is explicit nil, the zero value for string will be returned
 func (o *KubernetesNodePoolForPost) GetType() *string {
 	if o == nil {
 		return nil
 	}
-
 
 	return o.Type
 
@@ -90,13 +83,11 @@ func (o *KubernetesNodePoolForPost) GetTypeOk() (*string, bool) {
 		return nil, false
 	}
 
-
 	return o.Type, true
 }
 
 // SetType sets field value
 func (o *KubernetesNodePoolForPost) SetType(v string) {
-
 
 	o.Type = &v
 
@@ -111,14 +102,12 @@ func (o *KubernetesNodePoolForPost) HasType() bool {
 	return false
 }
 
-
 // GetHref returns the Href field value
 // If the value is explicit nil, the zero value for string will be returned
 func (o *KubernetesNodePoolForPost) GetHref() *string {
 	if o == nil {
 		return nil
 	}
-
 
 	return o.Href
 
@@ -132,13 +121,11 @@ func (o *KubernetesNodePoolForPost) GetHrefOk() (*string, bool) {
 		return nil, false
 	}
 
-
 	return o.Href, true
 }
 
 // SetHref sets field value
 func (o *KubernetesNodePoolForPost) SetHref(v string) {
-
 
 	o.Href = &v
 
@@ -153,14 +140,12 @@ func (o *KubernetesNodePoolForPost) HasHref() bool {
 	return false
 }
 
-
 // GetMetadata returns the Metadata field value
 // If the value is explicit nil, the zero value for DatacenterElementMetadata will be returned
 func (o *KubernetesNodePoolForPost) GetMetadata() *DatacenterElementMetadata {
 	if o == nil {
 		return nil
 	}
-
 
 	return o.Metadata
 
@@ -174,13 +159,11 @@ func (o *KubernetesNodePoolForPost) GetMetadataOk() (*DatacenterElementMetadata,
 		return nil, false
 	}
 
-
 	return o.Metadata, true
 }
 
 // SetMetadata sets field value
 func (o *KubernetesNodePoolForPost) SetMetadata(v DatacenterElementMetadata) {
-
 
 	o.Metadata = &v
 
@@ -195,14 +178,12 @@ func (o *KubernetesNodePoolForPost) HasMetadata() bool {
 	return false
 }
 
-
 // GetProperties returns the Properties field value
 // If the value is explicit nil, the zero value for KubernetesNodePoolPropertiesForPost will be returned
 func (o *KubernetesNodePoolForPost) GetProperties() *KubernetesNodePoolPropertiesForPost {
 	if o == nil {
 		return nil
 	}
-
 
 	return o.Properties
 
@@ -216,13 +197,11 @@ func (o *KubernetesNodePoolForPost) GetPropertiesOk() (*KubernetesNodePoolProper
 		return nil, false
 	}
 
-
 	return o.Properties, true
 }
 
 // SetProperties sets field value
 func (o *KubernetesNodePoolForPost) SetProperties(v KubernetesNodePoolPropertiesForPost) {
-
 
 	o.Properties = &v
 
@@ -297,5 +276,3 @@ func (v *NullableKubernetesNodePoolForPost) UnmarshalJSON(src []byte) error {
 	v.isSet = true
 	return json.Unmarshal(src, &v.value)
 }
-
-

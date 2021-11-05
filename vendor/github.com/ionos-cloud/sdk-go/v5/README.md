@@ -1,3 +1,14 @@
+![CI](https://github.com/ionos-cloud/sdk-resources/workflows/%5B%20CI%20%5D%20CloudApi%20V5%20/%20Go/badge.svg)
+[![Gitter](https://img.shields.io/gitter/room/ionos-cloud/sdk-general)](https://gitter.im/ionos-cloud/sdk-general)
+[![Quality Gate Status](https://sonarcloud.io/api/project_badges/measure?project=ionos-cloud_sdk-go&metric=alert_status)](https://sonarcloud.io/dashboard?id=ionos-cloud_sdk-go)
+[![Bugs](https://sonarcloud.io/api/project_badges/measure?project=ionos-cloud_sdk-go&metric=bugs)](https://sonarcloud.io/dashboard?id=ionos-cloud_sdk-go)
+[![Maintainability Rating](https://sonarcloud.io/api/project_badges/measure?project=ionos-cloud_sdk-go&metric=sqale_rating)](https://sonarcloud.io/dashboard?id=ionos-cloud_sdk-go)
+[![Reliability Rating](https://sonarcloud.io/api/project_badges/measure?project=ionos-cloud_sdk-go&metric=reliability_rating)](https://sonarcloud.io/dashboard?id=ionos-cloud_sdk-go)
+[![Security Rating](https://sonarcloud.io/api/project_badges/measure?project=ionos-cloud_sdk-go&metric=security_rating)](https://sonarcloud.io/dashboard?id=ionos-cloud_sdk-go)
+[![Vulnerabilities](https://sonarcloud.io/api/project_badges/measure?project=ionos-cloud_sdk-go&metric=vulnerabilities)](https://sonarcloud.io/dashboard?id=ionos-cloud_sdk-go)
+
+![Alt text](.github/IONOS.CLOUD.BLU.svg?raw=true "Title")
+
 # Go API client for ionoscloud
 
 An enterprise-grade Infrastructure is provided as a Service (IaaS) solution that can be managed through a browser-based \"Data Center Designer\" (DCD) tool or via an easy to use API. 
@@ -44,6 +55,8 @@ For using other server than the one defined on index 0 set context value `sw.Con
 ```golang
 ctx := context.WithValue(context.Background(), sw.ContextServerIndex, 1)
 ```
+
+Note: To overwrite the api endpoint - `api.ionos.com`, the environment variable `$IONOS_API_URL` can be set, and used with `NewConfigurationFromEnv()` function.
 
 ### Templated Server URL
 

@@ -16,18 +16,16 @@ import (
 
 // IpConsumer struct for IpConsumer
 type IpConsumer struct {
-	Ip *string `json:"ip,omitempty"`
-	Mac *string `json:"mac,omitempty"`
-	NicId *string `json:"nicId,omitempty"`
-	ServerId *string `json:"serverId,omitempty"`
-	ServerName *string `json:"serverName,omitempty"`
-	DatacenterId *string `json:"datacenterId,omitempty"`
-	DatacenterName *string `json:"datacenterName,omitempty"`
+	Ip              *string `json:"ip,omitempty"`
+	Mac             *string `json:"mac,omitempty"`
+	NicId           *string `json:"nicId,omitempty"`
+	ServerId        *string `json:"serverId,omitempty"`
+	ServerName      *string `json:"serverName,omitempty"`
+	DatacenterId    *string `json:"datacenterId,omitempty"`
+	DatacenterName  *string `json:"datacenterName,omitempty"`
 	K8sNodePoolUuid *string `json:"k8sNodePoolUuid,omitempty"`
-	K8sClusterUuid *string `json:"k8sClusterUuid,omitempty"`
+	K8sClusterUuid  *string `json:"k8sClusterUuid,omitempty"`
 }
-
-
 
 // GetIp returns the Ip field value
 // If the value is explicit nil, the zero value for string will be returned
@@ -35,7 +33,6 @@ func (o *IpConsumer) GetIp() *string {
 	if o == nil {
 		return nil
 	}
-
 
 	return o.Ip
 
@@ -49,13 +46,11 @@ func (o *IpConsumer) GetIpOk() (*string, bool) {
 		return nil, false
 	}
 
-
 	return o.Ip, true
 }
 
 // SetIp sets field value
 func (o *IpConsumer) SetIp(v string) {
-
 
 	o.Ip = &v
 
@@ -70,14 +65,12 @@ func (o *IpConsumer) HasIp() bool {
 	return false
 }
 
-
 // GetMac returns the Mac field value
 // If the value is explicit nil, the zero value for string will be returned
 func (o *IpConsumer) GetMac() *string {
 	if o == nil {
 		return nil
 	}
-
 
 	return o.Mac
 
@@ -91,13 +84,11 @@ func (o *IpConsumer) GetMacOk() (*string, bool) {
 		return nil, false
 	}
 
-
 	return o.Mac, true
 }
 
 // SetMac sets field value
 func (o *IpConsumer) SetMac(v string) {
-
 
 	o.Mac = &v
 
@@ -112,14 +103,12 @@ func (o *IpConsumer) HasMac() bool {
 	return false
 }
 
-
 // GetNicId returns the NicId field value
 // If the value is explicit nil, the zero value for string will be returned
 func (o *IpConsumer) GetNicId() *string {
 	if o == nil {
 		return nil
 	}
-
 
 	return o.NicId
 
@@ -133,13 +122,11 @@ func (o *IpConsumer) GetNicIdOk() (*string, bool) {
 		return nil, false
 	}
 
-
 	return o.NicId, true
 }
 
 // SetNicId sets field value
 func (o *IpConsumer) SetNicId(v string) {
-
 
 	o.NicId = &v
 
@@ -154,14 +141,12 @@ func (o *IpConsumer) HasNicId() bool {
 	return false
 }
 
-
 // GetServerId returns the ServerId field value
 // If the value is explicit nil, the zero value for string will be returned
 func (o *IpConsumer) GetServerId() *string {
 	if o == nil {
 		return nil
 	}
-
 
 	return o.ServerId
 
@@ -175,13 +160,11 @@ func (o *IpConsumer) GetServerIdOk() (*string, bool) {
 		return nil, false
 	}
 
-
 	return o.ServerId, true
 }
 
 // SetServerId sets field value
 func (o *IpConsumer) SetServerId(v string) {
-
 
 	o.ServerId = &v
 
@@ -196,14 +179,12 @@ func (o *IpConsumer) HasServerId() bool {
 	return false
 }
 
-
 // GetServerName returns the ServerName field value
 // If the value is explicit nil, the zero value for string will be returned
 func (o *IpConsumer) GetServerName() *string {
 	if o == nil {
 		return nil
 	}
-
 
 	return o.ServerName
 
@@ -217,13 +198,11 @@ func (o *IpConsumer) GetServerNameOk() (*string, bool) {
 		return nil, false
 	}
 
-
 	return o.ServerName, true
 }
 
 // SetServerName sets field value
 func (o *IpConsumer) SetServerName(v string) {
-
 
 	o.ServerName = &v
 
@@ -238,14 +217,12 @@ func (o *IpConsumer) HasServerName() bool {
 	return false
 }
 
-
 // GetDatacenterId returns the DatacenterId field value
 // If the value is explicit nil, the zero value for string will be returned
 func (o *IpConsumer) GetDatacenterId() *string {
 	if o == nil {
 		return nil
 	}
-
 
 	return o.DatacenterId
 
@@ -259,13 +236,11 @@ func (o *IpConsumer) GetDatacenterIdOk() (*string, bool) {
 		return nil, false
 	}
 
-
 	return o.DatacenterId, true
 }
 
 // SetDatacenterId sets field value
 func (o *IpConsumer) SetDatacenterId(v string) {
-
 
 	o.DatacenterId = &v
 
@@ -280,14 +255,12 @@ func (o *IpConsumer) HasDatacenterId() bool {
 	return false
 }
 
-
 // GetDatacenterName returns the DatacenterName field value
 // If the value is explicit nil, the zero value for string will be returned
 func (o *IpConsumer) GetDatacenterName() *string {
 	if o == nil {
 		return nil
 	}
-
 
 	return o.DatacenterName
 
@@ -301,13 +274,11 @@ func (o *IpConsumer) GetDatacenterNameOk() (*string, bool) {
 		return nil, false
 	}
 
-
 	return o.DatacenterName, true
 }
 
 // SetDatacenterName sets field value
 func (o *IpConsumer) SetDatacenterName(v string) {
-
 
 	o.DatacenterName = &v
 
@@ -322,14 +293,12 @@ func (o *IpConsumer) HasDatacenterName() bool {
 	return false
 }
 
-
 // GetK8sNodePoolUuid returns the K8sNodePoolUuid field value
 // If the value is explicit nil, the zero value for string will be returned
 func (o *IpConsumer) GetK8sNodePoolUuid() *string {
 	if o == nil {
 		return nil
 	}
-
 
 	return o.K8sNodePoolUuid
 
@@ -343,13 +312,11 @@ func (o *IpConsumer) GetK8sNodePoolUuidOk() (*string, bool) {
 		return nil, false
 	}
 
-
 	return o.K8sNodePoolUuid, true
 }
 
 // SetK8sNodePoolUuid sets field value
 func (o *IpConsumer) SetK8sNodePoolUuid(v string) {
-
 
 	o.K8sNodePoolUuid = &v
 
@@ -364,14 +331,12 @@ func (o *IpConsumer) HasK8sNodePoolUuid() bool {
 	return false
 }
 
-
 // GetK8sClusterUuid returns the K8sClusterUuid field value
 // If the value is explicit nil, the zero value for string will be returned
 func (o *IpConsumer) GetK8sClusterUuid() *string {
 	if o == nil {
 		return nil
 	}
-
 
 	return o.K8sClusterUuid
 
@@ -385,13 +350,11 @@ func (o *IpConsumer) GetK8sClusterUuidOk() (*string, bool) {
 		return nil, false
 	}
 
-
 	return o.K8sClusterUuid, true
 }
 
 // SetK8sClusterUuid sets field value
 func (o *IpConsumer) SetK8sClusterUuid(v string) {
-
 
 	o.K8sClusterUuid = &v
 
@@ -482,5 +445,3 @@ func (v *NullableIpConsumer) UnmarshalJSON(src []byte) error {
 	v.isSet = true
 	return json.Unmarshal(src, &v.value)
 }
-
-

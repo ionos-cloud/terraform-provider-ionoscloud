@@ -20,31 +20,31 @@ type Type string
 
 // List of Type
 const (
-	DATACENTER Type = "datacenter"
-	SERVER Type = "server"
-	VOLUME Type = "volume"
-	NIC Type = "nic"
-	LOADBALANCER Type = "loadbalancer"
-	LOCATION Type = "location"
-	FIREWALL_RULE Type = "firewall-rule"
-	IMAGE Type = "image"
-	SNAPSHOT Type = "snapshot"
-	LAN Type = "lan"
-	IPBLOCK Type = "ipblock"
-	PCC Type = "pcc"
-	CONTRACT Type = "contract"
-	USER Type = "user"
-	GROUP Type = "group"
-	COLLECTION Type = "collection"
-	RESOURCE Type = "resource"
-	REQUEST Type = "request"
+	DATACENTER     Type = "datacenter"
+	SERVER         Type = "server"
+	VOLUME         Type = "volume"
+	NIC            Type = "nic"
+	LOADBALANCER   Type = "loadbalancer"
+	LOCATION       Type = "location"
+	FIREWALL_RULE  Type = "firewall-rule"
+	IMAGE          Type = "image"
+	SNAPSHOT       Type = "snapshot"
+	LAN            Type = "lan"
+	IPBLOCK        Type = "ipblock"
+	PCC            Type = "pcc"
+	CONTRACT       Type = "contract"
+	USER           Type = "user"
+	GROUP          Type = "group"
+	COLLECTION     Type = "collection"
+	RESOURCE       Type = "resource"
+	REQUEST        Type = "request"
 	REQUEST_STATUS Type = "request-status"
-	S3KEY Type = "s3key"
-	BACKUPUNIT Type = "backupunit"
-	LABEL Type = "label"
-	K8S Type = "k8s"
-	NODEPOOL Type = "nodepool"
-	NODE Type = "node"
+	S3KEY          Type = "s3key"
+	BACKUPUNIT     Type = "backupunit"
+	LABEL          Type = "label"
+	K8S            Type = "k8s"
+	NODEPOOL       Type = "nodepool"
+	NODE           Type = "node"
 )
 
 func (v *Type) UnmarshalJSON(src []byte) error {
@@ -54,7 +54,7 @@ func (v *Type) UnmarshalJSON(src []byte) error {
 		return err
 	}
 	enumTypeValue := Type(value)
-	for _, existing := range []Type{ "datacenter", "server", "volume", "nic", "loadbalancer", "location", "firewall-rule", "image", "snapshot", "lan", "ipblock", "pcc", "contract", "user", "group", "collection", "resource", "request", "request-status", "s3key", "backupunit", "label", "k8s", "nodepool", "node",   } {
+	for _, existing := range []Type{"datacenter", "server", "volume", "nic", "loadbalancer", "location", "firewall-rule", "image", "snapshot", "lan", "ipblock", "pcc", "contract", "user", "group", "collection", "resource", "request", "request-status", "s3key", "backupunit", "label", "k8s", "nodepool", "node"} {
 		if existing == enumTypeValue {
 			*v = enumTypeValue
 			return nil
@@ -104,4 +104,3 @@ func (v *NullableType) UnmarshalJSON(src []byte) error {
 	v.isSet = true
 	return json.Unmarshal(src, &v.value)
 }
-

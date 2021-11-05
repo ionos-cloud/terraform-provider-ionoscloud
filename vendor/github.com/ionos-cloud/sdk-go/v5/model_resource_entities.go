@@ -19,15 +19,12 @@ type ResourceEntities struct {
 	Groups *ResourceGroups `json:"groups,omitempty"`
 }
 
-
-
 // GetGroups returns the Groups field value
 // If the value is explicit nil, the zero value for ResourceGroups will be returned
 func (o *ResourceEntities) GetGroups() *ResourceGroups {
 	if o == nil {
 		return nil
 	}
-
 
 	return o.Groups
 
@@ -41,13 +38,11 @@ func (o *ResourceEntities) GetGroupsOk() (*ResourceGroups, bool) {
 		return nil, false
 	}
 
-
 	return o.Groups, true
 }
 
 // SetGroups sets field value
 func (o *ResourceEntities) SetGroups(v ResourceGroups) {
-
 
 	o.Groups = &v
 
@@ -106,5 +101,3 @@ func (v *NullableResourceEntities) UnmarshalJSON(src []byte) error {
 	v.isSet = true
 	return json.Unmarshal(src, &v.value)
 }
-
-

@@ -30,15 +30,12 @@ type DatacenterProperties struct {
 	SecAuthProtection *bool `json:"secAuthProtection,omitempty"`
 }
 
-
-
 // GetName returns the Name field value
 // If the value is explicit nil, the zero value for string will be returned
 func (o *DatacenterProperties) GetName() *string {
 	if o == nil {
 		return nil
 	}
-
 
 	return o.Name
 
@@ -52,13 +49,11 @@ func (o *DatacenterProperties) GetNameOk() (*string, bool) {
 		return nil, false
 	}
 
-
 	return o.Name, true
 }
 
 // SetName sets field value
 func (o *DatacenterProperties) SetName(v string) {
-
 
 	o.Name = &v
 
@@ -73,14 +68,12 @@ func (o *DatacenterProperties) HasName() bool {
 	return false
 }
 
-
 // GetDescription returns the Description field value
 // If the value is explicit nil, the zero value for string will be returned
 func (o *DatacenterProperties) GetDescription() *string {
 	if o == nil {
 		return nil
 	}
-
 
 	return o.Description
 
@@ -94,13 +87,11 @@ func (o *DatacenterProperties) GetDescriptionOk() (*string, bool) {
 		return nil, false
 	}
 
-
 	return o.Description, true
 }
 
 // SetDescription sets field value
 func (o *DatacenterProperties) SetDescription(v string) {
-
 
 	o.Description = &v
 
@@ -115,14 +106,12 @@ func (o *DatacenterProperties) HasDescription() bool {
 	return false
 }
 
-
 // GetLocation returns the Location field value
 // If the value is explicit nil, the zero value for string will be returned
 func (o *DatacenterProperties) GetLocation() *string {
 	if o == nil {
 		return nil
 	}
-
 
 	return o.Location
 
@@ -136,13 +125,11 @@ func (o *DatacenterProperties) GetLocationOk() (*string, bool) {
 		return nil, false
 	}
 
-
 	return o.Location, true
 }
 
 // SetLocation sets field value
 func (o *DatacenterProperties) SetLocation(v string) {
-
 
 	o.Location = &v
 
@@ -157,14 +144,12 @@ func (o *DatacenterProperties) HasLocation() bool {
 	return false
 }
 
-
 // GetVersion returns the Version field value
 // If the value is explicit nil, the zero value for int32 will be returned
 func (o *DatacenterProperties) GetVersion() *int32 {
 	if o == nil {
 		return nil
 	}
-
 
 	return o.Version
 
@@ -178,13 +163,11 @@ func (o *DatacenterProperties) GetVersionOk() (*int32, bool) {
 		return nil, false
 	}
 
-
 	return o.Version, true
 }
 
 // SetVersion sets field value
 func (o *DatacenterProperties) SetVersion(v int32) {
-
 
 	o.Version = &v
 
@@ -199,14 +182,12 @@ func (o *DatacenterProperties) HasVersion() bool {
 	return false
 }
 
-
 // GetFeatures returns the Features field value
 // If the value is explicit nil, the zero value for []string will be returned
 func (o *DatacenterProperties) GetFeatures() *[]string {
 	if o == nil {
 		return nil
 	}
-
 
 	return o.Features
 
@@ -220,13 +201,11 @@ func (o *DatacenterProperties) GetFeaturesOk() (*[]string, bool) {
 		return nil, false
 	}
 
-
 	return o.Features, true
 }
 
 // SetFeatures sets field value
 func (o *DatacenterProperties) SetFeatures(v []string) {
-
 
 	o.Features = &v
 
@@ -241,14 +220,12 @@ func (o *DatacenterProperties) HasFeatures() bool {
 	return false
 }
 
-
 // GetSecAuthProtection returns the SecAuthProtection field value
 // If the value is explicit nil, the zero value for bool will be returned
 func (o *DatacenterProperties) GetSecAuthProtection() *bool {
 	if o == nil {
 		return nil
 	}
-
 
 	return o.SecAuthProtection
 
@@ -262,13 +239,11 @@ func (o *DatacenterProperties) GetSecAuthProtectionOk() (*bool, bool) {
 		return nil, false
 	}
 
-
 	return o.SecAuthProtection, true
 }
 
 // SetSecAuthProtection sets field value
 func (o *DatacenterProperties) SetSecAuthProtection(v bool) {
-
 
 	o.SecAuthProtection = &v
 
@@ -347,5 +322,3 @@ func (v *NullableDatacenterProperties) UnmarshalJSON(src []byte) error {
 	v.isSet = true
 	return json.Unmarshal(src, &v.value)
 }
-
-

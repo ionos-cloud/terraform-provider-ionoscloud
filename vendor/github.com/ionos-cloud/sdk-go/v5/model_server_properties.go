@@ -25,14 +25,12 @@ type ServerProperties struct {
 	// The availability zone in which the server should exist
 	AvailabilityZone *string `json:"availabilityZone,omitempty"`
 	// Status of the virtual Machine
-	VmState *string `json:"vmState,omitempty"`
-	BootCdrom *ResourceReference `json:"bootCdrom,omitempty"`
+	VmState    *string            `json:"vmState,omitempty"`
+	BootCdrom  *ResourceReference `json:"bootCdrom,omitempty"`
 	BootVolume *ResourceReference `json:"bootVolume,omitempty"`
 	// Cpu family of pserver
 	CpuFamily *string `json:"cpuFamily,omitempty"`
 }
-
-
 
 // GetName returns the Name field value
 // If the value is explicit nil, the zero value for string will be returned
@@ -40,7 +38,6 @@ func (o *ServerProperties) GetName() *string {
 	if o == nil {
 		return nil
 	}
-
 
 	return o.Name
 
@@ -54,13 +51,11 @@ func (o *ServerProperties) GetNameOk() (*string, bool) {
 		return nil, false
 	}
 
-
 	return o.Name, true
 }
 
 // SetName sets field value
 func (o *ServerProperties) SetName(v string) {
-
 
 	o.Name = &v
 
@@ -75,14 +70,12 @@ func (o *ServerProperties) HasName() bool {
 	return false
 }
 
-
 // GetCores returns the Cores field value
 // If the value is explicit nil, the zero value for int32 will be returned
 func (o *ServerProperties) GetCores() *int32 {
 	if o == nil {
 		return nil
 	}
-
 
 	return o.Cores
 
@@ -96,13 +89,11 @@ func (o *ServerProperties) GetCoresOk() (*int32, bool) {
 		return nil, false
 	}
 
-
 	return o.Cores, true
 }
 
 // SetCores sets field value
 func (o *ServerProperties) SetCores(v int32) {
-
 
 	o.Cores = &v
 
@@ -117,14 +108,12 @@ func (o *ServerProperties) HasCores() bool {
 	return false
 }
 
-
 // GetRam returns the Ram field value
 // If the value is explicit nil, the zero value for int32 will be returned
 func (o *ServerProperties) GetRam() *int32 {
 	if o == nil {
 		return nil
 	}
-
 
 	return o.Ram
 
@@ -138,13 +127,11 @@ func (o *ServerProperties) GetRamOk() (*int32, bool) {
 		return nil, false
 	}
 
-
 	return o.Ram, true
 }
 
 // SetRam sets field value
 func (o *ServerProperties) SetRam(v int32) {
-
 
 	o.Ram = &v
 
@@ -159,14 +146,12 @@ func (o *ServerProperties) HasRam() bool {
 	return false
 }
 
-
 // GetAvailabilityZone returns the AvailabilityZone field value
 // If the value is explicit nil, the zero value for string will be returned
 func (o *ServerProperties) GetAvailabilityZone() *string {
 	if o == nil {
 		return nil
 	}
-
 
 	return o.AvailabilityZone
 
@@ -180,13 +165,11 @@ func (o *ServerProperties) GetAvailabilityZoneOk() (*string, bool) {
 		return nil, false
 	}
 
-
 	return o.AvailabilityZone, true
 }
 
 // SetAvailabilityZone sets field value
 func (o *ServerProperties) SetAvailabilityZone(v string) {
-
 
 	o.AvailabilityZone = &v
 
@@ -201,14 +184,12 @@ func (o *ServerProperties) HasAvailabilityZone() bool {
 	return false
 }
 
-
 // GetVmState returns the VmState field value
 // If the value is explicit nil, the zero value for string will be returned
 func (o *ServerProperties) GetVmState() *string {
 	if o == nil {
 		return nil
 	}
-
 
 	return o.VmState
 
@@ -222,13 +203,11 @@ func (o *ServerProperties) GetVmStateOk() (*string, bool) {
 		return nil, false
 	}
 
-
 	return o.VmState, true
 }
 
 // SetVmState sets field value
 func (o *ServerProperties) SetVmState(v string) {
-
 
 	o.VmState = &v
 
@@ -243,14 +222,12 @@ func (o *ServerProperties) HasVmState() bool {
 	return false
 }
 
-
 // GetBootCdrom returns the BootCdrom field value
 // If the value is explicit nil, the zero value for ResourceReference will be returned
 func (o *ServerProperties) GetBootCdrom() *ResourceReference {
 	if o == nil {
 		return nil
 	}
-
 
 	return o.BootCdrom
 
@@ -264,13 +241,11 @@ func (o *ServerProperties) GetBootCdromOk() (*ResourceReference, bool) {
 		return nil, false
 	}
 
-
 	return o.BootCdrom, true
 }
 
 // SetBootCdrom sets field value
 func (o *ServerProperties) SetBootCdrom(v ResourceReference) {
-
 
 	o.BootCdrom = &v
 
@@ -285,14 +260,12 @@ func (o *ServerProperties) HasBootCdrom() bool {
 	return false
 }
 
-
 // GetBootVolume returns the BootVolume field value
 // If the value is explicit nil, the zero value for ResourceReference will be returned
 func (o *ServerProperties) GetBootVolume() *ResourceReference {
 	if o == nil {
 		return nil
 	}
-
 
 	return o.BootVolume
 
@@ -306,13 +279,11 @@ func (o *ServerProperties) GetBootVolumeOk() (*ResourceReference, bool) {
 		return nil, false
 	}
 
-
 	return o.BootVolume, true
 }
 
 // SetBootVolume sets field value
 func (o *ServerProperties) SetBootVolume(v ResourceReference) {
-
 
 	o.BootVolume = &v
 
@@ -327,14 +298,12 @@ func (o *ServerProperties) HasBootVolume() bool {
 	return false
 }
 
-
 // GetCpuFamily returns the CpuFamily field value
 // If the value is explicit nil, the zero value for string will be returned
 func (o *ServerProperties) GetCpuFamily() *string {
 	if o == nil {
 		return nil
 	}
-
 
 	return o.CpuFamily
 
@@ -348,13 +317,11 @@ func (o *ServerProperties) GetCpuFamilyOk() (*string, bool) {
 		return nil, false
 	}
 
-
 	return o.CpuFamily, true
 }
 
 // SetCpuFamily sets field value
 func (o *ServerProperties) SetCpuFamily(v string) {
-
 
 	o.CpuFamily = &v
 
@@ -441,5 +408,3 @@ func (v *NullableServerProperties) UnmarshalJSON(src []byte) error {
 	v.isSet = true
 	return json.Unmarshal(src, &v.value)
 }
-
-

@@ -34,15 +34,12 @@ type UserProperties struct {
 	Active *bool `json:"active,omitempty"`
 }
 
-
-
 // GetFirstname returns the Firstname field value
 // If the value is explicit nil, the zero value for string will be returned
 func (o *UserProperties) GetFirstname() *string {
 	if o == nil {
 		return nil
 	}
-
 
 	return o.Firstname
 
@@ -56,13 +53,11 @@ func (o *UserProperties) GetFirstnameOk() (*string, bool) {
 		return nil, false
 	}
 
-
 	return o.Firstname, true
 }
 
 // SetFirstname sets field value
 func (o *UserProperties) SetFirstname(v string) {
-
 
 	o.Firstname = &v
 
@@ -77,14 +72,12 @@ func (o *UserProperties) HasFirstname() bool {
 	return false
 }
 
-
 // GetLastname returns the Lastname field value
 // If the value is explicit nil, the zero value for string will be returned
 func (o *UserProperties) GetLastname() *string {
 	if o == nil {
 		return nil
 	}
-
 
 	return o.Lastname
 
@@ -98,13 +91,11 @@ func (o *UserProperties) GetLastnameOk() (*string, bool) {
 		return nil, false
 	}
 
-
 	return o.Lastname, true
 }
 
 // SetLastname sets field value
 func (o *UserProperties) SetLastname(v string) {
-
 
 	o.Lastname = &v
 
@@ -119,14 +110,12 @@ func (o *UserProperties) HasLastname() bool {
 	return false
 }
 
-
 // GetEmail returns the Email field value
 // If the value is explicit nil, the zero value for string will be returned
 func (o *UserProperties) GetEmail() *string {
 	if o == nil {
 		return nil
 	}
-
 
 	return o.Email
 
@@ -140,13 +129,11 @@ func (o *UserProperties) GetEmailOk() (*string, bool) {
 		return nil, false
 	}
 
-
 	return o.Email, true
 }
 
 // SetEmail sets field value
 func (o *UserProperties) SetEmail(v string) {
-
 
 	o.Email = &v
 
@@ -161,14 +148,12 @@ func (o *UserProperties) HasEmail() bool {
 	return false
 }
 
-
 // GetAdministrator returns the Administrator field value
 // If the value is explicit nil, the zero value for bool will be returned
 func (o *UserProperties) GetAdministrator() *bool {
 	if o == nil {
 		return nil
 	}
-
 
 	return o.Administrator
 
@@ -182,13 +167,11 @@ func (o *UserProperties) GetAdministratorOk() (*bool, bool) {
 		return nil, false
 	}
 
-
 	return o.Administrator, true
 }
 
 // SetAdministrator sets field value
 func (o *UserProperties) SetAdministrator(v bool) {
-
 
 	o.Administrator = &v
 
@@ -203,14 +186,12 @@ func (o *UserProperties) HasAdministrator() bool {
 	return false
 }
 
-
 // GetForceSecAuth returns the ForceSecAuth field value
 // If the value is explicit nil, the zero value for bool will be returned
 func (o *UserProperties) GetForceSecAuth() *bool {
 	if o == nil {
 		return nil
 	}
-
 
 	return o.ForceSecAuth
 
@@ -224,13 +205,11 @@ func (o *UserProperties) GetForceSecAuthOk() (*bool, bool) {
 		return nil, false
 	}
 
-
 	return o.ForceSecAuth, true
 }
 
 // SetForceSecAuth sets field value
 func (o *UserProperties) SetForceSecAuth(v bool) {
-
 
 	o.ForceSecAuth = &v
 
@@ -245,14 +224,12 @@ func (o *UserProperties) HasForceSecAuth() bool {
 	return false
 }
 
-
 // GetSecAuthActive returns the SecAuthActive field value
 // If the value is explicit nil, the zero value for bool will be returned
 func (o *UserProperties) GetSecAuthActive() *bool {
 	if o == nil {
 		return nil
 	}
-
 
 	return o.SecAuthActive
 
@@ -266,13 +243,11 @@ func (o *UserProperties) GetSecAuthActiveOk() (*bool, bool) {
 		return nil, false
 	}
 
-
 	return o.SecAuthActive, true
 }
 
 // SetSecAuthActive sets field value
 func (o *UserProperties) SetSecAuthActive(v bool) {
-
 
 	o.SecAuthActive = &v
 
@@ -287,14 +262,12 @@ func (o *UserProperties) HasSecAuthActive() bool {
 	return false
 }
 
-
 // GetS3CanonicalUserId returns the S3CanonicalUserId field value
 // If the value is explicit nil, the zero value for string will be returned
 func (o *UserProperties) GetS3CanonicalUserId() *string {
 	if o == nil {
 		return nil
 	}
-
 
 	return o.S3CanonicalUserId
 
@@ -308,13 +281,11 @@ func (o *UserProperties) GetS3CanonicalUserIdOk() (*string, bool) {
 		return nil, false
 	}
 
-
 	return o.S3CanonicalUserId, true
 }
 
 // SetS3CanonicalUserId sets field value
 func (o *UserProperties) SetS3CanonicalUserId(v string) {
-
 
 	o.S3CanonicalUserId = &v
 
@@ -329,14 +300,12 @@ func (o *UserProperties) HasS3CanonicalUserId() bool {
 	return false
 }
 
-
 // GetActive returns the Active field value
 // If the value is explicit nil, the zero value for bool will be returned
 func (o *UserProperties) GetActive() *bool {
 	if o == nil {
 		return nil
 	}
-
 
 	return o.Active
 
@@ -350,13 +319,11 @@ func (o *UserProperties) GetActiveOk() (*bool, bool) {
 		return nil, false
 	}
 
-
 	return o.Active, true
 }
 
 // SetActive sets field value
 func (o *UserProperties) SetActive(v bool) {
-
 
 	o.Active = &v
 
@@ -443,5 +410,3 @@ func (v *NullableUserProperties) UnmarshalJSON(src []byte) error {
 	v.isSet = true
 	return json.Unmarshal(src, &v.value)
 }
-
-

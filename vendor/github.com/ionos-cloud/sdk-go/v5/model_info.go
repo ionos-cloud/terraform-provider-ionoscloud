@@ -24,15 +24,12 @@ type Info struct {
 	Version *string `json:"version,omitempty"`
 }
 
-
-
 // GetHref returns the Href field value
 // If the value is explicit nil, the zero value for string will be returned
 func (o *Info) GetHref() *string {
 	if o == nil {
 		return nil
 	}
-
 
 	return o.Href
 
@@ -46,13 +43,11 @@ func (o *Info) GetHrefOk() (*string, bool) {
 		return nil, false
 	}
 
-
 	return o.Href, true
 }
 
 // SetHref sets field value
 func (o *Info) SetHref(v string) {
-
 
 	o.Href = &v
 
@@ -67,14 +62,12 @@ func (o *Info) HasHref() bool {
 	return false
 }
 
-
 // GetName returns the Name field value
 // If the value is explicit nil, the zero value for string will be returned
 func (o *Info) GetName() *string {
 	if o == nil {
 		return nil
 	}
-
 
 	return o.Name
 
@@ -88,13 +81,11 @@ func (o *Info) GetNameOk() (*string, bool) {
 		return nil, false
 	}
 
-
 	return o.Name, true
 }
 
 // SetName sets field value
 func (o *Info) SetName(v string) {
-
 
 	o.Name = &v
 
@@ -109,14 +100,12 @@ func (o *Info) HasName() bool {
 	return false
 }
 
-
 // GetVersion returns the Version field value
 // If the value is explicit nil, the zero value for string will be returned
 func (o *Info) GetVersion() *string {
 	if o == nil {
 		return nil
 	}
-
 
 	return o.Version
 
@@ -130,13 +119,11 @@ func (o *Info) GetVersionOk() (*string, bool) {
 		return nil, false
 	}
 
-
 	return o.Version, true
 }
 
 // SetVersion sets field value
 func (o *Info) SetVersion(v string) {
-
 
 	o.Version = &v
 
@@ -203,5 +190,3 @@ func (v *NullableInfo) UnmarshalJSON(src []byte) error {
 	v.isSet = true
 	return json.Unmarshal(src, &v.value)
 }
-
-

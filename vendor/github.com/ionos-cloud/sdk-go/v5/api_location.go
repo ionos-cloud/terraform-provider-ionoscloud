@@ -28,11 +28,11 @@ var (
 type LocationApiService service
 
 type ApiLocationsFindByRegionIdRequest struct {
-	ctx _context.Context
-	ApiService *LocationApiService
-	regionId string
-	pretty *bool
-	depth *int32
+	ctx             _context.Context
+	ApiService      *LocationApiService
+	regionId        string
+	pretty          *bool
+	depth           *int32
 	xContractNumber *int32
 }
 
@@ -63,8 +63,8 @@ func (r ApiLocationsFindByRegionIdRequest) Execute() (Locations, *APIResponse, e
 func (a *LocationApiService) LocationsFindByRegionId(ctx _context.Context, regionId string) ApiLocationsFindByRegionIdRequest {
 	return ApiLocationsFindByRegionIdRequest{
 		ApiService: a,
-		ctx: ctx,
-		regionId: regionId,
+		ctx:        ctx,
+		regionId:   regionId,
 	}
 }
 
@@ -100,6 +100,7 @@ func (a *LocationApiService) LocationsFindByRegionIdExecute(r ApiLocationsFindBy
 	if r.depth != nil {
 		localVarQueryParams.Add("depth", parameterToString(*r.depth, ""))
 	}
+
 	// to determine the Content-Type header
 	localVarHTTPContentTypes := []string{}
 
@@ -141,12 +142,12 @@ func (a *LocationApiService) LocationsFindByRegionIdExecute(r ApiLocationsFindBy
 
 	localVarHTTPResponse, httpRequestTime, err := a.client.callAPI(req)
 
-	localVarAPIResponse := &APIResponse {
-		Response: localVarHTTPResponse,
-		Method: localVarHTTPMethod,
-		RequestURL: localVarPath,
+	localVarAPIResponse := &APIResponse{
+		Response:    localVarHTTPResponse,
+		Method:      localVarHTTPMethod,
+		RequestURL:  localVarPath,
 		RequestTime: httpRequestTime,
-		Operation: "LocationsFindByRegionId",
+		Operation:   "LocationsFindByRegionId",
 	}
 
 	if err != nil || localVarHTTPResponse == nil {
@@ -163,16 +164,16 @@ func (a *LocationApiService) LocationsFindByRegionIdExecute(r ApiLocationsFindBy
 	if localVarHTTPResponse.StatusCode >= 300 {
 		newErr := GenericOpenAPIError{
 			statusCode: localVarHTTPResponse.StatusCode,
-			body:  localVarBody,
-			error: fmt.Sprintf("%s: %s", localVarHTTPResponse.Status, string(localVarBody)),
+			body:       localVarBody,
+			error:      fmt.Sprintf(FormatStringErr, localVarHTTPResponse.Status, string(localVarBody)),
 		}
-			var v Error
-			err = a.client.decode(&v, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
-			if err != nil {
-				newErr.error = err.Error()
-				return localVarReturnValue, localVarAPIResponse, newErr
-			}
-			newErr.model = v
+		var v Error
+		err = a.client.decode(&v, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
+		if err != nil {
+			newErr.error = err.Error()
+			return localVarReturnValue, localVarAPIResponse, newErr
+		}
+		newErr.model = v
 		return localVarReturnValue, localVarAPIResponse, newErr
 	}
 
@@ -180,8 +181,8 @@ func (a *LocationApiService) LocationsFindByRegionIdExecute(r ApiLocationsFindBy
 	if err != nil {
 		newErr := GenericOpenAPIError{
 			statusCode: localVarHTTPResponse.StatusCode,
-			body:  localVarBody,
-			error: err.Error(),
+			body:       localVarBody,
+			error:      err.Error(),
 		}
 		return localVarReturnValue, localVarAPIResponse, newErr
 	}
@@ -190,12 +191,12 @@ func (a *LocationApiService) LocationsFindByRegionIdExecute(r ApiLocationsFindBy
 }
 
 type ApiLocationsFindByRegionIdAndIdRequest struct {
-	ctx _context.Context
-	ApiService *LocationApiService
-	regionId string
-	locationId string
-	pretty *bool
-	depth *int32
+	ctx             _context.Context
+	ApiService      *LocationApiService
+	regionId        string
+	locationId      string
+	pretty          *bool
+	depth           *int32
 	xContractNumber *int32
 }
 
@@ -227,8 +228,8 @@ func (r ApiLocationsFindByRegionIdAndIdRequest) Execute() (Location, *APIRespons
 func (a *LocationApiService) LocationsFindByRegionIdAndId(ctx _context.Context, regionId string, locationId string) ApiLocationsFindByRegionIdAndIdRequest {
 	return ApiLocationsFindByRegionIdAndIdRequest{
 		ApiService: a,
-		ctx: ctx,
-		regionId: regionId,
+		ctx:        ctx,
+		regionId:   regionId,
 		locationId: locationId,
 	}
 }
@@ -266,6 +267,7 @@ func (a *LocationApiService) LocationsFindByRegionIdAndIdExecute(r ApiLocationsF
 	if r.depth != nil {
 		localVarQueryParams.Add("depth", parameterToString(*r.depth, ""))
 	}
+
 	// to determine the Content-Type header
 	localVarHTTPContentTypes := []string{}
 
@@ -307,12 +309,12 @@ func (a *LocationApiService) LocationsFindByRegionIdAndIdExecute(r ApiLocationsF
 
 	localVarHTTPResponse, httpRequestTime, err := a.client.callAPI(req)
 
-	localVarAPIResponse := &APIResponse {
-		Response: localVarHTTPResponse,
-		Method: localVarHTTPMethod,
-		RequestURL: localVarPath,
+	localVarAPIResponse := &APIResponse{
+		Response:    localVarHTTPResponse,
+		Method:      localVarHTTPMethod,
+		RequestURL:  localVarPath,
 		RequestTime: httpRequestTime,
-		Operation: "LocationsFindByRegionIdAndId",
+		Operation:   "LocationsFindByRegionIdAndId",
 	}
 
 	if err != nil || localVarHTTPResponse == nil {
@@ -329,16 +331,16 @@ func (a *LocationApiService) LocationsFindByRegionIdAndIdExecute(r ApiLocationsF
 	if localVarHTTPResponse.StatusCode >= 300 {
 		newErr := GenericOpenAPIError{
 			statusCode: localVarHTTPResponse.StatusCode,
-			body:  localVarBody,
-			error: fmt.Sprintf("%s: %s", localVarHTTPResponse.Status, string(localVarBody)),
+			body:       localVarBody,
+			error:      fmt.Sprintf(FormatStringErr, localVarHTTPResponse.Status, string(localVarBody)),
 		}
-			var v Error
-			err = a.client.decode(&v, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
-			if err != nil {
-				newErr.error = err.Error()
-				return localVarReturnValue, localVarAPIResponse, newErr
-			}
-			newErr.model = v
+		var v Error
+		err = a.client.decode(&v, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
+		if err != nil {
+			newErr.error = err.Error()
+			return localVarReturnValue, localVarAPIResponse, newErr
+		}
+		newErr.model = v
 		return localVarReturnValue, localVarAPIResponse, newErr
 	}
 
@@ -346,8 +348,8 @@ func (a *LocationApiService) LocationsFindByRegionIdAndIdExecute(r ApiLocationsF
 	if err != nil {
 		newErr := GenericOpenAPIError{
 			statusCode: localVarHTTPResponse.StatusCode,
-			body:  localVarBody,
-			error: err.Error(),
+			body:       localVarBody,
+			error:      err.Error(),
 		}
 		return localVarReturnValue, localVarAPIResponse, newErr
 	}
@@ -356,10 +358,12 @@ func (a *LocationApiService) LocationsFindByRegionIdAndIdExecute(r ApiLocationsF
 }
 
 type ApiLocationsGetRequest struct {
-	ctx _context.Context
-	ApiService *LocationApiService
-	pretty *bool
-	depth *int32
+	ctx             _context.Context
+	ApiService      *LocationApiService
+	filters         _neturl.Values
+	orderBy         *string
+	pretty          *bool
+	depth           *int32
 	xContractNumber *int32
 }
 
@@ -376,6 +380,19 @@ func (r ApiLocationsGetRequest) XContractNumber(xContractNumber int32) ApiLocati
 	return r
 }
 
+// Filters query parameters limit results to those containing a matching value for a specific property.
+func (r ApiLocationsGetRequest) Filter(key string, value string) ApiLocationsGetRequest {
+	filterKey := fmt.Sprintf(FilterQueryParam, key)
+	r.filters[filterKey] = []string{value}
+	return r
+}
+
+// OrderBy query param sorts the results alphanumerically in ascending order based on the specified property.
+func (r ApiLocationsGetRequest) OrderBy(orderBy string) ApiLocationsGetRequest {
+	r.orderBy = &orderBy
+	return r
+}
+
 func (r ApiLocationsGetRequest) Execute() (Locations, *APIResponse, error) {
 	return r.ApiService.LocationsGetExecute(r)
 }
@@ -389,7 +406,8 @@ func (r ApiLocationsGetRequest) Execute() (Locations, *APIResponse, error) {
 func (a *LocationApiService) LocationsGet(ctx _context.Context) ApiLocationsGetRequest {
 	return ApiLocationsGetRequest{
 		ApiService: a,
-		ctx: ctx,
+		ctx:        ctx,
+		filters:    _neturl.Values{},
 	}
 }
 
@@ -424,6 +442,17 @@ func (a *LocationApiService) LocationsGetExecute(r ApiLocationsGetRequest) (Loca
 	if r.depth != nil {
 		localVarQueryParams.Add("depth", parameterToString(*r.depth, ""))
 	}
+	if r.orderBy != nil {
+		localVarQueryParams.Add("orderBy", parameterToString(*r.orderBy, ""))
+	}
+	if len(r.filters) > 0 {
+		for k, v := range r.filters {
+			for _, iv := range v {
+				localVarQueryParams.Add(k, iv)
+			}
+		}
+	}
+
 	// to determine the Content-Type header
 	localVarHTTPContentTypes := []string{}
 
@@ -465,12 +494,12 @@ func (a *LocationApiService) LocationsGetExecute(r ApiLocationsGetRequest) (Loca
 
 	localVarHTTPResponse, httpRequestTime, err := a.client.callAPI(req)
 
-	localVarAPIResponse := &APIResponse {
-		Response: localVarHTTPResponse,
-		Method: localVarHTTPMethod,
-		RequestURL: localVarPath,
+	localVarAPIResponse := &APIResponse{
+		Response:    localVarHTTPResponse,
+		Method:      localVarHTTPMethod,
+		RequestURL:  localVarPath,
 		RequestTime: httpRequestTime,
-		Operation: "LocationsGet",
+		Operation:   "LocationsGet",
 	}
 
 	if err != nil || localVarHTTPResponse == nil {
@@ -487,16 +516,16 @@ func (a *LocationApiService) LocationsGetExecute(r ApiLocationsGetRequest) (Loca
 	if localVarHTTPResponse.StatusCode >= 300 {
 		newErr := GenericOpenAPIError{
 			statusCode: localVarHTTPResponse.StatusCode,
-			body:  localVarBody,
-			error: fmt.Sprintf("%s: %s", localVarHTTPResponse.Status, string(localVarBody)),
+			body:       localVarBody,
+			error:      fmt.Sprintf(FormatStringErr, localVarHTTPResponse.Status, string(localVarBody)),
 		}
-			var v Error
-			err = a.client.decode(&v, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
-			if err != nil {
-				newErr.error = err.Error()
-				return localVarReturnValue, localVarAPIResponse, newErr
-			}
-			newErr.model = v
+		var v Error
+		err = a.client.decode(&v, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
+		if err != nil {
+			newErr.error = err.Error()
+			return localVarReturnValue, localVarAPIResponse, newErr
+		}
+		newErr.model = v
 		return localVarReturnValue, localVarAPIResponse, newErr
 	}
 
@@ -504,8 +533,8 @@ func (a *LocationApiService) LocationsGetExecute(r ApiLocationsGetRequest) (Loca
 	if err != nil {
 		newErr := GenericOpenAPIError{
 			statusCode: localVarHTTPResponse.StatusCode,
-			body:  localVarBody,
-			error: err.Error(),
+			body:       localVarBody,
+			error:      err.Error(),
 		}
 		return localVarReturnValue, localVarAPIResponse, newErr
 	}

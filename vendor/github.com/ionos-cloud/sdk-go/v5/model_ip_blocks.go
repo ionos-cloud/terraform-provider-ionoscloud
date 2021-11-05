@@ -27,11 +27,9 @@ type IpBlocks struct {
 	// the offset specified in the request (or, if none was specified, the default offset of 0)
 	Offset *float32 `json:"offset,omitempty"`
 	// the limit specified in the request (or, if none was specified use the endpoint's default pagination limit)
-	Limit *float32 `json:"limit,omitempty"`
+	Limit *float32         `json:"limit,omitempty"`
 	Links *PaginationLinks `json:"_links,omitempty"`
 }
-
-
 
 // GetId returns the Id field value
 // If the value is explicit nil, the zero value for string will be returned
@@ -39,7 +37,6 @@ func (o *IpBlocks) GetId() *string {
 	if o == nil {
 		return nil
 	}
-
 
 	return o.Id
 
@@ -53,13 +50,11 @@ func (o *IpBlocks) GetIdOk() (*string, bool) {
 		return nil, false
 	}
 
-
 	return o.Id, true
 }
 
 // SetId sets field value
 func (o *IpBlocks) SetId(v string) {
-
 
 	o.Id = &v
 
@@ -74,14 +69,12 @@ func (o *IpBlocks) HasId() bool {
 	return false
 }
 
-
 // GetType returns the Type field value
 // If the value is explicit nil, the zero value for Type will be returned
 func (o *IpBlocks) GetType() *Type {
 	if o == nil {
 		return nil
 	}
-
 
 	return o.Type
 
@@ -95,13 +88,11 @@ func (o *IpBlocks) GetTypeOk() (*Type, bool) {
 		return nil, false
 	}
 
-
 	return o.Type, true
 }
 
 // SetType sets field value
 func (o *IpBlocks) SetType(v Type) {
-
 
 	o.Type = &v
 
@@ -116,14 +107,12 @@ func (o *IpBlocks) HasType() bool {
 	return false
 }
 
-
 // GetHref returns the Href field value
 // If the value is explicit nil, the zero value for string will be returned
 func (o *IpBlocks) GetHref() *string {
 	if o == nil {
 		return nil
 	}
-
 
 	return o.Href
 
@@ -137,13 +126,11 @@ func (o *IpBlocks) GetHrefOk() (*string, bool) {
 		return nil, false
 	}
 
-
 	return o.Href, true
 }
 
 // SetHref sets field value
 func (o *IpBlocks) SetHref(v string) {
-
 
 	o.Href = &v
 
@@ -158,14 +145,12 @@ func (o *IpBlocks) HasHref() bool {
 	return false
 }
 
-
 // GetItems returns the Items field value
 // If the value is explicit nil, the zero value for []IpBlock will be returned
 func (o *IpBlocks) GetItems() *[]IpBlock {
 	if o == nil {
 		return nil
 	}
-
 
 	return o.Items
 
@@ -179,13 +164,11 @@ func (o *IpBlocks) GetItemsOk() (*[]IpBlock, bool) {
 		return nil, false
 	}
 
-
 	return o.Items, true
 }
 
 // SetItems sets field value
 func (o *IpBlocks) SetItems(v []IpBlock) {
-
 
 	o.Items = &v
 
@@ -200,14 +183,12 @@ func (o *IpBlocks) HasItems() bool {
 	return false
 }
 
-
 // GetOffset returns the Offset field value
 // If the value is explicit nil, the zero value for float32 will be returned
 func (o *IpBlocks) GetOffset() *float32 {
 	if o == nil {
 		return nil
 	}
-
 
 	return o.Offset
 
@@ -221,13 +202,11 @@ func (o *IpBlocks) GetOffsetOk() (*float32, bool) {
 		return nil, false
 	}
 
-
 	return o.Offset, true
 }
 
 // SetOffset sets field value
 func (o *IpBlocks) SetOffset(v float32) {
-
 
 	o.Offset = &v
 
@@ -242,14 +221,12 @@ func (o *IpBlocks) HasOffset() bool {
 	return false
 }
 
-
 // GetLimit returns the Limit field value
 // If the value is explicit nil, the zero value for float32 will be returned
 func (o *IpBlocks) GetLimit() *float32 {
 	if o == nil {
 		return nil
 	}
-
 
 	return o.Limit
 
@@ -263,13 +240,11 @@ func (o *IpBlocks) GetLimitOk() (*float32, bool) {
 		return nil, false
 	}
 
-
 	return o.Limit, true
 }
 
 // SetLimit sets field value
 func (o *IpBlocks) SetLimit(v float32) {
-
 
 	o.Limit = &v
 
@@ -284,14 +259,12 @@ func (o *IpBlocks) HasLimit() bool {
 	return false
 }
 
-
 // GetLinks returns the Links field value
 // If the value is explicit nil, the zero value for PaginationLinks will be returned
 func (o *IpBlocks) GetLinks() *PaginationLinks {
 	if o == nil {
 		return nil
 	}
-
 
 	return o.Links
 
@@ -305,13 +278,11 @@ func (o *IpBlocks) GetLinksOk() (*PaginationLinks, bool) {
 		return nil, false
 	}
 
-
 	return o.Links, true
 }
 
 // SetLinks sets field value
 func (o *IpBlocks) SetLinks(v PaginationLinks) {
-
 
 	o.Links = &v
 
@@ -394,5 +365,3 @@ func (v *NullableIpBlocks) UnmarshalJSON(src []byte) error {
 	v.isSet = true
 	return json.Unmarshal(src, &v.value)
 }
-
-

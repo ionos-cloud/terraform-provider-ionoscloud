@@ -26,15 +26,12 @@ type KubernetesNodeProperties struct {
 	K8sVersion *string `json:"k8sVersion"`
 }
 
-
-
 // GetName returns the Name field value
 // If the value is explicit nil, the zero value for string will be returned
 func (o *KubernetesNodeProperties) GetName() *string {
 	if o == nil {
 		return nil
 	}
-
 
 	return o.Name
 
@@ -48,13 +45,11 @@ func (o *KubernetesNodeProperties) GetNameOk() (*string, bool) {
 		return nil, false
 	}
 
-
 	return o.Name, true
 }
 
 // SetName sets field value
 func (o *KubernetesNodeProperties) SetName(v string) {
-
 
 	o.Name = &v
 
@@ -69,14 +64,12 @@ func (o *KubernetesNodeProperties) HasName() bool {
 	return false
 }
 
-
 // GetPublicIP returns the PublicIP field value
 // If the value is explicit nil, the zero value for string will be returned
 func (o *KubernetesNodeProperties) GetPublicIP() *string {
 	if o == nil {
 		return nil
 	}
-
 
 	return o.PublicIP
 
@@ -90,13 +83,11 @@ func (o *KubernetesNodeProperties) GetPublicIPOk() (*string, bool) {
 		return nil, false
 	}
 
-
 	return o.PublicIP, true
 }
 
 // SetPublicIP sets field value
 func (o *KubernetesNodeProperties) SetPublicIP(v string) {
-
 
 	o.PublicIP = &v
 
@@ -111,14 +102,12 @@ func (o *KubernetesNodeProperties) HasPublicIP() bool {
 	return false
 }
 
-
 // GetPrivateIP returns the PrivateIP field value
 // If the value is explicit nil, the zero value for string will be returned
 func (o *KubernetesNodeProperties) GetPrivateIP() *string {
 	if o == nil {
 		return nil
 	}
-
 
 	return o.PrivateIP
 
@@ -132,13 +121,11 @@ func (o *KubernetesNodeProperties) GetPrivateIPOk() (*string, bool) {
 		return nil, false
 	}
 
-
 	return o.PrivateIP, true
 }
 
 // SetPrivateIP sets field value
 func (o *KubernetesNodeProperties) SetPrivateIP(v string) {
-
 
 	o.PrivateIP = &v
 
@@ -153,14 +140,12 @@ func (o *KubernetesNodeProperties) HasPrivateIP() bool {
 	return false
 }
 
-
 // GetK8sVersion returns the K8sVersion field value
 // If the value is explicit nil, the zero value for string will be returned
 func (o *KubernetesNodeProperties) GetK8sVersion() *string {
 	if o == nil {
 		return nil
 	}
-
 
 	return o.K8sVersion
 
@@ -174,13 +159,11 @@ func (o *KubernetesNodeProperties) GetK8sVersionOk() (*string, bool) {
 		return nil, false
 	}
 
-
 	return o.K8sVersion, true
 }
 
 // SetK8sVersion sets field value
 func (o *KubernetesNodeProperties) SetK8sVersion(v string) {
-
 
 	o.K8sVersion = &v
 
@@ -251,5 +234,3 @@ func (v *NullableKubernetesNodeProperties) UnmarshalJSON(src []byte) error {
 	v.isSet = true
 	return json.Unmarshal(src, &v.value)
 }
-
-

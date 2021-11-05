@@ -17,7 +17,7 @@ import (
 
 // UserMetadata struct for UserMetadata
 type UserMetadata struct {
-	// Resource's Entity Tag as defined in http://www.w3.org/Protocols/rfc2616/rfc2616-sec3.html#sec3.11 . Entity Tag is also added as an 'ETag response header to requests which don't use 'depth' parameter. 
+	// Resource's Entity Tag as defined in http://www.w3.org/Protocols/rfc2616/rfc2616-sec3.html#sec3.11 . Entity Tag is also added as an 'ETag response header to requests which don't use 'depth' parameter.
 	Etag *string `json:"etag,omitempty"`
 	// time of creation of the user
 	CreatedDate *IonosTime
@@ -25,15 +25,12 @@ type UserMetadata struct {
 	LastLogin *IonosTime
 }
 
-
-
 // GetEtag returns the Etag field value
 // If the value is explicit nil, the zero value for string will be returned
 func (o *UserMetadata) GetEtag() *string {
 	if o == nil {
 		return nil
 	}
-
 
 	return o.Etag
 
@@ -47,13 +44,11 @@ func (o *UserMetadata) GetEtagOk() (*string, bool) {
 		return nil, false
 	}
 
-
 	return o.Etag, true
 }
 
 // SetEtag sets field value
 func (o *UserMetadata) SetEtag(v string) {
-
 
 	o.Etag = &v
 
@@ -68,7 +63,6 @@ func (o *UserMetadata) HasEtag() bool {
 	return false
 }
 
-
 // GetCreatedDate returns the CreatedDate field value
 // If the value is explicit nil, the zero value for time.Time will be returned
 func (o *UserMetadata) GetCreatedDate() *time.Time {
@@ -80,7 +74,6 @@ func (o *UserMetadata) GetCreatedDate() *time.Time {
 		return nil
 	}
 	return &o.CreatedDate.Time
-
 
 }
 
@@ -104,7 +97,6 @@ func (o *UserMetadata) SetCreatedDate(v time.Time) {
 
 	o.CreatedDate = &IonosTime{v}
 
-
 }
 
 // HasCreatedDate returns a boolean if a field has been set.
@@ -115,7 +107,6 @@ func (o *UserMetadata) HasCreatedDate() bool {
 
 	return false
 }
-
 
 // GetLastLogin returns the LastLogin field value
 // If the value is explicit nil, the zero value for time.Time will be returned
@@ -128,7 +119,6 @@ func (o *UserMetadata) GetLastLogin() *time.Time {
 		return nil
 	}
 	return &o.LastLogin.Time
-
 
 }
 
@@ -151,7 +141,6 @@ func (o *UserMetadata) GetLastLoginOk() (*time.Time, bool) {
 func (o *UserMetadata) SetLastLogin(v time.Time) {
 
 	o.LastLogin = &IonosTime{v}
-
 
 }
 
@@ -216,5 +205,3 @@ func (v *NullableUserMetadata) UnmarshalJSON(src []byte) error {
 	v.isSet = true
 	return json.Unmarshal(src, &v.value)
 }
-
-

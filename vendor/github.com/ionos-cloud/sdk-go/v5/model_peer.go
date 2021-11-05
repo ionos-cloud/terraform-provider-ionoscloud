@@ -16,14 +16,12 @@ import (
 
 // Peer struct for Peer
 type Peer struct {
-	Id *string `json:"id,omitempty"`
-	Name *string `json:"name,omitempty"`
-	DatacenterId *string `json:"datacenterId,omitempty"`
+	Id             *string `json:"id,omitempty"`
+	Name           *string `json:"name,omitempty"`
+	DatacenterId   *string `json:"datacenterId,omitempty"`
 	DatacenterName *string `json:"datacenterName,omitempty"`
-	Location *string `json:"location,omitempty"`
+	Location       *string `json:"location,omitempty"`
 }
-
-
 
 // GetId returns the Id field value
 // If the value is explicit nil, the zero value for string will be returned
@@ -31,7 +29,6 @@ func (o *Peer) GetId() *string {
 	if o == nil {
 		return nil
 	}
-
 
 	return o.Id
 
@@ -45,13 +42,11 @@ func (o *Peer) GetIdOk() (*string, bool) {
 		return nil, false
 	}
 
-
 	return o.Id, true
 }
 
 // SetId sets field value
 func (o *Peer) SetId(v string) {
-
 
 	o.Id = &v
 
@@ -66,14 +61,12 @@ func (o *Peer) HasId() bool {
 	return false
 }
 
-
 // GetName returns the Name field value
 // If the value is explicit nil, the zero value for string will be returned
 func (o *Peer) GetName() *string {
 	if o == nil {
 		return nil
 	}
-
 
 	return o.Name
 
@@ -87,13 +80,11 @@ func (o *Peer) GetNameOk() (*string, bool) {
 		return nil, false
 	}
 
-
 	return o.Name, true
 }
 
 // SetName sets field value
 func (o *Peer) SetName(v string) {
-
 
 	o.Name = &v
 
@@ -108,14 +99,12 @@ func (o *Peer) HasName() bool {
 	return false
 }
 
-
 // GetDatacenterId returns the DatacenterId field value
 // If the value is explicit nil, the zero value for string will be returned
 func (o *Peer) GetDatacenterId() *string {
 	if o == nil {
 		return nil
 	}
-
 
 	return o.DatacenterId
 
@@ -129,13 +118,11 @@ func (o *Peer) GetDatacenterIdOk() (*string, bool) {
 		return nil, false
 	}
 
-
 	return o.DatacenterId, true
 }
 
 // SetDatacenterId sets field value
 func (o *Peer) SetDatacenterId(v string) {
-
 
 	o.DatacenterId = &v
 
@@ -150,14 +137,12 @@ func (o *Peer) HasDatacenterId() bool {
 	return false
 }
 
-
 // GetDatacenterName returns the DatacenterName field value
 // If the value is explicit nil, the zero value for string will be returned
 func (o *Peer) GetDatacenterName() *string {
 	if o == nil {
 		return nil
 	}
-
 
 	return o.DatacenterName
 
@@ -171,13 +156,11 @@ func (o *Peer) GetDatacenterNameOk() (*string, bool) {
 		return nil, false
 	}
 
-
 	return o.DatacenterName, true
 }
 
 // SetDatacenterName sets field value
 func (o *Peer) SetDatacenterName(v string) {
-
 
 	o.DatacenterName = &v
 
@@ -192,14 +175,12 @@ func (o *Peer) HasDatacenterName() bool {
 	return false
 }
 
-
 // GetLocation returns the Location field value
 // If the value is explicit nil, the zero value for string will be returned
 func (o *Peer) GetLocation() *string {
 	if o == nil {
 		return nil
 	}
-
 
 	return o.Location
 
@@ -213,13 +194,11 @@ func (o *Peer) GetLocationOk() (*string, bool) {
 		return nil, false
 	}
 
-
 	return o.Location, true
 }
 
 // SetLocation sets field value
 func (o *Peer) SetLocation(v string) {
-
 
 	o.Location = &v
 
@@ -294,5 +273,3 @@ func (v *NullablePeer) UnmarshalJSON(src []byte) error {
 	v.isSet = true
 	return json.Unmarshal(src, &v.value)
 }
-
-

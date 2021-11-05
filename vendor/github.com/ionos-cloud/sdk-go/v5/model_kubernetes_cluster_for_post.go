@@ -21,13 +21,11 @@ type KubernetesClusterForPost struct {
 	// The type of object
 	Type *string `json:"type,omitempty"`
 	// URL to the object representation (absolute path)
-	Href *string `json:"href,omitempty"`
-	Metadata *DatacenterElementMetadata `json:"metadata,omitempty"`
+	Href       *string                             `json:"href,omitempty"`
+	Metadata   *DatacenterElementMetadata          `json:"metadata,omitempty"`
 	Properties *KubernetesClusterPropertiesForPost `json:"properties"`
-	Entities *KubernetesClusterEntities `json:"entities,omitempty"`
+	Entities   *KubernetesClusterEntities          `json:"entities,omitempty"`
 }
-
-
 
 // GetId returns the Id field value
 // If the value is explicit nil, the zero value for string will be returned
@@ -35,7 +33,6 @@ func (o *KubernetesClusterForPost) GetId() *string {
 	if o == nil {
 		return nil
 	}
-
 
 	return o.Id
 
@@ -49,13 +46,11 @@ func (o *KubernetesClusterForPost) GetIdOk() (*string, bool) {
 		return nil, false
 	}
 
-
 	return o.Id, true
 }
 
 // SetId sets field value
 func (o *KubernetesClusterForPost) SetId(v string) {
-
 
 	o.Id = &v
 
@@ -70,14 +65,12 @@ func (o *KubernetesClusterForPost) HasId() bool {
 	return false
 }
 
-
 // GetType returns the Type field value
 // If the value is explicit nil, the zero value for string will be returned
 func (o *KubernetesClusterForPost) GetType() *string {
 	if o == nil {
 		return nil
 	}
-
 
 	return o.Type
 
@@ -91,13 +84,11 @@ func (o *KubernetesClusterForPost) GetTypeOk() (*string, bool) {
 		return nil, false
 	}
 
-
 	return o.Type, true
 }
 
 // SetType sets field value
 func (o *KubernetesClusterForPost) SetType(v string) {
-
 
 	o.Type = &v
 
@@ -112,14 +103,12 @@ func (o *KubernetesClusterForPost) HasType() bool {
 	return false
 }
 
-
 // GetHref returns the Href field value
 // If the value is explicit nil, the zero value for string will be returned
 func (o *KubernetesClusterForPost) GetHref() *string {
 	if o == nil {
 		return nil
 	}
-
 
 	return o.Href
 
@@ -133,13 +122,11 @@ func (o *KubernetesClusterForPost) GetHrefOk() (*string, bool) {
 		return nil, false
 	}
 
-
 	return o.Href, true
 }
 
 // SetHref sets field value
 func (o *KubernetesClusterForPost) SetHref(v string) {
-
 
 	o.Href = &v
 
@@ -154,14 +141,12 @@ func (o *KubernetesClusterForPost) HasHref() bool {
 	return false
 }
 
-
 // GetMetadata returns the Metadata field value
 // If the value is explicit nil, the zero value for DatacenterElementMetadata will be returned
 func (o *KubernetesClusterForPost) GetMetadata() *DatacenterElementMetadata {
 	if o == nil {
 		return nil
 	}
-
 
 	return o.Metadata
 
@@ -175,13 +160,11 @@ func (o *KubernetesClusterForPost) GetMetadataOk() (*DatacenterElementMetadata, 
 		return nil, false
 	}
 
-
 	return o.Metadata, true
 }
 
 // SetMetadata sets field value
 func (o *KubernetesClusterForPost) SetMetadata(v DatacenterElementMetadata) {
-
 
 	o.Metadata = &v
 
@@ -196,14 +179,12 @@ func (o *KubernetesClusterForPost) HasMetadata() bool {
 	return false
 }
 
-
 // GetProperties returns the Properties field value
 // If the value is explicit nil, the zero value for KubernetesClusterPropertiesForPost will be returned
 func (o *KubernetesClusterForPost) GetProperties() *KubernetesClusterPropertiesForPost {
 	if o == nil {
 		return nil
 	}
-
 
 	return o.Properties
 
@@ -217,13 +198,11 @@ func (o *KubernetesClusterForPost) GetPropertiesOk() (*KubernetesClusterProperti
 		return nil, false
 	}
 
-
 	return o.Properties, true
 }
 
 // SetProperties sets field value
 func (o *KubernetesClusterForPost) SetProperties(v KubernetesClusterPropertiesForPost) {
-
 
 	o.Properties = &v
 
@@ -238,14 +217,12 @@ func (o *KubernetesClusterForPost) HasProperties() bool {
 	return false
 }
 
-
 // GetEntities returns the Entities field value
 // If the value is explicit nil, the zero value for KubernetesClusterEntities will be returned
 func (o *KubernetesClusterForPost) GetEntities() *KubernetesClusterEntities {
 	if o == nil {
 		return nil
 	}
-
 
 	return o.Entities
 
@@ -259,13 +236,11 @@ func (o *KubernetesClusterForPost) GetEntitiesOk() (*KubernetesClusterEntities, 
 		return nil, false
 	}
 
-
 	return o.Entities, true
 }
 
 // SetEntities sets field value
 func (o *KubernetesClusterForPost) SetEntities(v KubernetesClusterEntities) {
-
 
 	o.Entities = &v
 
@@ -344,5 +319,3 @@ func (v *NullableKubernetesClusterForPost) UnmarshalJSON(src []byte) error {
 	v.isSet = true
 	return json.Unmarshal(src, &v.value)
 }
-
-

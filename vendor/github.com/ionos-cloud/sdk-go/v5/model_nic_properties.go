@@ -32,15 +32,12 @@ type NicProperties struct {
 	Nat *bool `json:"nat,omitempty"`
 }
 
-
-
 // GetName returns the Name field value
 // If the value is explicit nil, the zero value for string will be returned
 func (o *NicProperties) GetName() *string {
 	if o == nil {
 		return nil
 	}
-
 
 	return o.Name
 
@@ -54,13 +51,11 @@ func (o *NicProperties) GetNameOk() (*string, bool) {
 		return nil, false
 	}
 
-
 	return o.Name, true
 }
 
 // SetName sets field value
 func (o *NicProperties) SetName(v string) {
-
 
 	o.Name = &v
 
@@ -75,14 +70,12 @@ func (o *NicProperties) HasName() bool {
 	return false
 }
 
-
 // GetMac returns the Mac field value
 // If the value is explicit nil, the zero value for string will be returned
 func (o *NicProperties) GetMac() *string {
 	if o == nil {
 		return nil
 	}
-
 
 	return o.Mac
 
@@ -96,13 +89,11 @@ func (o *NicProperties) GetMacOk() (*string, bool) {
 		return nil, false
 	}
 
-
 	return o.Mac, true
 }
 
 // SetMac sets field value
 func (o *NicProperties) SetMac(v string) {
-
 
 	o.Mac = &v
 
@@ -117,14 +108,12 @@ func (o *NicProperties) HasMac() bool {
 	return false
 }
 
-
 // GetIps returns the Ips field value
 // If the value is explicit nil, the zero value for []string will be returned
 func (o *NicProperties) GetIps() *[]string {
 	if o == nil {
 		return nil
 	}
-
 
 	return o.Ips
 
@@ -138,13 +127,11 @@ func (o *NicProperties) GetIpsOk() (*[]string, bool) {
 		return nil, false
 	}
 
-
 	return o.Ips, true
 }
 
 // SetIps sets field value
 func (o *NicProperties) SetIps(v []string) {
-
 
 	o.Ips = &v
 
@@ -159,14 +146,12 @@ func (o *NicProperties) HasIps() bool {
 	return false
 }
 
-
 // GetDhcp returns the Dhcp field value
 // If the value is explicit nil, the zero value for bool will be returned
 func (o *NicProperties) GetDhcp() *bool {
 	if o == nil {
 		return nil
 	}
-
 
 	return o.Dhcp
 
@@ -180,13 +165,11 @@ func (o *NicProperties) GetDhcpOk() (*bool, bool) {
 		return nil, false
 	}
 
-
 	return o.Dhcp, true
 }
 
 // SetDhcp sets field value
 func (o *NicProperties) SetDhcp(v bool) {
-
 
 	o.Dhcp = &v
 
@@ -201,14 +184,12 @@ func (o *NicProperties) HasDhcp() bool {
 	return false
 }
 
-
 // GetLan returns the Lan field value
 // If the value is explicit nil, the zero value for int32 will be returned
 func (o *NicProperties) GetLan() *int32 {
 	if o == nil {
 		return nil
 	}
-
 
 	return o.Lan
 
@@ -222,13 +203,11 @@ func (o *NicProperties) GetLanOk() (*int32, bool) {
 		return nil, false
 	}
 
-
 	return o.Lan, true
 }
 
 // SetLan sets field value
 func (o *NicProperties) SetLan(v int32) {
-
 
 	o.Lan = &v
 
@@ -243,14 +222,12 @@ func (o *NicProperties) HasLan() bool {
 	return false
 }
 
-
 // GetFirewallActive returns the FirewallActive field value
 // If the value is explicit nil, the zero value for bool will be returned
 func (o *NicProperties) GetFirewallActive() *bool {
 	if o == nil {
 		return nil
 	}
-
 
 	return o.FirewallActive
 
@@ -264,13 +241,11 @@ func (o *NicProperties) GetFirewallActiveOk() (*bool, bool) {
 		return nil, false
 	}
 
-
 	return o.FirewallActive, true
 }
 
 // SetFirewallActive sets field value
 func (o *NicProperties) SetFirewallActive(v bool) {
-
 
 	o.FirewallActive = &v
 
@@ -285,14 +260,12 @@ func (o *NicProperties) HasFirewallActive() bool {
 	return false
 }
 
-
 // GetNat returns the Nat field value
 // If the value is explicit nil, the zero value for bool will be returned
 func (o *NicProperties) GetNat() *bool {
 	if o == nil {
 		return nil
 	}
-
 
 	return o.Nat
 
@@ -306,13 +279,11 @@ func (o *NicProperties) GetNatOk() (*bool, bool) {
 		return nil, false
 	}
 
-
 	return o.Nat, true
 }
 
 // SetNat sets field value
 func (o *NicProperties) SetNat(v bool) {
-
 
 	o.Nat = &v
 
@@ -395,5 +366,3 @@ func (v *NullableNicProperties) UnmarshalJSON(src []byte) error {
 	v.isSet = true
 	return json.Unmarshal(src, &v.value)
 }
-
-

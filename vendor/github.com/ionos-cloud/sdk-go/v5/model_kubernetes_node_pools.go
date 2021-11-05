@@ -26,15 +26,12 @@ type KubernetesNodePools struct {
 	Items *[]KubernetesNodePool `json:"items,omitempty"`
 }
 
-
-
 // GetId returns the Id field value
 // If the value is explicit nil, the zero value for string will be returned
 func (o *KubernetesNodePools) GetId() *string {
 	if o == nil {
 		return nil
 	}
-
 
 	return o.Id
 
@@ -48,13 +45,11 @@ func (o *KubernetesNodePools) GetIdOk() (*string, bool) {
 		return nil, false
 	}
 
-
 	return o.Id, true
 }
 
 // SetId sets field value
 func (o *KubernetesNodePools) SetId(v string) {
-
 
 	o.Id = &v
 
@@ -69,14 +64,12 @@ func (o *KubernetesNodePools) HasId() bool {
 	return false
 }
 
-
 // GetType returns the Type field value
 // If the value is explicit nil, the zero value for string will be returned
 func (o *KubernetesNodePools) GetType() *string {
 	if o == nil {
 		return nil
 	}
-
 
 	return o.Type
 
@@ -90,13 +83,11 @@ func (o *KubernetesNodePools) GetTypeOk() (*string, bool) {
 		return nil, false
 	}
 
-
 	return o.Type, true
 }
 
 // SetType sets field value
 func (o *KubernetesNodePools) SetType(v string) {
-
 
 	o.Type = &v
 
@@ -111,14 +102,12 @@ func (o *KubernetesNodePools) HasType() bool {
 	return false
 }
 
-
 // GetHref returns the Href field value
 // If the value is explicit nil, the zero value for string will be returned
 func (o *KubernetesNodePools) GetHref() *string {
 	if o == nil {
 		return nil
 	}
-
 
 	return o.Href
 
@@ -132,13 +121,11 @@ func (o *KubernetesNodePools) GetHrefOk() (*string, bool) {
 		return nil, false
 	}
 
-
 	return o.Href, true
 }
 
 // SetHref sets field value
 func (o *KubernetesNodePools) SetHref(v string) {
-
 
 	o.Href = &v
 
@@ -153,14 +140,12 @@ func (o *KubernetesNodePools) HasHref() bool {
 	return false
 }
 
-
 // GetItems returns the Items field value
 // If the value is explicit nil, the zero value for []KubernetesNodePool will be returned
 func (o *KubernetesNodePools) GetItems() *[]KubernetesNodePool {
 	if o == nil {
 		return nil
 	}
-
 
 	return o.Items
 
@@ -174,13 +159,11 @@ func (o *KubernetesNodePools) GetItemsOk() (*[]KubernetesNodePool, bool) {
 		return nil, false
 	}
 
-
 	return o.Items, true
 }
 
 // SetItems sets field value
 func (o *KubernetesNodePools) SetItems(v []KubernetesNodePool) {
-
 
 	o.Items = &v
 
@@ -251,5 +234,3 @@ func (v *NullableKubernetesNodePools) UnmarshalJSON(src []byte) error {
 	v.isSet = true
 	return json.Unmarshal(src, &v.value)
 }
-
-

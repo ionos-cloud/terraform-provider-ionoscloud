@@ -22,15 +22,12 @@ type LabelResourceProperties struct {
 	Value *string `json:"value,omitempty"`
 }
 
-
-
 // GetKey returns the Key field value
 // If the value is explicit nil, the zero value for string will be returned
 func (o *LabelResourceProperties) GetKey() *string {
 	if o == nil {
 		return nil
 	}
-
 
 	return o.Key
 
@@ -44,13 +41,11 @@ func (o *LabelResourceProperties) GetKeyOk() (*string, bool) {
 		return nil, false
 	}
 
-
 	return o.Key, true
 }
 
 // SetKey sets field value
 func (o *LabelResourceProperties) SetKey(v string) {
-
 
 	o.Key = &v
 
@@ -65,14 +60,12 @@ func (o *LabelResourceProperties) HasKey() bool {
 	return false
 }
 
-
 // GetValue returns the Value field value
 // If the value is explicit nil, the zero value for string will be returned
 func (o *LabelResourceProperties) GetValue() *string {
 	if o == nil {
 		return nil
 	}
-
 
 	return o.Value
 
@@ -86,13 +79,11 @@ func (o *LabelResourceProperties) GetValueOk() (*string, bool) {
 		return nil, false
 	}
 
-
 	return o.Value, true
 }
 
 // SetValue sets field value
 func (o *LabelResourceProperties) SetValue(v string) {
-
 
 	o.Value = &v
 
@@ -155,5 +146,3 @@ func (v *NullableLabelResourceProperties) UnmarshalJSON(src []byte) error {
 	v.isSet = true
 	return json.Unmarshal(src, &v.value)
 }
-
-

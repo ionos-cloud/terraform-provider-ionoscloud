@@ -21,11 +21,9 @@ type KubernetesConfig struct {
 	// The type of object
 	Type *string `json:"type,omitempty"`
 	// URL to the object representation (absolute path)
-	Href *string `json:"href,omitempty"`
+	Href       *string                     `json:"href,omitempty"`
 	Properties *KubernetesConfigProperties `json:"properties"`
 }
-
-
 
 // GetId returns the Id field value
 // If the value is explicit nil, the zero value for string will be returned
@@ -33,7 +31,6 @@ func (o *KubernetesConfig) GetId() *string {
 	if o == nil {
 		return nil
 	}
-
 
 	return o.Id
 
@@ -47,13 +44,11 @@ func (o *KubernetesConfig) GetIdOk() (*string, bool) {
 		return nil, false
 	}
 
-
 	return o.Id, true
 }
 
 // SetId sets field value
 func (o *KubernetesConfig) SetId(v string) {
-
 
 	o.Id = &v
 
@@ -68,14 +63,12 @@ func (o *KubernetesConfig) HasId() bool {
 	return false
 }
 
-
 // GetType returns the Type field value
 // If the value is explicit nil, the zero value for string will be returned
 func (o *KubernetesConfig) GetType() *string {
 	if o == nil {
 		return nil
 	}
-
 
 	return o.Type
 
@@ -89,13 +82,11 @@ func (o *KubernetesConfig) GetTypeOk() (*string, bool) {
 		return nil, false
 	}
 
-
 	return o.Type, true
 }
 
 // SetType sets field value
 func (o *KubernetesConfig) SetType(v string) {
-
 
 	o.Type = &v
 
@@ -110,14 +101,12 @@ func (o *KubernetesConfig) HasType() bool {
 	return false
 }
 
-
 // GetHref returns the Href field value
 // If the value is explicit nil, the zero value for string will be returned
 func (o *KubernetesConfig) GetHref() *string {
 	if o == nil {
 		return nil
 	}
-
 
 	return o.Href
 
@@ -131,13 +120,11 @@ func (o *KubernetesConfig) GetHrefOk() (*string, bool) {
 		return nil, false
 	}
 
-
 	return o.Href, true
 }
 
 // SetHref sets field value
 func (o *KubernetesConfig) SetHref(v string) {
-
 
 	o.Href = &v
 
@@ -152,14 +139,12 @@ func (o *KubernetesConfig) HasHref() bool {
 	return false
 }
 
-
 // GetProperties returns the Properties field value
 // If the value is explicit nil, the zero value for KubernetesConfigProperties will be returned
 func (o *KubernetesConfig) GetProperties() *KubernetesConfigProperties {
 	if o == nil {
 		return nil
 	}
-
 
 	return o.Properties
 
@@ -173,13 +158,11 @@ func (o *KubernetesConfig) GetPropertiesOk() (*KubernetesConfigProperties, bool)
 		return nil, false
 	}
 
-
 	return o.Properties, true
 }
 
 // SetProperties sets field value
 func (o *KubernetesConfig) SetProperties(v KubernetesConfigProperties) {
-
 
 	o.Properties = &v
 
@@ -250,5 +233,3 @@ func (v *NullableKubernetesConfig) UnmarshalJSON(src []byte) error {
 	v.isSet = true
 	return json.Unmarshal(src, &v.value)
 }
-
-

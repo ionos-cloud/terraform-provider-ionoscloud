@@ -21,12 +21,10 @@ type Volume struct {
 	// The type of object that has been created
 	Type *Type `json:"type,omitempty"`
 	// URL to the object representation (absolute path)
-	Href *string `json:"href,omitempty"`
-	Metadata *DatacenterElementMetadata `json:"metadata,omitempty"`
-	Properties *VolumeProperties `json:"properties"`
+	Href       *string                    `json:"href,omitempty"`
+	Metadata   *DatacenterElementMetadata `json:"metadata,omitempty"`
+	Properties *VolumeProperties          `json:"properties"`
 }
-
-
 
 // GetId returns the Id field value
 // If the value is explicit nil, the zero value for string will be returned
@@ -34,7 +32,6 @@ func (o *Volume) GetId() *string {
 	if o == nil {
 		return nil
 	}
-
 
 	return o.Id
 
@@ -48,13 +45,11 @@ func (o *Volume) GetIdOk() (*string, bool) {
 		return nil, false
 	}
 
-
 	return o.Id, true
 }
 
 // SetId sets field value
 func (o *Volume) SetId(v string) {
-
 
 	o.Id = &v
 
@@ -69,14 +64,12 @@ func (o *Volume) HasId() bool {
 	return false
 }
 
-
 // GetType returns the Type field value
 // If the value is explicit nil, the zero value for Type will be returned
 func (o *Volume) GetType() *Type {
 	if o == nil {
 		return nil
 	}
-
 
 	return o.Type
 
@@ -90,13 +83,11 @@ func (o *Volume) GetTypeOk() (*Type, bool) {
 		return nil, false
 	}
 
-
 	return o.Type, true
 }
 
 // SetType sets field value
 func (o *Volume) SetType(v Type) {
-
 
 	o.Type = &v
 
@@ -111,14 +102,12 @@ func (o *Volume) HasType() bool {
 	return false
 }
 
-
 // GetHref returns the Href field value
 // If the value is explicit nil, the zero value for string will be returned
 func (o *Volume) GetHref() *string {
 	if o == nil {
 		return nil
 	}
-
 
 	return o.Href
 
@@ -132,13 +121,11 @@ func (o *Volume) GetHrefOk() (*string, bool) {
 		return nil, false
 	}
 
-
 	return o.Href, true
 }
 
 // SetHref sets field value
 func (o *Volume) SetHref(v string) {
-
 
 	o.Href = &v
 
@@ -153,14 +140,12 @@ func (o *Volume) HasHref() bool {
 	return false
 }
 
-
 // GetMetadata returns the Metadata field value
 // If the value is explicit nil, the zero value for DatacenterElementMetadata will be returned
 func (o *Volume) GetMetadata() *DatacenterElementMetadata {
 	if o == nil {
 		return nil
 	}
-
 
 	return o.Metadata
 
@@ -174,13 +159,11 @@ func (o *Volume) GetMetadataOk() (*DatacenterElementMetadata, bool) {
 		return nil, false
 	}
 
-
 	return o.Metadata, true
 }
 
 // SetMetadata sets field value
 func (o *Volume) SetMetadata(v DatacenterElementMetadata) {
-
 
 	o.Metadata = &v
 
@@ -195,14 +178,12 @@ func (o *Volume) HasMetadata() bool {
 	return false
 }
 
-
 // GetProperties returns the Properties field value
 // If the value is explicit nil, the zero value for VolumeProperties will be returned
 func (o *Volume) GetProperties() *VolumeProperties {
 	if o == nil {
 		return nil
 	}
-
 
 	return o.Properties
 
@@ -216,13 +197,11 @@ func (o *Volume) GetPropertiesOk() (*VolumeProperties, bool) {
 		return nil, false
 	}
 
-
 	return o.Properties, true
 }
 
 // SetProperties sets field value
 func (o *Volume) SetProperties(v VolumeProperties) {
-
 
 	o.Properties = &v
 
@@ -297,5 +276,3 @@ func (v *NullableVolume) UnmarshalJSON(src []byte) error {
 	v.isSet = true
 	return json.Unmarshal(src, &v.value)
 }
-
-

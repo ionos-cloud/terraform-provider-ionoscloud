@@ -24,15 +24,12 @@ type ResourceReference struct {
 	Href *string `json:"href,omitempty"`
 }
 
-
-
 // GetId returns the Id field value
 // If the value is explicit nil, the zero value for string will be returned
 func (o *ResourceReference) GetId() *string {
 	if o == nil {
 		return nil
 	}
-
 
 	return o.Id
 
@@ -46,13 +43,11 @@ func (o *ResourceReference) GetIdOk() (*string, bool) {
 		return nil, false
 	}
 
-
 	return o.Id, true
 }
 
 // SetId sets field value
 func (o *ResourceReference) SetId(v string) {
-
 
 	o.Id = &v
 
@@ -67,14 +62,12 @@ func (o *ResourceReference) HasId() bool {
 	return false
 }
 
-
 // GetType returns the Type field value
 // If the value is explicit nil, the zero value for Type will be returned
 func (o *ResourceReference) GetType() *Type {
 	if o == nil {
 		return nil
 	}
-
 
 	return o.Type
 
@@ -88,13 +81,11 @@ func (o *ResourceReference) GetTypeOk() (*Type, bool) {
 		return nil, false
 	}
 
-
 	return o.Type, true
 }
 
 // SetType sets field value
 func (o *ResourceReference) SetType(v Type) {
-
 
 	o.Type = &v
 
@@ -109,14 +100,12 @@ func (o *ResourceReference) HasType() bool {
 	return false
 }
 
-
 // GetHref returns the Href field value
 // If the value is explicit nil, the zero value for string will be returned
 func (o *ResourceReference) GetHref() *string {
 	if o == nil {
 		return nil
 	}
-
 
 	return o.Href
 
@@ -130,13 +119,11 @@ func (o *ResourceReference) GetHrefOk() (*string, bool) {
 		return nil, false
 	}
 
-
 	return o.Href, true
 }
 
 // SetHref sets field value
 func (o *ResourceReference) SetHref(v string) {
-
 
 	o.Href = &v
 
@@ -203,5 +190,3 @@ func (v *NullableResourceReference) UnmarshalJSON(src []byte) error {
 	v.isSet = true
 	return json.Unmarshal(src, &v.value)
 }
-
-

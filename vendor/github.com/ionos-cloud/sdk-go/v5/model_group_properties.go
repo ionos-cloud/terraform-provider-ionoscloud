@@ -38,15 +38,12 @@ type GroupProperties struct {
 	CreateK8sCluster *bool `json:"createK8sCluster,omitempty"`
 }
 
-
-
 // GetName returns the Name field value
 // If the value is explicit nil, the zero value for string will be returned
 func (o *GroupProperties) GetName() *string {
 	if o == nil {
 		return nil
 	}
-
 
 	return o.Name
 
@@ -60,13 +57,11 @@ func (o *GroupProperties) GetNameOk() (*string, bool) {
 		return nil, false
 	}
 
-
 	return o.Name, true
 }
 
 // SetName sets field value
 func (o *GroupProperties) SetName(v string) {
-
 
 	o.Name = &v
 
@@ -81,14 +76,12 @@ func (o *GroupProperties) HasName() bool {
 	return false
 }
 
-
 // GetCreateDataCenter returns the CreateDataCenter field value
 // If the value is explicit nil, the zero value for bool will be returned
 func (o *GroupProperties) GetCreateDataCenter() *bool {
 	if o == nil {
 		return nil
 	}
-
 
 	return o.CreateDataCenter
 
@@ -102,13 +95,11 @@ func (o *GroupProperties) GetCreateDataCenterOk() (*bool, bool) {
 		return nil, false
 	}
 
-
 	return o.CreateDataCenter, true
 }
 
 // SetCreateDataCenter sets field value
 func (o *GroupProperties) SetCreateDataCenter(v bool) {
-
 
 	o.CreateDataCenter = &v
 
@@ -123,14 +114,12 @@ func (o *GroupProperties) HasCreateDataCenter() bool {
 	return false
 }
 
-
 // GetCreateSnapshot returns the CreateSnapshot field value
 // If the value is explicit nil, the zero value for bool will be returned
 func (o *GroupProperties) GetCreateSnapshot() *bool {
 	if o == nil {
 		return nil
 	}
-
 
 	return o.CreateSnapshot
 
@@ -144,13 +133,11 @@ func (o *GroupProperties) GetCreateSnapshotOk() (*bool, bool) {
 		return nil, false
 	}
 
-
 	return o.CreateSnapshot, true
 }
 
 // SetCreateSnapshot sets field value
 func (o *GroupProperties) SetCreateSnapshot(v bool) {
-
 
 	o.CreateSnapshot = &v
 
@@ -165,14 +152,12 @@ func (o *GroupProperties) HasCreateSnapshot() bool {
 	return false
 }
 
-
 // GetReserveIp returns the ReserveIp field value
 // If the value is explicit nil, the zero value for bool will be returned
 func (o *GroupProperties) GetReserveIp() *bool {
 	if o == nil {
 		return nil
 	}
-
 
 	return o.ReserveIp
 
@@ -186,13 +171,11 @@ func (o *GroupProperties) GetReserveIpOk() (*bool, bool) {
 		return nil, false
 	}
 
-
 	return o.ReserveIp, true
 }
 
 // SetReserveIp sets field value
 func (o *GroupProperties) SetReserveIp(v bool) {
-
 
 	o.ReserveIp = &v
 
@@ -207,14 +190,12 @@ func (o *GroupProperties) HasReserveIp() bool {
 	return false
 }
 
-
 // GetAccessActivityLog returns the AccessActivityLog field value
 // If the value is explicit nil, the zero value for bool will be returned
 func (o *GroupProperties) GetAccessActivityLog() *bool {
 	if o == nil {
 		return nil
 	}
-
 
 	return o.AccessActivityLog
 
@@ -228,13 +209,11 @@ func (o *GroupProperties) GetAccessActivityLogOk() (*bool, bool) {
 		return nil, false
 	}
 
-
 	return o.AccessActivityLog, true
 }
 
 // SetAccessActivityLog sets field value
 func (o *GroupProperties) SetAccessActivityLog(v bool) {
-
 
 	o.AccessActivityLog = &v
 
@@ -249,14 +228,12 @@ func (o *GroupProperties) HasAccessActivityLog() bool {
 	return false
 }
 
-
 // GetCreatePcc returns the CreatePcc field value
 // If the value is explicit nil, the zero value for bool will be returned
 func (o *GroupProperties) GetCreatePcc() *bool {
 	if o == nil {
 		return nil
 	}
-
 
 	return o.CreatePcc
 
@@ -270,13 +247,11 @@ func (o *GroupProperties) GetCreatePccOk() (*bool, bool) {
 		return nil, false
 	}
 
-
 	return o.CreatePcc, true
 }
 
 // SetCreatePcc sets field value
 func (o *GroupProperties) SetCreatePcc(v bool) {
-
 
 	o.CreatePcc = &v
 
@@ -291,14 +266,12 @@ func (o *GroupProperties) HasCreatePcc() bool {
 	return false
 }
 
-
 // GetS3Privilege returns the S3Privilege field value
 // If the value is explicit nil, the zero value for bool will be returned
 func (o *GroupProperties) GetS3Privilege() *bool {
 	if o == nil {
 		return nil
 	}
-
 
 	return o.S3Privilege
 
@@ -312,13 +285,11 @@ func (o *GroupProperties) GetS3PrivilegeOk() (*bool, bool) {
 		return nil, false
 	}
 
-
 	return o.S3Privilege, true
 }
 
 // SetS3Privilege sets field value
 func (o *GroupProperties) SetS3Privilege(v bool) {
-
 
 	o.S3Privilege = &v
 
@@ -333,14 +304,12 @@ func (o *GroupProperties) HasS3Privilege() bool {
 	return false
 }
 
-
 // GetCreateBackupUnit returns the CreateBackupUnit field value
 // If the value is explicit nil, the zero value for bool will be returned
 func (o *GroupProperties) GetCreateBackupUnit() *bool {
 	if o == nil {
 		return nil
 	}
-
 
 	return o.CreateBackupUnit
 
@@ -354,13 +323,11 @@ func (o *GroupProperties) GetCreateBackupUnitOk() (*bool, bool) {
 		return nil, false
 	}
 
-
 	return o.CreateBackupUnit, true
 }
 
 // SetCreateBackupUnit sets field value
 func (o *GroupProperties) SetCreateBackupUnit(v bool) {
-
 
 	o.CreateBackupUnit = &v
 
@@ -375,14 +342,12 @@ func (o *GroupProperties) HasCreateBackupUnit() bool {
 	return false
 }
 
-
 // GetCreateInternetAccess returns the CreateInternetAccess field value
 // If the value is explicit nil, the zero value for bool will be returned
 func (o *GroupProperties) GetCreateInternetAccess() *bool {
 	if o == nil {
 		return nil
 	}
-
 
 	return o.CreateInternetAccess
 
@@ -396,13 +361,11 @@ func (o *GroupProperties) GetCreateInternetAccessOk() (*bool, bool) {
 		return nil, false
 	}
 
-
 	return o.CreateInternetAccess, true
 }
 
 // SetCreateInternetAccess sets field value
 func (o *GroupProperties) SetCreateInternetAccess(v bool) {
-
 
 	o.CreateInternetAccess = &v
 
@@ -417,14 +380,12 @@ func (o *GroupProperties) HasCreateInternetAccess() bool {
 	return false
 }
 
-
 // GetCreateK8sCluster returns the CreateK8sCluster field value
 // If the value is explicit nil, the zero value for bool will be returned
 func (o *GroupProperties) GetCreateK8sCluster() *bool {
 	if o == nil {
 		return nil
 	}
-
 
 	return o.CreateK8sCluster
 
@@ -438,13 +399,11 @@ func (o *GroupProperties) GetCreateK8sClusterOk() (*bool, bool) {
 		return nil, false
 	}
 
-
 	return o.CreateK8sCluster, true
 }
 
 // SetCreateK8sCluster sets field value
 func (o *GroupProperties) SetCreateK8sCluster(v bool) {
-
 
 	o.CreateK8sCluster = &v
 
@@ -539,5 +498,3 @@ func (v *NullableGroupProperties) UnmarshalJSON(src []byte) error {
 	v.isSet = true
 	return json.Unmarshal(src, &v.value)
 }
-
-
