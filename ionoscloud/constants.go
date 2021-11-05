@@ -104,6 +104,12 @@ const (
 	VolumeDataSourceByName = "test_volume_name"
 )
 
+const (
+	shareResource         = "ionoscloud_share"
+	shareResourceFullName = shareResource + "." + sourceShareName
+	sourceShareName       = "share"
+)
+
 // General Constants
 const (
 	DataSource       = "data"

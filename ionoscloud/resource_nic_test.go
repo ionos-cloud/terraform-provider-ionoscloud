@@ -154,7 +154,7 @@ resource "ionoscloud_nic" "database_nic" {
   lan = 2
   firewall_active = true
   firewall_type = "INGRESS"
-  ips            = [ ionoscloud_ipblock.test_server.ips[0], ionoscloud_ipblock.test_server.ips[1] ]
+  ips = [ ionoscloud_ipblock.test_server.ips[0], ionoscloud_ipblock.test_server.ips[1] ]
   name = "%s"
 }
 `
@@ -168,7 +168,7 @@ resource "ionoscloud_nic" "database_nic" {
   dhcp = false
   firewall_active = false
   firewall_type = "BIDIRECTIONAL"
-  ips            = [ ionoscloud_ipblock.test_server.ips[0], ionoscloud_ipblock.test_server.ips[1] ]
+  ips = [ ionoscloud_ipblock.test_server.ips[0], ionoscloud_ipblock.test_server.ips[1] ]
   name = "updated"
 }
 `
