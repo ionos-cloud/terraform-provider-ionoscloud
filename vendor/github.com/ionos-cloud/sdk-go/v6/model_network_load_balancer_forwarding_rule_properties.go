@@ -25,12 +25,11 @@ type NetworkLoadBalancerForwardingRuleProperties struct {
 	// Listening IP. (inbound)
 	ListenerIp *string `json:"listenerIp"`
 	// Listening port number. (inbound) (range: 1 to 65535)
-	ListenerPort *int32 `json:"listenerPort"`
-	HealthCheck *NetworkLoadBalancerForwardingRuleHealthCheck `json:"healthCheck,omitempty"`
+	ListenerPort *int32                                        `json:"listenerPort"`
+	HealthCheck  *NetworkLoadBalancerForwardingRuleHealthCheck `json:"healthCheck,omitempty"`
 	// Array of items in that collection
 	Targets *[]NetworkLoadBalancerForwardingRuleTarget `json:"targets"`
 }
-
 
 // GetName returns the Name field value
 // If the value is explicit nil, the zero value for string will be returned
@@ -38,7 +37,6 @@ func (o *NetworkLoadBalancerForwardingRuleProperties) GetName() *string {
 	if o == nil {
 		return nil
 	}
-
 
 	return o.Name
 
@@ -52,13 +50,11 @@ func (o *NetworkLoadBalancerForwardingRuleProperties) GetNameOk() (*string, bool
 		return nil, false
 	}
 
-
 	return o.Name, true
 }
 
 // SetName sets field value
 func (o *NetworkLoadBalancerForwardingRuleProperties) SetName(v string) {
-
 
 	o.Name = &v
 
@@ -80,7 +76,6 @@ func (o *NetworkLoadBalancerForwardingRuleProperties) GetAlgorithm() *string {
 		return nil
 	}
 
-
 	return o.Algorithm
 
 }
@@ -93,13 +88,11 @@ func (o *NetworkLoadBalancerForwardingRuleProperties) GetAlgorithmOk() (*string,
 		return nil, false
 	}
 
-
 	return o.Algorithm, true
 }
 
 // SetAlgorithm sets field value
 func (o *NetworkLoadBalancerForwardingRuleProperties) SetAlgorithm(v string) {
-
 
 	o.Algorithm = &v
 
@@ -121,7 +114,6 @@ func (o *NetworkLoadBalancerForwardingRuleProperties) GetProtocol() *string {
 		return nil
 	}
 
-
 	return o.Protocol
 
 }
@@ -134,13 +126,11 @@ func (o *NetworkLoadBalancerForwardingRuleProperties) GetProtocolOk() (*string, 
 		return nil, false
 	}
 
-
 	return o.Protocol, true
 }
 
 // SetProtocol sets field value
 func (o *NetworkLoadBalancerForwardingRuleProperties) SetProtocol(v string) {
-
 
 	o.Protocol = &v
 
@@ -162,7 +152,6 @@ func (o *NetworkLoadBalancerForwardingRuleProperties) GetListenerIp() *string {
 		return nil
 	}
 
-
 	return o.ListenerIp
 
 }
@@ -175,13 +164,11 @@ func (o *NetworkLoadBalancerForwardingRuleProperties) GetListenerIpOk() (*string
 		return nil, false
 	}
 
-
 	return o.ListenerIp, true
 }
 
 // SetListenerIp sets field value
 func (o *NetworkLoadBalancerForwardingRuleProperties) SetListenerIp(v string) {
-
 
 	o.ListenerIp = &v
 
@@ -203,7 +190,6 @@ func (o *NetworkLoadBalancerForwardingRuleProperties) GetListenerPort() *int32 {
 		return nil
 	}
 
-
 	return o.ListenerPort
 
 }
@@ -216,13 +202,11 @@ func (o *NetworkLoadBalancerForwardingRuleProperties) GetListenerPortOk() (*int3
 		return nil, false
 	}
 
-
 	return o.ListenerPort, true
 }
 
 // SetListenerPort sets field value
 func (o *NetworkLoadBalancerForwardingRuleProperties) SetListenerPort(v int32) {
-
 
 	o.ListenerPort = &v
 
@@ -244,7 +228,6 @@ func (o *NetworkLoadBalancerForwardingRuleProperties) GetHealthCheck() *NetworkL
 		return nil
 	}
 
-
 	return o.HealthCheck
 
 }
@@ -257,13 +240,11 @@ func (o *NetworkLoadBalancerForwardingRuleProperties) GetHealthCheckOk() (*Netwo
 		return nil, false
 	}
 
-
 	return o.HealthCheck, true
 }
 
 // SetHealthCheck sets field value
 func (o *NetworkLoadBalancerForwardingRuleProperties) SetHealthCheck(v NetworkLoadBalancerForwardingRuleHealthCheck) {
-
 
 	o.HealthCheck = &v
 
@@ -285,7 +266,6 @@ func (o *NetworkLoadBalancerForwardingRuleProperties) GetTargets() *[]NetworkLoa
 		return nil
 	}
 
-
 	return o.Targets
 
 }
@@ -298,13 +278,11 @@ func (o *NetworkLoadBalancerForwardingRuleProperties) GetTargetsOk() (*[]Network
 		return nil, false
 	}
 
-
 	return o.Targets, true
 }
 
 // SetTargets sets field value
 func (o *NetworkLoadBalancerForwardingRuleProperties) SetTargets(v []NetworkLoadBalancerForwardingRuleTarget) {
-
 
 	o.Targets = &v
 
@@ -351,6 +329,7 @@ func (o NetworkLoadBalancerForwardingRuleProperties) MarshalJSON() ([]byte, erro
 	}
 	return json.Marshal(toSerialize)
 }
+
 type NullableNetworkLoadBalancerForwardingRuleProperties struct {
 	value *NetworkLoadBalancerForwardingRuleProperties
 	isSet bool
@@ -386,5 +365,3 @@ func (v *NullableNetworkLoadBalancerForwardingRuleProperties) UnmarshalJSON(src 
 	v.isSet = true
 	return json.Unmarshal(src, &v.value)
 }
-
-

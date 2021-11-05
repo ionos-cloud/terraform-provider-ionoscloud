@@ -26,14 +26,12 @@ type PrivateCrossConnectProperties struct {
 	ConnectableDatacenters *[]ConnectableDatacenter `json:"connectableDatacenters,omitempty"`
 }
 
-
 // GetName returns the Name field value
 // If the value is explicit nil, the zero value for string will be returned
 func (o *PrivateCrossConnectProperties) GetName() *string {
 	if o == nil {
 		return nil
 	}
-
 
 	return o.Name
 
@@ -47,13 +45,11 @@ func (o *PrivateCrossConnectProperties) GetNameOk() (*string, bool) {
 		return nil, false
 	}
 
-
 	return o.Name, true
 }
 
 // SetName sets field value
 func (o *PrivateCrossConnectProperties) SetName(v string) {
-
 
 	o.Name = &v
 
@@ -75,7 +71,6 @@ func (o *PrivateCrossConnectProperties) GetDescription() *string {
 		return nil
 	}
 
-
 	return o.Description
 
 }
@@ -88,13 +83,11 @@ func (o *PrivateCrossConnectProperties) GetDescriptionOk() (*string, bool) {
 		return nil, false
 	}
 
-
 	return o.Description, true
 }
 
 // SetDescription sets field value
 func (o *PrivateCrossConnectProperties) SetDescription(v string) {
-
 
 	o.Description = &v
 
@@ -116,7 +109,6 @@ func (o *PrivateCrossConnectProperties) GetPeers() *[]Peer {
 		return nil
 	}
 
-
 	return o.Peers
 
 }
@@ -129,13 +121,11 @@ func (o *PrivateCrossConnectProperties) GetPeersOk() (*[]Peer, bool) {
 		return nil, false
 	}
 
-
 	return o.Peers, true
 }
 
 // SetPeers sets field value
 func (o *PrivateCrossConnectProperties) SetPeers(v []Peer) {
-
 
 	o.Peers = &v
 
@@ -157,7 +147,6 @@ func (o *PrivateCrossConnectProperties) GetConnectableDatacenters() *[]Connectab
 		return nil
 	}
 
-
 	return o.ConnectableDatacenters
 
 }
@@ -170,13 +159,11 @@ func (o *PrivateCrossConnectProperties) GetConnectableDatacentersOk() (*[]Connec
 		return nil, false
 	}
 
-
 	return o.ConnectableDatacenters, true
 }
 
 // SetConnectableDatacenters sets field value
 func (o *PrivateCrossConnectProperties) SetConnectableDatacenters(v []ConnectableDatacenter) {
-
 
 	o.ConnectableDatacenters = &v
 
@@ -211,6 +198,7 @@ func (o PrivateCrossConnectProperties) MarshalJSON() ([]byte, error) {
 	}
 	return json.Marshal(toSerialize)
 }
+
 type NullablePrivateCrossConnectProperties struct {
 	value *PrivateCrossConnectProperties
 	isSet bool
@@ -246,5 +234,3 @@ func (v *NullablePrivateCrossConnectProperties) UnmarshalJSON(src []byte) error 
 	v.isSet = true
 	return json.Unmarshal(src, &v.value)
 }
-
-

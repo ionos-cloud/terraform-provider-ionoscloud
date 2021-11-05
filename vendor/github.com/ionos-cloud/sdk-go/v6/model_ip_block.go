@@ -21,11 +21,10 @@ type IpBlock struct {
 	// The type of object that has been created
 	Type *Type `json:"type,omitempty"`
 	// URL to the object representation (absolute path)
-	Href *string `json:"href,omitempty"`
-	Metadata *DatacenterElementMetadata `json:"metadata,omitempty"`
-	Properties *IpBlockProperties `json:"properties"`
+	Href       *string                    `json:"href,omitempty"`
+	Metadata   *DatacenterElementMetadata `json:"metadata,omitempty"`
+	Properties *IpBlockProperties         `json:"properties"`
 }
-
 
 // GetId returns the Id field value
 // If the value is explicit nil, the zero value for string will be returned
@@ -33,7 +32,6 @@ func (o *IpBlock) GetId() *string {
 	if o == nil {
 		return nil
 	}
-
 
 	return o.Id
 
@@ -47,13 +45,11 @@ func (o *IpBlock) GetIdOk() (*string, bool) {
 		return nil, false
 	}
 
-
 	return o.Id, true
 }
 
 // SetId sets field value
 func (o *IpBlock) SetId(v string) {
-
 
 	o.Id = &v
 
@@ -75,7 +71,6 @@ func (o *IpBlock) GetType() *Type {
 		return nil
 	}
 
-
 	return o.Type
 
 }
@@ -88,13 +83,11 @@ func (o *IpBlock) GetTypeOk() (*Type, bool) {
 		return nil, false
 	}
 
-
 	return o.Type, true
 }
 
 // SetType sets field value
 func (o *IpBlock) SetType(v Type) {
-
 
 	o.Type = &v
 
@@ -116,7 +109,6 @@ func (o *IpBlock) GetHref() *string {
 		return nil
 	}
 
-
 	return o.Href
 
 }
@@ -129,13 +121,11 @@ func (o *IpBlock) GetHrefOk() (*string, bool) {
 		return nil, false
 	}
 
-
 	return o.Href, true
 }
 
 // SetHref sets field value
 func (o *IpBlock) SetHref(v string) {
-
 
 	o.Href = &v
 
@@ -157,7 +147,6 @@ func (o *IpBlock) GetMetadata() *DatacenterElementMetadata {
 		return nil
 	}
 
-
 	return o.Metadata
 
 }
@@ -170,13 +159,11 @@ func (o *IpBlock) GetMetadataOk() (*DatacenterElementMetadata, bool) {
 		return nil, false
 	}
 
-
 	return o.Metadata, true
 }
 
 // SetMetadata sets field value
 func (o *IpBlock) SetMetadata(v DatacenterElementMetadata) {
-
 
 	o.Metadata = &v
 
@@ -198,7 +185,6 @@ func (o *IpBlock) GetProperties() *IpBlockProperties {
 		return nil
 	}
 
-
 	return o.Properties
 
 }
@@ -211,13 +197,11 @@ func (o *IpBlock) GetPropertiesOk() (*IpBlockProperties, bool) {
 		return nil, false
 	}
 
-
 	return o.Properties, true
 }
 
 // SetProperties sets field value
 func (o *IpBlock) SetProperties(v IpBlockProperties) {
-
 
 	o.Properties = &v
 
@@ -256,6 +240,7 @@ func (o IpBlock) MarshalJSON() ([]byte, error) {
 	}
 	return json.Marshal(toSerialize)
 }
+
 type NullableIpBlock struct {
 	value *IpBlock
 	isSet bool
@@ -291,5 +276,3 @@ func (v *NullableIpBlock) UnmarshalJSON(src []byte) error {
 	v.isSet = true
 	return json.Unmarshal(src, &v.value)
 }
-
-

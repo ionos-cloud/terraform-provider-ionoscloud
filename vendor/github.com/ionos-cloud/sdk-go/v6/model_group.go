@@ -21,11 +21,10 @@ type Group struct {
 	// The type of the resource
 	Type *Type `json:"type,omitempty"`
 	// URL to the object representation (absolute path)
-	Href *string `json:"href,omitempty"`
+	Href       *string          `json:"href,omitempty"`
 	Properties *GroupProperties `json:"properties"`
-	Entities *GroupEntities `json:"entities,omitempty"`
+	Entities   *GroupEntities   `json:"entities,omitempty"`
 }
-
 
 // GetId returns the Id field value
 // If the value is explicit nil, the zero value for string will be returned
@@ -33,7 +32,6 @@ func (o *Group) GetId() *string {
 	if o == nil {
 		return nil
 	}
-
 
 	return o.Id
 
@@ -47,13 +45,11 @@ func (o *Group) GetIdOk() (*string, bool) {
 		return nil, false
 	}
 
-
 	return o.Id, true
 }
 
 // SetId sets field value
 func (o *Group) SetId(v string) {
-
 
 	o.Id = &v
 
@@ -75,7 +71,6 @@ func (o *Group) GetType() *Type {
 		return nil
 	}
 
-
 	return o.Type
 
 }
@@ -88,13 +83,11 @@ func (o *Group) GetTypeOk() (*Type, bool) {
 		return nil, false
 	}
 
-
 	return o.Type, true
 }
 
 // SetType sets field value
 func (o *Group) SetType(v Type) {
-
 
 	o.Type = &v
 
@@ -116,7 +109,6 @@ func (o *Group) GetHref() *string {
 		return nil
 	}
 
-
 	return o.Href
 
 }
@@ -129,13 +121,11 @@ func (o *Group) GetHrefOk() (*string, bool) {
 		return nil, false
 	}
 
-
 	return o.Href, true
 }
 
 // SetHref sets field value
 func (o *Group) SetHref(v string) {
-
 
 	o.Href = &v
 
@@ -157,7 +147,6 @@ func (o *Group) GetProperties() *GroupProperties {
 		return nil
 	}
 
-
 	return o.Properties
 
 }
@@ -170,13 +159,11 @@ func (o *Group) GetPropertiesOk() (*GroupProperties, bool) {
 		return nil, false
 	}
 
-
 	return o.Properties, true
 }
 
 // SetProperties sets field value
 func (o *Group) SetProperties(v GroupProperties) {
-
 
 	o.Properties = &v
 
@@ -198,7 +185,6 @@ func (o *Group) GetEntities() *GroupEntities {
 		return nil
 	}
 
-
 	return o.Entities
 
 }
@@ -211,13 +197,11 @@ func (o *Group) GetEntitiesOk() (*GroupEntities, bool) {
 		return nil, false
 	}
 
-
 	return o.Entities, true
 }
 
 // SetEntities sets field value
 func (o *Group) SetEntities(v GroupEntities) {
-
 
 	o.Entities = &v
 
@@ -256,6 +240,7 @@ func (o Group) MarshalJSON() ([]byte, error) {
 	}
 	return json.Marshal(toSerialize)
 }
+
 type NullableGroup struct {
 	value *Group
 	isSet bool
@@ -291,5 +276,3 @@ func (v *NullableGroup) UnmarshalJSON(src []byte) error {
 	v.isSet = true
 	return json.Unmarshal(src, &v.value)
 }
-
-

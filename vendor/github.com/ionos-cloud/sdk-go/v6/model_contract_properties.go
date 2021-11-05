@@ -23,10 +23,9 @@ type ContractProperties struct {
 	// status of the contract
 	Status *string `json:"status,omitempty"`
 	// Registration domain of the contract
-	RegDomain *string `json:"regDomain,omitempty"`
+	RegDomain      *string         `json:"regDomain,omitempty"`
 	ResourceLimits *ResourceLimits `json:"resourceLimits,omitempty"`
 }
-
 
 // GetContractNumber returns the ContractNumber field value
 // If the value is explicit nil, the zero value for int64 will be returned
@@ -34,7 +33,6 @@ func (o *ContractProperties) GetContractNumber() *int64 {
 	if o == nil {
 		return nil
 	}
-
 
 	return o.ContractNumber
 
@@ -48,13 +46,11 @@ func (o *ContractProperties) GetContractNumberOk() (*int64, bool) {
 		return nil, false
 	}
 
-
 	return o.ContractNumber, true
 }
 
 // SetContractNumber sets field value
 func (o *ContractProperties) SetContractNumber(v int64) {
-
 
 	o.ContractNumber = &v
 
@@ -76,7 +72,6 @@ func (o *ContractProperties) GetOwner() *string {
 		return nil
 	}
 
-
 	return o.Owner
 
 }
@@ -89,13 +84,11 @@ func (o *ContractProperties) GetOwnerOk() (*string, bool) {
 		return nil, false
 	}
 
-
 	return o.Owner, true
 }
 
 // SetOwner sets field value
 func (o *ContractProperties) SetOwner(v string) {
-
 
 	o.Owner = &v
 
@@ -117,7 +110,6 @@ func (o *ContractProperties) GetStatus() *string {
 		return nil
 	}
 
-
 	return o.Status
 
 }
@@ -130,13 +122,11 @@ func (o *ContractProperties) GetStatusOk() (*string, bool) {
 		return nil, false
 	}
 
-
 	return o.Status, true
 }
 
 // SetStatus sets field value
 func (o *ContractProperties) SetStatus(v string) {
-
 
 	o.Status = &v
 
@@ -158,7 +148,6 @@ func (o *ContractProperties) GetRegDomain() *string {
 		return nil
 	}
 
-
 	return o.RegDomain
 
 }
@@ -171,13 +160,11 @@ func (o *ContractProperties) GetRegDomainOk() (*string, bool) {
 		return nil, false
 	}
 
-
 	return o.RegDomain, true
 }
 
 // SetRegDomain sets field value
 func (o *ContractProperties) SetRegDomain(v string) {
-
 
 	o.RegDomain = &v
 
@@ -199,7 +186,6 @@ func (o *ContractProperties) GetResourceLimits() *ResourceLimits {
 		return nil
 	}
 
-
 	return o.ResourceLimits
 
 }
@@ -212,13 +198,11 @@ func (o *ContractProperties) GetResourceLimitsOk() (*ResourceLimits, bool) {
 		return nil, false
 	}
 
-
 	return o.ResourceLimits, true
 }
 
 // SetResourceLimits sets field value
 func (o *ContractProperties) SetResourceLimits(v ResourceLimits) {
-
 
 	o.ResourceLimits = &v
 
@@ -257,6 +241,7 @@ func (o ContractProperties) MarshalJSON() ([]byte, error) {
 	}
 	return json.Marshal(toSerialize)
 }
+
 type NullableContractProperties struct {
 	value *ContractProperties
 	isSet bool
@@ -292,5 +277,3 @@ func (v *NullableContractProperties) UnmarshalJSON(src []byte) error {
 	v.isSet = true
 	return json.Unmarshal(src, &v.value)
 }
-
-

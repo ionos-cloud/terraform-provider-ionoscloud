@@ -21,11 +21,10 @@ type LabelResource struct {
 	// The type of object that has been created
 	Type *string `json:"type,omitempty"`
 	// URL to the object representation (absolute path)
-	Href *string `json:"href,omitempty"`
-	Metadata *NoStateMetaData `json:"metadata,omitempty"`
+	Href       *string                  `json:"href,omitempty"`
+	Metadata   *NoStateMetaData         `json:"metadata,omitempty"`
 	Properties *LabelResourceProperties `json:"properties"`
 }
-
 
 // GetId returns the Id field value
 // If the value is explicit nil, the zero value for string will be returned
@@ -33,7 +32,6 @@ func (o *LabelResource) GetId() *string {
 	if o == nil {
 		return nil
 	}
-
 
 	return o.Id
 
@@ -47,13 +45,11 @@ func (o *LabelResource) GetIdOk() (*string, bool) {
 		return nil, false
 	}
 
-
 	return o.Id, true
 }
 
 // SetId sets field value
 func (o *LabelResource) SetId(v string) {
-
 
 	o.Id = &v
 
@@ -75,7 +71,6 @@ func (o *LabelResource) GetType() *string {
 		return nil
 	}
 
-
 	return o.Type
 
 }
@@ -88,13 +83,11 @@ func (o *LabelResource) GetTypeOk() (*string, bool) {
 		return nil, false
 	}
 
-
 	return o.Type, true
 }
 
 // SetType sets field value
 func (o *LabelResource) SetType(v string) {
-
 
 	o.Type = &v
 
@@ -116,7 +109,6 @@ func (o *LabelResource) GetHref() *string {
 		return nil
 	}
 
-
 	return o.Href
 
 }
@@ -129,13 +121,11 @@ func (o *LabelResource) GetHrefOk() (*string, bool) {
 		return nil, false
 	}
 
-
 	return o.Href, true
 }
 
 // SetHref sets field value
 func (o *LabelResource) SetHref(v string) {
-
 
 	o.Href = &v
 
@@ -157,7 +147,6 @@ func (o *LabelResource) GetMetadata() *NoStateMetaData {
 		return nil
 	}
 
-
 	return o.Metadata
 
 }
@@ -170,13 +159,11 @@ func (o *LabelResource) GetMetadataOk() (*NoStateMetaData, bool) {
 		return nil, false
 	}
 
-
 	return o.Metadata, true
 }
 
 // SetMetadata sets field value
 func (o *LabelResource) SetMetadata(v NoStateMetaData) {
-
 
 	o.Metadata = &v
 
@@ -198,7 +185,6 @@ func (o *LabelResource) GetProperties() *LabelResourceProperties {
 		return nil
 	}
 
-
 	return o.Properties
 
 }
@@ -211,13 +197,11 @@ func (o *LabelResource) GetPropertiesOk() (*LabelResourceProperties, bool) {
 		return nil, false
 	}
 
-
 	return o.Properties, true
 }
 
 // SetProperties sets field value
 func (o *LabelResource) SetProperties(v LabelResourceProperties) {
-
 
 	o.Properties = &v
 
@@ -256,6 +240,7 @@ func (o LabelResource) MarshalJSON() ([]byte, error) {
 	}
 	return json.Marshal(toSerialize)
 }
+
 type NullableLabelResource struct {
 	value *LabelResource
 	isSet bool
@@ -291,5 +276,3 @@ func (v *NullableLabelResource) UnmarshalJSON(src []byte) error {
 	v.isSet = true
 	return json.Unmarshal(src, &v.value)
 }
-
-

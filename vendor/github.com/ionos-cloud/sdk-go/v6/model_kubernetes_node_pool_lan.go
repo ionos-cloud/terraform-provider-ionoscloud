@@ -24,14 +24,12 @@ type KubernetesNodePoolLan struct {
 	Routes *[]KubernetesNodePoolLanRoutes `json:"routes,omitempty"`
 }
 
-
 // GetId returns the Id field value
 // If the value is explicit nil, the zero value for int32 will be returned
 func (o *KubernetesNodePoolLan) GetId() *int32 {
 	if o == nil {
 		return nil
 	}
-
 
 	return o.Id
 
@@ -45,13 +43,11 @@ func (o *KubernetesNodePoolLan) GetIdOk() (*int32, bool) {
 		return nil, false
 	}
 
-
 	return o.Id, true
 }
 
 // SetId sets field value
 func (o *KubernetesNodePoolLan) SetId(v int32) {
-
 
 	o.Id = &v
 
@@ -73,7 +69,6 @@ func (o *KubernetesNodePoolLan) GetDhcp() *bool {
 		return nil
 	}
 
-
 	return o.Dhcp
 
 }
@@ -86,13 +81,11 @@ func (o *KubernetesNodePoolLan) GetDhcpOk() (*bool, bool) {
 		return nil, false
 	}
 
-
 	return o.Dhcp, true
 }
 
 // SetDhcp sets field value
 func (o *KubernetesNodePoolLan) SetDhcp(v bool) {
-
 
 	o.Dhcp = &v
 
@@ -114,7 +107,6 @@ func (o *KubernetesNodePoolLan) GetRoutes() *[]KubernetesNodePoolLanRoutes {
 		return nil
 	}
 
-
 	return o.Routes
 
 }
@@ -127,13 +119,11 @@ func (o *KubernetesNodePoolLan) GetRoutesOk() (*[]KubernetesNodePoolLanRoutes, b
 		return nil, false
 	}
 
-
 	return o.Routes, true
 }
 
 // SetRoutes sets field value
 func (o *KubernetesNodePoolLan) SetRoutes(v []KubernetesNodePoolLanRoutes) {
-
 
 	o.Routes = &v
 
@@ -164,6 +154,7 @@ func (o KubernetesNodePoolLan) MarshalJSON() ([]byte, error) {
 	}
 	return json.Marshal(toSerialize)
 }
+
 type NullableKubernetesNodePoolLan struct {
 	value *KubernetesNodePoolLan
 	isSet bool
@@ -199,5 +190,3 @@ func (v *NullableKubernetesNodePoolLan) UnmarshalJSON(src []byte) error {
 	v.isSet = true
 	return json.Unmarshal(src, &v.value)
 }
-
-

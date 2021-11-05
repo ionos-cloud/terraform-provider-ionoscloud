@@ -24,14 +24,12 @@ type NatGatewayProperties struct {
 	Lans *[]NatGatewayLanProperties `json:"lans,omitempty"`
 }
 
-
 // GetName returns the Name field value
 // If the value is explicit nil, the zero value for string will be returned
 func (o *NatGatewayProperties) GetName() *string {
 	if o == nil {
 		return nil
 	}
-
 
 	return o.Name
 
@@ -45,13 +43,11 @@ func (o *NatGatewayProperties) GetNameOk() (*string, bool) {
 		return nil, false
 	}
 
-
 	return o.Name, true
 }
 
 // SetName sets field value
 func (o *NatGatewayProperties) SetName(v string) {
-
 
 	o.Name = &v
 
@@ -73,7 +69,6 @@ func (o *NatGatewayProperties) GetPublicIps() *[]string {
 		return nil
 	}
 
-
 	return o.PublicIps
 
 }
@@ -86,13 +81,11 @@ func (o *NatGatewayProperties) GetPublicIpsOk() (*[]string, bool) {
 		return nil, false
 	}
 
-
 	return o.PublicIps, true
 }
 
 // SetPublicIps sets field value
 func (o *NatGatewayProperties) SetPublicIps(v []string) {
-
 
 	o.PublicIps = &v
 
@@ -114,7 +107,6 @@ func (o *NatGatewayProperties) GetLans() *[]NatGatewayLanProperties {
 		return nil
 	}
 
-
 	return o.Lans
 
 }
@@ -127,13 +119,11 @@ func (o *NatGatewayProperties) GetLansOk() (*[]NatGatewayLanProperties, bool) {
 		return nil, false
 	}
 
-
 	return o.Lans, true
 }
 
 // SetLans sets field value
 func (o *NatGatewayProperties) SetLans(v []NatGatewayLanProperties) {
-
 
 	o.Lans = &v
 
@@ -164,6 +154,7 @@ func (o NatGatewayProperties) MarshalJSON() ([]byte, error) {
 	}
 	return json.Marshal(toSerialize)
 }
+
 type NullableNatGatewayProperties struct {
 	value *NatGatewayProperties
 	isSet bool
@@ -199,5 +190,3 @@ func (v *NullableNatGatewayProperties) UnmarshalJSON(src []byte) error {
 	v.isSet = true
 	return json.Unmarshal(src, &v.value)
 }
-
-

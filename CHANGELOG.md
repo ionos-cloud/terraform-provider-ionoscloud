@@ -2,6 +2,7 @@
 
 - **code enhancements**: added http request time log for api calls
 - **new features**: import for `nic`, data_source for `nic`
+- **dependency update**: updated sdk-go to v6.0.0-beta.8
 
 ## 6.0.0-beta.14
 

@@ -16,11 +16,10 @@ import (
 
 // ConnectableDatacenter struct for ConnectableDatacenter
 type ConnectableDatacenter struct {
-	Id *string `json:"id,omitempty"`
-	Name *string `json:"name,omitempty"`
+	Id       *string `json:"id,omitempty"`
+	Name     *string `json:"name,omitempty"`
 	Location *string `json:"location,omitempty"`
 }
-
 
 // GetId returns the Id field value
 // If the value is explicit nil, the zero value for string will be returned
@@ -28,7 +27,6 @@ func (o *ConnectableDatacenter) GetId() *string {
 	if o == nil {
 		return nil
 	}
-
 
 	return o.Id
 
@@ -42,13 +40,11 @@ func (o *ConnectableDatacenter) GetIdOk() (*string, bool) {
 		return nil, false
 	}
 
-
 	return o.Id, true
 }
 
 // SetId sets field value
 func (o *ConnectableDatacenter) SetId(v string) {
-
 
 	o.Id = &v
 
@@ -70,7 +66,6 @@ func (o *ConnectableDatacenter) GetName() *string {
 		return nil
 	}
 
-
 	return o.Name
 
 }
@@ -83,13 +78,11 @@ func (o *ConnectableDatacenter) GetNameOk() (*string, bool) {
 		return nil, false
 	}
 
-
 	return o.Name, true
 }
 
 // SetName sets field value
 func (o *ConnectableDatacenter) SetName(v string) {
-
 
 	o.Name = &v
 
@@ -111,7 +104,6 @@ func (o *ConnectableDatacenter) GetLocation() *string {
 		return nil
 	}
 
-
 	return o.Location
 
 }
@@ -124,13 +116,11 @@ func (o *ConnectableDatacenter) GetLocationOk() (*string, bool) {
 		return nil, false
 	}
 
-
 	return o.Location, true
 }
 
 // SetLocation sets field value
 func (o *ConnectableDatacenter) SetLocation(v string) {
-
 
 	o.Location = &v
 
@@ -161,6 +151,7 @@ func (o ConnectableDatacenter) MarshalJSON() ([]byte, error) {
 	}
 	return json.Marshal(toSerialize)
 }
+
 type NullableConnectableDatacenter struct {
 	value *ConnectableDatacenter
 	isSet bool
@@ -196,5 +187,3 @@ func (v *NullableConnectableDatacenter) UnmarshalJSON(src []byte) error {
 	v.isSet = true
 	return json.Unmarshal(src, &v.value)
 }
-
-

@@ -21,11 +21,10 @@ type NetworkLoadBalancerForwardingRule struct {
 	// The type of object that has been created
 	Type *Type `json:"type,omitempty"`
 	// URL to the object representation (absolute path)
-	Href *string `json:"href,omitempty"`
-	Metadata *DatacenterElementMetadata `json:"metadata,omitempty"`
+	Href       *string                                      `json:"href,omitempty"`
+	Metadata   *DatacenterElementMetadata                   `json:"metadata,omitempty"`
 	Properties *NetworkLoadBalancerForwardingRuleProperties `json:"properties"`
 }
-
 
 // GetId returns the Id field value
 // If the value is explicit nil, the zero value for string will be returned
@@ -33,7 +32,6 @@ func (o *NetworkLoadBalancerForwardingRule) GetId() *string {
 	if o == nil {
 		return nil
 	}
-
 
 	return o.Id
 
@@ -47,13 +45,11 @@ func (o *NetworkLoadBalancerForwardingRule) GetIdOk() (*string, bool) {
 		return nil, false
 	}
 
-
 	return o.Id, true
 }
 
 // SetId sets field value
 func (o *NetworkLoadBalancerForwardingRule) SetId(v string) {
-
 
 	o.Id = &v
 
@@ -75,7 +71,6 @@ func (o *NetworkLoadBalancerForwardingRule) GetType() *Type {
 		return nil
 	}
 
-
 	return o.Type
 
 }
@@ -88,13 +83,11 @@ func (o *NetworkLoadBalancerForwardingRule) GetTypeOk() (*Type, bool) {
 		return nil, false
 	}
 
-
 	return o.Type, true
 }
 
 // SetType sets field value
 func (o *NetworkLoadBalancerForwardingRule) SetType(v Type) {
-
 
 	o.Type = &v
 
@@ -116,7 +109,6 @@ func (o *NetworkLoadBalancerForwardingRule) GetHref() *string {
 		return nil
 	}
 
-
 	return o.Href
 
 }
@@ -129,13 +121,11 @@ func (o *NetworkLoadBalancerForwardingRule) GetHrefOk() (*string, bool) {
 		return nil, false
 	}
 
-
 	return o.Href, true
 }
 
 // SetHref sets field value
 func (o *NetworkLoadBalancerForwardingRule) SetHref(v string) {
-
 
 	o.Href = &v
 
@@ -157,7 +147,6 @@ func (o *NetworkLoadBalancerForwardingRule) GetMetadata() *DatacenterElementMeta
 		return nil
 	}
 
-
 	return o.Metadata
 
 }
@@ -170,13 +159,11 @@ func (o *NetworkLoadBalancerForwardingRule) GetMetadataOk() (*DatacenterElementM
 		return nil, false
 	}
 
-
 	return o.Metadata, true
 }
 
 // SetMetadata sets field value
 func (o *NetworkLoadBalancerForwardingRule) SetMetadata(v DatacenterElementMetadata) {
-
 
 	o.Metadata = &v
 
@@ -198,7 +185,6 @@ func (o *NetworkLoadBalancerForwardingRule) GetProperties() *NetworkLoadBalancer
 		return nil
 	}
 
-
 	return o.Properties
 
 }
@@ -211,13 +197,11 @@ func (o *NetworkLoadBalancerForwardingRule) GetPropertiesOk() (*NetworkLoadBalan
 		return nil, false
 	}
 
-
 	return o.Properties, true
 }
 
 // SetProperties sets field value
 func (o *NetworkLoadBalancerForwardingRule) SetProperties(v NetworkLoadBalancerForwardingRuleProperties) {
-
 
 	o.Properties = &v
 
@@ -256,6 +240,7 @@ func (o NetworkLoadBalancerForwardingRule) MarshalJSON() ([]byte, error) {
 	}
 	return json.Marshal(toSerialize)
 }
+
 type NullableNetworkLoadBalancerForwardingRule struct {
 	value *NetworkLoadBalancerForwardingRule
 	isSet bool
@@ -291,5 +276,3 @@ func (v *NullableNetworkLoadBalancerForwardingRule) UnmarshalJSON(src []byte) er
 	v.isSet = true
 	return json.Unmarshal(src, &v.value)
 }
-
-

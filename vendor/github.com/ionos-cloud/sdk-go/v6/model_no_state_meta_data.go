@@ -17,7 +17,7 @@ import (
 
 // NoStateMetaData struct for NoStateMetaData
 type NoStateMetaData struct {
-	// Resource's Entity Tag as defined in http://www.w3.org/Protocols/rfc2616/rfc2616-sec3.html#sec3.11 . Entity Tag is also added as an 'ETag response header to requests which don't use 'depth' parameter. 
+	// Resource's Entity Tag as defined in http://www.w3.org/Protocols/rfc2616/rfc2616-sec3.html#sec3.11 . Entity Tag is also added as an 'ETag response header to requests which don't use 'depth' parameter.
 	Etag *string `json:"etag,omitempty"`
 	// The time the Resource was created
 	CreatedDate *IonosTime
@@ -33,14 +33,12 @@ type NoStateMetaData struct {
 	LastModifiedByUserId *string `json:"lastModifiedByUserId,omitempty"`
 }
 
-
 // GetEtag returns the Etag field value
 // If the value is explicit nil, the zero value for string will be returned
 func (o *NoStateMetaData) GetEtag() *string {
 	if o == nil {
 		return nil
 	}
-
 
 	return o.Etag
 
@@ -54,13 +52,11 @@ func (o *NoStateMetaData) GetEtagOk() (*string, bool) {
 		return nil, false
 	}
 
-
 	return o.Etag, true
 }
 
 // SetEtag sets field value
 func (o *NoStateMetaData) SetEtag(v string) {
-
 
 	o.Etag = &v
 
@@ -87,7 +83,6 @@ func (o *NoStateMetaData) GetCreatedDate() *time.Time {
 	}
 	return &o.CreatedDate.Time
 
-
 }
 
 // GetCreatedDateOk returns a tuple with the CreatedDate field value
@@ -110,7 +105,6 @@ func (o *NoStateMetaData) SetCreatedDate(v time.Time) {
 
 	o.CreatedDate = &IonosTime{v}
 
-
 }
 
 // HasCreatedDate returns a boolean if a field has been set.
@@ -129,7 +123,6 @@ func (o *NoStateMetaData) GetCreatedBy() *string {
 		return nil
 	}
 
-
 	return o.CreatedBy
 
 }
@@ -142,13 +135,11 @@ func (o *NoStateMetaData) GetCreatedByOk() (*string, bool) {
 		return nil, false
 	}
 
-
 	return o.CreatedBy, true
 }
 
 // SetCreatedBy sets field value
 func (o *NoStateMetaData) SetCreatedBy(v string) {
-
 
 	o.CreatedBy = &v
 
@@ -170,7 +161,6 @@ func (o *NoStateMetaData) GetCreatedByUserId() *string {
 		return nil
 	}
 
-
 	return o.CreatedByUserId
 
 }
@@ -183,13 +173,11 @@ func (o *NoStateMetaData) GetCreatedByUserIdOk() (*string, bool) {
 		return nil, false
 	}
 
-
 	return o.CreatedByUserId, true
 }
 
 // SetCreatedByUserId sets field value
 func (o *NoStateMetaData) SetCreatedByUserId(v string) {
-
 
 	o.CreatedByUserId = &v
 
@@ -216,7 +204,6 @@ func (o *NoStateMetaData) GetLastModifiedDate() *time.Time {
 	}
 	return &o.LastModifiedDate.Time
 
-
 }
 
 // GetLastModifiedDateOk returns a tuple with the LastModifiedDate field value
@@ -239,7 +226,6 @@ func (o *NoStateMetaData) SetLastModifiedDate(v time.Time) {
 
 	o.LastModifiedDate = &IonosTime{v}
 
-
 }
 
 // HasLastModifiedDate returns a boolean if a field has been set.
@@ -258,7 +244,6 @@ func (o *NoStateMetaData) GetLastModifiedBy() *string {
 		return nil
 	}
 
-
 	return o.LastModifiedBy
 
 }
@@ -271,13 +256,11 @@ func (o *NoStateMetaData) GetLastModifiedByOk() (*string, bool) {
 		return nil, false
 	}
 
-
 	return o.LastModifiedBy, true
 }
 
 // SetLastModifiedBy sets field value
 func (o *NoStateMetaData) SetLastModifiedBy(v string) {
-
 
 	o.LastModifiedBy = &v
 
@@ -299,7 +282,6 @@ func (o *NoStateMetaData) GetLastModifiedByUserId() *string {
 		return nil
 	}
 
-
 	return o.LastModifiedByUserId
 
 }
@@ -312,13 +294,11 @@ func (o *NoStateMetaData) GetLastModifiedByUserIdOk() (*string, bool) {
 		return nil, false
 	}
 
-
 	return o.LastModifiedByUserId, true
 }
 
 // SetLastModifiedByUserId sets field value
 func (o *NoStateMetaData) SetLastModifiedByUserId(v string) {
-
 
 	o.LastModifiedByUserId = &v
 
@@ -365,6 +345,7 @@ func (o NoStateMetaData) MarshalJSON() ([]byte, error) {
 	}
 	return json.Marshal(toSerialize)
 }
+
 type NullableNoStateMetaData struct {
 	value *NoStateMetaData
 	isSet bool
@@ -400,5 +381,3 @@ func (v *NullableNoStateMetaData) UnmarshalJSON(src []byte) error {
 	v.isSet = true
 	return json.Unmarshal(src, &v.value)
 }
-
-

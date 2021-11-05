@@ -16,10 +16,9 @@ import (
 
 // NetworkLoadBalancerEntities struct for NetworkLoadBalancerEntities
 type NetworkLoadBalancerEntities struct {
-	Flowlogs *FlowLogs `json:"flowlogs,omitempty"`
+	Flowlogs        *FlowLogs                           `json:"flowlogs,omitempty"`
 	Forwardingrules *NetworkLoadBalancerForwardingRules `json:"forwardingrules,omitempty"`
 }
-
 
 // GetFlowlogs returns the Flowlogs field value
 // If the value is explicit nil, the zero value for FlowLogs will be returned
@@ -27,7 +26,6 @@ func (o *NetworkLoadBalancerEntities) GetFlowlogs() *FlowLogs {
 	if o == nil {
 		return nil
 	}
-
 
 	return o.Flowlogs
 
@@ -41,13 +39,11 @@ func (o *NetworkLoadBalancerEntities) GetFlowlogsOk() (*FlowLogs, bool) {
 		return nil, false
 	}
 
-
 	return o.Flowlogs, true
 }
 
 // SetFlowlogs sets field value
 func (o *NetworkLoadBalancerEntities) SetFlowlogs(v FlowLogs) {
-
 
 	o.Flowlogs = &v
 
@@ -69,7 +65,6 @@ func (o *NetworkLoadBalancerEntities) GetForwardingrules() *NetworkLoadBalancerF
 		return nil
 	}
 
-
 	return o.Forwardingrules
 
 }
@@ -82,13 +77,11 @@ func (o *NetworkLoadBalancerEntities) GetForwardingrulesOk() (*NetworkLoadBalanc
 		return nil, false
 	}
 
-
 	return o.Forwardingrules, true
 }
 
 // SetForwardingrules sets field value
 func (o *NetworkLoadBalancerEntities) SetForwardingrules(v NetworkLoadBalancerForwardingRules) {
-
 
 	o.Forwardingrules = &v
 
@@ -115,6 +108,7 @@ func (o NetworkLoadBalancerEntities) MarshalJSON() ([]byte, error) {
 	}
 	return json.Marshal(toSerialize)
 }
+
 type NullableNetworkLoadBalancerEntities struct {
 	value *NetworkLoadBalancerEntities
 	isSet bool
@@ -150,5 +144,3 @@ func (v *NullableNetworkLoadBalancerEntities) UnmarshalJSON(src []byte) error {
 	v.isSet = true
 	return json.Unmarshal(src, &v.value)
 }
-
-

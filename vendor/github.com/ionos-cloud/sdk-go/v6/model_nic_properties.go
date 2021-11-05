@@ -36,14 +36,12 @@ type NicProperties struct {
 	PciSlot *int32 `json:"pciSlot,omitempty"`
 }
 
-
 // GetName returns the Name field value
 // If the value is explicit nil, the zero value for string will be returned
 func (o *NicProperties) GetName() *string {
 	if o == nil {
 		return nil
 	}
-
 
 	return o.Name
 
@@ -57,13 +55,11 @@ func (o *NicProperties) GetNameOk() (*string, bool) {
 		return nil, false
 	}
 
-
 	return o.Name, true
 }
 
 // SetName sets field value
 func (o *NicProperties) SetName(v string) {
-
 
 	o.Name = &v
 
@@ -85,7 +81,6 @@ func (o *NicProperties) GetMac() *string {
 		return nil
 	}
 
-
 	return o.Mac
 
 }
@@ -98,13 +93,11 @@ func (o *NicProperties) GetMacOk() (*string, bool) {
 		return nil, false
 	}
 
-
 	return o.Mac, true
 }
 
 // SetMac sets field value
 func (o *NicProperties) SetMac(v string) {
-
 
 	o.Mac = &v
 
@@ -126,7 +119,6 @@ func (o *NicProperties) GetIps() *[]string {
 		return nil
 	}
 
-
 	return o.Ips
 
 }
@@ -139,13 +131,11 @@ func (o *NicProperties) GetIpsOk() (*[]string, bool) {
 		return nil, false
 	}
 
-
 	return o.Ips, true
 }
 
 // SetIps sets field value
 func (o *NicProperties) SetIps(v []string) {
-
 
 	o.Ips = &v
 
@@ -167,7 +157,6 @@ func (o *NicProperties) GetDhcp() *bool {
 		return nil
 	}
 
-
 	return o.Dhcp
 
 }
@@ -180,13 +169,11 @@ func (o *NicProperties) GetDhcpOk() (*bool, bool) {
 		return nil, false
 	}
 
-
 	return o.Dhcp, true
 }
 
 // SetDhcp sets field value
 func (o *NicProperties) SetDhcp(v bool) {
-
 
 	o.Dhcp = &v
 
@@ -208,7 +195,6 @@ func (o *NicProperties) GetLan() *int32 {
 		return nil
 	}
 
-
 	return o.Lan
 
 }
@@ -221,13 +207,11 @@ func (o *NicProperties) GetLanOk() (*int32, bool) {
 		return nil, false
 	}
 
-
 	return o.Lan, true
 }
 
 // SetLan sets field value
 func (o *NicProperties) SetLan(v int32) {
-
 
 	o.Lan = &v
 
@@ -249,7 +233,6 @@ func (o *NicProperties) GetFirewallActive() *bool {
 		return nil
 	}
 
-
 	return o.FirewallActive
 
 }
@@ -262,13 +245,11 @@ func (o *NicProperties) GetFirewallActiveOk() (*bool, bool) {
 		return nil, false
 	}
 
-
 	return o.FirewallActive, true
 }
 
 // SetFirewallActive sets field value
 func (o *NicProperties) SetFirewallActive(v bool) {
-
 
 	o.FirewallActive = &v
 
@@ -290,7 +271,6 @@ func (o *NicProperties) GetFirewallType() *string {
 		return nil
 	}
 
-
 	return o.FirewallType
 
 }
@@ -303,13 +283,11 @@ func (o *NicProperties) GetFirewallTypeOk() (*string, bool) {
 		return nil, false
 	}
 
-
 	return o.FirewallType, true
 }
 
 // SetFirewallType sets field value
 func (o *NicProperties) SetFirewallType(v string) {
-
 
 	o.FirewallType = &v
 
@@ -331,7 +309,6 @@ func (o *NicProperties) GetDeviceNumber() *int32 {
 		return nil
 	}
 
-
 	return o.DeviceNumber
 
 }
@@ -344,13 +321,11 @@ func (o *NicProperties) GetDeviceNumberOk() (*int32, bool) {
 		return nil, false
 	}
 
-
 	return o.DeviceNumber, true
 }
 
 // SetDeviceNumber sets field value
 func (o *NicProperties) SetDeviceNumber(v int32) {
-
 
 	o.DeviceNumber = &v
 
@@ -372,7 +347,6 @@ func (o *NicProperties) GetPciSlot() *int32 {
 		return nil
 	}
 
-
 	return o.PciSlot
 
 }
@@ -385,13 +359,11 @@ func (o *NicProperties) GetPciSlotOk() (*int32, bool) {
 		return nil, false
 	}
 
-
 	return o.PciSlot, true
 }
 
 // SetPciSlot sets field value
 func (o *NicProperties) SetPciSlot(v int32) {
-
 
 	o.PciSlot = &v
 
@@ -446,6 +418,7 @@ func (o NicProperties) MarshalJSON() ([]byte, error) {
 	}
 	return json.Marshal(toSerialize)
 }
+
 type NullableNicProperties struct {
 	value *NicProperties
 	isSet bool
@@ -481,5 +454,3 @@ func (v *NullableNicProperties) UnmarshalJSON(src []byte) error {
 	v.isSet = true
 	return json.Unmarshal(src, &v.value)
 }
-
-

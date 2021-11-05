@@ -26,14 +26,12 @@ type KubernetesClusters struct {
 	Items *[]KubernetesCluster `json:"items,omitempty"`
 }
 
-
 // GetId returns the Id field value
 // If the value is explicit nil, the zero value for string will be returned
 func (o *KubernetesClusters) GetId() *string {
 	if o == nil {
 		return nil
 	}
-
 
 	return o.Id
 
@@ -47,13 +45,11 @@ func (o *KubernetesClusters) GetIdOk() (*string, bool) {
 		return nil, false
 	}
 
-
 	return o.Id, true
 }
 
 // SetId sets field value
 func (o *KubernetesClusters) SetId(v string) {
-
 
 	o.Id = &v
 
@@ -75,7 +71,6 @@ func (o *KubernetesClusters) GetType() *string {
 		return nil
 	}
 
-
 	return o.Type
 
 }
@@ -88,13 +83,11 @@ func (o *KubernetesClusters) GetTypeOk() (*string, bool) {
 		return nil, false
 	}
 
-
 	return o.Type, true
 }
 
 // SetType sets field value
 func (o *KubernetesClusters) SetType(v string) {
-
 
 	o.Type = &v
 
@@ -116,7 +109,6 @@ func (o *KubernetesClusters) GetHref() *string {
 		return nil
 	}
 
-
 	return o.Href
 
 }
@@ -129,13 +121,11 @@ func (o *KubernetesClusters) GetHrefOk() (*string, bool) {
 		return nil, false
 	}
 
-
 	return o.Href, true
 }
 
 // SetHref sets field value
 func (o *KubernetesClusters) SetHref(v string) {
-
 
 	o.Href = &v
 
@@ -157,7 +147,6 @@ func (o *KubernetesClusters) GetItems() *[]KubernetesCluster {
 		return nil
 	}
 
-
 	return o.Items
 
 }
@@ -170,13 +159,11 @@ func (o *KubernetesClusters) GetItemsOk() (*[]KubernetesCluster, bool) {
 		return nil, false
 	}
 
-
 	return o.Items, true
 }
 
 // SetItems sets field value
 func (o *KubernetesClusters) SetItems(v []KubernetesCluster) {
-
 
 	o.Items = &v
 
@@ -211,6 +198,7 @@ func (o KubernetesClusters) MarshalJSON() ([]byte, error) {
 	}
 	return json.Marshal(toSerialize)
 }
+
 type NullableKubernetesClusters struct {
 	value *KubernetesClusters
 	isSet bool
@@ -246,5 +234,3 @@ func (v *NullableKubernetesClusters) UnmarshalJSON(src []byte) error {
 	v.isSet = true
 	return json.Unmarshal(src, &v.value)
 }
-
-

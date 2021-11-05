@@ -27,10 +27,9 @@ type NetworkLoadBalancers struct {
 	// the offset (if specified in the request)
 	Offset *float32 `json:"offset,omitempty"`
 	// the limit (if specified in the request)
-	Limit *float32 `json:"limit,omitempty"`
+	Limit *float32         `json:"limit,omitempty"`
 	Links *PaginationLinks `json:"_links,omitempty"`
 }
-
 
 // GetId returns the Id field value
 // If the value is explicit nil, the zero value for string will be returned
@@ -38,7 +37,6 @@ func (o *NetworkLoadBalancers) GetId() *string {
 	if o == nil {
 		return nil
 	}
-
 
 	return o.Id
 
@@ -52,13 +50,11 @@ func (o *NetworkLoadBalancers) GetIdOk() (*string, bool) {
 		return nil, false
 	}
 
-
 	return o.Id, true
 }
 
 // SetId sets field value
 func (o *NetworkLoadBalancers) SetId(v string) {
-
 
 	o.Id = &v
 
@@ -80,7 +76,6 @@ func (o *NetworkLoadBalancers) GetType() *Type {
 		return nil
 	}
 
-
 	return o.Type
 
 }
@@ -93,13 +88,11 @@ func (o *NetworkLoadBalancers) GetTypeOk() (*Type, bool) {
 		return nil, false
 	}
 
-
 	return o.Type, true
 }
 
 // SetType sets field value
 func (o *NetworkLoadBalancers) SetType(v Type) {
-
 
 	o.Type = &v
 
@@ -121,7 +114,6 @@ func (o *NetworkLoadBalancers) GetHref() *string {
 		return nil
 	}
 
-
 	return o.Href
 
 }
@@ -134,13 +126,11 @@ func (o *NetworkLoadBalancers) GetHrefOk() (*string, bool) {
 		return nil, false
 	}
 
-
 	return o.Href, true
 }
 
 // SetHref sets field value
 func (o *NetworkLoadBalancers) SetHref(v string) {
-
 
 	o.Href = &v
 
@@ -162,7 +152,6 @@ func (o *NetworkLoadBalancers) GetItems() *[]NetworkLoadBalancer {
 		return nil
 	}
 
-
 	return o.Items
 
 }
@@ -175,13 +164,11 @@ func (o *NetworkLoadBalancers) GetItemsOk() (*[]NetworkLoadBalancer, bool) {
 		return nil, false
 	}
 
-
 	return o.Items, true
 }
 
 // SetItems sets field value
 func (o *NetworkLoadBalancers) SetItems(v []NetworkLoadBalancer) {
-
 
 	o.Items = &v
 
@@ -203,7 +190,6 @@ func (o *NetworkLoadBalancers) GetOffset() *float32 {
 		return nil
 	}
 
-
 	return o.Offset
 
 }
@@ -216,13 +202,11 @@ func (o *NetworkLoadBalancers) GetOffsetOk() (*float32, bool) {
 		return nil, false
 	}
 
-
 	return o.Offset, true
 }
 
 // SetOffset sets field value
 func (o *NetworkLoadBalancers) SetOffset(v float32) {
-
 
 	o.Offset = &v
 
@@ -244,7 +228,6 @@ func (o *NetworkLoadBalancers) GetLimit() *float32 {
 		return nil
 	}
 
-
 	return o.Limit
 
 }
@@ -257,13 +240,11 @@ func (o *NetworkLoadBalancers) GetLimitOk() (*float32, bool) {
 		return nil, false
 	}
 
-
 	return o.Limit, true
 }
 
 // SetLimit sets field value
 func (o *NetworkLoadBalancers) SetLimit(v float32) {
-
 
 	o.Limit = &v
 
@@ -285,7 +266,6 @@ func (o *NetworkLoadBalancers) GetLinks() *PaginationLinks {
 		return nil
 	}
 
-
 	return o.Links
 
 }
@@ -298,13 +278,11 @@ func (o *NetworkLoadBalancers) GetLinksOk() (*PaginationLinks, bool) {
 		return nil, false
 	}
 
-
 	return o.Links, true
 }
 
 // SetLinks sets field value
 func (o *NetworkLoadBalancers) SetLinks(v PaginationLinks) {
-
 
 	o.Links = &v
 
@@ -351,6 +329,7 @@ func (o NetworkLoadBalancers) MarshalJSON() ([]byte, error) {
 	}
 	return json.Marshal(toSerialize)
 }
+
 type NullableNetworkLoadBalancers struct {
 	value *NetworkLoadBalancers
 	isSet bool
@@ -386,5 +365,3 @@ func (v *NullableNetworkLoadBalancers) UnmarshalJSON(src []byte) error {
 	v.isSet = true
 	return json.Unmarshal(src, &v.value)
 }
-
-

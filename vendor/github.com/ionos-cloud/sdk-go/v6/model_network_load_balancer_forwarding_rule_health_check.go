@@ -26,14 +26,12 @@ type NetworkLoadBalancerForwardingRuleHealthCheck struct {
 	Retries *int32 `json:"retries,omitempty"`
 }
 
-
 // GetClientTimeout returns the ClientTimeout field value
 // If the value is explicit nil, the zero value for int32 will be returned
 func (o *NetworkLoadBalancerForwardingRuleHealthCheck) GetClientTimeout() *int32 {
 	if o == nil {
 		return nil
 	}
-
 
 	return o.ClientTimeout
 
@@ -47,13 +45,11 @@ func (o *NetworkLoadBalancerForwardingRuleHealthCheck) GetClientTimeoutOk() (*in
 		return nil, false
 	}
 
-
 	return o.ClientTimeout, true
 }
 
 // SetClientTimeout sets field value
 func (o *NetworkLoadBalancerForwardingRuleHealthCheck) SetClientTimeout(v int32) {
-
 
 	o.ClientTimeout = &v
 
@@ -75,7 +71,6 @@ func (o *NetworkLoadBalancerForwardingRuleHealthCheck) GetConnectTimeout() *int3
 		return nil
 	}
 
-
 	return o.ConnectTimeout
 
 }
@@ -88,13 +83,11 @@ func (o *NetworkLoadBalancerForwardingRuleHealthCheck) GetConnectTimeoutOk() (*i
 		return nil, false
 	}
 
-
 	return o.ConnectTimeout, true
 }
 
 // SetConnectTimeout sets field value
 func (o *NetworkLoadBalancerForwardingRuleHealthCheck) SetConnectTimeout(v int32) {
-
 
 	o.ConnectTimeout = &v
 
@@ -116,7 +109,6 @@ func (o *NetworkLoadBalancerForwardingRuleHealthCheck) GetTargetTimeout() *int32
 		return nil
 	}
 
-
 	return o.TargetTimeout
 
 }
@@ -129,13 +121,11 @@ func (o *NetworkLoadBalancerForwardingRuleHealthCheck) GetTargetTimeoutOk() (*in
 		return nil, false
 	}
 
-
 	return o.TargetTimeout, true
 }
 
 // SetTargetTimeout sets field value
 func (o *NetworkLoadBalancerForwardingRuleHealthCheck) SetTargetTimeout(v int32) {
-
 
 	o.TargetTimeout = &v
 
@@ -157,7 +147,6 @@ func (o *NetworkLoadBalancerForwardingRuleHealthCheck) GetRetries() *int32 {
 		return nil
 	}
 
-
 	return o.Retries
 
 }
@@ -170,13 +159,11 @@ func (o *NetworkLoadBalancerForwardingRuleHealthCheck) GetRetriesOk() (*int32, b
 		return nil, false
 	}
 
-
 	return o.Retries, true
 }
 
 // SetRetries sets field value
 func (o *NetworkLoadBalancerForwardingRuleHealthCheck) SetRetries(v int32) {
-
 
 	o.Retries = &v
 
@@ -211,6 +198,7 @@ func (o NetworkLoadBalancerForwardingRuleHealthCheck) MarshalJSON() ([]byte, err
 	}
 	return json.Marshal(toSerialize)
 }
+
 type NullableNetworkLoadBalancerForwardingRuleHealthCheck struct {
 	value *NetworkLoadBalancerForwardingRuleHealthCheck
 	isSet bool
@@ -246,5 +234,3 @@ func (v *NullableNetworkLoadBalancerForwardingRuleHealthCheck) UnmarshalJSON(src
 	v.isSet = true
 	return json.Unmarshal(src, &v.value)
 }
-
-

@@ -16,14 +16,13 @@ import (
 
 // DataCenterEntities struct for DataCenterEntities
 type DataCenterEntities struct {
-	Servers *Servers `json:"servers,omitempty"`
-	Volumes *Volumes `json:"volumes,omitempty"`
-	Loadbalancers *Loadbalancers `json:"loadbalancers,omitempty"`
-	Lans *Lans `json:"lans,omitempty"`
+	Servers              *Servers              `json:"servers,omitempty"`
+	Volumes              *Volumes              `json:"volumes,omitempty"`
+	Loadbalancers        *Loadbalancers        `json:"loadbalancers,omitempty"`
+	Lans                 *Lans                 `json:"lans,omitempty"`
 	Networkloadbalancers *NetworkLoadBalancers `json:"networkloadbalancers,omitempty"`
-	Natgateways *NatGateways `json:"natgateways,omitempty"`
+	Natgateways          *NatGateways          `json:"natgateways,omitempty"`
 }
-
 
 // GetServers returns the Servers field value
 // If the value is explicit nil, the zero value for Servers will be returned
@@ -31,7 +30,6 @@ func (o *DataCenterEntities) GetServers() *Servers {
 	if o == nil {
 		return nil
 	}
-
 
 	return o.Servers
 
@@ -45,13 +43,11 @@ func (o *DataCenterEntities) GetServersOk() (*Servers, bool) {
 		return nil, false
 	}
 
-
 	return o.Servers, true
 }
 
 // SetServers sets field value
 func (o *DataCenterEntities) SetServers(v Servers) {
-
 
 	o.Servers = &v
 
@@ -73,7 +69,6 @@ func (o *DataCenterEntities) GetVolumes() *Volumes {
 		return nil
 	}
 
-
 	return o.Volumes
 
 }
@@ -86,13 +81,11 @@ func (o *DataCenterEntities) GetVolumesOk() (*Volumes, bool) {
 		return nil, false
 	}
 
-
 	return o.Volumes, true
 }
 
 // SetVolumes sets field value
 func (o *DataCenterEntities) SetVolumes(v Volumes) {
-
 
 	o.Volumes = &v
 
@@ -114,7 +107,6 @@ func (o *DataCenterEntities) GetLoadbalancers() *Loadbalancers {
 		return nil
 	}
 
-
 	return o.Loadbalancers
 
 }
@@ -127,13 +119,11 @@ func (o *DataCenterEntities) GetLoadbalancersOk() (*Loadbalancers, bool) {
 		return nil, false
 	}
 
-
 	return o.Loadbalancers, true
 }
 
 // SetLoadbalancers sets field value
 func (o *DataCenterEntities) SetLoadbalancers(v Loadbalancers) {
-
 
 	o.Loadbalancers = &v
 
@@ -155,7 +145,6 @@ func (o *DataCenterEntities) GetLans() *Lans {
 		return nil
 	}
 
-
 	return o.Lans
 
 }
@@ -168,13 +157,11 @@ func (o *DataCenterEntities) GetLansOk() (*Lans, bool) {
 		return nil, false
 	}
 
-
 	return o.Lans, true
 }
 
 // SetLans sets field value
 func (o *DataCenterEntities) SetLans(v Lans) {
-
 
 	o.Lans = &v
 
@@ -196,7 +183,6 @@ func (o *DataCenterEntities) GetNetworkloadbalancers() *NetworkLoadBalancers {
 		return nil
 	}
 
-
 	return o.Networkloadbalancers
 
 }
@@ -209,13 +195,11 @@ func (o *DataCenterEntities) GetNetworkloadbalancersOk() (*NetworkLoadBalancers,
 		return nil, false
 	}
 
-
 	return o.Networkloadbalancers, true
 }
 
 // SetNetworkloadbalancers sets field value
 func (o *DataCenterEntities) SetNetworkloadbalancers(v NetworkLoadBalancers) {
-
 
 	o.Networkloadbalancers = &v
 
@@ -237,7 +221,6 @@ func (o *DataCenterEntities) GetNatgateways() *NatGateways {
 		return nil
 	}
 
-
 	return o.Natgateways
 
 }
@@ -250,13 +233,11 @@ func (o *DataCenterEntities) GetNatgatewaysOk() (*NatGateways, bool) {
 		return nil, false
 	}
 
-
 	return o.Natgateways, true
 }
 
 // SetNatgateways sets field value
 func (o *DataCenterEntities) SetNatgateways(v NatGateways) {
-
 
 	o.Natgateways = &v
 
@@ -299,6 +280,7 @@ func (o DataCenterEntities) MarshalJSON() ([]byte, error) {
 	}
 	return json.Marshal(toSerialize)
 }
+
 type NullableDataCenterEntities struct {
 	value *DataCenterEntities
 	isSet bool
@@ -334,5 +316,3 @@ func (v *NullableDataCenterEntities) UnmarshalJSON(src []byte) error {
 	v.isSet = true
 	return json.Unmarshal(src, &v.value)
 }
-
-

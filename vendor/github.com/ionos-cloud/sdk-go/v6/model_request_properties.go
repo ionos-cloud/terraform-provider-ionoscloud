@@ -16,12 +16,11 @@ import (
 
 // RequestProperties struct for RequestProperties
 type RequestProperties struct {
-	Method *string `json:"method,omitempty"`
+	Method  *string            `json:"method,omitempty"`
 	Headers *map[string]string `json:"headers,omitempty"`
-	Body *string `json:"body,omitempty"`
-	Url *string `json:"url,omitempty"`
+	Body    *string            `json:"body,omitempty"`
+	Url     *string            `json:"url,omitempty"`
 }
-
 
 // GetMethod returns the Method field value
 // If the value is explicit nil, the zero value for string will be returned
@@ -29,7 +28,6 @@ func (o *RequestProperties) GetMethod() *string {
 	if o == nil {
 		return nil
 	}
-
 
 	return o.Method
 
@@ -43,13 +41,11 @@ func (o *RequestProperties) GetMethodOk() (*string, bool) {
 		return nil, false
 	}
 
-
 	return o.Method, true
 }
 
 // SetMethod sets field value
 func (o *RequestProperties) SetMethod(v string) {
-
 
 	o.Method = &v
 
@@ -71,7 +67,6 @@ func (o *RequestProperties) GetHeaders() *map[string]string {
 		return nil
 	}
 
-
 	return o.Headers
 
 }
@@ -84,13 +79,11 @@ func (o *RequestProperties) GetHeadersOk() (*map[string]string, bool) {
 		return nil, false
 	}
 
-
 	return o.Headers, true
 }
 
 // SetHeaders sets field value
 func (o *RequestProperties) SetHeaders(v map[string]string) {
-
 
 	o.Headers = &v
 
@@ -112,7 +105,6 @@ func (o *RequestProperties) GetBody() *string {
 		return nil
 	}
 
-
 	return o.Body
 
 }
@@ -125,13 +117,11 @@ func (o *RequestProperties) GetBodyOk() (*string, bool) {
 		return nil, false
 	}
 
-
 	return o.Body, true
 }
 
 // SetBody sets field value
 func (o *RequestProperties) SetBody(v string) {
-
 
 	o.Body = &v
 
@@ -153,7 +143,6 @@ func (o *RequestProperties) GetUrl() *string {
 		return nil
 	}
 
-
 	return o.Url
 
 }
@@ -166,13 +155,11 @@ func (o *RequestProperties) GetUrlOk() (*string, bool) {
 		return nil, false
 	}
 
-
 	return o.Url, true
 }
 
 // SetUrl sets field value
 func (o *RequestProperties) SetUrl(v string) {
-
 
 	o.Url = &v
 
@@ -207,6 +194,7 @@ func (o RequestProperties) MarshalJSON() ([]byte, error) {
 	}
 	return json.Marshal(toSerialize)
 }
+
 type NullableRequestProperties struct {
 	value *RequestProperties
 	isSet bool
@@ -242,5 +230,3 @@ func (v *NullableRequestProperties) UnmarshalJSON(src []byte) error {
 	v.isSet = true
 	return json.Unmarshal(src, &v.value)
 }
-
-

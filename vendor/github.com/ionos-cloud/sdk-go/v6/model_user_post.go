@@ -19,14 +19,12 @@ type UserPost struct {
 	Properties *UserPropertiesPost `json:"properties"`
 }
 
-
 // GetProperties returns the Properties field value
 // If the value is explicit nil, the zero value for UserPropertiesPost will be returned
 func (o *UserPost) GetProperties() *UserPropertiesPost {
 	if o == nil {
 		return nil
 	}
-
 
 	return o.Properties
 
@@ -40,13 +38,11 @@ func (o *UserPost) GetPropertiesOk() (*UserPropertiesPost, bool) {
 		return nil, false
 	}
 
-
 	return o.Properties, true
 }
 
 // SetProperties sets field value
 func (o *UserPost) SetProperties(v UserPropertiesPost) {
-
 
 	o.Properties = &v
 
@@ -69,6 +65,7 @@ func (o UserPost) MarshalJSON() ([]byte, error) {
 	}
 	return json.Marshal(toSerialize)
 }
+
 type NullableUserPost struct {
 	value *UserPost
 	isSet bool
@@ -104,5 +101,3 @@ func (v *NullableUserPost) UnmarshalJSON(src []byte) error {
 	v.isSet = true
 	return json.Unmarshal(src, &v.value)
 }
-
-

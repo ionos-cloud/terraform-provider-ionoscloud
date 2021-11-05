@@ -19,14 +19,12 @@ type LanEntities struct {
 	Nics *LanNics `json:"nics,omitempty"`
 }
 
-
 // GetNics returns the Nics field value
 // If the value is explicit nil, the zero value for LanNics will be returned
 func (o *LanEntities) GetNics() *LanNics {
 	if o == nil {
 		return nil
 	}
-
 
 	return o.Nics
 
@@ -40,13 +38,11 @@ func (o *LanEntities) GetNicsOk() (*LanNics, bool) {
 		return nil, false
 	}
 
-
 	return o.Nics, true
 }
 
 // SetNics sets field value
 func (o *LanEntities) SetNics(v LanNics) {
-
 
 	o.Nics = &v
 
@@ -69,6 +65,7 @@ func (o LanEntities) MarshalJSON() ([]byte, error) {
 	}
 	return json.Marshal(toSerialize)
 }
+
 type NullableLanEntities struct {
 	value *LanEntities
 	isSet bool
@@ -104,5 +101,3 @@ func (v *NullableLanEntities) UnmarshalJSON(src []byte) error {
 	v.isSet = true
 	return json.Unmarshal(src, &v.value)
 }
-
-

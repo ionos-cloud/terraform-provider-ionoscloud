@@ -20,14 +20,12 @@ type S3Bucket struct {
 	Name *string `json:"name"`
 }
 
-
 // GetName returns the Name field value
 // If the value is explicit nil, the zero value for string will be returned
 func (o *S3Bucket) GetName() *string {
 	if o == nil {
 		return nil
 	}
-
 
 	return o.Name
 
@@ -41,13 +39,11 @@ func (o *S3Bucket) GetNameOk() (*string, bool) {
 		return nil, false
 	}
 
-
 	return o.Name, true
 }
 
 // SetName sets field value
 func (o *S3Bucket) SetName(v string) {
-
 
 	o.Name = &v
 
@@ -70,6 +66,7 @@ func (o S3Bucket) MarshalJSON() ([]byte, error) {
 	}
 	return json.Marshal(toSerialize)
 }
+
 type NullableS3Bucket struct {
 	value *S3Bucket
 	isSet bool
@@ -105,5 +102,3 @@ func (v *NullableS3Bucket) UnmarshalJSON(src []byte) error {
 	v.isSet = true
 	return json.Unmarshal(src, &v.value)
 }
-
-

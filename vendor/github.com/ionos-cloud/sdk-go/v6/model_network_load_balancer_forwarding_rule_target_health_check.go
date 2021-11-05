@@ -24,14 +24,12 @@ type NetworkLoadBalancerForwardingRuleTargetHealthCheck struct {
 	Maintenance *bool `json:"maintenance,omitempty"`
 }
 
-
 // GetCheck returns the Check field value
 // If the value is explicit nil, the zero value for bool will be returned
 func (o *NetworkLoadBalancerForwardingRuleTargetHealthCheck) GetCheck() *bool {
 	if o == nil {
 		return nil
 	}
-
 
 	return o.Check
 
@@ -45,13 +43,11 @@ func (o *NetworkLoadBalancerForwardingRuleTargetHealthCheck) GetCheckOk() (*bool
 		return nil, false
 	}
 
-
 	return o.Check, true
 }
 
 // SetCheck sets field value
 func (o *NetworkLoadBalancerForwardingRuleTargetHealthCheck) SetCheck(v bool) {
-
 
 	o.Check = &v
 
@@ -73,7 +69,6 @@ func (o *NetworkLoadBalancerForwardingRuleTargetHealthCheck) GetCheckInterval() 
 		return nil
 	}
 
-
 	return o.CheckInterval
 
 }
@@ -86,13 +81,11 @@ func (o *NetworkLoadBalancerForwardingRuleTargetHealthCheck) GetCheckIntervalOk(
 		return nil, false
 	}
 
-
 	return o.CheckInterval, true
 }
 
 // SetCheckInterval sets field value
 func (o *NetworkLoadBalancerForwardingRuleTargetHealthCheck) SetCheckInterval(v int32) {
-
 
 	o.CheckInterval = &v
 
@@ -114,7 +107,6 @@ func (o *NetworkLoadBalancerForwardingRuleTargetHealthCheck) GetMaintenance() *b
 		return nil
 	}
 
-
 	return o.Maintenance
 
 }
@@ -127,13 +119,11 @@ func (o *NetworkLoadBalancerForwardingRuleTargetHealthCheck) GetMaintenanceOk() 
 		return nil, false
 	}
 
-
 	return o.Maintenance, true
 }
 
 // SetMaintenance sets field value
 func (o *NetworkLoadBalancerForwardingRuleTargetHealthCheck) SetMaintenance(v bool) {
-
 
 	o.Maintenance = &v
 
@@ -164,6 +154,7 @@ func (o NetworkLoadBalancerForwardingRuleTargetHealthCheck) MarshalJSON() ([]byt
 	}
 	return json.Marshal(toSerialize)
 }
+
 type NullableNetworkLoadBalancerForwardingRuleTargetHealthCheck struct {
 	value *NetworkLoadBalancerForwardingRuleTargetHealthCheck
 	isSet bool
@@ -199,5 +190,3 @@ func (v *NullableNetworkLoadBalancerForwardingRuleTargetHealthCheck) UnmarshalJS
 	v.isSet = true
 	return json.Unmarshal(src, &v.value)
 }
-
-
