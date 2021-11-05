@@ -1,8 +1,9 @@
 ## 5.2.19
 
 - **code enhancements**: added http request time log for API calls
-- **new features**: import for `nic`, data_source for `nic`
+- **new features**: import for `nic`, data_source for `nic`, `share` 
 - **dependency update**: updated sdk-go to v5.1.9
+
 ## 5.2.18
 
 - **bug fixes**: fixed datacenter datasource
