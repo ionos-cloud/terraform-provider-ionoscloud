@@ -29,28 +29,28 @@ func Provider() *schema.Provider {
 			"username": {
 				Type:          schema.TypeString,
 				Optional:      true,
-				DefaultFunc:   schema.EnvDefaultFunc("IONOS_USERNAME", nil),
+				DefaultFunc:   schema.EnvDefaultFunc(ionoscloud.IonosUsernameEnvVar, nil),
 				Description:   "IonosCloud username for API operations. If token is provided, token is preferred",
 				ConflictsWith: []string{"token"},
 			},
 			"password": {
 				Type:          schema.TypeString,
 				Optional:      true,
-				DefaultFunc:   schema.EnvDefaultFunc("IONOS_PASSWORD", nil),
+				DefaultFunc:   schema.EnvDefaultFunc(ionoscloud.IonosPasswordEnvVar, nil),
 				Description:   "IonosCloud password for API operations. If token is provided, token is preferred",
 				ConflictsWith: []string{"token"},
 			},
 			"token": {
 				Type:          schema.TypeString,
 				Optional:      true,
-				DefaultFunc:   schema.EnvDefaultFunc("IONOS_TOKEN", nil),
+				DefaultFunc:   schema.EnvDefaultFunc(ionoscloud.IonosTokenEnvVar, nil),
 				Description:   "IonosCloud bearer token for API operations.",
 				ConflictsWith: []string{"username", "password"},
 			},
 			"endpoint": {
 				Type:        schema.TypeString,
 				Optional:    true,
-				DefaultFunc: schema.EnvDefaultFunc("IONOS_API_URL", ""),
+				DefaultFunc: schema.EnvDefaultFunc(ionoscloud.IonosApiUrlEnvVar, ""),
 				Description: "IonosCloud REST API URL.",
 			},
 			"retries": {
