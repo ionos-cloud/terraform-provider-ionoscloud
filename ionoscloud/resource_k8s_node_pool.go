@@ -453,6 +453,12 @@ func resourcek8sNodePoolUpdate(ctx context.Context, d *schema.ResourceData, meta
 				}
 			}
 
+			if *autoScaling.MaxNodeCount < *autoScaling.MinNodeCount {
+				d.SetId("")
+				diags := diag.FromErr(fmt.Errorf("error updating k8s node pool: max_node_count cannot be lower than min_node_count"))
+				return diags
+			}
+
 			if updateAutoscaling == true {
 				request.Properties.AutoScaling = autoScaling
 			}
@@ -460,33 +466,26 @@ func resourcek8sNodePoolUpdate(ctx context.Context, d *schema.ResourceData, meta
 	}
 
 	if d.HasChange("node_count") {
-		updateNodeCount := true
+		oldNc, newNc := d.GetChange("node_count")
+		nodeCount := int32(newNc.(int))
 
 		if d.Get("auto_scaling.0").(map[string]interface{}) != nil && (d.Get("auto_scaling.0.min_node_count").(int) != 0 || d.Get("auto_scaling.0.max_node_count").(int) != 0) {
 
-			updateNodeCount = false
-
-			var apiResponse *ionoscloud.APIResponse
-
-			np, apiResponse, npErr := client.KubernetesApi.K8sNodepoolsFindById(ctx, d.Get("k8s_cluster_id").(string), d.Id()).Execute()
-			logApiRequestTime(apiResponse)
-			if npErr != nil {
-				diags := diag.FromErr(fmt.Errorf("error retrieving k8s node pool %q: %s", d.Id(), npErr))
+			if nodeCount < *request.Properties.AutoScaling.MinNodeCount {
+				d.SetId("")
+				diags := diag.FromErr(fmt.Errorf("error updating k8s node pool: node_count cannot be lower than min_node_count"))
 				return diags
 			}
 
-			log.Printf("[INFO] Setting node_count for node pool %q from server from %d to %d instead of due to autoscaling %+v", d.Id(), uint32(d.Get("node_count").(int)), *np.Properties.NodeCount, d.Get("auto_scaling.0"))
-			request.Properties.NodeCount = np.Properties.NodeCount
-		}
-
-		if updateNodeCount {
-			oldNc, newNc := d.GetChange("node_count")
-			log.Printf("[INFO] k8s node pool node_count changed from %+v to %+v", oldNc, newNc)
-			if oldNc.(int) != newNc.(int) {
-				newNc := int32(newNc.(int))
-				request.Properties.NodeCount = &newNc
+			if nodeCount > *request.Properties.AutoScaling.MaxNodeCount {
+				d.SetId("")
+				diags := diag.FromErr(fmt.Errorf("error updating k8s node pool: node_count cannot be greater than max_node_count"))
+				return diags
 			}
 		}
+
+		log.Printf("[INFO] k8s node pool node_count changed from %+v to %+v", oldNc, newNc)
+		request.Properties.NodeCount = &nodeCount
 	}
 
 	if d.HasChange("lans") {
