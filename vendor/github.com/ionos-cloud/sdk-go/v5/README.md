@@ -56,8 +56,6 @@ For using other server than the one defined on index 0 set context value `sw.Con
 ctx := context.WithValue(context.Background(), sw.ContextServerIndex, 1)
 ```
 
-Note: To overwrite the api endpoint - `api.ionos.com`, the environment variable `$IONOS_API_URL` can be set, and used with `NewConfigurationFromEnv()` function.
-
 ### Templated Server URL
 
 Templated server URL is formatted using default variables from configuration or from context value `sw.ContextServerVariables` of type `map[string]string`.

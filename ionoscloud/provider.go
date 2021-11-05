@@ -145,10 +145,7 @@ func providerConfigure(d *schema.ResourceData, terraformVersion string) (interfa
 
 	cleanedUrl := cleanURL(d.Get("endpoint").(string))
 
-	newConfig := ionoscloud.NewConfiguration(username.(string), password.(string), token.(string))
-	if len(cleanedUrl) > 0 {
-		newConfig.Servers[0].URL = cleanedUrl
-	}
+	newConfig := ionoscloud.NewConfiguration(username.(string), password.(string), token.(string), cleanedUrl)
 
 	if os.Getenv("IONOS_DEBUG") != "" {
 		newConfig.Debug = true
