@@ -105,6 +105,12 @@ const (
 	nicTestResourceName = "database_nic"
 )
 
+const (
+	shareResource         = "ionoscloud_share"
+	shareResourceFullName = shareResource + "." + sourceShareName
+	sourceShareName       = "share"
+)
+
 // General Constants
 const (
 	DataSource       = "data"
