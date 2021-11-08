@@ -261,7 +261,7 @@ func resourceS3KeyImport(ctx context.Context, d *schema.ResourceData, meta inter
 	return []*schema.ResourceData{d}, nil
 }
 
-func setS3KeyIdAndProperties(s3Key *ionoscloud.S3Key, data *schema.ResourceData) (err error) {
+func setS3KeyIdAndProperties(s3Key *ionoscloud.S3Key, data *schema.ResourceData) error {
 
 	if s3Key == nil {
 		return fmt.Errorf("s3key not found")

@@ -22,14 +22,16 @@ func TestAccShare_Basic(t *testing.T) {
 			{
 				Config: fmt.Sprintf(testAccCheckShareConfigBasic),
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheckShareExists("ionoscloud_share.share", &share),
-					resource.TestCheckResourceAttr("ionoscloud_share.share", "share_privilege", "true"),
+					testAccCheckShareExists(shareResourceFullName, &share),
+					resource.TestCheckResourceAttr(shareResourceFullName, "edit_privilege", "true"),
+					resource.TestCheckResourceAttr(shareResourceFullName, "share_privilege", "true"),
 				),
 			},
 			{
 				Config: testAccCheckShareConfigUpdate,
 				Check: resource.ComposeTestCheckFunc(
-					resource.TestCheckResourceAttr("ionoscloud_share.share", "share_privilege", "false"),
+					resource.TestCheckResourceAttr(shareResourceFullName, "edit_privilege", "false"),
+					resource.TestCheckResourceAttr(shareResourceFullName, "share_privilege", "false"),
 				),
 			},
 		},
@@ -46,7 +48,7 @@ func testAccCheckShareDestroyCheck(s *terraform.State) error {
 	}
 	for _, rs := range s.RootModule().Resources {
 
-		if rs.Type != "ionoscloud_share" {
+		if rs.Type != shareResource {
 			continue
 		}
 
@@ -139,7 +141,7 @@ resource "ionoscloud_group" "group" {
 resource "ionoscloud_share" "share" {
   group_id = "${ionoscloud_group.group.id}"
   resource_id = "${ionoscloud_datacenter.foobar.id}"
-  edit_privilege = true
+  edit_privilege = false
   share_privilege = false
 }
 `

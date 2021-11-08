@@ -65,7 +65,7 @@ func Provider() *schema.Provider {
 			ServerResource:                   resourceServer(),
 			VolumeResource:                   resourceVolume(),
 			GroupResource:                    resourceGroup(),
-			"ionoscloud_share":               resourceShare(),
+			shareResource:                    resourceShare(),
 			UserResource:                     resourceUser(),
 			SnapshotResource:                 resourceSnapshot(),
 			"ionoscloud_ipfailover":          resourceLanIPFailover(),
@@ -103,6 +103,7 @@ func Provider() *schema.Provider {
 			IpBLockResource:                                 dataSourceIpBlock(),
 			VolumeResource:                                  dataSourceVolume(),
 			nicResource:                                     dataSourceNIC(),
+			shareResource:                                   dataSourceShare(),
 		},
 	}
 
