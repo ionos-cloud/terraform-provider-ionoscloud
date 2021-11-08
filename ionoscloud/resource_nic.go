@@ -213,7 +213,7 @@ func getNicData(d *schema.ResourceData, path string) ionoscloud.Nic {
 	return nic
 }
 
-func NicSetData(d *schema.ResourceData, nic *ionoscloud.Nic) (err error) {
+func NicSetData(d *schema.ResourceData, nic *ionoscloud.Nic) error {
 	if nic == nil {
 		return fmt.Errorf("nic is empty")
 	}

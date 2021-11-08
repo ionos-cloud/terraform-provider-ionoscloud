@@ -16,55 +16,6 @@ import (
 
 const SleepInterval = 5 * time.Second
 
-func resourceShareImporter(ctx context.Context, d *schema.ResourceData, meta interface{}) ([]*schema.ResourceData, error) {
-	parts := strings.Split(d.Id(), "/")
-	if len(parts) != 2 || parts[0] == "" || parts[1] == "" {
-		return nil, fmt.Errorf("invalid import id %q. Expecting {group}/{resource}", d.Id())
-	}
-
-	grpId := parts[0]
-	rscId := parts[1]
-
-	client := meta.(*ionoscloud.APIClient)
-
-	share, apiResponse, err := client.UserManagementApi.UmGroupsSharesFindByResourceId(ctx, grpId, rscId).Execute()
-	logApiRequestTime(apiResponse)
-
-	if err != nil {
-		if apiResponse != nil && apiResponse.Response != nil && apiResponse.StatusCode == 404 {
-			d.SetId("")
-			return nil, fmt.Errorf("an error occured while trying to fetch the share of resource %q for group %q", rscId, grpId)
-		}
-		return nil, fmt.Errorf("share does not exist of resource %q for group %q", rscId, grpId)
-	}
-
-	log.Printf("[INFO] share found: %+v", share)
-
-	d.SetId(*share.Id)
-
-	if err := d.Set("group_id", grpId); err != nil {
-		return nil, err
-	}
-
-	if err := d.Set("resource_id", rscId); err != nil {
-		return nil, err
-	}
-
-	if share.Properties.EditPrivilege != nil {
-		if err := d.Set("edit_privilege", *share.Properties.EditPrivilege); err != nil {
-			return nil, err
-		}
-	}
-
-	if share.Properties.SharePrivilege != nil {
-		if err := d.Set("share_privilege", *share.Properties.SharePrivilege); err != nil {
-			return nil, err
-		}
-	}
-
-	return []*schema.ResourceData{d}, nil
-}
-
 func resourceIpFailoverImporter(ctx context.Context, d *schema.ResourceData, meta interface{}) ([]*schema.ResourceData, error) {
 	parts := strings.Split(d.Id(), "/")
 	if len(parts) != 2 || parts[0] == "" || parts[1] == "" {
