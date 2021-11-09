@@ -72,7 +72,7 @@ func dataSourceNIC() *schema.Resource {
 		Timeouts: &resourceDefaultTimeouts,
 	}
 }
-func getNicSchema() map[string]*schema.Schema {
+func getNicDataSourceSchema() map[string]*schema.Schema {
 	return map[string]*schema.Schema{
 		"server_id": {
 			Type:         schema.TypeString,

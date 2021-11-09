@@ -89,7 +89,7 @@ func Test_dataSourceNicRead(t *testing.T) {
 		t.Fatalf("error marshalling nic %+v", nic)
 	}
 	var ctx = context.TODO()
-	data := getEmptyTestResourceData(t, getNicSchema())
+	data := getEmptyTestResourceData(t, getNicDataSourceSchema())
 	meta := getMockedClient(string(jsonNic))
 
 	err = data.Set("datacenter_id", "testValueDatacenter")
