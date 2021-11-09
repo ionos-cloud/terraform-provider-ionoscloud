@@ -3,6 +3,11 @@
 - **code enhancements**: added http request time log for api calls
 - **new features**: import for `nic`, data_source for `nic`, `share`
 - **dependency update**: updated sdk-go to v6.0.0-beta.8
+  **code enhancements**: for `k8s_node_pool`, `nic` and `share`:
+  - made tests comprehensive
+  - optimized test duration by including both match by id and by name in the same test
+  - removed duplicated code from import, data_source, resource and tests files
+- **bug fixes**: k8s_node_pool update node_count didn't work
 
 ## 6.0.0-beta.14
 
