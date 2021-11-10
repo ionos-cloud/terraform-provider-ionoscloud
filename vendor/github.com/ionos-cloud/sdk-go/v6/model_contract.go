@@ -17,10 +17,9 @@ import (
 // Contract struct for Contract
 type Contract struct {
 	// The type of the resource
-	Type *Type `json:"type,omitempty"`
+	Type       *Type               `json:"type,omitempty"`
 	Properties *ContractProperties `json:"properties"`
 }
-
 
 // GetType returns the Type field value
 // If the value is explicit nil, the zero value for Type will be returned
@@ -28,7 +27,6 @@ func (o *Contract) GetType() *Type {
 	if o == nil {
 		return nil
 	}
-
 
 	return o.Type
 
@@ -42,13 +40,11 @@ func (o *Contract) GetTypeOk() (*Type, bool) {
 		return nil, false
 	}
 
-
 	return o.Type, true
 }
 
 // SetType sets field value
 func (o *Contract) SetType(v Type) {
-
 
 	o.Type = &v
 
@@ -70,7 +66,6 @@ func (o *Contract) GetProperties() *ContractProperties {
 		return nil
 	}
 
-
 	return o.Properties
 
 }
@@ -83,13 +78,11 @@ func (o *Contract) GetPropertiesOk() (*ContractProperties, bool) {
 		return nil, false
 	}
 
-
 	return o.Properties, true
 }
 
 // SetProperties sets field value
 func (o *Contract) SetProperties(v ContractProperties) {
-
 
 	o.Properties = &v
 
@@ -116,6 +109,7 @@ func (o Contract) MarshalJSON() ([]byte, error) {
 	}
 	return json.Marshal(toSerialize)
 }
+
 type NullableContract struct {
 	value *Contract
 	isSet bool
@@ -151,5 +145,3 @@ func (v *NullableContract) UnmarshalJSON(src []byte) error {
 	v.isSet = true
 	return json.Unmarshal(src, &v.value)
 }
-
-

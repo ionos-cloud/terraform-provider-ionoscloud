@@ -26,14 +26,12 @@ type FlowLogProperties struct {
 	Bucket *string `json:"bucket"`
 }
 
-
 // GetName returns the Name field value
 // If the value is explicit nil, the zero value for string will be returned
 func (o *FlowLogProperties) GetName() *string {
 	if o == nil {
 		return nil
 	}
-
 
 	return o.Name
 
@@ -47,13 +45,11 @@ func (o *FlowLogProperties) GetNameOk() (*string, bool) {
 		return nil, false
 	}
 
-
 	return o.Name, true
 }
 
 // SetName sets field value
 func (o *FlowLogProperties) SetName(v string) {
-
 
 	o.Name = &v
 
@@ -75,7 +71,6 @@ func (o *FlowLogProperties) GetAction() *string {
 		return nil
 	}
 
-
 	return o.Action
 
 }
@@ -88,13 +83,11 @@ func (o *FlowLogProperties) GetActionOk() (*string, bool) {
 		return nil, false
 	}
 
-
 	return o.Action, true
 }
 
 // SetAction sets field value
 func (o *FlowLogProperties) SetAction(v string) {
-
 
 	o.Action = &v
 
@@ -116,7 +109,6 @@ func (o *FlowLogProperties) GetDirection() *string {
 		return nil
 	}
 
-
 	return o.Direction
 
 }
@@ -129,13 +121,11 @@ func (o *FlowLogProperties) GetDirectionOk() (*string, bool) {
 		return nil, false
 	}
 
-
 	return o.Direction, true
 }
 
 // SetDirection sets field value
 func (o *FlowLogProperties) SetDirection(v string) {
-
 
 	o.Direction = &v
 
@@ -157,7 +147,6 @@ func (o *FlowLogProperties) GetBucket() *string {
 		return nil
 	}
 
-
 	return o.Bucket
 
 }
@@ -170,13 +159,11 @@ func (o *FlowLogProperties) GetBucketOk() (*string, bool) {
 		return nil, false
 	}
 
-
 	return o.Bucket, true
 }
 
 // SetBucket sets field value
 func (o *FlowLogProperties) SetBucket(v string) {
-
 
 	o.Bucket = &v
 
@@ -211,6 +198,7 @@ func (o FlowLogProperties) MarshalJSON() ([]byte, error) {
 	}
 	return json.Marshal(toSerialize)
 }
+
 type NullableFlowLogProperties struct {
 	value *FlowLogProperties
 	isSet bool
@@ -246,5 +234,3 @@ func (v *NullableFlowLogProperties) UnmarshalJSON(src []byte) error {
 	v.isSet = true
 	return json.Unmarshal(src, &v.value)
 }
-
-

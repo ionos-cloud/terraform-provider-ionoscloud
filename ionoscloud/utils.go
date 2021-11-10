@@ -5,6 +5,7 @@ import (
 	"fmt"
 	ionoscloud "github.com/ionos-cloud/sdk-go/v6"
 	"log"
+	"net/http"
 	"reflect"
 	"regexp"
 	"strings"
@@ -143,72 +144,6 @@ func resourceK8sNodepoolImport(ctx context.Context, d *schema.ResourceData, meta
 	}
 
 	log.Printf("[INFO] Importing k8s node pool %q...", d.Id())
-
-	return []*schema.ResourceData{d}, nil
-}
-
-func resourceNicImport(_ context.Context, d *schema.ResourceData, _ interface{}) ([]*schema.ResourceData, error) {
-	parts := strings.Split(d.Id(), "/")
-	if len(parts) != 3 || parts[0] == "" || parts[1] == "" {
-		return nil, fmt.Errorf("invalid import id %q. Expecting {datacenter}/{server}/{nic}", d.Id())
-	}
-
-	if err := d.Set("datacenter_id", parts[0]); err != nil {
-		return nil, err
-	}
-	if err := d.Set("server_id", parts[1]); err != nil {
-		return nil, err
-	}
-	d.SetId(parts[2])
-
-	return []*schema.ResourceData{d}, nil
-}
-
-func resourceShareImporter(ctx context.Context, d *schema.ResourceData, meta interface{}) ([]*schema.ResourceData, error) {
-	parts := strings.Split(d.Id(), "/")
-	if len(parts) != 2 || parts[0] == "" || parts[1] == "" {
-		return nil, fmt.Errorf("invalid import id %q. Expecting {group}/{resource}", d.Id())
-	}
-
-	grpId := parts[0]
-	rscId := parts[1]
-
-	client := meta.(SdkBundle).CloudApiClient
-
-	share, apiResponse, err := client.UserManagementApi.UmGroupsSharesFindByResourceId(ctx, grpId, rscId).Execute()
-	logApiRequestTime(apiResponse)
-
-	if err != nil {
-		if apiResponse != nil && apiResponse.Response != nil && apiResponse.StatusCode == 404 {
-			d.SetId("")
-			return nil, fmt.Errorf("an error occured while trying to fetch the share of resource %q for group %q", rscId, grpId)
-		}
-		return nil, fmt.Errorf("share does not exist of resource %q for group %q", rscId, grpId)
-	}
-
-	log.Printf("[INFO] share found: %+v", share)
-
-	d.SetId(*share.Id)
-
-	if err := d.Set("group_id", grpId); err != nil {
-		return nil, err
-	}
-
-	if err := d.Set("resource_id", rscId); err != nil {
-		return nil, err
-	}
-
-	if share.Properties.EditPrivilege != nil {
-		if err := d.Set("edit_privilege", *share.Properties.EditPrivilege); err != nil {
-			return nil, err
-		}
-	}
-
-	if share.Properties.SharePrivilege != nil {
-		if err := d.Set("share_privilege", *share.Properties.SharePrivilege); err != nil {
-			return nil, err
-		}
-	}
 
 	return []*schema.ResourceData{d}, nil
 }
@@ -420,7 +355,14 @@ func GenerateEmail() string {
 
 func logApiRequestTime(resp *ionoscloud.APIResponse) {
 	if resp != nil {
-		log.Printf("[DEBUG] Request time : %s for operation : %s, status code : %d",
-			resp.RequestTime, resp.Operation, resp.StatusCode)
+		log.Printf("[DEBUG] Request time : %s for operation : %s",
+			resp.RequestTime, resp.Operation)
 	}
+}
+
+func httpNotFound(resp *ionoscloud.APIResponse) bool {
+	if resp != nil && resp.Response != nil && resp.StatusCode == http.StatusNotFound {
+		return true
+	}
+	return false
 }

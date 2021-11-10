@@ -26,14 +26,12 @@ type LocationProperties struct {
 	CpuArchitecture *[]CpuArchitectureProperties `json:"cpuArchitecture,omitempty"`
 }
 
-
 // GetName returns the Name field value
 // If the value is explicit nil, the zero value for string will be returned
 func (o *LocationProperties) GetName() *string {
 	if o == nil {
 		return nil
 	}
-
 
 	return o.Name
 
@@ -47,13 +45,11 @@ func (o *LocationProperties) GetNameOk() (*string, bool) {
 		return nil, false
 	}
 
-
 	return o.Name, true
 }
 
 // SetName sets field value
 func (o *LocationProperties) SetName(v string) {
-
 
 	o.Name = &v
 
@@ -75,7 +71,6 @@ func (o *LocationProperties) GetFeatures() *[]string {
 		return nil
 	}
 
-
 	return o.Features
 
 }
@@ -88,13 +83,11 @@ func (o *LocationProperties) GetFeaturesOk() (*[]string, bool) {
 		return nil, false
 	}
 
-
 	return o.Features, true
 }
 
 // SetFeatures sets field value
 func (o *LocationProperties) SetFeatures(v []string) {
-
 
 	o.Features = &v
 
@@ -116,7 +109,6 @@ func (o *LocationProperties) GetImageAliases() *[]string {
 		return nil
 	}
 
-
 	return o.ImageAliases
 
 }
@@ -129,13 +121,11 @@ func (o *LocationProperties) GetImageAliasesOk() (*[]string, bool) {
 		return nil, false
 	}
 
-
 	return o.ImageAliases, true
 }
 
 // SetImageAliases sets field value
 func (o *LocationProperties) SetImageAliases(v []string) {
-
 
 	o.ImageAliases = &v
 
@@ -157,7 +147,6 @@ func (o *LocationProperties) GetCpuArchitecture() *[]CpuArchitectureProperties {
 		return nil
 	}
 
-
 	return o.CpuArchitecture
 
 }
@@ -170,13 +159,11 @@ func (o *LocationProperties) GetCpuArchitectureOk() (*[]CpuArchitecturePropertie
 		return nil, false
 	}
 
-
 	return o.CpuArchitecture, true
 }
 
 // SetCpuArchitecture sets field value
 func (o *LocationProperties) SetCpuArchitecture(v []CpuArchitectureProperties) {
-
 
 	o.CpuArchitecture = &v
 
@@ -211,6 +198,7 @@ func (o LocationProperties) MarshalJSON() ([]byte, error) {
 	}
 	return json.Marshal(toSerialize)
 }
+
 type NullableLocationProperties struct {
 	value *LocationProperties
 	isSet bool
@@ -246,5 +234,3 @@ func (v *NullableLocationProperties) UnmarshalJSON(src []byte) error {
 	v.isSet = true
 	return json.Unmarshal(src, &v.value)
 }
-
-

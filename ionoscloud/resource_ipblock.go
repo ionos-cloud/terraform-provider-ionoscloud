@@ -224,7 +224,7 @@ func resourceIpBlockImporter(ctx context.Context, d *schema.ResourceData, meta i
 	return []*schema.ResourceData{d}, nil
 }
 
-func IpBlockSetData(d *schema.ResourceData, ipBlock *ionoscloud.IpBlock) (err error) {
+func IpBlockSetData(d *schema.ResourceData, ipBlock *ionoscloud.IpBlock) error {
 	if ipBlock == nil {
 		return fmt.Errorf("ipblock is empty")
 	}

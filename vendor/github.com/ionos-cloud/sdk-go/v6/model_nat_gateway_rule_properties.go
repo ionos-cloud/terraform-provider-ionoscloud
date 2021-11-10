@@ -27,10 +27,9 @@ type NatGatewayRuleProperties struct {
 	// Public IP address of the NAT gateway rule. Specifies the address used for masking outgoing packets source address field. Should be one of the customer reserved IP address already configured on the NAT gateway resource
 	PublicIp *string `json:"publicIp"`
 	// Target or destination subnet of the NAT gateway rule. For SNAT rules it specifies which packets this translation rule applies to based on the packets destination IP address. If none is provided, rule will match any address.
-	TargetSubnet *string `json:"targetSubnet,omitempty"`
+	TargetSubnet    *string          `json:"targetSubnet,omitempty"`
 	TargetPortRange *TargetPortRange `json:"targetPortRange,omitempty"`
 }
-
 
 // GetName returns the Name field value
 // If the value is explicit nil, the zero value for string will be returned
@@ -38,7 +37,6 @@ func (o *NatGatewayRuleProperties) GetName() *string {
 	if o == nil {
 		return nil
 	}
-
 
 	return o.Name
 
@@ -52,13 +50,11 @@ func (o *NatGatewayRuleProperties) GetNameOk() (*string, bool) {
 		return nil, false
 	}
 
-
 	return o.Name, true
 }
 
 // SetName sets field value
 func (o *NatGatewayRuleProperties) SetName(v string) {
-
 
 	o.Name = &v
 
@@ -80,7 +76,6 @@ func (o *NatGatewayRuleProperties) GetType() *NatGatewayRuleType {
 		return nil
 	}
 
-
 	return o.Type
 
 }
@@ -93,13 +88,11 @@ func (o *NatGatewayRuleProperties) GetTypeOk() (*NatGatewayRuleType, bool) {
 		return nil, false
 	}
 
-
 	return o.Type, true
 }
 
 // SetType sets field value
 func (o *NatGatewayRuleProperties) SetType(v NatGatewayRuleType) {
-
 
 	o.Type = &v
 
@@ -121,7 +114,6 @@ func (o *NatGatewayRuleProperties) GetProtocol() *NatGatewayRuleProtocol {
 		return nil
 	}
 
-
 	return o.Protocol
 
 }
@@ -134,13 +126,11 @@ func (o *NatGatewayRuleProperties) GetProtocolOk() (*NatGatewayRuleProtocol, boo
 		return nil, false
 	}
 
-
 	return o.Protocol, true
 }
 
 // SetProtocol sets field value
 func (o *NatGatewayRuleProperties) SetProtocol(v NatGatewayRuleProtocol) {
-
 
 	o.Protocol = &v
 
@@ -162,7 +152,6 @@ func (o *NatGatewayRuleProperties) GetSourceSubnet() *string {
 		return nil
 	}
 
-
 	return o.SourceSubnet
 
 }
@@ -175,13 +164,11 @@ func (o *NatGatewayRuleProperties) GetSourceSubnetOk() (*string, bool) {
 		return nil, false
 	}
 
-
 	return o.SourceSubnet, true
 }
 
 // SetSourceSubnet sets field value
 func (o *NatGatewayRuleProperties) SetSourceSubnet(v string) {
-
 
 	o.SourceSubnet = &v
 
@@ -203,7 +190,6 @@ func (o *NatGatewayRuleProperties) GetPublicIp() *string {
 		return nil
 	}
 
-
 	return o.PublicIp
 
 }
@@ -216,13 +202,11 @@ func (o *NatGatewayRuleProperties) GetPublicIpOk() (*string, bool) {
 		return nil, false
 	}
 
-
 	return o.PublicIp, true
 }
 
 // SetPublicIp sets field value
 func (o *NatGatewayRuleProperties) SetPublicIp(v string) {
-
 
 	o.PublicIp = &v
 
@@ -244,7 +228,6 @@ func (o *NatGatewayRuleProperties) GetTargetSubnet() *string {
 		return nil
 	}
 
-
 	return o.TargetSubnet
 
 }
@@ -257,13 +240,11 @@ func (o *NatGatewayRuleProperties) GetTargetSubnetOk() (*string, bool) {
 		return nil, false
 	}
 
-
 	return o.TargetSubnet, true
 }
 
 // SetTargetSubnet sets field value
 func (o *NatGatewayRuleProperties) SetTargetSubnet(v string) {
-
 
 	o.TargetSubnet = &v
 
@@ -285,7 +266,6 @@ func (o *NatGatewayRuleProperties) GetTargetPortRange() *TargetPortRange {
 		return nil
 	}
 
-
 	return o.TargetPortRange
 
 }
@@ -298,13 +278,11 @@ func (o *NatGatewayRuleProperties) GetTargetPortRangeOk() (*TargetPortRange, boo
 		return nil, false
 	}
 
-
 	return o.TargetPortRange, true
 }
 
 // SetTargetPortRange sets field value
 func (o *NatGatewayRuleProperties) SetTargetPortRange(v TargetPortRange) {
-
 
 	o.TargetPortRange = &v
 
@@ -351,6 +329,7 @@ func (o NatGatewayRuleProperties) MarshalJSON() ([]byte, error) {
 	}
 	return json.Marshal(toSerialize)
 }
+
 type NullableNatGatewayRuleProperties struct {
 	value *NatGatewayRuleProperties
 	isSet bool
@@ -386,5 +365,3 @@ func (v *NullableNatGatewayRuleProperties) UnmarshalJSON(src []byte) error {
 	v.isSet = true
 	return json.Unmarshal(src, &v.value)
 }
-
-

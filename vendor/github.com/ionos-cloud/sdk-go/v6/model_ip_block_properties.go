@@ -28,14 +28,12 @@ type IpBlockProperties struct {
 	IpConsumers *[]IpConsumer `json:"ipConsumers,omitempty"`
 }
 
-
 // GetIps returns the Ips field value
 // If the value is explicit nil, the zero value for []string will be returned
 func (o *IpBlockProperties) GetIps() *[]string {
 	if o == nil {
 		return nil
 	}
-
 
 	return o.Ips
 
@@ -49,13 +47,11 @@ func (o *IpBlockProperties) GetIpsOk() (*[]string, bool) {
 		return nil, false
 	}
 
-
 	return o.Ips, true
 }
 
 // SetIps sets field value
 func (o *IpBlockProperties) SetIps(v []string) {
-
 
 	o.Ips = &v
 
@@ -77,7 +73,6 @@ func (o *IpBlockProperties) GetLocation() *string {
 		return nil
 	}
 
-
 	return o.Location
 
 }
@@ -90,13 +85,11 @@ func (o *IpBlockProperties) GetLocationOk() (*string, bool) {
 		return nil, false
 	}
 
-
 	return o.Location, true
 }
 
 // SetLocation sets field value
 func (o *IpBlockProperties) SetLocation(v string) {
-
 
 	o.Location = &v
 
@@ -118,7 +111,6 @@ func (o *IpBlockProperties) GetSize() *int32 {
 		return nil
 	}
 
-
 	return o.Size
 
 }
@@ -131,13 +123,11 @@ func (o *IpBlockProperties) GetSizeOk() (*int32, bool) {
 		return nil, false
 	}
 
-
 	return o.Size, true
 }
 
 // SetSize sets field value
 func (o *IpBlockProperties) SetSize(v int32) {
-
 
 	o.Size = &v
 
@@ -159,7 +149,6 @@ func (o *IpBlockProperties) GetName() *string {
 		return nil
 	}
 
-
 	return o.Name
 
 }
@@ -172,13 +161,11 @@ func (o *IpBlockProperties) GetNameOk() (*string, bool) {
 		return nil, false
 	}
 
-
 	return o.Name, true
 }
 
 // SetName sets field value
 func (o *IpBlockProperties) SetName(v string) {
-
 
 	o.Name = &v
 
@@ -200,7 +187,6 @@ func (o *IpBlockProperties) GetIpConsumers() *[]IpConsumer {
 		return nil
 	}
 
-
 	return o.IpConsumers
 
 }
@@ -213,13 +199,11 @@ func (o *IpBlockProperties) GetIpConsumersOk() (*[]IpConsumer, bool) {
 		return nil, false
 	}
 
-
 	return o.IpConsumers, true
 }
 
 // SetIpConsumers sets field value
 func (o *IpBlockProperties) SetIpConsumers(v []IpConsumer) {
-
 
 	o.IpConsumers = &v
 
@@ -258,6 +242,7 @@ func (o IpBlockProperties) MarshalJSON() ([]byte, error) {
 	}
 	return json.Marshal(toSerialize)
 }
+
 type NullableIpBlockProperties struct {
 	value *IpBlockProperties
 	isSet bool
@@ -293,5 +278,3 @@ func (v *NullableIpBlockProperties) UnmarshalJSON(src []byte) error {
 	v.isSet = true
 	return json.Unmarshal(src, &v.value)
 }
-
-

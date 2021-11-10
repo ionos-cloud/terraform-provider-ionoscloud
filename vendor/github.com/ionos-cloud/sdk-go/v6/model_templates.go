@@ -26,14 +26,12 @@ type Templates struct {
 	Items *[]Template `json:"items,omitempty"`
 }
 
-
 // GetId returns the Id field value
 // If the value is explicit nil, the zero value for string will be returned
 func (o *Templates) GetId() *string {
 	if o == nil {
 		return nil
 	}
-
 
 	return o.Id
 
@@ -47,13 +45,11 @@ func (o *Templates) GetIdOk() (*string, bool) {
 		return nil, false
 	}
 
-
 	return o.Id, true
 }
 
 // SetId sets field value
 func (o *Templates) SetId(v string) {
-
 
 	o.Id = &v
 
@@ -75,7 +71,6 @@ func (o *Templates) GetType() *Type {
 		return nil
 	}
 
-
 	return o.Type
 
 }
@@ -88,13 +83,11 @@ func (o *Templates) GetTypeOk() (*Type, bool) {
 		return nil, false
 	}
 
-
 	return o.Type, true
 }
 
 // SetType sets field value
 func (o *Templates) SetType(v Type) {
-
 
 	o.Type = &v
 
@@ -116,7 +109,6 @@ func (o *Templates) GetHref() *string {
 		return nil
 	}
 
-
 	return o.Href
 
 }
@@ -129,13 +121,11 @@ func (o *Templates) GetHrefOk() (*string, bool) {
 		return nil, false
 	}
 
-
 	return o.Href, true
 }
 
 // SetHref sets field value
 func (o *Templates) SetHref(v string) {
-
 
 	o.Href = &v
 
@@ -157,7 +147,6 @@ func (o *Templates) GetItems() *[]Template {
 		return nil
 	}
 
-
 	return o.Items
 
 }
@@ -170,13 +159,11 @@ func (o *Templates) GetItemsOk() (*[]Template, bool) {
 		return nil, false
 	}
 
-
 	return o.Items, true
 }
 
 // SetItems sets field value
 func (o *Templates) SetItems(v []Template) {
-
 
 	o.Items = &v
 
@@ -211,6 +198,7 @@ func (o Templates) MarshalJSON() ([]byte, error) {
 	}
 	return json.Marshal(toSerialize)
 }
+
 type NullableTemplates struct {
 	value *Templates
 	isSet bool
@@ -246,5 +234,3 @@ func (v *NullableTemplates) UnmarshalJSON(src []byte) error {
 	v.isSet = true
 	return json.Unmarshal(src, &v.value)
 }
-
-

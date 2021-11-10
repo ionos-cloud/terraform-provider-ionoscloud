@@ -20,14 +20,12 @@ type BackupUnitSSO struct {
 	SsoUrl *string `json:"ssoUrl,omitempty"`
 }
 
-
 // GetSsoUrl returns the SsoUrl field value
 // If the value is explicit nil, the zero value for string will be returned
 func (o *BackupUnitSSO) GetSsoUrl() *string {
 	if o == nil {
 		return nil
 	}
-
 
 	return o.SsoUrl
 
@@ -41,13 +39,11 @@ func (o *BackupUnitSSO) GetSsoUrlOk() (*string, bool) {
 		return nil, false
 	}
 
-
 	return o.SsoUrl, true
 }
 
 // SetSsoUrl sets field value
 func (o *BackupUnitSSO) SetSsoUrl(v string) {
-
 
 	o.SsoUrl = &v
 
@@ -70,6 +66,7 @@ func (o BackupUnitSSO) MarshalJSON() ([]byte, error) {
 	}
 	return json.Marshal(toSerialize)
 }
+
 type NullableBackupUnitSSO struct {
 	value *BackupUnitSSO
 	isSet bool
@@ -105,5 +102,3 @@ func (v *NullableBackupUnitSSO) UnmarshalJSON(src []byte) error {
 	v.isSet = true
 	return json.Unmarshal(src, &v.value)
 }
-
-

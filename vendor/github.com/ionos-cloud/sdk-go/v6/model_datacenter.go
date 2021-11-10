@@ -21,12 +21,11 @@ type Datacenter struct {
 	// The type of object that has been created
 	Type *Type `json:"type,omitempty"`
 	// URL to the object representation (absolute path)
-	Href *string `json:"href,omitempty"`
-	Metadata *DatacenterElementMetadata `json:"metadata,omitempty"`
-	Properties *DatacenterProperties `json:"properties"`
-	Entities *DataCenterEntities `json:"entities,omitempty"`
+	Href       *string                    `json:"href,omitempty"`
+	Metadata   *DatacenterElementMetadata `json:"metadata,omitempty"`
+	Properties *DatacenterProperties      `json:"properties"`
+	Entities   *DataCenterEntities        `json:"entities,omitempty"`
 }
-
 
 // GetId returns the Id field value
 // If the value is explicit nil, the zero value for string will be returned
@@ -34,7 +33,6 @@ func (o *Datacenter) GetId() *string {
 	if o == nil {
 		return nil
 	}
-
 
 	return o.Id
 
@@ -48,13 +46,11 @@ func (o *Datacenter) GetIdOk() (*string, bool) {
 		return nil, false
 	}
 
-
 	return o.Id, true
 }
 
 // SetId sets field value
 func (o *Datacenter) SetId(v string) {
-
 
 	o.Id = &v
 
@@ -76,7 +72,6 @@ func (o *Datacenter) GetType() *Type {
 		return nil
 	}
 
-
 	return o.Type
 
 }
@@ -89,13 +84,11 @@ func (o *Datacenter) GetTypeOk() (*Type, bool) {
 		return nil, false
 	}
 
-
 	return o.Type, true
 }
 
 // SetType sets field value
 func (o *Datacenter) SetType(v Type) {
-
 
 	o.Type = &v
 
@@ -117,7 +110,6 @@ func (o *Datacenter) GetHref() *string {
 		return nil
 	}
 
-
 	return o.Href
 
 }
@@ -130,13 +122,11 @@ func (o *Datacenter) GetHrefOk() (*string, bool) {
 		return nil, false
 	}
 
-
 	return o.Href, true
 }
 
 // SetHref sets field value
 func (o *Datacenter) SetHref(v string) {
-
 
 	o.Href = &v
 
@@ -158,7 +148,6 @@ func (o *Datacenter) GetMetadata() *DatacenterElementMetadata {
 		return nil
 	}
 
-
 	return o.Metadata
 
 }
@@ -171,13 +160,11 @@ func (o *Datacenter) GetMetadataOk() (*DatacenterElementMetadata, bool) {
 		return nil, false
 	}
 
-
 	return o.Metadata, true
 }
 
 // SetMetadata sets field value
 func (o *Datacenter) SetMetadata(v DatacenterElementMetadata) {
-
 
 	o.Metadata = &v
 
@@ -199,7 +186,6 @@ func (o *Datacenter) GetProperties() *DatacenterProperties {
 		return nil
 	}
 
-
 	return o.Properties
 
 }
@@ -212,13 +198,11 @@ func (o *Datacenter) GetPropertiesOk() (*DatacenterProperties, bool) {
 		return nil, false
 	}
 
-
 	return o.Properties, true
 }
 
 // SetProperties sets field value
 func (o *Datacenter) SetProperties(v DatacenterProperties) {
-
 
 	o.Properties = &v
 
@@ -240,7 +224,6 @@ func (o *Datacenter) GetEntities() *DataCenterEntities {
 		return nil
 	}
 
-
 	return o.Entities
 
 }
@@ -253,13 +236,11 @@ func (o *Datacenter) GetEntitiesOk() (*DataCenterEntities, bool) {
 		return nil, false
 	}
 
-
 	return o.Entities, true
 }
 
 // SetEntities sets field value
 func (o *Datacenter) SetEntities(v DataCenterEntities) {
-
 
 	o.Entities = &v
 
@@ -302,6 +283,7 @@ func (o Datacenter) MarshalJSON() ([]byte, error) {
 	}
 	return json.Marshal(toSerialize)
 }
+
 type NullableDatacenter struct {
 	value *Datacenter
 	isSet bool
@@ -337,5 +319,3 @@ func (v *NullableDatacenter) UnmarshalJSON(src []byte) error {
 	v.isSet = true
 	return json.Unmarshal(src, &v.value)
 }
-
-

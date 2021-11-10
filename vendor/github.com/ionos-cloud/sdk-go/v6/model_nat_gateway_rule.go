@@ -21,11 +21,10 @@ type NatGatewayRule struct {
 	// The type of object that has been created
 	Type *Type `json:"type,omitempty"`
 	// URL to the object representation (absolute path)
-	Href *string `json:"href,omitempty"`
-	Metadata *DatacenterElementMetadata `json:"metadata,omitempty"`
-	Properties *NatGatewayRuleProperties `json:"properties"`
+	Href       *string                    `json:"href,omitempty"`
+	Metadata   *DatacenterElementMetadata `json:"metadata,omitempty"`
+	Properties *NatGatewayRuleProperties  `json:"properties"`
 }
-
 
 // GetId returns the Id field value
 // If the value is explicit nil, the zero value for string will be returned
@@ -33,7 +32,6 @@ func (o *NatGatewayRule) GetId() *string {
 	if o == nil {
 		return nil
 	}
-
 
 	return o.Id
 
@@ -47,13 +45,11 @@ func (o *NatGatewayRule) GetIdOk() (*string, bool) {
 		return nil, false
 	}
 
-
 	return o.Id, true
 }
 
 // SetId sets field value
 func (o *NatGatewayRule) SetId(v string) {
-
 
 	o.Id = &v
 
@@ -75,7 +71,6 @@ func (o *NatGatewayRule) GetType() *Type {
 		return nil
 	}
 
-
 	return o.Type
 
 }
@@ -88,13 +83,11 @@ func (o *NatGatewayRule) GetTypeOk() (*Type, bool) {
 		return nil, false
 	}
 
-
 	return o.Type, true
 }
 
 // SetType sets field value
 func (o *NatGatewayRule) SetType(v Type) {
-
 
 	o.Type = &v
 
@@ -116,7 +109,6 @@ func (o *NatGatewayRule) GetHref() *string {
 		return nil
 	}
 
-
 	return o.Href
 
 }
@@ -129,13 +121,11 @@ func (o *NatGatewayRule) GetHrefOk() (*string, bool) {
 		return nil, false
 	}
 
-
 	return o.Href, true
 }
 
 // SetHref sets field value
 func (o *NatGatewayRule) SetHref(v string) {
-
 
 	o.Href = &v
 
@@ -157,7 +147,6 @@ func (o *NatGatewayRule) GetMetadata() *DatacenterElementMetadata {
 		return nil
 	}
 
-
 	return o.Metadata
 
 }
@@ -170,13 +159,11 @@ func (o *NatGatewayRule) GetMetadataOk() (*DatacenterElementMetadata, bool) {
 		return nil, false
 	}
 
-
 	return o.Metadata, true
 }
 
 // SetMetadata sets field value
 func (o *NatGatewayRule) SetMetadata(v DatacenterElementMetadata) {
-
 
 	o.Metadata = &v
 
@@ -198,7 +185,6 @@ func (o *NatGatewayRule) GetProperties() *NatGatewayRuleProperties {
 		return nil
 	}
 
-
 	return o.Properties
 
 }
@@ -211,13 +197,11 @@ func (o *NatGatewayRule) GetPropertiesOk() (*NatGatewayRuleProperties, bool) {
 		return nil, false
 	}
 
-
 	return o.Properties, true
 }
 
 // SetProperties sets field value
 func (o *NatGatewayRule) SetProperties(v NatGatewayRuleProperties) {
-
 
 	o.Properties = &v
 
@@ -256,6 +240,7 @@ func (o NatGatewayRule) MarshalJSON() ([]byte, error) {
 	}
 	return json.Marshal(toSerialize)
 }
+
 type NullableNatGatewayRule struct {
 	value *NatGatewayRule
 	isSet bool
@@ -291,5 +276,3 @@ func (v *NullableNatGatewayRule) UnmarshalJSON(src []byte) error {
 	v.isSet = true
 	return json.Unmarshal(src, &v.value)
 }
-
-

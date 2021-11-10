@@ -28,13 +28,13 @@ var (
 type NetworkInterfacesApiService service
 
 type ApiDatacentersServersNicsDeleteRequest struct {
-	ctx _context.Context
-	ApiService *NetworkInterfacesApiService
-	datacenterId string
-	serverId string
-	nicId string
-	pretty *bool
-	depth *int32
+	ctx             _context.Context
+	ApiService      *NetworkInterfacesApiService
+	datacenterId    string
+	serverId        string
+	nicId           string
+	pretty          *bool
+	depth           *int32
 	xContractNumber *int32
 }
 
@@ -66,11 +66,11 @@ func (r ApiDatacentersServersNicsDeleteRequest) Execute() (*APIResponse, error) 
  */
 func (a *NetworkInterfacesApiService) DatacentersServersNicsDelete(ctx _context.Context, datacenterId string, serverId string, nicId string) ApiDatacentersServersNicsDeleteRequest {
 	return ApiDatacentersServersNicsDeleteRequest{
-		ApiService: a,
-		ctx: ctx,
+		ApiService:   a,
+		ctx:          ctx,
 		datacenterId: datacenterId,
-		serverId: serverId,
-		nicId: nicId,
+		serverId:     serverId,
+		nicId:        nicId,
 	}
 }
 
@@ -106,6 +106,7 @@ func (a *NetworkInterfacesApiService) DatacentersServersNicsDeleteExecute(r ApiD
 	if r.depth != nil {
 		localVarQueryParams.Add("depth", parameterToString(*r.depth, ""))
 	}
+
 	// to determine the Content-Type header
 	localVarHTTPContentTypes := []string{}
 
@@ -147,12 +148,12 @@ func (a *NetworkInterfacesApiService) DatacentersServersNicsDeleteExecute(r ApiD
 
 	localVarHTTPResponse, httpRequestTime, err := a.client.callAPI(req)
 
-	localVarAPIResponse := &APIResponse {
-		Response: localVarHTTPResponse,
-		Method: localVarHTTPMethod,
-		RequestURL: localVarPath,
+	localVarAPIResponse := &APIResponse{
+		Response:    localVarHTTPResponse,
+		Method:      localVarHTTPMethod,
+		RequestURL:  localVarPath,
 		RequestTime: httpRequestTime,
-		Operation: "DatacentersServersNicsDelete",
+		Operation:   "DatacentersServersNicsDelete",
 	}
 
 	if err != nil || localVarHTTPResponse == nil {
@@ -169,16 +170,16 @@ func (a *NetworkInterfacesApiService) DatacentersServersNicsDeleteExecute(r ApiD
 	if localVarHTTPResponse.StatusCode >= 300 {
 		newErr := GenericOpenAPIError{
 			statusCode: localVarHTTPResponse.StatusCode,
-			body:  localVarBody,
-			error: fmt.Sprintf("%s: %s", localVarHTTPResponse.Status, string(localVarBody)),
+			body:       localVarBody,
+			error:      fmt.Sprintf(FormatStringErr, localVarHTTPResponse.Status, string(localVarBody)),
 		}
-			var v Error
-			err = a.client.decode(&v, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
-			if err != nil {
-				newErr.error = err.Error()
-				return localVarAPIResponse, newErr
-			}
-			newErr.model = v
+		var v Error
+		err = a.client.decode(&v, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
+		if err != nil {
+			newErr.error = err.Error()
+			return localVarAPIResponse, newErr
+		}
+		newErr.model = v
 		return localVarAPIResponse, newErr
 	}
 
@@ -186,13 +187,13 @@ func (a *NetworkInterfacesApiService) DatacentersServersNicsDeleteExecute(r ApiD
 }
 
 type ApiDatacentersServersNicsFindByIdRequest struct {
-	ctx _context.Context
-	ApiService *NetworkInterfacesApiService
-	datacenterId string
-	serverId string
-	nicId string
-	pretty *bool
-	depth *int32
+	ctx             _context.Context
+	ApiService      *NetworkInterfacesApiService
+	datacenterId    string
+	serverId        string
+	nicId           string
+	pretty          *bool
+	depth           *int32
 	xContractNumber *int32
 }
 
@@ -224,11 +225,11 @@ func (r ApiDatacentersServersNicsFindByIdRequest) Execute() (Nic, *APIResponse, 
  */
 func (a *NetworkInterfacesApiService) DatacentersServersNicsFindById(ctx _context.Context, datacenterId string, serverId string, nicId string) ApiDatacentersServersNicsFindByIdRequest {
 	return ApiDatacentersServersNicsFindByIdRequest{
-		ApiService: a,
-		ctx: ctx,
+		ApiService:   a,
+		ctx:          ctx,
 		datacenterId: datacenterId,
-		serverId: serverId,
-		nicId: nicId,
+		serverId:     serverId,
+		nicId:        nicId,
 	}
 }
 
@@ -266,6 +267,7 @@ func (a *NetworkInterfacesApiService) DatacentersServersNicsFindByIdExecute(r Ap
 	if r.depth != nil {
 		localVarQueryParams.Add("depth", parameterToString(*r.depth, ""))
 	}
+
 	// to determine the Content-Type header
 	localVarHTTPContentTypes := []string{}
 
@@ -307,12 +309,12 @@ func (a *NetworkInterfacesApiService) DatacentersServersNicsFindByIdExecute(r Ap
 
 	localVarHTTPResponse, httpRequestTime, err := a.client.callAPI(req)
 
-	localVarAPIResponse := &APIResponse {
-		Response: localVarHTTPResponse,
-		Method: localVarHTTPMethod,
-		RequestURL: localVarPath,
+	localVarAPIResponse := &APIResponse{
+		Response:    localVarHTTPResponse,
+		Method:      localVarHTTPMethod,
+		RequestURL:  localVarPath,
 		RequestTime: httpRequestTime,
-		Operation: "DatacentersServersNicsFindById",
+		Operation:   "DatacentersServersNicsFindById",
 	}
 
 	if err != nil || localVarHTTPResponse == nil {
@@ -329,16 +331,16 @@ func (a *NetworkInterfacesApiService) DatacentersServersNicsFindByIdExecute(r Ap
 	if localVarHTTPResponse.StatusCode >= 300 {
 		newErr := GenericOpenAPIError{
 			statusCode: localVarHTTPResponse.StatusCode,
-			body:  localVarBody,
-			error: fmt.Sprintf("%s: %s", localVarHTTPResponse.Status, string(localVarBody)),
+			body:       localVarBody,
+			error:      fmt.Sprintf(FormatStringErr, localVarHTTPResponse.Status, string(localVarBody)),
 		}
-			var v Error
-			err = a.client.decode(&v, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
-			if err != nil {
-				newErr.error = err.Error()
-				return localVarReturnValue, localVarAPIResponse, newErr
-			}
-			newErr.model = v
+		var v Error
+		err = a.client.decode(&v, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
+		if err != nil {
+			newErr.error = err.Error()
+			return localVarReturnValue, localVarAPIResponse, newErr
+		}
+		newErr.model = v
 		return localVarReturnValue, localVarAPIResponse, newErr
 	}
 
@@ -346,8 +348,8 @@ func (a *NetworkInterfacesApiService) DatacentersServersNicsFindByIdExecute(r Ap
 	if err != nil {
 		newErr := GenericOpenAPIError{
 			statusCode: localVarHTTPResponse.StatusCode,
-			body:  localVarBody,
-			error: err.Error(),
+			body:       localVarBody,
+			error:      err.Error(),
 		}
 		return localVarReturnValue, localVarAPIResponse, newErr
 	}
@@ -356,15 +358,17 @@ func (a *NetworkInterfacesApiService) DatacentersServersNicsFindByIdExecute(r Ap
 }
 
 type ApiDatacentersServersNicsGetRequest struct {
-	ctx _context.Context
-	ApiService *NetworkInterfacesApiService
-	datacenterId string
-	serverId string
-	pretty *bool
-	depth *int32
+	ctx             _context.Context
+	ApiService      *NetworkInterfacesApiService
+	filters         _neturl.Values
+	orderBy         *string
+	datacenterId    string
+	serverId        string
+	pretty          *bool
+	depth           *int32
 	xContractNumber *int32
-	offset *int32
-	limit *int32
+	offset          *int32
+	limit           *int32
 }
 
 func (r ApiDatacentersServersNicsGetRequest) Pretty(pretty bool) ApiDatacentersServersNicsGetRequest {
@@ -388,6 +392,19 @@ func (r ApiDatacentersServersNicsGetRequest) Limit(limit int32) ApiDatacentersSe
 	return r
 }
 
+// Filters query parameters limit results to those containing a matching value for a specific property.
+func (r ApiDatacentersServersNicsGetRequest) Filter(key string, value string) ApiDatacentersServersNicsGetRequest {
+	filterKey := fmt.Sprintf(FilterQueryParam, key)
+	r.filters[filterKey] = []string{value}
+	return r
+}
+
+// OrderBy query param sorts the results alphanumerically in ascending order based on the specified property.
+func (r ApiDatacentersServersNicsGetRequest) OrderBy(orderBy string) ApiDatacentersServersNicsGetRequest {
+	r.orderBy = &orderBy
+	return r
+}
+
 func (r ApiDatacentersServersNicsGetRequest) Execute() (Nics, *APIResponse, error) {
 	return r.ApiService.DatacentersServersNicsGetExecute(r)
 }
@@ -402,10 +419,11 @@ func (r ApiDatacentersServersNicsGetRequest) Execute() (Nics, *APIResponse, erro
  */
 func (a *NetworkInterfacesApiService) DatacentersServersNicsGet(ctx _context.Context, datacenterId string, serverId string) ApiDatacentersServersNicsGetRequest {
 	return ApiDatacentersServersNicsGetRequest{
-		ApiService: a,
-		ctx: ctx,
+		ApiService:   a,
+		ctx:          ctx,
 		datacenterId: datacenterId,
-		serverId: serverId,
+		serverId:     serverId,
+		filters:      _neturl.Values{},
 	}
 }
 
@@ -448,6 +466,17 @@ func (a *NetworkInterfacesApiService) DatacentersServersNicsGetExecute(r ApiData
 	if r.limit != nil {
 		localVarQueryParams.Add("limit", parameterToString(*r.limit, ""))
 	}
+	if r.orderBy != nil {
+		localVarQueryParams.Add("orderBy", parameterToString(*r.orderBy, ""))
+	}
+	if len(r.filters) > 0 {
+		for k, v := range r.filters {
+			for _, iv := range v {
+				localVarQueryParams.Add(k, iv)
+			}
+		}
+	}
+
 	// to determine the Content-Type header
 	localVarHTTPContentTypes := []string{}
 
@@ -489,12 +518,12 @@ func (a *NetworkInterfacesApiService) DatacentersServersNicsGetExecute(r ApiData
 
 	localVarHTTPResponse, httpRequestTime, err := a.client.callAPI(req)
 
-	localVarAPIResponse := &APIResponse {
-		Response: localVarHTTPResponse,
-		Method: localVarHTTPMethod,
-		RequestURL: localVarPath,
+	localVarAPIResponse := &APIResponse{
+		Response:    localVarHTTPResponse,
+		Method:      localVarHTTPMethod,
+		RequestURL:  localVarPath,
 		RequestTime: httpRequestTime,
-		Operation: "DatacentersServersNicsGet",
+		Operation:   "DatacentersServersNicsGet",
 	}
 
 	if err != nil || localVarHTTPResponse == nil {
@@ -511,16 +540,16 @@ func (a *NetworkInterfacesApiService) DatacentersServersNicsGetExecute(r ApiData
 	if localVarHTTPResponse.StatusCode >= 300 {
 		newErr := GenericOpenAPIError{
 			statusCode: localVarHTTPResponse.StatusCode,
-			body:  localVarBody,
-			error: fmt.Sprintf("%s: %s", localVarHTTPResponse.Status, string(localVarBody)),
+			body:       localVarBody,
+			error:      fmt.Sprintf(FormatStringErr, localVarHTTPResponse.Status, string(localVarBody)),
 		}
-			var v Error
-			err = a.client.decode(&v, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
-			if err != nil {
-				newErr.error = err.Error()
-				return localVarReturnValue, localVarAPIResponse, newErr
-			}
-			newErr.model = v
+		var v Error
+		err = a.client.decode(&v, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
+		if err != nil {
+			newErr.error = err.Error()
+			return localVarReturnValue, localVarAPIResponse, newErr
+		}
+		newErr.model = v
 		return localVarReturnValue, localVarAPIResponse, newErr
 	}
 
@@ -528,8 +557,8 @@ func (a *NetworkInterfacesApiService) DatacentersServersNicsGetExecute(r ApiData
 	if err != nil {
 		newErr := GenericOpenAPIError{
 			statusCode: localVarHTTPResponse.StatusCode,
-			body:  localVarBody,
-			error: err.Error(),
+			body:       localVarBody,
+			error:      err.Error(),
 		}
 		return localVarReturnValue, localVarAPIResponse, newErr
 	}
@@ -538,14 +567,14 @@ func (a *NetworkInterfacesApiService) DatacentersServersNicsGetExecute(r ApiData
 }
 
 type ApiDatacentersServersNicsPatchRequest struct {
-	ctx _context.Context
-	ApiService *NetworkInterfacesApiService
-	datacenterId string
-	serverId string
-	nicId string
-	nic *NicProperties
-	pretty *bool
-	depth *int32
+	ctx             _context.Context
+	ApiService      *NetworkInterfacesApiService
+	datacenterId    string
+	serverId        string
+	nicId           string
+	nic             *NicProperties
+	pretty          *bool
+	depth           *int32
 	xContractNumber *int32
 }
 
@@ -581,11 +610,11 @@ func (r ApiDatacentersServersNicsPatchRequest) Execute() (Nic, *APIResponse, err
  */
 func (a *NetworkInterfacesApiService) DatacentersServersNicsPatch(ctx _context.Context, datacenterId string, serverId string, nicId string) ApiDatacentersServersNicsPatchRequest {
 	return ApiDatacentersServersNicsPatchRequest{
-		ApiService: a,
-		ctx: ctx,
+		ApiService:   a,
+		ctx:          ctx,
 		datacenterId: datacenterId,
-		serverId: serverId,
-		nicId: nicId,
+		serverId:     serverId,
+		nicId:        nicId,
 	}
 }
 
@@ -626,6 +655,7 @@ func (a *NetworkInterfacesApiService) DatacentersServersNicsPatchExecute(r ApiDa
 	if r.depth != nil {
 		localVarQueryParams.Add("depth", parameterToString(*r.depth, ""))
 	}
+
 	// to determine the Content-Type header
 	localVarHTTPContentTypes := []string{"application/json"}
 
@@ -669,12 +699,12 @@ func (a *NetworkInterfacesApiService) DatacentersServersNicsPatchExecute(r ApiDa
 
 	localVarHTTPResponse, httpRequestTime, err := a.client.callAPI(req)
 
-	localVarAPIResponse := &APIResponse {
-		Response: localVarHTTPResponse,
-		Method: localVarHTTPMethod,
-		RequestURL: localVarPath,
+	localVarAPIResponse := &APIResponse{
+		Response:    localVarHTTPResponse,
+		Method:      localVarHTTPMethod,
+		RequestURL:  localVarPath,
 		RequestTime: httpRequestTime,
-		Operation: "DatacentersServersNicsPatch",
+		Operation:   "DatacentersServersNicsPatch",
 	}
 
 	if err != nil || localVarHTTPResponse == nil {
@@ -691,16 +721,16 @@ func (a *NetworkInterfacesApiService) DatacentersServersNicsPatchExecute(r ApiDa
 	if localVarHTTPResponse.StatusCode >= 300 {
 		newErr := GenericOpenAPIError{
 			statusCode: localVarHTTPResponse.StatusCode,
-			body:  localVarBody,
-			error: fmt.Sprintf("%s: %s", localVarHTTPResponse.Status, string(localVarBody)),
+			body:       localVarBody,
+			error:      fmt.Sprintf(FormatStringErr, localVarHTTPResponse.Status, string(localVarBody)),
 		}
-			var v Error
-			err = a.client.decode(&v, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
-			if err != nil {
-				newErr.error = err.Error()
-				return localVarReturnValue, localVarAPIResponse, newErr
-			}
-			newErr.model = v
+		var v Error
+		err = a.client.decode(&v, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
+		if err != nil {
+			newErr.error = err.Error()
+			return localVarReturnValue, localVarAPIResponse, newErr
+		}
+		newErr.model = v
 		return localVarReturnValue, localVarAPIResponse, newErr
 	}
 
@@ -708,8 +738,8 @@ func (a *NetworkInterfacesApiService) DatacentersServersNicsPatchExecute(r ApiDa
 	if err != nil {
 		newErr := GenericOpenAPIError{
 			statusCode: localVarHTTPResponse.StatusCode,
-			body:  localVarBody,
-			error: err.Error(),
+			body:       localVarBody,
+			error:      err.Error(),
 		}
 		return localVarReturnValue, localVarAPIResponse, newErr
 	}
@@ -718,13 +748,13 @@ func (a *NetworkInterfacesApiService) DatacentersServersNicsPatchExecute(r ApiDa
 }
 
 type ApiDatacentersServersNicsPostRequest struct {
-	ctx _context.Context
-	ApiService *NetworkInterfacesApiService
-	datacenterId string
-	serverId string
-	nic *Nic
-	pretty *bool
-	depth *int32
+	ctx             _context.Context
+	ApiService      *NetworkInterfacesApiService
+	datacenterId    string
+	serverId        string
+	nic             *Nic
+	pretty          *bool
+	depth           *int32
 	xContractNumber *int32
 }
 
@@ -759,10 +789,10 @@ func (r ApiDatacentersServersNicsPostRequest) Execute() (Nic, *APIResponse, erro
  */
 func (a *NetworkInterfacesApiService) DatacentersServersNicsPost(ctx _context.Context, datacenterId string, serverId string) ApiDatacentersServersNicsPostRequest {
 	return ApiDatacentersServersNicsPostRequest{
-		ApiService: a,
-		ctx: ctx,
+		ApiService:   a,
+		ctx:          ctx,
 		datacenterId: datacenterId,
-		serverId: serverId,
+		serverId:     serverId,
 	}
 }
 
@@ -802,6 +832,7 @@ func (a *NetworkInterfacesApiService) DatacentersServersNicsPostExecute(r ApiDat
 	if r.depth != nil {
 		localVarQueryParams.Add("depth", parameterToString(*r.depth, ""))
 	}
+
 	// to determine the Content-Type header
 	localVarHTTPContentTypes := []string{"application/json"}
 
@@ -845,12 +876,12 @@ func (a *NetworkInterfacesApiService) DatacentersServersNicsPostExecute(r ApiDat
 
 	localVarHTTPResponse, httpRequestTime, err := a.client.callAPI(req)
 
-	localVarAPIResponse := &APIResponse {
-		Response: localVarHTTPResponse,
-		Method: localVarHTTPMethod,
-		RequestURL: localVarPath,
+	localVarAPIResponse := &APIResponse{
+		Response:    localVarHTTPResponse,
+		Method:      localVarHTTPMethod,
+		RequestURL:  localVarPath,
 		RequestTime: httpRequestTime,
-		Operation: "DatacentersServersNicsPost",
+		Operation:   "DatacentersServersNicsPost",
 	}
 
 	if err != nil || localVarHTTPResponse == nil {
@@ -867,16 +898,16 @@ func (a *NetworkInterfacesApiService) DatacentersServersNicsPostExecute(r ApiDat
 	if localVarHTTPResponse.StatusCode >= 300 {
 		newErr := GenericOpenAPIError{
 			statusCode: localVarHTTPResponse.StatusCode,
-			body:  localVarBody,
-			error: fmt.Sprintf("%s: %s", localVarHTTPResponse.Status, string(localVarBody)),
+			body:       localVarBody,
+			error:      fmt.Sprintf(FormatStringErr, localVarHTTPResponse.Status, string(localVarBody)),
 		}
-			var v Error
-			err = a.client.decode(&v, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
-			if err != nil {
-				newErr.error = err.Error()
-				return localVarReturnValue, localVarAPIResponse, newErr
-			}
-			newErr.model = v
+		var v Error
+		err = a.client.decode(&v, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
+		if err != nil {
+			newErr.error = err.Error()
+			return localVarReturnValue, localVarAPIResponse, newErr
+		}
+		newErr.model = v
 		return localVarReturnValue, localVarAPIResponse, newErr
 	}
 
@@ -884,8 +915,8 @@ func (a *NetworkInterfacesApiService) DatacentersServersNicsPostExecute(r ApiDat
 	if err != nil {
 		newErr := GenericOpenAPIError{
 			statusCode: localVarHTTPResponse.StatusCode,
-			body:  localVarBody,
-			error: err.Error(),
+			body:       localVarBody,
+			error:      err.Error(),
 		}
 		return localVarReturnValue, localVarAPIResponse, newErr
 	}
@@ -894,14 +925,14 @@ func (a *NetworkInterfacesApiService) DatacentersServersNicsPostExecute(r ApiDat
 }
 
 type ApiDatacentersServersNicsPutRequest struct {
-	ctx _context.Context
-	ApiService *NetworkInterfacesApiService
-	datacenterId string
-	serverId string
-	nicId string
-	nic *NicPut
-	pretty *bool
-	depth *int32
+	ctx             _context.Context
+	ApiService      *NetworkInterfacesApiService
+	datacenterId    string
+	serverId        string
+	nicId           string
+	nic             *NicPut
+	pretty          *bool
+	depth           *int32
 	xContractNumber *int32
 }
 
@@ -937,11 +968,11 @@ func (r ApiDatacentersServersNicsPutRequest) Execute() (Nic, *APIResponse, error
  */
 func (a *NetworkInterfacesApiService) DatacentersServersNicsPut(ctx _context.Context, datacenterId string, serverId string, nicId string) ApiDatacentersServersNicsPutRequest {
 	return ApiDatacentersServersNicsPutRequest{
-		ApiService: a,
-		ctx: ctx,
+		ApiService:   a,
+		ctx:          ctx,
 		datacenterId: datacenterId,
-		serverId: serverId,
-		nicId: nicId,
+		serverId:     serverId,
+		nicId:        nicId,
 	}
 }
 
@@ -982,6 +1013,7 @@ func (a *NetworkInterfacesApiService) DatacentersServersNicsPutExecute(r ApiData
 	if r.depth != nil {
 		localVarQueryParams.Add("depth", parameterToString(*r.depth, ""))
 	}
+
 	// to determine the Content-Type header
 	localVarHTTPContentTypes := []string{"application/json"}
 
@@ -1025,12 +1057,12 @@ func (a *NetworkInterfacesApiService) DatacentersServersNicsPutExecute(r ApiData
 
 	localVarHTTPResponse, httpRequestTime, err := a.client.callAPI(req)
 
-	localVarAPIResponse := &APIResponse {
-		Response: localVarHTTPResponse,
-		Method: localVarHTTPMethod,
-		RequestURL: localVarPath,
+	localVarAPIResponse := &APIResponse{
+		Response:    localVarHTTPResponse,
+		Method:      localVarHTTPMethod,
+		RequestURL:  localVarPath,
 		RequestTime: httpRequestTime,
-		Operation: "DatacentersServersNicsPut",
+		Operation:   "DatacentersServersNicsPut",
 	}
 
 	if err != nil || localVarHTTPResponse == nil {
@@ -1047,16 +1079,16 @@ func (a *NetworkInterfacesApiService) DatacentersServersNicsPutExecute(r ApiData
 	if localVarHTTPResponse.StatusCode >= 300 {
 		newErr := GenericOpenAPIError{
 			statusCode: localVarHTTPResponse.StatusCode,
-			body:  localVarBody,
-			error: fmt.Sprintf("%s: %s", localVarHTTPResponse.Status, string(localVarBody)),
+			body:       localVarBody,
+			error:      fmt.Sprintf(FormatStringErr, localVarHTTPResponse.Status, string(localVarBody)),
 		}
-			var v Error
-			err = a.client.decode(&v, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
-			if err != nil {
-				newErr.error = err.Error()
-				return localVarReturnValue, localVarAPIResponse, newErr
-			}
-			newErr.model = v
+		var v Error
+		err = a.client.decode(&v, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
+		if err != nil {
+			newErr.error = err.Error()
+			return localVarReturnValue, localVarAPIResponse, newErr
+		}
+		newErr.model = v
 		return localVarReturnValue, localVarAPIResponse, newErr
 	}
 
@@ -1064,8 +1096,8 @@ func (a *NetworkInterfacesApiService) DatacentersServersNicsPutExecute(r ApiData
 	if err != nil {
 		newErr := GenericOpenAPIError{
 			statusCode: localVarHTTPResponse.StatusCode,
-			body:  localVarBody,
-			error: err.Error(),
+			body:       localVarBody,
+			error:      err.Error(),
 		}
 		return localVarReturnValue, localVarAPIResponse, newErr
 	}

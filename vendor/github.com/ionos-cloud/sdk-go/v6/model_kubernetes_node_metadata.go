@@ -17,7 +17,7 @@ import (
 
 // KubernetesNodeMetadata struct for KubernetesNodeMetadata
 type KubernetesNodeMetadata struct {
-	// Resource's Entity Tag as defined in http://www.w3.org/Protocols/rfc2616/rfc2616-sec3.html#sec3.11 . Entity Tag is also added as an 'ETag response header to requests which don't use 'depth' parameter. 
+	// Resource's Entity Tag as defined in http://www.w3.org/Protocols/rfc2616/rfc2616-sec3.html#sec3.11 . Entity Tag is also added as an 'ETag response header to requests which don't use 'depth' parameter.
 	Etag *string `json:"etag,omitempty"`
 	// The last time the resource was created
 	CreatedDate *IonosTime
@@ -29,14 +29,12 @@ type KubernetesNodeMetadata struct {
 	LastSoftwareUpdatedDate *IonosTime
 }
 
-
 // GetEtag returns the Etag field value
 // If the value is explicit nil, the zero value for string will be returned
 func (o *KubernetesNodeMetadata) GetEtag() *string {
 	if o == nil {
 		return nil
 	}
-
 
 	return o.Etag
 
@@ -50,13 +48,11 @@ func (o *KubernetesNodeMetadata) GetEtagOk() (*string, bool) {
 		return nil, false
 	}
 
-
 	return o.Etag, true
 }
 
 // SetEtag sets field value
 func (o *KubernetesNodeMetadata) SetEtag(v string) {
-
 
 	o.Etag = &v
 
@@ -83,7 +79,6 @@ func (o *KubernetesNodeMetadata) GetCreatedDate() *time.Time {
 	}
 	return &o.CreatedDate.Time
 
-
 }
 
 // GetCreatedDateOk returns a tuple with the CreatedDate field value
@@ -105,7 +100,6 @@ func (o *KubernetesNodeMetadata) GetCreatedDateOk() (*time.Time, bool) {
 func (o *KubernetesNodeMetadata) SetCreatedDate(v time.Time) {
 
 	o.CreatedDate = &IonosTime{v}
-
 
 }
 
@@ -130,7 +124,6 @@ func (o *KubernetesNodeMetadata) GetLastModifiedDate() *time.Time {
 	}
 	return &o.LastModifiedDate.Time
 
-
 }
 
 // GetLastModifiedDateOk returns a tuple with the LastModifiedDate field value
@@ -153,7 +146,6 @@ func (o *KubernetesNodeMetadata) SetLastModifiedDate(v time.Time) {
 
 	o.LastModifiedDate = &IonosTime{v}
 
-
 }
 
 // HasLastModifiedDate returns a boolean if a field has been set.
@@ -172,7 +164,6 @@ func (o *KubernetesNodeMetadata) GetState() *string {
 		return nil
 	}
 
-
 	return o.State
 
 }
@@ -185,13 +176,11 @@ func (o *KubernetesNodeMetadata) GetStateOk() (*string, bool) {
 		return nil, false
 	}
 
-
 	return o.State, true
 }
 
 // SetState sets field value
 func (o *KubernetesNodeMetadata) SetState(v string) {
-
 
 	o.State = &v
 
@@ -218,7 +207,6 @@ func (o *KubernetesNodeMetadata) GetLastSoftwareUpdatedDate() *time.Time {
 	}
 	return &o.LastSoftwareUpdatedDate.Time
 
-
 }
 
 // GetLastSoftwareUpdatedDateOk returns a tuple with the LastSoftwareUpdatedDate field value
@@ -240,7 +228,6 @@ func (o *KubernetesNodeMetadata) GetLastSoftwareUpdatedDateOk() (*time.Time, boo
 func (o *KubernetesNodeMetadata) SetLastSoftwareUpdatedDate(v time.Time) {
 
 	o.LastSoftwareUpdatedDate = &IonosTime{v}
-
 
 }
 
@@ -277,6 +264,7 @@ func (o KubernetesNodeMetadata) MarshalJSON() ([]byte, error) {
 	}
 	return json.Marshal(toSerialize)
 }
+
 type NullableKubernetesNodeMetadata struct {
 	value *KubernetesNodeMetadata
 	isSet bool
@@ -312,5 +300,3 @@ func (v *NullableKubernetesNodeMetadata) UnmarshalJSON(src []byte) error {
 	v.isSet = true
 	return json.Unmarshal(src, &v.value)
 }
-
-

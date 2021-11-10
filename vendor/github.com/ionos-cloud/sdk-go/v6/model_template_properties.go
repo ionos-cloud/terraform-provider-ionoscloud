@@ -26,14 +26,12 @@ type TemplateProperties struct {
 	StorageSize *float32 `json:"storageSize"`
 }
 
-
 // GetName returns the Name field value
 // If the value is explicit nil, the zero value for string will be returned
 func (o *TemplateProperties) GetName() *string {
 	if o == nil {
 		return nil
 	}
-
 
 	return o.Name
 
@@ -47,13 +45,11 @@ func (o *TemplateProperties) GetNameOk() (*string, bool) {
 		return nil, false
 	}
 
-
 	return o.Name, true
 }
 
 // SetName sets field value
 func (o *TemplateProperties) SetName(v string) {
-
 
 	o.Name = &v
 
@@ -75,7 +71,6 @@ func (o *TemplateProperties) GetCores() *float32 {
 		return nil
 	}
 
-
 	return o.Cores
 
 }
@@ -88,13 +83,11 @@ func (o *TemplateProperties) GetCoresOk() (*float32, bool) {
 		return nil, false
 	}
 
-
 	return o.Cores, true
 }
 
 // SetCores sets field value
 func (o *TemplateProperties) SetCores(v float32) {
-
 
 	o.Cores = &v
 
@@ -116,7 +109,6 @@ func (o *TemplateProperties) GetRam() *float32 {
 		return nil
 	}
 
-
 	return o.Ram
 
 }
@@ -129,13 +121,11 @@ func (o *TemplateProperties) GetRamOk() (*float32, bool) {
 		return nil, false
 	}
 
-
 	return o.Ram, true
 }
 
 // SetRam sets field value
 func (o *TemplateProperties) SetRam(v float32) {
-
 
 	o.Ram = &v
 
@@ -157,7 +147,6 @@ func (o *TemplateProperties) GetStorageSize() *float32 {
 		return nil
 	}
 
-
 	return o.StorageSize
 
 }
@@ -170,13 +159,11 @@ func (o *TemplateProperties) GetStorageSizeOk() (*float32, bool) {
 		return nil, false
 	}
 
-
 	return o.StorageSize, true
 }
 
 // SetStorageSize sets field value
 func (o *TemplateProperties) SetStorageSize(v float32) {
-
 
 	o.StorageSize = &v
 
@@ -211,6 +198,7 @@ func (o TemplateProperties) MarshalJSON() ([]byte, error) {
 	}
 	return json.Marshal(toSerialize)
 }
+
 type NullableTemplateProperties struct {
 	value *TemplateProperties
 	isSet bool
@@ -246,5 +234,3 @@ func (v *NullableTemplateProperties) UnmarshalJSON(src []byte) error {
 	v.isSet = true
 	return json.Unmarshal(src, &v.value)
 }
-
-

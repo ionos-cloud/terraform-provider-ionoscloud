@@ -17,7 +17,7 @@ import (
 
 // DatacenterElementMetadata struct for DatacenterElementMetadata
 type DatacenterElementMetadata struct {
-	// Resource's Entity Tag as defined in http://www.w3.org/Protocols/rfc2616/rfc2616-sec3.html#sec3.11 . Entity Tag is also added as an 'ETag response header to requests which don't use 'depth' parameter. 
+	// Resource's Entity Tag as defined in http://www.w3.org/Protocols/rfc2616/rfc2616-sec3.html#sec3.11 . Entity Tag is also added as an 'ETag response header to requests which don't use 'depth' parameter.
 	Etag *string `json:"etag,omitempty"`
 	// The last time the resource was created
 	CreatedDate *IonosTime
@@ -35,14 +35,12 @@ type DatacenterElementMetadata struct {
 	State *string `json:"state,omitempty"`
 }
 
-
 // GetEtag returns the Etag field value
 // If the value is explicit nil, the zero value for string will be returned
 func (o *DatacenterElementMetadata) GetEtag() *string {
 	if o == nil {
 		return nil
 	}
-
 
 	return o.Etag
 
@@ -56,13 +54,11 @@ func (o *DatacenterElementMetadata) GetEtagOk() (*string, bool) {
 		return nil, false
 	}
 
-
 	return o.Etag, true
 }
 
 // SetEtag sets field value
 func (o *DatacenterElementMetadata) SetEtag(v string) {
-
 
 	o.Etag = &v
 
@@ -89,7 +85,6 @@ func (o *DatacenterElementMetadata) GetCreatedDate() *time.Time {
 	}
 	return &o.CreatedDate.Time
 
-
 }
 
 // GetCreatedDateOk returns a tuple with the CreatedDate field value
@@ -112,7 +107,6 @@ func (o *DatacenterElementMetadata) SetCreatedDate(v time.Time) {
 
 	o.CreatedDate = &IonosTime{v}
 
-
 }
 
 // HasCreatedDate returns a boolean if a field has been set.
@@ -131,7 +125,6 @@ func (o *DatacenterElementMetadata) GetCreatedBy() *string {
 		return nil
 	}
 
-
 	return o.CreatedBy
 
 }
@@ -144,13 +137,11 @@ func (o *DatacenterElementMetadata) GetCreatedByOk() (*string, bool) {
 		return nil, false
 	}
 
-
 	return o.CreatedBy, true
 }
 
 // SetCreatedBy sets field value
 func (o *DatacenterElementMetadata) SetCreatedBy(v string) {
-
 
 	o.CreatedBy = &v
 
@@ -172,7 +163,6 @@ func (o *DatacenterElementMetadata) GetCreatedByUserId() *string {
 		return nil
 	}
 
-
 	return o.CreatedByUserId
 
 }
@@ -185,13 +175,11 @@ func (o *DatacenterElementMetadata) GetCreatedByUserIdOk() (*string, bool) {
 		return nil, false
 	}
 
-
 	return o.CreatedByUserId, true
 }
 
 // SetCreatedByUserId sets field value
 func (o *DatacenterElementMetadata) SetCreatedByUserId(v string) {
-
 
 	o.CreatedByUserId = &v
 
@@ -218,7 +206,6 @@ func (o *DatacenterElementMetadata) GetLastModifiedDate() *time.Time {
 	}
 	return &o.LastModifiedDate.Time
 
-
 }
 
 // GetLastModifiedDateOk returns a tuple with the LastModifiedDate field value
@@ -241,7 +228,6 @@ func (o *DatacenterElementMetadata) SetLastModifiedDate(v time.Time) {
 
 	o.LastModifiedDate = &IonosTime{v}
 
-
 }
 
 // HasLastModifiedDate returns a boolean if a field has been set.
@@ -260,7 +246,6 @@ func (o *DatacenterElementMetadata) GetLastModifiedBy() *string {
 		return nil
 	}
 
-
 	return o.LastModifiedBy
 
 }
@@ -273,13 +258,11 @@ func (o *DatacenterElementMetadata) GetLastModifiedByOk() (*string, bool) {
 		return nil, false
 	}
 
-
 	return o.LastModifiedBy, true
 }
 
 // SetLastModifiedBy sets field value
 func (o *DatacenterElementMetadata) SetLastModifiedBy(v string) {
-
 
 	o.LastModifiedBy = &v
 
@@ -301,7 +284,6 @@ func (o *DatacenterElementMetadata) GetLastModifiedByUserId() *string {
 		return nil
 	}
 
-
 	return o.LastModifiedByUserId
 
 }
@@ -314,13 +296,11 @@ func (o *DatacenterElementMetadata) GetLastModifiedByUserIdOk() (*string, bool) 
 		return nil, false
 	}
 
-
 	return o.LastModifiedByUserId, true
 }
 
 // SetLastModifiedByUserId sets field value
 func (o *DatacenterElementMetadata) SetLastModifiedByUserId(v string) {
-
 
 	o.LastModifiedByUserId = &v
 
@@ -342,7 +322,6 @@ func (o *DatacenterElementMetadata) GetState() *string {
 		return nil
 	}
 
-
 	return o.State
 
 }
@@ -355,13 +334,11 @@ func (o *DatacenterElementMetadata) GetStateOk() (*string, bool) {
 		return nil, false
 	}
 
-
 	return o.State, true
 }
 
 // SetState sets field value
 func (o *DatacenterElementMetadata) SetState(v string) {
-
 
 	o.State = &v
 
@@ -412,6 +389,7 @@ func (o DatacenterElementMetadata) MarshalJSON() ([]byte, error) {
 	}
 	return json.Marshal(toSerialize)
 }
+
 type NullableDatacenterElementMetadata struct {
 	value *DatacenterElementMetadata
 	isSet bool
@@ -447,5 +425,3 @@ func (v *NullableDatacenterElementMetadata) UnmarshalJSON(src []byte) error {
 	v.isSet = true
 	return json.Unmarshal(src, &v.value)
 }
-
-

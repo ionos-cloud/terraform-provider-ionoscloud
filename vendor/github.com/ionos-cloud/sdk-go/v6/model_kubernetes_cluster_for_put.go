@@ -21,12 +21,11 @@ type KubernetesClusterForPut struct {
 	// The type of object
 	Type *string `json:"type,omitempty"`
 	// URL to the object representation (absolute path)
-	Href *string `json:"href,omitempty"`
-	Metadata *DatacenterElementMetadata `json:"metadata,omitempty"`
+	Href       *string                            `json:"href,omitempty"`
+	Metadata   *DatacenterElementMetadata         `json:"metadata,omitempty"`
 	Properties *KubernetesClusterPropertiesForPut `json:"properties"`
-	Entities *KubernetesClusterEntities `json:"entities,omitempty"`
+	Entities   *KubernetesClusterEntities         `json:"entities,omitempty"`
 }
-
 
 // GetId returns the Id field value
 // If the value is explicit nil, the zero value for string will be returned
@@ -34,7 +33,6 @@ func (o *KubernetesClusterForPut) GetId() *string {
 	if o == nil {
 		return nil
 	}
-
 
 	return o.Id
 
@@ -48,13 +46,11 @@ func (o *KubernetesClusterForPut) GetIdOk() (*string, bool) {
 		return nil, false
 	}
 
-
 	return o.Id, true
 }
 
 // SetId sets field value
 func (o *KubernetesClusterForPut) SetId(v string) {
-
 
 	o.Id = &v
 
@@ -76,7 +72,6 @@ func (o *KubernetesClusterForPut) GetType() *string {
 		return nil
 	}
 
-
 	return o.Type
 
 }
@@ -89,13 +84,11 @@ func (o *KubernetesClusterForPut) GetTypeOk() (*string, bool) {
 		return nil, false
 	}
 
-
 	return o.Type, true
 }
 
 // SetType sets field value
 func (o *KubernetesClusterForPut) SetType(v string) {
-
 
 	o.Type = &v
 
@@ -117,7 +110,6 @@ func (o *KubernetesClusterForPut) GetHref() *string {
 		return nil
 	}
 
-
 	return o.Href
 
 }
@@ -130,13 +122,11 @@ func (o *KubernetesClusterForPut) GetHrefOk() (*string, bool) {
 		return nil, false
 	}
 
-
 	return o.Href, true
 }
 
 // SetHref sets field value
 func (o *KubernetesClusterForPut) SetHref(v string) {
-
 
 	o.Href = &v
 
@@ -158,7 +148,6 @@ func (o *KubernetesClusterForPut) GetMetadata() *DatacenterElementMetadata {
 		return nil
 	}
 
-
 	return o.Metadata
 
 }
@@ -171,13 +160,11 @@ func (o *KubernetesClusterForPut) GetMetadataOk() (*DatacenterElementMetadata, b
 		return nil, false
 	}
 
-
 	return o.Metadata, true
 }
 
 // SetMetadata sets field value
 func (o *KubernetesClusterForPut) SetMetadata(v DatacenterElementMetadata) {
-
 
 	o.Metadata = &v
 
@@ -199,7 +186,6 @@ func (o *KubernetesClusterForPut) GetProperties() *KubernetesClusterPropertiesFo
 		return nil
 	}
 
-
 	return o.Properties
 
 }
@@ -212,13 +198,11 @@ func (o *KubernetesClusterForPut) GetPropertiesOk() (*KubernetesClusterPropertie
 		return nil, false
 	}
 
-
 	return o.Properties, true
 }
 
 // SetProperties sets field value
 func (o *KubernetesClusterForPut) SetProperties(v KubernetesClusterPropertiesForPut) {
-
 
 	o.Properties = &v
 
@@ -240,7 +224,6 @@ func (o *KubernetesClusterForPut) GetEntities() *KubernetesClusterEntities {
 		return nil
 	}
 
-
 	return o.Entities
 
 }
@@ -253,13 +236,11 @@ func (o *KubernetesClusterForPut) GetEntitiesOk() (*KubernetesClusterEntities, b
 		return nil, false
 	}
 
-
 	return o.Entities, true
 }
 
 // SetEntities sets field value
 func (o *KubernetesClusterForPut) SetEntities(v KubernetesClusterEntities) {
-
 
 	o.Entities = &v
 
@@ -302,6 +283,7 @@ func (o KubernetesClusterForPut) MarshalJSON() ([]byte, error) {
 	}
 	return json.Marshal(toSerialize)
 }
+
 type NullableKubernetesClusterForPut struct {
 	value *KubernetesClusterForPut
 	isSet bool
@@ -337,5 +319,3 @@ func (v *NullableKubernetesClusterForPut) UnmarshalJSON(src []byte) error {
 	v.isSet = true
 	return json.Unmarshal(src, &v.value)
 }
-
-

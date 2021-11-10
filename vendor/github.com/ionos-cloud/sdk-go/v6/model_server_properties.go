@@ -27,8 +27,8 @@ type ServerProperties struct {
 	// The availability zone in which the server should exist
 	AvailabilityZone *string `json:"availabilityZone,omitempty"`
 	// Status of the virtual Machine
-	VmState *string `json:"vmState,omitempty"`
-	BootCdrom *ResourceReference `json:"bootCdrom,omitempty"`
+	VmState    *string            `json:"vmState,omitempty"`
+	BootCdrom  *ResourceReference `json:"bootCdrom,omitempty"`
 	BootVolume *ResourceReference `json:"bootVolume,omitempty"`
 	// CPU architecture on which server gets provisioned; not all CPU architectures are available in all datacenter regions; available CPU architectures can be retrieved from the datacenter resource
 	CpuFamily *string `json:"cpuFamily,omitempty"`
@@ -36,14 +36,12 @@ type ServerProperties struct {
 	Type *string `json:"type,omitempty"`
 }
 
-
 // GetTemplateUuid returns the TemplateUuid field value
 // If the value is explicit nil, the zero value for string will be returned
 func (o *ServerProperties) GetTemplateUuid() *string {
 	if o == nil {
 		return nil
 	}
-
 
 	return o.TemplateUuid
 
@@ -57,13 +55,11 @@ func (o *ServerProperties) GetTemplateUuidOk() (*string, bool) {
 		return nil, false
 	}
 
-
 	return o.TemplateUuid, true
 }
 
 // SetTemplateUuid sets field value
 func (o *ServerProperties) SetTemplateUuid(v string) {
-
 
 	o.TemplateUuid = &v
 
@@ -85,7 +81,6 @@ func (o *ServerProperties) GetName() *string {
 		return nil
 	}
 
-
 	return o.Name
 
 }
@@ -98,13 +93,11 @@ func (o *ServerProperties) GetNameOk() (*string, bool) {
 		return nil, false
 	}
 
-
 	return o.Name, true
 }
 
 // SetName sets field value
 func (o *ServerProperties) SetName(v string) {
-
 
 	o.Name = &v
 
@@ -126,7 +119,6 @@ func (o *ServerProperties) GetCores() *int32 {
 		return nil
 	}
 
-
 	return o.Cores
 
 }
@@ -139,13 +131,11 @@ func (o *ServerProperties) GetCoresOk() (*int32, bool) {
 		return nil, false
 	}
 
-
 	return o.Cores, true
 }
 
 // SetCores sets field value
 func (o *ServerProperties) SetCores(v int32) {
-
 
 	o.Cores = &v
 
@@ -167,7 +157,6 @@ func (o *ServerProperties) GetRam() *int32 {
 		return nil
 	}
 
-
 	return o.Ram
 
 }
@@ -180,13 +169,11 @@ func (o *ServerProperties) GetRamOk() (*int32, bool) {
 		return nil, false
 	}
 
-
 	return o.Ram, true
 }
 
 // SetRam sets field value
 func (o *ServerProperties) SetRam(v int32) {
-
 
 	o.Ram = &v
 
@@ -208,7 +195,6 @@ func (o *ServerProperties) GetAvailabilityZone() *string {
 		return nil
 	}
 
-
 	return o.AvailabilityZone
 
 }
@@ -221,13 +207,11 @@ func (o *ServerProperties) GetAvailabilityZoneOk() (*string, bool) {
 		return nil, false
 	}
 
-
 	return o.AvailabilityZone, true
 }
 
 // SetAvailabilityZone sets field value
 func (o *ServerProperties) SetAvailabilityZone(v string) {
-
 
 	o.AvailabilityZone = &v
 
@@ -249,7 +233,6 @@ func (o *ServerProperties) GetVmState() *string {
 		return nil
 	}
 
-
 	return o.VmState
 
 }
@@ -262,13 +245,11 @@ func (o *ServerProperties) GetVmStateOk() (*string, bool) {
 		return nil, false
 	}
 
-
 	return o.VmState, true
 }
 
 // SetVmState sets field value
 func (o *ServerProperties) SetVmState(v string) {
-
 
 	o.VmState = &v
 
@@ -290,7 +271,6 @@ func (o *ServerProperties) GetBootCdrom() *ResourceReference {
 		return nil
 	}
 
-
 	return o.BootCdrom
 
 }
@@ -303,13 +283,11 @@ func (o *ServerProperties) GetBootCdromOk() (*ResourceReference, bool) {
 		return nil, false
 	}
 
-
 	return o.BootCdrom, true
 }
 
 // SetBootCdrom sets field value
 func (o *ServerProperties) SetBootCdrom(v ResourceReference) {
-
 
 	o.BootCdrom = &v
 
@@ -331,7 +309,6 @@ func (o *ServerProperties) GetBootVolume() *ResourceReference {
 		return nil
 	}
 
-
 	return o.BootVolume
 
 }
@@ -344,13 +321,11 @@ func (o *ServerProperties) GetBootVolumeOk() (*ResourceReference, bool) {
 		return nil, false
 	}
 
-
 	return o.BootVolume, true
 }
 
 // SetBootVolume sets field value
 func (o *ServerProperties) SetBootVolume(v ResourceReference) {
-
 
 	o.BootVolume = &v
 
@@ -372,7 +347,6 @@ func (o *ServerProperties) GetCpuFamily() *string {
 		return nil
 	}
 
-
 	return o.CpuFamily
 
 }
@@ -385,13 +359,11 @@ func (o *ServerProperties) GetCpuFamilyOk() (*string, bool) {
 		return nil, false
 	}
 
-
 	return o.CpuFamily, true
 }
 
 // SetCpuFamily sets field value
 func (o *ServerProperties) SetCpuFamily(v string) {
-
 
 	o.CpuFamily = &v
 
@@ -413,7 +385,6 @@ func (o *ServerProperties) GetType() *string {
 		return nil
 	}
 
-
 	return o.Type
 
 }
@@ -426,13 +397,11 @@ func (o *ServerProperties) GetTypeOk() (*string, bool) {
 		return nil, false
 	}
 
-
 	return o.Type, true
 }
 
 // SetType sets field value
 func (o *ServerProperties) SetType(v string) {
-
 
 	o.Type = &v
 
@@ -491,6 +460,7 @@ func (o ServerProperties) MarshalJSON() ([]byte, error) {
 	}
 	return json.Marshal(toSerialize)
 }
+
 type NullableServerProperties struct {
 	value *ServerProperties
 	isSet bool
@@ -526,5 +496,3 @@ func (v *NullableServerProperties) UnmarshalJSON(src []byte) error {
 	v.isSet = true
 	return json.Unmarshal(src, &v.value)
 }
-
-

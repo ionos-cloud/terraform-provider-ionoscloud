@@ -16,10 +16,9 @@ import (
 
 // NicEntities struct for NicEntities
 type NicEntities struct {
-	Flowlogs *FlowLogs `json:"flowlogs,omitempty"`
+	Flowlogs      *FlowLogs      `json:"flowlogs,omitempty"`
 	Firewallrules *FirewallRules `json:"firewallrules,omitempty"`
 }
-
 
 // GetFlowlogs returns the Flowlogs field value
 // If the value is explicit nil, the zero value for FlowLogs will be returned
@@ -27,7 +26,6 @@ func (o *NicEntities) GetFlowlogs() *FlowLogs {
 	if o == nil {
 		return nil
 	}
-
 
 	return o.Flowlogs
 
@@ -41,13 +39,11 @@ func (o *NicEntities) GetFlowlogsOk() (*FlowLogs, bool) {
 		return nil, false
 	}
 
-
 	return o.Flowlogs, true
 }
 
 // SetFlowlogs sets field value
 func (o *NicEntities) SetFlowlogs(v FlowLogs) {
-
 
 	o.Flowlogs = &v
 
@@ -69,7 +65,6 @@ func (o *NicEntities) GetFirewallrules() *FirewallRules {
 		return nil
 	}
 
-
 	return o.Firewallrules
 
 }
@@ -82,13 +77,11 @@ func (o *NicEntities) GetFirewallrulesOk() (*FirewallRules, bool) {
 		return nil, false
 	}
 
-
 	return o.Firewallrules, true
 }
 
 // SetFirewallrules sets field value
 func (o *NicEntities) SetFirewallrules(v FirewallRules) {
-
 
 	o.Firewallrules = &v
 
@@ -115,6 +108,7 @@ func (o NicEntities) MarshalJSON() ([]byte, error) {
 	}
 	return json.Marshal(toSerialize)
 }
+
 type NullableNicEntities struct {
 	value *NicEntities
 	isSet bool
@@ -150,5 +144,3 @@ func (v *NullableNicEntities) UnmarshalJSON(src []byte) error {
 	v.isSet = true
 	return json.Unmarshal(src, &v.value)
 }
-
-

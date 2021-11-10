@@ -16,17 +16,16 @@ import (
 
 // IpConsumer struct for IpConsumer
 type IpConsumer struct {
-	Ip *string `json:"ip,omitempty"`
-	Mac *string `json:"mac,omitempty"`
-	NicId *string `json:"nicId,omitempty"`
-	ServerId *string `json:"serverId,omitempty"`
-	ServerName *string `json:"serverName,omitempty"`
-	DatacenterId *string `json:"datacenterId,omitempty"`
-	DatacenterName *string `json:"datacenterName,omitempty"`
+	Ip              *string `json:"ip,omitempty"`
+	Mac             *string `json:"mac,omitempty"`
+	NicId           *string `json:"nicId,omitempty"`
+	ServerId        *string `json:"serverId,omitempty"`
+	ServerName      *string `json:"serverName,omitempty"`
+	DatacenterId    *string `json:"datacenterId,omitempty"`
+	DatacenterName  *string `json:"datacenterName,omitempty"`
 	K8sNodePoolUuid *string `json:"k8sNodePoolUuid,omitempty"`
-	K8sClusterUuid *string `json:"k8sClusterUuid,omitempty"`
+	K8sClusterUuid  *string `json:"k8sClusterUuid,omitempty"`
 }
-
 
 // GetIp returns the Ip field value
 // If the value is explicit nil, the zero value for string will be returned
@@ -34,7 +33,6 @@ func (o *IpConsumer) GetIp() *string {
 	if o == nil {
 		return nil
 	}
-
 
 	return o.Ip
 
@@ -48,13 +46,11 @@ func (o *IpConsumer) GetIpOk() (*string, bool) {
 		return nil, false
 	}
 
-
 	return o.Ip, true
 }
 
 // SetIp sets field value
 func (o *IpConsumer) SetIp(v string) {
-
 
 	o.Ip = &v
 
@@ -76,7 +72,6 @@ func (o *IpConsumer) GetMac() *string {
 		return nil
 	}
 
-
 	return o.Mac
 
 }
@@ -89,13 +84,11 @@ func (o *IpConsumer) GetMacOk() (*string, bool) {
 		return nil, false
 	}
 
-
 	return o.Mac, true
 }
 
 // SetMac sets field value
 func (o *IpConsumer) SetMac(v string) {
-
 
 	o.Mac = &v
 
@@ -117,7 +110,6 @@ func (o *IpConsumer) GetNicId() *string {
 		return nil
 	}
 
-
 	return o.NicId
 
 }
@@ -130,13 +122,11 @@ func (o *IpConsumer) GetNicIdOk() (*string, bool) {
 		return nil, false
 	}
 
-
 	return o.NicId, true
 }
 
 // SetNicId sets field value
 func (o *IpConsumer) SetNicId(v string) {
-
 
 	o.NicId = &v
 
@@ -158,7 +148,6 @@ func (o *IpConsumer) GetServerId() *string {
 		return nil
 	}
 
-
 	return o.ServerId
 
 }
@@ -171,13 +160,11 @@ func (o *IpConsumer) GetServerIdOk() (*string, bool) {
 		return nil, false
 	}
 
-
 	return o.ServerId, true
 }
 
 // SetServerId sets field value
 func (o *IpConsumer) SetServerId(v string) {
-
 
 	o.ServerId = &v
 
@@ -199,7 +186,6 @@ func (o *IpConsumer) GetServerName() *string {
 		return nil
 	}
 
-
 	return o.ServerName
 
 }
@@ -212,13 +198,11 @@ func (o *IpConsumer) GetServerNameOk() (*string, bool) {
 		return nil, false
 	}
 
-
 	return o.ServerName, true
 }
 
 // SetServerName sets field value
 func (o *IpConsumer) SetServerName(v string) {
-
 
 	o.ServerName = &v
 
@@ -240,7 +224,6 @@ func (o *IpConsumer) GetDatacenterId() *string {
 		return nil
 	}
 
-
 	return o.DatacenterId
 
 }
@@ -253,13 +236,11 @@ func (o *IpConsumer) GetDatacenterIdOk() (*string, bool) {
 		return nil, false
 	}
 
-
 	return o.DatacenterId, true
 }
 
 // SetDatacenterId sets field value
 func (o *IpConsumer) SetDatacenterId(v string) {
-
 
 	o.DatacenterId = &v
 
@@ -281,7 +262,6 @@ func (o *IpConsumer) GetDatacenterName() *string {
 		return nil
 	}
 
-
 	return o.DatacenterName
 
 }
@@ -294,13 +274,11 @@ func (o *IpConsumer) GetDatacenterNameOk() (*string, bool) {
 		return nil, false
 	}
 
-
 	return o.DatacenterName, true
 }
 
 // SetDatacenterName sets field value
 func (o *IpConsumer) SetDatacenterName(v string) {
-
 
 	o.DatacenterName = &v
 
@@ -322,7 +300,6 @@ func (o *IpConsumer) GetK8sNodePoolUuid() *string {
 		return nil
 	}
 
-
 	return o.K8sNodePoolUuid
 
 }
@@ -335,13 +312,11 @@ func (o *IpConsumer) GetK8sNodePoolUuidOk() (*string, bool) {
 		return nil, false
 	}
 
-
 	return o.K8sNodePoolUuid, true
 }
 
 // SetK8sNodePoolUuid sets field value
 func (o *IpConsumer) SetK8sNodePoolUuid(v string) {
-
 
 	o.K8sNodePoolUuid = &v
 
@@ -363,7 +338,6 @@ func (o *IpConsumer) GetK8sClusterUuid() *string {
 		return nil
 	}
 
-
 	return o.K8sClusterUuid
 
 }
@@ -376,13 +350,11 @@ func (o *IpConsumer) GetK8sClusterUuidOk() (*string, bool) {
 		return nil, false
 	}
 
-
 	return o.K8sClusterUuid, true
 }
 
 // SetK8sClusterUuid sets field value
 func (o *IpConsumer) SetK8sClusterUuid(v string) {
-
 
 	o.K8sClusterUuid = &v
 
@@ -437,6 +409,7 @@ func (o IpConsumer) MarshalJSON() ([]byte, error) {
 	}
 	return json.Marshal(toSerialize)
 }
+
 type NullableIpConsumer struct {
 	value *IpConsumer
 	isSet bool
@@ -472,5 +445,3 @@ func (v *NullableIpConsumer) UnmarshalJSON(src []byte) error {
 	v.isSet = true
 	return json.Unmarshal(src, &v.value)
 }
-
-

@@ -20,9 +20,8 @@ func TestAccNicImportBasic(t *testing.T) {
 			{
 				Config: fmt.Sprintf(testAccCheckNicConfigBasic, volumeName),
 			},
-
 			{
-				ResourceName:      "ionoscloud_nic.database_nic",
+				ResourceName:      fullNicResourceName,
 				ImportStateIdFunc: testAccNicImportStateId,
 				ImportState:       true,
 				ImportStateVerify: true,
@@ -35,7 +34,7 @@ func testAccNicImportStateId(s *terraform.State) (string, error) {
 	var importID = ""
 
 	for _, rs := range s.RootModule().Resources {
-		if rs.Type != "ionoscloud_nic" && rs.Primary.ID != "database_nic" {
+		if rs.Type != nicResource {
 			continue
 		}
 

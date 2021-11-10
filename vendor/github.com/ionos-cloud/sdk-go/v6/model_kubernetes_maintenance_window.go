@@ -22,14 +22,12 @@ type KubernetesMaintenanceWindow struct {
 	Time *string `json:"time"`
 }
 
-
 // GetDayOfTheWeek returns the DayOfTheWeek field value
 // If the value is explicit nil, the zero value for string will be returned
 func (o *KubernetesMaintenanceWindow) GetDayOfTheWeek() *string {
 	if o == nil {
 		return nil
 	}
-
 
 	return o.DayOfTheWeek
 
@@ -43,13 +41,11 @@ func (o *KubernetesMaintenanceWindow) GetDayOfTheWeekOk() (*string, bool) {
 		return nil, false
 	}
 
-
 	return o.DayOfTheWeek, true
 }
 
 // SetDayOfTheWeek sets field value
 func (o *KubernetesMaintenanceWindow) SetDayOfTheWeek(v string) {
-
 
 	o.DayOfTheWeek = &v
 
@@ -71,7 +67,6 @@ func (o *KubernetesMaintenanceWindow) GetTime() *string {
 		return nil
 	}
 
-
 	return o.Time
 
 }
@@ -84,13 +79,11 @@ func (o *KubernetesMaintenanceWindow) GetTimeOk() (*string, bool) {
 		return nil, false
 	}
 
-
 	return o.Time, true
 }
 
 // SetTime sets field value
 func (o *KubernetesMaintenanceWindow) SetTime(v string) {
-
 
 	o.Time = &v
 
@@ -117,6 +110,7 @@ func (o KubernetesMaintenanceWindow) MarshalJSON() ([]byte, error) {
 	}
 	return json.Marshal(toSerialize)
 }
+
 type NullableKubernetesMaintenanceWindow struct {
 	value *KubernetesMaintenanceWindow
 	isSet bool
@@ -152,5 +146,3 @@ func (v *NullableKubernetesMaintenanceWindow) UnmarshalJSON(src []byte) error {
 	v.isSet = true
 	return json.Unmarshal(src, &v.value)
 }
-
-

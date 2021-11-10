@@ -24,14 +24,12 @@ type LoadbalancerProperties struct {
 	Dhcp *bool `json:"dhcp,omitempty"`
 }
 
-
 // GetName returns the Name field value
 // If the value is explicit nil, the zero value for string will be returned
 func (o *LoadbalancerProperties) GetName() *string {
 	if o == nil {
 		return nil
 	}
-
 
 	return o.Name
 
@@ -45,13 +43,11 @@ func (o *LoadbalancerProperties) GetNameOk() (*string, bool) {
 		return nil, false
 	}
 
-
 	return o.Name, true
 }
 
 // SetName sets field value
 func (o *LoadbalancerProperties) SetName(v string) {
-
 
 	o.Name = &v
 
@@ -73,7 +69,6 @@ func (o *LoadbalancerProperties) GetIp() *string {
 		return nil
 	}
 
-
 	return o.Ip
 
 }
@@ -86,13 +81,11 @@ func (o *LoadbalancerProperties) GetIpOk() (*string, bool) {
 		return nil, false
 	}
 
-
 	return o.Ip, true
 }
 
 // SetIp sets field value
 func (o *LoadbalancerProperties) SetIp(v string) {
-
 
 	o.Ip = &v
 
@@ -114,7 +107,6 @@ func (o *LoadbalancerProperties) GetDhcp() *bool {
 		return nil
 	}
 
-
 	return o.Dhcp
 
 }
@@ -127,13 +119,11 @@ func (o *LoadbalancerProperties) GetDhcpOk() (*bool, bool) {
 		return nil, false
 	}
 
-
 	return o.Dhcp, true
 }
 
 // SetDhcp sets field value
 func (o *LoadbalancerProperties) SetDhcp(v bool) {
-
 
 	o.Dhcp = &v
 
@@ -164,6 +154,7 @@ func (o LoadbalancerProperties) MarshalJSON() ([]byte, error) {
 	}
 	return json.Marshal(toSerialize)
 }
+
 type NullableLoadbalancerProperties struct {
 	value *LoadbalancerProperties
 	isSet bool
@@ -199,5 +190,3 @@ func (v *NullableLoadbalancerProperties) UnmarshalJSON(src []byte) error {
 	v.isSet = true
 	return json.Unmarshal(src, &v.value)
 }
-
-

@@ -20,14 +20,12 @@ type Token struct {
 	Token *string `json:"token,omitempty"`
 }
 
-
 // GetToken returns the Token field value
 // If the value is explicit nil, the zero value for string will be returned
 func (o *Token) GetToken() *string {
 	if o == nil {
 		return nil
 	}
-
 
 	return o.Token
 
@@ -41,13 +39,11 @@ func (o *Token) GetTokenOk() (*string, bool) {
 		return nil, false
 	}
 
-
 	return o.Token, true
 }
 
 // SetToken sets field value
 func (o *Token) SetToken(v string) {
-
 
 	o.Token = &v
 
@@ -70,6 +66,7 @@ func (o Token) MarshalJSON() ([]byte, error) {
 	}
 	return json.Marshal(toSerialize)
 }
+
 type NullableToken struct {
 	value *Token
 	isSet bool
@@ -105,5 +102,3 @@ func (v *NullableToken) UnmarshalJSON(src []byte) error {
 	v.isSet = true
 	return json.Unmarshal(src, &v.value)
 }
-
-

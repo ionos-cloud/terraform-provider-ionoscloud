@@ -30,7 +30,7 @@ func (v *NatGatewayRuleType) UnmarshalJSON(src []byte) error {
 		return err
 	}
 	enumTypeValue := NatGatewayRuleType(value)
-	for _, existing := range []NatGatewayRuleType{ "SNAT",   } {
+	for _, existing := range []NatGatewayRuleType{"SNAT"} {
 		if existing == enumTypeValue {
 			*v = enumTypeValue
 			return nil
@@ -80,4 +80,3 @@ func (v *NullableNatGatewayRuleType) UnmarshalJSON(src []byte) error {
 	v.isSet = true
 	return json.Unmarshal(src, &v.value)
 }
-

@@ -26,14 +26,12 @@ type CpuArchitectureProperties struct {
 	Vendor *string `json:"vendor,omitempty"`
 }
 
-
 // GetCpuFamily returns the CpuFamily field value
 // If the value is explicit nil, the zero value for string will be returned
 func (o *CpuArchitectureProperties) GetCpuFamily() *string {
 	if o == nil {
 		return nil
 	}
-
 
 	return o.CpuFamily
 
@@ -47,13 +45,11 @@ func (o *CpuArchitectureProperties) GetCpuFamilyOk() (*string, bool) {
 		return nil, false
 	}
 
-
 	return o.CpuFamily, true
 }
 
 // SetCpuFamily sets field value
 func (o *CpuArchitectureProperties) SetCpuFamily(v string) {
-
 
 	o.CpuFamily = &v
 
@@ -75,7 +71,6 @@ func (o *CpuArchitectureProperties) GetMaxCores() *int32 {
 		return nil
 	}
 
-
 	return o.MaxCores
 
 }
@@ -88,13 +83,11 @@ func (o *CpuArchitectureProperties) GetMaxCoresOk() (*int32, bool) {
 		return nil, false
 	}
 
-
 	return o.MaxCores, true
 }
 
 // SetMaxCores sets field value
 func (o *CpuArchitectureProperties) SetMaxCores(v int32) {
-
 
 	o.MaxCores = &v
 
@@ -116,7 +109,6 @@ func (o *CpuArchitectureProperties) GetMaxRam() *int32 {
 		return nil
 	}
 
-
 	return o.MaxRam
 
 }
@@ -129,13 +121,11 @@ func (o *CpuArchitectureProperties) GetMaxRamOk() (*int32, bool) {
 		return nil, false
 	}
 
-
 	return o.MaxRam, true
 }
 
 // SetMaxRam sets field value
 func (o *CpuArchitectureProperties) SetMaxRam(v int32) {
-
 
 	o.MaxRam = &v
 
@@ -157,7 +147,6 @@ func (o *CpuArchitectureProperties) GetVendor() *string {
 		return nil
 	}
 
-
 	return o.Vendor
 
 }
@@ -170,13 +159,11 @@ func (o *CpuArchitectureProperties) GetVendorOk() (*string, bool) {
 		return nil, false
 	}
 
-
 	return o.Vendor, true
 }
 
 // SetVendor sets field value
 func (o *CpuArchitectureProperties) SetVendor(v string) {
-
 
 	o.Vendor = &v
 
@@ -211,6 +198,7 @@ func (o CpuArchitectureProperties) MarshalJSON() ([]byte, error) {
 	}
 	return json.Marshal(toSerialize)
 }
+
 type NullableCpuArchitectureProperties struct {
 	value *CpuArchitectureProperties
 	isSet bool
@@ -246,5 +234,3 @@ func (v *NullableCpuArchitectureProperties) UnmarshalJSON(src []byte) error {
 	v.isSet = true
 	return json.Unmarshal(src, &v.value)
 }
-
-

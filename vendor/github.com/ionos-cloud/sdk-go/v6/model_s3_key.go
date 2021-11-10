@@ -21,11 +21,10 @@ type S3Key struct {
 	// The type of the resource
 	Type *Type `json:"type,omitempty"`
 	// URL to the object representation (absolute path)
-	Href *string `json:"href,omitempty"`
-	Metadata *S3KeyMetadata `json:"metadata,omitempty"`
+	Href       *string          `json:"href,omitempty"`
+	Metadata   *S3KeyMetadata   `json:"metadata,omitempty"`
 	Properties *S3KeyProperties `json:"properties"`
 }
-
 
 // GetId returns the Id field value
 // If the value is explicit nil, the zero value for string will be returned
@@ -33,7 +32,6 @@ func (o *S3Key) GetId() *string {
 	if o == nil {
 		return nil
 	}
-
 
 	return o.Id
 
@@ -47,13 +45,11 @@ func (o *S3Key) GetIdOk() (*string, bool) {
 		return nil, false
 	}
 
-
 	return o.Id, true
 }
 
 // SetId sets field value
 func (o *S3Key) SetId(v string) {
-
 
 	o.Id = &v
 
@@ -75,7 +71,6 @@ func (o *S3Key) GetType() *Type {
 		return nil
 	}
 
-
 	return o.Type
 
 }
@@ -88,13 +83,11 @@ func (o *S3Key) GetTypeOk() (*Type, bool) {
 		return nil, false
 	}
 
-
 	return o.Type, true
 }
 
 // SetType sets field value
 func (o *S3Key) SetType(v Type) {
-
 
 	o.Type = &v
 
@@ -116,7 +109,6 @@ func (o *S3Key) GetHref() *string {
 		return nil
 	}
 
-
 	return o.Href
 
 }
@@ -129,13 +121,11 @@ func (o *S3Key) GetHrefOk() (*string, bool) {
 		return nil, false
 	}
 
-
 	return o.Href, true
 }
 
 // SetHref sets field value
 func (o *S3Key) SetHref(v string) {
-
 
 	o.Href = &v
 
@@ -157,7 +147,6 @@ func (o *S3Key) GetMetadata() *S3KeyMetadata {
 		return nil
 	}
 
-
 	return o.Metadata
 
 }
@@ -170,13 +159,11 @@ func (o *S3Key) GetMetadataOk() (*S3KeyMetadata, bool) {
 		return nil, false
 	}
 
-
 	return o.Metadata, true
 }
 
 // SetMetadata sets field value
 func (o *S3Key) SetMetadata(v S3KeyMetadata) {
-
 
 	o.Metadata = &v
 
@@ -198,7 +185,6 @@ func (o *S3Key) GetProperties() *S3KeyProperties {
 		return nil
 	}
 
-
 	return o.Properties
 
 }
@@ -211,13 +197,11 @@ func (o *S3Key) GetPropertiesOk() (*S3KeyProperties, bool) {
 		return nil, false
 	}
 
-
 	return o.Properties, true
 }
 
 // SetProperties sets field value
 func (o *S3Key) SetProperties(v S3KeyProperties) {
-
 
 	o.Properties = &v
 
@@ -256,6 +240,7 @@ func (o S3Key) MarshalJSON() ([]byte, error) {
 	}
 	return json.Marshal(toSerialize)
 }
+
 type NullableS3Key struct {
 	value *S3Key
 	isSet bool
@@ -291,5 +276,3 @@ func (v *NullableS3Key) UnmarshalJSON(src []byte) error {
 	v.isSet = true
 	return json.Unmarshal(src, &v.value)
 }
-
-

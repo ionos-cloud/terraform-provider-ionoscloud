@@ -20,7 +20,7 @@ type ImageProperties struct {
 	Name *string `json:"name,omitempty"`
 	// Human readable description
 	Description *string `json:"description,omitempty"`
-	// Location of that image/snapshot. 
+	// Location of that image/snapshot.
 	Location *string `json:"location,omitempty"`
 	// The size of the image in GB
 	Size *float32 `json:"size,omitempty"`
@@ -56,14 +56,12 @@ type ImageProperties struct {
 	CloudInit *string `json:"cloudInit,omitempty"`
 }
 
-
 // GetName returns the Name field value
 // If the value is explicit nil, the zero value for string will be returned
 func (o *ImageProperties) GetName() *string {
 	if o == nil {
 		return nil
 	}
-
 
 	return o.Name
 
@@ -77,13 +75,11 @@ func (o *ImageProperties) GetNameOk() (*string, bool) {
 		return nil, false
 	}
 
-
 	return o.Name, true
 }
 
 // SetName sets field value
 func (o *ImageProperties) SetName(v string) {
-
 
 	o.Name = &v
 
@@ -105,7 +101,6 @@ func (o *ImageProperties) GetDescription() *string {
 		return nil
 	}
 
-
 	return o.Description
 
 }
@@ -118,13 +113,11 @@ func (o *ImageProperties) GetDescriptionOk() (*string, bool) {
 		return nil, false
 	}
 
-
 	return o.Description, true
 }
 
 // SetDescription sets field value
 func (o *ImageProperties) SetDescription(v string) {
-
 
 	o.Description = &v
 
@@ -146,7 +139,6 @@ func (o *ImageProperties) GetLocation() *string {
 		return nil
 	}
 
-
 	return o.Location
 
 }
@@ -159,13 +151,11 @@ func (o *ImageProperties) GetLocationOk() (*string, bool) {
 		return nil, false
 	}
 
-
 	return o.Location, true
 }
 
 // SetLocation sets field value
 func (o *ImageProperties) SetLocation(v string) {
-
 
 	o.Location = &v
 
@@ -187,7 +177,6 @@ func (o *ImageProperties) GetSize() *float32 {
 		return nil
 	}
 
-
 	return o.Size
 
 }
@@ -200,13 +189,11 @@ func (o *ImageProperties) GetSizeOk() (*float32, bool) {
 		return nil, false
 	}
 
-
 	return o.Size, true
 }
 
 // SetSize sets field value
 func (o *ImageProperties) SetSize(v float32) {
-
 
 	o.Size = &v
 
@@ -228,7 +215,6 @@ func (o *ImageProperties) GetCpuHotPlug() *bool {
 		return nil
 	}
 
-
 	return o.CpuHotPlug
 
 }
@@ -241,13 +227,11 @@ func (o *ImageProperties) GetCpuHotPlugOk() (*bool, bool) {
 		return nil, false
 	}
 
-
 	return o.CpuHotPlug, true
 }
 
 // SetCpuHotPlug sets field value
 func (o *ImageProperties) SetCpuHotPlug(v bool) {
-
 
 	o.CpuHotPlug = &v
 
@@ -269,7 +253,6 @@ func (o *ImageProperties) GetCpuHotUnplug() *bool {
 		return nil
 	}
 
-
 	return o.CpuHotUnplug
 
 }
@@ -282,13 +265,11 @@ func (o *ImageProperties) GetCpuHotUnplugOk() (*bool, bool) {
 		return nil, false
 	}
 
-
 	return o.CpuHotUnplug, true
 }
 
 // SetCpuHotUnplug sets field value
 func (o *ImageProperties) SetCpuHotUnplug(v bool) {
-
 
 	o.CpuHotUnplug = &v
 
@@ -310,7 +291,6 @@ func (o *ImageProperties) GetRamHotPlug() *bool {
 		return nil
 	}
 
-
 	return o.RamHotPlug
 
 }
@@ -323,13 +303,11 @@ func (o *ImageProperties) GetRamHotPlugOk() (*bool, bool) {
 		return nil, false
 	}
 
-
 	return o.RamHotPlug, true
 }
 
 // SetRamHotPlug sets field value
 func (o *ImageProperties) SetRamHotPlug(v bool) {
-
 
 	o.RamHotPlug = &v
 
@@ -351,7 +329,6 @@ func (o *ImageProperties) GetRamHotUnplug() *bool {
 		return nil
 	}
 
-
 	return o.RamHotUnplug
 
 }
@@ -364,13 +341,11 @@ func (o *ImageProperties) GetRamHotUnplugOk() (*bool, bool) {
 		return nil, false
 	}
 
-
 	return o.RamHotUnplug, true
 }
 
 // SetRamHotUnplug sets field value
 func (o *ImageProperties) SetRamHotUnplug(v bool) {
-
 
 	o.RamHotUnplug = &v
 
@@ -392,7 +367,6 @@ func (o *ImageProperties) GetNicHotPlug() *bool {
 		return nil
 	}
 
-
 	return o.NicHotPlug
 
 }
@@ -405,13 +379,11 @@ func (o *ImageProperties) GetNicHotPlugOk() (*bool, bool) {
 		return nil, false
 	}
 
-
 	return o.NicHotPlug, true
 }
 
 // SetNicHotPlug sets field value
 func (o *ImageProperties) SetNicHotPlug(v bool) {
-
 
 	o.NicHotPlug = &v
 
@@ -433,7 +405,6 @@ func (o *ImageProperties) GetNicHotUnplug() *bool {
 		return nil
 	}
 
-
 	return o.NicHotUnplug
 
 }
@@ -446,13 +417,11 @@ func (o *ImageProperties) GetNicHotUnplugOk() (*bool, bool) {
 		return nil, false
 	}
 
-
 	return o.NicHotUnplug, true
 }
 
 // SetNicHotUnplug sets field value
 func (o *ImageProperties) SetNicHotUnplug(v bool) {
-
 
 	o.NicHotUnplug = &v
 
@@ -474,7 +443,6 @@ func (o *ImageProperties) GetDiscVirtioHotPlug() *bool {
 		return nil
 	}
 
-
 	return o.DiscVirtioHotPlug
 
 }
@@ -487,13 +455,11 @@ func (o *ImageProperties) GetDiscVirtioHotPlugOk() (*bool, bool) {
 		return nil, false
 	}
 
-
 	return o.DiscVirtioHotPlug, true
 }
 
 // SetDiscVirtioHotPlug sets field value
 func (o *ImageProperties) SetDiscVirtioHotPlug(v bool) {
-
 
 	o.DiscVirtioHotPlug = &v
 
@@ -515,7 +481,6 @@ func (o *ImageProperties) GetDiscVirtioHotUnplug() *bool {
 		return nil
 	}
 
-
 	return o.DiscVirtioHotUnplug
 
 }
@@ -528,13 +493,11 @@ func (o *ImageProperties) GetDiscVirtioHotUnplugOk() (*bool, bool) {
 		return nil, false
 	}
 
-
 	return o.DiscVirtioHotUnplug, true
 }
 
 // SetDiscVirtioHotUnplug sets field value
 func (o *ImageProperties) SetDiscVirtioHotUnplug(v bool) {
-
 
 	o.DiscVirtioHotUnplug = &v
 
@@ -556,7 +519,6 @@ func (o *ImageProperties) GetDiscScsiHotPlug() *bool {
 		return nil
 	}
 
-
 	return o.DiscScsiHotPlug
 
 }
@@ -569,13 +531,11 @@ func (o *ImageProperties) GetDiscScsiHotPlugOk() (*bool, bool) {
 		return nil, false
 	}
 
-
 	return o.DiscScsiHotPlug, true
 }
 
 // SetDiscScsiHotPlug sets field value
 func (o *ImageProperties) SetDiscScsiHotPlug(v bool) {
-
 
 	o.DiscScsiHotPlug = &v
 
@@ -597,7 +557,6 @@ func (o *ImageProperties) GetDiscScsiHotUnplug() *bool {
 		return nil
 	}
 
-
 	return o.DiscScsiHotUnplug
 
 }
@@ -610,13 +569,11 @@ func (o *ImageProperties) GetDiscScsiHotUnplugOk() (*bool, bool) {
 		return nil, false
 	}
 
-
 	return o.DiscScsiHotUnplug, true
 }
 
 // SetDiscScsiHotUnplug sets field value
 func (o *ImageProperties) SetDiscScsiHotUnplug(v bool) {
-
 
 	o.DiscScsiHotUnplug = &v
 
@@ -638,7 +595,6 @@ func (o *ImageProperties) GetLicenceType() *string {
 		return nil
 	}
 
-
 	return o.LicenceType
 
 }
@@ -651,13 +607,11 @@ func (o *ImageProperties) GetLicenceTypeOk() (*string, bool) {
 		return nil, false
 	}
 
-
 	return o.LicenceType, true
 }
 
 // SetLicenceType sets field value
 func (o *ImageProperties) SetLicenceType(v string) {
-
 
 	o.LicenceType = &v
 
@@ -679,7 +633,6 @@ func (o *ImageProperties) GetImageType() *string {
 		return nil
 	}
 
-
 	return o.ImageType
 
 }
@@ -692,13 +645,11 @@ func (o *ImageProperties) GetImageTypeOk() (*string, bool) {
 		return nil, false
 	}
 
-
 	return o.ImageType, true
 }
 
 // SetImageType sets field value
 func (o *ImageProperties) SetImageType(v string) {
-
 
 	o.ImageType = &v
 
@@ -720,7 +671,6 @@ func (o *ImageProperties) GetPublic() *bool {
 		return nil
 	}
 
-
 	return o.Public
 
 }
@@ -733,13 +683,11 @@ func (o *ImageProperties) GetPublicOk() (*bool, bool) {
 		return nil, false
 	}
 
-
 	return o.Public, true
 }
 
 // SetPublic sets field value
 func (o *ImageProperties) SetPublic(v bool) {
-
 
 	o.Public = &v
 
@@ -761,7 +709,6 @@ func (o *ImageProperties) GetImageAliases() *[]string {
 		return nil
 	}
 
-
 	return o.ImageAliases
 
 }
@@ -774,13 +721,11 @@ func (o *ImageProperties) GetImageAliasesOk() (*[]string, bool) {
 		return nil, false
 	}
 
-
 	return o.ImageAliases, true
 }
 
 // SetImageAliases sets field value
 func (o *ImageProperties) SetImageAliases(v []string) {
-
 
 	o.ImageAliases = &v
 
@@ -802,7 +747,6 @@ func (o *ImageProperties) GetCloudInit() *string {
 		return nil
 	}
 
-
 	return o.CloudInit
 
 }
@@ -815,13 +759,11 @@ func (o *ImageProperties) GetCloudInitOk() (*string, bool) {
 		return nil, false
 	}
 
-
 	return o.CloudInit, true
 }
 
 // SetCloudInit sets field value
 func (o *ImageProperties) SetCloudInit(v string) {
-
 
 	o.CloudInit = &v
 
@@ -916,6 +858,7 @@ func (o ImageProperties) MarshalJSON() ([]byte, error) {
 	}
 	return json.Marshal(toSerialize)
 }
+
 type NullableImageProperties struct {
 	value *ImageProperties
 	isSet bool
@@ -951,5 +894,3 @@ func (v *NullableImageProperties) UnmarshalJSON(src []byte) error {
 	v.isSet = true
 	return json.Unmarshal(src, &v.value)
 }
-
-

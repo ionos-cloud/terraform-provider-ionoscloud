@@ -27,10 +27,12 @@ var (
 type ContractResourcesApiService service
 
 type ApiContractsGetRequest struct {
-	ctx _context.Context
-	ApiService *ContractResourcesApiService
-	pretty *bool
-	depth *int32
+	ctx             _context.Context
+	ApiService      *ContractResourcesApiService
+	filters         _neturl.Values
+	orderBy         *string
+	pretty          *bool
+	depth           *int32
 	xContractNumber *int32
 }
 
@@ -47,6 +49,19 @@ func (r ApiContractsGetRequest) XContractNumber(xContractNumber int32) ApiContra
 	return r
 }
 
+// Filters query parameters limit results to those containing a matching value for a specific property.
+func (r ApiContractsGetRequest) Filter(key string, value string) ApiContractsGetRequest {
+	filterKey := fmt.Sprintf(FilterQueryParam, key)
+	r.filters[filterKey] = []string{value}
+	return r
+}
+
+// OrderBy query param sorts the results alphanumerically in ascending order based on the specified property.
+func (r ApiContractsGetRequest) OrderBy(orderBy string) ApiContractsGetRequest {
+	r.orderBy = &orderBy
+	return r
+}
+
 func (r ApiContractsGetRequest) Execute() (Contracts, *APIResponse, error) {
 	return r.ApiService.ContractsGetExecute(r)
 }
@@ -60,7 +75,8 @@ func (r ApiContractsGetRequest) Execute() (Contracts, *APIResponse, error) {
 func (a *ContractResourcesApiService) ContractsGet(ctx _context.Context) ApiContractsGetRequest {
 	return ApiContractsGetRequest{
 		ApiService: a,
-		ctx: ctx,
+		ctx:        ctx,
+		filters:    _neturl.Values{},
 	}
 }
 
@@ -95,6 +111,17 @@ func (a *ContractResourcesApiService) ContractsGetExecute(r ApiContractsGetReque
 	if r.depth != nil {
 		localVarQueryParams.Add("depth", parameterToString(*r.depth, ""))
 	}
+	if r.orderBy != nil {
+		localVarQueryParams.Add("orderBy", parameterToString(*r.orderBy, ""))
+	}
+	if len(r.filters) > 0 {
+		for k, v := range r.filters {
+			for _, iv := range v {
+				localVarQueryParams.Add(k, iv)
+			}
+		}
+	}
+
 	// to determine the Content-Type header
 	localVarHTTPContentTypes := []string{}
 
@@ -136,12 +163,12 @@ func (a *ContractResourcesApiService) ContractsGetExecute(r ApiContractsGetReque
 
 	localVarHTTPResponse, httpRequestTime, err := a.client.callAPI(req)
 
-	localVarAPIResponse := &APIResponse {
-		Response: localVarHTTPResponse,
-		Method: localVarHTTPMethod,
-		RequestURL: localVarPath,
+	localVarAPIResponse := &APIResponse{
+		Response:    localVarHTTPResponse,
+		Method:      localVarHTTPMethod,
+		RequestURL:  localVarPath,
 		RequestTime: httpRequestTime,
-		Operation: "ContractsGet",
+		Operation:   "ContractsGet",
 	}
 
 	if err != nil || localVarHTTPResponse == nil {
@@ -158,16 +185,16 @@ func (a *ContractResourcesApiService) ContractsGetExecute(r ApiContractsGetReque
 	if localVarHTTPResponse.StatusCode >= 300 {
 		newErr := GenericOpenAPIError{
 			statusCode: localVarHTTPResponse.StatusCode,
-			body:  localVarBody,
-			error: fmt.Sprintf("%s: %s", localVarHTTPResponse.Status, string(localVarBody)),
+			body:       localVarBody,
+			error:      fmt.Sprintf(FormatStringErr, localVarHTTPResponse.Status, string(localVarBody)),
 		}
-			var v Error
-			err = a.client.decode(&v, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
-			if err != nil {
-				newErr.error = err.Error()
-				return localVarReturnValue, localVarAPIResponse, newErr
-			}
-			newErr.model = v
+		var v Error
+		err = a.client.decode(&v, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
+		if err != nil {
+			newErr.error = err.Error()
+			return localVarReturnValue, localVarAPIResponse, newErr
+		}
+		newErr.model = v
 		return localVarReturnValue, localVarAPIResponse, newErr
 	}
 
@@ -175,8 +202,8 @@ func (a *ContractResourcesApiService) ContractsGetExecute(r ApiContractsGetReque
 	if err != nil {
 		newErr := GenericOpenAPIError{
 			statusCode: localVarHTTPResponse.StatusCode,
-			body:  localVarBody,
-			error: err.Error(),
+			body:       localVarBody,
+			error:      err.Error(),
 		}
 		return localVarReturnValue, localVarAPIResponse, newErr
 	}
