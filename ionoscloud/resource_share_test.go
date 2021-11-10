@@ -48,7 +48,7 @@ func testAccCheckShareDestroyCheck(s *terraform.State) error {
 	}
 	for _, rs := range s.RootModule().Resources {
 
-		if rs.Type != shareResource {
+		if rs.Type != ShareResource {
 			continue
 		}
 
