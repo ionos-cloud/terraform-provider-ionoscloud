@@ -26,11 +26,7 @@ type clientService struct {
 var _ ClientService = &clientService{}
 
 func NewClientService(username, password, token, url string) ClientService {
-	newConfigDbaas := dbaas.NewConfiguration(username, password, token)
-
-	if len(url) > 0 {
-		newConfigDbaas.Servers[0].URL = url
-	}
+	newConfigDbaas := dbaas.NewConfiguration(username, password, token, url)
 
 	if os.Getenv("IONOS_DEBUG") != "" {
 		newConfigDbaas.Debug = true
