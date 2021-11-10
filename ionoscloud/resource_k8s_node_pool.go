@@ -592,74 +592,48 @@ func resourcek8sNodePoolUpdate(ctx context.Context, d *schema.ResourceData, meta
 
 	if d.HasChange("lans") {
 		oldLANs, newLANs := d.GetChange("lans")
+		lans := make([]ionoscloud.KubernetesNodePoolLan, 0)
 		if newLANs.([]interface{}) != nil {
-			updateLans := false
-			var lans []ionoscloud.KubernetesNodePoolLan
 			for lanIndex := range newLANs.([]interface{}) {
 				lan := ionoscloud.KubernetesNodePoolLan{}
-				addLan := false
 				if lanID, lanIdOk := d.GetOk(fmt.Sprintf("lans.%d.id", lanIndex)); lanIdOk {
 					log.Printf("[INFO] Adding k8s node pool to LAN %+v...", lanID)
 					lanID := int32(lanID.(int))
 					lan.Id = &lanID
-					addLan = true
 				}
 
 				lanDhcp := d.Get(fmt.Sprintf("lans.%d.dhcp", lanIndex)).(bool)
 				lan.Dhcp = &lanDhcp
-
+				routes := make([]ionoscloud.KubernetesNodePoolLanRoutes, 0)
 				if lanRoutes, lanRoutesOk := d.GetOk(fmt.Sprintf("lans.%d.routes", lanIndex)); lanRoutesOk {
 					if lanRoutes.([]interface{}) != nil {
-						updateRoutes := false
-
-						var routes []ionoscloud.KubernetesNodePoolLanRoutes
-
 						for routeIndex := range lanRoutes.([]interface{}) {
 
-							addRoute := false
 							route := ionoscloud.KubernetesNodePoolLanRoutes{}
 							if routeNetwork, routeNewtworkOk := d.GetOk(fmt.Sprintf("lans.%d.routes.%d.network", lanIndex, routeIndex)); routeNewtworkOk {
 								routeNetwork := routeNetwork.(string)
 								route.Network = &routeNetwork
-								addRoute = true
 							}
 
 							if routeGatewayIp, routeGatewayIpOk := d.GetOk(fmt.Sprintf("lans.%d.routes.%d.gateway_ip", lanIndex, routeIndex)); routeGatewayIpOk {
 								routeGatewayIp := routeGatewayIp.(string)
 								route.GatewayIp = &routeGatewayIp
-								addRoute = true
 							}
 
-							if addRoute {
-								routes = append(routes, route)
-							}
+							routes = append(routes, route)
+
 						}
 
-						if len(routes) > 0 {
-							updateRoutes = true
-						}
-
-						if updateRoutes == true {
-							log.Printf("[INFO] k8s node pool LanRoutes set to %+v", routes)
-							lan.Routes = &routes
-						}
+						log.Printf("[INFO] k8s node pool LanRoutes set to %+v", routes)
 					}
 				}
-				if addLan {
-					lans = append(lans, lan)
-				}
-
-			}
-
-			if len(lans) > 0 {
-				updateLans = true
-			}
-
-			if updateLans == true {
-				log.Printf("[INFO] k8s node pool LANs changed from %+v to %+v", oldLANs, newLANs)
-				request.Properties.Lans = &lans
+				lan.Routes = &routes
+				lans = append(lans, lan)
 			}
 		}
+		log.Printf("[INFO] k8s node pool LANs changed from %+v to %+v", oldLANs, newLANs)
+
+		request.Properties.Lans = &lans
 	}
 
 	if d.HasChange("maintenance_window.0") {
@@ -706,6 +680,8 @@ func resourcek8sNodePoolUpdate(ctx context.Context, d *schema.ResourceData, meta
 	if d.HasChange("public_ips") {
 		oldPublicIps, newPublicIps := d.GetChange("public_ips")
 		log.Printf("[INFO] k8s pool public IPs changed from %+v to %+v", oldPublicIps, newPublicIps)
+		requestPublicIps := make([]string, 0)
+
 		if newPublicIps != nil {
 
 			publicIps := newPublicIps.([]interface{})
@@ -716,14 +692,13 @@ func resourcek8sNodePoolUpdate(ctx context.Context, d *schema.ResourceData, meta
 				return diags
 			}
 
-			requestPublicIps := make([]string, len(publicIps), len(publicIps))
-
-			for i := range publicIps {
-				requestPublicIps[i] = fmt.Sprint(publicIps[i])
+			for _, ip := range publicIps {
+				requestPublicIps = append(requestPublicIps, ip.(string))
 			}
 
-			request.Properties.PublicIps = &requestPublicIps
 		}
+		request.Properties.PublicIps = &requestPublicIps
+
 	}
 
 	if d.HasChange("labels") {
@@ -975,10 +950,8 @@ func setK8sNodePoolData(d *schema.ResourceData, nodePool *ionoscloud.KubernetesN
 
 			nodePoolLans := getK8sNodePoolLans(*nodePool.Properties.Lans)
 
-			if len(nodePoolLans) > 0 {
-				if err := d.Set("lans", nodePoolLans); err != nil {
-					return fmt.Errorf("error while setting lans property for k8sNodepool %s: %s", d.Id(), err)
-				}
+			if err := d.Set("lans", nodePoolLans); err != nil {
+				return fmt.Errorf("error while setting lans property for k8sNodepool %s: %s", d.Id(), err)
 			}
 
 		}
