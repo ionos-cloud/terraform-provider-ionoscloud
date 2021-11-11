@@ -49,6 +49,18 @@ const (
 	K8sClusterDataSourceByName = "test_k8s_cluster_name"
 )
 
+// NatGateway Constants
+const (
+	NatGatewayResource             = "ionoscloud_natgateway"
+	NatGatewayTestResource         = "test_nat_gateway"
+	NatGatewayDataSourceById       = "test_nat_gateway_id"
+	NatGatewayDataSourceByName     = "test_nat_gateway_name"
+	NatGatewayRuleResource         = "ionoscloud_natgateway_rule"
+	NatGatewayRuleTestResource     = "test_nat_gateway"
+	NatGatewayRuleDataSourceById   = "test_nat_gateway_id"
+	NatGatewayRuleDataSourceByName = "test_nat_gateway_name"
+)
+
 // Private Crossconnect Constants
 const (
 	PCCResource         = "ionoscloud_private_crossconnect"
