@@ -104,8 +104,8 @@ const (
 const IpBLockResource = "ionoscloud_ipblock"
 
 const (
-	nicResource         = "ionoscloud_nic"
-	fullNicResourceName = nicResource + "." + nicTestResourceName
+	NicResource         = "ionoscloud_nic"
+	fullNicResourceName = NicResource + "." + nicTestResourceName
 	nicTestResourceName = "database_nic"
 )
 
@@ -117,9 +117,15 @@ const (
 )
 
 const (
-	shareResource         = "ionoscloud_share"
-	shareResourceFullName = shareResource + "." + sourceShareName
+	ShareResource         = "ionoscloud_share"
+	shareResourceFullName = ShareResource + "." + sourceShareName
 	sourceShareName       = "share"
+)
+
+const (
+	ResourceIpFailover         = "ionoscloud_ipfailover"
+	ipfailoverResourceFullName = ResourceIpFailover + "." + ipfailoverName
+	ipfailoverName             = "failover-test"
 )
 
 // General Constants
