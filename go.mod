@@ -26,4 +26,4 @@ require (
 	gopkg.in/yaml.v3 v3.0.0-20200615113413-eeeca48fe776
 )
 
-replace github.com/ionos-cloud/sdk-go-autoscaling => ../../../../../sdk/autoscaling-sdk/autoscaling-sdk-go
+replace github.com/ionos-cloud/sdk-go-autoscaling => ../../../../../sdk/autoscaling-sdk

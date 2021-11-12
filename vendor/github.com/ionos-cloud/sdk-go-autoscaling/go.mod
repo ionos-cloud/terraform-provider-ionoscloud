@@ -1,4 +1,4 @@
-module github.com/ionos-cloud/sdk-go
+module github.com/ionos-cloud/sdk-go-autoscaling
 
 go 1.13
 
