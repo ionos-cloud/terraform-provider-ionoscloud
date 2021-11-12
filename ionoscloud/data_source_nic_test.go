@@ -54,10 +54,10 @@ func TestAccDataSourceNic(t *testing.T) {
 	})
 }
 
-const dataSourceNicById = nicResource + ".test_nic_data"
+const dataSourceNicById = NicResource + ".test_nic_data"
 
 const testAccDataSourceNicMatchId = testAccCheckNicConfigBasic + `
-data ` + nicResource + ` test_nic_data {
+data ` + NicResource + ` test_nic_data {
   datacenter_id = ` + DatacenterResource + `.` + DatacenterTestResource + `.id
   server_id = ` + ServerResource + `.` + ServerTestResource + `.id
   id = ` + fullNicResourceName + `.id
@@ -65,21 +65,21 @@ data ` + nicResource + ` test_nic_data {
 `
 
 const testAccDataSourceNicMatchName = testAccCheckNicConfigBasic +
-	`data ` + nicResource + ` test_nic_data {
+	`data ` + NicResource + ` test_nic_data {
   	datacenter_id = ` + DatacenterResource + `.` + DatacenterTestResource + `.id
 	server_id = ` + ServerResource + `.` + ServerTestResource + `.id
 	name = ` + fullNicResourceName + `.name 
 }`
 
 const testAccDataSourceNicMatchNameError = testAccCheckNicConfigBasic +
-	`data ` + nicResource + ` test_nic_data {
+	`data ` + NicResource + ` test_nic_data {
   	datacenter_id = ` + DatacenterResource + `.` + DatacenterTestResource + `.id
 	server_id = ` + ServerResource + `.` + ServerTestResource + `.id
 	name = "DoesNotExist"
 }`
 
 const testAccDataSourceNicMatchIdAndNameError = testAccCheckNicConfigBasic +
-	`data ` + nicResource + ` test_nic_data {
+	`data ` + NicResource + ` test_nic_data {
   	datacenter_id = ` + DatacenterResource + `.` + DatacenterTestResource + `.id
 	server_id = ` + ServerResource + `.` + ServerTestResource + `.id
 	id = ` + fullNicResourceName + `.id

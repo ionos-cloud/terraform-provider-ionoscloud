@@ -58,6 +58,18 @@ const (
 	DataSourceK8sNodePoolName = DataSource + "." + K8sNodePoolResource + "." + K8sNodePoolDataSourceByName
 )
 
+// NatGateway Constants
+const (
+	NatGatewayResource             = "ionoscloud_natgateway"
+	NatGatewayTestResource         = "test_nat_gateway"
+	NatGatewayDataSourceById       = "test_nat_gateway_id"
+	NatGatewayDataSourceByName     = "test_nat_gateway_name"
+	NatGatewayRuleResource         = "ionoscloud_natgateway_rule"
+	NatGatewayRuleTestResource     = "test_nat_gateway"
+	NatGatewayRuleDataSourceById   = "test_nat_gateway_id"
+	NatGatewayRuleDataSourceByName = "test_nat_gateway_name"
+)
+
 // Private Crossconnect Constants
 const (
 	PCCResource         = "ionoscloud_private_crossconnect"
@@ -101,8 +113,8 @@ const (
 const IpBLockResource = "ionoscloud_ipblock"
 
 const (
-	nicResource         = "ionoscloud_nic"
-	fullNicResourceName = nicResource + "." + nicTestResourceName
+	NicResource         = "ionoscloud_nic"
+	fullNicResourceName = NicResource + "." + nicTestResourceName
 	nicTestResourceName = "database_nic"
 )
 
@@ -114,9 +126,15 @@ const (
 )
 
 const (
-	shareResource         = "ionoscloud_share"
-	shareResourceFullName = shareResource + "." + sourceShareName
+	ShareResource         = "ionoscloud_share"
+	shareResourceFullName = ShareResource + "." + sourceShareName
 	sourceShareName       = "share"
+)
+
+const (
+	ResourceIpFailover         = "ionoscloud_ipfailover"
+	ipfailoverResourceFullName = ResourceIpFailover + "." + ipfailoverName
+	ipfailoverName             = "failover-test"
 )
 
 // General Constants
