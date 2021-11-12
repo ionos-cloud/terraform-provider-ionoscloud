@@ -89,7 +89,7 @@ func Provider() *schema.Provider {
 			PCCResource:                      dataSourcePcc(),
 			ServerResource:                   dataSourceServer(),
 			K8sClusterResource:               dataSourceK8sCluster(),
-			K8sNodePoolResource:       dataSourceK8sNodePool(),
+			K8sNodePoolResource:              dataSourceK8sNodePool(),
 			NatGatewayResource:               dataSourceNatGateway(),
 			NatGatewayRuleResource:           dataSourceNatGatewayRule(),
 			"ionoscloud_networkloadbalancer": dataSourceNetworkLoadBalancer(),
