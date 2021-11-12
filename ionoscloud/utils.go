@@ -215,3 +215,41 @@ func isValidName(i interface{}, k string) ([]string, []error) {
 
 	return nil, nil
 }
+
+// DiffBasedOnVersion used for k8 node pool and cluster
+func DiffBasedOnVersion(_, old, new string, _ *schema.ResourceData) bool {
+	var oldMajor, oldMinor string
+	if old != "" {
+		oldSplit := strings.Split(old, ".")
+		oldMajor = oldSplit[0]
+		oldMinor = oldSplit[1]
+
+		newSplit := strings.Split(new, ".")
+		newMajor := newSplit[0]
+		newMinor := newSplit[1]
+
+		if oldMajor == newMajor && oldMinor == newMinor {
+			return true
+		}
+	}
+	return false
+}
+
+func GenerateEmail() string {
+	email := fmt.Sprintf("terraform_test-%d@mailinator.com", time.Now().UnixNano())
+	return email
+}
+
+func logApiRequestTime(resp *ionoscloud.APIResponse) {
+	if resp != nil {
+		log.Printf("[DEBUG] Request time : %s for operation : %s",
+			resp.RequestTime, resp.Operation)
+	}
+}
+
+func httpNotFound(resp *ionoscloud.APIResponse) bool {
+	if resp != nil && resp.Response != nil && resp.StatusCode == http.StatusNotFound {
+		return true
+	}
+	return false
+}

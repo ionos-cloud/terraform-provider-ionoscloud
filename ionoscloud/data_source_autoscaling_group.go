@@ -245,12 +245,11 @@ func dataSourceAutoscalingGroupRead(ctx context.Context, d *schema.ResourceData,
 }
 
 func setAutoscalingGroupData(d *schema.ResourceData, group *autoscaling.Group) diag.Diagnostics {
-	d.SetId(*group.Id)
-	if err := d.Set("id", *group.Id); err != nil {
-		diags := diag.FromErr(err)
-		return diags
-	}
 
+	if group.Id != nil {
+		id := *group.Id
+		d.SetId(id)
+	}
 	if group.Properties != nil {
 		if group.Properties.Datacenter != nil {
 			datacenter := make([]interface{}, 1)
@@ -383,29 +382,29 @@ func setAutoscalingGroupData(d *schema.ResourceData, group *autoscaling.Group) d
 			return diags
 		}
 
-		if group.Properties.Template != nil {
-			template := make([]interface{}, 1)
-
-			templateEntry := make(map[string]interface{})
-
-			if group.Properties.Template.Href != nil {
-				templateEntry["href"] = *group.Properties.Template.Href
-			}
-
-			if group.Properties.Template.Type != nil {
-				templateEntry["type"] = *group.Properties.Template.Type
-			}
-
-			if group.Properties.Template.Id != nil {
-				templateEntry["id"] = *group.Properties.Template.Id
-			}
-
-			template[0] = templateEntry
-			if err := d.Set("template", template); err != nil {
-				diags := diag.FromErr(fmt.Errorf("error while setting template property for autoscaling group %s: %s", d.Id(), err))
-				return diags
-			}
-		}
+		//if group.Properties.Template != nil {
+		//	template := make([]interface{}, 1)
+		//
+		//	templateEntry := make(map[string]interface{})
+		//
+		//	if group.Properties.Template.Href != nil {
+		//		templateEntry["href"] = *group.Properties.Template.Href
+		//	}
+		//
+		//	if group.Properties.Template.Type != nil {
+		//		templateEntry["type"] = *group.Properties.Template.Type
+		//	}
+		//
+		//	if group.Properties.Template.Id != nil {
+		//		templateEntry["id"] = *group.Properties.Template.Id
+		//	}
+		//
+		//	template[0] = templateEntry
+		//	if err := d.Set("template", template); err != nil {
+		//		diags := diag.FromErr(fmt.Errorf("error while setting template property for autoscaling group %s: %s", d.Id(), err))
+		//		return diags
+		//	}
+		//}
 	}
 
 	return nil

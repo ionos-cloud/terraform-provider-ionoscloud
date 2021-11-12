@@ -232,7 +232,6 @@ func resourceAutoscalingGroupCreate(ctx context.Context, d *schema.ResourceData,
 	if _, datacenterOk := d.GetOk("datacenter"); datacenterOk {
 		if id, idOk := d.GetOk("datacenter.0.id"); idOk {
 			id := id.(string)
-			group.Properties.Datacenter = &autoscaling.GroupPropertiesDatacenter{}
 			group.Properties.Datacenter.Id = &id
 		}
 	}
@@ -262,7 +261,7 @@ func resourceAutoscalingGroupCreate(ctx context.Context, d *schema.ResourceData,
 		}
 
 		if _, scaleInActionOk := d.GetOk("policy.0.scale_in_action"); scaleInActionOk {
-			groupPolicyAction := autoscaling.GroupPolicyAction{}
+			groupPolicyAction := autoscaling.Action{}
 
 			if amount, amountOk := d.GetOk("policy.0.scale_in_action.0.amount"); amountOk {
 				amount := float32(amount.(int))

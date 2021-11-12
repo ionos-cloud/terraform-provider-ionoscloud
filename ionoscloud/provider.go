@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"github.com/hashicorp/terraform-plugin-sdk/meta"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
-	autoscaling "github.com/ionos-cloud/sdk-go-autoscaling"
+	autoscalingService "github.com/ionos-cloud/terraform-provider-ionoscloud/services/autoscaling"
 	"log"
 	"os"
 	"time"
@@ -19,7 +19,7 @@ var Version = "development"
 
 type SdkBundle struct {
 	CloudApiClient    *ionoscloud.APIClient
-	AutoscalingClient *autoscaling.APIClient
+	AutoscalingClient *autoscalingService.Client
 }
 
 // Provider returns a schema.Provider for ionoscloud.
@@ -174,20 +174,11 @@ func providerConfigure(d *schema.ResourceData, terraformVersion string) (interfa
 	newConfig.UserAgent = fmt.Sprintf("HashiCorp Terraform/%s Terraform Plugin SDK/%s Terraform Provider Ionoscloud/%s", terraformVersion, meta.SDKVersionString(), Version)
 
 	// configuring autoscaling client
-	newConfigAutoscaling := autoscaling.NewConfiguration(username.(string), password.(string), token.(string))
-	if len(cleanedUrl) > 0 {
-		newConfigAutoscaling.Servers[0].URL = cleanedUrl
-	}
-
-	if os.Getenv("IONOS_DEBUG") != "" {
-		newConfigAutoscaling.Debug = true
-	}
-
-	newAutoscalingClient := autoscaling.NewAPIClient(newConfigAutoscaling)
+	autoscalingClient := autoscalingService.NewClientService(username.(string), password.(string), token.(string), cleanedUrl)
 
 	return SdkBundle{
 		CloudApiClient:    newClient,
-		AutoscalingClient: newAutoscalingClient,
+		AutoscalingClient: autoscalingClient.Get(),
 	}, nil
 
 }

@@ -17,15 +17,15 @@ import (
 
 // GroupCollection struct for GroupCollection
 type GroupCollection struct {
-	Id    *map[string]interface{} `json:"id"`
+	Id    *string                 `json:"id"`
 	Type  *map[string]interface{} `json:"type,omitempty"`
-	Href  *map[string]interface{} `json:"href,omitempty"`
+	Href  *string                 `json:"href,omitempty"`
 	Items *[]GroupResource        `json:"items,omitempty"`
 }
 
 // GetId returns the Id field value
-// If the value is explicit nil, the zero value for map[string]interface{} will be returned
-func (o *GroupCollection) GetId() *map[string]interface{} {
+// If the value is explicit nil, the zero value for string will be returned
+func (o *GroupCollection) GetId() *string {
 	if o == nil {
 		return nil
 	}
@@ -37,7 +37,7 @@ func (o *GroupCollection) GetId() *map[string]interface{} {
 // GetIdOk returns a tuple with the Id field value
 // and a boolean to check if the value has been set.
 // NOTE: If the value is an explicit nil, `nil, true` will be returned
-func (o *GroupCollection) GetIdOk() (*map[string]interface{}, bool) {
+func (o *GroupCollection) GetIdOk() (*string, bool) {
 	if o == nil {
 		return nil, false
 	}
@@ -46,7 +46,7 @@ func (o *GroupCollection) GetIdOk() (*map[string]interface{}, bool) {
 }
 
 // SetId sets field value
-func (o *GroupCollection) SetId(v map[string]interface{}) {
+func (o *GroupCollection) SetId(v string) {
 
 	o.Id = &v
 
@@ -100,8 +100,8 @@ func (o *GroupCollection) HasType() bool {
 }
 
 // GetHref returns the Href field value
-// If the value is explicit nil, the zero value for map[string]interface{} will be returned
-func (o *GroupCollection) GetHref() *map[string]interface{} {
+// If the value is explicit nil, the zero value for string will be returned
+func (o *GroupCollection) GetHref() *string {
 	if o == nil {
 		return nil
 	}
@@ -113,7 +113,7 @@ func (o *GroupCollection) GetHref() *map[string]interface{} {
 // GetHrefOk returns a tuple with the Href field value
 // and a boolean to check if the value has been set.
 // NOTE: If the value is an explicit nil, `nil, true` will be returned
-func (o *GroupCollection) GetHrefOk() (*map[string]interface{}, bool) {
+func (o *GroupCollection) GetHrefOk() (*string, bool) {
 	if o == nil {
 		return nil, false
 	}
@@ -122,7 +122,7 @@ func (o *GroupCollection) GetHrefOk() (*map[string]interface{}, bool) {
 }
 
 // SetHref sets field value
-func (o *GroupCollection) SetHref(v map[string]interface{}) {
+func (o *GroupCollection) SetHref(v string) {
 
 	o.Href = &v
 

@@ -17,16 +17,16 @@ import (
 
 // Server struct for Server
 type Server struct {
-	Id         *map[string]interface{} `json:"id"`
-	Type       *map[string]interface{} `json:"type,omitempty"`
-	Href       *map[string]interface{} `json:"href,omitempty"`
-	Metadata   *MetadataBasic          `json:"metadata,omitempty"`
-	Properties *ServerProperties       `json:"properties,omitempty"`
+	Id         *string           `json:"id"`
+	Type       *string           `json:"type,omitempty"`
+	Href       *string           `json:"href,omitempty"`
+	Metadata   *MetadataBasic    `json:"metadata,omitempty"`
+	Properties *ServerProperties `json:"properties,omitempty"`
 }
 
 // GetId returns the Id field value
-// If the value is explicit nil, the zero value for map[string]interface{} will be returned
-func (o *Server) GetId() *map[string]interface{} {
+// If the value is explicit nil, the zero value for string will be returned
+func (o *Server) GetId() *string {
 	if o == nil {
 		return nil
 	}
@@ -38,7 +38,7 @@ func (o *Server) GetId() *map[string]interface{} {
 // GetIdOk returns a tuple with the Id field value
 // and a boolean to check if the value has been set.
 // NOTE: If the value is an explicit nil, `nil, true` will be returned
-func (o *Server) GetIdOk() (*map[string]interface{}, bool) {
+func (o *Server) GetIdOk() (*string, bool) {
 	if o == nil {
 		return nil, false
 	}
@@ -47,7 +47,7 @@ func (o *Server) GetIdOk() (*map[string]interface{}, bool) {
 }
 
 // SetId sets field value
-func (o *Server) SetId(v map[string]interface{}) {
+func (o *Server) SetId(v string) {
 
 	o.Id = &v
 
@@ -63,8 +63,8 @@ func (o *Server) HasId() bool {
 }
 
 // GetType returns the Type field value
-// If the value is explicit nil, the zero value for map[string]interface{} will be returned
-func (o *Server) GetType() *map[string]interface{} {
+// If the value is explicit nil, the zero value for string will be returned
+func (o *Server) GetType() *string {
 	if o == nil {
 		return nil
 	}
@@ -76,7 +76,7 @@ func (o *Server) GetType() *map[string]interface{} {
 // GetTypeOk returns a tuple with the Type field value
 // and a boolean to check if the value has been set.
 // NOTE: If the value is an explicit nil, `nil, true` will be returned
-func (o *Server) GetTypeOk() (*map[string]interface{}, bool) {
+func (o *Server) GetTypeOk() (*string, bool) {
 	if o == nil {
 		return nil, false
 	}
@@ -85,7 +85,7 @@ func (o *Server) GetTypeOk() (*map[string]interface{}, bool) {
 }
 
 // SetType sets field value
-func (o *Server) SetType(v map[string]interface{}) {
+func (o *Server) SetType(v string) {
 
 	o.Type = &v
 
@@ -101,8 +101,8 @@ func (o *Server) HasType() bool {
 }
 
 // GetHref returns the Href field value
-// If the value is explicit nil, the zero value for map[string]interface{} will be returned
-func (o *Server) GetHref() *map[string]interface{} {
+// If the value is explicit nil, the zero value for string will be returned
+func (o *Server) GetHref() *string {
 	if o == nil {
 		return nil
 	}
@@ -114,7 +114,7 @@ func (o *Server) GetHref() *map[string]interface{} {
 // GetHrefOk returns a tuple with the Href field value
 // and a boolean to check if the value has been set.
 // NOTE: If the value is an explicit nil, `nil, true` will be returned
-func (o *Server) GetHrefOk() (*map[string]interface{}, bool) {
+func (o *Server) GetHrefOk() (*string, bool) {
 	if o == nil {
 		return nil, false
 	}
@@ -123,7 +123,7 @@ func (o *Server) GetHrefOk() (*map[string]interface{}, bool) {
 }
 
 // SetHref sets field value
-func (o *Server) SetHref(v map[string]interface{}) {
+func (o *Server) SetHref(v string) {
 
 	o.Href = &v
 

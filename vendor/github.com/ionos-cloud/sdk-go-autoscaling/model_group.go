@@ -17,17 +17,17 @@ import (
 
 // Group A group of virtual servers where replica count can be scaled automatically.
 type Group struct {
-	Id         *map[string]interface{} `json:"id"`
-	Type       *map[string]interface{} `json:"type,omitempty"`
-	Href       *map[string]interface{} `json:"href,omitempty"`
+	Id         *string                 `json:"id"`
+	Type       *string                 `json:"type,omitempty"`
+	Href       *string                 `json:"href,omitempty"`
 	Metadata   *Metadata               `json:"metadata,omitempty"`
 	Properties *GroupProperties        `json:"properties,omitempty"`
 	Entities   *map[string]interface{} `json:"entities,omitempty"`
 }
 
 // GetId returns the Id field value
-// If the value is explicit nil, the zero value for map[string]interface{} will be returned
-func (o *Group) GetId() *map[string]interface{} {
+// If the value is explicit nil, the zero value for string will be returned
+func (o *Group) GetId() *string {
 	if o == nil {
 		return nil
 	}
@@ -39,7 +39,7 @@ func (o *Group) GetId() *map[string]interface{} {
 // GetIdOk returns a tuple with the Id field value
 // and a boolean to check if the value has been set.
 // NOTE: If the value is an explicit nil, `nil, true` will be returned
-func (o *Group) GetIdOk() (*map[string]interface{}, bool) {
+func (o *Group) GetIdOk() (*string, bool) {
 	if o == nil {
 		return nil, false
 	}
@@ -48,7 +48,7 @@ func (o *Group) GetIdOk() (*map[string]interface{}, bool) {
 }
 
 // SetId sets field value
-func (o *Group) SetId(v map[string]interface{}) {
+func (o *Group) SetId(v string) {
 
 	o.Id = &v
 
@@ -64,8 +64,8 @@ func (o *Group) HasId() bool {
 }
 
 // GetType returns the Type field value
-// If the value is explicit nil, the zero value for map[string]interface{} will be returned
-func (o *Group) GetType() *map[string]interface{} {
+// If the value is explicit nil, the zero value for string will be returned
+func (o *Group) GetType() *string {
 	if o == nil {
 		return nil
 	}
@@ -77,7 +77,7 @@ func (o *Group) GetType() *map[string]interface{} {
 // GetTypeOk returns a tuple with the Type field value
 // and a boolean to check if the value has been set.
 // NOTE: If the value is an explicit nil, `nil, true` will be returned
-func (o *Group) GetTypeOk() (*map[string]interface{}, bool) {
+func (o *Group) GetTypeOk() (*string, bool) {
 	if o == nil {
 		return nil, false
 	}
@@ -86,7 +86,7 @@ func (o *Group) GetTypeOk() (*map[string]interface{}, bool) {
 }
 
 // SetType sets field value
-func (o *Group) SetType(v map[string]interface{}) {
+func (o *Group) SetType(v string) {
 
 	o.Type = &v
 
@@ -102,8 +102,8 @@ func (o *Group) HasType() bool {
 }
 
 // GetHref returns the Href field value
-// If the value is explicit nil, the zero value for map[string]interface{} will be returned
-func (o *Group) GetHref() *map[string]interface{} {
+// If the value is explicit nil, the zero value for string will be returned
+func (o *Group) GetHref() *string {
 	if o == nil {
 		return nil
 	}
@@ -115,7 +115,7 @@ func (o *Group) GetHref() *map[string]interface{} {
 // GetHrefOk returns a tuple with the Href field value
 // and a boolean to check if the value has been set.
 // NOTE: If the value is an explicit nil, `nil, true` will be returned
-func (o *Group) GetHrefOk() (*map[string]interface{}, bool) {
+func (o *Group) GetHrefOk() (*string, bool) {
 	if o == nil {
 		return nil, false
 	}
@@ -124,7 +124,7 @@ func (o *Group) GetHrefOk() (*map[string]interface{}, bool) {
 }
 
 // SetHref sets field value
-func (o *Group) SetHref(v map[string]interface{}) {
+func (o *Group) SetHref(v string) {
 
 	o.Href = &v
 

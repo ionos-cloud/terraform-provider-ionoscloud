@@ -17,16 +17,16 @@ import (
 
 // Action A background action associated with an autoscaling group.
 type Action struct {
-	Id         *map[string]interface{} `json:"id"`
-	Type       *map[string]interface{} `json:"type,omitempty"`
-	Href       *map[string]interface{} `json:"href,omitempty"`
-	Metadata   *MetadataBasic          `json:"metadata,omitempty"`
-	Properties *ActionProperties       `json:"properties,omitempty"`
+	Id         *string           `json:"id"`
+	Type       *string           `json:"type,omitempty"`
+	Href       *string           `json:"href,omitempty"`
+	Metadata   *MetadataBasic    `json:"metadata,omitempty"`
+	Properties *ActionProperties `json:"properties,omitempty"`
 }
 
 // GetId returns the Id field value
-// If the value is explicit nil, the zero value for map[string]interface{} will be returned
-func (o *Action) GetId() *map[string]interface{} {
+// If the value is explicit nil, the zero value for string will be returned
+func (o *Action) GetId() *string {
 	if o == nil {
 		return nil
 	}
@@ -38,7 +38,7 @@ func (o *Action) GetId() *map[string]interface{} {
 // GetIdOk returns a tuple with the Id field value
 // and a boolean to check if the value has been set.
 // NOTE: If the value is an explicit nil, `nil, true` will be returned
-func (o *Action) GetIdOk() (*map[string]interface{}, bool) {
+func (o *Action) GetIdOk() (*string, bool) {
 	if o == nil {
 		return nil, false
 	}
@@ -47,7 +47,7 @@ func (o *Action) GetIdOk() (*map[string]interface{}, bool) {
 }
 
 // SetId sets field value
-func (o *Action) SetId(v map[string]interface{}) {
+func (o *Action) SetId(v string) {
 
 	o.Id = &v
 
@@ -63,8 +63,8 @@ func (o *Action) HasId() bool {
 }
 
 // GetType returns the Type field value
-// If the value is explicit nil, the zero value for map[string]interface{} will be returned
-func (o *Action) GetType() *map[string]interface{} {
+// If the value is explicit nil, the zero value for string will be returned
+func (o *Action) GetType() *string {
 	if o == nil {
 		return nil
 	}
@@ -76,7 +76,7 @@ func (o *Action) GetType() *map[string]interface{} {
 // GetTypeOk returns a tuple with the Type field value
 // and a boolean to check if the value has been set.
 // NOTE: If the value is an explicit nil, `nil, true` will be returned
-func (o *Action) GetTypeOk() (*map[string]interface{}, bool) {
+func (o *Action) GetTypeOk() (*string, bool) {
 	if o == nil {
 		return nil, false
 	}
@@ -85,7 +85,7 @@ func (o *Action) GetTypeOk() (*map[string]interface{}, bool) {
 }
 
 // SetType sets field value
-func (o *Action) SetType(v map[string]interface{}) {
+func (o *Action) SetType(v string) {
 
 	o.Type = &v
 
@@ -101,8 +101,8 @@ func (o *Action) HasType() bool {
 }
 
 // GetHref returns the Href field value
-// If the value is explicit nil, the zero value for map[string]interface{} will be returned
-func (o *Action) GetHref() *map[string]interface{} {
+// If the value is explicit nil, the zero value for string will be returned
+func (o *Action) GetHref() *string {
 	if o == nil {
 		return nil
 	}
@@ -114,7 +114,7 @@ func (o *Action) GetHref() *map[string]interface{} {
 // GetHrefOk returns a tuple with the Href field value
 // and a boolean to check if the value has been set.
 // NOTE: If the value is an explicit nil, `nil, true` will be returned
-func (o *Action) GetHrefOk() (*map[string]interface{}, bool) {
+func (o *Action) GetHrefOk() (*string, bool) {
 	if o == nil {
 		return nil, false
 	}
@@ -123,7 +123,7 @@ func (o *Action) GetHrefOk() (*map[string]interface{}, bool) {
 }
 
 // SetHref sets field value
-func (o *Action) SetHref(v map[string]interface{}) {
+func (o *Action) SetHref(v string) {
 
 	o.Href = &v
 
