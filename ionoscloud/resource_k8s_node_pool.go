@@ -490,11 +490,8 @@ func resourcek8sNodePoolUpdate(ctx context.Context, d *schema.ResourceData, meta
 
 	if d.HasChange("lans") {
 		oldLANs, newLANs := d.GetChange("lans")
+		lans := make([]ionoscloud.KubernetesNodePoolLan, 0)
 		if newLANs.([]interface{}) != nil {
-			updateLans := false
-
-			var lans []ionoscloud.KubernetesNodePoolLan
-
 			for lanIndex := range newLANs.([]interface{}) {
 				if lanID, lanIDOk := d.GetOk(fmt.Sprintf("lans.%d", lanIndex)); lanIDOk {
 					log.Printf("[INFO] Adding k8s node pool to LAN %+v...", lanID)
@@ -502,16 +499,9 @@ func resourcek8sNodePoolUpdate(ctx context.Context, d *schema.ResourceData, meta
 					lans = append(lans, ionoscloud.KubernetesNodePoolLan{Id: &lanID})
 				}
 			}
-
-			if len(lans) > 0 {
-				updateLans = true
-			}
-
-			if updateLans == true {
-				log.Printf("[INFO] k8s node pool LANs changed from %+v to %+v", oldLANs, newLANs)
-				request.Properties.Lans = &lans
-			}
 		}
+		log.Printf("[INFO] k8s pool public lans changed from %+v to %+v", oldLANs, lans)
+		request.Properties.Lans = &lans
 	}
 
 	if d.HasChange("maintenance_window.0") {
@@ -557,7 +547,7 @@ func resourcek8sNodePoolUpdate(ctx context.Context, d *schema.ResourceData, meta
 
 	if d.HasChange("public_ips") {
 		oldPublicIps, newPublicIps := d.GetChange("public_ips")
-		log.Printf("[INFO] k8s pool public IPs changed from %+v to %+v", oldPublicIps, newPublicIps)
+		requestPublicIps := make([]string, 0)
 		if newPublicIps != nil {
 
 			publicIps := newPublicIps.([]interface{})
@@ -568,14 +558,13 @@ func resourcek8sNodePoolUpdate(ctx context.Context, d *schema.ResourceData, meta
 				return diags
 			}
 
-			requestPublicIps := make([]string, len(publicIps), len(publicIps))
-
-			for i := range publicIps {
-				requestPublicIps[i] = fmt.Sprint(publicIps[i])
+			for _, ip := range publicIps {
+				requestPublicIps = append(requestPublicIps, ip.(string))
 			}
-
-			request.Properties.PublicIps = &requestPublicIps
 		}
+		request.Properties.PublicIps = &requestPublicIps
+		log.Printf("[INFO] k8s pool public IPs changed from %+v to %+v", oldPublicIps, newPublicIps)
+
 	}
 
 	if d.HasChange("labels") {
