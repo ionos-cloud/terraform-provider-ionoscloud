@@ -43,10 +43,14 @@ const (
 
 // K8s Constants
 const (
-	K8sClusterResource         = "ionoscloud_k8s_cluster"
-	K8sClusterTestResource     = "test_k8s_cluster"
-	K8sClusterDataSourceById   = "test_k8s_cluster_id"
-	K8sClusterDataSourceByName = "test_k8s_cluster_name"
+	K8sClusterResource          = "ionoscloud_k8s_cluster"
+	K8sClusterTestResource      = "test_k8s_cluster"
+	K8sClusterDataSourceById    = "test_k8s_cluster_id"
+	K8sClusterDataSourceByName  = "test_k8s_cluster_name"
+	K8sNodePoolResource         = "ionoscloud_k8s_node_pool"
+	K8sNodePoolTestResource     = "test_k8s_node_pool"
+	K8sNodePoolDataSourceById   = "test_k8s_node_pool_id"
+	K8sNodePoolDataSourceByName = "test_k8s_node_pool_name"
 )
 
 // Private Crossconnect Constants

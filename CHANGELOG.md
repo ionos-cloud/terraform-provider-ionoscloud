@@ -1,8 +1,13 @@
 ## 5.2.19
 
 - **code enhancements**: added http request time log for API calls
-- **new features**: import for `nic`, data_source for `nic`, `share` 
 - **dependency update**: updated sdk-go to v5.1.9
+- **code enhancements**: for `k8s_node_pool`, `nic` and `share`:
+  - made tests comprehensive
+  - optimized test duration by including both match by id and by name in the same test
+  - removed duplicated code from import, data_source, resource and tests files
+- **new features**: import for `nic`, data_source for `nic`, `share`
+- **bug fixes**: k8s_node_pool update node_count didn't work and emptying lans and public_ips
 
 ## 5.2.18
 
