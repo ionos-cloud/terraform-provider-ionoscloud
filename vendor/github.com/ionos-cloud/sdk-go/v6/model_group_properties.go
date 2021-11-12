@@ -1,7 +1,7 @@
 /*
  * CLOUD API
  *
- * An enterprise-grade Infrastructure is provided as a Service (IaaS) solution that can be managed through a browser-based \"Data Center Designer\" (DCD) tool or via an easy to use API.   The API allows you to perform a variety of management tasks such as spinning up additional servers, adding volumes, adjusting networking, and so forth. It is designed to allow users to leverage the same power and flexibility found within the DCD visual tool. Both tools are consistent with their concepts and lend well to making the experience smooth and intuitive.
+ * IONOS Enterprise-grade Infrastructure as a Service (IaaS) solutions can be managed through the Cloud API, in addition or as an alternative to the \"Data Center Designer\" (DCD) browser-based tool.    Both methods employ consistent concepts and features, deliver similar power and flexibility, and can be used to perform a multitude of management tasks, including adding servers, volumes, configuring networks, and so on.
  *
  * API version: 6.0-SDK.3
  */
@@ -44,15 +44,12 @@ type GroupProperties struct {
 	AccessAndManageCertificates *bool `json:"accessAndManageCertificates,omitempty"`
 }
 
-
-
 // GetName returns the Name field value
 // If the value is explicit nil, the zero value for string will be returned
 func (o *GroupProperties) GetName() *string {
 	if o == nil {
 		return nil
 	}
-
 
 	return o.Name
 
@@ -66,13 +63,11 @@ func (o *GroupProperties) GetNameOk() (*string, bool) {
 		return nil, false
 	}
 
-
 	return o.Name, true
 }
 
 // SetName sets field value
 func (o *GroupProperties) SetName(v string) {
-
 
 	o.Name = &v
 
@@ -87,15 +82,12 @@ func (o *GroupProperties) HasName() bool {
 	return false
 }
 
-
-
 // GetCreateDataCenter returns the CreateDataCenter field value
 // If the value is explicit nil, the zero value for bool will be returned
 func (o *GroupProperties) GetCreateDataCenter() *bool {
 	if o == nil {
 		return nil
 	}
-
 
 	return o.CreateDataCenter
 
@@ -109,13 +101,11 @@ func (o *GroupProperties) GetCreateDataCenterOk() (*bool, bool) {
 		return nil, false
 	}
 
-
 	return o.CreateDataCenter, true
 }
 
 // SetCreateDataCenter sets field value
 func (o *GroupProperties) SetCreateDataCenter(v bool) {
-
 
 	o.CreateDataCenter = &v
 
@@ -130,15 +120,12 @@ func (o *GroupProperties) HasCreateDataCenter() bool {
 	return false
 }
 
-
-
 // GetCreateSnapshot returns the CreateSnapshot field value
 // If the value is explicit nil, the zero value for bool will be returned
 func (o *GroupProperties) GetCreateSnapshot() *bool {
 	if o == nil {
 		return nil
 	}
-
 
 	return o.CreateSnapshot
 
@@ -152,13 +139,11 @@ func (o *GroupProperties) GetCreateSnapshotOk() (*bool, bool) {
 		return nil, false
 	}
 
-
 	return o.CreateSnapshot, true
 }
 
 // SetCreateSnapshot sets field value
 func (o *GroupProperties) SetCreateSnapshot(v bool) {
-
 
 	o.CreateSnapshot = &v
 
@@ -173,15 +158,12 @@ func (o *GroupProperties) HasCreateSnapshot() bool {
 	return false
 }
 
-
-
 // GetReserveIp returns the ReserveIp field value
 // If the value is explicit nil, the zero value for bool will be returned
 func (o *GroupProperties) GetReserveIp() *bool {
 	if o == nil {
 		return nil
 	}
-
 
 	return o.ReserveIp
 
@@ -195,13 +177,11 @@ func (o *GroupProperties) GetReserveIpOk() (*bool, bool) {
 		return nil, false
 	}
 
-
 	return o.ReserveIp, true
 }
 
 // SetReserveIp sets field value
 func (o *GroupProperties) SetReserveIp(v bool) {
-
 
 	o.ReserveIp = &v
 
@@ -216,15 +196,12 @@ func (o *GroupProperties) HasReserveIp() bool {
 	return false
 }
 
-
-
 // GetAccessActivityLog returns the AccessActivityLog field value
 // If the value is explicit nil, the zero value for bool will be returned
 func (o *GroupProperties) GetAccessActivityLog() *bool {
 	if o == nil {
 		return nil
 	}
-
 
 	return o.AccessActivityLog
 
@@ -238,13 +215,11 @@ func (o *GroupProperties) GetAccessActivityLogOk() (*bool, bool) {
 		return nil, false
 	}
 
-
 	return o.AccessActivityLog, true
 }
 
 // SetAccessActivityLog sets field value
 func (o *GroupProperties) SetAccessActivityLog(v bool) {
-
 
 	o.AccessActivityLog = &v
 
@@ -259,15 +234,12 @@ func (o *GroupProperties) HasAccessActivityLog() bool {
 	return false
 }
 
-
-
 // GetCreatePcc returns the CreatePcc field value
 // If the value is explicit nil, the zero value for bool will be returned
 func (o *GroupProperties) GetCreatePcc() *bool {
 	if o == nil {
 		return nil
 	}
-
 
 	return o.CreatePcc
 
@@ -281,13 +253,11 @@ func (o *GroupProperties) GetCreatePccOk() (*bool, bool) {
 		return nil, false
 	}
 
-
 	return o.CreatePcc, true
 }
 
 // SetCreatePcc sets field value
 func (o *GroupProperties) SetCreatePcc(v bool) {
-
 
 	o.CreatePcc = &v
 
@@ -302,15 +272,12 @@ func (o *GroupProperties) HasCreatePcc() bool {
 	return false
 }
 
-
-
 // GetS3Privilege returns the S3Privilege field value
 // If the value is explicit nil, the zero value for bool will be returned
 func (o *GroupProperties) GetS3Privilege() *bool {
 	if o == nil {
 		return nil
 	}
-
 
 	return o.S3Privilege
 
@@ -324,13 +291,11 @@ func (o *GroupProperties) GetS3PrivilegeOk() (*bool, bool) {
 		return nil, false
 	}
 
-
 	return o.S3Privilege, true
 }
 
 // SetS3Privilege sets field value
 func (o *GroupProperties) SetS3Privilege(v bool) {
-
 
 	o.S3Privilege = &v
 
@@ -345,15 +310,12 @@ func (o *GroupProperties) HasS3Privilege() bool {
 	return false
 }
 
-
-
 // GetCreateBackupUnit returns the CreateBackupUnit field value
 // If the value is explicit nil, the zero value for bool will be returned
 func (o *GroupProperties) GetCreateBackupUnit() *bool {
 	if o == nil {
 		return nil
 	}
-
 
 	return o.CreateBackupUnit
 
@@ -367,13 +329,11 @@ func (o *GroupProperties) GetCreateBackupUnitOk() (*bool, bool) {
 		return nil, false
 	}
 
-
 	return o.CreateBackupUnit, true
 }
 
 // SetCreateBackupUnit sets field value
 func (o *GroupProperties) SetCreateBackupUnit(v bool) {
-
 
 	o.CreateBackupUnit = &v
 
@@ -388,15 +348,12 @@ func (o *GroupProperties) HasCreateBackupUnit() bool {
 	return false
 }
 
-
-
 // GetCreateInternetAccess returns the CreateInternetAccess field value
 // If the value is explicit nil, the zero value for bool will be returned
 func (o *GroupProperties) GetCreateInternetAccess() *bool {
 	if o == nil {
 		return nil
 	}
-
 
 	return o.CreateInternetAccess
 
@@ -410,13 +367,11 @@ func (o *GroupProperties) GetCreateInternetAccessOk() (*bool, bool) {
 		return nil, false
 	}
 
-
 	return o.CreateInternetAccess, true
 }
 
 // SetCreateInternetAccess sets field value
 func (o *GroupProperties) SetCreateInternetAccess(v bool) {
-
 
 	o.CreateInternetAccess = &v
 
@@ -431,15 +386,12 @@ func (o *GroupProperties) HasCreateInternetAccess() bool {
 	return false
 }
 
-
-
 // GetCreateK8sCluster returns the CreateK8sCluster field value
 // If the value is explicit nil, the zero value for bool will be returned
 func (o *GroupProperties) GetCreateK8sCluster() *bool {
 	if o == nil {
 		return nil
 	}
-
 
 	return o.CreateK8sCluster
 
@@ -453,13 +405,11 @@ func (o *GroupProperties) GetCreateK8sClusterOk() (*bool, bool) {
 		return nil, false
 	}
 
-
 	return o.CreateK8sCluster, true
 }
 
 // SetCreateK8sCluster sets field value
 func (o *GroupProperties) SetCreateK8sCluster(v bool) {
-
 
 	o.CreateK8sCluster = &v
 
@@ -474,15 +424,12 @@ func (o *GroupProperties) HasCreateK8sCluster() bool {
 	return false
 }
 
-
-
 // GetCreateFlowLog returns the CreateFlowLog field value
 // If the value is explicit nil, the zero value for bool will be returned
 func (o *GroupProperties) GetCreateFlowLog() *bool {
 	if o == nil {
 		return nil
 	}
-
 
 	return o.CreateFlowLog
 
@@ -496,13 +443,11 @@ func (o *GroupProperties) GetCreateFlowLogOk() (*bool, bool) {
 		return nil, false
 	}
 
-
 	return o.CreateFlowLog, true
 }
 
 // SetCreateFlowLog sets field value
 func (o *GroupProperties) SetCreateFlowLog(v bool) {
-
 
 	o.CreateFlowLog = &v
 
@@ -517,15 +462,12 @@ func (o *GroupProperties) HasCreateFlowLog() bool {
 	return false
 }
 
-
-
 // GetAccessAndManageMonitoring returns the AccessAndManageMonitoring field value
 // If the value is explicit nil, the zero value for bool will be returned
 func (o *GroupProperties) GetAccessAndManageMonitoring() *bool {
 	if o == nil {
 		return nil
 	}
-
 
 	return o.AccessAndManageMonitoring
 
@@ -539,13 +481,11 @@ func (o *GroupProperties) GetAccessAndManageMonitoringOk() (*bool, bool) {
 		return nil, false
 	}
 
-
 	return o.AccessAndManageMonitoring, true
 }
 
 // SetAccessAndManageMonitoring sets field value
 func (o *GroupProperties) SetAccessAndManageMonitoring(v bool) {
-
 
 	o.AccessAndManageMonitoring = &v
 
@@ -560,15 +500,12 @@ func (o *GroupProperties) HasAccessAndManageMonitoring() bool {
 	return false
 }
 
-
-
 // GetAccessAndManageCertificates returns the AccessAndManageCertificates field value
 // If the value is explicit nil, the zero value for bool will be returned
 func (o *GroupProperties) GetAccessAndManageCertificates() *bool {
 	if o == nil {
 		return nil
 	}
-
 
 	return o.AccessAndManageCertificates
 
@@ -582,13 +519,11 @@ func (o *GroupProperties) GetAccessAndManageCertificatesOk() (*bool, bool) {
 		return nil, false
 	}
 
-
 	return o.AccessAndManageCertificates, true
 }
 
 // SetAccessAndManageCertificates sets field value
 func (o *GroupProperties) SetAccessAndManageCertificates(v bool) {
-
 
 	o.AccessAndManageCertificates = &v
 
@@ -603,74 +538,60 @@ func (o *GroupProperties) HasAccessAndManageCertificates() bool {
 	return false
 }
 
-
 func (o GroupProperties) MarshalJSON() ([]byte, error) {
 	toSerialize := map[string]interface{}{}
 
 	if o.Name != nil {
 		toSerialize["name"] = o.Name
 	}
-	
 
 	if o.CreateDataCenter != nil {
 		toSerialize["createDataCenter"] = o.CreateDataCenter
 	}
-	
 
 	if o.CreateSnapshot != nil {
 		toSerialize["createSnapshot"] = o.CreateSnapshot
 	}
-	
 
 	if o.ReserveIp != nil {
 		toSerialize["reserveIp"] = o.ReserveIp
 	}
-	
 
 	if o.AccessActivityLog != nil {
 		toSerialize["accessActivityLog"] = o.AccessActivityLog
 	}
-	
 
 	if o.CreatePcc != nil {
 		toSerialize["createPcc"] = o.CreatePcc
 	}
-	
 
 	if o.S3Privilege != nil {
 		toSerialize["s3Privilege"] = o.S3Privilege
 	}
-	
 
 	if o.CreateBackupUnit != nil {
 		toSerialize["createBackupUnit"] = o.CreateBackupUnit
 	}
-	
 
 	if o.CreateInternetAccess != nil {
 		toSerialize["createInternetAccess"] = o.CreateInternetAccess
 	}
-	
 
 	if o.CreateK8sCluster != nil {
 		toSerialize["createK8sCluster"] = o.CreateK8sCluster
 	}
-	
 
 	if o.CreateFlowLog != nil {
 		toSerialize["createFlowLog"] = o.CreateFlowLog
 	}
-	
 
 	if o.AccessAndManageMonitoring != nil {
 		toSerialize["accessAndManageMonitoring"] = o.AccessAndManageMonitoring
 	}
-	
 
 	if o.AccessAndManageCertificates != nil {
 		toSerialize["accessAndManageCertificates"] = o.AccessAndManageCertificates
 	}
-	
 	return json.Marshal(toSerialize)
 }
 
@@ -709,5 +630,3 @@ func (v *NullableGroupProperties) UnmarshalJSON(src []byte) error {
 	v.isSet = true
 	return json.Unmarshal(src, &v.value)
 }
-
-

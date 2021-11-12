@@ -42,9 +42,9 @@ The following attributes are returned by the datasource:
 * `ram` - The amount of memory for the server in MB
 * `availability_zone` - The availability zone in which the server should exist
 * `vm_state` - Status of the virtual Machine
-* `image_name`
 * `boot_cdrom`
 * `boot_volume`
+* `boot_image`
 * `token`
 * `cdroms` - list of
   * `id` - Id of the attached cdrom

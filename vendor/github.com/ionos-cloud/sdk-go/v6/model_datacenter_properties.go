@@ -1,7 +1,7 @@
 /*
  * CLOUD API
  *
- * An enterprise-grade Infrastructure is provided as a Service (IaaS) solution that can be managed through a browser-based \"Data Center Designer\" (DCD) tool or via an easy to use API.   The API allows you to perform a variety of management tasks such as spinning up additional servers, adding volumes, adjusting networking, and so forth. It is designed to allow users to leverage the same power and flexibility found within the DCD visual tool. Both tools are consistent with their concepts and lend well to making the experience smooth and intuitive.
+ * IONOS Enterprise-grade Infrastructure as a Service (IaaS) solutions can be managed through the Cloud API, in addition or as an alternative to the \"Data Center Designer\" (DCD) browser-based tool.    Both methods employ consistent concepts and features, deliver similar power and flexibility, and can be used to perform a multitude of management tasks, including adding servers, volumes, configuring networks, and so on.
  *
  * API version: 6.0-SDK.3
  */
@@ -32,15 +32,12 @@ type DatacenterProperties struct {
 	CpuArchitecture *[]CpuArchitectureProperties `json:"cpuArchitecture,omitempty"`
 }
 
-
-
 // GetName returns the Name field value
 // If the value is explicit nil, the zero value for string will be returned
 func (o *DatacenterProperties) GetName() *string {
 	if o == nil {
 		return nil
 	}
-
 
 	return o.Name
 
@@ -54,13 +51,11 @@ func (o *DatacenterProperties) GetNameOk() (*string, bool) {
 		return nil, false
 	}
 
-
 	return o.Name, true
 }
 
 // SetName sets field value
 func (o *DatacenterProperties) SetName(v string) {
-
 
 	o.Name = &v
 
@@ -75,15 +70,12 @@ func (o *DatacenterProperties) HasName() bool {
 	return false
 }
 
-
-
 // GetDescription returns the Description field value
 // If the value is explicit nil, the zero value for string will be returned
 func (o *DatacenterProperties) GetDescription() *string {
 	if o == nil {
 		return nil
 	}
-
 
 	return o.Description
 
@@ -97,13 +89,11 @@ func (o *DatacenterProperties) GetDescriptionOk() (*string, bool) {
 		return nil, false
 	}
 
-
 	return o.Description, true
 }
 
 // SetDescription sets field value
 func (o *DatacenterProperties) SetDescription(v string) {
-
 
 	o.Description = &v
 
@@ -118,15 +108,12 @@ func (o *DatacenterProperties) HasDescription() bool {
 	return false
 }
 
-
-
 // GetLocation returns the Location field value
 // If the value is explicit nil, the zero value for string will be returned
 func (o *DatacenterProperties) GetLocation() *string {
 	if o == nil {
 		return nil
 	}
-
 
 	return o.Location
 
@@ -140,13 +127,11 @@ func (o *DatacenterProperties) GetLocationOk() (*string, bool) {
 		return nil, false
 	}
 
-
 	return o.Location, true
 }
 
 // SetLocation sets field value
 func (o *DatacenterProperties) SetLocation(v string) {
-
 
 	o.Location = &v
 
@@ -161,15 +146,12 @@ func (o *DatacenterProperties) HasLocation() bool {
 	return false
 }
 
-
-
 // GetVersion returns the Version field value
 // If the value is explicit nil, the zero value for int32 will be returned
 func (o *DatacenterProperties) GetVersion() *int32 {
 	if o == nil {
 		return nil
 	}
-
 
 	return o.Version
 
@@ -183,13 +165,11 @@ func (o *DatacenterProperties) GetVersionOk() (*int32, bool) {
 		return nil, false
 	}
 
-
 	return o.Version, true
 }
 
 // SetVersion sets field value
 func (o *DatacenterProperties) SetVersion(v int32) {
-
 
 	o.Version = &v
 
@@ -204,15 +184,12 @@ func (o *DatacenterProperties) HasVersion() bool {
 	return false
 }
 
-
-
 // GetFeatures returns the Features field value
 // If the value is explicit nil, the zero value for []string will be returned
 func (o *DatacenterProperties) GetFeatures() *[]string {
 	if o == nil {
 		return nil
 	}
-
 
 	return o.Features
 
@@ -226,13 +203,11 @@ func (o *DatacenterProperties) GetFeaturesOk() (*[]string, bool) {
 		return nil, false
 	}
 
-
 	return o.Features, true
 }
 
 // SetFeatures sets field value
 func (o *DatacenterProperties) SetFeatures(v []string) {
-
 
 	o.Features = &v
 
@@ -247,15 +222,12 @@ func (o *DatacenterProperties) HasFeatures() bool {
 	return false
 }
 
-
-
 // GetSecAuthProtection returns the SecAuthProtection field value
 // If the value is explicit nil, the zero value for bool will be returned
 func (o *DatacenterProperties) GetSecAuthProtection() *bool {
 	if o == nil {
 		return nil
 	}
-
 
 	return o.SecAuthProtection
 
@@ -269,13 +241,11 @@ func (o *DatacenterProperties) GetSecAuthProtectionOk() (*bool, bool) {
 		return nil, false
 	}
 
-
 	return o.SecAuthProtection, true
 }
 
 // SetSecAuthProtection sets field value
 func (o *DatacenterProperties) SetSecAuthProtection(v bool) {
-
 
 	o.SecAuthProtection = &v
 
@@ -290,15 +260,12 @@ func (o *DatacenterProperties) HasSecAuthProtection() bool {
 	return false
 }
 
-
-
 // GetCpuArchitecture returns the CpuArchitecture field value
 // If the value is explicit nil, the zero value for []CpuArchitectureProperties will be returned
 func (o *DatacenterProperties) GetCpuArchitecture() *[]CpuArchitectureProperties {
 	if o == nil {
 		return nil
 	}
-
 
 	return o.CpuArchitecture
 
@@ -312,13 +279,11 @@ func (o *DatacenterProperties) GetCpuArchitectureOk() (*[]CpuArchitecturePropert
 		return nil, false
 	}
 
-
 	return o.CpuArchitecture, true
 }
 
 // SetCpuArchitecture sets field value
 func (o *DatacenterProperties) SetCpuArchitecture(v []CpuArchitectureProperties) {
-
 
 	o.CpuArchitecture = &v
 
@@ -333,44 +298,36 @@ func (o *DatacenterProperties) HasCpuArchitecture() bool {
 	return false
 }
 
-
 func (o DatacenterProperties) MarshalJSON() ([]byte, error) {
 	toSerialize := map[string]interface{}{}
 
 	if o.Name != nil {
 		toSerialize["name"] = o.Name
 	}
-	
 
 	if o.Description != nil {
 		toSerialize["description"] = o.Description
 	}
-	
 
 	if o.Location != nil {
 		toSerialize["location"] = o.Location
 	}
-	
 
 	if o.Version != nil {
 		toSerialize["version"] = o.Version
 	}
-	
 
 	if o.Features != nil {
 		toSerialize["features"] = o.Features
 	}
-	
 
 	if o.SecAuthProtection != nil {
 		toSerialize["secAuthProtection"] = o.SecAuthProtection
 	}
-	
 
 	if o.CpuArchitecture != nil {
 		toSerialize["cpuArchitecture"] = o.CpuArchitecture
 	}
-	
 	return json.Marshal(toSerialize)
 }
 
@@ -409,5 +366,3 @@ func (v *NullableDatacenterProperties) UnmarshalJSON(src []byte) error {
 	v.isSet = true
 	return json.Unmarshal(src, &v.value)
 }
-
-

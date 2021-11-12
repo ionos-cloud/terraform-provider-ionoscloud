@@ -1,7 +1,7 @@
 /*
  * CLOUD API
  *
- * An enterprise-grade Infrastructure is provided as a Service (IaaS) solution that can be managed through a browser-based \"Data Center Designer\" (DCD) tool or via an easy to use API.   The API allows you to perform a variety of management tasks such as spinning up additional servers, adding volumes, adjusting networking, and so forth. It is designed to allow users to leverage the same power and flexibility found within the DCD visual tool. Both tools are consistent with their concepts and lend well to making the experience smooth and intuitive.
+ * IONOS Enterprise-grade Infrastructure as a Service (IaaS) solutions can be managed through the Cloud API, in addition or as an alternative to the \"Data Center Designer\" (DCD) browser-based tool.    Both methods employ consistent concepts and features, deliver similar power and flexibility, and can be used to perform a multitude of management tasks, including adding servers, volumes, configuring networks, and so on.
  *
  * API version: 6.0-SDK.3
  */
@@ -17,13 +17,11 @@ import (
 
 // S3KeyMetadata struct for S3KeyMetadata
 type S3KeyMetadata struct {
-	// Resource's Entity Tag as defined in http://www.w3.org/Protocols/rfc2616/rfc2616-sec3.html#sec3.11 . Entity Tag is also added as an 'ETag response header to requests which don't use 'depth' parameter. 
+	// Resource's Entity Tag as defined in http://www.w3.org/Protocols/rfc2616/rfc2616-sec3.html#sec3.11 . Entity Tag is also added as an 'ETag response header to requests which don't use 'depth' parameter.
 	Etag *string `json:"etag,omitempty"`
 	// The time the S3 key was created
 	CreatedDate *IonosTime
 }
-
-
 
 // GetEtag returns the Etag field value
 // If the value is explicit nil, the zero value for string will be returned
@@ -31,7 +29,6 @@ func (o *S3KeyMetadata) GetEtag() *string {
 	if o == nil {
 		return nil
 	}
-
 
 	return o.Etag
 
@@ -45,13 +42,11 @@ func (o *S3KeyMetadata) GetEtagOk() (*string, bool) {
 		return nil, false
 	}
 
-
 	return o.Etag, true
 }
 
 // SetEtag sets field value
 func (o *S3KeyMetadata) SetEtag(v string) {
-
 
 	o.Etag = &v
 
@@ -66,8 +61,6 @@ func (o *S3KeyMetadata) HasEtag() bool {
 	return false
 }
 
-
-
 // GetCreatedDate returns the CreatedDate field value
 // If the value is explicit nil, the zero value for time.Time will be returned
 func (o *S3KeyMetadata) GetCreatedDate() *time.Time {
@@ -79,7 +72,6 @@ func (o *S3KeyMetadata) GetCreatedDate() *time.Time {
 		return nil
 	}
 	return &o.CreatedDate.Time
-
 
 }
 
@@ -103,7 +95,6 @@ func (o *S3KeyMetadata) SetCreatedDate(v time.Time) {
 
 	o.CreatedDate = &IonosTime{v}
 
-
 }
 
 // HasCreatedDate returns a boolean if a field has been set.
@@ -115,19 +106,16 @@ func (o *S3KeyMetadata) HasCreatedDate() bool {
 	return false
 }
 
-
 func (o S3KeyMetadata) MarshalJSON() ([]byte, error) {
 	toSerialize := map[string]interface{}{}
 
 	if o.Etag != nil {
 		toSerialize["etag"] = o.Etag
 	}
-	
 
 	if o.CreatedDate != nil {
 		toSerialize["createdDate"] = o.CreatedDate
 	}
-	
 	return json.Marshal(toSerialize)
 }
 
@@ -166,5 +154,3 @@ func (v *NullableS3KeyMetadata) UnmarshalJSON(src []byte) error {
 	v.isSet = true
 	return json.Unmarshal(src, &v.value)
 }
-
-

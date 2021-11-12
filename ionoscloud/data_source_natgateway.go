@@ -81,7 +81,7 @@ func dataSourceNatGatewayRead(d *schema.ResourceData, meta interface{}) error {
 	}
 	var natGateway ionoscloud.NatGateway
 	var err error
-
+	var apiResponse *ionoscloud.APIResponse
 	ctx, cancel := context.WithTimeout(context.Background(), *resourceDefaultTimeouts.Default)
 
 	if cancel != nil {
@@ -90,7 +90,8 @@ func dataSourceNatGatewayRead(d *schema.ResourceData, meta interface{}) error {
 
 	if idOk {
 		/* search by ID */
-		natGateway, _, err = client.NATGatewaysApi.DatacentersNatgatewaysFindByNatGatewayId(ctx, datacenterId.(string), id.(string)).Execute()
+		natGateway, apiResponse, err = client.NATGatewaysApi.DatacentersNatgatewaysFindByNatGatewayId(ctx, datacenterId.(string), id.(string)).Execute()
+		logApiRequestTime(apiResponse)
 		if err != nil {
 			return fmt.Errorf("an error occurred while fetching the nat gateway %s: %s", id.(string), err)
 		}
@@ -104,14 +105,16 @@ func dataSourceNatGatewayRead(d *schema.ResourceData, meta interface{}) error {
 			defer cancel()
 		}
 
-		natGateways, _, err := client.NATGatewaysApi.DatacentersNatgatewaysGet(ctx, datacenterId.(string)).Execute()
+		natGateways, apiResponse, err := client.NATGatewaysApi.DatacentersNatgatewaysGet(ctx, datacenterId.(string)).Execute()
+		logApiRequestTime(apiResponse)
 		if err != nil {
 			return fmt.Errorf("an error occurred while fetching nat gateway: %s", err.Error())
 		}
 
 		if natGateways.Items != nil {
 			for _, c := range *natGateways.Items {
-				tmpNatGateway, _, err := client.NATGatewaysApi.DatacentersNatgatewaysFindByNatGatewayId(ctx, datacenterId.(string), *c.Id).Execute()
+				tmpNatGateway, apiResponse, err := client.NATGatewaysApi.DatacentersNatgatewaysFindByNatGatewayId(ctx, datacenterId.(string), *c.Id).Execute()
+				logApiRequestTime(apiResponse)
 				if err != nil {
 					return fmt.Errorf("an error occurred while fetching nat gateway with ID %s: %s", *c.Id, err.Error())
 				}
@@ -131,65 +134,15 @@ func dataSourceNatGatewayRead(d *schema.ResourceData, meta interface{}) error {
 		return errors.New("nat gateway not found")
 	}
 
-	if err = setNatGatewayData(d, &natGateway); err != nil {
-		return err
-	}
-
-	return nil
-}
-
-func setNatGatewayData(d *schema.ResourceData, natGateway *ionoscloud.NatGateway) error {
-
 	if natGateway.Id != nil {
-		d.SetId(*natGateway.Id)
 		if err := d.Set("id", *natGateway.Id); err != nil {
 			return err
 		}
 	}
 
-	if natGateway.Properties != nil {
-		if natGateway.Properties.Name != nil {
-			err := d.Set("name", *natGateway.Properties.Name)
-			if err != nil {
-				return fmt.Errorf("error while setting name property for nat gateway %s: %s", d.Id(), err)
-			}
-		}
-
-		if natGateway.Properties.PublicIps != nil {
-			err := d.Set("public_ips", *natGateway.Properties.PublicIps)
-			if err != nil {
-				return fmt.Errorf("error while setting public_ips property for nat gateway %s: %s", d.Id(), err)
-			}
-		}
-
-		if natGateway.Properties.Lans != nil && len(*natGateway.Properties.Lans) > 0 {
-			var natGatewayLans []interface{}
-			for _, lan := range *natGateway.Properties.Lans {
-				lanEntry := make(map[string]interface{})
-
-				if lan.Id != nil {
-					lanEntry["id"] = *lan.Id
-				}
-
-				if len(*lan.GatewayIps) > 0 {
-					var gatewayIps []interface{}
-					for _, gatewayIp := range *lan.GatewayIps {
-						gatewayIps = append(gatewayIps, gatewayIp)
-					}
-					if len(gatewayIps) > 0 {
-						lanEntry["gateway_ips"] = gatewayIps
-					}
-				}
-
-				natGatewayLans = append(natGatewayLans, lanEntry)
-			}
-
-			if len(natGatewayLans) > 0 {
-				if err := d.Set("lans", natGatewayLans); err != nil {
-					return fmt.Errorf("error while setting lans property for nat gateway %s: %s", d.Id(), err)
-				}
-			}
-		}
+	if err = setNatGatewayData(d, &natGateway); err != nil {
+		return err
 	}
+
 	return nil
 }

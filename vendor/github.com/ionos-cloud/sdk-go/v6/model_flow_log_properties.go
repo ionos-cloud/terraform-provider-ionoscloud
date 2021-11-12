@@ -1,7 +1,7 @@
 /*
  * CLOUD API
  *
- * An enterprise-grade Infrastructure is provided as a Service (IaaS) solution that can be managed through a browser-based \"Data Center Designer\" (DCD) tool or via an easy to use API.   The API allows you to perform a variety of management tasks such as spinning up additional servers, adding volumes, adjusting networking, and so forth. It is designed to allow users to leverage the same power and flexibility found within the DCD visual tool. Both tools are consistent with their concepts and lend well to making the experience smooth and intuitive.
+ * IONOS Enterprise-grade Infrastructure as a Service (IaaS) solutions can be managed through the Cloud API, in addition or as an alternative to the \"Data Center Designer\" (DCD) browser-based tool.    Both methods employ consistent concepts and features, deliver similar power and flexibility, and can be used to perform a multitude of management tasks, including adding servers, volumes, configuring networks, and so on.
  *
  * API version: 6.0-SDK.3
  */
@@ -26,15 +26,12 @@ type FlowLogProperties struct {
 	Bucket *string `json:"bucket"`
 }
 
-
-
 // GetName returns the Name field value
 // If the value is explicit nil, the zero value for string will be returned
 func (o *FlowLogProperties) GetName() *string {
 	if o == nil {
 		return nil
 	}
-
 
 	return o.Name
 
@@ -48,13 +45,11 @@ func (o *FlowLogProperties) GetNameOk() (*string, bool) {
 		return nil, false
 	}
 
-
 	return o.Name, true
 }
 
 // SetName sets field value
 func (o *FlowLogProperties) SetName(v string) {
-
 
 	o.Name = &v
 
@@ -69,15 +64,12 @@ func (o *FlowLogProperties) HasName() bool {
 	return false
 }
 
-
-
 // GetAction returns the Action field value
 // If the value is explicit nil, the zero value for string will be returned
 func (o *FlowLogProperties) GetAction() *string {
 	if o == nil {
 		return nil
 	}
-
 
 	return o.Action
 
@@ -91,13 +83,11 @@ func (o *FlowLogProperties) GetActionOk() (*string, bool) {
 		return nil, false
 	}
 
-
 	return o.Action, true
 }
 
 // SetAction sets field value
 func (o *FlowLogProperties) SetAction(v string) {
-
 
 	o.Action = &v
 
@@ -112,15 +102,12 @@ func (o *FlowLogProperties) HasAction() bool {
 	return false
 }
 
-
-
 // GetDirection returns the Direction field value
 // If the value is explicit nil, the zero value for string will be returned
 func (o *FlowLogProperties) GetDirection() *string {
 	if o == nil {
 		return nil
 	}
-
 
 	return o.Direction
 
@@ -134,13 +121,11 @@ func (o *FlowLogProperties) GetDirectionOk() (*string, bool) {
 		return nil, false
 	}
 
-
 	return o.Direction, true
 }
 
 // SetDirection sets field value
 func (o *FlowLogProperties) SetDirection(v string) {
-
 
 	o.Direction = &v
 
@@ -155,15 +140,12 @@ func (o *FlowLogProperties) HasDirection() bool {
 	return false
 }
 
-
-
 // GetBucket returns the Bucket field value
 // If the value is explicit nil, the zero value for string will be returned
 func (o *FlowLogProperties) GetBucket() *string {
 	if o == nil {
 		return nil
 	}
-
 
 	return o.Bucket
 
@@ -177,13 +159,11 @@ func (o *FlowLogProperties) GetBucketOk() (*string, bool) {
 		return nil, false
 	}
 
-
 	return o.Bucket, true
 }
 
 // SetBucket sets field value
 func (o *FlowLogProperties) SetBucket(v string) {
-
 
 	o.Bucket = &v
 
@@ -198,29 +178,24 @@ func (o *FlowLogProperties) HasBucket() bool {
 	return false
 }
 
-
 func (o FlowLogProperties) MarshalJSON() ([]byte, error) {
 	toSerialize := map[string]interface{}{}
 
 	if o.Name != nil {
 		toSerialize["name"] = o.Name
 	}
-	
 
 	if o.Action != nil {
 		toSerialize["action"] = o.Action
 	}
-	
 
 	if o.Direction != nil {
 		toSerialize["direction"] = o.Direction
 	}
-	
 
 	if o.Bucket != nil {
 		toSerialize["bucket"] = o.Bucket
 	}
-	
 	return json.Marshal(toSerialize)
 }
 
@@ -259,5 +234,3 @@ func (v *NullableFlowLogProperties) UnmarshalJSON(src []byte) error {
 	v.isSet = true
 	return json.Unmarshal(src, &v.value)
 }
-
-

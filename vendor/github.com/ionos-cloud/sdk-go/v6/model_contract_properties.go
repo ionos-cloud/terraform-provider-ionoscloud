@@ -1,7 +1,7 @@
 /*
  * CLOUD API
  *
- * An enterprise-grade Infrastructure is provided as a Service (IaaS) solution that can be managed through a browser-based \"Data Center Designer\" (DCD) tool or via an easy to use API.   The API allows you to perform a variety of management tasks such as spinning up additional servers, adding volumes, adjusting networking, and so forth. It is designed to allow users to leverage the same power and flexibility found within the DCD visual tool. Both tools are consistent with their concepts and lend well to making the experience smooth and intuitive.
+ * IONOS Enterprise-grade Infrastructure as a Service (IaaS) solutions can be managed through the Cloud API, in addition or as an alternative to the \"Data Center Designer\" (DCD) browser-based tool.    Both methods employ consistent concepts and features, deliver similar power and flexibility, and can be used to perform a multitude of management tasks, including adding servers, volumes, configuring networks, and so on.
  *
  * API version: 6.0-SDK.3
  */
@@ -23,11 +23,9 @@ type ContractProperties struct {
 	// status of the contract
 	Status *string `json:"status,omitempty"`
 	// Registration domain of the contract
-	RegDomain *string `json:"regDomain,omitempty"`
+	RegDomain      *string         `json:"regDomain,omitempty"`
 	ResourceLimits *ResourceLimits `json:"resourceLimits,omitempty"`
 }
-
-
 
 // GetContractNumber returns the ContractNumber field value
 // If the value is explicit nil, the zero value for int64 will be returned
@@ -35,7 +33,6 @@ func (o *ContractProperties) GetContractNumber() *int64 {
 	if o == nil {
 		return nil
 	}
-
 
 	return o.ContractNumber
 
@@ -49,13 +46,11 @@ func (o *ContractProperties) GetContractNumberOk() (*int64, bool) {
 		return nil, false
 	}
 
-
 	return o.ContractNumber, true
 }
 
 // SetContractNumber sets field value
 func (o *ContractProperties) SetContractNumber(v int64) {
-
 
 	o.ContractNumber = &v
 
@@ -70,15 +65,12 @@ func (o *ContractProperties) HasContractNumber() bool {
 	return false
 }
 
-
-
 // GetOwner returns the Owner field value
 // If the value is explicit nil, the zero value for string will be returned
 func (o *ContractProperties) GetOwner() *string {
 	if o == nil {
 		return nil
 	}
-
 
 	return o.Owner
 
@@ -92,13 +84,11 @@ func (o *ContractProperties) GetOwnerOk() (*string, bool) {
 		return nil, false
 	}
 
-
 	return o.Owner, true
 }
 
 // SetOwner sets field value
 func (o *ContractProperties) SetOwner(v string) {
-
 
 	o.Owner = &v
 
@@ -113,15 +103,12 @@ func (o *ContractProperties) HasOwner() bool {
 	return false
 }
 
-
-
 // GetStatus returns the Status field value
 // If the value is explicit nil, the zero value for string will be returned
 func (o *ContractProperties) GetStatus() *string {
 	if o == nil {
 		return nil
 	}
-
 
 	return o.Status
 
@@ -135,13 +122,11 @@ func (o *ContractProperties) GetStatusOk() (*string, bool) {
 		return nil, false
 	}
 
-
 	return o.Status, true
 }
 
 // SetStatus sets field value
 func (o *ContractProperties) SetStatus(v string) {
-
 
 	o.Status = &v
 
@@ -156,15 +141,12 @@ func (o *ContractProperties) HasStatus() bool {
 	return false
 }
 
-
-
 // GetRegDomain returns the RegDomain field value
 // If the value is explicit nil, the zero value for string will be returned
 func (o *ContractProperties) GetRegDomain() *string {
 	if o == nil {
 		return nil
 	}
-
 
 	return o.RegDomain
 
@@ -178,13 +160,11 @@ func (o *ContractProperties) GetRegDomainOk() (*string, bool) {
 		return nil, false
 	}
 
-
 	return o.RegDomain, true
 }
 
 // SetRegDomain sets field value
 func (o *ContractProperties) SetRegDomain(v string) {
-
 
 	o.RegDomain = &v
 
@@ -199,15 +179,12 @@ func (o *ContractProperties) HasRegDomain() bool {
 	return false
 }
 
-
-
 // GetResourceLimits returns the ResourceLimits field value
 // If the value is explicit nil, the zero value for ResourceLimits will be returned
 func (o *ContractProperties) GetResourceLimits() *ResourceLimits {
 	if o == nil {
 		return nil
 	}
-
 
 	return o.ResourceLimits
 
@@ -221,13 +198,11 @@ func (o *ContractProperties) GetResourceLimitsOk() (*ResourceLimits, bool) {
 		return nil, false
 	}
 
-
 	return o.ResourceLimits, true
 }
 
 // SetResourceLimits sets field value
 func (o *ContractProperties) SetResourceLimits(v ResourceLimits) {
-
 
 	o.ResourceLimits = &v
 
@@ -242,34 +217,28 @@ func (o *ContractProperties) HasResourceLimits() bool {
 	return false
 }
 
-
 func (o ContractProperties) MarshalJSON() ([]byte, error) {
 	toSerialize := map[string]interface{}{}
 
 	if o.ContractNumber != nil {
 		toSerialize["contractNumber"] = o.ContractNumber
 	}
-	
 
 	if o.Owner != nil {
 		toSerialize["owner"] = o.Owner
 	}
-	
 
 	if o.Status != nil {
 		toSerialize["status"] = o.Status
 	}
-	
 
 	if o.RegDomain != nil {
 		toSerialize["regDomain"] = o.RegDomain
 	}
-	
 
 	if o.ResourceLimits != nil {
 		toSerialize["resourceLimits"] = o.ResourceLimits
 	}
-	
 	return json.Marshal(toSerialize)
 }
 
@@ -308,5 +277,3 @@ func (v *NullableContractProperties) UnmarshalJSON(src []byte) error {
 	v.isSet = true
 	return json.Unmarshal(src, &v.value)
 }
-
-

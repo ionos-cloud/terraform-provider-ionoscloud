@@ -1,7 +1,7 @@
 /*
  * CLOUD API
  *
- * An enterprise-grade Infrastructure is provided as a Service (IaaS) solution that can be managed through a browser-based \"Data Center Designer\" (DCD) tool or via an easy to use API.   The API allows you to perform a variety of management tasks such as spinning up additional servers, adding volumes, adjusting networking, and so forth. It is designed to allow users to leverage the same power and flexibility found within the DCD visual tool. Both tools are consistent with their concepts and lend well to making the experience smooth and intuitive.
+ * IONOS Enterprise-grade Infrastructure as a Service (IaaS) solutions can be managed through the Cloud API, in addition or as an alternative to the \"Data Center Designer\" (DCD) browser-based tool.    Both methods employ consistent concepts and features, deliver similar power and flexibility, and can be used to perform a multitude of management tasks, including adding servers, volumes, configuring networks, and so on.
  *
  * API version: 6.0-SDK.3
  */
@@ -28,11 +28,11 @@ var (
 type IPBlocksApiService service
 
 type ApiIpblocksDeleteRequest struct {
-	ctx _context.Context
-	ApiService *IPBlocksApiService
-	ipblockId string
-	pretty *bool
-	depth *int32
+	ctx             _context.Context
+	ApiService      *IPBlocksApiService
+	ipblockId       string
+	pretty          *bool
+	depth           *int32
 	xContractNumber *int32
 }
 
@@ -63,8 +63,8 @@ func (r ApiIpblocksDeleteRequest) Execute() (*APIResponse, error) {
 func (a *IPBlocksApiService) IpblocksDelete(ctx _context.Context, ipblockId string) ApiIpblocksDeleteRequest {
 	return ApiIpblocksDeleteRequest{
 		ApiService: a,
-		ctx: ctx,
-		ipblockId: ipblockId,
+		ctx:        ctx,
+		ipblockId:  ipblockId,
 	}
 }
 
@@ -98,6 +98,7 @@ func (a *IPBlocksApiService) IpblocksDeleteExecute(r ApiIpblocksDeleteRequest) (
 	if r.depth != nil {
 		localVarQueryParams.Add("depth", parameterToString(*r.depth, ""))
 	}
+
 	// to determine the Content-Type header
 	localVarHTTPContentTypes := []string{}
 
@@ -139,12 +140,12 @@ func (a *IPBlocksApiService) IpblocksDeleteExecute(r ApiIpblocksDeleteRequest) (
 
 	localVarHTTPResponse, httpRequestTime, err := a.client.callAPI(req)
 
-	localVarAPIResponse := &APIResponse {
-		Response: localVarHTTPResponse,
-		Method: localVarHTTPMethod,
-		RequestURL: localVarPath,
+	localVarAPIResponse := &APIResponse{
+		Response:    localVarHTTPResponse,
+		Method:      localVarHTTPMethod,
+		RequestURL:  localVarPath,
 		RequestTime: httpRequestTime,
-		Operation: "IpblocksDelete",
+		Operation:   "IpblocksDelete",
 	}
 
 	if err != nil || localVarHTTPResponse == nil {
@@ -161,16 +162,16 @@ func (a *IPBlocksApiService) IpblocksDeleteExecute(r ApiIpblocksDeleteRequest) (
 	if localVarHTTPResponse.StatusCode >= 300 {
 		newErr := GenericOpenAPIError{
 			statusCode: localVarHTTPResponse.StatusCode,
-			body:  localVarBody,
-			error: fmt.Sprintf("%s: %s", localVarHTTPResponse.Status, string(localVarBody)),
+			body:       localVarBody,
+			error:      fmt.Sprintf(FormatStringErr, localVarHTTPResponse.Status, string(localVarBody)),
 		}
-			var v Error
-			err = a.client.decode(&v, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
-			if err != nil {
-				newErr.error = err.Error()
-				return localVarAPIResponse, newErr
-			}
-			newErr.model = v
+		var v Error
+		err = a.client.decode(&v, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
+		if err != nil {
+			newErr.error = err.Error()
+			return localVarAPIResponse, newErr
+		}
+		newErr.model = v
 		return localVarAPIResponse, newErr
 	}
 
@@ -178,11 +179,11 @@ func (a *IPBlocksApiService) IpblocksDeleteExecute(r ApiIpblocksDeleteRequest) (
 }
 
 type ApiIpblocksFindByIdRequest struct {
-	ctx _context.Context
-	ApiService *IPBlocksApiService
-	ipblockId string
-	pretty *bool
-	depth *int32
+	ctx             _context.Context
+	ApiService      *IPBlocksApiService
+	ipblockId       string
+	pretty          *bool
+	depth           *int32
 	xContractNumber *int32
 }
 
@@ -213,8 +214,8 @@ func (r ApiIpblocksFindByIdRequest) Execute() (IpBlock, *APIResponse, error) {
 func (a *IPBlocksApiService) IpblocksFindById(ctx _context.Context, ipblockId string) ApiIpblocksFindByIdRequest {
 	return ApiIpblocksFindByIdRequest{
 		ApiService: a,
-		ctx: ctx,
-		ipblockId: ipblockId,
+		ctx:        ctx,
+		ipblockId:  ipblockId,
 	}
 }
 
@@ -250,6 +251,7 @@ func (a *IPBlocksApiService) IpblocksFindByIdExecute(r ApiIpblocksFindByIdReques
 	if r.depth != nil {
 		localVarQueryParams.Add("depth", parameterToString(*r.depth, ""))
 	}
+
 	// to determine the Content-Type header
 	localVarHTTPContentTypes := []string{}
 
@@ -291,12 +293,12 @@ func (a *IPBlocksApiService) IpblocksFindByIdExecute(r ApiIpblocksFindByIdReques
 
 	localVarHTTPResponse, httpRequestTime, err := a.client.callAPI(req)
 
-	localVarAPIResponse := &APIResponse {
-		Response: localVarHTTPResponse,
-		Method: localVarHTTPMethod,
-		RequestURL: localVarPath,
+	localVarAPIResponse := &APIResponse{
+		Response:    localVarHTTPResponse,
+		Method:      localVarHTTPMethod,
+		RequestURL:  localVarPath,
 		RequestTime: httpRequestTime,
-		Operation: "IpblocksFindById",
+		Operation:   "IpblocksFindById",
 	}
 
 	if err != nil || localVarHTTPResponse == nil {
@@ -313,16 +315,16 @@ func (a *IPBlocksApiService) IpblocksFindByIdExecute(r ApiIpblocksFindByIdReques
 	if localVarHTTPResponse.StatusCode >= 300 {
 		newErr := GenericOpenAPIError{
 			statusCode: localVarHTTPResponse.StatusCode,
-			body:  localVarBody,
-			error: fmt.Sprintf("%s: %s", localVarHTTPResponse.Status, string(localVarBody)),
+			body:       localVarBody,
+			error:      fmt.Sprintf(FormatStringErr, localVarHTTPResponse.Status, string(localVarBody)),
 		}
-			var v Error
-			err = a.client.decode(&v, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
-			if err != nil {
-				newErr.error = err.Error()
-				return localVarReturnValue, localVarAPIResponse, newErr
-			}
-			newErr.model = v
+		var v Error
+		err = a.client.decode(&v, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
+		if err != nil {
+			newErr.error = err.Error()
+			return localVarReturnValue, localVarAPIResponse, newErr
+		}
+		newErr.model = v
 		return localVarReturnValue, localVarAPIResponse, newErr
 	}
 
@@ -330,8 +332,8 @@ func (a *IPBlocksApiService) IpblocksFindByIdExecute(r ApiIpblocksFindByIdReques
 	if err != nil {
 		newErr := GenericOpenAPIError{
 			statusCode: localVarHTTPResponse.StatusCode,
-			body:  localVarBody,
-			error: err.Error(),
+			body:       localVarBody,
+			error:      err.Error(),
 		}
 		return localVarReturnValue, localVarAPIResponse, newErr
 	}
@@ -340,11 +342,15 @@ func (a *IPBlocksApiService) IpblocksFindByIdExecute(r ApiIpblocksFindByIdReques
 }
 
 type ApiIpblocksGetRequest struct {
-	ctx _context.Context
-	ApiService *IPBlocksApiService
-	pretty *bool
-	depth *int32
+	ctx             _context.Context
+	ApiService      *IPBlocksApiService
+	filters         _neturl.Values
+	orderBy         *string
+	pretty          *bool
+	depth           *int32
 	xContractNumber *int32
+	offset          *int32
+	limit           *int32
 }
 
 func (r ApiIpblocksGetRequest) Pretty(pretty bool) ApiIpblocksGetRequest {
@@ -359,13 +365,34 @@ func (r ApiIpblocksGetRequest) XContractNumber(xContractNumber int32) ApiIpblock
 	r.xContractNumber = &xContractNumber
 	return r
 }
+func (r ApiIpblocksGetRequest) Offset(offset int32) ApiIpblocksGetRequest {
+	r.offset = &offset
+	return r
+}
+func (r ApiIpblocksGetRequest) Limit(limit int32) ApiIpblocksGetRequest {
+	r.limit = &limit
+	return r
+}
+
+// Filters query parameters limit results to those containing a matching value for a specific property.
+func (r ApiIpblocksGetRequest) Filter(key string, value string) ApiIpblocksGetRequest {
+	filterKey := fmt.Sprintf(FilterQueryParam, key)
+	r.filters[filterKey] = []string{value}
+	return r
+}
+
+// OrderBy query param sorts the results alphanumerically in ascending order based on the specified property.
+func (r ApiIpblocksGetRequest) OrderBy(orderBy string) ApiIpblocksGetRequest {
+	r.orderBy = &orderBy
+	return r
+}
 
 func (r ApiIpblocksGetRequest) Execute() (IpBlocks, *APIResponse, error) {
 	return r.ApiService.IpblocksGetExecute(r)
 }
 
 /*
- * IpblocksGet List IP Blocks 
+ * IpblocksGet List IP Blocks
  * Retrieve a list of all reserved IP Blocks.
  * @param ctx _context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
  * @return ApiIpblocksGetRequest
@@ -373,7 +400,8 @@ func (r ApiIpblocksGetRequest) Execute() (IpBlocks, *APIResponse, error) {
 func (a *IPBlocksApiService) IpblocksGet(ctx _context.Context) ApiIpblocksGetRequest {
 	return ApiIpblocksGetRequest{
 		ApiService: a,
-		ctx: ctx,
+		ctx:        ctx,
+		filters:    _neturl.Values{},
 	}
 }
 
@@ -408,6 +436,23 @@ func (a *IPBlocksApiService) IpblocksGetExecute(r ApiIpblocksGetRequest) (IpBloc
 	if r.depth != nil {
 		localVarQueryParams.Add("depth", parameterToString(*r.depth, ""))
 	}
+	if r.offset != nil {
+		localVarQueryParams.Add("offset", parameterToString(*r.offset, ""))
+	}
+	if r.limit != nil {
+		localVarQueryParams.Add("limit", parameterToString(*r.limit, ""))
+	}
+	if r.orderBy != nil {
+		localVarQueryParams.Add("orderBy", parameterToString(*r.orderBy, ""))
+	}
+	if len(r.filters) > 0 {
+		for k, v := range r.filters {
+			for _, iv := range v {
+				localVarQueryParams.Add(k, iv)
+			}
+		}
+	}
+
 	// to determine the Content-Type header
 	localVarHTTPContentTypes := []string{}
 
@@ -449,12 +494,12 @@ func (a *IPBlocksApiService) IpblocksGetExecute(r ApiIpblocksGetRequest) (IpBloc
 
 	localVarHTTPResponse, httpRequestTime, err := a.client.callAPI(req)
 
-	localVarAPIResponse := &APIResponse {
-		Response: localVarHTTPResponse,
-		Method: localVarHTTPMethod,
-		RequestURL: localVarPath,
+	localVarAPIResponse := &APIResponse{
+		Response:    localVarHTTPResponse,
+		Method:      localVarHTTPMethod,
+		RequestURL:  localVarPath,
 		RequestTime: httpRequestTime,
-		Operation: "IpblocksGet",
+		Operation:   "IpblocksGet",
 	}
 
 	if err != nil || localVarHTTPResponse == nil {
@@ -471,16 +516,16 @@ func (a *IPBlocksApiService) IpblocksGetExecute(r ApiIpblocksGetRequest) (IpBloc
 	if localVarHTTPResponse.StatusCode >= 300 {
 		newErr := GenericOpenAPIError{
 			statusCode: localVarHTTPResponse.StatusCode,
-			body:  localVarBody,
-			error: fmt.Sprintf("%s: %s", localVarHTTPResponse.Status, string(localVarBody)),
+			body:       localVarBody,
+			error:      fmt.Sprintf(FormatStringErr, localVarHTTPResponse.Status, string(localVarBody)),
 		}
-			var v Error
-			err = a.client.decode(&v, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
-			if err != nil {
-				newErr.error = err.Error()
-				return localVarReturnValue, localVarAPIResponse, newErr
-			}
-			newErr.model = v
+		var v Error
+		err = a.client.decode(&v, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
+		if err != nil {
+			newErr.error = err.Error()
+			return localVarReturnValue, localVarAPIResponse, newErr
+		}
+		newErr.model = v
 		return localVarReturnValue, localVarAPIResponse, newErr
 	}
 
@@ -488,8 +533,8 @@ func (a *IPBlocksApiService) IpblocksGetExecute(r ApiIpblocksGetRequest) (IpBloc
 	if err != nil {
 		newErr := GenericOpenAPIError{
 			statusCode: localVarHTTPResponse.StatusCode,
-			body:  localVarBody,
-			error: err.Error(),
+			body:       localVarBody,
+			error:      err.Error(),
 		}
 		return localVarReturnValue, localVarAPIResponse, newErr
 	}
@@ -498,12 +543,12 @@ func (a *IPBlocksApiService) IpblocksGetExecute(r ApiIpblocksGetRequest) (IpBloc
 }
 
 type ApiIpblocksPatchRequest struct {
-	ctx _context.Context
-	ApiService *IPBlocksApiService
-	ipblockId string
-	ipblock *IpBlockProperties
-	pretty *bool
-	depth *int32
+	ctx             _context.Context
+	ApiService      *IPBlocksApiService
+	ipblockId       string
+	ipblock         *IpBlockProperties
+	pretty          *bool
+	depth           *int32
 	xContractNumber *int32
 }
 
@@ -538,8 +583,8 @@ func (r ApiIpblocksPatchRequest) Execute() (IpBlock, *APIResponse, error) {
 func (a *IPBlocksApiService) IpblocksPatch(ctx _context.Context, ipblockId string) ApiIpblocksPatchRequest {
 	return ApiIpblocksPatchRequest{
 		ApiService: a,
-		ctx: ctx,
-		ipblockId: ipblockId,
+		ctx:        ctx,
+		ipblockId:  ipblockId,
 	}
 }
 
@@ -578,6 +623,7 @@ func (a *IPBlocksApiService) IpblocksPatchExecute(r ApiIpblocksPatchRequest) (Ip
 	if r.depth != nil {
 		localVarQueryParams.Add("depth", parameterToString(*r.depth, ""))
 	}
+
 	// to determine the Content-Type header
 	localVarHTTPContentTypes := []string{"application/json"}
 
@@ -621,12 +667,12 @@ func (a *IPBlocksApiService) IpblocksPatchExecute(r ApiIpblocksPatchRequest) (Ip
 
 	localVarHTTPResponse, httpRequestTime, err := a.client.callAPI(req)
 
-	localVarAPIResponse := &APIResponse {
-		Response: localVarHTTPResponse,
-		Method: localVarHTTPMethod,
-		RequestURL: localVarPath,
+	localVarAPIResponse := &APIResponse{
+		Response:    localVarHTTPResponse,
+		Method:      localVarHTTPMethod,
+		RequestURL:  localVarPath,
 		RequestTime: httpRequestTime,
-		Operation: "IpblocksPatch",
+		Operation:   "IpblocksPatch",
 	}
 
 	if err != nil || localVarHTTPResponse == nil {
@@ -643,16 +689,16 @@ func (a *IPBlocksApiService) IpblocksPatchExecute(r ApiIpblocksPatchRequest) (Ip
 	if localVarHTTPResponse.StatusCode >= 300 {
 		newErr := GenericOpenAPIError{
 			statusCode: localVarHTTPResponse.StatusCode,
-			body:  localVarBody,
-			error: fmt.Sprintf("%s: %s", localVarHTTPResponse.Status, string(localVarBody)),
+			body:       localVarBody,
+			error:      fmt.Sprintf(FormatStringErr, localVarHTTPResponse.Status, string(localVarBody)),
 		}
-			var v Error
-			err = a.client.decode(&v, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
-			if err != nil {
-				newErr.error = err.Error()
-				return localVarReturnValue, localVarAPIResponse, newErr
-			}
-			newErr.model = v
+		var v Error
+		err = a.client.decode(&v, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
+		if err != nil {
+			newErr.error = err.Error()
+			return localVarReturnValue, localVarAPIResponse, newErr
+		}
+		newErr.model = v
 		return localVarReturnValue, localVarAPIResponse, newErr
 	}
 
@@ -660,8 +706,8 @@ func (a *IPBlocksApiService) IpblocksPatchExecute(r ApiIpblocksPatchRequest) (Ip
 	if err != nil {
 		newErr := GenericOpenAPIError{
 			statusCode: localVarHTTPResponse.StatusCode,
-			body:  localVarBody,
-			error: err.Error(),
+			body:       localVarBody,
+			error:      err.Error(),
 		}
 		return localVarReturnValue, localVarAPIResponse, newErr
 	}
@@ -670,11 +716,11 @@ func (a *IPBlocksApiService) IpblocksPatchExecute(r ApiIpblocksPatchRequest) (Ip
 }
 
 type ApiIpblocksPostRequest struct {
-	ctx _context.Context
-	ApiService *IPBlocksApiService
-	ipblock *IpBlock
-	pretty *bool
-	depth *int32
+	ctx             _context.Context
+	ApiService      *IPBlocksApiService
+	ipblock         *IpBlock
+	pretty          *bool
+	depth           *int32
 	xContractNumber *int32
 }
 
@@ -708,7 +754,7 @@ func (r ApiIpblocksPostRequest) Execute() (IpBlock, *APIResponse, error) {
 func (a *IPBlocksApiService) IpblocksPost(ctx _context.Context) ApiIpblocksPostRequest {
 	return ApiIpblocksPostRequest{
 		ApiService: a,
-		ctx: ctx,
+		ctx:        ctx,
 	}
 }
 
@@ -746,6 +792,7 @@ func (a *IPBlocksApiService) IpblocksPostExecute(r ApiIpblocksPostRequest) (IpBl
 	if r.depth != nil {
 		localVarQueryParams.Add("depth", parameterToString(*r.depth, ""))
 	}
+
 	// to determine the Content-Type header
 	localVarHTTPContentTypes := []string{"application/json"}
 
@@ -789,12 +836,12 @@ func (a *IPBlocksApiService) IpblocksPostExecute(r ApiIpblocksPostRequest) (IpBl
 
 	localVarHTTPResponse, httpRequestTime, err := a.client.callAPI(req)
 
-	localVarAPIResponse := &APIResponse {
-		Response: localVarHTTPResponse,
-		Method: localVarHTTPMethod,
-		RequestURL: localVarPath,
+	localVarAPIResponse := &APIResponse{
+		Response:    localVarHTTPResponse,
+		Method:      localVarHTTPMethod,
+		RequestURL:  localVarPath,
 		RequestTime: httpRequestTime,
-		Operation: "IpblocksPost",
+		Operation:   "IpblocksPost",
 	}
 
 	if err != nil || localVarHTTPResponse == nil {
@@ -811,16 +858,16 @@ func (a *IPBlocksApiService) IpblocksPostExecute(r ApiIpblocksPostRequest) (IpBl
 	if localVarHTTPResponse.StatusCode >= 300 {
 		newErr := GenericOpenAPIError{
 			statusCode: localVarHTTPResponse.StatusCode,
-			body:  localVarBody,
-			error: fmt.Sprintf("%s: %s", localVarHTTPResponse.Status, string(localVarBody)),
+			body:       localVarBody,
+			error:      fmt.Sprintf(FormatStringErr, localVarHTTPResponse.Status, string(localVarBody)),
 		}
-			var v Error
-			err = a.client.decode(&v, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
-			if err != nil {
-				newErr.error = err.Error()
-				return localVarReturnValue, localVarAPIResponse, newErr
-			}
-			newErr.model = v
+		var v Error
+		err = a.client.decode(&v, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
+		if err != nil {
+			newErr.error = err.Error()
+			return localVarReturnValue, localVarAPIResponse, newErr
+		}
+		newErr.model = v
 		return localVarReturnValue, localVarAPIResponse, newErr
 	}
 
@@ -828,8 +875,8 @@ func (a *IPBlocksApiService) IpblocksPostExecute(r ApiIpblocksPostRequest) (IpBl
 	if err != nil {
 		newErr := GenericOpenAPIError{
 			statusCode: localVarHTTPResponse.StatusCode,
-			body:  localVarBody,
-			error: err.Error(),
+			body:       localVarBody,
+			error:      err.Error(),
 		}
 		return localVarReturnValue, localVarAPIResponse, newErr
 	}
@@ -838,12 +885,12 @@ func (a *IPBlocksApiService) IpblocksPostExecute(r ApiIpblocksPostRequest) (IpBl
 }
 
 type ApiIpblocksPutRequest struct {
-	ctx _context.Context
-	ApiService *IPBlocksApiService
-	ipblockId string
-	ipblock *IpBlock
-	pretty *bool
-	depth *int32
+	ctx             _context.Context
+	ApiService      *IPBlocksApiService
+	ipblockId       string
+	ipblock         *IpBlock
+	pretty          *bool
+	depth           *int32
 	xContractNumber *int32
 }
 
@@ -878,8 +925,8 @@ func (r ApiIpblocksPutRequest) Execute() (IpBlock, *APIResponse, error) {
 func (a *IPBlocksApiService) IpblocksPut(ctx _context.Context, ipblockId string) ApiIpblocksPutRequest {
 	return ApiIpblocksPutRequest{
 		ApiService: a,
-		ctx: ctx,
-		ipblockId: ipblockId,
+		ctx:        ctx,
+		ipblockId:  ipblockId,
 	}
 }
 
@@ -918,6 +965,7 @@ func (a *IPBlocksApiService) IpblocksPutExecute(r ApiIpblocksPutRequest) (IpBloc
 	if r.depth != nil {
 		localVarQueryParams.Add("depth", parameterToString(*r.depth, ""))
 	}
+
 	// to determine the Content-Type header
 	localVarHTTPContentTypes := []string{"application/json"}
 
@@ -961,12 +1009,12 @@ func (a *IPBlocksApiService) IpblocksPutExecute(r ApiIpblocksPutRequest) (IpBloc
 
 	localVarHTTPResponse, httpRequestTime, err := a.client.callAPI(req)
 
-	localVarAPIResponse := &APIResponse {
-		Response: localVarHTTPResponse,
-		Method: localVarHTTPMethod,
-		RequestURL: localVarPath,
+	localVarAPIResponse := &APIResponse{
+		Response:    localVarHTTPResponse,
+		Method:      localVarHTTPMethod,
+		RequestURL:  localVarPath,
 		RequestTime: httpRequestTime,
-		Operation: "IpblocksPut",
+		Operation:   "IpblocksPut",
 	}
 
 	if err != nil || localVarHTTPResponse == nil {
@@ -983,16 +1031,16 @@ func (a *IPBlocksApiService) IpblocksPutExecute(r ApiIpblocksPutRequest) (IpBloc
 	if localVarHTTPResponse.StatusCode >= 300 {
 		newErr := GenericOpenAPIError{
 			statusCode: localVarHTTPResponse.StatusCode,
-			body:  localVarBody,
-			error: fmt.Sprintf("%s: %s", localVarHTTPResponse.Status, string(localVarBody)),
+			body:       localVarBody,
+			error:      fmt.Sprintf(FormatStringErr, localVarHTTPResponse.Status, string(localVarBody)),
 		}
-			var v Error
-			err = a.client.decode(&v, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
-			if err != nil {
-				newErr.error = err.Error()
-				return localVarReturnValue, localVarAPIResponse, newErr
-			}
-			newErr.model = v
+		var v Error
+		err = a.client.decode(&v, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
+		if err != nil {
+			newErr.error = err.Error()
+			return localVarReturnValue, localVarAPIResponse, newErr
+		}
+		newErr.model = v
 		return localVarReturnValue, localVarAPIResponse, newErr
 	}
 
@@ -1000,8 +1048,8 @@ func (a *IPBlocksApiService) IpblocksPutExecute(r ApiIpblocksPutRequest) (IpBloc
 	if err != nil {
 		newErr := GenericOpenAPIError{
 			statusCode: localVarHTTPResponse.StatusCode,
-			body:  localVarBody,
-			error: err.Error(),
+			body:       localVarBody,
+			error:      err.Error(),
 		}
 		return localVarReturnValue, localVarAPIResponse, newErr
 	}

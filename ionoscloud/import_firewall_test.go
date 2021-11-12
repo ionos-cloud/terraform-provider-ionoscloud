@@ -9,8 +9,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
 )
 
-func TestAccFirewall_ImportBasic(t *testing.T) {
-	firewallName := "firewall"
+func TestAccFirewallImportBasic(t *testing.T) {
 
 	resource.Test(t, resource.TestCase{
 		PreCheck:          func() { testAccPreCheck(t) },
@@ -18,11 +17,11 @@ func TestAccFirewall_ImportBasic(t *testing.T) {
 		CheckDestroy:      testAccCheckFirewallDestroyCheck,
 		Steps: []resource.TestStep{
 			{
-				Config: fmt.Sprintf(testacccheckfirewallconfigBasic, firewallName),
+				Config: testAccCheckFirewallConfigBasic,
 			},
 
 			{
-				ResourceName:      "ionoscloud_firewall.webserver_http",
+				ResourceName:      FirewallResource + "." + FirewallTestResource,
 				ImportStateIdFunc: testAccFirewallImportStateId,
 				ImportState:       true,
 				ImportStateVerify: true,
@@ -32,10 +31,10 @@ func TestAccFirewall_ImportBasic(t *testing.T) {
 }
 
 func testAccFirewallImportStateId(s *terraform.State) (string, error) {
-	var importID string = ""
+	var importID = ""
 
 	for _, rs := range s.RootModule().Resources {
-		if rs.Type != "ionoscloud_firewall" {
+		if rs.Type != FirewallResource {
 			continue
 		}
 

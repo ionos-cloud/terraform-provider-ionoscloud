@@ -7,7 +7,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 	ionoscloud "github.com/ionos-cloud/sdk-go/v6"
-	"strconv"
+	"strings"
 )
 
 func resourceFirewall() *schema.Resource {
@@ -37,10 +37,12 @@ func resourceFirewall() *schema.Resource {
 			"source_ip": {
 				Type:     schema.TypeString,
 				Optional: true,
+				Computed: true,
 			},
 			"target_ip": {
 				Type:     schema.TypeString,
 				Optional: true,
+				Computed: true,
 			},
 			"port_range_start": {
 				Type:     schema.TypeInt,
@@ -64,11 +66,11 @@ func resourceFirewall() *schema.Resource {
 				},
 			},
 			"icmp_type": {
-				Type:     schema.TypeString,
+				Type:     schema.TypeInt,
 				Optional: true,
 			},
 			"icmp_code": {
-				Type:     schema.TypeString,
+				Type:     schema.TypeInt,
 				Optional: true,
 			},
 			"type": {
@@ -102,62 +104,10 @@ func resourceFirewall() *schema.Resource {
 func resourceFirewallCreate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	client := meta.(SdkBundle).CloudApiClient
 
-	firewallProtocol := d.Get("protocol").(string)
+	firewall := getFirewallData(d, "", false)
 
-	fw := ionoscloud.FirewallRule{
-		Properties: &ionoscloud.FirewallruleProperties{
-			Protocol: &firewallProtocol,
-		},
-	}
-
-	if _, ok := d.GetOk("name"); ok {
-		firewallName := d.Get("name").(string)
-		fw.Properties.Name = &firewallName
-	}
-	if _, ok := d.GetOk("source_mac"); ok {
-		tempSourceMac := d.Get("source_mac").(string)
-		fw.Properties.SourceMac = &tempSourceMac
-	}
-	if _, ok := d.GetOk("source_ip"); ok {
-		tempSourceIp := d.Get("source_ip").(string)
-		fw.Properties.SourceIp = &tempSourceIp
-	}
-	if _, ok := d.GetOk("target_ip"); ok {
-		tempTargetIp := d.Get("target_ip").(string)
-		fw.Properties.TargetIp = &tempTargetIp
-	}
-	if _, ok := d.GetOk("port_range_start"); ok {
-		tempPortRangeStart := int32(d.Get("port_range_start").(int))
-		fw.Properties.PortRangeStart = &tempPortRangeStart
-	}
-	if _, ok := d.GetOk("port_range_end"); ok {
-		tempPortRangeEnd := int32(d.Get("port_range_end").(int))
-		fw.Properties.PortRangeEnd = &tempPortRangeEnd
-	}
-	if _, ok := d.GetOk("icmp_type"); ok {
-		tempIcmpType, err := strconv.Atoi(d.Get("icmp_type").(string))
-		if err != nil {
-			diags := diag.FromErr(fmt.Errorf("an error occured while creating a firewall rule: %s", err))
-			return diags
-		}
-		tempIcmpTypeInt := int32(tempIcmpType)
-		fw.Properties.IcmpType = &tempIcmpTypeInt
-	}
-	if _, ok := d.GetOk("icmp_code"); ok {
-		tempIcmpCodee, err := strconv.Atoi(d.Get("icmp_code").(string))
-		if err != nil {
-			diags := diag.FromErr(fmt.Errorf("an error occured while creating a firewall rule: %s", err))
-			return diags
-		}
-		tempIcmpCodeeInt := int32(tempIcmpCodee)
-		fw.Properties.IcmpCode = &tempIcmpCodeeInt
-	}
-	if _, ok := d.GetOk("type"); ok {
-		fwType := d.Get("type").(string)
-		fw.Properties.TargetIp = &fwType
-	}
-
-	fw, apiResponse, err := client.FirewallRulesApi.DatacentersServersNicsFirewallrulesPost(ctx, d.Get("datacenter_id").(string), d.Get("server_id").(string), d.Get("nic_id").(string)).Firewallrule(fw).Execute()
+	fw, apiResponse, err := client.FirewallRulesApi.DatacentersServersNicsFirewallrulesPost(ctx, d.Get("datacenter_id").(string), d.Get("server_id").(string), d.Get("nic_id").(string)).Firewallrule(firewall).Execute()
+	logApiRequestTime(apiResponse)
 
 	if err != nil {
 		diags := diag.FromErr(fmt.Errorf("an error occured while creating a firewall rule: %s", err))
@@ -184,9 +134,10 @@ func resourceFirewallRead(ctx context.Context, d *schema.ResourceData, meta inte
 
 	fw, apiResponse, err := client.FirewallRulesApi.DatacentersServersNicsFirewallrulesFindById(ctx, d.Get("datacenter_id").(string),
 		d.Get("server_id").(string), d.Get("nic_id").(string), d.Id()).Execute()
+	logApiRequestTime(apiResponse)
 
 	if err != nil {
-		if apiResponse != nil && apiResponse.StatusCode == 404 {
+		if apiResponse != nil && apiResponse.Response != nil && apiResponse.StatusCode == 404 {
 			d.SetId("")
 			return nil
 		}
@@ -194,91 +145,8 @@ func resourceFirewallRead(ctx context.Context, d *schema.ResourceData, meta inte
 		return diags
 	}
 
-	if fw.Properties.Protocol != nil {
-		err := d.Set("protocol", *fw.Properties.Protocol)
-		if err != nil {
-			diags := diag.FromErr(fmt.Errorf("error while setting protocol property for firewall %s: %s", d.Id(), err))
-			return diags
-		}
-	}
-
-	if fw.Properties.Name != nil {
-		err := d.Set("name", *fw.Properties.Name)
-		if err != nil {
-			diags := diag.FromErr(fmt.Errorf("error while setting name property for firewall %s: %s", d.Id(), err))
-			return diags
-		}
-
-	}
-
-	if fw.Properties.SourceMac != nil {
-		err := d.Set("source_mac", *fw.Properties.SourceMac)
-		if err != nil {
-			diags := diag.FromErr(fmt.Errorf("error while setting source_mac property for firewall %s: %s", d.Id(), err))
-			return diags
-		}
-	}
-
-	if fw.Properties.SourceIp != nil {
-		err := d.Set("source_ip", *fw.Properties.SourceIp)
-		if err != nil {
-			diags := diag.FromErr(fmt.Errorf("error while setting source_ip property for firewall %s: %s", d.Id(), err))
-			return diags
-		}
-	}
-
-	if fw.Properties.TargetIp != nil {
-		err := d.Set("target_ip", *fw.Properties.TargetIp)
-		if err != nil {
-			diags := diag.FromErr(fmt.Errorf("error while setting target_ip property for firewall %s: %s", d.Id(), err))
-			return diags
-		}
-	}
-
-	if fw.Properties.PortRangeStart != nil {
-		err := d.Set("port_range_start", *fw.Properties.PortRangeStart)
-		if err != nil {
-			diags := diag.FromErr(fmt.Errorf("error while setting port_range_start property for firewall %s: %s", d.Id(), err))
-			return diags
-		}
-	}
-
-	if fw.Properties.PortRangeEnd != nil {
-		err := d.Set("port_range_end", *fw.Properties.PortRangeEnd)
-		if err != nil {
-			diags := diag.FromErr(fmt.Errorf("error while setting port_range_end property for firewall %s: %s", d.Id(), err))
-			return diags
-		}
-	}
-
-	if fw.Properties.IcmpType != nil {
-		err := d.Set("icmp_type", *fw.Properties.IcmpType)
-		if err != nil {
-			diags := diag.FromErr(fmt.Errorf("error while setting icmp_type property for firewall %s: %s", d.Id(), err))
-			return diags
-		}
-	}
-
-	if fw.Properties.IcmpCode != nil {
-		err := d.Set("icmp_code", *fw.Properties.IcmpCode)
-		if err != nil {
-			diags := diag.FromErr(fmt.Errorf("error while setting icmp_code property for firewall %s: %s", d.Id(), err))
-			return diags
-		}
-	}
-
-	if fw.Properties.Type != nil {
-		err := d.Set("type", *fw.Properties.Type)
-		if err != nil {
-			diags := diag.FromErr(fmt.Errorf("error while setting type property for firewall %s: %s", d.Id(), err))
-			return diags
-		}
-	}
-
-	err = d.Set("nic_id", d.Get("nic_id").(string))
-	if err != nil {
-		diags := diag.FromErr(fmt.Errorf("error while setting nic_id property for firewall %s: %s", d.Id(), err))
-		return diags
+	if err := setFirewallData(d, &fw); err != nil {
+		return diag.FromErr(err)
 	}
 
 	return nil
@@ -287,66 +155,10 @@ func resourceFirewallRead(ctx context.Context, d *schema.ResourceData, meta inte
 func resourceFirewallUpdate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	client := meta.(SdkBundle).CloudApiClient
 
-	properties := ionoscloud.FirewallruleProperties{}
+	firewall := getFirewallData(d, "", true)
 
-	if d.HasChange("name") {
-		_, v := d.GetChange("name")
-		vStr := v.(string)
-		properties.Name = &vStr
-	}
-	if d.HasChange("source_mac") {
-		_, v := d.GetChange("source_mac")
-		vStr := v.(string)
-		properties.SourceMac = &vStr
-	}
-	if d.HasChange("source_ip") {
-		_, v := d.GetChange("source_ip")
-		vStr := v.(string)
-		properties.SourceIp = &vStr
-	}
-	if d.HasChange("target_ip") {
-		_, v := d.GetChange("target_ip")
-		vStr := v.(string)
-		properties.TargetIp = &vStr
-	}
-	if d.HasChange("port_range_start") {
-		_, v := d.GetChange("port_range_start")
-		vInt := int32(*(v.(*int)))
-		properties.PortRangeStart = &vInt
-	}
-	if d.HasChange("port_range_end") {
-		_, v := d.GetChange("port_range_end")
-		vInt := int32(*(v.(*int)))
-		properties.PortRangeEnd = &vInt
-	}
-	if d.HasChange("icmp_type") {
-		_, v := d.GetChange("icmp_type")
-		tempIcmpType, err := strconv.Atoi(v.(string))
-		if err != nil {
-			diags := diag.FromErr(fmt.Errorf("an error occured while updating a firewall rule: %s", err))
-			return diags
-		}
-		tempIcmpTypeInt := int32(tempIcmpType)
-		properties.IcmpType = &tempIcmpTypeInt
-	}
-	if d.HasChange("icmp_code") {
-		_, v := d.GetChange("icmp_code")
-		tempIcmpCode, err := strconv.Atoi(v.(string))
-		if err != nil {
-			diags := diag.FromErr(fmt.Errorf("an error occured while updating a firewall rule: %s", err))
-			return diags
-		}
-		tempIcmpCodeInt := int32(tempIcmpCode)
-		properties.IcmpCode = &tempIcmpCodeInt
-	}
-
-	if d.HasChange("type") {
-		_, v := d.GetChange("type")
-		vStr := v.(string)
-		properties.Type = &vStr
-	}
-
-	_, apiResponse, err := client.FirewallRulesApi.DatacentersServersNicsFirewallrulesPatch(ctx, d.Get("datacenter_id").(string), d.Get("server_id").(string), d.Get("nic_id").(string), d.Id()).Firewallrule(properties).Execute()
+	_, apiResponse, err := client.FirewallRulesApi.DatacentersServersNicsFirewallrulesPatch(ctx, d.Get("datacenter_id").(string), d.Get("server_id").(string), d.Get("nic_id").(string), d.Id()).Firewallrule(*firewall.Properties).Execute()
+	logApiRequestTime(apiResponse)
 
 	if err != nil {
 		diags := diag.FromErr(fmt.Errorf("an error occured while updating a firewall rule ID %s %s", d.Id(), err))
@@ -386,5 +198,190 @@ func resourceFirewallDelete(ctx context.Context, d *schema.ResourceData, meta in
 
 	d.SetId("")
 
+	return nil
+}
+
+func resourceFirewallImport(ctx context.Context, d *schema.ResourceData, meta interface{}) ([]*schema.ResourceData, error) {
+
+	client := meta.(*ionoscloud.APIClient)
+
+	parts := strings.Split(d.Id(), "/")
+	if len(parts) != 4 || parts[0] == "" || parts[1] == "" || parts[2] == "" || parts[3] == "" {
+		return nil, fmt.Errorf("invalid import id %q. Expecting {datacenter}/{server}/{nic}/{firewall}", d.Id())
+	}
+
+	dcId := parts[0]
+	serverId := parts[1]
+	nicId := parts[2]
+	firewallId := parts[3]
+
+	fw, apiResponse, err := client.FirewallRulesApi.DatacentersServersNicsFirewallrulesFindById(ctx, dcId,
+		serverId, nicId, firewallId).Execute()
+	logApiRequestTime(apiResponse)
+
+	if err != nil {
+		if apiResponse != nil && apiResponse.Response != nil && apiResponse.StatusCode == 404 {
+			d.SetId("")
+			return nil, fmt.Errorf("unable to find firewall rule %q", firewallId)
+		}
+		return nil, fmt.Errorf("an error occured while retrieving firewall rule %q: %q ", firewallId, err)
+	}
+
+	if err := d.Set("datacenter_id", dcId); err != nil {
+		return nil, err
+	}
+	if err := d.Set("server_id", serverId); err != nil {
+		return nil, err
+	}
+	if err := d.Set("nic_id", nicId); err != nil {
+		return nil, err
+	}
+
+	if err := setFirewallData(d, &fw); err != nil {
+		return nil, err
+	}
+
+	return []*schema.ResourceData{d}, nil
+}
+
+func getFirewallData(d *schema.ResourceData, path string, update bool) ionoscloud.FirewallRule {
+
+	firewall := ionoscloud.FirewallRule{
+		Properties: &ionoscloud.FirewallruleProperties{},
+	}
+
+	if !update {
+		if v, ok := d.GetOk(path + "protocol"); ok {
+			vStr := v.(string)
+			firewall.Properties.Protocol = &vStr
+		}
+	}
+
+	if v, ok := d.GetOk(path + "name"); ok {
+		vStr := v.(string)
+		firewall.Properties.Name = &vStr
+	}
+
+	if v, ok := d.GetOk(path + "source_mac"); ok {
+		val := v.(string)
+		firewall.Properties.SourceMac = &val
+	}
+
+	if v, ok := d.GetOk(path + "source_ip"); ok {
+		val := v.(string)
+		firewall.Properties.SourceIp = &val
+	}
+
+	if v, ok := d.GetOk(path + "target_ip"); ok {
+		val := v.(string)
+		firewall.Properties.TargetIp = &val
+	}
+
+	if v, ok := d.GetOk(path + "port_range_start"); ok {
+		val := int32(v.(int))
+		firewall.Properties.PortRangeStart = &val
+	}
+
+	if v, ok := d.GetOk(path + "port_range_end"); ok {
+		val := int32(v.(int))
+		firewall.Properties.PortRangeEnd = &val
+	}
+
+	if v, ok := d.GetOk(path + "icmp_type"); ok {
+		tempIcmpType := int32(v.(int))
+		firewall.Properties.IcmpType = &tempIcmpType
+
+	}
+	if v, ok := d.GetOk(path + "icmp_code"); ok {
+		tempIcmpCode := int32(v.(int))
+		firewall.Properties.IcmpCode = &tempIcmpCode
+
+	}
+	if v, ok := d.GetOk(path + "type"); ok {
+		tempType := v.(string)
+		firewall.Properties.Type = &tempType
+
+	}
+	return firewall
+}
+
+func setFirewallData(d *schema.ResourceData, firewall *ionoscloud.FirewallRule) error {
+
+	if firewall.Id != nil {
+		d.SetId(*firewall.Id)
+	}
+
+	if firewall.Properties != nil {
+
+		if firewall.Properties.Protocol != nil {
+			err := d.Set("protocol", *firewall.Properties.Protocol)
+			if err != nil {
+				return fmt.Errorf("error while setting protocol property for firewall %s: %s", d.Id(), err)
+			}
+		}
+
+		if firewall.Properties.Name != nil {
+			err := d.Set("name", *firewall.Properties.Name)
+			if err != nil {
+				return fmt.Errorf("error while setting name property for firewall %s: %s", d.Id(), err)
+			}
+		}
+
+		if firewall.Properties.SourceMac != nil {
+			err := d.Set("source_mac", *firewall.Properties.SourceMac)
+			if err != nil {
+				return fmt.Errorf("error while setting source_mac property for firewall %s: %s", d.Id(), err)
+			}
+		}
+
+		if firewall.Properties.SourceIp != nil {
+			err := d.Set("source_ip", *firewall.Properties.SourceIp)
+			if err != nil {
+				return fmt.Errorf("error while setting source_ip property for firewall %s: %s", d.Id(), err)
+			}
+		}
+
+		if firewall.Properties.TargetIp != nil {
+			err := d.Set("target_ip", *firewall.Properties.TargetIp)
+			if err != nil {
+				return fmt.Errorf("error while setting target_ip property for firewall %s: %s", d.Id(), err)
+			}
+		}
+
+		if firewall.Properties.PortRangeStart != nil {
+			err := d.Set("port_range_start", *firewall.Properties.PortRangeStart)
+			if err != nil {
+				return fmt.Errorf("error while setting port_range_start property for firewall %s: %s", d.Id(), err)
+			}
+		}
+
+		if firewall.Properties.PortRangeEnd != nil {
+			err := d.Set("port_range_end", *firewall.Properties.PortRangeEnd)
+			if err != nil {
+				return fmt.Errorf("error while setting port_range_end property for firewall %s: %s", d.Id(), err)
+			}
+		}
+
+		if firewall.Properties.IcmpType != nil {
+			err := d.Set("icmp_type", *firewall.Properties.IcmpType)
+			if err != nil {
+				return fmt.Errorf("error while setting icmp_type property for firewall %s: %s", d.Id(), err)
+			}
+		}
+
+		if firewall.Properties.IcmpCode != nil {
+			err := d.Set("icmp_code", *firewall.Properties.IcmpCode)
+			if err != nil {
+				return fmt.Errorf("error while setting icmp_code property for firewall %s: %s", d.Id(), err)
+			}
+		}
+
+		if firewall.Properties.Type != nil {
+			err := d.Set("type", *firewall.Properties.Type)
+			if err != nil {
+				return fmt.Errorf("error while setting type property for firewall %s: %s", d.Id(), err)
+			}
+		}
+	}
 	return nil
 }

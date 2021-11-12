@@ -1,7 +1,7 @@
 /*
  * CLOUD API
  *
- * An enterprise-grade Infrastructure is provided as a Service (IaaS) solution that can be managed through a browser-based \"Data Center Designer\" (DCD) tool or via an easy to use API.   The API allows you to perform a variety of management tasks such as spinning up additional servers, adding volumes, adjusting networking, and so forth. It is designed to allow users to leverage the same power and flexibility found within the DCD visual tool. Both tools are consistent with their concepts and lend well to making the experience smooth and intuitive.
+ * IONOS Enterprise-grade Infrastructure as a Service (IaaS) solutions can be managed through the Cloud API, in addition or as an alternative to the \"Data Center Designer\" (DCD) browser-based tool.    Both methods employ consistent concepts and features, deliver similar power and flexibility, and can be used to perform a multitude of management tasks, including adding servers, volumes, configuring networks, and so on.
  *
  * API version: 6.0-SDK.3
  */
@@ -21,11 +21,9 @@ type NetworkLoadBalancerForwardingRulePut struct {
 	// The type of object that has been created
 	Type *Type `json:"type,omitempty"`
 	// URL to the object representation (absolute path)
-	Href *string `json:"href,omitempty"`
+	Href       *string                                      `json:"href,omitempty"`
 	Properties *NetworkLoadBalancerForwardingRuleProperties `json:"properties"`
 }
-
-
 
 // GetId returns the Id field value
 // If the value is explicit nil, the zero value for string will be returned
@@ -33,7 +31,6 @@ func (o *NetworkLoadBalancerForwardingRulePut) GetId() *string {
 	if o == nil {
 		return nil
 	}
-
 
 	return o.Id
 
@@ -47,13 +44,11 @@ func (o *NetworkLoadBalancerForwardingRulePut) GetIdOk() (*string, bool) {
 		return nil, false
 	}
 
-
 	return o.Id, true
 }
 
 // SetId sets field value
 func (o *NetworkLoadBalancerForwardingRulePut) SetId(v string) {
-
 
 	o.Id = &v
 
@@ -68,15 +63,12 @@ func (o *NetworkLoadBalancerForwardingRulePut) HasId() bool {
 	return false
 }
 
-
-
 // GetType returns the Type field value
 // If the value is explicit nil, the zero value for Type will be returned
 func (o *NetworkLoadBalancerForwardingRulePut) GetType() *Type {
 	if o == nil {
 		return nil
 	}
-
 
 	return o.Type
 
@@ -90,13 +82,11 @@ func (o *NetworkLoadBalancerForwardingRulePut) GetTypeOk() (*Type, bool) {
 		return nil, false
 	}
 
-
 	return o.Type, true
 }
 
 // SetType sets field value
 func (o *NetworkLoadBalancerForwardingRulePut) SetType(v Type) {
-
 
 	o.Type = &v
 
@@ -111,15 +101,12 @@ func (o *NetworkLoadBalancerForwardingRulePut) HasType() bool {
 	return false
 }
 
-
-
 // GetHref returns the Href field value
 // If the value is explicit nil, the zero value for string will be returned
 func (o *NetworkLoadBalancerForwardingRulePut) GetHref() *string {
 	if o == nil {
 		return nil
 	}
-
 
 	return o.Href
 
@@ -133,13 +120,11 @@ func (o *NetworkLoadBalancerForwardingRulePut) GetHrefOk() (*string, bool) {
 		return nil, false
 	}
 
-
 	return o.Href, true
 }
 
 // SetHref sets field value
 func (o *NetworkLoadBalancerForwardingRulePut) SetHref(v string) {
-
 
 	o.Href = &v
 
@@ -154,15 +139,12 @@ func (o *NetworkLoadBalancerForwardingRulePut) HasHref() bool {
 	return false
 }
 
-
-
 // GetProperties returns the Properties field value
 // If the value is explicit nil, the zero value for NetworkLoadBalancerForwardingRuleProperties will be returned
 func (o *NetworkLoadBalancerForwardingRulePut) GetProperties() *NetworkLoadBalancerForwardingRuleProperties {
 	if o == nil {
 		return nil
 	}
-
 
 	return o.Properties
 
@@ -176,13 +158,11 @@ func (o *NetworkLoadBalancerForwardingRulePut) GetPropertiesOk() (*NetworkLoadBa
 		return nil, false
 	}
 
-
 	return o.Properties, true
 }
 
 // SetProperties sets field value
 func (o *NetworkLoadBalancerForwardingRulePut) SetProperties(v NetworkLoadBalancerForwardingRuleProperties) {
-
 
 	o.Properties = &v
 
@@ -197,29 +177,24 @@ func (o *NetworkLoadBalancerForwardingRulePut) HasProperties() bool {
 	return false
 }
 
-
 func (o NetworkLoadBalancerForwardingRulePut) MarshalJSON() ([]byte, error) {
 	toSerialize := map[string]interface{}{}
 
 	if o.Id != nil {
 		toSerialize["id"] = o.Id
 	}
-	
 
 	if o.Type != nil {
 		toSerialize["type"] = o.Type
 	}
-	
 
 	if o.Href != nil {
 		toSerialize["href"] = o.Href
 	}
-	
 
 	if o.Properties != nil {
 		toSerialize["properties"] = o.Properties
 	}
-	
 	return json.Marshal(toSerialize)
 }
 
@@ -258,5 +233,3 @@ func (v *NullableNetworkLoadBalancerForwardingRulePut) UnmarshalJSON(src []byte)
 	v.isSet = true
 	return json.Unmarshal(src, &v.value)
 }
-
-

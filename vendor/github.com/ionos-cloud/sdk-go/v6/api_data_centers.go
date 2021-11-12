@@ -1,7 +1,7 @@
 /*
  * CLOUD API
  *
- * An enterprise-grade Infrastructure is provided as a Service (IaaS) solution that can be managed through a browser-based \"Data Center Designer\" (DCD) tool or via an easy to use API.   The API allows you to perform a variety of management tasks such as spinning up additional servers, adding volumes, adjusting networking, and so forth. It is designed to allow users to leverage the same power and flexibility found within the DCD visual tool. Both tools are consistent with their concepts and lend well to making the experience smooth and intuitive.
+ * IONOS Enterprise-grade Infrastructure as a Service (IaaS) solutions can be managed through the Cloud API, in addition or as an alternative to the \"Data Center Designer\" (DCD) browser-based tool.    Both methods employ consistent concepts and features, deliver similar power and flexibility, and can be used to perform a multitude of management tasks, including adding servers, volumes, configuring networks, and so on.
  *
  * API version: 6.0-SDK.3
  */
@@ -28,11 +28,11 @@ var (
 type DataCentersApiService service
 
 type ApiDatacentersDeleteRequest struct {
-	ctx _context.Context
-	ApiService *DataCentersApiService
-	datacenterId string
-	pretty *bool
-	depth *int32
+	ctx             _context.Context
+	ApiService      *DataCentersApiService
+	datacenterId    string
+	pretty          *bool
+	depth           *int32
 	xContractNumber *int32
 }
 
@@ -54,16 +54,16 @@ func (r ApiDatacentersDeleteRequest) Execute() (*APIResponse, error) {
 }
 
 /*
- * DatacentersDelete Delete a Data Center
- * Will remove all objects within the datacenter and remove the datacenter object itself, too. This is a highly destructive method which should be used with caution
+ * DatacentersDelete Delete data centers
+ * Remove the specified data center and all the elements it contains. This is method is destructive and should be used carefully.
  * @param ctx _context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
- * @param datacenterId The unique ID of the datacenter
+ * @param datacenterId The unique ID of the data center.
  * @return ApiDatacentersDeleteRequest
  */
 func (a *DataCentersApiService) DatacentersDelete(ctx _context.Context, datacenterId string) ApiDatacentersDeleteRequest {
 	return ApiDatacentersDeleteRequest{
-		ApiService: a,
-		ctx: ctx,
+		ApiService:   a,
+		ctx:          ctx,
 		datacenterId: datacenterId,
 	}
 }
@@ -98,6 +98,7 @@ func (a *DataCentersApiService) DatacentersDeleteExecute(r ApiDatacentersDeleteR
 	if r.depth != nil {
 		localVarQueryParams.Add("depth", parameterToString(*r.depth, ""))
 	}
+
 	// to determine the Content-Type header
 	localVarHTTPContentTypes := []string{}
 
@@ -139,12 +140,12 @@ func (a *DataCentersApiService) DatacentersDeleteExecute(r ApiDatacentersDeleteR
 
 	localVarHTTPResponse, httpRequestTime, err := a.client.callAPI(req)
 
-	localVarAPIResponse := &APIResponse {
-		Response: localVarHTTPResponse,
-		Method: localVarHTTPMethod,
-		RequestURL: localVarPath,
+	localVarAPIResponse := &APIResponse{
+		Response:    localVarHTTPResponse,
+		Method:      localVarHTTPMethod,
+		RequestURL:  localVarPath,
 		RequestTime: httpRequestTime,
-		Operation: "DatacentersDelete",
+		Operation:   "DatacentersDelete",
 	}
 
 	if err != nil || localVarHTTPResponse == nil {
@@ -161,16 +162,16 @@ func (a *DataCentersApiService) DatacentersDeleteExecute(r ApiDatacentersDeleteR
 	if localVarHTTPResponse.StatusCode >= 300 {
 		newErr := GenericOpenAPIError{
 			statusCode: localVarHTTPResponse.StatusCode,
-			body:  localVarBody,
-			error: fmt.Sprintf("%s: %s", localVarHTTPResponse.Status, string(localVarBody)),
+			body:       localVarBody,
+			error:      fmt.Sprintf(FormatStringErr, localVarHTTPResponse.Status, string(localVarBody)),
 		}
-			var v Error
-			err = a.client.decode(&v, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
-			if err != nil {
-				newErr.error = err.Error()
-				return localVarAPIResponse, newErr
-			}
-			newErr.model = v
+		var v Error
+		err = a.client.decode(&v, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
+		if err != nil {
+			newErr.error = err.Error()
+			return localVarAPIResponse, newErr
+		}
+		newErr.model = v
 		return localVarAPIResponse, newErr
 	}
 
@@ -178,11 +179,11 @@ func (a *DataCentersApiService) DatacentersDeleteExecute(r ApiDatacentersDeleteR
 }
 
 type ApiDatacentersFindByIdRequest struct {
-	ctx _context.Context
-	ApiService *DataCentersApiService
-	datacenterId string
-	pretty *bool
-	depth *int32
+	ctx             _context.Context
+	ApiService      *DataCentersApiService
+	datacenterId    string
+	pretty          *bool
+	depth           *int32
 	xContractNumber *int32
 }
 
@@ -204,16 +205,16 @@ func (r ApiDatacentersFindByIdRequest) Execute() (Datacenter, *APIResponse, erro
 }
 
 /*
- * DatacentersFindById Retrieve a Data Center
- * You can retrieve a data center by using the resource's ID. This value can be found in the response body when a datacenter is created or when you GET a list of datacenters.
+ * DatacentersFindById Retrieve data centers
+ * Retrieve data centers by resource ID. This value is in the response body when the data center is created, and in the list of the data centers, returned by GET.
  * @param ctx _context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
- * @param datacenterId The unique ID of the datacenter
+ * @param datacenterId The unique ID of the data center.
  * @return ApiDatacentersFindByIdRequest
  */
 func (a *DataCentersApiService) DatacentersFindById(ctx _context.Context, datacenterId string) ApiDatacentersFindByIdRequest {
 	return ApiDatacentersFindByIdRequest{
-		ApiService: a,
-		ctx: ctx,
+		ApiService:   a,
+		ctx:          ctx,
 		datacenterId: datacenterId,
 	}
 }
@@ -250,6 +251,7 @@ func (a *DataCentersApiService) DatacentersFindByIdExecute(r ApiDatacentersFindB
 	if r.depth != nil {
 		localVarQueryParams.Add("depth", parameterToString(*r.depth, ""))
 	}
+
 	// to determine the Content-Type header
 	localVarHTTPContentTypes := []string{}
 
@@ -291,12 +293,12 @@ func (a *DataCentersApiService) DatacentersFindByIdExecute(r ApiDatacentersFindB
 
 	localVarHTTPResponse, httpRequestTime, err := a.client.callAPI(req)
 
-	localVarAPIResponse := &APIResponse {
-		Response: localVarHTTPResponse,
-		Method: localVarHTTPMethod,
-		RequestURL: localVarPath,
+	localVarAPIResponse := &APIResponse{
+		Response:    localVarHTTPResponse,
+		Method:      localVarHTTPMethod,
+		RequestURL:  localVarPath,
 		RequestTime: httpRequestTime,
-		Operation: "DatacentersFindById",
+		Operation:   "DatacentersFindById",
 	}
 
 	if err != nil || localVarHTTPResponse == nil {
@@ -313,16 +315,16 @@ func (a *DataCentersApiService) DatacentersFindByIdExecute(r ApiDatacentersFindB
 	if localVarHTTPResponse.StatusCode >= 300 {
 		newErr := GenericOpenAPIError{
 			statusCode: localVarHTTPResponse.StatusCode,
-			body:  localVarBody,
-			error: fmt.Sprintf("%s: %s", localVarHTTPResponse.Status, string(localVarBody)),
+			body:       localVarBody,
+			error:      fmt.Sprintf(FormatStringErr, localVarHTTPResponse.Status, string(localVarBody)),
 		}
-			var v Error
-			err = a.client.decode(&v, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
-			if err != nil {
-				newErr.error = err.Error()
-				return localVarReturnValue, localVarAPIResponse, newErr
-			}
-			newErr.model = v
+		var v Error
+		err = a.client.decode(&v, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
+		if err != nil {
+			newErr.error = err.Error()
+			return localVarReturnValue, localVarAPIResponse, newErr
+		}
+		newErr.model = v
 		return localVarReturnValue, localVarAPIResponse, newErr
 	}
 
@@ -330,8 +332,8 @@ func (a *DataCentersApiService) DatacentersFindByIdExecute(r ApiDatacentersFindB
 	if err != nil {
 		newErr := GenericOpenAPIError{
 			statusCode: localVarHTTPResponse.StatusCode,
-			body:  localVarBody,
-			error: err.Error(),
+			body:       localVarBody,
+			error:      err.Error(),
 		}
 		return localVarReturnValue, localVarAPIResponse, newErr
 	}
@@ -340,13 +342,15 @@ func (a *DataCentersApiService) DatacentersFindByIdExecute(r ApiDatacentersFindB
 }
 
 type ApiDatacentersGetRequest struct {
-	ctx _context.Context
-	ApiService *DataCentersApiService
-	pretty *bool
-	depth *int32
+	ctx             _context.Context
+	ApiService      *DataCentersApiService
+	filters         _neturl.Values
+	orderBy         *string
+	pretty          *bool
+	depth           *int32
 	xContractNumber *int32
-	offset *int32
-	limit *int32
+	offset          *int32
+	limit           *int32
 }
 
 func (r ApiDatacentersGetRequest) Pretty(pretty bool) ApiDatacentersGetRequest {
@@ -370,20 +374,34 @@ func (r ApiDatacentersGetRequest) Limit(limit int32) ApiDatacentersGetRequest {
 	return r
 }
 
+// Filters query parameters limit results to those containing a matching value for a specific property.
+func (r ApiDatacentersGetRequest) Filter(key string, value string) ApiDatacentersGetRequest {
+	filterKey := fmt.Sprintf(FilterQueryParam, key)
+	r.filters[filterKey] = []string{value}
+	return r
+}
+
+// OrderBy query param sorts the results alphanumerically in ascending order based on the specified property.
+func (r ApiDatacentersGetRequest) OrderBy(orderBy string) ApiDatacentersGetRequest {
+	r.orderBy = &orderBy
+	return r
+}
+
 func (r ApiDatacentersGetRequest) Execute() (Datacenters, *APIResponse, error) {
 	return r.ApiService.DatacentersGetExecute(r)
 }
 
 /*
- * DatacentersGet List Data Centers under your account
- * You can retrieve a complete list of data centers provisioned under your account
+ * DatacentersGet List your data centers
+ * List the data centers for your account. Default limit is the first 100 items; use pagination query parameters for listing more items.
  * @param ctx _context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
  * @return ApiDatacentersGetRequest
  */
 func (a *DataCentersApiService) DatacentersGet(ctx _context.Context) ApiDatacentersGetRequest {
 	return ApiDatacentersGetRequest{
 		ApiService: a,
-		ctx: ctx,
+		ctx:        ctx,
+		filters:    _neturl.Values{},
 	}
 }
 
@@ -424,6 +442,17 @@ func (a *DataCentersApiService) DatacentersGetExecute(r ApiDatacentersGetRequest
 	if r.limit != nil {
 		localVarQueryParams.Add("limit", parameterToString(*r.limit, ""))
 	}
+	if r.orderBy != nil {
+		localVarQueryParams.Add("orderBy", parameterToString(*r.orderBy, ""))
+	}
+	if len(r.filters) > 0 {
+		for k, v := range r.filters {
+			for _, iv := range v {
+				localVarQueryParams.Add(k, iv)
+			}
+		}
+	}
+
 	// to determine the Content-Type header
 	localVarHTTPContentTypes := []string{}
 
@@ -465,12 +494,12 @@ func (a *DataCentersApiService) DatacentersGetExecute(r ApiDatacentersGetRequest
 
 	localVarHTTPResponse, httpRequestTime, err := a.client.callAPI(req)
 
-	localVarAPIResponse := &APIResponse {
-		Response: localVarHTTPResponse,
-		Method: localVarHTTPMethod,
-		RequestURL: localVarPath,
+	localVarAPIResponse := &APIResponse{
+		Response:    localVarHTTPResponse,
+		Method:      localVarHTTPMethod,
+		RequestURL:  localVarPath,
 		RequestTime: httpRequestTime,
-		Operation: "DatacentersGet",
+		Operation:   "DatacentersGet",
 	}
 
 	if err != nil || localVarHTTPResponse == nil {
@@ -487,16 +516,16 @@ func (a *DataCentersApiService) DatacentersGetExecute(r ApiDatacentersGetRequest
 	if localVarHTTPResponse.StatusCode >= 300 {
 		newErr := GenericOpenAPIError{
 			statusCode: localVarHTTPResponse.StatusCode,
-			body:  localVarBody,
-			error: fmt.Sprintf("%s: %s", localVarHTTPResponse.Status, string(localVarBody)),
+			body:       localVarBody,
+			error:      fmt.Sprintf(FormatStringErr, localVarHTTPResponse.Status, string(localVarBody)),
 		}
-			var v Error
-			err = a.client.decode(&v, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
-			if err != nil {
-				newErr.error = err.Error()
-				return localVarReturnValue, localVarAPIResponse, newErr
-			}
-			newErr.model = v
+		var v Error
+		err = a.client.decode(&v, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
+		if err != nil {
+			newErr.error = err.Error()
+			return localVarReturnValue, localVarAPIResponse, newErr
+		}
+		newErr.model = v
 		return localVarReturnValue, localVarAPIResponse, newErr
 	}
 
@@ -504,8 +533,8 @@ func (a *DataCentersApiService) DatacentersGetExecute(r ApiDatacentersGetRequest
 	if err != nil {
 		newErr := GenericOpenAPIError{
 			statusCode: localVarHTTPResponse.StatusCode,
-			body:  localVarBody,
-			error: err.Error(),
+			body:       localVarBody,
+			error:      err.Error(),
 		}
 		return localVarReturnValue, localVarAPIResponse, newErr
 	}
@@ -514,12 +543,12 @@ func (a *DataCentersApiService) DatacentersGetExecute(r ApiDatacentersGetRequest
 }
 
 type ApiDatacentersPatchRequest struct {
-	ctx _context.Context
-	ApiService *DataCentersApiService
-	datacenterId string
-	datacenter *DatacenterProperties
-	pretty *bool
-	depth *int32
+	ctx             _context.Context
+	ApiService      *DataCentersApiService
+	datacenterId    string
+	datacenter      *DatacenterProperties
+	pretty          *bool
+	depth           *int32
 	xContractNumber *int32
 }
 
@@ -545,16 +574,16 @@ func (r ApiDatacentersPatchRequest) Execute() (Datacenter, *APIResponse, error) 
 }
 
 /*
- * DatacentersPatch Partially modify a Data Center
- * You can use update datacenter to re-name the datacenter or update its description
+ * DatacentersPatch Partially modify data centers
+ * Update data centers, rename them, or change their descriptions.
  * @param ctx _context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
- * @param datacenterId The unique ID of the datacenter
+ * @param datacenterId The unique ID of the data center.
  * @return ApiDatacentersPatchRequest
  */
 func (a *DataCentersApiService) DatacentersPatch(ctx _context.Context, datacenterId string) ApiDatacentersPatchRequest {
 	return ApiDatacentersPatchRequest{
-		ApiService: a,
-		ctx: ctx,
+		ApiService:   a,
+		ctx:          ctx,
 		datacenterId: datacenterId,
 	}
 }
@@ -594,6 +623,7 @@ func (a *DataCentersApiService) DatacentersPatchExecute(r ApiDatacentersPatchReq
 	if r.depth != nil {
 		localVarQueryParams.Add("depth", parameterToString(*r.depth, ""))
 	}
+
 	// to determine the Content-Type header
 	localVarHTTPContentTypes := []string{"application/json"}
 
@@ -637,12 +667,12 @@ func (a *DataCentersApiService) DatacentersPatchExecute(r ApiDatacentersPatchReq
 
 	localVarHTTPResponse, httpRequestTime, err := a.client.callAPI(req)
 
-	localVarAPIResponse := &APIResponse {
-		Response: localVarHTTPResponse,
-		Method: localVarHTTPMethod,
-		RequestURL: localVarPath,
+	localVarAPIResponse := &APIResponse{
+		Response:    localVarHTTPResponse,
+		Method:      localVarHTTPMethod,
+		RequestURL:  localVarPath,
 		RequestTime: httpRequestTime,
-		Operation: "DatacentersPatch",
+		Operation:   "DatacentersPatch",
 	}
 
 	if err != nil || localVarHTTPResponse == nil {
@@ -659,16 +689,16 @@ func (a *DataCentersApiService) DatacentersPatchExecute(r ApiDatacentersPatchReq
 	if localVarHTTPResponse.StatusCode >= 300 {
 		newErr := GenericOpenAPIError{
 			statusCode: localVarHTTPResponse.StatusCode,
-			body:  localVarBody,
-			error: fmt.Sprintf("%s: %s", localVarHTTPResponse.Status, string(localVarBody)),
+			body:       localVarBody,
+			error:      fmt.Sprintf(FormatStringErr, localVarHTTPResponse.Status, string(localVarBody)),
 		}
-			var v Error
-			err = a.client.decode(&v, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
-			if err != nil {
-				newErr.error = err.Error()
-				return localVarReturnValue, localVarAPIResponse, newErr
-			}
-			newErr.model = v
+		var v Error
+		err = a.client.decode(&v, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
+		if err != nil {
+			newErr.error = err.Error()
+			return localVarReturnValue, localVarAPIResponse, newErr
+		}
+		newErr.model = v
 		return localVarReturnValue, localVarAPIResponse, newErr
 	}
 
@@ -676,8 +706,8 @@ func (a *DataCentersApiService) DatacentersPatchExecute(r ApiDatacentersPatchReq
 	if err != nil {
 		newErr := GenericOpenAPIError{
 			statusCode: localVarHTTPResponse.StatusCode,
-			body:  localVarBody,
-			error: err.Error(),
+			body:       localVarBody,
+			error:      err.Error(),
 		}
 		return localVarReturnValue, localVarAPIResponse, newErr
 	}
@@ -686,11 +716,11 @@ func (a *DataCentersApiService) DatacentersPatchExecute(r ApiDatacentersPatchReq
 }
 
 type ApiDatacentersPostRequest struct {
-	ctx _context.Context
-	ApiService *DataCentersApiService
-	datacenter *Datacenter
-	pretty *bool
-	depth *int32
+	ctx             _context.Context
+	ApiService      *DataCentersApiService
+	datacenter      *Datacenter
+	pretty          *bool
+	depth           *int32
 	xContractNumber *int32
 }
 
@@ -716,15 +746,17 @@ func (r ApiDatacentersPostRequest) Execute() (Datacenter, *APIResponse, error) {
 }
 
 /*
- * DatacentersPost Create a Data Center
- * Virtual data centers are the foundation of the platform. They act as logical containers for all other objects you will be creating, e.g. servers. You can provision as many data centers as you want. Datacenters have their own private network and are logically segmented from each other to create isolation. You can use this POST method to create a simple datacenter or to create a datacenter with multiple objects under it such as servers and storage volumes.
+ * DatacentersPost Create data centers
+ * Create new data centers, and data centers that already contain elements, such as servers and storage volumes, with this POST method.
+
+Virtual data centers are the foundation of the platform; they act as logical containers for all other objects you create, such as servers and storage volumes. You can provision as many data centers as needed. Data centers have their own private networks and are logically segmented from each other to create isolation.
  * @param ctx _context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
  * @return ApiDatacentersPostRequest
- */
+*/
 func (a *DataCentersApiService) DatacentersPost(ctx _context.Context) ApiDatacentersPostRequest {
 	return ApiDatacentersPostRequest{
 		ApiService: a,
-		ctx: ctx,
+		ctx:        ctx,
 	}
 }
 
@@ -762,6 +794,7 @@ func (a *DataCentersApiService) DatacentersPostExecute(r ApiDatacentersPostReque
 	if r.depth != nil {
 		localVarQueryParams.Add("depth", parameterToString(*r.depth, ""))
 	}
+
 	// to determine the Content-Type header
 	localVarHTTPContentTypes := []string{"application/json"}
 
@@ -805,12 +838,12 @@ func (a *DataCentersApiService) DatacentersPostExecute(r ApiDatacentersPostReque
 
 	localVarHTTPResponse, httpRequestTime, err := a.client.callAPI(req)
 
-	localVarAPIResponse := &APIResponse {
-		Response: localVarHTTPResponse,
-		Method: localVarHTTPMethod,
-		RequestURL: localVarPath,
+	localVarAPIResponse := &APIResponse{
+		Response:    localVarHTTPResponse,
+		Method:      localVarHTTPMethod,
+		RequestURL:  localVarPath,
 		RequestTime: httpRequestTime,
-		Operation: "DatacentersPost",
+		Operation:   "DatacentersPost",
 	}
 
 	if err != nil || localVarHTTPResponse == nil {
@@ -827,16 +860,16 @@ func (a *DataCentersApiService) DatacentersPostExecute(r ApiDatacentersPostReque
 	if localVarHTTPResponse.StatusCode >= 300 {
 		newErr := GenericOpenAPIError{
 			statusCode: localVarHTTPResponse.StatusCode,
-			body:  localVarBody,
-			error: fmt.Sprintf("%s: %s", localVarHTTPResponse.Status, string(localVarBody)),
+			body:       localVarBody,
+			error:      fmt.Sprintf(FormatStringErr, localVarHTTPResponse.Status, string(localVarBody)),
 		}
-			var v Error
-			err = a.client.decode(&v, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
-			if err != nil {
-				newErr.error = err.Error()
-				return localVarReturnValue, localVarAPIResponse, newErr
-			}
-			newErr.model = v
+		var v Error
+		err = a.client.decode(&v, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
+		if err != nil {
+			newErr.error = err.Error()
+			return localVarReturnValue, localVarAPIResponse, newErr
+		}
+		newErr.model = v
 		return localVarReturnValue, localVarAPIResponse, newErr
 	}
 
@@ -844,8 +877,8 @@ func (a *DataCentersApiService) DatacentersPostExecute(r ApiDatacentersPostReque
 	if err != nil {
 		newErr := GenericOpenAPIError{
 			statusCode: localVarHTTPResponse.StatusCode,
-			body:  localVarBody,
-			error: err.Error(),
+			body:       localVarBody,
+			error:      err.Error(),
 		}
 		return localVarReturnValue, localVarAPIResponse, newErr
 	}
@@ -854,12 +887,12 @@ func (a *DataCentersApiService) DatacentersPostExecute(r ApiDatacentersPostReque
 }
 
 type ApiDatacentersPutRequest struct {
-	ctx _context.Context
-	ApiService *DataCentersApiService
-	datacenterId string
-	datacenter *Datacenter
-	pretty *bool
-	depth *int32
+	ctx             _context.Context
+	ApiService      *DataCentersApiService
+	datacenterId    string
+	datacenter      *Datacenter
+	pretty          *bool
+	depth           *int32
 	xContractNumber *int32
 }
 
@@ -885,16 +918,16 @@ func (r ApiDatacentersPutRequest) Execute() (Datacenter, *APIResponse, error) {
 }
 
 /*
- * DatacentersPut Modify a Data Center
- * You can use update datacenter to re-name the datacenter or update its description
+ * DatacentersPut Modify data centers
+ * Update data centers, rename them, or change their descriptions.
  * @param ctx _context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
- * @param datacenterId The unique ID of the datacenter
+ * @param datacenterId The unique ID of the data center.
  * @return ApiDatacentersPutRequest
  */
 func (a *DataCentersApiService) DatacentersPut(ctx _context.Context, datacenterId string) ApiDatacentersPutRequest {
 	return ApiDatacentersPutRequest{
-		ApiService: a,
-		ctx: ctx,
+		ApiService:   a,
+		ctx:          ctx,
 		datacenterId: datacenterId,
 	}
 }
@@ -934,6 +967,7 @@ func (a *DataCentersApiService) DatacentersPutExecute(r ApiDatacentersPutRequest
 	if r.depth != nil {
 		localVarQueryParams.Add("depth", parameterToString(*r.depth, ""))
 	}
+
 	// to determine the Content-Type header
 	localVarHTTPContentTypes := []string{"application/json"}
 
@@ -977,12 +1011,12 @@ func (a *DataCentersApiService) DatacentersPutExecute(r ApiDatacentersPutRequest
 
 	localVarHTTPResponse, httpRequestTime, err := a.client.callAPI(req)
 
-	localVarAPIResponse := &APIResponse {
-		Response: localVarHTTPResponse,
-		Method: localVarHTTPMethod,
-		RequestURL: localVarPath,
+	localVarAPIResponse := &APIResponse{
+		Response:    localVarHTTPResponse,
+		Method:      localVarHTTPMethod,
+		RequestURL:  localVarPath,
 		RequestTime: httpRequestTime,
-		Operation: "DatacentersPut",
+		Operation:   "DatacentersPut",
 	}
 
 	if err != nil || localVarHTTPResponse == nil {
@@ -999,16 +1033,16 @@ func (a *DataCentersApiService) DatacentersPutExecute(r ApiDatacentersPutRequest
 	if localVarHTTPResponse.StatusCode >= 300 {
 		newErr := GenericOpenAPIError{
 			statusCode: localVarHTTPResponse.StatusCode,
-			body:  localVarBody,
-			error: fmt.Sprintf("%s: %s", localVarHTTPResponse.Status, string(localVarBody)),
+			body:       localVarBody,
+			error:      fmt.Sprintf(FormatStringErr, localVarHTTPResponse.Status, string(localVarBody)),
 		}
-			var v Error
-			err = a.client.decode(&v, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
-			if err != nil {
-				newErr.error = err.Error()
-				return localVarReturnValue, localVarAPIResponse, newErr
-			}
-			newErr.model = v
+		var v Error
+		err = a.client.decode(&v, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
+		if err != nil {
+			newErr.error = err.Error()
+			return localVarReturnValue, localVarAPIResponse, newErr
+		}
+		newErr.model = v
 		return localVarReturnValue, localVarAPIResponse, newErr
 	}
 
@@ -1016,8 +1050,8 @@ func (a *DataCentersApiService) DatacentersPutExecute(r ApiDatacentersPutRequest
 	if err != nil {
 		newErr := GenericOpenAPIError{
 			statusCode: localVarHTTPResponse.StatusCode,
-			body:  localVarBody,
-			error: err.Error(),
+			body:       localVarBody,
+			error:      err.Error(),
 		}
 		return localVarReturnValue, localVarAPIResponse, newErr
 	}

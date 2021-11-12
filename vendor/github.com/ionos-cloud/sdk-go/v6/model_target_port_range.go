@@ -1,7 +1,7 @@
 /*
  * CLOUD API
  *
- * An enterprise-grade Infrastructure is provided as a Service (IaaS) solution that can be managed through a browser-based \"Data Center Designer\" (DCD) tool or via an easy to use API.   The API allows you to perform a variety of management tasks such as spinning up additional servers, adding volumes, adjusting networking, and so forth. It is designed to allow users to leverage the same power and flexibility found within the DCD visual tool. Both tools are consistent with their concepts and lend well to making the experience smooth and intuitive.
+ * IONOS Enterprise-grade Infrastructure as a Service (IaaS) solutions can be managed through the Cloud API, in addition or as an alternative to the \"Data Center Designer\" (DCD) browser-based tool.    Both methods employ consistent concepts and features, deliver similar power and flexibility, and can be used to perform a multitude of management tasks, including adding servers, volumes, configuring networks, and so on.
  *
  * API version: 6.0-SDK.3
  */
@@ -22,15 +22,12 @@ type TargetPortRange struct {
 	End *int32 `json:"end,omitempty"`
 }
 
-
-
 // GetStart returns the Start field value
 // If the value is explicit nil, the zero value for int32 will be returned
 func (o *TargetPortRange) GetStart() *int32 {
 	if o == nil {
 		return nil
 	}
-
 
 	return o.Start
 
@@ -44,13 +41,11 @@ func (o *TargetPortRange) GetStartOk() (*int32, bool) {
 		return nil, false
 	}
 
-
 	return o.Start, true
 }
 
 // SetStart sets field value
 func (o *TargetPortRange) SetStart(v int32) {
-
 
 	o.Start = &v
 
@@ -65,15 +60,12 @@ func (o *TargetPortRange) HasStart() bool {
 	return false
 }
 
-
-
 // GetEnd returns the End field value
 // If the value is explicit nil, the zero value for int32 will be returned
 func (o *TargetPortRange) GetEnd() *int32 {
 	if o == nil {
 		return nil
 	}
-
 
 	return o.End
 
@@ -87,13 +79,11 @@ func (o *TargetPortRange) GetEndOk() (*int32, bool) {
 		return nil, false
 	}
 
-
 	return o.End, true
 }
 
 // SetEnd sets field value
 func (o *TargetPortRange) SetEnd(v int32) {
-
 
 	o.End = &v
 
@@ -108,19 +98,16 @@ func (o *TargetPortRange) HasEnd() bool {
 	return false
 }
 
-
 func (o TargetPortRange) MarshalJSON() ([]byte, error) {
 	toSerialize := map[string]interface{}{}
 
 	if o.Start != nil {
 		toSerialize["start"] = o.Start
 	}
-	
 
 	if o.End != nil {
 		toSerialize["end"] = o.End
 	}
-	
 	return json.Marshal(toSerialize)
 }
 
@@ -159,5 +146,3 @@ func (v *NullableTargetPortRange) UnmarshalJSON(src []byte) error {
 	v.isSet = true
 	return json.Unmarshal(src, &v.value)
 }
-
-

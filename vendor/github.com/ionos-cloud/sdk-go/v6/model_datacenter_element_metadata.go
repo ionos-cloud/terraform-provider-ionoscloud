@@ -1,7 +1,7 @@
 /*
  * CLOUD API
  *
- * An enterprise-grade Infrastructure is provided as a Service (IaaS) solution that can be managed through a browser-based \"Data Center Designer\" (DCD) tool or via an easy to use API.   The API allows you to perform a variety of management tasks such as spinning up additional servers, adding volumes, adjusting networking, and so forth. It is designed to allow users to leverage the same power and flexibility found within the DCD visual tool. Both tools are consistent with their concepts and lend well to making the experience smooth and intuitive.
+ * IONOS Enterprise-grade Infrastructure as a Service (IaaS) solutions can be managed through the Cloud API, in addition or as an alternative to the \"Data Center Designer\" (DCD) browser-based tool.    Both methods employ consistent concepts and features, deliver similar power and flexibility, and can be used to perform a multitude of management tasks, including adding servers, volumes, configuring networks, and so on.
  *
  * API version: 6.0-SDK.3
  */
@@ -17,7 +17,7 @@ import (
 
 // DatacenterElementMetadata struct for DatacenterElementMetadata
 type DatacenterElementMetadata struct {
-	// Resource's Entity Tag as defined in http://www.w3.org/Protocols/rfc2616/rfc2616-sec3.html#sec3.11 . Entity Tag is also added as an 'ETag response header to requests which don't use 'depth' parameter. 
+	// Resource's Entity Tag as defined in http://www.w3.org/Protocols/rfc2616/rfc2616-sec3.html#sec3.11 . Entity Tag is also added as an 'ETag response header to requests which don't use 'depth' parameter.
 	Etag *string `json:"etag,omitempty"`
 	// The last time the resource was created
 	CreatedDate *IonosTime
@@ -35,15 +35,12 @@ type DatacenterElementMetadata struct {
 	State *string `json:"state,omitempty"`
 }
 
-
-
 // GetEtag returns the Etag field value
 // If the value is explicit nil, the zero value for string will be returned
 func (o *DatacenterElementMetadata) GetEtag() *string {
 	if o == nil {
 		return nil
 	}
-
 
 	return o.Etag
 
@@ -57,13 +54,11 @@ func (o *DatacenterElementMetadata) GetEtagOk() (*string, bool) {
 		return nil, false
 	}
 
-
 	return o.Etag, true
 }
 
 // SetEtag sets field value
 func (o *DatacenterElementMetadata) SetEtag(v string) {
-
 
 	o.Etag = &v
 
@@ -78,8 +73,6 @@ func (o *DatacenterElementMetadata) HasEtag() bool {
 	return false
 }
 
-
-
 // GetCreatedDate returns the CreatedDate field value
 // If the value is explicit nil, the zero value for time.Time will be returned
 func (o *DatacenterElementMetadata) GetCreatedDate() *time.Time {
@@ -91,7 +84,6 @@ func (o *DatacenterElementMetadata) GetCreatedDate() *time.Time {
 		return nil
 	}
 	return &o.CreatedDate.Time
-
 
 }
 
@@ -115,7 +107,6 @@ func (o *DatacenterElementMetadata) SetCreatedDate(v time.Time) {
 
 	o.CreatedDate = &IonosTime{v}
 
-
 }
 
 // HasCreatedDate returns a boolean if a field has been set.
@@ -127,15 +118,12 @@ func (o *DatacenterElementMetadata) HasCreatedDate() bool {
 	return false
 }
 
-
-
 // GetCreatedBy returns the CreatedBy field value
 // If the value is explicit nil, the zero value for string will be returned
 func (o *DatacenterElementMetadata) GetCreatedBy() *string {
 	if o == nil {
 		return nil
 	}
-
 
 	return o.CreatedBy
 
@@ -149,13 +137,11 @@ func (o *DatacenterElementMetadata) GetCreatedByOk() (*string, bool) {
 		return nil, false
 	}
 
-
 	return o.CreatedBy, true
 }
 
 // SetCreatedBy sets field value
 func (o *DatacenterElementMetadata) SetCreatedBy(v string) {
-
 
 	o.CreatedBy = &v
 
@@ -170,15 +156,12 @@ func (o *DatacenterElementMetadata) HasCreatedBy() bool {
 	return false
 }
 
-
-
 // GetCreatedByUserId returns the CreatedByUserId field value
 // If the value is explicit nil, the zero value for string will be returned
 func (o *DatacenterElementMetadata) GetCreatedByUserId() *string {
 	if o == nil {
 		return nil
 	}
-
 
 	return o.CreatedByUserId
 
@@ -192,13 +175,11 @@ func (o *DatacenterElementMetadata) GetCreatedByUserIdOk() (*string, bool) {
 		return nil, false
 	}
 
-
 	return o.CreatedByUserId, true
 }
 
 // SetCreatedByUserId sets field value
 func (o *DatacenterElementMetadata) SetCreatedByUserId(v string) {
-
 
 	o.CreatedByUserId = &v
 
@@ -213,8 +194,6 @@ func (o *DatacenterElementMetadata) HasCreatedByUserId() bool {
 	return false
 }
 
-
-
 // GetLastModifiedDate returns the LastModifiedDate field value
 // If the value is explicit nil, the zero value for time.Time will be returned
 func (o *DatacenterElementMetadata) GetLastModifiedDate() *time.Time {
@@ -226,7 +205,6 @@ func (o *DatacenterElementMetadata) GetLastModifiedDate() *time.Time {
 		return nil
 	}
 	return &o.LastModifiedDate.Time
-
 
 }
 
@@ -250,7 +228,6 @@ func (o *DatacenterElementMetadata) SetLastModifiedDate(v time.Time) {
 
 	o.LastModifiedDate = &IonosTime{v}
 
-
 }
 
 // HasLastModifiedDate returns a boolean if a field has been set.
@@ -262,15 +239,12 @@ func (o *DatacenterElementMetadata) HasLastModifiedDate() bool {
 	return false
 }
 
-
-
 // GetLastModifiedBy returns the LastModifiedBy field value
 // If the value is explicit nil, the zero value for string will be returned
 func (o *DatacenterElementMetadata) GetLastModifiedBy() *string {
 	if o == nil {
 		return nil
 	}
-
 
 	return o.LastModifiedBy
 
@@ -284,13 +258,11 @@ func (o *DatacenterElementMetadata) GetLastModifiedByOk() (*string, bool) {
 		return nil, false
 	}
 
-
 	return o.LastModifiedBy, true
 }
 
 // SetLastModifiedBy sets field value
 func (o *DatacenterElementMetadata) SetLastModifiedBy(v string) {
-
 
 	o.LastModifiedBy = &v
 
@@ -305,15 +277,12 @@ func (o *DatacenterElementMetadata) HasLastModifiedBy() bool {
 	return false
 }
 
-
-
 // GetLastModifiedByUserId returns the LastModifiedByUserId field value
 // If the value is explicit nil, the zero value for string will be returned
 func (o *DatacenterElementMetadata) GetLastModifiedByUserId() *string {
 	if o == nil {
 		return nil
 	}
-
 
 	return o.LastModifiedByUserId
 
@@ -327,13 +296,11 @@ func (o *DatacenterElementMetadata) GetLastModifiedByUserIdOk() (*string, bool) 
 		return nil, false
 	}
 
-
 	return o.LastModifiedByUserId, true
 }
 
 // SetLastModifiedByUserId sets field value
 func (o *DatacenterElementMetadata) SetLastModifiedByUserId(v string) {
-
 
 	o.LastModifiedByUserId = &v
 
@@ -348,15 +315,12 @@ func (o *DatacenterElementMetadata) HasLastModifiedByUserId() bool {
 	return false
 }
 
-
-
 // GetState returns the State field value
 // If the value is explicit nil, the zero value for string will be returned
 func (o *DatacenterElementMetadata) GetState() *string {
 	if o == nil {
 		return nil
 	}
-
 
 	return o.State
 
@@ -370,13 +334,11 @@ func (o *DatacenterElementMetadata) GetStateOk() (*string, bool) {
 		return nil, false
 	}
 
-
 	return o.State, true
 }
 
 // SetState sets field value
 func (o *DatacenterElementMetadata) SetState(v string) {
-
 
 	o.State = &v
 
@@ -391,49 +353,40 @@ func (o *DatacenterElementMetadata) HasState() bool {
 	return false
 }
 
-
 func (o DatacenterElementMetadata) MarshalJSON() ([]byte, error) {
 	toSerialize := map[string]interface{}{}
 
 	if o.Etag != nil {
 		toSerialize["etag"] = o.Etag
 	}
-	
 
 	if o.CreatedDate != nil {
 		toSerialize["createdDate"] = o.CreatedDate
 	}
-	
 
 	if o.CreatedBy != nil {
 		toSerialize["createdBy"] = o.CreatedBy
 	}
-	
 
 	if o.CreatedByUserId != nil {
 		toSerialize["createdByUserId"] = o.CreatedByUserId
 	}
-	
 
 	if o.LastModifiedDate != nil {
 		toSerialize["lastModifiedDate"] = o.LastModifiedDate
 	}
-	
 
 	if o.LastModifiedBy != nil {
 		toSerialize["lastModifiedBy"] = o.LastModifiedBy
 	}
-	
 
 	if o.LastModifiedByUserId != nil {
 		toSerialize["lastModifiedByUserId"] = o.LastModifiedByUserId
 	}
-	
 
 	if o.State != nil {
 		toSerialize["state"] = o.State
 	}
-	
 	return json.Marshal(toSerialize)
 }
 
@@ -472,5 +425,3 @@ func (v *NullableDatacenterElementMetadata) UnmarshalJSON(src []byte) error {
 	v.isSet = true
 	return json.Unmarshal(src, &v.value)
 }
-
-

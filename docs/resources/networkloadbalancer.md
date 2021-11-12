@@ -31,3 +31,11 @@ resource "ionoscloud_networkloadbalancer" "example" {
 - `target_lan` - (Required)[int] Id of the balanced private target LAN. (outbound)
 - `lb_private_ips` - (Optional)[list] Collection of private IP addresses with subnet mask of the Network Load Balancer. IPs must contain valid subnet mask. If user will not provide any IP then the system will generate one IP with /24 subnet.
 - `datacenter_id` - (Required)[string] A Datacenter's UUID.
+
+## Import
+
+A Network Load Balancer resource can be imported using its `resource id` and the `datacenter id` e.g.
+
+```shell
+terraform import ionoscloud_networkloadbalancer.my_networkloadbalancer {datacenter uuid}/{networkloadbalancer uuid}
+```

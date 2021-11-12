@@ -1,7 +1,7 @@
 /*
  * CLOUD API
  *
- * An enterprise-grade Infrastructure is provided as a Service (IaaS) solution that can be managed through a browser-based \"Data Center Designer\" (DCD) tool or via an easy to use API.   The API allows you to perform a variety of management tasks such as spinning up additional servers, adding volumes, adjusting networking, and so forth. It is designed to allow users to leverage the same power and flexibility found within the DCD visual tool. Both tools are consistent with their concepts and lend well to making the experience smooth and intuitive.
+ * IONOS Enterprise-grade Infrastructure as a Service (IaaS) solutions can be managed through the Cloud API, in addition or as an alternative to the \"Data Center Designer\" (DCD) browser-based tool.    Both methods employ consistent concepts and features, deliver similar power and flexibility, and can be used to perform a multitude of management tasks, including adding servers, volumes, configuring networks, and so on.
  *
  * API version: 6.0-SDK.3
  */
@@ -20,15 +20,12 @@ type Token struct {
 	Token *string `json:"token,omitempty"`
 }
 
-
-
 // GetToken returns the Token field value
 // If the value is explicit nil, the zero value for string will be returned
 func (o *Token) GetToken() *string {
 	if o == nil {
 		return nil
 	}
-
 
 	return o.Token
 
@@ -42,13 +39,11 @@ func (o *Token) GetTokenOk() (*string, bool) {
 		return nil, false
 	}
 
-
 	return o.Token, true
 }
 
 // SetToken sets field value
 func (o *Token) SetToken(v string) {
-
 
 	o.Token = &v
 
@@ -63,14 +58,12 @@ func (o *Token) HasToken() bool {
 	return false
 }
 
-
 func (o Token) MarshalJSON() ([]byte, error) {
 	toSerialize := map[string]interface{}{}
 
 	if o.Token != nil {
 		toSerialize["token"] = o.Token
 	}
-	
 	return json.Marshal(toSerialize)
 }
 
@@ -109,5 +102,3 @@ func (v *NullableToken) UnmarshalJSON(src []byte) error {
 	v.isSet = true
 	return json.Unmarshal(src, &v.value)
 }
-
-

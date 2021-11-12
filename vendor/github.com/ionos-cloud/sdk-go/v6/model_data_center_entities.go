@@ -1,7 +1,7 @@
 /*
  * CLOUD API
  *
- * An enterprise-grade Infrastructure is provided as a Service (IaaS) solution that can be managed through a browser-based \"Data Center Designer\" (DCD) tool or via an easy to use API.   The API allows you to perform a variety of management tasks such as spinning up additional servers, adding volumes, adjusting networking, and so forth. It is designed to allow users to leverage the same power and flexibility found within the DCD visual tool. Both tools are consistent with their concepts and lend well to making the experience smooth and intuitive.
+ * IONOS Enterprise-grade Infrastructure as a Service (IaaS) solutions can be managed through the Cloud API, in addition or as an alternative to the \"Data Center Designer\" (DCD) browser-based tool.    Both methods employ consistent concepts and features, deliver similar power and flexibility, and can be used to perform a multitude of management tasks, including adding servers, volumes, configuring networks, and so on.
  *
  * API version: 6.0-SDK.3
  */
@@ -16,15 +16,13 @@ import (
 
 // DataCenterEntities struct for DataCenterEntities
 type DataCenterEntities struct {
-	Servers *Servers `json:"servers,omitempty"`
-	Volumes *Volumes `json:"volumes,omitempty"`
-	Loadbalancers *Loadbalancers `json:"loadbalancers,omitempty"`
-	Lans *Lans `json:"lans,omitempty"`
+	Servers              *Servers              `json:"servers,omitempty"`
+	Volumes              *Volumes              `json:"volumes,omitempty"`
+	Loadbalancers        *Loadbalancers        `json:"loadbalancers,omitempty"`
+	Lans                 *Lans                 `json:"lans,omitempty"`
 	Networkloadbalancers *NetworkLoadBalancers `json:"networkloadbalancers,omitempty"`
-	Natgateways *NatGateways `json:"natgateways,omitempty"`
+	Natgateways          *NatGateways          `json:"natgateways,omitempty"`
 }
-
-
 
 // GetServers returns the Servers field value
 // If the value is explicit nil, the zero value for Servers will be returned
@@ -32,7 +30,6 @@ func (o *DataCenterEntities) GetServers() *Servers {
 	if o == nil {
 		return nil
 	}
-
 
 	return o.Servers
 
@@ -46,13 +43,11 @@ func (o *DataCenterEntities) GetServersOk() (*Servers, bool) {
 		return nil, false
 	}
 
-
 	return o.Servers, true
 }
 
 // SetServers sets field value
 func (o *DataCenterEntities) SetServers(v Servers) {
-
 
 	o.Servers = &v
 
@@ -67,15 +62,12 @@ func (o *DataCenterEntities) HasServers() bool {
 	return false
 }
 
-
-
 // GetVolumes returns the Volumes field value
 // If the value is explicit nil, the zero value for Volumes will be returned
 func (o *DataCenterEntities) GetVolumes() *Volumes {
 	if o == nil {
 		return nil
 	}
-
 
 	return o.Volumes
 
@@ -89,13 +81,11 @@ func (o *DataCenterEntities) GetVolumesOk() (*Volumes, bool) {
 		return nil, false
 	}
 
-
 	return o.Volumes, true
 }
 
 // SetVolumes sets field value
 func (o *DataCenterEntities) SetVolumes(v Volumes) {
-
 
 	o.Volumes = &v
 
@@ -110,15 +100,12 @@ func (o *DataCenterEntities) HasVolumes() bool {
 	return false
 }
 
-
-
 // GetLoadbalancers returns the Loadbalancers field value
 // If the value is explicit nil, the zero value for Loadbalancers will be returned
 func (o *DataCenterEntities) GetLoadbalancers() *Loadbalancers {
 	if o == nil {
 		return nil
 	}
-
 
 	return o.Loadbalancers
 
@@ -132,13 +119,11 @@ func (o *DataCenterEntities) GetLoadbalancersOk() (*Loadbalancers, bool) {
 		return nil, false
 	}
 
-
 	return o.Loadbalancers, true
 }
 
 // SetLoadbalancers sets field value
 func (o *DataCenterEntities) SetLoadbalancers(v Loadbalancers) {
-
 
 	o.Loadbalancers = &v
 
@@ -153,15 +138,12 @@ func (o *DataCenterEntities) HasLoadbalancers() bool {
 	return false
 }
 
-
-
 // GetLans returns the Lans field value
 // If the value is explicit nil, the zero value for Lans will be returned
 func (o *DataCenterEntities) GetLans() *Lans {
 	if o == nil {
 		return nil
 	}
-
 
 	return o.Lans
 
@@ -175,13 +157,11 @@ func (o *DataCenterEntities) GetLansOk() (*Lans, bool) {
 		return nil, false
 	}
 
-
 	return o.Lans, true
 }
 
 // SetLans sets field value
 func (o *DataCenterEntities) SetLans(v Lans) {
-
 
 	o.Lans = &v
 
@@ -196,15 +176,12 @@ func (o *DataCenterEntities) HasLans() bool {
 	return false
 }
 
-
-
 // GetNetworkloadbalancers returns the Networkloadbalancers field value
 // If the value is explicit nil, the zero value for NetworkLoadBalancers will be returned
 func (o *DataCenterEntities) GetNetworkloadbalancers() *NetworkLoadBalancers {
 	if o == nil {
 		return nil
 	}
-
 
 	return o.Networkloadbalancers
 
@@ -218,13 +195,11 @@ func (o *DataCenterEntities) GetNetworkloadbalancersOk() (*NetworkLoadBalancers,
 		return nil, false
 	}
 
-
 	return o.Networkloadbalancers, true
 }
 
 // SetNetworkloadbalancers sets field value
 func (o *DataCenterEntities) SetNetworkloadbalancers(v NetworkLoadBalancers) {
-
 
 	o.Networkloadbalancers = &v
 
@@ -239,15 +214,12 @@ func (o *DataCenterEntities) HasNetworkloadbalancers() bool {
 	return false
 }
 
-
-
 // GetNatgateways returns the Natgateways field value
 // If the value is explicit nil, the zero value for NatGateways will be returned
 func (o *DataCenterEntities) GetNatgateways() *NatGateways {
 	if o == nil {
 		return nil
 	}
-
 
 	return o.Natgateways
 
@@ -261,13 +233,11 @@ func (o *DataCenterEntities) GetNatgatewaysOk() (*NatGateways, bool) {
 		return nil, false
 	}
 
-
 	return o.Natgateways, true
 }
 
 // SetNatgateways sets field value
 func (o *DataCenterEntities) SetNatgateways(v NatGateways) {
-
 
 	o.Natgateways = &v
 
@@ -282,39 +252,32 @@ func (o *DataCenterEntities) HasNatgateways() bool {
 	return false
 }
 
-
 func (o DataCenterEntities) MarshalJSON() ([]byte, error) {
 	toSerialize := map[string]interface{}{}
 
 	if o.Servers != nil {
 		toSerialize["servers"] = o.Servers
 	}
-	
 
 	if o.Volumes != nil {
 		toSerialize["volumes"] = o.Volumes
 	}
-	
 
 	if o.Loadbalancers != nil {
 		toSerialize["loadbalancers"] = o.Loadbalancers
 	}
-	
 
 	if o.Lans != nil {
 		toSerialize["lans"] = o.Lans
 	}
-	
 
 	if o.Networkloadbalancers != nil {
 		toSerialize["networkloadbalancers"] = o.Networkloadbalancers
 	}
-	
 
 	if o.Natgateways != nil {
 		toSerialize["natgateways"] = o.Natgateways
 	}
-	
 	return json.Marshal(toSerialize)
 }
 
@@ -353,5 +316,3 @@ func (v *NullableDataCenterEntities) UnmarshalJSON(src []byte) error {
 	v.isSet = true
 	return json.Unmarshal(src, &v.value)
 }
-
-

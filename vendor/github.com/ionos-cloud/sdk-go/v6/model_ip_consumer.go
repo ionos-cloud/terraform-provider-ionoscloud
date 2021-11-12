@@ -1,7 +1,7 @@
 /*
  * CLOUD API
  *
- * An enterprise-grade Infrastructure is provided as a Service (IaaS) solution that can be managed through a browser-based \"Data Center Designer\" (DCD) tool or via an easy to use API.   The API allows you to perform a variety of management tasks such as spinning up additional servers, adding volumes, adjusting networking, and so forth. It is designed to allow users to leverage the same power and flexibility found within the DCD visual tool. Both tools are consistent with their concepts and lend well to making the experience smooth and intuitive.
+ * IONOS Enterprise-grade Infrastructure as a Service (IaaS) solutions can be managed through the Cloud API, in addition or as an alternative to the \"Data Center Designer\" (DCD) browser-based tool.    Both methods employ consistent concepts and features, deliver similar power and flexibility, and can be used to perform a multitude of management tasks, including adding servers, volumes, configuring networks, and so on.
  *
  * API version: 6.0-SDK.3
  */
@@ -16,18 +16,16 @@ import (
 
 // IpConsumer struct for IpConsumer
 type IpConsumer struct {
-	Ip *string `json:"ip,omitempty"`
-	Mac *string `json:"mac,omitempty"`
-	NicId *string `json:"nicId,omitempty"`
-	ServerId *string `json:"serverId,omitempty"`
-	ServerName *string `json:"serverName,omitempty"`
-	DatacenterId *string `json:"datacenterId,omitempty"`
-	DatacenterName *string `json:"datacenterName,omitempty"`
+	Ip              *string `json:"ip,omitempty"`
+	Mac             *string `json:"mac,omitempty"`
+	NicId           *string `json:"nicId,omitempty"`
+	ServerId        *string `json:"serverId,omitempty"`
+	ServerName      *string `json:"serverName,omitempty"`
+	DatacenterId    *string `json:"datacenterId,omitempty"`
+	DatacenterName  *string `json:"datacenterName,omitempty"`
 	K8sNodePoolUuid *string `json:"k8sNodePoolUuid,omitempty"`
-	K8sClusterUuid *string `json:"k8sClusterUuid,omitempty"`
+	K8sClusterUuid  *string `json:"k8sClusterUuid,omitempty"`
 }
-
-
 
 // GetIp returns the Ip field value
 // If the value is explicit nil, the zero value for string will be returned
@@ -35,7 +33,6 @@ func (o *IpConsumer) GetIp() *string {
 	if o == nil {
 		return nil
 	}
-
 
 	return o.Ip
 
@@ -49,13 +46,11 @@ func (o *IpConsumer) GetIpOk() (*string, bool) {
 		return nil, false
 	}
 
-
 	return o.Ip, true
 }
 
 // SetIp sets field value
 func (o *IpConsumer) SetIp(v string) {
-
 
 	o.Ip = &v
 
@@ -70,15 +65,12 @@ func (o *IpConsumer) HasIp() bool {
 	return false
 }
 
-
-
 // GetMac returns the Mac field value
 // If the value is explicit nil, the zero value for string will be returned
 func (o *IpConsumer) GetMac() *string {
 	if o == nil {
 		return nil
 	}
-
 
 	return o.Mac
 
@@ -92,13 +84,11 @@ func (o *IpConsumer) GetMacOk() (*string, bool) {
 		return nil, false
 	}
 
-
 	return o.Mac, true
 }
 
 // SetMac sets field value
 func (o *IpConsumer) SetMac(v string) {
-
 
 	o.Mac = &v
 
@@ -113,15 +103,12 @@ func (o *IpConsumer) HasMac() bool {
 	return false
 }
 
-
-
 // GetNicId returns the NicId field value
 // If the value is explicit nil, the zero value for string will be returned
 func (o *IpConsumer) GetNicId() *string {
 	if o == nil {
 		return nil
 	}
-
 
 	return o.NicId
 
@@ -135,13 +122,11 @@ func (o *IpConsumer) GetNicIdOk() (*string, bool) {
 		return nil, false
 	}
 
-
 	return o.NicId, true
 }
 
 // SetNicId sets field value
 func (o *IpConsumer) SetNicId(v string) {
-
 
 	o.NicId = &v
 
@@ -156,15 +141,12 @@ func (o *IpConsumer) HasNicId() bool {
 	return false
 }
 
-
-
 // GetServerId returns the ServerId field value
 // If the value is explicit nil, the zero value for string will be returned
 func (o *IpConsumer) GetServerId() *string {
 	if o == nil {
 		return nil
 	}
-
 
 	return o.ServerId
 
@@ -178,13 +160,11 @@ func (o *IpConsumer) GetServerIdOk() (*string, bool) {
 		return nil, false
 	}
 
-
 	return o.ServerId, true
 }
 
 // SetServerId sets field value
 func (o *IpConsumer) SetServerId(v string) {
-
 
 	o.ServerId = &v
 
@@ -199,15 +179,12 @@ func (o *IpConsumer) HasServerId() bool {
 	return false
 }
 
-
-
 // GetServerName returns the ServerName field value
 // If the value is explicit nil, the zero value for string will be returned
 func (o *IpConsumer) GetServerName() *string {
 	if o == nil {
 		return nil
 	}
-
 
 	return o.ServerName
 
@@ -221,13 +198,11 @@ func (o *IpConsumer) GetServerNameOk() (*string, bool) {
 		return nil, false
 	}
 
-
 	return o.ServerName, true
 }
 
 // SetServerName sets field value
 func (o *IpConsumer) SetServerName(v string) {
-
 
 	o.ServerName = &v
 
@@ -242,15 +217,12 @@ func (o *IpConsumer) HasServerName() bool {
 	return false
 }
 
-
-
 // GetDatacenterId returns the DatacenterId field value
 // If the value is explicit nil, the zero value for string will be returned
 func (o *IpConsumer) GetDatacenterId() *string {
 	if o == nil {
 		return nil
 	}
-
 
 	return o.DatacenterId
 
@@ -264,13 +236,11 @@ func (o *IpConsumer) GetDatacenterIdOk() (*string, bool) {
 		return nil, false
 	}
 
-
 	return o.DatacenterId, true
 }
 
 // SetDatacenterId sets field value
 func (o *IpConsumer) SetDatacenterId(v string) {
-
 
 	o.DatacenterId = &v
 
@@ -285,15 +255,12 @@ func (o *IpConsumer) HasDatacenterId() bool {
 	return false
 }
 
-
-
 // GetDatacenterName returns the DatacenterName field value
 // If the value is explicit nil, the zero value for string will be returned
 func (o *IpConsumer) GetDatacenterName() *string {
 	if o == nil {
 		return nil
 	}
-
 
 	return o.DatacenterName
 
@@ -307,13 +274,11 @@ func (o *IpConsumer) GetDatacenterNameOk() (*string, bool) {
 		return nil, false
 	}
 
-
 	return o.DatacenterName, true
 }
 
 // SetDatacenterName sets field value
 func (o *IpConsumer) SetDatacenterName(v string) {
-
 
 	o.DatacenterName = &v
 
@@ -328,15 +293,12 @@ func (o *IpConsumer) HasDatacenterName() bool {
 	return false
 }
 
-
-
 // GetK8sNodePoolUuid returns the K8sNodePoolUuid field value
 // If the value is explicit nil, the zero value for string will be returned
 func (o *IpConsumer) GetK8sNodePoolUuid() *string {
 	if o == nil {
 		return nil
 	}
-
 
 	return o.K8sNodePoolUuid
 
@@ -350,13 +312,11 @@ func (o *IpConsumer) GetK8sNodePoolUuidOk() (*string, bool) {
 		return nil, false
 	}
 
-
 	return o.K8sNodePoolUuid, true
 }
 
 // SetK8sNodePoolUuid sets field value
 func (o *IpConsumer) SetK8sNodePoolUuid(v string) {
-
 
 	o.K8sNodePoolUuid = &v
 
@@ -371,15 +331,12 @@ func (o *IpConsumer) HasK8sNodePoolUuid() bool {
 	return false
 }
 
-
-
 // GetK8sClusterUuid returns the K8sClusterUuid field value
 // If the value is explicit nil, the zero value for string will be returned
 func (o *IpConsumer) GetK8sClusterUuid() *string {
 	if o == nil {
 		return nil
 	}
-
 
 	return o.K8sClusterUuid
 
@@ -393,13 +350,11 @@ func (o *IpConsumer) GetK8sClusterUuidOk() (*string, bool) {
 		return nil, false
 	}
 
-
 	return o.K8sClusterUuid, true
 }
 
 // SetK8sClusterUuid sets field value
 func (o *IpConsumer) SetK8sClusterUuid(v string) {
-
 
 	o.K8sClusterUuid = &v
 
@@ -414,54 +369,44 @@ func (o *IpConsumer) HasK8sClusterUuid() bool {
 	return false
 }
 
-
 func (o IpConsumer) MarshalJSON() ([]byte, error) {
 	toSerialize := map[string]interface{}{}
 
 	if o.Ip != nil {
 		toSerialize["ip"] = o.Ip
 	}
-	
 
 	if o.Mac != nil {
 		toSerialize["mac"] = o.Mac
 	}
-	
 
 	if o.NicId != nil {
 		toSerialize["nicId"] = o.NicId
 	}
-	
 
 	if o.ServerId != nil {
 		toSerialize["serverId"] = o.ServerId
 	}
-	
 
 	if o.ServerName != nil {
 		toSerialize["serverName"] = o.ServerName
 	}
-	
 
 	if o.DatacenterId != nil {
 		toSerialize["datacenterId"] = o.DatacenterId
 	}
-	
 
 	if o.DatacenterName != nil {
 		toSerialize["datacenterName"] = o.DatacenterName
 	}
-	
 
 	if o.K8sNodePoolUuid != nil {
 		toSerialize["k8sNodePoolUuid"] = o.K8sNodePoolUuid
 	}
-	
 
 	if o.K8sClusterUuid != nil {
 		toSerialize["k8sClusterUuid"] = o.K8sClusterUuid
 	}
-	
 	return json.Marshal(toSerialize)
 }
 
@@ -500,5 +445,3 @@ func (v *NullableIpConsumer) UnmarshalJSON(src []byte) error {
 	v.isSet = true
 	return json.Unmarshal(src, &v.value)
 }
-
-

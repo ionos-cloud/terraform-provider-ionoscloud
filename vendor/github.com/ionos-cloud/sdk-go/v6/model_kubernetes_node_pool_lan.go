@@ -1,7 +1,7 @@
 /*
  * CLOUD API
  *
- * An enterprise-grade Infrastructure is provided as a Service (IaaS) solution that can be managed through a browser-based \"Data Center Designer\" (DCD) tool or via an easy to use API.   The API allows you to perform a variety of management tasks such as spinning up additional servers, adding volumes, adjusting networking, and so forth. It is designed to allow users to leverage the same power and flexibility found within the DCD visual tool. Both tools are consistent with their concepts and lend well to making the experience smooth and intuitive.
+ * IONOS Enterprise-grade Infrastructure as a Service (IaaS) solutions can be managed through the Cloud API, in addition or as an alternative to the \"Data Center Designer\" (DCD) browser-based tool.    Both methods employ consistent concepts and features, deliver similar power and flexibility, and can be used to perform a multitude of management tasks, including adding servers, volumes, configuring networks, and so on.
  *
  * API version: 6.0-SDK.3
  */
@@ -24,15 +24,12 @@ type KubernetesNodePoolLan struct {
 	Routes *[]KubernetesNodePoolLanRoutes `json:"routes,omitempty"`
 }
 
-
-
 // GetId returns the Id field value
 // If the value is explicit nil, the zero value for int32 will be returned
 func (o *KubernetesNodePoolLan) GetId() *int32 {
 	if o == nil {
 		return nil
 	}
-
 
 	return o.Id
 
@@ -46,13 +43,11 @@ func (o *KubernetesNodePoolLan) GetIdOk() (*int32, bool) {
 		return nil, false
 	}
 
-
 	return o.Id, true
 }
 
 // SetId sets field value
 func (o *KubernetesNodePoolLan) SetId(v int32) {
-
 
 	o.Id = &v
 
@@ -67,15 +62,12 @@ func (o *KubernetesNodePoolLan) HasId() bool {
 	return false
 }
 
-
-
 // GetDhcp returns the Dhcp field value
 // If the value is explicit nil, the zero value for bool will be returned
 func (o *KubernetesNodePoolLan) GetDhcp() *bool {
 	if o == nil {
 		return nil
 	}
-
 
 	return o.Dhcp
 
@@ -89,13 +81,11 @@ func (o *KubernetesNodePoolLan) GetDhcpOk() (*bool, bool) {
 		return nil, false
 	}
 
-
 	return o.Dhcp, true
 }
 
 // SetDhcp sets field value
 func (o *KubernetesNodePoolLan) SetDhcp(v bool) {
-
 
 	o.Dhcp = &v
 
@@ -110,15 +100,12 @@ func (o *KubernetesNodePoolLan) HasDhcp() bool {
 	return false
 }
 
-
-
 // GetRoutes returns the Routes field value
 // If the value is explicit nil, the zero value for []KubernetesNodePoolLanRoutes will be returned
 func (o *KubernetesNodePoolLan) GetRoutes() *[]KubernetesNodePoolLanRoutes {
 	if o == nil {
 		return nil
 	}
-
 
 	return o.Routes
 
@@ -132,13 +119,11 @@ func (o *KubernetesNodePoolLan) GetRoutesOk() (*[]KubernetesNodePoolLanRoutes, b
 		return nil, false
 	}
 
-
 	return o.Routes, true
 }
 
 // SetRoutes sets field value
 func (o *KubernetesNodePoolLan) SetRoutes(v []KubernetesNodePoolLanRoutes) {
-
 
 	o.Routes = &v
 
@@ -153,24 +138,20 @@ func (o *KubernetesNodePoolLan) HasRoutes() bool {
 	return false
 }
 
-
 func (o KubernetesNodePoolLan) MarshalJSON() ([]byte, error) {
 	toSerialize := map[string]interface{}{}
 
 	if o.Id != nil {
 		toSerialize["id"] = o.Id
 	}
-	
 
 	if o.Dhcp != nil {
 		toSerialize["dhcp"] = o.Dhcp
 	}
-	
 
 	if o.Routes != nil {
 		toSerialize["routes"] = o.Routes
 	}
-	
 	return json.Marshal(toSerialize)
 }
 
@@ -209,5 +190,3 @@ func (v *NullableKubernetesNodePoolLan) UnmarshalJSON(src []byte) error {
 	v.isSet = true
 	return json.Unmarshal(src, &v.value)
 }
-
-

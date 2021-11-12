@@ -1,7 +1,7 @@
 /*
  * CLOUD API
  *
- * An enterprise-grade Infrastructure is provided as a Service (IaaS) solution that can be managed through a browser-based \"Data Center Designer\" (DCD) tool or via an easy to use API.   The API allows you to perform a variety of management tasks such as spinning up additional servers, adding volumes, adjusting networking, and so forth. It is designed to allow users to leverage the same power and flexibility found within the DCD visual tool. Both tools are consistent with their concepts and lend well to making the experience smooth and intuitive.
+ * IONOS Enterprise-grade Infrastructure as a Service (IaaS) solutions can be managed through the Cloud API, in addition or as an alternative to the \"Data Center Designer\" (DCD) browser-based tool.    Both methods employ consistent concepts and features, deliver similar power and flexibility, and can be used to perform a multitude of management tasks, including adding servers, volumes, configuring networks, and so on.
  *
  * API version: 6.0-SDK.3
  */
@@ -28,15 +28,12 @@ type LabelProperties struct {
 	ResourceHref *string `json:"resourceHref,omitempty"`
 }
 
-
-
 // GetKey returns the Key field value
 // If the value is explicit nil, the zero value for string will be returned
 func (o *LabelProperties) GetKey() *string {
 	if o == nil {
 		return nil
 	}
-
 
 	return o.Key
 
@@ -50,13 +47,11 @@ func (o *LabelProperties) GetKeyOk() (*string, bool) {
 		return nil, false
 	}
 
-
 	return o.Key, true
 }
 
 // SetKey sets field value
 func (o *LabelProperties) SetKey(v string) {
-
 
 	o.Key = &v
 
@@ -71,15 +66,12 @@ func (o *LabelProperties) HasKey() bool {
 	return false
 }
 
-
-
 // GetValue returns the Value field value
 // If the value is explicit nil, the zero value for string will be returned
 func (o *LabelProperties) GetValue() *string {
 	if o == nil {
 		return nil
 	}
-
 
 	return o.Value
 
@@ -93,13 +85,11 @@ func (o *LabelProperties) GetValueOk() (*string, bool) {
 		return nil, false
 	}
 
-
 	return o.Value, true
 }
 
 // SetValue sets field value
 func (o *LabelProperties) SetValue(v string) {
-
 
 	o.Value = &v
 
@@ -114,15 +104,12 @@ func (o *LabelProperties) HasValue() bool {
 	return false
 }
 
-
-
 // GetResourceId returns the ResourceId field value
 // If the value is explicit nil, the zero value for string will be returned
 func (o *LabelProperties) GetResourceId() *string {
 	if o == nil {
 		return nil
 	}
-
 
 	return o.ResourceId
 
@@ -136,13 +123,11 @@ func (o *LabelProperties) GetResourceIdOk() (*string, bool) {
 		return nil, false
 	}
 
-
 	return o.ResourceId, true
 }
 
 // SetResourceId sets field value
 func (o *LabelProperties) SetResourceId(v string) {
-
 
 	o.ResourceId = &v
 
@@ -157,15 +142,12 @@ func (o *LabelProperties) HasResourceId() bool {
 	return false
 }
 
-
-
 // GetResourceType returns the ResourceType field value
 // If the value is explicit nil, the zero value for string will be returned
 func (o *LabelProperties) GetResourceType() *string {
 	if o == nil {
 		return nil
 	}
-
 
 	return o.ResourceType
 
@@ -179,13 +161,11 @@ func (o *LabelProperties) GetResourceTypeOk() (*string, bool) {
 		return nil, false
 	}
 
-
 	return o.ResourceType, true
 }
 
 // SetResourceType sets field value
 func (o *LabelProperties) SetResourceType(v string) {
-
 
 	o.ResourceType = &v
 
@@ -200,15 +180,12 @@ func (o *LabelProperties) HasResourceType() bool {
 	return false
 }
 
-
-
 // GetResourceHref returns the ResourceHref field value
 // If the value is explicit nil, the zero value for string will be returned
 func (o *LabelProperties) GetResourceHref() *string {
 	if o == nil {
 		return nil
 	}
-
 
 	return o.ResourceHref
 
@@ -222,13 +199,11 @@ func (o *LabelProperties) GetResourceHrefOk() (*string, bool) {
 		return nil, false
 	}
 
-
 	return o.ResourceHref, true
 }
 
 // SetResourceHref sets field value
 func (o *LabelProperties) SetResourceHref(v string) {
-
 
 	o.ResourceHref = &v
 
@@ -243,34 +218,28 @@ func (o *LabelProperties) HasResourceHref() bool {
 	return false
 }
 
-
 func (o LabelProperties) MarshalJSON() ([]byte, error) {
 	toSerialize := map[string]interface{}{}
 
 	if o.Key != nil {
 		toSerialize["key"] = o.Key
 	}
-	
 
 	if o.Value != nil {
 		toSerialize["value"] = o.Value
 	}
-	
 
 	if o.ResourceId != nil {
 		toSerialize["resourceId"] = o.ResourceId
 	}
-	
 
 	if o.ResourceType != nil {
 		toSerialize["resourceType"] = o.ResourceType
 	}
-	
 
 	if o.ResourceHref != nil {
 		toSerialize["resourceHref"] = o.ResourceHref
 	}
-	
 	return json.Marshal(toSerialize)
 }
 
@@ -309,5 +278,3 @@ func (v *NullableLabelProperties) UnmarshalJSON(src []byte) error {
 	v.isSet = true
 	return json.Unmarshal(src, &v.value)
 }
-
-

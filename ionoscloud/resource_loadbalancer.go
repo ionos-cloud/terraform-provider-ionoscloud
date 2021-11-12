@@ -7,6 +7,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 	ionoscloud "github.com/ionos-cloud/sdk-go/v6"
+	"log"
 )
 
 func resourceLoadbalancer() *schema.Resource {
@@ -77,7 +78,8 @@ func resourceLoadbalancerCreate(ctx context.Context, d *schema.ResourceData, met
 
 	dcid := d.Get("datacenter_id").(string)
 
-	resp, apiResp, err := client.LoadBalancersApi.DatacentersLoadbalancersPost(ctx, dcid).Loadbalancer(*lb).Execute()
+	resp, apiResponse, err := client.LoadBalancersApi.DatacentersLoadbalancersPost(ctx, dcid).Loadbalancer(*lb).Execute()
+	logApiRequestTime(apiResponse)
 
 	if err != nil {
 		diags := diag.FromErr(fmt.Errorf("error occured while creating a loadbalancer %s", err))
@@ -87,7 +89,7 @@ func resourceLoadbalancerCreate(ctx context.Context, d *schema.ResourceData, met
 	d.SetId(*resp.Id)
 
 	// Wait, catching any errors
-	_, errState := getStateChangeConf(meta, d, apiResp.Header.Get("Location"), schema.TimeoutCreate).WaitForStateContext(ctx)
+	_, errState := getStateChangeConf(meta, d, apiResponse.Header.Get("Location"), schema.TimeoutCreate).WaitForStateContext(ctx)
 	if errState != nil {
 		if IsRequestFailed(err) {
 			// Request failed, so resource was not created, delete resource from state file
@@ -104,8 +106,9 @@ func resourceLoadbalancerRead(ctx context.Context, d *schema.ResourceData, meta 
 	client := meta.(SdkBundle).CloudApiClient
 
 	lb, apiResponse, err := client.LoadBalancersApi.DatacentersLoadbalancersFindById(ctx, d.Get("datacenter_id").(string), d.Id()).Execute()
+	logApiRequestTime(apiResponse)
 	if err != nil {
-		if apiResponse != nil && apiResponse.StatusCode == 404 {
+		if apiResponse != nil && apiResponse.Response != nil && apiResponse.StatusCode == 404 {
 			d.SetId("")
 			return nil
 		}
@@ -163,7 +166,8 @@ func resourceLoadbalancerUpdate(ctx context.Context, d *schema.ResourceData, met
 	}
 
 	if hasChangeCount > 0 {
-		_, _, err := client.LoadBalancersApi.DatacentersLoadbalancersPatch(ctx, d.Get("datacenter_id").(string), d.Id()).Loadbalancer(*properties).Execute()
+		_, apiResponse, err := client.LoadBalancersApi.DatacentersLoadbalancersPatch(ctx, d.Get("datacenter_id").(string), d.Id()).Loadbalancer(*properties).Execute()
+		logApiRequestTime(apiResponse)
 		if err != nil {
 			diags := diag.FromErr(fmt.Errorf("error while updating loadbalancer %s: %s ", d.Id(), err))
 			return diags
@@ -176,20 +180,21 @@ func resourceLoadbalancerUpdate(ctx context.Context, d *schema.ResourceData, met
 		oldList := oldNicIds.([]interface{})
 
 		for _, o := range oldList {
-			apiresponse, err := client.LoadBalancersApi.DatacentersLoadbalancersBalancednicsDelete(context.TODO(),
+			apiResponse, err := client.LoadBalancersApi.DatacentersLoadbalancersBalancednicsDelete(context.TODO(),
 				d.Get("datacenter_id").(string), d.Id(), o.(string)).Execute()
+			logApiRequestTime(apiResponse)
 			if err != nil {
-				if apiresponse != nil && apiresponse.StatusCode == 404 {
+				if apiResponse != nil && apiResponse.Response != nil && apiResponse.StatusCode == 404 {
 					/* 404 - nic was not found - in case the nic is removed, VDC removes the nic from load balancers
 					that contain it, behind the scenes - therefore our call will yield 404 */
-					fmt.Printf("[WARNING] nic ID %s already removed from load balancer %s\n", o.(string), d.Id())
+					log.Printf("[WARNING] nic ID %s already removed from load balancer %s\n", o.(string), d.Id())
 				} else {
 					diags := diag.FromErr(fmt.Errorf("[load balancer update] an error occured while deleting a balanced nic: %s", err))
 					return diags
 				}
 			} else {
 				// Wait, catching any errors
-				_, errState := getStateChangeConf(meta, d, apiresponse.Header.Get("location"), schema.TimeoutUpdate).WaitForStateContext(ctx)
+				_, errState := getStateChangeConf(meta, d, apiResponse.Header.Get("location"), schema.TimeoutUpdate).WaitForStateContext(ctx)
 				if errState != nil {
 					diags := diag.FromErr(errState)
 					return diags
@@ -202,13 +207,14 @@ func resourceLoadbalancerUpdate(ctx context.Context, d *schema.ResourceData, met
 		for _, o := range newList {
 			id := o.(string)
 			nic := ionoscloud.Nic{Id: &id}
-			_, apiResp, err := client.LoadBalancersApi.DatacentersLoadbalancersBalancednicsPost(ctx, d.Get("datacenter_id").(string), d.Id()).Nic(nic).Execute()
+			_, apiResponse, err := client.LoadBalancersApi.DatacentersLoadbalancersBalancednicsPost(ctx, d.Get("datacenter_id").(string), d.Id()).Nic(nic).Execute()
+			logApiRequestTime(apiResponse)
 			if err != nil {
 				diags := diag.FromErr(fmt.Errorf("[load balancer update] an error occured while creating a balanced nic: %s", err))
 				return diags
 			}
 			// Wait, catching any errors
-			_, errState := getStateChangeConf(meta, d, apiResp.Header.Get("Location"), schema.TimeoutUpdate).WaitForStateContext(ctx)
+			_, errState := getStateChangeConf(meta, d, apiResponse.Header.Get("Location"), schema.TimeoutUpdate).WaitForStateContext(ctx)
 			if errState != nil {
 				diags := diag.FromErr(errState)
 				return diags
@@ -225,7 +231,8 @@ func resourceLoadbalancerDelete(ctx context.Context, d *schema.ResourceData, met
 	client := meta.(SdkBundle).CloudApiClient
 
 	dcid := d.Get("datacenter_id").(string)
-	apiResp, err := client.LoadBalancersApi.DatacentersLoadbalancersDelete(ctx, dcid, d.Id()).Execute()
+	apiResponse, err := client.LoadBalancersApi.DatacentersLoadbalancersDelete(ctx, dcid, d.Id()).Execute()
+	logApiRequestTime(apiResponse)
 
 	if err != nil {
 		diags := diag.FromErr(fmt.Errorf("[load balancer delete] an error occured while deleting a loadbalancer: %s", err))
@@ -233,7 +240,7 @@ func resourceLoadbalancerDelete(ctx context.Context, d *schema.ResourceData, met
 	}
 
 	// Wait, catching any errors
-	_, errState := getStateChangeConf(meta, d, apiResp.Header.Get("Location"), schema.TimeoutDelete).WaitForStateContext(ctx)
+	_, errState := getStateChangeConf(meta, d, apiResponse.Header.Get("Location"), schema.TimeoutDelete).WaitForStateContext(ctx)
 	if errState != nil {
 		diags := diag.FromErr(errState)
 		return diags

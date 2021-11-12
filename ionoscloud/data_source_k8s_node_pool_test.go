@@ -8,7 +8,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 )
 
-func TestAccDataSourceK8sNodePool_matchId(t *testing.T) {
+func TestAccDataSourceK8sNodePool(t *testing.T) {
 	resource.Test(t, resource.TestCase{
 		PreCheck: func() {
 			testAccPreCheck(t)
@@ -16,129 +16,72 @@ func TestAccDataSourceK8sNodePool_matchId(t *testing.T) {
 		ProviderFactories: testAccProviderFactories,
 		Steps: []resource.TestStep{
 			{
-				Config: testAccDataSourceProfitBricksK8sNodePoolCreateResources,
+				Config: testAccCheckK8sNodePoolConfigBasic,
 			},
 			{
 				Config: testAccDataSourceProfitBricksK8sNodePoolMatchId,
 				Check: resource.ComposeTestCheckFunc(
-					resource.TestCheckResourceAttr("data.ionoscloud_k8s_node_pool.test_ds_k8s_node_pool", "name", "test_nodepool"),
-					resource.TestCheckResourceAttr("data.ionoscloud_k8s_node_pool.test_ds_k8s_node_pool", "k8s_version", "1.20.8"),
+					resource.TestCheckResourceAttrPair(DataSourceK8sNodePoolId, "name", ResourceNameK8sNodePool, "name"),
+					resource.TestCheckResourceAttrPair(DataSourceK8sNodePoolId, "k8s_version", ResourceNameK8sNodePool, "k8s_version"),
+					resource.TestCheckResourceAttrPair(DataSourceK8sNodePoolId, "maintenance_window.0.day_of_the_week", ResourceNameK8sNodePool, "maintenance_window.0.day_of_the_week"),
+					resource.TestCheckResourceAttrPair(DataSourceK8sNodePoolId, "maintenance_window.0.time", ResourceNameK8sNodePool, "maintenance_window.0.time"),
+					resource.TestCheckResourceAttrPair(DataSourceK8sNodePoolId, "auto_scaling.0.min_node_count", ResourceNameK8sNodePool, "auto_scaling.0.min_node_count"),
+					resource.TestCheckResourceAttrPair(DataSourceK8sNodePoolId, "auto_scaling.0.max_node_count", ResourceNameK8sNodePool, "auto_scaling.0.max_node_count"),
+					resource.TestCheckResourceAttrPair(DataSourceK8sNodePoolId, "cpu_family", ResourceNameK8sNodePool, "cpu_family"),
+					resource.TestCheckResourceAttrPair(DataSourceK8sNodePoolId, "availability_zone", ResourceNameK8sNodePool, "availability_zone"),
+					resource.TestCheckResourceAttrPair(DataSourceK8sNodePoolId, "storage_type", ResourceNameK8sNodePool, "storage_type"),
+					resource.TestCheckResourceAttrPair(DataSourceK8sNodePoolId, "node_count", ResourceNameK8sNodePool, "node_count"),
+					resource.TestCheckResourceAttrPair(DataSourceK8sNodePoolId, "cores_count", ResourceNameK8sNodePool, "cores_count"),
+					resource.TestCheckResourceAttrPair(DataSourceK8sNodePoolId, "ram_size", ResourceNameK8sNodePool, "ram_size"),
+					resource.TestCheckResourceAttrPair(DataSourceK8sNodePoolId, "storage_size", ResourceNameK8sNodePool, "storage_size"),
+					resource.TestCheckResourceAttrPair(DataSourceK8sNodePoolId, "public_ips.0", ResourceNameK8sNodePool, "public_ips.0"),
+					resource.TestCheckResourceAttrPair(DataSourceK8sNodePoolId, "public_ips.1", ResourceNameK8sNodePool, "public_ips.1"),
+					resource.TestCheckResourceAttrPair(DataSourceK8sNodePoolId, "lans.0", ResourceNameK8sNodePool, "lans.0"),
+					resource.TestCheckResourceAttrPair(DataSourceK8sNodePoolId, "labels.foo", ResourceNameK8sNodePool, "labels.foo"),
+					resource.TestCheckResourceAttrPair(DataSourceK8sNodePoolId, "labels.color", ResourceNameK8sNodePool, "labels.color"),
+					resource.TestCheckResourceAttrPair(DataSourceK8sNodePoolId, "annotations.ann1", ResourceNameK8sNodePool, "annotations.ann1"),
+					resource.TestCheckResourceAttrPair(DataSourceK8sNodePoolId, "annotations.ann2", ResourceNameK8sNodePool, "annotations.ann2"),
 				),
-			},
-		},
-	})
-}
-
-func TestAccDataSourceK8sNodePool_matchName(t *testing.T) {
-	resource.Test(t, resource.TestCase{
-		PreCheck: func() {
-			testAccPreCheck(t)
-		},
-		ProviderFactories: testAccProviderFactories,
-		Steps: []resource.TestStep{
-			{
-				Config: testAccDataSourceProfitBricksK8sNodePoolCreateResources,
 			},
 			{
 				Config: testAccDataSourceProfitBricksK8sNodePoolMatchName,
 				Check: resource.ComposeTestCheckFunc(
-					resource.TestCheckResourceAttr("data.ionoscloud_k8s_node_pool.test_ds_k8s_node_pool", "name", "test_nodepool"),
-					resource.TestCheckResourceAttr("data.ionoscloud_k8s_node_pool.test_ds_k8s_node_pool", "k8s_version", "1.20.8"),
-					resource.TestCheckResourceAttrSet("data.ionoscloud_k8s_node_pool.test_ds_k8s_node_pool", "id"),
+					resource.TestCheckResourceAttrPair(DataSourceK8sNodePoolName, "name", ResourceNameK8sNodePool, "name"),
+					resource.TestCheckResourceAttrPair(DataSourceK8sNodePoolName, "k8s_version", ResourceNameK8sNodePool, "k8s_version"),
+					resource.TestCheckResourceAttrPair(DataSourceK8sNodePoolName, "maintenance_window.0.day_of_the_week", ResourceNameK8sNodePool, "maintenance_window.0.day_of_the_week"),
+					resource.TestCheckResourceAttrPair(DataSourceK8sNodePoolName, "maintenance_window.0.time", ResourceNameK8sNodePool, "maintenance_window.0.time"),
+					resource.TestCheckResourceAttrPair(DataSourceK8sNodePoolName, "auto_scaling.0.min_node_count", ResourceNameK8sNodePool, "auto_scaling.0.min_node_count"),
+					resource.TestCheckResourceAttrPair(DataSourceK8sNodePoolName, "auto_scaling.0.max_node_count", ResourceNameK8sNodePool, "auto_scaling.0.max_node_count"),
+					resource.TestCheckResourceAttrPair(DataSourceK8sNodePoolName, "cpu_family", ResourceNameK8sNodePool, "cpu_family"),
+					resource.TestCheckResourceAttrPair(DataSourceK8sNodePoolName, "availability_zone", ResourceNameK8sNodePool, "availability_zone"),
+					resource.TestCheckResourceAttrPair(DataSourceK8sNodePoolName, "storage_type", ResourceNameK8sNodePool, "storage_type"),
+					resource.TestCheckResourceAttrPair(DataSourceK8sNodePoolName, "node_count", ResourceNameK8sNodePool, "node_count"),
+					resource.TestCheckResourceAttrPair(DataSourceK8sNodePoolName, "cores_count", ResourceNameK8sNodePool, "cores_count"),
+					resource.TestCheckResourceAttrPair(DataSourceK8sNodePoolName, "ram_size", ResourceNameK8sNodePool, "ram_size"),
+					resource.TestCheckResourceAttrPair(DataSourceK8sNodePoolName, "storage_size", ResourceNameK8sNodePool, "storage_size"),
+					resource.TestCheckResourceAttrPair(DataSourceK8sNodePoolName, "public_ips.0", ResourceNameK8sNodePool, "public_ips.0"),
+					resource.TestCheckResourceAttrPair(DataSourceK8sNodePoolName, "public_ips.1", ResourceNameK8sNodePool, "public_ips.1"),
+					resource.TestCheckResourceAttrPair(DataSourceK8sNodePoolName, "lans.0", ResourceNameK8sNodePool, "lans.0"),
+					resource.TestCheckResourceAttrPair(DataSourceK8sNodePoolName, "labels.foo", ResourceNameK8sNodePool, "labels.foo"),
+					resource.TestCheckResourceAttrPair(DataSourceK8sNodePoolName, "labels.color", ResourceNameK8sNodePool, "labels.color"),
+					resource.TestCheckResourceAttrPair(DataSourceK8sNodePoolName, "annotations.ann1", ResourceNameK8sNodePool, "annotations.ann1"),
+					resource.TestCheckResourceAttrPair(DataSourceK8sNodePoolName, "annotations.ann2", ResourceNameK8sNodePool, "annotations.ann2"),
 				),
 			},
 		},
 	})
-
 }
 
-const testAccDataSourceProfitBricksK8sNodePoolCreateResources = `
-resource "ionoscloud_datacenter" "test_ds_k8s_datacenter" {
-	name              = "test_datacenter"
-	location          = "us/las"
-	description       = "test datacenter"
-}
-
-resource "ionoscloud_k8s_cluster" "test_ds_k8s_cluster" {
-	name              = "test_cluster"
-}
-
-resource "ionoscloud_k8s_node_pool" "test_ds_k8s_node_pool" {
-	depends_on 				= [ionoscloud_datacenter.test_ds_k8s_datacenter, ionoscloud_k8s_cluster.test_ds_k8s_cluster]
-	name					= "test_nodepool"
-	datacenter_id			= ionoscloud_datacenter.test_ds_k8s_datacenter.id
-	k8s_cluster_id			= ionoscloud_k8s_cluster.test_ds_k8s_cluster.id
-	node_count				= 1
-	cpu_family				= "AMD_OPTERON"
-	cores_count				= 1
-	ram_size				= 2048
-	availability_zone 		= "AUTO"
-	storage_type			= "HDD"
-	storage_size			= 15
-	k8s_version				= "1.20.8"
+const testAccDataSourceProfitBricksK8sNodePoolMatchId = testAccCheckK8sNodePoolConfigBasic + `
+data ` + K8sNodePoolResource + ` ` + K8sNodePoolDataSourceById + ` {
+	k8s_cluster_id  = ` + K8sClusterResource + `.terraform_acctest.id
+	id				= ` + K8sNodePoolResource + `.` + K8sNodePoolTestResource + `.id
 }
 `
 
-const testAccDataSourceProfitBricksK8sNodePoolMatchId = `
-resource "ionoscloud_datacenter" "test_ds_k8s_datacenter" {
-  name              = "test_datacenter"
-  location          = "us/las"
-  description       = "test datacenter"
-}
-
-resource "ionoscloud_k8s_cluster" "test_ds_k8s_cluster" {
-  name              = "test_cluster"
-}
-
-resource "ionoscloud_k8s_node_pool" "test_ds_k8s_node_pool" {
-	depends_on 				= [ionoscloud_datacenter.test_ds_k8s_datacenter, ionoscloud_k8s_cluster.test_ds_k8s_cluster]
-  name							= "test_nodepool"
-	datacenter_id			= ionoscloud_datacenter.test_ds_k8s_datacenter.id
-	k8s_cluster_id		= ionoscloud_k8s_cluster.test_ds_k8s_cluster.id
-	node_count				= 1
-	cpu_family				= "AMD_OPTERON"
-	cores_count				= 1
-	ram_size					= 2048
-	availability_zone = "AUTO"
-	storage_type			= "HDD"
-	storage_size			= 15
-	k8s_version				= "1.20.8"
-}
-
-data "ionoscloud_k8s_node_pool" "test_ds_k8s_node_pool" {
-	k8s_cluster_id 	= ionoscloud_k8s_cluster.test_ds_k8s_cluster.id
-	id				= ionoscloud_k8s_node_pool.test_ds_k8s_node_pool.id
-}
-`
-
-const testAccDataSourceProfitBricksK8sNodePoolMatchName = `
-resource "ionoscloud_datacenter" "test_ds_k8s_datacenter" {
-  name              = "test_datacenter"
-  location          = "us/las"
-  description       = "test datacenter"
-}
-
-resource "ionoscloud_k8s_cluster" "test_ds_k8s_cluster" {
-  name              = "test_cluster"
-}
-
-resource "ionoscloud_k8s_node_pool" "test_ds_k8s_node_pool" {
-	depends_on 				= [ionoscloud_datacenter.test_ds_k8s_datacenter, ionoscloud_k8s_cluster.test_ds_k8s_cluster]
-  name							= "test_nodepool"
-	datacenter_id			= ionoscloud_datacenter.test_ds_k8s_datacenter.id
-	k8s_cluster_id		= ionoscloud_k8s_cluster.test_ds_k8s_cluster.id
-	node_count				= 1
-	cpu_family				= "AMD_OPTERON"
-	cores_count				= 1
-	ram_size					= 2048
-	availability_zone = "AUTO"
-	storage_type			= "HDD"
-	storage_size			= 15
-	k8s_version				= "1.20.8"
-}
-
-data "ionoscloud_k8s_node_pool" "test_ds_k8s_node_pool" {
-	k8s_cluster_id 	= ionoscloud_k8s_cluster.test_ds_k8s_cluster.id
-	name			= "test_nodepool"
+const testAccDataSourceProfitBricksK8sNodePoolMatchName = testAccCheckK8sNodePoolConfigBasic + `
+data ` + K8sNodePoolResource + ` ` + K8sNodePoolDataSourceByName + ` {
+	k8s_cluster_id 	= ` + K8sClusterResource + `.terraform_acctest.id
+	name			= ` + K8sNodePoolResource + `.` + K8sNodePoolTestResource + `.name
 }
 `

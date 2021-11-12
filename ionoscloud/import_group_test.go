@@ -1,16 +1,13 @@
 package ionoscloud
 
 import (
-	"fmt"
-
 	"testing"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
 )
 
-func TestAccGroup_ImportBasic(t *testing.T) {
-	resourceName := "resource_group"
+func TestAccGroupImportBasic(t *testing.T) {
 
 	resource.Test(t, resource.TestCase{
 		PreCheck:          func() { testAccPreCheck(t) },
@@ -18,14 +15,15 @@ func TestAccGroup_ImportBasic(t *testing.T) {
 		CheckDestroy:      testAccCheckGroupDestroyCheck,
 		Steps: []resource.TestStep{
 			{
-				Config: fmt.Sprintf(testacccheckgroupconfigBasic, resourceName),
+				Config: testAccImportGroupConfigBasic,
 			},
 
 			{
-				ResourceName:      fmt.Sprintf("ionoscloud_group.%s", resourceName),
-				ImportStateIdFunc: testAccGroupImportStateId,
-				ImportState:       true,
-				ImportStateVerify: true,
+				ResourceName:            GroupResource + "." + GroupTestResource,
+				ImportStateIdFunc:       testAccGroupImportStateId,
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"user_id"},
 			},
 		},
 	})
@@ -35,7 +33,7 @@ func testAccGroupImportStateId(s *terraform.State) (string, error) {
 	importID := ""
 
 	for _, rs := range s.RootModule().Resources {
-		if rs.Type != "ionoscloud_group" {
+		if rs.Type != GroupResource {
 			continue
 		}
 
@@ -44,3 +42,29 @@ func testAccGroupImportStateId(s *terraform.State) (string, error) {
 
 	return importID, nil
 }
+
+var testAccImportGroupConfigBasic = `
+resource ` + UserResource + ` ` + UserTestResource + ` {
+  first_name = "user"
+  last_name = "test"
+  email = "` + GenerateEmail() + `"
+  password = "abc123-321CBA"
+  administrator = false
+  force_sec_auth= false
+  active = false
+}
+
+resource ` + GroupResource + ` ` + GroupTestResource + ` {
+  name = "` + GroupTestResource + `"
+  create_datacenter = true
+  create_snapshot = true
+  reserve_ip = true
+  access_activity_log = true
+  create_pcc = true
+  s3_privilege = true
+  create_backup_unit = true
+  create_internet_access = true
+  create_k8s_cluster = true
+  user_id = ` + UserResource + `.` + UserTestResource + `.id
+}
+`

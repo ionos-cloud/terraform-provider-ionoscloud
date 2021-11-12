@@ -1,7 +1,7 @@
 /*
  * CLOUD API
  *
- * An enterprise-grade Infrastructure is provided as a Service (IaaS) solution that can be managed through a browser-based \"Data Center Designer\" (DCD) tool or via an easy to use API.   The API allows you to perform a variety of management tasks such as spinning up additional servers, adding volumes, adjusting networking, and so forth. It is designed to allow users to leverage the same power and flexibility found within the DCD visual tool. Both tools are consistent with their concepts and lend well to making the experience smooth and intuitive.
+ * IONOS Enterprise-grade Infrastructure as a Service (IaaS) solutions can be managed through the Cloud API, in addition or as an alternative to the \"Data Center Designer\" (DCD) browser-based tool.    Both methods employ consistent concepts and features, deliver similar power and flexibility, and can be used to perform a multitude of management tasks, including adding servers, volumes, configuring networks, and so on.
  *
  * API version: 6.0-SDK.3
  */
@@ -28,12 +28,12 @@ var (
 type LansApiService service
 
 type ApiDatacentersLansDeleteRequest struct {
-	ctx _context.Context
-	ApiService *LansApiService
-	datacenterId string
-	lanId string
-	pretty *bool
-	depth *int32
+	ctx             _context.Context
+	ApiService      *LansApiService
+	datacenterId    string
+	lanId           string
+	pretty          *bool
+	depth           *int32
 	xContractNumber *int32
 }
 
@@ -58,16 +58,16 @@ func (r ApiDatacentersLansDeleteRequest) Execute() (*APIResponse, error) {
  * DatacentersLansDelete Delete a Lan.
  * Removes the specific LAN.
  * @param ctx _context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
- * @param datacenterId The unique ID of the datacenter
+ * @param datacenterId The unique ID of the data center.
  * @param lanId The unique ID of the LAN
  * @return ApiDatacentersLansDeleteRequest
  */
 func (a *LansApiService) DatacentersLansDelete(ctx _context.Context, datacenterId string, lanId string) ApiDatacentersLansDeleteRequest {
 	return ApiDatacentersLansDeleteRequest{
-		ApiService: a,
-		ctx: ctx,
+		ApiService:   a,
+		ctx:          ctx,
 		datacenterId: datacenterId,
-		lanId: lanId,
+		lanId:        lanId,
 	}
 }
 
@@ -102,6 +102,7 @@ func (a *LansApiService) DatacentersLansDeleteExecute(r ApiDatacentersLansDelete
 	if r.depth != nil {
 		localVarQueryParams.Add("depth", parameterToString(*r.depth, ""))
 	}
+
 	// to determine the Content-Type header
 	localVarHTTPContentTypes := []string{}
 
@@ -143,12 +144,12 @@ func (a *LansApiService) DatacentersLansDeleteExecute(r ApiDatacentersLansDelete
 
 	localVarHTTPResponse, httpRequestTime, err := a.client.callAPI(req)
 
-	localVarAPIResponse := &APIResponse {
-		Response: localVarHTTPResponse,
-		Method: localVarHTTPMethod,
-		RequestURL: localVarPath,
+	localVarAPIResponse := &APIResponse{
+		Response:    localVarHTTPResponse,
+		Method:      localVarHTTPMethod,
+		RequestURL:  localVarPath,
 		RequestTime: httpRequestTime,
-		Operation: "DatacentersLansDelete",
+		Operation:   "DatacentersLansDelete",
 	}
 
 	if err != nil || localVarHTTPResponse == nil {
@@ -165,16 +166,16 @@ func (a *LansApiService) DatacentersLansDeleteExecute(r ApiDatacentersLansDelete
 	if localVarHTTPResponse.StatusCode >= 300 {
 		newErr := GenericOpenAPIError{
 			statusCode: localVarHTTPResponse.StatusCode,
-			body:  localVarBody,
-			error: fmt.Sprintf("%s: %s", localVarHTTPResponse.Status, string(localVarBody)),
+			body:       localVarBody,
+			error:      fmt.Sprintf(FormatStringErr, localVarHTTPResponse.Status, string(localVarBody)),
 		}
-			var v Error
-			err = a.client.decode(&v, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
-			if err != nil {
-				newErr.error = err.Error()
-				return localVarAPIResponse, newErr
-			}
-			newErr.model = v
+		var v Error
+		err = a.client.decode(&v, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
+		if err != nil {
+			newErr.error = err.Error()
+			return localVarAPIResponse, newErr
+		}
+		newErr.model = v
 		return localVarAPIResponse, newErr
 	}
 
@@ -182,12 +183,12 @@ func (a *LansApiService) DatacentersLansDeleteExecute(r ApiDatacentersLansDelete
 }
 
 type ApiDatacentersLansFindByIdRequest struct {
-	ctx _context.Context
-	ApiService *LansApiService
-	datacenterId string
-	lanId string
-	pretty *bool
-	depth *int32
+	ctx             _context.Context
+	ApiService      *LansApiService
+	datacenterId    string
+	lanId           string
+	pretty          *bool
+	depth           *int32
 	xContractNumber *int32
 }
 
@@ -212,16 +213,16 @@ func (r ApiDatacentersLansFindByIdRequest) Execute() (Lan, *APIResponse, error) 
  * DatacentersLansFindById Retrieve a Lan
  * Retrieves the attributes of a given LAN.
  * @param ctx _context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
- * @param datacenterId The unique ID of the datacenter
+ * @param datacenterId The unique ID of the data center.
  * @param lanId The unique ID of the LAN
  * @return ApiDatacentersLansFindByIdRequest
  */
 func (a *LansApiService) DatacentersLansFindById(ctx _context.Context, datacenterId string, lanId string) ApiDatacentersLansFindByIdRequest {
 	return ApiDatacentersLansFindByIdRequest{
-		ApiService: a,
-		ctx: ctx,
+		ApiService:   a,
+		ctx:          ctx,
 		datacenterId: datacenterId,
-		lanId: lanId,
+		lanId:        lanId,
 	}
 }
 
@@ -258,6 +259,7 @@ func (a *LansApiService) DatacentersLansFindByIdExecute(r ApiDatacentersLansFind
 	if r.depth != nil {
 		localVarQueryParams.Add("depth", parameterToString(*r.depth, ""))
 	}
+
 	// to determine the Content-Type header
 	localVarHTTPContentTypes := []string{}
 
@@ -299,12 +301,12 @@ func (a *LansApiService) DatacentersLansFindByIdExecute(r ApiDatacentersLansFind
 
 	localVarHTTPResponse, httpRequestTime, err := a.client.callAPI(req)
 
-	localVarAPIResponse := &APIResponse {
-		Response: localVarHTTPResponse,
-		Method: localVarHTTPMethod,
-		RequestURL: localVarPath,
+	localVarAPIResponse := &APIResponse{
+		Response:    localVarHTTPResponse,
+		Method:      localVarHTTPMethod,
+		RequestURL:  localVarPath,
 		RequestTime: httpRequestTime,
-		Operation: "DatacentersLansFindById",
+		Operation:   "DatacentersLansFindById",
 	}
 
 	if err != nil || localVarHTTPResponse == nil {
@@ -321,16 +323,16 @@ func (a *LansApiService) DatacentersLansFindByIdExecute(r ApiDatacentersLansFind
 	if localVarHTTPResponse.StatusCode >= 300 {
 		newErr := GenericOpenAPIError{
 			statusCode: localVarHTTPResponse.StatusCode,
-			body:  localVarBody,
-			error: fmt.Sprintf("%s: %s", localVarHTTPResponse.Status, string(localVarBody)),
+			body:       localVarBody,
+			error:      fmt.Sprintf(FormatStringErr, localVarHTTPResponse.Status, string(localVarBody)),
 		}
-			var v Error
-			err = a.client.decode(&v, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
-			if err != nil {
-				newErr.error = err.Error()
-				return localVarReturnValue, localVarAPIResponse, newErr
-			}
-			newErr.model = v
+		var v Error
+		err = a.client.decode(&v, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
+		if err != nil {
+			newErr.error = err.Error()
+			return localVarReturnValue, localVarAPIResponse, newErr
+		}
+		newErr.model = v
 		return localVarReturnValue, localVarAPIResponse, newErr
 	}
 
@@ -338,8 +340,8 @@ func (a *LansApiService) DatacentersLansFindByIdExecute(r ApiDatacentersLansFind
 	if err != nil {
 		newErr := GenericOpenAPIError{
 			statusCode: localVarHTTPResponse.StatusCode,
-			body:  localVarBody,
-			error: err.Error(),
+			body:       localVarBody,
+			error:      err.Error(),
 		}
 		return localVarReturnValue, localVarAPIResponse, newErr
 	}
@@ -348,14 +350,16 @@ func (a *LansApiService) DatacentersLansFindByIdExecute(r ApiDatacentersLansFind
 }
 
 type ApiDatacentersLansGetRequest struct {
-	ctx _context.Context
-	ApiService *LansApiService
-	datacenterId string
-	pretty *bool
-	depth *int32
+	ctx             _context.Context
+	ApiService      *LansApiService
+	filters         _neturl.Values
+	orderBy         *string
+	datacenterId    string
+	pretty          *bool
+	depth           *int32
 	xContractNumber *int32
-	offset *int32
-	limit *int32
+	offset          *int32
+	limit           *int32
 }
 
 func (r ApiDatacentersLansGetRequest) Pretty(pretty bool) ApiDatacentersLansGetRequest {
@@ -379,6 +383,19 @@ func (r ApiDatacentersLansGetRequest) Limit(limit int32) ApiDatacentersLansGetRe
 	return r
 }
 
+// Filters query parameters limit results to those containing a matching value for a specific property.
+func (r ApiDatacentersLansGetRequest) Filter(key string, value string) ApiDatacentersLansGetRequest {
+	filterKey := fmt.Sprintf(FilterQueryParam, key)
+	r.filters[filterKey] = []string{value}
+	return r
+}
+
+// OrderBy query param sorts the results alphanumerically in ascending order based on the specified property.
+func (r ApiDatacentersLansGetRequest) OrderBy(orderBy string) ApiDatacentersLansGetRequest {
+	r.orderBy = &orderBy
+	return r
+}
+
 func (r ApiDatacentersLansGetRequest) Execute() (Lans, *APIResponse, error) {
 	return r.ApiService.DatacentersLansGetExecute(r)
 }
@@ -387,14 +404,15 @@ func (r ApiDatacentersLansGetRequest) Execute() (Lans, *APIResponse, error) {
  * DatacentersLansGet List Lans
  * Retrieve a list of LANs within the datacenter.
  * @param ctx _context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
- * @param datacenterId The unique ID of the datacenter
+ * @param datacenterId The unique ID of the data center.
  * @return ApiDatacentersLansGetRequest
  */
 func (a *LansApiService) DatacentersLansGet(ctx _context.Context, datacenterId string) ApiDatacentersLansGetRequest {
 	return ApiDatacentersLansGetRequest{
-		ApiService: a,
-		ctx: ctx,
+		ApiService:   a,
+		ctx:          ctx,
 		datacenterId: datacenterId,
+		filters:      _neturl.Values{},
 	}
 }
 
@@ -436,6 +454,17 @@ func (a *LansApiService) DatacentersLansGetExecute(r ApiDatacentersLansGetReques
 	if r.limit != nil {
 		localVarQueryParams.Add("limit", parameterToString(*r.limit, ""))
 	}
+	if r.orderBy != nil {
+		localVarQueryParams.Add("orderBy", parameterToString(*r.orderBy, ""))
+	}
+	if len(r.filters) > 0 {
+		for k, v := range r.filters {
+			for _, iv := range v {
+				localVarQueryParams.Add(k, iv)
+			}
+		}
+	}
+
 	// to determine the Content-Type header
 	localVarHTTPContentTypes := []string{}
 
@@ -477,12 +506,12 @@ func (a *LansApiService) DatacentersLansGetExecute(r ApiDatacentersLansGetReques
 
 	localVarHTTPResponse, httpRequestTime, err := a.client.callAPI(req)
 
-	localVarAPIResponse := &APIResponse {
-		Response: localVarHTTPResponse,
-		Method: localVarHTTPMethod,
-		RequestURL: localVarPath,
+	localVarAPIResponse := &APIResponse{
+		Response:    localVarHTTPResponse,
+		Method:      localVarHTTPMethod,
+		RequestURL:  localVarPath,
 		RequestTime: httpRequestTime,
-		Operation: "DatacentersLansGet",
+		Operation:   "DatacentersLansGet",
 	}
 
 	if err != nil || localVarHTTPResponse == nil {
@@ -499,16 +528,16 @@ func (a *LansApiService) DatacentersLansGetExecute(r ApiDatacentersLansGetReques
 	if localVarHTTPResponse.StatusCode >= 300 {
 		newErr := GenericOpenAPIError{
 			statusCode: localVarHTTPResponse.StatusCode,
-			body:  localVarBody,
-			error: fmt.Sprintf("%s: %s", localVarHTTPResponse.Status, string(localVarBody)),
+			body:       localVarBody,
+			error:      fmt.Sprintf(FormatStringErr, localVarHTTPResponse.Status, string(localVarBody)),
 		}
-			var v Error
-			err = a.client.decode(&v, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
-			if err != nil {
-				newErr.error = err.Error()
-				return localVarReturnValue, localVarAPIResponse, newErr
-			}
-			newErr.model = v
+		var v Error
+		err = a.client.decode(&v, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
+		if err != nil {
+			newErr.error = err.Error()
+			return localVarReturnValue, localVarAPIResponse, newErr
+		}
+		newErr.model = v
 		return localVarReturnValue, localVarAPIResponse, newErr
 	}
 
@@ -516,8 +545,8 @@ func (a *LansApiService) DatacentersLansGetExecute(r ApiDatacentersLansGetReques
 	if err != nil {
 		newErr := GenericOpenAPIError{
 			statusCode: localVarHTTPResponse.StatusCode,
-			body:  localVarBody,
-			error: err.Error(),
+			body:       localVarBody,
+			error:      err.Error(),
 		}
 		return localVarReturnValue, localVarAPIResponse, newErr
 	}
@@ -526,13 +555,13 @@ func (a *LansApiService) DatacentersLansGetExecute(r ApiDatacentersLansGetReques
 }
 
 type ApiDatacentersLansNicsFindByIdRequest struct {
-	ctx _context.Context
-	ApiService *LansApiService
-	datacenterId string
-	lanId string
-	nicId string
-	pretty *bool
-	depth *int32
+	ctx             _context.Context
+	ApiService      *LansApiService
+	datacenterId    string
+	lanId           string
+	nicId           string
+	pretty          *bool
+	depth           *int32
 	xContractNumber *int32
 }
 
@@ -557,18 +586,18 @@ func (r ApiDatacentersLansNicsFindByIdRequest) Execute() (Nic, *APIResponse, err
  * DatacentersLansNicsFindById Retrieve a nic attached to lan
  * This will retrieve the properties of an attached network interface.
  * @param ctx _context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
- * @param datacenterId The unique ID of the datacenter
+ * @param datacenterId The unique ID of the data center.
  * @param lanId The unique ID of the LAN
  * @param nicId The unique ID of the NIC
  * @return ApiDatacentersLansNicsFindByIdRequest
  */
 func (a *LansApiService) DatacentersLansNicsFindById(ctx _context.Context, datacenterId string, lanId string, nicId string) ApiDatacentersLansNicsFindByIdRequest {
 	return ApiDatacentersLansNicsFindByIdRequest{
-		ApiService: a,
-		ctx: ctx,
+		ApiService:   a,
+		ctx:          ctx,
 		datacenterId: datacenterId,
-		lanId: lanId,
-		nicId: nicId,
+		lanId:        lanId,
+		nicId:        nicId,
 	}
 }
 
@@ -606,6 +635,7 @@ func (a *LansApiService) DatacentersLansNicsFindByIdExecute(r ApiDatacentersLans
 	if r.depth != nil {
 		localVarQueryParams.Add("depth", parameterToString(*r.depth, ""))
 	}
+
 	// to determine the Content-Type header
 	localVarHTTPContentTypes := []string{}
 
@@ -647,12 +677,12 @@ func (a *LansApiService) DatacentersLansNicsFindByIdExecute(r ApiDatacentersLans
 
 	localVarHTTPResponse, httpRequestTime, err := a.client.callAPI(req)
 
-	localVarAPIResponse := &APIResponse {
-		Response: localVarHTTPResponse,
-		Method: localVarHTTPMethod,
-		RequestURL: localVarPath,
+	localVarAPIResponse := &APIResponse{
+		Response:    localVarHTTPResponse,
+		Method:      localVarHTTPMethod,
+		RequestURL:  localVarPath,
 		RequestTime: httpRequestTime,
-		Operation: "DatacentersLansNicsFindById",
+		Operation:   "DatacentersLansNicsFindById",
 	}
 
 	if err != nil || localVarHTTPResponse == nil {
@@ -669,16 +699,16 @@ func (a *LansApiService) DatacentersLansNicsFindByIdExecute(r ApiDatacentersLans
 	if localVarHTTPResponse.StatusCode >= 300 {
 		newErr := GenericOpenAPIError{
 			statusCode: localVarHTTPResponse.StatusCode,
-			body:  localVarBody,
-			error: fmt.Sprintf("%s: %s", localVarHTTPResponse.Status, string(localVarBody)),
+			body:       localVarBody,
+			error:      fmt.Sprintf(FormatStringErr, localVarHTTPResponse.Status, string(localVarBody)),
 		}
-			var v Error
-			err = a.client.decode(&v, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
-			if err != nil {
-				newErr.error = err.Error()
-				return localVarReturnValue, localVarAPIResponse, newErr
-			}
-			newErr.model = v
+		var v Error
+		err = a.client.decode(&v, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
+		if err != nil {
+			newErr.error = err.Error()
+			return localVarReturnValue, localVarAPIResponse, newErr
+		}
+		newErr.model = v
 		return localVarReturnValue, localVarAPIResponse, newErr
 	}
 
@@ -686,8 +716,8 @@ func (a *LansApiService) DatacentersLansNicsFindByIdExecute(r ApiDatacentersLans
 	if err != nil {
 		newErr := GenericOpenAPIError{
 			statusCode: localVarHTTPResponse.StatusCode,
-			body:  localVarBody,
-			error: err.Error(),
+			body:       localVarBody,
+			error:      err.Error(),
 		}
 		return localVarReturnValue, localVarAPIResponse, newErr
 	}
@@ -696,15 +726,17 @@ func (a *LansApiService) DatacentersLansNicsFindByIdExecute(r ApiDatacentersLans
 }
 
 type ApiDatacentersLansNicsGetRequest struct {
-	ctx _context.Context
-	ApiService *LansApiService
-	datacenterId string
-	lanId string
-	pretty *bool
-	depth *int32
+	ctx             _context.Context
+	ApiService      *LansApiService
+	filters         _neturl.Values
+	orderBy         *string
+	datacenterId    string
+	lanId           string
+	pretty          *bool
+	depth           *int32
 	xContractNumber *int32
-	offset *int32
-	limit *int32
+	offset          *int32
+	limit           *int32
 }
 
 func (r ApiDatacentersLansNicsGetRequest) Pretty(pretty bool) ApiDatacentersLansNicsGetRequest {
@@ -728,24 +760,38 @@ func (r ApiDatacentersLansNicsGetRequest) Limit(limit int32) ApiDatacentersLansN
 	return r
 }
 
+// Filters query parameters limit results to those containing a matching value for a specific property.
+func (r ApiDatacentersLansNicsGetRequest) Filter(key string, value string) ApiDatacentersLansNicsGetRequest {
+	filterKey := fmt.Sprintf(FilterQueryParam, key)
+	r.filters[filterKey] = []string{value}
+	return r
+}
+
+// OrderBy query param sorts the results alphanumerically in ascending order based on the specified property.
+func (r ApiDatacentersLansNicsGetRequest) OrderBy(orderBy string) ApiDatacentersLansNicsGetRequest {
+	r.orderBy = &orderBy
+	return r
+}
+
 func (r ApiDatacentersLansNicsGetRequest) Execute() (LanNics, *APIResponse, error) {
 	return r.ApiService.DatacentersLansNicsGetExecute(r)
 }
 
 /*
- * DatacentersLansNicsGet List Lan Members 
+ * DatacentersLansNicsGet List Lan Members
  * You can retrieve a list of nics attached to a LAN.
  * @param ctx _context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
- * @param datacenterId The unique ID of the datacenter
+ * @param datacenterId The unique ID of the data center.
  * @param lanId The unique ID of the LAN
  * @return ApiDatacentersLansNicsGetRequest
  */
 func (a *LansApiService) DatacentersLansNicsGet(ctx _context.Context, datacenterId string, lanId string) ApiDatacentersLansNicsGetRequest {
 	return ApiDatacentersLansNicsGetRequest{
-		ApiService: a,
-		ctx: ctx,
+		ApiService:   a,
+		ctx:          ctx,
 		datacenterId: datacenterId,
-		lanId: lanId,
+		lanId:        lanId,
+		filters:      _neturl.Values{},
 	}
 }
 
@@ -788,6 +834,17 @@ func (a *LansApiService) DatacentersLansNicsGetExecute(r ApiDatacentersLansNicsG
 	if r.limit != nil {
 		localVarQueryParams.Add("limit", parameterToString(*r.limit, ""))
 	}
+	if r.orderBy != nil {
+		localVarQueryParams.Add("orderBy", parameterToString(*r.orderBy, ""))
+	}
+	if len(r.filters) > 0 {
+		for k, v := range r.filters {
+			for _, iv := range v {
+				localVarQueryParams.Add(k, iv)
+			}
+		}
+	}
+
 	// to determine the Content-Type header
 	localVarHTTPContentTypes := []string{}
 
@@ -829,12 +886,12 @@ func (a *LansApiService) DatacentersLansNicsGetExecute(r ApiDatacentersLansNicsG
 
 	localVarHTTPResponse, httpRequestTime, err := a.client.callAPI(req)
 
-	localVarAPIResponse := &APIResponse {
-		Response: localVarHTTPResponse,
-		Method: localVarHTTPMethod,
-		RequestURL: localVarPath,
+	localVarAPIResponse := &APIResponse{
+		Response:    localVarHTTPResponse,
+		Method:      localVarHTTPMethod,
+		RequestURL:  localVarPath,
 		RequestTime: httpRequestTime,
-		Operation: "DatacentersLansNicsGet",
+		Operation:   "DatacentersLansNicsGet",
 	}
 
 	if err != nil || localVarHTTPResponse == nil {
@@ -851,16 +908,16 @@ func (a *LansApiService) DatacentersLansNicsGetExecute(r ApiDatacentersLansNicsG
 	if localVarHTTPResponse.StatusCode >= 300 {
 		newErr := GenericOpenAPIError{
 			statusCode: localVarHTTPResponse.StatusCode,
-			body:  localVarBody,
-			error: fmt.Sprintf("%s: %s", localVarHTTPResponse.Status, string(localVarBody)),
+			body:       localVarBody,
+			error:      fmt.Sprintf(FormatStringErr, localVarHTTPResponse.Status, string(localVarBody)),
 		}
-			var v Error
-			err = a.client.decode(&v, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
-			if err != nil {
-				newErr.error = err.Error()
-				return localVarReturnValue, localVarAPIResponse, newErr
-			}
-			newErr.model = v
+		var v Error
+		err = a.client.decode(&v, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
+		if err != nil {
+			newErr.error = err.Error()
+			return localVarReturnValue, localVarAPIResponse, newErr
+		}
+		newErr.model = v
 		return localVarReturnValue, localVarAPIResponse, newErr
 	}
 
@@ -868,8 +925,8 @@ func (a *LansApiService) DatacentersLansNicsGetExecute(r ApiDatacentersLansNicsG
 	if err != nil {
 		newErr := GenericOpenAPIError{
 			statusCode: localVarHTTPResponse.StatusCode,
-			body:  localVarBody,
-			error: err.Error(),
+			body:       localVarBody,
+			error:      err.Error(),
 		}
 		return localVarReturnValue, localVarAPIResponse, newErr
 	}
@@ -878,13 +935,13 @@ func (a *LansApiService) DatacentersLansNicsGetExecute(r ApiDatacentersLansNicsG
 }
 
 type ApiDatacentersLansNicsPostRequest struct {
-	ctx _context.Context
-	ApiService *LansApiService
-	datacenterId string
-	lanId string
-	nic *Nic
-	pretty *bool
-	depth *int32
+	ctx             _context.Context
+	ApiService      *LansApiService
+	datacenterId    string
+	lanId           string
+	nic             *Nic
+	pretty          *bool
+	depth           *int32
 	xContractNumber *int32
 }
 
@@ -913,16 +970,16 @@ func (r ApiDatacentersLansNicsPostRequest) Execute() (Nic, *APIResponse, error) 
  * DatacentersLansNicsPost Attach a nic
  * This will attach a pre-existing nic to a LAN.
  * @param ctx _context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
- * @param datacenterId The unique ID of the datacenter
+ * @param datacenterId The unique ID of the data center.
  * @param lanId The unique ID of the LAN
  * @return ApiDatacentersLansNicsPostRequest
  */
 func (a *LansApiService) DatacentersLansNicsPost(ctx _context.Context, datacenterId string, lanId string) ApiDatacentersLansNicsPostRequest {
 	return ApiDatacentersLansNicsPostRequest{
-		ApiService: a,
-		ctx: ctx,
+		ApiService:   a,
+		ctx:          ctx,
 		datacenterId: datacenterId,
-		lanId: lanId,
+		lanId:        lanId,
 	}
 }
 
@@ -962,6 +1019,7 @@ func (a *LansApiService) DatacentersLansNicsPostExecute(r ApiDatacentersLansNics
 	if r.depth != nil {
 		localVarQueryParams.Add("depth", parameterToString(*r.depth, ""))
 	}
+
 	// to determine the Content-Type header
 	localVarHTTPContentTypes := []string{"application/json"}
 
@@ -1005,12 +1063,12 @@ func (a *LansApiService) DatacentersLansNicsPostExecute(r ApiDatacentersLansNics
 
 	localVarHTTPResponse, httpRequestTime, err := a.client.callAPI(req)
 
-	localVarAPIResponse := &APIResponse {
-		Response: localVarHTTPResponse,
-		Method: localVarHTTPMethod,
-		RequestURL: localVarPath,
+	localVarAPIResponse := &APIResponse{
+		Response:    localVarHTTPResponse,
+		Method:      localVarHTTPMethod,
+		RequestURL:  localVarPath,
 		RequestTime: httpRequestTime,
-		Operation: "DatacentersLansNicsPost",
+		Operation:   "DatacentersLansNicsPost",
 	}
 
 	if err != nil || localVarHTTPResponse == nil {
@@ -1027,16 +1085,16 @@ func (a *LansApiService) DatacentersLansNicsPostExecute(r ApiDatacentersLansNics
 	if localVarHTTPResponse.StatusCode >= 300 {
 		newErr := GenericOpenAPIError{
 			statusCode: localVarHTTPResponse.StatusCode,
-			body:  localVarBody,
-			error: fmt.Sprintf("%s: %s", localVarHTTPResponse.Status, string(localVarBody)),
+			body:       localVarBody,
+			error:      fmt.Sprintf(FormatStringErr, localVarHTTPResponse.Status, string(localVarBody)),
 		}
-			var v Error
-			err = a.client.decode(&v, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
-			if err != nil {
-				newErr.error = err.Error()
-				return localVarReturnValue, localVarAPIResponse, newErr
-			}
-			newErr.model = v
+		var v Error
+		err = a.client.decode(&v, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
+		if err != nil {
+			newErr.error = err.Error()
+			return localVarReturnValue, localVarAPIResponse, newErr
+		}
+		newErr.model = v
 		return localVarReturnValue, localVarAPIResponse, newErr
 	}
 
@@ -1044,8 +1102,8 @@ func (a *LansApiService) DatacentersLansNicsPostExecute(r ApiDatacentersLansNics
 	if err != nil {
 		newErr := GenericOpenAPIError{
 			statusCode: localVarHTTPResponse.StatusCode,
-			body:  localVarBody,
-			error: err.Error(),
+			body:       localVarBody,
+			error:      err.Error(),
 		}
 		return localVarReturnValue, localVarAPIResponse, newErr
 	}
@@ -1054,13 +1112,13 @@ func (a *LansApiService) DatacentersLansNicsPostExecute(r ApiDatacentersLansNics
 }
 
 type ApiDatacentersLansPatchRequest struct {
-	ctx _context.Context
-	ApiService *LansApiService
-	datacenterId string
-	lanId string
-	lan *LanProperties
-	pretty *bool
-	depth *int32
+	ctx             _context.Context
+	ApiService      *LansApiService
+	datacenterId    string
+	lanId           string
+	lan             *LanProperties
+	pretty          *bool
+	depth           *int32
 	xContractNumber *int32
 }
 
@@ -1089,16 +1147,16 @@ func (r ApiDatacentersLansPatchRequest) Execute() (Lan, *APIResponse, error) {
  * DatacentersLansPatch Partially modify a Lan
  * You can use update attributes of a resource.
  * @param ctx _context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
- * @param datacenterId The unique ID of the datacenter
+ * @param datacenterId The unique ID of the data center.
  * @param lanId The unique ID of the LAN
  * @return ApiDatacentersLansPatchRequest
  */
 func (a *LansApiService) DatacentersLansPatch(ctx _context.Context, datacenterId string, lanId string) ApiDatacentersLansPatchRequest {
 	return ApiDatacentersLansPatchRequest{
-		ApiService: a,
-		ctx: ctx,
+		ApiService:   a,
+		ctx:          ctx,
 		datacenterId: datacenterId,
-		lanId: lanId,
+		lanId:        lanId,
 	}
 }
 
@@ -1138,6 +1196,7 @@ func (a *LansApiService) DatacentersLansPatchExecute(r ApiDatacentersLansPatchRe
 	if r.depth != nil {
 		localVarQueryParams.Add("depth", parameterToString(*r.depth, ""))
 	}
+
 	// to determine the Content-Type header
 	localVarHTTPContentTypes := []string{"application/json"}
 
@@ -1181,12 +1240,12 @@ func (a *LansApiService) DatacentersLansPatchExecute(r ApiDatacentersLansPatchRe
 
 	localVarHTTPResponse, httpRequestTime, err := a.client.callAPI(req)
 
-	localVarAPIResponse := &APIResponse {
-		Response: localVarHTTPResponse,
-		Method: localVarHTTPMethod,
-		RequestURL: localVarPath,
+	localVarAPIResponse := &APIResponse{
+		Response:    localVarHTTPResponse,
+		Method:      localVarHTTPMethod,
+		RequestURL:  localVarPath,
 		RequestTime: httpRequestTime,
-		Operation: "DatacentersLansPatch",
+		Operation:   "DatacentersLansPatch",
 	}
 
 	if err != nil || localVarHTTPResponse == nil {
@@ -1203,16 +1262,16 @@ func (a *LansApiService) DatacentersLansPatchExecute(r ApiDatacentersLansPatchRe
 	if localVarHTTPResponse.StatusCode >= 300 {
 		newErr := GenericOpenAPIError{
 			statusCode: localVarHTTPResponse.StatusCode,
-			body:  localVarBody,
-			error: fmt.Sprintf("%s: %s", localVarHTTPResponse.Status, string(localVarBody)),
+			body:       localVarBody,
+			error:      fmt.Sprintf(FormatStringErr, localVarHTTPResponse.Status, string(localVarBody)),
 		}
-			var v Error
-			err = a.client.decode(&v, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
-			if err != nil {
-				newErr.error = err.Error()
-				return localVarReturnValue, localVarAPIResponse, newErr
-			}
-			newErr.model = v
+		var v Error
+		err = a.client.decode(&v, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
+		if err != nil {
+			newErr.error = err.Error()
+			return localVarReturnValue, localVarAPIResponse, newErr
+		}
+		newErr.model = v
 		return localVarReturnValue, localVarAPIResponse, newErr
 	}
 
@@ -1220,8 +1279,8 @@ func (a *LansApiService) DatacentersLansPatchExecute(r ApiDatacentersLansPatchRe
 	if err != nil {
 		newErr := GenericOpenAPIError{
 			statusCode: localVarHTTPResponse.StatusCode,
-			body:  localVarBody,
-			error: err.Error(),
+			body:       localVarBody,
+			error:      err.Error(),
 		}
 		return localVarReturnValue, localVarAPIResponse, newErr
 	}
@@ -1230,12 +1289,12 @@ func (a *LansApiService) DatacentersLansPatchExecute(r ApiDatacentersLansPatchRe
 }
 
 type ApiDatacentersLansPostRequest struct {
-	ctx _context.Context
-	ApiService *LansApiService
-	datacenterId string
-	lan *LanPost
-	pretty *bool
-	depth *int32
+	ctx             _context.Context
+	ApiService      *LansApiService
+	datacenterId    string
+	lan             *LanPost
+	pretty          *bool
+	depth           *int32
 	xContractNumber *int32
 }
 
@@ -1264,13 +1323,13 @@ func (r ApiDatacentersLansPostRequest) Execute() (LanPost, *APIResponse, error) 
  * DatacentersLansPost Create a Lan
  * Creates a LAN within the datacenter.
  * @param ctx _context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
- * @param datacenterId The unique ID of the datacenter
+ * @param datacenterId The unique ID of the data center.
  * @return ApiDatacentersLansPostRequest
  */
 func (a *LansApiService) DatacentersLansPost(ctx _context.Context, datacenterId string) ApiDatacentersLansPostRequest {
 	return ApiDatacentersLansPostRequest{
-		ApiService: a,
-		ctx: ctx,
+		ApiService:   a,
+		ctx:          ctx,
 		datacenterId: datacenterId,
 	}
 }
@@ -1310,6 +1369,7 @@ func (a *LansApiService) DatacentersLansPostExecute(r ApiDatacentersLansPostRequ
 	if r.depth != nil {
 		localVarQueryParams.Add("depth", parameterToString(*r.depth, ""))
 	}
+
 	// to determine the Content-Type header
 	localVarHTTPContentTypes := []string{"application/json"}
 
@@ -1353,12 +1413,12 @@ func (a *LansApiService) DatacentersLansPostExecute(r ApiDatacentersLansPostRequ
 
 	localVarHTTPResponse, httpRequestTime, err := a.client.callAPI(req)
 
-	localVarAPIResponse := &APIResponse {
-		Response: localVarHTTPResponse,
-		Method: localVarHTTPMethod,
-		RequestURL: localVarPath,
+	localVarAPIResponse := &APIResponse{
+		Response:    localVarHTTPResponse,
+		Method:      localVarHTTPMethod,
+		RequestURL:  localVarPath,
 		RequestTime: httpRequestTime,
-		Operation: "DatacentersLansPost",
+		Operation:   "DatacentersLansPost",
 	}
 
 	if err != nil || localVarHTTPResponse == nil {
@@ -1375,16 +1435,16 @@ func (a *LansApiService) DatacentersLansPostExecute(r ApiDatacentersLansPostRequ
 	if localVarHTTPResponse.StatusCode >= 300 {
 		newErr := GenericOpenAPIError{
 			statusCode: localVarHTTPResponse.StatusCode,
-			body:  localVarBody,
-			error: fmt.Sprintf("%s: %s", localVarHTTPResponse.Status, string(localVarBody)),
+			body:       localVarBody,
+			error:      fmt.Sprintf(FormatStringErr, localVarHTTPResponse.Status, string(localVarBody)),
 		}
-			var v Error
-			err = a.client.decode(&v, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
-			if err != nil {
-				newErr.error = err.Error()
-				return localVarReturnValue, localVarAPIResponse, newErr
-			}
-			newErr.model = v
+		var v Error
+		err = a.client.decode(&v, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
+		if err != nil {
+			newErr.error = err.Error()
+			return localVarReturnValue, localVarAPIResponse, newErr
+		}
+		newErr.model = v
 		return localVarReturnValue, localVarAPIResponse, newErr
 	}
 
@@ -1392,8 +1452,8 @@ func (a *LansApiService) DatacentersLansPostExecute(r ApiDatacentersLansPostRequ
 	if err != nil {
 		newErr := GenericOpenAPIError{
 			statusCode: localVarHTTPResponse.StatusCode,
-			body:  localVarBody,
-			error: err.Error(),
+			body:       localVarBody,
+			error:      err.Error(),
 		}
 		return localVarReturnValue, localVarAPIResponse, newErr
 	}
@@ -1402,13 +1462,13 @@ func (a *LansApiService) DatacentersLansPostExecute(r ApiDatacentersLansPostRequ
 }
 
 type ApiDatacentersLansPutRequest struct {
-	ctx _context.Context
-	ApiService *LansApiService
-	datacenterId string
-	lanId string
-	lan *Lan
-	pretty *bool
-	depth *int32
+	ctx             _context.Context
+	ApiService      *LansApiService
+	datacenterId    string
+	lanId           string
+	lan             *Lan
+	pretty          *bool
+	depth           *int32
 	xContractNumber *int32
 }
 
@@ -1437,16 +1497,16 @@ func (r ApiDatacentersLansPutRequest) Execute() (Lan, *APIResponse, error) {
  * DatacentersLansPut Modify a Lan
  * You can use update attributes of a resource.
  * @param ctx _context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
- * @param datacenterId The unique ID of the datacenter
+ * @param datacenterId The unique ID of the data center.
  * @param lanId The unique ID of the LAN
  * @return ApiDatacentersLansPutRequest
  */
 func (a *LansApiService) DatacentersLansPut(ctx _context.Context, datacenterId string, lanId string) ApiDatacentersLansPutRequest {
 	return ApiDatacentersLansPutRequest{
-		ApiService: a,
-		ctx: ctx,
+		ApiService:   a,
+		ctx:          ctx,
 		datacenterId: datacenterId,
-		lanId: lanId,
+		lanId:        lanId,
 	}
 }
 
@@ -1486,6 +1546,7 @@ func (a *LansApiService) DatacentersLansPutExecute(r ApiDatacentersLansPutReques
 	if r.depth != nil {
 		localVarQueryParams.Add("depth", parameterToString(*r.depth, ""))
 	}
+
 	// to determine the Content-Type header
 	localVarHTTPContentTypes := []string{"application/json"}
 
@@ -1529,12 +1590,12 @@ func (a *LansApiService) DatacentersLansPutExecute(r ApiDatacentersLansPutReques
 
 	localVarHTTPResponse, httpRequestTime, err := a.client.callAPI(req)
 
-	localVarAPIResponse := &APIResponse {
-		Response: localVarHTTPResponse,
-		Method: localVarHTTPMethod,
-		RequestURL: localVarPath,
+	localVarAPIResponse := &APIResponse{
+		Response:    localVarHTTPResponse,
+		Method:      localVarHTTPMethod,
+		RequestURL:  localVarPath,
 		RequestTime: httpRequestTime,
-		Operation: "DatacentersLansPut",
+		Operation:   "DatacentersLansPut",
 	}
 
 	if err != nil || localVarHTTPResponse == nil {
@@ -1551,16 +1612,16 @@ func (a *LansApiService) DatacentersLansPutExecute(r ApiDatacentersLansPutReques
 	if localVarHTTPResponse.StatusCode >= 300 {
 		newErr := GenericOpenAPIError{
 			statusCode: localVarHTTPResponse.StatusCode,
-			body:  localVarBody,
-			error: fmt.Sprintf("%s: %s", localVarHTTPResponse.Status, string(localVarBody)),
+			body:       localVarBody,
+			error:      fmt.Sprintf(FormatStringErr, localVarHTTPResponse.Status, string(localVarBody)),
 		}
-			var v Error
-			err = a.client.decode(&v, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
-			if err != nil {
-				newErr.error = err.Error()
-				return localVarReturnValue, localVarAPIResponse, newErr
-			}
-			newErr.model = v
+		var v Error
+		err = a.client.decode(&v, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
+		if err != nil {
+			newErr.error = err.Error()
+			return localVarReturnValue, localVarAPIResponse, newErr
+		}
+		newErr.model = v
 		return localVarReturnValue, localVarAPIResponse, newErr
 	}
 
@@ -1568,8 +1629,8 @@ func (a *LansApiService) DatacentersLansPutExecute(r ApiDatacentersLansPutReques
 	if err != nil {
 		newErr := GenericOpenAPIError{
 			statusCode: localVarHTTPResponse.StatusCode,
-			body:  localVarBody,
-			error: err.Error(),
+			body:       localVarBody,
+			error:      err.Error(),
 		}
 		return localVarReturnValue, localVarAPIResponse, newErr
 	}

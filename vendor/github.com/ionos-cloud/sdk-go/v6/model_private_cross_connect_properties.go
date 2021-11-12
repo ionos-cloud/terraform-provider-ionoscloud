@@ -1,7 +1,7 @@
 /*
  * CLOUD API
  *
- * An enterprise-grade Infrastructure is provided as a Service (IaaS) solution that can be managed through a browser-based \"Data Center Designer\" (DCD) tool or via an easy to use API.   The API allows you to perform a variety of management tasks such as spinning up additional servers, adding volumes, adjusting networking, and so forth. It is designed to allow users to leverage the same power and flexibility found within the DCD visual tool. Both tools are consistent with their concepts and lend well to making the experience smooth and intuitive.
+ * IONOS Enterprise-grade Infrastructure as a Service (IaaS) solutions can be managed through the Cloud API, in addition or as an alternative to the \"Data Center Designer\" (DCD) browser-based tool.    Both methods employ consistent concepts and features, deliver similar power and flexibility, and can be used to perform a multitude of management tasks, including adding servers, volumes, configuring networks, and so on.
  *
  * API version: 6.0-SDK.3
  */
@@ -22,11 +22,9 @@ type PrivateCrossConnectProperties struct {
 	Description *string `json:"description,omitempty"`
 	// Read-Only attribute. Lists LAN's joined to this private cross connect
 	Peers *[]Peer `json:"peers,omitempty"`
-	// Read-Only attribute. Lists datacenters that can be joined to this private cross connect
+	// Read-Only attribute. Lists data centers that can be joined to this private cross connect
 	ConnectableDatacenters *[]ConnectableDatacenter `json:"connectableDatacenters,omitempty"`
 }
-
-
 
 // GetName returns the Name field value
 // If the value is explicit nil, the zero value for string will be returned
@@ -34,7 +32,6 @@ func (o *PrivateCrossConnectProperties) GetName() *string {
 	if o == nil {
 		return nil
 	}
-
 
 	return o.Name
 
@@ -48,13 +45,11 @@ func (o *PrivateCrossConnectProperties) GetNameOk() (*string, bool) {
 		return nil, false
 	}
 
-
 	return o.Name, true
 }
 
 // SetName sets field value
 func (o *PrivateCrossConnectProperties) SetName(v string) {
-
 
 	o.Name = &v
 
@@ -69,15 +64,12 @@ func (o *PrivateCrossConnectProperties) HasName() bool {
 	return false
 }
 
-
-
 // GetDescription returns the Description field value
 // If the value is explicit nil, the zero value for string will be returned
 func (o *PrivateCrossConnectProperties) GetDescription() *string {
 	if o == nil {
 		return nil
 	}
-
 
 	return o.Description
 
@@ -91,13 +83,11 @@ func (o *PrivateCrossConnectProperties) GetDescriptionOk() (*string, bool) {
 		return nil, false
 	}
 
-
 	return o.Description, true
 }
 
 // SetDescription sets field value
 func (o *PrivateCrossConnectProperties) SetDescription(v string) {
-
 
 	o.Description = &v
 
@@ -112,15 +102,12 @@ func (o *PrivateCrossConnectProperties) HasDescription() bool {
 	return false
 }
 
-
-
 // GetPeers returns the Peers field value
 // If the value is explicit nil, the zero value for []Peer will be returned
 func (o *PrivateCrossConnectProperties) GetPeers() *[]Peer {
 	if o == nil {
 		return nil
 	}
-
 
 	return o.Peers
 
@@ -134,13 +121,11 @@ func (o *PrivateCrossConnectProperties) GetPeersOk() (*[]Peer, bool) {
 		return nil, false
 	}
 
-
 	return o.Peers, true
 }
 
 // SetPeers sets field value
 func (o *PrivateCrossConnectProperties) SetPeers(v []Peer) {
-
 
 	o.Peers = &v
 
@@ -155,15 +140,12 @@ func (o *PrivateCrossConnectProperties) HasPeers() bool {
 	return false
 }
 
-
-
 // GetConnectableDatacenters returns the ConnectableDatacenters field value
 // If the value is explicit nil, the zero value for []ConnectableDatacenter will be returned
 func (o *PrivateCrossConnectProperties) GetConnectableDatacenters() *[]ConnectableDatacenter {
 	if o == nil {
 		return nil
 	}
-
 
 	return o.ConnectableDatacenters
 
@@ -177,13 +159,11 @@ func (o *PrivateCrossConnectProperties) GetConnectableDatacentersOk() (*[]Connec
 		return nil, false
 	}
 
-
 	return o.ConnectableDatacenters, true
 }
 
 // SetConnectableDatacenters sets field value
 func (o *PrivateCrossConnectProperties) SetConnectableDatacenters(v []ConnectableDatacenter) {
-
 
 	o.ConnectableDatacenters = &v
 
@@ -198,29 +178,24 @@ func (o *PrivateCrossConnectProperties) HasConnectableDatacenters() bool {
 	return false
 }
 
-
 func (o PrivateCrossConnectProperties) MarshalJSON() ([]byte, error) {
 	toSerialize := map[string]interface{}{}
 
 	if o.Name != nil {
 		toSerialize["name"] = o.Name
 	}
-	
 
 	if o.Description != nil {
 		toSerialize["description"] = o.Description
 	}
-	
 
 	if o.Peers != nil {
 		toSerialize["peers"] = o.Peers
 	}
-	
 
 	if o.ConnectableDatacenters != nil {
 		toSerialize["connectableDatacenters"] = o.ConnectableDatacenters
 	}
-	
 	return json.Marshal(toSerialize)
 }
 
@@ -259,5 +234,3 @@ func (v *NullablePrivateCrossConnectProperties) UnmarshalJSON(src []byte) error 
 	v.isSet = true
 	return json.Unmarshal(src, &v.value)
 }
-
-

@@ -25,7 +25,7 @@ resource "ionoscloud_datacenter" "example" {
 The following arguments are supported:
 
 * `name` - (Required)[string] The name of the Virtual Data Center.
-* `location` - (Required)[string] The regional location where the Virtual Data Center will be created.
+* `location` - (Required)[string] The regional location where the Virtual Data Center will be created. This argument is immutable.
 * `description` - (Optional)[string] Description for the Virtual Data Center.
 * `sec_auth_protection` - (Optional) [bool] Boolean value representing if the data center requires extra protection e.g. two factor protection
 * `version` - (Computed) The version of that Data Center. Gets incremented with every change

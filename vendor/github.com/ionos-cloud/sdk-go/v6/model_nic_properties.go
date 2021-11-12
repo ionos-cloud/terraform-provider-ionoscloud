@@ -1,7 +1,7 @@
 /*
  * CLOUD API
  *
- * An enterprise-grade Infrastructure is provided as a Service (IaaS) solution that can be managed through a browser-based \"Data Center Designer\" (DCD) tool or via an easy to use API.   The API allows you to perform a variety of management tasks such as spinning up additional servers, adding volumes, adjusting networking, and so forth. It is designed to allow users to leverage the same power and flexibility found within the DCD visual tool. Both tools are consistent with their concepts and lend well to making the experience smooth and intuitive.
+ * IONOS Enterprise-grade Infrastructure as a Service (IaaS) solutions can be managed through the Cloud API, in addition or as an alternative to the \"Data Center Designer\" (DCD) browser-based tool.    Both methods employ consistent concepts and features, deliver similar power and flexibility, and can be used to perform a multitude of management tasks, including adding servers, volumes, configuring networks, and so on.
  *
  * API version: 6.0-SDK.3
  */
@@ -36,15 +36,12 @@ type NicProperties struct {
 	PciSlot *int32 `json:"pciSlot,omitempty"`
 }
 
-
-
 // GetName returns the Name field value
 // If the value is explicit nil, the zero value for string will be returned
 func (o *NicProperties) GetName() *string {
 	if o == nil {
 		return nil
 	}
-
 
 	return o.Name
 
@@ -58,13 +55,11 @@ func (o *NicProperties) GetNameOk() (*string, bool) {
 		return nil, false
 	}
 
-
 	return o.Name, true
 }
 
 // SetName sets field value
 func (o *NicProperties) SetName(v string) {
-
 
 	o.Name = &v
 
@@ -79,15 +74,12 @@ func (o *NicProperties) HasName() bool {
 	return false
 }
 
-
-
 // GetMac returns the Mac field value
 // If the value is explicit nil, the zero value for string will be returned
 func (o *NicProperties) GetMac() *string {
 	if o == nil {
 		return nil
 	}
-
 
 	return o.Mac
 
@@ -101,13 +93,11 @@ func (o *NicProperties) GetMacOk() (*string, bool) {
 		return nil, false
 	}
 
-
 	return o.Mac, true
 }
 
 // SetMac sets field value
 func (o *NicProperties) SetMac(v string) {
-
 
 	o.Mac = &v
 
@@ -122,15 +112,12 @@ func (o *NicProperties) HasMac() bool {
 	return false
 }
 
-
-
 // GetIps returns the Ips field value
 // If the value is explicit nil, the zero value for []string will be returned
 func (o *NicProperties) GetIps() *[]string {
 	if o == nil {
 		return nil
 	}
-
 
 	return o.Ips
 
@@ -144,13 +131,11 @@ func (o *NicProperties) GetIpsOk() (*[]string, bool) {
 		return nil, false
 	}
 
-
 	return o.Ips, true
 }
 
 // SetIps sets field value
 func (o *NicProperties) SetIps(v []string) {
-
 
 	o.Ips = &v
 
@@ -165,15 +150,12 @@ func (o *NicProperties) HasIps() bool {
 	return false
 }
 
-
-
 // GetDhcp returns the Dhcp field value
 // If the value is explicit nil, the zero value for bool will be returned
 func (o *NicProperties) GetDhcp() *bool {
 	if o == nil {
 		return nil
 	}
-
 
 	return o.Dhcp
 
@@ -187,13 +169,11 @@ func (o *NicProperties) GetDhcpOk() (*bool, bool) {
 		return nil, false
 	}
 
-
 	return o.Dhcp, true
 }
 
 // SetDhcp sets field value
 func (o *NicProperties) SetDhcp(v bool) {
-
 
 	o.Dhcp = &v
 
@@ -208,15 +188,12 @@ func (o *NicProperties) HasDhcp() bool {
 	return false
 }
 
-
-
 // GetLan returns the Lan field value
 // If the value is explicit nil, the zero value for int32 will be returned
 func (o *NicProperties) GetLan() *int32 {
 	if o == nil {
 		return nil
 	}
-
 
 	return o.Lan
 
@@ -230,13 +207,11 @@ func (o *NicProperties) GetLanOk() (*int32, bool) {
 		return nil, false
 	}
 
-
 	return o.Lan, true
 }
 
 // SetLan sets field value
 func (o *NicProperties) SetLan(v int32) {
-
 
 	o.Lan = &v
 
@@ -251,15 +226,12 @@ func (o *NicProperties) HasLan() bool {
 	return false
 }
 
-
-
 // GetFirewallActive returns the FirewallActive field value
 // If the value is explicit nil, the zero value for bool will be returned
 func (o *NicProperties) GetFirewallActive() *bool {
 	if o == nil {
 		return nil
 	}
-
 
 	return o.FirewallActive
 
@@ -273,13 +245,11 @@ func (o *NicProperties) GetFirewallActiveOk() (*bool, bool) {
 		return nil, false
 	}
 
-
 	return o.FirewallActive, true
 }
 
 // SetFirewallActive sets field value
 func (o *NicProperties) SetFirewallActive(v bool) {
-
 
 	o.FirewallActive = &v
 
@@ -294,15 +264,12 @@ func (o *NicProperties) HasFirewallActive() bool {
 	return false
 }
 
-
-
 // GetFirewallType returns the FirewallType field value
 // If the value is explicit nil, the zero value for string will be returned
 func (o *NicProperties) GetFirewallType() *string {
 	if o == nil {
 		return nil
 	}
-
 
 	return o.FirewallType
 
@@ -316,13 +283,11 @@ func (o *NicProperties) GetFirewallTypeOk() (*string, bool) {
 		return nil, false
 	}
 
-
 	return o.FirewallType, true
 }
 
 // SetFirewallType sets field value
 func (o *NicProperties) SetFirewallType(v string) {
-
 
 	o.FirewallType = &v
 
@@ -337,15 +302,12 @@ func (o *NicProperties) HasFirewallType() bool {
 	return false
 }
 
-
-
 // GetDeviceNumber returns the DeviceNumber field value
 // If the value is explicit nil, the zero value for int32 will be returned
 func (o *NicProperties) GetDeviceNumber() *int32 {
 	if o == nil {
 		return nil
 	}
-
 
 	return o.DeviceNumber
 
@@ -359,13 +321,11 @@ func (o *NicProperties) GetDeviceNumberOk() (*int32, bool) {
 		return nil, false
 	}
 
-
 	return o.DeviceNumber, true
 }
 
 // SetDeviceNumber sets field value
 func (o *NicProperties) SetDeviceNumber(v int32) {
-
 
 	o.DeviceNumber = &v
 
@@ -380,15 +340,12 @@ func (o *NicProperties) HasDeviceNumber() bool {
 	return false
 }
 
-
-
 // GetPciSlot returns the PciSlot field value
 // If the value is explicit nil, the zero value for int32 will be returned
 func (o *NicProperties) GetPciSlot() *int32 {
 	if o == nil {
 		return nil
 	}
-
 
 	return o.PciSlot
 
@@ -402,13 +359,11 @@ func (o *NicProperties) GetPciSlotOk() (*int32, bool) {
 		return nil, false
 	}
 
-
 	return o.PciSlot, true
 }
 
 // SetPciSlot sets field value
 func (o *NicProperties) SetPciSlot(v int32) {
-
 
 	o.PciSlot = &v
 
@@ -423,54 +378,44 @@ func (o *NicProperties) HasPciSlot() bool {
 	return false
 }
 
-
 func (o NicProperties) MarshalJSON() ([]byte, error) {
 	toSerialize := map[string]interface{}{}
 
 	if o.Name != nil {
 		toSerialize["name"] = o.Name
 	}
-	
 
 	if o.Mac != nil {
 		toSerialize["mac"] = o.Mac
 	}
-	
 
 	if o.Ips != nil {
 		toSerialize["ips"] = o.Ips
 	}
-	
 
 	if o.Dhcp != nil {
 		toSerialize["dhcp"] = o.Dhcp
 	}
-	
 
 	if o.Lan != nil {
 		toSerialize["lan"] = o.Lan
 	}
-	
 
 	if o.FirewallActive != nil {
 		toSerialize["firewallActive"] = o.FirewallActive
 	}
-	
 
 	if o.FirewallType != nil {
 		toSerialize["firewallType"] = o.FirewallType
 	}
-	
 
 	if o.DeviceNumber != nil {
 		toSerialize["deviceNumber"] = o.DeviceNumber
 	}
-	
 
 	if o.PciSlot != nil {
 		toSerialize["pciSlot"] = o.PciSlot
 	}
-	
 	return json.Marshal(toSerialize)
 }
 
@@ -509,5 +454,3 @@ func (v *NullableNicProperties) UnmarshalJSON(src []byte) error {
 	v.isSet = true
 	return json.Unmarshal(src, &v.value)
 }
-
-

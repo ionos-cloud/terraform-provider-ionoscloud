@@ -1,7 +1,7 @@
 /*
  * CLOUD API
  *
- * An enterprise-grade Infrastructure is provided as a Service (IaaS) solution that can be managed through a browser-based \"Data Center Designer\" (DCD) tool or via an easy to use API.   The API allows you to perform a variety of management tasks such as spinning up additional servers, adding volumes, adjusting networking, and so forth. It is designed to allow users to leverage the same power and flexibility found within the DCD visual tool. Both tools are consistent with their concepts and lend well to making the experience smooth and intuitive.
+ * IONOS Enterprise-grade Infrastructure as a Service (IaaS) solutions can be managed through the Cloud API, in addition or as an alternative to the \"Data Center Designer\" (DCD) browser-based tool.    Both methods employ consistent concepts and features, deliver similar power and flexibility, and can be used to perform a multitude of management tasks, including adding servers, volumes, configuring networks, and so on.
  *
  * API version: 6.0-SDK.3
  */
@@ -24,15 +24,12 @@ type LoadbalancerProperties struct {
 	Dhcp *bool `json:"dhcp,omitempty"`
 }
 
-
-
 // GetName returns the Name field value
 // If the value is explicit nil, the zero value for string will be returned
 func (o *LoadbalancerProperties) GetName() *string {
 	if o == nil {
 		return nil
 	}
-
 
 	return o.Name
 
@@ -46,13 +43,11 @@ func (o *LoadbalancerProperties) GetNameOk() (*string, bool) {
 		return nil, false
 	}
 
-
 	return o.Name, true
 }
 
 // SetName sets field value
 func (o *LoadbalancerProperties) SetName(v string) {
-
 
 	o.Name = &v
 
@@ -67,15 +62,12 @@ func (o *LoadbalancerProperties) HasName() bool {
 	return false
 }
 
-
-
 // GetIp returns the Ip field value
 // If the value is explicit nil, the zero value for string will be returned
 func (o *LoadbalancerProperties) GetIp() *string {
 	if o == nil {
 		return nil
 	}
-
 
 	return o.Ip
 
@@ -89,13 +81,11 @@ func (o *LoadbalancerProperties) GetIpOk() (*string, bool) {
 		return nil, false
 	}
 
-
 	return o.Ip, true
 }
 
 // SetIp sets field value
 func (o *LoadbalancerProperties) SetIp(v string) {
-
 
 	o.Ip = &v
 
@@ -110,15 +100,12 @@ func (o *LoadbalancerProperties) HasIp() bool {
 	return false
 }
 
-
-
 // GetDhcp returns the Dhcp field value
 // If the value is explicit nil, the zero value for bool will be returned
 func (o *LoadbalancerProperties) GetDhcp() *bool {
 	if o == nil {
 		return nil
 	}
-
 
 	return o.Dhcp
 
@@ -132,13 +119,11 @@ func (o *LoadbalancerProperties) GetDhcpOk() (*bool, bool) {
 		return nil, false
 	}
 
-
 	return o.Dhcp, true
 }
 
 // SetDhcp sets field value
 func (o *LoadbalancerProperties) SetDhcp(v bool) {
-
 
 	o.Dhcp = &v
 
@@ -153,24 +138,20 @@ func (o *LoadbalancerProperties) HasDhcp() bool {
 	return false
 }
 
-
 func (o LoadbalancerProperties) MarshalJSON() ([]byte, error) {
 	toSerialize := map[string]interface{}{}
 
 	if o.Name != nil {
 		toSerialize["name"] = o.Name
 	}
-	
 
 	if o.Ip != nil {
 		toSerialize["ip"] = o.Ip
 	}
-	
 
 	if o.Dhcp != nil {
 		toSerialize["dhcp"] = o.Dhcp
 	}
-	
 	return json.Marshal(toSerialize)
 }
 
@@ -209,5 +190,3 @@ func (v *NullableLoadbalancerProperties) UnmarshalJSON(src []byte) error {
 	v.isSet = true
 	return json.Unmarshal(src, &v.value)
 }
-
-

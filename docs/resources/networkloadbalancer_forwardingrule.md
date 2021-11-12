@@ -55,3 +55,11 @@ resource "ionoscloud_networkloadbalancer_forwardingrule" "example" {
          - `maintenance` - (Optional)[boolean] Maintenance specifies if a target VM should be marked as down, even if it is not.
 - `datacenter_id` - (Required)[string] A Datacenter's UUID.
 - `natgateway_id` - (Required)[string] Network Load Balancer's UUID.
+
+## Import
+
+A Network Load Balancer Forwarding Rule resource can be imported using its `resource id`, the `datacenter id` and the `networkloadbalancer id` e.g.
+
+```shell
+terraform import ionoscloud_networkloadbalancer_forwardingrule.my_networkloadbalancer_forwardingrule {datacenter uuid}/{networkloadbalancer uuid}/{networkloadbalancer_forwardingrule uuid}
+```

@@ -80,6 +80,7 @@ func dataSourceNetworkLoadBalancerRead(d *schema.ResourceData, meta interface{})
 	}
 	var networkLoadBalancer ionoscloud.NetworkLoadBalancer
 	var err error
+	var apiResponse *ionoscloud.APIResponse
 
 	ctx, cancel := context.WithTimeout(context.Background(), *resourceDefaultTimeouts.Default)
 
@@ -89,7 +90,8 @@ func dataSourceNetworkLoadBalancerRead(d *schema.ResourceData, meta interface{})
 
 	if idOk {
 		/* search by ID */
-		networkLoadBalancer, _, err = client.NetworkLoadBalancersApi.DatacentersNetworkloadbalancersFindByNetworkLoadBalancerId(ctx, datacenterId.(string), id.(string)).Execute()
+		networkLoadBalancer, apiResponse, err = client.NetworkLoadBalancersApi.DatacentersNetworkloadbalancersFindByNetworkLoadBalancerId(ctx, datacenterId.(string), id.(string)).Execute()
+		logApiRequestTime(apiResponse)
 		if err != nil {
 			return fmt.Errorf("an error occurred while fetching the network loadbalancer %s: %s", id.(string), err)
 		}
@@ -103,14 +105,16 @@ func dataSourceNetworkLoadBalancerRead(d *schema.ResourceData, meta interface{})
 			defer cancel()
 		}
 
-		networkLoadBalancers, _, err := client.NetworkLoadBalancersApi.DatacentersNetworkloadbalancersGet(ctx, datacenterId.(string)).Execute()
+		networkLoadBalancers, apiResponse, err := client.NetworkLoadBalancersApi.DatacentersNetworkloadbalancersGet(ctx, datacenterId.(string)).Execute()
+		logApiRequestTime(apiResponse)
 		if err != nil {
 			return fmt.Errorf("an error occurred while fetching network loadbalancers: %s", err.Error())
 		}
 
 		if networkLoadBalancers.Items != nil {
 			for _, c := range *networkLoadBalancers.Items {
-				tmpNetworkLoadBalancer, _, err := client.NetworkLoadBalancersApi.DatacentersNetworkloadbalancersFindByNetworkLoadBalancerId(ctx, datacenterId.(string), *c.Id).Execute()
+				tmpNetworkLoadBalancer, apiResponse, err := client.NetworkLoadBalancersApi.DatacentersNetworkloadbalancersFindByNetworkLoadBalancerId(ctx, datacenterId.(string), *c.Id).Execute()
+				logApiRequestTime(apiResponse)
 				if err != nil {
 					return fmt.Errorf("an error occurred while fetching network loadbalancer with ID %s: %s", *c.Id, err.Error())
 				}
@@ -130,6 +134,12 @@ func dataSourceNetworkLoadBalancerRead(d *schema.ResourceData, meta interface{})
 		return errors.New("network loadbalancer not found")
 	}
 
+	if networkLoadBalancer.Id != nil {
+		if err := d.Set("id", *networkLoadBalancer.Id); err != nil {
+			return err
+		}
+	}
+
 	if err = setNetworkLoadBalancerData(d, &networkLoadBalancer); err != nil {
 		return err
 	}
@@ -141,9 +151,6 @@ func setNetworkLoadBalancerData(d *schema.ResourceData, networkLoadBalancer *ion
 
 	if networkLoadBalancer.Id != nil {
 		d.SetId(*networkLoadBalancer.Id)
-		if err := d.Set("id", *networkLoadBalancer.Id); err != nil {
-			return err
-		}
 	}
 
 	if networkLoadBalancer.Properties != nil {

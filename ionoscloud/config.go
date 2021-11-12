@@ -20,9 +20,9 @@ type Config struct {
 func (c *Config) Client(terraformVersion string) (*ionoscloud.APIClient, error) {
 	var client *ionoscloud.APIClient
 	if c.Token != "" {
-		client = ionoscloud.NewAPIClient(ionoscloud.NewConfiguration("", "", c.Token))
+		client = ionoscloud.NewAPIClient(ionoscloud.NewConfiguration("", "", c.Token, c.Endpoint))
 	} else {
-		client = ionoscloud.NewAPIClient(ionoscloud.NewConfiguration(c.Username, c.Password, ""))
+		client = ionoscloud.NewAPIClient(ionoscloud.NewConfiguration(c.Username, c.Password, "", c.Endpoint))
 	}
 	// todo: add ionoscloud.Version when introduced in sdk-go/v6
 	client.GetConfig().UserAgent = fmt.Sprintf("HashiCorp Terraform/%s Terraform Plugin SDK/%s Terraform Provider Ionoscloud/%s", terraformVersion, meta.SDKVersionString(), Version)

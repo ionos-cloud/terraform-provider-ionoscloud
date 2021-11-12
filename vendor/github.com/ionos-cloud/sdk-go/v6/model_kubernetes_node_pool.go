@@ -1,7 +1,7 @@
 /*
  * CLOUD API
  *
- * An enterprise-grade Infrastructure is provided as a Service (IaaS) solution that can be managed through a browser-based \"Data Center Designer\" (DCD) tool or via an easy to use API.   The API allows you to perform a variety of management tasks such as spinning up additional servers, adding volumes, adjusting networking, and so forth. It is designed to allow users to leverage the same power and flexibility found within the DCD visual tool. Both tools are consistent with their concepts and lend well to making the experience smooth and intuitive.
+ * IONOS Enterprise-grade Infrastructure as a Service (IaaS) solutions can be managed through the Cloud API, in addition or as an alternative to the \"Data Center Designer\" (DCD) browser-based tool.    Both methods employ consistent concepts and features, deliver similar power and flexibility, and can be used to perform a multitude of management tasks, including adding servers, volumes, configuring networks, and so on.
  *
  * API version: 6.0-SDK.3
  */
@@ -21,12 +21,10 @@ type KubernetesNodePool struct {
 	// The type of object
 	Type *string `json:"type,omitempty"`
 	// URL to the object representation (absolute path)
-	Href *string `json:"href,omitempty"`
-	Metadata *DatacenterElementMetadata `json:"metadata,omitempty"`
+	Href       *string                       `json:"href,omitempty"`
+	Metadata   *DatacenterElementMetadata    `json:"metadata,omitempty"`
 	Properties *KubernetesNodePoolProperties `json:"properties"`
 }
-
-
 
 // GetId returns the Id field value
 // If the value is explicit nil, the zero value for string will be returned
@@ -34,7 +32,6 @@ func (o *KubernetesNodePool) GetId() *string {
 	if o == nil {
 		return nil
 	}
-
 
 	return o.Id
 
@@ -48,13 +45,11 @@ func (o *KubernetesNodePool) GetIdOk() (*string, bool) {
 		return nil, false
 	}
 
-
 	return o.Id, true
 }
 
 // SetId sets field value
 func (o *KubernetesNodePool) SetId(v string) {
-
 
 	o.Id = &v
 
@@ -69,15 +64,12 @@ func (o *KubernetesNodePool) HasId() bool {
 	return false
 }
 
-
-
 // GetType returns the Type field value
 // If the value is explicit nil, the zero value for string will be returned
 func (o *KubernetesNodePool) GetType() *string {
 	if o == nil {
 		return nil
 	}
-
 
 	return o.Type
 
@@ -91,13 +83,11 @@ func (o *KubernetesNodePool) GetTypeOk() (*string, bool) {
 		return nil, false
 	}
 
-
 	return o.Type, true
 }
 
 // SetType sets field value
 func (o *KubernetesNodePool) SetType(v string) {
-
 
 	o.Type = &v
 
@@ -112,15 +102,12 @@ func (o *KubernetesNodePool) HasType() bool {
 	return false
 }
 
-
-
 // GetHref returns the Href field value
 // If the value is explicit nil, the zero value for string will be returned
 func (o *KubernetesNodePool) GetHref() *string {
 	if o == nil {
 		return nil
 	}
-
 
 	return o.Href
 
@@ -134,13 +121,11 @@ func (o *KubernetesNodePool) GetHrefOk() (*string, bool) {
 		return nil, false
 	}
 
-
 	return o.Href, true
 }
 
 // SetHref sets field value
 func (o *KubernetesNodePool) SetHref(v string) {
-
 
 	o.Href = &v
 
@@ -155,15 +140,12 @@ func (o *KubernetesNodePool) HasHref() bool {
 	return false
 }
 
-
-
 // GetMetadata returns the Metadata field value
 // If the value is explicit nil, the zero value for DatacenterElementMetadata will be returned
 func (o *KubernetesNodePool) GetMetadata() *DatacenterElementMetadata {
 	if o == nil {
 		return nil
 	}
-
 
 	return o.Metadata
 
@@ -177,13 +159,11 @@ func (o *KubernetesNodePool) GetMetadataOk() (*DatacenterElementMetadata, bool) 
 		return nil, false
 	}
 
-
 	return o.Metadata, true
 }
 
 // SetMetadata sets field value
 func (o *KubernetesNodePool) SetMetadata(v DatacenterElementMetadata) {
-
 
 	o.Metadata = &v
 
@@ -198,15 +178,12 @@ func (o *KubernetesNodePool) HasMetadata() bool {
 	return false
 }
 
-
-
 // GetProperties returns the Properties field value
 // If the value is explicit nil, the zero value for KubernetesNodePoolProperties will be returned
 func (o *KubernetesNodePool) GetProperties() *KubernetesNodePoolProperties {
 	if o == nil {
 		return nil
 	}
-
 
 	return o.Properties
 
@@ -220,13 +197,11 @@ func (o *KubernetesNodePool) GetPropertiesOk() (*KubernetesNodePoolProperties, b
 		return nil, false
 	}
 
-
 	return o.Properties, true
 }
 
 // SetProperties sets field value
 func (o *KubernetesNodePool) SetProperties(v KubernetesNodePoolProperties) {
-
 
 	o.Properties = &v
 
@@ -241,34 +216,28 @@ func (o *KubernetesNodePool) HasProperties() bool {
 	return false
 }
 
-
 func (o KubernetesNodePool) MarshalJSON() ([]byte, error) {
 	toSerialize := map[string]interface{}{}
 
 	if o.Id != nil {
 		toSerialize["id"] = o.Id
 	}
-	
 
 	if o.Type != nil {
 		toSerialize["type"] = o.Type
 	}
-	
 
 	if o.Href != nil {
 		toSerialize["href"] = o.Href
 	}
-	
 
 	if o.Metadata != nil {
 		toSerialize["metadata"] = o.Metadata
 	}
-	
 
 	if o.Properties != nil {
 		toSerialize["properties"] = o.Properties
 	}
-	
 	return json.Marshal(toSerialize)
 }
 
@@ -307,5 +276,3 @@ func (v *NullableKubernetesNodePool) UnmarshalJSON(src []byte) error {
 	v.isSet = true
 	return json.Unmarshal(src, &v.value)
 }
-
-

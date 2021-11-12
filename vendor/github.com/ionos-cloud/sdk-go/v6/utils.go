@@ -1,7 +1,7 @@
 /*
  * CLOUD API
  *
- * An enterprise-grade Infrastructure is provided as a Service (IaaS) solution that can be managed through a browser-based \"Data Center Designer\" (DCD) tool or via an easy to use API.   The API allows you to perform a variety of management tasks such as spinning up additional servers, adding volumes, adjusting networking, and so forth. It is designed to allow users to leverage the same power and flexibility found within the DCD visual tool. Both tools are consistent with their concepts and lend well to making the experience smooth and intuitive.
+ * IONOS Enterprise-grade Infrastructure as a Service (IaaS) solutions can be managed through the Cloud API, in addition or as an alternative to the \"Data Center Designer\" (DCD) browser-based tool.    Both methods employ consistent concepts and features, deliver similar power and flexibility, and can be used to perform a multitude of management tasks, including adding servers, volumes, configuring networks, and so on.
  *
  * API version: 6.0-SDK.3
  */
@@ -76,7 +76,6 @@ func (v *NullableBool) UnmarshalJSON(src []byte) error {
 	return json.Unmarshal(src, &v.value)
 }
 
-
 type NullableInt struct {
 	value *int
 	isSet bool
@@ -112,7 +111,6 @@ func (v *NullableInt) UnmarshalJSON(src []byte) error {
 	v.isSet = true
 	return json.Unmarshal(src, &v.value)
 }
-
 
 type NullableInt32 struct {
 	value *int32
@@ -150,7 +148,6 @@ func (v *NullableInt32) UnmarshalJSON(src []byte) error {
 	return json.Unmarshal(src, &v.value)
 }
 
-
 type NullableInt64 struct {
 	value *int64
 	isSet bool
@@ -186,7 +183,6 @@ func (v *NullableInt64) UnmarshalJSON(src []byte) error {
 	v.isSet = true
 	return json.Unmarshal(src, &v.value)
 }
-
 
 type NullableFloat32 struct {
 	value *float32
@@ -224,7 +220,6 @@ func (v *NullableFloat32) UnmarshalJSON(src []byte) error {
 	return json.Unmarshal(src, &v.value)
 }
 
-
 type NullableFloat64 struct {
 	value *float64
 	isSet bool
@@ -261,7 +256,6 @@ func (v *NullableFloat64) UnmarshalJSON(src []byte) error {
 	return json.Unmarshal(src, &v.value)
 }
 
-
 type NullableString struct {
 	value *string
 	isSet bool
@@ -297,7 +291,6 @@ func (v *NullableString) UnmarshalJSON(src []byte) error {
 	v.isSet = true
 	return json.Unmarshal(src, &v.value)
 }
-
 
 type NullableTime struct {
 	value *time.Time
@@ -348,8 +341,8 @@ func (t *IonosTime) UnmarshalJSON(data []byte) error {
 	if str[0] == '"' {
 		str = str[1:]
 	}
-	if str[len(str) - 1] == '"' {
-		str = str[:len(str) - 1]
+	if str[len(str)-1] == '"' {
+		str = str[:len(str)-1]
 	}
 	if !strings.Contains(str, "Z") {
 		/* forcefully adding timezone suffix to be able to parse the
@@ -363,4 +356,3 @@ func (t *IonosTime) UnmarshalJSON(data []byte) error {
 	*t = IonosTime{tt}
 	return nil
 }
-

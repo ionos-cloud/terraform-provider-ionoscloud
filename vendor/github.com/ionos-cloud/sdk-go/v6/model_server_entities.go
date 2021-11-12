@@ -1,7 +1,7 @@
 /*
  * CLOUD API
  *
- * An enterprise-grade Infrastructure is provided as a Service (IaaS) solution that can be managed through a browser-based \"Data Center Designer\" (DCD) tool or via an easy to use API.   The API allows you to perform a variety of management tasks such as spinning up additional servers, adding volumes, adjusting networking, and so forth. It is designed to allow users to leverage the same power and flexibility found within the DCD visual tool. Both tools are consistent with their concepts and lend well to making the experience smooth and intuitive.
+ * IONOS Enterprise-grade Infrastructure as a Service (IaaS) solutions can be managed through the Cloud API, in addition or as an alternative to the \"Data Center Designer\" (DCD) browser-based tool.    Both methods employ consistent concepts and features, deliver similar power and flexibility, and can be used to perform a multitude of management tasks, including adding servers, volumes, configuring networks, and so on.
  *
  * API version: 6.0-SDK.3
  */
@@ -16,12 +16,10 @@ import (
 
 // ServerEntities struct for ServerEntities
 type ServerEntities struct {
-	Cdroms *Cdroms `json:"cdroms,omitempty"`
+	Cdroms  *Cdroms          `json:"cdroms,omitempty"`
 	Volumes *AttachedVolumes `json:"volumes,omitempty"`
-	Nics *Nics `json:"nics,omitempty"`
+	Nics    *Nics            `json:"nics,omitempty"`
 }
-
-
 
 // GetCdroms returns the Cdroms field value
 // If the value is explicit nil, the zero value for Cdroms will be returned
@@ -29,7 +27,6 @@ func (o *ServerEntities) GetCdroms() *Cdroms {
 	if o == nil {
 		return nil
 	}
-
 
 	return o.Cdroms
 
@@ -43,13 +40,11 @@ func (o *ServerEntities) GetCdromsOk() (*Cdroms, bool) {
 		return nil, false
 	}
 
-
 	return o.Cdroms, true
 }
 
 // SetCdroms sets field value
 func (o *ServerEntities) SetCdroms(v Cdroms) {
-
 
 	o.Cdroms = &v
 
@@ -64,15 +59,12 @@ func (o *ServerEntities) HasCdroms() bool {
 	return false
 }
 
-
-
 // GetVolumes returns the Volumes field value
 // If the value is explicit nil, the zero value for AttachedVolumes will be returned
 func (o *ServerEntities) GetVolumes() *AttachedVolumes {
 	if o == nil {
 		return nil
 	}
-
 
 	return o.Volumes
 
@@ -86,13 +78,11 @@ func (o *ServerEntities) GetVolumesOk() (*AttachedVolumes, bool) {
 		return nil, false
 	}
 
-
 	return o.Volumes, true
 }
 
 // SetVolumes sets field value
 func (o *ServerEntities) SetVolumes(v AttachedVolumes) {
-
 
 	o.Volumes = &v
 
@@ -107,15 +97,12 @@ func (o *ServerEntities) HasVolumes() bool {
 	return false
 }
 
-
-
 // GetNics returns the Nics field value
 // If the value is explicit nil, the zero value for Nics will be returned
 func (o *ServerEntities) GetNics() *Nics {
 	if o == nil {
 		return nil
 	}
-
 
 	return o.Nics
 
@@ -129,13 +116,11 @@ func (o *ServerEntities) GetNicsOk() (*Nics, bool) {
 		return nil, false
 	}
 
-
 	return o.Nics, true
 }
 
 // SetNics sets field value
 func (o *ServerEntities) SetNics(v Nics) {
-
 
 	o.Nics = &v
 
@@ -150,24 +135,20 @@ func (o *ServerEntities) HasNics() bool {
 	return false
 }
 
-
 func (o ServerEntities) MarshalJSON() ([]byte, error) {
 	toSerialize := map[string]interface{}{}
 
 	if o.Cdroms != nil {
 		toSerialize["cdroms"] = o.Cdroms
 	}
-	
 
 	if o.Volumes != nil {
 		toSerialize["volumes"] = o.Volumes
 	}
-	
 
 	if o.Nics != nil {
 		toSerialize["nics"] = o.Nics
 	}
-	
 	return json.Marshal(toSerialize)
 }
 
@@ -206,5 +187,3 @@ func (v *NullableServerEntities) UnmarshalJSON(src []byte) error {
 	v.isSet = true
 	return json.Unmarshal(src, &v.value)
 }
-
-

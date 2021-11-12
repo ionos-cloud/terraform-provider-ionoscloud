@@ -154,7 +154,8 @@ func resourceGroupCreate(ctx context.Context, d *schema.ResourceData, meta inter
 
 	usertoAdd := d.Get("user_id").(string)
 
-	group, apiRsponse, err := client.UserManagementApi.UmGroupsPost(ctx).Group(request).Execute()
+	group, apiResponse, err := client.UserManagementApi.UmGroupsPost(ctx).Group(request).Execute()
+	logApiRequestTime(apiResponse)
 
 	if err != nil {
 		diags := diag.FromErr(fmt.Errorf("an error occured while creating a group: %s", err))
@@ -166,7 +167,7 @@ func resourceGroupCreate(ctx context.Context, d *schema.ResourceData, meta inter
 	d.SetId(*group.Id)
 
 	// Wait, catching any errors
-	_, errState := getStateChangeConf(meta, d, apiRsponse.Header.Get("Location"), schema.TimeoutCreate).WaitForStateContext(ctx)
+	_, errState := getStateChangeConf(meta, d, apiResponse.Header.Get("Location"), schema.TimeoutCreate).WaitForStateContext(ctx)
 	if errState != nil {
 		if IsRequestFailed(err) {
 			// Request failed, so resource was not created, delete resource from state file
@@ -182,6 +183,7 @@ func resourceGroupCreate(ctx context.Context, d *schema.ResourceData, meta inter
 			Id: &usertoAdd,
 		}
 		_, apiResponse, err := client.UserManagementApi.UmGroupsUsersPost(ctx, d.Id()).User(user).Execute()
+		logApiRequestTime(apiResponse)
 		if err != nil {
 			diags := diag.FromErr(fmt.Errorf("an error occured while adding %s user to group ID %s %s", usertoAdd, d.Id(), err))
 			return diags
@@ -200,9 +202,10 @@ func resourceGroupRead(ctx context.Context, d *schema.ResourceData, meta interfa
 	client := meta.(SdkBundle).CloudApiClient
 
 	group, apiResponse, err := client.UserManagementApi.UmGroupsFindById(ctx, d.Id()).Execute()
+	logApiRequestTime(apiResponse)
 
 	if err != nil {
-		if apiResponse != nil && apiResponse.StatusCode == 404 {
+		if apiResponse != nil && apiResponse.Response != nil && apiResponse.StatusCode == 404 {
 			d.SetId("")
 			return nil
 		}
@@ -210,150 +213,8 @@ func resourceGroupRead(ctx context.Context, d *schema.ResourceData, meta interfa
 		return diags
 	}
 
-	if group.Properties.Name != nil {
-		err := d.Set("name", *group.Properties.Name)
-		if err != nil {
-			diags := diag.FromErr(fmt.Errorf("error while setting name property for group %s: %s", d.Id(), err))
-			return diags
-		}
-	}
-
-	if group.Properties.CreateDataCenter != nil {
-		err := d.Set("create_datacenter", *group.Properties.CreateDataCenter)
-		if err != nil {
-			diags := diag.FromErr(fmt.Errorf("error while setting create_datacenter property for group %s: %s", d.Id(), err))
-			return diags
-		}
-	}
-
-	if group.Properties.CreateSnapshot != nil {
-		err := d.Set("create_snapshot", *group.Properties.CreateSnapshot)
-		if err != nil {
-			diags := diag.FromErr(fmt.Errorf("error while setting create_snapshot property for group %s: %s", d.Id(), err))
-			return diags
-		}
-	}
-
-	if group.Properties.ReserveIp != nil {
-		err := d.Set("reserve_ip", *group.Properties.ReserveIp)
-		if err != nil {
-			diags := diag.FromErr(fmt.Errorf("error while setting reserve_ip property for group %s: %s", d.Id(), err))
-			return diags
-		}
-	}
-
-	if group.Properties.AccessActivityLog != nil {
-		err := d.Set("access_activity_log", *group.Properties.AccessActivityLog)
-		if err != nil {
-			diags := diag.FromErr(fmt.Errorf("error while setting access_activity_log property for group %s: %s", d.Id(), err))
-			return diags
-		}
-	}
-
-	if group.Properties.CreatePcc != nil {
-		err := d.Set("create_pcc", *group.Properties.CreatePcc)
-		if err != nil {
-			diags := diag.FromErr(fmt.Errorf("error while setting create_pcc property for group %s: %s", d.Id(), err))
-			return diags
-		}
-	}
-
-	if group.Properties.S3Privilege != nil {
-		err := d.Set("s3_privilege", *group.Properties.S3Privilege)
-		if err != nil {
-			diags := diag.FromErr(fmt.Errorf("error while setting s3_privilege property for group %s: %s", d.Id(), err))
-			return diags
-		}
-	}
-
-	if group.Properties.CreateBackupUnit != nil {
-		err := d.Set("create_backup_unit", *group.Properties.CreateBackupUnit)
-		if err != nil {
-			diags := diag.FromErr(fmt.Errorf("error while setting create_backup_unit property for group %s: %s", d.Id(), err))
-			return diags
-		}
-	}
-
-	if group.Properties.CreateInternetAccess != nil {
-		err := d.Set("create_internet_access", *group.Properties.CreateInternetAccess)
-		if err != nil {
-			diags := diag.FromErr(fmt.Errorf("error while setting create_internet_access property for group %s: %s", d.Id(), err))
-			return diags
-		}
-	}
-
-	if group.Properties.CreateK8sCluster != nil {
-		err := d.Set("create_k8s_cluster", *group.Properties.CreateK8sCluster)
-		if err != nil {
-			diags := diag.FromErr(fmt.Errorf("error while setting create_k8s_cluster property for group %s: %s", d.Id(), err))
-			return diags
-		}
-	}
-
-	if group.Properties.CreateFlowLog != nil {
-		err := d.Set("create_flow_log", *group.Properties.CreateFlowLog)
-		if err != nil {
-			diags := diag.FromErr(fmt.Errorf("error while setting create_flow_log property for group %s: %s", d.Id(), err))
-			return diags
-		}
-	}
-
-	if group.Properties.AccessAndManageMonitoring != nil {
-		err := d.Set("access_and_manage_monitoring", *group.Properties.AccessAndManageMonitoring)
-		if err != nil {
-			diags := diag.FromErr(fmt.Errorf("error while setting access_and_manage_monitoring property for group %s: %s", d.Id(), err))
-			return diags
-		}
-	}
-
-	if group.Properties.AccessAndManageCertificates != nil {
-		err := d.Set("access_and_manage_certificates", *group.Properties.AccessAndManageCertificates)
-		if err != nil {
-			diags := diag.FromErr(fmt.Errorf("error while setting access_and_manage_certificates property for group %s: %s", d.Id(), err))
-			return diags
-		}
-	}
-
-	users, _, err := client.UserManagementApi.UmGroupsUsersGet(ctx, d.Id()).Execute()
-	if err != nil {
-		diags := diag.FromErr(fmt.Errorf("an error occured while ListGroupUsers %s %s", d.Id(), err))
-		return diags
-	}
-
-	if users.Items != nil && len(*users.Items) > 0 {
-		var usersEntries []interface{}
-		for _, user := range *users.Items {
-			userEntry := make(map[string]interface{})
-
-			if user.Properties.Firstname != nil {
-				userEntry["first_name"] = *user.Properties.Firstname
-			}
-
-			if user.Properties.Lastname != nil {
-				userEntry["last_name"] = *user.Properties.Lastname
-			}
-
-			if user.Properties.Email != nil {
-				userEntry["email"] = *user.Properties.Email
-			}
-
-			if user.Properties.Administrator != nil {
-				userEntry["administrator"] = *user.Properties.Administrator
-			}
-
-			if user.Properties.ForceSecAuth != nil {
-				userEntry["force_sec_auth"] = *user.Properties.ForceSecAuth
-			}
-
-			usersEntries = append(usersEntries, userEntry)
-		}
-
-		if len(usersEntries) > 0 {
-			if err := d.Set("users", usersEntries); err != nil {
-				diags := diag.FromErr(err)
-				return diags
-			}
-		}
+	if err := setGroupData(ctx, client, d, &group); err != nil {
+		return diag.FromErr(err)
 	}
 
 	return nil
@@ -369,13 +230,13 @@ func resourceGroupUpdate(ctx context.Context, d *schema.ResourceData, meta inter
 	tempCreatePcc := d.Get("create_pcc").(bool)
 	tempS3Privilege := d.Get("s3_privilege").(bool)
 	tempCreateBackupUnit := d.Get("create_backup_unit").(bool)
-	tempCreateInternatAccess := d.Get("create_internet_access").(bool)
+	tempCreateInternetAccess := d.Get("create_internet_access").(bool)
 	tempCreateK8sCluster := d.Get("create_k8s_cluster").(bool)
 	tempCreateFlowLog := d.Get("create_flow_log").(bool)
 	tempAccessAndManageMonitoring := d.Get("access_and_manage_monitoring").(bool)
 	tempAccessAndManageCertificates := d.Get("access_and_manage_certificates").(bool)
 
-	usertoAdd := d.Get("user_id").(string)
+	userToAdd := d.Get("user_id").(string)
 
 	groupReq := ionoscloud.Group{
 		Properties: &ionoscloud.GroupProperties{
@@ -386,7 +247,7 @@ func resourceGroupUpdate(ctx context.Context, d *schema.ResourceData, meta inter
 			CreatePcc:                   &tempCreatePcc,
 			S3Privilege:                 &tempS3Privilege,
 			CreateBackupUnit:            &tempCreateBackupUnit,
-			CreateInternetAccess:        &tempCreateInternatAccess,
+			CreateInternetAccess:        &tempCreateInternetAccess,
 			CreateK8sCluster:            &tempCreateK8sCluster,
 			CreateFlowLog:               &tempCreateFlowLog,
 			AccessAndManageMonitoring:   &tempAccessAndManageMonitoring,
@@ -399,6 +260,7 @@ func resourceGroupUpdate(ctx context.Context, d *schema.ResourceData, meta inter
 	groupReq.Properties.Name = &newValueStr
 
 	_, apiResponse, err := client.UserManagementApi.UmGroupsPut(ctx, d.Id()).Group(groupReq).Execute()
+	logApiRequestTime(apiResponse)
 	if err != nil {
 		diags := diag.FromErr(fmt.Errorf("an error occured while patching a group ID %s %s", d.Id(), err))
 		return diags
@@ -411,15 +273,16 @@ func resourceGroupUpdate(ctx context.Context, d *schema.ResourceData, meta inter
 	}
 
 	//add users to group if any is provided
-	if usertoAdd != "" {
+	if userToAdd != "" {
 
 		user := ionoscloud.User{
-			Id: &usertoAdd,
+			Id: &userToAdd,
 		}
 
 		_, apiResponse, err := client.UserManagementApi.UmGroupsUsersPost(ctx, d.Id()).User(user).Execute()
+		logApiRequestTime(apiResponse)
 		if err != nil {
-			diags := diag.FromErr(fmt.Errorf("an error occured while adding %s user to group ID %s %s", usertoAdd, d.Id(), err))
+			diags := diag.FromErr(fmt.Errorf("an error occured while adding %s user to group ID %s %s", userToAdd, d.Id(), err))
 			return diags
 		}
 
@@ -437,6 +300,7 @@ func resourceGroupDelete(ctx context.Context, d *schema.ResourceData, meta inter
 	client := meta.(SdkBundle).CloudApiClient
 
 	apiResponse, err := client.UserManagementApi.UmGroupsDelete(ctx, d.Id()).Execute()
+	logApiRequestTime(apiResponse)
 	if err != nil {
 		diags := diag.FromErr(err)
 		return diags
@@ -450,5 +314,153 @@ func resourceGroupDelete(ctx context.Context, d *schema.ResourceData, meta inter
 	}
 
 	d.SetId("")
+	return nil
+}
+
+func resourceGroupImporter(ctx context.Context, d *schema.ResourceData, meta interface{}) ([]*schema.ResourceData, error) {
+	client := meta.(*ionoscloud.APIClient)
+
+	grpId := d.Id()
+
+	group, apiResponse, err := client.UserManagementApi.UmGroupsFindById(ctx, grpId).Execute()
+	logApiRequestTime(apiResponse)
+
+	if err != nil {
+		if apiResponse != nil && apiResponse.Response != nil && apiResponse.StatusCode == 404 {
+			d.SetId("")
+			return nil, fmt.Errorf("an error occured while trying to fetch the group %q", grpId)
+		}
+		return nil, fmt.Errorf("group does not exist%q", grpId)
+	}
+
+	log.Printf("[INFO] group found: %+v", group)
+
+	if err := setGroupData(ctx, client, d, &group); err != nil {
+		return nil, err
+	}
+
+	return []*schema.ResourceData{d}, nil
+}
+
+func setGroupData(ctx context.Context, client *ionoscloud.APIClient, d *schema.ResourceData, group *ionoscloud.Group) error {
+
+	if group.Id != nil {
+		d.SetId(*group.Id)
+	}
+
+	if group.Properties != nil {
+		if group.Properties.Name != nil {
+			err := d.Set("name", *group.Properties.Name)
+			if err != nil {
+				return fmt.Errorf("error while setting name property for group %s: %s", d.Id(), err)
+			}
+		}
+
+		if group.Properties.CreateDataCenter != nil {
+			err := d.Set("create_datacenter", *group.Properties.CreateDataCenter)
+			if err != nil {
+				return fmt.Errorf("error while setting create_datacenter property for group %s: %s", d.Id(), err)
+			}
+		}
+
+		if group.Properties.CreateSnapshot != nil {
+			err := d.Set("create_snapshot", *group.Properties.CreateSnapshot)
+			if err != nil {
+				return fmt.Errorf("error while setting create_snapshot property for group %s: %s", d.Id(), err)
+			}
+		}
+
+		if group.Properties.ReserveIp != nil {
+			err := d.Set("reserve_ip", *group.Properties.ReserveIp)
+			if err != nil {
+				return fmt.Errorf("error while setting reserve_ip property for group %s: %s", d.Id(), err)
+			}
+		}
+
+		if group.Properties.AccessActivityLog != nil {
+			err := d.Set("access_activity_log", *group.Properties.AccessActivityLog)
+			if err != nil {
+				return fmt.Errorf("error while setting access_activity_log property for group %s: %s", d.Id(), err)
+			}
+		}
+
+		if group.Properties.CreatePcc != nil {
+			err := d.Set("create_pcc", *group.Properties.CreatePcc)
+			if err != nil {
+				return fmt.Errorf("error while setting create_pcc property for group %s: %s", d.Id(), err)
+			}
+		}
+
+		if group.Properties.S3Privilege != nil {
+			err := d.Set("s3_privilege", *group.Properties.S3Privilege)
+			if err != nil {
+				return fmt.Errorf("error while setting s3_privilege property for group %s: %s", d.Id(), err)
+			}
+		}
+
+		if group.Properties.CreateBackupUnit != nil {
+			err := d.Set("create_backup_unit", *group.Properties.CreateBackupUnit)
+			if err != nil {
+				return fmt.Errorf("error while setting create_backup_unit property for group %s: %s", d.Id(), err)
+			}
+		}
+
+		if group.Properties.CreateInternetAccess != nil {
+			err := d.Set("create_internet_access", *group.Properties.CreateInternetAccess)
+			if err != nil {
+				return fmt.Errorf("error while setting create_internet_access property for group %s: %s", d.Id(), err)
+			}
+		}
+
+		if group.Properties.CreateK8sCluster != nil {
+			err := d.Set("create_k8s_cluster", *group.Properties.CreateK8sCluster)
+			if err != nil {
+				return fmt.Errorf("error while setting create_k8s_cluster property for group %s: %s", d.Id(), err)
+			}
+		}
+
+		users, apiResponse, err := client.UserManagementApi.UmGroupsUsersGet(ctx, d.Id()).Execute()
+		logApiRequestTime(apiResponse)
+		if err != nil {
+			return fmt.Errorf("an error occured while ListGroupUsers %s %s", d.Id(), err)
+		}
+
+		usersEntries := make([]interface{}, 0)
+		if users.Items != nil && len(*users.Items) > 0 {
+			usersEntries = make([]interface{}, len(*users.Items))
+			for userIndex, user := range *users.Items {
+				userEntry := make(map[string]interface{})
+
+				if user.Properties.Firstname != nil {
+					userEntry["first_name"] = *user.Properties.Firstname
+				}
+
+				if user.Properties.Lastname != nil {
+					userEntry["last_name"] = *user.Properties.Lastname
+				}
+
+				if user.Properties.Email != nil {
+					userEntry["email"] = *user.Properties.Email
+				}
+
+				if user.Properties.Administrator != nil {
+					userEntry["administrator"] = *user.Properties.Administrator
+				}
+
+				if user.Properties.ForceSecAuth != nil {
+					userEntry["force_sec_auth"] = *user.Properties.ForceSecAuth
+				}
+
+				usersEntries[userIndex] = userEntry
+			}
+
+			if len(usersEntries) > 0 {
+				if err := d.Set("users", usersEntries); err != nil {
+					return err
+				}
+			}
+		}
+	}
+
 	return nil
 }

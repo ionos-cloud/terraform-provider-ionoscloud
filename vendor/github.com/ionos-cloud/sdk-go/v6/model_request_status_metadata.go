@@ -1,7 +1,7 @@
 /*
  * CLOUD API
  *
- * An enterprise-grade Infrastructure is provided as a Service (IaaS) solution that can be managed through a browser-based \"Data Center Designer\" (DCD) tool or via an easy to use API.   The API allows you to perform a variety of management tasks such as spinning up additional servers, adding volumes, adjusting networking, and so forth. It is designed to allow users to leverage the same power and flexibility found within the DCD visual tool. Both tools are consistent with their concepts and lend well to making the experience smooth and intuitive.
+ * IONOS Enterprise-grade Infrastructure as a Service (IaaS) solutions can be managed through the Cloud API, in addition or as an alternative to the \"Data Center Designer\" (DCD) browser-based tool.    Both methods employ consistent concepts and features, deliver similar power and flexibility, and can be used to perform a multitude of management tasks, including adding servers, volumes, configuring networks, and so on.
  *
  * API version: 6.0-SDK.3
  */
@@ -16,14 +16,12 @@ import (
 
 // RequestStatusMetadata struct for RequestStatusMetadata
 type RequestStatusMetadata struct {
-	Status *string `json:"status,omitempty"`
+	Status  *string `json:"status,omitempty"`
 	Message *string `json:"message,omitempty"`
-	// Resource's Entity Tag as defined in http://www.w3.org/Protocols/rfc2616/rfc2616-sec3.html#sec3.11 . Entity Tag is also added as an 'ETag response header to requests which don't use 'depth' parameter. 
-	Etag *string `json:"etag,omitempty"`
+	// Resource's Entity Tag as defined in http://www.w3.org/Protocols/rfc2616/rfc2616-sec3.html#sec3.11 . Entity Tag is also added as an 'ETag response header to requests which don't use 'depth' parameter.
+	Etag    *string          `json:"etag,omitempty"`
 	Targets *[]RequestTarget `json:"targets,omitempty"`
 }
-
-
 
 // GetStatus returns the Status field value
 // If the value is explicit nil, the zero value for string will be returned
@@ -31,7 +29,6 @@ func (o *RequestStatusMetadata) GetStatus() *string {
 	if o == nil {
 		return nil
 	}
-
 
 	return o.Status
 
@@ -45,13 +42,11 @@ func (o *RequestStatusMetadata) GetStatusOk() (*string, bool) {
 		return nil, false
 	}
 
-
 	return o.Status, true
 }
 
 // SetStatus sets field value
 func (o *RequestStatusMetadata) SetStatus(v string) {
-
 
 	o.Status = &v
 
@@ -66,15 +61,12 @@ func (o *RequestStatusMetadata) HasStatus() bool {
 	return false
 }
 
-
-
 // GetMessage returns the Message field value
 // If the value is explicit nil, the zero value for string will be returned
 func (o *RequestStatusMetadata) GetMessage() *string {
 	if o == nil {
 		return nil
 	}
-
 
 	return o.Message
 
@@ -88,13 +80,11 @@ func (o *RequestStatusMetadata) GetMessageOk() (*string, bool) {
 		return nil, false
 	}
 
-
 	return o.Message, true
 }
 
 // SetMessage sets field value
 func (o *RequestStatusMetadata) SetMessage(v string) {
-
 
 	o.Message = &v
 
@@ -109,15 +99,12 @@ func (o *RequestStatusMetadata) HasMessage() bool {
 	return false
 }
 
-
-
 // GetEtag returns the Etag field value
 // If the value is explicit nil, the zero value for string will be returned
 func (o *RequestStatusMetadata) GetEtag() *string {
 	if o == nil {
 		return nil
 	}
-
 
 	return o.Etag
 
@@ -131,13 +118,11 @@ func (o *RequestStatusMetadata) GetEtagOk() (*string, bool) {
 		return nil, false
 	}
 
-
 	return o.Etag, true
 }
 
 // SetEtag sets field value
 func (o *RequestStatusMetadata) SetEtag(v string) {
-
 
 	o.Etag = &v
 
@@ -152,15 +137,12 @@ func (o *RequestStatusMetadata) HasEtag() bool {
 	return false
 }
 
-
-
 // GetTargets returns the Targets field value
 // If the value is explicit nil, the zero value for []RequestTarget will be returned
 func (o *RequestStatusMetadata) GetTargets() *[]RequestTarget {
 	if o == nil {
 		return nil
 	}
-
 
 	return o.Targets
 
@@ -174,13 +156,11 @@ func (o *RequestStatusMetadata) GetTargetsOk() (*[]RequestTarget, bool) {
 		return nil, false
 	}
 
-
 	return o.Targets, true
 }
 
 // SetTargets sets field value
 func (o *RequestStatusMetadata) SetTargets(v []RequestTarget) {
-
 
 	o.Targets = &v
 
@@ -195,29 +175,24 @@ func (o *RequestStatusMetadata) HasTargets() bool {
 	return false
 }
 
-
 func (o RequestStatusMetadata) MarshalJSON() ([]byte, error) {
 	toSerialize := map[string]interface{}{}
 
 	if o.Status != nil {
 		toSerialize["status"] = o.Status
 	}
-	
 
 	if o.Message != nil {
 		toSerialize["message"] = o.Message
 	}
-	
 
 	if o.Etag != nil {
 		toSerialize["etag"] = o.Etag
 	}
-	
 
 	if o.Targets != nil {
 		toSerialize["targets"] = o.Targets
 	}
-	
 	return json.Marshal(toSerialize)
 }
 
@@ -256,5 +231,3 @@ func (v *NullableRequestStatusMetadata) UnmarshalJSON(src []byte) error {
 	v.isSet = true
 	return json.Unmarshal(src, &v.value)
 }
-
-

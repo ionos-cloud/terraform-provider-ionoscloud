@@ -1,7 +1,7 @@
 /*
  * CLOUD API
  *
- * An enterprise-grade Infrastructure is provided as a Service (IaaS) solution that can be managed through a browser-based \"Data Center Designer\" (DCD) tool or via an easy to use API.   The API allows you to perform a variety of management tasks such as spinning up additional servers, adding volumes, adjusting networking, and so forth. It is designed to allow users to leverage the same power and flexibility found within the DCD visual tool. Both tools are consistent with their concepts and lend well to making the experience smooth and intuitive.
+ * IONOS Enterprise-grade Infrastructure as a Service (IaaS) solutions can be managed through the Cloud API, in addition or as an alternative to the \"Data Center Designer\" (DCD) browser-based tool.    Both methods employ consistent concepts and features, deliver similar power and flexibility, and can be used to perform a multitude of management tasks, including adding servers, volumes, configuring networks, and so on.
  *
  * API version: 6.0-SDK.3
  */
@@ -24,15 +24,12 @@ type BackupUnitProperties struct {
 	Email *string `json:"email,omitempty"`
 }
 
-
-
 // GetName returns the Name field value
 // If the value is explicit nil, the zero value for string will be returned
 func (o *BackupUnitProperties) GetName() *string {
 	if o == nil {
 		return nil
 	}
-
 
 	return o.Name
 
@@ -46,13 +43,11 @@ func (o *BackupUnitProperties) GetNameOk() (*string, bool) {
 		return nil, false
 	}
 
-
 	return o.Name, true
 }
 
 // SetName sets field value
 func (o *BackupUnitProperties) SetName(v string) {
-
 
 	o.Name = &v
 
@@ -67,15 +62,12 @@ func (o *BackupUnitProperties) HasName() bool {
 	return false
 }
 
-
-
 // GetPassword returns the Password field value
 // If the value is explicit nil, the zero value for string will be returned
 func (o *BackupUnitProperties) GetPassword() *string {
 	if o == nil {
 		return nil
 	}
-
 
 	return o.Password
 
@@ -89,13 +81,11 @@ func (o *BackupUnitProperties) GetPasswordOk() (*string, bool) {
 		return nil, false
 	}
 
-
 	return o.Password, true
 }
 
 // SetPassword sets field value
 func (o *BackupUnitProperties) SetPassword(v string) {
-
 
 	o.Password = &v
 
@@ -110,15 +100,12 @@ func (o *BackupUnitProperties) HasPassword() bool {
 	return false
 }
 
-
-
 // GetEmail returns the Email field value
 // If the value is explicit nil, the zero value for string will be returned
 func (o *BackupUnitProperties) GetEmail() *string {
 	if o == nil {
 		return nil
 	}
-
 
 	return o.Email
 
@@ -132,13 +119,11 @@ func (o *BackupUnitProperties) GetEmailOk() (*string, bool) {
 		return nil, false
 	}
 
-
 	return o.Email, true
 }
 
 // SetEmail sets field value
 func (o *BackupUnitProperties) SetEmail(v string) {
-
 
 	o.Email = &v
 
@@ -153,24 +138,20 @@ func (o *BackupUnitProperties) HasEmail() bool {
 	return false
 }
 
-
 func (o BackupUnitProperties) MarshalJSON() ([]byte, error) {
 	toSerialize := map[string]interface{}{}
 
 	if o.Name != nil {
 		toSerialize["name"] = o.Name
 	}
-	
 
 	if o.Password != nil {
 		toSerialize["password"] = o.Password
 	}
-	
 
 	if o.Email != nil {
 		toSerialize["email"] = o.Email
 	}
-	
 	return json.Marshal(toSerialize)
 }
 
@@ -209,5 +190,3 @@ func (v *NullableBackupUnitProperties) UnmarshalJSON(src []byte) error {
 	v.isSet = true
 	return json.Unmarshal(src, &v.value)
 }
-
-

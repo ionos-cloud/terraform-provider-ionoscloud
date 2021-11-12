@@ -1,7 +1,7 @@
 /*
  * CLOUD API
  *
- * An enterprise-grade Infrastructure is provided as a Service (IaaS) solution that can be managed through a browser-based \"Data Center Designer\" (DCD) tool or via an easy to use API.   The API allows you to perform a variety of management tasks such as spinning up additional servers, adding volumes, adjusting networking, and so forth. It is designed to allow users to leverage the same power and flexibility found within the DCD visual tool. Both tools are consistent with their concepts and lend well to making the experience smooth and intuitive.
+ * IONOS Enterprise-grade Infrastructure as a Service (IaaS) solutions can be managed through the Cloud API, in addition or as an alternative to the \"Data Center Designer\" (DCD) browser-based tool.    Both methods employ consistent concepts and features, deliver similar power and flexibility, and can be used to perform a multitude of management tasks, including adding servers, volumes, configuring networks, and so on.
  *
  * API version: 6.0-SDK.3
  */
@@ -19,7 +19,7 @@ type KubernetesClusterPropertiesForPut struct {
 	// A Kubernetes Cluster Name. Valid Kubernetes Cluster name must be 63 characters or less and must be empty or begin and end with an alphanumeric character ([a-z0-9A-Z]) with dashes (-), underscores (_), dots (.), and alphanumerics between.
 	Name *string `json:"name"`
 	// The kubernetes version in which a cluster is running. This imposes restrictions on what kubernetes versions can be run in a cluster's nodepools. Additionally, not all kubernetes versions are viable upgrade targets for all prior versions.
-	K8sVersion *string `json:"k8sVersion,omitempty"`
+	K8sVersion        *string                      `json:"k8sVersion,omitempty"`
 	MaintenanceWindow *KubernetesMaintenanceWindow `json:"maintenanceWindow,omitempty"`
 	// Access to the K8s API server is restricted to these CIDRs. Cluster-internal traffic is not affected by this restriction. If no allowlist is specified, access is not restricted. If an IP without subnet mask is provided, the default value will be used: 32 for IPv4 and 128 for IPv6.
 	ApiSubnetAllowList *[]string `json:"apiSubnetAllowList,omitempty"`
@@ -27,15 +27,12 @@ type KubernetesClusterPropertiesForPut struct {
 	S3Buckets *[]S3Bucket `json:"s3Buckets,omitempty"`
 }
 
-
-
 // GetName returns the Name field value
 // If the value is explicit nil, the zero value for string will be returned
 func (o *KubernetesClusterPropertiesForPut) GetName() *string {
 	if o == nil {
 		return nil
 	}
-
 
 	return o.Name
 
@@ -49,13 +46,11 @@ func (o *KubernetesClusterPropertiesForPut) GetNameOk() (*string, bool) {
 		return nil, false
 	}
 
-
 	return o.Name, true
 }
 
 // SetName sets field value
 func (o *KubernetesClusterPropertiesForPut) SetName(v string) {
-
 
 	o.Name = &v
 
@@ -70,15 +65,12 @@ func (o *KubernetesClusterPropertiesForPut) HasName() bool {
 	return false
 }
 
-
-
 // GetK8sVersion returns the K8sVersion field value
 // If the value is explicit nil, the zero value for string will be returned
 func (o *KubernetesClusterPropertiesForPut) GetK8sVersion() *string {
 	if o == nil {
 		return nil
 	}
-
 
 	return o.K8sVersion
 
@@ -92,13 +84,11 @@ func (o *KubernetesClusterPropertiesForPut) GetK8sVersionOk() (*string, bool) {
 		return nil, false
 	}
 
-
 	return o.K8sVersion, true
 }
 
 // SetK8sVersion sets field value
 func (o *KubernetesClusterPropertiesForPut) SetK8sVersion(v string) {
-
 
 	o.K8sVersion = &v
 
@@ -113,15 +103,12 @@ func (o *KubernetesClusterPropertiesForPut) HasK8sVersion() bool {
 	return false
 }
 
-
-
 // GetMaintenanceWindow returns the MaintenanceWindow field value
 // If the value is explicit nil, the zero value for KubernetesMaintenanceWindow will be returned
 func (o *KubernetesClusterPropertiesForPut) GetMaintenanceWindow() *KubernetesMaintenanceWindow {
 	if o == nil {
 		return nil
 	}
-
 
 	return o.MaintenanceWindow
 
@@ -135,13 +122,11 @@ func (o *KubernetesClusterPropertiesForPut) GetMaintenanceWindowOk() (*Kubernete
 		return nil, false
 	}
 
-
 	return o.MaintenanceWindow, true
 }
 
 // SetMaintenanceWindow sets field value
 func (o *KubernetesClusterPropertiesForPut) SetMaintenanceWindow(v KubernetesMaintenanceWindow) {
-
 
 	o.MaintenanceWindow = &v
 
@@ -156,15 +141,12 @@ func (o *KubernetesClusterPropertiesForPut) HasMaintenanceWindow() bool {
 	return false
 }
 
-
-
 // GetApiSubnetAllowList returns the ApiSubnetAllowList field value
 // If the value is explicit nil, the zero value for []string will be returned
 func (o *KubernetesClusterPropertiesForPut) GetApiSubnetAllowList() *[]string {
 	if o == nil {
 		return nil
 	}
-
 
 	return o.ApiSubnetAllowList
 
@@ -178,13 +160,11 @@ func (o *KubernetesClusterPropertiesForPut) GetApiSubnetAllowListOk() (*[]string
 		return nil, false
 	}
 
-
 	return o.ApiSubnetAllowList, true
 }
 
 // SetApiSubnetAllowList sets field value
 func (o *KubernetesClusterPropertiesForPut) SetApiSubnetAllowList(v []string) {
-
 
 	o.ApiSubnetAllowList = &v
 
@@ -199,15 +179,12 @@ func (o *KubernetesClusterPropertiesForPut) HasApiSubnetAllowList() bool {
 	return false
 }
 
-
-
 // GetS3Buckets returns the S3Buckets field value
 // If the value is explicit nil, the zero value for []S3Bucket will be returned
 func (o *KubernetesClusterPropertiesForPut) GetS3Buckets() *[]S3Bucket {
 	if o == nil {
 		return nil
 	}
-
 
 	return o.S3Buckets
 
@@ -221,13 +198,11 @@ func (o *KubernetesClusterPropertiesForPut) GetS3BucketsOk() (*[]S3Bucket, bool)
 		return nil, false
 	}
 
-
 	return o.S3Buckets, true
 }
 
 // SetS3Buckets sets field value
 func (o *KubernetesClusterPropertiesForPut) SetS3Buckets(v []S3Bucket) {
-
 
 	o.S3Buckets = &v
 
@@ -242,34 +217,28 @@ func (o *KubernetesClusterPropertiesForPut) HasS3Buckets() bool {
 	return false
 }
 
-
 func (o KubernetesClusterPropertiesForPut) MarshalJSON() ([]byte, error) {
 	toSerialize := map[string]interface{}{}
 
 	if o.Name != nil {
 		toSerialize["name"] = o.Name
 	}
-	
 
 	if o.K8sVersion != nil {
 		toSerialize["k8sVersion"] = o.K8sVersion
 	}
-	
 
 	if o.MaintenanceWindow != nil {
 		toSerialize["maintenanceWindow"] = o.MaintenanceWindow
 	}
-	
 
 	if o.ApiSubnetAllowList != nil {
 		toSerialize["apiSubnetAllowList"] = o.ApiSubnetAllowList
 	}
-	
 
 	if o.S3Buckets != nil {
 		toSerialize["s3Buckets"] = o.S3Buckets
 	}
-	
 	return json.Marshal(toSerialize)
 }
 
@@ -308,5 +277,3 @@ func (v *NullableKubernetesClusterPropertiesForPut) UnmarshalJSON(src []byte) er
 	v.isSet = true
 	return json.Unmarshal(src, &v.value)
 }
-
-

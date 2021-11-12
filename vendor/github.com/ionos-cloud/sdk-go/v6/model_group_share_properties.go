@@ -1,7 +1,7 @@
 /*
  * CLOUD API
  *
- * An enterprise-grade Infrastructure is provided as a Service (IaaS) solution that can be managed through a browser-based \"Data Center Designer\" (DCD) tool or via an easy to use API.   The API allows you to perform a variety of management tasks such as spinning up additional servers, adding volumes, adjusting networking, and so forth. It is designed to allow users to leverage the same power and flexibility found within the DCD visual tool. Both tools are consistent with their concepts and lend well to making the experience smooth and intuitive.
+ * IONOS Enterprise-grade Infrastructure as a Service (IaaS) solutions can be managed through the Cloud API, in addition or as an alternative to the \"Data Center Designer\" (DCD) browser-based tool.    Both methods employ consistent concepts and features, deliver similar power and flexibility, and can be used to perform a multitude of management tasks, including adding servers, volumes, configuring networks, and so on.
  *
  * API version: 6.0-SDK.3
  */
@@ -22,15 +22,12 @@ type GroupShareProperties struct {
 	SharePrivilege *bool `json:"sharePrivilege,omitempty"`
 }
 
-
-
 // GetEditPrivilege returns the EditPrivilege field value
 // If the value is explicit nil, the zero value for bool will be returned
 func (o *GroupShareProperties) GetEditPrivilege() *bool {
 	if o == nil {
 		return nil
 	}
-
 
 	return o.EditPrivilege
 
@@ -44,13 +41,11 @@ func (o *GroupShareProperties) GetEditPrivilegeOk() (*bool, bool) {
 		return nil, false
 	}
 
-
 	return o.EditPrivilege, true
 }
 
 // SetEditPrivilege sets field value
 func (o *GroupShareProperties) SetEditPrivilege(v bool) {
-
 
 	o.EditPrivilege = &v
 
@@ -65,15 +60,12 @@ func (o *GroupShareProperties) HasEditPrivilege() bool {
 	return false
 }
 
-
-
 // GetSharePrivilege returns the SharePrivilege field value
 // If the value is explicit nil, the zero value for bool will be returned
 func (o *GroupShareProperties) GetSharePrivilege() *bool {
 	if o == nil {
 		return nil
 	}
-
 
 	return o.SharePrivilege
 
@@ -87,13 +79,11 @@ func (o *GroupShareProperties) GetSharePrivilegeOk() (*bool, bool) {
 		return nil, false
 	}
 
-
 	return o.SharePrivilege, true
 }
 
 // SetSharePrivilege sets field value
 func (o *GroupShareProperties) SetSharePrivilege(v bool) {
-
 
 	o.SharePrivilege = &v
 
@@ -108,19 +98,16 @@ func (o *GroupShareProperties) HasSharePrivilege() bool {
 	return false
 }
 
-
 func (o GroupShareProperties) MarshalJSON() ([]byte, error) {
 	toSerialize := map[string]interface{}{}
 
 	if o.EditPrivilege != nil {
 		toSerialize["editPrivilege"] = o.EditPrivilege
 	}
-	
 
 	if o.SharePrivilege != nil {
 		toSerialize["sharePrivilege"] = o.SharePrivilege
 	}
-	
 	return json.Marshal(toSerialize)
 }
 
@@ -159,5 +146,3 @@ func (v *NullableGroupShareProperties) UnmarshalJSON(src []byte) error {
 	v.isSet = true
 	return json.Unmarshal(src, &v.value)
 }
-
-

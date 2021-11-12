@@ -1,7 +1,7 @@
 /*
  * CLOUD API
  *
- * An enterprise-grade Infrastructure is provided as a Service (IaaS) solution that can be managed through a browser-based \"Data Center Designer\" (DCD) tool or via an easy to use API.   The API allows you to perform a variety of management tasks such as spinning up additional servers, adding volumes, adjusting networking, and so forth. It is designed to allow users to leverage the same power and flexibility found within the DCD visual tool. Both tools are consistent with their concepts and lend well to making the experience smooth and intuitive.
+ * IONOS Enterprise-grade Infrastructure as a Service (IaaS) solutions can be managed through the Cloud API, in addition or as an alternative to the \"Data Center Designer\" (DCD) browser-based tool.    Both methods employ consistent concepts and features, deliver similar power and flexibility, and can be used to perform a multitude of management tasks, including adding servers, volumes, configuring networks, and so on.
  *
  * API version: 6.0-SDK.3
  */
@@ -27,8 +27,8 @@ type ServerProperties struct {
 	// The availability zone in which the server should exist
 	AvailabilityZone *string `json:"availabilityZone,omitempty"`
 	// Status of the virtual Machine
-	VmState *string `json:"vmState,omitempty"`
-	BootCdrom *ResourceReference `json:"bootCdrom,omitempty"`
+	VmState    *string            `json:"vmState,omitempty"`
+	BootCdrom  *ResourceReference `json:"bootCdrom,omitempty"`
 	BootVolume *ResourceReference `json:"bootVolume,omitempty"`
 	// CPU architecture on which server gets provisioned; not all CPU architectures are available in all datacenter regions; available CPU architectures can be retrieved from the datacenter resource
 	CpuFamily *string `json:"cpuFamily,omitempty"`
@@ -36,15 +36,12 @@ type ServerProperties struct {
 	Type *string `json:"type,omitempty"`
 }
 
-
-
 // GetTemplateUuid returns the TemplateUuid field value
 // If the value is explicit nil, the zero value for string will be returned
 func (o *ServerProperties) GetTemplateUuid() *string {
 	if o == nil {
 		return nil
 	}
-
 
 	return o.TemplateUuid
 
@@ -58,13 +55,11 @@ func (o *ServerProperties) GetTemplateUuidOk() (*string, bool) {
 		return nil, false
 	}
 
-
 	return o.TemplateUuid, true
 }
 
 // SetTemplateUuid sets field value
 func (o *ServerProperties) SetTemplateUuid(v string) {
-
 
 	o.TemplateUuid = &v
 
@@ -79,15 +74,12 @@ func (o *ServerProperties) HasTemplateUuid() bool {
 	return false
 }
 
-
-
 // GetName returns the Name field value
 // If the value is explicit nil, the zero value for string will be returned
 func (o *ServerProperties) GetName() *string {
 	if o == nil {
 		return nil
 	}
-
 
 	return o.Name
 
@@ -101,13 +93,11 @@ func (o *ServerProperties) GetNameOk() (*string, bool) {
 		return nil, false
 	}
 
-
 	return o.Name, true
 }
 
 // SetName sets field value
 func (o *ServerProperties) SetName(v string) {
-
 
 	o.Name = &v
 
@@ -122,15 +112,12 @@ func (o *ServerProperties) HasName() bool {
 	return false
 }
 
-
-
 // GetCores returns the Cores field value
 // If the value is explicit nil, the zero value for int32 will be returned
 func (o *ServerProperties) GetCores() *int32 {
 	if o == nil {
 		return nil
 	}
-
 
 	return o.Cores
 
@@ -144,13 +131,11 @@ func (o *ServerProperties) GetCoresOk() (*int32, bool) {
 		return nil, false
 	}
 
-
 	return o.Cores, true
 }
 
 // SetCores sets field value
 func (o *ServerProperties) SetCores(v int32) {
-
 
 	o.Cores = &v
 
@@ -165,15 +150,12 @@ func (o *ServerProperties) HasCores() bool {
 	return false
 }
 
-
-
 // GetRam returns the Ram field value
 // If the value is explicit nil, the zero value for int32 will be returned
 func (o *ServerProperties) GetRam() *int32 {
 	if o == nil {
 		return nil
 	}
-
 
 	return o.Ram
 
@@ -187,13 +169,11 @@ func (o *ServerProperties) GetRamOk() (*int32, bool) {
 		return nil, false
 	}
 
-
 	return o.Ram, true
 }
 
 // SetRam sets field value
 func (o *ServerProperties) SetRam(v int32) {
-
 
 	o.Ram = &v
 
@@ -208,15 +188,12 @@ func (o *ServerProperties) HasRam() bool {
 	return false
 }
 
-
-
 // GetAvailabilityZone returns the AvailabilityZone field value
 // If the value is explicit nil, the zero value for string will be returned
 func (o *ServerProperties) GetAvailabilityZone() *string {
 	if o == nil {
 		return nil
 	}
-
 
 	return o.AvailabilityZone
 
@@ -230,13 +207,11 @@ func (o *ServerProperties) GetAvailabilityZoneOk() (*string, bool) {
 		return nil, false
 	}
 
-
 	return o.AvailabilityZone, true
 }
 
 // SetAvailabilityZone sets field value
 func (o *ServerProperties) SetAvailabilityZone(v string) {
-
 
 	o.AvailabilityZone = &v
 
@@ -251,15 +226,12 @@ func (o *ServerProperties) HasAvailabilityZone() bool {
 	return false
 }
 
-
-
 // GetVmState returns the VmState field value
 // If the value is explicit nil, the zero value for string will be returned
 func (o *ServerProperties) GetVmState() *string {
 	if o == nil {
 		return nil
 	}
-
 
 	return o.VmState
 
@@ -273,13 +245,11 @@ func (o *ServerProperties) GetVmStateOk() (*string, bool) {
 		return nil, false
 	}
 
-
 	return o.VmState, true
 }
 
 // SetVmState sets field value
 func (o *ServerProperties) SetVmState(v string) {
-
 
 	o.VmState = &v
 
@@ -294,15 +264,12 @@ func (o *ServerProperties) HasVmState() bool {
 	return false
 }
 
-
-
 // GetBootCdrom returns the BootCdrom field value
 // If the value is explicit nil, the zero value for ResourceReference will be returned
 func (o *ServerProperties) GetBootCdrom() *ResourceReference {
 	if o == nil {
 		return nil
 	}
-
 
 	return o.BootCdrom
 
@@ -316,13 +283,11 @@ func (o *ServerProperties) GetBootCdromOk() (*ResourceReference, bool) {
 		return nil, false
 	}
 
-
 	return o.BootCdrom, true
 }
 
 // SetBootCdrom sets field value
 func (o *ServerProperties) SetBootCdrom(v ResourceReference) {
-
 
 	o.BootCdrom = &v
 
@@ -337,15 +302,12 @@ func (o *ServerProperties) HasBootCdrom() bool {
 	return false
 }
 
-
-
 // GetBootVolume returns the BootVolume field value
 // If the value is explicit nil, the zero value for ResourceReference will be returned
 func (o *ServerProperties) GetBootVolume() *ResourceReference {
 	if o == nil {
 		return nil
 	}
-
 
 	return o.BootVolume
 
@@ -359,13 +321,11 @@ func (o *ServerProperties) GetBootVolumeOk() (*ResourceReference, bool) {
 		return nil, false
 	}
 
-
 	return o.BootVolume, true
 }
 
 // SetBootVolume sets field value
 func (o *ServerProperties) SetBootVolume(v ResourceReference) {
-
 
 	o.BootVolume = &v
 
@@ -380,15 +340,12 @@ func (o *ServerProperties) HasBootVolume() bool {
 	return false
 }
 
-
-
 // GetCpuFamily returns the CpuFamily field value
 // If the value is explicit nil, the zero value for string will be returned
 func (o *ServerProperties) GetCpuFamily() *string {
 	if o == nil {
 		return nil
 	}
-
 
 	return o.CpuFamily
 
@@ -402,13 +359,11 @@ func (o *ServerProperties) GetCpuFamilyOk() (*string, bool) {
 		return nil, false
 	}
 
-
 	return o.CpuFamily, true
 }
 
 // SetCpuFamily sets field value
 func (o *ServerProperties) SetCpuFamily(v string) {
-
 
 	o.CpuFamily = &v
 
@@ -423,15 +378,12 @@ func (o *ServerProperties) HasCpuFamily() bool {
 	return false
 }
 
-
-
 // GetType returns the Type field value
 // If the value is explicit nil, the zero value for string will be returned
 func (o *ServerProperties) GetType() *string {
 	if o == nil {
 		return nil
 	}
-
 
 	return o.Type
 
@@ -445,13 +397,11 @@ func (o *ServerProperties) GetTypeOk() (*string, bool) {
 		return nil, false
 	}
 
-
 	return o.Type, true
 }
 
 // SetType sets field value
 func (o *ServerProperties) SetType(v string) {
-
 
 	o.Type = &v
 
@@ -466,59 +416,48 @@ func (o *ServerProperties) HasType() bool {
 	return false
 }
 
-
 func (o ServerProperties) MarshalJSON() ([]byte, error) {
 	toSerialize := map[string]interface{}{}
 
 	if o.TemplateUuid != nil {
 		toSerialize["templateUuid"] = o.TemplateUuid
 	}
-	
 
 	if o.Name != nil {
 		toSerialize["name"] = o.Name
 	}
-	
 
 	if o.Cores != nil {
 		toSerialize["cores"] = o.Cores
 	}
-	
 
 	if o.Ram != nil {
 		toSerialize["ram"] = o.Ram
 	}
-	
 
 	if o.AvailabilityZone != nil {
 		toSerialize["availabilityZone"] = o.AvailabilityZone
 	}
-	
 
 	if o.VmState != nil {
 		toSerialize["vmState"] = o.VmState
 	}
-	
 
 	if o.BootCdrom != nil {
 		toSerialize["bootCdrom"] = o.BootCdrom
 	}
-	
 
 	if o.BootVolume != nil {
 		toSerialize["bootVolume"] = o.BootVolume
 	}
-	
 
 	if o.CpuFamily != nil {
 		toSerialize["cpuFamily"] = o.CpuFamily
 	}
-	
 
 	if o.Type != nil {
 		toSerialize["type"] = o.Type
 	}
-	
 	return json.Marshal(toSerialize)
 }
 
@@ -557,5 +496,3 @@ func (v *NullableServerProperties) UnmarshalJSON(src []byte) error {
 	v.isSet = true
 	return json.Unmarshal(src, &v.value)
 }
-
-

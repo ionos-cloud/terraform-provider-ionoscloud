@@ -1,7 +1,7 @@
 /*
  * CLOUD API
  *
- * An enterprise-grade Infrastructure is provided as a Service (IaaS) solution that can be managed through a browser-based \"Data Center Designer\" (DCD) tool or via an easy to use API.   The API allows you to perform a variety of management tasks such as spinning up additional servers, adding volumes, adjusting networking, and so forth. It is designed to allow users to leverage the same power and flexibility found within the DCD visual tool. Both tools are consistent with their concepts and lend well to making the experience smooth and intuitive.
+ * IONOS Enterprise-grade Infrastructure as a Service (IaaS) solutions can be managed through the Cloud API, in addition or as an alternative to the \"Data Center Designer\" (DCD) browser-based tool.    Both methods employ consistent concepts and features, deliver similar power and flexibility, and can be used to perform a multitude of management tasks, including adding servers, volumes, configuring networks, and so on.
  *
  * API version: 6.0-SDK.3
  */
@@ -28,11 +28,11 @@ var (
 type LocationsApiService service
 
 type ApiLocationsFindByRegionIdRequest struct {
-	ctx _context.Context
-	ApiService *LocationsApiService
-	regionId string
-	pretty *bool
-	depth *int32
+	ctx             _context.Context
+	ApiService      *LocationsApiService
+	regionId        string
+	pretty          *bool
+	depth           *int32
 	xContractNumber *int32
 }
 
@@ -54,8 +54,8 @@ func (r ApiLocationsFindByRegionIdRequest) Execute() (Locations, *APIResponse, e
 }
 
 /*
- * LocationsFindByRegionId List Locations within a region
- * Retrieve a list of Locations within a world's region
+ * LocationsFindByRegionId List locations within regions
+ * List locations by region ID.
  * @param ctx _context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
  * @param regionId
  * @return ApiLocationsFindByRegionIdRequest
@@ -63,8 +63,8 @@ func (r ApiLocationsFindByRegionIdRequest) Execute() (Locations, *APIResponse, e
 func (a *LocationsApiService) LocationsFindByRegionId(ctx _context.Context, regionId string) ApiLocationsFindByRegionIdRequest {
 	return ApiLocationsFindByRegionIdRequest{
 		ApiService: a,
-		ctx: ctx,
-		regionId: regionId,
+		ctx:        ctx,
+		regionId:   regionId,
 	}
 }
 
@@ -100,6 +100,7 @@ func (a *LocationsApiService) LocationsFindByRegionIdExecute(r ApiLocationsFindB
 	if r.depth != nil {
 		localVarQueryParams.Add("depth", parameterToString(*r.depth, ""))
 	}
+
 	// to determine the Content-Type header
 	localVarHTTPContentTypes := []string{}
 
@@ -141,12 +142,12 @@ func (a *LocationsApiService) LocationsFindByRegionIdExecute(r ApiLocationsFindB
 
 	localVarHTTPResponse, httpRequestTime, err := a.client.callAPI(req)
 
-	localVarAPIResponse := &APIResponse {
-		Response: localVarHTTPResponse,
-		Method: localVarHTTPMethod,
-		RequestURL: localVarPath,
+	localVarAPIResponse := &APIResponse{
+		Response:    localVarHTTPResponse,
+		Method:      localVarHTTPMethod,
+		RequestURL:  localVarPath,
 		RequestTime: httpRequestTime,
-		Operation: "LocationsFindByRegionId",
+		Operation:   "LocationsFindByRegionId",
 	}
 
 	if err != nil || localVarHTTPResponse == nil {
@@ -163,16 +164,16 @@ func (a *LocationsApiService) LocationsFindByRegionIdExecute(r ApiLocationsFindB
 	if localVarHTTPResponse.StatusCode >= 300 {
 		newErr := GenericOpenAPIError{
 			statusCode: localVarHTTPResponse.StatusCode,
-			body:  localVarBody,
-			error: fmt.Sprintf("%s: %s", localVarHTTPResponse.Status, string(localVarBody)),
+			body:       localVarBody,
+			error:      fmt.Sprintf(FormatStringErr, localVarHTTPResponse.Status, string(localVarBody)),
 		}
-			var v Error
-			err = a.client.decode(&v, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
-			if err != nil {
-				newErr.error = err.Error()
-				return localVarReturnValue, localVarAPIResponse, newErr
-			}
-			newErr.model = v
+		var v Error
+		err = a.client.decode(&v, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
+		if err != nil {
+			newErr.error = err.Error()
+			return localVarReturnValue, localVarAPIResponse, newErr
+		}
+		newErr.model = v
 		return localVarReturnValue, localVarAPIResponse, newErr
 	}
 
@@ -180,8 +181,8 @@ func (a *LocationsApiService) LocationsFindByRegionIdExecute(r ApiLocationsFindB
 	if err != nil {
 		newErr := GenericOpenAPIError{
 			statusCode: localVarHTTPResponse.StatusCode,
-			body:  localVarBody,
-			error: err.Error(),
+			body:       localVarBody,
+			error:      err.Error(),
 		}
 		return localVarReturnValue, localVarAPIResponse, newErr
 	}
@@ -190,12 +191,12 @@ func (a *LocationsApiService) LocationsFindByRegionIdExecute(r ApiLocationsFindB
 }
 
 type ApiLocationsFindByRegionIdAndIdRequest struct {
-	ctx _context.Context
-	ApiService *LocationsApiService
-	regionId string
-	locationId string
-	pretty *bool
-	depth *int32
+	ctx             _context.Context
+	ApiService      *LocationsApiService
+	regionId        string
+	locationId      string
+	pretty          *bool
+	depth           *int32
 	xContractNumber *int32
 }
 
@@ -217,7 +218,7 @@ func (r ApiLocationsFindByRegionIdAndIdRequest) Execute() (Location, *APIRespons
 }
 
 /*
- * LocationsFindByRegionIdAndId Retrieve a Location
+ * LocationsFindByRegionIdAndId Retrieve specified locations
  * Retrieves the attributes of a given location
  * @param ctx _context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
  * @param regionId
@@ -227,8 +228,8 @@ func (r ApiLocationsFindByRegionIdAndIdRequest) Execute() (Location, *APIRespons
 func (a *LocationsApiService) LocationsFindByRegionIdAndId(ctx _context.Context, regionId string, locationId string) ApiLocationsFindByRegionIdAndIdRequest {
 	return ApiLocationsFindByRegionIdAndIdRequest{
 		ApiService: a,
-		ctx: ctx,
-		regionId: regionId,
+		ctx:        ctx,
+		regionId:   regionId,
 		locationId: locationId,
 	}
 }
@@ -266,6 +267,7 @@ func (a *LocationsApiService) LocationsFindByRegionIdAndIdExecute(r ApiLocations
 	if r.depth != nil {
 		localVarQueryParams.Add("depth", parameterToString(*r.depth, ""))
 	}
+
 	// to determine the Content-Type header
 	localVarHTTPContentTypes := []string{}
 
@@ -307,12 +309,12 @@ func (a *LocationsApiService) LocationsFindByRegionIdAndIdExecute(r ApiLocations
 
 	localVarHTTPResponse, httpRequestTime, err := a.client.callAPI(req)
 
-	localVarAPIResponse := &APIResponse {
-		Response: localVarHTTPResponse,
-		Method: localVarHTTPMethod,
-		RequestURL: localVarPath,
+	localVarAPIResponse := &APIResponse{
+		Response:    localVarHTTPResponse,
+		Method:      localVarHTTPMethod,
+		RequestURL:  localVarPath,
 		RequestTime: httpRequestTime,
-		Operation: "LocationsFindByRegionIdAndId",
+		Operation:   "LocationsFindByRegionIdAndId",
 	}
 
 	if err != nil || localVarHTTPResponse == nil {
@@ -329,16 +331,16 @@ func (a *LocationsApiService) LocationsFindByRegionIdAndIdExecute(r ApiLocations
 	if localVarHTTPResponse.StatusCode >= 300 {
 		newErr := GenericOpenAPIError{
 			statusCode: localVarHTTPResponse.StatusCode,
-			body:  localVarBody,
-			error: fmt.Sprintf("%s: %s", localVarHTTPResponse.Status, string(localVarBody)),
+			body:       localVarBody,
+			error:      fmt.Sprintf(FormatStringErr, localVarHTTPResponse.Status, string(localVarBody)),
 		}
-			var v Error
-			err = a.client.decode(&v, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
-			if err != nil {
-				newErr.error = err.Error()
-				return localVarReturnValue, localVarAPIResponse, newErr
-			}
-			newErr.model = v
+		var v Error
+		err = a.client.decode(&v, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
+		if err != nil {
+			newErr.error = err.Error()
+			return localVarReturnValue, localVarAPIResponse, newErr
+		}
+		newErr.model = v
 		return localVarReturnValue, localVarAPIResponse, newErr
 	}
 
@@ -346,8 +348,8 @@ func (a *LocationsApiService) LocationsFindByRegionIdAndIdExecute(r ApiLocations
 	if err != nil {
 		newErr := GenericOpenAPIError{
 			statusCode: localVarHTTPResponse.StatusCode,
-			body:  localVarBody,
-			error: err.Error(),
+			body:       localVarBody,
+			error:      err.Error(),
 		}
 		return localVarReturnValue, localVarAPIResponse, newErr
 	}
@@ -356,10 +358,12 @@ func (a *LocationsApiService) LocationsFindByRegionIdAndIdExecute(r ApiLocations
 }
 
 type ApiLocationsGetRequest struct {
-	ctx _context.Context
-	ApiService *LocationsApiService
-	pretty *bool
-	depth *int32
+	ctx             _context.Context
+	ApiService      *LocationsApiService
+	filters         _neturl.Values
+	orderBy         *string
+	pretty          *bool
+	depth           *int32
 	xContractNumber *int32
 }
 
@@ -376,20 +380,34 @@ func (r ApiLocationsGetRequest) XContractNumber(xContractNumber int32) ApiLocati
 	return r
 }
 
+// Filters query parameters limit results to those containing a matching value for a specific property.
+func (r ApiLocationsGetRequest) Filter(key string, value string) ApiLocationsGetRequest {
+	filterKey := fmt.Sprintf(FilterQueryParam, key)
+	r.filters[filterKey] = []string{value}
+	return r
+}
+
+// OrderBy query param sorts the results alphanumerically in ascending order based on the specified property.
+func (r ApiLocationsGetRequest) OrderBy(orderBy string) ApiLocationsGetRequest {
+	r.orderBy = &orderBy
+	return r
+}
+
 func (r ApiLocationsGetRequest) Execute() (Locations, *APIResponse, error) {
 	return r.ApiService.LocationsGetExecute(r)
 }
 
 /*
- * LocationsGet List Locations
- * Retrieve a list of Locations. This list represents where you can provision your virtual data centers
+ * LocationsGet List locations
+ * List the available locations for provisioning your virtual data centers.
  * @param ctx _context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
  * @return ApiLocationsGetRequest
  */
 func (a *LocationsApiService) LocationsGet(ctx _context.Context) ApiLocationsGetRequest {
 	return ApiLocationsGetRequest{
 		ApiService: a,
-		ctx: ctx,
+		ctx:        ctx,
+		filters:    _neturl.Values{},
 	}
 }
 
@@ -424,6 +442,17 @@ func (a *LocationsApiService) LocationsGetExecute(r ApiLocationsGetRequest) (Loc
 	if r.depth != nil {
 		localVarQueryParams.Add("depth", parameterToString(*r.depth, ""))
 	}
+	if r.orderBy != nil {
+		localVarQueryParams.Add("orderBy", parameterToString(*r.orderBy, ""))
+	}
+	if len(r.filters) > 0 {
+		for k, v := range r.filters {
+			for _, iv := range v {
+				localVarQueryParams.Add(k, iv)
+			}
+		}
+	}
+
 	// to determine the Content-Type header
 	localVarHTTPContentTypes := []string{}
 
@@ -465,12 +494,12 @@ func (a *LocationsApiService) LocationsGetExecute(r ApiLocationsGetRequest) (Loc
 
 	localVarHTTPResponse, httpRequestTime, err := a.client.callAPI(req)
 
-	localVarAPIResponse := &APIResponse {
-		Response: localVarHTTPResponse,
-		Method: localVarHTTPMethod,
-		RequestURL: localVarPath,
+	localVarAPIResponse := &APIResponse{
+		Response:    localVarHTTPResponse,
+		Method:      localVarHTTPMethod,
+		RequestURL:  localVarPath,
 		RequestTime: httpRequestTime,
-		Operation: "LocationsGet",
+		Operation:   "LocationsGet",
 	}
 
 	if err != nil || localVarHTTPResponse == nil {
@@ -487,16 +516,16 @@ func (a *LocationsApiService) LocationsGetExecute(r ApiLocationsGetRequest) (Loc
 	if localVarHTTPResponse.StatusCode >= 300 {
 		newErr := GenericOpenAPIError{
 			statusCode: localVarHTTPResponse.StatusCode,
-			body:  localVarBody,
-			error: fmt.Sprintf("%s: %s", localVarHTTPResponse.Status, string(localVarBody)),
+			body:       localVarBody,
+			error:      fmt.Sprintf(FormatStringErr, localVarHTTPResponse.Status, string(localVarBody)),
 		}
-			var v Error
-			err = a.client.decode(&v, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
-			if err != nil {
-				newErr.error = err.Error()
-				return localVarReturnValue, localVarAPIResponse, newErr
-			}
-			newErr.model = v
+		var v Error
+		err = a.client.decode(&v, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
+		if err != nil {
+			newErr.error = err.Error()
+			return localVarReturnValue, localVarAPIResponse, newErr
+		}
+		newErr.model = v
 		return localVarReturnValue, localVarAPIResponse, newErr
 	}
 
@@ -504,8 +533,8 @@ func (a *LocationsApiService) LocationsGetExecute(r ApiLocationsGetRequest) (Loc
 	if err != nil {
 		newErr := GenericOpenAPIError{
 			statusCode: localVarHTTPResponse.StatusCode,
-			body:  localVarBody,
-			error: err.Error(),
+			body:       localVarBody,
+			error:      err.Error(),
 		}
 		return localVarReturnValue, localVarAPIResponse, newErr
 	}

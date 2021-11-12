@@ -1,7 +1,7 @@
 /*
  * CLOUD API
  *
- * An enterprise-grade Infrastructure is provided as a Service (IaaS) solution that can be managed through a browser-based \"Data Center Designer\" (DCD) tool or via an easy to use API.   The API allows you to perform a variety of management tasks such as spinning up additional servers, adding volumes, adjusting networking, and so forth. It is designed to allow users to leverage the same power and flexibility found within the DCD visual tool. Both tools are consistent with their concepts and lend well to making the experience smooth and intuitive.
+ * IONOS Enterprise-grade Infrastructure as a Service (IaaS) solutions can be managed through the Cloud API, in addition or as an alternative to the \"Data Center Designer\" (DCD) browser-based tool.    Both methods employ consistent concepts and features, deliver similar power and flexibility, and can be used to perform a multitude of management tasks, including adding servers, volumes, configuring networks, and so on.
  *
  * API version: 6.0-SDK.3
  */
@@ -26,15 +26,12 @@ type ResourceGroups struct {
 	Items *[]Resource `json:"items,omitempty"`
 }
 
-
-
 // GetId returns the Id field value
 // If the value is explicit nil, the zero value for string will be returned
 func (o *ResourceGroups) GetId() *string {
 	if o == nil {
 		return nil
 	}
-
 
 	return o.Id
 
@@ -48,13 +45,11 @@ func (o *ResourceGroups) GetIdOk() (*string, bool) {
 		return nil, false
 	}
 
-
 	return o.Id, true
 }
 
 // SetId sets field value
 func (o *ResourceGroups) SetId(v string) {
-
 
 	o.Id = &v
 
@@ -69,15 +64,12 @@ func (o *ResourceGroups) HasId() bool {
 	return false
 }
 
-
-
 // GetType returns the Type field value
 // If the value is explicit nil, the zero value for Type will be returned
 func (o *ResourceGroups) GetType() *Type {
 	if o == nil {
 		return nil
 	}
-
 
 	return o.Type
 
@@ -91,13 +83,11 @@ func (o *ResourceGroups) GetTypeOk() (*Type, bool) {
 		return nil, false
 	}
 
-
 	return o.Type, true
 }
 
 // SetType sets field value
 func (o *ResourceGroups) SetType(v Type) {
-
 
 	o.Type = &v
 
@@ -112,15 +102,12 @@ func (o *ResourceGroups) HasType() bool {
 	return false
 }
 
-
-
 // GetHref returns the Href field value
 // If the value is explicit nil, the zero value for string will be returned
 func (o *ResourceGroups) GetHref() *string {
 	if o == nil {
 		return nil
 	}
-
 
 	return o.Href
 
@@ -134,13 +121,11 @@ func (o *ResourceGroups) GetHrefOk() (*string, bool) {
 		return nil, false
 	}
 
-
 	return o.Href, true
 }
 
 // SetHref sets field value
 func (o *ResourceGroups) SetHref(v string) {
-
 
 	o.Href = &v
 
@@ -155,15 +140,12 @@ func (o *ResourceGroups) HasHref() bool {
 	return false
 }
 
-
-
 // GetItems returns the Items field value
 // If the value is explicit nil, the zero value for []Resource will be returned
 func (o *ResourceGroups) GetItems() *[]Resource {
 	if o == nil {
 		return nil
 	}
-
 
 	return o.Items
 
@@ -177,13 +159,11 @@ func (o *ResourceGroups) GetItemsOk() (*[]Resource, bool) {
 		return nil, false
 	}
 
-
 	return o.Items, true
 }
 
 // SetItems sets field value
 func (o *ResourceGroups) SetItems(v []Resource) {
-
 
 	o.Items = &v
 
@@ -198,29 +178,24 @@ func (o *ResourceGroups) HasItems() bool {
 	return false
 }
 
-
 func (o ResourceGroups) MarshalJSON() ([]byte, error) {
 	toSerialize := map[string]interface{}{}
 
 	if o.Id != nil {
 		toSerialize["id"] = o.Id
 	}
-	
 
 	if o.Type != nil {
 		toSerialize["type"] = o.Type
 	}
-	
 
 	if o.Href != nil {
 		toSerialize["href"] = o.Href
 	}
-	
 
 	if o.Items != nil {
 		toSerialize["items"] = o.Items
 	}
-	
 	return json.Marshal(toSerialize)
 }
 
@@ -259,5 +234,3 @@ func (v *NullableResourceGroups) UnmarshalJSON(src []byte) error {
 	v.isSet = true
 	return json.Unmarshal(src, &v.value)
 }
-
-

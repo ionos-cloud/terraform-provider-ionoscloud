@@ -17,7 +17,7 @@ func resourceDatacenter() *schema.Resource {
 		UpdateContext: resourceDatacenterUpdate,
 		DeleteContext: resourceDatacenterDelete,
 		Importer: &schema.ResourceImporter{
-			StateContext: schema.ImportStatePassthroughContext,
+			StateContext: resourceDatacenterImport,
 		},
 		Schema: map[string]*schema.Schema{
 
@@ -33,9 +33,10 @@ func resourceDatacenter() *schema.Resource {
 				ValidateFunc: validation.All(validation.StringIsNotWhiteSpace),
 			},
 			"description": {
-				Type:     schema.TypeString,
-				Optional: true,
-				Computed: true,
+				Type:        schema.TypeString,
+				Description: "A description for the datacenter, e.g. staging, production",
+				Optional:    true,
+				Computed:    true,
 			},
 			"sec_auth_protection": {
 				Type:     schema.TypeBool,
@@ -106,6 +107,7 @@ func resourceDatacenterCreate(ctx context.Context, d *schema.ResourceData, meta 
 	}
 
 	createdDatacenter, apiResponse, err := client.DataCentersApi.DatacentersPost(ctx).Datacenter(datacenter).Execute()
+	logApiRequestTime(apiResponse)
 
 	if err != nil {
 		diags := diag.FromErr(fmt.Errorf("error creating data center (%s) (%s)", d.Id(), err))
@@ -135,9 +137,10 @@ func resourceDatacenterRead(ctx context.Context, d *schema.ResourceData, meta in
 	client := meta.(SdkBundle).CloudApiClient
 
 	datacenter, apiResponse, err := client.DataCentersApi.DatacentersFindById(ctx, d.Id()).Execute()
+	logApiRequestTime(apiResponse)
 
 	if err != nil {
-		if apiResponse != nil && apiResponse.StatusCode == 404 {
+		if apiResponse != nil && apiResponse.Response != nil && apiResponse.StatusCode == 404 {
 			d.SetId("")
 			return nil
 		}
@@ -145,83 +148,8 @@ func resourceDatacenterRead(ctx context.Context, d *schema.ResourceData, meta in
 		return diags
 	}
 
-	if datacenter.Properties.Name != nil {
-		err := d.Set("name", *datacenter.Properties.Name)
-		if err != nil {
-			diags := diag.FromErr(fmt.Errorf("error while setting name property for datacenter %s: %s", d.Id(), err))
-			return diags
-		}
-	}
-
-	if datacenter.Properties.Location != nil {
-		err := d.Set("location", *datacenter.Properties.Location)
-		if err != nil {
-			diags := diag.FromErr(fmt.Errorf("error while setting location property for datacenter %s: %s", d.Id(), err))
-			return diags
-		}
-	}
-
-	if datacenter.Properties.Description != nil {
-		err := d.Set("description", *datacenter.Properties.Description)
-		if err != nil {
-			diags := diag.FromErr(fmt.Errorf("error while setting description property for datacenter %s: %s", d.Id(), err))
-			return diags
-		}
-	}
-
-	if datacenter.Properties.SecAuthProtection != nil {
-		err := d.Set("sec_auth_protection", *datacenter.Properties.SecAuthProtection)
-		if err != nil {
-			diags := diag.FromErr(fmt.Errorf("error while setting sec_auth_protection property for datacenter %s: %s", d.Id(), err))
-			return diags
-		}
-	}
-
-	if datacenter.Properties.Version != nil {
-		err := d.Set("version", *datacenter.Properties.Version)
-		if err != nil {
-			diags := diag.FromErr(fmt.Errorf("error while setting version property for datacenter %s: %s", d.Id(), err))
-			return diags
-		}
-	}
-
-	if datacenter.Properties.Features != nil && len(*datacenter.Properties.Features) > 0 {
-		err := d.Set("features", *datacenter.Properties.Features)
-		if err != nil {
-			diags := diag.FromErr(fmt.Errorf("error while setting features property for datacenter %s: %s", d.Id(), err))
-			return diags
-		}
-	}
-
-	if datacenter.Properties.CpuArchitecture != nil && len(*datacenter.Properties.CpuArchitecture) > 0 {
-		var cpuArchitectures []interface{}
-		for _, cpuArchitecture := range *datacenter.Properties.CpuArchitecture {
-			architectureEntry := make(map[string]interface{})
-
-			if cpuArchitecture.CpuFamily != nil {
-				architectureEntry["cpu_family"] = *cpuArchitecture.CpuFamily
-			}
-
-			if cpuArchitecture.MaxCores != nil {
-				architectureEntry["max_cores"] = *cpuArchitecture.MaxCores
-			}
-
-			if cpuArchitecture.MaxRam != nil {
-				architectureEntry["max_ram"] = *cpuArchitecture.MaxRam
-			}
-
-			if cpuArchitecture.Vendor != nil {
-				architectureEntry["vendor"] = *cpuArchitecture.Vendor
-			}
-
-			cpuArchitectures = append(cpuArchitectures, architectureEntry)
-		}
-		if len(cpuArchitectures) > 0 {
-			if err := d.Set("cpu_architecture", cpuArchitectures); err != nil {
-				diags := diag.FromErr(fmt.Errorf("error while setting features property for datacenter %s: %s", d.Id(), err))
-				return diags
-			}
-		}
+	if err := setDatacenterData(d, &datacenter); err != nil {
+		return diag.FromErr(err)
 	}
 
 	return nil
@@ -256,6 +184,7 @@ func resourceDatacenterUpdate(ctx context.Context, d *schema.ResourceData, meta 
 		obj.SecAuthProtection = &newSecAuthProtectionStr
 	}
 	_, apiResponse, err := client.DataCentersApi.DatacentersPatch(ctx, d.Id()).Datacenter(obj).Execute()
+	logApiRequestTime(apiResponse)
 
 	if err != nil {
 		diags := diag.FromErr(fmt.Errorf("an error occured while update the data center ID %s %s", d.Id(), err))
@@ -277,6 +206,7 @@ func resourceDatacenterDelete(ctx context.Context, d *schema.ResourceData, meta 
 	client := meta.(SdkBundle).CloudApiClient
 
 	apiResponse, err := client.DataCentersApi.DatacentersDelete(ctx, d.Id()).Execute()
+	logApiRequestTime(apiResponse)
 
 	if err != nil {
 		diags := diag.FromErr(err)
@@ -291,5 +221,114 @@ func resourceDatacenterDelete(ctx context.Context, d *schema.ResourceData, meta 
 	}
 
 	d.SetId("")
+	return nil
+}
+
+func resourceDatacenterImport(ctx context.Context, d *schema.ResourceData, meta interface{}) ([]*schema.ResourceData, error) {
+	client := meta.(*ionoscloud.APIClient)
+
+	dcId := d.Id()
+
+	datacenter, apiResponse, err := client.DataCentersApi.DatacentersFindById(ctx, d.Id()).Execute()
+	logApiRequestTime(apiResponse)
+
+	if err != nil {
+		if apiResponse != nil && apiResponse.Response != nil && apiResponse.StatusCode == 404 {
+			d.SetId("")
+			return nil, fmt.Errorf("unable to find datacenter %q", dcId)
+		}
+		return nil, fmt.Errorf("an error occured while retrieving the datacenter %q, %q", dcId, err)
+	}
+
+	log.Printf("[INFO] Datacenter found: %+v", datacenter)
+
+	if err := setDatacenterData(d, &datacenter); err != nil {
+		return nil, err
+	}
+
+	return []*schema.ResourceData{d}, nil
+}
+
+func setDatacenterData(d *schema.ResourceData, datacenter *ionoscloud.Datacenter) error {
+
+	if datacenter.Id != nil {
+		d.SetId(*datacenter.Id)
+	}
+
+	if datacenter.Properties != nil {
+		if datacenter.Properties.Location != nil {
+			err := d.Set("location", *datacenter.Properties.Location)
+			if err != nil {
+				return fmt.Errorf("error while setting location property for datacenter %s: %s", d.Id(), err)
+			}
+		}
+
+		if datacenter.Properties.Description != nil {
+			err := d.Set("description", *datacenter.Properties.Description)
+			if err != nil {
+				return fmt.Errorf("error while setting description property for datacenter %s: %s", d.Id(), err)
+			}
+		}
+
+		if datacenter.Properties.Name != nil {
+			err := d.Set("name", *datacenter.Properties.Name)
+			if err != nil {
+				return fmt.Errorf("error while setting name property for datacenter %s: %s", d.Id(), err)
+			}
+		}
+
+		if datacenter.Properties.Version != nil {
+			err := d.Set("version", *datacenter.Properties.Version)
+			if err != nil {
+				return fmt.Errorf("error while setting version property for datacenter %s: %s", d.Id(), err)
+			}
+		}
+
+		if datacenter.Properties.Features != nil && len(*datacenter.Properties.Features) > 0 {
+			err := d.Set("features", *datacenter.Properties.Features)
+			if err != nil {
+				return fmt.Errorf("error while setting features property for datacenter %s: %s", d.Id(), err)
+			}
+		}
+
+		if datacenter.Properties.SecAuthProtection != nil {
+			err := d.Set("sec_auth_protection", *datacenter.Properties.SecAuthProtection)
+			if err != nil {
+				return fmt.Errorf("error while setting sec_auth_protection property for datacenter %s: %s", d.Id(), err)
+			}
+		}
+
+		if datacenter.Properties.CpuArchitecture != nil && len(*datacenter.Properties.CpuArchitecture) > 0 {
+			var cpuArchitectures []interface{}
+			for _, cpuArchitecture := range *datacenter.Properties.CpuArchitecture {
+				architectureEntry := make(map[string]interface{})
+
+				if cpuArchitecture.CpuFamily != nil {
+					architectureEntry["cpu_family"] = *cpuArchitecture.CpuFamily
+				}
+
+				if cpuArchitecture.MaxCores != nil {
+					architectureEntry["max_cores"] = *cpuArchitecture.MaxCores
+				}
+
+				if cpuArchitecture.MaxRam != nil {
+					architectureEntry["max_ram"] = *cpuArchitecture.MaxRam
+				}
+
+				if cpuArchitecture.Vendor != nil {
+					architectureEntry["vendor"] = *cpuArchitecture.Vendor
+				}
+
+				cpuArchitectures = append(cpuArchitectures, architectureEntry)
+
+				if len(cpuArchitectures) > 0 {
+					if err := d.Set("cpu_architecture", cpuArchitectures); err != nil {
+						return fmt.Errorf("error while setting cpu_architecture property for datacenter %s: %s", d.Id(), err)
+					}
+				}
+			}
+		}
+	}
+
 	return nil
 }

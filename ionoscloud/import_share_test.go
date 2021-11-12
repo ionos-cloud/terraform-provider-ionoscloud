@@ -8,7 +8,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
 )
 
-func TestAccShare_ImportBasic(t *testing.T) {
+func TestAccShareImportBasic(t *testing.T) {
 	resourceName := "share"
 
 	resource.Test(t, resource.TestCase{
@@ -21,7 +21,7 @@ func TestAccShare_ImportBasic(t *testing.T) {
 			},
 
 			{
-				ResourceName:      fmt.Sprintf("ionoscloud_share.%s", resourceName),
+				ResourceName:      fmt.Sprintf("%s.%s", ShareResource, resourceName),
 				ImportStateIdFunc: testAccShareImportStateId,
 				ImportState:       true,
 				ImportStateVerify: true,
@@ -34,7 +34,7 @@ func testAccShareImportStateId(s *terraform.State) (string, error) {
 	importID := ""
 
 	for _, rs := range s.RootModule().Resources {
-		if rs.Type != "ionoscloud_share" {
+		if rs.Type != ShareResource {
 			continue
 		}
 

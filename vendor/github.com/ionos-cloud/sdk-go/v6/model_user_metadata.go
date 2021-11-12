@@ -1,7 +1,7 @@
 /*
  * CLOUD API
  *
- * An enterprise-grade Infrastructure is provided as a Service (IaaS) solution that can be managed through a browser-based \"Data Center Designer\" (DCD) tool or via an easy to use API.   The API allows you to perform a variety of management tasks such as spinning up additional servers, adding volumes, adjusting networking, and so forth. It is designed to allow users to leverage the same power and flexibility found within the DCD visual tool. Both tools are consistent with their concepts and lend well to making the experience smooth and intuitive.
+ * IONOS Enterprise-grade Infrastructure as a Service (IaaS) solutions can be managed through the Cloud API, in addition or as an alternative to the \"Data Center Designer\" (DCD) browser-based tool.    Both methods employ consistent concepts and features, deliver similar power and flexibility, and can be used to perform a multitude of management tasks, including adding servers, volumes, configuring networks, and so on.
  *
  * API version: 6.0-SDK.3
  */
@@ -17,7 +17,7 @@ import (
 
 // UserMetadata struct for UserMetadata
 type UserMetadata struct {
-	// Resource's Entity Tag as defined in http://www.w3.org/Protocols/rfc2616/rfc2616-sec3.html#sec3.11 . Entity Tag is also added as an 'ETag response header to requests which don't use 'depth' parameter. 
+	// Resource's Entity Tag as defined in http://www.w3.org/Protocols/rfc2616/rfc2616-sec3.html#sec3.11 . Entity Tag is also added as an 'ETag response header to requests which don't use 'depth' parameter.
 	Etag *string `json:"etag,omitempty"`
 	// time of creation of the user
 	CreatedDate *IonosTime
@@ -25,15 +25,12 @@ type UserMetadata struct {
 	LastLogin *IonosTime
 }
 
-
-
 // GetEtag returns the Etag field value
 // If the value is explicit nil, the zero value for string will be returned
 func (o *UserMetadata) GetEtag() *string {
 	if o == nil {
 		return nil
 	}
-
 
 	return o.Etag
 
@@ -47,13 +44,11 @@ func (o *UserMetadata) GetEtagOk() (*string, bool) {
 		return nil, false
 	}
 
-
 	return o.Etag, true
 }
 
 // SetEtag sets field value
 func (o *UserMetadata) SetEtag(v string) {
-
 
 	o.Etag = &v
 
@@ -68,8 +63,6 @@ func (o *UserMetadata) HasEtag() bool {
 	return false
 }
 
-
-
 // GetCreatedDate returns the CreatedDate field value
 // If the value is explicit nil, the zero value for time.Time will be returned
 func (o *UserMetadata) GetCreatedDate() *time.Time {
@@ -81,7 +74,6 @@ func (o *UserMetadata) GetCreatedDate() *time.Time {
 		return nil
 	}
 	return &o.CreatedDate.Time
-
 
 }
 
@@ -105,7 +97,6 @@ func (o *UserMetadata) SetCreatedDate(v time.Time) {
 
 	o.CreatedDate = &IonosTime{v}
 
-
 }
 
 // HasCreatedDate returns a boolean if a field has been set.
@@ -116,8 +107,6 @@ func (o *UserMetadata) HasCreatedDate() bool {
 
 	return false
 }
-
-
 
 // GetLastLogin returns the LastLogin field value
 // If the value is explicit nil, the zero value for time.Time will be returned
@@ -130,7 +119,6 @@ func (o *UserMetadata) GetLastLogin() *time.Time {
 		return nil
 	}
 	return &o.LastLogin.Time
-
 
 }
 
@@ -154,7 +142,6 @@ func (o *UserMetadata) SetLastLogin(v time.Time) {
 
 	o.LastLogin = &IonosTime{v}
 
-
 }
 
 // HasLastLogin returns a boolean if a field has been set.
@@ -166,24 +153,20 @@ func (o *UserMetadata) HasLastLogin() bool {
 	return false
 }
 
-
 func (o UserMetadata) MarshalJSON() ([]byte, error) {
 	toSerialize := map[string]interface{}{}
 
 	if o.Etag != nil {
 		toSerialize["etag"] = o.Etag
 	}
-	
 
 	if o.CreatedDate != nil {
 		toSerialize["createdDate"] = o.CreatedDate
 	}
-	
 
 	if o.LastLogin != nil {
 		toSerialize["lastLogin"] = o.LastLogin
 	}
-	
 	return json.Marshal(toSerialize)
 }
 
@@ -222,5 +205,3 @@ func (v *NullableUserMetadata) UnmarshalJSON(src []byte) error {
 	v.isSet = true
 	return json.Unmarshal(src, &v.value)
 }
-
-

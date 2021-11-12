@@ -1,7 +1,7 @@
 /*
  * CLOUD API
  *
- * An enterprise-grade Infrastructure is provided as a Service (IaaS) solution that can be managed through a browser-based \"Data Center Designer\" (DCD) tool or via an easy to use API.   The API allows you to perform a variety of management tasks such as spinning up additional servers, adding volumes, adjusting networking, and so forth. It is designed to allow users to leverage the same power and flexibility found within the DCD visual tool. Both tools are consistent with their concepts and lend well to making the experience smooth and intuitive.
+ * IONOS Enterprise-grade Infrastructure as a Service (IaaS) solutions can be managed through the Cloud API, in addition or as an alternative to the \"Data Center Designer\" (DCD) browser-based tool.    Both methods employ consistent concepts and features, deliver similar power and flexibility, and can be used to perform a multitude of management tasks, including adding servers, volumes, configuring networks, and so on.
  *
  * API version: 6.0-SDK.3
  */
@@ -16,12 +16,10 @@ import (
 
 // ConnectableDatacenter struct for ConnectableDatacenter
 type ConnectableDatacenter struct {
-	Id *string `json:"id,omitempty"`
-	Name *string `json:"name,omitempty"`
+	Id       *string `json:"id,omitempty"`
+	Name     *string `json:"name,omitempty"`
 	Location *string `json:"location,omitempty"`
 }
-
-
 
 // GetId returns the Id field value
 // If the value is explicit nil, the zero value for string will be returned
@@ -29,7 +27,6 @@ func (o *ConnectableDatacenter) GetId() *string {
 	if o == nil {
 		return nil
 	}
-
 
 	return o.Id
 
@@ -43,13 +40,11 @@ func (o *ConnectableDatacenter) GetIdOk() (*string, bool) {
 		return nil, false
 	}
 
-
 	return o.Id, true
 }
 
 // SetId sets field value
 func (o *ConnectableDatacenter) SetId(v string) {
-
 
 	o.Id = &v
 
@@ -64,15 +59,12 @@ func (o *ConnectableDatacenter) HasId() bool {
 	return false
 }
 
-
-
 // GetName returns the Name field value
 // If the value is explicit nil, the zero value for string will be returned
 func (o *ConnectableDatacenter) GetName() *string {
 	if o == nil {
 		return nil
 	}
-
 
 	return o.Name
 
@@ -86,13 +78,11 @@ func (o *ConnectableDatacenter) GetNameOk() (*string, bool) {
 		return nil, false
 	}
 
-
 	return o.Name, true
 }
 
 // SetName sets field value
 func (o *ConnectableDatacenter) SetName(v string) {
-
 
 	o.Name = &v
 
@@ -107,15 +97,12 @@ func (o *ConnectableDatacenter) HasName() bool {
 	return false
 }
 
-
-
 // GetLocation returns the Location field value
 // If the value is explicit nil, the zero value for string will be returned
 func (o *ConnectableDatacenter) GetLocation() *string {
 	if o == nil {
 		return nil
 	}
-
 
 	return o.Location
 
@@ -129,13 +116,11 @@ func (o *ConnectableDatacenter) GetLocationOk() (*string, bool) {
 		return nil, false
 	}
 
-
 	return o.Location, true
 }
 
 // SetLocation sets field value
 func (o *ConnectableDatacenter) SetLocation(v string) {
-
 
 	o.Location = &v
 
@@ -150,24 +135,20 @@ func (o *ConnectableDatacenter) HasLocation() bool {
 	return false
 }
 
-
 func (o ConnectableDatacenter) MarshalJSON() ([]byte, error) {
 	toSerialize := map[string]interface{}{}
 
 	if o.Id != nil {
 		toSerialize["id"] = o.Id
 	}
-	
 
 	if o.Name != nil {
 		toSerialize["name"] = o.Name
 	}
-	
 
 	if o.Location != nil {
 		toSerialize["location"] = o.Location
 	}
-	
 	return json.Marshal(toSerialize)
 }
 
@@ -206,5 +187,3 @@ func (v *NullableConnectableDatacenter) UnmarshalJSON(src []byte) error {
 	v.isSet = true
 	return json.Unmarshal(src, &v.value)
 }
-
-

@@ -1,7 +1,7 @@
 /*
  * CLOUD API
  *
- * An enterprise-grade Infrastructure is provided as a Service (IaaS) solution that can be managed through a browser-based \"Data Center Designer\" (DCD) tool or via an easy to use API.   The API allows you to perform a variety of management tasks such as spinning up additional servers, adding volumes, adjusting networking, and so forth. It is designed to allow users to leverage the same power and flexibility found within the DCD visual tool. Both tools are consistent with their concepts and lend well to making the experience smooth and intuitive.
+ * IONOS Enterprise-grade Infrastructure as a Service (IaaS) solutions can be managed through the Cloud API, in addition or as an alternative to the \"Data Center Designer\" (DCD) browser-based tool.    Both methods employ consistent concepts and features, deliver similar power and flexibility, and can be used to perform a multitude of management tasks, including adding servers, volumes, configuring networks, and so on.
  *
  * API version: 6.0-SDK.3
  */
@@ -18,11 +18,9 @@ import (
 type ResourceProperties struct {
 	// name of the resource
 	Name *string `json:"name,omitempty"`
-	// Boolean value representing if the resource is multi factor protected or not e.g. using two factor protection. Currently only Data Centers and Snapshots are allowed to be multi factor protected, The value of attribute if null is intentional and it means that the resource doesn't support multi factor protection at all.
+	// Boolean value representing if the resource is multi factor protected or not e.g. using two factor protection. Currently only data centers and Snapshots are allowed to be multi factor protected, The value of attribute if null is intentional and it means that the resource doesn't support multi factor protection at all.
 	SecAuthProtection *bool `json:"secAuthProtection,omitempty"`
 }
-
-
 
 // GetName returns the Name field value
 // If the value is explicit nil, the zero value for string will be returned
@@ -30,7 +28,6 @@ func (o *ResourceProperties) GetName() *string {
 	if o == nil {
 		return nil
 	}
-
 
 	return o.Name
 
@@ -44,13 +41,11 @@ func (o *ResourceProperties) GetNameOk() (*string, bool) {
 		return nil, false
 	}
 
-
 	return o.Name, true
 }
 
 // SetName sets field value
 func (o *ResourceProperties) SetName(v string) {
-
 
 	o.Name = &v
 
@@ -65,15 +60,12 @@ func (o *ResourceProperties) HasName() bool {
 	return false
 }
 
-
-
 // GetSecAuthProtection returns the SecAuthProtection field value
 // If the value is explicit nil, the zero value for bool will be returned
 func (o *ResourceProperties) GetSecAuthProtection() *bool {
 	if o == nil {
 		return nil
 	}
-
 
 	return o.SecAuthProtection
 
@@ -87,13 +79,11 @@ func (o *ResourceProperties) GetSecAuthProtectionOk() (*bool, bool) {
 		return nil, false
 	}
 
-
 	return o.SecAuthProtection, true
 }
 
 // SetSecAuthProtection sets field value
 func (o *ResourceProperties) SetSecAuthProtection(v bool) {
-
 
 	o.SecAuthProtection = &v
 
@@ -108,19 +98,16 @@ func (o *ResourceProperties) HasSecAuthProtection() bool {
 	return false
 }
 
-
 func (o ResourceProperties) MarshalJSON() ([]byte, error) {
 	toSerialize := map[string]interface{}{}
 
 	if o.Name != nil {
 		toSerialize["name"] = o.Name
 	}
-	
 
 	if o.SecAuthProtection != nil {
 		toSerialize["secAuthProtection"] = o.SecAuthProtection
 	}
-	
 	return json.Marshal(toSerialize)
 }
 
@@ -159,5 +146,3 @@ func (v *NullableResourceProperties) UnmarshalJSON(src []byte) error {
 	v.isSet = true
 	return json.Unmarshal(src, &v.value)
 }
-
-

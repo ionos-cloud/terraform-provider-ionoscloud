@@ -7,6 +7,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	ionoscloud "github.com/ionos-cloud/sdk-go/v6"
 	"log"
+	"strings"
 )
 
 func resourceNetworkLoadBalancer() *schema.Resource {
@@ -15,6 +16,9 @@ func resourceNetworkLoadBalancer() *schema.Resource {
 		ReadContext:   resourceNetworkLoadBalancerRead,
 		UpdateContext: resourceNetworkLoadBalancerUpdate,
 		DeleteContext: resourceNetworkLoadBalancerDelete,
+		Importer: &schema.ResourceImporter{
+			StateContext: resourceNetworkLoadBalancerImport,
+		},
 		Schema: map[string]*schema.Schema{
 
 			"name": {
@@ -118,6 +122,7 @@ func resourceNetworkLoadBalancerCreate(ctx context.Context, d *schema.ResourceDa
 	dcId := d.Get("datacenter_id").(string)
 
 	networkLoadBalancerResp, apiResponse, err := client.NetworkLoadBalancersApi.DatacentersNetworkloadbalancersPost(ctx, dcId).NetworkLoadBalancer(networkLoadBalancer).Execute()
+	logApiRequestTime(apiResponse)
 
 	if err != nil {
 		d.SetId("")
@@ -147,10 +152,11 @@ func resourceNetworkLoadBalancerRead(ctx context.Context, d *schema.ResourceData
 	dcId := d.Get("datacenter_id").(string)
 
 	networkLoadBalancer, apiResponse, err := client.NetworkLoadBalancersApi.DatacentersNetworkloadbalancersFindByNetworkLoadBalancerId(ctx, dcId, d.Id()).Execute()
+	logApiRequestTime(apiResponse)
 
 	if err != nil {
 		log.Printf("[INFO] Resource %s not found: %+v", d.Id(), err)
-		if apiResponse.StatusCode == 404 {
+		if apiResponse != nil && apiResponse.Response != nil && apiResponse.StatusCode == 404 {
 			d.SetId("")
 			return nil
 		}
@@ -158,44 +164,8 @@ func resourceNetworkLoadBalancerRead(ctx context.Context, d *schema.ResourceData
 
 	log.Printf("[INFO] Successfully retreived network load balancer %s: %+v", d.Id(), networkLoadBalancer)
 
-	if networkLoadBalancer.Properties.Name != nil {
-		err := d.Set("name", *networkLoadBalancer.Properties.Name)
-		if err != nil {
-			diags := diag.FromErr(fmt.Errorf("error while setting name property for network load balancer %s: %s", d.Id(), err))
-			return diags
-		}
-	}
-
-	if networkLoadBalancer.Properties.ListenerLan != nil {
-		err := d.Set("listener_lan", *networkLoadBalancer.Properties.ListenerLan)
-		if err != nil {
-			diags := diag.FromErr(fmt.Errorf("error while setting listener_lan property for network load balancer %s: %s", d.Id(), err))
-			return diags
-		}
-	}
-
-	if networkLoadBalancer.Properties.TargetLan != nil {
-		err := d.Set("target_lan", *networkLoadBalancer.Properties.TargetLan)
-		if err != nil {
-			diags := diag.FromErr(fmt.Errorf("error while setting target_lan property for network load balancer %s: %s", d.Id(), err))
-			return diags
-		}
-	}
-
-	if networkLoadBalancer.Properties.Ips != nil {
-		err := d.Set("ips", *networkLoadBalancer.Properties.Ips)
-		if err != nil {
-			diags := diag.FromErr(fmt.Errorf("error while setting ips property for network load balancer %s: %s", d.Id(), err))
-			return diags
-		}
-	}
-
-	if networkLoadBalancer.Properties.LbPrivateIps != nil {
-		err := d.Set("lb_private_ips", *networkLoadBalancer.Properties.LbPrivateIps)
-		if err != nil {
-			diags := diag.FromErr(fmt.Errorf("error while setting lb_private_ips property for network load balancer %s: %s", d.Id(), err))
-			return diags
-		}
+	if err := setNetworkLoadBalancerData(d, &networkLoadBalancer); err != nil {
+		return diag.FromErr(err)
 	}
 
 	return nil
@@ -253,6 +223,7 @@ func resourceNetworkLoadBalancerUpdate(ctx context.Context, d *schema.ResourceDa
 		}
 	}
 	_, apiResponse, err := client.NetworkLoadBalancersApi.DatacentersNetworkloadbalancersPatch(ctx, dcId, d.Id()).NetworkLoadBalancerProperties(*request.Properties).Execute()
+	logApiRequestTime(apiResponse)
 
 	if err != nil {
 		diags := diag.FromErr(fmt.Errorf("an error occured while updating a network loadbalancer ID %s %s \n ApiError: %s", d.Id(), err, responseBody(apiResponse)))
@@ -274,6 +245,7 @@ func resourceNetworkLoadBalancerDelete(ctx context.Context, d *schema.ResourceDa
 	dcId := d.Get("datacenter_id").(string)
 
 	apiResponse, err := client.NetworkLoadBalancersApi.DatacentersNetworkloadbalancersDelete(ctx, dcId, d.Id()).Execute()
+	logApiRequestTime(apiResponse)
 
 	if err != nil {
 		diags := diag.FromErr(fmt.Errorf("an error occured while deleting a network loadbalancer %s %s", d.Id(), err))
@@ -290,4 +262,38 @@ func resourceNetworkLoadBalancerDelete(ctx context.Context, d *schema.ResourceDa
 	d.SetId("")
 
 	return nil
+}
+
+func resourceNetworkLoadBalancerImport(ctx context.Context, d *schema.ResourceData, meta interface{}) ([]*schema.ResourceData, error) {
+	client := meta.(*ionoscloud.APIClient)
+
+	parts := strings.Split(d.Id(), "/")
+	if len(parts) != 2 || parts[0] == "" || parts[1] == "" {
+		return nil, fmt.Errorf("invalid import id %q. Expecting {datacenter}/{networkloadbalancer}", d.Id())
+	}
+
+	dcId := parts[0]
+	networkLoadBalancerId := parts[1]
+
+	networkLoadBalancer, apiResponse, err := client.NetworkLoadBalancersApi.DatacentersNetworkloadbalancersFindByNetworkLoadBalancerId(ctx, dcId, networkLoadBalancerId).Execute()
+	logApiRequestTime(apiResponse)
+
+	if err != nil {
+		log.Printf("[INFO] Resource %s not found: %+v", d.Id(), err)
+		if apiResponse != nil && apiResponse.Response != nil && apiResponse.StatusCode == 404 {
+			d.SetId("")
+			return nil, fmt.Errorf("unable to find network load balancer %q", networkLoadBalancerId)
+		}
+		return nil, fmt.Errorf("an error occured while retrieving network load balancer  %q: %q ", networkLoadBalancerId, err)
+	}
+
+	if err := d.Set("datacenter_id", dcId); err != nil {
+		return nil, err
+	}
+
+	if err := setNetworkLoadBalancerData(d, &networkLoadBalancer); err != nil {
+		return nil, err
+	}
+
+	return []*schema.ResourceData{d}, nil
 }

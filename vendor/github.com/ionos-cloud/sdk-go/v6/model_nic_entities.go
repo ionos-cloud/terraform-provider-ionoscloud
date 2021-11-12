@@ -1,7 +1,7 @@
 /*
  * CLOUD API
  *
- * An enterprise-grade Infrastructure is provided as a Service (IaaS) solution that can be managed through a browser-based \"Data Center Designer\" (DCD) tool or via an easy to use API.   The API allows you to perform a variety of management tasks such as spinning up additional servers, adding volumes, adjusting networking, and so forth. It is designed to allow users to leverage the same power and flexibility found within the DCD visual tool. Both tools are consistent with their concepts and lend well to making the experience smooth and intuitive.
+ * IONOS Enterprise-grade Infrastructure as a Service (IaaS) solutions can be managed through the Cloud API, in addition or as an alternative to the \"Data Center Designer\" (DCD) browser-based tool.    Both methods employ consistent concepts and features, deliver similar power and flexibility, and can be used to perform a multitude of management tasks, including adding servers, volumes, configuring networks, and so on.
  *
  * API version: 6.0-SDK.3
  */
@@ -16,11 +16,9 @@ import (
 
 // NicEntities struct for NicEntities
 type NicEntities struct {
-	Flowlogs *FlowLogs `json:"flowlogs,omitempty"`
+	Flowlogs      *FlowLogs      `json:"flowlogs,omitempty"`
 	Firewallrules *FirewallRules `json:"firewallrules,omitempty"`
 }
-
-
 
 // GetFlowlogs returns the Flowlogs field value
 // If the value is explicit nil, the zero value for FlowLogs will be returned
@@ -28,7 +26,6 @@ func (o *NicEntities) GetFlowlogs() *FlowLogs {
 	if o == nil {
 		return nil
 	}
-
 
 	return o.Flowlogs
 
@@ -42,13 +39,11 @@ func (o *NicEntities) GetFlowlogsOk() (*FlowLogs, bool) {
 		return nil, false
 	}
 
-
 	return o.Flowlogs, true
 }
 
 // SetFlowlogs sets field value
 func (o *NicEntities) SetFlowlogs(v FlowLogs) {
-
 
 	o.Flowlogs = &v
 
@@ -63,15 +58,12 @@ func (o *NicEntities) HasFlowlogs() bool {
 	return false
 }
 
-
-
 // GetFirewallrules returns the Firewallrules field value
 // If the value is explicit nil, the zero value for FirewallRules will be returned
 func (o *NicEntities) GetFirewallrules() *FirewallRules {
 	if o == nil {
 		return nil
 	}
-
 
 	return o.Firewallrules
 
@@ -85,13 +77,11 @@ func (o *NicEntities) GetFirewallrulesOk() (*FirewallRules, bool) {
 		return nil, false
 	}
 
-
 	return o.Firewallrules, true
 }
 
 // SetFirewallrules sets field value
 func (o *NicEntities) SetFirewallrules(v FirewallRules) {
-
 
 	o.Firewallrules = &v
 
@@ -106,19 +96,16 @@ func (o *NicEntities) HasFirewallrules() bool {
 	return false
 }
 
-
 func (o NicEntities) MarshalJSON() ([]byte, error) {
 	toSerialize := map[string]interface{}{}
 
 	if o.Flowlogs != nil {
 		toSerialize["flowlogs"] = o.Flowlogs
 	}
-	
 
 	if o.Firewallrules != nil {
 		toSerialize["firewallrules"] = o.Firewallrules
 	}
-	
 	return json.Marshal(toSerialize)
 }
 
@@ -157,5 +144,3 @@ func (v *NullableNicEntities) UnmarshalJSON(src []byte) error {
 	v.isSet = true
 	return json.Unmarshal(src, &v.value)
 }
-
-

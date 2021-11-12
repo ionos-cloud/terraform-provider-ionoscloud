@@ -10,9 +10,10 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
 )
 
-func TestAccNatGatewayRule_Basic(t *testing.T) {
+const resourceNatGatewayRuleResource = NatGatewayRuleResource + "." + NatGatewayRuleTestResource
+
+func TestAccNatGatewayRuleBasic(t *testing.T) {
 	var natGatewayRule ionoscloud.NatGatewayRule
-	natGatewayRuleName := "natGatewayRule"
 
 	resource.Test(t, resource.TestCase{
 		PreCheck: func() {
@@ -22,19 +23,30 @@ func TestAccNatGatewayRule_Basic(t *testing.T) {
 		CheckDestroy:      testAccCheckNatGatewayRuleDestroyCheck,
 		Steps: []resource.TestStep{
 			{
-				Config: fmt.Sprintf(testAccCheckNatGatewayRuleConfigBasic, natGatewayRuleName),
+				Config: fmt.Sprintf(testAccCheckNatGatewayRuleConfigBasic, NatGatewayRuleTestResource),
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheckNatGatewayRuleExists("ionoscloud_natgateway_rule.natgateway_rule", &natGatewayRule),
-					resource.TestCheckResourceAttr("ionoscloud_natgateway_rule.natgateway_rule", "name", natGatewayRuleName),
-					resource.TestCheckResourceAttrPair("ionoscloud_natgateway_rule.natgateway_rule", "public_ip", "ionoscloud_ipblock.natgateway_ips", "ips.0"),
+					testAccCheckNatGatewayRuleExists(resourceNatGatewayRuleResource, &natGatewayRule),
+					resource.TestCheckResourceAttr(resourceNatGatewayRuleResource, "name", NatGatewayRuleTestResource),
+					resource.TestCheckResourceAttr(resourceNatGatewayRuleResource, "type", "SNAT"),
+					resource.TestCheckResourceAttr(resourceNatGatewayRuleResource, "protocol", "TCP"),
+					resource.TestCheckResourceAttr(resourceNatGatewayRuleResource, "source_subnet", "10.0.1.0/24"),
+					resource.TestCheckResourceAttrPair(resourceNatGatewayRuleResource, "public_ip", IpBLockResource+".natgateway_rule_ips", "ips.0"),
+					resource.TestCheckResourceAttr(resourceNatGatewayRuleResource, "target_subnet", "172.16.0.0/24"),
+					resource.TestCheckResourceAttr(resourceNatGatewayRuleResource, "target_port_range.0.start", "500"),
+					resource.TestCheckResourceAttr(resourceNatGatewayRuleResource, "target_port_range.0.end", "1000"),
 				),
 			},
 			{
-				Config: fmt.Sprintf(testAccCheckNatGatewayRuleConfigUpdate),
+				Config: fmt.Sprintf(testAccCheckNatGatewayRuleConfigUpdate, UpdatedResources),
 				Check: resource.ComposeTestCheckFunc(
-					resource.TestCheckResourceAttr("ionoscloud_natgateway_rule.natgateway_rule", "name", "updated"),
-					resource.TestCheckResourceAttrPair("ionoscloud_natgateway_rule.natgateway_rule", "public_ip", "ionoscloud_ipblock.natgateway_ips", "ips.0"),
-				),
+					resource.TestCheckResourceAttr(resourceNatGatewayRuleResource, "name", UpdatedResources),
+					resource.TestCheckResourceAttr(resourceNatGatewayRuleResource, "type", "SNAT"),
+					resource.TestCheckResourceAttr(resourceNatGatewayRuleResource, "protocol", "UDP"),
+					resource.TestCheckResourceAttr(resourceNatGatewayRuleResource, "source_subnet", "10.3.1.0/24"),
+					resource.TestCheckResourceAttrPair(resourceNatGatewayRuleResource, "public_ip", IpBLockResource+".natgateway_rule_ips", "ips.0"),
+					resource.TestCheckResourceAttr(resourceNatGatewayRuleResource, "target_subnet", "172.31.0.0/24"),
+					resource.TestCheckResourceAttr(resourceNatGatewayRuleResource, "target_port_range.0.start", "200"),
+					resource.TestCheckResourceAttr(resourceNatGatewayRuleResource, "target_port_range.0.end", "1111")),
 			},
 		},
 	})
@@ -50,14 +62,15 @@ func testAccCheckNatGatewayRuleDestroyCheck(s *terraform.State) error {
 	}
 
 	for _, rs := range s.RootModule().Resources {
-		if rs.Type != "ionoscloud_datacenter" {
+		if rs.Type != NatGatewayRuleResource {
 			continue
 		}
 
 		apiResponse, err := client.NATGatewaysApi.DatacentersNatgatewaysRulesDelete(ctx, rs.Primary.Attributes["datacenter_id"], rs.Primary.Attributes["natgateway_id"], rs.Primary.ID).Execute()
+		logApiRequestTime(apiResponse)
 
 		if err != nil {
-			if apiResponse == nil || apiResponse.StatusCode != 404 {
+			if apiResponse == nil || apiResponse.Response != nil && apiResponse.StatusCode != 404 {
 				return fmt.Errorf("an error occured at checking deletion of nat gateway rule %s %s", rs.Primary.ID, responseBody(apiResponse))
 			}
 		} else {
@@ -87,7 +100,8 @@ func testAccCheckNatGatewayRuleExists(n string, natGateway *ionoscloud.NatGatewa
 			defer cancel()
 		}
 
-		foundNatGatewayRule, _, err := client.NATGatewaysApi.DatacentersNatgatewaysRulesFindByNatGatewayRuleId(ctx, rs.Primary.Attributes["datacenter_id"], rs.Primary.Attributes["natgateway_id"], rs.Primary.ID).Execute()
+		foundNatGatewayRule, apiResponse, err := client.NATGatewaysApi.DatacentersNatgatewaysRulesFindByNatGatewayRuleId(ctx, rs.Primary.Attributes["datacenter_id"], rs.Primary.Attributes["natgateway_id"], rs.Primary.ID).Execute()
+		logApiRequestTime(apiResponse)
 
 		if err != nil {
 			return fmt.Errorf("error occured while fetching NatGatewayRule: %s", rs.Primary.ID)
@@ -103,42 +117,43 @@ func testAccCheckNatGatewayRuleExists(n string, natGateway *ionoscloud.NatGatewa
 }
 
 const testAccCheckNatGatewayRuleConfigBasic = `
-resource "ionoscloud_datacenter" "natgateway_datacenter" {
-  name              = "test_natgateway"
+resource ` + DatacenterResource + ` "natgateway_rule_datacenter" {
+  name              = "test_natgateway_rule"
   location          = "de/fra"
   description       = "datacenter for hosting "
 }
 
-resource "ionoscloud_ipblock" "natgateway_ips" {
-  location = ionoscloud_datacenter.natgateway_datacenter.location
-  size = 1
-  name = "natgateway_ips"
+resource ` + IpBLockResource + ` "natgateway_rule_ips" {
+  location = ` + DatacenterResource + `.natgateway_rule_datacenter.location
+  size = 2
+  name = "natgateway_rule_ips"
 }
 
-resource "ionoscloud_lan" "natgateway_lan" {
-  datacenter_id = ionoscloud_datacenter.natgateway_datacenter.id
+resource ` + LanResource + ` "natgateway_rule_lan" {
+  datacenter_id = ` + DatacenterResource + `.natgateway_rule_datacenter.id 
   public        = false
-  name          = "test_natgateway_lan"
+  name          = "test_natgateway_rule_lan"
 }
 
-resource "ionoscloud_natgateway" "natgateway" {
-  datacenter_id = ionoscloud_datacenter.natgateway_datacenter.id
-  name          = "natgateway"
-  public_ips    = [ ionoscloud_ipblock.natgateway_ips.ips[0] ]
+resource ` + NatGatewayResource + ` "natgateway" { 
+  datacenter_id = ` + DatacenterResource + `.natgateway_rule_datacenter.id
+  name          = "test_natgateway_rule_natgateway" 
+  public_ips    = [ ` + IpBLockResource + `.natgateway_rule_ips.ips[0], ` + IpBLockResource + `.natgateway_rule_ips.ips[1] ]
   lans {
-     id          = ionoscloud_lan.natgateway_lan.id
+     id          = ` + LanResource + `.natgateway_rule_lan.id
+     gateway_ips = [ "10.11.2.5/32"] 
   }
 }
 
-resource "ionoscloud_natgateway_rule" "natgateway_rule" {
-  datacenter_id = ionoscloud_datacenter.natgateway_datacenter.id
-  natgateway_id = ionoscloud_natgateway.natgateway.id
+resource ` + NatGatewayRuleResource + ` ` + NatGatewayRuleTestResource + ` {
+  datacenter_id = ` + DatacenterResource + `.natgateway_rule_datacenter.id
+  natgateway_id = ` + NatGatewayResource + `.natgateway.id
   name          = "%s"
   type          = "SNAT"
   protocol      = "TCP"
   source_subnet = "10.0.1.0/24"
-  public_ip     = ionoscloud_ipblock.natgateway_ips.ips[0]
-  target_subnet = "10.0.1.0/24"
+  public_ip     = ` + IpBLockResource + `.natgateway_rule_ips.ips[0]
+  target_subnet = "172.16.0.0/24"
   target_port_range {
       start = 500
       end   = 1000
@@ -147,44 +162,45 @@ resource "ionoscloud_natgateway_rule" "natgateway_rule" {
 `
 
 const testAccCheckNatGatewayRuleConfigUpdate = `
-resource "ionoscloud_datacenter" "natgateway_datacenter" {
-  name              = "test_natgateway"
+resource ` + DatacenterResource + ` "natgateway_rule_datacenter" {
+  name              = "test_natgateway_rule"
   location          = "de/fra"
   description       = "datacenter for hosting "
 }
 
-resource "ionoscloud_ipblock" "natgateway_ips" {
-  location = ionoscloud_datacenter.natgateway_datacenter.location
-  size = 1
-  name = "natgateway_ips"
+resource ` + IpBLockResource + ` "natgateway_rule_ips" {
+  location = ` + DatacenterResource + `.natgateway_rule_datacenter.location
+  size = 2
+  name = "natgateway_rule_ips"
 }
 
-resource "ionoscloud_lan" "natgateway_lan" {
-  datacenter_id = ionoscloud_datacenter.natgateway_datacenter.id
+resource ` + LanResource + ` "natgateway_rule_lan" {
+  datacenter_id = ` + DatacenterResource + `.natgateway_rule_datacenter.id 
   public        = false
-  name          = "test_natgateway_lan"
+  name          = "test_natgateway_rule_lan"
 }
 
-resource "ionoscloud_natgateway" "natgateway" {
-  datacenter_id = ionoscloud_datacenter.natgateway_datacenter.id
-  name          = "natgateway"
-  public_ips    = [ ionoscloud_ipblock.natgateway_ips.ips[0] ]
+resource ` + NatGatewayResource + ` "natgateway" { 
+  datacenter_id = ` + DatacenterResource + `.natgateway_rule_datacenter.id
+  name          = "test_natgateway_rule_natgateway" 
+  public_ips    = [ ` + IpBLockResource + `.natgateway_rule_ips.ips[0], ` + IpBLockResource + `.natgateway_rule_ips.ips[1] ]
   lans {
-     id          = ionoscloud_lan.natgateway_lan.id
+     id          = ` + LanResource + `.natgateway_rule_lan.id
+     gateway_ips = [ "10.11.2.5/32"] 
   }
 }
 
-resource "ionoscloud_natgateway_rule" "natgateway_rule" {
-  datacenter_id = ionoscloud_datacenter.natgateway_datacenter.id
-  natgateway_id = ionoscloud_natgateway.natgateway.id
-  name          = "updated"
+resource ` + NatGatewayRuleResource + ` ` + NatGatewayRuleTestResource + ` {
+  datacenter_id = ` + DatacenterResource + `.natgateway_rule_datacenter.id
+  natgateway_id = ` + NatGatewayResource + `.natgateway.id
+  name          = "%s"
   type          = "SNAT"
-  protocol      = "TCP"
-  source_subnet = "10.0.1.0/24"
-  public_ip     = ionoscloud_ipblock.natgateway_ips.ips[0]
-  target_subnet = "10.0.1.0/24"
+  protocol      = "UDP"
+  source_subnet = "10.3.1.0/24"
+  public_ip     = ` + IpBLockResource + `.natgateway_rule_ips.ips[0]
+  target_subnet = "172.31.0.0/24"
   target_port_range {
-      start = 500
-      end   = 1000
+      start = 200
+      end   = 1111
   }
 }`

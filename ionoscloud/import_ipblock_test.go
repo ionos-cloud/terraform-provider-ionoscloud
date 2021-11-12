@@ -8,7 +8,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 )
 
-func TestAccIPBlock_ImportBasic(t *testing.T) {
+func TestAccIPBlockImportBasic(t *testing.T) {
 	location := "us/las"
 
 	resource.Test(t, resource.TestCase{
@@ -21,7 +21,7 @@ func TestAccIPBlock_ImportBasic(t *testing.T) {
 			},
 
 			{
-				ResourceName:      "ionoscloud_ipblock.webserver_ip",
+				ResourceName:      IpBLockResource + ".webserver_ip",
 				ImportState:       true,
 				ImportStateVerify: true,
 			},

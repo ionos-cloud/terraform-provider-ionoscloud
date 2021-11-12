@@ -113,6 +113,7 @@ func dataSourceNatGatewayRuleRead(d *schema.ResourceData, meta interface{}) erro
 
 	var natGatewayRule ionoscloud.NatGatewayRule
 	var err error
+	var apiResponse *ionoscloud.APIResponse
 
 	ctx, cancel := context.WithTimeout(context.Background(), *resourceDefaultTimeouts.Default)
 
@@ -122,7 +123,8 @@ func dataSourceNatGatewayRuleRead(d *schema.ResourceData, meta interface{}) erro
 
 	if idOk {
 		/* search by ID */
-		natGatewayRule, _, err = client.NATGatewaysApi.DatacentersNatgatewaysRulesFindByNatGatewayRuleId(ctx, datacenterId.(string), natgatewayId.(string), id.(string)).Execute()
+		natGatewayRule, apiResponse, err = client.NATGatewaysApi.DatacentersNatgatewaysRulesFindByNatGatewayRuleId(ctx, datacenterId.(string), natgatewayId.(string), id.(string)).Execute()
+		logApiRequestTime(apiResponse)
 		if err != nil {
 			return fmt.Errorf("an error occurred while fetching the nat gateway rule %s: %s", id.(string), err)
 		}
@@ -136,14 +138,16 @@ func dataSourceNatGatewayRuleRead(d *schema.ResourceData, meta interface{}) erro
 			defer cancel()
 		}
 
-		natGatewayRules, _, err := client.NATGatewaysApi.DatacentersNatgatewaysRulesGet(ctx, datacenterId.(string), natgatewayId.(string)).Execute()
+		natGatewayRules, apiResponse, err := client.NATGatewaysApi.DatacentersNatgatewaysRulesGet(ctx, datacenterId.(string), natgatewayId.(string)).Execute()
+		logApiRequestTime(apiResponse)
 		if err != nil {
 			return fmt.Errorf("an error occurred while fetching nat gateway rules: %s", err.Error())
 		}
 
 		if natGatewayRules.Items != nil {
 			for _, c := range *natGatewayRules.Items {
-				tmpNatGatewayRule, _, err := client.NATGatewaysApi.DatacentersNatgatewaysRulesFindByNatGatewayRuleId(ctx, datacenterId.(string), natgatewayId.(string), *c.Id).Execute()
+				tmpNatGatewayRule, apiResponse, err := client.NATGatewaysApi.DatacentersNatgatewaysRulesFindByNatGatewayRuleId(ctx, datacenterId.(string), natgatewayId.(string), *c.Id).Execute()
+				logApiRequestTime(apiResponse)
 				if err != nil {
 					return fmt.Errorf("an error occurred while fetching nat gateway rule with ID %s: %s", *c.Id, err.Error())
 				}
@@ -163,76 +167,15 @@ func dataSourceNatGatewayRuleRead(d *schema.ResourceData, meta interface{}) erro
 		return errors.New("nat gateway rule not found")
 	}
 
-	if err = setNatGatewayRuleData(d, &natGatewayRule); err != nil {
-		return err
-	}
-
-	return nil
-}
-
-func setNatGatewayRuleData(d *schema.ResourceData, natGatewayRule *ionoscloud.NatGatewayRule) error {
-
 	if natGatewayRule.Id != nil {
-		d.SetId(*natGatewayRule.Id)
 		if err := d.Set("id", *natGatewayRule.Id); err != nil {
 			return err
 		}
 	}
 
-	if natGatewayRule.Properties != nil {
-		if natGatewayRule.Properties.Name != nil {
-			err := d.Set("name", *natGatewayRule.Properties.Name)
-			if err != nil {
-				return fmt.Errorf("error while setting name property for nat gateway %s: %s", d.Id(), err)
-			}
-		}
-
-		if natGatewayRule.Properties.Type != nil {
-			err := d.Set("type", *natGatewayRule.Properties.Type)
-			if err != nil {
-				return fmt.Errorf("error while setting type property for nat gateway %s: %s", d.Id(), err)
-			}
-		}
-
-		if natGatewayRule.Properties.Protocol != nil {
-			err := d.Set("protocol", *natGatewayRule.Properties.Protocol)
-			if err != nil {
-				return fmt.Errorf("error while setting protocol property for nat gateway %s: %s", d.Id(), err)
-			}
-		}
-
-		if natGatewayRule.Properties.SourceSubnet != nil {
-			err := d.Set("source_subnet", *natGatewayRule.Properties.SourceSubnet)
-			if err != nil {
-				return fmt.Errorf("error while setting source_subnet property for nat gateway %s: %s", d.Id(), err)
-			}
-		}
-
-		if natGatewayRule.Properties.PublicIp != nil {
-			err := d.Set("public_ip", *natGatewayRule.Properties.PublicIp)
-			if err != nil {
-				return fmt.Errorf("error while setting public_ip property for nat gateway %s: %s", d.Id(), err)
-			}
-		}
-
-		if natGatewayRule.Properties.TargetSubnet != nil {
-			err := d.Set("target_subnet", *natGatewayRule.Properties.TargetSubnet)
-			if err != nil {
-				return fmt.Errorf("error while setting target_subnet property for nat gateway %s: %s", d.Id(), err)
-			}
-		}
-
-		if natGatewayRule.Properties.TargetPortRange != nil && natGatewayRule.Properties.TargetPortRange.Start != nil &&
-			natGatewayRule.Properties.TargetPortRange.End != nil {
-			err := d.Set("target_port_range", []map[string]int32{{
-				"start": *natGatewayRule.Properties.TargetPortRange.Start,
-				"end":   *natGatewayRule.Properties.TargetPortRange.End,
-			},
-			})
-			if err != nil {
-				return fmt.Errorf("error while setting target_port_range property for nat gateway %s: %s", d.Id(), err)
-			}
-		}
+	if err = setNatGatewayRuleData(d, &natGatewayRule); err != nil {
+		return err
 	}
+
 	return nil
 }

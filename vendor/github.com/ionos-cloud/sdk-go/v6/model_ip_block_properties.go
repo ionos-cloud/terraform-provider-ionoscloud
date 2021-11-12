@@ -1,7 +1,7 @@
 /*
  * CLOUD API
  *
- * An enterprise-grade Infrastructure is provided as a Service (IaaS) solution that can be managed through a browser-based \"Data Center Designer\" (DCD) tool or via an easy to use API.   The API allows you to perform a variety of management tasks such as spinning up additional servers, adding volumes, adjusting networking, and so forth. It is designed to allow users to leverage the same power and flexibility found within the DCD visual tool. Both tools are consistent with their concepts and lend well to making the experience smooth and intuitive.
+ * IONOS Enterprise-grade Infrastructure as a Service (IaaS) solutions can be managed through the Cloud API, in addition or as an alternative to the \"Data Center Designer\" (DCD) browser-based tool.    Both methods employ consistent concepts and features, deliver similar power and flexibility, and can be used to perform a multitude of management tasks, including adding servers, volumes, configuring networks, and so on.
  *
  * API version: 6.0-SDK.3
  */
@@ -28,15 +28,12 @@ type IpBlockProperties struct {
 	IpConsumers *[]IpConsumer `json:"ipConsumers,omitempty"`
 }
 
-
-
 // GetIps returns the Ips field value
 // If the value is explicit nil, the zero value for []string will be returned
 func (o *IpBlockProperties) GetIps() *[]string {
 	if o == nil {
 		return nil
 	}
-
 
 	return o.Ips
 
@@ -50,13 +47,11 @@ func (o *IpBlockProperties) GetIpsOk() (*[]string, bool) {
 		return nil, false
 	}
 
-
 	return o.Ips, true
 }
 
 // SetIps sets field value
 func (o *IpBlockProperties) SetIps(v []string) {
-
 
 	o.Ips = &v
 
@@ -71,15 +66,12 @@ func (o *IpBlockProperties) HasIps() bool {
 	return false
 }
 
-
-
 // GetLocation returns the Location field value
 // If the value is explicit nil, the zero value for string will be returned
 func (o *IpBlockProperties) GetLocation() *string {
 	if o == nil {
 		return nil
 	}
-
 
 	return o.Location
 
@@ -93,13 +85,11 @@ func (o *IpBlockProperties) GetLocationOk() (*string, bool) {
 		return nil, false
 	}
 
-
 	return o.Location, true
 }
 
 // SetLocation sets field value
 func (o *IpBlockProperties) SetLocation(v string) {
-
 
 	o.Location = &v
 
@@ -114,15 +104,12 @@ func (o *IpBlockProperties) HasLocation() bool {
 	return false
 }
 
-
-
 // GetSize returns the Size field value
 // If the value is explicit nil, the zero value for int32 will be returned
 func (o *IpBlockProperties) GetSize() *int32 {
 	if o == nil {
 		return nil
 	}
-
 
 	return o.Size
 
@@ -136,13 +123,11 @@ func (o *IpBlockProperties) GetSizeOk() (*int32, bool) {
 		return nil, false
 	}
 
-
 	return o.Size, true
 }
 
 // SetSize sets field value
 func (o *IpBlockProperties) SetSize(v int32) {
-
 
 	o.Size = &v
 
@@ -157,15 +142,12 @@ func (o *IpBlockProperties) HasSize() bool {
 	return false
 }
 
-
-
 // GetName returns the Name field value
 // If the value is explicit nil, the zero value for string will be returned
 func (o *IpBlockProperties) GetName() *string {
 	if o == nil {
 		return nil
 	}
-
 
 	return o.Name
 
@@ -179,13 +161,11 @@ func (o *IpBlockProperties) GetNameOk() (*string, bool) {
 		return nil, false
 	}
 
-
 	return o.Name, true
 }
 
 // SetName sets field value
 func (o *IpBlockProperties) SetName(v string) {
-
 
 	o.Name = &v
 
@@ -200,15 +180,12 @@ func (o *IpBlockProperties) HasName() bool {
 	return false
 }
 
-
-
 // GetIpConsumers returns the IpConsumers field value
 // If the value is explicit nil, the zero value for []IpConsumer will be returned
 func (o *IpBlockProperties) GetIpConsumers() *[]IpConsumer {
 	if o == nil {
 		return nil
 	}
-
 
 	return o.IpConsumers
 
@@ -222,13 +199,11 @@ func (o *IpBlockProperties) GetIpConsumersOk() (*[]IpConsumer, bool) {
 		return nil, false
 	}
 
-
 	return o.IpConsumers, true
 }
 
 // SetIpConsumers sets field value
 func (o *IpBlockProperties) SetIpConsumers(v []IpConsumer) {
-
 
 	o.IpConsumers = &v
 
@@ -243,34 +218,28 @@ func (o *IpBlockProperties) HasIpConsumers() bool {
 	return false
 }
 
-
 func (o IpBlockProperties) MarshalJSON() ([]byte, error) {
 	toSerialize := map[string]interface{}{}
 
 	if o.Ips != nil {
 		toSerialize["ips"] = o.Ips
 	}
-	
 
 	if o.Location != nil {
 		toSerialize["location"] = o.Location
 	}
-	
 
 	if o.Size != nil {
 		toSerialize["size"] = o.Size
 	}
-	
 
 	if o.Name != nil {
 		toSerialize["name"] = o.Name
 	}
-	
 
 	if o.IpConsumers != nil {
 		toSerialize["ipConsumers"] = o.IpConsumers
 	}
-	
 	return json.Marshal(toSerialize)
 }
 
@@ -309,5 +278,3 @@ func (v *NullableIpBlockProperties) UnmarshalJSON(src []byte) error {
 	v.isSet = true
 	return json.Unmarshal(src, &v.value)
 }
-
-

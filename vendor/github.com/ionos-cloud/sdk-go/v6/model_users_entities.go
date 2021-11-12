@@ -1,7 +1,7 @@
 /*
  * CLOUD API
  *
- * An enterprise-grade Infrastructure is provided as a Service (IaaS) solution that can be managed through a browser-based \"Data Center Designer\" (DCD) tool or via an easy to use API.   The API allows you to perform a variety of management tasks such as spinning up additional servers, adding volumes, adjusting networking, and so forth. It is designed to allow users to leverage the same power and flexibility found within the DCD visual tool. Both tools are consistent with their concepts and lend well to making the experience smooth and intuitive.
+ * IONOS Enterprise-grade Infrastructure as a Service (IaaS) solutions can be managed through the Cloud API, in addition or as an alternative to the \"Data Center Designer\" (DCD) browser-based tool.    Both methods employ consistent concepts and features, deliver similar power and flexibility, and can be used to perform a multitude of management tasks, including adding servers, volumes, configuring networks, and so on.
  *
  * API version: 6.0-SDK.3
  */
@@ -16,11 +16,9 @@ import (
 
 // UsersEntities struct for UsersEntities
 type UsersEntities struct {
-	Owns *ResourcesUsers `json:"owns,omitempty"`
-	Groups *GroupUsers `json:"groups,omitempty"`
+	Owns   *ResourcesUsers `json:"owns,omitempty"`
+	Groups *GroupUsers     `json:"groups,omitempty"`
 }
-
-
 
 // GetOwns returns the Owns field value
 // If the value is explicit nil, the zero value for ResourcesUsers will be returned
@@ -28,7 +26,6 @@ func (o *UsersEntities) GetOwns() *ResourcesUsers {
 	if o == nil {
 		return nil
 	}
-
 
 	return o.Owns
 
@@ -42,13 +39,11 @@ func (o *UsersEntities) GetOwnsOk() (*ResourcesUsers, bool) {
 		return nil, false
 	}
 
-
 	return o.Owns, true
 }
 
 // SetOwns sets field value
 func (o *UsersEntities) SetOwns(v ResourcesUsers) {
-
 
 	o.Owns = &v
 
@@ -63,15 +58,12 @@ func (o *UsersEntities) HasOwns() bool {
 	return false
 }
 
-
-
 // GetGroups returns the Groups field value
 // If the value is explicit nil, the zero value for GroupUsers will be returned
 func (o *UsersEntities) GetGroups() *GroupUsers {
 	if o == nil {
 		return nil
 	}
-
 
 	return o.Groups
 
@@ -85,13 +77,11 @@ func (o *UsersEntities) GetGroupsOk() (*GroupUsers, bool) {
 		return nil, false
 	}
 
-
 	return o.Groups, true
 }
 
 // SetGroups sets field value
 func (o *UsersEntities) SetGroups(v GroupUsers) {
-
 
 	o.Groups = &v
 
@@ -106,19 +96,16 @@ func (o *UsersEntities) HasGroups() bool {
 	return false
 }
 
-
 func (o UsersEntities) MarshalJSON() ([]byte, error) {
 	toSerialize := map[string]interface{}{}
 
 	if o.Owns != nil {
 		toSerialize["owns"] = o.Owns
 	}
-	
 
 	if o.Groups != nil {
 		toSerialize["groups"] = o.Groups
 	}
-	
 	return json.Marshal(toSerialize)
 }
 
@@ -157,5 +144,3 @@ func (v *NullableUsersEntities) UnmarshalJSON(src []byte) error {
 	v.isSet = true
 	return json.Unmarshal(src, &v.value)
 }
-
-

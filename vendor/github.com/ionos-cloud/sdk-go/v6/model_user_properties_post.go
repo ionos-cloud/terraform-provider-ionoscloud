@@ -1,7 +1,7 @@
 /*
  * CLOUD API
  *
- * An enterprise-grade Infrastructure is provided as a Service (IaaS) solution that can be managed through a browser-based \"Data Center Designer\" (DCD) tool or via an easy to use API.   The API allows you to perform a variety of management tasks such as spinning up additional servers, adding volumes, adjusting networking, and so forth. It is designed to allow users to leverage the same power and flexibility found within the DCD visual tool. Both tools are consistent with their concepts and lend well to making the experience smooth and intuitive.
+ * IONOS Enterprise-grade Infrastructure as a Service (IaaS) solutions can be managed through the Cloud API, in addition or as an alternative to the \"Data Center Designer\" (DCD) browser-based tool.    Both methods employ consistent concepts and features, deliver similar power and flexibility, and can be used to perform a multitude of management tasks, including adding servers, volumes, configuring networks, and so on.
  *
  * API version: 6.0-SDK.3
  */
@@ -34,15 +34,12 @@ type UserPropertiesPost struct {
 	Active *bool `json:"active,omitempty"`
 }
 
-
-
 // GetFirstname returns the Firstname field value
 // If the value is explicit nil, the zero value for string will be returned
 func (o *UserPropertiesPost) GetFirstname() *string {
 	if o == nil {
 		return nil
 	}
-
 
 	return o.Firstname
 
@@ -56,13 +53,11 @@ func (o *UserPropertiesPost) GetFirstnameOk() (*string, bool) {
 		return nil, false
 	}
 
-
 	return o.Firstname, true
 }
 
 // SetFirstname sets field value
 func (o *UserPropertiesPost) SetFirstname(v string) {
-
 
 	o.Firstname = &v
 
@@ -77,15 +72,12 @@ func (o *UserPropertiesPost) HasFirstname() bool {
 	return false
 }
 
-
-
 // GetLastname returns the Lastname field value
 // If the value is explicit nil, the zero value for string will be returned
 func (o *UserPropertiesPost) GetLastname() *string {
 	if o == nil {
 		return nil
 	}
-
 
 	return o.Lastname
 
@@ -99,13 +91,11 @@ func (o *UserPropertiesPost) GetLastnameOk() (*string, bool) {
 		return nil, false
 	}
 
-
 	return o.Lastname, true
 }
 
 // SetLastname sets field value
 func (o *UserPropertiesPost) SetLastname(v string) {
-
 
 	o.Lastname = &v
 
@@ -120,15 +110,12 @@ func (o *UserPropertiesPost) HasLastname() bool {
 	return false
 }
 
-
-
 // GetEmail returns the Email field value
 // If the value is explicit nil, the zero value for string will be returned
 func (o *UserPropertiesPost) GetEmail() *string {
 	if o == nil {
 		return nil
 	}
-
 
 	return o.Email
 
@@ -142,13 +129,11 @@ func (o *UserPropertiesPost) GetEmailOk() (*string, bool) {
 		return nil, false
 	}
 
-
 	return o.Email, true
 }
 
 // SetEmail sets field value
 func (o *UserPropertiesPost) SetEmail(v string) {
-
 
 	o.Email = &v
 
@@ -163,15 +148,12 @@ func (o *UserPropertiesPost) HasEmail() bool {
 	return false
 }
 
-
-
 // GetAdministrator returns the Administrator field value
 // If the value is explicit nil, the zero value for bool will be returned
 func (o *UserPropertiesPost) GetAdministrator() *bool {
 	if o == nil {
 		return nil
 	}
-
 
 	return o.Administrator
 
@@ -185,13 +167,11 @@ func (o *UserPropertiesPost) GetAdministratorOk() (*bool, bool) {
 		return nil, false
 	}
 
-
 	return o.Administrator, true
 }
 
 // SetAdministrator sets field value
 func (o *UserPropertiesPost) SetAdministrator(v bool) {
-
 
 	o.Administrator = &v
 
@@ -206,15 +186,12 @@ func (o *UserPropertiesPost) HasAdministrator() bool {
 	return false
 }
 
-
-
 // GetForceSecAuth returns the ForceSecAuth field value
 // If the value is explicit nil, the zero value for bool will be returned
 func (o *UserPropertiesPost) GetForceSecAuth() *bool {
 	if o == nil {
 		return nil
 	}
-
 
 	return o.ForceSecAuth
 
@@ -228,13 +205,11 @@ func (o *UserPropertiesPost) GetForceSecAuthOk() (*bool, bool) {
 		return nil, false
 	}
 
-
 	return o.ForceSecAuth, true
 }
 
 // SetForceSecAuth sets field value
 func (o *UserPropertiesPost) SetForceSecAuth(v bool) {
-
 
 	o.ForceSecAuth = &v
 
@@ -249,15 +224,12 @@ func (o *UserPropertiesPost) HasForceSecAuth() bool {
 	return false
 }
 
-
-
 // GetSecAuthActive returns the SecAuthActive field value
 // If the value is explicit nil, the zero value for bool will be returned
 func (o *UserPropertiesPost) GetSecAuthActive() *bool {
 	if o == nil {
 		return nil
 	}
-
 
 	return o.SecAuthActive
 
@@ -271,13 +243,11 @@ func (o *UserPropertiesPost) GetSecAuthActiveOk() (*bool, bool) {
 		return nil, false
 	}
 
-
 	return o.SecAuthActive, true
 }
 
 // SetSecAuthActive sets field value
 func (o *UserPropertiesPost) SetSecAuthActive(v bool) {
-
 
 	o.SecAuthActive = &v
 
@@ -292,15 +262,12 @@ func (o *UserPropertiesPost) HasSecAuthActive() bool {
 	return false
 }
 
-
-
 // GetPassword returns the Password field value
 // If the value is explicit nil, the zero value for string will be returned
 func (o *UserPropertiesPost) GetPassword() *string {
 	if o == nil {
 		return nil
 	}
-
 
 	return o.Password
 
@@ -314,13 +281,11 @@ func (o *UserPropertiesPost) GetPasswordOk() (*string, bool) {
 		return nil, false
 	}
 
-
 	return o.Password, true
 }
 
 // SetPassword sets field value
 func (o *UserPropertiesPost) SetPassword(v string) {
-
 
 	o.Password = &v
 
@@ -335,15 +300,12 @@ func (o *UserPropertiesPost) HasPassword() bool {
 	return false
 }
 
-
-
 // GetActive returns the Active field value
 // If the value is explicit nil, the zero value for bool will be returned
 func (o *UserPropertiesPost) GetActive() *bool {
 	if o == nil {
 		return nil
 	}
-
 
 	return o.Active
 
@@ -357,13 +319,11 @@ func (o *UserPropertiesPost) GetActiveOk() (*bool, bool) {
 		return nil, false
 	}
 
-
 	return o.Active, true
 }
 
 // SetActive sets field value
 func (o *UserPropertiesPost) SetActive(v bool) {
-
 
 	o.Active = &v
 
@@ -378,49 +338,40 @@ func (o *UserPropertiesPost) HasActive() bool {
 	return false
 }
 
-
 func (o UserPropertiesPost) MarshalJSON() ([]byte, error) {
 	toSerialize := map[string]interface{}{}
 
 	if o.Firstname != nil {
 		toSerialize["firstname"] = o.Firstname
 	}
-	
 
 	if o.Lastname != nil {
 		toSerialize["lastname"] = o.Lastname
 	}
-	
 
 	if o.Email != nil {
 		toSerialize["email"] = o.Email
 	}
-	
 
 	if o.Administrator != nil {
 		toSerialize["administrator"] = o.Administrator
 	}
-	
 
 	if o.ForceSecAuth != nil {
 		toSerialize["forceSecAuth"] = o.ForceSecAuth
 	}
-	
 
 	if o.SecAuthActive != nil {
 		toSerialize["secAuthActive"] = o.SecAuthActive
 	}
-	
 
 	if o.Password != nil {
 		toSerialize["password"] = o.Password
 	}
-	
 
 	if o.Active != nil {
 		toSerialize["active"] = o.Active
 	}
-	
 	return json.Marshal(toSerialize)
 }
 
@@ -459,5 +410,3 @@ func (v *NullableUserPropertiesPost) UnmarshalJSON(src []byte) error {
 	v.isSet = true
 	return json.Unmarshal(src, &v.value)
 }
-
-

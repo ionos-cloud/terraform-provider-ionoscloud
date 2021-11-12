@@ -1,7 +1,7 @@
 /*
  * CLOUD API
  *
- * An enterprise-grade Infrastructure is provided as a Service (IaaS) solution that can be managed through a browser-based \"Data Center Designer\" (DCD) tool or via an easy to use API.   The API allows you to perform a variety of management tasks such as spinning up additional servers, adding volumes, adjusting networking, and so forth. It is designed to allow users to leverage the same power and flexibility found within the DCD visual tool. Both tools are consistent with their concepts and lend well to making the experience smooth and intuitive.
+ * IONOS Enterprise-grade Infrastructure as a Service (IaaS) solutions can be managed through the Cloud API, in addition or as an alternative to the \"Data Center Designer\" (DCD) browser-based tool.    Both methods employ consistent concepts and features, deliver similar power and flexibility, and can be used to perform a multitude of management tasks, including adding servers, volumes, configuring networks, and so on.
  *
  * API version: 6.0-SDK.3
  */
@@ -28,15 +28,12 @@ type NetworkLoadBalancerProperties struct {
 	LbPrivateIps *[]string `json:"lbPrivateIps,omitempty"`
 }
 
-
-
 // GetName returns the Name field value
 // If the value is explicit nil, the zero value for string will be returned
 func (o *NetworkLoadBalancerProperties) GetName() *string {
 	if o == nil {
 		return nil
 	}
-
 
 	return o.Name
 
@@ -50,13 +47,11 @@ func (o *NetworkLoadBalancerProperties) GetNameOk() (*string, bool) {
 		return nil, false
 	}
 
-
 	return o.Name, true
 }
 
 // SetName sets field value
 func (o *NetworkLoadBalancerProperties) SetName(v string) {
-
 
 	o.Name = &v
 
@@ -71,15 +66,12 @@ func (o *NetworkLoadBalancerProperties) HasName() bool {
 	return false
 }
 
-
-
 // GetListenerLan returns the ListenerLan field value
 // If the value is explicit nil, the zero value for int32 will be returned
 func (o *NetworkLoadBalancerProperties) GetListenerLan() *int32 {
 	if o == nil {
 		return nil
 	}
-
 
 	return o.ListenerLan
 
@@ -93,13 +85,11 @@ func (o *NetworkLoadBalancerProperties) GetListenerLanOk() (*int32, bool) {
 		return nil, false
 	}
 
-
 	return o.ListenerLan, true
 }
 
 // SetListenerLan sets field value
 func (o *NetworkLoadBalancerProperties) SetListenerLan(v int32) {
-
 
 	o.ListenerLan = &v
 
@@ -114,15 +104,12 @@ func (o *NetworkLoadBalancerProperties) HasListenerLan() bool {
 	return false
 }
 
-
-
 // GetIps returns the Ips field value
 // If the value is explicit nil, the zero value for []string will be returned
 func (o *NetworkLoadBalancerProperties) GetIps() *[]string {
 	if o == nil {
 		return nil
 	}
-
 
 	return o.Ips
 
@@ -136,13 +123,11 @@ func (o *NetworkLoadBalancerProperties) GetIpsOk() (*[]string, bool) {
 		return nil, false
 	}
 
-
 	return o.Ips, true
 }
 
 // SetIps sets field value
 func (o *NetworkLoadBalancerProperties) SetIps(v []string) {
-
 
 	o.Ips = &v
 
@@ -157,15 +142,12 @@ func (o *NetworkLoadBalancerProperties) HasIps() bool {
 	return false
 }
 
-
-
 // GetTargetLan returns the TargetLan field value
 // If the value is explicit nil, the zero value for int32 will be returned
 func (o *NetworkLoadBalancerProperties) GetTargetLan() *int32 {
 	if o == nil {
 		return nil
 	}
-
 
 	return o.TargetLan
 
@@ -179,13 +161,11 @@ func (o *NetworkLoadBalancerProperties) GetTargetLanOk() (*int32, bool) {
 		return nil, false
 	}
 
-
 	return o.TargetLan, true
 }
 
 // SetTargetLan sets field value
 func (o *NetworkLoadBalancerProperties) SetTargetLan(v int32) {
-
 
 	o.TargetLan = &v
 
@@ -200,15 +180,12 @@ func (o *NetworkLoadBalancerProperties) HasTargetLan() bool {
 	return false
 }
 
-
-
 // GetLbPrivateIps returns the LbPrivateIps field value
 // If the value is explicit nil, the zero value for []string will be returned
 func (o *NetworkLoadBalancerProperties) GetLbPrivateIps() *[]string {
 	if o == nil {
 		return nil
 	}
-
 
 	return o.LbPrivateIps
 
@@ -222,13 +199,11 @@ func (o *NetworkLoadBalancerProperties) GetLbPrivateIpsOk() (*[]string, bool) {
 		return nil, false
 	}
 
-
 	return o.LbPrivateIps, true
 }
 
 // SetLbPrivateIps sets field value
 func (o *NetworkLoadBalancerProperties) SetLbPrivateIps(v []string) {
-
 
 	o.LbPrivateIps = &v
 
@@ -243,34 +218,28 @@ func (o *NetworkLoadBalancerProperties) HasLbPrivateIps() bool {
 	return false
 }
 
-
 func (o NetworkLoadBalancerProperties) MarshalJSON() ([]byte, error) {
 	toSerialize := map[string]interface{}{}
 
 	if o.Name != nil {
 		toSerialize["name"] = o.Name
 	}
-	
 
 	if o.ListenerLan != nil {
 		toSerialize["listenerLan"] = o.ListenerLan
 	}
-	
 
 	if o.Ips != nil {
 		toSerialize["ips"] = o.Ips
 	}
-	
 
 	if o.TargetLan != nil {
 		toSerialize["targetLan"] = o.TargetLan
 	}
-	
 
 	if o.LbPrivateIps != nil {
 		toSerialize["lbPrivateIps"] = o.LbPrivateIps
 	}
-	
 	return json.Marshal(toSerialize)
 }
 
@@ -309,5 +278,3 @@ func (v *NullableNetworkLoadBalancerProperties) UnmarshalJSON(src []byte) error 
 	v.isSet = true
 	return json.Unmarshal(src, &v.value)
 }
-
-

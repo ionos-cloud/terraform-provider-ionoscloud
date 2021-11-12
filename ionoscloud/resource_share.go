@@ -5,6 +5,8 @@ import (
 	"fmt"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
+	"log"
+	"strings"
 	"time"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
@@ -57,6 +59,7 @@ func resourceShareCreate(ctx context.Context, d *schema.ResourceData, meta inter
 	request.Properties.EditPrivilege = &tempEditPrivilege
 
 	rsp, apiResponse, err := client.UserManagementApi.UmGroupsSharesPost(ctx, d.Get("group_id").(string), d.Get("resource_id").(string)).Resource(request).Execute()
+	logApiRequestTime(apiResponse)
 
 	if err != nil {
 		diags := diag.FromErr(fmt.Errorf("an error occured while creating a share: %s", err))
@@ -82,8 +85,9 @@ func resourceShareRead(ctx context.Context, d *schema.ResourceData, meta interfa
 	client := meta.(SdkBundle).CloudApiClient
 
 	rsp, apiResponse, err := client.UserManagementApi.UmGroupsSharesFindByResourceId(ctx, d.Get("group_id").(string), d.Get("resource_id").(string)).Execute()
+	logApiRequestTime(apiResponse)
 	if err != nil {
-		if apiResponse != nil && apiResponse.StatusCode == 404 {
+		if apiResponse != nil && apiResponse.Response != nil && apiResponse.StatusCode == 404 {
 			d.SetId("")
 			return nil
 		}
@@ -117,6 +121,7 @@ func resourceShareUpdate(ctx context.Context, d *schema.ResourceData, meta inter
 
 	_, apiResponse, err := client.UserManagementApi.UmGroupsSharesPut(ctx,
 		d.Get("group_id").(string), d.Get("resource_id").(string)).Resource(shareReq).Execute()
+	logApiRequestTime(apiResponse)
 	if err != nil {
 		diags := diag.FromErr(fmt.Errorf("an error occured while patching a share ID %s %s", d.Id(), err))
 		return diags
@@ -139,8 +144,9 @@ func resourceShareDelete(ctx context.Context, d *schema.ResourceData, meta inter
 	resourceId := d.Get("resource_id").(string)
 
 	apiResponse, err := client.UserManagementApi.UmGroupsSharesDelete(ctx, groupId, resourceId).Execute()
+	logApiRequestTime(apiResponse)
 	if err != nil {
-		if apiResponse != nil && apiResponse.StatusCode == 404 {
+		if apiResponse != nil && apiResponse.Response != nil && apiResponse.StatusCode == 404 {
 			diags := diag.FromErr(err)
 			return diags
 		}
@@ -148,8 +154,9 @@ func resourceShareDelete(ctx context.Context, d *schema.ResourceData, meta inter
 		// todo: get rid of this retry
 		time.Sleep(20 * time.Second)
 		apiResponse, err := client.UserManagementApi.UmGroupsSharesDelete(ctx, groupId, resourceId).Execute()
+		logApiRequestTime(apiResponse)
 		if err != nil {
-			if apiResponse == nil || apiResponse.StatusCode != 404 {
+			if apiResponse == nil || apiResponse.Response != nil && apiResponse.StatusCode != 404 {
 				diags := diag.FromErr(fmt.Errorf("an error occured while deleting a share %s %s", d.Id(), err))
 				return diags
 			}
@@ -167,4 +174,53 @@ func resourceShareDelete(ctx context.Context, d *schema.ResourceData, meta inter
 
 	d.SetId("")
 	return nil
+}
+
+func resourceShareImporter(ctx context.Context, d *schema.ResourceData, meta interface{}) ([]*schema.ResourceData, error) {
+	parts := strings.Split(d.Id(), "/")
+	if len(parts) != 2 || parts[0] == "" || parts[1] == "" {
+		return nil, fmt.Errorf("invalid import id %q. Expecting {group}/{resource}", d.Id())
+	}
+
+	grpId := parts[0]
+	rscId := parts[1]
+
+	client := meta.(*ionoscloud.APIClient)
+
+	share, apiResponse, err := client.UserManagementApi.UmGroupsSharesFindByResourceId(ctx, grpId, rscId).Execute()
+	logApiRequestTime(apiResponse)
+
+	if err != nil {
+		if apiResponse != nil && apiResponse.Response != nil && apiResponse.StatusCode == 404 {
+			d.SetId("")
+			return nil, fmt.Errorf("an error occured while trying to fetch the share of resource %q for group %q", rscId, grpId)
+		}
+		return nil, fmt.Errorf("share does not exist of resource %q for group %q", rscId, grpId)
+	}
+
+	log.Printf("[INFO] share found: %+v", share)
+
+	d.SetId(*share.Id)
+
+	if err := d.Set("group_id", grpId); err != nil {
+		return nil, err
+	}
+
+	if err := d.Set("resource_id", rscId); err != nil {
+		return nil, err
+	}
+
+	if share.Properties.EditPrivilege != nil {
+		if err := d.Set("edit_privilege", *share.Properties.EditPrivilege); err != nil {
+			return nil, err
+		}
+	}
+
+	if share.Properties.SharePrivilege != nil {
+		if err := d.Set("share_privilege", *share.Properties.SharePrivilege); err != nil {
+			return nil, err
+		}
+	}
+
+	return []*schema.ResourceData{d}, nil
 }

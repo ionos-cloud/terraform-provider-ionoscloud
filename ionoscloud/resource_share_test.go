@@ -22,14 +22,16 @@ func TestAccShare_Basic(t *testing.T) {
 			{
 				Config: fmt.Sprintf(testAccCheckShareConfigBasic),
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheckShareExists("ionoscloud_share.share", &share),
-					resource.TestCheckResourceAttr("ionoscloud_share.share", "share_privilege", "true"),
+					testAccCheckShareExists(shareResourceFullName, &share),
+					resource.TestCheckResourceAttr(shareResourceFullName, "edit_privilege", "true"),
+					resource.TestCheckResourceAttr(shareResourceFullName, "share_privilege", "true"),
 				),
 			},
 			{
 				Config: testAccCheckShareConfigUpdate,
 				Check: resource.ComposeTestCheckFunc(
-					resource.TestCheckResourceAttr("ionoscloud_share.share", "share_privilege", "false"),
+					resource.TestCheckResourceAttr(shareResourceFullName, "edit_privilege", "false"),
+					resource.TestCheckResourceAttr(shareResourceFullName, "share_privilege", "false"),
 				),
 			},
 		},
@@ -46,7 +48,7 @@ func testAccCheckShareDestroyCheck(s *terraform.State) error {
 	}
 	for _, rs := range s.RootModule().Resources {
 
-		if rs.Type != "ionoscloud_share" {
+		if rs.Type != ShareResource {
 			continue
 		}
 
@@ -54,9 +56,10 @@ func testAccCheckShareDestroyCheck(s *terraform.State) error {
 		resourceId := rs.Primary.Attributes["resource_id"]
 
 		_, apiResponse, err := client.UserManagementApi.UmGroupsSharesFindByResourceId(ctx, grpId, resourceId).Execute()
+		logApiRequestTime(apiResponse)
 
 		if err != nil {
-			if apiResponse == nil || apiResponse.StatusCode != 404 {
+			if apiResponse == nil || apiResponse.Response != nil && apiResponse.StatusCode != 404 {
 				return fmt.Errorf("an error occurred while checking the destruction of resource %s in group %s: %s", resourceId, grpId, err)
 			}
 		} else {
@@ -84,7 +87,8 @@ func testAccCheckShareExists(n string, share *ionoscloud.GroupShare) resource.Te
 
 		grpId := rs.Primary.Attributes["group_id"]
 		resourceId := rs.Primary.Attributes["resource_id"]
-		foundshare, _, err := client.UserManagementApi.UmGroupsSharesFindByResourceId(context.TODO(), grpId, resourceId).Execute()
+		foundshare, apiResponse, err := client.UserManagementApi.UmGroupsSharesFindByResourceId(context.TODO(), grpId, resourceId).Execute()
+		logApiRequestTime(apiResponse)
 
 		if err != nil {
 			return fmt.Errorf("error occured while fetching Share of resource  %s in group %s", rs.Primary.Attributes["resource_id"], rs.Primary.Attributes["group_id"])
@@ -137,7 +141,7 @@ resource "ionoscloud_group" "group" {
 resource "ionoscloud_share" "share" {
   group_id = "${ionoscloud_group.group.id}"
   resource_id = "${ionoscloud_datacenter.foobar.id}"
-  edit_privilege = true
+  edit_privilege = false
   share_privilege = false
 }
 `

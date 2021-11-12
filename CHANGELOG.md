@@ -1,3 +1,69 @@
+## 6.0.0-beta.15
+
+- **code enhancements**: added http request time log for api calls
+- **new features**: import for `nic`, data_source for `nic`, `share`, `ipfailover`
+- **dependency update**: updated sdk-go to v6.0.0-beta.8
+- **tests enhancements**: improved tests on natgateway and natgateway_rule
+- **code enhancements**: for `k8s_node_pool`, `nic`, `ipfailover`, and `share`:
+  - made tests comprehensive
+  - optimized test duration by including both match by id and by name in the same test
+  - removed duplicated code from import, data_source, resource and tests files
+- **bug fixes**: k8s_node_pool update node_count and emptying lans and public_ips didn't work
+- **bug fixes**: fixed bug at creating natgateway_rule - target_subnet was not set properly
+
+## 6.0.0-beta.14
+
+- **bug fixes**: fixed datacenter datasource
+- **code enhancements**: added constants and removed duplicated tests to `backupUnit`, `datacenter`, `lan`, `s3_key`, `firewall`, `server`
+- **code enhancements**: for `pcc`, `group`, `user`, `snapshot`, and `volume` :
+  - made tests comprehensive
+  - optimized test duration by including both match by id and by name in the same test
+  - removed duplicated code from import, data_source, resource and tests files
+- **new features**: import for `snapshot`, `ipblock`, data_source for `group`, `user`, `ipblock`, `volume`
+
+## 6.0.0-beta.13
+- **bug fixes**: fixed issue #112 can't attach existing volume to server after recreating server
+- **bug fixes**: `cube server` could not be deleted
+- **functionality enhancements**: improved data_source for template - now `template` can be searched by any of its arguments
+- **bug fixes**: cannot empty `api_subnet_allow_list` and `s3_buckets`
+- **code enhancements**: for `k8s_cluster`:
+  - made tests comprehensive
+  - optimized test duration by including both match by id and by name in the same test
+  - removed duplicated code from import, data_source and resource files (set parameters)
+  
+## 6.0.0-beta.12
+
+- **bug fixes**: `server`: can not create cube server, firewall not updated
+- **bug fixes**: `firewall`: using type argument throws error
+- **code enhancements**: for `backupUnit`, `datacenter`, `lan`, `s3_key`, and `firewall` resources done the following:
+  - made tests comprehensive
+  - optimized test duration by including both match by id and by name in the same test
+  - removed duplicated code from import, data_source and resource files (set parameters)
+  - updated documentation
+  - improved import functions
+- **new features**: data_source for `s3_key`
+
+## 6.0.0-beta.11
+
+- added `image_alias` to volume
+- removed `public` and `gateway_ip` properties from `k8s_cluster`
+- added `data_sources for `backup_unit` and `firewall_rule`
+- added import for `natgateway`, `natgateway_rule`, `networkloadbalancer` and `networkloadbalancer_forwardingrule`
+- updated sdk-go to `v6.0.0-beta.7`
+
+## 6.0.0-beta.10
+
+- issue #19 - fixed update `ssh_key_path` although not changed
+- issue #93 - updated `documentation` for image data source
+- made `backup_unit_id` configurable for volume
+- fixed `server import`
+
+## 6.0.0-beta.9
+
+- issue #31 - k8s node pool labels and annotations implemented
+- ipblock `k8s_nodepool_uuid` attribute fixed
+- correctly importing private lans from k8s node pools
+
 ## 6.0.0-beta.8
 
 - fixed set of empty array in terraform state instead of null

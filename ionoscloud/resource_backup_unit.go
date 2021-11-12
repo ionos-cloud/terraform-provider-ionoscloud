@@ -66,7 +66,8 @@ func resourceBackupUnitCreate(ctx context.Context, d *schema.ResourceData, meta 
 		},
 	}
 
-	createdBackupUnit, _, err := client.BackupUnitsApi.BackupunitsPost(ctx).BackupUnit(backupUnit).Execute()
+	createdBackupUnit, apiResponse, err := client.BackupUnitsApi.BackupunitsPost(ctx).BackupUnit(backupUnit).Execute()
+	logApiRequestTime(apiResponse)
 
 	if err != nil {
 		d.SetId("")
@@ -77,28 +78,8 @@ func resourceBackupUnitCreate(ctx context.Context, d *schema.ResourceData, meta 
 	d.SetId(*createdBackupUnit.Id)
 	log.Printf("[INFO] Created backup unit: %s", d.Id())
 
-	for {
-		log.Printf("[INFO] Waiting for backup unit %s to be ready...", d.Id())
-
-		backupUnitReady, rsErr := backupUnitReady(client, d, ctx)
-
-		if rsErr != nil {
-			diags := diag.FromErr(fmt.Errorf("error while checking readiness status of backup unit %s: %s", d.Id(), rsErr))
-			return diags
-		}
-
-		if backupUnitReady {
-			log.Printf("[INFO] backup unit ready: %s", d.Id())
-			break
-		}
-
-		select {
-		case <-time.After(SleepInterval):
-			log.Printf("[INFO] trying again ...")
-		case <-ctx.Done():
-			diags := diag.FromErr(fmt.Errorf("backup unit creation timed out! WARNING: your backup unit will still probably be created after some time but the terraform state won't reflect that; check your Ionos Cloud account for updates"))
-			return diags
-		}
+	if diags := waitForUnitToBeReady(ctx, d, client); diags != nil {
+		return diags
 	}
 
 	return resourceBackupUnitRead(ctx, d, meta)
@@ -109,9 +90,10 @@ func resourceBackupUnitRead(ctx context.Context, d *schema.ResourceData, meta in
 	client := meta.(SdkBundle).CloudApiClient
 
 	backupUnit, apiResponse, err := client.BackupUnitsApi.BackupunitsFindById(ctx, d.Id()).Execute()
+	logApiRequestTime(apiResponse)
 
 	if err != nil {
-		if apiResponse != nil && apiResponse.StatusCode == 404 {
+		if apiResponse != nil && apiResponse.Response != nil && apiResponse.StatusCode == 404 {
 			d.SetId("")
 			return nil
 		}
@@ -120,6 +102,7 @@ func resourceBackupUnitRead(ctx context.Context, d *schema.ResourceData, meta in
 	}
 
 	contractResources, _, cErr := client.ContractResourcesApi.ContractsGet(ctx).Execute()
+	logApiRequestTime(apiResponse)
 
 	if cErr != nil {
 		diags := diag.FromErr(fmt.Errorf("error while fetching contract resources for backup unit %s: %s", d.Id(), cErr))
@@ -128,28 +111,8 @@ func resourceBackupUnitRead(ctx context.Context, d *schema.ResourceData, meta in
 
 	log.Printf("[INFO] Successfully retreived contract resource for backup unit unit %s: %+v", d.Id(), contractResources)
 
-	if backupUnit.Properties.Name != nil {
-		err := d.Set("name", *backupUnit.Properties.Name)
-		if err != nil {
-			diags := diag.FromErr(fmt.Errorf("error while setting name property for backup unit %s: %s", d.Id(), err))
-			return diags
-		}
-	}
-
-	if backupUnit.Properties.Email != nil {
-		epErr := d.Set("email", *backupUnit.Properties.Email)
-		if epErr != nil {
-			diags := diag.FromErr(fmt.Errorf("error while setting email property for backup unit %s: %s", d.Id(), epErr))
-			return diags
-		}
-	}
-
-	if backupUnit.Properties.Name != nil && contractResources.Id != nil {
-		err := d.Set("login", fmt.Sprintf("%s-%d", *backupUnit.Properties.Name, *(*contractResources.Items)[0].Properties.ContractNumber))
-		if err != nil {
-			diags := diag.FromErr(fmt.Errorf("error while setting login property for backup unit %s: %s", d.Id(), err))
-			return diags
-		}
+	if err := setBackupUnitData(d, &backupUnit, &contractResources); err != nil {
+		return diag.FromErr(err)
 	}
 
 	log.Printf("[INFO] Successfully retreived backup unit %s: %+v", d.Id(), backupUnit)
@@ -188,9 +151,10 @@ func resourceBackupUnitUpdate(ctx context.Context, d *schema.ResourceData, meta 
 	}
 
 	_, apiResponse, err := client.BackupUnitsApi.BackupunitsPut(ctx, d.Id()).BackupUnit(request).Execute()
+	logApiRequestTime(apiResponse)
 
 	if err != nil {
-		if apiResponse != nil && apiResponse.StatusCode == 404 {
+		if apiResponse != nil && apiResponse.Response != nil && apiResponse.StatusCode == 404 {
 			d.SetId("")
 			return nil
 		}
@@ -198,6 +162,14 @@ func resourceBackupUnitUpdate(ctx context.Context, d *schema.ResourceData, meta 
 		return diags
 	}
 
+	if diags := waitForUnitToBeReady(ctx, d, client); diags != nil {
+		return diags
+	}
+
+	return resourceBackupUnitRead(ctx, d, meta)
+}
+
+func waitForUnitToBeReady(ctx context.Context, d *schema.ResourceData, client *ionoscloud.APIClient) diag.Diagnostics {
 	for {
 		log.Printf("[INFO] Waiting for backup unit %s to be ready...", d.Id())
 
@@ -217,21 +189,22 @@ func resourceBackupUnitUpdate(ctx context.Context, d *schema.ResourceData, meta 
 		case <-time.After(SleepInterval):
 			log.Printf("[INFO] trying again ...")
 		case <-ctx.Done():
-			diags := diag.FromErr(fmt.Errorf("backup unit update timed out! WARNING: your backup unit will still probably be updated after some time but the terraform state won't reflect that; check your Ionos Cloud account for updates"))
+			diags := diag.FromErr(fmt.Errorf("backup unit readiness check timed out! WARNING: your backup unit will still probably be created/updated " +
+				"after some time but the terraform state won't reflect that; check your Ionos Cloud account for updates"))
 			return diags
 		}
 	}
-
-	return resourceBackupUnitRead(ctx, d, meta)
+	return nil
 }
 
 func resourceBackupUnitDelete(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	client := meta.(SdkBundle).CloudApiClient
 
 	apiResponse, err := client.BackupUnitsApi.BackupunitsDelete(ctx, d.Id()).Execute()
+	logApiRequestTime(apiResponse)
 
 	if err != nil {
-		if apiResponse != nil && apiResponse.StatusCode == 404 {
+		if apiResponse != nil && apiResponse.Response != nil && apiResponse.StatusCode == 404 {
 			d.SetId("")
 			return nil
 		}
@@ -258,7 +231,8 @@ func resourceBackupUnitDelete(ctx context.Context, d *schema.ResourceData, meta 
 		case <-time.After(SleepInterval):
 			log.Printf("[INFO] trying again ...")
 		case <-ctx.Done():
-			diags := diag.FromErr(fmt.Errorf("backup unit deletion timed out! WARNING: your backup unit will still probably be deleted after some time but the terraform state won't reflect that; check your Ionos Cloud account for updates"))
+			diags := diag.FromErr(fmt.Errorf("backup unit deletion timed out! WARNING: your backup unit will still probably be deleted " +
+				"after some time but the terraform state won't reflect that; check your Ionos Cloud account for updates"))
 			return diags
 		}
 	}
@@ -266,8 +240,41 @@ func resourceBackupUnitDelete(ctx context.Context, d *schema.ResourceData, meta 
 	return nil
 }
 
+func resourceBackupUnitImport(ctx context.Context, d *schema.ResourceData, meta interface{}) ([]*schema.ResourceData, error) {
+	client := meta.(*ionoscloud.APIClient)
+
+	buId := d.Id()
+
+	backupUnit, apiResponse, err := client.BackupUnitsApi.BackupunitsFindById(ctx, d.Id()).Execute()
+	logApiRequestTime(apiResponse)
+
+	if err != nil {
+		if apiResponse != nil && apiResponse.Response != nil && apiResponse.StatusCode == 404 {
+			d.SetId("")
+			return nil, fmt.Errorf("unable to find Backup Unit %q", buId)
+		}
+		return nil, fmt.Errorf("unable to retreive Backup Unit %q", buId)
+	}
+
+	log.Printf("[INFO] Backup Unit found: %+v", backupUnit)
+
+	contractResources, apiResponse, cErr := client.ContractResourcesApi.ContractsGet(ctx).Execute()
+	logApiRequestTime(apiResponse)
+
+	if cErr != nil {
+		return nil, fmt.Errorf("error while fetching contract resources for backup unit %q: %s", d.Id(), cErr)
+	}
+
+	if err := setBackupUnitData(d, &backupUnit, &contractResources); err != nil {
+		return nil, err
+	}
+
+	return []*schema.ResourceData{d}, nil
+}
+
 func backupUnitReady(client *ionoscloud.APIClient, d *schema.ResourceData, c context.Context) (bool, error) {
-	backupUnit, _, err := client.BackupUnitsApi.BackupunitsFindById(c, d.Id()).Execute()
+	backupUnit, apiResponse, err := client.BackupUnitsApi.BackupunitsFindById(c, d.Id()).Execute()
+	logApiRequestTime(apiResponse)
 
 	if err != nil {
 		return true, fmt.Errorf("error checking backup unit status: %s", err)
@@ -277,12 +284,59 @@ func backupUnitReady(client *ionoscloud.APIClient, d *schema.ResourceData, c con
 
 func backupUnitDeleted(client *ionoscloud.APIClient, d *schema.ResourceData, c context.Context) (bool, error) {
 	_, apiResponse, err := client.BackupUnitsApi.BackupunitsFindById(c, d.Id()).Execute()
+	logApiRequestTime(apiResponse)
 
 	if err != nil {
-		if apiResponse != nil && apiResponse.StatusCode == 404 {
+		if apiResponse != nil && apiResponse.Response != nil && apiResponse.StatusCode == 404 {
 			return true, nil
 		}
 		return true, fmt.Errorf("error checking backup unit deletion status: %s", err)
 	}
 	return false, nil
+}
+
+func setBackupUnitData(d *schema.ResourceData, backupUnit *ionoscloud.BackupUnit, contractResources *ionoscloud.Contracts) error {
+
+	if backupUnit.Id != nil {
+		d.SetId(*backupUnit.Id)
+	}
+
+	if backupUnit.Properties != nil {
+
+		if backupUnit.Properties.Name != nil {
+			epErr := d.Set("name", *backupUnit.Properties.Name)
+			if epErr != nil {
+				return fmt.Errorf("error while setting name property for backup unit %s: %s", d.Id(), epErr)
+			}
+		}
+
+		if backupUnit.Properties.Email != nil {
+			epErr := d.Set("email", *backupUnit.Properties.Email)
+			if epErr != nil {
+				return fmt.Errorf("error while setting email property for backup unit %s: %s", d.Id(), epErr)
+			}
+		}
+
+		if backupUnit.Properties.Name != nil && contractResources.Items != nil && len(*contractResources.Items) > 0 &&
+			(*contractResources.Items)[0].Properties.ContractNumber != nil {
+			err := d.Set("login", fmt.Sprintf("%s-%d", *backupUnit.Properties.Name, *(*contractResources.Items)[0].Properties.ContractNumber))
+			if err != nil {
+				return fmt.Errorf("error while setting login property for backup unit %s: %s", d.Id(), err)
+			}
+		} else {
+			if contractResources.Items == nil || len(*contractResources.Items) == 0 {
+				return fmt.Errorf("no contracts found for user")
+			}
+
+			props := (*contractResources.Items)[0].Properties
+			if props == nil {
+				return fmt.Errorf("could not get first contract properties")
+			}
+
+			if props.ContractNumber == nil {
+				return fmt.Errorf("contract number not set")
+			}
+		}
+	}
+	return nil
 }

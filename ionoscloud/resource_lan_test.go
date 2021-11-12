@@ -12,7 +12,6 @@ import (
 
 func TestAccLan_Basic(t *testing.T) {
 	var lan ionoscloud.Lan
-	lanName := "lanName"
 
 	resource.Test(t, resource.TestCase{
 		PreCheck: func() {
@@ -22,18 +21,19 @@ func TestAccLan_Basic(t *testing.T) {
 		CheckDestroy:      testAccCheckLanDestroyCheck,
 		Steps: []resource.TestStep{
 			{
-				Config: fmt.Sprintf(testAccCheckLanConfigBasic, lanName),
+				Config: testAccCheckLanConfigBasic,
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheckLanExists("ionoscloud_lan.webserver_lan", &lan),
-					testAccCheckLanAttributes("ionoscloud_lan.webserver_lan", lanName),
-					resource.TestCheckResourceAttr("ionoscloud_lan.webserver_lan", "name", lanName),
+					testAccCheckLanExists(LanResource+"."+LanTestResource, &lan),
+					resource.TestCheckResourceAttr(LanResource+"."+LanTestResource, "name", LanTestResource),
+					resource.TestCheckResourceAttr(LanResource+"."+LanTestResource, "public", "true"),
 				),
 			},
 			{
 				Config: testAccCheckLanConfigUpdate,
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheckLanAttributes("ionoscloud_lan.webserver_lan", "updated"),
-					resource.TestCheckResourceAttr("ionoscloud_lan.webserver_lan", "name", "updated"),
+					resource.TestCheckResourceAttr(LanResource+"."+LanTestResource, "name", UpdatedResources),
+					resource.TestCheckResourceAttr(LanResource+"."+LanTestResource, "public", "false"),
+					resource.TestCheckResourceAttrPair(LanResource+"."+LanTestResource, "pcc", PCCResource+"."+PCCTestResource, "id"),
 				),
 			},
 		},
@@ -49,14 +49,15 @@ func testAccCheckLanDestroyCheck(s *terraform.State) error {
 	}
 
 	for _, rs := range s.RootModule().Resources {
-		if rs.Type != "ionoscloud_datacenter" {
+		if rs.Type != LanResource {
 			continue
 		}
 
 		_, apiResponse, err := client.LansApi.DatacentersLansFindById(ctx, rs.Primary.Attributes["datacenter_id"], rs.Primary.ID).Execute()
+		logApiRequestTime(apiResponse)
 
 		if err != nil {
-			if apiResponse == nil || apiResponse.StatusCode != 404 {
+			if apiResponse == nil || apiResponse.Response != nil && apiResponse.StatusCode != 404 {
 				return fmt.Errorf("an error occurred while looking for lan %s: %s", rs.Primary.ID, err)
 			}
 		} else {
@@ -66,20 +67,6 @@ func testAccCheckLanDestroyCheck(s *terraform.State) error {
 	}
 
 	return nil
-}
-
-func testAccCheckLanAttributes(n string, name string) resource.TestCheckFunc {
-	return func(s *terraform.State) error {
-		rs, ok := s.RootModule().Resources[n]
-		if !ok {
-			return fmt.Errorf("testAccCheckLanAttributes: Not found: %s", n)
-		}
-		if rs.Primary.Attributes["name"] != name {
-			return fmt.Errorf("bad name: %s != %s", rs.Primary.Attributes["name"], name)
-		}
-
-		return nil
-	}
 }
 
 func testAccCheckLanExists(n string, lan *ionoscloud.Lan) resource.TestCheckFunc {
@@ -100,7 +87,8 @@ func testAccCheckLanExists(n string, lan *ionoscloud.Lan) resource.TestCheckFunc
 		if cancel != nil {
 			defer cancel()
 		}
-		foundLan, _, err := client.LansApi.DatacentersLansFindById(ctx, rs.Primary.Attributes["datacenter_id"], rs.Primary.ID).Execute()
+		foundLan, apiResponse, err := client.LansApi.DatacentersLansFindById(ctx, rs.Primary.Attributes["datacenter_id"], rs.Primary.ID).Execute()
+		logApiRequestTime(apiResponse)
 
 		if err != nil {
 			return fmt.Errorf("error occured while fetching Server: %s", rs.Primary.ID)
@@ -115,25 +103,17 @@ func testAccCheckLanExists(n string, lan *ionoscloud.Lan) resource.TestCheckFunc
 	}
 }
 
-const testAccCheckLanConfigBasic = `
-resource "ionoscloud_datacenter" "foobar" {
-	name       = "lan-test"
-	location = "us/las"
-}
-
-resource "ionoscloud_lan" "webserver_lan" {
-  datacenter_id = "${ionoscloud_datacenter.foobar.id}"
+const testAccCheckLanConfigBasic = testAccCheckDatacenterConfigBasic + `
+resource ` + LanResource + ` ` + LanTestResource + ` {
+  datacenter_id = ` + DatacenterResource + `.` + DatacenterTestResource + `.id
   public = true
-  name = "%s"
+  name = "` + LanTestResource + `"
 }`
 
-const testAccCheckLanConfigUpdate = `
-resource "ionoscloud_datacenter" "foobar" {
-	name       = "lan-test"
-	location = "us/las"
-}
-resource "ionoscloud_lan" "webserver_lan" {
-  datacenter_id = "${ionoscloud_datacenter.foobar.id}"
-  public = true
-  name = "updated"
+const testAccCheckLanConfigUpdate = testAccCheckDatacenterConfigBasic + testAccCheckPrivateCrossConnectConfigBasic + `
+resource ` + LanResource + ` ` + LanTestResource + ` {
+  datacenter_id = ` + DatacenterResource + `.` + DatacenterTestResource + `.id
+  public = false
+  name = "` + UpdatedResources + `"
+  pcc = ` + PCCResource + `.` + PCCTestResource + `.id
 }`

@@ -1,7 +1,7 @@
 /*
  * CLOUD API
  *
- * An enterprise-grade Infrastructure is provided as a Service (IaaS) solution that can be managed through a browser-based \"Data Center Designer\" (DCD) tool or via an easy to use API.   The API allows you to perform a variety of management tasks such as spinning up additional servers, adding volumes, adjusting networking, and so forth. It is designed to allow users to leverage the same power and flexibility found within the DCD visual tool. Both tools are consistent with their concepts and lend well to making the experience smooth and intuitive.
+ * IONOS Enterprise-grade Infrastructure as a Service (IaaS) solutions can be managed through the Cloud API, in addition or as an alternative to the \"Data Center Designer\" (DCD) browser-based tool.    Both methods employ consistent concepts and features, deliver similar power and flexibility, and can be used to perform a multitude of management tasks, including adding servers, volumes, configuring networks, and so on.
  *
  * API version: 6.0-SDK.3
  */
@@ -16,11 +16,9 @@ import (
 
 // GroupEntities struct for GroupEntities
 type GroupEntities struct {
-	Users *GroupMembers `json:"users,omitempty"`
+	Users     *GroupMembers   `json:"users,omitempty"`
 	Resources *ResourceGroups `json:"resources,omitempty"`
 }
-
-
 
 // GetUsers returns the Users field value
 // If the value is explicit nil, the zero value for GroupMembers will be returned
@@ -28,7 +26,6 @@ func (o *GroupEntities) GetUsers() *GroupMembers {
 	if o == nil {
 		return nil
 	}
-
 
 	return o.Users
 
@@ -42,13 +39,11 @@ func (o *GroupEntities) GetUsersOk() (*GroupMembers, bool) {
 		return nil, false
 	}
 
-
 	return o.Users, true
 }
 
 // SetUsers sets field value
 func (o *GroupEntities) SetUsers(v GroupMembers) {
-
 
 	o.Users = &v
 
@@ -63,15 +58,12 @@ func (o *GroupEntities) HasUsers() bool {
 	return false
 }
 
-
-
 // GetResources returns the Resources field value
 // If the value is explicit nil, the zero value for ResourceGroups will be returned
 func (o *GroupEntities) GetResources() *ResourceGroups {
 	if o == nil {
 		return nil
 	}
-
 
 	return o.Resources
 
@@ -85,13 +77,11 @@ func (o *GroupEntities) GetResourcesOk() (*ResourceGroups, bool) {
 		return nil, false
 	}
 
-
 	return o.Resources, true
 }
 
 // SetResources sets field value
 func (o *GroupEntities) SetResources(v ResourceGroups) {
-
 
 	o.Resources = &v
 
@@ -106,19 +96,16 @@ func (o *GroupEntities) HasResources() bool {
 	return false
 }
 
-
 func (o GroupEntities) MarshalJSON() ([]byte, error) {
 	toSerialize := map[string]interface{}{}
 
 	if o.Users != nil {
 		toSerialize["users"] = o.Users
 	}
-	
 
 	if o.Resources != nil {
 		toSerialize["resources"] = o.Resources
 	}
-	
 	return json.Marshal(toSerialize)
 }
 
@@ -157,5 +144,3 @@ func (v *NullableGroupEntities) UnmarshalJSON(src []byte) error {
 	v.isSet = true
 	return json.Unmarshal(src, &v.value)
 }
-
-

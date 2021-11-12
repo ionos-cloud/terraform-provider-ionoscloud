@@ -9,20 +9,18 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
 )
 
-func TestAccLan_ImportBasic(t *testing.T) {
-	lanName := "lanName"
-
+func TestAccLanImportBasic(t *testing.T) {
 	resource.Test(t, resource.TestCase{
 		PreCheck:          func() { testAccPreCheck(t) },
 		ProviderFactories: testAccProviderFactories,
 		CheckDestroy:      testAccCheckLanDestroyCheck,
 		Steps: []resource.TestStep{
 			{
-				Config: fmt.Sprintf(testAccCheckLanConfigBasic, lanName),
+				Config: testAccCheckLanConfigBasic,
 			},
 
 			{
-				ResourceName:      "ionoscloud_lan.webserver_lan",
+				ResourceName:      LanResource + "." + LanTestResource,
 				ImportStateIdFunc: testAccLanImportStateId,
 				ImportState:       true,
 				ImportStateVerify: true,
@@ -32,10 +30,10 @@ func TestAccLan_ImportBasic(t *testing.T) {
 }
 
 func testAccLanImportStateId(s *terraform.State) (string, error) {
-	var importID string = ""
+	var importID = ""
 
 	for _, rs := range s.RootModule().Resources {
-		if rs.Type != "ionoscloud_lan" {
+		if rs.Type != LanResource {
 			continue
 		}
 

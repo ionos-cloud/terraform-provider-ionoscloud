@@ -1,3 +1,5 @@
+// +build natgateway
+
 package ionoscloud
 
 import (
@@ -6,6 +8,9 @@ import (
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 )
+
+const dataSourceIdNatGatewayResource = NatGatewayResource + "." + NatGatewayDataSourceById
+const dataSourceNameNatGatewayResource = NatGatewayResource + "." + NatGatewayDataSourceByName
 
 func TestAccDataSourceNatGateway_matchId(t *testing.T) {
 
@@ -16,137 +21,40 @@ func TestAccDataSourceNatGateway_matchId(t *testing.T) {
 		ProviderFactories: testAccProviderFactories,
 		Steps: []resource.TestStep{
 			{
-				Config: fmt.Sprintf(testAccDataSourceNatGatewayCreateResources),
+				Config: fmt.Sprintf(testAccCheckNatGatewayConfigBasic, NatGatewayTestResource),
 			},
 			{
-				Config: fmt.Sprintf(testAccDataSourceNatGatewayMatchId),
+				Config: fmt.Sprintf(testAccDataSourceNatGatewayMatchId, NatGatewayTestResource),
 				Check: resource.ComposeTestCheckFunc(
-					resource.TestCheckResourceAttr("data.ionoscloud_natgateway.test_natgateway", "name", "test_datasource_natgateway"),
-					resource.TestCheckResourceAttrPair("data.ionoscloud_natgateway.test_natgateway", "public_ips.0", "ionoscloud_ipblock.natgateway_ips", "ips.0"),
+					resource.TestCheckResourceAttrPair(dataSourceIdNatGatewayResource, "name", resourceNatGatewayResource, "name"),
+					resource.TestCheckResourceAttrPair(dataSourceIdNatGatewayResource, "public_ips.0", resourceNatGatewayResource, "public_ips.0"),
+					resource.TestCheckResourceAttrPair(dataSourceIdNatGatewayResource, "lans.0.id", resourceNatGatewayResource, "lans.0.id"),
+					resource.TestCheckResourceAttrPair(dataSourceIdNatGatewayResource, "lans.0.gateway_ips", resourceNatGatewayResource, "lans.0.gateway_ips"),
+				),
+			},
+			{
+				Config: fmt.Sprintf(testAccDataSourceNatGatewayMatchName, NatGatewayTestResource),
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttrPair(dataSourceNameNatGatewayResource, "name", resourceNatGatewayResource, "name"),
+					resource.TestCheckResourceAttrPair(dataSourceNameNatGatewayResource, "public_ips.0", resourceNatGatewayResource, "public_ips.0"),
+					resource.TestCheckResourceAttrPair(dataSourceNameNatGatewayResource, "lans.0.id", resourceNatGatewayResource, "lans.0.id"),
+					resource.TestCheckResourceAttrPair(dataSourceNameNatGatewayResource, "lans.0.gateway_ips", resourceNatGatewayResource, "lans.0.gateway_ips"),
 				),
 			},
 		},
 	})
 }
 
-func TestAccDataSourceNatGateway_matchName(t *testing.T) {
-
-	resource.Test(t, resource.TestCase{
-		PreCheck: func() {
-			testAccPreCheck(t)
-		},
-		ProviderFactories: testAccProviderFactories,
-		Steps: []resource.TestStep{
-			{
-				Config: fmt.Sprintf(testAccDataSourceNatGatewayCreateResources),
-			},
-			{
-				Config: fmt.Sprintf(testAccDataSourceNatGatewayMatchName),
-				Check: resource.ComposeTestCheckFunc(
-					resource.TestCheckResourceAttr("data.ionoscloud_natgateway.test_natgateway", "name", "test_datasource_natgateway"),
-					resource.TestCheckResourceAttrPair("data.ionoscloud_natgateway.test_natgateway", "public_ips.0", "ionoscloud_ipblock.natgateway_ips", "ips.0"),
-				),
-			},
-		},
-	})
-}
-
-const testAccDataSourceNatGatewayCreateResources = `
-resource "ionoscloud_datacenter" "natgateway_datacenter" {
-  name              = "test_natgateway"
-  location          = "de/fra"
-  description       = "datacenter for hosting "
-}
-
-resource "ionoscloud_ipblock" "natgateway_ips" {
-  location = ionoscloud_datacenter.natgateway_datacenter.location
-  size = 1
-  name = "natgateway_ips"
-}
-
-resource "ionoscloud_lan" "natgateway_lan" {
-  datacenter_id = ionoscloud_datacenter.natgateway_datacenter.id 
-  public        = false
-  name          = "test_natgateway_lan"
-}
-
-resource "ionoscloud_natgateway" "natgateway" { 
-  datacenter_id = ionoscloud_datacenter.natgateway_datacenter.id
-  name          = "test_datasource_natgateway" 
-  public_ips    = [ ionoscloud_ipblock.natgateway_ips.ips[0] ]
-  lans {
-     id          = ionoscloud_lan.natgateway_lan.id
-     gateway_ips = [ "10.11.2.5/32"] 
-  }
+const testAccDataSourceNatGatewayMatchId = testAccCheckNatGatewayConfigBasic + `
+data ` + NatGatewayResource + ` ` + NatGatewayDataSourceById + ` {
+  datacenter_id = ` + DatacenterResource + `.natgateway_datacenter.id
+  id			= ` + NatGatewayResource + `.` + NatGatewayTestResource + `.id
 }
 `
 
-const testAccDataSourceNatGatewayMatchId = `
-resource "ionoscloud_datacenter" "natgateway_datacenter" {
-  name              = "test_natgateway"
-  location          = "de/fra"
-  description       = "datacenter for hosting "
-}
-
-resource "ionoscloud_ipblock" "natgateway_ips" {
-  location = ionoscloud_datacenter.natgateway_datacenter.location
-  size = 1
-  name = "natgateway_ips"
-}
-
-resource "ionoscloud_lan" "natgateway_lan" {
-  datacenter_id = ionoscloud_datacenter.natgateway_datacenter.id 
-  public        = false
-  name          = "test_natgateway_lan"
-}
-
-resource "ionoscloud_natgateway" "natgateway" { 
-  datacenter_id = ionoscloud_datacenter.natgateway_datacenter.id
-  name          = "test_datasource_natgateway" 
-  public_ips    = [ ionoscloud_ipblock.natgateway_ips.ips[0] ]
-  lans {
-     id          = ionoscloud_lan.natgateway_lan.id
-     gateway_ips = [ "10.11.2.5/32"] 
-  }
-}
-
-data "ionoscloud_natgateway" "test_natgateway" {
-  datacenter_id = ionoscloud_datacenter.natgateway_datacenter.id
-  id			= ionoscloud_natgateway.natgateway.id
-}
-`
-
-const testAccDataSourceNatGatewayMatchName = `
-resource "ionoscloud_datacenter" "natgateway_datacenter" {
-  name              = "test_natgateway"
-  location          = "de/fra"
-  description       = "datacenter for hosting "
-}
-
-resource "ionoscloud_ipblock" "natgateway_ips" {
-  location = ionoscloud_datacenter.natgateway_datacenter.location
-  size = 1
-  name = "natgateway_ips"
-}
-
-resource "ionoscloud_lan" "natgateway_lan" {
-  datacenter_id = ionoscloud_datacenter.natgateway_datacenter.id 
-  public        = false
-  name          = "test_natgateway_lan"
-}
-
-resource "ionoscloud_natgateway" "natgateway" { 
-  datacenter_id = ionoscloud_datacenter.natgateway_datacenter.id
-  name          = "test_datasource_natgateway" 
-  public_ips    = [ ionoscloud_ipblock.natgateway_ips.ips[0] ]
-  lans {
-     id          = ionoscloud_lan.natgateway_lan.id
-     gateway_ips = [ "10.11.2.5/32"] 
-  }
-}
-
-data "ionoscloud_natgateway" "test_natgateway" {
-  datacenter_id = ionoscloud_datacenter.natgateway_datacenter.id
-  name			= "test_datasource_"
+const testAccDataSourceNatGatewayMatchName = testAccCheckNatGatewayConfigBasic + `
+data ` + NatGatewayResource + ` ` + NatGatewayDataSourceByName + `  {
+  datacenter_id = ` + DatacenterResource + `.natgateway_datacenter.id
+  name			= ` + NatGatewayResource + `.` + NatGatewayTestResource + `.name
 }
 `

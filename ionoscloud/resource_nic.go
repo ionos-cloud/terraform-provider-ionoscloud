@@ -8,6 +8,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 	ionoscloud "github.com/ionos-cloud/sdk-go/v6"
 	"log"
+	"strings"
 )
 
 func resourceNic() *schema.Resource {
@@ -81,47 +82,13 @@ func resourceNic() *schema.Resource {
 func resourceNicCreate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	client := meta.(SdkBundle).CloudApiClient
 
-	lan := d.Get("lan").(int)
-	lanConverted := int32(lan)
-	nic := ionoscloud.Nic{
-		Properties: &ionoscloud.NicProperties{
-			Lan: &lanConverted,
-		},
-	}
-	if _, ok := d.GetOk("name"); ok {
-		name := d.Get("name").(string)
-		nic.Properties.Name = &name
-	}
-
-	dhcp := d.Get("dhcp").(bool)
-	nic.Properties.Dhcp = &dhcp
-
-	if _, ok := d.GetOk("firewall_active"); ok {
-		raw := d.Get("firewall_active").(bool)
-		nic.Properties.FirewallActive = &raw
-	}
-	if _, ok := d.GetOk("firewall_type"); ok {
-		raw := d.Get("firewall_type").(string)
-		nic.Properties.FirewallType = &raw
-	}
-
-	if v, ok := d.GetOk("ips"); ok {
-		raw := v.([]interface{})
-		if raw != nil && len(raw) > 0 {
-			var ips []string
-			for _, rawIp := range raw {
-				ip := rawIp.(string)
-				ips = append(ips, ip)
-			}
-			if ips != nil && len(ips) > 0 {
-				nic.Properties.Ips = &ips
-			}
-		}
-	}
+	nic := getNicData(d, "")
 
 	dcid := d.Get("datacenter_id").(string)
 	srvid := d.Get("server_id").(string)
-	nic, apiResp, err := client.NetworkInterfacesApi.DatacentersServersNicsPost(ctx, dcid, srvid).Nic(nic).Execute()
+
+	nic, apiResponse, err := client.NetworkInterfacesApi.DatacentersServersNicsPost(ctx, dcid, srvid).Nic(nic).Execute()
+	logApiRequestTime(apiResponse)
 
 	if err != nil {
 		diags := diag.FromErr(fmt.Errorf("error occured while creating a nic: %s", err))
@@ -131,7 +98,7 @@ func resourceNicCreate(ctx context.Context, d *schema.ResourceData, meta interfa
 		d.SetId(*nic.Id)
 	}
 	// Wait, catching any errors
-	_, errState := getStateChangeConf(meta, d, apiResp.Header.Get("Location"), schema.TimeoutCreate).WaitForStateContext(ctx)
+	_, errState := getStateChangeConf(meta, d, apiResponse.Header.Get("Location"), schema.TimeoutCreate).WaitForStateContext(ctx)
 	if errState != nil {
 		if IsRequestFailed(err) {
 			// Request failed, so resource was not created, delete resource from state file
@@ -150,10 +117,11 @@ func resourceNicRead(ctx context.Context, d *schema.ResourceData, meta interface
 	srvid := d.Get("server_id").(string)
 	nicid := d.Id()
 
-	rsp, apiResponse, err := client.NetworkInterfacesApi.DatacentersServersNicsFindById(ctx, dcid, srvid, nicid).Execute()
+	nic, apiResponse, err := client.NetworkInterfacesApi.DatacentersServersNicsFindById(ctx, dcid, srvid, nicid).Execute()
+	logApiRequestTime(apiResponse)
 
 	if err != nil {
-		if apiResponse != nil && apiResponse.StatusCode == 404 {
+		if apiResponse != nil && apiResponse.Response != nil && apiResponse.StatusCode == 404 {
 			d.SetId("")
 			return nil
 		}
@@ -161,62 +129,8 @@ func resourceNicRead(ctx context.Context, d *schema.ResourceData, meta interface
 		return diags
 	}
 
-	if rsp.Properties != nil {
-		log.Printf("[INFO] LAN ON NIC: %d", rsp.Properties.Lan)
-		if rsp.Properties.Dhcp != nil {
-			if err := d.Set("dhcp", *rsp.Properties.Dhcp); err != nil {
-				diags := diag.FromErr(err)
-				return diags
-			}
-		}
-		if rsp.Properties.Lan != nil {
-			if err := d.Set("lan", *rsp.Properties.Lan); err != nil {
-				diags := diag.FromErr(err)
-				return diags
-			}
-		}
-		if rsp.Properties.Name != nil {
-			if err := d.Set("name", *rsp.Properties.Name); err != nil {
-				diags := diag.FromErr(err)
-				return diags
-			}
-		}
-		if rsp.Properties.Ips != nil && len(*rsp.Properties.Ips) > 0 {
-			if err := d.Set("ips", *rsp.Properties.Ips); err != nil {
-				diags := diag.FromErr(err)
-				return diags
-			}
-		}
-		if rsp.Properties.FirewallActive != nil {
-			if err := d.Set("firewall_active", *rsp.Properties.FirewallActive); err != nil {
-				diags := diag.FromErr(err)
-				return diags
-			}
-		}
-		if rsp.Properties.FirewallType != nil {
-			if err := d.Set("firewall_type", *rsp.Properties.FirewallType); err != nil {
-				diags := diag.FromErr(err)
-				return diags
-			}
-		}
-		if rsp.Properties.Mac != nil {
-			if err := d.Set("mac", *rsp.Properties.Mac); err != nil {
-				diags := diag.FromErr(err)
-				return diags
-			}
-		}
-		if rsp.Properties.DeviceNumber != nil {
-			if err := d.Set("device_number", *rsp.Properties.DeviceNumber); err != nil {
-				diags := diag.FromErr(err)
-				return diags
-			}
-		}
-		if rsp.Properties.PciSlot != nil {
-			if err := d.Set("pci_slot", *rsp.Properties.PciSlot); err != nil {
-				diags := diag.FromErr(err)
-				return diags
-			}
-		}
+	if err := NicSetData(d, &nic); err != nil {
+		return diag.FromErr(err)
 	}
 
 	return nil
@@ -225,43 +139,14 @@ func resourceNicRead(ctx context.Context, d *schema.ResourceData, meta interface
 func resourceNicUpdate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	client := meta.(SdkBundle).CloudApiClient
 
-	properties := ionoscloud.NicProperties{}
+	dcId := d.Get("datacenter_id").(string)
+	srvId := d.Get("server_id").(string)
+	nicId := d.Id()
 
-	if d.HasChange("name") {
-		_, n := d.GetChange("name")
-		name := n.(string)
-		properties.Name = &name
-	}
-	if d.HasChange("lan") {
-		_, n := d.GetChange("lan")
-		lan := n.(int32)
-		properties.Lan = &lan
-	}
+	nic := getNicData(d, "")
 
-	n := d.Get("dhcp").(bool)
-	properties.Dhcp = &n
-
-	if d.HasChange("ips") {
-		_, v := d.GetChange("ips")
-		raw := v.([]interface{})
-		if raw != nil && len(raw) > 0 {
-			var ips []string
-			for _, rawIp := range raw {
-				ip := rawIp.(string)
-				ips = append(ips, ip)
-			}
-			if ips != nil && len(ips) > 0 {
-				properties.Ips = &ips
-			}
-		}
-	}
-
-	dcid := d.Get("datacenter_id").(string)
-	srvid := d.Get("server_id").(string)
-	nicid := d.Id()
-
-	_, apiResponse, err := client.NetworkInterfacesApi.DatacentersServersNicsPatch(ctx, dcid, srvid, nicid).Nic(properties).Execute()
-
+	_, apiResponse, err := client.NetworkInterfacesApi.DatacentersServersNicsPatch(ctx, dcId, srvId, nicId).Nic(*nic.Properties).Execute()
+	logApiRequestTime(apiResponse)
 	if err != nil {
 		diags := diag.FromErr(fmt.Errorf("error occured while updating a nic: %s", err))
 		return diags
@@ -283,14 +168,15 @@ func resourceNicDelete(ctx context.Context, d *schema.ResourceData, meta interfa
 	dcid := d.Get("datacenter_id").(string)
 	srvid := d.Get("server_id").(string)
 	nicid := d.Id()
-	apiresp, err := client.NetworkInterfacesApi.DatacentersServersNicsDelete(ctx, dcid, srvid, nicid).Execute()
+	apiResponse, err := client.NetworkInterfacesApi.DatacentersServersNicsDelete(ctx, dcid, srvid, nicid).Execute()
+	logApiRequestTime(apiResponse)
 
 	if err != nil {
 		diags := diag.FromErr(fmt.Errorf("an error occured while deleting a nic dcId %s ID %s %s", d.Get("datacenter_id").(string), d.Id(), err))
 		return diags
 	}
 	// Wait, catching any errors
-	_, errState := getStateChangeConf(meta, d, apiresp.Header.Get("Location"), schema.TimeoutDelete).WaitForStateContext(ctx)
+	_, errState := getStateChangeConf(meta, d, apiResponse.Header.Get("Location"), schema.TimeoutDelete).WaitForStateContext(ctx)
 	if errState != nil {
 		diags := diag.FromErr(errState)
 		return diags
@@ -298,4 +184,144 @@ func resourceNicDelete(ctx context.Context, d *schema.ResourceData, meta interfa
 
 	d.SetId("")
 	return nil
+}
+
+func getNicData(d *schema.ResourceData, path string) ionoscloud.Nic {
+
+	nic := ionoscloud.Nic{
+		Properties: &ionoscloud.NicProperties{},
+	}
+
+	lanInt := int32(d.Get(path + "lan").(int))
+	nic.Properties.Lan = &lanInt
+
+	if v, ok := d.GetOk(path + "name"); ok {
+		vStr := v.(string)
+		nic.Properties.Name = &vStr
+	}
+
+	nic.Properties.Dhcp = boolAddr(d.Get(path + "dhcp").(bool))
+	nic.Properties.FirewallActive = boolAddr(d.Get(path + "firewall_active").(bool))
+
+	if _, ok := d.GetOk("firewall_type"); ok {
+		raw := d.Get("firewall_type").(string)
+		nic.Properties.FirewallType = &raw
+	}
+
+	if v, ok := d.GetOk(path + "ips"); ok {
+		raw := v.([]interface{})
+		if raw != nil && len(raw) > 0 {
+			ips := make([]string, 0)
+			for _, rawIp := range raw {
+				ip := rawIp.(string)
+				ips = append(ips, ip)
+			}
+			if ips != nil && len(ips) > 0 {
+				nic.Properties.Ips = &ips
+			}
+		}
+	}
+
+	return nic
+}
+
+func NicSetData(d *schema.ResourceData, nic *ionoscloud.Nic) error {
+	if nic == nil {
+		return fmt.Errorf("nic is empty")
+	}
+
+	if nic.Id != nil {
+		d.SetId(*nic.Id)
+	}
+
+	if nic.Properties != nil {
+		log.Printf("[INFO] LAN ON NIC: %d", nic.Properties.Lan)
+		if nic.Properties.Dhcp != nil {
+			if err := d.Set("dhcp", *nic.Properties.Dhcp); err != nil {
+				return err
+			}
+		}
+		if nic.Properties.Lan != nil {
+			if err := d.Set("lan", *nic.Properties.Lan); err != nil {
+				return err
+			}
+		}
+		if nic.Properties.Name != nil {
+			if err := d.Set("name", *nic.Properties.Name); err != nil {
+				return err
+			}
+		}
+		if nic.Properties.Ips != nil && len(*nic.Properties.Ips) > 0 {
+			if err := d.Set("ips", *nic.Properties.Ips); err != nil {
+				return err
+			}
+		}
+		if nic.Properties.FirewallActive != nil {
+			if err := d.Set("firewall_active", *nic.Properties.FirewallActive); err != nil {
+				return err
+			}
+		}
+		if nic.Properties.FirewallType != nil {
+			if err := d.Set("firewall_type", *nic.Properties.FirewallType); err != nil {
+				return err
+			}
+		}
+		if nic.Properties.Mac != nil {
+			if err := d.Set("mac", *nic.Properties.Mac); err != nil {
+				return err
+			}
+		}
+		if nic.Properties.DeviceNumber != nil {
+			if err := d.Set("device_number", *nic.Properties.DeviceNumber); err != nil {
+				return err
+			}
+		}
+		if nic.Properties.PciSlot != nil {
+			if err := d.Set("pci_slot", *nic.Properties.PciSlot); err != nil {
+				return err
+			}
+		}
+	}
+
+	return nil
+}
+
+func resourceNicImport(ctx context.Context, d *schema.ResourceData, meta interface{}) ([]*schema.ResourceData, error) {
+	parts := strings.Split(d.Id(), "/")
+	if len(parts) != 3 || parts[0] == "" || parts[1] == "" {
+		return nil, fmt.Errorf("invalid import id %q. Expecting {datacenter}/{server}/{nic}", d.Id())
+	}
+	dcId := parts[0]
+	sId := parts[1]
+	nicId := parts[2]
+
+	client := meta.(*ionoscloud.APIClient)
+
+	nic, apiResponse, err := client.NetworkInterfacesApi.DatacentersServersNicsFindById(ctx, dcId, sId, nicId).Execute()
+	logApiRequestTime(apiResponse)
+
+	if err != nil {
+		if !httpNotFound(apiResponse) {
+			d.SetId("")
+			return nil, fmt.Errorf("an error occured while trying to fetch the nic %q", nicId)
+		}
+		return nil, fmt.Errorf("lan does not exist%q", nicId)
+	}
+
+	err = d.Set("datacenter_id", dcId)
+	if err != nil {
+		return nil, err
+	}
+	err = d.Set("server_id", sId)
+	if err != nil {
+		return nil, err
+	}
+
+	if err := NicSetData(d, &nic); err != nil {
+		return nil, err
+	}
+
+	log.Printf("[INFO] nic found: %+v", nic)
+
+	return []*schema.ResourceData{d}, nil
 }

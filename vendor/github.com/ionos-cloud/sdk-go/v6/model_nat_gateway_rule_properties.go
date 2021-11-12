@@ -1,7 +1,7 @@
 /*
  * CLOUD API
  *
- * An enterprise-grade Infrastructure is provided as a Service (IaaS) solution that can be managed through a browser-based \"Data Center Designer\" (DCD) tool or via an easy to use API.   The API allows you to perform a variety of management tasks such as spinning up additional servers, adding volumes, adjusting networking, and so forth. It is designed to allow users to leverage the same power and flexibility found within the DCD visual tool. Both tools are consistent with their concepts and lend well to making the experience smooth and intuitive.
+ * IONOS Enterprise-grade Infrastructure as a Service (IaaS) solutions can be managed through the Cloud API, in addition or as an alternative to the \"Data Center Designer\" (DCD) browser-based tool.    Both methods employ consistent concepts and features, deliver similar power and flexibility, and can be used to perform a multitude of management tasks, including adding servers, volumes, configuring networks, and so on.
  *
  * API version: 6.0-SDK.3
  */
@@ -27,11 +27,9 @@ type NatGatewayRuleProperties struct {
 	// Public IP address of the NAT gateway rule. Specifies the address used for masking outgoing packets source address field. Should be one of the customer reserved IP address already configured on the NAT gateway resource
 	PublicIp *string `json:"publicIp"`
 	// Target or destination subnet of the NAT gateway rule. For SNAT rules it specifies which packets this translation rule applies to based on the packets destination IP address. If none is provided, rule will match any address.
-	TargetSubnet *string `json:"targetSubnet,omitempty"`
+	TargetSubnet    *string          `json:"targetSubnet,omitempty"`
 	TargetPortRange *TargetPortRange `json:"targetPortRange,omitempty"`
 }
-
-
 
 // GetName returns the Name field value
 // If the value is explicit nil, the zero value for string will be returned
@@ -39,7 +37,6 @@ func (o *NatGatewayRuleProperties) GetName() *string {
 	if o == nil {
 		return nil
 	}
-
 
 	return o.Name
 
@@ -53,13 +50,11 @@ func (o *NatGatewayRuleProperties) GetNameOk() (*string, bool) {
 		return nil, false
 	}
 
-
 	return o.Name, true
 }
 
 // SetName sets field value
 func (o *NatGatewayRuleProperties) SetName(v string) {
-
 
 	o.Name = &v
 
@@ -74,15 +69,12 @@ func (o *NatGatewayRuleProperties) HasName() bool {
 	return false
 }
 
-
-
 // GetType returns the Type field value
 // If the value is explicit nil, the zero value for NatGatewayRuleType will be returned
 func (o *NatGatewayRuleProperties) GetType() *NatGatewayRuleType {
 	if o == nil {
 		return nil
 	}
-
 
 	return o.Type
 
@@ -96,13 +88,11 @@ func (o *NatGatewayRuleProperties) GetTypeOk() (*NatGatewayRuleType, bool) {
 		return nil, false
 	}
 
-
 	return o.Type, true
 }
 
 // SetType sets field value
 func (o *NatGatewayRuleProperties) SetType(v NatGatewayRuleType) {
-
 
 	o.Type = &v
 
@@ -117,15 +107,12 @@ func (o *NatGatewayRuleProperties) HasType() bool {
 	return false
 }
 
-
-
 // GetProtocol returns the Protocol field value
 // If the value is explicit nil, the zero value for NatGatewayRuleProtocol will be returned
 func (o *NatGatewayRuleProperties) GetProtocol() *NatGatewayRuleProtocol {
 	if o == nil {
 		return nil
 	}
-
 
 	return o.Protocol
 
@@ -139,13 +126,11 @@ func (o *NatGatewayRuleProperties) GetProtocolOk() (*NatGatewayRuleProtocol, boo
 		return nil, false
 	}
 
-
 	return o.Protocol, true
 }
 
 // SetProtocol sets field value
 func (o *NatGatewayRuleProperties) SetProtocol(v NatGatewayRuleProtocol) {
-
 
 	o.Protocol = &v
 
@@ -160,15 +145,12 @@ func (o *NatGatewayRuleProperties) HasProtocol() bool {
 	return false
 }
 
-
-
 // GetSourceSubnet returns the SourceSubnet field value
 // If the value is explicit nil, the zero value for string will be returned
 func (o *NatGatewayRuleProperties) GetSourceSubnet() *string {
 	if o == nil {
 		return nil
 	}
-
 
 	return o.SourceSubnet
 
@@ -182,13 +164,11 @@ func (o *NatGatewayRuleProperties) GetSourceSubnetOk() (*string, bool) {
 		return nil, false
 	}
 
-
 	return o.SourceSubnet, true
 }
 
 // SetSourceSubnet sets field value
 func (o *NatGatewayRuleProperties) SetSourceSubnet(v string) {
-
 
 	o.SourceSubnet = &v
 
@@ -203,15 +183,12 @@ func (o *NatGatewayRuleProperties) HasSourceSubnet() bool {
 	return false
 }
 
-
-
 // GetPublicIp returns the PublicIp field value
 // If the value is explicit nil, the zero value for string will be returned
 func (o *NatGatewayRuleProperties) GetPublicIp() *string {
 	if o == nil {
 		return nil
 	}
-
 
 	return o.PublicIp
 
@@ -225,13 +202,11 @@ func (o *NatGatewayRuleProperties) GetPublicIpOk() (*string, bool) {
 		return nil, false
 	}
 
-
 	return o.PublicIp, true
 }
 
 // SetPublicIp sets field value
 func (o *NatGatewayRuleProperties) SetPublicIp(v string) {
-
 
 	o.PublicIp = &v
 
@@ -246,15 +221,12 @@ func (o *NatGatewayRuleProperties) HasPublicIp() bool {
 	return false
 }
 
-
-
 // GetTargetSubnet returns the TargetSubnet field value
 // If the value is explicit nil, the zero value for string will be returned
 func (o *NatGatewayRuleProperties) GetTargetSubnet() *string {
 	if o == nil {
 		return nil
 	}
-
 
 	return o.TargetSubnet
 
@@ -268,13 +240,11 @@ func (o *NatGatewayRuleProperties) GetTargetSubnetOk() (*string, bool) {
 		return nil, false
 	}
 
-
 	return o.TargetSubnet, true
 }
 
 // SetTargetSubnet sets field value
 func (o *NatGatewayRuleProperties) SetTargetSubnet(v string) {
-
 
 	o.TargetSubnet = &v
 
@@ -289,15 +259,12 @@ func (o *NatGatewayRuleProperties) HasTargetSubnet() bool {
 	return false
 }
 
-
-
 // GetTargetPortRange returns the TargetPortRange field value
 // If the value is explicit nil, the zero value for TargetPortRange will be returned
 func (o *NatGatewayRuleProperties) GetTargetPortRange() *TargetPortRange {
 	if o == nil {
 		return nil
 	}
-
 
 	return o.TargetPortRange
 
@@ -311,13 +278,11 @@ func (o *NatGatewayRuleProperties) GetTargetPortRangeOk() (*TargetPortRange, boo
 		return nil, false
 	}
 
-
 	return o.TargetPortRange, true
 }
 
 // SetTargetPortRange sets field value
 func (o *NatGatewayRuleProperties) SetTargetPortRange(v TargetPortRange) {
-
 
 	o.TargetPortRange = &v
 
@@ -332,44 +297,36 @@ func (o *NatGatewayRuleProperties) HasTargetPortRange() bool {
 	return false
 }
 
-
 func (o NatGatewayRuleProperties) MarshalJSON() ([]byte, error) {
 	toSerialize := map[string]interface{}{}
 
 	if o.Name != nil {
 		toSerialize["name"] = o.Name
 	}
-	
 
 	if o.Type != nil {
 		toSerialize["type"] = o.Type
 	}
-	
 
 	if o.Protocol != nil {
 		toSerialize["protocol"] = o.Protocol
 	}
-	
 
 	if o.SourceSubnet != nil {
 		toSerialize["sourceSubnet"] = o.SourceSubnet
 	}
-	
 
 	if o.PublicIp != nil {
 		toSerialize["publicIp"] = o.PublicIp
 	}
-	
 
 	if o.TargetSubnet != nil {
 		toSerialize["targetSubnet"] = o.TargetSubnet
 	}
-	
 
 	if o.TargetPortRange != nil {
 		toSerialize["targetPortRange"] = o.TargetPortRange
 	}
-	
 	return json.Marshal(toSerialize)
 }
 
@@ -408,5 +365,3 @@ func (v *NullableNatGatewayRuleProperties) UnmarshalJSON(src []byte) error {
 	v.isSet = true
 	return json.Unmarshal(src, &v.value)
 }
-
-

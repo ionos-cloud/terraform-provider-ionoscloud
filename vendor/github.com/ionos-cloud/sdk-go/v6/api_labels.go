@@ -1,7 +1,7 @@
 /*
  * CLOUD API
  *
- * An enterprise-grade Infrastructure is provided as a Service (IaaS) solution that can be managed through a browser-based \"Data Center Designer\" (DCD) tool or via an easy to use API.   The API allows you to perform a variety of management tasks such as spinning up additional servers, adding volumes, adjusting networking, and so forth. It is designed to allow users to leverage the same power and flexibility found within the DCD visual tool. Both tools are consistent with their concepts and lend well to making the experience smooth and intuitive.
+ * IONOS Enterprise-grade Infrastructure as a Service (IaaS) solutions can be managed through the Cloud API, in addition or as an alternative to the \"Data Center Designer\" (DCD) browser-based tool.    Both methods employ consistent concepts and features, deliver similar power and flexibility, and can be used to perform a multitude of management tasks, including adding servers, volumes, configuring networks, and so on.
  *
  * API version: 6.0-SDK.3
  */
@@ -28,12 +28,12 @@ var (
 type LabelsApiService service
 
 type ApiDatacentersLabelsDeleteRequest struct {
-	ctx _context.Context
-	ApiService *LabelsApiService
-	datacenterId string
-	key string
-	pretty *bool
-	depth *int32
+	ctx             _context.Context
+	ApiService      *LabelsApiService
+	datacenterId    string
+	key             string
+	pretty          *bool
+	depth           *int32
 	xContractNumber *int32
 }
 
@@ -64,10 +64,10 @@ func (r ApiDatacentersLabelsDeleteRequest) Execute() (*APIResponse, error) {
  */
 func (a *LabelsApiService) DatacentersLabelsDelete(ctx _context.Context, datacenterId string, key string) ApiDatacentersLabelsDeleteRequest {
 	return ApiDatacentersLabelsDeleteRequest{
-		ApiService: a,
-		ctx: ctx,
+		ApiService:   a,
+		ctx:          ctx,
 		datacenterId: datacenterId,
-		key: key,
+		key:          key,
 	}
 }
 
@@ -102,6 +102,7 @@ func (a *LabelsApiService) DatacentersLabelsDeleteExecute(r ApiDatacentersLabels
 	if r.depth != nil {
 		localVarQueryParams.Add("depth", parameterToString(*r.depth, ""))
 	}
+
 	// to determine the Content-Type header
 	localVarHTTPContentTypes := []string{}
 
@@ -143,12 +144,12 @@ func (a *LabelsApiService) DatacentersLabelsDeleteExecute(r ApiDatacentersLabels
 
 	localVarHTTPResponse, httpRequestTime, err := a.client.callAPI(req)
 
-	localVarAPIResponse := &APIResponse {
-		Response: localVarHTTPResponse,
-		Method: localVarHTTPMethod,
-		RequestURL: localVarPath,
+	localVarAPIResponse := &APIResponse{
+		Response:    localVarHTTPResponse,
+		Method:      localVarHTTPMethod,
+		RequestURL:  localVarPath,
 		RequestTime: httpRequestTime,
-		Operation: "DatacentersLabelsDelete",
+		Operation:   "DatacentersLabelsDelete",
 	}
 
 	if err != nil || localVarHTTPResponse == nil {
@@ -165,16 +166,16 @@ func (a *LabelsApiService) DatacentersLabelsDeleteExecute(r ApiDatacentersLabels
 	if localVarHTTPResponse.StatusCode >= 300 {
 		newErr := GenericOpenAPIError{
 			statusCode: localVarHTTPResponse.StatusCode,
-			body:  localVarBody,
-			error: fmt.Sprintf("%s: %s", localVarHTTPResponse.Status, string(localVarBody)),
+			body:       localVarBody,
+			error:      fmt.Sprintf(FormatStringErr, localVarHTTPResponse.Status, string(localVarBody)),
 		}
-			var v Error
-			err = a.client.decode(&v, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
-			if err != nil {
-				newErr.error = err.Error()
-				return localVarAPIResponse, newErr
-			}
-			newErr.model = v
+		var v Error
+		err = a.client.decode(&v, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
+		if err != nil {
+			newErr.error = err.Error()
+			return localVarAPIResponse, newErr
+		}
+		newErr.model = v
 		return localVarAPIResponse, newErr
 	}
 
@@ -182,12 +183,12 @@ func (a *LabelsApiService) DatacentersLabelsDeleteExecute(r ApiDatacentersLabels
 }
 
 type ApiDatacentersLabelsFindByKeyRequest struct {
-	ctx _context.Context
-	ApiService *LabelsApiService
-	datacenterId string
-	key string
-	pretty *bool
-	depth *int32
+	ctx             _context.Context
+	ApiService      *LabelsApiService
+	datacenterId    string
+	key             string
+	pretty          *bool
+	depth           *int32
 	xContractNumber *int32
 }
 
@@ -218,10 +219,10 @@ func (r ApiDatacentersLabelsFindByKeyRequest) Execute() (LabelResource, *APIResp
  */
 func (a *LabelsApiService) DatacentersLabelsFindByKey(ctx _context.Context, datacenterId string, key string) ApiDatacentersLabelsFindByKeyRequest {
 	return ApiDatacentersLabelsFindByKeyRequest{
-		ApiService: a,
-		ctx: ctx,
+		ApiService:   a,
+		ctx:          ctx,
 		datacenterId: datacenterId,
-		key: key,
+		key:          key,
 	}
 }
 
@@ -258,6 +259,7 @@ func (a *LabelsApiService) DatacentersLabelsFindByKeyExecute(r ApiDatacentersLab
 	if r.depth != nil {
 		localVarQueryParams.Add("depth", parameterToString(*r.depth, ""))
 	}
+
 	// to determine the Content-Type header
 	localVarHTTPContentTypes := []string{}
 
@@ -299,12 +301,12 @@ func (a *LabelsApiService) DatacentersLabelsFindByKeyExecute(r ApiDatacentersLab
 
 	localVarHTTPResponse, httpRequestTime, err := a.client.callAPI(req)
 
-	localVarAPIResponse := &APIResponse {
-		Response: localVarHTTPResponse,
-		Method: localVarHTTPMethod,
-		RequestURL: localVarPath,
+	localVarAPIResponse := &APIResponse{
+		Response:    localVarHTTPResponse,
+		Method:      localVarHTTPMethod,
+		RequestURL:  localVarPath,
 		RequestTime: httpRequestTime,
-		Operation: "DatacentersLabelsFindByKey",
+		Operation:   "DatacentersLabelsFindByKey",
 	}
 
 	if err != nil || localVarHTTPResponse == nil {
@@ -321,16 +323,16 @@ func (a *LabelsApiService) DatacentersLabelsFindByKeyExecute(r ApiDatacentersLab
 	if localVarHTTPResponse.StatusCode >= 300 {
 		newErr := GenericOpenAPIError{
 			statusCode: localVarHTTPResponse.StatusCode,
-			body:  localVarBody,
-			error: fmt.Sprintf("%s: %s", localVarHTTPResponse.Status, string(localVarBody)),
+			body:       localVarBody,
+			error:      fmt.Sprintf(FormatStringErr, localVarHTTPResponse.Status, string(localVarBody)),
 		}
-			var v Error
-			err = a.client.decode(&v, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
-			if err != nil {
-				newErr.error = err.Error()
-				return localVarReturnValue, localVarAPIResponse, newErr
-			}
-			newErr.model = v
+		var v Error
+		err = a.client.decode(&v, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
+		if err != nil {
+			newErr.error = err.Error()
+			return localVarReturnValue, localVarAPIResponse, newErr
+		}
+		newErr.model = v
 		return localVarReturnValue, localVarAPIResponse, newErr
 	}
 
@@ -338,8 +340,8 @@ func (a *LabelsApiService) DatacentersLabelsFindByKeyExecute(r ApiDatacentersLab
 	if err != nil {
 		newErr := GenericOpenAPIError{
 			statusCode: localVarHTTPResponse.StatusCode,
-			body:  localVarBody,
-			error: err.Error(),
+			body:       localVarBody,
+			error:      err.Error(),
 		}
 		return localVarReturnValue, localVarAPIResponse, newErr
 	}
@@ -348,11 +350,13 @@ func (a *LabelsApiService) DatacentersLabelsFindByKeyExecute(r ApiDatacentersLab
 }
 
 type ApiDatacentersLabelsGetRequest struct {
-	ctx _context.Context
-	ApiService *LabelsApiService
-	datacenterId string
-	pretty *bool
-	depth *int32
+	ctx             _context.Context
+	ApiService      *LabelsApiService
+	filters         _neturl.Values
+	orderBy         *string
+	datacenterId    string
+	pretty          *bool
+	depth           *int32
 	xContractNumber *int32
 }
 
@@ -369,6 +373,19 @@ func (r ApiDatacentersLabelsGetRequest) XContractNumber(xContractNumber int32) A
 	return r
 }
 
+// Filters query parameters limit results to those containing a matching value for a specific property.
+func (r ApiDatacentersLabelsGetRequest) Filter(key string, value string) ApiDatacentersLabelsGetRequest {
+	filterKey := fmt.Sprintf(FilterQueryParam, key)
+	r.filters[filterKey] = []string{value}
+	return r
+}
+
+// OrderBy query param sorts the results alphanumerically in ascending order based on the specified property.
+func (r ApiDatacentersLabelsGetRequest) OrderBy(orderBy string) ApiDatacentersLabelsGetRequest {
+	r.orderBy = &orderBy
+	return r
+}
+
 func (r ApiDatacentersLabelsGetRequest) Execute() (LabelResources, *APIResponse, error) {
 	return r.ApiService.DatacentersLabelsGetExecute(r)
 }
@@ -382,9 +399,10 @@ func (r ApiDatacentersLabelsGetRequest) Execute() (LabelResources, *APIResponse,
  */
 func (a *LabelsApiService) DatacentersLabelsGet(ctx _context.Context, datacenterId string) ApiDatacentersLabelsGetRequest {
 	return ApiDatacentersLabelsGetRequest{
-		ApiService: a,
-		ctx: ctx,
+		ApiService:   a,
+		ctx:          ctx,
 		datacenterId: datacenterId,
+		filters:      _neturl.Values{},
 	}
 }
 
@@ -420,6 +438,17 @@ func (a *LabelsApiService) DatacentersLabelsGetExecute(r ApiDatacentersLabelsGet
 	if r.depth != nil {
 		localVarQueryParams.Add("depth", parameterToString(*r.depth, ""))
 	}
+	if r.orderBy != nil {
+		localVarQueryParams.Add("orderBy", parameterToString(*r.orderBy, ""))
+	}
+	if len(r.filters) > 0 {
+		for k, v := range r.filters {
+			for _, iv := range v {
+				localVarQueryParams.Add(k, iv)
+			}
+		}
+	}
+
 	// to determine the Content-Type header
 	localVarHTTPContentTypes := []string{}
 
@@ -461,12 +490,12 @@ func (a *LabelsApiService) DatacentersLabelsGetExecute(r ApiDatacentersLabelsGet
 
 	localVarHTTPResponse, httpRequestTime, err := a.client.callAPI(req)
 
-	localVarAPIResponse := &APIResponse {
-		Response: localVarHTTPResponse,
-		Method: localVarHTTPMethod,
-		RequestURL: localVarPath,
+	localVarAPIResponse := &APIResponse{
+		Response:    localVarHTTPResponse,
+		Method:      localVarHTTPMethod,
+		RequestURL:  localVarPath,
 		RequestTime: httpRequestTime,
-		Operation: "DatacentersLabelsGet",
+		Operation:   "DatacentersLabelsGet",
 	}
 
 	if err != nil || localVarHTTPResponse == nil {
@@ -483,16 +512,16 @@ func (a *LabelsApiService) DatacentersLabelsGetExecute(r ApiDatacentersLabelsGet
 	if localVarHTTPResponse.StatusCode >= 300 {
 		newErr := GenericOpenAPIError{
 			statusCode: localVarHTTPResponse.StatusCode,
-			body:  localVarBody,
-			error: fmt.Sprintf("%s: %s", localVarHTTPResponse.Status, string(localVarBody)),
+			body:       localVarBody,
+			error:      fmt.Sprintf(FormatStringErr, localVarHTTPResponse.Status, string(localVarBody)),
 		}
-			var v Error
-			err = a.client.decode(&v, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
-			if err != nil {
-				newErr.error = err.Error()
-				return localVarReturnValue, localVarAPIResponse, newErr
-			}
-			newErr.model = v
+		var v Error
+		err = a.client.decode(&v, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
+		if err != nil {
+			newErr.error = err.Error()
+			return localVarReturnValue, localVarAPIResponse, newErr
+		}
+		newErr.model = v
 		return localVarReturnValue, localVarAPIResponse, newErr
 	}
 
@@ -500,8 +529,8 @@ func (a *LabelsApiService) DatacentersLabelsGetExecute(r ApiDatacentersLabelsGet
 	if err != nil {
 		newErr := GenericOpenAPIError{
 			statusCode: localVarHTTPResponse.StatusCode,
-			body:  localVarBody,
-			error: err.Error(),
+			body:       localVarBody,
+			error:      err.Error(),
 		}
 		return localVarReturnValue, localVarAPIResponse, newErr
 	}
@@ -510,12 +539,12 @@ func (a *LabelsApiService) DatacentersLabelsGetExecute(r ApiDatacentersLabelsGet
 }
 
 type ApiDatacentersLabelsPostRequest struct {
-	ctx _context.Context
-	ApiService *LabelsApiService
-	datacenterId string
-	label *LabelResource
-	pretty *bool
-	depth *int32
+	ctx             _context.Context
+	ApiService      *LabelsApiService
+	datacenterId    string
+	label           *LabelResource
+	pretty          *bool
+	depth           *int32
 	xContractNumber *int32
 }
 
@@ -549,8 +578,8 @@ func (r ApiDatacentersLabelsPostRequest) Execute() (LabelResource, *APIResponse,
  */
 func (a *LabelsApiService) DatacentersLabelsPost(ctx _context.Context, datacenterId string) ApiDatacentersLabelsPostRequest {
 	return ApiDatacentersLabelsPostRequest{
-		ApiService: a,
-		ctx: ctx,
+		ApiService:   a,
+		ctx:          ctx,
 		datacenterId: datacenterId,
 	}
 }
@@ -590,6 +619,7 @@ func (a *LabelsApiService) DatacentersLabelsPostExecute(r ApiDatacentersLabelsPo
 	if r.depth != nil {
 		localVarQueryParams.Add("depth", parameterToString(*r.depth, ""))
 	}
+
 	// to determine the Content-Type header
 	localVarHTTPContentTypes := []string{"application/json"}
 
@@ -633,12 +663,12 @@ func (a *LabelsApiService) DatacentersLabelsPostExecute(r ApiDatacentersLabelsPo
 
 	localVarHTTPResponse, httpRequestTime, err := a.client.callAPI(req)
 
-	localVarAPIResponse := &APIResponse {
-		Response: localVarHTTPResponse,
-		Method: localVarHTTPMethod,
-		RequestURL: localVarPath,
+	localVarAPIResponse := &APIResponse{
+		Response:    localVarHTTPResponse,
+		Method:      localVarHTTPMethod,
+		RequestURL:  localVarPath,
 		RequestTime: httpRequestTime,
-		Operation: "DatacentersLabelsPost",
+		Operation:   "DatacentersLabelsPost",
 	}
 
 	if err != nil || localVarHTTPResponse == nil {
@@ -655,16 +685,16 @@ func (a *LabelsApiService) DatacentersLabelsPostExecute(r ApiDatacentersLabelsPo
 	if localVarHTTPResponse.StatusCode >= 300 {
 		newErr := GenericOpenAPIError{
 			statusCode: localVarHTTPResponse.StatusCode,
-			body:  localVarBody,
-			error: fmt.Sprintf("%s: %s", localVarHTTPResponse.Status, string(localVarBody)),
+			body:       localVarBody,
+			error:      fmt.Sprintf(FormatStringErr, localVarHTTPResponse.Status, string(localVarBody)),
 		}
-			var v Error
-			err = a.client.decode(&v, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
-			if err != nil {
-				newErr.error = err.Error()
-				return localVarReturnValue, localVarAPIResponse, newErr
-			}
-			newErr.model = v
+		var v Error
+		err = a.client.decode(&v, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
+		if err != nil {
+			newErr.error = err.Error()
+			return localVarReturnValue, localVarAPIResponse, newErr
+		}
+		newErr.model = v
 		return localVarReturnValue, localVarAPIResponse, newErr
 	}
 
@@ -672,8 +702,8 @@ func (a *LabelsApiService) DatacentersLabelsPostExecute(r ApiDatacentersLabelsPo
 	if err != nil {
 		newErr := GenericOpenAPIError{
 			statusCode: localVarHTTPResponse.StatusCode,
-			body:  localVarBody,
-			error: err.Error(),
+			body:       localVarBody,
+			error:      err.Error(),
 		}
 		return localVarReturnValue, localVarAPIResponse, newErr
 	}
@@ -682,13 +712,13 @@ func (a *LabelsApiService) DatacentersLabelsPostExecute(r ApiDatacentersLabelsPo
 }
 
 type ApiDatacentersLabelsPutRequest struct {
-	ctx _context.Context
-	ApiService *LabelsApiService
-	datacenterId string
-	key string
-	label *LabelResource
-	pretty *bool
-	depth *int32
+	ctx             _context.Context
+	ApiService      *LabelsApiService
+	datacenterId    string
+	key             string
+	label           *LabelResource
+	pretty          *bool
+	depth           *int32
 	xContractNumber *int32
 }
 
@@ -723,10 +753,10 @@ func (r ApiDatacentersLabelsPutRequest) Execute() (LabelResource, *APIResponse, 
  */
 func (a *LabelsApiService) DatacentersLabelsPut(ctx _context.Context, datacenterId string, key string) ApiDatacentersLabelsPutRequest {
 	return ApiDatacentersLabelsPutRequest{
-		ApiService: a,
-		ctx: ctx,
+		ApiService:   a,
+		ctx:          ctx,
 		datacenterId: datacenterId,
-		key: key,
+		key:          key,
 	}
 }
 
@@ -766,6 +796,7 @@ func (a *LabelsApiService) DatacentersLabelsPutExecute(r ApiDatacentersLabelsPut
 	if r.depth != nil {
 		localVarQueryParams.Add("depth", parameterToString(*r.depth, ""))
 	}
+
 	// to determine the Content-Type header
 	localVarHTTPContentTypes := []string{"application/json"}
 
@@ -809,12 +840,12 @@ func (a *LabelsApiService) DatacentersLabelsPutExecute(r ApiDatacentersLabelsPut
 
 	localVarHTTPResponse, httpRequestTime, err := a.client.callAPI(req)
 
-	localVarAPIResponse := &APIResponse {
-		Response: localVarHTTPResponse,
-		Method: localVarHTTPMethod,
-		RequestURL: localVarPath,
+	localVarAPIResponse := &APIResponse{
+		Response:    localVarHTTPResponse,
+		Method:      localVarHTTPMethod,
+		RequestURL:  localVarPath,
 		RequestTime: httpRequestTime,
-		Operation: "DatacentersLabelsPut",
+		Operation:   "DatacentersLabelsPut",
 	}
 
 	if err != nil || localVarHTTPResponse == nil {
@@ -831,16 +862,16 @@ func (a *LabelsApiService) DatacentersLabelsPutExecute(r ApiDatacentersLabelsPut
 	if localVarHTTPResponse.StatusCode >= 300 {
 		newErr := GenericOpenAPIError{
 			statusCode: localVarHTTPResponse.StatusCode,
-			body:  localVarBody,
-			error: fmt.Sprintf("%s: %s", localVarHTTPResponse.Status, string(localVarBody)),
+			body:       localVarBody,
+			error:      fmt.Sprintf(FormatStringErr, localVarHTTPResponse.Status, string(localVarBody)),
 		}
-			var v Error
-			err = a.client.decode(&v, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
-			if err != nil {
-				newErr.error = err.Error()
-				return localVarReturnValue, localVarAPIResponse, newErr
-			}
-			newErr.model = v
+		var v Error
+		err = a.client.decode(&v, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
+		if err != nil {
+			newErr.error = err.Error()
+			return localVarReturnValue, localVarAPIResponse, newErr
+		}
+		newErr.model = v
 		return localVarReturnValue, localVarAPIResponse, newErr
 	}
 
@@ -848,8 +879,8 @@ func (a *LabelsApiService) DatacentersLabelsPutExecute(r ApiDatacentersLabelsPut
 	if err != nil {
 		newErr := GenericOpenAPIError{
 			statusCode: localVarHTTPResponse.StatusCode,
-			body:  localVarBody,
-			error: err.Error(),
+			body:       localVarBody,
+			error:      err.Error(),
 		}
 		return localVarReturnValue, localVarAPIResponse, newErr
 	}
@@ -858,13 +889,13 @@ func (a *LabelsApiService) DatacentersLabelsPutExecute(r ApiDatacentersLabelsPut
 }
 
 type ApiDatacentersServersLabelsDeleteRequest struct {
-	ctx _context.Context
-	ApiService *LabelsApiService
-	datacenterId string
-	serverId string
-	key string
-	pretty *bool
-	depth *int32
+	ctx             _context.Context
+	ApiService      *LabelsApiService
+	datacenterId    string
+	serverId        string
+	key             string
+	pretty          *bool
+	depth           *int32
 	xContractNumber *int32
 }
 
@@ -889,18 +920,18 @@ func (r ApiDatacentersServersLabelsDeleteRequest) Execute() (*APIResponse, error
  * DatacentersServersLabelsDelete Delete a Label from Server
  * This will remove a label from the server.
  * @param ctx _context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
- * @param datacenterId The unique ID of the Datacenter
+ * @param datacenterId The unique ID of the data center.
  * @param serverId The unique ID of the Server
  * @param key The key of the Label
  * @return ApiDatacentersServersLabelsDeleteRequest
  */
 func (a *LabelsApiService) DatacentersServersLabelsDelete(ctx _context.Context, datacenterId string, serverId string, key string) ApiDatacentersServersLabelsDeleteRequest {
 	return ApiDatacentersServersLabelsDeleteRequest{
-		ApiService: a,
-		ctx: ctx,
+		ApiService:   a,
+		ctx:          ctx,
 		datacenterId: datacenterId,
-		serverId: serverId,
-		key: key,
+		serverId:     serverId,
+		key:          key,
 	}
 }
 
@@ -936,6 +967,7 @@ func (a *LabelsApiService) DatacentersServersLabelsDeleteExecute(r ApiDatacenter
 	if r.depth != nil {
 		localVarQueryParams.Add("depth", parameterToString(*r.depth, ""))
 	}
+
 	// to determine the Content-Type header
 	localVarHTTPContentTypes := []string{}
 
@@ -977,12 +1009,12 @@ func (a *LabelsApiService) DatacentersServersLabelsDeleteExecute(r ApiDatacenter
 
 	localVarHTTPResponse, httpRequestTime, err := a.client.callAPI(req)
 
-	localVarAPIResponse := &APIResponse {
-		Response: localVarHTTPResponse,
-		Method: localVarHTTPMethod,
-		RequestURL: localVarPath,
+	localVarAPIResponse := &APIResponse{
+		Response:    localVarHTTPResponse,
+		Method:      localVarHTTPMethod,
+		RequestURL:  localVarPath,
 		RequestTime: httpRequestTime,
-		Operation: "DatacentersServersLabelsDelete",
+		Operation:   "DatacentersServersLabelsDelete",
 	}
 
 	if err != nil || localVarHTTPResponse == nil {
@@ -999,16 +1031,16 @@ func (a *LabelsApiService) DatacentersServersLabelsDeleteExecute(r ApiDatacenter
 	if localVarHTTPResponse.StatusCode >= 300 {
 		newErr := GenericOpenAPIError{
 			statusCode: localVarHTTPResponse.StatusCode,
-			body:  localVarBody,
-			error: fmt.Sprintf("%s: %s", localVarHTTPResponse.Status, string(localVarBody)),
+			body:       localVarBody,
+			error:      fmt.Sprintf(FormatStringErr, localVarHTTPResponse.Status, string(localVarBody)),
 		}
-			var v Error
-			err = a.client.decode(&v, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
-			if err != nil {
-				newErr.error = err.Error()
-				return localVarAPIResponse, newErr
-			}
-			newErr.model = v
+		var v Error
+		err = a.client.decode(&v, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
+		if err != nil {
+			newErr.error = err.Error()
+			return localVarAPIResponse, newErr
+		}
+		newErr.model = v
 		return localVarAPIResponse, newErr
 	}
 
@@ -1016,13 +1048,13 @@ func (a *LabelsApiService) DatacentersServersLabelsDeleteExecute(r ApiDatacenter
 }
 
 type ApiDatacentersServersLabelsFindByKeyRequest struct {
-	ctx _context.Context
-	ApiService *LabelsApiService
-	datacenterId string
-	serverId string
-	key string
-	pretty *bool
-	depth *int32
+	ctx             _context.Context
+	ApiService      *LabelsApiService
+	datacenterId    string
+	serverId        string
+	key             string
+	pretty          *bool
+	depth           *int32
 	xContractNumber *int32
 }
 
@@ -1047,18 +1079,18 @@ func (r ApiDatacentersServersLabelsFindByKeyRequest) Execute() (LabelResource, *
  * DatacentersServersLabelsFindByKey Retrieve a Label of Server
  * This will retrieve the properties of a associated label to a server.
  * @param ctx _context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
- * @param datacenterId The unique ID of the Datacenter
+ * @param datacenterId The unique ID of the data center.
  * @param serverId The unique ID of the Server
  * @param key The key of the Label
  * @return ApiDatacentersServersLabelsFindByKeyRequest
  */
 func (a *LabelsApiService) DatacentersServersLabelsFindByKey(ctx _context.Context, datacenterId string, serverId string, key string) ApiDatacentersServersLabelsFindByKeyRequest {
 	return ApiDatacentersServersLabelsFindByKeyRequest{
-		ApiService: a,
-		ctx: ctx,
+		ApiService:   a,
+		ctx:          ctx,
 		datacenterId: datacenterId,
-		serverId: serverId,
-		key: key,
+		serverId:     serverId,
+		key:          key,
 	}
 }
 
@@ -1096,6 +1128,7 @@ func (a *LabelsApiService) DatacentersServersLabelsFindByKeyExecute(r ApiDatacen
 	if r.depth != nil {
 		localVarQueryParams.Add("depth", parameterToString(*r.depth, ""))
 	}
+
 	// to determine the Content-Type header
 	localVarHTTPContentTypes := []string{}
 
@@ -1137,12 +1170,12 @@ func (a *LabelsApiService) DatacentersServersLabelsFindByKeyExecute(r ApiDatacen
 
 	localVarHTTPResponse, httpRequestTime, err := a.client.callAPI(req)
 
-	localVarAPIResponse := &APIResponse {
-		Response: localVarHTTPResponse,
-		Method: localVarHTTPMethod,
-		RequestURL: localVarPath,
+	localVarAPIResponse := &APIResponse{
+		Response:    localVarHTTPResponse,
+		Method:      localVarHTTPMethod,
+		RequestURL:  localVarPath,
 		RequestTime: httpRequestTime,
-		Operation: "DatacentersServersLabelsFindByKey",
+		Operation:   "DatacentersServersLabelsFindByKey",
 	}
 
 	if err != nil || localVarHTTPResponse == nil {
@@ -1159,16 +1192,16 @@ func (a *LabelsApiService) DatacentersServersLabelsFindByKeyExecute(r ApiDatacen
 	if localVarHTTPResponse.StatusCode >= 300 {
 		newErr := GenericOpenAPIError{
 			statusCode: localVarHTTPResponse.StatusCode,
-			body:  localVarBody,
-			error: fmt.Sprintf("%s: %s", localVarHTTPResponse.Status, string(localVarBody)),
+			body:       localVarBody,
+			error:      fmt.Sprintf(FormatStringErr, localVarHTTPResponse.Status, string(localVarBody)),
 		}
-			var v Error
-			err = a.client.decode(&v, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
-			if err != nil {
-				newErr.error = err.Error()
-				return localVarReturnValue, localVarAPIResponse, newErr
-			}
-			newErr.model = v
+		var v Error
+		err = a.client.decode(&v, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
+		if err != nil {
+			newErr.error = err.Error()
+			return localVarReturnValue, localVarAPIResponse, newErr
+		}
+		newErr.model = v
 		return localVarReturnValue, localVarAPIResponse, newErr
 	}
 
@@ -1176,8 +1209,8 @@ func (a *LabelsApiService) DatacentersServersLabelsFindByKeyExecute(r ApiDatacen
 	if err != nil {
 		newErr := GenericOpenAPIError{
 			statusCode: localVarHTTPResponse.StatusCode,
-			body:  localVarBody,
-			error: err.Error(),
+			body:       localVarBody,
+			error:      err.Error(),
 		}
 		return localVarReturnValue, localVarAPIResponse, newErr
 	}
@@ -1186,12 +1219,14 @@ func (a *LabelsApiService) DatacentersServersLabelsFindByKeyExecute(r ApiDatacen
 }
 
 type ApiDatacentersServersLabelsGetRequest struct {
-	ctx _context.Context
-	ApiService *LabelsApiService
-	datacenterId string
-	serverId string
-	pretty *bool
-	depth *int32
+	ctx             _context.Context
+	ApiService      *LabelsApiService
+	filters         _neturl.Values
+	orderBy         *string
+	datacenterId    string
+	serverId        string
+	pretty          *bool
+	depth           *int32
 	xContractNumber *int32
 }
 
@@ -1208,6 +1243,19 @@ func (r ApiDatacentersServersLabelsGetRequest) XContractNumber(xContractNumber i
 	return r
 }
 
+// Filters query parameters limit results to those containing a matching value for a specific property.
+func (r ApiDatacentersServersLabelsGetRequest) Filter(key string, value string) ApiDatacentersServersLabelsGetRequest {
+	filterKey := fmt.Sprintf(FilterQueryParam, key)
+	r.filters[filterKey] = []string{value}
+	return r
+}
+
+// OrderBy query param sorts the results alphanumerically in ascending order based on the specified property.
+func (r ApiDatacentersServersLabelsGetRequest) OrderBy(orderBy string) ApiDatacentersServersLabelsGetRequest {
+	r.orderBy = &orderBy
+	return r
+}
+
 func (r ApiDatacentersServersLabelsGetRequest) Execute() (LabelResources, *APIResponse, error) {
 	return r.ApiService.DatacentersServersLabelsGetExecute(r)
 }
@@ -1216,16 +1264,17 @@ func (r ApiDatacentersServersLabelsGetRequest) Execute() (LabelResources, *APIRe
  * DatacentersServersLabelsGet List all Server Labels
  * You can retrieve a list of all labels associated with a server.
  * @param ctx _context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
- * @param datacenterId The unique ID of the Datacenter
+ * @param datacenterId The unique ID of the data center.
  * @param serverId The unique ID of the Server
  * @return ApiDatacentersServersLabelsGetRequest
  */
 func (a *LabelsApiService) DatacentersServersLabelsGet(ctx _context.Context, datacenterId string, serverId string) ApiDatacentersServersLabelsGetRequest {
 	return ApiDatacentersServersLabelsGetRequest{
-		ApiService: a,
-		ctx: ctx,
+		ApiService:   a,
+		ctx:          ctx,
 		datacenterId: datacenterId,
-		serverId: serverId,
+		serverId:     serverId,
+		filters:      _neturl.Values{},
 	}
 }
 
@@ -1262,6 +1311,17 @@ func (a *LabelsApiService) DatacentersServersLabelsGetExecute(r ApiDatacentersSe
 	if r.depth != nil {
 		localVarQueryParams.Add("depth", parameterToString(*r.depth, ""))
 	}
+	if r.orderBy != nil {
+		localVarQueryParams.Add("orderBy", parameterToString(*r.orderBy, ""))
+	}
+	if len(r.filters) > 0 {
+		for k, v := range r.filters {
+			for _, iv := range v {
+				localVarQueryParams.Add(k, iv)
+			}
+		}
+	}
+
 	// to determine the Content-Type header
 	localVarHTTPContentTypes := []string{}
 
@@ -1303,12 +1363,12 @@ func (a *LabelsApiService) DatacentersServersLabelsGetExecute(r ApiDatacentersSe
 
 	localVarHTTPResponse, httpRequestTime, err := a.client.callAPI(req)
 
-	localVarAPIResponse := &APIResponse {
-		Response: localVarHTTPResponse,
-		Method: localVarHTTPMethod,
-		RequestURL: localVarPath,
+	localVarAPIResponse := &APIResponse{
+		Response:    localVarHTTPResponse,
+		Method:      localVarHTTPMethod,
+		RequestURL:  localVarPath,
 		RequestTime: httpRequestTime,
-		Operation: "DatacentersServersLabelsGet",
+		Operation:   "DatacentersServersLabelsGet",
 	}
 
 	if err != nil || localVarHTTPResponse == nil {
@@ -1325,16 +1385,16 @@ func (a *LabelsApiService) DatacentersServersLabelsGetExecute(r ApiDatacentersSe
 	if localVarHTTPResponse.StatusCode >= 300 {
 		newErr := GenericOpenAPIError{
 			statusCode: localVarHTTPResponse.StatusCode,
-			body:  localVarBody,
-			error: fmt.Sprintf("%s: %s", localVarHTTPResponse.Status, string(localVarBody)),
+			body:       localVarBody,
+			error:      fmt.Sprintf(FormatStringErr, localVarHTTPResponse.Status, string(localVarBody)),
 		}
-			var v Error
-			err = a.client.decode(&v, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
-			if err != nil {
-				newErr.error = err.Error()
-				return localVarReturnValue, localVarAPIResponse, newErr
-			}
-			newErr.model = v
+		var v Error
+		err = a.client.decode(&v, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
+		if err != nil {
+			newErr.error = err.Error()
+			return localVarReturnValue, localVarAPIResponse, newErr
+		}
+		newErr.model = v
 		return localVarReturnValue, localVarAPIResponse, newErr
 	}
 
@@ -1342,8 +1402,8 @@ func (a *LabelsApiService) DatacentersServersLabelsGetExecute(r ApiDatacentersSe
 	if err != nil {
 		newErr := GenericOpenAPIError{
 			statusCode: localVarHTTPResponse.StatusCode,
-			body:  localVarBody,
-			error: err.Error(),
+			body:       localVarBody,
+			error:      err.Error(),
 		}
 		return localVarReturnValue, localVarAPIResponse, newErr
 	}
@@ -1352,13 +1412,13 @@ func (a *LabelsApiService) DatacentersServersLabelsGetExecute(r ApiDatacentersSe
 }
 
 type ApiDatacentersServersLabelsPostRequest struct {
-	ctx _context.Context
-	ApiService *LabelsApiService
-	datacenterId string
-	serverId string
-	label *LabelResource
-	pretty *bool
-	depth *int32
+	ctx             _context.Context
+	ApiService      *LabelsApiService
+	datacenterId    string
+	serverId        string
+	label           *LabelResource
+	pretty          *bool
+	depth           *int32
 	xContractNumber *int32
 }
 
@@ -1387,16 +1447,16 @@ func (r ApiDatacentersServersLabelsPostRequest) Execute() (LabelResource, *APIRe
  * DatacentersServersLabelsPost Add a Label to Server
  * This will add a label to the server.
  * @param ctx _context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
- * @param datacenterId The unique ID of the Datacenter
+ * @param datacenterId The unique ID of the data center.
  * @param serverId The unique ID of the Server
  * @return ApiDatacentersServersLabelsPostRequest
  */
 func (a *LabelsApiService) DatacentersServersLabelsPost(ctx _context.Context, datacenterId string, serverId string) ApiDatacentersServersLabelsPostRequest {
 	return ApiDatacentersServersLabelsPostRequest{
-		ApiService: a,
-		ctx: ctx,
+		ApiService:   a,
+		ctx:          ctx,
 		datacenterId: datacenterId,
-		serverId: serverId,
+		serverId:     serverId,
 	}
 }
 
@@ -1436,6 +1496,7 @@ func (a *LabelsApiService) DatacentersServersLabelsPostExecute(r ApiDatacentersS
 	if r.depth != nil {
 		localVarQueryParams.Add("depth", parameterToString(*r.depth, ""))
 	}
+
 	// to determine the Content-Type header
 	localVarHTTPContentTypes := []string{"application/json"}
 
@@ -1479,12 +1540,12 @@ func (a *LabelsApiService) DatacentersServersLabelsPostExecute(r ApiDatacentersS
 
 	localVarHTTPResponse, httpRequestTime, err := a.client.callAPI(req)
 
-	localVarAPIResponse := &APIResponse {
-		Response: localVarHTTPResponse,
-		Method: localVarHTTPMethod,
-		RequestURL: localVarPath,
+	localVarAPIResponse := &APIResponse{
+		Response:    localVarHTTPResponse,
+		Method:      localVarHTTPMethod,
+		RequestURL:  localVarPath,
 		RequestTime: httpRequestTime,
-		Operation: "DatacentersServersLabelsPost",
+		Operation:   "DatacentersServersLabelsPost",
 	}
 
 	if err != nil || localVarHTTPResponse == nil {
@@ -1501,16 +1562,16 @@ func (a *LabelsApiService) DatacentersServersLabelsPostExecute(r ApiDatacentersS
 	if localVarHTTPResponse.StatusCode >= 300 {
 		newErr := GenericOpenAPIError{
 			statusCode: localVarHTTPResponse.StatusCode,
-			body:  localVarBody,
-			error: fmt.Sprintf("%s: %s", localVarHTTPResponse.Status, string(localVarBody)),
+			body:       localVarBody,
+			error:      fmt.Sprintf(FormatStringErr, localVarHTTPResponse.Status, string(localVarBody)),
 		}
-			var v Error
-			err = a.client.decode(&v, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
-			if err != nil {
-				newErr.error = err.Error()
-				return localVarReturnValue, localVarAPIResponse, newErr
-			}
-			newErr.model = v
+		var v Error
+		err = a.client.decode(&v, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
+		if err != nil {
+			newErr.error = err.Error()
+			return localVarReturnValue, localVarAPIResponse, newErr
+		}
+		newErr.model = v
 		return localVarReturnValue, localVarAPIResponse, newErr
 	}
 
@@ -1518,8 +1579,8 @@ func (a *LabelsApiService) DatacentersServersLabelsPostExecute(r ApiDatacentersS
 	if err != nil {
 		newErr := GenericOpenAPIError{
 			statusCode: localVarHTTPResponse.StatusCode,
-			body:  localVarBody,
-			error: err.Error(),
+			body:       localVarBody,
+			error:      err.Error(),
 		}
 		return localVarReturnValue, localVarAPIResponse, newErr
 	}
@@ -1528,14 +1589,14 @@ func (a *LabelsApiService) DatacentersServersLabelsPostExecute(r ApiDatacentersS
 }
 
 type ApiDatacentersServersLabelsPutRequest struct {
-	ctx _context.Context
-	ApiService *LabelsApiService
-	datacenterId string
-	serverId string
-	key string
-	label *LabelResource
-	pretty *bool
-	depth *int32
+	ctx             _context.Context
+	ApiService      *LabelsApiService
+	datacenterId    string
+	serverId        string
+	key             string
+	label           *LabelResource
+	pretty          *bool
+	depth           *int32
 	xContractNumber *int32
 }
 
@@ -1564,18 +1625,18 @@ func (r ApiDatacentersServersLabelsPutRequest) Execute() (LabelResource, *APIRes
  * DatacentersServersLabelsPut Modify a Label of Server
  * This will modify the value of the label on a server.
  * @param ctx _context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
- * @param datacenterId The unique ID of the Datacenter
+ * @param datacenterId The unique ID of the data center.
  * @param serverId The unique ID of the Server
  * @param key The key of the Label
  * @return ApiDatacentersServersLabelsPutRequest
  */
 func (a *LabelsApiService) DatacentersServersLabelsPut(ctx _context.Context, datacenterId string, serverId string, key string) ApiDatacentersServersLabelsPutRequest {
 	return ApiDatacentersServersLabelsPutRequest{
-		ApiService: a,
-		ctx: ctx,
+		ApiService:   a,
+		ctx:          ctx,
 		datacenterId: datacenterId,
-		serverId: serverId,
-		key: key,
+		serverId:     serverId,
+		key:          key,
 	}
 }
 
@@ -1616,6 +1677,7 @@ func (a *LabelsApiService) DatacentersServersLabelsPutExecute(r ApiDatacentersSe
 	if r.depth != nil {
 		localVarQueryParams.Add("depth", parameterToString(*r.depth, ""))
 	}
+
 	// to determine the Content-Type header
 	localVarHTTPContentTypes := []string{"application/json"}
 
@@ -1659,12 +1721,12 @@ func (a *LabelsApiService) DatacentersServersLabelsPutExecute(r ApiDatacentersSe
 
 	localVarHTTPResponse, httpRequestTime, err := a.client.callAPI(req)
 
-	localVarAPIResponse := &APIResponse {
-		Response: localVarHTTPResponse,
-		Method: localVarHTTPMethod,
-		RequestURL: localVarPath,
+	localVarAPIResponse := &APIResponse{
+		Response:    localVarHTTPResponse,
+		Method:      localVarHTTPMethod,
+		RequestURL:  localVarPath,
 		RequestTime: httpRequestTime,
-		Operation: "DatacentersServersLabelsPut",
+		Operation:   "DatacentersServersLabelsPut",
 	}
 
 	if err != nil || localVarHTTPResponse == nil {
@@ -1681,16 +1743,16 @@ func (a *LabelsApiService) DatacentersServersLabelsPutExecute(r ApiDatacentersSe
 	if localVarHTTPResponse.StatusCode >= 300 {
 		newErr := GenericOpenAPIError{
 			statusCode: localVarHTTPResponse.StatusCode,
-			body:  localVarBody,
-			error: fmt.Sprintf("%s: %s", localVarHTTPResponse.Status, string(localVarBody)),
+			body:       localVarBody,
+			error:      fmt.Sprintf(FormatStringErr, localVarHTTPResponse.Status, string(localVarBody)),
 		}
-			var v Error
-			err = a.client.decode(&v, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
-			if err != nil {
-				newErr.error = err.Error()
-				return localVarReturnValue, localVarAPIResponse, newErr
-			}
-			newErr.model = v
+		var v Error
+		err = a.client.decode(&v, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
+		if err != nil {
+			newErr.error = err.Error()
+			return localVarReturnValue, localVarAPIResponse, newErr
+		}
+		newErr.model = v
 		return localVarReturnValue, localVarAPIResponse, newErr
 	}
 
@@ -1698,8 +1760,8 @@ func (a *LabelsApiService) DatacentersServersLabelsPutExecute(r ApiDatacentersSe
 	if err != nil {
 		newErr := GenericOpenAPIError{
 			statusCode: localVarHTTPResponse.StatusCode,
-			body:  localVarBody,
-			error: err.Error(),
+			body:       localVarBody,
+			error:      err.Error(),
 		}
 		return localVarReturnValue, localVarAPIResponse, newErr
 	}
@@ -1708,13 +1770,13 @@ func (a *LabelsApiService) DatacentersServersLabelsPutExecute(r ApiDatacentersSe
 }
 
 type ApiDatacentersVolumesLabelsDeleteRequest struct {
-	ctx _context.Context
-	ApiService *LabelsApiService
-	datacenterId string
-	volumeId string
-	key string
-	pretty *bool
-	depth *int32
+	ctx             _context.Context
+	ApiService      *LabelsApiService
+	datacenterId    string
+	volumeId        string
+	key             string
+	pretty          *bool
+	depth           *int32
 	xContractNumber *int32
 }
 
@@ -1739,18 +1801,18 @@ func (r ApiDatacentersVolumesLabelsDeleteRequest) Execute() (*APIResponse, error
  * DatacentersVolumesLabelsDelete Delete a Label from Volume
  * This will remove a label from the volume.
  * @param ctx _context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
- * @param datacenterId The unique ID of the Datacenter
+ * @param datacenterId The unique ID of the data center.
  * @param volumeId The unique ID of the Volume
  * @param key The key of the Label
  * @return ApiDatacentersVolumesLabelsDeleteRequest
  */
 func (a *LabelsApiService) DatacentersVolumesLabelsDelete(ctx _context.Context, datacenterId string, volumeId string, key string) ApiDatacentersVolumesLabelsDeleteRequest {
 	return ApiDatacentersVolumesLabelsDeleteRequest{
-		ApiService: a,
-		ctx: ctx,
+		ApiService:   a,
+		ctx:          ctx,
 		datacenterId: datacenterId,
-		volumeId: volumeId,
-		key: key,
+		volumeId:     volumeId,
+		key:          key,
 	}
 }
 
@@ -1786,6 +1848,7 @@ func (a *LabelsApiService) DatacentersVolumesLabelsDeleteExecute(r ApiDatacenter
 	if r.depth != nil {
 		localVarQueryParams.Add("depth", parameterToString(*r.depth, ""))
 	}
+
 	// to determine the Content-Type header
 	localVarHTTPContentTypes := []string{}
 
@@ -1827,12 +1890,12 @@ func (a *LabelsApiService) DatacentersVolumesLabelsDeleteExecute(r ApiDatacenter
 
 	localVarHTTPResponse, httpRequestTime, err := a.client.callAPI(req)
 
-	localVarAPIResponse := &APIResponse {
-		Response: localVarHTTPResponse,
-		Method: localVarHTTPMethod,
-		RequestURL: localVarPath,
+	localVarAPIResponse := &APIResponse{
+		Response:    localVarHTTPResponse,
+		Method:      localVarHTTPMethod,
+		RequestURL:  localVarPath,
 		RequestTime: httpRequestTime,
-		Operation: "DatacentersVolumesLabelsDelete",
+		Operation:   "DatacentersVolumesLabelsDelete",
 	}
 
 	if err != nil || localVarHTTPResponse == nil {
@@ -1849,16 +1912,16 @@ func (a *LabelsApiService) DatacentersVolumesLabelsDeleteExecute(r ApiDatacenter
 	if localVarHTTPResponse.StatusCode >= 300 {
 		newErr := GenericOpenAPIError{
 			statusCode: localVarHTTPResponse.StatusCode,
-			body:  localVarBody,
-			error: fmt.Sprintf("%s: %s", localVarHTTPResponse.Status, string(localVarBody)),
+			body:       localVarBody,
+			error:      fmt.Sprintf(FormatStringErr, localVarHTTPResponse.Status, string(localVarBody)),
 		}
-			var v Error
-			err = a.client.decode(&v, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
-			if err != nil {
-				newErr.error = err.Error()
-				return localVarAPIResponse, newErr
-			}
-			newErr.model = v
+		var v Error
+		err = a.client.decode(&v, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
+		if err != nil {
+			newErr.error = err.Error()
+			return localVarAPIResponse, newErr
+		}
+		newErr.model = v
 		return localVarAPIResponse, newErr
 	}
 
@@ -1866,13 +1929,13 @@ func (a *LabelsApiService) DatacentersVolumesLabelsDeleteExecute(r ApiDatacenter
 }
 
 type ApiDatacentersVolumesLabelsFindByKeyRequest struct {
-	ctx _context.Context
-	ApiService *LabelsApiService
-	datacenterId string
-	volumeId string
-	key string
-	pretty *bool
-	depth *int32
+	ctx             _context.Context
+	ApiService      *LabelsApiService
+	datacenterId    string
+	volumeId        string
+	key             string
+	pretty          *bool
+	depth           *int32
 	xContractNumber *int32
 }
 
@@ -1897,18 +1960,18 @@ func (r ApiDatacentersVolumesLabelsFindByKeyRequest) Execute() (LabelResource, *
  * DatacentersVolumesLabelsFindByKey Retrieve a Label of Volume
  * This will retrieve the properties of a associated label to a volume.
  * @param ctx _context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
- * @param datacenterId The unique ID of the Datacenter
+ * @param datacenterId The unique ID of the data center.
  * @param volumeId The unique ID of the Volume
  * @param key The key of the Label
  * @return ApiDatacentersVolumesLabelsFindByKeyRequest
  */
 func (a *LabelsApiService) DatacentersVolumesLabelsFindByKey(ctx _context.Context, datacenterId string, volumeId string, key string) ApiDatacentersVolumesLabelsFindByKeyRequest {
 	return ApiDatacentersVolumesLabelsFindByKeyRequest{
-		ApiService: a,
-		ctx: ctx,
+		ApiService:   a,
+		ctx:          ctx,
 		datacenterId: datacenterId,
-		volumeId: volumeId,
-		key: key,
+		volumeId:     volumeId,
+		key:          key,
 	}
 }
 
@@ -1946,6 +2009,7 @@ func (a *LabelsApiService) DatacentersVolumesLabelsFindByKeyExecute(r ApiDatacen
 	if r.depth != nil {
 		localVarQueryParams.Add("depth", parameterToString(*r.depth, ""))
 	}
+
 	// to determine the Content-Type header
 	localVarHTTPContentTypes := []string{}
 
@@ -1987,12 +2051,12 @@ func (a *LabelsApiService) DatacentersVolumesLabelsFindByKeyExecute(r ApiDatacen
 
 	localVarHTTPResponse, httpRequestTime, err := a.client.callAPI(req)
 
-	localVarAPIResponse := &APIResponse {
-		Response: localVarHTTPResponse,
-		Method: localVarHTTPMethod,
-		RequestURL: localVarPath,
+	localVarAPIResponse := &APIResponse{
+		Response:    localVarHTTPResponse,
+		Method:      localVarHTTPMethod,
+		RequestURL:  localVarPath,
 		RequestTime: httpRequestTime,
-		Operation: "DatacentersVolumesLabelsFindByKey",
+		Operation:   "DatacentersVolumesLabelsFindByKey",
 	}
 
 	if err != nil || localVarHTTPResponse == nil {
@@ -2009,16 +2073,16 @@ func (a *LabelsApiService) DatacentersVolumesLabelsFindByKeyExecute(r ApiDatacen
 	if localVarHTTPResponse.StatusCode >= 300 {
 		newErr := GenericOpenAPIError{
 			statusCode: localVarHTTPResponse.StatusCode,
-			body:  localVarBody,
-			error: fmt.Sprintf("%s: %s", localVarHTTPResponse.Status, string(localVarBody)),
+			body:       localVarBody,
+			error:      fmt.Sprintf(FormatStringErr, localVarHTTPResponse.Status, string(localVarBody)),
 		}
-			var v Error
-			err = a.client.decode(&v, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
-			if err != nil {
-				newErr.error = err.Error()
-				return localVarReturnValue, localVarAPIResponse, newErr
-			}
-			newErr.model = v
+		var v Error
+		err = a.client.decode(&v, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
+		if err != nil {
+			newErr.error = err.Error()
+			return localVarReturnValue, localVarAPIResponse, newErr
+		}
+		newErr.model = v
 		return localVarReturnValue, localVarAPIResponse, newErr
 	}
 
@@ -2026,8 +2090,8 @@ func (a *LabelsApiService) DatacentersVolumesLabelsFindByKeyExecute(r ApiDatacen
 	if err != nil {
 		newErr := GenericOpenAPIError{
 			statusCode: localVarHTTPResponse.StatusCode,
-			body:  localVarBody,
-			error: err.Error(),
+			body:       localVarBody,
+			error:      err.Error(),
 		}
 		return localVarReturnValue, localVarAPIResponse, newErr
 	}
@@ -2036,12 +2100,14 @@ func (a *LabelsApiService) DatacentersVolumesLabelsFindByKeyExecute(r ApiDatacen
 }
 
 type ApiDatacentersVolumesLabelsGetRequest struct {
-	ctx _context.Context
-	ApiService *LabelsApiService
-	datacenterId string
-	volumeId string
-	pretty *bool
-	depth *int32
+	ctx             _context.Context
+	ApiService      *LabelsApiService
+	filters         _neturl.Values
+	orderBy         *string
+	datacenterId    string
+	volumeId        string
+	pretty          *bool
+	depth           *int32
 	xContractNumber *int32
 }
 
@@ -2058,6 +2124,19 @@ func (r ApiDatacentersVolumesLabelsGetRequest) XContractNumber(xContractNumber i
 	return r
 }
 
+// Filters query parameters limit results to those containing a matching value for a specific property.
+func (r ApiDatacentersVolumesLabelsGetRequest) Filter(key string, value string) ApiDatacentersVolumesLabelsGetRequest {
+	filterKey := fmt.Sprintf(FilterQueryParam, key)
+	r.filters[filterKey] = []string{value}
+	return r
+}
+
+// OrderBy query param sorts the results alphanumerically in ascending order based on the specified property.
+func (r ApiDatacentersVolumesLabelsGetRequest) OrderBy(orderBy string) ApiDatacentersVolumesLabelsGetRequest {
+	r.orderBy = &orderBy
+	return r
+}
+
 func (r ApiDatacentersVolumesLabelsGetRequest) Execute() (LabelResources, *APIResponse, error) {
 	return r.ApiService.DatacentersVolumesLabelsGetExecute(r)
 }
@@ -2066,16 +2145,17 @@ func (r ApiDatacentersVolumesLabelsGetRequest) Execute() (LabelResources, *APIRe
  * DatacentersVolumesLabelsGet List all Volume Labels
  * You can retrieve a list of all labels associated with a volume.
  * @param ctx _context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
- * @param datacenterId The unique ID of the Datacenter
+ * @param datacenterId The unique ID of the data center.
  * @param volumeId The unique ID of the Volume
  * @return ApiDatacentersVolumesLabelsGetRequest
  */
 func (a *LabelsApiService) DatacentersVolumesLabelsGet(ctx _context.Context, datacenterId string, volumeId string) ApiDatacentersVolumesLabelsGetRequest {
 	return ApiDatacentersVolumesLabelsGetRequest{
-		ApiService: a,
-		ctx: ctx,
+		ApiService:   a,
+		ctx:          ctx,
 		datacenterId: datacenterId,
-		volumeId: volumeId,
+		volumeId:     volumeId,
+		filters:      _neturl.Values{},
 	}
 }
 
@@ -2112,6 +2192,17 @@ func (a *LabelsApiService) DatacentersVolumesLabelsGetExecute(r ApiDatacentersVo
 	if r.depth != nil {
 		localVarQueryParams.Add("depth", parameterToString(*r.depth, ""))
 	}
+	if r.orderBy != nil {
+		localVarQueryParams.Add("orderBy", parameterToString(*r.orderBy, ""))
+	}
+	if len(r.filters) > 0 {
+		for k, v := range r.filters {
+			for _, iv := range v {
+				localVarQueryParams.Add(k, iv)
+			}
+		}
+	}
+
 	// to determine the Content-Type header
 	localVarHTTPContentTypes := []string{}
 
@@ -2153,12 +2244,12 @@ func (a *LabelsApiService) DatacentersVolumesLabelsGetExecute(r ApiDatacentersVo
 
 	localVarHTTPResponse, httpRequestTime, err := a.client.callAPI(req)
 
-	localVarAPIResponse := &APIResponse {
-		Response: localVarHTTPResponse,
-		Method: localVarHTTPMethod,
-		RequestURL: localVarPath,
+	localVarAPIResponse := &APIResponse{
+		Response:    localVarHTTPResponse,
+		Method:      localVarHTTPMethod,
+		RequestURL:  localVarPath,
 		RequestTime: httpRequestTime,
-		Operation: "DatacentersVolumesLabelsGet",
+		Operation:   "DatacentersVolumesLabelsGet",
 	}
 
 	if err != nil || localVarHTTPResponse == nil {
@@ -2175,16 +2266,16 @@ func (a *LabelsApiService) DatacentersVolumesLabelsGetExecute(r ApiDatacentersVo
 	if localVarHTTPResponse.StatusCode >= 300 {
 		newErr := GenericOpenAPIError{
 			statusCode: localVarHTTPResponse.StatusCode,
-			body:  localVarBody,
-			error: fmt.Sprintf("%s: %s", localVarHTTPResponse.Status, string(localVarBody)),
+			body:       localVarBody,
+			error:      fmt.Sprintf(FormatStringErr, localVarHTTPResponse.Status, string(localVarBody)),
 		}
-			var v Error
-			err = a.client.decode(&v, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
-			if err != nil {
-				newErr.error = err.Error()
-				return localVarReturnValue, localVarAPIResponse, newErr
-			}
-			newErr.model = v
+		var v Error
+		err = a.client.decode(&v, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
+		if err != nil {
+			newErr.error = err.Error()
+			return localVarReturnValue, localVarAPIResponse, newErr
+		}
+		newErr.model = v
 		return localVarReturnValue, localVarAPIResponse, newErr
 	}
 
@@ -2192,8 +2283,8 @@ func (a *LabelsApiService) DatacentersVolumesLabelsGetExecute(r ApiDatacentersVo
 	if err != nil {
 		newErr := GenericOpenAPIError{
 			statusCode: localVarHTTPResponse.StatusCode,
-			body:  localVarBody,
-			error: err.Error(),
+			body:       localVarBody,
+			error:      err.Error(),
 		}
 		return localVarReturnValue, localVarAPIResponse, newErr
 	}
@@ -2202,13 +2293,13 @@ func (a *LabelsApiService) DatacentersVolumesLabelsGetExecute(r ApiDatacentersVo
 }
 
 type ApiDatacentersVolumesLabelsPostRequest struct {
-	ctx _context.Context
-	ApiService *LabelsApiService
-	datacenterId string
-	volumeId string
-	label *LabelResource
-	pretty *bool
-	depth *int32
+	ctx             _context.Context
+	ApiService      *LabelsApiService
+	datacenterId    string
+	volumeId        string
+	label           *LabelResource
+	pretty          *bool
+	depth           *int32
 	xContractNumber *int32
 }
 
@@ -2237,16 +2328,16 @@ func (r ApiDatacentersVolumesLabelsPostRequest) Execute() (LabelResource, *APIRe
  * DatacentersVolumesLabelsPost Add a Label to Volume
  * This will add a label to the volume.
  * @param ctx _context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
- * @param datacenterId The unique ID of the Datacenter
+ * @param datacenterId The unique ID of the data center.
  * @param volumeId The unique ID of the Volume
  * @return ApiDatacentersVolumesLabelsPostRequest
  */
 func (a *LabelsApiService) DatacentersVolumesLabelsPost(ctx _context.Context, datacenterId string, volumeId string) ApiDatacentersVolumesLabelsPostRequest {
 	return ApiDatacentersVolumesLabelsPostRequest{
-		ApiService: a,
-		ctx: ctx,
+		ApiService:   a,
+		ctx:          ctx,
 		datacenterId: datacenterId,
-		volumeId: volumeId,
+		volumeId:     volumeId,
 	}
 }
 
@@ -2286,6 +2377,7 @@ func (a *LabelsApiService) DatacentersVolumesLabelsPostExecute(r ApiDatacentersV
 	if r.depth != nil {
 		localVarQueryParams.Add("depth", parameterToString(*r.depth, ""))
 	}
+
 	// to determine the Content-Type header
 	localVarHTTPContentTypes := []string{"application/json"}
 
@@ -2329,12 +2421,12 @@ func (a *LabelsApiService) DatacentersVolumesLabelsPostExecute(r ApiDatacentersV
 
 	localVarHTTPResponse, httpRequestTime, err := a.client.callAPI(req)
 
-	localVarAPIResponse := &APIResponse {
-		Response: localVarHTTPResponse,
-		Method: localVarHTTPMethod,
-		RequestURL: localVarPath,
+	localVarAPIResponse := &APIResponse{
+		Response:    localVarHTTPResponse,
+		Method:      localVarHTTPMethod,
+		RequestURL:  localVarPath,
 		RequestTime: httpRequestTime,
-		Operation: "DatacentersVolumesLabelsPost",
+		Operation:   "DatacentersVolumesLabelsPost",
 	}
 
 	if err != nil || localVarHTTPResponse == nil {
@@ -2351,16 +2443,16 @@ func (a *LabelsApiService) DatacentersVolumesLabelsPostExecute(r ApiDatacentersV
 	if localVarHTTPResponse.StatusCode >= 300 {
 		newErr := GenericOpenAPIError{
 			statusCode: localVarHTTPResponse.StatusCode,
-			body:  localVarBody,
-			error: fmt.Sprintf("%s: %s", localVarHTTPResponse.Status, string(localVarBody)),
+			body:       localVarBody,
+			error:      fmt.Sprintf(FormatStringErr, localVarHTTPResponse.Status, string(localVarBody)),
 		}
-			var v Error
-			err = a.client.decode(&v, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
-			if err != nil {
-				newErr.error = err.Error()
-				return localVarReturnValue, localVarAPIResponse, newErr
-			}
-			newErr.model = v
+		var v Error
+		err = a.client.decode(&v, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
+		if err != nil {
+			newErr.error = err.Error()
+			return localVarReturnValue, localVarAPIResponse, newErr
+		}
+		newErr.model = v
 		return localVarReturnValue, localVarAPIResponse, newErr
 	}
 
@@ -2368,8 +2460,8 @@ func (a *LabelsApiService) DatacentersVolumesLabelsPostExecute(r ApiDatacentersV
 	if err != nil {
 		newErr := GenericOpenAPIError{
 			statusCode: localVarHTTPResponse.StatusCode,
-			body:  localVarBody,
-			error: err.Error(),
+			body:       localVarBody,
+			error:      err.Error(),
 		}
 		return localVarReturnValue, localVarAPIResponse, newErr
 	}
@@ -2378,14 +2470,14 @@ func (a *LabelsApiService) DatacentersVolumesLabelsPostExecute(r ApiDatacentersV
 }
 
 type ApiDatacentersVolumesLabelsPutRequest struct {
-	ctx _context.Context
-	ApiService *LabelsApiService
-	datacenterId string
-	volumeId string
-	key string
-	label *LabelResource
-	pretty *bool
-	depth *int32
+	ctx             _context.Context
+	ApiService      *LabelsApiService
+	datacenterId    string
+	volumeId        string
+	key             string
+	label           *LabelResource
+	pretty          *bool
+	depth           *int32
 	xContractNumber *int32
 }
 
@@ -2414,18 +2506,18 @@ func (r ApiDatacentersVolumesLabelsPutRequest) Execute() (LabelResource, *APIRes
  * DatacentersVolumesLabelsPut Modify a Label of Volume
  * This will modify the value of the label on a volume.
  * @param ctx _context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
- * @param datacenterId The unique ID of the Datacenter
+ * @param datacenterId The unique ID of the data center.
  * @param volumeId The unique ID of the Volume
  * @param key The key of the Label
  * @return ApiDatacentersVolumesLabelsPutRequest
  */
 func (a *LabelsApiService) DatacentersVolumesLabelsPut(ctx _context.Context, datacenterId string, volumeId string, key string) ApiDatacentersVolumesLabelsPutRequest {
 	return ApiDatacentersVolumesLabelsPutRequest{
-		ApiService: a,
-		ctx: ctx,
+		ApiService:   a,
+		ctx:          ctx,
 		datacenterId: datacenterId,
-		volumeId: volumeId,
-		key: key,
+		volumeId:     volumeId,
+		key:          key,
 	}
 }
 
@@ -2466,6 +2558,7 @@ func (a *LabelsApiService) DatacentersVolumesLabelsPutExecute(r ApiDatacentersVo
 	if r.depth != nil {
 		localVarQueryParams.Add("depth", parameterToString(*r.depth, ""))
 	}
+
 	// to determine the Content-Type header
 	localVarHTTPContentTypes := []string{"application/json"}
 
@@ -2509,12 +2602,12 @@ func (a *LabelsApiService) DatacentersVolumesLabelsPutExecute(r ApiDatacentersVo
 
 	localVarHTTPResponse, httpRequestTime, err := a.client.callAPI(req)
 
-	localVarAPIResponse := &APIResponse {
-		Response: localVarHTTPResponse,
-		Method: localVarHTTPMethod,
-		RequestURL: localVarPath,
+	localVarAPIResponse := &APIResponse{
+		Response:    localVarHTTPResponse,
+		Method:      localVarHTTPMethod,
+		RequestURL:  localVarPath,
 		RequestTime: httpRequestTime,
-		Operation: "DatacentersVolumesLabelsPut",
+		Operation:   "DatacentersVolumesLabelsPut",
 	}
 
 	if err != nil || localVarHTTPResponse == nil {
@@ -2531,16 +2624,16 @@ func (a *LabelsApiService) DatacentersVolumesLabelsPutExecute(r ApiDatacentersVo
 	if localVarHTTPResponse.StatusCode >= 300 {
 		newErr := GenericOpenAPIError{
 			statusCode: localVarHTTPResponse.StatusCode,
-			body:  localVarBody,
-			error: fmt.Sprintf("%s: %s", localVarHTTPResponse.Status, string(localVarBody)),
+			body:       localVarBody,
+			error:      fmt.Sprintf(FormatStringErr, localVarHTTPResponse.Status, string(localVarBody)),
 		}
-			var v Error
-			err = a.client.decode(&v, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
-			if err != nil {
-				newErr.error = err.Error()
-				return localVarReturnValue, localVarAPIResponse, newErr
-			}
-			newErr.model = v
+		var v Error
+		err = a.client.decode(&v, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
+		if err != nil {
+			newErr.error = err.Error()
+			return localVarReturnValue, localVarAPIResponse, newErr
+		}
+		newErr.model = v
 		return localVarReturnValue, localVarAPIResponse, newErr
 	}
 
@@ -2548,8 +2641,8 @@ func (a *LabelsApiService) DatacentersVolumesLabelsPutExecute(r ApiDatacentersVo
 	if err != nil {
 		newErr := GenericOpenAPIError{
 			statusCode: localVarHTTPResponse.StatusCode,
-			body:  localVarBody,
-			error: err.Error(),
+			body:       localVarBody,
+			error:      err.Error(),
 		}
 		return localVarReturnValue, localVarAPIResponse, newErr
 	}
@@ -2558,12 +2651,12 @@ func (a *LabelsApiService) DatacentersVolumesLabelsPutExecute(r ApiDatacentersVo
 }
 
 type ApiIpblocksLabelsDeleteRequest struct {
-	ctx _context.Context
-	ApiService *LabelsApiService
-	ipblockId string
-	key string
-	pretty *bool
-	depth *int32
+	ctx             _context.Context
+	ApiService      *LabelsApiService
+	ipblockId       string
+	key             string
+	pretty          *bool
+	depth           *int32
 	xContractNumber *int32
 }
 
@@ -2595,9 +2688,9 @@ func (r ApiIpblocksLabelsDeleteRequest) Execute() (*APIResponse, error) {
 func (a *LabelsApiService) IpblocksLabelsDelete(ctx _context.Context, ipblockId string, key string) ApiIpblocksLabelsDeleteRequest {
 	return ApiIpblocksLabelsDeleteRequest{
 		ApiService: a,
-		ctx: ctx,
-		ipblockId: ipblockId,
-		key: key,
+		ctx:        ctx,
+		ipblockId:  ipblockId,
+		key:        key,
 	}
 }
 
@@ -2632,6 +2725,7 @@ func (a *LabelsApiService) IpblocksLabelsDeleteExecute(r ApiIpblocksLabelsDelete
 	if r.depth != nil {
 		localVarQueryParams.Add("depth", parameterToString(*r.depth, ""))
 	}
+
 	// to determine the Content-Type header
 	localVarHTTPContentTypes := []string{}
 
@@ -2673,12 +2767,12 @@ func (a *LabelsApiService) IpblocksLabelsDeleteExecute(r ApiIpblocksLabelsDelete
 
 	localVarHTTPResponse, httpRequestTime, err := a.client.callAPI(req)
 
-	localVarAPIResponse := &APIResponse {
-		Response: localVarHTTPResponse,
-		Method: localVarHTTPMethod,
-		RequestURL: localVarPath,
+	localVarAPIResponse := &APIResponse{
+		Response:    localVarHTTPResponse,
+		Method:      localVarHTTPMethod,
+		RequestURL:  localVarPath,
 		RequestTime: httpRequestTime,
-		Operation: "IpblocksLabelsDelete",
+		Operation:   "IpblocksLabelsDelete",
 	}
 
 	if err != nil || localVarHTTPResponse == nil {
@@ -2695,16 +2789,16 @@ func (a *LabelsApiService) IpblocksLabelsDeleteExecute(r ApiIpblocksLabelsDelete
 	if localVarHTTPResponse.StatusCode >= 300 {
 		newErr := GenericOpenAPIError{
 			statusCode: localVarHTTPResponse.StatusCode,
-			body:  localVarBody,
-			error: fmt.Sprintf("%s: %s", localVarHTTPResponse.Status, string(localVarBody)),
+			body:       localVarBody,
+			error:      fmt.Sprintf(FormatStringErr, localVarHTTPResponse.Status, string(localVarBody)),
 		}
-			var v Error
-			err = a.client.decode(&v, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
-			if err != nil {
-				newErr.error = err.Error()
-				return localVarAPIResponse, newErr
-			}
-			newErr.model = v
+		var v Error
+		err = a.client.decode(&v, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
+		if err != nil {
+			newErr.error = err.Error()
+			return localVarAPIResponse, newErr
+		}
+		newErr.model = v
 		return localVarAPIResponse, newErr
 	}
 
@@ -2712,12 +2806,12 @@ func (a *LabelsApiService) IpblocksLabelsDeleteExecute(r ApiIpblocksLabelsDelete
 }
 
 type ApiIpblocksLabelsFindByKeyRequest struct {
-	ctx _context.Context
-	ApiService *LabelsApiService
-	ipblockId string
-	key string
-	pretty *bool
-	depth *int32
+	ctx             _context.Context
+	ApiService      *LabelsApiService
+	ipblockId       string
+	key             string
+	pretty          *bool
+	depth           *int32
 	xContractNumber *int32
 }
 
@@ -2749,9 +2843,9 @@ func (r ApiIpblocksLabelsFindByKeyRequest) Execute() (LabelResource, *APIRespons
 func (a *LabelsApiService) IpblocksLabelsFindByKey(ctx _context.Context, ipblockId string, key string) ApiIpblocksLabelsFindByKeyRequest {
 	return ApiIpblocksLabelsFindByKeyRequest{
 		ApiService: a,
-		ctx: ctx,
-		ipblockId: ipblockId,
-		key: key,
+		ctx:        ctx,
+		ipblockId:  ipblockId,
+		key:        key,
 	}
 }
 
@@ -2788,6 +2882,7 @@ func (a *LabelsApiService) IpblocksLabelsFindByKeyExecute(r ApiIpblocksLabelsFin
 	if r.depth != nil {
 		localVarQueryParams.Add("depth", parameterToString(*r.depth, ""))
 	}
+
 	// to determine the Content-Type header
 	localVarHTTPContentTypes := []string{}
 
@@ -2829,12 +2924,12 @@ func (a *LabelsApiService) IpblocksLabelsFindByKeyExecute(r ApiIpblocksLabelsFin
 
 	localVarHTTPResponse, httpRequestTime, err := a.client.callAPI(req)
 
-	localVarAPIResponse := &APIResponse {
-		Response: localVarHTTPResponse,
-		Method: localVarHTTPMethod,
-		RequestURL: localVarPath,
+	localVarAPIResponse := &APIResponse{
+		Response:    localVarHTTPResponse,
+		Method:      localVarHTTPMethod,
+		RequestURL:  localVarPath,
 		RequestTime: httpRequestTime,
-		Operation: "IpblocksLabelsFindByKey",
+		Operation:   "IpblocksLabelsFindByKey",
 	}
 
 	if err != nil || localVarHTTPResponse == nil {
@@ -2851,16 +2946,16 @@ func (a *LabelsApiService) IpblocksLabelsFindByKeyExecute(r ApiIpblocksLabelsFin
 	if localVarHTTPResponse.StatusCode >= 300 {
 		newErr := GenericOpenAPIError{
 			statusCode: localVarHTTPResponse.StatusCode,
-			body:  localVarBody,
-			error: fmt.Sprintf("%s: %s", localVarHTTPResponse.Status, string(localVarBody)),
+			body:       localVarBody,
+			error:      fmt.Sprintf(FormatStringErr, localVarHTTPResponse.Status, string(localVarBody)),
 		}
-			var v Error
-			err = a.client.decode(&v, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
-			if err != nil {
-				newErr.error = err.Error()
-				return localVarReturnValue, localVarAPIResponse, newErr
-			}
-			newErr.model = v
+		var v Error
+		err = a.client.decode(&v, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
+		if err != nil {
+			newErr.error = err.Error()
+			return localVarReturnValue, localVarAPIResponse, newErr
+		}
+		newErr.model = v
 		return localVarReturnValue, localVarAPIResponse, newErr
 	}
 
@@ -2868,8 +2963,8 @@ func (a *LabelsApiService) IpblocksLabelsFindByKeyExecute(r ApiIpblocksLabelsFin
 	if err != nil {
 		newErr := GenericOpenAPIError{
 			statusCode: localVarHTTPResponse.StatusCode,
-			body:  localVarBody,
-			error: err.Error(),
+			body:       localVarBody,
+			error:      err.Error(),
 		}
 		return localVarReturnValue, localVarAPIResponse, newErr
 	}
@@ -2878,11 +2973,13 @@ func (a *LabelsApiService) IpblocksLabelsFindByKeyExecute(r ApiIpblocksLabelsFin
 }
 
 type ApiIpblocksLabelsGetRequest struct {
-	ctx _context.Context
-	ApiService *LabelsApiService
-	ipblockId string
-	pretty *bool
-	depth *int32
+	ctx             _context.Context
+	ApiService      *LabelsApiService
+	filters         _neturl.Values
+	orderBy         *string
+	ipblockId       string
+	pretty          *bool
+	depth           *int32
 	xContractNumber *int32
 }
 
@@ -2896,6 +2993,19 @@ func (r ApiIpblocksLabelsGetRequest) Depth(depth int32) ApiIpblocksLabelsGetRequ
 }
 func (r ApiIpblocksLabelsGetRequest) XContractNumber(xContractNumber int32) ApiIpblocksLabelsGetRequest {
 	r.xContractNumber = &xContractNumber
+	return r
+}
+
+// Filters query parameters limit results to those containing a matching value for a specific property.
+func (r ApiIpblocksLabelsGetRequest) Filter(key string, value string) ApiIpblocksLabelsGetRequest {
+	filterKey := fmt.Sprintf(FilterQueryParam, key)
+	r.filters[filterKey] = []string{value}
+	return r
+}
+
+// OrderBy query param sorts the results alphanumerically in ascending order based on the specified property.
+func (r ApiIpblocksLabelsGetRequest) OrderBy(orderBy string) ApiIpblocksLabelsGetRequest {
+	r.orderBy = &orderBy
 	return r
 }
 
@@ -2913,8 +3023,9 @@ func (r ApiIpblocksLabelsGetRequest) Execute() (LabelResources, *APIResponse, er
 func (a *LabelsApiService) IpblocksLabelsGet(ctx _context.Context, ipblockId string) ApiIpblocksLabelsGetRequest {
 	return ApiIpblocksLabelsGetRequest{
 		ApiService: a,
-		ctx: ctx,
-		ipblockId: ipblockId,
+		ctx:        ctx,
+		ipblockId:  ipblockId,
+		filters:    _neturl.Values{},
 	}
 }
 
@@ -2950,6 +3061,17 @@ func (a *LabelsApiService) IpblocksLabelsGetExecute(r ApiIpblocksLabelsGetReques
 	if r.depth != nil {
 		localVarQueryParams.Add("depth", parameterToString(*r.depth, ""))
 	}
+	if r.orderBy != nil {
+		localVarQueryParams.Add("orderBy", parameterToString(*r.orderBy, ""))
+	}
+	if len(r.filters) > 0 {
+		for k, v := range r.filters {
+			for _, iv := range v {
+				localVarQueryParams.Add(k, iv)
+			}
+		}
+	}
+
 	// to determine the Content-Type header
 	localVarHTTPContentTypes := []string{}
 
@@ -2991,12 +3113,12 @@ func (a *LabelsApiService) IpblocksLabelsGetExecute(r ApiIpblocksLabelsGetReques
 
 	localVarHTTPResponse, httpRequestTime, err := a.client.callAPI(req)
 
-	localVarAPIResponse := &APIResponse {
-		Response: localVarHTTPResponse,
-		Method: localVarHTTPMethod,
-		RequestURL: localVarPath,
+	localVarAPIResponse := &APIResponse{
+		Response:    localVarHTTPResponse,
+		Method:      localVarHTTPMethod,
+		RequestURL:  localVarPath,
 		RequestTime: httpRequestTime,
-		Operation: "IpblocksLabelsGet",
+		Operation:   "IpblocksLabelsGet",
 	}
 
 	if err != nil || localVarHTTPResponse == nil {
@@ -3013,16 +3135,16 @@ func (a *LabelsApiService) IpblocksLabelsGetExecute(r ApiIpblocksLabelsGetReques
 	if localVarHTTPResponse.StatusCode >= 300 {
 		newErr := GenericOpenAPIError{
 			statusCode: localVarHTTPResponse.StatusCode,
-			body:  localVarBody,
-			error: fmt.Sprintf("%s: %s", localVarHTTPResponse.Status, string(localVarBody)),
+			body:       localVarBody,
+			error:      fmt.Sprintf(FormatStringErr, localVarHTTPResponse.Status, string(localVarBody)),
 		}
-			var v Error
-			err = a.client.decode(&v, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
-			if err != nil {
-				newErr.error = err.Error()
-				return localVarReturnValue, localVarAPIResponse, newErr
-			}
-			newErr.model = v
+		var v Error
+		err = a.client.decode(&v, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
+		if err != nil {
+			newErr.error = err.Error()
+			return localVarReturnValue, localVarAPIResponse, newErr
+		}
+		newErr.model = v
 		return localVarReturnValue, localVarAPIResponse, newErr
 	}
 
@@ -3030,8 +3152,8 @@ func (a *LabelsApiService) IpblocksLabelsGetExecute(r ApiIpblocksLabelsGetReques
 	if err != nil {
 		newErr := GenericOpenAPIError{
 			statusCode: localVarHTTPResponse.StatusCode,
-			body:  localVarBody,
-			error: err.Error(),
+			body:       localVarBody,
+			error:      err.Error(),
 		}
 		return localVarReturnValue, localVarAPIResponse, newErr
 	}
@@ -3040,12 +3162,12 @@ func (a *LabelsApiService) IpblocksLabelsGetExecute(r ApiIpblocksLabelsGetReques
 }
 
 type ApiIpblocksLabelsPostRequest struct {
-	ctx _context.Context
-	ApiService *LabelsApiService
-	ipblockId string
-	label *LabelResource
-	pretty *bool
-	depth *int32
+	ctx             _context.Context
+	ApiService      *LabelsApiService
+	ipblockId       string
+	label           *LabelResource
+	pretty          *bool
+	depth           *int32
 	xContractNumber *int32
 }
 
@@ -3080,8 +3202,8 @@ func (r ApiIpblocksLabelsPostRequest) Execute() (LabelResource, *APIResponse, er
 func (a *LabelsApiService) IpblocksLabelsPost(ctx _context.Context, ipblockId string) ApiIpblocksLabelsPostRequest {
 	return ApiIpblocksLabelsPostRequest{
 		ApiService: a,
-		ctx: ctx,
-		ipblockId: ipblockId,
+		ctx:        ctx,
+		ipblockId:  ipblockId,
 	}
 }
 
@@ -3120,6 +3242,7 @@ func (a *LabelsApiService) IpblocksLabelsPostExecute(r ApiIpblocksLabelsPostRequ
 	if r.depth != nil {
 		localVarQueryParams.Add("depth", parameterToString(*r.depth, ""))
 	}
+
 	// to determine the Content-Type header
 	localVarHTTPContentTypes := []string{"application/json"}
 
@@ -3163,12 +3286,12 @@ func (a *LabelsApiService) IpblocksLabelsPostExecute(r ApiIpblocksLabelsPostRequ
 
 	localVarHTTPResponse, httpRequestTime, err := a.client.callAPI(req)
 
-	localVarAPIResponse := &APIResponse {
-		Response: localVarHTTPResponse,
-		Method: localVarHTTPMethod,
-		RequestURL: localVarPath,
+	localVarAPIResponse := &APIResponse{
+		Response:    localVarHTTPResponse,
+		Method:      localVarHTTPMethod,
+		RequestURL:  localVarPath,
 		RequestTime: httpRequestTime,
-		Operation: "IpblocksLabelsPost",
+		Operation:   "IpblocksLabelsPost",
 	}
 
 	if err != nil || localVarHTTPResponse == nil {
@@ -3185,16 +3308,16 @@ func (a *LabelsApiService) IpblocksLabelsPostExecute(r ApiIpblocksLabelsPostRequ
 	if localVarHTTPResponse.StatusCode >= 300 {
 		newErr := GenericOpenAPIError{
 			statusCode: localVarHTTPResponse.StatusCode,
-			body:  localVarBody,
-			error: fmt.Sprintf("%s: %s", localVarHTTPResponse.Status, string(localVarBody)),
+			body:       localVarBody,
+			error:      fmt.Sprintf(FormatStringErr, localVarHTTPResponse.Status, string(localVarBody)),
 		}
-			var v Error
-			err = a.client.decode(&v, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
-			if err != nil {
-				newErr.error = err.Error()
-				return localVarReturnValue, localVarAPIResponse, newErr
-			}
-			newErr.model = v
+		var v Error
+		err = a.client.decode(&v, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
+		if err != nil {
+			newErr.error = err.Error()
+			return localVarReturnValue, localVarAPIResponse, newErr
+		}
+		newErr.model = v
 		return localVarReturnValue, localVarAPIResponse, newErr
 	}
 
@@ -3202,8 +3325,8 @@ func (a *LabelsApiService) IpblocksLabelsPostExecute(r ApiIpblocksLabelsPostRequ
 	if err != nil {
 		newErr := GenericOpenAPIError{
 			statusCode: localVarHTTPResponse.StatusCode,
-			body:  localVarBody,
-			error: err.Error(),
+			body:       localVarBody,
+			error:      err.Error(),
 		}
 		return localVarReturnValue, localVarAPIResponse, newErr
 	}
@@ -3212,13 +3335,13 @@ func (a *LabelsApiService) IpblocksLabelsPostExecute(r ApiIpblocksLabelsPostRequ
 }
 
 type ApiIpblocksLabelsPutRequest struct {
-	ctx _context.Context
-	ApiService *LabelsApiService
-	ipblockId string
-	key string
-	label *LabelResource
-	pretty *bool
-	depth *int32
+	ctx             _context.Context
+	ApiService      *LabelsApiService
+	ipblockId       string
+	key             string
+	label           *LabelResource
+	pretty          *bool
+	depth           *int32
 	xContractNumber *int32
 }
 
@@ -3254,9 +3377,9 @@ func (r ApiIpblocksLabelsPutRequest) Execute() (LabelResource, *APIResponse, err
 func (a *LabelsApiService) IpblocksLabelsPut(ctx _context.Context, ipblockId string, key string) ApiIpblocksLabelsPutRequest {
 	return ApiIpblocksLabelsPutRequest{
 		ApiService: a,
-		ctx: ctx,
-		ipblockId: ipblockId,
-		key: key,
+		ctx:        ctx,
+		ipblockId:  ipblockId,
+		key:        key,
 	}
 }
 
@@ -3296,6 +3419,7 @@ func (a *LabelsApiService) IpblocksLabelsPutExecute(r ApiIpblocksLabelsPutReques
 	if r.depth != nil {
 		localVarQueryParams.Add("depth", parameterToString(*r.depth, ""))
 	}
+
 	// to determine the Content-Type header
 	localVarHTTPContentTypes := []string{"application/json"}
 
@@ -3339,12 +3463,12 @@ func (a *LabelsApiService) IpblocksLabelsPutExecute(r ApiIpblocksLabelsPutReques
 
 	localVarHTTPResponse, httpRequestTime, err := a.client.callAPI(req)
 
-	localVarAPIResponse := &APIResponse {
-		Response: localVarHTTPResponse,
-		Method: localVarHTTPMethod,
-		RequestURL: localVarPath,
+	localVarAPIResponse := &APIResponse{
+		Response:    localVarHTTPResponse,
+		Method:      localVarHTTPMethod,
+		RequestURL:  localVarPath,
 		RequestTime: httpRequestTime,
-		Operation: "IpblocksLabelsPut",
+		Operation:   "IpblocksLabelsPut",
 	}
 
 	if err != nil || localVarHTTPResponse == nil {
@@ -3361,16 +3485,16 @@ func (a *LabelsApiService) IpblocksLabelsPutExecute(r ApiIpblocksLabelsPutReques
 	if localVarHTTPResponse.StatusCode >= 300 {
 		newErr := GenericOpenAPIError{
 			statusCode: localVarHTTPResponse.StatusCode,
-			body:  localVarBody,
-			error: fmt.Sprintf("%s: %s", localVarHTTPResponse.Status, string(localVarBody)),
+			body:       localVarBody,
+			error:      fmt.Sprintf(FormatStringErr, localVarHTTPResponse.Status, string(localVarBody)),
 		}
-			var v Error
-			err = a.client.decode(&v, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
-			if err != nil {
-				newErr.error = err.Error()
-				return localVarReturnValue, localVarAPIResponse, newErr
-			}
-			newErr.model = v
+		var v Error
+		err = a.client.decode(&v, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
+		if err != nil {
+			newErr.error = err.Error()
+			return localVarReturnValue, localVarAPIResponse, newErr
+		}
+		newErr.model = v
 		return localVarReturnValue, localVarAPIResponse, newErr
 	}
 
@@ -3378,8 +3502,8 @@ func (a *LabelsApiService) IpblocksLabelsPutExecute(r ApiIpblocksLabelsPutReques
 	if err != nil {
 		newErr := GenericOpenAPIError{
 			statusCode: localVarHTTPResponse.StatusCode,
-			body:  localVarBody,
-			error: err.Error(),
+			body:       localVarBody,
+			error:      err.Error(),
 		}
 		return localVarReturnValue, localVarAPIResponse, newErr
 	}
@@ -3388,11 +3512,11 @@ func (a *LabelsApiService) IpblocksLabelsPutExecute(r ApiIpblocksLabelsPutReques
 }
 
 type ApiLabelsFindByUrnRequest struct {
-	ctx _context.Context
-	ApiService *LabelsApiService
-	labelurn string
-	pretty *bool
-	depth *int32
+	ctx             _context.Context
+	ApiService      *LabelsApiService
+	labelurn        string
+	pretty          *bool
+	depth           *int32
 	xContractNumber *int32
 }
 
@@ -3423,8 +3547,8 @@ func (r ApiLabelsFindByUrnRequest) Execute() (Label, *APIResponse, error) {
 func (a *LabelsApiService) LabelsFindByUrn(ctx _context.Context, labelurn string) ApiLabelsFindByUrnRequest {
 	return ApiLabelsFindByUrnRequest{
 		ApiService: a,
-		ctx: ctx,
-		labelurn: labelurn,
+		ctx:        ctx,
+		labelurn:   labelurn,
 	}
 }
 
@@ -3460,6 +3584,7 @@ func (a *LabelsApiService) LabelsFindByUrnExecute(r ApiLabelsFindByUrnRequest) (
 	if r.depth != nil {
 		localVarQueryParams.Add("depth", parameterToString(*r.depth, ""))
 	}
+
 	// to determine the Content-Type header
 	localVarHTTPContentTypes := []string{}
 
@@ -3501,12 +3626,12 @@ func (a *LabelsApiService) LabelsFindByUrnExecute(r ApiLabelsFindByUrnRequest) (
 
 	localVarHTTPResponse, httpRequestTime, err := a.client.callAPI(req)
 
-	localVarAPIResponse := &APIResponse {
-		Response: localVarHTTPResponse,
-		Method: localVarHTTPMethod,
-		RequestURL: localVarPath,
+	localVarAPIResponse := &APIResponse{
+		Response:    localVarHTTPResponse,
+		Method:      localVarHTTPMethod,
+		RequestURL:  localVarPath,
 		RequestTime: httpRequestTime,
-		Operation: "LabelsFindByUrn",
+		Operation:   "LabelsFindByUrn",
 	}
 
 	if err != nil || localVarHTTPResponse == nil {
@@ -3523,16 +3648,16 @@ func (a *LabelsApiService) LabelsFindByUrnExecute(r ApiLabelsFindByUrnRequest) (
 	if localVarHTTPResponse.StatusCode >= 300 {
 		newErr := GenericOpenAPIError{
 			statusCode: localVarHTTPResponse.StatusCode,
-			body:  localVarBody,
-			error: fmt.Sprintf("%s: %s", localVarHTTPResponse.Status, string(localVarBody)),
+			body:       localVarBody,
+			error:      fmt.Sprintf(FormatStringErr, localVarHTTPResponse.Status, string(localVarBody)),
 		}
-			var v Error
-			err = a.client.decode(&v, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
-			if err != nil {
-				newErr.error = err.Error()
-				return localVarReturnValue, localVarAPIResponse, newErr
-			}
-			newErr.model = v
+		var v Error
+		err = a.client.decode(&v, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
+		if err != nil {
+			newErr.error = err.Error()
+			return localVarReturnValue, localVarAPIResponse, newErr
+		}
+		newErr.model = v
 		return localVarReturnValue, localVarAPIResponse, newErr
 	}
 
@@ -3540,8 +3665,8 @@ func (a *LabelsApiService) LabelsFindByUrnExecute(r ApiLabelsFindByUrnRequest) (
 	if err != nil {
 		newErr := GenericOpenAPIError{
 			statusCode: localVarHTTPResponse.StatusCode,
-			body:  localVarBody,
-			error: err.Error(),
+			body:       localVarBody,
+			error:      err.Error(),
 		}
 		return localVarReturnValue, localVarAPIResponse, newErr
 	}
@@ -3550,10 +3675,12 @@ func (a *LabelsApiService) LabelsFindByUrnExecute(r ApiLabelsFindByUrnRequest) (
 }
 
 type ApiLabelsGetRequest struct {
-	ctx _context.Context
-	ApiService *LabelsApiService
-	pretty *bool
-	depth *int32
+	ctx             _context.Context
+	ApiService      *LabelsApiService
+	filters         _neturl.Values
+	orderBy         *string
+	pretty          *bool
+	depth           *int32
 	xContractNumber *int32
 }
 
@@ -3570,12 +3697,25 @@ func (r ApiLabelsGetRequest) XContractNumber(xContractNumber int32) ApiLabelsGet
 	return r
 }
 
+// Filters query parameters limit results to those containing a matching value for a specific property.
+func (r ApiLabelsGetRequest) Filter(key string, value string) ApiLabelsGetRequest {
+	filterKey := fmt.Sprintf(FilterQueryParam, key)
+	r.filters[filterKey] = []string{value}
+	return r
+}
+
+// OrderBy query param sorts the results alphanumerically in ascending order based on the specified property.
+func (r ApiLabelsGetRequest) OrderBy(orderBy string) ApiLabelsGetRequest {
+	r.orderBy = &orderBy
+	return r
+}
+
 func (r ApiLabelsGetRequest) Execute() (Labels, *APIResponse, error) {
 	return r.ApiService.LabelsGetExecute(r)
 }
 
 /*
- * LabelsGet List Labels 
+ * LabelsGet List Labels
  * You can retrieve a complete list of labels that you have access to.
  * @param ctx _context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
  * @return ApiLabelsGetRequest
@@ -3583,7 +3723,8 @@ func (r ApiLabelsGetRequest) Execute() (Labels, *APIResponse, error) {
 func (a *LabelsApiService) LabelsGet(ctx _context.Context) ApiLabelsGetRequest {
 	return ApiLabelsGetRequest{
 		ApiService: a,
-		ctx: ctx,
+		ctx:        ctx,
+		filters:    _neturl.Values{},
 	}
 }
 
@@ -3618,6 +3759,17 @@ func (a *LabelsApiService) LabelsGetExecute(r ApiLabelsGetRequest) (Labels, *API
 	if r.depth != nil {
 		localVarQueryParams.Add("depth", parameterToString(*r.depth, ""))
 	}
+	if r.orderBy != nil {
+		localVarQueryParams.Add("orderBy", parameterToString(*r.orderBy, ""))
+	}
+	if len(r.filters) > 0 {
+		for k, v := range r.filters {
+			for _, iv := range v {
+				localVarQueryParams.Add(k, iv)
+			}
+		}
+	}
+
 	// to determine the Content-Type header
 	localVarHTTPContentTypes := []string{}
 
@@ -3659,12 +3811,12 @@ func (a *LabelsApiService) LabelsGetExecute(r ApiLabelsGetRequest) (Labels, *API
 
 	localVarHTTPResponse, httpRequestTime, err := a.client.callAPI(req)
 
-	localVarAPIResponse := &APIResponse {
-		Response: localVarHTTPResponse,
-		Method: localVarHTTPMethod,
-		RequestURL: localVarPath,
+	localVarAPIResponse := &APIResponse{
+		Response:    localVarHTTPResponse,
+		Method:      localVarHTTPMethod,
+		RequestURL:  localVarPath,
 		RequestTime: httpRequestTime,
-		Operation: "LabelsGet",
+		Operation:   "LabelsGet",
 	}
 
 	if err != nil || localVarHTTPResponse == nil {
@@ -3681,16 +3833,16 @@ func (a *LabelsApiService) LabelsGetExecute(r ApiLabelsGetRequest) (Labels, *API
 	if localVarHTTPResponse.StatusCode >= 300 {
 		newErr := GenericOpenAPIError{
 			statusCode: localVarHTTPResponse.StatusCode,
-			body:  localVarBody,
-			error: fmt.Sprintf("%s: %s", localVarHTTPResponse.Status, string(localVarBody)),
+			body:       localVarBody,
+			error:      fmt.Sprintf(FormatStringErr, localVarHTTPResponse.Status, string(localVarBody)),
 		}
-			var v Error
-			err = a.client.decode(&v, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
-			if err != nil {
-				newErr.error = err.Error()
-				return localVarReturnValue, localVarAPIResponse, newErr
-			}
-			newErr.model = v
+		var v Error
+		err = a.client.decode(&v, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
+		if err != nil {
+			newErr.error = err.Error()
+			return localVarReturnValue, localVarAPIResponse, newErr
+		}
+		newErr.model = v
 		return localVarReturnValue, localVarAPIResponse, newErr
 	}
 
@@ -3698,8 +3850,8 @@ func (a *LabelsApiService) LabelsGetExecute(r ApiLabelsGetRequest) (Labels, *API
 	if err != nil {
 		newErr := GenericOpenAPIError{
 			statusCode: localVarHTTPResponse.StatusCode,
-			body:  localVarBody,
-			error: err.Error(),
+			body:       localVarBody,
+			error:      err.Error(),
 		}
 		return localVarReturnValue, localVarAPIResponse, newErr
 	}
@@ -3708,12 +3860,12 @@ func (a *LabelsApiService) LabelsGetExecute(r ApiLabelsGetRequest) (Labels, *API
 }
 
 type ApiSnapshotsLabelsDeleteRequest struct {
-	ctx _context.Context
-	ApiService *LabelsApiService
-	snapshotId string
-	key string
-	pretty *bool
-	depth *int32
+	ctx             _context.Context
+	ApiService      *LabelsApiService
+	snapshotId      string
+	key             string
+	pretty          *bool
+	depth           *int32
 	xContractNumber *int32
 }
 
@@ -3745,9 +3897,9 @@ func (r ApiSnapshotsLabelsDeleteRequest) Execute() (*APIResponse, error) {
 func (a *LabelsApiService) SnapshotsLabelsDelete(ctx _context.Context, snapshotId string, key string) ApiSnapshotsLabelsDeleteRequest {
 	return ApiSnapshotsLabelsDeleteRequest{
 		ApiService: a,
-		ctx: ctx,
+		ctx:        ctx,
 		snapshotId: snapshotId,
-		key: key,
+		key:        key,
 	}
 }
 
@@ -3782,6 +3934,7 @@ func (a *LabelsApiService) SnapshotsLabelsDeleteExecute(r ApiSnapshotsLabelsDele
 	if r.depth != nil {
 		localVarQueryParams.Add("depth", parameterToString(*r.depth, ""))
 	}
+
 	// to determine the Content-Type header
 	localVarHTTPContentTypes := []string{}
 
@@ -3823,12 +3976,12 @@ func (a *LabelsApiService) SnapshotsLabelsDeleteExecute(r ApiSnapshotsLabelsDele
 
 	localVarHTTPResponse, httpRequestTime, err := a.client.callAPI(req)
 
-	localVarAPIResponse := &APIResponse {
-		Response: localVarHTTPResponse,
-		Method: localVarHTTPMethod,
-		RequestURL: localVarPath,
+	localVarAPIResponse := &APIResponse{
+		Response:    localVarHTTPResponse,
+		Method:      localVarHTTPMethod,
+		RequestURL:  localVarPath,
 		RequestTime: httpRequestTime,
-		Operation: "SnapshotsLabelsDelete",
+		Operation:   "SnapshotsLabelsDelete",
 	}
 
 	if err != nil || localVarHTTPResponse == nil {
@@ -3845,16 +3998,16 @@ func (a *LabelsApiService) SnapshotsLabelsDeleteExecute(r ApiSnapshotsLabelsDele
 	if localVarHTTPResponse.StatusCode >= 300 {
 		newErr := GenericOpenAPIError{
 			statusCode: localVarHTTPResponse.StatusCode,
-			body:  localVarBody,
-			error: fmt.Sprintf("%s: %s", localVarHTTPResponse.Status, string(localVarBody)),
+			body:       localVarBody,
+			error:      fmt.Sprintf(FormatStringErr, localVarHTTPResponse.Status, string(localVarBody)),
 		}
-			var v Error
-			err = a.client.decode(&v, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
-			if err != nil {
-				newErr.error = err.Error()
-				return localVarAPIResponse, newErr
-			}
-			newErr.model = v
+		var v Error
+		err = a.client.decode(&v, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
+		if err != nil {
+			newErr.error = err.Error()
+			return localVarAPIResponse, newErr
+		}
+		newErr.model = v
 		return localVarAPIResponse, newErr
 	}
 
@@ -3862,12 +4015,12 @@ func (a *LabelsApiService) SnapshotsLabelsDeleteExecute(r ApiSnapshotsLabelsDele
 }
 
 type ApiSnapshotsLabelsFindByKeyRequest struct {
-	ctx _context.Context
-	ApiService *LabelsApiService
-	snapshotId string
-	key string
-	pretty *bool
-	depth *int32
+	ctx             _context.Context
+	ApiService      *LabelsApiService
+	snapshotId      string
+	key             string
+	pretty          *bool
+	depth           *int32
 	xContractNumber *int32
 }
 
@@ -3899,9 +4052,9 @@ func (r ApiSnapshotsLabelsFindByKeyRequest) Execute() (LabelResource, *APIRespon
 func (a *LabelsApiService) SnapshotsLabelsFindByKey(ctx _context.Context, snapshotId string, key string) ApiSnapshotsLabelsFindByKeyRequest {
 	return ApiSnapshotsLabelsFindByKeyRequest{
 		ApiService: a,
-		ctx: ctx,
+		ctx:        ctx,
 		snapshotId: snapshotId,
-		key: key,
+		key:        key,
 	}
 }
 
@@ -3938,6 +4091,7 @@ func (a *LabelsApiService) SnapshotsLabelsFindByKeyExecute(r ApiSnapshotsLabelsF
 	if r.depth != nil {
 		localVarQueryParams.Add("depth", parameterToString(*r.depth, ""))
 	}
+
 	// to determine the Content-Type header
 	localVarHTTPContentTypes := []string{}
 
@@ -3979,12 +4133,12 @@ func (a *LabelsApiService) SnapshotsLabelsFindByKeyExecute(r ApiSnapshotsLabelsF
 
 	localVarHTTPResponse, httpRequestTime, err := a.client.callAPI(req)
 
-	localVarAPIResponse := &APIResponse {
-		Response: localVarHTTPResponse,
-		Method: localVarHTTPMethod,
-		RequestURL: localVarPath,
+	localVarAPIResponse := &APIResponse{
+		Response:    localVarHTTPResponse,
+		Method:      localVarHTTPMethod,
+		RequestURL:  localVarPath,
 		RequestTime: httpRequestTime,
-		Operation: "SnapshotsLabelsFindByKey",
+		Operation:   "SnapshotsLabelsFindByKey",
 	}
 
 	if err != nil || localVarHTTPResponse == nil {
@@ -4001,16 +4155,16 @@ func (a *LabelsApiService) SnapshotsLabelsFindByKeyExecute(r ApiSnapshotsLabelsF
 	if localVarHTTPResponse.StatusCode >= 300 {
 		newErr := GenericOpenAPIError{
 			statusCode: localVarHTTPResponse.StatusCode,
-			body:  localVarBody,
-			error: fmt.Sprintf("%s: %s", localVarHTTPResponse.Status, string(localVarBody)),
+			body:       localVarBody,
+			error:      fmt.Sprintf(FormatStringErr, localVarHTTPResponse.Status, string(localVarBody)),
 		}
-			var v Error
-			err = a.client.decode(&v, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
-			if err != nil {
-				newErr.error = err.Error()
-				return localVarReturnValue, localVarAPIResponse, newErr
-			}
-			newErr.model = v
+		var v Error
+		err = a.client.decode(&v, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
+		if err != nil {
+			newErr.error = err.Error()
+			return localVarReturnValue, localVarAPIResponse, newErr
+		}
+		newErr.model = v
 		return localVarReturnValue, localVarAPIResponse, newErr
 	}
 
@@ -4018,8 +4172,8 @@ func (a *LabelsApiService) SnapshotsLabelsFindByKeyExecute(r ApiSnapshotsLabelsF
 	if err != nil {
 		newErr := GenericOpenAPIError{
 			statusCode: localVarHTTPResponse.StatusCode,
-			body:  localVarBody,
-			error: err.Error(),
+			body:       localVarBody,
+			error:      err.Error(),
 		}
 		return localVarReturnValue, localVarAPIResponse, newErr
 	}
@@ -4028,11 +4182,13 @@ func (a *LabelsApiService) SnapshotsLabelsFindByKeyExecute(r ApiSnapshotsLabelsF
 }
 
 type ApiSnapshotsLabelsGetRequest struct {
-	ctx _context.Context
-	ApiService *LabelsApiService
-	snapshotId string
-	pretty *bool
-	depth *int32
+	ctx             _context.Context
+	ApiService      *LabelsApiService
+	filters         _neturl.Values
+	orderBy         *string
+	snapshotId      string
+	pretty          *bool
+	depth           *int32
 	xContractNumber *int32
 }
 
@@ -4046,6 +4202,19 @@ func (r ApiSnapshotsLabelsGetRequest) Depth(depth int32) ApiSnapshotsLabelsGetRe
 }
 func (r ApiSnapshotsLabelsGetRequest) XContractNumber(xContractNumber int32) ApiSnapshotsLabelsGetRequest {
 	r.xContractNumber = &xContractNumber
+	return r
+}
+
+// Filters query parameters limit results to those containing a matching value for a specific property.
+func (r ApiSnapshotsLabelsGetRequest) Filter(key string, value string) ApiSnapshotsLabelsGetRequest {
+	filterKey := fmt.Sprintf(FilterQueryParam, key)
+	r.filters[filterKey] = []string{value}
+	return r
+}
+
+// OrderBy query param sorts the results alphanumerically in ascending order based on the specified property.
+func (r ApiSnapshotsLabelsGetRequest) OrderBy(orderBy string) ApiSnapshotsLabelsGetRequest {
+	r.orderBy = &orderBy
 	return r
 }
 
@@ -4063,8 +4232,9 @@ func (r ApiSnapshotsLabelsGetRequest) Execute() (LabelResources, *APIResponse, e
 func (a *LabelsApiService) SnapshotsLabelsGet(ctx _context.Context, snapshotId string) ApiSnapshotsLabelsGetRequest {
 	return ApiSnapshotsLabelsGetRequest{
 		ApiService: a,
-		ctx: ctx,
+		ctx:        ctx,
 		snapshotId: snapshotId,
+		filters:    _neturl.Values{},
 	}
 }
 
@@ -4100,6 +4270,17 @@ func (a *LabelsApiService) SnapshotsLabelsGetExecute(r ApiSnapshotsLabelsGetRequ
 	if r.depth != nil {
 		localVarQueryParams.Add("depth", parameterToString(*r.depth, ""))
 	}
+	if r.orderBy != nil {
+		localVarQueryParams.Add("orderBy", parameterToString(*r.orderBy, ""))
+	}
+	if len(r.filters) > 0 {
+		for k, v := range r.filters {
+			for _, iv := range v {
+				localVarQueryParams.Add(k, iv)
+			}
+		}
+	}
+
 	// to determine the Content-Type header
 	localVarHTTPContentTypes := []string{}
 
@@ -4141,12 +4322,12 @@ func (a *LabelsApiService) SnapshotsLabelsGetExecute(r ApiSnapshotsLabelsGetRequ
 
 	localVarHTTPResponse, httpRequestTime, err := a.client.callAPI(req)
 
-	localVarAPIResponse := &APIResponse {
-		Response: localVarHTTPResponse,
-		Method: localVarHTTPMethod,
-		RequestURL: localVarPath,
+	localVarAPIResponse := &APIResponse{
+		Response:    localVarHTTPResponse,
+		Method:      localVarHTTPMethod,
+		RequestURL:  localVarPath,
 		RequestTime: httpRequestTime,
-		Operation: "SnapshotsLabelsGet",
+		Operation:   "SnapshotsLabelsGet",
 	}
 
 	if err != nil || localVarHTTPResponse == nil {
@@ -4163,16 +4344,16 @@ func (a *LabelsApiService) SnapshotsLabelsGetExecute(r ApiSnapshotsLabelsGetRequ
 	if localVarHTTPResponse.StatusCode >= 300 {
 		newErr := GenericOpenAPIError{
 			statusCode: localVarHTTPResponse.StatusCode,
-			body:  localVarBody,
-			error: fmt.Sprintf("%s: %s", localVarHTTPResponse.Status, string(localVarBody)),
+			body:       localVarBody,
+			error:      fmt.Sprintf(FormatStringErr, localVarHTTPResponse.Status, string(localVarBody)),
 		}
-			var v Error
-			err = a.client.decode(&v, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
-			if err != nil {
-				newErr.error = err.Error()
-				return localVarReturnValue, localVarAPIResponse, newErr
-			}
-			newErr.model = v
+		var v Error
+		err = a.client.decode(&v, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
+		if err != nil {
+			newErr.error = err.Error()
+			return localVarReturnValue, localVarAPIResponse, newErr
+		}
+		newErr.model = v
 		return localVarReturnValue, localVarAPIResponse, newErr
 	}
 
@@ -4180,8 +4361,8 @@ func (a *LabelsApiService) SnapshotsLabelsGetExecute(r ApiSnapshotsLabelsGetRequ
 	if err != nil {
 		newErr := GenericOpenAPIError{
 			statusCode: localVarHTTPResponse.StatusCode,
-			body:  localVarBody,
-			error: err.Error(),
+			body:       localVarBody,
+			error:      err.Error(),
 		}
 		return localVarReturnValue, localVarAPIResponse, newErr
 	}
@@ -4190,12 +4371,12 @@ func (a *LabelsApiService) SnapshotsLabelsGetExecute(r ApiSnapshotsLabelsGetRequ
 }
 
 type ApiSnapshotsLabelsPostRequest struct {
-	ctx _context.Context
-	ApiService *LabelsApiService
-	snapshotId string
-	label *LabelResource
-	pretty *bool
-	depth *int32
+	ctx             _context.Context
+	ApiService      *LabelsApiService
+	snapshotId      string
+	label           *LabelResource
+	pretty          *bool
+	depth           *int32
 	xContractNumber *int32
 }
 
@@ -4230,7 +4411,7 @@ func (r ApiSnapshotsLabelsPostRequest) Execute() (LabelResource, *APIResponse, e
 func (a *LabelsApiService) SnapshotsLabelsPost(ctx _context.Context, snapshotId string) ApiSnapshotsLabelsPostRequest {
 	return ApiSnapshotsLabelsPostRequest{
 		ApiService: a,
-		ctx: ctx,
+		ctx:        ctx,
 		snapshotId: snapshotId,
 	}
 }
@@ -4270,6 +4451,7 @@ func (a *LabelsApiService) SnapshotsLabelsPostExecute(r ApiSnapshotsLabelsPostRe
 	if r.depth != nil {
 		localVarQueryParams.Add("depth", parameterToString(*r.depth, ""))
 	}
+
 	// to determine the Content-Type header
 	localVarHTTPContentTypes := []string{"application/json"}
 
@@ -4313,12 +4495,12 @@ func (a *LabelsApiService) SnapshotsLabelsPostExecute(r ApiSnapshotsLabelsPostRe
 
 	localVarHTTPResponse, httpRequestTime, err := a.client.callAPI(req)
 
-	localVarAPIResponse := &APIResponse {
-		Response: localVarHTTPResponse,
-		Method: localVarHTTPMethod,
-		RequestURL: localVarPath,
+	localVarAPIResponse := &APIResponse{
+		Response:    localVarHTTPResponse,
+		Method:      localVarHTTPMethod,
+		RequestURL:  localVarPath,
 		RequestTime: httpRequestTime,
-		Operation: "SnapshotsLabelsPost",
+		Operation:   "SnapshotsLabelsPost",
 	}
 
 	if err != nil || localVarHTTPResponse == nil {
@@ -4335,16 +4517,16 @@ func (a *LabelsApiService) SnapshotsLabelsPostExecute(r ApiSnapshotsLabelsPostRe
 	if localVarHTTPResponse.StatusCode >= 300 {
 		newErr := GenericOpenAPIError{
 			statusCode: localVarHTTPResponse.StatusCode,
-			body:  localVarBody,
-			error: fmt.Sprintf("%s: %s", localVarHTTPResponse.Status, string(localVarBody)),
+			body:       localVarBody,
+			error:      fmt.Sprintf(FormatStringErr, localVarHTTPResponse.Status, string(localVarBody)),
 		}
-			var v Error
-			err = a.client.decode(&v, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
-			if err != nil {
-				newErr.error = err.Error()
-				return localVarReturnValue, localVarAPIResponse, newErr
-			}
-			newErr.model = v
+		var v Error
+		err = a.client.decode(&v, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
+		if err != nil {
+			newErr.error = err.Error()
+			return localVarReturnValue, localVarAPIResponse, newErr
+		}
+		newErr.model = v
 		return localVarReturnValue, localVarAPIResponse, newErr
 	}
 
@@ -4352,8 +4534,8 @@ func (a *LabelsApiService) SnapshotsLabelsPostExecute(r ApiSnapshotsLabelsPostRe
 	if err != nil {
 		newErr := GenericOpenAPIError{
 			statusCode: localVarHTTPResponse.StatusCode,
-			body:  localVarBody,
-			error: err.Error(),
+			body:       localVarBody,
+			error:      err.Error(),
 		}
 		return localVarReturnValue, localVarAPIResponse, newErr
 	}
@@ -4362,13 +4544,13 @@ func (a *LabelsApiService) SnapshotsLabelsPostExecute(r ApiSnapshotsLabelsPostRe
 }
 
 type ApiSnapshotsLabelsPutRequest struct {
-	ctx _context.Context
-	ApiService *LabelsApiService
-	snapshotId string
-	key string
-	label *LabelResource
-	pretty *bool
-	depth *int32
+	ctx             _context.Context
+	ApiService      *LabelsApiService
+	snapshotId      string
+	key             string
+	label           *LabelResource
+	pretty          *bool
+	depth           *int32
 	xContractNumber *int32
 }
 
@@ -4404,9 +4586,9 @@ func (r ApiSnapshotsLabelsPutRequest) Execute() (LabelResource, *APIResponse, er
 func (a *LabelsApiService) SnapshotsLabelsPut(ctx _context.Context, snapshotId string, key string) ApiSnapshotsLabelsPutRequest {
 	return ApiSnapshotsLabelsPutRequest{
 		ApiService: a,
-		ctx: ctx,
+		ctx:        ctx,
 		snapshotId: snapshotId,
-		key: key,
+		key:        key,
 	}
 }
 
@@ -4446,6 +4628,7 @@ func (a *LabelsApiService) SnapshotsLabelsPutExecute(r ApiSnapshotsLabelsPutRequ
 	if r.depth != nil {
 		localVarQueryParams.Add("depth", parameterToString(*r.depth, ""))
 	}
+
 	// to determine the Content-Type header
 	localVarHTTPContentTypes := []string{"application/json"}
 
@@ -4489,12 +4672,12 @@ func (a *LabelsApiService) SnapshotsLabelsPutExecute(r ApiSnapshotsLabelsPutRequ
 
 	localVarHTTPResponse, httpRequestTime, err := a.client.callAPI(req)
 
-	localVarAPIResponse := &APIResponse {
-		Response: localVarHTTPResponse,
-		Method: localVarHTTPMethod,
-		RequestURL: localVarPath,
+	localVarAPIResponse := &APIResponse{
+		Response:    localVarHTTPResponse,
+		Method:      localVarHTTPMethod,
+		RequestURL:  localVarPath,
 		RequestTime: httpRequestTime,
-		Operation: "SnapshotsLabelsPut",
+		Operation:   "SnapshotsLabelsPut",
 	}
 
 	if err != nil || localVarHTTPResponse == nil {
@@ -4511,16 +4694,16 @@ func (a *LabelsApiService) SnapshotsLabelsPutExecute(r ApiSnapshotsLabelsPutRequ
 	if localVarHTTPResponse.StatusCode >= 300 {
 		newErr := GenericOpenAPIError{
 			statusCode: localVarHTTPResponse.StatusCode,
-			body:  localVarBody,
-			error: fmt.Sprintf("%s: %s", localVarHTTPResponse.Status, string(localVarBody)),
+			body:       localVarBody,
+			error:      fmt.Sprintf(FormatStringErr, localVarHTTPResponse.Status, string(localVarBody)),
 		}
-			var v Error
-			err = a.client.decode(&v, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
-			if err != nil {
-				newErr.error = err.Error()
-				return localVarReturnValue, localVarAPIResponse, newErr
-			}
-			newErr.model = v
+		var v Error
+		err = a.client.decode(&v, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
+		if err != nil {
+			newErr.error = err.Error()
+			return localVarReturnValue, localVarAPIResponse, newErr
+		}
+		newErr.model = v
 		return localVarReturnValue, localVarAPIResponse, newErr
 	}
 
@@ -4528,8 +4711,8 @@ func (a *LabelsApiService) SnapshotsLabelsPutExecute(r ApiSnapshotsLabelsPutRequ
 	if err != nil {
 		newErr := GenericOpenAPIError{
 			statusCode: localVarHTTPResponse.StatusCode,
-			body:  localVarBody,
-			error: err.Error(),
+			body:       localVarBody,
+			error:      err.Error(),
 		}
 		return localVarReturnValue, localVarAPIResponse, newErr
 	}

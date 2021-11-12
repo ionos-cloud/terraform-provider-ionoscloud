@@ -6,6 +6,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 	"log"
+	"strings"
 	"time"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
@@ -49,6 +50,7 @@ func resourceS3KeyCreate(ctx context.Context, d *schema.ResourceData, meta inter
 
 	userId := d.Get("user_id").(string)
 	rsp, apiResponse, err := client.UserS3KeysApi.UmUsersS3keysPost(ctx, userId).Execute()
+	logApiRequestTime(apiResponse)
 
 	if err != nil {
 		d.SetId("")
@@ -78,6 +80,7 @@ func resourceS3KeyCreate(ctx context.Context, d *schema.ResourceData, meta inter
 	}
 	log.Printf("[INFO] Setting key active status to %+v", active)
 	_, apiResponse, err = client.UserS3KeysApi.UmUsersS3keysPut(ctx, userId, keyId).S3Key(s3Key).Execute()
+	logApiRequestTime(apiResponse)
 	if err != nil {
 		return diag.FromErr(fmt.Errorf("error saving key data %s: %s", keyId, err.Error()))
 	}
@@ -96,36 +99,22 @@ func resourceS3KeyRead(ctx context.Context, d *schema.ResourceData, meta interfa
 
 	userId := d.Get("user_id").(string)
 
-	rsp, apiResponse, err := client.UserS3KeysApi.UmUsersS3keysFindByKeyId(ctx, userId, d.Id()).Execute()
+	s3Key, apiResponse, err := client.UserS3KeysApi.UmUsersS3keysFindByKeyId(ctx, userId, d.Id()).Execute()
+	logApiRequestTime(apiResponse)
 
 	if err != nil {
-		if apiResponse != nil && apiResponse.StatusCode == 404 {
+		if apiResponse != nil && apiResponse.Response != nil && apiResponse.StatusCode == 404 {
 			d.SetId("")
 			return nil
 		}
-		diags := diag.FromErr(fmt.Errorf("error while reading S3 key %s: %s, %+v", d.Id(), err, rsp))
+		diags := diag.FromErr(fmt.Errorf("error while reading S3 key %s: %s, %+v", d.Id(), err, s3Key))
 		return diags
 	}
 
-	log.Printf("[INFO] Successfully retreived S3 key %s: %+v", d.Id(), rsp)
+	log.Printf("[INFO] Successfully retrieved S3 key %s: %+v", d.Id(), s3Key)
 
-	if rsp.Id != nil {
-		d.SetId(*rsp.Id)
-	}
-
-	if rsp.Properties.SecretKey != nil {
-		if err := d.Set("secret_key", *rsp.Properties.SecretKey); err != nil {
-			diags := diag.FromErr(err)
-			return diags
-		}
-	}
-
-	if rsp.Properties.Active != nil {
-		log.Printf("[INFO] SETTING ACTIVE TO %+v", *rsp.Properties.Active)
-		if err := d.Set("active", *rsp.Properties.Active); err != nil {
-			diags := diag.FromErr(err)
-			return diags
-		}
+	if err := setS3KeyIdAndProperties(&s3Key, d); err != nil {
+		return diag.FromErr(err)
 	}
 
 	return nil
@@ -148,9 +137,10 @@ func resourceS3KeyUpdate(ctx context.Context, d *schema.ResourceData, meta inter
 
 	userId := d.Get("user_id").(string)
 	_, apiResponse, err := client.UserS3KeysApi.UmUsersS3keysPut(ctx, userId, d.Id()).S3Key(request).Execute()
+	logApiRequestTime(apiResponse)
 
 	if err != nil {
-		if apiResponse != nil && apiResponse.StatusCode == 404 {
+		if apiResponse != nil && apiResponse.Response != nil && apiResponse.StatusCode == 404 {
 			d.SetId("")
 			return nil
 		}
@@ -172,9 +162,10 @@ func resourceS3KeyDelete(ctx context.Context, d *schema.ResourceData, meta inter
 
 	userId := d.Get("user_id").(string)
 	apiResponse, err := client.UserS3KeysApi.UmUsersS3keysDelete(ctx, userId, d.Id()).Execute()
+	logApiRequestTime(apiResponse)
 
 	if err != nil {
-		if apiResponse != nil && apiResponse.StatusCode == 404 {
+		if apiResponse != nil && apiResponse.Response != nil && apiResponse.StatusCode == 404 {
 			d.SetId("")
 			return nil
 		}
@@ -213,9 +204,10 @@ func resourceS3KeyDelete(ctx context.Context, d *schema.ResourceData, meta inter
 func s3KeyDeleted(ctx context.Context, client *ionoscloud.APIClient, d *schema.ResourceData) (bool, error) {
 	userId := d.Get("user_id").(string)
 	_, apiResponse, err := client.UserS3KeysApi.UmUsersS3keysFindByKeyId(ctx, userId, d.Id()).Execute()
+	logApiRequestTime(apiResponse)
 
 	if err != nil {
-		if apiResponse != nil && apiResponse.StatusCode == 404 {
+		if apiResponse != nil && apiResponse.Response != nil && apiResponse.StatusCode == 404 {
 			return true, nil
 		}
 		return true, fmt.Errorf("error checking S3 key deletion status: %s", err)
@@ -225,11 +217,71 @@ func s3KeyDeleted(ctx context.Context, client *ionoscloud.APIClient, d *schema.R
 
 func s3Ready(ctx context.Context, client *ionoscloud.APIClient, d *schema.ResourceData) (bool, error) {
 	userId := d.Get("user_id").(string)
-	rsp, _, err := client.UserS3KeysApi.UmUsersS3keysFindByKeyId(ctx, userId, d.Id()).Execute()
+	rsp, apiResponse, err := client.UserS3KeysApi.UmUsersS3keysFindByKeyId(ctx, userId, d.Id()).Execute()
+	logApiRequestTime(apiResponse)
 
 	if err != nil {
 		return true, fmt.Errorf("error checking S3 Key status: %s", err)
 	}
 	active := d.Get("active").(bool)
 	return *rsp.Properties.Active == active, nil
+}
+
+func resourceS3KeyImport(ctx context.Context, d *schema.ResourceData, meta interface{}) ([]*schema.ResourceData, error) {
+	parts := strings.Split(d.Id(), "/")
+
+	if len(parts) != 2 || parts[0] == "" || parts[1] == "" {
+		return nil, fmt.Errorf("invalid import id %q. Expecting {userId}/{s3KeyId}", d.Id())
+	}
+
+	userId := parts[0]
+	keyId := parts[1]
+
+	client := meta.(*ionoscloud.APIClient)
+
+	s3Key, apiResponse, err := client.UserS3KeysApi.UmUsersS3keysFindByKeyId(ctx, userId, keyId).Execute()
+	logApiRequestTime(apiResponse)
+
+	if err != nil {
+		if apiResponse != nil && apiResponse.Response != nil && apiResponse.StatusCode == 404 {
+			d.SetId("")
+			return nil, fmt.Errorf("unable to find S3 key %q", keyId)
+		}
+		return nil, fmt.Errorf("unable to retreive S3 key %q", keyId)
+	}
+
+	if err := setS3KeyIdAndProperties(&s3Key, d); err != nil {
+		return nil, err
+	}
+
+	if err := d.Set("user_id", userId); err != nil {
+		return nil, err
+	}
+
+	return []*schema.ResourceData{d}, nil
+}
+
+func setS3KeyIdAndProperties(s3Key *ionoscloud.S3Key, data *schema.ResourceData) error {
+
+	if s3Key == nil {
+		return fmt.Errorf("s3key not found")
+	}
+
+	if s3Key.Id != nil {
+		data.SetId(*s3Key.Id)
+	}
+
+	if s3Key.Properties.SecretKey != nil {
+		if err := data.Set("secret_key", *s3Key.Properties.SecretKey); err != nil {
+			return err
+		}
+	}
+
+	if s3Key.Properties.Active != nil {
+		log.Printf("[INFO] SETTING ACTIVE TO %+v", *s3Key.Properties.Active)
+		if err := data.Set("active", *s3Key.Properties.Active); err != nil {
+			return err
+		}
+	}
+	return nil
 }

@@ -1,7 +1,7 @@
 /*
  * CLOUD API
  *
- * An enterprise-grade Infrastructure is provided as a Service (IaaS) solution that can be managed through a browser-based \"Data Center Designer\" (DCD) tool or via an easy to use API.   The API allows you to perform a variety of management tasks such as spinning up additional servers, adding volumes, adjusting networking, and so forth. It is designed to allow users to leverage the same power and flexibility found within the DCD visual tool. Both tools are consistent with their concepts and lend well to making the experience smooth and intuitive.
+ * IONOS Enterprise-grade Infrastructure as a Service (IaaS) solutions can be managed through the Cloud API, in addition or as an alternative to the \"Data Center Designer\" (DCD) browser-based tool.    Both methods employ consistent concepts and features, deliver similar power and flexibility, and can be used to perform a multitude of management tasks, including adding servers, volumes, configuring networks, and so on.
  *
  * API version: 6.0-SDK.3
  */
@@ -22,15 +22,12 @@ type NatGatewayLanProperties struct {
 	GatewayIps *[]string `json:"gatewayIps,omitempty"`
 }
 
-
-
 // GetId returns the Id field value
 // If the value is explicit nil, the zero value for int32 will be returned
 func (o *NatGatewayLanProperties) GetId() *int32 {
 	if o == nil {
 		return nil
 	}
-
 
 	return o.Id
 
@@ -44,13 +41,11 @@ func (o *NatGatewayLanProperties) GetIdOk() (*int32, bool) {
 		return nil, false
 	}
 
-
 	return o.Id, true
 }
 
 // SetId sets field value
 func (o *NatGatewayLanProperties) SetId(v int32) {
-
 
 	o.Id = &v
 
@@ -65,15 +60,12 @@ func (o *NatGatewayLanProperties) HasId() bool {
 	return false
 }
 
-
-
 // GetGatewayIps returns the GatewayIps field value
 // If the value is explicit nil, the zero value for []string will be returned
 func (o *NatGatewayLanProperties) GetGatewayIps() *[]string {
 	if o == nil {
 		return nil
 	}
-
 
 	return o.GatewayIps
 
@@ -87,13 +79,11 @@ func (o *NatGatewayLanProperties) GetGatewayIpsOk() (*[]string, bool) {
 		return nil, false
 	}
 
-
 	return o.GatewayIps, true
 }
 
 // SetGatewayIps sets field value
 func (o *NatGatewayLanProperties) SetGatewayIps(v []string) {
-
 
 	o.GatewayIps = &v
 
@@ -108,19 +98,16 @@ func (o *NatGatewayLanProperties) HasGatewayIps() bool {
 	return false
 }
 
-
 func (o NatGatewayLanProperties) MarshalJSON() ([]byte, error) {
 	toSerialize := map[string]interface{}{}
 
 	if o.Id != nil {
 		toSerialize["id"] = o.Id
 	}
-	
 
 	if o.GatewayIps != nil {
 		toSerialize["gatewayIps"] = o.GatewayIps
 	}
-	
 	return json.Marshal(toSerialize)
 }
 
@@ -159,5 +146,3 @@ func (v *NullableNatGatewayLanProperties) UnmarshalJSON(src []byte) error {
 	v.isSet = true
 	return json.Unmarshal(src, &v.value)
 }
-
-

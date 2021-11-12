@@ -1,7 +1,7 @@
 /*
  * CLOUD API
  *
- * An enterprise-grade Infrastructure is provided as a Service (IaaS) solution that can be managed through a browser-based \"Data Center Designer\" (DCD) tool or via an easy to use API.   The API allows you to perform a variety of management tasks such as spinning up additional servers, adding volumes, adjusting networking, and so forth. It is designed to allow users to leverage the same power and flexibility found within the DCD visual tool. Both tools are consistent with their concepts and lend well to making the experience smooth and intuitive.
+ * IONOS Enterprise-grade Infrastructure as a Service (IaaS) solutions can be managed through the Cloud API, in addition or as an alternative to the \"Data Center Designer\" (DCD) browser-based tool.    Both methods employ consistent concepts and features, deliver similar power and flexibility, and can be used to perform a multitude of management tasks, including adding servers, volumes, configuring networks, and so on.
  *
  * API version: 6.0-SDK.3
  */
@@ -24,15 +24,12 @@ type PaginationLinks struct {
 	Next *string `json:"next,omitempty"`
 }
 
-
-
 // GetPrev returns the Prev field value
 // If the value is explicit nil, the zero value for string will be returned
 func (o *PaginationLinks) GetPrev() *string {
 	if o == nil {
 		return nil
 	}
-
 
 	return o.Prev
 
@@ -46,13 +43,11 @@ func (o *PaginationLinks) GetPrevOk() (*string, bool) {
 		return nil, false
 	}
 
-
 	return o.Prev, true
 }
 
 // SetPrev sets field value
 func (o *PaginationLinks) SetPrev(v string) {
-
 
 	o.Prev = &v
 
@@ -67,15 +62,12 @@ func (o *PaginationLinks) HasPrev() bool {
 	return false
 }
 
-
-
 // GetSelf returns the Self field value
 // If the value is explicit nil, the zero value for string will be returned
 func (o *PaginationLinks) GetSelf() *string {
 	if o == nil {
 		return nil
 	}
-
 
 	return o.Self
 
@@ -89,13 +81,11 @@ func (o *PaginationLinks) GetSelfOk() (*string, bool) {
 		return nil, false
 	}
 
-
 	return o.Self, true
 }
 
 // SetSelf sets field value
 func (o *PaginationLinks) SetSelf(v string) {
-
 
 	o.Self = &v
 
@@ -110,15 +100,12 @@ func (o *PaginationLinks) HasSelf() bool {
 	return false
 }
 
-
-
 // GetNext returns the Next field value
 // If the value is explicit nil, the zero value for string will be returned
 func (o *PaginationLinks) GetNext() *string {
 	if o == nil {
 		return nil
 	}
-
 
 	return o.Next
 
@@ -132,13 +119,11 @@ func (o *PaginationLinks) GetNextOk() (*string, bool) {
 		return nil, false
 	}
 
-
 	return o.Next, true
 }
 
 // SetNext sets field value
 func (o *PaginationLinks) SetNext(v string) {
-
 
 	o.Next = &v
 
@@ -153,24 +138,20 @@ func (o *PaginationLinks) HasNext() bool {
 	return false
 }
 
-
 func (o PaginationLinks) MarshalJSON() ([]byte, error) {
 	toSerialize := map[string]interface{}{}
 
 	if o.Prev != nil {
 		toSerialize["prev"] = o.Prev
 	}
-	
 
 	if o.Self != nil {
 		toSerialize["self"] = o.Self
 	}
-	
 
 	if o.Next != nil {
 		toSerialize["next"] = o.Next
 	}
-	
 	return json.Marshal(toSerialize)
 }
 
@@ -209,5 +190,3 @@ func (v *NullablePaginationLinks) UnmarshalJSON(src []byte) error {
 	v.isSet = true
 	return json.Unmarshal(src, &v.value)
 }
-
-

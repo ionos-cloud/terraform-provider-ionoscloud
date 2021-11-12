@@ -10,19 +10,19 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
 )
 
-func TestAcck8sNodepool_ImportBasic(t *testing.T) {
-	resourceName := "terraform_acctest"
+func TestAccK8sNodePoolImportBasic(t *testing.T) {
+
 	resource.Test(t, resource.TestCase{
 		PreCheck:          func() { testAccPreCheck(t) },
 		ProviderFactories: testAccProviderFactories,
-		CheckDestroy:      testAccCheckk8sNodepoolDestroyCheck,
+		CheckDestroy:      testAccCheckK8sNodePoolDestroyCheck,
 		Steps: []resource.TestStep{
 			{
-				Config: fmt.Sprintf(testAccCheckk8sNodepoolConfigBasic, resourceName),
+				Config: testAccCheckK8sNodePoolConfigBasic,
 			},
 			{
-				ResourceName:            fmt.Sprintf("ionoscloud_k8s_node_pool.%s", resourceName),
-				ImportStateIdFunc:       testAcck8sNodepoolImportStateID,
+				ResourceName:            ResourceNameK8sNodePool,
+				ImportStateIdFunc:       testAccK8sNodePoolImportStateID,
 				ImportState:             true,
 				ImportStateVerify:       true,
 				ImportStateVerifyIgnore: []string{"maintenance_window.0.time"},
@@ -31,16 +31,15 @@ func TestAcck8sNodepool_ImportBasic(t *testing.T) {
 	})
 }
 
-func testAcck8sNodepoolImportStateID(s *terraform.State) (string, error) {
-	var importID = ""
+func testAccK8sNodePoolImportStateID(s *terraform.State) (string, error) {
+	importID := ""
 
 	for _, rs := range s.RootModule().Resources {
-		if rs.Type != "ionoscloud_k8s_node_pool" {
+		if rs.Type != K8sClusterResource {
 			continue
 		}
 
 		importID = fmt.Sprintf("%s/%s", rs.Primary.Attributes["k8s_cluster_id"], rs.Primary.ID)
 	}
-
 	return importID, nil
 }

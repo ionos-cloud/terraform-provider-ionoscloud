@@ -1,7 +1,7 @@
 /*
  * CLOUD API
  *
- * An enterprise-grade Infrastructure is provided as a Service (IaaS) solution that can be managed through a browser-based \"Data Center Designer\" (DCD) tool or via an easy to use API.   The API allows you to perform a variety of management tasks such as spinning up additional servers, adding volumes, adjusting networking, and so forth. It is designed to allow users to leverage the same power and flexibility found within the DCD visual tool. Both tools are consistent with their concepts and lend well to making the experience smooth and intuitive.
+ * IONOS Enterprise-grade Infrastructure as a Service (IaaS) solutions can be managed through the Cloud API, in addition or as an alternative to the \"Data Center Designer\" (DCD) browser-based tool.    Both methods employ consistent concepts and features, deliver similar power and flexibility, and can be used to perform a multitude of management tasks, including adding servers, volumes, configuring networks, and so on.
  *
  * API version: 6.0-SDK.3
  */
@@ -24,15 +24,12 @@ type NetworkLoadBalancerForwardingRuleTargetHealthCheck struct {
 	Maintenance *bool `json:"maintenance,omitempty"`
 }
 
-
-
 // GetCheck returns the Check field value
 // If the value is explicit nil, the zero value for bool will be returned
 func (o *NetworkLoadBalancerForwardingRuleTargetHealthCheck) GetCheck() *bool {
 	if o == nil {
 		return nil
 	}
-
 
 	return o.Check
 
@@ -46,13 +43,11 @@ func (o *NetworkLoadBalancerForwardingRuleTargetHealthCheck) GetCheckOk() (*bool
 		return nil, false
 	}
 
-
 	return o.Check, true
 }
 
 // SetCheck sets field value
 func (o *NetworkLoadBalancerForwardingRuleTargetHealthCheck) SetCheck(v bool) {
-
 
 	o.Check = &v
 
@@ -67,15 +62,12 @@ func (o *NetworkLoadBalancerForwardingRuleTargetHealthCheck) HasCheck() bool {
 	return false
 }
 
-
-
 // GetCheckInterval returns the CheckInterval field value
 // If the value is explicit nil, the zero value for int32 will be returned
 func (o *NetworkLoadBalancerForwardingRuleTargetHealthCheck) GetCheckInterval() *int32 {
 	if o == nil {
 		return nil
 	}
-
 
 	return o.CheckInterval
 
@@ -89,13 +81,11 @@ func (o *NetworkLoadBalancerForwardingRuleTargetHealthCheck) GetCheckIntervalOk(
 		return nil, false
 	}
 
-
 	return o.CheckInterval, true
 }
 
 // SetCheckInterval sets field value
 func (o *NetworkLoadBalancerForwardingRuleTargetHealthCheck) SetCheckInterval(v int32) {
-
 
 	o.CheckInterval = &v
 
@@ -110,15 +100,12 @@ func (o *NetworkLoadBalancerForwardingRuleTargetHealthCheck) HasCheckInterval() 
 	return false
 }
 
-
-
 // GetMaintenance returns the Maintenance field value
 // If the value is explicit nil, the zero value for bool will be returned
 func (o *NetworkLoadBalancerForwardingRuleTargetHealthCheck) GetMaintenance() *bool {
 	if o == nil {
 		return nil
 	}
-
 
 	return o.Maintenance
 
@@ -132,13 +119,11 @@ func (o *NetworkLoadBalancerForwardingRuleTargetHealthCheck) GetMaintenanceOk() 
 		return nil, false
 	}
 
-
 	return o.Maintenance, true
 }
 
 // SetMaintenance sets field value
 func (o *NetworkLoadBalancerForwardingRuleTargetHealthCheck) SetMaintenance(v bool) {
-
 
 	o.Maintenance = &v
 
@@ -153,24 +138,20 @@ func (o *NetworkLoadBalancerForwardingRuleTargetHealthCheck) HasMaintenance() bo
 	return false
 }
 
-
 func (o NetworkLoadBalancerForwardingRuleTargetHealthCheck) MarshalJSON() ([]byte, error) {
 	toSerialize := map[string]interface{}{}
 
 	if o.Check != nil {
 		toSerialize["check"] = o.Check
 	}
-	
 
 	if o.CheckInterval != nil {
 		toSerialize["checkInterval"] = o.CheckInterval
 	}
-	
 
 	if o.Maintenance != nil {
 		toSerialize["maintenance"] = o.Maintenance
 	}
-	
 	return json.Marshal(toSerialize)
 }
 
@@ -209,5 +190,3 @@ func (v *NullableNetworkLoadBalancerForwardingRuleTargetHealthCheck) UnmarshalJS
 	v.isSet = true
 	return json.Unmarshal(src, &v.value)
 }
-
-

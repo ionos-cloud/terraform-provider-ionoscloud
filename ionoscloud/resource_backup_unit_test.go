@@ -10,39 +10,39 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
 )
 
-func TestAccbackupUnit_Basic(t *testing.T) {
+func TestAccBackupUnitBasic(t *testing.T) {
 	var backupUnit ionoscloud.BackupUnit
-	backupUnitName := "example"
 
 	resource.Test(t, resource.TestCase{
 		PreCheck: func() {
 			testAccPreCheck(t)
 		},
 		ProviderFactories: testAccProviderFactories,
-		CheckDestroy:      testAccCheckbackupUnitDestroyCheck,
+		CheckDestroy:      testAccCheckBackupUnitDestroyCheck,
 		Steps: []resource.TestStep{
 			{
-				Config: fmt.Sprintf(testAccCheckbackupUnitConfigBasic, backupUnitName),
+				Config: testAccCheckBackupUnitConfigBasic,
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheckbackupUnitExists("ionoscloud_backup_unit.example", &backupUnit),
-					resource.TestCheckResourceAttr("ionoscloud_backup_unit.example", "name", backupUnitName),
-					resource.TestCheckResourceAttr("ionoscloud_backup_unit.example", "email", "example@profitbricks.com"),
-					resource.TestCheckResourceAttr("ionoscloud_backup_unit.example", "password", "DemoPassword123$"),
+					testAccCheckBackupUnitExists(BackupUnitResource+"."+BackupUnitTestResource, &backupUnit),
+					resource.TestCheckResourceAttr(BackupUnitResource+"."+BackupUnitTestResource, "name", BackupUnitTestResource),
+					resource.TestCheckResourceAttr(BackupUnitResource+"."+BackupUnitTestResource, "email", "example@ionoscloud.com"),
+					resource.TestCheckResourceAttr(BackupUnitResource+"."+BackupUnitTestResource, "password", "DemoPassword123$"),
 				),
 			},
 			{
-				Config: testAccCheckbackupUnitConfigUpdate,
+				Config: testAccCheckBackupUnitConfigUpdate,
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheckbackupUnitExists("ionoscloud_backup_unit.example", &backupUnit),
-					resource.TestCheckResourceAttr("ionoscloud_backup_unit.example", "email", "example-updated@profitbricks.com"),
-					resource.TestCheckResourceAttr("ionoscloud_backup_unit.example", "password", "DemoPassword1234$"),
+					testAccCheckBackupUnitExists(BackupUnitResource+"."+BackupUnitTestResource, &backupUnit),
+					resource.TestCheckResourceAttr(BackupUnitResource+"."+BackupUnitTestResource, "name", BackupUnitTestResource),
+					resource.TestCheckResourceAttr(BackupUnitResource+"."+BackupUnitTestResource, "email", "example-updated@ionoscloud.com"),
+					resource.TestCheckResourceAttr(BackupUnitResource+"."+BackupUnitTestResource, "password", "DemoPassword1234$Updated"),
 				),
 			},
 		},
 	})
 }
 
-func testAccCheckbackupUnitDestroyCheck(s *terraform.State) error {
+func testAccCheckBackupUnitDestroyCheck(s *terraform.State) error {
 	client := testAccProvider.Meta().(SdkBundle).CloudApiClient
 
 	ctx, cancel := context.WithTimeout(context.Background(), *resourceDefaultTimeouts.Default)
@@ -53,14 +53,15 @@ func testAccCheckbackupUnitDestroyCheck(s *terraform.State) error {
 
 	for _, rs := range s.RootModule().Resources {
 
-		if rs.Type != "ionoscloud_backup_unit" {
+		if rs.Type != BackupUnitResource {
 			continue
 		}
 
 		_, apiResponse, err := client.BackupUnitsApi.BackupunitsFindById(ctx, rs.Primary.ID).Execute()
+		logApiRequestTime(apiResponse)
 
 		if err != nil {
-			if apiResponse == nil || apiResponse.StatusCode != 404 {
+			if apiResponse == nil || apiResponse.Response != nil && apiResponse.StatusCode != 404 {
 				return fmt.Errorf("an error occurred while checking for the destruction of backup unit %s: %s",
 					rs.Primary.ID, err)
 			}
@@ -72,7 +73,7 @@ func testAccCheckbackupUnitDestroyCheck(s *terraform.State) error {
 	return nil
 }
 
-func testAccCheckbackupUnitExists(n string, backupUnit *ionoscloud.BackupUnit) resource.TestCheckFunc {
+func testAccCheckBackupUnitExists(n string, backupUnit *ionoscloud.BackupUnit) resource.TestCheckFunc {
 	return func(s *terraform.State) error {
 		client := testAccProvider.Meta().(SdkBundle).CloudApiClient
 
@@ -92,7 +93,8 @@ func testAccCheckbackupUnitExists(n string, backupUnit *ionoscloud.BackupUnit) r
 			defer cancel()
 		}
 
-		foundBackupUnit, _, err := client.BackupUnitsApi.BackupunitsFindById(ctx, rs.Primary.ID).Execute()
+		foundBackupUnit, apiResponse, err := client.BackupUnitsApi.BackupunitsFindById(ctx, rs.Primary.ID).Execute()
+		logApiRequestTime(apiResponse)
 
 		if err != nil {
 			return fmt.Errorf("error occured while fetching backup unit: %s", rs.Primary.ID)
@@ -106,18 +108,18 @@ func testAccCheckbackupUnitExists(n string, backupUnit *ionoscloud.BackupUnit) r
 	}
 }
 
-const testAccCheckbackupUnitConfigBasic = `
-resource "ionoscloud_backup_unit" "example" {
-	name        = "%s"
+const testAccCheckBackupUnitConfigBasic = `
+resource ` + BackupUnitResource + ` ` + BackupUnitTestResource + ` {
+	name        = "` + BackupUnitTestResource + `"
 	password    = "DemoPassword123$"
-	email       = "example@profitbricks.com"
+	email       = "example@ionoscloud.com"
 }
 `
 
-const testAccCheckbackupUnitConfigUpdate = `
-resource "ionoscloud_backup_unit" "example" {
-	name        = "example"
-	email       = "example-updated@profitbricks.com"
-	password    = "DemoPassword1234$"
+const testAccCheckBackupUnitConfigUpdate = `
+resource ` + BackupUnitResource + ` ` + BackupUnitTestResource + ` {
+	name        = "` + BackupUnitTestResource + `"
+	email       = "example-updated@ionoscloud.com"
+	password    = "DemoPassword1234$Updated"
 }
 `
