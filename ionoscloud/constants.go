@@ -47,6 +47,15 @@ const (
 	K8sClusterTestResource     = "test_k8s_cluster"
 	K8sClusterDataSourceById   = "test_k8s_cluster_id"
 	K8sClusterDataSourceByName = "test_k8s_cluster_name"
+
+	K8sNodePoolResource         = "ionoscloud_k8s_node_pool"
+	K8sNodePoolTestResource     = "test_k8s_node_pool"
+	K8sNodePoolDataSourceById   = "test_k8s_node_pool_id"
+	K8sNodePoolDataSourceByName = "test_k8s_node_pool_name"
+
+	ResourceNameK8sNodePool   = K8sNodePoolResource + "." + K8sNodePoolTestResource
+	DataSourceK8sNodePoolId   = DataSource + "." + K8sNodePoolResource + "." + K8sNodePoolDataSourceById
+	DataSourceK8sNodePoolName = DataSource + "." + K8sNodePoolResource + "." + K8sNodePoolDataSourceByName
 )
 
 // NatGateway Constants

@@ -4,6 +4,11 @@
 - **new features**: import for `nic`, data_source for `nic`, `share`, `ipfailover`
 - **dependency update**: updated sdk-go to v6.0.0-beta.8
 - **tests enhancements**: improved tests on natgateway and natgateway_rule
+- **code enhancements**: for `k8s_node_pool`, `nic`, `ipfailover`, and `share`:
+  - made tests comprehensive
+  - optimized test duration by including both match by id and by name in the same test
+  - removed duplicated code from import, data_source, resource and tests files
+- **bug fixes**: k8s_node_pool update node_count and emptying lans and public_ips didn't work
 - **bug fixes**: fixed bug at creating natgateway_rule - target_subnet was not set properly
 
 ## 6.0.0-beta.14
