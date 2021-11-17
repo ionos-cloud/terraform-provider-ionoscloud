@@ -1,3 +1,7 @@
+## 5.2.20
+
+- **bug fixes**: revert icmp_code and icmp_type to string to allow setting to 0
+
 ## 5.2.19
 
 - **code enhancements**: added http request time log for API calls

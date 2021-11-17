@@ -49,7 +49,6 @@ func TestAccFirewallBasic(t *testing.T) {
 			{
 				Config: testAccCheckFirewallSetICMPToZero,
 				Check: resource.ComposeTestCheckFunc(
-					resource.TestCheckResourceAttr(FirewallResource+"."+FirewallTestResource, "source_mac", ""),
 					resource.TestCheckResourceAttr(FirewallResource+"."+FirewallTestResource, "icmp_type", "0"),
 					resource.TestCheckResourceAttr(FirewallResource+"."+FirewallTestResource, "icmp_code", "0"),
 				),
