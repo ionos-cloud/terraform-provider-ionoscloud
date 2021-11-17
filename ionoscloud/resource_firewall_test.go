@@ -46,6 +46,14 @@ func TestAccFirewallBasic(t *testing.T) {
 					resource.TestCheckResourceAttr(FirewallResource+"."+FirewallTestResource, "icmp_code", "7"),
 				),
 			},
+			{
+				Config: testAccCheckFirewallSetICMPToZero,
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttr(FirewallResource+"."+FirewallTestResource, "source_mac", ""),
+					resource.TestCheckResourceAttr(FirewallResource+"."+FirewallTestResource, "icmp_type", "0"),
+					resource.TestCheckResourceAttr(FirewallResource+"."+FirewallTestResource, "icmp_code", "0"),
+				),
+			},
 		},
 	})
 }
@@ -351,5 +359,55 @@ resource ` + FirewallResource + ` ` + FirewallTestResource + ` {
   source_mac = "00:0a:95:9d:68:17"
   source_ip = ionoscloud_ipblock.ipblock_update.ips[0]
   target_ip = ionoscloud_ipblock.ipblock_update.ips[1]
+}
+`
+
+const testAccCheckFirewallSetICMPToZero = testAccCheckDatacenterConfigBasic + `
+resource ` + ServerResource + ` ` + ServerTestResource + ` {
+  name = "webserver"
+  datacenter_id = ` + DatacenterResource + `.` + DatacenterTestResource + `.id
+  cores = 1
+  ram = 1024
+  availability_zone = "ZONE_1"
+  cpu_family = "AMD_OPTERON"
+	image_name ="ubuntu-16.04"
+	image_password = "test1234"
+  volume {
+    name = "system"
+    size = 5
+    disk_type = "SSD"
+}
+  nic {
+    lan = "1"
+    dhcp = true
+    firewall_active = true
+  }
+}
+
+resource "ionoscloud_nic" "database_nic" {
+  datacenter_id = ` + DatacenterResource + `.` + DatacenterTestResource + `.id
+  server_id = ` + ServerResource + `.` + ServerTestResource + `.id
+  lan = 2
+  dhcp = true
+  firewall_active = true
+  name = "updated"
+}
+
+resource "ionoscloud_ipblock" "ipblock_update" {
+  location = ` + DatacenterResource + `.` + DatacenterTestResource + `.location
+  size = 2
+  name = "firewall_ipblock"
+}
+resource ` + FirewallResource + ` ` + FirewallTestResource + `  {
+  datacenter_id = ` + DatacenterResource + `.` + DatacenterTestResource + `.id
+  server_id = ` + ServerResource + `.` + ServerTestResource + `.id
+  nic_id = "${ionoscloud_nic.database_nic.id}"
+  protocol = "ICMP"
+  name = "` + UpdatedResources + `"
+  source_mac = "00:0a:95:9d:68:17"
+  source_ip = ionoscloud_ipblock.ipblock_update.ips[0]
+  target_ip = ionoscloud_ipblock.ipblock_update.ips[1]
+  icmp_type = 0
+  icmp_code = 0
 }
 `
