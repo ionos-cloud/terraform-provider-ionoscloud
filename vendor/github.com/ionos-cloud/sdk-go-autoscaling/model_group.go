@@ -17,11 +17,14 @@ import (
 
 // Group A group of virtual servers where replica count can be scaled automatically.
 type Group struct {
-	Id         *string                 `json:"id"`
-	Type       *string                 `json:"type,omitempty"`
+	// The resource's unique identifier
+	Id *string `json:"id"`
+	// The type of object that has been created
+	Type *string `json:"type,omitempty"`
+	// URL to the object representation (absolute path)
 	Href       *string                 `json:"href,omitempty"`
 	Metadata   *Metadata               `json:"metadata,omitempty"`
-	Properties *GroupProperties        `json:"properties,omitempty"`
+	Properties *GroupProperties        `json:"properties"`
 	Entities   *map[string]interface{} `json:"entities,omitempty"`
 }
 

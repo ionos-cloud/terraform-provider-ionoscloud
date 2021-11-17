@@ -81,7 +81,7 @@ func (a *GroupsApiService) AutoscalingGroupsActionsFindByIdExecute(r ApiAutoscal
 		return localVarReturnValue, nil, GenericOpenAPIError{error: err.Error()}
 	}
 
-	localVarPath := localBasePath + "/groups/{groupId}/actions/{actionId}"
+	localVarPath := localBasePath + "/cloudapi/autoscaling/groups/{groupId}/actions/{actionId}"
 	localVarPath = strings.Replace(localVarPath, "{"+"actionId"+"}", _neturl.PathEscape(parameterToString(r.actionId, "")), -1)
 	localVarPath = strings.Replace(localVarPath, "{"+"groupId"+"}", _neturl.PathEscape(parameterToString(r.groupId, "")), -1)
 
@@ -102,7 +102,7 @@ func (a *GroupsApiService) AutoscalingGroupsActionsFindByIdExecute(r ApiAutoscal
 	}
 
 	// to determine the Accept header
-	localVarHTTPHeaderAccepts := []string{"*/*"}
+	localVarHTTPHeaderAccepts := []string{"application/json"}
 
 	// set Accept header
 	localVarHTTPHeaderAccept := selectHeaderAccept(localVarHTTPHeaderAccepts)
@@ -252,7 +252,7 @@ func (a *GroupsApiService) AutoscalingGroupsActionsGetExecute(r ApiAutoscalingGr
 		return localVarReturnValue, nil, GenericOpenAPIError{error: err.Error()}
 	}
 
-	localVarPath := localBasePath + "/groups/{groupId}/actions"
+	localVarPath := localBasePath + "/cloudapi/autoscaling/groups/{groupId}/actions"
 	localVarPath = strings.Replace(localVarPath, "{"+"groupId"+"}", _neturl.PathEscape(parameterToString(r.groupId, "")), -1)
 
 	localVarHeaderParams := make(map[string]string)
@@ -275,7 +275,7 @@ func (a *GroupsApiService) AutoscalingGroupsActionsGetExecute(r ApiAutoscalingGr
 	}
 
 	// to determine the Accept header
-	localVarHTTPHeaderAccepts := []string{"*/*"}
+	localVarHTTPHeaderAccepts := []string{"application/json"}
 
 	// set Accept header
 	localVarHTTPHeaderAccept := selectHeaderAccept(localVarHTTPHeaderAccepts)
@@ -412,7 +412,7 @@ func (a *GroupsApiService) AutoscalingGroupsDeleteExecute(r ApiAutoscalingGroups
 		return nil, GenericOpenAPIError{error: err.Error()}
 	}
 
-	localVarPath := localBasePath + "/groups/{groupId}"
+	localVarPath := localBasePath + "/cloudapi/autoscaling/groups/{groupId}"
 	localVarPath = strings.Replace(localVarPath, "{"+"groupId"+"}", _neturl.PathEscape(parameterToString(r.groupId, "")), -1)
 
 	localVarHeaderParams := make(map[string]string)
@@ -429,7 +429,7 @@ func (a *GroupsApiService) AutoscalingGroupsDeleteExecute(r ApiAutoscalingGroups
 	}
 
 	// to determine the Accept header
-	localVarHTTPHeaderAccepts := []string{"*/*"}
+	localVarHTTPHeaderAccepts := []string{"application/json"}
 
 	// set Accept header
 	localVarHTTPHeaderAccept := selectHeaderAccept(localVarHTTPHeaderAccepts)
@@ -564,7 +564,7 @@ func (a *GroupsApiService) AutoscalingGroupsFindByIdExecute(r ApiAutoscalingGrou
 		return localVarReturnValue, nil, GenericOpenAPIError{error: err.Error()}
 	}
 
-	localVarPath := localBasePath + "/groups/{groupId}"
+	localVarPath := localBasePath + "/cloudapi/autoscaling/groups/{groupId}"
 	localVarPath = strings.Replace(localVarPath, "{"+"groupId"+"}", _neturl.PathEscape(parameterToString(r.groupId, "")), -1)
 
 	localVarHeaderParams := make(map[string]string)
@@ -584,7 +584,7 @@ func (a *GroupsApiService) AutoscalingGroupsFindByIdExecute(r ApiAutoscalingGrou
 	}
 
 	// to determine the Accept header
-	localVarHTTPHeaderAccepts := []string{"*/*"}
+	localVarHTTPHeaderAccepts := []string{"application/json"}
 
 	// set Accept header
 	localVarHTTPHeaderAccept := selectHeaderAccept(localVarHTTPHeaderAccepts)
@@ -731,7 +731,7 @@ func (a *GroupsApiService) AutoscalingGroupsGetExecute(r ApiAutoscalingGroupsGet
 		return localVarReturnValue, nil, GenericOpenAPIError{error: err.Error()}
 	}
 
-	localVarPath := localBasePath + "/groups"
+	localVarPath := localBasePath + "/cloudapi/autoscaling/groups"
 
 	localVarHeaderParams := make(map[string]string)
 	localVarQueryParams := _neturl.Values{}
@@ -753,7 +753,7 @@ func (a *GroupsApiService) AutoscalingGroupsGetExecute(r ApiAutoscalingGroupsGet
 	}
 
 	// to determine the Accept header
-	localVarHTTPHeaderAccepts := []string{"*/*"}
+	localVarHTTPHeaderAccepts := []string{"application/json"}
 
 	// set Accept header
 	localVarHTTPHeaderAccept := selectHeaderAccept(localVarHTTPHeaderAccepts)
@@ -920,7 +920,7 @@ func (a *GroupsApiService) AutoscalingGroupsPostExecute(r ApiAutoscalingGroupsPo
 		return localVarReturnValue, nil, GenericOpenAPIError{error: err.Error()}
 	}
 
-	localVarPath := localBasePath + "/groups"
+	localVarPath := localBasePath + "/cloudapi/autoscaling/groups"
 
 	localVarHeaderParams := make(map[string]string)
 	localVarQueryParams := _neturl.Values{}
@@ -1046,14 +1046,14 @@ func (a *GroupsApiService) AutoscalingGroupsPostExecute(r ApiAutoscalingGroupsPo
 }
 
 type ApiAutoscalingGroupsPutRequest struct {
-	ctx        _context.Context
-	ApiService *GroupsApiService
-	groupId    string
-	group      *GroupUpdate
+	ctx         _context.Context
+	ApiService  *GroupsApiService
+	groupId     string
+	groupUpdate *GroupUpdate
 }
 
-func (r ApiAutoscalingGroupsPutRequest) Group(group GroupUpdate) ApiAutoscalingGroupsPutRequest {
-	r.group = &group
+func (r ApiAutoscalingGroupsPutRequest) GroupUpdate(groupUpdate GroupUpdate) ApiAutoscalingGroupsPutRequest {
+	r.groupUpdate = &groupUpdate
 	return r
 }
 
@@ -1097,18 +1097,18 @@ func (a *GroupsApiService) AutoscalingGroupsPutExecute(r ApiAutoscalingGroupsPut
 		return localVarReturnValue, nil, GenericOpenAPIError{error: err.Error()}
 	}
 
-	localVarPath := localBasePath + "/groups/{groupId}"
+	localVarPath := localBasePath + "/cloudapi/autoscaling/groups/{groupId}"
 	localVarPath = strings.Replace(localVarPath, "{"+"groupId"+"}", _neturl.PathEscape(parameterToString(r.groupId, "")), -1)
 
 	localVarHeaderParams := make(map[string]string)
 	localVarQueryParams := _neturl.Values{}
 	localVarFormParams := _neturl.Values{}
-	if r.group == nil {
-		return localVarReturnValue, nil, reportError("group is required and must be specified")
+	if r.groupUpdate == nil {
+		return localVarReturnValue, nil, reportError("groupUpdate is required and must be specified")
 	}
 
 	// to determine the Content-Type header
-	localVarHTTPContentTypes := []string{}
+	localVarHTTPContentTypes := []string{"application/json"}
 
 	// set Content-Type header
 	localVarHTTPContentType := selectHeaderContentType(localVarHTTPContentTypes)
@@ -1117,7 +1117,7 @@ func (a *GroupsApiService) AutoscalingGroupsPutExecute(r ApiAutoscalingGroupsPut
 	}
 
 	// to determine the Accept header
-	localVarHTTPHeaderAccepts := []string{"*/*"}
+	localVarHTTPHeaderAccepts := []string{"application/json"}
 
 	// set Accept header
 	localVarHTTPHeaderAccept := selectHeaderAccept(localVarHTTPHeaderAccepts)
@@ -1125,7 +1125,7 @@ func (a *GroupsApiService) AutoscalingGroupsPutExecute(r ApiAutoscalingGroupsPut
 		localVarHeaderParams["Accept"] = localVarHTTPHeaderAccept
 	}
 	// body params
-	localVarPostBody = r.group
+	localVarPostBody = r.groupUpdate
 	if r.ctx != nil {
 		// API Key Authentication
 		if auth, ok := r.ctx.Value(ContextAPIKeys).(map[string]APIKey); ok {
@@ -1269,7 +1269,7 @@ func (a *GroupsApiService) AutoscalingGroupsServersFindByIdExecute(r ApiAutoscal
 		return localVarReturnValue, nil, GenericOpenAPIError{error: err.Error()}
 	}
 
-	localVarPath := localBasePath + "/groups/{groupId}/servers/{serverId}"
+	localVarPath := localBasePath + "/cloudapi/autoscaling/groups/{groupId}/servers/{serverId}"
 	localVarPath = strings.Replace(localVarPath, "{"+"groupId"+"}", _neturl.PathEscape(parameterToString(r.groupId, "")), -1)
 	localVarPath = strings.Replace(localVarPath, "{"+"serverId"+"}", _neturl.PathEscape(parameterToString(r.serverId, "")), -1)
 
@@ -1290,7 +1290,7 @@ func (a *GroupsApiService) AutoscalingGroupsServersFindByIdExecute(r ApiAutoscal
 	}
 
 	// to determine the Accept header
-	localVarHTTPHeaderAccepts := []string{"*/*"}
+	localVarHTTPHeaderAccepts := []string{"application/json"}
 
 	// set Accept header
 	localVarHTTPHeaderAccept := selectHeaderAccept(localVarHTTPHeaderAccepts)
@@ -1442,7 +1442,7 @@ func (a *GroupsApiService) AutoscalingGroupsServersGetExecute(r ApiAutoscalingGr
 		return localVarReturnValue, nil, GenericOpenAPIError{error: err.Error()}
 	}
 
-	localVarPath := localBasePath + "/groups/{groupId}/servers"
+	localVarPath := localBasePath + "/cloudapi/autoscaling/groups/{groupId}/servers"
 	localVarPath = strings.Replace(localVarPath, "{"+"groupId"+"}", _neturl.PathEscape(parameterToString(r.groupId, "")), -1)
 
 	localVarHeaderParams := make(map[string]string)
@@ -1465,7 +1465,7 @@ func (a *GroupsApiService) AutoscalingGroupsServersGetExecute(r ApiAutoscalingGr
 	}
 
 	// to determine the Accept header
-	localVarHTTPHeaderAccepts := []string{"*/*"}
+	localVarHTTPHeaderAccepts := []string{"application/json"}
 
 	// set Accept header
 	localVarHTTPHeaderAccept := selectHeaderAccept(localVarHTTPHeaderAccepts)

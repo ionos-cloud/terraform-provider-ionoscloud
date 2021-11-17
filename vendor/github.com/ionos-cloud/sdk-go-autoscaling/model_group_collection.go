@@ -17,10 +17,13 @@ import (
 
 // GroupCollection struct for GroupCollection
 type GroupCollection struct {
-	Id    *string                 `json:"id"`
-	Type  *map[string]interface{} `json:"type,omitempty"`
-	Href  *string                 `json:"href,omitempty"`
-	Items *[]GroupResource        `json:"items,omitempty"`
+	// The resource's unique identifier
+	Id *string `json:"id"`
+	// The type of object that has been created
+	Type *string `json:"type,omitempty"`
+	// URL to the object representation (absolute path)
+	Href  *string          `json:"href,omitempty"`
+	Items *[]GroupResource `json:"items,omitempty"`
 }
 
 // GetId returns the Id field value
@@ -62,8 +65,8 @@ func (o *GroupCollection) HasId() bool {
 }
 
 // GetType returns the Type field value
-// If the value is explicit nil, the zero value for map[string]interface{} will be returned
-func (o *GroupCollection) GetType() *map[string]interface{} {
+// If the value is explicit nil, the zero value for string will be returned
+func (o *GroupCollection) GetType() *string {
 	if o == nil {
 		return nil
 	}
@@ -75,7 +78,7 @@ func (o *GroupCollection) GetType() *map[string]interface{} {
 // GetTypeOk returns a tuple with the Type field value
 // and a boolean to check if the value has been set.
 // NOTE: If the value is an explicit nil, `nil, true` will be returned
-func (o *GroupCollection) GetTypeOk() (*map[string]interface{}, bool) {
+func (o *GroupCollection) GetTypeOk() (*string, bool) {
 	if o == nil {
 		return nil, false
 	}
@@ -84,7 +87,7 @@ func (o *GroupCollection) GetTypeOk() (*map[string]interface{}, bool) {
 }
 
 // SetType sets field value
-func (o *GroupCollection) SetType(v map[string]interface{}) {
+func (o *GroupCollection) SetType(v string) {
 
 	o.Type = &v
 

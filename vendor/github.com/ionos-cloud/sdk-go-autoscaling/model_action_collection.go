@@ -17,10 +17,13 @@ import (
 
 // ActionCollection struct for ActionCollection
 type ActionCollection struct {
-	Id    *string                 `json:"id"`
-	Type  *map[string]interface{} `json:"type,omitempty"`
-	Href  *string                 `json:"href,omitempty"`
-	Items *map[string]interface{} `json:"items,omitempty"`
+	// The resource's unique identifier
+	Id *string `json:"id"`
+	// The type of object that has been created
+	Type *string `json:"type,omitempty"`
+	// URL to the object representation (absolute path)
+	Href  *string           `json:"href,omitempty"`
+	Items *[]ActionResource `json:"items,omitempty"`
 }
 
 // GetId returns the Id field value
@@ -62,8 +65,8 @@ func (o *ActionCollection) HasId() bool {
 }
 
 // GetType returns the Type field value
-// If the value is explicit nil, the zero value for map[string]interface{} will be returned
-func (o *ActionCollection) GetType() *map[string]interface{} {
+// If the value is explicit nil, the zero value for string will be returned
+func (o *ActionCollection) GetType() *string {
 	if o == nil {
 		return nil
 	}
@@ -75,7 +78,7 @@ func (o *ActionCollection) GetType() *map[string]interface{} {
 // GetTypeOk returns a tuple with the Type field value
 // and a boolean to check if the value has been set.
 // NOTE: If the value is an explicit nil, `nil, true` will be returned
-func (o *ActionCollection) GetTypeOk() (*map[string]interface{}, bool) {
+func (o *ActionCollection) GetTypeOk() (*string, bool) {
 	if o == nil {
 		return nil, false
 	}
@@ -84,7 +87,7 @@ func (o *ActionCollection) GetTypeOk() (*map[string]interface{}, bool) {
 }
 
 // SetType sets field value
-func (o *ActionCollection) SetType(v map[string]interface{}) {
+func (o *ActionCollection) SetType(v string) {
 
 	o.Type = &v
 
@@ -138,8 +141,8 @@ func (o *ActionCollection) HasHref() bool {
 }
 
 // GetItems returns the Items field value
-// If the value is explicit nil, the zero value for map[string]interface{} will be returned
-func (o *ActionCollection) GetItems() *map[string]interface{} {
+// If the value is explicit nil, the zero value for []ActionResource will be returned
+func (o *ActionCollection) GetItems() *[]ActionResource {
 	if o == nil {
 		return nil
 	}
@@ -151,7 +154,7 @@ func (o *ActionCollection) GetItems() *map[string]interface{} {
 // GetItemsOk returns a tuple with the Items field value
 // and a boolean to check if the value has been set.
 // NOTE: If the value is an explicit nil, `nil, true` will be returned
-func (o *ActionCollection) GetItemsOk() (*map[string]interface{}, bool) {
+func (o *ActionCollection) GetItemsOk() (*[]ActionResource, bool) {
 	if o == nil {
 		return nil, false
 	}
@@ -160,7 +163,7 @@ func (o *ActionCollection) GetItemsOk() (*map[string]interface{}, bool) {
 }
 
 // SetItems sets field value
-func (o *ActionCollection) SetItems(v map[string]interface{}) {
+func (o *ActionCollection) SetItems(v []ActionResource) {
 
 	o.Items = &v
 

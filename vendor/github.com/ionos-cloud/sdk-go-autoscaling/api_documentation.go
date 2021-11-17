@@ -66,7 +66,7 @@ func (a *DocumentationApiService) AutoscalingOpenapiJsonGetExecute(r ApiAutoscal
 		return nil, GenericOpenAPIError{error: err.Error()}
 	}
 
-	localVarPath := localBasePath + "/openapi.json"
+	localVarPath := localBasePath + "/cloudapi/autoscaling/openapi.json"
 
 	localVarHeaderParams := make(map[string]string)
 	localVarQueryParams := _neturl.Values{}
@@ -179,7 +179,7 @@ func (a *DocumentationApiService) AutoscalingOpenapiYamlGetExecute(r ApiAutoscal
 		return nil, GenericOpenAPIError{error: err.Error()}
 	}
 
-	localVarPath := localBasePath + "/openapi.yaml"
+	localVarPath := localBasePath + "/cloudapi/autoscaling/openapi.yaml"
 
 	localVarHeaderParams := make(map[string]string)
 	localVarQueryParams := _neturl.Values{}

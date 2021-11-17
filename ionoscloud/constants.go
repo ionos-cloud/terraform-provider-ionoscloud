@@ -1,5 +1,13 @@
 package ionoscloud
 
+// Autoscaling Constants
+const (
+	AutoscalingGroupResource         = "ionoscloud_autoscaling_group"
+	AutoscalingGroupTestResource     = "test_autoscaling_group"
+	AutoscalingGroupDataSourceById   = "test_autoscaling_group_id"
+	AutoscalingGroupDataSourceByName = "test_autoscaling_group_name"
+)
+
 // BackupUnit Constants
 const (
 	BackupUnitResource         = "ionoscloud_backup_unit"

@@ -17,8 +17,11 @@ import (
 
 // Server struct for Server
 type Server struct {
-	Id         *string           `json:"id"`
-	Type       *string           `json:"type,omitempty"`
+	// The resource's unique identifier
+	Id *string `json:"id"`
+	// The type of object that has been created
+	Type *string `json:"type,omitempty"`
+	// URL to the object representation (absolute path)
 	Href       *string           `json:"href,omitempty"`
 	Metadata   *MetadataBasic    `json:"metadata,omitempty"`
 	Properties *ServerProperties `json:"properties,omitempty"`

@@ -26,8 +26,8 @@ const (
 	IonosPasswordEnvVar   = "IONOS_PASSWORD"
 	IonosTokenEnvVar      = "IONOS_TOKEN"
 	IonosApiUrlEnvVar     = "IONOS_API_URL"
-	DefaultIonosServerUrl = "https://api.ionos.com/cloudapi/autoscaling"
-	DefaultIonosBasePath  = "/cloudapi/autoscaling"
+	DefaultIonosServerUrl = "https://api.ionos.com"
+	DefaultIonosBasePath  = ""
 	defaultMaxRetries     = 3
 	defaultWaitTime       = time.Duration(100) * time.Millisecond
 	defaultMaxWaitTime    = time.Duration(2000) * time.Millisecond
@@ -125,7 +125,7 @@ func NewConfiguration(username, password, token, hostUrl string) *Configuration 
 	cfg := &Configuration{
 		DefaultHeader:      make(map[string]string),
 		DefaultQueryParams: url.Values{},
-		UserAgent:          "ionos-cloud-sdk-go/1.0.1",
+		UserAgent:          "ionos-cloud-sdk-go/1.0.0",
 		Debug:              false,
 		Username:           username,
 		Password:           password,
@@ -136,7 +136,7 @@ func NewConfiguration(username, password, token, hostUrl string) *Configuration 
 		Servers: ServerConfigurations{
 			{
 				URL:         getServerUrl(hostUrl),
-				Description: "No description provided",
+				Description: "Production",
 			},
 		},
 		OperationServers: map[string]ServerConfigurations{},

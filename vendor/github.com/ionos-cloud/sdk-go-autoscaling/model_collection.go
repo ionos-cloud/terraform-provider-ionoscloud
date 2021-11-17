@@ -18,8 +18,9 @@ import (
 // Collection struct for Collection
 type Collection struct {
 	// Unique resource identifier
-	Id   *string                 `json:"id"`
-	Type *map[string]interface{} `json:"type,omitempty"`
+	Id *string `json:"id"`
+	// The type of object that has been created
+	Type *string `json:"type,omitempty"`
 	// Absolute URL to the resource's representation.
 	Href  *string     `json:"href,omitempty"`
 	Items *[]Resource `json:"items,omitempty"`
@@ -64,8 +65,8 @@ func (o *Collection) HasId() bool {
 }
 
 // GetType returns the Type field value
-// If the value is explicit nil, the zero value for map[string]interface{} will be returned
-func (o *Collection) GetType() *map[string]interface{} {
+// If the value is explicit nil, the zero value for string will be returned
+func (o *Collection) GetType() *string {
 	if o == nil {
 		return nil
 	}
@@ -77,7 +78,7 @@ func (o *Collection) GetType() *map[string]interface{} {
 // GetTypeOk returns a tuple with the Type field value
 // and a boolean to check if the value has been set.
 // NOTE: If the value is an explicit nil, `nil, true` will be returned
-func (o *Collection) GetTypeOk() (*map[string]interface{}, bool) {
+func (o *Collection) GetTypeOk() (*string, bool) {
 	if o == nil {
 		return nil, false
 	}
@@ -86,7 +87,7 @@ func (o *Collection) GetTypeOk() (*map[string]interface{}, bool) {
 }
 
 // SetType sets field value
-func (o *Collection) SetType(v map[string]interface{}) {
+func (o *Collection) SetType(v string) {
 
 	o.Type = &v
 
