@@ -7,6 +7,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 	ionoscloud "github.com/ionos-cloud/sdk-go/v6"
+	"strconv"
 	"strings"
 )
 
@@ -66,11 +67,11 @@ func resourceFirewall() *schema.Resource {
 				},
 			},
 			"icmp_type": {
-				Type:     schema.TypeInt,
+				Type:     schema.TypeString,
 				Optional: true,
 			},
 			"icmp_code": {
-				Type:     schema.TypeInt,
+				Type:     schema.TypeString,
 				Optional: true,
 			},
 			"type": {
@@ -104,8 +105,10 @@ func resourceFirewall() *schema.Resource {
 func resourceFirewallCreate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	client := meta.(*ionoscloud.APIClient)
 
-	firewall := getFirewallData(d, "", false)
-
+	firewall, diags := getFirewallData(d, "", false)
+	if diags != nil {
+		return diags
+	}
 	fw, apiResponse, err := client.FirewallRulesApi.DatacentersServersNicsFirewallrulesPost(ctx, d.Get("datacenter_id").(string), d.Get("server_id").(string), d.Get("nic_id").(string)).Firewallrule(firewall).Execute()
 	logApiRequestTime(apiResponse)
 
@@ -155,8 +158,10 @@ func resourceFirewallRead(ctx context.Context, d *schema.ResourceData, meta inte
 func resourceFirewallUpdate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	client := meta.(*ionoscloud.APIClient)
 
-	firewall := getFirewallData(d, "", true)
-
+	firewall, diags := getFirewallData(d, "", true)
+	if diags != nil {
+		return diags
+	}
 	_, apiResponse, err := client.FirewallRulesApi.DatacentersServersNicsFirewallrulesPatch(ctx, d.Get("datacenter_id").(string), d.Get("server_id").(string), d.Get("nic_id").(string), d.Id()).Firewallrule(*firewall.Properties).Execute()
 	logApiRequestTime(apiResponse)
 
@@ -244,7 +249,7 @@ func resourceFirewallImport(ctx context.Context, d *schema.ResourceData, meta in
 	return []*schema.ResourceData{d}, nil
 }
 
-func getFirewallData(d *schema.ResourceData, path string, update bool) ionoscloud.FirewallRule {
+func getFirewallData(d *schema.ResourceData, path string, update bool) (ionoscloud.FirewallRule, diag.Diagnostics) {
 
 	firewall := ionoscloud.FirewallRule{
 		Properties: &ionoscloud.FirewallruleProperties{},
@@ -288,12 +293,20 @@ func getFirewallData(d *schema.ResourceData, path string, update bool) ionosclou
 	}
 
 	if v, ok := d.GetOk(path + "icmp_type"); ok {
-		tempIcmpType := int32(v.(int))
+		intIcmpType, err := strconv.Atoi(v.(string))
+		if err != nil {
+			return firewall, diag.FromErr(fmt.Errorf("could not parse icmpTpye %s: %w", v.(string), err))
+		}
+		tempIcmpType := int32(intIcmpType)
 		firewall.Properties.IcmpType = &tempIcmpType
 
 	}
 	if v, ok := d.GetOk(path + "icmp_code"); ok {
-		tempIcmpCode := int32(v.(int))
+		intIcmpCode, err := strconv.Atoi(v.(string))
+		if err != nil {
+			return firewall, diag.FromErr(fmt.Errorf("could not parse icmpCode %s: %w", v.(string), err))
+		}
+		tempIcmpCode := int32(intIcmpCode)
 		firewall.Properties.IcmpCode = &tempIcmpCode
 
 	}
@@ -302,7 +315,7 @@ func getFirewallData(d *schema.ResourceData, path string, update bool) ionosclou
 		firewall.Properties.Type = &tempType
 
 	}
-	return firewall
+	return firewall, nil
 }
 
 func setFirewallData(d *schema.ResourceData, firewall *ionoscloud.FirewallRule) error {
@@ -363,14 +376,14 @@ func setFirewallData(d *schema.ResourceData, firewall *ionoscloud.FirewallRule) 
 		}
 
 		if firewall.Properties.IcmpType != nil {
-			err := d.Set("icmp_type", *firewall.Properties.IcmpType)
+			err := d.Set("icmp_type", strconv.Itoa(int(*firewall.Properties.IcmpType)))
 			if err != nil {
 				return fmt.Errorf("error while setting icmp_type property for firewall %s: %s", d.Id(), err)
 			}
 		}
 
 		if firewall.Properties.IcmpCode != nil {
-			err := d.Set("icmp_code", *firewall.Properties.IcmpCode)
+			err := d.Set("icmp_code", strconv.Itoa(int(*firewall.Properties.IcmpCode)))
 			if err != nil {
 				return fmt.Errorf("error while setting icmp_code property for firewall %s: %s", d.Id(), err)
 			}

@@ -10,6 +10,7 @@
   - removed duplicated code from import, data_source, resource and tests files
 - **bug fixes**: k8s_node_pool update node_count and emptying lans and public_ips didn't work
 - **bug fixes**: fixed bug at creating natgateway_rule - target_subnet was not set properly
+- **bug fixes**: revert icmp_code and icmp_type to string to allow setting to 0
 
 ## 6.0.0-beta.14
 
