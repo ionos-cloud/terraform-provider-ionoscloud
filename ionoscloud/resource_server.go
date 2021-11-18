@@ -515,7 +515,11 @@ func resourceServerCreate(ctx context.Context, d *schema.ResourceData, meta inte
 
 	// get firewall data and add object to server
 	if _, ok := d.GetOk("nic.0.firewall"); ok {
-		firewall = getFirewallData(d, "nic.0.firewall.0.", false)
+		var diags diag.Diagnostics
+		firewall, diags = getFirewallData(d, "nic.0.firewall.0.", false)
+		if diags != nil {
+			return diags
+		}
 		(*serverRequest.Entities.Nics.Items)[0].Entities = &ionoscloud.NicEntities{
 			Firewallrules: &ionoscloud.FirewallRules{
 				Items: &[]ionoscloud.FirewallRule{
@@ -715,9 +719,11 @@ func resourceServerUpdate(ctx context.Context, d *schema.ResourceData, meta inte
 
 		nic := getNicData(d, "nic.0.")
 		if d.HasChange("nic.0.firewall") {
-
-			firewall := getFirewallData(d, "nic.0.firewall.0.", true)
-
+			var diags diag.Diagnostics
+			firewall, diags := getFirewallData(d, "nic.0.firewall.0.", true)
+			if diags != nil {
+				return diags
+			}
 			firewallId := d.Get("firewallrule_id").(string)
 
 			_, apiResponse, err := client.NicApi.DatacentersServersNicsFirewallrulesFindById(ctx, dcId, *server.Id, nicId, firewallId).Execute()
