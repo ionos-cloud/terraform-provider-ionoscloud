@@ -4,13 +4,12 @@ import (
 	"context"
 	"fmt"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
+	ionoscloud "github.com/ionos-cloud/sdk-go/v5"
 	"log"
 	"strings"
 	"time"
-
-	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
-	ionoscloud "github.com/ionos-cloud/sdk-go/v5"
 )
 
 func resourceShare() *schema.Resource {
@@ -158,34 +157,59 @@ func resourceShareDelete(ctx context.Context, d *schema.ResourceData, meta inter
 	logApiRequestTime(apiResponse)
 	if err != nil {
 		if apiResponse != nil && apiResponse.Response != nil && apiResponse.StatusCode == 404 {
-			diags := diag.FromErr(err)
-			return diags
+			d.SetId("")
+			return nil
 		}
-		//try again in 20 seconds
-		time.Sleep(20 * time.Second)
-		_, apiResponse, err := client.UserManagementApi.UmGroupsSharesDelete(ctx, groupId, resourceId).Execute()
-		logApiRequestTime(apiResponse)
-		if err != nil {
-			if _, ok := err.(ionoscloud.GenericOpenAPIError); ok {
-				if apiResponse == nil || apiResponse.Response != nil && apiResponse.StatusCode != 404 {
-					diags := diag.FromErr(fmt.Errorf("an error occured while deleting a share %s %s", d.Id(), err))
-					return diags
-				}
-			}
-		}
+		diags := diag.FromErr(fmt.Errorf("error while deleting share object %s: %s", d.Id(), err))
+		return diags
 	}
 
-	// Wait, catching any errors
-	if apiResponse != nil {
-		_, errState := getStateChangeConf(meta, d, apiResponse.Header.Get("Location"), schema.TimeoutDelete).WaitForStateContext(ctx)
-		if errState != nil {
-			diags := diag.FromErr(errState)
+	for {
+		log.Printf("[INFO] Waiting for share %s to be deleted...", d.Id())
+
+		sDeleted, dsErr := shareDeleted(ctx, client, d)
+		if dsErr != nil {
+			diags := diag.FromErr(fmt.Errorf("error while checking deletion status of share %s: %s", d.Id(), dsErr))
 			return diags
 		}
+
+		if sDeleted {
+			log.Printf("[INFO] Successfully deleted Share: %s", d.Id())
+			break
+		}
+
+		select {
+		case <-time.After(SleepInterval):
+			log.Printf("[INFO] trying again ...")
+		case <-ctx.Done():
+			log.Printf("[INFO] share deletion timed out")
+			diags := diag.FromErr(fmt.Errorf("share deletion timed out! WARNING: your share will still probably be deleted after some" +
+				" time but the terraform state won't reflect that; check your Ionos Cloud account for updates"))
+			return diags
+		}
+
 	}
 
 	d.SetId("")
 	return nil
+}
+func shareDeleted(ctx context.Context, client *ionoscloud.APIClient, d *schema.ResourceData) (bool, error) {
+	groupId := d.Get("group_id").(string)
+	resourceId := d.Get("resource_id").(string)
+	rsp, apiResponse, err := client.UserManagementApi.UmGroupsSharesFindByResourceId(ctx, groupId, resourceId).Execute()
+	logApiRequestTime(apiResponse)
+
+	log.Printf("[INFO] Current deletion status for share %s: %+v", d.Id(), rsp)
+
+	if err != nil {
+		if apiResponse != nil && apiResponse.Response != nil && apiResponse.StatusCode == 404 {
+			return true, nil
+		}
+		return true, err
+
+	}
+	log.Printf("[INFO] share %s not deleted yet deleted : %+v", d.Id(), rsp)
+	return false, nil
 }
 
 func resourceShareImporter(ctx context.Context, d *schema.ResourceData, meta interface{}) ([]*schema.ResourceData, error) {
