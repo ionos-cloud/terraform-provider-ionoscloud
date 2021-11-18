@@ -193,6 +193,7 @@ func resourceShareDelete(ctx context.Context, d *schema.ResourceData, meta inter
 	d.SetId("")
 	return nil
 }
+
 func shareDeleted(ctx context.Context, client *ionoscloud.APIClient, d *schema.ResourceData) (bool, error) {
 	groupId := d.Get("group_id").(string)
 	resourceId := d.Get("resource_id").(string)
@@ -208,7 +209,7 @@ func shareDeleted(ctx context.Context, client *ionoscloud.APIClient, d *schema.R
 		return true, err
 
 	}
-	log.Printf("[INFO] share %s not deleted yet deleted : %+v", d.Id(), rsp)
+	log.Printf("[INFO] share %s not deleted yet : %+v", d.Id(), rsp)
 	return false, nil
 }
 
