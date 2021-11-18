@@ -1,7 +1,3 @@
-## 5.2.20
-
-- **bug fixes**: revert icmp_code and icmp_type to string to allow setting to 0
-
 ## 5.2.19
 
 - **code enhancements**: added http request time log for API calls
@@ -11,7 +7,7 @@
   - optimized test duration by including both match by id and by name in the same test
   - removed duplicated code from import, data_source, resource and tests files
 - **new features**: import for `nic`, data_source for `nic`, `share`
-- **bug fixes**: k8s_node_pool update node_count didn't work and emptying lans and public_ips
+- **bug fixes**: k8s_node_pool update node_count didn't work and emptying lans and public_ips. revert icmp_code and icmp_type to string to allow setting to 0
 
 ## 5.2.18
 
