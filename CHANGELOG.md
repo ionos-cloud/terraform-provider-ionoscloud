@@ -1,3 +1,7 @@
+## 5.2.20
+
+- **bug fixes**: fix crash and add additional logs 
+
 ## 5.2.19
 
 - **code enhancements**: added http request time log for API calls
