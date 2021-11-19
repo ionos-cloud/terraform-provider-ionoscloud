@@ -232,53 +232,55 @@ func IpBlockSetData(d *schema.ResourceData, ipBlock *ionoscloud.IpBlock) error {
 	if ipBlock.Id != nil {
 		d.SetId(*ipBlock.Id)
 	}
-
-	if ipBlock.Properties.Ips != nil && len(*ipBlock.Properties.Ips) > 0 {
-		if err := d.Set("ips", *ipBlock.Properties.Ips); err != nil {
-			return err
-		}
-	}
-
-	if ipBlock.Properties.Location != nil {
-		if err := d.Set("location", *ipBlock.Properties.Location); err != nil {
-			return err
-		}
-	}
-
-	if ipBlock.Properties.Size != nil {
-		if err := d.Set("size", *ipBlock.Properties.Size); err != nil {
-			return err
-		}
-	}
-
-	if ipBlock.Properties.Name != nil {
-		if err := d.Set("name", *ipBlock.Properties.Name); err != nil {
-			return err
-		}
-	}
-
-	if ipBlock.Properties.IpConsumers != nil && len(*ipBlock.Properties.IpConsumers) > 0 {
-		var ipConsumers []interface{}
-		for _, ipConsumer := range *ipBlock.Properties.IpConsumers {
-			ipConsumerEntry := make(map[string]interface{})
-			setPropWithNilCheck(ipConsumerEntry, "ip", ipConsumer.Ip)
-			setPropWithNilCheck(ipConsumerEntry, "mac", ipConsumer.Mac)
-			setPropWithNilCheck(ipConsumerEntry, "nic_id", ipConsumer.NicId)
-			setPropWithNilCheck(ipConsumerEntry, "server_id", ipConsumer.ServerId)
-			setPropWithNilCheck(ipConsumerEntry, "server_name", ipConsumer.ServerName)
-			setPropWithNilCheck(ipConsumerEntry, "datacenter_id", ipConsumer.DatacenterId)
-			setPropWithNilCheck(ipConsumerEntry, "datacenter_name", ipConsumer.DatacenterName)
-			setPropWithNilCheck(ipConsumerEntry, "k8s_nodepool_uuid", ipConsumer.K8sNodePoolUuid)
-			setPropWithNilCheck(ipConsumerEntry, "k8s_cluster_uuid", ipConsumer.K8sClusterUuid)
-
-			ipConsumers = append(ipConsumers, ipConsumerEntry)
-		}
-
-		if len(ipConsumers) > 0 {
-			if err := d.Set("ip_consumers", ipConsumers); err != nil {
+	if ipBlock.Properties != nil {
+		if ipBlock.Properties.Ips != nil && len(*ipBlock.Properties.Ips) > 0 {
+			if err := d.Set("ips", *ipBlock.Properties.Ips); err != nil {
 				return err
 			}
 		}
+
+		if ipBlock.Properties.Location != nil {
+			if err := d.Set("location", *ipBlock.Properties.Location); err != nil {
+				return err
+			}
+		}
+
+		if ipBlock.Properties.Size != nil {
+			if err := d.Set("size", *ipBlock.Properties.Size); err != nil {
+				return err
+			}
+		}
+
+		if ipBlock.Properties.Name != nil {
+			if err := d.Set("name", *ipBlock.Properties.Name); err != nil {
+				return err
+			}
+		}
+
+		if ipBlock.Properties.IpConsumers != nil && len(*ipBlock.Properties.IpConsumers) > 0 {
+			var ipConsumers []interface{}
+			for _, ipConsumer := range *ipBlock.Properties.IpConsumers {
+				ipConsumerEntry := make(map[string]interface{})
+				setPropWithNilCheck(ipConsumerEntry, "ip", ipConsumer.Ip)
+				setPropWithNilCheck(ipConsumerEntry, "mac", ipConsumer.Mac)
+				setPropWithNilCheck(ipConsumerEntry, "nic_id", ipConsumer.NicId)
+				setPropWithNilCheck(ipConsumerEntry, "server_id", ipConsumer.ServerId)
+				setPropWithNilCheck(ipConsumerEntry, "server_name", ipConsumer.ServerName)
+				setPropWithNilCheck(ipConsumerEntry, "datacenter_id", ipConsumer.DatacenterId)
+				setPropWithNilCheck(ipConsumerEntry, "datacenter_name", ipConsumer.DatacenterName)
+				setPropWithNilCheck(ipConsumerEntry, "k8s_nodepool_uuid", ipConsumer.K8sNodePoolUuid)
+				setPropWithNilCheck(ipConsumerEntry, "k8s_cluster_uuid", ipConsumer.K8sClusterUuid)
+
+				ipConsumers = append(ipConsumers, ipConsumerEntry)
+			}
+
+			if len(ipConsumers) > 0 {
+				if err := d.Set("ip_consumers", ipConsumers); err != nil {
+					return err
+				}
+			}
+		}
 	}
+
 	return nil
 }

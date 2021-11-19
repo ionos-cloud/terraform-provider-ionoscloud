@@ -113,25 +113,26 @@ func resourceLoadbalancerRead(ctx context.Context, d *schema.ResourceData, meta 
 		diags := diag.FromErr(fmt.Errorf("an error occured while fetching a lan ID %s %s", d.Id(), err))
 		return diags
 	}
-
-	if lb.Properties.Name != nil {
-		if err := d.Set("name", *lb.Properties.Name); err != nil {
-			diags := diag.FromErr(fmt.Errorf(""))
-			return diags
+	if lb.Properties != nil {
+		if lb.Properties.Name != nil {
+			if err := d.Set("name", *lb.Properties.Name); err != nil {
+				diags := diag.FromErr(fmt.Errorf(""))
+				return diags
+			}
 		}
-	}
 
-	if lb.Properties.Ip != nil {
-		if err := d.Set("ip", *lb.Properties.Ip); err != nil {
-			diags := diag.FromErr(fmt.Errorf(""))
-			return diags
+		if lb.Properties.Ip != nil {
+			if err := d.Set("ip", *lb.Properties.Ip); err != nil {
+				diags := diag.FromErr(fmt.Errorf(""))
+				return diags
+			}
 		}
-	}
 
-	if lb.Properties.Dhcp != nil {
-		if err := d.Set("dhcp", *lb.Properties.Dhcp); err != nil {
-			diags := diag.FromErr(fmt.Errorf(""))
-			return diags
+		if lb.Properties.Dhcp != nil {
+			if err := d.Set("dhcp", *lb.Properties.Dhcp); err != nil {
+				diags := diag.FromErr(fmt.Errorf(""))
+				return diags
+			}
 		}
 	}
 

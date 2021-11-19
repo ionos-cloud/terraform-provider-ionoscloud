@@ -100,17 +100,19 @@ func resourceShareRead(ctx context.Context, d *schema.ResourceData, meta interfa
 		return diags
 	}
 
-	if rsp.Properties.EditPrivilege != nil {
-		if err := d.Set("edit_privilege", *rsp.Properties.EditPrivilege); err != nil {
-			diags := diag.FromErr(err)
-			return diags
+	if rsp.Properties != nil {
+		if rsp.Properties.EditPrivilege != nil {
+			if err := d.Set("edit_privilege", *rsp.Properties.EditPrivilege); err != nil {
+				diags := diag.FromErr(err)
+				return diags
+			}
 		}
-	}
 
-	if rsp.Properties.SharePrivilege != nil {
-		if err := d.Set("share_privilege", *rsp.Properties.SharePrivilege); err != nil {
-			diags := diag.FromErr(err)
-			return diags
+		if rsp.Properties.SharePrivilege != nil {
+			if err := d.Set("share_privilege", *rsp.Properties.SharePrivilege); err != nil {
+				diags := diag.FromErr(err)
+				return diags
+			}
 		}
 	}
 

@@ -98,9 +98,11 @@ func dataSourceNicRead(ctx context.Context, data *schema.ResourceData, meta inte
 			return diag.FromErr(fmt.Errorf("error getting nic with id %s %s", id.(string), err))
 		}
 		if nameOk {
-			if *nic.Properties.Name != name {
-				return diag.FromErr(fmt.Errorf("name of nic (UUID=%s, name=%s) does not match expected name: %s",
-					*nic.Id, *nic.Properties.Name, name))
+			if nic.Properties != nil {
+				if *nic.Properties.Name != name {
+					return diag.FromErr(fmt.Errorf("name of nic (UUID=%s, name=%s) does not match expected name: %s",
+						*nic.Id, *nic.Properties.Name, name))
+				}
 			}
 		}
 	} else {
