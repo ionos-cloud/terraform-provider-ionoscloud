@@ -152,15 +152,14 @@ func resourceAutoscalingGroup() *schema.Resource {
 				},
 			},
 			"replica_configuration": {
-				Type:        schema.TypeList,
-				MaxItems:    1,
-				Description: "VMs for this Autoscaling Group will be created in this Virtual Datacenter. Please note, that it have the same `location` as the `template`.",
-				Required:    true,
+				Type:     schema.TypeList,
+				MaxItems: 1,
+				Required: true,
 				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{
 						"availability_zone": {
 							Required:     true,
-							Type:         schema.TypeInt,
+							Type:         schema.TypeString,
 							Description:  "The zone where the VMs are created using this configuration.",
 							ValidateFunc: validation.All(validation.StringInSlice([]string{"AUTO", "ZONE_1", "ZONE_2"}, true)),
 						},
@@ -172,7 +171,7 @@ func resourceAutoscalingGroup() *schema.Resource {
 						},
 						"cpu_family": {
 							Optional:     true,
-							Type:         schema.TypeInt,
+							Type:         schema.TypeString,
 							Description:  "The zone where the VMs are created using this configuration.",
 							ValidateFunc: validation.All(validation.StringInSlice([]string{"AMD_OPTERON", "INTEL_SKYLAKE", "INTEL_XEON"}, true)),
 						},
@@ -236,10 +235,14 @@ func resourceAutoscalingGroup() *schema.Resource {
 										Elem:     &schema.Schema{Type: schema.TypeString},
 										Optional: true,
 									},
-									"ssh_keys": {
+									"ssh_key_values": {
 										Type:     schema.TypeList,
 										Elem:     &schema.Schema{Type: schema.TypeString},
 										Optional: true,
+									},
+									"ssh_keys": {
+										Type:     schema.TypeList,
+										Elem:     &schema.Schema{Type: schema.TypeString},
 										Computed: true,
 									},
 									"type": {
@@ -251,7 +254,7 @@ func resourceAutoscalingGroup() *schema.Resource {
 									"user_data": {
 										Optional:    true,
 										Type:        schema.TypeString,
-										Description: "user-data (Cloud Init) for this replica volume.",
+										Description: "User-data (Cloud Init) for this replica volume.",
 									},
 									"image_password": {
 										Optional:    true,
@@ -263,31 +266,11 @@ func resourceAutoscalingGroup() *schema.Resource {
 					},
 				},
 			},
-			"datacenter": {
-				Type:        schema.TypeList,
-				MaxItems:    1,
-				Description: "VMs for this Autoscaling Group will be created in this Virtual Datacenter. Please note, that it have the same `location` as the `template`.",
-				Required:    true,
-				Elem: &schema.Resource{
-					Schema: map[string]*schema.Schema{
-						"href": {
-							Type:        schema.TypeString,
-							Description: "Absolute URL to the resource's representation",
-							Computed:    true,
-						},
-						"type": {
-							Type:        schema.TypeString,
-							Description: "Type of resource",
-							Computed:    true,
-						},
-						"id": {
-							Type:         schema.TypeString,
-							Description:  "Unique identifier for the resource",
-							Required:     true,
-							ValidateFunc: validation.All(validation.StringIsNotWhiteSpace),
-						},
-					},
-				},
+			"datacenter_id": {
+				Type:         schema.TypeString,
+				Description:  "Unique identifier for the resource",
+				Required:     true,
+				ValidateFunc: validation.All(validation.IsUUID),
 			},
 			"location": {
 				Type:        schema.TypeString,
@@ -308,6 +291,9 @@ func resourceAutoscalingGroupCreate(ctx context.Context, d *schema.ResourceData,
 		diags := diag.FromErr(fmt.Errorf("an error occured at getting data from the provided schema: %q", err))
 		return diags
 	}
+
+	log.Printf("[DEBUG] autoscaling group data extracted: %+v", *group)
+
 	autoscalingGroup, _, err := client.CreateGroup(ctx, *group)
 
 	if err != nil {
@@ -317,6 +303,7 @@ func resourceAutoscalingGroupCreate(ctx context.Context, d *schema.ResourceData,
 	}
 
 	d.SetId(*autoscalingGroup.Id)
+	log.Printf("[INFO] autoscaling Group created. Id set to %s", *autoscalingGroup.Id)
 
 	if err := checkAction(ctx, client, d); err != nil {
 		return diag.FromErr(err)
@@ -333,7 +320,7 @@ func resourceAutoscalingGroupRead(ctx context.Context, d *schema.ResourceData, m
 
 	if err != nil {
 		if apiResponse != nil && apiResponse.Response != nil && apiResponse.StatusCode == 404 {
-			log.Printf("[INFO] Resource %s not found: %+v", d.Id(), err)
+			log.Printf("[INFO] resource %s not found: %+v", d.Id(), err)
 			d.SetId("")
 			return nil
 		} else {
@@ -342,11 +329,13 @@ func resourceAutoscalingGroupRead(ctx context.Context, d *schema.ResourceData, m
 		}
 	}
 
-	log.Printf("[INFO] Successfully retreived autoscaling group %s: %+v", d.Id(), group)
+	log.Printf("[INFO] successfully retreived autoscaling group %s: %+v", d.Id(), group)
 
 	if err := autoscalingService.SetAutoscalingGroupData(d, group); err != nil {
 		return diag.FromErr(err)
 	}
+
+	log.Printf("[INFO] successfully set autoscaling group data %s", d.Id())
 
 	return nil
 }
@@ -361,12 +350,15 @@ func resourceAutoscalingGroupUpdate(ctx context.Context, d *schema.ResourceData,
 		return diag.FromErr(err)
 	}
 
+	log.Printf("[DEBUG] autoscaling group data extracted: %+v", *group)
+
 	_, _, err = client.UpdateGroup(ctx, d.Id(), *group)
 
 	if err != nil {
 		diags := diag.FromErr(fmt.Errorf("an error occured while updating autoscaling group %s: %s", d.Id(), err))
 		return diags
 	}
+	log.Printf("[INFO] autoscaling Group updated.")
 
 	time.Sleep(SleepInterval * 20)
 
@@ -386,6 +378,8 @@ func resourceAutoscalingGroupDelete(ctx context.Context, d *schema.ResourceData,
 		diags := diag.FromErr(fmt.Errorf("an error occured while deleting an autoscaling group %s %s", d.Id(), err))
 		return diags
 	}
+
+	log.Printf("[INFO] autoscaling Group deleted: %s.", d.Id())
 
 	d.SetId("")
 
@@ -418,7 +412,7 @@ func resourceAutoscalingGroupImport(ctx context.Context, d *schema.ResourceData,
 
 func actionReady(ctx context.Context, client *autoscalingService.Client, d *schema.ResourceData, actionId string) (bool, error) {
 
-	action, _, err := client.GetAction(ctx, actionId, d.Id())
+	action, _, err := client.GetAction(ctx, d.Id(), actionId)
 
 	if err != nil {
 		return true, fmt.Errorf("error checking action status: %s", err)

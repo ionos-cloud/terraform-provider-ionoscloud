@@ -223,29 +223,10 @@ func dataSourceAutoscalingGroup() *schema.Resource {
 					},
 				},
 			},
-			"datacenter": {
-				Type:        schema.TypeList,
-				Description: "VMs for this Autoscaling Group will be created in this Virtual Datacenter. Please note, that it have the same `location` as the `template`.",
+			"datacenter_id": {
+				Type:        schema.TypeString,
+				Description: "Unique identifier for the resource",
 				Computed:    true,
-				Elem: &schema.Resource{
-					Schema: map[string]*schema.Schema{
-						"href": {
-							Type:        schema.TypeString,
-							Description: "Absolute URL to the resource's representation",
-							Computed:    true,
-						},
-						"type": {
-							Type:        schema.TypeString,
-							Description: "Type of resource",
-							Computed:    true,
-						},
-						"id": {
-							Type:        schema.TypeString,
-							Description: "Unique identifier for the resource",
-							Computed:    true,
-						},
-					},
-				},
 			},
 			"location": {
 				Type:        schema.TypeString,

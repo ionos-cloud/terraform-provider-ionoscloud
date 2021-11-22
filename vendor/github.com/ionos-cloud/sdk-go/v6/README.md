@@ -1,3 +1,5 @@
+![Alt text](.github/IONOS.CLOUD.BLU.svg?raw=true "Title")
+
 # Go API client for ionoscloud
 
 An enterprise-grade Infrastructure is provided as a Service (IaaS) solution that can be managed through a browser-based \"Data Center Designer\" (DCD) tool or via an easy to use API. 
@@ -44,6 +46,8 @@ For using other server than the one defined on index 0 set context value `sw.Con
 ```golang
 ctx := context.WithValue(context.Background(), sw.ContextServerIndex, 1)
 ```
+
+Note: To overwrite the api endpoint - `api.ionos.com`, the environment variable `$IONOS_API_URL` can be set, and used with `NewConfigurationFromEnv()` function.
 
 ### Templated Server URL
 

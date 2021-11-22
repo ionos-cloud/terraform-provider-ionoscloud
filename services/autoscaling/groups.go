@@ -91,8 +91,13 @@ func GetAutoscalingGroupDataCreate(d *schema.ResourceData) (*autoscaling.Group, 
 		group.Properties.ReplicaConfiguration = replicaConfiguration
 	}
 
-	group.Properties.Datacenter = GetDatacenterData(d)
-
+	if value, ok := d.GetOk("datacenter_id"); ok {
+		value := value.(string)
+		datacenter := autoscaling.Resource{
+			Id: &value,
+		}
+		group.Properties.Datacenter = &datacenter
+	}
 	return &group, nil
 }
 
@@ -132,8 +137,8 @@ func GetAutoscalingGroupDataUpdate(d *schema.ResourceData) (*autoscaling.GroupUp
 		group.Properties.ReplicaConfiguration = replicaConfiguration
 	}
 
-	if d.HasChange("datacenter") {
-		return nil, fmt.Errorf("datacenter property is immutable and can pe used only in create requests")
+	if d.HasChange("datacenter_id") {
+		return nil, fmt.Errorf("datacenter_id property is immutable and can pe used only in create requests")
 	}
 	return &group, nil
 }
@@ -328,11 +333,11 @@ func GetVolumesData(d *schema.ResourceData) (*[]autoscaling.ReplicaVolumePost, e
 				var publicKeys []string
 
 				if value, ok := d.GetOk(fmt.Sprintf("replica_configuration.0.volumes.%d.ssh_key_paths", index)); ok {
-					sshKeyPaths := value.([]string)
+					sshKeyPaths := value.([]interface{})
 					if len(sshKeyPaths) != 0 {
 						for _, path := range sshKeyPaths {
 							log.Printf("[DEBUG] Reading file %s", path)
-							publicKey, err := readPublicKey(path)
+							publicKey, err := readPublicKey(path.(string))
 							if err != nil {
 								return nil, fmt.Errorf("error fetching sshkey from file (%s) (%s)", path, err.Error())
 							}
@@ -341,11 +346,11 @@ func GetVolumesData(d *schema.ResourceData) (*[]autoscaling.ReplicaVolumePost, e
 					}
 				}
 
-				if value, ok := d.GetOk(fmt.Sprintf("replica_configuration.0.volumes.%d.ssh_keys", index)); ok {
-					sshKeys := value.([]string)
+				if value, ok := d.GetOk(fmt.Sprintf("replica_configuration.0.volumes.%d.ssh_key_values", index)); ok {
+					sshKeys := value.([]interface{})
 					if len(sshKeys) != 0 {
 						for _, key := range sshKeys {
-							publicKeys = append(publicKeys, key)
+							publicKeys = append(publicKeys, key.(string))
 						}
 					}
 				}
@@ -379,27 +384,6 @@ func GetVolumesData(d *schema.ResourceData) (*[]autoscaling.ReplicaVolumePost, e
 	}
 
 	return &volumes, nil
-}
-
-func GetDatacenterData(d *schema.ResourceData) *autoscaling.Resource {
-	datacenter := autoscaling.Resource{}
-
-	if value, ok := d.GetOk("datacenter.0.href"); ok {
-		value := value.(string)
-		datacenter.Href = &value
-	}
-
-	if value, ok := d.GetOk("datacenter.0.type"); ok {
-		value := value.(string)
-		datacenter.Type = &value
-	}
-
-	if value, ok := d.GetOk("datacenter.0.id"); ok {
-		value := value.(string)
-		datacenter.Id = &value
-	}
-
-	return &datacenter
 }
 
 func SetAutoscalingGroupData(d *schema.ResourceData, group autoscaling.Group) error {
@@ -442,23 +426,26 @@ func SetAutoscalingGroupData(d *schema.ResourceData, group autoscaling.Group) er
 		}
 
 		if group.Properties.Policy != nil {
+			var policies []interface{}
 			policy := setPolicyProperties(*group.Properties.Policy)
-			if err := d.Set("policy", policy); err != nil {
+			policies = append(policies, policy)
+			if err := d.Set("policy", policies); err != nil {
 				return generateSetError(resourceName, "policy", err)
 			}
 		}
 
 		if group.Properties.ReplicaConfiguration != nil {
-			replicaConfiguration := setReplicaConfiguration(*group.Properties.ReplicaConfiguration)
-			if err := d.Set("replica_configuration", replicaConfiguration); err != nil {
+			var replicaConfigurations []interface{}
+			replicaConfiguration := setReplicaConfiguration(d, *group.Properties.ReplicaConfiguration)
+			replicaConfigurations = append(replicaConfigurations, replicaConfiguration)
+			if err := d.Set("replica_configuration", replicaConfigurations); err != nil {
 				return generateSetError(resourceName, "replica_configuration", err)
 			}
 		}
 
 		if group.Properties.Datacenter != nil {
-			datacenter := setDatacenterProperties(*group.Properties.Datacenter)
-			if err := d.Set("datacenter", datacenter); err != nil {
-				return generateSetError(resourceName, "datacenter", err)
+			if err := d.Set("datacenter_id", *group.Properties.Datacenter.Id); err != nil {
+				return generateSetError(resourceName, "datacenter_id", err)
 			}
 		}
 
@@ -483,12 +470,16 @@ func setPolicyProperties(groupPolicy autoscaling.GroupPolicy) map[string]interfa
 	setPropWithNilCheck(policy, "unit", groupPolicy.Unit)
 
 	if groupPolicy.ScaleInAction != nil {
+		var scaleInActions []interface{}
 		scaleInAction := setScaleInActionProperties(*groupPolicy.ScaleInAction)
-		policy["scale_in_action"] = scaleInAction
+		scaleInActions = append(scaleInActions, scaleInAction)
+		policy["scale_in_action"] = scaleInActions
 	}
 	if groupPolicy.ScaleOutAction != nil {
+		var scaleOutActions []interface{}
 		scaleOutAction := setScaleOutActionProperties(*groupPolicy.ScaleOutAction)
-		policy["scale_out_action"] = scaleOutAction
+		scaleOutActions = append(scaleOutActions, scaleOutAction)
+		policy["scale_out_action"] = scaleOutActions
 	}
 
 	return policy
@@ -517,7 +508,7 @@ func setScaleOutActionProperties(scaleOutAction autoscaling.GroupPolicyScaleOutA
 	return scaleOut
 }
 
-func setReplicaConfiguration(replicaConfiguration autoscaling.ReplicaPropertiesPost) map[string]interface{} {
+func setReplicaConfiguration(d *schema.ResourceData, replicaConfiguration autoscaling.ReplicaPropertiesPost) map[string]interface{} {
 
 	replica := map[string]interface{}{}
 
@@ -538,7 +529,7 @@ func setReplicaConfiguration(replicaConfiguration autoscaling.ReplicaPropertiesP
 	if replicaConfiguration.Volumes != nil {
 		var volumes []interface{}
 		for _, volume := range *replicaConfiguration.Volumes {
-			volumeEntry := setVolumeProperties(volume)
+			volumeEntry := setVolumeProperties(d, volume)
 			volumes = append(volumes, volumeEntry)
 		}
 		replica["volumes"] = volumes
@@ -557,7 +548,7 @@ func setNicProperties(replicaNic autoscaling.ReplicaNic) map[string]interface{} 
 	return nic
 }
 
-func setVolumeProperties(replicaVolume autoscaling.ReplicaVolumePost) map[string]interface{} {
+func setVolumeProperties(d *schema.ResourceData, replicaVolume autoscaling.ReplicaVolumePost) map[string]interface{} {
 	volume := map[string]interface{}{}
 
 	setPropWithNilCheck(volume, "image", replicaVolume.Image)
@@ -566,17 +557,18 @@ func setVolumeProperties(replicaVolume autoscaling.ReplicaVolumePost) map[string
 	setPropWithNilCheck(volume, "ssh_keys", replicaVolume.SshKeys)
 	setPropWithNilCheck(volume, "type", replicaVolume.Type)
 	setPropWithNilCheck(volume, "user_data", replicaVolume.UserData)
-	setPropWithNilCheck(volume, "image_password", replicaVolume.ImagePassword)
+
+	if paths, ok := d.GetOk("replica_configuration.0.volumes.0.ssh_key_paths"); ok {
+		volume["ssh_key_paths"] = paths
+	}
+
+	if paths, ok := d.GetOk("replica_configuration.0.volumes.0.ssh_key_values"); ok {
+		volume["ssh_key_values"] = paths
+	}
+
+	if password, ok := d.GetOk("replica_configuration.0.volumes.0.image_password"); ok {
+		volume["image_password"] = password
+	}
 
 	return volume
-}
-
-func setDatacenterProperties(datacenterResource autoscaling.Resource) map[string]interface{} {
-	datacenter := map[string]interface{}{}
-
-	setPropWithNilCheck(datacenter, "href", datacenterResource.Href)
-	setPropWithNilCheck(datacenter, "type", datacenterResource.Type)
-	setPropWithNilCheck(datacenter, "id", datacenterResource.Id)
-
-	return datacenter
 }

@@ -86,7 +86,7 @@ func resourceLanCreate(ctx context.Context, d *schema.ResourceData, meta interfa
 	}
 
 	dcid := d.Get("datacenter_id").(string)
-	rsp, apiResponse, err := client.LansApi.DatacentersLansPost(ctx, dcid).Lan(request).Execute()
+	rsp, apiResponse, err := client.LANsApi.DatacentersLansPost(ctx, dcid).Lan(request).Execute()
 	logApiRequestTime(apiResponse)
 
 	if err != nil {
@@ -97,7 +97,7 @@ func resourceLanCreate(ctx context.Context, d *schema.ResourceData, meta interfa
 
 	d.SetId(*rsp.Id)
 
-	log.Printf("[INFO] LAN ID: %s", d.Id())
+	log.Printf("[INFO] LAN ID set to: %s", d.Id())
 
 	// Wait, catching any errors
 	_, errState := getStateChangeConf(meta, d, apiResponse.Header.Get("Location"), schema.TimeoutCreate).WaitForStateContext(ctx)
@@ -143,7 +143,7 @@ func resourceLanRead(ctx context.Context, d *schema.ResourceData, meta interface
 
 	dcid := d.Get("datacenter_id").(string)
 
-	lan, apiResponse, err := client.LansApi.DatacentersLansFindById(ctx, dcid, d.Id()).Execute()
+	lan, apiResponse, err := client.LANsApi.DatacentersLansFindById(ctx, dcid, d.Id()).Execute()
 	logApiRequestTime(apiResponse)
 
 	if err != nil {
@@ -191,7 +191,7 @@ func resourceLanUpdate(ctx context.Context, d *schema.ResourceData, meta interfa
 
 	dcid := d.Get("datacenter_id").(string)
 
-	_, apiResponse, err := client.LansApi.DatacentersLansPatch(ctx, dcid, d.Id()).Lan(*properties).Execute()
+	_, apiResponse, err := client.LANsApi.DatacentersLansPatch(ctx, dcid, d.Id()).Lan(*properties).Execute()
 	logApiRequestTime(apiResponse)
 
 	if err != nil {
@@ -212,7 +212,7 @@ func resourceLanDelete(ctx context.Context, d *schema.ResourceData, meta interfa
 	client := meta.(SdkBundle).CloudApiClient
 	dcid := d.Get("datacenter_id").(string)
 
-	apiResponse, err := client.LansApi.DatacentersLansDelete(ctx, dcid, d.Id()).Execute()
+	apiResponse, err := client.LANsApi.DatacentersLansDelete(ctx, dcid, d.Id()).Execute()
 	logApiRequestTime(apiResponse)
 
 	if err != nil {
@@ -261,7 +261,7 @@ func resourceLanImport(ctx context.Context, d *schema.ResourceData, meta interfa
 	datacenterId := parts[0]
 	lanId := parts[1]
 
-	lan, apiResponse, err := client.LansApi.DatacentersLansFindById(ctx, datacenterId, lanId).Execute()
+	lan, apiResponse, err := client.LANsApi.DatacentersLansFindById(ctx, datacenterId, lanId).Execute()
 	logApiRequestTime(apiResponse)
 
 	if err != nil {
@@ -315,7 +315,7 @@ func setLanData(d *schema.ResourceData, lan *ionoscloud.Lan) error {
 
 func lanAvailable(ctx context.Context, client *ionoscloud.APIClient, d *schema.ResourceData) (bool, error) {
 	dcid := d.Get("datacenter_id").(string)
-	rsp, apiResponse, err := client.LansApi.DatacentersLansFindById(ctx, dcid, d.Id()).Execute()
+	rsp, apiResponse, err := client.LANsApi.DatacentersLansFindById(ctx, dcid, d.Id()).Execute()
 	logApiRequestTime(apiResponse)
 
 	log.Printf("[INFO] Current status for LAN %s: %+v", d.Id(), rsp)
@@ -329,7 +329,7 @@ func lanAvailable(ctx context.Context, client *ionoscloud.APIClient, d *schema.R
 func lanDeleted(ctx context.Context, client *ionoscloud.APIClient, d *schema.ResourceData) (bool, error) {
 	dcid := d.Get("datacenter_id").(string)
 
-	rsp, apiResponse, err := client.LansApi.DatacentersLansFindById(ctx, dcid, d.Id()).Execute()
+	rsp, apiResponse, err := client.LANsApi.DatacentersLansFindById(ctx, dcid, d.Id()).Execute()
 	logApiRequestTime(apiResponse)
 
 	log.Printf("[INFO] Current deletion status for LAN %s: %+v", d.Id(), rsp)

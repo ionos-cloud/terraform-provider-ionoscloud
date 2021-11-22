@@ -3,16 +3,16 @@ package ionoscloud
 import (
 	"context"
 	"fmt"
-	autoscaling "github.com/ionos-cloud/sdk-go-autoscaling"
-	"testing"
-
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
+	autoscaling "github.com/ionos-cloud/sdk-go-autoscaling"
+	"testing"
 )
 
-func TestAccAutoscalingGroup_Basic(t *testing.T) {
+var resourceAutoscalingGroupName = AutoscalingGroupResource + "." + AutoscalingGroupTestResource
+
+func TestAccAutoscalingGroupBasic(t *testing.T) {
 	var autoscalingGroup autoscaling.Group
-	autoscalingGroupName := "example"
 
 	resource.Test(t, resource.TestCase{
 		PreCheck: func() {
@@ -22,17 +22,16 @@ func TestAccAutoscalingGroup_Basic(t *testing.T) {
 		CheckDestroy:      testAccCheckAutoscalingGroupDestroyCheck,
 		Steps: []resource.TestStep{
 			{
-				Config: fmt.Sprintf(testAccCheckAutoscalingGroupConfigBasic, autoscalingGroupName),
+				Config: fmt.Sprintf(testAccCheckAutoscalingGroupConfigBasic, AutoscalingGroupTestResource),
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheckAutoscalingGroupExists("ionoscloud_autoscaling_group.autoscaling_group", &autoscalingGroup),
-					resource.TestCheckResourceAttr("ionoscloud_autoscaling_group.autoscaling_group", "name", autoscalingGroupName),
+					testAccCheckAutoscalingGroupExists(resourceAutoscalingGroupName, &autoscalingGroup),
+					resource.TestCheckResourceAttr(resourceAutoscalingGroupName, "name", AutoscalingGroupTestResource),
 				),
 			},
 			{
-				Config: fmt.Sprintf(testAccCheckAutoscalingGroupConfigUpdate),
+				Config: fmt.Sprintf(testAccCheckAutoscalingGroupConfigUpdate, UpdatedResources),
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheckAutoscalingGroupExists("ionoscloud_autoscaling_group.autoscaling_group", &autoscalingGroup),
-					resource.TestCheckResourceAttr("ionoscloud_autoscaling_group.autoscaling_group", "name", "updated"),
+					resource.TestCheckResourceAttr(resourceAutoscalingGroupName, "name", UpdatedResources),
 				),
 			},
 		},
@@ -105,121 +104,130 @@ func testAccCheckAutoscalingGroupExists(n string, autoscalingGroup *autoscaling.
 }
 
 const testAccCheckAutoscalingGroupConfigBasic = `
-resource "ionoscloud_datacenter" "autoscaling_group" {
+resource ` + DatacenterResource + ` "autoscaling_datacenter" {
    name     = "test_autoscaling_group"
-   location = "de/txl"
+   location = "de/fkb"
 }
-resource "ionoscloud_lan" "autoscaling_group" {
-	datacenter_id    = ionoscloud_datacenter.autoscaling_group.id
+resource ` + LanResource + ` "autoscaling_lan_1" {
+	datacenter_id    = ` + DatacenterResource + `.autoscaling_datacenter.id
     public           = false
-    name             = "test_autoscaling_group"
+    name             = "test_autoscaling_group_1"
 }
-resource "ionoscloud_autoscaling_template" "autoscaling_group" {
-	availability_zone    = "AUTO"
-    cores				 = 2
-	cpu_family           = "INTEL_SKYLAKE"
-	location			 = "de/txl"
-    name                 = "test_autoscaling_group"
-    nics    {
-		lan              = ionoscloud_lan.autoscaling_group.id
-        name             = "test_autoscaling_group"
-    }
-    ram                  = 1024
-	volumes  {
-    	image            = "e309f108-b48d-11eb-b9b3-d2869b2d44d9"
-		image_password   = "test12345678"
-        name             = "test_autoscaling_group"
-		size             = 50
-    	type             = "HDD"
-	}
+
+resource ` + LanResource + ` "autoscaling_lan_2" {
+	datacenter_id    = ` + DatacenterResource + `.autoscaling_datacenter.id
+    public           = false
+    name             = "test_autoscaling_group_2"
 }
-resource "ionoscloud_autoscaling_group" "autoscaling_group" {
-	datacenter {
-       id                  = ionoscloud_datacenter.autoscaling_group.id
-    }
+
+resource ` + AutoscalingGroupResource + `  ` + AutoscalingGroupTestResource + ` {
+	datacenter_id = ` + DatacenterResource + `.autoscaling_datacenter.id
 	max_replica_count      = 5
 	min_replica_count      = 1
+	target_replica_count   = 2
 	name				   = "%s"
-	policy  {
+	policy {
     	metric             = "INSTANCE_CPU_UTILIZATION_AVERAGE"
 		range              = "PT24H"
         scale_in_action {
-			amount         =  1
-			amount_type    = "ABSOLUTE"
-			cooldown_period= "PT5M"
+			amount        		    =  1
+			amount_type    			= "ABSOLUTE"
+			termination_policy_type = "OLDEST_SERVER_FIRST"
+			cooldown_period			= "PT5M"
         }
 		scale_in_threshold = 33
-    	scale_out_action {
-			amount         =  1
-			amount_type    = "ABSOLUTE"
-			cooldown_period= "PT5M"
+    	scale_out_action  {
+			amount          =  1
+			amount_type     = "ABSOLUTE"
+			cooldown_period = "PT5M"
         }
 		scale_out_threshold = 77
         unit                = "PER_HOUR"
 	}
-    target_replica_count    = 1
-	template {
-		id = ionoscloud_autoscaling_template.autoscaling_group.id
-    }
+    replica_configuration {
+		availability_zone = "AUTO"
+		cores 			  = "2"
+		cpu_family 		  = "INTEL_XEON"
+		nics {
+			lan  		  = ` + LanResource + `.autoscaling_lan_1.id
+			name		  = "LAN NIC 1"
+			dhcp 		  = true
+		}
+		ram				  = 2048
+		volumes	{
+			image  		  = "ee89912b-2290-11eb-af9f-1ee452559185"
+			name		  = "Volume 1"
+			size 		  = 30
+			ssh_key_paths = [ "/home/iulia/.ssh/id_rsa.pub"]
+			ssh_key_values= [ "ssh-rsa AAAAB3NzaC1yc2EAAAABIwAAAQEAklOUpkDHrfHY17SbrmTIpNLTGK9Tjom/BWDSU\nGPl+nafzlHDTYW7hdI4yZ5ew18JH4JW9jbhUFrviQzM7xlELEVf4h9lFX5QVkbPppSwg0cda3\nPbv7kOdJ/MTyBlWXFCR+HAo3FXRitBqxiX1nKhXpHAZsMciLq8V6RjsNAQwdsdMFvSlVK/7XA\nt3FaoJoAsncM1Q9x5+3V0Ww68/eIFmb1zuUFljQJKprrX88XypNDvjYNby6vw/Pb0rwert/En\nmZ+AW4OZPnTPI89ZPmVMLuayrD2cE86Z/il8b+gw3r3+1nKatmIkjn2so1d01QraTlMqVSsbx\nNrRFi9wrf+M7Q== user@domain.local"]
+			type		  = "HDD"
+			user_data	  = "ZWNobyAiSGVsbG8sIFdvcmxkIgo="
+			image_password= "passw0rd"
+		}
+	}
 }
 `
 
 const testAccCheckAutoscalingGroupConfigUpdate = `
-resource "ionoscloud_datacenter" "autoscaling_group" {
+resource ` + DatacenterResource + ` "autoscaling_datacenter" {
    name     = "test_autoscaling_group"
-   location = "de/txl"
+   location = "de/fkb"
 }
-resource "ionoscloud_lan" "autoscaling_group" {
-	datacenter_id    = ionoscloud_datacenter.autoscaling_group.id
+resource ` + LanResource + ` "autoscaling_lan_1" {
+	datacenter_id    = ` + DatacenterResource + `.autoscaling_datacenter.id
     public           = false
-    name             = "test_autoscaling_group"
+    name             = "test_autoscaling_group_1"
 }
-resource "ionoscloud_autoscaling_template" "autoscaling_group" {
-	availability_zone    = "AUTO"
-    cores				 = 2
-	cpu_family           = "INTEL_SKYLAKE"
-	location			 = "de/txl"
-    name                 = "test_autoscaling_group"
-    nics    {
-		lan              = ionoscloud_lan.autoscaling_group.id
-        name             = "test_autoscaling_group"
-    }
-    ram                  = 1024
-	volumes  {
-    	image            = "e309f108-b48d-11eb-b9b3-d2869b2d44d9"
-		image_password   = "test12345678"
-        name             = "test_autoscaling_group"
-		size             = 50
-    	type             = "HDD"
-	}
+
+resource ` + LanResource + ` "autoscaling_lan_2" {
+	datacenter_id    = ` + DatacenterResource + `.autoscaling_datacenter.id
+    public           = false
+    name             = "test_autoscaling_group_2"
 }
-resource "ionoscloud_autoscaling_group" "autoscaling_group" {
-	datacenter {
-       id                  = ionoscloud_datacenter.autoscaling_group.id
-    }
-	max_replica_count      = 0
-	min_replica_count      = 0
-	name				   = "updated"
+
+resource ` + AutoscalingGroupResource + `  ` + AutoscalingGroupTestResource + ` {
+	datacenter_id = ` + DatacenterResource + `.autoscaling_datacenter.id
+	max_replica_count      = 6
+	min_replica_count      = 2
+	target_replica_count   = 4
+	name				   = "%s"
 	policy  {
     	metric             = "INSTANCE_NETWORK_IN_BYTES"
-		range              = "PT24H"
+		range              = "PT12H"
         scale_in_action {
-			amount         =  1
-			amount_type    = "ABSOLUTE"
-			cooldown_period= "PT5M"
+			amount        		    =  2
+			amount_type    			= "PERCENTAGE"
+			termination_policy_type = "NEWEST_SERVER_FIRST"
+			cooldown_period			= "PT10M"
         }
-		scale_in_threshold = 33
+		scale_in_threshold = 35
     	scale_out_action {
-			amount         =  1
-			amount_type    = "ABSOLUTE"
-			cooldown_period= "PT5M"
+			amount         =  2
+			amount_type    = "PERCENTAGE"
+			cooldown_period= "PT10M"
         }
-		scale_out_threshold = 86
+		scale_out_threshold = 80
         unit                = "PER_MINUTE"
 	}
-    target_replica_count    = 1
-	template {
-		id = ionoscloud_autoscaling_template.autoscaling_group.id
-    }
+    replica_configuration {
+		availability_zone = "ZONE_1"
+		cores 			  = "3"
+		cpu_family 		  = "INTEL_XEON"
+		nics {
+			lan  		  = ` + LanResource + `.autoscaling_lan_2.id
+			name		  = "LAN NIC 2"
+			dhcp 		  = false
+		}
+		ram				  = 1024
+		volumes	{
+			image  		  = "129db64f-2291-11eb-af9f-1ee452559185"
+			name		  = "Volume 2"
+			size 		  = 40
+			ssh_key_paths = []
+			ssh_key_values= [ "ssh-rsa AAAAB3NzaC1yc2EAAAABIwAAAQEAklOUpkDHrfHY17SbrmTIpNLTGK9Tjom/BWDSU\nGPl+nafzlHDTYW7hdI4yZ5ew18JH4JW9jbhUFrviQzM7xlELEVf4h9lFX5QVkbPppSwg0cda3\nPbv7kOdJ/MTyBlWXFCR+HAo3FXRitBqxiX1nKhXpHAZsMciLq8V6RjsNAQwdsdMFvSlVK/7XA\nt3FaoJoAsncM1Q9x5+3V0Ww68/eIFmb1zuUFljQJKprrX88XypNDvjYNby6vw/Pb0rwert/En\nmZ+AW4OZPnTPI89ZPmVMLuayrD2cE86Z/il8b+gw3r3+1nKatmIkjn2so1d01QraTlMqVSsbx\nNrRFi9wrf+M7Q== user@domain.local"]
+			type		  = "HDD"
+			image_password= "passw0rdupdated"
+		}
+	}
 }
 `
