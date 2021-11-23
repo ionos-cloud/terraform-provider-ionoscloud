@@ -9,6 +9,9 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 )
 
+const dataSourceIdNatGatewayRuleResource = DataSource + "." + NatGatewayRuleResource + "." + NatGatewayDataSourceById
+const dataSourceNameNatGatewayRuleResource = DataSource + "." + NatGatewayRuleResource + "." + NatGatewayDataSourceByName
+
 func TestAccDataSourceNatGatewayRule(t *testing.T) {
 
 	resource.Test(t, resource.TestCase{
@@ -18,165 +21,50 @@ func TestAccDataSourceNatGatewayRule(t *testing.T) {
 		ProviderFactories: testAccProviderFactories,
 		Steps: []resource.TestStep{
 			{
-				Config: fmt.Sprintf(testAccDataSourceNatGatewayRuleCreateResources),
+				Config: fmt.Sprintf(testAccCheckNatGatewayRuleConfigBasic, NatGatewayRuleTestResource),
 			},
 			{
-				Config: fmt.Sprintf(testAccDataSourceNatGatewayRuleMatchId),
+				Config: fmt.Sprintf(testAccDataSourceNatGatewayRuleMatchId, NatGatewayRuleTestResource),
 				Check: resource.ComposeTestCheckFunc(
-					resource.TestCheckResourceAttr("data.ionoscloud_natgateway_rule.test_natgateway_rule_id", "name", "test_datasource_natgateway_rule"),
-					resource.TestCheckResourceAttrPair("data.ionoscloud_natgateway_rule.test_natgateway_rule_id", "public_ip", "ionoscloud_ipblock.natgateway_ips", "ips.0"),
+					resource.TestCheckResourceAttrPair(dataSourceIdNatGatewayRuleResource, "name", resourceNatGatewayRuleResource, "name"),
+					resource.TestCheckResourceAttrPair(dataSourceIdNatGatewayRuleResource, "type", resourceNatGatewayRuleResource, "type"),
+					resource.TestCheckResourceAttrPair(dataSourceIdNatGatewayRuleResource, "protocol", resourceNatGatewayRuleResource, "protocol"),
+					resource.TestCheckResourceAttrPair(dataSourceIdNatGatewayRuleResource, "source_subnet", resourceNatGatewayRuleResource, "source_subnet"),
+					resource.TestCheckResourceAttrPair(dataSourceIdNatGatewayRuleResource, "public_ip", resourceNatGatewayRuleResource, "public_ip"),
+					resource.TestCheckResourceAttrPair(dataSourceIdNatGatewayRuleResource, "target_subnet", resourceNatGatewayRuleResource, "target_subnet"),
+					resource.TestCheckResourceAttrPair(dataSourceIdNatGatewayRuleResource, "target_port_range.0.start", resourceNatGatewayRuleResource, "target_port_range.0.start"),
+					resource.TestCheckResourceAttrPair(dataSourceIdNatGatewayRuleResource, "target_port_range.0.end", resourceNatGatewayRuleResource, "target_port_range.0.end"),
 				),
 			},
 			{
-				Config: fmt.Sprintf(testAccDataSourceNatGatewayRuleMatchName),
+				Config: fmt.Sprintf(testAccDataSourceNatGatewayRuleMatchName, NatGatewayRuleTestResource),
 				Check: resource.ComposeTestCheckFunc(
-					resource.TestCheckResourceAttr("data.ionoscloud_natgateway_rule.test_natgateway_rule_name", "name", "test_datasource_natgateway_rule"),
-					resource.TestCheckResourceAttrPair("data.ionoscloud_natgateway_rule.test_natgateway_rule_name", "public_ip", "ionoscloud_ipblock.natgateway_ips", "ips.0"),
+					resource.TestCheckResourceAttrPair(dataSourceNameNatGatewayRuleResource, "name", resourceNatGatewayRuleResource, "name"),
+					resource.TestCheckResourceAttrPair(dataSourceNameNatGatewayRuleResource, "type", resourceNatGatewayRuleResource, "type"),
+					resource.TestCheckResourceAttrPair(dataSourceNameNatGatewayRuleResource, "protocol", resourceNatGatewayRuleResource, "protocol"),
+					resource.TestCheckResourceAttrPair(dataSourceNameNatGatewayRuleResource, "source_subnet", resourceNatGatewayRuleResource, "source_subnet"),
+					resource.TestCheckResourceAttrPair(dataSourceNameNatGatewayRuleResource, "public_ip", resourceNatGatewayRuleResource, "public_ip"),
+					resource.TestCheckResourceAttrPair(dataSourceNameNatGatewayRuleResource, "target_subnet", resourceNatGatewayRuleResource, "target_subnet"),
+					resource.TestCheckResourceAttrPair(dataSourceNameNatGatewayRuleResource, "target_port_range.0.start", resourceNatGatewayRuleResource, "target_port_range.0.start"),
+					resource.TestCheckResourceAttrPair(dataSourceNameNatGatewayRuleResource, "target_port_range.0.end", resourceNatGatewayRuleResource, "target_port_range.0.end"),
 				),
 			},
 		},
 	})
 }
 
-const testAccDataSourceNatGatewayRuleCreateResources = `
-resource "ionoscloud_datacenter" "natgateway_datacenter" {
-  name              = "test_natgateway"
-  location          = "de/fra"
-  description       = "datacenter for hosting "
-}
-
-resource "ionoscloud_ipblock" "natgateway_ips" {
-  location = ionoscloud_datacenter.natgateway_datacenter.location
-  size = 1
-  name = "natgateway_ips"
-}
-
-resource "ionoscloud_lan" "natgateway_lan" {
-  datacenter_id = ionoscloud_datacenter.natgateway_datacenter.id
-  public        = false
-  name          = "test_natgateway_lan"
-}
-resource "ionoscloud_natgateway" "natgateway" {
-  depends_on    = [ ionoscloud_lan.natgateway_lan ]
-  datacenter_id = ionoscloud_datacenter.natgateway_datacenter.id
-  name          = "natgateway_test"
-  public_ips    = [ ionoscloud_ipblock.natgateway_ips.ips[0] ]
-  lans {
-     id          = ionoscloud_lan.natgateway_lan.id
-     gateway_ips = [ "10.12.1.2/24"]
-  }
-}
-resource "ionoscloud_natgateway_rule" "natgateway_rule" {
-  datacenter_id = ionoscloud_datacenter.natgateway_datacenter.id
-  natgateway_id = ionoscloud_natgateway.natgateway.id
-  name          = "test_datasource_natgateway_rule"
-  type          = "SNAT"
-  protocol      = "TCP"
-  source_subnet = "10.0.1.0/24"
-  public_ip     = ionoscloud_ipblock.natgateway_ips.ips[0]
-  target_subnet = "10.0.1.0/24"
-  target_port_range {
-      start = 500
-      end   = 1000
-  }
+const testAccDataSourceNatGatewayRuleMatchId = testAccCheckNatGatewayRuleConfigBasic + `
+data ` + NatGatewayRuleResource + ` ` + NatGatewayRuleDataSourceById + ` {
+  datacenter_id = ` + DatacenterResource + `.natgateway_rule_datacenter.id
+  natgateway_id = ` + NatGatewayResource + `.natgateway.id
+  id			= ` + NatGatewayRuleResource + `.` + NatGatewayRuleTestResource + `.id
 }
 `
 
-const testAccDataSourceNatGatewayRuleMatchId = `
-resource "ionoscloud_datacenter" "natgateway_datacenter" {
-  name              = "test_natgateway"
-  location          = "de/fra"
-  description       = "datacenter for hosting "
-}
-
-resource "ionoscloud_ipblock" "natgateway_ips" {
-  location = ionoscloud_datacenter.natgateway_datacenter.location
-  size = 1
-  name = "natgateway_ips"
-}
-
-resource "ionoscloud_lan" "natgateway_lan" {
-  datacenter_id = ionoscloud_datacenter.natgateway_datacenter.id
-  public        = false
-  name          = "test_natgateway_lan"
-}
-resource "ionoscloud_natgateway" "natgateway" {
-  depends_on    = [ ionoscloud_lan.natgateway_lan ]
-  datacenter_id = ionoscloud_datacenter.natgateway_datacenter.id
-  name          = "natgateway_test"
-  public_ips    = [ ionoscloud_ipblock.natgateway_ips.ips[0] ]
-  lans {
-     id          = ionoscloud_lan.natgateway_lan.id
-     gateway_ips = [ "10.12.1.2/24"]
-  }
-}
-resource "ionoscloud_natgateway_rule" "natgateway_rule" {
-  datacenter_id = ionoscloud_datacenter.natgateway_datacenter.id
-  natgateway_id = ionoscloud_natgateway.natgateway.id
-  name          = "test_datasource_natgateway_rule"
-  type          = "SNAT"
-  protocol      = "TCP"
-  source_subnet = "10.0.1.0/24"
-  public_ip     = ionoscloud_ipblock.natgateway_ips.ips[0]
-  target_subnet = "10.0.1.0/24"
-  target_port_range {
-      start = 500
-      end   = 1000
-  }
-}
-
-data "ionoscloud_natgateway_rule" "test_natgateway_rule_id" {
-  datacenter_id = ionoscloud_datacenter.natgateway_datacenter.id
-  natgateway_id = ionoscloud_natgateway.natgateway.id
-  id			= ionoscloud_natgateway_rule.natgateway_rule.id
-}
-`
-
-const testAccDataSourceNatGatewayRuleMatchName = `
-resource "ionoscloud_datacenter" "natgateway_datacenter" {
-  name              = "test_natgateway"
-  location          = "de/fra"
-  description       = "datacenter for hosting "
-}
-
-resource "ionoscloud_ipblock" "natgateway_ips" {
-  location = ionoscloud_datacenter.natgateway_datacenter.location
-  size = 1
-  name = "natgateway_ips"
-}
-
-resource "ionoscloud_lan" "natgateway_lan" {
-  datacenter_id = ionoscloud_datacenter.natgateway_datacenter.id
-  public        = false
-  name          = "test_natgateway_lan"
-}
-resource "ionoscloud_natgateway" "natgateway" {
-  depends_on    = [ ionoscloud_lan.natgateway_lan ]
-  datacenter_id = ionoscloud_datacenter.natgateway_datacenter.id
-  name          = "natgateway_test"
-  public_ips    = [ ionoscloud_ipblock.natgateway_ips.ips[0] ]
-  lans {
-     id          = ionoscloud_lan.natgateway_lan.id
-     gateway_ips = [ "10.12.1.2/24"]
-  }
-}
-resource "ionoscloud_natgateway_rule" "natgateway_rule" {
-  datacenter_id = ionoscloud_datacenter.natgateway_datacenter.id
-  natgateway_id = ionoscloud_natgateway.natgateway.id
-  name          = "test_datasource_natgateway_rule"
-  type          = "SNAT"
-  protocol      = "TCP"
-  source_subnet = "10.0.1.0/24"
-  public_ip     = ionoscloud_ipblock.natgateway_ips.ips[0]
-  target_subnet = "10.0.1.0/24"
-  target_port_range {
-      start = 500
-      end   = 1000
-  }
-}
-data "ionoscloud_natgateway_rule" "test_natgateway_rule_name" {
-  datacenter_id = ionoscloud_datacenter.natgateway_datacenter.id
-  natgateway_id = ionoscloud_natgateway.natgateway.id
-  name			= "test_datasource_"
+const testAccDataSourceNatGatewayRuleMatchName = testAccCheckNatGatewayRuleConfigBasic + `
+data ` + NatGatewayRuleResource + ` ` + NatGatewayRuleDataSourceByName + ` {
+  datacenter_id = ` + DatacenterResource + `.natgateway_rule_datacenter.id
+  natgateway_id = ` + NatGatewayResource + `.natgateway.id
+  name			= ` + NatGatewayRuleResource + `.` + NatGatewayRuleTestResource + `.name
 }
 `

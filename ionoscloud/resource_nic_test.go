@@ -57,7 +57,7 @@ func testAccCheckNicDestroyCheck(s *terraform.State) error {
 	}
 
 	for _, rs := range s.RootModule().Resources {
-		if rs.Type != nicResource {
+		if rs.Type != NicResource {
 			continue
 		}
 

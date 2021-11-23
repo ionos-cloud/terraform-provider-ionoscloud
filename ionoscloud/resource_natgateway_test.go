@@ -12,9 +12,10 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
 )
 
-func TestAccNatGateway_Basic(t *testing.T) {
+const resourceNatGatewayResource = NatGatewayResource + "." + NatGatewayTestResource
+
+func TestAccNatGatewayBasic(t *testing.T) {
 	var natGateway ionoscloud.NatGateway
-	natGatewayName := "natGateway"
 
 	resource.Test(t, resource.TestCase{
 		PreCheck: func() {
@@ -24,18 +25,24 @@ func TestAccNatGateway_Basic(t *testing.T) {
 		CheckDestroy:      testAccCheckNatGatewayDestroyCheck,
 		Steps: []resource.TestStep{
 			{
-				Config: fmt.Sprintf(testAccCheckNatGatewayConfigBasic, natGatewayName),
+				Config: fmt.Sprintf(testAccCheckNatGatewayConfigBasic, NatGatewayTestResource),
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheckNatGatewayExists("ionoscloud_natgateway.natgateway", &natGateway),
-					resource.TestCheckResourceAttr("ionoscloud_natgateway.natgateway", "name", natGatewayName),
-					resource.TestCheckResourceAttrPair("ionoscloud_natgateway.natgateway", "public_ips.0", "ionoscloud_ipblock.natgateway_ips", "ips.0"),
+					testAccCheckNatGatewayExists(resourceNatGatewayResource, &natGateway),
+					resource.TestCheckResourceAttr(resourceNatGatewayResource, "name", NatGatewayTestResource),
+					resource.TestCheckResourceAttrPair(resourceNatGatewayResource, "public_ips.0", IpBLockResource+".natgateway_ips", "ips.0"),
+					resource.TestCheckResourceAttrPair(resourceNatGatewayResource, "lans.0.id", LanResource+".natgateway_lan", "id"),
+					resource.TestCheckResourceAttr(resourceNatGatewayResource, "lans.0.gateway_ips.0", "10.11.2.5/32"),
 				),
 			},
 			{
-				Config: fmt.Sprintf(testAccCheckNatGatewayConfigUpdate),
+				Config: fmt.Sprintf(testAccCheckNatGatewayConfigUpdate, UpdatedResources),
 				Check: resource.ComposeTestCheckFunc(
-					resource.TestCheckResourceAttr("ionoscloud_natgateway.natgateway", "name", "updated"),
-					resource.TestCheckResourceAttrPair("ionoscloud_natgateway.natgateway", "public_ips.0", "ionoscloud_ipblock.natgateway_ips", "ips.0"),
+					testAccCheckNatGatewayExists(resourceNatGatewayResource, &natGateway),
+					resource.TestCheckResourceAttr(resourceNatGatewayResource, "name", UpdatedResources),
+					resource.TestCheckResourceAttrPair(resourceNatGatewayResource, "public_ips.0", IpBLockResource+".natgateway_ips", "ips.0"),
+					resource.TestCheckResourceAttrPair(resourceNatGatewayResource, "public_ips.1", IpBLockResource+".natgateway_ips", "ips.1"),
+					resource.TestCheckResourceAttrPair(resourceNatGatewayResource, "lans.0.id", LanResource+".natgateway_lan_updated", "id"),
+					resource.TestCheckResourceAttr(resourceNatGatewayResource, "lans.0.gateway_ips.0", "10.11.2.6/32"),
 				),
 			},
 		},
@@ -51,7 +58,7 @@ func testAccCheckNatGatewayDestroyCheck(s *terraform.State) error {
 	}
 
 	for _, rs := range s.RootModule().Resources {
-		if rs.Type != "ionoscloud_datacenter" {
+		if rs.Type != NatGatewayResource {
 			continue
 		}
 
@@ -106,57 +113,66 @@ func testAccCheckNatGatewayExists(n string, natGateway *ionoscloud.NatGateway) r
 }
 
 const testAccCheckNatGatewayConfigBasic = `
-resource "ionoscloud_datacenter" "natgateway_datacenter" {
+resource ` + DatacenterResource + ` "natgateway_datacenter" {
   name              = "test_natgateway"
   location          = "de/fra"
   description       = "datacenter for hosting "
 }
 
-resource "ionoscloud_ipblock" "natgateway_ips" {
-  location = ionoscloud_datacenter.natgateway_datacenter.location
-  size = 1
+resource ` + IpBLockResource + ` "natgateway_ips" {
+  location = ` + DatacenterResource + `.natgateway_datacenter.location
+  size = 2
   name = "natgateway_ips"
 }
 
-resource "ionoscloud_lan" "natgateway_lan" {
-  datacenter_id = ionoscloud_datacenter.natgateway_datacenter.id 
+resource ` + LanResource + ` "natgateway_lan" {
+  datacenter_id = ` + DatacenterResource + `.natgateway_datacenter.id 
   public        = false
   name          = "test_natgateway_lan"
 }
 
-resource "ionoscloud_natgateway" "natgateway" { 
-  datacenter_id = ionoscloud_datacenter.natgateway_datacenter.id
-  name          = "%s"
-  public_ips    = [ ionoscloud_ipblock.natgateway_ips.ips[0] ]
+resource ` + NatGatewayResource + ` ` + NatGatewayTestResource + ` { 
+  datacenter_id = ` + DatacenterResource + `.natgateway_datacenter.id
+  name          = "%s" 
+  public_ips    = [ ` + IpBLockResource + `.natgateway_ips.ips[0] ]
   lans {
-     id          = ionoscloud_lan.natgateway_lan.id
+     id          = ` + LanResource + `.natgateway_lan.id
+     gateway_ips = [ "10.11.2.5/32"] 
   }
 }`
 
 const testAccCheckNatGatewayConfigUpdate = `
-resource "ionoscloud_datacenter" "natgateway_datacenter" {
+resource ` + DatacenterResource + ` "natgateway_datacenter" {
   name              = "test_natgateway"
   location          = "de/fra"
   description       = "datacenter for hosting "
 }
 
-resource "ionoscloud_ipblock" "natgateway_ips" {
-  location = ionoscloud_datacenter.natgateway_datacenter.location
-  size = 1
+resource ` + IpBLockResource + ` "natgateway_ips" {
+  location = ` + DatacenterResource + `.natgateway_datacenter.location
+  size = 2
   name = "natgateway_ips"
 }
 
-resource "ionoscloud_lan" "natgateway_lan" {
-  datacenter_id = ionoscloud_datacenter.natgateway_datacenter.id 
+resource ` + LanResource + ` "natgateway_lan" {
+  datacenter_id = ` + DatacenterResource + `.natgateway_datacenter.id 
   public        = false
   name          = "test_natgateway_lan"
 }
 
-resource "ionoscloud_natgateway" "natgateway" { 
-  datacenter_id = ionoscloud_datacenter.natgateway_datacenter.id
-  name          = "updated" 
-  public_ips    = [ ionoscloud_ipblock.natgateway_ips.ips[0] ]
+
+resource ` + LanResource + ` "natgateway_lan_updated" {
+  datacenter_id = ` + DatacenterResource + `.natgateway_datacenter.id 
+  public        = false
+  name          = "test_natgateway_lan"
+}
+
+resource ` + NatGatewayResource + ` ` + NatGatewayTestResource + ` { 
+  datacenter_id = ` + DatacenterResource + `.natgateway_datacenter.id
+  name          = "%s" 
+  public_ips    = [ ` + IpBLockResource + `.natgateway_ips.ips[0], ` + IpBLockResource + `.natgateway_ips.ips[1] ]
   lans {
-     id          = ionoscloud_lan.natgateway_lan.id
+     id          = ` + LanResource + `.natgateway_lan_updated.id
+     gateway_ips = [ "10.11.2.6/32"] 
   }
 }`
