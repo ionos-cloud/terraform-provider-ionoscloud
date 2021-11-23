@@ -127,7 +127,7 @@ func Test_dataSourceNicRead(t *testing.T) {
 	}
 }
 
-const dataSourceNicById = nicResource + ".test_nic_data"
+const dataSourceNicById = NicResource + ".test_nic_data"
 
 const testAccDataSourceNicMatchId = testAccCheckNicConfigBasic + `
 data ` + NicResource + ` test_nic_data {
