@@ -72,7 +72,64 @@ func dataSourceNIC() *schema.Resource {
 		Timeouts: &resourceDefaultTimeouts,
 	}
 }
-
+func getNicDataSourceSchema() map[string]*schema.Schema {
+	return map[string]*schema.Schema{
+		"server_id": {
+			Type:         schema.TypeString,
+			Required:     true,
+			ValidateFunc: validation.All(validation.StringIsNotWhiteSpace),
+		},
+		"datacenter_id": {
+			Type:         schema.TypeString,
+			Required:     true,
+			ValidateFunc: validation.All(validation.StringIsNotWhiteSpace),
+		},
+		"id": {
+			Type:     schema.TypeString,
+			Optional: true,
+		},
+		"name": {
+			Type:     schema.TypeString,
+			Optional: true,
+		},
+		"lan": {
+			Type:     schema.TypeInt,
+			Optional: true,
+		},
+		"dhcp": {
+			Type:     schema.TypeBool,
+			Optional: true,
+			Default:  true,
+		},
+		"ips": {
+			Type:     schema.TypeList,
+			Elem:     &schema.Schema{Type: schema.TypeString},
+			Computed: true,
+			Optional: true,
+		},
+		"firewall_active": {
+			Type:     schema.TypeBool,
+			Optional: true,
+		},
+		"firewall_type": {
+			Type:     schema.TypeString,
+			Optional: true,
+			Computed: true,
+		},
+		"mac": {
+			Type:     schema.TypeString,
+			Computed: true,
+		},
+		"device_number": {
+			Type:     schema.TypeInt,
+			Computed: true,
+		},
+		"pci_slot": {
+			Type:     schema.TypeInt,
+			Computed: true,
+		},
+	}
+}
 func dataSourceNicRead(ctx context.Context, data *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	client := meta.(*ionoscloud.APIClient)
 
