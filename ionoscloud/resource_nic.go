@@ -226,32 +226,32 @@ func NicSetData(d *schema.ResourceData, nic *ionoscloud.Nic) error {
 		log.Printf("[INFO] LAN ON NIC: %d", nic.Properties.Lan)
 		if nic.Properties.Dhcp != nil {
 			if err := d.Set("dhcp", *nic.Properties.Dhcp); err != nil {
-				return err
+				return fmt.Errorf("error setting dhcp %w", err)
 			}
 		}
 		if nic.Properties.Lan != nil {
 			if err := d.Set("lan", *nic.Properties.Lan); err != nil {
-				return err
+				return fmt.Errorf("error setting lan %w", err)
 			}
 		}
 		if nic.Properties.Name != nil {
 			if err := d.Set("name", *nic.Properties.Name); err != nil {
-				return err
+				return fmt.Errorf("error setting name %w", err)
 			}
 		}
 		if nic.Properties.Ips != nil && len(*nic.Properties.Ips) > 0 {
 			if err := d.Set("ips", *nic.Properties.Ips); err != nil {
-				return err
+				return fmt.Errorf("error setting ips %w", err)
 			}
 		}
 		if nic.Properties.FirewallActive != nil {
 			if err := d.Set("firewall_active", *nic.Properties.FirewallActive); err != nil {
-				return err
+				return fmt.Errorf("error setting firewall_active %w", err)
 			}
 		}
 		if nic.Properties.Mac != nil {
 			if err := d.Set("mac", *nic.Properties.Mac); err != nil {
-				return err
+				return fmt.Errorf("error setting mac %w", err)
 			}
 		}
 	}

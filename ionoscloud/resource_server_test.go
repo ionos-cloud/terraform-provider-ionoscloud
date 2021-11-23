@@ -194,6 +194,54 @@ func TestAccServerWithSnapshot(t *testing.T) {
 	})
 }
 
+func TestAccServerWithICMP(t *testing.T) {
+	var server ionoscloud.Server
+
+	resource.Test(t, resource.TestCase{
+		PreCheck: func() {
+			testAccPreCheck(t)
+		},
+		ProviderFactories: testAccProviderFactories,
+		CheckDestroy:      testAccCheckServerDestroyCheck,
+		Steps: []resource.TestStep{
+			{
+				Config: testAccCheckServerNoFirewall,
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckServerExists(ServerResource+"."+ServerTestResource, &server),
+					resource.TestCheckResourceAttr(ServerResource+"."+ServerTestResource, "name", ServerTestResource),
+					resource.TestCheckResourceAttr(ServerResource+"."+ServerTestResource, "cores", "1"),
+					resource.TestCheckResourceAttr(ServerResource+"."+ServerTestResource, "ram", "1024"),
+					resource.TestCheckResourceAttr(ServerResource+"."+ServerTestResource, "availability_zone", "ZONE_1"),
+					resource.TestCheckResourceAttr(ServerResource+"."+ServerTestResource, "cpu_family", "AMD_OPTERON"),
+					testImageNotNull(ServerResource, "boot_image"),
+					resource.TestCheckResourceAttr(ServerResource+"."+ServerTestResource, "image_password", "K3tTj8G14a3EgKyNeeiY"),
+					resource.TestCheckResourceAttr(ServerResource+"."+ServerTestResource, "volume.0.name", "system"),
+					resource.TestCheckResourceAttr(ServerResource+"."+ServerTestResource, "volume.0.size", "5"),
+					resource.TestCheckResourceAttr(ServerResource+"."+ServerTestResource, "volume.0.disk_type", "HDD"),
+					resource.TestCheckResourceAttrPair(ServerResource+"."+ServerTestResource, "nic.0.lan", LanResource+"."+LanTestResource, "id"),
+					resource.TestCheckResourceAttr(ServerResource+"."+ServerTestResource, "nic.0.name", "system"),
+					resource.TestCheckResourceAttr(ServerResource+"."+ServerTestResource, "nic.0.dhcp", "true"),
+					resource.TestCheckResourceAttr(ServerResource+"."+ServerTestResource, "nic.0.firewall_active", "false"),
+					resource.TestCheckResourceAttr(ServerResource+"."+ServerTestResource, "nic.0.firewall.0.icmp_type", "10"),
+					resource.TestCheckResourceAttr(ServerResource+"."+ServerTestResource, "nic.0.firewall.0.icmp_code", "1"),
+				),
+			},
+			{
+				Config: testAccCheckServerICMP,
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckServerExists(ServerResource+"."+ServerTestResource, &server),
+					resource.TestCheckResourceAttr(ServerResource+"."+ServerTestResource, "nic.0.dhcp", "true"),
+					resource.TestCheckResourceAttr(ServerResource+"."+ServerTestResource, "nic.0.firewall_active", "true"),
+					resource.TestCheckResourceAttr(ServerResource+"."+ServerTestResource, "nic.0.firewall.0.protocol", "ICMP"),
+					resource.TestCheckResourceAttr(ServerResource+"."+ServerTestResource, "nic.0.firewall.0.name", ServerTestResource),
+					resource.TestCheckResourceAttr(ServerResource+"."+ServerTestResource, "nic.0.firewall.0.icmp_type", "12"),
+					resource.TestCheckResourceAttr(ServerResource+"."+ServerTestResource, "nic.0.firewall.0.icmp_code", "0"),
+				),
+			},
+		},
+	})
+}
+
 func testAccCheckServerDestroyCheck(s *terraform.State) error {
 	client := testAccProvider.Meta().(*ionoscloud.APIClient)
 
@@ -503,3 +551,80 @@ resource ` + ServerResource + ` ` + ServerTestResource + ` {
   }
 }
 `
+
+const testAccCheckServerNoFirewall = `
+resource ` + DatacenterResource + ` ` + DatacenterTestResource + ` {
+	name       = "server-test"
+	location = "us/las"
+}
+resource ` + LanResource + ` ` + LanTestResource + ` {
+  datacenter_id = ` + DatacenterResource + `.` + DatacenterTestResource + `.id
+  public = true
+  name = "public"
+}
+resource ` + ServerResource + ` ` + ServerTestResource + ` {
+  name = "` + ServerTestResource + `"
+  datacenter_id = ` + DatacenterResource + `.` + DatacenterTestResource + `.id
+  cores = 1
+  ram = 1024
+  availability_zone = "ZONE_1"
+  cpu_family = "AMD_OPTERON"
+  image_name ="Debian-10-cloud-init.qcow2"
+  image_password = "K3tTj8G14a3EgKyNeeiY"
+  volume {
+    name = "system"
+    size = 5
+	disk_type = "HDD"
+}
+  nic {
+    lan = ` + LanResource + `.` + LanTestResource + `.id
+    name = "system"
+    dhcp = true
+    firewall_active = false
+    firewall {
+      protocol         = "ICMP"
+      name             = "` + ServerTestResource + `"
+      icmp_type        = "10"
+      icmp_code        = "1"
+	  }
+  }
+}`
+
+const testAccCheckServerICMP = `
+resource ` + DatacenterResource + ` ` + DatacenterTestResource + ` {
+	name       = "server-test"
+	location = "us/las"
+}
+
+resource ` + LanResource + ` ` + LanTestResource + ` {
+  datacenter_id = ` + DatacenterResource + `.` + DatacenterTestResource + `.id
+  public = true
+  name = "public"
+}
+resource ` + ServerResource + ` ` + ServerTestResource + ` {
+  name = "` + ServerTestResource + `"
+  datacenter_id = ` + DatacenterResource + `.` + DatacenterTestResource + `.id
+  cores = 1
+  ram = 1024
+  availability_zone = "ZONE_1"
+  cpu_family = "AMD_OPTERON"
+  image_name ="Debian-10-cloud-init.qcow2"
+  image_password = "K3tTj8G14a3EgKyNeeiY"
+  volume {
+    name = "system"
+    size = 5
+	disk_type = "HDD"
+}
+  nic {
+    lan             = ` + LanResource + `.` + LanTestResource + `.id
+    name 			= "system"
+    dhcp            = true
+    firewall_active = true
+    firewall {
+      protocol         = "ICMP"
+      name             = "` + ServerTestResource + `"
+      icmp_type        = "12"
+      icmp_code        = "0"
+	  }
+    }
+}`
