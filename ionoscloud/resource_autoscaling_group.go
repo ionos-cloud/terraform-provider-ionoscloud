@@ -444,7 +444,7 @@ func checkAction(ctx context.Context, client *autoscalingService.Client, d *sche
 
 	//wait for completion of triggered action
 	for {
-		log.Printf("[INFO] Waiting for action %s to be ready...", actionId)
+		log.Printf("[INFO] waiting for action %s to be ready...", actionId)
 
 		actionSuccessful, rsErr := actionReady(ctx, client, d, actionId)
 

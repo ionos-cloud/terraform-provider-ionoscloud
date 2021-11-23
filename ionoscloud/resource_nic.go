@@ -9,6 +9,7 @@ import (
 	ionoscloud "github.com/ionos-cloud/sdk-go/v6"
 	"log"
 	"strings"
+	"time"
 )
 
 func resourceNic() *schema.Resource {
@@ -165,25 +166,63 @@ func resourceNicUpdate(ctx context.Context, d *schema.ResourceData, meta interfa
 func resourceNicDelete(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	client := meta.(SdkBundle).CloudApiClient
 
-	dcid := d.Get("datacenter_id").(string)
-	srvid := d.Get("server_id").(string)
-	nicid := d.Id()
-	apiResponse, err := client.NetworkInterfacesApi.DatacentersServersNicsDelete(ctx, dcid, srvid, nicid).Execute()
+	dcId := d.Get("datacenter_id").(string)
+	srvId := d.Get("server_id").(string)
+	nicId := d.Id()
+	apiResponse, err := client.NetworkInterfacesApi.DatacentersServersNicsDelete(ctx, dcId, srvId, nicId).Execute()
 	logApiRequestTime(apiResponse)
 
 	if err != nil {
 		diags := diag.FromErr(fmt.Errorf("an error occured while deleting a nic dcId %s ID %s %s", d.Get("datacenter_id").(string), d.Id(), err))
 		return diags
 	}
-	// Wait, catching any errors
-	_, errState := getStateChangeConf(meta, d, apiResponse.Header.Get("Location"), schema.TimeoutDelete).WaitForStateContext(ctx)
-	if errState != nil {
-		diags := diag.FromErr(errState)
-		return diags
+
+	if err := waitForNicDeletion(ctx, client, d); err != nil {
+		return diag.FromErr(err)
 	}
 
 	d.SetId("")
 	return nil
+}
+
+func resourceNicImport(ctx context.Context, d *schema.ResourceData, meta interface{}) ([]*schema.ResourceData, error) {
+	parts := strings.Split(d.Id(), "/")
+	if len(parts) != 3 || parts[0] == "" || parts[1] == "" {
+		return nil, fmt.Errorf("invalid import id %q. Expecting {datacenter}/{server}/{nic}", d.Id())
+	}
+	dcId := parts[0]
+	sId := parts[1]
+	nicId := parts[2]
+
+	client := meta.(*ionoscloud.APIClient)
+
+	nic, apiResponse, err := client.NetworkInterfacesApi.DatacentersServersNicsFindById(ctx, dcId, sId, nicId).Execute()
+	logApiRequestTime(apiResponse)
+
+	if err != nil {
+		if !httpNotFound(apiResponse) {
+			d.SetId("")
+			return nil, fmt.Errorf("an error occured while trying to fetch the nic %q", nicId)
+		}
+		return nil, fmt.Errorf("lan does not exist%q", nicId)
+	}
+
+	err = d.Set("datacenter_id", dcId)
+	if err != nil {
+		return nil, err
+	}
+	err = d.Set("server_id", sId)
+	if err != nil {
+		return nil, err
+	}
+
+	if err := NicSetData(d, &nic); err != nil {
+		return nil, err
+	}
+
+	log.Printf("[INFO] nic found: %+v", nic)
+
+	return []*schema.ResourceData{d}, nil
 }
 
 func getNicData(d *schema.ResourceData, path string) ionoscloud.Nic {
@@ -286,42 +325,47 @@ func NicSetData(d *schema.ResourceData, nic *ionoscloud.Nic) error {
 	return nil
 }
 
-func resourceNicImport(ctx context.Context, d *schema.ResourceData, meta interface{}) ([]*schema.ResourceData, error) {
-	parts := strings.Split(d.Id(), "/")
-	if len(parts) != 3 || parts[0] == "" || parts[1] == "" {
-		return nil, fmt.Errorf("invalid import id %q. Expecting {datacenter}/{server}/{nic}", d.Id())
+func waitForNicDeletion(ctx context.Context, client *ionoscloud.APIClient, d *schema.ResourceData) error {
+	for {
+		log.Printf("[INFO] waiting for nic %s to be deleted...", d.Id())
+
+		nDeleted, dsErr := nicDeleted(ctx, client, d)
+
+		if dsErr != nil {
+			return fmt.Errorf("error while checking deletion status of nic %s: %s", d.Id(), dsErr)
+		}
+
+		if nDeleted {
+			log.Printf("[INFO] successfully deleted nic: %s", d.Id())
+			break
+		}
+
+		select {
+		case <-time.After(SleepInterval):
+			log.Printf("[INFO] trying again ...")
+		case <-ctx.Done():
+			log.Printf("[INFO] nic deletion timed out")
+			return fmt.Errorf("nic deletion timed out! WARNING: your nic will still probably be deleted after some time but the terraform state won't reflect that; check your Ionos Cloud account for updates")
+		}
 	}
-	dcId := parts[0]
-	sId := parts[1]
-	nicId := parts[2]
+	return nil
+}
 
-	client := meta.(*ionoscloud.APIClient)
+func nicDeleted(ctx context.Context, client *ionoscloud.APIClient, d *schema.ResourceData) (bool, error) {
+	dcId := d.Get("datacenter_id").(string)
+	srvId := d.Get("server_id").(string)
+	nicId := d.Id()
 
-	nic, apiResponse, err := client.NetworkInterfacesApi.DatacentersServersNicsFindById(ctx, dcId, sId, nicId).Execute()
+	rsp, apiResponse, err := client.NetworkInterfacesApi.DatacentersServersNicsFindById(ctx, dcId, srvId, nicId).Execute()
 	logApiRequestTime(apiResponse)
 
 	if err != nil {
-		if !httpNotFound(apiResponse) {
-			d.SetId("")
-			return nil, fmt.Errorf("an error occured while trying to fetch the nic %q", nicId)
+		if apiResponse != nil && apiResponse.Response != nil && apiResponse.StatusCode == 404 {
+			log.Printf("[INFO] nic deleted %s", d.Id())
+			return true, nil
 		}
-		return nil, fmt.Errorf("lan does not exist%q", nicId)
+		return true, fmt.Errorf("error checking nic deletion status: %s", err)
 	}
-
-	err = d.Set("datacenter_id", dcId)
-	if err != nil {
-		return nil, err
-	}
-	err = d.Set("server_id", sId)
-	if err != nil {
-		return nil, err
-	}
-
-	if err := NicSetData(d, &nic); err != nil {
-		return nil, err
-	}
-
-	log.Printf("[INFO] nic found: %+v", nic)
-
-	return []*schema.ResourceData{d}, nil
+	log.Printf("[INFO] nic %s not deleted yet; nic status: %+v", d.Id(), *rsp.Metadata.State)
+	return false, nil
 }
