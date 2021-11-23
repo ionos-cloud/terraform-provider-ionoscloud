@@ -292,7 +292,7 @@ func resourceAutoscalingGroupCreate(ctx context.Context, d *schema.ResourceData,
 		return diags
 	}
 
-	log.Printf("[DEBUG] autoscaling group data extracted: %+v", *group)
+	log.Printf("[DEBUG] autoscaling group data extracted: %+v", *group.Properties)
 
 	autoscalingGroup, _, err := client.CreateGroup(ctx, *group)
 
@@ -350,7 +350,7 @@ func resourceAutoscalingGroupUpdate(ctx context.Context, d *schema.ResourceData,
 		return diag.FromErr(err)
 	}
 
-	log.Printf("[DEBUG] autoscaling group data extracted: %+v", *group)
+	log.Printf("[DEBUG] autoscaling group data extracted: %+v", *group.Properties)
 
 	_, _, err = client.UpdateGroup(ctx, d.Id(), *group)
 

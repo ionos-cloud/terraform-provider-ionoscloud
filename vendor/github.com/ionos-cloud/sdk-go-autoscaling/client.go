@@ -91,7 +91,6 @@ func NewAPIClient(cfg *Configuration) *APIClient {
 	}
 	cfg.HTTPClient = &http.Client{Transport: tr}
 
-
 	return c
 }
 

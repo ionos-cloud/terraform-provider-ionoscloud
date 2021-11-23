@@ -15,58 +15,58 @@ Manages an Autoscaling Group on IonosCloud.
 ```hcl
 
 resource "ionoscloud_datacenter" "datacenter_example" {
-   name     = "datacenter_example"
-   location = "de/fkb"
+    name     = "datacenter_example"
+    location = "de/fkb"
 }
 resource "ionoscloud_lan" "lan_example" {
-	datacenter_id    = ionoscloud_datacenter.datacenter_example.id
+    datacenter_id    = ionoscloud_datacenter.datacenter_example.id
     public           = false
     name             = "lan_example"
 }
 
 resource "ionoscloud_autoscaling_group" "autoscaling_group_example" {
-	datacenter_id = ionoscloud_datacenter.datacenter_example.id
-	max_replica_count      = 5
-	min_replica_count      = 1
-	target_replica_count   = 2
-	name				   = "autoscaling_group_example"
-	policy {
-    	metric             = "INSTANCE_CPU_UTILIZATION_AVERAGE"
-		range              = "PT24H"
+    datacenter_id = ionoscloud_datacenter.datacenter_example.id
+    max_replica_count      = 5
+    min_replica_count      = 1
+    target_replica_count   = 2
+    name				   = "autoscaling_group_example"
+    policy {
+        metric             = "INSTANCE_CPU_UTILIZATION_AVERAGE"
+        range              = "PT24H"
         scale_in_action {
-			amount        		    =  1
-			amount_type    			= "ABSOLUTE"
-			termination_policy_type = "OLDEST_SERVER_FIRST"
-			cooldown_period			= "PT5M"
+            amount        		    =  1
+            amount_type    			= "ABSOLUTE"
+            termination_policy_type = "OLDEST_SERVER_FIRST"
+            cooldown_period			= "PT5M"
         }
-		scale_in_threshold = 33
-    	scale_out_action  {
-			amount          =  1
-			amount_type     = "ABSOLUTE"
-			cooldown_period = "PT5M"
+        scale_in_threshold = 33
+        scale_out_action  {
+            amount          =  1
+            amount_type     = "ABSOLUTE"
+            cooldown_period = "PT5M"
         }
-		scale_out_threshold = 77
+        scale_out_threshold = 77
         unit                = "PER_HOUR"
 	}
     replica_configuration {
-		availability_zone = "AUTO"
-		cores 			  = "2"
-		cpu_family 		  = "INTEL_XEON"
-		nics {
-			lan  		  = ionoscloud_lan.lan_example.id
-			name		  = "nic_example"
-			dhcp 		  = true
+        availability_zone = "AUTO"
+        cores 			  = "2"
+        cpu_family 		  = "INTEL_XEON"
+        nics {
+            lan  		  = ionoscloud_lan.lan_example.id
+            name		  = "nic_example"
+            dhcp 		  = true
 		}
-		ram				  = 2048
-		volumes	{
-			image  		  = "ee89912b-2290-11eb-af9f-1ee452559185"
-			name		  = "volume_example"
-			size 		  = 30
-			ssh_key_paths = [ "PATH_TO/.ssh/id_rsa.pub"]
-			ssh_key_values= [ "ssh-rsa AAAAB3NzaC1yc2EAAAABIwAAAQEAklOUpkDHrfHY17SbrmTIpNLTGK9Tjom/BWDSU\nGPl+nafzlHDTYW7hdI4yZ5ew18JH4JW9jbhUFrviQzM7xlELEVf4h9lFX5QVkbPppSwg0cda3\nPbv7kOdJ/MTyBlWXFCR+HAo3FXRitBqxiX1nKhXpHAZsMciLq8V6RjsNAQwdsdMFvSlVK/7XA\nt3FaoJoAsncM1Q9x5+3V0Ww68/eIFmb1zuUFljQJKprrX88XypNDvjYNby6vw/Pb0rwert/En\nmZ+AW4OZPnTPI89ZPmVMLuayrD2cE86Z/il8b+gw3r3+1nKatmIkjn2so1d01QraTlMqVSsbx\nNrRFi9wrf+M7Q== user@domain.local"]
-			type		  = "HDD"
-			user_data	  = "ZWNobyAiSGVsbG8sIFdvcmxkIgo="
-			image_password= "passw0rd"
+        ram				  = 2048
+        volumes	{
+            image  		  = "ee89912b-2290-11eb-af9f-1ee452559185"
+            name		  = "volume_example"
+            size 		  = 30
+            ssh_key_paths = [ "PATH_TO/.ssh/id_rsa.pub"]
+            ssh_key_values= [ "ssh-rsa AAAAB3NzaC1yc2EAAAABIwAAAQEAklOUpkDHrfHY17SbrmTIpNLTGK9Tjom/BWDSU\nGPl+nafzlHDTYW7hdI4yZ5ew18JH4JW9jbhUFrviQzM7xlELEVf4h9lFX5QVkbPppSwg0cda3\nPbv7kOdJ/MTyBlWXFCR+HAo3FXRitBqxiX1nKhXpHAZsMciLq8V6RjsNAQwdsdMFvSlVK/7XA\nt3FaoJoAsncM1Q9x5+3V0Ww68/eIFmb1zuUFljQJKprrX88XypNDvjYNby6vw/Pb0rwert/En\nmZ+AW4OZPnTPI89ZPmVMLuayrD2cE86Z/il8b+gw3r3+1nKatmIkjn2so1d01QraTlMqVSsbx\nNrRFi9wrf+M7Q== user@domain.local"]
+            type		  = "HDD"
+            user_data	  = "ZWNobyAiSGVsbG8sIFdvcmxkIgo="
+            image_password= "passw0rd"
 		}
 	}
 }

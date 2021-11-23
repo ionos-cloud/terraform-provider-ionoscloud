@@ -139,6 +139,14 @@ func GetAutoscalingGroupDataUpdate(d *schema.ResourceData) (*autoscaling.GroupUp
 
 	if d.HasChange("datacenter_id") {
 		return nil, fmt.Errorf("datacenter_id property is immutable and can pe used only in create requests")
+	} else {
+		if value, ok := d.GetOk("datacenter_id"); ok {
+			value := value.(string)
+			datacenter := autoscaling.Resource{
+				Id: &value,
+			}
+			group.Properties.Datacenter = &datacenter
+		}
 	}
 	return &group, nil
 }
@@ -290,12 +298,8 @@ func GetNicsData(d *schema.ResourceData) *[]autoscaling.ReplicaNic {
 					nicEntry.Name = &value
 				}
 
-				if value, ok := d.GetOk(fmt.Sprintf("replica_configuration.0.nics.%d.dhcp", index)); ok {
-					value := value.(bool)
-					nicEntry.Dhcp = &value
-				} else {
-					nicEntry.Dhcp = nil
-				}
+				value := d.Get(fmt.Sprintf("replica_configuration.0.nics.%d.dhcp", index)).(bool)
+				nicEntry.Dhcp = &value
 
 				nics = append(nics, nicEntry)
 			}
