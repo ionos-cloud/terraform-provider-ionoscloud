@@ -52,12 +52,12 @@ resource "ionoscloud_autoscaling_group" "autoscaling_group_example" {
         availability_zone = "AUTO"
         cores 			  = "2"
         cpu_family 		  = "INTEL_XEON"
+        ram				  = 2048
         nics {
             lan  		  = ionoscloud_lan.lan_example.id
             name		  = "nic_example"
             dhcp 		  = true
-		}
-        ram				  = 2048
+        }
         volumes	{
             image  		  = "ee89912b-2290-11eb-af9f-1ee452559185"
             name		  = "volume_example"
