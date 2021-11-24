@@ -1,3 +1,8 @@
+## 5.2.21
+
+- **bug fixes**: Add additional fixes to improve code stability and prevent crashes. Revert icmp_type and icmp_code inside server resource and add tests.
+- **bug fixes**: Allow creation of an inner firewall rule for server when updating a terraform plan. 
+
 ## 5.2.20
 
 - **bug fixes**: fix crash and add additional logs 
