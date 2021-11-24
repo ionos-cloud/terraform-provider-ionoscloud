@@ -12,9 +12,18 @@ The Target Group data source can be used to search for and return existing Appli
 
 ## Example Usage
 
+### By Id
 ```hcl
-data "ionoscloud_target_group" "example" {
-  name			= "example_"
+data "ionoscloud_target_group" "target_group_example" {
+  id			= <target_group_uuid>
+}
+```
+
+
+### By Name
+```hcl
+data "ionoscloud_target_group" "target_group_example" {
+  name			= "target_group_example"
 }
 ```
 

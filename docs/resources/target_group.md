@@ -24,15 +24,21 @@ resource "ionoscloud_target_group" "example" {
    health_check {
      check = true
      check_interval = 1000
+     maintenance = true
    }
  }
  health_check {
-     connect_timeout = 1000
+     connect_timeout = 5000
+     target_timeout = 50000
+     retries = 2
  }
  http_health_check {
-     path = "/monitoring"
-     match_type = "RESPONSE_BODY"
+     path = "/."
+     method = "GET"
+     match_type = "STATUS_CODE"
      response = "200"
+     regex = false
+     negate = false"
    }
 }
 ```

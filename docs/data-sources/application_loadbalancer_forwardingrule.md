@@ -12,11 +12,21 @@ The Application Load Balancer Forwarding Rule data source can be used to search 
 
 ## Example Usage
 
+### By Id
 ```hcl
-data "ionoscloud_application_loadbalancer_forwardingrule" "example" {
-  datacenter_id = ionoscloud_datacenter.example.id
-  application_loadbalancer_id = ionoscloud_application_loadbalancer.example.id
-  name    		= "example_"
+data "ionoscloud_application_loadbalancer_forwardingrule" "alb_fwr_example" {
+  datacenter_id = ionoscloud_datacenter.datacenter_example.id
+  application_loadbalancer_id = ionoscloud_application_loadbalancer.alb_example.id
+  id    		= <alb_fwr_id>
+}
+```
+
+### By Name
+```hcl
+data "ionoscloud_application_loadbalancer_forwardingrule" "alb_fwr_example" {
+  datacenter_id = ionoscloud_datacenter.datacenter_example.id
+  application_loadbalancer_id = ionoscloud_application_loadbalancer.alb_example.id
+  name    		= "alb_fwr_example"
 }
 ```
 

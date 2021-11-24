@@ -86,13 +86,6 @@ func dataSourceTargetGroup() *schema.Resource {
 				Computed:    true,
 				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{
-						"client_timeout": {
-							Type: schema.TypeInt,
-							Description: "ClientTimeout is expressed in milliseconds. This inactivity timeout applies " +
-								"when the client is expected to acknowledge or send data. If unset the default of 50 " +
-								"seconds will be used.",
-							Computed: true,
-						},
 						"connect_timeout": {
 							Type: schema.TypeInt,
 							Description: "It specifies the maximum time (in milliseconds) to wait for a connection attempt " +

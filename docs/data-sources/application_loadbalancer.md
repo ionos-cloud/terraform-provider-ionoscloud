@@ -12,10 +12,18 @@ The Application Load Balancer data source can be used to search for and return e
 
 ## Example Usage
 
+### By Id
 ```hcl
-data "ionoscloud_application_loadbalancer" "example" {
-  datacenter_id = ionoscloud_datacenter.example.id
-  name			= "example_"
+data "ionoscloud_application_loadbalancer" "alb_example" {
+  datacenter_id = ionoscloud_datacenter.datacenter_example.id
+  id			= <alb_uuid>
+}
+```
+### By Name
+```hcl
+data "ionoscloud_application_loadbalancer" "alb_example" {
+  datacenter_id = ionoscloud_datacenter.datacenter_example.id
+  name			= "alb_example"
 }
 ```
 
