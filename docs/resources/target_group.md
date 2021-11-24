@@ -69,3 +69,11 @@ The following arguments are supported:
     - `response` - (Required)[string] The response returned by the request.
     - `regex` - (Optional)[bool] 
     - `negate` - (Optional)[bool] 
+
+## Import
+
+Resource Target Group can be imported using the `resource id`, e.g.
+
+```shell
+terraform import ionoscloud_target_group.myTargetGroup {target group uuid}
+```
