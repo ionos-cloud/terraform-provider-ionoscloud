@@ -37,6 +37,7 @@ func resourceAutoscalingGroup() *schema.Resource {
 				Type:        schema.TypeInt,
 				Description: "The target number of VMs in this Group. Depending on the scaling policy, this number will be adjusted automatically. VMs will be created or destroyed automatically in order to adjust the actual number of VMs to this number. If targetReplicaCount is given in the request body then it must be >= minReplicaCount and <= maxReplicaCount.",
 				Optional:    true,
+				Computed:    true,
 				//DiffSuppressFunc: func(k, old, new string, d *schema.ResourceData) bool {
 				//	if old != "" {
 				//		return true

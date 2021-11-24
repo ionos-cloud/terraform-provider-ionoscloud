@@ -9,7 +9,7 @@ import (
 	"testing"
 )
 
-var resourceAutoscalingGroupName = AutoscalingGroupResource + "." + AutoscalingGroupTestResource
+const resourceAutoscalingGroupName = AutoscalingGroupResource + "." + AutoscalingGroupTestResource
 
 func TestAccAutoscalingGroupBasic(t *testing.T) {
 	var autoscalingGroup autoscaling.Group
@@ -98,7 +98,7 @@ func TestAccAutoscalingGroupBasic(t *testing.T) {
 					resource.TestCheckResourceAttr(resourceAutoscalingGroupName, "replica_configuration.0.volumes.0.image_password", "passw0rdupdated")),
 			},
 			{
-				Config: fmt.Sprintf(testAccCheckAutoscalingGroupConfigUpdateRemoveNicsVolumes, UpdatedResources),
+				Config: fmt.Sprintf(testAccCheckAutoscalingGroupConfigUpdateRemoveOptionalFields, UpdatedResources),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckAutoscalingGroupExists(resourceAutoscalingGroupName, &autoscalingGroup),
 					resource.TestCheckResourceAttr(resourceAutoscalingGroupName, "name", UpdatedResources),
@@ -120,10 +120,13 @@ func TestAccAutoscalingGroupBasic(t *testing.T) {
 					resource.TestCheckResourceAttr(resourceAutoscalingGroupName, "policy.0.unit", "PER_MINUTE"),
 					resource.TestCheckResourceAttr(resourceAutoscalingGroupName, "replica_configuration.0.availability_zone", "ZONE_1"),
 					resource.TestCheckResourceAttr(resourceAutoscalingGroupName, "replica_configuration.0.cores", "3"),
-					resource.TestCheckResourceAttr(resourceAutoscalingGroupName, "replica_configuration.0.cpu_family", "INTEL_XEON"),
+					resource.TestCheckResourceAttr(resourceAutoscalingGroupName, "replica_configuration.0.cpu_family", ""),
 					resource.TestCheckResourceAttr(resourceAutoscalingGroupName, "replica_configuration.0.ram", "1024"),
 					resource.TestCheckNoResourceAttr(resourceAutoscalingGroupName, "replica_configuration.0.nics"),
 					resource.TestCheckNoResourceAttr(resourceAutoscalingGroupName, "replica_configuration.0.volumes")),
+			},
+			{
+				Config: testAccCheckAutoscalingGroupConfigUpdateWrongFields,
 			},
 		},
 	})
@@ -162,6 +165,7 @@ func testAccCheckAutoscalingGroupDestroyCheck(s *terraform.State) error {
 
 func testAccCheckAutoscalingGroupExists(n string, autoscalingGroup *autoscaling.Group) resource.TestCheckFunc {
 	return func(s *terraform.State) error {
+		fmt.Printf("CHECK GROUP EXISTS \n ")
 		client := testAccProvider.Meta().(SdkBundle).AutoscalingClient
 
 		rs, ok := s.RootModule().Resources[n]
@@ -314,7 +318,7 @@ resource ` + AutoscalingGroupResource + `  ` + AutoscalingGroupTestResource + ` 
 			name		  = "Volume 2"
 			size 		  = 40
 			ssh_key_paths = []
-			ssh_key_values= [ "ssh-rsa AAAAB3NzaC1yc2EAAAABIwAAAQEAklOUpkDHrfHY17SbrmTIpNLTGK9Tjom/BWDSU\nGPl+nafzlHDTYW7hdI4yZ5ew18JH4JW9jbhUFrviQzM7xlELEVf4h9lFX5QVkbPppSwg0cda3\nPbv7kOdJ/MTyBlWXFCR+HAo3FXRitBqxiX1nKhXpHAZsMciLq8V6RjsNAQwdsdMFvSlVK/7XA\nt3FaoJoAsncM1Q9x5+3V0Ww68/eIFmb1zuUFljQJKprrX88XypNDvjYNby6vw/Pb0rwert/En\nmZ+AW4OZPnTPI89ZPmVMLuayrD2cE86Z/il8b+gw3r3+1nKatmIkjn2so1d01QraTlMqVSsbx\nNrRFi9wrf+M7Q== user@domain.local"]
+			ssh_key_values= ["ssh-rsa AAAAB3NzaC1yc2EAAAABIwAAAQEAklOUpkDHrfHY17SbrmTIpNLTGK9Tjom/BWDSU\nGPl+nafzlHDTYW7hdI4yZ5ew18JH4JW9jbhUFrviQzM7xlELEVf4h9lFX5QVkbPppSwg0cda3\nPbv7kOdJ/MTyBlWXFCR+HAo3FXRitBqxiX1nKhXpHAZsMciLq8V6RjsNAQwdsdMFvSlVK/7XA\nt3FaoJoAsncM1Q9x5+3V0Ww68/eIFmb1zuUFljQJKprrX88XypNDvjYNby6vw/Pb0rwert/En\nmZ+AW4OZPnTPI89ZPmVMLuayrD2cE86Z/il8b+gw3r3+1nKatmIkjn2so1d01QraTlMqVSsbx\nNrRFi9wrf+M7Q== user@domain.local"]
 			type		  = "HDD"
 			image_password= "passw0rdupdated"
 		}
@@ -322,7 +326,7 @@ resource ` + AutoscalingGroupResource + `  ` + AutoscalingGroupTestResource + ` 
 }
 `
 
-const testAccCheckAutoscalingGroupConfigUpdateRemoveNicsVolumes = `
+const testAccCheckAutoscalingGroupConfigUpdateRemoveOptionalFields = `
 resource ` + DatacenterResource + ` "autoscaling_datacenter" {
    name     = "test_autoscaling_group"
    location = "de/fkb"
@@ -343,22 +347,17 @@ resource ` + AutoscalingGroupResource + `  ` + AutoscalingGroupTestResource + ` 
 	datacenter_id = ` + DatacenterResource + `.autoscaling_datacenter.id
 	max_replica_count      = 6
 	min_replica_count      = 2
-	target_replica_count   = 4
 	name				   = "%s"
 	policy  {
     	metric             = "INSTANCE_NETWORK_IN_BYTES"
-		range              = "PT12H"
         scale_in_action {
 			amount        		    =  2
 			amount_type    			= "PERCENTAGE"
-			termination_policy_type = "NEWEST_SERVER_FIRST"
-			cooldown_period			= "PT10M"
         }
 		scale_in_threshold = 35
     	scale_out_action {
 			amount         =  2
 			amount_type    = "PERCENTAGE"
-			cooldown_period= "PT10M"
         }
 		scale_out_threshold = 80
         unit                = "PER_MINUTE"
@@ -366,7 +365,49 @@ resource ` + AutoscalingGroupResource + `  ` + AutoscalingGroupTestResource + ` 
     replica_configuration {
 		availability_zone = "ZONE_1"
 		cores 			  = "3"
-		cpu_family 		  = "INTEL_XEON"
+		ram				  = 1024
+	}
+}
+`
+const testAccCheckAutoscalingGroupConfigUpdateWrongFields = `
+resource ` + DatacenterResource + ` "autoscaling_datacenter" {
+   name     = "test_autoscaling_group"
+   location = "de/fkb"
+}
+resource ` + LanResource + ` "autoscaling_lan_1" {
+	datacenter_id    = ` + DatacenterResource + `.autoscaling_datacenter.id
+    public           = false
+    name             = "test_autoscaling_group_1"
+}
+
+resource ` + LanResource + ` "autoscaling_lan_2" {
+	datacenter_id    = ` + DatacenterResource + `.autoscaling_datacenter.id
+    public           = false
+    name             = "test_autoscaling_group_2"
+}
+
+resource ` + AutoscalingGroupResource + `  ` + AutoscalingGroupTestResource + ` {
+	datacenter_id = ` + DatacenterResource + `.autoscaling_datacenter.id
+	max_replica_count      = 6
+	min_replica_count      = 2
+	name				   = "%s"
+	policy  {
+    	metric             = "INSTANCE_NETWORK_IN_BYTES_WRONG"
+        scale_in_action {
+			amount        		    =  2
+			amount_type    			= "PERCENTAGE"
+        }
+		scale_in_threshold = 35
+    	scale_out_action {
+			amount         =  2
+			amount_type    = "PERCENTAGE"
+        }
+		scale_out_threshold = 80
+        unit                = "PER_MINUTE"
+	}
+    replica_configuration {
+		availability_zone = "ZONE_1"
+		cores 			  = "3"
 		ram				  = 1024
 	}
 }

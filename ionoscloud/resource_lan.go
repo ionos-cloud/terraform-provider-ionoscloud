@@ -134,7 +134,6 @@ func resourceLanCreate(ctx context.Context, d *schema.ResourceData, meta interfa
 			return diags
 		}
 	}
-
 	return resourceLanRead(ctx, d, meta)
 }
 
