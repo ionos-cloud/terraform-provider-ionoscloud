@@ -343,6 +343,12 @@ resource "ionoscloud_nic" "database_nic" {
   name = "updated"
 }
 
+resource "ionoscloud_ipblock" "ipblock_update" {
+  location = ` + DatacenterResource + `.` + DatacenterTestResource + `.location
+  size = 2
+  name = "firewall_ipblock"
+}
+
 resource ` + FirewallResource + ` ` + FirewallTestResource + ` {
   datacenter_id = ` + DatacenterResource + `.` + DatacenterTestResource + `.id
   server_id = ` + ServerResource + `.` + ServerTestResource + `.id
@@ -352,6 +358,8 @@ resource ` + FirewallResource + ` ` + FirewallTestResource + ` {
   port_range_start = 81
   port_range_end = 82
   source_mac = "00:0a:95:9d:68:17"
+  source_ip = ionoscloud_ipblock.ipblock_update.ips[0]
+  target_ip = ionoscloud_ipblock.ipblock_update.ips[1]
 }
 `
 
@@ -375,6 +383,12 @@ resource ` + ServerResource + ` ` + ServerTestResource + ` {
     dhcp = true
     firewall_active = true
   }
+}
+
+resource "ionoscloud_ipblock" "ipblock_update" {
+  location = ` + DatacenterResource + `.` + DatacenterTestResource + `.location
+  size = 2
+  name = "firewall_ipblock"
 }
 
 resource "ionoscloud_nic" "database_nic" {
