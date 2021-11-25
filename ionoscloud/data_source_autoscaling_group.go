@@ -136,7 +136,7 @@ func dataSourceAutoscalingGroup() *schema.Resource {
 					Schema: map[string]*schema.Schema{
 						"availability_zone": {
 							Computed:    true,
-							Type:        schema.TypeInt,
+							Type:        schema.TypeString,
 							Description: "The zone where the VMs are created using this configuration.",
 						},
 						"cores": {
@@ -146,7 +146,7 @@ func dataSourceAutoscalingGroup() *schema.Resource {
 						},
 						"cpu_family": {
 							Computed:    true,
-							Type:        schema.TypeInt,
+							Type:        schema.TypeString,
 							Description: "The zone where the VMs are created using this configuration.",
 						},
 						"nics": {
@@ -212,11 +212,6 @@ func dataSourceAutoscalingGroup() *schema.Resource {
 										Computed:    true,
 										Type:        schema.TypeString,
 										Description: "user-data (Cloud Init) for this replica volume.",
-									},
-									"image_password": {
-										Computed:    true,
-										Type:        schema.TypeString,
-										Description: "Image password for this replica volume.",
 									},
 								}},
 						},

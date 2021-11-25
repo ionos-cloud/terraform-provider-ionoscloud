@@ -125,9 +125,6 @@ func TestAccAutoscalingGroupBasic(t *testing.T) {
 					resource.TestCheckNoResourceAttr(resourceAutoscalingGroupName, "replica_configuration.0.nics"),
 					resource.TestCheckNoResourceAttr(resourceAutoscalingGroupName, "replica_configuration.0.volumes")),
 			},
-			{
-				Config: testAccCheckAutoscalingGroupConfigUpdateWrongFields,
-			},
 		},
 	})
 }
@@ -165,7 +162,6 @@ func testAccCheckAutoscalingGroupDestroyCheck(s *terraform.State) error {
 
 func testAccCheckAutoscalingGroupExists(n string, autoscalingGroup *autoscaling.Group) resource.TestCheckFunc {
 	return func(s *terraform.State) error {
-		fmt.Printf("CHECK GROUP EXISTS \n ")
 		client := testAccProvider.Meta().(SdkBundle).AutoscalingClient
 
 		rs, ok := s.RootModule().Resources[n]
@@ -350,49 +346,6 @@ resource ` + AutoscalingGroupResource + `  ` + AutoscalingGroupTestResource + ` 
 	name				   = "%s"
 	policy  {
     	metric             = "INSTANCE_NETWORK_IN_BYTES"
-        scale_in_action {
-			amount        		    =  2
-			amount_type    			= "PERCENTAGE"
-        }
-		scale_in_threshold = 35
-    	scale_out_action {
-			amount         =  2
-			amount_type    = "PERCENTAGE"
-        }
-		scale_out_threshold = 80
-        unit                = "PER_MINUTE"
-	}
-    replica_configuration {
-		availability_zone = "ZONE_1"
-		cores 			  = "3"
-		ram				  = 1024
-	}
-}
-`
-const testAccCheckAutoscalingGroupConfigUpdateWrongFields = `
-resource ` + DatacenterResource + ` "autoscaling_datacenter" {
-   name     = "test_autoscaling_group"
-   location = "de/fkb"
-}
-resource ` + LanResource + ` "autoscaling_lan_1" {
-	datacenter_id    = ` + DatacenterResource + `.autoscaling_datacenter.id
-    public           = false
-    name             = "test_autoscaling_group_1"
-}
-
-resource ` + LanResource + ` "autoscaling_lan_2" {
-	datacenter_id    = ` + DatacenterResource + `.autoscaling_datacenter.id
-    public           = false
-    name             = "test_autoscaling_group_2"
-}
-
-resource ` + AutoscalingGroupResource + `  ` + AutoscalingGroupTestResource + ` {
-	datacenter_id = ` + DatacenterResource + `.autoscaling_datacenter.id
-	max_replica_count      = 6
-	min_replica_count      = 2
-	name				   = "%s"
-	policy  {
-    	metric             = "INSTANCE_NETWORK_IN_BYTES_WRONG"
         scale_in_action {
 			amount        		    =  2
 			amount_type    			= "PERCENTAGE"

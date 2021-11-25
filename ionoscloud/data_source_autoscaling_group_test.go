@@ -53,7 +53,6 @@ func TestAccDataSourceAutoscalingGroup(t *testing.T) {
 					resource.TestCheckResourceAttrPair(dataSourceAutoscalingGroupId, "replica_configuration.0.volumes.0.ssh_keys", resourceAutoscalingGroupName, "replica_configuration.0.volumes.0.ssh_keys"),
 					resource.TestCheckResourceAttrPair(dataSourceAutoscalingGroupId, "replica_configuration.0.volumes.0.type", resourceAutoscalingGroupName, "replica_configuration.0.volumes.0.type"),
 					resource.TestCheckResourceAttrPair(dataSourceAutoscalingGroupId, "replica_configuration.0.volumes.0.user_data", resourceAutoscalingGroupName, "replica_configuration.0.volumes.0.user_data"),
-					resource.TestCheckResourceAttrPair(dataSourceAutoscalingGroupId, "replica_configuration.0.volumes.0.image_password", resourceAutoscalingGroupName, "replica_configuration.0.volumes.0.image_password"),
 				),
 			},
 			{
@@ -89,7 +88,6 @@ func TestAccDataSourceAutoscalingGroup(t *testing.T) {
 					resource.TestCheckResourceAttrPair(dataSourceAutoscalingGroupName, "replica_configuration.0.volumes.0.ssh_keys", resourceAutoscalingGroupName, "replica_configuration.0.volumes.0.ssh_keys"),
 					resource.TestCheckResourceAttrPair(dataSourceAutoscalingGroupName, "replica_configuration.0.volumes.0.type", resourceAutoscalingGroupName, "replica_configuration.0.volumes.0.type"),
 					resource.TestCheckResourceAttrPair(dataSourceAutoscalingGroupName, "replica_configuration.0.volumes.0.user_data", resourceAutoscalingGroupName, "replica_configuration.0.volumes.0.user_data"),
-					resource.TestCheckResourceAttrPair(dataSourceAutoscalingGroupName, "replica_configuration.0.volumes.0.image_password", resourceAutoscalingGroupName, "replica_configuration.0.volumes.0.image_password"),
 				),
 			},
 		},
