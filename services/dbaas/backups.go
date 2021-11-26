@@ -36,21 +36,21 @@ func SetPgSqlClusterBackupData(d *schema.ResourceData, clusterBackups *dbaas.Clu
 	resourceId := uuid.New()
 	d.SetId(resourceId.String())
 
-	if clusterBackups.Data != nil {
+	if clusterBackups.Items != nil {
 		var backups []interface{}
-		for _, backup := range *clusterBackups.Data {
+		for _, backup := range *clusterBackups.Items {
 
 			backupEntry := make(map[string]interface{})
 			if backup.Id != nil {
 				backupEntry["id"] = *backup.Id
 			}
 
-			if backup.ClusterId != nil {
-				backupEntry["cluster_id"] = *backup.ClusterId
+			if backup.Properties.ClusterId != nil {
+				backupEntry["cluster_id"] = *backup.Properties.ClusterId
 			}
 
-			if backup.DisplayName != nil {
-				backupEntry["display_name"] = *backup.DisplayName
+			if backup.Properties.DisplayName != nil {
+				backupEntry["display_name"] = *backup.Properties.DisplayName
 			}
 
 			if backup.Type != nil {
@@ -64,26 +64,6 @@ func SetPgSqlClusterBackupData(d *schema.ResourceData, clusterBackups *dbaas.Clu
 
 				if backup.Metadata.CreatedDate != nil {
 					metadataEntry["created_date"] = *backup.Metadata.CreatedDate
-				}
-
-				if backup.Metadata.CreatedBy != nil {
-					metadataEntry["created_by"] = *backup.Metadata.CreatedBy
-				}
-
-				if backup.Metadata.CreatedByUserId != nil {
-					metadataEntry["created_by_user_id"] = *backup.Metadata.CreatedByUserId
-				}
-
-				if backup.Metadata.LastModifiedDate != nil {
-					metadataEntry["last_modified_date"] = *backup.Metadata.LastModifiedDate
-				}
-
-				if backup.Metadata.LastModifiedBy != nil {
-					metadataEntry["last_modified_by"] = *backup.Metadata.LastModifiedBy
-				}
-
-				if backup.Metadata.LastModifiedByUserId != nil {
-					metadataEntry["last_modified_by_user_id"] = *backup.Metadata.LastModifiedByUserId
 				}
 
 				metadata = append(metadata, metadataEntry)

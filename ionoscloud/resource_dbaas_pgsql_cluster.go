@@ -8,7 +8,6 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 	dbaasService "github.com/ionos-cloud/terraform-provider-ionoscloud/services/dbaas"
 	"log"
-	"net"
 	"time"
 )
 
@@ -28,32 +27,26 @@ func resourceDbaasPgSqlCluster() *schema.Resource {
 				Required:     true,
 				ValidateFunc: validation.All(validation.StringIsNotWhiteSpace),
 			},
-			"replicas": {
-				Type:        schema.TypeInt,
-				Description: "The number of replicas in your cluster.",
-				Required:    true,
-				ValidateFunc: func(val interface{}, key string) (warns []string, errs []error) {
-					v := val.(int)
-					if v < 1 || v > 5 {
-						errs = append(errs, fmt.Errorf("%q should have a value between 1 and 5; got: %v", key, v))
-					}
-					return
-				},
+			"instances": {
+				Type:         schema.TypeInt,
+				Description:  "The total number of instances in the cluster (one master and n-1 standbys)",
+				Required:     true,
+				ValidateFunc: validation.All(validation.IntBetween(1, 5)),
 			},
-			"cpu_core_count": {
+			"cores": {
 				Type:        schema.TypeInt,
 				Description: "The number of CPU cores per replica.",
 				Required:    true,
 			},
-			"ram_size": {
-				Type:         schema.TypeString,
-				Description:  "The amount of memory per replica.",
+			"ram": {
+				Type:         schema.TypeInt,
+				Description:  "The amount of memory per instance in megabytes. Has to be a multiple of 256.",
 				Required:     true,
-				ValidateFunc: validation.All(validation.StringIsNotWhiteSpace),
+				ValidateFunc: validation.All(validation.IntAtLeast(2048), validation.IntDivisibleBy(256)),
 			},
 			"storage_size": {
-				Type:         schema.TypeString,
-				Description:  "The amount of storage per replica.",
+				Type:         schema.TypeInt,
+				Description:  "The amount of storage per instance in megabytes.",
 				Required:     true,
 				ValidateFunc: validation.All(validation.StringIsNotWhiteSpace),
 			},
@@ -61,42 +54,32 @@ func resourceDbaasPgSqlCluster() *schema.Resource {
 				Type:         schema.TypeString,
 				Description:  "The storage type used in your cluster.",
 				Required:     true,
-				ValidateFunc: validation.All(validation.StringIsNotWhiteSpace),
+				ValidateFunc: validation.All(validation.StringInSlice([]string{"HDD", "SSD"}, true)),
 			},
-			"vdc_connections": {
+			"connections": {
 				Type:        schema.TypeList,
 				MaxItems:    1,
-				Description: "The VDC to connect to your cluster.",
+				Description: "Details about the network connection for your cluster.",
 				Required:    true,
 				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{
-						"vdc_id": {
+						"datacenter_id": {
 							Type:         schema.TypeString,
+							Description:  "The datacenter to connect your cluster to.",
 							Required:     true,
-							ValidateFunc: validation.All(validation.StringIsNotWhiteSpace),
+							ValidateFunc: validation.All(validation.IsUUID),
 						},
 						"lan_id": {
 							Type:         schema.TypeString,
+							Description:  "The LAN to connect your cluster to.",
 							Required:     true,
 							ValidateFunc: validation.All(validation.StringIsNotWhiteSpace),
 						},
-						"ip_address": {
-							Type:        schema.TypeString,
-							Description: "The IP and subnet for the database.\n          Note the following unavailable IP ranges:\n          10.233.64.0/18\n          10.233.0.0/18\n          10.233.114.0/24",
-							Required:    true,
-							ValidateFunc: func(val interface{}, key string) (warns []string, errs []error) {
-								v := val.(string)
-								unavailableNetworks := []string{"10.233.64.0/18", "10.233.0.0/18", "10.233.114.0/24"}
-
-								ip, _, _ := net.ParseCIDR(v)
-
-								for _, unavailableNetwork := range unavailableNetworks {
-									if _, network, _ := net.ParseCIDR(unavailableNetwork); network.Contains(ip) {
-										errs = append(errs, fmt.Errorf("for %q the following IP ranges are unavailable: 10.233.64.0/18, 10.233.0.0/18, 10.233.114.0/24; got: %v", key, v))
-									}
-								}
-								return
-							},
+						"cidr": {
+							Type:         schema.TypeString,
+							Description:  "The IP and subnet for the database.\n          Note the following unavailable IP ranges:\n          10.233.64.0/18\n          10.233.0.0/18\n          10.233.114.0/24",
+							Required:     true,
+							ValidateFunc: VerifyUnavailableIPs,
 						},
 					},
 				},
@@ -125,10 +108,10 @@ func resourceDbaasPgSqlCluster() *schema.Resource {
 							Required:     true,
 							ValidateFunc: validation.All(validation.StringIsNotWhiteSpace),
 						},
-						"weekday": {
+						"day_of_the_week": {
 							Type:         schema.TypeString,
 							Required:     true,
-							ValidateFunc: validation.All(validation.StringIsNotWhiteSpace),
+							ValidateFunc: validation.All(validation.IsDayOfTheWeek(true)),
 						},
 					},
 				},
@@ -142,32 +125,45 @@ func resourceDbaasPgSqlCluster() *schema.Resource {
 					Schema: map[string]*schema.Schema{
 						"username": {
 							Type:         schema.TypeString,
-							Description:  "the username for the initial postgres user. some system usernames\n          are restricted (e.g. \"postgres\", \"admin\", \"standby\")",
+							Description:  "the username for the initial postgres user. some system usernames are restricted (e.g. \"postgres\", \"admin\", \"standby\")",
 							Required:     true,
 							ValidateFunc: validation.All(validation.StringIsNotWhiteSpace),
 						},
 						"password": {
 							Type:         schema.TypeString,
 							Required:     true,
+							Sensitive:    true,
 							ValidateFunc: validation.All(validation.StringIsNotWhiteSpace),
 						},
 					},
 				},
 			},
 			"synchronization_mode": {
-				Type:        schema.TypeString,
-				Description: "Represents different modes of replication.",
-				Required:    true,
+				Type:         schema.TypeString,
+				Description:  "Represents different modes of replication.",
+				Required:     true,
+				ValidateFunc: validation.All(validation.StringInSlice([]string{"ASYNCHRONOUS", "SYNCHRONOUS", "STRICTLY_SYNCHRONOUS"}, true)),
 			},
 			"from_backup": {
-				Type:        schema.TypeString,
+				Type:        schema.TypeList,
+				MaxItems:    1,
 				Description: "The PostgreSQL version of your cluster.",
 				Optional:    true,
-			},
-			"from_recovery_target_time": {
-				Type:        schema.TypeString,
-				Description: "If this value is supplied as ISO 8601 timestamp, the backup will be replayed up until the given timestamp. If empty, the backup will be applied completely.",
-				Optional:    true,
+				Elem: &schema.Resource{
+					Schema: map[string]*schema.Schema{
+						"backup_id": {
+							Type:         schema.TypeString,
+							Description:  "The unique ID of the backup you want to restore.",
+							Required:     true,
+							ValidateFunc: validation.All(validation.IsUUID),
+						},
+						"recovery_target_time": {
+							Type:        schema.TypeString,
+							Optional:    true,
+							Description: " If this value is supplied as ISO 8601 timestamp, the backup will be replayed up until the given timestamp. If empty, the backup will be applied completely.",
+						},
+					},
+				},
 			},
 		},
 		Timeouts: &resourceDefaultTimeouts,
@@ -177,25 +173,12 @@ func resourceDbaasPgSqlCluster() *schema.Resource {
 func resourceDbaasPgSqlClusterCreate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	client := meta.(SdkBundle).DbaasClient
 
-	dbaasCluster := dbaasService.GetDbaasPgSqlClusterDataCreate(d)
+	dbaasCluster, err := dbaasService.GetDbaasPgSqlClusterDataCreate(d)
 
-	var targetTime *time.Time
-
-	backupId := d.Get("from_backup").(string)
-	recoveryTargetTime := d.Get("from_recovery_target_time").(string)
-	if recoveryTargetTime != "" {
-		layout := "2006-01-02T15:04:05Z"
-		convertedTime, err := time.Parse(layout, recoveryTargetTime)
-		if err != nil {
-			diags := diag.FromErr(fmt.Errorf("an error occured while converting from_recovery_target_time to time.Time: %s", err))
-			return diags
-		}
-		targetTime = &convertedTime
-	} else {
-		targetTime = nil
+	if err != nil {
+		return diag.FromErr(err)
 	}
-
-	dbaasClusterResponse, _, err := client.CreateCluster(ctx, *dbaasCluster, backupId, targetTime)
+	dbaasClusterResponse, _, err := client.CreateCluster(ctx, *dbaasCluster)
 
 	if err != nil {
 		diags := diag.FromErr(fmt.Errorf("an error occured while creating a dbaas cluster: %s", err))
@@ -266,7 +249,7 @@ func resourceDbaasPgSqlClusterUpdate(ctx context.Context, d *schema.ResourceData
 		return diags
 	}
 
-	dbaasClusterResponse, _, err := client.ClustersApi.ClustersPatch(ctx, d.Id()).Cluster(*cluster).Execute()
+	dbaasClusterResponse, _, err := client.ClustersApi.ClustersPatch(ctx, d.Id()).PatchClusterRequest(*cluster).Execute()
 
 	if err != nil {
 		diags := diag.FromErr(fmt.Errorf("an error occured while updating a dbaas cluster: %s", err))
@@ -390,7 +373,7 @@ func dbaasClusterReady(ctx context.Context, client *dbaasService.Client, d *sche
 	//		return false, fmt.Errorf("dbaas cluster has failed. WARNING: your k8s cluster may still recover after some time but the terraform state won't reflect that; check your Ionos Cloud account for updates")
 	//	}
 	//}
-	return *subjectCluster.LifecycleStatus == "AVAILABLE", nil
+	return *subjectCluster.Metadata.State == "AVAILABLE", nil
 }
 
 func dbaasClusterDeleted(ctx context.Context, client *dbaasService.Client, d *schema.ResourceData) (bool, error) {

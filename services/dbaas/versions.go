@@ -24,11 +24,11 @@ func (c *Client) GetClusterVersions(ctx context.Context, clusterId string) (dbaa
 }
 
 func (c *Client) GetAllVersions(ctx context.Context) (dbaas.PostgresVersionList, *dbaas.APIResponse, error) {
-	backups, apiResponse, err := c.ClustersApi.PostgresVersionsGet(ctx).Execute()
+	versions, apiResponse, err := c.ClustersApi.PostgresVersionsGet(ctx).Execute()
 	if apiResponse != nil {
-		return backups, apiResponse, err
+		return versions, apiResponse, err
 	}
-	return backups, nil, err
+	return versions, nil, err
 }
 
 func SetPgSqlVersionsData(d *schema.ResourceData, postgresVersions dbaas.PostgresVersionList) diag.Diagnostics {

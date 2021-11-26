@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 	dbaas "github.com/ionos-cloud/sdk-go-autoscaling"
 	dbaasService "github.com/ionos-cloud/terraform-provider-ionoscloud/services/dbaas"
 )
@@ -15,12 +16,14 @@ func dataSourceDbaasPgSqlCluster() *schema.Resource {
 		ReadContext: dataSourceDbaasPgSqlReadCluster,
 		Schema: map[string]*schema.Schema{
 			"id": {
-				Type:     schema.TypeString,
-				Optional: true,
+				Type:         schema.TypeString,
+				Description:  "The is of your cluster.",
+				Optional:     true,
+				ValidateFunc: validation.All(validation.IsUUID),
 			},
 			"display_name": {
 				Type:        schema.TypeString,
-				Description: "The friendly name of your cluster.",
+				Description: "The name of your cluster.",
 				Optional:    true,
 			},
 			"postgres_version": {
@@ -28,24 +31,24 @@ func dataSourceDbaasPgSqlCluster() *schema.Resource {
 				Description: "The PostgreSQL version of your cluster.",
 				Computed:    true,
 			},
-			"replicas": {
+			"instances": {
 				Type:        schema.TypeInt,
-				Description: "The number of replicas in your cluster.",
+				Description: "The total number of instances in the cluster (one master and n-1 standbys)",
 				Computed:    true,
 			},
-			"cpu_core_count": {
+			"cores": {
 				Type:        schema.TypeInt,
 				Description: "The number of CPU cores per replica.",
 				Computed:    true,
 			},
-			"ram_size": {
-				Type:        schema.TypeString,
-				Description: "The amount of memory per replica.",
+			"ram": {
+				Type:        schema.TypeInt,
+				Description: "The amount of memory per instance in megabytes. Has to be a multiple of 256.",
 				Computed:    true,
 			},
 			"storage_size": {
-				Type:        schema.TypeString,
-				Description: "The amount of storage per replica.",
+				Type:        schema.TypeInt,
+				Description: "The amount of storage per instance in megabytes.",
 				Computed:    true,
 			},
 			"storage_type": {
@@ -53,21 +56,24 @@ func dataSourceDbaasPgSqlCluster() *schema.Resource {
 				Description: "The storage type used in your cluster.",
 				Computed:    true,
 			},
-			"vdc_connections": {
+			"connection": {
 				Type:        schema.TypeList,
-				Description: "The VDC to connect to your cluster.",
-				Computed:    true,
+				MaxItems:    1,
+				Description: "Details about the network connection for your cluster.",
+				Required:    true,
 				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{
-						"vdc_id": {
-							Type:     schema.TypeString,
-							Computed: true,
+						"datacenter_id": {
+							Type:        schema.TypeString,
+							Description: "The datacenter to connect your cluster to.",
+							Computed:    true,
 						},
 						"lan_id": {
-							Type:     schema.TypeString,
-							Computed: true,
+							Type:        schema.TypeString,
+							Description: "The LAN to connect your cluster to.",
+							Computed:    true,
 						},
-						"ip_address": {
+						"cidr": {
 							Type:        schema.TypeString,
 							Description: "The IP and subnet for the database.\n          Note the following unavailable IP ranges:\n          10.233.64.0/18\n          10.233.0.0/18\n          10.233.114.0/24",
 							Computed:    true,
@@ -82,6 +88,7 @@ func dataSourceDbaasPgSqlCluster() *schema.Resource {
 			},
 			"maintenance_window": {
 				Type:        schema.TypeList,
+				MaxItems:    1,
 				Description: "a weekly 4 hour-long window, during which maintenance might occur",
 				Computed:    true,
 				Elem: &schema.Resource{
@@ -90,7 +97,7 @@ func dataSourceDbaasPgSqlCluster() *schema.Resource {
 							Type:     schema.TypeString,
 							Computed: true,
 						},
-						"weekday": {
+						"day_of_the_week": {
 							Type:     schema.TypeString,
 							Computed: true,
 						},
@@ -105,12 +112,13 @@ func dataSourceDbaasPgSqlCluster() *schema.Resource {
 					Schema: map[string]*schema.Schema{
 						"username": {
 							Type:        schema.TypeString,
-							Description: "the username for the initial postgres user. some system usernames\n          are restricted (e.g. \"postgres\", \"admin\", \"standby\")",
+							Description: "the username for the initial postgres user. some system usernames are restricted (e.g. \"postgres\", \"admin\", \"standby\")",
 							Computed:    true,
 						},
 						"password": {
-							Type:     schema.TypeString,
-							Computed: true,
+							Type:      schema.TypeString,
+							Computed:  true,
+							Sensitive: true,
 						},
 					},
 				},
@@ -118,7 +126,27 @@ func dataSourceDbaasPgSqlCluster() *schema.Resource {
 			"synchronization_mode": {
 				Type:        schema.TypeString,
 				Description: "Represents different modes of replication.",
-				Optional:    true,
+				Computed:    true,
+			},
+			"from_backup": {
+				Type:        schema.TypeList,
+				MaxItems:    1,
+				Description: "The PostgreSQL version of your cluster.",
+				Computed:    true,
+				Elem: &schema.Resource{
+					Schema: map[string]*schema.Schema{
+						"backup_id": {
+							Type:        schema.TypeString,
+							Description: "The unique ID of the backup you want to restore.",
+							Computed:    true,
+						},
+						"recovery_target_time": {
+							Type:        schema.TypeString,
+							Computed:    true,
+							Description: " If this value is supplied as ISO 8601 timestamp, the backup will be replayed up until the given timestamp. If empty, the backup will be applied completely.",
+						},
+					},
+				},
 			},
 		},
 		Timeouts: &resourceDefaultTimeouts,
@@ -140,7 +168,7 @@ func dataSourceDbaasPgSqlReadCluster(ctx context.Context, d *schema.ResourceData
 		return diags
 	}
 
-	var cluster dbaas.Cluster
+	var cluster dbaas.ClusterResponse
 	var err error
 
 	if idOk {
@@ -158,8 +186,8 @@ func dataSourceDbaasPgSqlReadCluster(ctx context.Context, d *schema.ResourceData
 			return diags
 		}
 
-		if clusters.Data != nil && len(*clusters.Data) > 0 {
-			cluster = (*clusters.Data)[0]
+		if clusters.Items != nil && len(*clusters.Items) > 0 {
+			cluster = (*clusters.Items)[0]
 		} else {
 			return diag.FromErr(errors.New("dbaas cluster not found"))
 		}

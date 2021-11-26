@@ -168,9 +168,7 @@ func providerConfigure(d *schema.ResourceData, terraformVersion string) (interfa
 
 	newClient := ionoscloud.NewAPIClient(newConfig)
 
-	// todo: add ionoscloud.Version when added to sdk-go/v6
-	//newConfig.UserAgent = fmt.Sprintf("HashiCorp Terraform/%s Terraform Plugin SDK/%s Terraform Provider Ionoscloud/%s Ionoscloud SDK Go/%s", terraformVersion, meta.SDKVersionString(), Version, newClient.Version)
-	newConfig.UserAgent = fmt.Sprintf("HashiCorp Terraform/%s Terraform Plugin SDK/%s Terraform Provider Ionoscloud/%s", terraformVersion, meta.SDKVersionString(), Version)
+	newConfig.UserAgent = fmt.Sprintf("HashiCorp Terraform/%s Terraform Plugin SDK/%s Terraform Provider Ionoscloud/%s Ionoscloud SDK Go/%s", terraformVersion, meta.SDKVersionString(), Version, ionoscloud.Version)
 
 	dbaasClient := dbaasService.NewClientService(username.(string), password.(string), token.(string), cleanedUrl)
 

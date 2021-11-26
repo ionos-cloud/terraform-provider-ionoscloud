@@ -27,4 +27,4 @@ require (
 	gopkg.in/yaml.v3 v3.0.0-20200615113413-eeeca48fe776
 )
 
-replace github.com/ionos-cloud/sdk-go-autoscaling => ../sdk-go-dbaas-postgres
+replace github.com/ionos-cloud/sdk-go-autoscaling => ../../../../../sdk/new-dbaas-sdk

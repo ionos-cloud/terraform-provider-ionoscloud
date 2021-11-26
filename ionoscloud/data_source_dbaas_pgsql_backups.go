@@ -52,27 +52,6 @@ func dataSourceDbaasPgSqlBackups() *schema.Resource {
 										Description: "The ISO 8601 creation timestamp.",
 										Computed:    true,
 									},
-									"created_by": {
-										Type:     schema.TypeString,
-										Computed: true,
-									},
-									"created_by_user_id": {
-										Type:     schema.TypeString,
-										Computed: true,
-									},
-									"last_modified_date": {
-										Type:        schema.TypeString,
-										Description: "The ISO 8601 modified timestamp.",
-										Computed:    true,
-									},
-									"last_modified_by": {
-										Type:     schema.TypeString,
-										Computed: true,
-									},
-									"last_modified_by_user_id": {
-										Type:     schema.TypeString,
-										Computed: true,
-									},
 								},
 							},
 						},

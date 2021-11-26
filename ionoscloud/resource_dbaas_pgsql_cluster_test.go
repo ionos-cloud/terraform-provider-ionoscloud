@@ -10,7 +10,7 @@ import (
 )
 
 func TestAccDBaaSPgSqlClusterBasic(t *testing.T) {
-	var dbaasCluster dbaas.Cluster
+	var dbaasCluster dbaas.ClusterResponse
 
 	resource.Test(t, resource.TestCase{
 		PreCheck: func() {
@@ -24,18 +24,18 @@ func TestAccDBaaSPgSqlClusterBasic(t *testing.T) {
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckDbaasPgSqlClusterExists(DBaaSClusterResource+"."+DBaaSClusterTestResource, &dbaasCluster),
 					resource.TestCheckResourceAttr(DBaaSClusterResource+"."+DBaaSClusterTestResource, "postgres_version", "12"),
-					resource.TestCheckResourceAttr(DBaaSClusterResource+"."+DBaaSClusterTestResource, "replicas", "1"),
-					resource.TestCheckResourceAttr(DBaaSClusterResource+"."+DBaaSClusterTestResource, "cpu_core_count", "4"),
-					resource.TestCheckResourceAttr(DBaaSClusterResource+"."+DBaaSClusterTestResource, "ram_size", "3Gi"),
-					resource.TestCheckResourceAttr(DBaaSClusterResource+"."+DBaaSClusterTestResource, "storage_size", "2Gi"),
+					resource.TestCheckResourceAttr(DBaaSClusterResource+"."+DBaaSClusterTestResource, "instances", "1"),
+					resource.TestCheckResourceAttr(DBaaSClusterResource+"."+DBaaSClusterTestResource, "cores", "3"),
+					resource.TestCheckResourceAttr(DBaaSClusterResource+"."+DBaaSClusterTestResource, "ram", "2048"),
+					resource.TestCheckResourceAttr(DBaaSClusterResource+"."+DBaaSClusterTestResource, "storage_size", "2048"),
 					resource.TestCheckResourceAttr(DBaaSClusterResource+"."+DBaaSClusterTestResource, "storage_type", "HDD"),
-					resource.TestCheckResourceAttrPair(DBaaSClusterResource+"."+DBaaSClusterTestResource, "vdc_connections.0.vdc_id", "ionoscloud_datacenter.test_dbaas_cluster", "id"),
-					resource.TestCheckResourceAttrPair(DBaaSClusterResource+"."+DBaaSClusterTestResource, "vdc_connections.0.lan_id", "ionoscloud_lan.test_dbaas_cluster", "id"),
-					resource.TestCheckResourceAttr(DBaaSClusterResource+"."+DBaaSClusterTestResource, "vdc_connections.0.ip_address", "192.168.1.100/24"),
+					resource.TestCheckResourceAttrPair(DBaaSClusterResource+"."+DBaaSClusterTestResource, "connections.0.datacenter_id", "ionoscloud_datacenter.test_dbaas_cluster", "id"),
+					resource.TestCheckResourceAttrPair(DBaaSClusterResource+"."+DBaaSClusterTestResource, "connections.0.lan_id", "ionoscloud_lan.test_dbaas_cluster", "id"),
+					resource.TestCheckResourceAttr(DBaaSClusterResource+"."+DBaaSClusterTestResource, "connections.0.cidr", "192.168.1.100/24"),
 					resource.TestCheckResourceAttrPair(DBaaSClusterResource+"."+DBaaSClusterTestResource, "location", "ionoscloud_datacenter.test_dbaas_cluster", "location"),
 					resource.TestCheckResourceAttr(DBaaSClusterResource+"."+DBaaSClusterTestResource, "display_name", DBaaSClusterTestResource),
 					resource.TestCheckResourceAttr(DBaaSClusterResource+"."+DBaaSClusterTestResource, "maintenance_window.0.time", "09:00:00"),
-					resource.TestCheckResourceAttr(DBaaSClusterResource+"."+DBaaSClusterTestResource, "maintenance_window.0.weekday", "Sunday"),
+					resource.TestCheckResourceAttr(DBaaSClusterResource+"."+DBaaSClusterTestResource, "maintenance_window.0.day_of_the_week", "Sunday"),
 					resource.TestCheckResourceAttr(DBaaSClusterResource+"."+DBaaSClusterTestResource, "credentials.0.username", "username"),
 					resource.TestCheckResourceAttr(DBaaSClusterResource+"."+DBaaSClusterTestResource, "credentials.0.password", "password"),
 					resource.TestCheckResourceAttr(DBaaSClusterResource+"."+DBaaSClusterTestResource, "synchronization_mode", "asynchronous"),
@@ -46,18 +46,18 @@ func TestAccDBaaSPgSqlClusterBasic(t *testing.T) {
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckDbaasPgSqlClusterExists(DBaaSClusterResource+"."+DBaaSClusterTestResource, &dbaasCluster),
 					resource.TestCheckResourceAttr(DBaaSClusterResource+"."+DBaaSClusterTestResource, "postgres_version", "13"),
-					resource.TestCheckResourceAttr(DBaaSClusterResource+"."+DBaaSClusterTestResource, "replicas", "2"),
-					resource.TestCheckResourceAttr(DBaaSClusterResource+"."+DBaaSClusterTestResource, "cpu_core_count", "4"),
-					resource.TestCheckResourceAttr(DBaaSClusterResource+"."+DBaaSClusterTestResource, "ram_size", "3Gi"),
-					resource.TestCheckResourceAttr(DBaaSClusterResource+"."+DBaaSClusterTestResource, "storage_size", "3Gi"),
+					resource.TestCheckResourceAttr(DBaaSClusterResource+"."+DBaaSClusterTestResource, "instances", "2"),
+					resource.TestCheckResourceAttr(DBaaSClusterResource+"."+DBaaSClusterTestResource, "cores", "4"),
+					resource.TestCheckResourceAttr(DBaaSClusterResource+"."+DBaaSClusterTestResource, "ram", "2300"),
+					resource.TestCheckResourceAttr(DBaaSClusterResource+"."+DBaaSClusterTestResource, "storage_size", "2300"),
 					resource.TestCheckResourceAttr(DBaaSClusterResource+"."+DBaaSClusterTestResource, "storage_type", "HDD"),
-					resource.TestCheckResourceAttrPair(DBaaSClusterResource+"."+DBaaSClusterTestResource, "vdc_connections.0.vdc_id", "ionoscloud_datacenter.test_dbaas_cluster", "id"),
-					resource.TestCheckResourceAttrPair(DBaaSClusterResource+"."+DBaaSClusterTestResource, "vdc_connections.0.lan_id", "ionoscloud_lan.test_dbaas_cluster", "id"),
-					resource.TestCheckResourceAttr(DBaaSClusterResource+"."+DBaaSClusterTestResource, "vdc_connections.0.ip_address", "192.168.1.100/24"),
+					resource.TestCheckResourceAttrPair(DBaaSClusterResource+"."+DBaaSClusterTestResource, "connections.0.datacenter_id", "ionoscloud_datacenter.test_dbaas_cluster", "id"),
+					resource.TestCheckResourceAttrPair(DBaaSClusterResource+"."+DBaaSClusterTestResource, "connections.0.lan_id", "ionoscloud_lan.test_dbaas_cluster", "id"),
+					resource.TestCheckResourceAttr(DBaaSClusterResource+"."+DBaaSClusterTestResource, "connections.0.cidr", "192.168.1.100/24"),
 					resource.TestCheckResourceAttrPair(DBaaSClusterResource+"."+DBaaSClusterTestResource, "location", "ionoscloud_datacenter.test_dbaas_cluster", "location"),
 					resource.TestCheckResourceAttr(DBaaSClusterResource+"."+DBaaSClusterTestResource, "display_name", UpdatedResources),
 					resource.TestCheckResourceAttr(DBaaSClusterResource+"."+DBaaSClusterTestResource, "maintenance_window.0.time", "10:00:00"),
-					resource.TestCheckResourceAttr(DBaaSClusterResource+"."+DBaaSClusterTestResource, "maintenance_window.0.weekday", "Saturday"),
+					resource.TestCheckResourceAttr(DBaaSClusterResource+"."+DBaaSClusterTestResource, "maintenance_window.0.day_of_the_week", "Saturday"),
 					resource.TestCheckResourceAttr(DBaaSClusterResource+"."+DBaaSClusterTestResource, "credentials.0.username", "username"),
 					resource.TestCheckResourceAttr(DBaaSClusterResource+"."+DBaaSClusterTestResource, "credentials.0.password", "password"),
 					resource.TestCheckResourceAttr(DBaaSClusterResource+"."+DBaaSClusterTestResource, "synchronization_mode", "asynchronous"),
@@ -68,7 +68,7 @@ func TestAccDBaaSPgSqlClusterBasic(t *testing.T) {
 }
 
 func TestAccDBaaSPgSqlClusterAdditionalParameters(t *testing.T) {
-	var dbaasCluster dbaas.Cluster
+	var dbaasCluster dbaas.ClusterResponse
 	resource.Test(t, resource.TestCase{
 		PreCheck: func() {
 			testAccPreCheck(t)
@@ -81,16 +81,18 @@ func TestAccDBaaSPgSqlClusterAdditionalParameters(t *testing.T) {
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckDbaasPgSqlClusterExists(DBaaSClusterResource+"."+DBaaSClusterTestResource, &dbaasCluster),
 					resource.TestCheckResourceAttr(DBaaSClusterResource+"."+DBaaSClusterTestResource, "postgres_version", "12"),
-					resource.TestCheckResourceAttr(DBaaSClusterResource+"."+DBaaSClusterTestResource, "replicas", "1"),
-					resource.TestCheckResourceAttr(DBaaSClusterResource+"."+DBaaSClusterTestResource, "cpu_core_count", "4"),
-					resource.TestCheckResourceAttr(DBaaSClusterResource+"."+DBaaSClusterTestResource, "ram_size", "2Gi"),
-					resource.TestCheckResourceAttr(DBaaSClusterResource+"."+DBaaSClusterTestResource, "storage_size", "2Gi"),
+					resource.TestCheckResourceAttr(DBaaSClusterResource+"."+DBaaSClusterTestResource, "instances", "1"),
+					resource.TestCheckResourceAttr(DBaaSClusterResource+"."+DBaaSClusterTestResource, "cores", "3"),
+					resource.TestCheckResourceAttr(DBaaSClusterResource+"."+DBaaSClusterTestResource, "ram", "2048"),
+					resource.TestCheckResourceAttr(DBaaSClusterResource+"."+DBaaSClusterTestResource, "storage_size", "2048"),
 					resource.TestCheckResourceAttr(DBaaSClusterResource+"."+DBaaSClusterTestResource, "storage_type", "HDD"),
-					resource.TestCheckResourceAttrPair(DBaaSClusterResource+"."+DBaaSClusterTestResource, "vdc_connections.0.vdc_id", "ionoscloud_datacenter.test_dbaas_cluster", "id"),
-					resource.TestCheckResourceAttrPair(DBaaSClusterResource+"."+DBaaSClusterTestResource, "vdc_connections.0.lan_id", "ionoscloud_lan.test_dbaas_cluster", "id"),
-					resource.TestCheckResourceAttr(DBaaSClusterResource+"."+DBaaSClusterTestResource, "vdc_connections.0.ip_address", "192.168.1.100/24"),
+					resource.TestCheckResourceAttrPair(DBaaSClusterResource+"."+DBaaSClusterTestResource, "connections.0.datacenter_id", "ionoscloud_datacenter.test_dbaas_cluster", "id"),
+					resource.TestCheckResourceAttrPair(DBaaSClusterResource+"."+DBaaSClusterTestResource, "connections.0.lan_id", "ionoscloud_lan.test_dbaas_cluster", "id"),
+					resource.TestCheckResourceAttr(DBaaSClusterResource+"."+DBaaSClusterTestResource, "connections.0.cidr", "192.168.1.100/24"),
 					resource.TestCheckResourceAttrPair(DBaaSClusterResource+"."+DBaaSClusterTestResource, "location", "ionoscloud_datacenter.test_dbaas_cluster", "location"),
 					resource.TestCheckResourceAttr(DBaaSClusterResource+"."+DBaaSClusterTestResource, "display_name", "PostgreSQL_cluster_from_Backup"),
+					resource.TestCheckResourceAttr(DBaaSClusterResource+"."+DBaaSClusterTestResource, "maintenance_window.0.time", "09:00:00"),
+					resource.TestCheckResourceAttr(DBaaSClusterResource+"."+DBaaSClusterTestResource, "maintenance_window.0.day_of_the_week", "Sunday"),
 					resource.TestCheckResourceAttr(DBaaSClusterResource+"."+DBaaSClusterTestResource, "credentials.0.username", "username"),
 					resource.TestCheckResourceAttr(DBaaSClusterResource+"."+DBaaSClusterTestResource, "credentials.0.password", "password"),
 					resource.TestCheckResourceAttr(DBaaSClusterResource+"."+DBaaSClusterTestResource, "synchronization_mode", "asynchronous")),
@@ -128,7 +130,7 @@ func testAccCheckDbaasPgSqlClusterDestroyCheck(s *terraform.State) error {
 	return nil
 }
 
-func testAccCheckDbaasPgSqlClusterExists(n string, cluster *dbaas.Cluster) resource.TestCheckFunc {
+func testAccCheckDbaasPgSqlClusterExists(n string, cluster *dbaas.ClusterResponse) resource.TestCheckFunc {
 	return func(s *terraform.State) error {
 		client := testAccProvider.Meta().(SdkBundle).DbaasClient
 
@@ -177,21 +179,21 @@ resource "ionoscloud_lan" ` + DBaaSClusterTestResource + ` {
 
 resource ` + DBaaSClusterResource + ` ` + DBaaSClusterTestResource + ` {
   postgres_version   = 12
-  replicas           = 1
-  cpu_core_count     = 4
-  ram_size           = "3Gi"
-  storage_size       = "2Gi"
+  instances          = 1
+  cores              = 3
+  ram                = 2048
+  storage_size       = 2048
   storage_type       = "HDD"
-  vdc_connections   {
-	vdc_id          =  ionoscloud_datacenter.` + DBaaSClusterTestResource + `.id 
+  connections   {
+	datacenter_id   =  ionoscloud_datacenter.` + DBaaSClusterTestResource + `.id 
     lan_id          =  ionoscloud_lan.` + DBaaSClusterTestResource + `.id 
-    ip_address      =  "192.168.1.100/24"
+    cidr            =  "192.168.1.100/24"
   }
   location = ionoscloud_datacenter.` + DBaaSClusterTestResource + `.location
   display_name = "` + DBaaSClusterTestResource + `"
   maintenance_window {
-    weekday = "Sunday"
-    time            = "09:00:00"
+    day_of_the_week  = "Sunday"
+    time             = "09:00:00"
   }
   credentials {
   	username = "username"
@@ -216,20 +218,20 @@ resource "ionoscloud_lan" ` + DBaaSClusterTestResource + ` {
 
 resource ` + DBaaSClusterResource + ` ` + DBaaSClusterTestResource + ` {
   postgres_version   = 13
-  replicas           = 2
-  cpu_core_count     = 4
-  ram_size           = "3Gi"
-  storage_size       = "3Gi"
+  instances          = 2
+  cores              = 4
+  ram                = 2300
+  storage_size       = 2300
   storage_type       = "HDD"
-  vdc_connections   {
-	vdc_id          =  ionoscloud_datacenter.` + DBaaSClusterTestResource + `.id 
+  connections   {
+	datacenter_id   =  ionoscloud_datacenter.` + DBaaSClusterTestResource + `.id 
     lan_id          =  ionoscloud_lan.` + DBaaSClusterTestResource + `.id 
-    ip_address      =  "192.168.1.100/24"
+    cidr            =  "192.168.1.100/24"
   }
   location = ionoscloud_datacenter.` + DBaaSClusterTestResource + `.location
   display_name = "` + UpdatedResources + `"
   maintenance_window {
-    weekday = "Saturday"
+    day_of_the_week = "Saturday"
     time            = "10:00:00"
   }
   credentials {
@@ -255,20 +257,20 @@ resource "ionoscloud_lan" ` + DBaaSClusterTestResource + ` {
 
 resource ` + DBaaSClusterResource + ` ` + DBaaSClusterTestResource + ` {
   postgres_version   = 12
-  replicas           = 1
-  cpu_core_count     = 4
-  ram_size           = "2Gi"
-  storage_size       = "2Gi"
+  instances          = 1
+  cores              = 3
+  ram                = 2048
+  storage_size       = 2048
   storage_type       = "HDD"
-  vdc_connections   {
-	vdc_id          =  ionoscloud_datacenter.` + DBaaSClusterTestResource + `.id 
+  connections   {
+	datacenter_id   =  ionoscloud_datacenter.` + DBaaSClusterTestResource + `.id 
     lan_id          =  ionoscloud_lan.` + DBaaSClusterTestResource + `.id 
-    ip_address      =  "192.168.1.100/24"
+    cidr            =  "192.168.1.100/24"
   }
   location = ionoscloud_datacenter.` + DBaaSClusterTestResource + `.location
   display_name = "` + DBaaSClusterTestResource + `"
   maintenance_window {
-    weekday = "Sunday"
+    day_of_the_week = "Sunday"
     time            = "09:00:00"
   }
   credentials {
@@ -276,6 +278,8 @@ resource ` + DBaaSClusterResource + ` ` + DBaaSClusterTestResource + ` {
 	password = "password"
   }
   synchronization_mode = "asynchronous"
-  from_backup = "ad7ac139-2d0b-11ec-a2e3-92fbe7e27ed1-4oymiqu-12"
-  from_recovery_target_time = "2021-10-14T19:36:19Z"
+  from_backup {
+	backup_id = "ad7ac139-2d0b-11ec-a2e3-92fbe7e27ed1-4oymiqu-12"
+    recovery_target_time = "2021-10-14T19:36:19Z"
+  }
 }`
