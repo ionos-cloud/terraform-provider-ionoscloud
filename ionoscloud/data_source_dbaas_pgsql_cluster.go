@@ -56,7 +56,7 @@ func dataSourceDbaasPgSqlCluster() *schema.Resource {
 				Description: "The storage type used in your cluster.",
 				Computed:    true,
 			},
-			"connection": {
+			"connections": {
 				Type:        schema.TypeList,
 				MaxItems:    1,
 				Description: "Details about the network connection for your cluster.",
@@ -88,7 +88,6 @@ func dataSourceDbaasPgSqlCluster() *schema.Resource {
 			},
 			"maintenance_window": {
 				Type:        schema.TypeList,
-				MaxItems:    1,
 				Description: "a weekly 4 hour-long window, during which maintenance might occur",
 				Computed:    true,
 				Elem: &schema.Resource{
@@ -130,7 +129,6 @@ func dataSourceDbaasPgSqlCluster() *schema.Resource {
 			},
 			"from_backup": {
 				Type:        schema.TypeList,
-				MaxItems:    1,
 				Description: "The PostgreSQL version of your cluster.",
 				Computed:    true,
 				Elem: &schema.Resource{

@@ -45,10 +45,9 @@ func resourceDbaasPgSqlCluster() *schema.Resource {
 				ValidateFunc: validation.All(validation.IntAtLeast(2048), validation.IntDivisibleBy(256)),
 			},
 			"storage_size": {
-				Type:         schema.TypeInt,
-				Description:  "The amount of storage per instance in megabytes.",
-				Required:     true,
-				ValidateFunc: validation.All(validation.StringIsNotWhiteSpace),
+				Type:        schema.TypeInt,
+				Description: "The amount of storage per instance in megabytes.",
+				Required:    true,
 			},
 			"storage_type": {
 				Type:         schema.TypeString,
