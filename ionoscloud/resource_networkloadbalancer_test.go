@@ -1,3 +1,4 @@
+//go:build nlb
 // +build nlb
 
 package ionoscloud

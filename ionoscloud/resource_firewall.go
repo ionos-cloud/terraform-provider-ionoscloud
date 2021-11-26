@@ -7,6 +7,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 	ionoscloud "github.com/ionos-cloud/sdk-go/v6"
+	"log"
 	"strconv"
 	"strings"
 )
@@ -122,10 +123,12 @@ func resourceFirewallCreate(ctx context.Context, d *schema.ResourceData, meta in
 	_, errState := getStateChangeConf(meta, d, apiResponse.Header.Get("Location"), schema.TimeoutCreate).WaitForStateContext(ctx)
 	if errState != nil {
 		if IsRequestFailed(err) {
+			log.Printf("[DEBUG] firewall resource failed to be created")
 			// Request failed, so resource was not created, delete resource from state file
 			d.SetId("")
 		}
-		diags := diag.FromErr(errState)
+		diags := diag.FromErr(fmt.Errorf("an error occured while creating a firewall rule dcId: %s server_id: %s  "+
+			"nic_id: %s %w", d.Get("datacenter_id").(string), d.Get("server_id").(string), d.Get("nic_id").(string), err))
 		return diags
 	}
 
@@ -141,10 +144,12 @@ func resourceFirewallRead(ctx context.Context, d *schema.ResourceData, meta inte
 
 	if err != nil {
 		if apiResponse != nil && apiResponse.Response != nil && apiResponse.StatusCode == 404 {
+			log.Printf("[DEBUG] could not find firewall rule datacenter_id = %s server_id = %s with id = %s", d.Get("datacenter_id").(string), d.Get("server_id").(string), d.Id())
 			d.SetId("")
 			return nil
 		}
-		diags := diag.FromErr(fmt.Errorf("an error occured while fetching a firewall rule  dcId: %s server_id: %s  nic_id: %s ID: %s %s", d.Get("datacenter_id").(string), d.Get("server_id").(string), d.Get("nic_id").(string), d.Id(), err))
+		diags := diag.FromErr(fmt.Errorf("an error occured while fetching a firewall rule dcId: %s server_id: %s  nic_id: %s ID: %s %s",
+			d.Get("datacenter_id").(string), d.Get("server_id").(string), d.Get("nic_id").(string), d.Id(), err))
 		return diags
 	}
 
@@ -173,7 +178,7 @@ func resourceFirewallUpdate(ctx context.Context, d *schema.ResourceData, meta in
 	// Wait, catching any errors
 	_, errState := getStateChangeConf(meta, d, apiResponse.Header.Get("Location"), schema.TimeoutUpdate).WaitForStateContext(ctx)
 	if errState != nil {
-		diags := diag.FromErr(errState)
+		diags := diag.FromErr(fmt.Errorf("error getting state change for firewall patch %w", errState))
 		return diags
 	}
 
@@ -197,7 +202,7 @@ func resourceFirewallDelete(ctx context.Context, d *schema.ResourceData, meta in
 	// Wait, catching any errors
 	_, errState := getStateChangeConf(meta, d, apiResponse.Header.Get("Location"), schema.TimeoutDelete).WaitForStateContext(ctx)
 	if errState != nil {
-		diags := diag.FromErr(errState)
+		diags := diag.FromErr(fmt.Errorf("error getting state change for firewall delete %w", errState))
 		return diags
 	}
 

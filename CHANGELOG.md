@@ -11,6 +11,8 @@
 - **bug fixes**: k8s_node_pool update node_count and emptying lans and public_ips didn't work
 - **bug fixes**: fixed bug at creating natgateway_rule - target_subnet was not set properly
 - **bug fixes**: revert icmp_code and icmp_type to string to allow setting to 0
+- **bug fixes**: Add additional fixes to improve code stability and prevent crashes. Revert icmp_type and icmp_code inside server resource and add tests.
+- **bug fixes**: Allow creation of an inner firewall rule for server when updating a terraform plan.
 
 ## 6.0.0-beta.14
 
