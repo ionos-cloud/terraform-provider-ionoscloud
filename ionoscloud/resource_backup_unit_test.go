@@ -30,7 +30,16 @@ func TestAccBackupUnitBasic(t *testing.T) {
 				),
 			},
 			{
-				Config: testAccCheckBackupUnitConfigUpdate,
+				Config: testAccCheckBackupUnitConfigUpdatePassword,
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckBackupUnitExists(BackupUnitResource+"."+BackupUnitTestResource, &backupUnit),
+					resource.TestCheckResourceAttr(BackupUnitResource+"."+BackupUnitTestResource, "name", BackupUnitTestResource),
+					resource.TestCheckResourceAttr(BackupUnitResource+"."+BackupUnitTestResource, "email", "example@ionoscloud.com"),
+					resource.TestCheckResourceAttr(BackupUnitResource+"."+BackupUnitTestResource, "password", "DemoPassword1234$Updated"),
+				),
+			},
+			{
+				Config: testAccCheckBackupUnitConfigUpdateEmail,
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckBackupUnitExists(BackupUnitResource+"."+BackupUnitTestResource, &backupUnit),
 					resource.TestCheckResourceAttr(BackupUnitResource+"."+BackupUnitTestResource, "name", BackupUnitTestResource),
@@ -116,10 +125,18 @@ resource ` + BackupUnitResource + ` ` + BackupUnitTestResource + ` {
 }
 `
 
-const testAccCheckBackupUnitConfigUpdate = `
+const testAccCheckBackupUnitConfigUpdatePassword = `
 resource ` + BackupUnitResource + ` ` + BackupUnitTestResource + ` {
 	name        = "` + BackupUnitTestResource + `"
-	email       = "example-updated@ionoscloud.com"
 	password    = "DemoPassword1234$Updated"
+	email       = "example@ionoscloud.com"
+}
+`
+
+const testAccCheckBackupUnitConfigUpdateEmail = `
+resource ` + BackupUnitResource + ` ` + BackupUnitTestResource + ` {
+	name        = "` + BackupUnitTestResource + `"
+	password    = "DemoPassword1234$Updated"
+	email       = "example-updated@ionoscloud.com"
 }
 `
