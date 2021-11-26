@@ -64,7 +64,9 @@ func (c *Client) DeleteCluster(ctx context.Context, clusterId string) (dbaas.Clu
 
 func GetDbaasPgSqlClusterDataCreate(d *schema.ResourceData) (*dbaas.CreateClusterRequest, error) {
 
-	dbaasCluster := dbaas.CreateClusterRequest{}
+	dbaasCluster := dbaas.CreateClusterRequest{
+		Properties: &dbaas.CreateClusterProperties{},
+	}
 
 	if postgresVersion, ok := d.GetOk("postgres_version"); ok {
 		postgresVersion := postgresVersion.(string)
@@ -130,7 +132,9 @@ func GetDbaasPgSqlClusterDataCreate(d *schema.ResourceData) (*dbaas.CreateCluste
 
 func GetDbaasPgSqlClusterDataUpdate(d *schema.ResourceData) (*dbaas.PatchClusterRequest, diag.Diagnostics) {
 
-	dbaasCluster := dbaas.PatchClusterRequest{}
+	dbaasCluster := dbaas.PatchClusterRequest{
+		Properties: &dbaas.PatchClusterProperties{},
+	}
 
 	if postgresVersion, ok := d.GetOk("postgres_version"); ok {
 		postgresVersion := postgresVersion.(string)
