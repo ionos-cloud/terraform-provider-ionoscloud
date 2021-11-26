@@ -33,6 +33,18 @@ func TestAccUserBasic(t *testing.T) {
 				),
 			},
 			{
+				Config: testAccCheckUserConfigUpdateForceSec,
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckUserExists(UserResource+"."+UserTestResource, &user),
+					resource.TestCheckResourceAttr(UserResource+"."+UserTestResource, "first_name", UserTestResource),
+					resource.TestCheckResourceAttr(UserResource+"."+UserTestResource, "last_name", UserTestResource),
+					resource.TestCheckResourceAttrSet(UserResource+"."+UserTestResource, "email"),
+					resource.TestCheckResourceAttr(UserResource+"."+UserTestResource, "administrator", "true"),
+					resource.TestCheckResourceAttr(UserResource+"."+UserTestResource, "force_sec_auth", "false"),
+					resource.TestCheckResourceAttr(UserResource+"."+UserTestResource, "active", "true"),
+				),
+			},
+			{
 				Config: testAccCheckUserConfigUpdate,
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttr(UserResource+"."+UserTestResource, "first_name", UpdatedResources),
@@ -116,6 +128,17 @@ resource ` + UserResource + ` ` + UserTestResource + ` {
   password = "abc123-321CBA"
   administrator = true
   force_sec_auth= true
+  active  = true
+}`
+
+var testAccCheckUserConfigUpdateForceSec = `
+resource ` + UserResource + ` ` + UserTestResource + ` {
+  first_name = "` + UserTestResource + `"
+  last_name = "` + UserTestResource + `"
+  email = "` + GenerateEmail() + `"
+  password = "abc123-321CBA"
+  administrator = true
+  force_sec_auth= false
   active  = true
 }`
 

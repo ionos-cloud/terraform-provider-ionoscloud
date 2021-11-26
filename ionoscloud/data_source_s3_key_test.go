@@ -41,7 +41,7 @@ resource ` + UserResource + ` "example" {
 
 resource ` + S3KeyResource + ` ` + S3KeyTestResource + ` {
   user_id    = ` + UserResource + `.example.id
-  active     = false
+  active     = true
 }`
 
 var testAccDataSourceS3KeyMatchId = testAccDataSourceS3KeyConfigBasic + `
