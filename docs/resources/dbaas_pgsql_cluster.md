@@ -14,15 +14,15 @@ Manages a DbaaS PgSql Cluster.
 
 ```hcl
 resource "ionoscloud_datacenter" "example" {
-  name        = "example"
-  location    = "de/txl"
-  description = "Datacenter for testing dbaas cluster"
+  name                    = "example"
+  location                = "de/txl"
+  description             = "Datacenter for testing dbaas cluster"
 }
 
 resource "ionoscloud_lan"  "example" {
-  datacenter_id = ionoscloud_datacenter.example.id 
-  public        = false
-  name          = "example"
+  datacenter_id           = ionoscloud_datacenter.example.id 
+  public                  = false
+  name                    = "example"
 }
 
 resource "ionoscloud_pg_cluster" "example" {
