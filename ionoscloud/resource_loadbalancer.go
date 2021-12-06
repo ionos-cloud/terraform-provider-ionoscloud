@@ -7,6 +7,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 	ionoscloud "github.com/ionos-cloud/sdk-go/v5"
+	"log"
 )
 
 func resourceLoadbalancer() *schema.Resource {
@@ -186,7 +187,7 @@ func resourceLoadbalancerUpdate(ctx context.Context, d *schema.ResourceData, met
 				if apiResponse != nil && apiResponse.Response != nil && apiResponse.StatusCode == 404 {
 					/* 404 - nic was not found - in case the nic is removed, VDC removes the nic from load balancers
 					that contain it, behind the scenes - therefore our call will yield 404 */
-					fmt.Printf("[WARNING] nic ID %s already removed from load balancer %s\n", o.(string), d.Id())
+					log.Printf("[WARNING] nic ID %s already removed from load balancer %s\n", o.(string), d.Id())
 				} else {
 					diags := diag.FromErr(fmt.Errorf("[load balancer update] an error occured while deleting a balanced nic: %s", err))
 					return diags

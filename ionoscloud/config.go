@@ -21,7 +21,7 @@ type Config struct {
 func (c *Config) Client(terraformVersion string) (*ionoscloud.APIClient, error) {
 	var client *ionoscloud.APIClient
 
-	fmt.Printf("Config client \n")
+	log.Printf("[INFO] Config client \n")
 	if c.Token != "" {
 		client = ionoscloud.NewAPIClient(ionoscloud.NewConfiguration("", "", c.Token, c.Endpoint))
 	} else {

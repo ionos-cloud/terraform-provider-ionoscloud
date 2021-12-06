@@ -228,3 +228,11 @@ func httpNotFound(resp *ionoscloud.APIResponse) bool {
 	}
 	return false
 }
+
+//DiffToLower terraform suppress differences between lower and upper
+func DiffToLower(_, old, new string, _ *schema.ResourceData) bool {
+	if strings.ToLower(old) == strings.ToLower(new) {
+		return true
+	}
+	return false
+}

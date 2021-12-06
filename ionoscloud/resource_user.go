@@ -33,13 +33,15 @@ func resourceUser() *schema.Resource {
 				ValidateFunc: validation.All(validation.StringIsNotWhiteSpace),
 			},
 			"email": {
-				Type:         schema.TypeString,
-				Required:     true,
-				ValidateFunc: validation.All(validation.StringIsNotWhiteSpace),
+				Type:             schema.TypeString,
+				Required:         true,
+				ValidateFunc:     validation.All(validation.StringIsNotWhiteSpace),
+				DiffSuppressFunc: DiffToLower,
 			},
 			"password": {
 				Type:         schema.TypeString,
 				Required:     true,
+				Sensitive:    true,
 				ValidateFunc: validation.All(validation.StringIsNotWhiteSpace),
 			},
 			"administrator": {
@@ -73,8 +75,6 @@ func resourceUserCreate(ctx context.Context, d *schema.ResourceData, meta interf
 	request := ionoscloud.UserPost{
 		Properties: &ionoscloud.UserPropertiesPost{},
 	}
-
-	log.Printf("[DEBUG] NAME %s", d.Get("first_name"))
 
 	if d.Get("first_name") != nil {
 		firstName := d.Get("first_name").(string)
@@ -151,11 +151,24 @@ func resourceUserRead(ctx context.Context, d *schema.ResourceData, meta interfac
 
 func resourceUserUpdate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	client := meta.(*ionoscloud.APIClient)
-
+	foundUser, apiResponse, err := client.UserManagementApi.UmUsersFindById(ctx, d.Id()).Execute()
+	logApiRequestTime(apiResponse)
+	if err != nil {
+		diags := diag.FromErr(fmt.Errorf("an error occured while fetching a User ID %s %s", d.Id(), err))
+		return diags
+	}
 	userReq := ionoscloud.UserPut{
 		Properties: &ionoscloud.UserPropertiesPut{},
 	}
-
+	//this is a PUT, so we first fill everything, then we change what has been modified
+	if foundUser.Properties != nil {
+		userReq.Properties.Firstname = foundUser.Properties.Firstname
+		userReq.Properties.Lastname = foundUser.Properties.Lastname
+		userReq.Properties.Email = foundUser.Properties.Email
+		userReq.Properties.Active = foundUser.Properties.Active
+		userReq.Properties.Administrator = foundUser.Properties.Administrator
+		userReq.Properties.ForceSecAuth = foundUser.Properties.ForceSecAuth
+	}
 	if d.Get("first_name") != nil {
 		firstName := d.Get("first_name").(string)
 		userReq.Properties.Firstname = &firstName
@@ -178,9 +191,8 @@ func resourceUserUpdate(ctx context.Context, d *schema.ResourceData, meta interf
 	active := d.Get("active").(bool)
 	userReq.Properties.Active = &active
 
-	_, apiResponse, err := client.UserManagementApi.UmUsersPut(ctx, d.Id()).User(userReq).Execute()
+	_, apiResponse, err = client.UserManagementApi.UmUsersPut(ctx, d.Id()).User(userReq).Execute()
 	logApiRequestTime(apiResponse)
-
 	if err != nil {
 		diags := diag.FromErr(fmt.Errorf("an error occured while patching a user ID %s %s", d.Id(), err))
 		return diags
