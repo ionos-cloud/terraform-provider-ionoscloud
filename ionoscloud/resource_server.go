@@ -373,15 +373,10 @@ func resourceServer() *schema.Resource {
 										Optional: true,
 									},
 									"protocol": {
-										Type:     schema.TypeString,
-										Required: true,
-										DiffSuppressFunc: func(k, old, new string, d *schema.ResourceData) bool {
-											if strings.ToLower(old) == strings.ToLower(new) {
-												return true
-											}
-											return false
-										},
-										ValidateFunc: validation.All(validation.StringIsNotWhiteSpace),
+										Type:             schema.TypeString,
+										Required:         true,
+										DiffSuppressFunc: DiffToLower,
+										ValidateFunc:     validation.All(validation.StringIsNotWhiteSpace),
 									},
 									"source_mac": {
 										Type:     schema.TypeString,
