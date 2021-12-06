@@ -13,57 +13,72 @@ Manages a DbaaS PgSql Cluster.
 ## Example Usage
 
 ```hcl
+resource "ionoscloud_datacenter" "example" {
+  name        = "example"
+  location    = "de/txl"
+  description = "Datacenter for testing dbaas cluster"
+}
+
+resource "ionoscloud_lan"  "example" {
+  datacenter_id = ionoscloud_datacenter.example.id 
+  public        = false
+  name          = "example"
+}
+
 resource "ionoscloud_pg_cluster" "example" {
-  postgres_version   = 12
-  replicas           = 1
-  cpu_core_count     = 4
-  ram_size           = "2Gi"
-  storage_size       = "1Gi"
-  storage_type       = "HDD"
-  vdc_connections   {
-	vdc_id          =  ionoscloud_datacenter.example.id 
-    lan_id          =  ionoscloud_lan.example.id 
-    ip_address      =  "192.168.1.100/24"
+  postgres_version        = 12
+  instances               = 1
+  cores                   = 4
+  ram                     = 2048
+  storage_size            = 2048
+  storage_type            = "HDD"
+  connections   {
+	datacenter_id         =  ionoscloud_datacenter.example.id 
+    lan_id                =  ionoscloud_lan.example.id 
+    cidr                  =  "192.168.1.100/24"
   }
-  location = ionoscloud_datacenter.example.location
-  display_name = "PostgreSQL_cluster"
+  location                = ionoscloud_datacenter.example.location
+  display_name            = "PostgreSQL_cluster"
   maintenance_window {
-    weekday = "Sunday"
-    time            = "09:00:00"
+    day_of_the_week       = "Sunday"
+    time                  = "09:00:00"
   }
   credentials {
-  	username = "username"
-	password = "password"
+  	username              = "username"
+	password              = "password"
   }
-  synchronization_mode = "asynchronous"
-  from_backup = <backup_uuid>
-  from_recovery_target_time = "2021-10-14T19:36:19Z"
+  synchronization_mode    = "ASYNCHRONOUS"
+  from_backup {
+	backup_id             = <backup_uuid>
+    recovery_target_time  = "2021-12-06T13:54:08Z"
+  }
 }
 ```
 
 ## Argument reference
 
 * `postgres_version` - (Required)[string] The PostgreSQL version of your cluster.
-* `replicas` - (Required)[int] The number of replicas in your cluster.
-* `cpu_core_count` - (Required)[int] The number of CPU cores per replica.
-* `ram_size` - (Required)[string] The amount of memory per replica. **note that you have to use IEC format - eq: 2Gi**
-* `storage_size` - (Required)[string] The amount of storage per replica. **note that  you have to use IEC format - eq: 2Gi**
-* `storage_type` - (Required)[string] The storage type used in your cluster.
-* `vdc_connections` - (Required)[string] The VDC to connect to your cluster.
-  * `vdc_id` - (Required)[true] 
-  * `lan_id` - (Required)[true] The **private LAN** in the datacenter
-  * `ip_address` - (Required)[true] The IP and subnet for the database. Note the following unavailable IP ranges: 10.233.64.0/18, 10.233.0.0/18, 10.233.114.0/24
+* `instances` - (Required)[int] The total number of instances in the cluster (one master and n-1 standbys)
+* `cores` - (Required)[int] The number of CPU cores per replica.
+* `ram` - (Required)[int] The amount of memory per instance in megabytes. Has to be a multiple of 256.
+* `storage_size` - (Required)[int] The amount of storage per instance in megabytes.
+* `storage_type` - (Required)[string] The storage type used in your cluster. Can have one of the following values: HDD, SSD.
+* `connections` - (Required)[string] Details about the network connection for your cluster.
+  * `datacenter_id` - (Required)[true] The datacenter to connect your cluster to.
+  * `lan_id` - (Required)[true] The LAN to connect your cluster to.
+  * `cidr` - (Required)[true] The IP and subnet for the database. Note the following unavailable IP ranges: 10.233.64.0/18, 10.233.0.0/18, 10.233.114.0/24
 * `location` - (Required)[string] The physical location where the cluster will be created. This will be where all of your instances live. Property cannot be modified after datacenter creation (disallowed in update requests)
 * `display_name` - (Required)[string] The friendly name of your cluster.
 * `maintenance_window` - (Optional)[string] A weekly 4 hour-long window, during which maintenance might occur
   * `time` - (Required)[string]
-  * `weekday` - (Required)[string]
+  * `day_of_the_week` - (Required)[string]
 * `credentials` - (Required)[string] Credentials for the database user to be created.
-    * `username` - (Required)[string] The username for the initial postgres user. some system usernames are restricted (e.g. "postgres", "admin", "standby")
+    * `username` - (Required)[string] The username for the initial postgres user. Some system usernames are restricted (e.g. "postgres", "admin", "standby")
     * `password` - (Required)[string]
-* `synchronization_mode` - (Required) [string] Represents different modes of replication. Can have one of the following values: asynchronous, synchronous, strictly_synchronous. This attribute is immutable
+* `synchronization_mode` - (Required) [string] Represents different modes of replication. Can have one of the following values: ASYNCHRONOUS, SYNCHRONOUS, STRICTLY_SYNCHRONOUS. This attribute is immutable
 * `from_backup` - (Optional)[string] The unique ID of the backup you want to restore.
-* `from_recovery_target_time` - (Optional)[string] If this value is supplied as ISO 8601 timestamp, the backup will be replayed up until the given timestamp. If empty, the backup will be applied completely.
+  * `backup_id` - (Required)[string] The PostgreSQL version of your cluster.
+  * `recovery_target_time` - (Optional)[string] If this value is supplied as ISO 8601 timestamp, the backup will be replayed up until the given timestamp. If empty, the backup will be applied completely.
     
 ## Import
 

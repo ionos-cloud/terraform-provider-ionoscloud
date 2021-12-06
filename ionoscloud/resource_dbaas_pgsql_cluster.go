@@ -141,7 +141,7 @@ func resourceDbaasPgSqlCluster() *schema.Resource {
 				Type:         schema.TypeString,
 				Description:  "Represents different modes of replication.",
 				Required:     true,
-				ValidateFunc: validation.All(validation.StringInSlice([]string{"ASYNCHRONOUS", "SYNCHRONOUS", "STRICTLY_SYNCHRONOUS"}, true)),
+				ValidateFunc: validation.All(validation.StringInSlice([]string{"ASYNCHRONOUS", "SYNCHRONOUS", "STRICTLY_SYNCHRONOUS"}, false)),
 			},
 			"from_backup": {
 				Type:        schema.TypeList,
@@ -154,7 +154,7 @@ func resourceDbaasPgSqlCluster() *schema.Resource {
 							Type:         schema.TypeString,
 							Description:  "The unique ID of the backup you want to restore.",
 							Required:     true,
-							ValidateFunc: validation.All(validation.IsUUID),
+							ValidateFunc: validation.All(validation.StringIsNotWhiteSpace),
 						},
 						"recovery_target_time": {
 							Type:        schema.TypeString,

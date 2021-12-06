@@ -74,12 +74,12 @@ func GetDbaasPgSqlClusterDataCreate(d *schema.ResourceData) (*dbaas.CreateCluste
 	}
 
 	if instances, ok := d.GetOk("instances"); ok {
-		instances := float32(instances.(int))
+		instances := int32(instances.(int))
 		dbaasCluster.Properties.Instances = &instances
 	}
 
 	if cores, ok := d.GetOk("cores"); ok {
-		cores := float32(cores.(int))
+		cores := int32(cores.(int))
 		dbaasCluster.Properties.Cores = &cores
 	}
 
@@ -101,7 +101,7 @@ func GetDbaasPgSqlClusterDataCreate(d *schema.ResourceData) (*dbaas.CreateCluste
 	dbaasCluster.Properties.Connections = GetDbaasClusterVdcData(d)
 
 	if location, ok := d.GetOk("location"); ok {
-		location := location.(string)
+		location := dbaas.Location(location.(string))
 		dbaasCluster.Properties.Location = &location
 	}
 
@@ -142,12 +142,12 @@ func GetDbaasPgSqlClusterDataUpdate(d *schema.ResourceData) (*dbaas.PatchCluster
 	}
 
 	if instances, ok := d.GetOk("instances"); ok {
-		instances := float32(instances.(int))
+		instances := int32(instances.(int))
 		dbaasCluster.Properties.Instances = &instances
 	}
 
 	if cores, ok := d.GetOk("cores"); ok {
-		cores := float32(cores.(int))
+		cores := int32(cores.(int))
 		dbaasCluster.Properties.Cores = &cores
 	}
 
@@ -244,7 +244,7 @@ func GetDbaasClusterMaintenanceWindowData(d *schema.ResourceData) *dbaas.Mainten
 	}
 
 	if dayOfTheWeek, ok := d.GetOk("maintenance_window.0.day_of_the_week"); ok {
-		dayOfTheWeek := dayOfTheWeek.(string)
+		dayOfTheWeek := dbaas.DayOfTheWeek(dayOfTheWeek.(string))
 		maintananceWindow.DayOfTheWeek = &dayOfTheWeek
 	}
 
