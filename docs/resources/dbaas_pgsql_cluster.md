@@ -8,7 +8,7 @@ Creates and manages DbaaS Postgres Cluster objects.
 
 # ionoscloud\_pg_cluster
 
-Manages a DbaaS PgSql Cluster.
+Manages a DbaaS PgSql Cluster. 
 
 ## Example Usage
 
