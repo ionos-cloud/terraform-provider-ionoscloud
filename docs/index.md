@@ -87,9 +87,12 @@ $ export IONOS_API_URL="ionoscloud_cloud_api_url"
 Or you can provide your credentials in a `.tf` configuration file as shown in this example.
 
 
-## Debuging
+## Debugging
 
 In the default mode, the Terraform provider returns only HTTP client errors. These usually consist only of the HTTP status code. There is no clear description of the problem. But if you want to see the API call error messages as well, you need to tell the SDK and Terraform provider environment variables.
+
+Note: We recommend you only use IONOS_DEBUG for debugging purposes. Disable it in your production environments because it can log sensitive data. It logs the full request and response without encryption, even for an HTTPS call.
+Verbose request and response logging can also significantly impact your application’s performance.
 
 ```bash
 $ export TF_LOG=debug
