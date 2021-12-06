@@ -33,7 +33,7 @@ resource "ionoscloud_pg_cluster" "example" {
   storage_size            = 2048
   storage_type            = "HDD"
   connections   {
-	datacenter_id         =  ionoscloud_datacenter.example.id 
+    datacenter_id         =  ionoscloud_datacenter.example.id 
     lan_id                =  ionoscloud_lan.example.id 
     cidr                  =  "192.168.1.100/24"
   }
@@ -44,12 +44,12 @@ resource "ionoscloud_pg_cluster" "example" {
     time                  = "09:00:00"
   }
   credentials {
-  	username              = "username"
-	password              = "password"
+    username              = "username"
+    password              = "password"
   }
   synchronization_mode    = "ASYNCHRONOUS"
   from_backup {
-	backup_id             = <backup_uuid>
+    backup_id             = <backup_uuid>
     recovery_target_time  = "2021-12-06T13:54:08Z"
   }
 }
