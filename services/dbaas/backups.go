@@ -63,7 +63,7 @@ func SetPgSqlClusterBackupData(d *schema.ResourceData, clusterBackups *dbaas.Clu
 				metadataEntry := make(map[string]interface{})
 
 				if backup.Metadata.CreatedDate != nil {
-					metadataEntry["created_date"] = *backup.Metadata.CreatedDate
+					metadataEntry["created_date"] = (*backup.Metadata.CreatedDate).Time.String()
 				}
 
 				metadata = append(metadata, metadataEntry)

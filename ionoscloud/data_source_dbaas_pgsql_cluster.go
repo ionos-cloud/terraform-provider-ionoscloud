@@ -58,9 +58,8 @@ func dataSourceDbaasPgSqlCluster() *schema.Resource {
 			},
 			"connections": {
 				Type:        schema.TypeList,
-				MaxItems:    1,
 				Description: "Details about the network connection for your cluster.",
-				Required:    true,
+				Computed:    true,
 				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{
 						"datacenter_id": {
