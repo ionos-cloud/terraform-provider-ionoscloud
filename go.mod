@@ -1,6 +1,6 @@
 module github.com/ionos-cloud/terraform-provider-ionoscloud
 
-go 1.14
+go 1.17
 
 require (
 	github.com/agext/levenshtein v1.2.3 // indirect

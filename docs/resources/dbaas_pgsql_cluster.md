@@ -60,7 +60,7 @@ resource "ionoscloud_pg_cluster" "example" {
 * `postgres_version` - (Required)[string] The PostgreSQL version of your cluster.
 * `instances` - (Required)[int] The total number of instances in the cluster (one master and n-1 standbys)
 * `cores` - (Required)[int] The number of CPU cores per replica.
-* `ram` - (Required)[int] The amount of memory per instance in megabytes. Has to be a multiple of 256.
+* `ram` - (Required)[int] The amount of memory per instance in megabytes. Has to be a multiple of 1024.
 * `storage_size` - (Required)[int] The amount of storage per instance in megabytes.
 * `storage_type` - (Required)[string] The storage type used in your cluster. Can have one of the following values: HDD, SSD.
 * `connections` - (Required)[string] Details about the network connection for your cluster.

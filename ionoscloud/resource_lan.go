@@ -210,15 +210,18 @@ func resourceLanUpdate(ctx context.Context, d *schema.ResourceData, meta interfa
 
 func resourceLanDelete(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	client := meta.(SdkBundle).CloudApiClient
-	dcid := d.Get("datacenter_id").(string)
+	dcId := d.Get("datacenter_id").(string)
 
-	apiResponse, err := client.LansApi.DatacentersLansDelete(ctx, dcid, d.Id()).Execute()
+	apiResponse, err := client.LansApi.DatacentersLansDelete(ctx, dcId, d.Id()).Execute()
 	logApiRequestTime(apiResponse)
 
 	if err != nil {
-		diags := diag.FromErr(fmt.Errorf("an error occured while deleting lan dcId %s ID %s %s", dcid, d.Id(), err))
+		diags := diag.FromErr(fmt.Errorf("an error occured while deleting lan dcId %s ID %s %s", dcId, d.Id(), err))
 		return diags
 	}
+	log.Printf("[INFO] Request path: %s", apiResponse.Header.Get("Location"))
+
+	log.Printf("[INFO] Request to delete lan %s for datacenter %s has been sent successfully", d.Id(), dcId)
 
 	for {
 		log.Printf("[INFO] Waiting for LAN %s to be deleted...", d.Id())
@@ -327,19 +330,20 @@ func lanAvailable(ctx context.Context, client *ionoscloud.APIClient, d *schema.R
 }
 
 func lanDeleted(ctx context.Context, client *ionoscloud.APIClient, d *schema.ResourceData) (bool, error) {
-	dcid := d.Get("datacenter_id").(string)
+	dcId := d.Get("datacenter_id").(string)
 
-	rsp, apiResponse, err := client.LansApi.DatacentersLansFindById(ctx, dcid, d.Id()).Execute()
+	rsp, apiResponse, err := client.LansApi.DatacentersLansFindById(ctx, dcId, d.Id()).Execute()
 	logApiRequestTime(apiResponse)
-
-	log.Printf("[INFO] Current deletion status for LAN %s: %+v", d.Id(), rsp)
 
 	if err != nil {
 		if apiResponse != nil && apiResponse.Response != nil && apiResponse.StatusCode == 404 {
 			return true, nil
 		}
-		return true, fmt.Errorf("error checking LAN deletion status: %s", err)
+		return false, fmt.Errorf("error checking LAN deletion status: %s", err)
 	}
-	log.Printf("[INFO] LAN %s not deleted yet deleted LAN: %+v", d.Id(), rsp)
+	log.Printf("[INFO] LAN %s not deleted yet deleted from the datacenter %s", d.Id(), dcId)
+
+	log.Printf("[INFO] Current deletion status for LAN %s: %+v", d.Id(), *rsp.Metadata.State)
+
 	return false, nil
 }

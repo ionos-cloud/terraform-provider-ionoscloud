@@ -98,7 +98,11 @@ func GetDbaasPgSqlClusterDataCreate(d *schema.ResourceData) (*dbaas.CreateCluste
 		dbaasCluster.Properties.StorageType = &storageType
 	}
 
-	dbaasCluster.Properties.Connections = GetDbaasClusterVdcData(d)
+	if _, ok := d.GetOk("connections"); ok {
+		dbaasCluster.Properties.Connections = GetDbaasClusterConnectionsData(d)
+	} else {
+		return nil, fmt.Errorf("connections parameter is required in create cluster requests")
+	}
 
 	if location, ok := d.GetOk("location"); ok {
 		location := dbaas.Location(location.(string))
@@ -166,10 +170,7 @@ func GetDbaasPgSqlClusterDataUpdate(d *schema.ResourceData) (*dbaas.PatchCluster
 		return nil, diags
 	}
 
-	if d.HasChange("connections") {
-		diags := diag.FromErr(fmt.Errorf("connections parameter is immutable"))
-		return nil, diags
-	}
+	dbaasCluster.Properties.Connections = GetDbaasClusterConnectionsData(d)
 
 	if d.HasChange("location") {
 		diags := diag.FromErr(fmt.Errorf("location parameter is immutable"))
@@ -201,8 +202,8 @@ func GetDbaasPgSqlClusterDataUpdate(d *schema.ResourceData) (*dbaas.PatchCluster
 	return &dbaasCluster, nil
 }
 
-func GetDbaasClusterVdcData(d *schema.ResourceData) *[]dbaas.Connection {
-	var connections []dbaas.Connection
+func GetDbaasClusterConnectionsData(d *schema.ResourceData) *[]dbaas.Connection {
+	connections := make([]dbaas.Connection, 0)
 
 	if vdcValue, ok := d.GetOk("connections"); ok {
 		vdcValue := vdcValue.([]interface{})
@@ -338,7 +339,7 @@ func SetDbaasPgSqlClusterData(d *schema.ResourceData, cluster dbaas.ClusterRespo
 	if cluster.Properties.Connections != nil && len(*cluster.Properties.Connections) > 0 {
 		var connections []interface{}
 		for _, connection := range *cluster.Properties.Connections {
-			connectionEntry := setConnectionProperties(connection)
+			connectionEntry := SetConnectionProperties(connection)
 			connections = append(connections, connectionEntry)
 		}
 		if err := d.Set("connections", connections); err != nil {
@@ -360,7 +361,7 @@ func SetDbaasPgSqlClusterData(d *schema.ResourceData, cluster dbaas.ClusterRespo
 
 	if cluster.Properties.MaintenanceWindow != nil {
 		var maintenanceWindow []interface{}
-		maintenanceWindowEntry := setMaintenanceWindowProperties(*cluster.Properties.MaintenanceWindow)
+		maintenanceWindowEntry := SetMaintenanceWindowProperties(*cluster.Properties.MaintenanceWindow)
 		maintenanceWindow = append(maintenanceWindow, maintenanceWindowEntry)
 		if err := d.Set("maintenance_window", maintenanceWindow); err != nil {
 			return generateSetError(resourceName, "maintenance_window", err)
@@ -376,7 +377,7 @@ func SetDbaasPgSqlClusterData(d *schema.ResourceData, cluster dbaas.ClusterRespo
 	return nil
 }
 
-func setConnectionProperties(vdcConnection dbaas.Connection) map[string]interface{} {
+func SetConnectionProperties(vdcConnection dbaas.Connection) map[string]interface{} {
 
 	connection := map[string]interface{}{}
 
@@ -387,7 +388,7 @@ func setConnectionProperties(vdcConnection dbaas.Connection) map[string]interfac
 	return connection
 }
 
-func setMaintenanceWindowProperties(maintenanceWindow dbaas.MaintenanceWindow) map[string]interface{} {
+func SetMaintenanceWindowProperties(maintenanceWindow dbaas.MaintenanceWindow) map[string]interface{} {
 
 	maintenance := map[string]interface{}{}
 

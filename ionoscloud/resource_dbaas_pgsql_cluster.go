@@ -40,9 +40,9 @@ func resourceDbaasPgSqlCluster() *schema.Resource {
 			},
 			"ram": {
 				Type:         schema.TypeInt,
-				Description:  "The amount of memory per instance in megabytes. Has to be a multiple of 256.",
+				Description:  "The amount of memory per instance in megabytes. Has to be a multiple of 1024.",
 				Required:     true,
-				ValidateFunc: validation.All(validation.IntAtLeast(2048), validation.IntDivisibleBy(256)),
+				ValidateFunc: validation.All(validation.IntAtLeast(2048), validation.IntDivisibleBy(1024)),
 			},
 			"storage_size": {
 				Type:        schema.TypeInt,
@@ -59,7 +59,7 @@ func resourceDbaasPgSqlCluster() *schema.Resource {
 				Type:        schema.TypeList,
 				MaxItems:    1,
 				Description: "Details about the network connection for your cluster.",
-				Required:    true,
+				Optional:    true,
 				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{
 						"datacenter_id": {

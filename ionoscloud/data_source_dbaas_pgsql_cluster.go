@@ -43,7 +43,7 @@ func dataSourceDbaasPgSqlCluster() *schema.Resource {
 			},
 			"ram": {
 				Type:        schema.TypeInt,
-				Description: "The amount of memory per instance in megabytes. Has to be a multiple of 256.",
+				Description: "The amount of memory per instance in megabytes. Has to be a multiple of 1024.",
 				Computed:    true,
 			},
 			"storage_size": {
