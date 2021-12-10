@@ -36,4 +36,4 @@ If `cluster_id` is not provided the data source will return the list of postgres
 The following attributes are returned by the datasource:
 
 * `cluster_id` - Id of the cluster
-* `postgres_version` - list of PostgreSQL versions.
+* `postgres_versions` - list of PostgreSQL versions.
