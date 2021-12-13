@@ -1,8 +1,18 @@
 ## 6.0.0-beta.15
 
 - **code enhancements**: added http request time log for api calls
-- **new features**: import for `nic`, data_source for `nic`, `share`
+- **new features**: import for `nic`, data_source for `nic`, `share`, `ipfailover`
 - **dependency update**: updated sdk-go to v6.0.0-beta.8
+- **tests enhancements**: improved tests on natgateway and natgateway_rule
+- **code enhancements**: for `k8s_node_pool`, `nic`, `ipfailover`, and `share`:
+  - made tests comprehensive
+  - optimized test duration by including both match by id and by name in the same test
+  - removed duplicated code from import, data_source, resource and tests files
+- **bug fixes**: k8s_node_pool update node_count and emptying lans and public_ips didn't work
+- **bug fixes**: fixed bug at creating natgateway_rule - target_subnet was not set properly
+- **bug fixes**: revert icmp_code and icmp_type to string to allow setting to 0
+- **bug fixes**: Add additional fixes to improve code stability and prevent crashes. Revert icmp_type and icmp_code inside server resource and add tests.
+- **bug fixes**: Allow creation of an inner firewall rule for server when updating a terraform plan.
 
 ## 6.0.0-beta.14
 

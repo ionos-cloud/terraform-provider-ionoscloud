@@ -22,12 +22,12 @@ func resourceLanIPFailover() *schema.Resource {
 			"ip": {
 				Type:         schema.TypeString,
 				Required:     true,
-				ValidateFunc: validation.All(validation.StringIsNotWhiteSpace),
+				ValidateFunc: validation.All(validation.IsIPAddress),
 			},
 			"nicuuid": {
 				Type:         schema.TypeString,
 				Required:     true,
-				ValidateFunc: validation.All(validation.StringIsNotWhiteSpace),
+				ValidateFunc: validation.All(validation.IsUUID),
 			},
 			"lan_id": {
 				Type:         schema.TypeString,
@@ -38,7 +38,7 @@ func resourceLanIPFailover() *schema.Resource {
 				Type:         schema.TypeString,
 				Required:     true,
 				ForceNew:     true,
-				ValidateFunc: validation.All(validation.StringIsNotWhiteSpace),
+				ValidateFunc: validation.All(validation.IsUUID),
 			},
 		},
 		Timeouts: &resourceDefaultTimeouts,

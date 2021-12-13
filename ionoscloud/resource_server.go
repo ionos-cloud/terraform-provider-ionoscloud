@@ -296,15 +296,10 @@ func resourceServer() *schema.Resource {
 										Optional: true,
 									},
 									"protocol": {
-										Type:     schema.TypeString,
-										Required: true,
-										DiffSuppressFunc: func(k, old, new string, d *schema.ResourceData) bool {
-											if strings.ToLower(old) == strings.ToLower(new) {
-												return true
-											}
-											return false
-										},
-										ValidateFunc: validation.All(validation.StringIsNotWhiteSpace),
+										Type:             schema.TypeString,
+										Required:         true,
+										DiffSuppressFunc: DiffToLower,
+										ValidateFunc:     validation.All(validation.StringIsNotWhiteSpace),
 									},
 									"source_mac": {
 										Type:     schema.TypeString,
@@ -667,10 +662,11 @@ func resourceServerCreate(ctx context.Context, d *schema.ResourceData, meta inte
 	_, errState := getStateChangeConf(meta, d, apiResponse.Header.Get("Location"), schema.TimeoutCreate).WaitForStateContext(ctx)
 	if errState != nil {
 		if IsRequestFailed(err) {
+			log.Printf("[DEBUG] failed to create server resource")
 			// Request failed, so resource was not created, delete resource from state file
 			d.SetId("")
 		}
-		diags := diag.FromErr(errState)
+		diags := diag.FromErr(fmt.Errorf("error waiting for state change for server creation %w", errState))
 		return diags
 	}
 	server, apiResponse, err = client.ServersApi.DatacentersServersFindById(ctx, d.Get("datacenter_id").(string), *server.Id).Execute()
@@ -724,74 +720,6 @@ func resourceServerCreate(ctx context.Context, d *schema.ResourceData, meta inte
 	return resourceServerRead(ctx, d, meta)
 }
 
-func GetFirewallResource(d *schema.ResourceData, path string, update bool) ionoscloud.FirewallRule {
-
-	firewall := ionoscloud.FirewallRule{
-		Properties: &ionoscloud.FirewallruleProperties{},
-	}
-
-	if !update {
-		if v, ok := d.GetOk(path + ".protocol"); ok {
-			vStr := v.(string)
-			firewall.Properties.Protocol = &vStr
-		}
-	}
-
-	if v, ok := d.GetOk(path + ".name"); ok {
-		vStr := v.(string)
-		firewall.Properties.Name = &vStr
-	}
-
-	if v, ok := d.GetOk(path + ".source_mac"); ok {
-		val := v.(string)
-		firewall.Properties.SourceMac = &val
-	}
-
-	if v, ok := d.GetOk(path + ".source_ip"); ok {
-		val := v.(string)
-		firewall.Properties.SourceIp = &val
-	}
-
-	if v, ok := d.GetOk(path + ".target_ip"); ok {
-		val := v.(string)
-		firewall.Properties.TargetIp = &val
-	}
-
-	if v, ok := d.GetOk(path + ".port_range_start"); ok {
-		val := int32(v.(int))
-		firewall.Properties.PortRangeStart = &val
-	}
-
-	if v, ok := d.GetOk(path + ".port_range_end"); ok {
-		val := int32(v.(int))
-		firewall.Properties.PortRangeEnd = &val
-	}
-
-	if v, ok := d.GetOk(path + ".icmp_type"); ok {
-		tempIcmpType := v.(string)
-		if tempIcmpType != "" {
-			i, _ := strconv.Atoi(tempIcmpType)
-			iInt32 := int32(i)
-			firewall.Properties.IcmpType = &iInt32
-		}
-	}
-	if v, ok := d.GetOk(path + ".icmp_code"); ok {
-		tempIcmpCode := v.(string)
-		if tempIcmpCode != "" {
-			i, _ := strconv.Atoi(tempIcmpCode)
-			iInt32 := int32(i)
-			firewall.Properties.IcmpCode = &iInt32
-		}
-	}
-
-	if v, ok := d.GetOk(path + ".type"); ok {
-		val := v.(string)
-		firewall.Properties.Type = &val
-	}
-
-	return firewall
-}
-
 func resourceServerRead(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	client := meta.(SdkBundle).CloudApiClient
 
@@ -802,63 +730,65 @@ func resourceServerRead(ctx context.Context, d *schema.ResourceData, meta interf
 	logApiRequestTime(apiResponse)
 	if err != nil {
 		if apiResponse != nil && apiResponse.Response != nil && apiResponse.StatusCode == 404 {
+			log.Printf("[DEBUG] cannot find server by id \n")
 			d.SetId("")
 			return nil
 		}
 		diags := diag.FromErr(fmt.Errorf("error occured while fetching a server ID %s %s", d.Id(), err))
 		return diags
 	}
+	if server.Properties != nil {
+		if server.Properties.TemplateUuid != nil {
+			if err := d.Set("template_uuid", *server.Properties.TemplateUuid); err != nil {
+				diags := diag.FromErr(err)
+				return diags
+			}
+		}
 
-	if server.Properties.TemplateUuid != nil {
-		if err := d.Set("template_uuid", *server.Properties.TemplateUuid); err != nil {
-			diags := diag.FromErr(err)
-			return diags
+		if server.Properties.Name != nil {
+			if err := d.Set("name", *server.Properties.Name); err != nil {
+				diags := diag.FromErr(err)
+				return diags
+			}
+		}
+
+		if server.Properties.Cores != nil {
+			if err := d.Set("cores", *server.Properties.Cores); err != nil {
+				diags := diag.FromErr(err)
+				return diags
+			}
+		}
+
+		if server.Properties.Ram != nil {
+			if err := d.Set("ram", *server.Properties.Ram); err != nil {
+				diags := diag.FromErr(err)
+				return diags
+			}
+		}
+
+		if server.Properties.Type != nil {
+			if err := d.Set("type", *server.Properties.Type); err != nil {
+				diags := diag.FromErr(err)
+				return diags
+			}
+		}
+
+		if server.Properties.AvailabilityZone != nil {
+			if err := d.Set("availability_zone", *server.Properties.AvailabilityZone); err != nil {
+				diags := diag.FromErr(err)
+				return diags
+			}
+		}
+
+		if server.Properties.CpuFamily != nil {
+			if err := d.Set("cpu_family", *server.Properties.CpuFamily); err != nil {
+				diags := diag.FromErr(err)
+				return diags
+			}
 		}
 	}
 
-	if server.Properties.Name != nil {
-		if err := d.Set("name", *server.Properties.Name); err != nil {
-			diags := diag.FromErr(err)
-			return diags
-		}
-	}
-
-	if server.Properties.Cores != nil {
-		if err := d.Set("cores", *server.Properties.Cores); err != nil {
-			diags := diag.FromErr(err)
-			return diags
-		}
-	}
-
-	if server.Properties.Ram != nil {
-		if err := d.Set("ram", *server.Properties.Ram); err != nil {
-			diags := diag.FromErr(err)
-			return diags
-		}
-	}
-
-	if server.Properties.Type != nil {
-		if err := d.Set("type", *server.Properties.Type); err != nil {
-			diags := diag.FromErr(err)
-			return diags
-		}
-	}
-
-	if server.Properties.AvailabilityZone != nil {
-		if err := d.Set("availability_zone", *server.Properties.AvailabilityZone); err != nil {
-			diags := diag.FromErr(err)
-			return diags
-		}
-	}
-
-	if server.Properties.CpuFamily != nil {
-		if err := d.Set("cpu_family", *server.Properties.CpuFamily); err != nil {
-			diags := diag.FromErr(err)
-			return diags
-		}
-	}
-
-	if server.Entities.Volumes != nil && server.Entities.Volumes.Items != nil && len(*server.Entities.Volumes.Items) > 0 &&
+	if server.Entities != nil && server.Entities.Volumes != nil && server.Entities.Volumes.Items != nil && len(*server.Entities.Volumes.Items) > 0 &&
 		(*server.Entities.Volumes.Items)[0].Properties.Image != nil {
 		if err := d.Set("boot_image", *(*server.Entities.Volumes.Items)[0].Properties.Image); err != nil {
 			diags := diag.FromErr(err)
@@ -965,19 +895,18 @@ func resourceServerRead(ctx context.Context, d *schema.ResourceData, meta interf
 func SetNetworkProperties(nic ionoscloud.Nic) map[string]interface{} {
 
 	network := map[string]interface{}{}
-
-	setPropWithNilCheck(network, "dhcp", nic.Properties.Dhcp)
-	setPropWithNilCheck(network, "firewall_active", nic.Properties.FirewallActive)
-	setPropWithNilCheck(network, "firewall_type", nic.Properties.FirewallType)
-	setPropWithNilCheck(network, "lan", nic.Properties.Lan)
-	setPropWithNilCheck(network, "name", nic.Properties.Name)
-	setPropWithNilCheck(network, "ips", nic.Properties.Ips)
-	setPropWithNilCheck(network, "mac", nic.Properties.Mac)
-
-	if nic.Properties.Ips != nil && len(*nic.Properties.Ips) > 0 {
-		network["ips"] = *nic.Properties.Ips
+	if nic.Properties != nil {
+		setPropWithNilCheck(network, "dhcp", nic.Properties.Dhcp)
+		setPropWithNilCheck(network, "firewall_active", nic.Properties.FirewallActive)
+		setPropWithNilCheck(network, "firewall_type", nic.Properties.FirewallType)
+		setPropWithNilCheck(network, "lan", nic.Properties.Lan)
+		setPropWithNilCheck(network, "name", nic.Properties.Name)
+		setPropWithNilCheck(network, "ips", nic.Properties.Ips)
+		setPropWithNilCheck(network, "mac", nic.Properties.Mac)
+		if nic.Properties.Ips != nil && len(*nic.Properties.Ips) > 0 {
+			network["ips"] = *nic.Properties.Ips
+		}
 	}
-
 	return network
 }
 
@@ -988,39 +917,45 @@ func SetFirewallProperties(firewall ionoscloud.FirewallRule) map[string]interfac
 		"protocol": *firewall.Properties.Protocol,
 		"name":     *firewall.Properties.Name,
 	*/
-	setPropWithNilCheck(fw, "protocol", firewall.Properties.Protocol)
-	setPropWithNilCheck(fw, "name", firewall.Properties.Name)
-	setPropWithNilCheck(fw, "source_mac", firewall.Properties.SourceMac)
-	setPropWithNilCheck(fw, "source_ip", firewall.Properties.SourceIp)
-	setPropWithNilCheck(fw, "target_ip", firewall.Properties.TargetIp)
-	setPropWithNilCheck(fw, "port_range_start", firewall.Properties.PortRangeStart)
-	setPropWithNilCheck(fw, "port_range_end", firewall.Properties.PortRangeEnd)
-	setPropWithNilCheck(fw, "icmp_type", firewall.Properties.IcmpType)
-	setPropWithNilCheck(fw, "icmp_code", firewall.Properties.IcmpCode)
-	setPropWithNilCheck(fw, "type", firewall.Properties.Type)
+	if firewall.Properties != nil {
+		setPropWithNilCheck(fw, "protocol", firewall.Properties.Protocol)
+		setPropWithNilCheck(fw, "name", firewall.Properties.Name)
+		setPropWithNilCheck(fw, "source_mac", firewall.Properties.SourceMac)
+		setPropWithNilCheck(fw, "source_ip", firewall.Properties.SourceIp)
+		setPropWithNilCheck(fw, "target_ip", firewall.Properties.TargetIp)
+		setPropWithNilCheck(fw, "port_range_start", firewall.Properties.PortRangeStart)
+		setPropWithNilCheck(fw, "port_range_end", firewall.Properties.PortRangeEnd)
+		setPropWithNilCheck(fw, "type", firewall.Properties.Type)
+		if firewall.Properties.IcmpType != nil {
+			fw["icmp_type"] = strconv.Itoa(int(*firewall.Properties.IcmpType))
+		}
+		if firewall.Properties.IcmpCode != nil {
+			fw["icmp_code"] = strconv.Itoa(int(*firewall.Properties.IcmpCode))
+		}
+	}
 	return fw
 }
 
 func SetVolumeProperties(volume ionoscloud.Volume) map[string]interface{} {
 
 	volumeMap := map[string]interface{}{}
-
-	setPropWithNilCheck(volumeMap, "name", volume.Properties.Name)
-	setPropWithNilCheck(volumeMap, "disk_type", volume.Properties.Type)
-	setPropWithNilCheck(volumeMap, "size", volume.Properties.Size)
-	setPropWithNilCheck(volumeMap, "licence_type", volume.Properties.LicenceType)
-	setPropWithNilCheck(volumeMap, "bus", volume.Properties.Bus)
-	setPropWithNilCheck(volumeMap, "availability_zone", volume.Properties.AvailabilityZone)
-	setPropWithNilCheck(volumeMap, "cpu_hot_plug", volume.Properties.CpuHotPlug)
-	setPropWithNilCheck(volumeMap, "ram_hot_plug", volume.Properties.RamHotPlug)
-	setPropWithNilCheck(volumeMap, "nic_hot_plug", volume.Properties.NicHotPlug)
-	setPropWithNilCheck(volumeMap, "nic_hot_unplug", volume.Properties.NicHotUnplug)
-	setPropWithNilCheck(volumeMap, "disc_virtio_hot_plug", volume.Properties.DiscVirtioHotPlug)
-	setPropWithNilCheck(volumeMap, "disc_virtio_hot_unplug", volume.Properties.DiscVirtioHotUnplug)
-	setPropWithNilCheck(volumeMap, "device_number", volume.Properties.DeviceNumber)
-	setPropWithNilCheck(volumeMap, "user_data", volume.Properties.UserData)
-	setPropWithNilCheck(volumeMap, "backup_unit_id", volume.Properties.BackupunitId)
-
+	if volume.Properties != nil {
+		setPropWithNilCheck(volumeMap, "name", volume.Properties.Name)
+		setPropWithNilCheck(volumeMap, "disk_type", volume.Properties.Type)
+		setPropWithNilCheck(volumeMap, "size", volume.Properties.Size)
+		setPropWithNilCheck(volumeMap, "licence_type", volume.Properties.LicenceType)
+		setPropWithNilCheck(volumeMap, "bus", volume.Properties.Bus)
+		setPropWithNilCheck(volumeMap, "availability_zone", volume.Properties.AvailabilityZone)
+		setPropWithNilCheck(volumeMap, "cpu_hot_plug", volume.Properties.CpuHotPlug)
+		setPropWithNilCheck(volumeMap, "ram_hot_plug", volume.Properties.RamHotPlug)
+		setPropWithNilCheck(volumeMap, "nic_hot_plug", volume.Properties.NicHotPlug)
+		setPropWithNilCheck(volumeMap, "nic_hot_unplug", volume.Properties.NicHotUnplug)
+		setPropWithNilCheck(volumeMap, "disc_virtio_hot_plug", volume.Properties.DiscVirtioHotPlug)
+		setPropWithNilCheck(volumeMap, "disc_virtio_hot_unplug", volume.Properties.DiscVirtioHotUnplug)
+		setPropWithNilCheck(volumeMap, "device_number", volume.Properties.DeviceNumber)
+		setPropWithNilCheck(volumeMap, "user_data", volume.Properties.UserData)
+		setPropWithNilCheck(volumeMap, "backup_unit_id", volume.Properties.BackupunitId)
+	}
 	return volumeMap
 }
 
@@ -1150,7 +1085,7 @@ func resourceServerUpdate(ctx context.Context, d *schema.ResourceData, meta inte
 			// Wait, catching any errors
 			_, errState = getStateChangeConf(meta, d, apiResponse.Header.Get("Location"), schema.TimeoutCreate).WaitForStateContext(ctx)
 			if errState != nil {
-				diags := diag.FromErr(errState)
+				diags := diag.FromErr(fmt.Errorf("an error occured while waiting for a state change for dcId: %s server_id: %s ID: %s %w", dcId, d.Id(), bootVolume, err))
 				return diags
 			}
 		}
@@ -1234,9 +1169,16 @@ func resourceServerUpdate(ctx context.Context, d *schema.ResourceData, meta inte
 
 		if d.HasChange("nic.0.firewall") {
 
-			firewall := GetFirewallResource(d, "nic.0.firewall.0", true)
-
 			firewallId := d.Get("firewallrule_id").(string)
+			update := true
+			if firewallId == "" {
+				update = false
+			}
+
+			firewall, diags := getFirewallData(d, "nic.0.firewall.0.", update)
+			if diags != nil {
+				return diags
+			}
 
 			_, apiResponse, err := client.FirewallRulesApi.DatacentersServersNicsFirewallrulesFindById(ctx, dcId, *server.Id, *nic.Id, firewallId).Execute()
 			logApiRequestTime(apiResponse)
@@ -1250,11 +1192,16 @@ func resourceServerUpdate(ctx context.Context, d *schema.ResourceData, meta inte
 					return diags
 				}
 			}
+			if update == false {
 
-			firewall, apiResponse, err = client.FirewallRulesApi.DatacentersServersNicsFirewallrulesPatch(ctx, dcId, *server.Id, *nic.Id, firewallId).Firewallrule(*firewall.Properties).Execute()
+				firewall, apiResponse, err = client.FirewallRulesApi.DatacentersServersNicsFirewallrulesPost(ctx, dcId, *server.Id, *nic.Id).Firewallrule(firewall).Execute()
+			} else {
+				firewall, apiResponse, err = client.FirewallRulesApi.DatacentersServersNicsFirewallrulesPatch(ctx, dcId, *server.Id, *nic.Id, firewallId).Firewallrule(*firewall.Properties).Execute()
+
+			}
 			logApiRequestTime(apiResponse)
 			if err != nil {
-				diags := diag.FromErr(fmt.Errorf("an error occured while updating firewall rule dcId: %s server_id: %s nic_id %s ID: %s Response: %s", dcId, *server.Id, *nic.Id, firewallId, err))
+				diags := diag.FromErr(fmt.Errorf("an error occured while running firewall rule dcId: %s server_id: %s nic_id %s ID: %s Response: %s", dcId, *server.Id, *nic.Id, firewallId, err))
 				return diags
 			}
 
@@ -1263,6 +1210,13 @@ func resourceServerUpdate(ctx context.Context, d *schema.ResourceData, meta inte
 			if errState != nil {
 				diags := diag.FromErr(errState)
 				return diags
+			}
+
+			if firewallId == "" && firewall.Id != nil {
+				if err := d.Set("firewallrule_id", firewall.Id); err != nil {
+					diags := diag.FromErr(err)
+					return diags
+				}
 			}
 
 			nic.Entities = &ionoscloud.NicEntities{
@@ -1288,7 +1242,7 @@ func resourceServerUpdate(ctx context.Context, d *schema.ResourceData, meta inte
 		// Wait, catching any errors
 		_, errState := getStateChangeConf(meta, d, apiResponse.Header.Get("Location"), schema.TimeoutUpdate).WaitForStateContext(ctx)
 		if errState != nil {
-			diags := diag.FromErr(errState)
+			diags := diag.FromErr(fmt.Errorf("error getting state change for nics patch %w", errState))
 			return diags
 		}
 
@@ -1320,7 +1274,7 @@ func resourceServerDelete(ctx context.Context, d *schema.ResourceData, meta inte
 		// Wait, catching any errors
 		_, errState := getStateChangeConf(meta, d, apiResponse.Header.Get("Location"), schema.TimeoutDelete).WaitForStateContext(ctx)
 		if errState != nil {
-			diags := diag.FromErr(errState)
+			diags := diag.FromErr(fmt.Errorf("error getting state change for volumes delete %w", errState))
 			return diags
 		}
 	}
@@ -1336,7 +1290,7 @@ func resourceServerDelete(ctx context.Context, d *schema.ResourceData, meta inte
 	// Wait, catching any errors
 	_, errState := getStateChangeConf(meta, d, apiResponse.Header.Get("Location"), schema.TimeoutDelete).WaitForStateContext(ctx)
 	if errState != nil {
-		diags := diag.FromErr(errState)
+		diags := diag.FromErr(fmt.Errorf("error getting state change for datacenter delete %w", errState))
 		return diags
 	}
 
@@ -1372,49 +1326,50 @@ func resourceServerImport(ctx context.Context, d *schema.ResourceData, meta inte
 	if err := d.Set("datacenter_id", datacenterId); err != nil {
 		return nil, err
 	}
+	if server.Properties != nil {
+		if server.Properties.Name != nil {
+			if err := d.Set("name", *server.Properties.Name); err != nil {
+				return nil, fmt.Errorf("error setting name %w", err)
+			}
+		}
 
-	if server.Properties.Name != nil {
-		if err := d.Set("name", *server.Properties.Name); err != nil {
-			return nil, err
+		if server.Properties.Cores != nil {
+			if err := d.Set("cores", *server.Properties.Cores); err != nil {
+				return nil, fmt.Errorf("error setting cores %w", err)
+			}
+		}
+
+		if server.Properties.Ram != nil {
+			if err := d.Set("ram", *server.Properties.Ram); err != nil {
+				return nil, fmt.Errorf("error setting ram %w", err)
+			}
+		}
+
+		if server.Properties.AvailabilityZone != nil {
+			if err := d.Set("availability_zone", *server.Properties.AvailabilityZone); err != nil {
+				return nil, fmt.Errorf("error setting availability_zone %w", err)
+			}
+		}
+
+		if server.Properties.CpuFamily != nil {
+			if err := d.Set("cpu_family", *server.Properties.CpuFamily); err != nil {
+				return nil, fmt.Errorf("error setting cpu_family %w", err)
+			}
 		}
 	}
 
-	if server.Properties.Cores != nil {
-		if err := d.Set("cores", *server.Properties.Cores); err != nil {
-			return nil, err
-		}
-	}
-
-	if server.Properties.Ram != nil {
-		if err := d.Set("ram", *server.Properties.Ram); err != nil {
-			return nil, err
-		}
-	}
-
-	if server.Properties.AvailabilityZone != nil {
-		if err := d.Set("availability_zone", *server.Properties.AvailabilityZone); err != nil {
-			return nil, err
-		}
-	}
-
-	if server.Properties.CpuFamily != nil {
-		if err := d.Set("cpu_family", *server.Properties.CpuFamily); err != nil {
-			return nil, err
-		}
-	}
-
-	if server.Entities.Volumes != nil &&
+	if server.Entities != nil && server.Entities.Volumes != nil &&
 		len(*server.Entities.Volumes.Items) > 0 &&
 		(*server.Entities.Volumes.Items)[0].Properties.Image != nil {
 		if err := d.Set("boot_image", *(*server.Entities.Volumes.Items)[0].Properties.Image); err != nil {
-			return nil, err
+			return nil, fmt.Errorf("error setting boot_image %w", err)
 		}
 	}
 
-	if server.Entities.Nics != nil && len(*server.Entities.Nics.Items) > 0 && (*server.Entities.Nics.Items)[0].Id != nil {
+	if server.Entities != nil && server.Entities.Nics != nil && len(*server.Entities.Nics.Items) > 0 && (*server.Entities.Nics.Items)[0].Id != nil {
 		primaryNic := *(*server.Entities.Nics.Items)[0].Id
 		if err := d.Set("primary_nic", primaryNic); err != nil {
-			return nil, err
+			return nil, fmt.Errorf("error setting primary_nic %w", err)
 		}
 
 		nic, apiResponse, err := client.NetworkInterfacesApi.DatacentersServersNicsFindById(ctx, datacenterId, serverId, primaryNic).Execute()
@@ -1425,7 +1380,7 @@ func resourceServerImport(ctx context.Context, d *schema.ResourceData, meta inte
 
 		if len(*nic.Properties.Ips) > 0 {
 			if err := d.Set("primary_ip", (*nic.Properties.Ips)[0]); err != nil {
-				return nil, err
+				return nil, fmt.Errorf("error setting primary_ip %w", err)
 			}
 		}
 
@@ -1440,7 +1395,7 @@ func resourceServerImport(ctx context.Context, d *schema.ResourceData, meta inte
 		if firewallRules.Items != nil {
 			if len(*firewallRules.Items) > 0 {
 				if err := d.Set("firewallrule_id", *(*firewallRules.Items)[0].Id); err != nil {
-					return nil, err
+					return nil, fmt.Errorf("error setting firewallrule_id %w", err)
 				}
 			}
 		}
@@ -1459,37 +1414,38 @@ func resourceServerImport(ctx context.Context, d *schema.ResourceData, meta inte
 
 		networks := []map[string]interface{}{network}
 		if err := d.Set("nic", networks); err != nil {
-			return nil, err
+			return nil, fmt.Errorf("error setting nic %w", err)
 		}
 	}
 
-	if server.Properties.BootVolume != nil {
+	if server.Properties != nil && server.Properties.BootVolume != nil {
 		if server.Properties.BootVolume.Id != nil {
 			if err := d.Set("boot_volume", *server.Properties.BootVolume.Id); err != nil {
-				return nil, err
+				return nil, fmt.Errorf("error setting boot_volume %w", err)
 			}
 		}
 		volumeObj, apiResponse, err := client.ServersApi.DatacentersServersVolumesFindById(ctx, datacenterId, serverId, *server.Properties.BootVolume.Id).Execute()
 		logApiRequestTime(apiResponse)
 		if err == nil {
 			volumeItem := map[string]interface{}{}
-
-			setPropWithNilCheck(volumeItem, "name", volumeObj.Properties.Name)
-			setPropWithNilCheck(volumeItem, "disk_type", volumeObj.Properties.Type)
-			setPropWithNilCheck(volumeItem, "size", volumeObj.Properties.Size)
-			setPropWithNilCheck(volumeItem, "licence_type", volumeObj.Properties.LicenceType)
-			setPropWithNilCheck(volumeItem, "bus", volumeObj.Properties.Bus)
-			setPropWithNilCheck(volumeItem, "availability_zone", volumeObj.Properties.AvailabilityZone)
+			if volumeObj.Properties != nil {
+				setPropWithNilCheck(volumeItem, "name", volumeObj.Properties.Name)
+				setPropWithNilCheck(volumeItem, "disk_type", volumeObj.Properties.Type)
+				setPropWithNilCheck(volumeItem, "size", volumeObj.Properties.Size)
+				setPropWithNilCheck(volumeItem, "licence_type", volumeObj.Properties.LicenceType)
+				setPropWithNilCheck(volumeItem, "bus", volumeObj.Properties.Bus)
+				setPropWithNilCheck(volumeItem, "availability_zone", volumeObj.Properties.AvailabilityZone)
+			}
 
 			volumesList := []map[string]interface{}{volumeItem}
 			if err := d.Set("volume", volumesList); err != nil {
-				return nil, err
+				return nil, fmt.Errorf("error setting volume %w", err)
 			}
 		}
 	}
 	if len(parts) > 3 {
 		if err := d.Set("firewallrule_id", parts[3]); err != nil {
-			return nil, err
+			return nil, fmt.Errorf("error setting firewallrule_id %w", err)
 		}
 	}
 	d.SetId(parts[1])

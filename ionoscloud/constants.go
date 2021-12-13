@@ -47,6 +47,27 @@ const (
 	K8sClusterTestResource     = "test_k8s_cluster"
 	K8sClusterDataSourceById   = "test_k8s_cluster_id"
 	K8sClusterDataSourceByName = "test_k8s_cluster_name"
+
+	K8sNodePoolResource         = "ionoscloud_k8s_node_pool"
+	K8sNodePoolTestResource     = "test_k8s_node_pool"
+	K8sNodePoolDataSourceById   = "test_k8s_node_pool_id"
+	K8sNodePoolDataSourceByName = "test_k8s_node_pool_name"
+
+	ResourceNameK8sNodePool   = K8sNodePoolResource + "." + K8sNodePoolTestResource
+	DataSourceK8sNodePoolId   = DataSource + "." + K8sNodePoolResource + "." + K8sNodePoolDataSourceById
+	DataSourceK8sNodePoolName = DataSource + "." + K8sNodePoolResource + "." + K8sNodePoolDataSourceByName
+)
+
+// NatGateway Constants
+const (
+	NatGatewayResource             = "ionoscloud_natgateway"
+	NatGatewayTestResource         = "test_nat_gateway"
+	NatGatewayDataSourceById       = "test_nat_gateway_id"
+	NatGatewayDataSourceByName     = "test_nat_gateway_name"
+	NatGatewayRuleResource         = "ionoscloud_natgateway_rule"
+	NatGatewayRuleTestResource     = "test_nat_gateway"
+	NatGatewayRuleDataSourceById   = "test_nat_gateway_id"
+	NatGatewayRuleDataSourceByName = "test_nat_gateway_name"
 )
 
 // Private Crossconnect Constants
@@ -92,8 +113,8 @@ const (
 const IpBLockResource = "ionoscloud_ipblock"
 
 const (
-	nicResource         = "ionoscloud_nic"
-	fullNicResourceName = nicResource + "." + nicTestResourceName
+	NicResource         = "ionoscloud_nic"
+	fullNicResourceName = NicResource + "." + nicTestResourceName
 	nicTestResourceName = "database_nic"
 )
 
@@ -117,9 +138,15 @@ const (
 )
 
 const (
-	shareResource         = "ionoscloud_share"
-	shareResourceFullName = shareResource + "." + sourceShareName
+	ShareResource         = "ionoscloud_share"
+	shareResourceFullName = ShareResource + "." + sourceShareName
 	sourceShareName       = "share"
+)
+
+const (
+	ResourceIpFailover         = "ionoscloud_ipfailover"
+	ipfailoverResourceFullName = ResourceIpFailover + "." + ipfailoverName
+	ipfailoverName             = "failover-test"
 )
 
 // General Constants

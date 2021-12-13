@@ -20,7 +20,6 @@ func resourceNatGateway() *schema.Resource {
 			StateContext: resourceNatGatewayImport,
 		},
 		Schema: map[string]*schema.Schema{
-
 			"name": {
 				Type:        schema.TypeString,
 				Description: "Name of the NAT gateway",
@@ -330,4 +329,56 @@ func resourceNatGatewayImport(ctx context.Context, d *schema.ResourceData, meta 
 	}
 
 	return []*schema.ResourceData{d}, nil
+}
+
+func setNatGatewayData(d *schema.ResourceData, natGateway *ionoscloud.NatGateway) error {
+
+	if natGateway.Id != nil {
+		d.SetId(*natGateway.Id)
+	}
+
+	if natGateway.Properties != nil {
+		if natGateway.Properties.Name != nil {
+			err := d.Set("name", *natGateway.Properties.Name)
+			if err != nil {
+				return fmt.Errorf("error while setting name property for nat gateway %s: %s", d.Id(), err)
+			}
+		}
+
+		if natGateway.Properties.PublicIps != nil {
+			err := d.Set("public_ips", *natGateway.Properties.PublicIps)
+			if err != nil {
+				return fmt.Errorf("error while setting public_ips property for nat gateway %s: %s", d.Id(), err)
+			}
+		}
+
+		if natGateway.Properties.Lans != nil && len(*natGateway.Properties.Lans) > 0 {
+			var natGatewayLans []interface{}
+			for _, lan := range *natGateway.Properties.Lans {
+				lanEntry := make(map[string]interface{})
+
+				if lan.Id != nil {
+					lanEntry["id"] = *lan.Id
+				}
+
+				if len(*lan.GatewayIps) > 0 {
+					var gatewayIps []interface{}
+					for _, gatewayIp := range *lan.GatewayIps {
+						gatewayIps = append(gatewayIps, gatewayIp)
+					}
+					lanEntry["gateway_ips"] = gatewayIps
+
+				}
+
+				natGatewayLans = append(natGatewayLans, lanEntry)
+			}
+
+			if len(natGatewayLans) > 0 {
+				if err := d.Set("lans", natGatewayLans); err != nil {
+					return fmt.Errorf("error while setting lans property for nat gateway %s: %s", d.Id(), err)
+				}
+			}
+		}
+	}
+	return nil
 }

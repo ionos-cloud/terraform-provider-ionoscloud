@@ -1,3 +1,4 @@
+//go:build natgateway
 // +build natgateway
 
 package ionoscloud
@@ -12,19 +13,17 @@ import (
 )
 
 func TestAccNatGatewayRuleImportBasic(t *testing.T) {
-	natGatewayRuleName := "natGatewayRule"
-
 	resource.Test(t, resource.TestCase{
 		PreCheck:          func() { testAccPreCheck(t) },
 		ProviderFactories: testAccProviderFactories,
 		CheckDestroy:      testAccCheckNatGatewayRuleDestroyCheck,
 		Steps: []resource.TestStep{
 			{
-				Config: fmt.Sprintf(testAccCheckNatGatewayRuleConfigBasic, natGatewayRuleName),
+				Config: fmt.Sprintf(testAccCheckNatGatewayRuleConfigBasic, NatGatewayRuleTestResource),
 			},
 
 			{
-				ResourceName:      "ionoscloud_natgateway_rule.natgateway_rule",
+				ResourceName:      resourceNatGatewayRuleResource,
 				ImportStateIdFunc: testAccNatGatewayRuleImportStateId,
 				ImportState:       true,
 				ImportStateVerify: true,
@@ -37,7 +36,7 @@ func testAccNatGatewayRuleImportStateId(s *terraform.State) (string, error) {
 	var importID = ""
 
 	for _, rs := range s.RootModule().Resources {
-		if rs.Type != "ionoscloud_natgateway_rule" {
+		if rs.Type != NatGatewayRuleResource {
 			continue
 		}
 

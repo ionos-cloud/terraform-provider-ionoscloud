@@ -10,7 +10,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
 )
 
-func TestAccLanIPFailover_Basic(t *testing.T) {
+func TestAccLanIPFailoverBasic(t *testing.T) {
 	var lan ionoscloud.Lan
 	var ipfailover ionoscloud.IPFailover
 
@@ -32,13 +32,13 @@ func TestAccLanIPFailover_Basic(t *testing.T) {
 		CheckDestroy:      testAccCheckLanIPFailoverDestroyCheck,
 		Steps: []resource.TestStep{
 			{
-				Config: fmt.Sprintf(testAccCheckLanIPFailoverConfig_basic),
+				Config: fmt.Sprintf(testAccCheckLanIPFailoverConfig),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckLanIPFailoverGroupExists("ionoscloud_ipfailover.failover-test", &lan, &ipfailover),
 				),
 			},
 			{
-				Config: testAccCheckLanIPFailoverConfig_update,
+				Config: testAccCheckLanIPFailoverConfigUpdate,
 				Check: resource.ComposeTestCheckFunc(
 					testDeleted("ionoscloud_ipfailover.failover-test"),
 				),
@@ -143,7 +143,7 @@ func testAccCheckLanIPFailoverDestroyCheck(s *terraform.State) error {
 	return nil
 }
 
-const testAccCheckLanIPFailoverConfig_basic = `
+const testAccCheckLanIPFailoverConfig = `
 resource "ionoscloud_datacenter" "foobar" {
 	name       = "ipfailover-test"
 	location = "us/las"
@@ -191,7 +191,7 @@ resource "ionoscloud_ipfailover" "failover-test" {
 }
 `
 
-const testAccCheckLanIPFailoverConfig_update = `
+const testAccCheckLanIPFailoverConfigUpdate = `
 resource "ionoscloud_datacenter" "foobar" {
 	name       = "ipfailover-test"
 	location = "us/las"
