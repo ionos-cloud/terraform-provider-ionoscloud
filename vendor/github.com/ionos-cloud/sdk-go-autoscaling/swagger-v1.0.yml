@@ -1,0 +1,1033 @@
+openapi: 3.0.3
+
+info:
+  title: IONOS DBaaS REST API
+  description: |
+    An enterprise-grade Database is provided as a Service (DBaaS) solution that
+    can be managed through a browser-based "Data Center Designer" (DCD) tool or
+    via an easy to use API.
+
+    The API allows you to create additional database clusters or modify existing
+    ones. It is designed to allow users to leverage the same power and
+    flexibility found within the DCD visual tool. Both tools are consistent with
+    their concepts and lend well to making the experience smooth and intuitive.
+  version: 0.0.1
+
+servers:
+- url: https://api.ionos.com/databases/postgresql
+  description: Production
+
+security:
+- basicAuth: []
+- tokenAuth: []
+
+tags:
+- name: Clusters
+  description: everything about PostgreSQL clusters
+- name: Backups
+  description: everything about PostgreSQL backups
+- name: Restores
+  description: everything about PostgreSQL restores
+- name: Logs
+  description: everything about PostgreSQL logs
+- name: Metadata
+  description: all metadata about the API, like versions
+
+paths:
+  /clusters:
+    get:
+      operationId: clustersGet
+      summary: List clusters
+      description: Retrieves a list of PostgreSQL clusters.
+      security:
+      - basicAuth: []
+      - tokenAuth: []
+      tags:
+      - Clusters
+      parameters:
+      - $ref: '#/components/parameters/ClusterNameQuery'
+      responses:
+        200:
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ClusterList'
+        default:
+          $ref: '#/components/responses/ApiError'
+    post:
+      operationId: clustersPost
+      summary: Create a cluster
+      description: |
+        Creates a new PostgreSQL cluster.
+        If the `fromBackup` field is populated, the new cluster will be created
+        based on the given backup.
+      security:
+      - basicAuth: []
+      - tokenAuth: []
+      tags:
+      - Clusters
+      requestBody:
+        description: The cluster to be created.
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateClusterRequest'
+        required: true
+      responses:
+        200:
+          description: |
+            The created cluster is returned with `metadata.state` set to "BUSY".
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ClusterResponse'
+        default:
+          $ref: '#/components/responses/ApiError'
+
+  /clusters/{clusterId}:
+    get:
+      operationId: clustersFindById
+      summary: Fetch a cluster
+      description: |
+        You can retrieve a PostgreSQL cluster by using its ID. This value can be
+        found in the response body when a PostgreSQL cluster is created or when
+        you GET a list of PostgreSQL clusters.
+      security:
+      - basicAuth: []
+      - tokenAuth: []
+      tags:
+      - Clusters
+      parameters:
+      - $ref: '#/components/parameters/ClusterIdPath'
+      responses:
+        200:
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ClusterResponse'
+        default:
+          $ref: '#/components/responses/ApiError'
+    patch:
+      operationId: clustersPatch
+      summary: Patch a cluster
+      description: Patch attributes of a PostgreSQL cluster.
+      security:
+      - basicAuth: []
+      - tokenAuth: []
+      tags:
+      - Clusters
+      parameters:
+      - $ref: '#/components/parameters/ClusterIdPath'
+      requestBody:
+        description: The modified cluster.
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PatchClusterRequest'
+        required: true
+      responses:
+        200:
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ClusterResponse'
+        default:
+          $ref: '#/components/responses/ApiError'
+    delete:
+      operationId: clustersDelete
+      summary: Delete a cluster
+      description: Delete a PostgreSQL cluster.
+      security:
+      - basicAuth: []
+      - tokenAuth: []
+      tags:
+      - Clusters
+      parameters:
+      - $ref: '#/components/parameters/ClusterIdPath'
+      responses:
+        200:
+          description: |
+            The deleted cluster with `metadata.state` set to "DESTROYING".
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ClusterResponse'
+        default:
+          $ref: '#/components/responses/ApiError'
+
+  /clusters/backups:
+    get:
+      operationId: clustersBackupsGet
+      summary: List cluster backups
+      description: Retrieves a list of all PostgreSQL cluster backups.
+      security:
+      - basicAuth: []
+      - tokenAuth: []
+      tags:
+      - Backups
+      responses:
+        200:
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ClusterBackupList'
+        default:
+          $ref: '#/components/responses/ApiError'
+
+  /clusters/backups/{backupId}:
+    get:
+      operationId: clustersBackupsFindById
+      summary: Fetch a cluster backup
+      description: |
+        Retrieve a PostgreSQL cluster backup by using its ID. This value can be
+        found when you GET a list of PostgreSQL cluster backups.
+      security:
+      - basicAuth: []
+      - tokenAuth: []
+      tags:
+      - Backups
+      parameters:
+      - $ref: '#/components/parameters/BackupIdPath'
+      responses:
+        200:
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ClusterBackup'
+        default:
+          $ref: '#/components/responses/ApiError'
+
+  /clusters/{clusterId}/backups:
+    get:
+      operationId: clusterBackupsGet
+      summary: List backups of cluster
+      description: Retrieves a list of all backups of the given PostgreSQL cluster.
+      security:
+      - basicAuth: []
+      - tokenAuth: []
+      tags:
+      - Backups
+      parameters:
+      - $ref: '#/components/parameters/ClusterIdPath'
+      responses:
+        200:
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ClusterBackupList'
+        default:
+          $ref: '#/components/responses/ApiError'
+
+  /clusters/{clusterId}/restore:
+    post:
+      operationId: clusterRestorePost
+      summary: In-place restore of a cluster
+      description: Triggers an in-place restore of the given PostgreSQL.
+      security:
+      - basicAuth: []
+      - tokenAuth: []
+      tags:
+      - Restores
+      parameters:
+      - $ref: '#/components/parameters/ClusterIdPath'
+      requestBody:
+        description: The restore request to create.
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateRestoreRequest'
+        required: true
+      responses:
+        202:
+          description: successful operation
+        default:
+          $ref: '#/components/responses/ApiError'
+
+  /clusters/{clusterId}/logs:
+    get:
+      operationId: clusterLogsGet
+      summary: Get logs of your cluster
+      description: Retrieves PostgreSQL logs based on the given parameters.
+      security:
+      - basicAuth: []
+      - tokenAuth: []
+      tags:
+      - Logs
+      parameters:
+      - $ref: '#/components/parameters/ClusterIdPath'
+      - $ref: '#/components/parameters/LimitQuery'
+      - $ref: '#/components/parameters/StartQuery'
+      - $ref: '#/components/parameters/EndQuery'
+      responses:
+        200:
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ClusterLogs'
+        default:
+          $ref: '#/components/responses/ApiError'
+
+  /clusters/postgresversions:
+    get:
+      operationId: postgresVersionsGet
+      summary: List PostgreSQL versions
+      description: Retrieves a list of all available PostgreSQL versions.
+      security:
+      - basicAuth: []
+      - tokenAuth: []
+      tags:
+      - Clusters
+      responses:
+        200:
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PostgresVersionList'
+        default:
+          $ref: '#/components/responses/ApiError'
+
+  /clusters/{clusterId}/postgresversions:
+    get:
+      operationId: clusterPostgresVersionsGet
+      summary: List PostgreSQL versions
+      description: |
+        Retrieves a list of all PostgreSQL versions available for this cluster
+        including the current version.
+      security:
+      - basicAuth: []
+      - tokenAuth: []
+      tags:
+      - Clusters
+      parameters:
+      - $ref: '#/components/parameters/ClusterIdPath'
+      responses:
+        200:
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PostgresVersionList'
+        default:
+          $ref: '#/components/responses/ApiError'
+
+  /infos/version:
+    get:
+      operationId: infosVersionGet
+      summary: Get the current API version
+      description: Retrieves the current version of the responding API.
+      security:
+      - basicAuth: []
+      - tokenAuth: []
+      tags:
+      - Metadata
+      responses:
+        200:
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/APIVersion'
+        default:
+          $ref: '#/components/responses/ApiError'
+
+  /infos/versions:
+    get:
+      operationId: infosVersionsGet
+      summary: Fetch all API versions
+      description: Retrieves all available versions of the responding API.
+      security:
+      - basicAuth: []
+      - tokenAuth: []
+      tags:
+      - Metadata
+      responses:
+        200:
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/APIVersion'
+        default:
+          $ref: '#/components/responses/ApiError'
+
+components:
+  responses:
+    ApiError:
+      description: |
+        Any erroneous status code: 400 (parse error), 401 (auth error),
+        402 (trial access), 403 (insufficient permissions), 404 (not found),
+        405 (unsupported HTTP method), 415 (unsupported content type,
+        422 (validation error), 429 (request rate limit exceeded),
+        500 (server error), 503 (maintenance)
+      headers:
+        Content-Type:
+          description: application/problem+json
+          schema:
+            type: string
+            default: application/problem+json
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+
+  parameters:
+    ClusterNameQuery:
+      name: filter.name
+      in: query
+      description: |
+        Response filter to list only the PostgreSQL clusters that contain
+        the specified name. The value is case insensitive and matched on the
+        'displayName' field.
+      required: false
+      schema:
+        type: string
+
+    ClusterIdPath:
+      name: clusterId
+      in: path
+      description: The unique ID of the cluster.
+      required: true
+      schema:
+        type: string
+
+    BackupIdPath:
+      name: backupId
+      in: path
+      description: The unique ID of the backup.
+      required: true
+      schema:
+        type: string
+
+    LimitQuery:
+      name: limit
+      in: query
+      description: The maximal number of log lines to return.
+      required: false
+      schema:
+        $ref: '#/components/schemas/LimitQuery'
+
+
+    StartQuery:
+      name: start
+      in: query
+      description: The start time for the query in RFC3339 format.
+      required: false
+      schema:
+        type: string
+        format: date-time
+
+    EndQuery:
+      name: end
+      in: query
+      description: The end time for the query in RFC3339 format.
+      required: false
+      schema:
+        type: string
+        format: date-time
+
+  schemas:
+    ErrorResponse:
+      properties:
+        httpStatus:
+          type: integer
+          description: "HTTP status code of the operation"
+          example: 400
+        messages:
+          type: array
+          items:
+            $ref: '#/components/schemas/ErrorMessage'
+      type: object
+
+    ErrorMessage:
+      properties:
+        errorCode:
+          type: string
+          description: |
+            Application internal error code
+          example: "dbaas-err-api-123"
+        message:
+          type: string
+          description: |
+            A human readable explanation specific to this occurrence of the
+            problem.
+          example: "Error message example"
+      type: object
+
+    ResourceType:
+      description: The type of the resource.
+      type: string
+      enum:
+      - collection
+      - cluster
+      - backup
+
+    ResourceId:
+      type: string
+      description: The unique ID of the resource.
+      example: 498ae72f-411f-11eb-9d07-046c59cc737e
+
+    PostgresVersion:
+      type: string
+      description: The PostgreSQL version of your cluster.
+      example: 13
+
+    Instances:
+      type: integer
+      description: |
+        The total number of instances in the cluster (one master and n-1
+        standbys).
+      example: 2
+      minimum: 1
+      maximum: 5
+
+    LimitQuery:
+      type: integer
+      description: The maximal number of log lines to return.
+      example: 10
+      minimum: 1
+      maximum: 5000
+
+    Cores:
+      type: integer
+      description: The number of CPU cores per instance.
+      example: 4
+      minimum: 1
+
+    Ram:
+      type: integer
+      description: The amount of memory per instance in megabytes. Has to be a multiple of 1024.
+      multipleOf: 1024
+      example: 2048
+      minimum: 2048
+
+    StorageSize:
+      type: integer
+      description: The amount of storage per instance in megabytes.
+      example: 5000
+      minimum: 2048
+
+    Location:
+      type: string
+      description: |
+        The physical location where the cluster will be created. This will be
+        where all of your instances live. Property cannot be modified after
+        datacenter creation.
+      example: de/fra
+      enum:
+      - de/fra
+      - de/txl
+      - gb/lhr
+      - es/vit
+      - us/ewr
+      - us/las
+
+    DisplayName:
+      type: string
+      description: The friendly name of your cluster.
+      example: PostgreSQL cluster
+
+    CreateClusterRequest:
+      description: |
+        Request payload with all data needed to create a new PostgreSQL cluster.
+      properties:
+        metadata:
+          $ref: '#/components/schemas/Metadata'
+        properties:
+          $ref: '#/components/schemas/CreateClusterProperties'
+      type: object
+
+    CreateClusterProperties:
+      description: |
+        Properties with all data needed to create a new PostgreSQL cluster.
+      required:
+      - postgresVersion
+      - instances
+      - cores
+      - ram
+      - storageSize
+      - storageType
+      - connections
+      - location
+      - displayName
+      - credentials
+      - synchronizationMode
+      properties:
+        postgresVersion:
+          $ref: '#/components/schemas/PostgresVersion'
+        instances:
+          $ref: '#/components/schemas/Instances'
+        cores:
+          $ref: '#/components/schemas/Cores'
+        ram:
+          $ref: '#/components/schemas/Ram'
+        storageSize:
+          $ref: '#/components/schemas/StorageSize'
+        storageType:
+          $ref: '#/components/schemas/StorageType'
+        connections:
+          type: array
+          minItems: 1
+          maxItems: 1
+          items:
+            $ref: '#/components/schemas/Connection'
+        location:
+          $ref: '#/components/schemas/Location'
+        displayName:
+          $ref: '#/components/schemas/DisplayName'
+        maintenanceWindow:
+          $ref: '#/components/schemas/MaintenanceWindow'
+        credentials:
+          $ref: '#/components/schemas/DBUser'
+        synchronizationMode:
+          $ref: '#/components/schemas/SynchronizationMode'
+        fromBackup:
+          $ref: '#/components/schemas/CreateRestoreRequest'
+      type: object
+
+    PatchClusterRequest:
+      description: Request payload to change a cluster
+      properties:
+        metadata:
+          $ref: '#/components/schemas/Metadata'
+        properties:
+          $ref: '#/components/schemas/PatchClusterProperties'
+      type: object
+
+    PatchClusterProperties:
+      description: Properties of the payload to change a cluster
+      properties:
+        cores:
+          $ref: '#/components/schemas/Cores'
+        ram:
+          $ref: '#/components/schemas/Ram'
+        storageSize:
+          $ref: '#/components/schemas/StorageSize'
+        connections:
+          type: array
+          minItems: 0
+          maxItems: 1
+          items:
+            $ref: '#/components/schemas/Connection'
+        displayName:
+          $ref: '#/components/schemas/DisplayName'
+        maintenanceWindow:
+          $ref: '#/components/schemas/MaintenanceWindow'
+        postgresVersion:
+          $ref: '#/components/schemas/PostgresVersion'
+        instances:
+          $ref: '#/components/schemas/Instances'
+      type: object
+
+    CreateRestoreRequest:
+      description: The restore request.
+      properties:
+        backupId:
+          type: string
+          example: dcd31531-3ac8-11eb-9feb-046c59cc737e
+          description: The unique ID of the backup you want to restore.
+        recoveryTargetTime:
+          type: string
+          format: date-time
+          description: |
+            If this value is supplied as ISO 8601 timestamp, the backup will be
+            replayed up until the given timestamp. If empty, the backup will be
+            applied completely.
+          example: "2020-12-10T13:37:50+01:00"
+      required:
+      - backupId
+      type: object
+
+    DBUser:
+      description: Credentials for the database user to be created.
+      properties:
+        username:
+          type: string
+          description: |
+            The username for the initial postgres user. some system usernames
+            are restricted (e.g. "postgres", "admin", "standby").
+          example: db-admin
+        password:
+          type: string
+          example: password
+      required:
+      - username
+      - password
+      type: object
+
+    Connection:
+      description: Details about the network connection for your cluster.
+      properties:
+        datacenterId:
+          description: The datacenter to connect your cluster to.
+          type: string
+        lanId:
+          description: The LAN to connect your cluster to.
+          type: string
+        cidr:
+          type: string
+          description: |
+            The IP and subnet for your cluster.
+            Note the following unavailable IP ranges:
+            10.233.64.0/18
+            10.233.0.0/18
+            10.233.114.0/24
+          example: 192.168.1.100/24
+      required:
+      - datacenterId
+      - lanId
+      - cidr
+      type: object
+
+    Metadata:
+      description: Metadata of the resource
+      properties:
+        createdDate:
+          type: string
+          format: date-time
+          description: The ISO 8601 creation timestamp.
+          example: "2020-12-10T13:37:50+01:00"
+        createdBy:
+          type: string
+          example: john.doe@example.com
+        createdByUserId:
+          type: string
+          example: 87f9a82e-b28d-49ed-9d04-fba2c0459cd3
+        lastModifiedDate:
+          type: string
+          format: date-time
+          description: The ISO 8601 modified timestamp.
+          example: "2020-12-11T13:37:50+01:00"
+        lastModifiedBy:
+          type: string
+          example: jane.doe@example.com
+        lastModifiedByUserId:
+          type: string
+          example: 87f9a82e-b28d-49ed-9d04-fba2c0459cd3
+        state:
+          $ref: '#/components/schemas/State'
+
+    State:
+      description: The current status reported back by the cluster.
+      type: string
+      enum:
+      - AVAILABLE
+      - BUSY
+      - DESTROYING
+      - FAILED
+      - UNKNOWN
+      example: AVAILABLE
+
+    BackupMetadata:
+      description: Metadata of the backup resource.
+      properties:
+        createdDate:
+          type: string
+          format: date-time
+          description: The ISO 8601 creation timestamp.
+          example: "2020-12-10T13:37:50+01:00"
+      type: object
+
+    ClusterResponse:
+      description: A database cluster
+      properties:
+        type:
+          $ref: '#/components/schemas/ResourceType'
+        id:
+          $ref: '#/components/schemas/ResourceId'
+        metadata:
+          $ref: '#/components/schemas/Metadata'
+        properties:
+          $ref: '#/components/schemas/ClusterProperties'
+      type: object
+
+    ClusterProperties:
+      description: Properties of a database cluster
+      properties:
+        displayName:
+          $ref: '#/components/schemas/DisplayName'
+        postgresVersion:
+          $ref: '#/components/schemas/PostgresVersion'
+        location:
+          $ref: '#/components/schemas/Location'
+        backupLocation:
+          $ref: '#/components/schemas/BackupLocation'
+        instances:
+          $ref: '#/components/schemas/Instances'
+        ram:
+          $ref: '#/components/schemas/Ram'
+        cores:
+          $ref: '#/components/schemas/Cores'
+        storageSize:
+          $ref: '#/components/schemas/StorageSize'
+        storageType:
+          $ref: '#/components/schemas/StorageType'
+        connections:
+          type: array
+          minItems: 1
+          maxItems: 1
+          items:
+            $ref: '#/components/schemas/Connection'
+        maintenanceWindow:
+          $ref: '#/components/schemas/MaintenanceWindow'
+        synchronizationMode:
+          $ref: '#/components/schemas/SynchronizationMode'
+      type: object
+
+    BackupResponse:
+      description: A database backup
+      properties:
+        type:
+          $ref: '#/components/schemas/ResourceType'
+        id:
+          $ref: '#/components/schemas/ResourceId'
+        metadata:
+          $ref: '#/components/schemas/BackupMetadata'
+        properties:
+          $ref: '#/components/schemas/ClusterBackup'
+      type: object
+
+    ClusterBackup:
+      description: a backup object
+      properties:
+        id:
+          $ref: '#/components/schemas/ResourceId'
+        clusterId:
+          type: string
+          description: The unique ID of the cluster.
+          example: 498ae72f-411f-11eb-9d07-046c59cc737e
+        displayName:
+          $ref: '#/components/schemas/DisplayName'
+        version:
+          type: string
+          description: The PostgreSQL version this backup was created from.
+          example: 12
+        isActive:
+          type: boolean
+          description: Whether a cluster currently backs up data to this backup.
+          example: true
+        earliestRecoveryTargetTime:
+          type: string
+          format: date-time
+          description: The oldest available timestamp to which you can restore.
+          example: "2021-10-23T01:21:10Z"
+      type: object
+
+    BackupLocation:
+      type: string
+      description: The S3 location where the backups will be stored.
+      example: de
+      enum:
+      - de
+
+    MaintenanceWindow:
+      description: |
+        A weekly 4 hour-long window, during which maintenance might occur
+      properties:
+        time:
+          type: string
+          example: 16:30:59
+        dayOfTheWeek:
+          $ref: '#/components/schemas/DayOfTheWeek'
+      required:
+      - time
+      - dayOfTheWeek
+      type: object
+
+    DayOfTheWeek:
+      description: The name of the week day.
+      type: string
+      enum:
+      - Sunday
+      - Monday
+      - Tuesday
+      - Wednesday
+      - Thursday
+      - Friday
+      - Saturday
+      example: Monday
+
+    APIVersion:
+      properties:
+        version:
+          type: string
+          example: v2.1
+        swaggerUrl:
+          type: string
+          example: https://api.ionos.de/dbaas/postgres/infos/assets/swagger-v2.1.yml
+      type: object
+
+    StorageType:
+      description: The storage type used in your cluster.
+      type: string
+      enum:
+      - HDD
+      - SSD
+      example: HDD
+
+    Pagination:
+      type: object
+      properties:
+        offset:
+          $ref: '#/components/schemas/PaginationOffset'
+        limit:
+          $ref: '#/components/schemas/PaginationLimit'
+        _links:
+          $ref: '#/components/schemas/PaginationLinks'
+
+    PaginationOffset:
+      description: |
+        The offset specified in the request (if none was specified, the default
+        offset is 0) (not implemented yet).
+      type: integer
+      example: 0
+      minimum: 0
+      readOnly: true
+
+    PaginationLimit:
+      description: |
+        The limit specified in the request (if none was specified, use the
+        endpoint's default pagination limit) (not implemented yet, always return
+        number of items).
+      type: integer
+      example: 42
+      minimum: 0
+      readOnly: true
+
+    PaginationLinks:
+      description: |
+        URLs to navigate the different pages. As of now we always only return a
+        single page.
+      type: object
+      properties:
+        prev:
+          description: |
+            URL (with offset and limit parameters) of the previous page; only
+            present if offset is greater than 0.
+          type: string
+          format: uri
+          example: <PREVIOUS-PAGE-URI>
+          readOnly: true
+        self:
+          description: |
+            URL (with offset and limit parameters) of the current page.
+          type: string
+          format: uri
+          example: <THIS-PAGE-URI>
+          readOnly: true
+        next:
+          description: |
+            URL (with offset and limit parameters) of the next page; only
+            present if offset + limit is less than the total number of elements.
+          type: string
+          format: uri
+          example: <NEXT-PAGE-URI>
+          readOnly: true
+
+    ClusterList:
+      description: List of clusters
+      allOf:
+      - type: object
+        properties:
+          type:
+            $ref: '#/components/schemas/ResourceType'
+          id:
+            $ref: '#/components/schemas/ResourceId'
+          items:
+            type: array
+            items:
+              $ref: '#/components/schemas/ClusterResponse'
+      - $ref: '#/components/schemas/Pagination'
+      type: object
+
+    ClusterBackupList:
+      description: List of backups
+      allOf:
+      - type: object
+        properties:
+          type:
+            $ref: '#/components/schemas/ResourceType'
+          id:
+            $ref: '#/components/schemas/ResourceId'
+          items:
+            type: array
+            items:
+              $ref: '#/components/schemas/BackupResponse'
+      - $ref: '#/components/schemas/Pagination'
+
+    PostgresVersionList:
+      description: list of PostgreSQL versions
+      properties:
+        data:
+          type: array
+          items:
+            properties:
+              name:
+                type: string
+                example: 12
+            type: object
+      type: object
+
+    ClusterLogs:
+      description: The logs of the PostgreSQL cluster.
+      properties:
+        instances:
+          type: array
+          items:
+            properties:
+              name:
+                description: The name of the PostgreSQL instance.
+                type: string
+                example: postgres-cluster-0
+              messages:
+                type: array
+                items:
+                  properties:
+                    time:
+                      type: string
+                      format: date-time
+                      example: "2021-09-06T10:00:38.253+02:00"
+                    message:
+                      type: string
+                      example: Hello World
+
+            type: object
+      type: object
+
+    SynchronizationMode:
+      description: |
+        Represents different modes of replication.
+      type: string
+      enum:
+      - ASYNCHRONOUS
+      - SYNCHRONOUS
+      - STRICTLY_SYNCHRONOUS
+      example: ASYNCHRONOUS
+
+  securitySchemes:
+    basicAuth:
+      type: http
+      scheme: basic
+      description: |
+        You will need to base64 encode the string containing your credentials.
+        Separate your username and password with a colon, i.e.,
+        username:password and send it as 'Authorization' request header. More
+        details: https://en.wikipedia.org/wiki/Basic_access_authentication.
+    tokenAuth:
+      type: apiKey
+      in: header
+      name: Authorization
+      description: |
+        Please provide header value as 'Bearer <token>' and don't forget to add
+        'Bearer' HTTP Authorization Scheme before the token.
