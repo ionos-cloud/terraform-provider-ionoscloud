@@ -43,7 +43,7 @@ func dataSourceTemplate() *schema.Resource {
 }
 
 func dataSourceTemplateRead(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
-	client := meta.(*ionoscloud.APIClient)
+	client := meta.(SdkBundle).CloudApiClient
 
 	templates, apiResponse, err := client.TemplatesApi.TemplatesGet(ctx).Execute()
 	logApiRequestTime(apiResponse)

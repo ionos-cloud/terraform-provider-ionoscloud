@@ -112,7 +112,7 @@ func TestAccK8sNodePoolBasic(t *testing.T) {
 }
 
 func testAccCheckK8sNodePoolDestroyCheck(s *terraform.State) error {
-	client := testAccProvider.Meta().(*ionoscloud.APIClient)
+	client := testAccProvider.Meta().(SdkBundle).CloudApiClient
 
 	ctx, cancel := context.WithTimeout(context.Background(), *resourceDefaultTimeouts.Default)
 
@@ -121,7 +121,7 @@ func testAccCheckK8sNodePoolDestroyCheck(s *terraform.State) error {
 	}
 
 	for _, rs := range s.RootModule().Resources {
-		if rs.Type != "ionoscloud_k8s_node_pool" {
+		if rs.Type != K8sNodePoolResource {
 			continue
 		}
 

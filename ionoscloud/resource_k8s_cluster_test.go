@@ -128,7 +128,7 @@ func testAccCheckK8sClusterExists(n string, k8sCluster *ionoscloud.KubernetesClu
 }
 
 const testAccCheckK8sClusterConfigBasic = `
-resource ` + K8sClusterResourcfe + ` ` + K8sClusterTestResource + ` {
+resource ` + K8sClusterResource + ` ` + K8sClusterTestResource + ` {
   name        = "` + K8sClusterTestResource + `"
   k8s_version = "1.19.10"
   maintenance_window {
