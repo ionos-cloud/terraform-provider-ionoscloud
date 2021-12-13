@@ -36,10 +36,11 @@ func resourceBackupUnit() *schema.Resource {
 				ValidateFunc: validation.All(validation.StringIsNotWhiteSpace),
 			},
 			"email": {
-				Type:         schema.TypeString,
-				Description:  "The e-mail address you want assigned to the backup unit.",
-				Required:     true,
-				ValidateFunc: validation.All(validation.StringIsNotWhiteSpace),
+				Type:             schema.TypeString,
+				Description:      "The e-mail address you want assigned to the backup unit.",
+				Required:         true,
+				ValidateFunc:     validation.All(validation.StringIsNotWhiteSpace),
+				DiffSuppressFunc: DiffToLower,
 			},
 			"login": {
 				Type:        schema.TypeString,
@@ -109,8 +110,6 @@ func resourceBackupUnitRead(ctx context.Context, d *schema.ResourceData, meta in
 		return diags
 	}
 
-	log.Printf("[INFO] Successfully retreived contract resource for backup unit unit %s: %+v", d.Id(), contractResources)
-
 	if err := setBackupUnitData(d, &backupUnit, &contractResources); err != nil {
 		return diag.FromErr(err)
 	}
@@ -137,8 +136,7 @@ func resourceBackupUnitUpdate(ctx context.Context, d *schema.ResourceData, meta 
 	}
 
 	if d.HasChange("password") {
-		oldPassword, newPassword := d.GetChange("password")
-		log.Printf("[INFO] backup unit password changed from %+v to %+v", oldPassword, newPassword)
+		_, newPassword := d.GetChange("password")
 
 		newPasswordStr := newPassword.(string)
 		request.Properties.Password = &newPasswordStr

@@ -1,3 +1,7 @@
+## 5.2.22
+
+- **bug fixes**: Fix user update, remove sensitive logs, suppress email diff based on case.
+
 ## 5.2.21
 
 - **bug fixes**: Add additional fixes to improve code stability and prevent crashes. Revert icmp_type and icmp_code inside server resource and add tests.
