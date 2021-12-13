@@ -257,6 +257,8 @@ func resourceDbaasPgSqlClusterUpdate(ctx context.Context, d *schema.ResourceData
 
 	d.SetId(*dbaasClusterResponse.Id)
 
+	time.Sleep(SleepInterval)
+
 	for {
 		log.Printf("[INFO] Waiting for cluster %s to be ready...", d.Id())
 
