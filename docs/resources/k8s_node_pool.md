@@ -22,7 +22,11 @@ resource "ionoscloud_k8s_node_pool" "demo" {
   }
   lans {
     id   = ionoscloud_lan.terraform_acctest1.id
-    dhcp = false
+    dhcp = true
+    routes {
+      network   = "1.2.3.5/24"
+      gateway_ip = "10.1.5.17"
+    } 
   }
   lans {
     id   = ionoscloud_lan.terraform_acctest2.id
