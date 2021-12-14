@@ -14,6 +14,7 @@
 - **bug fixes**: revert icmp_code and icmp_type to string to allow setting to 0
 - **bug fixes**: Add additional fixes to improve code stability and prevent crashes. Revert icmp_type and icmp_code inside server resource and add tests.
 - **bug fixes**: Allow creation of an inner firewall rule for server when updating a terraform plan.
+- **bug fixes**: fixed issue #155: added stateUpgrader for handling change of lan field structure
 - **bug fixes**: fix sporadic EOF received when making a lot of https requests to server (fixed in sdk)
 - **bug fixes**: allow url to start with "http" (fixed in sdk)
 - **bug fixes**: fix user update, user password change and password field is now sensitive

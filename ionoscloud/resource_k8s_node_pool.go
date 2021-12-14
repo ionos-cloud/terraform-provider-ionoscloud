@@ -212,8 +212,55 @@ func resourceK8sNodePool() *schema.Resource {
 				},
 			},
 		},
+		Timeouts:      &resourceDefaultTimeouts,
+		SchemaVersion: 1,
+		StateUpgraders: []schema.StateUpgrader{
+			{
+				Type:    resourceK8sNodePool0().CoreConfigSchema().ImpliedType(),
+				Upgrade: resourceK8sNodePoolUpgradeV0,
+				Version: 0,
+			},
+		},
+	}
+}
+
+func resourceK8sNodePool0() *schema.Resource {
+	return &schema.Resource{
+		Schema: map[string]*schema.Schema{
+			"lans": {
+				Type:        schema.TypeList,
+				Description: "A list of Local Area Networks the node pool should be part of",
+				Optional:    true,
+				Elem: &schema.Schema{
+					Type: schema.TypeInt,
+				},
+			},
+		},
 		Timeouts: &resourceDefaultTimeouts,
 	}
+}
+
+func resourceK8sNodePoolUpgradeV0(_ context.Context, state map[string]interface{}, _ interface{}) (map[string]interface{}, error) {
+	oldState := state
+	oldData := oldState["lans"].([]interface{})
+
+	var lans []interface{}
+	for index, lanId := range oldData {
+		log.Printf("oldData index %+v id %v \n\n\n", index, lanId)
+		lanEntry := make(map[string]interface{})
+
+		lanEntry["id"] = lanId
+
+		lanEntry["dhcp"] = true
+
+		var nodePoolRoutes []interface{}
+
+		lanEntry["routes"] = nodePoolRoutes
+		lans = append(lans, lanEntry)
+	}
+	state["lans"] = lans
+
+	return state, nil
 }
 
 func resourcek8sNodePoolCreate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
