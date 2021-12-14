@@ -36,7 +36,7 @@ func testAccK8sNodePoolImportStateID(s *terraform.State) (string, error) {
 	importID := ""
 
 	for _, rs := range s.RootModule().Resources {
-		if rs.Type != K8sClusterResource {
+		if rs.Type != K8sNodePoolResource {
 			continue
 		}
 

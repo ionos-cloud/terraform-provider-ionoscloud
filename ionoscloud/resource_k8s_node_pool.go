@@ -888,6 +888,10 @@ func resourceK8sNodepoolImport(ctx context.Context, d *schema.ResourceData, meta
 
 	log.Printf("[INFO] K8s node pool found: %+v", k8sNodepool)
 
+	if err := d.Set("k8s_cluster_id", clusterId); err != nil {
+		return nil, fmt.Errorf("error while setting k8s_cluster_id property for k8s node pool %q: %q", npId, err)
+	}
+
 	if err := setK8sNodePoolData(d, &k8sNodepool); err != nil {
 		return nil, err
 	}
