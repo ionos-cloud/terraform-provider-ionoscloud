@@ -64,7 +64,7 @@ func resourceLanIPFailoverCreate(ctx context.Context, d *schema.ResourceData, me
 			NicUuid: &nicUuid,
 		}}
 
-	lan, apiResponse, err := client.LansApi.DatacentersLansPatch(ctx, dcid, lanid).Lan(*properties).Execute()
+	lan, apiResponse, err := client.LANsApi.DatacentersLansPatch(ctx, dcid, lanid).Lan(*properties).Execute()
 	logApiRequestTime(apiResponse)
 	if err != nil {
 		diags := diag.FromErr(fmt.Errorf("an error occured while patching a lans failover group  %s %s", lanid, err))
@@ -86,7 +86,7 @@ func resourceLanIPFailoverCreate(ctx context.Context, d *schema.ResourceData, me
 func resourceLanIPFailoverRead(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	client := meta.(*ionoscloud.APIClient)
 
-	lan, apiResponse, err := client.LansApi.DatacentersLansFindById(ctx, d.Get("datacenter_id").(string), d.Id()).Execute()
+	lan, apiResponse, err := client.LANsApi.DatacentersLansFindById(ctx, d.Get("datacenter_id").(string), d.Id()).Execute()
 	logApiRequestTime(apiResponse)
 
 	if err != nil {
@@ -145,7 +145,7 @@ func resourceLanIPFailoverUpdate(ctx context.Context, d *schema.ResourceData, me
 			NicUuid: &nicUuid,
 		}}
 
-	_, apiResponse, err := client.LansApi.DatacentersLansPatch(ctx, dcid, lanid).Lan(*properties).Execute()
+	_, apiResponse, err := client.LANsApi.DatacentersLansPatch(ctx, dcid, lanid).Lan(*properties).Execute()
 	logApiRequestTime(apiResponse)
 	if err != nil {
 		diags := diag.FromErr(fmt.Errorf("an error occured while patching a lan ID %s %s", d.Id(), err))
@@ -173,13 +173,13 @@ func resourceLanIPFailoverDelete(ctx context.Context, d *schema.ResourceData, me
 		IpFailover: &[]ionoscloud.IPFailover{},
 	}
 
-	_, apiResponse, err := client.LansApi.DatacentersLansPatch(ctx, dcid, lanid).Lan(*properties).Execute()
+	_, apiResponse, err := client.LANsApi.DatacentersLansPatch(ctx, dcid, lanid).Lan(*properties).Execute()
 	logApiRequestTime(apiResponse)
 	if err != nil {
 		/*
 						//try again in 90 seconds
 						time.Sleep(90 * time.Second)
-						_, apiResponse, err = client.LansApi.DatacentersLansPatch(ctx, dcid, lanid).Lan(*properties).Execute()
+						_, apiResponse, err = client.LANsApi.DatacentersLansPatch(ctx, dcid, lanid).Lan(*properties).Execute()
 			logApiRequestTime(apiResponse)
 
 						if err != nil && (apiResponse == nil || apiResponse.StatusCode != 404) {

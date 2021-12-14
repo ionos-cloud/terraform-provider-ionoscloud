@@ -27,7 +27,7 @@ func resourceIpFailoverImporter(ctx context.Context, d *schema.ResourceData, met
 
 	client := meta.(*ionoscloud.APIClient)
 
-	lan, apiResponse, err := client.LansApi.DatacentersLansFindById(ctx, dcId, lanId).Execute()
+	lan, apiResponse, err := client.LANsApi.DatacentersLansFindById(ctx, dcId, lanId).Execute()
 	logApiRequestTime(apiResponse)
 
 	if err != nil {

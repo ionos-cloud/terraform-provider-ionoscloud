@@ -230,8 +230,8 @@ func resourcek8sNodePoolCreate(ctx context.Context, d *schema.ResourceData, meta
 	storageSize := int32(d.Get("storage_size").(int))
 	ramSize := int32(d.Get("ram_size").(int))
 
-	k8sNodepool := ionoscloud.KubernetesNodePool{
-		Properties: &ionoscloud.KubernetesNodePoolProperties{
+	k8sNodepool := ionoscloud.KubernetesNodePoolForPost{
+		Properties: &ionoscloud.KubernetesNodePoolPropertiesForPost{
 			Name:             &name,
 			DatacenterId:     &datacenterId,
 			K8sVersion:       &k8sVersion,
@@ -731,7 +731,7 @@ func resourcek8sNodePoolUpdate(ctx context.Context, d *schema.ResourceData, meta
 		log.Printf("[INFO] Update req: %s", string(b))
 	}
 
-	_, apiResponse, err := client.KubernetesApi.K8sNodepoolsPut(ctx, d.Get("k8s_cluster_id").(string), d.Id()).KubernetesNodePoolForPut(request).Execute()
+	_, apiResponse, err := client.KubernetesApi.K8sNodepoolsPut(ctx, d.Get("k8s_cluster_id").(string), d.Id()).KubernetesNodePool(request).Execute()
 	logApiRequestTime(apiResponse)
 
 	if err != nil {
