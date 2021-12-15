@@ -1,3 +1,4 @@
+//go:build natgateway
 // +build natgateway
 
 package ionoscloud
@@ -31,7 +32,7 @@ func TestAccNatGatewayBasic(t *testing.T) {
 					resource.TestCheckResourceAttr(resourceNatGatewayResource, "name", NatGatewayTestResource),
 					resource.TestCheckResourceAttrPair(resourceNatGatewayResource, "public_ips.0", IpBLockResource+".natgateway_ips", "ips.0"),
 					resource.TestCheckResourceAttrPair(resourceNatGatewayResource, "lans.0.id", LanResource+".natgateway_lan", "id"),
-					resource.TestCheckResourceAttr(resourceNatGatewayResource, "lans.0.gateway_ips.0", "10.11.2.5/32"),
+					resource.TestCheckResourceAttr(resourceNatGatewayResource, "lans.0.gateway_ips.0", "10.11.2.5"),
 				),
 			},
 			{
@@ -137,7 +138,7 @@ resource ` + NatGatewayResource + ` ` + NatGatewayTestResource + ` {
   public_ips    = [ ` + IpBLockResource + `.natgateway_ips.ips[0] ]
   lans {
      id          = ` + LanResource + `.natgateway_lan.id
-     gateway_ips = [ "10.11.2.5/32"] 
+     gateway_ips = [ "10.11.2.5"] 
   }
 }`
 

@@ -141,7 +141,7 @@ resource ` + NatGatewayResource + ` "natgateway" {
   public_ips    = [ ` + IpBLockResource + `.natgateway_rule_ips.ips[0], ` + IpBLockResource + `.natgateway_rule_ips.ips[1] ]
   lans {
      id          = ` + LanResource + `.natgateway_rule_lan.id
-     gateway_ips = [ "10.11.2.5/32"] 
+     gateway_ips = [ "10.11.2.5"] 
   }
 }
 
@@ -186,7 +186,7 @@ resource ` + NatGatewayResource + ` "natgateway" {
   public_ips    = [ ` + IpBLockResource + `.natgateway_rule_ips.ips[0], ` + IpBLockResource + `.natgateway_rule_ips.ips[1] ]
   lans {
      id          = ` + LanResource + `.natgateway_rule_lan.id
-     gateway_ips = [ "10.11.2.5/32"] 
+     gateway_ips = [ "10.11.2.5"] 
   }
 }
 

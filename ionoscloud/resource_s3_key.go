@@ -78,14 +78,15 @@ func resourceS3KeyCreate(ctx context.Context, d *schema.ResourceData, meta inter
 			Active: &active,
 		},
 	}
-	log.Printf("[INFO] Setting key active status to %+v", active)
+	log.Printf("[INFO] Setting key active status to %t", *s3Key.Properties.Active)
 	_, apiResponse, err = client.UserS3KeysApi.UmUsersS3keysPut(ctx, userId, keyId).S3Key(s3Key).Execute()
+
 	logApiRequestTime(apiResponse)
 	if err != nil {
 		return diag.FromErr(fmt.Errorf("error saving key data %s: %s", keyId, err.Error()))
 	}
 
-	_, errState = getStateChangeConf(meta, d, apiResponse.Header.Get("Location"), schema.TimeoutCreate).WaitForStateContext(ctx)
+	_, errState = getStateChangeConf(meta, d, apiResponse.Header.Get("Location"), schema.TimeoutUpdate).WaitForStateContext(ctx)
 	if errState != nil {
 		diags := diag.FromErr(errState)
 		return diags
@@ -111,7 +112,10 @@ func resourceS3KeyRead(ctx context.Context, d *schema.ResourceData, meta interfa
 		return diags
 	}
 
-	log.Printf("[INFO] Successfully retrieved S3 key %s: %+v", d.Id(), s3Key)
+	log.Printf("[INFO] Successfully retrieved S3 key %s: %+v \n", d.Id(), s3Key)
+	if s3Key.HasProperties() && s3Key.Properties.HasActive() {
+		log.Printf("[INFO] Successfully retrieved S3 key with status: %t", *s3Key.Properties.Active)
+	}
 
 	if err := setS3KeyIdAndProperties(&s3Key, d); err != nil {
 		return diag.FromErr(err)

@@ -179,7 +179,7 @@ func resourceLanIPFailoverDelete(ctx context.Context, d *schema.ResourceData, me
 		/*
 						//try again in 90 seconds
 						time.Sleep(90 * time.Second)
-						_, apiResponse, err = client.LansApi.DatacentersLansPatch(ctx, dcid, lanid).Lan(*properties).Execute()
+						_, apiResponse, err = client.LANsApi.DatacentersLansPatch(ctx, dcid, lanid).Lan(*properties).Execute()
 			logApiRequestTime(apiResponse)
 
 						if err != nil && (apiResponse == nil || apiResponse.StatusCode != 404) {
