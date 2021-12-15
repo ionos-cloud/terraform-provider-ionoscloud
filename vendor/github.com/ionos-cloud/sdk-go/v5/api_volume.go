@@ -565,6 +565,7 @@ type ApiDatacentersVolumesGetRequest struct {
 	ApiService      *VolumeApiService
 	filters         _neturl.Values
 	orderBy         *string
+	maxResults      *int32
 	datacenterId    string
 	pretty          *bool
 	depth           *int32
@@ -604,6 +605,12 @@ func (r ApiDatacentersVolumesGetRequest) Filter(key string, value string) ApiDat
 // OrderBy query param sorts the results alphanumerically in ascending order based on the specified property.
 func (r ApiDatacentersVolumesGetRequest) OrderBy(orderBy string) ApiDatacentersVolumesGetRequest {
 	r.orderBy = &orderBy
+	return r
+}
+
+// MaxResults query param limits the number of results returned.
+func (r ApiDatacentersVolumesGetRequest) MaxResults(maxResults int32) ApiDatacentersVolumesGetRequest {
+	r.maxResults = &maxResults
 	return r
 }
 
@@ -667,6 +674,9 @@ func (a *VolumeApiService) DatacentersVolumesGetExecute(r ApiDatacentersVolumesG
 	}
 	if r.orderBy != nil {
 		localVarQueryParams.Add("orderBy", parameterToString(*r.orderBy, ""))
+	}
+	if r.maxResults != nil {
+		localVarQueryParams.Add("maxResults", parameterToString(*r.maxResults, ""))
 	}
 	if len(r.filters) > 0 {
 		for k, v := range r.filters {

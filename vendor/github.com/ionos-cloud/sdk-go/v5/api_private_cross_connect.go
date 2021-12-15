@@ -358,6 +358,7 @@ type ApiPccsGetRequest struct {
 	ApiService      *PrivateCrossConnectApiService
 	filters         _neturl.Values
 	orderBy         *string
+	maxResults      *int32
 	pretty          *bool
 	depth           *int32
 	xContractNumber *int32
@@ -386,6 +387,12 @@ func (r ApiPccsGetRequest) Filter(key string, value string) ApiPccsGetRequest {
 // OrderBy query param sorts the results alphanumerically in ascending order based on the specified property.
 func (r ApiPccsGetRequest) OrderBy(orderBy string) ApiPccsGetRequest {
 	r.orderBy = &orderBy
+	return r
+}
+
+// MaxResults query param limits the number of results returned.
+func (r ApiPccsGetRequest) MaxResults(maxResults int32) ApiPccsGetRequest {
+	r.maxResults = &maxResults
 	return r
 }
 
@@ -440,6 +447,9 @@ func (a *PrivateCrossConnectApiService) PccsGetExecute(r ApiPccsGetRequest) (Pri
 	}
 	if r.orderBy != nil {
 		localVarQueryParams.Add("orderBy", parameterToString(*r.orderBy, ""))
+	}
+	if r.maxResults != nil {
+		localVarQueryParams.Add("maxResults", parameterToString(*r.maxResults, ""))
 	}
 	if len(r.filters) > 0 {
 		for k, v := range r.filters {

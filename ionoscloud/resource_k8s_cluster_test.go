@@ -1,3 +1,4 @@
+//go:build k8s
 // +build k8s
 
 package ionoscloud
@@ -31,7 +32,7 @@ func TestAccK8sClusterBasic(t *testing.T) {
 					resource.TestCheckResourceAttr(K8sClusterResource+"."+K8sClusterTestResource, "maintenance_window.0.day_of_the_week", "Sunday"),
 					resource.TestCheckResourceAttr(K8sClusterResource+"."+K8sClusterTestResource, "maintenance_window.0.time", "09:00:00Z"),
 					resource.TestCheckResourceAttr(K8sClusterResource+"."+K8sClusterTestResource, "api_subnet_allow_list.0", "1.2.3.4/32"),
-					resource.TestCheckResourceAttr(K8sClusterResource+"."+K8sClusterTestResource, "s3_buckets.0.name", "sdktestv6"),
+					resource.TestCheckResourceAttr(K8sClusterResource+"."+K8sClusterTestResource, "s3_buckets.0.name", "sdktestv66"),
 				),
 			},
 			{
@@ -136,7 +137,7 @@ resource ` + K8sClusterResource + ` ` + K8sClusterTestResource + ` {
   }
   api_subnet_allow_list = ["1.2.3.4/32"]
   s3_buckets { 
-     name = "sdktestv6"
+     name = "sdktestv66"
   }
 }`
 

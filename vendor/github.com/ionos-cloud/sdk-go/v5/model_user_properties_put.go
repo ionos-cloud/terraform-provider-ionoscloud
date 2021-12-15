@@ -22,6 +22,8 @@ type UserPropertiesPut struct {
 	Lastname *string `json:"lastname,omitempty"`
 	// email address of the user
 	Email *string `json:"email,omitempty"`
+	// password of the user
+	Password *string `json:"password,omitempty"`
 	// indicates if the user has admin rights or not
 	Administrator *bool `json:"administrator,omitempty"`
 	// indicates if secure authentication should be forced on the user or not
@@ -140,6 +142,44 @@ func (o *UserPropertiesPut) SetEmail(v string) {
 // HasEmail returns a boolean if a field has been set.
 func (o *UserPropertiesPut) HasEmail() bool {
 	if o != nil && o.Email != nil {
+		return true
+	}
+
+	return false
+}
+
+// GetPassword returns the Password field value
+// If the value is explicit nil, the zero value for string will be returned
+func (o *UserPropertiesPut) GetPassword() *string {
+	if o == nil {
+		return nil
+	}
+
+	return o.Password
+
+}
+
+// GetPasswordOk returns a tuple with the Password field value
+// and a boolean to check if the value has been set.
+// NOTE: If the value is an explicit nil, `nil, true` will be returned
+func (o *UserPropertiesPut) GetPasswordOk() (*string, bool) {
+	if o == nil {
+		return nil, false
+	}
+
+	return o.Password, true
+}
+
+// SetPassword sets field value
+func (o *UserPropertiesPut) SetPassword(v string) {
+
+	o.Password = &v
+
+}
+
+// HasPassword returns a boolean if a field has been set.
+func (o *UserPropertiesPut) HasPassword() bool {
+	if o != nil && o.Password != nil {
 		return true
 	}
 
@@ -311,6 +351,10 @@ func (o UserPropertiesPut) MarshalJSON() ([]byte, error) {
 
 	if o.Email != nil {
 		toSerialize["email"] = o.Email
+	}
+
+	if o.Password != nil {
+		toSerialize["password"] = o.Password
 	}
 
 	if o.Administrator != nil {

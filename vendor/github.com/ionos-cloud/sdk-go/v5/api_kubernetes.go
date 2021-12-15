@@ -358,6 +358,7 @@ type ApiK8sGetRequest struct {
 	ApiService      *KubernetesApiService
 	filters         _neturl.Values
 	orderBy         *string
+	maxResults      *int32
 	pretty          *bool
 	depth           *int32
 	xContractNumber *int32
@@ -386,6 +387,12 @@ func (r ApiK8sGetRequest) Filter(key string, value string) ApiK8sGetRequest {
 // OrderBy query param sorts the results alphanumerically in ascending order based on the specified property.
 func (r ApiK8sGetRequest) OrderBy(orderBy string) ApiK8sGetRequest {
 	r.orderBy = &orderBy
+	return r
+}
+
+// MaxResults query param limits the number of results returned.
+func (r ApiK8sGetRequest) MaxResults(maxResults int32) ApiK8sGetRequest {
+	r.maxResults = &maxResults
 	return r
 }
 
@@ -440,6 +447,9 @@ func (a *KubernetesApiService) K8sGetExecute(r ApiK8sGetRequest) (KubernetesClus
 	}
 	if r.orderBy != nil {
 		localVarQueryParams.Add("orderBy", parameterToString(*r.orderBy, ""))
+	}
+	if r.maxResults != nil {
+		localVarQueryParams.Add("maxResults", parameterToString(*r.maxResults, ""))
 	}
 	if len(r.filters) > 0 {
 		for k, v := range r.filters {
@@ -543,6 +553,7 @@ type ApiK8sKubeconfigGetRequest struct {
 	ApiService      *KubernetesApiService
 	filters         _neturl.Values
 	orderBy         *string
+	maxResults      *int32
 	k8sClusterId    string
 	pretty          *bool
 	depth           *int32
@@ -572,6 +583,12 @@ func (r ApiK8sKubeconfigGetRequest) Filter(key string, value string) ApiK8sKubec
 // OrderBy query param sorts the results alphanumerically in ascending order based on the specified property.
 func (r ApiK8sKubeconfigGetRequest) OrderBy(orderBy string) ApiK8sKubeconfigGetRequest {
 	r.orderBy = &orderBy
+	return r
+}
+
+// MaxResults query param limits the number of results returned.
+func (r ApiK8sKubeconfigGetRequest) MaxResults(maxResults int32) ApiK8sKubeconfigGetRequest {
+	r.maxResults = &maxResults
 	return r
 }
 
@@ -629,6 +646,9 @@ func (a *KubernetesApiService) K8sKubeconfigGetExecute(r ApiK8sKubeconfigGetRequ
 	}
 	if r.orderBy != nil {
 		localVarQueryParams.Add("orderBy", parameterToString(*r.orderBy, ""))
+	}
+	if r.maxResults != nil {
+		localVarQueryParams.Add("maxResults", parameterToString(*r.maxResults, ""))
 	}
 	if len(r.filters) > 0 {
 		for k, v := range r.filters {
@@ -1066,6 +1086,7 @@ type ApiK8sNodepoolsGetRequest struct {
 	ApiService      *KubernetesApiService
 	filters         _neturl.Values
 	orderBy         *string
+	maxResults      *int32
 	k8sClusterId    string
 	pretty          *bool
 	depth           *int32
@@ -1095,6 +1116,12 @@ func (r ApiK8sNodepoolsGetRequest) Filter(key string, value string) ApiK8sNodepo
 // OrderBy query param sorts the results alphanumerically in ascending order based on the specified property.
 func (r ApiK8sNodepoolsGetRequest) OrderBy(orderBy string) ApiK8sNodepoolsGetRequest {
 	r.orderBy = &orderBy
+	return r
+}
+
+// MaxResults query param limits the number of results returned.
+func (r ApiK8sNodepoolsGetRequest) MaxResults(maxResults int32) ApiK8sNodepoolsGetRequest {
+	r.maxResults = &maxResults
 	return r
 }
 
@@ -1152,6 +1179,9 @@ func (a *KubernetesApiService) K8sNodepoolsGetExecute(r ApiK8sNodepoolsGetReques
 	}
 	if r.orderBy != nil {
 		localVarQueryParams.Add("orderBy", parameterToString(*r.orderBy, ""))
+	}
+	if r.maxResults != nil {
+		localVarQueryParams.Add("maxResults", parameterToString(*r.maxResults, ""))
 	}
 	if len(r.filters) > 0 {
 		for k, v := range r.filters {
@@ -1597,6 +1627,7 @@ type ApiK8sNodepoolsNodesGetRequest struct {
 	ApiService      *KubernetesApiService
 	filters         _neturl.Values
 	orderBy         *string
+	maxResults      *int32
 	k8sClusterId    string
 	nodepoolId      string
 	pretty          *bool
@@ -1627,6 +1658,12 @@ func (r ApiK8sNodepoolsNodesGetRequest) Filter(key string, value string) ApiK8sN
 // OrderBy query param sorts the results alphanumerically in ascending order based on the specified property.
 func (r ApiK8sNodepoolsNodesGetRequest) OrderBy(orderBy string) ApiK8sNodepoolsNodesGetRequest {
 	r.orderBy = &orderBy
+	return r
+}
+
+// MaxResults query param limits the number of results returned.
+func (r ApiK8sNodepoolsNodesGetRequest) MaxResults(maxResults int32) ApiK8sNodepoolsNodesGetRequest {
+	r.maxResults = &maxResults
 	return r
 }
 
@@ -1687,6 +1724,9 @@ func (a *KubernetesApiService) K8sNodepoolsNodesGetExecute(r ApiK8sNodepoolsNode
 	}
 	if r.orderBy != nil {
 		localVarQueryParams.Add("orderBy", parameterToString(*r.orderBy, ""))
+	}
+	if r.maxResults != nil {
+		localVarQueryParams.Add("maxResults", parameterToString(*r.maxResults, ""))
 	}
 	if len(r.filters) > 0 {
 		for k, v := range r.filters {
@@ -2655,6 +2695,7 @@ type ApiK8sVersionsCompatibilitiesGetRequest struct {
 	ApiService     *KubernetesApiService
 	filters        _neturl.Values
 	orderBy        *string
+	maxResults     *int32
 	clusterVersion string
 }
 
@@ -2668,6 +2709,12 @@ func (r ApiK8sVersionsCompatibilitiesGetRequest) Filter(key string, value string
 // OrderBy query param sorts the results alphanumerically in ascending order based on the specified property.
 func (r ApiK8sVersionsCompatibilitiesGetRequest) OrderBy(orderBy string) ApiK8sVersionsCompatibilitiesGetRequest {
 	r.orderBy = &orderBy
+	return r
+}
+
+// MaxResults query param limits the number of results returned.
+func (r ApiK8sVersionsCompatibilitiesGetRequest) MaxResults(maxResults int32) ApiK8sVersionsCompatibilitiesGetRequest {
+	r.maxResults = &maxResults
 	return r
 }
 
@@ -2719,6 +2766,9 @@ func (a *KubernetesApiService) K8sVersionsCompatibilitiesGetExecute(r ApiK8sVers
 
 	if r.orderBy != nil {
 		localVarQueryParams.Add("orderBy", parameterToString(*r.orderBy, ""))
+	}
+	if r.maxResults != nil {
+		localVarQueryParams.Add("maxResults", parameterToString(*r.maxResults, ""))
 	}
 	if len(r.filters) > 0 {
 		for k, v := range r.filters {
@@ -2819,6 +2869,7 @@ type ApiK8sVersionsDefaultGetRequest struct {
 	ApiService *KubernetesApiService
 	filters    _neturl.Values
 	orderBy    *string
+	maxResults *int32
 }
 
 // Filters query parameters limit results to those containing a matching value for a specific property.
@@ -2831,6 +2882,12 @@ func (r ApiK8sVersionsDefaultGetRequest) Filter(key string, value string) ApiK8s
 // OrderBy query param sorts the results alphanumerically in ascending order based on the specified property.
 func (r ApiK8sVersionsDefaultGetRequest) OrderBy(orderBy string) ApiK8sVersionsDefaultGetRequest {
 	r.orderBy = &orderBy
+	return r
+}
+
+// MaxResults query param limits the number of results returned.
+func (r ApiK8sVersionsDefaultGetRequest) MaxResults(maxResults int32) ApiK8sVersionsDefaultGetRequest {
+	r.maxResults = &maxResults
 	return r
 }
 
@@ -2879,6 +2936,9 @@ func (a *KubernetesApiService) K8sVersionsDefaultGetExecute(r ApiK8sVersionsDefa
 
 	if r.orderBy != nil {
 		localVarQueryParams.Add("orderBy", parameterToString(*r.orderBy, ""))
+	}
+	if r.maxResults != nil {
+		localVarQueryParams.Add("maxResults", parameterToString(*r.maxResults, ""))
 	}
 	if len(r.filters) > 0 {
 		for k, v := range r.filters {
@@ -2979,6 +3039,7 @@ type ApiK8sVersionsGetRequest struct {
 	ApiService *KubernetesApiService
 	filters    _neturl.Values
 	orderBy    *string
+	maxResults *int32
 }
 
 // Filters query parameters limit results to those containing a matching value for a specific property.
@@ -2991,6 +3052,12 @@ func (r ApiK8sVersionsGetRequest) Filter(key string, value string) ApiK8sVersion
 // OrderBy query param sorts the results alphanumerically in ascending order based on the specified property.
 func (r ApiK8sVersionsGetRequest) OrderBy(orderBy string) ApiK8sVersionsGetRequest {
 	r.orderBy = &orderBy
+	return r
+}
+
+// MaxResults query param limits the number of results returned.
+func (r ApiK8sVersionsGetRequest) MaxResults(maxResults int32) ApiK8sVersionsGetRequest {
+	r.maxResults = &maxResults
 	return r
 }
 
@@ -3039,6 +3106,9 @@ func (a *KubernetesApiService) K8sVersionsGetExecute(r ApiK8sVersionsGetRequest)
 
 	if r.orderBy != nil {
 		localVarQueryParams.Add("orderBy", parameterToString(*r.orderBy, ""))
+	}
+	if r.maxResults != nil {
+		localVarQueryParams.Add("maxResults", parameterToString(*r.maxResults, ""))
 	}
 	if len(r.filters) > 0 {
 		for k, v := range r.filters {

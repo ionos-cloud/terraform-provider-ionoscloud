@@ -191,6 +191,11 @@ func resourceUserUpdate(ctx context.Context, d *schema.ResourceData, meta interf
 	active := d.Get("active").(bool)
 	userReq.Properties.Active = &active
 
+	if d.HasChange("password") {
+		password := d.Get("password").(string)
+		userReq.Properties.Password = &password
+	}
+
 	_, apiResponse, err = client.UserManagementApi.UmUsersPut(ctx, d.Id()).User(userReq).Execute()
 	logApiRequestTime(apiResponse)
 	if err != nil {

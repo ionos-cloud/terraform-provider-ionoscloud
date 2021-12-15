@@ -3,7 +3,7 @@ package ionoscloud
 // BackupUnit Constants
 const (
 	BackupUnitResource         = "ionoscloud_backup_unit"
-	BackupUnitTestResource     = "testBackupUnit"
+	BackupUnitTestResource     = "testBackupUnit2"
 	BackupUnitDataSourceById   = "testBackupUnitId"
 	BackupUnitDataSourceByName = "testBackupUnitName"
 )

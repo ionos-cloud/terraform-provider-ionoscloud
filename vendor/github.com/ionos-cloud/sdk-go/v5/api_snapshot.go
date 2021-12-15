@@ -358,6 +358,7 @@ type ApiSnapshotsGetRequest struct {
 	ApiService      *SnapshotApiService
 	filters         _neturl.Values
 	orderBy         *string
+	maxResults      *int32
 	pretty          *bool
 	depth           *int32
 	xContractNumber *int32
@@ -386,6 +387,12 @@ func (r ApiSnapshotsGetRequest) Filter(key string, value string) ApiSnapshotsGet
 // OrderBy query param sorts the results alphanumerically in ascending order based on the specified property.
 func (r ApiSnapshotsGetRequest) OrderBy(orderBy string) ApiSnapshotsGetRequest {
 	r.orderBy = &orderBy
+	return r
+}
+
+// MaxResults query param limits the number of results returned.
+func (r ApiSnapshotsGetRequest) MaxResults(maxResults int32) ApiSnapshotsGetRequest {
+	r.maxResults = &maxResults
 	return r
 }
 
@@ -440,6 +447,9 @@ func (a *SnapshotApiService) SnapshotsGetExecute(r ApiSnapshotsGetRequest) (Snap
 	}
 	if r.orderBy != nil {
 		localVarQueryParams.Add("orderBy", parameterToString(*r.orderBy, ""))
+	}
+	if r.maxResults != nil {
+		localVarQueryParams.Add("maxResults", parameterToString(*r.maxResults, ""))
 	}
 	if len(r.filters) > 0 {
 		for k, v := range r.filters {

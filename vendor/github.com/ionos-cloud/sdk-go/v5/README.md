@@ -6,12 +6,15 @@
 [![Reliability Rating](https://sonarcloud.io/api/project_badges/measure?project=ionos-cloud_sdk-go&metric=reliability_rating)](https://sonarcloud.io/dashboard?id=ionos-cloud_sdk-go)
 [![Security Rating](https://sonarcloud.io/api/project_badges/measure?project=ionos-cloud_sdk-go&metric=security_rating)](https://sonarcloud.io/dashboard?id=ionos-cloud_sdk-go)
 [![Vulnerabilities](https://sonarcloud.io/api/project_badges/measure?project=ionos-cloud_sdk-go&metric=vulnerabilities)](https://sonarcloud.io/dashboard?id=ionos-cloud_sdk-go)
+[![Release](https://img.shields.io/github/v/release/ionos-cloud/sdk-go.svg)](https://github.com/ionos-cloud/sdk-go/releases/latest)
+[![Release Date](https://img.shields.io/github/release-date/ionos-cloud/sdk-go.svg)](https://github.com/ionos-cloud/sdk-go/releases/latest)
+[![Go](https://img.shields.io/github/go-mod/go-version/ionos-cloud/sdk-go.svg)](https://github.com/ionos-cloud/sdk-go)
 
 ![Alt text](.github/IONOS.CLOUD.BLU.svg?raw=true "Title")
 
 # Go API client for ionoscloud
 
-An enterprise-grade Infrastructure is provided as a Service (IaaS) solution that can be managed through a browser-based \"Data Center Designer\" (DCD) tool or via an easy to use API. 
+An enterprise-grade Infrastructure is provided as a Service (IaaS) solution that can be managed through a browser-based \"Data Center Designer\" (DCD) tool or via an easy-to-use API. 
 
 The API allows you to perform a variety of management tasks such as spinning up additional servers, adding volumes, adjusting networking, and so forth. It is designed to allow users to leverage the same power and flexibility found within the DCD visual tool. Both tools are consistent with their concepts and lend well to making the experience smooth and intuitive.
 
@@ -56,6 +59,8 @@ For using other server than the one defined on index 0 set context value `sw.Con
 ctx := context.WithValue(context.Background(), sw.ContextServerIndex, 1)
 ```
 
+Note: To overwrite the API endpoint - `api.ionos.com`, the environment variable `$IONOS_API_URL` can be set, and used with `NewConfigurationFromEnv()` function.
+
 ### Templated Server URL
 
 Templated server URL is formatted using default variables from configuration or from context value `sw.ContextServerVariables` of type `map[string]string`.
@@ -71,7 +76,7 @@ Note, enum values are always validated and all unused variables are silently ign
 ### URLs Configuration per Operation
 
 Each operation can use different server URL defined using `OperationServers` map in the `Configuration`.
-An operation is uniquely identifield by `"{classname}Service.{nickname}"` string.
+An operation is uniquely identified by `"{classname}Service.{nickname}"` string.
 Similar rules for overriding default operation server index and variables applies by using `sw.ContextOperationServerIndices` and `sw.ContextOperationServerVariables` context maps.
 
 ```
@@ -85,323 +90,338 @@ ctx = context.WithValue(context.Background(), sw.ContextOperationServerVariables
 })
 ```
 
+### Environment Variables
+
+| Environment Variable | Description                                                                                                                                                                                                                    |
+|----------------------|--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| `IONOS_USERNAME`     | Specify the username used to login, to authenticate against the IONOS Cloud API                                                                                                                                                | 
+| `IONOS_PASSWORD`     | Specify the password used to login, to authenticate against the IONOS Cloud API                                                                                                                                                | 
+| `IONOS_TOKEN`        | Specify the token used to login, if a token is being used instead of username and password                                                                                                                                     |
+| `IONOS_API_URL`      | Specify the API URL. It will overwrite the API endpoint default value `api.ionos.com`. Note: the host URL does not contain the `/cloudapi/v5` path, so it should _not_ be included in the `IONOS_API_URL` environment variable | 
+
 ## Documentation for API Endpoints
 
 All URIs are relative to *https://api.ionos.com/cloudapi/v5*
 
-Class | Method | HTTP request | Description
------------- | ------------- | ------------- | -------------
-*DefaultApi* | [**ApiInfoGet**](docs/DefaultApi.md#apiinfoget) | **Get** / | Display API information
-*BackupUnitApi* | [**BackupunitsDelete**](docs/BackupUnitApi.md#backupunitsdelete) | **Delete** /backupunits/{backupunitId} | Delete a Backup Unit
-*BackupUnitApi* | [**BackupunitsFindById**](docs/BackupUnitApi.md#backupunitsfindbyid) | **Get** /backupunits/{backupunitId} | Returns the specified backup Unit
-*BackupUnitApi* | [**BackupunitsGet**](docs/BackupUnitApi.md#backupunitsget) | **Get** /backupunits | List Backup Units 
-*BackupUnitApi* | [**BackupunitsPatch**](docs/BackupUnitApi.md#backupunitspatch) | **Patch** /backupunits/{backupunitId} | Partially modify a Backup Unit
-*BackupUnitApi* | [**BackupunitsPost**](docs/BackupUnitApi.md#backupunitspost) | **Post** /backupunits | Create a Backup Unit
-*BackupUnitApi* | [**BackupunitsPut**](docs/BackupUnitApi.md#backupunitsput) | **Put** /backupunits/{backupunitId} | Modify a Backup Unit
-*BackupUnitApi* | [**BackupunitsSsourlGet**](docs/BackupUnitApi.md#backupunitsssourlget) | **Get** /backupunits/{backupunitId}/ssourl | Returns a single signon URL for the specified backup Unit.
-*ContractApi* | [**ContractsGet**](docs/ContractApi.md#contractsget) | **Get** /contracts | Retrieve a Contract
-*DataCenterApi* | [**DatacentersDelete**](docs/DataCenterApi.md#datacentersdelete) | **Delete** /datacenters/{datacenterId} | Delete a Data Center
-*DataCenterApi* | [**DatacentersFindById**](docs/DataCenterApi.md#datacentersfindbyid) | **Get** /datacenters/{datacenterId} | Retrieve a Data Center
-*DataCenterApi* | [**DatacentersGet**](docs/DataCenterApi.md#datacentersget) | **Get** /datacenters | List Data Centers under your account
-*DataCenterApi* | [**DatacentersPatch**](docs/DataCenterApi.md#datacenterspatch) | **Patch** /datacenters/{datacenterId} | Partially modify a Data Center
-*DataCenterApi* | [**DatacentersPost**](docs/DataCenterApi.md#datacenterspost) | **Post** /datacenters | Create a Data Center
-*DataCenterApi* | [**DatacentersPut**](docs/DataCenterApi.md#datacentersput) | **Put** /datacenters/{datacenterId} | Modify a Data Center
-*IPBlocksApi* | [**IpblocksDelete**](docs/IPBlocksApi.md#ipblocksdelete) | **Delete** /ipblocks/{ipblockId} | Delete IP Block
-*IPBlocksApi* | [**IpblocksFindById**](docs/IPBlocksApi.md#ipblocksfindbyid) | **Get** /ipblocks/{ipblockId} | Retrieve an IP Block
-*IPBlocksApi* | [**IpblocksGet**](docs/IPBlocksApi.md#ipblocksget) | **Get** /ipblocks | List IP Blocks 
-*IPBlocksApi* | [**IpblocksPatch**](docs/IPBlocksApi.md#ipblockspatch) | **Patch** /ipblocks/{ipblockId} | Partially modify IP Block
-*IPBlocksApi* | [**IpblocksPost**](docs/IPBlocksApi.md#ipblockspost) | **Post** /ipblocks | Reserve IP Block
-*IPBlocksApi* | [**IpblocksPut**](docs/IPBlocksApi.md#ipblocksput) | **Put** /ipblocks/{ipblockId} | Modify IP Block
-*ImageApi* | [**ImagesDelete**](docs/ImageApi.md#imagesdelete) | **Delete** /images/{imageId} | Delete an Image
-*ImageApi* | [**ImagesFindById**](docs/ImageApi.md#imagesfindbyid) | **Get** /images/{imageId} | Retrieve an Image
-*ImageApi* | [**ImagesGet**](docs/ImageApi.md#imagesget) | **Get** /images | List Images 
-*ImageApi* | [**ImagesPatch**](docs/ImageApi.md#imagespatch) | **Patch** /images/{imageId} | Partially modify an Image
-*ImageApi* | [**ImagesPut**](docs/ImageApi.md#imagesput) | **Put** /images/{imageId} | Modify an Image
-*KubernetesApi* | [**K8sDelete**](docs/KubernetesApi.md#k8sdelete) | **Delete** /k8s/{k8sClusterId} | Delete Kubernetes Cluster
-*KubernetesApi* | [**K8sFindByClusterId**](docs/KubernetesApi.md#k8sfindbyclusterid) | **Get** /k8s/{k8sClusterId} | Retrieve Kubernetes Cluster
-*KubernetesApi* | [**K8sGet**](docs/KubernetesApi.md#k8sget) | **Get** /k8s | List Kubernetes Clusters
-*KubernetesApi* | [**K8sKubeconfigGet**](docs/KubernetesApi.md#k8skubeconfigget) | **Get** /k8s/{k8sClusterId}/kubeconfig | Retrieve Kubernetes Configuration File
-*KubernetesApi* | [**K8sNodepoolsDelete**](docs/KubernetesApi.md#k8snodepoolsdelete) | **Delete** /k8s/{k8sClusterId}/nodepools/{nodepoolId} | Delete Kubernetes Node Pool
-*KubernetesApi* | [**K8sNodepoolsFindById**](docs/KubernetesApi.md#k8snodepoolsfindbyid) | **Get** /k8s/{k8sClusterId}/nodepools/{nodepoolId} | Retrieve Kubernetes Node Pool
-*KubernetesApi* | [**K8sNodepoolsGet**](docs/KubernetesApi.md#k8snodepoolsget) | **Get** /k8s/{k8sClusterId}/nodepools | List Kubernetes Node Pools
-*KubernetesApi* | [**K8sNodepoolsNodesDelete**](docs/KubernetesApi.md#k8snodepoolsnodesdelete) | **Delete** /k8s/{k8sClusterId}/nodepools/{nodepoolId}/nodes/{nodeId} | Delete Kubernetes node
-*KubernetesApi* | [**K8sNodepoolsNodesFindById**](docs/KubernetesApi.md#k8snodepoolsnodesfindbyid) | **Get** /k8s/{k8sClusterId}/nodepools/{nodepoolId}/nodes/{nodeId} | Retrieve Kubernetes node
-*KubernetesApi* | [**K8sNodepoolsNodesGet**](docs/KubernetesApi.md#k8snodepoolsnodesget) | **Get** /k8s/{k8sClusterId}/nodepools/{nodepoolId}/nodes | Retrieve Kubernetes nodes.
-*KubernetesApi* | [**K8sNodepoolsNodesReplacePost**](docs/KubernetesApi.md#k8snodepoolsnodesreplacepost) | **Post** /k8s/{k8sClusterId}/nodepools/{nodepoolId}/nodes/{nodeId}/replace | Recreate the Kubernetes node
-*KubernetesApi* | [**K8sNodepoolsPost**](docs/KubernetesApi.md#k8snodepoolspost) | **Post** /k8s/{k8sClusterId}/nodepools | Create a Kubernetes Node Pool
-*KubernetesApi* | [**K8sNodepoolsPut**](docs/KubernetesApi.md#k8snodepoolsput) | **Put** /k8s/{k8sClusterId}/nodepools/{nodepoolId} | Modify Kubernetes Node Pool
-*KubernetesApi* | [**K8sPost**](docs/KubernetesApi.md#k8spost) | **Post** /k8s | Create Kubernetes Cluster
-*KubernetesApi* | [**K8sPut**](docs/KubernetesApi.md#k8sput) | **Put** /k8s/{k8sClusterId} | Modify Kubernetes Cluster
-*KubernetesApi* | [**K8sVersionsCompatibilitiesGet**](docs/KubernetesApi.md#k8sversionscompatibilitiesget) | **Get** /k8s/versions/{clusterVersion}/compatibilities | Retrieves a list of available kubernetes versions for nodepools depending on the given kubernetes version running in the cluster.
-*KubernetesApi* | [**K8sVersionsDefaultGet**](docs/KubernetesApi.md#k8sversionsdefaultget) | **Get** /k8s/versions/default | Retrieve the current default kubernetes version for clusters and nodepools.
-*KubernetesApi* | [**K8sVersionsGet**](docs/KubernetesApi.md#k8sversionsget) | **Get** /k8s/versions | Retrieve available Kubernetes versions
-*LabelApi* | [**DatacentersLabelsDelete**](docs/LabelApi.md#datacenterslabelsdelete) | **Delete** /datacenters/{datacenterId}/labels/{key} | Delete a Label from Data Center
-*LabelApi* | [**DatacentersLabelsFindByKey**](docs/LabelApi.md#datacenterslabelsfindbykey) | **Get** /datacenters/{datacenterId}/labels/{key} | Retrieve a Label of Data Center
-*LabelApi* | [**DatacentersLabelsGet**](docs/LabelApi.md#datacenterslabelsget) | **Get** /datacenters/{datacenterId}/labels | List all Data Center Labels
-*LabelApi* | [**DatacentersLabelsPost**](docs/LabelApi.md#datacenterslabelspost) | **Post** /datacenters/{datacenterId}/labels | Add a Label to Data Center
-*LabelApi* | [**DatacentersLabelsPut**](docs/LabelApi.md#datacenterslabelsput) | **Put** /datacenters/{datacenterId}/labels/{key} | Modify a Label of Data Center
-*LabelApi* | [**DatacentersServersLabelsDelete**](docs/LabelApi.md#datacentersserverslabelsdelete) | **Delete** /datacenters/{datacenterId}/servers/{serverId}/labels/{key} | Delete a Label from Server
-*LabelApi* | [**DatacentersServersLabelsFindByKey**](docs/LabelApi.md#datacentersserverslabelsfindbykey) | **Get** /datacenters/{datacenterId}/servers/{serverId}/labels/{key} | Retrieve a Label of Server
-*LabelApi* | [**DatacentersServersLabelsGet**](docs/LabelApi.md#datacentersserverslabelsget) | **Get** /datacenters/{datacenterId}/servers/{serverId}/labels | List all Server Labels
-*LabelApi* | [**DatacentersServersLabelsPost**](docs/LabelApi.md#datacentersserverslabelspost) | **Post** /datacenters/{datacenterId}/servers/{serverId}/labels | Add a Label to Server
-*LabelApi* | [**DatacentersServersLabelsPut**](docs/LabelApi.md#datacentersserverslabelsput) | **Put** /datacenters/{datacenterId}/servers/{serverId}/labels/{key} | Modify a Label of Server
-*LabelApi* | [**DatacentersVolumesLabelsDelete**](docs/LabelApi.md#datacentersvolumeslabelsdelete) | **Delete** /datacenters/{datacenterId}/volumes/{volumeId}/labels/{key} | Delete a Label from Volume
-*LabelApi* | [**DatacentersVolumesLabelsFindByKey**](docs/LabelApi.md#datacentersvolumeslabelsfindbykey) | **Get** /datacenters/{datacenterId}/volumes/{volumeId}/labels/{key} | Retrieve a Label of Volume
-*LabelApi* | [**DatacentersVolumesLabelsGet**](docs/LabelApi.md#datacentersvolumeslabelsget) | **Get** /datacenters/{datacenterId}/volumes/{volumeId}/labels | List all Volume Labels
-*LabelApi* | [**DatacentersVolumesLabelsPost**](docs/LabelApi.md#datacentersvolumeslabelspost) | **Post** /datacenters/{datacenterId}/volumes/{volumeId}/labels | Add a Label to Volume
-*LabelApi* | [**DatacentersVolumesLabelsPut**](docs/LabelApi.md#datacentersvolumeslabelsput) | **Put** /datacenters/{datacenterId}/volumes/{volumeId}/labels/{key} | Modify a Label of Volume
-*LabelApi* | [**IpblocksLabelsDelete**](docs/LabelApi.md#ipblockslabelsdelete) | **Delete** /ipblocks/{ipblockId}/labels/{key} | Delete a Label from IP Block
-*LabelApi* | [**IpblocksLabelsFindByKey**](docs/LabelApi.md#ipblockslabelsfindbykey) | **Get** /ipblocks/{ipblockId}/labels/{key} | Retrieve a Label of IP Block
-*LabelApi* | [**IpblocksLabelsGet**](docs/LabelApi.md#ipblockslabelsget) | **Get** /ipblocks/{ipblockId}/labels | List all Ip Block Labels
-*LabelApi* | [**IpblocksLabelsPost**](docs/LabelApi.md#ipblockslabelspost) | **Post** /ipblocks/{ipblockId}/labels | Add a Label to IP Block
-*LabelApi* | [**IpblocksLabelsPut**](docs/LabelApi.md#ipblockslabelsput) | **Put** /ipblocks/{ipblockId}/labels/{key} | Modify a Label of IP Block
-*LabelApi* | [**LabelsFindByUrn**](docs/LabelApi.md#labelsfindbyurn) | **Get** /labels/{labelurn} | Returns the label by its URN.
-*LabelApi* | [**LabelsGet**](docs/LabelApi.md#labelsget) | **Get** /labels | List Labels 
-*LabelApi* | [**SnapshotsLabelsDelete**](docs/LabelApi.md#snapshotslabelsdelete) | **Delete** /snapshots/{snapshotId}/labels/{key} | Delete a Label from Snapshot
-*LabelApi* | [**SnapshotsLabelsFindByKey**](docs/LabelApi.md#snapshotslabelsfindbykey) | **Get** /snapshots/{snapshotId}/labels/{key} | Retrieve a Label of Snapshot
-*LabelApi* | [**SnapshotsLabelsGet**](docs/LabelApi.md#snapshotslabelsget) | **Get** /snapshots/{snapshotId}/labels | List all Snapshot Labels
-*LabelApi* | [**SnapshotsLabelsPost**](docs/LabelApi.md#snapshotslabelspost) | **Post** /snapshots/{snapshotId}/labels | Add a Label to Snapshot
-*LabelApi* | [**SnapshotsLabelsPut**](docs/LabelApi.md#snapshotslabelsput) | **Put** /snapshots/{snapshotId}/labels/{key} | Modify a Label of Snapshot
-*LanApi* | [**DatacentersLansDelete**](docs/LanApi.md#datacenterslansdelete) | **Delete** /datacenters/{datacenterId}/lans/{lanId} | Delete a Lan.
-*LanApi* | [**DatacentersLansFindById**](docs/LanApi.md#datacenterslansfindbyid) | **Get** /datacenters/{datacenterId}/lans/{lanId} | Retrieve a Lan
-*LanApi* | [**DatacentersLansGet**](docs/LanApi.md#datacenterslansget) | **Get** /datacenters/{datacenterId}/lans | List Lans
-*LanApi* | [**DatacentersLansNicsFindById**](docs/LanApi.md#datacenterslansnicsfindbyid) | **Get** /datacenters/{datacenterId}/lans/{lanId}/nics/{nicId} | Retrieve a nic attached to lan
-*LanApi* | [**DatacentersLansNicsGet**](docs/LanApi.md#datacenterslansnicsget) | **Get** /datacenters/{datacenterId}/lans/{lanId}/nics | List Lan Members 
-*LanApi* | [**DatacentersLansNicsPost**](docs/LanApi.md#datacenterslansnicspost) | **Post** /datacenters/{datacenterId}/lans/{lanId}/nics | Attach a nic
-*LanApi* | [**DatacentersLansPatch**](docs/LanApi.md#datacenterslanspatch) | **Patch** /datacenters/{datacenterId}/lans/{lanId} | Partially modify a Lan
-*LanApi* | [**DatacentersLansPost**](docs/LanApi.md#datacenterslanspost) | **Post** /datacenters/{datacenterId}/lans | Create a Lan
-*LanApi* | [**DatacentersLansPut**](docs/LanApi.md#datacenterslansput) | **Put** /datacenters/{datacenterId}/lans/{lanId} | Modify a Lan
-*LoadBalancerApi* | [**DatacentersLoadbalancersBalancednicsDelete**](docs/LoadBalancerApi.md#datacentersloadbalancersbalancednicsdelete) | **Delete** /datacenters/{datacenterId}/loadbalancers/{loadbalancerId}/balancednics/{nicId} | Detach a nic from loadbalancer
-*LoadBalancerApi* | [**DatacentersLoadbalancersBalancednicsFindByNicId**](docs/LoadBalancerApi.md#datacentersloadbalancersbalancednicsfindbynicid) | **Get** /datacenters/{datacenterId}/loadbalancers/{loadbalancerId}/balancednics/{nicId} | Retrieve a nic attached to Load Balancer
-*LoadBalancerApi* | [**DatacentersLoadbalancersBalancednicsGet**](docs/LoadBalancerApi.md#datacentersloadbalancersbalancednicsget) | **Get** /datacenters/{datacenterId}/loadbalancers/{loadbalancerId}/balancednics | List Load Balancer Members 
-*LoadBalancerApi* | [**DatacentersLoadbalancersBalancednicsPost**](docs/LoadBalancerApi.md#datacentersloadbalancersbalancednicspost) | **Post** /datacenters/{datacenterId}/loadbalancers/{loadbalancerId}/balancednics | Attach a nic to Load Balancer
-*LoadBalancerApi* | [**DatacentersLoadbalancersDelete**](docs/LoadBalancerApi.md#datacentersloadbalancersdelete) | **Delete** /datacenters/{datacenterId}/loadbalancers/{loadbalancerId} | Delete a Loadbalancer.
-*LoadBalancerApi* | [**DatacentersLoadbalancersFindById**](docs/LoadBalancerApi.md#datacentersloadbalancersfindbyid) | **Get** /datacenters/{datacenterId}/loadbalancers/{loadbalancerId} | Retrieve a loadbalancer
-*LoadBalancerApi* | [**DatacentersLoadbalancersGet**](docs/LoadBalancerApi.md#datacentersloadbalancersget) | **Get** /datacenters/{datacenterId}/loadbalancers | List Load Balancers
-*LoadBalancerApi* | [**DatacentersLoadbalancersPatch**](docs/LoadBalancerApi.md#datacentersloadbalancerspatch) | **Patch** /datacenters/{datacenterId}/loadbalancers/{loadbalancerId} | Partially modify a Loadbalancer
-*LoadBalancerApi* | [**DatacentersLoadbalancersPost**](docs/LoadBalancerApi.md#datacentersloadbalancerspost) | **Post** /datacenters/{datacenterId}/loadbalancers | Create a Load Balancer
-*LoadBalancerApi* | [**DatacentersLoadbalancersPut**](docs/LoadBalancerApi.md#datacentersloadbalancersput) | **Put** /datacenters/{datacenterId}/loadbalancers/{loadbalancerId} | Modify a Load Balancer
-*LocationApi* | [**LocationsFindByRegionId**](docs/LocationApi.md#locationsfindbyregionid) | **Get** /locations/{regionId} | List Locations within a region
-*LocationApi* | [**LocationsFindByRegionIdAndId**](docs/LocationApi.md#locationsfindbyregionidandid) | **Get** /locations/{regionId}/{locationId} | Retrieve a Location
-*LocationApi* | [**LocationsGet**](docs/LocationApi.md#locationsget) | **Get** /locations | List Locations
-*NicApi* | [**DatacentersServersNicsDelete**](docs/NicApi.md#datacentersserversnicsdelete) | **Delete** /datacenters/{datacenterId}/servers/{serverId}/nics/{nicId} | Delete a Nic
-*NicApi* | [**DatacentersServersNicsFindById**](docs/NicApi.md#datacentersserversnicsfindbyid) | **Get** /datacenters/{datacenterId}/servers/{serverId}/nics/{nicId} | Retrieve a Nic
-*NicApi* | [**DatacentersServersNicsFirewallrulesDelete**](docs/NicApi.md#datacentersserversnicsfirewallrulesdelete) | **Delete** /datacenters/{datacenterId}/servers/{serverId}/nics/{nicId}/firewallrules/{firewallruleId} | Delete a Firewall Rule
-*NicApi* | [**DatacentersServersNicsFirewallrulesFindById**](docs/NicApi.md#datacentersserversnicsfirewallrulesfindbyid) | **Get** /datacenters/{datacenterId}/servers/{serverId}/nics/{nicId}/firewallrules/{firewallruleId} | Retrieve a Firewall Rule
-*NicApi* | [**DatacentersServersNicsFirewallrulesGet**](docs/NicApi.md#datacentersserversnicsfirewallrulesget) | **Get** /datacenters/{datacenterId}/servers/{serverId}/nics/{nicId}/firewallrules | List Firewall Rules 
-*NicApi* | [**DatacentersServersNicsFirewallrulesPatch**](docs/NicApi.md#datacentersserversnicsfirewallrulespatch) | **Patch** /datacenters/{datacenterId}/servers/{serverId}/nics/{nicId}/firewallrules/{firewallruleId} | Partially modify a Firewall Rule
-*NicApi* | [**DatacentersServersNicsFirewallrulesPost**](docs/NicApi.md#datacentersserversnicsfirewallrulespost) | **Post** /datacenters/{datacenterId}/servers/{serverId}/nics/{nicId}/firewallrules | Create a Firewall Rule
-*NicApi* | [**DatacentersServersNicsFirewallrulesPut**](docs/NicApi.md#datacentersserversnicsfirewallrulesput) | **Put** /datacenters/{datacenterId}/servers/{serverId}/nics/{nicId}/firewallrules/{firewallruleId} | Modify a Firewall Rule
-*NicApi* | [**DatacentersServersNicsGet**](docs/NicApi.md#datacentersserversnicsget) | **Get** /datacenters/{datacenterId}/servers/{serverId}/nics | List Nics 
-*NicApi* | [**DatacentersServersNicsPatch**](docs/NicApi.md#datacentersserversnicspatch) | **Patch** /datacenters/{datacenterId}/servers/{serverId}/nics/{nicId} | Partially modify a Nic
-*NicApi* | [**DatacentersServersNicsPost**](docs/NicApi.md#datacentersserversnicspost) | **Post** /datacenters/{datacenterId}/servers/{serverId}/nics | Create a Nic
-*NicApi* | [**DatacentersServersNicsPut**](docs/NicApi.md#datacentersserversnicsput) | **Put** /datacenters/{datacenterId}/servers/{serverId}/nics/{nicId} | Modify a Nic
-*PrivateCrossConnectApi* | [**PccsDelete**](docs/PrivateCrossConnectApi.md#pccsdelete) | **Delete** /pccs/{pccId} | Delete a Private Cross-Connect
-*PrivateCrossConnectApi* | [**PccsFindById**](docs/PrivateCrossConnectApi.md#pccsfindbyid) | **Get** /pccs/{pccId} | Retrieve a Private Cross-Connect
-*PrivateCrossConnectApi* | [**PccsGet**](docs/PrivateCrossConnectApi.md#pccsget) | **Get** /pccs | List Private Cross-Connects 
-*PrivateCrossConnectApi* | [**PccsPatch**](docs/PrivateCrossConnectApi.md#pccspatch) | **Patch** /pccs/{pccId} | Partially modify a private cross-connect
-*PrivateCrossConnectApi* | [**PccsPost**](docs/PrivateCrossConnectApi.md#pccspost) | **Post** /pccs | Create a Private Cross-Connect
-*RequestApi* | [**RequestsFindById**](docs/RequestApi.md#requestsfindbyid) | **Get** /requests/{requestId} | Retrieve a Request
-*RequestApi* | [**RequestsGet**](docs/RequestApi.md#requestsget) | **Get** /requests | List Requests
-*RequestApi* | [**RequestsStatusGet**](docs/RequestApi.md#requestsstatusget) | **Get** /requests/{requestId}/status | Retrieve Request Status
-*ServerApi* | [**DatacentersServersCdromsDelete**](docs/ServerApi.md#datacentersserverscdromsdelete) | **Delete** /datacenters/{datacenterId}/servers/{serverId}/cdroms/{cdromId} | Detach a CD-ROM
-*ServerApi* | [**DatacentersServersCdromsFindById**](docs/ServerApi.md#datacentersserverscdromsfindbyid) | **Get** /datacenters/{datacenterId}/servers/{serverId}/cdroms/{cdromId} | Retrieve an attached CD-ROM
-*ServerApi* | [**DatacentersServersCdromsGet**](docs/ServerApi.md#datacentersserverscdromsget) | **Get** /datacenters/{datacenterId}/servers/{serverId}/cdroms | List attached CD-ROMs 
-*ServerApi* | [**DatacentersServersCdromsPost**](docs/ServerApi.md#datacentersserverscdromspost) | **Post** /datacenters/{datacenterId}/servers/{serverId}/cdroms | Attach a CD-ROM
-*ServerApi* | [**DatacentersServersDelete**](docs/ServerApi.md#datacentersserversdelete) | **Delete** /datacenters/{datacenterId}/servers/{serverId} | Delete a Server
-*ServerApi* | [**DatacentersServersFindById**](docs/ServerApi.md#datacentersserversfindbyid) | **Get** /datacenters/{datacenterId}/servers/{serverId} | Retrieve a Server
-*ServerApi* | [**DatacentersServersGet**](docs/ServerApi.md#datacentersserversget) | **Get** /datacenters/{datacenterId}/servers | List Servers 
-*ServerApi* | [**DatacentersServersPatch**](docs/ServerApi.md#datacentersserverspatch) | **Patch** /datacenters/{datacenterId}/servers/{serverId} | Partially modify a Server
-*ServerApi* | [**DatacentersServersPost**](docs/ServerApi.md#datacentersserverspost) | **Post** /datacenters/{datacenterId}/servers | Create a Server
-*ServerApi* | [**DatacentersServersPut**](docs/ServerApi.md#datacentersserversput) | **Put** /datacenters/{datacenterId}/servers/{serverId} | Modify a Server
-*ServerApi* | [**DatacentersServersRebootPost**](docs/ServerApi.md#datacentersserversrebootpost) | **Post** /datacenters/{datacenterId}/servers/{serverId}/reboot | Reboot a Server
-*ServerApi* | [**DatacentersServersStartPost**](docs/ServerApi.md#datacentersserversstartpost) | **Post** /datacenters/{datacenterId}/servers/{serverId}/start | Start a Server
-*ServerApi* | [**DatacentersServersStopPost**](docs/ServerApi.md#datacentersserversstoppost) | **Post** /datacenters/{datacenterId}/servers/{serverId}/stop | Stop a Server
-*ServerApi* | [**DatacentersServersUpgradePost**](docs/ServerApi.md#datacentersserversupgradepost) | **Post** /datacenters/{datacenterId}/servers/{serverId}/upgrade | Upgrade a Server
-*ServerApi* | [**DatacentersServersVolumesDelete**](docs/ServerApi.md#datacentersserversvolumesdelete) | **Delete** /datacenters/{datacenterId}/servers/{serverId}/volumes/{volumeId} | Detach a volume
-*ServerApi* | [**DatacentersServersVolumesFindById**](docs/ServerApi.md#datacentersserversvolumesfindbyid) | **Get** /datacenters/{datacenterId}/servers/{serverId}/volumes/{volumeId} | Retrieve an attached volume
-*ServerApi* | [**DatacentersServersVolumesGet**](docs/ServerApi.md#datacentersserversvolumesget) | **Get** /datacenters/{datacenterId}/servers/{serverId}/volumes | List Attached Volumes
-*ServerApi* | [**DatacentersServersVolumesPost**](docs/ServerApi.md#datacentersserversvolumespost) | **Post** /datacenters/{datacenterId}/servers/{serverId}/volumes | Attach a volume
-*SnapshotApi* | [**SnapshotsDelete**](docs/SnapshotApi.md#snapshotsdelete) | **Delete** /snapshots/{snapshotId} | Delete a Snapshot
-*SnapshotApi* | [**SnapshotsFindById**](docs/SnapshotApi.md#snapshotsfindbyid) | **Get** /snapshots/{snapshotId} | Retrieve a Snapshot by its uuid.
-*SnapshotApi* | [**SnapshotsGet**](docs/SnapshotApi.md#snapshotsget) | **Get** /snapshots | List Snapshots 
-*SnapshotApi* | [**SnapshotsPatch**](docs/SnapshotApi.md#snapshotspatch) | **Patch** /snapshots/{snapshotId} | Partially modify a Snapshot
-*SnapshotApi* | [**SnapshotsPut**](docs/SnapshotApi.md#snapshotsput) | **Put** /snapshots/{snapshotId} | Modify a Snapshot
-*UserManagementApi* | [**UmGroupsDelete**](docs/UserManagementApi.md#umgroupsdelete) | **Delete** /um/groups/{groupId} | Delete a Group
-*UserManagementApi* | [**UmGroupsFindById**](docs/UserManagementApi.md#umgroupsfindbyid) | **Get** /um/groups/{groupId} | Retrieve a Group
-*UserManagementApi* | [**UmGroupsGet**](docs/UserManagementApi.md#umgroupsget) | **Get** /um/groups | List All Groups.
-*UserManagementApi* | [**UmGroupsPost**](docs/UserManagementApi.md#umgroupspost) | **Post** /um/groups | Create a Group
-*UserManagementApi* | [**UmGroupsPut**](docs/UserManagementApi.md#umgroupsput) | **Put** /um/groups/{groupId} | Modify a group
-*UserManagementApi* | [**UmGroupsResourcesGet**](docs/UserManagementApi.md#umgroupsresourcesget) | **Get** /um/groups/{groupId}/resources | Retrieve resources assigned to a group
-*UserManagementApi* | [**UmGroupsSharesDelete**](docs/UserManagementApi.md#umgroupssharesdelete) | **Delete** /um/groups/{groupId}/shares/{resourceId} | Remove a resource from a group
-*UserManagementApi* | [**UmGroupsSharesFindByResourceId**](docs/UserManagementApi.md#umgroupssharesfindbyresourceid) | **Get** /um/groups/{groupId}/shares/{resourceId} | Retrieve a group share
-*UserManagementApi* | [**UmGroupsSharesGet**](docs/UserManagementApi.md#umgroupssharesget) | **Get** /um/groups/{groupId}/shares | List Group Shares 
-*UserManagementApi* | [**UmGroupsSharesPost**](docs/UserManagementApi.md#umgroupssharespost) | **Post** /um/groups/{groupId}/shares/{resourceId} | Add a resource to a group
-*UserManagementApi* | [**UmGroupsSharesPut**](docs/UserManagementApi.md#umgroupssharesput) | **Put** /um/groups/{groupId}/shares/{resourceId} | Modify resource permissions of a group
-*UserManagementApi* | [**UmGroupsUsersDelete**](docs/UserManagementApi.md#umgroupsusersdelete) | **Delete** /um/groups/{groupId}/users/{userId} | Remove a user from a group
-*UserManagementApi* | [**UmGroupsUsersGet**](docs/UserManagementApi.md#umgroupsusersget) | **Get** /um/groups/{groupId}/users | List Group Members 
-*UserManagementApi* | [**UmGroupsUsersPost**](docs/UserManagementApi.md#umgroupsuserspost) | **Post** /um/groups/{groupId}/users | Add a user to a group
-*UserManagementApi* | [**UmResourcesFindByType**](docs/UserManagementApi.md#umresourcesfindbytype) | **Get** /um/resources/{resourceType} | Retrieve a list of Resources by type.
-*UserManagementApi* | [**UmResourcesFindByTypeAndId**](docs/UserManagementApi.md#umresourcesfindbytypeandid) | **Get** /um/resources/{resourceType}/{resourceId} | Retrieve a Resource by type.
-*UserManagementApi* | [**UmResourcesGet**](docs/UserManagementApi.md#umresourcesget) | **Get** /um/resources | List All Resources.
-*UserManagementApi* | [**UmUsersDelete**](docs/UserManagementApi.md#umusersdelete) | **Delete** /um/users/{userId} | Delete a User
-*UserManagementApi* | [**UmUsersFindById**](docs/UserManagementApi.md#umusersfindbyid) | **Get** /um/users/{userId} | Retrieve a User
-*UserManagementApi* | [**UmUsersGet**](docs/UserManagementApi.md#umusersget) | **Get** /um/users | List all Users 
-*UserManagementApi* | [**UmUsersGroupsGet**](docs/UserManagementApi.md#umusersgroupsget) | **Get** /um/users/{userId}/groups | Retrieve a User&#39;s group resources
-*UserManagementApi* | [**UmUsersOwnsGet**](docs/UserManagementApi.md#umusersownsget) | **Get** /um/users/{userId}/owns | Retrieve a User&#39;s own resources
-*UserManagementApi* | [**UmUsersPost**](docs/UserManagementApi.md#umuserspost) | **Post** /um/users | Create a user
-*UserManagementApi* | [**UmUsersPut**](docs/UserManagementApi.md#umusersput) | **Put** /um/users/{userId} | Modify a user
-*UserManagementApi* | [**UmUsersS3keysDelete**](docs/UserManagementApi.md#umuserss3keysdelete) | **Delete** /um/users/{userId}/s3keys/{keyId} | Delete a S3 key
-*UserManagementApi* | [**UmUsersS3keysFindByKeyId**](docs/UserManagementApi.md#umuserss3keysfindbykeyid) | **Get** /um/users/{userId}/s3keys/{keyId} | Retrieve given S3 key belonging to the given User
-*UserManagementApi* | [**UmUsersS3keysGet**](docs/UserManagementApi.md#umuserss3keysget) | **Get** /um/users/{userId}/s3keys | Retrieve a User&#39;s S3 keys
-*UserManagementApi* | [**UmUsersS3keysPost**](docs/UserManagementApi.md#umuserss3keyspost) | **Post** /um/users/{userId}/s3keys | Create a S3 key for the given user
-*UserManagementApi* | [**UmUsersS3keysPut**](docs/UserManagementApi.md#umuserss3keysput) | **Put** /um/users/{userId}/s3keys/{keyId} | Modify a S3 key having the given key id
-*UserManagementApi* | [**UmUsersS3ssourlGet**](docs/UserManagementApi.md#umuserss3ssourlget) | **Get** /um/users/{userId}/s3ssourl | Retrieve S3 object storage single signon URL for the given user
-*VolumeApi* | [**DatacentersVolumesCreateSnapshotPost**](docs/VolumeApi.md#datacentersvolumescreatesnapshotpost) | **Post** /datacenters/{datacenterId}/volumes/{volumeId}/create-snapshot | Create Volume Snapshot
-*VolumeApi* | [**DatacentersVolumesDelete**](docs/VolumeApi.md#datacentersvolumesdelete) | **Delete** /datacenters/{datacenterId}/volumes/{volumeId} | Delete a Volume
-*VolumeApi* | [**DatacentersVolumesFindById**](docs/VolumeApi.md#datacentersvolumesfindbyid) | **Get** /datacenters/{datacenterId}/volumes/{volumeId} | Retrieve a Volume
-*VolumeApi* | [**DatacentersVolumesGet**](docs/VolumeApi.md#datacentersvolumesget) | **Get** /datacenters/{datacenterId}/volumes | List Volumes 
-*VolumeApi* | [**DatacentersVolumesPatch**](docs/VolumeApi.md#datacentersvolumespatch) | **Patch** /datacenters/{datacenterId}/volumes/{volumeId} | Partially modify a Volume
-*VolumeApi* | [**DatacentersVolumesPost**](docs/VolumeApi.md#datacentersvolumespost) | **Post** /datacenters/{datacenterId}/volumes | Create a Volume
-*VolumeApi* | [**DatacentersVolumesPut**](docs/VolumeApi.md#datacentersvolumesput) | **Put** /datacenters/{datacenterId}/volumes/{volumeId} | Modify a Volume
-*VolumeApi* | [**DatacentersVolumesRestoreSnapshotPost**](docs/VolumeApi.md#datacentersvolumesrestoresnapshotpost) | **Post** /datacenters/{datacenterId}/volumes/{volumeId}/restore-snapshot | Restore Volume Snapshot
+<details >
+<summary title="Click to toggle">API Endpoints table</summary>
 
+| Class                    | Method                                                                                                                             | HTTP request                                                                                          | Description                                                                                                                       |
+|--------------------------|------------------------------------------------------------------------------------------------------------------------------------|-------------------------------------------------------------------------------------------------------|-----------------------------------------------------------------------------------------------------------------------------------|
+| *DefaultApi*             | [**ApiInfoGet**](docs/api/DefaultApi.md#apiinfoget)                                                                                | **Get** /                                                                                             | Display API information                                                                                                           |
+| *BackupUnitApi*          | [**BackupunitsDelete**](docs/api/BackupUnitApi.md#backupunitsdelete)                                                               | **Delete** /backupunits/{backupunitId}                                                                | Delete a Backup Unit                                                                                                              |
+| *BackupUnitApi*          | [**BackupunitsFindById**](docs/api/BackupUnitApi.md#backupunitsfindbyid)                                                           | **Get** /backupunits/{backupunitId}                                                                   | Returns the specified backup Unit                                                                                                 |
+| *BackupUnitApi*          | [**BackupunitsGet**](docs/api/BackupUnitApi.md#backupunitsget)                                                                     | **Get** /backupunits                                                                                  | List Backup Units                                                                                                                 |
+| *BackupUnitApi*          | [**BackupunitsPatch**](docs/api/BackupUnitApi.md#backupunitspatch)                                                                 | **Patch** /backupunits/{backupunitId}                                                                 | Partially modify a Backup Unit                                                                                                    |
+| *BackupUnitApi*          | [**BackupunitsPost**](docs/api/BackupUnitApi.md#backupunitspost)                                                                   | **Post** /backupunits                                                                                 | Create a Backup Unit                                                                                                              |
+| *BackupUnitApi*          | [**BackupunitsPut**](docs/api/BackupUnitApi.md#backupunitsput)                                                                     | **Put** /backupunits/{backupunitId}                                                                   | Modify a Backup Unit                                                                                                              |
+| *BackupUnitApi*          | [**BackupunitsSsourlGet**](docs/api/BackupUnitApi.md#backupunitsssourlget)                                                         | **Get** /backupunits/{backupunitId}/ssourl                                                            | Returns a single signon URL for the specified backup Unit.                                                                        |
+| *ContractApi*            | [**ContractsGet**](docs/api/ContractApi.md#contractsget)                                                                           | **Get** /contracts                                                                                    | Retrieve a Contract                                                                                                               |
+| *DataCenterApi*          | [**DatacentersDelete**](docs/api/DataCenterApi.md#datacentersdelete)                                                               | **Delete** /datacenters/{datacenterId}                                                                | Delete a Data Center                                                                                                              |
+| *DataCenterApi*          | [**DatacentersFindById**](docs/api/DataCenterApi.md#datacentersfindbyid)                                                           | **Get** /datacenters/{datacenterId}                                                                   | Retrieve a Data Center                                                                                                            |
+| *DataCenterApi*          | [**DatacentersGet**](docs/api/DataCenterApi.md#datacentersget)                                                                     | **Get** /datacenters                                                                                  | List Data Centers under your account                                                                                              |
+| *DataCenterApi*          | [**DatacentersPatch**](docs/api/DataCenterApi.md#datacenterspatch)                                                                 | **Patch** /datacenters/{datacenterId}                                                                 | Partially modify a Data Center                                                                                                    |
+| *DataCenterApi*          | [**DatacentersPost**](docs/api/DataCenterApi.md#datacenterspost)                                                                   | **Post** /datacenters                                                                                 | Create a Data Center                                                                                                              |
+| *DataCenterApi*          | [**DatacentersPut**](docs/api/DataCenterApi.md#datacentersput)                                                                     | **Put** /datacenters/{datacenterId}                                                                   | Modify a Data Center                                                                                                              |
+| *IPBlocksApi*            | [**IpblocksDelete**](docs/api/IPBlocksApi.md#ipblocksdelete)                                                                       | **Delete** /ipblocks/{ipblockId}                                                                      | Delete IP Block                                                                                                                   |
+| *IPBlocksApi*            | [**IpblocksFindById**](docs/api/IPBlocksApi.md#ipblocksfindbyid)                                                                   | **Get** /ipblocks/{ipblockId}                                                                         | Retrieve an IP Block                                                                                                              |
+| *IPBlocksApi*            | [**IpblocksGet**](docs/api/IPBlocksApi.md#ipblocksget)                                                                             | **Get** /ipblocks                                                                                     | List IP Blocks                                                                                                                    |
+| *IPBlocksApi*            | [**IpblocksPatch**](docs/api/IPBlocksApi.md#ipblockspatch)                                                                         | **Patch** /ipblocks/{ipblockId}                                                                       | Partially modify IP Block                                                                                                         |
+| *IPBlocksApi*            | [**IpblocksPost**](docs/api/IPBlocksApi.md#ipblockspost)                                                                           | **Post** /ipblocks                                                                                    | Reserve IP Block                                                                                                                  |
+| *IPBlocksApi*            | [**IpblocksPut**](docs/api/IPBlocksApi.md#ipblocksput)                                                                             | **Put** /ipblocks/{ipblockId}                                                                         | Modify IP Block                                                                                                                   |
+| *ImageApi*               | [**ImagesDelete**](docs/api/ImageApi.md#imagesdelete)                                                                              | **Delete** /images/{imageId}                                                                          | Delete an Image                                                                                                                   |
+| *ImageApi*               | [**ImagesFindById**](docs/api/ImageApi.md#imagesfindbyid)                                                                          | **Get** /images/{imageId}                                                                             | Retrieve an Image                                                                                                                 |
+| *ImageApi*               | [**ImagesGet**](docs/api/ImageApi.md#imagesget)                                                                                    | **Get** /images                                                                                       | List Images                                                                                                                       |
+| *ImageApi*               | [**ImagesPatch**](docs/api/ImageApi.md#imagespatch)                                                                                | **Patch** /images/{imageId}                                                                           | Partially modify an Image                                                                                                         |
+| *ImageApi*               | [**ImagesPut**](docs/api/ImageApi.md#imagesput)                                                                                    | **Put** /images/{imageId}                                                                             | Modify an Image                                                                                                                   |
+| *KubernetesApi*          | [**K8sDelete**](docs/api/KubernetesApi.md#k8sdelete)                                                                               | **Delete** /k8s/{k8sClusterId}                                                                        | Delete Kubernetes Cluster                                                                                                         |
+| *KubernetesApi*          | [**K8sFindByClusterId**](docs/api/KubernetesApi.md#k8sfindbyclusterid)                                                             | **Get** /k8s/{k8sClusterId}                                                                           | Retrieve Kubernetes Cluster                                                                                                       |
+| *KubernetesApi*          | [**K8sGet**](docs/api/KubernetesApi.md#k8sget)                                                                                     | **Get** /k8s                                                                                          | List Kubernetes Clusters                                                                                                          |
+| *KubernetesApi*          | [**K8sKubeconfigGet**](docs/api/KubernetesApi.md#k8skubeconfigget)                                                                 | **Get** /k8s/{k8sClusterId}/kubeconfig                                                                | Retrieve Kubernetes Configuration File                                                                                            |
+| *KubernetesApi*          | [**K8sNodepoolsDelete**](docs/api/KubernetesApi.md#k8snodepoolsdelete)                                                             | **Delete** /k8s/{k8sClusterId}/nodepools/{nodepoolId}                                                 | Delete Kubernetes Node Pool                                                                                                       |
+| *KubernetesApi*          | [**K8sNodepoolsFindById**](docs/api/KubernetesApi.md#k8snodepoolsfindbyid)                                                         | **Get** /k8s/{k8sClusterId}/nodepools/{nodepoolId}                                                    | Retrieve Kubernetes Node Pool                                                                                                     |
+| *KubernetesApi*          | [**K8sNodepoolsGet**](docs/api/KubernetesApi.md#k8snodepoolsget)                                                                   | **Get** /k8s/{k8sClusterId}/nodepools                                                                 | List Kubernetes Node Pools                                                                                                        |
+| *KubernetesApi*          | [**K8sNodepoolsNodesDelete**](docs/api/KubernetesApi.md#k8snodepoolsnodesdelete)                                                   | **Delete** /k8s/{k8sClusterId}/nodepools/{nodepoolId}/nodes/{nodeId}                                  | Delete Kubernetes node                                                                                                            |
+| *KubernetesApi*          | [**K8sNodepoolsNodesFindById**](docs/api/KubernetesApi.md#k8snodepoolsnodesfindbyid)                                               | **Get** /k8s/{k8sClusterId}/nodepools/{nodepoolId}/nodes/{nodeId}                                     | Retrieve Kubernetes node                                                                                                          |
+| *KubernetesApi*          | [**K8sNodepoolsNodesGet**](docs/api/KubernetesApi.md#k8snodepoolsnodesget)                                                         | **Get** /k8s/{k8sClusterId}/nodepools/{nodepoolId}/nodes                                              | Retrieve Kubernetes nodes.                                                                                                        |
+| *KubernetesApi*          | [**K8sNodepoolsNodesReplacePost**](docs/api/KubernetesApi.md#k8snodepoolsnodesreplacepost)                                         | **Post** /k8s/{k8sClusterId}/nodepools/{nodepoolId}/nodes/{nodeId}/replace                            | Recreate the Kubernetes node                                                                                                      |
+| *KubernetesApi*          | [**K8sNodepoolsPost**](docs/api/KubernetesApi.md#k8snodepoolspost)                                                                 | **Post** /k8s/{k8sClusterId}/nodepools                                                                | Create a Kubernetes Node Pool                                                                                                     |
+| *KubernetesApi*          | [**K8sNodepoolsPut**](docs/api/KubernetesApi.md#k8snodepoolsput)                                                                   | **Put** /k8s/{k8sClusterId}/nodepools/{nodepoolId}                                                    | Modify Kubernetes Node Pool                                                                                                       |
+| *KubernetesApi*          | [**K8sPost**](docs/api/KubernetesApi.md#k8spost)                                                                                   | **Post** /k8s                                                                                         | Create Kubernetes Cluster                                                                                                         |
+| *KubernetesApi*          | [**K8sPut**](docs/api/KubernetesApi.md#k8sput)                                                                                     | **Put** /k8s/{k8sClusterId}                                                                           | Modify Kubernetes Cluster                                                                                                         |
+| *KubernetesApi*          | [**K8sVersionsCompatibilitiesGet**](docs/api/KubernetesApi.md#k8sversionscompatibilitiesget)                                       | **Get** /k8s/versions/{clusterVersion}/compatibilities                                                | Retrieves a list of available kubernetes versions for nodepools depending on the given kubernetes version running in the cluster. |
+| *KubernetesApi*          | [**K8sVersionsDefaultGet**](docs/api/KubernetesApi.md#k8sversionsdefaultget)                                                       | **Get** /k8s/versions/default                                                                         | Retrieve the current default kubernetes version for clusters and nodepools.                                                       |
+| *KubernetesApi*          | [**K8sVersionsGet**](docs/api/KubernetesApi.md#k8sversionsget)                                                                     | **Get** /k8s/versions                                                                                 | Retrieve available Kubernetes versions                                                                                            |
+| *LabelApi*               | [**DatacentersLabelsDelete**](docs/api/LabelApi.md#datacenterslabelsdelete)                                                        | **Delete** /datacenters/{datacenterId}/labels/{key}                                                   | Delete a Label from Data Center                                                                                                   |
+| *LabelApi*               | [**DatacentersLabelsFindByKey**](docs/api/LabelApi.md#datacenterslabelsfindbykey)                                                  | **Get** /datacenters/{datacenterId}/labels/{key}                                                      | Retrieve a Label of Data Center                                                                                                   |
+| *LabelApi*               | [**DatacentersLabelsGet**](docs/api/LabelApi.md#datacenterslabelsget)                                                              | **Get** /datacenters/{datacenterId}/labels                                                            | List all Data Center Labels                                                                                                       |
+| *LabelApi*               | [**DatacentersLabelsPost**](docs/api/LabelApi.md#datacenterslabelspost)                                                            | **Post** /datacenters/{datacenterId}/labels                                                           | Add a Label to Data Center                                                                                                        |
+| *LabelApi*               | [**DatacentersLabelsPut**](docs/api/LabelApi.md#datacenterslabelsput)                                                              | **Put** /datacenters/{datacenterId}/labels/{key}                                                      | Modify a Label of Data Center                                                                                                     |
+| *LabelApi*               | [**DatacentersServersLabelsDelete**](docs/api/LabelApi.md#datacentersserverslabelsdelete)                                          | **Delete** /datacenters/{datacenterId}/servers/{serverId}/labels/{key}                                | Delete a Label from Server                                                                                                        |
+| *LabelApi*               | [**DatacentersServersLabelsFindByKey**](docs/api/LabelApi.md#datacentersserverslabelsfindbykey)                                    | **Get** /datacenters/{datacenterId}/servers/{serverId}/labels/{key}                                   | Retrieve a Label of Server                                                                                                        |
+| *LabelApi*               | [**DatacentersServersLabelsGet**](docs/api/LabelApi.md#datacentersserverslabelsget)                                                | **Get** /datacenters/{datacenterId}/servers/{serverId}/labels                                         | List all Server Labels                                                                                                            |
+| *LabelApi*               | [**DatacentersServersLabelsPost**](docs/api/LabelApi.md#datacentersserverslabelspost)                                              | **Post** /datacenters/{datacenterId}/servers/{serverId}/labels                                        | Add a Label to Server                                                                                                             |
+| *LabelApi*               | [**DatacentersServersLabelsPut**](docs/api/LabelApi.md#datacentersserverslabelsput)                                                | **Put** /datacenters/{datacenterId}/servers/{serverId}/labels/{key}                                   | Modify a Label of Server                                                                                                          |
+| *LabelApi*               | [**DatacentersVolumesLabelsDelete**](docs/api/LabelApi.md#datacentersvolumeslabelsdelete)                                          | **Delete** /datacenters/{datacenterId}/volumes/{volumeId}/labels/{key}                                | Delete a Label from Volume                                                                                                        |
+| *LabelApi*               | [**DatacentersVolumesLabelsFindByKey**](docs/api/LabelApi.md#datacentersvolumeslabelsfindbykey)                                    | **Get** /datacenters/{datacenterId}/volumes/{volumeId}/labels/{key}                                   | Retrieve a Label of Volume                                                                                                        |
+| *LabelApi*               | [**DatacentersVolumesLabelsGet**](docs/api/LabelApi.md#datacentersvolumeslabelsget)                                                | **Get** /datacenters/{datacenterId}/volumes/{volumeId}/labels                                         | List all Volume Labels                                                                                                            |
+| *LabelApi*               | [**DatacentersVolumesLabelsPost**](docs/api/LabelApi.md#datacentersvolumeslabelspost)                                              | **Post** /datacenters/{datacenterId}/volumes/{volumeId}/labels                                        | Add a Label to Volume                                                                                                             |
+| *LabelApi*               | [**DatacentersVolumesLabelsPut**](docs/api/LabelApi.md#datacentersvolumeslabelsput)                                                | **Put** /datacenters/{datacenterId}/volumes/{volumeId}/labels/{key}                                   | Modify a Label of Volume                                                                                                          |
+| *LabelApi*               | [**IpblocksLabelsDelete**](docs/api/LabelApi.md#ipblockslabelsdelete)                                                              | **Delete** /ipblocks/{ipblockId}/labels/{key}                                                         | Delete a Label from IP Block                                                                                                      |
+| *LabelApi*               | [**IpblocksLabelsFindByKey**](docs/api/LabelApi.md#ipblockslabelsfindbykey)                                                        | **Get** /ipblocks/{ipblockId}/labels/{key}                                                            | Retrieve a Label of IP Block                                                                                                      |
+| *LabelApi*               | [**IpblocksLabelsGet**](docs/api/LabelApi.md#ipblockslabelsget)                                                                    | **Get** /ipblocks/{ipblockId}/labels                                                                  | List all Ip Block Labels                                                                                                          |
+| *LabelApi*               | [**IpblocksLabelsPost**](docs/api/LabelApi.md#ipblockslabelspost)                                                                  | **Post** /ipblocks/{ipblockId}/labels                                                                 | Add a Label to IP Block                                                                                                           |
+| *LabelApi*               | [**IpblocksLabelsPut**](docs/api/LabelApi.md#ipblockslabelsput)                                                                    | **Put** /ipblocks/{ipblockId}/labels/{key}                                                            | Modify a Label of IP Block                                                                                                        |
+| *LabelApi*               | [**LabelsFindByUrn**](docs/api/LabelApi.md#labelsfindbyurn)                                                                        | **Get** /labels/{labelurn}                                                                            | Returns the label by its URN.                                                                                                     |
+| *LabelApi*               | [**LabelsGet**](docs/api/LabelApi.md#labelsget)                                                                                    | **Get** /labels                                                                                       | List Labels                                                                                                                       |
+| *LabelApi*               | [**SnapshotsLabelsDelete**](docs/api/LabelApi.md#snapshotslabelsdelete)                                                            | **Delete** /snapshots/{snapshotId}/labels/{key}                                                       | Delete a Label from Snapshot                                                                                                      |
+| *LabelApi*               | [**SnapshotsLabelsFindByKey**](docs/api/LabelApi.md#snapshotslabelsfindbykey)                                                      | **Get** /snapshots/{snapshotId}/labels/{key}                                                          | Retrieve a Label of Snapshot                                                                                                      |
+| *LabelApi*               | [**SnapshotsLabelsGet**](docs/api/LabelApi.md#snapshotslabelsget)                                                                  | **Get** /snapshots/{snapshotId}/labels                                                                | List all Snapshot Labels                                                                                                          |
+| *LabelApi*               | [**SnapshotsLabelsPost**](docs/api/LabelApi.md#snapshotslabelspost)                                                                | **Post** /snapshots/{snapshotId}/labels                                                               | Add a Label to Snapshot                                                                                                           |
+| *LabelApi*               | [**SnapshotsLabelsPut**](docs/api/LabelApi.md#snapshotslabelsput)                                                                  | **Put** /snapshots/{snapshotId}/labels/{key}                                                          | Modify a Label of Snapshot                                                                                                        |
+| *LanApi*                 | [**DatacentersLansDelete**](docs/api/LanApi.md#datacenterslansdelete)                                                              | **Delete** /datacenters/{datacenterId}/lans/{lanId}                                                   | Delete a Lan.                                                                                                                     |
+| *LanApi*                 | [**DatacentersLansFindById**](docs/api/LanApi.md#datacenterslansfindbyid)                                                          | **Get** /datacenters/{datacenterId}/lans/{lanId}                                                      | Retrieve a Lan                                                                                                                    |
+| *LanApi*                 | [**DatacentersLansGet**](docs/api/LanApi.md#datacenterslansget)                                                                    | **Get** /datacenters/{datacenterId}/lans                                                              | List Lans                                                                                                                         |
+| *LanApi*                 | [**DatacentersLansNicsFindById**](docs/api/LanApi.md#datacenterslansnicsfindbyid)                                                  | **Get** /datacenters/{datacenterId}/lans/{lanId}/nics/{nicId}                                         | Retrieve a nic attached to lan                                                                                                    |
+| *LanApi*                 | [**DatacentersLansNicsGet**](docs/api/LanApi.md#datacenterslansnicsget)                                                            | **Get** /datacenters/{datacenterId}/lans/{lanId}/nics                                                 | List Lan Members                                                                                                                  |
+| *LanApi*                 | [**DatacentersLansNicsPost**](docs/api/LanApi.md#datacenterslansnicspost)                                                          | **Post** /datacenters/{datacenterId}/lans/{lanId}/nics                                                | Attach a nic                                                                                                                      |
+| *LanApi*                 | [**DatacentersLansPatch**](docs/api/LanApi.md#datacenterslanspatch)                                                                | **Patch** /datacenters/{datacenterId}/lans/{lanId}                                                    | Partially modify a Lan                                                                                                            |
+| *LanApi*                 | [**DatacentersLansPost**](docs/api/LanApi.md#datacenterslanspost)                                                                  | **Post** /datacenters/{datacenterId}/lans                                                             | Create a Lan                                                                                                                      |
+| *LanApi*                 | [**DatacentersLansPut**](docs/api/LanApi.md#datacenterslansput)                                                                    | **Put** /datacenters/{datacenterId}/lans/{lanId}                                                      | Modify a Lan                                                                                                                      |
+| *LoadBalancerApi*        | [**DatacentersLoadbalancersBalancednicsDelete**](docs/api/LoadBalancerApi.md#datacentersloadbalancersbalancednicsdelete)           | **Delete** /datacenters/{datacenterId}/loadbalancers/{loadbalancerId}/balancednics/{nicId}            | Detach a nic from loadbalancer                                                                                                    |
+| *LoadBalancerApi*        | [**DatacentersLoadbalancersBalancednicsFindByNicId**](docs/api/LoadBalancerApi.md#datacentersloadbalancersbalancednicsfindbynicid) | **Get** /datacenters/{datacenterId}/loadbalancers/{loadbalancerId}/balancednics/{nicId}               | Retrieve a nic attached to Load Balancer                                                                                          |
+| *LoadBalancerApi*        | [**DatacentersLoadbalancersBalancednicsGet**](docs/api/LoadBalancerApi.md#datacentersloadbalancersbalancednicsget)                 | **Get** /datacenters/{datacenterId}/loadbalancers/{loadbalancerId}/balancednics                       | List Load Balancer Members                                                                                                        |
+| *LoadBalancerApi*        | [**DatacentersLoadbalancersBalancednicsPost**](docs/api/LoadBalancerApi.md#datacentersloadbalancersbalancednicspost)               | **Post** /datacenters/{datacenterId}/loadbalancers/{loadbalancerId}/balancednics                      | Attach a nic to Load Balancer                                                                                                     |
+| *LoadBalancerApi*        | [**DatacentersLoadbalancersDelete**](docs/api/LoadBalancerApi.md#datacentersloadbalancersdelete)                                   | **Delete** /datacenters/{datacenterId}/loadbalancers/{loadbalancerId}                                 | Delete a Loadbalancer.                                                                                                            |
+| *LoadBalancerApi*        | [**DatacentersLoadbalancersFindById**](docs/api/LoadBalancerApi.md#datacentersloadbalancersfindbyid)                               | **Get** /datacenters/{datacenterId}/loadbalancers/{loadbalancerId}                                    | Retrieve a loadbalancer                                                                                                           |
+| *LoadBalancerApi*        | [**DatacentersLoadbalancersGet**](docs/api/LoadBalancerApi.md#datacentersloadbalancersget)                                         | **Get** /datacenters/{datacenterId}/loadbalancers                                                     | List Load Balancers                                                                                                               |
+| *LoadBalancerApi*        | [**DatacentersLoadbalancersPatch**](docs/api/LoadBalancerApi.md#datacentersloadbalancerspatch)                                     | **Patch** /datacenters/{datacenterId}/loadbalancers/{loadbalancerId}                                  | Partially modify a Loadbalancer                                                                                                   |
+| *LoadBalancerApi*        | [**DatacentersLoadbalancersPost**](docs/api/LoadBalancerApi.md#datacentersloadbalancerspost)                                       | **Post** /datacenters/{datacenterId}/loadbalancers                                                    | Create a Load Balancer                                                                                                            |
+| *LoadBalancerApi*        | [**DatacentersLoadbalancersPut**](docs/api/LoadBalancerApi.md#datacentersloadbalancersput)                                         | **Put** /datacenters/{datacenterId}/loadbalancers/{loadbalancerId}                                    | Modify a Load Balancer                                                                                                            |
+| *LocationApi*            | [**LocationsFindByRegionId**](docs/api/LocationApi.md#locationsfindbyregionid)                                                     | **Get** /locations/{regionId}                                                                         | List Locations within a region                                                                                                    |
+| *LocationApi*            | [**LocationsFindByRegionIdAndId**](docs/api/LocationApi.md#locationsfindbyregionidandid)                                           | **Get** /locations/{regionId}/{locationId}                                                            | Retrieve a Location                                                                                                               |
+| *LocationApi*            | [**LocationsGet**](docs/api/LocationApi.md#locationsget)                                                                           | **Get** /locations                                                                                    | List Locations                                                                                                                    |
+| *NicApi*                 | [**DatacentersServersNicsDelete**](docs/api/NicApi.md#datacentersserversnicsdelete)                                                | **Delete** /datacenters/{datacenterId}/servers/{serverId}/nics/{nicId}                                | Delete a Nic                                                                                                                      |
+| *NicApi*                 | [**DatacentersServersNicsFindById**](docs/api/NicApi.md#datacentersserversnicsfindbyid)                                            | **Get** /datacenters/{datacenterId}/servers/{serverId}/nics/{nicId}                                   | Retrieve a Nic                                                                                                                    |
+| *NicApi*                 | [**DatacentersServersNicsFirewallrulesDelete**](docs/api/NicApi.md#datacentersserversnicsfirewallrulesdelete)                      | **Delete** /datacenters/{datacenterId}/servers/{serverId}/nics/{nicId}/firewallrules/{firewallruleId} | Delete a Firewall Rule                                                                                                            |
+| *NicApi*                 | [**DatacentersServersNicsFirewallrulesFindById**](docs/api/NicApi.md#datacentersserversnicsfirewallrulesfindbyid)                  | **Get** /datacenters/{datacenterId}/servers/{serverId}/nics/{nicId}/firewallrules/{firewallruleId}    | Retrieve a Firewall Rule                                                                                                          |
+| *NicApi*                 | [**DatacentersServersNicsFirewallrulesGet**](docs/api/NicApi.md#datacentersserversnicsfirewallrulesget)                            | **Get** /datacenters/{datacenterId}/servers/{serverId}/nics/{nicId}/firewallrules                     | List Firewall Rules                                                                                                               |
+| *NicApi*                 | [**DatacentersServersNicsFirewallrulesPatch**](docs/api/NicApi.md#datacentersserversnicsfirewallrulespatch)                        | **Patch** /datacenters/{datacenterId}/servers/{serverId}/nics/{nicId}/firewallrules/{firewallruleId}  | Partially modify a Firewall Rule                                                                                                  |
+| *NicApi*                 | [**DatacentersServersNicsFirewallrulesPost**](docs/api/NicApi.md#datacentersserversnicsfirewallrulespost)                          | **Post** /datacenters/{datacenterId}/servers/{serverId}/nics/{nicId}/firewallrules                    | Create a Firewall Rule                                                                                                            |
+| *NicApi*                 | [**DatacentersServersNicsFirewallrulesPut**](docs/api/NicApi.md#datacentersserversnicsfirewallrulesput)                            | **Put** /datacenters/{datacenterId}/servers/{serverId}/nics/{nicId}/firewallrules/{firewallruleId}    | Modify a Firewall Rule                                                                                                            |
+| *NicApi*                 | [**DatacentersServersNicsGet**](docs/api/NicApi.md#datacentersserversnicsget)                                                      | **Get** /datacenters/{datacenterId}/servers/{serverId}/nics                                           | List Nics                                                                                                                         |
+| *NicApi*                 | [**DatacentersServersNicsPatch**](docs/api/NicApi.md#datacentersserversnicspatch)                                                  | **Patch** /datacenters/{datacenterId}/servers/{serverId}/nics/{nicId}                                 | Partially modify a Nic                                                                                                            |
+| *NicApi*                 | [**DatacentersServersNicsPost**](docs/api/NicApi.md#datacentersserversnicspost)                                                    | **Post** /datacenters/{datacenterId}/servers/{serverId}/nics                                          | Create a Nic                                                                                                                      |
+| *NicApi*                 | [**DatacentersServersNicsPut**](docs/api/NicApi.md#datacentersserversnicsput)                                                      | **Put** /datacenters/{datacenterId}/servers/{serverId}/nics/{nicId}                                   | Modify a Nic                                                                                                                      |
+| *PrivateCrossConnectApi* | [**PccsDelete**](docs/api/PrivateCrossConnectApi.md#pccsdelete)                                                                    | **Delete** /pccs/{pccId}                                                                              | Delete a Private Cross-Connect                                                                                                    |
+| *PrivateCrossConnectApi* | [**PccsFindById**](docs/api/PrivateCrossConnectApi.md#pccsfindbyid)                                                                | **Get** /pccs/{pccId}                                                                                 | Retrieve a Private Cross-Connect                                                                                                  |
+| *PrivateCrossConnectApi* | [**PccsGet**](docs/api/PrivateCrossConnectApi.md#pccsget)                                                                          | **Get** /pccs                                                                                         | List Private Cross-Connects                                                                                                       |
+| *PrivateCrossConnectApi* | [**PccsPatch**](docs/api/PrivateCrossConnectApi.md#pccspatch)                                                                      | **Patch** /pccs/{pccId}                                                                               | Partially modify a private cross-connect                                                                                          |
+| *PrivateCrossConnectApi* | [**PccsPost**](docs/api/PrivateCrossConnectApi.md#pccspost)                                                                        | **Post** /pccs                                                                                        | Create a Private Cross-Connect                                                                                                    |
+| *RequestApi*             | [**RequestsFindById**](docs/api/RequestApi.md#requestsfindbyid)                                                                    | **Get** /requests/{requestId}                                                                         | Retrieve a Request                                                                                                                |
+| *RequestApi*             | [**RequestsGet**](docs/api/RequestApi.md#requestsget)                                                                              | **Get** /requests                                                                                     | List Requests                                                                                                                     |
+| *RequestApi*             | [**RequestsStatusGet**](docs/api/RequestApi.md#requestsstatusget)                                                                  | **Get** /requests/{requestId}/status                                                                  | Retrieve Request Status                                                                                                           |
+| *ServerApi*              | [**DatacentersServersCdromsDelete**](docs/api/ServerApi.md#datacentersserverscdromsdelete)                                         | **Delete** /datacenters/{datacenterId}/servers/{serverId}/cdroms/{cdromId}                            | Detach a CD-ROM                                                                                                                   |
+| *ServerApi*              | [**DatacentersServersCdromsFindById**](docs/api/ServerApi.md#datacentersserverscdromsfindbyid)                                     | **Get** /datacenters/{datacenterId}/servers/{serverId}/cdroms/{cdromId}                               | Retrieve an attached CD-ROM                                                                                                       |
+| *ServerApi*              | [**DatacentersServersCdromsGet**](docs/api/ServerApi.md#datacentersserverscdromsget)                                               | **Get** /datacenters/{datacenterId}/servers/{serverId}/cdroms                                         | List attached CD-ROMs                                                                                                             |
+| *ServerApi*              | [**DatacentersServersCdromsPost**](docs/api/ServerApi.md#datacentersserverscdromspost)                                             | **Post** /datacenters/{datacenterId}/servers/{serverId}/cdroms                                        | Attach a CD-ROM                                                                                                                   |
+| *ServerApi*              | [**DatacentersServersDelete**](docs/api/ServerApi.md#datacentersserversdelete)                                                     | **Delete** /datacenters/{datacenterId}/servers/{serverId}                                             | Delete a Server                                                                                                                   |
+| *ServerApi*              | [**DatacentersServersFindById**](docs/api/ServerApi.md#datacentersserversfindbyid)                                                 | **Get** /datacenters/{datacenterId}/servers/{serverId}                                                | Retrieve a Server                                                                                                                 |
+| *ServerApi*              | [**DatacentersServersGet**](docs/api/ServerApi.md#datacentersserversget)                                                           | **Get** /datacenters/{datacenterId}/servers                                                           | List Servers                                                                                                                      |
+| *ServerApi*              | [**DatacentersServersPatch**](docs/api/ServerApi.md#datacentersserverspatch)                                                       | **Patch** /datacenters/{datacenterId}/servers/{serverId}                                              | Partially modify a Server                                                                                                         |
+| *ServerApi*              | [**DatacentersServersPost**](docs/api/ServerApi.md#datacentersserverspost)                                                         | **Post** /datacenters/{datacenterId}/servers                                                          | Create a Server                                                                                                                   |
+| *ServerApi*              | [**DatacentersServersPut**](docs/api/ServerApi.md#datacentersserversput)                                                           | **Put** /datacenters/{datacenterId}/servers/{serverId}                                                | Modify a Server                                                                                                                   |
+| *ServerApi*              | [**DatacentersServersRebootPost**](docs/api/ServerApi.md#datacentersserversrebootpost)                                             | **Post** /datacenters/{datacenterId}/servers/{serverId}/reboot                                        | Reboot a Server                                                                                                                   |
+| *ServerApi*              | [**DatacentersServersStartPost**](docs/api/ServerApi.md#datacentersserversstartpost)                                               | **Post** /datacenters/{datacenterId}/servers/{serverId}/start                                         | Start a Server                                                                                                                    |
+| *ServerApi*              | [**DatacentersServersStopPost**](docs/api/ServerApi.md#datacentersserversstoppost)                                                 | **Post** /datacenters/{datacenterId}/servers/{serverId}/stop                                          | Stop a Server                                                                                                                     |
+| *ServerApi*              | [**DatacentersServersUpgradePost**](docs/api/ServerApi.md#datacentersserversupgradepost)                                           | **Post** /datacenters/{datacenterId}/servers/{serverId}/upgrade                                       | Upgrade a Server                                                                                                                  |
+| *ServerApi*              | [**DatacentersServersVolumesDelete**](docs/api/ServerApi.md#datacentersserversvolumesdelete)                                       | **Delete** /datacenters/{datacenterId}/servers/{serverId}/volumes/{volumeId}                          | Detach a volume                                                                                                                   |
+| *ServerApi*              | [**DatacentersServersVolumesFindById**](docs/api/ServerApi.md#datacentersserversvolumesfindbyid)                                   | **Get** /datacenters/{datacenterId}/servers/{serverId}/volumes/{volumeId}                             | Retrieve an attached volume                                                                                                       |
+| *ServerApi*              | [**DatacentersServersVolumesGet**](docs/api/ServerApi.md#datacentersserversvolumesget)                                             | **Get** /datacenters/{datacenterId}/servers/{serverId}/volumes                                        | List Attached Volumes                                                                                                             |
+| *ServerApi*              | [**DatacentersServersVolumesPost**](docs/api/ServerApi.md#datacentersserversvolumespost)                                           | **Post** /datacenters/{datacenterId}/servers/{serverId}/volumes                                       | Attach a volume                                                                                                                   |
+| *SnapshotApi*            | [**SnapshotsDelete**](docs/api/SnapshotApi.md#snapshotsdelete)                                                                     | **Delete** /snapshots/{snapshotId}                                                                    | Delete a Snapshot                                                                                                                 |
+| *SnapshotApi*            | [**SnapshotsFindById**](docs/api/SnapshotApi.md#snapshotsfindbyid)                                                                 | **Get** /snapshots/{snapshotId}                                                                       | Retrieve a Snapshot by its uuid.                                                                                                  |
+| *SnapshotApi*            | [**SnapshotsGet**](docs/api/SnapshotApi.md#snapshotsget)                                                                           | **Get** /snapshots                                                                                    | List Snapshots                                                                                                                    |
+| *SnapshotApi*            | [**SnapshotsPatch**](docs/api/SnapshotApi.md#snapshotspatch)                                                                       | **Patch** /snapshots/{snapshotId}                                                                     | Partially modify a Snapshot                                                                                                       |
+| *SnapshotApi*            | [**SnapshotsPut**](docs/api/SnapshotApi.md#snapshotsput)                                                                           | **Put** /snapshots/{snapshotId}                                                                       | Modify a Snapshot                                                                                                                 |
+| *UserManagementApi*      | [**UmGroupsDelete**](docs/api/UserManagementApi.md#umgroupsdelete)                                                                 | **Delete** /um/groups/{groupId}                                                                       | Delete a Group                                                                                                                    |
+| *UserManagementApi*      | [**UmGroupsFindById**](docs/api/UserManagementApi.md#umgroupsfindbyid)                                                             | **Get** /um/groups/{groupId}                                                                          | Retrieve a Group                                                                                                                  |
+| *UserManagementApi*      | [**UmGroupsGet**](docs/api/UserManagementApi.md#umgroupsget)                                                                       | **Get** /um/groups                                                                                    | List All Groups.                                                                                                                  |
+| *UserManagementApi*      | [**UmGroupsPost**](docs/api/UserManagementApi.md#umgroupspost)                                                                     | **Post** /um/groups                                                                                   | Create a Group                                                                                                                    |
+| *UserManagementApi*      | [**UmGroupsPut**](docs/api/UserManagementApi.md#umgroupsput)                                                                       | **Put** /um/groups/{groupId}                                                                          | Modify a group                                                                                                                    |
+| *UserManagementApi*      | [**UmGroupsResourcesGet**](docs/api/UserManagementApi.md#umgroupsresourcesget)                                                     | **Get** /um/groups/{groupId}/resources                                                                | Retrieve resources assigned to a group                                                                                            |
+| *UserManagementApi*      | [**UmGroupsSharesDelete**](docs/api/UserManagementApi.md#umgroupssharesdelete)                                                     | **Delete** /um/groups/{groupId}/shares/{resourceId}                                                   | Remove a resource from a group                                                                                                    |
+| *UserManagementApi*      | [**UmGroupsSharesFindByResourceId**](docs/api/UserManagementApi.md#umgroupssharesfindbyresourceid)                                 | **Get** /um/groups/{groupId}/shares/{resourceId}                                                      | Retrieve a group share                                                                                                            |
+| *UserManagementApi*      | [**UmGroupsSharesGet**](docs/api/UserManagementApi.md#umgroupssharesget)                                                           | **Get** /um/groups/{groupId}/shares                                                                   | List Group Shares                                                                                                                 |
+| *UserManagementApi*      | [**UmGroupsSharesPost**](docs/api/UserManagementApi.md#umgroupssharespost)                                                         | **Post** /um/groups/{groupId}/shares/{resourceId}                                                     | Add a resource to a group                                                                                                         |
+| *UserManagementApi*      | [**UmGroupsSharesPut**](docs/api/UserManagementApi.md#umgroupssharesput)                                                           | **Put** /um/groups/{groupId}/shares/{resourceId}                                                      | Modify resource permissions of a group                                                                                            |
+| *UserManagementApi*      | [**UmGroupsUsersDelete**](docs/api/UserManagementApi.md#umgroupsusersdelete)                                                       | **Delete** /um/groups/{groupId}/users/{userId}                                                        | Remove a user from a group                                                                                                        |
+| *UserManagementApi*      | [**UmGroupsUsersGet**](docs/api/UserManagementApi.md#umgroupsusersget)                                                             | **Get** /um/groups/{groupId}/users                                                                    | List Group Members                                                                                                                |
+| *UserManagementApi*      | [**UmGroupsUsersPost**](docs/api/UserManagementApi.md#umgroupsuserspost)                                                           | **Post** /um/groups/{groupId}/users                                                                   | Add a user to a group                                                                                                             |
+| *UserManagementApi*      | [**UmResourcesFindByType**](docs/api/UserManagementApi.md#umresourcesfindbytype)                                                   | **Get** /um/resources/{resourceType}                                                                  | Retrieve a list of Resources by type.                                                                                             |
+| *UserManagementApi*      | [**UmResourcesFindByTypeAndId**](docs/api/UserManagementApi.md#umresourcesfindbytypeandid)                                         | **Get** /um/resources/{resourceType}/{resourceId}                                                     | Retrieve a Resource by type.                                                                                                      |
+| *UserManagementApi*      | [**UmResourcesGet**](docs/api/UserManagementApi.md#umresourcesget)                                                                 | **Get** /um/resources                                                                                 | List All Resources.                                                                                                               |
+| *UserManagementApi*      | [**UmUsersDelete**](docs/api/UserManagementApi.md#umusersdelete)                                                                   | **Delete** /um/users/{userId}                                                                         | Delete a User                                                                                                                     |
+| *UserManagementApi*      | [**UmUsersFindById**](docs/api/UserManagementApi.md#umusersfindbyid)                                                               | **Get** /um/users/{userId}                                                                            | Retrieve a User                                                                                                                   |
+| *UserManagementApi*      | [**UmUsersGet**](docs/api/UserManagementApi.md#umusersget)                                                                         | **Get** /um/users                                                                                     | List all Users                                                                                                                    |
+| *UserManagementApi*      | [**UmUsersGroupsGet**](docs/api/UserManagementApi.md#umusersgroupsget)                                                             | **Get** /um/users/{userId}/groups                                                                     | Retrieve a User&#39;s group resources                                                                                             |
+| *UserManagementApi*      | [**UmUsersOwnsGet**](docs/api/UserManagementApi.md#umusersownsget)                                                                 | **Get** /um/users/{userId}/owns                                                                       | Retrieve a User&#39;s own resources                                                                                               |
+| *UserManagementApi*      | [**UmUsersPost**](docs/api/UserManagementApi.md#umuserspost)                                                                       | **Post** /um/users                                                                                    | Create a user                                                                                                                     |
+| *UserManagementApi*      | [**UmUsersPut**](docs/api/UserManagementApi.md#umusersput)                                                                         | **Put** /um/users/{userId}                                                                            | Modify a user                                                                                                                     |
+| *UserManagementApi*      | [**UmUsersS3keysDelete**](docs/api/UserManagementApi.md#umuserss3keysdelete)                                                       | **Delete** /um/users/{userId}/s3keys/{keyId}                                                          | Delete a S3 key                                                                                                                   |
+| *UserManagementApi*      | [**UmUsersS3keysFindByKeyId**](docs/api/UserManagementApi.md#umuserss3keysfindbykeyid)                                             | **Get** /um/users/{userId}/s3keys/{keyId}                                                             | Retrieve given S3 key belonging to the given User                                                                                 |
+| *UserManagementApi*      | [**UmUsersS3keysGet**](docs/api/UserManagementApi.md#umuserss3keysget)                                                             | **Get** /um/users/{userId}/s3keys                                                                     | Retrieve a User&#39;s S3 keys                                                                                                     |
+| *UserManagementApi*      | [**UmUsersS3keysPost**](docs/api/UserManagementApi.md#umuserss3keyspost)                                                           | **Post** /um/users/{userId}/s3keys                                                                    | Create a S3 key for the given user                                                                                                |
+| *UserManagementApi*      | [**UmUsersS3keysPut**](docs/api/UserManagementApi.md#umuserss3keysput)                                                             | **Put** /um/users/{userId}/s3keys/{keyId}                                                             | Modify a S3 key having the given key id                                                                                           |
+| *UserManagementApi*      | [**UmUsersS3ssourlGet**](docs/api/UserManagementApi.md#umuserss3ssourlget)                                                         | **Get** /um/users/{userId}/s3ssourl                                                                   | Retrieve S3 object storage single signon URL for the given user                                                                   |
+| *VolumeApi*              | [**DatacentersVolumesCreateSnapshotPost**](docs/api/VolumeApi.md#datacentersvolumescreatesnapshotpost)                             | **Post** /datacenters/{datacenterId}/volumes/{volumeId}/create-snapshot                               | Create Volume Snapshot                                                                                                            |
+| *VolumeApi*              | [**DatacentersVolumesDelete**](docs/api/VolumeApi.md#datacentersvolumesdelete)                                                     | **Delete** /datacenters/{datacenterId}/volumes/{volumeId}                                             | Delete a Volume                                                                                                                   |
+| *VolumeApi*              | [**DatacentersVolumesFindById**](docs/api/VolumeApi.md#datacentersvolumesfindbyid)                                                 | **Get** /datacenters/{datacenterId}/volumes/{volumeId}                                                | Retrieve a Volume                                                                                                                 |
+| *VolumeApi*              | [**DatacentersVolumesGet**](docs/api/VolumeApi.md#datacentersvolumesget)                                                           | **Get** /datacenters/{datacenterId}/volumes                                                           | List Volumes                                                                                                                      |
+| *VolumeApi*              | [**DatacentersVolumesPatch**](docs/api/VolumeApi.md#datacentersvolumespatch)                                                       | **Patch** /datacenters/{datacenterId}/volumes/{volumeId}                                              | Partially modify a Volume                                                                                                         |
+| *VolumeApi*              | [**DatacentersVolumesPost**](docs/api/VolumeApi.md#datacentersvolumespost)                                                         | **Post** /datacenters/{datacenterId}/volumes                                                          | Create a Volume                                                                                                                   |
+| *VolumeApi*              | [**DatacentersVolumesPut**](docs/api/VolumeApi.md#datacentersvolumesput)                                                           | **Put** /datacenters/{datacenterId}/volumes/{volumeId}                                                | Modify a Volume                                                                                                                   |
+| *VolumeApi*              | [**DatacentersVolumesRestoreSnapshotPost**](docs/api/VolumeApi.md#datacentersvolumesrestoresnapshotpost)                           | **Post** /datacenters/{datacenterId}/volumes/{volumeId}/restore-snapshot                              | Restore Volume Snapshot                                                                                                           |
+</details>
 
 ## Documentation For Models
 
- - [AttachedVolumes](docs/AttachedVolumes.md)
- - [BackupUnit](docs/BackupUnit.md)
- - [BackupUnitProperties](docs/BackupUnitProperties.md)
- - [BackupUnitSSO](docs/BackupUnitSSO.md)
- - [BackupUnits](docs/BackupUnits.md)
- - [BalancedNics](docs/BalancedNics.md)
- - [Cdroms](docs/Cdroms.md)
- - [ConnectableDatacenter](docs/ConnectableDatacenter.md)
- - [Contract](docs/Contract.md)
- - [ContractProperties](docs/ContractProperties.md)
- - [DataCenterEntities](docs/DataCenterEntities.md)
- - [Datacenter](docs/Datacenter.md)
- - [DatacenterElementMetadata](docs/DatacenterElementMetadata.md)
- - [DatacenterProperties](docs/DatacenterProperties.md)
- - [Datacenters](docs/Datacenters.md)
- - [Error](docs/Error.md)
- - [ErrorMessage](docs/ErrorMessage.md)
- - [FirewallRule](docs/FirewallRule.md)
- - [FirewallRules](docs/FirewallRules.md)
- - [FirewallruleProperties](docs/FirewallruleProperties.md)
- - [Group](docs/Group.md)
- - [GroupEntities](docs/GroupEntities.md)
- - [GroupMembers](docs/GroupMembers.md)
- - [GroupProperties](docs/GroupProperties.md)
- - [GroupShare](docs/GroupShare.md)
- - [GroupShareProperties](docs/GroupShareProperties.md)
- - [GroupShares](docs/GroupShares.md)
- - [GroupUsers](docs/GroupUsers.md)
- - [Groups](docs/Groups.md)
- - [IPFailover](docs/IPFailover.md)
- - [Image](docs/Image.md)
- - [ImageProperties](docs/ImageProperties.md)
- - [Images](docs/Images.md)
- - [Info](docs/Info.md)
- - [IpBlock](docs/IpBlock.md)
- - [IpBlockProperties](docs/IpBlockProperties.md)
- - [IpBlocks](docs/IpBlocks.md)
- - [IpConsumer](docs/IpConsumer.md)
- - [KubernetesAutoScaling](docs/KubernetesAutoScaling.md)
- - [KubernetesCluster](docs/KubernetesCluster.md)
- - [KubernetesClusterEntities](docs/KubernetesClusterEntities.md)
- - [KubernetesClusterForPost](docs/KubernetesClusterForPost.md)
- - [KubernetesClusterForPut](docs/KubernetesClusterForPut.md)
- - [KubernetesClusterProperties](docs/KubernetesClusterProperties.md)
- - [KubernetesClusterPropertiesForPost](docs/KubernetesClusterPropertiesForPost.md)
- - [KubernetesClusterPropertiesForPut](docs/KubernetesClusterPropertiesForPut.md)
- - [KubernetesClusters](docs/KubernetesClusters.md)
- - [KubernetesConfig](docs/KubernetesConfig.md)
- - [KubernetesConfigProperties](docs/KubernetesConfigProperties.md)
- - [KubernetesMaintenanceWindow](docs/KubernetesMaintenanceWindow.md)
- - [KubernetesNode](docs/KubernetesNode.md)
- - [KubernetesNodeMetadata](docs/KubernetesNodeMetadata.md)
- - [KubernetesNodePool](docs/KubernetesNodePool.md)
- - [KubernetesNodePoolForPost](docs/KubernetesNodePoolForPost.md)
- - [KubernetesNodePoolForPut](docs/KubernetesNodePoolForPut.md)
- - [KubernetesNodePoolLan](docs/KubernetesNodePoolLan.md)
- - [KubernetesNodePoolProperties](docs/KubernetesNodePoolProperties.md)
- - [KubernetesNodePoolPropertiesForPost](docs/KubernetesNodePoolPropertiesForPost.md)
- - [KubernetesNodePoolPropertiesForPut](docs/KubernetesNodePoolPropertiesForPut.md)
- - [KubernetesNodePools](docs/KubernetesNodePools.md)
- - [KubernetesNodeProperties](docs/KubernetesNodeProperties.md)
- - [KubernetesNodes](docs/KubernetesNodes.md)
- - [Label](docs/Label.md)
- - [LabelProperties](docs/LabelProperties.md)
- - [LabelResource](docs/LabelResource.md)
- - [LabelResourceProperties](docs/LabelResourceProperties.md)
- - [LabelResources](docs/LabelResources.md)
- - [Labels](docs/Labels.md)
- - [Lan](docs/Lan.md)
- - [LanEntities](docs/LanEntities.md)
- - [LanNics](docs/LanNics.md)
- - [LanPost](docs/LanPost.md)
- - [LanProperties](docs/LanProperties.md)
- - [LanPropertiesPost](docs/LanPropertiesPost.md)
- - [Lans](docs/Lans.md)
- - [Loadbalancer](docs/Loadbalancer.md)
- - [LoadbalancerEntities](docs/LoadbalancerEntities.md)
- - [LoadbalancerProperties](docs/LoadbalancerProperties.md)
- - [Loadbalancers](docs/Loadbalancers.md)
- - [Location](docs/Location.md)
- - [LocationProperties](docs/LocationProperties.md)
- - [Locations](docs/Locations.md)
- - [Nic](docs/Nic.md)
- - [NicEntities](docs/NicEntities.md)
- - [NicProperties](docs/NicProperties.md)
- - [Nics](docs/Nics.md)
- - [NoStateMetaData](docs/NoStateMetaData.md)
- - [PaginationLinks](docs/PaginationLinks.md)
- - [Peer](docs/Peer.md)
- - [PrivateCrossConnect](docs/PrivateCrossConnect.md)
- - [PrivateCrossConnectProperties](docs/PrivateCrossConnectProperties.md)
- - [PrivateCrossConnects](docs/PrivateCrossConnects.md)
- - [Request](docs/Request.md)
- - [RequestMetadata](docs/RequestMetadata.md)
- - [RequestProperties](docs/RequestProperties.md)
- - [RequestStatus](docs/RequestStatus.md)
- - [RequestStatusMetadata](docs/RequestStatusMetadata.md)
- - [RequestTarget](docs/RequestTarget.md)
- - [Requests](docs/Requests.md)
- - [Resource](docs/Resource.md)
- - [ResourceEntities](docs/ResourceEntities.md)
- - [ResourceGroups](docs/ResourceGroups.md)
- - [ResourceLimits](docs/ResourceLimits.md)
- - [ResourceProperties](docs/ResourceProperties.md)
- - [ResourceReference](docs/ResourceReference.md)
- - [Resources](docs/Resources.md)
- - [ResourcesUsers](docs/ResourcesUsers.md)
- - [S3Key](docs/S3Key.md)
- - [S3KeyMetadata](docs/S3KeyMetadata.md)
- - [S3KeyProperties](docs/S3KeyProperties.md)
- - [S3Keys](docs/S3Keys.md)
- - [S3ObjectStorageSSO](docs/S3ObjectStorageSSO.md)
- - [Server](docs/Server.md)
- - [ServerEntities](docs/ServerEntities.md)
- - [ServerProperties](docs/ServerProperties.md)
- - [Servers](docs/Servers.md)
- - [Snapshot](docs/Snapshot.md)
- - [SnapshotProperties](docs/SnapshotProperties.md)
- - [Snapshots](docs/Snapshots.md)
- - [Type](docs/Type.md)
- - [User](docs/User.md)
- - [UserMetadata](docs/UserMetadata.md)
- - [UserPost](docs/UserPost.md)
- - [UserProperties](docs/UserProperties.md)
- - [UserPropertiesPost](docs/UserPropertiesPost.md)
- - [UserPropertiesPut](docs/UserPropertiesPut.md)
- - [UserPut](docs/UserPut.md)
- - [Users](docs/Users.md)
- - [UsersEntities](docs/UsersEntities.md)
- - [Volume](docs/Volume.md)
- - [VolumeProperties](docs/VolumeProperties.md)
- - [Volumes](docs/Volumes.md)
+<details >
+<summary title="Click to toggle">API models list</summary>
 
+ - [AttachedVolumes](docs/models/AttachedVolumes.md)
+ - [BackupUnit](docs/models/BackupUnit.md)
+ - [BackupUnitProperties](docs/models/BackupUnitProperties.md)
+ - [BackupUnitSSO](docs/models/BackupUnitSSO.md)
+ - [BackupUnits](docs/models/BackupUnits.md)
+ - [BalancedNics](docs/models/BalancedNics.md)
+ - [Cdroms](docs/models/Cdroms.md)
+ - [ConnectableDatacenter](docs/models/ConnectableDatacenter.md)
+ - [Contract](docs/models/Contract.md)
+ - [ContractProperties](docs/models/ContractProperties.md)
+ - [DataCenterEntities](docs/models/DataCenterEntities.md)
+ - [Datacenter](docs/models/Datacenter.md)
+ - [DatacenterElementMetadata](docs/models/DatacenterElementMetadata.md)
+ - [DatacenterProperties](docs/models/DatacenterProperties.md)
+ - [Datacenters](docs/models/Datacenters.md)
+ - [Error](docs/models/Error.md)
+ - [ErrorMessage](docs/models/ErrorMessage.md)
+ - [FirewallRule](docs/models/FirewallRule.md)
+ - [FirewallRules](docs/models/FirewallRules.md)
+ - [FirewallruleProperties](docs/models/FirewallruleProperties.md)
+ - [Group](docs/models/Group.md)
+ - [GroupEntities](docs/models/GroupEntities.md)
+ - [GroupMembers](docs/models/GroupMembers.md)
+ - [GroupProperties](docs/models/GroupProperties.md)
+ - [GroupShare](docs/models/GroupShare.md)
+ - [GroupShareProperties](docs/models/GroupShareProperties.md)
+ - [GroupShares](docs/models/GroupShares.md)
+ - [GroupUsers](docs/models/GroupUsers.md)
+ - [Groups](docs/models/Groups.md)
+ - [IPFailover](docs/models/IPFailover.md)
+ - [Image](docs/models/Image.md)
+ - [ImageProperties](docs/models/ImageProperties.md)
+ - [Images](docs/models/Images.md)
+ - [Info](docs/models/Info.md)
+ - [IpBlock](docs/models/IpBlock.md)
+ - [IpBlockProperties](docs/models/IpBlockProperties.md)
+ - [IpBlocks](docs/models/IpBlocks.md)
+ - [IpConsumer](docs/models/IpConsumer.md)
+ - [KubernetesAutoScaling](docs/models/KubernetesAutoScaling.md)
+ - [KubernetesCluster](docs/models/KubernetesCluster.md)
+ - [KubernetesClusterEntities](docs/models/KubernetesClusterEntities.md)
+ - [KubernetesClusterForPost](docs/models/KubernetesClusterForPost.md)
+ - [KubernetesClusterForPut](docs/models/KubernetesClusterForPut.md)
+ - [KubernetesClusterProperties](docs/models/KubernetesClusterProperties.md)
+ - [KubernetesClusterPropertiesForPost](docs/models/KubernetesClusterPropertiesForPost.md)
+ - [KubernetesClusterPropertiesForPut](docs/models/KubernetesClusterPropertiesForPut.md)
+ - [KubernetesClusters](docs/models/KubernetesClusters.md)
+ - [KubernetesConfig](docs/models/KubernetesConfig.md)
+ - [KubernetesConfigProperties](docs/models/KubernetesConfigProperties.md)
+ - [KubernetesMaintenanceWindow](docs/models/KubernetesMaintenanceWindow.md)
+ - [KubernetesNode](docs/models/KubernetesNode.md)
+ - [KubernetesNodeMetadata](docs/models/KubernetesNodeMetadata.md)
+ - [KubernetesNodePool](docs/models/KubernetesNodePool.md)
+ - [KubernetesNodePoolForPost](docs/models/KubernetesNodePoolForPost.md)
+ - [KubernetesNodePoolForPut](docs/models/KubernetesNodePoolForPut.md)
+ - [KubernetesNodePoolLan](docs/models/KubernetesNodePoolLan.md)
+ - [KubernetesNodePoolProperties](docs/models/KubernetesNodePoolProperties.md)
+ - [KubernetesNodePoolPropertiesForPost](docs/models/KubernetesNodePoolPropertiesForPost.md)
+ - [KubernetesNodePoolPropertiesForPut](docs/models/KubernetesNodePoolPropertiesForPut.md)
+ - [KubernetesNodePools](docs/models/KubernetesNodePools.md)
+ - [KubernetesNodeProperties](docs/models/KubernetesNodeProperties.md)
+ - [KubernetesNodes](docs/models/KubernetesNodes.md)
+ - [Label](docs/models/Label.md)
+ - [LabelProperties](docs/models/LabelProperties.md)
+ - [LabelResource](docs/models/LabelResource.md)
+ - [LabelResourceProperties](docs/models/LabelResourceProperties.md)
+ - [LabelResources](docs/models/LabelResources.md)
+ - [Labels](docs/models/Labels.md)
+ - [Lan](docs/models/Lan.md)
+ - [LanEntities](docs/models/LanEntities.md)
+ - [LanNics](docs/models/LanNics.md)
+ - [LanPost](docs/models/LanPost.md)
+ - [LanProperties](docs/models/LanProperties.md)
+ - [LanPropertiesPost](docs/models/LanPropertiesPost.md)
+ - [Lans](docs/models/Lans.md)
+ - [Loadbalancer](docs/models/Loadbalancer.md)
+ - [LoadbalancerEntities](docs/models/LoadbalancerEntities.md)
+ - [LoadbalancerProperties](docs/models/LoadbalancerProperties.md)
+ - [Loadbalancers](docs/models/Loadbalancers.md)
+ - [Location](docs/models/Location.md)
+ - [LocationProperties](docs/models/LocationProperties.md)
+ - [Locations](docs/models/Locations.md)
+ - [Nic](docs/models/Nic.md)
+ - [NicEntities](docs/models/NicEntities.md)
+ - [NicProperties](docs/models/NicProperties.md)
+ - [Nics](docs/models/Nics.md)
+ - [NoStateMetaData](docs/models/NoStateMetaData.md)
+ - [PaginationLinks](docs/models/PaginationLinks.md)
+ - [Peer](docs/models/Peer.md)
+ - [PrivateCrossConnect](docs/models/PrivateCrossConnect.md)
+ - [PrivateCrossConnectProperties](docs/models/PrivateCrossConnectProperties.md)
+ - [PrivateCrossConnects](docs/models/PrivateCrossConnects.md)
+ - [Request](docs/models/Request.md)
+ - [RequestMetadata](docs/models/RequestMetadata.md)
+ - [RequestProperties](docs/models/RequestProperties.md)
+ - [RequestStatus](docs/models/RequestStatus.md)
+ - [RequestStatusMetadata](docs/models/RequestStatusMetadata.md)
+ - [RequestTarget](docs/models/RequestTarget.md)
+ - [Requests](docs/models/Requests.md)
+ - [Resource](docs/models/Resource.md)
+ - [ResourceEntities](docs/models/ResourceEntities.md)
+ - [ResourceGroups](docs/models/ResourceGroups.md)
+ - [ResourceLimits](docs/models/ResourceLimits.md)
+ - [ResourceProperties](docs/models/ResourceProperties.md)
+ - [ResourceReference](docs/models/ResourceReference.md)
+ - [Resources](docs/models/Resources.md)
+ - [ResourcesUsers](docs/models/ResourcesUsers.md)
+ - [S3Key](docs/models/S3Key.md)
+ - [S3KeyMetadata](docs/models/S3KeyMetadata.md)
+ - [S3KeyProperties](docs/models/S3KeyProperties.md)
+ - [S3Keys](docs/models/S3Keys.md)
+ - [S3ObjectStorageSSO](docs/models/S3ObjectStorageSSO.md)
+ - [Server](docs/models/Server.md)
+ - [ServerEntities](docs/models/ServerEntities.md)
+ - [ServerProperties](docs/models/ServerProperties.md)
+ - [Servers](docs/models/Servers.md)
+ - [Snapshot](docs/models/Snapshot.md)
+ - [SnapshotProperties](docs/models/SnapshotProperties.md)
+ - [Snapshots](docs/models/Snapshots.md)
+ - [Type](docs/models/Type.md)
+ - [User](docs/models/User.md)
+ - [UserMetadata](docs/models/UserMetadata.md)
+ - [UserPost](docs/models/UserPost.md)
+ - [UserProperties](docs/models/UserProperties.md)
+ - [UserPropertiesPost](docs/models/UserPropertiesPost.md)
+ - [UserPropertiesPut](docs/models/UserPropertiesPut.md)
+ - [UserPut](docs/models/UserPut.md)
+ - [Users](docs/models/Users.md)
+ - [UsersEntities](docs/models/UsersEntities.md)
+ - [Volume](docs/models/Volume.md)
+ - [VolumeProperties](docs/models/VolumeProperties.md)
+ - [Volumes](docs/models/Volumes.md)
+</details>
 
 ## Documentation For Authorization
 
@@ -446,6 +466,28 @@ Each of these functions takes a value of the given basic type and returns a poin
 * `PtrFloat64`
 * `PtrString`
 * `PtrTime`
+
+## Debugging
+
+If you want to see the API call request and response messages, you need to set the Debug field in the Configuration struct:
+
+```golang
+package main
+
+import "github.com/ionos-cloud/sdk-go/v5"
+
+func main() {
+    // create your configuration. replace username, password, token and url with correct values, or use NewConfigurationFromEnv()
+    // if you have set your env variables as explained above
+    cfg := ionoscloud.NewConfiguration("username", "password", "token", "hostUrl")
+    // enable request and response logging
+    cfg.Debug = true
+    // create you api client with the configuration
+    apiClient := ionoscloud.NewAPIClient(cfg)
+}
+```
+
+#### Note: We recommend you only set this field for debugging purposes. Disable it in your production environments because it can log sensitive data. It logs the full request and response without encryption, even for an HTTPS call. Verbose request and response logging can also significantly impact your application’s performance.
 
 ## Author
 

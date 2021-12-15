@@ -195,6 +195,7 @@ type ApiRequestsGetRequest struct {
 	ApiService          *RequestApiService
 	filters             _neturl.Values
 	orderBy             *string
+	maxResults          *int32
 	pretty              *bool
 	depth               *int32
 	xContractNumber     *int32
@@ -291,6 +292,12 @@ func (r ApiRequestsGetRequest) OrderBy(orderBy string) ApiRequestsGetRequest {
 	return r
 }
 
+// MaxResults query param limits the number of results returned.
+func (r ApiRequestsGetRequest) MaxResults(maxResults int32) ApiRequestsGetRequest {
+	r.maxResults = &maxResults
+	return r
+}
+
 func (r ApiRequestsGetRequest) Execute() (Requests, *APIResponse, error) {
 	return r.ApiService.RequestsGetExecute(r)
 }
@@ -381,6 +388,9 @@ func (a *RequestApiService) RequestsGetExecute(r ApiRequestsGetRequest) (Request
 	}
 	if r.orderBy != nil {
 		localVarQueryParams.Add("orderBy", parameterToString(*r.orderBy, ""))
+	}
+	if r.maxResults != nil {
+		localVarQueryParams.Add("maxResults", parameterToString(*r.maxResults, ""))
 	}
 	if len(r.filters) > 0 {
 		for k, v := range r.filters {
@@ -484,6 +494,7 @@ type ApiRequestsStatusGetRequest struct {
 	ApiService      *RequestApiService
 	filters         _neturl.Values
 	orderBy         *string
+	maxResults      *int32
 	requestId       string
 	pretty          *bool
 	depth           *int32
@@ -513,6 +524,12 @@ func (r ApiRequestsStatusGetRequest) Filter(key string, value string) ApiRequest
 // OrderBy query param sorts the results alphanumerically in ascending order based on the specified property.
 func (r ApiRequestsStatusGetRequest) OrderBy(orderBy string) ApiRequestsStatusGetRequest {
 	r.orderBy = &orderBy
+	return r
+}
+
+// MaxResults query param limits the number of results returned.
+func (r ApiRequestsStatusGetRequest) MaxResults(maxResults int32) ApiRequestsStatusGetRequest {
+	r.maxResults = &maxResults
 	return r
 }
 
@@ -570,6 +587,9 @@ func (a *RequestApiService) RequestsStatusGetExecute(r ApiRequestsStatusGetReque
 	}
 	if r.orderBy != nil {
 		localVarQueryParams.Add("orderBy", parameterToString(*r.orderBy, ""))
+	}
+	if r.maxResults != nil {
+		localVarQueryParams.Add("maxResults", parameterToString(*r.maxResults, ""))
 	}
 	if len(r.filters) > 0 {
 		for k, v := range r.filters {

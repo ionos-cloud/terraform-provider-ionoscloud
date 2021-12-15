@@ -358,6 +358,7 @@ type ApiBackupunitsGetRequest struct {
 	ApiService      *BackupUnitApiService
 	filters         _neturl.Values
 	orderBy         *string
+	maxResults      *int32
 	pretty          *bool
 	depth           *int32
 	xContractNumber *int32
@@ -386,6 +387,12 @@ func (r ApiBackupunitsGetRequest) Filter(key string, value string) ApiBackupunit
 // OrderBy query param sorts the results alphanumerically in ascending order based on the specified property.
 func (r ApiBackupunitsGetRequest) OrderBy(orderBy string) ApiBackupunitsGetRequest {
 	r.orderBy = &orderBy
+	return r
+}
+
+// MaxResults query param limits the number of results returned.
+func (r ApiBackupunitsGetRequest) MaxResults(maxResults int32) ApiBackupunitsGetRequest {
+	r.maxResults = &maxResults
 	return r
 }
 
@@ -440,6 +447,9 @@ func (a *BackupUnitApiService) BackupunitsGetExecute(r ApiBackupunitsGetRequest)
 	}
 	if r.orderBy != nil {
 		localVarQueryParams.Add("orderBy", parameterToString(*r.orderBy, ""))
+	}
+	if r.maxResults != nil {
+		localVarQueryParams.Add("maxResults", parameterToString(*r.maxResults, ""))
 	}
 	if len(r.filters) > 0 {
 		for k, v := range r.filters {
@@ -1058,6 +1068,7 @@ type ApiBackupunitsSsourlGetRequest struct {
 	ApiService      *BackupUnitApiService
 	filters         _neturl.Values
 	orderBy         *string
+	maxResults      *int32
 	backupunitId    string
 	pretty          *bool
 	xContractNumber *int32
@@ -1082,6 +1093,12 @@ func (r ApiBackupunitsSsourlGetRequest) Filter(key string, value string) ApiBack
 // OrderBy query param sorts the results alphanumerically in ascending order based on the specified property.
 func (r ApiBackupunitsSsourlGetRequest) OrderBy(orderBy string) ApiBackupunitsSsourlGetRequest {
 	r.orderBy = &orderBy
+	return r
+}
+
+// MaxResults query param limits the number of results returned.
+func (r ApiBackupunitsSsourlGetRequest) MaxResults(maxResults int32) ApiBackupunitsSsourlGetRequest {
+	r.maxResults = &maxResults
 	return r
 }
 
@@ -1136,6 +1153,9 @@ func (a *BackupUnitApiService) BackupunitsSsourlGetExecute(r ApiBackupunitsSsour
 	}
 	if r.orderBy != nil {
 		localVarQueryParams.Add("orderBy", parameterToString(*r.orderBy, ""))
+	}
+	if r.maxResults != nil {
+		localVarQueryParams.Add("maxResults", parameterToString(*r.maxResults, ""))
 	}
 	if len(r.filters) > 0 {
 		for k, v := range r.filters {

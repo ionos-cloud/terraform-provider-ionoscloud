@@ -358,6 +358,7 @@ type ApiIpblocksGetRequest struct {
 	ApiService      *IPBlocksApiService
 	filters         _neturl.Values
 	orderBy         *string
+	maxResults      *int32
 	pretty          *bool
 	depth           *int32
 	xContractNumber *int32
@@ -396,6 +397,12 @@ func (r ApiIpblocksGetRequest) Filter(key string, value string) ApiIpblocksGetRe
 // OrderBy query param sorts the results alphanumerically in ascending order based on the specified property.
 func (r ApiIpblocksGetRequest) OrderBy(orderBy string) ApiIpblocksGetRequest {
 	r.orderBy = &orderBy
+	return r
+}
+
+// MaxResults query param limits the number of results returned.
+func (r ApiIpblocksGetRequest) MaxResults(maxResults int32) ApiIpblocksGetRequest {
+	r.maxResults = &maxResults
 	return r
 }
 
@@ -456,6 +463,9 @@ func (a *IPBlocksApiService) IpblocksGetExecute(r ApiIpblocksGetRequest) (IpBloc
 	}
 	if r.orderBy != nil {
 		localVarQueryParams.Add("orderBy", parameterToString(*r.orderBy, ""))
+	}
+	if r.maxResults != nil {
+		localVarQueryParams.Add("maxResults", parameterToString(*r.maxResults, ""))
 	}
 	if len(r.filters) > 0 {
 		for k, v := range r.filters {
