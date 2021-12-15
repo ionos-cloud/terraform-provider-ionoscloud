@@ -18,10 +18,17 @@ resource "ionoscloud_datacenter" "datacenter_example" {
     name     = "datacenter_example"
     location = "de/fkb"
 }
-resource "ionoscloud_lan" "lan_example" {
+
+resource "ionoscloud_lan" "lan_example_1" {
     datacenter_id    = ionoscloud_datacenter.datacenter_example.id
     public           = false
-    name             = "lan_example"
+    name             = "lan_example_1"
+}
+
+resource "ionoscloud_lan" "lan_example_2" {
+    datacenter_id    = ionoscloud_datacenter.datacenter_example.id
+    public           = false
+    name             = "lan_example_2"
 }
 
 resource "ionoscloud_autoscaling_group" "autoscaling_group_example" {
@@ -54,8 +61,13 @@ resource "ionoscloud_autoscaling_group" "autoscaling_group_example" {
         cpu_family 		  = "INTEL_XEON"
         ram				  = 2048
         nics {
-            lan  		  = ionoscloud_lan.lan_example.id
-            name		  = "nic_example"
+            lan  		  = ionoscloud_lan.lan_example_1.id
+            name		  = "nic_example_1"
+            dhcp 		  = true
+        }
+        nics {
+            lan  		  = ionoscloud_lan.lan_example_2.id
+            name		  = "nic_example_2"
             dhcp 		  = true
         }
         volumes	{
