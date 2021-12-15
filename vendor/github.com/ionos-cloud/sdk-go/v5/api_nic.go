@@ -724,6 +724,7 @@ type ApiDatacentersServersNicsFirewallrulesGetRequest struct {
 	ApiService      *NicApiService
 	filters         _neturl.Values
 	orderBy         *string
+	maxResults      *int32
 	datacenterId    string
 	serverId        string
 	nicId           string
@@ -765,6 +766,12 @@ func (r ApiDatacentersServersNicsFirewallrulesGetRequest) Filter(key string, val
 // OrderBy query param sorts the results alphanumerically in ascending order based on the specified property.
 func (r ApiDatacentersServersNicsFirewallrulesGetRequest) OrderBy(orderBy string) ApiDatacentersServersNicsFirewallrulesGetRequest {
 	r.orderBy = &orderBy
+	return r
+}
+
+// MaxResults query param limits the number of results returned.
+func (r ApiDatacentersServersNicsFirewallrulesGetRequest) MaxResults(maxResults int32) ApiDatacentersServersNicsFirewallrulesGetRequest {
+	r.maxResults = &maxResults
 	return r
 }
 
@@ -834,6 +841,9 @@ func (a *NicApiService) DatacentersServersNicsFirewallrulesGetExecute(r ApiDatac
 	}
 	if r.orderBy != nil {
 		localVarQueryParams.Add("orderBy", parameterToString(*r.orderBy, ""))
+	}
+	if r.maxResults != nil {
+		localVarQueryParams.Add("maxResults", parameterToString(*r.maxResults, ""))
 	}
 	if len(r.filters) > 0 {
 		for k, v := range r.filters {
@@ -1488,6 +1498,7 @@ type ApiDatacentersServersNicsGetRequest struct {
 	ApiService      *NicApiService
 	filters         _neturl.Values
 	orderBy         *string
+	maxResults      *int32
 	datacenterId    string
 	serverId        string
 	pretty          *bool
@@ -1528,6 +1539,12 @@ func (r ApiDatacentersServersNicsGetRequest) Filter(key string, value string) Ap
 // OrderBy query param sorts the results alphanumerically in ascending order based on the specified property.
 func (r ApiDatacentersServersNicsGetRequest) OrderBy(orderBy string) ApiDatacentersServersNicsGetRequest {
 	r.orderBy = &orderBy
+	return r
+}
+
+// MaxResults query param limits the number of results returned.
+func (r ApiDatacentersServersNicsGetRequest) MaxResults(maxResults int32) ApiDatacentersServersNicsGetRequest {
+	r.maxResults = &maxResults
 	return r
 }
 
@@ -1594,6 +1611,9 @@ func (a *NicApiService) DatacentersServersNicsGetExecute(r ApiDatacentersServers
 	}
 	if r.orderBy != nil {
 		localVarQueryParams.Add("orderBy", parameterToString(*r.orderBy, ""))
+	}
+	if r.maxResults != nil {
+		localVarQueryParams.Add("maxResults", parameterToString(*r.maxResults, ""))
 	}
 	if len(r.filters) > 0 {
 		for k, v := range r.filters {

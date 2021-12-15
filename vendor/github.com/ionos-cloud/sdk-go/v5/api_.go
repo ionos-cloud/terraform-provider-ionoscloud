@@ -31,6 +31,7 @@ type ApiApiInfoGetRequest struct {
 	ApiService      *DefaultApiService
 	filters         _neturl.Values
 	orderBy         *string
+	maxResults      *int32
 	pretty          *bool
 	depth           *int32
 	xContractNumber *int32
@@ -59,6 +60,12 @@ func (r ApiApiInfoGetRequest) Filter(key string, value string) ApiApiInfoGetRequ
 // OrderBy query param sorts the results alphanumerically in ascending order based on the specified property.
 func (r ApiApiInfoGetRequest) OrderBy(orderBy string) ApiApiInfoGetRequest {
 	r.orderBy = &orderBy
+	return r
+}
+
+// MaxResults query param limits the number of results returned.
+func (r ApiApiInfoGetRequest) MaxResults(maxResults int32) ApiApiInfoGetRequest {
+	r.maxResults = &maxResults
 	return r
 }
 
@@ -113,6 +120,9 @@ func (a *DefaultApiService) ApiInfoGetExecute(r ApiApiInfoGetRequest) (Info, *AP
 	}
 	if r.orderBy != nil {
 		localVarQueryParams.Add("orderBy", parameterToString(*r.orderBy, ""))
+	}
+	if r.maxResults != nil {
+		localVarQueryParams.Add("maxResults", parameterToString(*r.maxResults, ""))
 	}
 	if len(r.filters) > 0 {
 		for k, v := range r.filters {

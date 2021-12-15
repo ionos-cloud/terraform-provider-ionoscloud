@@ -366,6 +366,7 @@ type ApiDatacentersLabelsGetRequest struct {
 	ApiService      *LabelApiService
 	filters         _neturl.Values
 	orderBy         *string
+	maxResults      *int32
 	datacenterId    string
 	pretty          *bool
 	depth           *int32
@@ -405,6 +406,12 @@ func (r ApiDatacentersLabelsGetRequest) Filter(key string, value string) ApiData
 // OrderBy query param sorts the results alphanumerically in ascending order based on the specified property.
 func (r ApiDatacentersLabelsGetRequest) OrderBy(orderBy string) ApiDatacentersLabelsGetRequest {
 	r.orderBy = &orderBy
+	return r
+}
+
+// MaxResults query param limits the number of results returned.
+func (r ApiDatacentersLabelsGetRequest) MaxResults(maxResults int32) ApiDatacentersLabelsGetRequest {
+	r.maxResults = &maxResults
 	return r
 }
 
@@ -468,6 +475,9 @@ func (a *LabelApiService) DatacentersLabelsGetExecute(r ApiDatacentersLabelsGetR
 	}
 	if r.orderBy != nil {
 		localVarQueryParams.Add("orderBy", parameterToString(*r.orderBy, ""))
+	}
+	if r.maxResults != nil {
+		localVarQueryParams.Add("maxResults", parameterToString(*r.maxResults, ""))
 	}
 	if len(r.filters) > 0 {
 		for k, v := range r.filters {
@@ -1263,6 +1273,7 @@ type ApiDatacentersServersLabelsGetRequest struct {
 	ApiService      *LabelApiService
 	filters         _neturl.Values
 	orderBy         *string
+	maxResults      *int32
 	datacenterId    string
 	serverId        string
 	pretty          *bool
@@ -1303,6 +1314,12 @@ func (r ApiDatacentersServersLabelsGetRequest) Filter(key string, value string) 
 // OrderBy query param sorts the results alphanumerically in ascending order based on the specified property.
 func (r ApiDatacentersServersLabelsGetRequest) OrderBy(orderBy string) ApiDatacentersServersLabelsGetRequest {
 	r.orderBy = &orderBy
+	return r
+}
+
+// MaxResults query param limits the number of results returned.
+func (r ApiDatacentersServersLabelsGetRequest) MaxResults(maxResults int32) ApiDatacentersServersLabelsGetRequest {
+	r.maxResults = &maxResults
 	return r
 }
 
@@ -1369,6 +1386,9 @@ func (a *LabelApiService) DatacentersServersLabelsGetExecute(r ApiDatacentersSer
 	}
 	if r.orderBy != nil {
 		localVarQueryParams.Add("orderBy", parameterToString(*r.orderBy, ""))
+	}
+	if r.maxResults != nil {
+		localVarQueryParams.Add("maxResults", parameterToString(*r.maxResults, ""))
 	}
 	if len(r.filters) > 0 {
 		for k, v := range r.filters {
@@ -2172,6 +2192,7 @@ type ApiDatacentersVolumesLabelsGetRequest struct {
 	ApiService      *LabelApiService
 	filters         _neturl.Values
 	orderBy         *string
+	maxResults      *int32
 	datacenterId    string
 	volumeId        string
 	pretty          *bool
@@ -2212,6 +2233,12 @@ func (r ApiDatacentersVolumesLabelsGetRequest) Filter(key string, value string) 
 // OrderBy query param sorts the results alphanumerically in ascending order based on the specified property.
 func (r ApiDatacentersVolumesLabelsGetRequest) OrderBy(orderBy string) ApiDatacentersVolumesLabelsGetRequest {
 	r.orderBy = &orderBy
+	return r
+}
+
+// MaxResults query param limits the number of results returned.
+func (r ApiDatacentersVolumesLabelsGetRequest) MaxResults(maxResults int32) ApiDatacentersVolumesLabelsGetRequest {
+	r.maxResults = &maxResults
 	return r
 }
 
@@ -2278,6 +2305,9 @@ func (a *LabelApiService) DatacentersVolumesLabelsGetExecute(r ApiDatacentersVol
 	}
 	if r.orderBy != nil {
 		localVarQueryParams.Add("orderBy", parameterToString(*r.orderBy, ""))
+	}
+	if r.maxResults != nil {
+		localVarQueryParams.Add("maxResults", parameterToString(*r.maxResults, ""))
 	}
 	if len(r.filters) > 0 {
 		for k, v := range r.filters {
@@ -3073,6 +3103,7 @@ type ApiIpblocksLabelsGetRequest struct {
 	ApiService      *LabelApiService
 	filters         _neturl.Values
 	orderBy         *string
+	maxResults      *int32
 	ipblockId       string
 	pretty          *bool
 	depth           *int32
@@ -3102,6 +3133,12 @@ func (r ApiIpblocksLabelsGetRequest) Filter(key string, value string) ApiIpblock
 // OrderBy query param sorts the results alphanumerically in ascending order based on the specified property.
 func (r ApiIpblocksLabelsGetRequest) OrderBy(orderBy string) ApiIpblocksLabelsGetRequest {
 	r.orderBy = &orderBy
+	return r
+}
+
+// MaxResults query param limits the number of results returned.
+func (r ApiIpblocksLabelsGetRequest) MaxResults(maxResults int32) ApiIpblocksLabelsGetRequest {
+	r.maxResults = &maxResults
 	return r
 }
 
@@ -3159,6 +3196,9 @@ func (a *LabelApiService) IpblocksLabelsGetExecute(r ApiIpblocksLabelsGetRequest
 	}
 	if r.orderBy != nil {
 		localVarQueryParams.Add("orderBy", parameterToString(*r.orderBy, ""))
+	}
+	if r.maxResults != nil {
+		localVarQueryParams.Add("maxResults", parameterToString(*r.maxResults, ""))
 	}
 	if len(r.filters) > 0 {
 		for k, v := range r.filters {
@@ -3775,6 +3815,7 @@ type ApiLabelsGetRequest struct {
 	ApiService      *LabelApiService
 	filters         _neturl.Values
 	orderBy         *string
+	maxResults      *int32
 	pretty          *bool
 	depth           *int32
 	xContractNumber *int32
@@ -3803,6 +3844,12 @@ func (r ApiLabelsGetRequest) Filter(key string, value string) ApiLabelsGetReques
 // OrderBy query param sorts the results alphanumerically in ascending order based on the specified property.
 func (r ApiLabelsGetRequest) OrderBy(orderBy string) ApiLabelsGetRequest {
 	r.orderBy = &orderBy
+	return r
+}
+
+// MaxResults query param limits the number of results returned.
+func (r ApiLabelsGetRequest) MaxResults(maxResults int32) ApiLabelsGetRequest {
+	r.maxResults = &maxResults
 	return r
 }
 
@@ -3857,6 +3904,9 @@ func (a *LabelApiService) LabelsGetExecute(r ApiLabelsGetRequest) (Labels, *APIR
 	}
 	if r.orderBy != nil {
 		localVarQueryParams.Add("orderBy", parameterToString(*r.orderBy, ""))
+	}
+	if r.maxResults != nil {
+		localVarQueryParams.Add("maxResults", parameterToString(*r.maxResults, ""))
 	}
 	if len(r.filters) > 0 {
 		for k, v := range r.filters {
@@ -4294,6 +4344,7 @@ type ApiSnapshotsLabelsGetRequest struct {
 	ApiService      *LabelApiService
 	filters         _neturl.Values
 	orderBy         *string
+	maxResults      *int32
 	snapshotId      string
 	pretty          *bool
 	depth           *int32
@@ -4323,6 +4374,12 @@ func (r ApiSnapshotsLabelsGetRequest) Filter(key string, value string) ApiSnapsh
 // OrderBy query param sorts the results alphanumerically in ascending order based on the specified property.
 func (r ApiSnapshotsLabelsGetRequest) OrderBy(orderBy string) ApiSnapshotsLabelsGetRequest {
 	r.orderBy = &orderBy
+	return r
+}
+
+// MaxResults query param limits the number of results returned.
+func (r ApiSnapshotsLabelsGetRequest) MaxResults(maxResults int32) ApiSnapshotsLabelsGetRequest {
+	r.maxResults = &maxResults
 	return r
 }
 
@@ -4380,6 +4437,9 @@ func (a *LabelApiService) SnapshotsLabelsGetExecute(r ApiSnapshotsLabelsGetReque
 	}
 	if r.orderBy != nil {
 		localVarQueryParams.Add("orderBy", parameterToString(*r.orderBy, ""))
+	}
+	if r.maxResults != nil {
+		localVarQueryParams.Add("maxResults", parameterToString(*r.maxResults, ""))
 	}
 	if len(r.filters) > 0 {
 		for k, v := range r.filters {

@@ -358,6 +358,7 @@ type ApiUmGroupsGetRequest struct {
 	ApiService      *UserManagementApiService
 	filters         _neturl.Values
 	orderBy         *string
+	maxResults      *int32
 	pretty          *bool
 	depth           *int32
 	xContractNumber *int32
@@ -386,6 +387,12 @@ func (r ApiUmGroupsGetRequest) Filter(key string, value string) ApiUmGroupsGetRe
 // OrderBy query param sorts the results alphanumerically in ascending order based on the specified property.
 func (r ApiUmGroupsGetRequest) OrderBy(orderBy string) ApiUmGroupsGetRequest {
 	r.orderBy = &orderBy
+	return r
+}
+
+// MaxResults query param limits the number of results returned.
+func (r ApiUmGroupsGetRequest) MaxResults(maxResults int32) ApiUmGroupsGetRequest {
+	r.maxResults = &maxResults
 	return r
 }
 
@@ -440,6 +447,9 @@ func (a *UserManagementApiService) UmGroupsGetExecute(r ApiUmGroupsGetRequest) (
 	}
 	if r.orderBy != nil {
 		localVarQueryParams.Add("orderBy", parameterToString(*r.orderBy, ""))
+	}
+	if r.maxResults != nil {
+		localVarQueryParams.Add("maxResults", parameterToString(*r.maxResults, ""))
 	}
 	if len(r.filters) > 0 {
 		for k, v := range r.filters {
@@ -885,6 +895,7 @@ type ApiUmGroupsResourcesGetRequest struct {
 	ApiService      *UserManagementApiService
 	filters         _neturl.Values
 	orderBy         *string
+	maxResults      *int32
 	groupId         string
 	pretty          *bool
 	depth           *int32
@@ -914,6 +925,12 @@ func (r ApiUmGroupsResourcesGetRequest) Filter(key string, value string) ApiUmGr
 // OrderBy query param sorts the results alphanumerically in ascending order based on the specified property.
 func (r ApiUmGroupsResourcesGetRequest) OrderBy(orderBy string) ApiUmGroupsResourcesGetRequest {
 	r.orderBy = &orderBy
+	return r
+}
+
+// MaxResults query param limits the number of results returned.
+func (r ApiUmGroupsResourcesGetRequest) MaxResults(maxResults int32) ApiUmGroupsResourcesGetRequest {
+	r.maxResults = &maxResults
 	return r
 }
 
@@ -970,6 +987,9 @@ func (a *UserManagementApiService) UmGroupsResourcesGetExecute(r ApiUmGroupsReso
 	}
 	if r.orderBy != nil {
 		localVarQueryParams.Add("orderBy", parameterToString(*r.orderBy, ""))
+	}
+	if r.maxResults != nil {
+		localVarQueryParams.Add("maxResults", parameterToString(*r.maxResults, ""))
 	}
 	if len(r.filters) > 0 {
 		for k, v := range r.filters {
@@ -1407,6 +1427,7 @@ type ApiUmGroupsSharesGetRequest struct {
 	ApiService      *UserManagementApiService
 	filters         _neturl.Values
 	orderBy         *string
+	maxResults      *int32
 	groupId         string
 	pretty          *bool
 	depth           *int32
@@ -1436,6 +1457,12 @@ func (r ApiUmGroupsSharesGetRequest) Filter(key string, value string) ApiUmGroup
 // OrderBy query param sorts the results alphanumerically in ascending order based on the specified property.
 func (r ApiUmGroupsSharesGetRequest) OrderBy(orderBy string) ApiUmGroupsSharesGetRequest {
 	r.orderBy = &orderBy
+	return r
+}
+
+// MaxResults query param limits the number of results returned.
+func (r ApiUmGroupsSharesGetRequest) MaxResults(maxResults int32) ApiUmGroupsSharesGetRequest {
+	r.maxResults = &maxResults
 	return r
 }
 
@@ -1493,6 +1520,9 @@ func (a *UserManagementApiService) UmGroupsSharesGetExecute(r ApiUmGroupsSharesG
 	}
 	if r.orderBy != nil {
 		localVarQueryParams.Add("orderBy", parameterToString(*r.orderBy, ""))
+	}
+	if r.maxResults != nil {
+		localVarQueryParams.Add("maxResults", parameterToString(*r.maxResults, ""))
 	}
 	if len(r.filters) > 0 {
 		for k, v := range r.filters {
@@ -2117,6 +2147,7 @@ type ApiUmGroupsUsersGetRequest struct {
 	ApiService      *UserManagementApiService
 	filters         _neturl.Values
 	orderBy         *string
+	maxResults      *int32
 	groupId         string
 	pretty          *bool
 	depth           *int32
@@ -2146,6 +2177,12 @@ func (r ApiUmGroupsUsersGetRequest) Filter(key string, value string) ApiUmGroups
 // OrderBy query param sorts the results alphanumerically in ascending order based on the specified property.
 func (r ApiUmGroupsUsersGetRequest) OrderBy(orderBy string) ApiUmGroupsUsersGetRequest {
 	r.orderBy = &orderBy
+	return r
+}
+
+// MaxResults query param limits the number of results returned.
+func (r ApiUmGroupsUsersGetRequest) MaxResults(maxResults int32) ApiUmGroupsUsersGetRequest {
+	r.maxResults = &maxResults
 	return r
 }
 
@@ -2203,6 +2240,9 @@ func (a *UserManagementApiService) UmGroupsUsersGetExecute(r ApiUmGroupsUsersGet
 	}
 	if r.orderBy != nil {
 		localVarQueryParams.Add("orderBy", parameterToString(*r.orderBy, ""))
+	}
+	if r.maxResults != nil {
+		localVarQueryParams.Add("maxResults", parameterToString(*r.maxResults, ""))
 	}
 	if len(r.filters) > 0 {
 		for k, v := range r.filters {
@@ -2809,6 +2849,7 @@ type ApiUmResourcesGetRequest struct {
 	ApiService      *UserManagementApiService
 	filters         _neturl.Values
 	orderBy         *string
+	maxResults      *int32
 	pretty          *bool
 	depth           *int32
 	xContractNumber *int32
@@ -2837,6 +2878,12 @@ func (r ApiUmResourcesGetRequest) Filter(key string, value string) ApiUmResource
 // OrderBy query param sorts the results alphanumerically in ascending order based on the specified property.
 func (r ApiUmResourcesGetRequest) OrderBy(orderBy string) ApiUmResourcesGetRequest {
 	r.orderBy = &orderBy
+	return r
+}
+
+// MaxResults query param limits the number of results returned.
+func (r ApiUmResourcesGetRequest) MaxResults(maxResults int32) ApiUmResourcesGetRequest {
+	r.maxResults = &maxResults
 	return r
 }
 
@@ -2891,6 +2938,9 @@ func (a *UserManagementApiService) UmResourcesGetExecute(r ApiUmResourcesGetRequ
 	}
 	if r.orderBy != nil {
 		localVarQueryParams.Add("orderBy", parameterToString(*r.orderBy, ""))
+	}
+	if r.maxResults != nil {
+		localVarQueryParams.Add("maxResults", parameterToString(*r.maxResults, ""))
 	}
 	if len(r.filters) > 0 {
 		for k, v := range r.filters {
@@ -3320,6 +3370,7 @@ type ApiUmUsersGetRequest struct {
 	ApiService      *UserManagementApiService
 	filters         _neturl.Values
 	orderBy         *string
+	maxResults      *int32
 	pretty          *bool
 	depth           *int32
 	xContractNumber *int32
@@ -3358,6 +3409,12 @@ func (r ApiUmUsersGetRequest) Filter(key string, value string) ApiUmUsersGetRequ
 // OrderBy query param sorts the results alphanumerically in ascending order based on the specified property.
 func (r ApiUmUsersGetRequest) OrderBy(orderBy string) ApiUmUsersGetRequest {
 	r.orderBy = &orderBy
+	return r
+}
+
+// MaxResults query param limits the number of results returned.
+func (r ApiUmUsersGetRequest) MaxResults(maxResults int32) ApiUmUsersGetRequest {
+	r.maxResults = &maxResults
 	return r
 }
 
@@ -3418,6 +3475,9 @@ func (a *UserManagementApiService) UmUsersGetExecute(r ApiUmUsersGetRequest) (Us
 	}
 	if r.orderBy != nil {
 		localVarQueryParams.Add("orderBy", parameterToString(*r.orderBy, ""))
+	}
+	if r.maxResults != nil {
+		localVarQueryParams.Add("maxResults", parameterToString(*r.maxResults, ""))
 	}
 	if len(r.filters) > 0 {
 		for k, v := range r.filters {
@@ -3521,6 +3581,7 @@ type ApiUmUsersGroupsGetRequest struct {
 	ApiService      *UserManagementApiService
 	filters         _neturl.Values
 	orderBy         *string
+	maxResults      *int32
 	userId          string
 	pretty          *bool
 	depth           *int32
@@ -3550,6 +3611,12 @@ func (r ApiUmUsersGroupsGetRequest) Filter(key string, value string) ApiUmUsersG
 // OrderBy query param sorts the results alphanumerically in ascending order based on the specified property.
 func (r ApiUmUsersGroupsGetRequest) OrderBy(orderBy string) ApiUmUsersGroupsGetRequest {
 	r.orderBy = &orderBy
+	return r
+}
+
+// MaxResults query param limits the number of results returned.
+func (r ApiUmUsersGroupsGetRequest) MaxResults(maxResults int32) ApiUmUsersGroupsGetRequest {
+	r.maxResults = &maxResults
 	return r
 }
 
@@ -3607,6 +3674,9 @@ func (a *UserManagementApiService) UmUsersGroupsGetExecute(r ApiUmUsersGroupsGet
 	}
 	if r.orderBy != nil {
 		localVarQueryParams.Add("orderBy", parameterToString(*r.orderBy, ""))
+	}
+	if r.maxResults != nil {
+		localVarQueryParams.Add("maxResults", parameterToString(*r.maxResults, ""))
 	}
 	if len(r.filters) > 0 {
 		for k, v := range r.filters {
@@ -3710,6 +3780,7 @@ type ApiUmUsersOwnsGetRequest struct {
 	ApiService      *UserManagementApiService
 	filters         _neturl.Values
 	orderBy         *string
+	maxResults      *int32
 	userId          string
 	pretty          *bool
 	depth           *int32
@@ -3739,6 +3810,12 @@ func (r ApiUmUsersOwnsGetRequest) Filter(key string, value string) ApiUmUsersOwn
 // OrderBy query param sorts the results alphanumerically in ascending order based on the specified property.
 func (r ApiUmUsersOwnsGetRequest) OrderBy(orderBy string) ApiUmUsersOwnsGetRequest {
 	r.orderBy = &orderBy
+	return r
+}
+
+// MaxResults query param limits the number of results returned.
+func (r ApiUmUsersOwnsGetRequest) MaxResults(maxResults int32) ApiUmUsersOwnsGetRequest {
+	r.maxResults = &maxResults
 	return r
 }
 
@@ -3796,6 +3873,9 @@ func (a *UserManagementApiService) UmUsersOwnsGetExecute(r ApiUmUsersOwnsGetRequ
 	}
 	if r.orderBy != nil {
 		localVarQueryParams.Add("orderBy", parameterToString(*r.orderBy, ""))
+	}
+	if r.maxResults != nil {
+		localVarQueryParams.Add("maxResults", parameterToString(*r.maxResults, ""))
 	}
 	if len(r.filters) > 0 {
 		for k, v := range r.filters {
@@ -4575,6 +4655,7 @@ type ApiUmUsersS3keysGetRequest struct {
 	ApiService      *UserManagementApiService
 	filters         _neturl.Values
 	orderBy         *string
+	maxResults      *int32
 	userId          string
 	pretty          *bool
 	depth           *int32
@@ -4604,6 +4685,12 @@ func (r ApiUmUsersS3keysGetRequest) Filter(key string, value string) ApiUmUsersS
 // OrderBy query param sorts the results alphanumerically in ascending order based on the specified property.
 func (r ApiUmUsersS3keysGetRequest) OrderBy(orderBy string) ApiUmUsersS3keysGetRequest {
 	r.orderBy = &orderBy
+	return r
+}
+
+// MaxResults query param limits the number of results returned.
+func (r ApiUmUsersS3keysGetRequest) MaxResults(maxResults int32) ApiUmUsersS3keysGetRequest {
+	r.maxResults = &maxResults
 	return r
 }
 
@@ -4661,6 +4748,9 @@ func (a *UserManagementApiService) UmUsersS3keysGetExecute(r ApiUmUsersS3keysGet
 	}
 	if r.orderBy != nil {
 		localVarQueryParams.Add("orderBy", parameterToString(*r.orderBy, ""))
+	}
+	if r.maxResults != nil {
+		localVarQueryParams.Add("maxResults", parameterToString(*r.maxResults, ""))
 	}
 	if len(r.filters) > 0 {
 		for k, v := range r.filters {
@@ -5104,6 +5194,7 @@ type ApiUmUsersS3ssourlGetRequest struct {
 	ApiService      *UserManagementApiService
 	filters         _neturl.Values
 	orderBy         *string
+	maxResults      *int32
 	userId          string
 	pretty          *bool
 	xContractNumber *int32
@@ -5128,6 +5219,12 @@ func (r ApiUmUsersS3ssourlGetRequest) Filter(key string, value string) ApiUmUser
 // OrderBy query param sorts the results alphanumerically in ascending order based on the specified property.
 func (r ApiUmUsersS3ssourlGetRequest) OrderBy(orderBy string) ApiUmUsersS3ssourlGetRequest {
 	r.orderBy = &orderBy
+	return r
+}
+
+// MaxResults query param limits the number of results returned.
+func (r ApiUmUsersS3ssourlGetRequest) MaxResults(maxResults int32) ApiUmUsersS3ssourlGetRequest {
+	r.maxResults = &maxResults
 	return r
 }
 
@@ -5182,6 +5279,9 @@ func (a *UserManagementApiService) UmUsersS3ssourlGetExecute(r ApiUmUsersS3ssour
 	}
 	if r.orderBy != nil {
 		localVarQueryParams.Add("orderBy", parameterToString(*r.orderBy, ""))
+	}
+	if r.maxResults != nil {
+		localVarQueryParams.Add("maxResults", parameterToString(*r.maxResults, ""))
 	}
 	if len(r.filters) > 0 {
 		for k, v := range r.filters {

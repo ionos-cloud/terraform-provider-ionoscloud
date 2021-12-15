@@ -374,6 +374,7 @@ type ApiDatacentersLoadbalancersBalancednicsGetRequest struct {
 	ApiService      *LoadBalancerApiService
 	filters         _neturl.Values
 	orderBy         *string
+	maxResults      *int32
 	datacenterId    string
 	loadbalancerId  string
 	pretty          *bool
@@ -414,6 +415,12 @@ func (r ApiDatacentersLoadbalancersBalancednicsGetRequest) Filter(key string, va
 // OrderBy query param sorts the results alphanumerically in ascending order based on the specified property.
 func (r ApiDatacentersLoadbalancersBalancednicsGetRequest) OrderBy(orderBy string) ApiDatacentersLoadbalancersBalancednicsGetRequest {
 	r.orderBy = &orderBy
+	return r
+}
+
+// MaxResults query param limits the number of results returned.
+func (r ApiDatacentersLoadbalancersBalancednicsGetRequest) MaxResults(maxResults int32) ApiDatacentersLoadbalancersBalancednicsGetRequest {
+	r.maxResults = &maxResults
 	return r
 }
 
@@ -480,6 +487,9 @@ func (a *LoadBalancerApiService) DatacentersLoadbalancersBalancednicsGetExecute(
 	}
 	if r.orderBy != nil {
 		localVarQueryParams.Add("orderBy", parameterToString(*r.orderBy, ""))
+	}
+	if r.maxResults != nil {
+		localVarQueryParams.Add("maxResults", parameterToString(*r.maxResults, ""))
 	}
 	if len(r.filters) > 0 {
 		for k, v := range r.filters {
@@ -1094,6 +1104,7 @@ type ApiDatacentersLoadbalancersGetRequest struct {
 	ApiService      *LoadBalancerApiService
 	filters         _neturl.Values
 	orderBy         *string
+	maxResults      *int32
 	datacenterId    string
 	pretty          *bool
 	depth           *int32
@@ -1133,6 +1144,12 @@ func (r ApiDatacentersLoadbalancersGetRequest) Filter(key string, value string) 
 // OrderBy query param sorts the results alphanumerically in ascending order based on the specified property.
 func (r ApiDatacentersLoadbalancersGetRequest) OrderBy(orderBy string) ApiDatacentersLoadbalancersGetRequest {
 	r.orderBy = &orderBy
+	return r
+}
+
+// MaxResults query param limits the number of results returned.
+func (r ApiDatacentersLoadbalancersGetRequest) MaxResults(maxResults int32) ApiDatacentersLoadbalancersGetRequest {
+	r.maxResults = &maxResults
 	return r
 }
 
@@ -1196,6 +1213,9 @@ func (a *LoadBalancerApiService) DatacentersLoadbalancersGetExecute(r ApiDatacen
 	}
 	if r.orderBy != nil {
 		localVarQueryParams.Add("orderBy", parameterToString(*r.orderBy, ""))
+	}
+	if r.maxResults != nil {
+		localVarQueryParams.Add("maxResults", parameterToString(*r.maxResults, ""))
 	}
 	if len(r.filters) > 0 {
 		for k, v := range r.filters {

@@ -50,7 +50,7 @@ const (
 	RequestStatusFailed  = "FAILED"
 	RequestStatusDone    = "DONE"
 
-	Version = "5.1.9"
+	Version = "5.1.11"
 )
 
 // Constants for APIs
@@ -248,14 +248,16 @@ func (c *APIClient) callAPI(request *http.Request) (*http.Response, time.Duratio
 
 		if c.cfg.Debug {
 			dump, err := httputil.DumpRequestOut(clonedRequest, true)
-			if err != nil {
-				return nil, httpRequestTime, err
+			if err == nil {
+				log.Printf("%s\n", string(dump))
+			} else {
+				log.Println("[DEBUG] DumpRequestOut err: ", err)
 			}
-			log.Printf("\ntry no: %d\n", retryCount)
-			log.Printf("%s\n", string(dump))
+			log.Printf("\n try no: %d\n", retryCount)
 		}
 
 		httpRequestStartTime := time.Now()
+		clonedRequest.Close = true
 		resp, err = c.cfg.HTTPClient.Do(clonedRequest)
 		httpRequestTime = time.Since(httpRequestStartTime)
 		if err != nil {
@@ -264,10 +266,11 @@ func (c *APIClient) callAPI(request *http.Request) (*http.Response, time.Duratio
 
 		if c.cfg.Debug {
 			dump, err := httputil.DumpResponse(resp, true)
-			if err != nil {
-				return resp, httpRequestTime, err
+			if err == nil {
+				log.Printf("\n%s\n", string(dump))
+			} else {
+				log.Println("[DEBUG] dumpResponse err ", err)
 			}
-			log.Printf("\n%s\n", string(dump))
 		}
 
 		var backoffTime time.Duration

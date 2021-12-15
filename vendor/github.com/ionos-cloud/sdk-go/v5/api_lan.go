@@ -366,6 +366,7 @@ type ApiDatacentersLansGetRequest struct {
 	ApiService      *LanApiService
 	filters         _neturl.Values
 	orderBy         *string
+	maxResults      *int32
 	datacenterId    string
 	pretty          *bool
 	depth           *int32
@@ -405,6 +406,12 @@ func (r ApiDatacentersLansGetRequest) Filter(key string, value string) ApiDatace
 // OrderBy query param sorts the results alphanumerically in ascending order based on the specified property.
 func (r ApiDatacentersLansGetRequest) OrderBy(orderBy string) ApiDatacentersLansGetRequest {
 	r.orderBy = &orderBy
+	return r
+}
+
+// MaxResults query param limits the number of results returned.
+func (r ApiDatacentersLansGetRequest) MaxResults(maxResults int32) ApiDatacentersLansGetRequest {
+	r.maxResults = &maxResults
 	return r
 }
 
@@ -468,6 +475,9 @@ func (a *LanApiService) DatacentersLansGetExecute(r ApiDatacentersLansGetRequest
 	}
 	if r.orderBy != nil {
 		localVarQueryParams.Add("orderBy", parameterToString(*r.orderBy, ""))
+	}
+	if r.maxResults != nil {
+		localVarQueryParams.Add("maxResults", parameterToString(*r.maxResults, ""))
 	}
 	if len(r.filters) > 0 {
 		for k, v := range r.filters {
@@ -742,6 +752,7 @@ type ApiDatacentersLansNicsGetRequest struct {
 	ApiService      *LanApiService
 	filters         _neturl.Values
 	orderBy         *string
+	maxResults      *int32
 	datacenterId    string
 	lanId           string
 	pretty          *bool
@@ -782,6 +793,12 @@ func (r ApiDatacentersLansNicsGetRequest) Filter(key string, value string) ApiDa
 // OrderBy query param sorts the results alphanumerically in ascending order based on the specified property.
 func (r ApiDatacentersLansNicsGetRequest) OrderBy(orderBy string) ApiDatacentersLansNicsGetRequest {
 	r.orderBy = &orderBy
+	return r
+}
+
+// MaxResults query param limits the number of results returned.
+func (r ApiDatacentersLansNicsGetRequest) MaxResults(maxResults int32) ApiDatacentersLansNicsGetRequest {
+	r.maxResults = &maxResults
 	return r
 }
 
@@ -848,6 +865,9 @@ func (a *LanApiService) DatacentersLansNicsGetExecute(r ApiDatacentersLansNicsGe
 	}
 	if r.orderBy != nil {
 		localVarQueryParams.Add("orderBy", parameterToString(*r.orderBy, ""))
+	}
+	if r.maxResults != nil {
+		localVarQueryParams.Add("maxResults", parameterToString(*r.maxResults, ""))
 	}
 	if len(r.filters) > 0 {
 		for k, v := range r.filters {

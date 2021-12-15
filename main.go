@@ -17,7 +17,7 @@ func main() {
 	flag.Parse()
 
 	if debugMode {
-		err := plugin.Debug(context.Background(), "registry.terraform.io/ionos-cloud/ionoscloud",
+		err := plugin.Debug(context.Background(), "ionoscloud",
 			&plugin.ServeOpts{
 				ProviderFunc: ionoscloud.Provider,
 			})

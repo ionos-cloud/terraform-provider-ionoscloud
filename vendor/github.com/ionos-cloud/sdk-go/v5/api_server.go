@@ -374,6 +374,7 @@ type ApiDatacentersServersCdromsGetRequest struct {
 	ApiService      *ServerApiService
 	filters         _neturl.Values
 	orderBy         *string
+	maxResults      *int32
 	datacenterId    string
 	serverId        string
 	pretty          *bool
@@ -414,6 +415,12 @@ func (r ApiDatacentersServersCdromsGetRequest) Filter(key string, value string) 
 // OrderBy query param sorts the results alphanumerically in ascending order based on the specified property.
 func (r ApiDatacentersServersCdromsGetRequest) OrderBy(orderBy string) ApiDatacentersServersCdromsGetRequest {
 	r.orderBy = &orderBy
+	return r
+}
+
+// MaxResults query param limits the number of results returned.
+func (r ApiDatacentersServersCdromsGetRequest) MaxResults(maxResults int32) ApiDatacentersServersCdromsGetRequest {
+	r.maxResults = &maxResults
 	return r
 }
 
@@ -480,6 +487,9 @@ func (a *ServerApiService) DatacentersServersCdromsGetExecute(r ApiDatacentersSe
 	}
 	if r.orderBy != nil {
 		localVarQueryParams.Add("orderBy", parameterToString(*r.orderBy, ""))
+	}
+	if r.maxResults != nil {
+		localVarQueryParams.Add("maxResults", parameterToString(*r.maxResults, ""))
 	}
 	if len(r.filters) > 0 {
 		for k, v := range r.filters {
@@ -1094,6 +1104,7 @@ type ApiDatacentersServersGetRequest struct {
 	ApiService      *ServerApiService
 	filters         _neturl.Values
 	orderBy         *string
+	maxResults      *int32
 	datacenterId    string
 	pretty          *bool
 	depth           *int32
@@ -1138,6 +1149,12 @@ func (r ApiDatacentersServersGetRequest) Filter(key string, value string) ApiDat
 // OrderBy query param sorts the results alphanumerically in ascending order based on the specified property.
 func (r ApiDatacentersServersGetRequest) OrderBy(orderBy string) ApiDatacentersServersGetRequest {
 	r.orderBy = &orderBy
+	return r
+}
+
+// MaxResults query param limits the number of results returned.
+func (r ApiDatacentersServersGetRequest) MaxResults(maxResults int32) ApiDatacentersServersGetRequest {
+	r.maxResults = &maxResults
 	return r
 }
 
@@ -1204,6 +1221,9 @@ func (a *ServerApiService) DatacentersServersGetExecute(r ApiDatacentersServersG
 	}
 	if r.orderBy != nil {
 		localVarQueryParams.Add("orderBy", parameterToString(*r.orderBy, ""))
+	}
+	if r.maxResults != nil {
+		localVarQueryParams.Add("maxResults", parameterToString(*r.maxResults, ""))
 	}
 	if len(r.filters) > 0 {
 		for k, v := range r.filters {
@@ -2844,6 +2864,7 @@ type ApiDatacentersServersVolumesGetRequest struct {
 	ApiService      *ServerApiService
 	filters         _neturl.Values
 	orderBy         *string
+	maxResults      *int32
 	datacenterId    string
 	serverId        string
 	pretty          *bool
@@ -2884,6 +2905,12 @@ func (r ApiDatacentersServersVolumesGetRequest) Filter(key string, value string)
 // OrderBy query param sorts the results alphanumerically in ascending order based on the specified property.
 func (r ApiDatacentersServersVolumesGetRequest) OrderBy(orderBy string) ApiDatacentersServersVolumesGetRequest {
 	r.orderBy = &orderBy
+	return r
+}
+
+// MaxResults query param limits the number of results returned.
+func (r ApiDatacentersServersVolumesGetRequest) MaxResults(maxResults int32) ApiDatacentersServersVolumesGetRequest {
+	r.maxResults = &maxResults
 	return r
 }
 
@@ -2950,6 +2977,9 @@ func (a *ServerApiService) DatacentersServersVolumesGetExecute(r ApiDatacentersS
 	}
 	if r.orderBy != nil {
 		localVarQueryParams.Add("orderBy", parameterToString(*r.orderBy, ""))
+	}
+	if r.maxResults != nil {
+		localVarQueryParams.Add("maxResults", parameterToString(*r.maxResults, ""))
 	}
 	if len(r.filters) > 0 {
 		for k, v := range r.filters {
