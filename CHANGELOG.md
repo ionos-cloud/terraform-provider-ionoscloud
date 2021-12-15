@@ -1,6 +1,7 @@
 ## 6.0.0
 
 - **code enhancements**: added http request time log for api calls
+- **code enhancements**: updated to go version 1.17, updated to sdk version 6.0.0 
 - **new features**: import for `nic`, data_source for `nic`, `share`, `ipfailover`
 - **dependency update**: updated sdk-go to v6.0.0-beta.8
 - **tests enhancements**: improved tests on natgateway and natgateway_rule
@@ -14,6 +15,10 @@
 - **bug fixes**: Add additional fixes to improve code stability and prevent crashes. Revert icmp_type and icmp_code inside server resource and add tests.
 - **bug fixes**: Allow creation of an inner firewall rule for server when updating a terraform plan.
 - **bug fixes**: fixed issue #155: added stateUpgrader for handling change of lan field structure
+- **bug fixes**: fix sporadic EOF received when making a lot of https requests to server (fixed in sdk)
+- **bug fixes**: allow url to start with "http" (fixed in sdk)
+- **bug fixes**: fix user update, user password change and password field is now sensitive
+- **bug fixes**: fix crash when no metadata is received from server 
 
 ## 6.0.0-beta.14
 
