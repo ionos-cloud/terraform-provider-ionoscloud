@@ -84,7 +84,7 @@ func Provider() *schema.Provider {
 			NatGatewayRuleResource:           resourceNatGatewayRule(),
 			"ionoscloud_networkloadbalancer": resourceNetworkLoadBalancer(),
 			"ionoscloud_networkloadbalancer_forwardingrule": resourceNetworkLoadBalancerForwardingRule(),
-			"ionoscloud_autoscaling_group":                  resourceAutoscalingGroup(),
+			AutoscalingGroupResource:                        resourceAutoscalingGroup(),
 		},
 		DataSourcesMap: map[string]*schema.Resource{
 			DatacenterResource:               dataSourceDataCenter(),
@@ -112,7 +112,8 @@ func Provider() *schema.Provider {
 			NicResource:                                     dataSourceNIC(),
 			ShareResource:                                   dataSourceShare(),
 			ResourceIpFailover:                              dataSourceIpFailover(),
-			"ionoscloud_autoscaling_group":                  dataSourceAutoscalingGroup(),
+			AutoscalingGroupResource:                        dataSourceAutoscalingGroup(),
+			AutoscalingGroupServersResource:                 dataSourceAutoscalingGroupServers(),
 		},
 	}
 

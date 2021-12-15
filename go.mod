@@ -76,4 +76,5 @@ require (
 )
 
 replace github.com/ionos-cloud/sdk-go-autoscaling => ../../../../../sdk/autoscaling-sdk
+replace github.com/ionos-cloud/sdk-go/v6  => ../sdk-go
 

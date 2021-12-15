@@ -44,12 +44,12 @@ func TestAccAutoscalingGroupBasic(t *testing.T) {
 					resource.TestCheckResourceAttr(resourceAutoscalingGroupName, "policy.0.unit", "PER_HOUR"),
 					resource.TestCheckResourceAttr(resourceAutoscalingGroupName, "replica_configuration.0.availability_zone", "AUTO"),
 					resource.TestCheckResourceAttr(resourceAutoscalingGroupName, "replica_configuration.0.cores", "2"),
-					resource.TestCheckResourceAttr(resourceAutoscalingGroupName, "replica_configuration.0.cpu_family", "INTEL_XEON"),
+					resource.TestCheckResourceAttr(resourceAutoscalingGroupName, "replica_configuration.0.cpu_family", "INTEL_SKYLAKE"),
 					resource.TestCheckResourceAttrPair(resourceAutoscalingGroupName, "replica_configuration.0.nics.0.lan", LanResource+".autoscaling_lan_1", "id"),
 					resource.TestCheckResourceAttr(resourceAutoscalingGroupName, "replica_configuration.0.nics.0.name", "LAN NIC 1"),
 					resource.TestCheckResourceAttr(resourceAutoscalingGroupName, "replica_configuration.0.nics.0.dhcp", "true"),
 					resource.TestCheckResourceAttr(resourceAutoscalingGroupName, "replica_configuration.0.ram", "2048"),
-					resource.TestCheckResourceAttr(resourceAutoscalingGroupName, "replica_configuration.0.volumes.0.image", "ee89912b-2290-11eb-af9f-1ee452559185"),
+					resource.TestCheckResourceAttr(resourceAutoscalingGroupName, "replica_configuration.0.volumes.0.image", "065ba739-e30a-11eb-a927-824af8c35c96"),
 					resource.TestCheckResourceAttr(resourceAutoscalingGroupName, "replica_configuration.0.volumes.0.name", "Volume 1"),
 					resource.TestCheckResourceAttr(resourceAutoscalingGroupName, "replica_configuration.0.volumes.0.size", "30"),
 					testNotEmptySlice(AutoscalingGroupResource, "replica_configuration.0.volumes.0.ssh_keys"),
@@ -81,7 +81,7 @@ func TestAccAutoscalingGroupBasic(t *testing.T) {
 					resource.TestCheckResourceAttr(resourceAutoscalingGroupName, "policy.0.unit", "PER_MINUTE"),
 					resource.TestCheckResourceAttr(resourceAutoscalingGroupName, "replica_configuration.0.availability_zone", "ZONE_1"),
 					resource.TestCheckResourceAttr(resourceAutoscalingGroupName, "replica_configuration.0.cores", "3"),
-					resource.TestCheckResourceAttr(resourceAutoscalingGroupName, "replica_configuration.0.cpu_family", "INTEL_XEON"),
+					resource.TestCheckResourceAttr(resourceAutoscalingGroupName, "replica_configuration.0.cpu_family", "INTEL_SKYLAKE"),
 					resource.TestCheckResourceAttrPair(resourceAutoscalingGroupName, "replica_configuration.0.nics.0.lan", LanResource+".autoscaling_lan_1", "id"),
 					resource.TestCheckResourceAttr(resourceAutoscalingGroupName, "replica_configuration.0.nics.0.name", UpdatedResources),
 					resource.TestCheckResourceAttr(resourceAutoscalingGroupName, "replica_configuration.0.nics.0.dhcp", "false"),
@@ -89,7 +89,7 @@ func TestAccAutoscalingGroupBasic(t *testing.T) {
 					resource.TestCheckResourceAttr(resourceAutoscalingGroupName, "replica_configuration.0.nics.1.name", "LAN NIC 2"),
 					resource.TestCheckResourceAttr(resourceAutoscalingGroupName, "replica_configuration.0.nics.1.dhcp", "true"),
 					resource.TestCheckResourceAttr(resourceAutoscalingGroupName, "replica_configuration.0.ram", "1024"),
-					resource.TestCheckResourceAttr(resourceAutoscalingGroupName, "replica_configuration.0.volumes.0.image", "129db64f-2291-11eb-af9f-1ee452559185"),
+					resource.TestCheckResourceAttr(resourceAutoscalingGroupName, "replica_configuration.0.volumes.0.image", "065ba739-e30a-11eb-a927-824af8c35c96"),
 					resource.TestCheckResourceAttr(resourceAutoscalingGroupName, "replica_configuration.0.volumes.0.name", "Volume 2"),
 					resource.TestCheckResourceAttr(resourceAutoscalingGroupName, "replica_configuration.0.volumes.0.size", "40"),
 					testNotEmptySlice(AutoscalingGroupResource, "replica_configuration.0.volumes.0.ssh_keys"),
@@ -197,7 +197,7 @@ func testAccCheckAutoscalingGroupExists(n string, autoscalingGroup *autoscaling.
 const testAccCheckAutoscalingGroupConfigBasic = `
 resource ` + DatacenterResource + ` "autoscaling_datacenter" {
    name     = "test_autoscaling_group"
-   location = "de/fkb"
+   location = "de/fra"
 }
 resource ` + LanResource + ` "autoscaling_lan_1" {
 	datacenter_id    = ` + DatacenterResource + `.autoscaling_datacenter.id
@@ -232,7 +232,7 @@ resource ` + AutoscalingGroupResource + `  ` + AutoscalingGroupTestResource + ` 
     replica_configuration {
 		availability_zone = "AUTO"
 		cores 			  = "2"
-		cpu_family 		  = "INTEL_XEON"
+		cpu_family 		  = "INTEL_SKYLAKE"
 		nics {
 			lan  		  = ` + LanResource + `.autoscaling_lan_1.id
 			name		  = "LAN NIC 1"
@@ -240,7 +240,7 @@ resource ` + AutoscalingGroupResource + `  ` + AutoscalingGroupTestResource + ` 
 		}
 		ram				  = 2048
 		volumes	{
-			image  		  = "ee89912b-2290-11eb-af9f-1ee452559185"
+			image  		  = "065ba739-e30a-11eb-a927-824af8c35c96"
 			name		  = "Volume 1"
 			size 		  = 30
 			ssh_key_paths = [ "/home/iulia/.ssh/id_rsa.pub"]
@@ -256,7 +256,7 @@ resource ` + AutoscalingGroupResource + `  ` + AutoscalingGroupTestResource + ` 
 const testAccCheckAutoscalingGroupConfigUpdate = `
 resource ` + DatacenterResource + ` "autoscaling_datacenter" {
    name     = "test_autoscaling_group"
-   location = "de/fkb"
+   location = "de/fra"
 }
 resource ` + LanResource + ` "autoscaling_lan_1" {
 	datacenter_id    = ` + DatacenterResource + `.autoscaling_datacenter.id
@@ -297,7 +297,7 @@ resource ` + AutoscalingGroupResource + `  ` + AutoscalingGroupTestResource + ` 
     replica_configuration {
 		availability_zone = "ZONE_1"
 		cores 			  = "3"
-		cpu_family 		  = "INTEL_XEON"
+		cpu_family 		  = "INTEL_SKYLAKE"
 		nics {
 			lan  		  = ` + LanResource + `.autoscaling_lan_1.id
 			name		  = "` + UpdatedResources + `"
@@ -310,7 +310,7 @@ resource ` + AutoscalingGroupResource + `  ` + AutoscalingGroupTestResource + ` 
 		}
 		ram				  = 1024
 		volumes	{
-			image  		  = "129db64f-2291-11eb-af9f-1ee452559185"
+			image  		  = "065ba739-e30a-11eb-a927-824af8c35c96"
 			name		  = "Volume 2"
 			size 		  = 40
 			ssh_key_paths = []
@@ -325,7 +325,7 @@ resource ` + AutoscalingGroupResource + `  ` + AutoscalingGroupTestResource + ` 
 const testAccCheckAutoscalingGroupConfigUpdateRemoveOptionalFields = `
 resource ` + DatacenterResource + ` "autoscaling_datacenter" {
    name     = "test_autoscaling_group"
-   location = "de/fkb"
+   location = "de/fra"
 }
 resource ` + LanResource + ` "autoscaling_lan_1" {
 	datacenter_id    = ` + DatacenterResource + `.autoscaling_datacenter.id
