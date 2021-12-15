@@ -13,6 +13,7 @@ package ionoscloud
 import (
 	"bytes"
 	"context"
+	"crypto/tls"
 	"encoding/json"
 	"encoding/xml"
 	"errors"
@@ -154,6 +155,11 @@ func NewAPIClient(cfg *Configuration) *APIClient {
 	c.UserManagementApi = (*UserManagementApiService)(&c.common)
 	c.UserS3KeysApi = (*UserS3KeysApiService)(&c.common)
 	c.VolumesApi = (*VolumesApiService)(&c.common)
+
+	tr := &http.Transport{
+		TLSClientConfig: &tls.Config{InsecureSkipVerify: true},
+	}
+	cfg.HTTPClient = &http.Client{Transport: tr}
 
 	return c
 }
