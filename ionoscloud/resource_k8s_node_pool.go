@@ -58,7 +58,7 @@ func resourceK8sNodePool() *schema.Resource {
 				},
 			},
 			"lans": {
-				Type:        schema.TypeList,
+				Type:        schema.TypeSet,
 				Description: "A list of Local Area Networks the node pool should be part of",
 				Optional:    true,
 				Elem: &schema.Schema{
@@ -245,27 +245,16 @@ func resourcek8sNodePoolCreate(ctx context.Context, d *schema.ResourceData, meta
 	}
 
 	if lansVal, lansOK := d.GetOk("lans"); lansOK {
-		if lansVal.([]interface{}) != nil {
-			updateLans := false
-
+		lansList := lansVal.(*schema.Set)
+		if lansList.List() != nil {
 			var lans []ionoscloud.KubernetesNodePoolLan
-
-			for lanIndex := range lansVal.([]interface{}) {
-				if lanID, lanIDOk := d.GetOk(fmt.Sprintf("lans.%d", lanIndex)); lanIDOk {
-					log.Printf("[INFO] Adding k8s node pool to LAN %+v...", lanID)
-					lanID := int32(lanID.(int))
-					lans = append(lans, ionoscloud.KubernetesNodePoolLan{Id: &lanID})
-				}
+			for _, lanItem := range lansList.List() {
+				lanID := int32(lanItem.(int))
+				log.Printf("[INFO] Adding LAN %+v to k8s node pool...", lanID)
+				lans = append(lans, ionoscloud.KubernetesNodePoolLan{Id: &lanID})
 			}
-
-			if len(lans) > 0 {
-				updateLans = true
-			}
-
-			if updateLans == true {
-				log.Printf("[INFO] k8s node pool LANs set to %+v", lans)
-				k8sNodepool.Properties.Lans = &lans
-			}
+			log.Printf("[INFO] k8s node pool LANs set to %+v", lans)
+			k8sNodepool.Properties.Lans = &lans
 		}
 	}
 
@@ -491,13 +480,12 @@ func resourcek8sNodePoolUpdate(ctx context.Context, d *schema.ResourceData, meta
 	if d.HasChange("lans") {
 		oldLANs, newLANs := d.GetChange("lans")
 		lans := make([]ionoscloud.KubernetesNodePoolLan, 0)
-		if newLANs.([]interface{}) != nil {
-			for lanIndex := range newLANs.([]interface{}) {
-				if lanID, lanIDOk := d.GetOk(fmt.Sprintf("lans.%d", lanIndex)); lanIDOk {
-					log.Printf("[INFO] Adding k8s node pool to LAN %+v...", lanID)
-					lanID := int32(lanID.(int))
-					lans = append(lans, ionoscloud.KubernetesNodePoolLan{Id: &lanID})
-				}
+		lansList := newLANs.(*schema.Set)
+		if lansList.List() != nil {
+			for _, lanItem := range lansList.List() {
+				lanID := int32(lanItem.(int))
+				log.Printf("[INFO] Adding LAN %+v to k8s node pool...", lanID)
+				lans = append(lans, ionoscloud.KubernetesNodePoolLan{Id: &lanID})
 			}
 		}
 		log.Printf("[INFO] k8s pool public lans changed from %+v to %+v", oldLANs, lans)
