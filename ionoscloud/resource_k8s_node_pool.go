@@ -242,7 +242,10 @@ func resourceK8sNodePool0() *schema.Resource {
 
 func resourceK8sNodePoolUpgradeV0(_ context.Context, state map[string]interface{}, _ interface{}) (map[string]interface{}, error) {
 	oldState := state
-	oldData := oldState["lans"].([]interface{})
+	var oldData []interface{}
+	if d, ok := oldState["lans"].([]interface{}); ok {
+		oldData = d
+	}
 
 	var lans []interface{}
 	for index, lanId := range oldData {
