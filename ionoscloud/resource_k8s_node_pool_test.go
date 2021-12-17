@@ -71,7 +71,8 @@ func TestAccK8sNodePoolBasic(t *testing.T) {
 					resource.TestCheckResourceAttrPair(resourceNameK8sNodePool, "public_ips.0", IpBLockResource+".terraform_acctest", "ips.0"),
 					resource.TestCheckResourceAttrPair(resourceNameK8sNodePool, "public_ips.1", IpBLockResource+".terraform_acctest", "ips.1"),
 					resource.TestCheckResourceAttrPair(resourceNameK8sNodePool, "public_ips.2", IpBLockResource+".terraform_acctest", "ips.2"),
-					resource.TestCheckResourceAttrPair(resourceNameK8sNodePool, "lans.0", LanResource+".terraform_acctest_updated", "id"),
+					resource.TestCheckResourceAttrPair(resourceNameK8sNodePool, "lans.0", LanResource+".terraform_acctest", "id"),
+					resource.TestCheckResourceAttrPair(resourceNameK8sNodePool, "lans.1", LanResource+".terraform_acctest_updated", "id"),
 					resource.TestCheckResourceAttr(resourceNameK8sNodePool, "labels.foo", "baz"),
 					resource.TestCheckResourceAttr(resourceNameK8sNodePool, "labels.color", "red"),
 					resource.TestCheckResourceAttr(resourceNameK8sNodePool, "labels.third", "thirdValue"),
@@ -291,7 +292,7 @@ resource ` + K8sNodePoolResource + ` ` + K8sNodePoolTestResource + ` {
   ram_size          = 2048
   storage_size      = 40
   public_ips        = [ ionoscloud_ipblock.terraform_acctest.ips[0], ionoscloud_ipblock.terraform_acctest.ips[1], ionoscloud_ipblock.terraform_acctest.ips[2] ]
-  lans 	            = [ ` + LanResource + `.terraform_acctest_updated.id ]
+  lans 	            = [ ` + LanResource + `.terraform_acctest.id,` + LanResource + `.terraform_acctest_updated.id ]
   labels = {
     foo = "baz"
     color = "red"

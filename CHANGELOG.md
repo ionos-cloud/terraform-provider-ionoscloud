@@ -1,3 +1,8 @@
+## 5.2.23
+
+### Fixes: 
+- Fixed rebuild k8 nodes with the same lan - order of lans is ignored now at diff
+
 ## 5.2.22
 
 ### Enhancements:
