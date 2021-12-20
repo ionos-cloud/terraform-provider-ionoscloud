@@ -73,10 +73,16 @@ func TestAccK8sNodePoolBasic(t *testing.T) {
 					resource.TestCheckResourceAttrPair(ResourceNameK8sNodePool, "public_ips.0", IpBLockResource+".terraform_acctest", "ips.0"),
 					resource.TestCheckResourceAttrPair(ResourceNameK8sNodePool, "public_ips.1", IpBLockResource+".terraform_acctest", "ips.1"),
 					resource.TestCheckResourceAttrPair(ResourceNameK8sNodePool, "public_ips.2", IpBLockResource+".terraform_acctest", "ips.2"),
-					resource.TestCheckResourceAttrPair(ResourceNameK8sNodePool, "lans.0.id", LanResource+".terraform_acctest_updated", "id"),
+					resource.TestCheckResourceAttrPair(ResourceNameK8sNodePool, "lans.0.id", LanResource+".terraform_acctest", "id"),
 					resource.TestCheckResourceAttr(ResourceNameK8sNodePool, "lans.0.dhcp", "false"),
 					resource.TestCheckResourceAttr(ResourceNameK8sNodePool, "lans.0.routes.0.network", "1.2.3.4/24"),
 					resource.TestCheckResourceAttr(ResourceNameK8sNodePool, "lans.0.routes.0.gateway_ip", "10.1.5.16"),
+					resource.TestCheckResourceAttrPair(ResourceNameK8sNodePool, "lans.1.id", LanResource+".terraform_acctest_updated", "id"),
+					resource.TestCheckResourceAttr(ResourceNameK8sNodePool, "lans.1.dhcp", "false"),
+					resource.TestCheckResourceAttr(ResourceNameK8sNodePool, "lans.1.routes.0.network", "1.2.3.5/24"),
+					resource.TestCheckResourceAttr(ResourceNameK8sNodePool, "lans.1.routes.0.gateway_ip", "10.1.5.17"),
+					resource.TestCheckResourceAttr(ResourceNameK8sNodePool, "lans.1.routes.1.network", "1.2.3.6/24"),
+					resource.TestCheckResourceAttr(ResourceNameK8sNodePool, "lans.1.routes.1.gateway_ip", "10.1.5.18"),
 					resource.TestCheckResourceAttr(ResourceNameK8sNodePool, "labels.foo", "baz"),
 					resource.TestCheckResourceAttr(ResourceNameK8sNodePool, "labels.color", "red"),
 					resource.TestCheckResourceAttr(ResourceNameK8sNodePool, "labels.third", "thirdValue"),
@@ -292,11 +298,23 @@ resource ` + K8sNodePoolResource + ` ` + K8sNodePoolTestResource + ` {
   storage_size      = 40
   public_ips        = [ ionoscloud_ipblock.terraform_acctest.ips[0], ionoscloud_ipblock.terraform_acctest.ips[1], ionoscloud_ipblock.terraform_acctest.ips[2] ]
   lans {
-    id   = ` + LanResource + `.terraform_acctest_updated.id
+    id   = ` + LanResource + `.terraform_acctest.id
     dhcp = false
  	routes {
        network   = "1.2.3.4/24"
        gateway_ip = "10.1.5.16"
+     }
+  }
+  lans {
+    id   = ` + LanResource + `.terraform_acctest_updated.id
+    dhcp = false
+ 	routes {
+       network   = "1.2.3.5/24"
+       gateway_ip = "10.1.5.17"
+     } 	
+     routes {
+       network   = "1.2.3.6/24"
+       gateway_ip = "10.1.5.18"
      }
    }
   labels = {

@@ -1,3 +1,9 @@
+## 6.0.1
+
+### Fixes: 
+- Fixed rebuild k8 nodes with the same lan - order of lans is ignored now at diff
+- Fixed conversion coming from a v5 state - added nil check in lans interface conversion
+
 ## 6.0.0
 
 ### Enhancements:
