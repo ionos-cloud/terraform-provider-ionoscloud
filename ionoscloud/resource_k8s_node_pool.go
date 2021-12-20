@@ -73,7 +73,7 @@ func resourceK8sNodePool() *schema.Resource {
 				},
 			},
 			"lans": {
-				Type:        schema.TypeList,
+				Type:        schema.TypeSet,
 				Description: "A list of Local Area Networks the node pool should be part of",
 				Optional:    true,
 				Elem: &schema.Resource{
@@ -90,7 +90,7 @@ func resourceK8sNodePool() *schema.Resource {
 							Default:     true,
 						},
 						"routes": {
-							Type:        schema.TypeList,
+							Type:        schema.TypeSet,
 							Description: "An array of additional LANs attached to worker nodes",
 							Optional:    true,
 							Elem: &schema.Resource{
@@ -263,6 +263,54 @@ func resourceK8sNodePoolUpgradeV0(_ context.Context, state map[string]interface{
 	return state, nil
 }
 
+func getLanResourceData(lansList *schema.Set) []ionoscloud.KubernetesNodePoolLan {
+	lans := make([]ionoscloud.KubernetesNodePoolLan, 0)
+	if lansList.List() != nil {
+		for _, lanItem := range lansList.List() {
+			lanContent := lanItem.(map[string]interface{})
+			lan := ionoscloud.KubernetesNodePoolLan{}
+
+			if lanID, lanIdOk := lanContent["id"].(int); lanIdOk {
+				log.Printf("[INFO] Adding LAN %v to node pool...", lanID)
+				lanID := int32(lanID)
+				lan.Id = &lanID
+			}
+
+			if lanDhcp, lanDhcpOk := lanContent["dhcp"].(bool); lanDhcpOk {
+				log.Printf("[INFO] Adding dhcp %v to node pool...", lanDhcp)
+				lan.Dhcp = &lanDhcp
+			}
+
+			routes := make([]ionoscloud.KubernetesNodePoolLanRoutes, 0)
+
+			if lanRoutes, lanRoutesOk := lanContent["routes"].(*schema.Set); lanRoutesOk {
+				log.Printf("[INFO] Adding routes %v to node pool...", lanRoutes)
+				if lanRoutes.List() != nil {
+					for _, routeItem := range lanRoutes.List() {
+						routeContent := routeItem.(map[string]interface{})
+						route := ionoscloud.KubernetesNodePoolLanRoutes{}
+
+						if routeNetwork, routeNewtworkOk := routeContent["network"].(string); routeNewtworkOk {
+							route.Network = &routeNetwork
+						}
+
+						if routeGatewayIp, routeGatewayIpOk := routeContent["gateway_ip"].(string); routeGatewayIpOk {
+							route.GatewayIp = &routeGatewayIp
+						}
+
+						routes = append(routes, route)
+
+					}
+				}
+				log.Printf("[INFO] k8s node pool LanRoutes set to %+v", routes)
+			}
+
+			lan.Routes = &routes
+			lans = append(lans, lan)
+		}
+	}
+	return lans
+}
 func resourcek8sNodePoolCreate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	client := meta.(*ionoscloud.APIClient)
 
@@ -342,76 +390,9 @@ func resourcek8sNodePoolCreate(ctx context.Context, d *schema.ResourceData, meta
 	}
 
 	if lansVal, lansOK := d.GetOk("lans"); lansOK {
-		if lansVal.([]interface{}) != nil {
-			updateLans := false
-
-			var lans []ionoscloud.KubernetesNodePoolLan
-
-			for lanIndex := range lansVal.([]interface{}) {
-				lan := ionoscloud.KubernetesNodePoolLan{}
-				addLan := false
-				if lanID, lanIdOk := d.GetOk(fmt.Sprintf("lans.%d.id", lanIndex)); lanIdOk {
-					log.Printf("[INFO] Adding k8s node pool to LAN %+v...", lanID)
-					lanID := int32(lanID.(int))
-					lan.Id = &lanID
-					addLan = true
-				}
-
-				lanDhcp := d.Get(fmt.Sprintf("lans.%d.dhcp", lanIndex)).(bool)
-				lan.Dhcp = &lanDhcp
-
-				if lanRoutes, lanRoutesOk := d.GetOk(fmt.Sprintf("lans.%d.routes", lanIndex)); lanRoutesOk {
-					if lanRoutes.([]interface{}) != nil {
-						updateRoutes := false
-
-						var routes []ionoscloud.KubernetesNodePoolLanRoutes
-
-						for routeIndex := range lanRoutes.([]interface{}) {
-
-							addRoute := false
-							route := ionoscloud.KubernetesNodePoolLanRoutes{}
-							if routeNetwork, routeNewtworkOk := d.GetOk(fmt.Sprintf("lans.%d.routes.%d.network", lanIndex, routeIndex)); routeNewtworkOk {
-								routeNetwork := routeNetwork.(string)
-								route.Network = &routeNetwork
-								addRoute = true
-							}
-
-							if routeGatewayIp, routeGatewayIpOk := d.GetOk(fmt.Sprintf("lans.%d.routes.%d.gateway_ip", lanIndex, routeIndex)); routeGatewayIpOk {
-								routeGatewayIp := routeGatewayIp.(string)
-								route.GatewayIp = &routeGatewayIp
-								addRoute = true
-							}
-
-							if addRoute {
-								routes = append(routes, route)
-							}
-						}
-
-						if len(routes) > 0 {
-							updateRoutes = true
-						}
-
-						if updateRoutes == true {
-							log.Printf("[INFO] k8s node pool LanRoutes set to %+v", routes)
-							lan.Routes = &routes
-						}
-					}
-				}
-				if addLan {
-					lans = append(lans, lan)
-				}
-
-			}
-
-			if len(lans) > 0 {
-				updateLans = true
-			}
-
-			if updateLans == true {
-				log.Printf("[INFO] k8s node pool LANs set to %+v", lans)
-				k8sNodepool.Properties.Lans = &lans
-			}
-		}
+		lansList := lansVal.(*schema.Set)
+		lans := getLanResourceData(lansList)
+		k8sNodepool.Properties.Lans = &lans
 	}
 
 	publicIpsProp, ok := d.GetOk("public_ips")
@@ -639,47 +620,9 @@ func resourcek8sNodePoolUpdate(ctx context.Context, d *schema.ResourceData, meta
 
 	if d.HasChange("lans") {
 		oldLANs, newLANs := d.GetChange("lans")
-		lans := make([]ionoscloud.KubernetesNodePoolLan, 0)
-		if newLANs.([]interface{}) != nil {
-			for lanIndex := range newLANs.([]interface{}) {
-				lan := ionoscloud.KubernetesNodePoolLan{}
-				if lanID, lanIdOk := d.GetOk(fmt.Sprintf("lans.%d.id", lanIndex)); lanIdOk {
-					log.Printf("[INFO] Adding k8s node pool to LAN %+v...", lanID)
-					lanID := int32(lanID.(int))
-					lan.Id = &lanID
-				}
-
-				lanDhcp := d.Get(fmt.Sprintf("lans.%d.dhcp", lanIndex)).(bool)
-				lan.Dhcp = &lanDhcp
-				routes := make([]ionoscloud.KubernetesNodePoolLanRoutes, 0)
-				if lanRoutes, lanRoutesOk := d.GetOk(fmt.Sprintf("lans.%d.routes", lanIndex)); lanRoutesOk {
-					if lanRoutes.([]interface{}) != nil {
-						for routeIndex := range lanRoutes.([]interface{}) {
-
-							route := ionoscloud.KubernetesNodePoolLanRoutes{}
-							if routeNetwork, routeNewtworkOk := d.GetOk(fmt.Sprintf("lans.%d.routes.%d.network", lanIndex, routeIndex)); routeNewtworkOk {
-								routeNetwork := routeNetwork.(string)
-								route.Network = &routeNetwork
-							}
-
-							if routeGatewayIp, routeGatewayIpOk := d.GetOk(fmt.Sprintf("lans.%d.routes.%d.gateway_ip", lanIndex, routeIndex)); routeGatewayIpOk {
-								routeGatewayIp := routeGatewayIp.(string)
-								route.GatewayIp = &routeGatewayIp
-							}
-
-							routes = append(routes, route)
-
-						}
-
-						log.Printf("[INFO] k8s node pool LanRoutes set to %+v", routes)
-					}
-				}
-				lan.Routes = &routes
-				lans = append(lans, lan)
-			}
-		}
+		lansList := newLANs.(*schema.Set)
+		lans := getLanResourceData(lansList)
 		log.Printf("[INFO] k8s node pool LANs changed from %+v to %+v", oldLANs, newLANs)
-
 		request.Properties.Lans = &lans
 	}
 
