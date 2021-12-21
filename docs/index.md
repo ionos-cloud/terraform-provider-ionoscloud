@@ -8,7 +8,7 @@ description: |-
 
 # IonosCloud Provider
 
-The IonosCloud provider gives the ability to deploy and configure resources using the IonosCloud Cloud API.
+The IonosCloud provider gives the ability to deploy and configure resources using the IonosCloud APIs.
 
 Use the navigation to the left to read about the available data sources and resources.
 
@@ -78,14 +78,45 @@ The following env variables have changed:
 
 The provider needs to be configured with proper credentials before it can be used.
 
+You can set the environment variables for HTTP basic authentication:
+
 ```bash
-$ export IONOS_USERNAME="ionoscloud_username"
-$ export IONOS_PASSWORD="ionoscloud_password"
-$ export IONOS_API_URL="ionoscloud_cloud_api_url"
+export IONOS_USERNAME="username"
+export IONOS_PASSWORD="password"
 ```
+
+Or you can use token authentication:
+
+```bash
+export IONOS_TOKEN="token"
+```
+
+Also, you can overwrite the api endpoint: `api.ionos.com` via the `--api-url` global flag or via the following environment variable:
+
+```bash
+export IONOS_API_URL="api-url"
+```
+
+Note: if `IONOS_API_URL` environment variable is set, it is recommended to have the `api.ionos.com` value (not `api.ionos.com/cloudapi/v5`).
+
 
 Or you can provide your credentials in a `.tf` configuration file as shown in this example.
 
+```hcl
+provider "ionoscloud" {
+  username          = var.ionos_username
+  password          = var.ionos_password
+  token             = var.ionos_token
+  endpoint          = var.ionos_api_url
+}
+```
+
+For setting the variable environment variables can be used. The environment variables must be in the format TF_VAR_name and this will be checked last for a value. For example:
+
+```bash
+export TF_VAR_ionos_username="username"
+export TF_VAR_ionos_password="password"
+```
 
 ## Debugging
 
@@ -106,7 +137,8 @@ now you can see the response body incl. api error message:
   "messages" : [ {
     "errorCode" : "200",
     "message" : "[VDC-yy-xxxx] Operation cannot be executed since this Kubernetes Nodepool is already marked for deletion. Current state of the resource is FAILED_DESTROYING."
-  } ]
+  }]
+}
 ```
 
 
