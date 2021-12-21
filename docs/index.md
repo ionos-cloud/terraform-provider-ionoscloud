@@ -91,7 +91,7 @@ Or you can use token authentication:
 export IONOS_TOKEN="token"
 ```
 
-Also, you can overwrite the api endpoint: `api.ionos.com` via the `--api-url` global flag or via the following environment variable:
+Also, you can overwrite the api endpoint: `api.ionos.com` via the following environment variable:
 
 ```bash
 export IONOS_API_URL="api-url"
