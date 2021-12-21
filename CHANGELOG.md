@@ -1,3 +1,9 @@
+## 6.0.2 (upcoming release)
+
+### Documentation:
+- Improved terraform registry documentation with a more detailed description of environment and terraform variables
+- Added badges containing the release and go version in README.md
+
 ## 6.0.1
 
 ### Fixes: 
