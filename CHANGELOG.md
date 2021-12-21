@@ -1,3 +1,9 @@
+## 5.2.24 (upcoming release)
+
+### Documentation: 
+- Improved terraform registry documentation with a more detailed description of environment and terraform variables
+- Added badges containing the release and go version in README.md
+
 ## 5.2.23
 
 ### Fixes: 
