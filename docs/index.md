@@ -100,7 +100,7 @@ export IONOS_API_URL="api-url"
 Note: if `IONOS_API_URL` environment variable is set, it is recommended to have the `api.ionos.com` value (not `api.ionos.com/cloudapi/v5`).
 
 
-Or you can provide your credentials in a `.tf` configuration file as shown in this example.
+Another way of configuring it, is by providing your credentials/api_url in a `.tf` configuration file as shown in the below example.
 
 ```hcl
 provider "ionoscloud" {
@@ -111,7 +111,7 @@ provider "ionoscloud" {
 }
 ```
 
-For setting the variable environment variables can be used. The environment variables must be in the format TF_VAR_name and this will be checked last for a value. For example:
+You can either explicitly write them in the .tf file or use var.name as in the example above. For setting the var.name, environment variables can be used. The environment variables must be in the format TF_VAR_name and this will be checked last for a value. For example:
 
 ```bash
 export TF_VAR_ionos_username="username"
