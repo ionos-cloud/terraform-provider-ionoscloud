@@ -52,6 +52,8 @@ func TestAccServerBasic(t *testing.T) {
 					resource.TestCheckResourceAttr(ServerResource+"."+ServerTestResource, "nic.0.firewall.0.source_mac", "00:0a:95:9d:68:17"),
 					resource.TestCheckResourceAttrPair(ServerResource+"."+ServerTestResource, "nic.0.firewall.0.source_ip", "ionoscloud_ipblock.webserver_ipblock", "ips.2"),
 					resource.TestCheckResourceAttrPair(ServerResource+"."+ServerTestResource, "nic.0.firewall.0.target_ip", "ionoscloud_ipblock.webserver_ipblock", "ips.3"),
+					resource.TestCheckResourceAttrSet(ServerResource+"."+ServerTestResource, "primary_ip"),
+					resource.TestCheckResourceAttrSet(ServerResource+"."+ServerTestResource, "boot_volume"),
 				),
 			},
 			{
@@ -84,6 +86,7 @@ func TestAccServerBasic(t *testing.T) {
 					resource.TestCheckResourceAttr(ServerResource+"."+ServerTestResource, "nic.0.firewall.0.source_mac", "00:0a:95:9d:68:18"),
 					resource.TestCheckResourceAttrPair(ServerResource+"."+ServerTestResource, "nic.0.firewall.0.source_ip", "ionoscloud_ipblock.webserver_ipblock_update", "ips.2"),
 					resource.TestCheckResourceAttrPair(ServerResource+"."+ServerTestResource, "nic.0.firewall.0.target_ip", "ionoscloud_ipblock.webserver_ipblock_update", "ips.3"),
+					resource.TestCheckResourceAttrSet(ServerResource+"."+ServerTestResource, "primary_ip"),
 				),
 			},
 		},
@@ -188,6 +191,7 @@ func TestAccServerWithSnapshot(t *testing.T) {
 					resource.TestCheckResourceAttrPair(ServerResource+"."+ServerTestResource, "nic.0.lan", LanResource+"."+LanTestResource, "id"),
 					resource.TestCheckResourceAttr(ServerResource+"."+ServerTestResource, "nic.0.dhcp", "true"),
 					resource.TestCheckResourceAttr(ServerResource+"."+ServerTestResource, "nic.0.firewall_active", "true"),
+					resource.TestCheckResourceAttrSet(ServerResource+"."+ServerTestResource, "boot_volume"),
 				),
 			},
 		},
@@ -538,7 +542,7 @@ resource ` + ServerResource + ` ` + ServerTestResource + ` {
   ram = 1024
   availability_zone = "ZONE_1"
   cpu_family = "INTEL_SKYLAKE"
-  image_name = "terraform_snapshot"
+  image_name = ` + SnapshotResource + `.test_snapshot.id
   volume {
     name = "` + ServerTestResource + `"
     size = 5

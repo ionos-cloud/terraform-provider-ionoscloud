@@ -451,6 +451,9 @@ func resourceServerCreate(ctx context.Context, d *schema.ResourceData, meta inte
 
 	// get image and imageAlias
 	image, imageAlias, err := getImage(ctx, client, d, *volume)
+	if err != nil {
+		return diag.FromErr(err)
+	}
 
 	// add remaining properties in volume (dependent in image and imageAlias)
 	if imageAlias != "" {
@@ -535,7 +538,7 @@ func resourceServerCreate(ctx context.Context, d *schema.ResourceData, meta inte
 	logApiRequestTime(apiResponse)
 
 	if err != nil {
-		diags := diag.FromErr(fmt.Errorf("error creating server: (%s)", err))
+		diags := diag.FromErr(fmt.Errorf("error creating server: (%w)", err))
 		return diags
 	}
 
@@ -561,7 +564,7 @@ func resourceServerCreate(ctx context.Context, d *schema.ResourceData, meta inte
 	logApiRequestTime(apiResponse)
 
 	if err != nil {
-		diags := diag.FromErr(fmt.Errorf("error fetching server: %s", err))
+		diags := diag.FromErr(fmt.Errorf("error fetching server: %w", err))
 		return diags
 	}
 
@@ -570,7 +573,7 @@ func resourceServerCreate(ctx context.Context, d *schema.ResourceData, meta inte
 	logApiRequestTime(apiResponse)
 
 	if err != nil {
-		diags := diag.FromErr(fmt.Errorf("an error occurred while fetching firewall rules: %s", err))
+		diags := diag.FromErr(fmt.Errorf("an error occurred while fetching firewall rules: %w", err))
 		return diags
 	}
 
@@ -586,7 +589,7 @@ func resourceServerCreate(ctx context.Context, d *schema.ResourceData, meta inte
 	if (*server.Entities.Nics.Items)[0].Id != nil {
 		err := d.Set("primary_nic", *(*server.Entities.Nics.Items)[0].Id)
 		if err != nil {
-			diags := diag.FromErr(fmt.Errorf("error while setting primary nic %s: %s", d.Id(), err))
+			diags := diag.FromErr(fmt.Errorf("error while setting primary nic %s: %w", d.Id(), err))
 			return diags
 		}
 	}
@@ -622,7 +625,7 @@ func resourceServerRead(ctx context.Context, d *schema.ResourceData, meta interf
 			d.SetId("")
 			return nil
 		}
-		diags := diag.FromErr(fmt.Errorf("error occured while fetching a server ID %s %s", d.Id(), err))
+		diags := diag.FromErr(fmt.Errorf("error occured while fetching a server ID %s %w", d.Id(), err))
 		return diags
 	}
 
@@ -647,7 +650,7 @@ func resourceServerUpdate(ctx context.Context, d *schema.ResourceData, meta inte
 	logApiRequestTime(apiResponse)
 
 	if err != nil {
-		diags := diag.FromErr(fmt.Errorf("error occured while updating server ID %s: %s", d.Id(), err))
+		diags := diag.FromErr(fmt.Errorf("error occured while updating server ID %s: %w", d.Id(), err))
 		return diags
 	}
 
@@ -678,7 +681,7 @@ func resourceServerUpdate(ctx context.Context, d *schema.ResourceData, meta inte
 			// Wait, catching any errors
 			_, errState = getStateChangeConf(meta, d, apiResponse.Header.Get("Location"), schema.TimeoutCreate).WaitForStateContext(ctx)
 			if errState != nil {
-				diags := diag.FromErr(fmt.Errorf("an error occured while waitin for a state change for dcId: %s server_id: %s ID: %s %s", dcId, d.Id(), bootVolume, err))
+				diags := diag.FromErr(fmt.Errorf("an error occured while waitin for a state change for dcId: %s server_id: %s ID: %s %w", dcId, d.Id(), bootVolume, err))
 				return diags
 			}
 		}
@@ -693,7 +696,7 @@ func resourceServerUpdate(ctx context.Context, d *schema.ResourceData, meta inte
 		logApiRequestTime(apiResponse)
 
 		if err != nil {
-			diags := diag.FromErr(fmt.Errorf("error patching volume %s %s", d.Id(), err))
+			diags := diag.FromErr(fmt.Errorf("error patching volume %s %w", d.Id(), err))
 			return diags
 		}
 
@@ -734,7 +737,7 @@ func resourceServerUpdate(ctx context.Context, d *schema.ResourceData, meta inte
 
 			if err != nil {
 				if apiResponse != nil && apiResponse.Response != nil && apiResponse.StatusCode != 404 {
-					diags := diag.FromErr(fmt.Errorf("error occured at checking existance of firewall %s %s", firewallId, err))
+					diags := diag.FromErr(fmt.Errorf("error occured at checking existance of firewall %s %w", firewallId, err))
 					return diags
 				} else if apiResponse != nil && apiResponse.Response != nil && apiResponse.StatusCode == 404 {
 					diags := diag.FromErr(fmt.Errorf("firewall does not exist %s", firewallId))
@@ -778,7 +781,7 @@ func resourceServerUpdate(ctx context.Context, d *schema.ResourceData, meta inte
 		_, apiResponse, err := client.NicApi.DatacentersServersNicsPatch(ctx, d.Get("datacenter_id").(string), *server.Id, nicId).Nic(*nic.Properties).Execute()
 		logApiRequestTime(apiResponse)
 		if err != nil {
-			diags := diag.FromErr(fmt.Errorf("error updating nic %s", err))
+			diags := diag.FromErr(fmt.Errorf("error updating nic %w", err))
 			return diags
 		}
 
@@ -802,7 +805,7 @@ func resourceServerDelete(ctx context.Context, d *schema.ResourceData, meta inte
 	logApiRequestTime(apiResponse)
 
 	if err != nil {
-		diags := diag.FromErr(fmt.Errorf("error occured while fetching a server ID %s %s", d.Id(), err))
+		diags := diag.FromErr(fmt.Errorf("error occured while fetching a server ID %s %w", d.Id(), err))
 		return diags
 	}
 
@@ -860,7 +863,7 @@ func resourceServerImport(ctx context.Context, d *schema.ResourceData, meta inte
 			d.SetId("")
 			return nil, fmt.Errorf("unable to find server %q", serverId)
 		}
-		return nil, fmt.Errorf("error occured while fetching a server ID %s %s", d.Id(), err)
+		return nil, fmt.Errorf("error occured while fetching a server ID %s %w", d.Id(), err)
 	}
 
 	if err := d.Set("datacenter_id", datacenterId); err != nil {
@@ -1146,6 +1149,12 @@ func setServerData(ctx context.Context, client *ionoscloud.APIClient, d *schema.
 			return err
 		}
 		nicEntry := SetNetworkProperties(nic)
+
+		if nic.Properties != nil && len(*nic.Properties.Ips) > 0 {
+			if err := d.Set("primary_ip", (*nic.Properties.Ips)[0]); err != nil {
+				return err
+			}
+		}
 
 		if (readFromSchema && primaryFirewallOk) || !readFromSchema {
 			var firewallId string
