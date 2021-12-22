@@ -1,13 +1,18 @@
 ## 5.2.24 (upcoming release)
 
-### Documentation: 
+### Documentation:
 - Improved terraform registry documentation with a more detailed description of environment and terraform variables
 - Added badges containing the release and go version in README.md
+
+### Fixes:
+- creating server with volume from snapshot did not populate volume_boot
+- primary_ip is now set on server creation
 
 ## 5.2.23
 
 ### Fixes: 
 - Fixed rebuild k8 nodes with the same lan - order of lans is ignored now at diff
+
 
 ## 5.2.22
 
@@ -18,11 +23,11 @@
 
 ### Fixes:
 - Password now saved for user on update
-- Host endpoint no longer overwritten if it starts with `http`(fixed in sdk)
-- Fix for receiving sporadic `EOF` from server.
-- Fix k8 node pool import
-- Fix crash when receiving empty metadata
-- Fix user update, remove sensitive logs, suppress email diff based on case.
+- fix sporadic EOF received when making a lot of concurrent https requests to server (fixed in sdk 6.0.0)
+- fixed #154: allow url to start with "http" (fixed in sdk v5.1.1)
+- fixed #92: user password change (fixed in sdk v5.1.1)
+- fix user update and password field is now sensitive
+- fix crash when no metadata is received from server
 
 ## 5.2.21
 

@@ -676,7 +676,7 @@ func getImage(ctx context.Context, client *ionoscloud.APIClient, d *schema.Resou
 				if image != "" {
 					isSnapshot = true
 				} else {
-					log.Printf("[*****] lookig for an image alias for %s\n", imageName)
+					log.Printf("[INFO] looking for an image alias for %s\n", imageName)
 
 					imageAlias = getImageAlias(ctx, client, imageName, *dc.Properties.Location)
 					if imageAlias == "" {
@@ -692,20 +692,21 @@ func getImage(ctx context.Context, client *ionoscloud.APIClient, d *schema.Resou
 		} else {
 			img, apiResponse, err := client.ImageApi.ImagesFindById(ctx, imageName).Execute()
 			logApiRequestTime(apiResponse)
-
+			//here we search for snapshot if we do not find img based on imageName
 			if apiResponse != nil && apiResponse.Response != nil && apiResponse.StatusCode == 404 {
 
-				_, apiResponse, err = client.SnapshotApi.SnapshotsFindById(ctx, imageName).Execute()
+				snapshot, apiResponse, err := client.SnapshotApi.SnapshotsFindById(ctx, imageName).Execute()
 				logApiRequestTime(apiResponse)
-
 				if err != nil {
-					return image, imageAlias, fmt.Errorf("could not fetch image/snapshot: %s", err)
+					return image, imageAlias, fmt.Errorf("could not fetch image/snapshot: %w", err)
 				}
 
 				isSnapshot = true
-
+				if snapshot.Id != nil {
+					image = *snapshot.Id
+				}
 			} else if err != nil {
-				return image, imageAlias, fmt.Errorf("error fetching image/snapshot: %s", err)
+				return image, imageAlias, fmt.Errorf("error fetching image/snapshot: %w", err)
 			}
 
 			if isSnapshot == false && img.Properties.Public != nil && *img.Properties.Public == true {
@@ -731,15 +732,25 @@ func getImage(ctx context.Context, client *ionoscloud.APIClient, d *schema.Resou
 				}
 			} else {
 				img, apiResponse, err := client.ImageApi.ImagesFindById(ctx, imageName).Execute()
+
 				logApiRequestTime(apiResponse)
 				if err != nil {
-
-					_, apiResponse, err := client.SnapshotApi.SnapshotsFindById(ctx, imageName).Execute()
-					logApiRequestTime(apiResponse)
-					if err != nil {
-						return image, imageAlias, fmt.Errorf("error fetching image/snapshot: %s", err)
+					//we want to search for snapshot again, but we check for
+					//image != "" to be sure we didn't find it when we searched above for it
+					if (apiResponse != nil && apiResponse.Response != nil && apiResponse.StatusCode == 404) && (image != "") {
+						snapshot, apiResponse, err := client.SnapshotApi.SnapshotsFindById(ctx, imageName).Execute()
+						logApiRequestTime(apiResponse)
+						if err != nil {
+							return image, imageAlias, fmt.Errorf("error fetching image/snapshot: %w", err)
+						}
+						if snapshot.Id != nil {
+							image = *snapshot.Id
+						}
+						isSnapshot = true
+					} else {
+						return image, imageAlias, err
 					}
-					isSnapshot = true
+
 				} else {
 					if isSnapshot == false && img.Properties.Public != nil && *img.Properties.Public == true {
 						if volume.ImagePassword == nil && (volume.SshKeys == nil || len(*volume.SshKeys) == 0) {
