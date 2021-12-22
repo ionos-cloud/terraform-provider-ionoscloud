@@ -1,9 +1,7 @@
 # Terraform provider
 
----
 **NOTE:**
-Please consider using Terraform IonosCloud Provider v6 releases that are using IONOS Cloud API Version 6, the latest stable API version. New features and improvements will be integrated in IONOS Cloud API Version 6.
----
+_Please consider using Terraform IonosCloud Provider v6 releases that are using IONOS Cloud API Version 6, the latest stable API version. New features and improvements will be integrated in IONOS Cloud API Version 6._
 
 ## Overview
 
