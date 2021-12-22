@@ -22,7 +22,7 @@ func TestAccNicImportBasic(t *testing.T) {
 			},
 
 			{
-				ResourceName:      fullNicResourceName,
+				ResourceName:      FullNicResourceName,
 				ImportStateIdFunc: testAccNicImportStateId,
 				ImportState:       true,
 				ImportStateVerify: true,
@@ -35,7 +35,7 @@ func testAccNicImportStateId(s *terraform.State) (string, error) {
 	importID := ""
 
 	for _, rs := range s.RootModule().Resources {
-		if rs.Type != nicResource {
+		if rs.Type != NicResource {
 			continue
 		}
 

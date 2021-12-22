@@ -22,16 +22,16 @@ func TestAccShareBasic(t *testing.T) {
 			{
 				Config: fmt.Sprintf(testacccheckshareconfigBasic),
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheckShareExists(shareResourceFullName, &share),
-					resource.TestCheckResourceAttr(shareResourceFullName, "edit_privilege", "true"),
-					resource.TestCheckResourceAttr(shareResourceFullName, "share_privilege", "true"),
+					testAccCheckShareExists(ShareResourceFullName, &share),
+					resource.TestCheckResourceAttr(ShareResourceFullName, "edit_privilege", "true"),
+					resource.TestCheckResourceAttr(ShareResourceFullName, "share_privilege", "true"),
 				),
 			},
 			{
 				Config: testacccheckshareconfigUpdate,
 				Check: resource.ComposeTestCheckFunc(
-					resource.TestCheckResourceAttr(shareResourceFullName, "edit_privilege", "false"),
-					resource.TestCheckResourceAttr(shareResourceFullName, "share_privilege", "false"),
+					resource.TestCheckResourceAttr(ShareResourceFullName, "edit_privilege", "false"),
+					resource.TestCheckResourceAttr(ShareResourceFullName, "share_privilege", "false"),
 				),
 			},
 		},
@@ -48,7 +48,7 @@ func testAccCheckShareDestroyCheck(s *terraform.State) error {
 	}
 	for _, rs := range s.RootModule().Resources {
 
-		if rs.Type != shareResource {
+		if rs.Type != ShareResource {
 			continue
 		}
 

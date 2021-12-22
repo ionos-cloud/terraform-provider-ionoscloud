@@ -1,5 +1,8 @@
 ## 5.2.24 (upcoming release)
 
+### Features:
+- add data source for ip failover
+
 ### Documentation:
 - Improved terraform registry documentation with a more detailed description of environment and terraform variables
 - Added badges containing the release and go version in README.md

@@ -104,19 +104,25 @@ const (
 )
 
 const (
-	nicResource         = "ionoscloud_nic"
-	fullNicResourceName = nicResource + "." + nicTestResourceName
-	nicTestResourceName = "database_nic"
+	NicResource         = "ionoscloud_nic"
+	FullNicResourceName = NicResource + "." + NicTestResourceName
+	NicTestResourceName = "database_nic"
 )
 
 const (
-	shareResource         = "ionoscloud_share"
-	shareResourceFullName = shareResource + "." + sourceShareName
-	sourceShareName       = "share"
+	ShareResource         = "ionoscloud_share"
+	ShareResourceFullName = ShareResource + "." + SourceShareName
+	SourceShareName       = "share"
 )
 
 // General Constants
 const (
 	DataSource       = "data"
 	UpdatedResources = "updated"
+)
+
+const (
+	ResourceIpFailover         = "ionoscloud_ipfailover"
+	IpfailoverResourceFullName = ResourceIpFailover + "." + IpfailoverName
+	IpfailoverName             = "failover-test"
 )

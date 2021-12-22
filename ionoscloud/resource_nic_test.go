@@ -24,21 +24,21 @@ func TestAccNicBasic(t *testing.T) {
 			{
 				Config: fmt.Sprintf(testAccCheckNicConfigBasic, volumeName),
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheckNICExists(fullNicResourceName, &nic),
-					resource.TestCheckResourceAttr(fullNicResourceName, "name", volumeName),
-					resource.TestCheckResourceAttr(fullNicResourceName, "dhcp", "true"),
-					resource.TestCheckResourceAttrSet(fullNicResourceName, "mac"),
-					resource.TestCheckResourceAttr(fullNicResourceName, "firewall_active", "true"),
-					resource.TestCheckResourceAttrPair(fullNicResourceName, "ips.0", "ionoscloud_ipblock.test_server", "ips.0"),
-					resource.TestCheckResourceAttrPair(fullNicResourceName, "ips.1", "ionoscloud_ipblock.test_server", "ips.1"),
+					testAccCheckNICExists(FullNicResourceName, &nic),
+					resource.TestCheckResourceAttr(FullNicResourceName, "name", volumeName),
+					resource.TestCheckResourceAttr(FullNicResourceName, "dhcp", "true"),
+					resource.TestCheckResourceAttrSet(FullNicResourceName, "mac"),
+					resource.TestCheckResourceAttr(FullNicResourceName, "firewall_active", "true"),
+					resource.TestCheckResourceAttrPair(FullNicResourceName, "ips.0", "ionoscloud_ipblock.test_server", "ips.0"),
+					resource.TestCheckResourceAttrPair(FullNicResourceName, "ips.1", "ionoscloud_ipblock.test_server", "ips.1"),
 				),
 			},
 			{
 				Config: testAccCheckNicConfigUpdate,
 				Check: resource.ComposeTestCheckFunc(
-					resource.TestCheckResourceAttr(fullNicResourceName, "name", "updated"),
-					resource.TestCheckResourceAttr(fullNicResourceName, "dhcp", "false"),
-					resource.TestCheckResourceAttr(fullNicResourceName, "firewall_active", "false"),
+					resource.TestCheckResourceAttr(FullNicResourceName, "name", "updated"),
+					resource.TestCheckResourceAttr(FullNicResourceName, "dhcp", "false"),
+					resource.TestCheckResourceAttr(FullNicResourceName, "firewall_active", "false"),
 				),
 			},
 		},
@@ -54,7 +54,7 @@ func testAccCheckNicDestroyCheck(s *terraform.State) error {
 	}
 
 	for _, rs := range s.RootModule().Resources {
-		if rs.Type != nicResource {
+		if rs.Type != NicResource {
 			continue
 		}
 
