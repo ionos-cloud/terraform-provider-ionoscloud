@@ -4,7 +4,7 @@ import (
 	"context"
 	"flag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/plugin"
-	"github.com/ionos-cloud/terraform-provider-ionoscloud/ionoscloud"
+	"github.com/ionos-cloud/terraform-provider-ionoscloud/v5/ionoscloud"
 	"log"
 )
 

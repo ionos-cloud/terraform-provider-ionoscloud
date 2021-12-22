@@ -1,4 +1,4 @@
-module github.com/ionos-cloud/terraform-provider-ionoscloud
+module github.com/ionos-cloud/terraform-provider-ionoscloud/v5
 
 go 1.17
 
