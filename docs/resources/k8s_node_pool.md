@@ -21,9 +21,21 @@ resource "ionoscloud_k8s_node_pool" "demo" {
     max_node_count = 3
   }
   lans {
-    id   = ionoscloud_lan.terraform_acctest.id
+    id   = ionoscloud_lan.terraform_acctest1.id
+    dhcp = true
+    routes {
+      network   = "1.2.3.5/24"
+      gateway_ip = "10.1.5.17"
+    } 
+    routes {
+      network   = "1.2.3.6/24"
+      gateway_ip = "10.1.5.18"
+    } 
+  }
+  lans {
+    id   = ionoscloud_lan.terraform_acctest2.id
     dhcp = false
-   }
+  }
   maintenance_window {
     day_of_the_week = "Sunday"
     time            = "10:30:00Z"
@@ -88,3 +100,5 @@ terraform import ionoscloud_k8s_node_pool.demo {k8s_cluster_uuid}/{k8s_nodepool_
 ```
 
 This can be helpful when you want to import kubernetes node pools which you have already created manually or using other means, outside of terraform, towards the goal of managing them via Terraform
+
+> :warning: **If you are upgrading from v5.x.x to v6.x.x**: You have to modify you plan for lans to match the new structure, by putting the ids from the old slice in lans.id fields.

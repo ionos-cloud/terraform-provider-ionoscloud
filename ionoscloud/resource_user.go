@@ -40,6 +40,7 @@ func resourceUser() *schema.Resource {
 				Type:         schema.TypeString,
 				Required:     true,
 				ValidateFunc: validation.All(validation.StringIsNotWhiteSpace),
+				Sensitive:    true,
 			},
 			"administrator": {
 				Type:     schema.TypeBool,
@@ -203,6 +204,11 @@ func resourceUserUpdate(ctx context.Context, d *schema.ResourceData, meta interf
 	if d.HasChange("force_sec_auth") {
 		forceSecAuth := d.Get("force_sec_auth").(bool)
 		userReq.Properties.ForceSecAuth = &forceSecAuth
+	}
+
+	if d.HasChange("password") {
+		password := d.Get("password").(string)
+		userReq.Properties.Password = &password
 	}
 
 	_, apiResponse, err = client.UserManagementApi.UmUsersPut(ctx, d.Id()).User(userReq).Execute()
