@@ -16,42 +16,42 @@ import (
 
 // APIVersion struct for APIVersion
 type APIVersion struct {
-	Version    *string `json:"version,omitempty"`
+	Name       *string `json:"name,omitempty"`
 	SwaggerUrl *string `json:"swaggerUrl,omitempty"`
 }
 
-// GetVersion returns the Version field value
+// GetName returns the Name field value
 // If the value is explicit nil, the zero value for string will be returned
-func (o *APIVersion) GetVersion() *string {
+func (o *APIVersion) GetName() *string {
 	if o == nil {
 		return nil
 	}
 
-	return o.Version
+	return o.Name
 
 }
 
-// GetVersionOk returns a tuple with the Version field value
+// GetNameOk returns a tuple with the Name field value
 // and a boolean to check if the value has been set.
 // NOTE: If the value is an explicit nil, `nil, true` will be returned
-func (o *APIVersion) GetVersionOk() (*string, bool) {
+func (o *APIVersion) GetNameOk() (*string, bool) {
 	if o == nil {
 		return nil, false
 	}
 
-	return o.Version, true
+	return o.Name, true
 }
 
-// SetVersion sets field value
-func (o *APIVersion) SetVersion(v string) {
+// SetName sets field value
+func (o *APIVersion) SetName(v string) {
 
-	o.Version = &v
+	o.Name = &v
 
 }
 
-// HasVersion returns a boolean if a field has been set.
-func (o *APIVersion) HasVersion() bool {
-	if o != nil && o.Version != nil {
+// HasName returns a boolean if a field has been set.
+func (o *APIVersion) HasName() bool {
+	if o != nil && o.Name != nil {
 		return true
 	}
 
@@ -99,8 +99,8 @@ func (o *APIVersion) HasSwaggerUrl() bool {
 func (o APIVersion) MarshalJSON() ([]byte, error) {
 	toSerialize := map[string]interface{}{}
 
-	if o.Version != nil {
-		toSerialize["version"] = o.Version
+	if o.Name != nil {
+		toSerialize["name"] = o.Name
 	}
 
 	if o.SwaggerUrl != nil {

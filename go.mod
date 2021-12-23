@@ -5,8 +5,8 @@ go 1.17
 require (
 	github.com/hashicorp/terraform-plugin-sdk v1.17.2
 	github.com/hashicorp/terraform-plugin-sdk/v2 v2.7.0
-	github.com/ionos-cloud/sdk-go/v6 v6.0.0-beta.8
 	github.com/ionos-cloud/sdk-go-autoscaling v1.0.0
+	github.com/ionos-cloud/sdk-go/v6 v6.0.0-beta.8
 	golang.org/x/crypto v0.0.0-20210421170649-83a5a9bb288b
 	gopkg.in/yaml.v3 v3.0.0-20200615113413-eeeca48fe776
 )
@@ -24,6 +24,7 @@ require (
 	github.com/go-test/deep v1.0.6 // indirect
 	github.com/golang/groupcache v0.0.0-20200121045136-8c9f03a8e57e // indirect
 	github.com/golang/protobuf v1.5.2 // indirect
+	github.com/google/uuid v1.1.2
 	github.com/googleapis/gax-go/v2 v2.0.5 // indirect
 	github.com/hashicorp/errwrap v1.0.0 // indirect
 	github.com/hashicorp/go-checkpoint v0.5.0 // indirect
@@ -31,7 +32,6 @@ require (
 	github.com/hashicorp/go-cty v1.4.1-0.20200414143053-d3edf31b6320 // indirect
 	github.com/hashicorp/go-getter v1.5.3 // indirect
 	github.com/hashicorp/go-hclog v0.15.0 // indirect
-	github.com/google/uuid v1.1.2
 	github.com/hashicorp/go-multierror v1.1.0 // indirect
 	github.com/hashicorp/go-plugin v1.4.1 // indirect
 	github.com/hashicorp/go-safetemp v1.0.0 // indirect
@@ -75,4 +75,4 @@ require (
 	google.golang.org/protobuf v1.26.0 // indirect
 )
 
-replace github.com/ionos-cloud/sdk-go-autoscaling => ../../../../../sdk/new-dbaas-sdk
+replace github.com/ionos-cloud/sdk-go-autoscaling => ../sdk-go-dbaas-postgres

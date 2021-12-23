@@ -18,7 +18,7 @@ import (
 type Connection struct {
 	// The datacenter to connect your cluster to.
 	DatacenterId *string `json:"datacenterId"`
-	// The LAN to connect your cluster to.
+	// The numeric LAN ID to connect your cluster to.
 	LanId *string `json:"lanId"`
 	// The IP and subnet for your cluster. Note the following unavailable IP ranges: 10.233.64.0/18 10.233.0.0/18 10.233.114.0/24
 	Cidr *string `json:"cidr"`

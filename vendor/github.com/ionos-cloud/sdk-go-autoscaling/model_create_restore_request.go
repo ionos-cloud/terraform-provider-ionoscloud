@@ -20,7 +20,7 @@ type CreateRestoreRequest struct {
 	// The unique ID of the backup you want to restore.
 	BackupId *string `json:"backupId"`
 	// If this value is supplied as ISO 8601 timestamp, the backup will be replayed up until the given timestamp. If empty, the backup will be applied completely.
-	RecoveryTargetTime *IonosTime
+	RecoveryTargetTime *IonosTime `json:"recoveryTargetTime,omitempty"`
 }
 
 // GetBackupId returns the BackupId field value

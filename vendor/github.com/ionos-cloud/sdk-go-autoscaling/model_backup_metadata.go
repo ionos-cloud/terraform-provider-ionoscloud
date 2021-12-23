@@ -18,7 +18,8 @@ import (
 // BackupMetadata Metadata of the backup resource.
 type BackupMetadata struct {
 	// The ISO 8601 creation timestamp.
-	CreatedDate *IonosTime
+	CreatedDate *IonosTime `json:"createdDate,omitempty"`
+	State       *State     `json:"state,omitempty"`
 }
 
 // GetCreatedDate returns the CreatedDate field value
@@ -66,11 +67,53 @@ func (o *BackupMetadata) HasCreatedDate() bool {
 	return false
 }
 
+// GetState returns the State field value
+// If the value is explicit nil, the zero value for State will be returned
+func (o *BackupMetadata) GetState() *State {
+	if o == nil {
+		return nil
+	}
+
+	return o.State
+
+}
+
+// GetStateOk returns a tuple with the State field value
+// and a boolean to check if the value has been set.
+// NOTE: If the value is an explicit nil, `nil, true` will be returned
+func (o *BackupMetadata) GetStateOk() (*State, bool) {
+	if o == nil {
+		return nil, false
+	}
+
+	return o.State, true
+}
+
+// SetState sets field value
+func (o *BackupMetadata) SetState(v State) {
+
+	o.State = &v
+
+}
+
+// HasState returns a boolean if a field has been set.
+func (o *BackupMetadata) HasState() bool {
+	if o != nil && o.State != nil {
+		return true
+	}
+
+	return false
+}
+
 func (o BackupMetadata) MarshalJSON() ([]byte, error) {
 	toSerialize := map[string]interface{}{}
 
 	if o.CreatedDate != nil {
 		toSerialize["createdDate"] = o.CreatedDate
+	}
+
+	if o.State != nil {
+		toSerialize["state"] = o.State
 	}
 
 	return json.Marshal(toSerialize)

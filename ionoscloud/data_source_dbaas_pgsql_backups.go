@@ -32,11 +32,6 @@ func dataSourceDbaasPgSqlBackups() *schema.Resource {
 							Description: "The unique ID of the cluster",
 							Computed:    true,
 						},
-						"display_name": {
-							Type:        schema.TypeString,
-							Description: "The friendly name of your cluster.",
-							Computed:    true,
-						},
 						"type": {
 							Type:     schema.TypeString,
 							Computed: true,

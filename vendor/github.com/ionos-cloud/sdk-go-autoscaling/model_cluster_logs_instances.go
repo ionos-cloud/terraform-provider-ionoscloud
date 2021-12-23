@@ -17,8 +17,8 @@ import (
 // ClusterLogsInstances struct for ClusterLogsInstances
 type ClusterLogsInstances struct {
 	// The name of the PostgreSQL instance.
-	Name     *string                   `json:"name,omitempty"`
-	Messages *[]map[string]interface{} `json:"messages,omitempty"`
+	Name     *string                `json:"name,omitempty"`
+	Messages *[]ClusterLogsMessages `json:"messages,omitempty"`
 }
 
 // GetName returns the Name field value
@@ -60,8 +60,8 @@ func (o *ClusterLogsInstances) HasName() bool {
 }
 
 // GetMessages returns the Messages field value
-// If the value is explicit nil, the zero value for []map[string]interface{} will be returned
-func (o *ClusterLogsInstances) GetMessages() *[]map[string]interface{} {
+// If the value is explicit nil, the zero value for []ClusterLogsMessages will be returned
+func (o *ClusterLogsInstances) GetMessages() *[]ClusterLogsMessages {
 	if o == nil {
 		return nil
 	}
@@ -73,7 +73,7 @@ func (o *ClusterLogsInstances) GetMessages() *[]map[string]interface{} {
 // GetMessagesOk returns a tuple with the Messages field value
 // and a boolean to check if the value has been set.
 // NOTE: If the value is an explicit nil, `nil, true` will be returned
-func (o *ClusterLogsInstances) GetMessagesOk() (*[]map[string]interface{}, bool) {
+func (o *ClusterLogsInstances) GetMessagesOk() (*[]ClusterLogsMessages, bool) {
 	if o == nil {
 		return nil, false
 	}
@@ -82,7 +82,7 @@ func (o *ClusterLogsInstances) GetMessagesOk() (*[]map[string]interface{}, bool)
 }
 
 // SetMessages sets field value
-func (o *ClusterLogsInstances) SetMessages(v []map[string]interface{}) {
+func (o *ClusterLogsInstances) SetMessages(v []ClusterLogsMessages) {
 
 	o.Messages = &v
 

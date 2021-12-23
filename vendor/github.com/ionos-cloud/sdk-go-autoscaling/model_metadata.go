@@ -18,14 +18,14 @@ import (
 // Metadata Metadata of the resource
 type Metadata struct {
 	// The ISO 8601 creation timestamp.
-	CreatedDate     *IonosTime
-	CreatedBy       *string `json:"createdBy,omitempty"`
-	CreatedByUserId *string `json:"createdByUserId,omitempty"`
+	CreatedDate     *IonosTime `json:"createdDate,omitempty"`
+	CreatedBy       *string    `json:"createdBy,omitempty"`
+	CreatedByUserId *string    `json:"createdByUserId,omitempty"`
 	// The ISO 8601 modified timestamp.
-	LastModifiedDate     *IonosTime
-	LastModifiedBy       *string `json:"lastModifiedBy,omitempty"`
-	LastModifiedByUserId *string `json:"lastModifiedByUserId,omitempty"`
-	State                *State  `json:"state,omitempty"`
+	LastModifiedDate     *IonosTime `json:"lastModifiedDate,omitempty"`
+	LastModifiedBy       *string    `json:"lastModifiedBy,omitempty"`
+	LastModifiedByUserId *string    `json:"lastModifiedByUserId,omitempty"`
+	State                *State     `json:"state,omitempty"`
 }
 
 // GetCreatedDate returns the CreatedDate field value

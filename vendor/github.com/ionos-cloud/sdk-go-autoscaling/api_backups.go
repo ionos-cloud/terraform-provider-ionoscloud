@@ -169,7 +169,7 @@ type ApiClustersBackupsFindByIdRequest struct {
 	backupId   string
 }
 
-func (r ApiClustersBackupsFindByIdRequest) Execute() (ClusterBackup, *APIResponse, error) {
+func (r ApiClustersBackupsFindByIdRequest) Execute() (BackupResponse, *APIResponse, error) {
 	return r.ApiService.ClustersBackupsFindByIdExecute(r)
 }
 
@@ -192,16 +192,16 @@ func (a *BackupsApiService) ClustersBackupsFindById(ctx _context.Context, backup
 
 /*
  * Execute executes the request
- * @return ClusterBackup
+ * @return BackupResponse
  */
-func (a *BackupsApiService) ClustersBackupsFindByIdExecute(r ApiClustersBackupsFindByIdRequest) (ClusterBackup, *APIResponse, error) {
+func (a *BackupsApiService) ClustersBackupsFindByIdExecute(r ApiClustersBackupsFindByIdRequest) (BackupResponse, *APIResponse, error) {
 	var (
 		localVarHTTPMethod   = _nethttp.MethodGet
 		localVarPostBody     interface{}
 		localVarFormFileName string
 		localVarFileName     string
 		localVarFileBytes    []byte
-		localVarReturnValue  ClusterBackup
+		localVarReturnValue  BackupResponse
 	)
 
 	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "BackupsApiService.ClustersBackupsFindById")

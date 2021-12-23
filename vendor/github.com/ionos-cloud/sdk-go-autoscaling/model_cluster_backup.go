@@ -21,14 +21,12 @@ type ClusterBackup struct {
 	Id *string `json:"id,omitempty"`
 	// The unique ID of the cluster.
 	ClusterId *string `json:"clusterId,omitempty"`
-	// The friendly name of your cluster.
-	DisplayName *string `json:"displayName,omitempty"`
 	// The PostgreSQL version this backup was created from.
 	Version *string `json:"version,omitempty"`
 	// Whether a cluster currently backs up data to this backup.
 	IsActive *bool `json:"isActive,omitempty"`
 	// The oldest available timestamp to which you can restore.
-	EarliestRecoveryTargetTime *IonosTime
+	EarliestRecoveryTargetTime *IonosTime `json:"earliestRecoveryTargetTime,omitempty"`
 }
 
 // GetId returns the Id field value
@@ -101,44 +99,6 @@ func (o *ClusterBackup) SetClusterId(v string) {
 // HasClusterId returns a boolean if a field has been set.
 func (o *ClusterBackup) HasClusterId() bool {
 	if o != nil && o.ClusterId != nil {
-		return true
-	}
-
-	return false
-}
-
-// GetDisplayName returns the DisplayName field value
-// If the value is explicit nil, the zero value for string will be returned
-func (o *ClusterBackup) GetDisplayName() *string {
-	if o == nil {
-		return nil
-	}
-
-	return o.DisplayName
-
-}
-
-// GetDisplayNameOk returns a tuple with the DisplayName field value
-// and a boolean to check if the value has been set.
-// NOTE: If the value is an explicit nil, `nil, true` will be returned
-func (o *ClusterBackup) GetDisplayNameOk() (*string, bool) {
-	if o == nil {
-		return nil, false
-	}
-
-	return o.DisplayName, true
-}
-
-// SetDisplayName sets field value
-func (o *ClusterBackup) SetDisplayName(v string) {
-
-	o.DisplayName = &v
-
-}
-
-// HasDisplayName returns a boolean if a field has been set.
-func (o *ClusterBackup) HasDisplayName() bool {
-	if o != nil && o.DisplayName != nil {
 		return true
 	}
 
@@ -275,10 +235,6 @@ func (o ClusterBackup) MarshalJSON() ([]byte, error) {
 
 	if o.ClusterId != nil {
 		toSerialize["clusterId"] = o.ClusterId
-	}
-
-	if o.DisplayName != nil {
-		toSerialize["displayName"] = o.DisplayName
 	}
 
 	if o.Version != nil {
