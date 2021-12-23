@@ -19,23 +19,23 @@ func TestAccDataSourceNic(t *testing.T) {
 			{
 				Config: testAccDataSourceNicMatchId,
 				Check: resource.ComposeTestCheckFunc(
-					resource.TestCheckResourceAttrPair(DataSource+"."+dataSourceNicById, "name", fullNicResourceName, "name"),
-					resource.TestCheckResourceAttrPair(DataSource+"."+dataSourceNicById, "dhcp", fullNicResourceName, "dhcp"),
-					resource.TestCheckResourceAttrPair(DataSource+"."+dataSourceNicById, "firewall_active", fullNicResourceName, "firewall_active"),
-					resource.TestCheckResourceAttrPair(DataSource+"."+dataSourceNicById, "mac", fullNicResourceName, "mac"),
-					resource.TestCheckResourceAttrPair(DataSource+"."+dataSourceNicById, "lan", fullNicResourceName, "lan"),
-					resource.TestCheckResourceAttrPair(DataSource+"."+dataSourceNicById, "ips", fullNicResourceName, "ips"),
+					resource.TestCheckResourceAttrPair(DataSource+"."+dataSourceNicById, "name", FullNicResourceName, "name"),
+					resource.TestCheckResourceAttrPair(DataSource+"."+dataSourceNicById, "dhcp", FullNicResourceName, "dhcp"),
+					resource.TestCheckResourceAttrPair(DataSource+"."+dataSourceNicById, "firewall_active", FullNicResourceName, "firewall_active"),
+					resource.TestCheckResourceAttrPair(DataSource+"."+dataSourceNicById, "mac", FullNicResourceName, "mac"),
+					resource.TestCheckResourceAttrPair(DataSource+"."+dataSourceNicById, "lan", FullNicResourceName, "lan"),
+					resource.TestCheckResourceAttrPair(DataSource+"."+dataSourceNicById, "ips", FullNicResourceName, "ips"),
 				),
 			},
 			{
 				Config: testAccDataSourceNicMatchName,
 				Check: resource.ComposeTestCheckFunc(
-					resource.TestCheckResourceAttrPair(DataSource+"."+dataSourceNicById, "name", fullNicResourceName, "name"),
-					resource.TestCheckResourceAttrPair(DataSource+"."+dataSourceNicById, "dhcp", fullNicResourceName, "dhcp"),
-					resource.TestCheckResourceAttrPair(DataSource+"."+dataSourceNicById, "firewall_active", fullNicResourceName, "firewall_active"),
-					resource.TestCheckResourceAttrPair(DataSource+"."+dataSourceNicById, "mac", fullNicResourceName, "mac"),
-					resource.TestCheckResourceAttrPair(DataSource+"."+dataSourceNicById, "lan", fullNicResourceName, "lan"),
-					resource.TestCheckResourceAttrPair(DataSource+"."+dataSourceNicById, "ips", fullNicResourceName, "ips"),
+					resource.TestCheckResourceAttrPair(DataSource+"."+dataSourceNicById, "name", FullNicResourceName, "name"),
+					resource.TestCheckResourceAttrPair(DataSource+"."+dataSourceNicById, "dhcp", FullNicResourceName, "dhcp"),
+					resource.TestCheckResourceAttrPair(DataSource+"."+dataSourceNicById, "firewall_active", FullNicResourceName, "firewall_active"),
+					resource.TestCheckResourceAttrPair(DataSource+"."+dataSourceNicById, "mac", FullNicResourceName, "mac"),
+					resource.TestCheckResourceAttrPair(DataSource+"."+dataSourceNicById, "lan", FullNicResourceName, "lan"),
+					resource.TestCheckResourceAttrPair(DataSource+"."+dataSourceNicById, "ips", FullNicResourceName, "ips"),
 				),
 			},
 			{
@@ -50,34 +50,34 @@ func TestAccDataSourceNic(t *testing.T) {
 	})
 }
 
-const dataSourceNicById = nicResource + ".test_nic_data"
+const dataSourceNicById = NicResource + ".test_nic_data"
 
 const testAccDataSourceNicMatchId = testAccCheckNicConfigBasic + `
-data ` + nicResource + ` test_nic_data {
+data ` + NicResource + ` test_nic_data {
   datacenter_id = ` + DatacenterResource + `.` + DatacenterTestResource + `.id
   server_id = ` + ServerResource + `.` + ServerTestResource + `.id
-  id = ` + fullNicResourceName + `.id
+  id = ` + FullNicResourceName + `.id
 }
 `
 
 const testAccDataSourceNicMatchName = testAccCheckNicConfigBasic +
-	`data ` + nicResource + ` test_nic_data {
+	`data ` + NicResource + ` test_nic_data {
   	datacenter_id = ` + DatacenterResource + `.` + DatacenterTestResource + `.id
 	server_id = ` + ServerResource + `.` + ServerTestResource + `.id
-	name = ` + fullNicResourceName + `.name 
+	name = ` + FullNicResourceName + `.name 
 }`
 
 const testAccDataSourceNicMatchNameError = testAccCheckNicConfigBasic +
-	`data ` + nicResource + ` test_nic_data {
+	`data ` + NicResource + ` test_nic_data {
   	datacenter_id = ` + DatacenterResource + `.` + DatacenterTestResource + `.id
 	server_id = ` + ServerResource + `.` + ServerTestResource + `.id
 	name = "DoesNotExist"
 }`
 
 const testAccDataSourceNicMatchIdAndNameError = testAccCheckNicConfigBasic +
-	`data ` + nicResource + ` test_nic_data {
+	`data ` + NicResource + ` test_nic_data {
   	datacenter_id = ` + DatacenterResource + `.` + DatacenterTestResource + `.id
 	server_id = ` + ServerResource + `.` + ServerTestResource + `.id
-	id = ` + fullNicResourceName + `.id
+	id = ` + FullNicResourceName + `.id
 	name = "doesNotExist"
 }`

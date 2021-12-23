@@ -10,7 +10,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
 )
 
-func TestAccLanIPFailover_Basic(t *testing.T) {
+func TestAccLanIPFailoverBasic(t *testing.T) {
 	var lan ionoscloud.Lan
 	var ipfailover ionoscloud.IPFailover
 

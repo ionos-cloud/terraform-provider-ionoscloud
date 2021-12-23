@@ -19,13 +19,13 @@ func TestAccDataSourceShareMatchFields(t *testing.T) {
 			{
 				Config: testAccDataSourceShareConfigBasic,
 				Check: resource.ComposeTestCheckFunc(
-					resource.TestCheckResourceAttrSet(shareResourceFullName, "id"),
-					resource.TestCheckResourceAttrPair(shareResourceFullName, "id", DataSource+"."+shareResource+"."+sourceShareName, "id"),
-					resource.TestCheckResourceAttrPair(shareResourceFullName, "edit_privilege",
-						DataSource+"."+shareResource+"."+sourceShareName, "edit_privilege"),
-					resource.TestCheckResourceAttrPair(shareResourceFullName, "share_privilege",
-						DataSource+"."+shareResource+"."+sourceShareName, "share_privilege"),
-					resource.TestCheckResourceAttr(DataSource+"."+shareResource+"."+sourceShareName, "edit_privilege", "true"),
+					resource.TestCheckResourceAttrSet(ShareResourceFullName, "id"),
+					resource.TestCheckResourceAttrPair(ShareResourceFullName, "id", DataSource+"."+ShareResource+"."+SourceShareName, "id"),
+					resource.TestCheckResourceAttrPair(ShareResourceFullName, "edit_privilege",
+						DataSource+"."+ShareResource+"."+SourceShareName, "edit_privilege"),
+					resource.TestCheckResourceAttrPair(ShareResourceFullName, "share_privilege",
+						DataSource+"."+ShareResource+"."+SourceShareName, "share_privilege"),
+					resource.TestCheckResourceAttr(DataSource+"."+ShareResource+"."+SourceShareName, "edit_privilege", "true"),
 				),
 			},
 		},
@@ -33,9 +33,9 @@ func TestAccDataSourceShareMatchFields(t *testing.T) {
 }
 
 var testAccDataSourceShareConfigBasic = testacccheckshareconfigBasic + `
-data ` + shareResource + " " + sourceShareName + `{
+data ` + ShareResource + " " + SourceShareName + `{
   group_id    = "${ionoscloud_group.group.id}"
   resource_id = "${ionoscloud_datacenter.foobar.id}"
-  id		  = ` + shareResourceFullName + `.id
+  id		  = ` + ShareResourceFullName + `.id
 }
 `
