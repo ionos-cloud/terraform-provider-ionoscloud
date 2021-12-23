@@ -5,13 +5,11 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
-
-	"github.com/hashicorp/go-version"
 )
 
-// StateFormatVersionConstraints defines the versions of the JSON state format
+// StateFormatVersions represents the versions of the JSON state format
 // that are supported by this package.
-var StateFormatVersionConstraints = ">= 0.1, < 2.0"
+var StateFormatVersions = []string{"0.1", "0.2"}
 
 // State is the top-level representation of a Terraform state.
 type State struct {
@@ -52,19 +50,9 @@ func (s *State) Validate() error {
 		return errors.New("unexpected state input, format version is missing")
 	}
 
-	constraint, err := version.NewConstraint(StateFormatVersionConstraints)
-	if err != nil {
-		return fmt.Errorf("invalid version constraint: %w", err)
-	}
-
-	version, err := version.NewVersion(s.FormatVersion)
-	if err != nil {
-		return fmt.Errorf("invalid format version %q: %w", s.FormatVersion, err)
-	}
-
-	if !constraint.Check(version) {
-		return fmt.Errorf("unsupported state format version: %q does not satisfy %q",
-			version, constraint)
+	if !isStringInSlice(StateFormatVersions, s.FormatVersion) {
+		return fmt.Errorf("unsupported state format version: expected %q, got %q",
+			StateFormatVersions, s.FormatVersion)
 	}
 
 	return nil

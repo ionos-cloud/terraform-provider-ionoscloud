@@ -4,13 +4,11 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
-
-	"github.com/hashicorp/go-version"
 )
 
-// PlanFormatVersionConstraints defines the versions of the JSON plan format
-// that are supported by this package.
-var PlanFormatVersionConstraints = ">= 0.1, < 2.0"
+// PlanFormatVersions represents versions of the JSON plan format that
+// are supported by this package.
+var PlanFormatVersions = []string{"0.1", "0.2"}
 
 // ResourceMode is a string representation of the resource type found
 // in certain fields in the plan.
@@ -68,19 +66,9 @@ func (p *Plan) Validate() error {
 		return errors.New("unexpected plan input, format version is missing")
 	}
 
-	constraint, err := version.NewConstraint(PlanFormatVersionConstraints)
-	if err != nil {
-		return fmt.Errorf("invalid version constraint: %w", err)
-	}
-
-	version, err := version.NewVersion(p.FormatVersion)
-	if err != nil {
-		return fmt.Errorf("invalid format version %q: %w", p.FormatVersion, err)
-	}
-
-	if !constraint.Check(version) {
-		return fmt.Errorf("unsupported plan format version: %q does not satisfy %q",
-			version, constraint)
+	if !isStringInSlice(PlanFormatVersions, p.FormatVersion) {
+		return fmt.Errorf("unsupported plan format version: expected %q, got %q",
+			PlanFormatVersions, p.FormatVersion)
 	}
 
 	return nil

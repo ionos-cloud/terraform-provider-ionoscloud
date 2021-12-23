@@ -6,7 +6,7 @@ require (
 	github.com/hashicorp/terraform-plugin-sdk v1.17.2
 	github.com/hashicorp/terraform-plugin-sdk/v2 v2.7.0
 	github.com/ionos-cloud/sdk-go-autoscaling v1.0.0
-	github.com/ionos-cloud/sdk-go/v6 v6.0.0-beta.8
+	github.com/ionos-cloud/sdk-go/v6 v6.0.0
 	golang.org/x/crypto v0.0.0-20210421170649-83a5a9bb288b
 	gopkg.in/yaml.v3 v3.0.0-20200615113413-eeeca48fe776
 )

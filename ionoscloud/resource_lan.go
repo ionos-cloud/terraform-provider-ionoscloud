@@ -212,7 +212,7 @@ func resourceLanDelete(ctx context.Context, d *schema.ResourceData, meta interfa
 	client := meta.(SdkBundle).CloudApiClient
 	dcId := d.Get("datacenter_id").(string)
 
-	apiResponse, err := client.LANsApi.DatacentersLansDelete(ctx, dcid, d.Id()).Execute()
+	apiResponse, err := client.LANsApi.DatacentersLansDelete(ctx, dcId, d.Id()).Execute()
 	logApiRequestTime(apiResponse)
 
 	if err != nil {
