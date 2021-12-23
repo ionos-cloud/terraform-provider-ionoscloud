@@ -341,9 +341,21 @@ func lanDeleted(ctx context.Context, client *ionoscloud.APIClient, d *schema.Res
 		}
 		return false, fmt.Errorf("error checking LAN deletion status: %s", err)
 	}
-	log.Printf("[INFO] LAN %s not deleted yet deleted from the datacenter %s", d.Id(), dcId)
 
+	log.Printf("[INFO] LAN %s not deleted yet deleted from the datacenter %s", d.Id(), dcId)
 	log.Printf("[INFO] Current deletion status for LAN %s: %+v", d.Id(), *rsp.Metadata.State)
+
+	if *rsp.Metadata.State == "AVAILABLE" {
+		apiResponse, err = client.LansApi.DatacentersLansDelete(ctx, dcId, d.Id()).Execute()
+		logApiRequestTime(apiResponse)
+
+		if err != nil {
+			if apiResponse != nil && apiResponse.Response != nil && apiResponse.StatusCode == 404 {
+				return true, nil
+			}
+			return false, fmt.Errorf("error deleting LAN %s: %w", d.Id(), err)
+		}
+	}
 
 	return false, nil
 }
