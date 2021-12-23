@@ -17,7 +17,7 @@ func dataSourceDbaasPgSqlCluster() *schema.Resource {
 		Schema: map[string]*schema.Schema{
 			"id": {
 				Type:         schema.TypeString,
-				Description:  "The is of your cluster.",
+				Description:  "The id of your cluster.",
 				Optional:     true,
 				ValidateFunc: validation.All(validation.IsUUID),
 			},
@@ -74,7 +74,7 @@ func dataSourceDbaasPgSqlCluster() *schema.Resource {
 						},
 						"cidr": {
 							Type:        schema.TypeString,
-							Description: "The IP and subnet for the database.\n          Note the following unavailable IP ranges:\n          10.233.64.0/18\n          10.233.0.0/18\n          10.233.114.0/24",
+							Description: "The IP and subnet for the database. Note the following unavailable IP ranges: 10.233.64.0/18, 10.233.0.0/18, 10.233.114.0/24",
 							Computed:    true,
 						},
 					},
@@ -187,12 +187,6 @@ func dataSourceDbaasPgSqlReadCluster(ctx context.Context, d *schema.ResourceData
 			cluster = (*clusters.Items)[0]
 		} else {
 			return diag.FromErr(errors.New("dbaas cluster not found"))
-		}
-	}
-
-	if cluster.Id != nil {
-		if err := d.Set("id", *cluster.Id); err != nil {
-			return nil
 		}
 	}
 

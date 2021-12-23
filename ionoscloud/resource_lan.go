@@ -317,15 +317,20 @@ func setLanData(d *schema.ResourceData, lan *ionoscloud.Lan) error {
 }
 
 func lanAvailable(ctx context.Context, client *ionoscloud.APIClient, d *schema.ResourceData) (bool, error) {
-	dcid := d.Get("datacenter_id").(string)
-	rsp, apiResponse, err := client.LANsApi.DatacentersLansFindById(ctx, dcid, d.Id()).Execute()
+	dcId := d.Get("datacenter_id").(string)
+	rsp, apiResponse, err := client.LANsApi.DatacentersLansFindById(ctx, dcId, d.Id()).Execute()
 	logApiRequestTime(apiResponse)
 
 	log.Printf("[INFO] Current status for LAN %s: %+v", d.Id(), rsp)
 
 	if err != nil {
-		return true, fmt.Errorf("error checking LAN status: %s", err)
+		return false, fmt.Errorf("error checking LAN status: %s", err)
 	}
+
+	if rsp.Metadata == nil || rsp.Metadata.State == nil {
+		return false, fmt.Errorf("could not retrieve state of lan %s", d.Id())
+	}
+
 	return *rsp.Metadata.State == "AVAILABLE", nil
 }
 
@@ -343,17 +348,20 @@ func lanDeleted(ctx context.Context, client *ionoscloud.APIClient, d *schema.Res
 	}
 
 	log.Printf("[INFO] LAN %s not deleted yet deleted from the datacenter %s", d.Id(), dcId)
-	log.Printf("[INFO] Current deletion status for LAN %s: %+v", d.Id(), *rsp.Metadata.State)
 
-	if *rsp.Metadata.State == "AVAILABLE" {
-		apiResponse, err = client.LANsApi.DatacentersLansDelete(ctx, dcId, d.Id()).Execute()
-		logApiRequestTime(apiResponse)
+	if rsp.Metadata != nil && rsp.Metadata.State != nil {
+		log.Printf("[INFO] Current deletion status for LAN %s: %+v", d.Id(), *rsp.Metadata.State)
 
-		if err != nil {
-			if apiResponse != nil && apiResponse.Response != nil && apiResponse.StatusCode == 404 {
-				return true, nil
+		if *rsp.Metadata.State == "AVAILABLE" {
+			apiResponse, err = client.LANsApi.DatacentersLansDelete(ctx, dcId, d.Id()).Execute()
+			logApiRequestTime(apiResponse)
+
+			if err != nil {
+				if apiResponse != nil && apiResponse.Response != nil && apiResponse.StatusCode == 404 {
+					return true, nil
+				}
+				return false, fmt.Errorf("error deleting LAN %s: %w", d.Id(), err)
 			}
-			return false, fmt.Errorf("error deleting LAN %s: %w", d.Id(), err)
 		}
 	}
 

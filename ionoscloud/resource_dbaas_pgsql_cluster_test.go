@@ -342,6 +342,7 @@ resource ` + DBaaSClusterResource + ` ` + DBaaSClusterTestResource + ` {
   ram                = 2048
   storage_size       = 2048
   storage_type       = "HDD"
+  display_name = "` + DBaaSClusterTestResource + `"
   connections   {
 	datacenter_id   =  ` + DatacenterResource + `.datacenter_example.id 
     lan_id          =  ` + LanResource + `.lan_example.id 
@@ -358,7 +359,7 @@ resource ` + DBaaSClusterResource + ` ` + DBaaSClusterTestResource + ` {
   }
   synchronization_mode = "ASYNCHRONOUS"
   from_backup {
-	backup_id = "24e86a13-5688-11ec-903e-cebe353ec223-4oymiqu-12"
-    recovery_target_time = "2021-12-06T13:54:08Z"
+	backup_id = "2feaf22e-63f9-11ec-8761-8e8cbbc03eb8-4oymiqu-12"
+    recovery_target_time = "2021-12-23T16:23:08Z"
   }
 }`
