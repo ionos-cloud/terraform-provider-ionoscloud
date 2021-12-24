@@ -594,6 +594,13 @@ func resourceServerCreate(ctx context.Context, d *schema.ResourceData, meta inte
 		}
 	}
 
+	if nic.Properties != nil && nic.Properties.Ips != nil && len(*nic.Properties.Ips) > 0 {
+		if err := d.Set("primary_ip", (*nic.Properties.Ips)[0]); err != nil {
+			diags := diag.FromErr(fmt.Errorf("error while setting primary ip %s: %w", d.Id(), err))
+			return diags
+		}
+	}
+
 	if (*server.Entities.Nics.Items)[0].Properties.Ips != nil &&
 		len(*(*server.Entities.Nics.Items)[0].Properties.Ips) > 0 &&
 		serverRequest.Entities.Volumes.Items != nil &&
@@ -1149,12 +1156,6 @@ func setServerData(ctx context.Context, client *ionoscloud.APIClient, d *schema.
 			return err
 		}
 		nicEntry := SetNetworkProperties(nic)
-
-		if nic.Properties != nil && len(*nic.Properties.Ips) > 0 {
-			if err := d.Set("primary_ip", (*nic.Properties.Ips)[0]); err != nil {
-				return err
-			}
-		}
 
 		if (readFromSchema && primaryFirewallOk) || !readFromSchema {
 			var firewallId string
