@@ -1,5 +1,8 @@
 # Terraform provider
 
+**NOTE:**
+_Please consider using Terraform IonosCloud Provider v6 releases that are using IONOS Cloud API Version 6, the latest stable API version. New features and improvements will be integrated in IONOS Cloud API Version 6._
+
 ## Overview
 
 The Terraform IonosCloud Provider provides you with access to the IONOS Cloud. The provider supports both simple and complex requests. It is designed for devops engineers and developers who are building their infrastructure in the IONOS Cloud . The provider wraps the IONOS Cloud GO SDK. All operations are performed over SSL and authenticated using your IONOS Cloud portal credentials. The provider can be used within an instance running in IONOS Cloud or directly over the Internet from any application that can send an HTTPS request and receive an HTTPS response.

@@ -6,10 +6,12 @@
 ### Documentation:
 - Improved terraform registry documentation with a more detailed description of environment and terraform variables
 - Added badges containing the release and go version in README.md
+- Add note on using v6 to Readme.md
 
 ### Fixes:
-- creating server with volume from snapshot did not populate volume_boot
-- primary_ip is now set on server creation
+- Creating server with volume from snapshot did not populate volume_boot
+- Primary_ip is now set on server creation
+- Add versioning to go.mod to allow version import of module
 
 ## 5.2.23
 

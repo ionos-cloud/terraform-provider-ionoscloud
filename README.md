@@ -12,6 +12,11 @@
 
 ![Alt text](.github/IONOS.CLOUD.BLU.svg?raw=true "Title")
 
+
+**NOTE:**
+_Please consider using Terraform IonosCloud Provider v6 releases that are using IONOS Cloud API Version 6, the latest stable API version. New features and improvements will be integrated in IONOS Cloud API Version 6._
+
+
 # IONOS Cloud Terraform Provider
 
 The IonosCloud provider gives the ability to deploy and configure resources using the IonosCloud APIs.
