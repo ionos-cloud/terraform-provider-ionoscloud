@@ -12,7 +12,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/ionos-cloud/sdk-go/v6"
-	dbaasService "github.com/ionos-cloud/terraform-provider-ionoscloud/services/dbaas"
+	dbaasService "github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/dbaas"
 )
 
 var Version = "development"
@@ -22,7 +22,7 @@ type SdkBundle struct {
 	DbaasClient    *dbaasService.Client
 }
 
-// Provider returns a schema.Provider for ionoscloud.
+// Provider returns a schema.Provider for ionoscloud
 func Provider() *schema.Provider {
 	provider := &schema.Provider{
 		Schema: map[string]*schema.Schema{

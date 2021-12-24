@@ -6,7 +6,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
-	dbaasService "github.com/ionos-cloud/terraform-provider-ionoscloud/services/dbaas"
+	dbaasService "github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/dbaas"
 	"log"
 	"time"
 )
