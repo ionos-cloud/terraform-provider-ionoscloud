@@ -1,5 +1,8 @@
 ## 6.0.2 (upcoming release)
 
+### Fixes:
+- Add versioning to allow module import.
+
 ### Documentation:
 - Improved terraform registry documentation with a more detailed description of environment and terraform variables
 - Added badges containing the release and go version in README.md
