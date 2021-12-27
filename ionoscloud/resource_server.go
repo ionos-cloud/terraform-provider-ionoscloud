@@ -592,12 +592,14 @@ func resourceServerCreate(ctx context.Context, d *schema.ResourceData, meta inte
 			diags := diag.FromErr(fmt.Errorf("error while setting primary nic %s: %w", d.Id(), err))
 			return diags
 		}
-	}
-
-	if nic.Properties != nil && nic.Properties.Ips != nil && len(*nic.Properties.Ips) > 0 {
-		if err := d.Set("primary_ip", (*nic.Properties.Ips)[0]); err != nil {
-			diags := diag.FromErr(fmt.Errorf("error while setting primary ip %s: %w", d.Id(), err))
-			return diags
+		if (*server.Entities.Nics.Items)[0].Properties != nil &&
+			(*server.Entities.Nics.Items)[0].Properties.Ips != nil &&
+			len(*(*server.Entities.Nics.Items)[0].Properties.Ips) > 0 {
+			log.Printf("[DEBUG] set primary_ip to %s", (*(*server.Entities.Nics.Items)[0].Properties.Ips)[0])
+			if err := d.Set("primary_ip", (*(*server.Entities.Nics.Items)[0].Properties.Ips)[0]); err != nil {
+				diags := diag.FromErr(fmt.Errorf("error while setting primary ip %s: %w", d.Id(), err))
+				return diags
+			}
 		}
 	}
 
@@ -864,13 +866,21 @@ func resourceServerImport(ctx context.Context, d *schema.ResourceData, meta inte
 
 	server, apiResponse, err := client.ServerApi.DatacentersServersFindById(ctx, datacenterId, serverId).Execute()
 	logApiRequestTime(apiResponse)
-
 	if err != nil {
 		if apiResponse != nil && apiResponse.Response != nil && apiResponse.StatusCode == 404 {
 			d.SetId("")
 			return nil, fmt.Errorf("unable to find server %q", serverId)
 		}
 		return nil, fmt.Errorf("error occured while fetching a server ID %s %w", d.Id(), err)
+	}
+
+	if server.Entities != nil && server.Entities.Nics != nil && (*server.Entities.Nics.Items)[0].Properties != nil &&
+		(*server.Entities.Nics.Items)[0].Properties.Ips != nil &&
+		len(*(*server.Entities.Nics.Items)[0].Properties.Ips) > 0 {
+		log.Printf("[DEBUG] set primary_ip to %s", (*(*server.Entities.Nics.Items)[0].Properties.Ips)[0])
+		if err := d.Set("primary_ip", (*(*server.Entities.Nics.Items)[0].Properties.Ips)[0]); err != nil {
+			return nil, fmt.Errorf("error while setting primary ip %s: %w", d.Id(), err)
+		}
 	}
 
 	if err := d.Set("datacenter_id", datacenterId); err != nil {

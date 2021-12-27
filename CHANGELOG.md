@@ -1,4 +1,4 @@
-## 5.2.24 (upcoming release)
+## 5.2.24
 
 ### Features:
 - add data source for ip failover
