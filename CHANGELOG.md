@@ -12,6 +12,7 @@
 - Creating server with volume from snapshot did not populate volume_boot
 - Primary_ip is now set on server creation
 - Add versioning to go.mod to allow version import of module
+- Immutable k8s node_pool fields should throw error when running plan also, not only on apply
 
 ## 5.2.23
 
