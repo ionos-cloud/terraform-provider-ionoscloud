@@ -20,6 +20,8 @@ func resourceK8sNodePool() *schema.Resource {
 		ReadContext:   resourcek8sNodePoolRead,
 		UpdateContext: resourcek8sNodePoolUpdate,
 		DeleteContext: resourcek8sNodePoolDelete,
+		CustomizeDiff: checkNodePoolImmutableFields,
+
 		Importer: &schema.ResourceImporter{
 			StateContext: resourceK8sNodepoolImport,
 		},
@@ -164,6 +166,48 @@ func resourceK8sNodePool() *schema.Resource {
 		},
 		Timeouts: &resourceDefaultTimeouts,
 	}
+}
+
+func checkNodePoolImmutableFields(_ context.Context, diff *schema.ResourceDiff, _ interface{}) error {
+	//we do not want to check in case of resource creation
+	if diff.Id() == "" {
+		return nil
+	}
+	if diff.HasChange("name") {
+		return fmt.Errorf("name attribute is immutable, therefore not allowed in update requests")
+
+	}
+
+	if diff.HasChange("cpu_family") {
+		return fmt.Errorf("cpu_family attribute is immutable, therefore not allowed in update requests")
+
+	}
+
+	if diff.HasChange("availability_zone") {
+		return fmt.Errorf("availability_zone attribute is immutable, therefore not allowed in update requests")
+
+	}
+
+	if diff.HasChange("cores_count") {
+		return fmt.Errorf("cores_count attribute is immutable, therefore not allowed in update requests")
+	}
+
+	if diff.HasChange("ram_size") {
+		return fmt.Errorf("ram_size attribute is immutable, therefore not allowed in update requests")
+
+	}
+
+	if diff.HasChange("storage_size") {
+		return fmt.Errorf("storage_size attribute is immutable, therefore not allowed in update requests")
+
+	}
+
+	if diff.HasChange("storage_type") {
+		return fmt.Errorf("storage_type attribute is immutable, therefore not allowed in update requests")
+
+	}
+	return nil
+
 }
 
 func resourcek8sNodePoolCreate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
@@ -365,41 +409,6 @@ func resourcek8sNodePoolUpdate(ctx context.Context, d *schema.ResourceData, meta
 	nodeCount := int32(d.Get("node_count").(int))
 	request.Properties = &ionoscloud.KubernetesNodePoolPropertiesForPut{
 		NodeCount: &nodeCount,
-	}
-
-	if d.HasChange("name") {
-		diags := diag.FromErr(fmt.Errorf("name attribute is immutable, therefore not allowed in update requests"))
-		return diags
-	}
-
-	if d.HasChange("cpu_family") {
-		diags := diag.FromErr(fmt.Errorf("cpu_family attribute is immutable, therefore not allowed in update requests"))
-		return diags
-	}
-
-	if d.HasChange("availability_zone") {
-		diags := diag.FromErr(fmt.Errorf("availability_zone attribute is immutable, therefore not allowed in update requests"))
-		return diags
-	}
-
-	if d.HasChange("cores_count") {
-		diags := diag.FromErr(fmt.Errorf("cores_count attribute is immutable, therefore not allowed in update requests"))
-		return diags
-	}
-
-	if d.HasChange("ram_size") {
-		diags := diag.FromErr(fmt.Errorf("ram_size attribute is immutable, therefore not allowed in update requests"))
-		return diags
-	}
-
-	if d.HasChange("storage_size") {
-		diags := diag.FromErr(fmt.Errorf("storage_size attribute is immutable, therefore not allowed in update requests"))
-		return diags
-	}
-
-	if d.HasChange("storage_type") {
-		diags := diag.FromErr(fmt.Errorf("storage_size attribute is immutable, therefore not allowed in update requests"))
-		return diags
 	}
 
 	if d.HasChange("k8s_version") {
