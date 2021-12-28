@@ -7,6 +7,9 @@
 - Improved terraform registry documentation with a more detailed description of environment and terraform variables
 - Added badges containing the release and go version in README.md
 
+### Fixes:
+- Immutable k8s node_pool fields should throw error when running plan also, not only on apply
+
 ## 6.0.1
 
 ### Fixes: 
