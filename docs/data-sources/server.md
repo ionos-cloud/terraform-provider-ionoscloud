@@ -8,7 +8,7 @@ Get information on a Ionos Cloud Servers
 
 # ionoscloud\_server
 
-The lans data source can be used to search for and return existing servers.
+The server data source can be used to search for and return existing servers.
 
 ## Example Usage
 

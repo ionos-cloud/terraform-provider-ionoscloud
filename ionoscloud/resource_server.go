@@ -567,9 +567,9 @@ func resourceServerCreate(ctx context.Context, d *schema.ResourceData, meta inte
 		diags := diag.FromErr(fmt.Errorf("error fetching server: %w", err))
 		return diags
 	}
-
+	firstNicItem := (*server.Entities.Nics.Items)[0]
 	firewallRules, apiResponse, err := client.NicApi.DatacentersServersNicsFirewallrulesGet(ctx, d.Get("datacenter_id").(string),
-		*server.Id, *(*server.Entities.Nics.Items)[0].Id).Execute()
+		*server.Id, *firstNicItem.Id).Execute()
 	logApiRequestTime(apiResponse)
 
 	if err != nil {
@@ -586,25 +586,38 @@ func resourceServerCreate(ctx context.Context, d *schema.ResourceData, meta inte
 		}
 	}
 
-	if (*server.Entities.Nics.Items)[0].Id != nil {
-		err := d.Set("primary_nic", *(*server.Entities.Nics.Items)[0].Id)
+	if firstNicItem.Id != nil {
+		err := d.Set("primary_nic", *firstNicItem.Id)
 		if err != nil {
 			diags := diag.FromErr(fmt.Errorf("error while setting primary nic %s: %w", d.Id(), err))
 			return diags
 		}
 	}
 
-	if (*server.Entities.Nics.Items)[0].Properties.Ips != nil &&
-		len(*(*server.Entities.Nics.Items)[0].Properties.Ips) > 0 &&
-		serverRequest.Entities.Volumes.Items != nil &&
-		len(*serverRequest.Entities.Volumes.Items) > 0 &&
-		(*serverRequest.Entities.Volumes.Items)[0].Properties != nil &&
-		(*serverRequest.Entities.Volumes.Items)[0].Properties.ImagePassword != nil {
+	firstNicProps := firstNicItem.Properties
+	firstNicIps := firstNicProps.Ips
+	if firstNicProps != nil &&
+		firstNicIps != nil &&
+		len(*firstNicIps) > 0 {
+		log.Printf("[DEBUG] set primary_ip to %s", (*firstNicIps)[0])
+		if err := d.Set("primary_ip", (*firstNicIps)[0]); err != nil {
+			diags := diag.FromErr(fmt.Errorf("error while setting primary ip %s: %w", d.Id(), err))
+			return diags
+		}
+	}
+	volumeItems := serverRequest.Entities.Volumes.Items
+	firstVolumeItem := (*volumeItems)[0]
+	if firstNicProps.Ips != nil &&
+		len(*firstNicIps) > 0 &&
+		volumeItems != nil &&
+		len(*volumeItems) > 0 &&
+		firstVolumeItem.Properties != nil &&
+		firstVolumeItem.Properties.ImagePassword != nil {
 
 		d.SetConnInfo(map[string]string{
 			"type":     "ssh",
-			"host":     (*(*server.Entities.Nics.Items)[0].Properties.Ips)[0],
-			"password": *(*serverRequest.Entities.Volumes.Items)[0].Properties.ImagePassword,
+			"host":     (*firstNicIps)[0],
+			"password": *firstVolumeItem.Properties.ImagePassword,
 		})
 	}
 
@@ -857,13 +870,22 @@ func resourceServerImport(ctx context.Context, d *schema.ResourceData, meta inte
 
 	server, apiResponse, err := client.ServerApi.DatacentersServersFindById(ctx, datacenterId, serverId).Execute()
 	logApiRequestTime(apiResponse)
-
 	if err != nil {
-		if apiResponse != nil && apiResponse.Response != nil && apiResponse.StatusCode == 404 {
+
+		if httpNotFound(apiResponse) {
 			d.SetId("")
 			return nil, fmt.Errorf("unable to find server %q", serverId)
 		}
 		return nil, fmt.Errorf("error occured while fetching a server ID %s %w", d.Id(), err)
+	}
+	firstNicItem := (*server.Entities.Nics.Items)[0]
+	if server.Entities != nil && server.Entities.Nics != nil && firstNicItem.Properties != nil &&
+		firstNicItem.Properties.Ips != nil &&
+		len(*firstNicItem.Properties.Ips) > 0 {
+		log.Printf("[DEBUG] set primary_ip to %s", (*firstNicItem.Properties.Ips)[0])
+		if err := d.Set("primary_ip", (*firstNicItem.Properties.Ips)[0]); err != nil {
+			return nil, fmt.Errorf("error while setting primary ip %s: %w", d.Id(), err)
+		}
 	}
 
 	if err := d.Set("datacenter_id", datacenterId); err != nil {
@@ -1149,12 +1171,6 @@ func setServerData(ctx context.Context, client *ionoscloud.APIClient, d *schema.
 			return err
 		}
 		nicEntry := SetNetworkProperties(nic)
-
-		if nic.Properties != nil && len(*nic.Properties.Ips) > 0 {
-			if err := d.Set("primary_ip", (*nic.Properties.Ips)[0]); err != nil {
-				return err
-			}
-		}
 
 		if (readFromSchema && primaryFirewallOk) || !readFromSchema {
 			var firewallId string
