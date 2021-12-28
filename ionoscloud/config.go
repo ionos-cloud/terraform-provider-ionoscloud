@@ -5,6 +5,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/meta"
 	ionoscloud "github.com/ionos-cloud/sdk-go/v5"
 	"log"
+	"runtime"
 )
 
 // Config represents
@@ -28,7 +29,9 @@ func (c *Config) Client(terraformVersion string) (*ionoscloud.APIClient, error) 
 		client = ionoscloud.NewAPIClient(ionoscloud.NewConfiguration(c.Username, c.Password, "", c.Endpoint))
 	}
 
-	client.GetConfig().UserAgent = fmt.Sprintf("HashiCorp Terraform/%s Terraform Plugin SDK/%s Terraform Provider Ionoscloud/%s Ionoscloud SDK Go/%s", terraformVersion, meta.SDKVersionString(), Version, ionoscloud.Version)
+	client.GetConfig().UserAgent = fmt.Sprintf(
+		"terraform-provider/%s_ionos-cloud-sdk-go/%s_hashicorp-terraform/%s_terraform-plugin-sdk/%s_os/%s_arch/%s",
+		Version, ionoscloud.Version, terraformVersion, meta.SDKVersionString(), runtime.GOOS, runtime.GOARCH)
 
 	log.Printf("[DEBUG] Terraform client UA set to %s", client.GetConfig().UserAgent)
 

@@ -7,6 +7,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/meta"
 	"log"
 	"os"
+	"runtime"
 	"time"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
@@ -16,8 +17,7 @@ import (
 )
 
 var (
-	Version = "development"
-	Commit  = "local"
+	Version = "5.2.24"
 )
 
 // Provider returns a schema.Provider for ionoscloud.
@@ -153,8 +153,8 @@ func providerConfigure(d *schema.ResourceData, terraformVersion string) (interfa
 
 	newClient := ionoscloud.NewAPIClient(newConfig)
 	newConfig.UserAgent = fmt.Sprintf(
-		"HashiCorp Terraform/%s Terraform Plugin SDK/%s IonosCloud Terraform Provider/%s/%s IonosCloud Go SDK/%s",
-		terraformVersion, meta.SDKVersionString(), Version, Commit, ionoscloud.Version)
+		"terraform-provider/%s_ionos-cloud-sdk-go/%s_hashicorp-terraform/%s_terraform-plugin-sdk/%s_os/%s_arch/%s",
+		Version, ionoscloud.Version, terraformVersion, meta.SDKVersionString(), runtime.GOOS, runtime.GOARCH)
 
 	return newClient, nil
 }
