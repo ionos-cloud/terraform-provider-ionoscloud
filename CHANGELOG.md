@@ -13,6 +13,7 @@
 - Primary_ip is now set on server creation
 - Add versioning to go.mod to allow version import of module
 - Immutable k8s node_pool fields should throw error when running plan also, not only on apply
+- Modify UserAgent string
 
 ## 5.2.23
 
