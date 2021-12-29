@@ -2,6 +2,7 @@
 
 ### Fixes:
 - Add versioning to allow module import.
+- Modify UserAgent string
 
 ### Documentation:
 - Improved terraform registry documentation with a more detailed description of environment and terraform variables
