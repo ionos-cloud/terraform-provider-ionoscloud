@@ -1,7 +1,7 @@
-## 6.0.2 (upcoming release)
+## 6.0.2
 
 ### Fixes:
-- Add versioning to allow module import.
+- fixes #168: Add versioning to allow module import.
 - Modify UserAgent string
 
 ### Documentation:
