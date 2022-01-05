@@ -137,7 +137,7 @@ resource ` + K8sClusterResource + ` ` + K8sClusterTestResource + ` {
   }
   api_subnet_allow_list = ["1.2.3.4/32"]
   s3_buckets { 
-     name = "sdktestv66"
+     name = "test_k8d"
   }
 }`
 

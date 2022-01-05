@@ -155,14 +155,6 @@ func resourceK8sNodePool() *schema.Resource {
 				Optional: true,
 				Elem:     &schema.Schema{Type: schema.TypeString},
 			},
-			"available_upgrade_versions": {
-				Type:        schema.TypeList,
-				Description: "A list of kubernetes versions available for upgrade",
-				Computed:    true,
-				Elem: &schema.Schema{
-					Type: schema.TypeString,
-				},
-			},
 		},
 		Timeouts: &resourceDefaultTimeouts,
 	}
@@ -826,12 +818,6 @@ func setK8sNodePoolData(d *schema.ResourceData, nodePool *ionoscloud.KubernetesN
 			err := d.Set("lans", lans)
 			if err != nil {
 				return fmt.Errorf("error while setting lans property for k8sNodepool %s: %s", d.Id(), err)
-			}
-		}
-
-		if nodePool.Properties.AvailableUpgradeVersions != nil && len(*nodePool.Properties.AvailableUpgradeVersions) > 0 {
-			if err := d.Set("available_upgrade_versions", *nodePool.Properties.AvailableUpgradeVersions); err != nil {
-				return err
 			}
 		}
 

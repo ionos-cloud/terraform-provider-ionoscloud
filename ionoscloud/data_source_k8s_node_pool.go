@@ -222,6 +222,12 @@ func dataSourceK8sReadNodePool(d *schema.ResourceData, meta interface{}) error {
 
 	}
 
+	if nodePool.Properties.AvailableUpgradeVersions != nil && len(*nodePool.Properties.AvailableUpgradeVersions) > 0 {
+		if err := d.Set("available_upgrade_versions", *nodePool.Properties.AvailableUpgradeVersions); err != nil {
+			return err
+		}
+	}
+
 	if err = setK8sNodePoolData(d, &nodePool); err != nil {
 		return err
 	}

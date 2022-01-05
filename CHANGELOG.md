@@ -1,3 +1,8 @@
+## 5.2.25 (upcoming release)
+
+### Fix:
+- Fixed diff on availableUpgradeVersions for k8s cluster and nodepool
+
 ## 5.2.24
 
 ### Features:

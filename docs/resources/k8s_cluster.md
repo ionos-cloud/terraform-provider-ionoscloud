@@ -32,7 +32,6 @@ The following arguments are supported:
 - `maintenance_window` - (Optional) See the **maintenance_window** section in the example above
   - `time` - (Required)[string] A clock time in the day when maintenance is allowed
   - `day_of_the_week` - (Required)[string] Day of the week when maintenance is allowed
-- `available_upgrade_versions` - (Computed) List of available versions for upgrading the cluster
 - `viable_node_pool_versions` - (Computed) List of versions that may be used for node pools under this cluster
 - `api_subnet_allow_list` - (Optional) Access to the K8s API server is restricted to these CIDRs. Cluster-internal traffic is not affected by this restriction. If no allowlist is specified, access is not restricted. If an IP without subnet mask is provided, the default value will be used: 32 for IPv4 and 128 for IPv6.
 - `s3_buckets` - (Optional) List of S3 bucket configured for K8s usage. For now it contains only an S3 bucket used to store K8s API audit logs.

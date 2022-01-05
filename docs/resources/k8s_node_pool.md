@@ -70,6 +70,7 @@ The following arguments are supported:
 - `public_ips` - (Optional)[list] A list of public IPs associated with the node pool; must have at least `node_count + 1` elements;  
 - `labels` - (Optional)[map] A key/value map of labels
 - `annotations` - (Optional)[map] A key/value map of annotations
+
 ## Import
 
 A Kubernetes Node Pool resource can be imported using its Kubernetes cluster's uuid as well as its own UUID, both of which you can retreive from the cloud API: `resource id`, e.g.:
