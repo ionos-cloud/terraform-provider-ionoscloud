@@ -55,15 +55,6 @@ func resourcek8sCluster() *schema.Resource {
 					},
 				},
 			},
-			"available_upgrade_versions": {
-				Type:        schema.TypeList,
-				Description: "List of available versions for upgrading the cluster",
-				Optional:    true,
-				Computed:    true,
-				Elem: &schema.Schema{
-					Type: schema.TypeString,
-				},
-			},
 			"viable_node_pool_versions": {
 				Type:        schema.TypeList,
 				Description: "List of versions that may be used for node pools under this cluster",
@@ -501,16 +492,6 @@ func setK8sClusterData(d *schema.ResourceData, cluster *ionoscloud.KubernetesClu
 					"day_of_the_week": *cluster.Properties.MaintenanceWindow.DayOfTheWeek,
 				},
 			}); err != nil {
-				return err
-			}
-		}
-
-		if cluster.Properties.AvailableUpgradeVersions != nil {
-			availableUpgradeVersions := make([]interface{}, len(*cluster.Properties.AvailableUpgradeVersions), len(*cluster.Properties.AvailableUpgradeVersions))
-			for i, availableUpgradeVersion := range *cluster.Properties.AvailableUpgradeVersions {
-				availableUpgradeVersions[i] = availableUpgradeVersion
-			}
-			if err := d.Set("available_upgrade_versions", availableUpgradeVersions); err != nil {
 				return err
 			}
 		}

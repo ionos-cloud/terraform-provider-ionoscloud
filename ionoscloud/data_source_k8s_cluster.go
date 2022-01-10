@@ -470,6 +470,15 @@ func setAdditionalK8sClusterData(d *schema.ResourceData, cluster *ionoscloud.Kub
 			}
 		}
 
+		if cluster.Properties != nil && cluster.Properties.AvailableUpgradeVersions != nil {
+			availableUpgradeVersions := make([]interface{}, len(*cluster.Properties.AvailableUpgradeVersions), len(*cluster.Properties.AvailableUpgradeVersions))
+			for i, availableUpgradeVersion := range *cluster.Properties.AvailableUpgradeVersions {
+				availableUpgradeVersions[i] = availableUpgradeVersion
+			}
+			if err := d.Set("available_upgrade_versions", availableUpgradeVersions); err != nil {
+				return err
+			}
+		}
 	}
 
 	return nil
