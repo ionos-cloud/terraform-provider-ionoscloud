@@ -1,3 +1,11 @@
+## 6.0.3 (upcoming release)
+
+### Enhancements:
+- improved tests for networkloadbalancer and networkloadbalancer_forwardingrule
+
+### Fixes:
+- fixed bug regarding updating listener_lan and target_lan 
+
 ## 6.0.2
 
 ### Fixes:
