@@ -225,12 +225,11 @@ func resourceNetworkLoadBalancerUpdate(ctx context.Context, d *schema.ResourceDa
 				lbPrivateIps = append(lbPrivateIps, privateIp.(string))
 			}
 		}
-		if len(lbPrivateIps) > 0 {
-			request.Properties.LbPrivateIps = &lbPrivateIps
-		} else {
+		if len(lbPrivateIps) == 0 {
 			diags := diag.FromErr(fmt.Errorf("you can not empty the lbPrivateIps field for networkloadbalancer %s", d.Id()))
 			return diags
 		}
+		request.Properties.LbPrivateIps = &lbPrivateIps
 	}
 	_, apiResponse, err := client.NetworkLoadBalancersApi.DatacentersNetworkloadbalancersPatch(ctx, dcId, d.Id()).NetworkLoadBalancerProperties(*request.Properties).Execute()
 	logApiRequestTime(apiResponse)
@@ -318,35 +317,35 @@ func setNetworkLoadBalancerData(d *schema.ResourceData, networkLoadBalancer *ion
 		if networkLoadBalancer.Properties.Name != nil {
 			err := d.Set("name", *networkLoadBalancer.Properties.Name)
 			if err != nil {
-				return fmt.Errorf("error while setting name property for network load balancer %s: %s", d.Id(), err)
+				return fmt.Errorf("error while setting name property for network load balancer %s: %w", d.Id(), err)
 			}
 		}
 
 		if networkLoadBalancer.Properties.ListenerLan != nil {
 			err := d.Set("listener_lan", *networkLoadBalancer.Properties.ListenerLan)
 			if err != nil {
-				return fmt.Errorf("error while setting listener_lan property for network load balancer %s: %s", d.Id(), err)
+				return fmt.Errorf("error while setting listener_lan property for network load balancer %s: %w", d.Id(), err)
 			}
 		}
 
 		if networkLoadBalancer.Properties.TargetLan != nil {
 			err := d.Set("target_lan", *networkLoadBalancer.Properties.TargetLan)
 			if err != nil {
-				return fmt.Errorf("error while setting target_lan property for network load balancer %s: %s", d.Id(), err)
+				return fmt.Errorf("error while setting target_lan property for network load balancer %s: %w", d.Id(), err)
 			}
 		}
 
 		if networkLoadBalancer.Properties.Ips != nil {
 			err := d.Set("ips", *networkLoadBalancer.Properties.Ips)
 			if err != nil {
-				return fmt.Errorf("error while setting ips property for network load balancer %s: %s", d.Id(), err)
+				return fmt.Errorf("error while setting ips property for network load balancer %s: %w", d.Id(), err)
 			}
 		}
 
 		if networkLoadBalancer.Properties.LbPrivateIps != nil {
 			err := d.Set("lb_private_ips", *networkLoadBalancer.Properties.LbPrivateIps)
 			if err != nil {
-				return fmt.Errorf("error while setting lb_private_ips property for network load balancer %s: %s", d.Id(), err)
+				return fmt.Errorf("error while setting lb_private_ips property for network load balancer %s: %w", d.Id(), err)
 			}
 		}
 

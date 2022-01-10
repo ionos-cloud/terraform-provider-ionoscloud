@@ -83,12 +83,6 @@ func dataSourceNetworkLoadBalancerRead(ctx context.Context, d *schema.ResourceDa
 	var err error
 	var apiResponse *ionoscloud.APIResponse
 
-	ctx, cancel := context.WithTimeout(context.Background(), *resourceDefaultTimeouts.Default)
-
-	if cancel != nil {
-		defer cancel()
-	}
-
 	if idOk {
 		/* search by ID */
 		networkLoadBalancer, apiResponse, err = client.NetworkLoadBalancersApi.DatacentersNetworkloadbalancersFindByNetworkLoadBalancerId(ctx, datacenterId.(string), id.(string)).Execute()
@@ -99,12 +93,6 @@ func dataSourceNetworkLoadBalancerRead(ctx context.Context, d *schema.ResourceDa
 	} else {
 		/* search by name */
 		var networkLoadBalancers ionoscloud.NetworkLoadBalancers
-
-		ctx, cancel := context.WithTimeout(context.Background(), *resourceDefaultTimeouts.Default)
-
-		if cancel != nil {
-			defer cancel()
-		}
 
 		networkLoadBalancers, apiResponse, err := client.NetworkLoadBalancersApi.DatacentersNetworkloadbalancersGet(ctx, datacenterId.(string)).Execute()
 		logApiRequestTime(apiResponse)
