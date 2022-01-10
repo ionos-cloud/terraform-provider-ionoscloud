@@ -187,26 +187,31 @@ func resourceNetworkLoadBalancerUpdate(ctx context.Context, d *schema.ResourceDa
 
 	if d.HasChange("listener_lan") {
 		_, v := d.GetChange("listener_lan")
-		vStr := v.(string)
-		request.Properties.Name = &vStr
+		vInt := int32(v.(int))
+		request.Properties.ListenerLan = &vInt
 	}
 
 	if d.HasChange("target_lan") {
 		_, v := d.GetChange("target_lan")
-		vStr := v.(string)
-		request.Properties.Name = &vStr
+		vInt := int32(v.(int))
+		request.Properties.TargetLan = &vInt
 	}
 
 	if d.HasChange("ips") {
 		oldIps, newIps := d.GetChange("ips")
 		log.Printf("[INFO] network loadbalancer ips changed from %+v to %+v", oldIps, newIps)
 		ipsVal := newIps.([]interface{})
+		ips := make([]string, 0)
 		if ipsVal != nil {
-			ips := make([]string, len(ipsVal), len(ipsVal))
-			for idx := range ipsVal {
-				ips[idx] = fmt.Sprint(ipsVal[idx])
+			for _, ip := range ipsVal {
+				ips = append(ips, ip.(string))
 			}
+		}
+		if len(ips) > 0 {
 			request.Properties.Ips = &ips
+		} else {
+			diags := diag.FromErr(fmt.Errorf("you can not empty the ips field for networkloadbalancer %s", d.Id()))
+			return diags
 		}
 	}
 
@@ -214,12 +219,17 @@ func resourceNetworkLoadBalancerUpdate(ctx context.Context, d *schema.ResourceDa
 		oldLbPrivateIps, newLbPrivateIps := d.GetChange("lb_private_ips")
 		log.Printf("[INFO] network loadbalancer lb_private_ips changed from %+v to %+v", oldLbPrivateIps, newLbPrivateIps)
 		lbPrivateIpsVal := newLbPrivateIps.([]interface{})
+		lbPrivateIps := make([]string, 0)
 		if lbPrivateIpsVal != nil {
-			lbPrivateIps := make([]string, len(lbPrivateIpsVal), len(lbPrivateIpsVal))
-			for idx := range lbPrivateIpsVal {
-				lbPrivateIps[idx] = fmt.Sprint(lbPrivateIpsVal[idx])
+			for _, privateIp := range lbPrivateIpsVal {
+				lbPrivateIps = append(lbPrivateIps, privateIp.(string))
 			}
+		}
+		if len(lbPrivateIps) > 0 {
 			request.Properties.LbPrivateIps = &lbPrivateIps
+		} else {
+			diags := diag.FromErr(fmt.Errorf("you can not empty the lbPrivateIps field for networkloadbalancer %s", d.Id()))
+			return diags
 		}
 	}
 	_, apiResponse, err := client.NetworkLoadBalancersApi.DatacentersNetworkloadbalancersPatch(ctx, dcId, d.Id()).NetworkLoadBalancerProperties(*request.Properties).Execute()
@@ -296,4 +306,50 @@ func resourceNetworkLoadBalancerImport(ctx context.Context, d *schema.ResourceDa
 	}
 
 	return []*schema.ResourceData{d}, nil
+}
+
+func setNetworkLoadBalancerData(d *schema.ResourceData, networkLoadBalancer *ionoscloud.NetworkLoadBalancer) error {
+
+	if networkLoadBalancer.Id != nil {
+		d.SetId(*networkLoadBalancer.Id)
+	}
+
+	if networkLoadBalancer.Properties != nil {
+		if networkLoadBalancer.Properties.Name != nil {
+			err := d.Set("name", *networkLoadBalancer.Properties.Name)
+			if err != nil {
+				return fmt.Errorf("error while setting name property for network load balancer %s: %s", d.Id(), err)
+			}
+		}
+
+		if networkLoadBalancer.Properties.ListenerLan != nil {
+			err := d.Set("listener_lan", *networkLoadBalancer.Properties.ListenerLan)
+			if err != nil {
+				return fmt.Errorf("error while setting listener_lan property for network load balancer %s: %s", d.Id(), err)
+			}
+		}
+
+		if networkLoadBalancer.Properties.TargetLan != nil {
+			err := d.Set("target_lan", *networkLoadBalancer.Properties.TargetLan)
+			if err != nil {
+				return fmt.Errorf("error while setting target_lan property for network load balancer %s: %s", d.Id(), err)
+			}
+		}
+
+		if networkLoadBalancer.Properties.Ips != nil {
+			err := d.Set("ips", *networkLoadBalancer.Properties.Ips)
+			if err != nil {
+				return fmt.Errorf("error while setting ips property for network load balancer %s: %s", d.Id(), err)
+			}
+		}
+
+		if networkLoadBalancer.Properties.LbPrivateIps != nil {
+			err := d.Set("lb_private_ips", *networkLoadBalancer.Properties.LbPrivateIps)
+			if err != nil {
+				return fmt.Errorf("error while setting lb_private_ips property for network load balancer %s: %s", d.Id(), err)
+			}
+		}
+
+	}
+	return nil
 }

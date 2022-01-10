@@ -1,6 +1,3 @@
-//go:build nlb
-// +build nlb
-
 package ionoscloud
 
 import (
@@ -13,9 +10,10 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
 )
 
+const networkLoadBalancerResource = NetworkLoadBalancerResource + "." + NetworkLoadBalancerTestResource
+
 func TestAccNetworkLoadBalancer_Basic(t *testing.T) {
 	var networkLoadBalancer ionoscloud.NetworkLoadBalancer
-	networkLoadBalancerName := "networkLoadBalancer"
 
 	resource.Test(t, resource.TestCase{
 		PreCheck: func() {
@@ -25,16 +23,26 @@ func TestAccNetworkLoadBalancer_Basic(t *testing.T) {
 		CheckDestroy:      testAccCheckNetworkLoadBalancerDestroyCheck,
 		Steps: []resource.TestStep{
 			{
-				Config: fmt.Sprintf(testAccCheckNetworkLoadBalancerConfigBasic, networkLoadBalancerName),
+				Config: testAccCheckNetworkLoadBalancerConfigBasic,
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheckNetworkLoadBalancerExists("ionoscloud_networkloadbalancer.test_networkloadbalancer", &networkLoadBalancer),
-					resource.TestCheckResourceAttr("ionoscloud_networkloadbalancer.test_networkloadbalancer", "name", networkLoadBalancerName),
+					testAccCheckNetworkLoadBalancerExists(networkLoadBalancerResource, &networkLoadBalancer),
+					resource.TestCheckResourceAttr(networkLoadBalancerResource, "name", NetworkLoadBalancerTestResource),
+					resource.TestCheckResourceAttr(networkLoadBalancerResource, "ips.0", "10.12.118.224"),
+					resource.TestCheckResourceAttr(networkLoadBalancerResource, "lb_private_ips.0", "10.13.72.225/24"),
+					resource.TestCheckResourceAttrPair(networkLoadBalancerResource, "listener_lan", LanResource+".nlb_lan_1", "id"),
+					resource.TestCheckResourceAttrPair(networkLoadBalancerResource, "target_lan", LanResource+".nlb_lan_2", "id"),
 				),
 			},
 			{
 				Config: testAccCheckNetworkLoadBalancerConfigUpdate,
 				Check: resource.ComposeTestCheckFunc(
-					resource.TestCheckResourceAttr("ionoscloud_networkloadbalancer.test_networkloadbalancer", "name", "updated"),
+					resource.TestCheckResourceAttr(networkLoadBalancerResource, "name", UpdatedResources),
+					resource.TestCheckResourceAttr(networkLoadBalancerResource, "ips.0", "10.12.118.224"),
+					resource.TestCheckResourceAttr(networkLoadBalancerResource, "ips.1", "10.12.119.224"),
+					resource.TestCheckResourceAttr(networkLoadBalancerResource, "lb_private_ips.0", "10.13.72.225/24"),
+					resource.TestCheckResourceAttr(networkLoadBalancerResource, "lb_private_ips.1", "10.13.73.225/24"),
+					resource.TestCheckResourceAttrPair(networkLoadBalancerResource, "listener_lan", LanResource+".nlb_lan_3", "id"),
+					resource.TestCheckResourceAttrPair(networkLoadBalancerResource, "target_lan", LanResource+".nlb_lan_4", "id"),
 				),
 			},
 		},
@@ -51,7 +59,7 @@ func testAccCheckNetworkLoadBalancerDestroyCheck(s *terraform.State) error {
 	}
 
 	for _, rs := range s.RootModule().Resources {
-		if rs.Type != "ionoscloud_datacenter" {
+		if rs.Type != NetworkLoadBalancerResource {
 			continue
 		}
 
@@ -106,60 +114,72 @@ func testAccCheckNetworkLoadBalancerExists(n string, networkLoadBalancer *ionosc
 }
 
 const testAccCheckNetworkLoadBalancerConfigBasic = `
-resource "ionoscloud_datacenter" "datacenter" {
+resource ` + DatacenterResource + ` "datacenter" {
   name              = "test_nbl"
   location          = "gb/lhr"
   description       = "datacenter for hosting "
 }
 
-resource "ionoscloud_lan" "nlb_lan_1" {
-  datacenter_id = ionoscloud_datacenter.datacenter.id
+resource ` + LanResource + ` "nlb_lan_1" {
+  datacenter_id = ` + DatacenterResource + `.datacenter.id
   public        = false
   name          = "lan_1"
 }
 
-resource "ionoscloud_lan" "nlb_lan_2" {
-  datacenter_id = ionoscloud_datacenter.datacenter.id
+resource ` + LanResource + ` "nlb_lan_2" {
+  datacenter_id = ` + DatacenterResource + `.datacenter.id
   public        = false
   name          = "lan_2"
 }
 
 
-resource "ionoscloud_networkloadbalancer" "test_networkloadbalancer" {
-  datacenter_id = ionoscloud_datacenter.datacenter.id
-  name          = "%s"
-  listener_lan  = ionoscloud_lan.nlb_lan_1.id
-  target_lan    = ionoscloud_lan.nlb_lan_2.id
+resource ` + NetworkLoadBalancerResource + ` ` + NetworkLoadBalancerTestResource + ` {
+  datacenter_id = ` + DatacenterResource + `.datacenter.id
+  name          = "` + NetworkLoadBalancerTestResource + `"
+  listener_lan  = ` + LanResource + `.nlb_lan_1.id
+  target_lan    = ` + LanResource + `.nlb_lan_2.id
   ips           = ["10.12.118.224"]
   lb_private_ips = ["10.13.72.225/24"]
 }
 `
 
 const testAccCheckNetworkLoadBalancerConfigUpdate = `
-resource "ionoscloud_datacenter" "datacenter" {
+resource ` + DatacenterResource + ` "datacenter" {
   name              = "test_nbl"
   location          = "gb/lhr"
   description       = "datacenter for hosting "
 }
 
-resource "ionoscloud_lan" "nlb_lan_1" {
-  datacenter_id = ionoscloud_datacenter.datacenter.id
+resource ` + LanResource + ` "nlb_lan_1" {
+  datacenter_id = ` + DatacenterResource + `.datacenter.id
   public        = false
   name          = "lan_1"
 }
 
-resource "ionoscloud_lan" "nlb_lan_2" {
-  datacenter_id = ionoscloud_datacenter.datacenter.id
+resource ` + LanResource + ` "nlb_lan_2" {
+  datacenter_id = ` + DatacenterResource + `.datacenter.id
   public        = false
   name          = "lan_2"
 }
 
+resource ` + LanResource + ` "nlb_lan_3" {
+  datacenter_id = ` + DatacenterResource + `.datacenter.id
+  public        = false
+  name          = "lan_3"
+}
 
-resource "ionoscloud_networkloadbalancer" "test_networkloadbalancer" {
-  datacenter_id = ionoscloud_datacenter.datacenter.id
-  name          = "updated"
-  listener_lan  = ionoscloud_lan.nlb_lan_1.id
-  target_lan    = ionoscloud_lan.nlb_lan_2.id
-  ips           = ["10.12.118.224"]
-  lb_private_ips = ["10.13.72.225/24"]
-}`
+resource ` + LanResource + ` "nlb_lan_4" {
+  datacenter_id = ` + DatacenterResource + `.datacenter.id
+  public        = false
+  name          = "lan_4"
+}
+
+resource ` + NetworkLoadBalancerResource + ` ` + NetworkLoadBalancerTestResource + ` {
+  datacenter_id = ` + DatacenterResource + `.datacenter.id
+  name          = "` + UpdatedResources + `"
+  listener_lan  = ` + LanResource + `.nlb_lan_3.id
+  target_lan    = ` + LanResource + `.nlb_lan_4.id
+  ips           = ["10.12.118.224", "10.12.119.224"]
+  lb_private_ips = ["10.13.72.225/24", "10.13.73.225/24"]
+}
+`

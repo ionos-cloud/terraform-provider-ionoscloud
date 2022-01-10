@@ -4,6 +4,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	ionoscloud "github.com/ionos-cloud/sdk-go/v6"
 	"strings"
@@ -11,7 +12,7 @@ import (
 
 func dataSourceNetworkLoadBalancer() *schema.Resource {
 	return &schema.Resource{
-		Read: dataSourceNetworkLoadBalancerRead,
+		ReadContext: dataSourceNetworkLoadBalancerRead,
 		Schema: map[string]*schema.Schema{
 			"id": {
 				Type:     schema.TypeString,
@@ -61,22 +62,22 @@ func dataSourceNetworkLoadBalancer() *schema.Resource {
 	}
 }
 
-func dataSourceNetworkLoadBalancerRead(d *schema.ResourceData, meta interface{}) error {
+func dataSourceNetworkLoadBalancerRead(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	client := meta.(*ionoscloud.APIClient)
 
 	datacenterId, dcIdOk := d.GetOk("datacenter_id")
 	if !dcIdOk {
-		return errors.New("no datacenter_id was specified")
+		return diag.FromErr(errors.New("no datacenter_id was specified"))
 	}
 
 	id, idOk := d.GetOk("id")
 	name, nameOk := d.GetOk("name")
 
 	if idOk && nameOk {
-		return errors.New("id and name cannot be both specified in the same time")
+		return diag.FromErr(errors.New("id and name cannot be both specified in the same time"))
 	}
 	if !idOk && !nameOk {
-		return errors.New("please provide either the lan id or name")
+		return diag.FromErr(errors.New("please provide either the lan id or name"))
 	}
 	var networkLoadBalancer ionoscloud.NetworkLoadBalancer
 	var err error
@@ -93,7 +94,7 @@ func dataSourceNetworkLoadBalancerRead(d *schema.ResourceData, meta interface{})
 		networkLoadBalancer, apiResponse, err = client.NetworkLoadBalancersApi.DatacentersNetworkloadbalancersFindByNetworkLoadBalancerId(ctx, datacenterId.(string), id.(string)).Execute()
 		logApiRequestTime(apiResponse)
 		if err != nil {
-			return fmt.Errorf("an error occurred while fetching the network loadbalancer %s: %s", id.(string), err)
+			return diag.FromErr(fmt.Errorf("an error occurred while fetching the network loadbalancer %s: %s", id.(string), err))
 		}
 	} else {
 		/* search by name */
@@ -108,7 +109,7 @@ func dataSourceNetworkLoadBalancerRead(d *schema.ResourceData, meta interface{})
 		networkLoadBalancers, apiResponse, err := client.NetworkLoadBalancersApi.DatacentersNetworkloadbalancersGet(ctx, datacenterId.(string)).Execute()
 		logApiRequestTime(apiResponse)
 		if err != nil {
-			return fmt.Errorf("an error occurred while fetching network loadbalancers: %s", err.Error())
+			return diag.FromErr(fmt.Errorf("an error occurred while fetching network loadbalancers: %s", err.Error()))
 		}
 
 		if networkLoadBalancers.Items != nil {
@@ -116,7 +117,7 @@ func dataSourceNetworkLoadBalancerRead(d *schema.ResourceData, meta interface{})
 				tmpNetworkLoadBalancer, apiResponse, err := client.NetworkLoadBalancersApi.DatacentersNetworkloadbalancersFindByNetworkLoadBalancerId(ctx, datacenterId.(string), *c.Id).Execute()
 				logApiRequestTime(apiResponse)
 				if err != nil {
-					return fmt.Errorf("an error occurred while fetching network loadbalancer with ID %s: %s", *c.Id, err.Error())
+					return diag.FromErr(fmt.Errorf("an error occurred while fetching network loadbalancer with ID %s: %s", *c.Id, err.Error()))
 				}
 				if tmpNetworkLoadBalancer.Properties.Name != nil {
 					if strings.Contains(*tmpNetworkLoadBalancer.Properties.Name, name.(string)) {
@@ -131,64 +132,18 @@ func dataSourceNetworkLoadBalancerRead(d *schema.ResourceData, meta interface{})
 	}
 
 	if &networkLoadBalancer == nil {
-		return errors.New("network loadbalancer not found")
+		return diag.FromErr(errors.New("network loadbalancer not found"))
 	}
 
 	if networkLoadBalancer.Id != nil {
 		if err := d.Set("id", *networkLoadBalancer.Id); err != nil {
-			return err
+			return diag.FromErr(err)
 		}
 	}
 
 	if err = setNetworkLoadBalancerData(d, &networkLoadBalancer); err != nil {
-		return err
+		return diag.FromErr(err)
 	}
 
-	return nil
-}
-
-func setNetworkLoadBalancerData(d *schema.ResourceData, networkLoadBalancer *ionoscloud.NetworkLoadBalancer) error {
-
-	if networkLoadBalancer.Id != nil {
-		d.SetId(*networkLoadBalancer.Id)
-	}
-
-	if networkLoadBalancer.Properties != nil {
-		if networkLoadBalancer.Properties.Name != nil {
-			err := d.Set("name", *networkLoadBalancer.Properties.Name)
-			if err != nil {
-				return fmt.Errorf("error while setting name property for network load balancer %s: %s", d.Id(), err)
-			}
-		}
-
-		if networkLoadBalancer.Properties.ListenerLan != nil {
-			err := d.Set("listener_lan", *networkLoadBalancer.Properties.ListenerLan)
-			if err != nil {
-				return fmt.Errorf("error while setting listener_lan property for network load balancer %s: %s", d.Id(), err)
-			}
-		}
-
-		if networkLoadBalancer.Properties.TargetLan != nil {
-			err := d.Set("target_lan", *networkLoadBalancer.Properties.TargetLan)
-			if err != nil {
-				return fmt.Errorf("error while setting target_lan property for network load balancer %s: %s", d.Id(), err)
-			}
-		}
-
-		if networkLoadBalancer.Properties.Ips != nil {
-			err := d.Set("ips", *networkLoadBalancer.Properties.Ips)
-			if err != nil {
-				return fmt.Errorf("error while setting ips property for network load balancer %s: %s", d.Id(), err)
-			}
-		}
-
-		if networkLoadBalancer.Properties.LbPrivateIps != nil {
-			err := d.Set("lb_private_ips", *networkLoadBalancer.Properties.LbPrivateIps)
-			if err != nil {
-				return fmt.Errorf("error while setting lb_private_ips property for network load balancer %s: %s", d.Id(), err)
-			}
-		}
-
-	}
 	return nil
 }

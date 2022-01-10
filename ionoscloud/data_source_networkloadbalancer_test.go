@@ -1,6 +1,3 @@
-//go:build nlb
-// +build nlb
-
 package ionoscloud
 
 import (
@@ -8,6 +5,9 @@ import (
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 )
+
+const dataSourceNetworkLoadBalancerId = DataSource + "." + NetworkLoadBalancerResource + "." + NetworkLoadBalancerDataSourceById
+const dataSourceNetworkLoadBalancerName = DataSource + "." + NetworkLoadBalancerResource + "." + NetworkLoadBalancerDataSourceByName
 
 func TestAccDataSourceNetworkLoadBalancer(t *testing.T) {
 	resource.Test(t, resource.TestCase{
@@ -17,120 +17,42 @@ func TestAccDataSourceNetworkLoadBalancer(t *testing.T) {
 		ProviderFactories: testAccProviderFactories,
 		Steps: []resource.TestStep{
 			{
-				Config: testAccDataSourceNetworkLoadBalancerCreateResources,
+				Config: testAccCheckNetworkLoadBalancerConfigBasic,
 			},
 			{
 				Config: testAccDataSourceNetworkLoadBalancerMatchId,
 				Check: resource.ComposeTestCheckFunc(
-					resource.TestCheckResourceAttr("data.ionoscloud_networkloadbalancer.test_networkloadbalancer_id", "name", "test_datasource_nlb"),
+					resource.TestCheckResourceAttrPair(networkLoadBalancerResource, "name", dataSourceNetworkLoadBalancerId, "name"),
+					resource.TestCheckResourceAttrPair(networkLoadBalancerResource, "listener_lan", dataSourceNetworkLoadBalancerId, "listener_lan"),
+					resource.TestCheckResourceAttrPair(networkLoadBalancerResource, "ips", dataSourceNetworkLoadBalancerId, "ips"),
+					resource.TestCheckResourceAttrPair(networkLoadBalancerResource, "target_lan", dataSourceNetworkLoadBalancerId, "target_lan"),
+					resource.TestCheckResourceAttrPair(networkLoadBalancerResource, "lb_private_ips", dataSourceNetworkLoadBalancerId, "lb_private_ips"),
 				),
 			},
 			{
 				Config: testAccDataSourceNetworkLoadBalancerMatchName,
 				Check: resource.ComposeTestCheckFunc(
-					resource.TestCheckResourceAttr("data.ionoscloud_networkloadbalancer.test_networkloadbalancer_name", "name", "test_datasource_nlb"),
+					resource.TestCheckResourceAttrPair(networkLoadBalancerResource, "name", dataSourceNetworkLoadBalancerName, "name"),
+					resource.TestCheckResourceAttrPair(networkLoadBalancerResource, "listener_lan", dataSourceNetworkLoadBalancerName, "listener_lan"),
+					resource.TestCheckResourceAttrPair(networkLoadBalancerResource, "ips", dataSourceNetworkLoadBalancerName, "ips"),
+					resource.TestCheckResourceAttrPair(networkLoadBalancerResource, "target_lan", dataSourceNetworkLoadBalancerName, "target_lan"),
+					resource.TestCheckResourceAttrPair(networkLoadBalancerResource, "lb_private_ips", dataSourceNetworkLoadBalancerName, "lb_private_ips"),
 				),
 			},
 		},
 	})
 }
 
-const testAccDataSourceNetworkLoadBalancerCreateResources = `
-resource "ionoscloud_datacenter" "datacenter" {
-  name              = "test_nbl"
-  location          = "gb/lhr"
-  description       = "datacenter for hosting "
-}
-
-resource "ionoscloud_lan" "nlb_lan_1" {
-  datacenter_id = ionoscloud_datacenter.datacenter.id
-  public        = false
-  name          = "lan_1"
-}
-
-resource "ionoscloud_lan" "nlb_lan_2" {
-  datacenter_id = ionoscloud_datacenter.datacenter.id
-  public        = false
-  name          = "lan_2"
-}
-
-
-resource "ionoscloud_networkloadbalancer" "networkloadbalancer" {
-  datacenter_id = ionoscloud_datacenter.datacenter.id
-  name          = "test_datasource_nlb"
-  listener_lan  = ionoscloud_lan.nlb_lan_1.id
-  target_lan    = ionoscloud_lan.nlb_lan_2.id
-  ips           = ["10.12.118.224"]
-  lb_private_ips = ["10.13.72.225/24"]
+const testAccDataSourceNetworkLoadBalancerMatchId = testAccCheckNetworkLoadBalancerConfigBasic + `
+data ` + NetworkLoadBalancerResource + ` ` + NetworkLoadBalancerDataSourceById + ` {
+  datacenter_id = ` + NetworkLoadBalancerResource + `.` + NetworkLoadBalancerTestResource + `.datacenter_id
+  id			= ` + NetworkLoadBalancerResource + `.` + NetworkLoadBalancerTestResource + `.id
 }
 `
 
-const testAccDataSourceNetworkLoadBalancerMatchId = `
-resource "ionoscloud_datacenter" "datacenter" {
-  name              = "test_nbl"
-  location          = "gb/lhr"
-  description       = "datacenter for hosting "
-}
-
-resource "ionoscloud_lan" "nlb_lan_1" {
-  datacenter_id = ionoscloud_datacenter.datacenter.id
-  public        = false
-  name          = "lan_1"
-}
-
-resource "ionoscloud_lan" "nlb_lan_2" {
-  datacenter_id = ionoscloud_datacenter.datacenter.id
-  public        = false
-  name          = "lan_2"
-}
-
-
-resource "ionoscloud_networkloadbalancer" "networkloadbalancer" {
-  datacenter_id = ionoscloud_datacenter.datacenter.id
-  name          = "test_datasource_nlb"
-  listener_lan  = ionoscloud_lan.nlb_lan_1.id
-  target_lan    = ionoscloud_lan.nlb_lan_2.id
-  ips           = ["10.12.118.224"]
-  lb_private_ips = ["10.13.72.225/24"]
-}
-
-data "ionoscloud_networkloadbalancer" "test_networkloadbalancer_id" {
-  datacenter_id = ionoscloud_datacenter.datacenter.id
-  id			= ionoscloud_networkloadbalancer.networkloadbalancer.id
-}
-`
-
-const testAccDataSourceNetworkLoadBalancerMatchName = `
-resource "ionoscloud_datacenter" "datacenter" {
-  name              = "test_nbl"
-  location          = "gb/lhr"
-  description       = "datacenter for hosting "
-}
-
-resource "ionoscloud_lan" "nlb_lan_1" {
-  datacenter_id = ionoscloud_datacenter.datacenter.id
-  public        = false
-  name          = "lan_1"
-}
-
-resource "ionoscloud_lan" "nlb_lan_2" {
-  datacenter_id = ionoscloud_datacenter.datacenter.id
-  public        = false
-  name          = "lan_2"
-}
-
-
-resource "ionoscloud_networkloadbalancer" "networkloadbalancer" {
-  datacenter_id = ionoscloud_datacenter.datacenter.id
-  name          = "test_datasource_nlb"
-  listener_lan  = ionoscloud_lan.nlb_lan_1.id
-  target_lan    = ionoscloud_lan.nlb_lan_2.id
-  ips           = ["10.12.118.224"]
-  lb_private_ips = ["10.13.72.225/24"]
-}
-
-data "ionoscloud_networkloadbalancer" "test_networkloadbalancer_name" {
-  datacenter_id = ionoscloud_datacenter.datacenter.id
-  name			= "test_datasource_"
+const testAccDataSourceNetworkLoadBalancerMatchName = testAccCheckNetworkLoadBalancerConfigBasic + `
+data ` + NetworkLoadBalancerResource + ` ` + NetworkLoadBalancerDataSourceByName + ` {
+  datacenter_id = ` + NetworkLoadBalancerResource + `.` + NetworkLoadBalancerTestResource + `.datacenter_id
+  name			= ` + NetworkLoadBalancerResource + `.` + NetworkLoadBalancerTestResource + `.name
 }
 `
