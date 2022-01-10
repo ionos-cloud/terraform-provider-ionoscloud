@@ -1,3 +1,6 @@
+//go:build nlb
+// +build nlb
+
 package ionoscloud
 
 import (
@@ -12,7 +15,7 @@ import (
 
 const networkLoadBalancerResource = NetworkLoadBalancerResource + "." + NetworkLoadBalancerTestResource
 
-func TestAccNetworkLoadBalancer_Basic(t *testing.T) {
+func TestAccNetworkLoadBalancerBasic(t *testing.T) {
 	var networkLoadBalancer ionoscloud.NetworkLoadBalancer
 
 	resource.Test(t, resource.TestCase{

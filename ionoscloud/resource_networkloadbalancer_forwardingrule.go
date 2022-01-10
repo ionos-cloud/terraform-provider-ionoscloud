@@ -396,14 +396,12 @@ func resourceNetworkLoadBalancerForwardingRuleUpdate(ctx context.Context, d *sch
 	if d.HasChange("health_check.0") {
 		_, v := d.GetChange("health_check.0")
 		if v.(map[string]interface{}) != nil {
-			updateHealthCheck := false
 
 			healthCheck := &ionoscloud.NetworkLoadBalancerForwardingRuleHealthCheck{}
 
 			if d.HasChange("health_check.0.client_timeout") {
 				_, newValue := d.GetChange("health_check.0.client_timeout")
 				if newValue != 0 {
-					updateHealthCheck = true
 					newValue := int32(newValue.(int))
 					healthCheck.ClientTimeout = &newValue
 				}
@@ -412,7 +410,6 @@ func resourceNetworkLoadBalancerForwardingRuleUpdate(ctx context.Context, d *sch
 			if d.HasChange("health_check.0.connect_timeout") {
 				_, newValue := d.GetChange("health_check.0.connect_timeout")
 				if newValue != 0 {
-					updateHealthCheck = true
 					newValue := int32(newValue.(int))
 					healthCheck.ConnectTimeout = &newValue
 				}
@@ -421,7 +418,6 @@ func resourceNetworkLoadBalancerForwardingRuleUpdate(ctx context.Context, d *sch
 			if d.HasChange("health_check.0.target_timeout") {
 				_, newValue := d.GetChange("health_check.0.target_timeout")
 				if newValue != 0 {
-					updateHealthCheck = true
 					newValue := int32(newValue.(int))
 					healthCheck.TargetTimeout = &newValue
 				}
@@ -430,23 +426,18 @@ func resourceNetworkLoadBalancerForwardingRuleUpdate(ctx context.Context, d *sch
 			if d.HasChange("health_check.0.retries") {
 				_, newValue := d.GetChange("health_check.0.retries")
 				if newValue != 0 {
-					updateHealthCheck = true
 					newValue := int32(newValue.(int))
 					healthCheck.Retries = &newValue
 				}
 			}
 
-			if updateHealthCheck == true {
-				request.Properties.HealthCheck = healthCheck
-			}
+			request.Properties.HealthCheck = healthCheck
 		}
 	}
 
 	if d.HasChange("targets") {
 		oldTargets, newTargets := d.GetChange("targets")
 		if newTargets.([]interface{}) != nil {
-			updateTargets := false
-
 			var targets []ionoscloud.NetworkLoadBalancerForwardingRuleTarget
 
 			for targetIndex := range newTargets.([]interface{}) {
@@ -488,15 +479,8 @@ func resourceNetworkLoadBalancerForwardingRuleUpdate(ctx context.Context, d *sch
 
 				targets = append(targets, target)
 			}
-
-			if len(targets) > 0 {
-				updateTargets = true
-			}
-
-			if updateTargets == true {
-				log.Printf("[INFO] Network load balancer forwarding rule targets changed from %+v to %+v", oldTargets, newTargets)
-				request.Properties.Targets = &targets
-			}
+			log.Printf("[INFO] Network load balancer forwarding rule targets changed from %+v to %+v", oldTargets, newTargets)
+			request.Properties.Targets = &targets
 		}
 	}
 	_, apiResponse, err := client.NetworkLoadBalancersApi.DatacentersNetworkloadbalancersForwardingrulesPatch(ctx, dcId, nlbID, d.Id()).NetworkLoadBalancerForwardingRuleProperties(*request.Properties).Execute()
