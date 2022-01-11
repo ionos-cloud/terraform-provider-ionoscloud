@@ -226,7 +226,7 @@ func resourceStateRefreshFunc(meta interface{}, path string) resource.StateRefre
 	return func() (interface{}, string, error) {
 		client := meta.(SdkBundle).CloudApiClient
 
-		fmt.Printf("[INFO] Checking PATH %s\n", path)
+		log.Printf("[INFO] Checking PATH %s\n", path)
 		if path == "" {
 			return nil, "", fmt.Errorf("can not check a state when path is empty")
 		}
