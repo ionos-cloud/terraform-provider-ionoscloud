@@ -5,6 +5,7 @@
 
 ### Fixes:
 - fixed bug regarding updating listener_lan and target_lan 
+- fixed diff on availableUpgradeVersions for k8s cluster and nodepool
 
 ## 6.0.2
 
