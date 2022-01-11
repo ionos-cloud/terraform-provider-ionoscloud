@@ -85,7 +85,7 @@ func Provider() *schema.Provider {
 			NatGatewayRuleResource:      resourceNatGatewayRule(),
 			NetworkLoadBalancerResource: resourceNetworkLoadBalancer(),
 			NetworkLoadBalancerForwardingRuleResource: resourceNetworkLoadBalancerForwardingRule(),
-			DBaaSClusterResource:                            resourceDbaasPgSqlCluster(),
+			DBaaSClusterResource:                      resourceDbaasPgSqlCluster(),
 		},
 		DataSourcesMap: map[string]*schema.Resource{
 			DatacenterResource:                        dataSourceDataCenter(),
@@ -113,9 +113,9 @@ func Provider() *schema.Provider {
 			NicResource:                               dataSourceNIC(),
 			ShareResource:                             dataSourceShare(),
 			ResourceIpFailover:                        dataSourceIpFailover(),
-			DBaaSClusterResource:                            dataSourceDbaasPgSqlCluster(),
-			DBaaSVersionsResource:                           dataSourceDbaasPgSqlVersions(),
-			DBaaSBackupsResource:                            dataSourceDbaasPgSqlBackups(),
+			DBaaSClusterResource:                      dataSourceDbaasPgSqlCluster(),
+			DBaaSVersionsResource:                     dataSourceDbaasPgSqlVersions(),
+			DBaaSBackupsResource:                      dataSourceDbaasPgSqlBackups(),
 		},
 	}
 

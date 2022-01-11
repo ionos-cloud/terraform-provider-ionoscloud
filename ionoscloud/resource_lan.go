@@ -302,8 +302,6 @@ func lanAvailable(ctx context.Context, client *ionoscloud.APIClient, d *schema.R
 	rsp, apiResponse, err := client.LANsApi.DatacentersLansFindById(ctx, dcId, d.Id()).Execute()
 	logApiRequestTime(apiResponse)
 
-	log.Printf("[INFO] Current status for LAN %s: %+v", d.Id(), rsp)
-
 	if err != nil {
 		return true, fmt.Errorf("error checking LAN status: %w", err)
 	}
@@ -316,26 +314,10 @@ func lanAvailable(ctx context.Context, client *ionoscloud.APIClient, d *schema.R
 }
 
 func lanDeleted(ctx context.Context, client *ionoscloud.APIClient, d *schema.ResourceData) (bool, error) {
-	dcId := d.Get("datacenter_id").(string)
+	dcid := d.Get("datacenter_id").(string)
 
-	rsp, apiResponse, err := client.LANsApi.DatacentersLansFindById(ctx, dcId, d.Id()).Execute()
+	rsp, apiResponse, err := client.LANsApi.DatacentersLansFindById(ctx, dcid, d.Id()).Execute()
 	logApiRequestTime(apiResponse)
-
-	if err != nil {
-		if apiResponse != nil && apiResponse.Response != nil && apiResponse.StatusCode == 404 {
-			return true, nil
-		}
-		return false, fmt.Errorf("error checking LAN deletion status: %s", err)
-	}
-
-	log.Printf("[INFO] LAN %s not deleted yet deleted from the datacenter %s", d.Id(), dcId)
-
-	if rsp.Metadata != nil && rsp.Metadata.State != nil {
-		log.Printf("[INFO] Current deletion status for LAN %s: %+v", d.Id(), *rsp.Metadata.State)
-
-		if *rsp.Metadata.State == "AVAILABLE" {
-			apiResponse, err = client.LANsApi.DatacentersLansDelete(ctx, dcId, d.Id()).Execute()
-			logApiRequestTime(apiResponse)
 
 	if err != nil {
 		if httpNotFound(apiResponse) {

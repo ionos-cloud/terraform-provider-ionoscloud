@@ -262,7 +262,7 @@ func dataSourceK8sReadCluster(ctx context.Context, d *schema.ResourceData, meta 
 		return diag.FromErr(errors.New("id and name cannot be both specified in the same time"))
 	}
 	if !idOk && !nameOk {
-		return errors.New("please provide either the k8s cluster id or name")
+		return diag.FromErr(errors.New("please provide either the k8s cluster id or name"))
 	}
 	var cluster ionoscloud.KubernetesCluster
 	var err error
