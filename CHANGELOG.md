@@ -8,6 +8,9 @@
 - fixed diff on availableUpgradeVersions for k8s cluster and nodepool
 - fixed lan deletion - wait for completion of nic deletion
 
+### Documentation:
+- restructured documentation by splitting it in product folders 
+
 ## 6.0.2
 
 ### Fixes:
