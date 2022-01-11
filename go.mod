@@ -3,10 +3,11 @@ module github.com/ionos-cloud/terraform-provider-ionoscloud
 go 1.17
 
 require (
+	github.com/hashicorp/go-uuid v1.0.2
 	github.com/hashicorp/terraform-plugin-sdk v1.17.2
 	github.com/hashicorp/terraform-plugin-sdk/v2 v2.9.0
-	github.com/ionos-cloud/sdk-go/v6 v6.0.0
 	github.com/ionos-cloud/sdk-go-autoscaling v1.0.0
+	github.com/ionos-cloud/sdk-go/v6 v6.0.0
 	golang.org/x/crypto v0.0.0-20210421170649-83a5a9bb288b
 	gopkg.in/yaml.v3 v3.0.0-20200615113413-eeeca48fe776
 )
@@ -35,7 +36,6 @@ require (
 	github.com/hashicorp/go-multierror v1.1.0 // indirect
 	github.com/hashicorp/go-plugin v1.4.1 // indirect
 	github.com/hashicorp/go-safetemp v1.0.0 // indirect
-	github.com/hashicorp/go-uuid v1.0.2 // indirect
 	github.com/hashicorp/go-version v1.3.0 // indirect
 	github.com/hashicorp/hcl/v2 v2.8.2 // indirect
 	github.com/hashicorp/logutils v1.0.0 // indirect
@@ -76,5 +76,5 @@ require (
 )
 
 replace github.com/ionos-cloud/sdk-go-autoscaling => ../../../../../sdk/autoscaling-sdk
-replace github.com/ionos-cloud/sdk-go/v6  => ../sdk-go
 
+replace github.com/ionos-cloud/sdk-go/v6 => ../sdk-go

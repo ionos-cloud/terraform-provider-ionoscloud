@@ -209,23 +209,39 @@ func resourceLanUpdate(ctx context.Context, d *schema.ResourceData, meta interfa
 
 func resourceLanDelete(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	client := meta.(SdkBundle).CloudApiClient
-	dcId := d.Get("datacenter_id").(string)
+	dcid := d.Get("datacenter_id").(string)
 
-	if err := waitForNicsDeletion(ctx, client, d); err != nil {
-		return diag.FromErr(err)
-	}
-
-	apiResponse, err := client.LANsApi.DatacentersLansDelete(ctx, dcId, d.Id()).Execute()
+	apiResponse, err := client.LANsApi.DatacentersLansDelete(ctx, dcid, d.Id()).Execute()
 	logApiRequestTime(apiResponse)
 
 	if err != nil {
-		diags := diag.FromErr(fmt.Errorf("an error occured while deleting lan dcId %s ID %s %s", dcId, d.Id(), err))
+		diags := diag.FromErr(fmt.Errorf("an error occured while deleting lan dcId %s ID %s %s", dcid, d.Id(), err))
 		return diags
-
 	}
 
-	if err := waitForLanDeletion(ctx, client, d); err != nil {
-		return diag.FromErr(err)
+	for {
+		log.Printf("[INFO] Waiting for LAN %s to be deleted...", d.Id())
+
+		lDeleted, dsErr := lanDeleted(ctx, client, d)
+
+		if dsErr != nil {
+			diags := diag.FromErr(fmt.Errorf("error while checking deletion status of LAN %s: %s", d.Id(), dsErr))
+			return diags
+		}
+
+		if lDeleted {
+			log.Printf("[INFO] Successfully deleted LAN: %s", d.Id())
+			break
+		}
+
+		select {
+		case <-time.After(SleepInterval):
+			log.Printf("[INFO] trying again ...")
+		case <-ctx.Done():
+			log.Printf("[INFO] lan deletion timed out")
+			diags := diag.FromErr(fmt.Errorf("lan deletion timed out! WARNING: your lan will still probably be deleted after some time but the terraform state won't reflect that; check your Ionos Cloud account for updates"))
+			return diags
+		}
 	}
 
 	d.SetId("")
@@ -301,12 +317,11 @@ func lanAvailable(ctx context.Context, client *ionoscloud.APIClient, d *schema.R
 	rsp, apiResponse, err := client.LANsApi.DatacentersLansFindById(ctx, dcid, d.Id()).Execute()
 	logApiRequestTime(apiResponse)
 
+	log.Printf("[INFO] Current status for LAN %s: %+v", d.Id(), rsp)
+
 	if err != nil {
 		return true, fmt.Errorf("error checking LAN status: %s", err)
 	}
-
-	log.Printf("[INFO] current status for LAN %s: %+v", d.Id(), *rsp.Metadata.State)
-
 	return *rsp.Metadata.State == "AVAILABLE", nil
 }
 
@@ -316,83 +331,14 @@ func lanDeleted(ctx context.Context, client *ionoscloud.APIClient, d *schema.Res
 	rsp, apiResponse, err := client.LANsApi.DatacentersLansFindById(ctx, dcid, d.Id()).Execute()
 	logApiRequestTime(apiResponse)
 
+	log.Printf("[INFO] Current deletion status for LAN %s: %+v", d.Id(), rsp)
+
 	if err != nil {
 		if apiResponse != nil && apiResponse.Response != nil && apiResponse.StatusCode == 404 {
-			log.Printf("[INFO] LAN deleted %s", d.Id())
 			return true, nil
 		}
 		return true, fmt.Errorf("error checking LAN deletion status: %s", err)
 	}
-	log.Printf("[INFO] LAN %s not deleted yet; LAN status: %+v", d.Id(), *rsp.Metadata.State)
+	log.Printf("[INFO] LAN %s not deleted yet deleted LAN: %+v", d.Id(), rsp)
 	return false, nil
-}
-
-func waitForLanDeletion(ctx context.Context, client *ionoscloud.APIClient, d *schema.ResourceData) error {
-	for {
-		log.Printf("[INFO] waiting for LAN %s to be deleted...", d.Id())
-
-		lDeleted, dsErr := lanDeleted(ctx, client, d)
-
-		if dsErr != nil {
-			return fmt.Errorf("error while checking deletion status of LAN %s: %s", d.Id(), dsErr)
-		}
-
-		if lDeleted {
-			log.Printf("[INFO] successfully deleted LAN: %s", d.Id())
-			break
-		}
-
-		select {
-		case <-time.After(SleepInterval):
-			log.Printf("[INFO] trying again ...")
-		case <-ctx.Done():
-			log.Printf("[INFO] lan deletion timed out")
-			return fmt.Errorf("lan deletion timed out! WARNING: your lan will still probably be deleted after some time but the terraform state won't reflect that; check your Ionos Cloud account for updates")
-		}
-	}
-	return nil
-}
-
-func nicsDeleted(ctx context.Context, client *ionoscloud.APIClient, d *schema.ResourceData) (bool, error) {
-	dcId := d.Get("datacenter_id").(string)
-
-	nics, apiResponse, err := client.LANsApi.DatacentersLansNicsGet(ctx, dcId, d.Id()).Execute()
-	logApiRequestTime(apiResponse)
-
-	if err != nil {
-		return false, fmt.Errorf("an error occured while searching for nics in datacenter with id: %s for lan with: id %s %s", dcId, d.Id(), err)
-	}
-
-	if nics.Items != nil && len(*nics.Items) > 0 {
-		log.Printf("[INFO] there are still nics under LAN  with id %s", d.Id())
-		return false, nil
-	}
-
-	return true, nil
-}
-
-func waitForNicsDeletion(ctx context.Context, client *ionoscloud.APIClient, d *schema.ResourceData) error {
-	for {
-		log.Printf("[INFO] waiting for nics under LAN %s to be deleted...", d.Id())
-
-		nicsDeleted, dsErr := nicsDeleted(ctx, client, d)
-
-		if dsErr != nil {
-			return fmt.Errorf("error while checking nics under lan %s: %s", d.Id(), dsErr)
-		}
-
-		if nicsDeleted {
-			log.Printf("[INFO] no nics under LAN: %s", d.Id())
-			break
-		}
-
-		select {
-		case <-time.After(SleepInterval):
-			log.Printf("[INFO] trying again ...")
-		case <-ctx.Done():
-			log.Printf("[INFO] nics deletion check timed out")
-			return fmt.Errorf("nics deletion check timed out! WARNING: your lan nics may still be deleted; check your Ionos Cloud account for updates and perform again a destroy for remaining resources")
-		}
-	}
-	return nil
 }
