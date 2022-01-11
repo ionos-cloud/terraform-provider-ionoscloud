@@ -7,7 +7,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 	autoscaling "github.com/ionos-cloud/sdk-go-autoscaling"
-	autoscalingService "github.com/ionos-cloud/terraform-provider-ionoscloud/services/autoscaling"
+	autoscalingService "github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/autoscaling"
 )
 
 func dataSourceAutoscalingGroup() *schema.Resource {

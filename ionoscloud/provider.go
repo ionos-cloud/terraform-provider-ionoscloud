@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"github.com/hashicorp/terraform-plugin-sdk/meta"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
-	autoscalingService "github.com/ionos-cloud/terraform-provider-ionoscloud/services/autoscaling"
+	autoscalingService "github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/autoscaling"
 	"log"
 	"os"
 	"runtime"
@@ -85,8 +85,7 @@ func Provider() *schema.Provider {
 			NatGatewayRuleResource:      resourceNatGatewayRule(),
 			NetworkLoadBalancerResource: resourceNetworkLoadBalancer(),
 			NetworkLoadBalancerForwardingRuleResource: resourceNetworkLoadBalancerForwardingRule(),
-			AutoscalingGroupResource:                        resourceAutoscalingGroup(),
-
+			AutoscalingGroupResource:                  resourceAutoscalingGroup(),
 		},
 		DataSourcesMap: map[string]*schema.Resource{
 			DatacenterResource:                        dataSourceDataCenter(),
@@ -114,9 +113,8 @@ func Provider() *schema.Provider {
 			NicResource:                               dataSourceNIC(),
 			ShareResource:                             dataSourceShare(),
 			ResourceIpFailover:                        dataSourceIpFailover(),
-			AutoscalingGroupResource:                        dataSourceAutoscalingGroup(),
-			AutoscalingGroupServersResource:                 dataSourceAutoscalingGroupServers(),
-
+			AutoscalingGroupResource:                  dataSourceAutoscalingGroup(),
+			AutoscalingGroupServersResource:           dataSourceAutoscalingGroupServers(),
 		},
 	}
 
