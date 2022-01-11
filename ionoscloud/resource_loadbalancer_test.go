@@ -13,7 +13,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
 )
 
-func TestAccLoadbalancer_Basic(t *testing.T) {
+func TestAccLoadbalancerBasic(t *testing.T) {
 	var loadbalancer ionoscloud.Loadbalancer
 	lbName := "loadbalancer"
 

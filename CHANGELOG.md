@@ -4,8 +4,9 @@
 - improved tests for networkloadbalancer and networkloadbalancer_forwardingrule
 
 ### Fixes:
-- fixed bug regarding updating listener_lan and target_lan 
+- fixed bug regarding updating listener_lan and target_lan on networkloadbalancer
 - fixed diff on availableUpgradeVersions for k8s cluster and nodepool
+- fixed lan deletion - wait for completion of nic deletion
 
 ## 6.0.2
 
