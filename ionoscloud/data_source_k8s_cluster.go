@@ -5,6 +5,7 @@ import (
 	"encoding/base64"
 	"errors"
 	"fmt"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	ionoscloud "github.com/ionos-cloud/sdk-go/v6"
 	"gopkg.in/yaml.v3"
@@ -39,7 +40,7 @@ type KubeConfig struct {
 
 func dataSourceK8sCluster() *schema.Resource {
 	return &schema.Resource{
-		Read: dataSourceK8sReadCluster,
+		ReadContext: dataSourceK8sReadCluster,
 		Schema: map[string]*schema.Schema{
 			"id": {
 				Type:     schema.TypeString,
@@ -251,26 +252,20 @@ func dataSourceK8sCluster() *schema.Resource {
 	}
 }
 
-func dataSourceK8sReadCluster(d *schema.ResourceData, meta interface{}) error {
+func dataSourceK8sReadCluster(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	client := meta.(SdkBundle).CloudApiClient
 
 	id, idOk := d.GetOk("id")
 	name, nameOk := d.GetOk("name")
 
 	if idOk && nameOk {
-		return errors.New("id and name cannot be both specified in the same time")
+		return diag.FromErr(errors.New("id and name cannot be both specified in the same time"))
 	}
 	if !idOk && !nameOk {
-		return errors.New("please provide either the lan id or name")
+		return diag.FromErr(errors.New("please provide either the lan id or name"))
 	}
 	var cluster ionoscloud.KubernetesCluster
 	var err error
-
-	ctx, cancel := context.WithTimeout(context.Background(), *resourceDefaultTimeouts.Default)
-
-	if cancel != nil {
-		defer cancel()
-	}
 	var apiResponse *ionoscloud.APIResponse
 
 	if idOk {
@@ -278,22 +273,16 @@ func dataSourceK8sReadCluster(d *schema.ResourceData, meta interface{}) error {
 		cluster, apiResponse, err = client.KubernetesApi.K8sFindByClusterId(ctx, id.(string)).Execute()
 		logApiRequestTime(apiResponse)
 		if err != nil {
-			return fmt.Errorf("an error occurred while fetching the k8s cluster with ID %s: %s", id.(string), err)
+			return diag.FromErr(fmt.Errorf("an error occurred while fetching the k8s cluster with ID %s: %s", id.(string), err))
 		}
 	} else {
 		/* search by name */
 		var clusters ionoscloud.KubernetesClusters
 
-		ctx, cancel := context.WithTimeout(context.Background(), *resourceDefaultTimeouts.Default)
-
-		if cancel != nil {
-			defer cancel()
-		}
-
 		clusters, apiResponse, err := client.KubernetesApi.K8sGet(ctx).Execute()
 		logApiRequestTime(apiResponse)
 		if err != nil {
-			return fmt.Errorf("an error occurred while fetching k8s clusters: %s", err.Error())
+			return diag.FromErr(fmt.Errorf("an error occurred while fetching k8s clusters: %s", err.Error()))
 		}
 
 		found := false
@@ -302,7 +291,7 @@ func dataSourceK8sReadCluster(d *schema.ResourceData, meta interface{}) error {
 				tmpCluster, apiResponse, err := client.KubernetesApi.K8sFindByClusterId(ctx, *c.Id).Execute()
 				logApiRequestTime(apiResponse)
 				if err != nil {
-					return fmt.Errorf("an error occurred while fetching k8s cluster with ID %s: %s", *c.Id, err.Error())
+					return diag.FromErr(fmt.Errorf("an error occurred while fetching k8s cluster with ID %s: %s", *c.Id, err.Error()))
 				}
 				if tmpCluster.Properties.Name != nil && *tmpCluster.Properties.Name == name.(string) {
 					/* lan found */
@@ -314,17 +303,17 @@ func dataSourceK8sReadCluster(d *schema.ResourceData, meta interface{}) error {
 			}
 		}
 		if !found {
-			return errors.New("k8s cluster not found")
+			return diag.FromErr(errors.New("k8s cluster not found"))
 		}
 
 	}
 
 	if err = setK8sClusterData(d, &cluster); err != nil {
-		return err
+		return diag.FromErr(err)
 	}
 
 	if err = setAdditionalK8sClusterData(d, &cluster, client); err != nil {
-		return err
+		return diag.FromErr(err)
 	}
 
 	return nil
@@ -470,6 +459,15 @@ func setAdditionalK8sClusterData(d *schema.ResourceData, cluster *ionoscloud.Kub
 			}
 		}
 
+		if cluster.Properties != nil && cluster.Properties.AvailableUpgradeVersions != nil {
+			availableUpgradeVersions := make([]interface{}, len(*cluster.Properties.AvailableUpgradeVersions), len(*cluster.Properties.AvailableUpgradeVersions))
+			for i, availableUpgradeVersion := range *cluster.Properties.AvailableUpgradeVersions {
+				availableUpgradeVersions[i] = availableUpgradeVersion
+			}
+			if err := d.Set("available_upgrade_versions", availableUpgradeVersions); err != nil {
+				return err
+			}
+		}
 	}
 
 	return nil

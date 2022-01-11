@@ -1,64 +1,113 @@
+## 6.0.3 (upcoming release)
+
+### Enhancements:
+- improved tests for networkloadbalancer and networkloadbalancer_forwardingrule
+
+### Fixes:
+- fixed bug regarding updating listener_lan and target_lan 
+- fixed diff on availableUpgradeVersions for k8s cluster and nodepool
+
+## 6.0.2
+
+### Fixes:
+- fixes #168: Add versioning to allow module import.
+- Modify UserAgent string
+
+### Documentation:
+- Improved terraform registry documentation with a more detailed description of environment and terraform variables
+- Added badges containing the release and go version in README.md
+
+### Fixes:
+- Immutable k8s node_pool fields should throw error when running plan also, not only on apply
+
+## 6.0.1
+
+### Fixes: 
+- Fixed rebuild k8 nodes with the same lan - order of lans is ignored now at diff
+- Fixed conversion coming from a v5 state - added nil check in lans interface conversion
+
 ## 6.0.0
 
-- **code enhancements**: added http request time log for api calls
-- **code enhancements**: updated to go version 1.17, updated to sdk version 6.0.0 
-- **new features**: import for `nic`, data_source for `nic`, `share`, `ipfailover`
-- **dependency update**: updated sdk-go to v6.0.0-beta.8
-- **tests enhancements**: improved tests on natgateway and natgateway_rule
-- **code enhancements**: for `k8s_node_pool`, `nic`, `ipfailover`, and `share`:
+### Enhancements:
+- added http request time log for api calls
+- updated to go version 1.17, updated to sdk version 6.0.0
+- for `k8s_node_pool`, `nic`, `ipfailover`, and `share`:
   - made tests comprehensive
   - optimized test duration by including both match by id and by name in the same test
   - removed duplicated code from import, data_source, resource and tests files
-- **bug fixes**: k8s_node_pool update node_count and emptying lans and public_ips didn't work
-- **bug fixes**: fixed bug at creating natgateway_rule - target_subnet was not set properly
-- **bug fixes**: revert icmp_code and icmp_type to string to allow setting to 0
-- **bug fixes**: Add additional fixes to improve code stability and prevent crashes. Revert icmp_type and icmp_code inside server resource and add tests.
-- **bug fixes**: Allow creation of an inner firewall rule for server when updating a terraform plan.
-- **bug fixes**: fixed issue #155: added stateUpgrader for handling change of lan field structure
-- **bug fixes**: fix sporadic EOF received when making a lot of https requests to server (fixed in sdk)
-- **bug fixes**: allow url to start with "http" (fixed in sdk)
-- **bug fixes**: fix user update, user password change and password field is now sensitive
-- **bug fixes**: fix crash when no metadata is received from server 
+- improved tests on natgateway and natgateway_rule
+
+### Features:
+- import for `nic`, data_source for `nic`, `share`, `ipfailover`
+
+### Fixes:
+- k8s_node_pool update node_count and emptying lans and public_ips didn't work
+- fixed bug at creating natgateway_rule - target_subnet was not set properly
+- revert icmp_code and icmp_type to string to allow setting to 0
+- Add additional fixes to improve code stability and prevent crashes. Revert icmp_type and icmp_code inside server resource and add tests.
+- Allow creation of an inner firewall rule for server when updating a terraform plan.
+- fixed issue #155: added stateUpgrader for handling change of lan field structure
+- fix sporadic EOF received when making a lot of https requests to server (fixed in sdk)
+- fixed #154: allow url to start with "http" (fixed in sdk)
+- fixed #92: fix user update, user password change and password field is now sensitive
+- fix crash when no metadata is received from server
 
 ## 6.0.0-beta.14
 
-- **bug fixes**: fixed datacenter datasource
-- **code enhancements**: added constants and removed duplicated tests to `backupUnit`, `datacenter`, `lan`, `s3_key`, `firewall`, `server`
-- **code enhancements**: for `pcc`, `group`, `user`, `snapshot`, and `volume` :
+### Fixes:
+- fixed datacenter datasource
+
+### Enhancements:
+- added constants and removed duplicated tests to `backupUnit`, `datacenter`, `lan`, `s3_key`, `firewall`, `server`
+- for `pcc`, `group`, `user`, `snapshot`, and `volume` :
   - made tests comprehensive
   - optimized test duration by including both match by id and by name in the same test
   - removed duplicated code from import, data_source, resource and tests files
-- **new features**: import for `snapshot`, `ipblock`, data_source for `group`, `user`, `ipblock`, `volume`
+
+### Features:
+- added import for `snapshot`, `ipblock`, data_source for `group`, `user`, `ipblock`, `volume`
 
 ## 6.0.0-beta.13
-- **bug fixes**: fixed issue #112 can't attach existing volume to server after recreating server
-- **bug fixes**: `cube server` could not be deleted
-- **functionality enhancements**: improved data_source for template - now `template` can be searched by any of its arguments
-- **bug fixes**: cannot empty `api_subnet_allow_list` and `s3_buckets`
+
+### Fixes:
+- fixed issue #112 can't attach existing volume to server after recreating server
+- `cube server` could not be deleted
+- cannot empty `api_subnet_allow_list` and `s3_buckets`
+
+### Enhancements:
+- improved data_source for template - now `template` can be searched by any of its arguments
 - **code enhancements**: for `k8s_cluster`:
   - made tests comprehensive
   - optimized test duration by including both match by id and by name in the same test
   - removed duplicated code from import, data_source and resource files (set parameters)
   
 ## 6.0.0-beta.12
+### Fixes:
+- `server`: can not create cube server, firewall not updated
+- `firewall`: using type argument throws error
 
-- **bug fixes**: `server`: can not create cube server, firewall not updated
-- **bug fixes**: `firewall`: using type argument throws error
-- **code enhancements**: for `backupUnit`, `datacenter`, `lan`, `s3_key`, and `firewall` resources done the following:
+### Enhancements:
+- for `backupUnit`, `datacenter`, `lan`, `s3_key`, and `firewall` resources done the following:
   - made tests comprehensive
   - optimized test duration by including both match by id and by name in the same test
   - removed duplicated code from import, data_source and resource files (set parameters)
   - updated documentation
   - improved import functions
-- **new features**: data_source for `s3_key`
+
+### Features:
+- data_source for `s3_key`
 
 ## 6.0.0-beta.11
-
+### Fixes:
 - added `image_alias` to volume
 - removed `public` and `gateway_ip` properties from `k8s_cluster`
+
+### Enhancements:
+- updated sdk-go to `v6.0.0-beta.7`
+
+### Features:
 - added `data_sources for `backup_unit` and `firewall_rule`
 - added import for `natgateway`, `natgateway_rule`, `networkloadbalancer` and `networkloadbalancer_forwardingrule`
-- updated sdk-go to `v6.0.0-beta.7`
 
 ## 6.0.0-beta.10
 
@@ -114,6 +163,8 @@
 ## 6.0.0-alpha.4
 
 - documentation updates
+
+## Enhancements:
 - terraform plugin sdk upgrade to v2.4.3
 - fix: create volume without password
 - fix: ability to create server without image

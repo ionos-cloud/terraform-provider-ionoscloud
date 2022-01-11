@@ -13,9 +13,10 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
 )
 
-func TestAccNetworkLoadBalancerForwardingRule_Basic(t *testing.T) {
+const networkLoadBalancerForwardingRuleResource = NetworkLoadBalancerForwardingRuleResource + "." + NetworkLoadBalancerForwardingRuleTestResource
+
+func TestAccNetworkLoadBalancerForwardingRuleBasic(t *testing.T) {
 	var networkLoadBalancerForwardingRule ionoscloud.NetworkLoadBalancerForwardingRule
-	networkLoadBalancerForwardingRuleName := "networkLoadBalancerForwardingRule"
 
 	resource.Test(t, resource.TestCase{
 		PreCheck: func() {
@@ -25,16 +26,44 @@ func TestAccNetworkLoadBalancerForwardingRule_Basic(t *testing.T) {
 		CheckDestroy:      testAccCheckNetworkLoadBalancerForwardingRuleDestroyCheck,
 		Steps: []resource.TestStep{
 			{
-				Config: fmt.Sprintf(testAccCheckNetworkLoadBalancerForwardingRuleConfigBasic, networkLoadBalancerForwardingRuleName),
+				Config: testAccCheckNetworkLoadBalancerForwardingRuleConfigBasic,
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheckNetworkLoadBalancerForwardingRuleExists("ionoscloud_networkloadbalancer_forwardingrule.forwarding_rule", &networkLoadBalancerForwardingRule),
-					resource.TestCheckResourceAttr("ionoscloud_networkloadbalancer_forwardingrule.forwarding_rule", "name", networkLoadBalancerForwardingRuleName),
+					testAccCheckNetworkLoadBalancerForwardingRuleExists(networkLoadBalancerForwardingRuleResource, &networkLoadBalancerForwardingRule),
+					resource.TestCheckResourceAttr(networkLoadBalancerForwardingRuleResource, "name", NetworkLoadBalancerForwardingRuleTestResource),
+					resource.TestCheckResourceAttr(networkLoadBalancerForwardingRuleResource, "algorithm", "SOURCE_IP"),
+					resource.TestCheckResourceAttr(networkLoadBalancerForwardingRuleResource, "protocol", "TCP"),
+					resource.TestCheckResourceAttr(networkLoadBalancerForwardingRuleResource, "listener_ip", "10.12.118.224"),
+					resource.TestCheckResourceAttr(networkLoadBalancerForwardingRuleResource, "listener_port", "8081"),
+					resource.TestCheckResourceAttr(networkLoadBalancerForwardingRuleResource, "health_check.0.client_timeout", "1000"),
+					resource.TestCheckResourceAttr(networkLoadBalancerForwardingRuleResource, "health_check.0.connect_timeout", "1200"),
+					resource.TestCheckResourceAttr(networkLoadBalancerForwardingRuleResource, "health_check.0.target_timeout", "1400"),
+					resource.TestCheckResourceAttr(networkLoadBalancerForwardingRuleResource, "health_check.0.retries", "3"),
+					resource.TestCheckResourceAttr(networkLoadBalancerForwardingRuleResource, "targets.0.ip", "22.231.2.2"),
+					resource.TestCheckResourceAttr(networkLoadBalancerForwardingRuleResource, "targets.0.port", "8080"),
+					resource.TestCheckResourceAttr(networkLoadBalancerForwardingRuleResource, "targets.0.weight", "123"),
+					resource.TestCheckResourceAttr(networkLoadBalancerForwardingRuleResource, "targets.0.health_check.0.check", "true"),
+					resource.TestCheckResourceAttr(networkLoadBalancerForwardingRuleResource, "targets.0.health_check.0.check_interval", "1000"),
+					resource.TestCheckResourceAttr(networkLoadBalancerForwardingRuleResource, "targets.0.health_check.0.maintenance", "false"),
 				),
 			},
 			{
 				Config: testAccCheckNetworkLoadBalancerForwardingRuleConfigUpdate,
 				Check: resource.ComposeTestCheckFunc(
-					resource.TestCheckResourceAttr("ionoscloud_networkloadbalancer_forwardingrule.forwarding_rule", "name", "updated"),
+					resource.TestCheckResourceAttr(networkLoadBalancerForwardingRuleResource, "name", UpdatedResources),
+					resource.TestCheckResourceAttr(networkLoadBalancerForwardingRuleResource, "algorithm", "ROUND_ROBIN"),
+					resource.TestCheckResourceAttr(networkLoadBalancerForwardingRuleResource, "protocol", "HTTP"),
+					resource.TestCheckResourceAttr(networkLoadBalancerForwardingRuleResource, "listener_ip", "10.12.119.224"),
+					resource.TestCheckResourceAttr(networkLoadBalancerForwardingRuleResource, "listener_port", "8080"),
+					resource.TestCheckResourceAttr(networkLoadBalancerForwardingRuleResource, "health_check.0.client_timeout", "1010"),
+					resource.TestCheckResourceAttr(networkLoadBalancerForwardingRuleResource, "health_check.0.connect_timeout", "1210"),
+					resource.TestCheckResourceAttr(networkLoadBalancerForwardingRuleResource, "health_check.0.target_timeout", "1410"),
+					resource.TestCheckResourceAttr(networkLoadBalancerForwardingRuleResource, "health_check.0.retries", "4"),
+					resource.TestCheckResourceAttr(networkLoadBalancerForwardingRuleResource, "targets.0.ip", "22.231.2.3"),
+					resource.TestCheckResourceAttr(networkLoadBalancerForwardingRuleResource, "targets.0.port", "8081"),
+					resource.TestCheckResourceAttr(networkLoadBalancerForwardingRuleResource, "targets.0.weight", "124"),
+					resource.TestCheckResourceAttr(networkLoadBalancerForwardingRuleResource, "targets.0.health_check.0.check", "true"),
+					resource.TestCheckResourceAttr(networkLoadBalancerForwardingRuleResource, "targets.0.health_check.0.check_interval", "1010"),
+					resource.TestCheckResourceAttr(networkLoadBalancerForwardingRuleResource, "targets.0.health_check.0.maintenance", "true"),
 				),
 			},
 		},
@@ -51,7 +80,7 @@ func testAccCheckNetworkLoadBalancerForwardingRuleDestroyCheck(s *terraform.Stat
 	}
 
 	for _, rs := range s.RootModule().Resources {
-		if rs.Type != "ionoscloud_datacenter" {
+		if rs.Type != NetworkLoadBalancerForwardingRuleResource {
 			continue
 		}
 
@@ -105,105 +134,58 @@ func testAccCheckNetworkLoadBalancerForwardingRuleExists(n string, networkLoadBa
 	}
 }
 
-const testAccCheckNetworkLoadBalancerForwardingRuleConfigBasic = `
-resource "ionoscloud_datacenter" "nlb_fr_datacenter" {
-  name              = "test_nlb_fr"
-  location          = "gb/lhr"
-  description       = "datacenter for hosting "
-}
-
-resource "ionoscloud_lan" "nlb_fr_lan_1" {
-  datacenter_id = ionoscloud_datacenter.nlb_fr_datacenter.id
-  public        = false
-  name          = "test_nlb_fr_lan_1"
-}
-
-resource "ionoscloud_lan" "nlb_fr_lan_2" {
-  datacenter_id = ionoscloud_datacenter.nlb_fr_datacenter.id
-  public        = false
-  name          = "test_nlb_fr_lan_1"
-}
-
-
-resource "ionoscloud_networkloadbalancer" "test_nbl_fr" {
-  datacenter_id = ionoscloud_datacenter.nlb_fr_datacenter.id
-  name          = "test_nlb_fr"
-  listener_lan  = ionoscloud_lan.nlb_fr_lan_1.id
-  target_lan    = ionoscloud_lan.nlb_fr_lan_2.id
-  ips           = ["10.12.118.224"]
-  lb_private_ips = ["10.13.72.225/24"]
-}
-
-resource "ionoscloud_networkloadbalancer_forwardingrule" "forwarding_rule" {
- datacenter_id = ionoscloud_datacenter.nlb_fr_datacenter.id
- networkloadbalancer_id = ionoscloud_networkloadbalancer.test_nbl_fr.id
- name = "%s"
- algorithm = "SOURCE_IP"
- protocol = "TCP"
- listener_ip = "10.12.118.224"
- listener_port = "8081"
- health_check {
-     client_timeout = 1000
- }
- targets {
-   ip = "22.231.2.2"
-   port = "8080"
-   weight = "123"
-   health_check {
-     check = true
-     check_interval = 1000
-   }
- }
+const testAccCheckNetworkLoadBalancerForwardingRuleConfigBasic = testAccCheckNetworkLoadBalancerConfigBasic + `
+resource ` + NetworkLoadBalancerForwardingRuleResource + ` ` + NetworkLoadBalancerForwardingRuleTestResource + ` {
+  	datacenter_id = ` + NetworkLoadBalancerResource + `.` + NetworkLoadBalancerTestResource + `.datacenter_id
+ 	networkloadbalancer_id = ` + NetworkLoadBalancerResource + `.` + NetworkLoadBalancerTestResource + `.id
+ 	name = "` + NetworkLoadBalancerForwardingRuleTestResource + `"
+ 	algorithm = "SOURCE_IP"
+ 	protocol = "TCP"
+ 	listener_ip = "10.12.118.224"
+ 	listener_port = "8081"
+ 	health_check {
+		client_timeout = 1000
+     	connect_timeout = 1200
+     	target_timeout = 1400
+     	retries = 3
+ 	}
+ 	targets {
+   		ip = "22.231.2.2"
+   		port = "8080"
+   		weight = "123"
+   		health_check {
+     		check = true
+     		check_interval = 1000
+     		maintenance = false
+   		}
+ 	}
 }
 `
 
-const testAccCheckNetworkLoadBalancerForwardingRuleConfigUpdate = `
-resource "ionoscloud_datacenter" "nlb_fr_datacenter" {
-  name              = "test_nlb_fr"
-  location          = "gb/lhr"
-  description       = "datacenter for hosting "
+const testAccCheckNetworkLoadBalancerForwardingRuleConfigUpdate = testAccCheckNetworkLoadBalancerConfigUpdate + `
+resource ` + NetworkLoadBalancerForwardingRuleResource + ` ` + NetworkLoadBalancerForwardingRuleTestResource + ` {
+	datacenter_id = ` + NetworkLoadBalancerResource + `.` + NetworkLoadBalancerTestResource + `.datacenter_id
+	networkloadbalancer_id = ` + NetworkLoadBalancerResource + `.` + NetworkLoadBalancerTestResource + `.id
+	name = "` + UpdatedResources + `"
+	algorithm = "ROUND_ROBIN"
+	protocol = "HTTP"
+	listener_ip = "10.12.119.224"
+	listener_port = "8080"
+	health_check {
+		client_timeout = 1010
+		connect_timeout = 1210
+		target_timeout = 1410
+		retries = 4
+ 	}
+ 	targets {
+   		ip = "22.231.2.3"
+   		port = "8081"
+   		weight = "124"
+   		health_check {
+     		check = true
+     		check_interval = 1010
+    		 maintenance = true
+   		}
+ 	}
 }
-
-resource "ionoscloud_lan" "nlb_fr_lan_1" {
-  datacenter_id = ionoscloud_datacenter.nlb_fr_datacenter.id
-  public        = false
-  name          = "test_nlb_fr_lan_1"
-}
-
-resource "ionoscloud_lan" "nlb_fr_lan_2" {
-  datacenter_id = ionoscloud_datacenter.nlb_fr_datacenter.id
-  public        = false
-  name          = "test_nlb_fr_lan_1"
-}
-
-
-resource "ionoscloud_networkloadbalancer" "test_nbl_fr" {
-  datacenter_id = ionoscloud_datacenter.nlb_fr_datacenter.id
-  name          = "test_nlb_fr"
-  listener_lan  = ionoscloud_lan.nlb_fr_lan_1.id
-  target_lan    = ionoscloud_lan.nlb_fr_lan_2.id
-  ips           = ["10.12.118.224"]
-  lb_private_ips = ["10.13.72.225/24"]
-}
-
-resource "ionoscloud_networkloadbalancer_forwardingrule" "forwarding_rule" {
- datacenter_id = ionoscloud_datacenter.nlb_fr_datacenter.id
- networkloadbalancer_id = ionoscloud_networkloadbalancer.test_nbl_fr.id
- name = "updated"
- algorithm = "SOURCE_IP"
- protocol = "TCP"
- listener_ip = "10.12.118.224"
- listener_port = "8081"
- health_check {
-     client_timeout = 1000
- }
- targets {
-   ip = "22.231.2.2"
-   port = "8080"
-   weight = "123"
-   health_check {
-     check = true
-     check_interval = 1500
-   }
- }
-}`
+`
