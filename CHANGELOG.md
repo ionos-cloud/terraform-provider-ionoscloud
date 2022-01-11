@@ -1,11 +1,28 @@
-## 6.0.2 (upcoming release)
+## 6.0.3 (upcoming release)
+
+### Enhancements:
+- improved tests for networkloadbalancer and networkloadbalancer_forwardingrule
 
 ### Fixes:
-- Add versioning to allow module import.
+- fixed bug regarding updating listener_lan and target_lan on networkloadbalancer
+- fixed diff on availableUpgradeVersions for k8s cluster and nodepool
+- fixed lan deletion - wait for completion of nic deletion
+
+### Documentation:
+- restructured documentation by splitting it in product folders 
+
+## 6.0.2
+
+### Fixes:
+- fixes #168: Add versioning to allow module import.
+- Modify UserAgent string
 
 ### Documentation:
 - Improved terraform registry documentation with a more detailed description of environment and terraform variables
 - Added badges containing the release and go version in README.md
+
+### Fixes:
+- Immutable k8s node_pool fields should throw error when running plan also, not only on apply
 
 ## 6.0.1
 

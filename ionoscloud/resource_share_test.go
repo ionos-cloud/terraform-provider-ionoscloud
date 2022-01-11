@@ -10,7 +10,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
 )
 
-func TestAccShare_Basic(t *testing.T) {
+func TestAccShareBasic(t *testing.T) {
 	var share ionoscloud.GroupShare
 	resource.Test(t, resource.TestCase{
 		PreCheck: func() {

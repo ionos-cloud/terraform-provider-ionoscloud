@@ -70,6 +70,18 @@ const (
 	NatGatewayRuleDataSourceByName = "test_nat_gateway_name"
 )
 
+// NetworkLoadBalancer Constants
+const (
+	NetworkLoadBalancerResource                       = "ionoscloud_networkloadbalancer"
+	NetworkLoadBalancerTestResource                   = "test_networkloadbalancer"
+	NetworkLoadBalancerDataSourceById                 = "test_networkloadbalancer_id"
+	NetworkLoadBalancerDataSourceByName               = "test_networkloadbalancer_name"
+	NetworkLoadBalancerForwardingRuleResource         = "ionoscloud_networkloadbalancer_forwardingrule"
+	NetworkLoadBalancerForwardingRuleTestResource     = "test_networkloadbalancer_forwardingrule"
+	NetworkLoadBalancerForwardingRuleDataSourceById   = "test_networkloadbalancer_forwardingrule_id"
+	NetworkLoadBalancerForwardingRuleDataSourceByName = "test_networkloadbalancer_forwardingrule_name"
+)
+
 // Private Crossconnect Constants
 const (
 	PCCResource         = "ionoscloud_private_crossconnect"

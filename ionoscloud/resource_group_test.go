@@ -10,7 +10,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
 )
 
-func TestAccGroup_Basic(t *testing.T) {
+func TestAccGroupBasic(t *testing.T) {
 	var group ionoscloud.Group
 
 	resource.Test(t, resource.TestCase{

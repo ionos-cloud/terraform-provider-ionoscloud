@@ -23,6 +23,7 @@ func resourceK8sNodePool() *schema.Resource {
 		Importer: &schema.ResourceImporter{
 			StateContext: resourceK8sNodepoolImport,
 		},
+		CustomizeDiff: checkNodePoolImmutableFields,
 		Schema: map[string]*schema.Schema{
 			"name": {
 				Type:         schema.TypeString,
@@ -203,14 +204,6 @@ func resourceK8sNodePool() *schema.Resource {
 				Optional: true,
 				Elem:     &schema.Schema{Type: schema.TypeString},
 			},
-			"available_upgrade_versions": {
-				Type:        schema.TypeList,
-				Description: "A list of kubernetes versions available for upgrade",
-				Computed:    true,
-				Elem: &schema.Schema{
-					Type: schema.TypeString,
-				},
-			},
 		},
 		Timeouts:      &resourceDefaultTimeouts,
 		SchemaVersion: 1,
@@ -222,6 +215,48 @@ func resourceK8sNodePool() *schema.Resource {
 			},
 		},
 	}
+}
+
+func checkNodePoolImmutableFields(_ context.Context, diff *schema.ResourceDiff, _ interface{}) error {
+	//we do not want to check in case of resource creation
+	if diff.Id() == "" {
+		return nil
+	}
+	if diff.HasChange("name") {
+		return fmt.Errorf("name attribute is immutable, therefore not allowed in update requests")
+
+	}
+
+	if diff.HasChange("cpu_family") {
+		return fmt.Errorf("cpu_family attribute is immutable, therefore not allowed in update requests")
+
+	}
+
+	if diff.HasChange("availability_zone") {
+		return fmt.Errorf("availability_zone attribute is immutable, therefore not allowed in update requests")
+
+	}
+
+	if diff.HasChange("cores_count") {
+		return fmt.Errorf("cores_count attribute is immutable, therefore not allowed in update requests")
+	}
+
+	if diff.HasChange("ram_size") {
+		return fmt.Errorf("ram_size attribute is immutable, therefore not allowed in update requests")
+
+	}
+
+	if diff.HasChange("storage_size") {
+		return fmt.Errorf("storage_size attribute is immutable, therefore not allowed in update requests")
+
+	}
+
+	if diff.HasChange("storage_type") {
+		return fmt.Errorf("storage_type attribute is immutable, therefore not allowed in update requests")
+
+	}
+	return nil
+
 }
 
 func resourceK8sNodePool0() *schema.Resource {
@@ -509,41 +544,6 @@ func resourcek8sNodePoolUpdate(ctx context.Context, d *schema.ResourceData, meta
 	nodeCount := int32(d.Get("node_count").(int))
 	request.Properties = &ionoscloud.KubernetesNodePoolPropertiesForPut{
 		NodeCount: &nodeCount,
-	}
-
-	if d.HasChange("name") {
-		diags := diag.FromErr(fmt.Errorf("name attribute is immutable, therefore not allowed in update requests"))
-		return diags
-	}
-
-	if d.HasChange("cpu_family") {
-		diags := diag.FromErr(fmt.Errorf("cpu_family attribute is immutable, therefore not allowed in update requests"))
-		return diags
-	}
-
-	if d.HasChange("availability_zone") {
-		diags := diag.FromErr(fmt.Errorf("availability_zone attribute is immutable, therefore not allowed in update requests"))
-		return diags
-	}
-
-	if d.HasChange("cores_count") {
-		diags := diag.FromErr(fmt.Errorf("cores_count attribute is immutable, therefore not allowed in update requests"))
-		return diags
-	}
-
-	if d.HasChange("ram_size") {
-		diags := diag.FromErr(fmt.Errorf("ram_size attribute is immutable, therefore not allowed in update requests"))
-		return diags
-	}
-
-	if d.HasChange("storage_size") {
-		diags := diag.FromErr(fmt.Errorf("storage_size attribute is immutable, therefore not allowed in update requests"))
-		return diags
-	}
-
-	if d.HasChange("storage_type") {
-		diags := diag.FromErr(fmt.Errorf("storage_size attribute is immutable, therefore not allowed in update requests"))
-		return diags
 	}
 
 	if d.HasChange("k8s_version") {
@@ -951,12 +951,6 @@ func setK8sNodePoolData(d *schema.ResourceData, nodePool *ionoscloud.KubernetesN
 				return fmt.Errorf("error while setting lans property for k8sNodepool %s: %s", d.Id(), err)
 			}
 
-		}
-
-		if nodePool.Properties.AvailableUpgradeVersions != nil && len(*nodePool.Properties.AvailableUpgradeVersions) > 0 {
-			if err := d.Set("available_upgrade_versions", *nodePool.Properties.AvailableUpgradeVersions); err != nil {
-				return err
-			}
 		}
 
 		if nodePool.Properties.PublicIps != nil && len(*nodePool.Properties.PublicIps) > 0 {

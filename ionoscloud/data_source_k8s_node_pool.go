@@ -4,6 +4,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 	ionoscloud "github.com/ionos-cloud/sdk-go/v6"
@@ -11,7 +12,7 @@ import (
 
 func dataSourceK8sNodePool() *schema.Resource {
 	return &schema.Resource{
-		Read: dataSourceK8sReadNodePool,
+		ReadContext: dataSourceK8sReadNodePool,
 		Schema: map[string]*schema.Schema{
 			"k8s_cluster_id": {
 				Type:         schema.TypeString,
@@ -183,7 +184,7 @@ func dataSourceK8sNodePool() *schema.Resource {
 	}
 }
 
-func dataSourceK8sReadNodePool(d *schema.ResourceData, meta interface{}) error {
+func dataSourceK8sReadNodePool(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	client := meta.(SdkBundle).CloudApiClient
 
 	clusterId := d.Get("k8s_cluster_id")
@@ -191,10 +192,10 @@ func dataSourceK8sReadNodePool(d *schema.ResourceData, meta interface{}) error {
 	name, nameOk := d.GetOk("name")
 
 	if idOk && nameOk {
-		return errors.New("id and name cannot be both specified in the same time")
+		return diag.FromErr(errors.New("id and name cannot be both specified in the same time"))
 	}
 	if !idOk && !nameOk {
-		return errors.New("please provide either the lan id or name")
+		return diag.FromErr(errors.New("please provide either the lan id or name"))
 	}
 	var nodePool ionoscloud.KubernetesNodePool
 	var err error
@@ -202,31 +203,19 @@ func dataSourceK8sReadNodePool(d *schema.ResourceData, meta interface{}) error {
 
 	if idOk {
 		/* search by ID */
-		ctx, cancel := context.WithTimeout(context.Background(), *resourceDefaultTimeouts.Default)
-
-		if cancel != nil {
-			defer cancel()
-		}
-
 		nodePool, apiResponse, err = client.KubernetesApi.K8sNodepoolsFindById(ctx, clusterId.(string), id.(string)).Execute()
 		logApiRequestTime(apiResponse)
 		if err != nil {
-			return fmt.Errorf("an error occurred while fetching the k8s nodePool with ID %s: %s", id.(string), err)
+			return diag.FromErr(fmt.Errorf("an error occurred while fetching the k8s nodePool with ID %s: %s", id.(string), err))
 		}
 	} else {
 		/* search by name */
 		var clusters ionoscloud.KubernetesNodePools
 
-		ctx, cancel := context.WithTimeout(context.Background(), *resourceDefaultTimeouts.Default)
-
-		if cancel != nil {
-			defer cancel()
-		}
-
 		clusters, apiResponse, err := client.KubernetesApi.K8sNodepoolsGet(ctx, clusterId.(string)).Execute()
 		logApiRequestTime(apiResponse)
 		if err != nil {
-			return fmt.Errorf("an error occurred while fetching k8s nodepools: %s", err.Error())
+			return diag.FromErr(fmt.Errorf("an error occurred while fetching k8s nodepools: %s", err.Error()))
 		}
 
 		found := false
@@ -235,7 +224,7 @@ func dataSourceK8sReadNodePool(d *schema.ResourceData, meta interface{}) error {
 				tmpNodePool, apiResponse, err := client.KubernetesApi.K8sNodepoolsFindById(ctx, clusterId.(string), *c.Id).Execute()
 				logApiRequestTime(apiResponse)
 				if err != nil {
-					return fmt.Errorf("an error occurred while fetching k8s nodePool with ID %s: %s", *c.Id, err.Error())
+					return diag.FromErr(fmt.Errorf("an error occurred while fetching k8s nodePool with ID %s: %s", *c.Id, err.Error()))
 				}
 				if tmpNodePool.Properties.Name != nil && *tmpNodePool.Properties.Name == name.(string) {
 					/* lan found */
@@ -247,18 +236,24 @@ func dataSourceK8sReadNodePool(d *schema.ResourceData, meta interface{}) error {
 		}
 
 		if !found {
-			return errors.New("k8s nodePool not found")
+			return diag.FromErr(errors.New("k8s nodePool not found"))
 		}
 
 	}
 
 	if err = setK8sNodePoolData(d, &nodePool); err != nil {
-		return err
+		return diag.FromErr(err)
 	}
 
 	if nodePool.Metadata != nil && nodePool.Metadata.State != nil {
 		if err := d.Set("state", *nodePool.Metadata.State); err != nil {
-			return err
+			return diag.FromErr(err)
+		}
+	}
+
+	if nodePool.Properties.AvailableUpgradeVersions != nil && len(*nodePool.Properties.AvailableUpgradeVersions) > 0 {
+		if err := d.Set("available_upgrade_versions", *nodePool.Properties.AvailableUpgradeVersions); err != nil {
+			return diag.FromErr(err)
 		}
 	}
 

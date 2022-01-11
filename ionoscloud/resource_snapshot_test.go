@@ -10,7 +10,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
 )
 
-func TestAccSnapshot_Basic(t *testing.T) {
+func TestAccSnapshotBasic(t *testing.T) {
 	var snapshot ionoscloud.Snapshot
 
 	resource.Test(t, resource.TestCase{
