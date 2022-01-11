@@ -148,7 +148,7 @@ func resourceLanRead(ctx context.Context, d *schema.ResourceData, meta interface
 	logApiRequestTime(apiResponse)
 
 	if err != nil {
-		if apiResponse != nil && apiResponse.Response != nil && apiResponse.StatusCode == 404 {
+		if httpNotFound(apiResponse) {
 			log.Printf("[INFO] LAN %s not found", d.Id())
 			d.SetId("")
 			return nil
@@ -208,7 +208,7 @@ func resourceLanDelete(ctx context.Context, d *schema.ResourceData, meta interfa
 	client := meta.(*ionoscloud.APIClient)
 	dcId := d.Get("datacenter_id").(string)
 
-	if err := waitForNicsDeletion(ctx, client, d); err != nil {
+	if err := waitForLanNicsDeletion(ctx, client, d); err != nil {
 		return diag.FromErr(err)
 	}
 
@@ -245,7 +245,7 @@ func resourceLanImport(ctx context.Context, d *schema.ResourceData, meta interfa
 	logApiRequestTime(apiResponse)
 
 	if err != nil {
-		if apiResponse != nil && apiResponse.Response != nil && apiResponse.StatusCode == 404 {
+		if httpNotFound(apiResponse) {
 			d.SetId("")
 			return nil, fmt.Errorf("unable to find lan %q", lanId)
 		}
@@ -273,7 +273,9 @@ func lanAvailable(ctx context.Context, client *ionoscloud.APIClient, d *schema.R
 		return true, fmt.Errorf("error checking LAN status: %s", err)
 	}
 
-	log.Printf("[INFO] current status for LAN %s: %+v", d.Id(), *rsp.Metadata.State)
+	if rsp.Metadata != nil && rsp.Metadata.State != nil {
+		log.Printf("[INFO] current status for LAN %s: %+v", d.Id(), *rsp.Metadata.State)
+	}
 
 	return *rsp.Metadata.State == "AVAILABLE", nil
 }
@@ -285,13 +287,16 @@ func lanDeleted(ctx context.Context, client *ionoscloud.APIClient, d *schema.Res
 	logApiRequestTime(apiResponse)
 
 	if err != nil {
-		if apiResponse != nil && apiResponse.Response != nil && apiResponse.StatusCode == 404 {
+		if httpNotFound(apiResponse) {
 			log.Printf("[INFO] LAN deleted %s", d.Id())
 			return true, nil
 		}
 		return true, fmt.Errorf("error checking LAN deletion status: %s", err)
 	}
-	log.Printf("[INFO] LAN %s not deleted yet; LAN status: %+v", d.Id(), *rsp.Metadata.State)
+	if rsp.Metadata != nil && rsp.Metadata.State != nil {
+		log.Printf("[INFO] LAN %s not deleted yet; LAN status: %+v", d.Id(), *rsp.Metadata.State)
+	}
+
 	return false, nil
 }
 
@@ -321,7 +326,7 @@ func waitForLanDeletion(ctx context.Context, client *ionoscloud.APIClient, d *sc
 	return nil
 }
 
-func nicsDeleted(ctx context.Context, client *ionoscloud.APIClient, d *schema.ResourceData) (bool, error) {
+func lanNicsDeleted(ctx context.Context, client *ionoscloud.APIClient, d *schema.ResourceData) (bool, error) {
 	dcId := d.Get("datacenter_id").(string)
 
 	nics, apiResponse, err := client.LanApi.DatacentersLansNicsGet(ctx, dcId, d.Id()).Execute()
@@ -339,11 +344,11 @@ func nicsDeleted(ctx context.Context, client *ionoscloud.APIClient, d *schema.Re
 	return true, nil
 }
 
-func waitForNicsDeletion(ctx context.Context, client *ionoscloud.APIClient, d *schema.ResourceData) error {
+func waitForLanNicsDeletion(ctx context.Context, client *ionoscloud.APIClient, d *schema.ResourceData) error {
 	for {
 		log.Printf("[INFO] waiting for nics under LAN %s to be deleted...", d.Id())
 
-		nicsDeleted, dsErr := nicsDeleted(ctx, client, d)
+		nicsDeleted, dsErr := lanNicsDeleted(ctx, client, d)
 
 		if dsErr != nil {
 			return fmt.Errorf("error while checking nics under lan %s: %s", d.Id(), dsErr)
