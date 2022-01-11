@@ -10,7 +10,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
 )
 
-func TestAccLan_Basic(t *testing.T) {
+func TestAccLanBasic(t *testing.T) {
 	var lan ionoscloud.Lan
 
 	resource.Test(t, resource.TestCase{

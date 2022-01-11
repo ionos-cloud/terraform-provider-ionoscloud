@@ -1,7 +1,8 @@
-## 5.2.25 (upcoming release)
+## 5.2.25 
 
 ### Fix:
 - Fixed diff on availableUpgradeVersions for k8s cluster and nodepool
+- Fixed lan deletion - wait for completion of nic deletion
 
 ## 5.2.24
 
