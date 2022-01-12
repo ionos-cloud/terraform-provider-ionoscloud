@@ -1,4 +1,4 @@
-## 6.0.3 (upcoming release)
+## 6.0.3
 
 ### Enhancements:
 - improved tests for networkloadbalancer and networkloadbalancer_forwardingrule
