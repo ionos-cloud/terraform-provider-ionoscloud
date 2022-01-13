@@ -20,7 +20,7 @@
 - fixed lan deletion - wait for completion of nic deletion
 
 ### Documentation:
-- restructured documentation by splitting it in product folders 
+- restructured documentation by adding subcategories
 
 ## 6.0.2
 
