@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
-	dbaas "github.com/ionos-cloud/sdk-go-autoscaling"
+	dbaas "github.com/ionos-cloud/sdk-go-dbaas-postgres"
 	"testing"
 )
 

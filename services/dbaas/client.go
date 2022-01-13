@@ -1,7 +1,7 @@
 package dbaas
 
 import (
-	dbaas "github.com/ionos-cloud/sdk-go-autoscaling"
+	dbaas "github.com/ionos-cloud/sdk-go-dbaas-postgres"
 	"os"
 )
 
