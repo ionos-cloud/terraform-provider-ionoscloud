@@ -1,4 +1,5 @@
 ---
+subcategory: "Database as a Service - Postgres"
 layout: "ionoscloud"
 page_title: "IonosCloud : ionoscloud_pg_versions"
 sidebar_current: "docs-ionoscloud_pg_versions"

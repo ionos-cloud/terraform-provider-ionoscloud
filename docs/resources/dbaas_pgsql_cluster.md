@@ -1,4 +1,5 @@
 ---
+subcategory: "Database as a Service - Postgres"
 layout: "ionoscloud"
 page_title: "IonosCloud: ionoscloud_pg_cluster"
 sidebar_current: "docs-resource-pg_cluster"

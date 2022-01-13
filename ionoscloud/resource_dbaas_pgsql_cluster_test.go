@@ -1,3 +1,6 @@
+//go:build dbaas
+// +build dbaas
+
 package ionoscloud
 
 import (
@@ -25,7 +28,7 @@ func TestAccDBaaSPgSqlClusterBasic(t *testing.T) {
 					testAccCheckDbaasPgSqlClusterExists(DBaaSClusterResource+"."+DBaaSClusterTestResource, &dbaasCluster),
 					resource.TestCheckResourceAttr(DBaaSClusterResource+"."+DBaaSClusterTestResource, "postgres_version", "12"),
 					resource.TestCheckResourceAttr(DBaaSClusterResource+"."+DBaaSClusterTestResource, "instances", "1"),
-					resource.TestCheckResourceAttr(DBaaSClusterResource+"."+DBaaSClusterTestResource, "cores", "3"),
+					resource.TestCheckResourceAttr(DBaaSClusterResource+"."+DBaaSClusterTestResource, "cores", "1"),
 					resource.TestCheckResourceAttr(DBaaSClusterResource+"."+DBaaSClusterTestResource, "ram", "2048"),
 					resource.TestCheckResourceAttr(DBaaSClusterResource+"."+DBaaSClusterTestResource, "storage_size", "2048"),
 					resource.TestCheckResourceAttr(DBaaSClusterResource+"."+DBaaSClusterTestResource, "storage_type", "HDD"),
@@ -47,7 +50,7 @@ func TestAccDBaaSPgSqlClusterBasic(t *testing.T) {
 					testAccCheckDbaasPgSqlClusterExists(DBaaSClusterResource+"."+DBaaSClusterTestResource, &dbaasCluster),
 					resource.TestCheckResourceAttr(DBaaSClusterResource+"."+DBaaSClusterTestResource, "postgres_version", "13"),
 					resource.TestCheckResourceAttr(DBaaSClusterResource+"."+DBaaSClusterTestResource, "instances", "2"),
-					resource.TestCheckResourceAttr(DBaaSClusterResource+"."+DBaaSClusterTestResource, "cores", "4"),
+					resource.TestCheckResourceAttr(DBaaSClusterResource+"."+DBaaSClusterTestResource, "cores", "2"),
 					resource.TestCheckResourceAttr(DBaaSClusterResource+"."+DBaaSClusterTestResource, "ram", "3072"),
 					resource.TestCheckResourceAttr(DBaaSClusterResource+"."+DBaaSClusterTestResource, "storage_size", "3072"),
 					resource.TestCheckResourceAttr(DBaaSClusterResource+"."+DBaaSClusterTestResource, "storage_type", "HDD"),
@@ -69,7 +72,7 @@ func TestAccDBaaSPgSqlClusterBasic(t *testing.T) {
 					testAccCheckDbaasPgSqlClusterExists(DBaaSClusterResource+"."+DBaaSClusterTestResource, &dbaasCluster),
 					resource.TestCheckResourceAttr(DBaaSClusterResource+"."+DBaaSClusterTestResource, "postgres_version", "13"),
 					resource.TestCheckResourceAttr(DBaaSClusterResource+"."+DBaaSClusterTestResource, "instances", "2"),
-					resource.TestCheckResourceAttr(DBaaSClusterResource+"."+DBaaSClusterTestResource, "cores", "4"),
+					resource.TestCheckResourceAttr(DBaaSClusterResource+"."+DBaaSClusterTestResource, "cores", "2"),
 					resource.TestCheckResourceAttr(DBaaSClusterResource+"."+DBaaSClusterTestResource, "ram", "3072"),
 					resource.TestCheckResourceAttr(DBaaSClusterResource+"."+DBaaSClusterTestResource, "storage_size", "3072"),
 					resource.TestCheckResourceAttr(DBaaSClusterResource+"."+DBaaSClusterTestResource, "storage_type", "HDD"),
@@ -89,6 +92,7 @@ func TestAccDBaaSPgSqlClusterBasic(t *testing.T) {
 
 func TestAccDBaaSPgSqlClusterAdditionalParameters(t *testing.T) {
 	var dbaasCluster dbaas.ClusterResponse
+	t.Skip()
 	resource.Test(t, resource.TestCase{
 		PreCheck: func() {
 			testAccPreCheck(t)
@@ -102,7 +106,7 @@ func TestAccDBaaSPgSqlClusterAdditionalParameters(t *testing.T) {
 					testAccCheckDbaasPgSqlClusterExists(DBaaSClusterResource+"."+DBaaSClusterTestResource, &dbaasCluster),
 					resource.TestCheckResourceAttr(DBaaSClusterResource+"."+DBaaSClusterTestResource, "postgres_version", "12"),
 					resource.TestCheckResourceAttr(DBaaSClusterResource+"."+DBaaSClusterTestResource, "instances", "1"),
-					resource.TestCheckResourceAttr(DBaaSClusterResource+"."+DBaaSClusterTestResource, "cores", "3"),
+					resource.TestCheckResourceAttr(DBaaSClusterResource+"."+DBaaSClusterTestResource, "cores", "1"),
 					resource.TestCheckResourceAttr(DBaaSClusterResource+"."+DBaaSClusterTestResource, "ram", "2048"),
 					resource.TestCheckResourceAttr(DBaaSClusterResource+"."+DBaaSClusterTestResource, "storage_size", "2048"),
 					resource.TestCheckResourceAttr(DBaaSClusterResource+"."+DBaaSClusterTestResource, "storage_type", "HDD"),
@@ -200,7 +204,7 @@ resource ` + LanResource + ` "lan_example" {
 resource ` + DBaaSClusterResource + ` ` + DBaaSClusterTestResource + ` {
   postgres_version   = 12
   instances          = 1
-  cores              = 3
+  cores              = 1
   ram                = 2048
   storage_size       = 2048
   storage_type       = "HDD"
@@ -252,7 +256,7 @@ resource ` + LanResource + ` "lan_example_update" {
 resource ` + DBaaSClusterResource + ` ` + DBaaSClusterTestResource + ` {
   postgres_version   = 13
   instances          = 2
-  cores              = 4
+  cores              = 2
   ram                = 3072
   storage_size       = 3072
   storage_type       = "HDD"
@@ -304,7 +308,7 @@ resource ` + LanResource + ` "lan_example_update" {
 resource ` + DBaaSClusterResource + ` ` + DBaaSClusterTestResource + ` {
   postgres_version   = 13
   instances          = 2
-  cores              = 4
+  cores              = 2
   ram                = 3072
   storage_size       = 3072
   storage_type       = "HDD"
@@ -338,7 +342,7 @@ resource ` + LanResource + ` "lan_example" {
 resource ` + DBaaSClusterResource + ` ` + DBaaSClusterTestResource + ` {
   postgres_version   = 12
   instances          = 1
-  cores              = 3
+  cores              = 1
   ram                = 2048
   storage_size       = 2048
   storage_type       = "HDD"
@@ -359,7 +363,7 @@ resource ` + DBaaSClusterResource + ` ` + DBaaSClusterTestResource + ` {
   }
   synchronization_mode = "ASYNCHRONOUS"
   from_backup {
-	backup_id = "2feaf22e-63f9-11ec-8761-8e8cbbc03eb8-4oymiqu-12"
-    recovery_target_time = "2021-12-23T16:23:08Z"
+	backup_id = "f767c6e5-747c-11ec-9bb6-4aa52b3d55f1-4oymiqu-12"
+    recovery_target_time = "2022-01-13T16:27:42Z"
   }
 }`

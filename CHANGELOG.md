@@ -1,7 +1,7 @@
 ## 6.1.0
 
-### Feature:
-- Database as a Service: 
+### Features:
+- New Product: **Database as a Service**: 
   - Resources: 
     - resource_dbaas_pgsql_cluster
   - Data Sources:

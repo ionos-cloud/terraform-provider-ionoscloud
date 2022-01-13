@@ -1,3 +1,6 @@
+//go:build dbaas
+// +build dbaas
+
 package ionoscloud
 
 import (

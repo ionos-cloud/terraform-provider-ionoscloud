@@ -339,9 +339,9 @@ func resourceDbaasPgSqlClusterImport(ctx context.Context, d *schema.ResourceData
 	if err != nil {
 		if apiResponse != nil && apiResponse.Response != nil && apiResponse.StatusCode == 404 {
 			d.SetId("")
-			return nil, fmt.Errorf("an error occured while trying to fetch the import of dbaas cluster %q", clusterId)
+			return nil, fmt.Errorf("dbaas cluster does not exist %q", clusterId)
 		}
-		return nil, fmt.Errorf("dbaas cluster does not exist %q", clusterId)
+		return nil, fmt.Errorf("an error occured while trying to fetch the import of dbaas cluster %q", clusterId)
 	}
 
 	log.Printf("[INFO] dbaas cluster found: %+v", dbaasCluster)
@@ -359,7 +359,7 @@ func dbaasClusterReady(ctx context.Context, client *dbaasService.Client, d *sche
 	if err != nil {
 		return true, fmt.Errorf("error checking dbaas cluster status: %s", err)
 	}
-	// Removed this part since there are still problems with the clusters being unstable (failing for a short time and then recovering)
+	// ToDo: Removed this part since there are still problems with the clusters being unstable (failing for a short time and then recovering)
 	//if *subjectCluster.LifecycleStatus == "FAILED" {
 	//
 	//	time.Sleep(time.Second * 3)
