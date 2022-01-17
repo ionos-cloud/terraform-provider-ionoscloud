@@ -89,7 +89,7 @@ func dataSourceNatGatewayRule() *schema.Resource {
 }
 
 func dataSourceNatGatewayRuleRead(d *schema.ResourceData, meta interface{}) error {
-	client := meta.(*ionoscloud.APIClient)
+	client := meta.(SdkBundle).CloudApiClient
 
 	datacenterId, dcIdOk := d.GetOk("datacenter_id")
 	if !dcIdOk {

@@ -13,11 +13,17 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/ionos-cloud/sdk-go/v6"
+	dbaasService "github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/dbaas"
 )
 
 var Version = "DEV"
 
-// Provider returns a schema.Provider for ionoscloud.
+type SdkBundle struct {
+	CloudApiClient *ionoscloud.APIClient
+	DbaasClient    *dbaasService.Client
+}
+
+// Provider returns a schema.Provider for ionoscloud
 func Provider() *schema.Provider {
 	provider := &schema.Provider{
 		Schema: map[string]*schema.Schema{
@@ -79,6 +85,7 @@ func Provider() *schema.Provider {
 			NatGatewayRuleResource:      resourceNatGatewayRule(),
 			NetworkLoadBalancerResource: resourceNetworkLoadBalancer(),
 			NetworkLoadBalancerForwardingRuleResource: resourceNetworkLoadBalancerForwardingRule(),
+			DBaaSClusterResource:                      resourceDbaasPgSqlCluster(),
 		},
 		DataSourcesMap: map[string]*schema.Resource{
 			DatacenterResource:                        dataSourceDataCenter(),
@@ -106,6 +113,9 @@ func Provider() *schema.Provider {
 			NicResource:                               dataSourceNIC(),
 			ShareResource:                             dataSourceShare(),
 			ResourceIpFailover:                        dataSourceIpFailover(),
+			DBaaSClusterResource:                      dataSourceDbaasPgSqlCluster(),
+			DBaaSVersionsResource:                     dataSourceDbaasPgSqlVersions(),
+			DBaaSBackupsResource:                      dataSourceDbaasPgSqlBackups(),
 		},
 	}
 
@@ -164,7 +174,12 @@ func providerConfigure(d *schema.ResourceData, terraformVersion string) (interfa
 		"terraform-provider/%s_ionos-cloud-sdk-go/%s_hashicorp-terraform/%s_terraform-plugin-sdk/%s_os/%s_arch/%s",
 		Version, ionoscloud.Version, terraformVersion, meta.SDKVersionString(), runtime.GOOS, runtime.GOARCH)
 
-	return newClient, nil
+	dbaasClient := dbaasService.NewClientService(username.(string), password.(string), token.(string), cleanedUrl)
+
+	return SdkBundle{
+		CloudApiClient: newClient,
+		DbaasClient:    dbaasClient.Get(),
+	}, nil
 }
 
 // cleanURL makes sure trailing slash does not corrupt the state
@@ -208,7 +223,7 @@ func IsRequestFailed(err error) bool {
 // resourceStateRefreshFunc tracks progress of a request
 func resourceStateRefreshFunc(meta interface{}, path string) resource.StateRefreshFunc {
 	return func() (interface{}, string, error) {
-		client := meta.(*ionoscloud.APIClient)
+		client := meta.(SdkBundle).CloudApiClient
 
 		log.Printf("[INFO] Checking PATH %s\n", path)
 		if path == "" {

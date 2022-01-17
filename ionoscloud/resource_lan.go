@@ -65,7 +65,7 @@ func resourceLan() *schema.Resource {
 }
 
 func resourceLanCreate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
-	client := meta.(*ionoscloud.APIClient)
+	client := meta.(SdkBundle).CloudApiClient
 	public := d.Get("public").(bool)
 	request := ionoscloud.LanPost{
 		Properties: &ionoscloud.LanPropertiesPost{
@@ -139,7 +139,7 @@ func resourceLanCreate(ctx context.Context, d *schema.ResourceData, meta interfa
 }
 
 func resourceLanRead(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
-	client := meta.(*ionoscloud.APIClient)
+	client := meta.(SdkBundle).CloudApiClient
 
 	dcid := d.Get("datacenter_id").(string)
 
@@ -167,7 +167,7 @@ func resourceLanRead(ctx context.Context, d *schema.ResourceData, meta interface
 }
 
 func resourceLanUpdate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
-	client := meta.(*ionoscloud.APIClient)
+	client := meta.(SdkBundle).CloudApiClient
 	properties := &ionoscloud.LanProperties{}
 	newValue := d.Get("public")
 	public := newValue.(bool)
@@ -209,7 +209,7 @@ func resourceLanUpdate(ctx context.Context, d *schema.ResourceData, meta interfa
 }
 
 func resourceLanDelete(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
-	client := meta.(*ionoscloud.APIClient)
+	client := meta.(SdkBundle).CloudApiClient
 	dcId := d.Get("datacenter_id").(string)
 
 	if err := waitForLanNicsDeletion(ctx, client, d); err != nil {
@@ -234,7 +234,7 @@ func resourceLanDelete(ctx context.Context, d *schema.ResourceData, meta interfa
 }
 
 func resourceLanImport(ctx context.Context, d *schema.ResourceData, meta interface{}) ([]*schema.ResourceData, error) {
-	client := meta.(*ionoscloud.APIClient)
+	client := meta.(SdkBundle).CloudApiClient
 
 	parts := strings.Split(d.Id(), "/")
 
@@ -298,22 +298,25 @@ func setLanData(d *schema.ResourceData, lan *ionoscloud.Lan) error {
 }
 
 func lanAvailable(ctx context.Context, client *ionoscloud.APIClient, d *schema.ResourceData) (bool, error) {
-	dcid := d.Get("datacenter_id").(string)
-	rsp, apiResponse, err := client.LANsApi.DatacentersLansFindById(ctx, dcid, d.Id()).Execute()
+	dcId := d.Get("datacenter_id").(string)
+	rsp, apiResponse, err := client.LANsApi.DatacentersLansFindById(ctx, dcId, d.Id()).Execute()
 	logApiRequestTime(apiResponse)
-
-	log.Printf("[INFO] Current status for LAN %s: %+v", d.Id(), rsp)
 
 	if err != nil {
 		return true, fmt.Errorf("error checking LAN status: %w", err)
 	}
+
+	if rsp.Metadata == nil || rsp.Metadata.State == nil {
+		return false, fmt.Errorf("could not retrieve state of lan %s", d.Id())
+	}
+
 	return *rsp.Metadata.State == "AVAILABLE", nil
 }
 
 func lanDeleted(ctx context.Context, client *ionoscloud.APIClient, d *schema.ResourceData) (bool, error) {
-	dcid := d.Get("datacenter_id").(string)
+	dcId := d.Get("datacenter_id").(string)
 
-	rsp, apiResponse, err := client.LANsApi.DatacentersLansFindById(ctx, dcid, d.Id()).Execute()
+	rsp, apiResponse, err := client.LANsApi.DatacentersLansFindById(ctx, dcId, d.Id()).Execute()
 	logApiRequestTime(apiResponse)
 
 	if err != nil {
@@ -321,10 +324,26 @@ func lanDeleted(ctx context.Context, client *ionoscloud.APIClient, d *schema.Res
 			log.Printf("[INFO] LAN deleted %s", d.Id())
 			return true, nil
 		}
-		return true, fmt.Errorf("error checking LAN deletion status: %w", err)
+		return false, fmt.Errorf("error checking LAN deletion status: %w", err)
 	}
+
+	log.Printf("[INFO] LAN %s not deleted yet deleted from the datacenter %s", d.Id(), dcId)
+
 	if rsp.Metadata != nil && rsp.Metadata.State != nil {
-		log.Printf("[INFO] LAN %s not deleted yet; LAN status: %+v", d.Id(), *rsp.Metadata.State)
+		log.Printf("[INFO] Current deletion status for LAN %s: %+v", d.Id(), *rsp.Metadata.State)
+
+		//this is an workaround for the fact that in DBaaS tests lan is not deleted at the first request
+		if *rsp.Metadata.State == "AVAILABLE" {
+			apiResponse, err = client.LANsApi.DatacentersLansDelete(ctx, dcId, d.Id()).Execute()
+			logApiRequestTime(apiResponse)
+
+			if err != nil {
+				if httpNotFound(apiResponse) {
+					return true, nil
+				}
+				return false, fmt.Errorf("error deleting LAN %s: %w", d.Id(), err)
+			}
+		}
 	}
 
 	return false, nil

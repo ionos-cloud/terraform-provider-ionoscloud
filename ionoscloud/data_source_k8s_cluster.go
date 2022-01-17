@@ -253,7 +253,7 @@ func dataSourceK8sCluster() *schema.Resource {
 }
 
 func dataSourceK8sReadCluster(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
-	client := meta.(*ionoscloud.APIClient)
+	client := meta.(SdkBundle).CloudApiClient
 
 	id, idOk := d.GetOk("id")
 	name, nameOk := d.GetOk("name")
@@ -262,7 +262,7 @@ func dataSourceK8sReadCluster(ctx context.Context, d *schema.ResourceData, meta 
 		return diag.FromErr(errors.New("id and name cannot be both specified in the same time"))
 	}
 	if !idOk && !nameOk {
-		return diag.FromErr(errors.New("please provide either the lan id or name"))
+		return diag.FromErr(errors.New("please provide either the k8s cluster id or name"))
 	}
 	var cluster ionoscloud.KubernetesCluster
 	var err error
@@ -294,7 +294,6 @@ func dataSourceK8sReadCluster(ctx context.Context, d *schema.ResourceData, meta 
 					return diag.FromErr(fmt.Errorf("an error occurred while fetching k8s cluster with ID %s: %s", *c.Id, err.Error()))
 				}
 				if tmpCluster.Properties.Name != nil && *tmpCluster.Properties.Name == name.(string) {
-					/* lan found */
 					cluster = tmpCluster
 					found = true
 					break

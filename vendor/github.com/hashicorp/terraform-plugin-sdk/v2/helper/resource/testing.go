@@ -9,7 +9,6 @@ import (
 	"regexp"
 	"strconv"
 	"strings"
-	"time"
 
 	"github.com/hashicorp/go-multierror"
 	testing "github.com/mitchellh/go-testing-interface"
@@ -114,7 +113,6 @@ func runSweepers(regions []string, sweepers map[string]*Sweeper, allowFailures b
 		var regionSweeperErrorFound bool
 		regionSweeperRunList := make(map[string]error)
 
-		start := time.Now()
 		log.Printf("[DEBUG] Running Sweepers for region (%s):\n", region)
 		for _, sweeper := range sweepers {
 			if err := runSweeperWithRegion(region, sweeper, sweepers, regionSweeperRunList, allowFailures); err != nil {
@@ -126,10 +124,8 @@ func runSweepers(regions []string, sweepers map[string]*Sweeper, allowFailures b
 				return sweeperRunList, fmt.Errorf("sweeper (%s) for region (%s) failed: %s", sweeper.Name, region, err)
 			}
 		}
-		elapsed := time.Now().Sub(start)
-		log.Printf("Completed Sweepers for region (%s) in %s", region, elapsed)
 
-		log.Printf("Sweeper Tests for region (%s) ran successfully:\n", region)
+		log.Printf("Sweeper Tests ran successfully:\n")
 		for sweeper, sweeperErr := range regionSweeperRunList {
 			if sweeperErr == nil {
 				fmt.Printf("\t- %s\n", sweeper)
@@ -140,7 +136,7 @@ func runSweepers(regions []string, sweepers map[string]*Sweeper, allowFailures b
 
 		if regionSweeperErrorFound {
 			sweeperErrorFound = true
-			log.Printf("Sweeper Tests for region (%s) ran unsuccessfully:\n", region)
+			log.Printf("Sweeper Tests ran unsuccessfully:\n")
 			for sweeper, sweeperErr := range regionSweeperRunList {
 				if sweeperErr != nil {
 					fmt.Printf("\t- %s: %s\n", sweeper, sweeperErr)
@@ -237,11 +233,7 @@ func runSweeperWithRegion(region string, s *Sweeper, sweepers map[string]*Sweepe
 
 	log.Printf("[DEBUG] Running Sweeper (%s) in region (%s)", s.Name, region)
 
-	start := time.Now()
 	runE := s.F(region)
-	elapsed := time.Now().Sub(start)
-
-	log.Printf("[DEBUG] Completed Sweeper (%s) in region (%s) in %s", s.Name, region, elapsed)
 
 	sweeperRunList[s.Name] = runE
 

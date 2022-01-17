@@ -78,7 +78,7 @@ func dataSourceFirewall() *schema.Resource {
 }
 
 func dataSourceFirewallRead(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
-	client := meta.(*ionoscloud.APIClient)
+	client := meta.(SdkBundle).CloudApiClient
 
 	datacenterId := d.Get("datacenter_id").(string)
 	serverId := d.Get("server_id").(string)

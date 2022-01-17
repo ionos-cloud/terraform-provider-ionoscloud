@@ -80,7 +80,7 @@ func resourceNic() *schema.Resource {
 }
 
 func resourceNicCreate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
-	client := meta.(*ionoscloud.APIClient)
+	client := meta.(SdkBundle).CloudApiClient
 
 	nic := getNicData(d, "")
 
@@ -111,7 +111,7 @@ func resourceNicCreate(ctx context.Context, d *schema.ResourceData, meta interfa
 }
 
 func resourceNicRead(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
-	client := meta.(*ionoscloud.APIClient)
+	client := meta.(SdkBundle).CloudApiClient
 
 	dcid := d.Get("datacenter_id").(string)
 	srvid := d.Get("server_id").(string)
@@ -137,7 +137,7 @@ func resourceNicRead(ctx context.Context, d *schema.ResourceData, meta interface
 }
 
 func resourceNicUpdate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
-	client := meta.(*ionoscloud.APIClient)
+	client := meta.(SdkBundle).CloudApiClient
 
 	dcId := d.Get("datacenter_id").(string)
 	srvId := d.Get("server_id").(string)
@@ -163,7 +163,7 @@ func resourceNicUpdate(ctx context.Context, d *schema.ResourceData, meta interfa
 }
 
 func resourceNicDelete(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
-	client := meta.(*ionoscloud.APIClient)
+	client := meta.(SdkBundle).CloudApiClient
 
 	dcid := d.Get("datacenter_id").(string)
 	srvid := d.Get("server_id").(string)
@@ -295,7 +295,7 @@ func resourceNicImport(ctx context.Context, d *schema.ResourceData, meta interfa
 	sId := parts[1]
 	nicId := parts[2]
 
-	client := meta.(*ionoscloud.APIClient)
+	client := meta.(SdkBundle).CloudApiClient
 
 	nic, apiResponse, err := client.NetworkInterfacesApi.DatacentersServersNicsFindById(ctx, dcId, sId, nicId).Execute()
 	logApiRequestTime(apiResponse)

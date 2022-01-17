@@ -1,3 +1,6 @@
+//go:build natgateway
+// +build natgateway
+
 package ionoscloud
 
 import (
@@ -53,7 +56,7 @@ func TestAccNatGatewayRuleBasic(t *testing.T) {
 }
 
 func testAccCheckNatGatewayRuleDestroyCheck(s *terraform.State) error {
-	client := testAccProvider.Meta().(*ionoscloud.APIClient)
+	client := testAccProvider.Meta().(SdkBundle).CloudApiClient
 
 	ctx, cancel := context.WithTimeout(context.Background(), *resourceDefaultTimeouts.Delete)
 
@@ -83,7 +86,7 @@ func testAccCheckNatGatewayRuleDestroyCheck(s *terraform.State) error {
 
 func testAccCheckNatGatewayRuleExists(n string, natGateway *ionoscloud.NatGatewayRule) resource.TestCheckFunc {
 	return func(s *terraform.State) error {
-		client := testAccProvider.Meta().(*ionoscloud.APIClient)
+		client := testAccProvider.Meta().(SdkBundle).CloudApiClient
 		rs, ok := s.RootModule().Resources[n]
 
 		if !ok {

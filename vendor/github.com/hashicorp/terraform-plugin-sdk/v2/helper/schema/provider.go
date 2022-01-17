@@ -90,9 +90,6 @@ type Provider struct {
 	// cancellation signal. This function can yield Diagnostics.
 	ConfigureContextFunc ConfigureContextFunc
 
-	// configured is enabled after a Configure() call
-	configured bool
-
 	meta interface{}
 
 	TerraformVersion string
@@ -264,10 +261,6 @@ func (p *Provider) Configure(ctx context.Context, c *terraform.ResourceConfig) d
 		return nil
 	}
 
-	if p.configured {
-		log.Printf("[WARN] Previously configured provider being re-configured. This can cause issues in concurrent testing if the configurations are not equal.")
-	}
-
 	sm := schemaMap(p.Schema)
 
 	// Get a ResourceData for this configuration. To do this, we actually
@@ -289,23 +282,15 @@ func (p *Provider) Configure(ctx context.Context, c *terraform.ResourceConfig) d
 		}
 		p.meta = meta
 	}
-
-	var diags diag.Diagnostics
-
 	if p.ConfigureContextFunc != nil {
-		meta, configureDiags := p.ConfigureContextFunc(ctx, data)
-		diags = append(diags, configureDiags...)
-
+		meta, diags := p.ConfigureContextFunc(ctx, data)
 		if diags.HasError() {
 			return diags
 		}
-
 		p.meta = meta
 	}
 
-	p.configured = true
-
-	return diags
+	return nil
 }
 
 // Resources returns all the available resource types that this provider

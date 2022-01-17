@@ -185,7 +185,7 @@ func dataSourceK8sNodePool() *schema.Resource {
 }
 
 func dataSourceK8sReadNodePool(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
-	client := meta.(*ionoscloud.APIClient)
+	client := meta.(SdkBundle).CloudApiClient
 
 	clusterId := d.Get("k8s_cluster_id")
 	id, idOk := d.GetOk("id")

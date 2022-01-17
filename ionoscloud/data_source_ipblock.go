@@ -105,7 +105,7 @@ func datasourceIpBlockRead(ctx context.Context, data *schema.ResourceData, meta 
 	}
 	var ipBlock ionoscloud.IpBlock
 	var err error
-	client := meta.(*ionoscloud.APIClient)
+	client := meta.(SdkBundle).CloudApiClient
 	var apiResponse *ionoscloud.APIResponse
 
 	if !idOk && !nameOk && !locationOk {

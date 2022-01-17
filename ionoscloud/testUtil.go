@@ -29,7 +29,9 @@ func getMockedClient(jsonResponse string) interface{} {
 	cfg := ionoscloud.NewConfiguration("", "", "", ts.URL)
 	cfg.HTTPClient = ts.Client()
 
-	return ionoscloud.NewAPIClient(cfg)
+	return SdkBundle{
+		CloudApiClient: ionoscloud.NewAPIClient(cfg),
+	}
 }
 
 func getEmptyTestResourceData(t *testing.T, resourceSchema map[string]*schema.Schema) *schema.ResourceData {

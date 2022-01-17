@@ -84,7 +84,7 @@ func resourceDatacenter() *schema.Resource {
 
 func resourceDatacenterCreate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 
-	client := meta.(*ionoscloud.APIClient)
+	client := meta.(SdkBundle).CloudApiClient
 
 	datacenterName := d.Get("name").(string)
 	datacenterLocation := d.Get("location").(string)
@@ -134,7 +134,7 @@ func resourceDatacenterCreate(ctx context.Context, d *schema.ResourceData, meta 
 
 func resourceDatacenterRead(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 
-	client := meta.(*ionoscloud.APIClient)
+	client := meta.(SdkBundle).CloudApiClient
 
 	datacenter, apiResponse, err := client.DataCentersApi.DatacentersFindById(ctx, d.Id()).Execute()
 	logApiRequestTime(apiResponse)
@@ -157,7 +157,7 @@ func resourceDatacenterRead(ctx context.Context, d *schema.ResourceData, meta in
 
 func resourceDatacenterUpdate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 
-	client := meta.(*ionoscloud.APIClient)
+	client := meta.(SdkBundle).CloudApiClient
 	obj := ionoscloud.DatacenterProperties{}
 
 	if d.HasChange("name") {
@@ -203,7 +203,7 @@ func resourceDatacenterUpdate(ctx context.Context, d *schema.ResourceData, meta 
 
 func resourceDatacenterDelete(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 
-	client := meta.(*ionoscloud.APIClient)
+	client := meta.(SdkBundle).CloudApiClient
 
 	apiResponse, err := client.DataCentersApi.DatacentersDelete(ctx, d.Id()).Execute()
 	logApiRequestTime(apiResponse)
@@ -225,7 +225,7 @@ func resourceDatacenterDelete(ctx context.Context, d *schema.ResourceData, meta 
 }
 
 func resourceDatacenterImport(ctx context.Context, d *schema.ResourceData, meta interface{}) ([]*schema.ResourceData, error) {
-	client := meta.(*ionoscloud.APIClient)
+	client := meta.(SdkBundle).CloudApiClient
 
 	dcId := d.Id()
 

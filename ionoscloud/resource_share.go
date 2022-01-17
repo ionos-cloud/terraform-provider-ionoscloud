@@ -47,7 +47,7 @@ func resourceShare() *schema.Resource {
 }
 
 func resourceShareCreate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
-	client := meta.(*ionoscloud.APIClient)
+	client := meta.(SdkBundle).CloudApiClient
 
 	request := ionoscloud.GroupShare{
 		Properties: &ionoscloud.GroupShareProperties{},
@@ -82,7 +82,7 @@ func resourceShareCreate(ctx context.Context, d *schema.ResourceData, meta inter
 }
 
 func resourceShareRead(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
-	client := meta.(*ionoscloud.APIClient)
+	client := meta.(SdkBundle).CloudApiClient
 
 	rsp, apiResponse, err := client.UserManagementApi.UmGroupsSharesFindByResourceId(ctx, d.Get("group_id").(string), d.Get("resource_id").(string)).Execute()
 	logApiRequestTime(apiResponse)
@@ -107,7 +107,7 @@ func resourceShareRead(ctx context.Context, d *schema.ResourceData, meta interfa
 }
 
 func resourceShareUpdate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
-	client := meta.(*ionoscloud.APIClient)
+	client := meta.(SdkBundle).CloudApiClient
 
 	tempSharePrivilege := d.Get("share_privilege").(bool)
 	tempEditPrivilege := d.Get("edit_privilege").(bool)
@@ -138,7 +138,7 @@ func resourceShareUpdate(ctx context.Context, d *schema.ResourceData, meta inter
 }
 
 func resourceShareDelete(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
-	client := meta.(*ionoscloud.APIClient)
+	client := meta.(SdkBundle).CloudApiClient
 
 	groupId := d.Get("group_id").(string)
 	resourceId := d.Get("resource_id").(string)
@@ -185,7 +185,7 @@ func resourceShareImporter(ctx context.Context, d *schema.ResourceData, meta int
 	grpId := parts[0]
 	rscId := parts[1]
 
-	client := meta.(*ionoscloud.APIClient)
+	client := meta.(SdkBundle).CloudApiClient
 
 	share, apiResponse, err := client.UserManagementApi.UmGroupsSharesFindByResourceId(ctx, grpId, rscId).Execute()
 	logApiRequestTime(apiResponse)

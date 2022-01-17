@@ -5,6 +5,7 @@ import (
 	"fmt"
 	ionoscloud "github.com/ionos-cloud/sdk-go/v6"
 	"log"
+	"net"
 	"net/http"
 	"reflect"
 	"regexp"
@@ -25,7 +26,7 @@ func resourceIpFailoverImporter(ctx context.Context, d *schema.ResourceData, met
 	dcId := parts[0]
 	lanId := parts[1]
 
-	client := meta.(*ionoscloud.APIClient)
+	client := meta.(SdkBundle).CloudApiClient
 
 	lan, apiResponse, err := client.LANsApi.DatacentersLansFindById(ctx, dcId, lanId).Execute()
 	logApiRequestTime(apiResponse)
@@ -79,7 +80,7 @@ func resourceLoadbalancerImporter(ctx context.Context, d *schema.ResourceData, m
 	dcId := parts[0]
 	lbId := parts[1]
 
-	client := meta.(*ionoscloud.APIClient)
+	client := meta.(SdkBundle).CloudApiClient
 
 	loadbalancer, apiResponse, err := client.LoadBalancersApi.DatacentersLoadbalancersFindById(ctx, dcId, lbId).Execute()
 	logApiRequestTime(apiResponse)
@@ -222,6 +223,21 @@ func DiffToLower(_, old, new string, _ *schema.ResourceData) bool {
 		return true
 	}
 	return false
+}
+
+// VerifyUnavailableIPs used for DBaaS cluster to check the provided IPs
+func VerifyUnavailableIPs(val interface{}, key string) (warns []string, errs []error) {
+	v := val.(string)
+	unavailableNetworks := []string{"10.233.64.0/18", "10.233.0.0/18", "10.233.114.0/24"}
+
+	ip, _, _ := net.ParseCIDR(v)
+
+	for _, unavailableNetwork := range unavailableNetworks {
+		if _, network, _ := net.ParseCIDR(unavailableNetwork); network.Contains(ip) {
+			errs = append(errs, fmt.Errorf("for %q the following IP ranges are unavailable: 10.233.64.0/18, 10.233.0.0/18, 10.233.114.0/24; got: %v", key, v))
+		}
+	}
+	return
 }
 
 func GenerateEmail() string {
