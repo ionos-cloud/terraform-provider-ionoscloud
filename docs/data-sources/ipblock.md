@@ -4,7 +4,7 @@ layout: "ionoscloud"
 page_title: "IonosCloud: ipblock"
 sidebar_current: "docs-datasource-ipblock"
 description: |-
-Get information on a IonosCloud Ip Block
+  Get information on a IonosCloud Ip Block
 ---
 
 # ionoscloud\_ipblock

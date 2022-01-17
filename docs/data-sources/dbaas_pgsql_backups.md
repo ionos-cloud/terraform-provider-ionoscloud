@@ -4,7 +4,7 @@ layout: "ionoscloud"
 page_title: "IonosCloud : ionoscloud_pg_backups"
 sidebar_current: "docs-ionoscloud_pg_backups"
 description: |-
-Get information on DbaaS PgSql Backups
+  Get information on DbaaS PgSql Backups
 ---
 
 # ionoscloud\_pg_backups

@@ -4,7 +4,7 @@ layout: "ionoscloud"
 page_title: "IonosCloud : ionoscloud_pg_versions"
 sidebar_current: "docs-ionoscloud_pg_versions"
 description: |-
-Get information on DbaaS PgSql Versions
+  Get information on DbaaS PgSql Versions
 ---
 
 # ionoscloud\_pg_versions

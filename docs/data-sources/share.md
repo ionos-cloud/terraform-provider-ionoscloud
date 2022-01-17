@@ -4,7 +4,7 @@ layout: "ionoscloud"
 page_title: "IonosCloud: share"
 sidebar_current: "docs-datasource-share"
 description: |-
-Get Information on share permission objects
+  Get Information on share permission objects
 ---
 
 # ionoscloud\_share

@@ -4,7 +4,7 @@ layout: "ionoscloud"
 page_title: "IonosCloud: networkloadbalancer"
 sidebar_current: "docs-resource-networkloadbalancer"
 description: |-
-Creates and manages Network Load Balancer objects.
+  Creates and manages Network Load Balancer objects.
 ---
 
 # ionoscloud_networkloadbalancer

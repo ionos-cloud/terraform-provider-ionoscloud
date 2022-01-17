@@ -4,7 +4,7 @@ layout: "ionoscloud"
 page_title: "IonosCloud: firewall"
 sidebar_current: "docs-datasource-firewall"
 description: |-
-Get Information on a IonosCloud Firewall
+  Get Information on a IonosCloud Firewall
 ---
 
 # ionoscloud\_firewall

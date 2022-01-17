@@ -1,3 +1,8 @@
+## 6.1.1
+
+### Docs:
+- Fix documentation in terraform registry 
+
 ## 6.1.0
 
 ### Features:

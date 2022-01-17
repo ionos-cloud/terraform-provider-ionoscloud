@@ -4,7 +4,7 @@ layout: "ionoscloud"
 page_title: "IonosCloud : ionoscloud_volume"
 sidebar_current: "docs-ionoscloud-datasource-volume"
 description: |-
-Get information on a Ionos Cloud Volume
+  Get information on a Ionos Cloud Volume
 ---
 
 # ionoscloud\_volume

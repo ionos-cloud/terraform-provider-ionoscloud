@@ -4,7 +4,7 @@ layout: "ionoscloud"
 page_title: "IonosCloud : ionoscloud_template"
 sidebar_current: "docs-ionoscloud-datasource-template"
 description: |-
-Get information on a Ionos Cloud Template
+  Get information on a Ionos Cloud Template
 ---
 
 # ionoscloud_template

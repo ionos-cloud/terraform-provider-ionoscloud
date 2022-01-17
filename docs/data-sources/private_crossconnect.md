@@ -4,7 +4,7 @@ layout: "ionoscloud"
 page_title: "IonosCloud : ionoscloud_private_crossconnect"
 sidebar_current: "docs-ionoscloud-datasource-private-crossconnect"
 description: |-
-Get information on a Ionos Cloud Private Crossconnects
+  Get information on a Ionos Cloud Private Crossconnects
 ---
 
 # ionoscloud\_private_crossconnect

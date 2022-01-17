@@ -4,7 +4,7 @@ layout: "ionoscloud"
 page_title: "IonosCloud : ionoscloud_natgateway_rule"
 sidebar_current: "docs-ionoscloud-datasource-natgateway_rule"
 description: |-
-Get information on a Nat Gateway Rule
+  Get information on a Nat Gateway Rule
 ---
 
 # ionoscloud_natgateway_rule

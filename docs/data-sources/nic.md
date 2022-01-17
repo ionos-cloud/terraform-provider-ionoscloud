@@ -4,7 +4,7 @@ layout: "ionoscloud"
 page_title: "IonosCloud: nic"
 sidebar_current: "docs-ionoscloud-datasource-nic"
 description: |-
-Get information on a Ionos Cloud NIC
+  Get information on a Ionos Cloud NIC
 ---
 
 # ionoscloud_nic

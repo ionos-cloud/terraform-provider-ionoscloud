@@ -4,7 +4,7 @@ layout: "ionoscloud"
 page_title: "IonosCloud: natgateway_rule"
 sidebar_current: "docs-resource-natgateway_rule"
 description: |-
-Creates and manages Nat Gateway Rule objects.
+  Creates and manages Nat Gateway Rule objects.
 ---
 
 # ionoscloud_natgateway_rule

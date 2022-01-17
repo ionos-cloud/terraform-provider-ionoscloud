@@ -4,7 +4,7 @@ layout: "ionoscloud"
 page_title: "IonosCloud : ionoscloud_pg_cluster"
 sidebar_current: "docs-ionoscloud_pg_cluster"
 description: |-
-Get information on a DbaaS PgSql Cluster
+  Get information on a DbaaS PgSql Cluster
 ---
 
 # ionoscloud\_pg_cluster

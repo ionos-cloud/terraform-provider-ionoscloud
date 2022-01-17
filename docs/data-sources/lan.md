@@ -4,7 +4,7 @@ layout: "ionoscloud"
 page_title: "IonosCloud : ionoscloud_lan"
 sidebar_current: "docs-ionoscloud-datasource-lan"
 description: |-
-Get information on a Ionos Cloud Lans
+  Get information on a Ionos Cloud Lans
 ---
 
 # ionoscloud\_lan

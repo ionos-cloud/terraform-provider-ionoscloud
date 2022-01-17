@@ -4,7 +4,7 @@ layout: "ionoscloud"
 page_title: "IonosCloud : ionoscloud_networkloadbalancer"
 sidebar_current: "docs-ionoscloud-datasource-networkloadbalancer"
 description: |-
-Get information on a Network Load Balancer
+  Get information on a Network Load Balancer
 ---
 
 # ionoscloud_networkloadbalancer

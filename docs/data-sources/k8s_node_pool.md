@@ -4,7 +4,7 @@ layout: "ionoscloud"
 page_title: "IonosCloud : ionoscloud_k8s_node_pool"
 sidebar_current: "docs-ionoscloud-datasource-k8s-node-pool"
 description: |-
-Get information on a IonosCloud K8s Node Pool
+  Get information on a IonosCloud K8s Node Pool
 ---
 
 # ionoscloud\_k8s\_node\_pool
