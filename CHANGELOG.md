@@ -8,6 +8,7 @@
     - data_source_dbaas_pgsql_backups
     - data_source_dbaas_pgsql_cluster
     - data_source_dbaas_pgsql_versions
+  - Dependency-update: added SDK-Go-DBaaS Postgres version [v1.0.0](https://github.com/ionos-cloud/sdk-go-dbaas-postgres/releases/tag/v1.0.0)
 
 ## 6.0.3
 
