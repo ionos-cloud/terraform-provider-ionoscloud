@@ -53,6 +53,7 @@ func resourceNatGateway() *schema.Resource {
 							Elem: &schema.Schema{
 								Type: schema.TypeString,
 							},
+							DiffSuppressFunc: DiffCidr,
 						},
 					},
 				},
