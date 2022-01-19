@@ -1,3 +1,8 @@
+## 5.2.26(upcoming release)
+
+### Fix:
+- set depth explicitly to improve performance
+
 ## 5.2.25 
 
 ### Fix:
