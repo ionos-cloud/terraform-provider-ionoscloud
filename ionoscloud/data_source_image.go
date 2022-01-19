@@ -111,7 +111,7 @@ func dataSourceImageRead(d *schema.ResourceData, meta interface{}) error {
 		defer cancel()
 	}
 
-	images, apiResponse, err := client.ImageApi.ImagesGet(ctx).Execute()
+	images, apiResponse, err := client.ImageApi.ImagesGet(ctx).Depth(1).Execute()
 	logApiRequestTime(apiResponse)
 
 	if err != nil {
@@ -132,7 +132,7 @@ func dataSourceImageRead(d *schema.ResourceData, meta interface{}) error {
 		nameVer := fmt.Sprintf("%s-%s", name, version.(string))
 		if images.Items != nil {
 			for _, img := range *images.Items {
-				if img.Properties.Name != nil && strings.ToLower(*img.Properties.Name) == strings.ToLower(nameVer) {
+				if img.Properties != nil && img.Properties.Name != nil && strings.ToLower(*img.Properties.Name) == strings.ToLower(nameVer) {
 					results = append(results, img)
 				}
 			}
