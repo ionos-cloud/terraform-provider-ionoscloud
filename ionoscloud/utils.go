@@ -227,9 +227,10 @@ func DiffToLower(_, old, new string, _ *schema.ResourceData) bool {
 
 //DiffCidr terraform suppress differences between ip and cidr
 func DiffCidr(_, old, new string, _ *schema.ResourceData) bool {
-	_, _, err := net.ParseCIDR(old)
+	oldIp, _, err := net.ParseCIDR(old)
+	newIp := net.ParseIP(new)
 	// if new is an ip and old is a cidr, suppress
-	if net.ParseIP(new) != nil && err == nil {
+	if err == nil && newIp != nil && oldIp != nil && newIp.Equal(oldIp) {
 		return true
 	}
 	return false
