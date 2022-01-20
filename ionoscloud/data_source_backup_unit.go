@@ -79,7 +79,7 @@ func dataSourceBackupUnitRead(ctx context.Context, d *schema.ResourceData, meta 
 				tmpBackupUnit, apiResponse, err := client.BackupUnitApi.BackupunitsFindById(ctx, *bu.Id).Execute()
 				logApiRequestTime(apiResponse)
 				if err != nil {
-					return diag.FromErr(fmt.Errorf("an error occurred while fetching backup unit with ID %s: %s", *bu.Id, err.Error()))
+					return diag.FromErr(fmt.Errorf("an error occurred while fetching backup unit with ID %s: %w", *bu.Id, err))
 				}
 				if tmpBackupUnit.Properties.Name != nil && *tmpBackupUnit.Properties.Name == name.(string) {
 					backupUnit = tmpBackupUnit

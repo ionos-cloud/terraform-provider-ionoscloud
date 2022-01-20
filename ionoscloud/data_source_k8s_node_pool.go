@@ -181,7 +181,7 @@ func dataSourceK8sReadNodePool(d *schema.ResourceData, meta interface{}) error {
 		nodePool, apiResponse, err = client.KubernetesApi.K8sNodepoolsFindById(ctx, clusterId.(string), id.(string)).Execute()
 		logApiRequestTime(apiResponse)
 		if err != nil {
-			return fmt.Errorf("an error occurred while fetching the k8s nodePool with ID %s: %s", id.(string), err)
+			return fmt.Errorf("an error occurred while fetching the k8s nodePool with ID %s: %w", id.(string), err)
 		}
 	} else {
 		/* search by name */
@@ -193,7 +193,7 @@ func dataSourceK8sReadNodePool(d *schema.ResourceData, meta interface{}) error {
 			defer cancel()
 		}
 
-		clusters, apiResponse, err := client.KubernetesApi.K8sNodepoolsGet(ctx, clusterId.(string)).Execute()
+		clusters, apiResponse, err := client.KubernetesApi.K8sNodepoolsGet(ctx, clusterId.(string)).Depth(1).Execute()
 		logApiRequestTime(apiResponse)
 		if err != nil {
 			return fmt.Errorf("an error occurred while fetching k8s nodepools: %s", err.Error())
@@ -205,9 +205,9 @@ func dataSourceK8sReadNodePool(d *schema.ResourceData, meta interface{}) error {
 				tmpNodePool, apiResponse, err := client.KubernetesApi.K8sNodepoolsFindById(ctx, clusterId.(string), *c.Id).Execute()
 				logApiRequestTime(apiResponse)
 				if err != nil {
-					return fmt.Errorf("an error occurred while fetching k8s nodePool with ID %s: %s", *c.Id, err.Error())
+					return fmt.Errorf("an error occurred while fetching k8s nodePool with ID %s: %w", *c.Id, err)
 				}
-				if tmpNodePool.Properties.Name != nil && *tmpNodePool.Properties.Name == name.(string) {
+				if tmpNodePool.Properties != nil && tmpNodePool.Properties.Name != nil && *tmpNodePool.Properties.Name == name.(string) {
 					/* lan found */
 					nodePool = tmpNodePool
 					found = true

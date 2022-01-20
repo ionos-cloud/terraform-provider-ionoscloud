@@ -107,7 +107,7 @@ func dataSourceFirewallRead(ctx context.Context, d *schema.ResourceData, meta in
 		/* search by name */
 		var firewalls ionoscloud.FirewallRules
 
-		firewalls, apiResponse, err := client.NicApi.DatacentersServersNicsFirewallrulesGet(ctx, datacenterId, serverId, nicId).Execute()
+		firewalls, apiResponse, err := client.NicApi.DatacentersServersNicsFirewallrulesGet(ctx, datacenterId, serverId, nicId).Depth(1).Execute()
 		logApiRequestTime(apiResponse)
 
 		if err != nil {
@@ -121,7 +121,7 @@ func dataSourceFirewallRead(ctx context.Context, d *schema.ResourceData, meta in
 				if err != nil {
 					return diag.FromErr(fmt.Errorf("an error occurred while fetching firewall rule with ID %s: %s", *fr.Id, err.Error()))
 				}
-				if tmpFirewall.Properties.Name != nil && *tmpFirewall.Properties.Name == name.(string) {
+				if tmpFirewall.Properties != nil && tmpFirewall.Properties.Name != nil && *tmpFirewall.Properties.Name == name.(string) {
 					firewall = tmpFirewall
 					found = true
 					break

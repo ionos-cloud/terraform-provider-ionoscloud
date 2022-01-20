@@ -110,7 +110,7 @@ func dataSourceLanRead(d *schema.ResourceData, meta interface{}) error {
 		/* search by name */
 		var lans ionoscloud.Lans
 
-		lans, apiResponse, err := client.LanApi.DatacentersLansGet(ctx, datacenterId.(string)).Execute()
+		lans, apiResponse, err := client.LanApi.DatacentersLansGet(ctx, datacenterId.(string)).Depth(1).Execute()
 		logApiRequestTime(apiResponse)
 		if err != nil {
 			return fmt.Errorf("an error occurred while fetching lans: %s", err.Error())
@@ -119,7 +119,7 @@ func dataSourceLanRead(d *schema.ResourceData, meta interface{}) error {
 		found := false
 		if lans.Items != nil {
 			for _, l := range *lans.Items {
-				if l.Properties.Name != nil && *l.Properties.Name == name.(string) {
+				if l.Properties != nil && l.Properties.Name != nil && *l.Properties.Name == name.(string) {
 					/* lan found */
 					lan, apiResponse, err = client.LanApi.DatacentersLansFindById(ctx, datacenterId.(string), *l.Id).Execute()
 					logApiRequestTime(apiResponse)

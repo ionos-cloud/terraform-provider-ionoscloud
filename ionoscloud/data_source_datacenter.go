@@ -96,7 +96,7 @@ func dataSourceDataCenterRead(ctx context.Context, d *schema.ResourceData, meta 
 		}
 		log.Printf("[INFO] Got dc [Name=%s, Location=%s]", *datacenter.Properties.Name, *datacenter.Properties.Location)
 	} else {
-		datacenters, apiResponse, err := client.DataCenterApi.DatacentersGet(ctx).Execute()
+		datacenters, apiResponse, err := client.DataCenterApi.DatacentersGet(ctx).Depth(1).Execute()
 		logApiRequestTime(apiResponse)
 
 		if err != nil {
@@ -108,7 +108,7 @@ func dataSourceDataCenterRead(ctx context.Context, d *schema.ResourceData, meta 
 		if nameOk && datacenters.Items != nil {
 			var resultsByDatacenter []ionoscloud.Datacenter
 			for _, dc := range *datacenters.Items {
-				if dc.Properties.Name != nil && *dc.Properties.Name == name {
+				if dc.Properties != nil && dc.Properties.Name != nil && *dc.Properties.Name == name {
 					resultsByDatacenter = append(resultsByDatacenter, dc)
 				}
 			}

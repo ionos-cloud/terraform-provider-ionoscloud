@@ -84,7 +84,7 @@ func dataSourceUserRead(ctx context.Context, d *schema.ResourceData, meta interf
 		/* search by name */
 		var users ionoscloud.Users
 
-		users, apiResponse, err := client.UserManagementApi.UmUsersGet(ctx).Execute()
+		users, apiResponse, err := client.UserManagementApi.UmUsersGet(ctx).Depth(1).Execute()
 		logApiRequestTime(apiResponse)
 		if err != nil {
 			diags := diag.FromErr(fmt.Errorf("an error occurred while fetching users: %s", err.Error()))
@@ -94,7 +94,7 @@ func dataSourceUserRead(ctx context.Context, d *schema.ResourceData, meta interf
 		found := false
 		if users.Items != nil {
 			for _, u := range *users.Items {
-				if u.Properties.Email != nil && *u.Properties.Email == email.(string) {
+				if u.Properties != nil && u.Properties.Email != nil && *u.Properties.Email == email.(string) {
 					/* user found */
 					user, apiResponse, err = client.UserManagementApi.UmUsersFindById(ctx, *u.Id).Execute()
 					logApiRequestTime(apiResponse)

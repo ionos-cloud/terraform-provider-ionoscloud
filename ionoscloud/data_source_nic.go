@@ -95,7 +95,7 @@ func dataSourceNicRead(ctx context.Context, data *schema.ResourceData, meta inte
 		nic, apiResponse, err = client.NicApi.DatacentersServersNicsFindById(ctx, datacenterId, serverId, id.(string)).Execute()
 		logApiRequestTime(apiResponse)
 		if err != nil {
-			return diag.FromErr(fmt.Errorf("error getting nic with id %s %s", id.(string), err))
+			return diag.FromErr(fmt.Errorf("error getting nic with id %s %w", id.(string), err))
 		}
 		if nameOk {
 			if nic.Properties != nil {
@@ -106,11 +106,11 @@ func dataSourceNicRead(ctx context.Context, data *schema.ResourceData, meta inte
 			}
 		}
 	} else {
-		nics, apiResponse, err := client.NicApi.DatacentersServersNicsGet(ctx, datacenterId, serverId).Execute()
+		nics, apiResponse, err := client.NicApi.DatacentersServersNicsGet(ctx, datacenterId, serverId).Depth(1).Execute()
 		logApiRequestTime(apiResponse)
 
 		if err != nil {
-			return diag.FromErr(fmt.Errorf("an error occured while fetching nics: %s ", err))
+			return diag.FromErr(fmt.Errorf("an error occured while fetching nics: %w ", err))
 		}
 
 		if nameOk && nics.Items != nil {
@@ -118,7 +118,7 @@ func dataSourceNicRead(ctx context.Context, data *schema.ResourceData, meta inte
 				log.Printf("[WARNING] found multiple nic results for name %s\n", name)
 			}
 			for _, tempNic := range *nics.Items {
-				if tempNic.Properties.Name != nil && *tempNic.Properties.Name == name {
+				if tempNic.Properties != nil && tempNic.Properties.Name != nil && *tempNic.Properties.Name == name {
 					nic = tempNic
 					break
 				}
