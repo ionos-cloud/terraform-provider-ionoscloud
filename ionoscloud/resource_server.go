@@ -239,7 +239,7 @@ func resourceServer() *schema.Resource {
 							Computed: true,
 						},
 						"boot_server": {
-							Type:        schema.TypeInt,
+							Type:        schema.TypeString,
 							Description: "The UUID of the attached server.",
 							Computed:    true,
 						},
@@ -1318,7 +1318,7 @@ func resourceServerImport(ctx context.Context, d *schema.ResourceData, meta inte
 
 	client := meta.(SdkBundle).CloudApiClient
 
-	server, apiResponse, err := client.ServersApi.DatacentersServersFindById(ctx, datacenterId, serverId).Execute()
+	server, apiResponse, err := client.ServersApi.DatacentersServersFindById(ctx, datacenterId, serverId).Depth(3).Execute()
 	logApiRequestTime(apiResponse)
 
 	if err != nil {

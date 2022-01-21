@@ -124,7 +124,7 @@ func resourceVolume() *schema.Resource {
 				Computed: true,
 			},
 			"boot_server": {
-				Type:        schema.TypeInt,
+				Type:        schema.TypeString,
 				Description: "The UUID of the attached server.",
 				Computed:    true,
 			},
