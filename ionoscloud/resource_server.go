@@ -1034,7 +1034,7 @@ func resourceServerUpdate(ctx context.Context, d *schema.ResourceData, meta inte
 		/* todo: figure out a way of sending a nil bootCdrom to the API (the sdk's omitempty doesn't let us) */
 	}
 
-	server, apiResponse, err := client.ServersApi.DatacentersServersPatch(ctx, dcId, d.Id()).Server(request).Execute()
+	server, apiResponse, err := client.ServersApi.DatacentersServersPatch(ctx, dcId, d.Id()).Server(request).Depth(3).Execute()
 	logApiRequestTime(apiResponse)
 
 	if err != nil {
