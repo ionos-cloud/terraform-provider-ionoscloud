@@ -635,7 +635,7 @@ func resolveImageName(ctx context.Context, client *ionoscloud.APIClient, imageNa
 		return nil, fmt.Errorf("imageName not suplied")
 	}
 
-	images, apiResponse, err := client.ImagesApi.ImagesGet(ctx).Execute()
+	images, apiResponse, err := client.ImagesApi.ImagesGet(ctx).Depth(1).Execute()
 	logApiRequestTime(apiResponse)
 
 	if err != nil {
@@ -646,7 +646,7 @@ func resolveImageName(ctx context.Context, client *ionoscloud.APIClient, imageNa
 	if len(*images.Items) > 0 {
 		for _, i := range *images.Items {
 			imgName := ""
-			if i.Properties.Name != nil && *i.Properties.Name != "" {
+			if i.Properties != nil && i.Properties.Name != nil && *i.Properties.Name != "" {
 				imgName = *i.Properties.Name
 			}
 
@@ -669,7 +669,7 @@ func getSnapshotId(ctx context.Context, client *ionoscloud.APIClient, snapshotNa
 		return ""
 	}
 
-	snapshots, apiResponse, err := client.SnapshotsApi.SnapshotsGet(ctx).Execute()
+	snapshots, apiResponse, err := client.SnapshotsApi.SnapshotsGet(ctx).Depth(1).Execute()
 	logApiRequestTime(apiResponse)
 
 	if err != nil {
@@ -679,7 +679,7 @@ func getSnapshotId(ctx context.Context, client *ionoscloud.APIClient, snapshotNa
 	if len(*snapshots.Items) > 0 {
 		for _, i := range *snapshots.Items {
 			imgName := ""
-			if *i.Properties.Name != "" {
+			if i.Properties != nil && i.Properties.Name != nil && *i.Properties.Name != "" {
 				imgName = *i.Properties.Name
 			}
 
