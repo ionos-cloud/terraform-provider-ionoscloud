@@ -123,23 +123,23 @@ func dataSourceGroupRead(ctx context.Context, d *schema.ResourceData, meta inter
 	} else {
 		/* search by name */
 		var groups ionoscloud.Groups
-		var apiResponse *ionoscloud.APIResponse
-		groups, apiResponse, err := client.UserManagementApi.UmGroupsGet(ctx).Execute()
+
+		groups, apiResponse, err := client.UserManagementApi.UmGroupsGet(ctx).Depth(1).Execute()
 		logApiRequestTime(apiResponse)
 		if err != nil {
-			diags := diag.FromErr(fmt.Errorf("an error occurred while fetching groups: %s", err.Error()))
+			diags := diag.FromErr(fmt.Errorf("an error occurred while fetching groups: %w", err))
 			return diags
 		}
 
 		found := false
 		if groups.Items != nil {
 			for _, g := range *groups.Items {
-				if g.Properties.Name != nil && *g.Properties.Name == name.(string) {
+				if g.Properties != nil && g.Properties.Name != nil && *g.Properties.Name == name.(string) {
 					/* group found */
 					group, apiResponse, err = client.UserManagementApi.UmGroupsFindById(ctx, *g.Id).Execute()
 					logApiRequestTime(apiResponse)
 					if err != nil {
-						diags := diag.FromErr(fmt.Errorf("an error occurred while fetching group %s: %s", *g.Id, err))
+						diags := diag.FromErr(fmt.Errorf("an error occurred while fetching group %s: %w", *g.Id, err))
 						return diags
 					}
 					found = true

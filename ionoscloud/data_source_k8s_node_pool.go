@@ -217,7 +217,7 @@ func dataSourceK8sReadNodePool(ctx context.Context, d *schema.ResourceData, meta
 		/* search by name */
 		var clusters ionoscloud.KubernetesNodePools
 
-		clusters, apiResponse, err := client.KubernetesApi.K8sNodepoolsGet(ctx, clusterId.(string)).Execute()
+		clusters, apiResponse, err := client.KubernetesApi.K8sNodepoolsGet(ctx, clusterId.(string)).Depth(1).Execute()
 		logApiRequestTime(apiResponse)
 		if err != nil {
 			return diag.FromErr(fmt.Errorf("an error occurred while fetching k8s nodepools: %s", err.Error()))
@@ -229,9 +229,9 @@ func dataSourceK8sReadNodePool(ctx context.Context, d *schema.ResourceData, meta
 				tmpNodePool, apiResponse, err := client.KubernetesApi.K8sNodepoolsFindById(ctx, clusterId.(string), *c.Id).Execute()
 				logApiRequestTime(apiResponse)
 				if err != nil {
-					return diag.FromErr(fmt.Errorf("an error occurred while fetching k8s nodePool with ID %s: %s", *c.Id, err.Error()))
+					return diag.FromErr(fmt.Errorf("an error occurred while fetching k8s nodePool with ID %s: %w", *c.Id, err))
 				}
-				if tmpNodePool.Properties.Name != nil && *tmpNodePool.Properties.Name == name.(string) {
+				if tmpNodePool.Properties != nil && tmpNodePool.Properties.Name != nil && *tmpNodePool.Properties.Name == name.(string) {
 					/* lan found */
 					nodePool = tmpNodePool
 					found = true

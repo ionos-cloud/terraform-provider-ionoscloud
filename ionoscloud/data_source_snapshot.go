@@ -124,7 +124,7 @@ func dataSourceSnapshotRead(ctx context.Context, d *schema.ResourceData, meta in
 
 		if snapshots.Items != nil {
 			for _, snp := range *snapshots.Items {
-				if snp.Properties.Name != nil && *snp.Properties.Name == name {
+				if snp.Properties != nil && snp.Properties.Name != nil && *snp.Properties.Name == name {
 					results = append(results, snp)
 				}
 			}

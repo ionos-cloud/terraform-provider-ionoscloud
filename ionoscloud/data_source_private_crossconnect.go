@@ -187,7 +187,7 @@ func dataSourcePccRead(d *schema.ResourceData, meta interface{}) error {
 	if nameOk {
 		/* search by name */
 		var pccs ionoscloud.PrivateCrossConnects
-		pccs, apiResponse, err := client.PrivateCrossConnectsApi.PccsGet(ctx).Execute()
+		pccs, apiResponse, err := client.PrivateCrossConnectsApi.PccsGet(ctx).Depth(1).Execute()
 		logApiRequestTime(apiResponse)
 		if err != nil {
 			return fmt.Errorf("an error occurred while fetching pccs: %s", err.Error())
@@ -196,7 +196,7 @@ func dataSourcePccRead(d *schema.ResourceData, meta interface{}) error {
 		found := false
 		if pccs.Items != nil {
 			for _, p := range *pccs.Items {
-				if p.Properties.Name != nil && *p.Properties.Name == name.(string) {
+				if p.Properties != nil && p.Properties.Name != nil && *p.Properties.Name == name.(string) {
 					/* lan found */
 					pcc, apiResponse, err = client.PrivateCrossConnectsApi.PccsFindById(ctx, *p.Id).Execute()
 					logApiRequestTime(apiResponse)

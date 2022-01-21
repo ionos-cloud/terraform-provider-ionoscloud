@@ -419,10 +419,10 @@ func setGroupData(ctx context.Context, client *ionoscloud.APIClient, d *schema.R
 			}
 		}
 
-		users, apiResponse, err := client.UserManagementApi.UmGroupsUsersGet(ctx, d.Id()).Execute()
+		users, apiResponse, err := client.UserManagementApi.UmGroupsUsersGet(ctx, d.Id()).Depth(1).Execute()
 		logApiRequestTime(apiResponse)
 		if err != nil {
-			return fmt.Errorf("an error occured while ListGroupUsers %s %s", d.Id(), err)
+			return fmt.Errorf("an error occured while ListGroupUsers %s %w", d.Id(), err)
 		}
 
 		usersEntries := make([]interface{}, 0)
@@ -430,27 +430,27 @@ func setGroupData(ctx context.Context, client *ionoscloud.APIClient, d *schema.R
 			usersEntries = make([]interface{}, len(*users.Items))
 			for userIndex, user := range *users.Items {
 				userEntry := make(map[string]interface{})
+				if user.Properties != nil {
+					if user.Properties.Firstname != nil {
+						userEntry["first_name"] = *user.Properties.Firstname
+					}
 
-				if user.Properties.Firstname != nil {
-					userEntry["first_name"] = *user.Properties.Firstname
+					if user.Properties.Lastname != nil {
+						userEntry["last_name"] = *user.Properties.Lastname
+					}
+
+					if user.Properties.Email != nil {
+						userEntry["email"] = *user.Properties.Email
+					}
+
+					if user.Properties.Administrator != nil {
+						userEntry["administrator"] = *user.Properties.Administrator
+					}
+
+					if user.Properties.ForceSecAuth != nil {
+						userEntry["force_sec_auth"] = *user.Properties.ForceSecAuth
+					}
 				}
-
-				if user.Properties.Lastname != nil {
-					userEntry["last_name"] = *user.Properties.Lastname
-				}
-
-				if user.Properties.Email != nil {
-					userEntry["email"] = *user.Properties.Email
-				}
-
-				if user.Properties.Administrator != nil {
-					userEntry["administrator"] = *user.Properties.Administrator
-				}
-
-				if user.Properties.ForceSecAuth != nil {
-					userEntry["force_sec_auth"] = *user.Properties.ForceSecAuth
-				}
-
 				usersEntries[userIndex] = userEntry
 			}
 

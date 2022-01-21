@@ -658,7 +658,7 @@ func resolveImageName(ctx context.Context, client *ionoscloud.APIClient, imageNa
 	if len(*images.Items) > 0 {
 		for _, i := range *images.Items {
 			imgName := ""
-			if i.Properties.Name != nil && *i.Properties.Name != "" {
+			if i.Properties != nil && i.Properties.Name != nil && *i.Properties.Name != "" {
 				imgName = *i.Properties.Name
 			}
 
@@ -691,7 +691,7 @@ func getSnapshotId(ctx context.Context, client *ionoscloud.APIClient, snapshotNa
 	if len(*snapshots.Items) > 0 {
 		for _, i := range *snapshots.Items {
 			imgName := ""
-			if *i.Properties.Name != "" {
+			if i.Properties != nil && i.Properties.Name != nil && *i.Properties.Name != "" {
 				imgName = *i.Properties.Name
 			}
 

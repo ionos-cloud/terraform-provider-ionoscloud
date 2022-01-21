@@ -284,7 +284,7 @@ func dataSourceK8sReadCluster(ctx context.Context, d *schema.ResourceData, meta 
 				if err != nil {
 					return diag.FromErr(fmt.Errorf("an error occurred while fetching k8s cluster with ID %s: %s", *c.Id, err.Error()))
 				}
-				if tmpCluster.Properties.Name != nil && *tmpCluster.Properties.Name == name.(string) {
+				if tmpCluster.Properties != nil && tmpCluster.Properties.Name != nil && *tmpCluster.Properties.Name == name.(string) {
 					cluster = tmpCluster
 					found = true
 					break
