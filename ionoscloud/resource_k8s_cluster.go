@@ -68,7 +68,7 @@ func resourcek8sCluster() *schema.Resource {
 			},
 			"public": {
 				Type:        schema.TypeBool,
-				Description: "TThe indicator if the cluster is public or private. Be aware that setting it to false is currently in beta phase.",
+				Description: "The indicator if the cluster is public or private. Be aware that setting it to false is currently in beta phase.",
 				Optional:    true,
 				Default:     true,
 			},
