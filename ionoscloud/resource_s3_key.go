@@ -78,9 +78,8 @@ func resourceS3KeyCreate(ctx context.Context, d *schema.ResourceData, meta inter
 			Active: &active,
 		},
 	}
-	log.Printf("[INFO] Setting key active status to %t", *s3Key.Properties.Active)
-	_, apiResponse, err = client.UserS3KeysApi.UmUsersS3keysPut(ctx, userId, keyId).S3Key(s3Key).Execute()
-
+	log.Printf("[INFO] Setting key active status to %+v", active)
+	_, apiResponse, err = client.UserS3KeysApi.UmUsersS3keysPut(ctx, userId, keyId).S3Key(s3Key).Depth(1).Execute()
 	logApiRequestTime(apiResponse)
 	if err != nil {
 		return diag.FromErr(fmt.Errorf("error saving key data %s: %s", keyId, err.Error()))

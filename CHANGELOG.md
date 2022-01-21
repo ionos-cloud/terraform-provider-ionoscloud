@@ -4,6 +4,7 @@
 - do not diff on gateway ips set as normal ips instead of cidr
 ## Enhancements:
 - terraform plugin sdk upgrade to v2.10.1
+- use depth explicitly on api calls to improve performance
 
 ## 6.1.2
 

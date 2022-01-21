@@ -25,6 +25,7 @@ func resourceServer() *schema.Resource {
 		Importer: &schema.ResourceImporter{
 			StateContext: resourceServerImport,
 		},
+
 		Schema: map[string]*schema.Schema{
 			// Server parameters
 			"template_uuid": {
@@ -669,7 +670,9 @@ func resourceServerCreate(ctx context.Context, d *schema.ResourceData, meta inte
 		diags := diag.FromErr(fmt.Errorf("error waiting for state change for server creation %w", errState))
 		return diags
 	}
-	server, apiResponse, err = client.ServersApi.DatacentersServersFindById(ctx, d.Get("datacenter_id").(string), *server.Id).Execute()
+
+	// get additional data for schema
+	server, apiResponse, err = client.ServersApi.DatacentersServersFindById(ctx, d.Get("datacenter_id").(string), *server.Id).Depth(3).Execute()
 	logApiRequestTime(apiResponse)
 
 	if err != nil {
@@ -716,7 +719,6 @@ func resourceServerCreate(ctx context.Context, d *schema.ResourceData, meta inte
 			"password": *(*server.Entities.Volumes.Items)[0].Properties.ImagePassword,
 		})
 	}
-
 	return resourceServerRead(ctx, d, meta)
 }
 
@@ -726,7 +728,7 @@ func resourceServerRead(ctx context.Context, d *schema.ResourceData, meta interf
 	dcId := d.Get("datacenter_id").(string)
 	serverId := d.Id()
 
-	server, apiResponse, err := client.ServersApi.DatacentersServersFindById(ctx, dcId, serverId).Execute()
+	server, apiResponse, err := client.ServersApi.DatacentersServersFindById(ctx, dcId, serverId).Depth(2).Execute()
 	logApiRequestTime(apiResponse)
 	if err != nil {
 		if apiResponse != nil && apiResponse.Response != nil && apiResponse.StatusCode == 404 {
@@ -1208,7 +1210,7 @@ func resourceServerUpdate(ctx context.Context, d *schema.ResourceData, meta inte
 			// Wait, catching any errors
 			_, errState = getStateChangeConf(meta, d, apiResponse.Header.Get("Location"), schema.TimeoutCreate).WaitForStateContext(ctx)
 			if errState != nil {
-				diags := diag.FromErr(errState)
+				diags := diag.FromErr(fmt.Errorf("an error occured while waiting for state change dcId: %s server_id: %s nic_id %s ID: %s Response: %w", dcId, *server.Id, *nic.Id, firewallId, errState))
 				return diags
 			}
 
@@ -1268,7 +1270,7 @@ func resourceServerDelete(ctx context.Context, d *schema.ResourceData, meta inte
 		logApiRequestTime(apiResponse)
 
 		if err != nil {
-			diags := diag.FromErr(fmt.Errorf("error occured while delete volume %s of server ID %s %s", *server.Properties.BootVolume.Id, d.Id(), err))
+			diags := diag.FromErr(fmt.Errorf("error occured while delete volume %s of server ID %s %w", *server.Properties.BootVolume.Id, d.Id(), err))
 			return diags
 		}
 		// Wait, catching any errors
@@ -1282,7 +1284,7 @@ func resourceServerDelete(ctx context.Context, d *schema.ResourceData, meta inte
 	apiResponse, err = client.ServersApi.DatacentersServersDelete(ctx, dcId, d.Id()).Execute()
 	logApiRequestTime(apiResponse)
 	if err != nil {
-		diags := diag.FromErr(fmt.Errorf("an error occured while deleting a server ID %s %s", d.Id(), err))
+		diags := diag.FromErr(fmt.Errorf("an error occured while deleting a server ID %s %w", d.Id(), err))
 		return diags
 
 	}
@@ -1322,6 +1324,16 @@ func resourceServerImport(ctx context.Context, d *schema.ResourceData, meta inte
 	}
 
 	d.SetId(*server.Id)
+
+	firstNicItem := (*server.Entities.Nics.Items)[0]
+	if server.Entities != nil && server.Entities.Nics != nil && firstNicItem.Properties != nil &&
+		firstNicItem.Properties.Ips != nil &&
+		len(*firstNicItem.Properties.Ips) > 0 {
+		log.Printf("[DEBUG] set primary_ip to %s", (*firstNicItem.Properties.Ips)[0])
+		if err := d.Set("primary_ip", (*firstNicItem.Properties.Ips)[0]); err != nil {
+			return nil, fmt.Errorf("error while setting primary ip %s: %w", d.Id(), err)
+		}
+	}
 
 	if err := d.Set("datacenter_id", datacenterId); err != nil {
 		return nil, err

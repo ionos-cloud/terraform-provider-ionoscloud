@@ -132,7 +132,7 @@ func datasourceIpBlockRead(ctx context.Context, data *schema.ResourceData, meta 
 		log.Printf("[INFO] Got ip block [Name=%s, Location=%s]", *ipBlock.Properties.Name, *ipBlock.Properties.Location)
 	} else {
 
-		ipBlocks, apiResponse, err := client.IPBlocksApi.IpblocksGet(ctx).Execute()
+		ipBlocks, apiResponse, err := client.IPBlocksApi.IpblocksGet(ctx).Depth(1).Execute()
 		logApiRequestTime(apiResponse)
 
 		if err != nil {
@@ -143,7 +143,7 @@ func datasourceIpBlockRead(ctx context.Context, data *schema.ResourceData, meta 
 
 		if nameOk && ipBlocks.Items != nil {
 			for _, block := range *ipBlocks.Items {
-				if block.Properties.Name != nil && *block.Properties.Name == name {
+				if block.Properties != nil && block.Properties.Name != nil && *block.Properties.Name == name {
 					results = append(results, block)
 					//found based on name only, save this in case we don't find based on location
 					if !locationOk {

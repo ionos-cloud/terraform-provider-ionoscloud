@@ -464,8 +464,7 @@ func setServerData(d *schema.ResourceData, server *ionoscloud.Server, token *ion
 				return err
 			}
 		}
-
-		if server.Entities.Volumes != nil && server.Entities.Volumes.Items != nil && len(*server.Entities.Volumes.Items) > 0 &&
+		if server.Entities != nil && server.Entities.Volumes != nil && server.Entities.Volumes.Items != nil && len(*server.Entities.Volumes.Items) > 0 &&
 			(*server.Entities.Volumes.Items)[0].Properties.Image != nil {
 			if err := d.Set("boot_image", *(*server.Entities.Volumes.Items)[0].Properties.Image); err != nil {
 				return err
@@ -590,16 +589,18 @@ func setServerData(d *schema.ResourceData, server *ionoscloud.Server, token *ion
 					ruleEntry := make(map[string]interface{})
 
 					ruleEntry["id"] = stringOrDefault(rule.Id, "")
-					ruleEntry["name"] = stringOrDefault(rule.Properties.Name, "")
-					ruleEntry["protocol"] = stringOrDefault(rule.Properties.Protocol, "")
-					ruleEntry["source_mac"] = stringOrDefault(rule.Properties.SourceMac, "")
-					ruleEntry["source_ip"] = stringOrDefault(rule.Properties.SourceIp, "")
-					ruleEntry["target_ip"] = stringOrDefault(rule.Properties.TargetIp, "")
-					ruleEntry["icmp_code"] = int32OrDefault(rule.Properties.IcmpCode, 0)
-					ruleEntry["icmp_type"] = int32OrDefault(rule.Properties.IcmpType, 0)
-					ruleEntry["port_range_start"] = int32OrDefault(rule.Properties.PortRangeStart, 0)
-					ruleEntry["port_range_end"] = int32OrDefault(rule.Properties.PortRangeEnd, 0)
-					ruleEntry["type"] = stringOrDefault(rule.Properties.Type, "")
+					if rule.Properties != nil {
+						ruleEntry["name"] = stringOrDefault(rule.Properties.Name, "")
+						ruleEntry["protocol"] = stringOrDefault(rule.Properties.Protocol, "")
+						ruleEntry["source_mac"] = stringOrDefault(rule.Properties.SourceMac, "")
+						ruleEntry["source_ip"] = stringOrDefault(rule.Properties.SourceIp, "")
+						ruleEntry["target_ip"] = stringOrDefault(rule.Properties.TargetIp, "")
+						ruleEntry["icmp_code"] = int32OrDefault(rule.Properties.IcmpCode, 0)
+						ruleEntry["icmp_type"] = int32OrDefault(rule.Properties.IcmpType, 0)
+						ruleEntry["port_range_start"] = int32OrDefault(rule.Properties.PortRangeStart, 0)
+						ruleEntry["port_range_end"] = int32OrDefault(rule.Properties.PortRangeEnd, 0)
+						ruleEntry["type"] = stringOrDefault(rule.Properties.Type, "")
+					}
 					firewallRules = append(firewallRules, ruleEntry)
 				}
 				entry["firewall_rules"] = firewallRules
@@ -651,29 +652,29 @@ func dataSourceServerRead(d *schema.ResourceData, meta interface{}) error {
 
 	if idOk {
 		/* search by ID */
-		server, apiResponse, err = client.ServersApi.DatacentersServersFindById(ctx, datacenterId.(string), id.(string)).Execute()
+		server, apiResponse, err = client.ServersApi.DatacentersServersFindById(ctx, datacenterId.(string), id.(string)).Depth(4).Execute()
 		logApiRequestTime(apiResponse)
 		if err != nil {
-			return fmt.Errorf("an error occurred while fetching the server with ID %s: %s", id.(string), err)
+			return fmt.Errorf("an error occurred while fetching the server with ID %s: %w", id.(string), err)
 		}
 	} else {
 		/* search by name */
 		var servers ionoscloud.Servers
-		servers, apiResponse, err := client.ServersApi.DatacentersServersGet(ctx, datacenterId.(string)).Execute()
+		servers, apiResponse, err := client.ServersApi.DatacentersServersGet(ctx, datacenterId.(string)).Depth(1).Execute()
 		logApiRequestTime(apiResponse)
 		if err != nil {
-			return fmt.Errorf("an error occurred while fetching servers: %s", err.Error())
+			return fmt.Errorf("an error occurred while fetching servers: %w", err)
 		}
 
 		found := false
 		if servers.Items != nil {
 			for _, s := range *servers.Items {
-				if s.Properties.Name != nil && *s.Properties.Name == name.(string) {
+				if s.Properties != nil && s.Properties.Name != nil && *s.Properties.Name == name.(string) {
 					/* server found */
-					server, apiResponse, err = client.ServersApi.DatacentersServersFindById(ctx, datacenterId.(string), *s.Id).Execute()
+					server, apiResponse, err = client.ServersApi.DatacentersServersFindById(ctx, datacenterId.(string), *s.Id).Depth(4).Execute()
 					logApiRequestTime(apiResponse)
 					if err != nil {
-						return fmt.Errorf("an error occurred while fetching the server with ID %s: %s", *s.Id, err)
+						return fmt.Errorf("an error occurred while fetching the server with ID %s: %w", *s.Id, err)
 					}
 					found = true
 					break
@@ -694,7 +695,7 @@ func dataSourceServerRead(d *schema.ResourceData, meta interface{}) error {
 		logApiRequestTime(apiResponse)
 
 		if err != nil {
-			return fmt.Errorf("an error occurred while fetching the server token %s: %s", *server.Id, err)
+			return fmt.Errorf("an error occurred while fetching the server token %s: %w", *server.Id, err)
 		}
 	}
 

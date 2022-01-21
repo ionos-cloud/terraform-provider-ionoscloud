@@ -131,30 +131,30 @@ func dataSourceVolumeRead(ctx context.Context, d *schema.ResourceData, meta inte
 		volume, apiResponse, err = client.VolumesApi.DatacentersVolumesFindById(ctx, datacenterId.(string), id.(string)).Execute()
 		logApiRequestTime(apiResponse)
 		if err != nil {
-			diags := diag.FromErr(fmt.Errorf("an error occurred while fetching volume with ID %s: %s", id.(string), err))
+			diags := diag.FromErr(fmt.Errorf("an error occurred while fetching volume with ID %s: %w", id.(string), err))
 			return diags
 		}
 	} else {
 		/* search by name */
 		var volumes ionoscloud.Volumes
 
-		volumes, apiResponse, err = client.VolumesApi.DatacentersVolumesGet(ctx, datacenterId.(string)).Execute()
+		volumes, apiResponse, err = client.VolumesApi.DatacentersVolumesGet(ctx, datacenterId.(string)).Depth(1).Execute()
 		logApiRequestTime(apiResponse)
 
 		if err != nil {
-			diags := diag.FromErr(fmt.Errorf("an error occurred while fetching volumes: %s", err.Error()))
+			diags := diag.FromErr(fmt.Errorf("an error occurred while fetching volumes: %w", err))
 			return diags
 		}
 
 		found := false
 		if volumes.Items != nil {
 			for _, v := range *volumes.Items {
-				if v.Properties.Name != nil && *v.Properties.Name == name.(string) {
+				if v.Properties != nil && v.Properties.Name != nil && *v.Properties.Name == name.(string) {
 					/* volume found */
 					volume, apiResponse, err = client.VolumesApi.DatacentersVolumesFindById(ctx, datacenterId.(string), *v.Id).Execute()
 					logApiRequestTime(apiResponse)
 					if err != nil {
-						diags := diag.FromErr(fmt.Errorf("an error occurred while fetching volume %s: %s", *v.Id, err))
+						diags := diag.FromErr(fmt.Errorf("an error occurred while fetching volume %s: %w", *v.Id, err))
 						return diags
 					}
 					found = true

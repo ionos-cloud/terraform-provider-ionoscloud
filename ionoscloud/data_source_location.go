@@ -63,9 +63,7 @@ func dataSourceLocationRead(d *schema.ResourceData, meta interface{}) error {
 	if cancel != nil {
 		defer cancel()
 	}
-	var apiResponse *ionoscloud.APIResponse
-
-	locations, apiResponse, err := client.LocationsApi.LocationsGet(ctx).Execute()
+	locations, apiResponse, err := client.LocationsApi.LocationsGet(ctx).Depth(1).Execute()
 	logApiRequestTime(apiResponse)
 
 	if err != nil {
@@ -82,7 +80,7 @@ func dataSourceLocationRead(d *schema.ResourceData, meta interface{}) error {
 
 	if locations.Items != nil {
 		for _, loc := range *locations.Items {
-			if loc.Properties.Name != nil && *loc.Properties.Name == name.(string) {
+			if loc.Properties != nil && loc.Properties.Name != nil && *loc.Properties.Name == name.(string) {
 				results = append(results, loc)
 			}
 		}
