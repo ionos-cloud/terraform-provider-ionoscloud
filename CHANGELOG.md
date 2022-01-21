@@ -1,3 +1,10 @@
+## 6.1.3(upcoming release)
+
+### Fixes:
+- do not diff on gateway ips set as normal ips instead of cidr
+## Enhancements:
+- terraform plugin sdk upgrade to v2.10.1
+
 ## 6.1.2
 
 ### Docs:
