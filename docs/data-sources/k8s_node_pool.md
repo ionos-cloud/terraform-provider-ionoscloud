@@ -73,3 +73,4 @@ The following attributes are returned by the datasource:
 * `annotations` - A map of annotations in the form of key -> value
 * `available_upgrade_versions` - A list of kubernetes versions available for upgrade
 * `public_ips` - The list of fixed IPs associated with this node pool
+* `gateway_ip` - Public IP address for the gateway performing source NAT for the node pool's nodes belonging to a private cluster. Required only if the node pool belongs to a private cluster.

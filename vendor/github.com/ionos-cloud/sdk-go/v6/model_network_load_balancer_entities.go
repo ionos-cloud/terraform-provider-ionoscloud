@@ -98,11 +98,9 @@ func (o *NetworkLoadBalancerEntities) HasForwardingrules() bool {
 
 func (o NetworkLoadBalancerEntities) MarshalJSON() ([]byte, error) {
 	toSerialize := map[string]interface{}{}
-
 	if o.Flowlogs != nil {
 		toSerialize["flowlogs"] = o.Flowlogs
 	}
-
 	if o.Forwardingrules != nil {
 		toSerialize["forwardingrules"] = o.Forwardingrules
 	}

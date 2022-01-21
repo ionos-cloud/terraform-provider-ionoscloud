@@ -98,11 +98,9 @@ func (o *GroupEntities) HasResources() bool {
 
 func (o GroupEntities) MarshalJSON() ([]byte, error) {
 	toSerialize := map[string]interface{}{}
-
 	if o.Users != nil {
 		toSerialize["users"] = o.Users
 	}
-
 	if o.Resources != nil {
 		toSerialize["resources"] = o.Resources
 	}

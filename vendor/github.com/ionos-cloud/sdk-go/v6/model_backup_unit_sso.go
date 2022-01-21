@@ -60,7 +60,6 @@ func (o *BackupUnitSSO) HasSsoUrl() bool {
 
 func (o BackupUnitSSO) MarshalJSON() ([]byte, error) {
 	toSerialize := map[string]interface{}{}
-
 	if o.SsoUrl != nil {
 		toSerialize["ssoUrl"] = o.SsoUrl
 	}

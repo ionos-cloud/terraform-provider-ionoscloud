@@ -60,7 +60,6 @@ func (o *S3ObjectStorageSSO) HasSsoUrl() bool {
 
 func (o S3ObjectStorageSSO) MarshalJSON() ([]byte, error) {
 	toSerialize := map[string]interface{}{}
-
 	if o.SsoUrl != nil {
 		toSerialize["ssoUrl"] = o.SsoUrl
 	}

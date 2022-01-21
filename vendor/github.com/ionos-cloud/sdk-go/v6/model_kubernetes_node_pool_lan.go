@@ -140,15 +140,12 @@ func (o *KubernetesNodePoolLan) HasRoutes() bool {
 
 func (o KubernetesNodePoolLan) MarshalJSON() ([]byte, error) {
 	toSerialize := map[string]interface{}{}
-
 	if o.Id != nil {
 		toSerialize["id"] = o.Id
 	}
-
 	if o.Dhcp != nil {
 		toSerialize["dhcp"] = o.Dhcp
 	}
-
 	if o.Routes != nil {
 		toSerialize["routes"] = o.Routes
 	}

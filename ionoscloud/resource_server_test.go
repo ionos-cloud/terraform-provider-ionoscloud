@@ -40,6 +40,7 @@ func TestAccServerBasic(t *testing.T) {
 					resource.TestCheckResourceAttrPair(ServerResource+"."+ServerTestResource, "volume.0.backup_unit_id", BackupUnitResource+"."+BackupUnitTestResource, "id"),
 					resource.TestCheckResourceAttr(ServerResource+"."+ServerTestResource, "volume.0.bus", "VIRTIO"),
 					resource.TestCheckResourceAttr(ServerResource+"."+ServerTestResource, "volume.0.availability_zone", "ZONE_1"),
+					resource.TestCheckResourceAttrPair(ServerResource+"."+ServerTestResource, "volume.0.boot_server", ServerResource+"."+ServerTestResource, "id"),
 					resource.TestCheckResourceAttrPair(ServerResource+"."+ServerTestResource, "nic.0.lan", LanResource+"."+LanTestResource, "id"),
 					resource.TestCheckResourceAttr(ServerResource+"."+ServerTestResource, "nic.0.name", "system"),
 					resource.TestCheckResourceAttr(ServerResource+"."+ServerTestResource, "nic.0.dhcp", "true"),

@@ -177,19 +177,15 @@ func (o *RequestStatusMetadata) HasTargets() bool {
 
 func (o RequestStatusMetadata) MarshalJSON() ([]byte, error) {
 	toSerialize := map[string]interface{}{}
-
 	if o.Status != nil {
 		toSerialize["status"] = o.Status
 	}
-
 	if o.Message != nil {
 		toSerialize["message"] = o.Message
 	}
-
 	if o.Etag != nil {
 		toSerialize["etag"] = o.Etag
 	}
-
 	if o.Targets != nil {
 		toSerialize["targets"] = o.Targets
 	}

@@ -66,19 +66,12 @@ func resourcek8sCluster() *schema.Resource {
 					Type: schema.TypeString,
 				},
 			},
-			//"public": {
-			//	Type: schema.TypeBool,
-			//	Description: "The indicator if the cluster is public or private. Be aware that setting it to false is " +
-			//		"currently in beta phase.",
-			//	Optional: true,
-			//	Default:  true,
-			//},
-			//"gateway_ip": {
-			//	Type: schema.TypeString,
-			//	Description: "The IP address of the gateway used by the cluster. This is mandatory when `public` is set " +
-			//		"to `false` and should not be provided otherwise.",
-			//	Optional: true,
-			//},
+			"public": {
+				Type:        schema.TypeBool,
+				Description: "The indicator if the cluster is public or private. Be aware that setting it to false is currently in beta phase.",
+				Optional:    true,
+				Default:     true,
+			},
 			"api_subnet_allow_list": {
 				Type: schema.TypeList,
 				Description: "Access to the K8s API server is restricted to these CIDRs. Cluster-internal traffic is not " +
@@ -139,14 +132,9 @@ func resourcek8sClusterCreate(ctx context.Context, d *schema.ResourceData, meta 
 		mdVal := mdVal.(string)
 		cluster.Properties.MaintenanceWindow.DayOfTheWeek = &mdVal
 	}
-	//
-	//public := d.Get("public").(bool)
-	//cluster.Properties.Public = &public
-	//
-	//if gatewayIp, gatewayIpOk := d.GetOk("gateway_ip"); gatewayIpOk {
-	//	gatewayIp := gatewayIp.(string)
-	//	cluster.Properties.GatewayIp = &gatewayIp
-	//}
+
+	public := d.Get("public").(bool)
+	cluster.Properties.Public = &public
 
 	if apiSubnet, apiSubnetOk := d.GetOk("api_subnet_allow_list"); apiSubnetOk {
 		apiSubnet := apiSubnet.([]interface{})
@@ -356,6 +344,11 @@ func resourcek8sClusterUpdate(ctx context.Context, d *schema.ResourceData, meta 
 		request.Properties.S3Buckets = &s3Buckets
 	}
 
+	if d.HasChange("public") {
+		diags := diag.FromErr(fmt.Errorf("public attribute is immutable, therefore not allowed in update requests"))
+		return diags
+	}
+
 	_, apiResponse, err := client.KubernetesApi.K8sPut(ctx, d.Id()).KubernetesCluster(request).Execute()
 	logApiRequestTime(apiResponse)
 
@@ -507,19 +500,12 @@ func setK8sClusterData(d *schema.ResourceData, cluster *ionoscloud.KubernetesClu
 			}
 		}
 
-		//if cluster.Properties.Public != nil {
-		//	err := d.Set("public", *cluster.Properties.Public)
-		//	if err != nil {
-		//		return fmt.Errorf("error while setting public property for cluser %s: %s", d.Id(), err)
-		//	}
-		//}
-		//
-		//if cluster.Properties.GatewayIp != nil {
-		//	err := d.Set("gateway_ip", *cluster.Properties.GatewayIp)
-		//	if err != nil {
-		//		return fmt.Errorf("error while setting gateway_ip property for cluser %s: %s", d.Id(), err)
-		//	}
-		//}
+		if cluster.Properties.Public != nil {
+			err := d.Set("public", *cluster.Properties.Public)
+			if err != nil {
+				return fmt.Errorf("error while setting public property for cluser %s: %s", d.Id(), err)
+			}
+		}
 
 		if cluster.Properties.ApiSubnetAllowList != nil {
 			apiSubnetAllowLists := make([]interface{}, len(*cluster.Properties.ApiSubnetAllowList), len(*cluster.Properties.ApiSubnetAllowList))

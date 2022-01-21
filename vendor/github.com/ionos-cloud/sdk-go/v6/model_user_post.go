@@ -59,7 +59,6 @@ func (o *UserPost) HasProperties() bool {
 
 func (o UserPost) MarshalJSON() ([]byte, error) {
 	toSerialize := map[string]interface{}{}
-
 	if o.Properties != nil {
 		toSerialize["properties"] = o.Properties
 	}

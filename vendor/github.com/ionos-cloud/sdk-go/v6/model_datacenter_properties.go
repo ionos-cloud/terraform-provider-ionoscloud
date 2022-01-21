@@ -300,31 +300,24 @@ func (o *DatacenterProperties) HasCpuArchitecture() bool {
 
 func (o DatacenterProperties) MarshalJSON() ([]byte, error) {
 	toSerialize := map[string]interface{}{}
-
 	if o.Name != nil {
 		toSerialize["name"] = o.Name
 	}
-
 	if o.Description != nil {
 		toSerialize["description"] = o.Description
 	}
-
 	if o.Location != nil {
 		toSerialize["location"] = o.Location
 	}
-
 	if o.Version != nil {
 		toSerialize["version"] = o.Version
 	}
-
 	if o.Features != nil {
 		toSerialize["features"] = o.Features
 	}
-
 	if o.SecAuthProtection != nil {
 		toSerialize["secAuthProtection"] = o.SecAuthProtection
 	}
-
 	if o.CpuArchitecture != nil {
 		toSerialize["cpuArchitecture"] = o.CpuArchitecture
 	}

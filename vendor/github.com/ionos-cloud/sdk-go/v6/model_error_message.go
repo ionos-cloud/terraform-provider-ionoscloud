@@ -18,7 +18,7 @@ import (
 type ErrorMessage struct {
 	// Application internal error code.
 	ErrorCode *string `json:"errorCode,omitempty"`
-	// Human-readable message.
+	// A human-readable message.
 	Message *string `json:"message,omitempty"`
 }
 
@@ -100,11 +100,9 @@ func (o *ErrorMessage) HasMessage() bool {
 
 func (o ErrorMessage) MarshalJSON() ([]byte, error) {
 	toSerialize := map[string]interface{}{}
-
 	if o.ErrorCode != nil {
 		toSerialize["errorCode"] = o.ErrorCode
 	}
-
 	if o.Message != nil {
 		toSerialize["message"] = o.Message
 	}

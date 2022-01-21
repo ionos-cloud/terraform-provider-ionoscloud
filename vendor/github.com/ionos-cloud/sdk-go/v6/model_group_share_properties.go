@@ -100,11 +100,9 @@ func (o *GroupShareProperties) HasSharePrivilege() bool {
 
 func (o GroupShareProperties) MarshalJSON() ([]byte, error) {
 	toSerialize := map[string]interface{}{}
-
 	if o.EditPrivilege != nil {
 		toSerialize["editPrivilege"] = o.EditPrivilege
 	}
-
 	if o.SharePrivilege != nil {
 		toSerialize["sharePrivilege"] = o.SharePrivilege
 	}

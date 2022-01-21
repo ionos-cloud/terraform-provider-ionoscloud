@@ -31,7 +31,7 @@ type VolumeProperties struct {
 	ImageAlias    *string `json:"imageAlias,omitempty"`
 	// Public SSH keys are set on the image as authorized keys for appropriate SSH login to the instance using the corresponding private key. This field may only be set in creation requests. When reading, it always returns null. SSH keys are only supported if a public Linux image is used for the volume creation.
 	SshKeys *[]string `json:"sshKeys,omitempty"`
-	// The bus type of the volume. Default is VIRTIO
+	// The bus type for this volume; default is VIRTIO.
 	Bus *string `json:"bus,omitempty"`
 	// OS type for this volume.
 	LicenceType *string `json:"licenceType,omitempty"`
@@ -55,6 +55,8 @@ type VolumeProperties struct {
 	BackupunitId *string `json:"backupunitId,omitempty"`
 	// The cloud-init configuration for the volume as base64 encoded string. The property is immutable and is only allowed to be set on creation of a new a volume. It is mandatory to provide either 'public image' or 'imageAlias' that has cloud-init compatibility in conjunction with this property.
 	UserData *string `json:"userData,omitempty"`
+	// The UUID of the attached server.
+	BootServer *string `json:"bootServer,omitempty"`
 }
 
 // GetName returns the Name field value
@@ -817,87 +819,108 @@ func (o *VolumeProperties) HasUserData() bool {
 	return false
 }
 
+// GetBootServer returns the BootServer field value
+// If the value is explicit nil, the zero value for string will be returned
+func (o *VolumeProperties) GetBootServer() *string {
+	if o == nil {
+		return nil
+	}
+
+	return o.BootServer
+
+}
+
+// GetBootServerOk returns a tuple with the BootServer field value
+// and a boolean to check if the value has been set.
+// NOTE: If the value is an explicit nil, `nil, true` will be returned
+func (o *VolumeProperties) GetBootServerOk() (*string, bool) {
+	if o == nil {
+		return nil, false
+	}
+
+	return o.BootServer, true
+}
+
+// SetBootServer sets field value
+func (o *VolumeProperties) SetBootServer(v string) {
+
+	o.BootServer = &v
+
+}
+
+// HasBootServer returns a boolean if a field has been set.
+func (o *VolumeProperties) HasBootServer() bool {
+	if o != nil && o.BootServer != nil {
+		return true
+	}
+
+	return false
+}
+
 func (o VolumeProperties) MarshalJSON() ([]byte, error) {
 	toSerialize := map[string]interface{}{}
-
 	if o.Name != nil {
 		toSerialize["name"] = o.Name
 	}
-
 	if o.Type != nil {
 		toSerialize["type"] = o.Type
 	}
-
 	if o.Size != nil {
 		toSerialize["size"] = o.Size
 	}
-
 	if o.AvailabilityZone != nil {
 		toSerialize["availabilityZone"] = o.AvailabilityZone
 	}
-
 	if o.Image != nil {
 		toSerialize["image"] = o.Image
 	}
-
 	if o.ImagePassword != nil {
 		toSerialize["imagePassword"] = o.ImagePassword
 	}
-
 	if o.ImageAlias != nil {
 		toSerialize["imageAlias"] = o.ImageAlias
 	}
-
 	if o.SshKeys != nil {
 		toSerialize["sshKeys"] = o.SshKeys
 	}
-
 	if o.Bus != nil {
 		toSerialize["bus"] = o.Bus
 	}
-
 	if o.LicenceType != nil {
 		toSerialize["licenceType"] = o.LicenceType
 	}
-
 	if o.CpuHotPlug != nil {
 		toSerialize["cpuHotPlug"] = o.CpuHotPlug
 	}
-
 	if o.RamHotPlug != nil {
 		toSerialize["ramHotPlug"] = o.RamHotPlug
 	}
-
 	if o.NicHotPlug != nil {
 		toSerialize["nicHotPlug"] = o.NicHotPlug
 	}
-
 	if o.NicHotUnplug != nil {
 		toSerialize["nicHotUnplug"] = o.NicHotUnplug
 	}
-
 	if o.DiscVirtioHotPlug != nil {
 		toSerialize["discVirtioHotPlug"] = o.DiscVirtioHotPlug
 	}
-
 	if o.DiscVirtioHotUnplug != nil {
 		toSerialize["discVirtioHotUnplug"] = o.DiscVirtioHotUnplug
 	}
-
 	if o.DeviceNumber != nil {
 		toSerialize["deviceNumber"] = o.DeviceNumber
 	}
-
 	if o.PciSlot != nil {
 		toSerialize["pciSlot"] = o.PciSlot
 	}
-
 	if o.BackupunitId != nil {
 		toSerialize["backupunitId"] = o.BackupunitId
 	}
-
 	if o.UserData != nil {
 		toSerialize["userData"] = o.UserData
+	}
+	if o.BootServer != nil {
+		toSerialize["bootServer"] = o.BootServer
 	}
 	return json.Marshal(toSerialize)
 }

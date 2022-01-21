@@ -209,20 +209,11 @@ func dataSourceK8sCluster() *schema.Resource {
 				Type:     schema.TypeString,
 				Computed: true,
 			},
-			//"public": {
-			//	Type: schema.TypeBool,
-			//	Description: "The indicator if the cluster is public or private. Be aware that setting it to false is " +
-			//		"currently in beta phase.",
-			//	Optional: true,
-			//	Computed: true,
-			//},
-			//"gateway_ip": {
-			//	Type: schema.TypeString,
-			//	Description: "The IP address of the gateway used by the cluster. This is mandatory when `public` is set " +
-			//		"to `false` and should not be provided otherwise.",
-			//	Optional: true,
-			//	Computed: true,
-			//},
+			"public": {
+				Type:        schema.TypeBool,
+				Description: "The indicator if the cluster is public or private. Be aware that setting it to false is currently in beta phase.",
+				Computed:    true,
+			},
 			"api_subnet_allow_list": {
 				Type: schema.TypeList,
 				Description: "Access to the K8s API server is restricted to these CIDRs. Cluster-internal traffic is not " +

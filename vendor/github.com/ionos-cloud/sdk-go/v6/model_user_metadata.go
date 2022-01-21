@@ -155,15 +155,12 @@ func (o *UserMetadata) HasLastLogin() bool {
 
 func (o UserMetadata) MarshalJSON() ([]byte, error) {
 	toSerialize := map[string]interface{}{}
-
 	if o.Etag != nil {
 		toSerialize["etag"] = o.Etag
 	}
-
 	if o.CreatedDate != nil {
 		toSerialize["createdDate"] = o.CreatedDate
 	}
-
 	if o.LastLogin != nil {
 		toSerialize["lastLogin"] = o.LastLogin
 	}

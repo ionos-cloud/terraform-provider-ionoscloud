@@ -4,6 +4,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 	ionoscloud "github.com/ionos-cloud/sdk-go/v6"
@@ -11,7 +12,7 @@ import (
 
 func dataSourceServer() *schema.Resource {
 	return &schema.Resource{
-		Read: dataSourceServerRead,
+		ReadContext: dataSourceServerRead,
 		Schema: map[string]*schema.Schema{
 			"template_uuid": {
 				Type:     schema.TypeString,
@@ -249,6 +250,11 @@ func dataSourceServer() *schema.Resource {
 						"user_data": {
 							Type:     schema.TypeString,
 							Optional: true,
+						},
+						"boot_server": {
+							Type:        schema.TypeString,
+							Description: "The UUID of the attached server.",
+							Computed:    true,
 						},
 					},
 				},
@@ -550,6 +556,7 @@ func setServerData(d *schema.ResourceData, server *ionoscloud.Server, token *ion
 			entry["pci_slot"] = int32OrDefault(volume.Properties.PciSlot, 0)
 			entry["backup_unit_id"] = stringOrDefault(volume.Properties.BackupunitId, "")
 			entry["user_data"] = stringOrDefault(volume.Properties.UserData, "")
+			entry["boot_server"] = stringOrDefault(volume.Properties.BootServer, "")
 
 			volumes = append(volumes, entry)
 		}
@@ -623,39 +630,33 @@ func setServerData(d *schema.ResourceData, server *ionoscloud.Server, token *ion
 	return nil
 }
 
-func dataSourceServerRead(d *schema.ResourceData, meta interface{}) error {
+func dataSourceServerRead(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	client := meta.(SdkBundle).CloudApiClient
 
 	datacenterId, dcIdOk := d.GetOk("datacenter_id")
 	if !dcIdOk {
-		return errors.New("no datacenter_id was specified")
+		return diag.FromErr(errors.New("no datacenter_id was specified"))
 	}
 
 	id, idOk := d.GetOk("id")
 	name, nameOk := d.GetOk("name")
 
 	if idOk && nameOk {
-		return errors.New("id and name cannot be both specified in the same time")
+		return diag.FromErr(errors.New("id and name cannot be both specified in the same time"))
 	}
 	if !idOk && !nameOk {
-		return errors.New("please provide either the server id or name")
+		return diag.FromErr(errors.New("please provide either the server id or name"))
 	}
 	var server ionoscloud.Server
 	var err error
 	var apiResponse *ionoscloud.APIResponse
-
-	ctx, cancel := context.WithTimeout(context.Background(), *resourceDefaultTimeouts.Default)
-
-	if cancel != nil {
-		defer cancel()
-	}
 
 	if idOk {
 		/* search by ID */
 		server, apiResponse, err = client.ServersApi.DatacentersServersFindById(ctx, datacenterId.(string), id.(string)).Depth(4).Execute()
 		logApiRequestTime(apiResponse)
 		if err != nil {
-			return fmt.Errorf("an error occurred while fetching the server with ID %s: %w", id.(string), err)
+			return diag.FromErr(fmt.Errorf("an error occurred while fetching the server with ID %s: %w", id.(string), err))
 		}
 	} else {
 		/* search by name */
@@ -663,7 +664,7 @@ func dataSourceServerRead(d *schema.ResourceData, meta interface{}) error {
 		servers, apiResponse, err := client.ServersApi.DatacentersServersGet(ctx, datacenterId.(string)).Depth(1).Execute()
 		logApiRequestTime(apiResponse)
 		if err != nil {
-			return fmt.Errorf("an error occurred while fetching servers: %w", err)
+			return diag.FromErr(fmt.Errorf("an error occurred while fetching servers: %w", err))
 		}
 
 		found := false
@@ -674,7 +675,7 @@ func dataSourceServerRead(d *schema.ResourceData, meta interface{}) error {
 					server, apiResponse, err = client.ServersApi.DatacentersServersFindById(ctx, datacenterId.(string), *s.Id).Depth(4).Execute()
 					logApiRequestTime(apiResponse)
 					if err != nil {
-						return fmt.Errorf("an error occurred while fetching the server with ID %s: %w", *s.Id, err)
+						return diag.FromErr(fmt.Errorf("an error occurred while fetching the server with ID %s: %w", *s.Id, err))
 					}
 					found = true
 					break
@@ -683,7 +684,7 @@ func dataSourceServerRead(d *schema.ResourceData, meta interface{}) error {
 		}
 
 		if !found {
-			return errors.New("server not found")
+			return diag.FromErr(errors.New("server not found"))
 		}
 
 	}
@@ -695,12 +696,12 @@ func dataSourceServerRead(d *schema.ResourceData, meta interface{}) error {
 		logApiRequestTime(apiResponse)
 
 		if err != nil {
-			return fmt.Errorf("an error occurred while fetching the server token %s: %w", *server.Id, err)
+			return diag.FromErr(fmt.Errorf("an error occurred while fetching the server token %s: %w", *server.Id, err))
 		}
 	}
 
 	if err = setServerData(d, &server, &token); err != nil {
-		return err
+		return diag.FromErr(err)
 	}
 
 	return nil

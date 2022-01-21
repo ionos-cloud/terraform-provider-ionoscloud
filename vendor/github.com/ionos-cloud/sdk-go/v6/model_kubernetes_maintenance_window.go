@@ -100,11 +100,9 @@ func (o *KubernetesMaintenanceWindow) HasTime() bool {
 
 func (o KubernetesMaintenanceWindow) MarshalJSON() ([]byte, error) {
 	toSerialize := map[string]interface{}{}
-
 	if o.DayOfTheWeek != nil {
 		toSerialize["dayOfTheWeek"] = o.DayOfTheWeek
 	}
-
 	if o.Time != nil {
 		toSerialize["time"] = o.Time
 	}
