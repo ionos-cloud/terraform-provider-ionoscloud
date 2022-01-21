@@ -1,4 +1,4 @@
-## 6.1.3(upcoming release)
+## 6.1.3
 
 ### Features:
 - added **public** parameter for k8s_cluster (creation of private clusters is possible now)
