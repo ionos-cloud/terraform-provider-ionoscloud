@@ -340,35 +340,27 @@ func (o *UserPropertiesPut) HasActive() bool {
 
 func (o UserPropertiesPut) MarshalJSON() ([]byte, error) {
 	toSerialize := map[string]interface{}{}
-
 	if o.Firstname != nil {
 		toSerialize["firstname"] = o.Firstname
 	}
-
 	if o.Lastname != nil {
 		toSerialize["lastname"] = o.Lastname
 	}
-
 	if o.Email != nil {
 		toSerialize["email"] = o.Email
 	}
-
 	if o.Password != nil {
 		toSerialize["password"] = o.Password
 	}
-
 	if o.Administrator != nil {
 		toSerialize["administrator"] = o.Administrator
 	}
-
 	if o.ForceSecAuth != nil {
 		toSerialize["forceSecAuth"] = o.ForceSecAuth
 	}
-
 	if o.SecAuthActive != nil {
 		toSerialize["secAuthActive"] = o.SecAuthActive
 	}
-
 	if o.Active != nil {
 		toSerialize["active"] = o.Active
 	}

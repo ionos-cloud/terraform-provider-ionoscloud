@@ -20,11 +20,11 @@ type NetworkLoadBalancerProperties struct {
 	Name *string `json:"name"`
 	// ID of the listening LAN (inbound).
 	ListenerLan *int32 `json:"listenerLan"`
-	// Collection of IP addresses of the Network Load Balancer. (Inbound and outbound) IP of the listenerLan must be a customer reserved IP for the public Load Balancer and private IP for the private Load balancer.
+	// Collection of the Network Load Balancer IP addresses. (Inbound and outbound) IPs of the listenerLan must be customer-reserved IPs for public Load Balancers, and private IPs for private Load Balancers.
 	Ips *[]string `json:"ips,omitempty"`
 	// ID of the balanced private target LAN (outbound).
 	TargetLan *int32 `json:"targetLan"`
-	// Collection of private IP addresses with subnet mask of the Network Load Balancer. IPs must contain valid subnet mask. If user will not provide any IP then the system will generate one IP with /24 subnet.
+	// Collection of private IP addresses with subnet mask of the Network Load Balancer. IPs must contain a valid subnet mask. If no IP is provided, the system will generate an IP with /24 subnet.
 	LbPrivateIps *[]string `json:"lbPrivateIps,omitempty"`
 }
 
@@ -220,23 +220,18 @@ func (o *NetworkLoadBalancerProperties) HasLbPrivateIps() bool {
 
 func (o NetworkLoadBalancerProperties) MarshalJSON() ([]byte, error) {
 	toSerialize := map[string]interface{}{}
-
 	if o.Name != nil {
 		toSerialize["name"] = o.Name
 	}
-
 	if o.ListenerLan != nil {
 		toSerialize["listenerLan"] = o.ListenerLan
 	}
-
 	if o.Ips != nil {
 		toSerialize["ips"] = o.Ips
 	}
-
 	if o.TargetLan != nil {
 		toSerialize["targetLan"] = o.TargetLan
 	}
-
 	if o.LbPrivateIps != nil {
 		toSerialize["lbPrivateIps"] = o.LbPrivateIps
 	}

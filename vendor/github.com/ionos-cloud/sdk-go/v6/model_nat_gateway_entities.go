@@ -98,11 +98,9 @@ func (o *NatGatewayEntities) HasFlowlogs() bool {
 
 func (o NatGatewayEntities) MarshalJSON() ([]byte, error) {
 	toSerialize := map[string]interface{}{}
-
 	if o.Rules != nil {
 		toSerialize["rules"] = o.Rules
 	}
-
 	if o.Flowlogs != nil {
 		toSerialize["flowlogs"] = o.Flowlogs
 	}

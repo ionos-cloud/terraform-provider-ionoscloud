@@ -180,19 +180,15 @@ func (o *KubernetesNodeProperties) HasK8sVersion() bool {
 
 func (o KubernetesNodeProperties) MarshalJSON() ([]byte, error) {
 	toSerialize := map[string]interface{}{}
-
 	if o.Name != nil {
 		toSerialize["name"] = o.Name
 	}
-
 	if o.PublicIP != nil {
 		toSerialize["publicIP"] = o.PublicIP
 	}
-
 	if o.PrivateIP != nil {
 		toSerialize["privateIP"] = o.PrivateIP
 	}
-
 	if o.K8sVersion != nil {
 		toSerialize["k8sVersion"] = o.K8sVersion
 	}

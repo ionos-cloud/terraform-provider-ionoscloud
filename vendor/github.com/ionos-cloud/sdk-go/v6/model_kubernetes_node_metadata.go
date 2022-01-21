@@ -242,23 +242,18 @@ func (o *KubernetesNodeMetadata) HasLastSoftwareUpdatedDate() bool {
 
 func (o KubernetesNodeMetadata) MarshalJSON() ([]byte, error) {
 	toSerialize := map[string]interface{}{}
-
 	if o.Etag != nil {
 		toSerialize["etag"] = o.Etag
 	}
-
 	if o.CreatedDate != nil {
 		toSerialize["createdDate"] = o.CreatedDate
 	}
-
 	if o.LastModifiedDate != nil {
 		toSerialize["lastModifiedDate"] = o.LastModifiedDate
 	}
-
 	if o.State != nil {
 		toSerialize["state"] = o.State
 	}
-
 	if o.LastSoftwareUpdatedDate != nil {
 		toSerialize["lastSoftwareUpdatedDate"] = o.LastSoftwareUpdatedDate
 	}

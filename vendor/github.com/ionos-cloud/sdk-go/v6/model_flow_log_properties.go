@@ -180,19 +180,15 @@ func (o *FlowLogProperties) HasBucket() bool {
 
 func (o FlowLogProperties) MarshalJSON() ([]byte, error) {
 	toSerialize := map[string]interface{}{}
-
 	if o.Name != nil {
 		toSerialize["name"] = o.Name
 	}
-
 	if o.Action != nil {
 		toSerialize["action"] = o.Action
 	}
-
 	if o.Direction != nil {
 		toSerialize["direction"] = o.Direction
 	}
-
 	if o.Bucket != nil {
 		toSerialize["bucket"] = o.Bucket
 	}

@@ -250,6 +250,11 @@ func dataSourceServer() *schema.Resource {
 							Type:     schema.TypeString,
 							Optional: true,
 						},
+						"boot_server": {
+							Type:        schema.TypeInt,
+							Description: "The UUID of the attached server.",
+							Computed:    true,
+						},
 					},
 				},
 			},
@@ -551,6 +556,7 @@ func setServerData(d *schema.ResourceData, server *ionoscloud.Server, token *ion
 			entry["pci_slot"] = int32OrDefault(volume.Properties.PciSlot, 0)
 			entry["backup_unit_id"] = stringOrDefault(volume.Properties.BackupunitId, "")
 			entry["user_data"] = stringOrDefault(volume.Properties.UserData, "")
+			entry["boot_server"] = stringOrDefault(volume.Properties.BootServer, "")
 
 			volumes = append(volumes, entry)
 		}

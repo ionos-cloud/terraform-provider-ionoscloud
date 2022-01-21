@@ -28,11 +28,11 @@ type NicProperties struct {
 	Lan *int32 `json:"lan"`
 	// Activate or deactivate the firewall. By default, an active firewall without any defined rules will block all incoming network traffic except for the firewall rules that explicitly allows certain protocols, IP addresses and ports.
 	FirewallActive *bool `json:"firewallActive,omitempty"`
-	// The type of firewall rules that will be allowed on the NIC. If not specified, the default INGRESS value is taken.
+	// The type of firewall rules that will be allowed on the NIC. If not specified, the default INGRESS value is used.
 	FirewallType *string `json:"firewallType,omitempty"`
-	// The Logical Unit Number (LUN) of the storage volume. Null if this NIC was create from CloudAPI and no DCD changes were done on the Datacenter.
+	// The Logical Unit Number (LUN) of the storage volume. Null if this NIC was created using Cloud API and no DCD changes were performed on the Datacenter.
 	DeviceNumber *int32 `json:"deviceNumber,omitempty"`
-	// The PCI slot number of the NIC.
+	// The PCI slot number for the NIC.
 	PciSlot *int32 `json:"pciSlot,omitempty"`
 }
 
@@ -380,39 +380,28 @@ func (o *NicProperties) HasPciSlot() bool {
 
 func (o NicProperties) MarshalJSON() ([]byte, error) {
 	toSerialize := map[string]interface{}{}
-
 	if o.Name != nil {
 		toSerialize["name"] = o.Name
 	}
-
 	if o.Mac != nil {
 		toSerialize["mac"] = o.Mac
 	}
-
-	if o.Ips != nil {
-		toSerialize["ips"] = o.Ips
-	}
-
+	toSerialize["ips"] = o.Ips
 	if o.Dhcp != nil {
 		toSerialize["dhcp"] = o.Dhcp
 	}
-
 	if o.Lan != nil {
 		toSerialize["lan"] = o.Lan
 	}
-
 	if o.FirewallActive != nil {
 		toSerialize["firewallActive"] = o.FirewallActive
 	}
-
 	if o.FirewallType != nil {
 		toSerialize["firewallType"] = o.FirewallType
 	}
-
 	if o.DeviceNumber != nil {
 		toSerialize["deviceNumber"] = o.DeviceNumber
 	}
-
 	if o.PciSlot != nil {
 		toSerialize["pciSlot"] = o.PciSlot
 	}

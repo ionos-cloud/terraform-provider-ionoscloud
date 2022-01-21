@@ -540,55 +540,42 @@ func (o *GroupProperties) HasAccessAndManageCertificates() bool {
 
 func (o GroupProperties) MarshalJSON() ([]byte, error) {
 	toSerialize := map[string]interface{}{}
-
 	if o.Name != nil {
 		toSerialize["name"] = o.Name
 	}
-
 	if o.CreateDataCenter != nil {
 		toSerialize["createDataCenter"] = o.CreateDataCenter
 	}
-
 	if o.CreateSnapshot != nil {
 		toSerialize["createSnapshot"] = o.CreateSnapshot
 	}
-
 	if o.ReserveIp != nil {
 		toSerialize["reserveIp"] = o.ReserveIp
 	}
-
 	if o.AccessActivityLog != nil {
 		toSerialize["accessActivityLog"] = o.AccessActivityLog
 	}
-
 	if o.CreatePcc != nil {
 		toSerialize["createPcc"] = o.CreatePcc
 	}
-
 	if o.S3Privilege != nil {
 		toSerialize["s3Privilege"] = o.S3Privilege
 	}
-
 	if o.CreateBackupUnit != nil {
 		toSerialize["createBackupUnit"] = o.CreateBackupUnit
 	}
-
 	if o.CreateInternetAccess != nil {
 		toSerialize["createInternetAccess"] = o.CreateInternetAccess
 	}
-
 	if o.CreateK8sCluster != nil {
 		toSerialize["createK8sCluster"] = o.CreateK8sCluster
 	}
-
 	if o.CreateFlowLog != nil {
 		toSerialize["createFlowLog"] = o.CreateFlowLog
 	}
-
 	if o.AccessAndManageMonitoring != nil {
 		toSerialize["accessAndManageMonitoring"] = o.AccessAndManageMonitoring
 	}
-
 	if o.AccessAndManageCertificates != nil {
 		toSerialize["accessAndManageCertificates"] = o.AccessAndManageCertificates
 	}

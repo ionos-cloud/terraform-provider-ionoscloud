@@ -123,6 +123,11 @@ func resourceVolume() *schema.Resource {
 				Type:     schema.TypeInt,
 				Computed: true,
 			},
+			"boot_server": {
+				Type:        schema.TypeInt,
+				Description: "The UUID of the attached server.",
+				Computed:    true,
+			},
 			"server_id": {
 				Type:         schema.TypeString,
 				Required:     true,
@@ -626,6 +631,13 @@ func setVolumeData(d *schema.ResourceData, volume *ionoscloud.Volume) error {
 			return fmt.Errorf("error while setting device_number property for volume %s: %s", d.Id(), err)
 		}
 	}
+
+	if volume.Properties.BootServer != nil {
+		err := d.Set("boot_server", *volume.Properties.BootServer)
+		if err != nil {
+			return fmt.Errorf("error while setting boot_server property for volume %s: %s", d.Id(), err)
+		}
+	}
 	return nil
 }
 
@@ -635,7 +647,7 @@ func resolveImageName(ctx context.Context, client *ionoscloud.APIClient, imageNa
 		return nil, fmt.Errorf("imageName not suplied")
 	}
 
-	images, apiResponse, err := client.ImagesApi.ImagesGet(ctx).Execute()
+	images, apiResponse, err := client.ImagesApi.ImagesGet(ctx).Depth(1).Execute()
 	logApiRequestTime(apiResponse)
 
 	if err != nil {
@@ -669,7 +681,7 @@ func getSnapshotId(ctx context.Context, client *ionoscloud.APIClient, snapshotNa
 		return ""
 	}
 
-	snapshots, apiResponse, err := client.SnapshotsApi.SnapshotsGet(ctx).Execute()
+	snapshots, apiResponse, err := client.SnapshotsApi.SnapshotsGet(ctx).Depth(1).Execute()
 	logApiRequestTime(apiResponse)
 
 	if err != nil {

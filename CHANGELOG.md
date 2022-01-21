@@ -1,3 +1,9 @@
+## 6.1.3
+
+### Features:
+- Private cluster: public parameter on  k8s_cluster and gateway_ip parameter on k8s_node_pool
+- Boot server read only property on volume
+
 ## 6.1.2
 
 ### Docs:

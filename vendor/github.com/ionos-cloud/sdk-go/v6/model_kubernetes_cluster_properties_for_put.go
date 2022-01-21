@@ -21,7 +21,7 @@ type KubernetesClusterPropertiesForPut struct {
 	// The Kubernetes version the cluster is running. This imposes restrictions on what Kubernetes versions can be run in a cluster's nodepools. Additionally, not all Kubernetes versions are viable upgrade targets for all prior versions.
 	K8sVersion        *string                      `json:"k8sVersion,omitempty"`
 	MaintenanceWindow *KubernetesMaintenanceWindow `json:"maintenanceWindow,omitempty"`
-	// Access to the K8s API server is restricted to these CIDRs. Traffic, internal to the cluster, is not affected by this restriction. If no allowlist is specified, access is not restricted. If an IP without subnet mask is provided, the default value will be used: 32 for IPv4 and 128 for IPv6.
+	// Access to the K8s API server is restricted to these CIDRs. Traffic, internal to the cluster, is not affected by this restriction. If no allowlist is specified, access is not restricted. If an IP without subnet mask is provided, the default value is used: 32 for IPv4 and 128 for IPv6.
 	ApiSubnetAllowList *[]string `json:"apiSubnetAllowList,omitempty"`
 	// List of S3 bucket configured for K8s usage. For now it contains only an S3 bucket used to store K8s API audit logs
 	S3Buckets *[]S3Bucket `json:"s3Buckets,omitempty"`
@@ -219,23 +219,18 @@ func (o *KubernetesClusterPropertiesForPut) HasS3Buckets() bool {
 
 func (o KubernetesClusterPropertiesForPut) MarshalJSON() ([]byte, error) {
 	toSerialize := map[string]interface{}{}
-
 	if o.Name != nil {
 		toSerialize["name"] = o.Name
 	}
-
 	if o.K8sVersion != nil {
 		toSerialize["k8sVersion"] = o.K8sVersion
 	}
-
 	if o.MaintenanceWindow != nil {
 		toSerialize["maintenanceWindow"] = o.MaintenanceWindow
 	}
-
 	if o.ApiSubnetAllowList != nil {
 		toSerialize["apiSubnetAllowList"] = o.ApiSubnetAllowList
 	}
-
 	if o.S3Buckets != nil {
 		toSerialize["s3Buckets"] = o.S3Buckets
 	}

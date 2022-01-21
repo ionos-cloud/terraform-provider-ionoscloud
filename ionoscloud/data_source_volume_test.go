@@ -32,6 +32,7 @@ func TestAccDataSourceVolume(t *testing.T) {
 					resource.TestCheckResourceAttrPair(DataSource+"."+VolumeResource+"."+VolumeDataSourceById, "disc_virtio_hot_plug", VolumeResource+"."+VolumeTestResource, "disc_virtio_hot_plug"),
 					resource.TestCheckResourceAttrPair(DataSource+"."+VolumeResource+"."+VolumeDataSourceById, "disc_virtio_hot_unplug", VolumeResource+"."+VolumeTestResource, "disc_virtio_hot_unplug"),
 					resource.TestCheckResourceAttrPair(DataSource+"."+VolumeResource+"."+VolumeDataSourceById, "device_number", VolumeResource+"."+VolumeTestResource, "device_number"),
+					resource.TestCheckResourceAttrPair(DataSource+"."+VolumeResource+"."+VolumeDataSourceById, "boot_server", ServerResource+"."+ServerTestResource, "id"),
 				),
 			},
 			{
@@ -51,7 +52,7 @@ func TestAccDataSourceVolume(t *testing.T) {
 					resource.TestCheckResourceAttrPair(DataSource+"."+VolumeResource+"."+VolumeDataSourceByName, "disc_virtio_hot_plug", VolumeResource+"."+VolumeTestResource, "disc_virtio_hot_plug"),
 					resource.TestCheckResourceAttrPair(DataSource+"."+VolumeResource+"."+VolumeDataSourceByName, "disc_virtio_hot_unplug", VolumeResource+"."+VolumeTestResource, "disc_virtio_hot_unplug"),
 					resource.TestCheckResourceAttrPair(DataSource+"."+VolumeResource+"."+VolumeDataSourceByName, "device_number", VolumeResource+"."+VolumeTestResource, "device_number"),
-				),
+					resource.TestCheckResourceAttrPair(DataSource+"."+VolumeResource+"."+VolumeDataSourceByName, "boot_server", ServerResource+"."+ServerTestResource, "id")),
 			},
 		},
 	})

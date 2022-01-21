@@ -117,6 +117,48 @@ func TestAccK8sNodePoolBasic(t *testing.T) {
 	})
 }
 
+func TestAccK8sNodePoolGatewayIP(t *testing.T) {
+	var k8sNodepool ionoscloud.KubernetesNodePool
+
+	resource.Test(t, resource.TestCase{
+		PreCheck: func() {
+			testAccPreCheck(t)
+		},
+		ProviderFactories: testAccProviderFactories,
+		CheckDestroy:      testAccCheckK8sNodePoolDestroyCheck,
+		Steps: []resource.TestStep{
+			{
+				Config: testAccCheckK8sNodePoolConfigGatewayIP,
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckK8sNodePoolExists(ResourceNameK8sNodePool, &k8sNodepool),
+					resource.TestCheckResourceAttr(ResourceNameK8sNodePool, "name", K8sNodePoolTestResource),
+					resource.TestCheckResourceAttr(ResourceNameK8sNodePool, "k8s_version", "1.19.10"),
+					resource.TestCheckResourceAttr(ResourceNameK8sNodePool, "maintenance_window.0.day_of_the_week", "Monday"),
+					resource.TestCheckResourceAttr(ResourceNameK8sNodePool, "maintenance_window.0.time", "09:00:00Z"),
+					resource.TestCheckResourceAttr(ResourceNameK8sNodePool, "auto_scaling.0.min_node_count", "1"),
+					resource.TestCheckResourceAttr(ResourceNameK8sNodePool, "auto_scaling.0.max_node_count", "1"),
+					resource.TestCheckResourceAttr(ResourceNameK8sNodePool, "cpu_family", "INTEL_XEON"),
+					resource.TestCheckResourceAttr(ResourceNameK8sNodePool, "availability_zone", "AUTO"),
+					resource.TestCheckResourceAttr(ResourceNameK8sNodePool, "storage_type", "SSD"),
+					resource.TestCheckResourceAttr(ResourceNameK8sNodePool, "node_count", "1"),
+					resource.TestCheckResourceAttr(ResourceNameK8sNodePool, "cores_count", "2"),
+					resource.TestCheckResourceAttr(ResourceNameK8sNodePool, "ram_size", "2048"),
+					resource.TestCheckResourceAttr(ResourceNameK8sNodePool, "storage_size", "40"),
+					resource.TestCheckResourceAttrPair(ResourceNameK8sNodePool, "gateway_ip", IpBLockResource+".terraform_acctest", "ips.0"),
+					resource.TestCheckResourceAttrPair(ResourceNameK8sNodePool, "lans.0.id", LanResource+".terraform_acctest", "id"),
+					resource.TestCheckResourceAttr(ResourceNameK8sNodePool, "lans.0.dhcp", "true"),
+					resource.TestCheckResourceAttr(ResourceNameK8sNodePool, "lans.0.routes.0.network", "1.2.3.5/24"),
+					resource.TestCheckResourceAttr(ResourceNameK8sNodePool, "lans.0.routes.0.gateway_ip", "10.1.5.17"),
+					resource.TestCheckResourceAttr(ResourceNameK8sNodePool, "labels.foo", "bar"),
+					resource.TestCheckResourceAttr(ResourceNameK8sNodePool, "labels.color", "green"),
+					resource.TestCheckResourceAttr(ResourceNameK8sNodePool, "annotations.ann1", "value1"),
+					resource.TestCheckResourceAttr(ResourceNameK8sNodePool, "annotations.ann2", "value2"),
+				),
+			},
+		},
+	})
+}
+
 func testAccCheckK8sNodePoolDestroyCheck(s *terraform.State) error {
 	client := testAccProvider.Meta().(SdkBundle).CloudApiClient
 
@@ -381,4 +423,68 @@ resource ` + K8sNodePoolResource + ` ` + K8sNodePoolTestResource + ` {
   public_ips        = []
   labels = {}
   annotations = {}
+}`
+const testAccCheckK8sNodePoolConfigGatewayIP = `
+resource ` + DatacenterResource + ` "terraform_acctest" {
+  name        = "terraform_acctest"
+  location    = "us/las"
+  description = "Datacenter created through terraform"
+}
+resource ` + LanResource + ` "terraform_acctest" {
+  datacenter_id = ` + DatacenterResource + `.terraform_acctest.id
+  public = false
+  name = "terraform_acctest"
+}
+resource ` + IpBLockResource + ` "terraform_acctest" {
+  location = ` + DatacenterResource + `.terraform_acctest.location
+  size = 1
+  name = "terraform_acctest"
+}
+resource ` + K8sClusterResource + ` "terraform_acctest" {
+  name        = "terraform_acctest"
+  k8s_version = "1.19.10"
+  maintenance_window {
+    day_of_the_week = "Monday"
+    time            = "09:00:00Z"
+  }
+  public = "false"
+}
+
+resource ` + K8sNodePoolResource + ` ` + K8sNodePoolTestResource + ` {
+  datacenter_id     = ` + DatacenterResource + `.terraform_acctest.id
+  k8s_cluster_id    = ` + K8sClusterResource + `.terraform_acctest.id
+  name        = "` + K8sNodePoolTestResource + `"
+  k8s_version = ` + K8sClusterResource + `.terraform_acctest.k8s_version
+  maintenance_window {
+    day_of_the_week = "Monday"
+    time            = "09:00:00Z"
+  } 
+  auto_scaling {
+    min_node_count = 1
+    max_node_count = 1
+  }
+  cpu_family        = "INTEL_XEON"
+  availability_zone = "AUTO"
+  storage_type      = "SSD"
+  node_count        = 1
+  cores_count       = 2
+  ram_size          = 2048
+  storage_size      = 40
+  gateway_ip        = ` + IpBLockResource + `.terraform_acctest.ips[0]
+  lans {
+    id   = ` + LanResource + `.terraform_acctest.id
+    dhcp = true
+	routes {
+       network   = "1.2.3.5/24"
+       gateway_ip = "10.1.5.17"
+     }
+   }  
+  labels = {
+    foo = "bar"
+    color = "green"
+  }
+  annotations = {
+    ann1 = "value1"
+    ann2 = "value2"
+  }
 }`

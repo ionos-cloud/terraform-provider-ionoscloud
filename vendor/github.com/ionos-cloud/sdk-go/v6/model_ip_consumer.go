@@ -371,39 +371,30 @@ func (o *IpConsumer) HasK8sClusterUuid() bool {
 
 func (o IpConsumer) MarshalJSON() ([]byte, error) {
 	toSerialize := map[string]interface{}{}
-
 	if o.Ip != nil {
 		toSerialize["ip"] = o.Ip
 	}
-
 	if o.Mac != nil {
 		toSerialize["mac"] = o.Mac
 	}
-
 	if o.NicId != nil {
 		toSerialize["nicId"] = o.NicId
 	}
-
 	if o.ServerId != nil {
 		toSerialize["serverId"] = o.ServerId
 	}
-
 	if o.ServerName != nil {
 		toSerialize["serverName"] = o.ServerName
 	}
-
 	if o.DatacenterId != nil {
 		toSerialize["datacenterId"] = o.DatacenterId
 	}
-
 	if o.DatacenterName != nil {
 		toSerialize["datacenterName"] = o.DatacenterName
 	}
-
 	if o.K8sNodePoolUuid != nil {
 		toSerialize["k8sNodePoolUuid"] = o.K8sNodePoolUuid
 	}
-
 	if o.K8sClusterUuid != nil {
 		toSerialize["k8sClusterUuid"] = o.K8sClusterUuid
 	}

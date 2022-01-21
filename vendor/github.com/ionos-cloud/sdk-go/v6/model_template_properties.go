@@ -180,19 +180,15 @@ func (o *TemplateProperties) HasStorageSize() bool {
 
 func (o TemplateProperties) MarshalJSON() ([]byte, error) {
 	toSerialize := map[string]interface{}{}
-
 	if o.Name != nil {
 		toSerialize["name"] = o.Name
 	}
-
 	if o.Cores != nil {
 		toSerialize["cores"] = o.Cores
 	}
-
 	if o.Ram != nil {
 		toSerialize["ram"] = o.Ram
 	}
-
 	if o.StorageSize != nil {
 		toSerialize["storageSize"] = o.StorageSize
 	}

@@ -237,6 +237,11 @@ func resourceServer() *schema.Resource {
 							Type:     schema.TypeInt,
 							Computed: true,
 						},
+						"boot_server": {
+							Type:        schema.TypeInt,
+							Description: "The UUID of the attached server.",
+							Computed:    true,
+						},
 					},
 				},
 			},
@@ -955,6 +960,7 @@ func SetVolumeProperties(volume ionoscloud.Volume) map[string]interface{} {
 		setPropWithNilCheck(volumeMap, "device_number", volume.Properties.DeviceNumber)
 		setPropWithNilCheck(volumeMap, "user_data", volume.Properties.UserData)
 		setPropWithNilCheck(volumeMap, "backup_unit_id", volume.Properties.BackupunitId)
+		setPropWithNilCheck(volumeMap, "boot_server", volume.Properties.BootServer)
 	}
 	return volumeMap
 }

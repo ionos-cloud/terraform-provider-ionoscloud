@@ -180,19 +180,15 @@ func (o *CpuArchitectureProperties) HasVendor() bool {
 
 func (o CpuArchitectureProperties) MarshalJSON() ([]byte, error) {
 	toSerialize := map[string]interface{}{}
-
 	if o.CpuFamily != nil {
 		toSerialize["cpuFamily"] = o.CpuFamily
 	}
-
 	if o.MaxCores != nil {
 		toSerialize["maxCores"] = o.MaxCores
 	}
-
 	if o.MaxRam != nil {
 		toSerialize["maxRam"] = o.MaxRam
 	}
-
 	if o.Vendor != nil {
 		toSerialize["vendor"] = o.Vendor
 	}

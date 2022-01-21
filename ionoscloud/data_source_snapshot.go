@@ -114,7 +114,7 @@ func dataSourceSnapshotRead(ctx context.Context, d *schema.ResourceData, meta in
 	} else {
 		var results []ionoscloud.Snapshot
 
-		snapshots, apiResponse, err := client.SnapshotsApi.SnapshotsGet(ctx).Execute()
+		snapshots, apiResponse, err := client.SnapshotsApi.SnapshotsGet(ctx).Depth(1).Execute()
 		logApiRequestTime(apiResponse)
 
 		if err != nil {

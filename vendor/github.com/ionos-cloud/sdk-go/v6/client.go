@@ -42,7 +42,6 @@ var (
 )
 
 const DepthParam = "depth"
-const DefaultDepth = "10"
 
 const (
 	RequestStatusQueued  = "QUEUED"
@@ -50,7 +49,7 @@ const (
 	RequestStatusFailed  = "FAILED"
 	RequestStatusDone    = "DONE"
 
-	Version = "6.0.0"
+	Version = "6.0.1"
 )
 
 // Constants for APIs
@@ -450,11 +449,6 @@ func (c *APIClient) prepareRequest(
 		for _, iv := range v {
 			query.Add(k, iv)
 		}
-	}
-
-	// Adding default depth if needed
-	if query.Get(DepthParam) == "" {
-		query.Add(DepthParam, DefaultDepth)
 	}
 
 	// Encode the parameters.
