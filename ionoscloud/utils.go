@@ -225,6 +225,17 @@ func DiffToLower(_, old, new string, _ *schema.ResourceData) bool {
 	return false
 }
 
+//DiffCidr terraform suppress differences between ip and cidr
+func DiffCidr(_, old, new string, _ *schema.ResourceData) bool {
+	oldIp, _, err := net.ParseCIDR(old)
+	newIp := net.ParseIP(new)
+	// if new is an ip and old is a cidr, suppress
+	if err == nil && newIp != nil && oldIp != nil && newIp.Equal(oldIp) {
+		return true
+	}
+	return false
+}
+
 // VerifyUnavailableIPs used for DBaaS cluster to check the provided IPs
 func VerifyUnavailableIPs(val interface{}, key string) (warns []string, errs []error) {
 	v := val.(string)

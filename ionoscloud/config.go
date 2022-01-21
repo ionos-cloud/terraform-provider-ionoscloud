@@ -2,7 +2,7 @@ package ionoscloud
 
 import (
 	"fmt"
-	"github.com/hashicorp/terraform-plugin-sdk/meta"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/meta"
 	ionoscloud "github.com/ionos-cloud/sdk-go/v6"
 	"log"
 	"runtime"
