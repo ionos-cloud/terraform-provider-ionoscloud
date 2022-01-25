@@ -25,4 +25,5 @@ jobs:
         env:
           IONOS_USERNAME: ${{ secrets.IONOS_VDC_USER_GO_V6 }}
           IONOS_PASSWORD: ${{ secrets.IONOS_VDC_PASSWORD_GO_V6 }}
+          TF_ACC: true
         run: go test ./ionoscloud -v -timeout 100000s
