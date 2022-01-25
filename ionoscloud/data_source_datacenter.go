@@ -116,61 +116,59 @@ func dataSourceDataCenterRead(ctx context.Context, d *schema.ResourceData, meta 
 					*datacenter.Id, *datacenter.Properties.Location, location))
 			}
 		}
-		log.Printf("[INFO] Got dc [Name=%s, Location=%s]", *datacenter.Properties.Name, *datacenter.Properties.Location)
-	} else {
-		datacenters, apiResponse, err := client.DataCentersApi.DatacentersGet(ctx).Depth(1).Execute()
-		logApiRequestTime(apiResponse)
-
-		if err != nil {
-			return diag.FromErr(fmt.Errorf("an error occured while fetching datacenters: %s ", err))
+		if datacenter.Properties != nil {
+			log.Printf("[INFO] Got backupUnit [Name=%s], Location=%s, [Id=%s]", *datacenter.Properties.Name, *datacenter.Properties.Location, *datacenter.Id)
 		}
+	} else {
 
 		var results []ionoscloud.Datacenter
+		var resultsByDatacenter ionoscloud.Datacenters
+		var resultsByLocation ionoscloud.Datacenters
 
-		if nameOk && datacenters.Items != nil {
-			var resultsByDatacenter []ionoscloud.Datacenter
-			for _, dc := range *datacenters.Items {
-				if dc.Properties != nil && dc.Properties.Name != nil && *dc.Properties.Name == name {
-					resultsByDatacenter = append(resultsByDatacenter, dc)
-				}
+		if nameOk {
+			resultsByDatacenter, apiResponse, err = client.DataCentersApi.DatacentersGet(ctx).Depth(1).Filter("name", name).Execute()
+			logApiRequestTime(apiResponse)
+
+			if err != nil {
+				return diag.FromErr(fmt.Errorf("an error occurred while fetching backup unit: %s", err.Error()))
 			}
 
-			if resultsByDatacenter == nil {
-				return diag.FromErr(fmt.Errorf("could not find a datacenter with name %s", name))
-			} else {
-				results = resultsByDatacenter
+			if resultsByDatacenter.Items == nil || len(*resultsByDatacenter.Items) == 0 {
+				return diag.FromErr(fmt.Errorf("no datacenter found with the specified name"))
 			}
 		}
 
 		if locationOk {
-			var resultsByLocation []ionoscloud.Datacenter
-			if results != nil {
-				for _, dc := range results {
+			if resultsByDatacenter.Items != nil && len(*resultsByDatacenter.Items) > 0 {
+				for _, dc := range *resultsByDatacenter.Items {
 					if dc.Properties.Location != nil && *dc.Properties.Location == location {
-						resultsByLocation = append(resultsByLocation, dc)
+						results = append(results, dc)
 						break
 					}
 				}
-			} else if datacenters.Items != nil {
-				/* find the first datacenter matching the location */
-				for _, dc := range *datacenters.Items {
-					if dc.Properties.Location != nil && *dc.Properties.Location == location {
-						resultsByLocation = append(resultsByLocation, dc)
-						break
-					}
+				if results == nil || len(results) == 0 {
+					return diag.FromErr(fmt.Errorf("no datacenter found with the specified location"))
 				}
-			}
-			if resultsByLocation == nil {
-				return diag.FromErr(fmt.Errorf("could not find a datacenter with location %s", location))
 			} else {
-				results = resultsByLocation
+				/* find the first datacenter matching the location */
+				resultsByLocation, apiResponse, err = client.DataCentersApi.DatacentersGet(ctx).Depth(1).Filter("location", location).Execute()
+				logApiRequestTime(apiResponse)
+
+				if err != nil {
+					return diag.FromErr(fmt.Errorf("an error occurred while fetching backup unit: %s", err.Error()))
+				}
+				if resultsByLocation.Items == nil || len(*resultsByLocation.Items) == 0 {
+					return diag.FromErr(fmt.Errorf("no datacenter found with the specified location"))
+				}
 			}
 		}
 
-		if results != nil {
-			datacenter = results[0]
-		} else {
-			return diag.FromErr(fmt.Errorf("there are no datacenters that match the search criteria"))
+		if results != nil && len(results) > 0 {
+			datacenter = results[len(results)-1]
+		} else if resultsByLocation.Items != nil && len(*resultsByLocation.Items) > 0 {
+			datacenter = (*resultsByLocation.Items)[len(*resultsByLocation.Items)-1]
+		} else if resultsByDatacenter.Items != nil && len(*resultsByDatacenter.Items) > 0 {
+			datacenter = (*resultsByDatacenter.Items)[len(*resultsByDatacenter.Items)-1]
 		}
 
 	}

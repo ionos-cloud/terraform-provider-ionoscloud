@@ -1,5 +1,11 @@
 package ionoscloud
 
+// Image Constants
+const (
+	ImageResource     = "ionoscloud_image"
+	ImageTestResource = "test_image"
+)
+
 // BackupUnit Constants
 const (
 	BackupUnitResource         = "ionoscloud_backup_unit"

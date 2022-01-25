@@ -6,6 +6,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	ionoscloud "github.com/ionos-cloud/sdk-go/v6"
+	"log"
 )
 
 func dataSourceBackupUnit() *schema.Resource {
@@ -53,8 +54,6 @@ func dataSourceBackupUnitRead(ctx context.Context, d *schema.ResourceData, meta 
 	var err error
 	var apiResponse *ionoscloud.APIResponse
 
-	found := false
-
 	if idOk {
 		/* search by ID */
 		backupUnit, apiResponse, err = client.BackupUnitsApi.BackupunitsFindById(ctx, id.(string)).Execute()
@@ -62,38 +61,24 @@ func dataSourceBackupUnitRead(ctx context.Context, d *schema.ResourceData, meta 
 		if err != nil {
 			return diag.FromErr(fmt.Errorf("an error occurred while fetching the backup unit %s: %s", id.(string), err))
 		}
-		found = true
+		if backupUnit.Properties != nil {
+			log.Printf("[INFO] Got backupUnit [Name=%s] [Id=%s]", *backupUnit.Properties.Name, *backupUnit.Id)
+		}
 	} else {
 		/* search by name */
-		var backupUnits ionoscloud.BackupUnits
-
-		backupUnits, apiResponse, err := client.BackupUnitsApi.BackupunitsGet(ctx).Execute()
+		backupUnits, apiResponse, err := client.BackupUnitsApi.BackupunitsGet(ctx).Depth(1).Filter("name", name.(string)).Execute()
 		logApiRequestTime(apiResponse)
 
 		if err != nil {
 			return diag.FromErr(fmt.Errorf("an error occurred while fetching backup unit: %s", err.Error()))
 		}
 
-		if backupUnits.Items != nil {
-			for _, bu := range *backupUnits.Items {
-				tmpBackupUnit, apiResponse, err := client.BackupUnitsApi.BackupunitsFindById(ctx, *bu.Id).Execute()
-				logApiRequestTime(apiResponse)
-				if err != nil {
-					return diag.FromErr(fmt.Errorf("an error occurred while fetching backup unit with ID %s: %s", *bu.Id, err.Error()))
-				}
-				if tmpBackupUnit.Properties.Name != nil && *tmpBackupUnit.Properties.Name == name.(string) {
-					backupUnit = tmpBackupUnit
-					found = true
-					break
-				}
-
-			}
+		if backupUnits.Items != nil && len(*backupUnits.Items) > 0 {
+			backupUnit = (*backupUnits.Items)[len(*backupUnits.Items)-1]
+		} else {
+			return diag.FromErr(fmt.Errorf("no backup unit found with the specified name"))
 		}
 
-	}
-
-	if !found {
-		return diag.FromErr(fmt.Errorf("backup unit not found"))
 	}
 
 	contractResources, apiResponse, cErr := client.ContractResourcesApi.ContractsGet(ctx).Execute()

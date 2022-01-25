@@ -90,7 +90,7 @@ func Provider() *schema.Provider {
 		DataSourcesMap: map[string]*schema.Resource{
 			DatacenterResource:                        dataSourceDataCenter(),
 			"ionoscloud_location":                     dataSourceLocation(),
-			"ionoscloud_image":                        dataSourceImage(),
+			ImageResource:                             dataSourceImage(),
 			"ionoscloud_resource":                     dataSourceResource(),
 			SnapshotResource:                          dataSourceSnapshot(),
 			LanResource:                               dataSourceLan(),
