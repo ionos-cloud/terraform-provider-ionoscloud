@@ -22,10 +22,7 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v2
       - name: Test
-        with:
-          ionos-vdc-user: ${{ secrets.IONOS_VDC_USER_GO_V6 }}
-          ionos-vdc-password: ${{ secrets.IONOS_VDC_PASSWORD_GO_V6 }}
-          codex-s3-bucket: ${{ env.codex-s3-bucket }}
-          codex-s3-key: ${{ secrets.CODEX_S3_KEY }}
-          codex-s3-secret: ${{ secrets.CODEX_S3_SECRET }}
+        env:
+          IONOS_USERNAME: ${{ secrets.IONOS_VDC_USER_GO_V6 }}
+          IONOS_PASSWORD: ${{ secrets.IONOS_VDC_PASSWORD_GO_V6 }}
         run: go test ./ionoscloud -v -timeout 100000s
