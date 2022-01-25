@@ -3,27 +3,36 @@ name: Build and test
 on:
   workflow_dispatch:
     inputs:
-      test-tag:
+      test-tags:
         description: test tags to use
         required: false
-        default:
+        default: k8s,dbaas,natgateway,nlb
 jobs:
   test:
     strategy:
       matrix:
         go-version: [^1.17]
         os: [ubuntu-latest]
+
     runs-on: ${{ matrix.os }}
+
     steps:
       - name: Install Go
-        uses: actions/setup-go@v2
+      - uses: actions/setup-go@v2
         with:
           go-version: ${{ matrix.go-version }}
       - name: Checkout code
-        uses: actions/checkout@v2
+      - uses: actions/checkout@v2
+        with:
+          ref: release/v6.0.x
       - name: Test
         env:
           IONOS_USERNAME: ${{ secrets.IONOS_VDC_USER_GO_V6 }}
           IONOS_PASSWORD: ${{ secrets.IONOS_VDC_PASSWORD_GO_V6 }}
           TF_ACC: true
-        run: go test ./ionoscloud -v -timeout 100000s
+      - name : "run tests with tags"
+        if: github.event.inputs.test-tags != ''
+      - run: go test ./ionoscloud -v -timeout 240m -tags ${{ github.event.inputs.test-tags }}
+      - name : "run tests without tags"
+        if: github.event.inputs.test-tags == ''
+      - run: go test ./ionoscloud -v -timeout 180m
