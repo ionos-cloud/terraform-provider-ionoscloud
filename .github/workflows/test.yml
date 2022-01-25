@@ -11,8 +11,8 @@ jobs:
   test:
     strategy:
       matrix:
-        go-version: ^1.17
-        os: ubuntu-latest
+        go-version: [^1.17]
+        os: [ubuntu-latest]
     runs-on: ${{ matrix.os }}
     steps:
       - name: Install Go
