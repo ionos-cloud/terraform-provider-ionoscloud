@@ -1,5 +1,4 @@
 name: Build and test
-
 on:
   workflow_dispatch:
     inputs:
@@ -13,9 +12,7 @@ jobs:
       matrix:
         go-version: [^1.17]
         os: [ubuntu-latest]
-
     runs-on: ${{ matrix.os }}
-
     steps:
       - name: Install Go
         uses: actions/setup-go@v2
@@ -30,9 +27,9 @@ jobs:
           IONOS_USERNAME: ${{ secrets.IONOS_VDC_USER_GO_V6 }}
           IONOS_PASSWORD: ${{ secrets.IONOS_VDC_PASSWORD_GO_V6 }}
           TF_ACC: true
-      - name : "run tests with tags"
+      - name: Run tests with tags
         if: github.event.inputs.test-tags != ''
         run: go test ./ionoscloud -v -timeout 240m -tags ${{ github.event.inputs.test-tags }}
-      - name : "run tests without tags"
+      - name: Run tests without tags
         if: github.event.inputs.test-tags == ''
         run: go test ./ionoscloud -v -timeout 180m
