@@ -6,6 +6,7 @@ on:
         description: "test tags, in the form of a list without spaces: 'all,compute,server,firewall,k8s,dbaas,natgateway,nlb,waiting_for_vdc' "
         required: false
         type: string
+        default: compute
 jobs:
   test:
     env:
