@@ -4,10 +4,8 @@ import (
 	"context"
 	"fmt"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
-	ionoscloud "github.com/ionos-cloud/sdk-go/v6"
-	"strings"
-
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
+	ionoscloud "github.com/ionos-cloud/sdk-go/v6"
 )
 
 func dataSourceImage() *schema.Resource {
@@ -106,85 +104,52 @@ func dataSourceImage() *schema.Resource {
 func dataSourceImageRead(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	client := meta.(SdkBundle).CloudApiClient
 
-	images, apiResponse, err := client.ImagesApi.ImagesGet(ctx).Depth(1).Execute()
-	logApiRequestTime(apiResponse)
-
-	if err != nil {
-		return diag.FromErr(fmt.Errorf("an error occured while fetching IonosCloud images %s", err))
-	}
-
 	name := d.Get("name").(string)
 	imageType, imageTypeOk := d.GetOk("type")
 	location, locationOk := d.GetOk("location")
 	version, versionOk := d.GetOk("version")
 	cloudInit, cloudInitOk := d.GetOk("cloud_init")
 
-	var results []ionoscloud.Image
+	var results ionoscloud.Images
+	var image ionoscloud.Image
+
+	request := client.ImagesApi.ImagesGet(ctx).Depth(1)
 
 	// if version value is present then concatenate name - version
 	// otherwise search by name or part of the name
 	if versionOk {
 		nameVer := fmt.Sprintf("%s-%s", name, version.(string))
-		if images.Items != nil {
-			for _, img := range *images.Items {
-				if img.Properties != nil && img.Properties.Name != nil && strings.ToLower(*img.Properties.Name) == strings.ToLower(nameVer) {
-					results = append(results, img)
-				}
-			}
-		}
-		if results == nil {
-			return diag.FromErr(fmt.Errorf("could not find an image with name %s and version %s (%s)", name, version.(string), nameVer))
-		}
+		request = request.Filter("name", nameVer)
 	} else {
-		if images.Items != nil {
-			for _, img := range *images.Items {
-				if img.Properties.Name != nil && strings.ToLower(*img.Properties.Name) == strings.ToLower(name) {
-					results = append(results, img)
-					break
-				}
-			}
-		}
-		if results == nil {
-			return diag.FromErr(fmt.Errorf("could not find an image with name %s", name))
-		}
+		request = request.Filter("name", name)
 	}
 
 	if imageTypeOk {
-		var imageTypeResults []ionoscloud.Image
-		for _, img := range results {
-			if img.Properties.ImageType != nil && *img.Properties.ImageType == imageType.(string) {
-				imageTypeResults = append(imageTypeResults, img)
-			}
-
-		}
-		results = imageTypeResults
+		request = request.Filter("imageType", imageType.(string))
 	}
 
 	if locationOk {
-		var locationResults []ionoscloud.Image
-		for _, img := range results {
-			if img.Properties.Location != nil && *img.Properties.Location == location.(string) {
-				locationResults = append(locationResults, img)
-			}
-		}
-		results = locationResults
+		request = request.Filter("location", location.(string))
 	}
 
 	if cloudInitOk {
-		var cloudInitResults []ionoscloud.Image
-		for _, img := range results {
-			if img.Properties.CloudInit != nil && *img.Properties.CloudInit == cloudInit.(string) {
-				cloudInitResults = append(cloudInitResults, img)
-			}
-		}
-		results = cloudInitResults
+		request = request.Filter("cloudInit", cloudInit.(string))
 	}
 
-	if len(results) == 0 {
-		return diag.FromErr(fmt.Errorf("there are no images that match the search criteria"))
+	results, apiResponse, err := request.Execute()
+	logApiRequestTime(apiResponse)
+
+	if err != nil {
+		return diag.FromErr(fmt.Errorf("an error occurred while fetching Ionos images: %s", err.Error()))
 	}
 
-	if err := setImageData(d, &results[0]); err != nil {
+	if results.Items != nil && len(*results.Items) > 0 {
+		image = (*results.Items)[len(*results.Items)-1]
+	} else {
+		return diag.FromErr(fmt.Errorf("no image found with the specified criteria"))
+	}
+
+	if err := setImageData(d, &image); err != nil {
 		return diag.FromErr(err)
 	}
 	return nil

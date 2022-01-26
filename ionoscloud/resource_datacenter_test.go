@@ -66,15 +66,15 @@ func TestAccDataCenterBasic(t *testing.T) {
 			},
 			{
 				Config:      testAccDataSourceDatacenterWrongName,
-				ExpectError: regexp.MustCompile("no datacenter found with the specified name"),
+				ExpectError: regexp.MustCompile("no datacenter found with the specified criteria"),
 			},
 			{
 				Config:      testAccDataSourceDatacenterWrongLocation,
-				ExpectError: regexp.MustCompile("no datacenter found with the specified location"),
+				ExpectError: regexp.MustCompile("no datacenter found with the specified criteria"),
 			},
 			{
 				Config:      testAccDataSourceDatacenterWrongNameAndLocation,
-				ExpectError: regexp.MustCompile("no datacenter found with the specified name"),
+				ExpectError: regexp.MustCompile("no datacenter found with the specified criteria"),
 			},
 			{
 				Config: testAccCheckDatacenterConfigUpdate,

@@ -62,19 +62,19 @@ func TestAccDataSourceIpBlock(t *testing.T) {
 			},
 			{
 				Config:      testAccDataSourceIpBlockNameError,
-				ExpectError: regexp.MustCompile(`could not find an ip block with name 1`),
+				ExpectError: regexp.MustCompile(`no ip block found with the specified criteria`),
 			},
 			{
 				Config:      testAccDataSourceIpBlockMatchNameLocationError,
-				ExpectError: regexp.MustCompile(`there are no ip blocks that match the search criteria`),
+				ExpectError: regexp.MustCompile(`no ip block found with the specified criteria`),
 			},
 			{
 				Config:      testAccDataSourceIpBlockLocationError,
-				ExpectError: regexp.MustCompile(`there are no ip blocks that match the search criteria`),
+				ExpectError: regexp.MustCompile(`no ip block found with the specified criteria`),
 			},
 			{
 				Config:      testIpBlockGoodIdLocationError,
-				ExpectError: regexp.MustCompile(`does not match expected location`),
+				ExpectError: regexp.MustCompile(`location of ip block`),
 			},
 		},
 	})

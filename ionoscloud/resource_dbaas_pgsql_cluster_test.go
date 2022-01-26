@@ -45,6 +45,65 @@ func TestAccDBaaSPgSqlClusterBasic(t *testing.T) {
 				),
 			},
 			{
+				Config: testAccDataSourceDBaaSPgSqlClusterMatchId,
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttrPair(DataSource+"."+DBaaSClusterResource+"."+DBaaSClusterTestDataSourceById, "display_name", DBaaSClusterResource+"."+DBaaSClusterTestResource, "display_name"),
+					resource.TestCheckResourceAttrPair(DataSource+"."+DBaaSClusterResource+"."+DBaaSClusterTestDataSourceById, "instances", DBaaSClusterResource+"."+DBaaSClusterTestResource, "instances"),
+					resource.TestCheckResourceAttrPair(DataSource+"."+DBaaSClusterResource+"."+DBaaSClusterTestDataSourceById, "cores", DBaaSClusterResource+"."+DBaaSClusterTestResource, "cores"),
+					resource.TestCheckResourceAttrPair(DataSource+"."+DBaaSClusterResource+"."+DBaaSClusterTestDataSourceById, "ram", DBaaSClusterResource+"."+DBaaSClusterTestResource, "ram"),
+					resource.TestCheckResourceAttrPair(DataSource+"."+DBaaSClusterResource+"."+DBaaSClusterTestDataSourceById, "storage_size", DBaaSClusterResource+"."+DBaaSClusterTestResource, "storage_size"),
+					resource.TestCheckResourceAttrPair(DataSource+"."+DBaaSClusterResource+"."+DBaaSClusterTestDataSourceById, "storage_type", DBaaSClusterResource+"."+DBaaSClusterTestResource, "storage_type"),
+					resource.TestCheckResourceAttrPair(DataSource+"."+DBaaSClusterResource+"."+DBaaSClusterTestDataSourceById, "connections.datacenter_id", DBaaSClusterResource+"."+DBaaSClusterTestResource, "connections.datacenter_id"),
+					resource.TestCheckResourceAttrPair(DataSource+"."+DBaaSClusterResource+"."+DBaaSClusterTestDataSourceById, "connections.lan_id", DBaaSClusterResource+"."+DBaaSClusterTestResource, "connections.lan_id"),
+					resource.TestCheckResourceAttrPair(DataSource+"."+DBaaSClusterResource+"."+DBaaSClusterTestDataSourceById, "connections.cidr", DBaaSClusterResource+"."+DBaaSClusterTestResource, "connections.cidr"),
+					resource.TestCheckResourceAttrPair(DataSource+"."+DBaaSClusterResource+"."+DBaaSClusterTestDataSourceById, "location", DBaaSClusterResource+"."+DBaaSClusterTestResource, "location"),
+					resource.TestCheckResourceAttrPair(DataSource+"."+DBaaSClusterResource+"."+DBaaSClusterTestDataSourceById, "display_name", DBaaSClusterResource+"."+DBaaSClusterTestResource, "display_name"),
+					resource.TestCheckResourceAttrPair(DataSource+"."+DBaaSClusterResource+"."+DBaaSClusterTestDataSourceById, "maintenance_window.day_of_the_week", DBaaSClusterResource+"."+DBaaSClusterTestResource, "maintenance_window.day_of_the_week"),
+					resource.TestCheckResourceAttrPair(DataSource+"."+DBaaSClusterResource+"."+DBaaSClusterTestDataSourceById, "maintenance_window.time", DBaaSClusterResource+"."+DBaaSClusterTestResource, "maintenance_window.time"),
+					resource.TestCheckResourceAttrPair(DataSource+"."+DBaaSClusterResource+"."+DBaaSClusterTestDataSourceById, "credentials.username", DBaaSClusterResource+"."+DBaaSClusterTestResource, "credentials.username"),
+					resource.TestCheckResourceAttrPair(DataSource+"."+DBaaSClusterResource+"."+DBaaSClusterTestDataSourceById, "credentials.password", DBaaSClusterResource+"."+DBaaSClusterTestResource, "credentials.password"),
+				),
+			},
+			{
+				Config: testAccDataSourceDBaaSPgSqlClusterMatchName,
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttrPair(DataSource+"."+DBaaSClusterResource+"."+DBaaSClusterTestDataSourceByName, "display_name", DBaaSClusterResource+"."+DBaaSClusterTestResource, "display_name"),
+					resource.TestCheckResourceAttrPair(DataSource+"."+DBaaSClusterResource+"."+DBaaSClusterTestDataSourceByName, "instances", DBaaSClusterResource+"."+DBaaSClusterTestResource, "instances"),
+					resource.TestCheckResourceAttrPair(DataSource+"."+DBaaSClusterResource+"."+DBaaSClusterTestDataSourceByName, "cores", DBaaSClusterResource+"."+DBaaSClusterTestResource, "cores"),
+					resource.TestCheckResourceAttrPair(DataSource+"."+DBaaSClusterResource+"."+DBaaSClusterTestDataSourceByName, "ram", DBaaSClusterResource+"."+DBaaSClusterTestResource, "ram"),
+					resource.TestCheckResourceAttrPair(DataSource+"."+DBaaSClusterResource+"."+DBaaSClusterTestDataSourceByName, "storage_size", DBaaSClusterResource+"."+DBaaSClusterTestResource, "storage_size"),
+					resource.TestCheckResourceAttrPair(DataSource+"."+DBaaSClusterResource+"."+DBaaSClusterTestDataSourceByName, "storage_type", DBaaSClusterResource+"."+DBaaSClusterTestResource, "storage_type"),
+					resource.TestCheckResourceAttrPair(DataSource+"."+DBaaSClusterResource+"."+DBaaSClusterTestDataSourceByName, "connections.datacenter_id", DBaaSClusterResource+"."+DBaaSClusterTestResource, "connections.datacenter_id"),
+					resource.TestCheckResourceAttrPair(DataSource+"."+DBaaSClusterResource+"."+DBaaSClusterTestDataSourceByName, "connections.lan_id", DBaaSClusterResource+"."+DBaaSClusterTestResource, "connections.lan_id"),
+					resource.TestCheckResourceAttrPair(DataSource+"."+DBaaSClusterResource+"."+DBaaSClusterTestDataSourceByName, "connections.cidr", DBaaSClusterResource+"."+DBaaSClusterTestResource, "connections.cidr"),
+					resource.TestCheckResourceAttrPair(DataSource+"."+DBaaSClusterResource+"."+DBaaSClusterTestDataSourceByName, "location", DBaaSClusterResource+"."+DBaaSClusterTestResource, "location"),
+					resource.TestCheckResourceAttrPair(DataSource+"."+DBaaSClusterResource+"."+DBaaSClusterTestDataSourceByName, "display_name", DBaaSClusterResource+"."+DBaaSClusterTestResource, "display_name"),
+					resource.TestCheckResourceAttrPair(DataSource+"."+DBaaSClusterResource+"."+DBaaSClusterTestDataSourceByName, "maintenance_window.day_of_the_week", DBaaSClusterResource+"."+DBaaSClusterTestResource, "maintenance_window.day_of_the_week"),
+					resource.TestCheckResourceAttrPair(DataSource+"."+DBaaSClusterResource+"."+DBaaSClusterTestDataSourceByName, "maintenance_window.time", DBaaSClusterResource+"."+DBaaSClusterTestResource, "maintenance_window.time"),
+					resource.TestCheckResourceAttrPair(DataSource+"."+DBaaSClusterResource+"."+DBaaSClusterTestDataSourceByName, "credentials.username", DBaaSClusterResource+"."+DBaaSClusterTestResource, "credentials.username"),
+					resource.TestCheckResourceAttrPair(DataSource+"."+DBaaSClusterResource+"."+DBaaSClusterTestDataSourceByName, "credentials.password", DBaaSClusterResource+"."+DBaaSClusterTestResource, "credentials.password"),
+				),
+			},
+			{
+				Config: testAccDataSourceDbaasPgSqlClusterBackups,
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttrPair(DataSource+"."+DBaaSBackupsResource+"."+DBaaSBackupsTest, "cluster_backups.0.cluster_id", DataSource+"."+DBaaSBackupsResource+"."+DBaaSBackupsTest, "cluster_id"),
+					testNotEmptySlice(DBaaSBackupsResource, "cluster_backups.#"),
+				),
+			},
+			{
+				Config: testAccDataSourceDbaasPgSqlVersionsByClusterId,
+				Check: resource.ComposeTestCheckFunc(
+					testNotEmptySlice(DBaaSVersionsResource, "postgres_versions.#"),
+				),
+			},
+			{
+				Config: testAccDataSourceDbaasPgSqlAllVersions,
+				Check: resource.ComposeTestCheckFunc(
+					testNotEmptySlice(DBaaSVersionsResource, "postgres_versions.#"),
+				),
+			},
+			{
 				Config: testAccCheckDbaasPgSqlClusterConfigUpdate,
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckDbaasPgSqlClusterExists(DBaaSClusterResource+"."+DBaaSClusterTestResource, &dbaasCluster),
@@ -367,3 +426,32 @@ resource ` + DBaaSClusterResource + ` ` + DBaaSClusterTestResource + ` {
     recovery_target_time = "2022-01-13T16:27:42Z"
   }
 }`
+
+const testAccDataSourceDBaaSPgSqlClusterMatchId = testAccCheckDbaasPgSqlClusterConfigBasic + `
+data ` + DBaaSClusterResource + ` ` + DBaaSClusterTestDataSourceById + ` {
+  id	= ` + DBaaSClusterResource + `.` + DBaaSClusterTestResource + `.id
+}
+`
+
+const testAccDataSourceDBaaSPgSqlClusterMatchName = testAccCheckDbaasPgSqlClusterConfigBasic + `
+data ` + DBaaSClusterResource + ` ` + DBaaSClusterTestDataSourceByName + ` {
+  display_name	= "` + DBaaSClusterTestResource + `"
+}
+`
+
+const testAccDataSourceDbaasPgSqlClusterBackups = testAccCheckDbaasPgSqlClusterConfigBasic + `
+data ` + DBaaSBackupsResource + ` ` + DBaaSBackupsTest + ` {
+	cluster_id = ` + DBaaSClusterResource + `.` + DBaaSClusterTestResource + `.id
+}
+`
+
+const testAccDataSourceDbaasPgSqlAllVersions = `
+data ` + DBaaSVersionsResource + ` ` + DBaaSVersionsTest + ` {
+}
+`
+
+const testAccDataSourceDbaasPgSqlVersionsByClusterId = testAccCheckDbaasPgSqlClusterConfigBasic + `
+data ` + DBaaSVersionsResource + ` ` + DBaaSVersionsTest + ` {
+	cluster_id = ` + DBaaSClusterResource + `.` + DBaaSClusterTestResource + `.id
+}
+`
