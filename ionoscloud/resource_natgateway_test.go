@@ -30,7 +30,7 @@ func TestAccNatGatewayBasic(t *testing.T) {
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckNatGatewayExists(resourceNatGatewayResource, &natGateway),
 					resource.TestCheckResourceAttr(resourceNatGatewayResource, "name", NatGatewayTestResource),
-					resource.TestCheckResourceAttrPair(resourceNatGatewayResource, "public_ips.0", IpBLockResource+".natgateway_ips", "ips.0"),
+					resource.TestCheckResourceAttrPair(resourceNatGatewayResource, "public_ips.0", IpBlockResource+".natgateway_ips", "ips.0"),
 					resource.TestCheckResourceAttrPair(resourceNatGatewayResource, "lans.0.id", LanResource+".natgateway_lan", "id"),
 					resource.TestCheckResourceAttr(resourceNatGatewayResource, "lans.0.gateway_ips.0", "10.11.2.5/24"),
 				),
@@ -40,8 +40,8 @@ func TestAccNatGatewayBasic(t *testing.T) {
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckNatGatewayExists(resourceNatGatewayResource, &natGateway),
 					resource.TestCheckResourceAttr(resourceNatGatewayResource, "name", UpdatedResources),
-					resource.TestCheckResourceAttrPair(resourceNatGatewayResource, "public_ips.0", IpBLockResource+".natgateway_ips", "ips.0"),
-					resource.TestCheckResourceAttrPair(resourceNatGatewayResource, "public_ips.1", IpBLockResource+".natgateway_ips", "ips.1"),
+					resource.TestCheckResourceAttrPair(resourceNatGatewayResource, "public_ips.0", IpBlockResource+".natgateway_ips", "ips.0"),
+					resource.TestCheckResourceAttrPair(resourceNatGatewayResource, "public_ips.1", IpBlockResource+".natgateway_ips", "ips.1"),
 					resource.TestCheckResourceAttrPair(resourceNatGatewayResource, "lans.0.id", LanResource+".natgateway_lan_updated", "id"),
 					resource.TestCheckResourceAttr(resourceNatGatewayResource, "lans.0.gateway_ips.0", "10.11.2.6/24"),
 				),
@@ -120,7 +120,7 @@ resource ` + DatacenterResource + ` "natgateway_datacenter" {
   description       = "datacenter for hosting "
 }
 
-resource ` + IpBLockResource + ` "natgateway_ips" {
+resource ` + IpBlockResource + ` "natgateway_ips" {
   location = ` + DatacenterResource + `.natgateway_datacenter.location
   size = 2
   name = "natgateway_ips"
@@ -135,7 +135,7 @@ resource ` + LanResource + ` "natgateway_lan" {
 resource ` + NatGatewayResource + ` ` + NatGatewayTestResource + ` { 
   datacenter_id = ` + DatacenterResource + `.natgateway_datacenter.id
   name          = "%s" 
-  public_ips    = [ ` + IpBLockResource + `.natgateway_ips.ips[0] ]
+  public_ips    = [ ` + IpBlockResource + `.natgateway_ips.ips[0] ]
   lans {
      id          = ` + LanResource + `.natgateway_lan.id
      gateway_ips = [ "10.11.2.5"] 
@@ -149,7 +149,7 @@ resource ` + DatacenterResource + ` "natgateway_datacenter" {
   description       = "datacenter for hosting "
 }
 
-resource ` + IpBLockResource + ` "natgateway_ips" {
+resource ` + IpBlockResource + ` "natgateway_ips" {
   location = ` + DatacenterResource + `.natgateway_datacenter.location
   size = 2
   name = "natgateway_ips"
@@ -171,7 +171,7 @@ resource ` + LanResource + ` "natgateway_lan_updated" {
 resource ` + NatGatewayResource + ` ` + NatGatewayTestResource + ` { 
   datacenter_id = ` + DatacenterResource + `.natgateway_datacenter.id
   name          = "%s" 
-  public_ips    = [ ` + IpBLockResource + `.natgateway_ips.ips[0], ` + IpBLockResource + `.natgateway_ips.ips[1] ]
+  public_ips    = [ ` + IpBlockResource + `.natgateway_ips.ips[0], ` + IpBlockResource + `.natgateway_ips.ips[1] ]
   lans {
      id          = ` + LanResource + `.natgateway_lan_updated.id
      gateway_ips = [ "10.11.2.6/24"] 

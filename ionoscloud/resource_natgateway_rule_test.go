@@ -33,7 +33,7 @@ func TestAccNatGatewayRuleBasic(t *testing.T) {
 					resource.TestCheckResourceAttr(resourceNatGatewayRuleResource, "type", "SNAT"),
 					resource.TestCheckResourceAttr(resourceNatGatewayRuleResource, "protocol", "TCP"),
 					resource.TestCheckResourceAttr(resourceNatGatewayRuleResource, "source_subnet", "10.0.1.0/24"),
-					resource.TestCheckResourceAttrPair(resourceNatGatewayRuleResource, "public_ip", IpBLockResource+".natgateway_rule_ips", "ips.0"),
+					resource.TestCheckResourceAttrPair(resourceNatGatewayRuleResource, "public_ip", IpBlockResource+".natgateway_rule_ips", "ips.0"),
 					resource.TestCheckResourceAttr(resourceNatGatewayRuleResource, "target_subnet", "172.16.0.0/24"),
 					resource.TestCheckResourceAttr(resourceNatGatewayRuleResource, "target_port_range.0.start", "500"),
 					resource.TestCheckResourceAttr(resourceNatGatewayRuleResource, "target_port_range.0.end", "1000"),
@@ -46,7 +46,7 @@ func TestAccNatGatewayRuleBasic(t *testing.T) {
 					resource.TestCheckResourceAttr(resourceNatGatewayRuleResource, "type", "SNAT"),
 					resource.TestCheckResourceAttr(resourceNatGatewayRuleResource, "protocol", "UDP"),
 					resource.TestCheckResourceAttr(resourceNatGatewayRuleResource, "source_subnet", "10.3.1.0/24"),
-					resource.TestCheckResourceAttrPair(resourceNatGatewayRuleResource, "public_ip", IpBLockResource+".natgateway_rule_ips", "ips.0"),
+					resource.TestCheckResourceAttrPair(resourceNatGatewayRuleResource, "public_ip", IpBlockResource+".natgateway_rule_ips", "ips.0"),
 					resource.TestCheckResourceAttr(resourceNatGatewayRuleResource, "target_subnet", "172.31.0.0/24"),
 					resource.TestCheckResourceAttr(resourceNatGatewayRuleResource, "target_port_range.0.start", "200"),
 					resource.TestCheckResourceAttr(resourceNatGatewayRuleResource, "target_port_range.0.end", "1111")),
@@ -126,7 +126,7 @@ resource ` + DatacenterResource + ` "natgateway_rule_datacenter" {
   description       = "datacenter for hosting "
 }
 
-resource ` + IpBLockResource + ` "natgateway_rule_ips" {
+resource ` + IpBlockResource + ` "natgateway_rule_ips" {
   location = ` + DatacenterResource + `.natgateway_rule_datacenter.location
   size = 2
   name = "natgateway_rule_ips"
@@ -141,7 +141,7 @@ resource ` + LanResource + ` "natgateway_rule_lan" {
 resource ` + NatGatewayResource + ` "natgateway" { 
   datacenter_id = ` + DatacenterResource + `.natgateway_rule_datacenter.id
   name          = "test_natgateway_rule_natgateway" 
-  public_ips    = [ ` + IpBLockResource + `.natgateway_rule_ips.ips[0], ` + IpBLockResource + `.natgateway_rule_ips.ips[1] ]
+  public_ips    = [ ` + IpBlockResource + `.natgateway_rule_ips.ips[0], ` + IpBlockResource + `.natgateway_rule_ips.ips[1] ]
   lans {
      id          = ` + LanResource + `.natgateway_rule_lan.id
      gateway_ips = [ "10.11.2.5"] 
@@ -155,7 +155,7 @@ resource ` + NatGatewayRuleResource + ` ` + NatGatewayRuleTestResource + ` {
   type          = "SNAT"
   protocol      = "TCP"
   source_subnet = "10.0.1.0/24"
-  public_ip     = ` + IpBLockResource + `.natgateway_rule_ips.ips[0]
+  public_ip     = ` + IpBlockResource + `.natgateway_rule_ips.ips[0]
   target_subnet = "172.16.0.0/24"
   target_port_range {
       start = 500
@@ -171,7 +171,7 @@ resource ` + DatacenterResource + ` "natgateway_rule_datacenter" {
   description       = "datacenter for hosting "
 }
 
-resource ` + IpBLockResource + ` "natgateway_rule_ips" {
+resource ` + IpBlockResource + ` "natgateway_rule_ips" {
   location = ` + DatacenterResource + `.natgateway_rule_datacenter.location
   size = 2
   name = "natgateway_rule_ips"
@@ -186,7 +186,7 @@ resource ` + LanResource + ` "natgateway_rule_lan" {
 resource ` + NatGatewayResource + ` "natgateway" { 
   datacenter_id = ` + DatacenterResource + `.natgateway_rule_datacenter.id
   name          = "test_natgateway_rule_natgateway" 
-  public_ips    = [ ` + IpBLockResource + `.natgateway_rule_ips.ips[0], ` + IpBLockResource + `.natgateway_rule_ips.ips[1] ]
+  public_ips    = [ ` + IpBlockResource + `.natgateway_rule_ips.ips[0], ` + IpBlockResource + `.natgateway_rule_ips.ips[1] ]
   lans {
      id          = ` + LanResource + `.natgateway_rule_lan.id
      gateway_ips = [ "10.11.2.5"] 
@@ -200,7 +200,7 @@ resource ` + NatGatewayRuleResource + ` ` + NatGatewayRuleTestResource + ` {
   type          = "SNAT"
   protocol      = "UDP"
   source_subnet = "10.3.1.0/24"
-  public_ip     = ` + IpBLockResource + `.natgateway_rule_ips.ips[0]
+  public_ip     = ` + IpBlockResource + `.natgateway_rule_ips.ips[0]
   target_subnet = "172.31.0.0/24"
   target_port_range {
       start = 200

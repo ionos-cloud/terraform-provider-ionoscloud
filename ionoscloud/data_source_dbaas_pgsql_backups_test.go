@@ -15,8 +15,6 @@ func TestAccDataSourceDbaasPgSqlClusterBackups(t *testing.T) {
 			testAccPreCheck(t)
 		},
 		ProviderFactories: testAccProviderFactories,
-		Steps: []resource.TestStep{
-			{},
-		},
+		Steps:             []resource.TestStep{},
 	})
 }
