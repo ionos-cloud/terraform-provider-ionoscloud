@@ -25,7 +25,8 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v2
         with:
-          ref: release/v6.0.x
+#          ref: release/v6.0.x
+           ref:  feat/add_tests_to_workflow
       - name: Print test-tags
         run: echo ${{ github.event.inputs.test-tags }}
       - name: Run tests with tags
