@@ -1,3 +1,5 @@
+//go:build compute || all || ipblock
+
 package ionoscloud
 
 import (

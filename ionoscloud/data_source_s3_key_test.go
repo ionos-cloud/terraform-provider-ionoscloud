@@ -1,3 +1,5 @@
+//go:build compute || all || s3key
+
 package ionoscloud
 
 import (

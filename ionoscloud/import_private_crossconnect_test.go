@@ -1,3 +1,5 @@
+//go:build compute || all || crossconnect
+
 package ionoscloud
 
 import (
