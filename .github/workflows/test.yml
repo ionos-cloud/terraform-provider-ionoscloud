@@ -8,6 +8,10 @@ on:
         default: k8s,dbaas,natgateway,nlb
 jobs:
   test:
+    env:
+      IONOS_USERNAME: ${{ secrets.IONOS_VDC_USER_GO_V6 }}
+      IONOS_PASSWORD: ${{ secrets.IONOS_VDC_PASSWORD_GO_V6 }}
+      TF_ACC: true
     strategy:
       matrix:
         go-version: [^1.17]
@@ -22,14 +26,10 @@ jobs:
         uses: actions/checkout@v2
         with:
           ref: release/v6.0.x
-      - name: Test
-        env:
-          IONOS_USERNAME: ${{ secrets.IONOS_VDC_USER_GO_V6 }}
-          IONOS_PASSWORD: ${{ secrets.IONOS_VDC_PASSWORD_GO_V6 }}
-          TF_ACC: true
       - name: Run tests with tags
         if: github.event.inputs.test-tags != ''
         run: go test ./ionoscloud -v -timeout 240m -tags ${{ github.event.inputs.test-tags }}
+        env:
       - name: Run tests without tags
         if: github.event.inputs.test-tags == ''
         run: go test ./ionoscloud -v -timeout 180m
