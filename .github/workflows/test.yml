@@ -32,7 +32,7 @@ jobs:
           TF_ACC: true
       - name : "run tests with tags"
         if: github.event.inputs.test-tags != ''
-          run: go test ./ionoscloud -v -timeout 240m -tags ${{ github.event.inputs.test-tags }}
+        run: go test ./ionoscloud -v -timeout 240m -tags ${{ github.event.inputs.test-tags }}
       - name : "run tests without tags"
         if: github.event.inputs.test-tags == ''
-          run: go test ./ionoscloud -v -timeout 180m
+        run: go test ./ionoscloud -v -timeout 180m
