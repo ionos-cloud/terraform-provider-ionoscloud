@@ -26,9 +26,11 @@ jobs:
         uses: actions/checkout@v2
         with:
           ref: release/v6.0.x
+      - name: Print test-tags
+        run: echo ${{ github.event.inputs.test-tags }}
       - name: Run tests with tags
-        if: github.event.inputs.test-tags != ''
+        if: ${{ github.event.inputs.test-tags != '' }}
         run: go test ./ionoscloud -v -timeout 240m -tags ${{ github.event.inputs.test-tags }}
       - name: Run tests without tags
-        if: github.event.inputs.test-tags == ''
+        if: ${{ github.event.inputs.test-tags == ''}}
         run: go test ./ionoscloud -v -timeout 180m
