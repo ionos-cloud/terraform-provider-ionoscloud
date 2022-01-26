@@ -3,9 +3,9 @@ on:
   workflow_dispatch:
     inputs:
       test-tags:
-        description: test tags to use
+        description: "test tags, in the form of a list without spaces: 'k8s,dbaas,natgateway,nlb,waiting_for_vdc, nlb' "
         required: false
-        default: k8s,dbaas,natgateway,nlb
+        type: string
 jobs:
   test:
     env:
@@ -30,7 +30,7 @@ jobs:
         run: echo ${{ github.event.inputs.test-tags }}
       - name: Run tests with tags
         if: ${{ github.event.inputs.test-tags != '' }}
-        run: go test ./ionoscloud -v -timeout 240m -tags ${{ github.event.inputs.test-tags }}
+        run: go test ./ionoscloud -v -failfast -timeout 240m -tags ${{ github.event.inputs.test-tags }}
       - name: Run tests without tags
         if: ${{ github.event.inputs.test-tags == ''}}
-        run: go test ./ionoscloud -v -timeout 180m
+        run: go test ./ionoscloud -v -failfast -timeout 180m
