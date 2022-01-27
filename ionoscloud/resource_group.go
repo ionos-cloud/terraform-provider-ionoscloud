@@ -158,7 +158,7 @@ func resourceGroupCreate(ctx context.Context, d *schema.ResourceData, meta inter
 	logApiRequestTime(apiResponse)
 
 	if err != nil {
-		diags := diag.FromErr(fmt.Errorf("an error occured while creating a group: %s", err))
+		diags := diag.FromErr(fmt.Errorf("an error occured while creating a group: %w", err))
 		return diags
 	}
 
@@ -185,7 +185,7 @@ func resourceGroupCreate(ctx context.Context, d *schema.ResourceData, meta inter
 		_, apiResponse, err := client.UserManagementApi.UmGroupsUsersPost(ctx, d.Id()).User(user).Execute()
 		logApiRequestTime(apiResponse)
 		if err != nil {
-			diags := diag.FromErr(fmt.Errorf("an error occured while adding %s user to group ID %s %s", usertoAdd, d.Id(), err))
+			diags := diag.FromErr(fmt.Errorf("an error occured while adding %s user to group ID %s %w", usertoAdd, d.Id(), err))
 			return diags
 		}
 		// Wait, catching any errors
@@ -209,7 +209,7 @@ func resourceGroupRead(ctx context.Context, d *schema.ResourceData, meta interfa
 			d.SetId("")
 			return nil
 		}
-		diags := diag.FromErr(fmt.Errorf("an error occured while fetching a Group ID %s %s", d.Id(), err))
+		diags := diag.FromErr(fmt.Errorf("an error occured while fetching a Group ID %s %w", d.Id(), err))
 		return diags
 	}
 
@@ -262,7 +262,7 @@ func resourceGroupUpdate(ctx context.Context, d *schema.ResourceData, meta inter
 	_, apiResponse, err := client.UserManagementApi.UmGroupsPut(ctx, d.Id()).Group(groupReq).Execute()
 	logApiRequestTime(apiResponse)
 	if err != nil {
-		diags := diag.FromErr(fmt.Errorf("an error occured while patching a group ID %s %s", d.Id(), err))
+		diags := diag.FromErr(fmt.Errorf("an error occured while patching a group ID %s %w", d.Id(), err))
 		return diags
 	}
 	// Wait, catching any errors
@@ -282,7 +282,7 @@ func resourceGroupUpdate(ctx context.Context, d *schema.ResourceData, meta inter
 		_, apiResponse, err := client.UserManagementApi.UmGroupsUsersPost(ctx, d.Id()).User(user).Execute()
 		logApiRequestTime(apiResponse)
 		if err != nil {
-			diags := diag.FromErr(fmt.Errorf("an error occured while adding %s user to group ID %s %s", userToAdd, d.Id(), err))
+			diags := diag.FromErr(fmt.Errorf("an error occured while adding %s user to group ID %s %w", userToAdd, d.Id(), err))
 			return diags
 		}
 

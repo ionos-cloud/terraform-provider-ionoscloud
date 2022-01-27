@@ -54,7 +54,7 @@ func resourceS3KeyCreate(ctx context.Context, d *schema.ResourceData, meta inter
 
 	if err != nil {
 		d.SetId("")
-		diags := diag.FromErr(fmt.Errorf("error creating S3 key: %s", err))
+		diags := diag.FromErr(fmt.Errorf("error creating S3 key: %w", err))
 		return diags
 	}
 
@@ -107,7 +107,7 @@ func resourceS3KeyRead(ctx context.Context, d *schema.ResourceData, meta interfa
 			d.SetId("")
 			return nil
 		}
-		diags := diag.FromErr(fmt.Errorf("error while reading S3 key %s: %s, %+v", d.Id(), err, s3Key))
+		diags := diag.FromErr(fmt.Errorf("error while reading S3 key %s: %w, %+v", d.Id(), err, s3Key))
 		return diags
 	}
 
@@ -147,7 +147,7 @@ func resourceS3KeyUpdate(ctx context.Context, d *schema.ResourceData, meta inter
 			d.SetId("")
 			return nil
 		}
-		diags := diag.FromErr(fmt.Errorf("error while updating S3 key %s: %s", d.Id(), err))
+		diags := diag.FromErr(fmt.Errorf("error while updating S3 key %s: %w", d.Id(), err))
 		return diags
 	}
 
@@ -172,7 +172,7 @@ func resourceS3KeyDelete(ctx context.Context, d *schema.ResourceData, meta inter
 			d.SetId("")
 			return nil
 		}
-		diags := diag.FromErr(fmt.Errorf("error while deleting S3 key %s: %s", d.Id(), err))
+		diags := diag.FromErr(fmt.Errorf("error while deleting S3 key %s: %w", d.Id(), err))
 		return diags
 	}
 

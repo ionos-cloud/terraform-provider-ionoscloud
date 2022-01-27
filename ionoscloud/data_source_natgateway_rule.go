@@ -139,9 +139,9 @@ func dataSourceNatGatewayRuleRead(ctx context.Context, d *schema.ResourceData, m
 
 		if natGatewayRules.Items != nil && len(*natGatewayRules.Items) > 0 {
 			natGatewayRule = (*natGatewayRules.Items)[len(*natGatewayRules.Items)-1]
-			log.Printf("[INFO] %v nat gateway rules found matching the search critiria. Getting the latest nat gateway rule from the list %v", len(*natGatewayRules.Items), *natGatewayRule.Id)
+			log.Printf("[WARN] %v nat gateway rules found matching the search criteria. Getting the latest nat gateway rule from the list %v", len(*natGatewayRules.Items), *natGatewayRule.Id)
 		} else {
-			return diag.FromErr(fmt.Errorf("no nat gateway rule found with the specified name"))
+			return diag.FromErr(fmt.Errorf("no nat gateway rule found with the specified name %s", name.(string)))
 		}
 	}
 

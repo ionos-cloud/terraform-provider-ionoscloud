@@ -59,7 +59,7 @@ func dataSourceBackupUnitRead(ctx context.Context, d *schema.ResourceData, meta 
 		backupUnit, apiResponse, err = client.BackupUnitsApi.BackupunitsFindById(ctx, id.(string)).Execute()
 		logApiRequestTime(apiResponse)
 		if err != nil {
-			return diag.FromErr(fmt.Errorf("an error occurred while fetching the backup unit %s: %s", id.(string), err))
+			return diag.FromErr(fmt.Errorf("an error occurred while fetching the backup unit %s: %w", id.(string), err))
 		}
 		if backupUnit.Properties != nil {
 			log.Printf("[INFO] Got backupUnit [Name=%s] [Id=%s]", *backupUnit.Properties.Name, *backupUnit.Id)
@@ -75,9 +75,9 @@ func dataSourceBackupUnitRead(ctx context.Context, d *schema.ResourceData, meta 
 
 		if backupUnits.Items != nil && len(*backupUnits.Items) > 0 {
 			backupUnit = (*backupUnits.Items)[len(*backupUnits.Items)-1]
-			log.Printf("[INFO] %v backup units found matching the search critiria. Getting the latest backup unit from the list %v", len(*backupUnits.Items), *backupUnit.Id)
+			log.Printf("[WARN] %v backup units found matching the search criteria. Getting the latest backup unit from the list %v", len(*backupUnits.Items), *backupUnit.Id)
 		} else {
-			return diag.FromErr(fmt.Errorf("no backup unit found with the specified name"))
+			return diag.FromErr(fmt.Errorf("no backup unit found with the specified name %s", name.(string)))
 		}
 
 	}
@@ -86,7 +86,7 @@ func dataSourceBackupUnitRead(ctx context.Context, d *schema.ResourceData, meta 
 	logApiRequestTime(apiResponse)
 
 	if cErr != nil {
-		diags := diag.FromErr(fmt.Errorf("error while fetching contract resources for backup unit %s: %s", d.Id(), cErr))
+		diags := diag.FromErr(fmt.Errorf("error while fetching contract resources for backup unit %s: %w", d.Id(), cErr))
 		return diags
 	}
 

@@ -118,7 +118,7 @@ func dataSourceGroupRead(ctx context.Context, d *schema.ResourceData, meta inter
 		group, apiResponse, err = client.UserManagementApi.UmGroupsFindById(ctx, id.(string)).Execute()
 		logApiRequestTime(apiResponse)
 		if err != nil {
-			diags := diag.FromErr(fmt.Errorf("an error occurred while fetching group with ID %s: %s", id.(string), err))
+			diags := diag.FromErr(fmt.Errorf("an error occurred while fetching group with ID %s: %w", id.(string), err))
 			return diags
 		}
 	} else {
@@ -132,9 +132,9 @@ func dataSourceGroupRead(ctx context.Context, d *schema.ResourceData, meta inter
 
 		if groups.Items != nil && len(*groups.Items) > 0 {
 			group = (*groups.Items)[len(*groups.Items)-1]
-			log.Printf("[INFO] %v groups found matching the search critiria. Getting the latest group from the list %v", len(*groups.Items), *group.Id)
+			log.Printf("[WARN] %v groups found matching the search criteria. Getting the latest group from the list %v", len(*groups.Items), *group.Id)
 		} else {
-			return diag.FromErr(fmt.Errorf("no group found with the specified name"))
+			return diag.FromErr(fmt.Errorf("no group found with the specified name %s", name.(string)))
 		}
 
 	}

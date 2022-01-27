@@ -224,9 +224,9 @@ func dataSourceK8sReadNodePool(ctx context.Context, d *schema.ResourceData, meta
 
 		if nodePools.Items != nil && len(*nodePools.Items) > 0 {
 			nodePool = (*nodePools.Items)[len(*nodePools.Items)-1]
-			log.Printf("[INFO] %v node pools found matching the search critiria. Getting the latest node pool from the list %v", len(*nodePools.Items), *nodePool.Id)
+			log.Printf("[WARN] %v node pools found matching the search criteria. Getting the latest node pool from the list %v", len(*nodePools.Items), *nodePool.Id)
 		} else {
-			return diag.FromErr(fmt.Errorf("no node pools found with the specified name"))
+			return diag.FromErr(fmt.Errorf("no node pools found with the specified name %s", name.(string)))
 		}
 
 	}

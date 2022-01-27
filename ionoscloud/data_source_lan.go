@@ -104,7 +104,7 @@ func dataSourceLanRead(ctx context.Context, d *schema.ResourceData, meta interfa
 		lan, apiResponse, err = client.LANsApi.DatacentersLansFindById(ctx, datacenterId.(string), id.(string)).Execute()
 		logApiRequestTime(apiResponse)
 		if err != nil {
-			return diag.FromErr(fmt.Errorf("an error occurred while fetching lan with ID %s: %s", id.(string), err))
+			return diag.FromErr(fmt.Errorf("an error occurred while fetching lan with ID %s: %w", id.(string), err))
 		}
 	} else {
 		/* search by name */
@@ -116,9 +116,9 @@ func dataSourceLanRead(ctx context.Context, d *schema.ResourceData, meta interfa
 
 		if lans.Items != nil && len(*lans.Items) > 0 {
 			lan = (*lans.Items)[len(*lans.Items)-1]
-			log.Printf("[INFO] %v lans found matching the search critiria. Getting the latest lan from the list %v", len(*lans.Items), *lan.Id)
+			log.Printf("[WARN] %v lans found matching the search criteria. Getting the latest lan from the list %v", len(*lans.Items), *lan.Id)
 		} else {
-			return diag.FromErr(fmt.Errorf("no lan found with the specified name"))
+			return diag.FromErr(fmt.Errorf("no lan found with the specified name %s", name.(string)))
 		}
 
 	}

@@ -180,7 +180,7 @@ func resourceDbaasPgSqlClusterCreate(ctx context.Context, d *schema.ResourceData
 	dbaasClusterResponse, _, err := client.CreateCluster(ctx, *dbaasCluster)
 
 	if err != nil {
-		diags := diag.FromErr(fmt.Errorf("an error occured while creating a dbaas cluster: %s", err))
+		diags := diag.FromErr(fmt.Errorf("an error occured while creating a dbaas cluster: %w", err))
 		return diags
 	}
 
@@ -192,7 +192,7 @@ func resourceDbaasPgSqlClusterCreate(ctx context.Context, d *schema.ResourceData
 		clusterReady, rsErr := dbaasClusterReady(ctx, client, d)
 
 		if rsErr != nil {
-			diags := diag.FromErr(fmt.Errorf("error while checking readiness status of dbaas cluster %s: %s", d.Id(), rsErr))
+			diags := diag.FromErr(fmt.Errorf("error while checking readiness status of dbaas cluster %s: %w", d.Id(), rsErr))
 			return diags
 		}
 
@@ -226,7 +226,7 @@ func resourceDbaasPgSqlClusterRead(ctx context.Context, d *schema.ResourceData, 
 			d.SetId("")
 			return nil
 		}
-		diags := diag.FromErr(fmt.Errorf("error while fetching dbaas cluster %s: %s", d.Id(), err))
+		diags := diag.FromErr(fmt.Errorf("error while fetching dbaas cluster %s: %w", d.Id(), err))
 		return diags
 	}
 

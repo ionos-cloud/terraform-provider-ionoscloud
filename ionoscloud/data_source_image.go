@@ -146,9 +146,9 @@ func dataSourceImageRead(ctx context.Context, d *schema.ResourceData, meta inter
 
 	if results.Items != nil && len(*results.Items) > 0 {
 		image = (*results.Items)[len(*results.Items)-1]
-		log.Printf("[INFO] %v images found matching the search critiria. Getting the latest image from the list %v", len(*results.Items), *image.Id)
+		log.Printf("[WARN] %v images found matching the search criteria. Getting the latest image from the list %v", len(*results.Items), *image.Id)
 	} else {
-		return diag.FromErr(fmt.Errorf("no image found with the specified criteria"))
+		return diag.FromErr(fmt.Errorf("no image found with the specified criteria: name %s, imageType %s, location %s, cloudInit %s", name, imageType.(string), location.(string), cloudInit.(string)))
 	}
 
 	if err := setImageData(d, &image); err != nil {

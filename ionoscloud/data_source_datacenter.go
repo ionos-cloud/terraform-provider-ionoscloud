@@ -141,9 +141,9 @@ func dataSourceDataCenterRead(ctx context.Context, d *schema.ResourceData, meta 
 
 		if results.Items != nil && len(*results.Items) > 0 {
 			datacenter = (*results.Items)[len(*results.Items)-1]
-			log.Printf("[INFO] %v datacenters found matching the search critiria. Getting the latest datacenter from the list %v", len(*results.Items), *datacenter.Id)
+			log.Printf("[WARN] %v datacenters found matching the search criteria. Getting the latest datacenter from the list %v", len(*results.Items), *datacenter.Id)
 		} else {
-			return diag.FromErr(fmt.Errorf("no datacenter found with the specified criteria"))
+			return diag.FromErr(fmt.Errorf("no datacenter found with the specified criteria: name %s, location %s", name, location))
 		}
 
 	}

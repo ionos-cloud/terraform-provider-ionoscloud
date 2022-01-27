@@ -72,7 +72,7 @@ func resourceBackupUnitCreate(ctx context.Context, d *schema.ResourceData, meta 
 
 	if err != nil {
 		d.SetId("")
-		diags := diag.FromErr(fmt.Errorf("error creating backup unit: %s", err))
+		diags := diag.FromErr(fmt.Errorf("error creating backup unit: %w", err))
 		return diags
 	}
 
@@ -98,7 +98,7 @@ func resourceBackupUnitRead(ctx context.Context, d *schema.ResourceData, meta in
 			d.SetId("")
 			return nil
 		}
-		diags := diag.FromErr(fmt.Errorf("error while fetching backup unit %s: %s", d.Id(), err))
+		diags := diag.FromErr(fmt.Errorf("error while fetching backup unit %s: %w", d.Id(), err))
 		return diags
 	}
 
@@ -106,7 +106,7 @@ func resourceBackupUnitRead(ctx context.Context, d *schema.ResourceData, meta in
 	logApiRequestTime(apiResponse)
 
 	if cErr != nil {
-		diags := diag.FromErr(fmt.Errorf("error while fetching contract resources for backup unit %s: %s", d.Id(), cErr))
+		diags := diag.FromErr(fmt.Errorf("error while fetching contract resources for backup unit %s: %w", d.Id(), cErr))
 		return diags
 	}
 
@@ -158,7 +158,7 @@ func resourceBackupUnitUpdate(ctx context.Context, d *schema.ResourceData, meta 
 			d.SetId("")
 			return nil
 		}
-		diags := diag.FromErr(fmt.Errorf("error while updating backup unit %s: %s", d.Id(), err))
+		diags := diag.FromErr(fmt.Errorf("error while updating backup unit %s: %w", d.Id(), err))
 		return diags
 	}
 
@@ -176,7 +176,7 @@ func waitForUnitToBeReady(ctx context.Context, d *schema.ResourceData, client *i
 		backupUnitReady, rsErr := backupUnitReady(client, d, ctx)
 
 		if rsErr != nil {
-			diags := diag.FromErr(fmt.Errorf("error while checking readiness status of backup unit %s: %s", d.Id(), rsErr))
+			diags := diag.FromErr(fmt.Errorf("error while checking readiness status of backup unit %s: %w", d.Id(), rsErr))
 			return diags
 		}
 
@@ -208,7 +208,7 @@ func resourceBackupUnitDelete(ctx context.Context, d *schema.ResourceData, meta 
 			d.SetId("")
 			return nil
 		}
-		diags := diag.FromErr(fmt.Errorf("error while deleting backup unit %s: %s", d.Id(), err))
+		diags := diag.FromErr(fmt.Errorf("error while deleting backup unit %s: %w", d.Id(), err))
 		return diags
 	}
 
@@ -218,7 +218,7 @@ func resourceBackupUnitDelete(ctx context.Context, d *schema.ResourceData, meta 
 		backupUnitDeleted, dsErr := backupUnitDeleted(client, d, ctx)
 
 		if dsErr != nil {
-			diags := diag.FromErr(fmt.Errorf("error while checking deletion status of backup unit %s: %s", d.Id(), dsErr))
+			diags := diag.FromErr(fmt.Errorf("error while checking deletion status of backup unit %s: %w", d.Id(), dsErr))
 			return diags
 		}
 

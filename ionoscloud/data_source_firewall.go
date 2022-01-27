@@ -116,9 +116,9 @@ func dataSourceFirewallRead(ctx context.Context, d *schema.ResourceData, meta in
 
 		if firewalls.Items != nil && len(*firewalls.Items) > 0 {
 			firewall = (*firewalls.Items)[len(*firewalls.Items)-1]
-			log.Printf("[INFO] %v firewalls found matching the search critiria. Getting the latest firewall from the list %v", len(*firewalls.Items), *firewall.Id)
+			log.Printf("[WARN] %v firewalls found matching the search criteria. Getting the latest firewall from the list %v", len(*firewalls.Items), *firewall.Id)
 		} else {
-			return diag.FromErr(fmt.Errorf("no firewall found with the specified name"))
+			return diag.FromErr(fmt.Errorf("no firewall found with the specified name %s", name.(string)))
 		}
 
 	}

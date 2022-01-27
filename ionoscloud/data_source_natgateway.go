@@ -94,7 +94,7 @@ func dataSourceNatGatewayRead(ctx context.Context, d *schema.ResourceData, meta 
 		natGateway, apiResponse, err = client.NATGatewaysApi.DatacentersNatgatewaysFindByNatGatewayId(ctx, datacenterId.(string), id.(string)).Execute()
 		logApiRequestTime(apiResponse)
 		if err != nil {
-			return diag.FromErr(fmt.Errorf("an error occurred while fetching the nat gateway %s: %s", id.(string), err))
+			return diag.FromErr(fmt.Errorf("an error occurred while fetching the nat gateway %s: %w", id.(string), err))
 		}
 	} else {
 		/* search by name */
@@ -106,9 +106,9 @@ func dataSourceNatGatewayRead(ctx context.Context, d *schema.ResourceData, meta 
 
 		if natGateways.Items != nil && len(*natGateways.Items) > 0 {
 			natGateway = (*natGateways.Items)[len(*natGateways.Items)-1]
-			log.Printf("[INFO] %v nat gateways found matching the search critiria. Getting the latest nat gateway from the list %v", len(*natGateways.Items), *natGateway.Id)
+			log.Printf("[WARN] %v nat gateways found matching the search criteria. Getting the latest nat gateway from the list %v", len(*natGateways.Items), *natGateway.Id)
 		} else {
-			return diag.FromErr(fmt.Errorf("no nat gateway found with the specified name"))
+			return diag.FromErr(fmt.Errorf("no nat gateway found with the specified name %s", name.(string)))
 		}
 
 	}

@@ -77,7 +77,7 @@ func dataSourceUserRead(ctx context.Context, d *schema.ResourceData, meta interf
 		user, apiResponse, err = client.UserManagementApi.UmUsersFindById(ctx, id.(string)).Execute()
 		logApiRequestTime(apiResponse)
 		if err != nil {
-			diags := diag.FromErr(fmt.Errorf("an error occurred while fetching user with ID %s: %s", id.(string), err))
+			diags := diag.FromErr(fmt.Errorf("an error occurred while fetching user with ID %s: %w", id.(string), err))
 			return diags
 		}
 	} else {
@@ -99,7 +99,7 @@ func dataSourceUserRead(ctx context.Context, d *schema.ResourceData, meta interf
 					user, apiResponse, err = client.UserManagementApi.UmUsersFindById(ctx, *u.Id).Execute()
 					logApiRequestTime(apiResponse)
 					if err != nil {
-						diags := diag.FromErr(fmt.Errorf("an error occurred while fetching user %s: %s", *u.Id, err))
+						diags := diag.FromErr(fmt.Errorf("an error occurred while fetching user %s: %w", *u.Id, err))
 						return diags
 					}
 					found = true
