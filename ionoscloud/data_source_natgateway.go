@@ -4,14 +4,15 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	ionoscloud "github.com/ionos-cloud/sdk-go/v6"
-	"strings"
+	"log"
 )
 
 func dataSourceNatGateway() *schema.Resource {
 	return &schema.Resource{
-		Read: dataSourceNatGatewayRead,
+		ReadContext: dataSourceNatGatewayRead,
 		Schema: map[string]*schema.Schema{
 			"id": {
 				Type:     schema.TypeString,
@@ -62,22 +63,22 @@ func dataSourceNatGateway() *schema.Resource {
 	}
 }
 
-func dataSourceNatGatewayRead(d *schema.ResourceData, meta interface{}) error {
+func dataSourceNatGatewayRead(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	client := meta.(SdkBundle).CloudApiClient
 
 	datacenterId, dcIdOk := d.GetOk("datacenter_id")
 	if !dcIdOk {
-		return errors.New("no datacenter_id was specified")
+		return diag.FromErr(errors.New("no datacenter_id was specified"))
 	}
 
 	id, idOk := d.GetOk("id")
 	name, nameOk := d.GetOk("name")
 
 	if idOk && nameOk {
-		return errors.New("id and name cannot be both specified in the same time")
+		return diag.FromErr(errors.New("id and name cannot be both specified in the same time"))
 	}
 	if !idOk && !nameOk {
-		return errors.New("please provide either the lan id or name")
+		return diag.FromErr(errors.New("please provide either the lan id or name"))
 	}
 	var natGateway ionoscloud.NatGateway
 	var err error
@@ -93,55 +94,27 @@ func dataSourceNatGatewayRead(d *schema.ResourceData, meta interface{}) error {
 		natGateway, apiResponse, err = client.NATGatewaysApi.DatacentersNatgatewaysFindByNatGatewayId(ctx, datacenterId.(string), id.(string)).Execute()
 		logApiRequestTime(apiResponse)
 		if err != nil {
-			return fmt.Errorf("an error occurred while fetching the nat gateway %s: %s", id.(string), err)
+			return diag.FromErr(fmt.Errorf("an error occurred while fetching the nat gateway %s: %s", id.(string), err))
 		}
 	} else {
 		/* search by name */
-		var natGateways ionoscloud.NatGateways
-
-		ctx, cancel := context.WithTimeout(context.Background(), *resourceDefaultTimeouts.Default)
-
-		if cancel != nil {
-			defer cancel()
-		}
-
-		natGateways, apiResponse, err := client.NATGatewaysApi.DatacentersNatgatewaysGet(ctx, datacenterId.(string)).Execute()
+		natGateways, apiResponse, err := client.NATGatewaysApi.DatacentersNatgatewaysGet(ctx, datacenterId.(string)).Depth(1).Filter("name", name.(string)).Execute()
 		logApiRequestTime(apiResponse)
 		if err != nil {
-			return fmt.Errorf("an error occurred while fetching nat gateway: %s", err.Error())
+			return diag.FromErr(fmt.Errorf("an error occurred while fetching nat gateways: %s", err.Error()))
 		}
 
-		if natGateways.Items != nil {
-			for _, c := range *natGateways.Items {
-				tmpNatGateway, apiResponse, err := client.NATGatewaysApi.DatacentersNatgatewaysFindByNatGatewayId(ctx, datacenterId.(string), *c.Id).Execute()
-				logApiRequestTime(apiResponse)
-				if err != nil {
-					return fmt.Errorf("an error occurred while fetching nat gateway with ID %s: %s", *c.Id, err.Error())
-				}
-				if tmpNatGateway.Properties.Name != nil {
-					if strings.Contains(*tmpNatGateway.Properties.Name, name.(string)) {
-						natGateway = tmpNatGateway
-						break
-					}
-				}
-
-			}
+		if natGateways.Items != nil && len(*natGateways.Items) > 0 {
+			natGateway = (*natGateways.Items)[len(*natGateways.Items)-1]
+			log.Printf("[INFO] %v nat gateways found matching the search critiria. Getting the latest nat gateway from the list %v", len(*natGateways.Items), *natGateway.Id)
+		} else {
+			return diag.FromErr(fmt.Errorf("no nat gateway found with the specified name"))
 		}
 
-	}
-
-	if &natGateway == nil {
-		return errors.New("nat gateway not found")
-	}
-
-	if natGateway.Id != nil {
-		if err := d.Set("id", *natGateway.Id); err != nil {
-			return err
-		}
 	}
 
 	if err = setNatGatewayData(d, &natGateway); err != nil {
-		return err
+		return diag.FromErr(err)
 	}
 
 	return nil

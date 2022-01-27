@@ -9,6 +9,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	ionoscloud "github.com/ionos-cloud/sdk-go/v6"
 	"gopkg.in/yaml.v3"
+	"log"
 )
 
 type KubeConfig struct {
@@ -276,6 +277,8 @@ func dataSourceK8sReadCluster(ctx context.Context, d *schema.ResourceData, meta 
 
 		if clusters.Items != nil && len(*clusters.Items) > 0 {
 			cluster = (*clusters.Items)[len(*clusters.Items)-1]
+			log.Printf("[INFO] %v clusters found matching the search critiria. Getting the latest  cluster from the list %v", len(*clusters.Items), *cluster.Id)
+
 		} else {
 			return diag.FromErr(fmt.Errorf("no cluster found with the specified name"))
 		}

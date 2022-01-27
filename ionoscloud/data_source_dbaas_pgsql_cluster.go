@@ -9,6 +9,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 	dbaas "github.com/ionos-cloud/sdk-go-dbaas-postgres"
 	dbaasService "github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/dbaas"
+	"log"
 )
 
 func dataSourceDbaasPgSqlCluster() *schema.Resource {
@@ -184,7 +185,8 @@ func dataSourceDbaasPgSqlReadCluster(ctx context.Context, d *schema.ResourceData
 		}
 
 		if clusters.Items != nil && len(*clusters.Items) > 0 {
-			cluster = (*clusters.Items)[0]
+			cluster = (*clusters.Items)[len(*clusters.Items)-1]
+			log.Printf("[INFO] %v clusters found matching the search critiria. Getting the latest datacenter from the list %v", len(*clusters.Items), *cluster.Id)
 		} else {
 			return diag.FromErr(errors.New("dbaas cluster not found"))
 		}

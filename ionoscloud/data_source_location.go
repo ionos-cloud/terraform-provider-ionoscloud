@@ -87,6 +87,7 @@ func dataSourceLocationRead(ctx context.Context, d *schema.ResourceData, meta in
 
 	if locations.Items != nil && len(*locations.Items) > 0 {
 		location = (*locations.Items)[len(*locations.Items)-1]
+		log.Printf("[INFO] %v locations found matching the search critiria. Getting the latest location from the list %v", len(*locations.Items), *location.Id)
 	} else {
 		return diag.FromErr(fmt.Errorf("no location found with the specified criteria"))
 	}

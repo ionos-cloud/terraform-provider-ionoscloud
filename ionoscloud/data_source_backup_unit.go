@@ -75,6 +75,7 @@ func dataSourceBackupUnitRead(ctx context.Context, d *schema.ResourceData, meta 
 
 		if backupUnits.Items != nil && len(*backupUnits.Items) > 0 {
 			backupUnit = (*backupUnits.Items)[len(*backupUnits.Items)-1]
+			log.Printf("[INFO] %v backup units found matching the search critiria. Getting the latest backup unit from the list %v", len(*backupUnits.Items), *backupUnit.Id)
 		} else {
 			return diag.FromErr(fmt.Errorf("no backup unit found with the specified name"))
 		}

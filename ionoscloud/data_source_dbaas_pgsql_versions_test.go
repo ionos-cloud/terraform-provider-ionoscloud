@@ -25,11 +25,7 @@ func TestAccDataSourceDbaasPgSqlVersionsClusterId(t *testing.T) {
 			testAccPreCheck(t)
 		},
 		ProviderFactories: testAccProviderFactories,
-		Steps: []resource.TestStep{
-			{
-				Config: testAccCheckDbaasPgSqlClusterConfigBasic,
-			},
-		},
+		Steps:             []resource.TestStep{},
 	})
 
 }

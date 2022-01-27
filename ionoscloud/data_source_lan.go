@@ -8,6 +8,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 	ionoscloud "github.com/ionos-cloud/sdk-go/v6"
+	"log"
 )
 
 func dataSourceLan() *schema.Resource {
@@ -115,6 +116,7 @@ func dataSourceLanRead(ctx context.Context, d *schema.ResourceData, meta interfa
 
 		if lans.Items != nil && len(*lans.Items) > 0 {
 			lan = (*lans.Items)[len(*lans.Items)-1]
+			log.Printf("[INFO] %v lans found matching the search critiria. Getting the latest lan from the list %v", len(*lans.Items), *lan.Id)
 		} else {
 			return diag.FromErr(fmt.Errorf("no lan found with the specified name"))
 		}

@@ -153,6 +153,7 @@ func datasourceIpBlockRead(ctx context.Context, data *schema.ResourceData, meta 
 
 		if results.Items != nil && len(*results.Items) > 0 {
 			ipBlock = (*results.Items)[len(*results.Items)-1]
+			log.Printf("[INFO] %v ip blocks found matching the search critiria. Getting the latest ip block from the list %v", len(*results.Items), *ipBlock.Id)
 		} else {
 			return diag.FromErr(fmt.Errorf("no ip block found with the specified criteria"))
 		}

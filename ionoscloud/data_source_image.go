@@ -6,6 +6,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	ionoscloud "github.com/ionos-cloud/sdk-go/v6"
+	"log"
 )
 
 func dataSourceImage() *schema.Resource {
@@ -145,6 +146,7 @@ func dataSourceImageRead(ctx context.Context, d *schema.ResourceData, meta inter
 
 	if results.Items != nil && len(*results.Items) > 0 {
 		image = (*results.Items)[len(*results.Items)-1]
+		log.Printf("[INFO] %v images found matching the search critiria. Getting the latest image from the list %v", len(*results.Items), *image.Id)
 	} else {
 		return diag.FromErr(fmt.Errorf("no image found with the specified criteria"))
 	}
