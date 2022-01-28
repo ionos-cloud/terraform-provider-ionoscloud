@@ -114,7 +114,7 @@ func resourceFirewallCreate(ctx context.Context, d *schema.ResourceData, meta in
 	logApiRequestTime(apiResponse)
 
 	if err != nil {
-		diags := diag.FromErr(fmt.Errorf("an error occured while creating a firewall rule: %s", err))
+		diags := diag.FromErr(fmt.Errorf("an error occured while creating a firewall rule: %w", err))
 		return diags
 	}
 	d.SetId(*fw.Id)

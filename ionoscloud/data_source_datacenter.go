@@ -116,61 +116,34 @@ func dataSourceDataCenterRead(ctx context.Context, d *schema.ResourceData, meta 
 					*datacenter.Id, *datacenter.Properties.Location, location))
 			}
 		}
-		log.Printf("[INFO] Got dc [Name=%s, Location=%s]", *datacenter.Properties.Name, *datacenter.Properties.Location)
-	} else {
-		datacenters, apiResponse, err := client.DataCentersApi.DatacentersGet(ctx).Depth(1).Execute()
-		logApiRequestTime(apiResponse)
-
-		if err != nil {
-			return diag.FromErr(fmt.Errorf("an error occured while fetching datacenters: %s ", err))
+		if datacenter.Properties != nil {
+			log.Printf("[INFO] Got backupUnit [Name=%s], Location=%s, [Id=%s]", *datacenter.Properties.Name, *datacenter.Properties.Location, *datacenter.Id)
 		}
+	} else {
 
-		var results []ionoscloud.Datacenter
+		var results ionoscloud.Datacenters
 
-		if nameOk && datacenters.Items != nil {
-			var resultsByDatacenter []ionoscloud.Datacenter
-			for _, dc := range *datacenters.Items {
-				if dc.Properties != nil && dc.Properties.Name != nil && *dc.Properties.Name == name {
-					resultsByDatacenter = append(resultsByDatacenter, dc)
-				}
-			}
-
-			if resultsByDatacenter == nil {
-				return diag.FromErr(fmt.Errorf("could not find a datacenter with name %s", name))
-			} else {
-				results = resultsByDatacenter
-			}
+		request := client.DataCentersApi.DatacentersGet(ctx).Depth(1)
+		if nameOk {
+			request = request.Filter("name", name)
 		}
 
 		if locationOk {
-			var resultsByLocation []ionoscloud.Datacenter
-			if results != nil {
-				for _, dc := range results {
-					if dc.Properties.Location != nil && *dc.Properties.Location == location {
-						resultsByLocation = append(resultsByLocation, dc)
-						break
-					}
-				}
-			} else if datacenters.Items != nil {
-				/* find the first datacenter matching the location */
-				for _, dc := range *datacenters.Items {
-					if dc.Properties.Location != nil && *dc.Properties.Location == location {
-						resultsByLocation = append(resultsByLocation, dc)
-						break
-					}
-				}
-			}
-			if resultsByLocation == nil {
-				return diag.FromErr(fmt.Errorf("could not find a datacenter with location %s", location))
-			} else {
-				results = resultsByLocation
-			}
+			request = request.Filter("location", location)
 		}
 
-		if results != nil {
-			datacenter = results[0]
+		results, apiResponse, err = request.Execute()
+		logApiRequestTime(apiResponse)
+
+		if err != nil {
+			return diag.FromErr(fmt.Errorf("an error occurred while fetching backup unit: %s", err.Error()))
+		}
+
+		if results.Items != nil && len(*results.Items) > 0 {
+			datacenter = (*results.Items)[len(*results.Items)-1]
+			log.Printf("[WARN] %v datacenters found matching the search criteria. Getting the latest datacenter from the list %v", len(*results.Items), *datacenter.Id)
 		} else {
-			return diag.FromErr(fmt.Errorf("there are no datacenters that match the search criteria"))
+			return diag.FromErr(fmt.Errorf("no datacenter found with the specified criteria: name %s, location %s", name, location))
 		}
 
 	}

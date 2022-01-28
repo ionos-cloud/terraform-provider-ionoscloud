@@ -40,6 +40,16 @@ func TestAccLanIPFailoverBasic(t *testing.T) {
 				),
 			},
 			{
+				Config: testAccDataSourceIpFailoverConfigBasic,
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttrSet(ipfailoverResourceFullName, "id"),
+					resource.TestCheckResourceAttrPair(ipfailoverResourceFullName, "id", DataSource+"."+ResourceIpFailover+"."+ipfailoverName, "id"),
+					resource.TestCheckResourceAttrPair(ipfailoverResourceFullName, "nicuuid", DataSource+"."+ResourceIpFailover+"."+ipfailoverName, "nicuuid"),
+					resource.TestCheckResourceAttrPair(ipfailoverResourceFullName, "lan_id", DataSource+"."+ResourceIpFailover+"."+ipfailoverName, "lan_id"),
+					resource.TestCheckResourceAttrPair(ipfailoverResourceFullName, "datacenter_id", DataSource+"."+ResourceIpFailover+"."+ipfailoverName, "datacenter_id"),
+				),
+			},
+			{
 				Config: testAccCheckLanIPFailoverConfigUpdate,
 				Check: resource.ComposeTestCheckFunc(
 					testDeleted("ionoscloud_ipfailover.failover-test"),
@@ -78,11 +88,11 @@ func testAccCheckLanIPFailoverGroupExists(n string, _ *ionoscloud.Lan, _ *ionosc
 		lan, apiResponse, err := client.LANsApi.DatacentersLansFindById(ctx, dcId, lanId).Execute()
 		logApiRequestTime(apiResponse)
 		if err != nil {
-			return fmt.Errorf("lan %s not found.", lanId)
+			return fmt.Errorf("lan %s not found", lanId)
 		}
 
 		if lan.Properties.IpFailover == nil {
-			return fmt.Errorf("lan %s has no failover groups.", lanId)
+			return fmt.Errorf("lan %s has no failover groups", lanId)
 		}
 		found := false
 		for _, fo := range *lan.Properties.IpFailover {
@@ -231,5 +241,12 @@ resource "ionoscloud_server" "webserver" {
     firewall_active = true
      ips =["${ionoscloud_ipblock.webserver_ip.ips[0]}"]
   }
+}
+`
+
+var testAccDataSourceIpFailoverConfigBasic = testAccCheckLanIPFailoverConfig + `
+data ` + ResourceIpFailover + " " + ipfailoverName + `{
+  datacenter_id = "${ionoscloud_datacenter.foobar.id}"
+  id		    = ` + ipfailoverResourceFullName + `.id
 }
 `

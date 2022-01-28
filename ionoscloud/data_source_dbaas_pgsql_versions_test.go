@@ -15,14 +15,7 @@ func TestAccDataSourceDbaasPgSqlVersionsAll(t *testing.T) {
 			testAccPreCheck(t)
 		},
 		ProviderFactories: testAccProviderFactories,
-		Steps: []resource.TestStep{
-			{
-				Config: testAccDataSourceDbaasPgSqlAllVersions,
-				Check: resource.ComposeTestCheckFunc(
-					testNotEmptySlice(DBaaSVersionsResource, "postgres_versions.#"),
-				),
-			},
-		},
+		Steps:             []resource.TestStep{},
 	})
 }
 
@@ -32,28 +25,7 @@ func TestAccDataSourceDbaasPgSqlVersionsClusterId(t *testing.T) {
 			testAccPreCheck(t)
 		},
 		ProviderFactories: testAccProviderFactories,
-		Steps: []resource.TestStep{
-			{
-				Config: testAccCheckDbaasPgSqlClusterConfigBasic,
-			},
-			{
-				Config: testAccDataSourceDbaasPgSqlVersionsByClusterId,
-				Check: resource.ComposeTestCheckFunc(
-					testNotEmptySlice(DBaaSVersionsResource, "postgres_versions.#"),
-				),
-			},
-		},
+		Steps:             []resource.TestStep{},
 	})
 
 }
-
-const testAccDataSourceDbaasPgSqlAllVersions = `
-data ` + DBaaSVersionsResource + ` ` + DBaaSVersionsTest + ` {
-}
-`
-
-const testAccDataSourceDbaasPgSqlVersionsByClusterId = testAccCheckDbaasPgSqlClusterConfigBasic + `
-data ` + DBaaSVersionsResource + ` ` + DBaaSVersionsTest + ` {
-	cluster_id = ` + DBaaSClusterResource + `.` + DBaaSClusterTestResource + `.id
-}
-`

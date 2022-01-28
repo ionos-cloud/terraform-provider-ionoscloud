@@ -62,7 +62,7 @@ func resourceShareCreate(ctx context.Context, d *schema.ResourceData, meta inter
 	logApiRequestTime(apiResponse)
 
 	if err != nil {
-		diags := diag.FromErr(fmt.Errorf("an error occured while creating a share: %s", err))
+		diags := diag.FromErr(fmt.Errorf("an error occured while creating a share: %w", err))
 		return diags
 	}
 	d.SetId(*rsp.Id)
@@ -91,7 +91,7 @@ func resourceShareRead(ctx context.Context, d *schema.ResourceData, meta interfa
 			d.SetId("")
 			return nil
 		}
-		diags := diag.FromErr(fmt.Errorf("an error occured while fetching a Share ID %s %s", d.Id(), err))
+		diags := diag.FromErr(fmt.Errorf("an error occured while fetching a Share ID %s %w", d.Id(), err))
 		return diags
 	}
 
@@ -123,7 +123,7 @@ func resourceShareUpdate(ctx context.Context, d *schema.ResourceData, meta inter
 		d.Get("group_id").(string), d.Get("resource_id").(string)).Resource(shareReq).Execute()
 	logApiRequestTime(apiResponse)
 	if err != nil {
-		diags := diag.FromErr(fmt.Errorf("an error occured while patching a share ID %s %s", d.Id(), err))
+		diags := diag.FromErr(fmt.Errorf("an error occured while patching a share ID %s %w", d.Id(), err))
 		return diags
 	}
 
@@ -157,7 +157,7 @@ func resourceShareDelete(ctx context.Context, d *schema.ResourceData, meta inter
 		logApiRequestTime(apiResponse)
 		if err != nil {
 			if apiResponse == nil || apiResponse.Response != nil && apiResponse.StatusCode != 404 {
-				diags := diag.FromErr(fmt.Errorf("an error occured while deleting a share %s %s", d.Id(), err))
+				diags := diag.FromErr(fmt.Errorf("an error occured while deleting a share %s %w", d.Id(), err))
 				return diags
 			}
 		}

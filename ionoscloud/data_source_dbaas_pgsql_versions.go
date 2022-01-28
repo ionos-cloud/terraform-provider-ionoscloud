@@ -42,7 +42,7 @@ func dataSourceDbaasPgSqlReadVersions(ctx context.Context, d *schema.ResourceDat
 		/* search by ID */
 		postgresVersions, _, err = client.GetClusterVersions(ctx, id.(string))
 		if err != nil {
-			diags := diag.FromErr(fmt.Errorf("an error occurred while fetching postgres versions for cluster with ID %s: %s", id.(string), err))
+			diags := diag.FromErr(fmt.Errorf("an error occurred while fetching postgres versions for cluster with ID %s: %w", id.(string), err))
 			return diags
 		}
 	} else {

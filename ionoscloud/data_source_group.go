@@ -7,6 +7,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	ionoscloud "github.com/ionos-cloud/sdk-go/v6"
+	"log"
 )
 
 func dataSourceGroup() *schema.Resource {
@@ -117,41 +118,25 @@ func dataSourceGroupRead(ctx context.Context, d *schema.ResourceData, meta inter
 		group, apiResponse, err = client.UserManagementApi.UmGroupsFindById(ctx, id.(string)).Execute()
 		logApiRequestTime(apiResponse)
 		if err != nil {
-			diags := diag.FromErr(fmt.Errorf("an error occurred while fetching group with ID %s: %s", id.(string), err))
+			diags := diag.FromErr(fmt.Errorf("an error occurred while fetching group with ID %s: %w", id.(string), err))
 			return diags
 		}
 	} else {
 		/* search by name */
-		var groups ionoscloud.Groups
-
-		groups, apiResponse, err := client.UserManagementApi.UmGroupsGet(ctx).Depth(1).Execute()
+		groups, apiResponse, err := client.UserManagementApi.UmGroupsGet(ctx).Depth(1).Filter("name", name.(string)).Execute()
 		logApiRequestTime(apiResponse)
 		if err != nil {
 			diags := diag.FromErr(fmt.Errorf("an error occurred while fetching groups: %w", err))
 			return diags
 		}
 
-		found := false
-		if groups.Items != nil {
-			for _, g := range *groups.Items {
-				if g.Properties != nil && g.Properties.Name != nil && *g.Properties.Name == name.(string) {
-					/* group found */
-					group, apiResponse, err = client.UserManagementApi.UmGroupsFindById(ctx, *g.Id).Execute()
-					logApiRequestTime(apiResponse)
-					if err != nil {
-						diags := diag.FromErr(fmt.Errorf("an error occurred while fetching group %s: %w", *g.Id, err))
-						return diags
-					}
-					found = true
-					break
-				}
-			}
+		if groups.Items != nil && len(*groups.Items) > 0 {
+			group = (*groups.Items)[len(*groups.Items)-1]
+			log.Printf("[WARN] %v groups found matching the search criteria. Getting the latest group from the list %v", len(*groups.Items), *group.Id)
+		} else {
+			return diag.FromErr(fmt.Errorf("no group found with the specified name %s", name.(string)))
 		}
 
-		if !found {
-			diags := diag.FromErr(fmt.Errorf("group not found"))
-			return diags
-		}
 	}
 
 	if err = setGroupData(ctx, client, d, &group); err != nil {

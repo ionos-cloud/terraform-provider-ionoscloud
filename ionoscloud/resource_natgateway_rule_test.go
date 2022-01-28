@@ -7,6 +7,7 @@ import (
 	"context"
 	"fmt"
 	ionoscloud "github.com/ionos-cloud/sdk-go/v6"
+	"regexp"
 	"testing"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
@@ -14,6 +15,8 @@ import (
 )
 
 const resourceNatGatewayRuleResource = NatGatewayRuleResource + "." + NatGatewayRuleTestResource
+const dataSourceIdNatGatewayRuleResource = DataSource + "." + NatGatewayRuleResource + "." + NatGatewayDataSourceById
+const dataSourceNameNatGatewayRuleResource = DataSource + "." + NatGatewayRuleResource + "." + NatGatewayDataSourceByName
 
 func TestAccNatGatewayRuleBasic(t *testing.T) {
 	var natGatewayRule ionoscloud.NatGatewayRule
@@ -33,7 +36,7 @@ func TestAccNatGatewayRuleBasic(t *testing.T) {
 					resource.TestCheckResourceAttr(resourceNatGatewayRuleResource, "type", "SNAT"),
 					resource.TestCheckResourceAttr(resourceNatGatewayRuleResource, "protocol", "TCP"),
 					resource.TestCheckResourceAttr(resourceNatGatewayRuleResource, "source_subnet", "10.0.1.0/24"),
-					resource.TestCheckResourceAttrPair(resourceNatGatewayRuleResource, "public_ip", IpBLockResource+".natgateway_rule_ips", "ips.0"),
+					resource.TestCheckResourceAttrPair(resourceNatGatewayRuleResource, "public_ip", IpBlockResource+".natgateway_rule_ips", "ips.0"),
 					resource.TestCheckResourceAttr(resourceNatGatewayRuleResource, "target_subnet", "172.16.0.0/24"),
 					resource.TestCheckResourceAttr(resourceNatGatewayRuleResource, "target_port_range.0.start", "500"),
 					resource.TestCheckResourceAttr(resourceNatGatewayRuleResource, "target_port_range.0.end", "1000"),
@@ -46,10 +49,40 @@ func TestAccNatGatewayRuleBasic(t *testing.T) {
 					resource.TestCheckResourceAttr(resourceNatGatewayRuleResource, "type", "SNAT"),
 					resource.TestCheckResourceAttr(resourceNatGatewayRuleResource, "protocol", "UDP"),
 					resource.TestCheckResourceAttr(resourceNatGatewayRuleResource, "source_subnet", "10.3.1.0/24"),
-					resource.TestCheckResourceAttrPair(resourceNatGatewayRuleResource, "public_ip", IpBLockResource+".natgateway_rule_ips", "ips.0"),
+					resource.TestCheckResourceAttrPair(resourceNatGatewayRuleResource, "public_ip", IpBlockResource+".natgateway_rule_ips", "ips.0"),
 					resource.TestCheckResourceAttr(resourceNatGatewayRuleResource, "target_subnet", "172.31.0.0/24"),
 					resource.TestCheckResourceAttr(resourceNatGatewayRuleResource, "target_port_range.0.start", "200"),
 					resource.TestCheckResourceAttr(resourceNatGatewayRuleResource, "target_port_range.0.end", "1111")),
+			},
+			{
+				Config: fmt.Sprintf(testAccDataSourceNatGatewayRuleMatchId, NatGatewayRuleTestResource),
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttrPair(dataSourceIdNatGatewayRuleResource, "name", resourceNatGatewayRuleResource, "name"),
+					resource.TestCheckResourceAttrPair(dataSourceIdNatGatewayRuleResource, "type", resourceNatGatewayRuleResource, "type"),
+					resource.TestCheckResourceAttrPair(dataSourceIdNatGatewayRuleResource, "protocol", resourceNatGatewayRuleResource, "protocol"),
+					resource.TestCheckResourceAttrPair(dataSourceIdNatGatewayRuleResource, "source_subnet", resourceNatGatewayRuleResource, "source_subnet"),
+					resource.TestCheckResourceAttrPair(dataSourceIdNatGatewayRuleResource, "public_ip", resourceNatGatewayRuleResource, "public_ip"),
+					resource.TestCheckResourceAttrPair(dataSourceIdNatGatewayRuleResource, "target_subnet", resourceNatGatewayRuleResource, "target_subnet"),
+					resource.TestCheckResourceAttrPair(dataSourceIdNatGatewayRuleResource, "target_port_range.0.start", resourceNatGatewayRuleResource, "target_port_range.0.start"),
+					resource.TestCheckResourceAttrPair(dataSourceIdNatGatewayRuleResource, "target_port_range.0.end", resourceNatGatewayRuleResource, "target_port_range.0.end"),
+				),
+			},
+			{
+				Config: fmt.Sprintf(testAccDataSourceNatGatewayRuleMatchName, NatGatewayRuleTestResource),
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttrPair(dataSourceNameNatGatewayRuleResource, "name", resourceNatGatewayRuleResource, "name"),
+					resource.TestCheckResourceAttrPair(dataSourceNameNatGatewayRuleResource, "type", resourceNatGatewayRuleResource, "type"),
+					resource.TestCheckResourceAttrPair(dataSourceNameNatGatewayRuleResource, "protocol", resourceNatGatewayRuleResource, "protocol"),
+					resource.TestCheckResourceAttrPair(dataSourceNameNatGatewayRuleResource, "source_subnet", resourceNatGatewayRuleResource, "source_subnet"),
+					resource.TestCheckResourceAttrPair(dataSourceNameNatGatewayRuleResource, "public_ip", resourceNatGatewayRuleResource, "public_ip"),
+					resource.TestCheckResourceAttrPair(dataSourceNameNatGatewayRuleResource, "target_subnet", resourceNatGatewayRuleResource, "target_subnet"),
+					resource.TestCheckResourceAttrPair(dataSourceNameNatGatewayRuleResource, "target_port_range.0.start", resourceNatGatewayRuleResource, "target_port_range.0.start"),
+					resource.TestCheckResourceAttrPair(dataSourceNameNatGatewayRuleResource, "target_port_range.0.end", resourceNatGatewayRuleResource, "target_port_range.0.end"),
+				),
+			},
+			{
+				Config:      fmt.Sprintf(testAccDataSourceNatGatewayRuleWrongName, NatGatewayRuleTestResource),
+				ExpectError: regexp.MustCompile(`no nat gateway rule found with the specified name`),
 			},
 		},
 	})
@@ -126,7 +159,7 @@ resource ` + DatacenterResource + ` "natgateway_rule_datacenter" {
   description       = "datacenter for hosting "
 }
 
-resource ` + IpBLockResource + ` "natgateway_rule_ips" {
+resource ` + IpBlockResource + ` "natgateway_rule_ips" {
   location = ` + DatacenterResource + `.natgateway_rule_datacenter.location
   size = 2
   name = "natgateway_rule_ips"
@@ -141,7 +174,7 @@ resource ` + LanResource + ` "natgateway_rule_lan" {
 resource ` + NatGatewayResource + ` "natgateway" { 
   datacenter_id = ` + DatacenterResource + `.natgateway_rule_datacenter.id
   name          = "test_natgateway_rule_natgateway" 
-  public_ips    = [ ` + IpBLockResource + `.natgateway_rule_ips.ips[0], ` + IpBLockResource + `.natgateway_rule_ips.ips[1] ]
+  public_ips    = [ ` + IpBlockResource + `.natgateway_rule_ips.ips[0], ` + IpBlockResource + `.natgateway_rule_ips.ips[1] ]
   lans {
      id          = ` + LanResource + `.natgateway_rule_lan.id
      gateway_ips = [ "10.11.2.5"] 
@@ -155,7 +188,7 @@ resource ` + NatGatewayRuleResource + ` ` + NatGatewayRuleTestResource + ` {
   type          = "SNAT"
   protocol      = "TCP"
   source_subnet = "10.0.1.0/24"
-  public_ip     = ` + IpBLockResource + `.natgateway_rule_ips.ips[0]
+  public_ip     = ` + IpBlockResource + `.natgateway_rule_ips.ips[0]
   target_subnet = "172.16.0.0/24"
   target_port_range {
       start = 500
@@ -171,7 +204,7 @@ resource ` + DatacenterResource + ` "natgateway_rule_datacenter" {
   description       = "datacenter for hosting "
 }
 
-resource ` + IpBLockResource + ` "natgateway_rule_ips" {
+resource ` + IpBlockResource + ` "natgateway_rule_ips" {
   location = ` + DatacenterResource + `.natgateway_rule_datacenter.location
   size = 2
   name = "natgateway_rule_ips"
@@ -186,7 +219,7 @@ resource ` + LanResource + ` "natgateway_rule_lan" {
 resource ` + NatGatewayResource + ` "natgateway" { 
   datacenter_id = ` + DatacenterResource + `.natgateway_rule_datacenter.id
   name          = "test_natgateway_rule_natgateway" 
-  public_ips    = [ ` + IpBLockResource + `.natgateway_rule_ips.ips[0], ` + IpBLockResource + `.natgateway_rule_ips.ips[1] ]
+  public_ips    = [ ` + IpBlockResource + `.natgateway_rule_ips.ips[0], ` + IpBlockResource + `.natgateway_rule_ips.ips[1] ]
   lans {
      id          = ` + LanResource + `.natgateway_rule_lan.id
      gateway_ips = [ "10.11.2.5"] 
@@ -200,10 +233,34 @@ resource ` + NatGatewayRuleResource + ` ` + NatGatewayRuleTestResource + ` {
   type          = "SNAT"
   protocol      = "UDP"
   source_subnet = "10.3.1.0/24"
-  public_ip     = ` + IpBLockResource + `.natgateway_rule_ips.ips[0]
+  public_ip     = ` + IpBlockResource + `.natgateway_rule_ips.ips[0]
   target_subnet = "172.31.0.0/24"
   target_port_range {
       start = 200
       end   = 1111
   }
 }`
+
+const testAccDataSourceNatGatewayRuleMatchId = testAccCheckNatGatewayRuleConfigBasic + `
+data ` + NatGatewayRuleResource + ` ` + NatGatewayRuleDataSourceById + ` {
+  datacenter_id = ` + DatacenterResource + `.natgateway_rule_datacenter.id
+  natgateway_id = ` + NatGatewayResource + `.natgateway.id
+  id			= ` + NatGatewayRuleResource + `.` + NatGatewayRuleTestResource + `.id
+}
+`
+
+const testAccDataSourceNatGatewayRuleMatchName = testAccCheckNatGatewayRuleConfigBasic + `
+data ` + NatGatewayRuleResource + ` ` + NatGatewayRuleDataSourceByName + ` {
+  datacenter_id = ` + DatacenterResource + `.natgateway_rule_datacenter.id
+  natgateway_id = ` + NatGatewayResource + `.natgateway.id
+  name			= ` + NatGatewayRuleResource + `.` + NatGatewayRuleTestResource + `.name
+}
+`
+
+const testAccDataSourceNatGatewayRuleWrongName = testAccCheckNatGatewayRuleConfigBasic + `
+data ` + NatGatewayRuleResource + ` ` + NatGatewayRuleDataSourceByName + ` {
+  datacenter_id = ` + DatacenterResource + `.natgateway_rule_datacenter.id
+  natgateway_id = ` + NatGatewayResource + `.natgateway.id
+  name			= "wrong_name"
+}
+`

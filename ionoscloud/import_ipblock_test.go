@@ -3,15 +3,12 @@
 package ionoscloud
 
 import (
-	"fmt"
-
 	"testing"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 )
 
 func TestAccIPBlockImportBasic(t *testing.T) {
-	location := "us/las"
 
 	resource.Test(t, resource.TestCase{
 		PreCheck:          func() { testAccPreCheck(t) },
@@ -19,11 +16,10 @@ func TestAccIPBlockImportBasic(t *testing.T) {
 		CheckDestroy:      testAccCheckIPBlockDestroyCheck,
 		Steps: []resource.TestStep{
 			{
-				Config: fmt.Sprintf(testAccCheckIPBlockConfigBasic, location),
+				Config: testAccCheckIPBlockConfigBasic,
 			},
-
 			{
-				ResourceName:      IpBLockResource + ".webserver_ip",
+				ResourceName:      fullIpBlockResourceName,
 				ImportState:       true,
 				ImportStateVerify: true,
 			},

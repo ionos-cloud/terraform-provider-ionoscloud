@@ -132,54 +132,31 @@ func datasourceIpBlockRead(ctx context.Context, data *schema.ResourceData, meta 
 		log.Printf("[INFO] Got ip block [Name=%s, Location=%s]", *ipBlock.Properties.Name, *ipBlock.Properties.Location)
 	} else {
 
-		ipBlocks, apiResponse, err := client.IPBlocksApi.IpblocksGet(ctx).Depth(1).Execute()
-		logApiRequestTime(apiResponse)
+		var results ionoscloud.IpBlocks
 
-		if err != nil {
-			return diag.FromErr(fmt.Errorf("an error occured while fetching ipBlocks: %s ", err))
-		}
+		request := client.IPBlocksApi.IpblocksGet(ctx).Depth(1)
 
-		var results []ionoscloud.IpBlock
-
-		if nameOk && ipBlocks.Items != nil {
-			for _, block := range *ipBlocks.Items {
-				if block.Properties != nil && block.Properties.Name != nil && *block.Properties.Name == name {
-					results = append(results, block)
-					//found based on name only, save this in case we don't find based on location
-					if !locationOk {
-						ipBlock = results[0]
-					}
-				}
-			}
-
-			if results == nil {
-				return diag.FromErr(fmt.Errorf("could not find an ip block with name %s", name))
-			}
+		if nameOk {
+			request = request.Filter("name", name)
 		}
 
 		if locationOk {
-			if results != nil {
-				for _, block := range results {
-					if block.Properties.Location != nil && *block.Properties.Location == location {
-						ipBlock = block
-						break
-					}
-				}
-			} else if ipBlocks.Items != nil {
-				/* find the first ipblock matching the location */
-				for _, block := range *ipBlocks.Items {
-					if block.Properties.Location != nil && *block.Properties.Location == location {
-						ipBlock = block
-						break
-					}
-				}
-			}
+			request = request.Filter("location", location)
 		}
 
-	}
+		results, apiResponse, err := request.Execute()
+		logApiRequestTime(apiResponse)
 
-	if ipBlock.Id == nil {
-		return diag.FromErr(fmt.Errorf("there are no ip blocks that match the search criteria id = %s, name = %s, location = %s", id, name, location))
+		if err != nil {
+			return diag.FromErr(fmt.Errorf("an error occurred while fetching ip blocks: %s", err.Error()))
+		}
+
+		if results.Items != nil && len(*results.Items) > 0 {
+			ipBlock = (*results.Items)[len(*results.Items)-1]
+			log.Printf("[WARN] %v ip blocks found matching the search criteria. Getting the latest ip block from the list %v", len(*results.Items), *ipBlock.Id)
+		} else {
+			return diag.FromErr(fmt.Errorf("no ip block found with the specified criteria: name %s, location %s", name, location))
+		}
 	}
 
 	if err := IpBlockSetData(data, &ipBlock); err != nil {

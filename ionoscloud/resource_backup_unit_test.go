@@ -6,6 +6,7 @@ import (
 	"context"
 	"fmt"
 	ionoscloud "github.com/ionos-cloud/sdk-go/v6"
+	"regexp"
 	"testing"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
@@ -30,6 +31,26 @@ func TestAccBackupUnitBasic(t *testing.T) {
 					resource.TestCheckResourceAttr(BackupUnitResource+"."+BackupUnitTestResource, "email", "example@ionoscloud.com"),
 					resource.TestCheckResourceAttr(BackupUnitResource+"."+BackupUnitTestResource, "password", "DemoPassword123$"),
 				),
+			},
+			{
+				Config: testAccDataSourceBackupUnitMatchId,
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttrPair(DataSource+"."+BackupUnitResource+"."+BackupUnitDataSourceById, "name", BackupUnitResource+"."+BackupUnitTestResource, "name"),
+					resource.TestCheckResourceAttrPair(DataSource+"."+BackupUnitResource+"."+BackupUnitDataSourceById, "email", BackupUnitResource+"."+BackupUnitTestResource, "email"),
+					resource.TestCheckResourceAttrPair(DataSource+"."+BackupUnitResource+"."+BackupUnitDataSourceById, "login", BackupUnitResource+"."+BackupUnitTestResource, "login"),
+				),
+			},
+			{
+				Config: testAccDataSourceBackupUnitMatchName,
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttrPair(DataSource+"."+BackupUnitResource+"."+BackupUnitDataSourceByName, "name", BackupUnitResource+"."+BackupUnitTestResource, "name"),
+					resource.TestCheckResourceAttrPair(DataSource+"."+BackupUnitResource+"."+BackupUnitDataSourceByName, "email", BackupUnitResource+"."+BackupUnitTestResource, "email"),
+					resource.TestCheckResourceAttrPair(DataSource+"."+BackupUnitResource+"."+BackupUnitDataSourceByName, "login", BackupUnitResource+"."+BackupUnitTestResource, "login"),
+				),
+			},
+			{
+				Config:      testAccDataSourceBackupUnitMatchWrongName,
+				ExpectError: regexp.MustCompile("no backup unit found with the specified name"),
 			},
 			{
 				Config: testAccCheckBackupUnitConfigUpdatePassword,
@@ -132,5 +153,22 @@ resource ` + BackupUnitResource + ` ` + BackupUnitTestResource + ` {
 	name        = "` + BackupUnitTestResource + `"
 	password    = "DemoPassword1234$Updated"
 	email       = "example-updated@ionoscloud.com"
+}
+`
+const testAccDataSourceBackupUnitMatchId = testAccCheckBackupUnitConfigBasic + `
+data ` + BackupUnitResource + ` ` + BackupUnitDataSourceById + ` {
+  id			= ` + BackupUnitResource + `.` + BackupUnitTestResource + `.id
+}
+`
+
+const testAccDataSourceBackupUnitMatchName = testAccCheckBackupUnitConfigBasic + `
+data ` + BackupUnitResource + ` ` + BackupUnitDataSourceByName + ` {
+  name			= "` + BackupUnitTestResource + `"
+}
+`
+
+const testAccDataSourceBackupUnitMatchWrongName = testAccCheckBackupUnitConfigBasic + `
+data ` + BackupUnitResource + ` ` + BackupUnitDataSourceByName + ` {
+  name			= "wrong_name"
 }
 `

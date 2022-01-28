@@ -4,14 +4,15 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	ionoscloud "github.com/ionos-cloud/sdk-go/v6"
-	"strings"
+	"log"
 )
 
 func dataSourceNatGatewayRule() *schema.Resource {
 	return &schema.Resource{
-		Read: dataSourceNatGatewayRuleRead,
+		ReadContext: dataSourceNatGatewayRuleRead,
 		Schema: map[string]*schema.Schema{
 			"id": {
 				Type:     schema.TypeString,
@@ -88,27 +89,27 @@ func dataSourceNatGatewayRule() *schema.Resource {
 	}
 }
 
-func dataSourceNatGatewayRuleRead(d *schema.ResourceData, meta interface{}) error {
+func dataSourceNatGatewayRuleRead(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	client := meta.(SdkBundle).CloudApiClient
 
 	datacenterId, dcIdOk := d.GetOk("datacenter_id")
 	if !dcIdOk {
-		return errors.New("no datacenter_id was specified")
+		return diag.FromErr(errors.New("no datacenter_id was specified"))
 	}
 
 	natgatewayId, ngIdOk := d.GetOk("natgateway_id")
 	if !ngIdOk {
-		return errors.New("no natgateway_id was specified")
+		return diag.FromErr(errors.New("no natgateway_id was specified"))
 	}
 
 	id, idOk := d.GetOk("id")
 	name, nameOk := d.GetOk("name")
 
 	if idOk && nameOk {
-		return errors.New("id and name cannot be both specified in the same time")
+		return diag.FromErr(errors.New("id and name cannot be both specified in the same time"))
 	}
 	if !idOk && !nameOk {
-		return errors.New("please provide either the lan id or name")
+		return diag.FromErr(errors.New("please provide either the lan id or name"))
 	}
 
 	var natGatewayRule ionoscloud.NatGatewayRule
@@ -126,55 +127,26 @@ func dataSourceNatGatewayRuleRead(d *schema.ResourceData, meta interface{}) erro
 		natGatewayRule, apiResponse, err = client.NATGatewaysApi.DatacentersNatgatewaysRulesFindByNatGatewayRuleId(ctx, datacenterId.(string), natgatewayId.(string), id.(string)).Execute()
 		logApiRequestTime(apiResponse)
 		if err != nil {
-			return fmt.Errorf("an error occurred while fetching the nat gateway rule %s: %s", id.(string), err)
+			return diag.FromErr(fmt.Errorf("an error occurred while fetching the nat gateway rule %s: %s", id.(string), err))
 		}
 	} else {
 		/* search by name */
-		var natGatewayRules ionoscloud.NatGatewayRules
-
-		ctx, cancel := context.WithTimeout(context.Background(), *resourceDefaultTimeouts.Default)
-
-		if cancel != nil {
-			defer cancel()
-		}
-
-		natGatewayRules, apiResponse, err := client.NATGatewaysApi.DatacentersNatgatewaysRulesGet(ctx, datacenterId.(string), natgatewayId.(string)).Execute()
+		natGatewayRules, apiResponse, err := client.NATGatewaysApi.DatacentersNatgatewaysRulesGet(ctx, datacenterId.(string), natgatewayId.(string)).Depth(1).Filter("name", name.(string)).Execute()
 		logApiRequestTime(apiResponse)
 		if err != nil {
-			return fmt.Errorf("an error occurred while fetching nat gateway rules: %s", err.Error())
+			return diag.FromErr(fmt.Errorf("an error occurred while fetching nat gateway rules: %s", err.Error()))
 		}
 
-		if natGatewayRules.Items != nil {
-			for _, c := range *natGatewayRules.Items {
-				tmpNatGatewayRule, apiResponse, err := client.NATGatewaysApi.DatacentersNatgatewaysRulesFindByNatGatewayRuleId(ctx, datacenterId.(string), natgatewayId.(string), *c.Id).Execute()
-				logApiRequestTime(apiResponse)
-				if err != nil {
-					return fmt.Errorf("an error occurred while fetching nat gateway rule with ID %s: %s", *c.Id, err.Error())
-				}
-				if tmpNatGatewayRule.Properties.Name != nil {
-					if strings.Contains(*tmpNatGatewayRule.Properties.Name, name.(string)) {
-						natGatewayRule = tmpNatGatewayRule
-						break
-					}
-				}
-
-			}
-		}
-
-	}
-
-	if &natGatewayRule == nil {
-		return errors.New("nat gateway rule not found")
-	}
-
-	if natGatewayRule.Id != nil {
-		if err := d.Set("id", *natGatewayRule.Id); err != nil {
-			return err
+		if natGatewayRules.Items != nil && len(*natGatewayRules.Items) > 0 {
+			natGatewayRule = (*natGatewayRules.Items)[len(*natGatewayRules.Items)-1]
+			log.Printf("[WARN] %v nat gateway rules found matching the search criteria. Getting the latest nat gateway rule from the list %v", len(*natGatewayRules.Items), *natGatewayRule.Id)
+		} else {
+			return diag.FromErr(fmt.Errorf("no nat gateway rule found with the specified name %s", name.(string)))
 		}
 	}
 
 	if err = setNatGatewayRuleData(d, &natGatewayRule); err != nil {
-		return err
+		return diag.FromErr(err)
 	}
 
 	return nil

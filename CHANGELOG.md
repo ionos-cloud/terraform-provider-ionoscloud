@@ -1,3 +1,9 @@
+## 6.1.4 (upcoming release)
+
+### Enhancements:
+- improved lookup in data_sources by using filters
+- improved tests duration by moving steps from data_source test files in the corresponding resource test files 
+
 ## 6.1.3
 
 ### Features:

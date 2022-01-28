@@ -1,5 +1,17 @@
 package ionoscloud
 
+// Image Constants
+const (
+	ImageResource     = "ionoscloud_image"
+	ImageTestResource = "test_image"
+)
+
+// Location Constants
+const (
+	LocationResource     = "ionoscloud_location"
+	LocationTestResource = "test_location"
+)
+
 // BackupUnit Constants
 const (
 	BackupUnitResource         = "ionoscloud_backup_unit"
@@ -122,7 +134,13 @@ const (
 )
 
 //Ip Block constants
-const IpBLockResource = "ionoscloud_ipblock"
+const (
+	IpBlockResource           = "ionoscloud_ipblock"
+	IpBlockTestResource       = "test_ip_block"
+	IpBlockDataSourceById     = "test_ip_block_id"
+	IpBlockDataSourceByName   = "test_ip_block_id"
+	IpBlockDataSourceMatching = "test_ip_block_id_location"
+)
 
 const (
 	NicResource         = "ionoscloud_nic"

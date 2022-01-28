@@ -4,14 +4,16 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 	ionoscloud "github.com/ionos-cloud/sdk-go/v6"
+	"log"
 )
 
 func dataSourceLan() *schema.Resource {
 	return &schema.Resource{
-		Read: dataSourceLanRead,
+		ReadContext: dataSourceLanRead,
 		Schema: map[string]*schema.Schema{
 			"id": {
 				Type:     schema.TypeString,
@@ -73,22 +75,22 @@ func convertIpFailoverList(ips *[]ionoscloud.IPFailover) []interface{} {
 	return ret
 }
 
-func dataSourceLanRead(d *schema.ResourceData, meta interface{}) error {
+func dataSourceLanRead(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	client := meta.(SdkBundle).CloudApiClient
 
 	datacenterId, dcIdOk := d.GetOk("datacenter_id")
 	if !dcIdOk {
-		return errors.New("no datacenter_id was specified")
+		return diag.FromErr(errors.New("no datacenter_id was specified"))
 	}
 
 	id, idOk := d.GetOk("id")
 	name, nameOk := d.GetOk("name")
 
 	if idOk && nameOk {
-		return errors.New("id and name cannot be both specified in the same time")
+		return diag.FromErr(errors.New("id and name cannot be both specified in the same time"))
 	}
 	if !idOk && !nameOk {
-		return errors.New("please provide either the lan id or name")
+		return diag.FromErr(errors.New("please provide either the lan id or name"))
 	}
 	var lan ionoscloud.Lan
 	var err error
@@ -102,41 +104,27 @@ func dataSourceLanRead(d *schema.ResourceData, meta interface{}) error {
 		lan, apiResponse, err = client.LANsApi.DatacentersLansFindById(ctx, datacenterId.(string), id.(string)).Execute()
 		logApiRequestTime(apiResponse)
 		if err != nil {
-			return fmt.Errorf("an error occurred while fetching lan with ID %s: %s", id.(string), err)
+			return diag.FromErr(fmt.Errorf("an error occurred while fetching lan with ID %s: %w", id.(string), err))
 		}
 	} else {
 		/* search by name */
-		var lans ionoscloud.Lans
-
-		lans, apiResponse, err := client.LANsApi.DatacentersLansGet(ctx, datacenterId.(string)).Depth(1).Execute()
+		lans, apiResponse, err := client.LANsApi.DatacentersLansGet(ctx, datacenterId.(string)).Depth(1).Filter("name", name.(string)).Execute()
 		logApiRequestTime(apiResponse)
 		if err != nil {
-			return fmt.Errorf("an error occurred while fetching lans: %s", err.Error())
+			return diag.FromErr(fmt.Errorf("an error occurred while fetching lans: %s", err.Error()))
 		}
 
-		found := false
-		if lans.Items != nil {
-			for _, l := range *lans.Items {
-				if l.Properties != nil && l.Properties.Name != nil && *l.Properties.Name == name.(string) {
-					/* lan found */
-					lan, apiResponse, err = client.LANsApi.DatacentersLansFindById(ctx, datacenterId.(string), *l.Id).Execute()
-					logApiRequestTime(apiResponse)
-					if err != nil {
-						return fmt.Errorf("an error occurred while fetching lan %s: %s", *l.Id, err)
-					}
-					found = true
-					break
-				}
-			}
+		if lans.Items != nil && len(*lans.Items) > 0 {
+			lan = (*lans.Items)[len(*lans.Items)-1]
+			log.Printf("[WARN] %v lans found matching the search criteria. Getting the latest lan from the list %v", len(*lans.Items), *lan.Id)
+		} else {
+			return diag.FromErr(fmt.Errorf("no lan found with the specified name %s", name.(string)))
 		}
 
-		if !found {
-			return fmt.Errorf("lan not found")
-		}
 	}
 
 	if err = setLanData(d, &lan); err != nil {
-		return err
+		return diag.FromErr(err)
 	}
 
 	return nil

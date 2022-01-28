@@ -9,6 +9,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	ionoscloud "github.com/ionos-cloud/sdk-go/v6"
 	"gopkg.in/yaml.v3"
+	"log"
 )
 
 type KubeConfig struct {
@@ -268,32 +269,18 @@ func dataSourceK8sReadCluster(ctx context.Context, d *schema.ResourceData, meta 
 		}
 	} else {
 		/* search by name */
-		var clusters ionoscloud.KubernetesClusters
-
-		clusters, apiResponse, err := client.KubernetesApi.K8sGet(ctx).Execute()
+		clusters, apiResponse, err := client.KubernetesApi.K8sGet(ctx).Depth(1).Filter("name", name.(string)).Execute()
 		logApiRequestTime(apiResponse)
 		if err != nil {
 			return diag.FromErr(fmt.Errorf("an error occurred while fetching k8s clusters: %s", err.Error()))
 		}
 
-		found := false
-		if clusters.Items != nil {
-			for _, c := range *clusters.Items {
-				tmpCluster, apiResponse, err := client.KubernetesApi.K8sFindByClusterId(ctx, *c.Id).Execute()
-				logApiRequestTime(apiResponse)
-				if err != nil {
-					return diag.FromErr(fmt.Errorf("an error occurred while fetching k8s cluster with ID %s: %s", *c.Id, err.Error()))
-				}
-				if tmpCluster.Properties != nil && tmpCluster.Properties.Name != nil && *tmpCluster.Properties.Name == name.(string) {
-					cluster = tmpCluster
-					found = true
-					break
-				}
+		if clusters.Items != nil && len(*clusters.Items) > 0 {
+			cluster = (*clusters.Items)[len(*clusters.Items)-1]
+			log.Printf("[WARN] %v clusters found matching the search criteria. Getting the latest  cluster from the list %v", len(*clusters.Items), *cluster.Id)
 
-			}
-		}
-		if !found {
-			return diag.FromErr(errors.New("k8s cluster not found"))
+		} else {
+			return diag.FromErr(fmt.Errorf("no cluster found with the specified name %s", name.(string)))
 		}
 
 	}

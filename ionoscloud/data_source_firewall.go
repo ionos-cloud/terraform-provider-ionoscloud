@@ -7,6 +7,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 	ionoscloud "github.com/ionos-cloud/sdk-go/v6"
+	"log"
 )
 
 func dataSourceFirewall() *schema.Resource {
@@ -97,8 +98,6 @@ func dataSourceFirewallRead(ctx context.Context, d *schema.ResourceData, meta in
 	var err error
 	var apiResponse *ionoscloud.APIResponse
 
-	found := false
-
 	if idOk {
 		/* search by ID */
 		firewall, apiResponse, err = client.FirewallRulesApi.DatacentersServersNicsFirewallrulesFindById(ctx, datacenterId, serverId, nicId, id.(string)).Execute()
@@ -106,38 +105,22 @@ func dataSourceFirewallRead(ctx context.Context, d *schema.ResourceData, meta in
 		if err != nil {
 			return diag.FromErr(fmt.Errorf("an error occurred while fetching the firewall rule %s: %s", id.(string), err))
 		}
-		found = true
 	} else {
 		/* search by name */
-		var firewalls ionoscloud.FirewallRules
-
-		firewalls, apiResponse, err := client.FirewallRulesApi.DatacentersServersNicsFirewallrulesGet(ctx, datacenterId, serverId, nicId).Depth(1).Execute()
+		firewalls, apiResponse, err := client.FirewallRulesApi.DatacentersServersNicsFirewallrulesGet(ctx, datacenterId, serverId, nicId).Depth(1).Filter("name", name.(string)).Execute()
 		logApiRequestTime(apiResponse)
 
 		if err != nil {
 			return diag.FromErr(fmt.Errorf("an error occurred while fetching backup unit: %s", err.Error()))
 		}
 
-		if firewalls.Items != nil {
-			for _, fr := range *firewalls.Items {
-				tmpFirewall, apiResponse, err := client.FirewallRulesApi.DatacentersServersNicsFirewallrulesFindById(ctx, datacenterId, serverId, nicId, *fr.Id).Execute()
-				logApiRequestTime(apiResponse)
-				if err != nil {
-					return diag.FromErr(fmt.Errorf("an error occurred while fetching firewall rule with ID %s: %s", *fr.Id, err.Error()))
-				}
-				if tmpFirewall.Properties != nil && tmpFirewall.Properties.Name != nil && *tmpFirewall.Properties.Name == name.(string) {
-					firewall = tmpFirewall
-					found = true
-					break
-				}
-
-			}
+		if firewalls.Items != nil && len(*firewalls.Items) > 0 {
+			firewall = (*firewalls.Items)[len(*firewalls.Items)-1]
+			log.Printf("[WARN] %v firewalls found matching the search criteria. Getting the latest firewall from the list %v", len(*firewalls.Items), *firewall.Id)
+		} else {
+			return diag.FromErr(fmt.Errorf("no firewall found with the specified name %s", name.(string)))
 		}
 
-	}
-
-	if !found {
-		return diag.FromErr(fmt.Errorf("firewall rule not found"))
 	}
 
 	if err := setFirewallData(d, &firewall); err != nil {

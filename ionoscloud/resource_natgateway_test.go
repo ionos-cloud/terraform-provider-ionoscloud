@@ -7,6 +7,7 @@ import (
 	"context"
 	"fmt"
 	ionoscloud "github.com/ionos-cloud/sdk-go/v6"
+	"regexp"
 	"testing"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
@@ -14,6 +15,8 @@ import (
 )
 
 const resourceNatGatewayResource = NatGatewayResource + "." + NatGatewayTestResource
+const dataSourceIdNatGatewayResource = DataSource + "." + NatGatewayResource + "." + NatGatewayDataSourceById
+const dataSourceNameNatGatewayResource = DataSource + "." + NatGatewayResource + "." + NatGatewayDataSourceByName
 
 func TestAccNatGatewayBasic(t *testing.T) {
 	var natGateway ionoscloud.NatGateway
@@ -30,18 +33,40 @@ func TestAccNatGatewayBasic(t *testing.T) {
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckNatGatewayExists(resourceNatGatewayResource, &natGateway),
 					resource.TestCheckResourceAttr(resourceNatGatewayResource, "name", NatGatewayTestResource),
-					resource.TestCheckResourceAttrPair(resourceNatGatewayResource, "public_ips.0", IpBLockResource+".natgateway_ips", "ips.0"),
+					resource.TestCheckResourceAttrPair(resourceNatGatewayResource, "public_ips.0", IpBlockResource+".natgateway_ips", "ips.0"),
 					resource.TestCheckResourceAttrPair(resourceNatGatewayResource, "lans.0.id", LanResource+".natgateway_lan", "id"),
 					resource.TestCheckResourceAttr(resourceNatGatewayResource, "lans.0.gateway_ips.0", "10.11.2.5/24"),
 				),
+			},
+			{
+				Config: fmt.Sprintf(testAccDataSourceNatGatewayMatchId, NatGatewayTestResource),
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttrPair(dataSourceIdNatGatewayResource, "name", resourceNatGatewayResource, "name"),
+					resource.TestCheckResourceAttrPair(dataSourceIdNatGatewayResource, "public_ips.0", resourceNatGatewayResource, "public_ips.0"),
+					resource.TestCheckResourceAttrPair(dataSourceIdNatGatewayResource, "lans.0.id", resourceNatGatewayResource, "lans.0.id"),
+					resource.TestCheckResourceAttrPair(dataSourceIdNatGatewayResource, "lans.0.gateway_ips", resourceNatGatewayResource, "lans.0.gateway_ips"),
+				),
+			},
+			{
+				Config: fmt.Sprintf(testAccDataSourceNatGatewayMatchName, NatGatewayTestResource),
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttrPair(dataSourceNameNatGatewayResource, "name", resourceNatGatewayResource, "name"),
+					resource.TestCheckResourceAttrPair(dataSourceNameNatGatewayResource, "public_ips.0", resourceNatGatewayResource, "public_ips.0"),
+					resource.TestCheckResourceAttrPair(dataSourceNameNatGatewayResource, "lans.0.id", resourceNatGatewayResource, "lans.0.id"),
+					resource.TestCheckResourceAttrPair(dataSourceNameNatGatewayResource, "lans.0.gateway_ips", resourceNatGatewayResource, "lans.0.gateway_ips"),
+				),
+			},
+			{
+				Config:      testAccDataSourceNatGatewayWrongName,
+				ExpectError: regexp.MustCompile(`no nat gateway found with the specified name`),
 			},
 			{
 				Config: fmt.Sprintf(testAccCheckNatGatewayConfigUpdate, UpdatedResources),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckNatGatewayExists(resourceNatGatewayResource, &natGateway),
 					resource.TestCheckResourceAttr(resourceNatGatewayResource, "name", UpdatedResources),
-					resource.TestCheckResourceAttrPair(resourceNatGatewayResource, "public_ips.0", IpBLockResource+".natgateway_ips", "ips.0"),
-					resource.TestCheckResourceAttrPair(resourceNatGatewayResource, "public_ips.1", IpBLockResource+".natgateway_ips", "ips.1"),
+					resource.TestCheckResourceAttrPair(resourceNatGatewayResource, "public_ips.0", IpBlockResource+".natgateway_ips", "ips.0"),
+					resource.TestCheckResourceAttrPair(resourceNatGatewayResource, "public_ips.1", IpBlockResource+".natgateway_ips", "ips.1"),
 					resource.TestCheckResourceAttrPair(resourceNatGatewayResource, "lans.0.id", LanResource+".natgateway_lan_updated", "id"),
 					resource.TestCheckResourceAttr(resourceNatGatewayResource, "lans.0.gateway_ips.0", "10.11.2.6/24"),
 				),
@@ -120,7 +145,7 @@ resource ` + DatacenterResource + ` "natgateway_datacenter" {
   description       = "datacenter for hosting "
 }
 
-resource ` + IpBLockResource + ` "natgateway_ips" {
+resource ` + IpBlockResource + ` "natgateway_ips" {
   location = ` + DatacenterResource + `.natgateway_datacenter.location
   size = 2
   name = "natgateway_ips"
@@ -135,7 +160,7 @@ resource ` + LanResource + ` "natgateway_lan" {
 resource ` + NatGatewayResource + ` ` + NatGatewayTestResource + ` { 
   datacenter_id = ` + DatacenterResource + `.natgateway_datacenter.id
   name          = "%s" 
-  public_ips    = [ ` + IpBLockResource + `.natgateway_ips.ips[0] ]
+  public_ips    = [ ` + IpBlockResource + `.natgateway_ips.ips[0] ]
   lans {
      id          = ` + LanResource + `.natgateway_lan.id
      gateway_ips = [ "10.11.2.5"] 
@@ -149,7 +174,7 @@ resource ` + DatacenterResource + ` "natgateway_datacenter" {
   description       = "datacenter for hosting "
 }
 
-resource ` + IpBLockResource + ` "natgateway_ips" {
+resource ` + IpBlockResource + ` "natgateway_ips" {
   location = ` + DatacenterResource + `.natgateway_datacenter.location
   size = 2
   name = "natgateway_ips"
@@ -171,9 +196,30 @@ resource ` + LanResource + ` "natgateway_lan_updated" {
 resource ` + NatGatewayResource + ` ` + NatGatewayTestResource + ` { 
   datacenter_id = ` + DatacenterResource + `.natgateway_datacenter.id
   name          = "%s" 
-  public_ips    = [ ` + IpBLockResource + `.natgateway_ips.ips[0], ` + IpBLockResource + `.natgateway_ips.ips[1] ]
+  public_ips    = [ ` + IpBlockResource + `.natgateway_ips.ips[0], ` + IpBlockResource + `.natgateway_ips.ips[1] ]
   lans {
      id          = ` + LanResource + `.natgateway_lan_updated.id
      gateway_ips = [ "10.11.2.6/24"] 
   }
 }`
+
+const testAccDataSourceNatGatewayMatchId = testAccCheckNatGatewayConfigBasic + `
+data ` + NatGatewayResource + ` ` + NatGatewayDataSourceById + ` {
+  datacenter_id = ` + DatacenterResource + `.natgateway_datacenter.id
+  id			= ` + NatGatewayResource + `.` + NatGatewayTestResource + `.id
+}
+`
+
+const testAccDataSourceNatGatewayMatchName = testAccCheckNatGatewayConfigBasic + `
+data ` + NatGatewayResource + ` ` + NatGatewayDataSourceByName + `  {
+  datacenter_id = ` + DatacenterResource + `.natgateway_datacenter.id
+  name			= ` + NatGatewayResource + `.` + NatGatewayTestResource + `.name
+}
+`
+
+const testAccDataSourceNatGatewayWrongName = testAccCheckNatGatewayConfigBasic + `
+data ` + NatGatewayResource + ` ` + NatGatewayDataSourceByName + `  {
+  datacenter_id = ` + DatacenterResource + `.natgateway_datacenter.id
+  name			= "wrong_name"
+}
+`
