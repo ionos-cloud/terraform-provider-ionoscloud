@@ -16,6 +16,7 @@ import (
 	"net/http"
 	"net/url"
 	"os"
+	"strconv"
 	"strings"
 	"time"
 )
@@ -124,7 +125,7 @@ func NewConfiguration(username, password, token, hostUrl string) *Configuration 
 	cfg := &Configuration{
 		DefaultHeader:      make(map[string]string),
 		DefaultQueryParams: url.Values{},
-		UserAgent:          "ionos-cloud-sdk-go/6.0.0",
+		UserAgent:          "ionos-cloud-sdk-go/v6.0.1",
 		Debug:              false,
 		Username:           username,
 		Password:           password,
@@ -145,6 +146,11 @@ func NewConfiguration(username, password, token, hostUrl string) *Configuration 
 
 func NewConfigurationFromEnv() *Configuration {
 	return NewConfiguration(os.Getenv(IonosUsernameEnvVar), os.Getenv(IonosPasswordEnvVar), os.Getenv(IonosTokenEnvVar), os.Getenv(IonosApiUrlEnvVar))
+}
+
+// SetDepth sets the depth query param for all the requests
+func (c *Configuration) SetDepth(depth int32) {
+	c.DefaultQueryParams["depth"] = []string{strconv.Itoa(int(depth))}
 }
 
 // AddDefaultHeader adds a new HTTP header to the default header in the request

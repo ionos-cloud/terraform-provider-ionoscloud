@@ -59,7 +59,6 @@ func (o *LanEntities) HasNics() bool {
 
 func (o LanEntities) MarshalJSON() ([]byte, error) {
 	toSerialize := map[string]interface{}{}
-
 	if o.Nics != nil {
 		toSerialize["nics"] = o.Nics
 	}

@@ -60,7 +60,6 @@ func (o *RemoteConsoleUrl) HasUrl() bool {
 
 func (o RemoteConsoleUrl) MarshalJSON() ([]byte, error) {
 	toSerialize := map[string]interface{}{}
-
 	if o.Url != nil {
 		toSerialize["url"] = o.Url
 	}

@@ -53,7 +53,7 @@ resource "ionoscloud_volume" "example" {
 * `nic_hot_unplug` - (Computed)[string] Is capable of nic hot unplug (no reboot required)
 * `disc_virtio_hot_plug` - (Computed)[string] Is capable of Virt-IO drive hot plug (no reboot required)
 * `disc_virtio_hot_unplug` - (Computed)[string] Is capable of Virt-IO drive hot unplug (no reboot required). This works only for non-Windows virtual Machines.
-
+* `boot_server` - (Computed)[string] The UUID of the attached server.
 > **⚠ WARNING**
 >
 > If you want to create a **CUBE** server, the type of the inline volume must be set to **DAS**. In this case, you can not set the `size` argument since it is taken from the `template_uuid` you set in the server.

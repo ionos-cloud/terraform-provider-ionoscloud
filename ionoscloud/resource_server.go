@@ -238,6 +238,11 @@ func resourceServer() *schema.Resource {
 							Type:     schema.TypeInt,
 							Computed: true,
 						},
+						"boot_server": {
+							Type:        schema.TypeString,
+							Description: "The UUID of the attached server.",
+							Computed:    true,
+						},
 					},
 				},
 			},
@@ -957,6 +962,7 @@ func SetVolumeProperties(volume ionoscloud.Volume) map[string]interface{} {
 		setPropWithNilCheck(volumeMap, "device_number", volume.Properties.DeviceNumber)
 		setPropWithNilCheck(volumeMap, "user_data", volume.Properties.UserData)
 		setPropWithNilCheck(volumeMap, "backup_unit_id", volume.Properties.BackupunitId)
+		setPropWithNilCheck(volumeMap, "boot_server", volume.Properties.BootServer)
 	}
 	return volumeMap
 }
@@ -1028,7 +1034,7 @@ func resourceServerUpdate(ctx context.Context, d *schema.ResourceData, meta inte
 		/* todo: figure out a way of sending a nil bootCdrom to the API (the sdk's omitempty doesn't let us) */
 	}
 
-	server, apiResponse, err := client.ServersApi.DatacentersServersPatch(ctx, dcId, d.Id()).Server(request).Execute()
+	server, apiResponse, err := client.ServersApi.DatacentersServersPatch(ctx, dcId, d.Id()).Server(request).Depth(3).Execute()
 	logApiRequestTime(apiResponse)
 
 	if err != nil {
@@ -1312,7 +1318,7 @@ func resourceServerImport(ctx context.Context, d *schema.ResourceData, meta inte
 
 	client := meta.(SdkBundle).CloudApiClient
 
-	server, apiResponse, err := client.ServersApi.DatacentersServersFindById(ctx, datacenterId, serverId).Execute()
+	server, apiResponse, err := client.ServersApi.DatacentersServersFindById(ctx, datacenterId, serverId).Depth(3).Execute()
 	logApiRequestTime(apiResponse)
 
 	if err != nil {

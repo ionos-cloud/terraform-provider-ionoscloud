@@ -10,10 +10,10 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 )
 
-const dataSourceIdNatGatewayResource = NatGatewayResource + "." + NatGatewayDataSourceById
-const dataSourceNameNatGatewayResource = NatGatewayResource + "." + NatGatewayDataSourceByName
+const dataSourceIdNatGatewayResource = DataSource + "." + NatGatewayResource + "." + NatGatewayDataSourceById
+const dataSourceNameNatGatewayResource = DataSource + "." + NatGatewayResource + "." + NatGatewayDataSourceByName
 
-func TestAccDataSourceNatGateway_matchId(t *testing.T) {
+func TestAccDataSourceNatGateway(t *testing.T) {
 
 	resource.Test(t, resource.TestCase{
 		PreCheck: func() {

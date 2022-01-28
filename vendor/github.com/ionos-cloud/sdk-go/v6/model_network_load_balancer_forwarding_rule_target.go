@@ -16,11 +16,11 @@ import (
 
 // NetworkLoadBalancerForwardingRuleTarget struct for NetworkLoadBalancerForwardingRuleTarget
 type NetworkLoadBalancerForwardingRuleTarget struct {
-	// IP of a balanced target VM
+	// The IP of the balanced target VM.
 	Ip *string `json:"ip"`
-	// Port of the balanced target service. (range: 1 to 65535)
+	// The port of the balanced target service; valid range is 1 to 65535.
 	Port *int32 `json:"port"`
-	// Weight parameter is used to adjust the target VM's weight relative to other target VMs. All target VMs will receive a load proportional to their weight relative to the sum of all weights, so the higher the weight, the higher the load. The default weight is 1, and the maximal value is 256. A value of 0 means the target VM will not participate in load-balancing but will still accept persistent connections. If this parameter is used to distribute the load according to target VM's capacity, it is recommended to start with values which can both grow and shrink, for instance between 10 and 100 to leave enough room above and below for later adjustments.
+	// Traffic is distributed in proportion to target weight, relative to the combined weight of all targets. A target with higher weight receives a greater share of traffic. Valid range is 0 to 256 and default is 1. Targets with weight of 0 do not participate in load balancing but still accept persistent connections. It is best to assign weights in the middle of the range to leave room for later adjustments.
 	Weight      *int32                                              `json:"weight"`
 	HealthCheck *NetworkLoadBalancerForwardingRuleTargetHealthCheck `json:"healthCheck,omitempty"`
 }
@@ -179,19 +179,15 @@ func (o *NetworkLoadBalancerForwardingRuleTarget) HasHealthCheck() bool {
 
 func (o NetworkLoadBalancerForwardingRuleTarget) MarshalJSON() ([]byte, error) {
 	toSerialize := map[string]interface{}{}
-
 	if o.Ip != nil {
 		toSerialize["ip"] = o.Ip
 	}
-
 	if o.Port != nil {
 		toSerialize["port"] = o.Port
 	}
-
 	if o.Weight != nil {
 		toSerialize["weight"] = o.Weight
 	}
-
 	if o.HealthCheck != nil {
 		toSerialize["healthCheck"] = o.HealthCheck
 	}

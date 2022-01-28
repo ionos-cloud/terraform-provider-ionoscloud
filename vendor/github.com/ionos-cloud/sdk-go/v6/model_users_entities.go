@@ -98,11 +98,9 @@ func (o *UsersEntities) HasGroups() bool {
 
 func (o UsersEntities) MarshalJSON() ([]byte, error) {
 	toSerialize := map[string]interface{}{}
-
 	if o.Owns != nil {
 		toSerialize["owns"] = o.Owns
 	}
-
 	if o.Groups != nil {
 		toSerialize["groups"] = o.Groups
 	}

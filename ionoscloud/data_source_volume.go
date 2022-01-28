@@ -93,6 +93,11 @@ func dataSourceVolume() *schema.Resource {
 				Type:     schema.TypeInt,
 				Computed: true,
 			},
+			"boot_server": {
+				Type:        schema.TypeString,
+				Description: "The UUID of the attached server.",
+				Computed:    true,
+			},
 			"datacenter_id": {
 				Type:     schema.TypeString,
 				Required: true,

@@ -140,15 +140,10 @@ func (o *LoadbalancerProperties) HasDhcp() bool {
 
 func (o LoadbalancerProperties) MarshalJSON() ([]byte, error) {
 	toSerialize := map[string]interface{}{}
-
 	if o.Name != nil {
 		toSerialize["name"] = o.Name
 	}
-
-	if o.Ip != nil {
-		toSerialize["ip"] = o.Ip
-	}
-
+	toSerialize["ip"] = o.Ip
 	if o.Dhcp != nil {
 		toSerialize["dhcp"] = o.Dhcp
 	}

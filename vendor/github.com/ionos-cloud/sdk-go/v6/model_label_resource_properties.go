@@ -100,11 +100,9 @@ func (o *LabelResourceProperties) HasValue() bool {
 
 func (o LabelResourceProperties) MarshalJSON() ([]byte, error) {
 	toSerialize := map[string]interface{}{}
-
 	if o.Key != nil {
 		toSerialize["key"] = o.Key
 	}
-
 	if o.Value != nil {
 		toSerialize["value"] = o.Value
 	}

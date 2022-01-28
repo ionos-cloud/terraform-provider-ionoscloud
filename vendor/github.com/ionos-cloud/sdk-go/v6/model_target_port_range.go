@@ -100,11 +100,9 @@ func (o *TargetPortRange) HasEnd() bool {
 
 func (o TargetPortRange) MarshalJSON() ([]byte, error) {
 	toSerialize := map[string]interface{}{}
-
 	if o.Start != nil {
 		toSerialize["start"] = o.Start
 	}
-
 	if o.End != nil {
 		toSerialize["end"] = o.End
 	}

@@ -32,7 +32,7 @@ func TestAccNatGatewayBasic(t *testing.T) {
 					resource.TestCheckResourceAttr(resourceNatGatewayResource, "name", NatGatewayTestResource),
 					resource.TestCheckResourceAttrPair(resourceNatGatewayResource, "public_ips.0", IpBLockResource+".natgateway_ips", "ips.0"),
 					resource.TestCheckResourceAttrPair(resourceNatGatewayResource, "lans.0.id", LanResource+".natgateway_lan", "id"),
-					resource.TestCheckResourceAttr(resourceNatGatewayResource, "lans.0.gateway_ips.0", "10.11.2.5"),
+					resource.TestCheckResourceAttr(resourceNatGatewayResource, "lans.0.gateway_ips.0", "10.11.2.5/24"),
 				),
 			},
 			{
@@ -43,7 +43,7 @@ func TestAccNatGatewayBasic(t *testing.T) {
 					resource.TestCheckResourceAttrPair(resourceNatGatewayResource, "public_ips.0", IpBLockResource+".natgateway_ips", "ips.0"),
 					resource.TestCheckResourceAttrPair(resourceNatGatewayResource, "public_ips.1", IpBLockResource+".natgateway_ips", "ips.1"),
 					resource.TestCheckResourceAttrPair(resourceNatGatewayResource, "lans.0.id", LanResource+".natgateway_lan_updated", "id"),
-					resource.TestCheckResourceAttr(resourceNatGatewayResource, "lans.0.gateway_ips.0", "10.11.2.6/32"),
+					resource.TestCheckResourceAttr(resourceNatGatewayResource, "lans.0.gateway_ips.0", "10.11.2.6/24"),
 				),
 			},
 		},
@@ -174,6 +174,6 @@ resource ` + NatGatewayResource + ` ` + NatGatewayTestResource + ` {
   public_ips    = [ ` + IpBLockResource + `.natgateway_ips.ips[0], ` + IpBLockResource + `.natgateway_ips.ips[1] ]
   lans {
      id          = ` + LanResource + `.natgateway_lan_updated.id
-     gateway_ips = [ "10.11.2.6/32"] 
+     gateway_ips = [ "10.11.2.6/24"] 
   }
 }`

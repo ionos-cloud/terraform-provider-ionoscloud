@@ -299,31 +299,24 @@ func (o *NatGatewayRuleProperties) HasTargetPortRange() bool {
 
 func (o NatGatewayRuleProperties) MarshalJSON() ([]byte, error) {
 	toSerialize := map[string]interface{}{}
-
 	if o.Name != nil {
 		toSerialize["name"] = o.Name
 	}
-
 	if o.Type != nil {
 		toSerialize["type"] = o.Type
 	}
-
 	if o.Protocol != nil {
 		toSerialize["protocol"] = o.Protocol
 	}
-
 	if o.SourceSubnet != nil {
 		toSerialize["sourceSubnet"] = o.SourceSubnet
 	}
-
 	if o.PublicIp != nil {
 		toSerialize["publicIp"] = o.PublicIp
 	}
-
 	if o.TargetSubnet != nil {
 		toSerialize["targetSubnet"] = o.TargetSubnet
 	}
-
 	if o.TargetPortRange != nil {
 		toSerialize["targetPortRange"] = o.TargetPortRange
 	}

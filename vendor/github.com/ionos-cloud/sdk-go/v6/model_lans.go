@@ -22,7 +22,7 @@ type Lans struct {
 	Type *Type `json:"type,omitempty"`
 	// URL to the object representation (absolute path).
 	Href *string `json:"href,omitempty"`
-	// Array of items in that collection.
+	// Array of items in the collection.
 	Items *[]Lan `json:"items,omitempty"`
 	// The offset (if specified in the request).
 	Offset *float32 `json:"offset,omitempty"`
@@ -299,31 +299,24 @@ func (o *Lans) HasLinks() bool {
 
 func (o Lans) MarshalJSON() ([]byte, error) {
 	toSerialize := map[string]interface{}{}
-
 	if o.Id != nil {
 		toSerialize["id"] = o.Id
 	}
-
 	if o.Type != nil {
 		toSerialize["type"] = o.Type
 	}
-
 	if o.Href != nil {
 		toSerialize["href"] = o.Href
 	}
-
 	if o.Items != nil {
 		toSerialize["items"] = o.Items
 	}
-
 	if o.Offset != nil {
 		toSerialize["offset"] = o.Offset
 	}
-
 	if o.Limit != nil {
 		toSerialize["limit"] = o.Limit
 	}
-
 	if o.Links != nil {
 		toSerialize["_links"] = o.Links
 	}

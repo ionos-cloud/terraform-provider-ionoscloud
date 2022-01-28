@@ -32,6 +32,7 @@ func TestAccVolumeBasic(t *testing.T) {
 					resource.TestCheckResourceAttr(VolumeResource+"."+VolumeTestResource, "bus", "VIRTIO"),
 					resource.TestCheckResourceAttr(VolumeResource+"."+VolumeTestResource, "availability_zone", "ZONE_1"),
 					resource.TestCheckResourceAttr(VolumeResource+"."+VolumeTestResource, "image_name", "Debian-10-cloud-init.qcow2"),
+					resource.TestCheckResourceAttrPair(VolumeResource+"."+VolumeTestResource, "boot_server", ServerResource+"."+ServerTestResource, "id"),
 					testImageNotNull(VolumeResource, "image")),
 			},
 			{
@@ -43,6 +44,7 @@ func TestAccVolumeBasic(t *testing.T) {
 					resource.TestCheckResourceAttr(VolumeResource+"."+VolumeTestResource, "bus", "VIRTIO"),
 					resource.TestCheckResourceAttr(VolumeResource+"."+VolumeTestResource, "availability_zone", "ZONE_1"),
 					resource.TestCheckResourceAttr(VolumeResource+"."+VolumeTestResource, "image_name", "Debian-10-cloud-init.qcow2"),
+					resource.TestCheckResourceAttrPair(VolumeResource+"."+VolumeTestResource, "boot_server", ServerResource+"."+ServerTestResource+"updated", "id"),
 					testImageNotNull(VolumeResource, "image")),
 			},
 		},

@@ -69,7 +69,7 @@ func dataSourceResourceRead(d *schema.ResourceData, meta interface{}) error {
 		}
 	} else {
 		//items, err := client.ListResources()
-		items, apiResponse, err := client.UserManagementApi.UmResourcesGet(ctx).Execute()
+		items, apiResponse, err := client.UserManagementApi.UmResourcesGet(ctx).Depth(1).Execute()
 		logApiRequestTime(apiResponse)
 		if err != nil {
 			return fmt.Errorf("an error occured while fetching resources %s", err)

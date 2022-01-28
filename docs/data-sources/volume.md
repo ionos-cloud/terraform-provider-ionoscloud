@@ -51,3 +51,4 @@ The following attributes are returned by the datasource:
 * `nic_hot_unplug` - Is capable of nic hot unplug (no reboot required)
 * `disc_virtio_hot_plug` - Is capable of Virt-IO drive hot plug (no reboot required)
 * `disc_virtio_hot_unplug` - Is capable of Virt-IO drive hot unplug (no reboot required). This works only for non-Windows virtual Machines.
+* `boot_server` - The UUID of the attached server.

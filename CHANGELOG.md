@@ -1,12 +1,19 @@
-## 6.1.3(upcoming release)
+## 6.1.3
+
+### Features:
+- added **public** parameter for k8s_cluster (creation of private clusters is possible now)
+- added **gateway_ip** paramater for k8s_nodepool
+- added **boot_server** read-only property for volume
 
 ### Fixes:
 - do not diff on gateway ips set as normal ips instead of cidr
-## Enhancements:
+
+### Enhancements:
 - terraform plugin sdk upgrade to v2.10.1
 - use depth explicitly on api calls to improve performance
 - sdk-go updated to v6.0.1
 - workflow to run tests from github actions and split tests with build tags
+
 
 ## 6.1.2
 

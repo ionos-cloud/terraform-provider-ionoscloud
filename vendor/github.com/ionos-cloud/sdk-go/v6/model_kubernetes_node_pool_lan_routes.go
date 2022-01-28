@@ -100,11 +100,9 @@ func (o *KubernetesNodePoolLanRoutes) HasGatewayIp() bool {
 
 func (o KubernetesNodePoolLanRoutes) MarshalJSON() ([]byte, error) {
 	toSerialize := map[string]interface{}{}
-
 	if o.Network != nil {
 		toSerialize["network"] = o.Network
 	}
-
 	if o.GatewayIp != nil {
 		toSerialize["gatewayIp"] = o.GatewayIp
 	}

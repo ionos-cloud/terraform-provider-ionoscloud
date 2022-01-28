@@ -20,7 +20,7 @@ type NatGatewayProperties struct {
 	Name *string `json:"name"`
 	// Collection of public IP addresses of the NAT Gateway. Should be customer reserved IP addresses in that location.
 	PublicIps *[]string `json:"publicIps"`
-	// Collection of LANs connected to the NAT Gateway. IPs must contain valid subnet mask. If user will not provide any IP then system will generate an IP with /24 subnet.
+	// Collection of LANs connected to the NAT Gateway. IPs must contain a valid subnet mask. If no IP is provided, the system will generate an IP with /24 subnet.
 	Lans *[]NatGatewayLanProperties `json:"lans,omitempty"`
 }
 
@@ -140,15 +140,12 @@ func (o *NatGatewayProperties) HasLans() bool {
 
 func (o NatGatewayProperties) MarshalJSON() ([]byte, error) {
 	toSerialize := map[string]interface{}{}
-
 	if o.Name != nil {
 		toSerialize["name"] = o.Name
 	}
-
 	if o.PublicIps != nil {
 		toSerialize["publicIps"] = o.PublicIps
 	}
-
 	if o.Lans != nil {
 		toSerialize["lans"] = o.Lans
 	}

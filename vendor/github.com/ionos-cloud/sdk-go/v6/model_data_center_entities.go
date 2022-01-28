@@ -254,27 +254,21 @@ func (o *DataCenterEntities) HasNatgateways() bool {
 
 func (o DataCenterEntities) MarshalJSON() ([]byte, error) {
 	toSerialize := map[string]interface{}{}
-
 	if o.Servers != nil {
 		toSerialize["servers"] = o.Servers
 	}
-
 	if o.Volumes != nil {
 		toSerialize["volumes"] = o.Volumes
 	}
-
 	if o.Loadbalancers != nil {
 		toSerialize["loadbalancers"] = o.Loadbalancers
 	}
-
 	if o.Lans != nil {
 		toSerialize["lans"] = o.Lans
 	}
-
 	if o.Networkloadbalancers != nil {
 		toSerialize["networkloadbalancers"] = o.Networkloadbalancers
 	}
-
 	if o.Natgateways != nil {
 		toSerialize["natgateways"] = o.Natgateways
 	}

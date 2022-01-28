@@ -100,11 +100,9 @@ func (o *S3KeyProperties) HasActive() bool {
 
 func (o S3KeyProperties) MarshalJSON() ([]byte, error) {
 	toSerialize := map[string]interface{}{}
-
 	if o.SecretKey != nil {
 		toSerialize["secretKey"] = o.SecretKey
 	}
-
 	if o.Active != nil {
 		toSerialize["active"] = o.Active
 	}

@@ -100,11 +100,9 @@ func (o *NatGatewayLanProperties) HasGatewayIps() bool {
 
 func (o NatGatewayLanProperties) MarshalJSON() ([]byte, error) {
 	toSerialize := map[string]interface{}{}
-
 	if o.Id != nil {
 		toSerialize["id"] = o.Id
 	}
-
 	if o.GatewayIps != nil {
 		toSerialize["gatewayIps"] = o.GatewayIps
 	}

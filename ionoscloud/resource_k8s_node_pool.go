@@ -188,11 +188,16 @@ func resourceK8sNodePool() *schema.Resource {
 			},
 			"public_ips": {
 				Type:        schema.TypeList,
-				Description: "A list of fixed IPs",
+				Description: "A list of fixed IPs. Cannot be set on private clusters.",
 				Optional:    true,
 				Elem: &schema.Schema{
 					Type: schema.TypeString,
 				},
+			},
+			"gateway_ip": {
+				Type:        schema.TypeString,
+				Description: "Public IP address for the gateway performing source NAT for the node pool's nodes belonging to a private cluster. Required only if the node pool belongs to a private cluster.",
+				Optional:    true,
 			},
 			"labels": {
 				Type:     schema.TypeMap,
@@ -253,6 +258,11 @@ func checkNodePoolImmutableFields(_ context.Context, diff *schema.ResourceDiff, 
 
 	if diff.HasChange("storage_type") {
 		return fmt.Errorf("storage_type attribute is immutable, therefore not allowed in update requests")
+
+	}
+
+	if diff.HasChange("gateway_ip") {
+		return fmt.Errorf("gateway_ip attribute is immutable, therefore not allowed in update requests")
 
 	}
 	return nil
@@ -448,6 +458,11 @@ func resourcek8sNodePoolCreate(ctx context.Context, d *schema.ResourceData, meta
 			requestPublicIps = append(requestPublicIps, fmt.Sprint(publicIps[i]))
 		}
 		k8sNodepool.Properties.PublicIps = &requestPublicIps
+	}
+
+	if gatewayIp, gatewayIpOk := d.GetOk("gateway_ip"); gatewayIpOk {
+		gatewayIp := gatewayIp.(string)
+		k8sNodepool.Properties.GatewayIp = &gatewayIp
 	}
 
 	labelsProp, ok := d.GetOk("labels")
@@ -692,6 +707,11 @@ func resourcek8sNodePoolUpdate(ctx context.Context, d *schema.ResourceData, meta
 		}
 		request.Properties.PublicIps = &requestPublicIps
 
+	}
+
+	if d.HasChange("gateway_ip") {
+		diags := diag.FromErr(fmt.Errorf("gateway_ip attribute is immutable, therefore not allowed in update requests"))
+		return diags
 	}
 
 	if d.HasChange("labels") {
@@ -956,6 +976,12 @@ func setK8sNodePoolData(d *schema.ResourceData, nodePool *ionoscloud.KubernetesN
 		if nodePool.Properties.PublicIps != nil && len(*nodePool.Properties.PublicIps) > 0 {
 			if err := d.Set("public_ips", *nodePool.Properties.PublicIps); err != nil {
 				return err
+			}
+		}
+
+		if nodePool.Properties.GatewayIp != nil {
+			if err := d.Set("gateway_ip", *nodePool.Properties.GatewayIp); err != nil {
+				return fmt.Errorf("error while setting gateway_ip property for nodepool %s: %s", d.Id(), err)
 			}
 		}
 

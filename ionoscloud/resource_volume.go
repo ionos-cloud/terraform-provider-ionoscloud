@@ -123,6 +123,11 @@ func resourceVolume() *schema.Resource {
 				Type:     schema.TypeInt,
 				Computed: true,
 			},
+			"boot_server": {
+				Type:        schema.TypeString,
+				Description: "The UUID of the attached server.",
+				Computed:    true,
+			},
 			"server_id": {
 				Type:         schema.TypeString,
 				Required:     true,
@@ -624,6 +629,13 @@ func setVolumeData(d *schema.ResourceData, volume *ionoscloud.Volume) error {
 		err := d.Set("device_number", *volume.Properties.DeviceNumber)
 		if err != nil {
 			return fmt.Errorf("error while setting device_number property for volume %s: %s", d.Id(), err)
+		}
+	}
+
+	if volume.Properties.BootServer != nil {
+		err := d.Set("boot_server", *volume.Properties.BootServer)
+		if err != nil {
+			return fmt.Errorf("error while setting boot_server property for volume %s: %s", d.Id(), err)
 		}
 	}
 	return nil
