@@ -17,11 +17,7 @@ func TestAccDataSourceNic(t *testing.T) {
 			testAccPreCheck(t)
 		},
 		ProviderFactories: testAccProviderFactories,
-		Steps: []resource.TestStep{
-			{
-				Config: testCreateDataCenterAndServer,
-			},
-		},
+		Steps:             []resource.TestStep{},
 	})
 }
 
