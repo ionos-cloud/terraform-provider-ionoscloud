@@ -6,6 +6,8 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 )
 
+const resourceName = DataSource + "." + ResourceResource + "." + ResourceTestResource
+
 func TestAccResourceBasic(t *testing.T) {
 	resource.Test(t, resource.TestCase{
 		PreCheck: func() {
@@ -14,9 +16,9 @@ func TestAccResourceBasic(t *testing.T) {
 		ProviderFactories: testAccProviderFactories,
 		Steps: []resource.TestStep{
 			{
-				Config: testaccdatasourceresourceBasic,
+				Config: testAccDataSourceResourceBasic,
 				Check: resource.ComposeTestCheckFunc(
-					resource.TestCheckResourceAttr("data.ionoscloud_resource.res", "resource_type", "datacenter"),
+					resource.TestCheckResourceAttr(resourceName, "resource_type", "datacenter"),
 				),
 			},
 		},
@@ -24,13 +26,13 @@ func TestAccResourceBasic(t *testing.T) {
 
 }
 
-const testaccdatasourceresourceBasic = `
-resource "ionoscloud_datacenter" "foobar" {
+const testAccDataSourceResourceBasic = `
+resource ` + DatacenterResource + ` "foobar" {
   name       = "test_name"
   location = "us/las"
 }
 
-data "ionoscloud_resource" "res" {
+data ` + ResourceResource + ` ` + ResourceTestResource + ` {
   resource_type = "datacenter"
-  resource_id="${ionoscloud_datacenter.foobar.id}"
+  resource_id= ` + DatacenterResource + `.foobar.id
 }`

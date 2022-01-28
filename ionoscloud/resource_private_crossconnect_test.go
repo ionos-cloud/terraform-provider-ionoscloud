@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	ionoscloud "github.com/ionos-cloud/sdk-go/v6"
+	"regexp"
 	"testing"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
@@ -27,6 +28,28 @@ func TestAccPrivateCrossConnectBasic(t *testing.T) {
 					resource.TestCheckResourceAttr(PCCResource+"."+PCCTestResource, "name", PCCTestResource),
 					resource.TestCheckResourceAttr(PCCResource+"."+PCCTestResource, "description", PCCTestResource),
 				),
+			},
+			{
+				Config: testAccDataSourcePccMatchId,
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttrPair(DataSource+"."+PCCResource+"."+PCCDataSourceById, "name", PCCResource+"."+PCCTestResource, "name"),
+					resource.TestCheckResourceAttrPair(DataSource+"."+PCCResource+"."+PCCDataSourceById, "description", PCCResource+"."+PCCTestResource, "description"),
+					resource.TestCheckResourceAttrPair(DataSource+"."+PCCResource+"."+PCCDataSourceById, "peers", PCCResource+"."+PCCTestResource, "peers"),
+					resource.TestCheckResourceAttrPair(DataSource+"."+PCCResource+"."+PCCDataSourceById, "connectable_datacenters", PCCResource+"."+PCCTestResource, "connectable_datacenters"),
+				),
+			},
+			{
+				Config: testAccDataSourcePccMatchName,
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttrPair(DataSource+"."+PCCResource+"."+PCCDataSourceByName, "name", PCCResource+"."+PCCTestResource, "name"),
+					resource.TestCheckResourceAttrPair(DataSource+"."+PCCResource+"."+PCCDataSourceByName, "description", PCCResource+"."+PCCTestResource, "description"),
+					resource.TestCheckResourceAttrPair(DataSource+"."+PCCResource+"."+PCCDataSourceByName, "peers", PCCResource+"."+PCCTestResource, "peers"),
+					resource.TestCheckResourceAttrPair(DataSource+"."+PCCResource+"."+PCCDataSourceByName, "connectable_datacenters", PCCResource+"."+PCCTestResource, "connectable_datacenters"),
+				),
+			},
+			{
+				Config:      testAccDataSourcePccWrongName,
+				ExpectError: regexp.MustCompile(`no pcc found with the specified name`),
 			},
 			{
 				Config: testAccCheckPrivateCrossConnectConfigUpdate,
@@ -112,3 +135,21 @@ resource ` + PCCResource + ` ` + PCCTestResource + ` {
   name        = "` + UpdatedResources + `"
   description = "` + UpdatedResources + `"
 }`
+
+const testAccDataSourcePccMatchId = testAccCheckPrivateCrossConnectConfigBasic + `
+data ` + PCCResource + ` ` + PCCDataSourceById + ` {
+  id			= ` + PCCResource + `.` + PCCTestResource + `.id
+}
+`
+
+const testAccDataSourcePccMatchName = testAccCheckPrivateCrossConnectConfigBasic + `
+data ` + PCCResource + ` ` + PCCDataSourceByName + ` {
+  name			= "` + PCCTestResource + `"
+}
+`
+
+const testAccDataSourcePccWrongName = testAccCheckPrivateCrossConnectConfigBasic + `
+data ` + PCCResource + ` ` + PCCDataSourceByName + ` {
+  name			= "wrong_name"
+}
+`

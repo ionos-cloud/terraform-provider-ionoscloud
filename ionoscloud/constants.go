@@ -12,6 +12,18 @@ const (
 	LocationTestResource = "test_location"
 )
 
+// Resource Constants
+const (
+	ResourceResource     = "ionoscloud_resource"
+	ResourceTestResource = "test_resource"
+)
+
+// Template Constants
+const (
+	TemplateResource     = "ionoscloud_template"
+	TemplateTestResource = "test_template"
+)
+
 // BackupUnit Constants
 const (
 	BackupUnitResource         = "ionoscloud_backup_unit"

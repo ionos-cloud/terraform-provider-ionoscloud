@@ -7,6 +7,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	ionoscloud "github.com/ionos-cloud/sdk-go/v6"
+	"log"
 )
 
 func dataSourceUser() *schema.Resource {
@@ -82,35 +83,18 @@ func dataSourceUserRead(ctx context.Context, d *schema.ResourceData, meta interf
 		}
 	} else {
 		/* search by name */
-		var users ionoscloud.Users
-
-		users, apiResponse, err := client.UserManagementApi.UmUsersGet(ctx).Depth(1).Execute()
+		users, apiResponse, err := client.UserManagementApi.UmUsersGet(ctx).Depth(1).Filter("email", email.(string)).Execute()
 		logApiRequestTime(apiResponse)
 		if err != nil {
 			diags := diag.FromErr(fmt.Errorf("an error occurred while fetching users: %s", err.Error()))
 			return diags
 		}
 
-		found := false
-		if users.Items != nil {
-			for _, u := range *users.Items {
-				if u.Properties != nil && u.Properties.Email != nil && *u.Properties.Email == email.(string) {
-					/* user found */
-					user, apiResponse, err = client.UserManagementApi.UmUsersFindById(ctx, *u.Id).Execute()
-					logApiRequestTime(apiResponse)
-					if err != nil {
-						diags := diag.FromErr(fmt.Errorf("an error occurred while fetching user %s: %w", *u.Id, err))
-						return diags
-					}
-					found = true
-					break
-				}
-			}
-		}
-
-		if !found {
-			diags := diag.FromErr(fmt.Errorf("user not found"))
-			return diags
+		if users.Items != nil && len(*users.Items) > 0 {
+			user = (*users.Items)[len(*users.Items)-1]
+			log.Printf("[INFO] %v users found matching the search criteria. Getting the latest user from the list %v", len(*users.Items), *user.Id)
+		} else {
+			return diag.FromErr(fmt.Errorf("no user found with the specified email %s", email.(string)))
 		}
 	}
 

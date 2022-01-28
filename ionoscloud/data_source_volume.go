@@ -7,6 +7,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	ionoscloud "github.com/ionos-cloud/sdk-go/v6"
+	"log"
 )
 
 func dataSourceVolume() *schema.Resource {
@@ -141,9 +142,7 @@ func dataSourceVolumeRead(ctx context.Context, d *schema.ResourceData, meta inte
 		}
 	} else {
 		/* search by name */
-		var volumes ionoscloud.Volumes
-
-		volumes, apiResponse, err = client.VolumesApi.DatacentersVolumesGet(ctx, datacenterId.(string)).Depth(1).Execute()
+		volumes, apiResponse, err := client.VolumesApi.DatacentersVolumesGet(ctx, datacenterId.(string)).Depth(1).Filter("name", name.(string)).Execute()
 		logApiRequestTime(apiResponse)
 
 		if err != nil {
@@ -151,26 +150,11 @@ func dataSourceVolumeRead(ctx context.Context, d *schema.ResourceData, meta inte
 			return diags
 		}
 
-		found := false
-		if volumes.Items != nil {
-			for _, v := range *volumes.Items {
-				if v.Properties != nil && v.Properties.Name != nil && *v.Properties.Name == name.(string) {
-					/* volume found */
-					volume, apiResponse, err = client.VolumesApi.DatacentersVolumesFindById(ctx, datacenterId.(string), *v.Id).Execute()
-					logApiRequestTime(apiResponse)
-					if err != nil {
-						diags := diag.FromErr(fmt.Errorf("an error occurred while fetching volume %s: %w", *v.Id, err))
-						return diags
-					}
-					found = true
-					break
-				}
-			}
-		}
-
-		if !found {
-			diags := diag.FromErr(fmt.Errorf("volume not found"))
-			return diags
+		if volumes.Items != nil && len(*volumes.Items) > 0 {
+			volume = (*volumes.Items)[len(*volumes.Items)-1]
+			log.Printf("[INFO] %v volumes found matching the search criteria. Getting the latest volume from the list %v", len(*volumes.Items), *volume.Id)
+		} else {
+			return diag.FromErr(fmt.Errorf("no volume found with the specified name %s", name.(string)))
 		}
 	}
 
