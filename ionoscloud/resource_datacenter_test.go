@@ -1,3 +1,5 @@
+//go:build compute || all || datacenter
+
 package ionoscloud
 
 import (
@@ -153,14 +155,6 @@ func testAccCheckDatacenterExists(n string, datacenter *ionoscloud.Datacenter) r
 		return nil
 	}
 }
-
-const testAccCheckDatacenterConfigBasic = `
-resource ` + DatacenterResource + ` ` + DatacenterTestResource + ` {
-	name       = "` + DatacenterTestResource + `"
-	location = "us/las"
-	description = "Test Datacenter Description"
-	sec_auth_protection = false
-}`
 
 const testAccCheckDatacenterConfigUpdate = `
 resource ` + DatacenterResource + ` ` + DatacenterTestResource + ` {

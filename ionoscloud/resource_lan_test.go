@@ -1,3 +1,5 @@
+//go:build compute || all || lan
+
 package ionoscloud
 
 import (
@@ -127,13 +129,6 @@ func testAccCheckLanExists(n string, lan *ionoscloud.Lan) resource.TestCheckFunc
 		return nil
 	}
 }
-
-const testAccCheckLanConfigBasic = testAccCheckDatacenterConfigBasic + `
-resource ` + LanResource + ` ` + LanTestResource + ` {
-  datacenter_id = ` + DatacenterResource + `.` + DatacenterTestResource + `.id
-  public = true
-  name = "` + LanTestResource + `"
-}`
 
 const testAccCheckLanConfigUpdate = testAccCheckDatacenterConfigBasic + testAccCheckPrivateCrossConnectConfigBasic + `
 resource ` + LanResource + ` ` + LanTestResource + ` {

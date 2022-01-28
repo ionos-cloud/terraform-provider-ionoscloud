@@ -68,3 +68,23 @@ func testNotEmptySlice(resource, attribute string) resource.TestCheckFunc {
 		return nil
 	}
 }
+
+func testImageNotNull(resource, attribute string) resource.TestCheckFunc {
+	return func(s *terraform.State) error {
+		for _, rs := range s.RootModule().Resources {
+			if rs.Type != resource {
+				continue
+			}
+
+			image := rs.Primary.Attributes[attribute]
+
+			if image == "" {
+				return fmt.Errorf("%s is empty, expected an UUID", attribute)
+			} else if !IsValidUUID(image) {
+				return fmt.Errorf("%s should be a valid UUID, got: %#v", attribute, image)
+			}
+
+		}
+		return nil
+	}
+}

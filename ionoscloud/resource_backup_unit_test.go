@@ -1,3 +1,5 @@
+//go:build compute || all || backup
+
 package ionoscloud
 
 import (
@@ -137,14 +139,6 @@ func testAccCheckBackupUnitExists(n string, backupUnit *ionoscloud.BackupUnit) r
 		return nil
 	}
 }
-
-const testAccCheckBackupUnitConfigBasic = `
-resource ` + BackupUnitResource + ` ` + BackupUnitTestResource + ` {
-	name        = "` + BackupUnitTestResource + `"
-	password    = "DemoPassword123$"
-	email       = "example@ionoscloud.com"
-}
-`
 
 const testAccCheckBackupUnitConfigUpdatePassword = `
 resource ` + BackupUnitResource + ` ` + BackupUnitTestResource + ` {
