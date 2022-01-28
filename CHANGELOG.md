@@ -5,6 +5,7 @@
 ## Enhancements:
 - terraform plugin sdk upgrade to v2.10.1
 - use depth explicitly on api calls to improve performance
+- sdk-go updated to v6.0.1
 - workflow to run tests from github actions and split tests with build tags
 
 ## 6.1.2
