@@ -1,4 +1,4 @@
-//go:build compute || all || crossconnect
+//go:build compute || all || pcc
 
 package ionoscloud
 
