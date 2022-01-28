@@ -3,6 +3,8 @@
 ### Enhancements:
 - improved lookup in data_sources by using filters
 - improved tests duration by moving steps from data_source test files in the corresponding resource test files 
+- added workflow to run tests from github actions 
+- split tests with build tags
 
 ## 6.1.3
 
@@ -18,7 +20,6 @@
 - terraform plugin sdk upgrade to v2.10.1
 - use depth explicitly on api calls to improve performance
 - sdk-go updated to v6.0.1
-- workflow to run tests from github actions and split tests with build tags
 
 
 ## 6.1.2

@@ -14,40 +14,6 @@ func TestAccDataSourcePcc(t *testing.T) {
 			testAccPreCheck(t)
 		},
 		ProviderFactories: testAccProviderFactories,
-		Steps: []resource.TestStep{
-			{
-				Config: testAccCheckPrivateCrossConnectConfigBasic,
-			},
-			{
-				Config: testAccDataSourcePccMatchId,
-				Check: resource.ComposeTestCheckFunc(
-					resource.TestCheckResourceAttrPair(DataSource+"."+PCCResource+"."+PCCDataSourceById, "name", PCCResource+"."+PCCTestResource, "name"),
-					resource.TestCheckResourceAttrPair(DataSource+"."+PCCResource+"."+PCCDataSourceById, "description", PCCResource+"."+PCCTestResource, "description"),
-					resource.TestCheckResourceAttrPair(DataSource+"."+PCCResource+"."+PCCDataSourceById, "peers", PCCResource+"."+PCCTestResource, "peers"),
-					resource.TestCheckResourceAttrPair(DataSource+"."+PCCResource+"."+PCCDataSourceById, "connectable_datacenters", PCCResource+"."+PCCTestResource, "connectable_datacenters"),
-				),
-			},
-			{
-				Config: testAccDataSourcePccMatchName,
-				Check: resource.ComposeTestCheckFunc(
-					resource.TestCheckResourceAttrPair(DataSource+"."+PCCResource+"."+PCCDataSourceByName, "name", PCCResource+"."+PCCTestResource, "name"),
-					resource.TestCheckResourceAttrPair(DataSource+"."+PCCResource+"."+PCCDataSourceByName, "description", PCCResource+"."+PCCTestResource, "description"),
-					resource.TestCheckResourceAttrPair(DataSource+"."+PCCResource+"."+PCCDataSourceByName, "peers", PCCResource+"."+PCCTestResource, "peers"),
-					resource.TestCheckResourceAttrPair(DataSource+"."+PCCResource+"."+PCCDataSourceByName, "connectable_datacenters", PCCResource+"."+PCCTestResource, "connectable_datacenters"),
-				),
-			},
-		},
+		Steps:             []resource.TestStep{},
 	})
 }
-
-const testAccDataSourcePccMatchId = testAccCheckPrivateCrossConnectConfigBasic + `
-data ` + PCCResource + ` ` + PCCDataSourceById + ` {
-  id			= ` + PCCResource + `.` + PCCTestResource + `.id
-}
-`
-
-const testAccDataSourcePccMatchName = testAccCheckPrivateCrossConnectConfigBasic + `
-data ` + PCCResource + ` ` + PCCDataSourceByName + ` {
-  name			= "` + PCCTestResource + `"
-}
-`

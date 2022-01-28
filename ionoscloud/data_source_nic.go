@@ -173,27 +173,19 @@ func dataSourceNicRead(ctx context.Context, data *schema.ResourceData, meta inte
 			}
 		}
 	} else {
-		nics, apiResponse, err := client.NetworkInterfacesApi.DatacentersServersNicsGet(ctx, datacenterId, serverId).Depth(1).Execute()
+		nics, apiResponse, err := client.NetworkInterfacesApi.DatacentersServersNicsGet(ctx, datacenterId, serverId).Depth(1).Filter("name", name).Execute()
 		logApiRequestTime(apiResponse)
 
 		if err != nil {
 			return diag.FromErr(fmt.Errorf("an error occured while fetching nics: %w ", err))
 		}
 
-		if nameOk && nics.Items != nil {
-			if len(*nics.Items) > 1 {
-				log.Printf("[WARNING] found multiple nic results for name %s\n", name)
-			}
-			for _, tempNic := range *nics.Items {
-				if tempNic.Properties != nil && tempNic.Properties.Name != nil && *tempNic.Properties.Name == name {
-					nic = tempNic
-					break
-				}
-			}
+		if nics.Items != nil && len(*nics.Items) > 0 {
+			nic = (*nics.Items)[len(*nics.Items)-1]
+			log.Printf("[INFO] %v nics found matching the search criteria. Getting the latest nic from the list %v", len(*nics.Items), *nic.Id)
+		} else {
+			return diag.FromErr(fmt.Errorf("no nic found with the specified name %s", name))
 		}
-	}
-	if nic.Id == nil {
-		return diag.FromErr(fmt.Errorf("there are no nics that match the search criteria id = %s, name = %s", id, name))
 	}
 
 	if err := NicSetData(data, &nic); err != nil {

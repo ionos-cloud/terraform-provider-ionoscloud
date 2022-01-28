@@ -7,6 +7,7 @@ import (
 	"context"
 	"fmt"
 	ionoscloud "github.com/ionos-cloud/sdk-go/v6"
+	"regexp"
 	"testing"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
@@ -14,6 +15,9 @@ import (
 )
 
 const networkLoadBalancerResource = NetworkLoadBalancerResource + "." + NetworkLoadBalancerTestResource
+
+const dataSourceNetworkLoadBalancerId = DataSource + "." + NetworkLoadBalancerResource + "." + NetworkLoadBalancerDataSourceById
+const dataSourceNetworkLoadBalancerName = DataSource + "." + NetworkLoadBalancerResource + "." + NetworkLoadBalancerDataSourceByName
 
 func TestAccNetworkLoadBalancerBasic(t *testing.T) {
 	var networkLoadBalancer ionoscloud.NetworkLoadBalancer
@@ -35,6 +39,30 @@ func TestAccNetworkLoadBalancerBasic(t *testing.T) {
 					resource.TestCheckResourceAttrPair(networkLoadBalancerResource, "listener_lan", LanResource+".nlb_lan_1", "id"),
 					resource.TestCheckResourceAttrPair(networkLoadBalancerResource, "target_lan", LanResource+".nlb_lan_2", "id"),
 				),
+			},
+			{
+				Config: testAccDataSourceNetworkLoadBalancerMatchId,
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttrPair(networkLoadBalancerResource, "name", dataSourceNetworkLoadBalancerId, "name"),
+					resource.TestCheckResourceAttrPair(networkLoadBalancerResource, "listener_lan", dataSourceNetworkLoadBalancerId, "listener_lan"),
+					resource.TestCheckResourceAttrPair(networkLoadBalancerResource, "ips", dataSourceNetworkLoadBalancerId, "ips"),
+					resource.TestCheckResourceAttrPair(networkLoadBalancerResource, "target_lan", dataSourceNetworkLoadBalancerId, "target_lan"),
+					resource.TestCheckResourceAttrPair(networkLoadBalancerResource, "lb_private_ips", dataSourceNetworkLoadBalancerId, "lb_private_ips"),
+				),
+			},
+			{
+				Config: testAccDataSourceNetworkLoadBalancerMatchName,
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttrPair(networkLoadBalancerResource, "name", dataSourceNetworkLoadBalancerName, "name"),
+					resource.TestCheckResourceAttrPair(networkLoadBalancerResource, "listener_lan", dataSourceNetworkLoadBalancerName, "listener_lan"),
+					resource.TestCheckResourceAttrPair(networkLoadBalancerResource, "ips", dataSourceNetworkLoadBalancerName, "ips"),
+					resource.TestCheckResourceAttrPair(networkLoadBalancerResource, "target_lan", dataSourceNetworkLoadBalancerName, "target_lan"),
+					resource.TestCheckResourceAttrPair(networkLoadBalancerResource, "lb_private_ips", dataSourceNetworkLoadBalancerName, "lb_private_ips"),
+				),
+			},
+			{
+				Config:      testAccDataSourceNetworkLoadBalancerWrongName,
+				ExpectError: regexp.MustCompile(`no network load balancer found with the specified name`),
 			},
 			{
 				Config: testAccCheckNetworkLoadBalancerConfigUpdate,
@@ -184,5 +212,26 @@ resource ` + NetworkLoadBalancerResource + ` ` + NetworkLoadBalancerTestResource
   target_lan    = ` + LanResource + `.nlb_lan_4.id
   ips           = ["10.12.118.224", "10.12.119.224"]
   lb_private_ips = ["10.13.72.225/24", "10.13.73.225/24"]
+}
+`
+
+const testAccDataSourceNetworkLoadBalancerMatchId = testAccCheckNetworkLoadBalancerConfigBasic + `
+data ` + NetworkLoadBalancerResource + ` ` + NetworkLoadBalancerDataSourceById + ` {
+  datacenter_id = ` + NetworkLoadBalancerResource + `.` + NetworkLoadBalancerTestResource + `.datacenter_id
+  id			= ` + NetworkLoadBalancerResource + `.` + NetworkLoadBalancerTestResource + `.id
+}
+`
+
+const testAccDataSourceNetworkLoadBalancerMatchName = testAccCheckNetworkLoadBalancerConfigBasic + `
+data ` + NetworkLoadBalancerResource + ` ` + NetworkLoadBalancerDataSourceByName + ` {
+  datacenter_id = ` + NetworkLoadBalancerResource + `.` + NetworkLoadBalancerTestResource + `.datacenter_id
+  name			= ` + NetworkLoadBalancerResource + `.` + NetworkLoadBalancerTestResource + `.name
+}
+`
+
+const testAccDataSourceNetworkLoadBalancerWrongName = testAccCheckNetworkLoadBalancerConfigBasic + `
+data ` + NetworkLoadBalancerResource + ` ` + NetworkLoadBalancerDataSourceByName + ` {
+  datacenter_id = ` + NetworkLoadBalancerResource + `.` + NetworkLoadBalancerTestResource + `.datacenter_id
+  name			= "wrong_name"
 }
 `

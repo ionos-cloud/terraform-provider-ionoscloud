@@ -14,10 +14,6 @@ func TestAccDataSourceLan(t *testing.T) {
 			testAccPreCheck(t)
 		},
 		ProviderFactories: testAccProviderFactories,
-		Steps: []resource.TestStep{
-			{
-				Config: testAccCheckLanConfigBasic,
-			},
-		},
+		Steps:             []resource.TestStep{},
 	})
 }

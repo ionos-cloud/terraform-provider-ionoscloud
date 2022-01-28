@@ -8,6 +8,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 	ionoscloud "github.com/ionos-cloud/sdk-go/v6"
+	"log"
 )
 
 func dataSourceServer() *schema.Resource {
@@ -653,40 +654,25 @@ func dataSourceServerRead(ctx context.Context, d *schema.ResourceData, meta inte
 
 	if idOk {
 		/* search by ID */
-		server, apiResponse, err = client.ServersApi.DatacentersServersFindById(ctx, datacenterId.(string), id.(string)).Depth(4).Execute()
+		server, apiResponse, err = client.ServersApi.DatacentersServersFindById(ctx, datacenterId.(string), id.(string)).Depth(5).Execute()
 		logApiRequestTime(apiResponse)
 		if err != nil {
 			return diag.FromErr(fmt.Errorf("an error occurred while fetching the server with ID %s: %w", id.(string), err))
 		}
 	} else {
 		/* search by name */
-		var servers ionoscloud.Servers
-		servers, apiResponse, err := client.ServersApi.DatacentersServersGet(ctx, datacenterId.(string)).Depth(1).Execute()
+		servers, apiResponse, err := client.ServersApi.DatacentersServersGet(ctx, datacenterId.(string)).Depth(5).Filter("name", name.(string)).Execute()
 		logApiRequestTime(apiResponse)
 		if err != nil {
 			return diag.FromErr(fmt.Errorf("an error occurred while fetching servers: %w", err))
 		}
 
-		found := false
-		if servers.Items != nil {
-			for _, s := range *servers.Items {
-				if s.Properties != nil && s.Properties.Name != nil && *s.Properties.Name == name.(string) {
-					/* server found */
-					server, apiResponse, err = client.ServersApi.DatacentersServersFindById(ctx, datacenterId.(string), *s.Id).Depth(4).Execute()
-					logApiRequestTime(apiResponse)
-					if err != nil {
-						return diag.FromErr(fmt.Errorf("an error occurred while fetching the server with ID %s: %w", *s.Id, err))
-					}
-					found = true
-					break
-				}
-			}
+		if servers.Items != nil && len(*servers.Items) > 0 {
+			server = (*servers.Items)[len(*servers.Items)-1]
+			log.Printf("[INFO] %v servers found matching the search criteria. Getting the latest server from the list %v", len(*servers.Items), *server.Id)
+		} else {
+			return diag.FromErr(fmt.Errorf("no server found with the specified name %s", name))
 		}
-
-		if !found {
-			return diag.FromErr(errors.New("server not found"))
-		}
-
 	}
 
 	var token = ionoscloud.Token{}

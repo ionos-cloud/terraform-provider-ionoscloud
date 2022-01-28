@@ -31,6 +31,15 @@ func TestAccS3KeyBasic(t *testing.T) {
 				),
 			},
 			{
+				Config: testAccDataSourceS3KeyMatchId,
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttrSet(S3KeyResource+"."+S3KeyTestResource, "id"),
+					resource.TestCheckResourceAttrPair(S3KeyResource+"."+S3KeyTestResource, "id", DataSource+"."+S3KeyResource+"."+S3KeyDataSourceById, "id"),
+					resource.TestCheckResourceAttrPair(S3KeyResource+"."+S3KeyTestResource, "secret", DataSource+"."+S3KeyResource+"."+S3KeyDataSourceById, "secret"),
+					resource.TestCheckResourceAttrPair(S3KeyResource+"."+S3KeyTestResource, "active", DataSource+"."+S3KeyResource+"."+S3KeyDataSourceById, "active"),
+				),
+			},
+			{
 				Config: testAccChecks3KeyConfigUpdate,
 				Check: resource.ComposeTestCheckFunc(
 					testAccChecks3KeyExists(S3KeyResource+"."+S3KeyTestResource, &s3Key),
@@ -129,3 +138,9 @@ resource ` + S3KeyResource + ` ` + S3KeyTestResource + ` {
   user_id    = ` + UserResource + `.example.id
   active     = true
 }`
+var testAccDataSourceS3KeyMatchId = testAccChecks3KeyConfigBasic + `
+data ` + S3KeyResource + ` ` + S3KeyDataSourceById + ` {
+ user_id    	= ` + UserResource + `.example.id
+ id			= ` + S3KeyResource + `.` + S3KeyTestResource + `.id
+}
+`

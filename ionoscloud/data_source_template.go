@@ -6,7 +6,8 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	ionoscloud "github.com/ionos-cloud/sdk-go/v6"
-	"strings"
+	"log"
+	"strconv"
 )
 
 func dataSourceTemplate() *schema.Resource {
@@ -45,7 +46,31 @@ func dataSourceTemplate() *schema.Resource {
 func dataSourceTemplateRead(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	client := meta.(SdkBundle).CloudApiClient
 
-	templates, apiResponse, err := client.TemplatesApi.TemplatesGet(ctx).Depth(1).Execute()
+	name, nameOk := d.GetOk("name")
+	cores, coresOk := d.GetOk("cores")
+	ram, ramOk := d.GetOk("ram")
+	storageSize, storageSizeOk := d.GetOk("storage_size")
+
+	var template ionoscloud.Template
+	request := client.TemplatesApi.TemplatesGet(ctx).Depth(1)
+
+	if nameOk {
+		request = request.Filter("name", name.(string))
+	}
+
+	if coresOk {
+		request = request.Filter("cores", strconv.Itoa(int(cores.(float64))))
+	}
+
+	if ramOk {
+		request = request.Filter("ram", strconv.Itoa(int(ram.(float64))))
+	}
+
+	if storageSizeOk {
+		request = request.Filter("storageSize", strconv.Itoa(int(storageSize.(float64))))
+	}
+
+	templates, apiResponse, err := request.Execute()
 	logApiRequestTime(apiResponse)
 
 	if err != nil {
@@ -53,89 +78,48 @@ func dataSourceTemplateRead(ctx context.Context, d *schema.ResourceData, meta in
 		return diags
 	}
 
-	name := d.Get("name").(string)
-	cores, coresOk := d.GetOk("cores")
-	ram, ramOk := d.GetOk("ram")
-	storageSize, storageSizeOk := d.GetOk("storage_size")
+	if templates.Items != nil && len(*templates.Items) > 0 {
+		template = (*templates.Items)[len(*templates.Items)-1]
+		log.Printf("[INFO] %v templates found matching the search criteria. Getting the latest template from the list %v", len(*templates.Items), *template.Id)
+	} else {
+		return diag.FromErr(fmt.Errorf("no template found with the specified criteria: name %s, cores %s, ram %s, storageSize %s", name.(string), strconv.Itoa(int(cores.(float64))), strconv.Itoa(int(ram.(float64))), strconv.Itoa(int(storageSize.(float64)))))
+	}
 
-	var results []ionoscloud.Template
+	if err = setTemplateData(d, &template); err != nil {
+		return diag.FromErr(err)
+	}
 
-	if templates.Items != nil {
-		for _, tmp := range *templates.Items {
-			if strings.Contains(strings.ToLower(*tmp.Properties.Name), strings.ToLower(name)) {
-				results = append(results, tmp)
+	return nil
+}
+
+func setTemplateData(d *schema.ResourceData, template *ionoscloud.Template) error {
+	d.SetId(*template.Id)
+
+	if template.Properties != nil {
+		if template.Properties.Name != nil {
+			err := d.Set("name", *template.Properties.Name)
+			if err != nil {
+				return fmt.Errorf("error while setting name property for image %s: %s", d.Id(), err)
 			}
 		}
-	}
 
-	if coresOk {
-		var coresResults []ionoscloud.Template
-		for _, tmp := range results {
-			cores := float32(cores.(float64))
-			if tmp.Properties.Cores != nil && *tmp.Properties.Cores == cores {
-				coresResults = append(coresResults, tmp)
+		if template.Properties.Cores != nil {
+			if err := d.Set("cores", *template.Properties.Cores); err != nil {
+				return err
 			}
 		}
-		results = coresResults
-	}
-
-	if ramOk {
-		var ramResults []ionoscloud.Template
-		for _, tmp := range results {
-			ram := float32(ram.(float64))
-			if tmp.Properties.Ram != nil && *tmp.Properties.Ram == ram {
-				ramResults = append(ramResults, tmp)
+		if template.Properties.Ram != nil {
+			if err := d.Set("ram", *template.Properties.Ram); err != nil {
+				return err
 			}
 		}
-		results = ramResults
-	}
-
-	if storageSizeOk {
-		var storageSizeResults []ionoscloud.Template
-		storageSize := float32(storageSize.(float64))
-		for _, tmp := range results {
-			if tmp.Properties.StorageSize != nil && *tmp.Properties.StorageSize == storageSize {
-				storageSizeResults = append(storageSizeResults, tmp)
+		if template.Properties.StorageSize != nil {
+			if err := d.Set("storage_size", *template.Properties.StorageSize); err != nil {
+				return err
 			}
 		}
-		results = storageSizeResults
-	}
 
-	if len(results) > 1 {
-		diags := diag.FromErr(fmt.Errorf("There is more than one template that match the search criteria "))
-		return diags
 	}
-
-	if len(results) == 0 {
-		diags := diag.FromErr(fmt.Errorf("There are no templates that match the search criteria "))
-		return diags
-	}
-
-	if results[0].Properties.Name != nil {
-		err := d.Set("name", *results[0].Properties.Name)
-		if err != nil {
-			diags := diag.FromErr(fmt.Errorf("error while setting name property for image %s: %s", d.Id(), err))
-			return diags
-		}
-	}
-
-	if results[0].Properties.Cores != nil {
-		if err := d.Set("cores", *results[0].Properties.Cores); err != nil {
-			return diag.FromErr(err)
-		}
-	}
-	if results[0].Properties.Ram != nil {
-		if err := d.Set("ram", *results[0].Properties.Ram); err != nil {
-			return diag.FromErr(err)
-		}
-	}
-	if results[0].Properties.StorageSize != nil {
-		if err := d.Set("storage_size", *results[0].Properties.StorageSize); err != nil {
-			return diag.FromErr(err)
-		}
-	}
-
-	d.SetId(*results[0].Id)
 
 	return nil
 }

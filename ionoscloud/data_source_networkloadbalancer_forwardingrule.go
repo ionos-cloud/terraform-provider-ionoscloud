@@ -8,7 +8,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 	ionoscloud "github.com/ionos-cloud/sdk-go/v6"
-	"strings"
+	"log"
 )
 
 func dataSourceNetworkLoadBalancerForwardingRule() *schema.Resource {
@@ -178,29 +178,17 @@ func dataSourceNetworkLoadBalancerForwardingRuleRead(ctx context.Context, d *sch
 		}
 	} else {
 		/* search by name */
-		var networkLoadBalancerForwardingRules ionoscloud.NetworkLoadBalancerForwardingRules
-
-		networkLoadBalancerForwardingRules, apiResponse, err := client.NetworkLoadBalancersApi.DatacentersNetworkloadbalancersForwardingrulesGet(ctx, datacenterId.(string), networkloadbalancerId.(string)).Execute()
+		networkLoadBalancerForwardingRules, apiResponse, err := client.NetworkLoadBalancersApi.DatacentersNetworkloadbalancersForwardingrulesGet(ctx, datacenterId.(string), networkloadbalancerId.(string)).Depth(1).Filter("name", name.(string)).Execute()
 		logApiRequestTime(apiResponse)
 		if err != nil {
 			return diag.FromErr(fmt.Errorf("an error occurred while fetching network loadbalancers forwarding rules: %s", err.Error()))
 		}
 
-		if networkLoadBalancerForwardingRules.Items != nil {
-			for _, c := range *networkLoadBalancerForwardingRules.Items {
-				tmpNetworkLoadBalancerForwardingRule, apiResponse, err := client.NetworkLoadBalancersApi.DatacentersNetworkloadbalancersForwardingrulesFindByForwardingRuleId(ctx, datacenterId.(string), networkloadbalancerId.(string), *c.Id).Execute()
-				logApiRequestTime(apiResponse)
-				if err != nil {
-					return diag.FromErr(fmt.Errorf("an error occurred while fetching network loadbalancer forwarding rule with ID %s: %s", *c.Id, err.Error()))
-				}
-				if tmpNetworkLoadBalancerForwardingRule.Properties.Name != nil {
-					if strings.Contains(*tmpNetworkLoadBalancerForwardingRule.Properties.Name, name.(string)) {
-						networkLoadBalancerForwardingRule = tmpNetworkLoadBalancerForwardingRule
-						break
-					}
-				}
-
-			}
+		if networkLoadBalancerForwardingRules.Items != nil && len(*networkLoadBalancerForwardingRules.Items) > 0 {
+			networkLoadBalancerForwardingRule = (*networkLoadBalancerForwardingRules.Items)[len(*networkLoadBalancerForwardingRules.Items)-1]
+			log.Printf("[INFO] %v network load balancers forwarding rules found matching the search criteria. Getting the latest network load balancer forwarding rule from the list %v", len(*networkLoadBalancerForwardingRules.Items), *networkLoadBalancerForwardingRule.Id)
+		} else {
+			return diag.FromErr(fmt.Errorf("no network load balancer forwarding rule found with the specified name %s", name.(string)))
 		}
 
 	}

@@ -6,6 +6,8 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	ionoscloud "github.com/ionos-cloud/sdk-go/v6"
+	"log"
+	"strconv"
 )
 
 func dataSourceSnapshot() *schema.Resource {
@@ -95,7 +97,7 @@ func dataSourceSnapshotRead(ctx context.Context, d *schema.ResourceData, meta in
 	client := meta.(SdkBundle).CloudApiClient
 
 	id, idOk := d.GetOk("id")
-	name := d.Get("name").(string)
+	name, nameOk := d.GetOk("name")
 	location, locationOk := d.GetOk("location")
 	size, sizeOk := d.GetOk("size")
 
@@ -112,9 +114,22 @@ func dataSourceSnapshotRead(ctx context.Context, d *schema.ResourceData, meta in
 			return diags
 		}
 	} else {
-		var results []ionoscloud.Snapshot
 
-		snapshots, apiResponse, err := client.SnapshotsApi.SnapshotsGet(ctx).Depth(1).Execute()
+		request := client.SnapshotsApi.SnapshotsGet(ctx).Depth(1)
+
+		if nameOk {
+			request = request.Filter("name", name.(string))
+		}
+
+		if locationOk {
+			request = request.Filter("location", location.(string))
+		}
+
+		if sizeOk {
+			request = request.Filter("size", strconv.Itoa(size.(int)))
+		}
+
+		snapshots, apiResponse, err := request.Execute()
 		logApiRequestTime(apiResponse)
 
 		if err != nil {
@@ -122,41 +137,12 @@ func dataSourceSnapshotRead(ctx context.Context, d *schema.ResourceData, meta in
 			return diags
 		}
 
-		if snapshots.Items != nil {
-			for _, snp := range *snapshots.Items {
-				if snp.Properties != nil && snp.Properties.Name != nil && *snp.Properties.Name == name {
-					results = append(results, snp)
-				}
-			}
+		if snapshots.Items != nil && len(*snapshots.Items) > 0 {
+			snapshot = (*snapshots.Items)[len(*snapshots.Items)-1]
+			log.Printf("[INFO] %v snapshots found matching the search criteria. Getting the latest snapshot from the list %v", len(*snapshots.Items), *snapshot.Id)
+		} else {
+			return diag.FromErr(fmt.Errorf("no snapshot found with the specified criteria: location %s, size %s", location.(string), strconv.Itoa(size.(int))))
 		}
-
-		if locationOk {
-			var locationResults []ionoscloud.Snapshot
-			for _, snp := range results {
-				if *snp.Properties.Location == location.(string) {
-					locationResults = append(locationResults, snp)
-				}
-
-			}
-			results = locationResults
-		}
-
-		if sizeOk {
-			var sizeResults []ionoscloud.Snapshot
-			for _, snp := range results {
-				if *snp.Properties.Size <= float32(size.(int)) {
-					sizeResults = append(sizeResults, snp)
-				}
-
-			}
-			results = sizeResults
-		}
-
-		if len(results) == 0 {
-			diags := diag.FromErr(fmt.Errorf("There are no snapshots that match the search criteria "))
-			return diags
-		}
-		snapshot = results[0]
 	}
 
 	if err = setSnapshotData(d, &snapshot); err != nil {
