@@ -1,3 +1,5 @@
+//go:build compute || all || firewall
+
 package ionoscloud
 
 import (

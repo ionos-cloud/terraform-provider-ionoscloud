@@ -1,3 +1,5 @@
+//go:build compute || all || backup_unit
+
 package ionoscloud
 
 import (

@@ -1,3 +1,5 @@
+//go:build compute || all || pcc
+
 package ionoscloud
 
 import (
@@ -100,12 +102,6 @@ func testAccCheckPrivateCrossConnectExists(n string, privateCrossConnect *ionosc
 		return nil
 	}
 }
-
-const testAccCheckPrivateCrossConnectConfigBasic = `
-resource ` + PCCResource + ` ` + PCCTestResource + ` {
-  name        = "` + PCCTestResource + `"
-  description = "` + PCCTestResource + `"
-}`
 
 const testAccCheckPrivateCrossConnectConfigUpdate = `
 resource ` + PCCResource + ` ` + PCCTestResource + ` {

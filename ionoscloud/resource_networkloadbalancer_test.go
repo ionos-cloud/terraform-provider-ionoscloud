@@ -1,5 +1,5 @@
-//go:build nlb
-// +build nlb
+//go:build all || nlb
+// +build all nlb
 
 package ionoscloud
 

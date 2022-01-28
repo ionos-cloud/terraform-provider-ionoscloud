@@ -1,3 +1,5 @@
+//go:build compute || all || group
+
 package ionoscloud
 
 import (

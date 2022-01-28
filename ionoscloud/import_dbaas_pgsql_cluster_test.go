@@ -1,5 +1,5 @@
-//go:build dbaas
-// +build dbaas
+//go:build all || dbaas
+// +build all dbaas
 
 package ionoscloud
 

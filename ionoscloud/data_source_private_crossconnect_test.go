@@ -1,3 +1,5 @@
+//go:build compute || all || pcc
+
 package ionoscloud
 
 import (

@@ -1,3 +1,5 @@
+//go:build compute || all || ipfailover
+
 package ionoscloud
 
 import (
