@@ -111,7 +111,8 @@ func resourceS3KeyRead(ctx context.Context, d *schema.ResourceData, meta interfa
 		return diags
 	}
 
-	log.Printf("[INFO] Successfully retrieved S3 key %s: %+v \n", d.Id(), s3Key)
+	log.Printf("[INFO] Successfully retrieved S3 key %+v \n", *s3Key.Id)
+
 	if s3Key.HasProperties() && s3Key.Properties.HasActive() {
 		log.Printf("[INFO] Successfully retrieved S3 key with status: %t", *s3Key.Properties.Active)
 	}
@@ -131,12 +132,10 @@ func resourceS3KeyUpdate(ctx context.Context, d *schema.ResourceData, meta inter
 
 	log.Printf("[INFO] Attempting to update S3 key %s", d.Id())
 
-	if d.HasChange("active") {
-		newActiveSetting := d.Get("active")
-		log.Printf("[INFO] S3 key active setting changed to %+v", newActiveSetting)
-		active := newActiveSetting.(bool)
-		request.Properties.Active = &active
-	}
+	newActiveSetting := d.Get("active")
+	log.Printf("[INFO] S3 key active setting changed to %+v", newActiveSetting)
+	active := newActiveSetting.(bool)
+	request.Properties.Active = &active
 
 	userId := d.Get("user_id").(string)
 	_, apiResponse, err := client.UserS3KeysApi.UmUsersS3keysPut(ctx, userId, d.Id()).S3Key(request).Execute()
