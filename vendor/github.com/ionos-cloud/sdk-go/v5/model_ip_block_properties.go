@@ -220,23 +220,18 @@ func (o *IpBlockProperties) HasIpConsumers() bool {
 
 func (o IpBlockProperties) MarshalJSON() ([]byte, error) {
 	toSerialize := map[string]interface{}{}
-
 	if o.Ips != nil {
 		toSerialize["ips"] = o.Ips
 	}
-
 	if o.Location != nil {
 		toSerialize["location"] = o.Location
 	}
-
 	if o.Size != nil {
 		toSerialize["size"] = o.Size
 	}
-
 	if o.Name != nil {
 		toSerialize["name"] = o.Name
 	}
-
 	if o.IpConsumers != nil {
 		toSerialize["ipConsumers"] = o.IpConsumers
 	}

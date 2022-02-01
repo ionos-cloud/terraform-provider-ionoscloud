@@ -96,9 +96,19 @@ func (a *KubernetesApiService) K8sDeleteExecute(r ApiK8sDeleteRequest) (map[stri
 
 	if r.pretty != nil {
 		localVarQueryParams.Add("pretty", parameterToString(*r.pretty, ""))
+	} else {
+		defaultQueryParam := a.client.cfg.DefaultQueryParams.Get("pretty")
+		if defaultQueryParam == "" {
+			localVarQueryParams.Add("pretty", parameterToString(true, ""))
+		}
 	}
 	if r.depth != nil {
 		localVarQueryParams.Add("depth", parameterToString(*r.depth, ""))
+	} else {
+		defaultQueryParam := a.client.cfg.DefaultQueryParams.Get("depth")
+		if defaultQueryParam == "" {
+			localVarQueryParams.Add("depth", parameterToString(0, ""))
+		}
 	}
 
 	// to determine the Content-Type header
@@ -170,7 +180,7 @@ func (a *KubernetesApiService) K8sDeleteExecute(r ApiK8sDeleteRequest) (map[stri
 		var v Error
 		err = a.client.decode(&v, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
 		if err != nil {
-			newErr.error = err.Error()
+			newErr.error = fmt.Sprintf(FormatStringErr, localVarHTTPResponse.Status, err.Error())
 			return localVarReturnValue, localVarAPIResponse, newErr
 		}
 		newErr.model = v
@@ -259,9 +269,19 @@ func (a *KubernetesApiService) K8sFindByClusterIdExecute(r ApiK8sFindByClusterId
 
 	if r.pretty != nil {
 		localVarQueryParams.Add("pretty", parameterToString(*r.pretty, ""))
+	} else {
+		defaultQueryParam := a.client.cfg.DefaultQueryParams.Get("pretty")
+		if defaultQueryParam == "" {
+			localVarQueryParams.Add("pretty", parameterToString(true, ""))
+		}
 	}
 	if r.depth != nil {
 		localVarQueryParams.Add("depth", parameterToString(*r.depth, ""))
+	} else {
+		defaultQueryParam := a.client.cfg.DefaultQueryParams.Get("depth")
+		if defaultQueryParam == "" {
+			localVarQueryParams.Add("depth", parameterToString(0, ""))
+		}
 	}
 
 	// to determine the Content-Type header
@@ -333,7 +353,7 @@ func (a *KubernetesApiService) K8sFindByClusterIdExecute(r ApiK8sFindByClusterId
 		var v Error
 		err = a.client.decode(&v, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
 		if err != nil {
-			newErr.error = err.Error()
+			newErr.error = fmt.Sprintf(FormatStringErr, localVarHTTPResponse.Status, err.Error())
 			return localVarReturnValue, localVarAPIResponse, newErr
 		}
 		newErr.model = v
@@ -441,9 +461,19 @@ func (a *KubernetesApiService) K8sGetExecute(r ApiK8sGetRequest) (KubernetesClus
 
 	if r.pretty != nil {
 		localVarQueryParams.Add("pretty", parameterToString(*r.pretty, ""))
+	} else {
+		defaultQueryParam := a.client.cfg.DefaultQueryParams.Get("pretty")
+		if defaultQueryParam == "" {
+			localVarQueryParams.Add("pretty", parameterToString(true, ""))
+		}
 	}
 	if r.depth != nil {
 		localVarQueryParams.Add("depth", parameterToString(*r.depth, ""))
+	} else {
+		defaultQueryParam := a.client.cfg.DefaultQueryParams.Get("depth")
+		if defaultQueryParam == "" {
+			localVarQueryParams.Add("depth", parameterToString(0, ""))
+		}
 	}
 	if r.orderBy != nil {
 		localVarQueryParams.Add("orderBy", parameterToString(*r.orderBy, ""))
@@ -528,7 +558,7 @@ func (a *KubernetesApiService) K8sGetExecute(r ApiK8sGetRequest) (KubernetesClus
 		var v Error
 		err = a.client.decode(&v, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
 		if err != nil {
-			newErr.error = err.Error()
+			newErr.error = fmt.Sprintf(FormatStringErr, localVarHTTPResponse.Status, err.Error())
 			return localVarReturnValue, localVarAPIResponse, newErr
 		}
 		newErr.model = v
@@ -640,9 +670,19 @@ func (a *KubernetesApiService) K8sKubeconfigGetExecute(r ApiK8sKubeconfigGetRequ
 
 	if r.pretty != nil {
 		localVarQueryParams.Add("pretty", parameterToString(*r.pretty, ""))
+	} else {
+		defaultQueryParam := a.client.cfg.DefaultQueryParams.Get("pretty")
+		if defaultQueryParam == "" {
+			localVarQueryParams.Add("pretty", parameterToString(true, ""))
+		}
 	}
 	if r.depth != nil {
 		localVarQueryParams.Add("depth", parameterToString(*r.depth, ""))
+	} else {
+		defaultQueryParam := a.client.cfg.DefaultQueryParams.Get("depth")
+		if defaultQueryParam == "" {
+			localVarQueryParams.Add("depth", parameterToString(0, ""))
+		}
 	}
 	if r.orderBy != nil {
 		localVarQueryParams.Add("orderBy", parameterToString(*r.orderBy, ""))
@@ -727,7 +767,7 @@ func (a *KubernetesApiService) K8sKubeconfigGetExecute(r ApiK8sKubeconfigGetRequ
 		var v Error
 		err = a.client.decode(&v, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
 		if err != nil {
-			newErr.error = err.Error()
+			newErr.error = fmt.Sprintf(FormatStringErr, localVarHTTPResponse.Status, err.Error())
 			return localVarReturnValue, localVarAPIResponse, newErr
 		}
 		newErr.model = v
@@ -820,9 +860,19 @@ func (a *KubernetesApiService) K8sNodepoolsDeleteExecute(r ApiK8sNodepoolsDelete
 
 	if r.pretty != nil {
 		localVarQueryParams.Add("pretty", parameterToString(*r.pretty, ""))
+	} else {
+		defaultQueryParam := a.client.cfg.DefaultQueryParams.Get("pretty")
+		if defaultQueryParam == "" {
+			localVarQueryParams.Add("pretty", parameterToString(true, ""))
+		}
 	}
 	if r.depth != nil {
 		localVarQueryParams.Add("depth", parameterToString(*r.depth, ""))
+	} else {
+		defaultQueryParam := a.client.cfg.DefaultQueryParams.Get("depth")
+		if defaultQueryParam == "" {
+			localVarQueryParams.Add("depth", parameterToString(0, ""))
+		}
 	}
 
 	// to determine the Content-Type header
@@ -894,7 +944,7 @@ func (a *KubernetesApiService) K8sNodepoolsDeleteExecute(r ApiK8sNodepoolsDelete
 		var v Error
 		err = a.client.decode(&v, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
 		if err != nil {
-			newErr.error = err.Error()
+			newErr.error = fmt.Sprintf(FormatStringErr, localVarHTTPResponse.Status, err.Error())
 			return localVarReturnValue, localVarAPIResponse, newErr
 		}
 		newErr.model = v
@@ -987,9 +1037,19 @@ func (a *KubernetesApiService) K8sNodepoolsFindByIdExecute(r ApiK8sNodepoolsFind
 
 	if r.pretty != nil {
 		localVarQueryParams.Add("pretty", parameterToString(*r.pretty, ""))
+	} else {
+		defaultQueryParam := a.client.cfg.DefaultQueryParams.Get("pretty")
+		if defaultQueryParam == "" {
+			localVarQueryParams.Add("pretty", parameterToString(true, ""))
+		}
 	}
 	if r.depth != nil {
 		localVarQueryParams.Add("depth", parameterToString(*r.depth, ""))
+	} else {
+		defaultQueryParam := a.client.cfg.DefaultQueryParams.Get("depth")
+		if defaultQueryParam == "" {
+			localVarQueryParams.Add("depth", parameterToString(0, ""))
+		}
 	}
 
 	// to determine the Content-Type header
@@ -1061,7 +1121,7 @@ func (a *KubernetesApiService) K8sNodepoolsFindByIdExecute(r ApiK8sNodepoolsFind
 		var v Error
 		err = a.client.decode(&v, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
 		if err != nil {
-			newErr.error = err.Error()
+			newErr.error = fmt.Sprintf(FormatStringErr, localVarHTTPResponse.Status, err.Error())
 			return localVarReturnValue, localVarAPIResponse, newErr
 		}
 		newErr.model = v
@@ -1173,9 +1233,19 @@ func (a *KubernetesApiService) K8sNodepoolsGetExecute(r ApiK8sNodepoolsGetReques
 
 	if r.pretty != nil {
 		localVarQueryParams.Add("pretty", parameterToString(*r.pretty, ""))
+	} else {
+		defaultQueryParam := a.client.cfg.DefaultQueryParams.Get("pretty")
+		if defaultQueryParam == "" {
+			localVarQueryParams.Add("pretty", parameterToString(true, ""))
+		}
 	}
 	if r.depth != nil {
 		localVarQueryParams.Add("depth", parameterToString(*r.depth, ""))
+	} else {
+		defaultQueryParam := a.client.cfg.DefaultQueryParams.Get("depth")
+		if defaultQueryParam == "" {
+			localVarQueryParams.Add("depth", parameterToString(0, ""))
+		}
 	}
 	if r.orderBy != nil {
 		localVarQueryParams.Add("orderBy", parameterToString(*r.orderBy, ""))
@@ -1260,7 +1330,7 @@ func (a *KubernetesApiService) K8sNodepoolsGetExecute(r ApiK8sNodepoolsGetReques
 		var v Error
 		err = a.client.decode(&v, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
 		if err != nil {
-			newErr.error = err.Error()
+			newErr.error = fmt.Sprintf(FormatStringErr, localVarHTTPResponse.Status, err.Error())
 			return localVarReturnValue, localVarAPIResponse, newErr
 		}
 		newErr.model = v
@@ -1357,9 +1427,19 @@ func (a *KubernetesApiService) K8sNodepoolsNodesDeleteExecute(r ApiK8sNodepoolsN
 
 	if r.pretty != nil {
 		localVarQueryParams.Add("pretty", parameterToString(*r.pretty, ""))
+	} else {
+		defaultQueryParam := a.client.cfg.DefaultQueryParams.Get("pretty")
+		if defaultQueryParam == "" {
+			localVarQueryParams.Add("pretty", parameterToString(true, ""))
+		}
 	}
 	if r.depth != nil {
 		localVarQueryParams.Add("depth", parameterToString(*r.depth, ""))
+	} else {
+		defaultQueryParam := a.client.cfg.DefaultQueryParams.Get("depth")
+		if defaultQueryParam == "" {
+			localVarQueryParams.Add("depth", parameterToString(0, ""))
+		}
 	}
 
 	// to determine the Content-Type header
@@ -1431,7 +1511,7 @@ func (a *KubernetesApiService) K8sNodepoolsNodesDeleteExecute(r ApiK8sNodepoolsN
 		var v Error
 		err = a.client.decode(&v, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
 		if err != nil {
-			newErr.error = err.Error()
+			newErr.error = fmt.Sprintf(FormatStringErr, localVarHTTPResponse.Status, err.Error())
 			return localVarReturnValue, localVarAPIResponse, newErr
 		}
 		newErr.model = v
@@ -1528,9 +1608,19 @@ func (a *KubernetesApiService) K8sNodepoolsNodesFindByIdExecute(r ApiK8sNodepool
 
 	if r.pretty != nil {
 		localVarQueryParams.Add("pretty", parameterToString(*r.pretty, ""))
+	} else {
+		defaultQueryParam := a.client.cfg.DefaultQueryParams.Get("pretty")
+		if defaultQueryParam == "" {
+			localVarQueryParams.Add("pretty", parameterToString(true, ""))
+		}
 	}
 	if r.depth != nil {
 		localVarQueryParams.Add("depth", parameterToString(*r.depth, ""))
+	} else {
+		defaultQueryParam := a.client.cfg.DefaultQueryParams.Get("depth")
+		if defaultQueryParam == "" {
+			localVarQueryParams.Add("depth", parameterToString(0, ""))
+		}
 	}
 
 	// to determine the Content-Type header
@@ -1602,7 +1692,7 @@ func (a *KubernetesApiService) K8sNodepoolsNodesFindByIdExecute(r ApiK8sNodepool
 		var v Error
 		err = a.client.decode(&v, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
 		if err != nil {
-			newErr.error = err.Error()
+			newErr.error = fmt.Sprintf(FormatStringErr, localVarHTTPResponse.Status, err.Error())
 			return localVarReturnValue, localVarAPIResponse, newErr
 		}
 		newErr.model = v
@@ -1718,9 +1808,19 @@ func (a *KubernetesApiService) K8sNodepoolsNodesGetExecute(r ApiK8sNodepoolsNode
 
 	if r.pretty != nil {
 		localVarQueryParams.Add("pretty", parameterToString(*r.pretty, ""))
+	} else {
+		defaultQueryParam := a.client.cfg.DefaultQueryParams.Get("pretty")
+		if defaultQueryParam == "" {
+			localVarQueryParams.Add("pretty", parameterToString(true, ""))
+		}
 	}
 	if r.depth != nil {
 		localVarQueryParams.Add("depth", parameterToString(*r.depth, ""))
+	} else {
+		defaultQueryParam := a.client.cfg.DefaultQueryParams.Get("depth")
+		if defaultQueryParam == "" {
+			localVarQueryParams.Add("depth", parameterToString(0, ""))
+		}
 	}
 	if r.orderBy != nil {
 		localVarQueryParams.Add("orderBy", parameterToString(*r.orderBy, ""))
@@ -1805,7 +1905,7 @@ func (a *KubernetesApiService) K8sNodepoolsNodesGetExecute(r ApiK8sNodepoolsNode
 		var v Error
 		err = a.client.decode(&v, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
 		if err != nil {
-			newErr.error = err.Error()
+			newErr.error = fmt.Sprintf(FormatStringErr, localVarHTTPResponse.Status, err.Error())
 			return localVarReturnValue, localVarAPIResponse, newErr
 		}
 		newErr.model = v
@@ -1904,9 +2004,19 @@ func (a *KubernetesApiService) K8sNodepoolsNodesReplacePostExecute(r ApiK8sNodep
 
 	if r.pretty != nil {
 		localVarQueryParams.Add("pretty", parameterToString(*r.pretty, ""))
+	} else {
+		defaultQueryParam := a.client.cfg.DefaultQueryParams.Get("pretty")
+		if defaultQueryParam == "" {
+			localVarQueryParams.Add("pretty", parameterToString(true, ""))
+		}
 	}
 	if r.depth != nil {
 		localVarQueryParams.Add("depth", parameterToString(*r.depth, ""))
+	} else {
+		defaultQueryParam := a.client.cfg.DefaultQueryParams.Get("depth")
+		if defaultQueryParam == "" {
+			localVarQueryParams.Add("depth", parameterToString(0, ""))
+		}
 	}
 
 	// to determine the Content-Type header
@@ -1978,7 +2088,7 @@ func (a *KubernetesApiService) K8sNodepoolsNodesReplacePostExecute(r ApiK8sNodep
 		var v Error
 		err = a.client.decode(&v, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
 		if err != nil {
-			newErr.error = err.Error()
+			newErr.error = fmt.Sprintf(FormatStringErr, localVarHTTPResponse.Status, err.Error())
 			return localVarReturnValue, localVarAPIResponse, newErr
 		}
 		newErr.model = v
@@ -2075,9 +2185,19 @@ func (a *KubernetesApiService) K8sNodepoolsPostExecute(r ApiK8sNodepoolsPostRequ
 
 	if r.pretty != nil {
 		localVarQueryParams.Add("pretty", parameterToString(*r.pretty, ""))
+	} else {
+		defaultQueryParam := a.client.cfg.DefaultQueryParams.Get("pretty")
+		if defaultQueryParam == "" {
+			localVarQueryParams.Add("pretty", parameterToString(true, ""))
+		}
 	}
 	if r.depth != nil {
 		localVarQueryParams.Add("depth", parameterToString(*r.depth, ""))
+	} else {
+		defaultQueryParam := a.client.cfg.DefaultQueryParams.Get("depth")
+		if defaultQueryParam == "" {
+			localVarQueryParams.Add("depth", parameterToString(0, ""))
+		}
 	}
 
 	// to determine the Content-Type header
@@ -2151,7 +2271,7 @@ func (a *KubernetesApiService) K8sNodepoolsPostExecute(r ApiK8sNodepoolsPostRequ
 		var v Error
 		err = a.client.decode(&v, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
 		if err != nil {
-			newErr.error = err.Error()
+			newErr.error = fmt.Sprintf(FormatStringErr, localVarHTTPResponse.Status, err.Error())
 			return localVarReturnValue, localVarAPIResponse, newErr
 		}
 		newErr.model = v
@@ -2252,9 +2372,19 @@ func (a *KubernetesApiService) K8sNodepoolsPutExecute(r ApiK8sNodepoolsPutReques
 
 	if r.pretty != nil {
 		localVarQueryParams.Add("pretty", parameterToString(*r.pretty, ""))
+	} else {
+		defaultQueryParam := a.client.cfg.DefaultQueryParams.Get("pretty")
+		if defaultQueryParam == "" {
+			localVarQueryParams.Add("pretty", parameterToString(true, ""))
+		}
 	}
 	if r.depth != nil {
 		localVarQueryParams.Add("depth", parameterToString(*r.depth, ""))
+	} else {
+		defaultQueryParam := a.client.cfg.DefaultQueryParams.Get("depth")
+		if defaultQueryParam == "" {
+			localVarQueryParams.Add("depth", parameterToString(0, ""))
+		}
 	}
 
 	// to determine the Content-Type header
@@ -2328,7 +2458,7 @@ func (a *KubernetesApiService) K8sNodepoolsPutExecute(r ApiK8sNodepoolsPutReques
 		var v Error
 		err = a.client.decode(&v, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
 		if err != nil {
-			newErr.error = err.Error()
+			newErr.error = fmt.Sprintf(FormatStringErr, localVarHTTPResponse.Status, err.Error())
 			return localVarReturnValue, localVarAPIResponse, newErr
 		}
 		newErr.model = v
@@ -2421,9 +2551,19 @@ func (a *KubernetesApiService) K8sPostExecute(r ApiK8sPostRequest) (KubernetesCl
 
 	if r.pretty != nil {
 		localVarQueryParams.Add("pretty", parameterToString(*r.pretty, ""))
+	} else {
+		defaultQueryParam := a.client.cfg.DefaultQueryParams.Get("pretty")
+		if defaultQueryParam == "" {
+			localVarQueryParams.Add("pretty", parameterToString(true, ""))
+		}
 	}
 	if r.depth != nil {
 		localVarQueryParams.Add("depth", parameterToString(*r.depth, ""))
+	} else {
+		defaultQueryParam := a.client.cfg.DefaultQueryParams.Get("depth")
+		if defaultQueryParam == "" {
+			localVarQueryParams.Add("depth", parameterToString(0, ""))
+		}
 	}
 
 	// to determine the Content-Type header
@@ -2497,7 +2637,7 @@ func (a *KubernetesApiService) K8sPostExecute(r ApiK8sPostRequest) (KubernetesCl
 		var v Error
 		err = a.client.decode(&v, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
 		if err != nil {
-			newErr.error = err.Error()
+			newErr.error = fmt.Sprintf(FormatStringErr, localVarHTTPResponse.Status, err.Error())
 			return localVarReturnValue, localVarAPIResponse, newErr
 		}
 		newErr.model = v
@@ -2594,9 +2734,19 @@ func (a *KubernetesApiService) K8sPutExecute(r ApiK8sPutRequest) (KubernetesClus
 
 	if r.pretty != nil {
 		localVarQueryParams.Add("pretty", parameterToString(*r.pretty, ""))
+	} else {
+		defaultQueryParam := a.client.cfg.DefaultQueryParams.Get("pretty")
+		if defaultQueryParam == "" {
+			localVarQueryParams.Add("pretty", parameterToString(true, ""))
+		}
 	}
 	if r.depth != nil {
 		localVarQueryParams.Add("depth", parameterToString(*r.depth, ""))
+	} else {
+		defaultQueryParam := a.client.cfg.DefaultQueryParams.Get("depth")
+		if defaultQueryParam == "" {
+			localVarQueryParams.Add("depth", parameterToString(0, ""))
+		}
 	}
 
 	// to determine the Content-Type header
@@ -2670,7 +2820,7 @@ func (a *KubernetesApiService) K8sPutExecute(r ApiK8sPutRequest) (KubernetesClus
 		var v Error
 		err = a.client.decode(&v, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
 		if err != nil {
-			newErr.error = err.Error()
+			newErr.error = fmt.Sprintf(FormatStringErr, localVarHTTPResponse.Status, err.Error())
 			return localVarReturnValue, localVarAPIResponse, newErr
 		}
 		newErr.model = v
@@ -2844,7 +2994,7 @@ func (a *KubernetesApiService) K8sVersionsCompatibilitiesGetExecute(r ApiK8sVers
 		var v Error
 		err = a.client.decode(&v, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
 		if err != nil {
-			newErr.error = err.Error()
+			newErr.error = fmt.Sprintf(FormatStringErr, localVarHTTPResponse.Status, err.Error())
 			return localVarReturnValue, localVarAPIResponse, newErr
 		}
 		newErr.model = v
@@ -3014,7 +3164,7 @@ func (a *KubernetesApiService) K8sVersionsDefaultGetExecute(r ApiK8sVersionsDefa
 		var v Error
 		err = a.client.decode(&v, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
 		if err != nil {
-			newErr.error = err.Error()
+			newErr.error = fmt.Sprintf(FormatStringErr, localVarHTTPResponse.Status, err.Error())
 			return localVarReturnValue, localVarAPIResponse, newErr
 		}
 		newErr.model = v
@@ -3184,7 +3334,7 @@ func (a *KubernetesApiService) K8sVersionsGetExecute(r ApiK8sVersionsGetRequest)
 		var v Error
 		err = a.client.decode(&v, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
 		if err != nil {
-			newErr.error = err.Error()
+			newErr.error = fmt.Sprintf(FormatStringErr, localVarHTTPResponse.Status, err.Error())
 			return localVarReturnValue, localVarAPIResponse, newErr
 		}
 		newErr.model = v

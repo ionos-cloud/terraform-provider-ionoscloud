@@ -98,11 +98,9 @@ func (o *IPFailover) HasNicUuid() bool {
 
 func (o IPFailover) MarshalJSON() ([]byte, error) {
 	toSerialize := map[string]interface{}{}
-
 	if o.Ip != nil {
 		toSerialize["ip"] = o.Ip
 	}
-
 	if o.NicUuid != nil {
 		toSerialize["nicUuid"] = o.NicUuid
 	}

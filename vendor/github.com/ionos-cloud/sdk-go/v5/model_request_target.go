@@ -98,11 +98,9 @@ func (o *RequestTarget) HasStatus() bool {
 
 func (o RequestTarget) MarshalJSON() ([]byte, error) {
 	toSerialize := map[string]interface{}{}
-
 	if o.Target != nil {
 		toSerialize["target"] = o.Target
 	}
-
 	if o.Status != nil {
 		toSerialize["status"] = o.Status
 	}

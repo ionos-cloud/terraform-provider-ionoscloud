@@ -104,9 +104,19 @@ func (a *LoadBalancerApiService) DatacentersLoadbalancersBalancednicsDeleteExecu
 
 	if r.pretty != nil {
 		localVarQueryParams.Add("pretty", parameterToString(*r.pretty, ""))
+	} else {
+		defaultQueryParam := a.client.cfg.DefaultQueryParams.Get("pretty")
+		if defaultQueryParam == "" {
+			localVarQueryParams.Add("pretty", parameterToString(true, ""))
+		}
 	}
 	if r.depth != nil {
 		localVarQueryParams.Add("depth", parameterToString(*r.depth, ""))
+	} else {
+		defaultQueryParam := a.client.cfg.DefaultQueryParams.Get("depth")
+		if defaultQueryParam == "" {
+			localVarQueryParams.Add("depth", parameterToString(0, ""))
+		}
 	}
 
 	// to determine the Content-Type header
@@ -178,7 +188,7 @@ func (a *LoadBalancerApiService) DatacentersLoadbalancersBalancednicsDeleteExecu
 		var v Error
 		err = a.client.decode(&v, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
 		if err != nil {
-			newErr.error = err.Error()
+			newErr.error = fmt.Sprintf(FormatStringErr, localVarHTTPResponse.Status, err.Error())
 			return localVarReturnValue, localVarAPIResponse, newErr
 		}
 		newErr.model = v
@@ -275,9 +285,19 @@ func (a *LoadBalancerApiService) DatacentersLoadbalancersBalancednicsFindByNicId
 
 	if r.pretty != nil {
 		localVarQueryParams.Add("pretty", parameterToString(*r.pretty, ""))
+	} else {
+		defaultQueryParam := a.client.cfg.DefaultQueryParams.Get("pretty")
+		if defaultQueryParam == "" {
+			localVarQueryParams.Add("pretty", parameterToString(true, ""))
+		}
 	}
 	if r.depth != nil {
 		localVarQueryParams.Add("depth", parameterToString(*r.depth, ""))
+	} else {
+		defaultQueryParam := a.client.cfg.DefaultQueryParams.Get("depth")
+		if defaultQueryParam == "" {
+			localVarQueryParams.Add("depth", parameterToString(0, ""))
+		}
 	}
 
 	// to determine the Content-Type header
@@ -349,7 +369,7 @@ func (a *LoadBalancerApiService) DatacentersLoadbalancersBalancednicsFindByNicId
 		var v Error
 		err = a.client.decode(&v, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
 		if err != nil {
-			newErr.error = err.Error()
+			newErr.error = fmt.Sprintf(FormatStringErr, localVarHTTPResponse.Status, err.Error())
 			return localVarReturnValue, localVarAPIResponse, newErr
 		}
 		newErr.model = v
@@ -475,15 +495,35 @@ func (a *LoadBalancerApiService) DatacentersLoadbalancersBalancednicsGetExecute(
 
 	if r.pretty != nil {
 		localVarQueryParams.Add("pretty", parameterToString(*r.pretty, ""))
+	} else {
+		defaultQueryParam := a.client.cfg.DefaultQueryParams.Get("pretty")
+		if defaultQueryParam == "" {
+			localVarQueryParams.Add("pretty", parameterToString(true, ""))
+		}
 	}
 	if r.depth != nil {
 		localVarQueryParams.Add("depth", parameterToString(*r.depth, ""))
+	} else {
+		defaultQueryParam := a.client.cfg.DefaultQueryParams.Get("depth")
+		if defaultQueryParam == "" {
+			localVarQueryParams.Add("depth", parameterToString(0, ""))
+		}
 	}
 	if r.offset != nil {
 		localVarQueryParams.Add("offset", parameterToString(*r.offset, ""))
+	} else {
+		defaultQueryParam := a.client.cfg.DefaultQueryParams.Get("offset")
+		if defaultQueryParam == "" {
+			localVarQueryParams.Add("offset", parameterToString(0, ""))
+		}
 	}
 	if r.limit != nil {
 		localVarQueryParams.Add("limit", parameterToString(*r.limit, ""))
+	} else {
+		defaultQueryParam := a.client.cfg.DefaultQueryParams.Get("limit")
+		if defaultQueryParam == "" {
+			localVarQueryParams.Add("limit", parameterToString(1000, ""))
+		}
 	}
 	if r.orderBy != nil {
 		localVarQueryParams.Add("orderBy", parameterToString(*r.orderBy, ""))
@@ -568,7 +608,7 @@ func (a *LoadBalancerApiService) DatacentersLoadbalancersBalancednicsGetExecute(
 		var v Error
 		err = a.client.decode(&v, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
 		if err != nil {
-			newErr.error = err.Error()
+			newErr.error = fmt.Sprintf(FormatStringErr, localVarHTTPResponse.Status, err.Error())
 			return localVarReturnValue, localVarAPIResponse, newErr
 		}
 		newErr.model = v
@@ -669,9 +709,19 @@ func (a *LoadBalancerApiService) DatacentersLoadbalancersBalancednicsPostExecute
 
 	if r.pretty != nil {
 		localVarQueryParams.Add("pretty", parameterToString(*r.pretty, ""))
+	} else {
+		defaultQueryParam := a.client.cfg.DefaultQueryParams.Get("pretty")
+		if defaultQueryParam == "" {
+			localVarQueryParams.Add("pretty", parameterToString(true, ""))
+		}
 	}
 	if r.depth != nil {
 		localVarQueryParams.Add("depth", parameterToString(*r.depth, ""))
+	} else {
+		defaultQueryParam := a.client.cfg.DefaultQueryParams.Get("depth")
+		if defaultQueryParam == "" {
+			localVarQueryParams.Add("depth", parameterToString(0, ""))
+		}
 	}
 
 	// to determine the Content-Type header
@@ -745,7 +795,7 @@ func (a *LoadBalancerApiService) DatacentersLoadbalancersBalancednicsPostExecute
 		var v Error
 		err = a.client.decode(&v, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
 		if err != nil {
-			newErr.error = err.Error()
+			newErr.error = fmt.Sprintf(FormatStringErr, localVarHTTPResponse.Status, err.Error())
 			return localVarReturnValue, localVarAPIResponse, newErr
 		}
 		newErr.model = v
@@ -838,9 +888,19 @@ func (a *LoadBalancerApiService) DatacentersLoadbalancersDeleteExecute(r ApiData
 
 	if r.pretty != nil {
 		localVarQueryParams.Add("pretty", parameterToString(*r.pretty, ""))
+	} else {
+		defaultQueryParam := a.client.cfg.DefaultQueryParams.Get("pretty")
+		if defaultQueryParam == "" {
+			localVarQueryParams.Add("pretty", parameterToString(true, ""))
+		}
 	}
 	if r.depth != nil {
 		localVarQueryParams.Add("depth", parameterToString(*r.depth, ""))
+	} else {
+		defaultQueryParam := a.client.cfg.DefaultQueryParams.Get("depth")
+		if defaultQueryParam == "" {
+			localVarQueryParams.Add("depth", parameterToString(0, ""))
+		}
 	}
 
 	// to determine the Content-Type header
@@ -912,7 +972,7 @@ func (a *LoadBalancerApiService) DatacentersLoadbalancersDeleteExecute(r ApiData
 		var v Error
 		err = a.client.decode(&v, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
 		if err != nil {
-			newErr.error = err.Error()
+			newErr.error = fmt.Sprintf(FormatStringErr, localVarHTTPResponse.Status, err.Error())
 			return localVarReturnValue, localVarAPIResponse, newErr
 		}
 		newErr.model = v
@@ -1005,9 +1065,19 @@ func (a *LoadBalancerApiService) DatacentersLoadbalancersFindByIdExecute(r ApiDa
 
 	if r.pretty != nil {
 		localVarQueryParams.Add("pretty", parameterToString(*r.pretty, ""))
+	} else {
+		defaultQueryParam := a.client.cfg.DefaultQueryParams.Get("pretty")
+		if defaultQueryParam == "" {
+			localVarQueryParams.Add("pretty", parameterToString(true, ""))
+		}
 	}
 	if r.depth != nil {
 		localVarQueryParams.Add("depth", parameterToString(*r.depth, ""))
+	} else {
+		defaultQueryParam := a.client.cfg.DefaultQueryParams.Get("depth")
+		if defaultQueryParam == "" {
+			localVarQueryParams.Add("depth", parameterToString(0, ""))
+		}
 	}
 
 	// to determine the Content-Type header
@@ -1079,7 +1149,7 @@ func (a *LoadBalancerApiService) DatacentersLoadbalancersFindByIdExecute(r ApiDa
 		var v Error
 		err = a.client.decode(&v, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
 		if err != nil {
-			newErr.error = err.Error()
+			newErr.error = fmt.Sprintf(FormatStringErr, localVarHTTPResponse.Status, err.Error())
 			return localVarReturnValue, localVarAPIResponse, newErr
 		}
 		newErr.model = v
@@ -1201,15 +1271,35 @@ func (a *LoadBalancerApiService) DatacentersLoadbalancersGetExecute(r ApiDatacen
 
 	if r.pretty != nil {
 		localVarQueryParams.Add("pretty", parameterToString(*r.pretty, ""))
+	} else {
+		defaultQueryParam := a.client.cfg.DefaultQueryParams.Get("pretty")
+		if defaultQueryParam == "" {
+			localVarQueryParams.Add("pretty", parameterToString(true, ""))
+		}
 	}
 	if r.depth != nil {
 		localVarQueryParams.Add("depth", parameterToString(*r.depth, ""))
+	} else {
+		defaultQueryParam := a.client.cfg.DefaultQueryParams.Get("depth")
+		if defaultQueryParam == "" {
+			localVarQueryParams.Add("depth", parameterToString(0, ""))
+		}
 	}
 	if r.offset != nil {
 		localVarQueryParams.Add("offset", parameterToString(*r.offset, ""))
+	} else {
+		defaultQueryParam := a.client.cfg.DefaultQueryParams.Get("offset")
+		if defaultQueryParam == "" {
+			localVarQueryParams.Add("offset", parameterToString(0, ""))
+		}
 	}
 	if r.limit != nil {
 		localVarQueryParams.Add("limit", parameterToString(*r.limit, ""))
+	} else {
+		defaultQueryParam := a.client.cfg.DefaultQueryParams.Get("limit")
+		if defaultQueryParam == "" {
+			localVarQueryParams.Add("limit", parameterToString(1000, ""))
+		}
 	}
 	if r.orderBy != nil {
 		localVarQueryParams.Add("orderBy", parameterToString(*r.orderBy, ""))
@@ -1294,7 +1384,7 @@ func (a *LoadBalancerApiService) DatacentersLoadbalancersGetExecute(r ApiDatacen
 		var v Error
 		err = a.client.decode(&v, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
 		if err != nil {
-			newErr.error = err.Error()
+			newErr.error = fmt.Sprintf(FormatStringErr, localVarHTTPResponse.Status, err.Error())
 			return localVarReturnValue, localVarAPIResponse, newErr
 		}
 		newErr.model = v
@@ -1395,9 +1485,19 @@ func (a *LoadBalancerApiService) DatacentersLoadbalancersPatchExecute(r ApiDatac
 
 	if r.pretty != nil {
 		localVarQueryParams.Add("pretty", parameterToString(*r.pretty, ""))
+	} else {
+		defaultQueryParam := a.client.cfg.DefaultQueryParams.Get("pretty")
+		if defaultQueryParam == "" {
+			localVarQueryParams.Add("pretty", parameterToString(true, ""))
+		}
 	}
 	if r.depth != nil {
 		localVarQueryParams.Add("depth", parameterToString(*r.depth, ""))
+	} else {
+		defaultQueryParam := a.client.cfg.DefaultQueryParams.Get("depth")
+		if defaultQueryParam == "" {
+			localVarQueryParams.Add("depth", parameterToString(0, ""))
+		}
 	}
 
 	// to determine the Content-Type header
@@ -1471,7 +1571,7 @@ func (a *LoadBalancerApiService) DatacentersLoadbalancersPatchExecute(r ApiDatac
 		var v Error
 		err = a.client.decode(&v, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
 		if err != nil {
-			newErr.error = err.Error()
+			newErr.error = fmt.Sprintf(FormatStringErr, localVarHTTPResponse.Status, err.Error())
 			return localVarReturnValue, localVarAPIResponse, newErr
 		}
 		newErr.model = v
@@ -1568,9 +1668,19 @@ func (a *LoadBalancerApiService) DatacentersLoadbalancersPostExecute(r ApiDatace
 
 	if r.pretty != nil {
 		localVarQueryParams.Add("pretty", parameterToString(*r.pretty, ""))
+	} else {
+		defaultQueryParam := a.client.cfg.DefaultQueryParams.Get("pretty")
+		if defaultQueryParam == "" {
+			localVarQueryParams.Add("pretty", parameterToString(true, ""))
+		}
 	}
 	if r.depth != nil {
 		localVarQueryParams.Add("depth", parameterToString(*r.depth, ""))
+	} else {
+		defaultQueryParam := a.client.cfg.DefaultQueryParams.Get("depth")
+		if defaultQueryParam == "" {
+			localVarQueryParams.Add("depth", parameterToString(0, ""))
+		}
 	}
 
 	// to determine the Content-Type header
@@ -1644,7 +1754,7 @@ func (a *LoadBalancerApiService) DatacentersLoadbalancersPostExecute(r ApiDatace
 		var v Error
 		err = a.client.decode(&v, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
 		if err != nil {
-			newErr.error = err.Error()
+			newErr.error = fmt.Sprintf(FormatStringErr, localVarHTTPResponse.Status, err.Error())
 			return localVarReturnValue, localVarAPIResponse, newErr
 		}
 		newErr.model = v
@@ -1745,9 +1855,19 @@ func (a *LoadBalancerApiService) DatacentersLoadbalancersPutExecute(r ApiDatacen
 
 	if r.pretty != nil {
 		localVarQueryParams.Add("pretty", parameterToString(*r.pretty, ""))
+	} else {
+		defaultQueryParam := a.client.cfg.DefaultQueryParams.Get("pretty")
+		if defaultQueryParam == "" {
+			localVarQueryParams.Add("pretty", parameterToString(true, ""))
+		}
 	}
 	if r.depth != nil {
 		localVarQueryParams.Add("depth", parameterToString(*r.depth, ""))
+	} else {
+		defaultQueryParam := a.client.cfg.DefaultQueryParams.Get("depth")
+		if defaultQueryParam == "" {
+			localVarQueryParams.Add("depth", parameterToString(0, ""))
+		}
 	}
 
 	// to determine the Content-Type header
@@ -1821,7 +1941,7 @@ func (a *LoadBalancerApiService) DatacentersLoadbalancersPutExecute(r ApiDatacen
 		var v Error
 		err = a.client.decode(&v, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
 		if err != nil {
-			newErr.error = err.Error()
+			newErr.error = fmt.Sprintf(FormatStringErr, localVarHTTPResponse.Status, err.Error())
 			return localVarReturnValue, localVarAPIResponse, newErr
 		}
 		newErr.model = v

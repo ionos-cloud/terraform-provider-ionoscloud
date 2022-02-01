@@ -96,9 +96,19 @@ func (a *IPBlocksApiService) IpblocksDeleteExecute(r ApiIpblocksDeleteRequest) (
 
 	if r.pretty != nil {
 		localVarQueryParams.Add("pretty", parameterToString(*r.pretty, ""))
+	} else {
+		defaultQueryParam := a.client.cfg.DefaultQueryParams.Get("pretty")
+		if defaultQueryParam == "" {
+			localVarQueryParams.Add("pretty", parameterToString(true, ""))
+		}
 	}
 	if r.depth != nil {
 		localVarQueryParams.Add("depth", parameterToString(*r.depth, ""))
+	} else {
+		defaultQueryParam := a.client.cfg.DefaultQueryParams.Get("depth")
+		if defaultQueryParam == "" {
+			localVarQueryParams.Add("depth", parameterToString(0, ""))
+		}
 	}
 
 	// to determine the Content-Type header
@@ -170,7 +180,7 @@ func (a *IPBlocksApiService) IpblocksDeleteExecute(r ApiIpblocksDeleteRequest) (
 		var v Error
 		err = a.client.decode(&v, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
 		if err != nil {
-			newErr.error = err.Error()
+			newErr.error = fmt.Sprintf(FormatStringErr, localVarHTTPResponse.Status, err.Error())
 			return localVarReturnValue, localVarAPIResponse, newErr
 		}
 		newErr.model = v
@@ -259,9 +269,19 @@ func (a *IPBlocksApiService) IpblocksFindByIdExecute(r ApiIpblocksFindByIdReques
 
 	if r.pretty != nil {
 		localVarQueryParams.Add("pretty", parameterToString(*r.pretty, ""))
+	} else {
+		defaultQueryParam := a.client.cfg.DefaultQueryParams.Get("pretty")
+		if defaultQueryParam == "" {
+			localVarQueryParams.Add("pretty", parameterToString(true, ""))
+		}
 	}
 	if r.depth != nil {
 		localVarQueryParams.Add("depth", parameterToString(*r.depth, ""))
+	} else {
+		defaultQueryParam := a.client.cfg.DefaultQueryParams.Get("depth")
+		if defaultQueryParam == "" {
+			localVarQueryParams.Add("depth", parameterToString(0, ""))
+		}
 	}
 
 	// to determine the Content-Type header
@@ -333,7 +353,7 @@ func (a *IPBlocksApiService) IpblocksFindByIdExecute(r ApiIpblocksFindByIdReques
 		var v Error
 		err = a.client.decode(&v, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
 		if err != nil {
-			newErr.error = err.Error()
+			newErr.error = fmt.Sprintf(FormatStringErr, localVarHTTPResponse.Status, err.Error())
 			return localVarReturnValue, localVarAPIResponse, newErr
 		}
 		newErr.model = v
@@ -451,15 +471,35 @@ func (a *IPBlocksApiService) IpblocksGetExecute(r ApiIpblocksGetRequest) (IpBloc
 
 	if r.pretty != nil {
 		localVarQueryParams.Add("pretty", parameterToString(*r.pretty, ""))
+	} else {
+		defaultQueryParam := a.client.cfg.DefaultQueryParams.Get("pretty")
+		if defaultQueryParam == "" {
+			localVarQueryParams.Add("pretty", parameterToString(true, ""))
+		}
 	}
 	if r.depth != nil {
 		localVarQueryParams.Add("depth", parameterToString(*r.depth, ""))
+	} else {
+		defaultQueryParam := a.client.cfg.DefaultQueryParams.Get("depth")
+		if defaultQueryParam == "" {
+			localVarQueryParams.Add("depth", parameterToString(0, ""))
+		}
 	}
 	if r.offset != nil {
 		localVarQueryParams.Add("offset", parameterToString(*r.offset, ""))
+	} else {
+		defaultQueryParam := a.client.cfg.DefaultQueryParams.Get("offset")
+		if defaultQueryParam == "" {
+			localVarQueryParams.Add("offset", parameterToString(0, ""))
+		}
 	}
 	if r.limit != nil {
 		localVarQueryParams.Add("limit", parameterToString(*r.limit, ""))
+	} else {
+		defaultQueryParam := a.client.cfg.DefaultQueryParams.Get("limit")
+		if defaultQueryParam == "" {
+			localVarQueryParams.Add("limit", parameterToString(100, ""))
+		}
 	}
 	if r.orderBy != nil {
 		localVarQueryParams.Add("orderBy", parameterToString(*r.orderBy, ""))
@@ -544,7 +584,7 @@ func (a *IPBlocksApiService) IpblocksGetExecute(r ApiIpblocksGetRequest) (IpBloc
 		var v Error
 		err = a.client.decode(&v, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
 		if err != nil {
-			newErr.error = err.Error()
+			newErr.error = fmt.Sprintf(FormatStringErr, localVarHTTPResponse.Status, err.Error())
 			return localVarReturnValue, localVarAPIResponse, newErr
 		}
 		newErr.model = v
@@ -641,9 +681,19 @@ func (a *IPBlocksApiService) IpblocksPatchExecute(r ApiIpblocksPatchRequest) (Ip
 
 	if r.pretty != nil {
 		localVarQueryParams.Add("pretty", parameterToString(*r.pretty, ""))
+	} else {
+		defaultQueryParam := a.client.cfg.DefaultQueryParams.Get("pretty")
+		if defaultQueryParam == "" {
+			localVarQueryParams.Add("pretty", parameterToString(true, ""))
+		}
 	}
 	if r.depth != nil {
 		localVarQueryParams.Add("depth", parameterToString(*r.depth, ""))
+	} else {
+		defaultQueryParam := a.client.cfg.DefaultQueryParams.Get("depth")
+		if defaultQueryParam == "" {
+			localVarQueryParams.Add("depth", parameterToString(0, ""))
+		}
 	}
 
 	// to determine the Content-Type header
@@ -717,7 +767,7 @@ func (a *IPBlocksApiService) IpblocksPatchExecute(r ApiIpblocksPatchRequest) (Ip
 		var v Error
 		err = a.client.decode(&v, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
 		if err != nil {
-			newErr.error = err.Error()
+			newErr.error = fmt.Sprintf(FormatStringErr, localVarHTTPResponse.Status, err.Error())
 			return localVarReturnValue, localVarAPIResponse, newErr
 		}
 		newErr.model = v
@@ -810,9 +860,19 @@ func (a *IPBlocksApiService) IpblocksPostExecute(r ApiIpblocksPostRequest) (IpBl
 
 	if r.pretty != nil {
 		localVarQueryParams.Add("pretty", parameterToString(*r.pretty, ""))
+	} else {
+		defaultQueryParam := a.client.cfg.DefaultQueryParams.Get("pretty")
+		if defaultQueryParam == "" {
+			localVarQueryParams.Add("pretty", parameterToString(true, ""))
+		}
 	}
 	if r.depth != nil {
 		localVarQueryParams.Add("depth", parameterToString(*r.depth, ""))
+	} else {
+		defaultQueryParam := a.client.cfg.DefaultQueryParams.Get("depth")
+		if defaultQueryParam == "" {
+			localVarQueryParams.Add("depth", parameterToString(0, ""))
+		}
 	}
 
 	// to determine the Content-Type header
@@ -886,7 +946,7 @@ func (a *IPBlocksApiService) IpblocksPostExecute(r ApiIpblocksPostRequest) (IpBl
 		var v Error
 		err = a.client.decode(&v, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
 		if err != nil {
-			newErr.error = err.Error()
+			newErr.error = fmt.Sprintf(FormatStringErr, localVarHTTPResponse.Status, err.Error())
 			return localVarReturnValue, localVarAPIResponse, newErr
 		}
 		newErr.model = v
@@ -983,9 +1043,19 @@ func (a *IPBlocksApiService) IpblocksPutExecute(r ApiIpblocksPutRequest) (IpBloc
 
 	if r.pretty != nil {
 		localVarQueryParams.Add("pretty", parameterToString(*r.pretty, ""))
+	} else {
+		defaultQueryParam := a.client.cfg.DefaultQueryParams.Get("pretty")
+		if defaultQueryParam == "" {
+			localVarQueryParams.Add("pretty", parameterToString(true, ""))
+		}
 	}
 	if r.depth != nil {
 		localVarQueryParams.Add("depth", parameterToString(*r.depth, ""))
+	} else {
+		defaultQueryParam := a.client.cfg.DefaultQueryParams.Get("depth")
+		if defaultQueryParam == "" {
+			localVarQueryParams.Add("depth", parameterToString(0, ""))
+		}
 	}
 
 	// to determine the Content-Type header
@@ -1059,7 +1129,7 @@ func (a *IPBlocksApiService) IpblocksPutExecute(r ApiIpblocksPutRequest) (IpBloc
 		var v Error
 		err = a.client.decode(&v, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
 		if err != nil {
-			newErr.error = err.Error()
+			newErr.error = fmt.Sprintf(FormatStringErr, localVarHTTPResponse.Status, err.Error())
 			return localVarReturnValue, localVarAPIResponse, newErr
 		}
 		newErr.model = v

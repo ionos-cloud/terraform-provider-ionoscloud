@@ -100,9 +100,19 @@ func (a *LanApiService) DatacentersLansDeleteExecute(r ApiDatacentersLansDeleteR
 
 	if r.pretty != nil {
 		localVarQueryParams.Add("pretty", parameterToString(*r.pretty, ""))
+	} else {
+		defaultQueryParam := a.client.cfg.DefaultQueryParams.Get("pretty")
+		if defaultQueryParam == "" {
+			localVarQueryParams.Add("pretty", parameterToString(true, ""))
+		}
 	}
 	if r.depth != nil {
 		localVarQueryParams.Add("depth", parameterToString(*r.depth, ""))
+	} else {
+		defaultQueryParam := a.client.cfg.DefaultQueryParams.Get("depth")
+		if defaultQueryParam == "" {
+			localVarQueryParams.Add("depth", parameterToString(0, ""))
+		}
 	}
 
 	// to determine the Content-Type header
@@ -174,7 +184,7 @@ func (a *LanApiService) DatacentersLansDeleteExecute(r ApiDatacentersLansDeleteR
 		var v Error
 		err = a.client.decode(&v, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
 		if err != nil {
-			newErr.error = err.Error()
+			newErr.error = fmt.Sprintf(FormatStringErr, localVarHTTPResponse.Status, err.Error())
 			return localVarReturnValue, localVarAPIResponse, newErr
 		}
 		newErr.model = v
@@ -267,9 +277,19 @@ func (a *LanApiService) DatacentersLansFindByIdExecute(r ApiDatacentersLansFindB
 
 	if r.pretty != nil {
 		localVarQueryParams.Add("pretty", parameterToString(*r.pretty, ""))
+	} else {
+		defaultQueryParam := a.client.cfg.DefaultQueryParams.Get("pretty")
+		if defaultQueryParam == "" {
+			localVarQueryParams.Add("pretty", parameterToString(true, ""))
+		}
 	}
 	if r.depth != nil {
 		localVarQueryParams.Add("depth", parameterToString(*r.depth, ""))
+	} else {
+		defaultQueryParam := a.client.cfg.DefaultQueryParams.Get("depth")
+		if defaultQueryParam == "" {
+			localVarQueryParams.Add("depth", parameterToString(0, ""))
+		}
 	}
 
 	// to determine the Content-Type header
@@ -341,7 +361,7 @@ func (a *LanApiService) DatacentersLansFindByIdExecute(r ApiDatacentersLansFindB
 		var v Error
 		err = a.client.decode(&v, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
 		if err != nil {
-			newErr.error = err.Error()
+			newErr.error = fmt.Sprintf(FormatStringErr, localVarHTTPResponse.Status, err.Error())
 			return localVarReturnValue, localVarAPIResponse, newErr
 		}
 		newErr.model = v
@@ -463,15 +483,35 @@ func (a *LanApiService) DatacentersLansGetExecute(r ApiDatacentersLansGetRequest
 
 	if r.pretty != nil {
 		localVarQueryParams.Add("pretty", parameterToString(*r.pretty, ""))
+	} else {
+		defaultQueryParam := a.client.cfg.DefaultQueryParams.Get("pretty")
+		if defaultQueryParam == "" {
+			localVarQueryParams.Add("pretty", parameterToString(true, ""))
+		}
 	}
 	if r.depth != nil {
 		localVarQueryParams.Add("depth", parameterToString(*r.depth, ""))
+	} else {
+		defaultQueryParam := a.client.cfg.DefaultQueryParams.Get("depth")
+		if defaultQueryParam == "" {
+			localVarQueryParams.Add("depth", parameterToString(0, ""))
+		}
 	}
 	if r.offset != nil {
 		localVarQueryParams.Add("offset", parameterToString(*r.offset, ""))
+	} else {
+		defaultQueryParam := a.client.cfg.DefaultQueryParams.Get("offset")
+		if defaultQueryParam == "" {
+			localVarQueryParams.Add("offset", parameterToString(0, ""))
+		}
 	}
 	if r.limit != nil {
 		localVarQueryParams.Add("limit", parameterToString(*r.limit, ""))
+	} else {
+		defaultQueryParam := a.client.cfg.DefaultQueryParams.Get("limit")
+		if defaultQueryParam == "" {
+			localVarQueryParams.Add("limit", parameterToString(1000, ""))
+		}
 	}
 	if r.orderBy != nil {
 		localVarQueryParams.Add("orderBy", parameterToString(*r.orderBy, ""))
@@ -556,7 +596,7 @@ func (a *LanApiService) DatacentersLansGetExecute(r ApiDatacentersLansGetRequest
 		var v Error
 		err = a.client.decode(&v, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
 		if err != nil {
-			newErr.error = err.Error()
+			newErr.error = fmt.Sprintf(FormatStringErr, localVarHTTPResponse.Status, err.Error())
 			return localVarReturnValue, localVarAPIResponse, newErr
 		}
 		newErr.model = v
@@ -653,9 +693,19 @@ func (a *LanApiService) DatacentersLansNicsFindByIdExecute(r ApiDatacentersLansN
 
 	if r.pretty != nil {
 		localVarQueryParams.Add("pretty", parameterToString(*r.pretty, ""))
+	} else {
+		defaultQueryParam := a.client.cfg.DefaultQueryParams.Get("pretty")
+		if defaultQueryParam == "" {
+			localVarQueryParams.Add("pretty", parameterToString(true, ""))
+		}
 	}
 	if r.depth != nil {
 		localVarQueryParams.Add("depth", parameterToString(*r.depth, ""))
+	} else {
+		defaultQueryParam := a.client.cfg.DefaultQueryParams.Get("depth")
+		if defaultQueryParam == "" {
+			localVarQueryParams.Add("depth", parameterToString(0, ""))
+		}
 	}
 
 	// to determine the Content-Type header
@@ -727,7 +777,7 @@ func (a *LanApiService) DatacentersLansNicsFindByIdExecute(r ApiDatacentersLansN
 		var v Error
 		err = a.client.decode(&v, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
 		if err != nil {
-			newErr.error = err.Error()
+			newErr.error = fmt.Sprintf(FormatStringErr, localVarHTTPResponse.Status, err.Error())
 			return localVarReturnValue, localVarAPIResponse, newErr
 		}
 		newErr.model = v
@@ -853,15 +903,35 @@ func (a *LanApiService) DatacentersLansNicsGetExecute(r ApiDatacentersLansNicsGe
 
 	if r.pretty != nil {
 		localVarQueryParams.Add("pretty", parameterToString(*r.pretty, ""))
+	} else {
+		defaultQueryParam := a.client.cfg.DefaultQueryParams.Get("pretty")
+		if defaultQueryParam == "" {
+			localVarQueryParams.Add("pretty", parameterToString(true, ""))
+		}
 	}
 	if r.depth != nil {
 		localVarQueryParams.Add("depth", parameterToString(*r.depth, ""))
+	} else {
+		defaultQueryParam := a.client.cfg.DefaultQueryParams.Get("depth")
+		if defaultQueryParam == "" {
+			localVarQueryParams.Add("depth", parameterToString(0, ""))
+		}
 	}
 	if r.offset != nil {
 		localVarQueryParams.Add("offset", parameterToString(*r.offset, ""))
+	} else {
+		defaultQueryParam := a.client.cfg.DefaultQueryParams.Get("offset")
+		if defaultQueryParam == "" {
+			localVarQueryParams.Add("offset", parameterToString(0, ""))
+		}
 	}
 	if r.limit != nil {
 		localVarQueryParams.Add("limit", parameterToString(*r.limit, ""))
+	} else {
+		defaultQueryParam := a.client.cfg.DefaultQueryParams.Get("limit")
+		if defaultQueryParam == "" {
+			localVarQueryParams.Add("limit", parameterToString(1000, ""))
+		}
 	}
 	if r.orderBy != nil {
 		localVarQueryParams.Add("orderBy", parameterToString(*r.orderBy, ""))
@@ -946,7 +1016,7 @@ func (a *LanApiService) DatacentersLansNicsGetExecute(r ApiDatacentersLansNicsGe
 		var v Error
 		err = a.client.decode(&v, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
 		if err != nil {
-			newErr.error = err.Error()
+			newErr.error = fmt.Sprintf(FormatStringErr, localVarHTTPResponse.Status, err.Error())
 			return localVarReturnValue, localVarAPIResponse, newErr
 		}
 		newErr.model = v
@@ -1047,9 +1117,19 @@ func (a *LanApiService) DatacentersLansNicsPostExecute(r ApiDatacentersLansNicsP
 
 	if r.pretty != nil {
 		localVarQueryParams.Add("pretty", parameterToString(*r.pretty, ""))
+	} else {
+		defaultQueryParam := a.client.cfg.DefaultQueryParams.Get("pretty")
+		if defaultQueryParam == "" {
+			localVarQueryParams.Add("pretty", parameterToString(true, ""))
+		}
 	}
 	if r.depth != nil {
 		localVarQueryParams.Add("depth", parameterToString(*r.depth, ""))
+	} else {
+		defaultQueryParam := a.client.cfg.DefaultQueryParams.Get("depth")
+		if defaultQueryParam == "" {
+			localVarQueryParams.Add("depth", parameterToString(0, ""))
+		}
 	}
 
 	// to determine the Content-Type header
@@ -1123,7 +1203,7 @@ func (a *LanApiService) DatacentersLansNicsPostExecute(r ApiDatacentersLansNicsP
 		var v Error
 		err = a.client.decode(&v, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
 		if err != nil {
-			newErr.error = err.Error()
+			newErr.error = fmt.Sprintf(FormatStringErr, localVarHTTPResponse.Status, err.Error())
 			return localVarReturnValue, localVarAPIResponse, newErr
 		}
 		newErr.model = v
@@ -1224,9 +1304,19 @@ func (a *LanApiService) DatacentersLansPatchExecute(r ApiDatacentersLansPatchReq
 
 	if r.pretty != nil {
 		localVarQueryParams.Add("pretty", parameterToString(*r.pretty, ""))
+	} else {
+		defaultQueryParam := a.client.cfg.DefaultQueryParams.Get("pretty")
+		if defaultQueryParam == "" {
+			localVarQueryParams.Add("pretty", parameterToString(true, ""))
+		}
 	}
 	if r.depth != nil {
 		localVarQueryParams.Add("depth", parameterToString(*r.depth, ""))
+	} else {
+		defaultQueryParam := a.client.cfg.DefaultQueryParams.Get("depth")
+		if defaultQueryParam == "" {
+			localVarQueryParams.Add("depth", parameterToString(0, ""))
+		}
 	}
 
 	// to determine the Content-Type header
@@ -1300,7 +1390,7 @@ func (a *LanApiService) DatacentersLansPatchExecute(r ApiDatacentersLansPatchReq
 		var v Error
 		err = a.client.decode(&v, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
 		if err != nil {
-			newErr.error = err.Error()
+			newErr.error = fmt.Sprintf(FormatStringErr, localVarHTTPResponse.Status, err.Error())
 			return localVarReturnValue, localVarAPIResponse, newErr
 		}
 		newErr.model = v
@@ -1397,9 +1487,19 @@ func (a *LanApiService) DatacentersLansPostExecute(r ApiDatacentersLansPostReque
 
 	if r.pretty != nil {
 		localVarQueryParams.Add("pretty", parameterToString(*r.pretty, ""))
+	} else {
+		defaultQueryParam := a.client.cfg.DefaultQueryParams.Get("pretty")
+		if defaultQueryParam == "" {
+			localVarQueryParams.Add("pretty", parameterToString(true, ""))
+		}
 	}
 	if r.depth != nil {
 		localVarQueryParams.Add("depth", parameterToString(*r.depth, ""))
+	} else {
+		defaultQueryParam := a.client.cfg.DefaultQueryParams.Get("depth")
+		if defaultQueryParam == "" {
+			localVarQueryParams.Add("depth", parameterToString(0, ""))
+		}
 	}
 
 	// to determine the Content-Type header
@@ -1473,7 +1573,7 @@ func (a *LanApiService) DatacentersLansPostExecute(r ApiDatacentersLansPostReque
 		var v Error
 		err = a.client.decode(&v, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
 		if err != nil {
-			newErr.error = err.Error()
+			newErr.error = fmt.Sprintf(FormatStringErr, localVarHTTPResponse.Status, err.Error())
 			return localVarReturnValue, localVarAPIResponse, newErr
 		}
 		newErr.model = v
@@ -1574,9 +1674,19 @@ func (a *LanApiService) DatacentersLansPutExecute(r ApiDatacentersLansPutRequest
 
 	if r.pretty != nil {
 		localVarQueryParams.Add("pretty", parameterToString(*r.pretty, ""))
+	} else {
+		defaultQueryParam := a.client.cfg.DefaultQueryParams.Get("pretty")
+		if defaultQueryParam == "" {
+			localVarQueryParams.Add("pretty", parameterToString(true, ""))
+		}
 	}
 	if r.depth != nil {
 		localVarQueryParams.Add("depth", parameterToString(*r.depth, ""))
+	} else {
+		defaultQueryParam := a.client.cfg.DefaultQueryParams.Get("depth")
+		if defaultQueryParam == "" {
+			localVarQueryParams.Add("depth", parameterToString(0, ""))
+		}
 	}
 
 	// to determine the Content-Type header
@@ -1650,7 +1760,7 @@ func (a *LanApiService) DatacentersLansPutExecute(r ApiDatacentersLansPutRequest
 		var v Error
 		err = a.client.decode(&v, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
 		if err != nil {
-			newErr.error = err.Error()
+			newErr.error = fmt.Sprintf(FormatStringErr, localVarHTTPResponse.Status, err.Error())
 			return localVarReturnValue, localVarAPIResponse, newErr
 		}
 		newErr.model = v

@@ -96,9 +96,19 @@ func (a *SnapshotApiService) SnapshotsDeleteExecute(r ApiSnapshotsDeleteRequest)
 
 	if r.pretty != nil {
 		localVarQueryParams.Add("pretty", parameterToString(*r.pretty, ""))
+	} else {
+		defaultQueryParam := a.client.cfg.DefaultQueryParams.Get("pretty")
+		if defaultQueryParam == "" {
+			localVarQueryParams.Add("pretty", parameterToString(true, ""))
+		}
 	}
 	if r.depth != nil {
 		localVarQueryParams.Add("depth", parameterToString(*r.depth, ""))
+	} else {
+		defaultQueryParam := a.client.cfg.DefaultQueryParams.Get("depth")
+		if defaultQueryParam == "" {
+			localVarQueryParams.Add("depth", parameterToString(0, ""))
+		}
 	}
 
 	// to determine the Content-Type header
@@ -170,7 +180,7 @@ func (a *SnapshotApiService) SnapshotsDeleteExecute(r ApiSnapshotsDeleteRequest)
 		var v Error
 		err = a.client.decode(&v, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
 		if err != nil {
-			newErr.error = err.Error()
+			newErr.error = fmt.Sprintf(FormatStringErr, localVarHTTPResponse.Status, err.Error())
 			return localVarReturnValue, localVarAPIResponse, newErr
 		}
 		newErr.model = v
@@ -259,9 +269,19 @@ func (a *SnapshotApiService) SnapshotsFindByIdExecute(r ApiSnapshotsFindByIdRequ
 
 	if r.pretty != nil {
 		localVarQueryParams.Add("pretty", parameterToString(*r.pretty, ""))
+	} else {
+		defaultQueryParam := a.client.cfg.DefaultQueryParams.Get("pretty")
+		if defaultQueryParam == "" {
+			localVarQueryParams.Add("pretty", parameterToString(true, ""))
+		}
 	}
 	if r.depth != nil {
 		localVarQueryParams.Add("depth", parameterToString(*r.depth, ""))
+	} else {
+		defaultQueryParam := a.client.cfg.DefaultQueryParams.Get("depth")
+		if defaultQueryParam == "" {
+			localVarQueryParams.Add("depth", parameterToString(0, ""))
+		}
 	}
 
 	// to determine the Content-Type header
@@ -333,7 +353,7 @@ func (a *SnapshotApiService) SnapshotsFindByIdExecute(r ApiSnapshotsFindByIdRequ
 		var v Error
 		err = a.client.decode(&v, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
 		if err != nil {
-			newErr.error = err.Error()
+			newErr.error = fmt.Sprintf(FormatStringErr, localVarHTTPResponse.Status, err.Error())
 			return localVarReturnValue, localVarAPIResponse, newErr
 		}
 		newErr.model = v
@@ -441,9 +461,19 @@ func (a *SnapshotApiService) SnapshotsGetExecute(r ApiSnapshotsGetRequest) (Snap
 
 	if r.pretty != nil {
 		localVarQueryParams.Add("pretty", parameterToString(*r.pretty, ""))
+	} else {
+		defaultQueryParam := a.client.cfg.DefaultQueryParams.Get("pretty")
+		if defaultQueryParam == "" {
+			localVarQueryParams.Add("pretty", parameterToString(true, ""))
+		}
 	}
 	if r.depth != nil {
 		localVarQueryParams.Add("depth", parameterToString(*r.depth, ""))
+	} else {
+		defaultQueryParam := a.client.cfg.DefaultQueryParams.Get("depth")
+		if defaultQueryParam == "" {
+			localVarQueryParams.Add("depth", parameterToString(0, ""))
+		}
 	}
 	if r.orderBy != nil {
 		localVarQueryParams.Add("orderBy", parameterToString(*r.orderBy, ""))
@@ -528,7 +558,7 @@ func (a *SnapshotApiService) SnapshotsGetExecute(r ApiSnapshotsGetRequest) (Snap
 		var v Error
 		err = a.client.decode(&v, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
 		if err != nil {
-			newErr.error = err.Error()
+			newErr.error = fmt.Sprintf(FormatStringErr, localVarHTTPResponse.Status, err.Error())
 			return localVarReturnValue, localVarAPIResponse, newErr
 		}
 		newErr.model = v
@@ -625,9 +655,19 @@ func (a *SnapshotApiService) SnapshotsPatchExecute(r ApiSnapshotsPatchRequest) (
 
 	if r.pretty != nil {
 		localVarQueryParams.Add("pretty", parameterToString(*r.pretty, ""))
+	} else {
+		defaultQueryParam := a.client.cfg.DefaultQueryParams.Get("pretty")
+		if defaultQueryParam == "" {
+			localVarQueryParams.Add("pretty", parameterToString(true, ""))
+		}
 	}
 	if r.depth != nil {
 		localVarQueryParams.Add("depth", parameterToString(*r.depth, ""))
+	} else {
+		defaultQueryParam := a.client.cfg.DefaultQueryParams.Get("depth")
+		if defaultQueryParam == "" {
+			localVarQueryParams.Add("depth", parameterToString(0, ""))
+		}
 	}
 
 	// to determine the Content-Type header
@@ -701,7 +741,7 @@ func (a *SnapshotApiService) SnapshotsPatchExecute(r ApiSnapshotsPatchRequest) (
 		var v Error
 		err = a.client.decode(&v, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
 		if err != nil {
-			newErr.error = err.Error()
+			newErr.error = fmt.Sprintf(FormatStringErr, localVarHTTPResponse.Status, err.Error())
 			return localVarReturnValue, localVarAPIResponse, newErr
 		}
 		newErr.model = v
@@ -798,9 +838,19 @@ func (a *SnapshotApiService) SnapshotsPutExecute(r ApiSnapshotsPutRequest) (Snap
 
 	if r.pretty != nil {
 		localVarQueryParams.Add("pretty", parameterToString(*r.pretty, ""))
+	} else {
+		defaultQueryParam := a.client.cfg.DefaultQueryParams.Get("pretty")
+		if defaultQueryParam == "" {
+			localVarQueryParams.Add("pretty", parameterToString(true, ""))
+		}
 	}
 	if r.depth != nil {
 		localVarQueryParams.Add("depth", parameterToString(*r.depth, ""))
+	} else {
+		defaultQueryParam := a.client.cfg.DefaultQueryParams.Get("depth")
+		if defaultQueryParam == "" {
+			localVarQueryParams.Add("depth", parameterToString(0, ""))
+		}
 	}
 
 	// to determine the Content-Type header
@@ -874,7 +924,7 @@ func (a *SnapshotApiService) SnapshotsPutExecute(r ApiSnapshotsPutRequest) (Snap
 		var v Error
 		err = a.client.decode(&v, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
 		if err != nil {
-			newErr.error = err.Error()
+			newErr.error = fmt.Sprintf(FormatStringErr, localVarHTTPResponse.Status, err.Error())
 			return localVarReturnValue, localVarAPIResponse, newErr
 		}
 		newErr.model = v

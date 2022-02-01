@@ -218,23 +218,18 @@ func (o *KubernetesNodePoolForPut) HasProperties() bool {
 
 func (o KubernetesNodePoolForPut) MarshalJSON() ([]byte, error) {
 	toSerialize := map[string]interface{}{}
-
 	if o.Id != nil {
 		toSerialize["id"] = o.Id
 	}
-
 	if o.Type != nil {
 		toSerialize["type"] = o.Type
 	}
-
 	if o.Href != nil {
 		toSerialize["href"] = o.Href
 	}
-
 	if o.Metadata != nil {
 		toSerialize["metadata"] = o.Metadata
 	}
-
 	if o.Properties != nil {
 		toSerialize["properties"] = o.Properties
 	}

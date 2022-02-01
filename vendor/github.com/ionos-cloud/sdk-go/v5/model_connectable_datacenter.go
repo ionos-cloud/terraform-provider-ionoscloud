@@ -137,15 +137,12 @@ func (o *ConnectableDatacenter) HasLocation() bool {
 
 func (o ConnectableDatacenter) MarshalJSON() ([]byte, error) {
 	toSerialize := map[string]interface{}{}
-
 	if o.Id != nil {
 		toSerialize["id"] = o.Id
 	}
-
 	if o.Name != nil {
 		toSerialize["name"] = o.Name
 	}
-
 	if o.Location != nil {
 		toSerialize["location"] = o.Location
 	}

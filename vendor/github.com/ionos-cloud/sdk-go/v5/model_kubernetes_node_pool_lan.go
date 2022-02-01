@@ -60,7 +60,6 @@ func (o *KubernetesNodePoolLan) HasId() bool {
 
 func (o KubernetesNodePoolLan) MarshalJSON() ([]byte, error) {
 	toSerialize := map[string]interface{}{}
-
 	if o.Id != nil {
 		toSerialize["id"] = o.Id
 	}

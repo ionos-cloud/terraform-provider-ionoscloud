@@ -219,23 +219,18 @@ func (o *ContractProperties) HasResourceLimits() bool {
 
 func (o ContractProperties) MarshalJSON() ([]byte, error) {
 	toSerialize := map[string]interface{}{}
-
 	if o.ContractNumber != nil {
 		toSerialize["contractNumber"] = o.ContractNumber
 	}
-
 	if o.Owner != nil {
 		toSerialize["owner"] = o.Owner
 	}
-
 	if o.Status != nil {
 		toSerialize["status"] = o.Status
 	}
-
 	if o.RegDomain != nil {
 		toSerialize["regDomain"] = o.RegDomain
 	}
-
 	if o.ResourceLimits != nil {
 		toSerialize["resourceLimits"] = o.ResourceLimits
 	}

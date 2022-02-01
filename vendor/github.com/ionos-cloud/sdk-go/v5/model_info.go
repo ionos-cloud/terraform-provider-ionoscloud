@@ -140,15 +140,12 @@ func (o *Info) HasVersion() bool {
 
 func (o Info) MarshalJSON() ([]byte, error) {
 	toSerialize := map[string]interface{}{}
-
 	if o.Href != nil {
 		toSerialize["href"] = o.Href
 	}
-
 	if o.Name != nil {
 		toSerialize["name"] = o.Name
 	}
-
 	if o.Version != nil {
 		toSerialize["version"] = o.Version
 	}

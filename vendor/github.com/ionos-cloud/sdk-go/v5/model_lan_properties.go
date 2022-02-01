@@ -180,19 +180,15 @@ func (o *LanProperties) HasPublic() bool {
 
 func (o LanProperties) MarshalJSON() ([]byte, error) {
 	toSerialize := map[string]interface{}{}
-
 	if o.Name != nil {
 		toSerialize["name"] = o.Name
 	}
-
 	if o.IpFailover != nil {
 		toSerialize["ipFailover"] = o.IpFailover
 	}
-
 	if o.Pcc != nil {
 		toSerialize["pcc"] = o.Pcc
 	}
-
 	if o.Public != nil {
 		toSerialize["public"] = o.Public
 	}

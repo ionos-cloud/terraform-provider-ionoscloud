@@ -140,15 +140,12 @@ func (o *LocationProperties) HasImageAliases() bool {
 
 func (o LocationProperties) MarshalJSON() ([]byte, error) {
 	toSerialize := map[string]interface{}{}
-
 	if o.Name != nil {
 		toSerialize["name"] = o.Name
 	}
-
 	if o.Features != nil {
 		toSerialize["features"] = o.Features
 	}
-
 	if o.ImageAliases != nil {
 		toSerialize["imageAliases"] = o.ImageAliases
 	}

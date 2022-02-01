@@ -187,19 +187,15 @@ func (o *RequestMetadata) HasRequestStatus() bool {
 
 func (o RequestMetadata) MarshalJSON() ([]byte, error) {
 	toSerialize := map[string]interface{}{}
-
 	if o.CreatedDate != nil {
 		toSerialize["createdDate"] = o.CreatedDate
 	}
-
 	if o.CreatedBy != nil {
 		toSerialize["createdBy"] = o.CreatedBy
 	}
-
 	if o.Etag != nil {
 		toSerialize["etag"] = o.Etag
 	}
-
 	if o.RequestStatus != nil {
 		toSerialize["requestStatus"] = o.RequestStatus
 	}

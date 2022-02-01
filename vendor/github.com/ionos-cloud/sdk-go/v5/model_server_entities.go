@@ -137,15 +137,12 @@ func (o *ServerEntities) HasNics() bool {
 
 func (o ServerEntities) MarshalJSON() ([]byte, error) {
 	toSerialize := map[string]interface{}{}
-
 	if o.Cdroms != nil {
 		toSerialize["cdroms"] = o.Cdroms
 	}
-
 	if o.Volumes != nil {
 		toSerialize["volumes"] = o.Volumes
 	}
-
 	if o.Nics != nil {
 		toSerialize["nics"] = o.Nics
 	}

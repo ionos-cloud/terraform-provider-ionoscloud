@@ -99,11 +99,9 @@ func (o *Contract) HasProperties() bool {
 
 func (o Contract) MarshalJSON() ([]byte, error) {
 	toSerialize := map[string]interface{}{}
-
 	if o.Type != nil {
 		toSerialize["type"] = o.Type
 	}
-
 	if o.Properties != nil {
 		toSerialize["properties"] = o.Properties
 	}

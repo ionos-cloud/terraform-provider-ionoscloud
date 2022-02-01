@@ -779,79 +779,60 @@ func (o *VolumeProperties) HasUserData() bool {
 
 func (o VolumeProperties) MarshalJSON() ([]byte, error) {
 	toSerialize := map[string]interface{}{}
-
 	if o.Name != nil {
 		toSerialize["name"] = o.Name
 	}
-
 	if o.Type != nil {
 		toSerialize["type"] = o.Type
 	}
-
 	if o.Size != nil {
 		toSerialize["size"] = o.Size
 	}
-
 	if o.AvailabilityZone != nil {
 		toSerialize["availabilityZone"] = o.AvailabilityZone
 	}
-
 	if o.Image != nil {
 		toSerialize["image"] = o.Image
 	}
-
 	if o.ImagePassword != nil {
 		toSerialize["imagePassword"] = o.ImagePassword
 	}
-
 	if o.ImageAlias != nil {
 		toSerialize["imageAlias"] = o.ImageAlias
 	}
-
 	if o.SshKeys != nil {
 		toSerialize["sshKeys"] = o.SshKeys
 	}
-
 	if o.Bus != nil {
 		toSerialize["bus"] = o.Bus
 	}
-
 	if o.LicenceType != nil {
 		toSerialize["licenceType"] = o.LicenceType
 	}
-
 	if o.CpuHotPlug != nil {
 		toSerialize["cpuHotPlug"] = o.CpuHotPlug
 	}
-
 	if o.RamHotPlug != nil {
 		toSerialize["ramHotPlug"] = o.RamHotPlug
 	}
-
 	if o.NicHotPlug != nil {
 		toSerialize["nicHotPlug"] = o.NicHotPlug
 	}
-
 	if o.NicHotUnplug != nil {
 		toSerialize["nicHotUnplug"] = o.NicHotUnplug
 	}
-
 	if o.DiscVirtioHotPlug != nil {
 		toSerialize["discVirtioHotPlug"] = o.DiscVirtioHotPlug
 	}
-
 	if o.DiscVirtioHotUnplug != nil {
 		toSerialize["discVirtioHotUnplug"] = o.DiscVirtioHotUnplug
 	}
-
 	if o.DeviceNumber != nil {
 		toSerialize["deviceNumber"] = o.DeviceNumber
 	}
-
 	if o.BackupunitId != nil {
 		toSerialize["backupunitId"] = o.BackupunitId
 	}
-
 	if o.UserData != nil {
 		toSerialize["userData"] = o.UserData
 	}

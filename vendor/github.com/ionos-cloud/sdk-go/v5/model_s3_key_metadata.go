@@ -108,11 +108,9 @@ func (o *S3KeyMetadata) HasCreatedDate() bool {
 
 func (o S3KeyMetadata) MarshalJSON() ([]byte, error) {
 	toSerialize := map[string]interface{}{}
-
 	if o.Etag != nil {
 		toSerialize["etag"] = o.Etag
 	}
-
 	if o.CreatedDate != nil {
 		toSerialize["createdDate"] = o.CreatedDate
 	}

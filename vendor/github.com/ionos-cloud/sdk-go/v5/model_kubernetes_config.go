@@ -179,19 +179,15 @@ func (o *KubernetesConfig) HasProperties() bool {
 
 func (o KubernetesConfig) MarshalJSON() ([]byte, error) {
 	toSerialize := map[string]interface{}{}
-
 	if o.Id != nil {
 		toSerialize["id"] = o.Id
 	}
-
 	if o.Type != nil {
 		toSerialize["type"] = o.Type
 	}
-
 	if o.Href != nil {
 		toSerialize["href"] = o.Href
 	}
-
 	if o.Properties != nil {
 		toSerialize["properties"] = o.Properties
 	}

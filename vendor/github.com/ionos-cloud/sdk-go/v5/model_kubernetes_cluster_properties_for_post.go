@@ -219,23 +219,18 @@ func (o *KubernetesClusterPropertiesForPost) HasS3Buckets() bool {
 
 func (o KubernetesClusterPropertiesForPost) MarshalJSON() ([]byte, error) {
 	toSerialize := map[string]interface{}{}
-
 	if o.Name != nil {
 		toSerialize["name"] = o.Name
 	}
-
 	if o.K8sVersion != nil {
 		toSerialize["k8sVersion"] = o.K8sVersion
 	}
-
 	if o.MaintenanceWindow != nil {
 		toSerialize["maintenanceWindow"] = o.MaintenanceWindow
 	}
-
 	if o.ApiSubnetAllowList != nil {
 		toSerialize["apiSubnetAllowList"] = o.ApiSubnetAllowList
 	}
-
 	if o.S3Buckets != nil {
 		toSerialize["s3Buckets"] = o.S3Buckets
 	}
