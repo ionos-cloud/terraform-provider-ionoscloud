@@ -1,9 +1,10 @@
 ---
+subcategory: "User Management"
 layout: "ionoscloud"
 page_title: "IonosCloud : ionoscloud_user"
 sidebar_current: "docs-ionoscloud-datasource-user"
 description: |-
-Get information on a Ionos Cloud Users
+  Get information on a Ionos Cloud Users
 ---
 
 # ionoscloud\_user

@@ -1,4 +1,5 @@
 ---
+subcategory: "Managed Backup"
 layout: "ionoscloud"
 page_title: "IonosCloud: backup_unit"
 sidebar_current: "docs-resource-backup-unit"

@@ -1,4 +1,5 @@
 ---
+subcategory: "Compute Engine"
 layout: "ionoscloud"
 page_title: "IonosCloud: loadbalancer"
 sidebar_current: "docs-resource-loadbalancer"

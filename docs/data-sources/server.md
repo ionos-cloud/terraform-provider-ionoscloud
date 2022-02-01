@@ -1,9 +1,10 @@
 ---
+subcategory: "Compute Engine"
 layout: "ionoscloud"
 page_title: "IonosCloud : ionoscloud_server"
 sidebar_current: "docs-ionoscloud-datasource-server"
 description: |-
-Get information on a Ionos Cloud Servers
+  Get information on a Ionos Cloud Servers
 ---
 
 # ionoscloud\_server

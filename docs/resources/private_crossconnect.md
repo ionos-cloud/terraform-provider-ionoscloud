@@ -1,4 +1,5 @@
 ---
+subcategory: "Compute Engine"
 layout: "ionoscloud"
 page_title: "IonosCloud: private_crossconnect"
 sidebar_current: "docs-resource-private-crossconnect"

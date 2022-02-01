@@ -1,9 +1,10 @@
 ---
+subcategory: "Compute Engine"
 layout: "ionoscloud"
 page_title: "IonosCloud: ipfailover"
 sidebar_current: "docs-resource-ipfailover"
 description: |-
-Get Information on ipfailover objects.
+  Get Information on ipfailover objects.
 ---
 
 # ionoscloud\_ipfailover

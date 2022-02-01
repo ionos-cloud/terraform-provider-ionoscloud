@@ -1,4 +1,5 @@
 ---
+subcategory: "Compute Engine"
 layout: "ionoscloud"
 page_title: "IonosCloud : datacenter"
 sidebar_current: "docs-datasource-datacenter"
