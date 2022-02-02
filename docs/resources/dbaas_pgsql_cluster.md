@@ -26,6 +26,33 @@ resource "ionoscloud_lan"  "example" {
   name                    = "example"
 }
 
+resource "ionoscloud_server" "example" {
+  name = "example"
+  datacenter_id = ionoscloud_datacenter.example.id
+  cores = 2
+  ram = 2048
+  availability_zone = "ZONE_1"
+  cpu_family = "INTEL_SKYLAKE"
+  image_name ="Debian-10-cloud-init.qcow2"
+  image_password = <password>
+  volume {
+    name = "example"
+    size = 6
+    disk_type = "SSD Standard"
+  }
+  nic {
+    lan = ionoscloud_lan.example.id
+    name = "example"
+    dhcp = true
+  }
+}
+
+locals {
+ prefix = format("%s/%s", ionoscloud_server.example.nic[0].ips[0], "24")
+ database_ip = cidrhost(local.prefix, 1)
+ database_ip_cidr = format("%s/%s", local.database_ip, "24")
+}
+
 resource "ionoscloud_pg_cluster" "example" {
   postgres_version        = 12
   instances               = 1
@@ -36,7 +63,7 @@ resource "ionoscloud_pg_cluster" "example" {
   connections   {
     datacenter_id         =  ionoscloud_datacenter.example.id 
     lan_id                =  ionoscloud_lan.example.id 
-    cidr                  =  "192.168.1.100/24"
+    cidr                  =  local.database_ip_cidr
   }
   location                = ionoscloud_datacenter.example.location
   display_name            = "PostgreSQL_cluster"
@@ -67,7 +94,7 @@ resource "ionoscloud_pg_cluster" "example" {
 * `connections` - (Required)[string] Details about the network connection for your cluster.
   * `datacenter_id` - (Required)[true] The datacenter to connect your cluster to.
   * `lan_id` - (Required)[true] The LAN to connect your cluster to.
-  * `cidr` - (Required)[true] The IP and subnet for the database. Note the following unavailable IP ranges: 10.233.64.0/18, 10.233.0.0/18, 10.233.114.0/24. Please enter in the correct format like IP/Subnet, exp: 192.168.10.0/24. See [Private IPs](https://www.ionos.com/help/server-cloud-infrastructure/private-network/private-ip-address-ranges/).
+  * `cidr` - (Required)[true] The IP and subnet for the database. Note the following unavailable IP ranges: 10.233.64.0/18, 10.233.0.0/18, 10.233.114.0/24. Please enter in the correct format like IP/Subnet, exp: 192.168.10.0/24. See [Private IPs](https://www.ionos.com/help/server-cloud-infrastructure/private-network/private-ip-address-ranges/) and [Cluster Setup - Preparing the network](https://docs.ionos.com/reference/product-information/api-automation-guides/database-as-a-service/create-a-database#preparing-the-network).
 * `location` - (Required)[string] The physical location where the cluster will be created. This will be where all of your instances live. Property cannot be modified after datacenter creation (disallowed in update requests)
 * `display_name` - (Required)[string] The friendly name of your cluster.
 * `maintenance_window` - (Optional)[string] A weekly 4 hour-long window, during which maintenance might occur

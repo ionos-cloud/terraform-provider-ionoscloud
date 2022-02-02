@@ -114,7 +114,9 @@ func GetDbaasPgSqlClusterDataCreate(d *schema.ResourceData) (*dbaas.CreateCluste
 		dbaasCluster.Properties.DisplayName = &displayName
 	}
 
-	dbaasCluster.Properties.MaintenanceWindow = GetDbaasClusterMaintenanceWindowData(d)
+	if _, ok := d.GetOk("maintenance_window"); ok {
+		dbaasCluster.Properties.MaintenanceWindow = GetDbaasClusterMaintenanceWindowData(d)
+	}
 
 	dbaasCluster.Properties.Credentials = GetDbaasClusterCredentialsData(d)
 
@@ -237,19 +239,19 @@ func GetDbaasClusterConnectionsData(d *schema.ResourceData) *[]dbaas.Connection 
 }
 
 func GetDbaasClusterMaintenanceWindowData(d *schema.ResourceData) *dbaas.MaintenanceWindow {
-	var maintananceWindow dbaas.MaintenanceWindow
+	var maintenanceWindow dbaas.MaintenanceWindow
 
 	if timeV, ok := d.GetOk("maintenance_window.0.time"); ok {
 		timeV := timeV.(string)
-		maintananceWindow.Time = &timeV
+		maintenanceWindow.Time = &timeV
 	}
 
 	if dayOfTheWeek, ok := d.GetOk("maintenance_window.0.day_of_the_week"); ok {
 		dayOfTheWeek := dbaas.DayOfTheWeek(dayOfTheWeek.(string))
-		maintananceWindow.DayOfTheWeek = &dayOfTheWeek
+		maintenanceWindow.DayOfTheWeek = &dayOfTheWeek
 	}
 
-	return &maintananceWindow
+	return &maintenanceWindow
 }
 
 func GetDbaasClusterCredentialsData(d *schema.ResourceData) *dbaas.DBUser {
