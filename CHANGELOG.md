@@ -7,6 +7,9 @@
 ### Fix:
 - set depth explicitly to improve performance
 
+### Documentation:
+- restructured documentation by adding subcategories
+
 ## 5.2.25 
 
 ### Fix:

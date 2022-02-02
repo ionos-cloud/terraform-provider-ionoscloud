@@ -1,4 +1,5 @@
 ---
+subcategory: "Compute Engine"
 layout: "ionoscloud"
 page_title: "IonosCloud: ipblock"
 sidebar_current: "docs-resource-ipblock"

@@ -1,4 +1,5 @@
 ---
+subcategory: "Managed Kubernetes"
 layout: "ionoscloud"
 page_title: "IonosCloud: k8s_cluster"
 sidebar_current: "docs-resource-k8s-cluster"

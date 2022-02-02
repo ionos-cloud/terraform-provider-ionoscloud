@@ -1,9 +1,10 @@
 ---
+subcategory: "User Management"
 layout: "ionoscloud"
 page_title: "IonosCloud : ionoscloud_group"
 sidebar_current: "docs-ionoscloud-datasource-group"
 description: |-
-Get information on a Ionos Cloud Groups
+  Get information on a Ionos Cloud Groups
 ---
 
 # ionoscloud\_group
