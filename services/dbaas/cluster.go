@@ -114,7 +114,9 @@ func GetDbaasPgSqlClusterDataCreate(d *schema.ResourceData) (*dbaas.CreateCluste
 		dbaasCluster.Properties.DisplayName = &displayName
 	}
 
-	dbaasCluster.Properties.MaintenanceWindow = GetDbaasClusterMaintenanceWindowData(d)
+	if _, ok := d.GetOk("maintenance_window"); ok {
+		dbaasCluster.Properties.MaintenanceWindow = GetDbaasClusterMaintenanceWindowData(d)
+	}
 
 	dbaasCluster.Properties.Credentials = GetDbaasClusterCredentialsData(d)
 
