@@ -3,14 +3,20 @@
 ### Enhancements:
 - improved lookup in data_sources by using filters
 - improved tests duration by moving steps from data_source test files in the corresponding resource test files 
-- added workflow to run tests from github actions 
+- added workflow to run tests from GitHub actions 
 - split tests with build tags
+
+### Documentations: 
+- a more accurate example on how can the cidr be set automatically on a DBaaS Cluster
+
+### Fixes: 
+- fix on creating a DBaaS Cluster without specifying the maintenance window
 
 ## 6.1.3
 
 ### Features:
 - added **public** parameter for k8s_cluster (creation of private clusters is possible now)
-- added **gateway_ip** paramater for k8s_nodepool
+- added **gateway_ip** parameter for k8s_nodepool
 - added **boot_server** read-only property for volume
 
 ### Fixes:
