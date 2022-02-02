@@ -4,7 +4,6 @@
 package ionoscloud
 
 import (
-	"fmt"
 	"testing"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
@@ -17,10 +16,6 @@ func TestAccDataSourceNatGatewayRule(t *testing.T) {
 			testAccPreCheck(t)
 		},
 		ProviderFactories: testAccProviderFactories,
-		Steps: []resource.TestStep{
-			{
-				Config: fmt.Sprintf(testAccCheckNatGatewayRuleConfigBasic, NatGatewayRuleTestResource),
-			},
-		},
+		Steps:             []resource.TestStep{},
 	})
 }
