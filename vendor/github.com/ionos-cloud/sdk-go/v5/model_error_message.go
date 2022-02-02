@@ -100,11 +100,9 @@ func (o *ErrorMessage) HasMessage() bool {
 
 func (o ErrorMessage) MarshalJSON() ([]byte, error) {
 	toSerialize := map[string]interface{}{}
-
 	if o.ErrorCode != nil {
 		toSerialize["errorCode"] = o.ErrorCode
 	}
-
 	if o.Message != nil {
 		toSerialize["message"] = o.Message
 	}

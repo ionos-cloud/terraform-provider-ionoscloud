@@ -180,19 +180,15 @@ func (o *PrivateCrossConnectProperties) HasConnectableDatacenters() bool {
 
 func (o PrivateCrossConnectProperties) MarshalJSON() ([]byte, error) {
 	toSerialize := map[string]interface{}{}
-
 	if o.Name != nil {
 		toSerialize["name"] = o.Name
 	}
-
 	if o.Description != nil {
 		toSerialize["description"] = o.Description
 	}
-
 	if o.Peers != nil {
 		toSerialize["peers"] = o.Peers
 	}
-
 	if o.ConnectableDatacenters != nil {
 		toSerialize["connectableDatacenters"] = o.ConnectableDatacenters
 	}

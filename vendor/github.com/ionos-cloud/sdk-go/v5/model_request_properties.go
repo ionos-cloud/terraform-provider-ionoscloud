@@ -176,19 +176,15 @@ func (o *RequestProperties) HasUrl() bool {
 
 func (o RequestProperties) MarshalJSON() ([]byte, error) {
 	toSerialize := map[string]interface{}{}
-
 	if o.Method != nil {
 		toSerialize["method"] = o.Method
 	}
-
 	if o.Headers != nil {
 		toSerialize["headers"] = o.Headers
 	}
-
 	if o.Body != nil {
 		toSerialize["body"] = o.Body
 	}
-
 	if o.Url != nil {
 		toSerialize["url"] = o.Url
 	}

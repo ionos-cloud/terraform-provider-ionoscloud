@@ -42,7 +42,6 @@ var (
 )
 
 const DepthParam = "depth"
-const DefaultDepth = "10"
 
 const (
 	RequestStatusQueued  = "QUEUED"
@@ -50,7 +49,7 @@ const (
 	RequestStatusFailed  = "FAILED"
 	RequestStatusDone    = "DONE"
 
-	Version = "5.1.11"
+	Version = "5.1.12"
 )
 
 // Constants for APIs
@@ -249,7 +248,7 @@ func (c *APIClient) callAPI(request *http.Request) (*http.Response, time.Duratio
 		if c.cfg.Debug {
 			dump, err := httputil.DumpRequestOut(clonedRequest, true)
 			if err == nil {
-				log.Printf("%s\n", string(dump))
+				log.Printf(" [DEBUG] DumpRequestOut : %s\n", string(dump))
 			} else {
 				log.Println("[DEBUG] DumpRequestOut err: ", err)
 			}
@@ -267,9 +266,9 @@ func (c *APIClient) callAPI(request *http.Request) (*http.Response, time.Duratio
 		if c.cfg.Debug {
 			dump, err := httputil.DumpResponse(resp, true)
 			if err == nil {
-				log.Printf("\n%s\n", string(dump))
+				log.Printf("\n [DEBUG] DumpResponse : %s\n", string(dump))
 			} else {
-				log.Println("[DEBUG] dumpResponse err ", err)
+				log.Println("[DEBUG] DumpResponse err ", err)
 			}
 		}
 
@@ -432,11 +431,6 @@ func (c *APIClient) prepareRequest(
 		for _, iv := range v {
 			query.Add(k, iv)
 		}
-	}
-
-	// Adding default depth if needed
-	if query.Get(DepthParam) == "" {
-		query.Add(DepthParam, DefaultDepth)
 	}
 
 	// Encode the parameters.

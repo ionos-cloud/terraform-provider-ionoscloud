@@ -59,7 +59,6 @@ func (o *NicEntities) HasFirewallrules() bool {
 
 func (o NicEntities) MarshalJSON() ([]byte, error) {
 	toSerialize := map[string]interface{}{}
-
 	if o.Firewallrules != nil {
 		toSerialize["firewallrules"] = o.Firewallrules
 	}

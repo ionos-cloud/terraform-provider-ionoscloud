@@ -99,11 +99,9 @@ func (o *UserPut) HasProperties() bool {
 
 func (o UserPut) MarshalJSON() ([]byte, error) {
 	toSerialize := map[string]interface{}{}
-
 	if o.Id != nil {
 		toSerialize["id"] = o.Id
 	}
-
 	if o.Properties != nil {
 		toSerialize["properties"] = o.Properties
 	}

@@ -378,39 +378,30 @@ func (o *KubernetesNodePoolPropertiesForPut) HasPublicIps() bool {
 
 func (o KubernetesNodePoolPropertiesForPut) MarshalJSON() ([]byte, error) {
 	toSerialize := map[string]interface{}{}
-
 	if o.Name != nil {
 		toSerialize["name"] = o.Name
 	}
-
 	if o.NodeCount != nil {
 		toSerialize["nodeCount"] = o.NodeCount
 	}
-
 	if o.K8sVersion != nil {
 		toSerialize["k8sVersion"] = o.K8sVersion
 	}
-
 	if o.MaintenanceWindow != nil {
 		toSerialize["maintenanceWindow"] = o.MaintenanceWindow
 	}
-
 	if o.AutoScaling != nil {
 		toSerialize["autoScaling"] = o.AutoScaling
 	}
-
 	if o.Lans != nil {
 		toSerialize["lans"] = o.Lans
 	}
-
 	if o.Labels != nil {
 		toSerialize["labels"] = o.Labels
 	}
-
 	if o.Annotations != nil {
 		toSerialize["annotations"] = o.Annotations
 	}
-
 	if o.PublicIps != nil {
 		toSerialize["publicIps"] = o.PublicIps
 	}

@@ -140,15 +140,12 @@ func (o *BackupUnitProperties) HasEmail() bool {
 
 func (o BackupUnitProperties) MarshalJSON() ([]byte, error) {
 	toSerialize := map[string]interface{}{}
-
 	if o.Name != nil {
 		toSerialize["name"] = o.Name
 	}
-
 	if o.Password != nil {
 		toSerialize["password"] = o.Password
 	}
-
 	if o.Email != nil {
 		toSerialize["email"] = o.Email
 	}

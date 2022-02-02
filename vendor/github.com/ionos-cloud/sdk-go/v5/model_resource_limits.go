@@ -700,71 +700,54 @@ func (o *ResourceLimits) HasK8sClustersProvisioned() bool {
 
 func (o ResourceLimits) MarshalJSON() ([]byte, error) {
 	toSerialize := map[string]interface{}{}
-
 	if o.CoresPerServer != nil {
 		toSerialize["coresPerServer"] = o.CoresPerServer
 	}
-
 	if o.CoresPerContract != nil {
 		toSerialize["coresPerContract"] = o.CoresPerContract
 	}
-
 	if o.CoresProvisioned != nil {
 		toSerialize["coresProvisioned"] = o.CoresProvisioned
 	}
-
 	if o.RamPerServer != nil {
 		toSerialize["ramPerServer"] = o.RamPerServer
 	}
-
 	if o.RamPerContract != nil {
 		toSerialize["ramPerContract"] = o.RamPerContract
 	}
-
 	if o.RamProvisioned != nil {
 		toSerialize["ramProvisioned"] = o.RamProvisioned
 	}
-
 	if o.HddLimitPerVolume != nil {
 		toSerialize["hddLimitPerVolume"] = o.HddLimitPerVolume
 	}
-
 	if o.HddLimitPerContract != nil {
 		toSerialize["hddLimitPerContract"] = o.HddLimitPerContract
 	}
-
 	if o.HddVolumeProvisioned != nil {
 		toSerialize["hddVolumeProvisioned"] = o.HddVolumeProvisioned
 	}
-
 	if o.SsdLimitPerVolume != nil {
 		toSerialize["ssdLimitPerVolume"] = o.SsdLimitPerVolume
 	}
-
 	if o.SsdLimitPerContract != nil {
 		toSerialize["ssdLimitPerContract"] = o.SsdLimitPerContract
 	}
-
 	if o.SsdVolumeProvisioned != nil {
 		toSerialize["ssdVolumeProvisioned"] = o.SsdVolumeProvisioned
 	}
-
 	if o.ReservableIps != nil {
 		toSerialize["reservableIps"] = o.ReservableIps
 	}
-
 	if o.ReservedIpsOnContract != nil {
 		toSerialize["reservedIpsOnContract"] = o.ReservedIpsOnContract
 	}
-
 	if o.ReservedIpsInUse != nil {
 		toSerialize["reservedIpsInUse"] = o.ReservedIpsInUse
 	}
-
 	if o.K8sClusterLimitTotal != nil {
 		toSerialize["k8sClusterLimitTotal"] = o.K8sClusterLimitTotal
 	}
-
 	if o.K8sClustersProvisioned != nil {
 		toSerialize["k8sClustersProvisioned"] = o.K8sClustersProvisioned
 	}

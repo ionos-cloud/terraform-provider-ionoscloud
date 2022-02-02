@@ -1,4 +1,8 @@
-## 5.2.26(upcoming release)
+## 5.2.26
+
+### Enhancements:
+- Update sdk to new version to have depth set on a case by case basis
+- Add some additional logs
 
 ### Fix:
 - set depth explicitly to improve performance

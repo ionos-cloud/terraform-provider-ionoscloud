@@ -99,11 +99,9 @@ func (o *Error) HasMessages() bool {
 
 func (o Error) MarshalJSON() ([]byte, error) {
 	toSerialize := map[string]interface{}{}
-
 	if o.HttpStatus != nil {
 		toSerialize["httpStatus"] = o.HttpStatus
 	}
-
 	if o.Messages != nil {
 		toSerialize["messages"] = o.Messages
 	}
