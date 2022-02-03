@@ -1,11 +1,12 @@
+## 5.2.27(upcoming release)
+
 ## 5.2.26
 
 ### Enhancements:
-- Update sdk to new version to have depth set on a case by case basis
+- Update sdk-go to version v5.1.12
 - Add some additional logs
-
-### Fix:
-- set depth explicitly to improve performance
+- Use depth explicitly on api calls to improve performance
+- Terraform plugin sdk upgrade to v2.10.1
 
 ### Documentation:
 - restructured documentation by adding subcategories
