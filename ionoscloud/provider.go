@@ -256,3 +256,12 @@ var resourceDefaultTimeouts = schema.ResourceTimeout{
 	Delete:  schema.DefaultTimeout(60 * time.Minute),
 	Default: schema.DefaultTimeout(60 * time.Minute),
 }
+
+// k8sTimeouts sets default value for each Timeout type
+// can be increased to a maximum of 4 hours
+var k8sTimeouts = schema.ResourceTimeout{
+	Create:  schema.DefaultTimeout(2 * time.Hour),
+	Update:  schema.DefaultTimeout(2 * time.Hour),
+	Delete:  schema.DefaultTimeout(2 * time.Hour),
+	Default: schema.DefaultTimeout(2 * time.Hour),
+}
