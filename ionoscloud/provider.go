@@ -6,6 +6,8 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/meta"
 	"log"
+	"net"
+	"net/http"
 	"os"
 	"runtime"
 	"time"
@@ -168,6 +170,8 @@ func providerConfigure(d *schema.ResourceData, terraformVersion string) (interfa
 		newConfig.Debug = true
 	}
 
+	newConfig.HTTPClient = &http.Client{Transport: createTransport()}
+
 	newClient := ionoscloud.NewAPIClient(newConfig)
 
 	newConfig.UserAgent = fmt.Sprintf(
@@ -175,11 +179,30 @@ func providerConfigure(d *schema.ResourceData, terraformVersion string) (interfa
 		Version, ionoscloud.Version, terraformVersion, meta.SDKVersionString(), runtime.GOOS, runtime.GOARCH)
 
 	dbaasClient := dbaasService.NewClientService(username.(string), password.(string), token.(string), cleanedUrl)
+	//dbaasClient.GetConfig().HTTPClient = &http.Client{Transport: createTransport()}
 
 	return SdkBundle{
 		CloudApiClient: newClient,
 		DbaasClient:    dbaasClient.Get(),
 	}, nil
+}
+
+func createTransport() *http.Transport {
+	dialer := &net.Dialer{
+		Timeout:   30 * time.Second,
+		KeepAlive: 30 * time.Second,
+	}
+	return &http.Transport{
+		Proxy:                 http.ProxyFromEnvironment,
+		DialContext:           dialer.DialContext,
+		DisableKeepAlives:     true,
+		ForceAttemptHTTP2:     true,
+		MaxIdleConns:          100,
+		IdleConnTimeout:       90 * time.Second,
+		TLSHandshakeTimeout:   15 * time.Second,
+		ExpectContinueTimeout: 1 * time.Second,
+		MaxIdleConnsPerHost:   runtime.GOMAXPROCS(0) + 1,
+	}
 }
 
 // cleanURL makes sure trailing slash does not corrupt the state
