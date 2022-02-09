@@ -1,5 +1,9 @@
 ## 5.2.27(upcoming release)
 
+### Fixes:
+
+- Increase timeout for nodepool CRUD
+
 ## 5.2.26
 
 ### Enhancements:

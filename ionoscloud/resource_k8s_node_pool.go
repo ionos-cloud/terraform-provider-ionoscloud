@@ -156,7 +156,7 @@ func resourceK8sNodePool() *schema.Resource {
 				Elem:     &schema.Schema{Type: schema.TypeString},
 			},
 		},
-		Timeouts: &resourceDefaultTimeouts,
+		Timeouts: &k8sTimeouts,
 	}
 }
 
@@ -856,7 +856,7 @@ func setK8sNodePoolData(d *schema.ResourceData, nodePool *ionoscloud.KubernetesN
 }
 
 func k8sNodepoolReady(client *ionoscloud.APIClient, d *schema.ResourceData) (bool, error) {
-	ctx, cancel := context.WithTimeout(context.Background(), *resourceDefaultTimeouts.Default)
+	ctx, cancel := context.WithTimeout(context.Background(), *k8sTimeouts.Default)
 
 	if cancel != nil {
 		defer cancel()
@@ -871,14 +871,13 @@ func k8sNodepoolReady(client *ionoscloud.APIClient, d *schema.ResourceData) (boo
 }
 
 func k8sNodepoolDeleted(client *ionoscloud.APIClient, d *schema.ResourceData) (bool, error) {
-	ctx, cancel := context.WithTimeout(context.Background(), *resourceDefaultTimeouts.Default)
+	ctx, cancel := context.WithTimeout(context.Background(), *k8sTimeouts.Default)
 
 	if cancel != nil {
 		defer cancel()
 	}
 	_, apiResponse, err := client.KubernetesApi.K8sNodepoolsFindById(ctx, d.Get("k8s_cluster_id").(string), d.Id()).Execute()
 	logApiRequestTime(apiResponse)
-
 	if err != nil {
 		if apiResponse != nil && apiResponse.Response != nil && apiResponse.StatusCode == 404 {
 			return true, nil

@@ -3,16 +3,15 @@ package ionoscloud
 import (
 	"context"
 	"fmt"
-	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
-	"github.com/hashicorp/terraform-plugin-sdk/v2/meta"
 	"log"
 	"os"
 	"runtime"
 	"time"
 
+	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
-
+	"github.com/hashicorp/terraform-plugin-sdk/v2/meta"
 	"github.com/ionos-cloud/sdk-go/v5"
 )
 
@@ -255,4 +254,13 @@ var resourceDefaultTimeouts = schema.ResourceTimeout{
 	Update:  schema.DefaultTimeout(60 * time.Minute),
 	Delete:  schema.DefaultTimeout(60 * time.Minute),
 	Default: schema.DefaultTimeout(60 * time.Minute),
+}
+
+// k8sTimeouts sets default value for each Timeout type
+// can be increased to a maximum of 4 hours
+var k8sTimeouts = schema.ResourceTimeout{
+	Create:  schema.DefaultTimeout(2 * time.Hour),
+	Update:  schema.DefaultTimeout(2 * time.Hour),
+	Delete:  schema.DefaultTimeout(2 * time.Hour),
+	Default: schema.DefaultTimeout(2 * time.Hour),
 }
