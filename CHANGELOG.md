@@ -5,6 +5,7 @@
 - improved tests duration by moving steps from data_source test files in the corresponding resource test files 
 - added workflow to run tests from GitHub actions 
 - split tests with build tags
+- update http client with better values
 
 ### Documentations: 
 - a more accurate example on how can the cidr be set automatically on a DBaaS Cluster
