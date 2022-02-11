@@ -1,5 +1,9 @@
 ## 5.2.27(upcoming release)
 
+### Enhancements:
+
+- improve http client performance and behaviour
+
 ### Fixes:
 
 - Increase timeout for nodepool CRUD
