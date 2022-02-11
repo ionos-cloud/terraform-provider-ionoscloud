@@ -1,4 +1,4 @@
-## 5.2.27(upcoming release)
+## 5.2.27
 
 ### Enhancements:
 
