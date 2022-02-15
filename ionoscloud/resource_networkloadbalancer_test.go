@@ -30,6 +30,17 @@ func TestAccNetworkLoadBalancerBasic(t *testing.T) {
 		CheckDestroy:      testAccCheckNetworkLoadBalancerDestroyCheck,
 		Steps: []resource.TestStep{
 			{
+				Config: testAccCheckNetworkLoadBalancerConfigBasicWithoutPrivateIp,
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckNetworkLoadBalancerExists(networkLoadBalancerResource, &networkLoadBalancer),
+					resource.TestCheckResourceAttr(networkLoadBalancerResource, "name", NetworkLoadBalancerTestResource),
+					resource.TestCheckResourceAttr(networkLoadBalancerResource, "ips.0", "10.12.118.224"),
+					resource.TestCheckResourceAttrSet(networkLoadBalancerResource, "lb_private_ips.0"),
+					resource.TestCheckResourceAttrPair(networkLoadBalancerResource, "listener_lan", LanResource+".nlb_lan_1", "id"),
+					resource.TestCheckResourceAttrPair(networkLoadBalancerResource, "target_lan", LanResource+".nlb_lan_2", "id"),
+				),
+			},
+			{
 				Config: testAccCheckNetworkLoadBalancerConfigBasic,
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckNetworkLoadBalancerExists(networkLoadBalancerResource, &networkLoadBalancer),
@@ -143,6 +154,35 @@ func testAccCheckNetworkLoadBalancerExists(n string, networkLoadBalancer *ionosc
 		return nil
 	}
 }
+
+const testAccCheckNetworkLoadBalancerConfigBasicWithoutPrivateIp = `
+resource ` + DatacenterResource + ` "datacenter" {
+  name              = "test_nbl"
+  location          = "gb/lhr"
+  description       = "datacenter for hosting "
+}
+
+resource ` + LanResource + ` "nlb_lan_1" {
+  datacenter_id = ` + DatacenterResource + `.datacenter.id
+  public        = false
+  name          = "lan_1"
+}
+
+resource ` + LanResource + ` "nlb_lan_2" {
+  datacenter_id = ` + DatacenterResource + `.datacenter.id
+  public        = false
+  name          = "lan_2"
+}
+
+
+resource ` + NetworkLoadBalancerResource + ` ` + NetworkLoadBalancerTestResource + ` {
+  datacenter_id = ` + DatacenterResource + `.datacenter.id
+  name          = "` + NetworkLoadBalancerTestResource + `"
+  listener_lan  = ` + LanResource + `.nlb_lan_1.id
+  target_lan    = ` + LanResource + `.nlb_lan_2.id
+  ips           = ["10.12.118.224"]
+}
+`
 
 const testAccCheckNetworkLoadBalancerConfigBasic = `
 resource ` + DatacenterResource + ` "datacenter" {

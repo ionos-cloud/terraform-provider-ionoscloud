@@ -42,11 +42,18 @@ func TestAccNetworkLoadBalancerForwardingRuleBasic(t *testing.T) {
 					resource.TestCheckResourceAttr(networkLoadBalancerForwardingRuleResource, "health_check.0.target_timeout", "1400"),
 					resource.TestCheckResourceAttr(networkLoadBalancerForwardingRuleResource, "health_check.0.retries", "3"),
 					resource.TestCheckResourceAttr(networkLoadBalancerForwardingRuleResource, "targets.0.ip", "22.231.2.2"),
-					resource.TestCheckResourceAttr(networkLoadBalancerForwardingRuleResource, "targets.0.port", "8080"),
+					resource.TestCheckResourceAttr(networkLoadBalancerForwardingRuleResource, "targets.0.port", "8081"),
 					resource.TestCheckResourceAttr(networkLoadBalancerForwardingRuleResource, "targets.0.weight", "123"),
 					resource.TestCheckResourceAttr(networkLoadBalancerForwardingRuleResource, "targets.0.health_check.0.check", "true"),
 					resource.TestCheckResourceAttr(networkLoadBalancerForwardingRuleResource, "targets.0.health_check.0.check_interval", "1000"),
 					resource.TestCheckResourceAttr(networkLoadBalancerForwardingRuleResource, "targets.0.health_check.0.maintenance", "false"),
+					resource.TestCheckResourceAttr(networkLoadBalancerForwardingRuleResource, "targets.1.ip", "22.231.2.3"),
+					resource.TestCheckResourceAttr(networkLoadBalancerForwardingRuleResource, "targets.2.ip", "22.231.2.4"),
+					resource.TestCheckResourceAttr(networkLoadBalancerForwardingRuleResource, "targets.2.port", "8081"),
+					resource.TestCheckResourceAttr(networkLoadBalancerForwardingRuleResource, "targets.2.weight", "123"),
+					resource.TestCheckResourceAttr(networkLoadBalancerForwardingRuleResource, "targets.2.health_check.0.check", "true"),
+					resource.TestCheckResourceAttr(networkLoadBalancerForwardingRuleResource, "targets.2.health_check.0.check_interval", "1000"),
+					resource.TestCheckResourceAttr(networkLoadBalancerForwardingRuleResource, "targets.2.health_check.0.maintenance", "false"),
 				),
 			},
 			{
@@ -105,12 +112,20 @@ func TestAccNetworkLoadBalancerForwardingRuleBasic(t *testing.T) {
 					resource.TestCheckResourceAttr(networkLoadBalancerForwardingRuleResource, "health_check.0.connect_timeout", "1210"),
 					resource.TestCheckResourceAttr(networkLoadBalancerForwardingRuleResource, "health_check.0.target_timeout", "1410"),
 					resource.TestCheckResourceAttr(networkLoadBalancerForwardingRuleResource, "health_check.0.retries", "4"),
-					resource.TestCheckResourceAttr(networkLoadBalancerForwardingRuleResource, "targets.0.ip", "22.231.2.3"),
+					resource.TestCheckResourceAttr(networkLoadBalancerForwardingRuleResource, "targets.0.ip", "22.231.2.2"),
 					resource.TestCheckResourceAttr(networkLoadBalancerForwardingRuleResource, "targets.0.port", "8081"),
-					resource.TestCheckResourceAttr(networkLoadBalancerForwardingRuleResource, "targets.0.weight", "124"),
+					resource.TestCheckResourceAttr(networkLoadBalancerForwardingRuleResource, "targets.0.weight", "123"),
 					resource.TestCheckResourceAttr(networkLoadBalancerForwardingRuleResource, "targets.0.health_check.0.check", "true"),
-					resource.TestCheckResourceAttr(networkLoadBalancerForwardingRuleResource, "targets.0.health_check.0.check_interval", "1010"),
-					resource.TestCheckResourceAttr(networkLoadBalancerForwardingRuleResource, "targets.0.health_check.0.maintenance", "true"),
+					resource.TestCheckResourceAttr(networkLoadBalancerForwardingRuleResource, "targets.0.health_check.0.check_interval", "1000"),
+					resource.TestCheckResourceAttr(networkLoadBalancerForwardingRuleResource, "targets.0.health_check.0.maintenance", "false"),
+					resource.TestCheckResourceAttr(networkLoadBalancerForwardingRuleResource, "targets.1.ip", "22.231.2.3"),
+					resource.TestCheckResourceAttr(networkLoadBalancerForwardingRuleResource, "targets.2.ip", "22.231.2.4"),
+					resource.TestCheckResourceAttr(networkLoadBalancerForwardingRuleResource, "targets.3.ip", "22.231.2.5"),
+					resource.TestCheckResourceAttr(networkLoadBalancerForwardingRuleResource, "targets.3.port", "8081"),
+					resource.TestCheckResourceAttr(networkLoadBalancerForwardingRuleResource, "targets.3.weight", "123"),
+					resource.TestCheckResourceAttr(networkLoadBalancerForwardingRuleResource, "targets.3.health_check.0.check", "true"),
+					resource.TestCheckResourceAttr(networkLoadBalancerForwardingRuleResource, "targets.3.health_check.0.check_interval", "1010"),
+					resource.TestCheckResourceAttr(networkLoadBalancerForwardingRuleResource, "targets.3.health_check.0.maintenance", "true"),
 				),
 			},
 		},
@@ -196,16 +211,23 @@ resource ` + NetworkLoadBalancerForwardingRuleResource + ` ` + NetworkLoadBalanc
      	target_timeout = 1400
      	retries = 3
  	}
- 	targets {
-   		ip = "22.231.2.2"
-   		port = "8080"
+   dynamic "targets" {
+     for_each = var.IPs
+     content {
+        ip = targets.value
+   		port = "8081"
    		weight = "123"
    		health_check {
      		check = true
      		check_interval = 1000
      		maintenance = false
    		}
- 	}
+ 	  }
+  }
+}
+variable IPs{
+  type    = list
+  default =["22.231.2.2", "22.231.2.3", "22.231.2.4"]
 }
 `
 
@@ -225,9 +247,39 @@ resource ` + NetworkLoadBalancerForwardingRuleResource + ` ` + NetworkLoadBalanc
 		retries = 4
  	}
  	targets {
+   		ip = "22.231.2.2"
+   		port = "8081"
+   		weight = "123"
+   		health_check {
+     		check = true
+     		check_interval = 1000
+     		maintenance = false
+   		}
+ 	}
+ 	targets {
    		ip = "22.231.2.3"
    		port = "8081"
-   		weight = "124"
+   		weight = "123"
+   		health_check {
+     		check = true
+     		check_interval = 1000
+     		maintenance = false
+   		}
+ 	}
+ 	targets {
+   		ip = "22.231.2.4"
+   		port = "8081"
+   		weight = "123"
+   		health_check {
+     		check = true
+     		check_interval = 1000
+     		maintenance = false
+   		}
+ 	}
+ 	targets {
+   		ip = "22.231.2.5"
+   		port = "8081"
+   		weight = "123"
    		health_check {
      		check = true
      		check_interval = 1010

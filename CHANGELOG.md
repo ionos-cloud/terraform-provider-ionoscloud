@@ -12,6 +12,7 @@
 
 ### Fixes: 
 - fix on creating a DBaaS Cluster without specifying the maintenance window
+- solve #204 - targets in nlb forwarding rule(switched to Set instead of List), lb_private_ips(set to computed), features in datacenter resources(switched to Set instead of List)
 
 ## 6.1.3
 
