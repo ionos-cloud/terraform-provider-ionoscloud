@@ -52,6 +52,7 @@ func resourceNetworkLoadBalancer() *schema.Resource {
 					"must contain valid subnet mask. If user will not provide any IP then the system will " +
 					"generate one IP with /24 subnet.",
 				Optional: true,
+				Computed: true,
 				Elem: &schema.Schema{
 					Type: schema.TypeString,
 				},

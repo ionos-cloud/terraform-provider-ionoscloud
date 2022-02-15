@@ -87,7 +87,7 @@ func resourceNetworkLoadBalancerForwardingRule() *schema.Resource {
 				},
 			},
 			"targets": {
-				Type:        schema.TypeList,
+				Type:        schema.TypeSet,
 				Description: "Array of items in that collection",
 				Required:    true,
 				Elem: &schema.Resource{
@@ -228,72 +228,13 @@ func resourceNetworkLoadBalancerForwardingRuleCreate(ctx context.Context, d *sch
 	}
 
 	if targetsVal, targetsOk := d.GetOk("targets"); targetsOk {
-		if targetsVal.([]interface{}) != nil {
-			updateTargets := false
-
-			var targets []ionoscloud.NetworkLoadBalancerForwardingRuleTarget
-
-			for targetIndex := range targetsVal.([]interface{}) {
-				target := ionoscloud.NetworkLoadBalancerForwardingRuleTarget{}
-				addTarget := false
-				if ip, ipOk := d.GetOk(fmt.Sprintf("targets.%d.ip", targetIndex)); ipOk {
-					ip := ip.(string)
-					target.Ip = &ip
-					addTarget = true
-				} else {
-					diags := diag.FromErr(fmt.Errorf("ip must be provided for network loadbalancer forwarding rule target"))
-					return diags
-				}
-
-				if port, portOk := d.GetOk(fmt.Sprintf("targets.%d.port", targetIndex)); portOk {
-					port := int32(port.(int))
-					target.Port = &port
-				} else {
-					diags := diag.FromErr(fmt.Errorf("port must be provided for network loadbalancer forwarding rule target"))
-					return diags
-				}
-
-				if weight, weightOk := d.GetOk(fmt.Sprintf("targets.%d.weight", targetIndex)); weightOk {
-					weight := int32(weight.(int))
-					target.Weight = &weight
-				} else {
-					diags := diag.FromErr(fmt.Errorf("weight must be provided for network loadbalancer forwarding rule target"))
-					return diags
-				}
-
-				if _, healthCheckOk := d.GetOk(fmt.Sprintf("targets.%d.health_check.0", targetIndex)); healthCheckOk {
-					target.HealthCheck = &ionoscloud.NetworkLoadBalancerForwardingRuleTargetHealthCheck{}
-
-					if check, checkOk := d.GetOk(fmt.Sprintf("targets.%d.health_check.0.check", targetIndex)); checkOk {
-						check := check.(bool)
-						target.HealthCheck.Check = &check
-					}
-
-					if checkInterval, checkIntervalOk := d.GetOk(fmt.Sprintf("targets.%d.health_check.0.check_interval", targetIndex)); checkIntervalOk {
-						checkInterval := int32(checkInterval.(int))
-						target.HealthCheck.CheckInterval = &checkInterval
-					}
-					if maintenance, maintenanceOk := d.GetOk(fmt.Sprintf("targets.%d.health_check.0.maintenance", targetIndex)); maintenanceOk {
-						maintenance := maintenance.(bool)
-						target.HealthCheck.Maintenance = &maintenance
-					}
-
-				}
-
-				if addTarget {
-					targets = append(targets, target)
-				}
-
-			}
-
-			if len(targets) > 0 {
-				updateTargets = true
-			}
-
-			if updateTargets == true {
-				log.Printf("[INFO] Network load balancer forwarding rule targets set to %+v", targets)
-				networkLoadBalancerForwardingRule.Properties.Targets = &targets
-			}
+		targets, diags := getTargetsData(targetsVal)
+		if diags != nil {
+			return diags
+		}
+		if len(targets) > 0 {
+			log.Printf("[INFO] Network load balancer forwarding rule targets set to %+v", targets)
+			networkLoadBalancerForwardingRule.Properties.Targets = &targets
 		}
 	}
 
@@ -325,6 +266,70 @@ func resourceNetworkLoadBalancerForwardingRuleCreate(ctx context.Context, d *sch
 	return resourceNetworkLoadBalancerForwardingRuleRead(ctx, d, meta)
 }
 
+func getTargetsData(targets interface{}) ([]ionoscloud.NetworkLoadBalancerForwardingRuleTarget, diag.Diagnostics) {
+	if targets.(*schema.Set) != nil {
+		targetsList := targets.(*schema.Set).List()
+		var targets []ionoscloud.NetworkLoadBalancerForwardingRuleTarget
+		target := ionoscloud.NetworkLoadBalancerForwardingRuleTarget{}
+		for _, targetItem := range targetsList {
+			targetMap := targetItem.(map[string]interface{})
+
+			addTarget := false
+			if ip, ipOk := targetMap["ip"].(string); ipOk {
+				target.Ip = &ip
+				addTarget = true
+			} else {
+				diags := diag.FromErr(fmt.Errorf("ip must be provided for network loadbalancer forwarding rule target"))
+				return nil, diags
+			}
+
+			if port, portOk := targetMap["port"].(int); portOk {
+				port := int32(port)
+				target.Port = &port
+			} else {
+				diags := diag.FromErr(fmt.Errorf("port must be provided for network loadbalancer forwarding rule target"))
+				return nil, diags
+			}
+
+			if weight, weightOk := targetMap["weight"].(int); weightOk {
+				weight := int32(weight)
+				target.Weight = &weight
+			} else {
+				diags := diag.FromErr(fmt.Errorf("weight must be provided for network loadbalancer forwarding rule target"))
+				return nil, diags
+
+			}
+			//if lanRoutes, lanRoutesOk := lanContent["routes"].(*schema.Set); lanRoutesOk {
+			if healthCheck, healthCheckOk := targetMap["health_check"].([]interface{}); healthCheckOk {
+				healthCheckMap := healthCheck[0].(map[string]interface{})
+				target.HealthCheck = &ionoscloud.NetworkLoadBalancerForwardingRuleTargetHealthCheck{}
+
+				if check, checkOk := healthCheckMap["check"].(bool); checkOk {
+					target.HealthCheck.Check = &check
+				}
+
+				if checkInterval, checkIntervalOk := healthCheckMap["check_interval"].(int); checkIntervalOk {
+					checkInterval := int32(checkInterval)
+					target.HealthCheck.CheckInterval = &checkInterval
+				}
+				if maintenance, maintenanceOk := healthCheckMap["maintenance"].(bool); maintenanceOk {
+					target.HealthCheck.Maintenance = &maintenance
+				}
+
+			}
+
+			if addTarget {
+				targets = append(targets, target)
+			}
+
+		}
+		return targets, nil
+
+	} else {
+		return nil, diag.FromErr(fmt.Errorf("expected required set for targets field : %+v", targets))
+	}
+}
+
 func resourceNetworkLoadBalancerForwardingRuleRead(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 
 	client := meta.(SdkBundle).CloudApiClient
@@ -344,7 +349,7 @@ func resourceNetworkLoadBalancerForwardingRuleRead(ctx context.Context, d *schem
 		}
 	}
 
-	log.Printf("[INFO] Successfully retreived network load balancer forwarding rule %s: %+v", d.Id(), networkLoadBalancerForwardingRule)
+	log.Printf("[INFO] Successfully retrieved network load balancer forwarding rule %s: %+v", d.Id(), networkLoadBalancerForwardingRule)
 
 	if err := setNetworkLoadBalancerForwardingRuleData(d, &networkLoadBalancerForwardingRule); err != nil {
 		return diag.FromErr(err)
@@ -437,51 +442,12 @@ func resourceNetworkLoadBalancerForwardingRuleUpdate(ctx context.Context, d *sch
 
 	if d.HasChange("targets") {
 		oldTargets, newTargets := d.GetChange("targets")
-		if newTargets.([]interface{}) != nil {
-			var targets []ionoscloud.NetworkLoadBalancerForwardingRuleTarget
-
-			for targetIndex := range newTargets.([]interface{}) {
-				target := ionoscloud.NetworkLoadBalancerForwardingRuleTarget{}
-
-				if ip, ipOk := d.GetOk(fmt.Sprintf("targets.%d.ip", targetIndex)); ipOk {
-					ip := ip.(string)
-					target.Ip = &ip
-				}
-
-				if port, portOk := d.GetOk(fmt.Sprintf("targets.%d.port", targetIndex)); portOk {
-					port := int32(port.(int))
-					target.Port = &port
-				}
-
-				if weight, weightOk := d.GetOk(fmt.Sprintf("targets.%d.weight", targetIndex)); weightOk {
-					weight := int32(weight.(int))
-					target.Weight = &weight
-				}
-
-				if _, healthCheckOk := d.GetOk(fmt.Sprintf("targets.%d.health_check.0", targetIndex)); healthCheckOk {
-					target.HealthCheck = &ionoscloud.NetworkLoadBalancerForwardingRuleTargetHealthCheck{}
-
-					if check, checkOk := d.GetOk(fmt.Sprintf("targets.%d.health_check.0.check", targetIndex)); checkOk {
-						check := check.(bool)
-						target.HealthCheck.Check = &check
-					}
-
-					if checkInterval, checkIntervalOk := d.GetOk(fmt.Sprintf("targets.%d.health_check.0.check_interval", targetIndex)); checkIntervalOk {
-						checkInterval := int32(checkInterval.(int))
-						target.HealthCheck.CheckInterval = &checkInterval
-					}
-
-					if maintenance, maintenanceOk := d.GetOk(fmt.Sprintf("targets.%d.health_check.0.maintenance", targetIndex)); maintenanceOk {
-						maintenance := maintenance.(bool)
-						target.HealthCheck.Maintenance = &maintenance
-					}
-				}
-
-				targets = append(targets, target)
-			}
-			log.Printf("[INFO] Network load balancer forwarding rule targets changed from %+v to %+v", oldTargets, newTargets)
-			request.Properties.Targets = &targets
+		targets, diags := getTargetsData(newTargets)
+		if diags != nil {
+			return diags
 		}
+		log.Printf("[INFO] Network load balancer forwarding rule targets changed from %+v to %+v", oldTargets, newTargets)
+		request.Properties.Targets = &targets
 	}
 	_, apiResponse, err := client.NetworkLoadBalancersApi.DatacentersNetworkloadbalancersForwardingrulesPatch(ctx, dcId, nlbID, d.Id()).NetworkLoadBalancerForwardingRuleProperties(*request.Properties).Execute()
 	logApiRequestTime(apiResponse)

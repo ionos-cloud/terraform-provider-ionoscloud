@@ -35,7 +35,7 @@ func dataSourceDataCenter() *schema.Resource {
 				Computed: true,
 			},
 			"features": {
-				Type:     schema.TypeList,
+				Type:     schema.TypeSet,
 				Computed: true,
 				Elem: &schema.Schema{
 					Type: schema.TypeString,
