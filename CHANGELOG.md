@@ -9,6 +9,7 @@
 
 ### Documentations: 
 - a more accurate example on how can the cidr be set automatically on a DBaaS Cluster
+- update doc of how to dump kube_config into a file in yaml format.
 
 ### Fixes: 
 - fix on creating a DBaaS Cluster without specifying the maintenance window
