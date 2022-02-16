@@ -5,7 +5,7 @@
 - improved tests duration by moving steps from data_source test files in the corresponding resource test files 
 - added workflow to run tests from GitHub actions 
 - split tests with build tags
-- update http client with better values
+- improve http client performance and timeouts
 
 ### Documentations: 
 - a more accurate example on how can the cidr be set automatically on a DBaaS Cluster
@@ -13,6 +13,8 @@
 ### Fixes: 
 - fix on creating a DBaaS Cluster without specifying the maintenance window
 - solve #204 - targets in nlb forwarding rule(switched to Set instead of List), lb_private_ips(set to computed), features in datacenter resources(switched to Set instead of List)
+- fix of plugin crash when updating k8s_node_pool node_count
+- fix of diff when creating a k8s_node_pool without maintenance_window
 
 ## 6.1.3
 

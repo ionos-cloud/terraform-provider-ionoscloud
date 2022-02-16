@@ -34,7 +34,7 @@ func resourceK8sNodePool() *schema.Resource {
 			"k8s_version": {
 				Type:        schema.TypeString,
 				Description: "The desired kubernetes version",
-				Optional:    true,
+				Required:    true,
 				DiffSuppressFunc: func(k, old, new string, d *schema.ResourceData) bool {
 					var oldMajor, oldMinor string
 					if old != "" {
@@ -61,14 +61,16 @@ func resourceK8sNodePool() *schema.Resource {
 				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{
 						"min_node_count": {
-							Type:        schema.TypeInt,
-							Description: "The minimum number of worker nodes the node pool can scale down to. Should be less than max_node_count",
-							Required:    true,
+							Type:         schema.TypeInt,
+							Description:  "The minimum number of worker nodes the node pool can scale down to. Should be less than max_node_count",
+							Required:     true,
+							ValidateFunc: validation.All(validation.IntAtLeast(1)),
 						},
 						"max_node_count": {
-							Type:        schema.TypeInt,
-							Description: "The maximum number of worker nodes that the node pool can scale to. Should be greater than min_node_count",
-							Required:    true,
+							Type:         schema.TypeInt,
+							Description:  "The maximum number of worker nodes that the node pool can scale to. Should be greater than min_node_count",
+							Required:     true,
+							ValidateFunc: validation.All(validation.IntAtLeast(1)),
 						},
 					},
 				},
@@ -118,6 +120,7 @@ func resourceK8sNodePool() *schema.Resource {
 				Type:        schema.TypeList,
 				Description: "A maintenance window comprise of a day of the week and a time for maintenance to be allowed",
 				Optional:    true,
+				Computed:    true,
 				MaxItems:    1,
 				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{
@@ -557,25 +560,47 @@ func resourcek8sNodePoolUpdate(ctx context.Context, d *schema.ResourceData, meta
 	request := ionoscloud.KubernetesNodePoolForPut{}
 
 	nodeCount := int32(d.Get("node_count").(int))
+
 	request.Properties = &ionoscloud.KubernetesNodePoolPropertiesForPut{
 		NodeCount: &nodeCount,
 	}
 
+	if d.HasChange("node_count") {
+		oldNc, newNc := d.GetChange("node_count")
+		log.Printf("[INFO] k8s node pool node_count changed from %+v to %+v", oldNc, newNc)
+	}
+
+	k8sVersion := d.Get("k8s_version").(string)
+	request.Properties.K8sVersion = &k8sVersion
 	if d.HasChange("k8s_version") {
 		oldk8sVersion, newk8sVersion := d.GetChange("k8s_version")
 		log.Printf("[INFO] k8s pool k8s version changed from %+v to %+v", oldk8sVersion, newk8sVersion)
-		if newk8sVersion != nil {
-			newk8sVersion := newk8sVersion.(string)
-			request.Properties.K8sVersion = &newk8sVersion
-		}
 	}
 
-	if d.HasChange("auto_scaling.0") {
+	if _, autoScalingOk := d.GetOk("auto_scaling.0"); autoScalingOk {
 		_, newAs := d.GetChange("auto_scaling.0")
 		if newAs.(map[string]interface{}) != nil {
-			updateAutoscaling := false
 			minNodeCount := int32(d.Get("auto_scaling.0.min_node_count").(int))
 			maxNodeCount := int32(d.Get("auto_scaling.0.max_node_count").(int))
+
+			if minNodeCount > maxNodeCount {
+				d.SetId("")
+				diags := diag.FromErr(fmt.Errorf("error updating k8s node pool: max_node_count cannot be lower than min_node_count"))
+				return diags
+			}
+
+			if nodeCount < minNodeCount {
+				d.SetId("")
+				diags := diag.FromErr(fmt.Errorf("error updating k8s node pool: node_count cannot be lower than min_node_count"))
+				return diags
+			}
+
+			if nodeCount > maxNodeCount {
+				d.SetId("")
+				diags := diag.FromErr(fmt.Errorf("error updating k8s node pool: node_count cannot be greater than max_node_count"))
+				return diags
+			}
+
 			autoScaling := &ionoscloud.KubernetesAutoScaling{
 				MinNodeCount: &minNodeCount,
 				MaxNodeCount: &maxNodeCount,
@@ -583,57 +608,16 @@ func resourcek8sNodePoolUpdate(ctx context.Context, d *schema.ResourceData, meta
 
 			if d.HasChange("auto_scaling.0.min_node_count") {
 				oldMinNodes, newMinNodes := d.GetChange("auto_scaling.0.min_node_count")
-				if newMinNodes != 0 {
-					log.Printf("[INFO] k8s node pool autoscaling min # of nodes changed from %+v to %+v", oldMinNodes, newMinNodes)
-					updateAutoscaling = true
-					newMinNodes := int32(newMinNodes.(int))
-					autoScaling.MinNodeCount = &newMinNodes
-				}
+				log.Printf("[INFO] k8s node pool autoscaling min # of nodes changed from %+v to %+v", oldMinNodes, newMinNodes)
 			}
 
 			if d.HasChange("auto_scaling.0.max_node_count") {
 				oldMaxNodes, newMaxNodes := d.GetChange("auto_scaling.0.max_node_count")
-				if newMaxNodes != 0 {
-					log.Printf("[INFO] k8s node pool autoscaling max # of nodes changed from %+v to %+v", oldMaxNodes, newMaxNodes)
-					updateAutoscaling = true
-					newMaxNodes := int32(newMaxNodes.(int))
-					autoScaling.MaxNodeCount = &newMaxNodes
-				}
+				log.Printf("[INFO] k8s node pool autoscaling max # of nodes changed from %+v to %+v", oldMaxNodes, newMaxNodes)
 			}
 
-			if *autoScaling.MaxNodeCount < *autoScaling.MinNodeCount {
-				d.SetId("")
-				diags := diag.FromErr(fmt.Errorf("error updating k8s node pool: max_node_count cannot be lower than min_node_count"))
-				return diags
-			}
-
-			if updateAutoscaling == true {
-				request.Properties.AutoScaling = autoScaling
-			}
+			request.Properties.AutoScaling = autoScaling
 		}
-	}
-
-	if d.HasChange("node_count") {
-		oldNc, newNc := d.GetChange("node_count")
-		nodeCount := int32(newNc.(int))
-
-		if d.Get("auto_scaling.0").(map[string]interface{}) != nil && (d.Get("auto_scaling.0.min_node_count").(int) != 0 || d.Get("auto_scaling.0.max_node_count").(int) != 0) {
-
-			if nodeCount < *request.Properties.AutoScaling.MinNodeCount {
-				d.SetId("")
-				diags := diag.FromErr(fmt.Errorf("error updating k8s node pool: node_count cannot be lower than min_node_count"))
-				return diags
-			}
-
-			if nodeCount > *request.Properties.AutoScaling.MaxNodeCount {
-				d.SetId("")
-				diags := diag.FromErr(fmt.Errorf("error updating k8s node pool: node_count cannot be greater than max_node_count"))
-				return diags
-			}
-		}
-
-		log.Printf("[INFO] k8s node pool node_count changed from %+v to %+v", oldNc, newNc)
-		request.Properties.NodeCount = &nodeCount
 	}
 
 	if d.HasChange("lans") {
