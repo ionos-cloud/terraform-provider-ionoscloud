@@ -1,3 +1,9 @@
+## 5.2.28 (upcoming release)
+
+### Fixes:
+- fix of plugin crash when updating k8s_node_pool node_count
+- fix of diff when creating a k8s_node_pool without maintenance_window
+
 ## 5.2.27
 
 ### Enhancements:
