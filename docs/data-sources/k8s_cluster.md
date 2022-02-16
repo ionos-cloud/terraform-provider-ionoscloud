@@ -130,14 +130,16 @@ provider "kubernetes" {
 
 **NOTE**: Dumping `kube_config` data into files poses a security risk.
 
+**NOTE**: Using `sensitive_content` for `local_file` does not show the data written to the file during the plan phase.
+
 ```
 data "ionoscloud_k8s_cluster" "k8s_cluster_example" {
   name     = "k8s-demo"
 }
 
 resource "local_file" "kubeconfig" {
-    content     = yamlencode(jsondecode(data.ionoscloud_k8s_cluster.k8s_cluster_example.kube_config))
-    filename = "kubeconfig.yaml"
+    sensitive_content     = yamlencode(jsondecode(data.ionoscloud_k8s_cluster.k8s_cluster_example.kube_config))
+    filename              = "kubeconfig.yaml"
 }
 
 ```
