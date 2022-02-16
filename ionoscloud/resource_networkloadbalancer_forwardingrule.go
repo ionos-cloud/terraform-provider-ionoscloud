@@ -299,23 +299,23 @@ func getTargetsData(targets interface{}) ([]ionoscloud.NetworkLoadBalancerForwar
 				return nil, diags
 
 			}
-			//if lanRoutes, lanRoutesOk := lanContent["routes"].(*schema.Set); lanRoutesOk {
 			if healthCheck, healthCheckOk := targetMap["health_check"].([]interface{}); healthCheckOk {
-				healthCheckMap := healthCheck[0].(map[string]interface{})
-				target.HealthCheck = &ionoscloud.NetworkLoadBalancerForwardingRuleTargetHealthCheck{}
+				if len(healthCheck) > 0 {
+					healthCheckMap := healthCheck[0].(map[string]interface{})
+					target.HealthCheck = &ionoscloud.NetworkLoadBalancerForwardingRuleTargetHealthCheck{}
 
-				if check, checkOk := healthCheckMap["check"].(bool); checkOk {
-					target.HealthCheck.Check = &check
-				}
+					if check, checkOk := healthCheckMap["check"].(bool); checkOk {
+						target.HealthCheck.Check = &check
+					}
 
-				if checkInterval, checkIntervalOk := healthCheckMap["check_interval"].(int); checkIntervalOk {
-					checkInterval := int32(checkInterval)
-					target.HealthCheck.CheckInterval = &checkInterval
+					if checkInterval, checkIntervalOk := healthCheckMap["check_interval"].(int); checkIntervalOk {
+						checkInterval := int32(checkInterval)
+						target.HealthCheck.CheckInterval = &checkInterval
+					}
+					if maintenance, maintenanceOk := healthCheckMap["maintenance"].(bool); maintenanceOk {
+						target.HealthCheck.Maintenance = &maintenance
+					}
 				}
-				if maintenance, maintenanceOk := healthCheckMap["maintenance"].(bool); maintenanceOk {
-					target.HealthCheck.Maintenance = &maintenance
-				}
-
 			}
 
 			if addTarget {
