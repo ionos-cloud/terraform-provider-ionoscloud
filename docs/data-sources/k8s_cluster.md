@@ -135,9 +135,9 @@ data "ionoscloud_k8s_cluster" "k8s_cluster_example" {
   name     = "k8s-demo"
 }
 
-resource "null_resource" "getcfg" {
-  provisioner "local-exec" {
-    command = "echo \"${yamlencode(data.ionoscloud_k8s_cluster.k8s_cluster_example.kube_config)}\" > kubecfg.yaml"
-  }
+resource "local_file" "kubeconfig" {
+    content     = yamlencode(jsondecode(data.ionoscloud_k8s_cluster.k8s_cluster_example.kube_config))
+    filename = "kubeconfig.yaml"
 }
+
 ```
