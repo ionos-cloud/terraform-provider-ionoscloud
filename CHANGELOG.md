@@ -1,4 +1,4 @@
-## 6.1.4 (upcoming release)
+## 6.1.4
 
 ### Enhancements:
 - improved lookup in data_sources by using filters
