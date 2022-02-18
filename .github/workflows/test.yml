@@ -1,9 +1,0 @@
-name: 'test'
-description: 'Dummy GitHub Action'
-on:
-  workflow_dispatch:
-
-jobs:
-  DummyJob:
-    steps:
-      - name: DummyStep
