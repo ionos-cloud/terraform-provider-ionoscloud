@@ -1,7 +1,7 @@
 # Table of contents
 
 * [Terraform provider](README.md)
-* [Changelog](changelog.md)
+* [Changelog](../CHANGELOG.md)
 
 ## Terraform Registry
 
