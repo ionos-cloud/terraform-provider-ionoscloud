@@ -1,3 +1,8 @@
+## 6.1.5 (upcoming release)
+
+### Documentation:
+- updated gitbook documentation with `legal` subheading
+
 ## 6.1.4
 
 ### Enhancements:
