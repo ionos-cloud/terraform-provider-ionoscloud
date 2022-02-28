@@ -50,4 +50,4 @@ Resource Group can be imported using the `resource id`, e.g.
 terraform import ionoscloud_group.mygroup {group uuid}
 ```
 
-> :warning: **If you are upgrading to v6.1.5**: You have to modify you plan for user_ids to match the new structure, by renaming the field old field, **user_id**, to user_ids and put the old value into an array.
+> :warning: **If you are upgrading to v6.1.5**: You have to modify you plan for user_ids to match the new structure, by renaming the field old field, **user_id**, to user_ids and put the old value into an array. This is not backwards compatible.
