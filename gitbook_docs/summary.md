@@ -1,6 +1,6 @@
 # Table of contents
 
-* [Introduction](README.md)
+* [Introduction](../README.md)
 * [Changelog](../CHANGELOG.md)
 
 ## Terraform Registry
