@@ -41,5 +41,4 @@ The following attributes are returned by the datasource:
 * `create_backup_unit` - The group will be allowed to create backup unit privilege.
 * `create_internet_access` - The group will be allowed to create internet access privilege.
 * `create_k8s_cluster` - The group will be allowed to create kubernetes cluster privilege.
-* `user_id` - The ID of the specific user to add to the group.
 * `users` - List of users in group.

@@ -39,7 +39,7 @@ resource "ionoscloud_group" "group" {
 * `create_flow_log` - (Optional) [Boolean]  The group will be allowed to create flow log.
 * `access_and_manage_monitoring` - (Optional) [Boolean]  The group will be allowed to access and manage monitoring.
 * `access_and_manage_certificates` - (Optional) [Boolean]  The group will be allowed to access and manage certificates.
-* `user_id` - (Optional) [string] The ID of the specific user to add to the group.
+* `user_ids` - (Optional) [list] A list of users to add to the group.
 * `users` - (Computed) List of users - See the user section
 
 ## Import
@@ -49,3 +49,5 @@ Resource Group can be imported using the `resource id`, e.g.
 ```shell
 terraform import ionoscloud_group.mygroup {group uuid}
 ```
+
+> :warning: **If you are upgrading to v6.1.5**: You have to modify you plan for user_ids to match the new structure, by renaming the field old field, **user_id**, to user_ids and put the old value into an array.

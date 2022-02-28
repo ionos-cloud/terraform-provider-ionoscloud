@@ -117,8 +117,42 @@ func resourceGroup() *schema.Resource {
 				},
 			},
 		},
+		Timeouts:      &resourceDefaultTimeouts,
+		SchemaVersion: 1,
+		StateUpgraders: []schema.StateUpgrader{
+			{
+				Type:    resourceGroup0().CoreConfigSchema().ImpliedType(),
+				Upgrade: resourceGroupUpgradeV0,
+				Version: 0,
+			},
+		},
+	}
+}
+
+func resourceGroup0() *schema.Resource {
+	return &schema.Resource{
+		Schema: map[string]*schema.Schema{
+			"user_id": {
+				Type:     schema.TypeString,
+				Optional: true,
+			},
+		},
 		Timeouts: &resourceDefaultTimeouts,
 	}
+}
+
+func resourceGroupUpgradeV0(_ context.Context, state map[string]interface{}, _ interface{}) (map[string]interface{}, error) {
+	oldState := state
+	var oldData string
+	if d, ok := oldState["user_id"].(string); ok {
+		oldData = d
+	}
+
+	var users []string
+	users = append(users, oldData)
+	state["user_ids"] = users
+
+	return state, nil
 }
 
 func resourceGroupCreate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
@@ -128,7 +162,6 @@ func resourceGroupCreate(ctx context.Context, d *schema.ResourceData, meta inter
 		Properties: &ionoscloud.GroupProperties{},
 	}
 
-	log.Printf("[DEBUG] NAME %s", d.Get("name"))
 	groupName := d.Get("name").(string)
 	if d.Get("name") != nil {
 		request.Properties.Name = &groupName
@@ -276,21 +309,23 @@ func resourceGroupUpdate(ctx context.Context, d *schema.ResourceData, meta inter
 		newUsersList := convertSlice(newValues.(*schema.Set).List())
 
 		newUsers := diffSliceOneWay(newUsersList, oldUsersList)
-		log.Printf("[INFO] New users to add: %+v", newUsers)
 		deletedUsers := diffSliceOneWay(oldUsersList, newUsersList)
-		log.Printf("[INFO] New users to delete: %+v", deletedUsers)
-		log.Printf("[INFO] New users : %+v", newUsersList)
-		log.Printf("[INFO] Old users : %+v", oldUsersList)
 
-		for _, userID := range newUsers {
-			if err := addUserToGroup(userID, ctx, d, meta); err != nil {
-				return diag.FromErr(err)
+		if newUsers != nil && len(newUsers) > 0 {
+			log.Printf("[INFO] New users to add: %+v", newUsers)
+			for _, userID := range newUsers {
+				if err := addUserToGroup(userID, ctx, d, meta); err != nil {
+					return diag.FromErr(err)
+				}
 			}
 		}
 
-		for _, userID := range deletedUsers {
-			if err := deleteUserFromGroup(userID, ctx, d, meta); err != nil {
-				return diag.FromErr(err)
+		if deletedUsers != nil && len(deletedUsers) > 0 {
+			log.Printf("[INFO] Users to delete: %+v", deletedUsers)
+			for _, userID := range deletedUsers {
+				if err := deleteUserFromGroup(userID, ctx, d, meta); err != nil {
+					return diag.FromErr(err)
+				}
 			}
 		}
 	}
@@ -427,17 +462,13 @@ func setGroupData(ctx context.Context, client *ionoscloud.APIClient, d *schema.R
 			return fmt.Errorf("an error occured while ListGroupUsers %s %w", d.Id(), err)
 		}
 
-		fmt.Printf("I AM HERE ____________________________")
 		usersEntries := make([]interface{}, 0)
 		if users.Items != nil && len(*users.Items) > 0 {
 			usersEntries = make([]interface{}, len(*users.Items))
 			for userIndex, user := range *users.Items {
 				userEntry := make(map[string]interface{})
 
-				fmt.Printf("I AM THERE ____________________________")
-
 				if user.Id != nil {
-					fmt.Printf("I AM EVERYWHERE %s ____________________________", *user.Id)
 					userEntry["id"] = *user.Id
 				}
 

@@ -1,3 +1,8 @@
+## 6.1.5 (upcoming release)
+
+###Enhancement 
+- modified group_resource to accept multiple users. **Note: Modify you plan according to the documentation**
+
 ## 6.1.4
 
 ### Enhancements:

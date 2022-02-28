@@ -58,10 +58,6 @@ func dataSourceGroup() *schema.Resource {
 				Type:     schema.TypeBool,
 				Computed: true,
 			},
-			"user_id": {
-				Type:     schema.TypeString,
-				Computed: true,
-			},
 			"users": {
 				Type:     schema.TypeSet,
 				Computed: true,
