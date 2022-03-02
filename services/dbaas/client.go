@@ -34,7 +34,7 @@ func NewClientService(username, password, token, url string) ClientService {
 	if os.Getenv("IONOS_DEBUG") != "" {
 		newConfigDbaas.Debug = true
 	}
-	newConfigDbaas.MaxRetries = 6
+	newConfigDbaas.MaxRetries = 999
 	newConfigDbaas.MaxWaitTime = 2 * time.Second
 
 	newConfigDbaas.HTTPClient = &http.Client{Transport: createTransport()}

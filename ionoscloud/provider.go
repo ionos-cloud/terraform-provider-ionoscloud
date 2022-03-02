@@ -169,7 +169,7 @@ func providerConfigure(d *schema.ResourceData, terraformVersion string) (interfa
 	if os.Getenv("IONOS_DEBUG") != "" {
 		newConfig.Debug = true
 	}
-	newConfig.MaxRetries = 6
+	newConfig.MaxRetries = 999
 	newConfig.WaitTime = 4 * time.Second
 	newConfig.HTTPClient = &http.Client{Transport: createTransport()}
 
