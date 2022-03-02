@@ -5,7 +5,6 @@ import (
 	"net"
 	"net/http"
 	"os"
-	"runtime"
 	"time"
 )
 
@@ -35,6 +34,8 @@ func NewClientService(username, password, token, url string) ClientService {
 	if os.Getenv("IONOS_DEBUG") != "" {
 		newConfigDbaas.Debug = true
 	}
+	newConfigDbaas.MaxRetries = 6
+	newConfigDbaas.MaxWaitTime = 2 * time.Second
 
 	newConfigDbaas.HTTPClient = &http.Client{Transport: createTransport()}
 
@@ -64,11 +65,10 @@ func createTransport() *http.Transport {
 		Proxy:                 http.ProxyFromEnvironment,
 		DialContext:           dialer.DialContext,
 		DisableKeepAlives:     true,
-		ForceAttemptHTTP2:     true,
-		MaxIdleConns:          100,
-		IdleConnTimeout:       90 * time.Second,
+		IdleConnTimeout:       30 * time.Second,
 		TLSHandshakeTimeout:   15 * time.Second,
 		ExpectContinueTimeout: 1 * time.Second,
-		MaxIdleConnsPerHost:   runtime.GOMAXPROCS(0) + 1,
+		MaxIdleConnsPerHost:   3,
+		MaxConnsPerHost:       3,
 	}
 }
