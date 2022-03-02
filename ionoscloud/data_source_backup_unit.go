@@ -66,7 +66,7 @@ func dataSourceBackupUnitRead(ctx context.Context, d *schema.ResourceData, meta 
 		}
 	} else {
 		/* search by name */
-		backupUnits, apiResponse, err := client.BackupUnitsApi.BackupunitsGet(ctx).Depth(1).Filter("name", name.(string)).Execute()
+		backupUnits, apiResponse, err := client.BackupUnitsApi.BackupunitsGet(ctx).Depth(1).Filter("name", name.(string)).OrderBy("name").Execute()
 		logApiRequestTime(apiResponse)
 
 		if err != nil {
@@ -74,12 +74,17 @@ func dataSourceBackupUnitRead(ctx context.Context, d *schema.ResourceData, meta 
 		}
 
 		if backupUnits.Items != nil && len(*backupUnits.Items) > 0 {
-			backupUnit = (*backupUnits.Items)[len(*backupUnits.Items)-1]
-			log.Printf("[WARN] %v backup units found matching the search criteria. Getting the latest backup unit from the list %v", len(*backupUnits.Items), *backupUnit.Id)
-		} else {
-			return diag.FromErr(fmt.Errorf("no backup unit found with the specified name %s", name.(string)))
+			for _, backupUnitItem := range *backupUnits.Items {
+				if backupUnitItem.Properties != nil && backupUnitItem.Properties.Name != nil && *backupUnitItem.Properties.Name == name.(string) {
+					backupUnit = backupUnitItem
+					break
+				}
+			}
 		}
 
+		if backupUnit.Properties == nil {
+			return diag.FromErr(fmt.Errorf("no backup unit found with the specified name %s", name.(string)))
+		}
 	}
 
 	contractResources, apiResponse, cErr := client.ContractResourcesApi.ContractsGet(ctx).Execute()

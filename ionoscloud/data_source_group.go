@@ -7,7 +7,6 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	ionoscloud "github.com/ionos-cloud/sdk-go/v6"
-	"log"
 )
 
 func dataSourceGroup() *schema.Resource {
@@ -131,12 +130,17 @@ func dataSourceGroupRead(ctx context.Context, d *schema.ResourceData, meta inter
 		}
 
 		if groups.Items != nil && len(*groups.Items) > 0 {
-			group = (*groups.Items)[len(*groups.Items)-1]
-			log.Printf("[WARN] %v groups found matching the search criteria. Getting the latest group from the list %v", len(*groups.Items), *group.Id)
-		} else {
-			return diag.FromErr(fmt.Errorf("no group found with the specified name %s", name.(string)))
+			for _, groupItem := range *groups.Items {
+				if groupItem.Properties != nil && groupItem.Properties.Name != nil && *groupItem.Properties.Name == name.(string) {
+					group = groupItem
+					break
+				}
+			}
 		}
 
+		if group.Properties == nil {
+			return diag.FromErr(fmt.Errorf("no group found with the specified name %s", name.(string)))
+		}
 	}
 
 	if err = setGroupData(ctx, client, d, &group); err != nil {

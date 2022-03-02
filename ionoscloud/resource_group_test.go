@@ -208,6 +208,18 @@ data ` + GroupResource + ` ` + GroupDataSourceById + ` {
 `
 
 var testAccDataSourceGroupMatchName = testAccCheckGroupConfigBasic + `
+resource ` + GroupResource + ` ` + GroupTestResource + `similar {
+  name = "similar` + GroupTestResource + `"
+  create_datacenter = true
+  create_snapshot = true
+  reserve_ip = true
+  access_activity_log = true
+  create_pcc = true
+  s3_privilege = true
+  create_backup_unit = true
+  create_internet_access = true
+  create_k8s_cluster = true
+}
 data ` + GroupResource + ` ` + GroupDataSourceByName + ` {
   name			= "` + GroupTestResource + `"
 }

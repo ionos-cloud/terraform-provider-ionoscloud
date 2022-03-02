@@ -148,7 +148,7 @@ func testAccCheckDatacenterExists(n string, datacenter *ionoscloud.Datacenter) r
 			return fmt.Errorf("error occured while fetching DC: %s", rs.Primary.ID)
 		}
 		if *foundDC.Id != rs.Primary.ID {
-			return fmt.Errorf("Record not found")
+			return fmt.Errorf("record not found")
 		}
 		datacenter = &foundDC
 
@@ -170,6 +170,13 @@ data ` + DatacenterResource + ` ` + DatacenterDataSourceById + ` {
 }`
 
 const testAccDataSourceDatacenterMatchName = testAccCheckDatacenterConfigBasic + `
+resource ` + DatacenterResource + ` ` + DatacenterTestResource + `similar {
+	name       =  "similar` + UpdatedResources + `"
+	location = "us/las"
+	description = "Test Datacenter Description Updated"
+	sec_auth_protection = false
+}
+
 data ` + DatacenterResource + ` ` + DatacenterDataSourceByName + ` {
     name = ` + DatacenterResource + `.` + DatacenterTestResource + `.name
 }`

@@ -140,9 +140,31 @@ func dataSourceDataCenterRead(ctx context.Context, d *schema.ResourceData, meta 
 		}
 
 		if results.Items != nil && len(*results.Items) > 0 {
-			datacenter = (*results.Items)[len(*results.Items)-1]
-			log.Printf("[WARN] %v datacenters found matching the search criteria. Getting the latest datacenter from the list %v", len(*results.Items), *datacenter.Id)
-		} else {
+			var match bool
+			for _, result := range *results.Items {
+				match = true
+
+				if nameOk && result.Properties != nil && result.Properties.Name != nil {
+					if *result.Properties.Name != name {
+						match = false
+					}
+				}
+
+				if locationOk && result.Properties != nil && result.Properties.Location != nil {
+					if *result.Properties.Location != location {
+						match = false
+					}
+				}
+
+				if match {
+					datacenter = result
+					break
+				}
+			}
+
+		}
+
+		if datacenter.Properties == nil {
 			return diag.FromErr(fmt.Errorf("no datacenter found with the specified criteria: name %s, location %s", name, location))
 		}
 

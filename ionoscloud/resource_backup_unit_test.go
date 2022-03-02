@@ -162,6 +162,12 @@ data ` + BackupUnitResource + ` ` + BackupUnitDataSourceById + ` {
 `
 
 const testAccDataSourceBackupUnitMatchName = testAccCheckBackupUnitConfigBasic + `
+resource ` + BackupUnitResource + ` ` + BackupUnitTestResource + `similar {
+	name        = "similar` + BackupUnitTestResource + `"
+	password    = "DemoPassword1234$Updated"
+	email       = "example-updated@ionoscloud.com"
+}
+
 data ` + BackupUnitResource + ` ` + BackupUnitDataSourceByName + ` {
   name			= "` + BackupUnitTestResource + `"
 }

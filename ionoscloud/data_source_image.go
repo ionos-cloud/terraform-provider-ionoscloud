@@ -6,7 +6,6 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	ionoscloud "github.com/ionos-cloud/sdk-go/v6"
-	"log"
 )
 
 func dataSourceImage() *schema.Resource {
@@ -105,7 +104,7 @@ func dataSourceImage() *schema.Resource {
 func dataSourceImageRead(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	client := meta.(SdkBundle).CloudApiClient
 
-	name := d.Get("name").(string)
+	name, nameOk := d.GetOk("name")
 	imageType, imageTypeOk := d.GetOk("type")
 	location, locationOk := d.GetOk("location")
 	version, versionOk := d.GetOk("version")
@@ -119,10 +118,10 @@ func dataSourceImageRead(ctx context.Context, d *schema.ResourceData, meta inter
 	// if version value is present then concatenate name - version
 	// otherwise search by name or part of the name
 	if versionOk {
-		nameVer := fmt.Sprintf("%s-%s", name, version.(string))
+		nameVer := fmt.Sprintf("%s-%s", name.(string), version.(string))
 		request = request.Filter("name", nameVer)
 	} else {
-		request = request.Filter("name", name)
+		request = request.Filter("name", name.(string))
 	}
 
 	if imageTypeOk {
@@ -145,9 +144,46 @@ func dataSourceImageRead(ctx context.Context, d *schema.ResourceData, meta inter
 	}
 
 	if results.Items != nil && len(*results.Items) > 0 {
-		image = (*results.Items)[len(*results.Items)-1]
-		log.Printf("[WARN] %v images found matching the search criteria. Getting the latest image from the list %v", len(*results.Items), *image.Id)
-	} else {
+		var match bool
+		for _, result := range *results.Items {
+			match = true
+			if versionOk && nameOk && result.Properties != nil && result.Properties.Name != nil {
+				nameVer := fmt.Sprintf("%s-%s", name.(string), version.(string))
+				if *result.Properties.Name != nameVer {
+					match = false
+				}
+			} else if nameOk && result.Properties != nil && result.Properties.Name != nil {
+				if *result.Properties.Name != name.(string) {
+					match = false
+				}
+			}
+
+			if imageTypeOk && result.Properties != nil && result.Properties.ImageType != nil {
+				if *result.Properties.ImageType != imageType.(string) {
+					match = false
+				}
+			}
+
+			if locationOk && result.Properties != nil && result.Properties.Location != nil {
+				if *result.Properties.Location != location.(string) {
+					match = false
+				}
+			}
+
+			if cloudInitOk && result.Properties != nil && result.Properties.CloudInit != nil {
+				if *result.Properties.CloudInit != cloudInit.(string) {
+					match = false
+				}
+			}
+
+			if match {
+				image = result
+				break
+			}
+		}
+	}
+
+	if image.Properties == nil {
 		return diag.FromErr(fmt.Errorf("no image found with the specified criteria: name %s, imageType %s, location %s, cloudInit %s", name, imageType.(string), location.(string), cloudInit.(string)))
 	}
 
