@@ -35,7 +35,7 @@ func NewClientService(username, password, token, url string) ClientService {
 		newConfigDbaas.Debug = true
 	}
 	newConfigDbaas.MaxRetries = 999
-	newConfigDbaas.MaxWaitTime = 2 * time.Second
+	newConfigDbaas.MaxWaitTime = 4 * time.Second
 
 	newConfigDbaas.HTTPClient = &http.Client{Transport: createTransport()}
 
