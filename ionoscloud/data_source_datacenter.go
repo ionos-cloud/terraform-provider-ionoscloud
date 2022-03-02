@@ -125,11 +125,11 @@ func dataSourceDataCenterRead(ctx context.Context, d *schema.ResourceData, meta 
 
 		request := client.DataCentersApi.DatacentersGet(ctx).Depth(1)
 		if nameOk {
-			request = request.Filter("name", name)
+			request = request.Filter("name", name).OrderBy("name")
 		}
 
 		if locationOk {
-			request = request.Filter("location", location)
+			request = request.Filter("location", location).OrderBy("location")
 		}
 
 		results, apiResponse, err = request.Execute()

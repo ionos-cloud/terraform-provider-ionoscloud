@@ -119,21 +119,21 @@ func dataSourceImageRead(ctx context.Context, d *schema.ResourceData, meta inter
 	// otherwise search by name or part of the name
 	if versionOk {
 		nameVer := fmt.Sprintf("%s-%s", name.(string), version.(string))
-		request = request.Filter("name", nameVer)
+		request = request.Filter("name", nameVer).OrderBy("name")
 	} else {
-		request = request.Filter("name", name.(string))
+		request = request.Filter("name", name.(string)).OrderBy("name")
 	}
 
 	if imageTypeOk {
-		request = request.Filter("imageType", imageType.(string))
+		request = request.Filter("imageType", imageType.(string)).OrderBy("imageType")
 	}
 
 	if locationOk {
-		request = request.Filter("location", location.(string))
+		request = request.Filter("location", location.(string)).OrderBy("location")
 	}
 
 	if cloudInitOk {
-		request = request.Filter("cloudInit", cloudInit.(string))
+		request = request.Filter("cloudInit", cloudInit.(string)).OrderBy("cloudInit")
 	}
 
 	results, apiResponse, err := request.Execute()
