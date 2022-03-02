@@ -146,11 +146,10 @@ func resourceGroupUpgradeV0(_ context.Context, state map[string]interface{}, _ i
 	var oldData string
 	if d, ok := oldState["user_id"].(string); ok {
 		oldData = d
+		var users []string
+		users = append(users, oldData)
+		state["user_ids"] = users
 	}
-
-	var users []string
-	users = append(users, oldData)
-	state["user_ids"] = users
 
 	return state, nil
 }

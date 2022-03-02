@@ -172,7 +172,7 @@ func diffSlice(slice1 []string, slice2 []string) []string {
 	return diff
 }
 
-// difference returns the elements in `a` that aren't in `b`.
+// diffSliceOneWay returns the elements in `a` that aren't in `b`.
 func diffSliceOneWay(a, b []string) []string {
 	mb := make(map[string]struct{}, len(b))
 	for _, x := range b {
