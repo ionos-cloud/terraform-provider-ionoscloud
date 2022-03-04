@@ -106,25 +106,39 @@ func dataSourceFirewallRead(ctx context.Context, d *schema.ResourceData, meta in
 		}
 	} else {
 		/* search by name */
-		firewalls, apiResponse, err := client.FirewallRulesApi.DatacentersServersNicsFirewallrulesGet(ctx, datacenterId, serverId, nicId).Depth(1).Filter("name", name.(string)).OrderBy("name").Execute()
+		var firewalls ionoscloud.FirewallRules
+
+		firewalls, apiResponse, err := client.FirewallRulesApi.DatacentersServersNicsFirewallrulesGet(ctx, datacenterId, serverId, nicId).Depth(1).Execute()
 		logApiRequestTime(apiResponse)
 
 		if err != nil {
 			return diag.FromErr(fmt.Errorf("an error occurred while fetching backup unit: %s", err.Error()))
 		}
 
-		if firewalls.Items != nil && len(*firewalls.Items) > 0 {
-			for _, firewallItem := range *firewalls.Items {
-				if firewallItem.Properties != nil && firewallItem.Properties.Name != nil && *firewallItem.Properties.Name == name.(string) {
-					firewall = firewallItem
-					break
+		var results []ionoscloud.FirewallRule
+
+		if firewalls.Items != nil {
+			for _, fr := range *firewalls.Items {
+				tmpFirewall, apiResponse, err := client.FirewallRulesApi.DatacentersServersNicsFirewallrulesFindById(ctx, datacenterId, serverId, nicId, *fr.Id).Execute()
+				logApiRequestTime(apiResponse)
+				if err != nil {
+					return diag.FromErr(fmt.Errorf("an error occurred while fetching firewall rule with ID %s: %s", *fr.Id, err.Error()))
 				}
+				if tmpFirewall.Properties != nil && tmpFirewall.Properties.Name != nil && *tmpFirewall.Properties.Name == name.(string) {
+					results = append(results, fr)
+				}
+
 			}
 		}
 
-		if firewall.Properties == nil {
-			return diag.FromErr(fmt.Errorf("no firewall found with the specified name %s", name.(string)))
+		if results == nil || len(results) == 0 {
+			return diag.FromErr(fmt.Errorf("no firewall rule found with the specified name = %s", name))
+		} else if len(results) > 1 {
+			return diag.FromErr(fmt.Errorf("more than one firewall rule found with the specified criteria name = %s", name))
+		} else {
+			firewall = results[0]
 		}
+
 	}
 
 	if err := setFirewallData(d, &firewall); err != nil {

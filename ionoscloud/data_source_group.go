@@ -117,30 +117,45 @@ func dataSourceGroupRead(ctx context.Context, d *schema.ResourceData, meta inter
 		group, apiResponse, err = client.UserManagementApi.UmGroupsFindById(ctx, id.(string)).Execute()
 		logApiRequestTime(apiResponse)
 		if err != nil {
-			diags := diag.FromErr(fmt.Errorf("an error occurred while fetching group with ID %s: %w", id.(string), err))
+			diags := diag.FromErr(fmt.Errorf("an error occurred while fetching group with ID %s: %s", id.(string), err))
 			return diags
 		}
 	} else {
 		/* search by name */
-		groups, apiResponse, err := client.UserManagementApi.UmGroupsGet(ctx).Depth(1).Filter("name", name.(string)).OrderBy("name").Execute()
+		var groups ionoscloud.Groups
+
+		groups, apiResponse, err := client.UserManagementApi.UmGroupsGet(ctx).Depth(1).Execute()
 		logApiRequestTime(apiResponse)
 		if err != nil {
 			diags := diag.FromErr(fmt.Errorf("an error occurred while fetching groups: %w", err))
 			return diags
 		}
 
-		if groups.Items != nil && len(*groups.Items) > 0 {
-			for _, groupItem := range *groups.Items {
-				if groupItem.Properties != nil && groupItem.Properties.Name != nil && *groupItem.Properties.Name == name.(string) {
-					group = groupItem
-					break
+		var results []ionoscloud.Group
+
+		if groups.Items != nil {
+			for _, g := range *groups.Items {
+				if g.Properties != nil && g.Properties.Name != nil && *g.Properties.Name == name.(string) {
+					/* group found */
+					group, apiResponse, err = client.UserManagementApi.UmGroupsFindById(ctx, *g.Id).Execute()
+					logApiRequestTime(apiResponse)
+					if err != nil {
+						diags := diag.FromErr(fmt.Errorf("an error occurred while fetching group %s: %w", *g.Id, err))
+						return diags
+					}
+					results = append(results, g)
 				}
 			}
 		}
 
-		if group.Properties == nil {
-			return diag.FromErr(fmt.Errorf("no group found with the specified name %s", name.(string)))
+		if results == nil || len(results) == 0 {
+			return diag.FromErr(fmt.Errorf("no group found with the specified name = %s", name))
+		} else if len(results) > 1 {
+			return diag.FromErr(fmt.Errorf("more than one group found with the specified criteria name = %s", name))
+		} else {
+			group = results[0]
 		}
+
 	}
 
 	if err = setGroupData(ctx, client, d, &group); err != nil {

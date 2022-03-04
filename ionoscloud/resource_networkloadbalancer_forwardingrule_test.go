@@ -97,7 +97,7 @@ func TestAccNetworkLoadBalancerForwardingRuleBasic(t *testing.T) {
 				),
 			},
 			{
-				Config:      testAccDataSourceNetworkLoadBalancerForwardingRuleWrongName,
+				Config:      testAccDataSourceNetworkLoadBalancerForwardingRuleWrongNameError,
 				ExpectError: regexp.MustCompile(`no network load balancer forwarding rule found with the specified name`),
 			},
 			{
@@ -304,7 +304,7 @@ data ` + NetworkLoadBalancerForwardingRuleResource + ` ` + NetworkLoadBalancerFo
 }
 `
 
-const testAccDataSourceNetworkLoadBalancerForwardingRuleWrongName = testAccCheckNetworkLoadBalancerForwardingRuleConfigBasic + `
+const testAccDataSourceNetworkLoadBalancerForwardingRuleWrongNameError = testAccCheckNetworkLoadBalancerForwardingRuleConfigBasic + `
 data ` + NetworkLoadBalancerForwardingRuleResource + ` ` + NetworkLoadBalancerForwardingRuleDataSourceByName + ` {
   datacenter_id = ` + networkLoadBalancerForwardingRuleResource + `.datacenter_id
   networkloadbalancer_id  = ` + networkLoadBalancerForwardingRuleResource + `.networkloadbalancer_id

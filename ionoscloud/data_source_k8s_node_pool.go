@@ -8,7 +8,6 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 	ionoscloud "github.com/ionos-cloud/sdk-go/v6"
-	"log"
 )
 
 func dataSourceK8sNodePool() *schema.Resource {
@@ -216,19 +215,38 @@ func dataSourceK8sReadNodePool(ctx context.Context, d *schema.ResourceData, meta
 		}
 	} else {
 		/* search by name */
-		nodePools, apiResponse, err := client.KubernetesApi.K8sNodepoolsGet(ctx, clusterId.(string)).Depth(1).Filter("name", name.(string)).Execute()
+		var nodePools ionoscloud.KubernetesNodePools
+
+		nodePools, apiResponse, err := client.KubernetesApi.K8sNodepoolsGet(ctx, clusterId.(string)).Depth(1).Execute()
 		logApiRequestTime(apiResponse)
 		if err != nil {
 			return diag.FromErr(fmt.Errorf("an error occurred while fetching k8s nodepools: %s", err.Error()))
 		}
 
-		if nodePools.Items != nil && len(*nodePools.Items) > 0 {
-			nodePool = (*nodePools.Items)[len(*nodePools.Items)-1]
-			log.Printf("[WARN] %v node pools found matching the search criteria. Getting the latest node pool from the list %v", len(*nodePools.Items), *nodePool.Id)
-		} else {
-			return diag.FromErr(fmt.Errorf("no node pools found with the specified name %s", name.(string)))
-		}
+		if nodePools.Items != nil {
+			var results []ionoscloud.KubernetesNodePool
 
+			for _, c := range *nodePools.Items {
+				tmpNodePool, apiResponse, err := client.KubernetesApi.K8sNodepoolsFindById(ctx, clusterId.(string), *c.Id).Execute()
+				logApiRequestTime(apiResponse)
+				if err != nil {
+					return diag.FromErr(fmt.Errorf("an error occurred while fetching k8s nodePool with ID %s: %w", *c.Id, err))
+				}
+				if tmpNodePool.Properties != nil && tmpNodePool.Properties.Name != nil && *tmpNodePool.Properties.Name == name.(string) {
+					/* lan found */
+					results = append(results, tmpNodePool)
+					break
+				}
+			}
+
+			if results == nil || len(results) == 0 {
+				return diag.FromErr(fmt.Errorf("no nodepool found with the specified name %s", name.(string)))
+			} else if len(results) > 1 {
+				return diag.FromErr(fmt.Errorf("more than one nodepool found with the specified name %s", name.(string)))
+			} else {
+				nodePool = results[0]
+			}
+		}
 	}
 
 	if err = setK8sNodePoolData(d, &nodePool); err != nil {

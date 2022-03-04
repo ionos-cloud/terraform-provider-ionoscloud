@@ -81,8 +81,8 @@ func TestAccNatGatewayRuleBasic(t *testing.T) {
 				),
 			},
 			{
-				Config:      fmt.Sprintf(testAccDataSourceNatGatewayRuleWrongName, NatGatewayRuleTestResource),
-				ExpectError: regexp.MustCompile(`no nat gateway rule found with the specified name`),
+				Config:      fmt.Sprintf(testAccDataSourceNatGatewayRuleWrongNameError, NatGatewayRuleTestResource),
+				ExpectError: regexp.MustCompile(`no nat gateway found with the specified criteria: name`),
 			},
 		},
 	})
@@ -257,7 +257,7 @@ data ` + NatGatewayRuleResource + ` ` + NatGatewayRuleDataSourceByName + ` {
 }
 `
 
-const testAccDataSourceNatGatewayRuleWrongName = testAccCheckNatGatewayRuleConfigBasic + `
+const testAccDataSourceNatGatewayRuleWrongNameError = testAccCheckNatGatewayRuleConfigBasic + `
 data ` + NatGatewayRuleResource + ` ` + NatGatewayRuleDataSourceByName + ` {
   datacenter_id = ` + DatacenterResource + `.natgateway_rule_datacenter.id
   natgateway_id = ` + NatGatewayResource + `.natgateway.id

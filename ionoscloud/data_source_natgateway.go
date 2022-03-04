@@ -7,7 +7,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	ionoscloud "github.com/ionos-cloud/sdk-go/v6"
-	"log"
+	"strings"
 )
 
 func dataSourceNatGateway() *schema.Resource {
@@ -83,11 +83,6 @@ func dataSourceNatGatewayRead(ctx context.Context, d *schema.ResourceData, meta 
 	var natGateway ionoscloud.NatGateway
 	var err error
 	var apiResponse *ionoscloud.APIResponse
-	ctx, cancel := context.WithTimeout(context.Background(), *resourceDefaultTimeouts.Default)
-
-	if cancel != nil {
-		defer cancel()
-	}
 
 	if idOk {
 		/* search by ID */
@@ -98,17 +93,38 @@ func dataSourceNatGatewayRead(ctx context.Context, d *schema.ResourceData, meta 
 		}
 	} else {
 		/* search by name */
-		natGateways, apiResponse, err := client.NATGatewaysApi.DatacentersNatgatewaysGet(ctx, datacenterId.(string)).Depth(1).Filter("name", name.(string)).Execute()
+		var natGateways ionoscloud.NatGateways
+
+		natGateways, apiResponse, err := client.NATGatewaysApi.DatacentersNatgatewaysGet(ctx, datacenterId.(string)).Execute()
 		logApiRequestTime(apiResponse)
 		if err != nil {
-			return diag.FromErr(fmt.Errorf("an error occurred while fetching nat gateways: %s", err.Error()))
+			return diag.FromErr(fmt.Errorf("an error occurred while fetching nat gateway: %s", err.Error()))
 		}
 
-		if natGateways.Items != nil && len(*natGateways.Items) > 0 {
-			natGateway = (*natGateways.Items)[len(*natGateways.Items)-1]
-			log.Printf("[WARN] %v nat gateways found matching the search criteria. Getting the latest nat gateway from the list %v", len(*natGateways.Items), *natGateway.Id)
+		var results []ionoscloud.NatGateway
+		if natGateways.Items != nil {
+			for _, c := range *natGateways.Items {
+				tmpNatGateway, apiResponse, err := client.NATGatewaysApi.DatacentersNatgatewaysFindByNatGatewayId(ctx, datacenterId.(string), *c.Id).Execute()
+				logApiRequestTime(apiResponse)
+				if err != nil {
+					return diag.FromErr(fmt.Errorf("an error occurred while fetching nat gateway with ID %s: %s", *c.Id, err.Error()))
+				}
+				if tmpNatGateway.Properties.Name != nil {
+					if strings.Contains(*tmpNatGateway.Properties.Name, name.(string)) {
+						natGateway = tmpNatGateway
+						results = append(results, natGateway)
+					}
+				}
+
+			}
+		}
+
+		if results == nil || len(results) == 0 {
+			return diag.FromErr(fmt.Errorf("no nat gateway found with the specified criteria: name = %s", name.(string)))
+		} else if len(results) > 1 {
+			return diag.FromErr(fmt.Errorf("more than one nat gateway found with the specified criteria: name = %s", name.(string)))
 		} else {
-			return diag.FromErr(fmt.Errorf("no nat gateway found with the specified name %s", name.(string)))
+			natGateway = results[0]
 		}
 
 	}

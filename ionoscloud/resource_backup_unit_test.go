@@ -49,7 +49,7 @@ func TestAccBackupUnitBasic(t *testing.T) {
 				),
 			},
 			{
-				Config:      testAccDataSourceBackupUnitMatchWrongName,
+				Config:      testAccDataSourceBackupUnitMatchWrongNameError,
 				ExpectError: regexp.MustCompile("no backup unit found with the specified name"),
 			},
 			{
@@ -173,7 +173,7 @@ data ` + BackupUnitResource + ` ` + BackupUnitDataSourceByName + ` {
 }
 `
 
-const testAccDataSourceBackupUnitMatchWrongName = testAccCheckBackupUnitConfigBasic + `
+const testAccDataSourceBackupUnitMatchWrongNameError = testAccCheckBackupUnitConfigBasic + `
 data ` + BackupUnitResource + ` ` + BackupUnitDataSourceByName + ` {
   name			= "wrong_name"
 }

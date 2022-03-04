@@ -8,6 +8,7 @@ import (
 	"fmt"
 	ionoscloud "github.com/ionos-cloud/sdk-go/v6"
 	"log"
+	"regexp"
 	"testing"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
@@ -29,7 +30,7 @@ func TestAccK8sNodePoolBasic(t *testing.T) {
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckK8sNodePoolExists(ResourceNameK8sNodePool, &k8sNodepool),
 					resource.TestCheckResourceAttr(ResourceNameK8sNodePool, "name", K8sNodePoolTestResource),
-					resource.TestCheckResourceAttr(ResourceNameK8sNodePool, "k8s_version", "1.19.10"),
+					resource.TestCheckResourceAttr(ResourceNameK8sNodePool, "k8s_version", "1.20.10"),
 					resource.TestCheckResourceAttr(ResourceNameK8sNodePool, "maintenance_window.0.day_of_the_week", "Monday"),
 					resource.TestCheckResourceAttr(ResourceNameK8sNodePool, "maintenance_window.0.time", "09:00:00Z"),
 					resource.TestCheckResourceAttr(ResourceNameK8sNodePool, "auto_scaling.0.min_node_count", "1"),
@@ -104,11 +105,15 @@ func TestAccK8sNodePoolBasic(t *testing.T) {
 				),
 			},
 			{
+				Config:      testAccDataSourceDatacenterWrongNameError,
+				ExpectError: regexp.MustCompile("no nodepool found with the specified name"),
+			},
+			{
 				Config: testAccCheckK8sNodePoolConfigUpdate,
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckK8sNodePoolExists(ResourceNameK8sNodePool, &k8sNodepool),
 					resource.TestCheckResourceAttr(ResourceNameK8sNodePool, "name", K8sNodePoolTestResource),
-					resource.TestCheckResourceAttr(ResourceNameK8sNodePool, "k8s_version", "1.19.10"),
+					resource.TestCheckResourceAttr(ResourceNameK8sNodePool, "k8s_version", "1.20.10"),
 					resource.TestCheckResourceAttr(ResourceNameK8sNodePool, "maintenance_window.0.day_of_the_week", "Tuesday"),
 					resource.TestCheckResourceAttr(ResourceNameK8sNodePool, "maintenance_window.0.time", "10:00:00Z"),
 					resource.TestCheckResourceAttr(ResourceNameK8sNodePool, "auto_scaling.0.min_node_count", "1"),
@@ -146,7 +151,7 @@ func TestAccK8sNodePoolBasic(t *testing.T) {
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckK8sNodePoolExists(ResourceNameK8sNodePool, &k8sNodepool),
 					resource.TestCheckResourceAttr(ResourceNameK8sNodePool, "name", K8sNodePoolTestResource),
-					resource.TestCheckResourceAttr(ResourceNameK8sNodePool, "k8s_version", "1.20.10"),
+					resource.TestCheckResourceAttr(ResourceNameK8sNodePool, "k8s_version", "1.21.9"),
 					resource.TestCheckResourceAttr(ResourceNameK8sNodePool, "maintenance_window.0.day_of_the_week", "Tuesday"),
 					resource.TestCheckResourceAttr(ResourceNameK8sNodePool, "maintenance_window.0.time", "10:00:00Z"),
 					resource.TestCheckResourceAttr(ResourceNameK8sNodePool, "auto_scaling.0.min_node_count", "1"),
@@ -182,7 +187,7 @@ func TestAccK8sNodePoolGatewayIP(t *testing.T) {
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckK8sNodePoolExists(ResourceNameK8sNodePool, &k8sNodepool),
 					resource.TestCheckResourceAttr(ResourceNameK8sNodePool, "name", K8sNodePoolTestResource),
-					resource.TestCheckResourceAttr(ResourceNameK8sNodePool, "k8s_version", "1.19.10"),
+					resource.TestCheckResourceAttr(ResourceNameK8sNodePool, "k8s_version", "1.20.10"),
 					resource.TestCheckResourceAttr(ResourceNameK8sNodePool, "maintenance_window.0.day_of_the_week", "Monday"),
 					resource.TestCheckResourceAttr(ResourceNameK8sNodePool, "maintenance_window.0.time", "09:00:00Z"),
 					resource.TestCheckResourceAttr(ResourceNameK8sNodePool, "auto_scaling.0.min_node_count", "1"),
@@ -337,7 +342,7 @@ resource ` + IpBlockResource + ` "terraform_acctest" {
 }
 resource ` + K8sClusterResource + ` "terraform_acctest" {
   name        = "terraform_acctest"
-  k8s_version = "1.19.10"
+  k8s_version = "1.20.10"
   maintenance_window {
     day_of_the_week = "Monday"
     time            = "09:00:00Z"
@@ -405,7 +410,7 @@ resource ` + IpBlockResource + ` "terraform_acctest" {
 }
 resource ` + K8sClusterResource + ` "terraform_acctest" {
 	name        = "terraform_acctest"
-	k8s_version = "1.19.14"
+	k8s_version = "1.20.14"
 	maintenance_window {
 		day_of_the_week = "Monday"
 		time            = "09:00:00Z"
@@ -487,7 +492,7 @@ resource ` + IpBlockResource + ` "terraform_acctest" {
 }
 resource ` + K8sClusterResource + ` "terraform_acctest" {
 	name        = "terraform_acctest"
-    k8s_version = "1.20.10"
+    k8s_version = "1.21.9"
 	maintenance_window {
 		day_of_the_week = "Monday"
 		time            = "09:00:00Z"
@@ -535,7 +540,7 @@ resource ` + IpBlockResource + ` "terraform_acctest" {
 }
 resource ` + K8sClusterResource + ` "terraform_acctest" {
   name        = "terraform_acctest"
-  k8s_version = "1.19.10"
+  k8s_version = "1.20.10"
   maintenance_window {
     day_of_the_week = "Monday"
     time            = "09:00:00Z"
@@ -593,6 +598,13 @@ const testAccDataSourceProfitBricksK8sNodePoolMatchName = testAccCheckK8sNodePoo
 data ` + K8sNodePoolResource + ` ` + K8sNodePoolDataSourceByName + ` {
 	k8s_cluster_id 	= ` + K8sClusterResource + `.terraform_acctest.id
 	name			= ` + K8sNodePoolResource + `.` + K8sNodePoolTestResource + `.name
+}
+`
+
+const testAccDataSourceProfitBricksK8sNodePoolWrongNameError = testAccCheckK8sNodePoolConfigBasic + `
+data ` + K8sNodePoolResource + ` ` + K8sNodePoolDataSourceByName + ` {
+	k8s_cluster_id 	= ` + K8sClusterResource + `.terraform_acctest.id
+	name			= "wrong_name"
 }
 `
 

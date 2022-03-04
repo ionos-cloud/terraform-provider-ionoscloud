@@ -76,7 +76,7 @@ func TestAccVolumeBasic(t *testing.T) {
 					resource.TestCheckResourceAttrPair(DataSource+"."+VolumeResource+"."+VolumeDataSourceByName, "boot_server", ServerResource+"."+ServerTestResource, "id")),
 			},
 			{
-				Config:      testAccDataSourceVolumeWrongName,
+				Config:      testAccDataSourceVolumeWrongNameError,
 				ExpectError: regexp.MustCompile(`no volume found with the specified name`),
 			},
 			{
@@ -298,7 +298,7 @@ data ` + VolumeResource + ` ` + VolumeDataSourceByName + ` {
 }
 `
 
-var testAccDataSourceVolumeWrongName = testAccCheckVolumeConfigBasic + `
+var testAccDataSourceVolumeWrongNameError = testAccCheckVolumeConfigBasic + `
 data ` + VolumeResource + ` ` + VolumeDataSourceByName + ` {
   datacenter_id = ` + DatacenterResource + `.` + DatacenterTestResource + `.id
   name			= "wrong_name"

@@ -176,25 +176,31 @@ func dataSourceDbaasPgSqlReadCluster(ctx context.Context, d *schema.ResourceData
 			return diags
 		}
 	} else {
-		clusters, _, err := client.ListClusters(ctx, name.(string))
+		clusters, _, err := client.ListClusters(ctx, "")
 
 		if err != nil {
 			diags := diag.FromErr(fmt.Errorf("an error occurred while fetching dbaas clusters: %s", err.Error()))
 			return diags
 		}
 
+		var results []dbaas.ClusterResponse
+
 		if clusters.Items != nil && len(*clusters.Items) > 0 {
 			for _, clusterItem := range *clusters.Items {
 				if clusterItem.Properties != nil && clusterItem.Properties.DisplayName != nil && *clusterItem.Properties.DisplayName == name.(string) {
-					cluster = clusterItem
-					break
+					results = append(results, clusterItem)
 				}
 			}
 		}
 
-		if cluster.Properties == nil {
-			return diag.FromErr(fmt.Errorf("no DBaaS cluster found with the specified name %s", name.(string)))
+		if results == nil || len(results) == 0 {
+			return diag.FromErr(fmt.Errorf("no DBaaS cluster found with the specified name = %s", name))
+		} else if len(results) > 1 {
+			return diag.FromErr(fmt.Errorf("more than one DBaaS cluster found with the specified criteria name = %s", name))
+		} else {
+			cluster = results[0]
 		}
+
 	}
 
 	if err := dbaasService.SetDbaasPgSqlClusterData(d, cluster); err != nil {

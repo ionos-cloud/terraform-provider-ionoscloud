@@ -67,12 +67,7 @@ func dataSourceLocationRead(ctx context.Context, d *schema.ResourceData, meta in
 		return diag.FromErr(fmt.Errorf("either 'name' or 'feature' must be provided"))
 	}
 
-	var location ionoscloud.Location
 	request := client.LocationsApi.LocationsGet(ctx).Depth(1)
-
-	if nameOk {
-		request = request.Filter("name", name.(string))
-	}
 
 	if featureOk {
 		request = request.Filter("features", feature.(string))
@@ -84,15 +79,25 @@ func dataSourceLocationRead(ctx context.Context, d *schema.ResourceData, meta in
 	if err != nil {
 		return diag.FromErr(fmt.Errorf("an error occurred while fetching locations: %s", err.Error()))
 	}
+	var results []ionoscloud.Location
 
-	if locations.Items != nil && len(*locations.Items) > 0 {
-		location = (*locations.Items)[len(*locations.Items)-1]
-		log.Printf("[WARN] %v locations found matching the search criteria. Getting the latest location from the list %v", len(*locations.Items), *location.Id)
-	} else {
-		return diag.FromErr(fmt.Errorf("no location found with the specified criteria: name %s, feature %s", name.(string), feature.(string)))
+	if nameOk && locations.Items != nil {
+		for _, loc := range *locations.Items {
+			if loc.Properties != nil && loc.Properties.Name != nil && *loc.Properties.Name == name.(string) {
+				results = append(results, loc)
+			}
+		}
 	}
 
-	log.Printf("[INFO] Results length %d *************", len(*locations.Items))
+	log.Printf("[INFO] Results length %d *************", len(results))
+
+	var location ionoscloud.Location
+
+	if results == nil || len(results) == 0 {
+		return diag.FromErr(fmt.Errorf("no location found with the specified criteria: name = %s, feature = %s", name.(string), feature.(string)))
+	} else {
+		location = results[0]
+	}
 
 	if err := setLocationData(d, &location); err != nil {
 		return diag.FromErr(err)

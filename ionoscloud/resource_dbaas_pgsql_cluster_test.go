@@ -86,7 +86,7 @@ func TestAccDBaaSPgSqlClusterBasic(t *testing.T) {
 				),
 			},
 			{
-				Config:      testAccDataSourceDBaaSPgSqlClusterWrongName,
+				Config:      testAccDataSourceDBaaSPgSqlClusterWrongNameError,
 				ExpectError: regexp.MustCompile("no DBaaS cluster found with the specified name"),
 			},
 			{
@@ -444,7 +444,7 @@ data ` + DBaaSClusterResource + ` ` + DBaaSClusterTestDataSourceByName + ` {
 }
 `
 
-const testAccDataSourceDBaaSPgSqlClusterWrongName = testAccCheckDbaasPgSqlClusterConfigBasic + `
+const testAccDataSourceDBaaSPgSqlClusterWrongNameError = testAccCheckDbaasPgSqlClusterConfigBasic + `
 data ` + DBaaSClusterResource + ` ` + DBaaSClusterTestDataSourceByName + ` {
   display_name	= "wrong_name"
 }

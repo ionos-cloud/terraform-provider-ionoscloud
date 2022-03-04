@@ -126,7 +126,7 @@ func TestAccServerBasic(t *testing.T) {
 				),
 			},
 			{
-				Config:      testAccDataSourceServerWrongName,
+				Config:      testAccDataSourceServerWrongNameError,
 				ExpectError: regexp.MustCompile(`no server found with the specified name`),
 			},
 			{
@@ -497,7 +497,7 @@ data ` + ServerResource + ` ` + ServerDataSourceByName + ` {
   name			= "` + ServerTestResource + `"
 }
 `
-const testAccDataSourceServerWrongName = testAccCheckServerConfigBasic + `
+const testAccDataSourceServerWrongNameError = testAccCheckServerConfigBasic + `
 data ` + ServerResource + ` ` + ServerDataSourceByName + ` {
   datacenter_id = ` + DatacenterResource + `.` + DatacenterTestResource + `.id
   name			= "wrong_name"
