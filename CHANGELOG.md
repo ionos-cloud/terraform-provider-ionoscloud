@@ -1,4 +1,10 @@
-## 6.1.5 (upcoming release)
+## 6.1.5
+
+### Fixes
+- Limit max concurrent connections to the same host to 3.
+- Set max retries in case of rate-limit(429) to 999.
+- Set backoff time to 4s.
+
 
 ### Documentation:
 - updated gitbook documentation with `legal` subheading
