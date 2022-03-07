@@ -67,15 +67,19 @@ func TestAccDataCenterBasic(t *testing.T) {
 				),
 			},
 			{
-				Config:      testAccDataSourceDatacenterWrongName,
+				Config:      testAccDataSourceDatacenterMultipleResultsError,
+				ExpectError: regexp.MustCompile("more than one datacenter found with the specified criteria"),
+			},
+			{
+				Config:      testAccDataSourceDatacenterWrongNameError,
 				ExpectError: regexp.MustCompile("no datacenter found with the specified criteria"),
 			},
 			{
-				Config:      testAccDataSourceDatacenterWrongLocation,
+				Config:      testAccDataSourceDatacenterWrongLocationError,
 				ExpectError: regexp.MustCompile("no datacenter found with the specified criteria"),
 			},
 			{
-				Config:      testAccDataSourceDatacenterWrongNameAndLocation,
+				Config:      testAccDataSourceDatacenterWrongNameAndLocationError,
 				ExpectError: regexp.MustCompile("no datacenter found with the specified criteria"),
 			},
 			{
@@ -148,7 +152,7 @@ func testAccCheckDatacenterExists(n string, datacenter *ionoscloud.Datacenter) r
 			return fmt.Errorf("error occured while fetching DC: %s", rs.Primary.ID)
 		}
 		if *foundDC.Id != rs.Primary.ID {
-			return fmt.Errorf("Record not found")
+			return fmt.Errorf("record not found")
 		}
 		datacenter = &foundDC
 
@@ -180,19 +184,32 @@ data ` + DatacenterResource + ` ` + DatacenterDataSourceMatching + ` {
     location = ` + DatacenterResource + `.` + DatacenterTestResource + `.location
 }`
 
-const testAccDataSourceDatacenterWrongName = testAccCheckDatacenterConfigBasic + `
+const testAccDataSourceDatacenterMultipleResultsError = testAccCheckDatacenterConfigBasic + `
+resource ` + DatacenterResource + ` ` + DatacenterTestResource + `_multiple_results {
+	name       = "` + DatacenterTestResource + `"
+	location = "us/las"
+	description = "Test Datacenter Description Updated"
+	sec_auth_protection = false
+}
+
+data ` + DatacenterResource + ` ` + DatacenterDataSourceMatching + ` {
+    name = ` + DatacenterResource + `.` + DatacenterTestResource + `.name
+    location = ` + DatacenterResource + `.` + DatacenterTestResource + `.location
+}`
+
+const testAccDataSourceDatacenterWrongNameError = testAccCheckDatacenterConfigBasic + `
 data ` + DatacenterResource + ` ` + DatacenterDataSourceMatching + ` {
     name = "wrong_name"
     location = ` + DatacenterResource + `.` + DatacenterTestResource + `.location
 }`
 
-const testAccDataSourceDatacenterWrongLocation = testAccCheckDatacenterConfigBasic + `
+const testAccDataSourceDatacenterWrongLocationError = testAccCheckDatacenterConfigBasic + `
 data ` + DatacenterResource + ` ` + DatacenterDataSourceMatching + ` {
     name = ` + DatacenterResource + `.` + DatacenterTestResource + `.name
     location =  "wrong_location"
 }`
 
-const testAccDataSourceDatacenterWrongNameAndLocation = testAccCheckDatacenterConfigBasic + `
+const testAccDataSourceDatacenterWrongNameAndLocationError = testAccCheckDatacenterConfigBasic + `
 data ` + DatacenterResource + ` ` + DatacenterDataSourceMatching + ` {
     name =  "wrong_name"
     location =  "wrong_location"

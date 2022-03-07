@@ -1,10 +1,17 @@
+## 6.1.6
+
+### Fixes
+- fixed data sources to provide an exact match (roll-back to 6.1.3 + errors in case of multiple results)
+
+### Documentation
+- updated k8s cluster and node pool version from examples
+
 ## 6.1.5
 
 ### Fixes
 - Limit max concurrent connections to the same host to 3.
 - Set max retries in case of rate-limit(429) to 999.
 - Set backoff time to 4s.
-
 
 ### Documentation:
 - updated gitbook documentation with `legal` subheading

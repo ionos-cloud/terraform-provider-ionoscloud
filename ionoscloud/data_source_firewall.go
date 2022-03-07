@@ -7,7 +7,6 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 	ionoscloud "github.com/ionos-cloud/sdk-go/v6"
-	"log"
 )
 
 func dataSourceFirewall() *schema.Resource {
@@ -107,18 +106,36 @@ func dataSourceFirewallRead(ctx context.Context, d *schema.ResourceData, meta in
 		}
 	} else {
 		/* search by name */
-		firewalls, apiResponse, err := client.FirewallRulesApi.DatacentersServersNicsFirewallrulesGet(ctx, datacenterId, serverId, nicId).Depth(1).Filter("name", name.(string)).Execute()
+		var firewalls ionoscloud.FirewallRules
+
+		firewalls, apiResponse, err := client.FirewallRulesApi.DatacentersServersNicsFirewallrulesGet(ctx, datacenterId, serverId, nicId).Depth(1).Execute()
 		logApiRequestTime(apiResponse)
 
 		if err != nil {
 			return diag.FromErr(fmt.Errorf("an error occurred while fetching backup unit: %s", err.Error()))
 		}
 
-		if firewalls.Items != nil && len(*firewalls.Items) > 0 {
-			firewall = (*firewalls.Items)[len(*firewalls.Items)-1]
-			log.Printf("[WARN] %v firewalls found matching the search criteria. Getting the latest firewall from the list %v", len(*firewalls.Items), *firewall.Id)
+		var results []ionoscloud.FirewallRule
+
+		if firewalls.Items != nil {
+			for _, fr := range *firewalls.Items {
+				if fr.Properties != nil && fr.Properties.Name != nil && *fr.Properties.Name == name.(string) {
+					tmpFirewall, apiResponse, err := client.FirewallRulesApi.DatacentersServersNicsFirewallrulesFindById(ctx, datacenterId, serverId, nicId, *fr.Id).Execute()
+					logApiRequestTime(apiResponse)
+					if err != nil {
+						return diag.FromErr(fmt.Errorf("an error occurred while fetching firewall rule with ID %s: %s", *fr.Id, err.Error()))
+					}
+					results = append(results, tmpFirewall)
+				}
+			}
+		}
+
+		if results == nil || len(results) == 0 {
+			return diag.FromErr(fmt.Errorf("no firewall rule found with the specified name = %s", name))
+		} else if len(results) > 1 {
+			return diag.FromErr(fmt.Errorf("more than one firewall rule found with the specified criteria name = %s", name))
 		} else {
-			return diag.FromErr(fmt.Errorf("no firewall found with the specified name %s", name.(string)))
+			firewall = results[0]
 		}
 
 	}

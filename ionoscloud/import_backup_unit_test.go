@@ -1,4 +1,4 @@
-//go:build compute || all || backup_unit
+//go:build all || backup_unit
 
 package ionoscloud
 

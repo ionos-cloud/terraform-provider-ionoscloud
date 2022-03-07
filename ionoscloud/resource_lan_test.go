@@ -52,7 +52,11 @@ func TestAccLanBasic(t *testing.T) {
 				),
 			},
 			{
-				Config:      testAccDataSourceLanWrongName,
+				Config:      testAccDataSourceLanMultipleResultsError,
+				ExpectError: regexp.MustCompile(`more than one lan found with the specified criteria name`),
+			},
+			{
+				Config:      testAccDataSourceLanWrongNameError,
 				ExpectError: regexp.MustCompile(`no lan found with the specified name`),
 			},
 			{
@@ -152,7 +156,20 @@ data ` + LanResource + ` ` + LanDataSourceByName + ` {
 }
 `
 
-const testAccDataSourceLanWrongName = testAccCheckLanConfigBasic + `
+const testAccDataSourceLanMultipleResultsError = testAccCheckLanConfigBasic + `
+resource ` + LanResource + ` ` + LanTestResource + `_multiple_results {
+  datacenter_id = ` + DatacenterResource + `.` + DatacenterTestResource + `.id
+  public = true
+  name = "` + LanTestResource + `"
+}
+
+data ` + LanResource + ` ` + LanDataSourceByName + ` {
+  datacenter_id = ` + DatacenterResource + `.` + DatacenterTestResource + `.id
+  name			= "` + LanTestResource + `"
+}
+`
+
+const testAccDataSourceLanWrongNameError = testAccCheckLanConfigBasic + `
 data ` + LanResource + ` ` + LanDataSourceByName + ` {
   datacenter_id = ` + DatacenterResource + `.` + DatacenterTestResource + `.id
   name			= "wrong_name"

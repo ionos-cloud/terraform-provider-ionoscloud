@@ -54,7 +54,7 @@ func TestAccDataSourceTemplate(t *testing.T) {
 				),
 			},
 			{
-				Config:      testAccDataSourceTemplateStorageWrongName,
+				Config:      testAccDataSourceTemplateStorageWrongNameError,
 				ExpectError: regexp.MustCompile(`no template found with the specified criteria`),
 			},
 			{
@@ -82,7 +82,6 @@ data ` + TemplateResource + ` ` + TemplateTestResource + ` {
 const testAccDataSourceTemplateCores = `
 data ` + TemplateResource + ` ` + TemplateTestResource + ` {
 	cores = 6
-	name = "CUBES XL"
 }`
 
 const testAccDataSourceTemplateRam = `
@@ -93,10 +92,9 @@ data ` + TemplateResource + ` ` + TemplateTestResource + ` {
 const testAccDataSourceTemplateStorageSize = `
 data ` + TemplateResource + ` ` + TemplateTestResource + ` {
 	storage_size = 80
-	cores = 2
 }`
 
-const testAccDataSourceTemplateStorageWrongName = `
+const testAccDataSourceTemplateStorageWrongNameError = `
 data ` + TemplateResource + ` ` + TemplateTestResource + ` {
 	name		 = "CUBES S"
 	cores		 = 6

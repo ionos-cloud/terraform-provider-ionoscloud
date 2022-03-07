@@ -64,8 +64,12 @@ func TestAccFirewallBasic(t *testing.T) {
 				),
 			},
 			{
-				Config:      testAccDataSourceFirewallWrongName,
-				ExpectError: regexp.MustCompile("no firewall found with the specified name"),
+				Config:      testAccDataSourceFirewallMultipleResultsError,
+				ExpectError: regexp.MustCompile("more than one firewall rule found with the specified criteria name"),
+			},
+			{
+				Config:      testAccDataSourceFirewallWrongNameError,
+				ExpectError: regexp.MustCompile("no firewall rule found with the specified name"),
 			},
 			{
 				Config: testAccCheckFirewallConfigUpdate,
@@ -471,7 +475,30 @@ data ` + FirewallResource + ` ` + FirewallDataSourceByName + ` {
 }
 `
 
-const testAccDataSourceFirewallWrongName = testAccCheckFirewallConfigBasic + `
+const testAccDataSourceFirewallMultipleResultsError = testAccCheckFirewallConfigBasic + `
+resource ` + FirewallResource + ` ` + FirewallTestResource + `_multiple_results  {
+datacenter_id = ` + DatacenterResource + `.` + DatacenterTestResource + `.id
+  server_id = ` + ServerResource + `.` + ServerTestResource + `.id
+  nic_id = "${ionoscloud_nic.database_nic.id}"
+  protocol = "ICMP"
+  name = "` + FirewallTestResource + `"
+  source_mac = "00:0a:95:9d:68:16"
+  source_ip = ionoscloud_ipblock.ipblock.ips[0]
+  target_ip = ionoscloud_ipblock.ipblock.ips[1]
+  icmp_type = 1
+  icmp_code = 8
+  type = "INGRESS"
+}
+
+data ` + FirewallResource + ` ` + FirewallDataSourceByName + ` {
+  datacenter_id = ` + DatacenterResource + `.` + DatacenterTestResource + `.id
+  server_id = ` + ServerResource + `.` + ServerTestResource + `.id
+  nic_id = ionoscloud_nic.database_nic.id
+  name	= "` + FirewallTestResource + `"
+}
+`
+
+const testAccDataSourceFirewallWrongNameError = testAccCheckFirewallConfigBasic + `
 data ` + FirewallResource + ` ` + FirewallDataSourceByName + ` {
   datacenter_id = ` + DatacenterResource + `.` + DatacenterTestResource + `.id
   server_id = ` + ServerResource + `.` + ServerTestResource + `.id

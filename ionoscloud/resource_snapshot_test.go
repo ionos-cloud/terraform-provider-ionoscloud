@@ -94,7 +94,7 @@ func TestAccSnapshotBasic(t *testing.T) {
 				),
 			},
 			{
-				Config:      testAccDataSourceSnapshotWrongName,
+				Config:      testAccDataSourceSnapshotWrongNameError,
 				ExpectError: regexp.MustCompile(`no snapshot found with the specified criteria`),
 			},
 			{
@@ -204,7 +204,7 @@ data ` + SnapshotResource + ` ` + SnapshotDataSourceByName + ` {
     size = ` + SnapshotResource + `.` + SnapshotTestResource + `.size
 }`
 
-const testAccDataSourceSnapshotWrongName = testAccCheckSnapshotConfigBasic + `
+const testAccDataSourceSnapshotWrongNameError = testAccCheckSnapshotConfigBasic + `
 data ` + SnapshotResource + ` ` + SnapshotDataSourceByName + ` {
     name = "wrong_name"
     location = ` + SnapshotResource + `.` + SnapshotTestResource + `.location
@@ -222,5 +222,5 @@ const testAccDataSourceSnapshotWrongSize = testAccCheckSnapshotConfigBasic + `
 data ` + SnapshotResource + ` ` + SnapshotDataSourceByName + ` {
     name = ` + SnapshotResource + `.` + SnapshotTestResource + `.name
     location = ` + SnapshotResource + `.` + SnapshotTestResource + `.location
-    size = 10
+    size = 1234
 }`
