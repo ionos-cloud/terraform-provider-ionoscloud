@@ -78,12 +78,12 @@ func dataSourceBackupUnitRead(ctx context.Context, d *schema.ResourceData, meta 
 		var results []ionoscloud.BackupUnit
 		if backupUnits.Items != nil {
 			for _, bu := range *backupUnits.Items {
-				tmpBackupUnit, apiResponse, err := client.BackupUnitsApi.BackupunitsFindById(ctx, *bu.Id).Execute()
-				logApiRequestTime(apiResponse)
-				if err != nil {
-					return diag.FromErr(fmt.Errorf("an error occurred while fetching backup unit with ID %s: %s", *bu.Id, err.Error()))
-				}
-				if tmpBackupUnit.Properties.Name != nil && *tmpBackupUnit.Properties.Name == name.(string) {
+				if bu.Properties.Name != nil && *bu.Properties.Name == name.(string) {
+					tmpBackupUnit, apiResponse, err := client.BackupUnitsApi.BackupunitsFindById(ctx, *bu.Id).Execute()
+					logApiRequestTime(apiResponse)
+					if err != nil {
+						return diag.FromErr(fmt.Errorf("an error occurred while fetching backup unit with ID %s: %s", *bu.Id, err.Error()))
+					}
 					results = append(results, tmpBackupUnit)
 				}
 

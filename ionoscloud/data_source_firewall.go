@@ -119,15 +119,14 @@ func dataSourceFirewallRead(ctx context.Context, d *schema.ResourceData, meta in
 
 		if firewalls.Items != nil {
 			for _, fr := range *firewalls.Items {
-				tmpFirewall, apiResponse, err := client.FirewallRulesApi.DatacentersServersNicsFirewallrulesFindById(ctx, datacenterId, serverId, nicId, *fr.Id).Execute()
-				logApiRequestTime(apiResponse)
-				if err != nil {
-					return diag.FromErr(fmt.Errorf("an error occurred while fetching firewall rule with ID %s: %s", *fr.Id, err.Error()))
+				if fr.Properties != nil && fr.Properties.Name != nil && *fr.Properties.Name == name.(string) {
+					tmpFirewall, apiResponse, err := client.FirewallRulesApi.DatacentersServersNicsFirewallrulesFindById(ctx, datacenterId, serverId, nicId, *fr.Id).Execute()
+					logApiRequestTime(apiResponse)
+					if err != nil {
+						return diag.FromErr(fmt.Errorf("an error occurred while fetching firewall rule with ID %s: %s", *fr.Id, err.Error()))
+					}
+					results = append(results, tmpFirewall)
 				}
-				if tmpFirewall.Properties != nil && tmpFirewall.Properties.Name != nil && *tmpFirewall.Properties.Name == name.(string) {
-					results = append(results, fr)
-				}
-
 			}
 		}
 

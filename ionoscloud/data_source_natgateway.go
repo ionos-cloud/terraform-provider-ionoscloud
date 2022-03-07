@@ -104,12 +104,12 @@ func dataSourceNatGatewayRead(ctx context.Context, d *schema.ResourceData, meta 
 		var results []ionoscloud.NatGateway
 		if natGateways.Items != nil {
 			for _, c := range *natGateways.Items {
-				tmpNatGateway, apiResponse, err := client.NATGatewaysApi.DatacentersNatgatewaysFindByNatGatewayId(ctx, datacenterId.(string), *c.Id).Execute()
-				logApiRequestTime(apiResponse)
-				if err != nil {
-					return diag.FromErr(fmt.Errorf("an error occurred while fetching nat gateway with ID %s: %s", *c.Id, err.Error()))
-				}
-				if tmpNatGateway.Properties.Name != nil {
+				if c.Properties.Name != nil {
+					tmpNatGateway, apiResponse, err := client.NATGatewaysApi.DatacentersNatgatewaysFindByNatGatewayId(ctx, datacenterId.(string), *c.Id).Execute()
+					logApiRequestTime(apiResponse)
+					if err != nil {
+						return diag.FromErr(fmt.Errorf("an error occurred while fetching nat gateway with ID %s: %s", *c.Id, err.Error()))
+					}
 					if strings.Contains(*tmpNatGateway.Properties.Name, name.(string)) {
 						natGateway = tmpNatGateway
 						results = append(results, natGateway)

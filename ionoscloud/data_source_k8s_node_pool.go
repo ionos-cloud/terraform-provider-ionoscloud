@@ -227,12 +227,12 @@ func dataSourceK8sReadNodePool(ctx context.Context, d *schema.ResourceData, meta
 			var results []ionoscloud.KubernetesNodePool
 
 			for _, c := range *nodePools.Items {
-				tmpNodePool, apiResponse, err := client.KubernetesApi.K8sNodepoolsFindById(ctx, clusterId.(string), *c.Id).Execute()
-				logApiRequestTime(apiResponse)
-				if err != nil {
-					return diag.FromErr(fmt.Errorf("an error occurred while fetching k8s nodePool with ID %s: %w", *c.Id, err))
-				}
-				if tmpNodePool.Properties != nil && tmpNodePool.Properties.Name != nil && *tmpNodePool.Properties.Name == name.(string) {
+				if c.Properties != nil && c.Properties.Name != nil && *c.Properties.Name == name.(string) {
+					tmpNodePool, apiResponse, err := client.KubernetesApi.K8sNodepoolsFindById(ctx, clusterId.(string), *c.Id).Execute()
+					logApiRequestTime(apiResponse)
+					if err != nil {
+						return diag.FromErr(fmt.Errorf("an error occurred while fetching k8s nodePool with ID %s: %w", *c.Id, err))
+					}
 					/* lan found */
 					results = append(results, tmpNodePool)
 					break

@@ -280,12 +280,12 @@ func dataSourceK8sReadCluster(ctx context.Context, d *schema.ResourceData, meta 
 			var results []ionoscloud.KubernetesCluster
 
 			for _, c := range *clusters.Items {
-				tmpCluster, apiResponse, err := client.KubernetesApi.K8sFindByClusterId(ctx, *c.Id).Execute()
-				logApiRequestTime(apiResponse)
-				if err != nil {
-					return diag.FromErr(fmt.Errorf("an error occurred while fetching k8s cluster with ID %s: %s", *c.Id, err.Error()))
-				}
-				if tmpCluster.Properties != nil && tmpCluster.Properties.Name != nil && *tmpCluster.Properties.Name == name.(string) {
+				if c.Properties != nil && c.Properties.Name != nil && *c.Properties.Name == name.(string) {
+					tmpCluster, apiResponse, err := client.KubernetesApi.K8sFindByClusterId(ctx, *c.Id).Execute()
+					logApiRequestTime(apiResponse)
+					if err != nil {
+						return diag.FromErr(fmt.Errorf("an error occurred while fetching k8s cluster with ID %s: %s", *c.Id, err.Error()))
+					}
 					results = append(results, tmpCluster)
 					break
 				}

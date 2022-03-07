@@ -135,12 +135,12 @@ func dataSourceNatGatewayRuleRead(ctx context.Context, d *schema.ResourceData, m
 		var results []ionoscloud.NatGatewayRule
 		if natGatewayRules.Items != nil {
 			for _, c := range *natGatewayRules.Items {
-				tmpNatGatewayRule, apiResponse, err := client.NATGatewaysApi.DatacentersNatgatewaysRulesFindByNatGatewayRuleId(ctx, datacenterId.(string), natgatewayId.(string), *c.Id).Execute()
-				logApiRequestTime(apiResponse)
-				if err != nil {
-					return diag.FromErr(fmt.Errorf("an error occurred while fetching nat gateway rule with ID %s: %s", *c.Id, err.Error()))
-				}
-				if tmpNatGatewayRule.Properties.Name != nil && *tmpNatGatewayRule.Properties.Name == name.(string) {
+				if c.Properties.Name != nil && *c.Properties.Name == name.(string) {
+					tmpNatGatewayRule, apiResponse, err := client.NATGatewaysApi.DatacentersNatgatewaysRulesFindByNatGatewayRuleId(ctx, datacenterId.(string), natgatewayId.(string), *c.Id).Execute()
+					logApiRequestTime(apiResponse)
+					if err != nil {
+						return diag.FromErr(fmt.Errorf("an error occurred while fetching nat gateway rule with ID %s: %s", *c.Id, err.Error()))
+					}
 					results = append(results, tmpNatGatewayRule)
 				}
 
