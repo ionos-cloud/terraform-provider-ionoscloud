@@ -214,7 +214,7 @@ func testAccCheckVolumeExists(n string, volume *ionoscloud.Volume) resource.Test
 	}
 }
 
-const testAccCheckVolumeConfigBasic = testAccCheckLanConfigBasic + testAccCheckBackupUnitConfigBasic + `
+const testAccCheckVolumeConfigBasic = testAccCheckLanConfigBasic + `
 resource ` + ServerResource + ` ` + ServerTestResource + `{
   name = "` + ServerTestResource + `"
   datacenter_id = ` + DatacenterResource + `.` + DatacenterTestResource + `.id
@@ -245,11 +245,10 @@ resource ` + VolumeResource + ` ` + VolumeTestResource + ` {
 	bus = "VIRTIO"
 	image_name ="Debian-10-cloud-init.qcow2"
 	image_password = "K3tTj8G14a3EgKyNeeiY"
-	backup_unit_id = ` + BackupUnitResource + `.` + BackupUnitTestResource + `.id
 	user_data = "foo"
 }`
 
-const testAccCheckVolumeConfigUpdate = testAccCheckBackupUnitConfigBasic + testAccCheckLanConfigBasic + `
+const testAccCheckVolumeConfigUpdate = testAccCheckLanConfigBasic + `
 resource ` + ServerResource + ` ` + ServerTestResource + `updated {
   name = "` + ServerTestResource + `"
   datacenter_id = ` + DatacenterResource + `.` + DatacenterTestResource + `.id
@@ -280,7 +279,6 @@ resource ` + VolumeResource + ` ` + VolumeTestResource + ` {
 	bus = "VIRTIO"
 	image_name ="Debian-10-cloud-init.qcow2"
 	image_password = "K3tTj8G14a3EgKyNeeiYupdated"
-	backup_unit_id = ` + BackupUnitResource + `.` + BackupUnitTestResource + `.id
 	user_data = "foo"
 }`
 
