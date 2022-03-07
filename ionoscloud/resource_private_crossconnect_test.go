@@ -50,8 +50,12 @@ func TestAccPrivateCrossConnectBasic(t *testing.T) {
 				),
 			},
 			{
+				Config:      testAccDataSourcePccMultipleResultsError,
+				ExpectError: regexp.MustCompile(`more than one pcc found with the specified criteria: name`),
+			},
+			{
 				Config:      testAccDataSourcePccWrongNameError,
-				ExpectError: regexp.MustCompile(`no pcc found with the specified name`),
+				ExpectError: regexp.MustCompile(`no pcc found with the specified criteria: name`),
 			},
 			{
 				Config: testAccCheckPrivateCrossConnectConfigUpdate,
@@ -147,5 +151,16 @@ data ` + PCCResource + ` ` + PCCDataSourceByName + ` {
 const testAccDataSourcePccWrongNameError = testAccCheckPrivateCrossConnectConfigBasic + `
 data ` + PCCResource + ` ` + PCCDataSourceByName + ` {
   name			= "wrong_name"
+}
+`
+
+const testAccDataSourcePccMultipleResultsError = testAccCheckPrivateCrossConnectConfigBasic + `
+resource ` + PCCResource + ` ` + PCCTestResource + `_multiple_results {
+  name        = "` + PCCTestResource + `"
+  description = "` + PCCTestResource + `"
+}
+
+data ` + PCCResource + ` ` + PCCDataSourceByName + ` {
+  name			= "` + PCCTestResource + `"
 }
 `

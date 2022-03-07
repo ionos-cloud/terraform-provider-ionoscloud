@@ -77,7 +77,7 @@ func TestAccVolumeBasic(t *testing.T) {
 			},
 			{
 				Config:      testAccDataSourceVolumeWrongNameError,
-				ExpectError: regexp.MustCompile(`no volume found with the specified name`),
+				ExpectError: regexp.MustCompile(`no volume found with the specified criteria: name`),
 			},
 			{
 				Config: testAccCheckVolumeConfigUpdate,

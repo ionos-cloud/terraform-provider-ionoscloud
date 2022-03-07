@@ -222,5 +222,5 @@ const testAccDataSourceSnapshotWrongSize = testAccCheckSnapshotConfigBasic + `
 data ` + SnapshotResource + ` ` + SnapshotDataSourceByName + ` {
     name = ` + SnapshotResource + `.` + SnapshotTestResource + `.name
     location = ` + SnapshotResource + `.` + SnapshotTestResource + `.location
-    size = 10
+    size = 1234
 }`

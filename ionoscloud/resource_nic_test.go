@@ -66,11 +66,15 @@ func TestAccNicBasic(t *testing.T) {
 			},
 			{
 				Config:      testAccDataSourceNicMatchNameError,
-				ExpectError: regexp.MustCompile(`no nic found with the specified name`),
+				ExpectError: regexp.MustCompile(`no nic found with the specified criteria: name`),
 			},
 			{
 				Config:      testAccDataSourceNicMatchIdAndNameError,
 				ExpectError: regexp.MustCompile(`does not match expected name`),
+			},
+			{
+				Config:      testAccDataSourceNicMultipleResultsError,
+				ExpectError: regexp.MustCompile(`more than one nic found with the specified criteria: name`),
 			},
 			{
 				Config: testAccCheckNicConfigUpdate,
@@ -185,7 +189,7 @@ resource "ionoscloud_server" "test_server" {
 `
 
 const testAccCheckNicConfigBasic = testCreateDataCenterAndServer + `
-resource "ionoscloud_nic" "database_nic" {
+resource ` + NicResource + ` "database_nic" {
   datacenter_id = ` + DatacenterResource + `.` + DatacenterTestResource + `.id
   server_id = ` + ServerResource + `.` + ServerTestResource + `.id
   lan = 2
@@ -197,8 +201,7 @@ resource "ionoscloud_nic" "database_nic" {
 `
 
 const testAccCheckNicConfigUpdate = testCreateDataCenterAndServer + `
-
-resource "ionoscloud_nic" "database_nic" {
+resource ` + NicResource + ` "database_nic" {
   datacenter_id = ` + DatacenterResource + `.` + DatacenterTestResource + `.id
   server_id = ` + ServerResource + `.` + ServerTestResource + `.id
   lan = 2
@@ -219,24 +222,47 @@ data ` + NicResource + ` test_nic_data {
 }
 `
 
-const testAccDataSourceNicMatchName = testAccCheckNicConfigBasic +
-	`data ` + NicResource + ` test_nic_data {
+const testAccDataSourceNicMatchName = testAccCheckNicConfigBasic + `
+data ` + NicResource + ` test_nic_data {
   	datacenter_id = ` + DatacenterResource + `.` + DatacenterTestResource + `.id
 	server_id = ` + ServerResource + `.` + ServerTestResource + `.id
 	name = ` + fullNicResourceName + `.name 
 }`
 
-const testAccDataSourceNicMatchNameError = testAccCheckNicConfigBasic +
-	`data ` + NicResource + ` test_nic_data {
+const testAccDataSourceNicMatchNameError = testAccCheckNicConfigBasic + `
+data ` + NicResource + ` test_nic_data {
   	datacenter_id = ` + DatacenterResource + `.` + DatacenterTestResource + `.id
 	server_id = ` + ServerResource + `.` + ServerTestResource + `.id
 	name = "DoesNotExist"
 }`
 
-const testAccDataSourceNicMatchIdAndNameError = testAccCheckNicConfigBasic +
-	`data ` + NicResource + ` test_nic_data {
+const testAccDataSourceNicMatchIdAndNameError = testAccCheckNicConfigBasic + `
+data ` + NicResource + ` test_nic_data {
   	datacenter_id = ` + DatacenterResource + `.` + DatacenterTestResource + `.id
 	server_id = ` + ServerResource + `.` + ServerTestResource + `.id
 	id = ` + fullNicResourceName + `.id
 	name = "doesNotExist"
+}`
+
+const testAccDataSourceNicMultipleResultsError = testAccCheckNicConfigBasic + `
+resource "ionoscloud_ipblock" "test_server_multiple_results" {
+  location = ionoscloud_datacenter.test_datacenter.location
+  size = 2
+  name = "test_server_ipblock"
+}
+
+resource ` + NicResource + ` "database_nic_multiple_results" {
+  datacenter_id = ` + DatacenterResource + `.` + DatacenterTestResource + `.id
+  server_id = ` + ServerResource + `.` + ServerTestResource + `.id
+  lan = 2
+  firewall_active = true
+  firewall_type = "INGRESS"
+  ips = [ ionoscloud_ipblock.test_server_multiple_results.ips[0], ionoscloud_ipblock.test_server_multiple_results.ips[1] ]
+  name = "%s"
+}
+
+data ` + NicResource + ` test_nic_data {
+  	datacenter_id = ` + DatacenterResource + `.` + DatacenterTestResource + `.id
+	server_id = ` + ServerResource + `.` + ServerTestResource + `.id
+	name = ` + fullNicResourceName + `.name 
 }`

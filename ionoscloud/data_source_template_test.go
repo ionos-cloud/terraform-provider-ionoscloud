@@ -82,7 +82,6 @@ data ` + TemplateResource + ` ` + TemplateTestResource + ` {
 const testAccDataSourceTemplateCores = `
 data ` + TemplateResource + ` ` + TemplateTestResource + ` {
 	cores = 6
-	name = "CUBES XL"
 }`
 
 const testAccDataSourceTemplateRam = `
@@ -93,7 +92,6 @@ data ` + TemplateResource + ` ` + TemplateTestResource + ` {
 const testAccDataSourceTemplateStorageSize = `
 data ` + TemplateResource + ` ` + TemplateTestResource + ` {
 	storage_size = 80
-	cores = 2
 }`
 
 const testAccDataSourceTemplateStorageWrongNameError = `

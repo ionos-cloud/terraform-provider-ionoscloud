@@ -73,7 +73,7 @@ func TestAccNetworkLoadBalancerBasic(t *testing.T) {
 			},
 			{
 				Config:      testAccDataSourceNetworkLoadBalancerWrongNameError,
-				ExpectError: regexp.MustCompile(`no network load balancer found with the specified name`),
+				ExpectError: regexp.MustCompile(`no network load balancer found with the specified criteria: name`),
 			},
 			{
 				Config: testAccCheckNetworkLoadBalancerConfigUpdate,

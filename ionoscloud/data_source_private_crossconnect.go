@@ -7,7 +7,6 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	ionoscloud "github.com/ionos-cloud/sdk-go/v6"
-	"log"
 )
 
 func dataSourcePcc() *schema.Resource {
@@ -183,18 +182,35 @@ func dataSourcePccRead(ctx context.Context, d *schema.ResourceData, meta interfa
 	if nameOk {
 		/* search by name */
 		var pccs ionoscloud.PrivateCrossConnects
-		pccs, apiResponse, err := client.PrivateCrossConnectsApi.PccsGet(ctx).Depth(1).Filter("name", name.(string)).Execute()
+		pccs, apiResponse, err := client.PrivateCrossConnectsApi.PccsGet(ctx).Depth(1).Execute()
 		logApiRequestTime(apiResponse)
 		if err != nil {
 			return diag.FromErr(fmt.Errorf("an error occurred while fetching pccs: %s", err.Error()))
 		}
 
-		if pccs.Items != nil && len(*pccs.Items) > 0 {
-			pcc = (*pccs.Items)[len(*pccs.Items)-1]
-			log.Printf("[INFO] %v pccs found matching the search criteria. Getting the latest pcc from the list %v", len(*pccs.Items), *pcc.Id)
-		} else {
-			return diag.FromErr(fmt.Errorf("no pcc found with the specified name %s", name))
+		var results []ionoscloud.PrivateCrossConnect
+
+		if pccs.Items != nil {
+			for _, p := range *pccs.Items {
+				if p.Properties != nil && p.Properties.Name != nil && *p.Properties.Name == name.(string) {
+					pcc, apiResponse, err = client.PrivateCrossConnectsApi.PccsFindById(ctx, *p.Id).Execute()
+					logApiRequestTime(apiResponse)
+					if err != nil {
+						return diag.FromErr(fmt.Errorf("an error occurred while fetching the pcc with ID %s: %s", *p.Id, err))
+					}
+					results = append(results, pcc)
+				}
+			}
 		}
+
+		if results == nil || len(results) == 0 {
+			return diag.FromErr(fmt.Errorf("no pcc found with the specified criteria: name = %s", name))
+		} else if len(results) > 1 {
+			return diag.FromErr(fmt.Errorf("more than one pcc found with the specified criteria: name = %s", name))
+		} else {
+			pcc = results[0]
+		}
+
 	}
 
 	if err = setPccDataSource(d, &pcc); err != nil {

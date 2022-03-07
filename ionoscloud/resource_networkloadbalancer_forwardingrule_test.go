@@ -98,7 +98,7 @@ func TestAccNetworkLoadBalancerForwardingRuleBasic(t *testing.T) {
 			},
 			{
 				Config:      testAccDataSourceNetworkLoadBalancerForwardingRuleWrongNameError,
-				ExpectError: regexp.MustCompile(`no network load balancer forwarding rule found with the specified name`),
+				ExpectError: regexp.MustCompile(`no network load balancer forwarding rule found with the specified criteria: name`),
 			},
 			{
 				Config: testAccCheckNetworkLoadBalancerForwardingRuleConfigUpdate,

@@ -127,7 +127,7 @@ func TestAccServerBasic(t *testing.T) {
 			},
 			{
 				Config:      testAccDataSourceServerWrongNameError,
-				ExpectError: regexp.MustCompile(`no server found with the specified name`),
+				ExpectError: regexp.MustCompile(`no server found with the specified criteria: name`),
 			},
 			{
 				Config: testAccCheckServerConfigUpdate,
