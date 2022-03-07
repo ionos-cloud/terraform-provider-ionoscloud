@@ -152,7 +152,7 @@ func dataSourceSnapshotRead(ctx context.Context, d *schema.ResourceData, meta in
 		if sizeOk {
 			var sizeResults []ionoscloud.Snapshot
 			for _, snp := range results {
-				if *snp.Properties.Size == float32(size.(int)) {
+				if snp.Properties != nil && snp.Properties.Size != nil && *snp.Properties.Size == float32(size.(int)) {
 					sizeResults = append(sizeResults, snp)
 				}
 

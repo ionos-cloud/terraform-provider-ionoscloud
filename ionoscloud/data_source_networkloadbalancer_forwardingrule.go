@@ -187,12 +187,12 @@ func dataSourceNetworkLoadBalancerForwardingRuleRead(ctx context.Context, d *sch
 
 		var results []ionoscloud.NetworkLoadBalancerForwardingRule
 		if networkLoadBalancerForwardingRules.Items != nil {
-			for _, c := range *networkLoadBalancerForwardingRules.Items {
-				if c.Properties.Name != nil && *c.Properties.Name == name.(string) {
-					tmpNetworkLoadBalancerForwardingRule, apiResponse, err := client.NetworkLoadBalancersApi.DatacentersNetworkloadbalancersForwardingrulesFindByForwardingRuleId(ctx, datacenterId.(string), networkloadbalancerId.(string), *c.Id).Execute()
+			for _, nlbr := range *networkLoadBalancerForwardingRules.Items {
+				if nlbr.Properties != nil && nlbr.Properties.Name != nil && *nlbr.Properties.Name == name.(string) {
+					tmpNetworkLoadBalancerForwardingRule, apiResponse, err := client.NetworkLoadBalancersApi.DatacentersNetworkloadbalancersForwardingrulesFindByForwardingRuleId(ctx, datacenterId.(string), networkloadbalancerId.(string), *nlbr.Id).Execute()
 					logApiRequestTime(apiResponse)
 					if err != nil {
-						return diag.FromErr(fmt.Errorf("an error occurred while fetching network loadbalancer forwarding rule with ID %s: %s", *c.Id, err.Error()))
+						return diag.FromErr(fmt.Errorf("an error occurred while fetching network loadbalancer forwarding rule with ID %s: %s", *nlbr.Id, err.Error()))
 					}
 					results = append(results, tmpNetworkLoadBalancerForwardingRule)
 				}

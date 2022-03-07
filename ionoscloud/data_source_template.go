@@ -101,7 +101,7 @@ func dataSourceTemplateRead(ctx context.Context, d *schema.ResourceData, meta in
 		if results != nil {
 			var storageSizeResults []ionoscloud.Template
 			for _, tmp := range results {
-				if tmp.Properties.StorageSize != nil && *tmp.Properties.StorageSize == storageSize {
+				if tmp.Properties != nil && tmp.Properties.StorageSize != nil && *tmp.Properties.StorageSize == storageSize {
 					storageSizeResults = append(storageSizeResults, tmp)
 				}
 			}

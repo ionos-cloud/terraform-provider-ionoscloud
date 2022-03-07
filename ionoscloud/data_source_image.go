@@ -137,7 +137,7 @@ func dataSourceImageRead(ctx context.Context, d *schema.ResourceData, meta inter
 	} else if nameOk {
 		if images.Items != nil {
 			for _, img := range *images.Items {
-				if img.Properties.Name != nil && strings.ToLower(*img.Properties.Name) == strings.ToLower(name.(string)) {
+				if img.Properties != nil && img.Properties.Name != nil && strings.ToLower(*img.Properties.Name) == strings.ToLower(name.(string)) {
 					results = append(results, img)
 					break
 				}
@@ -151,7 +151,7 @@ func dataSourceImageRead(ctx context.Context, d *schema.ResourceData, meta inter
 	if imageTypeOk {
 		var imageTypeResults []ionoscloud.Image
 		for _, img := range results {
-			if img.Properties.ImageType != nil && *img.Properties.ImageType == imageType.(string) {
+			if img.Properties != nil && img.Properties.ImageType != nil && *img.Properties.ImageType == imageType.(string) {
 				imageTypeResults = append(imageTypeResults, img)
 			}
 
@@ -162,7 +162,7 @@ func dataSourceImageRead(ctx context.Context, d *schema.ResourceData, meta inter
 	if locationOk {
 		var locationResults []ionoscloud.Image
 		for _, img := range results {
-			if img.Properties.Location != nil && *img.Properties.Location == location.(string) {
+			if img.Properties != nil && img.Properties.Location != nil && *img.Properties.Location == location.(string) {
 				locationResults = append(locationResults, img)
 			}
 		}
@@ -172,7 +172,7 @@ func dataSourceImageRead(ctx context.Context, d *schema.ResourceData, meta inter
 	if cloudInitOk {
 		var cloudInitResults []ionoscloud.Image
 		for _, img := range results {
-			if img.Properties.CloudInit != nil && *img.Properties.CloudInit == cloudInit.(string) {
+			if img.Properties != nil && img.Properties.CloudInit != nil && *img.Properties.CloudInit == cloudInit.(string) {
 				cloudInitResults = append(cloudInitResults, img)
 			}
 		}
