@@ -16,7 +16,7 @@ Manages a Kubernetes Node Pool, part of a managed Kubernetes cluster on IonosClo
 ```hcl
 resource "ionoscloud_k8s_node_pool" "demo" {
   name        = demo
-  k8s_version = "1.18.5"
+  k8s_version = "1.21.9"
   auto_scaling {
     min_node_count = 1
     max_node_count = 3
