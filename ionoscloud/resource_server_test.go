@@ -15,6 +15,8 @@ import (
 
 const bootCdromImageId = "83f21679-3321-11eb-a681-1e659523cb7b"
 
+//ToDo: add backup unit back in tests when stable
+
 func TestAccServerBasic(t *testing.T) {
 	var server ionoscloud.Server
 
@@ -40,7 +42,6 @@ func TestAccServerBasic(t *testing.T) {
 					resource.TestCheckResourceAttr(ServerResource+"."+ServerTestResource, "volume.0.name", "system"),
 					resource.TestCheckResourceAttr(ServerResource+"."+ServerTestResource, "volume.0.size", "5"),
 					resource.TestCheckResourceAttr(ServerResource+"."+ServerTestResource, "volume.0.disk_type", "SSD Standard"),
-					resource.TestCheckResourceAttrPair(ServerResource+"."+ServerTestResource, "volume.0.backup_unit_id", BackupUnitResource+"."+BackupUnitTestResource, "id"),
 					resource.TestCheckResourceAttr(ServerResource+"."+ServerTestResource, "volume.0.bus", "VIRTIO"),
 					resource.TestCheckResourceAttr(ServerResource+"."+ServerTestResource, "volume.0.availability_zone", "ZONE_1"),
 					resource.TestCheckResourceAttrPair(ServerResource+"."+ServerTestResource, "volume.0.boot_server", ServerResource+"."+ServerTestResource, "id"),
@@ -144,7 +145,6 @@ func TestAccServerBasic(t *testing.T) {
 					resource.TestCheckResourceAttr(ServerResource+"."+ServerTestResource, "type", "ENTERPRISE"),
 					resource.TestCheckResourceAttr(ServerResource+"."+ServerTestResource, "volume.0.size", "6"),
 					resource.TestCheckResourceAttr(ServerResource+"."+ServerTestResource, "volume.0.disk_type", "SSD Standard"),
-					resource.TestCheckResourceAttrPair(ServerResource+"."+ServerTestResource, "volume.0.backup_unit_id", BackupUnitResource+"."+BackupUnitTestResource, "id"),
 					resource.TestCheckResourceAttr(ServerResource+"."+ServerTestResource, "volume.0.bus", "IDE"),
 					resource.TestCheckResourceAttr(ServerResource+"."+ServerTestResource, "volume.0.availability_zone", "ZONE_1"),
 					resource.TestCheckResourceAttrPair(ServerResource+"."+ServerTestResource, "nic.0.lan", LanResource+"."+LanTestResource, "id"),
@@ -428,7 +428,6 @@ resource ` + DatacenterResource + ` ` + DatacenterTestResource + ` {
 	name       = "server-test"
 	location = "us/las"
 }
-` + testAccCheckBackupUnitConfigBasic + `
 
 resource "ionoscloud_ipblock" "webserver_ipblock" {
   location = ` + DatacenterResource + `.` + DatacenterTestResource + `.location
@@ -460,7 +459,6 @@ resource ` + ServerResource + ` ` + ServerTestResource + ` {
     name = "` + UpdatedResources + `"
     size = 6
     disk_type = "SSD Standard"
-	backup_unit_id = ` + BackupUnitResource + `.` + BackupUnitTestResource + `.id
     user_data = "foo"
     bus = "IDE"
     availability_zone = "ZONE_1"
