@@ -101,13 +101,13 @@ func dataSourceNetworkLoadBalancerRead(ctx context.Context, d *schema.ResourceDa
 
 		var results []ionoscloud.NetworkLoadBalancer
 		if networkLoadBalancers.Items != nil {
-			for _, nlb := range *networkLoadBalancers.Items {
-				if nlb.Properties != nil && nlb.Properties.Name != nil && *nlb.Properties.Name == name.(string) {
-					tmpNetworkLoadBalancer, apiResponse, err := client.NetworkLoadBalancersApi.DatacentersNetworkloadbalancersFindByNetworkLoadBalancerId(ctx, datacenterId.(string), *nlb.Id).Execute()
-					logApiRequestTime(apiResponse)
-					if err != nil {
-						return diag.FromErr(fmt.Errorf("an error occurred while fetching network loadbalancer with ID %s: %s", *nlb.Id, err.Error()))
-					}
+			for _, c := range *networkLoadBalancers.Items {
+				tmpNetworkLoadBalancer, apiResponse, err := client.NetworkLoadBalancersApi.DatacentersNetworkloadbalancersFindByNetworkLoadBalancerId(ctx, datacenterId.(string), *c.Id).Execute()
+				logApiRequestTime(apiResponse)
+				if err != nil {
+					return diag.FromErr(fmt.Errorf("an error occurred while fetching network loadbalancer with ID %s: %s", *c.Id, err.Error()))
+				}
+				if tmpNetworkLoadBalancer.Properties != nil && tmpNetworkLoadBalancer.Properties.Name != nil && *tmpNetworkLoadBalancer.Properties.Name == name.(string) {
 					results = append(results, tmpNetworkLoadBalancer)
 				}
 			}
