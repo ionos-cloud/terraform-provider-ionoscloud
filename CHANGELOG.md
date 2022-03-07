@@ -3,6 +3,9 @@
 ### Fixes
 - fixed data sources to provide an exact match (roll-back to 6.1.3 + errors in case of multiple results)
 
+### Documentation
+- updated k8s cluster and node pool version from examples
+
 ## 6.1.5
 
 ### Fixes
