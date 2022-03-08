@@ -7,7 +7,6 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 	ionoscloud "github.com/ionos-cloud/sdk-go/v6"
-	"log"
 )
 
 func dataSourceNIC() *schema.Resource {
@@ -173,18 +172,29 @@ func dataSourceNicRead(ctx context.Context, data *schema.ResourceData, meta inte
 			}
 		}
 	} else {
-		nics, apiResponse, err := client.NetworkInterfacesApi.DatacentersServersNicsGet(ctx, datacenterId, serverId).Depth(1).Filter("name", name).Execute()
+		nics, apiResponse, err := client.NetworkInterfacesApi.DatacentersServersNicsGet(ctx, datacenterId, serverId).Depth(1).Execute()
 		logApiRequestTime(apiResponse)
 
 		if err != nil {
 			return diag.FromErr(fmt.Errorf("an error occured while fetching nics: %w ", err))
 		}
 
-		if nics.Items != nil && len(*nics.Items) > 0 {
-			nic = (*nics.Items)[len(*nics.Items)-1]
-			log.Printf("[INFO] %v nics found matching the search criteria. Getting the latest nic from the list %v", len(*nics.Items), *nic.Id)
+		var results []ionoscloud.Nic
+
+		if nameOk && nics.Items != nil {
+			for _, tempNic := range *nics.Items {
+				if tempNic.Properties != nil && tempNic.Properties.Name != nil && *tempNic.Properties.Name == name {
+					results = append(results, tempNic)
+				}
+			}
+		}
+
+		if results == nil || len(results) == 0 {
+			return diag.FromErr(fmt.Errorf("no nic found with the specified criteria: name = %s", name))
+		} else if len(results) > 1 {
+			return diag.FromErr(fmt.Errorf("more than one nic found with the specified criteria: name = %s", name))
 		} else {
-			return diag.FromErr(fmt.Errorf("no nic found with the specified name %s", name))
+			nic = results[0]
 		}
 	}
 

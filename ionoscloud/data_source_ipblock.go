@@ -118,13 +118,13 @@ func datasourceIpBlockRead(ctx context.Context, data *schema.ResourceData, meta 
 			return diag.FromErr(fmt.Errorf("error getting ip block with id %s %s", id.(string), err))
 		}
 		if nameOk {
-			if *ipBlock.Properties.Name != name {
+			if ipBlock.Properties != nil && *ipBlock.Properties.Name != name {
 				return diag.FromErr(fmt.Errorf("name of ip block (UUID=%s, name=%s) does not match expected name: %s",
 					*ipBlock.Id, *ipBlock.Properties.Name, name))
 			}
 		}
 		if locationOk {
-			if *ipBlock.Properties.Location != location {
+			if ipBlock.Properties != nil && *ipBlock.Properties.Location != location {
 				return diag.FromErr(fmt.Errorf("location of ip block (UUID=%s, location=%s) does not match expected location: %s",
 					*ipBlock.Id, *ipBlock.Properties.Location, location))
 			}
@@ -132,31 +132,54 @@ func datasourceIpBlockRead(ctx context.Context, data *schema.ResourceData, meta 
 		log.Printf("[INFO] Got ip block [Name=%s, Location=%s]", *ipBlock.Properties.Name, *ipBlock.Properties.Location)
 	} else {
 
-		var results ionoscloud.IpBlocks
-
-		request := client.IPBlocksApi.IpblocksGet(ctx).Depth(1)
-
-		if nameOk {
-			request = request.Filter("name", name)
-		}
-
-		if locationOk {
-			request = request.Filter("location", location)
-		}
-
-		results, apiResponse, err := request.Execute()
+		ipBlocks, apiResponse, err := client.IPBlocksApi.IpblocksGet(ctx).Depth(1).Execute()
 		logApiRequestTime(apiResponse)
 
 		if err != nil {
-			return diag.FromErr(fmt.Errorf("an error occurred while fetching ip blocks: %s", err.Error()))
+			return diag.FromErr(fmt.Errorf("an error occured while fetching ipBlocks: %s ", err))
 		}
 
-		if results.Items != nil && len(*results.Items) > 0 {
-			ipBlock = (*results.Items)[len(*results.Items)-1]
-			log.Printf("[WARN] %v ip blocks found matching the search criteria. Getting the latest ip block from the list %v", len(*results.Items), *ipBlock.Id)
-		} else {
-			return diag.FromErr(fmt.Errorf("no ip block found with the specified criteria: name %s, location %s", name, location))
+		var results []ionoscloud.IpBlock
+
+		if nameOk && ipBlocks.Items != nil {
+			for _, block := range *ipBlocks.Items {
+				if block.Properties != nil && block.Properties.Name != nil && *block.Properties.Name == name {
+					results = append(results, block)
+				}
+			}
+
+			if results == nil {
+				return diag.FromErr(fmt.Errorf("no ip block found with the specified criteria name %s", name))
+			}
 		}
+
+		if locationOk {
+			if results != nil {
+				var locationResults []ionoscloud.IpBlock
+				for _, block := range results {
+					if block.Properties != nil && block.Properties.Location != nil && *block.Properties.Location == location {
+						locationResults = append(locationResults, block)
+					}
+				}
+				results = locationResults
+			} else if ipBlocks.Items != nil {
+				/* find the first ipblock matching the location */
+				for _, block := range *ipBlocks.Items {
+					if block.Properties != nil && block.Properties.Location != nil && *block.Properties.Location == location {
+						results = append(results, block)
+					}
+				}
+			}
+		}
+
+		if results == nil || len(results) == 0 {
+			return diag.FromErr(fmt.Errorf("no ip block found with the specified criteria name = %s, location = %s", name, location))
+		} else if len(results) > 1 {
+			return diag.FromErr(fmt.Errorf("more than one ip block found with the specified criteria name = %s, location = %s", name, location))
+		} else {
+			ipBlock = results[0]
+		}
+
 	}
 
 	if err := IpBlockSetData(data, &ipBlock); err != nil {

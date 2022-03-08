@@ -57,8 +57,8 @@ func TestAccNatGatewayBasic(t *testing.T) {
 				),
 			},
 			{
-				Config:      testAccDataSourceNatGatewayWrongName,
-				ExpectError: regexp.MustCompile(`no nat gateway found with the specified name`),
+				Config:      testAccDataSourceNatGatewayWrongNameError,
+				ExpectError: regexp.MustCompile(`no nat gateway found with the specified criteria`),
 			},
 			{
 				Config: fmt.Sprintf(testAccCheckNatGatewayConfigUpdate, UpdatedResources),
@@ -217,7 +217,7 @@ data ` + NatGatewayResource + ` ` + NatGatewayDataSourceByName + `  {
 }
 `
 
-const testAccDataSourceNatGatewayWrongName = testAccCheckNatGatewayConfigBasic + `
+const testAccDataSourceNatGatewayWrongNameError = testAccCheckNatGatewayConfigBasic + `
 data ` + NatGatewayResource + ` ` + NatGatewayDataSourceByName + `  {
   datacenter_id = ` + DatacenterResource + `.natgateway_datacenter.id
   name			= "wrong_name"

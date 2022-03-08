@@ -8,7 +8,6 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 	ionoscloud "github.com/ionos-cloud/sdk-go/v6"
-	"log"
 )
 
 func dataSourceLan() *schema.Resource {
@@ -95,10 +94,7 @@ func dataSourceLanRead(ctx context.Context, d *schema.ResourceData, meta interfa
 	var lan ionoscloud.Lan
 	var err error
 	var apiResponse *ionoscloud.APIResponse
-	ctx, cancel := context.WithTimeout(context.Background(), *resourceDefaultTimeouts.Default)
-	if cancel != nil {
-		defer cancel()
-	}
+
 	if idOk {
 		/* search by ID */
 		lan, apiResponse, err = client.LANsApi.DatacentersLansFindById(ctx, datacenterId.(string), id.(string)).Execute()
@@ -108,19 +104,37 @@ func dataSourceLanRead(ctx context.Context, d *schema.ResourceData, meta interfa
 		}
 	} else {
 		/* search by name */
-		lans, apiResponse, err := client.LANsApi.DatacentersLansGet(ctx, datacenterId.(string)).Depth(1).Filter("name", name.(string)).Execute()
+		var lans ionoscloud.Lans
+
+		lans, apiResponse, err := client.LANsApi.DatacentersLansGet(ctx, datacenterId.(string)).Depth(1).Execute()
 		logApiRequestTime(apiResponse)
 		if err != nil {
 			return diag.FromErr(fmt.Errorf("an error occurred while fetching lans: %s", err.Error()))
 		}
 
-		if lans.Items != nil && len(*lans.Items) > 0 {
-			lan = (*lans.Items)[len(*lans.Items)-1]
-			log.Printf("[WARN] %v lans found matching the search criteria. Getting the latest lan from the list %v", len(*lans.Items), *lan.Id)
-		} else {
-			return diag.FromErr(fmt.Errorf("no lan found with the specified name %s", name.(string)))
+		var results []ionoscloud.Lan
+
+		if lans.Items != nil {
+			for _, l := range *lans.Items {
+				if l.Properties != nil && l.Properties.Name != nil && *l.Properties.Name == name.(string) {
+					/* lan found */
+					lan, apiResponse, err = client.LANsApi.DatacentersLansFindById(ctx, datacenterId.(string), *l.Id).Execute()
+					logApiRequestTime(apiResponse)
+					if err != nil {
+						return diag.FromErr(fmt.Errorf("an error occurred while fetching lan %s: %w", *l.Id, err))
+					}
+					results = append(results, l)
+				}
+			}
 		}
 
+		if results == nil || len(results) == 0 {
+			return diag.FromErr(fmt.Errorf("no lan found with the specified name: %s", name))
+		} else if len(results) > 1 {
+			return diag.FromErr(fmt.Errorf("more than one lan found with the specified criteria name: %s", name))
+		} else {
+			lan = results[0]
+		}
 	}
 
 	if err = setLanData(d, &lan); err != nil {

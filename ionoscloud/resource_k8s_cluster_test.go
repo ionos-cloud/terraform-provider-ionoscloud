@@ -7,6 +7,7 @@ import (
 	"context"
 	"fmt"
 	ionoscloud "github.com/ionos-cloud/sdk-go/v6"
+	"regexp"
 	"testing"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
@@ -28,7 +29,7 @@ func TestAccK8sClusterBasic(t *testing.T) {
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckK8sClusterExists(K8sClusterResource+"."+K8sClusterTestResource, &k8sCluster),
 					resource.TestCheckResourceAttr(K8sClusterResource+"."+K8sClusterTestResource, "name", K8sClusterTestResource),
-					resource.TestCheckResourceAttr(K8sClusterResource+"."+K8sClusterTestResource, "k8s_version", "1.19.10"),
+					resource.TestCheckResourceAttr(K8sClusterResource+"."+K8sClusterTestResource, "k8s_version", "1.20.10"),
 					resource.TestCheckResourceAttr(K8sClusterResource+"."+K8sClusterTestResource, "public", "true"),
 					resource.TestCheckResourceAttr(K8sClusterResource+"."+K8sClusterTestResource, "maintenance_window.0.day_of_the_week", "Sunday"),
 					resource.TestCheckResourceAttr(K8sClusterResource+"."+K8sClusterTestResource, "maintenance_window.0.time", "09:00:00Z"),
@@ -61,11 +62,15 @@ func TestAccK8sClusterBasic(t *testing.T) {
 				),
 			},
 			{
+				Config:      testAccDataSourceDatacenterWrongNameError,
+				ExpectError: regexp.MustCompile("no cluster found with the specified name"),
+			},
+			{
 				Config: testAccCheckK8sClusterConfigUpdate,
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckK8sClusterExists(K8sClusterResource+"."+K8sClusterTestResource, &k8sCluster),
 					resource.TestCheckResourceAttr(K8sClusterResource+"."+K8sClusterTestResource, "name", UpdatedResources),
-					resource.TestCheckResourceAttr(K8sClusterResource+"."+K8sClusterTestResource, "k8s_version", "1.19.10"),
+					resource.TestCheckResourceAttr(K8sClusterResource+"."+K8sClusterTestResource, "k8s_version", "1.20.10"),
 					resource.TestCheckResourceAttr(K8sClusterResource+"."+K8sClusterTestResource, "public", "true"),
 					resource.TestCheckResourceAttr(K8sClusterResource+"."+K8sClusterTestResource, "maintenance_window.0.day_of_the_week", "Monday"),
 					resource.TestCheckResourceAttr(K8sClusterResource+"."+K8sClusterTestResource, "maintenance_window.0.time", "10:30:00Z"),
@@ -78,7 +83,7 @@ func TestAccK8sClusterBasic(t *testing.T) {
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckK8sClusterExists(K8sClusterResource+"."+K8sClusterTestResource, &k8sCluster),
 					resource.TestCheckResourceAttr(K8sClusterResource+"."+K8sClusterTestResource, "name", UpdatedResources),
-					resource.TestCheckResourceAttr(K8sClusterResource+"."+K8sClusterTestResource, "k8s_version", "1.20.10"),
+					resource.TestCheckResourceAttr(K8sClusterResource+"."+K8sClusterTestResource, "k8s_version", "1.21.9"),
 					resource.TestCheckResourceAttr(K8sClusterResource+"."+K8sClusterTestResource, "public", "true"),
 					resource.TestCheckResourceAttr(K8sClusterResource+"."+K8sClusterTestResource, "maintenance_window.0.day_of_the_week", "Monday"),
 					resource.TestCheckResourceAttr(K8sClusterResource+"."+K8sClusterTestResource, "maintenance_window.0.time", "10:30:00Z"),
@@ -184,21 +189,21 @@ func testAccCheckK8sClusterExists(n string, k8sCluster *ionoscloud.KubernetesClu
 const testAccCheckK8sClusterConfigBasic = `
 resource ` + K8sClusterResource + ` ` + K8sClusterTestResource + ` {
   name        = "` + K8sClusterTestResource + `"
-  k8s_version = "1.19.10"
+  k8s_version = "1.20.10"
   maintenance_window {
     day_of_the_week = "Sunday"
     time            = "09:00:00Z"
   }
   api_subnet_allow_list = ["1.2.3.4/32"]
   s3_buckets { 
-     name = "test_k8s_terraform"
+     name = "test_k8d"
   }
 }`
 
 const testAccCheckK8sClusterConfigUpdate = `
 resource ` + K8sClusterResource + ` ` + K8sClusterTestResource + ` {
   name        = "` + UpdatedResources + `"
-  k8s_version = "1.19.14"
+  k8s_version = "1.20.14"
   public = "true"
   maintenance_window {
     day_of_the_week = "Monday"
@@ -211,7 +216,7 @@ resource ` + K8sClusterResource + ` ` + K8sClusterTestResource + ` {
 const testAccCheckk8sClusterConfigUpdateVersion = `
 resource ` + K8sClusterResource + ` ` + K8sClusterTestResource + ` {
   name        = "` + UpdatedResources + `"
-  k8s_version = "1.20.10"
+  k8s_version = "1.21.9"
   maintenance_window {
     day_of_the_week = "Monday"
     time            = "10:30:00Z"
@@ -223,7 +228,7 @@ resource ` + K8sClusterResource + ` ` + K8sClusterTestResource + ` {
 const testAccCheckK8sClusterConfigPrivateCluster = `
 resource ` + K8sClusterResource + ` ` + K8sClusterTestResource + ` {
   name        = "` + K8sClusterTestResource + `"
-  k8s_version = "1.20.10"
+  k8s_version = "1.21.9"
   maintenance_window {
     day_of_the_week = "Sunday"
     time            = "09:00:00Z"
@@ -244,5 +249,11 @@ data ` + K8sClusterResource + ` ` + K8sClusterDataSourceById + `{
 const testAccDataSourceK8sClusterMatchName = testAccCheckK8sClusterConfigBasic + `
 data ` + K8sClusterResource + ` ` + K8sClusterDataSourceByName + `{
   name	= "` + K8sClusterTestResource + `"
+}
+`
+
+const testAccDataSourceK8sClusterWrongNameError = testAccCheckK8sClusterConfigBasic + `
+data ` + K8sClusterResource + ` ` + K8sClusterDataSourceByName + `{
+  name	= "wrong_name"
 }
 `

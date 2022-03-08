@@ -70,6 +70,10 @@ func TestAccIPBlockBasic(t *testing.T) {
 				),
 			},
 			{
+				Config:      testAccDataSourceIpBlockMultipleResultsError,
+				ExpectError: regexp.MustCompile(`more than one ip block found with the specified criteria`),
+			},
+			{
 				Config:      testAccDataSourceIpBlockNameError,
 				ExpectError: regexp.MustCompile(`no ip block found with the specified criteria`),
 			},
@@ -199,6 +203,17 @@ data ` + IpBlockResource + ` ` + IpBlockDataSourceMatching + ` {
 }`
 
 const testAccDataSourceIpBlockMatchName = testAccCheckIPBlockConfigBasic + `
+data ` + IpBlockResource + ` ` + IpBlockDataSourceByName + ` { 
+	name = ` + fullIpBlockResourceName + `.name
+}`
+
+const testAccDataSourceIpBlockMultipleResultsError = testAccCheckIPBlockConfigBasic + `
+resource ` + IpBlockResource + ` ` + IpBlockTestResource + `_same_name{
+  location = "` + location + `"
+  size = 2
+  name = ` + fullIpBlockResourceName + `.name
+}
+
 data ` + IpBlockResource + ` ` + IpBlockDataSourceByName + ` { 
 	name = ` + fullIpBlockResourceName + `.name
 }`

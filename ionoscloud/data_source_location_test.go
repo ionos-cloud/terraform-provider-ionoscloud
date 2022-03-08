@@ -26,7 +26,7 @@ func TestAccDataSourceLocationBasic(t *testing.T) {
 				),
 			},
 			{
-				Config:      testAccDataSourceLocationWrongName,
+				Config:      testAccDataSourceLocationWrongNameError,
 				ExpectError: regexp.MustCompile("no location found with the specified criteria"),
 			},
 			{
@@ -44,7 +44,7 @@ data ` + LocationResource + ` ` + LocationTestResource + ` {
 	  feature = "SSD"
 }
 `
-const testAccDataSourceLocationWrongName = `
+const testAccDataSourceLocationWrongNameError = `
 data ` + LocationResource + ` ` + LocationTestResource + ` {
 	  name = "wrong_name"
 	  feature = "SSD"

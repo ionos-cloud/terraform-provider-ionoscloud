@@ -76,8 +76,8 @@ func TestAccVolumeBasic(t *testing.T) {
 					resource.TestCheckResourceAttrPair(DataSource+"."+VolumeResource+"."+VolumeDataSourceByName, "boot_server", ServerResource+"."+ServerTestResource, "id")),
 			},
 			{
-				Config:      testAccDataSourceVolumeWrongName,
-				ExpectError: regexp.MustCompile(`no volume found with the specified name`),
+				Config:      testAccDataSourceVolumeWrongNameError,
+				ExpectError: regexp.MustCompile(`no volume found with the specified criteria: name`),
 			},
 			{
 				Config: testAccCheckVolumeConfigUpdate,
@@ -214,7 +214,7 @@ func testAccCheckVolumeExists(n string, volume *ionoscloud.Volume) resource.Test
 	}
 }
 
-const testAccCheckVolumeConfigBasic = testAccCheckLanConfigBasic + testAccCheckBackupUnitConfigBasic + `
+const testAccCheckVolumeConfigBasic = testAccCheckLanConfigBasic + `
 resource ` + ServerResource + ` ` + ServerTestResource + `{
   name = "` + ServerTestResource + `"
   datacenter_id = ` + DatacenterResource + `.` + DatacenterTestResource + `.id
@@ -245,11 +245,10 @@ resource ` + VolumeResource + ` ` + VolumeTestResource + ` {
 	bus = "VIRTIO"
 	image_name ="Debian-10-cloud-init.qcow2"
 	image_password = "K3tTj8G14a3EgKyNeeiY"
-	backup_unit_id = ` + BackupUnitResource + `.` + BackupUnitTestResource + `.id
 	user_data = "foo"
 }`
 
-const testAccCheckVolumeConfigUpdate = testAccCheckBackupUnitConfigBasic + testAccCheckLanConfigBasic + `
+const testAccCheckVolumeConfigUpdate = testAccCheckLanConfigBasic + `
 resource ` + ServerResource + ` ` + ServerTestResource + `updated {
   name = "` + ServerTestResource + `"
   datacenter_id = ` + DatacenterResource + `.` + DatacenterTestResource + `.id
@@ -280,7 +279,6 @@ resource ` + VolumeResource + ` ` + VolumeTestResource + ` {
 	bus = "VIRTIO"
 	image_name ="Debian-10-cloud-init.qcow2"
 	image_password = "K3tTj8G14a3EgKyNeeiYupdated"
-	backup_unit_id = ` + BackupUnitResource + `.` + BackupUnitTestResource + `.id
 	user_data = "foo"
 }`
 
@@ -298,7 +296,7 @@ data ` + VolumeResource + ` ` + VolumeDataSourceByName + ` {
 }
 `
 
-var testAccDataSourceVolumeWrongName = testAccCheckVolumeConfigBasic + `
+var testAccDataSourceVolumeWrongNameError = testAccCheckVolumeConfigBasic + `
 data ` + VolumeResource + ` ` + VolumeDataSourceByName + ` {
   datacenter_id = ` + DatacenterResource + `.` + DatacenterTestResource + `.id
   name			= "wrong_name"

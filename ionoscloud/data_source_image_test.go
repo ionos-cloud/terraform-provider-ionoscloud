@@ -28,7 +28,7 @@ func TestAccDataSourceImageBasic(t *testing.T) {
 				),
 			},
 			{
-				Config:      testAccDataSourceImageWrongName,
+				Config:      testAccDataSourceImageWrongNameError,
 				ExpectError: regexp.MustCompile("no image found with the specified criteria"),
 			},
 			{
@@ -62,7 +62,7 @@ const testAccDataSourceImageBasic = `
 	}
 `
 
-const testAccDataSourceImageWrongName = `
+const testAccDataSourceImageWrongNameError = `
 	data ` + ImageResource + ` ` + ImageTestResource + ` {
 	  name = "wrong_name"
 	  type = "CDROM"

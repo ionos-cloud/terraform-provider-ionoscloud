@@ -1,4 +1,4 @@
-//go:build compute || all || backup
+//go:build all || backup
 
 package ionoscloud
 
@@ -49,7 +49,7 @@ func TestAccBackupUnitBasic(t *testing.T) {
 				),
 			},
 			{
-				Config:      testAccDataSourceBackupUnitMatchWrongName,
+				Config:      testAccDataSourceBackupUnitMatchWrongNameError,
 				ExpectError: regexp.MustCompile("no backup unit found with the specified name"),
 			},
 			{
@@ -162,12 +162,18 @@ data ` + BackupUnitResource + ` ` + BackupUnitDataSourceById + ` {
 `
 
 const testAccDataSourceBackupUnitMatchName = testAccCheckBackupUnitConfigBasic + `
+resource ` + BackupUnitResource + ` ` + BackupUnitTestResource + `similar {
+	name        = "similar` + BackupUnitTestResource + `"
+	password    = "DemoPassword1234$Updated"
+	email       = "example-updated@ionoscloud.com"
+}
+
 data ` + BackupUnitResource + ` ` + BackupUnitDataSourceByName + ` {
   name			= "` + BackupUnitTestResource + `"
 }
 `
 
-const testAccDataSourceBackupUnitMatchWrongName = testAccCheckBackupUnitConfigBasic + `
+const testAccDataSourceBackupUnitMatchWrongNameError = testAccCheckBackupUnitConfigBasic + `
 data ` + BackupUnitResource + ` ` + BackupUnitDataSourceByName + ` {
   name			= "wrong_name"
 }

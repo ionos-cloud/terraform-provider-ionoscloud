@@ -43,18 +43,6 @@ func TestAccNatGatewayRuleBasic(t *testing.T) {
 				),
 			},
 			{
-				Config: fmt.Sprintf(testAccCheckNatGatewayRuleConfigUpdate, UpdatedResources),
-				Check: resource.ComposeTestCheckFunc(
-					resource.TestCheckResourceAttr(resourceNatGatewayRuleResource, "name", UpdatedResources),
-					resource.TestCheckResourceAttr(resourceNatGatewayRuleResource, "type", "SNAT"),
-					resource.TestCheckResourceAttr(resourceNatGatewayRuleResource, "protocol", "UDP"),
-					resource.TestCheckResourceAttr(resourceNatGatewayRuleResource, "source_subnet", "10.3.1.0/24"),
-					resource.TestCheckResourceAttrPair(resourceNatGatewayRuleResource, "public_ip", IpBlockResource+".natgateway_rule_ips", "ips.0"),
-					resource.TestCheckResourceAttr(resourceNatGatewayRuleResource, "target_subnet", "172.31.0.0/24"),
-					resource.TestCheckResourceAttr(resourceNatGatewayRuleResource, "target_port_range.0.start", "200"),
-					resource.TestCheckResourceAttr(resourceNatGatewayRuleResource, "target_port_range.0.end", "1111")),
-			},
-			{
 				Config: fmt.Sprintf(testAccDataSourceNatGatewayRuleMatchId, NatGatewayRuleTestResource),
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttrPair(dataSourceIdNatGatewayRuleResource, "name", resourceNatGatewayRuleResource, "name"),
@@ -81,8 +69,20 @@ func TestAccNatGatewayRuleBasic(t *testing.T) {
 				),
 			},
 			{
-				Config:      fmt.Sprintf(testAccDataSourceNatGatewayRuleWrongName, NatGatewayRuleTestResource),
-				ExpectError: regexp.MustCompile(`no nat gateway rule found with the specified name`),
+				Config:      fmt.Sprintf(testAccDataSourceNatGatewayRuleWrongNameError, NatGatewayRuleTestResource),
+				ExpectError: regexp.MustCompile(`no nat gateway rule found with the specified criteria: name`),
+			},
+			{
+				Config: fmt.Sprintf(testAccCheckNatGatewayRuleConfigUpdate, UpdatedResources),
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttr(resourceNatGatewayRuleResource, "name", UpdatedResources),
+					resource.TestCheckResourceAttr(resourceNatGatewayRuleResource, "type", "SNAT"),
+					resource.TestCheckResourceAttr(resourceNatGatewayRuleResource, "protocol", "UDP"),
+					resource.TestCheckResourceAttr(resourceNatGatewayRuleResource, "source_subnet", "10.3.1.0/24"),
+					resource.TestCheckResourceAttrPair(resourceNatGatewayRuleResource, "public_ip", IpBlockResource+".natgateway_rule_ips", "ips.0"),
+					resource.TestCheckResourceAttr(resourceNatGatewayRuleResource, "target_subnet", "172.31.0.0/24"),
+					resource.TestCheckResourceAttr(resourceNatGatewayRuleResource, "target_port_range.0.start", "200"),
+					resource.TestCheckResourceAttr(resourceNatGatewayRuleResource, "target_port_range.0.end", "1111")),
 			},
 		},
 	})
@@ -257,7 +257,7 @@ data ` + NatGatewayRuleResource + ` ` + NatGatewayRuleDataSourceByName + ` {
 }
 `
 
-const testAccDataSourceNatGatewayRuleWrongName = testAccCheckNatGatewayRuleConfigBasic + `
+const testAccDataSourceNatGatewayRuleWrongNameError = testAccCheckNatGatewayRuleConfigBasic + `
 data ` + NatGatewayRuleResource + ` ` + NatGatewayRuleDataSourceByName + ` {
   datacenter_id = ` + DatacenterResource + `.natgateway_rule_datacenter.id
   natgateway_id = ` + NatGatewayResource + `.natgateway.id

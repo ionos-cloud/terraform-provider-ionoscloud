@@ -7,7 +7,6 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	ionoscloud "github.com/ionos-cloud/sdk-go/v6"
-	"log"
 )
 
 func dataSourceNatGatewayRule() *schema.Resource {
@@ -116,12 +115,6 @@ func dataSourceNatGatewayRuleRead(ctx context.Context, d *schema.ResourceData, m
 	var err error
 	var apiResponse *ionoscloud.APIResponse
 
-	ctx, cancel := context.WithTimeout(context.Background(), *resourceDefaultTimeouts.Default)
-
-	if cancel != nil {
-		defer cancel()
-	}
-
 	if idOk {
 		/* search by ID */
 		natGatewayRule, apiResponse, err = client.NATGatewaysApi.DatacentersNatgatewaysRulesFindByNatGatewayRuleId(ctx, datacenterId.(string), natgatewayId.(string), id.(string)).Execute()
@@ -131,18 +124,37 @@ func dataSourceNatGatewayRuleRead(ctx context.Context, d *schema.ResourceData, m
 		}
 	} else {
 		/* search by name */
-		natGatewayRules, apiResponse, err := client.NATGatewaysApi.DatacentersNatgatewaysRulesGet(ctx, datacenterId.(string), natgatewayId.(string)).Depth(1).Filter("name", name.(string)).Execute()
+		var natGatewayRules ionoscloud.NatGatewayRules
+
+		natGatewayRules, apiResponse, err := client.NATGatewaysApi.DatacentersNatgatewaysRulesGet(ctx, datacenterId.(string), natgatewayId.(string)).Execute()
 		logApiRequestTime(apiResponse)
 		if err != nil {
 			return diag.FromErr(fmt.Errorf("an error occurred while fetching nat gateway rules: %s", err.Error()))
 		}
 
-		if natGatewayRules.Items != nil && len(*natGatewayRules.Items) > 0 {
-			natGatewayRule = (*natGatewayRules.Items)[len(*natGatewayRules.Items)-1]
-			log.Printf("[WARN] %v nat gateway rules found matching the search criteria. Getting the latest nat gateway rule from the list %v", len(*natGatewayRules.Items), *natGatewayRule.Id)
-		} else {
-			return diag.FromErr(fmt.Errorf("no nat gateway rule found with the specified name %s", name.(string)))
+		var results []ionoscloud.NatGatewayRule
+		if natGatewayRules.Items != nil {
+			for _, c := range *natGatewayRules.Items {
+				tmpNatGatewayRule, apiResponse, err := client.NATGatewaysApi.DatacentersNatgatewaysRulesFindByNatGatewayRuleId(ctx, datacenterId.(string), natgatewayId.(string), *c.Id).Execute()
+				logApiRequestTime(apiResponse)
+				if err != nil {
+					return diag.FromErr(fmt.Errorf("an error occurred while fetching nat gateway rule with ID %s: %s", *c.Id, err.Error()))
+				}
+				if tmpNatGatewayRule.Properties != nil && tmpNatGatewayRule.Properties.Name != nil && *tmpNatGatewayRule.Properties.Name == name.(string) {
+					results = append(results, tmpNatGatewayRule)
+				}
+
+			}
 		}
+
+		if results == nil || len(results) == 0 {
+			return diag.FromErr(fmt.Errorf("no nat gateway rule found with the specified criteria: name = %s", name.(string)))
+		} else if len(results) > 1 {
+			return diag.FromErr(fmt.Errorf("more than one nat gateway rule found with the specified criteria: name = %s", name.(string)))
+		} else {
+			natGatewayRule = results[0]
+		}
+
 	}
 
 	if err = setNatGatewayRuleData(d, &natGatewayRule); err != nil {

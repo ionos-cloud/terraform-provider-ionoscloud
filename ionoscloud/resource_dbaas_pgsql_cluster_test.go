@@ -9,6 +9,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
 	dbaas "github.com/ionos-cloud/sdk-go-dbaas-postgres"
+	"regexp"
 	"testing"
 )
 
@@ -83,6 +84,10 @@ func TestAccDBaaSPgSqlClusterBasic(t *testing.T) {
 					resource.TestCheckResourceAttrPair(DataSource+"."+DBaaSClusterResource+"."+DBaaSClusterTestDataSourceByName, "credentials.username", DBaaSClusterResource+"."+DBaaSClusterTestResource, "credentials.username"),
 					resource.TestCheckResourceAttrPair(DataSource+"."+DBaaSClusterResource+"."+DBaaSClusterTestDataSourceByName, "credentials.password", DBaaSClusterResource+"."+DBaaSClusterTestResource, "credentials.password"),
 				),
+			},
+			{
+				Config:      testAccDataSourceDBaaSPgSqlClusterWrongNameError,
+				ExpectError: regexp.MustCompile("no DBaaS cluster found with the specified name"),
 			},
 			{
 				Config: testAccDataSourceDbaasPgSqlClusterBackups,
@@ -436,6 +441,12 @@ data ` + DBaaSClusterResource + ` ` + DBaaSClusterTestDataSourceById + ` {
 const testAccDataSourceDBaaSPgSqlClusterMatchName = testAccCheckDbaasPgSqlClusterConfigBasic + `
 data ` + DBaaSClusterResource + ` ` + DBaaSClusterTestDataSourceByName + ` {
   display_name	= "` + DBaaSClusterTestResource + `"
+}
+`
+
+const testAccDataSourceDBaaSPgSqlClusterWrongNameError = testAccCheckDbaasPgSqlClusterConfigBasic + `
+data ` + DBaaSClusterResource + ` ` + DBaaSClusterTestDataSourceByName + ` {
+  display_name	= "wrong_name"
 }
 `
 

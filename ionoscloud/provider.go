@@ -169,7 +169,8 @@ func providerConfigure(d *schema.ResourceData, terraformVersion string) (interfa
 	if os.Getenv("IONOS_DEBUG") != "" {
 		newConfig.Debug = true
 	}
-
+	newConfig.MaxRetries = 999
+	newConfig.WaitTime = 4 * time.Second
 	newConfig.HTTPClient = &http.Client{Transport: createTransport()}
 
 	newClient := ionoscloud.NewAPIClient(newConfig)
@@ -196,12 +197,11 @@ func createTransport() *http.Transport {
 		Proxy:                 http.ProxyFromEnvironment,
 		DialContext:           dialer.DialContext,
 		DisableKeepAlives:     true,
-		ForceAttemptHTTP2:     true,
-		MaxIdleConns:          100,
-		IdleConnTimeout:       90 * time.Second,
+		IdleConnTimeout:       30 * time.Second,
 		TLSHandshakeTimeout:   15 * time.Second,
 		ExpectContinueTimeout: 1 * time.Second,
-		MaxIdleConnsPerHost:   runtime.GOMAXPROCS(0) + 1,
+		MaxIdleConnsPerHost:   3,
+		MaxConnsPerHost:       3,
 	}
 }
 

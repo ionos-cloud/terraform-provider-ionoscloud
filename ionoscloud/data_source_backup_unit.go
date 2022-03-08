@@ -66,18 +66,34 @@ func dataSourceBackupUnitRead(ctx context.Context, d *schema.ResourceData, meta 
 		}
 	} else {
 		/* search by name */
-		backupUnits, apiResponse, err := client.BackupUnitsApi.BackupunitsGet(ctx).Depth(1).Filter("name", name.(string)).Execute()
+		var backupUnits ionoscloud.BackupUnits
+
+		backupUnits, apiResponse, err := client.BackupUnitsApi.BackupunitsGet(ctx).Depth(1).Execute()
 		logApiRequestTime(apiResponse)
 
 		if err != nil {
 			return diag.FromErr(fmt.Errorf("an error occurred while fetching backup unit: %s", err.Error()))
 		}
 
-		if backupUnits.Items != nil && len(*backupUnits.Items) > 0 {
-			backupUnit = (*backupUnits.Items)[len(*backupUnits.Items)-1]
-			log.Printf("[WARN] %v backup units found matching the search criteria. Getting the latest backup unit from the list %v", len(*backupUnits.Items), *backupUnit.Id)
+		var results []ionoscloud.BackupUnit
+		if backupUnits.Items != nil {
+			for _, bu := range *backupUnits.Items {
+				if bu.Properties != nil && bu.Properties.Name != nil && *bu.Properties.Name == name.(string) {
+					tmpBackupUnit, apiResponse, err := client.BackupUnitsApi.BackupunitsFindById(ctx, *bu.Id).Execute()
+					logApiRequestTime(apiResponse)
+					if err != nil {
+						return diag.FromErr(fmt.Errorf("an error occurred while fetching backup unit with ID %s: %s", *bu.Id, err.Error()))
+					}
+					results = append(results, tmpBackupUnit)
+				}
+
+			}
+		}
+
+		if results == nil || len(results) == 0 {
+			return diag.FromErr(fmt.Errorf("no backup unit found with the specified name %s", name))
 		} else {
-			return diag.FromErr(fmt.Errorf("no backup unit found with the specified name %s", name.(string)))
+			backupUnit = results[0]
 		}
 
 	}
