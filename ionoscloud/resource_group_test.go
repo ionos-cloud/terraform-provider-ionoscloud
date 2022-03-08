@@ -179,7 +179,7 @@ func testAccCheckGroupExists(n string, group *ionoscloud.Group) resource.TestChe
 	}
 }
 
-var testAccCheckGroupConfigBasic = `
+var testAccCheckGroupCreateUsers = `
 resource ` + UserResource + ` ` + UserTestResource + ` {
   first_name = "user"
   last_name = "test"
@@ -200,6 +200,9 @@ resource ` + UserResource + ` ` + UserTestResource + `2 {
   active = false
 }
 
+`
+
+var testAccCheckGroupConfigBasic = testAccCheckGroupCreateUsers + `
 resource ` + GroupResource + ` ` + GroupTestResource + ` {
   name = "` + GroupTestResource + `"
   create_datacenter = true
@@ -264,27 +267,7 @@ data ` + GroupResource + ` ` + GroupDataSourceByName + ` {
 }
 `
 
-var testAccCheckGroupConfigUpdate = `
-resource ` + UserResource + ` ` + UserTestResource + ` {
-  first_name = "user"
-  last_name = "test"
-  email = "` + GenerateEmail() + `"
-  password = "abc123-321CBA"
-  administrator = false
-  force_sec_auth= false
-  active = false
-}
-
-resource ` + UserResource + ` ` + UserTestResource + `2 {
-  first_name = "user"
-  last_name = "test"
-  email = "` + GenerateEmail() + `"
-  password = "abc123-321CBA"
-  administrator = false
-  force_sec_auth= false
-  active = false
-}
-
+var testAccCheckGroupConfigUpdate = testAccCheckGroupCreateUsers + `
 resource ` + UserResource + ` ` + UserTestResource + `3 {
   first_name = "user"
   last_name = "test"
