@@ -17,7 +17,7 @@ func TestAccGroupImportBasic(t *testing.T) {
 		CheckDestroy:      testAccCheckGroupDestroyCheck,
 		Steps: []resource.TestStep{
 			{
-				Config: testAccCheckGroupConfigBasic,
+				Config: testAccImportGroupConfigBasic,
 			},
 
 			{
@@ -44,3 +44,29 @@ func testAccGroupImportStateId(s *terraform.State) (string, error) {
 
 	return importID, nil
 }
+
+var testAccImportGroupConfigBasic = `
+resource ` + UserResource + ` ` + UserTestResource + ` {
+  first_name = "user"
+  last_name = "test"
+  email = "` + GenerateEmail() + `"
+  password = "abc123-321CBA"
+  administrator = false
+  force_sec_auth= false
+  active = false
+}
+
+resource ` + GroupResource + ` ` + GroupTestResource + ` {
+  name = "` + GroupTestResource + `"
+  create_datacenter = true
+  create_snapshot = true
+  reserve_ip = true
+  access_activity_log = true
+  create_pcc = true
+  s3_privilege = true
+  create_backup_unit = true
+  create_internet_access = true
+  create_k8s_cluster = true
+  user_ids = [` + UserResource + `.` + UserTestResource + `.id]
+}
+`
