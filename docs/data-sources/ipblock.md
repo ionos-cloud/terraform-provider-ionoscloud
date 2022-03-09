@@ -17,21 +17,25 @@ When this happens, please refine your search string so that it is specific enoug
 ## Example Usage
 
 ```hcl
-datasource "ionoscloud_ipblock" "example" {
+data "ionoscloud_ipblock" "example" {
   id =` <ipblock_id>`
 }
+``` 
 
 ```hcl
-datasource "ionoscloud_ipblock" "example" {
+data "ionoscloud_ipblock" "example" {
   name =` <ipblock_name>`
 }
+``` 
 
 ```hcl
-datasource "ionoscloud_ipblock" "example" {
+data "ionoscloud_ipblock" "example" {
   location =` <ipblock_location>`
 }
+``` 
 
-datasource "ionoscloud_ipblock" "example" {
+``` 
+data "ionoscloud_ipblock" "example" {
   name =` <ipblock_name>`
   location =` <ipblock_location>`
 }
