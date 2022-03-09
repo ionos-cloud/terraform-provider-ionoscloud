@@ -14,8 +14,8 @@ The DbaaS Postgres Backups data source can be used to search for and return exis
 ## Example Usage
 
 ```hcl
-data "ionoscloud_pg_backups" "test_ds_dbaas_backups" {
-	cluster_id = ionoscloud_pg_cluster.test_dbaas_cluster.id
+data "ionoscloud_pg_backups" "example" {
+	cluster_id = <cluster_id>
 }
 ```
 

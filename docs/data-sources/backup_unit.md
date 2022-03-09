@@ -9,13 +9,21 @@ description: |-
 
 # ionoscloud\_backup_unit
 
-The backup unit data source can be used to search for and return an existing Backup Unit. You can provide a string for either id or name parameters which will be compared with provisioned Backup Units. If a single match is found, it will be returned. If your search results in multiple matches, an error will be generated. When this happens, please refine your search string so that it is specific enough to return only one result.
+The **Backup Unit data source** can be used to search for and return an existing Backup Unit. You can provide a string for either id or name parameters which will be compared with provisioned Backup Units. If a single match is found, it will be returned. If your search results in multiple matches, an error will be generated. When this happens, please refine your search string so that it is specific enough to return only one result.
 
 ## Example Usage
 
+### By Id
 ```hcl
-data "ionoscloud_backup_unit" "test_backup_unit" {
-  name			= "test backup unit"
+data "ionoscloud_backup_unit" "example" {
+  id			= <backup_unit_id>
+}
+```
+
+### By Name
+```hcl
+data "ionoscloud_backup_unit" "example" {
+  name			= "backup example"
 }
 ```
 

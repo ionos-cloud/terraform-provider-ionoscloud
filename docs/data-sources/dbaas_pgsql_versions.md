@@ -15,14 +15,14 @@ The DbaaS Postgres Versions data source can be used to search for and retrieve l
 
 ### Retrieve list of postgres versions for a specific cluster
 ```hcl
-data "ionoscloud_pg_versions" "test_ds_dbaas_versions" {
-	cluster_id = ionoscloud_pg_cluster.test_dbaas_cluster.id
+data "ionoscloud_pg_versions" "example" {
+	cluster_id = <cluster_id>
 }
 ```
 
 ### Retrieve list of postgres versions for all clusters
 ```hcl
-data "ionoscloud_pg_versions" "test_ds_dbaas_versions" {
+data "ionoscloud_pg_versions" "example" {
 }
 ```
 

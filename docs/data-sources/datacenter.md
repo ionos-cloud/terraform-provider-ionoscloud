@@ -14,7 +14,7 @@ The data centers data source can be used to search for and return an existing Vi
 ## Example Usage
 
 ```hcl
-data "ionoscloud_datacenter" "dc_example" {
+data "ionoscloud_datacenter" "example" {
   name     = "test_dc"
   location = "us"
 }
