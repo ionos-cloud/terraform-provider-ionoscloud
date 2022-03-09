@@ -11,6 +11,8 @@ description: |-
 
 The share data source can be used to search for and return an existing share object.
 You need to provide the group_id and resource_id to get the group resources for the shared resource.
+If a single match is found, it will be returned. If your search results in multiple matches, an error will be returned.
+When this happens, please refine your search string so that it is specific enough to return only one result.
 
 ## Example Usage
 
