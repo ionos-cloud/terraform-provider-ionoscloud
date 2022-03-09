@@ -9,7 +9,10 @@ description: |-
 
 # ionoscloud_s3_key
 
-The s3 key data source can be used to search for and return an existing s3 key. You can provide a string id which will be compared with provisioned s3 keys. If a single match is found, it will be returned.
+The s3 key data source can be used to search for and return an existing s3 key.
+You can provide a string id which will be compared with provisioned s3 keys.
+If a single match is found, it will be returned. If your search results in multiple matches, an error will be returned.
+When this happens, please refine your search string so that it is specific enough to return only one result.
 
 ## Example Usage
 

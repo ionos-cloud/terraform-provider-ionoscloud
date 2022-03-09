@@ -9,7 +9,9 @@ description: |-
 
 # ionoscloud\_server
 
-The server data source can be used to search for and return existing servers.
+The server data source can be used to search for and return existing servers. 
+If a single match is found, it will be returned. If your search results in multiple matches, an error will be returned.
+When this happens, please refine your search string so that it is specific enough to return only one result.
 
 ## Example Usage
 
