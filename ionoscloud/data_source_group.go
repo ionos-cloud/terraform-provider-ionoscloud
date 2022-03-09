@@ -57,15 +57,15 @@ func dataSourceGroup() *schema.Resource {
 				Type:     schema.TypeBool,
 				Computed: true,
 			},
-			"user_id": {
-				Type:     schema.TypeString,
-				Computed: true,
-			},
 			"users": {
 				Type:     schema.TypeSet,
 				Computed: true,
 				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{
+						"id": {
+							Type:     schema.TypeString,
+							Computed: true,
+						},
 						"first_name": {
 							Type:     schema.TypeString,
 							Computed: true,

@@ -73,15 +73,22 @@ func resourceGroup() *schema.Resource {
 				Type:     schema.TypeBool,
 				Optional: true,
 			},
-			"user_id": {
-				Type:     schema.TypeString,
+			"user_ids": {
+				Type:     schema.TypeSet,
 				Optional: true,
+				Elem: &schema.Schema{
+					Type: schema.TypeString,
+				},
 			},
 			"users": {
 				Type:     schema.TypeSet,
 				Computed: true,
 				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{
+						"id": {
+							Type:     schema.TypeString,
+							Computed: true,
+						},
 						"first_name": {
 							Type:     schema.TypeString,
 							Computed: true,
@@ -110,8 +117,41 @@ func resourceGroup() *schema.Resource {
 				},
 			},
 		},
+		Timeouts:      &resourceDefaultTimeouts,
+		SchemaVersion: 1,
+		StateUpgraders: []schema.StateUpgrader{
+			{
+				Type:    resourceGroup0().CoreConfigSchema().ImpliedType(),
+				Upgrade: resourceGroupUpgradeV0,
+				Version: 0,
+			},
+		},
+	}
+}
+
+func resourceGroup0() *schema.Resource {
+	return &schema.Resource{
+		Schema: map[string]*schema.Schema{
+			"user_id": {
+				Type:     schema.TypeString,
+				Optional: true,
+			},
+		},
 		Timeouts: &resourceDefaultTimeouts,
 	}
+}
+
+func resourceGroupUpgradeV0(_ context.Context, state map[string]interface{}, _ interface{}) (map[string]interface{}, error) {
+	oldState := state
+	var oldData string
+	if d, ok := oldState["user_id"].(string); ok {
+		oldData = d
+		var users []string
+		users = append(users, oldData)
+		state["user_ids"] = users
+	}
+
+	return state, nil
 }
 
 func resourceGroupCreate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
@@ -121,7 +161,6 @@ func resourceGroupCreate(ctx context.Context, d *schema.ResourceData, meta inter
 		Properties: &ionoscloud.GroupProperties{},
 	}
 
-	log.Printf("[DEBUG] NAME %s", d.Get("name"))
 	groupName := d.Get("name").(string)
 	if d.Get("name") != nil {
 		request.Properties.Name = &groupName
@@ -152,8 +191,6 @@ func resourceGroupCreate(ctx context.Context, d *schema.ResourceData, meta inter
 	tempAccessAndManageCertificates := d.Get("access_and_manage_certificates").(bool)
 	request.Properties.AccessAndManageCertificates = &tempAccessAndManageCertificates
 
-	usertoAdd := d.Get("user_id").(string)
-
 	group, apiResponse, err := client.UserManagementApi.UmGroupsPost(ctx).Group(request).Execute()
 	logApiRequestTime(apiResponse)
 
@@ -178,21 +215,16 @@ func resourceGroupCreate(ctx context.Context, d *schema.ResourceData, meta inter
 	}
 
 	//add users to group if any is provided
-	if usertoAdd != "" {
-		user := ionoscloud.User{
-			Id: &usertoAdd,
-		}
-		_, apiResponse, err := client.UserManagementApi.UmGroupsUsersPost(ctx, d.Id()).User(user).Execute()
-		logApiRequestTime(apiResponse)
-		if err != nil {
-			diags := diag.FromErr(fmt.Errorf("an error occured while adding %s user to group ID %s %w", usertoAdd, d.Id(), err))
-			return diags
-		}
-		// Wait, catching any errors
-		_, errState := getStateChangeConf(meta, d, apiResponse.Header.Get("Location"), schema.TimeoutCreate).WaitForStateContext(ctx)
-		if errState != nil {
-			diags := diag.FromErr(errState)
-			return diags
+	if usersVal, usersOK := d.GetOk("user_ids"); usersOK {
+		usersList := usersVal.(*schema.Set)
+		if usersList.List() != nil {
+			for _, userItem := range usersList.List() {
+				userID := userItem.(string)
+				log.Printf("[INFO] Adding user %+v to group...", userID)
+				if err := addUserToGroup(userID, ctx, d, meta); err != nil {
+					return diag.FromErr(err)
+				}
+			}
 		}
 	}
 	return resourceGroupRead(ctx, d, meta)
@@ -236,8 +268,6 @@ func resourceGroupUpdate(ctx context.Context, d *schema.ResourceData, meta inter
 	tempAccessAndManageMonitoring := d.Get("access_and_manage_monitoring").(bool)
 	tempAccessAndManageCertificates := d.Get("access_and_manage_certificates").(bool)
 
-	userToAdd := d.Get("user_id").(string)
-
 	groupReq := ionoscloud.Group{
 		Properties: &ionoscloud.GroupProperties{
 			CreateDataCenter:            &tempCreateDataCenter,
@@ -272,27 +302,33 @@ func resourceGroupUpdate(ctx context.Context, d *schema.ResourceData, meta inter
 		return diags
 	}
 
-	//add users to group if any is provided
-	if userToAdd != "" {
+	if d.HasChange("user_ids") {
+		oldValues, newValues := d.GetChange("user_ids")
+		oldUsersList := convertSlice(oldValues.(*schema.Set).List())
+		newUsersList := convertSlice(newValues.(*schema.Set).List())
 
-		user := ionoscloud.User{
-			Id: &userToAdd,
+		newUsers := diffSliceOneWay(newUsersList, oldUsersList)
+		deletedUsers := diffSliceOneWay(oldUsersList, newUsersList)
+
+		if newUsers != nil && len(newUsers) > 0 {
+			log.Printf("[INFO] New users to add: %+v", newUsers)
+			for _, userID := range newUsers {
+				if err := addUserToGroup(userID, ctx, d, meta); err != nil {
+					return diag.FromErr(err)
+				}
+			}
 		}
 
-		_, apiResponse, err := client.UserManagementApi.UmGroupsUsersPost(ctx, d.Id()).User(user).Execute()
-		logApiRequestTime(apiResponse)
-		if err != nil {
-			diags := diag.FromErr(fmt.Errorf("an error occured while adding %s user to group ID %s %w", userToAdd, d.Id(), err))
-			return diags
-		}
-
-		// Wait, catching any errors
-		_, errState := getStateChangeConf(meta, d, apiResponse.Header.Get("Location"), schema.TimeoutCreate).WaitForStateContext(ctx)
-		if errState != nil {
-			diags := diag.FromErr(errState)
-			return diags
+		if deletedUsers != nil && len(deletedUsers) > 0 {
+			log.Printf("[INFO] Users to delete: %+v", deletedUsers)
+			for _, userID := range deletedUsers {
+				if err := deleteUserFromGroup(userID, ctx, d, meta); err != nil {
+					return diag.FromErr(err)
+				}
+			}
 		}
 	}
+
 	return resourceGroupRead(ctx, d, meta)
 }
 
@@ -430,6 +466,11 @@ func setGroupData(ctx context.Context, client *ionoscloud.APIClient, d *schema.R
 			usersEntries = make([]interface{}, len(*users.Items))
 			for userIndex, user := range *users.Items {
 				userEntry := make(map[string]interface{})
+
+				if user.Id != nil {
+					userEntry["id"] = *user.Id
+				}
+
 				if user.Properties != nil {
 					if user.Properties.Firstname != nil {
 						userEntry["first_name"] = *user.Properties.Firstname
@@ -460,6 +501,51 @@ func setGroupData(ctx context.Context, client *ionoscloud.APIClient, d *schema.R
 				}
 			}
 		}
+	}
+
+	return nil
+}
+
+func addUserToGroup(id string, ctx context.Context, d *schema.ResourceData, meta interface{}) error {
+	client := meta.(SdkBundle).CloudApiClient
+
+	userToAdd := ionoscloud.User{
+		Id: &id,
+	}
+	_, apiResponse, err := client.UserManagementApi.UmGroupsUsersPost(ctx, d.Id()).User(userToAdd).Execute()
+	logApiRequestTime(apiResponse)
+
+	if err != nil {
+		return fmt.Errorf("an error occured while adding %s user to group ID %s %w", id, d.Id(), err)
+	}
+
+	log.Printf("[INFO] Added user %s to group %s", id, d.Id())
+
+	// Wait, catching any errors
+	_, errState := getStateChangeConf(meta, d, apiResponse.Header.Get("Location"), schema.TimeoutCreate).WaitForStateContext(ctx)
+	if errState != nil {
+		return errState
+	}
+
+	return nil
+}
+
+func deleteUserFromGroup(id string, ctx context.Context, d *schema.ResourceData, meta interface{}) error {
+	client := meta.(SdkBundle).CloudApiClient
+
+	apiResponse, err := client.UserManagementApi.UmGroupsUsersDelete(ctx, d.Id(), id).Execute()
+	logApiRequestTime(apiResponse)
+
+	if err != nil {
+		return fmt.Errorf("an error occured while deleting %s user from group ID %s %w", id, d.Id(), err)
+	}
+
+	log.Printf("[INFO] Deleted user %s from group %s", id, d.Id())
+
+	// Wait, catching any errors
+	_, errState := getStateChangeConf(meta, d, apiResponse.Header.Get("Location"), schema.TimeoutCreate).WaitForStateContext(ctx)
+	if errState != nil {
+		return errState
 	}
 
 	return nil

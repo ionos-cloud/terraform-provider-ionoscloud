@@ -15,9 +15,9 @@ Manages users and list users and groups associated with that user.
 
 ```hcl
 resource "ionoscloud_user" "user" {
-  first_name = "terraform"
-  last_name = "test"
-  email = "%s"
+  first_name = "user"
+  last_name = "user"
+  email = "user@email.com"
   password = "abc123-321CBA"
   administrator = false
   force_sec_auth= false

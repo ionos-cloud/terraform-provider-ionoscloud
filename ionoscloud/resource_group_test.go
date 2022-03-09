@@ -179,7 +179,7 @@ func testAccCheckGroupExists(n string, group *ionoscloud.Group) resource.TestChe
 	}
 }
 
-var testAccCheckGroupConfigBasic = `
+var testAccCheckGroupCreateUsers = `
 resource ` + UserResource + ` ` + UserTestResource + ` {
   first_name = "user"
   last_name = "test"
@@ -190,6 +190,19 @@ resource ` + UserResource + ` ` + UserTestResource + ` {
   active = false
 }
 
+resource ` + UserResource + ` ` + UserTestResource + `2 {
+  first_name = "user"
+  last_name = "test"
+  email = "` + GenerateEmail() + `"
+  password = "abc123-321CBA"
+  administrator = false
+  force_sec_auth= false
+  active = false
+}
+
+`
+
+var testAccCheckGroupConfigBasic = testAccCheckGroupCreateUsers + `
 resource ` + GroupResource + ` ` + GroupTestResource + ` {
   name = "` + GroupTestResource + `"
   create_datacenter = true
@@ -201,7 +214,7 @@ resource ` + GroupResource + ` ` + GroupTestResource + ` {
   create_backup_unit = true
   create_internet_access = true
   create_k8s_cluster = true
-  user_id = ` + UserResource + `.` + UserTestResource + `.id
+  user_ids = [` + UserResource + `.` + UserTestResource + `.id, ` + UserResource + `.` + UserTestResource + `2.id]
 }
 `
 
@@ -254,9 +267,9 @@ data ` + GroupResource + ` ` + GroupDataSourceByName + ` {
 }
 `
 
-var testAccCheckGroupConfigUpdate = `
-resource ` + UserResource + ` resource_user_updated {
-  first_name = "updated"
+var testAccCheckGroupConfigUpdate = testAccCheckGroupCreateUsers + `
+resource ` + UserResource + ` ` + UserTestResource + `3 {
+  first_name = "user"
   last_name = "test"
   email = "` + GenerateEmail() + `"
   password = "abc123-321CBA"
@@ -276,6 +289,6 @@ resource ` + GroupResource + ` ` + GroupTestResource + ` {
   create_backup_unit = false
   create_internet_access = false
   create_k8s_cluster = false
-  user_id = ` + UserResource + `.resource_user_updated.id
+  user_ids = [` + UserResource + `.` + UserTestResource + `.id, ` + UserResource + `.` + UserTestResource + `3.id]
 }
 `

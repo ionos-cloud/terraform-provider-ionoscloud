@@ -67,6 +67,6 @@ resource ` + GroupResource + ` ` + GroupTestResource + ` {
   create_backup_unit = true
   create_internet_access = true
   create_k8s_cluster = true
-  user_id = ` + UserResource + `.` + UserTestResource + `.id
+  user_ids = [` + UserResource + `.` + UserTestResource + `.id]
 }
 `
