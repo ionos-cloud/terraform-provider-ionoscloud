@@ -36,7 +36,7 @@
     * [IpBlock](../docs/data-sources/ipblock.md)
     * [IP Failover](../docs/data-sources/ipfailover.md)
     * [Lan](../docs/data-sources/lan.md)
-    * [Location](../docs/data-sources/firewall.md)
+    * [Location](../docs/data-sources/location.md)
     * [Nic](../docs/data-sources/nic.md)
     * [Private Cross Connect](../docs/data-sources/private_crossconnect.md)
     * [Server](../docs/data-sources/server.md)
