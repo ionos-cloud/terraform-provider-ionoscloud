@@ -11,7 +11,7 @@ description: |-
 
 The ip block data source can be used to search for and return an existing Ip Block.
 You can provide a string for the id, the name or the location parameters which will be compared with the provisioned Ip Blocks.
-If a single match is found, it will be returned. If your search results in multiple matches, the first result found will be returned.
+If a single match is found, it will be returned. If your search results in multiple matches, an error will be returned.
 When this happens, please refine your search string so that it is specific enough to return only one result.
 
 ## Example Usage

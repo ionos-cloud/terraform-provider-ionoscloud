@@ -9,7 +9,7 @@ description: |-
 
 # ionoscloud\_snapshot
 
-The snapshots data source can be used to search for and return an existing snapshot which can then be used to provision a server.
+The snapshot data source can be used to search for and return an existing snapshot which can then be used to provision a server. If a single match is found, it will be returned. If your search results in multiple matches, an error will be returned. When this happens, please refine your search string so that it is specific enough to return only one result.
 
 ## Example Usage
 
@@ -20,6 +20,7 @@ data "ionoscloud_snapshot" "snapshot_example" {
   location = "location_id"
 }
 ```
+Note: The size argument is in GB
 
 ## Argument Reference
 
@@ -28,8 +29,10 @@ data "ionoscloud_snapshot" "snapshot_example" {
  * `location` - (Optional) Id of the existing snapshot's location.
  * `size` - (Optional) The size of the snapshot to look for.
 
-Either `name` or `id` must be provided. If none, or both are provided, the datasource will return an error. Additionally, you can add `location` and `size` along with the `name` argument for a more refined search.
-
+Either `name` or `id` must be provided. If none, or both are provided, the datasource will return an error. 
+Additionally, you can add `location` and `size` along with the `name` argument for a more refined search.
+If a single match is found, it will be returned. If your search results in multiple matches, an error will be returned.
+When this happens, please refine your search string so that it is specific enough to return only one result.
 
 ## Attributes Reference
 

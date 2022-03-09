@@ -9,7 +9,9 @@ description: |-
 
 # ionoscloud\_location
 
-The locations data source can be used to search for and return an existing location which can then be used elsewhere in the configuration.
+The location's data source can be used to search for and return an existing location which can then be used elsewhere in the configuration.
+If a single match is found, it will be returned. If your search results in multiple matches, an error will be returned.
+When this happens, please refine your search string so that it is specific enough to return only one result.
 
 ## Example Usage
 

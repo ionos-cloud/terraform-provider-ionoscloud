@@ -9,7 +9,10 @@ description: |-
 
 # ionoscloud\_firewall
 
-The firewall data source can be used to search for and return an existing FirewallRules. You can provide a string for either id or name parameters which will be compared with provisioned Firewall Rules. If a single match is found, it will be returned. If your search results in multiple matches, an error will be generated. When this happens, please refine your search string so that it is specific enough to return only one result.
+The firewall data source can be used to search for and return an existing FirewallRules. 
+You can provide a string for either id or name parameters which will be compared with provisioned Firewall Rules.
+If a single match is found, it will be returned. If your search results in multiple matches, an error will be returned. 
+When this happens, please refine your search string so that it is specific enough to return only one result.
 
 ## Example Usage
 
