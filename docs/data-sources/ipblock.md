@@ -19,7 +19,7 @@ When this happens, please refine your search string so that it is specific enoug
 ## Example Usage
 
 ```hcl
-datasource "ionoscloud_ipblock" "example" {
+data "ionoscloud_ipblock" "example" {
   id =` <ipblock_id>`
 }
 ```
