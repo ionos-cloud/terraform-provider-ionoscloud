@@ -29,6 +29,7 @@ func resourceK8sNodePool() *schema.Resource {
 				Type:         schema.TypeString,
 				Description:  "The desired name for the node pool",
 				Required:     true,
+				ForceNew:     true,
 				ValidateFunc: validation.All(validation.StringIsNotWhiteSpace),
 			},
 			"k8s_version": {
@@ -143,30 +144,33 @@ func resourceK8sNodePool() *schema.Resource {
 				Type:         schema.TypeString,
 				Description:  "The UUID of the VDC",
 				Required:     true,
-				ValidateFunc: validation.All(validation.StringIsNotWhiteSpace),
+				ValidateFunc: validation.All(validation.IsUUID),
 			},
 			"k8s_cluster_id": {
 				Type:         schema.TypeString,
 				Description:  "The UUID of an existing kubernetes cluster",
 				Required:     true,
-				ValidateFunc: validation.All(validation.StringIsNotWhiteSpace),
+				ValidateFunc: validation.All(validation.IsUUID),
 			},
 			"cpu_family": {
 				Type:         schema.TypeString,
 				Description:  "CPU Family",
 				Required:     true,
+				ForceNew:     true,
 				ValidateFunc: validation.All(validation.StringIsNotWhiteSpace),
 			},
 			"availability_zone": {
 				Type:         schema.TypeString,
 				Description:  "The compute availability zone in which the nodes should exist",
 				Required:     true,
+				ForceNew:     true,
 				ValidateFunc: validation.All(validation.StringIsNotWhiteSpace),
 			},
 			"storage_type": {
 				Type:         schema.TypeString,
 				Description:  "Storage type to use",
 				Required:     true,
+				ForceNew:     true,
 				ValidateFunc: validation.All(validation.StringIsNotWhiteSpace),
 			},
 			"node_count": {
@@ -177,16 +181,19 @@ func resourceK8sNodePool() *schema.Resource {
 			"cores_count": {
 				Type:        schema.TypeInt,
 				Description: "CPU cores count",
+				ForceNew:    true,
 				Required:    true,
 			},
 			"ram_size": {
 				Type:        schema.TypeInt,
 				Description: "The amount of RAM in MB",
+				ForceNew:    true,
 				Required:    true,
 			},
 			"storage_size": {
 				Type:        schema.TypeInt,
 				Description: "The total allocated storage capacity of a node in GB",
+				ForceNew:    true,
 				Required:    true,
 			},
 			"public_ips": {
@@ -200,6 +207,7 @@ func resourceK8sNodePool() *schema.Resource {
 			"gateway_ip": {
 				Type:        schema.TypeString,
 				Description: "Public IP address for the gateway performing source NAT for the node pool's nodes belonging to a private cluster. Required only if the node pool belongs to a private cluster.",
+				ForceNew:    true,
 				Optional:    true,
 			},
 			"labels": {
@@ -211,6 +219,12 @@ func resourceK8sNodePool() *schema.Resource {
 				Type:     schema.TypeMap,
 				Optional: true,
 				Elem:     &schema.Schema{Type: schema.TypeString},
+			},
+			"allow_replace": {
+				Type:        schema.TypeBool,
+				Optional:    true,
+				Default:     false,
+				Description: "When set to true, allows the update of immutable fields by destroying and re-creating the node pool",
 			},
 		},
 		Timeouts:      &resourceDefaultTimeouts,
@@ -226,6 +240,12 @@ func resourceK8sNodePool() *schema.Resource {
 }
 
 func checkNodePoolImmutableFields(_ context.Context, diff *schema.ResourceDiff, _ interface{}) error {
+
+	allowReplace := diff.Get("allow_replace").(bool)
+	//allows the immutable fields to be updated
+	if allowReplace {
+		return nil
+	}
 	//we do not want to check in case of resource creation
 	if diff.Id() == "" {
 		return nil
