@@ -33,7 +33,7 @@ resource "ionoscloud_lan" "example" {
 
 resource "ionoscloud_ipblock" "example" {
     location            = ionoscloud_datacenter.example.location
-    size                = 2
+    size                = 4
     name                = "IP Block Example"
 }
 
@@ -68,8 +68,8 @@ resource "ionoscloud_server" "example" {
         port_range_start  = 22
         port_range_end    = 22
 	    source_mac        = "00:0a:95:9d:68:17"
-	    source_ip         = ionoscloud_ipblock.webserver_ipblock.ips[2]
-	    target_ip         = ionoscloud_ipblock.webserver_ipblock.ips[3]
+	    source_ip         = ionoscloud_ipblock.example.ips[2]
+	    target_ip         = ionoscloud_ipblock.example.ips[3]
 	    type              = "EGRESS"
     }
   }
