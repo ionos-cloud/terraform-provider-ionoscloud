@@ -92,6 +92,11 @@ The following arguments are supported:
 - `labels` - (Optional)[map] A key/value map of labels
 - `annotations` - (Optional)[map] A key/value map of annotations
 - `gateway_ip` - (Optional)[string] Public IP address for the gateway performing source NAT for the node pool's nodes belonging to a private cluster. Required only if the node pool belongs to a private cluster.
+- `allow_replace` - (Optional)[bool] When set to true, allows the update of immutable fields by destroying and re-creating the node pool.
+
+⚠️ **_Warning: `allow_replace` - will let you update immutable fields, but it will destroy and re-create the node pool in order to do it. Set the field to true only if you know what you are doing._**
+
+Immutable fields list: name, cpu_family, availability_zone, cores_count, ram_size, storage_size, storage_type, gateway_ip. 
 
 ## Import
 
@@ -103,4 +108,4 @@ terraform import ionoscloud_k8s_node_pool.demo {k8s_cluster_uuid}/{k8s_nodepool_
 
 This can be helpful when you want to import kubernetes node pools which you have already created manually or using other means, outside of terraform, towards the goal of managing them via Terraform
 
-> :warning: **If you are upgrading from v5.x.x to v6.x.x**: You have to modify you plan for lans to match the new structure, by putting the ids from the old slice in lans.id fields. This is not backwards compatible.
+⚠️ **_Warning: **If you are upgrading from v5.x.x to v6.x.x**: You have to modify you plan for lans to match the new structure, by putting the ids from the old slice in lans.id fields. This is not backwards compatible._**
