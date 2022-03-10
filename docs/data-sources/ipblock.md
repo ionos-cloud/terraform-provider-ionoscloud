@@ -9,35 +9,39 @@ description: |-
 
 # ionoscloud\_ipblock
 
-The ip block data source can be used to search for and return an existing Ip Block.
+The **IP Block data source** can be used to search for and return an existing Ip Block.
 You can provide a string for the id, the name or the location parameters which will be compared with the provisioned Ip Blocks.
 If a single match is found, it will be returned. If your search results in multiple matches, an error will be returned.
 When this happens, please refine your search string so that it is specific enough to return only one result.
 
 ## Example Usage
 
+### By ID
 ```hcl
 data "ionoscloud_ipblock" "example" {
-  id =` <ipblock_id>`
+  id = <ipblock_id>
 }
 ``` 
 
+### By Name
 ```hcl
 data "ionoscloud_ipblock" "example" {
-  name =` <ipblock_name>`
+  name = "IP Block Name"
 }
 ``` 
 
+### By Location
 ```hcl
 data "ionoscloud_ipblock" "example" {
-  location =` <ipblock_location>`
+  location = "us/las"
 }
 ``` 
 
+### By Name & Location
 ``` 
 data "ionoscloud_ipblock" "example" {
-  name =` <ipblock_name>`
-  location =` <ipblock_location>`
+  name      = "IP Block Name"
+  location  = "us/las"
 }
 ```
 

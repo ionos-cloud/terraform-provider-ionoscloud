@@ -9,16 +9,36 @@ description: |-
 
 # ionoscloud\_share
 
-Manages shares and list shares permissions granted to the group members for each shared resource.
+Manages **Shares** and list shares permissions granted to the group members for each shared resource.
 
 ## Example Usage
 
 ```hcl
-resource "ionoscloud_share" "share" {
-  group_id = "groupId"
-  resource_id = "resourceId"
-  edit_privilege = true
-  share_privilege = false
+resource "ionoscloud_datacenter" "example" {
+	name                = "Datacenter Example"
+	location            = "us/las"
+	description         = "Datacenter Description"
+	sec_auth_protection = false
+}
+
+resource "ionoscloud_group" "example" {
+  name                    = "Group Example"
+  create_datacenter       = true
+  create_snapshot         = true
+  reserve_ip              = true
+  access_activity_log     = true
+  create_pcc              = true
+  s3_privilege            = true
+  create_backup_unit      = true
+  create_internet_access  = true
+  create_k8s_cluster      = true
+}
+
+resource "ionoscloud_share" "example" {
+  group_id                = ionoscloud_group.example.id
+  resource_id             = ionoscloud_datacenter.example.id
+  edit_privilege          = true
+  share_privilege         = false
 }
 ```
 

@@ -9,36 +9,41 @@ description: |-
 
 # ionoscloud\_group
 
-Manages groups and group privileges on IonosCloud.
+Manages **Groups** and **Group Privileges** on IonosCloud.
 
 ## Example Usage
 
 ```hcl
-resource "ionoscloud_user" "user1" {
-  first_name = "user1"
-  last_name = "user1"
-  email = "user1@email.com"
-  password = "abc123-321CBA"
-  administrator = false
-  force_sec_auth= false
+resource "ionoscloud_user" "example1" {
+  first_name              = "user1"
+  last_name               = "user1"
+  email                   = <unique_email>
+  password                = "abc123-321CBA"
+  administrator           = false
+  force_sec_auth          = false
 }
 
-resource "ionoscloud_user" "user2" {
-  first_name = "user2"
-  last_name = "user2"
-  email = "user2@email.com"
-  password = "abc123-321CBA"
-  administrator = false
-  force_sec_auth= false
+resource "ionoscloud_user" "example2" {
+  first_name              = "user2"
+  last_name               = "user2"
+  email                   = <unique_email>
+  password                = "abc123-321CBA"
+  administrator           = false
+  force_sec_auth          = false
 }
 
-resource "ionoscloud_group" "group" {
-  name = "my group"
-  create_datacenter = true
-  create_snapshot = true
-  reserve_ip = true
-  access_activity_log = false
-  user_ids = [ ionoscloud_user.user1.id, ionoscloud_user.user2.id ] 
+resource "ionoscloud_group" "example" {
+  name                    = "Group Example"
+  create_datacenter       = true
+  create_snapshot         = true
+  reserve_ip              = true
+  access_activity_log     = true
+  create_pcc              = true
+  s3_privilege            = true
+  create_backup_unit      = true
+  create_internet_access  = true
+  create_k8s_cluster      = true
+  user_ids                = [ ionoscloud_user.example1.id, ionoscloud_user.example2.id ] 
 }
 ```
 

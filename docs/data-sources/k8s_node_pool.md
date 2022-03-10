@@ -9,16 +9,25 @@ description: |-
 
 # ionoscloud\_k8s\_node\_pool
 
-The k8s node pool data source can be used to search for and return existing k8s node pools.
+The **k8s Node Pool** data source can be used to search for and return existing k8s Node Pools.
 If a single match is found, it will be returned. If your search results in multiple matches, an error will be returned.
 When this happens, please refine your search string so that it is specific enough to return only one result.
 
 ## Example Usage
 
+### By ID
 ```hcl
-data "ionoscloud_k8s_node_pool" "k8s_node_pool_example" {
-  name     = "My_Node_Pool"
-  k8s_cluster_id 	= ionoscloud_k8s_cluster.k8s_cluster_example.id
+data "ionoscloud_k8s_node_pool" "example" {
+  id                = <k8s_nodepool_id>
+  k8s_cluster_id 	= <k8s_cluster_id>
+}
+```
+
+### By Name
+```hcl
+data "ionoscloud_k8s_node_pool" "example" {
+  name              = "k8s NodePool Example"
+  k8s_cluster_id 	= <k8s_cluster_id>
 }
 ```
 

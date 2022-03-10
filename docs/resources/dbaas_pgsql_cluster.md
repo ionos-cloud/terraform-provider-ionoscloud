@@ -9,7 +9,7 @@ description: |-
 
 # ionoscloud\_pg_cluster
 
-Manages a DbaaS PgSql Cluster. 
+Manages a **DbaaS PgSql Cluster**. 
 
 ## Example Usage
 
@@ -27,30 +27,30 @@ resource "ionoscloud_lan"  "example" {
 }
 
 resource "ionoscloud_server" "example" {
-  name = "example"
-  datacenter_id = ionoscloud_datacenter.example.id
-  cores = 2
-  ram = 2048
-  availability_zone = "ZONE_1"
-  cpu_family = "INTEL_SKYLAKE"
-  image_name ="Debian-10-cloud-init.qcow2"
-  image_password = <password>
+  name                    = "example"
+  datacenter_id           = ionoscloud_datacenter.example.id
+  cores                   = 2
+  ram                     = 2048
+  availability_zone       = "ZONE_1"
+  cpu_family              = "INTEL_SKYLAKE"
+  image_name              = "Debian-10-cloud-init.qcow2"
+  image_password          = "password"
   volume {
-    name = "example"
-    size = 6
-    disk_type = "SSD Standard"
+    name                  = "example"
+    size                  = 6
+    disk_type             = "SSD Standard"
   }
   nic {
-    lan = ionoscloud_lan.example.id
-    name = "example"
-    dhcp = true
+    lan                   = ionoscloud_lan.example.id
+    name                  = "example"
+    dhcp                  = true
   }
 }
 
 locals {
- prefix = format("%s/%s", ionoscloud_server.example.nic[0].ips[0], "24")
- database_ip = cidrhost(local.prefix, 1)
- database_ip_cidr = format("%s/%s", local.database_ip, "24")
+ prefix                   = format("%s/%s", ionoscloud_server.example.nic[0].ips[0], "24")
+ database_ip              = cidrhost(local.prefix, 1)
+ database_ip_cidr         = format("%s/%s", local.database_ip, "24")
 }
 
 resource "ionoscloud_pg_cluster" "example" {

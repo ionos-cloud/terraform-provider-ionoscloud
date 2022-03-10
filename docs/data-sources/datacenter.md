@@ -9,7 +9,7 @@ description: |-
 
 # ionoscloud\_datacenter
 
-The datacenter data source can be used to search for and return an existing Virtual Data Center.
+The **Datacenter data source** can be used to search for and return an existing Virtual Data Center.
 You can provide a string for the name and location parameters which will be compared with provisioned Virtual Data Centers.
 If a single match is found, it will be returned. If your search results in multiple matches, an error will be returned.
 When this happens, please refine your search string so that it is specific enough to return only one result.
@@ -18,10 +18,9 @@ When this happens, please refine your search string so that it is specific enoug
 
 ```hcl
 data "ionoscloud_datacenter" "example" {
-data "ionoscloud_datacenter" "dc_example" {
-  id       = "datacenter_id"
-  name     = "test_dc"
-  location = "us"
+  id       = <datacenter_id>
+  name     = "Datacenter Example"
+  location = "us/las"
 }
 ```
 

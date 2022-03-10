@@ -9,7 +9,7 @@ description: |-
 
 # ionoscloud\_share
 
-The share data source can be used to search for and return an existing share object.
+The **Share data source** can be used to search for and return an existing share object.
 You need to provide the group_id and resource_id to get the group resources for the shared resource.
 If a single match is found, it will be returned. If your search results in multiple matches, an error will be returned.
 When this happens, please refine your search string so that it is specific enough to return only one result.
@@ -17,10 +17,10 @@ When this happens, please refine your search string so that it is specific enoug
 ## Example Usage
 
 ```hcl
-data "ionoscloud_share" "share" {
-  group_id = "groupId"
-  resource_id = "resourceId"
-  id			= "share uuid"
+data "ionoscloud_share" "example" {
+  group_id      = <group_id>
+  resource_id   = <resource_id>
+  id			= <share_id>
 }
 ```
 

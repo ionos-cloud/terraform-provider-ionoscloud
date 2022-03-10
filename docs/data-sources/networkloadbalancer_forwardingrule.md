@@ -9,17 +9,28 @@ description: |-
 
 # ionoscloud_networkloadbalancer_forwardingrule
 
-The network load balancer forwarding rule data source can be used to search for and return existing network forwarding rules.
+The **Network Load Balancer Forwarding Rule data source** can be used to search for and return existing network forwarding rules.
 If a single match is found, it will be returned. If your search results in multiple matches, an error will be returned.
 When this happens, please refine your search string so that it is specific enough to return only one result.
 
 ## Example Usage
 
+## By ID
 ```hcl
 data "ionoscloud_networkloadbalancer_forwardingrule" "example" {
-  datacenter_id = ionoscloud_datacenter.example.id
-  networkloadbalancer_id  = ionoscloud_networkloadbalancer.example.id
-  name			= "example_"
+    datacenter_id               = <datacenter_id>
+    networkloadbalancer_id      = <networkloadbalancer_id>
+    id  			            = <networkloadbalancer_forwardingrule_id>
+}
+```
+
+
+## By Name
+```hcl
+data "ionoscloud_networkloadbalancer_forwardingrule" "example" {
+    datacenter_id               = <datacenter_id>
+    networkloadbalancer_id      = <networkloadbalancer_id>
+    name                        = "Network Load Balancer Forwarding Rule Example"
 }
 ```
 

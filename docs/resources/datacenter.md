@@ -9,15 +9,16 @@ description: |-
 
 # ionoscloud\_datacenter
 
-Manages a Virtual Data Center on IonosCloud.
+Manages a Virtual **Data Center** on IonosCloud.
 
 ## Example Usage
 
 ```hcl
 resource "ionoscloud_datacenter" "example" {
-  name        = "datacenter name"
-  location    = "us/las"
-  description = "datacenter description"
+  name                = "Datacenter Example"
+  location            = "us/las"
+  description         = "datacenter description"
+  sec_auth_protection = false
 }
 ```
 
