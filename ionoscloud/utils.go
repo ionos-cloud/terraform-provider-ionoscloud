@@ -7,7 +7,6 @@ import (
 	"log"
 	"net"
 	"net/http"
-	"reflect"
 	"regexp"
 	"strings"
 	"time"
@@ -144,49 +143,6 @@ func convertSlice(slice []interface{}) []string {
 	return s
 }
 
-func diffSlice(slice1 []string, slice2 []string) []string {
-	var diff []string
-
-	// Loop two times, first to find slice1 strings not in slice2,
-	// second loop to find slice2 strings not in slice1
-	for i := 0; i < 2; i++ {
-		for _, s1 := range slice1 {
-			found := false
-			for _, s2 := range slice2 {
-				if s1 == s2 {
-					found = true
-					break
-				}
-			}
-			// String not found. We add it to return slice
-			if !found {
-				diff = append(diff, s1)
-			}
-		}
-		// Swap the slices, only if it was the first loop
-		if i == 0 {
-			slice1, slice2 = slice2, slice1
-		}
-	}
-
-	return diff
-}
-
-// diffSliceOneWay returns the elements in `a` that aren't in `b`.
-func diffSliceOneWay(a, b []string) []string {
-	mb := make(map[string]struct{}, len(b))
-	for _, x := range b {
-		mb[x] = struct{}{}
-	}
-	var diff []string
-	for _, x := range a {
-		if _, found := mb[x]; !found {
-			diff = append(diff, x)
-		}
-	}
-	return diff
-}
-
 func responseBody(resp *ionoscloud.APIResponse) string {
 	ret := "<nil>"
 	if resp != nil {
@@ -194,18 +150,6 @@ func responseBody(resp *ionoscloud.APIResponse) string {
 	}
 
 	return ret
-}
-
-func setPropWithNilCheck(m map[string]interface{}, prop string, v interface{}) {
-
-	rVal := reflect.ValueOf(v)
-	if rVal.Kind() == reflect.Ptr {
-		if !rVal.IsNil() {
-			m[prop] = rVal.Elem().Interface()
-		}
-	} else {
-		m[prop] = v
-	}
 }
 
 func IsValidUUID(uuid string) bool {
@@ -264,11 +208,6 @@ func VerifyUnavailableIPs(val interface{}, key string) (warns []string, errs []e
 		}
 	}
 	return
-}
-
-func GenerateEmail() string {
-	email := fmt.Sprintf("terraform_test-%d@mailinator.com", time.Now().UnixNano())
-	return email
 }
 
 func logApiRequestTime(resp *ionoscloud.APIResponse) {

@@ -6,6 +6,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	dbaas "github.com/ionos-cloud/sdk-go-dbaas-postgres"
+	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils"
 	"time"
 )
 
@@ -304,37 +305,37 @@ func SetDbaasPgSqlClusterData(d *schema.ResourceData, cluster dbaas.ClusterRespo
 
 	if cluster.Properties.PostgresVersion != nil {
 		if err := d.Set("postgres_version", *cluster.Properties.PostgresVersion); err != nil {
-			return generateSetError(resourceName, "postgres_version", err)
+			return utils.GenerateSetError(resourceName, "postgres_version", err)
 		}
 	}
 
 	if cluster.Properties.Instances != nil {
 		if err := d.Set("instances", *cluster.Properties.Instances); err != nil {
-			return generateSetError(resourceName, "instances", err)
+			return utils.GenerateSetError(resourceName, "instances", err)
 		}
 	}
 
 	if cluster.Properties.Cores != nil {
 		if err := d.Set("cores", *cluster.Properties.Cores); err != nil {
-			return generateSetError(resourceName, "cores", err)
+			return utils.GenerateSetError(resourceName, "cores", err)
 		}
 	}
 
 	if cluster.Properties.Ram != nil {
 		if err := d.Set("ram", *cluster.Properties.Ram); err != nil {
-			return generateSetError(resourceName, "ram", err)
+			return utils.GenerateSetError(resourceName, "ram", err)
 		}
 	}
 
 	if cluster.Properties.StorageSize != nil {
 		if err := d.Set("storage_size", *cluster.Properties.StorageSize); err != nil {
-			return generateSetError(resourceName, "storage_size", err)
+			return utils.GenerateSetError(resourceName, "storage_size", err)
 		}
 	}
 
 	if cluster.Properties.StorageType != nil {
 		if err := d.Set("storage_type", *cluster.Properties.StorageType); err != nil {
-			return generateSetError(resourceName, "storage_type", err)
+			return utils.GenerateSetError(resourceName, "storage_type", err)
 		}
 	}
 
@@ -345,7 +346,7 @@ func SetDbaasPgSqlClusterData(d *schema.ResourceData, cluster dbaas.ClusterRespo
 			connections = append(connections, connectionEntry)
 		}
 		if err := d.Set("connections", connections); err != nil {
-			return generateSetError(resourceName, "connections", err)
+			return utils.GenerateSetError(resourceName, "connections", err)
 		}
 	}
 
@@ -366,7 +367,7 @@ func SetDbaasPgSqlClusterData(d *schema.ResourceData, cluster dbaas.ClusterRespo
 		maintenanceWindowEntry := SetMaintenanceWindowProperties(*cluster.Properties.MaintenanceWindow)
 		maintenanceWindow = append(maintenanceWindow, maintenanceWindowEntry)
 		if err := d.Set("maintenance_window", maintenanceWindow); err != nil {
-			return generateSetError(resourceName, "maintenance_window", err)
+			return utils.GenerateSetError(resourceName, "maintenance_window", err)
 		}
 	}
 
@@ -383,9 +384,9 @@ func SetConnectionProperties(vdcConnection dbaas.Connection) map[string]interfac
 
 	connection := map[string]interface{}{}
 
-	setPropWithNilCheck(connection, "datacenter_id", vdcConnection.DatacenterId)
-	setPropWithNilCheck(connection, "lan_id", vdcConnection.LanId)
-	setPropWithNilCheck(connection, "cidr", vdcConnection.Cidr)
+	utils.SetPropWithNilCheck(connection, "datacenter_id", vdcConnection.DatacenterId)
+	utils.SetPropWithNilCheck(connection, "lan_id", vdcConnection.LanId)
+	utils.SetPropWithNilCheck(connection, "cidr", vdcConnection.Cidr)
 
 	return connection
 }
@@ -394,8 +395,8 @@ func SetMaintenanceWindowProperties(maintenanceWindow dbaas.MaintenanceWindow) m
 
 	maintenance := map[string]interface{}{}
 
-	setPropWithNilCheck(maintenance, "time", maintenanceWindow.Time)
-	setPropWithNilCheck(maintenance, "day_of_the_week", maintenanceWindow.DayOfTheWeek)
+	utils.SetPropWithNilCheck(maintenance, "time", maintenanceWindow.Time)
+	utils.SetPropWithNilCheck(maintenance, "day_of_the_week", maintenanceWindow.DayOfTheWeek)
 
 	return maintenance
 }
