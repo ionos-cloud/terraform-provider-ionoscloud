@@ -9,7 +9,7 @@ description: |-
 
 # ionoscloud_server
 
-Manages a Server on IonosCloud.
+Manages a **Server** on IonosCloud.
 
 ## Example Usage
 

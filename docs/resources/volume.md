@@ -9,7 +9,7 @@ description: |-
 
 # ionoscloud\_volume
 
-Manages a volume on IonosCloud.
+Manages a **Volume** on IonosCloud.
 
 ## Example Usage
 

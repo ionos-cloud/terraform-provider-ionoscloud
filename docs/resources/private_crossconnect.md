@@ -9,7 +9,7 @@ description: |-
 
 # ionoscloud_private_crossconnect
 
-Manages a Private Cross Connect on IonosCloud.
+Manages a **Private Cross Connect** on IonosCloud.
 
 ## Example Usage
 

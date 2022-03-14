@@ -9,7 +9,7 @@ description: |-
 
 # ionoscloud\_user
 
-Manages users and list users and groups associated with that user.
+Manages **Users** and list users and groups associated with that user.
 
 ## Example Usage
 

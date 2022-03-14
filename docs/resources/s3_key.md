@@ -9,7 +9,7 @@ description: |-
 
 # ionoscloud_s3_key
 
-Manages an S3 Key on IonosCloud.
+Manages an **S3 Key** on IonosCloud.
 
 ## Example Usage
 

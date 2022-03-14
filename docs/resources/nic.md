@@ -76,7 +76,7 @@ resource "ionoscloud_nic" "example" {
 
 ## Import
 
-Resource Nic can be imported using the `resource id`, e.g.
+Resource **Nic** can be imported using the `resource id`, e.g.
 
 ```shell
 terraform import ionoscloud_nic.mynic {datacenter uuid}/{server uuid}/{nic uuid}
