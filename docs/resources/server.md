@@ -123,7 +123,7 @@ resource "ionoscloud_server" "example" {
 }
 ```
 
-##Argument reference
+## Argument reference
 
 - `template_uuid` - (Optional)[string] The UUID of the template for creating a CUBE server; the available templates for CUBE servers can be found on the templates resource
 - `name` - (Required)[string] The name of the server.
