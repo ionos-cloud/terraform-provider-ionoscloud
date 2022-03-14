@@ -1,8 +1,8 @@
 ## 6.2.1(upcoming release)
 
 ### Enhancement 
-- add `allow_replace` to node pool resource, which allows the update of immutable node_pool fields by
-destroying and re-creating the resource. This field should be used with care, understanding the risks.
+- add `allow_replace` to node pool resource, which allows the update of immutable node_pool fields will first 
+destroy and then re-create the resource. This field should be used with care, understanding the risks.
 
 ## 6.2.0
 
