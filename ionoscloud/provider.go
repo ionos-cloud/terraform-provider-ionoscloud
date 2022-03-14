@@ -189,11 +189,15 @@ func providerConfigure(d *schema.ResourceData, terraformVersion string) (interfa
 		Version, ionoscloud.Version, terraformVersion, meta.SDKVersionString(), runtime.GOOS, runtime.GOARCH)
 
 	dbaasClient := dbaasService.NewClientService(username.(string), password.(string), token.(string), cleanedUrl)
-	// dbaasClient.GetConfig().HTTPClient = &http.Client{Transport: createTransport()}
+
+	dbc := dbaasClient.Get()
+	if insecure.(bool) {
+		dbc.APIClient.GetConfig().HTTPClient = &http.Client{Transport: createTransport(insecure.(bool))}
+	}
 
 	return SdkBundle{
 		CloudApiClient: newClient,
-		DbaasClient:    dbaasClient.Get(),
+		DbaasClient:    dbc,
 	}, nil
 }
 
