@@ -66,7 +66,7 @@ The following attributes are returned by the datasource:
 * `ram_size` - The amount of RAM in MB
 * `availability_zone` - The compute availability zone in which the nodes should exist
 * `storage_type` - HDD or SDD
-* `storage_size` - Size of storage
+* `storage_size` - The size of the volume in GB. The size should be greater than 10GB.
 * `k8s_version` - The kubernetes version
 * `maintenance_window` - A maintenance window comprise of a day of the week and a time for maintenance to be allowed
   * `time` - A clock time in the day when maintenance is allowed

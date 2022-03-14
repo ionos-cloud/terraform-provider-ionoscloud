@@ -45,7 +45,7 @@ The following attributes are returned by the datasource:
 * `instances` - The total number of instances in the cluster (one master and n-1 standbys)
 * `cores` - The number of CPU cores per replica.
 * `ram` - The amount of memory per instance in megabytes. 
-* `storage_size` - The amount of storage per instance in megabytes.
+* `storage_size` - The amount of storage per instance in MB.
 * `storage_type` - The storage type used in your cluster. 
 * `connections` - Details about the network connection for your cluster.
   * `datacenter_id` - The datacenter to connect your cluster to.

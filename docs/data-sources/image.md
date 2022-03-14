@@ -19,7 +19,6 @@ When this happens, please refine your search string so that it is specific enoug
 data "ionoscloud_image" "example" {
   name        = "ubuntu"
   type        = "CDROM"
-  version     = "18.04.3-live-server-amd64.iso"
   location    = "de/fkb"
   cloud_init  = "NONE"
 }
@@ -28,7 +27,6 @@ data "ionoscloud_image" "example" {
 ## Argument Reference
 
  * `name` - (Required) Name of an existing image that you want to search for.
- * `version` - (Optional) Version of the image (see details below).
  * `location` - (Optional) Id of the existing image's location.
  * `type` - (Optional) The image type, HDD or CD-ROM.
  * `cloud_init` - (Optional) Cloud init compatibility ("NONE" or "V1")

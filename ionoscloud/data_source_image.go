@@ -122,7 +122,7 @@ func dataSourceImageRead(ctx context.Context, d *schema.ResourceData, meta inter
 
 	// if version value is present then concatenate name - version
 	// otherwise search by name or part of the name
-	if versionOk && nameOk {
+	if versionOk && nameOk && version.(string) != "" && name.(string) != "" {
 		nameVer := fmt.Sprintf("%s-%s", name.(string), version.(string))
 		if images.Items != nil {
 			for _, img := range *images.Items {
@@ -134,24 +134,25 @@ func dataSourceImageRead(ctx context.Context, d *schema.ResourceData, meta inter
 		if results == nil {
 			return diag.FromErr(fmt.Errorf("no image found with the specified criteria: name %s and version %s (%s)", name.(string), version.(string), nameVer))
 		}
-	} else if nameOk {
+	} else if nameOk && name.(string) != "" {
 		if images.Items != nil {
 			for _, img := range *images.Items {
-				if img.Properties != nil && img.Properties.Name != nil && strings.ToLower(*img.Properties.Name) == strings.ToLower(name.(string)) {
+				if img.Properties != nil && img.Properties.Name != nil && strings.Contains(strings.ToLower(*img.Properties.Name), strings.ToLower(name.(string))) {
 					results = append(results, img)
-					break
 				}
 			}
 		}
 		if results == nil {
 			return diag.FromErr(fmt.Errorf("no image found with the specified criteria: name %s", name.(string)))
 		}
+	} else {
+		results = *images.Items
 	}
 
-	if imageTypeOk {
+	if imageTypeOk && imageType.(string) != "" {
 		var imageTypeResults []ionoscloud.Image
 		for _, img := range results {
-			if img.Properties != nil && img.Properties.ImageType != nil && *img.Properties.ImageType == imageType.(string) {
+			if img.Properties != nil && img.Properties.ImageType != nil && strings.ToLower(*img.Properties.ImageType) == strings.ToLower(imageType.(string)) {
 				imageTypeResults = append(imageTypeResults, img)
 			}
 
@@ -159,20 +160,20 @@ func dataSourceImageRead(ctx context.Context, d *schema.ResourceData, meta inter
 		results = imageTypeResults
 	}
 
-	if locationOk {
+	if locationOk && location.(string) != "" {
 		var locationResults []ionoscloud.Image
 		for _, img := range results {
-			if img.Properties != nil && img.Properties.Location != nil && *img.Properties.Location == location.(string) {
+			if img.Properties != nil && img.Properties.Location != nil && strings.ToLower(*img.Properties.Location) == strings.ToLower(location.(string)) {
 				locationResults = append(locationResults, img)
 			}
 		}
 		results = locationResults
 	}
 
-	if cloudInitOk {
+	if cloudInitOk && cloudInit.(string) != "" {
 		var cloudInitResults []ionoscloud.Image
 		for _, img := range results {
-			if img.Properties != nil && img.Properties.CloudInit != nil && *img.Properties.CloudInit == cloudInit.(string) {
+			if img.Properties != nil && img.Properties.CloudInit != nil && strings.ToLower(*img.Properties.CloudInit) == strings.ToLower(cloudInit.(string)) {
 				cloudInitResults = append(cloudInitResults, img)
 			}
 		}
@@ -183,8 +184,6 @@ func dataSourceImageRead(ctx context.Context, d *schema.ResourceData, meta inter
 
 	if results == nil || len(results) == 0 {
 		return diag.FromErr(fmt.Errorf("no image found with the specified criteria: name = %s, type = %s, location = %s, version = %s, cloudInit = %s", name.(string), imageType.(string), location.(string), version.(string), cloudInit.(string)))
-	} else if len(results) > 1 {
-		return diag.FromErr(fmt.Errorf("more than one cluster found with the specified criteria: name = %s, type = %s, location = %s, version = %s, cloudInit = %s", name.(string), imageType.(string), location.(string), version.(string), cloudInit.(string)))
 	} else {
 		image = results[0]
 	}

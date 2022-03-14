@@ -16,11 +16,17 @@ Manages a volume on IonosCloud.
 A primary volume will be created with the server. If there is a need for additional volumes, this resource handles it.
 
 ```hcl
+data "ionoscloud_image" "example" {
+    type                  = "HDD"
+    cloud_init            = "V1"
+    location              = "us/las"
+}
+
 resource "ionoscloud_datacenter" "example" {
-	name                = "Datacenter Example"
-	location            = "us/las"
-	description         = "Datacenter Description"
-	sec_auth_protection = false
+    name                  = "Datacenter Example"
+    location              = "us/las"
+    description           = "Datacenter Description"
+    sec_auth_protection   = false
 }
 
 resource "ionoscloud_lan" "example" {
@@ -30,9 +36,9 @@ resource "ionoscloud_lan" "example" {
 }
 
 resource "ionoscloud_ipblock" "example" {
-    location            = ionoscloud_datacenter.example.location
-    size                = 4
-    name                = "IP Block Example"
+    location              = ionoscloud_datacenter.example.location
+    size                  = 4
+    name                  = "IP Block Example"
 }
 
 resource "ionoscloud_server" "example" {
@@ -42,7 +48,7 @@ resource "ionoscloud_server" "example" {
     ram                   = 1024
     availability_zone     = "ZONE_1"
     cpu_family            = "AMD_OPTERON"
-    image_name            = "Debian-10-cloud-init.qcow2"
+    image_name            = data.ionoscloud_image.example.id
     image_password        = "K3tTj8G14a3EgKyNeeiY"
     type                  = "ENTERPRISE"
     volume {
@@ -65,10 +71,10 @@ resource "ionoscloud_server" "example" {
         name              = "SSH"
         port_range_start  = 22
         port_range_end    = 22
-	    source_mac        = "00:0a:95:9d:68:17"
-	    source_ip         = ionoscloud_ipblock.example.ips[2]
-	    target_ip         = ionoscloud_ipblock.example.ips[3]
-	    type              = "EGRESS"
+        source_mac        = "00:0a:95:9d:68:17"
+        source_ip         = ionoscloud_ipblock.example.ips[2]
+        target_ip         = ionoscloud_ipblock.example.ips[3]
+        type              = "EGRESS"
     }
   }
 }
@@ -81,7 +87,7 @@ resource "ionoscloud_volume" "example" {
   size                    = 5
   disk_type               = "SSD Standard"
   bus                     = "VIRTIO"
-  image_name              = "Debian-10-cloud-init.qcow2"
+  image_name              = data.ionoscloud_image.example.id
   image_password          = "K3tTj8G14a3EgKyNeeiY"
   user_data               = "foo"
 }

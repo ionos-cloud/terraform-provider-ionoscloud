@@ -114,7 +114,7 @@ The following arguments are supported:
 - `node_count` -(Required)[int] - The desired number of nodes in the node pool
 - `cores_count` -(Required)[int] - The CPU cores count for each node of the node pool. *This attribute is immutable*.
 - `ram_size` -(Required)[int] - The desired amount of RAM, in MB. *This attribute is immutable*.
-- `storage_size` -(Required)[int] - The desired amount of storage for each node, in GB. *This attribute is immutable*.
+- `storage_size` -(Required)[int] - The size of the volume in GB. The size should be greater than 10GB. *This attribute is immutable*.
 - `public_ips` - (Optional)[list] A list of public IPs associated with the node pool; must have at least `node_count + 1` elements  
 - `labels` - (Optional)[map] A key/value map of labels
 - `annotations` - (Optional)[map] A key/value map of annotations
