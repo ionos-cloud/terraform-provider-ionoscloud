@@ -9,24 +9,32 @@ description: |-
 
 # ionoscloud\_snapshot
 
-The snapshot data source can be used to search for and return an existing snapshot which can then be used to provision a server. If a single match is found, it will be returned. If your search results in multiple matches, an error will be returned. When this happens, please refine your search string so that it is specific enough to return only one result.
+The **Snapshot data source** can be used to search for and return an existing snapshot which can then be used to provision a server. If a single match is found, it will be returned. If your search results in multiple matches, an error will be returned. When this happens, please refine your search string so that it is specific enough to return only one result.
 
 ## Example Usage
 
+### By ID
 ```hcl
-data "ionoscloud_snapshot" "snapshot_example" {
-  name     = "my snapshot"
+data "ionoscloud_snapshot" "example" {
+  id = <snapshot_id>
+}
+```
+
+### By Name & Size & Location
+```hcl
+data "ionoscloud_snapshot" "example" {
+  name     = "Snapshot Example"
   size     = "2"
-  location = "location_id"
+  location = "us/las"
 }
 ```
 Note: The size argument is in GB
 
 ## Argument Reference
 
- * `id` - (Optional) Uuid of an existing snapshot that you want to search for.
+ * `id` - (Optional) UUID of an existing snapshot that you want to search for.
  * `name` - (Optional) Name of an existing snapshot that you want to search for.
- * `location` - (Optional) Id of the existing snapshot's location.
+ * `location` - (Optional) Existing snapshot's location.
  * `size` - (Optional) The size of the snapshot to look for.
 
 Either `name` or `id` must be provided. If none, or both are provided, the datasource will return an error. 

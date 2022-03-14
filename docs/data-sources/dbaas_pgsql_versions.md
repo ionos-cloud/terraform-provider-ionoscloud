@@ -9,7 +9,7 @@ description: |-
 
 # ionoscloud\_pg_versions
 
-The DbaaS Postgres Versions data source can be used to search for and retrieve list of available postgres versions for a specific cluster or for all clusters.
+The **DbaaS Postgres Versions data source** can be used to search for and retrieve list of available postgres versions for a specific cluster or for all clusters.
 If a single match is found, it will be returned. If your search results in multiple matches, an error will be returned.
 When this happens, please refine your search string so that it is specific enough to return only one result.
 
@@ -17,14 +17,14 @@ When this happens, please refine your search string so that it is specific enoug
 
 ### Retrieve list of postgres versions for a specific cluster
 ```hcl
-data "ionoscloud_pg_versions" "test_ds_dbaas_versions" {
-	cluster_id = ionoscloud_pg_cluster.test_dbaas_cluster.id
+data "ionoscloud_pg_versions" "example" {
+	cluster_id = <cluster_id>
 }
 ```
 
 ### Retrieve list of postgres versions for all clusters
 ```hcl
-data "ionoscloud_pg_versions" "test_ds_dbaas_versions" {
+data "ionoscloud_pg_versions" "example" {
 }
 ```
 

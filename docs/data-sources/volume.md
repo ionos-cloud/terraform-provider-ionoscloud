@@ -15,9 +15,19 @@ When this happens, please refine your search string so that it is specific enoug
 
 ## Example Usage
 
+### By ID
 ```hcl
-data "ionoscloud_volume" "volume_example" {
-  name			= "my_volume@email.com"
+data "ionoscloud_volume" "example" {
+  datacenter_id = <datacenter_id>
+  id			= <volume_id>
+}
+```
+
+### By Name
+```hcl
+data "ionoscloud_volume" "example" {
+  datacenter_id = <datacenter_id>
+  name			= "Volume Example"
 }
 ```
 

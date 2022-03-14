@@ -9,15 +9,28 @@ description: |-
 
 # ionoscloud\_lan
 
-Manages a LAN on IonosCloud.
+Manages a **LAN** on IonosCloud.
 
 ## Example Usage
 
 ```hcl
+resource "ionoscloud_datacenter" "example" {
+  name                = "Datacenter Example"
+  location            = "us/las"
+  description         = "Datacenter Description"
+  sec_auth_protection = false
+}
+
+resource "ionoscloud_private_crossconnect" "example" {
+  name                  = "PCC Example"
+  description           = "PCC Description"
+}
+
 resource "ionoscloud_lan" "example" {
-  datacenter_id = ionoscloud_datacenter.example.id
-  public        = true
-  pcc           = ionoscloud_private_crossconnect.example.id
+  datacenter_id         = ionoscloud_datacenter.example.id
+  public                = true
+  name                  = "Lan Example"
+  pcc                   = ionoscloud_private_crossconnect.example.id
 }
 ```
 
@@ -41,5 +54,5 @@ terraform import ionoscloud_lan.mylan {datacenter uuid}/{lan id}
 
 ## Important Notes
 
-- Please note that only LANS datacenters found in the same physical location can be connected through a private cross-connect
+- Please note that only LANs datacenters found in the same physical location can be connected through a private cross-connect
 - A LAN cannot be a part of two private cross-connects

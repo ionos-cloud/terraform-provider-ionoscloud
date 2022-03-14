@@ -9,15 +9,22 @@ description: |-
 
 # ionoscloud\_k8s\_cluster
 
-The k8s cluster data source can be used to search for and return existing k8s clusters.
+The **k8s Cluster data source** can be used to search for and return existing k8s clusters.
 If a single match is found, it will be returned. If your search results in multiple matches, an error will be returned.
 When this happens, please refine your search string so that it is specific enough to return only one result.
 
 ## Example Usage
-
+### By ID
 ```hcl
-data "ionoscloud_k8s_cluster" "k8s_cluster_example" {
-  name     = "My_Cluster"
+data "ionoscloud_k8s_cluster" "example" {
+  id      = <cluster_id>
+}
+```
+
+### By Name
+```hcl
+data "ionoscloud_k8s_cluster" "example" {
+  name     = "K8s Cluster Example"
 }
 ```
 

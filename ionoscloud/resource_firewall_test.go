@@ -253,7 +253,7 @@ resource ` + FirewallResource + ` ` + FirewallTestResource + ` {
   target_ip = ionoscloud_ipblock.ipblock.ips[1]
   icmp_type = 1
   icmp_code = 8
-  type = "INGRESS"
+  type 		= "INGRESS"
 }
 `
 

@@ -9,17 +9,22 @@ description: |-
 
 # ionoscloud_k8s_cluster
 
-Manages a Managed Kubernetes cluster on IonosCloud.
+Manages a **Managed Kubernetes Cluster** on IonosCloud.
 
 ## Example Usage
 
 ```hcl
 resource "ionoscloud_k8s_cluster" "example" {
-  name        = "example"
-  k8s_version = "1.22.6"
+  name                  = "k8sClusterExample"
+  k8s_version           = "1.20.10"
+  public                = true
   maintenance_window {
-    day_of_the_week = "Monday"
-    time            = "09:30:00Z"
+    day_of_the_week     = "Sunday"
+    time                = "09:00:00Z"
+  }
+  api_subnet_allow_list = ["1.2.3.4/32"]
+  s3_buckets { 
+     name               = <your_s3_bucket>
   }
 }
 ```
