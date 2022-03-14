@@ -16,9 +16,16 @@ When this happens, please refine your search string so that it is specific enoug
 
 ## Example Usage
 
+### By ID 
 ```hcl
 data "ionoscloud_datacenter" "example" {
   id       = <datacenter_id>
+}
+```
+
+### By Name & Location
+```hcl
+data "ionoscloud_datacenter" "example" {
   name     = "Datacenter Example"
   location = "us/las"
 }
