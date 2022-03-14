@@ -1,3 +1,12 @@
+## 6.2.1
+
+### Fixes 
+- fixed image data-source bug when `name` not provided - data-source returned 0 results
+
+### Documentation
+- improved all the examples to be ready to use 
+- added units where missing
+
 ## 6.2.0
 
 ### Enhancement
