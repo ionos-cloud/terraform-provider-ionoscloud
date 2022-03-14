@@ -2,12 +2,13 @@ package ionoscloud
 
 import (
 	"fmt"
-	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
-	ionoscloud "github.com/ionos-cloud/sdk-go/v6"
 	"log"
 	"net/http"
 	"net/http/httptest"
 	"testing"
+
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
+	ionoscloud "github.com/ionos-cloud/sdk-go/v6"
 )
 
 //mocked server, that responds with jsonResponse to whatever we send to it
@@ -26,7 +27,7 @@ func createMockServer(jsonResponse string) *httptest.Server {
 func getMockedClient(jsonResponse string) interface{} {
 	ts := createMockServer(jsonResponse)
 
-	cfg := ionoscloud.NewConfiguration("", "", "", ts.URL)
+	cfg := ionoscloud.NewConfiguration("", "", "", ts.URL, false)
 	cfg.HTTPClient = ts.Client()
 
 	return SdkBundle{

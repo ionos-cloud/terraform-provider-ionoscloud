@@ -2,9 +2,8 @@ package ionoscloud
 
 import (
 	"context"
+	"crypto/tls"
 	"fmt"
-	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
-	"github.com/hashicorp/terraform-plugin-sdk/v2/meta"
 	"log"
 	"net"
 	"net/http"
@@ -12,9 +11,12 @@ import (
 	"runtime"
 	"time"
 
+	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/meta"
+
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
-	"github.com/ionos-cloud/sdk-go/v6"
+	ionoscloud "github.com/ionos-cloud/sdk-go/v6"
 	dbaasService "github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/dbaas"
 )
 
@@ -61,6 +63,12 @@ func Provider() *schema.Provider {
 				Optional:   true,
 				Default:    50,
 				Deprecated: "Timeout is used instead of this functionality",
+			},
+			"insecure": {
+				Type:       schema.TypeBool,
+				Optional:   true,
+				Default:    false,
+				Deprecated: "disable TLS certificate check",
 			},
 		},
 
@@ -144,6 +152,7 @@ func providerConfigure(d *schema.ResourceData, terraformVersion string) (interfa
 	username, usernameOk := d.GetOk("username")
 	password, passwordOk := d.GetOk("password")
 	token, tokenOk := d.GetOk("token")
+	insecure := d.Get("insecure")
 
 	if !tokenOk {
 		if !usernameOk {
@@ -164,14 +173,14 @@ func providerConfigure(d *schema.ResourceData, terraformVersion string) (interfa
 
 	cleanedUrl := cleanURL(d.Get("endpoint").(string))
 
-	newConfig := ionoscloud.NewConfiguration(username.(string), password.(string), token.(string), cleanedUrl)
+	newConfig := ionoscloud.NewConfiguration(username.(string), password.(string), token.(string), cleanedUrl, insecure.(bool))
 
 	if os.Getenv("IONOS_DEBUG") != "" {
 		newConfig.Debug = true
 	}
 	newConfig.MaxRetries = 999
 	newConfig.WaitTime = 4 * time.Second
-	newConfig.HTTPClient = &http.Client{Transport: createTransport()}
+	newConfig.HTTPClient = &http.Client{Transport: createTransport(insecure.(bool))}
 
 	newClient := ionoscloud.NewAPIClient(newConfig)
 
@@ -180,7 +189,7 @@ func providerConfigure(d *schema.ResourceData, terraformVersion string) (interfa
 		Version, ionoscloud.Version, terraformVersion, meta.SDKVersionString(), runtime.GOOS, runtime.GOARCH)
 
 	dbaasClient := dbaasService.NewClientService(username.(string), password.(string), token.(string), cleanedUrl)
-	//dbaasClient.GetConfig().HTTPClient = &http.Client{Transport: createTransport()}
+	// dbaasClient.GetConfig().HTTPClient = &http.Client{Transport: createTransport()}
 
 	return SdkBundle{
 		CloudApiClient: newClient,
@@ -188,12 +197,12 @@ func providerConfigure(d *schema.ResourceData, terraformVersion string) (interfa
 	}, nil
 }
 
-func createTransport() *http.Transport {
+func createTransport(insecure bool) *http.Transport {
 	dialer := &net.Dialer{
 		Timeout:   30 * time.Second,
 		KeepAlive: 30 * time.Second,
 	}
-	return &http.Transport{
+	t := &http.Transport{
 		Proxy:                 http.ProxyFromEnvironment,
 		DialContext:           dialer.DialContext,
 		DisableKeepAlives:     true,
@@ -203,6 +212,10 @@ func createTransport() *http.Transport {
 		MaxIdleConnsPerHost:   3,
 		MaxConnsPerHost:       3,
 	}
+	if insecure {
+		t.TLSClientConfig = &tls.Config{InsecureSkipVerify: true}
+	}
+	return t
 }
 
 // cleanURL makes sure trailing slash does not corrupt the state

@@ -22,15 +22,16 @@ import (
 )
 
 const (
-	IonosUsernameEnvVar   = "IONOS_USERNAME"
-	IonosPasswordEnvVar   = "IONOS_PASSWORD"
-	IonosTokenEnvVar      = "IONOS_TOKEN"
-	IonosApiUrlEnvVar     = "IONOS_API_URL"
-	DefaultIonosServerUrl = "https://api.ionos.com/cloudapi/v6"
-	DefaultIonosBasePath  = "/cloudapi/v6"
-	defaultMaxRetries     = 3
-	defaultWaitTime       = time.Duration(100) * time.Millisecond
-	defaultMaxWaitTime    = time.Duration(2000) * time.Millisecond
+	IonosUsernameEnvVar    = "IONOS_USERNAME"
+	IonosPasswordEnvVar    = "IONOS_PASSWORD"
+	IonosTokenEnvVar       = "IONOS_TOKEN"
+	IonosApiUrlEnvVar      = "IONOS_API_URL"
+	IonosApiInsecureEnvVar = "IONOS_API_INSECURE"
+	DefaultIonosServerUrl  = "https://api.ionos.com/cloudapi/v6"
+	DefaultIonosBasePath   = "/cloudapi/v6"
+	defaultMaxRetries      = 3
+	defaultWaitTime        = time.Duration(100) * time.Millisecond
+	defaultMaxWaitTime     = time.Duration(2000) * time.Millisecond
 )
 
 // contextKeys are used to identify the type of value in the context.
@@ -118,10 +119,11 @@ type Configuration struct {
 	MaxRetries         int           `json:"maxRetries,omitempty"`
 	WaitTime           time.Duration `json:"waitTime,omitempty"`
 	MaxWaitTime        time.Duration `json:"maxWaitTime,omitempty"`
+
 }
 
 // NewConfiguration returns a new Configuration object
-func NewConfiguration(username, password, token, hostUrl string) *Configuration {
+func NewConfiguration(username, password, token, hostUrl string, insecure bool) *Configuration {
 	cfg := &Configuration{
 		DefaultHeader:      make(map[string]string),
 		DefaultQueryParams: url.Values{},
@@ -145,7 +147,7 @@ func NewConfiguration(username, password, token, hostUrl string) *Configuration 
 }
 
 func NewConfigurationFromEnv() *Configuration {
-	return NewConfiguration(os.Getenv(IonosUsernameEnvVar), os.Getenv(IonosPasswordEnvVar), os.Getenv(IonosTokenEnvVar), os.Getenv(IonosApiUrlEnvVar))
+	return NewConfiguration(os.Getenv(IonosUsernameEnvVar), os.Getenv(IonosPasswordEnvVar), os.Getenv(IonosTokenEnvVar), os.Getenv(IonosApiUrlEnvVar), os.Getenv(IonosApiInsecureEnvVar) == "true")
 }
 
 // SetDepth sets the depth query param for all the requests

@@ -2,10 +2,11 @@ package ionoscloud
 
 import (
 	"fmt"
-	"github.com/hashicorp/terraform-plugin-sdk/v2/meta"
-	ionoscloud "github.com/ionos-cloud/sdk-go/v6"
 	"log"
 	"runtime"
+
+	"github.com/hashicorp/terraform-plugin-sdk/v2/meta"
+	ionoscloud "github.com/ionos-cloud/sdk-go/v6"
 )
 
 // Config represents
@@ -15,15 +16,16 @@ type Config struct {
 	Endpoint string
 	Retries  int
 	Token    string
+	Insecure bool
 }
 
 // Client returns a new client for accessing ionoscloud.
 func (c *Config) Client(terraformVersion string) (*ionoscloud.APIClient, error) {
 	var client *ionoscloud.APIClient
 	if c.Token != "" {
-		client = ionoscloud.NewAPIClient(ionoscloud.NewConfiguration("", "", c.Token, c.Endpoint))
+		client = ionoscloud.NewAPIClient(ionoscloud.NewConfiguration("", "", c.Token, c.Endpoint, c.Insecure))
 	} else {
-		client = ionoscloud.NewAPIClient(ionoscloud.NewConfiguration(c.Username, c.Password, "", c.Endpoint))
+		client = ionoscloud.NewAPIClient(ionoscloud.NewConfiguration(c.Username, c.Password, "", c.Endpoint, c.Insecure))
 	}
 
 	client.GetConfig().UserAgent = fmt.Sprintf(
