@@ -30,7 +30,7 @@ Please see the [Documentation](docs/index.md#migrating-from-the-profitbricks-pro
 
 ```terraform
 provider "ionoscloud" {
-  version = "~> 5.0.0"
+  version = "~> 6.2.0"
 }
 ```
 
