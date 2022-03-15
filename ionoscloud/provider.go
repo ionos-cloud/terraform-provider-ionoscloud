@@ -5,8 +5,8 @@ import (
 	"fmt"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/meta"
+	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils"
 	"log"
-	"net"
 	"net/http"
 	"os"
 	"runtime"
@@ -171,7 +171,7 @@ func providerConfigure(d *schema.ResourceData, terraformVersion string) (interfa
 	}
 	newConfig.MaxRetries = 999
 	newConfig.WaitTime = 4 * time.Second
-	newConfig.HTTPClient = &http.Client{Transport: createTransport()}
+	newConfig.HTTPClient = &http.Client{Transport: utils.CreateTransport()}
 
 	newClient := ionoscloud.NewAPIClient(newConfig)
 
@@ -186,23 +186,6 @@ func providerConfigure(d *schema.ResourceData, terraformVersion string) (interfa
 		CloudApiClient: newClient,
 		DbaasClient:    dbaasClient.Get(),
 	}, nil
-}
-
-func createTransport() *http.Transport {
-	dialer := &net.Dialer{
-		Timeout:   30 * time.Second,
-		KeepAlive: 30 * time.Second,
-	}
-	return &http.Transport{
-		Proxy:                 http.ProxyFromEnvironment,
-		DialContext:           dialer.DialContext,
-		DisableKeepAlives:     true,
-		IdleConnTimeout:       30 * time.Second,
-		TLSHandshakeTimeout:   15 * time.Second,
-		ExpectContinueTimeout: 1 * time.Second,
-		MaxIdleConnsPerHost:   3,
-		MaxConnsPerHost:       3,
-	}
 }
 
 // cleanURL makes sure trailing slash does not corrupt the state

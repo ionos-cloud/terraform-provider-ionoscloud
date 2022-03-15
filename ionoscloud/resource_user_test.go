@@ -6,6 +6,7 @@ import (
 	"context"
 	"fmt"
 	ionoscloud "github.com/ionos-cloud/sdk-go/v6"
+	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils"
 	"regexp"
 	"testing"
 
@@ -157,7 +158,7 @@ var testAccCheckUserConfigBasic = `
 resource ` + UserResource + ` ` + UserTestResource + ` {
   first_name = "` + UserTestResource + `"
   last_name = "` + UserTestResource + `"
-  email = "` + GenerateEmail() + `"
+  email = "` + utils.GenerateEmail() + `"
   password = "abc123-321CBA"
   administrator = true
   force_sec_auth= true
