@@ -9,7 +9,7 @@ description: |-
 
 # ionoscloud\_pg_cluster
 
-Manages a DbaaS PgSql Cluster. 
+Manages a **DbaaS PgSql Cluster**. 
 
 ## Example Usage
 
@@ -27,30 +27,30 @@ resource "ionoscloud_lan"  "example" {
 }
 
 resource "ionoscloud_server" "example" {
-  name = "example"
-  datacenter_id = ionoscloud_datacenter.example.id
-  cores = 2
-  ram = 2048
-  availability_zone = "ZONE_1"
-  cpu_family = "INTEL_SKYLAKE"
-  image_name ="Debian-10-cloud-init.qcow2"
-  image_password = <password>
+  name                    = "example"
+  datacenter_id           = ionoscloud_datacenter.example.id
+  cores                   = 2
+  ram                     = 2048
+  availability_zone       = "ZONE_1"
+  cpu_family              = "INTEL_SKYLAKE"
+  image_name              = "Debian-10-cloud-init.qcow2"
+  image_password          = "password"
   volume {
-    name = "example"
-    size = 6
-    disk_type = "SSD Standard"
+    name                  = "example"
+    size                  = 6
+    disk_type             = "SSD Standard"
   }
   nic {
-    lan = ionoscloud_lan.example.id
-    name = "example"
-    dhcp = true
+    lan                   = ionoscloud_lan.example.id
+    name                  = "example"
+    dhcp                  = true
   }
 }
 
 locals {
- prefix = format("%s/%s", ionoscloud_server.example.nic[0].ips[0], "24")
- database_ip = cidrhost(local.prefix, 1)
- database_ip_cidr = format("%s/%s", local.database_ip, "24")
+ prefix                   = format("%s/%s", ionoscloud_server.example.nic[0].ips[0], "24")
+ database_ip              = cidrhost(local.prefix, 1)
+ database_ip_cidr         = format("%s/%s", local.database_ip, "24")
 }
 
 resource "ionoscloud_pg_cluster" "example" {
@@ -89,7 +89,7 @@ resource "ionoscloud_pg_cluster" "example" {
 * `instances` - (Required)[int] The total number of instances in the cluster (one master and n-1 standbys)
 * `cores` - (Required)[int] The number of CPU cores per replica.
 * `ram` - (Required)[int] The amount of memory per instance in megabytes. Has to be a multiple of 1024.
-* `storage_size` - (Required)[int] The amount of storage per instance in megabytes.
+* `storage_size` - (Required)[int] The amount of storage per instance in MB.
 * `storage_type` - (Required)[string] The storage type used in your cluster. Can have one of the following values: HDD, SSD.
 * `connections` - (Required)[string] Details about the network connection for your cluster.
   * `datacenter_id` - (Required)[true] The datacenter to connect your cluster to.

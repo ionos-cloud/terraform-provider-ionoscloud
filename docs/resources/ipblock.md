@@ -9,14 +9,15 @@ description: |-
 
 # ionoscloud\_ipblock
 
-Manages IP Blocks on IonosCloud. IP Blocks contain reserved public IP addresses that can be assigned servers or other resources.
+Manages **IP Blocks** on IonosCloud. IP Blocks contain reserved public IP addresses that can be assigned servers or other resources.
 
 ## Example Usage
 
 ```hcl
 resource "ionoscloud_ipblock" "example" {
-  location = "${ionoscloud_datacenter.example.location}"
-  size     = 1
+  location  = "us/las"
+  size      = 3
+  name      = "IP Block Example"
 }
 ```
 

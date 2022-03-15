@@ -9,19 +9,29 @@ description: |-
 
 # ionoscloud\_firewall
 
-The firewall data source can be used to search for and return an existing FirewallRules. 
+The **Firewall data source** can be used to search for and return an existing FirewallRules. 
 You can provide a string for either id or name parameters which will be compared with provisioned Firewall Rules.
 If a single match is found, it will be returned. If your search results in multiple matches, an error will be returned. 
 When this happens, please refine your search string so that it is specific enough to return only one result.
 
 ## Example Usage
-
+### By ID
 ```hcl
-data "ionoscloud_firewall" "test_firewall" {
-  datacenter_id = "${ionoscloud_datacenter.foobar.id}"
-  server_id = "${ionoscloud_server.webserver.id}"
-  nic_id = "${ionoscloud_nic.database_nic.id}"
-  name	= "test_ds_firewall_rule"
+data "ionoscloud_firewall" "example" {
+  datacenter_id = <datacenter_id>
+  server_id     = <server_id>
+  nic_id        = <nic_id>
+  id            = <firewall_id>
+}
+```
+
+### By Name
+```hcl
+data "ionoscloud_firewall" "example" {
+  datacenter_id   = <datacenter_id>
+  server_id       = <server_id>
+  nic_id          = <nic_id>
+  name            = "test_ds_firewall_rule"
 }
 ```
 

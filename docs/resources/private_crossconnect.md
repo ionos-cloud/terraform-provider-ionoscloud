@@ -9,14 +9,14 @@ description: |-
 
 # ionoscloud_private_crossconnect
 
-Manages a Private Cross Connect on IonosCloud.
+Manages a **Private Cross Connect** on IonosCloud.
 
 ## Example Usage
 
 ```hcl
 resource "ionoscloud_private_crossconnect" "example" {
-  name = "example"
-  description = "example pcc"
+  name        = "PCC Example"
+  description = "PCC Description"
 }
 ```
 

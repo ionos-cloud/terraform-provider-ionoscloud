@@ -9,15 +9,23 @@ description: |-
 
 # ionoscloud\_user
 
-The user data source can be used to search for and return existing users.
+The **User data source** can be used to search for and return existing users.
 If a single match is found, it will be returned. If your search results in multiple matches, an error will be returned.
 When this happens, please refine your search string so that it is specific enough to return only one result.
 
 ## Example Usage
 
+### By ID
 ```hcl
-data "ionoscloud_user" "user_example" {
-  email			= "my_user@email.com"
+data "ionoscloud_user" "example" {
+  id			= <user_id>
+}
+```
+
+### By Email
+```hcl
+data "ionoscloud_user" "example" {
+  email			= "example@email.com"
 }
 ```
 

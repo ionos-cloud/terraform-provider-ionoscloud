@@ -9,24 +9,53 @@ description: |-
 
 # ionoscloud_natgateway_rule
 
-Manages a Nat Gateway Rule on IonosCloud.
+Manages a **Nat Gateway Rule** on IonosCloud.
 
 ## Example Usage
 
 ```hcl
+resource "ionoscloud_datacenter" "example" {
+	name                    = "Datacenter Example"
+	location                = "us/las"
+	description             = "Datacenter Description"
+	sec_auth_protection     = false
+}
+
+resource "ionoscloud_ipblock" "example" {
+    location                = "us/las"
+    size                    = 2
+    name                    = "IP Block Example"
+}
+
+resource "ionoscloud_lan" "example" {
+    datacenter_id           = ionoscloud_datacenter.example.id
+    public                  = true
+    name                    = "Lan Example"
+}
+
+resource "ionoscloud_natgateway" "example" {
+    datacenter_id           = ionoscloud_datacenter.example.id
+    name                    = "example"
+    public_ips              = [ ionoscloud_ipblock.example.ips[0], ionoscloud_ipblock.example.ips[1] ]
+     lans {
+        id                  = ionoscloud_lan.example.id
+        gateway_ips         = [ "10.11.2.5"]
+     }
+}
+
 resource "ionoscloud_natgateway_rule" "example" {
-  datacenter_id = ionoscloud_datacenter.example.id
-  natgateway_id = ionoscloud_natgateway.example.id
-  name          = "example"
-  type          = "SNAT"
-  protocol      = "TCP"
-  source_subnet = "10.0.1.0/24"
-  public_ip     = "${ionoscloud_ipblock.example.ips[0]}"
-  target_subnet = "10.0.1.0/24"
-  target_port_range {
-      start = 500
-      end   = 1000
-  }
+    datacenter_id           = ionoscloud_datacenter.example.id
+    natgateway_id           = ionoscloud_natgateway.example.id
+    name                    = "example"
+    type                    = "SNAT"
+    protocol                = "TCP"
+    source_subnet           = "10.0.1.0/24"
+    public_ip               = ionoscloud_ipblock.example.ips[0]
+    target_subnet           = "10.0.1.0/24"
+    target_port_range {
+        start               = 500
+        end                 = 1000
+    }
 }
 ```
 

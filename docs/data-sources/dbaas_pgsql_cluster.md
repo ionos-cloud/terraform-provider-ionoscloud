@@ -9,13 +9,13 @@ description: |-
 
 # ionoscloud\_pg_cluster
 
-The DbaaS Postgres Cluster data source can be used to search for and return an existing DbaaS Postgres Cluster.
+The **DbaaS Postgres Cluster data source** can be used to search for and return an existing DbaaS Postgres Cluster.
 If a single match is found, it will be returned. If your search results in multiple matches, an error will be returned.
 When this happens, please refine your search string so that it is specific enough to return only one result.
 
 ## Example Usage
 
-### By Id 
+### By ID 
 ```hcl
 data "ionoscloud_pg_cluster" "example" {
   id	= <cluster_id>
@@ -45,7 +45,7 @@ The following attributes are returned by the datasource:
 * `instances` - The total number of instances in the cluster (one master and n-1 standbys)
 * `cores` - The number of CPU cores per replica.
 * `ram` - The amount of memory per instance in megabytes. 
-* `storage_size` - The amount of storage per instance in megabytes.
+* `storage_size` - The amount of storage per instance in MB.
 * `storage_type` - The storage type used in your cluster. 
 * `connections` - Details about the network connection for your cluster.
   * `datacenter_id` - The datacenter to connect your cluster to.

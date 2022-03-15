@@ -9,23 +9,27 @@ description: |-
 
 # ionoscloud_nic
 
-The nic data source can be used to search for and return existing nics.
+The **Nic data source** can be used to search for and return existing nics.
 If a single match is found, it will be returned. If your search results in multiple matches, an error will be returned.
 When this happens, please refine your search string so that it is specific enough to return only one result.
 
 ## Example Usage
 
+### By ID
 ```hcl
-data "ionoscloud_nic" "lan_example" {
-  datacenter_id = ionoscloud_datacenter.example.id
-  server_id = ionoscloud_server.example.id
-  id			= "nic_id"
+data "ionoscloud_nic" "example" {
+  datacenter_id   = <datancenter_id>
+  server_id       = <server_id>
+  id			  = <nic_id>
 }
+```
 
-data "ionoscloud_nic" "lan_example" {
-  datacenter_id = ionoscloud_datacenter.example.id
-  server_id = ionoscloud_server.example.id
-  name			= "nic_name"
+### By Name
+```hcl
+data "ionoscloud_nic" "example" {
+  datacenter_id   = <datancenter_id>
+  server_id       = <server_id>
+  name            = "Nic Example"
 }
 ```
 

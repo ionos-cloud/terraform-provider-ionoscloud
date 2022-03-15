@@ -9,15 +9,23 @@ description: |-
 
 # ionoscloud\_private_crossconnect
 
-The private crossconnect data source can be used to search for and return existing private crossconnects.
+The **Private Crossconnect data source** can be used to search for and return existing private crossconnects.
 If a single match is found, it will be returned. If your search results in multiple matches, an error will be returned.
 When this happens, please refine your search string so that it is specific enough to return only one result.
 
 ## Example Usage
 
+### By ID
 ```hcl
-data "ionoscloud_private_crossconnect" "pcc_example" {
-  name     = "My PCC"
+data "ionoscloud_private_crossconnect" "example" {
+  id       = <private_crossconnect_id>
+}
+```
+
+### By Name
+```hcl
+data "ionoscloud_private_crossconnect" "example" {
+  name     = "PCC Example"
 }
 ```
 

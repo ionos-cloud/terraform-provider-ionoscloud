@@ -9,14 +9,14 @@ description: |-
 
 # ionoscloud_backup_unit
 
-Manages a Backup Unit on IonosCloud.
+Manages a **Backup Unit** on IonosCloud.
 
 ## Example Usage
 
 ```hcl
 resource "ionoscloud_backup_unit" "example" {
-  name        = "example"
-  password    = "<example-password>"
+  name        = "Backup Unit Example"
+  password    = "pass12345"
   email       = "example@example-domain.com"
 }
 ```
