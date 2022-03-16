@@ -169,7 +169,7 @@ var testAccCheckUserConfigUpdateForceSec = `
 resource ` + UserResource + ` ` + UserTestResource + ` {
  first_name = "` + UserTestResource + `"
  last_name = "` + UserTestResource + `"
- email = "` + GenerateEmail() + `"
+ email = "` + utils.GenerateEmail() + `"
  password = "abc123-321CBA"
  administrator = true
  force_sec_auth= false
@@ -180,7 +180,7 @@ var testAccCheckUserConfigUpdate = `
 resource ` + UserResource + ` ` + UserTestResource + ` {
  first_name = "` + UpdatedResources + `"
  last_name = "` + UpdatedResources + `"
- email = "` + GenerateEmail() + `"
+ email = "` + utils.GenerateEmail() + `"
  password = "abc123-321CBAupdated"
  administrator = false
  force_sec_auth= false
