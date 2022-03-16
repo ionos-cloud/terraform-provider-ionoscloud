@@ -24,34 +24,32 @@ func resourceApplicationLoadBalancer() *schema.Resource {
 		Schema: map[string]*schema.Schema{
 			"name": {
 				Type:         schema.TypeString,
-				Description:  "Name of the application loadbalancer",
+				Description:  "The name of the Application Load Balancer.",
 				Required:     true,
 				ValidateFunc: validation.All(validation.StringIsNotWhiteSpace),
 			},
 			"listener_lan": {
 				Type:        schema.TypeInt,
-				Description: "Id of the listening LAN. (inbound)",
+				Description: "D of the listening (inbound) LAN.",
 				Required:    true,
 			},
 			"ips": {
-				Type: schema.TypeList,
-				Description: "Collection of IP addresses of the Application Load Balancer. (inbound and outbound) IP of " +
-					"the listenerLan must be a customer reserved IP for the public load balancer and private IP for the private load balancer.",
-				Optional: true,
+				Type:        schema.TypeSet,
+				Description: "Collection of the Application Load Balancer IP addresses. (Inbound and outbound) IPs of the listenerLan are customer-reserved public IPs for the public Load Balancers, and private IPs for the private Load Balancers.",
+				Optional:    true,
 				Elem: &schema.Schema{
 					Type: schema.TypeString,
 				},
 			},
 			"target_lan": {
 				Type:        schema.TypeInt,
-				Description: "Id of the balanced private target LAN. (outbound)",
+				Description: "ID of the balanced private target LAN (outbound).",
 				Required:    true,
 			},
 			"lb_private_ips": {
-				Type: schema.TypeList,
-				Description: "Collection of private IP addresses with subnet mask of the Application Load Balancer. " +
-					"IPs must contain valid subnet mask. If user will not provide any IP then the system will generate one IP with /24 subnet.",
-				Optional: true,
+				Type:        schema.TypeSet,
+				Description: "Collection of private IP addresses with the subnet mask of the Application Load Balancer. IPs must contain valid a subnet mask. If no IP is provided, the system will generate an IP with /24 subnet.",
+				Optional:    true,
 				Elem: &schema.Schema{
 					Type: schema.TypeString,
 				},
@@ -90,7 +88,7 @@ func resourceApplicationLoadBalancerCreate(ctx context.Context, d *schema.Resour
 	}
 
 	if ipsVal, ipsOk := d.GetOk("ips"); ipsOk {
-		ipsVal := ipsVal.([]interface{})
+		ipsVal := ipsVal.(*schema.Set).List()
 		if ipsVal != nil {
 			ips := make([]string, 0)
 			for _, value := range ipsVal {
@@ -111,7 +109,7 @@ func resourceApplicationLoadBalancerCreate(ctx context.Context, d *schema.Resour
 	}
 
 	if privateIpsVal, privateIpsOk := d.GetOk("lb_private_ips"); privateIpsOk {
-		privateIpsVal := privateIpsVal.([]interface{})
+		privateIpsVal := privateIpsVal.(*schema.Set).List()
 		if privateIpsVal != nil {
 			privateIps := make([]string, 0)
 			for _, value := range privateIpsVal {
@@ -197,7 +195,7 @@ func resourceApplicationLoadBalancerUpdate(ctx context.Context, d *schema.Resour
 
 	if d.HasChange("ips") {
 		_, newIps := d.GetChange("ips")
-		ipsVal := newIps.([]interface{})
+		ipsVal := newIps.(*schema.Set).List()
 		if ipsVal != nil {
 			ips := make([]string, 0)
 			for _, value := range ipsVal {
@@ -217,7 +215,7 @@ func resourceApplicationLoadBalancerUpdate(ctx context.Context, d *schema.Resour
 
 	if d.HasChange("lb_private_ips") {
 		_, newPrivateIps := d.GetChange("lb_private_ips")
-		privateIpsVal := newPrivateIps.([]interface{})
+		privateIpsVal := newPrivateIps.(*schema.Set).List()
 		if privateIpsVal != nil {
 			privateIps := make([]string, 0)
 			for _, value := range privateIpsVal {

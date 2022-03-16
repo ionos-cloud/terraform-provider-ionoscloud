@@ -34,6 +34,24 @@ type UserPropertiesPost struct {
 	Active *bool `json:"active,omitempty"`
 }
 
+// NewUserPropertiesPost instantiates a new UserPropertiesPost object
+// This constructor will assign default values to properties that have it defined,
+// and makes sure properties required by API are set, but the set of arguments
+// will change when the set of required properties is changed
+func NewUserPropertiesPost() *UserPropertiesPost {
+	this := UserPropertiesPost{}
+
+	return &this
+}
+
+// NewUserPropertiesPostWithDefaults instantiates a new UserPropertiesPost object
+// This constructor will only assign default values to properties that have it defined,
+// but it doesn't guarantee that properties required by API are set
+func NewUserPropertiesPostWithDefaults() *UserPropertiesPost {
+	this := UserPropertiesPost{}
+	return &this
+}
+
 // GetFirstname returns the Firstname field value
 // If the value is explicit nil, the zero value for string will be returned
 func (o *UserPropertiesPost) GetFirstname() *string {

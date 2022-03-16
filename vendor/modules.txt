@@ -149,7 +149,7 @@ github.com/hashicorp/yamux
 # github.com/ionos-cloud/sdk-go-dbaas-postgres v1.0.0
 ## explicit; go 1.17
 github.com/ionos-cloud/sdk-go-dbaas-postgres
-# github.com/ionos-cloud/sdk-go/v6 v6.0.1
+# github.com/ionos-cloud/sdk-go/v6 v6.0.1 => ../../../sdk/alb
 ## explicit; go 1.17
 github.com/ionos-cloud/sdk-go/v6
 # github.com/jhump/protoreflect v1.6.1
@@ -339,3 +339,4 @@ google.golang.org/protobuf/types/known/timestamppb
 # gopkg.in/yaml.v3 v3.0.0-20200615113413-eeeca48fe776
 ## explicit
 gopkg.in/yaml.v3
+# github.com/ionos-cloud/sdk-go/v6 => ../../../sdk/alb

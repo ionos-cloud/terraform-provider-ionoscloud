@@ -31,6 +31,24 @@ type Nics struct {
 	Links *PaginationLinks `json:"_links,omitempty"`
 }
 
+// NewNics instantiates a new Nics object
+// This constructor will assign default values to properties that have it defined,
+// and makes sure properties required by API are set, but the set of arguments
+// will change when the set of required properties is changed
+func NewNics() *Nics {
+	this := Nics{}
+
+	return &this
+}
+
+// NewNicsWithDefaults instantiates a new Nics object
+// This constructor will only assign default values to properties that have it defined,
+// but it doesn't guarantee that properties required by API are set
+func NewNicsWithDefaults() *Nics {
+	this := Nics{}
+	return &this
+}
+
 // GetId returns the Id field value
 // If the value is explicit nil, the zero value for string will be returned
 func (o *Nics) GetId() *string {

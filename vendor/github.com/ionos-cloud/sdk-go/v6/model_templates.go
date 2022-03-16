@@ -26,6 +26,24 @@ type Templates struct {
 	Items *[]Template `json:"items,omitempty"`
 }
 
+// NewTemplates instantiates a new Templates object
+// This constructor will assign default values to properties that have it defined,
+// and makes sure properties required by API are set, but the set of arguments
+// will change when the set of required properties is changed
+func NewTemplates() *Templates {
+	this := Templates{}
+
+	return &this
+}
+
+// NewTemplatesWithDefaults instantiates a new Templates object
+// This constructor will only assign default values to properties that have it defined,
+// but it doesn't guarantee that properties required by API are set
+func NewTemplatesWithDefaults() *Templates {
+	this := Templates{}
+	return &this
+}
+
 // GetId returns the Id field value
 // If the value is explicit nil, the zero value for string will be returned
 func (o *Templates) GetId() *string {

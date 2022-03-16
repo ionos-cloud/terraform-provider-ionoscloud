@@ -31,6 +31,24 @@ type FirewallRules struct {
 	Links *PaginationLinks `json:"_links,omitempty"`
 }
 
+// NewFirewallRules instantiates a new FirewallRules object
+// This constructor will assign default values to properties that have it defined,
+// and makes sure properties required by API are set, but the set of arguments
+// will change when the set of required properties is changed
+func NewFirewallRules() *FirewallRules {
+	this := FirewallRules{}
+
+	return &this
+}
+
+// NewFirewallRulesWithDefaults instantiates a new FirewallRules object
+// This constructor will only assign default values to properties that have it defined,
+// but it doesn't guarantee that properties required by API are set
+func NewFirewallRulesWithDefaults() *FirewallRules {
+	this := FirewallRules{}
+	return &this
+}
+
 // GetId returns the Id field value
 // If the value is explicit nil, the zero value for string will be returned
 func (o *FirewallRules) GetId() *string {

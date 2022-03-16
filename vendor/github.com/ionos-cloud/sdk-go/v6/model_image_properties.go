@@ -56,6 +56,26 @@ type ImageProperties struct {
 	CloudInit *string `json:"cloudInit,omitempty"`
 }
 
+// NewImageProperties instantiates a new ImageProperties object
+// This constructor will assign default values to properties that have it defined,
+// and makes sure properties required by API are set, but the set of arguments
+// will change when the set of required properties is changed
+func NewImageProperties(licenceType string) *ImageProperties {
+	this := ImageProperties{}
+
+	this.LicenceType = &licenceType
+
+	return &this
+}
+
+// NewImagePropertiesWithDefaults instantiates a new ImageProperties object
+// This constructor will only assign default values to properties that have it defined,
+// but it doesn't guarantee that properties required by API are set
+func NewImagePropertiesWithDefaults() *ImageProperties {
+	this := ImageProperties{}
+	return &this
+}
+
 // GetName returns the Name field value
 // If the value is explicit nil, the zero value for string will be returned
 func (o *ImageProperties) GetName() *string {

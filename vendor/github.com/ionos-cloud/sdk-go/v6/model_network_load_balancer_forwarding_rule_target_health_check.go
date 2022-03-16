@@ -24,6 +24,24 @@ type NetworkLoadBalancerForwardingRuleTargetHealthCheck struct {
 	Maintenance *bool `json:"maintenance,omitempty"`
 }
 
+// NewNetworkLoadBalancerForwardingRuleTargetHealthCheck instantiates a new NetworkLoadBalancerForwardingRuleTargetHealthCheck object
+// This constructor will assign default values to properties that have it defined,
+// and makes sure properties required by API are set, but the set of arguments
+// will change when the set of required properties is changed
+func NewNetworkLoadBalancerForwardingRuleTargetHealthCheck() *NetworkLoadBalancerForwardingRuleTargetHealthCheck {
+	this := NetworkLoadBalancerForwardingRuleTargetHealthCheck{}
+
+	return &this
+}
+
+// NewNetworkLoadBalancerForwardingRuleTargetHealthCheckWithDefaults instantiates a new NetworkLoadBalancerForwardingRuleTargetHealthCheck object
+// This constructor will only assign default values to properties that have it defined,
+// but it doesn't guarantee that properties required by API are set
+func NewNetworkLoadBalancerForwardingRuleTargetHealthCheckWithDefaults() *NetworkLoadBalancerForwardingRuleTargetHealthCheck {
+	this := NetworkLoadBalancerForwardingRuleTargetHealthCheck{}
+	return &this
+}
+
 // GetCheck returns the Check field value
 // If the value is explicit nil, the zero value for bool will be returned
 func (o *NetworkLoadBalancerForwardingRuleTargetHealthCheck) GetCheck() *bool {

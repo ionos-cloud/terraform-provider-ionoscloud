@@ -79,7 +79,7 @@ func Provider() *schema.Provider {
 			SnapshotResource:            resourceSnapshot(),
 			ResourceIpFailover:          resourceLanIPFailover(),
 			K8sClusterResource:          resourcek8sCluster(),
-			K8sNodePoolResource:         resourcek8sNodePool(),
+			K8sNodePoolResource:         resourceK8sNodePool(),
 			PCCResource:                 resourcePrivateCrossConnect(),
 			BackupUnitResource:          resourceBackupUnit(),
 			S3KeyResource:               resourceS3Key(),

@@ -26,6 +26,24 @@ type GroupMembers struct {
 	Items *[]User `json:"items,omitempty"`
 }
 
+// NewGroupMembers instantiates a new GroupMembers object
+// This constructor will assign default values to properties that have it defined,
+// and makes sure properties required by API are set, but the set of arguments
+// will change when the set of required properties is changed
+func NewGroupMembers() *GroupMembers {
+	this := GroupMembers{}
+
+	return &this
+}
+
+// NewGroupMembersWithDefaults instantiates a new GroupMembers object
+// This constructor will only assign default values to properties that have it defined,
+// but it doesn't guarantee that properties required by API are set
+func NewGroupMembersWithDefaults() *GroupMembers {
+	this := GroupMembers{}
+	return &this
+}
+
 // GetId returns the Id field value
 // If the value is explicit nil, the zero value for string will be returned
 func (o *GroupMembers) GetId() *string {

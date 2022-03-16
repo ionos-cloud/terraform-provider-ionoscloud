@@ -24,49 +24,36 @@ func resourceApplicationLoadBalancerForwardingRule() *schema.Resource {
 
 			"name": {
 				Type:         schema.TypeString,
-				Description:  "A name of that Application Load Balancer forwarding rule",
+				Description:  "The name of the Application Load Balancer forwarding rule.",
 				Required:     true,
 				ValidateFunc: validation.All(validation.StringIsNotWhiteSpace),
 			},
 			"protocol": {
 				Type:         schema.TypeString,
-				Description:  "Protocol of the balancing.",
+				Description:  "Balancing protocol",
 				Required:     true,
 				ValidateFunc: validation.All(validation.StringIsNotWhiteSpace),
 			},
 			"listener_ip": {
 				Type:         schema.TypeString,
-				Description:  "Listening IP. (inbound)",
+				Description:  "Listening (inbound) IP",
 				Required:     true,
 				ValidateFunc: validation.All(validation.StringIsNotWhiteSpace),
 			},
 			"listener_port": {
 				Type:        schema.TypeInt,
-				Description: "Listening port number. (inbound) (range: 1 to 65535)",
+				Description: "Listening (inbound) port number; valid range is 1 to 65535.",
 				Required:    true,
 			},
-			"health_check": {
-				Type:        schema.TypeList,
-				MaxItems:    1,
-				Description: "Health check attributes for Application Load Balancer forwarding rule",
+			"client_timeout": {
+				Type:        schema.TypeInt,
+				Description: "The maximum time in milliseconds to wait for the client to acknowledge or send data; default is 50,000 (50 seconds).",
 				Optional:    true,
 				Computed:    true,
-				Elem: &schema.Resource{
-					Schema: map[string]*schema.Schema{
-						"client_timeout": {
-							Type: schema.TypeInt,
-							Description: "ClientTimeout is expressed in milliseconds. This inactivity timeout applies " +
-								"when the client is expected to acknowledge or send data. If unset the default of 50 " +
-								"seconds will be used.",
-							Optional: true,
-							Computed: true,
-						},
-					},
-				},
 			},
 			"server_certificates": {
-				Type:        schema.TypeList,
-				Description: "Array of items in that collection.",
+				Type:        schema.TypeSet,
+				Description: "Array of items in the collection.",
 				Optional:    true,
 				Elem: &schema.Schema{
 					Type: schema.TypeString,
@@ -80,57 +67,57 @@ func resourceApplicationLoadBalancerForwardingRule() *schema.Resource {
 					Schema: map[string]*schema.Schema{
 						"name": {
 							Type:         schema.TypeString,
-							Description:  "A name of that Application Load Balancer http rule",
+							Description:  "The unique name of the Application Load Balancer HTTP rule.",
 							Required:     true,
 							ValidateFunc: validation.All(validation.StringIsNotWhiteSpace),
 						},
 						"type": {
 							Type:         schema.TypeString,
-							Description:  "Type of the Http Rule",
+							Description:  "Type of the HTTP rule.",
 							Required:     true,
 							ValidateFunc: validation.All(validation.StringIsNotWhiteSpace),
 						},
 						"target_group": {
 							Type:        schema.TypeString,
-							Description: "The UUID of the target group; mandatory for FORWARD action",
+							Description: "The ID of the target group; mandatory and only valid for FORWARD actions.",
 							Optional:    true,
 						},
 						"drop_query": {
 							Type:        schema.TypeBool,
-							Description: "Default is false; true for REDIRECT action.",
+							Description: "Default is false; valid only for REDIRECT actions.",
 							Optional:    true,
 						},
 						"location": {
 							Type:        schema.TypeString,
-							Description: "The location for redirecting; mandatory for REDIRECT action",
+							Description: "The location for redirecting; mandatory and valid only for REDIRECT actions.",
 							Optional:    true,
 						},
 						"status_code": {
 							Type:        schema.TypeInt,
-							Description: "On REDIRECT action it can take the value 301, 302, 303, 307, 308; on STATIC action it is between 200 and 599",
+							Description: "Valid only for REDIRECT and STATIC actions. For REDIRECT actions, default is 301 and possible values are 301, 302, 303, 307, and 308. For STATIC actions, default is 503 and valid range is 200 to 599.",
 							Optional:    true,
 							Computed:    true,
 						},
 						"response_message": {
 							Type:        schema.TypeString,
-							Description: "The response message of the request; mandatory for STATIC action",
+							Description: "The response message of the request; mandatory for STATIC actions.",
 							Optional:    true,
 						},
 						"content_type": {
 							Type:        schema.TypeString,
-							Description: "Will be provided by the PAAS Team; default application/json",
+							Description: "Valid only for STATIC actions.",
 							Optional:    true,
 						},
 						"conditions": {
 							Type:        schema.TypeList,
-							Description: "Array of items in that collection",
+							Description: "An array of items in the collection.The action is only performed if each and every condition is met; if no conditions are set, the rule will always be performed.",
 							Optional:    true,
 							Computed:    true,
 							Elem: &schema.Resource{
 								Schema: map[string]*schema.Schema{
 									"type": {
 										Type:         schema.TypeString,
-										Description:  "Type of the Http Rule condition.",
+										Description:  "Type of the HTTP rule condition.",
 										Required:     true,
 										ValidateFunc: validation.All(validation.StringIsNotWhiteSpace),
 										DiffSuppressFunc: func(k, old, new string, d *schema.ResourceData) bool {
@@ -142,7 +129,7 @@ func resourceApplicationLoadBalancerForwardingRule() *schema.Resource {
 									},
 									"condition": {
 										Type:         schema.TypeString,
-										Description:  "Condition of the Http Rule condition.",
+										Description:  "Matching rule for the HTTP rule condition attribute; mandatory for HEADER, PATH, QUERY, METHOD, HOST, and COOKIE types; must be null when type is SOURCE_IP.",
 										Required:     true,
 										ValidateFunc: validation.All(validation.StringIsNotWhiteSpace),
 										DiffSuppressFunc: func(k, old, new string, d *schema.ResourceData) bool {
@@ -154,16 +141,18 @@ func resourceApplicationLoadBalancerForwardingRule() *schema.Resource {
 									},
 									"negate": {
 										Type:        schema.TypeBool,
-										Description: "Specifies whether the condition is negated or not; default: false.",
+										Description: "Specifies whether the condition is negated or not; the default is False.",
 										Optional:    true,
 									},
 									"key": {
-										Type:     schema.TypeString,
-										Optional: true,
+										Type:        schema.TypeString,
+										Description: "Must be null when type is PATH, METHOD, HOST, or SOURCE_IP. Key can only be set when type is COOKIES, HEADER, or QUERY.",
+										Optional:    true,
 									},
 									"value": {
-										Type:     schema.TypeString,
-										Optional: true,
+										Type:        schema.TypeString,
+										Description: "Mandatory for conditions CONTAINS, EQUALS, MATCHES, STARTS_WITH, ENDS_WITH; must be null when condition is EXISTS; should be a valid CIDR if provided and if type is SOURCE_IP.",
+										Optional:    true,
 									},
 								},
 							},
@@ -238,7 +227,7 @@ func resourceApplicationLoadBalancerForwardingRuleCreate(ctx context.Context, d 
 	}
 
 	if serverCertificatesVal, serverCertificatesOk := d.GetOk("server_certificates"); serverCertificatesOk {
-		serverCertificatesVal := serverCertificatesVal.([]interface{})
+		serverCertificatesVal := serverCertificatesVal.(*schema.Set).List()
 		if serverCertificatesVal != nil {
 			serverCertificates := make([]string, 0)
 			for _, value := range serverCertificatesVal {
@@ -495,15 +484,14 @@ func resourceApplicationLoadBalancerForwardingRuleUpdate(ctx context.Context, d 
 
 	if d.HasChange("server_certificates") {
 		_, v := d.GetChange("server_certificates")
-		if v.([]interface{}) != nil {
-			serverCertificates := make([]string, 0)
-			for _, value := range v.([]interface{}) {
+		certificatesValues := v.(*schema.Set).List()
+		serverCertificates := make([]string, 0)
+		if certificatesValues != nil {
+			for _, value := range certificatesValues {
 				serverCertificates = append(serverCertificates, value.(string))
 			}
-			if len(serverCertificates) > 0 {
-				request.Properties.ServerCertificates = &serverCertificates
-			}
 		}
+		request.Properties.ServerCertificates = &serverCertificates
 	}
 
 	if d.HasChange("http_rules") {

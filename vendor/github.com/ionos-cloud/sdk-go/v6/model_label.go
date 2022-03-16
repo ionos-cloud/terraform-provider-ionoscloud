@@ -26,6 +26,26 @@ type Label struct {
 	Properties *LabelProperties `json:"properties"`
 }
 
+// NewLabel instantiates a new Label object
+// This constructor will assign default values to properties that have it defined,
+// and makes sure properties required by API are set, but the set of arguments
+// will change when the set of required properties is changed
+func NewLabel(properties LabelProperties) *Label {
+	this := Label{}
+
+	this.Properties = &properties
+
+	return &this
+}
+
+// NewLabelWithDefaults instantiates a new Label object
+// This constructor will only assign default values to properties that have it defined,
+// but it doesn't guarantee that properties required by API are set
+func NewLabelWithDefaults() *Label {
+	this := Label{}
+	return &this
+}
+
 // GetId returns the Id field value
 // If the value is explicit nil, the zero value for string will be returned
 func (o *Label) GetId() *string {

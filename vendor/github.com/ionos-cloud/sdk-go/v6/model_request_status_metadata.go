@@ -23,6 +23,24 @@ type RequestStatusMetadata struct {
 	Targets *[]RequestTarget `json:"targets,omitempty"`
 }
 
+// NewRequestStatusMetadata instantiates a new RequestStatusMetadata object
+// This constructor will assign default values to properties that have it defined,
+// and makes sure properties required by API are set, but the set of arguments
+// will change when the set of required properties is changed
+func NewRequestStatusMetadata() *RequestStatusMetadata {
+	this := RequestStatusMetadata{}
+
+	return &this
+}
+
+// NewRequestStatusMetadataWithDefaults instantiates a new RequestStatusMetadata object
+// This constructor will only assign default values to properties that have it defined,
+// but it doesn't guarantee that properties required by API are set
+func NewRequestStatusMetadataWithDefaults() *RequestStatusMetadata {
+	this := RequestStatusMetadata{}
+	return &this
+}
+
 // GetStatus returns the Status field value
 // If the value is explicit nil, the zero value for string will be returned
 func (o *RequestStatusMetadata) GetStatus() *string {

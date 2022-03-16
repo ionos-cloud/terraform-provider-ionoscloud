@@ -26,6 +26,24 @@ type LocationProperties struct {
 	CpuArchitecture *[]CpuArchitectureProperties `json:"cpuArchitecture,omitempty"`
 }
 
+// NewLocationProperties instantiates a new LocationProperties object
+// This constructor will assign default values to properties that have it defined,
+// and makes sure properties required by API are set, but the set of arguments
+// will change when the set of required properties is changed
+func NewLocationProperties() *LocationProperties {
+	this := LocationProperties{}
+
+	return &this
+}
+
+// NewLocationPropertiesWithDefaults instantiates a new LocationProperties object
+// This constructor will only assign default values to properties that have it defined,
+// but it doesn't guarantee that properties required by API are set
+func NewLocationPropertiesWithDefaults() *LocationProperties {
+	this := LocationProperties{}
+	return &this
+}
+
 // GetName returns the Name field value
 // If the value is explicit nil, the zero value for string will be returned
 func (o *LocationProperties) GetName() *string {

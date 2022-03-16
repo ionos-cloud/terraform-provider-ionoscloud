@@ -25,6 +25,26 @@ type NatGatewayPut struct {
 	Properties *NatGatewayProperties `json:"properties"`
 }
 
+// NewNatGatewayPut instantiates a new NatGatewayPut object
+// This constructor will assign default values to properties that have it defined,
+// and makes sure properties required by API are set, but the set of arguments
+// will change when the set of required properties is changed
+func NewNatGatewayPut(properties NatGatewayProperties) *NatGatewayPut {
+	this := NatGatewayPut{}
+
+	this.Properties = &properties
+
+	return &this
+}
+
+// NewNatGatewayPutWithDefaults instantiates a new NatGatewayPut object
+// This constructor will only assign default values to properties that have it defined,
+// but it doesn't guarantee that properties required by API are set
+func NewNatGatewayPutWithDefaults() *NatGatewayPut {
+	this := NatGatewayPut{}
+	return &this
+}
+
 // GetId returns the Id field value
 // If the value is explicit nil, the zero value for string will be returned
 func (o *NatGatewayPut) GetId() *string {

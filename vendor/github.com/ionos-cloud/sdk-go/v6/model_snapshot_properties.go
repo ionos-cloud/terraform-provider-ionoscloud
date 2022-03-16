@@ -50,6 +50,24 @@ type SnapshotProperties struct {
 	LicenceType *string `json:"licenceType,omitempty"`
 }
 
+// NewSnapshotProperties instantiates a new SnapshotProperties object
+// This constructor will assign default values to properties that have it defined,
+// and makes sure properties required by API are set, but the set of arguments
+// will change when the set of required properties is changed
+func NewSnapshotProperties() *SnapshotProperties {
+	this := SnapshotProperties{}
+
+	return &this
+}
+
+// NewSnapshotPropertiesWithDefaults instantiates a new SnapshotProperties object
+// This constructor will only assign default values to properties that have it defined,
+// but it doesn't guarantee that properties required by API are set
+func NewSnapshotPropertiesWithDefaults() *SnapshotProperties {
+	this := SnapshotProperties{}
+	return &this
+}
+
 // GetName returns the Name field value
 // If the value is explicit nil, the zero value for string will be returned
 func (o *SnapshotProperties) GetName() *string {

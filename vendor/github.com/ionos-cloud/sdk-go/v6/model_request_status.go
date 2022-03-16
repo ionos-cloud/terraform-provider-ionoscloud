@@ -25,6 +25,24 @@ type RequestStatus struct {
 	Metadata *RequestStatusMetadata `json:"metadata,omitempty"`
 }
 
+// NewRequestStatus instantiates a new RequestStatus object
+// This constructor will assign default values to properties that have it defined,
+// and makes sure properties required by API are set, but the set of arguments
+// will change when the set of required properties is changed
+func NewRequestStatus() *RequestStatus {
+	this := RequestStatus{}
+
+	return &this
+}
+
+// NewRequestStatusWithDefaults instantiates a new RequestStatus object
+// This constructor will only assign default values to properties that have it defined,
+// but it doesn't guarantee that properties required by API are set
+func NewRequestStatusWithDefaults() *RequestStatus {
+	this := RequestStatus{}
+	return &this
+}
+
 // GetId returns the Id field value
 // If the value is explicit nil, the zero value for string will be returned
 func (o *RequestStatus) GetId() *string {

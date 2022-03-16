@@ -25,6 +25,26 @@ type NetworkLoadBalancerPut struct {
 	Properties *NetworkLoadBalancerProperties `json:"properties"`
 }
 
+// NewNetworkLoadBalancerPut instantiates a new NetworkLoadBalancerPut object
+// This constructor will assign default values to properties that have it defined,
+// and makes sure properties required by API are set, but the set of arguments
+// will change when the set of required properties is changed
+func NewNetworkLoadBalancerPut(properties NetworkLoadBalancerProperties) *NetworkLoadBalancerPut {
+	this := NetworkLoadBalancerPut{}
+
+	this.Properties = &properties
+
+	return &this
+}
+
+// NewNetworkLoadBalancerPutWithDefaults instantiates a new NetworkLoadBalancerPut object
+// This constructor will only assign default values to properties that have it defined,
+// but it doesn't guarantee that properties required by API are set
+func NewNetworkLoadBalancerPutWithDefaults() *NetworkLoadBalancerPut {
+	this := NetworkLoadBalancerPut{}
+	return &this
+}
+
 // GetId returns the Id field value
 // If the value is explicit nil, the zero value for string will be returned
 func (o *NetworkLoadBalancerPut) GetId() *string {

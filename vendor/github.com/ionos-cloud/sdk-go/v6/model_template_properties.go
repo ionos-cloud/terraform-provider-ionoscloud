@@ -26,6 +26,29 @@ type TemplateProperties struct {
 	StorageSize *float32 `json:"storageSize"`
 }
 
+// NewTemplateProperties instantiates a new TemplateProperties object
+// This constructor will assign default values to properties that have it defined,
+// and makes sure properties required by API are set, but the set of arguments
+// will change when the set of required properties is changed
+func NewTemplateProperties(name string, cores float32, ram float32, storageSize float32) *TemplateProperties {
+	this := TemplateProperties{}
+
+	this.Name = &name
+	this.Cores = &cores
+	this.Ram = &ram
+	this.StorageSize = &storageSize
+
+	return &this
+}
+
+// NewTemplatePropertiesWithDefaults instantiates a new TemplateProperties object
+// This constructor will only assign default values to properties that have it defined,
+// but it doesn't guarantee that properties required by API are set
+func NewTemplatePropertiesWithDefaults() *TemplateProperties {
+	this := TemplateProperties{}
+	return &this
+}
+
 // GetName returns the Name field value
 // If the value is explicit nil, the zero value for string will be returned
 func (o *TemplateProperties) GetName() *string {

@@ -23,6 +23,24 @@ type S3KeyMetadata struct {
 	CreatedDate *IonosTime
 }
 
+// NewS3KeyMetadata instantiates a new S3KeyMetadata object
+// This constructor will assign default values to properties that have it defined,
+// and makes sure properties required by API are set, but the set of arguments
+// will change when the set of required properties is changed
+func NewS3KeyMetadata() *S3KeyMetadata {
+	this := S3KeyMetadata{}
+
+	return &this
+}
+
+// NewS3KeyMetadataWithDefaults instantiates a new S3KeyMetadata object
+// This constructor will only assign default values to properties that have it defined,
+// but it doesn't guarantee that properties required by API are set
+func NewS3KeyMetadataWithDefaults() *S3KeyMetadata {
+	this := S3KeyMetadata{}
+	return &this
+}
+
 // GetEtag returns the Etag field value
 // If the value is explicit nil, the zero value for string will be returned
 func (o *S3KeyMetadata) GetEtag() *string {
