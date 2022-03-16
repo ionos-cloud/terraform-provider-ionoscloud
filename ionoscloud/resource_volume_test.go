@@ -1,9 +1,12 @@
+//go:build compute || all || volume
+
 package ionoscloud
 
 import (
 	"context"
 	"fmt"
 	ionoscloud "github.com/ionos-cloud/sdk-go/v6"
+	"regexp"
 	"testing"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
@@ -30,7 +33,51 @@ func TestAccVolumeBasic(t *testing.T) {
 					resource.TestCheckResourceAttr(VolumeResource+"."+VolumeTestResource, "bus", "VIRTIO"),
 					resource.TestCheckResourceAttr(VolumeResource+"."+VolumeTestResource, "availability_zone", "ZONE_1"),
 					resource.TestCheckResourceAttr(VolumeResource+"."+VolumeTestResource, "image_name", "Debian-10-cloud-init.qcow2"),
+					resource.TestCheckResourceAttrPair(VolumeResource+"."+VolumeTestResource, "boot_server", ServerResource+"."+ServerTestResource, "id"),
 					testImageNotNull(VolumeResource, "image")),
+			},
+			{
+				Config: testAccDataSourceVolumeMatchId,
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttrPair(DataSource+"."+VolumeResource+"."+VolumeDataSourceById, "name", VolumeResource+"."+VolumeTestResource, "name"),
+					resource.TestCheckResourceAttrPair(DataSource+"."+VolumeResource+"."+VolumeDataSourceById, "image", VolumeResource+"."+VolumeTestResource, "image"),
+					resource.TestCheckResourceAttrPair(DataSource+"."+VolumeResource+"."+VolumeDataSourceById, "image_alias", VolumeResource+"."+VolumeTestResource, "image_alias"),
+					resource.TestCheckResourceAttrPair(DataSource+"."+VolumeResource+"."+VolumeDataSourceById, "disk_type", VolumeResource+"."+VolumeTestResource, "disk_type"),
+					resource.TestCheckResourceAttrPair(DataSource+"."+VolumeResource+"."+VolumeDataSourceById, "sshkey", VolumeResource+"."+VolumeTestResource, "sshkey"),
+					resource.TestCheckResourceAttrPair(DataSource+"."+VolumeResource+"."+VolumeDataSourceById, "bus", VolumeResource+"."+VolumeTestResource, "bus"),
+					resource.TestCheckResourceAttrPair(DataSource+"."+VolumeResource+"."+VolumeDataSourceById, "availability_zone", VolumeResource+"."+VolumeTestResource, "availability_zone"),
+					resource.TestCheckResourceAttrPair(DataSource+"."+VolumeResource+"."+VolumeDataSourceById, "cpu_hot_plug", VolumeResource+"."+VolumeTestResource, "cpu_hot_plug"),
+					resource.TestCheckResourceAttrPair(DataSource+"."+VolumeResource+"."+VolumeDataSourceById, "ram_hot_plug", VolumeResource+"."+VolumeTestResource, "ram_hot_plug"),
+					resource.TestCheckResourceAttrPair(DataSource+"."+VolumeResource+"."+VolumeDataSourceById, "nic_hot_plug", VolumeResource+"."+VolumeTestResource, "nic_hot_plug"),
+					resource.TestCheckResourceAttrPair(DataSource+"."+VolumeResource+"."+VolumeDataSourceById, "nic_hot_unplug", VolumeResource+"."+VolumeTestResource, "nic_hot_unplug"),
+					resource.TestCheckResourceAttrPair(DataSource+"."+VolumeResource+"."+VolumeDataSourceById, "disc_virtio_hot_plug", VolumeResource+"."+VolumeTestResource, "disc_virtio_hot_plug"),
+					resource.TestCheckResourceAttrPair(DataSource+"."+VolumeResource+"."+VolumeDataSourceById, "disc_virtio_hot_unplug", VolumeResource+"."+VolumeTestResource, "disc_virtio_hot_unplug"),
+					resource.TestCheckResourceAttrPair(DataSource+"."+VolumeResource+"."+VolumeDataSourceById, "device_number", VolumeResource+"."+VolumeTestResource, "device_number"),
+					resource.TestCheckResourceAttrPair(DataSource+"."+VolumeResource+"."+VolumeDataSourceById, "boot_server", ServerResource+"."+ServerTestResource, "id"),
+				),
+			},
+			{
+				Config: testAccDataSourceVolumeMatchName,
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttrPair(DataSource+"."+VolumeResource+"."+VolumeDataSourceByName, "name", VolumeResource+"."+VolumeTestResource, "name"),
+					resource.TestCheckResourceAttrPair(DataSource+"."+VolumeResource+"."+VolumeDataSourceByName, "image", VolumeResource+"."+VolumeTestResource, "image"),
+					resource.TestCheckResourceAttrPair(DataSource+"."+VolumeResource+"."+VolumeDataSourceByName, "image_alias", VolumeResource+"."+VolumeTestResource, "image_alias"),
+					resource.TestCheckResourceAttrPair(DataSource+"."+VolumeResource+"."+VolumeDataSourceByName, "disk_type", VolumeResource+"."+VolumeTestResource, "disk_type"),
+					resource.TestCheckResourceAttrPair(DataSource+"."+VolumeResource+"."+VolumeDataSourceByName, "sshkey", VolumeResource+"."+VolumeTestResource, "sshkey"),
+					resource.TestCheckResourceAttrPair(DataSource+"."+VolumeResource+"."+VolumeDataSourceByName, "bus", VolumeResource+"."+VolumeTestResource, "bus"),
+					resource.TestCheckResourceAttrPair(DataSource+"."+VolumeResource+"."+VolumeDataSourceByName, "availability_zone", VolumeResource+"."+VolumeTestResource, "availability_zone"),
+					resource.TestCheckResourceAttrPair(DataSource+"."+VolumeResource+"."+VolumeDataSourceByName, "cpu_hot_plug", VolumeResource+"."+VolumeTestResource, "cpu_hot_plug"),
+					resource.TestCheckResourceAttrPair(DataSource+"."+VolumeResource+"."+VolumeDataSourceByName, "ram_hot_plug", VolumeResource+"."+VolumeTestResource, "ram_hot_plug"),
+					resource.TestCheckResourceAttrPair(DataSource+"."+VolumeResource+"."+VolumeDataSourceByName, "nic_hot_plug", VolumeResource+"."+VolumeTestResource, "nic_hot_plug"),
+					resource.TestCheckResourceAttrPair(DataSource+"."+VolumeResource+"."+VolumeDataSourceByName, "nic_hot_unplug", VolumeResource+"."+VolumeTestResource, "nic_hot_unplug"),
+					resource.TestCheckResourceAttrPair(DataSource+"."+VolumeResource+"."+VolumeDataSourceByName, "disc_virtio_hot_plug", VolumeResource+"."+VolumeTestResource, "disc_virtio_hot_plug"),
+					resource.TestCheckResourceAttrPair(DataSource+"."+VolumeResource+"."+VolumeDataSourceByName, "disc_virtio_hot_unplug", VolumeResource+"."+VolumeTestResource, "disc_virtio_hot_unplug"),
+					resource.TestCheckResourceAttrPair(DataSource+"."+VolumeResource+"."+VolumeDataSourceByName, "device_number", VolumeResource+"."+VolumeTestResource, "device_number"),
+					resource.TestCheckResourceAttrPair(DataSource+"."+VolumeResource+"."+VolumeDataSourceByName, "boot_server", ServerResource+"."+ServerTestResource, "id")),
+			},
+			{
+				Config:      testAccDataSourceVolumeWrongNameError,
+				ExpectError: regexp.MustCompile(`no volume found with the specified criteria: name`),
 			},
 			{
 				Config: testAccCheckVolumeConfigUpdate,
@@ -41,6 +88,7 @@ func TestAccVolumeBasic(t *testing.T) {
 					resource.TestCheckResourceAttr(VolumeResource+"."+VolumeTestResource, "bus", "VIRTIO"),
 					resource.TestCheckResourceAttr(VolumeResource+"."+VolumeTestResource, "availability_zone", "ZONE_1"),
 					resource.TestCheckResourceAttr(VolumeResource+"."+VolumeTestResource, "image_name", "Debian-10-cloud-init.qcow2"),
+					resource.TestCheckResourceAttrPair(VolumeResource+"."+VolumeTestResource, "boot_server", ServerResource+"."+ServerTestResource+"updated", "id"),
 					testImageNotNull(VolumeResource, "image")),
 			},
 		},
@@ -102,7 +150,7 @@ func TestAccVolumeResolveImageName(t *testing.T) {
 }
 
 func testAccCheckVolumeDestroyCheck(s *terraform.State) error {
-	client := testAccProvider.Meta().(*ionoscloud.APIClient)
+	client := testAccProvider.Meta().(SdkBundle).CloudApiClient
 
 	ctx, cancel := context.WithTimeout(context.Background(), *resourceDefaultTimeouts.Delete)
 
@@ -132,7 +180,7 @@ func testAccCheckVolumeDestroyCheck(s *terraform.State) error {
 
 func testAccCheckVolumeExists(n string, volume *ionoscloud.Volume) resource.TestCheckFunc {
 	return func(s *terraform.State) error {
-		client := testAccProvider.Meta().(*ionoscloud.APIClient)
+		client := testAccProvider.Meta().(SdkBundle).CloudApiClient
 
 		rs, ok := s.RootModule().Resources[n]
 
@@ -166,27 +214,7 @@ func testAccCheckVolumeExists(n string, volume *ionoscloud.Volume) resource.Test
 	}
 }
 
-func testImageNotNull(resource, attribute string) resource.TestCheckFunc {
-	return func(s *terraform.State) error {
-		for _, rs := range s.RootModule().Resources {
-			if rs.Type != resource {
-				continue
-			}
-
-			image := rs.Primary.Attributes[attribute]
-
-			if image == "" {
-				return fmt.Errorf("%s is empty, expected an UUID", attribute)
-			} else if !IsValidUUID(image) {
-				return fmt.Errorf("%s should be a valid UUID, got: %#v", attribute, image)
-			}
-
-		}
-		return nil
-	}
-}
-
-const testAccCheckVolumeConfigBasic = testAccCheckLanConfigBasic + testAccCheckBackupUnitConfigBasic + `
+const testAccCheckVolumeConfigBasic = testAccCheckLanConfigBasic + `
 resource ` + ServerResource + ` ` + ServerTestResource + `{
   name = "` + ServerTestResource + `"
   datacenter_id = ` + DatacenterResource + `.` + DatacenterTestResource + `.id
@@ -217,11 +245,10 @@ resource ` + VolumeResource + ` ` + VolumeTestResource + ` {
 	bus = "VIRTIO"
 	image_name ="Debian-10-cloud-init.qcow2"
 	image_password = "K3tTj8G14a3EgKyNeeiY"
-	backup_unit_id = ` + BackupUnitResource + `.` + BackupUnitTestResource + `.id
 	user_data = "foo"
 }`
 
-const testAccCheckVolumeConfigUpdate = testAccCheckBackupUnitConfigBasic + testAccCheckLanConfigBasic + `
+const testAccCheckVolumeConfigUpdate = testAccCheckLanConfigBasic + `
 resource ` + ServerResource + ` ` + ServerTestResource + `updated {
   name = "` + ServerTestResource + `"
   datacenter_id = ` + DatacenterResource + `.` + DatacenterTestResource + `.id
@@ -252,9 +279,29 @@ resource ` + VolumeResource + ` ` + VolumeTestResource + ` {
 	bus = "VIRTIO"
 	image_name ="Debian-10-cloud-init.qcow2"
 	image_password = "K3tTj8G14a3EgKyNeeiYupdated"
-	backup_unit_id = ` + BackupUnitResource + `.` + BackupUnitTestResource + `.id
 	user_data = "foo"
 }`
+
+var testAccDataSourceVolumeMatchId = testAccCheckVolumeConfigBasic + `
+data ` + VolumeResource + ` ` + VolumeDataSourceById + ` {
+  datacenter_id = ` + DatacenterResource + `.` + DatacenterTestResource + `.id
+  id			= ` + VolumeResource + `.` + VolumeTestResource + `.id
+}
+`
+
+var testAccDataSourceVolumeMatchName = testAccCheckVolumeConfigBasic + `
+data ` + VolumeResource + ` ` + VolumeDataSourceByName + ` {
+  datacenter_id = ` + DatacenterResource + `.` + DatacenterTestResource + `.id
+  name			= ` + VolumeResource + `.` + VolumeTestResource + `.name
+}
+`
+
+var testAccDataSourceVolumeWrongNameError = testAccCheckVolumeConfigBasic + `
+data ` + VolumeResource + ` ` + VolumeDataSourceByName + ` {
+  datacenter_id = ` + DatacenterResource + `.` + DatacenterTestResource + `.id
+  name			= "wrong_name"
+}
+`
 
 const testAccCheckVolumeConfigNoPassword = testAccCheckLanConfigBasic + `
 resource ` + ServerResource + ` ` + ServerTestResource + ` {

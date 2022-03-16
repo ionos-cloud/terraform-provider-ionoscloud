@@ -1,3 +1,5 @@
+//go:build compute || all || ipfailover
+
 package ionoscloud
 
 import (
@@ -18,7 +20,7 @@ func TestAccIpFailoverImportBasic(t *testing.T) {
 		CheckDestroy:      testAccCheckLanIPFailoverDestroyCheck,
 		Steps: []resource.TestStep{
 			{
-				Config: fmt.Sprintf(testaccchecklanipfailoverconfigBasic),
+				Config: fmt.Sprintf(testAccCheckLanIPFailoverConfig),
 			},
 
 			{

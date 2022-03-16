@@ -1,4 +1,5 @@
 ---
+subcategory: "Compute Engine"
 layout: "ionoscloud"
 page_title: "IonosCloud: loadbalancer"
 sidebar_current: "docs-resource-loadbalancer"
@@ -13,11 +14,45 @@ Manages a Load Balancer on IonosCloud.
 ## Example Usage
 
 ```hcl
+resource "ionoscloud_datacenter" "example" {
+  name                = "Datacenter Example"
+  location            = "us/las"
+  description         = "Datacenter Description"
+  sec_auth_protection = false
+}
+
+resource "ionoscloud_lan" "example" {
+  datacenter_id         = ionoscloud_datacenter.example.id
+  public                = true
+  name                  = "Lan Example"
+}
+
+resource "ionoscloud_server" "example" {
+  name                  = "Server Example"
+  datacenter_id         = ionoscloud_datacenter.example.id
+  cores                 = 1
+  ram                   = 1024
+  availability_zone     = "ZONE_1"
+  cpu_family            = "AMD_OPTERON"
+  image_name            = "Ubuntu-20.04"
+  image_password        = "K3tTj8G14a3EgKyNeeiY"
+  volume {
+    name                = "system"
+    size                = 14
+    disk_type           = "SSD"
+  }
+  nic {
+    lan                 = "1"
+    dhcp                = true
+    firewall_active     = true
+  }
+}
+
 resource "ionoscloud_loadbalancer" "example" {
-  datacenter_id = "${ionoscloud_datacenter.example.id}"
-  nic_ids        = ["${ionoscloud_nic.example.id}"]
-  name          = "load balancer name"
-  dhcp          = true
+  datacenter_id         = ionoscloud_datacenter.example.id
+  nic_ids               = [ ionoscloud_server.example.primary_nic ]
+  name                  = "Load Balancer Example"
+  dhcp                  = true
 }
 ```
 

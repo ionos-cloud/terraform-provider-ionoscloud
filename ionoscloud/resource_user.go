@@ -31,14 +31,16 @@ func resourceUser() *schema.Resource {
 				ValidateFunc: validation.All(validation.StringIsNotWhiteSpace),
 			},
 			"email": {
-				Type:         schema.TypeString,
-				Required:     true,
-				ValidateFunc: validation.All(validation.StringIsNotWhiteSpace),
+				Type:             schema.TypeString,
+				Required:         true,
+				ValidateFunc:     validation.All(validation.StringIsNotWhiteSpace),
+				DiffSuppressFunc: DiffToLower,
 			},
 			"password": {
 				Type:         schema.TypeString,
 				Required:     true,
 				ValidateFunc: validation.All(validation.StringIsNotWhiteSpace),
+				Sensitive:    true,
 			},
 			"administrator": {
 				Type:     schema.TypeBool,
@@ -66,7 +68,7 @@ func resourceUser() *schema.Resource {
 }
 
 func resourceUserCreate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
-	client := meta.(*ionoscloud.APIClient)
+	client := meta.(SdkBundle).CloudApiClient
 	request := ionoscloud.UserPost{
 		Properties: &ionoscloud.UserPropertiesPost{},
 	}
@@ -128,7 +130,7 @@ func resourceUserCreate(ctx context.Context, d *schema.ResourceData, meta interf
 }
 
 func resourceUserRead(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
-	client := meta.(*ionoscloud.APIClient)
+	client := meta.(SdkBundle).CloudApiClient
 
 	user, apiResponse, err := client.UserManagementApi.UmUsersFindById(ctx, d.Id()).Execute()
 	logApiRequestTime(apiResponse)
@@ -150,17 +152,32 @@ func resourceUserRead(ctx context.Context, d *schema.ResourceData, meta interfac
 }
 
 func resourceUserUpdate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
-	client := meta.(*ionoscloud.APIClient)
+	client := meta.(SdkBundle).CloudApiClient
+
+	foundUser, apiResponse, err := client.UserManagementApi.UmUsersFindById(ctx, d.Id()).Execute()
+	logApiRequestTime(apiResponse)
+	if err != nil {
+		diags := diag.FromErr(fmt.Errorf("an error occured while fetching a User ID %s %s", d.Id(), err))
+		return diags
+	}
 
 	userReq := ionoscloud.UserPut{
 		Properties: &ionoscloud.UserPropertiesPut{},
+	}
+	//this is a PUT, so we first fill everything, then we change what has been modified
+	if foundUser.Properties != nil {
+		userReq.Properties.Firstname = foundUser.Properties.Firstname
+		userReq.Properties.Lastname = foundUser.Properties.Lastname
+		userReq.Properties.Email = foundUser.Properties.Email
+		userReq.Properties.Active = foundUser.Properties.Active
+		userReq.Properties.Administrator = foundUser.Properties.Administrator
+		userReq.Properties.ForceSecAuth = foundUser.Properties.ForceSecAuth
 	}
 
 	if d.HasChange("first_name") {
 		_, newValue := d.GetChange("first_name")
 		firstName := newValue.(string)
 		userReq.Properties.Firstname = &firstName
-
 	}
 
 	if d.HasChange("last_name") {
@@ -189,9 +206,13 @@ func resourceUserUpdate(ctx context.Context, d *schema.ResourceData, meta interf
 		userReq.Properties.ForceSecAuth = &forceSecAuth
 	}
 
-	_, apiResponse, err := client.UserManagementApi.UmUsersPut(ctx, d.Id()).User(userReq).Execute()
-	logApiRequestTime(apiResponse)
+	if d.HasChange("password") {
+		password := d.Get("password").(string)
+		userReq.Properties.Password = &password
+	}
 
+	_, apiResponse, err = client.UserManagementApi.UmUsersPut(ctx, d.Id()).User(userReq).Execute()
+	logApiRequestTime(apiResponse)
 	if err != nil {
 		diags := diag.FromErr(fmt.Errorf("an error occured while patching a user ID %s %s", d.Id(), err))
 		return diags
@@ -208,7 +229,7 @@ func resourceUserUpdate(ctx context.Context, d *schema.ResourceData, meta interf
 }
 
 func resourceUserDelete(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
-	client := meta.(*ionoscloud.APIClient)
+	client := meta.(SdkBundle).CloudApiClient
 
 	apiResponse, err := client.UserManagementApi.UmUsersDelete(ctx, d.Id()).Execute()
 	logApiRequestTime(apiResponse)
@@ -230,7 +251,7 @@ func resourceUserDelete(ctx context.Context, d *schema.ResourceData, meta interf
 }
 
 func resourceUserImporter(ctx context.Context, d *schema.ResourceData, meta interface{}) ([]*schema.ResourceData, error) {
-	client := meta.(*ionoscloud.APIClient)
+	client := meta.(SdkBundle).CloudApiClient
 
 	userId := d.Id()
 

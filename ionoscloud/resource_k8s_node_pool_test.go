@@ -1,4 +1,5 @@
-// +build k8s
+//go:build all || k8s
+// +build all k8s
 
 package ionoscloud
 
@@ -7,91 +8,14 @@ import (
 	"fmt"
 	ionoscloud "github.com/ionos-cloud/sdk-go/v6"
 	"log"
+	"regexp"
 	"testing"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
 )
 
-func TestAcck8sNodepool_Basic(t *testing.T) {
-	var k8sNodepool ionoscloud.KubernetesNodePool
-	k8sNodepoolName := "terraform_acctest"
-
-	resource.Test(t, resource.TestCase{
-		PreCheck: func() {
-			testAccPreCheck(t)
-		},
-		ProviderFactories: testAccProviderFactories,
-		CheckDestroy:      testAccCheckk8sNodepoolDestroyCheck,
-		Steps: []resource.TestStep{
-			{
-				Config: fmt.Sprintf(testAccCheckk8sNodepoolConfigBasic, k8sNodepoolName),
-				Check: resource.ComposeTestCheckFunc(
-					testAccCheckk8sNodepoolExists("ionoscloud_k8s_node_pool.terraform_acctest", &k8sNodepool),
-					resource.TestCheckResourceAttr("ionoscloud_k8s_node_pool.terraform_acctest", "name", k8sNodepoolName),
-					resource.TestCheckResourceAttrPair("ionoscloud_k8s_node_pool.terraform_acctest", "public_ips.0", "ionoscloud_ipblock.terraform_acctest", "ips.0"),
-					resource.TestCheckResourceAttrPair("ionoscloud_k8s_node_pool.terraform_acctest", "public_ips.1", "ionoscloud_ipblock.terraform_acctest", "ips.1"),
-					resource.TestCheckResourceAttr("ionoscloud_k8s_node_pool.terraform_acctest", "labels.foo", "bar"),
-					resource.TestCheckResourceAttr("ionoscloud_k8s_node_pool.terraform_acctest", "labels.color", "green"),
-					resource.TestCheckResourceAttr("ionoscloud_k8s_node_pool.terraform_acctest", "annotations.ann1", "value1"),
-					resource.TestCheckResourceAttr("ionoscloud_k8s_node_pool.terraform_acctest", "annotations.ann2", "value2"),
-				),
-			},
-			{
-				Config: fmt.Sprintf(testAccCheckk8sNodepoolConfigUpdate, k8sNodepoolName),
-				Check: resource.ComposeTestCheckFunc(
-					testAccCheckk8sNodepoolExists("ionoscloud_k8s_node_pool.terraform_acctest", &k8sNodepool),
-					resource.TestCheckResourceAttr("ionoscloud_k8s_node_pool.terraform_acctest", "name", k8sNodepoolName),
-					resource.TestCheckResourceAttrPair("ionoscloud_k8s_node_pool.terraform_acctest", "public_ips.0", "ionoscloud_ipblock.terraform_acctest", "ips.0"),
-					resource.TestCheckResourceAttrPair("ionoscloud_k8s_node_pool.terraform_acctest", "public_ips.1", "ionoscloud_ipblock.terraform_acctest", "ips.1"),
-					resource.TestCheckResourceAttrPair("ionoscloud_k8s_node_pool.terraform_acctest", "public_ips.2", "ionoscloud_ipblock.terraform_acctest", "ips.2"),
-					resource.TestCheckResourceAttr("ionoscloud_k8s_node_pool.terraform_acctest", "labels.foo", "baz"),
-					resource.TestCheckResourceAttr("ionoscloud_k8s_node_pool.terraform_acctest", "labels.color", "red"),
-					resource.TestCheckResourceAttr("ionoscloud_k8s_node_pool.terraform_acctest", "labels.third", "thirdValue"),
-					resource.TestCheckResourceAttr("ionoscloud_k8s_node_pool.terraform_acctest", "annotations.ann1", "value1Changed"),
-					resource.TestCheckResourceAttr("ionoscloud_k8s_node_pool.terraform_acctest", "annotations.ann2", "value2Changed"),
-					resource.TestCheckResourceAttr("ionoscloud_k8s_node_pool.terraform_acctest", "annotations.ann3", "newValue"),
-				),
-			},
-			{
-				Config: "",
-			},
-		},
-	})
-}
-
-func TestAcck8sNodepool_Lan(t *testing.T) {
-	var k8sNodepool ionoscloud.KubernetesNodePool
-	k8sNodepoolName := "terraform_acctest"
-
-	resource.Test(t, resource.TestCase{
-		PreCheck: func() {
-			testAccPreCheck(t)
-		},
-		ProviderFactories: testAccProviderFactories,
-		CheckDestroy:      testAccCheckk8sNodepoolDestroyCheck,
-		Steps: []resource.TestStep{
-			{
-				Config: fmt.Sprintf(testAccCheckk8sNodepoolConfigLan, k8sNodepoolName),
-				Check: resource.ComposeTestCheckFunc(
-					testAccCheckk8sNodepoolExists("ionoscloud_k8s_node_pool.terraform_acctest", &k8sNodepool),
-					resource.TestCheckResourceAttr("ionoscloud_k8s_node_pool.terraform_acctest", "name", k8sNodepoolName),
-					resource.TestCheckResourceAttr("ionoscloud_k8s_node_pool.terraform_acctest", "lans.0.dhcp", "true"),
-				),
-			},
-			{
-				Config: fmt.Sprintf(testAccCheckk8sNodepoolConfigLanUpdate, k8sNodepoolName),
-				Check: resource.ComposeTestCheckFunc(
-					testAccCheckk8sNodepoolExists("ionoscloud_k8s_node_pool.terraform_acctest", &k8sNodepool),
-					resource.TestCheckResourceAttr("ionoscloud_k8s_node_pool.terraform_acctest", "name", k8sNodepoolName),
-					resource.TestCheckResourceAttr("ionoscloud_k8s_node_pool.terraform_acctest", "lans.0.dhcp", "false"),
-				),
-			},
-		},
-	})
-}
-
-func TestAcck8sNodepool_Version(t *testing.T) {
+func TestAccK8sNodePoolBasic(t *testing.T) {
 	var k8sNodepool ionoscloud.KubernetesNodePool
 
 	resource.Test(t, resource.TestCase{
@@ -99,35 +23,242 @@ func TestAcck8sNodepool_Version(t *testing.T) {
 			testAccPreCheck(t)
 		},
 		ProviderFactories: testAccProviderFactories,
-		CheckDestroy:      testAccCheckk8sNodepoolDestroyCheck,
+		CheckDestroy:      testAccCheckK8sNodePoolDestroyCheck,
 		Steps: []resource.TestStep{
 			{
-				Config: fmt.Sprintf(testAccCheckk8sNodepoolConfigVersion),
+				Config: testAccCheckK8sNodePoolConfigBasic,
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheckk8sNodepoolExists("ionoscloud_k8s_node_pool.terraform_acctest", &k8sNodepool),
-					resource.TestCheckResourceAttr("ionoscloud_k8s_node_pool.terraform_acctest", "k8s_version", "1.18.5"),
+					testAccCheckK8sNodePoolExists(ResourceNameK8sNodePool, &k8sNodepool),
+					resource.TestCheckResourceAttr(ResourceNameK8sNodePool, "name", K8sNodePoolTestResource),
+					resource.TestCheckResourceAttr(ResourceNameK8sNodePool, "k8s_version", "1.20.10"),
+					resource.TestCheckResourceAttr(ResourceNameK8sNodePool, "maintenance_window.0.day_of_the_week", "Monday"),
+					resource.TestCheckResourceAttr(ResourceNameK8sNodePool, "maintenance_window.0.time", "09:00:00Z"),
+					resource.TestCheckResourceAttr(ResourceNameK8sNodePool, "auto_scaling.0.min_node_count", "1"),
+					resource.TestCheckResourceAttr(ResourceNameK8sNodePool, "auto_scaling.0.max_node_count", "1"),
+					resource.TestCheckResourceAttr(ResourceNameK8sNodePool, "cpu_family", "INTEL_XEON"),
+					resource.TestCheckResourceAttr(ResourceNameK8sNodePool, "availability_zone", "AUTO"),
+					resource.TestCheckResourceAttr(ResourceNameK8sNodePool, "storage_type", "SSD"),
+					resource.TestCheckResourceAttr(ResourceNameK8sNodePool, "node_count", "1"),
+					resource.TestCheckResourceAttr(ResourceNameK8sNodePool, "cores_count", "2"),
+					resource.TestCheckResourceAttr(ResourceNameK8sNodePool, "ram_size", "2048"),
+					resource.TestCheckResourceAttr(ResourceNameK8sNodePool, "storage_size", "40"),
+					resource.TestCheckResourceAttrPair(ResourceNameK8sNodePool, "public_ips.0", IpBlockResource+".terraform_acctest", "ips.0"),
+					resource.TestCheckResourceAttrPair(ResourceNameK8sNodePool, "public_ips.1", IpBlockResource+".terraform_acctest", "ips.1"),
+					resource.TestCheckResourceAttrPair(ResourceNameK8sNodePool, "lans.0.id", LanResource+".terraform_acctest", "id"),
+					resource.TestCheckResourceAttr(ResourceNameK8sNodePool, "lans.0.dhcp", "true"),
+					resource.TestCheckResourceAttr(ResourceNameK8sNodePool, "lans.0.routes.0.network", "1.2.3.5/24"),
+					resource.TestCheckResourceAttr(ResourceNameK8sNodePool, "lans.0.routes.0.gateway_ip", "10.1.5.17"),
+					resource.TestCheckResourceAttr(ResourceNameK8sNodePool, "labels.foo", "bar"),
+					resource.TestCheckResourceAttr(ResourceNameK8sNodePool, "labels.color", "green"),
+					resource.TestCheckResourceAttr(ResourceNameK8sNodePool, "annotations.ann1", "value1"),
+					resource.TestCheckResourceAttr(ResourceNameK8sNodePool, "annotations.ann2", "value2"),
 				),
 			},
 			{
-				Config: fmt.Sprintf(testAccCheckk8sNodepoolConfigIgnoreVersion),
+				Config: testAccDataSourceProfitBricksK8sNodePoolMatchId,
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheckk8sNodepoolExists("ionoscloud_k8s_node_pool.terraform_acctest", &k8sNodepool),
-					resource.TestCheckResourceAttr("ionoscloud_k8s_node_pool.terraform_acctest", "k8s_version", "1.18.5"),
+					resource.TestCheckResourceAttrPair(DataSourceK8sNodePoolId, "name", ResourceNameK8sNodePool, "name"),
+					resource.TestCheckResourceAttrPair(DataSourceK8sNodePoolId, "k8s_version", ResourceNameK8sNodePool, "k8s_version"),
+					resource.TestCheckResourceAttrPair(DataSourceK8sNodePoolId, "maintenance_window.0.day_of_the_week", ResourceNameK8sNodePool, "maintenance_window.0.day_of_the_week"),
+					resource.TestCheckResourceAttrPair(DataSourceK8sNodePoolId, "maintenance_window.0.time", ResourceNameK8sNodePool, "maintenance_window.0.time"),
+					resource.TestCheckResourceAttrPair(DataSourceK8sNodePoolId, "auto_scaling.0.min_node_count", ResourceNameK8sNodePool, "auto_scaling.0.min_node_count"),
+					resource.TestCheckResourceAttrPair(DataSourceK8sNodePoolId, "auto_scaling.0.max_node_count", ResourceNameK8sNodePool, "auto_scaling.0.max_node_count"),
+					resource.TestCheckResourceAttrPair(DataSourceK8sNodePoolId, "cpu_family", ResourceNameK8sNodePool, "cpu_family"),
+					resource.TestCheckResourceAttrPair(DataSourceK8sNodePoolId, "availability_zone", ResourceNameK8sNodePool, "availability_zone"),
+					resource.TestCheckResourceAttrPair(DataSourceK8sNodePoolId, "storage_type", ResourceNameK8sNodePool, "storage_type"),
+					resource.TestCheckResourceAttrPair(DataSourceK8sNodePoolId, "node_count", ResourceNameK8sNodePool, "node_count"),
+					resource.TestCheckResourceAttrPair(DataSourceK8sNodePoolId, "cores_count", ResourceNameK8sNodePool, "cores_count"),
+					resource.TestCheckResourceAttrPair(DataSourceK8sNodePoolId, "ram_size", ResourceNameK8sNodePool, "ram_size"),
+					resource.TestCheckResourceAttrPair(DataSourceK8sNodePoolId, "storage_size", ResourceNameK8sNodePool, "storage_size"),
+					resource.TestCheckResourceAttrPair(DataSourceK8sNodePoolId, "public_ips.0", ResourceNameK8sNodePool, "public_ips.0"),
+					resource.TestCheckResourceAttrPair(DataSourceK8sNodePoolId, "public_ips.1", ResourceNameK8sNodePool, "public_ips.1"),
+					resource.TestCheckResourceAttrPair(DataSourceK8sNodePoolId, "lans.0", ResourceNameK8sNodePool, "lans.0"),
+					resource.TestCheckResourceAttrPair(DataSourceK8sNodePoolId, "labels.foo", ResourceNameK8sNodePool, "labels.foo"),
+					resource.TestCheckResourceAttrPair(DataSourceK8sNodePoolId, "labels.color", ResourceNameK8sNodePool, "labels.color"),
+					resource.TestCheckResourceAttrPair(DataSourceK8sNodePoolId, "annotations.ann1", ResourceNameK8sNodePool, "annotations.ann1"),
+					resource.TestCheckResourceAttrPair(DataSourceK8sNodePoolId, "annotations.ann2", ResourceNameK8sNodePool, "annotations.ann2"),
 				),
 			},
 			{
-				Config: fmt.Sprintf(testAccCheckk8sNodepoolConfigChangeVersion),
+				Config: testAccDataSourceProfitBricksK8sNodePoolMatchName,
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheckk8sNodepoolExists("ionoscloud_k8s_node_pool.terraform_acctest", &k8sNodepool),
-					resource.TestCheckResourceAttr("ionoscloud_k8s_node_pool.terraform_acctest", "k8s_version", "1.19.10"),
+					resource.TestCheckResourceAttrPair(DataSourceK8sNodePoolName, "name", ResourceNameK8sNodePool, "name"),
+					resource.TestCheckResourceAttrPair(DataSourceK8sNodePoolName, "k8s_version", ResourceNameK8sNodePool, "k8s_version"),
+					resource.TestCheckResourceAttrPair(DataSourceK8sNodePoolName, "maintenance_window.0.day_of_the_week", ResourceNameK8sNodePool, "maintenance_window.0.day_of_the_week"),
+					resource.TestCheckResourceAttrPair(DataSourceK8sNodePoolName, "maintenance_window.0.time", ResourceNameK8sNodePool, "maintenance_window.0.time"),
+					resource.TestCheckResourceAttrPair(DataSourceK8sNodePoolName, "auto_scaling.0.min_node_count", ResourceNameK8sNodePool, "auto_scaling.0.min_node_count"),
+					resource.TestCheckResourceAttrPair(DataSourceK8sNodePoolName, "auto_scaling.0.max_node_count", ResourceNameK8sNodePool, "auto_scaling.0.max_node_count"),
+					resource.TestCheckResourceAttrPair(DataSourceK8sNodePoolName, "cpu_family", ResourceNameK8sNodePool, "cpu_family"),
+					resource.TestCheckResourceAttrPair(DataSourceK8sNodePoolName, "availability_zone", ResourceNameK8sNodePool, "availability_zone"),
+					resource.TestCheckResourceAttrPair(DataSourceK8sNodePoolName, "storage_type", ResourceNameK8sNodePool, "storage_type"),
+					resource.TestCheckResourceAttrPair(DataSourceK8sNodePoolName, "node_count", ResourceNameK8sNodePool, "node_count"),
+					resource.TestCheckResourceAttrPair(DataSourceK8sNodePoolName, "cores_count", ResourceNameK8sNodePool, "cores_count"),
+					resource.TestCheckResourceAttrPair(DataSourceK8sNodePoolName, "ram_size", ResourceNameK8sNodePool, "ram_size"),
+					resource.TestCheckResourceAttrPair(DataSourceK8sNodePoolName, "storage_size", ResourceNameK8sNodePool, "storage_size"),
+					resource.TestCheckResourceAttrPair(DataSourceK8sNodePoolName, "public_ips.0", ResourceNameK8sNodePool, "public_ips.0"),
+					resource.TestCheckResourceAttrPair(DataSourceK8sNodePoolName, "public_ips.1", ResourceNameK8sNodePool, "public_ips.1"),
+					resource.TestCheckResourceAttrPair(DataSourceK8sNodePoolName, "lans.0", ResourceNameK8sNodePool, "lans.0"),
+					resource.TestCheckResourceAttrPair(DataSourceK8sNodePoolName, "labels.foo", ResourceNameK8sNodePool, "labels.foo"),
+					resource.TestCheckResourceAttrPair(DataSourceK8sNodePoolName, "labels.color", ResourceNameK8sNodePool, "labels.color"),
+					resource.TestCheckResourceAttrPair(DataSourceK8sNodePoolName, "annotations.ann1", ResourceNameK8sNodePool, "annotations.ann1"),
+					resource.TestCheckResourceAttrPair(DataSourceK8sNodePoolName, "annotations.ann2", ResourceNameK8sNodePool, "annotations.ann2"),
+				),
+			},
+			{
+				Config:      testAccDataSourceDatacenterWrongNameError,
+				ExpectError: regexp.MustCompile("no nodepool found with the specified name"),
+			},
+			{
+				Config: testAccCheckK8sNodePoolConfigUpdate,
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckK8sNodePoolExists(ResourceNameK8sNodePool, &k8sNodepool),
+					resource.TestCheckResourceAttr(ResourceNameK8sNodePool, "name", K8sNodePoolTestResource),
+					resource.TestCheckResourceAttr(ResourceNameK8sNodePool, "k8s_version", "1.20.10"),
+					resource.TestCheckResourceAttr(ResourceNameK8sNodePool, "maintenance_window.0.day_of_the_week", "Tuesday"),
+					resource.TestCheckResourceAttr(ResourceNameK8sNodePool, "maintenance_window.0.time", "10:00:00Z"),
+					resource.TestCheckResourceAttr(ResourceNameK8sNodePool, "auto_scaling.0.min_node_count", "1"),
+					resource.TestCheckResourceAttr(ResourceNameK8sNodePool, "auto_scaling.0.max_node_count", "2"),
+					resource.TestCheckResourceAttr(ResourceNameK8sNodePool, "cpu_family", "INTEL_XEON"),
+					resource.TestCheckResourceAttr(ResourceNameK8sNodePool, "availability_zone", "AUTO"),
+					resource.TestCheckResourceAttr(ResourceNameK8sNodePool, "storage_type", "SSD"),
+					resource.TestCheckResourceAttr(ResourceNameK8sNodePool, "node_count", "2"),
+					resource.TestCheckResourceAttr(ResourceNameK8sNodePool, "cores_count", "2"),
+					resource.TestCheckResourceAttr(ResourceNameK8sNodePool, "ram_size", "2048"),
+					resource.TestCheckResourceAttr(ResourceNameK8sNodePool, "storage_size", "40"),
+					resource.TestCheckResourceAttrPair(ResourceNameK8sNodePool, "public_ips.0", IpBlockResource+".terraform_acctest", "ips.0"),
+					resource.TestCheckResourceAttrPair(ResourceNameK8sNodePool, "public_ips.1", IpBlockResource+".terraform_acctest", "ips.1"),
+					resource.TestCheckResourceAttrPair(ResourceNameK8sNodePool, "public_ips.2", IpBlockResource+".terraform_acctest", "ips.2"),
+					resource.TestCheckResourceAttrPair(ResourceNameK8sNodePool, "lans.0.id", LanResource+".terraform_acctest", "id"),
+					resource.TestCheckResourceAttr(ResourceNameK8sNodePool, "lans.0.dhcp", "false"),
+					resource.TestCheckResourceAttr(ResourceNameK8sNodePool, "lans.0.routes.0.network", "1.2.3.4/24"),
+					resource.TestCheckResourceAttr(ResourceNameK8sNodePool, "lans.0.routes.0.gateway_ip", "10.1.5.16"),
+					resource.TestCheckResourceAttrPair(ResourceNameK8sNodePool, "lans.1.id", LanResource+".terraform_acctest_updated", "id"),
+					resource.TestCheckResourceAttr(ResourceNameK8sNodePool, "lans.1.dhcp", "false"),
+					resource.TestCheckResourceAttr(ResourceNameK8sNodePool, "lans.1.routes.0.network", "1.2.3.5/24"),
+					resource.TestCheckResourceAttr(ResourceNameK8sNodePool, "lans.1.routes.0.gateway_ip", "10.1.5.17"),
+					resource.TestCheckResourceAttr(ResourceNameK8sNodePool, "lans.1.routes.1.network", "1.2.3.6/24"),
+					resource.TestCheckResourceAttr(ResourceNameK8sNodePool, "lans.1.routes.1.gateway_ip", "10.1.5.18"),
+					resource.TestCheckResourceAttr(ResourceNameK8sNodePool, "labels.foo", "baz"),
+					resource.TestCheckResourceAttr(ResourceNameK8sNodePool, "labels.color", "red"),
+					resource.TestCheckResourceAttr(ResourceNameK8sNodePool, "labels.third", "thirdValue"),
+					resource.TestCheckResourceAttr(ResourceNameK8sNodePool, "annotations.ann1", "value1Changed"),
+					resource.TestCheckResourceAttr(ResourceNameK8sNodePool, "annotations.ann2", "value2Changed"),
+					resource.TestCheckResourceAttr(ResourceNameK8sNodePool, "annotations.ann3", "newValue"),
+				),
+			},
+			{
+				Config: testAccCheckK8sNodePoolConfigUpdateAgain,
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckK8sNodePoolExists(ResourceNameK8sNodePool, &k8sNodepool),
+					resource.TestCheckResourceAttr(ResourceNameK8sNodePool, "name", K8sNodePoolTestResource),
+					resource.TestCheckResourceAttr(ResourceNameK8sNodePool, "k8s_version", "1.21.9"),
+					resource.TestCheckResourceAttr(ResourceNameK8sNodePool, "maintenance_window.0.day_of_the_week", "Tuesday"),
+					resource.TestCheckResourceAttr(ResourceNameK8sNodePool, "maintenance_window.0.time", "10:00:00Z"),
+					resource.TestCheckResourceAttr(ResourceNameK8sNodePool, "auto_scaling.0.min_node_count", "1"),
+					resource.TestCheckResourceAttr(ResourceNameK8sNodePool, "auto_scaling.0.max_node_count", "2"),
+					resource.TestCheckResourceAttr(ResourceNameK8sNodePool, "cpu_family", "INTEL_XEON"),
+					resource.TestCheckResourceAttr(ResourceNameK8sNodePool, "availability_zone", "AUTO"),
+					resource.TestCheckResourceAttr(ResourceNameK8sNodePool, "storage_type", "SSD"),
+					resource.TestCheckResourceAttr(ResourceNameK8sNodePool, "node_count", "2"),
+					resource.TestCheckResourceAttr(ResourceNameK8sNodePool, "cores_count", "2"),
+					resource.TestCheckResourceAttr(ResourceNameK8sNodePool, "ram_size", "2048"),
+					resource.TestCheckResourceAttr(ResourceNameK8sNodePool, "storage_size", "40"),
+					resource.TestCheckNoResourceAttr(ResourceNameK8sNodePool, "public_ips"),
+					resource.TestCheckNoResourceAttr(ResourceNameK8sNodePool, "lans"),
+					resource.TestCheckNoResourceAttr(ResourceNameK8sNodePool, "labels"),
+					resource.TestCheckNoResourceAttr(ResourceNameK8sNodePool, "annotations")),
+			},
+		},
+	})
+}
+
+func TestAccK8sNodePoolGatewayIP(t *testing.T) {
+	var k8sNodepool ionoscloud.KubernetesNodePool
+
+	resource.Test(t, resource.TestCase{
+		PreCheck: func() {
+			testAccPreCheck(t)
+		},
+		ProviderFactories: testAccProviderFactories,
+		CheckDestroy:      testAccCheckK8sNodePoolDestroyCheck,
+		Steps: []resource.TestStep{
+			{
+				Config: testAccCheckK8sNodePoolConfigGatewayIP,
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckK8sNodePoolExists(ResourceNameK8sNodePool, &k8sNodepool),
+					resource.TestCheckResourceAttr(ResourceNameK8sNodePool, "name", K8sNodePoolTestResource),
+					resource.TestCheckResourceAttr(ResourceNameK8sNodePool, "k8s_version", "1.20.10"),
+					resource.TestCheckResourceAttr(ResourceNameK8sNodePool, "maintenance_window.0.day_of_the_week", "Monday"),
+					resource.TestCheckResourceAttr(ResourceNameK8sNodePool, "maintenance_window.0.time", "09:00:00Z"),
+					resource.TestCheckResourceAttr(ResourceNameK8sNodePool, "auto_scaling.0.min_node_count", "1"),
+					resource.TestCheckResourceAttr(ResourceNameK8sNodePool, "auto_scaling.0.max_node_count", "1"),
+					resource.TestCheckResourceAttr(ResourceNameK8sNodePool, "cpu_family", "INTEL_XEON"),
+					resource.TestCheckResourceAttr(ResourceNameK8sNodePool, "availability_zone", "AUTO"),
+					resource.TestCheckResourceAttr(ResourceNameK8sNodePool, "storage_type", "SSD"),
+					resource.TestCheckResourceAttr(ResourceNameK8sNodePool, "node_count", "1"),
+					resource.TestCheckResourceAttr(ResourceNameK8sNodePool, "cores_count", "2"),
+					resource.TestCheckResourceAttr(ResourceNameK8sNodePool, "ram_size", "2048"),
+					resource.TestCheckResourceAttr(ResourceNameK8sNodePool, "storage_size", "40"),
+					resource.TestCheckResourceAttrPair(ResourceNameK8sNodePool, "gateway_ip", IpBlockResource+".terraform_acctest", "ips.0"),
+					resource.TestCheckResourceAttrPair(ResourceNameK8sNodePool, "lans.0.id", LanResource+".terraform_acctest", "id"),
+					resource.TestCheckResourceAttr(ResourceNameK8sNodePool, "lans.0.dhcp", "true"),
+					resource.TestCheckResourceAttr(ResourceNameK8sNodePool, "lans.0.routes.0.network", "1.2.3.5/24"),
+					resource.TestCheckResourceAttr(ResourceNameK8sNodePool, "lans.0.routes.0.gateway_ip", "10.1.5.17"),
+					resource.TestCheckResourceAttr(ResourceNameK8sNodePool, "labels.foo", "bar"),
+					resource.TestCheckResourceAttr(ResourceNameK8sNodePool, "labels.color", "green"),
+					resource.TestCheckResourceAttr(ResourceNameK8sNodePool, "annotations.ann1", "value1"),
+					resource.TestCheckResourceAttr(ResourceNameK8sNodePool, "annotations.ann2", "value2"),
 				),
 			},
 		},
 	})
 }
 
-func testAccCheckk8sNodepoolDestroyCheck(s *terraform.State) error {
-	client := testAccProvider.Meta().(*ionoscloud.APIClient)
+func TestAccK8sNodePoolNoOptional(t *testing.T) {
+	var k8sNodepool ionoscloud.KubernetesNodePool
+
+	resource.Test(t, resource.TestCase{
+		PreCheck: func() {
+			testAccPreCheck(t)
+		},
+		ProviderFactories: testAccProviderFactories,
+		CheckDestroy:      testAccCheckK8sNodePoolDestroyCheck,
+		Steps: []resource.TestStep{
+			{
+				Config: testAccCheckK8sNodePoolConfigNoOptionalFields,
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckK8sNodePoolExists(ResourceNameK8sNodePool, &k8sNodepool),
+					resource.TestCheckResourceAttr(ResourceNameK8sNodePool, "name", K8sNodePoolTestResource),
+					resource.TestCheckResourceAttr(ResourceNameK8sNodePool, "k8s_version", "1.21.4"),
+					resource.TestCheckResourceAttr(ResourceNameK8sNodePool, "cpu_family", "INTEL_XEON"),
+					resource.TestCheckResourceAttr(ResourceNameK8sNodePool, "availability_zone", "AUTO"),
+					resource.TestCheckResourceAttr(ResourceNameK8sNodePool, "storage_type", "SSD"),
+					resource.TestCheckResourceAttr(ResourceNameK8sNodePool, "node_count", "2"),
+					resource.TestCheckResourceAttr(ResourceNameK8sNodePool, "cores_count", "1"),
+					resource.TestCheckResourceAttr(ResourceNameK8sNodePool, "ram_size", "2048"),
+					resource.TestCheckResourceAttr(ResourceNameK8sNodePool, "storage_size", "40"),
+				),
+			},
+			{
+				Config: testAccCheckK8sNodePoolConfigNoOptionalFieldsUpdate,
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckK8sNodePoolExists(ResourceNameK8sNodePool, &k8sNodepool),
+					resource.TestCheckResourceAttr(ResourceNameK8sNodePool, "name", K8sNodePoolTestResource),
+					resource.TestCheckResourceAttr(ResourceNameK8sNodePool, "k8s_version", "1.21.4"),
+					resource.TestCheckResourceAttr(ResourceNameK8sNodePool, "cpu_family", "INTEL_XEON"),
+					resource.TestCheckResourceAttr(ResourceNameK8sNodePool, "availability_zone", "AUTO"),
+					resource.TestCheckResourceAttr(ResourceNameK8sNodePool, "storage_type", "SSD"),
+					resource.TestCheckResourceAttr(ResourceNameK8sNodePool, "node_count", "1"),
+					resource.TestCheckResourceAttr(ResourceNameK8sNodePool, "cores_count", "1"),
+					resource.TestCheckResourceAttr(ResourceNameK8sNodePool, "ram_size", "2048"),
+					resource.TestCheckResourceAttr(ResourceNameK8sNodePool, "storage_size", "40")),
+			},
+		},
+	})
+}
+
+func testAccCheckK8sNodePoolDestroyCheck(s *terraform.State) error {
+	client := testAccProvider.Meta().(SdkBundle).CloudApiClient
 
 	ctx, cancel := context.WithTimeout(context.Background(), *resourceDefaultTimeouts.Default)
 
@@ -136,7 +267,7 @@ func testAccCheckk8sNodepoolDestroyCheck(s *terraform.State) error {
 	}
 
 	for _, rs := range s.RootModule().Resources {
-		if rs.Type != "ionoscloud_k8s_node_pool" {
+		if rs.Type != K8sNodePoolResource {
 			continue
 		}
 
@@ -156,9 +287,9 @@ func testAccCheckk8sNodepoolDestroyCheck(s *terraform.State) error {
 	return nil
 }
 
-func testAccCheckk8sNodepoolExists(n string, k8sNodepool *ionoscloud.KubernetesNodePool) resource.TestCheckFunc {
+func testAccCheckK8sNodePoolExists(n string, k8sNodepool *ionoscloud.KubernetesNodePool) resource.TestCheckFunc {
 	return func(s *terraform.State) error {
-		client := testAccProvider.Meta().(*ionoscloud.APIClient)
+		client := testAccProvider.Meta().(SdkBundle).CloudApiClient
 
 		rs, ok := s.RootModule().Resources[n]
 
@@ -193,46 +324,59 @@ func testAccCheckk8sNodepoolExists(n string, k8sNodepool *ionoscloud.KubernetesN
 	}
 }
 
-const testAccCheckk8sNodepoolConfigBasic = `
-resource "ionoscloud_datacenter" "terraform_acctest" {
+const testAccCheckK8sNodePoolConfigBasic = `
+resource ` + DatacenterResource + ` "terraform_acctest" {
   name        = "terraform_acctest"
   location    = "us/las"
   description = "Datacenter created through terraform"
 }
-
-resource "ionoscloud_ipblock" "terraform_acctest" {
-  location = ionoscloud_datacenter.terraform_acctest.location
+resource ` + LanResource + ` "terraform_acctest" {
+  datacenter_id = ` + DatacenterResource + `.terraform_acctest.id
+  public = false
+  name = "terraform_acctest"
+}
+resource ` + IpBlockResource + ` "terraform_acctest" {
+  location = ` + DatacenterResource + `.terraform_acctest.location
   size = 3
   name = "terraform_acctest"
 }
-
-resource "ionoscloud_k8s_cluster" "terraform_acctest" {
-  depends_on = [ ionoscloud_datacenter.terraform_acctest ]
-  name        = "terraform_acctest2"
+resource ` + K8sClusterResource + ` "terraform_acctest" {
+  name        = "terraform_acctest"
   k8s_version = "1.20.10"
   maintenance_window {
     day_of_the_week = "Monday"
     time            = "09:00:00Z"
   }
 }
-
-resource "ionoscloud_k8s_node_pool" "terraform_acctest" {
-  name        = "%s"
-  k8s_version = ionoscloud_k8s_cluster.terraform_acctest.k8s_version
+resource ` + K8sNodePoolResource + ` ` + K8sNodePoolTestResource + ` {
+  datacenter_id     = ` + DatacenterResource + `.terraform_acctest.id
+  k8s_cluster_id    = ` + K8sClusterResource + `.terraform_acctest.id
+  name        = "` + K8sNodePoolTestResource + `"
+  k8s_version = ` + K8sClusterResource + `.terraform_acctest.k8s_version
   maintenance_window {
     day_of_the_week = "Monday"
     time            = "09:00:00Z"
+  } 
+  auto_scaling {
+    min_node_count = 1
+    max_node_count = 1
   }
-  datacenter_id     = ionoscloud_datacenter.terraform_acctest.id
-  k8s_cluster_id    = ionoscloud_k8s_cluster.terraform_acctest.id
-  cpu_family        = "AMD_OPTERON"
+  cpu_family        = "INTEL_XEON"
   availability_zone = "AUTO"
   storage_type      = "SSD"
   node_count        = 1
   cores_count       = 2
   ram_size          = 2048
   storage_size      = 40
-  public_ips        = [ ionoscloud_ipblock.terraform_acctest.ips[0], ionoscloud_ipblock.terraform_acctest.ips[1] ]
+  public_ips        = [ ` + IpBlockResource + `.terraform_acctest.ips[0], ` + IpBlockResource + `.terraform_acctest.ips[1] ]
+  lans {
+    id   = ` + LanResource + `.terraform_acctest.id
+    dhcp = true
+	routes {
+       network   = "1.2.3.5/24"
+       gateway_ip = "10.1.5.17"
+     }
+   }  
   labels = {
     foo = "bar"
     color = "green"
@@ -243,49 +387,76 @@ resource "ionoscloud_k8s_node_pool" "terraform_acctest" {
   }
 }`
 
-const testAccCheckk8sNodepoolConfigUpdate = `
-resource "ionoscloud_datacenter" "terraform_acctest" {
-  name        = "terraform_acctest"
-  location    = "us/las"
-  description = "Datacenter created through terraform"
+const testAccCheckK8sNodePoolConfigUpdate = `
+resource ` + DatacenterResource + ` "terraform_acctest" {
+	name        = "terraform_acctest"
+	location    = "us/las"
+	description = "Datacenter created through terraform"
 }
-
-resource "ionoscloud_ipblock" "terraform_acctest" {
-  location = ionoscloud_datacenter.terraform_acctest.location
-  size = 3
-  name = "terraform_acctest"
+resource ` + LanResource + ` "terraform_acctest" {
+	datacenter_id = ` + DatacenterResource + `.terraform_acctest.id
+	public = false
+	name = "terraform_acctest"
 }
-
-resource "ionoscloud_k8s_cluster" "terraform_acctest" {
-  name        = "terraform_acctest2"
-  k8s_version = "1.20.10"
+resource ` + LanResource + ` "terraform_acctest_updated" {
+	datacenter_id = ` + DatacenterResource + `.terraform_acctest.id
+	public = false
+	name = "terraform_acctest"
+}
+resource ` + IpBlockResource + ` "terraform_acctest" {
+	location = ` + DatacenterResource + `.terraform_acctest.location
+	size = 3
+	name = "terraform_acctest"
+}
+resource ` + K8sClusterResource + ` "terraform_acctest" {
+	name        = "terraform_acctest"
+	k8s_version = "1.20.14"
+	maintenance_window {
+		day_of_the_week = "Monday"
+		time            = "09:00:00Z"
+	}
+}
+resource ` + K8sNodePoolResource + ` ` + K8sNodePoolTestResource + ` {
+  	datacenter_id     = ` + DatacenterResource + `.terraform_acctest.id
+  	k8s_cluster_id    = ` + K8sClusterResource + `.terraform_acctest.id
+  	name        = "` + K8sNodePoolTestResource + `"
+ 	 k8s_version = ` + K8sClusterResource + `.terraform_acctest.k8s_version
+ 	 auto_scaling {
+ 	 	min_node_count = 1
+		max_node_count = 2
+  }
   maintenance_window {
-    day_of_the_week = "Monday"
-    time            = "09:00:00Z"
+    day_of_the_week = "Tuesday"
+    time            = "10:00:00Z"
   }
-}
-
-resource "ionoscloud_k8s_node_pool" "terraform_acctest" {
-  name        = "%s"
-  k8s_version = "${ionoscloud_k8s_cluster.terraform_acctest.k8s_version}"
-  auto_scaling {
-  	min_node_count = 1
-	max_node_count = 2
-  }
-  maintenance_window {
-    day_of_the_week = "Monday"
-    time            = "09:00:00Z"
-  }
-  datacenter_id     = ionoscloud_datacenter.terraform_acctest.id
-  k8s_cluster_id    = ionoscloud_k8s_cluster.terraform_acctest.id
-  cpu_family        = "AMD_OPTERON"
+  cpu_family        = "INTEL_XEON"
   availability_zone = "AUTO"
   storage_type      = "SSD"
-  node_count        = 1
+  node_count        = 2
   cores_count       = 2
   ram_size          = 2048
   storage_size      = 40
   public_ips        = [ ionoscloud_ipblock.terraform_acctest.ips[0], ionoscloud_ipblock.terraform_acctest.ips[1], ionoscloud_ipblock.terraform_acctest.ips[2] ]
+  lans {
+    id   = ` + LanResource + `.terraform_acctest.id
+    dhcp = false
+ 	routes {
+       network   = "1.2.3.4/24"
+       gateway_ip = "10.1.5.16"
+     }
+  }
+  lans {
+    id   = ` + LanResource + `.terraform_acctest_updated.id
+    dhcp = false
+ 	routes {
+       network   = "1.2.3.5/24"
+       gateway_ip = "10.1.5.17"
+     } 	
+     routes {
+       network   = "1.2.3.6/24"
+       gateway_ip = "10.1.5.18"
+     }
+   }
   labels = {
     foo = "baz"
     color = "red"
@@ -298,160 +469,207 @@ resource "ionoscloud_k8s_node_pool" "terraform_acctest" {
   }
 }`
 
-const testAccCheckk8sNodepoolConfigLan = `
-resource "ionoscloud_datacenter" "terraform_acctest" {
-  name        = "terraform_acctest_lan"
+const testAccCheckK8sNodePoolConfigUpdateAgain = `
+resource ` + DatacenterResource + ` "terraform_acctest" {
+	name        = "terraform_acctest"
+	location    = "us/las"
+	description = "Datacenter created through terraform"
+}
+resource ` + LanResource + ` "terraform_acctest" {
+	datacenter_id = ` + DatacenterResource + `.terraform_acctest.id
+	public = false
+	name = "terraform_acctest"
+}
+resource ` + LanResource + ` "terraform_acctest_updated" {
+	datacenter_id = ` + DatacenterResource + `.terraform_acctest.id
+	public = false
+	name = "terraform_acctest"
+}
+resource ` + IpBlockResource + ` "terraform_acctest" {
+	location = ` + DatacenterResource + `.terraform_acctest.location
+	size = 3
+	name = "terraform_acctest"
+}
+resource ` + K8sClusterResource + ` "terraform_acctest" {
+	name        = "terraform_acctest"
+    k8s_version = "1.21.9"
+	maintenance_window {
+		day_of_the_week = "Monday"
+		time            = "09:00:00Z"
+	}
+}
+resource ` + K8sNodePoolResource + ` ` + K8sNodePoolTestResource + ` {
+  	datacenter_id     = ` + DatacenterResource + `.terraform_acctest.id
+  	k8s_cluster_id    = ` + K8sClusterResource + `.terraform_acctest.id
+  	name        = "` + K8sNodePoolTestResource + `"
+ 	 k8s_version = ` + K8sClusterResource + `.terraform_acctest.k8s_version
+ 	 auto_scaling {
+ 	 	min_node_count = 1
+		max_node_count = 2
+  }
+  maintenance_window {
+    day_of_the_week = "Tuesday"
+    time            = "10:00:00Z"
+  }
+  cpu_family        = "INTEL_XEON"
+  availability_zone = "AUTO"
+  storage_type      = "SSD"
+  node_count        = 2
+  cores_count       = 2
+  ram_size          = 2048
+  storage_size      = 40
+  public_ips        = []
+  labels = {}
+  annotations = {}
+}`
+const testAccCheckK8sNodePoolConfigGatewayIP = `
+resource ` + DatacenterResource + ` "terraform_acctest" {
+  name        = "terraform_acctest"
   location    = "us/las"
   description = "Datacenter created through terraform"
 }
-
-resource "ionoscloud_lan" "terraform_acctest" {
-  datacenter_id = "${ionoscloud_datacenter.terraform_acctest.id}"
+resource ` + LanResource + ` "terraform_acctest" {
+  datacenter_id = ` + DatacenterResource + `.terraform_acctest.id
   public = false
-  name = "terraform_acctest_lan"
+  name = "terraform_acctest"
 }
-
-resource "ionoscloud_k8s_cluster" "terraform_acctest" {
-  name        = "terraform_acctest_lan"
+resource ` + IpBlockResource + ` "terraform_acctest" {
+  location = ` + DatacenterResource + `.terraform_acctest.location
+  size = 1
+  name = "terraform_acctest"
+}
+resource ` + K8sClusterResource + ` "terraform_acctest" {
+  name        = "terraform_acctest"
   k8s_version = "1.20.10"
   maintenance_window {
     day_of_the_week = "Monday"
     time            = "09:00:00Z"
   }
+  public = "false"
 }
 
-resource "ionoscloud_k8s_node_pool" "terraform_acctest" {
-  name              = "%s"
-  datacenter_id     = ionoscloud_datacenter.terraform_acctest.id
-  k8s_cluster_id    = ionoscloud_k8s_cluster.terraform_acctest.id
-  k8s_version       = ionoscloud_k8s_cluster.terraform_acctest.k8s_version
+resource ` + K8sNodePoolResource + ` ` + K8sNodePoolTestResource + ` {
+  datacenter_id     = ` + DatacenterResource + `.terraform_acctest.id
+  k8s_cluster_id    = ` + K8sClusterResource + `.terraform_acctest.id
+  name        = "` + K8sNodePoolTestResource + `"
+  k8s_version = ` + K8sClusterResource + `.terraform_acctest.k8s_version
+  maintenance_window {
+    day_of_the_week = "Monday"
+    time            = "09:00:00Z"
+  } 
+  auto_scaling {
+    min_node_count = 1
+    max_node_count = 1
+  }
+  cpu_family        = "INTEL_XEON"
+  availability_zone = "AUTO"
+  storage_type      = "SSD"
+  node_count        = 1
+  cores_count       = 2
+  ram_size          = 2048
+  storage_size      = 40
+  gateway_ip        = ` + IpBlockResource + `.terraform_acctest.ips[0]
   lans {
-    id   = ionoscloud_lan.terraform_acctest.id
+    id   = ` + LanResource + `.terraform_acctest.id
     dhcp = true
-   }
-  cpu_family        = "AMD_OPTERON"
-  availability_zone = "AUTO"
-  storage_type      = "SSD"
-  node_count        = 1
-  cores_count       = 2
-  ram_size          = 2048
-  storage_size      = 40
+	routes {
+       network   = "1.2.3.5/24"
+       gateway_ip = "10.1.5.17"
+     }
+   }  
+  labels = {
+    foo = "bar"
+    color = "green"
+  }
+  annotations = {
+    ann1 = "value1"
+    ann2 = "value2"
+  }
 }`
 
-const testAccCheckk8sNodepoolConfigLanUpdate = `
-resource "ionoscloud_datacenter" "terraform_acctest" {
-  name        = "terraform_acctest_lan"
+const testAccDataSourceProfitBricksK8sNodePoolMatchId = testAccCheckK8sNodePoolConfigBasic + `
+data ` + K8sNodePoolResource + ` ` + K8sNodePoolDataSourceById + ` {
+	k8s_cluster_id  = ` + K8sClusterResource + `.terraform_acctest.id
+	id				= ` + K8sNodePoolResource + `.` + K8sNodePoolTestResource + `.id
+}
+`
+
+const testAccDataSourceProfitBricksK8sNodePoolMatchName = testAccCheckK8sNodePoolConfigBasic + `
+data ` + K8sNodePoolResource + ` ` + K8sNodePoolDataSourceByName + ` {
+	k8s_cluster_id 	= ` + K8sClusterResource + `.terraform_acctest.id
+	name			= ` + K8sNodePoolResource + `.` + K8sNodePoolTestResource + `.name
+}
+`
+
+const testAccDataSourceProfitBricksK8sNodePoolWrongNameError = testAccCheckK8sNodePoolConfigBasic + `
+data ` + K8sNodePoolResource + ` ` + K8sNodePoolDataSourceByName + ` {
+	k8s_cluster_id 	= ` + K8sClusterResource + `.terraform_acctest.id
+	name			= "wrong_name"
+}
+`
+
+const testAccCheckK8sNodePoolConfigNoOptionalFields = `
+resource ` + DatacenterResource + ` "terraform_acctest" {
+  name        = "terraform_acctest"
   location    = "us/las"
   description = "Datacenter created through terraform"
 }
 
-resource "ionoscloud_lan" "terraform_acctest" {
-  datacenter_id = "${ionoscloud_datacenter.terraform_acctest.id}"
-  public = false
-  name = "terraform_acctest_lan"
-}
-
-resource "ionoscloud_k8s_cluster" "terraform_acctest" {
-  name        = "terraform_acctest_lan"
-  k8s_version = "1.20.10"
+resource ` + K8sClusterResource + ` "terraform_acctest" {
+  name        = "terraform_acctest"
+  k8s_version = "1.21.4"
   maintenance_window {
     day_of_the_week = "Monday"
     time            = "09:00:00Z"
   }
 }
-
-resource "ionoscloud_k8s_node_pool" "terraform_acctest" {
-  name              = "%s"
-  datacenter_id     = ionoscloud_datacenter.terraform_acctest.id
-  k8s_cluster_id    = ionoscloud_k8s_cluster.terraform_acctest.id
-  k8s_version       = ionoscloud_k8s_cluster.terraform_acctest.k8s_version
-  lans {
-    id   = ionoscloud_lan.terraform_acctest.id
-    dhcp = false
-   }
-  cpu_family        = "AMD_OPTERON"
+resource ` + K8sNodePoolResource + ` ` + K8sNodePoolTestResource + ` {
+  datacenter_id     = ` + DatacenterResource + `.terraform_acctest.id
+  k8s_cluster_id    = ` + K8sClusterResource + `.terraform_acctest.id
+  k8s_version = ` + K8sClusterResource + `.terraform_acctest.k8s_version
+  name        = "` + K8sNodePoolTestResource + `"
+  auto_scaling {
+    min_node_count = 1
+    max_node_count = 3
+  }
+  cpu_family        = "INTEL_XEON"
   availability_zone = "AUTO"
   storage_type      = "SSD"
-  node_count        = 1
-  cores_count       = 2
+  node_count        = 2
+  cores_count       = 1
   ram_size          = 2048
   storage_size      = 40
 }`
 
-const testAccCheckk8sNodepoolConfigVersion = `
-resource "ionoscloud_datacenter" "terraform_acctest" {
+const testAccCheckK8sNodePoolConfigNoOptionalFieldsUpdate = `
+resource ` + DatacenterResource + ` "terraform_acctest" {
   name        = "terraform_acctest"
   location    = "us/las"
   description = "Datacenter created through terraform"
 }
 
-resource "ionoscloud_k8s_cluster" "terraform_acctest" {
+resource ` + K8sClusterResource + ` "terraform_acctest" {
   name        = "terraform_acctest"
-  k8s_version = "1.18.5"
+  k8s_version = "1.21.4"
+  maintenance_window {
+    day_of_the_week = "Monday"
+    time            = "09:00:00Z"
+  }
 }
-
-resource "ionoscloud_k8s_node_pool" "terraform_acctest" {
-  name        = "test_version"
-  k8s_version = "${ionoscloud_k8s_cluster.terraform_acctest.k8s_version}"
-  datacenter_id     = "${ionoscloud_datacenter.terraform_acctest.id}"
-  k8s_cluster_id    = "${ionoscloud_k8s_cluster.terraform_acctest.id}"
+resource ` + K8sNodePoolResource + ` ` + K8sNodePoolTestResource + ` {
+  datacenter_id     = ` + DatacenterResource + `.terraform_acctest.id
+  k8s_cluster_id    = ` + K8sClusterResource + `.terraform_acctest.id
+  name        = "` + K8sNodePoolTestResource + `"
+  k8s_version = ` + K8sClusterResource + `.terraform_acctest.k8s_version
+  auto_scaling {
+    min_node_count = 1
+    max_node_count = 3
+  }
   cpu_family        = "INTEL_XEON"
   availability_zone = "AUTO"
   storage_type      = "SSD"
   node_count        = 1
-  cores_count       = 2
-  ram_size          = 2048
-  storage_size      = 40
-}`
-
-const testAccCheckk8sNodepoolConfigIgnoreVersion = `
-resource "ionoscloud_datacenter" "terraform_acctest" {
-  name        = "terraform_acctest"
-  location    = "us/las"
-  description = "Datacenter created through terraform"
-}
-
-resource "ionoscloud_k8s_cluster" "terraform_acctest" {
-  name        = "terraform_acctest"
-  k8s_version = "1.18.9"
-}
-
-resource "ionoscloud_k8s_node_pool" "terraform_acctest" {
-  name        = "test_version"
-  k8s_version = "${ionoscloud_k8s_cluster.terraform_acctest.k8s_version}"
-  datacenter_id     = "${ionoscloud_datacenter.terraform_acctest.id}"
-  k8s_cluster_id    = "${ionoscloud_k8s_cluster.terraform_acctest.id}"
-  cpu_family        = "INTEL_XEON"
-  availability_zone = "AUTO"
-  storage_type      = "SSD"
-  node_count        = 1
-  cores_count       = 2
-  ram_size          = 2048
-  storage_size      = 40
-}`
-
-const testAccCheckk8sNodepoolConfigChangeVersion = `
-resource "ionoscloud_datacenter" "terraform_acctest" {
-  name        = "terraform_acctest"
-  location    = "us/las"
-  description = "Datacenter created through terraform"
-}
-
-resource "ionoscloud_k8s_cluster" "terraform_acctest" {
-  name        = "terraform_acctest"
-  k8s_version = "1.19.10"
-}
-
-resource "ionoscloud_k8s_node_pool" "terraform_acctest" {
-  name        = "test_version"
-  k8s_version = "${ionoscloud_k8s_cluster.terraform_acctest.k8s_version}"
-  datacenter_id     = "${ionoscloud_datacenter.terraform_acctest.id}"
-  k8s_cluster_id    = "${ionoscloud_k8s_cluster.terraform_acctest.id}"
-  cpu_family        = "INTEL_XEON"
-  availability_zone = "AUTO"
-  storage_type      = "SSD"
-  node_count        = 1
-  cores_count       = 2
+  cores_count       = 1
   ram_size          = 2048
   storage_size      = 40
 }`

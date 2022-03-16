@@ -1,16 +1,19 @@
+//go:build compute || all || nic
+
 package ionoscloud
 
 import (
 	"context"
 	"fmt"
 	ionoscloud "github.com/ionos-cloud/sdk-go/v6"
+	"regexp"
 	"testing"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
 )
 
-func TestAccNic_Basic(t *testing.T) {
+func TestAccNicBasic(t *testing.T) {
 	var nic ionoscloud.Nic
 	volumeName := "volume"
 
@@ -24,42 +27,62 @@ func TestAccNic_Basic(t *testing.T) {
 			{
 				Config: fmt.Sprintf(testAccCheckNicConfigBasic, volumeName),
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheckNICExists("ionoscloud_nic.database_nic", &nic),
-					testAccCheckNicAttributes("ionoscloud_nic.database_nic", volumeName),
-					resource.TestCheckResourceAttrSet("ionoscloud_nic.database_nic", "mac"),
-					resource.TestCheckResourceAttr("ionoscloud_nic.database_nic", "name", volumeName),
-					resource.TestCheckResourceAttr("ionoscloud_nic.database_nic", "dhcp", "true"),
+					testAccCheckNICExists(fullNicResourceName, &nic),
+					resource.TestCheckResourceAttrSet(fullNicResourceName, "pci_slot"),
+					resource.TestCheckResourceAttr(fullNicResourceName, "name", volumeName),
+					resource.TestCheckResourceAttr(fullNicResourceName, "dhcp", "true"),
+					resource.TestCheckResourceAttrSet(fullNicResourceName, "mac"),
+					resource.TestCheckResourceAttr(fullNicResourceName, "firewall_active", "true"),
+					resource.TestCheckResourceAttr(fullNicResourceName, "firewall_type", "INGRESS"),
+					resource.TestCheckResourceAttrPair(fullNicResourceName, "ips.0", "ionoscloud_ipblock.test_server", "ips.0"),
+					resource.TestCheckResourceAttrPair(fullNicResourceName, "ips.1", "ionoscloud_ipblock.test_server", "ips.1"),
 				),
+			},
+			{
+				Config: testAccDataSourceNicMatchId,
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttrPair(DataSource+"."+dataSourceNicById, "name", fullNicResourceName, "name"),
+					resource.TestCheckResourceAttrPair(DataSource+"."+dataSourceNicById, "dhcp", fullNicResourceName, "dhcp"),
+					resource.TestCheckResourceAttrPair(DataSource+"."+dataSourceNicById, "firewall_active", fullNicResourceName, "firewall_active"),
+					resource.TestCheckResourceAttrPair(DataSource+"."+dataSourceNicById, "firewall_type", fullNicResourceName, "firewall_type"),
+					resource.TestCheckResourceAttrPair(DataSource+"."+dataSourceNicById, "mac", fullNicResourceName, "mac"),
+					resource.TestCheckResourceAttrPair(DataSource+"."+dataSourceNicById, "pci_slot", fullNicResourceName, "pci_slot"),
+					resource.TestCheckResourceAttrPair(DataSource+"."+dataSourceNicById, "lan", fullNicResourceName, "lan"),
+					resource.TestCheckResourceAttrPair(DataSource+"."+dataSourceNicById, "ips", fullNicResourceName, "ips"),
+				),
+			},
+			{
+				Config: testAccDataSourceNicMatchName,
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttrPair(DataSource+"."+dataSourceNicById, "name", fullNicResourceName, "name"),
+					resource.TestCheckResourceAttrPair(DataSource+"."+dataSourceNicById, "dhcp", fullNicResourceName, "dhcp"),
+					resource.TestCheckResourceAttrPair(DataSource+"."+dataSourceNicById, "firewall_active", fullNicResourceName, "firewall_active"),
+					resource.TestCheckResourceAttrPair(DataSource+"."+dataSourceNicById, "firewall_type", fullNicResourceName, "firewall_type"),
+					resource.TestCheckResourceAttrPair(DataSource+"."+dataSourceNicById, "mac", fullNicResourceName, "mac"),
+					resource.TestCheckResourceAttrPair(DataSource+"."+dataSourceNicById, "pci_slot", fullNicResourceName, "pci_slot"),
+					resource.TestCheckResourceAttrPair(DataSource+"."+dataSourceNicById, "lan", fullNicResourceName, "lan"),
+					resource.TestCheckResourceAttrPair(DataSource+"."+dataSourceNicById, "ips", fullNicResourceName, "ips"),
+				),
+			},
+			{
+				Config:      testAccDataSourceNicMatchNameError,
+				ExpectError: regexp.MustCompile(`no nic found with the specified criteria: name`),
+			},
+			{
+				Config:      testAccDataSourceNicMatchIdAndNameError,
+				ExpectError: regexp.MustCompile(`does not match expected name`),
+			},
+			{
+				Config:      testAccDataSourceNicMultipleResultsError,
+				ExpectError: regexp.MustCompile(`more than one nic found with the specified criteria: name`),
 			},
 			{
 				Config: testAccCheckNicConfigUpdate,
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheckNicAttributes("ionoscloud_nic.database_nic", "updated"),
-					resource.TestCheckResourceAttr("ionoscloud_nic.database_nic", "name", "updated"),
-					resource.TestCheckResourceAttr("ionoscloud_nic.database_nic", "dhcp", "false"),
-				),
-			},
-		},
-	})
-}
-
-func TestAccNic_Ips(t *testing.T) {
-	var nic ionoscloud.Nic
-
-	resource.Test(t, resource.TestCase{
-		PreCheck: func() {
-			testAccPreCheck(t)
-		},
-		ProviderFactories: testAccProviderFactories,
-		CheckDestroy:      testAccCheckNicDestroyCheck,
-		Steps: []resource.TestStep{
-			{
-				Config: fmt.Sprintf(testaccchecknicconfigIps),
-				Check: resource.ComposeTestCheckFunc(
-					testAccCheckNICExists("ionoscloud_nic.database_nic", &nic),
-					resource.TestCheckResourceAttrSet("ionoscloud_nic.database_nic", "mac"),
-					resource.TestCheckResourceAttrPair("ionoscloud_nic.database_nic", "ips.0", "ionoscloud_ipblock.webserver", "ips.0"),
-					resource.TestCheckResourceAttrPair("ionoscloud_nic.database_nic", "ips.1", "ionoscloud_ipblock.webserver", "ips.1"),
+					resource.TestCheckResourceAttr(fullNicResourceName, "name", "updated"),
+					resource.TestCheckResourceAttr(fullNicResourceName, "dhcp", "false"),
+					resource.TestCheckResourceAttr(fullNicResourceName, "firewall_active", "false"),
+					resource.TestCheckResourceAttr(fullNicResourceName, "firewall_type", "BIDIRECTIONAL"),
 				),
 			},
 		},
@@ -67,7 +90,7 @@ func TestAccNic_Ips(t *testing.T) {
 }
 
 func testAccCheckNicDestroyCheck(s *terraform.State) error {
-	client := testAccProvider.Meta().(*ionoscloud.APIClient)
+	client := testAccProvider.Meta().(SdkBundle).CloudApiClient
 
 	ctx, cancel := context.WithTimeout(context.Background(), *resourceDefaultTimeouts.Delete)
 	if cancel != nil {
@@ -75,7 +98,7 @@ func testAccCheckNicDestroyCheck(s *terraform.State) error {
 	}
 
 	for _, rs := range s.RootModule().Resources {
-		if rs.Type != "ionoscloud_nic" {
+		if rs.Type != NicResource {
 			continue
 		}
 
@@ -87,7 +110,7 @@ func testAccCheckNicDestroyCheck(s *terraform.State) error {
 			Execute()
 
 		if err != nil {
-			if apiResponse == nil || apiResponse.Response != nil && apiResponse.StatusCode != 404 {
+			if !httpNotFound(apiResponse) {
 				return fmt.Errorf("an error occurred while checking the destruction of nic %s: %s", rs.Primary.ID, err)
 			}
 		} else {
@@ -98,23 +121,9 @@ func testAccCheckNicDestroyCheck(s *terraform.State) error {
 	return nil
 }
 
-func testAccCheckNicAttributes(n string, name string) resource.TestCheckFunc {
-	return func(s *terraform.State) error {
-		rs, ok := s.RootModule().Resources[n]
-		if !ok {
-			return fmt.Errorf("testAccCheckNicAttributes: Not found: %s", n)
-		}
-		if rs.Primary.Attributes["name"] != name {
-			return fmt.Errorf("bad name: %s", rs.Primary.Attributes["name"])
-		}
-
-		return nil
-	}
-}
-
 func testAccCheckNICExists(n string, nic *ionoscloud.Nic) resource.TestCheckFunc {
 	return func(s *terraform.State) error {
-		client := testAccProvider.Meta().(*ionoscloud.APIClient)
+		client := testAccProvider.Meta().(SdkBundle).CloudApiClient
 
 		rs, ok := s.RootModule().Resources[n]
 		if !ok {
@@ -147,94 +156,19 @@ func testAccCheckNICExists(n string, nic *ionoscloud.Nic) resource.TestCheckFunc
 	}
 }
 
-const testAccCheckNicConfigBasic = `
-resource "ionoscloud_datacenter" "foobar" {
+const testCreateDataCenterAndServer = `
+resource "ionoscloud_datacenter" "test_datacenter" {
 	name       = "nic-test"
 	location = "us/las"
 }
-
-resource "ionoscloud_server" "webserver" {
-  name = "webserver"
-  datacenter_id = "${ionoscloud_datacenter.foobar.id}"
-  cores = 1
-  ram = 1024
-  availability_zone = "ZONE_1"
-  cpu_family = "AMD_OPTERON"
-  image_name = "Ubuntu-20.04"
-  image_password = "K3tTj8G14a3EgKyNeeiY"
-  volume {
-    name = "system"
-    size = 14
-    disk_type = "SSD"
-
-}
-  nic {
-    lan = "1"
-    dhcp = true
-    firewall_active = true
-  }
-}
-
-resource "ionoscloud_nic" "database_nic" {
-  datacenter_id = "${ionoscloud_datacenter.foobar.id}"
-  server_id = "${ionoscloud_server.webserver.id}"
-  lan = 2
-  firewall_active = true
-  firewall_type = "INGRESS"
-  name = "%s"
-}`
-
-const testAccCheckNicConfigUpdate = `
-resource "ionoscloud_datacenter" "foobar" {
-	name       = "nic-test"
-	location = "us/las"
-}
-
-resource "ionoscloud_server" "webserver" {
-  name = "webserver"
-  datacenter_id = "${ionoscloud_datacenter.foobar.id}"
-  cores = 1
-  ram = 1024
-  availability_zone = "ZONE_1"
-  cpu_family = "AMD_OPTERON"
-  image_name = "Ubuntu-20.04"
-  image_password = "K3tTj8G14a3EgKyNeeiY"
-  volume {
-    name = "system"
-    size = 14
-    disk_type = "SSD"
-}
-  nic {
-    lan = "1"
-    dhcp = true
-    firewall_active = true
-  }
-}
-
-resource "ionoscloud_nic" "database_nic" {
-  datacenter_id = "${ionoscloud_datacenter.foobar.id}"
-  server_id = "${ionoscloud_server.webserver.id}"
-  lan = 2
-  dhcp = false
-  firewall_active = true
-  firewall_type = "INGRESS"
-  name = "updated"
-}
-`
-
-const testaccchecknicconfigIps = `
-resource "ionoscloud_datacenter" "foobar" {
-	name       = "nic-test"
-	location = "us/las"
-}
-resource "ionoscloud_ipblock" "webserver" {
-  location = ionoscloud_datacenter.foobar.location
+resource "ionoscloud_ipblock" "test_server" {
+  location = ionoscloud_datacenter.test_datacenter.location
   size = 2
-  name = "webserver_ipblock"
+  name = "test_server_ipblock"
 }
-resource "ionoscloud_server" "webserver" {
-  name = "webserver"
-  datacenter_id = "${ionoscloud_datacenter.foobar.id}"
+resource "ionoscloud_server" "test_server" {
+  name = "test_server"
+  datacenter_id = "${ionoscloud_datacenter.test_datacenter.id}"
   cores = 1
   ram = 1024
   availability_zone = "ZONE_1"
@@ -252,12 +186,83 @@ resource "ionoscloud_server" "webserver" {
     firewall_active = true
   }
 }
-resource "ionoscloud_nic" "database_nic" {
-  datacenter_id = "${ionoscloud_datacenter.foobar.id}"
-  server_id = "${ionoscloud_server.webserver.id}"
+`
+
+const testAccCheckNicConfigBasic = testCreateDataCenterAndServer + `
+resource ` + NicResource + ` "database_nic" {
+  datacenter_id = ` + DatacenterResource + `.` + DatacenterTestResource + `.id
+  server_id = ` + ServerResource + `.` + ServerTestResource + `.id
+  lan = 2
+  firewall_active = true
+  firewall_type = "INGRESS"
+  ips = [ ionoscloud_ipblock.test_server.ips[0], ionoscloud_ipblock.test_server.ips[1] ]
+  name = "%s"
+}
+`
+
+const testAccCheckNicConfigUpdate = testCreateDataCenterAndServer + `
+resource ` + NicResource + ` "database_nic" {
+  datacenter_id = ` + DatacenterResource + `.` + DatacenterTestResource + `.id
+  server_id = ` + ServerResource + `.` + ServerTestResource + `.id
   lan = 2
   dhcp = false
+  firewall_active = false
+  firewall_type = "BIDIRECTIONAL"
+  ips = [ ionoscloud_ipblock.test_server.ips[0], ionoscloud_ipblock.test_server.ips[1] ]
+  name = "updated"
+}
+`
+const dataSourceNicById = NicResource + ".test_nic_data"
+
+const testAccDataSourceNicMatchId = testAccCheckNicConfigBasic + `
+data ` + NicResource + ` test_nic_data {
+  datacenter_id = ` + DatacenterResource + `.` + DatacenterTestResource + `.id
+  server_id = ` + ServerResource + `.` + ServerTestResource + `.id
+  id = ` + fullNicResourceName + `.id
+}
+`
+
+const testAccDataSourceNicMatchName = testAccCheckNicConfigBasic + `
+data ` + NicResource + ` test_nic_data {
+  	datacenter_id = ` + DatacenterResource + `.` + DatacenterTestResource + `.id
+	server_id = ` + ServerResource + `.` + ServerTestResource + `.id
+	name = ` + fullNicResourceName + `.name 
+}`
+
+const testAccDataSourceNicMatchNameError = testAccCheckNicConfigBasic + `
+data ` + NicResource + ` test_nic_data {
+  	datacenter_id = ` + DatacenterResource + `.` + DatacenterTestResource + `.id
+	server_id = ` + ServerResource + `.` + ServerTestResource + `.id
+	name = "DoesNotExist"
+}`
+
+const testAccDataSourceNicMatchIdAndNameError = testAccCheckNicConfigBasic + `
+data ` + NicResource + ` test_nic_data {
+  	datacenter_id = ` + DatacenterResource + `.` + DatacenterTestResource + `.id
+	server_id = ` + ServerResource + `.` + ServerTestResource + `.id
+	id = ` + fullNicResourceName + `.id
+	name = "doesNotExist"
+}`
+
+const testAccDataSourceNicMultipleResultsError = testAccCheckNicConfigBasic + `
+resource "ionoscloud_ipblock" "test_server_multiple_results" {
+  location = ionoscloud_datacenter.test_datacenter.location
+  size = 2
+  name = "test_server_ipblock"
+}
+
+resource ` + NicResource + ` "database_nic_multiple_results" {
+  datacenter_id = ` + DatacenterResource + `.` + DatacenterTestResource + `.id
+  server_id = ` + ServerResource + `.` + ServerTestResource + `.id
+  lan = 2
   firewall_active = true
-  ips            = [ ionoscloud_ipblock.webserver.ips[0], ionoscloud_ipblock.webserver.ips[1] ]
-  name = "test_nic"
+  firewall_type = "INGRESS"
+  ips = [ ionoscloud_ipblock.test_server_multiple_results.ips[0], ionoscloud_ipblock.test_server_multiple_results.ips[1] ]
+  name = "%s"
+}
+
+data ` + NicResource + ` test_nic_data {
+  	datacenter_id = ` + DatacenterResource + `.` + DatacenterTestResource + `.id
+	server_id = ` + ServerResource + `.` + ServerTestResource + `.id
+	name = ` + fullNicResourceName + `.name 
 }`

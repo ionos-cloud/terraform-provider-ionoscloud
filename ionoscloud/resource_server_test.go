@@ -1,9 +1,12 @@
+//go:build compute || all || server
+
 package ionoscloud
 
 import (
 	"context"
 	"fmt"
 	ionoscloud "github.com/ionos-cloud/sdk-go/v6"
+	"regexp"
 	"testing"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
@@ -11,6 +14,8 @@ import (
 )
 
 const bootCdromImageId = "83f21679-3321-11eb-a681-1e659523cb7b"
+
+//ToDo: add backup unit back in tests when stable
 
 func TestAccServerBasic(t *testing.T) {
 	var server ionoscloud.Server
@@ -37,9 +42,9 @@ func TestAccServerBasic(t *testing.T) {
 					resource.TestCheckResourceAttr(ServerResource+"."+ServerTestResource, "volume.0.name", "system"),
 					resource.TestCheckResourceAttr(ServerResource+"."+ServerTestResource, "volume.0.size", "5"),
 					resource.TestCheckResourceAttr(ServerResource+"."+ServerTestResource, "volume.0.disk_type", "SSD Standard"),
-					resource.TestCheckResourceAttrPair(ServerResource+"."+ServerTestResource, "volume.0.backup_unit_id", BackupUnitResource+"."+BackupUnitTestResource, "id"),
 					resource.TestCheckResourceAttr(ServerResource+"."+ServerTestResource, "volume.0.bus", "VIRTIO"),
 					resource.TestCheckResourceAttr(ServerResource+"."+ServerTestResource, "volume.0.availability_zone", "ZONE_1"),
+					resource.TestCheckResourceAttrPair(ServerResource+"."+ServerTestResource, "volume.0.boot_server", ServerResource+"."+ServerTestResource, "id"),
 					resource.TestCheckResourceAttrPair(ServerResource+"."+ServerTestResource, "nic.0.lan", LanResource+"."+LanTestResource, "id"),
 					resource.TestCheckResourceAttr(ServerResource+"."+ServerTestResource, "nic.0.name", "system"),
 					resource.TestCheckResourceAttr(ServerResource+"."+ServerTestResource, "nic.0.dhcp", "true"),
@@ -58,6 +63,74 @@ func TestAccServerBasic(t *testing.T) {
 				),
 			},
 			{
+				Config: testAccDataSourceServerMatchId,
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttrPair(DataSource+"."+ServerResource+"."+ServerDataSourceById, "name", ServerResource+"."+ServerTestResource, "name"),
+					resource.TestCheckResourceAttrPair(DataSource+"."+ServerResource+"."+ServerDataSourceById, "cores", ServerResource+"."+ServerTestResource, "cores"),
+					resource.TestCheckResourceAttrPair(DataSource+"."+ServerResource+"."+ServerDataSourceById, "ram", ServerResource+"."+ServerTestResource, "ram"),
+					resource.TestCheckResourceAttrPair(DataSource+"."+ServerResource+"."+ServerDataSourceById, "availability_zone", ServerResource+"."+ServerTestResource, "availability_zone"),
+					resource.TestCheckResourceAttrPair(DataSource+"."+ServerResource+"."+ServerDataSourceById, "cpu_family", ServerResource+"."+ServerTestResource, "cpu_family"),
+					resource.TestCheckResourceAttrPair(DataSource+"."+ServerResource+"."+ServerDataSourceById, "type", ServerResource+"."+ServerTestResource, "type"),
+					resource.TestCheckResourceAttrPair(DataSource+"."+ServerResource+"."+ServerDataSourceById, "volumes.0.name", ServerResource+"."+ServerTestResource, "volume.0.name"),
+					resource.TestCheckResourceAttrPair(DataSource+"."+ServerResource+"."+ServerDataSourceById, "volumes.0.size", ServerResource+"."+ServerTestResource, "volume.0.size"),
+					resource.TestCheckResourceAttrPair(DataSource+"."+ServerResource+"."+ServerDataSourceById, "volumes.0.type", ServerResource+"."+ServerTestResource, "volume.0.disk_type"),
+					resource.TestCheckResourceAttrPair(DataSource+"."+ServerResource+"."+ServerDataSourceById, "volumes.0.bus", ServerResource+"."+ServerTestResource, "volume.0.bus"),
+					resource.TestCheckResourceAttrPair(DataSource+"."+ServerResource+"."+ServerDataSourceById, "volumes.0.availability_zone", ServerResource+"."+ServerTestResource, "volume.0.availability_zone"),
+					resource.TestCheckResourceAttrPair(DataSource+"."+ServerResource+"."+ServerDataSourceById, "volumes.0.boot_server", ServerResource+"."+ServerTestResource, "id"),
+					resource.TestCheckResourceAttrPair(DataSource+"."+ServerResource+"."+ServerDataSourceById, "nics.0.lan", ServerResource+"."+ServerTestResource, "nic.0.lan"),
+					resource.TestCheckResourceAttrPair(DataSource+"."+ServerResource+"."+ServerDataSourceById, "nics.0.name", ServerResource+"."+ServerTestResource, "nic.0.name"),
+					resource.TestCheckResourceAttrPair(DataSource+"."+ServerResource+"."+ServerDataSourceById, "nics.0.dhcp", ServerResource+"."+ServerTestResource, "nic.0.dhcp"),
+					resource.TestCheckResourceAttrPair(DataSource+"."+ServerResource+"."+ServerDataSourceById, "nics.0.firewall_active", ServerResource+"."+ServerTestResource, "nic.0.firewall_active"),
+					resource.TestCheckResourceAttrPair(DataSource+"."+ServerResource+"."+ServerDataSourceById, "nics.0.firewall_type", ServerResource+"."+ServerTestResource, "nic.0.firewall_type"),
+					resource.TestCheckResourceAttrPair(DataSource+"."+ServerResource+"."+ServerDataSourceById, "nics.0.ips.0", ServerResource+"."+ServerTestResource, "nic.0.ips.0"),
+					resource.TestCheckResourceAttrPair(DataSource+"."+ServerResource+"."+ServerDataSourceById, "nics.0.ips.1", ServerResource+"."+ServerTestResource, "nic.0.ips.1"),
+					resource.TestCheckResourceAttrPair(DataSource+"."+ServerResource+"."+ServerDataSourceById, "nics.0.firewall_rules.0.protocol", ServerResource+"."+ServerTestResource, "nic.0.firewall.0.protocol"),
+					resource.TestCheckResourceAttrPair(DataSource+"."+ServerResource+"."+ServerDataSourceById, "nics.0.firewall_rules.0.name", ServerResource+"."+ServerTestResource, "nic.0.firewall.0.name"),
+					resource.TestCheckResourceAttrPair(DataSource+"."+ServerResource+"."+ServerDataSourceById, "nics.0.firewall_rules.0.port_range_start", ServerResource+"."+ServerTestResource, "nic.0.firewall.0.port_range_start"),
+					resource.TestCheckResourceAttrPair(DataSource+"."+ServerResource+"."+ServerDataSourceById, "nics.0.firewall_rules.0.port_range_end", ServerResource+"."+ServerTestResource, "nic.0.firewall.0.port_range_end"),
+					resource.TestCheckResourceAttrPair(DataSource+"."+ServerResource+"."+ServerDataSourceById, "nics.0.firewall_rules.0.source_mac", ServerResource+"."+ServerTestResource, "nic.0.firewall.0.source_mac"),
+					resource.TestCheckResourceAttrPair(DataSource+"."+ServerResource+"."+ServerDataSourceById, "nics.0.firewall_rules.0.source_ip", ServerResource+"."+ServerTestResource, "nic.0.firewall.0.source_ip"),
+					resource.TestCheckResourceAttrPair(DataSource+"."+ServerResource+"."+ServerDataSourceById, "nics.0.firewall_rules.0.target_ip", ServerResource+"."+ServerTestResource, "nic.0.firewall.0.target_ip"),
+					resource.TestCheckResourceAttrPair(DataSource+"."+ServerResource+"."+ServerDataSourceById, "nics.0.firewall_rules.0.type", ServerResource+"."+ServerTestResource, "nic.0.firewall.0.type"),
+				),
+			},
+			{
+				Config: testAccDataSourceServerMatchName,
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttrPair(DataSource+"."+ServerResource+"."+ServerDataSourceByName, "name", ServerResource+"."+ServerTestResource, "name"),
+					resource.TestCheckResourceAttrPair(DataSource+"."+ServerResource+"."+ServerDataSourceByName, "cores", ServerResource+"."+ServerTestResource, "cores"),
+					resource.TestCheckResourceAttrPair(DataSource+"."+ServerResource+"."+ServerDataSourceByName, "ram", ServerResource+"."+ServerTestResource, "ram"),
+					resource.TestCheckResourceAttrPair(DataSource+"."+ServerResource+"."+ServerDataSourceByName, "availability_zone", ServerResource+"."+ServerTestResource, "availability_zone"),
+					resource.TestCheckResourceAttrPair(DataSource+"."+ServerResource+"."+ServerDataSourceByName, "cpu_family", ServerResource+"."+ServerTestResource, "cpu_family"),
+					resource.TestCheckResourceAttrPair(DataSource+"."+ServerResource+"."+ServerDataSourceByName, "type", ServerResource+"."+ServerTestResource, "type"),
+					resource.TestCheckResourceAttrPair(DataSource+"."+ServerResource+"."+ServerDataSourceByName, "volumes.0.name", ServerResource+"."+ServerTestResource, "volume.0.name"),
+					resource.TestCheckResourceAttrPair(DataSource+"."+ServerResource+"."+ServerDataSourceByName, "volumes.0.size", ServerResource+"."+ServerTestResource, "volume.0.size"),
+					resource.TestCheckResourceAttrPair(DataSource+"."+ServerResource+"."+ServerDataSourceByName, "volumes.0.type", ServerResource+"."+ServerTestResource, "volume.0.disk_type"),
+					resource.TestCheckResourceAttrPair(DataSource+"."+ServerResource+"."+ServerDataSourceByName, "volumes.0.bus", ServerResource+"."+ServerTestResource, "volume.0.bus"),
+					resource.TestCheckResourceAttrPair(DataSource+"."+ServerResource+"."+ServerDataSourceByName, "volumes.0.boot_server", ServerResource+"."+ServerTestResource, "id"),
+					resource.TestCheckResourceAttrPair(DataSource+"."+ServerResource+"."+ServerDataSourceByName, "volumes.0.availability_zone", ServerResource+"."+ServerTestResource, "volume.0.availability_zone"),
+					resource.TestCheckResourceAttrPair(DataSource+"."+ServerResource+"."+ServerDataSourceByName, "nics.0.lan", ServerResource+"."+ServerTestResource, "nic.0.lan"),
+					resource.TestCheckResourceAttrPair(DataSource+"."+ServerResource+"."+ServerDataSourceByName, "nics.0.name", ServerResource+"."+ServerTestResource, "nic.0.name"),
+					resource.TestCheckResourceAttrPair(DataSource+"."+ServerResource+"."+ServerDataSourceByName, "nics.0.dhcp", ServerResource+"."+ServerTestResource, "nic.0.dhcp"),
+					resource.TestCheckResourceAttrPair(DataSource+"."+ServerResource+"."+ServerDataSourceByName, "nics.0.firewall_active", ServerResource+"."+ServerTestResource, "nic.0.firewall_active"),
+					resource.TestCheckResourceAttrPair(DataSource+"."+ServerResource+"."+ServerDataSourceByName, "nics.0.firewall_type", ServerResource+"."+ServerTestResource, "nic.0.firewall_type"),
+					resource.TestCheckResourceAttrPair(DataSource+"."+ServerResource+"."+ServerDataSourceByName, "nics.0.ips.0", ServerResource+"."+ServerTestResource, "nic.0.ips.0"),
+					resource.TestCheckResourceAttrPair(DataSource+"."+ServerResource+"."+ServerDataSourceByName, "nics.0.ips.1", ServerResource+"."+ServerTestResource, "nic.0.ips.1"),
+					resource.TestCheckResourceAttrPair(DataSource+"."+ServerResource+"."+ServerDataSourceByName, "nics.0.firewall_rules.0.protocol", ServerResource+"."+ServerTestResource, "nic.0.firewall.0.protocol"),
+					resource.TestCheckResourceAttrPair(DataSource+"."+ServerResource+"."+ServerDataSourceByName, "nics.0.firewall_rules.0.name", ServerResource+"."+ServerTestResource, "nic.0.firewall.0.name"),
+					resource.TestCheckResourceAttrPair(DataSource+"."+ServerResource+"."+ServerDataSourceByName, "nics.0.firewall_rules.0.port_range_start", ServerResource+"."+ServerTestResource, "nic.0.firewall.0.port_range_start"),
+					resource.TestCheckResourceAttrPair(DataSource+"."+ServerResource+"."+ServerDataSourceByName, "nics.0.firewall_rules.0.port_range_end", ServerResource+"."+ServerTestResource, "nic.0.firewall.0.port_range_end"),
+					resource.TestCheckResourceAttrPair(DataSource+"."+ServerResource+"."+ServerDataSourceByName, "nics.0.firewall_rules.0.source_mac", ServerResource+"."+ServerTestResource, "nic.0.firewall.0.source_mac"),
+					resource.TestCheckResourceAttrPair(DataSource+"."+ServerResource+"."+ServerDataSourceByName, "nics.0.firewall_rules.0.source_ip", ServerResource+"."+ServerTestResource, "nic.0.firewall.0.source_ip"),
+					resource.TestCheckResourceAttrPair(DataSource+"."+ServerResource+"."+ServerDataSourceByName, "nics.0.firewall_rules.0.target_ip", ServerResource+"."+ServerTestResource, "nic.0.firewall.0.target_ip"),
+					resource.TestCheckResourceAttrPair(DataSource+"."+ServerResource+"."+ServerDataSourceByName, "nics.0.firewall_rules.0.type", ServerResource+"."+ServerTestResource, "nic.0.firewall.0.type"),
+				),
+			},
+			{
+				Config:      testAccDataSourceServerWrongNameError,
+				ExpectError: regexp.MustCompile(`no server found with the specified criteria: name`),
+			},
+			{
 				Config: testAccCheckServerConfigUpdate,
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckServerExists(ServerResource+"."+ServerTestResource, &server),
@@ -72,7 +145,6 @@ func TestAccServerBasic(t *testing.T) {
 					resource.TestCheckResourceAttr(ServerResource+"."+ServerTestResource, "type", "ENTERPRISE"),
 					resource.TestCheckResourceAttr(ServerResource+"."+ServerTestResource, "volume.0.size", "6"),
 					resource.TestCheckResourceAttr(ServerResource+"."+ServerTestResource, "volume.0.disk_type", "SSD Standard"),
-					resource.TestCheckResourceAttrPair(ServerResource+"."+ServerTestResource, "volume.0.backup_unit_id", BackupUnitResource+"."+BackupUnitTestResource, "id"),
 					resource.TestCheckResourceAttr(ServerResource+"."+ServerTestResource, "volume.0.bus", "IDE"),
 					resource.TestCheckResourceAttr(ServerResource+"."+ServerTestResource, "volume.0.availability_zone", "ZONE_1"),
 					resource.TestCheckResourceAttrPair(ServerResource+"."+ServerTestResource, "nic.0.lan", LanResource+"."+LanTestResource, "id"),
@@ -235,8 +307,56 @@ func TestAccServerCubeServer(t *testing.T) {
 	})
 }
 
+func TestAccServerWithICMP(t *testing.T) {
+	var server ionoscloud.Server
+
+	resource.Test(t, resource.TestCase{
+		PreCheck: func() {
+			testAccPreCheck(t)
+		},
+		ProviderFactories: testAccProviderFactories,
+		CheckDestroy:      testAccCheckServerDestroyCheck,
+		Steps: []resource.TestStep{
+			{
+				Config: testAccCheckServerNoFirewall,
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckServerExists(ServerResource+"."+ServerTestResource, &server),
+					resource.TestCheckResourceAttr(ServerResource+"."+ServerTestResource, "name", ServerTestResource),
+					resource.TestCheckResourceAttr(ServerResource+"."+ServerTestResource, "cores", "1"),
+					resource.TestCheckResourceAttr(ServerResource+"."+ServerTestResource, "ram", "1024"),
+					resource.TestCheckResourceAttr(ServerResource+"."+ServerTestResource, "availability_zone", "ZONE_1"),
+					resource.TestCheckResourceAttr(ServerResource+"."+ServerTestResource, "cpu_family", "AMD_OPTERON"),
+					testImageNotNull(ServerResource, "boot_image"),
+					resource.TestCheckResourceAttr(ServerResource+"."+ServerTestResource, "image_password", "K3tTj8G14a3EgKyNeeiY"),
+					resource.TestCheckResourceAttr(ServerResource+"."+ServerTestResource, "volume.0.name", "system"),
+					resource.TestCheckResourceAttr(ServerResource+"."+ServerTestResource, "volume.0.size", "5"),
+					resource.TestCheckResourceAttr(ServerResource+"."+ServerTestResource, "volume.0.disk_type", "HDD"),
+					resource.TestCheckResourceAttrPair(ServerResource+"."+ServerTestResource, "nic.0.lan", LanResource+"."+LanTestResource, "id"),
+					resource.TestCheckResourceAttr(ServerResource+"."+ServerTestResource, "nic.0.name", "system"),
+					resource.TestCheckResourceAttr(ServerResource+"."+ServerTestResource, "nic.0.dhcp", "true"),
+					resource.TestCheckResourceAttr(ServerResource+"."+ServerTestResource, "nic.0.firewall_active", "false"),
+					resource.TestCheckResourceAttr(ServerResource+"."+ServerTestResource, "nic.0.firewall.0.icmp_type", "10"),
+					resource.TestCheckResourceAttr(ServerResource+"."+ServerTestResource, "nic.0.firewall.0.icmp_code", "1"),
+				),
+			},
+			{
+				Config: testAccCheckServerICMP,
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckServerExists(ServerResource+"."+ServerTestResource, &server),
+					resource.TestCheckResourceAttr(ServerResource+"."+ServerTestResource, "nic.0.dhcp", "true"),
+					resource.TestCheckResourceAttr(ServerResource+"."+ServerTestResource, "nic.0.firewall_active", "true"),
+					resource.TestCheckResourceAttr(ServerResource+"."+ServerTestResource, "nic.0.firewall.0.protocol", "ICMP"),
+					resource.TestCheckResourceAttr(ServerResource+"."+ServerTestResource, "nic.0.firewall.0.name", ServerTestResource),
+					resource.TestCheckResourceAttr(ServerResource+"."+ServerTestResource, "nic.0.firewall.0.icmp_type", "12"),
+					resource.TestCheckResourceAttr(ServerResource+"."+ServerTestResource, "nic.0.firewall.0.icmp_code", "0"),
+				),
+			},
+		},
+	})
+}
+
 func testAccCheckServerDestroyCheck(s *terraform.State) error {
-	client := testAccProvider.Meta().(*ionoscloud.APIClient)
+	client := testAccProvider.Meta().(SdkBundle).CloudApiClient
 
 	ctx, cancel := context.WithTimeout(context.Background(), *resourceDefaultTimeouts.Default)
 
@@ -269,7 +389,7 @@ func testAccCheckServerDestroyCheck(s *terraform.State) error {
 
 func testAccCheckServerExists(n string, server *ionoscloud.Server) resource.TestCheckFunc {
 	return func(s *terraform.State) error {
-		client := testAccProvider.Meta().(*ionoscloud.APIClient)
+		client := testAccProvider.Meta().(SdkBundle).CloudApiClient
 
 		rs, ok := s.RootModule().Resources[n]
 
@@ -303,68 +423,11 @@ func testAccCheckServerExists(n string, server *ionoscloud.Server) resource.Test
 	}
 }
 
-const testAccCheckServerConfigBasic = `
-resource ` + DatacenterResource + ` ` + DatacenterTestResource + ` {
-	name       = "server-test"
-	location = "us/las"
-}
-` + testAccCheckBackupUnitConfigBasic + `
-
-resource "ionoscloud_ipblock" "webserver_ipblock" {
-  location = ` + DatacenterResource + `.` + DatacenterTestResource + `.location
-  size = 4
-  name = "webserver_ipblock"
-}
-resource ` + LanResource + ` ` + LanTestResource + ` {
-  datacenter_id = ` + DatacenterResource + `.` + DatacenterTestResource + `.id
-  public = true
-  name = "public"
-}
-resource ` + ServerResource + ` ` + ServerTestResource + ` {
-  name = "` + ServerTestResource + `"
-  datacenter_id = ` + DatacenterResource + `.` + DatacenterTestResource + `.id
-  cores = 1
-  ram = 1024
-  availability_zone = "ZONE_1"
-  cpu_family = "AMD_OPTERON"
-  image_name ="Debian-10-cloud-init.qcow2"
-  image_password = "K3tTj8G14a3EgKyNeeiY"
-  type = "ENTERPRISE"
-  volume {
-    name = "system"
-    size = 5
-    disk_type = "SSD Standard"
-	backup_unit_id = ` + BackupUnitResource + `.` + BackupUnitTestResource + `.id
-    user_data = "foo"
-    bus = "VIRTIO"
-    availability_zone = "ZONE_1"
-}
-  nic {
-    lan = ` + LanResource + `.` + LanTestResource + `.id
-    name = "system"
-    dhcp = true
-    firewall_active = true
-	firewall_type = "BIDIRECTIONAL"
-    ips            = [ ionoscloud_ipblock.webserver_ipblock.ips[0], ionoscloud_ipblock.webserver_ipblock.ips[1] ]
-    firewall {
-      protocol = "TCP"
-      name = "SSH"
-      port_range_start = 22
-      port_range_end = 22
-	  source_mac = "00:0a:95:9d:68:17"
-	  source_ip = ionoscloud_ipblock.webserver_ipblock.ips[2]
-	  target_ip = ionoscloud_ipblock.webserver_ipblock.ips[3]
-	  type = "EGRESS"
-    }
-  }
-}`
-
 const testAccCheckServerConfigUpdate = `
 resource ` + DatacenterResource + ` ` + DatacenterTestResource + ` {
 	name       = "server-test"
 	location = "us/las"
 }
-` + testAccCheckBackupUnitConfigBasic + `
 
 resource "ionoscloud_ipblock" "webserver_ipblock" {
   location = ` + DatacenterResource + `.` + DatacenterTestResource + `.location
@@ -396,7 +459,6 @@ resource ` + ServerResource + ` ` + ServerTestResource + ` {
     name = "` + UpdatedResources + `"
     size = 6
     disk_type = "SSD Standard"
-	backup_unit_id = ` + BackupUnitResource + `.` + BackupUnitTestResource + `.id
     user_data = "foo"
     bus = "IDE"
     availability_zone = "ZONE_1"
@@ -419,6 +481,26 @@ resource ` + ServerResource + ` ` + ServerTestResource + ` {
     }
   }
 }`
+
+const testAccDataSourceServerMatchId = testAccCheckServerConfigBasic + `
+data ` + ServerResource + ` ` + ServerDataSourceById + ` {
+  datacenter_id = ` + DatacenterResource + `.` + DatacenterTestResource + `.id
+  id			= ` + ServerResource + `.` + ServerTestResource + `.id
+}
+`
+
+const testAccDataSourceServerMatchName = testAccCheckServerConfigBasic + `
+data ` + ServerResource + ` ` + ServerDataSourceByName + ` {
+  datacenter_id = ` + DatacenterResource + `.` + DatacenterTestResource + `.id
+  name			= "` + ServerTestResource + `"
+}
+`
+const testAccDataSourceServerWrongNameError = testAccCheckServerConfigBasic + `
+data ` + ServerResource + ` ` + ServerDataSourceByName + ` {
+  datacenter_id = ` + DatacenterResource + `.` + DatacenterTestResource + `.id
+  name			= "wrong_name"
+}
+`
 
 const testAccCheckServerConfigBootCdromNoImage = `
 resource ` + DatacenterResource + ` ` + DatacenterTestResource + ` {
@@ -589,4 +671,80 @@ resource "ionoscloud_server" ` + ServerTestResource + ` {
     dhcp            = true
     firewall_active = true
   }
+}`
+
+const testAccCheckServerNoFirewall = `
+resource ` + DatacenterResource + ` ` + DatacenterTestResource + ` {
+	name       = "server-test"
+	location = "us/las"
+}
+resource ` + LanResource + ` ` + LanTestResource + ` {
+  datacenter_id = ` + DatacenterResource + `.` + DatacenterTestResource + `.id
+  public = true
+  name = "public"
+}
+resource ` + ServerResource + ` ` + ServerTestResource + ` {
+  name = "` + ServerTestResource + `"
+  datacenter_id = ` + DatacenterResource + `.` + DatacenterTestResource + `.id
+  cores = 1
+  ram = 1024
+  availability_zone = "ZONE_1"
+  cpu_family = "AMD_OPTERON"
+  image_name ="Debian-10-cloud-init.qcow2"
+  image_password = "K3tTj8G14a3EgKyNeeiY"
+  volume {
+    name = "system"
+    size = 5
+	disk_type = "HDD"
+}
+  nic {
+    lan = ` + LanResource + `.` + LanTestResource + `.id
+    name = "system"
+    dhcp = true
+    firewall_active = false
+    firewall {
+      protocol         = "ICMP"
+      name             = "` + ServerTestResource + `"
+      icmp_type        = "10"
+      icmp_code        = "1"
+	  }
+  }
+}`
+
+const testAccCheckServerICMP = `
+resource ` + DatacenterResource + ` ` + DatacenterTestResource + ` {
+	name       = "server-test"
+	location = "us/las"
+}
+resource ` + LanResource + ` ` + LanTestResource + ` {
+  datacenter_id = ` + DatacenterResource + `.` + DatacenterTestResource + `.id
+  public = true
+  name = "public"
+}
+resource ` + ServerResource + ` ` + ServerTestResource + ` {
+  name = "` + ServerTestResource + `"
+  datacenter_id = ` + DatacenterResource + `.` + DatacenterTestResource + `.id
+  cores = 1
+  ram = 1024
+  availability_zone = "ZONE_1"
+  cpu_family = "AMD_OPTERON"
+  image_name ="Debian-10-cloud-init.qcow2"
+  image_password = "K3tTj8G14a3EgKyNeeiY"
+  volume {
+    name = "system"
+    size = 5
+	disk_type = "HDD"
+}
+  nic {
+    lan             = ` + LanResource + `.` + LanTestResource + `.id
+    name 			= "system"
+    dhcp            = true
+    firewall_active = true
+    firewall {
+      protocol         = "ICMP"
+      name             = "` + ServerTestResource + `"
+      icmp_type        = "12"
+      icmp_code        = "0"
+	  }
+    }
 }`

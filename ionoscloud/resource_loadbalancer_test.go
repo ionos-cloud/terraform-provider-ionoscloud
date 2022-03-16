@@ -1,4 +1,5 @@
-// +build waiting_for_vdc
+//go:build all || waiting_for_vdc
+// +build all waiting_for_vdc
 
 package ionoscloud
 
@@ -12,7 +13,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
 )
 
-func TestAccLoadbalancer_Basic(t *testing.T) {
+func TestAccLoadbalancerBasic(t *testing.T) {
 	var loadbalancer ionoscloud.Loadbalancer
 	lbName := "loadbalancer"
 
@@ -43,7 +44,7 @@ func TestAccLoadbalancer_Basic(t *testing.T) {
 }
 
 func testAccCheckLoadbalancerDestroyCheck(s *terraform.State) error {
-	client := testAccProvider.Meta().(*ionoscloud.APIClient)
+	client := testAccProvider.Meta().(SdkBundle).CloudApiClient
 
 	ctx, cancel := context.WithTimeout(context.Background(), *resourceDefaultTimeouts.Delete)
 	if cancel != nil {
@@ -89,7 +90,7 @@ func testAccCheckLoadbalancerAttributes(n string, name string) resource.TestChec
 
 func testAccCheckLoadbalancerExists(n string, loadbalancer *ionoscloud.Loadbalancer) resource.TestCheckFunc {
 	return func(s *terraform.State) error {
-		client := testAccProvider.Meta().(*ionoscloud.APIClient)
+		client := testAccProvider.Meta().(SdkBundle).CloudApiClient
 		rs, ok := s.RootModule().Resources[n]
 
 		if !ok {

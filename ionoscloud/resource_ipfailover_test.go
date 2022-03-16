@@ -1,3 +1,5 @@
+//go:build compute || all || ipfailover
+
 package ionoscloud
 
 import (
@@ -10,7 +12,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
 )
 
-func TestAccLanIPFailover_Basic(t *testing.T) {
+func TestAccLanIPFailoverBasic(t *testing.T) {
 	var lan ionoscloud.Lan
 	var ipfailover ionoscloud.IPFailover
 
@@ -32,13 +34,23 @@ func TestAccLanIPFailover_Basic(t *testing.T) {
 		CheckDestroy:      testAccCheckLanIPFailoverDestroyCheck,
 		Steps: []resource.TestStep{
 			{
-				Config: fmt.Sprintf(testaccchecklanipfailoverconfigBasic),
+				Config: fmt.Sprintf(testAccCheckLanIPFailoverConfig),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckLanIPFailoverGroupExists("ionoscloud_ipfailover.failover-test", &lan, &ipfailover),
 				),
 			},
 			{
-				Config: testaccchecklanipfailoverconfigUpdate,
+				Config: testAccDataSourceIpFailoverConfigBasic,
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttrSet(ipfailoverResourceFullName, "id"),
+					resource.TestCheckResourceAttrPair(ipfailoverResourceFullName, "id", DataSource+"."+ResourceIpFailover+"."+ipfailoverName, "id"),
+					resource.TestCheckResourceAttrPair(ipfailoverResourceFullName, "nicuuid", DataSource+"."+ResourceIpFailover+"."+ipfailoverName, "nicuuid"),
+					resource.TestCheckResourceAttrPair(ipfailoverResourceFullName, "lan_id", DataSource+"."+ResourceIpFailover+"."+ipfailoverName, "lan_id"),
+					resource.TestCheckResourceAttrPair(ipfailoverResourceFullName, "datacenter_id", DataSource+"."+ResourceIpFailover+"."+ipfailoverName, "datacenter_id"),
+				),
+			},
+			{
+				Config: testAccCheckLanIPFailoverConfigUpdate,
 				Check: resource.ComposeTestCheckFunc(
 					testDeleted("ionoscloud_ipfailover.failover-test"),
 				),
@@ -52,7 +64,7 @@ func TestAccLanIPFailover_Basic(t *testing.T) {
 
 func testAccCheckLanIPFailoverGroupExists(n string, _ *ionoscloud.Lan, _ *ionoscloud.IPFailover) resource.TestCheckFunc {
 	return func(s *terraform.State) error {
-		client := testAccProvider.Meta().(*ionoscloud.APIClient)
+		client := testAccProvider.Meta().(SdkBundle).CloudApiClient
 
 		rs, ok := s.RootModule().Resources[n]
 		if !ok {
@@ -73,7 +85,7 @@ func testAccCheckLanIPFailoverGroupExists(n string, _ *ionoscloud.Lan, _ *ionosc
 			defer cancel()
 		}
 
-		lan, apiResponse, err := client.LansApi.DatacentersLansFindById(ctx, dcId, lanId).Execute()
+		lan, apiResponse, err := client.LANsApi.DatacentersLansFindById(ctx, dcId, lanId).Execute()
 		logApiRequestTime(apiResponse)
 		if err != nil {
 			return fmt.Errorf("lan %s not found", lanId)
@@ -97,7 +109,7 @@ func testAccCheckLanIPFailoverGroupExists(n string, _ *ionoscloud.Lan, _ *ionosc
 }
 
 func testAccCheckLanIPFailoverDestroyCheck(s *terraform.State) error {
-	client := testAccProvider.Meta().(*ionoscloud.APIClient)
+	client := testAccProvider.Meta().(SdkBundle).CloudApiClient
 
 	ctx, cancel := context.WithTimeout(context.Background(), *resourceDefaultTimeouts.Default)
 
@@ -114,7 +126,7 @@ func testAccCheckLanIPFailoverDestroyCheck(s *terraform.State) error {
 		lanId := rs.Primary.Attributes["lan_id"]
 		nicUuid := rs.Primary.Attributes["nicuuid"]
 
-		lan, apiResponse, err := client.LansApi.DatacentersLansFindById(ctx, dcId, lanId).Execute()
+		lan, apiResponse, err := client.LANsApi.DatacentersLansFindById(ctx, dcId, lanId).Execute()
 		logApiRequestTime(apiResponse)
 
 		if err != nil {
@@ -143,7 +155,7 @@ func testAccCheckLanIPFailoverDestroyCheck(s *terraform.State) error {
 	return nil
 }
 
-const testaccchecklanipfailoverconfigBasic = `
+const testAccCheckLanIPFailoverConfig = `
 resource "ionoscloud_datacenter" "foobar" {
 	name       = "ipfailover-test"
 	location = "us/las"
@@ -191,7 +203,7 @@ resource "ionoscloud_ipfailover" "failover-test" {
 }
 `
 
-const testaccchecklanipfailoverconfigUpdate = `
+const testAccCheckLanIPFailoverConfigUpdate = `
 resource "ionoscloud_datacenter" "foobar" {
 	name       = "ipfailover-test"
 	location = "us/las"
@@ -229,5 +241,12 @@ resource "ionoscloud_server" "webserver" {
     firewall_active = true
      ips =["${ionoscloud_ipblock.webserver_ip.ips[0]}"]
   }
+}
+`
+
+var testAccDataSourceIpFailoverConfigBasic = testAccCheckLanIPFailoverConfig + `
+data ` + ResourceIpFailover + " " + ipfailoverName + `{
+  datacenter_id = "${ionoscloud_datacenter.foobar.id}"
+  id		    = ` + ipfailoverResourceFullName + `.id
 }
 `

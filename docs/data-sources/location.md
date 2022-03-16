@@ -1,4 +1,5 @@
 ---
+subcategory: "Compute Engine"
 layout: "ionoscloud"
 page_title: "IonosCloud: location"
 sidebar_current: "docs-datasource-location"
@@ -8,12 +9,14 @@ description: |-
 
 # ionoscloud\_location
 
-The locations data source can be used to search for and return an existing location which can then be used elsewhere in the configuration.
+The **Location data source** can be used to search for and return an existing location which can then be used elsewhere in the configuration.
+If a single match is found, it will be returned. If your search results in multiple matches, an error will be returned.
+When this happens, please refine your search string so that it is specific enough to return only one result.
 
 ## Example Usage
 
 ```hcl
-data "ionoscloud_location" "loc1" {
+data "ionoscloud_location" "example" {
   name    = "karlsruhe"
   feature = "SSD"
 }

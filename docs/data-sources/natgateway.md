@@ -1,21 +1,32 @@
 ---
+subcategory: "NAT Gateway"
 layout: "ionoscloud"
 page_title: "IonosCloud : ionoscloud_natgateway"
 sidebar_current: "docs-ionoscloud-datasource-natgateway"
 description: |-
-Get information on a Nat Gateway
+  Get information on a Nat Gateway
 ---
 
 # ionoscloud_natgateway
 
-The nat gateway data source can be used to search for and return existing natgateways.
+The **NAT gateway data source** can be used to search for and return existing NAT Gateways.
+If a single match is found, it will be returned. If your search results in multiple matches, an error will be returned.
+When this happens, please refine your search string so that it is specific enough to return only one result.
 
 ## Example Usage
-
+### By ID
 ```hcl
-data "ionoscloud_natgateway" "natgateway_example" {
-  datacenter_id = ionoscloud_datacenter.datacenter_example.id
-  name			= "example_"
+data "ionoscloud_natgateway" "example" {
+  datacenter_id = <datacenter_id>
+  id			= <nat_gateway_id>
+}
+```
+
+### By Name
+```hcl
+data "ionoscloud_natgateway" "example" {
+  datacenter_id = <datacenter_id>
+  name			= "NAT Gateway Example"
 }
 ```
 

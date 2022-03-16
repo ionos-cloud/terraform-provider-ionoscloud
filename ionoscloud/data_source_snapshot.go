@@ -2,6 +2,7 @@ package ionoscloud
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
@@ -92,12 +93,19 @@ func dataSourceSnapshot() *schema.Resource {
 }
 
 func dataSourceSnapshotRead(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
-	client := meta.(*ionoscloud.APIClient)
+	client := meta.(SdkBundle).CloudApiClient
 
 	id, idOk := d.GetOk("id")
-	name := d.Get("name").(string)
+	name, nameOk := d.GetOk("name")
 	location, locationOk := d.GetOk("location")
 	size, sizeOk := d.GetOk("size")
+
+	if idOk && nameOk {
+		return diag.FromErr(errors.New("id and name cannot be both specified in the same time"))
+	}
+	if !idOk && !nameOk {
+		return diag.FromErr(errors.New("please provide either the server id or name"))
+	}
 
 	var snapshot ionoscloud.Snapshot
 	var err error
@@ -114,7 +122,7 @@ func dataSourceSnapshotRead(ctx context.Context, d *schema.ResourceData, meta in
 	} else {
 		var results []ionoscloud.Snapshot
 
-		snapshots, apiResponse, err := client.SnapshotsApi.SnapshotsGet(ctx).Execute()
+		snapshots, apiResponse, err := client.SnapshotsApi.SnapshotsGet(ctx).Depth(1).Execute()
 		logApiRequestTime(apiResponse)
 
 		if err != nil {
@@ -124,7 +132,7 @@ func dataSourceSnapshotRead(ctx context.Context, d *schema.ResourceData, meta in
 
 		if snapshots.Items != nil {
 			for _, snp := range *snapshots.Items {
-				if snp.Properties.Name != nil && *snp.Properties.Name == name {
+				if snp.Properties != nil && snp.Properties.Name != nil && *snp.Properties.Name == name.(string) {
 					results = append(results, snp)
 				}
 			}
@@ -144,7 +152,7 @@ func dataSourceSnapshotRead(ctx context.Context, d *schema.ResourceData, meta in
 		if sizeOk {
 			var sizeResults []ionoscloud.Snapshot
 			for _, snp := range results {
-				if *snp.Properties.Size <= float32(size.(int)) {
+				if snp.Properties != nil && snp.Properties.Size != nil && *snp.Properties.Size == float32(size.(int)) {
 					sizeResults = append(sizeResults, snp)
 				}
 
@@ -152,11 +160,13 @@ func dataSourceSnapshotRead(ctx context.Context, d *schema.ResourceData, meta in
 			results = sizeResults
 		}
 
-		if len(results) == 0 {
-			diags := diag.FromErr(fmt.Errorf("There are no snapshots that match the search criteria "))
-			return diags
+		if results == nil || len(results) == 0 {
+			return diag.FromErr(fmt.Errorf("no snapshot found with the specified criteria: name = %s, location = %s, size = %v", name.(string), location.(string), size.(int)))
+		} else if len(results) > 1 {
+			return diag.FromErr(fmt.Errorf("more than one snapshot found with the specified criteria: name = %s, location = %s, size = %v", name.(string), location.(string), size.(int)))
+		} else {
+			snapshot = results[0]
 		}
-		snapshot = results[0]
 	}
 
 	if err = setSnapshotData(d, &snapshot); err != nil {

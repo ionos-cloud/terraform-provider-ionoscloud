@@ -21,7 +21,6 @@ func resourceNatGatewayRule() *schema.Resource {
 			StateContext: resourceNatGatewayRuleImport,
 		},
 		Schema: map[string]*schema.Schema{
-
 			"name": {
 				Type:         schema.TypeString,
 				Description:  "Name of the NAT gateway rule",
@@ -108,7 +107,7 @@ func resourceNatGatewayRule() *schema.Resource {
 
 func resourceNatGatewayRuleCreate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 
-	client := meta.(*ionoscloud.APIClient)
+	client := meta.(SdkBundle).CloudApiClient
 
 	natGatewayRule := ionoscloud.NatGatewayRule{
 		Properties: &ionoscloud.NatGatewayRuleProperties{},
@@ -158,7 +157,7 @@ func resourceNatGatewayRuleCreate(ctx context.Context, d *schema.ResourceData, m
 		natGatewayRule.Properties.Protocol = &protocol
 	}
 
-	if targetSubnet, targetSubnetOk := d.GetOk("source_subnet"); targetSubnetOk {
+	if targetSubnet, targetSubnetOk := d.GetOk("target_subnet"); targetSubnetOk {
 		targetSubnet := targetSubnet.(string)
 		natGatewayRule.Properties.TargetSubnet = &targetSubnet
 	}
@@ -210,7 +209,7 @@ func resourceNatGatewayRuleCreate(ctx context.Context, d *schema.ResourceData, m
 }
 
 func resourceNatGatewayRuleRead(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
-	client := meta.(*ionoscloud.APIClient)
+	client := meta.(SdkBundle).CloudApiClient
 
 	dcId := d.Get("datacenter_id").(string)
 	ngId := d.Get("natgateway_id").(string)
@@ -235,7 +234,7 @@ func resourceNatGatewayRuleRead(ctx context.Context, d *schema.ResourceData, met
 	return nil
 }
 func resourceNatGatewayRuleUpdate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
-	client := meta.(*ionoscloud.APIClient)
+	client := meta.(SdkBundle).CloudApiClient
 	request := ionoscloud.NatGatewayRule{
 		Properties: &ionoscloud.NatGatewayRuleProperties{},
 	}
@@ -334,7 +333,7 @@ func resourceNatGatewayRuleUpdate(ctx context.Context, d *schema.ResourceData, m
 }
 
 func resourceNatGatewayRuleDelete(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
-	client := meta.(*ionoscloud.APIClient)
+	client := meta.(SdkBundle).CloudApiClient
 
 	dcId := d.Get("datacenter_id").(string)
 	ngId := d.Get("natgateway_id").(string)
@@ -360,7 +359,7 @@ func resourceNatGatewayRuleDelete(ctx context.Context, d *schema.ResourceData, m
 }
 
 func resourceNatGatewayRuleImport(ctx context.Context, d *schema.ResourceData, meta interface{}) ([]*schema.ResourceData, error) {
-	client := meta.(*ionoscloud.APIClient)
+	client := meta.(SdkBundle).CloudApiClient
 
 	parts := strings.Split(d.Id(), "/")
 	if len(parts) != 3 || parts[0] == "" || parts[1] == "" || parts[2] == "" {
@@ -395,4 +394,68 @@ func resourceNatGatewayRuleImport(ctx context.Context, d *schema.ResourceData, m
 	}
 
 	return []*schema.ResourceData{d}, nil
+}
+
+func setNatGatewayRuleData(d *schema.ResourceData, natGatewayRule *ionoscloud.NatGatewayRule) error {
+
+	if natGatewayRule.Id != nil {
+		d.SetId(*natGatewayRule.Id)
+	}
+
+	if natGatewayRule.Properties != nil {
+		if natGatewayRule.Properties.Name != nil {
+			err := d.Set("name", *natGatewayRule.Properties.Name)
+			if err != nil {
+				return fmt.Errorf("error while setting name property for nat gateway %s: %s", d.Id(), err)
+			}
+		}
+
+		if natGatewayRule.Properties.Type != nil {
+			err := d.Set("type", *natGatewayRule.Properties.Type)
+			if err != nil {
+				return fmt.Errorf("error while setting type property for nat gateway %s: %s", d.Id(), err)
+			}
+		}
+
+		if natGatewayRule.Properties.Protocol != nil {
+			err := d.Set("protocol", *natGatewayRule.Properties.Protocol)
+			if err != nil {
+				return fmt.Errorf("error while setting protocol property for nat gateway %s: %s", d.Id(), err)
+			}
+		}
+
+		if natGatewayRule.Properties.SourceSubnet != nil {
+			err := d.Set("source_subnet", *natGatewayRule.Properties.SourceSubnet)
+			if err != nil {
+				return fmt.Errorf("error while setting source_subnet property for nat gateway %s: %s", d.Id(), err)
+			}
+		}
+
+		if natGatewayRule.Properties.PublicIp != nil {
+			err := d.Set("public_ip", *natGatewayRule.Properties.PublicIp)
+			if err != nil {
+				return fmt.Errorf("error while setting public_ip property for nat gateway %s: %s", d.Id(), err)
+			}
+		}
+
+		if natGatewayRule.Properties.TargetSubnet != nil {
+			err := d.Set("target_subnet", *natGatewayRule.Properties.TargetSubnet)
+			if err != nil {
+				return fmt.Errorf("error while setting target_subnet property for nat gateway %s: %s", d.Id(), err)
+			}
+		}
+
+		if natGatewayRule.Properties.TargetPortRange != nil && natGatewayRule.Properties.TargetPortRange.Start != nil &&
+			natGatewayRule.Properties.TargetPortRange.End != nil {
+			err := d.Set("target_port_range", []map[string]int32{{
+				"start": *natGatewayRule.Properties.TargetPortRange.Start,
+				"end":   *natGatewayRule.Properties.TargetPortRange.End,
+			},
+			})
+			if err != nil {
+				return fmt.Errorf("error while setting target_port_range property for nat gateway %s: %s", d.Id(), err)
+			}
+		}
+	}
+	return nil
 }

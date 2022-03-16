@@ -1,16 +1,19 @@
+//go:build compute || all || lan
+
 package ionoscloud
 
 import (
 	"context"
 	"fmt"
 	ionoscloud "github.com/ionos-cloud/sdk-go/v6"
+	"regexp"
 	"testing"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
 )
 
-func TestAccLan_Basic(t *testing.T) {
+func TestAccLanBasic(t *testing.T) {
 	var lan ionoscloud.Lan
 
 	resource.Test(t, resource.TestCase{
@@ -29,6 +32,34 @@ func TestAccLan_Basic(t *testing.T) {
 				),
 			},
 			{
+				Config: testAccDataSourceLanMatchId,
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttrPair(DataSource+"."+LanResource+"."+LanDataSourceById, "name", LanResource+"."+LanTestResource, "name"),
+					resource.TestCheckResourceAttrPair(DataSource+"."+LanResource+"."+LanDataSourceById, "ip_failover.nic_uuid", LanResource+"."+LanTestResource, "ip_failover.nic_uuid"),
+					resource.TestCheckResourceAttrPair(DataSource+"."+LanResource+"."+LanDataSourceById, "ip_failover.ip", LanResource+"."+LanTestResource, "ip_failover.ip"),
+					resource.TestCheckResourceAttrPair(DataSource+"."+LanResource+"."+LanDataSourceById, "pcc", LanResource+"."+LanTestResource, "pcc"),
+					resource.TestCheckResourceAttrPair(DataSource+"."+LanResource+"."+LanDataSourceById, "public", LanResource+"."+LanTestResource, "public"),
+				),
+			},
+			{
+				Config: testAccDataSourceLanMatchName,
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttrPair(DataSource+"."+LanResource+"."+LanDataSourceByName, "name", LanResource+"."+LanTestResource, "name"),
+					resource.TestCheckResourceAttrPair(DataSource+"."+LanResource+"."+LanDataSourceByName, "ip_failover.nic_uuid", LanResource+"."+LanTestResource, "ip_failover.nic_uuid"),
+					resource.TestCheckResourceAttrPair(DataSource+"."+LanResource+"."+LanDataSourceByName, "ip_failover.ip", LanResource+"."+LanTestResource, "ip_failover.ip"),
+					resource.TestCheckResourceAttrPair(DataSource+"."+LanResource+"."+LanDataSourceByName, "pcc", LanResource+"."+LanTestResource, "pcc"),
+					resource.TestCheckResourceAttrPair(DataSource+"."+LanResource+"."+LanDataSourceByName, "public", LanResource+"."+LanTestResource, "public"),
+				),
+			},
+			{
+				Config:      testAccDataSourceLanMultipleResultsError,
+				ExpectError: regexp.MustCompile(`more than one lan found with the specified criteria name`),
+			},
+			{
+				Config:      testAccDataSourceLanWrongNameError,
+				ExpectError: regexp.MustCompile(`no lan found with the specified name`),
+			},
+			{
 				Config: testAccCheckLanConfigUpdate,
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttr(LanResource+"."+LanTestResource, "name", UpdatedResources),
@@ -41,7 +72,7 @@ func TestAccLan_Basic(t *testing.T) {
 }
 
 func testAccCheckLanDestroyCheck(s *terraform.State) error {
-	client := testAccProvider.Meta().(*ionoscloud.APIClient)
+	client := testAccProvider.Meta().(SdkBundle).CloudApiClient
 	ctx, cancel := context.WithTimeout(context.Background(), *resourceDefaultTimeouts.Delete)
 
 	if cancel != nil {
@@ -53,7 +84,7 @@ func testAccCheckLanDestroyCheck(s *terraform.State) error {
 			continue
 		}
 
-		_, apiResponse, err := client.LansApi.DatacentersLansFindById(ctx, rs.Primary.Attributes["datacenter_id"], rs.Primary.ID).Execute()
+		_, apiResponse, err := client.LANsApi.DatacentersLansFindById(ctx, rs.Primary.Attributes["datacenter_id"], rs.Primary.ID).Execute()
 		logApiRequestTime(apiResponse)
 
 		if err != nil {
@@ -71,7 +102,7 @@ func testAccCheckLanDestroyCheck(s *terraform.State) error {
 
 func testAccCheckLanExists(n string, lan *ionoscloud.Lan) resource.TestCheckFunc {
 	return func(s *terraform.State) error {
-		client := testAccProvider.Meta().(*ionoscloud.APIClient)
+		client := testAccProvider.Meta().(SdkBundle).CloudApiClient
 
 		rs, ok := s.RootModule().Resources[n]
 
@@ -87,7 +118,7 @@ func testAccCheckLanExists(n string, lan *ionoscloud.Lan) resource.TestCheckFunc
 		if cancel != nil {
 			defer cancel()
 		}
-		foundLan, apiResponse, err := client.LansApi.DatacentersLansFindById(ctx, rs.Primary.Attributes["datacenter_id"], rs.Primary.ID).Execute()
+		foundLan, apiResponse, err := client.LANsApi.DatacentersLansFindById(ctx, rs.Primary.Attributes["datacenter_id"], rs.Primary.ID).Execute()
 		logApiRequestTime(apiResponse)
 
 		if err != nil {
@@ -103,13 +134,6 @@ func testAccCheckLanExists(n string, lan *ionoscloud.Lan) resource.TestCheckFunc
 	}
 }
 
-const testAccCheckLanConfigBasic = testAccCheckDatacenterConfigBasic + `
-resource ` + LanResource + ` ` + LanTestResource + ` {
-  datacenter_id = ` + DatacenterResource + `.` + DatacenterTestResource + `.id
-  public = true
-  name = "` + LanTestResource + `"
-}`
-
 const testAccCheckLanConfigUpdate = testAccCheckDatacenterConfigBasic + testAccCheckPrivateCrossConnectConfigBasic + `
 resource ` + LanResource + ` ` + LanTestResource + ` {
   datacenter_id = ` + DatacenterResource + `.` + DatacenterTestResource + `.id
@@ -117,3 +141,37 @@ resource ` + LanResource + ` ` + LanTestResource + ` {
   name = "` + UpdatedResources + `"
   pcc = ` + PCCResource + `.` + PCCTestResource + `.id
 }`
+
+const testAccDataSourceLanMatchId = testAccCheckLanConfigBasic + `
+data ` + LanResource + ` ` + LanDataSourceById + ` {
+  datacenter_id = ` + DatacenterResource + `.` + DatacenterTestResource + `.id
+  id			= ` + LanResource + `.` + LanTestResource + `.id
+}
+`
+
+const testAccDataSourceLanMatchName = testAccCheckLanConfigBasic + `
+data ` + LanResource + ` ` + LanDataSourceByName + ` {
+  datacenter_id = ` + DatacenterResource + `.` + DatacenterTestResource + `.id
+  name			= "` + LanTestResource + `"
+}
+`
+
+const testAccDataSourceLanMultipleResultsError = testAccCheckLanConfigBasic + `
+resource ` + LanResource + ` ` + LanTestResource + `_multiple_results {
+  datacenter_id = ` + DatacenterResource + `.` + DatacenterTestResource + `.id
+  public = true
+  name = "` + LanTestResource + `"
+}
+
+data ` + LanResource + ` ` + LanDataSourceByName + ` {
+  datacenter_id = ` + DatacenterResource + `.` + DatacenterTestResource + `.id
+  name			= "` + LanTestResource + `"
+}
+`
+
+const testAccDataSourceLanWrongNameError = testAccCheckLanConfigBasic + `
+data ` + LanResource + ` ` + LanDataSourceByName + ` {
+  datacenter_id = ` + DatacenterResource + `.` + DatacenterTestResource + `.id
+  name			= "wrong_name"
+}
+`

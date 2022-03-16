@@ -46,7 +46,7 @@ func resourceS3Key() *schema.Resource {
 }
 
 func resourceS3KeyCreate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
-	client := meta.(*ionoscloud.APIClient)
+	client := meta.(SdkBundle).CloudApiClient
 
 	userId := d.Get("user_id").(string)
 	rsp, apiResponse, err := client.UserS3KeysApi.UmUsersS3keysPost(ctx, userId).Execute()
@@ -54,7 +54,7 @@ func resourceS3KeyCreate(ctx context.Context, d *schema.ResourceData, meta inter
 
 	if err != nil {
 		d.SetId("")
-		diags := diag.FromErr(fmt.Errorf("error creating S3 key: %s", err))
+		diags := diag.FromErr(fmt.Errorf("error creating S3 key: %w", err))
 		return diags
 	}
 
@@ -79,13 +79,13 @@ func resourceS3KeyCreate(ctx context.Context, d *schema.ResourceData, meta inter
 		},
 	}
 	log.Printf("[INFO] Setting key active status to %+v", active)
-	_, apiResponse, err = client.UserS3KeysApi.UmUsersS3keysPut(ctx, userId, keyId).S3Key(s3Key).Execute()
+	_, apiResponse, err = client.UserS3KeysApi.UmUsersS3keysPut(ctx, userId, keyId).S3Key(s3Key).Depth(1).Execute()
 	logApiRequestTime(apiResponse)
 	if err != nil {
 		return diag.FromErr(fmt.Errorf("error saving key data %s: %s", keyId, err.Error()))
 	}
 
-	_, errState = getStateChangeConf(meta, d, apiResponse.Header.Get("Location"), schema.TimeoutCreate).WaitForStateContext(ctx)
+	_, errState = getStateChangeConf(meta, d, apiResponse.Header.Get("Location"), schema.TimeoutUpdate).WaitForStateContext(ctx)
 	if errState != nil {
 		diags := diag.FromErr(errState)
 		return diags
@@ -95,7 +95,7 @@ func resourceS3KeyCreate(ctx context.Context, d *schema.ResourceData, meta inter
 }
 
 func resourceS3KeyRead(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
-	client := meta.(*ionoscloud.APIClient)
+	client := meta.(SdkBundle).CloudApiClient
 
 	userId := d.Get("user_id").(string)
 
@@ -107,11 +107,15 @@ func resourceS3KeyRead(ctx context.Context, d *schema.ResourceData, meta interfa
 			d.SetId("")
 			return nil
 		}
-		diags := diag.FromErr(fmt.Errorf("error while reading S3 key %s: %s, %+v", d.Id(), err, s3Key))
+		diags := diag.FromErr(fmt.Errorf("error while reading S3 key %s: %w, %+v", d.Id(), err, s3Key))
 		return diags
 	}
 
-	log.Printf("[INFO] Successfully retrieved S3 key %s: %+v", d.Id(), s3Key)
+	log.Printf("[INFO] Successfully retrieved S3 key %+v \n", *s3Key.Id)
+
+	if s3Key.HasProperties() && s3Key.Properties.HasActive() {
+		log.Printf("[INFO] Successfully retrieved S3 key with status: %t", *s3Key.Properties.Active)
+	}
 
 	if err := setS3KeyIdAndProperties(&s3Key, d); err != nil {
 		return diag.FromErr(err)
@@ -121,19 +125,17 @@ func resourceS3KeyRead(ctx context.Context, d *schema.ResourceData, meta interfa
 }
 
 func resourceS3KeyUpdate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
-	client := meta.(*ionoscloud.APIClient)
+	client := meta.(SdkBundle).CloudApiClient
 
 	request := ionoscloud.S3Key{}
 	request.Properties = &ionoscloud.S3KeyProperties{}
 
 	log.Printf("[INFO] Attempting to update S3 key %s", d.Id())
 
-	if d.HasChange("active") {
-		newActiveSetting := d.Get("active")
-		log.Printf("[INFO] S3 key active setting changed to %+v", newActiveSetting)
-		active := newActiveSetting.(bool)
-		request.Properties.Active = &active
-	}
+	newActiveSetting := d.Get("active")
+	log.Printf("[INFO] S3 key active setting changed to %+v", newActiveSetting)
+	active := newActiveSetting.(bool)
+	request.Properties.Active = &active
 
 	userId := d.Get("user_id").(string)
 	_, apiResponse, err := client.UserS3KeysApi.UmUsersS3keysPut(ctx, userId, d.Id()).S3Key(request).Execute()
@@ -144,7 +146,7 @@ func resourceS3KeyUpdate(ctx context.Context, d *schema.ResourceData, meta inter
 			d.SetId("")
 			return nil
 		}
-		diags := diag.FromErr(fmt.Errorf("error while updating S3 key %s: %s", d.Id(), err))
+		diags := diag.FromErr(fmt.Errorf("error while updating S3 key %s: %w", d.Id(), err))
 		return diags
 	}
 
@@ -158,7 +160,7 @@ func resourceS3KeyUpdate(ctx context.Context, d *schema.ResourceData, meta inter
 }
 
 func resourceS3KeyDelete(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
-	client := meta.(*ionoscloud.APIClient)
+	client := meta.(SdkBundle).CloudApiClient
 
 	userId := d.Get("user_id").(string)
 	apiResponse, err := client.UserS3KeysApi.UmUsersS3keysDelete(ctx, userId, d.Id()).Execute()
@@ -169,7 +171,7 @@ func resourceS3KeyDelete(ctx context.Context, d *schema.ResourceData, meta inter
 			d.SetId("")
 			return nil
 		}
-		diags := diag.FromErr(fmt.Errorf("error while deleting S3 key %s: %s", d.Id(), err))
+		diags := diag.FromErr(fmt.Errorf("error while deleting S3 key %s: %w", d.Id(), err))
 		return diags
 	}
 
@@ -237,7 +239,7 @@ func resourceS3KeyImport(ctx context.Context, d *schema.ResourceData, meta inter
 	userId := parts[0]
 	keyId := parts[1]
 
-	client := meta.(*ionoscloud.APIClient)
+	client := meta.(SdkBundle).CloudApiClient
 
 	s3Key, apiResponse, err := client.UserS3KeysApi.UmUsersS3keysFindByKeyId(ctx, userId, keyId).Execute()
 	logApiRequestTime(apiResponse)
@@ -261,7 +263,7 @@ func resourceS3KeyImport(ctx context.Context, d *schema.ResourceData, meta inter
 	return []*schema.ResourceData{d}, nil
 }
 
-func setS3KeyIdAndProperties(s3Key *ionoscloud.S3Key, data *schema.ResourceData) (err error) {
+func setS3KeyIdAndProperties(s3Key *ionoscloud.S3Key, data *schema.ResourceData) error {
 
 	if s3Key == nil {
 		return fmt.Errorf("s3key not found")

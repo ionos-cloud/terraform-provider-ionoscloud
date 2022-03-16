@@ -1,21 +1,33 @@
 ---
+subcategory: "Managed Kubernetes"
 layout: "ionoscloud"
 page_title: "IonosCloud : ionoscloud_k8s_node_pool"
 sidebar_current: "docs-ionoscloud-datasource-k8s-node-pool"
 description: |-
-Get information on a IonosCloud K8s Node Pool
+  Get information on a IonosCloud K8s Node Pool
 ---
 
 # ionoscloud\_k8s\_node\_pool
 
-The k8s node pool data source can be used to search for and return existing k8s node pools.
+The **k8s Node Pool** data source can be used to search for and return existing k8s Node Pools.
+If a single match is found, it will be returned. If your search results in multiple matches, an error will be returned.
+When this happens, please refine your search string so that it is specific enough to return only one result.
 
 ## Example Usage
 
+### By ID
 ```hcl
-data "ionoscloud_k8s_node_pool" "k8s_node_pool_example" {
-  name     = "My_Node_Pool"
-  k8s_cluster_id 	= ionoscloud_k8s_cluster.k8s_cluster_example.id
+data "ionoscloud_k8s_node_pool" "example" {
+  id                = <k8s_nodepool_id>
+  k8s_cluster_id 	= <k8s_cluster_id>
+}
+```
+
+### By Name
+```hcl
+data "ionoscloud_k8s_node_pool" "example" {
+  name              = "k8s NodePool Example"
+  k8s_cluster_id 	= <k8s_cluster_id>
 }
 ```
 
@@ -54,7 +66,7 @@ The following attributes are returned by the datasource:
 * `ram_size` - The amount of RAM in MB
 * `availability_zone` - The compute availability zone in which the nodes should exist
 * `storage_type` - HDD or SDD
-* `storage_size` - Size of storage
+* `storage_size` - The size of the volume in GB. The size should be greater than 10GB.
 * `k8s_version` - The kubernetes version
 * `maintenance_window` - A maintenance window comprise of a day of the week and a time for maintenance to be allowed
   * `time` - A clock time in the day when maintenance is allowed
@@ -72,3 +84,4 @@ The following attributes are returned by the datasource:
 * `annotations` - A map of annotations in the form of key -> value
 * `available_upgrade_versions` - A list of kubernetes versions available for upgrade
 * `public_ips` - The list of fixed IPs associated with this node pool
+* `gateway_ip` - Public IP address for the gateway performing source NAT for the node pool's nodes belonging to a private cluster. Required only if the node pool belongs to a private cluster.

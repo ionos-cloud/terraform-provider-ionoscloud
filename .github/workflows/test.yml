@@ -1,0 +1,46 @@
+name: Test suite
+on:
+  workflow_dispatch:
+    inputs:
+      branch:
+        description: "branch on which to run tests: master, release/v5"
+        required: true
+        type: string
+        default: master
+      test-tags:
+        description: "test tags, in the form of a list without spaces: 'all,compute,server,firewall,k8s,dbaas,natgateway,nlb,waiting_for_vdc' "
+        required: false
+        type: string
+        default: compute
+      tf-log:
+        description: "terraform logs, accepted values: off, trace, debug, info, warn or error"
+        required: false
+        type: string
+        default: off
+jobs:
+  test:
+    env:
+      IONOS_USERNAME: ${{ secrets.IONOS_VDC_USER_GO_V6 }}
+      IONOS_PASSWORD: ${{ secrets.IONOS_VDC_PASSWORD_GO_V6 }}
+      TF_ACC: true
+      TF_LOG: ${{ github.event.inputs.tf-log }}
+    strategy:
+      matrix:
+        go-version: [^1.17]
+        os: [ubuntu-latest]
+    runs-on: ${{ matrix.os }}
+    steps:
+      - name: Install Go
+        uses: actions/setup-go@v2
+        with:
+          go-version: ${{ matrix.go-version }}
+      - name: Checkout code
+        uses: actions/checkout@v2
+        with:
+          ref:  ${{ github.event.inputs.branch }}
+      - name: Run tests with tags
+        if: ${{ github.event.inputs.test-tags != '' }}
+        run: go test ./ionoscloud -v -failfast -timeout 240m -tags ${{ github.event.inputs.test-tags }}
+      - name: Run tests without tags
+        if: ${{ github.event.inputs.test-tags == ''}}
+        run: go test ./ionoscloud -v -failfast -timeout 180m

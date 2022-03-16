@@ -1,4 +1,5 @@
 ---
+subcategory: "Compute Engine"
 layout: "ionoscloud"
 page_title: "IonosCloud : datacenter"
 sidebar_current: "docs-datasource-datacenter"
@@ -8,14 +9,25 @@ description: |-
 
 # ionoscloud\_datacenter
 
-The data centers data source can be used to search for and return an existing Virtual Data Center. You can provide a string for the name and location parameters which will be compared with provisioned Virtual Data Centers. If a single match is found, it will be returned. If your search results in multiple matches, an error will be generated. When this happens, please refine your search string so that it is specific enough to return only one result.
+The **Datacenter data source** can be used to search for and return an existing Virtual Data Center.
+You can provide a string for the name and location parameters which will be compared with provisioned Virtual Data Centers.
+If a single match is found, it will be returned. If your search results in multiple matches, an error will be returned.
+When this happens, please refine your search string so that it is specific enough to return only one result.
 
 ## Example Usage
 
+### By ID 
 ```hcl
-data "ionoscloud_datacenter" "dc_example" {
-  name     = "test_dc"
-  location = "us"
+data "ionoscloud_datacenter" "example" {
+  id       = <datacenter_id>
+}
+```
+
+### By Name & Location
+```hcl
+data "ionoscloud_datacenter" "example" {
+  name     = "Datacenter Example"
+  location = "us/las"
 }
 ```
 

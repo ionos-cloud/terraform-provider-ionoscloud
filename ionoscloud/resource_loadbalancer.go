@@ -55,7 +55,7 @@ func resourceLoadbalancer() *schema.Resource {
 }
 
 func resourceLoadbalancerCreate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
-	client := meta.(*ionoscloud.APIClient)
+	client := meta.(SdkBundle).CloudApiClient
 
 	rawIds := d.Get("nic_ids").([]interface{})
 	var nicIds []ionoscloud.Nic
@@ -104,7 +104,7 @@ func resourceLoadbalancerCreate(ctx context.Context, d *schema.ResourceData, met
 }
 
 func resourceLoadbalancerRead(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
-	client := meta.(*ionoscloud.APIClient)
+	client := meta.(SdkBundle).CloudApiClient
 
 	lb, apiResponse, err := client.LoadBalancersApi.DatacentersLoadbalancersFindById(ctx, d.Get("datacenter_id").(string), d.Id()).Execute()
 	logApiRequestTime(apiResponse)
@@ -142,7 +142,7 @@ func resourceLoadbalancerRead(ctx context.Context, d *schema.ResourceData, meta 
 }
 
 func resourceLoadbalancerUpdate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
-	client := meta.(*ionoscloud.APIClient)
+	client := meta.(SdkBundle).CloudApiClient
 
 	properties := &ionoscloud.LoadbalancerProperties{}
 
@@ -229,7 +229,7 @@ func resourceLoadbalancerUpdate(ctx context.Context, d *schema.ResourceData, met
 }
 
 func resourceLoadbalancerDelete(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
-	client := meta.(*ionoscloud.APIClient)
+	client := meta.(SdkBundle).CloudApiClient
 
 	dcid := d.Get("datacenter_id").(string)
 	apiResponse, err := client.LoadBalancersApi.DatacentersLoadbalancersDelete(ctx, dcid, d.Id()).Execute()

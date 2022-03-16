@@ -1,46 +1,210 @@
-## 6.0.0-beta.15
+## 6.2.1(upcoming release)
 
-- **code enhancements**: added http request time log for api calls
+### Documentation
+- improved all the examples to be ready to use 
+- added units where missing
 
-## 6.0.0-beta.14
+### Enhancement
+- add `allow_replace` to node pool resource, which allows the update of immutable node_pool fields will first
+  destroy and then re-create the resource. This field should be used with care, understanding the risks.
 
-- **bug fixes**: fixed datacenter datasource
-- **code enhancements**: added constants and removed duplicated tests to `backupUnit`, `datacenter`, `lan`, `s3_key`, `firewall`, `server`
-- **code enhancements**: for `pcc`, `group`, `user`, `snapshot`, and `volume` :
+### Fixes
+- fixed image data-source bug when `name` not provided - data-source returned 0 results
+
+## 6.2.0
+
+### Enhancement
+- modified group_resource to accept multiple users. **Note: Modify your plan according to the documentation**
+
+## 6.1.6
+
+### Fixes
+- fixed data sources to provide an exact match (roll-back to 6.1.3 + errors in case of multiple results)
+
+### Documentation
+- updated k8s cluster and node pool version from examples
+
+## 6.1.5
+
+### Fixes
+- Limit max concurrent connections to the same host to 3.
+- Set max retries in case of rate-limit(429) to 999.
+- Set backoff time to 4s.
+
+### Documentation:
+- updated gitbook documentation with `legal` subheading
+
+## 6.1.4
+
+### Enhancements:
+- improved lookup in data_sources by using filters
+- improved tests duration by moving steps from data_source test files in the corresponding resource test files 
+- added workflow to run tests from GitHub actions 
+- split tests with build tags
+- improve http client performance and timeouts
+
+### Documentations: 
+- a more accurate example on how can the cidr be set automatically on a DBaaS Cluster
+- update doc of how to dump kube_config into a file in yaml format.
+
+### Fixes: 
+- fix on creating a DBaaS Cluster without specifying the maintenance window
+- solve #204 - targets in nlb forwarding rule(switched to Set instead of List), lb_private_ips(set to computed), features in datacenter resources(switched to Set instead of List)
+- fix of plugin crash when updating k8s_node_pool node_count
+- fix of diff when creating a k8s_node_pool without maintenance_window
+
+## 6.1.3
+
+### Features:
+- added **public** parameter for k8s_cluster (creation of private clusters is possible now)
+- added **gateway_ip** parameter for k8s_nodepool
+- added **boot_server** read-only property for volume
+
+### Fixes:
+- do not diff on gateway ips set as normal ips instead of cidr
+
+### Enhancements:
+- terraform plugin sdk upgrade to v2.10.1
+- use depth explicitly on api calls to improve performance
+- sdk-go updated to v6.0.1
+
+
+## 6.1.2
+
+### Docs:
+- Fix documentation in terraform registry
+
+## 6.1.1
+
+### Docs:
+- Fix documentation in terraform registry 
+
+## 6.1.0
+
+### Features:
+- New Product: **Database as a Service**: 
+  - Resources: 
+    - resource_dbaas_pgsql_cluster
+  - Data Sources:
+    - data_source_dbaas_pgsql_backups
+    - data_source_dbaas_pgsql_cluster
+    - data_source_dbaas_pgsql_versions
+  - Dependency-update: added SDK-Go-DBaaS Postgres version [v1.0.0](https://github.com/ionos-cloud/sdk-go-dbaas-postgres/releases/tag/v1.0.0)
+
+## 6.0.3
+
+### Enhancements:
+- improved tests for networkloadbalancer and networkloadbalancer_forwardingrule
+
+### Fixes:
+- fixed bug regarding updating listener_lan and target_lan on networkloadbalancer
+- fixed diff on availableUpgradeVersions for k8s cluster and nodepool
+- fixed lan deletion - wait for completion of nic deletion
+
+### Documentation:
+- restructured documentation by adding subcategories
+
+## 6.0.2
+
+### Fixes:
+- fixes #168: Add versioning to allow module import.
+- Modify UserAgent string
+
+### Documentation:
+- Improved terraform registry documentation with a more detailed description of environment and terraform variables
+- Added badges containing the release and go version in README.md
+
+### Fixes:
+- Immutable k8s node_pool fields should throw error when running plan also, not only on apply
+
+## 6.0.1
+
+### Fixes: 
+- Fixed rebuild k8 nodes with the same lan - order of lans is ignored now at diff
+- Fixed conversion coming from a v5 state - added nil check in lans interface conversion
+
+## 6.0.0
+
+### Enhancements:
+- added http request time log for api calls
+- updated to go version 1.17, updated to sdk version 6.0.0
+- for `k8s_node_pool`, `nic`, `ipfailover`, and `share`:
   - made tests comprehensive
   - optimized test duration by including both match by id and by name in the same test
   - removed duplicated code from import, data_source, resource and tests files
-- **new features**: import for `snapshot`, `ipblock`, data_source for `group`, `user`, `ipblock`, `volume`
+- improved tests on natgateway and natgateway_rule
+
+### Features:
+- import for `nic`, data_source for `nic`, `share`, `ipfailover`
+
+### Fixes:
+- k8s_node_pool update node_count and emptying lans and public_ips didn't work
+- fixed bug at creating natgateway_rule - target_subnet was not set properly
+- revert icmp_code and icmp_type to string to allow setting to 0
+- Add additional fixes to improve code stability and prevent crashes. Revert icmp_type and icmp_code inside server resource and add tests.
+- Allow creation of an inner firewall rule for server when updating a terraform plan.
+- fixed issue #155: added stateUpgrader for handling change of lan field structure
+- fix sporadic EOF received when making a lot of https requests to server (fixed in sdk)
+- fixed #154: allow url to start with "http" (fixed in sdk)
+- fixed #92: fix user update, user password change and password field is now sensitive
+- fix crash when no metadata is received from server
+
+## 6.0.0-beta.14
+
+### Fixes:
+- fixed datacenter datasource
+
+### Enhancements:
+- added constants and removed duplicated tests to `backupUnit`, `datacenter`, `lan`, `s3_key`, `firewall`, `server`
+- for `pcc`, `group`, `user`, `snapshot`, and `volume` :
+  - made tests comprehensive
+  - optimized test duration by including both match by id and by name in the same test
+  - removed duplicated code from import, data_source, resource and tests files
+
+### Features:
+- added import for `snapshot`, `ipblock`, data_source for `group`, `user`, `ipblock`, `volume`
 
 ## 6.0.0-beta.13
-- **bug fixes**: fixed issue #112 can't attach existing volume to server after recreating server
-- **bug fixes**: `cube server` could not be deleted
-- **functionality enhancements**: improved data_source for template - now `template` can be searched by any of its arguments
-- **bug fixes**: cannot empty `api_subnet_allow_list` and `s3_buckets`
+
+### Fixes:
+- fixed issue #112 can't attach existing volume to server after recreating server
+- `cube server` could not be deleted
+- cannot empty `api_subnet_allow_list` and `s3_buckets`
+
+### Enhancements:
+- improved data_source for template - now `template` can be searched by any of its arguments
 - **code enhancements**: for `k8s_cluster`:
   - made tests comprehensive
   - optimized test duration by including both match by id and by name in the same test
   - removed duplicated code from import, data_source and resource files (set parameters)
   
 ## 6.0.0-beta.12
+### Fixes:
+- `server`: can not create cube server, firewall not updated
+- `firewall`: using type argument throws error
 
-- **bug fixes**: `server`: can not create cube server, firewall not updated
-- **bug fixes**: `firewall`: using type argument throws error
-- **code enhancements**: for `backupUnit`, `datacenter`, `lan`, `s3_key`, and `firewall` resources done the following:
+### Enhancements:
+- for `backupUnit`, `datacenter`, `lan`, `s3_key`, and `firewall` resources done the following:
   - made tests comprehensive
   - optimized test duration by including both match by id and by name in the same test
   - removed duplicated code from import, data_source and resource files (set parameters)
   - updated documentation
   - improved import functions
-- **new features**: data_source for `s3_key`
+
+### Features:
+- data_source for `s3_key`
 
 ## 6.0.0-beta.11
-
+### Fixes:
 - added `image_alias` to volume
 - removed `public` and `gateway_ip` properties from `k8s_cluster`
+
+### Enhancements:
+- updated sdk-go to `v6.0.0-beta.7`
+
+### Features:
 - added `data_sources for `backup_unit` and `firewall_rule`
 - added import for `natgateway`, `natgateway_rule`, `networkloadbalancer` and `networkloadbalancer_forwardingrule`
-- updated sdk-go to `v6.0.0-beta.7`
 
 ## 6.0.0-beta.10
 
@@ -96,6 +260,8 @@
 ## 6.0.0-alpha.4
 
 - documentation updates
+
+## Enhancements:
 - terraform plugin sdk upgrade to v2.4.3
 - fix: create volume without password
 - fix: ability to create server without image

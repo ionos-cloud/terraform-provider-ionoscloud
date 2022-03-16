@@ -3,7 +3,7 @@ on:
   push:
     branches:
       - master
-      - release/v6.0.x
+      - release/v5
   pull_request:
     types: [opened, synchronize, reopened]
 jobs:

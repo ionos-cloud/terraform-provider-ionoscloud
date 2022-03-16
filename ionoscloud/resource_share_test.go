@@ -1,3 +1,5 @@
+//go:build compute || all || share
+
 package ionoscloud
 
 import (
@@ -10,7 +12,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
 )
 
-func TestAccShare_Basic(t *testing.T) {
+func TestAccShareBasic(t *testing.T) {
 	var share ionoscloud.GroupShare
 	resource.Test(t, resource.TestCase{
 		PreCheck: func() {
@@ -22,14 +24,28 @@ func TestAccShare_Basic(t *testing.T) {
 			{
 				Config: fmt.Sprintf(testAccCheckShareConfigBasic),
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheckShareExists("ionoscloud_share.share", &share),
-					resource.TestCheckResourceAttr("ionoscloud_share.share", "share_privilege", "true"),
+					testAccCheckShareExists(shareResourceFullName, &share),
+					resource.TestCheckResourceAttr(shareResourceFullName, "edit_privilege", "true"),
+					resource.TestCheckResourceAttr(shareResourceFullName, "share_privilege", "true"),
+				),
+			},
+			{
+				Config: testAccDataSourceShareConfigBasic,
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttrSet(shareResourceFullName, "id"),
+					resource.TestCheckResourceAttrPair(shareResourceFullName, "id", DataSource+"."+ShareResource+"."+sourceShareName, "id"),
+					resource.TestCheckResourceAttrPair(shareResourceFullName, "edit_privilege",
+						DataSource+"."+ShareResource+"."+sourceShareName, "edit_privilege"),
+					resource.TestCheckResourceAttrPair(shareResourceFullName, "share_privilege",
+						DataSource+"."+ShareResource+"."+sourceShareName, "share_privilege"),
+					resource.TestCheckResourceAttr(DataSource+"."+ShareResource+"."+sourceShareName, "edit_privilege", "true"),
 				),
 			},
 			{
 				Config: testAccCheckShareConfigUpdate,
 				Check: resource.ComposeTestCheckFunc(
-					resource.TestCheckResourceAttr("ionoscloud_share.share", "share_privilege", "false"),
+					resource.TestCheckResourceAttr(shareResourceFullName, "edit_privilege", "false"),
+					resource.TestCheckResourceAttr(shareResourceFullName, "share_privilege", "false"),
 				),
 			},
 		},
@@ -37,7 +53,7 @@ func TestAccShare_Basic(t *testing.T) {
 }
 
 func testAccCheckShareDestroyCheck(s *terraform.State) error {
-	client := testAccProvider.Meta().(*ionoscloud.APIClient)
+	client := testAccProvider.Meta().(SdkBundle).CloudApiClient
 
 	ctx, cancel := context.WithTimeout(context.Background(), *resourceDefaultTimeouts.Delete)
 
@@ -46,7 +62,7 @@ func testAccCheckShareDestroyCheck(s *terraform.State) error {
 	}
 	for _, rs := range s.RootModule().Resources {
 
-		if rs.Type != "ionoscloud_share" {
+		if rs.Type != ShareResource {
 			continue
 		}
 
@@ -71,7 +87,7 @@ func testAccCheckShareDestroyCheck(s *terraform.State) error {
 
 func testAccCheckShareExists(n string, share *ionoscloud.GroupShare) resource.TestCheckFunc {
 	return func(s *terraform.State) error {
-		client := testAccProvider.Meta().(*ionoscloud.APIClient)
+		client := testAccProvider.Meta().(SdkBundle).CloudApiClient
 
 		rs, ok := s.RootModule().Resources[n]
 
@@ -139,7 +155,15 @@ resource "ionoscloud_group" "group" {
 resource "ionoscloud_share" "share" {
   group_id = "${ionoscloud_group.group.id}"
   resource_id = "${ionoscloud_datacenter.foobar.id}"
-  edit_privilege = true
+  edit_privilege = false
   share_privilege = false
+}
+`
+
+var testAccDataSourceShareConfigBasic = testAccCheckShareConfigBasic + `
+data ` + ShareResource + " " + sourceShareName + `{
+  group_id    = "${ionoscloud_group.group.id}"
+  resource_id = "${ionoscloud_datacenter.foobar.id}"
+  id		  = ` + shareResourceFullName + `.id
 }
 `

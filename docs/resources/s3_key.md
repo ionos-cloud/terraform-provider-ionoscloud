@@ -1,4 +1,5 @@
 ---
+subcategory: "User Management"
 layout: "ionoscloud"
 page_title: "IonosCloud: s3_key"
 sidebar_current: "docs-resource-s3-key"
@@ -8,14 +9,23 @@ description: |-
 
 # ionoscloud_s3_key
 
-Manages an S3 Key on IonosCloud.
+Manages an **S3 Key** on IonosCloud.
 
 ## Example Usage
 
 ```hcl
-resource "ionoscloud_s3_key" "demo" {
-  user_id    = <user-uuid>
-  active     = true
+resource "ionoscloud_user" "example" {
+    first_name              = "example"
+    last_name               = "example"
+    email                   = <unique_email>
+    password                = "abc123-321CBA"
+    administrator           = false
+    force_sec_auth          = false
+}
+
+resource "ionoscloud_s3_key" "example" {
+    user_id                 = ionoscloud_user.example.id
+    active                  = true
 }
 ```
 

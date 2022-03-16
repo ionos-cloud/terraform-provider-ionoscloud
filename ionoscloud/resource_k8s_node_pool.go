@@ -14,7 +14,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 )
 
-func resourcek8sNodePool() *schema.Resource {
+func resourceK8sNodePool() *schema.Resource {
 	return &schema.Resource{
 		CreateContext: resourcek8sNodePoolCreate,
 		ReadContext:   resourcek8sNodePoolRead,
@@ -23,17 +23,19 @@ func resourcek8sNodePool() *schema.Resource {
 		Importer: &schema.ResourceImporter{
 			StateContext: resourceK8sNodepoolImport,
 		},
+		CustomizeDiff: checkNodePoolImmutableFields,
 		Schema: map[string]*schema.Schema{
 			"name": {
 				Type:         schema.TypeString,
 				Description:  "The desired name for the node pool",
 				Required:     true,
+				ForceNew:     true,
 				ValidateFunc: validation.All(validation.StringIsNotWhiteSpace),
 			},
 			"k8s_version": {
 				Type:        schema.TypeString,
 				Description: "The desired kubernetes version",
-				Optional:    true,
+				Required:    true,
 				DiffSuppressFunc: func(k, old, new string, d *schema.ResourceData) bool {
 					var oldMajor, oldMinor string
 					if old != "" {
@@ -60,20 +62,22 @@ func resourcek8sNodePool() *schema.Resource {
 				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{
 						"min_node_count": {
-							Type:        schema.TypeInt,
-							Description: "The minimum number of worker nodes the node pool can scale down to. Should be less than max_node_count",
-							Required:    true,
+							Type:         schema.TypeInt,
+							Description:  "The minimum number of worker nodes the node pool can scale down to. Should be less than max_node_count",
+							Required:     true,
+							ValidateFunc: validation.All(validation.IntAtLeast(1)),
 						},
 						"max_node_count": {
-							Type:        schema.TypeInt,
-							Description: "The maximum number of worker nodes that the node pool can scale to. Should be greater than min_node_count",
-							Required:    true,
+							Type:         schema.TypeInt,
+							Description:  "The maximum number of worker nodes that the node pool can scale to. Should be greater than min_node_count",
+							Required:     true,
+							ValidateFunc: validation.All(validation.IntAtLeast(1)),
 						},
 					},
 				},
 			},
 			"lans": {
-				Type:        schema.TypeList,
+				Type:        schema.TypeSet,
 				Description: "A list of Local Area Networks the node pool should be part of",
 				Optional:    true,
 				Elem: &schema.Resource{
@@ -90,7 +94,7 @@ func resourcek8sNodePool() *schema.Resource {
 							Default:     true,
 						},
 						"routes": {
-							Type:        schema.TypeList,
+							Type:        schema.TypeSet,
 							Description: "An array of additional LANs attached to worker nodes",
 							Optional:    true,
 							Elem: &schema.Resource{
@@ -117,6 +121,7 @@ func resourcek8sNodePool() *schema.Resource {
 				Type:        schema.TypeList,
 				Description: "A maintenance window comprise of a day of the week and a time for maintenance to be allowed",
 				Optional:    true,
+				Computed:    true,
 				MaxItems:    1,
 				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{
@@ -139,30 +144,33 @@ func resourcek8sNodePool() *schema.Resource {
 				Type:         schema.TypeString,
 				Description:  "The UUID of the VDC",
 				Required:     true,
-				ValidateFunc: validation.All(validation.StringIsNotWhiteSpace),
+				ValidateFunc: validation.All(validation.IsUUID),
 			},
 			"k8s_cluster_id": {
 				Type:         schema.TypeString,
 				Description:  "The UUID of an existing kubernetes cluster",
 				Required:     true,
-				ValidateFunc: validation.All(validation.StringIsNotWhiteSpace),
+				ValidateFunc: validation.All(validation.IsUUID),
 			},
 			"cpu_family": {
 				Type:         schema.TypeString,
 				Description:  "CPU Family",
 				Required:     true,
+				ForceNew:     true,
 				ValidateFunc: validation.All(validation.StringIsNotWhiteSpace),
 			},
 			"availability_zone": {
 				Type:         schema.TypeString,
 				Description:  "The compute availability zone in which the nodes should exist",
 				Required:     true,
+				ForceNew:     true,
 				ValidateFunc: validation.All(validation.StringIsNotWhiteSpace),
 			},
 			"storage_type": {
 				Type:         schema.TypeString,
 				Description:  "Storage type to use",
 				Required:     true,
+				ForceNew:     true,
 				ValidateFunc: validation.All(validation.StringIsNotWhiteSpace),
 			},
 			"node_count": {
@@ -173,25 +181,34 @@ func resourcek8sNodePool() *schema.Resource {
 			"cores_count": {
 				Type:        schema.TypeInt,
 				Description: "CPU cores count",
+				ForceNew:    true,
 				Required:    true,
 			},
 			"ram_size": {
 				Type:        schema.TypeInt,
 				Description: "The amount of RAM in MB",
+				ForceNew:    true,
 				Required:    true,
 			},
 			"storage_size": {
 				Type:        schema.TypeInt,
 				Description: "The total allocated storage capacity of a node in GB",
+				ForceNew:    true,
 				Required:    true,
 			},
 			"public_ips": {
 				Type:        schema.TypeList,
-				Description: "A list of fixed IPs",
+				Description: "A list of fixed IPs. Cannot be set on private clusters.",
 				Optional:    true,
 				Elem: &schema.Schema{
 					Type: schema.TypeString,
 				},
+			},
+			"gateway_ip": {
+				Type:        schema.TypeString,
+				Description: "Public IP address for the gateway performing source NAT for the node pool's nodes belonging to a private cluster. Required only if the node pool belongs to a private cluster.",
+				ForceNew:    true,
+				Optional:    true,
 			},
 			"labels": {
 				Type:     schema.TypeMap,
@@ -203,13 +220,170 @@ func resourcek8sNodePool() *schema.Resource {
 				Optional: true,
 				Elem:     &schema.Schema{Type: schema.TypeString},
 			},
+			"allow_replace": {
+				Type:        schema.TypeBool,
+				Optional:    true,
+				Default:     false,
+				Description: "When set to true, allows the update of immutable fields by destroying and re-creating the node pool",
+			},
+		},
+		Timeouts:      &resourceDefaultTimeouts,
+		SchemaVersion: 1,
+		StateUpgraders: []schema.StateUpgrader{
+			{
+				Type:    resourceK8sNodePool0().CoreConfigSchema().ImpliedType(),
+				Upgrade: resourceK8sNodePoolUpgradeV0,
+				Version: 0,
+			},
+		},
+	}
+}
+
+func checkNodePoolImmutableFields(_ context.Context, diff *schema.ResourceDiff, _ interface{}) error {
+
+	allowReplace := diff.Get("allow_replace").(bool)
+	//allows the immutable fields to be updated
+	if allowReplace {
+		return nil
+	}
+	//we do not want to check in case of resource creation
+	if diff.Id() == "" {
+		return nil
+	}
+	if diff.HasChange("name") {
+		return fmt.Errorf("name attribute is immutable, therefore not allowed in update requests")
+
+	}
+
+	if diff.HasChange("cpu_family") {
+		return fmt.Errorf("cpu_family attribute is immutable, therefore not allowed in update requests")
+
+	}
+
+	if diff.HasChange("availability_zone") {
+		return fmt.Errorf("availability_zone attribute is immutable, therefore not allowed in update requests")
+
+	}
+
+	if diff.HasChange("cores_count") {
+		return fmt.Errorf("cores_count attribute is immutable, therefore not allowed in update requests")
+	}
+
+	if diff.HasChange("ram_size") {
+		return fmt.Errorf("ram_size attribute is immutable, therefore not allowed in update requests")
+
+	}
+
+	if diff.HasChange("storage_size") {
+		return fmt.Errorf("storage_size attribute is immutable, therefore not allowed in update requests")
+
+	}
+
+	if diff.HasChange("storage_type") {
+		return fmt.Errorf("storage_type attribute is immutable, therefore not allowed in update requests")
+
+	}
+
+	if diff.HasChange("gateway_ip") {
+		return fmt.Errorf("gateway_ip attribute is immutable, therefore not allowed in update requests")
+
+	}
+	return nil
+
+}
+
+func resourceK8sNodePool0() *schema.Resource {
+	return &schema.Resource{
+		Schema: map[string]*schema.Schema{
+			"lans": {
+				Type:        schema.TypeList,
+				Description: "A list of Local Area Networks the node pool should be part of",
+				Optional:    true,
+				Elem: &schema.Schema{
+					Type: schema.TypeInt,
+				},
+			},
 		},
 		Timeouts: &resourceDefaultTimeouts,
 	}
 }
 
+func resourceK8sNodePoolUpgradeV0(_ context.Context, state map[string]interface{}, _ interface{}) (map[string]interface{}, error) {
+	oldState := state
+	var oldData []interface{}
+	if d, ok := oldState["lans"].([]interface{}); ok {
+		oldData = d
+	}
+
+	var lans []interface{}
+	for index, lanId := range oldData {
+		log.Printf("oldData index %+v id %v \n\n\n", index, lanId)
+		lanEntry := make(map[string]interface{})
+
+		lanEntry["id"] = lanId
+
+		lanEntry["dhcp"] = true
+
+		var nodePoolRoutes []interface{}
+
+		lanEntry["routes"] = nodePoolRoutes
+		lans = append(lans, lanEntry)
+	}
+	state["lans"] = lans
+
+	return state, nil
+}
+
+func getLanResourceData(lansList *schema.Set) []ionoscloud.KubernetesNodePoolLan {
+	lans := make([]ionoscloud.KubernetesNodePoolLan, 0)
+	if lansList.List() != nil {
+		for _, lanItem := range lansList.List() {
+			lanContent := lanItem.(map[string]interface{})
+			lan := ionoscloud.KubernetesNodePoolLan{}
+
+			if lanID, lanIdOk := lanContent["id"].(int); lanIdOk {
+				log.Printf("[INFO] Adding LAN %v to node pool...", lanID)
+				lanID := int32(lanID)
+				lan.Id = &lanID
+			}
+
+			if lanDhcp, lanDhcpOk := lanContent["dhcp"].(bool); lanDhcpOk {
+				log.Printf("[INFO] Adding dhcp %v to node pool...", lanDhcp)
+				lan.Dhcp = &lanDhcp
+			}
+
+			routes := make([]ionoscloud.KubernetesNodePoolLanRoutes, 0)
+
+			if lanRoutes, lanRoutesOk := lanContent["routes"].(*schema.Set); lanRoutesOk {
+				log.Printf("[INFO] Adding routes %v to node pool...", lanRoutes)
+				if lanRoutes.List() != nil {
+					for _, routeItem := range lanRoutes.List() {
+						routeContent := routeItem.(map[string]interface{})
+						route := ionoscloud.KubernetesNodePoolLanRoutes{}
+
+						if routeNetwork, routeNewtworkOk := routeContent["network"].(string); routeNewtworkOk {
+							route.Network = &routeNetwork
+						}
+
+						if routeGatewayIp, routeGatewayIpOk := routeContent["gateway_ip"].(string); routeGatewayIpOk {
+							route.GatewayIp = &routeGatewayIp
+						}
+
+						routes = append(routes, route)
+
+					}
+				}
+				log.Printf("[INFO] k8s node pool LanRoutes set to %+v", routes)
+			}
+
+			lan.Routes = &routes
+			lans = append(lans, lan)
+		}
+	}
+	return lans
+}
 func resourcek8sNodePoolCreate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
-	client := meta.(*ionoscloud.APIClient)
+	client := meta.(SdkBundle).CloudApiClient
 
 	name := d.Get("name").(string)
 	datacenterId := d.Get("datacenter_id").(string)
@@ -222,8 +396,8 @@ func resourcek8sNodePoolCreate(ctx context.Context, d *schema.ResourceData, meta
 	storageSize := int32(d.Get("storage_size").(int))
 	ramSize := int32(d.Get("ram_size").(int))
 
-	k8sNodepool := ionoscloud.KubernetesNodePool{
-		Properties: &ionoscloud.KubernetesNodePoolProperties{
+	k8sNodepool := ionoscloud.KubernetesNodePoolForPost{
+		Properties: &ionoscloud.KubernetesNodePoolPropertiesForPost{
 			Name:             &name,
 			DatacenterId:     &datacenterId,
 			K8sVersion:       &k8sVersion,
@@ -287,76 +461,9 @@ func resourcek8sNodePoolCreate(ctx context.Context, d *schema.ResourceData, meta
 	}
 
 	if lansVal, lansOK := d.GetOk("lans"); lansOK {
-		if lansVal.([]interface{}) != nil {
-			updateLans := false
-
-			var lans []ionoscloud.KubernetesNodePoolLan
-
-			for lanIndex := range lansVal.([]interface{}) {
-				lan := ionoscloud.KubernetesNodePoolLan{}
-				addLan := false
-				if lanID, lanIdOk := d.GetOk(fmt.Sprintf("lans.%d.id", lanIndex)); lanIdOk {
-					log.Printf("[INFO] Adding k8s node pool to LAN %+v...", lanID)
-					lanID := int32(lanID.(int))
-					lan.Id = &lanID
-					addLan = true
-				}
-
-				lanDhcp := d.Get(fmt.Sprintf("lans.%d.dhcp", lanIndex)).(bool)
-				lan.Dhcp = &lanDhcp
-
-				if lanRoutes, lanRoutesOk := d.GetOk(fmt.Sprintf("lans.%d.routes", lanIndex)); lanRoutesOk {
-					if lanRoutes.([]interface{}) != nil {
-						updateRoutes := false
-
-						var routes []ionoscloud.KubernetesNodePoolLanRoutes
-
-						for routeIndex := range lanRoutes.([]interface{}) {
-
-							addRoute := false
-							route := ionoscloud.KubernetesNodePoolLanRoutes{}
-							if routeNetwork, routeNewtworkOk := d.GetOk(fmt.Sprintf("lans.%d.routes.%d.network", lanIndex, routeIndex)); routeNewtworkOk {
-								routeNetwork := routeNetwork.(string)
-								route.Network = &routeNetwork
-								addRoute = true
-							}
-
-							if routeGatewayIp, routeGatewayIpOk := d.GetOk(fmt.Sprintf("lans.%d.routes.%d.gateway_ip", lanIndex, routeIndex)); routeGatewayIpOk {
-								routeGatewayIp := routeGatewayIp.(string)
-								route.GatewayIp = &routeGatewayIp
-								addRoute = true
-							}
-
-							if addRoute {
-								routes = append(routes, route)
-							}
-						}
-
-						if len(routes) > 0 {
-							updateRoutes = true
-						}
-
-						if updateRoutes == true {
-							log.Printf("[INFO] k8s node pool LanRoutes set to %+v", routes)
-							lan.Routes = &routes
-						}
-					}
-				}
-				if addLan {
-					lans = append(lans, lan)
-				}
-
-			}
-
-			if len(lans) > 0 {
-				updateLans = true
-			}
-
-			if updateLans == true {
-				log.Printf("[INFO] k8s node pool LANs set to %+v", lans)
-				k8sNodepool.Properties.Lans = &lans
-			}
-		}
+		lansList := lansVal.(*schema.Set)
+		lans := getLanResourceData(lansList)
+		k8sNodepool.Properties.Lans = &lans
 	}
 
 	publicIpsProp, ok := d.GetOk("public_ips")
@@ -374,6 +481,11 @@ func resourcek8sNodePoolCreate(ctx context.Context, d *schema.ResourceData, meta
 			requestPublicIps = append(requestPublicIps, fmt.Sprint(publicIps[i]))
 		}
 		k8sNodepool.Properties.PublicIps = &requestPublicIps
+	}
+
+	if gatewayIp, gatewayIpOk := d.GetOk("gateway_ip"); gatewayIpOk {
+		gatewayIp := gatewayIp.(string)
+		k8sNodepool.Properties.GatewayIp = &gatewayIp
 	}
 
 	labelsProp, ok := d.GetOk("labels")
@@ -438,7 +550,7 @@ func resourcek8sNodePoolCreate(ctx context.Context, d *schema.ResourceData, meta
 }
 
 func resourcek8sNodePoolRead(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
-	client := meta.(*ionoscloud.APIClient)
+	client := meta.(SdkBundle).CloudApiClient
 
 	k8sNodepool, apiResponse, err := client.KubernetesApi.K8sNodepoolsFindById(ctx, d.Get("k8s_cluster_id").(string), d.Id()).Execute()
 	logApiRequestTime(apiResponse)
@@ -455,222 +567,60 @@ func resourcek8sNodePoolRead(ctx context.Context, d *schema.ResourceData, meta i
 
 	log.Printf("[INFO] Successfully retreived k8s node pool %s: %+v", d.Id(), k8sNodepool)
 
-	d.SetId(*k8sNodepool.Id)
-
-	if k8sNodepool.Properties.Name != nil {
-		err := d.Set("name", *k8sNodepool.Properties.Name)
-		if err != nil {
-			diags := diag.FromErr(fmt.Errorf("error while setting name property for k8sNodepool %s: %s", d.Id(), err))
-			return diags
-		}
-
-	}
-
-	if k8sNodepool.Properties.K8sVersion != nil {
-		err := d.Set("k8s_version", *k8sNodepool.Properties.K8sVersion)
-		if err != nil {
-			diags := diag.FromErr(fmt.Errorf("error while setting k8s_version property for k8sNodepool %s: %s", d.Id(), err))
-			return diags
-		}
-
-	}
-
-	if k8sNodepool.Properties.DatacenterId != nil {
-		err := d.Set("datacenter_id", *k8sNodepool.Properties.DatacenterId)
-		if err != nil {
-			diags := diag.FromErr(fmt.Errorf("error while setting datacenter_id property for k8sNodepool %s: %s", d.Id(), err))
-			return diags
-		}
-
-	}
-
-	if k8sNodepool.Properties.CpuFamily != nil {
-		err := d.Set("cpu_family", *k8sNodepool.Properties.CpuFamily)
-		if err != nil {
-			diags := diag.FromErr(fmt.Errorf("error while setting cpu_family property for k8sNodepool %s: %s", d.Id(), err))
-			return diags
-		}
-
-	}
-
-	if k8sNodepool.Properties.AvailabilityZone != nil {
-		err := d.Set("availability_zone", *k8sNodepool.Properties.AvailabilityZone)
-		if err != nil {
-			diags := diag.FromErr(fmt.Errorf("error while setting availability_zone property for k8sNodepool %s: %s", d.Id(), err))
-			return diags
-		}
-
-	}
-
-	if k8sNodepool.Properties.StorageType != nil {
-		err := d.Set("storage_type", *k8sNodepool.Properties.StorageType)
-		if err != nil {
-			diags := diag.FromErr(fmt.Errorf("error while setting storage_type property for k8sNodepool %s: %s", d.Id(), err))
-			return diags
-		}
-
-	}
-
-	if k8sNodepool.Properties.NodeCount != nil {
-		err := d.Set("node_count", *k8sNodepool.Properties.NodeCount)
-		if err != nil {
-			diags := diag.FromErr(fmt.Errorf("error while setting node_count property for k8sNodepool %s: %s", d.Id(), err))
-			return diags
-		}
-
-	}
-
-	if k8sNodepool.Properties.CoresCount != nil {
-		err := d.Set("cores_count", *k8sNodepool.Properties.CoresCount)
-		if err != nil {
-			diags := diag.FromErr(fmt.Errorf("error while setting cores_count property for k8sNodepool %s: %s", d.Id(), err))
-			return diags
-		}
-
-	}
-
-	if k8sNodepool.Properties.RamSize != nil {
-		err := d.Set("ram_size", *k8sNodepool.Properties.RamSize)
-		if err != nil {
-			diags := diag.FromErr(fmt.Errorf("error while setting ram_size property for k8sNodepool %s: %s", d.Id(), err))
-			return diags
-		}
-
-	}
-
-	if k8sNodepool.Properties.StorageSize != nil {
-		err := d.Set("storage_size", *k8sNodepool.Properties.StorageSize)
-		if err != nil {
-			diags := diag.FromErr(fmt.Errorf("error while setting storage_size property for k8sNodepool %s: %s", d.Id(), err))
-			return diags
-		}
-
-	}
-
-	if k8sNodepool.Properties.PublicIps != nil && len(*k8sNodepool.Properties.PublicIps) > 0 {
-		err := d.Set("public_ips", *k8sNodepool.Properties.PublicIps)
-		if err != nil {
-			diags := diag.FromErr(fmt.Errorf("error while setting public_ips property for k8sNodepool %s: %s", d.Id(), err))
-			return diags
-		}
-	}
-
-	if k8sNodepool.Properties.AutoScaling != nil && k8sNodepool.Properties.AutoScaling.MinNodeCount != nil &&
-		k8sNodepool.Properties.AutoScaling.MaxNodeCount != nil && (*k8sNodepool.Properties.AutoScaling.MinNodeCount != 0 &&
-		*k8sNodepool.Properties.AutoScaling.MaxNodeCount != 0) {
-		err := d.Set("auto_scaling", []map[string]int32{
-			{
-				"min_node_count": *k8sNodepool.Properties.AutoScaling.MinNodeCount,
-				"max_node_count": *k8sNodepool.Properties.AutoScaling.MaxNodeCount,
-			},
-		})
-		if err != nil {
-			diags := diag.FromErr(fmt.Errorf("error while setting auto_scaling property for k8sNodepool %s: %s", d.Id(), err))
-			return diags
-		}
-		log.Printf("[INFO] Setting AutoScaling for k8s node pool %s to %+v...", d.Id(), *k8sNodepool.Properties.AutoScaling)
-	}
-
-	if k8sNodepool.Properties.Lans != nil && len(*k8sNodepool.Properties.Lans) > 0 {
-
-		nodePoolLans := getK8sNodePoolLans(*k8sNodepool.Properties.Lans)
-
-		if len(nodePoolLans) > 0 {
-			if err := d.Set("lans", nodePoolLans); err != nil {
-				diags := diag.FromErr(fmt.Errorf("error while setting lans property for k8sNodepool %s: %s", d.Id(), err))
-				return diags
-			}
-		}
-
-	}
-
-	labels := make(map[string]interface{})
-	if k8sNodepool.Properties.Labels != nil && len(*k8sNodepool.Properties.Labels) > 0 {
-		for k, v := range *k8sNodepool.Properties.Labels {
-			labels[k] = v
-		}
-	}
-
-	if err := d.Set("labels", labels); err != nil {
-		diags := diag.FromErr(fmt.Errorf("error while setting the labels property for k8sNodepool %s: %s", d.Id(), err))
-		return diags
-	}
-
-	annotations := make(map[string]interface{})
-	if k8sNodepool.Properties.Annotations != nil && len(*k8sNodepool.Properties.Annotations) > 0 {
-		for k, v := range *k8sNodepool.Properties.Annotations {
-			annotations[k] = v
-		}
-	}
-
-	if err := d.Set("annotations", annotations); err != nil {
-		diags := diag.FromErr(fmt.Errorf("error while setting the annotations property for k8sNodepool %s: %s", d.Id(), err))
-		return diags
+	if err := setK8sNodePoolData(d, &k8sNodepool); err != nil {
+		return diag.FromErr(err)
 	}
 
 	return nil
 }
 
 func resourcek8sNodePoolUpdate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
-	client := meta.(*ionoscloud.APIClient)
+	client := meta.(SdkBundle).CloudApiClient
 
 	request := ionoscloud.KubernetesNodePoolForPut{}
 
 	nodeCount := int32(d.Get("node_count").(int))
+
 	request.Properties = &ionoscloud.KubernetesNodePoolPropertiesForPut{
 		NodeCount: &nodeCount,
 	}
 
-	if d.HasChange("name") {
-		diags := diag.FromErr(fmt.Errorf("name attribute is immutable, therefore not allowed in update requests"))
-		return diags
+	if d.HasChange("node_count") {
+		oldNc, newNc := d.GetChange("node_count")
+		log.Printf("[INFO] k8s node pool node_count changed from %+v to %+v", oldNc, newNc)
 	}
 
-	if d.HasChange("cpu_family") {
-		diags := diag.FromErr(fmt.Errorf("cpu_family attribute is immutable, therefore not allowed in update requests"))
-		return diags
-	}
-
-	if d.HasChange("availability_zone") {
-		diags := diag.FromErr(fmt.Errorf("availability_zone attribute is immutable, therefore not allowed in update requests"))
-		return diags
-	}
-
-	if d.HasChange("cores_count") {
-		diags := diag.FromErr(fmt.Errorf("cores_count attribute is immutable, therefore not allowed in update requests"))
-		return diags
-	}
-
-	if d.HasChange("ram_size") {
-		diags := diag.FromErr(fmt.Errorf("ram_size attribute is immutable, therefore not allowed in update requests"))
-		return diags
-	}
-
-	if d.HasChange("storage_size") {
-		diags := diag.FromErr(fmt.Errorf("storage_size attribute is immutable, therefore not allowed in update requests"))
-		return diags
-	}
-
-	if d.HasChange("storage_type") {
-		diags := diag.FromErr(fmt.Errorf("storage_size attribute is immutable, therefore not allowed in update requests"))
-		return diags
-	}
-
+	k8sVersion := d.Get("k8s_version").(string)
+	request.Properties.K8sVersion = &k8sVersion
 	if d.HasChange("k8s_version") {
 		oldk8sVersion, newk8sVersion := d.GetChange("k8s_version")
 		log.Printf("[INFO] k8s pool k8s version changed from %+v to %+v", oldk8sVersion, newk8sVersion)
-		if newk8sVersion != nil {
-			newk8sVersion := newk8sVersion.(string)
-			request.Properties.K8sVersion = &newk8sVersion
-		}
 	}
 
-	if d.HasChange("auto_scaling.0") {
+	if _, autoScalingOk := d.GetOk("auto_scaling.0"); autoScalingOk {
 		_, newAs := d.GetChange("auto_scaling.0")
 		if newAs.(map[string]interface{}) != nil {
-			updateAutoscaling := false
 			minNodeCount := int32(d.Get("auto_scaling.0.min_node_count").(int))
 			maxNodeCount := int32(d.Get("auto_scaling.0.max_node_count").(int))
+
+			if minNodeCount > maxNodeCount {
+				d.SetId("")
+				diags := diag.FromErr(fmt.Errorf("error updating k8s node pool: max_node_count cannot be lower than min_node_count"))
+				return diags
+			}
+
+			if nodeCount < minNodeCount {
+				d.SetId("")
+				diags := diag.FromErr(fmt.Errorf("error updating k8s node pool: node_count cannot be lower than min_node_count"))
+				return diags
+			}
+
+			if nodeCount > maxNodeCount {
+				d.SetId("")
+				diags := diag.FromErr(fmt.Errorf("error updating k8s node pool: node_count cannot be greater than max_node_count"))
+				return diags
+			}
+
 			autoScaling := &ionoscloud.KubernetesAutoScaling{
 				MinNodeCount: &minNodeCount,
 				MaxNodeCount: &maxNodeCount,
@@ -678,128 +628,24 @@ func resourcek8sNodePoolUpdate(ctx context.Context, d *schema.ResourceData, meta
 
 			if d.HasChange("auto_scaling.0.min_node_count") {
 				oldMinNodes, newMinNodes := d.GetChange("auto_scaling.0.min_node_count")
-				if newMinNodes != 0 {
-					log.Printf("[INFO] k8s node pool autoscaling min # of nodes changed from %+v to %+v", oldMinNodes, newMinNodes)
-					updateAutoscaling = true
-					newMinNodes := int32(newMinNodes.(int))
-					autoScaling.MinNodeCount = &newMinNodes
-				}
+				log.Printf("[INFO] k8s node pool autoscaling min # of nodes changed from %+v to %+v", oldMinNodes, newMinNodes)
 			}
 
 			if d.HasChange("auto_scaling.0.max_node_count") {
 				oldMaxNodes, newMaxNodes := d.GetChange("auto_scaling.0.max_node_count")
-				if newMaxNodes != 0 {
-					log.Printf("[INFO] k8s node pool autoscaling max # of nodes changed from %+v to %+v", oldMaxNodes, newMaxNodes)
-					updateAutoscaling = true
-					newMaxNodes := int32(newMaxNodes.(int))
-					autoScaling.MaxNodeCount = &newMaxNodes
-				}
+				log.Printf("[INFO] k8s node pool autoscaling max # of nodes changed from %+v to %+v", oldMaxNodes, newMaxNodes)
 			}
 
-			if updateAutoscaling == true {
-				request.Properties.AutoScaling = autoScaling
-			}
-		}
-	}
-
-	if d.HasChange("node_count") {
-		updateNodeCount := true
-
-		if d.Get("auto_scaling.0").(map[string]interface{}) != nil && (d.Get("auto_scaling.0.min_node_count").(int) != 0 || d.Get("auto_scaling.0.max_node_count").(int) != 0) {
-
-			updateNodeCount = false
-			var apiResponse *ionoscloud.APIResponse
-			np, _, npErr := client.KubernetesApi.K8sNodepoolsFindById(ctx, d.Get("k8s_cluster_id").(string), d.Id()).Execute()
-			logApiRequestTime(apiResponse)
-			if npErr != nil {
-				diags := diag.FromErr(fmt.Errorf("error retrieving k8s node pool %q: %s", d.Id(), npErr))
-				return diags
-			}
-
-			log.Printf("[INFO] Setting node_count for node pool %q from server from %d to %d instead of due to autoscaling %+v", d.Id(), uint32(d.Get("node_count").(int)), *np.Properties.NodeCount, d.Get("auto_scaling.0"))
-			request.Properties.NodeCount = np.Properties.NodeCount
-		}
-
-		if updateNodeCount {
-			oldNc, newNc := d.GetChange("node_count")
-			log.Printf("[INFO] k8s node pool node_count changed from %+v to %+v", oldNc, newNc)
-			if oldNc.(int) != newNc.(int) {
-				newNc := int32(newNc.(int))
-				request.Properties.NodeCount = &newNc
-			}
+			request.Properties.AutoScaling = autoScaling
 		}
 	}
 
 	if d.HasChange("lans") {
 		oldLANs, newLANs := d.GetChange("lans")
-		if newLANs.([]interface{}) != nil {
-			updateLans := false
-			var lans []ionoscloud.KubernetesNodePoolLan
-			for lanIndex := range newLANs.([]interface{}) {
-				lan := ionoscloud.KubernetesNodePoolLan{}
-				addLan := false
-				if lanID, lanIdOk := d.GetOk(fmt.Sprintf("lans.%d.id", lanIndex)); lanIdOk {
-					log.Printf("[INFO] Adding k8s node pool to LAN %+v...", lanID)
-					lanID := int32(lanID.(int))
-					lan.Id = &lanID
-					addLan = true
-				}
-
-				lanDhcp := d.Get(fmt.Sprintf("lans.%d.dhcp", lanIndex)).(bool)
-				lan.Dhcp = &lanDhcp
-
-				if lanRoutes, lanRoutesOk := d.GetOk(fmt.Sprintf("lans.%d.routes", lanIndex)); lanRoutesOk {
-					if lanRoutes.([]interface{}) != nil {
-						updateRoutes := false
-
-						var routes []ionoscloud.KubernetesNodePoolLanRoutes
-
-						for routeIndex := range lanRoutes.([]interface{}) {
-
-							addRoute := false
-							route := ionoscloud.KubernetesNodePoolLanRoutes{}
-							if routeNetwork, routeNewtworkOk := d.GetOk(fmt.Sprintf("lans.%d.routes.%d.network", lanIndex, routeIndex)); routeNewtworkOk {
-								routeNetwork := routeNetwork.(string)
-								route.Network = &routeNetwork
-								addRoute = true
-							}
-
-							if routeGatewayIp, routeGatewayIpOk := d.GetOk(fmt.Sprintf("lans.%d.routes.%d.gateway_ip", lanIndex, routeIndex)); routeGatewayIpOk {
-								routeGatewayIp := routeGatewayIp.(string)
-								route.GatewayIp = &routeGatewayIp
-								addRoute = true
-							}
-
-							if addRoute {
-								routes = append(routes, route)
-							}
-						}
-
-						if len(routes) > 0 {
-							updateRoutes = true
-						}
-
-						if updateRoutes == true {
-							log.Printf("[INFO] k8s node pool LanRoutes set to %+v", routes)
-							lan.Routes = &routes
-						}
-					}
-				}
-				if addLan {
-					lans = append(lans, lan)
-				}
-
-			}
-
-			if len(lans) > 0 {
-				updateLans = true
-			}
-
-			if updateLans == true {
-				log.Printf("[INFO] k8s node pool LANs changed from %+v to %+v", oldLANs, newLANs)
-				request.Properties.Lans = &lans
-			}
-		}
+		lansList := newLANs.(*schema.Set)
+		lans := getLanResourceData(lansList)
+		log.Printf("[INFO] k8s node pool LANs changed from %+v to %+v", oldLANs, newLANs)
+		request.Properties.Lans = &lans
 	}
 
 	if d.HasChange("maintenance_window.0") {
@@ -846,6 +692,8 @@ func resourcek8sNodePoolUpdate(ctx context.Context, d *schema.ResourceData, meta
 	if d.HasChange("public_ips") {
 		oldPublicIps, newPublicIps := d.GetChange("public_ips")
 		log.Printf("[INFO] k8s pool public IPs changed from %+v to %+v", oldPublicIps, newPublicIps)
+		requestPublicIps := make([]string, 0)
+
 		if newPublicIps != nil {
 
 			publicIps := newPublicIps.([]interface{})
@@ -856,14 +704,18 @@ func resourcek8sNodePoolUpdate(ctx context.Context, d *schema.ResourceData, meta
 				return diags
 			}
 
-			requestPublicIps := make([]string, len(publicIps), len(publicIps))
-
-			for i := range publicIps {
-				requestPublicIps[i] = fmt.Sprint(publicIps[i])
+			for _, ip := range publicIps {
+				requestPublicIps = append(requestPublicIps, ip.(string))
 			}
 
-			request.Properties.PublicIps = &requestPublicIps
 		}
+		request.Properties.PublicIps = &requestPublicIps
+
+	}
+
+	if d.HasChange("gateway_ip") {
+		diags := diag.FromErr(fmt.Errorf("gateway_ip attribute is immutable, therefore not allowed in update requests"))
+		return diags
 	}
 
 	if d.HasChange("labels") {
@@ -896,7 +748,7 @@ func resourcek8sNodePoolUpdate(ctx context.Context, d *schema.ResourceData, meta
 		log.Printf("[INFO] Update req: %s", string(b))
 	}
 
-	_, apiResponse, err := client.KubernetesApi.K8sNodepoolsPut(ctx, d.Get("k8s_cluster_id").(string), d.Id()).KubernetesNodePoolForPut(request).Execute()
+	_, apiResponse, err := client.KubernetesApi.K8sNodepoolsPut(ctx, d.Get("k8s_cluster_id").(string), d.Id()).KubernetesNodePool(request).Execute()
 	logApiRequestTime(apiResponse)
 
 	if err != nil {
@@ -936,7 +788,7 @@ func resourcek8sNodePoolUpdate(ctx context.Context, d *schema.ResourceData, meta
 }
 
 func resourcek8sNodePoolDelete(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
-	client := meta.(*ionoscloud.APIClient)
+	client := meta.(SdkBundle).CloudApiClient
 
 	apiResponse, err := client.KubernetesApi.K8sNodepoolsDelete(ctx, d.Get("k8s_cluster_id").(string), d.Id()).Execute()
 	logApiRequestTime(apiResponse)
@@ -978,6 +830,192 @@ func resourcek8sNodePoolDelete(ctx context.Context, d *schema.ResourceData, meta
 	return nil
 }
 
+func resourceK8sNodepoolImport(ctx context.Context, d *schema.ResourceData, meta interface{}) ([]*schema.ResourceData, error) {
+
+	parts := strings.Split(d.Id(), "/")
+
+	if len(parts) != 2 || parts[0] == "" || parts[1] == "" {
+		return nil, fmt.Errorf("invalid import id %q. Expecting {k8sClusterId}/{k8sNodePoolId}", d.Id())
+	}
+
+	clusterId := parts[0]
+	npId := parts[1]
+
+	client := meta.(SdkBundle).CloudApiClient
+
+	k8sNodepool, apiResponse, err := client.KubernetesApi.K8sNodepoolsFindById(ctx, clusterId, npId).Execute()
+	logApiRequestTime(apiResponse)
+
+	if err != nil {
+		if _, ok := err.(ionoscloud.GenericOpenAPIError); ok {
+			if apiResponse != nil && apiResponse.Response != nil && apiResponse.StatusCode == 404 {
+				d.SetId("")
+				return nil, fmt.Errorf("unable to find k8s node pool %q", npId)
+			}
+		}
+		return nil, fmt.Errorf("unable to retreive k8s node pool %q", npId)
+	}
+
+	log.Printf("[INFO] K8s node pool found: %+v", k8sNodepool)
+
+	if err := d.Set("k8s_cluster_id", clusterId); err != nil {
+		return nil, fmt.Errorf("error while setting k8s_cluster_id property for k8s node pool %q: %q", npId, err)
+	}
+
+	if err := setK8sNodePoolData(d, &k8sNodepool); err != nil {
+		return nil, err
+	}
+	log.Printf("[INFO] Importing k8s node pool %q...", d.Id())
+
+	return []*schema.ResourceData{d}, nil
+}
+
+func setK8sNodePoolData(d *schema.ResourceData, nodePool *ionoscloud.KubernetesNodePool) error {
+
+	if nodePool.Id != nil {
+		d.SetId(*nodePool.Id)
+	}
+
+	if nodePool.Properties != nil {
+		if nodePool.Properties.Name != nil {
+			if err := d.Set("name", *nodePool.Properties.Name); err != nil {
+				return err
+			}
+		}
+
+		if nodePool.Properties.DatacenterId != nil {
+			if err := d.Set("datacenter_id", *nodePool.Properties.DatacenterId); err != nil {
+				return err
+			}
+		}
+
+		if nodePool.Properties.NodeCount != nil {
+			if err := d.Set("node_count", *nodePool.Properties.NodeCount); err != nil {
+				return err
+			}
+		}
+
+		if nodePool.Properties.CpuFamily != nil {
+			if err := d.Set("cpu_family", *nodePool.Properties.CpuFamily); err != nil {
+				return err
+			}
+		}
+
+		if nodePool.Properties.CoresCount != nil {
+			if err := d.Set("cores_count", *nodePool.Properties.CoresCount); err != nil {
+				return err
+			}
+		}
+
+		if nodePool.Properties.RamSize != nil {
+			if err := d.Set("ram_size", *nodePool.Properties.RamSize); err != nil {
+				return err
+			}
+		}
+
+		if nodePool.Properties.AvailabilityZone != nil {
+			if err := d.Set("availability_zone", *nodePool.Properties.AvailabilityZone); err != nil {
+				return err
+			}
+		}
+
+		if nodePool.Properties.StorageType != nil {
+			if err := d.Set("storage_type", *nodePool.Properties.StorageType); err != nil {
+				return err
+			}
+		}
+
+		if nodePool.Properties.StorageSize != nil {
+			if err := d.Set("storage_size", *nodePool.Properties.StorageSize); err != nil {
+				return err
+			}
+		}
+
+		if nodePool.Properties.K8sVersion != nil {
+			if err := d.Set("k8s_version", *nodePool.Properties.K8sVersion); err != nil {
+				return err
+			}
+		}
+
+		if nodePool.Properties.PublicIps != nil && len(*nodePool.Properties.PublicIps) > 0 {
+			if err := d.Set("public_ips", *nodePool.Properties.PublicIps); err != nil {
+				return err
+			}
+		}
+
+		if nodePool.Properties.MaintenanceWindow != nil && nodePool.Properties.MaintenanceWindow.Time != nil && nodePool.Properties.MaintenanceWindow.DayOfTheWeek != nil {
+			if err := d.Set("maintenance_window", []map[string]string{
+				{
+					"time":            *nodePool.Properties.MaintenanceWindow.Time,
+					"day_of_the_week": *nodePool.Properties.MaintenanceWindow.DayOfTheWeek,
+				},
+			}); err != nil {
+				return err
+			}
+		}
+
+		if nodePool.Properties.AutoScaling != nil && nodePool.Properties.AutoScaling.MinNodeCount != nil &&
+			nodePool.Properties.AutoScaling.MaxNodeCount != nil && (*nodePool.Properties.AutoScaling.MinNodeCount != 0 &&
+			*nodePool.Properties.AutoScaling.MaxNodeCount != 0) {
+			if err := d.Set("auto_scaling", []map[string]uint32{
+				{
+					"min_node_count": uint32(*nodePool.Properties.AutoScaling.MinNodeCount),
+					"max_node_count": uint32(*nodePool.Properties.AutoScaling.MaxNodeCount),
+				},
+			}); err != nil {
+				return err
+			}
+		}
+
+		if nodePool.Properties.Lans != nil && len(*nodePool.Properties.Lans) > 0 {
+
+			nodePoolLans := getK8sNodePoolLans(*nodePool.Properties.Lans)
+
+			if err := d.Set("lans", nodePoolLans); err != nil {
+				return fmt.Errorf("error while setting lans property for k8sNodepool %s: %s", d.Id(), err)
+			}
+
+		}
+
+		if nodePool.Properties.PublicIps != nil && len(*nodePool.Properties.PublicIps) > 0 {
+			if err := d.Set("public_ips", *nodePool.Properties.PublicIps); err != nil {
+				return err
+			}
+		}
+
+		if nodePool.Properties.GatewayIp != nil {
+			if err := d.Set("gateway_ip", *nodePool.Properties.GatewayIp); err != nil {
+				return fmt.Errorf("error while setting gateway_ip property for nodepool %s: %s", d.Id(), err)
+			}
+		}
+
+		labels := make(map[string]interface{})
+		if nodePool.Properties.Labels != nil && len(*nodePool.Properties.Labels) > 0 {
+			for k, v := range *nodePool.Properties.Labels {
+				labels[k] = v
+			}
+		}
+
+		if err := d.Set("labels", labels); err != nil {
+			return fmt.Errorf("error while setting the labels property for k8sNodepool %s: %s", d.Id(), err)
+
+		}
+
+		annotations := make(map[string]interface{})
+		if nodePool.Properties.Annotations != nil && len(*nodePool.Properties.Annotations) > 0 {
+			for k, v := range *nodePool.Properties.Annotations {
+				annotations[k] = v
+			}
+		}
+
+		if err := d.Set("annotations", annotations); err != nil {
+			return fmt.Errorf("error while setting the annotations property for k8sNodepool %s: %s", d.Id(), err)
+		}
+
+	}
+
+	return nil
+}
 func k8sNodepoolReady(ctx context.Context, client *ionoscloud.APIClient, d *schema.ResourceData) (bool, error) {
 	subjectNodepool, apiResponse, err := client.KubernetesApi.K8sNodepoolsFindById(ctx, d.Get("k8s_cluster_id").(string), d.Id()).Execute()
 	logApiRequestTime(apiResponse)

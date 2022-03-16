@@ -5,6 +5,8 @@ import (
 	"fmt"
 	ionoscloud "github.com/ionos-cloud/sdk-go/v6"
 	"log"
+	"net"
+	"net/http"
 	"reflect"
 	"regexp"
 	"strings"
@@ -15,204 +17,6 @@ import (
 
 const SleepInterval = 5 * time.Second
 
-func resourceK8sNodepoolImport(ctx context.Context, d *schema.ResourceData, meta interface{}) ([]*schema.ResourceData, error) {
-
-	parts := strings.Split(d.Id(), "/")
-
-	if len(parts) != 2 || parts[0] == "" || parts[1] == "" {
-		return nil, fmt.Errorf("invalid import id %q. Expecting {k8sClusterId}/{k8sNodePoolId}", d.Id())
-	}
-
-	clusterId := parts[0]
-	npId := parts[1]
-
-	client := meta.(*ionoscloud.APIClient)
-
-	k8sNodepool, apiResponse, err := client.KubernetesApi.K8sNodepoolsFindById(ctx, clusterId, npId).Execute()
-	logApiRequestTime(apiResponse)
-
-	if err != nil {
-		if apiResponse != nil && apiResponse.Response != nil && apiResponse.StatusCode == 404 {
-			d.SetId("")
-			return nil, fmt.Errorf("unable to find k8s node pool %q", npId)
-		}
-		return nil, fmt.Errorf("unable to retreive k8s node pool %q", npId)
-	}
-
-	log.Printf("[INFO] K8s node pool found: %+v", k8sNodepool)
-
-	d.SetId(*k8sNodepool.Id)
-	if err := d.Set("name", *k8sNodepool.Properties.Name); err != nil {
-		return nil, err
-	}
-	if err := d.Set("k8s_version", *k8sNodepool.Properties.K8sVersion); err != nil {
-		return nil, err
-	}
-	if err := d.Set("k8s_cluster_id", clusterId); err != nil {
-		return nil, err
-	}
-	if err := d.Set("datacenter_id", *k8sNodepool.Properties.DatacenterId); err != nil {
-		return nil, err
-	}
-	if err := d.Set("cpu_family", *k8sNodepool.Properties.CpuFamily); err != nil {
-		return nil, err
-	}
-	if err := d.Set("availability_zone", *k8sNodepool.Properties.AvailabilityZone); err != nil {
-		return nil, err
-	}
-	if err := d.Set("storage_type", *k8sNodepool.Properties.StorageType); err != nil {
-		return nil, err
-	}
-	if err := d.Set("node_count", *k8sNodepool.Properties.NodeCount); err != nil {
-		return nil, err
-	}
-	if err := d.Set("cores_count", *k8sNodepool.Properties.CoresCount); err != nil {
-		return nil, err
-	}
-	if err := d.Set("ram_size", *k8sNodepool.Properties.RamSize); err != nil {
-		return nil, err
-	}
-	if err := d.Set("storage_size", *k8sNodepool.Properties.StorageSize); err != nil {
-		return nil, err
-	}
-
-	if k8sNodepool.Properties.PublicIps != nil {
-		if err := d.Set("public_ips", k8sNodepool.Properties.PublicIps); err != nil {
-			return nil, err
-		}
-		log.Printf("[INFO] Setting Public IPs for k8s node pool %s to %+v...", d.Id(), d.Get("public_ips"))
-	}
-
-	if k8sNodepool.Properties.AutoScaling != nil && k8sNodepool.Properties.AutoScaling.MinNodeCount != nil && k8sNodepool.Properties.AutoScaling.MaxNodeCount != nil && (*k8sNodepool.Properties.AutoScaling.MinNodeCount != 0 && *k8sNodepool.Properties.AutoScaling.MaxNodeCount != 0) {
-		if err := d.Set("auto_scaling", []map[string]int32{
-			{
-				"min_node_count": *k8sNodepool.Properties.AutoScaling.MinNodeCount,
-				"max_node_count": *k8sNodepool.Properties.AutoScaling.MaxNodeCount,
-			},
-		}); err != nil {
-			return nil, err
-		}
-		log.Printf("[INFO] Setting AutoScaling for k8s node pool %s to %+v...", d.Id(), k8sNodepool.Properties.AutoScaling)
-	}
-
-	if k8sNodepool.Properties.Lans != nil {
-
-		nodePoolLans := getK8sNodePoolLans(*k8sNodepool.Properties.Lans)
-
-		if len(nodePoolLans) > 0 {
-			if err := d.Set("lans", nodePoolLans); err != nil {
-				return nil, err
-			}
-		}
-
-		log.Printf("[INFO] Setting LAN's for k8s node pool %s to %+v...", d.Id(), d.Get("lans"))
-	}
-
-	if k8sNodepool.Properties.MaintenanceWindow != nil {
-		if err := d.Set("maintenance_window", []map[string]string{
-			{
-				"day_of_the_week": *k8sNodepool.Properties.MaintenanceWindow.DayOfTheWeek,
-				"time":            *k8sNodepool.Properties.MaintenanceWindow.Time,
-			},
-		}); err != nil {
-			return nil, err
-		}
-		log.Printf("[INFO] Setting maintenance window for k8s node pool %s to %+v...", d.Id(), k8sNodepool.Properties.MaintenanceWindow)
-	}
-
-	labels := make(map[string]interface{})
-	if k8sNodepool.Properties.Labels != nil && len(*k8sNodepool.Properties.Labels) > 0 {
-		for k, v := range *k8sNodepool.Properties.Labels {
-			labels[k] = v
-		}
-	}
-
-	if err := d.Set("labels", labels); err != nil {
-		return nil, fmt.Errorf("error while setting the labels property for k8sNodepool %s: %s", d.Id(), err)
-	}
-
-	annotations := make(map[string]interface{})
-	if k8sNodepool.Properties.Annotations != nil && len(*k8sNodepool.Properties.Annotations) > 0 {
-		for k, v := range *k8sNodepool.Properties.Annotations {
-			annotations[k] = v
-		}
-	}
-
-	if err := d.Set("annotations", annotations); err != nil {
-		return nil, fmt.Errorf("error while setting the annotations property for k8sNodepool %s: %s", d.Id(), err)
-	}
-
-	log.Printf("[INFO] Importing k8s node pool %q...", d.Id())
-
-	return []*schema.ResourceData{d}, nil
-}
-
-func resourceNicImport(_ context.Context, d *schema.ResourceData, _ interface{}) ([]*schema.ResourceData, error) {
-	parts := strings.Split(d.Id(), "/")
-	if len(parts) != 3 || parts[0] == "" || parts[1] == "" {
-		return nil, fmt.Errorf("invalid import id %q. Expecting {datacenter}/{server}/{nic}", d.Id())
-	}
-
-	if err := d.Set("datacenter_id", parts[0]); err != nil {
-		return nil, err
-	}
-	if err := d.Set("server_id", parts[1]); err != nil {
-		return nil, err
-	}
-	d.SetId(parts[2])
-
-	return []*schema.ResourceData{d}, nil
-}
-
-func resourceShareImporter(ctx context.Context, d *schema.ResourceData, meta interface{}) ([]*schema.ResourceData, error) {
-	parts := strings.Split(d.Id(), "/")
-	if len(parts) != 2 || parts[0] == "" || parts[1] == "" {
-		return nil, fmt.Errorf("invalid import id %q. Expecting {group}/{resource}", d.Id())
-	}
-
-	grpId := parts[0]
-	rscId := parts[1]
-
-	client := meta.(*ionoscloud.APIClient)
-
-	share, apiResponse, err := client.UserManagementApi.UmGroupsSharesFindByResourceId(ctx, grpId, rscId).Execute()
-	logApiRequestTime(apiResponse)
-
-	if err != nil {
-		if apiResponse != nil && apiResponse.Response != nil && apiResponse.StatusCode == 404 {
-			d.SetId("")
-			return nil, fmt.Errorf("an error occured while trying to fetch the share of resource %q for group %q", rscId, grpId)
-		}
-		return nil, fmt.Errorf("share does not exist of resource %q for group %q", rscId, grpId)
-	}
-
-	log.Printf("[INFO] share found: %+v", share)
-
-	d.SetId(*share.Id)
-
-	if err := d.Set("group_id", grpId); err != nil {
-		return nil, err
-	}
-
-	if err := d.Set("resource_id", rscId); err != nil {
-		return nil, err
-	}
-
-	if share.Properties.EditPrivilege != nil {
-		if err := d.Set("edit_privilege", *share.Properties.EditPrivilege); err != nil {
-			return nil, err
-		}
-	}
-
-	if share.Properties.SharePrivilege != nil {
-		if err := d.Set("share_privilege", *share.Properties.SharePrivilege); err != nil {
-			return nil, err
-		}
-	}
-
-	return []*schema.ResourceData{d}, nil
-}
-
 func resourceIpFailoverImporter(ctx context.Context, d *schema.ResourceData, meta interface{}) ([]*schema.ResourceData, error) {
 	parts := strings.Split(d.Id(), "/")
 	if len(parts) != 2 || parts[0] == "" || parts[1] == "" {
@@ -222,9 +26,9 @@ func resourceIpFailoverImporter(ctx context.Context, d *schema.ResourceData, met
 	dcId := parts[0]
 	lanId := parts[1]
 
-	client := meta.(*ionoscloud.APIClient)
+	client := meta.(SdkBundle).CloudApiClient
 
-	lan, apiResponse, err := client.LansApi.DatacentersLansFindById(ctx, dcId, lanId).Execute()
+	lan, apiResponse, err := client.LANsApi.DatacentersLansFindById(ctx, dcId, lanId).Execute()
 	logApiRequestTime(apiResponse)
 
 	if err != nil {
@@ -276,7 +80,7 @@ func resourceLoadbalancerImporter(ctx context.Context, d *schema.ResourceData, m
 	dcId := parts[0]
 	lbId := parts[1]
 
-	client := meta.(*ionoscloud.APIClient)
+	client := meta.(SdkBundle).CloudApiClient
 
 	loadbalancer, apiResponse, err := client.LoadBalancersApi.DatacentersLoadbalancersFindById(ctx, dcId, lbId).Execute()
 	logApiRequestTime(apiResponse)
@@ -368,6 +172,21 @@ func diffSlice(slice1 []string, slice2 []string) []string {
 	return diff
 }
 
+// diffSliceOneWay returns the elements in `a` that aren't in `b`.
+func diffSliceOneWay(a, b []string) []string {
+	mb := make(map[string]struct{}, len(b))
+	for _, x := range b {
+		mb[x] = struct{}{}
+	}
+	var diff []string
+	for _, x := range a {
+		if _, found := mb[x]; !found {
+			diff = append(diff, x)
+		}
+	}
+	return diff
+}
+
 func responseBody(resp *ionoscloud.APIResponse) string {
 	ret := "<nil>"
 	if resp != nil {
@@ -413,6 +232,40 @@ func DiffBasedOnVersion(_, old, new string, _ *schema.ResourceData) bool {
 	return false
 }
 
+//DiffToLower terraform suppress differences between lower and upper
+func DiffToLower(_, old, new string, _ *schema.ResourceData) bool {
+	if strings.ToLower(old) == strings.ToLower(new) {
+		return true
+	}
+	return false
+}
+
+//DiffCidr terraform suppress differences between ip and cidr
+func DiffCidr(_, old, new string, _ *schema.ResourceData) bool {
+	oldIp, _, err := net.ParseCIDR(old)
+	newIp := net.ParseIP(new)
+	// if new is an ip and old is a cidr, suppress
+	if err == nil && newIp != nil && oldIp != nil && newIp.Equal(oldIp) {
+		return true
+	}
+	return false
+}
+
+// VerifyUnavailableIPs used for DBaaS cluster to check the provided IPs
+func VerifyUnavailableIPs(val interface{}, key string) (warns []string, errs []error) {
+	v := val.(string)
+	unavailableNetworks := []string{"10.233.64.0/18", "10.233.0.0/18", "10.233.114.0/24"}
+
+	ip, _, _ := net.ParseCIDR(v)
+
+	for _, unavailableNetwork := range unavailableNetworks {
+		if _, network, _ := net.ParseCIDR(unavailableNetwork); network.Contains(ip) {
+			errs = append(errs, fmt.Errorf("for %q the following IP ranges are unavailable: 10.233.64.0/18, 10.233.0.0/18, 10.233.114.0/24; got: %v", key, v))
+		}
+	}
+	return
+}
+
 func GenerateEmail() string {
 	email := fmt.Sprintf("terraform_test-%d@mailinator.com", time.Now().UnixNano())
 	return email
@@ -420,7 +273,14 @@ func GenerateEmail() string {
 
 func logApiRequestTime(resp *ionoscloud.APIResponse) {
 	if resp != nil {
-		log.Printf("[DEBUG] Request time : %s for operation : %s, status code : %d",
-			resp.RequestTime, resp.Operation, resp.StatusCode)
+		log.Printf("[DEBUG] Request time : %s for operation : %s",
+			resp.RequestTime, resp.Operation)
 	}
+}
+
+func httpNotFound(resp *ionoscloud.APIResponse) bool {
+	if resp != nil && resp.Response != nil && resp.StatusCode == http.StatusNotFound {
+		return true
+	}
+	return false
 }

@@ -123,6 +123,11 @@ func resourceVolume() *schema.Resource {
 				Type:     schema.TypeInt,
 				Computed: true,
 			},
+			"boot_server": {
+				Type:        schema.TypeString,
+				Description: "The UUID of the attached server.",
+				Computed:    true,
+			},
 			"server_id": {
 				Type:         schema.TypeString,
 				Required:     true,
@@ -141,7 +146,7 @@ func resourceVolume() *schema.Resource {
 
 func resourceVolumeCreate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 
-	client := meta.(*ionoscloud.APIClient)
+	client := meta.(SdkBundle).CloudApiClient
 
 	volume := ionoscloud.Volume{
 		Properties: &ionoscloud.VolumeProperties{},
@@ -321,7 +326,7 @@ func resourceVolumeCreate(ctx context.Context, d *schema.ResourceData, meta inte
 }
 
 func resourceVolumeRead(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
-	client := meta.(*ionoscloud.APIClient)
+	client := meta.(SdkBundle).CloudApiClient
 
 	dcId := d.Get("datacenter_id").(string)
 	serverID := d.Get("server_id").(string)
@@ -356,7 +361,7 @@ func resourceVolumeRead(ctx context.Context, d *schema.ResourceData, meta interf
 }
 
 func resourceVolumeUpdate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
-	client := meta.(*ionoscloud.APIClient)
+	client := meta.(SdkBundle).CloudApiClient
 
 	properties := ionoscloud.VolumeProperties{}
 	dcId := d.Get("datacenter_id").(string)
@@ -445,7 +450,7 @@ func resourceVolumeUpdate(ctx context.Context, d *schema.ResourceData, meta inte
 }
 
 func resourceVolumeDelete(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
-	client := meta.(*ionoscloud.APIClient)
+	client := meta.(SdkBundle).CloudApiClient
 
 	dcId := d.Get("datacenter_id").(string)
 
@@ -474,7 +479,7 @@ func resourceVolumeImporter(ctx context.Context, d *schema.ResourceData, meta in
 		return nil, fmt.Errorf("invalid import id %q. Expecting {datacenter}/{server}/{volume}", d.Id())
 	}
 
-	client := meta.(*ionoscloud.APIClient)
+	client := meta.(SdkBundle).CloudApiClient
 
 	dcId := parts[0]
 	srvId := parts[1]
@@ -626,6 +631,13 @@ func setVolumeData(d *schema.ResourceData, volume *ionoscloud.Volume) error {
 			return fmt.Errorf("error while setting device_number property for volume %s: %s", d.Id(), err)
 		}
 	}
+
+	if volume.Properties.BootServer != nil {
+		err := d.Set("boot_server", *volume.Properties.BootServer)
+		if err != nil {
+			return fmt.Errorf("error while setting boot_server property for volume %s: %s", d.Id(), err)
+		}
+	}
 	return nil
 }
 
@@ -635,7 +647,7 @@ func resolveImageName(ctx context.Context, client *ionoscloud.APIClient, imageNa
 		return nil, fmt.Errorf("imageName not suplied")
 	}
 
-	images, apiResponse, err := client.ImagesApi.ImagesGet(ctx).Execute()
+	images, apiResponse, err := client.ImagesApi.ImagesGet(ctx).Depth(1).Execute()
 	logApiRequestTime(apiResponse)
 
 	if err != nil {
@@ -646,7 +658,7 @@ func resolveImageName(ctx context.Context, client *ionoscloud.APIClient, imageNa
 	if len(*images.Items) > 0 {
 		for _, i := range *images.Items {
 			imgName := ""
-			if i.Properties.Name != nil && *i.Properties.Name != "" {
+			if i.Properties != nil && i.Properties.Name != nil && *i.Properties.Name != "" {
 				imgName = *i.Properties.Name
 			}
 
@@ -669,7 +681,7 @@ func getSnapshotId(ctx context.Context, client *ionoscloud.APIClient, snapshotNa
 		return ""
 	}
 
-	snapshots, apiResponse, err := client.SnapshotsApi.SnapshotsGet(ctx).Execute()
+	snapshots, apiResponse, err := client.SnapshotsApi.SnapshotsGet(ctx).Depth(1).Execute()
 	logApiRequestTime(apiResponse)
 
 	if err != nil {
@@ -679,7 +691,7 @@ func getSnapshotId(ctx context.Context, client *ionoscloud.APIClient, snapshotNa
 	if len(*snapshots.Items) > 0 {
 		for _, i := range *snapshots.Items {
 			imgName := ""
-			if *i.Properties.Name != "" {
+			if i.Properties != nil && i.Properties.Name != nil && *i.Properties.Name != "" {
 				imgName = *i.Properties.Name
 			}
 

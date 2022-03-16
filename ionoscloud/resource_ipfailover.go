@@ -22,12 +22,12 @@ func resourceLanIPFailover() *schema.Resource {
 			"ip": {
 				Type:         schema.TypeString,
 				Required:     true,
-				ValidateFunc: validation.All(validation.StringIsNotWhiteSpace),
+				ValidateFunc: validation.All(validation.IsIPAddress),
 			},
 			"nicuuid": {
 				Type:         schema.TypeString,
 				Required:     true,
-				ValidateFunc: validation.All(validation.StringIsNotWhiteSpace),
+				ValidateFunc: validation.All(validation.IsUUID),
 			},
 			"lan_id": {
 				Type:         schema.TypeString,
@@ -38,7 +38,7 @@ func resourceLanIPFailover() *schema.Resource {
 				Type:         schema.TypeString,
 				Required:     true,
 				ForceNew:     true,
-				ValidateFunc: validation.All(validation.StringIsNotWhiteSpace),
+				ValidateFunc: validation.All(validation.IsUUID),
 			},
 		},
 		Timeouts: &resourceDefaultTimeouts,
@@ -46,7 +46,7 @@ func resourceLanIPFailover() *schema.Resource {
 }
 
 func resourceLanIPFailoverCreate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
-	client := meta.(*ionoscloud.APIClient)
+	client := meta.(SdkBundle).CloudApiClient
 	dcid := d.Get("datacenter_id").(string)
 	lanid := d.Get("lan_id").(string)
 	if lanid == "" {
@@ -64,10 +64,10 @@ func resourceLanIPFailoverCreate(ctx context.Context, d *schema.ResourceData, me
 			NicUuid: &nicUuid,
 		}}
 
-	lan, apiResponse, err := client.LansApi.DatacentersLansPatch(ctx, dcid, lanid).Lan(*properties).Execute()
+	lan, apiResponse, err := client.LANsApi.DatacentersLansPatch(ctx, dcid, lanid).Lan(*properties).Execute()
 	logApiRequestTime(apiResponse)
 	if err != nil {
-		diags := diag.FromErr(fmt.Errorf("an error occured while patching a lans failover group  %s %s", lanid, err))
+		diags := diag.FromErr(fmt.Errorf("an error occured while patching a lans failover group  %s %w", lanid, err))
 		return diags
 	}
 
@@ -84,9 +84,9 @@ func resourceLanIPFailoverCreate(ctx context.Context, d *schema.ResourceData, me
 }
 
 func resourceLanIPFailoverRead(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
-	client := meta.(*ionoscloud.APIClient)
+	client := meta.(SdkBundle).CloudApiClient
 
-	lan, apiResponse, err := client.LansApi.DatacentersLansFindById(ctx, d.Get("datacenter_id").(string), d.Id()).Execute()
+	lan, apiResponse, err := client.LANsApi.DatacentersLansFindById(ctx, d.Get("datacenter_id").(string), d.Id()).Execute()
 	logApiRequestTime(apiResponse)
 
 	if err != nil {
@@ -94,14 +94,14 @@ func resourceLanIPFailoverRead(ctx context.Context, d *schema.ResourceData, meta
 			d.SetId("")
 			return nil
 		}
-		diags := diag.FromErr(fmt.Errorf("an error occured while fetching a lan ID %s %s", d.Id(), err))
+		diags := diag.FromErr(fmt.Errorf("an error occured while fetching a lan ID %s %w", d.Id(), err))
 		return diags
 	}
 
 	if lan.Properties.IpFailover != nil {
 		err := d.Set("ip", *(*lan.Properties.IpFailover)[0].Ip)
 		if err != nil {
-			diags := diag.FromErr(fmt.Errorf("error while setting ip property for IpFailover %s: %s", d.Id(), err))
+			diags := diag.FromErr(fmt.Errorf("error while setting ip property for IpFailover %s: %w", d.Id(), err))
 			return diags
 		}
 	}
@@ -109,7 +109,7 @@ func resourceLanIPFailoverRead(ctx context.Context, d *schema.ResourceData, meta
 	if lan.Properties.IpFailover != nil {
 		err := d.Set("nicuuid", *(*lan.Properties.IpFailover)[0].NicUuid)
 		if err != nil {
-			diags := diag.FromErr(fmt.Errorf("error while setting nicuuid property for IpFailover %s: %s", d.Id(), err))
+			diags := diag.FromErr(fmt.Errorf("error while setting nicuuid property for IpFailover %s: %w", d.Id(), err))
 			return diags
 		}
 	}
@@ -117,7 +117,7 @@ func resourceLanIPFailoverRead(ctx context.Context, d *schema.ResourceData, meta
 	if lan.Id != nil {
 		err := d.Set("lan_id", *lan.Id)
 		if err != nil {
-			diags := diag.FromErr(fmt.Errorf("error while setting lan_id property for IpFailover %s: %s", d.Id(), err))
+			diags := diag.FromErr(fmt.Errorf("error while setting lan_id property for IpFailover %s: %sw", d.Id(), err))
 			return diags
 		}
 	}
@@ -131,7 +131,7 @@ func resourceLanIPFailoverRead(ctx context.Context, d *schema.ResourceData, meta
 }
 
 func resourceLanIPFailoverUpdate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
-	client := meta.(*ionoscloud.APIClient)
+	client := meta.(SdkBundle).CloudApiClient
 
 	properties := &ionoscloud.LanProperties{}
 	dcid := d.Get("datacenter_id").(string)
@@ -145,10 +145,10 @@ func resourceLanIPFailoverUpdate(ctx context.Context, d *schema.ResourceData, me
 			NicUuid: &nicUuid,
 		}}
 
-	_, apiResponse, err := client.LansApi.DatacentersLansPatch(ctx, dcid, lanid).Lan(*properties).Execute()
+	_, apiResponse, err := client.LANsApi.DatacentersLansPatch(ctx, dcid, lanid).Lan(*properties).Execute()
 	logApiRequestTime(apiResponse)
 	if err != nil {
-		diags := diag.FromErr(fmt.Errorf("an error occured while patching a lan ID %s %s", d.Id(), err))
+		diags := diag.FromErr(fmt.Errorf("an error occured while patching a lan ID %s %w", d.Id(), err))
 		return diags
 	}
 
@@ -163,7 +163,7 @@ func resourceLanIPFailoverUpdate(ctx context.Context, d *schema.ResourceData, me
 }
 
 func resourceLanIPFailoverDelete(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
-	client := meta.(*ionoscloud.APIClient)
+	client := meta.(SdkBundle).CloudApiClient
 
 	dcid := d.Get("datacenter_id").(string)
 	lanid := d.Get("lan_id").(string)
@@ -173,20 +173,20 @@ func resourceLanIPFailoverDelete(ctx context.Context, d *schema.ResourceData, me
 		IpFailover: &[]ionoscloud.IPFailover{},
 	}
 
-	_, apiResponse, err := client.LansApi.DatacentersLansPatch(ctx, dcid, lanid).Lan(*properties).Execute()
+	_, apiResponse, err := client.LANsApi.DatacentersLansPatch(ctx, dcid, lanid).Lan(*properties).Execute()
 	logApiRequestTime(apiResponse)
 	if err != nil {
 		/*
 						//try again in 90 seconds
 						time.Sleep(90 * time.Second)
-						_, apiResponse, err = client.LansApi.DatacentersLansPatch(ctx, dcid, lanid).Lan(*properties).Execute()
+						_, apiResponse, err = client.LANsApi.DatacentersLansPatch(ctx, dcid, lanid).Lan(*properties).Execute()
 			logApiRequestTime(apiResponse)
 
 						if err != nil && (apiResponse == nil || apiResponse.StatusCode != 404) {
 							return fmt.Errorf("an error occured while removing a lans ipfailover groups dcId %s ID %s %s", d.Get("datacenter_id").(string), d.Id(), err)
 						}
 		*/
-		diags := diag.FromErr(fmt.Errorf("an error occured while removing a lans ipfailover groups dcId %s ID %s %s", d.Get("datacenter_id").(string), d.Id(), err))
+		diags := diag.FromErr(fmt.Errorf("an error occured while removing a lans ipfailover groups dcId %s ID %s %w", d.Get("datacenter_id").(string), d.Id(), err))
 		return diags
 	}
 

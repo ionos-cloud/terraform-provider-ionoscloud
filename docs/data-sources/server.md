@@ -1,21 +1,33 @@
 ---
+subcategory: "Compute Engine"
 layout: "ionoscloud"
 page_title: "IonosCloud : ionoscloud_server"
 sidebar_current: "docs-ionoscloud-datasource-server"
 description: |-
-Get information on a Ionos Cloud Servers
+  Get information on a Ionos Cloud Servers
 ---
 
 # ionoscloud\_server
 
-The server data source can be used to search for and return existing servers.
+The **Server data source** can be used to search for and return existing servers. 
+If a single match is found, it will be returned. If your search results in multiple matches, an error will be returned.
+When this happens, please refine your search string so that it is specific enough to return only one result.
 
 ## Example Usage
 
+### By ID
 ```hcl
-data "ionoscloud_server" "server_example" {
-   datacenter_id = ionoscloud_datacenter.datacenter_example.id
-   name			 = "example_"
+data "ionoscloud_server" "example" {
+   datacenter_id = <datacenter_id>
+   id			 = <server_id>
+}
+```
+
+### By Name
+```hcl
+data "ionoscloud_server" "example" {
+   datacenter_id = <datacenter_id>
+   name			 = "Server Example"
 }
 ```
 

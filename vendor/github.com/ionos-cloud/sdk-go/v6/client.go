@@ -49,7 +49,7 @@ const (
 	RequestStatusFailed  = "FAILED"
 	RequestStatusDone    = "DONE"
 
-	Version = "6.2.0-beta.6"
+	Version = "6.0.1"
 )
 
 // Constants for APIs
@@ -65,8 +65,6 @@ type APIClient struct {
 	// API Services
 
 	DefaultApi *DefaultApiService
-
-	ApplicationLoadBalancersApi *ApplicationLoadBalancersApiService
 
 	BackupUnitsApi *BackupUnitsApiService
 
@@ -106,8 +104,6 @@ type APIClient struct {
 
 	SnapshotsApi *SnapshotsApiService
 
-	TargetGroupsApi *TargetGroupsApiService
-
 	TemplatesApi *TemplatesApiService
 
 	UserManagementApi *UserManagementApiService
@@ -134,7 +130,6 @@ func NewAPIClient(cfg *Configuration) *APIClient {
 
 	// API Services
 	c.DefaultApi = (*DefaultApiService)(&c.common)
-	c.ApplicationLoadBalancersApi = (*ApplicationLoadBalancersApiService)(&c.common)
 	c.BackupUnitsApi = (*BackupUnitsApiService)(&c.common)
 	c.ContractResourcesApi = (*ContractResourcesApiService)(&c.common)
 	c.DataCentersApi = (*DataCentersApiService)(&c.common)
@@ -154,7 +149,6 @@ func NewAPIClient(cfg *Configuration) *APIClient {
 	c.RequestsApi = (*RequestsApiService)(&c.common)
 	c.ServersApi = (*ServersApiService)(&c.common)
 	c.SnapshotsApi = (*SnapshotsApiService)(&c.common)
-	c.TargetGroupsApi = (*TargetGroupsApiService)(&c.common)
 	c.TemplatesApi = (*TemplatesApiService)(&c.common)
 	c.UserManagementApi = (*UserManagementApiService)(&c.common)
 	c.UserS3KeysApi = (*UserS3KeysApiService)(&c.common)
@@ -272,7 +266,7 @@ func (c *APIClient) callAPI(request *http.Request) (*http.Response, time.Duratio
 		if c.cfg.Debug {
 			dump, err := httputil.DumpRequestOut(clonedRequest, true)
 			if err == nil {
-				log.Printf(" [DEBUG] DumpRequestOut : %s\n", string(dump))
+				log.Printf("%s\n", string(dump))
 			} else {
 				log.Println("[DEBUG] DumpRequestOut err: ", err)
 			}
@@ -290,9 +284,9 @@ func (c *APIClient) callAPI(request *http.Request) (*http.Response, time.Duratio
 		if c.cfg.Debug {
 			dump, err := httputil.DumpResponse(resp, true)
 			if err == nil {
-				log.Printf("\n [DEBUG] DumpResponse : %s\n", string(dump))
+				log.Printf("\n%s\n", string(dump))
 			} else {
-				log.Println("[DEBUG] DumpResponse err ", err)
+				log.Println("[DEBUG] dumpResponse err ", err)
 			}
 		}
 
@@ -321,7 +315,7 @@ func (c *APIClient) callAPI(request *http.Request) (*http.Response, time.Duratio
 
 		if retryCount >= c.GetConfig().MaxRetries {
 			if c.cfg.Debug {
-				log.Printf("number of maximum retries exceeded (%d retries)\n", c.cfg.MaxRetries)
+				fmt.Printf("number of maximum retries exceeded (%d retries)\n", c.cfg.MaxRetries)
 			}
 			break
 		} else {
@@ -337,7 +331,7 @@ func (c *APIClient) backOff(t time.Duration) {
 		t = c.GetConfig().MaxWaitTime
 	}
 	if c.cfg.Debug {
-		log.Printf("sleeping %s before retrying request\n", t.String())
+		fmt.Printf("sleeping %s before retrying request\n", t.String())
 	}
 	time.Sleep(t)
 }
@@ -546,14 +540,14 @@ func (c *APIClient) decode(v interface{}, b []byte, contentType string) (err err
 					return err
 				}
 			} else {
-				return errors.New("unknown type with GetActualInstance but no unmarshalObj.UnmarshalJSON defined")
+				errors.New("Unknown type with GetActualInstance but no unmarshalObj.UnmarshalJSON defined")
 			}
 		} else if err = json.Unmarshal(b, v); err != nil { // simple model
 			return err
 		}
 		return nil
 	}
-	return fmt.Errorf("undefined response type for content %s", contentType)
+	return errors.New("undefined response type")
 }
 
 func (c *APIClient) GetRequestStatus(ctx context.Context, path string) (*RequestStatus, *APIResponse, error) {

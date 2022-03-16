@@ -4,6 +4,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 	ionoscloud "github.com/ionos-cloud/sdk-go/v6"
@@ -11,7 +12,7 @@ import (
 
 func dataSourceServer() *schema.Resource {
 	return &schema.Resource{
-		Read: dataSourceServerRead,
+		ReadContext: dataSourceServerRead,
 		Schema: map[string]*schema.Schema{
 			"template_uuid": {
 				Type:     schema.TypeString,
@@ -250,6 +251,11 @@ func dataSourceServer() *schema.Resource {
 							Type:     schema.TypeString,
 							Optional: true,
 						},
+						"boot_server": {
+							Type:        schema.TypeString,
+							Description: "The UUID of the attached server.",
+							Computed:    true,
+						},
 					},
 				},
 			},
@@ -464,8 +470,7 @@ func setServerData(d *schema.ResourceData, server *ionoscloud.Server, token *ion
 				return err
 			}
 		}
-
-		if server.Entities.Volumes != nil && server.Entities.Volumes.Items != nil && len(*server.Entities.Volumes.Items) > 0 &&
+		if server.Entities != nil && server.Entities.Volumes != nil && server.Entities.Volumes.Items != nil && len(*server.Entities.Volumes.Items) > 0 &&
 			(*server.Entities.Volumes.Items)[0].Properties.Image != nil {
 			if err := d.Set("boot_image", *(*server.Entities.Volumes.Items)[0].Properties.Image); err != nil {
 				return err
@@ -551,6 +556,7 @@ func setServerData(d *schema.ResourceData, server *ionoscloud.Server, token *ion
 			entry["pci_slot"] = int32OrDefault(volume.Properties.PciSlot, 0)
 			entry["backup_unit_id"] = stringOrDefault(volume.Properties.BackupunitId, "")
 			entry["user_data"] = stringOrDefault(volume.Properties.UserData, "")
+			entry["boot_server"] = stringOrDefault(volume.Properties.BootServer, "")
 
 			volumes = append(volumes, entry)
 		}
@@ -590,16 +596,18 @@ func setServerData(d *schema.ResourceData, server *ionoscloud.Server, token *ion
 					ruleEntry := make(map[string]interface{})
 
 					ruleEntry["id"] = stringOrDefault(rule.Id, "")
-					ruleEntry["name"] = stringOrDefault(rule.Properties.Name, "")
-					ruleEntry["protocol"] = stringOrDefault(rule.Properties.Protocol, "")
-					ruleEntry["source_mac"] = stringOrDefault(rule.Properties.SourceMac, "")
-					ruleEntry["source_ip"] = stringOrDefault(rule.Properties.SourceIp, "")
-					ruleEntry["target_ip"] = stringOrDefault(rule.Properties.TargetIp, "")
-					ruleEntry["icmp_code"] = int32OrDefault(rule.Properties.IcmpCode, 0)
-					ruleEntry["icmp_type"] = int32OrDefault(rule.Properties.IcmpType, 0)
-					ruleEntry["port_range_start"] = int32OrDefault(rule.Properties.PortRangeStart, 0)
-					ruleEntry["port_range_end"] = int32OrDefault(rule.Properties.PortRangeEnd, 0)
-					ruleEntry["type"] = stringOrDefault(rule.Properties.Type, "")
+					if rule.Properties != nil {
+						ruleEntry["name"] = stringOrDefault(rule.Properties.Name, "")
+						ruleEntry["protocol"] = stringOrDefault(rule.Properties.Protocol, "")
+						ruleEntry["source_mac"] = stringOrDefault(rule.Properties.SourceMac, "")
+						ruleEntry["source_ip"] = stringOrDefault(rule.Properties.SourceIp, "")
+						ruleEntry["target_ip"] = stringOrDefault(rule.Properties.TargetIp, "")
+						ruleEntry["icmp_code"] = int32OrDefault(rule.Properties.IcmpCode, 0)
+						ruleEntry["icmp_type"] = int32OrDefault(rule.Properties.IcmpType, 0)
+						ruleEntry["port_range_start"] = int32OrDefault(rule.Properties.PortRangeStart, 0)
+						ruleEntry["port_range_end"] = int32OrDefault(rule.Properties.PortRangeEnd, 0)
+						ruleEntry["type"] = stringOrDefault(rule.Properties.Type, "")
+					}
 					firewallRules = append(firewallRules, ruleEntry)
 				}
 				entry["firewall_rules"] = firewallRules
@@ -622,67 +630,64 @@ func setServerData(d *schema.ResourceData, server *ionoscloud.Server, token *ion
 	return nil
 }
 
-func dataSourceServerRead(d *schema.ResourceData, meta interface{}) error {
-	client := meta.(*ionoscloud.APIClient)
+func dataSourceServerRead(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+	client := meta.(SdkBundle).CloudApiClient
 
 	datacenterId, dcIdOk := d.GetOk("datacenter_id")
 	if !dcIdOk {
-		return errors.New("no datacenter_id was specified")
+		return diag.FromErr(errors.New("no datacenter_id was specified"))
 	}
 
 	id, idOk := d.GetOk("id")
 	name, nameOk := d.GetOk("name")
 
 	if idOk && nameOk {
-		return errors.New("id and name cannot be both specified in the same time")
+		return diag.FromErr(errors.New("id and name cannot be both specified in the same time"))
 	}
 	if !idOk && !nameOk {
-		return errors.New("please provide either the server id or name")
+		return diag.FromErr(errors.New("please provide either the server id or name"))
 	}
 	var server ionoscloud.Server
 	var err error
 	var apiResponse *ionoscloud.APIResponse
 
-	ctx, cancel := context.WithTimeout(context.Background(), *resourceDefaultTimeouts.Default)
-
-	if cancel != nil {
-		defer cancel()
-	}
-
 	if idOk {
 		/* search by ID */
-		server, apiResponse, err = client.ServersApi.DatacentersServersFindById(ctx, datacenterId.(string), id.(string)).Execute()
+		server, apiResponse, err = client.ServersApi.DatacentersServersFindById(ctx, datacenterId.(string), id.(string)).Depth(5).Execute()
 		logApiRequestTime(apiResponse)
 		if err != nil {
-			return fmt.Errorf("an error occurred while fetching the server with ID %s: %s", id.(string), err)
+			return diag.FromErr(fmt.Errorf("an error occurred while fetching the server with ID %s: %w", id.(string), err))
 		}
 	} else {
 		/* search by name */
-		var servers ionoscloud.Servers
-		servers, apiResponse, err := client.ServersApi.DatacentersServersGet(ctx, datacenterId.(string)).Execute()
+		servers, apiResponse, err := client.ServersApi.DatacentersServersGet(ctx, datacenterId.(string)).Depth(5).Execute()
 		logApiRequestTime(apiResponse)
 		if err != nil {
-			return fmt.Errorf("an error occurred while fetching servers: %s", err.Error())
+			return diag.FromErr(fmt.Errorf("an error occurred while fetching servers: %w", err))
 		}
 
-		found := false
+		var results []ionoscloud.Server
+
 		if servers.Items != nil {
 			for _, s := range *servers.Items {
-				if s.Properties.Name != nil && *s.Properties.Name == name.(string) {
+				if s.Properties != nil && s.Properties.Name != nil && *s.Properties.Name == name.(string) {
 					/* server found */
-					server, apiResponse, err = client.ServersApi.DatacentersServersFindById(ctx, datacenterId.(string), *s.Id).Execute()
+					server, apiResponse, err = client.ServersApi.DatacentersServersFindById(ctx, datacenterId.(string), *s.Id).Depth(4).Execute()
 					logApiRequestTime(apiResponse)
 					if err != nil {
-						return fmt.Errorf("an error occurred while fetching the server with ID %s: %s", *s.Id, err)
+						return diag.FromErr(fmt.Errorf("an error occurred while fetching the server with ID %s: %w", *s.Id, err))
 					}
-					found = true
-					break
+					results = append(results, server)
 				}
 			}
 		}
 
-		if !found {
-			return errors.New("server not found")
+		if results == nil || len(results) == 0 {
+			return diag.FromErr(fmt.Errorf("no server found with the specified criteria: name = %s", name.(string)))
+		} else if len(results) > 1 {
+			return diag.FromErr(fmt.Errorf("more than one server found with the specified criteria: name = %s", name.(string)))
+		} else {
+			server = results[0]
 		}
 
 	}
@@ -694,12 +699,12 @@ func dataSourceServerRead(d *schema.ResourceData, meta interface{}) error {
 		logApiRequestTime(apiResponse)
 
 		if err != nil {
-			return fmt.Errorf("an error occurred while fetching the server token %s: %s", *server.Id, err)
+			return diag.FromErr(fmt.Errorf("an error occurred while fetching the server token %s: %w", *server.Id, err))
 		}
 	}
 
 	if err = setServerData(d, &server, &token); err != nil {
-		return err
+		return diag.FromErr(err)
 	}
 
 	return nil

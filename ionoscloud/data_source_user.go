@@ -55,7 +55,7 @@ func dataSourceUser() *schema.Resource {
 }
 
 func dataSourceUserRead(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
-	client := meta.(*ionoscloud.APIClient)
+	client := meta.(SdkBundle).CloudApiClient
 
 	id, idOk := d.GetOk("id")
 	email, emailOk := d.GetOk("email")
@@ -77,24 +77,24 @@ func dataSourceUserRead(ctx context.Context, d *schema.ResourceData, meta interf
 		user, apiResponse, err = client.UserManagementApi.UmUsersFindById(ctx, id.(string)).Execute()
 		logApiRequestTime(apiResponse)
 		if err != nil {
-			diags := diag.FromErr(fmt.Errorf("an error occurred while fetching user with ID %s: %s", id.(string), err))
+			diags := diag.FromErr(fmt.Errorf("an error occurred while fetching user with ID %s: %w", id.(string), err))
 			return diags
 		}
 	} else {
 		/* search by name */
 		var users ionoscloud.Users
 
-		users, apiResponse, err := client.UserManagementApi.UmUsersGet(ctx).Execute()
+		users, apiResponse, err := client.UserManagementApi.UmUsersGet(ctx).Depth(1).Execute()
 		logApiRequestTime(apiResponse)
 		if err != nil {
 			diags := diag.FromErr(fmt.Errorf("an error occurred while fetching users: %s", err.Error()))
 			return diags
 		}
 
-		found := false
+		var results []ionoscloud.User
 		if users.Items != nil {
 			for _, u := range *users.Items {
-				if u.Properties.Email != nil && *u.Properties.Email == email.(string) {
+				if u.Properties != nil && u.Properties.Email != nil && *u.Properties.Email == email.(string) {
 					/* user found */
 					user, apiResponse, err = client.UserManagementApi.UmUsersFindById(ctx, *u.Id).Execute()
 					logApiRequestTime(apiResponse)
@@ -102,15 +102,15 @@ func dataSourceUserRead(ctx context.Context, d *schema.ResourceData, meta interf
 						diags := diag.FromErr(fmt.Errorf("an error occurred while fetching user %s: %s", *u.Id, err))
 						return diags
 					}
-					found = true
-					break
+					results = append(results, user)
 				}
 			}
 		}
 
-		if !found {
-			diags := diag.FromErr(fmt.Errorf("user not found"))
-			return diags
+		if results == nil || len(results) == 0 {
+			return diag.FromErr(fmt.Errorf("no user found with the specified criteria: email = %s", email.(string)))
+		} else {
+			user = results[0]
 		}
 	}
 

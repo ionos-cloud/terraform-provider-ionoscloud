@@ -1,4 +1,5 @@
 ---
+subcategory: "Compute Engine"
 layout: "ionoscloud"
 page_title: "IonosCloud: datacenter"
 sidebar_current: "docs-resource-datacenter"
@@ -8,15 +9,16 @@ description: |-
 
 # ionoscloud\_datacenter
 
-Manages a Virtual Data Center on IonosCloud.
+Manages a Virtual **Data Center** on IonosCloud.
 
 ## Example Usage
 
 ```hcl
 resource "ionoscloud_datacenter" "example" {
-  name        = "datacenter name"
-  location    = "us/las"
-  description = "datacenter description"
+  name                = "Datacenter Example"
+  location            = "us/las"
+  description         = "datacenter description"
+  sec_auth_protection = false
 }
 ```
 

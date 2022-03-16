@@ -1,4 +1,5 @@
 ---
+subcategory: "User Management"
 layout: "ionoscloud"
 page_title: "IonosCloud: user"
 sidebar_current: "docs-resource-user"
@@ -8,18 +9,19 @@ description: |-
 
 # ionoscloud\_user
 
-Manages users and list users and groups associated with that user.
+Manages **Users** and list users and groups associated with that user.
 
 ## Example Usage
 
 ```hcl
-resource "ionoscloud_user" "user" {
-  first_name = "terraform"
-  last_name = "test"
-  email = "%s"
-  password = "abc123-321CBA"
-  administrator = false
-  force_sec_auth= false
+resource "ionoscloud_user" "example" {
+  first_name              = "example"
+  last_name               = "example"
+  email                   = <unique_email>
+  password                = "abc123-321CBA"
+  administrator           = false
+  force_sec_auth          = false
+  active                  = true
 }
 ```
 

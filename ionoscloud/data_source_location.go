@@ -3,6 +3,7 @@ package ionoscloud
 import (
 	"context"
 	"fmt"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	ionoscloud "github.com/ionos-cloud/sdk-go/v6"
 	"log"
@@ -10,7 +11,7 @@ import (
 
 func dataSourceLocation() *schema.Resource {
 	return &schema.Resource{
-		Read: dataSourceLocationRead,
+		ReadContext: dataSourceLocationRead,
 		Schema: map[string]*schema.Schema{
 			"name": {
 				Type:     schema.TypeString,
@@ -56,54 +57,64 @@ func dataSourceLocation() *schema.Resource {
 	}
 }
 
-func dataSourceLocationRead(d *schema.ResourceData, meta interface{}) error {
-	client := meta.(*ionoscloud.APIClient)
+func dataSourceLocationRead(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+	client := meta.(SdkBundle).CloudApiClient
 
-	ctx, cancel := context.WithTimeout(context.Background(), *resourceDefaultTimeouts.Default)
-	if cancel != nil {
-		defer cancel()
+	name, nameOk := d.GetOk("name")
+	feature, featureOk := d.GetOk("feature")
+
+	if !nameOk && !featureOk {
+		return diag.FromErr(fmt.Errorf("either 'name' or 'feature' must be provided"))
 	}
-	var apiResponse *ionoscloud.APIResponse
 
-	locations, apiResponse, err := client.LocationsApi.LocationsGet(ctx).Execute()
+	request := client.LocationsApi.LocationsGet(ctx).Depth(1)
+
+	if featureOk {
+		request = request.Filter("features", feature.(string))
+	}
+
+	locations, apiResponse, err := request.Execute()
 	logApiRequestTime(apiResponse)
 
 	if err != nil {
-		return fmt.Errorf("an error occured while fetching IonosCloud locations %s", err)
-	}
-
-	name, nameOk := d.GetOk("name")
-	feature, featureOk := d.GetOk("features")
-
-	if !nameOk && !featureOk {
-		return fmt.Errorf("either 'name' or 'feature' must be provided")
+		return diag.FromErr(fmt.Errorf("an error occurred while fetching locations: %s", err.Error()))
 	}
 	var results []ionoscloud.Location
 
-	if locations.Items != nil {
+	if nameOk && locations.Items != nil {
 		for _, loc := range *locations.Items {
-			if loc.Properties.Name != nil && *loc.Properties.Name == name.(string) {
+			if loc.Properties != nil && loc.Properties.Name != nil && *loc.Properties.Name == name.(string) {
 				results = append(results, loc)
 			}
 		}
 	}
 
-	if featureOk {
-		var locationResults []ionoscloud.Location
-		for _, loc := range results {
-			for _, f := range *loc.Properties.Features {
-				if f == feature.(string) {
-					locationResults = append(locationResults, loc)
-				}
-			}
-		}
-		results = locationResults
-	}
 	log.Printf("[INFO] Results length %d *************", len(results))
 
-	for _, loc := range results {
+	var location ionoscloud.Location
+
+	if results == nil || len(results) == 0 {
+		return diag.FromErr(fmt.Errorf("no location found with the specified criteria: name = %s, feature = %s", name.(string), feature.(string)))
+	} else {
+		location = results[0]
+	}
+
+	if err := setLocationData(d, &location); err != nil {
+		return diag.FromErr(err)
+	}
+
+	return nil
+}
+
+func setLocationData(d *schema.ResourceData, location *ionoscloud.Location) error {
+
+	if location.Id != nil {
+		d.SetId(*location.Id)
+	}
+
+	if location.Properties != nil {
 		var cpuArchitectures []interface{}
-		for _, cpuArchitecture := range *loc.Properties.CpuArchitecture {
+		for _, cpuArchitecture := range *location.Properties.CpuArchitecture {
 			architectureEntry := make(map[string]interface{})
 
 			if cpuArchitecture.CpuFamily != nil {
@@ -132,7 +143,7 @@ func dataSourceLocationRead(d *schema.ResourceData, meta interface{}) error {
 		}
 
 		var imageAliases []string
-		for _, imageAlias := range *loc.Properties.ImageAliases {
+		for _, imageAlias := range *location.Properties.ImageAliases {
 			imageAliases = append(imageAliases, imageAlias)
 		}
 
@@ -142,12 +153,6 @@ func dataSourceLocationRead(d *schema.ResourceData, meta interface{}) error {
 			}
 		}
 	}
-
-	if len(results) == 0 {
-		return fmt.Errorf("there are no locations that match the search criteria")
-	}
-
-	d.SetId(*results[0].Id)
 
 	return nil
 }

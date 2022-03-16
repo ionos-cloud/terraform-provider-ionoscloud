@@ -1,20 +1,33 @@
 ---
+subcategory: "Compute Engine"
 layout: "ionoscloud"
 page_title: "IonosCloud : ionoscloud_volume"
 sidebar_current: "docs-ionoscloud-datasource-volume"
 description: |-
-Get information on a Ionos Cloud Volume
+  Get information on a Ionos Cloud Volume
 ---
 
 # ionoscloud\_volume
 
 The volume data source can be used to search for and return existing volumes.
+If a single match is found, it will be returned. If your search results in multiple matches, an error will be returned.
+When this happens, please refine your search string so that it is specific enough to return only one result.
 
 ## Example Usage
 
+### By ID
 ```hcl
-data "ionoscloud_volume" "volume_example" {
-  name			= "my_volume@email.com"
+data "ionoscloud_volume" "example" {
+  datacenter_id = <datacenter_id>
+  id			= <volume_id>
+}
+```
+
+### By Name
+```hcl
+data "ionoscloud_volume" "example" {
+  datacenter_id = <datacenter_id>
+  name			= "Volume Example"
 }
 ```
 
@@ -50,3 +63,4 @@ The following attributes are returned by the datasource:
 * `nic_hot_unplug` - Is capable of nic hot unplug (no reboot required)
 * `disc_virtio_hot_plug` - Is capable of Virt-IO drive hot plug (no reboot required)
 * `disc_virtio_hot_unplug` - Is capable of Virt-IO drive hot unplug (no reboot required). This works only for non-Windows virtual Machines.
+* `boot_server` - The UUID of the attached server.

@@ -6,10 +6,16 @@
 [![Reliability Rating](https://sonarcloud.io/api/project_badges/measure?project=terraform-provider&metric=reliability_rating)](https://sonarcloud.io/dashboard?id=terraform-provider)
 [![Security Rating](https://sonarcloud.io/api/project_badges/measure?project=terraform-provider&metric=security_rating)](https://sonarcloud.io/dashboard?id=terraform-provider)
 [![Vulnerabilities](https://sonarcloud.io/api/project_badges/measure?project=terraform-provider&metric=vulnerabilities)](https://sonarcloud.io/dashboard?id=terraform-provider)
+[![Release](https://img.shields.io/github/v/release/ionos-cloud/terraform-provider-ionoscloud.svg)](https://github.com/ionos-cloud/terraform-provider-ionoscloud/releases/latest)
+[![Release Date](https://img.shields.io/github/release-date/ionos-cloud/terraform-provider-ionoscloud.svg)](https://github.com/ionos-cloud/terraform-provider-ionoscloud/releases/latest)
+[![Test suite](https://github.com/ionos-cloud/terraform-provider-ionoscloud/actions/workflows/test.yml/badge.svg)](https://github.com/ionos-cloud/terraform-provider-ionoscloud/actions/workflows/test.yml)
+[![Go](https://img.shields.io/github/go-mod/go-version/ionos-cloud/terraform-provider-ionoscloud.svg)](https://github.com/ionos-cloud/terraform-provider-ionoscloud)
 
 ![Alt text](.github/IONOS.CLOUD.BLU.svg?raw=true "Title")
 
 # IONOS Cloud Terraform Provider
+
+The IonosCloud provider gives the ability to deploy and configure resources using the IonosCloud APIs.
 
 ## Migrating from the ProfitBricks provider
 
@@ -20,7 +26,7 @@ Please see the [Documentation](docs/index.md#migrating-from-the-profitbricks-pro
 - [Terraform](https://www.terraform.io/downloads.html) 0.12.x
 - [Go](https://golang.org/doc/install) 1.13 (to build the provider plugin)
 
-**NOTE:** In order to use a speciffic version of this provider, please include the following block at the beginning of your terraform config files [details](https://www.terraform.io/docs/configuration/terraform.html#specifying-a-required-terraform-version):
+**NOTE:** In order to use a specific version of this provider, please include the following block at the beginning of your terraform config files [details](https://www.terraform.io/docs/configuration/terraform.html#specifying-a-required-terraform-version):
 
 ```terraform
 provider "ionoscloud" {

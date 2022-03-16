@@ -1,20 +1,31 @@
 ---
+subcategory: "User Management"
 layout: "ionoscloud"
 page_title: "IonosCloud : ionoscloud_group"
 sidebar_current: "docs-ionoscloud-datasource-group"
 description: |-
-Get information on a Ionos Cloud Groups
+  Get information on a Ionos Cloud Groups
 ---
 
 # ionoscloud\_group
 
-The groups data source can be used to search for and return existing groups.
+The **Group data source** can be used to search for and return existing groups.
+If a single match is found, it will be returned. If your search results in multiple matches, an error will be returned. 
+When this happens, please refine your search string so that it is specific enough to return only one result.
 
 ## Example Usage
 
+### By ID
 ```hcl
-data "ionoscloud_group" "group_example" {
-  name			= "my_group"
+data "ionoscloud_group" "example" {
+  id			= <group_id>
+}
+```
+
+### By Name
+```hcl
+data "ionoscloud_group" "example" {
+  name			= "Group Example"
 }
 ```
 
@@ -40,5 +51,4 @@ The following attributes are returned by the datasource:
 * `create_backup_unit` - The group will be allowed to create backup unit privilege.
 * `create_internet_access` - The group will be allowed to create internet access privilege.
 * `create_k8s_cluster` - The group will be allowed to create kubernetes cluster privilege.
-* `user_id` - The ID of the specific user to add to the group.
 * `users` - List of users in group.

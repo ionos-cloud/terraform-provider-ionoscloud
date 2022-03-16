@@ -98,7 +98,7 @@ func resourcePrivateCrossConnect() *schema.Resource {
 }
 
 func resourcePrivateCrossConnectCreate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
-	client := meta.(*ionoscloud.APIClient)
+	client := meta.(SdkBundle).CloudApiClient
 
 	name := d.Get("name").(string)
 	pcc := ionoscloud.PrivateCrossConnect{
@@ -118,7 +118,7 @@ func resourcePrivateCrossConnectCreate(ctx context.Context, d *schema.ResourceDa
 
 	if err != nil {
 		d.SetId("")
-		diags := diag.FromErr(fmt.Errorf("error creating private PCC: %s", err))
+		diags := diag.FromErr(fmt.Errorf("error creating private PCC: %w", err))
 		return diags
 	}
 
@@ -132,7 +132,7 @@ func resourcePrivateCrossConnectCreate(ctx context.Context, d *schema.ResourceDa
 }
 
 func resourcePrivateCrossConnectRead(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
-	client := meta.(*ionoscloud.APIClient)
+	client := meta.(SdkBundle).CloudApiClient
 
 	pcc, apiResponse, err := client.PrivateCrossConnectsApi.PccsFindById(ctx, d.Id()).Execute()
 	logApiRequestTime(apiResponse)
@@ -142,7 +142,7 @@ func resourcePrivateCrossConnectRead(ctx context.Context, d *schema.ResourceData
 			d.SetId("")
 			return nil
 		}
-		diags := diag.FromErr(fmt.Errorf("error while fetching PCC %s: %s", d.Id(), err))
+		diags := diag.FromErr(fmt.Errorf("error while fetching PCC %s: %w", d.Id(), err))
 		return diags
 	}
 
@@ -155,7 +155,7 @@ func resourcePrivateCrossConnectRead(ctx context.Context, d *schema.ResourceData
 }
 
 func resourcePrivateCrossConnectUpdate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
-	client := meta.(*ionoscloud.APIClient)
+	client := meta.(SdkBundle).CloudApiClient
 
 	request := ionoscloud.PrivateCrossConnect{}
 	name := d.Get("name").(string)
@@ -189,7 +189,7 @@ func resourcePrivateCrossConnectUpdate(ctx context.Context, d *schema.ResourceDa
 			d.SetId("")
 			return nil
 		}
-		diags := diag.FromErr(fmt.Errorf("error while updating PCC %s: %s", d.Id(), err))
+		diags := diag.FromErr(fmt.Errorf("error while updating PCC %s: %w", d.Id(), err))
 		return diags
 	}
 	if diags := waitForPCCToBeReady(ctx, d, client); diags != nil {
@@ -200,7 +200,7 @@ func resourcePrivateCrossConnectUpdate(ctx context.Context, d *schema.ResourceDa
 }
 
 func resourcePrivateCrossConnectDelete(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
-	client := meta.(*ionoscloud.APIClient)
+	client := meta.(SdkBundle).CloudApiClient
 
 	apiResponse, err := client.PrivateCrossConnectsApi.PccsDelete(ctx, d.Id()).Execute()
 	logApiRequestTime(apiResponse)
@@ -210,7 +210,7 @@ func resourcePrivateCrossConnectDelete(ctx context.Context, d *schema.ResourceDa
 			d.SetId("")
 			return nil
 		}
-		diags := diag.FromErr(fmt.Errorf("error while deleting PCC %s: %s", d.Id(), err))
+		diags := diag.FromErr(fmt.Errorf("error while deleting PCC %s: %w", d.Id(), err))
 		return diags
 	}
 
@@ -220,7 +220,7 @@ func resourcePrivateCrossConnectDelete(ctx context.Context, d *schema.ResourceDa
 		pccDeleted, dsErr := privateCrossConnectDeleted(ctx, client, d)
 
 		if dsErr != nil {
-			diags := diag.FromErr(fmt.Errorf("error while deleting PCC %s: %s", d.Id(), err))
+			diags := diag.FromErr(fmt.Errorf("error while deleting PCC %s: %w", d.Id(), err))
 			return diags
 		}
 
@@ -243,7 +243,7 @@ func resourcePrivateCrossConnectDelete(ctx context.Context, d *schema.ResourceDa
 }
 
 func resourcePrivateCrossConnectImport(ctx context.Context, d *schema.ResourceData, meta interface{}) ([]*schema.ResourceData, error) {
-	client := meta.(*ionoscloud.APIClient)
+	client := meta.(SdkBundle).CloudApiClient
 
 	pccId := d.Id()
 
@@ -307,7 +307,7 @@ func waitForPCCToBeReady(ctx context.Context, d *schema.ResourceData, client *io
 		pccReady, rsErr := privateCrossConnectReady(ctx, client, d)
 
 		if rsErr != nil {
-			diags := diag.FromErr(fmt.Errorf("error while checking readiness status of PCC %s: %s", d.Id(), rsErr))
+			diags := diag.FromErr(fmt.Errorf("error while checking readiness status of PCC %s: %w", d.Id(), rsErr))
 			return diags
 		}
 

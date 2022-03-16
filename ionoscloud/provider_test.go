@@ -3,6 +3,7 @@ package ionoscloud
 import (
 	"context"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
+	ionoscloud "github.com/ionos-cloud/sdk-go/v6"
 	"os"
 	"testing"
 
@@ -36,16 +37,16 @@ func TestProvider_impl(t *testing.T) {
 }
 
 func testAccPreCheck(t *testing.T) {
-	pbUsername := os.Getenv("IONOS_USERNAME")
-	pbPassword := os.Getenv("IONOS_PASSWORD")
-	pbToken := os.Getenv("IONOS_TOKEN")
+	pbUsername := os.Getenv(ionoscloud.IonosUsernameEnvVar)
+	pbPassword := os.Getenv(ionoscloud.IonosPasswordEnvVar)
+	pbToken := os.Getenv(ionoscloud.IonosTokenEnvVar)
 	if pbToken == "" {
 		if pbUsername == "" || pbPassword == "" {
-			t.Fatal("IONOS_USERNAME/IONOS_PASSWORD or IONOS_TOKEN must be set for acceptance tests")
+			t.Fatalf("%s/%s or %s must be set for acceptance tests", ionoscloud.IonosUsernameEnvVar, ionoscloud.IonosPasswordEnvVar, ionoscloud.IonosTokenEnvVar)
 		}
 	} else {
 		if pbUsername != "" || pbPassword != "" {
-			t.Fatal("IONOS_USERNAME/IONOS_PASSWORD or IONOS_TOKEN must be set for acceptance tests")
+			t.Fatalf("%s/%s can not be set together with %s", ionoscloud.IonosUsernameEnvVar, ionoscloud.IonosPasswordEnvVar, ionoscloud.IonosTokenEnvVar)
 		}
 
 	}

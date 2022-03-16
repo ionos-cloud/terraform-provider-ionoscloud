@@ -57,15 +57,6 @@ func resourcek8sCluster() *schema.Resource {
 					},
 				},
 			},
-			"available_upgrade_versions": {
-				Type:        schema.TypeList,
-				Description: "List of available versions for upgrading the cluster",
-				Optional:    true,
-				Computed:    true,
-				Elem: &schema.Schema{
-					Type: schema.TypeString,
-				},
-			},
 			"viable_node_pool_versions": {
 				Type:        schema.TypeList,
 				Description: "List of versions that may be used for node pools under this cluster",
@@ -75,19 +66,12 @@ func resourcek8sCluster() *schema.Resource {
 					Type: schema.TypeString,
 				},
 			},
-			//"public": {
-			//	Type: schema.TypeBool,
-			//	Description: "The indicator if the cluster is public or private. Be aware that setting it to false is " +
-			//		"currently in beta phase.",
-			//	Optional: true,
-			//	Default:  true,
-			//},
-			//"gateway_ip": {
-			//	Type: schema.TypeString,
-			//	Description: "The IP address of the gateway used by the cluster. This is mandatory when `public` is set " +
-			//		"to `false` and should not be provided otherwise.",
-			//	Optional: true,
-			//},
+			"public": {
+				Type:        schema.TypeBool,
+				Description: "The indicator if the cluster is public or private. Be aware that setting it to false is currently in beta phase.",
+				Optional:    true,
+				Default:     true,
+			},
 			"api_subnet_allow_list": {
 				Type: schema.TypeList,
 				Description: "Access to the K8s API server is restricted to these CIDRs. Cluster-internal traffic is not " +
@@ -119,7 +103,7 @@ func resourcek8sCluster() *schema.Resource {
 }
 
 func resourcek8sClusterCreate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
-	client := meta.(*ionoscloud.APIClient)
+	client := meta.(SdkBundle).CloudApiClient
 
 	clusterName := d.Get("name").(string)
 	cluster := ionoscloud.KubernetesClusterForPost{
@@ -148,14 +132,9 @@ func resourcek8sClusterCreate(ctx context.Context, d *schema.ResourceData, meta 
 		mdVal := mdVal.(string)
 		cluster.Properties.MaintenanceWindow.DayOfTheWeek = &mdVal
 	}
-	//
-	//public := d.Get("public").(bool)
-	//cluster.Properties.Public = &public
-	//
-	//if gatewayIp, gatewayIpOk := d.GetOk("gateway_ip"); gatewayIpOk {
-	//	gatewayIp := gatewayIp.(string)
-	//	cluster.Properties.GatewayIp = &gatewayIp
-	//}
+
+	public := d.Get("public").(bool)
+	cluster.Properties.Public = &public
 
 	if apiSubnet, apiSubnetOk := d.GetOk("api_subnet_allow_list"); apiSubnetOk {
 		apiSubnet := apiSubnet.([]interface{})
@@ -238,7 +217,7 @@ func resourcek8sClusterCreate(ctx context.Context, d *schema.ResourceData, meta 
 }
 
 func resourcek8sClusterRead(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
-	client := meta.(*ionoscloud.APIClient)
+	client := meta.(SdkBundle).CloudApiClient
 
 	cluster, apiResponse, err := client.KubernetesApi.K8sFindByClusterId(ctx, d.Id()).Execute()
 	logApiRequestTime(apiResponse)
@@ -263,7 +242,7 @@ func resourcek8sClusterRead(ctx context.Context, d *schema.ResourceData, meta in
 
 func resourcek8sClusterUpdate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 
-	client := meta.(*ionoscloud.APIClient)
+	client := meta.(SdkBundle).CloudApiClient
 
 	request := ionoscloud.KubernetesClusterForPut{}
 
@@ -365,6 +344,11 @@ func resourcek8sClusterUpdate(ctx context.Context, d *schema.ResourceData, meta 
 		request.Properties.S3Buckets = &s3Buckets
 	}
 
+	if d.HasChange("public") {
+		diags := diag.FromErr(fmt.Errorf("public attribute is immutable, therefore not allowed in update requests"))
+		return diags
+	}
+
 	_, apiResponse, err := client.KubernetesApi.K8sPut(ctx, d.Id()).KubernetesCluster(request).Execute()
 	logApiRequestTime(apiResponse)
 
@@ -407,7 +391,7 @@ func resourcek8sClusterUpdate(ctx context.Context, d *schema.ResourceData, meta 
 
 func resourcek8sClusterDelete(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 
-	client := meta.(*ionoscloud.APIClient)
+	client := meta.(SdkBundle).CloudApiClient
 
 	apiResponse, err := client.KubernetesApi.K8sDelete(ctx, d.Id()).Execute()
 	logApiRequestTime(apiResponse)
@@ -451,7 +435,7 @@ func resourcek8sClusterDelete(ctx context.Context, d *schema.ResourceData, meta 
 }
 
 func resourceK8sClusterImport(ctx context.Context, d *schema.ResourceData, meta interface{}) ([]*schema.ResourceData, error) {
-	client := meta.(*ionoscloud.APIClient)
+	client := meta.(SdkBundle).CloudApiClient
 
 	clusterId := d.Id()
 
@@ -506,16 +490,6 @@ func setK8sClusterData(d *schema.ResourceData, cluster *ionoscloud.KubernetesClu
 			}
 		}
 
-		if cluster.Properties.AvailableUpgradeVersions != nil {
-			var availableUpgradeVersions []interface{}
-			for _, availableUpgradeVersion := range *cluster.Properties.AvailableUpgradeVersions {
-				availableUpgradeVersions = append(availableUpgradeVersions, availableUpgradeVersion)
-			}
-			if err := d.Set("available_upgrade_versions", availableUpgradeVersions); err != nil {
-				return err
-			}
-		}
-
 		if cluster.Properties.ViableNodePoolVersions != nil && len(*cluster.Properties.ViableNodePoolVersions) > 0 {
 			var viableNodePoolVersions []interface{}
 			for _, viableNodePoolVersion := range *cluster.Properties.ViableNodePoolVersions {
@@ -526,19 +500,12 @@ func setK8sClusterData(d *schema.ResourceData, cluster *ionoscloud.KubernetesClu
 			}
 		}
 
-		//if cluster.Properties.Public != nil {
-		//	err := d.Set("public", *cluster.Properties.Public)
-		//	if err != nil {
-		//		return fmt.Errorf("error while setting public property for cluser %s: %s", d.Id(), err)
-		//	}
-		//}
-		//
-		//if cluster.Properties.GatewayIp != nil {
-		//	err := d.Set("gateway_ip", *cluster.Properties.GatewayIp)
-		//	if err != nil {
-		//		return fmt.Errorf("error while setting gateway_ip property for cluser %s: %s", d.Id(), err)
-		//	}
-		//}
+		if cluster.Properties.Public != nil {
+			err := d.Set("public", *cluster.Properties.Public)
+			if err != nil {
+				return fmt.Errorf("error while setting public property for cluser %s: %s", d.Id(), err)
+			}
+		}
 
 		if cluster.Properties.ApiSubnetAllowList != nil {
 			apiSubnetAllowLists := make([]interface{}, len(*cluster.Properties.ApiSubnetAllowList), len(*cluster.Properties.ApiSubnetAllowList))
