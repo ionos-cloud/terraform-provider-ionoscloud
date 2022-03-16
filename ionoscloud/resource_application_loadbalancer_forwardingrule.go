@@ -7,6 +7,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 	ionoscloud "github.com/ionos-cloud/sdk-go/v6"
+	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils"
 	"log"
 	"strings"
 )
@@ -32,7 +33,7 @@ func resourceApplicationLoadBalancerForwardingRule() *schema.Resource {
 				Type:         schema.TypeString,
 				Description:  "Balancing protocol",
 				Required:     true,
-				ValidateFunc: validation.All(validation.StringIsNotWhiteSpace),
+				ValidateFunc: validation.All(validation.StringInSlice([]string{"HTTP"}, true)),
 			},
 			"listener_ip": {
 				Type:         schema.TypeString,
@@ -41,9 +42,10 @@ func resourceApplicationLoadBalancerForwardingRule() *schema.Resource {
 				ValidateFunc: validation.All(validation.StringIsNotWhiteSpace),
 			},
 			"listener_port": {
-				Type:        schema.TypeInt,
-				Description: "Listening (inbound) port number; valid range is 1 to 65535.",
-				Required:    true,
+				Type:         schema.TypeInt,
+				Description:  "Listening (inbound) port number; valid range is 1 to 65535.",
+				Required:     true,
+				ValidateFunc: validation.All(validation.IntBetween(1, 65535)),
 			},
 			"client_timeout": {
 				Type:        schema.TypeInt,
@@ -56,7 +58,8 @@ func resourceApplicationLoadBalancerForwardingRule() *schema.Resource {
 				Description: "Array of items in the collection.",
 				Optional:    true,
 				Elem: &schema.Schema{
-					Type: schema.TypeString,
+					Type:         schema.TypeString,
+					ValidateFunc: validation.All(validation.IsUUID),
 				},
 			},
 			"http_rules": {
@@ -75,7 +78,7 @@ func resourceApplicationLoadBalancerForwardingRule() *schema.Resource {
 							Type:         schema.TypeString,
 							Description:  "Type of the HTTP rule.",
 							Required:     true,
-							ValidateFunc: validation.All(validation.StringIsNotWhiteSpace),
+							ValidateFunc: validation.All(validation.StringInSlice([]string{"FORWARD", "STATIC", "REDIRECT"}, true)),
 						},
 						"target_group": {
 							Type:        schema.TypeString,
@@ -93,10 +96,11 @@ func resourceApplicationLoadBalancerForwardingRule() *schema.Resource {
 							Optional:    true,
 						},
 						"status_code": {
-							Type:        schema.TypeInt,
-							Description: "Valid only for REDIRECT and STATIC actions. For REDIRECT actions, default is 301 and possible values are 301, 302, 303, 307, and 308. For STATIC actions, default is 503 and valid range is 200 to 599.",
-							Optional:    true,
-							Computed:    true,
+							Type:         schema.TypeInt,
+							Description:  "Valid only for REDIRECT and STATIC actions. For REDIRECT actions, default is 301 and possible values are 301, 302, 303, 307, and 308. For STATIC actions, default is 503 and valid range is 200 to 599.",
+							Optional:     true,
+							Computed:     true,
+							ValidateFunc: validation.All(validation.IntInSlice([]int{301, 302, 303, 307, 308, 200, 503, 599})),
 						},
 						"response_message": {
 							Type:        schema.TypeString,
@@ -116,28 +120,18 @@ func resourceApplicationLoadBalancerForwardingRule() *schema.Resource {
 							Elem: &schema.Resource{
 								Schema: map[string]*schema.Schema{
 									"type": {
-										Type:         schema.TypeString,
-										Description:  "Type of the HTTP rule condition.",
-										Required:     true,
-										ValidateFunc: validation.All(validation.StringIsNotWhiteSpace),
-										DiffSuppressFunc: func(k, old, new string, d *schema.ResourceData) bool {
-											if strings.ToLower(old) == strings.ToLower(new) {
-												return true
-											}
-											return false
-										},
+										Type:             schema.TypeString,
+										Description:      "Type of the HTTP rule condition.",
+										Required:         true,
+										ValidateFunc:     validation.All(validation.StringInSlice([]string{"HEADER", "PATH", "QUERY", "METHOD", "HOST", "COOKIE", "SOURCE_IP"}, true)),
+										DiffSuppressFunc: utils.DiffSuppressCaseInsensitive,
 									},
 									"condition": {
-										Type:         schema.TypeString,
-										Description:  "Matching rule for the HTTP rule condition attribute; mandatory for HEADER, PATH, QUERY, METHOD, HOST, and COOKIE types; must be null when type is SOURCE_IP.",
-										Required:     true,
-										ValidateFunc: validation.All(validation.StringIsNotWhiteSpace),
-										DiffSuppressFunc: func(k, old, new string, d *schema.ResourceData) bool {
-											if strings.ToLower(old) == strings.ToLower(new) {
-												return true
-											}
-											return false
-										},
+										Type:             schema.TypeString,
+										Description:      "Matching rule for the HTTP rule condition attribute; mandatory for HEADER, PATH, QUERY, METHOD, HOST, and COOKIE types; must be null when type is SOURCE_IP.",
+										Required:         true,
+										ValidateFunc:     validation.All(validation.StringInSlice([]string{"EXISTS", "CONTAINS", "EQUALS", "MATCHES", "STARTS_WITH", "ENDS_WITH"}, true)),
+										DiffSuppressFunc: utils.DiffSuppressCaseInsensitive,
 									},
 									"negate": {
 										Type:        schema.TypeBool,
@@ -164,13 +158,13 @@ func resourceApplicationLoadBalancerForwardingRule() *schema.Resource {
 				Type:         schema.TypeString,
 				Required:     true,
 				ForceNew:     true,
-				ValidateFunc: validation.All(validation.StringIsNotWhiteSpace),
+				ValidateFunc: validation.All(validation.IsUUID),
 			},
 			"application_loadbalancer_id": {
 				Type:         schema.TypeString,
 				Required:     true,
 				ForceNew:     true,
-				ValidateFunc: validation.All(validation.StringIsNotWhiteSpace),
+				ValidateFunc: validation.All(validation.IsUUID),
 			},
 		},
 		Timeouts: &resourceDefaultTimeouts,
@@ -187,43 +181,26 @@ func resourceApplicationLoadBalancerForwardingRuleCreate(ctx context.Context, d 
 	if name, nameOk := d.GetOk("name"); nameOk {
 		name := name.(string)
 		applicationLoadBalancerForwardingRule.Properties.Name = &name
-	} else {
-		diags := diag.FromErr(fmt.Errorf("name must be provided for application loadbalancer forwarding rule"))
-		return diags
 	}
 
 	if protocol, protocolOk := d.GetOk("protocol"); protocolOk {
 		protocol := protocol.(string)
 		applicationLoadBalancerForwardingRule.Properties.Protocol = &protocol
-	} else {
-		diags := diag.FromErr(fmt.Errorf("protocol must be provided for application loadbalancer forwarding rule"))
-		return diags
 	}
 
 	if listenerIp, listenerIpOk := d.GetOk("listener_ip"); listenerIpOk {
 		listenerIp := listenerIp.(string)
 		applicationLoadBalancerForwardingRule.Properties.ListenerIp = &listenerIp
-	} else {
-		diags := diag.FromErr(fmt.Errorf("listner ip must be provided for application loadbalancer forwarding rule"))
-		return diags
 	}
 
 	if listenerPort, listenerPortOk := d.GetOk("listener_port"); listenerPortOk {
 		listenerPort := int32(listenerPort.(int))
 		applicationLoadBalancerForwardingRule.Properties.ListenerPort = &listenerPort
-	} else {
-		diags := diag.FromErr(fmt.Errorf("listner port must be provided for application loadbalancer forwarding rule"))
-		return diags
 	}
 
-	if _, healthCheckOk := d.GetOk("health_check.0"); healthCheckOk {
-		applicationLoadBalancerForwardingRule.Properties.HealthCheck = &ionoscloud.ApplicationLoadBalancerForwardingRuleHealthCheck{}
-
-		if clientTimeout, clientTimeoutOk := d.GetOk("health_check.0.client_timeout"); clientTimeoutOk {
-			clientTimeout := int32(clientTimeout.(int))
-			applicationLoadBalancerForwardingRule.Properties.HealthCheck.ClientTimeout = &clientTimeout
-		}
-
+	if clientTimeout, clientTimeoutOk := d.GetOk("client_timeout"); clientTimeoutOk {
+		clientTimeout := int32(clientTimeout.(int))
+		applicationLoadBalancerForwardingRule.Properties.ClientTimeout = &clientTimeout
 	}
 
 	if serverCertificatesVal, serverCertificatesOk := d.GetOk("server_certificates"); serverCertificatesOk {
@@ -310,17 +287,11 @@ func resourceApplicationLoadBalancerForwardingRuleCreate(ctx context.Context, d 
 								typeVal := typeVal.(string)
 								condition.Type = &typeVal
 								addCondition = true
-							} else {
-								diags := diag.FromErr(fmt.Errorf("type must be provided for application loadbalancer forwarding rule http rule condition"))
-								return diags
 							}
 
 							if conditionVal, conditionOk := d.GetOk(fmt.Sprintf("http_rules.%d.conditions.%d.condition", httpRuleIndex, conditionIndex)); conditionOk {
 								conditionVal := conditionVal.(string)
 								condition.Condition = &conditionVal
-							} else {
-								diags := diag.FromErr(fmt.Errorf("condition must be provided for application loadbalancer forwarding rule http rule condition"))
-								return diags
 							}
 
 							if negate, negateOk := d.GetOk(fmt.Sprintf("http_rules.%d.conditions.%d.negate", httpRuleIndex, conditionIndex)); negateOk {
@@ -460,26 +431,10 @@ func resourceApplicationLoadBalancerForwardingRuleUpdate(ctx context.Context, d 
 		request.Properties.ListenerPort = &vStr
 	}
 
-	if d.HasChange("health_check.0") {
-		_, v := d.GetChange("health_check.0")
-		if v.(map[string]interface{}) != nil {
-			updateHealthCheck := false
-
-			healthCheck := &ionoscloud.ApplicationLoadBalancerForwardingRuleHealthCheck{}
-
-			if d.HasChange("health_check.0.client_timeout") {
-				_, newValue := d.GetChange("health_check.0.client_timeout")
-				if newValue != 0 {
-					updateHealthCheck = true
-					newValue := int32(newValue.(int))
-					healthCheck.ClientTimeout = &newValue
-				}
-			}
-
-			if updateHealthCheck == true {
-				request.Properties.HealthCheck = healthCheck
-			}
-		}
+	if d.HasChange("client_timeout") {
+		_, v := d.GetChange("client_timeout")
+		vStr := int32(v.(int))
+		request.Properties.ClientTimeout = &vStr
 	}
 
 	if d.HasChange("server_certificates") {
@@ -743,17 +698,10 @@ func setApplicationLoadBalancerForwardingRuleData(d *schema.ResourceData, applic
 			}
 		}
 
-		if applicationLoadBalancerForwardingRule.Properties.HealthCheck != nil {
-			healthCheck := make([]interface{}, 1)
-
-			healthCheckEntry := make(map[string]interface{})
-			if applicationLoadBalancerForwardingRule.Properties.HealthCheck.ClientTimeout != nil {
-				healthCheckEntry["client_timeout"] = *applicationLoadBalancerForwardingRule.Properties.HealthCheck.ClientTimeout
-			}
-			healthCheck[0] = healthCheckEntry
-			err := d.Set("health_check", healthCheck)
+		if applicationLoadBalancerForwardingRule.Properties.ClientTimeout != nil {
+			err := d.Set("client_timeout", *applicationLoadBalancerForwardingRule.Properties.ClientTimeout)
 			if err != nil {
-				return fmt.Errorf("error while setting health_check property for application load balancer forwarding rule %s: %s", d.Id(), err)
+				return fmt.Errorf("error while setting client_timeout property for application load balancer forwarding rule %s: %s", d.Id(), err)
 			}
 		}
 

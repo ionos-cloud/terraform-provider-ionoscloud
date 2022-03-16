@@ -21,8 +21,11 @@ type TargetGroupTarget struct {
 	// The port of the balanced target service; valid range is 1 to 65535.
 	Port *int32 `json:"port"`
 	// Traffic is distributed in proportion to target weight, relative to the combined weight of all targets. A target with higher weight receives a greater share of traffic. Valid range is 0 to 256 and default is 1; targets with weight of 0 do not participate in load balancing but still accept persistent connections. It is best use values in the middle of the range to leave room for later adjustments.
-	Weight      *int32                        `json:"weight"`
-	HealthCheck *TargetGroupTargetHealthCheck `json:"healthCheck,omitempty"`
+	Weight *int32 `json:"weight"`
+	// Makes the target available only if it accepts periodic health check TCP connection attempts; when turned off, the target is considered always available. The health check only consists of a connection attempt to the address and port of the target. Default is True.
+	HealthCheckEnabled *bool `json:"healthCheckEnabled,omitempty"`
+	// Maintenance mode prevents the target from receiving balanced traffic.
+	MaintenanceEnabled *bool `json:"maintenanceEnabled,omitempty"`
 }
 
 // NewTargetGroupTarget instantiates a new TargetGroupTarget object
@@ -161,38 +164,76 @@ func (o *TargetGroupTarget) HasWeight() bool {
 	return false
 }
 
-// GetHealthCheck returns the HealthCheck field value
-// If the value is explicit nil, the zero value for TargetGroupTargetHealthCheck will be returned
-func (o *TargetGroupTarget) GetHealthCheck() *TargetGroupTargetHealthCheck {
+// GetHealthCheckEnabled returns the HealthCheckEnabled field value
+// If the value is explicit nil, the zero value for bool will be returned
+func (o *TargetGroupTarget) GetHealthCheckEnabled() *bool {
 	if o == nil {
 		return nil
 	}
 
-	return o.HealthCheck
+	return o.HealthCheckEnabled
 
 }
 
-// GetHealthCheckOk returns a tuple with the HealthCheck field value
+// GetHealthCheckEnabledOk returns a tuple with the HealthCheckEnabled field value
 // and a boolean to check if the value has been set.
 // NOTE: If the value is an explicit nil, `nil, true` will be returned
-func (o *TargetGroupTarget) GetHealthCheckOk() (*TargetGroupTargetHealthCheck, bool) {
+func (o *TargetGroupTarget) GetHealthCheckEnabledOk() (*bool, bool) {
 	if o == nil {
 		return nil, false
 	}
 
-	return o.HealthCheck, true
+	return o.HealthCheckEnabled, true
 }
 
-// SetHealthCheck sets field value
-func (o *TargetGroupTarget) SetHealthCheck(v TargetGroupTargetHealthCheck) {
+// SetHealthCheckEnabled sets field value
+func (o *TargetGroupTarget) SetHealthCheckEnabled(v bool) {
 
-	o.HealthCheck = &v
+	o.HealthCheckEnabled = &v
 
 }
 
-// HasHealthCheck returns a boolean if a field has been set.
-func (o *TargetGroupTarget) HasHealthCheck() bool {
-	if o != nil && o.HealthCheck != nil {
+// HasHealthCheckEnabled returns a boolean if a field has been set.
+func (o *TargetGroupTarget) HasHealthCheckEnabled() bool {
+	if o != nil && o.HealthCheckEnabled != nil {
+		return true
+	}
+
+	return false
+}
+
+// GetMaintenanceEnabled returns the MaintenanceEnabled field value
+// If the value is explicit nil, the zero value for bool will be returned
+func (o *TargetGroupTarget) GetMaintenanceEnabled() *bool {
+	if o == nil {
+		return nil
+	}
+
+	return o.MaintenanceEnabled
+
+}
+
+// GetMaintenanceEnabledOk returns a tuple with the MaintenanceEnabled field value
+// and a boolean to check if the value has been set.
+// NOTE: If the value is an explicit nil, `nil, true` will be returned
+func (o *TargetGroupTarget) GetMaintenanceEnabledOk() (*bool, bool) {
+	if o == nil {
+		return nil, false
+	}
+
+	return o.MaintenanceEnabled, true
+}
+
+// SetMaintenanceEnabled sets field value
+func (o *TargetGroupTarget) SetMaintenanceEnabled(v bool) {
+
+	o.MaintenanceEnabled = &v
+
+}
+
+// HasMaintenanceEnabled returns a boolean if a field has been set.
+func (o *TargetGroupTarget) HasMaintenanceEnabled() bool {
+	if o != nil && o.MaintenanceEnabled != nil {
 		return true
 	}
 
@@ -210,8 +251,11 @@ func (o TargetGroupTarget) MarshalJSON() ([]byte, error) {
 	if o.Weight != nil {
 		toSerialize["weight"] = o.Weight
 	}
-	if o.HealthCheck != nil {
-		toSerialize["healthCheck"] = o.HealthCheck
+	if o.HealthCheckEnabled != nil {
+		toSerialize["healthCheckEnabled"] = o.HealthCheckEnabled
+	}
+	if o.MaintenanceEnabled != nil {
+		toSerialize["maintenanceEnabled"] = o.MaintenanceEnabled
 	}
 	return json.Marshal(toSerialize)
 }

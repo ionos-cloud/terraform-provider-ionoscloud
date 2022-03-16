@@ -4,7 +4,7 @@
     "description": "IONOS Enterprise-grade Infrastructure as a Service (IaaS) solutions can be managed through the Cloud API, in addition or as an alternative to the \"Data Center Designer\" (DCD) browser-based tool. \n\n Both methods employ consistent concepts and features, deliver similar power and flexibility, and can be used to perform a multitude of management tasks, including adding servers, volumes, configuring networks, and so on.",
     "version": "6.0",
     "title": "CLOUD API",
-    "x-sdk-patch-level": 5
+    "x-sdk-patch-level": 4
   },
   "host": "api.ionos.com",
   "basePath": "/cloudapi/v6",
@@ -207,10 +207,14 @@
         },
         "security": [
           {
-            "Basic Authentication": []
+            "Basic Authentication": [
+              
+            ]
           },
           {
-            "Token Authentication": []
+            "Token Authentication": [
+              
+            ]
           }
         ],
         "operationId": "datacentersGet"
@@ -282,10 +286,14 @@
         },
         "security": [
           {
-            "Basic Authentication": []
+            "Basic Authentication": [
+              
+            ]
           },
           {
-            "Token Authentication": []
+            "Token Authentication": [
+              
+            ]
           }
         ],
         "operationId": "datacentersPost"
@@ -352,10 +360,14 @@
         },
         "security": [
           {
-            "Basic Authentication": []
+            "Basic Authentication": [
+              
+            ]
           },
           {
-            "Token Authentication": []
+            "Token Authentication": [
+              
+            ]
           }
         ],
         "operationId": "datacentersFindById"
@@ -434,10 +446,14 @@
         },
         "security": [
           {
-            "Basic Authentication": []
+            "Basic Authentication": [
+              
+            ]
           },
           {
-            "Token Authentication": []
+            "Token Authentication": [
+              
+            ]
           }
         ],
         "operationId": "datacentersPut"
@@ -504,10 +520,14 @@
         },
         "security": [
           {
-            "Basic Authentication": []
+            "Basic Authentication": [
+              
+            ]
           },
           {
-            "Token Authentication": []
+            "Token Authentication": [
+              
+            ]
           }
         ],
         "operationId": "datacentersDelete"
@@ -586,10 +606,14 @@
         },
         "security": [
           {
-            "Basic Authentication": []
+            "Basic Authentication": [
+              
+            ]
           },
           {
-            "Token Authentication": []
+            "Token Authentication": [
+              
+            ]
           }
         ],
         "operationId": "datacentersPatch"
@@ -649,10 +673,14 @@
         },
         "security": [
           {
-            "Basic Authentication": []
+            "Basic Authentication": [
+              
+            ]
           },
           {
-            "Token Authentication": []
+            "Token Authentication": [
+              
+            ]
           }
         ],
         "operationId": "locationsGet"
@@ -719,10 +747,14 @@
         },
         "security": [
           {
-            "Basic Authentication": []
+            "Basic Authentication": [
+              
+            ]
           },
           {
-            "Token Authentication": []
+            "Token Authentication": [
+              
+            ]
           }
         ],
         "operationId": "locationsFindByRegionId"
@@ -796,10 +828,14 @@
         },
         "security": [
           {
-            "Basic Authentication": []
+            "Basic Authentication": [
+              
+            ]
           },
           {
-            "Token Authentication": []
+            "Token Authentication": [
+              
+            ]
           }
         ],
         "operationId": "locationsFindByRegionIdAndId"
@@ -879,10 +915,14 @@
         },
         "security": [
           {
-            "Basic Authentication": []
+            "Basic Authentication": [
+              
+            ]
           },
           {
-            "Token Authentication": []
+            "Token Authentication": [
+              
+            ]
           }
         ],
         "operationId": "datacentersServersGet"
@@ -961,10 +1001,14 @@
         },
         "security": [
           {
-            "Basic Authentication": []
+            "Basic Authentication": [
+              
+            ]
           },
           {
-            "Token Authentication": []
+            "Token Authentication": [
+              
+            ]
           }
         ],
         "operationId": "datacentersServersPost"
@@ -1038,10 +1082,14 @@
         },
         "security": [
           {
-            "Basic Authentication": []
+            "Basic Authentication": [
+              
+            ]
           },
           {
-            "Token Authentication": []
+            "Token Authentication": [
+              
+            ]
           }
         ],
         "operationId": "datacentersServersFindById"
@@ -1127,10 +1175,14 @@
         },
         "security": [
           {
-            "Basic Authentication": []
+            "Basic Authentication": [
+              
+            ]
           },
           {
-            "Token Authentication": []
+            "Token Authentication": [
+              
+            ]
           }
         ],
         "operationId": "datacentersServersPut"
@@ -1204,10 +1256,14 @@
         },
         "security": [
           {
-            "Basic Authentication": []
+            "Basic Authentication": [
+              
+            ]
           },
           {
-            "Token Authentication": []
+            "Token Authentication": [
+              
+            ]
           }
         ],
         "operationId": "datacentersServersDelete"
@@ -1293,10 +1349,14 @@
         },
         "security": [
           {
-            "Basic Authentication": []
+            "Basic Authentication": [
+              
+            ]
           },
           {
-            "Token Authentication": []
+            "Token Authentication": [
+              
+            ]
           }
         ],
         "operationId": "datacentersServersPatch"
@@ -1376,10 +1436,9 @@
         },
         "security": [
           {
-            "Basic Authentication": []
-          },
-          {
-            "Token Authentication": []
+            "Basic Authentication": [
+              
+            ]
           }
         ],
         "operationId": "datacentersServersVolumesGet"
@@ -1465,10 +1524,9 @@
         },
         "security": [
           {
-            "Basic Authentication": []
-          },
-          {
-            "Token Authentication": []
+            "Basic Authentication": [
+              
+            ]
           }
         ],
         "operationId": "datacentersServersVolumesPost"
@@ -1549,10 +1607,14 @@
         },
         "security": [
           {
-            "Basic Authentication": []
+            "Basic Authentication": [
+              
+            ]
           },
           {
-            "Token Authentication": []
+            "Token Authentication": [
+              
+            ]
           }
         ],
         "operationId": "datacentersServersVolumesFindById"
@@ -1633,10 +1695,14 @@
         },
         "security": [
           {
-            "Basic Authentication": []
+            "Basic Authentication": [
+              
+            ]
           },
           {
-            "Token Authentication": []
+            "Token Authentication": [
+              
+            ]
           }
         ],
         "operationId": "datacentersServersVolumesDelete"
@@ -1716,10 +1782,14 @@
         },
         "security": [
           {
-            "Basic Authentication": []
+            "Basic Authentication": [
+              
+            ]
           },
           {
-            "Token Authentication": []
+            "Token Authentication": [
+              
+            ]
           }
         ],
         "operationId": "datacentersServersCdromsGet"
@@ -1805,10 +1875,14 @@
         },
         "security": [
           {
-            "Basic Authentication": []
+            "Basic Authentication": [
+              
+            ]
           },
           {
-            "Token Authentication": []
+            "Token Authentication": [
+              
+            ]
           }
         ],
         "operationId": "datacentersServersCdromsPost"
@@ -1889,10 +1963,14 @@
         },
         "security": [
           {
-            "Basic Authentication": []
+            "Basic Authentication": [
+              
+            ]
           },
           {
-            "Token Authentication": []
+            "Token Authentication": [
+              
+            ]
           }
         ],
         "operationId": "datacentersServersCdromsFindById"
@@ -1973,10 +2051,14 @@
         },
         "security": [
           {
-            "Basic Authentication": []
+            "Basic Authentication": [
+              
+            ]
           },
           {
-            "Token Authentication": []
+            "Token Authentication": [
+              
+            ]
           }
         ],
         "operationId": "datacentersServersCdromsDelete"
@@ -2052,10 +2134,14 @@
         },
         "security": [
           {
-            "Basic Authentication": []
+            "Basic Authentication": [
+              
+            ]
           },
           {
-            "Token Authentication": []
+            "Token Authentication": [
+              
+            ]
           }
         ],
         "operationId": "datacentersServersRebootPost"
@@ -2131,10 +2217,14 @@
         },
         "security": [
           {
-            "Basic Authentication": []
+            "Basic Authentication": [
+              
+            ]
           },
           {
-            "Token Authentication": []
+            "Token Authentication": [
+              
+            ]
           }
         ],
         "operationId": "datacentersServersStartPost"
@@ -2210,10 +2300,14 @@
         },
         "security": [
           {
-            "Basic Authentication": []
+            "Basic Authentication": [
+              
+            ]
           },
           {
-            "Token Authentication": []
+            "Token Authentication": [
+              
+            ]
           }
         ],
         "operationId": "datacentersServersStopPost"
@@ -2289,10 +2383,14 @@
         },
         "security": [
           {
-            "Basic Authentication": []
+            "Basic Authentication": [
+              
+            ]
           },
           {
-            "Token Authentication": []
+            "Token Authentication": [
+              
+            ]
           }
         ],
         "operationId": "datacentersServersSuspendPost"
@@ -2368,10 +2466,14 @@
         },
         "security": [
           {
-            "Basic Authentication": []
+            "Basic Authentication": [
+              
+            ]
           },
           {
-            "Token Authentication": []
+            "Token Authentication": [
+              
+            ]
           }
         ],
         "operationId": "datacentersServersResumePost"
@@ -2447,10 +2549,14 @@
         },
         "security": [
           {
-            "Basic Authentication": []
+            "Basic Authentication": [
+              
+            ]
           },
           {
-            "Token Authentication": []
+            "Token Authentication": [
+              
+            ]
           }
         ],
         "operationId": "datacentersServersUpgradePost"
@@ -2524,10 +2630,14 @@
         },
         "security": [
           {
-            "Basic Authentication": []
+            "Basic Authentication": [
+              
+            ]
           },
           {
-            "Token Authentication": []
+            "Token Authentication": [
+              
+            ]
           }
         ],
         "operationId": "datacentersServersTokenGet"
@@ -2601,10 +2711,14 @@
         },
         "security": [
           {
-            "Basic Authentication": []
+            "Basic Authentication": [
+              
+            ]
           },
           {
-            "Token Authentication": []
+            "Token Authentication": [
+              
+            ]
           }
         ],
         "operationId": "datacentersServersRemoteConsoleGet"
@@ -2664,10 +2778,14 @@
         },
         "security": [
           {
-            "Basic Authentication": []
+            "Basic Authentication": [
+              
+            ]
           },
           {
-            "Token Authentication": []
+            "Token Authentication": [
+              
+            ]
           }
         ],
         "operationId": "imagesGet"
@@ -2734,10 +2852,14 @@
         },
         "security": [
           {
-            "Basic Authentication": []
+            "Basic Authentication": [
+              
+            ]
           },
           {
-            "Token Authentication": []
+            "Token Authentication": [
+              
+            ]
           }
         ],
         "operationId": "imagesFindById"
@@ -2816,10 +2938,14 @@
         },
         "security": [
           {
-            "Basic Authentication": []
+            "Basic Authentication": [
+              
+            ]
           },
           {
-            "Token Authentication": []
+            "Token Authentication": [
+              
+            ]
           }
         ],
         "operationId": "imagesPut"
@@ -2886,10 +3012,14 @@
         },
         "security": [
           {
-            "Basic Authentication": []
+            "Basic Authentication": [
+              
+            ]
           },
           {
-            "Token Authentication": []
+            "Token Authentication": [
+              
+            ]
           }
         ],
         "operationId": "imagesDelete"
@@ -2968,10 +3098,14 @@
         },
         "security": [
           {
-            "Basic Authentication": []
+            "Basic Authentication": [
+              
+            ]
           },
           {
-            "Token Authentication": []
+            "Token Authentication": [
+              
+            ]
           }
         ],
         "operationId": "imagesPatch"
@@ -3044,10 +3178,14 @@
         },
         "security": [
           {
-            "Basic Authentication": []
+            "Basic Authentication": [
+              
+            ]
           },
           {
-            "Token Authentication": []
+            "Token Authentication": [
+              
+            ]
           }
         ],
         "operationId": "datacentersVolumesGet"
@@ -3126,10 +3264,14 @@
         },
         "security": [
           {
-            "Basic Authentication": []
+            "Basic Authentication": [
+              
+            ]
           },
           {
-            "Token Authentication": []
+            "Token Authentication": [
+              
+            ]
           }
         ],
         "operationId": "datacentersVolumesPost"
@@ -3203,10 +3345,14 @@
         },
         "security": [
           {
-            "Basic Authentication": []
+            "Basic Authentication": [
+              
+            ]
           },
           {
-            "Token Authentication": []
+            "Token Authentication": [
+              
+            ]
           }
         ],
         "operationId": "datacentersVolumesFindById"
@@ -3292,10 +3438,14 @@
         },
         "security": [
           {
-            "Basic Authentication": []
+            "Basic Authentication": [
+              
+            ]
           },
           {
-            "Token Authentication": []
+            "Token Authentication": [
+              
+            ]
           }
         ],
         "operationId": "datacentersVolumesPut"
@@ -3369,10 +3519,14 @@
         },
         "security": [
           {
-            "Basic Authentication": []
+            "Basic Authentication": [
+              
+            ]
           },
           {
-            "Token Authentication": []
+            "Token Authentication": [
+              
+            ]
           }
         ],
         "operationId": "datacentersVolumesDelete"
@@ -3458,10 +3612,14 @@
         },
         "security": [
           {
-            "Basic Authentication": []
+            "Basic Authentication": [
+              
+            ]
           },
           {
-            "Token Authentication": []
+            "Token Authentication": [
+              
+            ]
           }
         ],
         "operationId": "datacentersVolumesPatch"
@@ -3544,10 +3702,14 @@
         },
         "security": [
           {
-            "Basic Authentication": []
+            "Basic Authentication": [
+              
+            ]
           },
           {
-            "Token Authentication": []
+            "Token Authentication": [
+              
+            ]
           }
         ],
         "operationId": "datacentersVolumesRestore-snapshotPost"
@@ -3662,10 +3824,14 @@
         },
         "security": [
           {
-            "Basic Authentication": []
+            "Basic Authentication": [
+              
+            ]
           },
           {
-            "Token Authentication": []
+            "Token Authentication": [
+              
+            ]
           }
         ],
         "operationId": "datacentersVolumesCreate-snapshotPost"
@@ -3725,10 +3891,14 @@
         },
         "security": [
           {
-            "Basic Authentication": []
+            "Basic Authentication": [
+              
+            ]
           },
           {
-            "Token Authentication": []
+            "Token Authentication": [
+              
+            ]
           }
         ],
         "operationId": "snapshotsGet"
@@ -3795,10 +3965,14 @@
         },
         "security": [
           {
-            "Basic Authentication": []
+            "Basic Authentication": [
+              
+            ]
           },
           {
-            "Token Authentication": []
+            "Token Authentication": [
+              
+            ]
           }
         ],
         "operationId": "snapshotsFindById"
@@ -3877,10 +4051,14 @@
         },
         "security": [
           {
-            "Basic Authentication": []
+            "Basic Authentication": [
+              
+            ]
           },
           {
-            "Token Authentication": []
+            "Token Authentication": [
+              
+            ]
           }
         ],
         "operationId": "snapshotsPut"
@@ -3947,10 +4125,14 @@
         },
         "security": [
           {
-            "Basic Authentication": []
+            "Basic Authentication": [
+              
+            ]
           },
           {
-            "Token Authentication": []
+            "Token Authentication": [
+              
+            ]
           }
         ],
         "operationId": "snapshotsDelete"
@@ -4029,10 +4211,14 @@
         },
         "security": [
           {
-            "Basic Authentication": []
+            "Basic Authentication": [
+              
+            ]
           },
           {
-            "Token Authentication": []
+            "Token Authentication": [
+              
+            ]
           }
         ],
         "operationId": "snapshotsPatch"
@@ -4098,10 +4284,14 @@
         },
         "security": [
           {
-            "Basic Authentication": []
+            "Basic Authentication": [
+              
+            ]
           },
           {
-            "Token Authentication": []
+            "Token Authentication": [
+              
+            ]
           }
         ],
         "operationId": "ipblocksGet"
@@ -4173,10 +4363,14 @@
         },
         "security": [
           {
-            "Basic Authentication": []
+            "Basic Authentication": [
+              
+            ]
           },
           {
-            "Token Authentication": []
+            "Token Authentication": [
+              
+            ]
           }
         ],
         "operationId": "ipblocksPost"
@@ -4243,10 +4437,14 @@
         },
         "security": [
           {
-            "Basic Authentication": []
+            "Basic Authentication": [
+              
+            ]
           },
           {
-            "Token Authentication": []
+            "Token Authentication": [
+              
+            ]
           }
         ],
         "operationId": "ipblocksFindById"
@@ -4325,10 +4523,14 @@
         },
         "security": [
           {
-            "Basic Authentication": []
+            "Basic Authentication": [
+              
+            ]
           },
           {
-            "Token Authentication": []
+            "Token Authentication": [
+              
+            ]
           }
         ],
         "operationId": "ipblocksPut"
@@ -4395,10 +4597,14 @@
         },
         "security": [
           {
-            "Basic Authentication": []
+            "Basic Authentication": [
+              
+            ]
           },
           {
-            "Token Authentication": []
+            "Token Authentication": [
+              
+            ]
           }
         ],
         "operationId": "ipblocksDelete"
@@ -4477,10 +4683,14 @@
         },
         "security": [
           {
-            "Basic Authentication": []
+            "Basic Authentication": [
+              
+            ]
           },
           {
-            "Token Authentication": []
+            "Token Authentication": [
+              
+            ]
           }
         ],
         "operationId": "ipblocksPatch"
@@ -4553,10 +4763,14 @@
         },
         "security": [
           {
-            "Basic Authentication": []
+            "Basic Authentication": [
+              
+            ]
           },
           {
-            "Token Authentication": []
+            "Token Authentication": [
+              
+            ]
           }
         ],
         "operationId": "datacentersLansGet"
@@ -4635,10 +4849,14 @@
         },
         "security": [
           {
-            "Basic Authentication": []
+            "Basic Authentication": [
+              
+            ]
           },
           {
-            "Token Authentication": []
+            "Token Authentication": [
+              
+            ]
           }
         ],
         "operationId": "datacentersLansPost"
@@ -4712,10 +4930,14 @@
         },
         "security": [
           {
-            "Basic Authentication": []
+            "Basic Authentication": [
+              
+            ]
           },
           {
-            "Token Authentication": []
+            "Token Authentication": [
+              
+            ]
           }
         ],
         "operationId": "datacentersLansFindById"
@@ -4801,10 +5023,14 @@
         },
         "security": [
           {
-            "Basic Authentication": []
+            "Basic Authentication": [
+              
+            ]
           },
           {
-            "Token Authentication": []
+            "Token Authentication": [
+              
+            ]
           }
         ],
         "operationId": "datacentersLansPut"
@@ -4878,10 +5104,14 @@
         },
         "security": [
           {
-            "Basic Authentication": []
+            "Basic Authentication": [
+              
+            ]
           },
           {
-            "Token Authentication": []
+            "Token Authentication": [
+              
+            ]
           }
         ],
         "operationId": "datacentersLansDelete"
@@ -4967,10 +5197,14 @@
         },
         "security": [
           {
-            "Basic Authentication": []
+            "Basic Authentication": [
+              
+            ]
           },
           {
-            "Token Authentication": []
+            "Token Authentication": [
+              
+            ]
           }
         ],
         "operationId": "datacentersLansPatch"
@@ -5050,10 +5284,14 @@
         },
         "security": [
           {
-            "Basic Authentication": []
+            "Basic Authentication": [
+              
+            ]
           },
           {
-            "Token Authentication": []
+            "Token Authentication": [
+              
+            ]
           }
         ],
         "operationId": "datacentersLansNicsGet"
@@ -5139,10 +5377,14 @@
         },
         "security": [
           {
-            "Basic Authentication": []
+            "Basic Authentication": [
+              
+            ]
           },
           {
-            "Token Authentication": []
+            "Token Authentication": [
+              
+            ]
           }
         ],
         "operationId": "datacentersLansNicsPost"
@@ -5223,10 +5465,14 @@
         },
         "security": [
           {
-            "Basic Authentication": []
+            "Basic Authentication": [
+              
+            ]
           },
           {
-            "Token Authentication": []
+            "Token Authentication": [
+              
+            ]
           }
         ],
         "operationId": "datacentersLansNicsFindById"
@@ -5306,10 +5552,14 @@
         },
         "security": [
           {
-            "Basic Authentication": []
+            "Basic Authentication": [
+              
+            ]
           },
           {
-            "Token Authentication": []
+            "Token Authentication": [
+              
+            ]
           }
         ],
         "operationId": "datacentersServersNicsGet"
@@ -5395,10 +5645,14 @@
         },
         "security": [
           {
-            "Basic Authentication": []
+            "Basic Authentication": [
+              
+            ]
           },
           {
-            "Token Authentication": []
+            "Token Authentication": [
+              
+            ]
           }
         ],
         "operationId": "datacentersServersNicsPost"
@@ -5479,10 +5733,14 @@
         },
         "security": [
           {
-            "Basic Authentication": []
+            "Basic Authentication": [
+              
+            ]
           },
           {
-            "Token Authentication": []
+            "Token Authentication": [
+              
+            ]
           }
         ],
         "operationId": "datacentersServersNicsFindById"
@@ -5575,10 +5833,14 @@
         },
         "security": [
           {
-            "Basic Authentication": []
+            "Basic Authentication": [
+              
+            ]
           },
           {
-            "Token Authentication": []
+            "Token Authentication": [
+              
+            ]
           }
         ],
         "operationId": "datacentersServersNicsPut"
@@ -5659,10 +5921,14 @@
         },
         "security": [
           {
-            "Basic Authentication": []
+            "Basic Authentication": [
+              
+            ]
           },
           {
-            "Token Authentication": []
+            "Token Authentication": [
+              
+            ]
           }
         ],
         "operationId": "datacentersServersNicsDelete"
@@ -5755,10 +6021,14 @@
         },
         "security": [
           {
-            "Basic Authentication": []
+            "Basic Authentication": [
+              
+            ]
           },
           {
-            "Token Authentication": []
+            "Token Authentication": [
+              
+            ]
           }
         ],
         "operationId": "datacentersServersNicsPatch"
@@ -5845,10 +6115,14 @@
         },
         "security": [
           {
-            "Basic Authentication": []
+            "Basic Authentication": [
+              
+            ]
           },
           {
-            "Token Authentication": []
+            "Token Authentication": [
+              
+            ]
           }
         ],
         "operationId": "datacentersServersNicsFirewallrulesGet"
@@ -5941,10 +6215,14 @@
         },
         "security": [
           {
-            "Basic Authentication": []
+            "Basic Authentication": [
+              
+            ]
           },
           {
-            "Token Authentication": []
+            "Token Authentication": [
+              
+            ]
           }
         ],
         "operationId": "datacentersServersNicsFirewallrulesPost"
@@ -6032,10 +6310,14 @@
         },
         "security": [
           {
-            "Basic Authentication": []
+            "Basic Authentication": [
+              
+            ]
           },
           {
-            "Token Authentication": []
+            "Token Authentication": [
+              
+            ]
           }
         ],
         "operationId": "datacentersServersNicsFirewallrulesFindById"
@@ -6135,10 +6417,14 @@
         },
         "security": [
           {
-            "Basic Authentication": []
+            "Basic Authentication": [
+              
+            ]
           },
           {
-            "Token Authentication": []
+            "Token Authentication": [
+              
+            ]
           }
         ],
         "operationId": "datacentersServersNicsFirewallrulesPut"
@@ -6226,10 +6512,14 @@
         },
         "security": [
           {
-            "Basic Authentication": []
+            "Basic Authentication": [
+              
+            ]
           },
           {
-            "Token Authentication": []
+            "Token Authentication": [
+              
+            ]
           }
         ],
         "operationId": "datacentersServersNicsFirewallrulesDelete"
@@ -6329,10 +6619,14 @@
         },
         "security": [
           {
-            "Basic Authentication": []
+            "Basic Authentication": [
+              
+            ]
           },
           {
-            "Token Authentication": []
+            "Token Authentication": [
+              
+            ]
           }
         ],
         "operationId": "datacentersServersNicsFirewallrulesPatch"
@@ -6416,10 +6710,14 @@
         },
         "security": [
           {
-            "Basic Authentication": []
+            "Basic Authentication": [
+              
+            ]
           },
           {
-            "Token Authentication": []
+            "Token Authentication": [
+              
+            ]
           }
         ],
         "operationId": "datacentersServersNicsFlowlogsGet"
@@ -6509,10 +6807,14 @@
         },
         "security": [
           {
-            "Basic Authentication": []
+            "Basic Authentication": [
+              
+            ]
           },
           {
-            "Token Authentication": []
+            "Token Authentication": [
+              
+            ]
           }
         ],
         "operationId": "datacentersServersNicsFlowlogsPost"
@@ -6597,10 +6899,14 @@
         },
         "security": [
           {
-            "Basic Authentication": []
+            "Basic Authentication": [
+              
+            ]
           },
           {
-            "Token Authentication": []
+            "Token Authentication": [
+              
+            ]
           }
         ],
         "operationId": "datacentersServersNicsFlowlogsFindById"
@@ -6697,10 +7003,14 @@
         },
         "security": [
           {
-            "Basic Authentication": []
+            "Basic Authentication": [
+              
+            ]
           },
           {
-            "Token Authentication": []
+            "Token Authentication": [
+              
+            ]
           }
         ],
         "operationId": "datacentersServersNicsFlowlogsPut"
@@ -6797,10 +7107,14 @@
         },
         "security": [
           {
-            "Basic Authentication": []
+            "Basic Authentication": [
+              
+            ]
           },
           {
-            "Token Authentication": []
+            "Token Authentication": [
+              
+            ]
           }
         ],
         "operationId": "datacentersServersNicsFlowlogsPatch"
@@ -6885,10 +7199,14 @@
         },
         "security": [
           {
-            "Basic Authentication": []
+            "Basic Authentication": [
+              
+            ]
           },
           {
-            "Token Authentication": []
+            "Token Authentication": [
+              
+            ]
           }
         ],
         "operationId": "datacentersServersNicsFlowlogsDelete"
@@ -6961,10 +7279,14 @@
         },
         "security": [
           {
-            "Basic Authentication": []
+            "Basic Authentication": [
+              
+            ]
           },
           {
-            "Token Authentication": []
+            "Token Authentication": [
+              
+            ]
           }
         ],
         "operationId": "datacentersLoadbalancersGet"
@@ -7043,10 +7365,14 @@
         },
         "security": [
           {
-            "Basic Authentication": []
+            "Basic Authentication": [
+              
+            ]
           },
           {
-            "Token Authentication": []
+            "Token Authentication": [
+              
+            ]
           }
         ],
         "operationId": "datacentersLoadbalancersPost"
@@ -7120,10 +7446,14 @@
         },
         "security": [
           {
-            "Basic Authentication": []
+            "Basic Authentication": [
+              
+            ]
           },
           {
-            "Token Authentication": []
+            "Token Authentication": [
+              
+            ]
           }
         ],
         "operationId": "datacentersLoadbalancersFindById"
@@ -7209,10 +7539,14 @@
         },
         "security": [
           {
-            "Basic Authentication": []
+            "Basic Authentication": [
+              
+            ]
           },
           {
-            "Token Authentication": []
+            "Token Authentication": [
+              
+            ]
           }
         ],
         "operationId": "datacentersLoadbalancersPut"
@@ -7286,10 +7620,14 @@
         },
         "security": [
           {
-            "Basic Authentication": []
+            "Basic Authentication": [
+              
+            ]
           },
           {
-            "Token Authentication": []
+            "Token Authentication": [
+              
+            ]
           }
         ],
         "operationId": "datacentersLoadbalancersDelete"
@@ -7375,10 +7713,14 @@
         },
         "security": [
           {
-            "Basic Authentication": []
+            "Basic Authentication": [
+              
+            ]
           },
           {
-            "Token Authentication": []
+            "Token Authentication": [
+              
+            ]
           }
         ],
         "operationId": "datacentersLoadbalancersPatch"
@@ -7452,10 +7794,14 @@
         },
         "security": [
           {
-            "Basic Authentication": []
+            "Basic Authentication": [
+              
+            ]
           },
           {
-            "Token Authentication": []
+            "Token Authentication": [
+              
+            ]
           }
         ],
         "operationId": "datacentersLoadbalancersBalancednicsGet"
@@ -7541,10 +7887,14 @@
         },
         "security": [
           {
-            "Basic Authentication": []
+            "Basic Authentication": [
+              
+            ]
           },
           {
-            "Token Authentication": []
+            "Token Authentication": [
+              
+            ]
           }
         ],
         "operationId": "datacentersLoadbalancersBalancednicsPost"
@@ -7625,10 +7975,14 @@
         },
         "security": [
           {
-            "Basic Authentication": []
+            "Basic Authentication": [
+              
+            ]
           },
           {
-            "Token Authentication": []
+            "Token Authentication": [
+              
+            ]
           }
         ],
         "operationId": "datacentersLoadbalancersBalancednicsFindByNicId"
@@ -7709,10 +8063,14 @@
         },
         "security": [
           {
-            "Basic Authentication": []
+            "Basic Authentication": [
+              
+            ]
           },
           {
-            "Token Authentication": []
+            "Token Authentication": [
+              
+            ]
           }
         ],
         "operationId": "datacentersLoadbalancersBalancednicsDelete"
@@ -7779,10 +8137,14 @@
         },
         "security": [
           {
-            "Basic Authentication": []
+            "Basic Authentication": [
+              
+            ]
           },
           {
-            "Token Authentication": []
+            "Token Authentication": [
+              
+            ]
           }
         ],
         "operationId": "datacentersNatgatewaysGet"
@@ -7861,10 +8223,14 @@
         },
         "security": [
           {
-            "Basic Authentication": []
+            "Basic Authentication": [
+              
+            ]
           },
           {
-            "Token Authentication": []
+            "Token Authentication": [
+              
+            ]
           }
         ],
         "operationId": "datacentersNatgatewaysPost"
@@ -7938,10 +8304,14 @@
         },
         "security": [
           {
-            "Basic Authentication": []
+            "Basic Authentication": [
+              
+            ]
           },
           {
-            "Token Authentication": []
+            "Token Authentication": [
+              
+            ]
           }
         ],
         "operationId": "datacentersNatgatewaysFindByNatGatewayId"
@@ -8018,10 +8388,14 @@
         },
         "security": [
           {
-            "Basic Authentication": []
+            "Basic Authentication": [
+              
+            ]
           },
           {
-            "Token Authentication": []
+            "Token Authentication": [
+              
+            ]
           }
         ],
         "operationId": "datacentersNatgatewaysPut"
@@ -8098,10 +8472,14 @@
         },
         "security": [
           {
-            "Basic Authentication": []
+            "Basic Authentication": [
+              
+            ]
           },
           {
-            "Token Authentication": []
+            "Token Authentication": [
+              
+            ]
           }
         ],
         "operationId": "datacentersNatgatewaysPatch"
@@ -8171,10 +8549,14 @@
         },
         "security": [
           {
-            "Basic Authentication": []
+            "Basic Authentication": [
+              
+            ]
           },
           {
-            "Token Authentication": []
+            "Token Authentication": [
+              
+            ]
           }
         ],
         "operationId": "datacentersNatgatewaysDelete"
@@ -8248,10 +8630,14 @@
         },
         "security": [
           {
-            "Basic Authentication": []
+            "Basic Authentication": [
+              
+            ]
           },
           {
-            "Token Authentication": []
+            "Token Authentication": [
+              
+            ]
           }
         ],
         "operationId": "datacentersNatgatewaysRulesGet"
@@ -8337,10 +8723,14 @@
         },
         "security": [
           {
-            "Basic Authentication": []
+            "Basic Authentication": [
+              
+            ]
           },
           {
-            "Token Authentication": []
+            "Token Authentication": [
+              
+            ]
           }
         ],
         "operationId": "datacentersNatgatewaysRulesPost"
@@ -8421,10 +8811,14 @@
         },
         "security": [
           {
-            "Basic Authentication": []
+            "Basic Authentication": [
+              
+            ]
           },
           {
-            "Token Authentication": []
+            "Token Authentication": [
+              
+            ]
           }
         ],
         "operationId": "datacentersNatgatewaysRulesFindByNatGatewayRuleId"
@@ -8508,10 +8902,14 @@
         },
         "security": [
           {
-            "Basic Authentication": []
+            "Basic Authentication": [
+              
+            ]
           },
           {
-            "Token Authentication": []
+            "Token Authentication": [
+              
+            ]
           }
         ],
         "operationId": "datacentersNatgatewaysRulesPut"
@@ -8595,10 +8993,14 @@
         },
         "security": [
           {
-            "Basic Authentication": []
+            "Basic Authentication": [
+              
+            ]
           },
           {
-            "Token Authentication": []
+            "Token Authentication": [
+              
+            ]
           }
         ],
         "operationId": "datacentersNatgatewaysRulesPatch"
@@ -8675,10 +9077,14 @@
         },
         "security": [
           {
-            "Basic Authentication": []
+            "Basic Authentication": [
+              
+            ]
           },
           {
-            "Token Authentication": []
+            "Token Authentication": [
+              
+            ]
           }
         ],
         "operationId": "datacentersNatgatewaysRulesDelete"
@@ -8751,10 +9157,14 @@
         },
         "security": [
           {
-            "Basic Authentication": []
+            "Basic Authentication": [
+              
+            ]
           },
           {
-            "Token Authentication": []
+            "Token Authentication": [
+              
+            ]
           }
         ],
         "operationId": "datacentersNatgatewaysFlowlogsGet"
@@ -8833,10 +9243,14 @@
         },
         "security": [
           {
-            "Basic Authentication": []
+            "Basic Authentication": [
+              
+            ]
           },
           {
-            "Token Authentication": []
+            "Token Authentication": [
+              
+            ]
           }
         ],
         "operationId": "datacentersNatgatewaysFlowlogsPost"
@@ -8906,10 +9320,14 @@
         },
         "security": [
           {
-            "Basic Authentication": []
+            "Basic Authentication": [
+              
+            ]
           },
           {
-            "Token Authentication": []
+            "Token Authentication": [
+              
+            ]
           }
         ],
         "operationId": "datacentersNatgatewaysFlowlogsFindByFlowLogId"
@@ -8986,10 +9404,14 @@
         },
         "security": [
           {
-            "Basic Authentication": []
+            "Basic Authentication": [
+              
+            ]
           },
           {
-            "Token Authentication": []
+            "Token Authentication": [
+              
+            ]
           }
         ],
         "operationId": "datacentersNatgatewaysFlowlogsPut"
@@ -9066,10 +9488,14 @@
         },
         "security": [
           {
-            "Basic Authentication": []
+            "Basic Authentication": [
+              
+            ]
           },
           {
-            "Token Authentication": []
+            "Token Authentication": [
+              
+            ]
           }
         ],
         "operationId": "datacentersNatgatewaysFlowlogsPatch"
@@ -9139,10 +9565,14 @@
         },
         "security": [
           {
-            "Basic Authentication": []
+            "Basic Authentication": [
+              
+            ]
           },
           {
-            "Token Authentication": []
+            "Token Authentication": [
+              
+            ]
           }
         ],
         "operationId": "datacentersNatgatewaysFlowlogsDelete"
@@ -9215,10 +9645,14 @@
         },
         "security": [
           {
-            "Basic Authentication": []
+            "Basic Authentication": [
+              
+            ]
           },
           {
-            "Token Authentication": []
+            "Token Authentication": [
+              
+            ]
           }
         ],
         "operationId": "datacentersNetworkloadbalancersGet"
@@ -9297,10 +9731,14 @@
         },
         "security": [
           {
-            "Basic Authentication": []
+            "Basic Authentication": [
+              
+            ]
           },
           {
-            "Token Authentication": []
+            "Token Authentication": [
+              
+            ]
           }
         ],
         "operationId": "datacentersNetworkloadbalancersPost"
@@ -9370,10 +9808,14 @@
         },
         "security": [
           {
-            "Basic Authentication": []
+            "Basic Authentication": [
+              
+            ]
           },
           {
-            "Token Authentication": []
+            "Token Authentication": [
+              
+            ]
           }
         ],
         "operationId": "datacentersNetworkloadbalancersFindByNetworkLoadBalancerId"
@@ -9450,10 +9892,14 @@
         },
         "security": [
           {
-            "Basic Authentication": []
+            "Basic Authentication": [
+              
+            ]
           },
           {
-            "Token Authentication": []
+            "Token Authentication": [
+              
+            ]
           }
         ],
         "operationId": "datacentersNetworkloadbalancersPut"
@@ -9530,10 +9976,14 @@
         },
         "security": [
           {
-            "Basic Authentication": []
+            "Basic Authentication": [
+              
+            ]
           },
           {
-            "Token Authentication": []
+            "Token Authentication": [
+              
+            ]
           }
         ],
         "operationId": "datacentersNetworkloadbalancersPatch"
@@ -9603,10 +10053,14 @@
         },
         "security": [
           {
-            "Basic Authentication": []
+            "Basic Authentication": [
+              
+            ]
           },
           {
-            "Token Authentication": []
+            "Token Authentication": [
+              
+            ]
           }
         ],
         "operationId": "datacentersNetworkloadbalancersDelete"
@@ -9676,10 +10130,14 @@
         },
         "security": [
           {
-            "Basic Authentication": []
+            "Basic Authentication": [
+              
+            ]
           },
           {
-            "Token Authentication": []
+            "Token Authentication": [
+              
+            ]
           }
         ],
         "operationId": "datacentersNetworkloadbalancersFlowlogsGet"
@@ -9761,10 +10219,14 @@
         },
         "security": [
           {
-            "Basic Authentication": []
+            "Basic Authentication": [
+              
+            ]
           },
           {
-            "Token Authentication": []
+            "Token Authentication": [
+              
+            ]
           }
         ],
         "operationId": "datacentersNetworkloadbalancersFlowlogsPost"
@@ -9841,10 +10303,14 @@
         },
         "security": [
           {
-            "Basic Authentication": []
+            "Basic Authentication": [
+              
+            ]
           },
           {
-            "Token Authentication": []
+            "Token Authentication": [
+              
+            ]
           }
         ],
         "operationId": "datacentersNetworkloadbalancersFlowlogsFindByFlowLogId"
@@ -9928,10 +10394,14 @@
         },
         "security": [
           {
-            "Basic Authentication": []
+            "Basic Authentication": [
+              
+            ]
           },
           {
-            "Token Authentication": []
+            "Token Authentication": [
+              
+            ]
           }
         ],
         "operationId": "datacentersNetworkloadbalancersFlowlogsPut"
@@ -10015,10 +10485,14 @@
         },
         "security": [
           {
-            "Basic Authentication": []
+            "Basic Authentication": [
+              
+            ]
           },
           {
-            "Token Authentication": []
+            "Token Authentication": [
+              
+            ]
           }
         ],
         "operationId": "datacentersNetworkloadbalancersFlowlogsPatch"
@@ -10095,10 +10569,14 @@
         },
         "security": [
           {
-            "Basic Authentication": []
+            "Basic Authentication": [
+              
+            ]
           },
           {
-            "Token Authentication": []
+            "Token Authentication": [
+              
+            ]
           }
         ],
         "operationId": "datacentersNetworkloadbalancersFlowlogsDelete"
@@ -10168,10 +10646,14 @@
         },
         "security": [
           {
-            "Basic Authentication": []
+            "Basic Authentication": [
+              
+            ]
           },
           {
-            "Token Authentication": []
+            "Token Authentication": [
+              
+            ]
           }
         ],
         "operationId": "datacentersNetworkloadbalancersForwardingrulesGet"
@@ -10253,10 +10735,14 @@
         },
         "security": [
           {
-            "Basic Authentication": []
+            "Basic Authentication": [
+              
+            ]
           },
           {
-            "Token Authentication": []
+            "Token Authentication": [
+              
+            ]
           }
         ],
         "operationId": "datacentersNetworkloadbalancersForwardingrulesPost"
@@ -10333,10 +10819,14 @@
         },
         "security": [
           {
-            "Basic Authentication": []
+            "Basic Authentication": [
+              
+            ]
           },
           {
-            "Token Authentication": []
+            "Token Authentication": [
+              
+            ]
           }
         ],
         "operationId": "datacentersNetworkloadbalancersForwardingrulesFindByForwardingRuleId"
@@ -10420,10 +10910,14 @@
         },
         "security": [
           {
-            "Basic Authentication": []
+            "Basic Authentication": [
+              
+            ]
           },
           {
-            "Token Authentication": []
+            "Token Authentication": [
+              
+            ]
           }
         ],
         "operationId": "datacentersNetworkloadbalancersForwardingrulesPut"
@@ -10507,10 +11001,14 @@
         },
         "security": [
           {
-            "Basic Authentication": []
+            "Basic Authentication": [
+              
+            ]
           },
           {
-            "Token Authentication": []
+            "Token Authentication": [
+              
+            ]
           }
         ],
         "operationId": "datacentersNetworkloadbalancersForwardingrulesPatch"
@@ -10587,10 +11085,14 @@
         },
         "security": [
           {
-            "Basic Authentication": []
+            "Basic Authentication": [
+              
+            ]
           },
           {
-            "Token Authentication": []
+            "Token Authentication": [
+              
+            ]
           }
         ],
         "operationId": "datacentersNetworkloadbalancersForwardingrulesDelete"
@@ -10663,10 +11165,14 @@
         },
         "security": [
           {
-            "Basic Authentication": []
+            "Basic Authentication": [
+              
+            ]
           },
           {
-            "Token Authentication": []
+            "Token Authentication": [
+              
+            ]
           }
         ],
         "operationId": "datacentersApplicationloadbalancersGet"
@@ -10745,10 +11251,14 @@
         },
         "security": [
           {
-            "Basic Authentication": []
+            "Basic Authentication": [
+              
+            ]
           },
           {
-            "Token Authentication": []
+            "Token Authentication": [
+              
+            ]
           }
         ],
         "operationId": "datacentersApplicationloadbalancersPost"
@@ -10818,10 +11328,14 @@
         },
         "security": [
           {
-            "Basic Authentication": []
+            "Basic Authentication": [
+              
+            ]
           },
           {
-            "Token Authentication": []
+            "Token Authentication": [
+              
+            ]
           }
         ],
         "operationId": "datacentersApplicationloadbalancersFindByApplicationLoadBalancerId"
@@ -10898,10 +11412,14 @@
         },
         "security": [
           {
-            "Basic Authentication": []
+            "Basic Authentication": [
+              
+            ]
           },
           {
-            "Token Authentication": []
+            "Token Authentication": [
+              
+            ]
           }
         ],
         "operationId": "datacentersApplicationloadbalancersPut"
@@ -10978,10 +11496,14 @@
         },
         "security": [
           {
-            "Basic Authentication": []
+            "Basic Authentication": [
+              
+            ]
           },
           {
-            "Token Authentication": []
+            "Token Authentication": [
+              
+            ]
           }
         ],
         "operationId": "datacentersApplicationloadbalancersPatch"
@@ -11051,10 +11573,14 @@
         },
         "security": [
           {
-            "Basic Authentication": []
+            "Basic Authentication": [
+              
+            ]
           },
           {
-            "Token Authentication": []
+            "Token Authentication": [
+              
+            ]
           }
         ],
         "operationId": "datacentersApplicationloadbalancersDelete"
@@ -11124,10 +11650,14 @@
         },
         "security": [
           {
-            "Basic Authentication": []
+            "Basic Authentication": [
+              
+            ]
           },
           {
-            "Token Authentication": []
+            "Token Authentication": [
+              
+            ]
           }
         ],
         "operationId": "datacentersApplicationloadbalancersForwardingrulesGet"
@@ -11209,10 +11739,14 @@
         },
         "security": [
           {
-            "Basic Authentication": []
+            "Basic Authentication": [
+              
+            ]
           },
           {
-            "Token Authentication": []
+            "Token Authentication": [
+              
+            ]
           }
         ],
         "operationId": "datacentersApplicationloadbalancersForwardingrulesPost"
@@ -11289,10 +11823,14 @@
         },
         "security": [
           {
-            "Basic Authentication": []
+            "Basic Authentication": [
+              
+            ]
           },
           {
-            "Token Authentication": []
+            "Token Authentication": [
+              
+            ]
           }
         ],
         "operationId": "datacentersApplicationloadbalancersForwardingrulesFindByForwardingRuleId"
@@ -11376,10 +11914,14 @@
         },
         "security": [
           {
-            "Basic Authentication": []
+            "Basic Authentication": [
+              
+            ]
           },
           {
-            "Token Authentication": []
+            "Token Authentication": [
+              
+            ]
           }
         ],
         "operationId": "datacentersApplicationloadbalancersForwardingrulesPut"
@@ -11463,10 +12005,14 @@
         },
         "security": [
           {
-            "Basic Authentication": []
+            "Basic Authentication": [
+              
+            ]
           },
           {
-            "Token Authentication": []
+            "Token Authentication": [
+              
+            ]
           }
         ],
         "operationId": "datacentersApplicationloadbalancersForwardingrulesPatch"
@@ -11543,10 +12089,14 @@
         },
         "security": [
           {
-            "Basic Authentication": []
+            "Basic Authentication": [
+              
+            ]
           },
           {
-            "Token Authentication": []
+            "Token Authentication": [
+              
+            ]
           }
         ],
         "operationId": "datacentersApplicationloadbalancersForwardingrulesDelete"
@@ -11616,10 +12166,14 @@
         },
         "security": [
           {
-            "Basic Authentication": []
+            "Basic Authentication": [
+              
+            ]
           },
           {
-            "Token Authentication": []
+            "Token Authentication": [
+              
+            ]
           }
         ],
         "operationId": "datacentersApplicationloadbalancersFlowlogsGet"
@@ -11701,10 +12255,14 @@
         },
         "security": [
           {
-            "Basic Authentication": []
+            "Basic Authentication": [
+              
+            ]
           },
           {
-            "Token Authentication": []
+            "Token Authentication": [
+              
+            ]
           }
         ],
         "operationId": "datacentersApplicationloadbalancersFlowlogsPost"
@@ -11781,10 +12339,14 @@
         },
         "security": [
           {
-            "Basic Authentication": []
+            "Basic Authentication": [
+              
+            ]
           },
           {
-            "Token Authentication": []
+            "Token Authentication": [
+              
+            ]
           }
         ],
         "operationId": "datacentersApplicationloadbalancersFlowlogsFindByFlowLogId"
@@ -11868,10 +12430,14 @@
         },
         "security": [
           {
-            "Basic Authentication": []
+            "Basic Authentication": [
+              
+            ]
           },
           {
-            "Token Authentication": []
+            "Token Authentication": [
+              
+            ]
           }
         ],
         "operationId": "datacentersApplicationloadbalancersFlowlogsPut"
@@ -11955,10 +12521,14 @@
         },
         "security": [
           {
-            "Basic Authentication": []
+            "Basic Authentication": [
+              
+            ]
           },
           {
-            "Token Authentication": []
+            "Token Authentication": [
+              
+            ]
           }
         ],
         "operationId": "datacentersApplicationloadbalancersFlowlogsPatch"
@@ -12035,10 +12605,14 @@
         },
         "security": [
           {
-            "Basic Authentication": []
+            "Basic Authentication": [
+              
+            ]
           },
           {
-            "Token Authentication": []
+            "Token Authentication": [
+              
+            ]
           }
         ],
         "operationId": "datacentersApplicationloadbalancersFlowlogsDelete"
@@ -12104,10 +12678,14 @@
         },
         "security": [
           {
-            "Basic Authentication": []
+            "Basic Authentication": [
+              
+            ]
           },
           {
-            "Token Authentication": []
+            "Token Authentication": [
+              
+            ]
           }
         ],
         "operationId": "targetgroupsGet"
@@ -12179,10 +12757,14 @@
         },
         "security": [
           {
-            "Basic Authentication": []
+            "Basic Authentication": [
+              
+            ]
           },
           {
-            "Token Authentication": []
+            "Token Authentication": [
+              
+            ]
           }
         ],
         "operationId": "targetgroupsPost"
@@ -12245,10 +12827,14 @@
         },
         "security": [
           {
-            "Basic Authentication": []
+            "Basic Authentication": [
+              
+            ]
           },
           {
-            "Token Authentication": []
+            "Token Authentication": [
+              
+            ]
           }
         ],
         "operationId": "targetgroupsFindByTargetGroupId"
@@ -12318,10 +12904,14 @@
         },
         "security": [
           {
-            "Basic Authentication": []
+            "Basic Authentication": [
+              
+            ]
           },
           {
-            "Token Authentication": []
+            "Token Authentication": [
+              
+            ]
           }
         ],
         "operationId": "targetgroupsPut"
@@ -12391,10 +12981,14 @@
         },
         "security": [
           {
-            "Basic Authentication": []
+            "Basic Authentication": [
+              
+            ]
           },
           {
-            "Token Authentication": []
+            "Token Authentication": [
+              
+            ]
           }
         ],
         "operationId": "targetgroupsPatch"
@@ -12457,10 +13051,14 @@
         },
         "security": [
           {
-            "Basic Authentication": []
+            "Basic Authentication": [
+              
+            ]
           },
           {
-            "Token Authentication": []
+            "Token Authentication": [
+              
+            ]
           }
         ],
         "operationId": "targetGroupsDelete"
@@ -12527,10 +13125,14 @@
         },
         "security": [
           {
-            "Basic Authentication": []
+            "Basic Authentication": [
+              
+            ]
           },
           {
-            "Token Authentication": []
+            "Token Authentication": [
+              
+            ]
           }
         ],
         "operationId": "requestsFindById"
@@ -12673,10 +13275,14 @@
         },
         "security": [
           {
-            "Basic Authentication": []
+            "Basic Authentication": [
+              
+            ]
           },
           {
-            "Token Authentication": []
+            "Token Authentication": [
+              
+            ]
           }
         ],
         "operationId": "requestsGet"
@@ -12743,10 +13349,14 @@
         },
         "security": [
           {
-            "Basic Authentication": []
+            "Basic Authentication": [
+              
+            ]
           },
           {
-            "Token Authentication": []
+            "Token Authentication": [
+              
+            ]
           }
         ],
         "operationId": "requestsStatusGet"
@@ -12806,10 +13416,14 @@
         },
         "security": [
           {
-            "Basic Authentication": []
+            "Basic Authentication": [
+              
+            ]
           },
           {
-            "Token Authentication": []
+            "Token Authentication": [
+              
+            ]
           }
         ],
         "operationId": "contractsGet"
@@ -12875,10 +13489,14 @@
         },
         "security": [
           {
-            "Basic Authentication": []
+            "Basic Authentication": [
+              
+            ]
           },
           {
-            "Token Authentication": []
+            "Token Authentication": [
+              
+            ]
           }
         ],
         "operationId": "umUsersGet"
@@ -12950,10 +13568,14 @@
         },
         "security": [
           {
-            "Basic Authentication": []
+            "Basic Authentication": [
+              
+            ]
           },
           {
-            "Token Authentication": []
+            "Token Authentication": [
+              
+            ]
           }
         ],
         "operationId": "umUsersPost"
@@ -13020,10 +13642,14 @@
         },
         "security": [
           {
-            "Basic Authentication": []
+            "Basic Authentication": [
+              
+            ]
           },
           {
-            "Token Authentication": []
+            "Token Authentication": [
+              
+            ]
           }
         ],
         "operationId": "umUsersFindById"
@@ -13102,10 +13728,14 @@
         },
         "security": [
           {
-            "Basic Authentication": []
+            "Basic Authentication": [
+              
+            ]
           },
           {
-            "Token Authentication": []
+            "Token Authentication": [
+              
+            ]
           }
         ],
         "operationId": "umUsersPut"
@@ -13172,10 +13802,14 @@
         },
         "security": [
           {
-            "Basic Authentication": []
+            "Basic Authentication": [
+              
+            ]
           },
           {
-            "Token Authentication": []
+            "Token Authentication": [
+              
+            ]
           }
         ],
         "operationId": "umUsersDelete"
@@ -13242,10 +13876,14 @@
         },
         "security": [
           {
-            "Basic Authentication": []
+            "Basic Authentication": [
+              
+            ]
           },
           {
-            "Token Authentication": []
+            "Token Authentication": [
+              
+            ]
           }
         ],
         "operationId": "umUsersGroupsGet"
@@ -13312,10 +13950,14 @@
         },
         "security": [
           {
-            "Basic Authentication": []
+            "Basic Authentication": [
+              
+            ]
           },
           {
-            "Token Authentication": []
+            "Token Authentication": [
+              
+            ]
           }
         ],
         "operationId": "umUsersOwnsGet"
@@ -13375,10 +14017,14 @@
         },
         "security": [
           {
-            "Basic Authentication": []
+            "Basic Authentication": [
+              
+            ]
           },
           {
-            "Token Authentication": []
+            "Token Authentication": [
+              
+            ]
           }
         ],
         "operationId": "umGroupsGet"
@@ -13450,10 +14096,14 @@
         },
         "security": [
           {
-            "Basic Authentication": []
+            "Basic Authentication": [
+              
+            ]
           },
           {
-            "Token Authentication": []
+            "Token Authentication": [
+              
+            ]
           }
         ],
         "operationId": "umGroupsPost"
@@ -13520,10 +14170,14 @@
         },
         "security": [
           {
-            "Basic Authentication": []
+            "Basic Authentication": [
+              
+            ]
           },
           {
-            "Token Authentication": []
+            "Token Authentication": [
+              
+            ]
           }
         ],
         "operationId": "umGroupsFindById"
@@ -13602,10 +14256,14 @@
         },
         "security": [
           {
-            "Basic Authentication": []
+            "Basic Authentication": [
+              
+            ]
           },
           {
-            "Token Authentication": []
+            "Token Authentication": [
+              
+            ]
           }
         ],
         "operationId": "umGroupsPut"
@@ -13672,10 +14330,14 @@
         },
         "security": [
           {
-            "Basic Authentication": []
+            "Basic Authentication": [
+              
+            ]
           },
           {
-            "Token Authentication": []
+            "Token Authentication": [
+              
+            ]
           }
         ],
         "operationId": "umGroupsDelete"
@@ -13742,10 +14404,14 @@
         },
         "security": [
           {
-            "Basic Authentication": []
+            "Basic Authentication": [
+              
+            ]
           },
           {
-            "Token Authentication": []
+            "Token Authentication": [
+              
+            ]
           }
         ],
         "operationId": "umGroupsResourcesGet"
@@ -13812,10 +14478,14 @@
         },
         "security": [
           {
-            "Basic Authentication": []
+            "Basic Authentication": [
+              
+            ]
           },
           {
-            "Token Authentication": []
+            "Token Authentication": [
+              
+            ]
           }
         ],
         "operationId": "umGroupsUsersGet"
@@ -13894,10 +14564,14 @@
         },
         "security": [
           {
-            "Basic Authentication": []
+            "Basic Authentication": [
+              
+            ]
           },
           {
-            "Token Authentication": []
+            "Token Authentication": [
+              
+            ]
           }
         ],
         "operationId": "umGroupsUsersPost"
@@ -13973,10 +14647,14 @@
         },
         "security": [
           {
-            "Basic Authentication": []
+            "Basic Authentication": [
+              
+            ]
           },
           {
-            "Token Authentication": []
+            "Token Authentication": [
+              
+            ]
           }
         ],
         "operationId": "umGroupsUsersDelete"
@@ -14050,10 +14728,14 @@
         },
         "security": [
           {
-            "Basic Authentication": []
+            "Basic Authentication": [
+              
+            ]
           },
           {
-            "Token Authentication": []
+            "Token Authentication": [
+              
+            ]
           }
         ],
         "operationId": "umGroupsSharesFindByResourceId"
@@ -14139,10 +14821,14 @@
         },
         "security": [
           {
-            "Basic Authentication": []
+            "Basic Authentication": [
+              
+            ]
           },
           {
-            "Token Authentication": []
+            "Token Authentication": [
+              
+            ]
           }
         ],
         "operationId": "umGroupsSharesPost"
@@ -14228,10 +14914,14 @@
         },
         "security": [
           {
-            "Basic Authentication": []
+            "Basic Authentication": [
+              
+            ]
           },
           {
-            "Token Authentication": []
+            "Token Authentication": [
+              
+            ]
           }
         ],
         "operationId": "umGroupsSharesPut"
@@ -14305,10 +14995,14 @@
         },
         "security": [
           {
-            "Basic Authentication": []
+            "Basic Authentication": [
+              
+            ]
           },
           {
-            "Token Authentication": []
+            "Token Authentication": [
+              
+            ]
           }
         ],
         "operationId": "umGroupsSharesDelete"
@@ -14375,10 +15069,14 @@
         },
         "security": [
           {
-            "Basic Authentication": []
+            "Basic Authentication": [
+              
+            ]
           },
           {
-            "Token Authentication": []
+            "Token Authentication": [
+              
+            ]
           }
         ],
         "operationId": "umGroupsSharesGet"
@@ -14438,10 +15136,14 @@
         },
         "security": [
           {
-            "Basic Authentication": []
+            "Basic Authentication": [
+              
+            ]
           },
           {
-            "Token Authentication": []
+            "Token Authentication": [
+              
+            ]
           }
         ],
         "operationId": "umResourcesGet"
@@ -14508,10 +15210,14 @@
         },
         "security": [
           {
-            "Basic Authentication": []
+            "Basic Authentication": [
+              
+            ]
           },
           {
-            "Token Authentication": []
+            "Token Authentication": [
+              
+            ]
           }
         ],
         "operationId": "umResourcesFindByType"
@@ -14585,10 +15291,14 @@
         },
         "security": [
           {
-            "Basic Authentication": []
+            "Basic Authentication": [
+              
+            ]
           },
           {
-            "Token Authentication": []
+            "Token Authentication": [
+              
+            ]
           }
         ],
         "operationId": "umResourcesFindByTypeAndId"
@@ -14655,10 +15365,14 @@
         },
         "security": [
           {
-            "Basic Authentication": []
+            "Basic Authentication": [
+              
+            ]
           },
           {
-            "Token Authentication": []
+            "Token Authentication": [
+              
+            ]
           }
         ],
         "operationId": "umUsersS3keysGet"
@@ -14728,10 +15442,14 @@
         },
         "security": [
           {
-            "Basic Authentication": []
+            "Basic Authentication": [
+              
+            ]
           },
           {
-            "Token Authentication": []
+            "Token Authentication": [
+              
+            ]
           }
         ],
         "operationId": "umUsersS3keysPost"
@@ -14805,10 +15523,14 @@
         },
         "security": [
           {
-            "Basic Authentication": []
+            "Basic Authentication": [
+              
+            ]
           },
           {
-            "Token Authentication": []
+            "Token Authentication": [
+              
+            ]
           }
         ],
         "operationId": "umUsersS3keysFindByKeyId"
@@ -14894,10 +15616,14 @@
         },
         "security": [
           {
-            "Basic Authentication": []
+            "Basic Authentication": [
+              
+            ]
           },
           {
-            "Token Authentication": []
+            "Token Authentication": [
+              
+            ]
           }
         ],
         "operationId": "umUsersS3keysPut"
@@ -14971,10 +15697,14 @@
         },
         "security": [
           {
-            "Basic Authentication": []
+            "Basic Authentication": [
+              
+            ]
           },
           {
-            "Token Authentication": []
+            "Token Authentication": [
+              
+            ]
           }
         ],
         "operationId": "umUsersS3keysDelete"
@@ -15038,10 +15768,14 @@
         },
         "security": [
           {
-            "Basic Authentication": []
+            "Basic Authentication": [
+              
+            ]
           },
           {
-            "Token Authentication": []
+            "Token Authentication": [
+              
+            ]
           }
         ],
         "operationId": "umUsersS3ssourlGet"
@@ -15101,10 +15835,14 @@
         },
         "security": [
           {
-            "Basic Authentication": []
+            "Basic Authentication": [
+              
+            ]
           },
           {
-            "Token Authentication": []
+            "Token Authentication": [
+              
+            ]
           }
         ],
         "operationId": "backupunitsGet"
@@ -15176,10 +15914,14 @@
         },
         "security": [
           {
-            "Basic Authentication": []
+            "Basic Authentication": [
+              
+            ]
           },
           {
-            "Token Authentication": []
+            "Token Authentication": [
+              
+            ]
           }
         ],
         "operationId": "backupunitsPost"
@@ -15246,10 +15988,14 @@
         },
         "security": [
           {
-            "Basic Authentication": []
+            "Basic Authentication": [
+              
+            ]
           },
           {
-            "Token Authentication": []
+            "Token Authentication": [
+              
+            ]
           }
         ],
         "operationId": "backupunitsFindById"
@@ -15328,10 +16074,14 @@
         },
         "security": [
           {
-            "Basic Authentication": []
+            "Basic Authentication": [
+              
+            ]
           },
           {
-            "Token Authentication": []
+            "Token Authentication": [
+              
+            ]
           }
         ],
         "operationId": "backupunitsPut"
@@ -15410,10 +16160,14 @@
         },
         "security": [
           {
-            "Basic Authentication": []
+            "Basic Authentication": [
+              
+            ]
           },
           {
-            "Token Authentication": []
+            "Token Authentication": [
+              
+            ]
           }
         ],
         "operationId": "backupunitsPatch"
@@ -15480,10 +16234,14 @@
         },
         "security": [
           {
-            "Basic Authentication": []
+            "Basic Authentication": [
+              
+            ]
           },
           {
-            "Token Authentication": []
+            "Token Authentication": [
+              
+            ]
           }
         ],
         "operationId": "backupunitsDelete"
@@ -15547,10 +16305,14 @@
         },
         "security": [
           {
-            "Basic Authentication": []
+            "Basic Authentication": [
+              
+            ]
           },
           {
-            "Token Authentication": []
+            "Token Authentication": [
+              
+            ]
           }
         ],
         "operationId": "backupunitsSsourlGet"
@@ -15610,10 +16372,14 @@
         },
         "security": [
           {
-            "Basic Authentication": []
+            "Basic Authentication": [
+              
+            ]
           },
           {
-            "Token Authentication": []
+            "Token Authentication": [
+              
+            ]
           }
         ],
         "operationId": "k8sGet"
@@ -15680,10 +16446,14 @@
         },
         "security": [
           {
-            "Basic Authentication": []
+            "Basic Authentication": [
+              
+            ]
           },
           {
-            "Token Authentication": []
+            "Token Authentication": [
+              
+            ]
           }
         ],
         "operationId": "k8sPost"
@@ -15750,10 +16520,14 @@
         },
         "security": [
           {
-            "Basic Authentication": []
+            "Basic Authentication": [
+              
+            ]
           },
           {
-            "Token Authentication": []
+            "Token Authentication": [
+              
+            ]
           }
         ],
         "operationId": "k8sFindByClusterId"
@@ -15827,10 +16601,14 @@
         },
         "security": [
           {
-            "Basic Authentication": []
+            "Basic Authentication": [
+              
+            ]
           },
           {
-            "Token Authentication": []
+            "Token Authentication": [
+              
+            ]
           }
         ],
         "operationId": "k8sPut"
@@ -15892,10 +16670,14 @@
         },
         "security": [
           {
-            "Basic Authentication": []
+            "Basic Authentication": [
+              
+            ]
           },
           {
-            "Token Authentication": []
+            "Token Authentication": [
+              
+            ]
           }
         ],
         "operationId": "k8sDelete"
@@ -15964,10 +16746,14 @@
         },
         "security": [
           {
-            "Basic Authentication": []
+            "Basic Authentication": [
+              
+            ]
           },
           {
-            "Token Authentication": []
+            "Token Authentication": [
+              
+            ]
           }
         ],
         "operationId": "k8sKubeconfigGet"
@@ -16034,10 +16820,14 @@
         },
         "security": [
           {
-            "Basic Authentication": []
+            "Basic Authentication": [
+              
+            ]
           },
           {
-            "Token Authentication": []
+            "Token Authentication": [
+              
+            ]
           }
         ],
         "operationId": "k8sNodepoolsGet"
@@ -16111,10 +16901,14 @@
         },
         "security": [
           {
-            "Basic Authentication": []
+            "Basic Authentication": [
+              
+            ]
           },
           {
-            "Token Authentication": []
+            "Token Authentication": [
+              
+            ]
           }
         ],
         "operationId": "k8sNodepoolsPost"
@@ -16185,10 +16979,14 @@
         },
         "security": [
           {
-            "Basic Authentication": []
+            "Basic Authentication": [
+              
+            ]
           },
           {
-            "Token Authentication": []
+            "Token Authentication": [
+              
+            ]
           }
         ],
         "operationId": "k8sNodepoolsFindById"
@@ -16269,10 +17067,14 @@
         },
         "security": [
           {
-            "Basic Authentication": []
+            "Basic Authentication": [
+              
+            ]
           },
           {
-            "Token Authentication": []
+            "Token Authentication": [
+              
+            ]
           }
         ],
         "operationId": "k8sNodepoolsPut"
@@ -16341,10 +17143,14 @@
         },
         "security": [
           {
-            "Basic Authentication": []
+            "Basic Authentication": [
+              
+            ]
           },
           {
-            "Token Authentication": []
+            "Token Authentication": [
+              
+            ]
           }
         ],
         "operationId": "k8sNodepoolsDelete"
@@ -16415,10 +17221,14 @@
         },
         "security": [
           {
-            "Basic Authentication": []
+            "Basic Authentication": [
+              
+            ]
           },
           {
-            "Token Authentication": []
+            "Token Authentication": [
+              
+            ]
           }
         ],
         "operationId": "k8sNodepoolsNodesGet"
@@ -16496,10 +17306,14 @@
         },
         "security": [
           {
-            "Basic Authentication": []
+            "Basic Authentication": [
+              
+            ]
           },
           {
-            "Token Authentication": []
+            "Token Authentication": [
+              
+            ]
           }
         ],
         "operationId": "k8sNodepoolsNodesFindById"
@@ -16575,10 +17389,14 @@
         },
         "security": [
           {
-            "Basic Authentication": []
+            "Basic Authentication": [
+              
+            ]
           },
           {
-            "Token Authentication": []
+            "Token Authentication": [
+              
+            ]
           }
         ],
         "operationId": "k8sNodepoolsNodesDelete"
@@ -16653,10 +17471,14 @@
         },
         "security": [
           {
-            "Basic Authentication": []
+            "Basic Authentication": [
+              
+            ]
           },
           {
-            "Token Authentication": []
+            "Token Authentication": [
+              
+            ]
           }
         ],
         "operationId": "k8sNodepoolsNodesReplacePost"
@@ -16708,10 +17530,14 @@
         },
         "security": [
           {
-            "Basic Authentication": []
+            "Basic Authentication": [
+              
+            ]
           },
           {
-            "Token Authentication": []
+            "Token Authentication": [
+              
+            ]
           }
         ],
         "operationId": "k8sVersionsGet"
@@ -16760,10 +17586,14 @@
         },
         "security": [
           {
-            "Basic Authentication": []
+            "Basic Authentication": [
+              
+            ]
           },
           {
-            "Token Authentication": []
+            "Token Authentication": [
+              
+            ]
           }
         ],
         "operationId": "k8sVersionsDefaultGet"
@@ -16823,10 +17653,14 @@
         },
         "security": [
           {
-            "Basic Authentication": []
+            "Basic Authentication": [
+              
+            ]
           },
           {
-            "Token Authentication": []
+            "Token Authentication": [
+              
+            ]
           }
         ],
         "operationId": "pccsGet"
@@ -16898,10 +17732,14 @@
         },
         "security": [
           {
-            "Basic Authentication": []
+            "Basic Authentication": [
+              
+            ]
           },
           {
-            "Token Authentication": []
+            "Token Authentication": [
+              
+            ]
           }
         ],
         "operationId": "pccsPost"
@@ -16968,10 +17806,14 @@
         },
         "security": [
           {
-            "Basic Authentication": []
+            "Basic Authentication": [
+              
+            ]
           },
           {
-            "Token Authentication": []
+            "Token Authentication": [
+              
+            ]
           }
         ],
         "operationId": "pccsFindById"
@@ -17038,10 +17880,14 @@
         },
         "security": [
           {
-            "Basic Authentication": []
+            "Basic Authentication": [
+              
+            ]
           },
           {
-            "Token Authentication": []
+            "Token Authentication": [
+              
+            ]
           }
         ],
         "operationId": "pccsDelete"
@@ -17120,10 +17966,14 @@
         },
         "security": [
           {
-            "Basic Authentication": []
+            "Basic Authentication": [
+              
+            ]
           },
           {
-            "Token Authentication": []
+            "Token Authentication": [
+              
+            ]
           }
         ],
         "operationId": "pccsPatch"
@@ -17183,10 +18033,14 @@
         },
         "security": [
           {
-            "Basic Authentication": []
+            "Basic Authentication": [
+              
+            ]
           },
           {
-            "Token Authentication": []
+            "Token Authentication": [
+              
+            ]
           }
         ],
         "operationId": "labelsGet"
@@ -17253,10 +18107,14 @@
         },
         "security": [
           {
-            "Basic Authentication": []
+            "Basic Authentication": [
+              
+            ]
           },
           {
-            "Token Authentication": []
+            "Token Authentication": [
+              
+            ]
           }
         ],
         "operationId": "labelsFindByUrn"
@@ -17323,10 +18181,14 @@
         },
         "security": [
           {
-            "Basic Authentication": []
+            "Basic Authentication": [
+              
+            ]
           },
           {
-            "Token Authentication": []
+            "Token Authentication": [
+              
+            ]
           }
         ],
         "operationId": "datacentersLabelsGet"
@@ -17400,10 +18262,14 @@
         },
         "security": [
           {
-            "Basic Authentication": []
+            "Basic Authentication": [
+              
+            ]
           },
           {
-            "Token Authentication": []
+            "Token Authentication": [
+              
+            ]
           }
         ],
         "operationId": "datacentersLabelsPost"
@@ -17477,10 +18343,14 @@
         },
         "security": [
           {
-            "Basic Authentication": []
+            "Basic Authentication": [
+              
+            ]
           },
           {
-            "Token Authentication": []
+            "Token Authentication": [
+              
+            ]
           }
         ],
         "operationId": "datacentersLabelsFindByKey"
@@ -17561,10 +18431,14 @@
         },
         "security": [
           {
-            "Basic Authentication": []
+            "Basic Authentication": [
+              
+            ]
           },
           {
-            "Token Authentication": []
+            "Token Authentication": [
+              
+            ]
           }
         ],
         "operationId": "datacentersLabelsPut"
@@ -17633,10 +18507,14 @@
         },
         "security": [
           {
-            "Basic Authentication": []
+            "Basic Authentication": [
+              
+            ]
           },
           {
-            "Token Authentication": []
+            "Token Authentication": [
+              
+            ]
           }
         ],
         "operationId": "datacentersLabelsDelete"
@@ -17710,10 +18588,14 @@
         },
         "security": [
           {
-            "Basic Authentication": []
+            "Basic Authentication": [
+              
+            ]
           },
           {
-            "Token Authentication": []
+            "Token Authentication": [
+              
+            ]
           }
         ],
         "operationId": "datacentersServersLabelsGet"
@@ -17794,10 +18676,14 @@
         },
         "security": [
           {
-            "Basic Authentication": []
+            "Basic Authentication": [
+              
+            ]
           },
           {
-            "Token Authentication": []
+            "Token Authentication": [
+              
+            ]
           }
         ],
         "operationId": "datacentersServersLabelsPost"
@@ -17878,10 +18764,14 @@
         },
         "security": [
           {
-            "Basic Authentication": []
+            "Basic Authentication": [
+              
+            ]
           },
           {
-            "Token Authentication": []
+            "Token Authentication": [
+              
+            ]
           }
         ],
         "operationId": "datacentersServersLabelsFindByKey"
@@ -17969,10 +18859,14 @@
         },
         "security": [
           {
-            "Basic Authentication": []
+            "Basic Authentication": [
+              
+            ]
           },
           {
-            "Token Authentication": []
+            "Token Authentication": [
+              
+            ]
           }
         ],
         "operationId": "datacentersServersLabelsPut"
@@ -18048,10 +18942,14 @@
         },
         "security": [
           {
-            "Basic Authentication": []
+            "Basic Authentication": [
+              
+            ]
           },
           {
-            "Token Authentication": []
+            "Token Authentication": [
+              
+            ]
           }
         ],
         "operationId": "datacentersServersLabelsDelete"
@@ -18125,10 +19023,14 @@
         },
         "security": [
           {
-            "Basic Authentication": []
+            "Basic Authentication": [
+              
+            ]
           },
           {
-            "Token Authentication": []
+            "Token Authentication": [
+              
+            ]
           }
         ],
         "operationId": "datacentersVolumesLabelsGet"
@@ -18209,10 +19111,14 @@
         },
         "security": [
           {
-            "Basic Authentication": []
+            "Basic Authentication": [
+              
+            ]
           },
           {
-            "Token Authentication": []
+            "Token Authentication": [
+              
+            ]
           }
         ],
         "operationId": "datacentersVolumesLabelsPost"
@@ -18293,10 +19199,14 @@
         },
         "security": [
           {
-            "Basic Authentication": []
+            "Basic Authentication": [
+              
+            ]
           },
           {
-            "Token Authentication": []
+            "Token Authentication": [
+              
+            ]
           }
         ],
         "operationId": "datacentersVolumesLabelsFindByKey"
@@ -18384,10 +19294,14 @@
         },
         "security": [
           {
-            "Basic Authentication": []
+            "Basic Authentication": [
+              
+            ]
           },
           {
-            "Token Authentication": []
+            "Token Authentication": [
+              
+            ]
           }
         ],
         "operationId": "datacentersVolumesLabelsPut"
@@ -18463,10 +19377,14 @@
         },
         "security": [
           {
-            "Basic Authentication": []
+            "Basic Authentication": [
+              
+            ]
           },
           {
-            "Token Authentication": []
+            "Token Authentication": [
+              
+            ]
           }
         ],
         "operationId": "datacentersVolumesLabelsDelete"
@@ -18533,10 +19451,14 @@
         },
         "security": [
           {
-            "Basic Authentication": []
+            "Basic Authentication": [
+              
+            ]
           },
           {
-            "Token Authentication": []
+            "Token Authentication": [
+              
+            ]
           }
         ],
         "operationId": "snapshotsLabelsGet"
@@ -18610,10 +19532,14 @@
         },
         "security": [
           {
-            "Basic Authentication": []
+            "Basic Authentication": [
+              
+            ]
           },
           {
-            "Token Authentication": []
+            "Token Authentication": [
+              
+            ]
           }
         ],
         "operationId": "snapshotsLabelsPost"
@@ -18687,10 +19613,14 @@
         },
         "security": [
           {
-            "Basic Authentication": []
+            "Basic Authentication": [
+              
+            ]
           },
           {
-            "Token Authentication": []
+            "Token Authentication": [
+              
+            ]
           }
         ],
         "operationId": "snapshotsLabelsFindByKey"
@@ -18771,10 +19701,14 @@
         },
         "security": [
           {
-            "Basic Authentication": []
+            "Basic Authentication": [
+              
+            ]
           },
           {
-            "Token Authentication": []
+            "Token Authentication": [
+              
+            ]
           }
         ],
         "operationId": "snapshotsLabelsPut"
@@ -18843,10 +19777,14 @@
         },
         "security": [
           {
-            "Basic Authentication": []
+            "Basic Authentication": [
+              
+            ]
           },
           {
-            "Token Authentication": []
+            "Token Authentication": [
+              
+            ]
           }
         ],
         "operationId": "snapshotsLabelsDelete"
@@ -18913,10 +19851,14 @@
         },
         "security": [
           {
-            "Basic Authentication": []
+            "Basic Authentication": [
+              
+            ]
           },
           {
-            "Token Authentication": []
+            "Token Authentication": [
+              
+            ]
           }
         ],
         "operationId": "ipblocksLabelsGet"
@@ -18990,10 +19932,14 @@
         },
         "security": [
           {
-            "Basic Authentication": []
+            "Basic Authentication": [
+              
+            ]
           },
           {
-            "Token Authentication": []
+            "Token Authentication": [
+              
+            ]
           }
         ],
         "operationId": "ipblocksLabelsPost"
@@ -19067,10 +20013,14 @@
         },
         "security": [
           {
-            "Basic Authentication": []
+            "Basic Authentication": [
+              
+            ]
           },
           {
-            "Token Authentication": []
+            "Token Authentication": [
+              
+            ]
           }
         ],
         "operationId": "ipblocksLabelsFindByKey"
@@ -19151,10 +20101,14 @@
         },
         "security": [
           {
-            "Basic Authentication": []
+            "Basic Authentication": [
+              
+            ]
           },
           {
-            "Token Authentication": []
+            "Token Authentication": [
+              
+            ]
           }
         ],
         "operationId": "ipblocksLabelsPut"
@@ -19223,10 +20177,14 @@
         },
         "security": [
           {
-            "Basic Authentication": []
+            "Basic Authentication": [
+              
+            ]
           },
           {
-            "Token Authentication": []
+            "Token Authentication": [
+              
+            ]
           }
         ],
         "operationId": "ipblocksLabelsDelete"
@@ -19280,10 +20238,14 @@
         },
         "security": [
           {
-            "Basic Authentication": []
+            "Basic Authentication": [
+              
+            ]
           },
           {
-            "Token Authentication": []
+            "Token Authentication": [
+              
+            ]
           }
         ],
         "operationId": "templatesGet"
@@ -19344,10 +20306,14 @@
         },
         "security": [
           {
-            "Basic Authentication": []
+            "Basic Authentication": [
+              
+            ]
           },
           {
-            "Token Authentication": []
+            "Token Authentication": [
+              
+            ]
           }
         ],
         "operationId": "templatesFindById"
@@ -26068,6 +27034,12 @@
           "description": "The maximum time in milliseconds to wait for a target to respond to a check. For target VMs with 'Check Interval' set, the lesser of the two  values is used once the TCP connection is established.",
           "example": 2000
         },
+        "checkInterval": {
+          "type": "integer",
+          "format": "int32",
+          "description": "The interval in milliseconds between consecutive health checks; default is 2000.",
+          "example": 2000
+        },
         "retries": {
           "type": "integer",
           "format": "int32",
@@ -26153,26 +27125,11 @@
           "description": "Traffic is distributed in proportion to target weight, relative to the combined weight of all targets. A target with higher weight receives a greater share of traffic. Valid range is 0 to 256 and default is 1; targets with weight of 0 do not participate in load balancing but still accept persistent connections. It is best use values in the middle of the range to leave room for later adjustments.",
           "example": "123"
         },
-        "healthCheck": {
-          "$ref": "#/definitions/TargetGroupTargetHealthCheck",
-          "description": "Health check properties for Network Load Balancer forwarding rule target."
-        }
-      }
-    },
-    "TargetGroupTargetHealthCheck": {
-      "type": "object",
-      "properties": {
-        "check": {
+        "healthCheckEnabled": {
           "type": "boolean",
           "description": "Makes the target available only if it accepts periodic health check TCP connection attempts; when turned off, the target is considered always available. The health check only consists of a connection attempt to the address and port of the target. Default is True."
         },
-        "checkInterval": {
-          "type": "integer",
-          "format": "int32",
-          "description": "The interval in milliseconds between consecutive health checks; default is 2000.",
-          "example": 2000
-        },
-        "maintenance": {
+        "maintenanceEnabled": {
           "type": "boolean",
           "description": "Maintenance mode prevents the target from receiving balanced traffic."
         }

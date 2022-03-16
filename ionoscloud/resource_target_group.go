@@ -23,72 +23,53 @@ func resourceTargetGroup() *schema.Resource {
 			"name": {
 				Type:         schema.TypeString,
 				Required:     true,
-				Description:  "A name of that Target Group",
+				Description:  "The name of the target group.",
 				ValidateFunc: validation.All(validation.StringIsNotWhiteSpace),
 			},
 			"algorithm": {
 				Type:         schema.TypeString,
 				Required:     true,
-				Description:  "Algorithm for the balancing.",
-				ValidateFunc: validation.All(validation.StringIsNotWhiteSpace),
+				Description:  "Balancing algorithm.",
+				ValidateFunc: validation.All(validation.StringInSlice([]string{"ROUND_ROBIN", "LEAST_CONNECTION", "RANDOM", "SOURCE_IP"}, true)),
 			},
 			"protocol": {
 				Type:         schema.TypeString,
 				Required:     true,
-				Description:  "Protocol of the balancing.",
-				ValidateFunc: validation.All(validation.StringIsNotWhiteSpace),
+				Description:  "Balancing protocol.",
+				ValidateFunc: validation.All(validation.StringInSlice([]string{"HTTP"}, true)),
 			},
 			"targets": {
 				Type:        schema.TypeList,
-				Description: "Array of items in that collection",
+				Description: "Array of items in the collection",
 				Required:    true,
 				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{
 						"ip": {
 							Type:         schema.TypeString,
-							Description:  "IP of a balanced target VM",
+							Description:  "The IP of the balanced target VM.",
 							Required:     true,
 							ValidateFunc: validation.All(validation.StringIsNotWhiteSpace),
 						},
 						"port": {
 							Type:        schema.TypeInt,
-							Description: "Port of the balanced target service. (range: 1 to 65535)",
+							Description: "The port of the balanced target service; valid range is 1 to 65535.",
 							Required:    true,
 						},
 						"weight": {
 							Type:        schema.TypeInt,
-							Description: "Weight parameter is used to adjust the target VM's weight relative to other target VMs",
+							Description: "Traffic is distributed in proportion to target weight, relative to the combined weight of all targets. A target with higher weight receives a greater share of traffic. Valid range is 0 to 256 and default is 1; targets with weight of 0 do not participate in load balancing but still accept persistent connections. It is best use values in the middle of the range to leave room for later adjustments.",
 							Required:    true,
 						},
-						"health_check": {
-							Type:        schema.TypeList,
-							MaxItems:    1,
-							Description: "Health check attributes for Network Load Balancer forwarding rule target",
+						"health_check_enabled": {
+							Type:        schema.TypeBool,
+							Description: "Makes the target available only if it accepts periodic health check TCP connection attempts; when turned off, the target is considered always available. The health check only consists of a connection attempt to the address and port of the target. Default is True.",
 							Optional:    true,
 							Computed:    true,
-							Elem: &schema.Resource{
-								Schema: map[string]*schema.Schema{
-									"check": {
-										Type:        schema.TypeBool,
-										Description: "Check specifies whether the target VM's health is checked.",
-										Optional:    true,
-										Computed:    true,
-									},
-									"check_interval": {
-										Type: schema.TypeInt,
-										Description: "CheckInterval determines the duration (in milliseconds) between " +
-											"consecutive health checks. If unspecified a default of 2000 ms is used.",
-										Optional: true,
-										Computed: true,
-									},
-									"maintenance": {
-										Type:        schema.TypeBool,
-										Description: "Maintenance specifies if a target VM should be marked as down, even if it is not.",
-										Optional:    true,
-										Computed:    true,
-									},
-								},
-							},
+						},
+						"maintenance_enabled": {
+							Type:        schema.TypeBool,
+							Description: "Maintenance mode prevents the target from receiving balanced traffic.",
+							Optional:    true,
 						},
 					},
 				},
@@ -101,26 +82,24 @@ func resourceTargetGroup() *schema.Resource {
 				Computed:    true,
 				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{
-						"connect_timeout": {
-							Type: schema.TypeInt,
-							Description: "It specifies the maximum time (in milliseconds) to wait for a connection attempt " +
-								"to a target VM to succeed. If unset, the default of 5 seconds will be used.",
-							Optional: true,
-							Computed: true,
+						"check_timeout": {
+							Type:        schema.TypeInt,
+							Description: "The maximum time in milliseconds to wait for a target to respond to a check. For target VMs with 'Check Interval' set, the lesser of the two  values is used once the TCP connection is established.",
+							Optional:    true,
+							Computed:    true,
 						},
-						"target_timeout": {
-							Type: schema.TypeInt,
-							Description: "argetTimeout specifies the maximum inactivity time (in milliseconds) on the " +
-								"target VM side. If unset, the default of 50 seconds will be used.",
-							Optional: true,
-							Computed: true,
+						"check_interval": {
+							Type:        schema.TypeInt,
+							Description: "The interval in milliseconds between consecutive health checks; default is 2000.",
+							Optional:    true,
+							Computed:    true,
 						},
 						"retries": {
-							Type: schema.TypeInt,
-							Description: "Retries specifies the number of retries to perform on a target VM after a " +
-								"connection failure. If unset, the default value of 3 will be used. (valid range: [0, 65535]).",
-							Optional: true,
-							Computed: true,
+							Type:         schema.TypeInt,
+							Description:  "The maximum number of attempts to reconnect to a target after a connection failure. Valid range is 0 to 65535, and default is three reconnection.",
+							Optional:     true,
+							Computed:     true,
+							ValidateFunc: validation.All(validation.IntBetween(1, 65535)),
 						},
 					},
 				},
@@ -135,24 +114,25 @@ func resourceTargetGroup() *schema.Resource {
 					Schema: map[string]*schema.Schema{
 						"path": {
 							Type:        schema.TypeString,
-							Description: "The path for the HTTP health check; default: /.",
+							Description: "The path (destination URL) for the HTTP health check request; the default is /.",
 							Optional:    true,
 							Computed:    true,
 						},
 						"method": {
-							Type:        schema.TypeString,
-							Description: "The method for the HTTP health check.",
-							Optional:    true,
-							Computed:    true,
+							Type:         schema.TypeString,
+							Description:  "The method for the HTTP health check.",
+							Optional:     true,
+							Computed:     true,
+							ValidateFunc: validation.All(validation.StringInSlice([]string{"HEAD", "PUT", "POST", "GET", "TRACE", "PATCH", "OPTIONS"}, true)),
 						},
 						"match_type": {
 							Type:         schema.TypeString,
 							Required:     true,
-							ValidateFunc: validation.All(validation.StringIsNotWhiteSpace),
+							ValidateFunc: validation.All(validation.StringInSlice([]string{"STATUS_CODE", "RESPONSE_BODY"}, true)),
 						},
 						"response": {
 							Type:         schema.TypeString,
-							Description:  "The response returned by the request.",
+							Description:  "The response returned by the request, depending on the match type.",
 							Required:     true,
 							ValidateFunc: validation.All(validation.StringIsNotWhiteSpace),
 						},
@@ -182,108 +162,58 @@ func resourceTargetGroupCreate(ctx context.Context, d *schema.ResourceData, meta
 	if name, nameOk := d.GetOk("name"); nameOk {
 		name := name.(string)
 		targetGroup.Properties.Name = &name
-	} else {
-		diags := diag.FromErr(fmt.Errorf("name must be provided for target group"))
-		return diags
 	}
 
 	if algorithm, algorithmOk := d.GetOk("algorithm"); algorithmOk {
 		algorithm := algorithm.(string)
 		targetGroup.Properties.Algorithm = &algorithm
-	} else {
-		diags := diag.FromErr(fmt.Errorf("algorithm must be provided for target group"))
-		return diags
 	}
 
 	if protocol, protocolOk := d.GetOk("protocol"); protocolOk {
 		protocol := protocol.(string)
 		targetGroup.Properties.Protocol = &protocol
-	} else {
-		diags := diag.FromErr(fmt.Errorf("protocol must be provided for target group"))
-		return diags
 	}
 
 	if targetsVal, targetsOk := d.GetOk("targets"); targetsOk {
 		if targetsVal.([]interface{}) != nil {
-			updateTargets := false
-
 			var targets []ionoscloud.TargetGroupTarget
 
 			for targetIndex := range targetsVal.([]interface{}) {
 				target := ionoscloud.TargetGroupTarget{}
-				addTarget := false
 				if ip, ipOk := d.GetOk(fmt.Sprintf("targets.%d.ip", targetIndex)); ipOk {
 					ip := ip.(string)
 					target.Ip = &ip
-					addTarget = true
-				} else {
-					diags := diag.FromErr(fmt.Errorf("ip must be provided for target group target"))
-					return diags
 				}
 
 				if port, portOk := d.GetOk(fmt.Sprintf("targets.%d.port", targetIndex)); portOk {
 					port := int32(port.(int))
 					target.Port = &port
-				} else {
-					diags := diag.FromErr(fmt.Errorf("port must be provided for target group target"))
-					return diags
 				}
 
 				if weight, weightOk := d.GetOk(fmt.Sprintf("targets.%d.weight", targetIndex)); weightOk {
 					weight := int32(weight.(int))
 					target.Weight = &weight
-				} else {
-					diags := diag.FromErr(fmt.Errorf("weight must be provided for target group target"))
-					return diags
 				}
 
-				if _, healthCheckOk := d.GetOk(fmt.Sprintf("targets.%d.health_check.0", targetIndex)); healthCheckOk {
-					target.HealthCheck = &ionoscloud.TargetGroupTargetHealthCheck{}
-
-					if check, checkOk := d.GetOk(fmt.Sprintf("targets.%d.health_check.0.check", targetIndex)); checkOk {
-						check := check.(bool)
-						target.HealthCheck.Check = &check
-					}
-
-					if checkInterval, checkIntervalOk := d.GetOk(fmt.Sprintf("targets.%d.health_check.0.check_interval", targetIndex)); checkIntervalOk {
-						checkInterval := int32(checkInterval.(int))
-						target.HealthCheck.CheckInterval = &checkInterval
-					}
-					if maintenance, maintenanceOk := d.GetOk(fmt.Sprintf("targets.%d.health_check.0.maintenance", targetIndex)); maintenanceOk {
-						maintenance := maintenance.(bool)
-						target.HealthCheck.Maintenance = &maintenance
-					}
-
-				}
-
-				if addTarget {
-					targets = append(targets, target)
-				}
+				targets = append(targets, target)
 
 			}
 
-			if len(targets) > 0 {
-				updateTargets = true
-			}
-
-			if updateTargets == true {
-				log.Printf("[INFO] Target group targets set to %+v", targets)
-				targetGroup.Properties.Targets = &targets
-			}
+			targetGroup.Properties.Targets = &targets
 		}
 	}
 
 	if _, healthCheckOk := d.GetOk("health_check.0"); healthCheckOk {
 		targetGroup.Properties.HealthCheck = &ionoscloud.TargetGroupHealthCheck{}
 
-		if connectTimeout, connectTimeoutOk := d.GetOk("health_check.0.connect_timeout"); connectTimeoutOk {
-			connectTimeout := int32(connectTimeout.(int))
-			targetGroup.Properties.HealthCheck.ConnectTimeout = &connectTimeout
+		if checkTimeout, checkTimeoutOk := d.GetOk("health_check.0.check_timeout"); checkTimeoutOk {
+			checkTimeout := int32(checkTimeout.(int))
+			targetGroup.Properties.HealthCheck.CheckTimeout = &checkTimeout
 		}
 
-		if targetTimeout, targetTimeoutOk := d.GetOk("health_check.0.target_timeout"); targetTimeoutOk {
-			targetTimeout := int32(targetTimeout.(int))
-			targetGroup.Properties.HealthCheck.TargetTimeout = &targetTimeout
+		if checkInterval, checkIntervalOk := d.GetOk("health_check.0.check_interval"); checkIntervalOk {
+			checkInterval := int32(checkInterval.(int))
+			targetGroup.Properties.HealthCheck.CheckInterval = &checkInterval
 		}
 
 		if retries, retriesOk := d.GetOk("health_check.0.retries"); retriesOk {
@@ -399,8 +329,6 @@ func resourceTargetGroupUpdate(ctx context.Context, d *schema.ResourceData, meta
 	if d.HasChange("targets") {
 		oldTargets, newTargets := d.GetChange("targets")
 		if newTargets.([]interface{}) != nil {
-			updateTargets := false
-
 			var targets []ionoscloud.TargetGroupTarget
 
 			for targetIndex := range newTargets.([]interface{}) {
@@ -421,83 +349,61 @@ func resourceTargetGroupUpdate(ctx context.Context, d *schema.ResourceData, meta
 					target.Weight = &weight
 				}
 
-				if _, healthCheckOk := d.GetOk(fmt.Sprintf("targets.%d.health_check.0", targetIndex)); healthCheckOk {
-					target.HealthCheck = &ionoscloud.TargetGroupTargetHealthCheck{}
+				if healthCheck, healthCheckOk := d.GetOk(fmt.Sprintf("targets.%d.health_check_enabled", targetIndex)); healthCheckOk {
+					healthCheck := healthCheck.(bool)
+					target.HealthCheckEnabled = &healthCheck
+				}
 
-					if check, checkOk := d.GetOk(fmt.Sprintf("targets.%d.health_check.0.check", targetIndex)); checkOk {
-						check := check.(bool)
-						target.HealthCheck.Check = &check
-					}
-
-					if checkInterval, checkIntervalOk := d.GetOk(fmt.Sprintf("targets.%d.health_check.0.check_interval", targetIndex)); checkIntervalOk {
-						checkInterval := int32(checkInterval.(int))
-						target.HealthCheck.CheckInterval = &checkInterval
-					}
-
-					if maintenance, maintenanceOk := d.GetOk(fmt.Sprintf("targets.%d.health_check.0.maintenance", targetIndex)); maintenanceOk {
-						maintenance := maintenance.(bool)
-						target.HealthCheck.Maintenance = &maintenance
-					}
+				if maintenance, maintenanceOk := d.GetOk(fmt.Sprintf("targets.%d.maintenance_enabled", targetIndex)); maintenanceOk {
+					maintenance := maintenance.(bool)
+					target.MaintenanceEnabled = &maintenance
 				}
 
 				targets = append(targets, target)
 			}
 
-			if len(targets) > 0 {
-				updateTargets = true
-			}
-
-			if updateTargets == true {
-				log.Printf("[INFO] Network load balancer forwarding rule targets changed from %+v to %+v", oldTargets, newTargets)
-				input.Targets = &targets
-			}
+			log.Printf("[INFO] Network load balancer forwarding rule targets changed from %+v to %+v", oldTargets, newTargets)
+			input.Targets = &targets
 		}
 	}
 
 	if d.HasChange("health_check.0") {
 		_, v := d.GetChange("health_check.0")
 		if v.(map[string]interface{}) != nil {
-			updateHealthCheck := false
 
 			healthCheck := &ionoscloud.TargetGroupHealthCheck{}
 
-			if d.HasChange("health_check.0.connect_timeout") {
-				_, newValue := d.GetChange("health_check.0.connect_timeout")
+			if d.HasChange("health_check.0.check_timeout") {
+				_, newValue := d.GetChange("health_check.0.check_timeout")
 				if newValue != 0 {
-					updateHealthCheck = true
 					newValue := int32(newValue.(int))
-					healthCheck.ConnectTimeout = &newValue
+					healthCheck.CheckTimeout = &newValue
 				}
 			}
 
-			if d.HasChange("health_check.0.target_timeout") {
-				_, newValue := d.GetChange("health_check.0.target_timeout")
+			if d.HasChange("health_check.0.check_interval") {
+				_, newValue := d.GetChange("health_check.0.check_interval")
 				if newValue != 0 {
-					updateHealthCheck = true
 					newValue := int32(newValue.(int))
-					healthCheck.TargetTimeout = &newValue
+					healthCheck.CheckInterval = &newValue
 				}
 			}
 
 			if d.HasChange("health_check.0.retries") {
 				_, newValue := d.GetChange("health_check.0.retries")
 				if newValue != 0 {
-					updateHealthCheck = true
 					newValue := int32(newValue.(int))
 					healthCheck.Retries = &newValue
 				}
 			}
 
-			if updateHealthCheck == true {
-				input.HealthCheck = healthCheck
-			}
+			input.HealthCheck = healthCheck
 		}
 	}
 
 	if d.HasChange("http_health_check.0") {
 		_, v := d.GetChange("http_health_check.0")
 		if v.(map[string]interface{}) != nil {
-			updateHttpHealthCheck := false
 
 			healthCheck := &ionoscloud.TargetGroupHttpHealthCheck{}
 
@@ -520,7 +426,6 @@ func resourceTargetGroupUpdate(ctx context.Context, d *schema.ResourceData, meta
 			if d.HasChange("http_health_check.0.match_type") {
 				_, newValue := d.GetChange("health_check.0.match_type")
 				if newValue != 0 {
-					updateHttpHealthCheck = true
 					newValue := newValue.(string)
 					healthCheck.MatchType = &newValue
 				}
@@ -549,9 +454,9 @@ func resourceTargetGroupUpdate(ctx context.Context, d *schema.ResourceData, meta
 					healthCheck.Negate = &newValue
 				}
 			}
-			if updateHttpHealthCheck == true {
-				input.HttpHealthCheck = healthCheck
-			}
+
+			input.HttpHealthCheck = healthCheck
+
 		}
 	}
 
@@ -665,25 +570,12 @@ func setTargetGroupData(d *schema.ResourceData, targetGroup *ionoscloud.TargetGr
 					targetEntry["weight"] = *target.Weight
 				}
 
-				if target.HealthCheck != nil {
-					healthCheck := make([]interface{}, 1)
+				if target.HealthCheckEnabled != nil {
+					targetEntry["health_check_enabled"] = *target.HealthCheckEnabled
+				}
 
-					healthCheckEntry := make(map[string]interface{})
-
-					if target.HealthCheck.Check != nil {
-						healthCheckEntry["check"] = *target.HealthCheck.Check
-					}
-
-					if target.HealthCheck.CheckInterval != nil {
-						healthCheckEntry["check_interval"] = *target.HealthCheck.CheckInterval
-					}
-
-					if target.HealthCheck.Maintenance != nil {
-						healthCheckEntry["maintenance"] = *target.HealthCheck.Maintenance
-					}
-
-					healthCheck[0] = healthCheckEntry
-					targetEntry["health_check"] = healthCheck
+				if target.MaintenanceEnabled != nil {
+					targetEntry["maintenance_enabled"] = *target.MaintenanceEnabled
 				}
 
 				forwardingRuleTargets = append(forwardingRuleTargets, targetEntry)
@@ -701,12 +593,12 @@ func setTargetGroupData(d *schema.ResourceData, targetGroup *ionoscloud.TargetGr
 
 			healthCheckEntry := make(map[string]interface{})
 
-			if targetGroup.Properties.HealthCheck.ConnectTimeout != nil {
-				healthCheckEntry["connect_timeout"] = *targetGroup.Properties.HealthCheck.ConnectTimeout
+			if targetGroup.Properties.HealthCheck.CheckTimeout != nil {
+				healthCheckEntry["check_timeout"] = *targetGroup.Properties.HealthCheck.CheckTimeout
 			}
 
-			if targetGroup.Properties.HealthCheck.TargetTimeout != nil {
-				healthCheckEntry["target_timeout"] = *targetGroup.Properties.HealthCheck.TargetTimeout
+			if targetGroup.Properties.HealthCheck.CheckInterval != nil {
+				healthCheckEntry["check_interval"] = *targetGroup.Properties.HealthCheck.CheckInterval
 			}
 
 			if targetGroup.Properties.HealthCheck.Retries != nil {

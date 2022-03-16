@@ -18,6 +18,8 @@ import (
 type TargetGroupHealthCheck struct {
 	// The maximum time in milliseconds to wait for a target to respond to a check. For target VMs with 'Check Interval' set, the lesser of the two  values is used once the TCP connection is established.
 	CheckTimeout *int32 `json:"checkTimeout,omitempty"`
+	// The interval in milliseconds between consecutive health checks; default is 2000.
+	CheckInterval *int32 `json:"checkInterval,omitempty"`
 	// The maximum number of attempts to reconnect to a target after a connection failure. Valid range is 0 to 65535, and default is three reconnection attempts.
 	Retries *int32 `json:"retries,omitempty"`
 }
@@ -78,6 +80,44 @@ func (o *TargetGroupHealthCheck) HasCheckTimeout() bool {
 	return false
 }
 
+// GetCheckInterval returns the CheckInterval field value
+// If the value is explicit nil, the zero value for int32 will be returned
+func (o *TargetGroupHealthCheck) GetCheckInterval() *int32 {
+	if o == nil {
+		return nil
+	}
+
+	return o.CheckInterval
+
+}
+
+// GetCheckIntervalOk returns a tuple with the CheckInterval field value
+// and a boolean to check if the value has been set.
+// NOTE: If the value is an explicit nil, `nil, true` will be returned
+func (o *TargetGroupHealthCheck) GetCheckIntervalOk() (*int32, bool) {
+	if o == nil {
+		return nil, false
+	}
+
+	return o.CheckInterval, true
+}
+
+// SetCheckInterval sets field value
+func (o *TargetGroupHealthCheck) SetCheckInterval(v int32) {
+
+	o.CheckInterval = &v
+
+}
+
+// HasCheckInterval returns a boolean if a field has been set.
+func (o *TargetGroupHealthCheck) HasCheckInterval() bool {
+	if o != nil && o.CheckInterval != nil {
+		return true
+	}
+
+	return false
+}
+
 // GetRetries returns the Retries field value
 // If the value is explicit nil, the zero value for int32 will be returned
 func (o *TargetGroupHealthCheck) GetRetries() *int32 {
@@ -120,6 +160,9 @@ func (o TargetGroupHealthCheck) MarshalJSON() ([]byte, error) {
 	toSerialize := map[string]interface{}{}
 	if o.CheckTimeout != nil {
 		toSerialize["checkTimeout"] = o.CheckTimeout
+	}
+	if o.CheckInterval != nil {
+		toSerialize["checkInterval"] = o.CheckInterval
 	}
 	if o.Retries != nil {
 		toSerialize["retries"] = o.Retries

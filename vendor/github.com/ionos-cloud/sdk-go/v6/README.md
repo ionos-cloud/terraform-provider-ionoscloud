@@ -661,7 +661,6 @@ All URIs are relative to *https://api.ionos.com/cloudapi/v6*
  - [TargetGroupProperties](docs/models/TargetGroupProperties)
  - [TargetGroupPut](docs/models/TargetGroupPut)
  - [TargetGroupTarget](docs/models/TargetGroupTarget)
- - [TargetGroupTargetHealthCheck](docs/models/TargetGroupTargetHealthCheck)
  - [TargetGroups](docs/models/TargetGroups)
  - [TargetPortRange](docs/models/TargetPortRange)
  - [Template](docs/models/Template)

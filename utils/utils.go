@@ -2,9 +2,11 @@ package utils
 
 import (
 	"fmt"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"net"
 	"net/http"
 	"reflect"
+	"strings"
 	"time"
 )
 
@@ -67,6 +69,14 @@ func DiffSliceOneWay(a, b []string) []string {
 		}
 	}
 	return diff
+}
+
+// DiffSliceOneWay returns the elements in `a` that aren't in `b`.
+func DiffSuppressCaseInsensitive(_, old, new string, _ *schema.ResourceData) bool {
+	if strings.ToLower(old) == strings.ToLower(new) {
+		return true
+	}
+	return false
 }
 
 func GenerateSetError(resource, field string, err error) error {
