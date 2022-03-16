@@ -214,6 +214,9 @@ func logApiRequestTime(resp *ionoscloud.APIResponse) {
 	if resp != nil {
 		log.Printf("[DEBUG] Request time : %s for operation : %s",
 			resp.RequestTime, resp.Operation)
+		if resp.Response != nil {
+			log.Printf("[DEBUG] response status code : %d\n", resp.StatusCode)
+		}
 	}
 }
 
