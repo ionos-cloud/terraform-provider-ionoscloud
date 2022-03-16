@@ -18,6 +18,30 @@ const (
 	TargetGroupDataSourceByName = "test_target_group_name"
 )
 
+// Image Constants
+const (
+	ImageResource     = "ionoscloud_image"
+	ImageTestResource = "test_image"
+)
+
+// Location Constants
+const (
+	LocationResource     = "ionoscloud_location"
+	LocationTestResource = "test_location"
+)
+
+// Resource Constants
+const (
+	ResourceResource     = "ionoscloud_resource"
+	ResourceTestResource = "test_resource"
+)
+
+// Template Constants
+const (
+	TemplateResource     = "ionoscloud_template"
+	TemplateTestResource = "test_template"
+)
+
 // BackupUnit Constants
 const (
 	BackupUnitResource         = "ionoscloud_backup_unit"
@@ -65,6 +89,39 @@ const (
 	K8sClusterTestResource     = "test_k8s_cluster"
 	K8sClusterDataSourceById   = "test_k8s_cluster_id"
 	K8sClusterDataSourceByName = "test_k8s_cluster_name"
+
+	K8sNodePoolResource         = "ionoscloud_k8s_node_pool"
+	K8sNodePoolTestResource     = "test_k8s_node_pool"
+	K8sNodePoolDataSourceById   = "test_k8s_node_pool_id"
+	K8sNodePoolDataSourceByName = "test_k8s_node_pool_name"
+
+	ResourceNameK8sNodePool   = K8sNodePoolResource + "." + K8sNodePoolTestResource
+	DataSourceK8sNodePoolId   = DataSource + "." + K8sNodePoolResource + "." + K8sNodePoolDataSourceById
+	DataSourceK8sNodePoolName = DataSource + "." + K8sNodePoolResource + "." + K8sNodePoolDataSourceByName
+)
+
+// NatGateway Constants
+const (
+	NatGatewayResource             = "ionoscloud_natgateway"
+	NatGatewayTestResource         = "test_nat_gateway"
+	NatGatewayDataSourceById       = "test_nat_gateway_id"
+	NatGatewayDataSourceByName     = "test_nat_gateway_name"
+	NatGatewayRuleResource         = "ionoscloud_natgateway_rule"
+	NatGatewayRuleTestResource     = "test_nat_gateway"
+	NatGatewayRuleDataSourceById   = "test_nat_gateway_id"
+	NatGatewayRuleDataSourceByName = "test_nat_gateway_name"
+)
+
+// NetworkLoadBalancer Constants
+const (
+	NetworkLoadBalancerResource                       = "ionoscloud_networkloadbalancer"
+	NetworkLoadBalancerTestResource                   = "test_networkloadbalancer"
+	NetworkLoadBalancerDataSourceById                 = "test_networkloadbalancer_id"
+	NetworkLoadBalancerDataSourceByName               = "test_networkloadbalancer_name"
+	NetworkLoadBalancerForwardingRuleResource         = "ionoscloud_networkloadbalancer_forwardingrule"
+	NetworkLoadBalancerForwardingRuleTestResource     = "test_networkloadbalancer_forwardingrule"
+	NetworkLoadBalancerForwardingRuleDataSourceById   = "test_networkloadbalancer_forwardingrule_id"
+	NetworkLoadBalancerForwardingRuleDataSourceByName = "test_networkloadbalancer_forwardingrule_name"
 )
 
 // Private Crossconnect Constants
@@ -107,13 +164,49 @@ const (
 )
 
 //Ip Block constants
-const IpBLockResource = "ionoscloud_ipblock"
+const (
+	IpBlockResource           = "ionoscloud_ipblock"
+	IpBlockTestResource       = "test_ip_block"
+	IpBlockDataSourceById     = "test_ip_block_id"
+	IpBlockDataSourceByName   = "test_ip_block_id"
+	IpBlockDataSourceMatching = "test_ip_block_id_location"
+)
+
+const (
+	NicResource         = "ionoscloud_nic"
+	fullNicResourceName = NicResource + "." + nicTestResourceName
+	nicTestResourceName = "database_nic"
+)
 
 const (
 	VolumeResource         = "ionoscloud_volume"
 	VolumeTestResource     = "test_volume"
 	VolumeDataSourceById   = "test_volume_id"
 	VolumeDataSourceByName = "test_volume_name"
+)
+
+// DBaaS Constants
+const (
+	DBaaSClusterResource             = "ionoscloud_pg_cluster"
+	DBaaSClusterTestResource         = "test_dbaas_cluster"
+	DBaaSClusterTestDataSourceById   = "test_dbaas_cluster_id"
+	DBaaSClusterTestDataSourceByName = "test_dbaas_cluster_name"
+	DBaaSBackupsResource             = "ionoscloud_pg_backups"
+	DBaaSBackupsTest                 = "test_dbaas_backups"
+	DBaaSVersionsResource            = "ionoscloud_pg_versions"
+	DBaaSVersionsTest                = "test_dbaas_versions"
+)
+
+const (
+	ShareResource         = "ionoscloud_share"
+	shareResourceFullName = ShareResource + "." + sourceShareName
+	sourceShareName       = "share"
+)
+
+const (
+	ResourceIpFailover         = "ionoscloud_ipfailover"
+	ipfailoverResourceFullName = ResourceIpFailover + "." + ipfailoverName
+	ipfailoverName             = "failover-test"
 )
 
 // General Constants
