@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
+	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils"
 	"testing"
 )
 
@@ -47,7 +48,7 @@ var testAccImportS3KeyConfigBasic = `
 resource ` + UserResource + ` "example" {
   first_name = "terraform"
   last_name = "test"
-  email = "` + GenerateEmail() + `"
+  email = "` + utils.GenerateEmail() + `"
   password = "abc123-321CBA"
   administrator = false
   force_sec_auth= false
