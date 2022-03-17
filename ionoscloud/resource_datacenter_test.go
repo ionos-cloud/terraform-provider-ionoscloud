@@ -197,12 +197,6 @@ data ` + DatacenterResource + ` ` + DatacenterDataSourceMatching + ` {
     location = ` + DatacenterResource + `.` + DatacenterTestResource + `.location
 }`
 
-const testAccDataSourceDatacenterWrongNameError = testAccCheckDatacenterConfigBasic + `
-data ` + DatacenterResource + ` ` + DatacenterDataSourceMatching + ` {
-    name = "wrong_name"
-    location = ` + DatacenterResource + `.` + DatacenterTestResource + `.location
-}`
-
 const testAccDataSourceDatacenterWrongLocationError = testAccCheckDatacenterConfigBasic + `
 data ` + DatacenterResource + ` ` + DatacenterDataSourceMatching + ` {
     name = ` + DatacenterResource + `.` + DatacenterTestResource + `.name
