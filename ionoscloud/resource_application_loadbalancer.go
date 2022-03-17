@@ -201,9 +201,7 @@ func resourceApplicationLoadBalancerUpdate(ctx context.Context, d *schema.Resour
 			for _, value := range ipsVal {
 				ips = append(ips, value.(string))
 			}
-			if len(ips) > 0 {
-				request.Properties.Ips = &ips
-			}
+			request.Properties.Ips = &ips
 		}
 	}
 

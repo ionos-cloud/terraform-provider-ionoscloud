@@ -133,7 +133,7 @@ func TestValueInSlice(resource, attribute, value string) resource.TestCheckFunc 
 				continue
 			}
 
-			fmt.Printf("in test")
+			fmt.Printf("in test %s", attribute)
 
 			lengthOfSlice, err := strconv.Atoi(rs.Primary.Attributes[attribute])
 

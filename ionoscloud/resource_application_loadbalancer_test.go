@@ -30,13 +30,30 @@ func TestAccApplicationLoadBalancerBasic(t *testing.T) {
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckApplicationLoadBalancerExists(resourceNameAlb, &applicationLoadBalancer),
 					resource.TestCheckResourceAttr(resourceNameAlb, "name", ApplicationLoadBalancerTestResource),
-					utils.TestValueInSlice(ApplicationLoadBalancerResource, "ips", "10.12.118.224"),
+					resource.TestCheckResourceAttrPair(resourceNameAlb, "listener_lan", LanResource+".alb_lan_1", "id"),
+					resource.TestCheckResourceAttrPair(resourceNameAlb, "target_lan", LanResource+".alb_lan_2", "id"),
+					utils.TestValueInSlice(ApplicationLoadBalancerResource, "ips.#", "10.12.118.224"),
+					utils.TestValueInSlice(ApplicationLoadBalancerResource, "lb_private_ips.#", "10.13.72.225/24"),
 				),
 			},
 			{
 				Config: testAccCheckApplicationLoadBalancerConfigUpdate,
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttr(resourceNameAlb, "name", UpdatedResources),
+					resource.TestCheckResourceAttrPair(resourceNameAlb, "listener_lan", LanResource+".alb_lan_3", "id"),
+					resource.TestCheckResourceAttrPair(resourceNameAlb, "target_lan", LanResource+".alb_lan_4", "id"),
+					utils.TestValueInSlice(ApplicationLoadBalancerResource, "ips.#", "10.12.118.224"),
+					utils.TestValueInSlice(ApplicationLoadBalancerResource, "ips.#", "10.12.119.224"),
+					utils.TestValueInSlice(ApplicationLoadBalancerResource, "lb_private_ips.#", "10.13.72.225/24"),
+					utils.TestValueInSlice(ApplicationLoadBalancerResource, "lb_private_ips.#", "10.13.73.225/24"),
+				),
+			},
+			{
+				Config: testAccCheckApplicationLoadBalancerConfigUpdateEmptyArrays,
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttr(resourceNameAlb, "name", UpdatedResources),
+					resource.TestCheckResourceAttrPair(resourceNameAlb, "listener_lan", LanResource+".alb_lan_3", "id"),
+					resource.TestCheckResourceAttrPair(resourceNameAlb, "target_lan", LanResource+".alb_lan_4", "id"),
 				),
 			},
 		},
@@ -175,7 +192,47 @@ resource ` + ApplicationLoadBalancerResource + ` ` + ApplicationLoadBalancerTest
   datacenter_id = ` + DatacenterResource + `.alb_datacenter.id
   name          = "` + UpdatedResources + `"
   listener_lan    = ` + LanResource + `.alb_lan_3.id
-  ips           = [ "10.12.118.224"]
+  ips           = [ "10.12.118.224", "10.12.119.224"]
   target_lan    = ` + LanResource + `.alb_lan_4.id
-  lb_private_ips= [ "10.13.72.225/24"]
+  lb_private_ips= [ "10.13.72.225/24", "10.13.73.225/24"]
+}`
+
+const testAccCheckApplicationLoadBalancerConfigUpdateEmptyArrays = `
+resource ` + DatacenterResource + ` "alb_datacenter" {
+  name              = "test_alb"
+  location          = "de/txl"
+  description       = "datacenter for hosting "
+}
+
+resource ` + LanResource + ` "alb_lan_1" {
+  datacenter_id = ` + DatacenterResource + `.alb_datacenter.id 
+  public        = false
+  name          = "test_alb_lan_1"
+}
+
+resource ` + LanResource + ` "alb_lan_2" {
+  datacenter_id = ` + DatacenterResource + `.alb_datacenter.id 
+  public        = false
+  name          = "test_alb_lan_2"
+}
+
+resource ` + LanResource + ` "alb_lan_3" {
+  datacenter_id = ` + DatacenterResource + `.alb_datacenter.id 
+  public        = false
+  name          = "test_alb_lan_3"
+}
+
+resource ` + LanResource + ` "alb_lan_4" {
+  datacenter_id = ` + DatacenterResource + `.alb_datacenter.id 
+  public        = false
+  name          = "test_alb_lan_4"
+}
+
+resource ` + ApplicationLoadBalancerResource + ` ` + ApplicationLoadBalancerTestResource + ` { 
+  datacenter_id = ` + DatacenterResource + `.alb_datacenter.id
+  name          = "` + UpdatedResources + `"
+  listener_lan    = ` + LanResource + `.alb_lan_3.id
+  ips           = []
+  target_lan    = ` + LanResource + `.alb_lan_4.id
+  lb_private_ips= []
 }`
