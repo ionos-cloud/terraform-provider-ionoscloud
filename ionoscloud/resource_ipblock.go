@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
+	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils"
 	"log"
 	"strings"
 
@@ -261,15 +262,15 @@ func IpBlockSetData(d *schema.ResourceData, ipBlock *ionoscloud.IpBlock) error {
 		var ipConsumers []interface{}
 		for _, ipConsumer := range *ipBlock.Properties.IpConsumers {
 			ipConsumerEntry := make(map[string]interface{})
-			setPropWithNilCheck(ipConsumerEntry, "ip", ipConsumer.Ip)
-			setPropWithNilCheck(ipConsumerEntry, "mac", ipConsumer.Mac)
-			setPropWithNilCheck(ipConsumerEntry, "nic_id", ipConsumer.NicId)
-			setPropWithNilCheck(ipConsumerEntry, "server_id", ipConsumer.ServerId)
-			setPropWithNilCheck(ipConsumerEntry, "server_name", ipConsumer.ServerName)
-			setPropWithNilCheck(ipConsumerEntry, "datacenter_id", ipConsumer.DatacenterId)
-			setPropWithNilCheck(ipConsumerEntry, "datacenter_name", ipConsumer.DatacenterName)
-			setPropWithNilCheck(ipConsumerEntry, "k8s_nodepool_uuid", ipConsumer.K8sNodePoolUuid)
-			setPropWithNilCheck(ipConsumerEntry, "k8s_cluster_uuid", ipConsumer.K8sClusterUuid)
+			utils.SetPropWithNilCheck(ipConsumerEntry, "ip", ipConsumer.Ip)
+			utils.SetPropWithNilCheck(ipConsumerEntry, "mac", ipConsumer.Mac)
+			utils.SetPropWithNilCheck(ipConsumerEntry, "nic_id", ipConsumer.NicId)
+			utils.SetPropWithNilCheck(ipConsumerEntry, "server_id", ipConsumer.ServerId)
+			utils.SetPropWithNilCheck(ipConsumerEntry, "server_name", ipConsumer.ServerName)
+			utils.SetPropWithNilCheck(ipConsumerEntry, "datacenter_id", ipConsumer.DatacenterId)
+			utils.SetPropWithNilCheck(ipConsumerEntry, "datacenter_name", ipConsumer.DatacenterName)
+			utils.SetPropWithNilCheck(ipConsumerEntry, "k8s_nodepool_uuid", ipConsumer.K8sNodePoolUuid)
+			utils.SetPropWithNilCheck(ipConsumerEntry, "k8s_cluster_uuid", ipConsumer.K8sClusterUuid)
 
 			ipConsumers = append(ipConsumers, ipConsumerEntry)
 		}

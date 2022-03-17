@@ -6,6 +6,7 @@ import (
 	"context"
 	"fmt"
 	ionoscloud "github.com/ionos-cloud/sdk-go/v6"
+	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils"
 	"regexp"
 	"testing"
 
@@ -183,7 +184,7 @@ var testAccCheckGroupCreateUsers = `
 resource ` + UserResource + ` ` + UserTestResource + ` {
   first_name = "user"
   last_name = "test"
-  email = "` + GenerateEmail() + `"
+  email = "` + utils.GenerateEmail() + `"
   password = "abc123-321CBA"
   administrator = false
   force_sec_auth= false
@@ -193,7 +194,7 @@ resource ` + UserResource + ` ` + UserTestResource + ` {
 resource ` + UserResource + ` ` + UserTestResource + `2 {
   first_name = "user"
   last_name = "test"
-  email = "` + GenerateEmail() + `"
+  email = "` + utils.GenerateEmail() + `"
   password = "abc123-321CBA"
   administrator = false
   force_sec_auth= false
@@ -271,7 +272,7 @@ var testAccCheckGroupConfigUpdate = testAccCheckGroupCreateUsers + `
 resource ` + UserResource + ` ` + UserTestResource + `3 {
   first_name = "user"
   last_name = "test"
-  email = "` + GenerateEmail() + `"
+  email = "` + utils.GenerateEmail() + `"
   password = "abc123-321CBA"
   administrator = false
   force_sec_auth= false

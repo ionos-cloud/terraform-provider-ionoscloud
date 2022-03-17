@@ -78,4 +78,4 @@ When declaring NIC resources to be used with the load balancer, please make sure
 you use the "lifecycle meta-argument" to make sure changes to the lan attribute
 of the nic are ignored. 
 
-Please see the nic resource's documentation for an example on how to do that. 
+Please see the [Nic](nic.md) resource's documentation for an example on how to do that. 

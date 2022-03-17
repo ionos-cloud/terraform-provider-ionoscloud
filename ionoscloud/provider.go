@@ -5,8 +5,8 @@ import (
 	"fmt"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/meta"
+	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils"
 	"log"
-	"net"
 	"net/http"
 	"os"
 	"runtime"
@@ -171,7 +171,7 @@ func providerConfigure(d *schema.ResourceData, terraformVersion string) (interfa
 	}
 	newConfig.MaxRetries = 999
 	newConfig.WaitTime = 4 * time.Second
-	newConfig.HTTPClient = &http.Client{Transport: createTransport()}
+	newConfig.HTTPClient = &http.Client{Transport: utils.CreateTransport()}
 
 	newClient := ionoscloud.NewAPIClient(newConfig)
 
@@ -186,23 +186,6 @@ func providerConfigure(d *schema.ResourceData, terraformVersion string) (interfa
 		CloudApiClient: newClient,
 		DbaasClient:    dbaasClient.Get(),
 	}, nil
-}
-
-func createTransport() *http.Transport {
-	dialer := &net.Dialer{
-		Timeout:   30 * time.Second,
-		KeepAlive: 30 * time.Second,
-	}
-	return &http.Transport{
-		Proxy:                 http.ProxyFromEnvironment,
-		DialContext:           dialer.DialContext,
-		DisableKeepAlives:     true,
-		IdleConnTimeout:       30 * time.Second,
-		TLSHandshakeTimeout:   15 * time.Second,
-		ExpectContinueTimeout: 1 * time.Second,
-		MaxIdleConnsPerHost:   3,
-		MaxConnsPerHost:       3,
-	}
 }
 
 // cleanURL makes sure trailing slash does not corrupt the state
@@ -253,8 +236,8 @@ func resourceStateRefreshFunc(meta interface{}, path string) resource.StateRefre
 			return nil, "", fmt.Errorf("can not check a state when path is empty")
 		}
 
-		request, _, err := client.GetRequestStatus(context.Background(), path)
-
+		request, apiResponse, err := client.GetRequestStatus(context.Background(), path)
+		logApiRequestTime(apiResponse)
 		if err != nil {
 			return nil, "", fmt.Errorf("request failed with following error: %s", err)
 		}
@@ -273,7 +256,18 @@ func resourceStateRefreshFunc(meta interface{}, path string) resource.StateRefre
 				return request, "DONE", nil
 			}
 		} else {
-			return nil, "", fmt.Errorf("request metadata status is nil")
+			if request == nil {
+				log.Printf("[DEBUG] request is nil")
+			} else if request.Metadata == nil {
+				log.Printf("[DEBUG] request metadata is nil")
+			}
+			if request != nil && request.Metadata != nil && request.Metadata.Message != nil {
+				log.Printf("[DEBUG] request failed with following error: %s", *request.Metadata.Message)
+			}
+			if apiResponse != nil {
+				log.Printf("[DEBUG] response message %s", apiResponse.Message)
+			}
+			return nil, "", fmt.Errorf("request metadata status is nil for path %s", path)
 		}
 
 		return nil, *request.Metadata.Status, nil

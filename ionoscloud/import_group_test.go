@@ -3,6 +3,7 @@
 package ionoscloud
 
 import (
+	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils"
 	"testing"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
@@ -49,7 +50,7 @@ var testAccImportGroupConfigBasic = `
 resource ` + UserResource + ` ` + UserTestResource + ` {
   first_name = "user"
   last_name = "test"
-  email = "` + GenerateEmail() + `"
+  email = "` + utils.GenerateEmail() + `"
   password = "abc123-321CBA"
   administrator = false
   force_sec_auth= false

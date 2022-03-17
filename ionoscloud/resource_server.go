@@ -7,6 +7,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 	ionoscloud "github.com/ionos-cloud/sdk-go/v6"
+	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils"
 	"io/ioutil"
 	"log"
 	"strconv"
@@ -173,7 +174,7 @@ func resourceServer() *schema.Resource {
 								sshKeyPath := d.Get("volume.0.ssh_key_path").([]interface{})
 								oldSshKeyPath := d.Get("ssh_key_path").([]interface{})
 
-								if len(diffSlice(convertSlice(sshKeyPath), convertSlice(oldSshKeyPath))) == 0 {
+								if len(utils.DiffSlice(convertSlice(sshKeyPath), convertSlice(oldSshKeyPath))) == 0 {
 									return true
 								}
 
@@ -903,13 +904,13 @@ func SetNetworkProperties(nic ionoscloud.Nic) map[string]interface{} {
 
 	network := map[string]interface{}{}
 	if nic.Properties != nil {
-		setPropWithNilCheck(network, "dhcp", nic.Properties.Dhcp)
-		setPropWithNilCheck(network, "firewall_active", nic.Properties.FirewallActive)
-		setPropWithNilCheck(network, "firewall_type", nic.Properties.FirewallType)
-		setPropWithNilCheck(network, "lan", nic.Properties.Lan)
-		setPropWithNilCheck(network, "name", nic.Properties.Name)
-		setPropWithNilCheck(network, "ips", nic.Properties.Ips)
-		setPropWithNilCheck(network, "mac", nic.Properties.Mac)
+		utils.SetPropWithNilCheck(network, "dhcp", nic.Properties.Dhcp)
+		utils.SetPropWithNilCheck(network, "firewall_active", nic.Properties.FirewallActive)
+		utils.SetPropWithNilCheck(network, "firewall_type", nic.Properties.FirewallType)
+		utils.SetPropWithNilCheck(network, "lan", nic.Properties.Lan)
+		utils.SetPropWithNilCheck(network, "name", nic.Properties.Name)
+		utils.SetPropWithNilCheck(network, "ips", nic.Properties.Ips)
+		utils.SetPropWithNilCheck(network, "mac", nic.Properties.Mac)
 		if nic.Properties.Ips != nil && len(*nic.Properties.Ips) > 0 {
 			network["ips"] = *nic.Properties.Ips
 		}
@@ -925,14 +926,14 @@ func SetFirewallProperties(firewall ionoscloud.FirewallRule) map[string]interfac
 		"name":     *firewall.Properties.Name,
 	*/
 	if firewall.Properties != nil {
-		setPropWithNilCheck(fw, "protocol", firewall.Properties.Protocol)
-		setPropWithNilCheck(fw, "name", firewall.Properties.Name)
-		setPropWithNilCheck(fw, "source_mac", firewall.Properties.SourceMac)
-		setPropWithNilCheck(fw, "source_ip", firewall.Properties.SourceIp)
-		setPropWithNilCheck(fw, "target_ip", firewall.Properties.TargetIp)
-		setPropWithNilCheck(fw, "port_range_start", firewall.Properties.PortRangeStart)
-		setPropWithNilCheck(fw, "port_range_end", firewall.Properties.PortRangeEnd)
-		setPropWithNilCheck(fw, "type", firewall.Properties.Type)
+		utils.SetPropWithNilCheck(fw, "protocol", firewall.Properties.Protocol)
+		utils.SetPropWithNilCheck(fw, "name", firewall.Properties.Name)
+		utils.SetPropWithNilCheck(fw, "source_mac", firewall.Properties.SourceMac)
+		utils.SetPropWithNilCheck(fw, "source_ip", firewall.Properties.SourceIp)
+		utils.SetPropWithNilCheck(fw, "target_ip", firewall.Properties.TargetIp)
+		utils.SetPropWithNilCheck(fw, "port_range_start", firewall.Properties.PortRangeStart)
+		utils.SetPropWithNilCheck(fw, "port_range_end", firewall.Properties.PortRangeEnd)
+		utils.SetPropWithNilCheck(fw, "type", firewall.Properties.Type)
 		if firewall.Properties.IcmpType != nil {
 			fw["icmp_type"] = strconv.Itoa(int(*firewall.Properties.IcmpType))
 		}
@@ -947,22 +948,22 @@ func SetVolumeProperties(volume ionoscloud.Volume) map[string]interface{} {
 
 	volumeMap := map[string]interface{}{}
 	if volume.Properties != nil {
-		setPropWithNilCheck(volumeMap, "name", volume.Properties.Name)
-		setPropWithNilCheck(volumeMap, "disk_type", volume.Properties.Type)
-		setPropWithNilCheck(volumeMap, "size", volume.Properties.Size)
-		setPropWithNilCheck(volumeMap, "licence_type", volume.Properties.LicenceType)
-		setPropWithNilCheck(volumeMap, "bus", volume.Properties.Bus)
-		setPropWithNilCheck(volumeMap, "availability_zone", volume.Properties.AvailabilityZone)
-		setPropWithNilCheck(volumeMap, "cpu_hot_plug", volume.Properties.CpuHotPlug)
-		setPropWithNilCheck(volumeMap, "ram_hot_plug", volume.Properties.RamHotPlug)
-		setPropWithNilCheck(volumeMap, "nic_hot_plug", volume.Properties.NicHotPlug)
-		setPropWithNilCheck(volumeMap, "nic_hot_unplug", volume.Properties.NicHotUnplug)
-		setPropWithNilCheck(volumeMap, "disc_virtio_hot_plug", volume.Properties.DiscVirtioHotPlug)
-		setPropWithNilCheck(volumeMap, "disc_virtio_hot_unplug", volume.Properties.DiscVirtioHotUnplug)
-		setPropWithNilCheck(volumeMap, "device_number", volume.Properties.DeviceNumber)
-		setPropWithNilCheck(volumeMap, "user_data", volume.Properties.UserData)
-		setPropWithNilCheck(volumeMap, "backup_unit_id", volume.Properties.BackupunitId)
-		setPropWithNilCheck(volumeMap, "boot_server", volume.Properties.BootServer)
+		utils.SetPropWithNilCheck(volumeMap, "name", volume.Properties.Name)
+		utils.SetPropWithNilCheck(volumeMap, "disk_type", volume.Properties.Type)
+		utils.SetPropWithNilCheck(volumeMap, "size", volume.Properties.Size)
+		utils.SetPropWithNilCheck(volumeMap, "licence_type", volume.Properties.LicenceType)
+		utils.SetPropWithNilCheck(volumeMap, "bus", volume.Properties.Bus)
+		utils.SetPropWithNilCheck(volumeMap, "availability_zone", volume.Properties.AvailabilityZone)
+		utils.SetPropWithNilCheck(volumeMap, "cpu_hot_plug", volume.Properties.CpuHotPlug)
+		utils.SetPropWithNilCheck(volumeMap, "ram_hot_plug", volume.Properties.RamHotPlug)
+		utils.SetPropWithNilCheck(volumeMap, "nic_hot_plug", volume.Properties.NicHotPlug)
+		utils.SetPropWithNilCheck(volumeMap, "nic_hot_unplug", volume.Properties.NicHotUnplug)
+		utils.SetPropWithNilCheck(volumeMap, "disc_virtio_hot_plug", volume.Properties.DiscVirtioHotPlug)
+		utils.SetPropWithNilCheck(volumeMap, "disc_virtio_hot_unplug", volume.Properties.DiscVirtioHotUnplug)
+		utils.SetPropWithNilCheck(volumeMap, "device_number", volume.Properties.DeviceNumber)
+		utils.SetPropWithNilCheck(volumeMap, "user_data", volume.Properties.UserData)
+		utils.SetPropWithNilCheck(volumeMap, "backup_unit_id", volume.Properties.BackupunitId)
+		utils.SetPropWithNilCheck(volumeMap, "boot_server", volume.Properties.BootServer)
 	}
 	return volumeMap
 }
@@ -1447,12 +1448,12 @@ func resourceServerImport(ctx context.Context, d *schema.ResourceData, meta inte
 		if err == nil {
 			volumeItem := map[string]interface{}{}
 			if volumeObj.Properties != nil {
-				setPropWithNilCheck(volumeItem, "name", volumeObj.Properties.Name)
-				setPropWithNilCheck(volumeItem, "disk_type", volumeObj.Properties.Type)
-				setPropWithNilCheck(volumeItem, "size", volumeObj.Properties.Size)
-				setPropWithNilCheck(volumeItem, "licence_type", volumeObj.Properties.LicenceType)
-				setPropWithNilCheck(volumeItem, "bus", volumeObj.Properties.Bus)
-				setPropWithNilCheck(volumeItem, "availability_zone", volumeObj.Properties.AvailabilityZone)
+				utils.SetPropWithNilCheck(volumeItem, "name", volumeObj.Properties.Name)
+				utils.SetPropWithNilCheck(volumeItem, "disk_type", volumeObj.Properties.Type)
+				utils.SetPropWithNilCheck(volumeItem, "size", volumeObj.Properties.Size)
+				utils.SetPropWithNilCheck(volumeItem, "licence_type", volumeObj.Properties.LicenceType)
+				utils.SetPropWithNilCheck(volumeItem, "bus", volumeObj.Properties.Bus)
+				utils.SetPropWithNilCheck(volumeItem, "availability_zone", volumeObj.Properties.AvailabilityZone)
 			}
 
 			volumesList := []map[string]interface{}{volumeItem}
