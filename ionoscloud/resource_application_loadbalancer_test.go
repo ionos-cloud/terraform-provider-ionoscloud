@@ -1,9 +1,12 @@
+//go:build all || alb
+
 package ionoscloud
 
 import (
 	"context"
 	"fmt"
 	ionoscloud "github.com/ionos-cloud/sdk-go/v6"
+	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils"
 	"testing"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
@@ -27,6 +30,7 @@ func TestAccApplicationLoadBalancerBasic(t *testing.T) {
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckApplicationLoadBalancerExists(resourceNameAlb, &applicationLoadBalancer),
 					resource.TestCheckResourceAttr(resourceNameAlb, "name", ApplicationLoadBalancerTestResource),
+					utils.TestValueInSlice(ApplicationLoadBalancerResource, "ips", "10.12.118.224"),
 				),
 			},
 			{
@@ -40,7 +44,7 @@ func TestAccApplicationLoadBalancerBasic(t *testing.T) {
 }
 
 func testAccCheckApplicationLoadBalancerDestroyCheck(s *terraform.State) error {
-	client := testAccProvider.Meta().(*ionoscloud.APIClient)
+	client := testAccProvider.Meta().(SdkBundle).CloudApiClient
 	ctx, cancel := context.WithTimeout(context.Background(), *resourceDefaultTimeouts.Delete)
 
 	if cancel != nil {
@@ -72,7 +76,7 @@ func testAccCheckApplicationLoadBalancerDestroyCheck(s *terraform.State) error {
 
 func testAccCheckApplicationLoadBalancerExists(n string, alb *ionoscloud.ApplicationLoadBalancer) resource.TestCheckFunc {
 	return func(s *terraform.State) error {
-		client := testAccProvider.Meta().(*ionoscloud.APIClient)
+		client := testAccProvider.Meta().(SdkBundle).CloudApiClient
 		rs, ok := s.RootModule().Resources[n]
 
 		if !ok {
@@ -155,11 +159,23 @@ resource ` + LanResource + ` "alb_lan_2" {
   name          = "test_alb_lan_2"
 }
 
+resource ` + LanResource + ` "alb_lan_3" {
+  datacenter_id = ` + DatacenterResource + `.alb_datacenter.id 
+  public        = false
+  name          = "test_alb_lan_3"
+}
+
+resource ` + LanResource + ` "alb_lan_4" {
+  datacenter_id = ` + DatacenterResource + `.alb_datacenter.id 
+  public        = false
+  name          = "test_alb_lan_4"
+}
+
 resource ` + ApplicationLoadBalancerResource + ` ` + ApplicationLoadBalancerTestResource + ` { 
   datacenter_id = ` + DatacenterResource + `.alb_datacenter.id
   name          = "` + UpdatedResources + `"
-  listener_lan    = ` + LanResource + `.alb_lan_1.id
+  listener_lan    = ` + LanResource + `.alb_lan_3.id
   ips           = [ "10.12.118.224"]
-  target_lan    = ` + LanResource + `.alb_lan_2.id
+  target_lan    = ` + LanResource + `.alb_lan_4.id
   lb_private_ips= [ "10.13.72.225/24"]
 }`

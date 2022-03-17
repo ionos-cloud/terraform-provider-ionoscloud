@@ -172,7 +172,7 @@ func resourceApplicationLoadBalancerForwardingRule() *schema.Resource {
 }
 
 func resourceApplicationLoadBalancerForwardingRuleCreate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
-	client := meta.(*ionoscloud.APIClient)
+	client := meta.(SdkBundle).CloudApiClient
 
 	applicationLoadBalancerForwardingRule := ionoscloud.ApplicationLoadBalancerForwardingRule{
 		Properties: &ionoscloud.ApplicationLoadBalancerForwardingRuleProperties{},
@@ -373,7 +373,7 @@ func resourceApplicationLoadBalancerForwardingRuleCreate(ctx context.Context, d 
 
 func resourceApplicationLoadBalancerForwardingRuleRead(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 
-	client := meta.(*ionoscloud.APIClient)
+	client := meta.(SdkBundle).CloudApiClient
 
 	dcId := d.Get("datacenter_id").(string)
 
@@ -398,7 +398,7 @@ func resourceApplicationLoadBalancerForwardingRuleRead(ctx context.Context, d *s
 }
 
 func resourceApplicationLoadBalancerForwardingRuleUpdate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
-	client := meta.(*ionoscloud.APIClient)
+	client := meta.(SdkBundle).CloudApiClient
 
 	request := ionoscloud.ApplicationLoadBalancerForwardingRule{
 		Properties: &ionoscloud.ApplicationLoadBalancerForwardingRuleProperties{},
@@ -601,7 +601,7 @@ func resourceApplicationLoadBalancerForwardingRuleUpdate(ctx context.Context, d 
 }
 
 func resourceApplicationLoadBalancerForwardingRuleDelete(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
-	client := meta.(*ionoscloud.APIClient)
+	client := meta.(SdkBundle).CloudApiClient
 
 	dcId := d.Get("datacenter_id").(string)
 	albID := d.Get("application_loadbalancer_id").(string)
@@ -627,7 +627,7 @@ func resourceApplicationLoadBalancerForwardingRuleDelete(ctx context.Context, d 
 }
 
 func resourceApplicationLoadBalancerForwardingRuleImport(ctx context.Context, d *schema.ResourceData, meta interface{}) ([]*schema.ResourceData, error) {
-	client := meta.(*ionoscloud.APIClient)
+	client := meta.(SdkBundle).CloudApiClient
 
 	parts := strings.Split(d.Id(), "/")
 

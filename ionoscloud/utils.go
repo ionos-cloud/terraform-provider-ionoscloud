@@ -7,7 +7,6 @@ import (
 	"log"
 	"net"
 	"net/http"
-	"regexp"
 	"strings"
 	"time"
 
@@ -150,11 +149,6 @@ func responseBody(resp *ionoscloud.APIResponse) string {
 	}
 
 	return ret
-}
-
-func IsValidUUID(uuid string) bool {
-	r := regexp.MustCompile("^[a-fA-F0-9]{8}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-[a-fA-F0-9]{12}$")
-	return r.MatchString(uuid)
 }
 
 // DiffBasedOnVersion used for k8 node pool and cluster

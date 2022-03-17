@@ -153,7 +153,7 @@ func resourceTargetGroup() *schema.Resource {
 }
 
 func resourceTargetGroupCreate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
-	client := meta.(*ionoscloud.APIClient)
+	client := meta.(SdkBundle).CloudApiClient
 
 	targetGroup := ionoscloud.TargetGroup{
 		Properties: &ionoscloud.TargetGroupProperties{},
@@ -282,7 +282,7 @@ func resourceTargetGroupCreate(ctx context.Context, d *schema.ResourceData, meta
 }
 
 func resourceTargetGroupRead(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
-	client := meta.(*ionoscloud.APIClient)
+	client := meta.(SdkBundle).CloudApiClient
 
 	rsp, apiResponse, err := client.TargetGroupsApi.TargetgroupsFindByTargetGroupId(ctx, d.Id()).Execute()
 	logApiRequestTime(apiResponse)
@@ -304,7 +304,7 @@ func resourceTargetGroupRead(ctx context.Context, d *schema.ResourceData, meta i
 }
 
 func resourceTargetGroupUpdate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
-	client := meta.(*ionoscloud.APIClient)
+	client := meta.(SdkBundle).CloudApiClient
 
 	input := ionoscloud.TargetGroupProperties{}
 
@@ -479,7 +479,7 @@ func resourceTargetGroupUpdate(ctx context.Context, d *schema.ResourceData, meta
 }
 
 func resourceTargetGroupDelete(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
-	client := meta.(*ionoscloud.APIClient)
+	client := meta.(SdkBundle).CloudApiClient
 
 	apiResponse, err := client.TargetGroupsApi.TargetGroupsDelete(ctx, d.Id()).Execute()
 	logApiRequestTime(apiResponse)
@@ -502,7 +502,7 @@ func resourceTargetGroupDelete(ctx context.Context, d *schema.ResourceData, meta
 }
 
 func resourceTargetGroupImport(ctx context.Context, d *schema.ResourceData, meta interface{}) ([]*schema.ResourceData, error) {
-	client := meta.(*ionoscloud.APIClient)
+	client := meta.(SdkBundle).CloudApiClient
 
 	groupIp := d.Id()
 

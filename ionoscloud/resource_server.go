@@ -1022,7 +1022,7 @@ func resourceServerUpdate(ctx context.Context, d *schema.ResourceData, meta inte
 		_, n := d.GetChange("boot_cdrom")
 		bootCdrom := n.(string)
 
-		if IsValidUUID(bootCdrom) {
+		if utils.IsValidUUID(bootCdrom) {
 
 			request.BootCdrom = &ionoscloud.ResourceReference{
 				Id: &bootCdrom,

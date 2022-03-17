@@ -38,7 +38,7 @@ func TestAccGroupBasic(t *testing.T) {
 					resource.TestCheckResourceAttr(GroupResource+"."+GroupTestResource, "create_backup_unit", "true"),
 					resource.TestCheckResourceAttr(GroupResource+"."+GroupTestResource, "create_internet_access", "true"),
 					resource.TestCheckResourceAttr(GroupResource+"."+GroupTestResource, "create_k8s_cluster", "true"),
-					testNotEmptySlice(GroupResource, "users")),
+					utils.TestNotEmptySlice(GroupResource, "users")),
 			},
 			{
 				Config: testAccDataSourceGroupMatchId,
@@ -53,7 +53,7 @@ func TestAccGroupBasic(t *testing.T) {
 					resource.TestCheckResourceAttrPair(DataSource+"."+GroupResource+"."+GroupDataSourceById, "create_backup_unit", GroupResource+"."+GroupTestResource, "create_backup_unit"),
 					resource.TestCheckResourceAttrPair(DataSource+"."+GroupResource+"."+GroupDataSourceById, "create_internet_access", GroupResource+"."+GroupTestResource, "create_internet_access"),
 					resource.TestCheckResourceAttrPair(DataSource+"."+GroupResource+"."+GroupDataSourceById, "create_k8s_cluster", GroupResource+"."+GroupTestResource, "create_k8s_cluster"),
-					testNotEmptySlice(DataSource+"."+GroupResource, "users"),
+					utils.TestNotEmptySlice(DataSource+"."+GroupResource, "users"),
 				),
 			},
 			{
@@ -69,7 +69,7 @@ func TestAccGroupBasic(t *testing.T) {
 					resource.TestCheckResourceAttrPair(DataSource+"."+GroupResource+"."+GroupDataSourceByName, "create_backup_unit", GroupResource+"."+GroupTestResource, "create_backup_unit"),
 					resource.TestCheckResourceAttrPair(DataSource+"."+GroupResource+"."+GroupDataSourceByName, "create_internet_access", GroupResource+"."+GroupTestResource, "create_internet_access"),
 					resource.TestCheckResourceAttrPair(DataSource+"."+GroupResource+"."+GroupDataSourceByName, "create_k8s_cluster", GroupResource+"."+GroupTestResource, "create_k8s_cluster"),
-					testNotEmptySlice(DataSource+"."+GroupResource, "users"),
+					utils.TestNotEmptySlice(DataSource+"."+GroupResource, "users"),
 				),
 			},
 			{
@@ -85,7 +85,7 @@ func TestAccGroupBasic(t *testing.T) {
 					resource.TestCheckResourceAttrPair(DataSource+"."+GroupResource+"."+GroupDataSourceByName, "create_backup_unit", GroupResource+"."+GroupTestResource, "create_backup_unit"),
 					resource.TestCheckResourceAttrPair(DataSource+"."+GroupResource+"."+GroupDataSourceByName, "create_internet_access", GroupResource+"."+GroupTestResource, "create_internet_access"),
 					resource.TestCheckResourceAttrPair(DataSource+"."+GroupResource+"."+GroupDataSourceByName, "create_k8s_cluster", GroupResource+"."+GroupTestResource, "create_k8s_cluster"),
-					testNotEmptySlice(DataSource+"."+GroupResource, "users"),
+					utils.TestNotEmptySlice(DataSource+"."+GroupResource, "users"),
 				),
 			},
 			{
@@ -110,7 +110,7 @@ func TestAccGroupBasic(t *testing.T) {
 					resource.TestCheckResourceAttr(GroupResource+"."+GroupTestResource, "create_backup_unit", "false"),
 					resource.TestCheckResourceAttr(GroupResource+"."+GroupTestResource, "create_internet_access", "false"),
 					resource.TestCheckResourceAttr(GroupResource+"."+GroupTestResource, "create_k8s_cluster", "false"),
-					testNotEmptySlice(GroupResource, "users")),
+					utils.TestNotEmptySlice(GroupResource, "users")),
 			},
 		},
 	})

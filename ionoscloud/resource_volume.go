@@ -6,6 +6,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 	ionoscloud "github.com/ionos-cloud/sdk-go/v6"
+	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils"
 	"log"
 	"strings"
 
@@ -256,7 +257,7 @@ func resourceVolumeCreate(ctx context.Context, d *schema.ResourceData, meta inte
 	}
 
 	if backupUnitId, ok := d.GetOk("backup_unit_id"); ok {
-		if IsValidUUID(backupUnitId.(string)) {
+		if utils.IsValidUUID(backupUnitId.(string)) {
 			if image == "" && imageAlias == "" {
 				diags := diag.FromErr(fmt.Errorf("it is mandatory to provide either public image that has cloud-init compatibility in conjunction with backup_unit_id property "))
 				return diags
@@ -739,7 +740,7 @@ func checkImage(ctx context.Context, client *ionoscloud.APIClient, imageInput, i
 	isSnapshot = false
 
 	if imageInput != "" {
-		if !IsValidUUID(imageInput) {
+		if !utils.IsValidUUID(imageInput) {
 			dc, apiResponse, err := client.DataCentersApi.DatacentersFindById(ctx, dcId).Execute()
 			logApiRequestTime(apiResponse)
 			if err != nil {
