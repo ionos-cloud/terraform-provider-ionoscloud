@@ -196,13 +196,13 @@ func resourceApplicationLoadBalancerUpdate(ctx context.Context, d *schema.Resour
 	if d.HasChange("ips") {
 		_, newIps := d.GetChange("ips")
 		ipsVal := newIps.(*schema.Set).List()
+		ips := make([]string, 0)
 		if ipsVal != nil {
-			ips := make([]string, 0)
 			for _, value := range ipsVal {
 				ips = append(ips, value.(string))
 			}
-			request.Properties.Ips = &ips
 		}
+		request.Properties.Ips = &ips
 	}
 
 	if d.HasChange("target_lan") {
@@ -214,15 +214,14 @@ func resourceApplicationLoadBalancerUpdate(ctx context.Context, d *schema.Resour
 	if d.HasChange("lb_private_ips") {
 		_, newPrivateIps := d.GetChange("lb_private_ips")
 		privateIpsVal := newPrivateIps.(*schema.Set).List()
+		privateIps := make([]string, 0)
+
 		if privateIpsVal != nil {
-			privateIps := make([]string, 0)
 			for _, value := range privateIpsVal {
 				privateIps = append(privateIps, value.(string))
 			}
-			if len(privateIps) > 0 {
-				request.Properties.LbPrivateIps = &privateIps
-			}
 		}
+		request.Properties.LbPrivateIps = &privateIps
 	}
 
 	_, apiResponse, err := client.ApplicationLoadBalancersApi.DatacentersApplicationloadbalancersPatch(ctx, dcId, d.Id()).ApplicationLoadBalancerProperties(*request.Properties).Execute()
