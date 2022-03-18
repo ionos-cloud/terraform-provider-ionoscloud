@@ -3,6 +3,8 @@
 ### Documentation
 - improved all the examples to be ready to use 
 - added units where missing
+- added example for adding a secondary NIC to an IP Failover
+- updated provider version to the latest release in main registry page
 
 ### Enhancement
 - add `allow_replace` to node pool resource, which allows the update of immutable node_pool fields will first
