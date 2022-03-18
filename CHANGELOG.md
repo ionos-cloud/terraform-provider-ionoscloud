@@ -6,6 +6,8 @@
 
 ### Documentation: 
 - fixed gitbook documentation to show CHANGELOG.md
+- added example for adding a secondary NIC to an IP Failover
+- updated provider version to the latest release in main registry page
 
 ## 5.2.27
 
