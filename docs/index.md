@@ -150,7 +150,7 @@ terraform {
   required_providers {
     ionoscloud = {
       source = "ionos-cloud/ionoscloud"
-      version = "= 6.0.0-alpha.3"
+      version = "= 6.2.0"
     }
   }
 }
@@ -201,41 +201,46 @@ An example of overwriting the `create`, `update`, and `delete` timeouts:
 
 ```hcl
 resource "ionoscloud_server" "example" {
-  name              = "server"
-  datacenter_id     = "${ionoscloud_datacenter.example.id}"
-  cores             = 1
-  ram               = 1024
-  availability_zone = "ZONE_1"
-  cpu_family        = "AMD_OPTERON"
-
-  volume {
-    name           = "new"
-    image_name     = "${var.ubuntu}"
-    size           = 5
-    disk_type      = "SSD"
-    ssh_key_path   = "${var.private_key_path}"
-    image_password = "test1234"
-  }
-
-  nic {
-    lan             = "${ionoscloud_lan.example.id}"
-    dhcp            = true
-    ip              = "${ionoscloud_ipblock.example.ips[0]}"
-    firewall_active = true
-
-    firewall {
-      protocol         = "TCP"
-      name             = "SSH"
-      port_range_start = 22
-      port_range_end   = 22
+    name                  = "Server Example"
+    datacenter_id         = ionoscloud_datacenter.example.id
+    cores                 = 1
+    ram                   = 1024
+    availability_zone     = "ZONE_1"
+    cpu_family            = "AMD_OPTERON"
+    image_name            = data.ionoscloud_image.example.id
+    image_password        = "K3tTj8G14a3EgKyNeeiY"
+    type                  = "ENTERPRISE"
+    volume {
+        name              = "system"
+        size              = 5
+        disk_type         = "SSD Standard"
+        user_data         = "foo"
+        bus               = "VIRTIO"
+        availability_zone = "ZONE_1"
     }
-  }
-
-  timeouts {
-    create = "30m"
-    update = "300s"
-    delete = "2h"
-  }
+    nic {
+        lan               = ionoscloud_lan.example.id
+        name              = "system"
+        dhcp              = true
+        firewall_active   = true
+        firewall_type     = "BIDIRECTIONAL"
+        ips               = [ ionoscloud_ipblock.example.ips[0], ionoscloud_ipblock.example.ips[1] ]
+        firewall {
+            protocol          = "TCP"
+            name              = "SSH"
+            port_range_start  = 22
+            port_range_end    = 22
+            source_mac        = "00:0a:95:9d:68:17"
+            source_ip         = ionoscloud_ipblock.example.ips[2]
+            target_ip         = ionoscloud_ipblock.example.ips[3]
+            type              = "EGRESS"
+        }
+    }
+    timeouts {
+      create = "30m"
+      update = "300s"
+      delete = "2h"
+    }
 }
 
 ```
