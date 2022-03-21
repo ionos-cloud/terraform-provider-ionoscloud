@@ -2,10 +2,10 @@
 name: Nighly compute test run
 on:
   schedule:
-    - cron: '30 12 * * MON-FRI'
-#    - cron: '0 0 12 ? * MON-FRI'
 # At 21:00:00pm, every day between Monday and Friday, every month
-#   - cron: '0 0 21 ? * MON-FRI *'
+    - cron: '0 21 * * MON-FRI'
+  workflow_dispatch:
+
 jobs:
   test:
     env:
