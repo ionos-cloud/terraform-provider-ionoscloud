@@ -1,31 +1,30 @@
-# This is a basic workflow to help you get started with Actions
-
-name: CI
-
-# Controls when the workflow will run
+#This workflow will run every night, running terraform compute tests
+name: Nighly compute test run
 on:
-
-  # Allows you to run this workflow manually from the Actions tab
+  schedule:
+# At 21:00:00pm, every day between Monday and Friday, every month
+#   - cron: '0 0 21 ? * MON-FRI *'
+    - cron: '0 0,44 11 ? * MON-FRI *'
   workflow_dispatch:
 
-# A workflow run is made up of one or more jobs that can run sequentially or in parallel
 jobs:
-  # This workflow contains a single job called "build"
-  build:
-    # The type of runner that the job will run on
-    runs-on: ubuntu-latest
-
-    # Steps represent a sequence of tasks that will be executed as part of the job
+  test:
+    env:
+      IONOS_USERNAME: ${{ secrets.IONOS_VDC_USER_GO_V6 }}
+      IONOS_PASSWORD: ${{ secrets.IONOS_VDC_PASSWORD_GO_V6 }}
+      TF_ACC: true
+      TF_LOG: debug
+    strategy:
+      matrix:
+        go-version: [^1.17]
+        os: [ubuntu-latest]
+    runs-on: ${{ matrix.os }}
     steps:
-      # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
-      - uses: actions/checkout@v2
-
-      # Runs a single command using the runners shell
-      - name: Run a one-line script
-        run: echo Hello, world!
-
-      # Runs a set of commands using the runners shell
-      - name: Run a multi-line script
-        run: |
-          echo Add other actions to build,
-          echo test, and deploy your project.
+      - name: Install Go
+        uses: actions/setup-go@v2
+        with:
+          go-version: ${{ matrix.go-version }}
+      - name: Checkout code
+        uses: actions/checkout@v2
+      - name: Run tests with compute tag
+        run: go test ./ionoscloud -v -failfast -timeout 240m -tags compute
