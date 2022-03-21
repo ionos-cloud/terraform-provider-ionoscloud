@@ -2,7 +2,7 @@
 name: Nighly compute test run
 on:
   schedule:
-    - cron: '0 0 * * MON-FRI'
+    - cron: '05 12 * * MON-FRI'
 #    - cron: '0 0 12 ? * MON-FRI'
 # At 21:00:00pm, every day between Monday and Friday, every month
 #   - cron: '0 0 21 ? * MON-FRI *'
