@@ -95,3 +95,9 @@ resource ` + ServerResource + ` ` + ServerTestResource + ` {
   }
 }`
 )
+
+const testAccDataSourceDatacenterWrongNameError = testAccCheckDatacenterConfigBasic + `
+data ` + DatacenterResource + ` ` + DatacenterDataSourceMatching + ` {
+    name = "wrong_name"
+    location = ` + DatacenterResource + `.` + DatacenterTestResource + `.location
+}`
