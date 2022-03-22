@@ -12,6 +12,7 @@
 
 ### Fixes
 - fixed image data-source bug when `name` not provided - data-source returned 0 results
+- immutable fields will throw error in plan phase, thus the state is no longer updated
 
 ## 6.2.0
 
