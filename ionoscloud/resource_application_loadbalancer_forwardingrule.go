@@ -111,6 +111,7 @@ func resourceApplicationLoadBalancerForwardingRule() *schema.Resource {
 							Type:        schema.TypeString,
 							Description: "Valid only for STATIC actions.",
 							Optional:    true,
+							Computed:    true,
 						},
 						"conditions": {
 							Type:        schema.TypeList,
@@ -129,7 +130,7 @@ func resourceApplicationLoadBalancerForwardingRule() *schema.Resource {
 									"condition": {
 										Type:             schema.TypeString,
 										Description:      "Matching rule for the HTTP rule condition attribute; mandatory for HEADER, PATH, QUERY, METHOD, HOST, and COOKIE types; must be null when type is SOURCE_IP.",
-										Required:         true,
+										Optional:         true,
 										ValidateFunc:     validation.All(validation.StringInSlice([]string{"EXISTS", "CONTAINS", "EQUALS", "MATCHES", "STARTS_WITH", "ENDS_WITH"}, true)),
 										DiffSuppressFunc: utils.DiffSuppressCaseInsensitive,
 									},
@@ -452,7 +453,6 @@ func resourceApplicationLoadBalancerForwardingRuleUpdate(ctx context.Context, d 
 	if d.HasChange("http_rules") {
 		_, newHttpRules := d.GetChange("http_rules")
 		if newHttpRules.([]interface{}) != nil {
-			updateHttpRules := false
 
 			var httpRules []ionoscloud.ApplicationLoadBalancerHttpRule
 
@@ -509,27 +509,19 @@ func resourceApplicationLoadBalancerForwardingRuleUpdate(ctx context.Context, d 
 				if conditionsVal, conditionsOk := d.GetOk(fmt.Sprintf("http_rules.%d.conditions", httpRuleIndex)); conditionsOk {
 					if conditionsVal.([]interface{}) != nil {
 
-						addConditions := false
 						var conditions []ionoscloud.ApplicationLoadBalancerHttpRuleCondition
 
 						for conditionIndex := range conditionsVal.([]interface{}) {
 
 							condition := ionoscloud.ApplicationLoadBalancerHttpRuleCondition{}
-							addCondition := false
 
-							if typeVal, typeOk := d.GetOk(fmt.Sprintf("http_rules.%d.conditions.%d.type", httpRuleIndex, conditionIndex)); typeOk {
-								typeVal := typeVal.(string)
-								condition.Type = &typeVal
-								addCondition = true
-							} else {
-								diags := diag.FromErr(fmt.Errorf("type must be provided for application loadbalancer forwarding rule http rule condition"))
-								return diags
-							}
+							typeVal := d.Get(fmt.Sprintf("http_rules.%d.conditions.%d.type", httpRuleIndex, conditionIndex)).(string)
+							condition.Type = &typeVal
 
 							if conditionVal, conditionOk := d.GetOk(fmt.Sprintf("http_rules.%d.conditions.%d.condition", httpRuleIndex, conditionIndex)); conditionOk {
 								conditionVal := conditionVal.(string)
 								condition.Condition = &conditionVal
-							} else {
+							} else if strings.ToUpper(typeVal) != "SOURCE_IP" {
 								diags := diag.FromErr(fmt.Errorf("condition must be provided for application loadbalancer forwarding rule http rule condition"))
 								return diags
 							}
@@ -549,19 +541,10 @@ func resourceApplicationLoadBalancerForwardingRuleUpdate(ctx context.Context, d 
 								condition.Value = &value
 							}
 
-							if addCondition {
-								conditions = append(conditions, condition)
-							}
+							conditions = append(conditions, condition)
 						}
 
-						if len(conditions) > 0 {
-							addConditions = true
-						}
-
-						if addConditions {
-							httpRule.Conditions = &conditions
-						}
-
+						httpRule.Conditions = &conditions
 					}
 
 				}
@@ -572,14 +555,9 @@ func resourceApplicationLoadBalancerForwardingRuleUpdate(ctx context.Context, d 
 
 			}
 
-			if len(httpRules) > 0 {
-				updateHttpRules = true
-			}
+			log.Printf("[INFO] Application load balancer forwarding rule httpRules set to %+v", httpRules)
+			request.Properties.HttpRules = &httpRules
 
-			if updateHttpRules == true {
-				log.Printf("[INFO] Application load balancer forwarding rule httpRules set to %+v", httpRules)
-				request.Properties.HttpRules = &httpRules
-			}
 		}
 	}
 	_, apiResponse, err := client.ApplicationLoadBalancersApi.DatacentersApplicationloadbalancersForwardingrulesPatch(ctx, dcId, albId, d.Id()).ApplicationLoadBalancerForwardingRuleProperties(*request.Properties).Execute()

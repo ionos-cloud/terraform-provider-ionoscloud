@@ -4,6 +4,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 	ionoscloud "github.com/ionos-cloud/sdk-go/v6"
@@ -12,50 +13,40 @@ import (
 
 func dataSourceApplicationLoadBalancerForwardingRule() *schema.Resource {
 	return &schema.Resource{
-		Read: dataSourceApplicationLoadBalancerForwardingRuleRead,
+		ReadContext: dataSourceApplicationLoadBalancerForwardingRuleRead,
 		Schema: map[string]*schema.Schema{
 			"id": {
 				Type:     schema.TypeString,
 				Optional: true,
 			},
 			"name": {
-				Type:     schema.TypeString,
-				Optional: true,
+				Type:        schema.TypeString,
+				Description: "The name of the Application Load Balancer forwarding rule.",
+				Optional:    true,
 			},
 			"protocol": {
 				Type:        schema.TypeString,
-				Description: "Protocol of the balancing.",
+				Description: "Balancing protocol",
 				Computed:    true,
 			},
 			"listener_ip": {
 				Type:        schema.TypeString,
-				Description: "Listening IP. (inbound)",
+				Description: "Listening (inbound) IP",
 				Computed:    true,
 			},
 			"listener_port": {
 				Type:        schema.TypeInt,
-				Description: "Listening port number. (inbound) (range: 1 to 65535)",
+				Description: "Listening (inbound) port number; valid range is 1 to 65535.",
 				Computed:    true,
 			},
-			"health_check": {
-				Type:        schema.TypeList,
-				Description: "Health check attributes for Application Load Balancer forwarding rule",
+			"client_timeout": {
+				Type:        schema.TypeInt,
+				Description: "The maximum time in milliseconds to wait for the client to acknowledge or send data; default is 50,000 (50 seconds).",
 				Computed:    true,
-				Elem: &schema.Resource{
-					Schema: map[string]*schema.Schema{
-						"client_timeout": {
-							Type: schema.TypeInt,
-							Description: "ClientTimeout is expressed in milliseconds. This inactivity timeout applies " +
-								"when the client is expected to acknowledge or send data. If unset the default of 50 " +
-								"seconds will be used.",
-							Computed: true,
-						},
-					},
-				},
 			},
 			"server_certificates": {
-				Type:        schema.TypeList,
-				Description: "Array of items in that collection.",
+				Type:        schema.TypeSet,
+				Description: "Array of items in the collection.",
 				Computed:    true,
 				Elem: &schema.Schema{
 					Type: schema.TypeString,
@@ -69,72 +60,74 @@ func dataSourceApplicationLoadBalancerForwardingRule() *schema.Resource {
 					Schema: map[string]*schema.Schema{
 						"name": {
 							Type:        schema.TypeString,
-							Description: "A name of that Application Load Balancer http rule",
+							Description: "The unique name of the Application Load Balancer HTTP rule.",
 							Computed:    true,
 						},
 						"type": {
 							Type:        schema.TypeString,
-							Description: "Type of the Http Rule",
+							Description: "Type of the HTTP rule.",
 							Computed:    true,
 						},
 						"target_group": {
 							Type:        schema.TypeString,
-							Description: "The UUID of the target group; mandatory for FORWARD action",
+							Description: "The ID of the target group; mandatory and only valid for FORWARD actions.",
 							Computed:    true,
 						},
 						"drop_query": {
 							Type:        schema.TypeBool,
-							Description: "Default is false; true for REDIRECT action.",
+							Description: "Default is false; valid only for REDIRECT actions.",
 							Computed:    true,
 						},
 						"location": {
 							Type:        schema.TypeString,
-							Description: "The location for redirecting; mandatory for REDIRECT action",
+							Description: "The location for redirecting; mandatory and valid only for REDIRECT actions.",
 							Computed:    true,
 						},
 						"status_code": {
 							Type:        schema.TypeInt,
-							Description: "On REDIRECT action it can take the value 301, 302, 303, 307, 308; on STATIC action it is between 200 and 599",
+							Description: "Valid only for REDIRECT and STATIC actions. For REDIRECT actions, default is 301 and possible values are 301, 302, 303, 307, and 308. For STATIC actions, default is 503 and valid range is 200 to 599.",
 							Computed:    true,
 						},
 						"response_message": {
 							Type:        schema.TypeString,
-							Description: "he response message of the request; mandatory for STATIC action",
+							Description: "The response message of the request; mandatory for STATIC actions.",
 							Computed:    true,
 						},
 						"content_type": {
 							Type:        schema.TypeString,
-							Description: "Will be provided by the PAAS Team; default application/json",
+							Description: "Valid only for STATIC actions.",
 							Computed:    true,
 						},
 						"conditions": {
 							Type:        schema.TypeList,
-							Description: "Array of items in that collection",
+							Description: "An array of items in the collection.The action is only performed if each and every condition is met; if no conditions are set, the rule will always be performed.",
 							Computed:    true,
 							Elem: &schema.Resource{
 								Schema: map[string]*schema.Schema{
 									"type": {
 										Type:        schema.TypeString,
-										Description: "Type of the Http Rule condition.",
+										Description: "Type of the HTTP rule condition.",
 										Computed:    true,
 									},
 									"condition": {
 										Type:        schema.TypeString,
-										Description: "Condition of the Http Rule condition.",
+										Description: "Matching rule for the HTTP rule condition attribute; mandatory for HEADER, PATH, QUERY, METHOD, HOST, and COOKIE types; must be null when type is SOURCE_IP.",
 										Computed:    true,
 									},
 									"negate": {
 										Type:        schema.TypeBool,
-										Description: "Specifies whether the condition is negated or not; default: false.",
+										Description: "Specifies whether the condition is negated or not; the default is False.",
 										Computed:    true,
 									},
 									"key": {
-										Type:     schema.TypeString,
-										Computed: true,
+										Type:        schema.TypeString,
+										Description: "Must be null when type is PATH, METHOD, HOST, or SOURCE_IP. Key can only be set when type is COOKIES, HEADER, or QUERY.",
+										Computed:    true,
 									},
 									"value": {
-										Type:     schema.TypeString,
-										Computed: true,
+										Type:        schema.TypeString,
+										Description: "Mandatory for conditions CONTAINS, EQUALS, MATCHES, STARTS_WITH, ENDS_WITH; must be null when condition is EXISTS; should be a valid CIDR if provided and if type is SOURCE_IP.",
+										Computed:    true,
 									},
 								},
 							},
@@ -145,101 +138,84 @@ func dataSourceApplicationLoadBalancerForwardingRule() *schema.Resource {
 			"datacenter_id": {
 				Type:         schema.TypeString,
 				Required:     true,
-				ForceNew:     true,
-				ValidateFunc: validation.All(validation.StringIsNotWhiteSpace),
+				ValidateFunc: validation.All(validation.IsUUID),
 			},
 			"application_loadbalancer_id": {
 				Type:         schema.TypeString,
 				Required:     true,
-				ForceNew:     true,
-				ValidateFunc: validation.All(validation.StringIsNotWhiteSpace),
+				ValidateFunc: validation.All(validation.IsUUID),
 			},
 		},
 		Timeouts: &resourceDefaultTimeouts,
 	}
 }
 
-func dataSourceApplicationLoadBalancerForwardingRuleRead(d *schema.ResourceData, meta interface{}) error {
+func dataSourceApplicationLoadBalancerForwardingRuleRead(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	client := meta.(SdkBundle).CloudApiClient
 
-	datacenterId, dcIdOk := d.GetOk("datacenter_id")
-	if !dcIdOk {
-		return errors.New("no datacenter_id was specified")
-	}
+	datacenterId := d.Get("datacenter_id").(string)
+	albId := d.Get("application_loadbalancer_id").(string)
 
-	albId, albIdOk := d.GetOk("application_loadbalancer_id")
-	if !albIdOk {
-		return errors.New("no application_loadbalancer_id was specified")
-	}
+	idValue, idOk := d.GetOk("id")
+	nameValue, nameOk := d.GetOk("name")
 
-	id, idOk := d.GetOk("id")
-	name, nameOk := d.GetOk("name")
+	id := idValue.(string)
+	name := nameValue.(string)
 
 	if idOk && nameOk {
-		return errors.New("id and name cannot be both specified in the same time")
+		return diag.FromErr(errors.New("id and name cannot be both specified in the same time"))
 	}
 	if !idOk && !nameOk {
-		return errors.New("please provide either the application loadbalancer forwarding rule id or name")
+		return diag.FromErr(errors.New("please provide either the application load balancer forwarding rule id or name"))
 	}
+
 	var applicationLoadBalancerForwardingRule ionoscloud.ApplicationLoadBalancerForwardingRule
 	var err error
 	var apiResponse *ionoscloud.APIResponse
-	ctx, cancel := context.WithTimeout(context.Background(), *resourceDefaultTimeouts.Default)
-
-	if cancel != nil {
-		defer cancel()
-	}
 
 	if idOk {
 		/* search by ID */
-		applicationLoadBalancerForwardingRule, apiResponse, err = client.ApplicationLoadBalancersApi.DatacentersApplicationloadbalancersForwardingrulesFindByForwardingRuleId(ctx, datacenterId.(string), albId.(string), id.(string)).Execute()
+		applicationLoadBalancerForwardingRule, apiResponse, err = client.ApplicationLoadBalancersApi.DatacentersApplicationloadbalancersForwardingrulesFindByForwardingRuleId(ctx, datacenterId, albId, id).Execute()
 		logApiRequestTime(apiResponse)
 		if err != nil {
-			return fmt.Errorf("an error occurred while fetching the nat gateway %s: %s", id.(string), err)
+			return diag.FromErr(fmt.Errorf("an error occurred while fetching the nat gateway %s: %s", id, err))
 		}
 	} else {
 		/* search by name */
 		var applicationLoadBalancersForwardingRules ionoscloud.ApplicationLoadBalancerForwardingRules
 
-		ctx, cancel := context.WithTimeout(context.Background(), *resourceDefaultTimeouts.Default)
-
-		if cancel != nil {
-			defer cancel()
-		}
-
-		applicationLoadBalancersForwardingRules, apiResponse, err := client.ApplicationLoadBalancersApi.DatacentersApplicationloadbalancersForwardingrulesGet(ctx, datacenterId.(string), albId.(string)).Execute()
+		applicationLoadBalancersForwardingRules, apiResponse, err := client.ApplicationLoadBalancersApi.DatacentersApplicationloadbalancersForwardingrulesGet(ctx, datacenterId, albId).Depth(5).Execute()
 		logApiRequestTime(apiResponse)
 
 		if err != nil {
-			return fmt.Errorf("an error occurred while fetching application loadbalancers: %s", err.Error())
+			return diag.FromErr(fmt.Errorf("an error occurred while fetching application loadbalancers: %s", err.Error()))
 		}
+
+		var results []ionoscloud.ApplicationLoadBalancerForwardingRule
 
 		if applicationLoadBalancersForwardingRules.Items != nil {
-			for _, c := range *applicationLoadBalancersForwardingRules.Items {
-				tmpAlb, apiResponse, err := client.ApplicationLoadBalancersApi.DatacentersApplicationloadbalancersForwardingrulesFindByForwardingRuleId(ctx, datacenterId.(string), albId.(string), *c.Id).Execute()
-				logApiRequestTime(apiResponse)
-
-				if err != nil {
-					return fmt.Errorf("an error occurred while fetching nat gateway with ID %s: %s", *c.Id, err.Error())
-				}
-				if tmpAlb.Properties.Name != nil {
-					if strings.Contains(*tmpAlb.Properties.Name, name.(string)) {
-						applicationLoadBalancerForwardingRule = tmpAlb
-						break
+			for _, albFr := range *applicationLoadBalancersForwardingRules.Items {
+				if albFr.Properties != nil && albFr.Properties.Name != nil && strings.ToLower(*albFr.Properties.Name) == strings.ToLower(name) {
+					tmpAlbFr, apiResponse, err := client.ApplicationLoadBalancersApi.DatacentersApplicationloadbalancersForwardingrulesFindByForwardingRuleId(ctx, datacenterId, albId, *albFr.Id).Execute()
+					logApiRequestTime(apiResponse)
+					if err != nil {
+						return diag.FromErr(fmt.Errorf("an error occurred while fetching nat gateway with ID %s: %s", *albFr.Id, err.Error()))
 					}
+					results = append(results, tmpAlbFr)
 				}
-
 			}
 		}
-
-	}
-
-	if &applicationLoadBalancerForwardingRule == nil {
-		return errors.New("application loadbalancer forwarding rule not found")
+		if results == nil || len(results) == 0 {
+			return diag.FromErr(fmt.Errorf("no application load balanacer forwarding rule found with the specified criteria: name = %s", name))
+		} else if len(results) > 1 {
+			return diag.FromErr(fmt.Errorf("more than one application load balanacer forwarding rule found with the specified criteria: name = %s", name))
+		} else {
+			applicationLoadBalancerForwardingRule = results[0]
+		}
 	}
 
 	if err = setApplicationLoadBalancerForwardingRuleData(d, &applicationLoadBalancerForwardingRule); err != nil {
-		return err
+		return diag.FromErr(err)
 	}
 
 	return nil

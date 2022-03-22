@@ -7,6 +7,7 @@ import (
 	"fmt"
 	ionoscloud "github.com/ionos-cloud/sdk-go/v6"
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils"
+	"regexp"
 	"testing"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
@@ -14,6 +15,8 @@ import (
 )
 
 var resourceNameAlb = ApplicationLoadBalancerResource + "." + ApplicationLoadBalancerTestResource
+var dataSourceNameAlbById = DataSource + "." + ApplicationLoadBalancerResource + "." + ApplicationLoadBalancerDataSourceById
+var dataSourceNameAlbByName = DataSource + "." + ApplicationLoadBalancerResource + "." + ApplicationLoadBalancerDataSourceByName
 
 func TestAccApplicationLoadBalancerBasic(t *testing.T) {
 	var applicationLoadBalancer ionoscloud.ApplicationLoadBalancer
@@ -37,6 +40,30 @@ func TestAccApplicationLoadBalancerBasic(t *testing.T) {
 				),
 			},
 			{
+				Config: testAccDataSourceApplicationLoadBalancerMatchId,
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttrPair(resourceNameAlb, "name", dataSourceNameAlbById, "name"),
+					resource.TestCheckResourceAttrPair(resourceNameAlb, "listener_lan", dataSourceNameAlbById, "listener_lan"),
+					resource.TestCheckResourceAttrPair(resourceNameAlb, "target_lan", dataSourceNameAlbById, "target_lan"),
+					resource.TestCheckResourceAttrPair(resourceNameAlb, "ips.0", dataSourceNameAlbById, "ips.0"),
+					resource.TestCheckResourceAttrPair(resourceNameAlb, "lb_private_ips.0", dataSourceNameAlbById, "lb_private_ips.0"),
+				),
+			},
+			{
+				Config: testAccDataSourceApplicationLoadBalancerMatchName,
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttrPair(resourceNameAlb, "name", dataSourceNameAlbByName, "name"),
+					resource.TestCheckResourceAttrPair(resourceNameAlb, "listener_lan", dataSourceNameAlbByName, "listener_lan"),
+					resource.TestCheckResourceAttrPair(resourceNameAlb, "target_lan", dataSourceNameAlbByName, "target_lan"),
+					resource.TestCheckResourceAttrPair(resourceNameAlb, "ips.0", dataSourceNameAlbByName, "ips.0"),
+					resource.TestCheckResourceAttrPair(resourceNameAlb, "lb_private_ips.0", dataSourceNameAlbByName, "lb_private_ips.0"),
+				),
+			},
+			{
+				Config:      testAccDataSourceApplicationLoadBalancerWrongNameError,
+				ExpectError: regexp.MustCompile("no application load balanacer found with the specified criteria"),
+			},
+			{
 				Config: testAccCheckApplicationLoadBalancerConfigUpdate,
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttr(resourceNameAlb, "name", UpdatedResources),
@@ -46,14 +73,6 @@ func TestAccApplicationLoadBalancerBasic(t *testing.T) {
 					utils.TestValueInSlice(ApplicationLoadBalancerResource, "ips.#", "10.12.119.224"),
 					utils.TestValueInSlice(ApplicationLoadBalancerResource, "lb_private_ips.#", "10.13.72.225/24"),
 					utils.TestValueInSlice(ApplicationLoadBalancerResource, "lb_private_ips.#", "10.13.73.225/24"),
-				),
-			},
-			{
-				Config: testAccCheckApplicationLoadBalancerConfigUpdateEmptyArrays,
-				Check: resource.ComposeTestCheckFunc(
-					resource.TestCheckResourceAttr(resourceNameAlb, "name", UpdatedResources),
-					resource.TestCheckResourceAttrPair(resourceNameAlb, "listener_lan", LanResource+".alb_lan_3", "id"),
-					resource.TestCheckResourceAttrPair(resourceNameAlb, "target_lan", LanResource+".alb_lan_4", "id"),
 				),
 			},
 		},
@@ -132,7 +151,7 @@ func testAccCheckApplicationLoadBalancerExists(n string, alb *ionoscloud.Applica
 const testAccCheckApplicationLoadBalancerConfigBasic = `
 resource ` + DatacenterResource + ` "alb_datacenter" {
   name              = "test_alb"
-  location          = "de/txl"
+  location          = "de/fkb"
   description       = "datacenter for hosting "
 }
 
@@ -160,7 +179,7 @@ resource ` + ApplicationLoadBalancerResource + ` ` + ApplicationLoadBalancerTest
 const testAccCheckApplicationLoadBalancerConfigUpdate = `
 resource ` + DatacenterResource + ` "alb_datacenter" {
   name              = "test_alb"
-  location          = "de/txl"
+  location          = "de/fkb"
   description       = "datacenter for hosting "
 }
 
@@ -197,42 +216,23 @@ resource ` + ApplicationLoadBalancerResource + ` ` + ApplicationLoadBalancerTest
   lb_private_ips= [ "10.13.72.225/24", "10.13.73.225/24"]
 }`
 
-const testAccCheckApplicationLoadBalancerConfigUpdateEmptyArrays = `
-resource ` + DatacenterResource + ` "alb_datacenter" {
-  name              = "test_alb"
-  location          = "de/txl"
-  description       = "datacenter for hosting "
-}
-
-resource ` + LanResource + ` "alb_lan_1" {
-  datacenter_id = ` + DatacenterResource + `.alb_datacenter.id 
-  public        = false
-  name          = "test_alb_lan_1"
-}
-
-resource ` + LanResource + ` "alb_lan_2" {
-  datacenter_id = ` + DatacenterResource + `.alb_datacenter.id 
-  public        = false
-  name          = "test_alb_lan_2"
-}
-
-resource ` + LanResource + ` "alb_lan_3" {
-  datacenter_id = ` + DatacenterResource + `.alb_datacenter.id 
-  public        = false
-  name          = "test_alb_lan_3"
-}
-
-resource ` + LanResource + ` "alb_lan_4" {
-  datacenter_id = ` + DatacenterResource + `.alb_datacenter.id 
-  public        = false
-  name          = "test_alb_lan_4"
-}
-
-resource ` + ApplicationLoadBalancerResource + ` ` + ApplicationLoadBalancerTestResource + ` { 
+const testAccDataSourceApplicationLoadBalancerMatchId = testAccCheckApplicationLoadBalancerConfigBasic + `
+data ` + ApplicationLoadBalancerResource + ` ` + ApplicationLoadBalancerDataSourceById + ` {
   datacenter_id = ` + DatacenterResource + `.alb_datacenter.id
-  name          = "` + UpdatedResources + `"
-  listener_lan    = ` + LanResource + `.alb_lan_3.id
-  ips           = []
-  target_lan    = ` + LanResource + `.alb_lan_4.id
-  lb_private_ips= []
-}`
+  id			= ` + ApplicationLoadBalancerResource + `.` + ApplicationLoadBalancerTestResource + `.id
+}
+`
+
+const testAccDataSourceApplicationLoadBalancerMatchName = testAccCheckApplicationLoadBalancerConfigBasic + `
+data ` + ApplicationLoadBalancerResource + ` ` + ApplicationLoadBalancerDataSourceByName + ` {
+  datacenter_id = ` + DatacenterResource + `.alb_datacenter.id
+  name          = ` + ApplicationLoadBalancerResource + `.` + ApplicationLoadBalancerTestResource + `.name
+}
+`
+
+const testAccDataSourceApplicationLoadBalancerWrongNameError = testAccCheckApplicationLoadBalancerConfigBasic + `
+data ` + ApplicationLoadBalancerResource + ` ` + ApplicationLoadBalancerDataSourceByName + ` {
+  datacenter_id = ` + DatacenterResource + `.alb_datacenter.id
+  name          = "wrong_name"
+}
+`
