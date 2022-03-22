@@ -90,21 +90,21 @@ resource "ionoscloud_pg_cluster" "example" {
 * `cores` - (Required)[int] The number of CPU cores per replica.
 * `ram` - (Required)[int] The amount of memory per instance in megabytes. Has to be a multiple of 1024.
 * `storage_size` - (Required)[int] The amount of storage per instance in MB. Has to be a multiple of 2048.
-* `storage_type` - (Required)[string] The storage type used in your cluster. Can have one of the following values: HDD, SSD.
+* `storage_type` - (Required)[string] The storage type used in your cluster. Can have one of the following values: HDD, SSD. This attribute is immutable(disallowed in update requests).
 * `connections` - (Required)[string] Details about the network connection for your cluster.
   * `datacenter_id` - (Required)[true] The datacenter to connect your cluster to.
   * `lan_id` - (Required)[true] The LAN to connect your cluster to.
   * `cidr` - (Required)[true] The IP and subnet for the database. Note the following unavailable IP ranges: 10.233.64.0/18, 10.233.0.0/18, 10.233.114.0/24. Please enter in the correct format like IP/Subnet, exp: 192.168.10.0/24. See [Private IPs](https://www.ionos.com/help/server-cloud-infrastructure/private-network/private-ip-address-ranges/) and [Cluster Setup - Preparing the network](https://docs.ionos.com/reference/product-information/api-automation-guides/database-as-a-service/create-a-database#preparing-the-network).
-* `location` - (Required)[string] The physical location where the cluster will be created. This will be where all of your instances live. Property cannot be modified after datacenter creation (disallowed in update requests)
+* `location` - (Required)[string] The physical location where the cluster will be created. This will be where all of your instances live. Property cannot be modified after datacenter creation. This attribute is immutable(disallowed in update requests).
 * `display_name` - (Required)[string] The friendly name of your cluster.
 * `maintenance_window` - (Optional)[string] A weekly 4 hour-long window, during which maintenance might occur
   * `time` - (Required)[string]
   * `day_of_the_week` - (Required)[string]
-* `credentials` - (Required)[string] Credentials for the database user to be created.
+* `credentials` - (Required)[string] Credentials for the database user to be created. This attribute is immutable(disallowed in update requests).
     * `username` - (Required)[string] The username for the initial postgres user. Some system usernames are restricted (e.g. "postgres", "admin", "standby")
     * `password` - (Required)[string]
-* `synchronization_mode` - (Required) [string] Represents different modes of replication. Can have one of the following values: ASYNCHRONOUS, SYNCHRONOUS, STRICTLY_SYNCHRONOUS. This attribute is immutable
-* `from_backup` - (Optional)[string] The unique ID of the backup you want to restore.
+* `synchronization_mode` - (Required) [string] Represents different modes of replication. Can have one of the following values: ASYNCHRONOUS, SYNCHRONOUS, STRICTLY_SYNCHRONOUS. This attribute is immutable(disallowed in update requests).
+* `from_backup` - (Optional)[string] The unique ID of the backup you want to restore. This attribute is immutable(disallowed in update requests).
   * `backup_id` - (Required)[string] The PostgreSQL version of your cluster.
   * `recovery_target_time` - (Optional)[string] If this value is supplied as ISO 8601 timestamp, the backup will be replayed up until the given timestamp. If empty, the backup will be applied completely.
     

@@ -111,7 +111,6 @@ func checkClusterImmutableFields(_ context.Context, diff *schema.ResourceDiff, _
 	}
 	if diff.HasChange("public") {
 		return fmt.Errorf("public %s", ImmutableError)
-
 	}
 	return nil
 
