@@ -101,3 +101,5 @@ data ` + DatacenterResource + ` ` + DatacenterDataSourceMatching + ` {
     name = "wrong_name"
     location = ` + DatacenterResource + `.` + DatacenterTestResource + `.location
 }`
+
+const ImmutableError = "attribute is immutable, therefore not allowed in update requests"

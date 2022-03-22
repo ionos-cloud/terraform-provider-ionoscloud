@@ -21,6 +21,8 @@ func resourcek8sCluster() *schema.Resource {
 		Importer: &schema.ResourceImporter{
 			StateContext: resourceK8sClusterImport,
 		},
+		CustomizeDiff: checkClusterImmutableFields,
+
 		Schema: map[string]*schema.Schema{
 			"name": {
 				Type:         schema.TypeString,
@@ -101,7 +103,19 @@ func resourcek8sCluster() *schema.Resource {
 		Timeouts: &resourceDefaultTimeouts,
 	}
 }
+func checkClusterImmutableFields(_ context.Context, diff *schema.ResourceDiff, _ interface{}) error {
 
+	//we do not want to check in case of resource creation
+	if diff.Id() == "" {
+		return nil
+	}
+	if diff.HasChange("public") {
+		return fmt.Errorf("public %s", ImmutableError)
+
+	}
+	return nil
+
+}
 func resourcek8sClusterCreate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	client := meta.(SdkBundle).CloudApiClient
 
@@ -342,11 +356,6 @@ func resourcek8sClusterUpdate(ctx context.Context, d *schema.ResourceData, meta 
 			}
 		}
 		request.Properties.S3Buckets = &s3Buckets
-	}
-
-	if d.HasChange("public") {
-		diags := diag.FromErr(fmt.Errorf("public attribute is immutable, therefore not allowed in update requests"))
-		return diags
 	}
 
 	_, apiResponse, err := client.KubernetesApi.K8sPut(ctx, d.Id()).KubernetesCluster(request).Execute()

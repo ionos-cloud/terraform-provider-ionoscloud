@@ -26,6 +26,7 @@ func resourceServer() *schema.Resource {
 		Importer: &schema.ResourceImporter{
 			StateContext: resourceServerImport,
 		},
+		CustomizeDiff: checkServerImmutableFields,
 
 		Schema: map[string]*schema.Schema{
 			// Server parameters
@@ -364,6 +365,43 @@ func resourceServer() *schema.Resource {
 	}
 }
 
+func checkServerImmutableFields(_ context.Context, diff *schema.ResourceDiff, _ interface{}) error {
+
+	//we do not want to check in case of resource creation
+	if diff.Id() == "" {
+		return nil
+	}
+	if diff.HasChange("image_name") {
+		return fmt.Errorf("image_name %s", ImmutableError)
+	}
+
+	if diff.HasChange("availability_zone") {
+		return fmt.Errorf("availability_zone %s", ImmutableError)
+	}
+	if diff.HasChange("volume") {
+		if diff.HasChange("volume.0.user_data") {
+			return fmt.Errorf("volume.0.user_data %s", ImmutableError)
+		}
+
+		if diff.HasChange("volume.0.backup_unit_id") {
+			return fmt.Errorf("volume.0.backup_unit_id %s", ImmutableError)
+		}
+
+		if diff.HasChange("volume.0.image_name") {
+			return fmt.Errorf("volume.0.image_name %s", ImmutableError)
+		}
+
+		if diff.HasChange("volume.0.disk_type") {
+			return fmt.Errorf("volume.0.disk_type %s", ImmutableError)
+		}
+
+		if diff.HasChange("volume.0.availability_zone") {
+			return fmt.Errorf("volume.0.availability_zone %s", ImmutableError)
+		}
+	}
+	return nil
+
+}
 func resourceServerCreate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	client := meta.(SdkBundle).CloudApiClient
 
@@ -1003,19 +1041,11 @@ func resourceServerUpdate(ctx context.Context, d *schema.ResourceData, meta inte
 		nStr := n.(string)
 		request.Type = &nStr
 	}
-	if d.HasChange("availability_zone") {
-		diags := diag.FromErr(fmt.Errorf("availability_zone is immutable"))
-		return diags
-	}
+
 	if d.HasChange("cpu_family") {
 		_, n := d.GetChange("cpu_family")
 		nStr := n.(string)
 		request.CpuFamily = &nStr
-	}
-
-	if d.HasChange("image_name") {
-		diags := diag.FromErr(fmt.Errorf("image_name is immutable"))
-		return diags
 	}
 
 	if d.HasChange("boot_cdrom") {
@@ -1049,33 +1079,7 @@ func resourceServerUpdate(ctx context.Context, d *schema.ResourceData, meta inte
 		return diags
 	}
 	// Volume stuff
-
 	if d.HasChange("volume") {
-		if d.HasChange("volume.0.user_data") {
-			diags := diag.FromErr(fmt.Errorf("volume.0.user_data is immutable and is only allowed to be set on a new volume creation"))
-			return diags
-		}
-
-		if d.HasChange("volume.0.backup_unit_id") {
-			diags := diag.FromErr(fmt.Errorf("volume.0.backup_unit_id\" is immutable and is only allowed to be set on a new volume creation"))
-			return diags
-		}
-
-		if d.HasChange("volume.0.image_name") {
-			diags := diag.FromErr(fmt.Errorf("volume.0.image_name is immutable"))
-			return diags
-		}
-
-		if d.HasChange("volume.0.disk_type") {
-			diags := diag.FromErr(fmt.Errorf("volume.0.disk_type is immutable"))
-			return diags
-		}
-
-		if d.HasChange("volume.0.availability_zone") {
-			diags := diag.FromErr(fmt.Errorf("volume.0.availability_zone is immutable"))
-			return diags
-		}
-
 		bootVolume := d.Get("boot_volume").(string)
 		_, apiResponse, err := client.ServersApi.DatacentersServersVolumesFindById(ctx, dcId, d.Id(), bootVolume).Execute()
 		logApiRequestTime(apiResponse)
