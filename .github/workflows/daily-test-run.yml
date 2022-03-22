@@ -1,9 +1,9 @@
-#This workflow will run every night, running terraform compute tests
-name: Nighly compute test run
+#This workflow will run every day, running terraform compute-engine tests
+name: Daily compute-engine test run
 on:
   schedule:
-# At 21:00:00pm, every day between Monday and Friday, every month
-    - cron: '0 21 * * MON-FRI'
+# At 09:00:00am, every day between Monday and Friday, every month
+    - cron: '0 09 * * MON-FRI'
 
 jobs:
   test:
