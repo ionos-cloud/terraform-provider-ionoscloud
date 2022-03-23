@@ -24,6 +24,24 @@ type PaginationLinks struct {
 	Next *string `json:"next,omitempty"`
 }
 
+// NewPaginationLinks instantiates a new PaginationLinks object
+// This constructor will assign default values to properties that have it defined,
+// and makes sure properties required by API are set, but the set of arguments
+// will change when the set of required properties is changed
+func NewPaginationLinks() *PaginationLinks {
+	this := PaginationLinks{}
+
+	return &this
+}
+
+// NewPaginationLinksWithDefaults instantiates a new PaginationLinks object
+// This constructor will only assign default values to properties that have it defined,
+// but it doesn't guarantee that properties required by API are set
+func NewPaginationLinksWithDefaults() *PaginationLinks {
+	this := PaginationLinks{}
+	return &this
+}
+
 // GetPrev returns the Prev field value
 // If the value is explicit nil, the zero value for string will be returned
 func (o *PaginationLinks) GetPrev() *string {

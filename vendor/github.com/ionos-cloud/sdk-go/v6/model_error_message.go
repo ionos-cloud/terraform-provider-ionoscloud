@@ -22,6 +22,24 @@ type ErrorMessage struct {
 	Message *string `json:"message,omitempty"`
 }
 
+// NewErrorMessage instantiates a new ErrorMessage object
+// This constructor will assign default values to properties that have it defined,
+// and makes sure properties required by API are set, but the set of arguments
+// will change when the set of required properties is changed
+func NewErrorMessage() *ErrorMessage {
+	this := ErrorMessage{}
+
+	return &this
+}
+
+// NewErrorMessageWithDefaults instantiates a new ErrorMessage object
+// This constructor will only assign default values to properties that have it defined,
+// but it doesn't guarantee that properties required by API are set
+func NewErrorMessageWithDefaults() *ErrorMessage {
+	this := ErrorMessage{}
+	return &this
+}
+
 // GetErrorCode returns the ErrorCode field value
 // If the value is explicit nil, the zero value for string will be returned
 func (o *ErrorMessage) GetErrorCode() *string {

@@ -20,6 +20,24 @@ type S3ObjectStorageSSO struct {
 	SsoUrl *string `json:"ssoUrl,omitempty"`
 }
 
+// NewS3ObjectStorageSSO instantiates a new S3ObjectStorageSSO object
+// This constructor will assign default values to properties that have it defined,
+// and makes sure properties required by API are set, but the set of arguments
+// will change when the set of required properties is changed
+func NewS3ObjectStorageSSO() *S3ObjectStorageSSO {
+	this := S3ObjectStorageSSO{}
+
+	return &this
+}
+
+// NewS3ObjectStorageSSOWithDefaults instantiates a new S3ObjectStorageSSO object
+// This constructor will only assign default values to properties that have it defined,
+// but it doesn't guarantee that properties required by API are set
+func NewS3ObjectStorageSSOWithDefaults() *S3ObjectStorageSSO {
+	this := S3ObjectStorageSSO{}
+	return &this
+}
+
 // GetSsoUrl returns the SsoUrl field value
 // If the value is explicit nil, the zero value for string will be returned
 func (o *S3ObjectStorageSSO) GetSsoUrl() *string {

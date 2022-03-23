@@ -26,6 +26,24 @@ type Resources struct {
 	Items *[]Resource `json:"items,omitempty"`
 }
 
+// NewResources instantiates a new Resources object
+// This constructor will assign default values to properties that have it defined,
+// and makes sure properties required by API are set, but the set of arguments
+// will change when the set of required properties is changed
+func NewResources() *Resources {
+	this := Resources{}
+
+	return &this
+}
+
+// NewResourcesWithDefaults instantiates a new Resources object
+// This constructor will only assign default values to properties that have it defined,
+// but it doesn't guarantee that properties required by API are set
+func NewResourcesWithDefaults() *Resources {
+	this := Resources{}
+	return &this
+}
+
 // GetId returns the Id field value
 // If the value is explicit nil, the zero value for string will be returned
 func (o *Resources) GetId() *string {

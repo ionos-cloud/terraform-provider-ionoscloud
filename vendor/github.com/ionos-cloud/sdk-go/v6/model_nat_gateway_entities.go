@@ -20,6 +20,24 @@ type NatGatewayEntities struct {
 	Flowlogs *FlowLogs        `json:"flowlogs,omitempty"`
 }
 
+// NewNatGatewayEntities instantiates a new NatGatewayEntities object
+// This constructor will assign default values to properties that have it defined,
+// and makes sure properties required by API are set, but the set of arguments
+// will change when the set of required properties is changed
+func NewNatGatewayEntities() *NatGatewayEntities {
+	this := NatGatewayEntities{}
+
+	return &this
+}
+
+// NewNatGatewayEntitiesWithDefaults instantiates a new NatGatewayEntities object
+// This constructor will only assign default values to properties that have it defined,
+// but it doesn't guarantee that properties required by API are set
+func NewNatGatewayEntitiesWithDefaults() *NatGatewayEntities {
+	this := NatGatewayEntities{}
+	return &this
+}
+
 // GetRules returns the Rules field value
 // If the value is explicit nil, the zero value for NatGatewayRules will be returned
 func (o *NatGatewayEntities) GetRules() *NatGatewayRules {

@@ -33,6 +33,24 @@ type NoStateMetaData struct {
 	LastModifiedByUserId *string `json:"lastModifiedByUserId,omitempty"`
 }
 
+// NewNoStateMetaData instantiates a new NoStateMetaData object
+// This constructor will assign default values to properties that have it defined,
+// and makes sure properties required by API are set, but the set of arguments
+// will change when the set of required properties is changed
+func NewNoStateMetaData() *NoStateMetaData {
+	this := NoStateMetaData{}
+
+	return &this
+}
+
+// NewNoStateMetaDataWithDefaults instantiates a new NoStateMetaData object
+// This constructor will only assign default values to properties that have it defined,
+// but it doesn't guarantee that properties required by API are set
+func NewNoStateMetaDataWithDefaults() *NoStateMetaData {
+	this := NoStateMetaData{}
+	return &this
+}
+
 // GetEtag returns the Etag field value
 // If the value is explicit nil, the zero value for string will be returned
 func (o *NoStateMetaData) GetEtag() *string {

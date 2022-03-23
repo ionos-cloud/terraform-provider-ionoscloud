@@ -25,6 +25,26 @@ type FlowLogPut struct {
 	Properties *FlowLogProperties `json:"properties"`
 }
 
+// NewFlowLogPut instantiates a new FlowLogPut object
+// This constructor will assign default values to properties that have it defined,
+// and makes sure properties required by API are set, but the set of arguments
+// will change when the set of required properties is changed
+func NewFlowLogPut(properties FlowLogProperties) *FlowLogPut {
+	this := FlowLogPut{}
+
+	this.Properties = &properties
+
+	return &this
+}
+
+// NewFlowLogPutWithDefaults instantiates a new FlowLogPut object
+// This constructor will only assign default values to properties that have it defined,
+// but it doesn't guarantee that properties required by API are set
+func NewFlowLogPutWithDefaults() *FlowLogPut {
+	this := FlowLogPut{}
+	return &this
+}
+
 // GetId returns the Id field value
 // If the value is explicit nil, the zero value for string will be returned
 func (o *FlowLogPut) GetId() *string {

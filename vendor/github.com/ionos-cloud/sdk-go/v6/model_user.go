@@ -27,6 +27,26 @@ type User struct {
 	Entities   *UsersEntities  `json:"entities,omitempty"`
 }
 
+// NewUser instantiates a new User object
+// This constructor will assign default values to properties that have it defined,
+// and makes sure properties required by API are set, but the set of arguments
+// will change when the set of required properties is changed
+func NewUser(properties UserProperties) *User {
+	this := User{}
+
+	this.Properties = &properties
+
+	return &this
+}
+
+// NewUserWithDefaults instantiates a new User object
+// This constructor will only assign default values to properties that have it defined,
+// but it doesn't guarantee that properties required by API are set
+func NewUserWithDefaults() *User {
+	this := User{}
+	return &this
+}
+
 // GetId returns the Id field value
 // If the value is explicit nil, the zero value for string will be returned
 func (o *User) GetId() *string {

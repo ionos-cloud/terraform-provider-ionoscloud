@@ -26,6 +26,24 @@ type S3Keys struct {
 	Items *[]S3Key `json:"items,omitempty"`
 }
 
+// NewS3Keys instantiates a new S3Keys object
+// This constructor will assign default values to properties that have it defined,
+// and makes sure properties required by API are set, but the set of arguments
+// will change when the set of required properties is changed
+func NewS3Keys() *S3Keys {
+	this := S3Keys{}
+
+	return &this
+}
+
+// NewS3KeysWithDefaults instantiates a new S3Keys object
+// This constructor will only assign default values to properties that have it defined,
+// but it doesn't guarantee that properties required by API are set
+func NewS3KeysWithDefaults() *S3Keys {
+	this := S3Keys{}
+	return &this
+}
+
 // GetId returns the Id field value
 // If the value is explicit nil, the zero value for string will be returned
 func (o *S3Keys) GetId() *string {

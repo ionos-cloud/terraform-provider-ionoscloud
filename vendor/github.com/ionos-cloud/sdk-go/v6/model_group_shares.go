@@ -26,6 +26,24 @@ type GroupShares struct {
 	Items *[]GroupShare `json:"items,omitempty"`
 }
 
+// NewGroupShares instantiates a new GroupShares object
+// This constructor will assign default values to properties that have it defined,
+// and makes sure properties required by API are set, but the set of arguments
+// will change when the set of required properties is changed
+func NewGroupShares() *GroupShares {
+	this := GroupShares{}
+
+	return &this
+}
+
+// NewGroupSharesWithDefaults instantiates a new GroupShares object
+// This constructor will only assign default values to properties that have it defined,
+// but it doesn't guarantee that properties required by API are set
+func NewGroupSharesWithDefaults() *GroupShares {
+	this := GroupShares{}
+	return &this
+}
+
 // GetId returns the Id field value
 // If the value is explicit nil, the zero value for string will be returned
 func (o *GroupShares) GetId() *string {

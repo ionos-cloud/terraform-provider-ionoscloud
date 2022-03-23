@@ -20,6 +20,24 @@ type RequestTarget struct {
 	Status *string            `json:"status,omitempty"`
 }
 
+// NewRequestTarget instantiates a new RequestTarget object
+// This constructor will assign default values to properties that have it defined,
+// and makes sure properties required by API are set, but the set of arguments
+// will change when the set of required properties is changed
+func NewRequestTarget() *RequestTarget {
+	this := RequestTarget{}
+
+	return &this
+}
+
+// NewRequestTargetWithDefaults instantiates a new RequestTarget object
+// This constructor will only assign default values to properties that have it defined,
+// but it doesn't guarantee that properties required by API are set
+func NewRequestTargetWithDefaults() *RequestTarget {
+	this := RequestTarget{}
+	return &this
+}
+
 // GetTarget returns the Target field value
 // If the value is explicit nil, the zero value for ResourceReference will be returned
 func (o *RequestTarget) GetTarget() *ResourceReference {

@@ -28,6 +28,27 @@ type IpBlockProperties struct {
 	IpConsumers *[]IpConsumer `json:"ipConsumers,omitempty"`
 }
 
+// NewIpBlockProperties instantiates a new IpBlockProperties object
+// This constructor will assign default values to properties that have it defined,
+// and makes sure properties required by API are set, but the set of arguments
+// will change when the set of required properties is changed
+func NewIpBlockProperties(location string, size int32) *IpBlockProperties {
+	this := IpBlockProperties{}
+
+	this.Location = &location
+	this.Size = &size
+
+	return &this
+}
+
+// NewIpBlockPropertiesWithDefaults instantiates a new IpBlockProperties object
+// This constructor will only assign default values to properties that have it defined,
+// but it doesn't guarantee that properties required by API are set
+func NewIpBlockPropertiesWithDefaults() *IpBlockProperties {
+	this := IpBlockProperties{}
+	return &this
+}
+
 // GetIps returns the Ips field value
 // If the value is explicit nil, the zero value for []string will be returned
 func (o *IpBlockProperties) GetIps() *[]string {

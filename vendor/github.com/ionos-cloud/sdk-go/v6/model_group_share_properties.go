@@ -22,6 +22,24 @@ type GroupShareProperties struct {
 	SharePrivilege *bool `json:"sharePrivilege,omitempty"`
 }
 
+// NewGroupShareProperties instantiates a new GroupShareProperties object
+// This constructor will assign default values to properties that have it defined,
+// and makes sure properties required by API are set, but the set of arguments
+// will change when the set of required properties is changed
+func NewGroupShareProperties() *GroupShareProperties {
+	this := GroupShareProperties{}
+
+	return &this
+}
+
+// NewGroupSharePropertiesWithDefaults instantiates a new GroupShareProperties object
+// This constructor will only assign default values to properties that have it defined,
+// but it doesn't guarantee that properties required by API are set
+func NewGroupSharePropertiesWithDefaults() *GroupShareProperties {
+	this := GroupShareProperties{}
+	return &this
+}
+
 // GetEditPrivilege returns the EditPrivilege field value
 // If the value is explicit nil, the zero value for bool will be returned
 func (o *GroupShareProperties) GetEditPrivilege() *bool {

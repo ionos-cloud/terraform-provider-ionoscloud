@@ -27,6 +27,26 @@ type Lan struct {
 	Entities   *LanEntities               `json:"entities,omitempty"`
 }
 
+// NewLan instantiates a new Lan object
+// This constructor will assign default values to properties that have it defined,
+// and makes sure properties required by API are set, but the set of arguments
+// will change when the set of required properties is changed
+func NewLan(properties LanProperties) *Lan {
+	this := Lan{}
+
+	this.Properties = &properties
+
+	return &this
+}
+
+// NewLanWithDefaults instantiates a new Lan object
+// This constructor will only assign default values to properties that have it defined,
+// but it doesn't guarantee that properties required by API are set
+func NewLanWithDefaults() *Lan {
+	this := Lan{}
+	return &this
+}
+
 // GetId returns the Id field value
 // If the value is explicit nil, the zero value for string will be returned
 func (o *Lan) GetId() *string {
