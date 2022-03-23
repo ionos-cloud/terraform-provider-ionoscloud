@@ -26,6 +26,27 @@ type KubernetesNodeProperties struct {
 	K8sVersion *string `json:"k8sVersion"`
 }
 
+// NewKubernetesNodeProperties instantiates a new KubernetesNodeProperties object
+// This constructor will assign default values to properties that have it defined,
+// and makes sure properties required by API are set, but the set of arguments
+// will change when the set of required properties is changed
+func NewKubernetesNodeProperties(name string, k8sVersion string) *KubernetesNodeProperties {
+	this := KubernetesNodeProperties{}
+
+	this.Name = &name
+	this.K8sVersion = &k8sVersion
+
+	return &this
+}
+
+// NewKubernetesNodePropertiesWithDefaults instantiates a new KubernetesNodeProperties object
+// This constructor will only assign default values to properties that have it defined,
+// but it doesn't guarantee that properties required by API are set
+func NewKubernetesNodePropertiesWithDefaults() *KubernetesNodeProperties {
+	this := KubernetesNodeProperties{}
+	return &this
+}
+
 // GetName returns the Name field value
 // If the value is explicit nil, the zero value for string will be returned
 func (o *KubernetesNodeProperties) GetName() *string {

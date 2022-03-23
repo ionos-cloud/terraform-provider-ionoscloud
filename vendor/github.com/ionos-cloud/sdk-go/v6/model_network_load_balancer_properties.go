@@ -28,6 +28,28 @@ type NetworkLoadBalancerProperties struct {
 	LbPrivateIps *[]string `json:"lbPrivateIps,omitempty"`
 }
 
+// NewNetworkLoadBalancerProperties instantiates a new NetworkLoadBalancerProperties object
+// This constructor will assign default values to properties that have it defined,
+// and makes sure properties required by API are set, but the set of arguments
+// will change when the set of required properties is changed
+func NewNetworkLoadBalancerProperties(name string, listenerLan int32, targetLan int32) *NetworkLoadBalancerProperties {
+	this := NetworkLoadBalancerProperties{}
+
+	this.Name = &name
+	this.ListenerLan = &listenerLan
+	this.TargetLan = &targetLan
+
+	return &this
+}
+
+// NewNetworkLoadBalancerPropertiesWithDefaults instantiates a new NetworkLoadBalancerProperties object
+// This constructor will only assign default values to properties that have it defined,
+// but it doesn't guarantee that properties required by API are set
+func NewNetworkLoadBalancerPropertiesWithDefaults() *NetworkLoadBalancerProperties {
+	this := NetworkLoadBalancerProperties{}
+	return &this
+}
+
 // GetName returns the Name field value
 // If the value is explicit nil, the zero value for string will be returned
 func (o *NetworkLoadBalancerProperties) GetName() *string {

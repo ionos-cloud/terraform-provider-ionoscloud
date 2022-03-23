@@ -20,6 +20,24 @@ type NicEntities struct {
 	Firewallrules *FirewallRules `json:"firewallrules,omitempty"`
 }
 
+// NewNicEntities instantiates a new NicEntities object
+// This constructor will assign default values to properties that have it defined,
+// and makes sure properties required by API are set, but the set of arguments
+// will change when the set of required properties is changed
+func NewNicEntities() *NicEntities {
+	this := NicEntities{}
+
+	return &this
+}
+
+// NewNicEntitiesWithDefaults instantiates a new NicEntities object
+// This constructor will only assign default values to properties that have it defined,
+// but it doesn't guarantee that properties required by API are set
+func NewNicEntitiesWithDefaults() *NicEntities {
+	this := NicEntities{}
+	return &this
+}
+
 // GetFlowlogs returns the Flowlogs field value
 // If the value is explicit nil, the zero value for FlowLogs will be returned
 func (o *NicEntities) GetFlowlogs() *FlowLogs {

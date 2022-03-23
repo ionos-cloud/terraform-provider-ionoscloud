@@ -31,6 +31,31 @@ type NetworkLoadBalancerForwardingRuleProperties struct {
 	Targets *[]NetworkLoadBalancerForwardingRuleTarget `json:"targets"`
 }
 
+// NewNetworkLoadBalancerForwardingRuleProperties instantiates a new NetworkLoadBalancerForwardingRuleProperties object
+// This constructor will assign default values to properties that have it defined,
+// and makes sure properties required by API are set, but the set of arguments
+// will change when the set of required properties is changed
+func NewNetworkLoadBalancerForwardingRuleProperties(name string, algorithm string, protocol string, listenerIp string, listenerPort int32, targets []NetworkLoadBalancerForwardingRuleTarget) *NetworkLoadBalancerForwardingRuleProperties {
+	this := NetworkLoadBalancerForwardingRuleProperties{}
+
+	this.Name = &name
+	this.Algorithm = &algorithm
+	this.Protocol = &protocol
+	this.ListenerIp = &listenerIp
+	this.ListenerPort = &listenerPort
+	this.Targets = &targets
+
+	return &this
+}
+
+// NewNetworkLoadBalancerForwardingRulePropertiesWithDefaults instantiates a new NetworkLoadBalancerForwardingRuleProperties object
+// This constructor will only assign default values to properties that have it defined,
+// but it doesn't guarantee that properties required by API are set
+func NewNetworkLoadBalancerForwardingRulePropertiesWithDefaults() *NetworkLoadBalancerForwardingRuleProperties {
+	this := NetworkLoadBalancerForwardingRuleProperties{}
+	return &this
+}
+
 // GetName returns the Name field value
 // If the value is explicit nil, the zero value for string will be returned
 func (o *NetworkLoadBalancerForwardingRuleProperties) GetName() *string {

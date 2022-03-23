@@ -22,6 +22,24 @@ type TargetPortRange struct {
 	End *int32 `json:"end,omitempty"`
 }
 
+// NewTargetPortRange instantiates a new TargetPortRange object
+// This constructor will assign default values to properties that have it defined,
+// and makes sure properties required by API are set, but the set of arguments
+// will change when the set of required properties is changed
+func NewTargetPortRange() *TargetPortRange {
+	this := TargetPortRange{}
+
+	return &this
+}
+
+// NewTargetPortRangeWithDefaults instantiates a new TargetPortRange object
+// This constructor will only assign default values to properties that have it defined,
+// but it doesn't guarantee that properties required by API are set
+func NewTargetPortRangeWithDefaults() *TargetPortRange {
+	this := TargetPortRange{}
+	return &this
+}
+
 // GetStart returns the Start field value
 // If the value is explicit nil, the zero value for int32 will be returned
 func (o *TargetPortRange) GetStart() *int32 {

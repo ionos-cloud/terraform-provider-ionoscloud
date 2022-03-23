@@ -25,6 +25,28 @@ type NetworkLoadBalancerForwardingRuleTarget struct {
 	HealthCheck *NetworkLoadBalancerForwardingRuleTargetHealthCheck `json:"healthCheck,omitempty"`
 }
 
+// NewNetworkLoadBalancerForwardingRuleTarget instantiates a new NetworkLoadBalancerForwardingRuleTarget object
+// This constructor will assign default values to properties that have it defined,
+// and makes sure properties required by API are set, but the set of arguments
+// will change when the set of required properties is changed
+func NewNetworkLoadBalancerForwardingRuleTarget(ip string, port int32, weight int32) *NetworkLoadBalancerForwardingRuleTarget {
+	this := NetworkLoadBalancerForwardingRuleTarget{}
+
+	this.Ip = &ip
+	this.Port = &port
+	this.Weight = &weight
+
+	return &this
+}
+
+// NewNetworkLoadBalancerForwardingRuleTargetWithDefaults instantiates a new NetworkLoadBalancerForwardingRuleTarget object
+// This constructor will only assign default values to properties that have it defined,
+// but it doesn't guarantee that properties required by API are set
+func NewNetworkLoadBalancerForwardingRuleTargetWithDefaults() *NetworkLoadBalancerForwardingRuleTarget {
+	this := NetworkLoadBalancerForwardingRuleTarget{}
+	return &this
+}
+
 // GetIp returns the Ip field value
 // If the value is explicit nil, the zero value for string will be returned
 func (o *NetworkLoadBalancerForwardingRuleTarget) GetIp() *string {

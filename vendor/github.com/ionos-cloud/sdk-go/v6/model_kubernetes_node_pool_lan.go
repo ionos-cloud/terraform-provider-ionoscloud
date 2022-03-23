@@ -24,6 +24,26 @@ type KubernetesNodePoolLan struct {
 	Routes *[]KubernetesNodePoolLanRoutes `json:"routes,omitempty"`
 }
 
+// NewKubernetesNodePoolLan instantiates a new KubernetesNodePoolLan object
+// This constructor will assign default values to properties that have it defined,
+// and makes sure properties required by API are set, but the set of arguments
+// will change when the set of required properties is changed
+func NewKubernetesNodePoolLan(id int32) *KubernetesNodePoolLan {
+	this := KubernetesNodePoolLan{}
+
+	this.Id = &id
+
+	return &this
+}
+
+// NewKubernetesNodePoolLanWithDefaults instantiates a new KubernetesNodePoolLan object
+// This constructor will only assign default values to properties that have it defined,
+// but it doesn't guarantee that properties required by API are set
+func NewKubernetesNodePoolLanWithDefaults() *KubernetesNodePoolLan {
+	this := KubernetesNodePoolLan{}
+	return &this
+}
+
 // GetId returns the Id field value
 // If the value is explicit nil, the zero value for int32 will be returned
 func (o *KubernetesNodePoolLan) GetId() *int32 {

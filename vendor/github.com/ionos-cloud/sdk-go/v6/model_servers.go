@@ -31,6 +31,24 @@ type Servers struct {
 	Links *PaginationLinks `json:"_links,omitempty"`
 }
 
+// NewServers instantiates a new Servers object
+// This constructor will assign default values to properties that have it defined,
+// and makes sure properties required by API are set, but the set of arguments
+// will change when the set of required properties is changed
+func NewServers() *Servers {
+	this := Servers{}
+
+	return &this
+}
+
+// NewServersWithDefaults instantiates a new Servers object
+// This constructor will only assign default values to properties that have it defined,
+// but it doesn't guarantee that properties required by API are set
+func NewServersWithDefaults() *Servers {
+	this := Servers{}
+	return &this
+}
+
 // GetId returns the Id field value
 // If the value is explicit nil, the zero value for string will be returned
 func (o *Servers) GetId() *string {

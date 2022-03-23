@@ -49,7 +49,7 @@ const (
 	RequestStatusFailed  = "FAILED"
 	RequestStatusDone    = "DONE"
 
-	Version = "6.0.1"
+	Version = "6.0.2"
 )
 
 // Constants for APIs
@@ -266,7 +266,7 @@ func (c *APIClient) callAPI(request *http.Request) (*http.Response, time.Duratio
 		if c.cfg.Debug {
 			dump, err := httputil.DumpRequestOut(clonedRequest, true)
 			if err == nil {
-				log.Printf("%s\n", string(dump))
+				log.Printf(" [DEBUG] DumpRequestOut : %s\n", string(dump))
 			} else {
 				log.Println("[DEBUG] DumpRequestOut err: ", err)
 			}
@@ -284,9 +284,9 @@ func (c *APIClient) callAPI(request *http.Request) (*http.Response, time.Duratio
 		if c.cfg.Debug {
 			dump, err := httputil.DumpResponse(resp, true)
 			if err == nil {
-				log.Printf("\n%s\n", string(dump))
+				log.Printf("\n [DEBUG] DumpResponse : %s\n", string(dump))
 			} else {
-				log.Println("[DEBUG] dumpResponse err ", err)
+				log.Println("[DEBUG] DumpResponse err ", err)
 			}
 		}
 
@@ -315,7 +315,7 @@ func (c *APIClient) callAPI(request *http.Request) (*http.Response, time.Duratio
 
 		if retryCount >= c.GetConfig().MaxRetries {
 			if c.cfg.Debug {
-				fmt.Printf("number of maximum retries exceeded (%d retries)\n", c.cfg.MaxRetries)
+				log.Printf("number of maximum retries exceeded (%d retries)\n", c.cfg.MaxRetries)
 			}
 			break
 		} else {
@@ -331,7 +331,7 @@ func (c *APIClient) backOff(t time.Duration) {
 		t = c.GetConfig().MaxWaitTime
 	}
 	if c.cfg.Debug {
-		fmt.Printf("sleeping %s before retrying request\n", t.String())
+		log.Printf("sleeping %s before retrying request\n", t.String())
 	}
 	time.Sleep(t)
 }
@@ -540,14 +540,14 @@ func (c *APIClient) decode(v interface{}, b []byte, contentType string) (err err
 					return err
 				}
 			} else {
-				errors.New("Unknown type with GetActualInstance but no unmarshalObj.UnmarshalJSON defined")
+				return errors.New("unknown type with GetActualInstance but no unmarshalObj.UnmarshalJSON defined")
 			}
 		} else if err = json.Unmarshal(b, v); err != nil { // simple model
 			return err
 		}
 		return nil
 	}
-	return errors.New("undefined response type")
+	return fmt.Errorf("undefined response type for content %s", contentType)
 }
 
 func (c *APIClient) GetRequestStatus(ctx context.Context, path string) (*RequestStatus, *APIResponse, error) {

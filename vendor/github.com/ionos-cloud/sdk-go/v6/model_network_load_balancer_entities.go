@@ -20,6 +20,24 @@ type NetworkLoadBalancerEntities struct {
 	Forwardingrules *NetworkLoadBalancerForwardingRules `json:"forwardingrules,omitempty"`
 }
 
+// NewNetworkLoadBalancerEntities instantiates a new NetworkLoadBalancerEntities object
+// This constructor will assign default values to properties that have it defined,
+// and makes sure properties required by API are set, but the set of arguments
+// will change when the set of required properties is changed
+func NewNetworkLoadBalancerEntities() *NetworkLoadBalancerEntities {
+	this := NetworkLoadBalancerEntities{}
+
+	return &this
+}
+
+// NewNetworkLoadBalancerEntitiesWithDefaults instantiates a new NetworkLoadBalancerEntities object
+// This constructor will only assign default values to properties that have it defined,
+// but it doesn't guarantee that properties required by API are set
+func NewNetworkLoadBalancerEntitiesWithDefaults() *NetworkLoadBalancerEntities {
+	this := NetworkLoadBalancerEntities{}
+	return &this
+}
+
 // GetFlowlogs returns the Flowlogs field value
 // If the value is explicit nil, the zero value for FlowLogs will be returned
 func (o *NetworkLoadBalancerEntities) GetFlowlogs() *FlowLogs {

@@ -22,6 +22,24 @@ type KubernetesNodePoolLanRoutes struct {
 	GatewayIp *string `json:"gatewayIp,omitempty"`
 }
 
+// NewKubernetesNodePoolLanRoutes instantiates a new KubernetesNodePoolLanRoutes object
+// This constructor will assign default values to properties that have it defined,
+// and makes sure properties required by API are set, but the set of arguments
+// will change when the set of required properties is changed
+func NewKubernetesNodePoolLanRoutes() *KubernetesNodePoolLanRoutes {
+	this := KubernetesNodePoolLanRoutes{}
+
+	return &this
+}
+
+// NewKubernetesNodePoolLanRoutesWithDefaults instantiates a new KubernetesNodePoolLanRoutes object
+// This constructor will only assign default values to properties that have it defined,
+// but it doesn't guarantee that properties required by API are set
+func NewKubernetesNodePoolLanRoutesWithDefaults() *KubernetesNodePoolLanRoutes {
+	this := KubernetesNodePoolLanRoutes{}
+	return &this
+}
+
 // GetNetwork returns the Network field value
 // If the value is explicit nil, the zero value for string will be returned
 func (o *KubernetesNodePoolLanRoutes) GetNetwork() *string {

@@ -19,6 +19,24 @@ type KubernetesClusterEntities struct {
 	Nodepools *KubernetesNodePools `json:"nodepools,omitempty"`
 }
 
+// NewKubernetesClusterEntities instantiates a new KubernetesClusterEntities object
+// This constructor will assign default values to properties that have it defined,
+// and makes sure properties required by API are set, but the set of arguments
+// will change when the set of required properties is changed
+func NewKubernetesClusterEntities() *KubernetesClusterEntities {
+	this := KubernetesClusterEntities{}
+
+	return &this
+}
+
+// NewKubernetesClusterEntitiesWithDefaults instantiates a new KubernetesClusterEntities object
+// This constructor will only assign default values to properties that have it defined,
+// but it doesn't guarantee that properties required by API are set
+func NewKubernetesClusterEntitiesWithDefaults() *KubernetesClusterEntities {
+	this := KubernetesClusterEntities{}
+	return &this
+}
+
 // GetNodepools returns the Nodepools field value
 // If the value is explicit nil, the zero value for KubernetesNodePools will be returned
 func (o *KubernetesClusterEntities) GetNodepools() *KubernetesNodePools {

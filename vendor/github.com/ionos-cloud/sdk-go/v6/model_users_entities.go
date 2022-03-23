@@ -20,6 +20,24 @@ type UsersEntities struct {
 	Groups *GroupUsers     `json:"groups,omitempty"`
 }
 
+// NewUsersEntities instantiates a new UsersEntities object
+// This constructor will assign default values to properties that have it defined,
+// and makes sure properties required by API are set, but the set of arguments
+// will change when the set of required properties is changed
+func NewUsersEntities() *UsersEntities {
+	this := UsersEntities{}
+
+	return &this
+}
+
+// NewUsersEntitiesWithDefaults instantiates a new UsersEntities object
+// This constructor will only assign default values to properties that have it defined,
+// but it doesn't guarantee that properties required by API are set
+func NewUsersEntitiesWithDefaults() *UsersEntities {
+	this := UsersEntities{}
+	return &this
+}
+
 // GetOwns returns the Owns field value
 // If the value is explicit nil, the zero value for ResourcesUsers will be returned
 func (o *UsersEntities) GetOwns() *ResourcesUsers {

@@ -26,6 +26,24 @@ type LanProperties struct {
 	Public *bool `json:"public,omitempty"`
 }
 
+// NewLanProperties instantiates a new LanProperties object
+// This constructor will assign default values to properties that have it defined,
+// and makes sure properties required by API are set, but the set of arguments
+// will change when the set of required properties is changed
+func NewLanProperties() *LanProperties {
+	this := LanProperties{}
+
+	return &this
+}
+
+// NewLanPropertiesWithDefaults instantiates a new LanProperties object
+// This constructor will only assign default values to properties that have it defined,
+// but it doesn't guarantee that properties required by API are set
+func NewLanPropertiesWithDefaults() *LanProperties {
+	this := LanProperties{}
+	return &this
+}
+
 // GetName returns the Name field value
 // If the value is explicit nil, the zero value for string will be returned
 func (o *LanProperties) GetName() *string {
