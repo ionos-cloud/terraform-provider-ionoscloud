@@ -46,15 +46,16 @@ func testAccS3KeyImportStateID(s *terraform.State) (string, error) {
 
 var testAccImportS3KeyConfigBasic = `
 resource ` + UserResource + ` "example" {
-  first_name = "terraform"
-  last_name = "test"
-  email = "` + utils.GenerateEmail() + `"
-  password = "abc123-321CBA"
-  administrator = false
-  force_sec_auth= false
+  first_name 	 = "terraform"
+  last_name 	 = "test"
+  email 		 = "` + utils.GenerateEmail() + `"
+  password 		 = "abc123-321CBA"
+  administrator  = false
+  force_sec_auth = false
+  active 		 = false
 }
 
 resource ` + S3KeyResource + ` ` + S3KeyTestResource + ` {
   user_id    = ` + UserResource + `.example.id
-  active     = false
+  active     = true
 }`
