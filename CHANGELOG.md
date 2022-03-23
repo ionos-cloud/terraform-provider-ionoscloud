@@ -12,7 +12,9 @@
 
 ### Fixes
 - fixed image data-source bug when `name` not provided - data-source returned 0 results
-- immutable fields will throw error in plan phase, thus the state is no longer updated
+- when you try to change an immutable field, you get an error, but before that the tf state is changed. 
+Before applying a real change you need to `apply` it back with an error again. 
+To fix, when you try to change immutable fields they will throw an error in the plan phase.
 
 ## 6.2.0
 
