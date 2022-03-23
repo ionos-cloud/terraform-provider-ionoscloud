@@ -14,11 +14,11 @@ func TestAccTargetGroupImportBasic(t *testing.T) {
 		CheckDestroy:      testAccCheckIPBlockDestroyCheck,
 		Steps: []resource.TestStep{
 			{
-				Config: testAccCheckTargetGroupConfigUpdate,
+				Config: testAccCheckTargetGroupConfigBasic,
 			},
 
 			{
-				ResourceName:      TargetGroupResource + "." + TargetGroupTestResource,
+				ResourceName:      resourceNameTargetGroup,
 				ImportState:       true,
 				ImportStateVerify: true,
 			},

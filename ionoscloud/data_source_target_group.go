@@ -4,6 +4,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	ionoscloud "github.com/ionos-cloud/sdk-go/v6"
 	"strings"
@@ -11,71 +12,57 @@ import (
 
 func dataSourceTargetGroup() *schema.Resource {
 	return &schema.Resource{
-		Read: dataSourceTargetGroupRead,
+		ReadContext: dataSourceTargetGroupRead,
 		Schema: map[string]*schema.Schema{
 			"id": {
 				Type:     schema.TypeString,
 				Optional: true,
 			},
 			"name": {
-				Type:     schema.TypeString,
-				Optional: true,
+				Type:        schema.TypeString,
+				Optional:    true,
+				Description: "The name of the target group.",
 			},
 			"algorithm": {
 				Type:        schema.TypeString,
 				Computed:    true,
-				Description: "Algorithm for the balancing.",
+				Description: "Balancing algorithm.",
 			},
 			"protocol": {
 				Type:        schema.TypeString,
 				Computed:    true,
-				Description: "Protocol of the balancing.",
+				Description: "Balancing protocol.",
 			},
 			"targets": {
 				Type:        schema.TypeList,
-				Description: "Array of items in that collection",
+				Description: "Array of items in the collection",
 				Computed:    true,
 				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{
 						"ip": {
 							Type:        schema.TypeString,
-							Description: "IP of a balanced target VM",
+							Description: "The IP of the balanced target VM.",
 							Computed:    true,
 						},
 						"port": {
 							Type:        schema.TypeInt,
-							Description: "Port of the balanced target service. (range: 1 to 65535)",
+							Description: "The port of the balanced target service; valid range is 1 to 65535.",
 							Computed:    true,
 						},
 						"weight": {
 							Type:        schema.TypeInt,
-							Description: "Weight parameter is used to adjust the target VM's weight relative to other target VMs",
+							Description: "Traffic is distributed in proportion to target weight, relative to the combined weight of all targets. A target with higher weight receives a greater share of traffic. Valid range is 0 to 256 and default is 1; targets with weight of 0 do not participate in load balancing but still accept persistent connections. It is best use values in the middle of the range to leave room for later adjustments.",
 							Computed:    true,
 						},
-						"health_check": {
-							Type:        schema.TypeList,
-							Description: "Health check attributes for Network Load Balancer forwarding rule target",
+						"health_check_enabled": {
+							Type:        schema.TypeBool,
+							Description: "Makes the target available only if it accepts periodic health check TCP connection attempts; when turned off, the target is considered always available. The health check only consists of a connection attempt to the address and port of the target. Default is True.",
 							Computed:    true,
-							Elem: &schema.Resource{
-								Schema: map[string]*schema.Schema{
-									"check": {
-										Type:        schema.TypeBool,
-										Description: "Check specifies whether the target VM's health is checked.",
-										Computed:    true,
-									},
-									"check_interval": {
-										Type: schema.TypeInt,
-										Description: "CheckInterval determines the duration (in milliseconds) between " +
-											"consecutive health checks. If unspecified a default of 2000 ms is used.",
-										Computed: true,
-									},
-									"maintenance": {
-										Type:        schema.TypeBool,
-										Description: "Maintenance specifies if a target VM should be marked as down, even if it is not.",
-										Computed:    true,
-									},
-								},
-							},
+						},
+						"maintenance_enabled": {
+							Type:        schema.TypeBool,
+							Description: "Maintenance mode prevents the target from receiving balanced traffic.",
+							Computed:    true,
 						},
 					},
 				},
@@ -86,23 +73,20 @@ func dataSourceTargetGroup() *schema.Resource {
 				Computed:    true,
 				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{
-						"connect_timeout": {
-							Type: schema.TypeInt,
-							Description: "It specifies the maximum time (in milliseconds) to wait for a connection attempt " +
-								"to a target VM to succeed. If unset, the default of 5 seconds will be used.",
-							Computed: true,
+						"check_timeout": {
+							Type:        schema.TypeInt,
+							Description: "The maximum time in milliseconds to wait for a target to respond to a check. For target VMs with 'Check Interval' set, the lesser of the two  values is used once the TCP connection is established.",
+							Computed:    true,
 						},
-						"target_timeout": {
-							Type: schema.TypeInt,
-							Description: "argetTimeout specifies the maximum inactivity time (in milliseconds) on the " +
-								"target VM side. If unset, the default of 50 seconds will be used.",
-							Computed: true,
+						"check_interval": {
+							Type:        schema.TypeInt,
+							Description: "The interval in milliseconds between consecutive health checks; default is 2000.",
+							Computed:    true,
 						},
 						"retries": {
-							Type: schema.TypeInt,
-							Description: "Retries specifies the number of retries to perform on a target VM after a " +
-								"connection failure. If unset, the default value of 3 will be used. (valid range: [0, 65535]).",
-							Computed: true,
+							Type:        schema.TypeInt,
+							Description: "The maximum number of attempts to reconnect to a target after a connection failure. Valid range is 0 to 65535, and default is three reconnection.",
+							Computed:    true,
 						},
 					},
 				},
@@ -115,7 +99,7 @@ func dataSourceTargetGroup() *schema.Resource {
 					Schema: map[string]*schema.Schema{
 						"path": {
 							Type:        schema.TypeString,
-							Description: "The path for the HTTP health check; default: /.",
+							Description: "The path (destination URL) for the HTTP health check request; the default is /.",
 							Computed:    true,
 						},
 						"method": {
@@ -129,7 +113,7 @@ func dataSourceTargetGroup() *schema.Resource {
 						},
 						"response": {
 							Type:        schema.TypeString,
-							Description: "The response returned by the request.",
+							Description: "The response returned by the request, depending on the match type.",
 							Computed:    true,
 						},
 						"regex": {
@@ -148,78 +132,72 @@ func dataSourceTargetGroup() *schema.Resource {
 	}
 }
 
-func dataSourceTargetGroupRead(d *schema.ResourceData, meta interface{}) error {
+func dataSourceTargetGroupRead(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	client := meta.(SdkBundle).CloudApiClient
 
-	id, idOk := d.GetOk("id")
-	name, nameOk := d.GetOk("name")
+	idValue, idOk := d.GetOk("id")
+	nameValue, nameOk := d.GetOk("name")
+
+	id := idValue.(string)
+	name := nameValue.(string)
 
 	if idOk && nameOk {
-		return errors.New("id and name cannot be both specified in the same time")
+		return diag.FromErr(errors.New("id and name cannot be both specified in the same time"))
 	}
 	if !idOk && !nameOk {
-		return errors.New("please provide either the target group id or name")
+		return diag.FromErr(errors.New("please provide either the target group id or name"))
 	}
 	var targetGroup ionoscloud.TargetGroup
 	var err error
 	var apiResponse *ionoscloud.APIResponse
 
-	ctx, cancel := context.WithTimeout(context.Background(), *resourceDefaultTimeouts.Default)
-
-	if cancel != nil {
-		defer cancel()
-	}
-
 	if idOk {
 		/* search by ID */
-		targetGroup, apiResponse, err = client.TargetGroupsApi.TargetgroupsFindByTargetGroupId(ctx, id.(string)).Execute()
+		targetGroup, apiResponse, err = client.TargetGroupsApi.TargetgroupsFindByTargetGroupId(ctx, id).Execute()
 		logApiRequestTime(apiResponse)
 
 		if err != nil {
-			return fmt.Errorf("an error occurred while fetching the target groups %s: %s", id.(string), err)
+			return diag.FromErr(fmt.Errorf("an error occurred while fetching the target groups %s: %s", id, err))
 		}
 	} else {
 		/* search by name */
 		var targetGroups ionoscloud.TargetGroups
 
-		ctx, cancel := context.WithTimeout(context.Background(), *resourceDefaultTimeouts.Default)
-
-		if cancel != nil {
-			defer cancel()
-		}
-
-		targetGroups, apiResponse, err := client.TargetGroupsApi.TargetgroupsGet(ctx).Execute()
+		targetGroups, apiResponse, err := client.TargetGroupsApi.TargetgroupsGet(ctx).Depth(5).Execute()
 		logApiRequestTime(apiResponse)
 
 		if err != nil {
-			return fmt.Errorf("an error occurred while fetching target groups: %s", err.Error())
+			return diag.FromErr(fmt.Errorf("an error occurred while fetching target groups: %s", err.Error()))
 		}
 
-		if targetGroups.Items != nil {
-			for _, c := range *targetGroups.Items {
-				tmpTargetGroup, apiResponse, err := client.TargetGroupsApi.TargetgroupsFindByTargetGroupId(ctx, *c.Id).Execute()
-				logApiRequestTime(apiResponse)
-				if err != nil {
-					return fmt.Errorf("an error occurred while fetching target group with ID %s: %s", *c.Id, err.Error())
-				}
-				if tmpTargetGroup.Properties.Name != nil {
-					if strings.Contains(*tmpTargetGroup.Properties.Name, name.(string)) {
-						targetGroup = tmpTargetGroup
-						break
-					}
-				}
+		var results []ionoscloud.TargetGroup
 
+		if targetGroups.Items != nil {
+			for _, t := range *targetGroups.Items {
+				if t.Properties.Name != nil && strings.ToLower(*t.Properties.Name) == strings.ToLower(name) {
+					tmpTargetGroup, apiResponse, err := client.TargetGroupsApi.TargetgroupsFindByTargetGroupId(ctx, *t.Id).Execute()
+					logApiRequestTime(apiResponse)
+					if err != nil {
+						return diag.FromErr(fmt.Errorf("an error occurred while fetching target group with ID %s: %s", *t.Id, err.Error()))
+					}
+					results = append(results, tmpTargetGroup)
+
+				}
 			}
 		}
 
-	}
+		if results == nil || len(results) == 0 {
+			return diag.FromErr(fmt.Errorf("no target group found with the specified criteria: name = %s", name))
+		} else if len(results) > 1 {
+			return diag.FromErr(fmt.Errorf("more than one target group found with the specified criteria: name = %s", name))
+		} else {
+			targetGroup = results[0]
+		}
 
-	if &targetGroup == nil {
-		return errors.New("target group not found")
 	}
 
 	if err = setTargetGroupData(d, &targetGroup); err != nil {
-		return err
+		return diag.FromErr(err)
 	}
 
 	return nil

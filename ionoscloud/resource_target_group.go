@@ -7,7 +7,6 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 	ionoscloud "github.com/ionos-cloud/sdk-go/v6"
-	"log"
 )
 
 func resourceTargetGroup() *schema.Resource {
@@ -174,88 +173,14 @@ func resourceTargetGroupCreate(ctx context.Context, d *schema.ResourceData, meta
 		targetGroup.Properties.Protocol = &protocol
 	}
 
-	if targetsVal, targetsOk := d.GetOk("targets"); targetsOk {
-		if targetsVal.([]interface{}) != nil {
-			var targets []ionoscloud.TargetGroupTarget
-
-			for targetIndex := range targetsVal.([]interface{}) {
-				target := ionoscloud.TargetGroupTarget{}
-				if ip, ipOk := d.GetOk(fmt.Sprintf("targets.%d.ip", targetIndex)); ipOk {
-					ip := ip.(string)
-					target.Ip = &ip
-				}
-
-				if port, portOk := d.GetOk(fmt.Sprintf("targets.%d.port", targetIndex)); portOk {
-					port := int32(port.(int))
-					target.Port = &port
-				}
-
-				if weight, weightOk := d.GetOk(fmt.Sprintf("targets.%d.weight", targetIndex)); weightOk {
-					weight := int32(weight.(int))
-					target.Weight = &weight
-				}
-
-				targets = append(targets, target)
-
-			}
-
-			targetGroup.Properties.Targets = &targets
-		}
-	}
+	targetGroup.Properties.Targets = getTargetGroupTargetData(d)
 
 	if _, healthCheckOk := d.GetOk("health_check.0"); healthCheckOk {
-		targetGroup.Properties.HealthCheck = &ionoscloud.TargetGroupHealthCheck{}
-
-		if checkTimeout, checkTimeoutOk := d.GetOk("health_check.0.check_timeout"); checkTimeoutOk {
-			checkTimeout := int32(checkTimeout.(int))
-			targetGroup.Properties.HealthCheck.CheckTimeout = &checkTimeout
-		}
-
-		if checkInterval, checkIntervalOk := d.GetOk("health_check.0.check_interval"); checkIntervalOk {
-			checkInterval := int32(checkInterval.(int))
-			targetGroup.Properties.HealthCheck.CheckInterval = &checkInterval
-		}
-
-		if retries, retriesOk := d.GetOk("health_check.0.retries"); retriesOk {
-			retries := int32(retries.(int))
-			targetGroup.Properties.HealthCheck.Retries = &retries
-		}
-
+		targetGroup.Properties.HealthCheck = getTargetGroupHealthCheckData(d)
 	}
 
 	if _, httpHealthCheckOk := d.GetOk("http_health_check.0"); httpHealthCheckOk {
-		targetGroup.Properties.HttpHealthCheck = &ionoscloud.TargetGroupHttpHealthCheck{}
-
-		if path, pathOk := d.GetOk("http_health_check.0.path"); pathOk {
-			path := path.(string)
-			targetGroup.Properties.HttpHealthCheck.Path = &path
-		}
-
-		if method, methodOk := d.GetOk("http_health_check.0.method"); methodOk {
-			method := method.(string)
-			targetGroup.Properties.HttpHealthCheck.Method = &method
-		}
-
-		if matchType, matchTypeOk := d.GetOk("http_health_check.0.match_type"); matchTypeOk {
-			matchType := matchType.(string)
-			targetGroup.Properties.HttpHealthCheck.MatchType = &matchType
-		}
-
-		if response, responseOk := d.GetOk("http_health_check.0.response"); responseOk {
-			response := response.(string)
-			targetGroup.Properties.HttpHealthCheck.Response = &response
-		}
-
-		if regex, regexOk := d.GetOk("http_health_check.0.regex"); regexOk {
-			regex := regex.(bool)
-			targetGroup.Properties.HttpHealthCheck.Regex = &regex
-		}
-
-		if negate, negateOk := d.GetOk("http_health_check.0.negate"); negateOk {
-			negate := negate.(bool)
-			targetGroup.Properties.HttpHealthCheck.Negate = &negate
-		}
-
+		targetGroup.Properties.HttpHealthCheck = getTargetGroupHttpHealthCheckData(d)
 	}
 
 	rsp, apiResponse, err := client.TargetGroupsApi.TargetgroupsPost(ctx).TargetGroup(targetGroup).Execute()
@@ -306,167 +231,44 @@ func resourceTargetGroupRead(ctx context.Context, d *schema.ResourceData, meta i
 func resourceTargetGroupUpdate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	client := meta.(SdkBundle).CloudApiClient
 
-	input := ionoscloud.TargetGroupProperties{}
-
-	if d.HasChange("name") {
-		_, v := d.GetChange("name")
-		vStr := v.(string)
-		input.Name = &vStr
+	targetGroup := ionoscloud.TargetGroupPut{
+		Properties: &ionoscloud.TargetGroupProperties{},
 	}
 
-	if d.HasChange("algorithm") {
-		_, v := d.GetChange("algorithm")
-		vStr := v.(string)
-		input.Algorithm = &vStr
+	if name, nameOk := d.GetOk("name"); nameOk {
+		name := name.(string)
+		targetGroup.Properties.Name = &name
 	}
 
-	if d.HasChange("protocol") {
-		_, v := d.GetChange("protocol")
-		vStr := v.(string)
-		input.Protocol = &vStr
+	if algorithm, algorithmOk := d.GetOk("algorithm"); algorithmOk {
+		algorithm := algorithm.(string)
+		targetGroup.Properties.Algorithm = &algorithm
 	}
 
-	if d.HasChange("targets") {
-		oldTargets, newTargets := d.GetChange("targets")
-		if newTargets.([]interface{}) != nil {
-			var targets []ionoscloud.TargetGroupTarget
-
-			for targetIndex := range newTargets.([]interface{}) {
-				target := ionoscloud.TargetGroupTarget{}
-
-				if ip, ipOk := d.GetOk(fmt.Sprintf("targets.%d.ip", targetIndex)); ipOk {
-					ip := ip.(string)
-					target.Ip = &ip
-				}
-
-				if port, portOk := d.GetOk(fmt.Sprintf("targets.%d.port", targetIndex)); portOk {
-					port := int32(port.(int))
-					target.Port = &port
-				}
-
-				if weight, weightOk := d.GetOk(fmt.Sprintf("targets.%d.weight", targetIndex)); weightOk {
-					weight := int32(weight.(int))
-					target.Weight = &weight
-				}
-
-				if healthCheck, healthCheckOk := d.GetOk(fmt.Sprintf("targets.%d.health_check_enabled", targetIndex)); healthCheckOk {
-					healthCheck := healthCheck.(bool)
-					target.HealthCheckEnabled = &healthCheck
-				}
-
-				if maintenance, maintenanceOk := d.GetOk(fmt.Sprintf("targets.%d.maintenance_enabled", targetIndex)); maintenanceOk {
-					maintenance := maintenance.(bool)
-					target.MaintenanceEnabled = &maintenance
-				}
-
-				targets = append(targets, target)
-			}
-
-			log.Printf("[INFO] Network load balancer forwarding rule targets changed from %+v to %+v", oldTargets, newTargets)
-			input.Targets = &targets
-		}
+	if protocol, protocolOk := d.GetOk("protocol"); protocolOk {
+		protocol := protocol.(string)
+		targetGroup.Properties.Protocol = &protocol
 	}
 
-	if d.HasChange("health_check.0") {
-		_, v := d.GetChange("health_check.0")
-		if v.(map[string]interface{}) != nil {
+	targetGroup.Properties.Targets = getTargetGroupTargetData(d)
 
-			healthCheck := &ionoscloud.TargetGroupHealthCheck{}
-
-			if d.HasChange("health_check.0.check_timeout") {
-				_, newValue := d.GetChange("health_check.0.check_timeout")
-				if newValue != 0 {
-					newValue := int32(newValue.(int))
-					healthCheck.CheckTimeout = &newValue
-				}
-			}
-
-			if d.HasChange("health_check.0.check_interval") {
-				_, newValue := d.GetChange("health_check.0.check_interval")
-				if newValue != 0 {
-					newValue := int32(newValue.(int))
-					healthCheck.CheckInterval = &newValue
-				}
-			}
-
-			if d.HasChange("health_check.0.retries") {
-				_, newValue := d.GetChange("health_check.0.retries")
-				if newValue != 0 {
-					newValue := int32(newValue.(int))
-					healthCheck.Retries = &newValue
-				}
-			}
-
-			input.HealthCheck = healthCheck
-		}
+	if _, healthCheckOk := d.GetOk("health_check.0"); healthCheckOk {
+		targetGroup.Properties.HealthCheck = getTargetGroupHealthCheckData(d)
 	}
 
-	if d.HasChange("http_health_check.0") {
-		_, v := d.GetChange("http_health_check.0")
-		if v.(map[string]interface{}) != nil {
-
-			healthCheck := &ionoscloud.TargetGroupHttpHealthCheck{}
-
-			if d.HasChange("http_health_check.0.path") {
-				_, newValue := d.GetChange("health_check.0.path")
-				if newValue != 0 {
-					newValue := newValue.(string)
-					healthCheck.Path = &newValue
-				}
-			}
-
-			if d.HasChange("http_health_check.0.method") {
-				_, newValue := d.GetChange("health_check.0.method")
-				if newValue != 0 {
-					newValue := newValue.(string)
-					healthCheck.Method = &newValue
-				}
-			}
-
-			if d.HasChange("http_health_check.0.match_type") {
-				_, newValue := d.GetChange("health_check.0.match_type")
-				if newValue != 0 {
-					newValue := newValue.(string)
-					healthCheck.MatchType = &newValue
-				}
-			}
-
-			if d.HasChange("http_health_check.0.response") {
-				_, newValue := d.GetChange("health_check.0.response")
-				if newValue != 0 {
-					newValue := newValue.(string)
-					healthCheck.Response = &newValue
-				}
-			}
-
-			if d.HasChange("http_health_check.0.regex") {
-				_, newValue := d.GetChange("health_check.0.regex")
-				if newValue != 0 {
-					newValue := newValue.(bool)
-					healthCheck.Regex = &newValue
-				}
-			}
-
-			if d.HasChange("http_health_check.0.negate") {
-				_, newValue := d.GetChange("health_check.0.negate")
-				if newValue != 0 {
-					newValue := newValue.(bool)
-					healthCheck.Negate = &newValue
-				}
-			}
-
-			input.HttpHealthCheck = healthCheck
-
-		}
+	if _, httpHealthCheckOk := d.GetOk("http_health_check.0"); httpHealthCheckOk {
+		targetGroup.Properties.HttpHealthCheck = getTargetGroupHttpHealthCheckData(d)
 	}
 
-	_, apiResponse, err := client.TargetGroupsApi.TargetgroupsPatch(ctx, d.Id()).TargetGroupProperties(input).Execute()
+	response, apiResponse, err := client.TargetGroupsApi.TargetgroupsPut(ctx, d.Id()).TargetGroup(targetGroup).Execute()
 	logApiRequestTime(apiResponse)
 
 	if err != nil {
 		diags := diag.FromErr(fmt.Errorf("an error occured while restoring a targetGroup ID %s %d", d.Id(), err))
 		return diags
 	}
+
+	d.SetId(*response.Id)
 
 	// Wait, catching any errors
 	_, errState := getStateChangeConf(meta, d, apiResponse.Header.Get("Location"), schema.TimeoutUpdate).WaitForStateContext(ctx)
@@ -650,4 +452,92 @@ func setTargetGroupData(d *schema.ResourceData, targetGroup *ionoscloud.TargetGr
 
 	}
 	return nil
+}
+
+func getTargetGroupTargetData(d *schema.ResourceData) *[]ionoscloud.TargetGroupTarget {
+	targets := make([]ionoscloud.TargetGroupTarget, 0)
+
+	if targetsVal, targetsOk := d.GetOk("targets"); targetsOk {
+
+		if targetsVal.([]interface{}) != nil {
+
+			for targetIndex := range targetsVal.([]interface{}) {
+				target := ionoscloud.TargetGroupTarget{}
+				if ip, ipOk := d.GetOk(fmt.Sprintf("targets.%d.ip", targetIndex)); ipOk {
+					ip := ip.(string)
+					target.Ip = &ip
+				}
+
+				if port, portOk := d.GetOk(fmt.Sprintf("targets.%d.port", targetIndex)); portOk {
+					port := int32(port.(int))
+					target.Port = &port
+				}
+
+				if weight, weightOk := d.GetOk(fmt.Sprintf("targets.%d.weight", targetIndex)); weightOk {
+					weight := int32(weight.(int))
+					target.Weight = &weight
+				}
+
+				targets = append(targets, target)
+			}
+		}
+	}
+	return &targets
+}
+
+func getTargetGroupHealthCheckData(d *schema.ResourceData) *ionoscloud.TargetGroupHealthCheck {
+	healthCheck := ionoscloud.TargetGroupHealthCheck{}
+
+	if checkTimeout, checkTimeoutOk := d.GetOk("health_check.0.check_timeout"); checkTimeoutOk {
+		checkTimeout := int32(checkTimeout.(int))
+		healthCheck.CheckTimeout = &checkTimeout
+	}
+
+	if checkInterval, checkIntervalOk := d.GetOk("health_check.0.check_interval"); checkIntervalOk {
+		checkInterval := int32(checkInterval.(int))
+		healthCheck.CheckInterval = &checkInterval
+	}
+
+	if retries, retriesOk := d.GetOk("health_check.0.retries"); retriesOk {
+		retries := int32(retries.(int))
+		healthCheck.Retries = &retries
+	}
+
+	return &healthCheck
+}
+
+func getTargetGroupHttpHealthCheckData(d *schema.ResourceData) *ionoscloud.TargetGroupHttpHealthCheck {
+	httpHealthCheck := ionoscloud.TargetGroupHttpHealthCheck{}
+
+	if path, pathOk := d.GetOk("http_health_check.0.path"); pathOk {
+		path := path.(string)
+		httpHealthCheck.Path = &path
+	}
+
+	if method, methodOk := d.GetOk("http_health_check.0.method"); methodOk {
+		method := method.(string)
+		httpHealthCheck.Method = &method
+	}
+
+	if matchType, matchTypeOk := d.GetOk("http_health_check.0.match_type"); matchTypeOk {
+		matchType := matchType.(string)
+		httpHealthCheck.MatchType = &matchType
+	}
+
+	if response, responseOk := d.GetOk("http_health_check.0.response"); responseOk {
+		response := response.(string)
+		httpHealthCheck.Response = &response
+	}
+
+	if regex, regexOk := d.GetOk("http_health_check.0.regex"); regexOk {
+		regex := regex.(bool)
+		httpHealthCheck.Regex = &regex
+	}
+
+	if negate, negateOk := d.GetOk("http_health_check.0.negate"); negateOk {
+		negate := negate.(bool)
+		httpHealthCheck.Negate = &negate
+	}
+
+	return &httpHealthCheck
 }

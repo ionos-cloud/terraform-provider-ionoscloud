@@ -40,9 +40,9 @@ func TestAccApplicationLoadBalancerForwardingRuleBasic(t *testing.T) {
 					resource.TestCheckResourceAttr(resourceNameAlbRule, "http_rules.0.conditions.0.condition", "EQUALS"),
 					resource.TestCheckResourceAttr(resourceNameAlbRule, "http_rules.0.conditions.0.value", "value"),
 					resource.TestCheckResourceAttr(resourceNameAlbRule, "http_rules.0.name", "http_rule"),
-					//resource.TestCheckResourceAttr(resourceNameAlbRule, "http_rules.1.type", "FORWARD"),
-					//resource.TestCheckResourceAttr(resourceNameAlbRule, "http_rules.1.conditions.0.type", "SOURCE_IP"),
-					//resource.TestCheckResourceAttr(resourceNameAlbRule, "http_rules.1.conditions.0.value", "value"),
+					resource.TestCheckResourceAttr(resourceNameAlbRule, "http_rules.1.type", "FORWARD"),
+					resource.TestCheckResourceAttr(resourceNameAlbRule, "http_rules.1.conditions.0.type", "SOURCE_IP"),
+					resource.TestCheckResourceAttr(resourceNameAlbRule, "http_rules.1.conditions.0.value", "10.12.118.224/24"),
 				),
 			},
 			{
@@ -59,9 +59,9 @@ func TestAccApplicationLoadBalancerForwardingRuleBasic(t *testing.T) {
 					resource.TestCheckResourceAttrPair(dataSourceNameAlbRuleById, "http_rules.0.conditions.0.condition", resourceNameAlbRule, "http_rules.0.conditions.0.condition"),
 					resource.TestCheckResourceAttrPair(dataSourceNameAlbRuleById, "http_rules.0.conditions.0.value", resourceNameAlbRule, "http_rules.0.conditions.0.value"),
 					resource.TestCheckResourceAttrPair(dataSourceNameAlbRuleById, "http_rules.0.name", resourceNameAlbRule, "http_rules.0.name"),
-					//resource.TestCheckResourceAttrPair(dataSourceNameAlbRuleById, "http_rules.1.type", resourceNameAlbRule, "http_rules.1.type"),
-					//resource.TestCheckResourceAttrPair(dataSourceNameAlbRuleById, "http_rules.1.conditions.0.type", resourceNameAlbRule, "http_rules.1.conditions.0.type"),
-					//resource.TestCheckResourceAttrPair(dataSourceNameAlbRuleById, "http_rules.1.conditions.0.value", resourceNameAlbRule, "http_rules.1.conditions.0.value"),
+					resource.TestCheckResourceAttrPair(dataSourceNameAlbRuleById, "http_rules.1.type", resourceNameAlbRule, "http_rules.1.type"),
+					resource.TestCheckResourceAttrPair(dataSourceNameAlbRuleById, "http_rules.1.conditions.0.type", resourceNameAlbRule, "http_rules.1.conditions.0.type"),
+					resource.TestCheckResourceAttrPair(dataSourceNameAlbRuleById, "http_rules.1.conditions.0.value", resourceNameAlbRule, "http_rules.1.conditions.0.value"),
 				),
 			},
 			{
@@ -78,9 +78,9 @@ func TestAccApplicationLoadBalancerForwardingRuleBasic(t *testing.T) {
 					resource.TestCheckResourceAttrPair(dataSourceNameAlbRuleByName, "http_rules.0.conditions.0.condition", resourceNameAlbRule, "http_rules.0.conditions.0.condition"),
 					resource.TestCheckResourceAttrPair(dataSourceNameAlbRuleByName, "http_rules.0.conditions.0.value", resourceNameAlbRule, "http_rules.0.conditions.0.value"),
 					resource.TestCheckResourceAttrPair(dataSourceNameAlbRuleByName, "http_rules.0.name", resourceNameAlbRule, "http_rules.0.name"),
-					//resource.TestCheckResourceAttrPair(dataSourceNameAlbRuleByName, "http_rules.1.type", resourceNameAlbRule, "http_rules.1.type"),
-					//resource.TestCheckResourceAttrPair(dataSourceNameAlbRuleByName, "http_rules.1.conditions.0.type", resourceNameAlbRule, "http_rules.1.conditions.0.type"),
-					//resource.TestCheckResourceAttrPair(dataSourceNameAlbRuleByName, "http_rules.1.conditions.0.value", resourceNameAlbRule, "http_rules.1.conditions.0.value"),
+					resource.TestCheckResourceAttrPair(dataSourceNameAlbRuleByName, "http_rules.1.type", resourceNameAlbRule, "http_rules.1.type"),
+					resource.TestCheckResourceAttrPair(dataSourceNameAlbRuleByName, "http_rules.1.conditions.0.type", resourceNameAlbRule, "http_rules.1.conditions.0.type"),
+					resource.TestCheckResourceAttrPair(dataSourceNameAlbRuleByName, "http_rules.1.conditions.0.value", resourceNameAlbRule, "http_rules.1.conditions.0.value"),
 				),
 			},
 			{
@@ -105,7 +105,7 @@ func TestAccApplicationLoadBalancerForwardingRuleBasic(t *testing.T) {
 					resource.TestCheckResourceAttr(resourceNameAlbRule, "http_rules.0.conditions.0.condition", "EQUALS"),
 					resource.TestCheckResourceAttr(resourceNameAlbRule, "http_rules.0.conditions.0.negate", "true"),
 					resource.TestCheckResourceAttr(resourceNameAlbRule, "http_rules.0.conditions.0.key", "key"),
-					resource.TestCheckResourceAttr(resourceNameAlbRule, "http_rules.0.conditions.0.value", "value"),
+					resource.TestCheckResourceAttr(resourceNameAlbRule, "http_rules.0.conditions.0.value", "10.12.119.224/24"),
 				),
 			},
 			{
@@ -125,7 +125,7 @@ func TestAccApplicationLoadBalancerForwardingRuleBasic(t *testing.T) {
 					resource.TestCheckResourceAttr(resourceNameAlbRule, "http_rules.0.conditions.0.condition", "EQUALS"),
 					resource.TestCheckResourceAttr(resourceNameAlbRule, "http_rules.0.conditions.0.negate", "true"),
 					resource.TestCheckResourceAttr(resourceNameAlbRule, "http_rules.0.conditions.0.key", "key"),
-					resource.TestCheckResourceAttr(resourceNameAlbRule, "http_rules.0.conditions.0.value", "value"),
+					resource.TestCheckResourceAttr(resourceNameAlbRule, "http_rules.0.conditions.0.value", "10.12.120.224/24"),
 					resource.TestCheckResourceAttr(resourceNameAlbRule, "http_rules.1.name", "http_rule_2"),
 					resource.TestCheckResourceAttr(resourceNameAlbRule, "http_rules.1.type", "STATIC"),
 					resource.TestCheckResourceAttr(resourceNameAlbRule, "http_rules.1.drop_query", "false"),
@@ -135,7 +135,7 @@ func TestAccApplicationLoadBalancerForwardingRuleBasic(t *testing.T) {
 					resource.TestCheckResourceAttr(resourceNameAlbRule, "http_rules.1.conditions.0.condition", "MATCHES"),
 					resource.TestCheckResourceAttr(resourceNameAlbRule, "http_rules.1.conditions.0.negate", "false"),
 					resource.TestCheckResourceAttr(resourceNameAlbRule, "http_rules.1.conditions.0.key", "key"),
-					resource.TestCheckResourceAttr(resourceNameAlbRule, "http_rules.1.conditions.0.value", "value"),
+					resource.TestCheckResourceAttr(resourceNameAlbRule, "http_rules.1.conditions.0.value", "10.12.120.224/24"),
 				),
 			},
 		},
@@ -214,7 +214,7 @@ func testAccCheckApplicationLoadBalancerForwardingRuleExists(n string, alb *iono
 	}
 }
 
-const testAccCheckApplicationLoadBalancerForwardingRuleConfigBasic = testAccCheckApplicationLoadBalancerConfigUpdate + `
+const testAccCheckApplicationLoadBalancerForwardingRuleConfigBasic = testAccCheckApplicationLoadBalancerConfigUpdate + testAccCheckTargetGroupConfigBasic + `
 resource ` + ApplicationLoadBalancerForwardingRuleResource + ` ` + ApplicationLoadBalancerForwardingRuleTestResource + ` {
  datacenter_id = ` + DatacenterResource + `.alb_datacenter.id
  application_loadbalancer_id = ` + ApplicationLoadBalancerResource + `.` + ApplicationLoadBalancerTestResource + `.id
@@ -232,17 +232,18 @@ resource ` + ApplicationLoadBalancerForwardingRuleResource + ` ` + ApplicationLo
      value = "value"
    }
  }
- #http_rules {
- #  name = "http_rule_2"
- #  type = "FORWARD"
- #  conditions {
- #    type = "SOURCE_IP"
- #    value = "10.12.118.224/24"
- #  }
- #}
+ http_rules {
+   name = "http_rule_2"
+   type = "FORWARD"
+   target_group = ` + resourceNameTargetGroup + `.id
+   conditions {
+     type = "SOURCE_IP"
+     value = "10.12.118.224/24"
+   }
+ }
 }`
 
-const testAccCheckApplicationLoadBalancerForwardingRuleConfigUpdate = testAccCheckApplicationLoadBalancerConfigUpdate + `
+const testAccCheckApplicationLoadBalancerForwardingRuleConfigUpdate = testAccCheckApplicationLoadBalancerConfigUpdate + testAccCheckTargetGroupConfigBasic + `
 resource ` + ApplicationLoadBalancerForwardingRuleResource + ` ` + ApplicationLoadBalancerForwardingRuleTestResource + ` {
  datacenter_id = ` + DatacenterResource + `.alb_datacenter.id
  application_loadbalancer_id = ` + ApplicationLoadBalancerResource + `.` + ApplicationLoadBalancerTestResource + `.id
@@ -263,7 +264,7 @@ resource ` + ApplicationLoadBalancerForwardingRuleResource + ` ` + ApplicationLo
      condition = "EQUALS"
      negate = true
      key = "key"
-     value = "value"
+     value = "10.12.119.224/24"
    }
  }
 }`
@@ -289,7 +290,7 @@ resource ` + ApplicationLoadBalancerForwardingRuleResource + ` ` + ApplicationLo
      condition = "EQUALS"
      negate = true
      key = "key"
-     value = "value"
+     value = "10.12.120.224/24"
    }
  }
  http_rules {
@@ -304,7 +305,7 @@ resource ` + ApplicationLoadBalancerForwardingRuleResource + ` ` + ApplicationLo
      condition = "MATCHES"
      negate = false
      key = "key"
-     value = "value"
+     value = "10.12.120.224/24"
    }
  }
 }`
