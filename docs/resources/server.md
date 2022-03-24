@@ -134,8 +134,8 @@ resource "ionoscloud_server" "example" {
 - `availability_zone` - (Optional)[string] The availability zone in which the server should exist. This property is immutable.
 - `licence_type` - (Optional)[string] Sets the OS type of the server.
 - `cpu_family` - (Optional)[string] Sets the CPU type. "AMD_OPTERON", "INTEL_XEON" or "INTEL_SKYLAKE".
-- `volume` - (Required) See the Volume section.
-- `nic` - (Required) See the NIC section.
+- `volume` - (Required) See the [Volume](volume.md) section.
+- `nic` - (Required) See the [Nic](nic.md) section.
 - `boot_volume` - (Computed) The associated boot volume.
 - `boot_cdrom` - (Optional)[string] The associated boot drive, if any.
 - `boot_image` - (Optional)[string] The image or snapshot UUID / name. May also be an image alias. It is required if `licence_type` is not provided.

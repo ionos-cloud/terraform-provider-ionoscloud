@@ -168,17 +168,7 @@ func GetDbaasPgSqlClusterDataUpdate(d *schema.ResourceData) (*dbaas.PatchCluster
 		dbaasCluster.Properties.StorageSize = &storageSize
 	}
 
-	if d.HasChange("storage_type") {
-		diags := diag.FromErr(fmt.Errorf("storage_type parameter is immutable"))
-		return nil, diags
-	}
-
 	dbaasCluster.Properties.Connections = GetDbaasClusterConnectionsData(d)
-
-	if d.HasChange("location") {
-		diags := diag.FromErr(fmt.Errorf("location parameter is immutable"))
-		return nil, diags
-	}
 
 	if displayName, ok := d.GetOk("display_name"); ok {
 		displayName := displayName.(string)
@@ -186,21 +176,6 @@ func GetDbaasPgSqlClusterDataUpdate(d *schema.ResourceData) (*dbaas.PatchCluster
 	}
 
 	dbaasCluster.Properties.MaintenanceWindow = GetDbaasClusterMaintenanceWindowData(d)
-
-	if d.HasChange("credentials") {
-		diags := diag.FromErr(fmt.Errorf("credentials parameter is immutable"))
-		return nil, diags
-	}
-
-	if d.HasChange("synchronization_mode") {
-		diags := diag.FromErr(fmt.Errorf("synchronization_mode parameter is immutable"))
-		return nil, diags
-	}
-
-	if d.HasChange("from_backup") {
-		diags := diag.FromErr(fmt.Errorf("from_backup parameter is immutable"))
-		return nil, diags
-	}
 
 	return &dbaasCluster, nil
 }

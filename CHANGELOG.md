@@ -3,13 +3,21 @@
 ### Documentation
 - improved all the examples to be ready to use 
 - added units where missing
+- added example for adding a secondary NIC to an IP Failover
+- updated provider version to the latest release in main registry page
 
 ### Enhancement
 - add `allow_replace` to node pool resource, which allows the update of immutable node_pool fields will first
   destroy and then re-create the resource. This field should be used with care, understanding the risks.
+- update sdk-go dependency to v6.0.2
+- update sdk-go-dbaas-postgres dependency to v1.0.2
+- update terraform-plugin-sdk to v2.12.0
 
 ### Fixes
 - fixed image data-source bug when `name` not provided - data-source returned 0 results
+- when you try to change an immutable field, you get an error, but before that the tf state is changed. 
+Before applying a real change you need to `apply` it back with an error again. 
+To fix, when you try to change immutable fields they will throw an error in the plan phase.
 
 ## 6.2.0
 

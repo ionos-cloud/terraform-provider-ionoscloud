@@ -22,6 +22,7 @@ func resourceVolume() *schema.Resource {
 		Importer: &schema.ResourceImporter{
 			StateContext: resourceVolumeImporter,
 		},
+		CustomizeDiff: checkVolumeImmutableFields,
 		Schema: map[string]*schema.Schema{
 			"image_name": {
 				Type:     schema.TypeString,
@@ -143,6 +144,40 @@ func resourceVolume() *schema.Resource {
 		},
 		Timeouts: &resourceDefaultTimeouts,
 	}
+}
+
+func checkVolumeImmutableFields(_ context.Context, diff *schema.ResourceDiff, _ interface{}) error {
+
+	//we do not want to check in case of resource creation
+	if diff.Id() == "" {
+		return nil
+	}
+
+	if diff.HasChange("availability_zone") {
+		return fmt.Errorf("availability_zone %s", ImmutableError)
+	}
+
+	if diff.HasChange("user_data") {
+		return fmt.Errorf("user_data %s", ImmutableError)
+	}
+
+	if diff.HasChange("backup_unit_id") {
+		return fmt.Errorf("backup_unit_id %s", ImmutableError)
+	}
+
+	if diff.HasChange("image_name") {
+		return fmt.Errorf("image_name %s", ImmutableError)
+	}
+
+	if diff.HasChange("disk_type") {
+		return fmt.Errorf("disk_type %s", ImmutableError)
+	}
+
+	if diff.HasChange("availability_zone") {
+		return fmt.Errorf("availability_zone %s", ImmutableError)
+	}
+	return nil
+
 }
 
 func resourceVolumeCreate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
@@ -372,10 +407,7 @@ func resourceVolumeUpdate(ctx context.Context, d *schema.ResourceData, meta inte
 		newValueStr := newValue.(string)
 		properties.Name = &newValueStr
 	}
-	if d.HasChange("disk_type") {
-		diags := diag.FromErr(fmt.Errorf("disk_type is immutable"))
-		return diags
-	}
+
 	if d.HasChange("size") {
 		_, newValue := d.GetChange("size")
 		newValueFloat32 := float32(newValue.(int))
@@ -385,25 +417,6 @@ func resourceVolumeUpdate(ctx context.Context, d *schema.ResourceData, meta inte
 		_, newValue := d.GetChange("bus")
 		newValueStr := newValue.(string)
 		properties.Bus = &newValueStr
-	}
-	if d.HasChange("availability_zone") {
-		diags := diag.FromErr(fmt.Errorf("availability_zone is immutable"))
-		return diags
-	}
-
-	if d.HasChange("user_data") {
-		diags := diag.FromErr(fmt.Errorf("user_data property of resource volume is immutable "))
-		return diags
-	}
-
-	if d.HasChange("backup_unit_id") {
-		diags := diag.FromErr(fmt.Errorf("backup_unit_id property of resource volume is immutable "))
-		return diags
-	}
-
-	if d.HasChange("image_name") {
-		diags := diag.FromErr(fmt.Errorf("backup_unit_id property of resource volume is immutable "))
-		return diags
 	}
 
 	volume, apiResponse, err := client.VolumesApi.DatacentersVolumesPatch(ctx, dcId, d.Id()).Volume(properties).Execute()

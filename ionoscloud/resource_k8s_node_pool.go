@@ -251,42 +251,35 @@ func checkNodePoolImmutableFields(_ context.Context, diff *schema.ResourceDiff, 
 		return nil
 	}
 	if diff.HasChange("name") {
-		return fmt.Errorf("name attribute is immutable, therefore not allowed in update requests")
-
+		return fmt.Errorf("name %s", ImmutableError)
 	}
 
 	if diff.HasChange("cpu_family") {
-		return fmt.Errorf("cpu_family attribute is immutable, therefore not allowed in update requests")
-
+		return fmt.Errorf("cpu_family %s", ImmutableError)
 	}
 
 	if diff.HasChange("availability_zone") {
-		return fmt.Errorf("availability_zone attribute is immutable, therefore not allowed in update requests")
-
+		return fmt.Errorf("availability_zone %s", ImmutableError)
 	}
 
 	if diff.HasChange("cores_count") {
-		return fmt.Errorf("cores_count attribute is immutable, therefore not allowed in update requests")
+		return fmt.Errorf("cores_count %s", ImmutableError)
 	}
 
 	if diff.HasChange("ram_size") {
-		return fmt.Errorf("ram_size attribute is immutable, therefore not allowed in update requests")
-
+		return fmt.Errorf("ram_size %s", ImmutableError)
 	}
 
 	if diff.HasChange("storage_size") {
-		return fmt.Errorf("storage_size attribute is immutable, therefore not allowed in update requests")
-
+		return fmt.Errorf("storage_size %s", ImmutableError)
 	}
 
 	if diff.HasChange("storage_type") {
-		return fmt.Errorf("storage_type attribute is immutable, therefore not allowed in update requests")
-
+		return fmt.Errorf("storage_type %s", ImmutableError)
 	}
 
 	if diff.HasChange("gateway_ip") {
-		return fmt.Errorf("gateway_ip attribute is immutable, therefore not allowed in update requests")
-
+		return fmt.Errorf("gateway_ip %s", ImmutableError)
 	}
 	return nil
 

@@ -20,6 +20,7 @@ func resourceDbaasPgSqlCluster() *schema.Resource {
 		Importer: &schema.ResourceImporter{
 			StateContext: resourceDbaasPgSqlClusterImport,
 		},
+		CustomizeDiff: checkDBaaSClusterImmutableFields,
 		Schema: map[string]*schema.Schema{
 			"postgres_version": {
 				Type:         schema.TypeString,
@@ -45,14 +46,16 @@ func resourceDbaasPgSqlCluster() *schema.Resource {
 				ValidateFunc: validation.All(validation.IntAtLeast(2048), validation.IntDivisibleBy(1024)),
 			},
 			"storage_size": {
-				Type:        schema.TypeInt,
-				Description: "The amount of storage per instance in megabytes.",
-				Required:    true,
+				Type:         schema.TypeInt,
+				Description:  "The amount of storage per instance in megabytes. Has to be a multiple of 2048.",
+				Required:     true,
+				ValidateFunc: validation.All(validation.IntAtLeast(2048)),
 			},
 			"storage_type": {
-				Type:         schema.TypeString,
-				Description:  "The storage type used in your cluster.",
-				Required:     true,
+				Type:        schema.TypeString,
+				Description: "The storage type used in your cluster.",
+				Required:    true,
+
 				ValidateFunc: validation.All(validation.StringInSlice([]string{"HDD", "SSD"}, true)),
 			},
 			"connections": {
@@ -168,7 +171,30 @@ func resourceDbaasPgSqlCluster() *schema.Resource {
 		Timeouts: &resourceDefaultTimeouts,
 	}
 }
+func checkDBaaSClusterImmutableFields(_ context.Context, diff *schema.ResourceDiff, _ interface{}) error {
 
+	//we do not want to check in case of resource creation
+	if diff.Id() == "" {
+		return nil
+	}
+	if diff.HasChange("storage_type") {
+		return fmt.Errorf("storage_type %s", ImmutableError)
+	}
+	if diff.HasChange("location") {
+		return fmt.Errorf("location %s", ImmutableError)
+	}
+	if diff.HasChange("credentials") {
+		return fmt.Errorf("credentials %s", ImmutableError)
+	}
+	if diff.HasChange("synchronization_mode") {
+		return fmt.Errorf("synchronization_mode %s", ImmutableError)
+	}
+	if diff.HasChange("from_backup") {
+		return fmt.Errorf("from_backup %s", ImmutableError)
+	}
+	return nil
+
+}
 func resourceDbaasPgSqlClusterCreate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	client := meta.(SdkBundle).DbaasClient
 

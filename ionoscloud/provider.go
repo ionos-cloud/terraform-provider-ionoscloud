@@ -242,8 +242,8 @@ func resourceStateRefreshFunc(meta interface{}, path string) resource.StateRefre
 			return nil, "", fmt.Errorf("can not check a state when path is empty")
 		}
 
-		request, _, err := client.GetRequestStatus(context.Background(), path)
-
+		request, apiResponse, err := client.GetRequestStatus(context.Background(), path)
+		logApiRequestTime(apiResponse)
 		if err != nil {
 			return nil, "", fmt.Errorf("request failed with following error: %s", err)
 		}
@@ -262,7 +262,18 @@ func resourceStateRefreshFunc(meta interface{}, path string) resource.StateRefre
 				return request, "DONE", nil
 			}
 		} else {
-			return nil, "", fmt.Errorf("request metadata status is nil")
+			if request == nil {
+				log.Printf("[DEBUG] request is nil")
+			} else if request.Metadata == nil {
+				log.Printf("[DEBUG] request metadata is nil")
+			}
+			if request != nil && request.Metadata != nil && request.Metadata.Message != nil {
+				log.Printf("[DEBUG] request failed with following error: %s", *request.Metadata.Message)
+			}
+			if apiResponse != nil {
+				log.Printf("[DEBUG] response message %s", apiResponse.Message)
+			}
+			return nil, "", fmt.Errorf("request metadata status is nil for path %s", path)
 		}
 
 		return nil, *request.Metadata.Status, nil
