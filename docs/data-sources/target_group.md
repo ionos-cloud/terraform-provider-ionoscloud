@@ -1,36 +1,40 @@
 ---
+subcategory: "Application Load Balancer"
 layout: "ionoscloud"
 page_title: "IonosCloud : ionoscloud_target_group"
 sidebar_current: "docs-ionoscloud_target_group"
 description: |-
-Get information on an Target Group
+  Get information on an Target Group
 ---
 
 # ionoscloud_target_group
 
-The Target Group data source can be used to search for and return existing Application Load Balancer Target Group.
+The **Target Group** data source can be used to search for and return an existing Application Load Balancer Target Group.
+You can provide a string for the name parameter which will be compared with provisioned Application Load Balancer Target Groups.
+If a single match is found, it will be returned. If your search results in multiple matches, an error will be returned.
+When this happens, please make sure that your resources have unique names.
 
 ## Example Usage
 
 ### By Id
 ```hcl
-data "ionoscloud_target_group" "target_group_example" {
-  id			= <target_group_uuid>
+data "ionoscloud_target_group" "example" {
+  id  = <target_group_id>
 }
 ```
 
 
 ### By Name
 ```hcl
-data "ionoscloud_target_group" "target_group_example" {
-  name			= "target_group_example"
+data "ionoscloud_target_group" "example" {
+  name  = "Target Group Example"
 }
 ```
 
 ## Argument Reference
 
-* `name` - (Optional) Name of an existing target group that you want to search for.
 * `id` - (Optional) ID of the target group you want to search for.
+* `name` - (Optional) Name of an existing target group that you want to search for. Search by name is case-insensitive, but the whole resource name is required (we do not support partial matching).
 
 Either `name` or `id` must be provided. If none, or both of `name` and `id` are provided, the datasource will return an error.
 
@@ -41,24 +45,22 @@ The following attributes are returned by the datasource:
 
 - `id` - The Id of that Target group
 - `name` - The name of that Target Group.
-- `algorithm` - Algorithm for the balancing.
-- `protocol` - Protocol of the balancing.
-- `targets` - Array of items in that collection.
-    - `ip` - IP of a balanced target VM.
-    - `port` - Port of the balanced target service. (range: 1 to 65535).
-    - `weight` - Weight parameter is used to adjust the target VM's weight relative to other target VMs.
-    - `health_check` - Health check attributes for Network Load Balancer forwarding rule target.
-        - `check` - Check specifies whether the target VM's health is checked.
-        - `check_interval` - CheckInterval determines the duration (in milliseconds) between consecutive health checks. If unspecified a default of 2000 ms is used.
-        - `maintenance` - Maintenance specifies if a target VM should be marked as down, even if it is not.
+- `algorithm` - Balancing algorithm.
+- `protocol` - Balancing protocol.
+- `targets` - Array of items in the collection
+  - `ip` - The IP of the balanced target VM.
+  - `port` - The port of the balanced target service; valid range is 1 to 65535.
+  - `weight` - Traffic is distributed in proportion to target weight, relative to the combined weight of all targets. A target with higher weight receives a greater share of traffic. Valid range is 0 to 256 and default is 1; targets with weight of 0 do not participate in load balancing but still accept persistent connections. It is best use values in the middle of the range to leave room for later adjustments.
+  - `health_check_enabled` - Makes the target available only if it accepts periodic health check TCP connection attempts; when turned off, the target is considered always available. The health check only consists of a connection attempt to the address and port of the target. Default is True.
+  - `maintenance_enabled` - Maintenance mode prevents the target from receiving balanced traffic.
 - `health_check` - Health check attributes for Target Group.
-    - `connect_timeout` - It specifies the maximum time (in milliseconds) to wait for a connection attempt to a target VM to succeed. If unset, the default of 5 seconds will be used.
-    - `target_timeout` - TargetTimeout specifies the maximum inactivity time (in milliseconds) on the target VM side. If unset, the default of 50 seconds will be used.
-    - `retries` - Retries specifies the number of retries to perform on a target VM after a connection failure. If unset, the default value of 3 will be used.
-- `http_health_check` - Http health check attributes for Target Group.
-    - `path` - The path for the HTTP health check; default: /.
-    - `method` - The method for the HTTP health check.
-    - `match_type`
-    - `response` - The response returned by the request.
-    - `regex` 
-    - `negate` 
+  - `check_timeout` - The maximum time in milliseconds to wait for a target to respond to a check. For target VMs with 'Check Interval' set, the lesser of the two  values is used once the TCP connection is established.
+  - `check_interval` - The interval in milliseconds between consecutive health checks; default is 2000.
+  - `retries` - The maximum number of attempts to reconnect to a target after a connection failure. Valid range is 0 to 65535, and default is three reconnection.
+- `http_health_check` - Http health check attributes for Target Group
+  - `path` - The path (destination URL) for the HTTP health check request; the default is /.
+  - `method` - The method for the HTTP health check.
+  - `match_type` 
+  - `response` - The response returned by the request, depending on the match type.
+  - `regex`
+  - `negate` 

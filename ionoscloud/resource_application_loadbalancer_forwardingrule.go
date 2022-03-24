@@ -31,13 +31,13 @@ func resourceApplicationLoadBalancerForwardingRule() *schema.Resource {
 			},
 			"protocol": {
 				Type:         schema.TypeString,
-				Description:  "Balancing protocol",
+				Description:  "Balancing protocol.",
 				Required:     true,
 				ValidateFunc: validation.All(validation.StringInSlice([]string{"HTTP"}, true)),
 			},
 			"listener_ip": {
 				Type:         schema.TypeString,
-				Description:  "Listening (inbound) IP",
+				Description:  "Listening (inbound) IP.",
 				Required:     true,
 				ValidateFunc: validation.All(validation.StringIsNotWhiteSpace),
 			},
@@ -217,130 +217,11 @@ func resourceApplicationLoadBalancerForwardingRuleCreate(ctx context.Context, d 
 		}
 	}
 
-	if httpRulesVal, httpRulesOk := d.GetOk("http_rules"); httpRulesOk {
-		if httpRulesVal.([]interface{}) != nil {
-			addHttpRules := false
-
-			var httpRules []ionoscloud.ApplicationLoadBalancerHttpRule
-
-			for httpRuleIndex := range httpRulesVal.([]interface{}) {
-				httpRule := ionoscloud.ApplicationLoadBalancerHttpRule{}
-				addHttpRule := false
-				if name, nameOk := d.GetOk(fmt.Sprintf("http_rules.%d.name", httpRuleIndex)); nameOk {
-					name := name.(string)
-					httpRule.Name = &name
-					addHttpRule = true
-				} else {
-					diags := diag.FromErr(fmt.Errorf("ip must be provided for application loadbalancer forwarding rule http_rule"))
-					return diags
-				}
-
-				if typeVal, typeOk := d.GetOk(fmt.Sprintf("http_rules.%d.type", httpRuleIndex)); typeOk {
-					typeVal := typeVal.(string)
-					httpRule.Type = &typeVal
-				} else {
-					diags := diag.FromErr(fmt.Errorf("type must be provided for application loadbalancer forwarding rule http_rule"))
-					return diags
-				}
-
-				if targetGroup, targetGroupOk := d.GetOk(fmt.Sprintf("http_rules.%d.target_group", httpRuleIndex)); targetGroupOk {
-					targetGroup := targetGroup.(string)
-					httpRule.TargetGroup = &targetGroup
-				}
-
-				if dropQuery, dropQueryOk := d.GetOk(fmt.Sprintf("http_rules.%d.drop_query", httpRuleIndex)); dropQueryOk {
-					dropQuery := dropQuery.(bool)
-					httpRule.DropQuery = &dropQuery
-				}
-
-				if location, locationOk := d.GetOk(fmt.Sprintf("http_rules.%d.location", httpRuleIndex)); locationOk {
-					location := location.(string)
-					httpRule.Location = &location
-				}
-
-				if statusCode, statusCodeOk := d.GetOk(fmt.Sprintf("http_rules.%d.status_code", httpRuleIndex)); statusCodeOk {
-					statusCode := int32(statusCode.(int))
-					httpRule.StatusCode = &statusCode
-				}
-
-				if responseMessage, responseMessageOk := d.GetOk(fmt.Sprintf("http_rules.%d.response_message", httpRuleIndex)); responseMessageOk {
-					responseMessage := responseMessage.(string)
-					httpRule.ResponseMessage = &responseMessage
-				}
-
-				if contentType, contentTypeOk := d.GetOk(fmt.Sprintf("http_rules.%d.content_type", httpRuleIndex)); contentTypeOk {
-					contentType := contentType.(string)
-					httpRule.ContentType = &contentType
-				}
-
-				if conditionsVal, conditionsOk := d.GetOk(fmt.Sprintf("http_rules.%d.conditions", httpRuleIndex)); conditionsOk {
-					if conditionsVal.([]interface{}) != nil {
-
-						addConditions := false
-						var conditions []ionoscloud.ApplicationLoadBalancerHttpRuleCondition
-
-						for conditionIndex := range conditionsVal.([]interface{}) {
-
-							condition := ionoscloud.ApplicationLoadBalancerHttpRuleCondition{}
-							addCondition := false
-
-							if typeVal, typeOk := d.GetOk(fmt.Sprintf("http_rules.%d.conditions.%d.type", httpRuleIndex, conditionIndex)); typeOk {
-								typeVal := typeVal.(string)
-								condition.Type = &typeVal
-								addCondition = true
-							}
-
-							if conditionVal, conditionOk := d.GetOk(fmt.Sprintf("http_rules.%d.conditions.%d.condition", httpRuleIndex, conditionIndex)); conditionOk {
-								conditionVal := conditionVal.(string)
-								condition.Condition = &conditionVal
-							}
-
-							if negate, negateOk := d.GetOk(fmt.Sprintf("http_rules.%d.conditions.%d.negate", httpRuleIndex, conditionIndex)); negateOk {
-								negate := negate.(bool)
-								condition.Negate = &negate
-							}
-
-							if key, keyOk := d.GetOk(fmt.Sprintf("http_rules.%d.conditions.%d.key", httpRuleIndex, conditionIndex)); keyOk {
-								key := key.(string)
-								condition.Key = &key
-							}
-
-							if value, valueOk := d.GetOk(fmt.Sprintf("http_rules.%d.conditions.%d.value", httpRuleIndex, conditionIndex)); valueOk {
-								value := value.(string)
-								condition.Value = &value
-							}
-
-							if addCondition {
-								conditions = append(conditions, condition)
-							}
-						}
-
-						if len(conditions) > 0 {
-							addConditions = true
-						}
-
-						if addConditions {
-							httpRule.Conditions = &conditions
-						}
-
-					}
-
-				}
-
-				if addHttpRule {
-					httpRules = append(httpRules, httpRule)
-				}
-
-			}
-
-			if len(httpRules) > 0 {
-				addHttpRules = true
-			}
-
-			if addHttpRules == true {
-				log.Printf("[INFO] Application load balancer forwarding rule httpRules set to %+v", httpRules)
-				applicationLoadBalancerForwardingRule.Properties.HttpRules = &httpRules
-			}
+	if _, httpRulesOk := d.GetOk("http_rules"); httpRulesOk {
+		if httpRules, err := getAlbHttpRulesData(d); err == nil {
+			applicationLoadBalancerForwardingRule.Properties.HttpRules = httpRules
+		} else {
+			return diag.FromErr(err)
 		}
 	}
 
@@ -451,115 +332,13 @@ func resourceApplicationLoadBalancerForwardingRuleUpdate(ctx context.Context, d 
 	}
 
 	if d.HasChange("http_rules") {
-		_, newHttpRules := d.GetChange("http_rules")
-		if newHttpRules.([]interface{}) != nil {
-
-			var httpRules []ionoscloud.ApplicationLoadBalancerHttpRule
-
-			for httpRuleIndex := range newHttpRules.([]interface{}) {
-				httpRule := ionoscloud.ApplicationLoadBalancerHttpRule{}
-				addHttpRule := false
-				if name, nameOk := d.GetOk(fmt.Sprintf("http_rules.%d.name", httpRuleIndex)); nameOk {
-					name := name.(string)
-					httpRule.Name = &name
-					addHttpRule = true
-				} else {
-					diags := diag.FromErr(fmt.Errorf("ip must be provided for application loadbalancer forwarding rule http_rule"))
-					return diags
-				}
-
-				if typeVal, typeOk := d.GetOk(fmt.Sprintf("http_rules.%d.type", httpRuleIndex)); typeOk {
-					typeVal := typeVal.(string)
-					httpRule.Type = &typeVal
-				} else {
-					diags := diag.FromErr(fmt.Errorf("type must be provided for application loadbalancer forwarding rule http_rule"))
-					return diags
-				}
-
-				if targetGroup, targetGroupOk := d.GetOk(fmt.Sprintf("http_rules.%d.target_group", httpRuleIndex)); targetGroupOk {
-					targetGroup := targetGroup.(string)
-					httpRule.TargetGroup = &targetGroup
-				}
-
-				if dropQuery, dropQueryOk := d.GetOk(fmt.Sprintf("http_rules.%d.drop_query", httpRuleIndex)); dropQueryOk {
-					dropQuery := dropQuery.(bool)
-					httpRule.DropQuery = &dropQuery
-				}
-
-				if location, locationOk := d.GetOk(fmt.Sprintf("http_rules.%d.location", httpRuleIndex)); locationOk {
-					location := location.(string)
-					httpRule.Location = &location
-				}
-
-				if statusCode, statusCodeOk := d.GetOk(fmt.Sprintf("http_rules.%d.status_code", httpRuleIndex)); statusCodeOk {
-					statusCode := int32(statusCode.(int))
-					httpRule.StatusCode = &statusCode
-				}
-
-				if responseMessage, responseMessageOk := d.GetOk(fmt.Sprintf("http_rules.%d.response_message", httpRuleIndex)); responseMessageOk {
-					responseMessage := responseMessage.(string)
-					httpRule.ResponseMessage = &responseMessage
-				}
-
-				if contentType, contentTypeOk := d.GetOk(fmt.Sprintf("http_rules.%d.content_type", httpRuleIndex)); contentTypeOk {
-					contentType := contentType.(string)
-					httpRule.ContentType = &contentType
-				}
-
-				if conditionsVal, conditionsOk := d.GetOk(fmt.Sprintf("http_rules.%d.conditions", httpRuleIndex)); conditionsOk {
-					if conditionsVal.([]interface{}) != nil {
-
-						var conditions []ionoscloud.ApplicationLoadBalancerHttpRuleCondition
-
-						for conditionIndex := range conditionsVal.([]interface{}) {
-
-							condition := ionoscloud.ApplicationLoadBalancerHttpRuleCondition{}
-
-							typeVal := d.Get(fmt.Sprintf("http_rules.%d.conditions.%d.type", httpRuleIndex, conditionIndex)).(string)
-							condition.Type = &typeVal
-
-							if conditionVal, conditionOk := d.GetOk(fmt.Sprintf("http_rules.%d.conditions.%d.condition", httpRuleIndex, conditionIndex)); conditionOk {
-								conditionVal := conditionVal.(string)
-								condition.Condition = &conditionVal
-							} else if strings.ToUpper(typeVal) != "SOURCE_IP" {
-								diags := diag.FromErr(fmt.Errorf("condition must be provided for application loadbalancer forwarding rule http rule condition"))
-								return diags
-							}
-
-							if negate, negateOk := d.GetOk(fmt.Sprintf("http_rules.%d.conditions.%d.negate", httpRuleIndex, conditionIndex)); negateOk {
-								negate := negate.(bool)
-								condition.Negate = &negate
-							}
-
-							if key, keyOk := d.GetOk(fmt.Sprintf("http_rules.%d.conditions.%d.key", httpRuleIndex, conditionIndex)); keyOk {
-								key := key.(string)
-								condition.Key = &key
-							}
-
-							if value, valueOk := d.GetOk(fmt.Sprintf("http_rules.%d.conditions.%d.value", httpRuleIndex, conditionIndex)); valueOk {
-								value := value.(string)
-								condition.Value = &value
-							}
-
-							conditions = append(conditions, condition)
-						}
-
-						httpRule.Conditions = &conditions
-					}
-
-				}
-
-				if addHttpRule {
-					httpRules = append(httpRules, httpRule)
-				}
-
-			}
-
-			log.Printf("[INFO] Application load balancer forwarding rule httpRules set to %+v", httpRules)
-			request.Properties.HttpRules = &httpRules
-
+		if httpRules, err := getAlbHttpRulesData(d); err == nil {
+			request.Properties.HttpRules = httpRules
+		} else {
+			return diag.FromErr(err)
 		}
 	}
+
 	_, apiResponse, err := client.ApplicationLoadBalancersApi.DatacentersApplicationloadbalancersForwardingrulesPatch(ctx, dcId, albId, d.Id()).ApplicationLoadBalancerForwardingRuleProperties(*request.Properties).Execute()
 	logApiRequestTime(apiResponse)
 
@@ -770,4 +549,102 @@ func setApplicationLoadBalancerForwardingRuleData(d *schema.ResourceData, applic
 		}
 	}
 	return nil
+}
+
+func getAlbHttpRulesData(d *schema.ResourceData) (*[]ionoscloud.ApplicationLoadBalancerHttpRule, error) {
+	var httpRules []ionoscloud.ApplicationLoadBalancerHttpRule
+
+	httpRulesVal := d.Get("http_rules").([]interface{})
+
+	for httpRuleIndex := range httpRulesVal {
+
+		httpRule := ionoscloud.ApplicationLoadBalancerHttpRule{}
+
+		if name, nameOk := d.GetOk(fmt.Sprintf("http_rules.%d.name", httpRuleIndex)); nameOk {
+			name := name.(string)
+			httpRule.Name = &name
+		}
+
+		if typeVal, typeOk := d.GetOk(fmt.Sprintf("http_rules.%d.type", httpRuleIndex)); typeOk {
+			typeVal := typeVal.(string)
+			httpRule.Type = &typeVal
+		}
+
+		if targetGroup, targetGroupOk := d.GetOk(fmt.Sprintf("http_rules.%d.target_group", httpRuleIndex)); targetGroupOk {
+			targetGroup := targetGroup.(string)
+			httpRule.TargetGroup = &targetGroup
+		}
+
+		if dropQuery, dropQueryOk := d.GetOk(fmt.Sprintf("http_rules.%d.drop_query", httpRuleIndex)); dropQueryOk {
+			dropQuery := dropQuery.(bool)
+			httpRule.DropQuery = &dropQuery
+		}
+
+		if location, locationOk := d.GetOk(fmt.Sprintf("http_rules.%d.location", httpRuleIndex)); locationOk {
+			location := location.(string)
+			httpRule.Location = &location
+		}
+
+		if statusCode, statusCodeOk := d.GetOk(fmt.Sprintf("http_rules.%d.status_code", httpRuleIndex)); statusCodeOk {
+			statusCode := int32(statusCode.(int))
+			httpRule.StatusCode = &statusCode
+		}
+
+		if responseMessage, responseMessageOk := d.GetOk(fmt.Sprintf("http_rules.%d.response_message", httpRuleIndex)); responseMessageOk {
+			responseMessage := responseMessage.(string)
+			httpRule.ResponseMessage = &responseMessage
+		}
+
+		if contentType, contentTypeOk := d.GetOk(fmt.Sprintf("http_rules.%d.content_type", httpRuleIndex)); contentTypeOk {
+			contentType := contentType.(string)
+			httpRule.ContentType = &contentType
+		}
+
+		if conditionsVal, conditionsOk := d.GetOk(fmt.Sprintf("http_rules.%d.conditions", httpRuleIndex)); conditionsOk {
+			if conditionsVal.([]interface{}) != nil {
+
+				var conditions []ionoscloud.ApplicationLoadBalancerHttpRuleCondition
+
+				for conditionIndex := range conditionsVal.([]interface{}) {
+
+					condition := ionoscloud.ApplicationLoadBalancerHttpRuleCondition{}
+
+					typeVal := d.Get(fmt.Sprintf("http_rules.%d.conditions.%d.type", httpRuleIndex, conditionIndex)).(string)
+					condition.Type = &typeVal
+
+					if conditionVal, conditionOk := d.GetOk(fmt.Sprintf("http_rules.%d.conditions.%d.condition", httpRuleIndex, conditionIndex)); conditionOk {
+						conditionVal := conditionVal.(string)
+						condition.Condition = &conditionVal
+					} else if strings.ToUpper(typeVal) != "SOURCE_IP" {
+						return nil, fmt.Errorf("condition must be provided for application loadbalancer forwarding rule http rule condition")
+					}
+
+					if negate, negateOk := d.GetOk(fmt.Sprintf("http_rules.%d.conditions.%d.negate", httpRuleIndex, conditionIndex)); negateOk {
+						negate := negate.(bool)
+						condition.Negate = &negate
+					}
+
+					if key, keyOk := d.GetOk(fmt.Sprintf("http_rules.%d.conditions.%d.key", httpRuleIndex, conditionIndex)); keyOk {
+						key := key.(string)
+						condition.Key = &key
+					}
+
+					if value, valueOk := d.GetOk(fmt.Sprintf("http_rules.%d.conditions.%d.value", httpRuleIndex, conditionIndex)); valueOk {
+						value := value.(string)
+						condition.Value = &value
+					}
+
+					conditions = append(conditions, condition)
+				}
+
+				httpRule.Conditions = &conditions
+			}
+
+		}
+
+		httpRules = append(httpRules, httpRule)
+
+	}
+
+	return &httpRules, nil
 }

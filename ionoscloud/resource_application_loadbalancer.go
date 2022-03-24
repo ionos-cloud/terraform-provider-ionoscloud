@@ -30,7 +30,7 @@ func resourceApplicationLoadBalancer() *schema.Resource {
 			},
 			"listener_lan": {
 				Type:        schema.TypeInt,
-				Description: "D of the listening (inbound) LAN.",
+				Description: "ID of the listening (inbound) LAN.",
 				Required:    true,
 			},
 			"ips": {

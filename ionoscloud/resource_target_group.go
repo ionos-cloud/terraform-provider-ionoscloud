@@ -39,7 +39,7 @@ func resourceTargetGroup() *schema.Resource {
 			},
 			"targets": {
 				Type:        schema.TypeList,
-				Description: "Array of items in the collection",
+				Description: "Array of items in the collection.",
 				Required:    true,
 				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{

@@ -86,11 +86,11 @@ func Provider() *schema.Provider {
 			NatGatewayResource:          resourceNatGateway(),
 			NatGatewayRuleResource:      resourceNatGatewayRule(),
 			NetworkLoadBalancerResource: resourceNetworkLoadBalancer(),
-			NetworkLoadBalancerForwardingRuleResource:            resourceNetworkLoadBalancerForwardingRule(),
-			DBaaSClusterResource:                                 resourceDbaasPgSqlCluster(),
-			ApplicationLoadBalancerResource:                      resourceApplicationLoadBalancer(),
-			"ionoscloud_application_loadbalancer_forwardingrule": resourceApplicationLoadBalancerForwardingRule(),
-			"ionoscloud_target_group":                            resourceTargetGroup(),
+			NetworkLoadBalancerForwardingRuleResource:     resourceNetworkLoadBalancerForwardingRule(),
+			DBaaSClusterResource:                          resourceDbaasPgSqlCluster(),
+			ApplicationLoadBalancerResource:               resourceApplicationLoadBalancer(),
+			ApplicationLoadBalancerForwardingRuleResource: resourceApplicationLoadBalancerForwardingRule(),
+			TargetGroupResource:                           resourceTargetGroup(),
 		},
 		DataSourcesMap: map[string]*schema.Resource{
 			DatacenterResource:          dataSourceDataCenter(),
@@ -122,8 +122,8 @@ func Provider() *schema.Provider {
 			DBaaSVersionsResource:           dataSourceDbaasPgSqlVersions(),
 			DBaaSBackupsResource:            dataSourceDbaasPgSqlBackups(),
 			ApplicationLoadBalancerResource: dataSourceApplicationLoadBalancer(),
-			"ionoscloud_application_loadbalancer_forwardingrule": dataSourceApplicationLoadBalancerForwardingRule(),
-			"ionoscloud_target_group":                            dataSourceTargetGroup(),
+			ApplicationLoadBalancerForwardingRuleResource: dataSourceApplicationLoadBalancerForwardingRule(),
+			TargetGroupResource:                           dataSourceTargetGroup(),
 		},
 	}
 
