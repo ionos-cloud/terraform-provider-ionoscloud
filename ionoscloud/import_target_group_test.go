@@ -13,7 +13,7 @@ func TestAccTargetGroupImportBasic(t *testing.T) {
 	resource.Test(t, resource.TestCase{
 		PreCheck:          func() { testAccPreCheck(t) },
 		ProviderFactories: testAccProviderFactories,
-		CheckDestroy:      testAccCheckIPBlockDestroyCheck,
+		CheckDestroy:      testAccCheckTargetGroupDestroyCheck,
 		Steps: []resource.TestStep{
 			{
 				Config: testAccCheckTargetGroupConfigBasic,
