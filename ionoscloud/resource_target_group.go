@@ -480,6 +480,12 @@ func getTargetGroupTargetData(d *schema.ResourceData) *[]ionoscloud.TargetGroupT
 					target.Weight = &weight
 				}
 
+				healthCheck := d.Get(fmt.Sprintf("targets.%d.health_check_enabled", targetIndex)).(bool)
+				target.HealthCheckEnabled = &healthCheck
+
+				maintenance := d.Get(fmt.Sprintf("targets.%d.maintenance_enabled", targetIndex)).(bool)
+				target.MaintenanceEnabled = &maintenance
+
 				targets = append(targets, target)
 			}
 		}

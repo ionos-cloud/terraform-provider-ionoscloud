@@ -1,3 +1,5 @@
+//go:build all || alb
+
 package ionoscloud
 
 import (
@@ -46,7 +48,7 @@ func TestAccTargetGroupBasic(t *testing.T) {
 					resource.TestCheckResourceAttr(resourceNameTargetGroup, "targets.0.port", "8080"),
 					resource.TestCheckResourceAttr(resourceNameTargetGroup, "targets.0.weight", "1"),
 					resource.TestCheckResourceAttr(resourceNameTargetGroup, "targets.0.health_check_enabled", "true"),
-					resource.TestCheckResourceAttr(resourceNameTargetGroup, "targets.0.maintenance_enabled", "false"),
+					resource.TestCheckResourceAttr(resourceNameTargetGroup, "targets.0.maintenance_enabled", "true"),
 					resource.TestCheckResourceAttr(resourceNameTargetGroup, "health_check.0.check_timeout", "5000"),
 					resource.TestCheckResourceAttr(resourceNameTargetGroup, "health_check.0.check_interval", "50000"),
 					resource.TestCheckResourceAttr(resourceNameTargetGroup, "health_check.0.retries", "2"),
@@ -113,7 +115,7 @@ func TestAccTargetGroupBasic(t *testing.T) {
 					resource.TestCheckResourceAttr(resourceNameTargetGroup, "targets.0.ip", "22.232.2.3"),
 					resource.TestCheckResourceAttr(resourceNameTargetGroup, "targets.0.port", "8081"),
 					resource.TestCheckResourceAttr(resourceNameTargetGroup, "targets.0.weight", "124"),
-					resource.TestCheckResourceAttr(resourceNameTargetGroup, "targets.0.health_check_enabled", "true"),
+					resource.TestCheckResourceAttr(resourceNameTargetGroup, "targets.0.health_check_enabled", "false"),
 					resource.TestCheckResourceAttr(resourceNameTargetGroup, "targets.0.maintenance_enabled", "false"),
 					resource.TestCheckResourceAttr(resourceNameTargetGroup, "health_check.0.check_timeout", "5500"),
 					resource.TestCheckResourceAttr(resourceNameTargetGroup, "health_check.0.check_interval", "55000"),
@@ -217,7 +219,7 @@ resource ` + TargetGroupResource + ` ` + TargetGroupTestResource + ` {
    port = "8080"
    weight = "1"
    health_check_enabled = true
-   maintenance_enabled = false
+   maintenance_enabled = true
  }
  health_check {
      check_timeout = 5000
@@ -244,7 +246,7 @@ resource ` + TargetGroupResource + ` ` + TargetGroupTestResource + ` {
    ip = "22.232.2.3"
    port = "8081"
    weight = "124"
-   health_check_enabled = true
+   health_check_enabled = false
    maintenance_enabled = false
  }
  health_check {
