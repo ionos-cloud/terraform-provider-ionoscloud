@@ -265,7 +265,7 @@ func resourceApplicationLoadBalancerForwardingRuleRead(ctx context.Context, d *s
 
 	if err != nil {
 		log.Printf("[INFO] Resource %s not found: %+v", d.Id(), err)
-		if apiResponse.StatusCode == 404 {
+		if httpNotFound(apiResponse) {
 			d.SetId("")
 			return nil
 		}
@@ -400,7 +400,7 @@ func resourceApplicationLoadBalancerForwardingRuleImport(ctx context.Context, d 
 	logApiRequestTime(apiResponse)
 
 	if err != nil {
-		if apiResponse != nil && apiResponse.Response != nil && apiResponse.StatusCode == 404 {
+		if httpNotFound(apiResponse) {
 			d.SetId("")
 			return nil, fmt.Errorf("unable to find alb forwarding rule %q", ruleId)
 		}

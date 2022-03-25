@@ -176,7 +176,7 @@ func resourceNatGatewayRead(ctx context.Context, d *schema.ResourceData, meta in
 
 	if err != nil {
 		log.Printf("[INFO] Resource %s not found: %+v", d.Id(), err)
-		if apiResponse != nil && apiResponse.Response != nil && apiResponse.StatusCode == 404 {
+		if httpNotFound(apiResponse) {
 			d.SetId("")
 			return nil
 		}
@@ -317,7 +317,7 @@ func resourceNatGatewayImport(ctx context.Context, d *schema.ResourceData, meta 
 
 	if err != nil {
 		log.Printf("[INFO] Resource %s not found: %+v", d.Id(), err)
-		if apiResponse != nil && apiResponse.Response != nil && apiResponse.StatusCode == 404 {
+		if httpNotFound(apiResponse) {
 			d.SetId("")
 			return nil, fmt.Errorf("unable to find nat gateway  %q", natGatewayId)
 		}

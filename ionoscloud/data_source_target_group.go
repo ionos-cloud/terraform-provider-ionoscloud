@@ -167,7 +167,7 @@ func dataSourceTargetGroupRead(ctx context.Context, d *schema.ResourceData, meta
 		logApiRequestTime(apiResponse)
 
 		if err != nil {
-			return diag.FromErr(fmt.Errorf("an error occurred while fetching target groups: %s", err.Error()))
+			return diag.FromErr(fmt.Errorf("an error occurred while fetching target groups: %w", err))
 		}
 
 		var results []ionoscloud.TargetGroup
@@ -178,7 +178,7 @@ func dataSourceTargetGroupRead(ctx context.Context, d *schema.ResourceData, meta
 					tmpTargetGroup, apiResponse, err := client.TargetGroupsApi.TargetgroupsFindByTargetGroupId(ctx, *t.Id).Execute()
 					logApiRequestTime(apiResponse)
 					if err != nil {
-						return diag.FromErr(fmt.Errorf("an error occurred while fetching target group with ID %s: %s", *t.Id, err.Error()))
+						return diag.FromErr(fmt.Errorf("an error occurred while fetching target group with ID %s: %w", *t.Id, err))
 					}
 					results = append(results, tmpTargetGroup)
 
@@ -190,9 +190,9 @@ func dataSourceTargetGroupRead(ctx context.Context, d *schema.ResourceData, meta
 			return diag.FromErr(fmt.Errorf("no target group found with the specified criteria: name = %s", name))
 		} else if len(results) > 1 {
 			return diag.FromErr(fmt.Errorf("more than one target group found with the specified criteria: name = %s", name))
-		} else {
-			targetGroup = results[0]
 		}
+
+		targetGroup = results[0]
 
 	}
 

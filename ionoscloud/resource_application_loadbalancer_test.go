@@ -14,9 +14,9 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
 )
 
-var resourceNameAlb = ApplicationLoadBalancerResource + "." + ApplicationLoadBalancerTestResource
-var dataSourceNameAlbById = DataSource + "." + ApplicationLoadBalancerResource + "." + ApplicationLoadBalancerDataSourceById
-var dataSourceNameAlbByName = DataSource + "." + ApplicationLoadBalancerResource + "." + ApplicationLoadBalancerDataSourceByName
+var resourceNameAlb = ALBResource + "." + ALBTestResource
+var dataSourceNameAlbById = DataSource + "." + ALBResource + "." + ALBDataSourceById
+var dataSourceNameAlbByName = DataSource + "." + ALBResource + "." + ALBDataSourceByName
 
 func TestAccApplicationLoadBalancerBasic(t *testing.T) {
 	var applicationLoadBalancer ionoscloud.ApplicationLoadBalancer
@@ -32,11 +32,11 @@ func TestAccApplicationLoadBalancerBasic(t *testing.T) {
 				Config: testAccCheckApplicationLoadBalancerConfigBasic,
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckApplicationLoadBalancerExists(resourceNameAlb, &applicationLoadBalancer),
-					resource.TestCheckResourceAttr(resourceNameAlb, "name", ApplicationLoadBalancerTestResource),
+					resource.TestCheckResourceAttr(resourceNameAlb, "name", ALBTestResource),
 					resource.TestCheckResourceAttrPair(resourceNameAlb, "listener_lan", LanResource+".alb_lan_1", "id"),
 					resource.TestCheckResourceAttrPair(resourceNameAlb, "target_lan", LanResource+".alb_lan_2", "id"),
-					utils.TestValueInSlice(ApplicationLoadBalancerResource, "ips.#", "10.12.118.224"),
-					utils.TestValueInSlice(ApplicationLoadBalancerResource, "lb_private_ips.#", "10.13.72.225/24"),
+					utils.TestValueInSlice(ALBResource, "ips.#", "10.12.118.224"),
+					utils.TestValueInSlice(ALBResource, "lb_private_ips.#", "10.13.72.225/24"),
 				),
 			},
 			{
@@ -69,10 +69,10 @@ func TestAccApplicationLoadBalancerBasic(t *testing.T) {
 					resource.TestCheckResourceAttr(resourceNameAlb, "name", UpdatedResources),
 					resource.TestCheckResourceAttrPair(resourceNameAlb, "listener_lan", LanResource+".alb_lan_3", "id"),
 					resource.TestCheckResourceAttrPair(resourceNameAlb, "target_lan", LanResource+".alb_lan_4", "id"),
-					utils.TestValueInSlice(ApplicationLoadBalancerResource, "ips.#", "10.12.118.224"),
-					utils.TestValueInSlice(ApplicationLoadBalancerResource, "ips.#", "10.12.119.224"),
-					utils.TestValueInSlice(ApplicationLoadBalancerResource, "lb_private_ips.#", "10.13.72.225/24"),
-					utils.TestValueInSlice(ApplicationLoadBalancerResource, "lb_private_ips.#", "10.13.73.225/24"),
+					utils.TestValueInSlice(ALBResource, "ips.#", "10.12.118.224"),
+					utils.TestValueInSlice(ALBResource, "ips.#", "10.12.119.224"),
+					utils.TestValueInSlice(ALBResource, "lb_private_ips.#", "10.13.72.225/24"),
+					utils.TestValueInSlice(ALBResource, "lb_private_ips.#", "10.13.73.225/24"),
 				),
 			},
 		},
@@ -88,7 +88,7 @@ func testAccCheckApplicationLoadBalancerDestroyCheck(s *terraform.State) error {
 	}
 
 	for _, rs := range s.RootModule().Resources {
-		if rs.Type != ApplicationLoadBalancerResource {
+		if rs.Type != ALBResource {
 			continue
 		}
 
@@ -99,7 +99,7 @@ func testAccCheckApplicationLoadBalancerDestroyCheck(s *terraform.State) error {
 		logApiRequestTime(apiResponse)
 
 		if err != nil {
-			if apiResponse == nil || apiResponse.StatusCode != 404 {
+			if errorBesideNotFound(apiResponse) {
 				return fmt.Errorf("an error occured and checking deletion of application loadbalancer %s %s", rs.Primary.ID, responseBody(apiResponse))
 			}
 		} else {
@@ -136,7 +136,7 @@ func testAccCheckApplicationLoadBalancerExists(n string, alb *ionoscloud.Applica
 		logApiRequestTime(apiResponse)
 
 		if err != nil {
-			return fmt.Errorf("error occured while fetching NatGateway: %s", rs.Primary.ID)
+			return fmt.Errorf("error occured while fetching NatGateway: %s, %w", rs.Primary.ID, err)
 		}
 		if *foundNatGateway.Id != rs.Primary.ID {
 			return fmt.Errorf("record not found")
@@ -167,9 +167,9 @@ resource ` + LanResource + ` "alb_lan_2" {
   name          = "test_alb_lan_2"
 }
 
-resource ` + ApplicationLoadBalancerResource + ` ` + ApplicationLoadBalancerTestResource + ` { 
+resource ` + ALBResource + ` ` + ALBTestResource + ` { 
   datacenter_id = ` + DatacenterResource + `.alb_datacenter.id
-  name          = "` + ApplicationLoadBalancerTestResource + `"
+  name          = "` + ALBTestResource + `"
   listener_lan  = ` + LanResource + `.alb_lan_1.id
   ips           = [ "10.12.118.224"]
   target_lan    = ` + LanResource + `.alb_lan_2.id
@@ -207,7 +207,7 @@ resource ` + LanResource + ` "alb_lan_4" {
   name          = "test_alb_lan_4"
 }
 
-resource ` + ApplicationLoadBalancerResource + ` ` + ApplicationLoadBalancerTestResource + ` { 
+resource ` + ALBResource + ` ` + ALBTestResource + ` { 
   datacenter_id = ` + DatacenterResource + `.alb_datacenter.id
   name          = "` + UpdatedResources + `"
   listener_lan    = ` + LanResource + `.alb_lan_3.id
@@ -217,21 +217,21 @@ resource ` + ApplicationLoadBalancerResource + ` ` + ApplicationLoadBalancerTest
 }`
 
 const testAccDataSourceApplicationLoadBalancerMatchId = testAccCheckApplicationLoadBalancerConfigBasic + `
-data ` + ApplicationLoadBalancerResource + ` ` + ApplicationLoadBalancerDataSourceById + ` {
+data ` + ALBResource + ` ` + ALBDataSourceById + ` {
   datacenter_id = ` + DatacenterResource + `.alb_datacenter.id
-  id			= ` + ApplicationLoadBalancerResource + `.` + ApplicationLoadBalancerTestResource + `.id
+  id			= ` + ALBResource + `.` + ALBTestResource + `.id
 }
 `
 
 const testAccDataSourceApplicationLoadBalancerMatchName = testAccCheckApplicationLoadBalancerConfigBasic + `
-data ` + ApplicationLoadBalancerResource + ` ` + ApplicationLoadBalancerDataSourceByName + ` {
+data ` + ALBResource + ` ` + ALBDataSourceByName + ` {
   datacenter_id = ` + DatacenterResource + `.alb_datacenter.id
-  name          = ` + ApplicationLoadBalancerResource + `.` + ApplicationLoadBalancerTestResource + `.name
+  name          = ` + ALBResource + `.` + ALBTestResource + `.name
 }
 `
 
 const testAccDataSourceApplicationLoadBalancerWrongNameError = testAccCheckApplicationLoadBalancerConfigBasic + `
-data ` + ApplicationLoadBalancerResource + ` ` + ApplicationLoadBalancerDataSourceByName + ` {
+data ` + ALBResource + ` ` + ALBDataSourceByName + ` {
   datacenter_id = ` + DatacenterResource + `.alb_datacenter.id
   name          = "wrong_name"
 }

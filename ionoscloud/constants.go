@@ -2,15 +2,15 @@ package ionoscloud
 
 // ApplicationLoadBalancer Constants
 const (
-	ApplicationLoadBalancerResource         = "ionoscloud_application_loadbalancer"
-	ApplicationLoadBalancerTestResource     = "test_application_loadbalancer"
-	ApplicationLoadBalancerDataSourceById   = "test_application_loadbalancer_id"
-	ApplicationLoadBalancerDataSourceByName = "test_application_loadbalancer_name"
+	ALBResource         = "ionoscloud_application_loadbalancer"
+	ALBTestResource     = "test_application_loadbalancer"
+	ALBDataSourceById   = "test_application_loadbalancer_id"
+	ALBDataSourceByName = "test_application_loadbalancer_name"
 
-	ApplicationLoadBalancerForwardingRuleResource         = "ionoscloud_application_loadbalancer_forwardingrule"
-	ApplicationLoadBalancerForwardingRuleTestResource     = "test_application_loadbalancer_forwardingrule"
-	ApplicationLoadBalancerForwardingRuleDataSourceById   = "test_application_loadbalancer_forwardingrule_id"
-	ApplicationLoadBalancerForwardingRuleDataSourceByName = "test_application_loadbalancer_forwardingrule_name"
+	ALBForwardingRuleResource         = "ionoscloud_application_loadbalancer_forwardingrule"
+	ALBForwardingRuleTestResource     = "test_application_loadbalancer_forwardingrule"
+	ALBForwardingRuleDataSourceById   = "test_application_loadbalancer_forwardingrule_id"
+	ALBForwardingRuleDataSourceByName = "test_application_loadbalancer_forwardingrule_name"
 
 	TargetGroupResource         = "ionoscloud_target_group"
 	TargetGroupTestResource     = "test_target_group"

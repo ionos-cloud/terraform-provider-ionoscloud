@@ -519,7 +519,7 @@ func resourceServerCreate(ctx context.Context, d *schema.ResourceData, meta inte
 			log.Printf("[DEBUG] Reading file %s", path)
 			publicKey, err := readPublicKey(path.(string))
 			if err != nil {
-				diags := diag.FromErr(fmt.Errorf("error fetching sshkey from file (%s) %s", path, err.Error()))
+				diags := diag.FromErr(fmt.Errorf("error fetching sshkey from file (%s) %w", path, err))
 				return diags
 			}
 			publicKeys = append(publicKeys, publicKey)
@@ -775,7 +775,7 @@ func resourceServerRead(ctx context.Context, d *schema.ResourceData, meta interf
 	server, apiResponse, err := client.ServersApi.DatacentersServersFindById(ctx, dcId, serverId).Depth(2).Execute()
 	logApiRequestTime(apiResponse)
 	if err != nil {
-		if apiResponse != nil && apiResponse.Response != nil && apiResponse.StatusCode == 404 {
+		if httpNotFound(apiResponse) {
 			log.Printf("[DEBUG] cannot find server by id \n")
 			d.SetId("")
 			return nil
@@ -1197,10 +1197,10 @@ func resourceServerUpdate(ctx context.Context, d *schema.ResourceData, meta inte
 			logApiRequestTime(apiResponse)
 
 			if err != nil {
-				if apiResponse != nil && apiResponse.Response != nil && apiResponse.StatusCode != 404 {
+				if errorBesideNotFound(apiResponse) {
 					diags := diag.FromErr(fmt.Errorf("error occured at checking existance of firewall %s %s", firewallId, err))
 					return diags
-				} else if apiResponse != nil && apiResponse.Response != nil && apiResponse.StatusCode == 404 {
+				} else if httpNotFound(apiResponse) {
 					diags := diag.FromErr(fmt.Errorf("firewall does not exist %s", firewallId))
 					return diags
 				}
@@ -1327,7 +1327,7 @@ func resourceServerImport(ctx context.Context, d *schema.ResourceData, meta inte
 	logApiRequestTime(apiResponse)
 
 	if err != nil {
-		if apiResponse != nil && apiResponse.Response != nil && apiResponse.StatusCode == 404 {
+		if httpNotFound(apiResponse) {
 			d.SetId("")
 			return nil, fmt.Errorf("unable to find server %q", serverId)
 		}

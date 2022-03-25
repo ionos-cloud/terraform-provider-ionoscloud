@@ -87,7 +87,7 @@ func dataSourceUserRead(ctx context.Context, d *schema.ResourceData, meta interf
 		users, apiResponse, err := client.UserManagementApi.UmUsersGet(ctx).Depth(1).Execute()
 		logApiRequestTime(apiResponse)
 		if err != nil {
-			diags := diag.FromErr(fmt.Errorf("an error occurred while fetching users: %s", err.Error()))
+			diags := diag.FromErr(fmt.Errorf("an error occurred while fetching users: %w", err))
 			return diags
 		}
 

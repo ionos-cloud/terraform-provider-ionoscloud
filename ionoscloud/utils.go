@@ -30,7 +30,7 @@ func resourceIpFailoverImporter(ctx context.Context, d *schema.ResourceData, met
 	logApiRequestTime(apiResponse)
 
 	if err != nil {
-		if apiResponse != nil && apiResponse.Response != nil && apiResponse.StatusCode == 404 {
+		if httpNotFound(apiResponse) {
 			d.SetId("")
 			return nil, fmt.Errorf("an error occured while trying to fetch the lan %q", lanId)
 		}
@@ -84,7 +84,7 @@ func resourceLoadbalancerImporter(ctx context.Context, d *schema.ResourceData, m
 	logApiRequestTime(apiResponse)
 
 	if err != nil {
-		if apiResponse != nil && apiResponse.Response != nil && apiResponse.StatusCode == 404 {
+		if httpNotFound(apiResponse) {
 			d.SetId("")
 			return nil, fmt.Errorf("an error occured while trying to fetch the loadbalancer %q", lbId)
 		}
@@ -216,6 +216,13 @@ func logApiRequestTime(resp *ionoscloud.APIResponse) {
 
 func httpNotFound(resp *ionoscloud.APIResponse) bool {
 	if resp != nil && resp.Response != nil && resp.StatusCode == http.StatusNotFound {
+		return true
+	}
+	return false
+}
+
+func errorBesideNotFound(resp *ionoscloud.APIResponse) bool {
+	if resp == nil || resp.Response != nil && resp.StatusCode != http.StatusNotFound {
 		return true
 	}
 	return false

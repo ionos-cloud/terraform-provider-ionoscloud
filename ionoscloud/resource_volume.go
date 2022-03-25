@@ -206,7 +206,7 @@ func resourceVolumeCreate(ctx context.Context, d *schema.ResourceData, meta inte
 			log.Printf("[DEBUG] Reading file %s", path)
 			publicKey, err := readPublicKey(path.(string))
 			if err != nil {
-				diags := diag.FromErr(fmt.Errorf("error fetching sshkey from file (%s) (%s)", path, err.Error()))
+				diags := diag.FromErr(fmt.Errorf("error fetching sshkey from file (%s) (%s)", path, err))
 				return diags
 			}
 			publicKeys = append(publicKeys, publicKey)
@@ -372,7 +372,7 @@ func resourceVolumeRead(ctx context.Context, d *schema.ResourceData, meta interf
 	logApiRequestTime(apiResponse)
 
 	if err != nil {
-		if apiResponse != nil && apiResponse.Response != nil && apiResponse.StatusCode == 404 {
+		if httpNotFound(apiResponse) {
 			d.SetId("")
 			return nil
 		}
@@ -503,7 +503,7 @@ func resourceVolumeImporter(ctx context.Context, d *schema.ResourceData, meta in
 	logApiRequestTime(apiResponse)
 
 	if err != nil {
-		if apiResponse != nil && apiResponse.Response != nil && apiResponse.StatusCode == 404 {
+		if httpNotFound(apiResponse) {
 			d.SetId("")
 			return nil, fmt.Errorf("volume does not exist %q", volumeId)
 		}
@@ -792,11 +792,11 @@ func checkImage(ctx context.Context, client *ionoscloud.APIClient, imageInput, i
 			img, apiResponse, err := client.ImagesApi.ImagesFindById(ctx, imageInput).Execute()
 			logApiRequestTime(apiResponse)
 			if err != nil {
-				if apiResponse != nil && apiResponse.Response != nil && apiResponse.StatusCode == 404 {
+				if httpNotFound(apiResponse) {
 					snapshot, apiResponse, err := client.SnapshotsApi.SnapshotsFindById(ctx, imageInput).Execute()
 					logApiRequestTime(apiResponse)
 					if err != nil {
-						if apiResponse != nil && apiResponse.Response != nil && apiResponse.StatusCode == 404 {
+						if httpNotFound(apiResponse) {
 							diags := diag.FromErr(fmt.Errorf("image/snapshot %s not found: %s", imageInput, err))
 							return image, imageAlias, isSnapshot, diags
 						} else {

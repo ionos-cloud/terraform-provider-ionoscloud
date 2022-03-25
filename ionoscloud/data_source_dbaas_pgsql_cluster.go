@@ -179,7 +179,7 @@ func dataSourceDbaasPgSqlReadCluster(ctx context.Context, d *schema.ResourceData
 		clusters, _, err := client.ListClusters(ctx, "")
 
 		if err != nil {
-			diags := diag.FromErr(fmt.Errorf("an error occurred while fetching dbaas clusters: %s", err.Error()))
+			diags := diag.FromErr(fmt.Errorf("an error occurred while fetching dbaas clusters: %w", err))
 			return diags
 		}
 

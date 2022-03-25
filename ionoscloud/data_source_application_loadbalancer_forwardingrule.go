@@ -178,7 +178,7 @@ func dataSourceApplicationLoadBalancerForwardingRuleRead(ctx context.Context, d 
 		applicationLoadBalancerForwardingRule, apiResponse, err = client.ApplicationLoadBalancersApi.DatacentersApplicationloadbalancersForwardingrulesFindByForwardingRuleId(ctx, datacenterId, albId, id).Execute()
 		logApiRequestTime(apiResponse)
 		if err != nil {
-			return diag.FromErr(fmt.Errorf("an error occurred while fetching the nat gateway %s: %s", id, err))
+			return diag.FromErr(fmt.Errorf("an error occurred while fetching the application load balancer forwarding rule %s: %w", id, err))
 		}
 	} else {
 		/* search by name */
@@ -188,7 +188,7 @@ func dataSourceApplicationLoadBalancerForwardingRuleRead(ctx context.Context, d 
 		logApiRequestTime(apiResponse)
 
 		if err != nil {
-			return diag.FromErr(fmt.Errorf("an error occurred while fetching application loadbalancers: %s", err.Error()))
+			return diag.FromErr(fmt.Errorf("an error occurred while fetching application loadbalancer forwarding rules: %w", err))
 		}
 
 		var results []ionoscloud.ApplicationLoadBalancerForwardingRule
@@ -199,7 +199,7 @@ func dataSourceApplicationLoadBalancerForwardingRuleRead(ctx context.Context, d 
 					tmpAlbFr, apiResponse, err := client.ApplicationLoadBalancersApi.DatacentersApplicationloadbalancersForwardingrulesFindByForwardingRuleId(ctx, datacenterId, albId, *albFr.Id).Execute()
 					logApiRequestTime(apiResponse)
 					if err != nil {
-						return diag.FromErr(fmt.Errorf("an error occurred while fetching nat gateway with ID %s: %s", *albFr.Id, err.Error()))
+						return diag.FromErr(fmt.Errorf("an error occurred while fetching application load balancer forwarding rule with ID %s: %w", *albFr.Id, err))
 					}
 					results = append(results, tmpAlbFr)
 				}
@@ -209,9 +209,9 @@ func dataSourceApplicationLoadBalancerForwardingRuleRead(ctx context.Context, d 
 			return diag.FromErr(fmt.Errorf("no application load balanacer forwarding rule found with the specified criteria: name = %s", name))
 		} else if len(results) > 1 {
 			return diag.FromErr(fmt.Errorf("more than one application load balanacer forwarding rule found with the specified criteria: name = %s", name))
-		} else {
-			applicationLoadBalancerForwardingRule = results[0]
 		}
+
+		applicationLoadBalancerForwardingRule = results[0]
 	}
 
 	if err = setApplicationLoadBalancerForwardingRuleData(d, &applicationLoadBalancerForwardingRule); err != nil {

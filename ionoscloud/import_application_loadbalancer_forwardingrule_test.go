@@ -35,7 +35,7 @@ func testAccApplicationLoadBalancerForwardingRuleImportStateId(s *terraform.Stat
 	importID := ""
 
 	for _, rs := range s.RootModule().Resources {
-		if rs.Type != ApplicationLoadBalancerForwardingRuleResource {
+		if rs.Type != ALBForwardingRuleResource {
 			continue
 		}
 

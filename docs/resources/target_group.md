@@ -4,7 +4,7 @@ layout: "ionoscloud"
 page_title: "IonosCloud: target_group"
 sidebar_current: "docs-resource-target_group"
 description: |-
-Creates and manages IonosCloud Target Group.
+  Creates and manages IonosCloud Target Group.
 ---
 
 # ionoscloud_target_group

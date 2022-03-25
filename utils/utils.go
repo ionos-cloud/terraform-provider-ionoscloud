@@ -139,12 +139,12 @@ func TestValueInSlice(resource, attribute, value string) resource.TestCheckFunc 
 				return err
 			} else if lengthOfSlice <= 0 {
 				return fmt.Errorf("returned %s slice is empty", attribute)
-			} else {
-				for i := 0; i < lengthOfSlice; i++ {
-					attribute = attribute[:len(attribute)-1] + strconv.Itoa(i)
-					if rs.Primary.Attributes[attribute] == value {
-						return nil
-					}
+			}
+
+			for i := 0; i < lengthOfSlice; i++ {
+				attribute = attribute[:len(attribute)-1] + strconv.Itoa(i)
+				if rs.Primary.Attributes[attribute] == value {
+					return nil
 				}
 			}
 

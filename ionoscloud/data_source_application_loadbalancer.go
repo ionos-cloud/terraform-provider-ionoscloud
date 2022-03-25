@@ -25,7 +25,7 @@ func dataSourceApplicationLoadBalancer() *schema.Resource {
 			},
 			"listener_lan": {
 				Type:        schema.TypeInt,
-				Description: "D of the listening (inbound) LAN.",
+				Description: "ID of the listening (inbound) LAN.",
 				Computed:    true,
 			},
 			"ips": {
@@ -85,7 +85,7 @@ func dataSourceApplicationLoadBalancerRead(ctx context.Context, d *schema.Resour
 		applicationLoadBalancer, apiResponse, err = client.ApplicationLoadBalancersApi.DatacentersApplicationloadbalancersFindByApplicationLoadBalancerId(ctx, datacenterId, id).Execute()
 		logApiRequestTime(apiResponse)
 		if err != nil {
-			return diag.FromErr(fmt.Errorf("an error occurred while fetching the nat gateway %s: %w", id, err))
+			return diag.FromErr(fmt.Errorf("an error occurred while fetching the application load balancer %s: %w", id, err))
 		}
 	} else {
 		/* search by name */
@@ -95,7 +95,7 @@ func dataSourceApplicationLoadBalancerRead(ctx context.Context, d *schema.Resour
 		logApiRequestTime(apiResponse)
 
 		if err != nil {
-			return diag.FromErr(fmt.Errorf("an error occurred while fetching nat gateway: %s", err.Error()))
+			return diag.FromErr(fmt.Errorf("an error occurred while fetching application load balancers: %w", err))
 		}
 
 		var results []ionoscloud.ApplicationLoadBalancer
@@ -106,7 +106,7 @@ func dataSourceApplicationLoadBalancerRead(ctx context.Context, d *schema.Resour
 					tmpAlb, apiResponse, err := client.ApplicationLoadBalancersApi.DatacentersApplicationloadbalancersFindByApplicationLoadBalancerId(ctx, datacenterId, *alb.Id).Execute()
 					logApiRequestTime(apiResponse)
 					if err != nil {
-						return diag.FromErr(fmt.Errorf("an error occurred while fetching nat gateway with ID %s: %s", *alb.Id, err.Error()))
+						return diag.FromErr(fmt.Errorf("an error occurred while fetching application load balancer with ID %s: %w", *alb.Id, err))
 					}
 					results = append(results, tmpAlb)
 				}
@@ -118,9 +118,10 @@ func dataSourceApplicationLoadBalancerRead(ctx context.Context, d *schema.Resour
 			return diag.FromErr(fmt.Errorf("no application load balanacer found with the specified criteria: name = %s", name))
 		} else if len(results) > 1 {
 			return diag.FromErr(fmt.Errorf("more than one application load balanacer found with the specified criteria: name = %s", name))
-		} else {
-			applicationLoadBalancer = results[0]
 		}
+
+		applicationLoadBalancer = results[0]
+
 	}
 
 	if err = setApplicationLoadBalancerData(d, &applicationLoadBalancer); err != nil {

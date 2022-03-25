@@ -35,7 +35,7 @@ func testAccApplicationLoadBalancerImportStateId(s *terraform.State) (string, er
 	importID := ""
 
 	for _, rs := range s.RootModule().Resources {
-		if rs.Type != ApplicationLoadBalancerResource {
+		if rs.Type != ALBResource {
 			continue
 		}
 

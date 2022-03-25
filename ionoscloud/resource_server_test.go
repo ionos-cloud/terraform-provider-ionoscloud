@@ -376,7 +376,7 @@ func testAccCheckServerDestroyCheck(s *terraform.State) error {
 		logApiRequestTime(apiResponse)
 
 		if err != nil {
-			if apiResponse == nil || apiResponse.Response != nil && apiResponse.StatusCode != 404 {
+			if errorBesideNotFound(apiResponse) {
 				return fmt.Errorf("unable to fetch server %s: %s", rs.Primary.ID, err)
 			}
 		} else {

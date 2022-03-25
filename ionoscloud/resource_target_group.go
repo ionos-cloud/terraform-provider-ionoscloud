@@ -1,5 +1,3 @@
-//go:build all || alb
-
 package ionoscloud
 
 import (
@@ -215,7 +213,7 @@ func resourceTargetGroupRead(ctx context.Context, d *schema.ResourceData, meta i
 	logApiRequestTime(apiResponse)
 
 	if err != nil {
-		if apiResponse != nil && apiResponse.StatusCode == 404 {
+		if httpNotFound(apiResponse) {
 			d.SetId("")
 			return nil
 		}
@@ -314,7 +312,7 @@ func resourceTargetGroupImport(ctx context.Context, d *schema.ResourceData, meta
 	logApiRequestTime(apiResponse)
 
 	if err != nil {
-		if apiResponse != nil && apiResponse.Response != nil && apiResponse.StatusCode == 404 {
+		if httpNotFound(apiResponse) {
 			d.SetId("")
 			return nil, fmt.Errorf("unable to find target group %q", groupIp)
 		}

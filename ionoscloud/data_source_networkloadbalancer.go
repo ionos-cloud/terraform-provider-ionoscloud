@@ -96,7 +96,7 @@ func dataSourceNetworkLoadBalancerRead(ctx context.Context, d *schema.ResourceDa
 		networkLoadBalancers, apiResponse, err := client.NetworkLoadBalancersApi.DatacentersNetworkloadbalancersGet(ctx, datacenterId.(string)).Execute()
 		logApiRequestTime(apiResponse)
 		if err != nil {
-			return diag.FromErr(fmt.Errorf("an error occurred while fetching network loadbalancers: %s", err.Error()))
+			return diag.FromErr(fmt.Errorf("an error occurred while fetching network loadbalancers: %w", err))
 		}
 
 		var results []ionoscloud.NetworkLoadBalancer
@@ -105,7 +105,7 @@ func dataSourceNetworkLoadBalancerRead(ctx context.Context, d *schema.ResourceDa
 				tmpNetworkLoadBalancer, apiResponse, err := client.NetworkLoadBalancersApi.DatacentersNetworkloadbalancersFindByNetworkLoadBalancerId(ctx, datacenterId.(string), *c.Id).Execute()
 				logApiRequestTime(apiResponse)
 				if err != nil {
-					return diag.FromErr(fmt.Errorf("an error occurred while fetching network loadbalancer with ID %s: %s", *c.Id, err.Error()))
+					return diag.FromErr(fmt.Errorf("an error occurred while fetching network loadbalancer with ID %s: %w", *c.Id, err))
 				}
 				if tmpNetworkLoadBalancer.Properties != nil && tmpNetworkLoadBalancer.Properties.Name != nil && *tmpNetworkLoadBalancer.Properties.Name == name.(string) {
 					results = append(results, tmpNetworkLoadBalancer)

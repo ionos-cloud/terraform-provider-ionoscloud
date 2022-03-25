@@ -219,7 +219,7 @@ func resourceNatGatewayRuleRead(ctx context.Context, d *schema.ResourceData, met
 
 	if err != nil {
 		log.Printf("[INFO] Resource %s not found: %+v", d.Id(), err)
-		if apiResponse != nil && apiResponse.Response != nil && apiResponse.StatusCode == 404 {
+		if httpNotFound(apiResponse) {
 			d.SetId("")
 			return nil
 		}
@@ -375,7 +375,7 @@ func resourceNatGatewayRuleImport(ctx context.Context, d *schema.ResourceData, m
 
 	if err != nil {
 		log.Printf("[INFO] Resource %s not found: %+v", d.Id(), err)
-		if apiResponse != nil && apiResponse.Response != nil && apiResponse.StatusCode == 404 {
+		if httpNotFound(apiResponse) {
 			d.SetId("")
 			return nil, fmt.Errorf("unable to find nat gateway rule %q", natGatewayRuleId)
 		}

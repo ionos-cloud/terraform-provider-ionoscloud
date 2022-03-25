@@ -185,7 +185,7 @@ func dataSourcePccRead(ctx context.Context, d *schema.ResourceData, meta interfa
 		pccs, apiResponse, err := client.PrivateCrossConnectsApi.PccsGet(ctx).Depth(1).Execute()
 		logApiRequestTime(apiResponse)
 		if err != nil {
-			return diag.FromErr(fmt.Errorf("an error occurred while fetching pccs: %s", err.Error()))
+			return diag.FromErr(fmt.Errorf("an error occurred while fetching pccs: %w", err))
 		}
 
 		var results []ionoscloud.PrivateCrossConnect

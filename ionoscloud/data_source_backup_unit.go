@@ -72,7 +72,7 @@ func dataSourceBackupUnitRead(ctx context.Context, d *schema.ResourceData, meta 
 		logApiRequestTime(apiResponse)
 
 		if err != nil {
-			return diag.FromErr(fmt.Errorf("an error occurred while fetching backup unit: %s", err.Error()))
+			return diag.FromErr(fmt.Errorf("an error occurred while fetching backup unit: %s", err))
 		}
 
 		var results []ionoscloud.BackupUnit
@@ -82,7 +82,7 @@ func dataSourceBackupUnitRead(ctx context.Context, d *schema.ResourceData, meta 
 					tmpBackupUnit, apiResponse, err := client.BackupUnitsApi.BackupunitsFindById(ctx, *bu.Id).Execute()
 					logApiRequestTime(apiResponse)
 					if err != nil {
-						return diag.FromErr(fmt.Errorf("an error occurred while fetching backup unit with ID %s: %s", *bu.Id, err.Error()))
+						return diag.FromErr(fmt.Errorf("an error occurred while fetching backup unit with ID %s: %w", *bu.Id, err))
 					}
 					results = append(results, tmpBackupUnit)
 				}

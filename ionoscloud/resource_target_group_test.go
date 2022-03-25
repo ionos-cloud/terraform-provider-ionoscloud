@@ -142,7 +142,7 @@ func testAccCheckTargetGroupDestroyCheck(s *terraform.State) error {
 	}
 
 	for _, rs := range s.RootModule().Resources {
-		if rs.Type != ApplicationLoadBalancerResource {
+		if rs.Type != ALBResource {
 			continue
 		}
 
@@ -150,7 +150,7 @@ func testAccCheckTargetGroupDestroyCheck(s *terraform.State) error {
 		logApiRequestTime(apiResponse)
 
 		if err != nil {
-			if apiResponse == nil || apiResponse.StatusCode != 404 {
+			if errorBesideNotFound(apiResponse) {
 				return fmt.Errorf("an error occured at checking deletion of forwarding rule %s %s", rs.Primary.ID, err)
 			}
 		} else {
@@ -184,7 +184,7 @@ func testAccCheckTargetGroupExists(n string, targetGroup *ionoscloud.TargetGroup
 		logApiRequestTime(apiResponse)
 
 		if err != nil {
-			return fmt.Errorf("error occured while fetching TargetGroup: %s", rs.Primary.ID)
+			return fmt.Errorf("error occured while fetching TargetGroup: %s, %w", rs.Primary.ID, err)
 		}
 		if *foundTargetGroup.Id != rs.Primary.ID {
 			return fmt.Errorf("record not found")
