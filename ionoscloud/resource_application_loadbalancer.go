@@ -128,7 +128,7 @@ func resourceApplicationLoadBalancerCreate(ctx context.Context, d *schema.Resour
 
 	if err != nil {
 		d.SetId("")
-		diags := diag.FromErr(fmt.Errorf("error creating application loadbalancer: %s, %s", err, responseBody(apiResponse)))
+		diags := diag.FromErr(fmt.Errorf("error creating application loadbalancer: %w, %s", err, responseBody(apiResponse)))
 		return diags
 	}
 
@@ -228,7 +228,7 @@ func resourceApplicationLoadBalancerUpdate(ctx context.Context, d *schema.Resour
 	logApiRequestTime(apiResponse)
 
 	if err != nil {
-		diags := diag.FromErr(fmt.Errorf("an error occured while updating application loadbalancer ID %s %s", d.Id(), err))
+		diags := diag.FromErr(fmt.Errorf("an error occured while updating application loadbalancer ID %s %w", d.Id(), err))
 		return diags
 	}
 
@@ -250,7 +250,7 @@ func resourceApplicationLoadBalancerDelete(ctx context.Context, d *schema.Resour
 	logApiRequestTime(apiResponse)
 
 	if err != nil {
-		diags := diag.FromErr(fmt.Errorf("an error occured while deleting an application loadbalancer %s %s", d.Id(), err))
+		diags := diag.FromErr(fmt.Errorf("an error occured while deleting an application loadbalancer %s %w", d.Id(), err))
 		return diags
 	}
 
@@ -286,11 +286,11 @@ func resourceApplicationLoadBalancerImport(ctx context.Context, d *schema.Resour
 			d.SetId("")
 			return nil, fmt.Errorf("unable to find alb %q", albId)
 		}
-		return nil, fmt.Errorf("an error occured while retrieving the alb %q, %q", albId, err)
+		return nil, fmt.Errorf("an error occured while retrieving the alb %q, %w", albId, err)
 	}
 
 	if err := d.Set("datacenter_id", datacenterId); err != nil {
-		return nil, fmt.Errorf("error while setting datacenter_id property for alb %q: %q", albId, err)
+		return nil, fmt.Errorf("error while setting datacenter_id property for alb %q: %w", albId, err)
 	}
 
 	if err := setApplicationLoadBalancerData(d, &alb); err != nil {
@@ -308,35 +308,35 @@ func setApplicationLoadBalancerData(d *schema.ResourceData, applicationLoadBalan
 		if applicationLoadBalancer.Properties.Name != nil {
 			err := d.Set("name", *applicationLoadBalancer.Properties.Name)
 			if err != nil {
-				return fmt.Errorf("error while setting name property for application loadbalancer %s: %s", d.Id(), err)
+				return fmt.Errorf("error while setting name property for application loadbalancer %s: %w", d.Id(), err)
 			}
 		}
 
 		if applicationLoadBalancer.Properties.ListenerLan != nil {
 			err := d.Set("listener_lan", *applicationLoadBalancer.Properties.ListenerLan)
 			if err != nil {
-				return fmt.Errorf("error while setting listener_lan property for application loadbalancer %s: %s", d.Id(), err)
+				return fmt.Errorf("error while setting listener_lan property for application loadbalancer %s: %w", d.Id(), err)
 			}
 		}
 
 		if applicationLoadBalancer.Properties.Ips != nil {
 			err := d.Set("ips", *applicationLoadBalancer.Properties.Ips)
 			if err != nil {
-				return fmt.Errorf("error while setting ips property for application loadbalancer %s: %s", d.Id(), err)
+				return fmt.Errorf("error while setting ips property for application loadbalancer %s: %w", d.Id(), err)
 			}
 		}
 
 		if applicationLoadBalancer.Properties.TargetLan != nil {
 			err := d.Set("target_lan", *applicationLoadBalancer.Properties.TargetLan)
 			if err != nil {
-				return fmt.Errorf("error while setting target_lan property for application loadbalancer %s: %s", d.Id(), err)
+				return fmt.Errorf("error while setting target_lan property for application loadbalancer %s: %w", d.Id(), err)
 			}
 		}
 
 		if applicationLoadBalancer.Properties.LbPrivateIps != nil {
 			err := d.Set("lb_private_ips", *applicationLoadBalancer.Properties.LbPrivateIps)
 			if err != nil {
-				return fmt.Errorf("error while setting lb_private_ips property for application loadbalancer %s: %s", d.Id(), err)
+				return fmt.Errorf("error while setting lb_private_ips property for application loadbalancer %s: %w", d.Id(), err)
 			}
 		}
 	}

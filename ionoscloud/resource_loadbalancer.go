@@ -83,7 +83,7 @@ func resourceLoadbalancerCreate(ctx context.Context, d *schema.ResourceData, met
 	logApiRequestTime(apiResponse)
 
 	if err != nil {
-		diags := diag.FromErr(fmt.Errorf("error occured while creating a loadbalancer %s", err))
+		diags := diag.FromErr(fmt.Errorf("error occured while creating a loadbalancer %w", err))
 		return diags
 	}
 
@@ -113,7 +113,7 @@ func resourceLoadbalancerRead(ctx context.Context, d *schema.ResourceData, meta 
 			d.SetId("")
 			return nil
 		}
-		diags := diag.FromErr(fmt.Errorf("an error occured while fetching a lan ID %s %s", d.Id(), err))
+		diags := diag.FromErr(fmt.Errorf("an error occured while fetching a lan ID %s %w", d.Id(), err))
 		return diags
 	}
 

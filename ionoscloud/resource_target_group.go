@@ -1,3 +1,5 @@
+//go:build all || alb
+
 package ionoscloud
 
 import (
@@ -187,7 +189,7 @@ func resourceTargetGroupCreate(ctx context.Context, d *schema.ResourceData, meta
 	logApiRequestTime(apiResponse)
 
 	if err != nil {
-		diags := diag.FromErr(fmt.Errorf("an error occured while creating a target group: %s ", err))
+		diags := diag.FromErr(fmt.Errorf("an error occured while creating a target group: %w ", err))
 		return diags
 	}
 
@@ -217,7 +219,7 @@ func resourceTargetGroupRead(ctx context.Context, d *schema.ResourceData, meta i
 			d.SetId("")
 			return nil
 		}
-		diags := diag.FromErr(fmt.Errorf("error occured while fetching a target group %s %s", d.Id(), err))
+		diags := diag.FromErr(fmt.Errorf("error occured while fetching a target group %s %w", d.Id(), err))
 		return diags
 	}
 
@@ -264,7 +266,7 @@ func resourceTargetGroupUpdate(ctx context.Context, d *schema.ResourceData, meta
 	logApiRequestTime(apiResponse)
 
 	if err != nil {
-		diags := diag.FromErr(fmt.Errorf("an error occured while restoring a targetGroup ID %s %d", d.Id(), err))
+		diags := diag.FromErr(fmt.Errorf("an error occured while restoring a targetGroup ID %s %w", d.Id(), err))
 		return diags
 	}
 
@@ -287,7 +289,7 @@ func resourceTargetGroupDelete(ctx context.Context, d *schema.ResourceData, meta
 	logApiRequestTime(apiResponse)
 
 	if err != nil {
-		diags := diag.FromErr(fmt.Errorf("an error occured while deleting a target group %s %s", d.Id(), err))
+		diags := diag.FromErr(fmt.Errorf("an error occured while deleting a target group %s %w", d.Id(), err))
 		return diags
 	}
 
@@ -316,7 +318,7 @@ func resourceTargetGroupImport(ctx context.Context, d *schema.ResourceData, meta
 			d.SetId("")
 			return nil, fmt.Errorf("unable to find target group %q", groupIp)
 		}
-		return nil, fmt.Errorf("an error occured while retrieving the target group %q, %q", groupIp, err)
+		return nil, fmt.Errorf("an error occured while retrieving the target group %q, %w", groupIp, err)
 	}
 
 	if err := setTargetGroupData(d, &groupTarget); err != nil {
@@ -336,21 +338,21 @@ func setTargetGroupData(d *schema.ResourceData, targetGroup *ionoscloud.TargetGr
 		if targetGroup.Properties.Name != nil {
 			err := d.Set("name", *targetGroup.Properties.Name)
 			if err != nil {
-				return fmt.Errorf("error while setting name property for target group %s: %s", d.Id(), err)
+				return fmt.Errorf("error while setting name property for target group %s: %w", d.Id(), err)
 			}
 		}
 
 		if targetGroup.Properties.Algorithm != nil {
 			err := d.Set("algorithm", *targetGroup.Properties.Algorithm)
 			if err != nil {
-				return fmt.Errorf("error while setting algorithm property for target group %s: %s", d.Id(), err)
+				return fmt.Errorf("error while setting algorithm property for target group %s: %w", d.Id(), err)
 			}
 		}
 
 		if targetGroup.Properties.Protocol != nil {
 			err := d.Set("protocol", *targetGroup.Properties.Protocol)
 			if err != nil {
-				return fmt.Errorf("error while setting protocol property for target group %s: %s", d.Id(), err)
+				return fmt.Errorf("error while setting protocol property for target group %s: %w", d.Id(), err)
 			}
 		}
 
@@ -386,7 +388,7 @@ func setTargetGroupData(d *schema.ResourceData, targetGroup *ionoscloud.TargetGr
 
 		if len(forwardingRuleTargets) > 0 {
 			if err := d.Set("targets", forwardingRuleTargets); err != nil {
-				return fmt.Errorf("error while setting targets property for target group  %s: %s", d.Id(), err)
+				return fmt.Errorf("error while setting targets property for target group  %s: %w", d.Id(), err)
 			}
 		}
 
@@ -410,7 +412,7 @@ func setTargetGroupData(d *schema.ResourceData, targetGroup *ionoscloud.TargetGr
 			healthCheck[0] = healthCheckEntry
 			err := d.Set("health_check", healthCheck)
 			if err != nil {
-				return fmt.Errorf("error while setting health_check property for target group %s: %s", d.Id(), err)
+				return fmt.Errorf("error while setting health_check property for target group %s: %w", d.Id(), err)
 			}
 		}
 
@@ -446,7 +448,7 @@ func setTargetGroupData(d *schema.ResourceData, targetGroup *ionoscloud.TargetGr
 			httpHealthCheck[0] = httpHealthCheckEntry
 			err := d.Set("http_health_check", httpHealthCheck)
 			if err != nil {
-				return fmt.Errorf("error while setting http_health_check property for target group %s: %s", d.Id(), err)
+				return fmt.Errorf("error while setting http_health_check property for target group %s: %w", d.Id(), err)
 			}
 		}
 

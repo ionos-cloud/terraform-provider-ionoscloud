@@ -240,6 +240,24 @@ All URIs are relative to *https://api.ionos.com/cloudapi/v6*
 Class | Method | HTTP request | Description
 ------------- | ------------- | ------------- | -------------
 DefaultApi | [**ApiInfoGet**](docs/api/DefaultApi.md#apiinfoget) | **Get** / | Display API information
+ApplicationLoadBalancersApi | [**DatacentersApplicationloadbalancersDelete**](docs/api/ApplicationLoadBalancersApi.md#datacentersapplicationloadbalancersdelete) | **Delete** /datacenters/{datacenterId}/applicationloadbalancers/{applicationLoadBalancerId} | Delete Application Load Balancers
+ApplicationLoadBalancersApi | [**DatacentersApplicationloadbalancersFindByApplicationLoadBalancerId**](docs/api/ApplicationLoadBalancersApi.md#datacentersapplicationloadbalancersfindbyapplicationloadbalancerid) | **Get** /datacenters/{datacenterId}/applicationloadbalancers/{applicationLoadBalancerId} | Retrieve Application Load Balancers
+ApplicationLoadBalancersApi | [**DatacentersApplicationloadbalancersFlowlogsDelete**](docs/api/ApplicationLoadBalancersApi.md#datacentersapplicationloadbalancersflowlogsdelete) | **Delete** /datacenters/{datacenterId}/applicationloadbalancers/{applicationLoadBalancerId}/flowlogs/{flowLogId} | Delete ALB Flow Logs
+ApplicationLoadBalancersApi | [**DatacentersApplicationloadbalancersFlowlogsFindByFlowLogId**](docs/api/ApplicationLoadBalancersApi.md#datacentersapplicationloadbalancersflowlogsfindbyflowlogid) | **Get** /datacenters/{datacenterId}/applicationloadbalancers/{applicationLoadBalancerId}/flowlogs/{flowLogId} | Retrieve ALB Flow Logs
+ApplicationLoadBalancersApi | [**DatacentersApplicationloadbalancersFlowlogsGet**](docs/api/ApplicationLoadBalancersApi.md#datacentersapplicationloadbalancersflowlogsget) | **Get** /datacenters/{datacenterId}/applicationloadbalancers/{applicationLoadBalancerId}/flowlogs | List ALB Flow Logs
+ApplicationLoadBalancersApi | [**DatacentersApplicationloadbalancersFlowlogsPatch**](docs/api/ApplicationLoadBalancersApi.md#datacentersapplicationloadbalancersflowlogspatch) | **Patch** /datacenters/{datacenterId}/applicationloadbalancers/{applicationLoadBalancerId}/flowlogs/{flowLogId} | Partially modify ALB Flow Logs
+ApplicationLoadBalancersApi | [**DatacentersApplicationloadbalancersFlowlogsPost**](docs/api/ApplicationLoadBalancersApi.md#datacentersapplicationloadbalancersflowlogspost) | **Post** /datacenters/{datacenterId}/applicationloadbalancers/{applicationLoadBalancerId}/flowlogs | Create ALB Flow Logs
+ApplicationLoadBalancersApi | [**DatacentersApplicationloadbalancersFlowlogsPut**](docs/api/ApplicationLoadBalancersApi.md#datacentersapplicationloadbalancersflowlogsput) | **Put** /datacenters/{datacenterId}/applicationloadbalancers/{applicationLoadBalancerId}/flowlogs/{flowLogId} | Modify ALB Flow Logs
+ApplicationLoadBalancersApi | [**DatacentersApplicationloadbalancersForwardingrulesDelete**](docs/api/ApplicationLoadBalancersApi.md#datacentersapplicationloadbalancersforwardingrulesdelete) | **Delete** /datacenters/{datacenterId}/applicationloadbalancers/{applicationLoadBalancerId}/forwardingrules/{forwardingRuleId} | Delete ALB forwarding rules
+ApplicationLoadBalancersApi | [**DatacentersApplicationloadbalancersForwardingrulesFindByForwardingRuleId**](docs/api/ApplicationLoadBalancersApi.md#datacentersapplicationloadbalancersforwardingrulesfindbyforwardingruleid) | **Get** /datacenters/{datacenterId}/applicationloadbalancers/{applicationLoadBalancerId}/forwardingrules/{forwardingRuleId} | Retrieve ALB forwarding rules
+ApplicationLoadBalancersApi | [**DatacentersApplicationloadbalancersForwardingrulesGet**](docs/api/ApplicationLoadBalancersApi.md#datacentersapplicationloadbalancersforwardingrulesget) | **Get** /datacenters/{datacenterId}/applicationloadbalancers/{applicationLoadBalancerId}/forwardingrules | List ALB forwarding rules
+ApplicationLoadBalancersApi | [**DatacentersApplicationloadbalancersForwardingrulesPatch**](docs/api/ApplicationLoadBalancersApi.md#datacentersapplicationloadbalancersforwardingrulespatch) | **Patch** /datacenters/{datacenterId}/applicationloadbalancers/{applicationLoadBalancerId}/forwardingrules/{forwardingRuleId} | Partially modify ALB forwarding rules
+ApplicationLoadBalancersApi | [**DatacentersApplicationloadbalancersForwardingrulesPost**](docs/api/ApplicationLoadBalancersApi.md#datacentersapplicationloadbalancersforwardingrulespost) | **Post** /datacenters/{datacenterId}/applicationloadbalancers/{applicationLoadBalancerId}/forwardingrules | Create ALB forwarding rules
+ApplicationLoadBalancersApi | [**DatacentersApplicationloadbalancersForwardingrulesPut**](docs/api/ApplicationLoadBalancersApi.md#datacentersapplicationloadbalancersforwardingrulesput) | **Put** /datacenters/{datacenterId}/applicationloadbalancers/{applicationLoadBalancerId}/forwardingrules/{forwardingRuleId} | Modify ALB forwarding rules
+ApplicationLoadBalancersApi | [**DatacentersApplicationloadbalancersGet**](docs/api/ApplicationLoadBalancersApi.md#datacentersapplicationloadbalancersget) | **Get** /datacenters/{datacenterId}/applicationloadbalancers | List Application Load Balancers
+ApplicationLoadBalancersApi | [**DatacentersApplicationloadbalancersPatch**](docs/api/ApplicationLoadBalancersApi.md#datacentersapplicationloadbalancerspatch) | **Patch** /datacenters/{datacenterId}/applicationloadbalancers/{applicationLoadBalancerId} | Partially modify Application Load Balancers
+ApplicationLoadBalancersApi | [**DatacentersApplicationloadbalancersPost**](docs/api/ApplicationLoadBalancersApi.md#datacentersapplicationloadbalancerspost) | **Post** /datacenters/{datacenterId}/applicationloadbalancers | Create Application Load Balancers
+ApplicationLoadBalancersApi | [**DatacentersApplicationloadbalancersPut**](docs/api/ApplicationLoadBalancersApi.md#datacentersapplicationloadbalancersput) | **Put** /datacenters/{datacenterId}/applicationloadbalancers/{applicationLoadBalancerId} | Modify Application Load Balancers
 BackupUnitsApi | [**BackupunitsDelete**](docs/api/BackupUnitsApi.md#backupunitsdelete) | **Delete** /backupunits/{backupunitId} | Delete backup units
 BackupUnitsApi | [**BackupunitsFindById**](docs/api/BackupUnitsApi.md#backupunitsfindbyid) | **Get** /backupunits/{backupunitId} | Retrieve backup units
 BackupUnitsApi | [**BackupunitsGet**](docs/api/BackupUnitsApi.md#backupunitsget) | **Get** /backupunits | List backup units
@@ -420,6 +438,12 @@ SnapshotsApi | [**SnapshotsFindById**](docs/api/SnapshotsApi.md#snapshotsfindbyi
 SnapshotsApi | [**SnapshotsGet**](docs/api/SnapshotsApi.md#snapshotsget) | **Get** /snapshots | List snapshots
 SnapshotsApi | [**SnapshotsPatch**](docs/api/SnapshotsApi.md#snapshotspatch) | **Patch** /snapshots/{snapshotId} | Partially modify snapshots
 SnapshotsApi | [**SnapshotsPut**](docs/api/SnapshotsApi.md#snapshotsput) | **Put** /snapshots/{snapshotId} | Modify snapshots
+TargetGroupsApi | [**TargetGroupsDelete**](docs/api/TargetGroupsApi.md#targetgroupsdelete) | **Delete** /targetgroups/{targetGroupId} | Remove target groups
+TargetGroupsApi | [**TargetgroupsFindByTargetGroupId**](docs/api/TargetGroupsApi.md#targetgroupsfindbytargetgroupid) | **Get** /targetgroups/{targetGroupId} | Retrieve target groups
+TargetGroupsApi | [**TargetgroupsGet**](docs/api/TargetGroupsApi.md#targetgroupsget) | **Get** /targetgroups | List target groups
+TargetGroupsApi | [**TargetgroupsPatch**](docs/api/TargetGroupsApi.md#targetgroupspatch) | **Patch** /targetgroups/{targetGroupId} | Partially modify target groups
+TargetGroupsApi | [**TargetgroupsPost**](docs/api/TargetGroupsApi.md#targetgroupspost) | **Post** /targetgroups | Create target groups
+TargetGroupsApi | [**TargetgroupsPut**](docs/api/TargetGroupsApi.md#targetgroupsput) | **Put** /targetgroups/{targetGroupId} | Modify target groups
 TemplatesApi | [**TemplatesFindById**](docs/api/TemplatesApi.md#templatesfindbyid) | **Get** /templates/{templateId} | Retrieve Cubes Templates
 TemplatesApi | [**TemplatesGet**](docs/api/TemplatesApi.md#templatesget) | **Get** /templates | List Cubes Templates
 UserManagementApi | [**UmGroupsDelete**](docs/api/UserManagementApi.md#umgroupsdelete) | **Delete** /um/groups/{groupId} | Delete groups
@@ -469,6 +493,17 @@ All URIs are relative to *https://api.ionos.com/cloudapi/v6*
 <details >
 <summary title="Click to toggle">API models list</summary>
 
+ - [ApplicationLoadBalancer](docs/models/ApplicationLoadBalancer)
+ - [ApplicationLoadBalancerEntities](docs/models/ApplicationLoadBalancerEntities)
+ - [ApplicationLoadBalancerForwardingRule](docs/models/ApplicationLoadBalancerForwardingRule)
+ - [ApplicationLoadBalancerForwardingRuleProperties](docs/models/ApplicationLoadBalancerForwardingRuleProperties)
+ - [ApplicationLoadBalancerForwardingRulePut](docs/models/ApplicationLoadBalancerForwardingRulePut)
+ - [ApplicationLoadBalancerForwardingRules](docs/models/ApplicationLoadBalancerForwardingRules)
+ - [ApplicationLoadBalancerHttpRule](docs/models/ApplicationLoadBalancerHttpRule)
+ - [ApplicationLoadBalancerHttpRuleCondition](docs/models/ApplicationLoadBalancerHttpRuleCondition)
+ - [ApplicationLoadBalancerProperties](docs/models/ApplicationLoadBalancerProperties)
+ - [ApplicationLoadBalancerPut](docs/models/ApplicationLoadBalancerPut)
+ - [ApplicationLoadBalancers](docs/models/ApplicationLoadBalancers)
  - [AttachedVolumes](docs/models/AttachedVolumes)
  - [BackupUnit](docs/models/BackupUnit)
  - [BackupUnitProperties](docs/models/BackupUnitProperties)
@@ -620,6 +655,13 @@ All URIs are relative to *https://api.ionos.com/cloudapi/v6*
  - [Snapshot](docs/models/Snapshot)
  - [SnapshotProperties](docs/models/SnapshotProperties)
  - [Snapshots](docs/models/Snapshots)
+ - [TargetGroup](docs/models/TargetGroup)
+ - [TargetGroupHealthCheck](docs/models/TargetGroupHealthCheck)
+ - [TargetGroupHttpHealthCheck](docs/models/TargetGroupHttpHealthCheck)
+ - [TargetGroupProperties](docs/models/TargetGroupProperties)
+ - [TargetGroupPut](docs/models/TargetGroupPut)
+ - [TargetGroupTarget](docs/models/TargetGroupTarget)
+ - [TargetGroups](docs/models/TargetGroups)
  - [TargetPortRange](docs/models/TargetPortRange)
  - [Template](docs/models/Template)
  - [TemplateProperties](docs/models/TemplateProperties)

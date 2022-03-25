@@ -233,7 +233,7 @@ func resourceApplicationLoadBalancerForwardingRuleCreate(ctx context.Context, d 
 
 	if err != nil {
 		d.SetId("")
-		diags := diag.FromErr(fmt.Errorf("error creating application loadbalancer forwarding rule: %s \n ApiError: %s", err, responseBody(apiResponse)))
+		diags := diag.FromErr(fmt.Errorf("error creating application loadbalancer forwarding rule: %w \n ApiError: %s", err, responseBody(apiResponse)))
 		return diags
 	}
 
@@ -343,8 +343,8 @@ func resourceApplicationLoadBalancerForwardingRuleUpdate(ctx context.Context, d 
 	logApiRequestTime(apiResponse)
 
 	if err != nil {
-		diags := diag.FromErr(fmt.Errorf("an error occured while updating a application loadbalancer forwarding rule ID %s %s \n ApiError: %s",
-			d.Id(), err, responseBody(apiResponse)))
+		diags := diag.FromErr(fmt.Errorf("an error occured while updating a application loadbalancer forwarding rule ID %s %w",
+			d.Id(), err))
 		return diags
 	}
 
@@ -367,7 +367,7 @@ func resourceApplicationLoadBalancerForwardingRuleDelete(ctx context.Context, d 
 	logApiRequestTime(apiResponse)
 
 	if err != nil {
-		diags := diag.FromErr(fmt.Errorf("an error occured while deleting a application loadbalancer forwarding rule %s %s", d.Id(), err))
+		diags := diag.FromErr(fmt.Errorf("an error occured while deleting a application loadbalancer forwarding rule %s %w", d.Id(), err))
 		return diags
 	}
 
@@ -404,14 +404,14 @@ func resourceApplicationLoadBalancerForwardingRuleImport(ctx context.Context, d 
 			d.SetId("")
 			return nil, fmt.Errorf("unable to find alb forwarding rule %q", ruleId)
 		}
-		return nil, fmt.Errorf("an error occured while retrieving the alb forwarding rule %q, %q", ruleId, err)
+		return nil, fmt.Errorf("an error occured while retrieving the alb forwarding rule %q, %w", ruleId, err)
 	}
 
 	if err := d.Set("datacenter_id", datacenterId); err != nil {
-		return nil, fmt.Errorf("error while setting datacenter_id property for  alb forwarding rule %q: %q", ruleId, err)
+		return nil, fmt.Errorf("error while setting datacenter_id property for  alb forwarding rule %q: %w", ruleId, err)
 	}
 	if err := d.Set("application_loadbalancer_id", albId); err != nil {
-		return nil, fmt.Errorf("error while setting application_loadbalancer_id property for  alb forwarding rule %q: %q", ruleId, err)
+		return nil, fmt.Errorf("error while setting application_loadbalancer_id property for  alb forwarding rule %q: %w", ruleId, err)
 	}
 
 	if err := setApplicationLoadBalancerForwardingRuleData(d, &albForwardingRule); err != nil {
@@ -430,42 +430,42 @@ func setApplicationLoadBalancerForwardingRuleData(d *schema.ResourceData, applic
 		if applicationLoadBalancerForwardingRule.Properties.Name != nil {
 			err := d.Set("name", *applicationLoadBalancerForwardingRule.Properties.Name)
 			if err != nil {
-				return fmt.Errorf("error while setting name property for application load balancer forwarding rule %s: %s", d.Id(), err)
+				return fmt.Errorf("error while setting name property for application load balancer forwarding rule %s: %w", d.Id(), err)
 			}
 		}
 
 		if applicationLoadBalancerForwardingRule.Properties.Protocol != nil {
 			err := d.Set("protocol", *applicationLoadBalancerForwardingRule.Properties.Protocol)
 			if err != nil {
-				return fmt.Errorf("error while setting protocol property for application load balancer forwarding rule %s: %s", d.Id(), err)
+				return fmt.Errorf("error while setting protocol property for application load balancer forwarding rule %s: %w", d.Id(), err)
 			}
 		}
 
 		if applicationLoadBalancerForwardingRule.Properties.ListenerIp != nil {
 			err := d.Set("listener_ip", *applicationLoadBalancerForwardingRule.Properties.ListenerIp)
 			if err != nil {
-				return fmt.Errorf("error while setting listener_ip property for application load balancer forwarding rule %s: %s", d.Id(), err)
+				return fmt.Errorf("error while setting listener_ip property for application load balancer forwarding rule %s: %w", d.Id(), err)
 			}
 		}
 
 		if applicationLoadBalancerForwardingRule.Properties.ListenerPort != nil {
 			err := d.Set("listener_port", *applicationLoadBalancerForwardingRule.Properties.ListenerPort)
 			if err != nil {
-				return fmt.Errorf("error while setting listener_port property for application load balancer forwarding rule %s: %s", d.Id(), err)
+				return fmt.Errorf("error while setting listener_port property for application load balancer forwarding rule %s: %w", d.Id(), err)
 			}
 		}
 
 		if applicationLoadBalancerForwardingRule.Properties.ClientTimeout != nil {
 			err := d.Set("client_timeout", *applicationLoadBalancerForwardingRule.Properties.ClientTimeout)
 			if err != nil {
-				return fmt.Errorf("error while setting client_timeout property for application load balancer forwarding rule %s: %s", d.Id(), err)
+				return fmt.Errorf("error while setting client_timeout property for application load balancer forwarding rule %s: %w", d.Id(), err)
 			}
 		}
 
 		if applicationLoadBalancerForwardingRule.Properties.ServerCertificates != nil {
 			err := d.Set("server_certificates", *applicationLoadBalancerForwardingRule.Properties.ServerCertificates)
 			if err != nil {
-				return fmt.Errorf("error while setting server_certificates property for application load balancer forwarding rule %s: %s", d.Id(), err)
+				return fmt.Errorf("error while setting server_certificates property for application load balancer forwarding rule %s: %w", d.Id(), err)
 			}
 		}
 
@@ -544,7 +544,7 @@ func setApplicationLoadBalancerForwardingRuleData(d *schema.ResourceData, applic
 
 		if len(httpRules) > 0 {
 			if err := d.Set("http_rules", httpRules); err != nil {
-				return fmt.Errorf("error while setting http_rules property for application load balancer forwarding rule  %s: %s", d.Id(), err)
+				return fmt.Errorf("error while setting http_rules property for application load balancer forwarding rule  %s: %w", d.Id(), err)
 			}
 		}
 	}

@@ -85,7 +85,7 @@ func dataSourceApplicationLoadBalancerRead(ctx context.Context, d *schema.Resour
 		applicationLoadBalancer, apiResponse, err = client.ApplicationLoadBalancersApi.DatacentersApplicationloadbalancersFindByApplicationLoadBalancerId(ctx, datacenterId, id).Execute()
 		logApiRequestTime(apiResponse)
 		if err != nil {
-			return diag.FromErr(fmt.Errorf("an error occurred while fetching the nat gateway %s: %s", id, err))
+			return diag.FromErr(fmt.Errorf("an error occurred while fetching the nat gateway %s: %w", id, err))
 		}
 	} else {
 		/* search by name */

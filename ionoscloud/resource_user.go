@@ -110,7 +110,7 @@ func resourceUserCreate(ctx context.Context, d *schema.ResourceData, meta interf
 	logApiRequestTime(apiResponse)
 
 	if err != nil {
-		diags := diag.FromErr(fmt.Errorf("an error occured while creating a user: %s", err))
+		diags := diag.FromErr(fmt.Errorf("an error occured while creating a user: %w", err))
 		return diags
 	}
 
@@ -140,7 +140,7 @@ func resourceUserRead(ctx context.Context, d *schema.ResourceData, meta interfac
 			d.SetId("")
 			return nil
 		}
-		diags := diag.FromErr(fmt.Errorf("an error occured while fetching a User ID %s %s", d.Id(), err))
+		diags := diag.FromErr(fmt.Errorf("an error occured while fetching a User ID %s %w", d.Id(), err))
 		return diags
 	}
 

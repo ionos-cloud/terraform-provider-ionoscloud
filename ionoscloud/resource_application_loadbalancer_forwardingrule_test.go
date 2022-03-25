@@ -1,3 +1,5 @@
+//go:build all || alb
+
 package ionoscloud
 
 import (
