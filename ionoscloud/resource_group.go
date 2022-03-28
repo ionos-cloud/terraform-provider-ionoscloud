@@ -74,12 +74,19 @@ func resourceGroup() *schema.Resource {
 				Type:     schema.TypeBool,
 				Optional: true,
 			},
+			"user_id": {
+				Type:          schema.TypeString,
+				Optional:      true,
+				ConflictsWith: []string{"user_ids"},
+				Deprecated:    "Please use user_ids for adding users to the group, since user_id will pe removed in the future",
+			},
 			"user_ids": {
 				Type:     schema.TypeSet,
 				Optional: true,
 				Elem: &schema.Schema{
 					Type: schema.TypeString,
 				},
+				ConflictsWith: []string{"user_id"},
 			},
 			"users": {
 				Type:     schema.TypeSet,
@@ -118,42 +125,43 @@ func resourceGroup() *schema.Resource {
 				},
 			},
 		},
-		Timeouts:      &resourceDefaultTimeouts,
-		SchemaVersion: 1,
-		StateUpgraders: []schema.StateUpgrader{
-			{
-				Type:    resourceGroup0().CoreConfigSchema().ImpliedType(),
-				Upgrade: resourceGroupUpgradeV0,
-				Version: 0,
-			},
-		},
-	}
-}
-
-func resourceGroup0() *schema.Resource {
-	return &schema.Resource{
-		Schema: map[string]*schema.Schema{
-			"user_id": {
-				Type:     schema.TypeString,
-				Optional: true,
-			},
-		},
 		Timeouts: &resourceDefaultTimeouts,
+		//SchemaVersion: 1,
+		//StateUpgraders: []schema.StateUpgrader{
+		//	{
+		//		Type:    resourceGroup0().CoreConfigSchema().ImpliedType(),
+		//		Upgrade: resourceGroupUpgradeV0,
+		//		Version: 0,
+		//	},
+		//},
 	}
 }
 
-func resourceGroupUpgradeV0(_ context.Context, state map[string]interface{}, _ interface{}) (map[string]interface{}, error) {
-	oldState := state
-	var oldData string
-	if d, ok := oldState["user_id"].(string); ok {
-		oldData = d
-		var users []string
-		users = append(users, oldData)
-		state["user_ids"] = users
-	}
-
-	return state, nil
-}
+//
+//func resourceGroup0() *schema.Resource {
+//	return &schema.Resource{
+//		Schema: map[string]*schema.Schema{
+//			"user_id": {
+//				Type:     schema.TypeString,
+//				Optional: true,
+//			},
+//		},
+//		Timeouts: &resourceDefaultTimeouts,
+//	}
+//}
+//
+//func resourceGroupUpgradeV0(_ context.Context, state map[string]interface{}, _ interface{}) (map[string]interface{}, error) {
+//	oldState := state
+//	var oldData string
+//	if d, ok := oldState["user_id"].(string); ok {
+//		oldData = d
+//		var users []string
+//		users = append(users, oldData)
+//		state["user_ids"] = users
+//	}
+//
+//	return state, nil
+//}
 
 func resourceGroupCreate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	client := meta.(SdkBundle).CloudApiClient
@@ -216,6 +224,14 @@ func resourceGroupCreate(ctx context.Context, d *schema.ResourceData, meta inter
 	}
 
 	//add users to group if any is provided
+	if userVal, userOK := d.GetOk("user_id"); userOK {
+		userID := userVal.(string)
+		log.Printf("[INFO] Adding user %+v to group...", userID)
+		if err := addUserToGroup(userID, ctx, d, meta); err != nil {
+			return diag.FromErr(err)
+		}
+	}
+
 	if usersVal, usersOK := d.GetOk("user_ids"); usersOK {
 		usersList := usersVal.(*schema.Set)
 		if usersList.List() != nil {
@@ -301,6 +317,28 @@ func resourceGroupUpdate(ctx context.Context, d *schema.ResourceData, meta inter
 	if errState != nil {
 		diags := diag.FromErr(errState)
 		return diags
+	}
+
+	if d.HasChange("user_id") {
+		oldValue, newValue := d.GetChange("user_id")
+
+		userIdToAdd := newValue.(string)
+		userIdToRemove := oldValue.(string)
+
+		log.Printf("[INFO] User to add: %+v", userIdToAdd)
+		log.Printf("[INFO] User to remove: %+v", userIdToRemove)
+
+		if userIdToAdd != "" {
+			if err := addUserToGroup(userIdToAdd, ctx, d, meta); err != nil {
+				return diag.FromErr(err)
+			}
+		}
+
+		if userIdToRemove != "" {
+			if err := deleteUserFromGroup(userIdToRemove, ctx, d, meta); err != nil {
+				return diag.FromErr(err)
+			}
+		}
 	}
 
 	if d.HasChange("user_ids") {

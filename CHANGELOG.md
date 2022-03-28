@@ -18,6 +18,7 @@
 - when you try to change an immutable field, you get an error, but before that the tf state is changed. 
 Before applying a real change you need to `apply` it back with an error again. 
 To fix, when you try to change immutable fields they will throw an error in the plan phase.
+- reintroduced in group resource the `user_id` argument, as deprecated, to provide a period of transition
 
 ## 6.2.0
 

@@ -63,6 +63,7 @@ resource "ionoscloud_group" "example" {
 * `access_and_manage_monitoring` - (Optional) [Boolean]  The group will be allowed to access and manage monitoring.
 * `access_and_manage_certificates` - (Optional) [Boolean]  The group will be allowed to access and manage certificates.
 * `user_ids` - (Optional) [list] A list of users to add to the group.
+* `user_id` - (Optional) [string] The ID of the specific user to add to the group. Please use user_ids argument since this is **DEPRECATED**
 * `users` - (Computed) List of users - See the [User](user.md) section
 
 ## Import
