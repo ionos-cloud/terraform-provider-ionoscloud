@@ -7,6 +7,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	ionoscloud "github.com/ionos-cloud/sdk-go/v6"
+	"strings"
 )
 
 func dataSourceNetworkLoadBalancer() *schema.Resource {
@@ -107,7 +108,7 @@ func dataSourceNetworkLoadBalancerRead(ctx context.Context, d *schema.ResourceDa
 				if err != nil {
 					return diag.FromErr(fmt.Errorf("an error occurred while fetching network loadbalancer with ID %s: %s", *c.Id, err.Error()))
 				}
-				if tmpNetworkLoadBalancer.Properties != nil && tmpNetworkLoadBalancer.Properties.Name != nil && *tmpNetworkLoadBalancer.Properties.Name == name.(string) {
+				if tmpNetworkLoadBalancer.Properties != nil && tmpNetworkLoadBalancer.Properties.Name != nil && strings.ToLower(*tmpNetworkLoadBalancer.Properties.Name) == strings.ToLower(name.(string)) {
 					results = append(results, tmpNetworkLoadBalancer)
 				}
 			}

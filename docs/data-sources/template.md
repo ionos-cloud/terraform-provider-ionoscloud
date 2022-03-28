@@ -45,7 +45,7 @@ data "ionoscloud_template" "example" {
 
 ## Argument Reference
 
-* `name` - (Optional) A name of that resource.
+* `name` - (Optional) The name of template. Search by name is case-insensitive, but the whole resource name is required (we do not support partial matching).
 * `cores` - (Optional) The CPU cores count.
 * `ram` - (Optional) The RAM size in MB.
 * `storage_size` - (Optional) The storage size in GB.

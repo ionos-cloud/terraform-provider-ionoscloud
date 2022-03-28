@@ -11,7 +11,7 @@ description: |-
 
 The **Location data source** can be used to search for and return an existing location which can then be used elsewhere in the configuration.
 If a single match is found, it will be returned. If your search results in multiple matches, an error will be returned.
-When this happens, please refine your search string so that it is specific enough to return only one result.
+When this happens, please make sure that your resources have unique names.
 
 ## Example Usage
 
@@ -24,7 +24,7 @@ data "ionoscloud_location" "example" {
 
 ## Argument Reference
 
- * `name` - (Required) Name of the location to search for.
+ * `name` - (Required) Name of the location to search for. Search by name is case-insensitive, but the whole resource name is required (we do not support partial matching).
  * `feature` - (Optional) A desired feature that the location must be able to provide.
 
 ## Attributes Reference

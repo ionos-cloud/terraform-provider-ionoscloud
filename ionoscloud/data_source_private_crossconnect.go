@@ -7,6 +7,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	ionoscloud "github.com/ionos-cloud/sdk-go/v6"
+	"strings"
 )
 
 func dataSourcePcc() *schema.Resource {
@@ -192,7 +193,7 @@ func dataSourcePccRead(ctx context.Context, d *schema.ResourceData, meta interfa
 
 		if pccs.Items != nil {
 			for _, p := range *pccs.Items {
-				if p.Properties != nil && p.Properties.Name != nil && *p.Properties.Name == name.(string) {
+				if p.Properties != nil && p.Properties.Name != nil && strings.ToLower(*p.Properties.Name) == strings.ToLower(name.(string)) {
 					pcc, apiResponse, err = client.PrivateCrossConnectsApi.PccsFindById(ctx, *p.Id).Execute()
 					logApiRequestTime(apiResponse)
 					if err != nil {

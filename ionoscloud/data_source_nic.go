@@ -7,6 +7,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 	ionoscloud "github.com/ionos-cloud/sdk-go/v6"
+	"strings"
 )
 
 func dataSourceNIC() *schema.Resource {
@@ -183,7 +184,7 @@ func dataSourceNicRead(ctx context.Context, data *schema.ResourceData, meta inte
 
 		if nameOk && nics.Items != nil {
 			for _, tempNic := range *nics.Items {
-				if tempNic.Properties != nil && tempNic.Properties.Name != nil && *tempNic.Properties.Name == name {
+				if tempNic.Properties != nil && tempNic.Properties.Name != nil && strings.ToLower(*tempNic.Properties.Name) == strings.ToLower(name) {
 					results = append(results, tempNic)
 				}
 			}

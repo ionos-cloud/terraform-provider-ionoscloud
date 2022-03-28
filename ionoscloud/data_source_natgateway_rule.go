@@ -7,6 +7,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	ionoscloud "github.com/ionos-cloud/sdk-go/v6"
+	"strings"
 )
 
 func dataSourceNatGatewayRule() *schema.Resource {
@@ -140,7 +141,7 @@ func dataSourceNatGatewayRuleRead(ctx context.Context, d *schema.ResourceData, m
 				if err != nil {
 					return diag.FromErr(fmt.Errorf("an error occurred while fetching nat gateway rule with ID %s: %s", *c.Id, err.Error()))
 				}
-				if tmpNatGatewayRule.Properties != nil && tmpNatGatewayRule.Properties.Name != nil && *tmpNatGatewayRule.Properties.Name == name.(string) {
+				if tmpNatGatewayRule.Properties != nil && tmpNatGatewayRule.Properties.Name != nil && strings.ToLower(*tmpNatGatewayRule.Properties.Name) == strings.ToLower(name.(string)) {
 					results = append(results, tmpNatGatewayRule)
 				}
 

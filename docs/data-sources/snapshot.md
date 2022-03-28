@@ -9,7 +9,9 @@ description: |-
 
 # ionoscloud\_snapshot
 
-The **Snapshot data source** can be used to search for and return an existing snapshot which can then be used to provision a server. If a single match is found, it will be returned. If your search results in multiple matches, an error will be returned. When this happens, please refine your search string so that it is specific enough to return only one result.
+The **Snapshot data source** can be used to search for and return an existing snapshot which can then be used to provision a server. 
+If a single match is found, it will be returned. If your search results in multiple matches, an error will be returned.
+When this happens, please make sure that your resources have unique names.
 
 ## Example Usage
 
@@ -33,7 +35,7 @@ Note: The size argument is in GB
 ## Argument Reference
 
  * `id` - (Optional) UUID of an existing snapshot that you want to search for.
- * `name` - (Optional) Name of an existing snapshot that you want to search for.
+ * `name` - (Optional) Name of an existing snapshot that you want to search for. Search by name is case-insensitive, but the whole resource name is required (we do not support partial matching).
  * `location` - (Optional) Existing snapshot's location.
  * `size` - (Optional) The size of the snapshot to look for.
 

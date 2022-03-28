@@ -11,7 +11,7 @@ description: |-
 
 The **NAT gateway data source** can be used to search for and return existing NAT Gateways.
 If a single match is found, it will be returned. If your search results in multiple matches, an error will be returned.
-When this happens, please refine your search string so that it is specific enough to return only one result.
+When this happens, please make sure that your resources have unique names.
 
 ## Example Usage
 ### By ID
@@ -33,7 +33,7 @@ data "ionoscloud_natgateway" "example" {
 ## Argument Reference
 
 * `datacenter_id` - (Required) Datacenter's UUID.
-* `name` - (Optional) Name of an existing network load balancer forwarding rule that you want to search for.
+* `name` - (Optional) Name of an existing network load balancer forwarding rule that you want to search for. Search by name is case-insensitive, but the whole resource name is required (we do not support partial matching).
 * `id` - (Optional) ID of the network load balancer forwarding rule you want to search for.
 
 `datacenter_id` and either `name` or `id` must be provided. If none, or both of `name` and `id` are provided, the datasource will return an error.

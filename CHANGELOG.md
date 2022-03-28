@@ -5,6 +5,7 @@
 - added units where missing
 - added example for adding a secondary NIC to an IP Failover
 - updated provider version to the latest release in main registry page
+- documented the behavior of data-sources in terms of case-sensitivity 
 
 ### Enhancement
 - add `allow_replace` to node pool resource, which allows the update of immutable node_pool fields will first
@@ -12,6 +13,7 @@
 - update sdk-go dependency to v6.0.2
 - update sdk-go-dbaas-postgres dependency to v1.0.2
 - update terraform-plugin-sdk to v2.12.0
+- made all data-sources case-insensitive for name argument
 
 ### Fixes
 - fixed image data-source bug when `name` not provided - data-source returned 0 results

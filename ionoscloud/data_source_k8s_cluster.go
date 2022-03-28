@@ -9,6 +9,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	ionoscloud "github.com/ionos-cloud/sdk-go/v6"
 	"gopkg.in/yaml.v3"
+	"strings"
 )
 
 type KubeConfig struct {
@@ -280,7 +281,7 @@ func dataSourceK8sReadCluster(ctx context.Context, d *schema.ResourceData, meta 
 			var results []ionoscloud.KubernetesCluster
 
 			for _, c := range *clusters.Items {
-				if c.Properties != nil && c.Properties.Name != nil && *c.Properties.Name == name.(string) {
+				if c.Properties != nil && c.Properties.Name != nil && strings.ToLower(*c.Properties.Name) == strings.ToLower(name.(string)) {
 					tmpCluster, apiResponse, err := client.KubernetesApi.K8sFindByClusterId(ctx, *c.Id).Execute()
 					logApiRequestTime(apiResponse)
 					if err != nil {

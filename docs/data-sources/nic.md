@@ -11,7 +11,7 @@ description: |-
 
 The **Nic data source** can be used to search for and return existing nics.
 If a single match is found, it will be returned. If your search results in multiple matches, an error will be returned.
-When this happens, please refine your search string so that it is specific enough to return only one result.
+When this happens, please make sure that your resources have unique names.
 
 ## Example Usage
 
@@ -37,7 +37,7 @@ data "ionoscloud_nic" "example" {
 
 - `datacenter_id` - (Required)[string] The ID of a Virtual Data Center.
 - `server_id` - (Required)[string] The ID of a server.
-- `name` - (Optional)[string] The name of the LAN.
+- `name` - (Optional)[string] The name of the LAN. Search by name is case-insensitive, but the whole resource name is required (we do not support partial matching).
 * `id` - (Optional) ID of the nic you want to search for.
 
 `datacenter_id` and either `name` or `id` must be provided. 

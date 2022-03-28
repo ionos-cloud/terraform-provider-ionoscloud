@@ -7,6 +7,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	ionoscloud "github.com/ionos-cloud/sdk-go/v6"
 	"log"
+	"strings"
 )
 
 func dataSourceLocation() *schema.Resource {
@@ -83,7 +84,7 @@ func dataSourceLocationRead(ctx context.Context, d *schema.ResourceData, meta in
 
 	if nameOk && locations.Items != nil {
 		for _, loc := range *locations.Items {
-			if loc.Properties != nil && loc.Properties.Name != nil && *loc.Properties.Name == name.(string) {
+			if loc.Properties != nil && loc.Properties.Name != nil && strings.ToLower(*loc.Properties.Name) == strings.ToLower(name.(string)) {
 				results = append(results, loc)
 			}
 		}

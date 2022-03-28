@@ -11,7 +11,7 @@ description: |-
 
 The **NAT Gateway Rule data source** can be used to search for and return existing NAT Gateway Rules.
 If a single match is found, it will be returned. If your search results in multiple matches, an error will be returned.
-When this happens, please refine your search string so that it is specific enough to return only one result.
+When this happens, please make sure that your resources have unique names.
 
 ## Example Usage
 
@@ -37,7 +37,7 @@ data "ionoscloud_natgateway_rule" "example" {
 
 * `datacenter_id` - (Required) Datacenter's UUID.
 * `natgateway_id` - (Required) Nat Gateway's UUID.
-* `name` - (Optional) Name of an existing NAT gateway rule that you want to search for.
+* `name` - (Optional) Name of an existing NAT gateway rule that you want to search for. Search by name is case-insensitive, but the whole resource name is required (we do not support partial matching).
 * `id` - (Optional) ID of the NAT gateway rule you want to search for.
 
 Both `datacenter_id` and `natgateway_id` and either `name` or `id` must be provided. If none, or both of `name` and `id` are provided, the datasource will return an error.

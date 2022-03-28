@@ -6,6 +6,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	ionoscloud "github.com/ionos-cloud/sdk-go/v6"
 	"log"
+	"strings"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 )
@@ -133,7 +134,7 @@ func dataSourceDataCenterRead(ctx context.Context, d *schema.ResourceData, meta 
 		if nameOk && datacenters.Items != nil {
 			var resultsByDatacenter []ionoscloud.Datacenter
 			for _, dc := range *datacenters.Items {
-				if dc.Properties != nil && dc.Properties.Name != nil && *dc.Properties.Name == name {
+				if dc.Properties != nil && dc.Properties.Name != nil && strings.ToLower(*dc.Properties.Name) == strings.ToLower(name) {
 					resultsByDatacenter = append(resultsByDatacenter, dc)
 				}
 			}

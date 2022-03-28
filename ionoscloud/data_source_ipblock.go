@@ -8,6 +8,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 	ionoscloud "github.com/ionos-cloud/sdk-go/v6"
 	"log"
+	"strings"
 )
 
 func dataSourceIpBlock() *schema.Resource {
@@ -143,7 +144,7 @@ func datasourceIpBlockRead(ctx context.Context, data *schema.ResourceData, meta 
 
 		if nameOk && ipBlocks.Items != nil {
 			for _, block := range *ipBlocks.Items {
-				if block.Properties != nil && block.Properties.Name != nil && *block.Properties.Name == name {
+				if block.Properties != nil && block.Properties.Name != nil && strings.ToLower(*block.Properties.Name) == strings.ToLower(name) {
 					results = append(results, block)
 				}
 			}

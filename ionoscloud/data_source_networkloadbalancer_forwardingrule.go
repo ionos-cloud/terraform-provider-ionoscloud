@@ -8,6 +8,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 	ionoscloud "github.com/ionos-cloud/sdk-go/v6"
+	"strings"
 )
 
 func dataSourceNetworkLoadBalancerForwardingRule() *schema.Resource {
@@ -193,7 +194,7 @@ func dataSourceNetworkLoadBalancerForwardingRuleRead(ctx context.Context, d *sch
 				if err != nil {
 					return diag.FromErr(fmt.Errorf("an error occurred while fetching network loadbalancer forwarding rule with ID %s: %s", *c.Id, err.Error()))
 				}
-				if tmpNetworkLoadBalancerForwardingRule.Properties != nil && tmpNetworkLoadBalancerForwardingRule.Properties.Name != nil && *tmpNetworkLoadBalancerForwardingRule.Properties.Name == name.(string) {
+				if tmpNetworkLoadBalancerForwardingRule.Properties != nil && tmpNetworkLoadBalancerForwardingRule.Properties.Name != nil && strings.ToLower(*tmpNetworkLoadBalancerForwardingRule.Properties.Name) == strings.ToLower(name.(string)) {
 					results = append(results, tmpNetworkLoadBalancerForwardingRule)
 				}
 			}

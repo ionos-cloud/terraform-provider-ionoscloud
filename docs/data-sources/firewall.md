@@ -11,10 +11,11 @@ description: |-
 
 The **Firewall data source** can be used to search for and return an existing FirewallRules. 
 You can provide a string for either id or name parameters which will be compared with provisioned Firewall Rules.
-If a single match is found, it will be returned. If your search results in multiple matches, an error will be returned. 
-When this happens, please refine your search string so that it is specific enough to return only one result.
+If a single match is found, it will be returned. If your search results in multiple matches, an error will be returned.
+When this happens, please make sure that your resources have unique names.
 
 ## Example Usage
+
 ### By ID
 ```hcl
 data "ionoscloud_firewall" "example" {
@@ -39,7 +40,7 @@ data "ionoscloud_firewall" "example" {
 
 The following arguments are supported:
 
-* `name` - (Optional) Name of an existing firewall rule that you want to search for.
+* `name` - (Optional) Name of an existing firewall rule that you want to search for. Search by name is case-insensitive, but the whole resource name is required (we do not support partial matching).
 * `id` - (Optional) ID of the firewall rule you want to search for.
 * `datacenter_id` - (Required) The Virtual Data Center ID.
 * `server_id` - (Required) The Server ID.

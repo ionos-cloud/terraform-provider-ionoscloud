@@ -8,6 +8,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 	ionoscloud "github.com/ionos-cloud/sdk-go/v6"
+	"strings"
 )
 
 func dataSourceServer() *schema.Resource {
@@ -670,7 +671,7 @@ func dataSourceServerRead(ctx context.Context, d *schema.ResourceData, meta inte
 
 		if servers.Items != nil {
 			for _, s := range *servers.Items {
-				if s.Properties != nil && s.Properties.Name != nil && *s.Properties.Name == name.(string) {
+				if s.Properties != nil && s.Properties.Name != nil && strings.ToLower(*s.Properties.Name) == strings.ToLower(name.(string)) {
 					/* server found */
 					server, apiResponse, err = client.ServersApi.DatacentersServersFindById(ctx, datacenterId.(string), *s.Id).Depth(4).Execute()
 					logApiRequestTime(apiResponse)

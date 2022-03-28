@@ -11,7 +11,7 @@ description: |-
 
 The **DbaaS Postgres Cluster data source** can be used to search for and return an existing DbaaS Postgres Cluster.
 If a single match is found, it will be returned. If your search results in multiple matches, an error will be returned.
-When this happens, please refine your search string so that it is specific enough to return only one result.
+When this happens, please make sure that your resources have unique names.
 
 ## Example Usage
 
@@ -32,7 +32,7 @@ data "ionoscloud_pg_cluster" "example" {
 
 ## Argument Reference
 
-* `display_name` - (Optional) Display name or an existing cluster that you want to search for.
+* `display_name` - (Optional) Display name or an existing cluster that you want to search for. Search by name is case-insensitive, but the whole resource name is required (we do not support partial matching).
 * `id` - (Optional) ID of the cluster you want to search for.
 
 Either `display_name` or `id` must be provided. If none, or both are provided, the datasource will return an error.
