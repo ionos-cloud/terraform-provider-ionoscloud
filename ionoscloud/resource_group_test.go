@@ -110,6 +110,7 @@ func TestAccGroupBasic(t *testing.T) {
 					resource.TestCheckResourceAttr(GroupResource+"."+GroupTestResource, "create_backup_unit", "false"),
 					resource.TestCheckResourceAttr(GroupResource+"."+GroupTestResource, "create_internet_access", "false"),
 					resource.TestCheckResourceAttr(GroupResource+"."+GroupTestResource, "create_k8s_cluster", "false"),
+					resource.TestCheckResourceAttrPair(GroupResource+".test_user_id", "users.0.id", UserResource+"."+UserTestResource+"3", "id"),
 					testNotEmptySlice(GroupResource, "users")),
 			},
 		},
@@ -277,6 +278,20 @@ resource ` + UserResource + ` ` + UserTestResource + `3 {
   administrator = false
   force_sec_auth= false
   active = false
+}
+
+resource ` + GroupResource + ` "test_user_id" {
+  name = "` + GroupTestResource + `"
+  create_datacenter = false
+  create_snapshot = false
+  reserve_ip = false
+  access_activity_log = false
+  create_pcc = false
+  s3_privilege = false
+  create_backup_unit = false
+  create_internet_access = false
+  create_k8s_cluster = false
+  user_id = ` + UserResource + `.` + UserTestResource + `3.id
 }
 
 resource ` + GroupResource + ` ` + GroupTestResource + ` {
