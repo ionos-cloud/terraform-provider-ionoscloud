@@ -113,6 +113,27 @@ func TestAccGroupBasic(t *testing.T) {
 					resource.TestCheckResourceAttrPair(GroupResource+".test_user_id", "users.0.id", UserResource+"."+UserTestResource+"3", "id"),
 					testNotEmptySlice(GroupResource, "users")),
 			},
+			{
+				Config: testAccCheckGroupUpdateMigrateToUserIds,
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckGroupExists(GroupResource+"."+GroupTestResource, &group),
+					resource.TestCheckResourceAttr(GroupResource+"."+GroupTestResource, "name", UpdatedResources),
+					resource.TestCheckResourceAttr(GroupResource+"."+GroupTestResource, "create_datacenter", "false"),
+					resource.TestCheckResourceAttr(GroupResource+"."+GroupTestResource, "create_snapshot", "false"),
+					resource.TestCheckResourceAttr(GroupResource+"."+GroupTestResource, "reserve_ip", "false"),
+					resource.TestCheckResourceAttr(GroupResource+"."+GroupTestResource, "access_activity_log", "false"),
+					resource.TestCheckResourceAttr(GroupResource+"."+GroupTestResource, "create_pcc", "false"),
+					resource.TestCheckResourceAttr(GroupResource+"."+GroupTestResource, "s3_privilege", "false"),
+					resource.TestCheckResourceAttr(GroupResource+"."+GroupTestResource, "create_backup_unit", "false"),
+					resource.TestCheckResourceAttr(GroupResource+"."+GroupTestResource, "create_internet_access", "false"),
+					resource.TestCheckResourceAttr(GroupResource+"."+GroupTestResource, "create_k8s_cluster", "false"),
+					resource.TestCheckResourceAttrPair(GroupResource+".test_user_id", "users.0.id", UserResource+"."+UserTestResource+"3", "id"),
+					testNotEmptySlice(GroupResource, "users")),
+			},
+			{
+				Config:      testAccCheckGroupBothUserArgumentsError,
+				ExpectError: regexp.MustCompile("Conflicting configuration arguments"),
+			},
 		},
 	})
 }
@@ -306,5 +327,86 @@ resource ` + GroupResource + ` ` + GroupTestResource + ` {
   create_internet_access = false
   create_k8s_cluster = false
   user_ids = [` + UserResource + `.` + UserTestResource + `.id, ` + UserResource + `.` + UserTestResource + `3.id]
+}
+`
+
+var testAccCheckGroupUpdateMigrateToUserIds = testAccCheckGroupCreateUsers + `
+resource ` + UserResource + ` ` + UserTestResource + `3 {
+  first_name = "user"
+  last_name = "test"
+  email = "` + utils.GenerateEmail() + `"
+  password = "abc123-321CBA"
+  administrator = false
+  force_sec_auth= false
+  active = false
+}
+
+resource ` + GroupResource + ` "test_user_id" {
+  name = "` + GroupTestResource + `"
+  create_datacenter = false
+  create_snapshot = false
+  reserve_ip = false
+  access_activity_log = false
+  create_pcc = false
+  s3_privilege = false
+  create_backup_unit = false
+  create_internet_access = false
+  create_k8s_cluster = false
+  user_ids = [` + UserResource + `.` + UserTestResource + `3.id]
+}
+
+resource ` + GroupResource + ` ` + GroupTestResource + ` {
+  name = "` + UpdatedResources + `"
+  create_datacenter = false
+  create_snapshot = false
+  reserve_ip = false
+  access_activity_log = false
+  create_pcc = false
+  s3_privilege = false
+  create_backup_unit = false
+  create_internet_access = false
+  create_k8s_cluster = false
+  user_ids = [` + UserResource + `.` + UserTestResource + `.id, ` + UserResource + `.` + UserTestResource + `3.id]
+}
+`
+
+var testAccCheckGroupBothUserArgumentsError = testAccCheckGroupCreateUsers + `
+resource ` + UserResource + ` ` + UserTestResource + `3 {
+  first_name = "user"
+  last_name = "test"
+  email = "` + utils.GenerateEmail() + `"
+  password = "abc123-321CBA"
+  administrator = false
+  force_sec_auth= false
+  active = false
+}
+
+resource ` + GroupResource + ` "test_user_id" {
+  name = "` + GroupTestResource + `"
+  create_datacenter = false
+  create_snapshot = false
+  reserve_ip = false
+  access_activity_log = false
+  create_pcc = false
+  s3_privilege = false
+  create_backup_unit = false
+  create_internet_access = false
+  create_k8s_cluster = false
+  user_ids = [` + UserResource + `.` + UserTestResource + `3.id]
+}
+
+resource ` + GroupResource + ` ` + GroupTestResource + ` {
+  name = "` + UpdatedResources + `"
+  create_datacenter = false
+  create_snapshot = false
+  reserve_ip = false
+  access_activity_log = false
+  create_pcc = false
+  s3_privilege = false
+  create_backup_unit = false
+  create_internet_access = false
+  create_k8s_cluster = false
+  user_ids = [` + UserResource + `.` + UserTestResource + `.id, ` + UserResource + `.` + UserTestResource + `3.id]
+  user_id = ` + UserResource + `.` + UserTestResource + `.id
 }
 `

@@ -320,7 +320,7 @@ func resourceGroupUpdate(ctx context.Context, d *schema.ResourceData, meta inter
 	}
 
 	if d.HasChange("user_id") {
-		oldValue, newValue := d.GetChange("user_ids")
+		oldValue, newValue := d.GetChange("user_id")
 
 		userIdToAdd := newValue.(string)
 		userIdToRemove := oldValue.(string)
@@ -328,12 +328,16 @@ func resourceGroupUpdate(ctx context.Context, d *schema.ResourceData, meta inter
 		log.Printf("[INFO] User to add: %+v", userIdToAdd)
 		log.Printf("[INFO] User to remove: %+v", userIdToRemove)
 
-		if err := addUserToGroup(userIdToAdd, ctx, d, meta); err != nil {
-			return diag.FromErr(err)
+		if userIdToAdd != "" {
+			if err := addUserToGroup(userIdToAdd, ctx, d, meta); err != nil {
+				return diag.FromErr(err)
+			}
 		}
 
-		if err := deleteUserFromGroup(userIdToRemove, ctx, d, meta); err != nil {
-			return diag.FromErr(err)
+		if userIdToRemove != "" {
+			if err := deleteUserFromGroup(userIdToRemove, ctx, d, meta); err != nil {
+				return diag.FromErr(err)
+			}
 		}
 	}
 
