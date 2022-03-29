@@ -7,6 +7,8 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 	ionoscloud "github.com/ionos-cloud/sdk-go/v6"
+	"log"
+	"strings"
 )
 
 func resourceLanIPFailover() *schema.Resource {
@@ -120,7 +122,7 @@ func resourceLanIPFailoverRead(ctx context.Context, d *schema.ResourceData, meta
 	if lan.Id != nil {
 		err := d.Set("lan_id", *lan.Id)
 		if err != nil {
-			diags := diag.FromErr(fmt.Errorf("error while setting lan_id property for IpFailover %s: %sw", d.Id(), err))
+			diags := diag.FromErr(fmt.Errorf("error while setting lan_id property for IpFailover %s: %w", d.Id(), err))
 			return diags
 		}
 	}
@@ -202,4 +204,62 @@ func resourceLanIPFailoverDelete(ctx context.Context, d *schema.ResourceData, me
 
 	d.SetId("")
 	return nil
+}
+
+func resourceIpFailoverImporter(ctx context.Context, d *schema.ResourceData, meta interface{}) ([]*schema.ResourceData, error) {
+	parts := strings.Split(d.Id(), "/")
+	if len(parts) != 2 || parts[0] == "" || parts[1] == "" {
+		return nil, fmt.Errorf("invalid import id %q. Expecting {datacenter}/{lan}", d.Id())
+	}
+
+	dcId := parts[0]
+	lanId := parts[1]
+
+	client := meta.(SdkBundle).CloudApiClient
+
+	lan, apiResponse, err := client.LANsApi.DatacentersLansFindById(ctx, dcId, lanId).Execute()
+	logApiRequestTime(apiResponse)
+
+	if err != nil {
+		if apiResponse != nil && apiResponse.Response != nil && apiResponse.StatusCode == 404 {
+			d.SetId("")
+			return nil, fmt.Errorf("an error occured while trying to fetch the lan %q", lanId)
+		}
+		return nil, fmt.Errorf("lan does not exist %q", lanId)
+	}
+
+	log.Printf("[INFO] lan found: %+v", lan)
+
+	d.SetId(*lan.Id)
+
+	if err := d.Set("datacenter_id", dcId); err != nil {
+		return nil, err
+	}
+
+	failoverSlice := lan.Properties.IpFailover
+	if lan.Properties != nil && failoverSlice != nil && len(*failoverSlice) > 0 {
+		firstFailover := (*failoverSlice)[0]
+		if firstFailover.Ip != nil {
+			err := d.Set("ip", firstFailover.Ip)
+			if err != nil {
+				return nil, fmt.Errorf("error while setting ip property for IpFailover %s: %w", d.Id(), err)
+
+			}
+		}
+		if firstFailover.NicUuid != nil {
+			err := d.Set("nicuuid", firstFailover.NicUuid)
+			if err != nil {
+				return nil, fmt.Errorf("error while setting nicuuid property for IpFailover %s: %w", d.Id(), err)
+			}
+		}
+	}
+
+	if lan.Id != nil {
+		err := d.Set("lan_id", *lan.Id)
+		if err != nil {
+			return nil, err
+		}
+	}
+
+	return []*schema.ResourceData{d}, nil
 }
