@@ -19,6 +19,7 @@
 Before applying a real change you need to `apply` it back with an error again. 
 To fix, when you try to change immutable fields they will throw an error in the plan phase.
 - reintroduced in group resource the `user_id` argument, as deprecated, to provide a period of transition
+- check slice length to prevent crash
 
 ## 6.2.0
 

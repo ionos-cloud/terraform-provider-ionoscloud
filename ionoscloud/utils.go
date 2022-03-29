@@ -1,7 +1,6 @@
 package ionoscloud
 
 import (
-	"context"
 	"fmt"
 	ionoscloud "github.com/ionos-cloud/sdk-go/v6"
 	"log"
@@ -15,125 +14,6 @@ import (
 )
 
 const SleepInterval = 5 * time.Second
-
-func resourceIpFailoverImporter(ctx context.Context, d *schema.ResourceData, meta interface{}) ([]*schema.ResourceData, error) {
-	parts := strings.Split(d.Id(), "/")
-	if len(parts) != 2 || parts[0] == "" || parts[1] == "" {
-		return nil, fmt.Errorf("invalid import id %q. Expecting {datacenter}/{lan}", d.Id())
-	}
-
-	dcId := parts[0]
-	lanId := parts[1]
-
-	client := meta.(SdkBundle).CloudApiClient
-
-	lan, apiResponse, err := client.LANsApi.DatacentersLansFindById(ctx, dcId, lanId).Execute()
-	logApiRequestTime(apiResponse)
-
-	if err != nil {
-		if apiResponse != nil && apiResponse.Response != nil && apiResponse.StatusCode == 404 {
-			d.SetId("")
-			return nil, fmt.Errorf("an error occured while trying to fetch the lan %q", lanId)
-		}
-		return nil, fmt.Errorf("lan does not exist%q", lanId)
-	}
-
-	log.Printf("[INFO] lan found: %+v", lan)
-
-	d.SetId(*lan.Id)
-
-	if err := d.Set("datacenter_id", dcId); err != nil {
-		return nil, err
-	}
-
-	if lan.Properties.IpFailover != nil {
-		err := d.Set("ip", *(*lan.Properties.IpFailover)[0].Ip)
-		if err != nil {
-			return nil, err
-		}
-	}
-
-	if lan.Properties.IpFailover != nil {
-		err := d.Set("nicuuid", *(*lan.Properties.IpFailover)[0].NicUuid)
-		if err != nil {
-			return nil, err
-		}
-	}
-
-	if lan.Id != nil {
-		err := d.Set("lan_id", *lan.Id)
-		if err != nil {
-			return nil, err
-		}
-	}
-
-	return []*schema.ResourceData{d}, nil
-}
-
-func resourceLoadbalancerImporter(ctx context.Context, d *schema.ResourceData, meta interface{}) ([]*schema.ResourceData, error) {
-	parts := strings.Split(d.Id(), "/")
-	if len(parts) != 2 || parts[0] == "" || parts[1] == "" {
-		return nil, fmt.Errorf("invalid import id %q. Expecting {datacenter}/{loadbalancer}", d.Id())
-	}
-
-	dcId := parts[0]
-	lbId := parts[1]
-
-	client := meta.(SdkBundle).CloudApiClient
-
-	loadbalancer, apiResponse, err := client.LoadBalancersApi.DatacentersLoadbalancersFindById(ctx, dcId, lbId).Execute()
-	logApiRequestTime(apiResponse)
-
-	if err != nil {
-		if apiResponse != nil && apiResponse.Response != nil && apiResponse.StatusCode == 404 {
-			d.SetId("")
-			return nil, fmt.Errorf("an error occured while trying to fetch the loadbalancer %q", lbId)
-		}
-		return nil, fmt.Errorf("loadbalancer does not exist%q", lbId)
-	}
-
-	log.Printf("[INFO] loadbalancer found: %+v", loadbalancer)
-
-	d.SetId(*loadbalancer.Id)
-
-	if err := d.Set("datacenter_id", dcId); err != nil {
-		return nil, err
-	}
-
-	if loadbalancer.Properties.Name != nil {
-		if err := d.Set("name", *loadbalancer.Properties.Name); err != nil {
-			return nil, err
-		}
-	}
-
-	if loadbalancer.Properties.Ip != nil {
-		if err := d.Set("ip", *loadbalancer.Properties.Ip); err != nil {
-			return nil, err
-		}
-	}
-
-	if loadbalancer.Properties.Dhcp != nil {
-		if err := d.Set("dhcp", *loadbalancer.Properties.Dhcp); err != nil {
-			return nil, err
-		}
-	}
-
-	if loadbalancer.Entities != nil && loadbalancer.Entities.Balancednics != nil &&
-		loadbalancer.Entities.Balancednics.Items != nil && len(*loadbalancer.Entities.Balancednics.Items) > 0 {
-
-		var lans []string
-		for _, lan := range *loadbalancer.Entities.Balancednics.Items {
-			if *lan.Id != "" {
-				lans = append(lans, *lan.Id)
-			}
-		}
-		if err := d.Set("nic_ids", lans); err != nil {
-			return nil, err
-		}
-	}
-
-	return []*schema.ResourceData{d}, nil
-}
 
 func convertSlice(slice []interface{}) []string {
 	s := make([]string, len(slice))
