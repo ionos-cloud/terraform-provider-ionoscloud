@@ -47,7 +47,7 @@ resource "ionoscloud_group" "example" {
 }
 ```
 
-##Argument reference
+## Argument reference
 
 * `name` - (Required) [string] A name for the group.
 * `create_datacenter` - (Optional) [Boolean] The group will be allowed to create virtual data centers.
