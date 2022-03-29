@@ -99,7 +99,7 @@ func resourceLanIPFailoverRead(ctx context.Context, d *schema.ResourceData, meta
 	}
 
 	failoverSlice := lan.Properties.IpFailover
-	if lan.Properties != nil && lan.Properties.IpFailover != nil && len(*failoverSlice) > 0 {
+	if lan.Properties != nil && failoverSlice != nil && len(*failoverSlice) > 0 {
 		firstFailover := (*failoverSlice)[0]
 		if firstFailover.Ip != nil {
 			err := d.Set("ip", firstFailover.Ip)
