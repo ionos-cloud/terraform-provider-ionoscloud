@@ -46,17 +46,21 @@ func resourceIpFailoverImporter(ctx context.Context, d *schema.ResourceData, met
 		return nil, err
 	}
 
-	if lan.Properties.IpFailover != nil {
-		err := d.Set("ip", *(*lan.Properties.IpFailover)[0].Ip)
-		if err != nil {
-			return nil, err
-		}
-	}
+	failoverSlice := lan.Properties.IpFailover
+	if lan.Properties != nil && lan.Properties.IpFailover != nil && len(*failoverSlice) > 0 {
+		firstFailover := (*failoverSlice)[0]
+		if firstFailover.Ip != nil {
+			err := d.Set("ip", firstFailover.Ip)
+			if err != nil {
+				return nil, fmt.Errorf("error while setting ip property for IpFailover %s: %w", d.Id(), err)
 
-	if lan.Properties.IpFailover != nil {
-		err := d.Set("nicuuid", *(*lan.Properties.IpFailover)[0].NicUuid)
-		if err != nil {
-			return nil, err
+			}
+		}
+		if firstFailover.NicUuid != nil {
+			err := d.Set("nicuuid", firstFailover.NicUuid)
+			if err != nil {
+				return nil, fmt.Errorf("error while setting nicuuid property for IpFailover %s: %w", d.Id(), err)
+			}
 		}
 	}
 

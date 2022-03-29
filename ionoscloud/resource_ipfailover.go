@@ -98,19 +98,22 @@ func resourceLanIPFailoverRead(ctx context.Context, d *schema.ResourceData, meta
 		return diags
 	}
 
-	if lan.Properties.IpFailover != nil {
-		err := d.Set("ip", *(*lan.Properties.IpFailover)[0].Ip)
-		if err != nil {
-			diags := diag.FromErr(fmt.Errorf("error while setting ip property for IpFailover %s: %w", d.Id(), err))
-			return diags
+	failoverSlice := lan.Properties.IpFailover
+	if lan.Properties != nil && lan.Properties.IpFailover != nil && len(*failoverSlice) > 0 {
+		firstFailover := (*failoverSlice)[0]
+		if firstFailover.Ip != nil {
+			err := d.Set("ip", firstFailover.Ip)
+			if err != nil {
+				diags := diag.FromErr(fmt.Errorf("error while setting ip property for IpFailover %s: %w", d.Id(), err))
+				return diags
+			}
 		}
-	}
-
-	if lan.Properties.IpFailover != nil {
-		err := d.Set("nicuuid", *(*lan.Properties.IpFailover)[0].NicUuid)
-		if err != nil {
-			diags := diag.FromErr(fmt.Errorf("error while setting nicuuid property for IpFailover %s: %w", d.Id(), err))
-			return diags
+		if firstFailover.NicUuid != nil {
+			err := d.Set("nicuuid", firstFailover.NicUuid)
+			if err != nil {
+				diags := diag.FromErr(fmt.Errorf("error while setting nicuuid property for IpFailover %s: %w", d.Id(), err))
+				return diags
+			}
 		}
 	}
 
