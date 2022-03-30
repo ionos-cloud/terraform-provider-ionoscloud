@@ -105,7 +105,7 @@ func TestAccK8sNodePoolBasic(t *testing.T) {
 				),
 			},
 			{
-				Config:      testAccDataSourceDatacenterWrongNameError,
+				Config:      testAccDataSourceProfitBricksK8sNodePoolWrongNameError,
 				ExpectError: regexp.MustCompile("no nodepool found with the specified name"),
 			},
 			{

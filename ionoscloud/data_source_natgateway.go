@@ -7,6 +7,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	ionoscloud "github.com/ionos-cloud/sdk-go/v6"
+	"strings"
 )
 
 func dataSourceNatGateway() *schema.Resource {
@@ -94,7 +95,7 @@ func dataSourceNatGatewayRead(ctx context.Context, d *schema.ResourceData, meta 
 		/* search by name */
 		var natGateways ionoscloud.NatGateways
 
-		natGateways, apiResponse, err := client.NATGatewaysApi.DatacentersNatgatewaysGet(ctx, datacenterId.(string)).Execute()
+		natGateways, apiResponse, err := client.NATGatewaysApi.DatacentersNatgatewaysGet(ctx, datacenterId.(string)).Depth(1).Execute()
 		logApiRequestTime(apiResponse)
 		if err != nil {
 			return diag.FromErr(fmt.Errorf("an error occurred while fetching nat gateway: %s", err.Error()))
@@ -102,13 +103,13 @@ func dataSourceNatGatewayRead(ctx context.Context, d *schema.ResourceData, meta 
 
 		var results []ionoscloud.NatGateway
 		if natGateways.Items != nil {
-			for _, c := range *natGateways.Items {
-				tmpNatGateway, apiResponse, err := client.NATGatewaysApi.DatacentersNatgatewaysFindByNatGatewayId(ctx, datacenterId.(string), *c.Id).Execute()
-				logApiRequestTime(apiResponse)
-				if err != nil {
-					return diag.FromErr(fmt.Errorf("an error occurred while fetching nat gateway with ID %s: %s", *c.Id, err.Error()))
-				}
-				if tmpNatGateway.Properties != nil && tmpNatGateway.Properties.Name != nil && *tmpNatGateway.Properties.Name == name.(string) {
+			for _, ng := range *natGateways.Items {
+				if ng.Properties != nil && ng.Properties.Name != nil && strings.ToLower(*ng.Properties.Name) == strings.ToLower(name.(string)) {
+					tmpNatGateway, apiResponse, err := client.NATGatewaysApi.DatacentersNatgatewaysFindByNatGatewayId(ctx, datacenterId.(string), *ng.Id).Execute()
+					logApiRequestTime(apiResponse)
+					if err != nil {
+						return diag.FromErr(fmt.Errorf("an error occurred while fetching nat gateway with ID %s: %s", *ng.Id, err.Error()))
+					}
 					natGateway = tmpNatGateway
 					results = append(results, natGateway)
 				}

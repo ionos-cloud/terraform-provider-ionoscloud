@@ -62,7 +62,7 @@ func TestAccK8sClusterBasic(t *testing.T) {
 				),
 			},
 			{
-				Config:      testAccDataSourceDatacenterWrongNameError,
+				Config:      testAccDataSourceK8sClusterWrongNameError,
 				ExpectError: regexp.MustCompile("no cluster found with the specified name"),
 			},
 			{
@@ -74,7 +74,8 @@ func TestAccK8sClusterBasic(t *testing.T) {
 					resource.TestCheckResourceAttr(K8sClusterResource+"."+K8sClusterTestResource, "public", "true"),
 					resource.TestCheckResourceAttr(K8sClusterResource+"."+K8sClusterTestResource, "maintenance_window.0.day_of_the_week", "Monday"),
 					resource.TestCheckResourceAttr(K8sClusterResource+"."+K8sClusterTestResource, "maintenance_window.0.time", "10:30:00Z"),
-					resource.TestCheckNoResourceAttr(K8sClusterResource+"."+K8sClusterTestResource, "api_subnet_allow_list"),
+					resource.TestCheckResourceAttr(K8sClusterResource+"."+K8sClusterTestResource, "api_subnet_allow_list.0", "1.2.3.4/32"),
+					resource.TestCheckResourceAttr(K8sClusterResource+"."+K8sClusterTestResource, "api_subnet_allow_list.1", "1.2.5.6/32"),
 					resource.TestCheckNoResourceAttr(K8sClusterResource+"."+K8sClusterTestResource, "s3_buckets"),
 				),
 			},
@@ -209,7 +210,7 @@ resource ` + K8sClusterResource + ` ` + K8sClusterTestResource + ` {
     day_of_the_week = "Monday"
     time            = "10:30:00Z"
   }
-  api_subnet_allow_list = []
+  api_subnet_allow_list = ["1.2.3.4/32", "1.2.5.6/32"]
   s3_buckets {}
 }`
 
