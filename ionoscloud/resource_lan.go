@@ -316,7 +316,7 @@ func lanAvailable(ctx context.Context, client *ionoscloud.APIClient, d *schema.R
 func lanDeleted(ctx context.Context, client *ionoscloud.APIClient, d *schema.ResourceData) (bool, error) {
 	dcId := d.Get("datacenter_id").(string)
 
-	rsp, apiResponse, err := client.LANsApi.DatacentersLansFindById(ctx, dcId, d.Id()).Execute()
+	_, apiResponse, err := client.LANsApi.DatacentersLansFindById(ctx, dcId, d.Id()).Execute()
 	logApiRequestTime(apiResponse)
 
 	if err != nil {
@@ -328,23 +328,6 @@ func lanDeleted(ctx context.Context, client *ionoscloud.APIClient, d *schema.Res
 	}
 
 	log.Printf("[INFO] LAN %s not deleted yet deleted from the datacenter %s", d.Id(), dcId)
-
-	if rsp.Metadata != nil && rsp.Metadata.State != nil {
-		log.Printf("[INFO] Current deletion status for LAN %s: %+v", d.Id(), *rsp.Metadata.State)
-
-		//this is an workaround for the fact that in DBaaS tests lan is not deleted at the first request
-		if *rsp.Metadata.State == "AVAILABLE" {
-			apiResponse, err = client.LANsApi.DatacentersLansDelete(ctx, dcId, d.Id()).Execute()
-			logApiRequestTime(apiResponse)
-
-			if err != nil {
-				if httpNotFound(apiResponse) {
-					return true, nil
-				}
-				return false, fmt.Errorf("error deleting LAN %s: %w", d.Id(), err)
-			}
-		}
-	}
 
 	return false, nil
 }

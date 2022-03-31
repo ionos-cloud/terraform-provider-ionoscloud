@@ -16,7 +16,7 @@ func TestAccDbaasPgSqlClusterImportBasic(t *testing.T) {
 		CheckDestroy:      testAccCheckDbaasPgSqlClusterDestroyCheck,
 		Steps: []resource.TestStep{
 			{
-				Config: testAccCheckDbaasPgSqlClusterConfigBasic,
+				Config: testAccCheckDbaasPgSqlClusterConfigUpdateRemoveConnections,
 			},
 			{
 				ResourceName:            DBaaSClusterResource + "." + DBaaSClusterTestResource,
@@ -24,23 +24,6 @@ func TestAccDbaasPgSqlClusterImportBasic(t *testing.T) {
 				ImportStateVerify:       true,
 				ImportStateVerifyIgnore: []string{"credentials"},
 			},
-			{
-				Config: testAccCheckDbaasPgSqlClusterConfigBasicRemoveCluster,
-			},
 		},
 	})
 }
-
-const testAccCheckDbaasPgSqlClusterConfigBasicRemoveCluster = `
-resource ` + DatacenterResource + ` "datacenter_example" {
-  name        = "datacenter_example"
-  location    = "de/txl"
-  description = "Datacenter for testing dbaas cluster"
-}
-
-resource ` + LanResource + ` "lan_example" {
-  datacenter_id = ` + DatacenterResource + `.datacenter_example.id 
-  public        = false
-  name          = "lan_example"
-}
-`

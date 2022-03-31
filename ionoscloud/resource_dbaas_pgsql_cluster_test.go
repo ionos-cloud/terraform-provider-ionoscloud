@@ -150,6 +150,9 @@ func TestAccDBaaSPgSqlClusterBasic(t *testing.T) {
 					resource.TestCheckResourceAttr(DBaaSClusterResource+"."+DBaaSClusterTestResource, "synchronization_mode", "ASYNCHRONOUS"),
 				),
 			},
+			{
+				Config: testAccCheckDbaasPgSqlClusterConfigCleanup,
+			},
 		},
 	})
 }
@@ -390,6 +393,32 @@ resource ` + DBaaSClusterResource + ` ` + DBaaSClusterTestResource + ` {
 }
 `
 
+const testAccCheckDbaasPgSqlClusterConfigCleanup = `
+resource ` + DatacenterResource + ` "datacenter_example" {
+  name        = "datacenter_example"
+  location    = "de/txl"
+  description = "Datacenter for testing dbaas cluster"
+}
+
+resource ` + DatacenterResource + ` "datacenter_example_update" {
+  name        = "datacenter_example_update"
+  location    = "de/txl"
+  description = "Datacenter for testing dbaas cluster"
+}
+
+resource ` + LanResource + ` "lan_example" {
+  datacenter_id = ` + DatacenterResource + `.datacenter_example.id 
+  public        = false
+  name          = "lan_example"
+}
+
+resource ` + LanResource + ` "lan_example_update" {
+  datacenter_id = ` + DatacenterResource + `.datacenter_example_update.id 
+  public        = false
+  name          = "lan_example_update"
+}
+`
+
 const testAccFromBackup = `
 resource ` + DatacenterResource + ` "datacenter_example" {
   name        = "datacenter_example"
@@ -456,7 +485,7 @@ data ` + DBaaSBackupsResource + ` ` + DBaaSBackupsTest + ` {
 }
 `
 
-const testAccDataSourceDbaasPgSqlAllVersions = `
+const testAccDataSourceDbaasPgSqlAllVersions = testAccCheckDbaasPgSqlClusterConfigBasic + `
 data ` + DBaaSVersionsResource + ` ` + DBaaSVersionsTest + ` {
 }
 `

@@ -233,9 +233,9 @@ func resourceNatGatewayUpdate(ctx context.Context, d *schema.ResourceData, meta 
 				if lanGatewayIps, lanGatewayIpsOk := d.GetOk(fmt.Sprintf("lans.%d.gateway_ips", lanIndex)); lanGatewayIpsOk {
 					lanGatewayIps := lanGatewayIps.([]interface{})
 					if lanGatewayIps != nil {
-						gatewayIps := make([]string, len(lanGatewayIps), len(lanGatewayIps))
-						for idx := range lanGatewayIps {
-							gatewayIps[idx] = fmt.Sprint(lanGatewayIps[idx])
+						gatewayIps := make([]string, 0)
+						for _, lanGatewayIp := range lanGatewayIps {
+							gatewayIps = append(gatewayIps, lanGatewayIp.(string))
 						}
 						lan.GatewayIps = &gatewayIps
 					}
