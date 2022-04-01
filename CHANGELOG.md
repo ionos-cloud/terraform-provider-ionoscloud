@@ -25,6 +25,7 @@ To fix, when you try to change immutable fields they will throw an error in the 
 - reintroduced in group resource the `user_id` argument, as deprecated, to provide a period of transition
 - check slice length to prevent crash
 - fixed k8s_cluster data_source bug when searching by name 
+- fix lan deletion error, when trying to delete it immediately after the deletion of the cluster that contained it
 
 ## 6.2.0
 
