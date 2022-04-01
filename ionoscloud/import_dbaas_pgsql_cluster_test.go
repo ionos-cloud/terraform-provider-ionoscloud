@@ -11,18 +11,26 @@ import (
 
 func TestAccDbaasPgSqlClusterImportBasic(t *testing.T) {
 	resource.Test(t, resource.TestCase{
-		PreCheck:          func() { testAccPreCheck(t) },
+		PreCheck: func() {
+			testAccPreCheck(t)
+		},
 		ProviderFactories: testAccProviderFactories,
 		CheckDestroy:      testAccCheckDbaasPgSqlClusterDestroyCheck,
 		Steps: []resource.TestStep{
 			{
-				Config: testAccCheckDbaasPgSqlClusterConfigBasic,
+				Config: testAccCheckDbaasPgSqlClusterConfigUpdate,
 			},
 			{
 				ResourceName:            DBaaSClusterResource + "." + DBaaSClusterTestResource,
 				ImportState:             true,
 				ImportStateVerify:       true,
 				ImportStateVerifyIgnore: []string{"credentials"},
+			},
+			{
+				Config: testAccCheckDbaasPgSqlClusterConfigUpdateRemoveConnections,
+			},
+			{
+				Config: testAccCheckDbaasPgSqlClusterConfigCleanup,
 			},
 		},
 	})
