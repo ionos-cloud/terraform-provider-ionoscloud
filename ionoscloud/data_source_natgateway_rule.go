@@ -7,6 +7,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	ionoscloud "github.com/ionos-cloud/sdk-go/v6"
+	"strings"
 )
 
 func dataSourceNatGatewayRule() *schema.Resource {
@@ -126,7 +127,7 @@ func dataSourceNatGatewayRuleRead(ctx context.Context, d *schema.ResourceData, m
 		/* search by name */
 		var natGatewayRules ionoscloud.NatGatewayRules
 
-		natGatewayRules, apiResponse, err := client.NATGatewaysApi.DatacentersNatgatewaysRulesGet(ctx, datacenterId.(string), natgatewayId.(string)).Execute()
+		natGatewayRules, apiResponse, err := client.NATGatewaysApi.DatacentersNatgatewaysRulesGet(ctx, datacenterId.(string), natgatewayId.(string)).Depth(1).Execute()
 		logApiRequestTime(apiResponse)
 		if err != nil {
 			return diag.FromErr(fmt.Errorf("an error occurred while fetching nat gateway rules: %s", err.Error()))
@@ -134,13 +135,13 @@ func dataSourceNatGatewayRuleRead(ctx context.Context, d *schema.ResourceData, m
 
 		var results []ionoscloud.NatGatewayRule
 		if natGatewayRules.Items != nil {
-			for _, c := range *natGatewayRules.Items {
-				tmpNatGatewayRule, apiResponse, err := client.NATGatewaysApi.DatacentersNatgatewaysRulesFindByNatGatewayRuleId(ctx, datacenterId.(string), natgatewayId.(string), *c.Id).Execute()
-				logApiRequestTime(apiResponse)
-				if err != nil {
-					return diag.FromErr(fmt.Errorf("an error occurred while fetching nat gateway rule with ID %s: %s", *c.Id, err.Error()))
-				}
-				if tmpNatGatewayRule.Properties != nil && tmpNatGatewayRule.Properties.Name != nil && *tmpNatGatewayRule.Properties.Name == name.(string) {
+			for _, ngr := range *natGatewayRules.Items {
+				if ngr.Properties != nil && ngr.Properties.Name != nil && strings.EqualFold(*ngr.Properties.Name, name.(string)) {
+					tmpNatGatewayRule, apiResponse, err := client.NATGatewaysApi.DatacentersNatgatewaysRulesFindByNatGatewayRuleId(ctx, datacenterId.(string), natgatewayId.(string), *ngr.Id).Execute()
+					logApiRequestTime(apiResponse)
+					if err != nil {
+						return diag.FromErr(fmt.Errorf("an error occurred while fetching nat gateway rule with ID %s: %s", *ngr.Id, err.Error()))
+					}
 					results = append(results, tmpNatGatewayRule)
 				}
 

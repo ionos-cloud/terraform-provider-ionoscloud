@@ -26,7 +26,7 @@ func resourceNatGateway() *schema.Resource {
 				Required:    true,
 			},
 			"public_ips": {
-				Type:        schema.TypeList,
+				Type:        schema.TypeSet,
 				Description: "Collection of public IP addresses of the NAT gateway. Should be customer reserved IP addresses in that location",
 				Required:    true,
 				Elem: &schema.Schema{
@@ -80,11 +80,11 @@ func resourceNatGatewayCreate(ctx context.Context, d *schema.ResourceData, meta 
 	}
 
 	if publicIpsVal, publicIpsOk := d.GetOk("public_ips"); publicIpsOk {
-		publicIpsVal := publicIpsVal.([]interface{})
+		publicIpsVal := publicIpsVal.(*schema.Set).List()
 		if publicIpsVal != nil {
-			publicIps := make([]string, len(publicIpsVal), len(publicIpsVal))
-			for idx := range publicIpsVal {
-				publicIps[idx] = fmt.Sprint(publicIpsVal[idx])
+			publicIps := make([]string, 0)
+			for _, publicIp := range publicIpsVal {
+				publicIps = append(publicIps, publicIp.(string))
 			}
 			natGateway.Properties.PublicIps = &publicIps
 		} else {
@@ -206,11 +206,11 @@ func resourceNatGatewayUpdate(ctx context.Context, d *schema.ResourceData, meta 
 	if d.HasChange("public_ips") {
 		oldPublicIps, newPublicIps := d.GetChange("public_ips")
 		log.Printf("[INFO] nat gateway public IPs changed from %+v to %+v", oldPublicIps, newPublicIps)
-		publicIpsVal := newPublicIps.([]interface{})
+		publicIpsVal := newPublicIps.(*schema.Set).List()
 		if publicIpsVal != nil {
-			publicIps := make([]string, len(publicIpsVal), len(publicIpsVal))
-			for idx := range publicIpsVal {
-				publicIps[idx] = fmt.Sprint(publicIpsVal[idx])
+			publicIps := make([]string, 0)
+			for _, publicIp := range publicIpsVal {
+				publicIps = append(publicIps, publicIp.(string))
 			}
 			request.Properties.PublicIps = &publicIps
 		}
@@ -233,9 +233,9 @@ func resourceNatGatewayUpdate(ctx context.Context, d *schema.ResourceData, meta 
 				if lanGatewayIps, lanGatewayIpsOk := d.GetOk(fmt.Sprintf("lans.%d.gateway_ips", lanIndex)); lanGatewayIpsOk {
 					lanGatewayIps := lanGatewayIps.([]interface{})
 					if lanGatewayIps != nil {
-						gatewayIps := make([]string, len(lanGatewayIps), len(lanGatewayIps))
-						for idx := range lanGatewayIps {
-							gatewayIps[idx] = fmt.Sprint(lanGatewayIps[idx])
+						gatewayIps := make([]string, 0)
+						for _, lanGatewayIp := range lanGatewayIps {
+							gatewayIps = append(gatewayIps, lanGatewayIp.(string))
 						}
 						lan.GatewayIps = &gatewayIps
 					}
