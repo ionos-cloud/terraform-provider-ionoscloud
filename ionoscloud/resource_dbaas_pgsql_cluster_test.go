@@ -1,6 +1,3 @@
-//go:build all || dbaas
-// +build all dbaas
-
 package ionoscloud
 
 import (
@@ -37,6 +34,7 @@ func TestAccDBaaSPgSqlClusterBasic(t *testing.T) {
 					resource.TestCheckResourceAttrPair(DBaaSClusterResource+"."+DBaaSClusterTestResource, "connections.0.lan_id", LanResource+".lan_example", "id"),
 					resource.TestCheckResourceAttr(DBaaSClusterResource+"."+DBaaSClusterTestResource, "connections.0.cidr", "192.168.1.100/24"),
 					resource.TestCheckResourceAttrPair(DBaaSClusterResource+"."+DBaaSClusterTestResource, "location", DatacenterResource+".datacenter_example", "location"),
+					resource.TestCheckResourceAttr(DBaaSClusterResource+"."+DBaaSClusterTestResource, "backup_location", "de"),
 					resource.TestCheckResourceAttr(DBaaSClusterResource+"."+DBaaSClusterTestResource, "display_name", DBaaSClusterTestResource),
 					resource.TestCheckResourceAttr(DBaaSClusterResource+"."+DBaaSClusterTestResource, "maintenance_window.0.time", "09:00:00"),
 					resource.TestCheckResourceAttr(DBaaSClusterResource+"."+DBaaSClusterTestResource, "maintenance_window.0.day_of_the_week", "Sunday"),
@@ -58,6 +56,7 @@ func TestAccDBaaSPgSqlClusterBasic(t *testing.T) {
 					resource.TestCheckResourceAttrPair(DataSource+"."+DBaaSClusterResource+"."+DBaaSClusterTestDataSourceById, "connections.lan_id", DBaaSClusterResource+"."+DBaaSClusterTestResource, "connections.lan_id"),
 					resource.TestCheckResourceAttrPair(DataSource+"."+DBaaSClusterResource+"."+DBaaSClusterTestDataSourceById, "connections.cidr", DBaaSClusterResource+"."+DBaaSClusterTestResource, "connections.cidr"),
 					resource.TestCheckResourceAttrPair(DataSource+"."+DBaaSClusterResource+"."+DBaaSClusterTestDataSourceById, "location", DBaaSClusterResource+"."+DBaaSClusterTestResource, "location"),
+					resource.TestCheckResourceAttrPair(DataSource+"."+DBaaSClusterResource+"."+DBaaSClusterTestDataSourceById, "backup_location", DBaaSClusterResource+"."+DBaaSClusterTestResource, "backup_location"),
 					resource.TestCheckResourceAttrPair(DataSource+"."+DBaaSClusterResource+"."+DBaaSClusterTestDataSourceById, "display_name", DBaaSClusterResource+"."+DBaaSClusterTestResource, "display_name"),
 					resource.TestCheckResourceAttrPair(DataSource+"."+DBaaSClusterResource+"."+DBaaSClusterTestDataSourceById, "maintenance_window.day_of_the_week", DBaaSClusterResource+"."+DBaaSClusterTestResource, "maintenance_window.day_of_the_week"),
 					resource.TestCheckResourceAttrPair(DataSource+"."+DBaaSClusterResource+"."+DBaaSClusterTestDataSourceById, "maintenance_window.time", DBaaSClusterResource+"."+DBaaSClusterTestResource, "maintenance_window.time"),
@@ -78,6 +77,7 @@ func TestAccDBaaSPgSqlClusterBasic(t *testing.T) {
 					resource.TestCheckResourceAttrPair(DataSource+"."+DBaaSClusterResource+"."+DBaaSClusterTestDataSourceByName, "connections.lan_id", DBaaSClusterResource+"."+DBaaSClusterTestResource, "connections.lan_id"),
 					resource.TestCheckResourceAttrPair(DataSource+"."+DBaaSClusterResource+"."+DBaaSClusterTestDataSourceByName, "connections.cidr", DBaaSClusterResource+"."+DBaaSClusterTestResource, "connections.cidr"),
 					resource.TestCheckResourceAttrPair(DataSource+"."+DBaaSClusterResource+"."+DBaaSClusterTestDataSourceByName, "location", DBaaSClusterResource+"."+DBaaSClusterTestResource, "location"),
+					resource.TestCheckResourceAttrPair(DataSource+"."+DBaaSClusterResource+"."+DBaaSClusterTestDataSourceByName, "backup_location", DBaaSClusterResource+"."+DBaaSClusterTestResource, "backup_location"),
 					resource.TestCheckResourceAttrPair(DataSource+"."+DBaaSClusterResource+"."+DBaaSClusterTestDataSourceByName, "display_name", DBaaSClusterResource+"."+DBaaSClusterTestResource, "display_name"),
 					resource.TestCheckResourceAttrPair(DataSource+"."+DBaaSClusterResource+"."+DBaaSClusterTestDataSourceByName, "maintenance_window.day_of_the_week", DBaaSClusterResource+"."+DBaaSClusterTestResource, "maintenance_window.day_of_the_week"),
 					resource.TestCheckResourceAttrPair(DataSource+"."+DBaaSClusterResource+"."+DBaaSClusterTestDataSourceByName, "maintenance_window.time", DBaaSClusterResource+"."+DBaaSClusterTestResource, "maintenance_window.time"),
@@ -122,6 +122,7 @@ func TestAccDBaaSPgSqlClusterBasic(t *testing.T) {
 					resource.TestCheckResourceAttrPair(DBaaSClusterResource+"."+DBaaSClusterTestResource, "connections.0.lan_id", LanResource+".lan_example_update", "id"),
 					resource.TestCheckResourceAttr(DBaaSClusterResource+"."+DBaaSClusterTestResource, "connections.0.cidr", "192.168.1.101/24"),
 					resource.TestCheckResourceAttrPair(DBaaSClusterResource+"."+DBaaSClusterTestResource, "location", DatacenterResource+".datacenter_example_update", "location"),
+					resource.TestCheckResourceAttr(DBaaSClusterResource+"."+DBaaSClusterTestResource, "backup_location", "de"),
 					resource.TestCheckResourceAttr(DBaaSClusterResource+"."+DBaaSClusterTestResource, "display_name", UpdatedResources),
 					resource.TestCheckResourceAttr(DBaaSClusterResource+"."+DBaaSClusterTestResource, "maintenance_window.0.time", "10:00:00"),
 					resource.TestCheckResourceAttr(DBaaSClusterResource+"."+DBaaSClusterTestResource, "maintenance_window.0.day_of_the_week", "Saturday"),
@@ -142,6 +143,7 @@ func TestAccDBaaSPgSqlClusterBasic(t *testing.T) {
 					resource.TestCheckResourceAttr(DBaaSClusterResource+"."+DBaaSClusterTestResource, "storage_type", "HDD"),
 					resource.TestCheckNoResourceAttr(DBaaSClusterResource+"."+DBaaSClusterTestResource, "connections"),
 					resource.TestCheckResourceAttrPair(DBaaSClusterResource+"."+DBaaSClusterTestResource, "location", DatacenterResource+".datacenter_example_update", "location"),
+					resource.TestCheckResourceAttr(DBaaSClusterResource+"."+DBaaSClusterTestResource, "backup_location", "de"),
 					resource.TestCheckResourceAttr(DBaaSClusterResource+"."+DBaaSClusterTestResource, "display_name", UpdatedResources),
 					resource.TestCheckResourceAttr(DBaaSClusterResource+"."+DBaaSClusterTestResource, "maintenance_window.0.time", "10:00:00"),
 					resource.TestCheckResourceAttr(DBaaSClusterResource+"."+DBaaSClusterTestResource, "maintenance_window.0.day_of_the_week", "Saturday"),
@@ -149,9 +151,6 @@ func TestAccDBaaSPgSqlClusterBasic(t *testing.T) {
 					resource.TestCheckResourceAttr(DBaaSClusterResource+"."+DBaaSClusterTestResource, "credentials.0.password", "password"),
 					resource.TestCheckResourceAttr(DBaaSClusterResource+"."+DBaaSClusterTestResource, "synchronization_mode", "ASYNCHRONOUS"),
 				),
-			},
-			{
-				Config: testAccCheckDbaasPgSqlClusterConfigCleanup,
 			},
 		},
 	})
@@ -281,6 +280,7 @@ resource ` + DBaaSClusterResource + ` ` + DBaaSClusterTestResource + ` {
     cidr            =  "192.168.1.100/24"
   }
   location = ` + DatacenterResource + `.datacenter_example.location
+  backup_location = "de"
   display_name = "` + DBaaSClusterTestResource + `"
   maintenance_window {
     day_of_the_week  = "Sunday"
@@ -333,6 +333,7 @@ resource ` + DBaaSClusterResource + ` ` + DBaaSClusterTestResource + ` {
     cidr            =  "192.168.1.101/24"
   }
   location = ` + DatacenterResource + `.datacenter_example_update.location
+  backup_location = "de"
   display_name = "` + UpdatedResources + `"
   maintenance_window {
     day_of_the_week = "Saturday"
@@ -380,6 +381,7 @@ resource ` + DBaaSClusterResource + ` ` + DBaaSClusterTestResource + ` {
   storage_size       = 3072
   storage_type       = "HDD"
   location = ` + DatacenterResource + `.datacenter_example_update.location
+  backup_location = "de"
   display_name = "` + UpdatedResources + `"
   maintenance_window {
     day_of_the_week = "Saturday"
@@ -390,32 +392,6 @@ resource ` + DBaaSClusterResource + ` ` + DBaaSClusterTestResource + ` {
 	password = "password"
   }
   synchronization_mode = "ASYNCHRONOUS"
-}
-`
-
-const testAccCheckDbaasPgSqlClusterConfigCleanup = `
-resource ` + DatacenterResource + ` "datacenter_example" {
-  name        = "datacenter_example"
-  location    = "de/txl"
-  description = "Datacenter for testing dbaas cluster"
-}
-
-resource ` + DatacenterResource + ` "datacenter_example_update" {
-  name        = "datacenter_example_update"
-  location    = "de/txl"
-  description = "Datacenter for testing dbaas cluster"
-}
-
-resource ` + LanResource + ` "lan_example" {
-  datacenter_id = ` + DatacenterResource + `.datacenter_example.id 
-  public        = false
-  name          = "lan_example"
-}
-
-resource ` + LanResource + ` "lan_example_update" {
-  datacenter_id = ` + DatacenterResource + `.datacenter_example_update.id 
-  public        = false
-  name          = "lan_example_update"
 }
 `
 

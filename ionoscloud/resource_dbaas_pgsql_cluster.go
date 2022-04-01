@@ -359,6 +359,8 @@ func resourceDbaasPgSqlClusterDelete(ctx context.Context, d *schema.ResourceData
 		}
 	}
 
+	time.Sleep(SleepInterval * 3)
+
 	return nil
 }
 
