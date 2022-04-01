@@ -12,6 +12,7 @@
 - update sdk-go dependency to v6.0.2
 - update sdk-go-dbaas-postgres dependency to v1.0.2
 - update terraform-plugin-sdk to v2.12.0
+- token and username+password does not conflict anymore, all three can be set, the token having priority
 
 ### Fixes
 - fixed image data-source bug when `name` not provided - data-source returned 0 results
