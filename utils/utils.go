@@ -96,7 +96,7 @@ func TestValueInSlice(resource, attribute string, value int) resource.TestCheckF
 				return nil
 			}
 		}
-		return fmt.Errorf("length of slice %v is not %v, the actual length beeing %v", attribute, value, length)
+		return fmt.Errorf("length of slice %v is not %v, the actual length being %v", attribute, value, length)
 	}
 }
 

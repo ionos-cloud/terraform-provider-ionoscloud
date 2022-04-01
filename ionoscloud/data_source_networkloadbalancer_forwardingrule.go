@@ -189,7 +189,7 @@ func dataSourceNetworkLoadBalancerForwardingRuleRead(ctx context.Context, d *sch
 		var results []ionoscloud.NetworkLoadBalancerForwardingRule
 		if networkLoadBalancerForwardingRules.Items != nil {
 			for _, nlbfr := range *networkLoadBalancerForwardingRules.Items {
-				if nlbfr.Properties != nil && nlbfr.Properties.Name != nil && strings.ToLower(*nlbfr.Properties.Name) == strings.ToLower(name.(string)) {
+				if nlbfr.Properties != nil && nlbfr.Properties.Name != nil && strings.EqualFold(*nlbfr.Properties.Name, name.(string)) {
 					tmpNetworkLoadBalancerForwardingRule, apiResponse, err := client.NetworkLoadBalancersApi.DatacentersNetworkloadbalancersForwardingrulesFindByForwardingRuleId(ctx, datacenterId.(string), networkloadbalancerId.(string), *nlbfr.Id).Depth(1).Execute()
 					logApiRequestTime(apiResponse)
 					if err != nil {

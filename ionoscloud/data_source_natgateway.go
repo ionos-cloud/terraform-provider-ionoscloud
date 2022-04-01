@@ -104,7 +104,7 @@ func dataSourceNatGatewayRead(ctx context.Context, d *schema.ResourceData, meta 
 		var results []ionoscloud.NatGateway
 		if natGateways.Items != nil {
 			for _, ng := range *natGateways.Items {
-				if ng.Properties != nil && ng.Properties.Name != nil && strings.ToLower(*ng.Properties.Name) == strings.ToLower(name.(string)) {
+				if ng.Properties != nil && ng.Properties.Name != nil && strings.EqualFold(*ng.Properties.Name, name.(string)) {
 					tmpNatGateway, apiResponse, err := client.NATGatewaysApi.DatacentersNatgatewaysFindByNatGatewayId(ctx, datacenterId.(string), *ng.Id).Execute()
 					logApiRequestTime(apiResponse)
 					if err != nil {

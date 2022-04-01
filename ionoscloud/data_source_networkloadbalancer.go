@@ -103,7 +103,7 @@ func dataSourceNetworkLoadBalancerRead(ctx context.Context, d *schema.ResourceDa
 		var results []ionoscloud.NetworkLoadBalancer
 		if networkLoadBalancers.Items != nil {
 			for _, nlb := range *networkLoadBalancers.Items {
-				if nlb.Properties != nil && nlb.Properties.Name != nil && strings.ToLower(*nlb.Properties.Name) == strings.ToLower(name.(string)) {
+				if nlb.Properties != nil && nlb.Properties.Name != nil && strings.EqualFold(*nlb.Properties.Name, name.(string)) {
 					tmpNetworkLoadBalancer, apiResponse, err := client.NetworkLoadBalancersApi.DatacentersNetworkloadbalancersFindByNetworkLoadBalancerId(ctx, datacenterId.(string), *nlb.Id).Execute()
 					logApiRequestTime(apiResponse)
 					if err != nil {
