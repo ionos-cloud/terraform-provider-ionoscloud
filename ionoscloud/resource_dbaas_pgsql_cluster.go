@@ -190,6 +190,9 @@ func checkDBaaSClusterImmutableFields(_ context.Context, diff *schema.ResourceDi
 	if diff.HasChange("location") {
 		return fmt.Errorf("location %s", ImmutableError)
 	}
+	if diff.HasChange("backup_location") {
+		return fmt.Errorf("backup_location %s", ImmutableError)
+	}
 	if diff.HasChange("credentials") {
 		return fmt.Errorf("credentials %s", ImmutableError)
 	}

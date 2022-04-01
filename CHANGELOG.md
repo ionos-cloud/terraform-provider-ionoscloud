@@ -14,6 +14,9 @@
 - update terraform-plugin-sdk to v2.12.0
 - token and username+password does not conflict anymore, all three can be set, the token having priority
 
+### Features 
+- added backup_location property for ionoscloud_pg_cluster. For mor details refer to the [documentation](/docs/resources/dbaas_pgsql_cluster.md)
+
 ### Fixes
 - fixed image data-source bug when `name` not provided - data-source returned 0 results
 - when you try to change an immutable field, you get an error, but before that the tf state is changed. 
