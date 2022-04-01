@@ -85,6 +85,11 @@ func dataSourceDbaasPgSqlCluster() *schema.Resource {
 				Description: "The physical location where the cluster will be created. This will be where all of your instances live. Property cannot be modified after datacenter creation (disallowed in update requests)",
 				Computed:    true,
 			},
+			"backup_location": {
+				Type:        schema.TypeString,
+				Description: "The S3 location where the backups will be stored.",
+				Computed:    true,
+			},
 			"maintenance_window": {
 				Type:        schema.TypeList,
 				Description: "a weekly 4 hour-long window, during which maintenance might occur",

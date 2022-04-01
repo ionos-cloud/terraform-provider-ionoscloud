@@ -90,7 +90,14 @@ func resourceDbaasPgSqlCluster() *schema.Resource {
 				Type:         schema.TypeString,
 				Description:  "The physical location where the cluster will be created. This will be where all of your instances live. Property cannot be modified after datacenter creation (disallowed in update requests)",
 				Required:     true,
-				ValidateFunc: validation.All(validation.StringIsNotWhiteSpace),
+				ValidateFunc: validation.All(validation.StringInSlice([]string{"de/fra", "de/txl", "gb/lhr", "es/vit", "us/ewr", "us/las"}, true)),
+			},
+			"backup_location": {
+				Type:         schema.TypeString,
+				Description:  "The S3 location where the backups will be stored.",
+				Optional:     true,
+				Computed:     true,
+				ValidateFunc: validation.All(validation.StringInSlice([]string{"de", "eu-south-2", "eu-central-2"}, true)),
 			},
 			"display_name": {
 				Type:        schema.TypeString,
