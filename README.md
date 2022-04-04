@@ -83,9 +83,9 @@ In order to run the full suite of Acceptance tests, run `make testacc TAGS=all`.
 $ make testacc TAGS=all
 ```
 
-### Test Categories Tags
+### Test Tags
 
-If you want to test a specific category of tests, they are split by **build tags** as follows:
+If you want to test a specific batch of tests, they are split by **build tags** as follows:
 
 - `compute` - all **compute engine** tests (datacenter, firewall rule, image, IP block, IP failover, lan, location, nic, private cross connect, server, snapshot, template, volume)
 - `nlb` - **network load balancer network load balancer forwarding rule tests**
@@ -102,4 +102,4 @@ You can also test one single resource, using on of the tags: `backup`, `datacent
 
 ### What Are We Testing?
 
-The purpose of our tests is to **provision** resources containing all the available arguments, followed by **updates** on all arguments that allow this action. Beside the provisioning part, **data-sources** and **imports** are also tested.
+The purpose of our tests is to **provision** resources containing all the available arguments, followed by **updates** on all arguments that allow this action. Beside the provisioning part, **data-sources** with all possible arguments and **imports** are also tested.
