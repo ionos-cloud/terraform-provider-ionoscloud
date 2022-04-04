@@ -90,7 +90,7 @@ func resourceDbaasPgSqlCluster() *schema.Resource {
 				Type:         schema.TypeString,
 				Description:  "The physical location where the cluster will be created. This will be where all of your instances live. Property cannot be modified after datacenter creation (disallowed in update requests)",
 				Required:     true,
-				ValidateFunc: validation.All(validation.StringInSlice([]string{"de/fra", "de/txl", "gb/lhr", "es/vit", "us/ewr", "us/las"}, true)),
+				ValidateFunc: validation.All(validation.StringIsNotWhiteSpace),
 			},
 			"backup_location": {
 				Type:         schema.TypeString,
@@ -362,6 +362,7 @@ func resourceDbaasPgSqlClusterDelete(ctx context.Context, d *schema.ResourceData
 		}
 	}
 
+	// wait 15 seconds after the deletion of the cluster, for the lan to be freed
 	time.Sleep(SleepInterval * 3)
 
 	return nil
