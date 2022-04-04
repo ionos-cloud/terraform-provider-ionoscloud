@@ -69,7 +69,7 @@ $ $GOPATH/bin/terraform-provider-ionoscloud
 
 ## Testing the Provider
 
-⚠️ **Warning:** Acceptance tests create real resources, and often cost money to run.
+⚠️ **Warning:** Acceptance tests provision resources in the IONOS Cloud, and often may involve extra billing charges on your account.
 
 In order to test the provider, you can simply run `make test`.
 
