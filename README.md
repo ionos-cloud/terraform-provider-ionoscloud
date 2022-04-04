@@ -71,7 +71,7 @@ $ $GOPATH/bin/terraform-provider-ionoscloud
 
 ### What Are We Testing?
 
-The purpose of our tests is to **provision** resources containing all the available arguments, followed by **updates** on all arguments that allow this action. Beside the provisioning part, **data-sources** with all possible arguments and **imports** are also tested.
+The purpose of our acceptance tests is to **provision** resources containing all the available arguments, followed by **updates** on all arguments that allow this action. Beside the provisioning part, **data-sources** with all possible arguments and **imports** are also tested.
 
 All tests are integrated into [github actions](https://github.com/ionos-cloud/terraform-provider-ionoscloud/actions) that run daily and are also run manually before any release.
 
@@ -79,13 +79,13 @@ All tests are integrated into [github actions](https://github.com/ionos-cloud/te
 
 ⚠️ **Warning:** Acceptance tests provision resources in the IONOS Cloud, and often may involve extra billing charges on your account.
 
-In order to test the provider, you can simply run `make test`.
+In order to test the provider, you can simply run:
 
 ``` sh
 $ make test
 ```
 
-In order to run the full suite of Acceptance tests, run `make testacc TAGS=all`.
+In order to run the full suite of Acceptance tests, run:
 
 ``` sh
 $ make testacc TAGS=all
