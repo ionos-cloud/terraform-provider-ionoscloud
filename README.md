@@ -100,7 +100,7 @@ _Example of running server and lan tests:_
 $ make testacc TAGS=server,lan
 ```
 
-<details>
+<details> <summary title="Click to toggle">See more details about <b>test tags</b></summary>
 
 **Build tags** are named as follows:
 
