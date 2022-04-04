@@ -105,9 +105,9 @@ $ make testacc TAGS=server,lan
 **Build tags** are named as follows:
 
 - `compute` - all **compute engine** tests (datacenter, firewall rule, image, IP block, IP failover, lan, location, nic, private cross connect, server, snapshot, template, volume)
-- `nlb` - **network load balancer and network load balancer forwarding rule tests**
-- `natgateway` - **NAT gateway and NAT gateway rule tests**
-- `k8s` - **k8s cluster and k8s node pool tests**
+- `nlb` - **network load balancer** and **network load balancer forwarding rule tests**
+- `natgateway` - **NAT gateway** and **NAT gateway rule tests**
+- `k8s` - **k8s cluster** and **k8s node pool tests**
 - `dbaas` - **DBaaS postgres cluster tests**
 
 ``` sh
