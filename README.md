@@ -67,23 +67,55 @@ $ $GOPATH/bin/terraform-provider-ionoscloud
 ...
 ```
 
-In order to test the provider, you can simply run `make test`.
+## Testing the Provider
 
-```sh
+### What Are We Testing?
+
+The purpose of our acceptance tests is to **provision** resources containing all the available arguments, followed by **updates** on all arguments that allow this action. Beside the provisioning part, **data-sources** with all possible arguments and **imports** are also tested.
+
+All tests are integrated into [github actions](https://github.com/ionos-cloud/terraform-provider-ionoscloud/actions) that run daily and are also run manually before any release.
+
+### How to Run Tests Locally 
+
+⚠️ **Warning:** Acceptance tests provision resources in the IONOS Cloud, and often may involve extra billing charges on your account.
+
+In order to test the provider, you can simply run:
+
+``` sh
 $ make test
 ```
 
-In order to run the full suite of Acceptance tests, run `make testacc TAGS=all`.
+In order to run the full suite of Acceptance tests, run:
 
-Tests can be split using build tags: all(all tests), compute(all compute-engine tests), dbaas, k8s, server, lan, ipblock.
-
-⚠️ **_Note: Acceptance tests create real resources, and often cost money to run._**
-
-```sh
+``` sh
 $ make testacc TAGS=all
 ```
 
-Will run all server and lan tests:
-```sh
+#### Test Tags
+
+Tests can also be run for a batch of resources or for a single resource, using tags.
+
+_Example of running server and lan tests:_
+``` sh
 $ make testacc TAGS=server,lan
 ```
+
+<details> <summary title="Click to toggle">See more details about <b>test tags</b></summary>
+
+**Build tags** are named as follows:
+
+- `compute` - all **compute engine** tests (datacenter, firewall rule, image, IP block, IP failover, lan, location, nic, private cross connect, server, snapshot, template, volume)
+- `nlb` - **network load balancer** and **network load balancer forwarding rule** tests
+- `natgateway` - **NAT gateway** and **NAT gateway rule** tests
+- `k8s` - **k8s cluster** and **k8s node pool** tests
+- `dbaas` - **DBaaS postgres cluster** tests
+
+``` sh
+$ make testacc TAGS=dbaas
+```
+
+You can also test one single resource, using one of the tags: `backup`, `datacenter`, `dbaas`, `firewall`, `group`, `image`, `ipblock`, `ipfailover`, `k8s`, `lan`, `location`, `natgateway`,
+`nlb`, `nic`, `pcc`, `resource`, `s3key`, `server`, `share`, `snapshot`, `template`, `user`, `volume`
+
+</details>
+
