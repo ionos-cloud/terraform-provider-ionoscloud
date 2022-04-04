@@ -67,23 +67,39 @@ $ $GOPATH/bin/terraform-provider-ionoscloud
 ...
 ```
 
+## Testing the Provider
+
+⚠️ **Warning:** Acceptance tests create real resources, and often cost money to run.
+
 In order to test the provider, you can simply run `make test`.
 
-```sh
+``` bash
 $ make test
 ```
 
 In order to run the full suite of Acceptance tests, run `make testacc TAGS=all`.
 
-Tests can be split using build tags: all(all tests), compute(all compute-engine tests), dbaas, k8s, server, lan, ipblock.
-
-⚠️ **_Note: Acceptance tests create real resources, and often cost money to run._**
-
-```sh
+``` bash
 $ make testacc TAGS=all
 ```
 
-Will run all server and lan tests:
-```sh
-$ make testacc TAGS=server,lan
+### Test Categories Tags
+
+If you want to test a specific category of tests, they are split by **build tags** as follows:
+
+- `compute` - all **compute engine** tests (datacenter, firewall rule, image, IP block, IP failover, lan, location, nic, private cross connect, server, snapshot, template, volume)
+- `nlb` - **network load balancer network load balancer forwarding rule tests**
+- `natgateway` - **NAT gateway and NAT gateway rule tests**
+- `k8s` - **k8s cluster and k8s node pool tests**
+- `dbaas` - **postgres cluster tests**
+
+``` bash
+$ make testacc TAGS=dbaas
 ```
+
+You can also test one single resource, using on of the tags: `backup`, `datacenter`, `dbaas`, `firewall`, `group`, `image`, `ipblock`, `ipfailover`, `k8s`, `lan`, `location`, `natgateway`,
+`nlb`, `nic`, `pcc`, `resource`, `s3key`, `server`, `share`, `snapshot`, `template`, `user`, `volume`
+
+### What Are We Testing?
+
+The purpose of our tests is to **provision** resources containing all the available arguments, followed by **updates** on all arguments that allow this action. Beside the provisioning part, **data-sources** and **imports** are also tested.
