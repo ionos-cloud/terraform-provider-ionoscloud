@@ -95,7 +95,8 @@ resource "ionoscloud_pg_cluster" "example" {
   * `datacenter_id` - (Required)[true] The datacenter to connect your cluster to.
   * `lan_id` - (Required)[true] The LAN to connect your cluster to.
   * `cidr` - (Required)[true] The IP and subnet for the database. Note the following unavailable IP ranges: 10.233.64.0/18, 10.233.0.0/18, 10.233.114.0/24. Please enter in the correct format like IP/Subnet, exp: 192.168.10.0/24. See [Private IPs](https://www.ionos.com/help/server-cloud-infrastructure/private-network/private-ip-address-ranges/) and [Cluster Setup - Preparing the network](https://docs.ionos.com/reference/product-information/api-automation-guides/database-as-a-service/create-a-database#preparing-the-network).
-* `location` - (Required)[string] The physical location where the cluster will be created. This will be where all of your instances live. Property cannot be modified after datacenter creation. This attribute is immutable(disallowed in update requests).
+* `location` - (Required)[string] The physical location where the cluster will be created. This will be where all of your instances live. Property cannot be modified after datacenter creation. Possible values are: `de/fra`, `de/txl`, `gb/lhr`, `es/vit`, `us/ewr`, `us/las`. This attribute is immutable(disallowed in update requests).
+* `backup_location` - (Optional)[string] The S3 location where the backups will be stored. Possible values are: `de`, `eu-south-2`, `eu-central-2`. This attribute is immutable (disallowed in update requests).
 * `display_name` - (Required)[string] The friendly name of your cluster.
 * `maintenance_window` - (Optional)[string] A weekly 4 hour-long window, during which maintenance might occur
   * `time` - (Required)[string]
