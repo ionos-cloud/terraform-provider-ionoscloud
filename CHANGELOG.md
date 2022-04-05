@@ -1,3 +1,8 @@
+## 6.2.2
+
+### Fix
+- fixed error from upgrading from 6.2.0 to 6.2.1 (version compatibility issue)
+
 ## 6.2.1
 
 ### Documentation
