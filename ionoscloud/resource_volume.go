@@ -78,9 +78,10 @@ func resourceVolume() *schema.Resource {
 				Optional: true,
 			},
 			"availability_zone": {
-				Type:     schema.TypeString,
-				Optional: true,
-				Computed: true,
+				Type:         schema.TypeString,
+				Optional:     true,
+				Computed:     true,
+				ValidateFunc: validation.All(validation.StringInSlice([]string{"AUTO", "ZONE_1", "ZONE_2", "ZONE_3"}, true)),
 			},
 			"cpu_hot_plug": {
 				Type:     schema.TypeBool,
