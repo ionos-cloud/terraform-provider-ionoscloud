@@ -1,3 +1,8 @@
+## 6.2.3(upcoming release)
+
+### Fixes 
+- remove deprecated image_name field on volume level from server resource
+
 ## 6.2.2
 
 ### Fix
