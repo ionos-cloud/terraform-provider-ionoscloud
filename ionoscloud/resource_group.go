@@ -125,8 +125,8 @@ func resourceGroup() *schema.Resource {
 				},
 			},
 		},
-		Timeouts: &resourceDefaultTimeouts,
-		//SchemaVersion: 1,
+		Timeouts:      &resourceDefaultTimeouts,
+		SchemaVersion: 1,
 		//StateUpgraders: []schema.StateUpgrader{
 		//	{
 		//		Type:    resourceGroup0().CoreConfigSchema().ImpliedType(),
