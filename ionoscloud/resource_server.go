@@ -549,7 +549,10 @@ func resourceServerCreate(ctx context.Context, d *schema.ResourceData, meta inte
 			},
 		},
 	}
-	var primaryNic *ionoscloud.Nic = &(*server.Entities.Nics.Items)[0]
+	var primaryNic *ionoscloud.Nic
+	if server.Entities.Nics != nil && server.Entities.Nics.Items != nil && len(*server.Entities.Nics.Items) > 0 {
+		primaryNic = &(*server.Entities.Nics.Items)[0]
+	}
 	// Nic Arguments
 	if _, ok := d.GetOk("nic"); ok {
 		lanInt := int32(d.Get("nic.0.lan").(int))
@@ -591,7 +594,7 @@ func resourceServerCreate(ctx context.Context, d *schema.ResourceData, meta inte
 				nic,
 			},
 		}
-		//primaryNic = &(*server.Entities.Nics.Items)[0]
+		primaryNic = &(*server.Entities.Nics.Items)[0]
 		log.Printf("[DEBUG] dhcp nic after %t", *nic.Properties.Dhcp)
 		log.Printf("[DEBUG] dhcp %t", *primaryNic.Properties.Dhcp)
 
@@ -664,8 +667,7 @@ func resourceServerCreate(ctx context.Context, d *schema.ResourceData, meta inte
 			}
 		}
 	}
-
-	if primaryNic.Properties.Ips != nil {
+	if primaryNic != nil && primaryNic.Properties != nil && primaryNic.Properties.Ips != nil {
 		if len(*primaryNic.Properties.Ips) == 0 {
 			*primaryNic.Properties.Ips = nil
 		}
