@@ -301,7 +301,7 @@ func resourceDbaasPgSqlClusterUpdate(ctx context.Context, d *schema.ResourceData
 		clusterReady, rsErr := dbaasClusterReady(ctx, client, d)
 
 		if rsErr != nil {
-			diags := diag.FromErr(fmt.Errorf("error while checking readiness status of dbaas cluster %s: %s", d.Id(), rsErr))
+			diags := diag.FromErr(fmt.Errorf("error while checking readiness status of dbaas cluster %s: %w", d.Id(), rsErr))
 			return diags
 		}
 
