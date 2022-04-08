@@ -2,6 +2,7 @@
 
 ### Fixes
 - do not allow empty string AvailabilityZone. Only allow "AUTO", "ZONE_1", "ZONE_2", "ZONE_3"
+- type field in server resource should be case-insensitive
 
 ## 6.2.2
 
