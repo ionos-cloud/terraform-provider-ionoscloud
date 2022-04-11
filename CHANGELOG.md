@@ -2,6 +2,7 @@
 
 ### Fixes
 - do not allow empty string AvailabilityZone. Only allow "AUTO", "ZONE_1", "ZONE_2", "ZONE_3"
+- solve #266 crash on resource_volume when using image_alias with no image_password, or ssh_key_path
 
 ## 6.2.2
 
