@@ -164,7 +164,7 @@ func resourceK8sNodePool() *schema.Resource {
 				Description:  "The compute availability zone in which the nodes should exist",
 				Required:     true,
 				ForceNew:     true,
-				ValidateFunc: validation.All(validation.StringIsNotWhiteSpace),
+				ValidateFunc: validation.All(validation.StringInSlice([]string{"AUTO", "ZONE_1", "ZONE_2"}, true)),
 			},
 			"storage_type": {
 				Type:         schema.TypeString,

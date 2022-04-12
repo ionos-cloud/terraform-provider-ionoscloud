@@ -1,6 +1,8 @@
-## 6.2.3(upcoming release)
+## 6.2.3(Upcoming Release)
 
-### Fixes 
+### Fixes
+- do not allow empty string AvailabilityZone. Only allow "AUTO", "ZONE_1", "ZONE_2", "ZONE_3"
+- type field in server resource should be case-insensitive
 - remove deprecated image_name field on volume level from server resource
 
 ## 6.2.2
