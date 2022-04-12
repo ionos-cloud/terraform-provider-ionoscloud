@@ -783,7 +783,7 @@ func checkImage(ctx context.Context, client *ionoscloud.APIClient, imageInput, i
 				return image, imageAlias, isSnapshot, diags
 			}
 
-			if imagePassword == "" && len(sshKeyPath) == 0 && isSnapshot == false && img.Properties.Public != nil && *img.Properties.Public {
+			if imagePassword == "" && len(sshKeyPath) == 0 && isSnapshot == false && (img != nil && img.Properties != nil && img.Properties.Public != nil && *img.Properties.Public || imageAlias != "") {
 				diags := diag.FromErr(fmt.Errorf("either 'image_password' or 'ssh_key_path' must be provided"))
 				return image, imageAlias, isSnapshot, diags
 			}
