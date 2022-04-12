@@ -2,11 +2,13 @@
 
 ### Fixes
 - do not allow empty string AvailabilityZone. Only allow "AUTO", "ZONE_1", "ZONE_2", "ZONE_3"
+- type field in server resource should be case-insensitive
+- remove deprecated image_name field on volume level from server resource
 - solve #266 crash on resource_volume when using image_alias with no image_password, or ssh_key_path
 
 ## 6.2.2
 
-### Fixes
+### Fix
 - fixed error from upgrading from 6.2.0 to 6.2.1 (version compatibility issue)
 
 ## 6.2.1
