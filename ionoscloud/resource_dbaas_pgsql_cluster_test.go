@@ -115,7 +115,7 @@ func TestAccDBaaSPgSqlClusterBasic(t *testing.T) {
 				Config: testAccCheckDbaasPgSqlClusterConfigUpdate,
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckDbaasPgSqlClusterExists(DBaaSClusterResource+"."+DBaaSClusterTestResource, &dbaasCluster),
-					resource.TestCheckResourceAttr(DBaaSClusterResource+"."+DBaaSClusterTestResource, "postgres_version", "13"),
+					resource.TestCheckResourceAttr(DBaaSClusterResource+"."+DBaaSClusterTestResource, "postgres_version", "12"),
 					resource.TestCheckResourceAttr(DBaaSClusterResource+"."+DBaaSClusterTestResource, "instances", "2"),
 					resource.TestCheckResourceAttr(DBaaSClusterResource+"."+DBaaSClusterTestResource, "cores", "2"),
 					resource.TestCheckResourceAttr(DBaaSClusterResource+"."+DBaaSClusterTestResource, "ram", "3072"),
@@ -138,7 +138,7 @@ func TestAccDBaaSPgSqlClusterBasic(t *testing.T) {
 				Config: testAccCheckDbaasPgSqlClusterConfigUpdateRemoveConnections,
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckDbaasPgSqlClusterExists(DBaaSClusterResource+"."+DBaaSClusterTestResource, &dbaasCluster),
-					resource.TestCheckResourceAttr(DBaaSClusterResource+"."+DBaaSClusterTestResource, "postgres_version", "13"),
+					resource.TestCheckResourceAttr(DBaaSClusterResource+"."+DBaaSClusterTestResource, "postgres_version", "12"),
 					resource.TestCheckResourceAttr(DBaaSClusterResource+"."+DBaaSClusterTestResource, "instances", "2"),
 					resource.TestCheckResourceAttr(DBaaSClusterResource+"."+DBaaSClusterTestResource, "cores", "2"),
 					resource.TestCheckResourceAttr(DBaaSClusterResource+"."+DBaaSClusterTestResource, "ram", "3072"),
@@ -154,6 +154,12 @@ func TestAccDBaaSPgSqlClusterBasic(t *testing.T) {
 					resource.TestCheckResourceAttr(DBaaSClusterResource+"."+DBaaSClusterTestResource, "credentials.0.password", "password"),
 					resource.TestCheckResourceAttr(DBaaSClusterResource+"."+DBaaSClusterTestResource, "synchronization_mode", "ASYNCHRONOUS"),
 				),
+			},
+			{
+				//we need this as a separate test because the dbaas cluster needs to be deleted first
+				//in order to be able to delete the associated lan after
+				// otherwise we get 'Access Denied: Lan 1 is delete-protected by DBAAS'
+				Config: testAccCheckDbaasPgSqlClusterConfigUpdateRemoveDBaaS,
 			},
 		},
 	})
@@ -324,7 +330,7 @@ resource ` + LanResource + ` "lan_example_update" {
 
 
 resource ` + DBaaSClusterResource + ` ` + DBaaSClusterTestResource + ` {
-  postgres_version   = 13
+  postgres_version   = 12
   instances          = 2
   cores              = 2
   ram                = 3072
@@ -377,7 +383,7 @@ resource ` + LanResource + ` "lan_example_update" {
 
 
 resource ` + DBaaSClusterResource + ` ` + DBaaSClusterTestResource + ` {
-  postgres_version   = 13
+  postgres_version   = 12
   instances          = 2
   cores              = 2
   ram                = 3072
@@ -395,6 +401,31 @@ resource ` + DBaaSClusterResource + ` ` + DBaaSClusterTestResource + ` {
 	password = "password"
   }
   synchronization_mode = "ASYNCHRONOUS"
+}
+`
+const testAccCheckDbaasPgSqlClusterConfigUpdateRemoveDBaaS = `
+resource ` + DatacenterResource + ` "datacenter_example" {
+  name        = "datacenter_example"
+  location    = "de/txl"
+  description = "Datacenter for testing dbaas cluster"
+}
+
+resource ` + DatacenterResource + ` "datacenter_example_update" {
+  name        = "datacenter_example_update"
+  location    = "de/txl"
+  description = "Datacenter for testing dbaas cluster"
+}
+
+resource ` + LanResource + ` "lan_example" {
+  datacenter_id = ` + DatacenterResource + `.datacenter_example.id 
+  public        = false
+  name          = "lan_example"
+}
+
+resource ` + LanResource + ` "lan_example_update" {
+  datacenter_id = ` + DatacenterResource + `.datacenter_example_update.id 
+  public        = false
+  name          = "lan_example_update"
 }
 `
 

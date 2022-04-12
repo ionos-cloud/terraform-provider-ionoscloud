@@ -69,9 +69,10 @@ func resourceServer() *schema.Resource {
 				Computed: true,
 			},
 			"type": {
-				Type:     schema.TypeString,
-				Optional: true,
-				Computed: true,
+				Type:             schema.TypeString,
+				Optional:         true,
+				Computed:         true,
+				DiffSuppressFunc: DiffToLower,
 			},
 			"boot_image": {
 				Type:     schema.TypeString,
