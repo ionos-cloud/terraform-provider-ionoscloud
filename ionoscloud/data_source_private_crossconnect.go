@@ -193,7 +193,7 @@ func dataSourcePccRead(ctx context.Context, d *schema.ResourceData, meta interfa
 
 		if pccs.Items != nil {
 			for _, p := range *pccs.Items {
-				if p.Properties != nil && p.Properties.Name != nil && strings.ToLower(*p.Properties.Name) == strings.ToLower(name.(string)) {
+				if p.Properties != nil && p.Properties.Name != nil && strings.EqualFold(*p.Properties.Name, name.(string)) {
 					pcc, apiResponse, err = client.PrivateCrossConnectsApi.PccsFindById(ctx, *p.Id).Execute()
 					logApiRequestTime(apiResponse)
 					if err != nil {

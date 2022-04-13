@@ -79,7 +79,7 @@ func dataSourceBackupUnitRead(ctx context.Context, d *schema.ResourceData, meta 
 		var results []ionoscloud.BackupUnit
 		if backupUnits.Items != nil {
 			for _, bu := range *backupUnits.Items {
-				if bu.Properties != nil && bu.Properties.Name != nil && strings.ToLower(*bu.Properties.Name) == strings.ToLower(name.(string)) {
+				if bu.Properties != nil && bu.Properties.Name != nil && strings.EqualFold(*bu.Properties.Name, name.(string)) {
 					tmpBackupUnit, apiResponse, err := client.BackupUnitsApi.BackupunitsFindById(ctx, *bu.Id).Execute()
 					logApiRequestTime(apiResponse)
 					if err != nil {

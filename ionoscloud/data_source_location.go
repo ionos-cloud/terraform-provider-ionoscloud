@@ -84,7 +84,7 @@ func dataSourceLocationRead(ctx context.Context, d *schema.ResourceData, meta in
 
 	if nameOk && locations.Items != nil {
 		for _, loc := range *locations.Items {
-			if loc.Properties != nil && loc.Properties.Name != nil && strings.ToLower(*loc.Properties.Name) == strings.ToLower(name.(string)) {
+			if loc.Properties != nil && loc.Properties.Name != nil && strings.EqualFold(*loc.Properties.Name, name.(string)) {
 				results = append(results, loc)
 			}
 		}

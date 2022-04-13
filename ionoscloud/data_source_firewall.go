@@ -120,7 +120,7 @@ func dataSourceFirewallRead(ctx context.Context, d *schema.ResourceData, meta in
 
 		if firewalls.Items != nil {
 			for _, fr := range *firewalls.Items {
-				if fr.Properties != nil && fr.Properties.Name != nil && strings.ToLower(*fr.Properties.Name) == strings.ToLower(name.(string)) {
+				if fr.Properties != nil && fr.Properties.Name != nil && strings.EqualFold(*fr.Properties.Name, name.(string)) {
 					tmpFirewall, apiResponse, err := client.FirewallRulesApi.DatacentersServersNicsFirewallrulesFindById(ctx, datacenterId, serverId, nicId, *fr.Id).Execute()
 					logApiRequestTime(apiResponse)
 					if err != nil {

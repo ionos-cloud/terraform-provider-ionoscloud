@@ -108,7 +108,7 @@ func dataSourceNetworkLoadBalancerRead(ctx context.Context, d *schema.ResourceDa
 				if err != nil {
 					return diag.FromErr(fmt.Errorf("an error occurred while fetching network loadbalancer with ID %s: %s", *c.Id, err.Error()))
 				}
-				if tmpNetworkLoadBalancer.Properties != nil && tmpNetworkLoadBalancer.Properties.Name != nil && strings.ToLower(*tmpNetworkLoadBalancer.Properties.Name) == strings.ToLower(name.(string)) {
+				if tmpNetworkLoadBalancer.Properties != nil && tmpNetworkLoadBalancer.Properties.Name != nil && strings.EqualFold(*tmpNetworkLoadBalancer.Properties.Name, name.(string)) {
 					results = append(results, tmpNetworkLoadBalancer)
 				}
 			}

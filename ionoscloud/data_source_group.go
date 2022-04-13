@@ -136,7 +136,7 @@ func dataSourceGroupRead(ctx context.Context, d *schema.ResourceData, meta inter
 
 		if groups.Items != nil {
 			for _, g := range *groups.Items {
-				if g.Properties != nil && g.Properties.Name != nil && strings.ToLower(*g.Properties.Name) == strings.ToLower(name.(string)) {
+				if g.Properties != nil && g.Properties.Name != nil && strings.EqualFold(*g.Properties.Name, name.(string)) {
 					/* group found */
 					group, apiResponse, err = client.UserManagementApi.UmGroupsFindById(ctx, *g.Id).Execute()
 					logApiRequestTime(apiResponse)

@@ -132,7 +132,7 @@ func dataSourceImageRead(ctx context.Context, d *schema.ResourceData, meta inter
 		nameVer := fmt.Sprintf("%s-%s", name, version)
 		if images.Items != nil {
 			for _, img := range *images.Items {
-				if img.Properties != nil && img.Properties.Name != nil && strings.ToLower(*img.Properties.Name) == strings.ToLower(nameVer) {
+				if img.Properties != nil && img.Properties.Name != nil && strings.EqualFold(*img.Properties.Name, nameVer) {
 					results = append(results, img)
 				}
 			}
@@ -158,7 +158,7 @@ func dataSourceImageRead(ctx context.Context, d *schema.ResourceData, meta inter
 	if imageTypeOk && imageType != "" {
 		var imageTypeResults []ionoscloud.Image
 		for _, img := range results {
-			if img.Properties != nil && img.Properties.ImageType != nil && strings.ToLower(*img.Properties.ImageType) == strings.ToLower(imageType) {
+			if img.Properties != nil && img.Properties.ImageType != nil && strings.EqualFold(*img.Properties.ImageType, imageType) {
 				imageTypeResults = append(imageTypeResults, img)
 			}
 
@@ -169,7 +169,7 @@ func dataSourceImageRead(ctx context.Context, d *schema.ResourceData, meta inter
 	if locationOk && location != "" {
 		var locationResults []ionoscloud.Image
 		for _, img := range results {
-			if img.Properties != nil && img.Properties.Location != nil && strings.ToLower(*img.Properties.Location) == strings.ToLower(location) {
+			if img.Properties != nil && img.Properties.Location != nil && strings.EqualFold(*img.Properties.Location, location) {
 				locationResults = append(locationResults, img)
 			}
 		}
@@ -179,7 +179,7 @@ func dataSourceImageRead(ctx context.Context, d *schema.ResourceData, meta inter
 	if cloudInitOk && cloudInit != "" {
 		var cloudInitResults []ionoscloud.Image
 		for _, img := range results {
-			if img.Properties != nil && img.Properties.CloudInit != nil && strings.ToLower(*img.Properties.CloudInit) == strings.ToLower(cloudInit) {
+			if img.Properties != nil && img.Properties.CloudInit != nil && strings.EqualFold(*img.Properties.CloudInit, cloudInit) {
 				cloudInitResults = append(cloudInitResults, img)
 			}
 		}

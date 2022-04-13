@@ -117,7 +117,7 @@ func dataSourceLanRead(ctx context.Context, d *schema.ResourceData, meta interfa
 
 		if lans.Items != nil {
 			for _, l := range *lans.Items {
-				if l.Properties != nil && l.Properties.Name != nil && strings.ToLower(*l.Properties.Name) == strings.ToLower(name.(string)) {
+				if l.Properties != nil && l.Properties.Name != nil && strings.EqualFold(*l.Properties.Name, name.(string)) {
 					/* lan found */
 					lan, apiResponse, err = client.LANsApi.DatacentersLansFindById(ctx, datacenterId.(string), *l.Id).Execute()
 					logApiRequestTime(apiResponse)

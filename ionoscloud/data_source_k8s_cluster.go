@@ -281,7 +281,7 @@ func dataSourceK8sReadCluster(ctx context.Context, d *schema.ResourceData, meta 
 			var results []ionoscloud.KubernetesCluster
 
 			for _, c := range *clusters.Items {
-				if c.Properties != nil && c.Properties.Name != nil && strings.ToLower(*c.Properties.Name) == strings.ToLower(name.(string)) {
+				if c.Properties != nil && c.Properties.Name != nil && strings.EqualFold(*c.Properties.Name, name.(string)) {
 					tmpCluster, apiResponse, err := client.KubernetesApi.K8sFindByClusterId(ctx, *c.Id).Execute()
 					logApiRequestTime(apiResponse)
 					if err != nil {

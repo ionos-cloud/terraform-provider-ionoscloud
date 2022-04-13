@@ -141,7 +141,7 @@ func dataSourceNatGatewayRuleRead(ctx context.Context, d *schema.ResourceData, m
 				if err != nil {
 					return diag.FromErr(fmt.Errorf("an error occurred while fetching nat gateway rule with ID %s: %s", *c.Id, err.Error()))
 				}
-				if tmpNatGatewayRule.Properties != nil && tmpNatGatewayRule.Properties.Name != nil && strings.ToLower(*tmpNatGatewayRule.Properties.Name) == strings.ToLower(name.(string)) {
+				if tmpNatGatewayRule.Properties != nil && tmpNatGatewayRule.Properties.Name != nil && strings.EqualFold(*tmpNatGatewayRule.Properties.Name, name.(string)) {
 					results = append(results, tmpNatGatewayRule)
 				}
 

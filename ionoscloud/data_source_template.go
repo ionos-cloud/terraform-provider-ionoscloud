@@ -62,7 +62,7 @@ func dataSourceTemplateRead(ctx context.Context, d *schema.ResourceData, meta in
 
 	if nameOk && templates.Items != nil {
 		for _, tmp := range *templates.Items {
-			if strings.ToLower(*tmp.Properties.Name) == strings.ToLower(name.(string)) {
+			if tmp.Properties != nil && tmp.Properties.Name != nil && strings.EqualFold(*tmp.Properties.Name, name.(string)) {
 				results = append(results, tmp)
 			}
 		}

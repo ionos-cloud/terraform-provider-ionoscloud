@@ -144,7 +144,7 @@ func datasourceIpBlockRead(ctx context.Context, data *schema.ResourceData, meta 
 
 		if nameOk && ipBlocks.Items != nil {
 			for _, block := range *ipBlocks.Items {
-				if block.Properties != nil && block.Properties.Name != nil && strings.ToLower(*block.Properties.Name) == strings.ToLower(name) {
+				if block.Properties != nil && block.Properties.Name != nil && strings.EqualFold(*block.Properties.Name, name) {
 					results = append(results, block)
 				}
 			}

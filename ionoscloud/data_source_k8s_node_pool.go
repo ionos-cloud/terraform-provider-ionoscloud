@@ -228,7 +228,7 @@ func dataSourceK8sReadNodePool(ctx context.Context, d *schema.ResourceData, meta
 			var results []ionoscloud.KubernetesNodePool
 
 			for _, c := range *nodePools.Items {
-				if c.Properties != nil && c.Properties.Name != nil && strings.ToLower(*c.Properties.Name) == strings.ToLower(name.(string)) {
+				if c.Properties != nil && c.Properties.Name != nil && strings.EqualFold(*c.Properties.Name, name.(string)) {
 					tmpNodePool, apiResponse, err := client.KubernetesApi.K8sNodepoolsFindById(ctx, clusterId.(string), *c.Id).Execute()
 					logApiRequestTime(apiResponse)
 					if err != nil {

@@ -184,7 +184,7 @@ func dataSourceNicRead(ctx context.Context, data *schema.ResourceData, meta inte
 
 		if nameOk && nics.Items != nil {
 			for _, tempNic := range *nics.Items {
-				if tempNic.Properties != nil && tempNic.Properties.Name != nil && strings.ToLower(*tempNic.Properties.Name) == strings.ToLower(name) {
+				if tempNic.Properties != nil && tempNic.Properties.Name != nil && strings.EqualFold(*tempNic.Properties.Name, name) {
 					results = append(results, tempNic)
 				}
 			}

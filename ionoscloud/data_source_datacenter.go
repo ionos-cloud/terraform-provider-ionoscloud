@@ -134,7 +134,7 @@ func dataSourceDataCenterRead(ctx context.Context, d *schema.ResourceData, meta 
 		if nameOk && datacenters.Items != nil {
 			var resultsByDatacenter []ionoscloud.Datacenter
 			for _, dc := range *datacenters.Items {
-				if dc.Properties != nil && dc.Properties.Name != nil && strings.ToLower(*dc.Properties.Name) == strings.ToLower(name) {
+				if dc.Properties != nil && dc.Properties.Name != nil && strings.EqualFold(*dc.Properties.Name, name) {
 					resultsByDatacenter = append(resultsByDatacenter, dc)
 				}
 			}

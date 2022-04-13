@@ -109,7 +109,7 @@ func dataSourceNatGatewayRead(ctx context.Context, d *schema.ResourceData, meta 
 				if err != nil {
 					return diag.FromErr(fmt.Errorf("an error occurred while fetching nat gateway with ID %s: %s", *c.Id, err.Error()))
 				}
-				if tmpNatGateway.Properties != nil && tmpNatGateway.Properties.Name != nil && strings.ToLower(*tmpNatGateway.Properties.Name) == strings.ToLower(name.(string)) {
+				if tmpNatGateway.Properties != nil && tmpNatGateway.Properties.Name != nil && strings.EqualFold(*tmpNatGateway.Properties.Name, name.(string)) {
 					natGateway = tmpNatGateway
 					results = append(results, natGateway)
 				}

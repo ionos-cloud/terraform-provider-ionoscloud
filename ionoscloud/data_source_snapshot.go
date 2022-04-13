@@ -133,7 +133,7 @@ func dataSourceSnapshotRead(ctx context.Context, d *schema.ResourceData, meta in
 
 		if snapshots.Items != nil {
 			for _, snp := range *snapshots.Items {
-				if snp.Properties != nil && snp.Properties.Name != nil && strings.ToLower(*snp.Properties.Name) == strings.ToLower(name.(string)) {
+				if snp.Properties != nil && snp.Properties.Name != nil && strings.EqualFold(*snp.Properties.Name, name.(string)) {
 					results = append(results, snp)
 				}
 			}
