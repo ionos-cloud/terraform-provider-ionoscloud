@@ -63,6 +63,8 @@ resource "ionoscloud_group" "group3" {
 * `active` - (Optional)[Boolean] Indicates if the user is active
 * `group_ids` - (Optional)[Set] The groups that this user will be a member of
 
+**NOTE:** Group_ids field cannot be used at the same time with user_ids field in group resource. Trying to add the same user to the same group in both ways in the same plan will result in a cyclic dependency error.
+
 ## Import
 
 Resource User can be imported using the `resource id`, e.g.
