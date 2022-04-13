@@ -7,6 +7,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 	ionoscloud "github.com/ionos-cloud/sdk-go/v6"
+	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils"
 	"log"
 )
 
@@ -62,6 +63,15 @@ func resourceUser() *schema.Resource {
 				Type:     schema.TypeBool,
 				Optional: true,
 			},
+			"group_ids": {
+				Type:     schema.TypeSet,
+				Optional: true,
+				Elem: &schema.Schema{
+					Type:         schema.TypeString,
+					ValidateFunc: validation.All(validation.IsUUID),
+				},
+				Description: "Ids of the groups that the user is a member of",
+			},
 		},
 		Timeouts: &resourceDefaultTimeouts,
 	}
@@ -105,12 +115,24 @@ func resourceUserCreate(ctx context.Context, d *schema.ResourceData, meta interf
 		diags := diag.FromErr(fmt.Errorf("sec_auth_active attribute is not allowed in create requests"))
 		return diags
 	}
+	if groupsVal, groupsOk := d.GetOk("group_ids"); groupsOk {
+		groupsList := groupsVal.(*schema.Set).List()
+		log.Printf("[INFO] Adding group_ids %+v ", groupsList)
+		if groupsList != nil {
+			for _, groupsItem := range groupsList {
+				groupId := groupsItem.(string)
+				if err := addUserToGroup(d.Id(), groupId, ctx, d, meta); err != nil {
+					return diag.FromErr(err)
+				}
+			}
+		}
+	}
 
 	rsp, apiResponse, err := client.UserManagementApi.UmUsersPost(ctx).User(request).Execute()
 	logApiRequestTime(apiResponse)
 
 	if err != nil {
-		diags := diag.FromErr(fmt.Errorf("an error occured while creating a user: %s", err))
+		diags := diag.FromErr(fmt.Errorf("an error occurred while creating a user: %w", err))
 		return diags
 	}
 
@@ -140,7 +162,7 @@ func resourceUserRead(ctx context.Context, d *schema.ResourceData, meta interfac
 			d.SetId("")
 			return nil
 		}
-		diags := diag.FromErr(fmt.Errorf("an error occured while fetching a User ID %s %s", d.Id(), err))
+		diags := diag.FromErr(fmt.Errorf("an error occured while fetching a User ID %s %w", d.Id(), err))
 		return diags
 	}
 
@@ -209,6 +231,33 @@ func resourceUserUpdate(ctx context.Context, d *schema.ResourceData, meta interf
 	if d.HasChange("password") {
 		password := d.Get("password").(string)
 		userReq.Properties.Password = &password
+	}
+
+	if d.HasChange("group_ids") {
+		oldValues, newValues := d.GetChange("group_ids")
+		oldGroupsList := convertSlice(oldValues.(*schema.Set).List())
+		newGroupsList := convertSlice(newValues.(*schema.Set).List())
+
+		newGroups := utils.DiffSliceOneWay(newGroupsList, oldGroupsList)
+		deletedGroups := utils.DiffSliceOneWay(oldGroupsList, newGroupsList)
+
+		if newGroups != nil && len(newGroups) > 0 {
+			log.Printf("[INFO] New groups to add: %+v", newGroups)
+			for _, groupId := range newGroups {
+				if err := addUserToGroup(d.Id(), groupId, ctx, d, meta); err != nil {
+					return diag.FromErr(err)
+				}
+			}
+		}
+
+		if deletedGroups != nil && len(deletedGroups) > 0 {
+			log.Printf("[INFO] Groups to delete: %+v", deletedGroups)
+			for _, groupId := range deletedGroups {
+				if err := deleteUserFromGroup(d.Id(), groupId, ctx, d, meta); err != nil {
+					return diag.FromErr(err)
+				}
+			}
+		}
 	}
 
 	_, apiResponse, err = client.UserManagementApi.UmUsersPut(ctx, d.Id()).User(userReq).Execute()

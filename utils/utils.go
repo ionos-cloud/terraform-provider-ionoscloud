@@ -2,12 +2,9 @@ package utils
 
 import (
 	"fmt"
-	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
-	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
 	"net"
 	"net/http"
 	"reflect"
-	"strconv"
 	"time"
 )
 
@@ -74,30 +71,6 @@ func DiffSliceOneWay(a, b []string) []string {
 
 func GenerateSetError(resource, field string, err error) error {
 	return fmt.Errorf("an error occured while setting %s property for %s, %s", field, resource, err)
-}
-
-func TestValueInSlice(resource, attribute string, value int) resource.TestCheckFunc {
-	return func(s *terraform.State) error {
-		var length int
-		for _, rs := range s.RootModule().Resources {
-			if rs.Type != resource {
-				continue
-			}
-
-			lengthOfSlice, err := strconv.Atoi(rs.Primary.Attributes[attribute])
-
-			if err != nil {
-				return err
-			}
-
-			length = lengthOfSlice
-
-			if lengthOfSlice == value {
-				return nil
-			}
-		}
-		return fmt.Errorf("length of slice %v is not %v, the actual length being %v", attribute, value, length)
-	}
 }
 
 func SetPropWithNilCheck(m map[string]interface{}, prop string, v interface{}) {

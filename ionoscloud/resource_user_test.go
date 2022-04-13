@@ -88,6 +88,26 @@ func TestAccUserBasic(t *testing.T) {
 					resource.TestCheckResourceAttr(UserResource+"."+UserTestResource, "force_sec_auth", "false"),
 					resource.TestCheckResourceAttr(UserResource+"."+UserTestResource, "active", "false")),
 			},
+			{
+				Config: testAccCheckUserMultipleGroups,
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttr(UserResource+"."+UserTestResource, "group_ids.#", "3"),
+					resource.TestCheckResourceAttr(DataSource+"."+UserResource+"."+UserDataSourceById, "groups.#", "3"),
+					resource.TestCheckTypeSetElemNestedAttrs(DataSource+"."+UserResource+"."+UserDataSourceById, "groups.*", map[string]string{
+						"name": "group1",
+					}),
+					resource.TestCheckTypeSetElemNestedAttrs(DataSource+"."+UserResource+"."+UserDataSourceById, "groups.*", map[string]string{
+						"name": "group2",
+					}),
+					resource.TestCheckTypeSetElemNestedAttrs(DataSource+"."+UserResource+"."+UserDataSourceById, "groups.*", map[string]string{
+						"name": "group3",
+					})),
+			},
+			{
+				Config: testAccCheckUserRemoveAllGroups,
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttr(UserResource+"."+UserTestResource, "group_ids.#", "0")),
+			},
 		},
 	})
 }
@@ -186,6 +206,169 @@ resource ` + UserResource + ` ` + UserTestResource + ` {
  force_sec_auth= false
  active  = false
 }`
+
+var testAccCheckUserMultipleGroups = `
+resource ` + UserResource + ` ` + UserTestResource + ` {
+ first_name 	= "` + UpdatedResources + `"
+ last_name 		= "` + UpdatedResources + `"
+ email 			= "` + utils.GenerateEmail() + `"
+ password 		= "abc123-321CBAupdated"
+ administrator  = false
+ force_sec_auth = false
+ active  		= false
+ group_ids 		= [ ionoscloud_group.group1.id, ionoscloud_group.group2.id, ionoscloud_group.group3.id]
+}
+
+resource "ionoscloud_group" "group1" {
+  name = "group1"
+  create_datacenter = true
+  create_snapshot = true
+  reserve_ip = true
+  access_activity_log = false
+  create_k8s_cluster = true
+}
+resource "ionoscloud_group" "group2" {
+  name = "group2"
+  create_datacenter = true
+  create_snapshot = true
+  reserve_ip = true
+  access_activity_log = false
+  create_k8s_cluster = true
+}
+resource "ionoscloud_group" "group3" {
+  name = "group3"
+  create_datacenter = true
+  create_snapshot = true
+  reserve_ip = true
+  access_activity_log = false
+}
+
+data ` + UserResource + ` ` + UserDataSourceById + ` {
+	id = ionoscloud_user.` + UserTestResource + `.id
+}
+`
+
+var testAccCheckUserMultipleGroups1Element = `
+resource ` + UserResource + ` ` + UserTestResource + ` {
+ first_name 	= "` + UpdatedResources + `"
+ last_name 		= "` + UpdatedResources + `"
+ email 			= "` + utils.GenerateEmail() + `"
+ password 		= "abc123-321CBAupdated"
+ administrator  = false
+ force_sec_auth = false
+ active  		= false
+ group_ids 		= [ ionoscloud_group.group1.id]
+}
+
+resource "ionoscloud_group" "group1" {
+  name = "group1"
+  create_datacenter = true
+  create_snapshot = true
+  reserve_ip = true
+  access_activity_log = false
+  create_k8s_cluster = true
+}
+resource "ionoscloud_group" "group2" {
+  name = "group2"
+  create_datacenter = true
+  create_snapshot = true
+  reserve_ip = true
+  access_activity_log = false
+  create_k8s_cluster = true
+}
+resource "ionoscloud_group" "group3" {
+  name = "group3"
+  create_datacenter = true
+  create_snapshot = true
+  reserve_ip = true
+  access_activity_log = false
+}
+
+data ` + UserResource + ` ` + UserDataSourceById + ` {
+	id = ionoscloud_user.` + UserTestResource + `.id
+}
+`
+
+var testAccCheckUserRemoveAllGroups = `
+resource ` + UserResource + ` ` + UserTestResource + ` {
+ first_name 	= "` + UpdatedResources + `"
+ last_name 		= "` + UpdatedResources + `"
+ email 			= "` + utils.GenerateEmail() + `"
+ password 		= "abc123-321CBAupdated"
+ administrator  = false
+ force_sec_auth = false
+ active  		= false
+}
+
+resource "ionoscloud_group" "group1" {
+  name = "group1"
+  create_datacenter = true
+  create_snapshot = true
+  reserve_ip = true
+  access_activity_log = false
+  create_k8s_cluster = true
+}
+resource "ionoscloud_group" "group2" {
+  name = "group2"
+  create_datacenter = true
+  create_snapshot = true
+  reserve_ip = true
+  access_activity_log = false
+  create_k8s_cluster = true
+}
+resource "ionoscloud_group" "group3" {
+  name = "group3"
+  create_datacenter = true
+  create_snapshot = true
+  reserve_ip = true
+  access_activity_log = false
+}
+
+data ` + UserResource + ` ` + UserDataSourceById + ` {
+	id = ionoscloud_user.` + UserTestResource + `.id
+}
+`
+
+var testAccCheckUserWrongGroupId = `
+resource ` + UserResource + ` ` + UserTestResource + ` {
+ first_name 	= "` + UpdatedResources + `"
+ last_name 		= "` + UpdatedResources + `"
+ email 			= "` + utils.GenerateEmail() + `"
+ password 		= "abc123-321CBAupdated"
+ administrator  = false
+ force_sec_auth = false
+ active  		= false
+ group_ids = ["notAnId"]
+}
+
+resource "ionoscloud_group" "group1" {
+  name = "group1"
+  create_datacenter = true
+  create_snapshot = true
+  reserve_ip = true
+  access_activity_log = false
+  create_k8s_cluster = true
+}
+resource "ionoscloud_group" "group2" {
+  name = "group2"
+  create_datacenter = true
+  create_snapshot = true
+  reserve_ip = true
+  access_activity_log = false
+  create_k8s_cluster = true
+}
+resource "ionoscloud_group" "group3" {
+  name = "group3"
+  create_datacenter = true
+  create_snapshot = true
+  reserve_ip = true
+  access_activity_log = false
+}
+
+data ` + UserResource + ` ` + UserDataSourceById + ` {
+	id = ionoscloud_user.` + UserTestResource + `.id
+}
+`
 
 var testAccDataSourceUserMatchId = testAccCheckUserConfigBasic + `
 data ` + UserResource + ` ` + UserDataSourceById + ` {

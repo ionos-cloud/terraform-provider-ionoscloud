@@ -6,6 +6,10 @@
 - remove deprecated image_name field on volume level from server resource
 - solve #266 crash on resource_volume when using image_alias with no image_password, or ssh_key_path
 
+### Features
+- added `group_ids` property for `ionoscloud_user` resource. For more details refer to the [documentation](docs/resources/user.md)
+- added `groups` property for `ionoscloud_user` data source. For more details refer to the [documentation](docs/data-sources/user.md)
+
 ## 6.2.2
 
 ### Fix
@@ -29,7 +33,7 @@
 - token and username+password does not conflict anymore, all three can be set, the token having priority
 
 ### Features 
-- added `backup_location` property for `ionoscloud_pg_cluster`. For more details refer to the [documentation](/docs/resources/dbaas_pgsql_cluster.md)
+- added `backup_location` property for `ionoscloud_pg_cluster`. For more details refer to the [documentation](docs/resources/dbaas_pgsql_cluster.md)
 
 ### Fixes
 - fixed image data-source bug when `name` not provided - data-source returned 0 results
