@@ -7,7 +7,6 @@ import (
 	"context"
 	"fmt"
 	ionoscloud "github.com/ionos-cloud/sdk-go/v6"
-	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils"
 	"regexp"
 	"testing"
 
@@ -66,7 +65,7 @@ func TestAccNatGatewayBasic(t *testing.T) {
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckNatGatewayExists(resourceNatGatewayResource, &natGateway),
 					resource.TestCheckResourceAttr(resourceNatGatewayResource, "name", UpdatedResources),
-					utils.TestValueInSlice(NatGatewayResource, "public_ips.#", 2),
+					resource.TestCheckResourceAttr(NatGatewayResource, "public_ips.#", 2),
 					resource.TestCheckResourceAttrPair(resourceNatGatewayResource, "lans.0.id", LanResource+".natgateway_lan_updated", "id"),
 					resource.TestCheckResourceAttr(resourceNatGatewayResource, "lans.0.gateway_ips.0", "10.11.2.6/24"),
 				),
