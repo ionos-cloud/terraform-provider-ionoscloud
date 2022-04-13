@@ -50,3 +50,4 @@ The following attributes are returned by the datasource:
 * `sec_auth_active` - Indicates if secure authentication is active for the user or not
 * `s3_canonical_user_id` - Canonical (S3) id of the user for a given identity
 * `active` - Indicates if the user is active
+* `groups` - Shows the id and name of the groups that the user is a member of

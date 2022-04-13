@@ -227,7 +227,7 @@ func resourceGroupCreate(ctx context.Context, d *schema.ResourceData, meta inter
 	if userVal, userOK := d.GetOk("user_id"); userOK {
 		userID := userVal.(string)
 		log.Printf("[INFO] Adding user %+v to group...", userID)
-		if err := addUserToGroup(userID, ctx, d, meta); err != nil {
+		if err := addUserToGroup(userID, d.Id(), ctx, d, meta); err != nil {
 			return diag.FromErr(err)
 		}
 	}
@@ -238,7 +238,7 @@ func resourceGroupCreate(ctx context.Context, d *schema.ResourceData, meta inter
 			for _, userItem := range usersList.List() {
 				userID := userItem.(string)
 				log.Printf("[INFO] Adding user %+v to group...", userID)
-				if err := addUserToGroup(userID, ctx, d, meta); err != nil {
+				if err := addUserToGroup(userID, d.Id(), ctx, d, meta); err != nil {
 					return diag.FromErr(err)
 				}
 			}
@@ -329,13 +329,13 @@ func resourceGroupUpdate(ctx context.Context, d *schema.ResourceData, meta inter
 		log.Printf("[INFO] User to remove: %+v", userIdToRemove)
 
 		if userIdToAdd != "" {
-			if err := addUserToGroup(userIdToAdd, ctx, d, meta); err != nil {
+			if err := addUserToGroup(userIdToAdd, d.Id(), ctx, d, meta); err != nil {
 				return diag.FromErr(err)
 			}
 		}
 
 		if userIdToRemove != "" {
-			if err := deleteUserFromGroup(userIdToRemove, ctx, d, meta); err != nil {
+			if err := deleteUserFromGroup(userIdToRemove, d.Id(), ctx, d, meta); err != nil {
 				return diag.FromErr(err)
 			}
 		}
@@ -352,7 +352,7 @@ func resourceGroupUpdate(ctx context.Context, d *schema.ResourceData, meta inter
 		if newUsers != nil && len(newUsers) > 0 {
 			log.Printf("[INFO] New users to add: %+v", newUsers)
 			for _, userID := range newUsers {
-				if err := addUserToGroup(userID, ctx, d, meta); err != nil {
+				if err := addUserToGroup(userID, d.Id(), ctx, d, meta); err != nil {
 					return diag.FromErr(err)
 				}
 			}
@@ -361,7 +361,7 @@ func resourceGroupUpdate(ctx context.Context, d *schema.ResourceData, meta inter
 		if deletedUsers != nil && len(deletedUsers) > 0 {
 			log.Printf("[INFO] Users to delete: %+v", deletedUsers)
 			for _, userID := range deletedUsers {
-				if err := deleteUserFromGroup(userID, ctx, d, meta); err != nil {
+				if err := deleteUserFromGroup(userID, d.Id(), ctx, d, meta); err != nil {
 					return diag.FromErr(err)
 				}
 			}
@@ -545,20 +545,20 @@ func setGroupData(ctx context.Context, client *ionoscloud.APIClient, d *schema.R
 	return nil
 }
 
-func addUserToGroup(id string, ctx context.Context, d *schema.ResourceData, meta interface{}) error {
+func addUserToGroup(userId, groupId string, ctx context.Context, d *schema.ResourceData, meta interface{}) error {
 	client := meta.(SdkBundle).CloudApiClient
-
 	userToAdd := ionoscloud.User{
-		Id: &id,
+		Id: &userId,
 	}
-	_, apiResponse, err := client.UserManagementApi.UmGroupsUsersPost(ctx, d.Id()).User(userToAdd).Execute()
+
+	_, apiResponse, err := client.UserManagementApi.UmGroupsUsersPost(ctx, groupId).User(userToAdd).Execute()
 	logApiRequestTime(apiResponse)
 
 	if err != nil {
-		return fmt.Errorf("an error occured while adding %s user to group ID %s %w", id, d.Id(), err)
+		return fmt.Errorf("an error occured while adding %s user to group ID %s %w", userId, groupId, err)
 	}
 
-	log.Printf("[INFO] Added user %s to group %s", id, d.Id())
+	log.Printf("[INFO] Added user %s to group %s", userId, groupId)
 
 	// Wait, catching any errors
 	_, errState := getStateChangeConf(meta, d, apiResponse.Header.Get("Location"), schema.TimeoutCreate).WaitForStateContext(ctx)
@@ -569,17 +569,17 @@ func addUserToGroup(id string, ctx context.Context, d *schema.ResourceData, meta
 	return nil
 }
 
-func deleteUserFromGroup(id string, ctx context.Context, d *schema.ResourceData, meta interface{}) error {
+func deleteUserFromGroup(userId, groupId string, ctx context.Context, d *schema.ResourceData, meta interface{}) error {
 	client := meta.(SdkBundle).CloudApiClient
 
-	apiResponse, err := client.UserManagementApi.UmGroupsUsersDelete(ctx, d.Id(), id).Execute()
+	apiResponse, err := client.UserManagementApi.UmGroupsUsersDelete(ctx, groupId, userId).Execute()
 	logApiRequestTime(apiResponse)
 
 	if err != nil {
-		return fmt.Errorf("an error occured while deleting %s user from group ID %s %w", id, d.Id(), err)
+		return fmt.Errorf("an error occured while deleting %s user from group ID %s %w", userId, groupId, err)
 	}
 
-	log.Printf("[INFO] Deleted user %s from group %s", id, d.Id())
+	log.Printf("[INFO] Deleted user %s from group %s", userId, groupId)
 
 	// Wait, catching any errors
 	_, errState := getStateChangeConf(meta, d, apiResponse.Header.Get("Location"), schema.TimeoutCreate).WaitForStateContext(ctx)
