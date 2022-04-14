@@ -35,7 +35,7 @@ func dataSourceBackupUnit() *schema.Resource {
 				Computed:    true,
 			},
 			"partial_match": {
-				Type:        schema.TypeString,
+				Type:        schema.TypeBool,
 				Description: "Whether partial matching is allowed or not when using name in this data_source",
 				Default:     false,
 				Optional:    true,
