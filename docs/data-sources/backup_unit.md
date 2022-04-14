@@ -44,7 +44,7 @@ The following arguments are supported:
 
 * `id` - (Optional) ID of the backup unit you want to search for.
 * `name` - (Optional) Name of an existing backup unit that you want to search for. Search by name is case-insensitive. The whole resource name is required if `partial_match` parameter is not set to true.
-* `partial_match` - (Optional) Whether partial matching is allowed or not when using name in this data_source. Default value is false.
+* `partial_match` - (Optional) Whether partial matching is allowed or not when using name argument. Default value is false.
 
 Either `id` or `name` must be provided. If none, or both are provided, the datasource will return an error.
 

@@ -59,6 +59,10 @@ func TestAccBackupUnitBasic(t *testing.T) {
 				ExpectError: regexp.MustCompile("no backup unit found with the specified name"),
 			},
 			{
+				Config:      testAccDataSourceBackupUnitPartialMatchWrongNameError,
+				ExpectError: regexp.MustCompile("no backup unit found with the specified name"),
+			},
+			{
 				Config:      testAccDataSourceBackupUnitMatchPartialMatchDisabledError,
 				ExpectError: regexp.MustCompile("no backup unit found with the specified name"),
 			},
@@ -193,6 +197,13 @@ data ` + BackupUnitResource + ` ` + BackupUnitDataSourceByName + ` {
 const testAccDataSourceBackupUnitMatchWrongNameError = testAccCheckBackupUnitConfigBasic + `
 data ` + BackupUnitResource + ` ` + BackupUnitDataSourceByName + ` {
   name			= "wrong_name"
+}
+`
+
+const testAccDataSourceBackupUnitPartialMatchWrongNameError = testAccCheckBackupUnitConfigBasic + `
+data ` + BackupUnitResource + ` ` + BackupUnitDataSourceByName + ` {
+  name			= "wrong_name"
+  partial_match = true
 }
 `
 

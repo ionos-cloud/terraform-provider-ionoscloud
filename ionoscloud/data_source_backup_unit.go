@@ -31,12 +31,12 @@ func dataSourceBackupUnit() *schema.Resource {
 			},
 			"login": {
 				Type:        schema.TypeString,
-				Description: "The login associated with the backup unit. Derived from the contract number",
+				Description: "The login associated with the backup unit. Derived from the contract number.",
 				Computed:    true,
 			},
 			"partial_match": {
 				Type:        schema.TypeBool,
-				Description: "Whether partial matching is allowed or not when using name in this data_source",
+				Description: "Whether partial matching is allowed or not when using name argument.",
 				Default:     false,
 				Optional:    true,
 			},
@@ -69,7 +69,7 @@ func dataSourceBackupUnitRead(ctx context.Context, d *schema.ResourceData, meta 
 		backupUnit, apiResponse, err = client.BackupUnitsApi.BackupunitsFindById(ctx, id).Execute()
 		logApiRequestTime(apiResponse)
 		if err != nil {
-			return diag.FromErr(fmt.Errorf("an error occurred while fetching the backup unit %s: %w", id, err))
+			return diag.FromErr(fmt.Errorf("an error occurred while fetching the backup unit while searching by id %s: %w", id, err))
 		}
 		if backupUnit.Properties != nil {
 			log.Printf("[INFO] Got backupUnit [Name=%s] [Id=%s]", *backupUnit.Properties.Name, *backupUnit.Id)
@@ -85,7 +85,7 @@ func dataSourceBackupUnitRead(ctx context.Context, d *schema.ResourceData, meta 
 			logApiRequestTime(apiResponse)
 
 			if err != nil {
-				return diag.FromErr(fmt.Errorf("an error occurred while fetching backup unit: %s", err.Error()))
+				return diag.FromErr(fmt.Errorf("an error occurred while fetching backup units while searching by partial name: %s, %w", name, err))
 			}
 
 			results = *backupUnits.Items
@@ -103,7 +103,7 @@ func dataSourceBackupUnitRead(ctx context.Context, d *schema.ResourceData, meta 
 						tmpBackupUnit, apiResponse, err := client.BackupUnitsApi.BackupunitsFindById(ctx, *bu.Id).Execute()
 						logApiRequestTime(apiResponse)
 						if err != nil {
-							return diag.FromErr(fmt.Errorf("an error occurred while fetching backup unit with ID %s: %s", *bu.Id, err.Error()))
+							return diag.FromErr(fmt.Errorf("an error occurred while fetching the backup unit with ID: %s while searching by full name: %s: %w", *bu.Id, name, err))
 						}
 						results = append(results, tmpBackupUnit)
 					}
