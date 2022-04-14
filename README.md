@@ -8,7 +8,7 @@
 [![Vulnerabilities](https://sonarcloud.io/api/project_badges/measure?project=terraform-provider&metric=vulnerabilities)](https://sonarcloud.io/dashboard?id=terraform-provider)
 [![Release](https://img.shields.io/github/v/release/ionos-cloud/terraform-provider-ionoscloud.svg)](https://github.com/ionos-cloud/terraform-provider-ionoscloud/releases/latest)
 [![Release Date](https://img.shields.io/github/release-date/ionos-cloud/terraform-provider-ionoscloud.svg)](https://github.com/ionos-cloud/terraform-provider-ionoscloud/releases/latest)
-[![Test suite](https://github.com/ionos-cloud/terraform-provider-ionoscloud/actions/workflows/test.yml/badge.svg)](https://github.com/ionos-cloud/terraform-provider-ionoscloud/actions/workflows/test.yml)
+[![Daily compute-engine test run](https://github.com/ionos-cloud/terraform-provider-ionoscloud/actions/workflows/daily-test-run.yml/badge.svg)](https://github.com/ionos-cloud/terraform-provider-ionoscloud/actions/workflows/daily-test-run.yml)
 [![Go](https://img.shields.io/github/go-mod/go-version/ionos-cloud/terraform-provider-ionoscloud.svg)](https://github.com/ionos-cloud/terraform-provider-ionoscloud)
 
 ![Alt text](.github/IONOS.CLOUD.BLU.svg?raw=true "Title")
@@ -23,8 +23,8 @@ Please see the [Documentation](docs/index.md#migrating-from-the-profitbricks-pro
 
 ## Requirements
 
-- [Terraform](https://www.terraform.io/downloads.html) 0.12.x
-- [Go](https://golang.org/doc/install) 1.13 (to build the provider plugin)
+- [Terraform](https://www.terraform.io/downloads.html) 0.12.x+
+- [Go](https://golang.org/doc/install) 1.17 (to build the provider plugin)
 
 **NOTE:** In order to use a specific version of this provider, please include the following block at the beginning of your terraform config files [details](https://www.terraform.io/docs/configuration/terraform.html#specifying-a-required-terraform-version):
 
@@ -56,7 +56,7 @@ See the [IonosCloud Provider documentation](https://registry.terraform.io/provid
 
 ## Developing the Provider
 
-If you wish to work on the provider, you'll first need [Go](http://www.golang.org) installed on your machine (version 1.13+ is _required_). You'll also need to correctly setup a [GOPATH](http://golang.org/doc/code.html#GOPATH), as well as adding `$GOPATH/bin` to your `$PATH`.
+If you wish to work on the provider, you'll first need [Go](http://www.golang.org) installed on your machine (version 1.17+ is _required_). You'll also need to correctly setup a [GOPATH](http://golang.org/doc/code.html#GOPATH), as well as adding `$GOPATH/bin` to your `$PATH`.
 
 To compile the provider, run `make build`. This will build the provider and put the provider binary in the `$GOPATH/bin` directory.
 
@@ -67,16 +67,55 @@ $ $GOPATH/bin/terraform-provider-ionoscloud
 ...
 ```
 
-In order to test the provider, you can simply run `make test`.
+## Testing the Provider
 
-```sh
+### What Are We Testing?
+
+The purpose of our acceptance tests is to **provision** resources containing all the available arguments, followed by **updates** on all arguments that allow this action. Beside the provisioning part, **data-sources** with all possible arguments and **imports** are also tested.
+
+All tests are integrated into [github actions](https://github.com/ionos-cloud/terraform-provider-ionoscloud/actions) that run daily and are also run manually before any release.
+
+### How to Run Tests Locally 
+
+⚠️ **Warning:** Acceptance tests provision resources in the IONOS Cloud, and often may involve extra billing charges on your account.
+
+In order to test the provider, you can simply run:
+
+``` sh
 $ make test
 ```
 
-In order to run the full suite of Acceptance tests, run `make testacc`.
+In order to run the full suite of Acceptance tests, run:
 
-_Note:_ Acceptance tests create real resources, and often cost money to run.
-
-```sh
-$ make testacc
+``` sh
+$ make testacc TAGS=all
 ```
+
+#### Test Tags
+
+Tests can also be run for a batch of resources or for a single resource, using tags.
+
+_Example of running server and lan tests:_
+``` sh
+$ make testacc TAGS=server,lan
+```
+
+<details> <summary title="Click to toggle">See more details about <b>test tags</b></summary>
+
+**Build tags** are named as follows:
+
+- `compute` - all **compute engine** tests (datacenter, firewall rule, image, IP block, IP failover, lan, location, nic, private cross connect, server, snapshot, template, volume)
+- `nlb` - **network load balancer** and **network load balancer forwarding rule** tests
+- `natgateway` - **NAT gateway** and **NAT gateway rule** tests
+- `k8s` - **k8s cluster** and **k8s node pool** tests
+- `dbaas` - **DBaaS postgres cluster** tests
+
+``` sh
+$ make testacc TAGS=dbaas
+```
+
+You can also test one single resource, using one of the tags: `backup`, `datacenter`, `dbaas`, `firewall`, `group`, `image`, `ipblock`, `ipfailover`, `k8s`, `lan`, `location`, `natgateway`,
+`nlb`, `nic`, `pcc`, `resource`, `s3key`, `server`, `share`, `snapshot`, `template`, `user`, `volume`
+
+</details>
+

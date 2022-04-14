@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 	ionoscloud "github.com/ionos-cloud/sdk-go/v6"
 )
 
@@ -49,6 +50,23 @@ func dataSourceUser() *schema.Resource {
 				Type:     schema.TypeBool,
 				Computed: true,
 			},
+			"groups": {
+				Type:     schema.TypeSet,
+				Computed: true,
+				Elem: &schema.Resource{
+					Schema: map[string]*schema.Schema{
+						"id": {
+							Type:     schema.TypeString,
+							Computed: true,
+						},
+						"name": {
+							Type:         schema.TypeString,
+							Required:     true,
+							ValidateFunc: validation.All(validation.StringIsNotWhiteSpace),
+						},
+					},
+				},
+			},
 		},
 		Timeouts: &resourceDefaultTimeouts,
 	}
@@ -87,7 +105,7 @@ func dataSourceUserRead(ctx context.Context, d *schema.ResourceData, meta interf
 		users, apiResponse, err := client.UserManagementApi.UmUsersGet(ctx).Depth(1).Execute()
 		logApiRequestTime(apiResponse)
 		if err != nil {
-			diags := diag.FromErr(fmt.Errorf("an error occurred while fetching users: %s", err.Error()))
+			diags := diag.FromErr(fmt.Errorf("an error occurred while fetching users: %w", err))
 			return diags
 		}
 
@@ -99,7 +117,7 @@ func dataSourceUserRead(ctx context.Context, d *schema.ResourceData, meta interf
 					user, apiResponse, err = client.UserManagementApi.UmUsersFindById(ctx, *u.Id).Execute()
 					logApiRequestTime(apiResponse)
 					if err != nil {
-						diags := diag.FromErr(fmt.Errorf("an error occurred while fetching user %s: %s", *u.Id, err))
+						diags := diag.FromErr(fmt.Errorf("an error occurred while fetching user %s: %w", *u.Id, err))
 						return diags
 					}
 					results = append(results, user)
@@ -113,9 +131,48 @@ func dataSourceUserRead(ctx context.Context, d *schema.ResourceData, meta interf
 			user = results[0]
 		}
 	}
+	if err = setUsersForGroup(ctx, d, &user, *client); err != nil {
+		return diag.FromErr(err)
+	}
 
 	if err = setUserData(d, &user); err != nil {
 		return diag.FromErr(err)
+	}
+
+	return nil
+}
+func setUsersForGroup(ctx context.Context, d *schema.ResourceData, user *ionoscloud.User, client ionoscloud.APIClient) error {
+	if user == nil {
+		return fmt.Errorf("did not expect empty user")
+	}
+
+	groups, apiResponse, err := client.UserManagementApi.UmUsersGroupsGet(ctx, *user.Id).Depth(1).Execute()
+	logApiRequestTime(apiResponse)
+	if err != nil {
+		return fmt.Errorf("an error occured while executing UmUsersGroupsGet %s (%w)", *user.Id, err)
+	}
+
+	groupEntries := make([]interface{}, 0)
+	if groups.Items != nil && len(*groups.Items) > 0 {
+		groupEntries = make([]interface{}, len(*groups.Items))
+		for groupIndex, group := range *groups.Items {
+			groupEntry := make(map[string]interface{})
+
+			if group.Id != nil {
+				groupEntry["id"] = *group.Id
+			}
+
+			if group.Properties != nil && group.Properties.Name != nil {
+				groupEntry["name"] = group.Properties.Name
+			}
+			groupEntries[groupIndex] = groupEntry
+		}
+
+		if len(groupEntries) > 0 {
+			if err := d.Set("groups", groupEntries); err != nil {
+				return fmt.Errorf("error while setting groups for user (%w)", err)
+			}
+		}
 	}
 
 	return nil

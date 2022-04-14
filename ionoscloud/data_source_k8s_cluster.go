@@ -271,7 +271,7 @@ func dataSourceK8sReadCluster(ctx context.Context, d *schema.ResourceData, meta 
 		/* search by name */
 		var clusters ionoscloud.KubernetesClusters
 
-		clusters, apiResponse, err := client.KubernetesApi.K8sGet(ctx).Execute()
+		clusters, apiResponse, err := client.KubernetesApi.K8sGet(ctx).Depth(1).Execute()
 		logApiRequestTime(apiResponse)
 		if err != nil {
 			return diag.FromErr(fmt.Errorf("an error occurred while fetching k8s clusters: %s", err.Error()))

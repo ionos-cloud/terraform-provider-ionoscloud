@@ -47,7 +47,7 @@ resource "ionoscloud_group" "example" {
 }
 ```
 
-##Argument reference
+## Argument reference
 
 * `name` - (Required) [string] A name for the group.
 * `create_datacenter` - (Optional) [Boolean] The group will be allowed to create virtual data centers.
@@ -65,6 +65,8 @@ resource "ionoscloud_group" "example" {
 * `user_ids` - (Optional) [list] A list of users to add to the group.
 * `user_id` - (Optional) [string] The ID of the specific user to add to the group. Please use user_ids argument since this is **DEPRECATED**
 * `users` - (Computed) List of users - See the [User](user.md) section
+
+**NOTE:** user_id/user_ids field cannot be used at the same time with group_ids field in user resource. Trying to add the same user to the same group in both ways in the same plan will result in a cyclic dependency error.
 
 ## Import
 

@@ -8,6 +8,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 	ionoscloud "github.com/ionos-cloud/sdk-go/v6"
 	"log"
+	"strings"
 )
 
 func resourceLoadbalancer() *schema.Resource {
@@ -82,7 +83,7 @@ func resourceLoadbalancerCreate(ctx context.Context, d *schema.ResourceData, met
 	logApiRequestTime(apiResponse)
 
 	if err != nil {
-		diags := diag.FromErr(fmt.Errorf("error occured while creating a loadbalancer %s", err))
+		diags := diag.FromErr(fmt.Errorf("error occured while creating a loadbalancer %w", err))
 		return diags
 	}
 
@@ -189,7 +190,7 @@ func resourceLoadbalancerUpdate(ctx context.Context, d *schema.ResourceData, met
 					that contain it, behind the scenes - therefore our call will yield 404 */
 					log.Printf("[WARNING] nic ID %s already removed from load balancer %s\n", o.(string), d.Id())
 				} else {
-					diags := diag.FromErr(fmt.Errorf("[load balancer update] an error occured while deleting a balanced nic: %s", err))
+					diags := diag.FromErr(fmt.Errorf("[load balancer update] an error occured while deleting a balanced nic: %w", err))
 					return diags
 				}
 			} else {
@@ -210,7 +211,7 @@ func resourceLoadbalancerUpdate(ctx context.Context, d *schema.ResourceData, met
 			_, apiResponse, err := client.LoadBalancersApi.DatacentersLoadbalancersBalancednicsPost(ctx, d.Get("datacenter_id").(string), d.Id()).Nic(nic).Execute()
 			logApiRequestTime(apiResponse)
 			if err != nil {
-				diags := diag.FromErr(fmt.Errorf("[load balancer update] an error occured while creating a balanced nic: %s", err))
+				diags := diag.FromErr(fmt.Errorf("[load balancer update] an error occured while creating a balanced nic: %w", err))
 				return diags
 			}
 			// Wait, catching any errors
@@ -235,7 +236,7 @@ func resourceLoadbalancerDelete(ctx context.Context, d *schema.ResourceData, met
 	logApiRequestTime(apiResponse)
 
 	if err != nil {
-		diags := diag.FromErr(fmt.Errorf("[load balancer delete] an error occured while deleting a loadbalancer: %s", err))
+		diags := diag.FromErr(fmt.Errorf("[load balancer delete] an error occured while deleting a loadbalancer: %w", err))
 		return diags
 	}
 
@@ -248,4 +249,69 @@ func resourceLoadbalancerDelete(ctx context.Context, d *schema.ResourceData, met
 
 	d.SetId("")
 	return nil
+}
+
+func resourceLoadbalancerImporter(ctx context.Context, d *schema.ResourceData, meta interface{}) ([]*schema.ResourceData, error) {
+	parts := strings.Split(d.Id(), "/")
+	if len(parts) != 2 || parts[0] == "" || parts[1] == "" {
+		return nil, fmt.Errorf("invalid import id %q. Expecting {datacenter}/{loadbalancer}", d.Id())
+	}
+
+	dcId := parts[0]
+	lbId := parts[1]
+
+	client := meta.(SdkBundle).CloudApiClient
+
+	loadbalancer, apiResponse, err := client.LoadBalancersApi.DatacentersLoadbalancersFindById(ctx, dcId, lbId).Execute()
+	logApiRequestTime(apiResponse)
+
+	if err != nil {
+		if apiResponse != nil && apiResponse.Response != nil && apiResponse.StatusCode == 404 {
+			d.SetId("")
+			return nil, fmt.Errorf("an error occured while trying to fetch the loadbalancer %q", lbId)
+		}
+		return nil, fmt.Errorf("loadbalancer does not exist %q", lbId)
+	}
+
+	log.Printf("[INFO] loadbalancer found: %+v", loadbalancer)
+
+	d.SetId(*loadbalancer.Id)
+
+	if err := d.Set("datacenter_id", dcId); err != nil {
+		return nil, err
+	}
+
+	if loadbalancer.Properties.Name != nil {
+		if err := d.Set("name", *loadbalancer.Properties.Name); err != nil {
+			return nil, err
+		}
+	}
+
+	if loadbalancer.Properties.Ip != nil {
+		if err := d.Set("ip", *loadbalancer.Properties.Ip); err != nil {
+			return nil, err
+		}
+	}
+
+	if loadbalancer.Properties.Dhcp != nil {
+		if err := d.Set("dhcp", *loadbalancer.Properties.Dhcp); err != nil {
+			return nil, err
+		}
+	}
+
+	if loadbalancer.Entities != nil && loadbalancer.Entities.Balancednics != nil &&
+		loadbalancer.Entities.Balancednics.Items != nil && len(*loadbalancer.Entities.Balancednics.Items) > 0 {
+
+		var lans []string
+		for _, lan := range *loadbalancer.Entities.Balancednics.Items {
+			if *lan.Id != "" {
+				lans = append(lans, *lan.Id)
+			}
+		}
+		if err := d.Set("nic_ids", lans); err != nil {
+			return nil, err
+		}
+	}
+
+	return []*schema.ResourceData{d}, nil
 }

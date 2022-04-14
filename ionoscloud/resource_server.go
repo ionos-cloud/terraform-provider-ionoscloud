@@ -50,8 +50,10 @@ func resourceServer() *schema.Resource {
 				Computed: true,
 			},
 			"availability_zone": {
-				Type:     schema.TypeString,
-				Optional: true,
+				Type:         schema.TypeString,
+				Optional:     true,
+				Computed:     true,
+				ValidateFunc: validation.All(validation.StringInSlice([]string{"AUTO", "ZONE_1", "ZONE_2"}, true)),
 			},
 			"boot_volume": {
 				Type:     schema.TypeString,
@@ -67,9 +69,10 @@ func resourceServer() *schema.Resource {
 				Computed: true,
 			},
 			"type": {
-				Type:     schema.TypeString,
-				Optional: true,
-				Computed: true,
+				Type:             schema.TypeString,
+				Optional:         true,
+				Computed:         true,
+				DiffSuppressFunc: DiffToLower,
 			},
 			"boot_image": {
 				Type:     schema.TypeString,
@@ -102,10 +105,9 @@ func resourceServer() *schema.Resource {
 				ConflictsWith: []string{"volume.0.image_password"},
 			},
 			"image_name": {
-				Type:          schema.TypeString,
-				Optional:      true,
-				Computed:      true,
-				ConflictsWith: []string{"volume.0.image_name"},
+				Type:     schema.TypeString,
+				Optional: true,
+				Computed: true,
 			},
 			"ssh_key_path": {
 				Type:          schema.TypeList,
@@ -120,18 +122,6 @@ func resourceServer() *schema.Resource {
 				MaxItems: 1,
 				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{
-						"image_name": {
-							Type:          schema.TypeString,
-							Optional:      true,
-							ConflictsWith: []string{"image_name"},
-							Deprecated:    "Please use image_name under server level",
-							DiffSuppressFunc: func(k, old, new string, d *schema.ResourceData) bool {
-								if d.Get("image_name").(string) == new {
-									return true
-								}
-								return false
-							},
-						},
 						"size": {
 							Type:     schema.TypeInt,
 							Optional: true,
@@ -192,9 +182,10 @@ func resourceServer() *schema.Resource {
 							Optional: true,
 						},
 						"availability_zone": {
-							Type:     schema.TypeString,
-							Optional: true,
-							Computed: true,
+							Type:         schema.TypeString,
+							Optional:     true,
+							Computed:     true,
+							ValidateFunc: validation.All(validation.StringInSlice([]string{"AUTO", "ZONE_1", "ZONE_2", "ZONE_3"}, true)),
 						},
 						"cpu_hot_plug": {
 							Type:     schema.TypeBool,
@@ -387,10 +378,6 @@ func checkServerImmutableFields(_ context.Context, diff *schema.ResourceDiff, _ 
 			return fmt.Errorf("volume.0.backup_unit_id %s", ImmutableError)
 		}
 
-		if diff.HasChange("volume.0.image_name") {
-			return fmt.Errorf("volume.0.image_name %s", ImmutableError)
-		}
-
 		if diff.HasChange("volume.0.disk_type") {
 			return fmt.Errorf("volume.0.disk_type %s", ImmutableError)
 		}
@@ -529,13 +516,7 @@ func resourceServerCreate(ctx context.Context, d *schema.ResourceData, meta inte
 		}
 	}
 
-	if v, ok := d.GetOk("volume.0.image_name"); ok {
-		imageInput = v.(string)
-		if err := d.Set("image_name", v.(string)); err != nil {
-			diags := diag.FromErr(err)
-			return diags
-		}
-	} else if v, ok := d.GetOk("image_name"); ok {
+	if v, ok := d.GetOk("image_name"); ok {
 		imageInput = v.(string)
 	}
 
@@ -572,7 +553,10 @@ func resourceServerCreate(ctx context.Context, d *schema.ResourceData, meta inte
 			},
 		},
 	}
-
+	var primaryNic *ionoscloud.Nic
+	if server.Entities.Nics != nil && server.Entities.Nics.Items != nil && len(*server.Entities.Nics.Items) > 0 {
+		primaryNic = &(*server.Entities.Nics.Items)[0]
+	}
 	// Nic Arguments
 	if _, ok := d.GetOk("nic"); ok {
 		lanInt := int32(d.Get("nic.0.lan").(int))
@@ -607,16 +591,16 @@ func resourceServerCreate(ctx context.Context, d *schema.ResourceData, meta inte
 			}
 		}
 
-		log.Printf("[DEBUG] dhcp nic before%t", *nic.Properties.Dhcp)
+		log.Printf("[DEBUG] dhcp nic before %t", *nic.Properties.Dhcp)
 
 		server.Entities.Nics = &ionoscloud.Nics{
 			Items: &[]ionoscloud.Nic{
 				nic,
 			},
 		}
-
+		primaryNic = &(*server.Entities.Nics.Items)[0]
 		log.Printf("[DEBUG] dhcp nic after %t", *nic.Properties.Dhcp)
-		log.Printf("[DEBUG] dhcp %t", *(*server.Entities.Nics.Items)[0].Properties.Dhcp)
+		log.Printf("[DEBUG] dhcp %t", *primaryNic.Properties.Dhcp)
 
 		if _, ok := d.GetOk("nic.0.firewall"); ok {
 			protocolStr := d.Get("nic.0.firewall.0.protocol").(string)
@@ -678,7 +662,7 @@ func resourceServerCreate(ctx context.Context, d *schema.ResourceData, meta inte
 				firewall.Properties.Type = &val
 			}
 
-			(*server.Entities.Nics.Items)[0].Entities = &ionoscloud.NicEntities{
+			primaryNic.Entities = &ionoscloud.NicEntities{
 				Firewallrules: &ionoscloud.FirewallRules{
 					Items: &[]ionoscloud.FirewallRule{
 						firewall,
@@ -687,27 +671,26 @@ func resourceServerCreate(ctx context.Context, d *schema.ResourceData, meta inte
 			}
 		}
 	}
-
-	if (*server.Entities.Nics.Items)[0].Properties.Ips != nil {
-		if len(*(*server.Entities.Nics.Items)[0].Properties.Ips) == 0 {
-			*(*server.Entities.Nics.Items)[0].Properties.Ips = nil
+	if primaryNic != nil && primaryNic.Properties != nil && primaryNic.Properties.Ips != nil {
+		if len(*primaryNic.Properties.Ips) == 0 {
+			*primaryNic.Properties.Ips = nil
 		}
 	}
 
-	server, apiResponse, err := client.ServersApi.DatacentersServersPost(ctx, d.Get("datacenter_id").(string)).Server(server).Execute()
+	createdServer, apiResponse, err := client.ServersApi.DatacentersServersPost(ctx, d.Get("datacenter_id").(string)).Server(server).Execute()
 	logApiRequestTime(apiResponse)
 
 	if err != nil {
-		diags := diag.FromErr(fmt.Errorf("error creating server: %s", err))
+		diags := diag.FromErr(fmt.Errorf("error creating server: %w", err))
 		return diags
 	}
-	d.SetId(*server.Id)
+	d.SetId(*createdServer.Id)
 
 	// Wait, catching any errors
 	_, errState := getStateChangeConf(meta, d, apiResponse.Header.Get("Location"), schema.TimeoutCreate).WaitForStateContext(ctx)
 	if errState != nil {
 		if IsRequestFailed(err) {
-			log.Printf("[DEBUG] failed to create server resource")
+			log.Printf("[DEBUG] failed to create createdServer resource")
 			// Request failed, so resource was not created, delete resource from state file
 			d.SetId("")
 		}
@@ -716,18 +699,17 @@ func resourceServerCreate(ctx context.Context, d *schema.ResourceData, meta inte
 	}
 
 	// get additional data for schema
-	server, apiResponse, err = client.ServersApi.DatacentersServersFindById(ctx, d.Get("datacenter_id").(string), *server.Id).Depth(3).Execute()
+	createdServer, apiResponse, err = client.ServersApi.DatacentersServersFindById(ctx, d.Get("datacenter_id").(string), *createdServer.Id).Depth(3).Execute()
 	logApiRequestTime(apiResponse)
 
 	if err != nil {
-		diags := diag.FromErr(fmt.Errorf("error fetching server: (%s)", err))
+		diags := diag.FromErr(fmt.Errorf("error fetching server: (%w)", err))
 		return diags
 	}
 
 	firewallRules, apiResponse, err := client.FirewallRulesApi.DatacentersServersNicsFirewallrulesGet(ctx, d.Get("datacenter_id").(string),
-		*server.Id, *(*server.Entities.Nics.Items)[0].Id).Execute()
+		*createdServer.Id, *(*createdServer.Entities.Nics.Items)[0].Id).Execute()
 	logApiRequestTime(apiResponse)
-
 	if err != nil {
 		diags := diag.FromErr(fmt.Errorf("an error occurred while fetching firewall rules: %s", err))
 		return diags
@@ -742,25 +724,25 @@ func resourceServerCreate(ctx context.Context, d *schema.ResourceData, meta inte
 		}
 	}
 
-	if (*server.Entities.Nics.Items)[0].Id != nil {
-		err := d.Set("primary_nic", *(*server.Entities.Nics.Items)[0].Id)
+	if (*createdServer.Entities.Nics.Items)[0].Id != nil {
+		err := d.Set("primary_nic", *(*createdServer.Entities.Nics.Items)[0].Id)
 		if err != nil {
 			diags := diag.FromErr(fmt.Errorf("error while setting primary nic %s: %s", d.Id(), err))
 			return diags
 		}
 	}
 
-	if (*server.Entities.Nics.Items)[0].Properties.Ips != nil &&
-		len(*(*server.Entities.Nics.Items)[0].Properties.Ips) > 0 &&
-		server.Entities.Volumes.Items != nil &&
-		len(*server.Entities.Volumes.Items) > 0 &&
-		(*server.Entities.Volumes.Items)[0].Properties != nil &&
-		(*server.Entities.Volumes.Items)[0].Properties.ImagePassword != nil {
+	if (*createdServer.Entities.Nics.Items)[0].Properties.Ips != nil &&
+		len(*(*createdServer.Entities.Nics.Items)[0].Properties.Ips) > 0 &&
+		createdServer.Entities.Volumes.Items != nil &&
+		len(*createdServer.Entities.Volumes.Items) > 0 &&
+		(*createdServer.Entities.Volumes.Items)[0].Properties != nil &&
+		(*createdServer.Entities.Volumes.Items)[0].Properties.ImagePassword != nil {
 
 		d.SetConnInfo(map[string]string{
 			"type":     "ssh",
-			"host":     (*(*server.Entities.Nics.Items)[0].Properties.Ips)[0],
-			"password": *(*server.Entities.Volumes.Items)[0].Properties.ImagePassword,
+			"host":     (*(*createdServer.Entities.Nics.Items)[0].Properties.Ips)[0],
+			"password": *(*createdServer.Entities.Volumes.Items)[0].Properties.ImagePassword,
 		})
 	}
 	return resourceServerRead(ctx, d, meta)
