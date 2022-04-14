@@ -66,6 +66,7 @@ func dataSourceBackupUnitRead(ctx context.Context, d *schema.ResourceData, meta 
 
 	if idOk {
 		/* search by ID */
+		log.Printf("[INFO] Using data source for backup unit by id %s", id)
 		backupUnit, apiResponse, err = client.BackupUnitsApi.BackupunitsFindById(ctx, id).Execute()
 		logApiRequestTime(apiResponse)
 		if err != nil {
@@ -79,6 +80,8 @@ func dataSourceBackupUnitRead(ctx context.Context, d *schema.ResourceData, meta 
 		var results []ionoscloud.BackupUnit
 
 		partialMatch := d.Get("partial_match").(bool)
+
+		log.Printf("[INFO] Using data source for backup unit by name with partial_match %t and name: %s", partialMatch, name)
 
 		if partialMatch {
 			backupUnits, apiResponse, err := client.BackupUnitsApi.BackupunitsGet(ctx).Depth(1).Filter("name", name).Execute()
