@@ -24,6 +24,13 @@ resource "ionoscloud_target_group" "example" {
         weight                = "1"
         health_check_enabled  = true
         maintenance_enabled   = false
+    }    
+    targets {
+        ip                    = "22.231.2.3"
+        port                  = "8081"
+        weight                = "124"
+        health_check_enabled  = false
+        maintenance_enabled   = false
     }
     health_check {
         check_timeout         = 5000

@@ -61,4 +61,4 @@ require (
 	google.golang.org/protobuf v1.27.1 // indirect
 )
 
-replace github.com/ionos-cloud/sdk-go/v6 => ../../../sdk/alb
+replace github.com/ionos-cloud/sdk-go/v6 => ../../../../../sdk/alb
