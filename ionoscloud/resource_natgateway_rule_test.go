@@ -56,6 +56,19 @@ func TestAccNatGatewayRuleBasic(t *testing.T) {
 				),
 			},
 			{
+				Config: fmt.Sprintf(testAccDataSourceNatGatewayRulePartialMatchName, NatGatewayRuleTestResource),
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttrPair(dataSourceNameNatGatewayRuleResource, "name", resourceNatGatewayRuleResource, "name"),
+					resource.TestCheckResourceAttrPair(dataSourceNameNatGatewayRuleResource, "type", resourceNatGatewayRuleResource, "type"),
+					resource.TestCheckResourceAttrPair(dataSourceNameNatGatewayRuleResource, "protocol", resourceNatGatewayRuleResource, "protocol"),
+					resource.TestCheckResourceAttrPair(dataSourceNameNatGatewayRuleResource, "source_subnet", resourceNatGatewayRuleResource, "source_subnet"),
+					resource.TestCheckResourceAttrPair(dataSourceNameNatGatewayRuleResource, "public_ip", resourceNatGatewayRuleResource, "public_ip"),
+					resource.TestCheckResourceAttrPair(dataSourceNameNatGatewayRuleResource, "target_subnet", resourceNatGatewayRuleResource, "target_subnet"),
+					resource.TestCheckResourceAttrPair(dataSourceNameNatGatewayRuleResource, "target_port_range.0.start", resourceNatGatewayRuleResource, "target_port_range.0.start"),
+					resource.TestCheckResourceAttrPair(dataSourceNameNatGatewayRuleResource, "target_port_range.0.end", resourceNatGatewayRuleResource, "target_port_range.0.end"),
+				),
+			},
+			{
 				Config: fmt.Sprintf(testAccDataSourceNatGatewayRuleMatchName, NatGatewayRuleTestResource),
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttrPair(dataSourceNameNatGatewayRuleResource, "name", resourceNatGatewayRuleResource, "name"),
@@ -70,6 +83,10 @@ func TestAccNatGatewayRuleBasic(t *testing.T) {
 			},
 			{
 				Config:      fmt.Sprintf(testAccDataSourceNatGatewayRuleWrongNameError, NatGatewayRuleTestResource),
+				ExpectError: regexp.MustCompile(`no nat gateway rule found with the specified criteria: name`),
+			},
+			{
+				Config:      fmt.Sprintf(testAccDataSourceNatGatewayRuleWrongPartialNameError, NatGatewayRuleTestResource),
 				ExpectError: regexp.MustCompile(`no nat gateway rule found with the specified criteria: name`),
 			},
 			{
@@ -249,6 +266,15 @@ data ` + NatGatewayRuleResource + ` ` + NatGatewayRuleDataSourceById + ` {
 }
 `
 
+const testAccDataSourceNatGatewayRulePartialMatchName = testAccCheckNatGatewayRuleConfigBasic + `
+data ` + NatGatewayRuleResource + ` ` + NatGatewayRuleDataSourceByName + ` {
+  datacenter_id = ` + DatacenterResource + `.natgateway_rule_datacenter.id
+  natgateway_id = ` + NatGatewayResource + `.natgateway.id
+  name			= "` + DataSourcePartial + `"
+  partial_match = true
+}
+`
+
 const testAccDataSourceNatGatewayRuleMatchName = testAccCheckNatGatewayRuleConfigBasic + `
 data ` + NatGatewayRuleResource + ` ` + NatGatewayRuleDataSourceByName + ` {
   datacenter_id = ` + DatacenterResource + `.natgateway_rule_datacenter.id
@@ -257,6 +283,14 @@ data ` + NatGatewayRuleResource + ` ` + NatGatewayRuleDataSourceByName + ` {
 }
 `
 
+const testAccDataSourceNatGatewayRuleWrongPartialNameError = testAccCheckNatGatewayRuleConfigBasic + `
+data ` + NatGatewayRuleResource + ` ` + NatGatewayRuleDataSourceByName + ` {
+  datacenter_id = ` + DatacenterResource + `.natgateway_rule_datacenter.id
+  natgateway_id = ` + NatGatewayResource + `.natgateway.id
+  name			= "wrong_name"
+  partial_match = true
+}
+`
 const testAccDataSourceNatGatewayRuleWrongNameError = testAccCheckNatGatewayRuleConfigBasic + `
 data ` + NatGatewayRuleResource + ` ` + NatGatewayRuleDataSourceByName + ` {
   datacenter_id = ` + DatacenterResource + `.natgateway_rule_datacenter.id

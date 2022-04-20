@@ -34,7 +34,7 @@ func TestAccK8sClusterBasic(t *testing.T) {
 					resource.TestCheckResourceAttr(K8sClusterResource+"."+K8sClusterTestResource, "maintenance_window.0.day_of_the_week", "Sunday"),
 					resource.TestCheckResourceAttr(K8sClusterResource+"."+K8sClusterTestResource, "maintenance_window.0.time", "09:00:00Z"),
 					resource.TestCheckResourceAttr(K8sClusterResource+"."+K8sClusterTestResource, "api_subnet_allow_list.0", "1.2.3.4/32"),
-					resource.TestCheckResourceAttr(K8sClusterResource+"."+K8sClusterTestResource, "s3_buckets.0.name", "test_k8s_terraform_v6"),
+					resource.TestCheckResourceAttr(K8sClusterResource+"."+K8sClusterTestResource, "s3_buckets.0.name", "test_k8d"),
 				),
 			},
 			{
@@ -47,6 +47,18 @@ func TestAccK8sClusterBasic(t *testing.T) {
 					resource.TestCheckResourceAttrPair(DataSource+"."+K8sClusterResource+"."+K8sClusterDataSourceById, "maintenance_window.0.time", K8sClusterResource+"."+K8sClusterTestResource, "maintenance_window.0.time"),
 					resource.TestCheckResourceAttrPair(DataSource+"."+K8sClusterResource+"."+K8sClusterDataSourceById, "api_subnet_allow_list.0", K8sClusterResource+"."+K8sClusterTestResource, "api_subnet_allow_list.0"),
 					resource.TestCheckResourceAttrPair(DataSource+"."+K8sClusterResource+"."+K8sClusterDataSourceById, "s3_buckets.0.name", K8sClusterResource+"."+K8sClusterTestResource, "s3_buckets.0.name"),
+				),
+			},
+			{
+				Config: testAccDataSourceK8sClusterPartialMatchName,
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttrPair(DataSource+"."+K8sClusterResource+"."+K8sClusterDataSourceByName, "name", K8sClusterResource+"."+K8sClusterTestResource, "name"),
+					resource.TestCheckResourceAttrPair(DataSource+"."+K8sClusterResource+"."+K8sClusterDataSourceByName, "k8s_version", K8sClusterResource+"."+K8sClusterTestResource, "k8s_version"),
+					resource.TestCheckResourceAttrPair(DataSource+"."+K8sClusterResource+"."+K8sClusterDataSourceByName, "maintenance_window.0.day_of_the_week", K8sClusterResource+"."+K8sClusterTestResource, "maintenance_window.0.day_of_the_week"),
+					resource.TestCheckResourceAttrPair(DataSource+"."+K8sClusterResource+"."+K8sClusterDataSourceByName, "maintenance_window.0.time", K8sClusterResource+"."+K8sClusterTestResource, "maintenance_window.0.time"),
+					resource.TestCheckResourceAttrPair(DataSource+"."+K8sClusterResource+"."+K8sClusterDataSourceByName, "maintenance_window.0.time", K8sClusterResource+"."+K8sClusterTestResource, "maintenance_window.0.time"),
+					resource.TestCheckResourceAttrPair(DataSource+"."+K8sClusterResource+"."+K8sClusterDataSourceByName, "api_subnet_allow_list.0", K8sClusterResource+"."+K8sClusterTestResource, "api_subnet_allow_list.0"),
+					resource.TestCheckResourceAttrPair(DataSource+"."+K8sClusterResource+"."+K8sClusterDataSourceByName, "s3_buckets.0.name", K8sClusterResource+"."+K8sClusterTestResource, "s3_buckets.0.name"),
 				),
 			},
 			{
@@ -63,6 +75,10 @@ func TestAccK8sClusterBasic(t *testing.T) {
 			},
 			{
 				Config:      testAccDataSourceK8sClusterWrongNameError,
+				ExpectError: regexp.MustCompile("no cluster found with the specified name"),
+			},
+			{
+				Config:      testAccDataSourceK8sClusterWrongPartialNameError,
 				ExpectError: regexp.MustCompile("no cluster found with the specified name"),
 			},
 			{
@@ -114,7 +130,7 @@ func TestAccK8sClusterPrivate(t *testing.T) {
 					resource.TestCheckResourceAttr(K8sClusterResource+"."+K8sClusterTestResource, "maintenance_window.0.day_of_the_week", "Sunday"),
 					resource.TestCheckResourceAttr(K8sClusterResource+"."+K8sClusterTestResource, "maintenance_window.0.time", "09:00:00Z"),
 					resource.TestCheckResourceAttr(K8sClusterResource+"."+K8sClusterTestResource, "api_subnet_allow_list.0", "1.2.3.4/32"),
-					resource.TestCheckResourceAttr(K8sClusterResource+"."+K8sClusterTestResource, "s3_buckets.0.name", "test_k8s_terraform_v6"),
+					resource.TestCheckResourceAttr(K8sClusterResource+"."+K8sClusterTestResource, "s3_buckets.0.name", "test_k8d"),
 					resource.TestCheckResourceAttr(K8sClusterResource+"."+K8sClusterTestResource, "public", "false"),
 				),
 			},
@@ -197,7 +213,7 @@ resource ` + K8sClusterResource + ` ` + K8sClusterTestResource + ` {
   }
   api_subnet_allow_list = ["1.2.3.4/32"]
   s3_buckets { 
-     name = "test_k8s_terraform_v6"
+     name = "test_k8d"
   }
 }`
 
@@ -236,7 +252,7 @@ resource ` + K8sClusterResource + ` ` + K8sClusterTestResource + ` {
   }
   api_subnet_allow_list = ["1.2.3.4/32"]
   s3_buckets { 
-     name = "test_k8s_terraform_v6"
+     name = "test_k8d"
   }
   public = "false"
 }`
@@ -253,8 +269,21 @@ data ` + K8sClusterResource + ` ` + K8sClusterDataSourceByName + `{
 }
 `
 
+const testAccDataSourceK8sClusterPartialMatchName = testAccCheckK8sClusterConfigBasic + `
+data ` + K8sClusterResource + ` ` + K8sClusterDataSourceByName + `{
+  name	= "` + DataSourcePartial + `" 
+  partial_match = true
+}
+`
+
 const testAccDataSourceK8sClusterWrongNameError = testAccCheckK8sClusterConfigBasic + `
 data ` + K8sClusterResource + ` ` + K8sClusterDataSourceByName + `{
   name	= "wrong_name"
+}
+`
+const testAccDataSourceK8sClusterWrongPartialNameError = testAccCheckK8sClusterConfigBasic + `
+data ` + K8sClusterResource + ` ` + K8sClusterDataSourceByName + `{
+  name	= "wrong_name"
+  partial_match = true
 }
 `

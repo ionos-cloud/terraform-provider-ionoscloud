@@ -110,7 +110,6 @@ func dataSourceBackupUnitRead(ctx context.Context, d *schema.ResourceData, meta 
 						}
 						results = append(results, tmpBackupUnit)
 					}
-
 				}
 			}
 		}

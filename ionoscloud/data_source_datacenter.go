@@ -23,6 +23,12 @@ func dataSourceDataCenter() *schema.Resource {
 				Type:     schema.TypeString,
 				Optional: true,
 			},
+			"partial_match": {
+				Type:        schema.TypeBool,
+				Description: "Whether partial matching is allowed or not when using name argument.",
+				Default:     false,
+				Optional:    true,
+			},
 			"location": {
 				Type:     schema.TypeString,
 				Optional: true,
@@ -78,8 +84,12 @@ func dataSourceDataCenter() *schema.Resource {
 func dataSourceDataCenterRead(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	client := meta.(SdkBundle).CloudApiClient
 
-	var name, location string
-	id, idOk := d.GetOk("id")
+	var id, name, location string
+
+	t, idOk := d.GetOk("id")
+	if idOk {
+		id = t.(string)
+	}
 
 	t, nameOk := d.GetOk("name")
 	if nameOk {
@@ -100,13 +110,14 @@ func dataSourceDataCenterRead(ctx context.Context, d *schema.ResourceData, meta 
 	}
 
 	if idOk {
-		datacenter, apiResponse, err = client.DataCentersApi.DatacentersFindById(ctx, id.(string)).Execute()
+		log.Printf("[INFO] Using data source for datacenter by id %s", id)
+		datacenter, apiResponse, err = client.DataCentersApi.DatacentersFindById(ctx, id).Execute()
 		logApiRequestTime(apiResponse)
 		if err != nil {
-			return diag.FromErr(fmt.Errorf("error getting datacenter with id %s %s", id.(string), err))
+			return diag.FromErr(fmt.Errorf("an error occurred while fetching the datacenter while searching by id %s %w", id, err))
 		}
 		if nameOk {
-			if *datacenter.Properties.Name != name {
+			if datacenter.Properties != nil && datacenter.Properties.Name != nil && (!strings.EqualFold(*datacenter.Properties.Name, name) || !strings.Contains(*datacenter.Properties.Name, name)) {
 				return diag.FromErr(fmt.Errorf("name of dc (UUID=%s, name=%s) does not match expected name: %s",
 					*datacenter.Id, *datacenter.Properties.Name, name))
 			}
@@ -122,27 +133,43 @@ func dataSourceDataCenterRead(ctx context.Context, d *schema.ResourceData, meta 
 		}
 
 	} else {
-		datacenters, apiResponse, err := client.DataCentersApi.DatacentersGet(ctx).Depth(1).Execute()
-		logApiRequestTime(apiResponse)
-
-		if err != nil {
-			return diag.FromErr(fmt.Errorf("an error occured while fetching datacenters: %s ", err))
-		}
-
 		var results []ionoscloud.Datacenter
 
-		if nameOk && datacenters.Items != nil {
-			var resultsByDatacenter []ionoscloud.Datacenter
-			for _, dc := range *datacenters.Items {
-				if dc.Properties != nil && dc.Properties.Name != nil && strings.EqualFold(*dc.Properties.Name, name) {
-					resultsByDatacenter = append(resultsByDatacenter, dc)
-				}
+		partialMatch := d.Get("partial_match").(bool)
+
+		log.Printf("[INFO] Using data source for datacenter by name with partial_match %t and name: %s", partialMatch, name)
+
+		if nameOk && partialMatch {
+			datacenters, apiResponse, err := client.DataCentersApi.DatacentersGet(ctx).Depth(1).Filter("name", name).Execute()
+			logApiRequestTime(apiResponse)
+
+			if err != nil {
+				return diag.FromErr(fmt.Errorf("an error occured while fetching datacenters while searching by name: %s, %w ", name, err))
+			}
+			results = *datacenters.Items
+		} else {
+			datacenters, apiResponse, err := client.DataCentersApi.DatacentersGet(ctx).Depth(1).Execute()
+			logApiRequestTime(apiResponse)
+
+			if err != nil {
+				return diag.FromErr(fmt.Errorf("an error occured while fetching datacenters while searching by name: %s, %w ", name, err))
 			}
 
-			if resultsByDatacenter == nil {
-				return diag.FromErr(fmt.Errorf("no datacenter found with the specified criteria: name = %s", name))
-			} else {
-				results = resultsByDatacenter
+			results = *datacenters.Items
+
+			if nameOk && results != nil {
+				var resultsByName []ionoscloud.Datacenter
+				for _, dc := range results {
+					if dc.Properties != nil && dc.Properties.Name != nil && strings.EqualFold(*dc.Properties.Name, name) {
+						resultsByName = append(resultsByName, dc)
+					}
+				}
+
+				if resultsByName == nil {
+					return diag.FromErr(fmt.Errorf("no datacenter found with the specified criteria: name = %s", name))
+				} else {
+					results = resultsByName
+				}
 			}
 		}
 
@@ -150,14 +177,7 @@ func dataSourceDataCenterRead(ctx context.Context, d *schema.ResourceData, meta 
 			var resultsByLocation []ionoscloud.Datacenter
 			if results != nil {
 				for _, dc := range results {
-					if dc.Properties.Location != nil && *dc.Properties.Location == location {
-						resultsByLocation = append(resultsByLocation, dc)
-					}
-				}
-			} else if datacenters.Items != nil {
-				/* find the first datacenter matching the location */
-				for _, dc := range *datacenters.Items {
-					if dc.Properties.Location != nil && *dc.Properties.Location == location {
+					if dc.Properties.Location != nil && strings.EqualFold(*dc.Properties.Location, location) {
 						resultsByLocation = append(resultsByLocation, dc)
 					}
 				}

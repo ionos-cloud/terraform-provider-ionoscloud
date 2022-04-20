@@ -45,7 +45,8 @@ data "ionoscloud_template" "example" {
 
 ## Argument Reference
 
-* `name` - (Optional) The name of template. Search by name is case-insensitive, but the whole resource name is required (we do not support partial matching).
+* `name` - (Optional) The name of template. Search by name is case-insensitive. The whole resource name is required if `partial_match` parameter is not set to true..
+* `partial_match` - (Optional) Whether partial matching is allowed or not when using name argument. Default value is false.
 * `cores` - (Optional) The CPU cores count.
 * `ram` - (Optional) The RAM size in MB.
 * `storage_size` - (Optional) The storage size in GB.

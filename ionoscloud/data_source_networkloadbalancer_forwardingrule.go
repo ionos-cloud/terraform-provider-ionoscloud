@@ -8,6 +8,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 	ionoscloud "github.com/ionos-cloud/sdk-go/v6"
+	"log"
 	"strings"
 )
 
@@ -22,6 +23,12 @@ func dataSourceNetworkLoadBalancerForwardingRule() *schema.Resource {
 			"name": {
 				Type:     schema.TypeString,
 				Optional: true,
+			},
+			"partial_match": {
+				Type:        schema.TypeBool,
+				Description: "Whether partial matching is allowed or not when using name argument.",
+				Default:     false,
+				Optional:    true,
 			},
 			"algorithm": {
 				Type:        schema.TypeString,
@@ -146,18 +153,14 @@ func dataSourceNetworkLoadBalancerForwardingRule() *schema.Resource {
 func dataSourceNetworkLoadBalancerForwardingRuleRead(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	client := meta.(SdkBundle).CloudApiClient
 
-	datacenterId, dcIdOk := d.GetOk("datacenter_id")
-	if !dcIdOk {
-		return diag.FromErr(errors.New("no datacenter_id was specified"))
-	}
+	datacenterId := d.Get("datacenter_id").(string)
+	networkloadbalancerId := d.Get("networkloadbalancer_id").(string)
 
-	networkloadbalancerId, nlbIdOk := d.GetOk("networkloadbalancer_id")
-	if !nlbIdOk {
-		return diag.FromErr(errors.New("no networkloadbalancer_id was specified"))
-	}
+	idValue, idOk := d.GetOk("id")
+	nameValue, nameOk := d.GetOk("name")
 
-	id, idOk := d.GetOk("id")
-	name, nameOk := d.GetOk("name")
+	id := idValue.(string)
+	name := nameValue.(string)
 
 	if idOk && nameOk {
 		return diag.FromErr(errors.New("id and name cannot be both specified in the same time"))
@@ -171,39 +174,52 @@ func dataSourceNetworkLoadBalancerForwardingRuleRead(ctx context.Context, d *sch
 
 	if idOk {
 		/* search by ID */
-		networkLoadBalancerForwardingRule, apiResponse, err = client.NetworkLoadBalancersApi.DatacentersNetworkloadbalancersForwardingrulesFindByForwardingRuleId(ctx, datacenterId.(string), networkloadbalancerId.(string), id.(string)).Execute()
+		log.Printf("[INFO] Using data source for network loadbalancers forwarding rule by id %s", id)
+		networkLoadBalancerForwardingRule, apiResponse, err = client.NetworkLoadBalancersApi.DatacentersNetworkloadbalancersForwardingrulesFindByForwardingRuleId(ctx, datacenterId, networkloadbalancerId, id).Execute()
 		logApiRequestTime(apiResponse)
 		if err != nil {
-			return diag.FromErr(fmt.Errorf("an error occurred while fetching the network loadbalancer forwarding rule %s: %s", id.(string), err))
+			return diag.FromErr(fmt.Errorf("an error occurred while fetching the network loadbalancer forwarding rule %s: %s", id, err))
 		}
 	} else {
 		/* search by name */
-		var networkLoadBalancerForwardingRules ionoscloud.NetworkLoadBalancerForwardingRules
-
-		networkLoadBalancerForwardingRules, apiResponse, err := client.NetworkLoadBalancersApi.DatacentersNetworkloadbalancersForwardingrulesGet(ctx, datacenterId.(string), networkloadbalancerId.(string)).Depth(1).Execute()
-		logApiRequestTime(apiResponse)
-		if err != nil {
-			return diag.FromErr(fmt.Errorf("an error occurred while fetching network loadbalancers forwarding rules: %s", err.Error()))
-		}
-
 		var results []ionoscloud.NetworkLoadBalancerForwardingRule
-		if networkLoadBalancerForwardingRules.Items != nil {
-			for _, nlbfr := range *networkLoadBalancerForwardingRules.Items {
-				if nlbfr.Properties != nil && nlbfr.Properties.Name != nil && strings.EqualFold(*nlbfr.Properties.Name, name.(string)) {
-					tmpNetworkLoadBalancerForwardingRule, apiResponse, err := client.NetworkLoadBalancersApi.DatacentersNetworkloadbalancersForwardingrulesFindByForwardingRuleId(ctx, datacenterId.(string), networkloadbalancerId.(string), *nlbfr.Id).Depth(1).Execute()
-					logApiRequestTime(apiResponse)
-					if err != nil {
-						return diag.FromErr(fmt.Errorf("an error occurred while fetching network loadbalancer forwarding rule with ID %s: %s", *nlbfr.Id, err.Error()))
+
+		partialMatch := d.Get("partial_match").(bool)
+
+		log.Printf("[INFO] Using data source for network loadbalancers forwarding rule by name with partial_match %t and name: %s", partialMatch, name)
+
+		if partialMatch {
+			networkLoadBalancerForwardingRules, apiResponse, err := client.NetworkLoadBalancersApi.DatacentersNetworkloadbalancersForwardingrulesGet(ctx, datacenterId, networkloadbalancerId).Depth(1).Filter("name", name).Execute()
+			logApiRequestTime(apiResponse)
+			if err != nil {
+				return diag.FromErr(fmt.Errorf("an error occurred while fetching network loadbalancers forwarding rules: %s", err.Error()))
+			}
+			results = *networkLoadBalancerForwardingRules.Items
+		} else {
+			networkLoadBalancerForwardingRules, apiResponse, err := client.NetworkLoadBalancersApi.DatacentersNetworkloadbalancersForwardingrulesGet(ctx, datacenterId, networkloadbalancerId).Depth(1).Execute()
+			logApiRequestTime(apiResponse)
+			if err != nil {
+				return diag.FromErr(fmt.Errorf("an error occurred while fetching network loadbalancers forwarding rules: %s", err.Error()))
+			}
+
+			if networkLoadBalancerForwardingRules.Items != nil {
+				for _, nlbfr := range *networkLoadBalancerForwardingRules.Items {
+					if nlbfr.Properties != nil && nlbfr.Properties.Name != nil && strings.EqualFold(*nlbfr.Properties.Name, name) {
+						tmpNetworkLoadBalancerForwardingRule, apiResponse, err := client.NetworkLoadBalancersApi.DatacentersNetworkloadbalancersForwardingrulesFindByForwardingRuleId(ctx, datacenterId, networkloadbalancerId, *nlbfr.Id).Depth(1).Execute()
+						logApiRequestTime(apiResponse)
+						if err != nil {
+							return diag.FromErr(fmt.Errorf("an error occurred while fetching network loadbalancer forwarding rule with ID %s: %s", *nlbfr.Id, err.Error()))
+						}
+						results = append(results, tmpNetworkLoadBalancerForwardingRule)
 					}
-					results = append(results, tmpNetworkLoadBalancerForwardingRule)
 				}
 			}
 		}
 
 		if results == nil || len(results) == 0 {
-			return diag.FromErr(fmt.Errorf("no network load balancer forwarding rule found with the specified criteria: name = %s", name.(string)))
+			return diag.FromErr(fmt.Errorf("no network load balancer forwarding rule found with the specified criteria: name = %s", name))
 		} else if len(results) > 1 {
-			return diag.FromErr(fmt.Errorf("more than one network load balancer forwarding rule found with the specified criteria: name = %s", name.(string)))
+			return diag.FromErr(fmt.Errorf("more than one network load balancer forwarding rule found with the specified criteria: name = %s", name))
 		} else {
 			networkLoadBalancerForwardingRule = results[0]
 		}

@@ -18,6 +18,12 @@ func dataSourceLocation() *schema.Resource {
 				Type:     schema.TypeString,
 				Optional: true,
 			},
+			"partial_match": {
+				Type:        schema.TypeBool,
+				Description: "Whether partial matching is allowed or not when using name argument.",
+				Default:     false,
+				Optional:    true,
+			},
 			"feature": {
 				Type:     schema.TypeString,
 				Optional: true,
@@ -61,8 +67,11 @@ func dataSourceLocation() *schema.Resource {
 func dataSourceLocationRead(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	client := meta.(SdkBundle).CloudApiClient
 
-	name, nameOk := d.GetOk("name")
-	feature, featureOk := d.GetOk("feature")
+	nameValue, nameOk := d.GetOk("name")
+	featureValue, featureOk := d.GetOk("feature")
+
+	name := nameValue.(string)
+	feature := featureValue.(string)
 
 	if !nameOk && !featureOk {
 		return diag.FromErr(fmt.Errorf("either 'name' or 'feature' must be provided"))
@@ -71,7 +80,15 @@ func dataSourceLocationRead(ctx context.Context, d *schema.ResourceData, meta in
 	request := client.LocationsApi.LocationsGet(ctx).Depth(1)
 
 	if featureOk {
-		request = request.Filter("features", feature.(string))
+		request = request.Filter("features", feature)
+	}
+
+	partialMatch := d.Get("partial_match").(bool)
+
+	log.Printf("[INFO] Using data source for location by name with partial_match %t and name: %s", partialMatch, name)
+
+	if nameOk && partialMatch {
+		request = request.Filter("name", name)
 	}
 
 	locations, apiResponse, err := request.Execute()
@@ -80,22 +97,26 @@ func dataSourceLocationRead(ctx context.Context, d *schema.ResourceData, meta in
 	if err != nil {
 		return diag.FromErr(fmt.Errorf("an error occurred while fetching locations: %s", err.Error()))
 	}
+
 	var results []ionoscloud.Location
 
-	if nameOk && locations.Items != nil {
-		for _, loc := range *locations.Items {
-			if loc.Properties != nil && loc.Properties.Name != nil && strings.EqualFold(*loc.Properties.Name, name.(string)) {
-				results = append(results, loc)
+	if partialMatch {
+		results = *locations.Items
+	} else {
+		if nameOk && locations.Items != nil {
+			for _, loc := range *locations.Items {
+				if loc.Properties != nil && loc.Properties.Name != nil && strings.EqualFold(*loc.Properties.Name, name) {
+					results = append(results, loc)
+				}
 			}
 		}
+		log.Printf("[INFO] Results length %d *************", len(results))
 	}
-
-	log.Printf("[INFO] Results length %d *************", len(results))
 
 	var location ionoscloud.Location
 
 	if results == nil || len(results) == 0 {
-		return diag.FromErr(fmt.Errorf("no location found with the specified criteria: name = %s, feature = %s", name.(string), feature.(string)))
+		return diag.FromErr(fmt.Errorf("no location found with the specified criteria: name = %s, feature = %s", name, feature))
 	} else {
 		location = results[0]
 	}
@@ -114,6 +135,12 @@ func setLocationData(d *schema.ResourceData, location *ionoscloud.Location) erro
 	}
 
 	if location.Properties != nil {
+		if location.Properties.Name != nil {
+			if err := d.Set("name", *location.Properties.Name); err != nil {
+				return fmt.Errorf("error while setting name property for location %s: %s", d.Id(), err)
+			}
+		}
+
 		var cpuArchitectures []interface{}
 		for _, cpuArchitecture := range *location.Properties.CpuArchitecture {
 			architectureEntry := make(map[string]interface{})
@@ -150,7 +177,7 @@ func setLocationData(d *schema.ResourceData, location *ionoscloud.Location) erro
 
 		if len(imageAliases) > 0 {
 			if err := d.Set("image_aliases", imageAliases); err != nil {
-				return fmt.Errorf("error while setting image_aliases property for datacenter %s: %s", d.Id(), err)
+				return fmt.Errorf("error while setting image_aliases property for location %s: %s", d.Id(), err)
 			}
 		}
 	}

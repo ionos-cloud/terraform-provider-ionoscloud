@@ -11,7 +11,7 @@ description: |-
 
 The **Network Load Balancer Forwarding Rule data source** can be used to search for and return existing network forwarding rules.
 If a single match is found, it will be returned. If your search results in multiple matches, an error will be returned.
-When this happens, please make sure that your resources have unique names.
+When this happens, please refine your search and make sure that your resources have unique names.
 
 ## Example Usage
 
@@ -24,7 +24,6 @@ data "ionoscloud_networkloadbalancer_forwardingrule" "example" {
 }
 ```
 
-
 ## By Name
 ```hcl
 data "ionoscloud_networkloadbalancer_forwardingrule" "example" {
@@ -34,14 +33,25 @@ data "ionoscloud_networkloadbalancer_forwardingrule" "example" {
 }
 ```
 
+## By Name by Partial Match
+```hcl
+data "ionoscloud_networkloadbalancer_forwardingrule" "example" {
+    datacenter_id               = <datacenter_id>
+    networkloadbalancer_id      = <networkloadbalancer_id>
+    name                        = "Example"
+    partial_match               = true
+}
+```
+
 ## Argument Reference
 
 * `datacenter_id` - (Required) Datacenter's UUID.
 * `networkloadbalancer_id` - (Required) Network Load Balancer's UUID.
-* `name` - (Optional) Name of an existing network load balancer forwarding rule that you want to search for. Search by name is case-insensitive, but the whole resource name is required (we do not support partial matching).
 * `id` - (Optional) ID of the network load balancer forwarding rule you want to search for.
+* `name` - (Optional) Name of an existing network load balancer forwarding rule that you want to search for. Search by name is case-insensitive. The whole resource name is required if `partial_match` parameter is not set to true..
+* `partial_match` - (Optional) Whether partial matching is allowed or not when using name argument. Default value is false.
 
-Both `datacenter_id` and `networkloadbalancer_id` and either `name` or `id` must be provided. If none, or both of `name` and `id` are provided, the datasource will return an error.
+Both `datacenter_id` and `networkloadbalancer_id` and either `id` or `name` must be provided. If none, or both of `name` and `id` are provided, the datasource will return an error.
 
 ## Attributes Reference
 

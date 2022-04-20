@@ -12,7 +12,7 @@ description: |-
 The **k8s Cluster data source** can be used to search for and return existing k8s clusters.
 You can provide a string for either id or name parameters which will be compared with provisioned K8s Clusters.
 If a single match is found, it will be returned. If your search results in multiple matches, an error will be returned.
-When this happens, please make sure that your resources have unique names.
+When this happens, please refine your search and make sure that your resources have unique names.
 
 ## Example Usage
 ### By ID
@@ -29,12 +29,21 @@ data "ionoscloud_k8s_cluster" "example" {
 }
 ```
 
+### By Name with Partial Match
+```hcl
+data "ionoscloud_k8s_cluster" "example" {
+  name          = "Example"
+  partial_match = true
+}
+```
+
 ## Argument Reference
 
-* `name` - (Optional) Name or an existing cluster that you want to search for. Search by name is case-insensitive, but the whole resource name is required (we do not support partial matching).
 * `id` - (Optional) ID of the cluster you want to search for.
+* `name` - (Optional) Name or an existing cluster that you want to search for. Search by name is case-insensitive. The whole resource name is required if `partial_match` parameter is not set to true..
+* `partial_match` - (Optional) Whether partial matching is allowed or not when using name argument. Default value is false.
 
-Either `name` or `id` must be provided. If none, or both are provided, the datasource will return an error.
+Either `id` or `name` must be provided. If none, or both are provided, the datasource will return an error.
 
 ## Attributes Reference
 

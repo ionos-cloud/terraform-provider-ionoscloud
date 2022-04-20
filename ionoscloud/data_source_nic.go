@@ -7,6 +7,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 	ionoscloud "github.com/ionos-cloud/sdk-go/v6"
+	"log"
 	"strings"
 )
 
@@ -31,6 +32,12 @@ func dataSourceNIC() *schema.Resource {
 			"name": {
 				Type:     schema.TypeString,
 				Optional: true,
+			},
+			"partial_match": {
+				Type:        schema.TypeBool,
+				Description: "Whether partial matching is allowed or not when using name argument.",
+				Default:     false,
+				Optional:    true,
 			},
 			"lan": {
 				Type:     schema.TypeInt,
@@ -92,6 +99,12 @@ func getNicDataSourceSchema() map[string]*schema.Schema {
 			Type:     schema.TypeString,
 			Optional: true,
 		},
+		"partial_match": {
+			Type:        schema.TypeBool,
+			Description: "Whether partial matching is allowed or not when using name argument.",
+			Default:     false,
+			Optional:    true,
+		},
 		"lan": {
 			Type:     schema.TypeInt,
 			Optional: true,
@@ -146,13 +159,13 @@ func dataSourceNicRead(ctx context.Context, data *schema.ResourceData, meta inte
 	if sIdOk {
 		serverId = st.(string)
 	}
-	var name string
-	id, idOk := data.GetOk("id")
 
-	t, nameOk := data.GetOk("name")
-	if nameOk {
-		name = t.(string)
-	}
+	idValue, idOk := data.GetOk("id")
+	nameValue, nameOk := data.GetOk("name")
+
+	id := idValue.(string)
+	name := nameValue.(string)
+
 	var nic ionoscloud.Nic
 	var err error
 	var apiResponse *ionoscloud.APIResponse
@@ -161,10 +174,12 @@ func dataSourceNicRead(ctx context.Context, data *schema.ResourceData, meta inte
 		return diag.FromErr(fmt.Errorf("either id, or name must be set"))
 	}
 	if idOk {
-		nic, apiResponse, err = client.NetworkInterfacesApi.DatacentersServersNicsFindById(ctx, datacenterId, serverId, id.(string)).Execute()
+		log.Printf("[INFO] Using data source for nic by id %s", id)
+
+		nic, apiResponse, err = client.NetworkInterfacesApi.DatacentersServersNicsFindById(ctx, datacenterId, serverId, id).Execute()
 		logApiRequestTime(apiResponse)
 		if err != nil {
-			return diag.FromErr(fmt.Errorf("error getting nic with id %s %w", id.(string), err))
+			return diag.FromErr(fmt.Errorf("error getting nic with id %s %w", id, err))
 		}
 		if nameOk {
 			if *nic.Properties.Name != name {
@@ -173,19 +188,35 @@ func dataSourceNicRead(ctx context.Context, data *schema.ResourceData, meta inte
 			}
 		}
 	} else {
-		nics, apiResponse, err := client.NetworkInterfacesApi.DatacentersServersNicsGet(ctx, datacenterId, serverId).Depth(1).Execute()
-		logApiRequestTime(apiResponse)
-
-		if err != nil {
-			return diag.FromErr(fmt.Errorf("an error occured while fetching nics: %w ", err))
-		}
-
+		/* search by name */
 		var results []ionoscloud.Nic
 
-		if nameOk && nics.Items != nil {
-			for _, tempNic := range *nics.Items {
-				if tempNic.Properties != nil && tempNic.Properties.Name != nil && strings.EqualFold(*tempNic.Properties.Name, name) {
-					results = append(results, tempNic)
+		partialMatch := data.Get("partial_match").(bool)
+
+		log.Printf("[INFO] Using data source for lan by name with partial_match %t and name: %s", partialMatch, name)
+
+		if partialMatch {
+			nics, apiResponse, err := client.NetworkInterfacesApi.DatacentersServersNicsGet(ctx, datacenterId, serverId).Depth(1).Filter("name", name).Execute()
+			logApiRequestTime(apiResponse)
+
+			if err != nil {
+				return diag.FromErr(fmt.Errorf("an error occured while fetching nics: %w ", err))
+			}
+
+			results = *nics.Items
+		} else {
+			nics, apiResponse, err := client.NetworkInterfacesApi.DatacentersServersNicsGet(ctx, datacenterId, serverId).Depth(1).Execute()
+			logApiRequestTime(apiResponse)
+
+			if err != nil {
+				return diag.FromErr(fmt.Errorf("an error occured while fetching nics: %w ", err))
+			}
+
+			if nameOk && nics.Items != nil {
+				for _, tempNic := range *nics.Items {
+					if tempNic.Properties != nil && tempNic.Properties.Name != nil && strings.EqualFold(*tempNic.Properties.Name, name) {
+						results = append(results, tempNic)
+					}
 				}
 			}
 		}

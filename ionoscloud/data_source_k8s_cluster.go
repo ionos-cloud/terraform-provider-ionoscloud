@@ -9,6 +9,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	ionoscloud "github.com/ionos-cloud/sdk-go/v6"
 	"gopkg.in/yaml.v3"
+	"log"
 	"strings"
 )
 
@@ -50,6 +51,12 @@ func dataSourceK8sCluster() *schema.Resource {
 			"name": {
 				Type:     schema.TypeString,
 				Optional: true,
+			},
+			"partial_match": {
+				Type:        schema.TypeBool,
+				Description: "Whether partial matching is allowed or not when using name argument.",
+				Default:     false,
+				Optional:    true,
 			},
 			"state": {
 				Type:     schema.TypeString,
@@ -247,8 +254,11 @@ func dataSourceK8sCluster() *schema.Resource {
 func dataSourceK8sReadCluster(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	client := meta.(SdkBundle).CloudApiClient
 
-	id, idOk := d.GetOk("id")
-	name, nameOk := d.GetOk("name")
+	idValue, idOk := d.GetOk("id")
+	nameValue, nameOk := d.GetOk("name")
+
+	id := idValue.(string)
+	name := nameValue.(string)
 
 	if idOk && nameOk {
 		return diag.FromErr(errors.New("id and name cannot be both specified in the same time"))
@@ -261,46 +271,60 @@ func dataSourceK8sReadCluster(ctx context.Context, d *schema.ResourceData, meta 
 	var apiResponse *ionoscloud.APIResponse
 
 	if idOk {
+		log.Printf("[INFO] Using data source for k8s cluster by id %s", id)
 		/* search by ID */
-		cluster, apiResponse, err = client.KubernetesApi.K8sFindByClusterId(ctx, id.(string)).Execute()
+		cluster, apiResponse, err = client.KubernetesApi.K8sFindByClusterId(ctx, id).Execute()
 		logApiRequestTime(apiResponse)
 		if err != nil {
-			return diag.FromErr(fmt.Errorf("an error occurred while fetching the k8s cluster with ID %s: %s", id.(string), err))
+			return diag.FromErr(fmt.Errorf("an error occurred while fetching the k8s cluster with ID %s: %s", id, err))
 		}
 	} else {
 		/* search by name */
-		var clusters ionoscloud.KubernetesClusters
+		var results []ionoscloud.KubernetesCluster
 
-		clusters, apiResponse, err := client.KubernetesApi.K8sGet(ctx).Depth(1).Execute()
-		logApiRequestTime(apiResponse)
-		if err != nil {
-			return diag.FromErr(fmt.Errorf("an error occurred while fetching k8s clusters: %s", err.Error()))
-		}
+		partialMatch := d.Get("partial_match").(bool)
 
-		if clusters.Items != nil {
-			var results []ionoscloud.KubernetesCluster
+		log.Printf("[INFO] Using data source for k8s cluster by name with partial_match %t and name: %s", partialMatch, name)
 
-			for _, c := range *clusters.Items {
-				if c.Properties != nil && c.Properties.Name != nil && strings.EqualFold(*c.Properties.Name, name.(string)) {
-					tmpCluster, apiResponse, err := client.KubernetesApi.K8sFindByClusterId(ctx, *c.Id).Execute()
-					logApiRequestTime(apiResponse)
-					if err != nil {
-						return diag.FromErr(fmt.Errorf("an error occurred while fetching k8s cluster with ID %s: %s", *c.Id, err.Error()))
+		if partialMatch {
+			log.Printf("[INFO] Using data source for k8s cluster by id %s", id)
+
+			clusters, apiResponse, err := client.KubernetesApi.K8sGet(ctx).Depth(1).Filter("name", name).Execute()
+			logApiRequestTime(apiResponse)
+			if err != nil {
+				return diag.FromErr(fmt.Errorf("an error occurred while fetching k8s clusters: %s", err.Error()))
+			}
+
+			results = *clusters.Items
+		} else {
+			clusters, apiResponse, err := client.KubernetesApi.K8sGet(ctx).Depth(1).Execute()
+			logApiRequestTime(apiResponse)
+			if err != nil {
+				return diag.FromErr(fmt.Errorf("an error occurred while fetching k8s clusters: %s", err.Error()))
+			}
+
+			if clusters.Items != nil {
+				for _, c := range *clusters.Items {
+					if c.Properties != nil && c.Properties.Name != nil && strings.EqualFold(*c.Properties.Name, name) {
+						tmpCluster, apiResponse, err := client.KubernetesApi.K8sFindByClusterId(ctx, *c.Id).Execute()
+						logApiRequestTime(apiResponse)
+						if err != nil {
+							return diag.FromErr(fmt.Errorf("an error occurred while fetching k8s cluster with ID %s: %s", *c.Id, err.Error()))
+						}
+						results = append(results, tmpCluster)
+						break
 					}
-					results = append(results, tmpCluster)
-					break
 				}
 			}
-
-			if results == nil || len(results) == 0 {
-				return diag.FromErr(fmt.Errorf("no cluster found with the specified name %s", name.(string)))
-			} else if len(results) > 1 {
-				return diag.FromErr(fmt.Errorf("more than one cluster found with the specified name %s", name.(string)))
-			} else {
-				cluster = results[0]
-			}
 		}
 
+		if results == nil || len(results) == 0 {
+			return diag.FromErr(fmt.Errorf("no cluster found with the specified name %s", name))
+		} else if len(results) > 1 {
+			return diag.FromErr(fmt.Errorf("more than one cluster found with the specified name %s", name))
+		} else {
+			cluster = results[0]
+		}
 	}
 
 	if err = setK8sClusterData(d, &cluster); err != nil {

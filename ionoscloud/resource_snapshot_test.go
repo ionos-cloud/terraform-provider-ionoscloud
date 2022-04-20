@@ -52,7 +52,7 @@ func TestAccSnapshotBasic(t *testing.T) {
 				),
 			},
 			{
-				Config: testAccDataSourceSnapshotMatching,
+				Config: testAccDataSourceSnapshotPartialMatching,
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttrPair(DataSource+"."+SnapshotResource+"."+SnapshotDataSourceByName, "name", SnapshotResource+"."+SnapshotTestResource, "name"),
 					resource.TestCheckResourceAttrPair(DataSource+"."+SnapshotResource+"."+SnapshotDataSourceByName, "location", SnapshotResource+"."+SnapshotTestResource, "location"),
@@ -95,6 +95,10 @@ func TestAccSnapshotBasic(t *testing.T) {
 			},
 			{
 				Config:      testAccDataSourceSnapshotWrongNameError,
+				ExpectError: regexp.MustCompile(`no snapshot found with the specified criteria`),
+			},
+			{
+				Config:      testAccDataSourceSnapshotWrongPartialNameError,
 				ExpectError: regexp.MustCompile(`no snapshot found with the specified criteria`),
 			},
 			{
@@ -204,11 +208,27 @@ data ` + SnapshotResource + ` ` + SnapshotDataSourceByName + ` {
     size = ` + SnapshotResource + `.` + SnapshotTestResource + `.size
 }`
 
+const testAccDataSourceSnapshotPartialMatching = testAccCheckSnapshotConfigBasic + `
+data ` + SnapshotResource + ` ` + SnapshotDataSourceByName + ` {
+    name = "` + DataSourcePartial + `"
+    location = ` + SnapshotResource + `.` + SnapshotTestResource + `.location
+    size = ` + SnapshotResource + `.` + SnapshotTestResource + `.size
+	partial_match = true
+}`
+
 const testAccDataSourceSnapshotWrongNameError = testAccCheckSnapshotConfigBasic + `
 data ` + SnapshotResource + ` ` + SnapshotDataSourceByName + ` {
     name = "wrong_name"
     location = ` + SnapshotResource + `.` + SnapshotTestResource + `.location
     size = ` + SnapshotResource + `.` + SnapshotTestResource + `.size
+}`
+
+const testAccDataSourceSnapshotWrongPartialNameError = testAccCheckSnapshotConfigBasic + `
+data ` + SnapshotResource + ` ` + SnapshotDataSourceByName + ` {
+    name = "wrong_name"
+    location = ` + SnapshotResource + `.` + SnapshotTestResource + `.location
+    size = ` + SnapshotResource + `.` + SnapshotTestResource + `.size
+	partial_match = true
 }`
 
 const testAccDataSourceSnapshotWrongLocation = testAccCheckSnapshotConfigBasic + `

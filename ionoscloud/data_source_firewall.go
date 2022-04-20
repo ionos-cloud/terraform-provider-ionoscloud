@@ -7,6 +7,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 	ionoscloud "github.com/ionos-cloud/sdk-go/v6"
+	"log"
 	"strings"
 )
 
@@ -21,6 +22,12 @@ func dataSourceFirewall() *schema.Resource {
 			"name": {
 				Type:     schema.TypeString,
 				Optional: true,
+			},
+			"partial_match": {
+				Type:        schema.TypeBool,
+				Description: "Whether partial matching is allowed or not when using name argument.",
+				Default:     false,
+				Optional:    true,
 			},
 			"protocol": {
 				Type:     schema.TypeString,
@@ -85,8 +92,11 @@ func dataSourceFirewallRead(ctx context.Context, d *schema.ResourceData, meta in
 	serverId := d.Get("server_id").(string)
 	nicId := d.Get("nic_id").(string)
 
-	id, idOk := d.GetOk("id")
-	name, nameOk := d.GetOk("name")
+	idValue, idOk := d.GetOk("id")
+	nameValue, nameOk := d.GetOk("name")
+
+	id := idValue.(string)
+	name := nameValue.(string)
 
 	if idOk && nameOk {
 		return diag.FromErr(fmt.Errorf("id and name cannot be both specified in the same time"))
@@ -100,33 +110,47 @@ func dataSourceFirewallRead(ctx context.Context, d *schema.ResourceData, meta in
 
 	if idOk {
 		/* search by ID */
-		firewall, apiResponse, err = client.FirewallRulesApi.DatacentersServersNicsFirewallrulesFindById(ctx, datacenterId, serverId, nicId, id.(string)).Execute()
+		log.Printf("[INFO] Using data source for firewall rule by id %s", id)
+		firewall, apiResponse, err = client.FirewallRulesApi.DatacentersServersNicsFirewallrulesFindById(ctx, datacenterId, serverId, nicId, id).Execute()
 		logApiRequestTime(apiResponse)
 		if err != nil {
-			return diag.FromErr(fmt.Errorf("an error occurred while fetching the firewall rule %s: %s", id.(string), err))
+			return diag.FromErr(fmt.Errorf("an error occurred while fetching the firewall rule %s: %s", id, err))
 		}
 	} else {
 		/* search by name */
-		var firewalls ionoscloud.FirewallRules
-
-		firewalls, apiResponse, err := client.FirewallRulesApi.DatacentersServersNicsFirewallrulesGet(ctx, datacenterId, serverId, nicId).Depth(1).Execute()
-		logApiRequestTime(apiResponse)
-
-		if err != nil {
-			return diag.FromErr(fmt.Errorf("an error occurred while fetching backup unit: %s", err.Error()))
-		}
-
 		var results []ionoscloud.FirewallRule
 
-		if firewalls.Items != nil {
-			for _, fr := range *firewalls.Items {
-				if fr.Properties != nil && fr.Properties.Name != nil && strings.EqualFold(*fr.Properties.Name, name.(string)) {
-					tmpFirewall, apiResponse, err := client.FirewallRulesApi.DatacentersServersNicsFirewallrulesFindById(ctx, datacenterId, serverId, nicId, *fr.Id).Execute()
-					logApiRequestTime(apiResponse)
-					if err != nil {
-						return diag.FromErr(fmt.Errorf("an error occurred while fetching firewall rule with ID %s: %s", *fr.Id, err.Error()))
+		partialMatch := d.Get("partial_match").(bool)
+
+		log.Printf("[INFO] Using data source for backup unit by name with partial_match %t and name: %s", partialMatch, name)
+
+		if partialMatch {
+			firewalls, apiResponse, err := client.FirewallRulesApi.DatacentersServersNicsFirewallrulesGet(ctx, datacenterId, serverId, nicId).Depth(1).Filter("name", name).Execute()
+			logApiRequestTime(apiResponse)
+
+			if err != nil {
+				return diag.FromErr(fmt.Errorf("an error occurred while fetching firewall rules while searching by partial name: %s, %w", name, err))
+			}
+
+			results = *firewalls.Items
+		} else {
+			firewalls, apiResponse, err := client.FirewallRulesApi.DatacentersServersNicsFirewallrulesGet(ctx, datacenterId, serverId, nicId).Depth(1).Execute()
+			logApiRequestTime(apiResponse)
+
+			if err != nil {
+				return diag.FromErr(fmt.Errorf("an error occurred while fetching  firewall rule: %w", err))
+			}
+
+			if firewalls.Items != nil {
+				for _, fr := range *firewalls.Items {
+					if fr.Properties != nil && fr.Properties.Name != nil && strings.EqualFold(*fr.Properties.Name, name) {
+						tmpFirewall, apiResponse, err := client.FirewallRulesApi.DatacentersServersNicsFirewallrulesFindById(ctx, datacenterId, serverId, nicId, *fr.Id).Execute()
+						logApiRequestTime(apiResponse)
+						if err != nil {
+							return diag.FromErr(fmt.Errorf("an error occurred while fetching firewall rule with ID %s: %w", *fr.Id, err))
+						}
+						results = append(results, tmpFirewall)
 					}
-					results = append(results, tmpFirewall)
 				}
 			}
 		}

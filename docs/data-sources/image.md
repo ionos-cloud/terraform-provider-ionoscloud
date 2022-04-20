@@ -23,7 +23,8 @@ data "ionoscloud_image" "example" {
 
 ## Argument Reference
 
- * `name` - (Required) Name of an existing image that you want to search for. Search by name is case-insensitive, but the whole resource name is required (we do not support partial matching).
+ * `name` - (Required) Name of an existing image that you want to search for. Search by name is case-insensitive. The whole resource name is required if `partial_match` parameter is not set to true..
+ * `partial_match` - (Optional) Whether partial matching is allowed or not when using name argument. Default value is false.
  * `location` - (Optional) Id of the existing image's location.
  * `type` - (Optional) The image type, HDD or CD-ROM.
  * `cloud_init` - (Optional) Cloud init compatibility ("NONE" or "V1")

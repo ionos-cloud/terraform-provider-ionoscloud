@@ -8,6 +8,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 	ionoscloud "github.com/ionos-cloud/sdk-go/v6"
+	"log"
 	"strings"
 )
 
@@ -52,6 +53,12 @@ func dataSourceLan() *schema.Resource {
 				Type:     schema.TypeBool,
 				Computed: true,
 			},
+			"partial_match": {
+				Type:        schema.TypeBool,
+				Description: "Whether partial matching is allowed or not when using name argument.",
+				Default:     false,
+				Optional:    true,
+			},
 		},
 		Timeouts: &resourceDefaultTimeouts,
 	}
@@ -83,8 +90,11 @@ func dataSourceLanRead(ctx context.Context, d *schema.ResourceData, meta interfa
 		return diag.FromErr(errors.New("no datacenter_id was specified"))
 	}
 
-	id, idOk := d.GetOk("id")
-	name, nameOk := d.GetOk("name")
+	idValue, idOk := d.GetOk("id")
+	nameValue, nameOk := d.GetOk("name")
+
+	id := idValue.(string)
+	name := nameValue.(string)
 
 	if idOk && nameOk {
 		return diag.FromErr(errors.New("id and name cannot be both specified in the same time"))
@@ -98,33 +108,46 @@ func dataSourceLanRead(ctx context.Context, d *schema.ResourceData, meta interfa
 
 	if idOk {
 		/* search by ID */
-		lan, apiResponse, err = client.LANsApi.DatacentersLansFindById(ctx, datacenterId.(string), id.(string)).Execute()
+		log.Printf("[INFO] Using data source for lan by id %s", id)
+
+		lan, apiResponse, err = client.LANsApi.DatacentersLansFindById(ctx, datacenterId.(string), id).Execute()
 		logApiRequestTime(apiResponse)
 		if err != nil {
-			return diag.FromErr(fmt.Errorf("an error occurred while fetching lan with ID %s: %w", id.(string), err))
+			return diag.FromErr(fmt.Errorf("an error occurred while fetching lan with ID %s: %w", id, err))
 		}
 	} else {
 		/* search by name */
-		var lans ionoscloud.Lans
-
-		lans, apiResponse, err := client.LANsApi.DatacentersLansGet(ctx, datacenterId.(string)).Depth(1).Execute()
-		logApiRequestTime(apiResponse)
-		if err != nil {
-			return diag.FromErr(fmt.Errorf("an error occurred while fetching lans: %s", err.Error()))
-		}
-
 		var results []ionoscloud.Lan
 
-		if lans.Items != nil {
-			for _, l := range *lans.Items {
-				if l.Properties != nil && l.Properties.Name != nil && strings.EqualFold(*l.Properties.Name, name.(string)) {
-					/* lan found */
-					lan, apiResponse, err = client.LANsApi.DatacentersLansFindById(ctx, datacenterId.(string), *l.Id).Execute()
-					logApiRequestTime(apiResponse)
-					if err != nil {
-						return diag.FromErr(fmt.Errorf("an error occurred while fetching lan %s: %w", *l.Id, err))
+		partialMatch := d.Get("partial_match").(bool)
+
+		log.Printf("[INFO] Using data source for lan by name with partial_match %t and name: %s", partialMatch, name)
+
+		if partialMatch {
+			lans, apiResponse, err := client.LANsApi.DatacentersLansGet(ctx, datacenterId.(string)).Depth(1).Filter("name", name).Execute()
+			logApiRequestTime(apiResponse)
+			if err != nil {
+				return diag.FromErr(fmt.Errorf("an error occurred while fetching lans: %s", err.Error()))
+			}
+			results = *lans.Items
+		} else {
+			lans, apiResponse, err := client.LANsApi.DatacentersLansGet(ctx, datacenterId.(string)).Depth(1).Execute()
+			logApiRequestTime(apiResponse)
+			if err != nil {
+				return diag.FromErr(fmt.Errorf("an error occurred while fetching lans: %s", err.Error()))
+			}
+
+			if lans.Items != nil {
+				for _, l := range *lans.Items {
+					if l.Properties != nil && l.Properties.Name != nil && strings.EqualFold(*l.Properties.Name, name) {
+						/* lan found */
+						lan, apiResponse, err = client.LANsApi.DatacentersLansFindById(ctx, datacenterId.(string), *l.Id).Execute()
+						logApiRequestTime(apiResponse)
+						if err != nil {
+							return diag.FromErr(fmt.Errorf("an error occurred while fetching lan %s: %w", *l.Id, err))
+						}
+						results = append(results, l)
 					}
-					results = append(results, l)
 				}
 			}
 		}

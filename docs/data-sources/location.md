@@ -11,7 +11,7 @@ description: |-
 
 The **Location data source** can be used to search for and return an existing location which can then be used elsewhere in the configuration.
 If a single match is found, it will be returned. If your search results in multiple matches, an error will be returned.
-When this happens, please make sure that your resources have unique names.
+When this happens, please refine your search and make sure that your resources have unique names.
 
 ## Example Usage
 
@@ -22,9 +22,20 @@ data "ionoscloud_location" "example" {
 }
 ```
 
+## Example Usage with Partial Match
+
+```hcl
+data "ionoscloud_location" "example" {
+  name          = "karls"
+  feature       = "SSD"
+  partial_match = true
+}
+```
+
 ## Argument Reference
 
- * `name` - (Required) Name of the location to search for. Search by name is case-insensitive, but the whole resource name is required (we do not support partial matching).
+ * `name` - (Required) Name of the location to search for. Search by name is case-insensitive. The whole resource name is required if `partial_match` parameter is not set to true..
+ * `partial_match` - (Optional) Whether partial matching is allowed or not when using name argument. Default value is false.
  * `feature` - (Optional) A desired feature that the location must be able to provide.
 
 ## Attributes Reference

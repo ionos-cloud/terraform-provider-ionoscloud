@@ -62,6 +62,25 @@ func TestAccVolumeBasic(t *testing.T) {
 				),
 			},
 			{
+				Config: testAccDataSourceVolumePartialMatchName,
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttrPair(DataSource+"."+VolumeResource+"."+VolumeDataSourceByName, "name", VolumeResource+"."+VolumeTestResource, "name"),
+					resource.TestCheckResourceAttrPair(DataSource+"."+VolumeResource+"."+VolumeDataSourceByName, "image", VolumeResource+"."+VolumeTestResource, "image"),
+					resource.TestCheckResourceAttrPair(DataSource+"."+VolumeResource+"."+VolumeDataSourceByName, "image_alias", VolumeResource+"."+VolumeTestResource, "image_alias"),
+					resource.TestCheckResourceAttrPair(DataSource+"."+VolumeResource+"."+VolumeDataSourceByName, "disk_type", VolumeResource+"."+VolumeTestResource, "disk_type"),
+					resource.TestCheckResourceAttrPair(DataSource+"."+VolumeResource+"."+VolumeDataSourceByName, "sshkey", VolumeResource+"."+VolumeTestResource, "sshkey"),
+					resource.TestCheckResourceAttrPair(DataSource+"."+VolumeResource+"."+VolumeDataSourceByName, "bus", VolumeResource+"."+VolumeTestResource, "bus"),
+					resource.TestCheckResourceAttrPair(DataSource+"."+VolumeResource+"."+VolumeDataSourceByName, "availability_zone", VolumeResource+"."+VolumeTestResource, "availability_zone"),
+					resource.TestCheckResourceAttrPair(DataSource+"."+VolumeResource+"."+VolumeDataSourceByName, "cpu_hot_plug", VolumeResource+"."+VolumeTestResource, "cpu_hot_plug"),
+					resource.TestCheckResourceAttrPair(DataSource+"."+VolumeResource+"."+VolumeDataSourceByName, "ram_hot_plug", VolumeResource+"."+VolumeTestResource, "ram_hot_plug"),
+					resource.TestCheckResourceAttrPair(DataSource+"."+VolumeResource+"."+VolumeDataSourceByName, "nic_hot_plug", VolumeResource+"."+VolumeTestResource, "nic_hot_plug"),
+					resource.TestCheckResourceAttrPair(DataSource+"."+VolumeResource+"."+VolumeDataSourceByName, "nic_hot_unplug", VolumeResource+"."+VolumeTestResource, "nic_hot_unplug"),
+					resource.TestCheckResourceAttrPair(DataSource+"."+VolumeResource+"."+VolumeDataSourceByName, "disc_virtio_hot_plug", VolumeResource+"."+VolumeTestResource, "disc_virtio_hot_plug"),
+					resource.TestCheckResourceAttrPair(DataSource+"."+VolumeResource+"."+VolumeDataSourceByName, "disc_virtio_hot_unplug", VolumeResource+"."+VolumeTestResource, "disc_virtio_hot_unplug"),
+					resource.TestCheckResourceAttrPair(DataSource+"."+VolumeResource+"."+VolumeDataSourceByName, "device_number", VolumeResource+"."+VolumeTestResource, "device_number"),
+					resource.TestCheckResourceAttrPair(DataSource+"."+VolumeResource+"."+VolumeDataSourceByName, "boot_server", ServerResource+"."+ServerTestResource, "id")),
+			},
+			{
 				Config: testAccDataSourceVolumeMatchName,
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttrPair(DataSource+"."+VolumeResource+"."+VolumeDataSourceByName, "name", VolumeResource+"."+VolumeTestResource, "name"),
@@ -82,6 +101,10 @@ func TestAccVolumeBasic(t *testing.T) {
 			},
 			{
 				Config:      testAccDataSourceVolumeWrongNameError,
+				ExpectError: regexp.MustCompile(`no volume found with the specified criteria: name`),
+			},
+			{
+				Config:      testAccDataSourceVolumeWrongPartialNameError,
 				ExpectError: regexp.MustCompile(`no volume found with the specified criteria: name`),
 			},
 			{
@@ -336,10 +359,27 @@ data ` + VolumeResource + ` ` + VolumeDataSourceByName + ` {
 }
 `
 
+var testAccDataSourceVolumePartialMatchName = testAccCheckVolumeConfigBasic + `
+data ` + VolumeResource + ` ` + VolumeDataSourceByName + ` {
+  datacenter_id = ` + DatacenterResource + `.` + DatacenterTestResource + `.id
+  name			= "` + DataSourcePartial + `"
+  partial_match = true
+}
+`
+
 var testAccDataSourceVolumeWrongNameError = testAccCheckVolumeConfigBasic + `
 data ` + VolumeResource + ` ` + VolumeDataSourceByName + ` {
   datacenter_id = ` + DatacenterResource + `.` + DatacenterTestResource + `.id
   name			= "wrong_name"
+}
+`
+
+var testAccDataSourceVolumeWrongPartialNameError = testAccCheckVolumeConfigBasic + `
+data ` + VolumeResource + ` ` + VolumeDataSourceByName + ` {
+  datacenter_id = ` + DatacenterResource + `.` + DatacenterTestResource + `.id
+  name			= "wrong_name"
+  partial_match = true
+
 }
 `
 
