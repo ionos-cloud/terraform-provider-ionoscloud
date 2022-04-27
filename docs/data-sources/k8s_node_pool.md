@@ -12,7 +12,7 @@ description: |-
 The **k8s Node Pool** data source can be used to search for and return existing k8s Node Pools.
 You can provide a string for either id or name parameters which will be compared with provisioned K8s Node Pools.
 If a single match is found, it will be returned. If your search results in multiple matches, an error will be returned.
-When this happens, please make sure that your resources have unique names.
+When this happens, please refine your search and make sure that your resources have unique names.
 
 ## Example Usage
 
@@ -32,13 +32,23 @@ data "ionoscloud_k8s_node_pool" "example" {
 }
 ```
 
+### By Name with Partial Match
+```hcl
+data "ionoscloud_k8s_node_pool" "example" {
+  k8s_cluster_id 	= <k8s_cluster_id>
+  name              = "Example"
+  partial_match 	= true
+}
+```
+
 ## Argument Reference
 
 * `k8s_cluster_id` (Required) K8s Cluster' UUID
-* `name` - (Optional) Name of an existing node pool that you want to search for. Search by name is case-insensitive, but the whole resource name is required (we do not support partial matching).
 * `id` - (Optional) ID of the node pool you want to search for.
+* `name` - (Optional) Name of an existing node pool that you want to search for. Search by name is case-insensitive. The whole resource name is required if `partial_match` parameter is not set to true..
+* `partial_match` - (Optional) Whether partial matching is allowed or not when using name argument. Default value is false.
 
-`k8s_cluster_id` and either `name` or `id` must be provided. If none, or both of `name` and `id` are provided, the datasource will return an error.
+`k8s_cluster_id` and either `id` or `name` must be provided. If none, or both of `name` and `id` are provided, the datasource will return an error.
 
 ## Attributes Reference
 

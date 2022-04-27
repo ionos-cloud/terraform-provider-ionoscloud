@@ -97,6 +97,12 @@ func dataSourceImage() *schema.Resource {
 				Optional: true,
 				Computed: true,
 			},
+			"partial_match": {
+				Type:        schema.TypeBool,
+				Description: "Whether partial matching is allowed or not when using name argument.",
+				Default:     false,
+				Optional:    true,
+			},
 		},
 		Timeouts: &resourceDefaultTimeouts,
 	}

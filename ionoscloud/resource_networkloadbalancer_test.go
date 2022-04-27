@@ -62,6 +62,16 @@ func TestAccNetworkLoadBalancerBasic(t *testing.T) {
 				),
 			},
 			{
+				Config: testAccDataSourceNetworkLoadBalancerPartialMatchName,
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttrPair(networkLoadBalancerResource, "name", dataSourceNetworkLoadBalancerName, "name"),
+					resource.TestCheckResourceAttrPair(networkLoadBalancerResource, "listener_lan", dataSourceNetworkLoadBalancerName, "listener_lan"),
+					resource.TestCheckResourceAttrPair(networkLoadBalancerResource, "ips", dataSourceNetworkLoadBalancerName, "ips"),
+					resource.TestCheckResourceAttrPair(networkLoadBalancerResource, "target_lan", dataSourceNetworkLoadBalancerName, "target_lan"),
+					resource.TestCheckResourceAttrPair(networkLoadBalancerResource, "lb_private_ips", dataSourceNetworkLoadBalancerName, "lb_private_ips"),
+				),
+			},
+			{
 				Config: testAccDataSourceNetworkLoadBalancerMatchName,
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttrPair(networkLoadBalancerResource, "name", dataSourceNetworkLoadBalancerName, "name"),
@@ -73,6 +83,10 @@ func TestAccNetworkLoadBalancerBasic(t *testing.T) {
 			},
 			{
 				Config:      testAccDataSourceNetworkLoadBalancerWrongNameError,
+				ExpectError: regexp.MustCompile(`no network load balancer found with the specified criteria: name`),
+			},
+			{
+				Config:      testAccDataSourceNetworkLoadBalancerWrongPartialNameError,
 				ExpectError: regexp.MustCompile(`no network load balancer found with the specified criteria: name`),
 			},
 			{
@@ -269,9 +283,25 @@ data ` + NetworkLoadBalancerResource + ` ` + NetworkLoadBalancerDataSourceByName
 }
 `
 
+const testAccDataSourceNetworkLoadBalancerPartialMatchName = testAccCheckNetworkLoadBalancerConfigBasic + `
+data ` + NetworkLoadBalancerResource + ` ` + NetworkLoadBalancerDataSourceByName + ` {
+  datacenter_id = ` + NetworkLoadBalancerResource + `.` + NetworkLoadBalancerTestResource + `.datacenter_id
+  name			= "` + DataSourcePartial + `"
+  partial_match = true
+}
+`
+
 const testAccDataSourceNetworkLoadBalancerWrongNameError = testAccCheckNetworkLoadBalancerConfigBasic + `
 data ` + NetworkLoadBalancerResource + ` ` + NetworkLoadBalancerDataSourceByName + ` {
   datacenter_id = ` + NetworkLoadBalancerResource + `.` + NetworkLoadBalancerTestResource + `.datacenter_id
   name			= "wrong_name"
+}
+`
+
+const testAccDataSourceNetworkLoadBalancerWrongPartialNameError = testAccCheckNetworkLoadBalancerConfigBasic + `
+data ` + NetworkLoadBalancerResource + ` ` + NetworkLoadBalancerDataSourceByName + ` {
+  datacenter_id = ` + NetworkLoadBalancerResource + `.` + NetworkLoadBalancerTestResource + `.datacenter_id
+  name			= "wrong_name"
+  partial_match = true
 }
 `

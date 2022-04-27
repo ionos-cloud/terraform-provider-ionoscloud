@@ -45,6 +45,17 @@ func TestAccDataCenterBasic(t *testing.T) {
 				),
 			},
 			{
+				Config: testAccDataSourceDatacenterPartialMatchName,
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttrPair(DataSource+"."+DatacenterResource+"."+DatacenterDataSourceByName, "name", DatacenterResource+"."+DatacenterTestResource, "name"),
+					resource.TestCheckResourceAttrPair(DataSource+"."+DatacenterResource+"."+DatacenterDataSourceByName, "location", DatacenterResource+"."+DatacenterTestResource, "location"),
+					resource.TestCheckResourceAttrPair(DataSource+"."+DatacenterResource+"."+DatacenterDataSourceByName, "description", DatacenterResource+"."+DatacenterTestResource, "description"),
+					resource.TestCheckResourceAttrPair(DataSource+"."+DatacenterResource+"."+DatacenterDataSourceByName, "version", DatacenterResource+"."+DatacenterTestResource, "version"),
+					resource.TestCheckResourceAttrPair(DataSource+"."+DatacenterResource+"."+DatacenterDataSourceByName, "features", DatacenterResource+"."+DatacenterTestResource, "features"),
+					resource.TestCheckResourceAttrPair(DataSource+"."+DatacenterResource+"."+DatacenterDataSourceByName, "sec_auth_protection", DatacenterResource+"."+DatacenterTestResource, "sec_auth_protection"),
+				),
+			},
+			{
 				Config: testAccDataSourceDatacenterMatchName,
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttrPair(DataSource+"."+DatacenterResource+"."+DatacenterDataSourceByName, "name", DatacenterResource+"."+DatacenterTestResource, "name"),
@@ -72,6 +83,10 @@ func TestAccDataCenterBasic(t *testing.T) {
 			},
 			{
 				Config:      testAccDataSourceDatacenterWrongNameError,
+				ExpectError: regexp.MustCompile("no datacenter found with the specified criteria"),
+			},
+			{
+				Config:      testAccDataSourceDatacenterWrongPartialNameError,
 				ExpectError: regexp.MustCompile("no datacenter found with the specified criteria"),
 			},
 			{
@@ -178,6 +193,12 @@ data ` + DatacenterResource + ` ` + DatacenterDataSourceByName + ` {
     name = ` + DatacenterResource + `.` + DatacenterTestResource + `.name
 }`
 
+const testAccDataSourceDatacenterPartialMatchName = testAccCheckDatacenterConfigBasic + `
+data ` + DatacenterResource + ` ` + DatacenterDataSourceByName + ` {
+    name = "` + DataSourcePartial + `"
+  	partial_match = true
+}`
+
 const testAccDataSourceDatacenterMatching = testAccCheckDatacenterConfigBasic + `
 data ` + DatacenterResource + ` ` + DatacenterDataSourceMatching + ` {
     name = ` + DatacenterResource + `.` + DatacenterTestResource + `.name
@@ -195,6 +216,12 @@ resource ` + DatacenterResource + ` ` + DatacenterTestResource + `_multiple_resu
 data ` + DatacenterResource + ` ` + DatacenterDataSourceMatching + ` {
     name = ` + DatacenterResource + `.` + DatacenterTestResource + `.name
     location = ` + DatacenterResource + `.` + DatacenterTestResource + `.location
+}`
+
+const testAccDataSourceDatacenterWrongPartialNameError = testAccCheckDatacenterConfigBasic + `
+data ` + DatacenterResource + ` ` + DatacenterDataSourceMatching + ` {
+    name = "wrong_name"
+  	partial_match = true
 }`
 
 const testAccDataSourceDatacenterWrongLocationError = testAccCheckDatacenterConfigBasic + `

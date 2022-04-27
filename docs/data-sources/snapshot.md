@@ -11,7 +11,7 @@ description: |-
 
 The **Snapshot data source** can be used to search for and return an existing snapshot which can then be used to provision a server. 
 If a single match is found, it will be returned. If your search results in multiple matches, an error will be returned.
-When this happens, please make sure that your resources have unique names.
+When this happens, please refine your search and make sure that your resources have unique names.
 
 ## Example Usage
 
@@ -30,16 +30,27 @@ data "ionoscloud_snapshot" "example" {
   location = "us/las"
 }
 ```
+
+### By Name with Partial Match & Size & Location
+```hcl
+data "ionoscloud_snapshot" "example" {
+  name          = "Example"
+  partial_match = true
+  size          = "2"
+  location      = "us/las"
+}
+```
 Note: The size argument is in GB
 
 ## Argument Reference
 
  * `id` - (Optional) UUID of an existing snapshot that you want to search for.
- * `name` - (Optional) Name of an existing snapshot that you want to search for. Search by name is case-insensitive, but the whole resource name is required (we do not support partial matching).
+ * `name` - (Optional) Name of an existing snapshot that you want to search for. Search by name is case-insensitive. The whole resource name is required if `partial_match` parameter is not set to true..
+ * `partial_match` - (Optional) Whether partial matching is allowed or not when using name argument. Default value is false.
  * `location` - (Optional) Existing snapshot's location.
  * `size` - (Optional) The size of the snapshot to look for.
 
-Either `name` or `id` must be provided. If none, or both are provided, the datasource will return an error. 
+Either `idn` or `ame` must be provided. If none, or both are provided, the datasource will return an error. 
 Additionally, you can add `location` and `size` along with the `name` argument for a more refined search.
 If a single match is found, it will be returned. If your search results in multiple matches, an error will be returned.
 When this happens, please refine your search string so that it is specific enough to return only one result.

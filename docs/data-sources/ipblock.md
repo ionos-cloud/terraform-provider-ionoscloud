@@ -12,7 +12,7 @@ description: |-
 The **IP Block data source** can be used to search for and return an existing Ip Block.
 You can provide a string for the id, the name or the location parameters which will be compared with the provisioned Ip Blocks.
 If a single match is found, it will be returned. If your search results in multiple matches, an error will be returned.
-When this happens, please make sure that your resources have unique names.
+When this happens, please refine your search and make sure that your resources have unique names.
 
 ## Example Usage
 
@@ -26,7 +26,15 @@ data "ionoscloud_ipblock" "example" {
 ### By Name
 ```hcl
 data "ionoscloud_ipblock" "example" {
-  name = "IP Block Name"
+  name = "IP Block Example"
+}
+``` 
+
+### By Name with Partial Match
+```hcl
+data "ionoscloud_ipblock" "example" {
+  name          = "Example"
+  partial_match = true
 }
 ``` 
 
@@ -48,7 +56,8 @@ data "ionoscloud_ipblock" "example" {
 ## Argument reference
 
 * `id` - (Optional) ID of an existing Ip Block that you want to search for.
-* `name` - (Optional) Name of an existing Ip Block that you want to search for. Search by name is case-insensitive, but the whole resource name is required (we do not support partial matching).
+* `name` - (Optional) Name of an existing Ip Block that you want to search for. Search by name is case-insensitive. The whole resource name is required if `partial_match` parameter is not set to true..
+* `partial_match` - (Optional) Whether partial matching is allowed or not when using name argument. Default value is false.
 * `location` - (Optional) The regional location for this IP Block: us/las, us/ewr, de/fra, de/fkb.
 
 ## Attributes Reference

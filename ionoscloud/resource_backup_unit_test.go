@@ -1,4 +1,4 @@
-//go:build all || backup
+//go:build compute || all || backup
 
 package ionoscloud
 
@@ -41,6 +41,14 @@ func TestAccBackupUnitBasic(t *testing.T) {
 				),
 			},
 			{
+				Config: testAccDataSourceBackupUnitPartialMatchName,
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttrPair(DataSource+"."+BackupUnitResource+"."+BackupUnitDataSourceByName, "name", BackupUnitResource+"."+BackupUnitTestResource, "name"),
+					resource.TestCheckResourceAttrPair(DataSource+"."+BackupUnitResource+"."+BackupUnitDataSourceByName, "email", BackupUnitResource+"."+BackupUnitTestResource, "email"),
+					resource.TestCheckResourceAttrPair(DataSource+"."+BackupUnitResource+"."+BackupUnitDataSourceByName, "login", BackupUnitResource+"."+BackupUnitTestResource, "login"),
+				),
+			},
+			{
 				Config: testAccDataSourceBackupUnitMatchName,
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttrPair(DataSource+"."+BackupUnitResource+"."+BackupUnitDataSourceByName, "name", BackupUnitResource+"."+BackupUnitTestResource, "name"),
@@ -50,6 +58,14 @@ func TestAccBackupUnitBasic(t *testing.T) {
 			},
 			{
 				Config:      testAccDataSourceBackupUnitMatchWrongNameError,
+				ExpectError: regexp.MustCompile("no backup unit found with the specified name"),
+			},
+			{
+				Config:      testAccDataSourceBackupUnitPartialMatchWrongNameError,
+				ExpectError: regexp.MustCompile("no backup unit found with the specified name"),
+			},
+			{
+				Config:      testAccDataSourceBackupUnitMatchPartialMatchDisabledError,
 				ExpectError: regexp.MustCompile("no backup unit found with the specified name"),
 			},
 			{
@@ -161,6 +177,13 @@ data ` + BackupUnitResource + ` ` + BackupUnitDataSourceById + ` {
 }
 `
 
+const testAccDataSourceBackupUnitPartialMatchName = testAccCheckBackupUnitConfigBasic + `
+data ` + BackupUnitResource + ` ` + BackupUnitDataSourceByName + ` {
+  name			= "` + DataSourcePartial + `"
+  partial_match = true
+}
+`
+
 const testAccDataSourceBackupUnitMatchName = testAccCheckBackupUnitConfigBasic + `
 resource ` + BackupUnitResource + ` ` + BackupUnitTestResource + `similar {
 	name        = "similar` + BackupUnitTestResource + `"
@@ -176,5 +199,18 @@ data ` + BackupUnitResource + ` ` + BackupUnitDataSourceByName + ` {
 const testAccDataSourceBackupUnitMatchWrongNameError = testAccCheckBackupUnitConfigBasic + `
 data ` + BackupUnitResource + ` ` + BackupUnitDataSourceByName + ` {
   name			= "wrong_name"
+}
+`
+
+const testAccDataSourceBackupUnitPartialMatchWrongNameError = testAccCheckBackupUnitConfigBasic + `
+data ` + BackupUnitResource + ` ` + BackupUnitDataSourceByName + ` {
+  name			= "wrong_name"
+  partial_match = true
+}
+`
+
+const testAccDataSourceBackupUnitMatchPartialMatchDisabledError = testAccCheckBackupUnitConfigBasic + `
+data ` + BackupUnitResource + ` ` + BackupUnitDataSourceByName + ` {
+  name			= "` + DataSourcePartial + `"
 }
 `

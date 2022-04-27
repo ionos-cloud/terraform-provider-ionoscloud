@@ -7,6 +7,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	ionoscloud "github.com/ionos-cloud/sdk-go/v6"
+	"log"
 	"strings"
 )
 
@@ -21,6 +22,12 @@ func dataSourceNatGateway() *schema.Resource {
 			"name": {
 				Type:     schema.TypeString,
 				Optional: true,
+			},
+			"partial_match": {
+				Type:        schema.TypeBool,
+				Description: "Whether partial matching is allowed or not when using name argument.",
+				Default:     false,
+				Optional:    true,
 			},
 			"public_ips": {
 				Type:        schema.TypeList,
@@ -66,13 +73,13 @@ func dataSourceNatGateway() *schema.Resource {
 func dataSourceNatGatewayRead(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	client := meta.(SdkBundle).CloudApiClient
 
-	datacenterId, dcIdOk := d.GetOk("datacenter_id")
-	if !dcIdOk {
-		return diag.FromErr(errors.New("no datacenter_id was specified"))
-	}
+	datacenterId := d.Get("datacenter_id").(string)
 
-	id, idOk := d.GetOk("id")
-	name, nameOk := d.GetOk("name")
+	idValue, idOk := d.GetOk("id")
+	nameValue, nameOk := d.GetOk("name")
+
+	id := idValue.(string)
+	name := nameValue.(string)
 
 	if idOk && nameOk {
 		return diag.FromErr(errors.New("id and name cannot be both specified in the same time"))
@@ -86,41 +93,56 @@ func dataSourceNatGatewayRead(ctx context.Context, d *schema.ResourceData, meta 
 
 	if idOk {
 		/* search by ID */
-		natGateway, apiResponse, err = client.NATGatewaysApi.DatacentersNatgatewaysFindByNatGatewayId(ctx, datacenterId.(string), id.(string)).Execute()
+		log.Printf("[INFO] Using data source for nat gateway by id %s", id)
+
+		natGateway, apiResponse, err = client.NATGatewaysApi.DatacentersNatgatewaysFindByNatGatewayId(ctx, datacenterId, id).Execute()
 		logApiRequestTime(apiResponse)
 		if err != nil {
-			return diag.FromErr(fmt.Errorf("an error occurred while fetching the nat gateway %s: %w", id.(string), err))
+			return diag.FromErr(fmt.Errorf("an error occurred while fetching the nat gateway %s: %w", id, err))
 		}
 	} else {
 		/* search by name */
-		var natGateways ionoscloud.NatGateways
-
-		natGateways, apiResponse, err := client.NATGatewaysApi.DatacentersNatgatewaysGet(ctx, datacenterId.(string)).Depth(1).Execute()
-		logApiRequestTime(apiResponse)
-		if err != nil {
-			return diag.FromErr(fmt.Errorf("an error occurred while fetching nat gateway: %s", err.Error()))
-		}
-
 		var results []ionoscloud.NatGateway
-		if natGateways.Items != nil {
-			for _, ng := range *natGateways.Items {
-				if ng.Properties != nil && ng.Properties.Name != nil && strings.EqualFold(*ng.Properties.Name, name.(string)) {
-					tmpNatGateway, apiResponse, err := client.NATGatewaysApi.DatacentersNatgatewaysFindByNatGatewayId(ctx, datacenterId.(string), *ng.Id).Execute()
-					logApiRequestTime(apiResponse)
-					if err != nil {
-						return diag.FromErr(fmt.Errorf("an error occurred while fetching nat gateway with ID %s: %s", *ng.Id, err.Error()))
-					}
-					natGateway = tmpNatGateway
-					results = append(results, natGateway)
-				}
 
+		partialMatch := d.Get("partial_match").(bool)
+
+		log.Printf("[INFO] Using data source for nat gateway by name with partial_match %t and name: %s", partialMatch, name)
+
+		if partialMatch {
+			natGateways, apiResponse, err := client.NATGatewaysApi.DatacentersNatgatewaysGet(ctx, datacenterId).Depth(1).Filter("name", name).Execute()
+			logApiRequestTime(apiResponse)
+			if err != nil {
+				return diag.FromErr(fmt.Errorf("an error occurred while fetching nat gateway: %s", err.Error()))
+			}
+
+			results = *natGateways.Items
+		} else {
+			natGateways, apiResponse, err := client.NATGatewaysApi.DatacentersNatgatewaysGet(ctx, datacenterId).Depth(1).Execute()
+			logApiRequestTime(apiResponse)
+			if err != nil {
+				return diag.FromErr(fmt.Errorf("an error occurred while fetching nat gateway: %s", err.Error()))
+			}
+
+			if natGateways.Items != nil {
+				for _, ng := range *natGateways.Items {
+					if ng.Properties != nil && ng.Properties.Name != nil && strings.EqualFold(*ng.Properties.Name, name) {
+						tmpNatGateway, apiResponse, err := client.NATGatewaysApi.DatacentersNatgatewaysFindByNatGatewayId(ctx, datacenterId, *ng.Id).Execute()
+						logApiRequestTime(apiResponse)
+						if err != nil {
+							return diag.FromErr(fmt.Errorf("an error occurred while fetching nat gateway with ID %s: %s", *ng.Id, err.Error()))
+						}
+						natGateway = tmpNatGateway
+						results = append(results, natGateway)
+					}
+
+				}
 			}
 		}
 
 		if results == nil || len(results) == 0 {
-			return diag.FromErr(fmt.Errorf("no nat gateway found with the specified criteria: name = %s", name.(string)))
+			return diag.FromErr(fmt.Errorf("no nat gateway found with the specified criteria: name = %s", name))
 		} else if len(results) > 1 {
-			return diag.FromErr(fmt.Errorf("more than one nat gateway found with the specified criteria: name = %s", name.(string)))
+			return diag.FromErr(fmt.Errorf("more than one nat gateway found with the specified criteria: name = %s", name))
 		} else {
 			natGateway = results[0]
 		}

@@ -57,7 +57,7 @@ func TestAccGroupBasic(t *testing.T) {
 				),
 			},
 			{
-				Config: testAccDataSourceGroupMatchName,
+				Config: testAccDataSourceGroupPartialMatchName,
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttrPair(DataSource+"."+GroupResource+"."+GroupDataSourceByName, "name", GroupResource+"."+GroupTestResource, "name"),
 					resource.TestCheckResourceAttrPair(DataSource+"."+GroupResource+"."+GroupDataSourceByName, "create_datacenter", GroupResource+"."+GroupTestResource, "create_datacenter"),
@@ -94,6 +94,10 @@ func TestAccGroupBasic(t *testing.T) {
 			},
 			{
 				Config:      testAccDataSourceGroupWrongNameError,
+				ExpectError: regexp.MustCompile("no group found with the specified name"),
+			},
+			{
+				Config:      testAccDataSourceGroupWrongPartialNameError,
 				ExpectError: regexp.MustCompile("no group found with the specified name"),
 			},
 			{
@@ -265,6 +269,13 @@ data ` + GroupResource + ` ` + GroupDataSourceByName + ` {
 }
 `
 
+var testAccDataSourceGroupPartialMatchName = testAccCheckGroupConfigBasic + `
+data ` + GroupResource + ` ` + GroupDataSourceByName + ` {
+  name			= "` + DataSourcePartial + `"
+  partial_match = true
+}
+`
+
 var testAccDataSourceGroupMultipleResultsError = testAccCheckGroupConfigBasic + `
 resource ` + GroupResource + ` ` + GroupTestResource + `_multiple_results {
   name = "` + GroupTestResource + `"
@@ -287,6 +298,13 @@ data ` + GroupResource + ` ` + GroupDataSourceByName + ` {
 var testAccDataSourceGroupWrongNameError = testAccCheckGroupConfigBasic + `
 data ` + GroupResource + ` ` + GroupDataSourceByName + ` {
   name			= "wrong_name"
+}
+`
+
+var testAccDataSourceGroupWrongPartialNameError = testAccCheckGroupConfigBasic + `
+data ` + GroupResource + ` ` + GroupDataSourceByName + ` {
+  name			= "wrong_name"
+  partial_match  = true
 }
 `
 

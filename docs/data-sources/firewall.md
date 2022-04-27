@@ -12,7 +12,7 @@ description: |-
 The **Firewall data source** can be used to search for and return an existing FirewallRules. 
 You can provide a string for either id or name parameters which will be compared with provisioned Firewall Rules.
 If a single match is found, it will be returned. If your search results in multiple matches, an error will be returned.
-When this happens, please make sure that your resources have unique names.
+When this happens, please refine your search and make sure that your resources have unique names.
 
 ## Example Usage
 
@@ -32,7 +32,18 @@ data "ionoscloud_firewall" "example" {
   datacenter_id   = <datacenter_id>
   server_id       = <server_id>
   nic_id          = <nic_id>
-  name            = "test_ds_firewall_rule"
+  name            = "Firewall Rule Example"
+}
+```
+
+### By Name with Partial Match
+```hcl
+data "ionoscloud_firewall" "example" {
+  datacenter_id   = <datacenter_id>
+  server_id       = <server_id>
+  nic_id          = <nic_id>
+  name            = "Firewall"
+  partial_match   = true
 }
 ```
 
@@ -40,13 +51,14 @@ data "ionoscloud_firewall" "example" {
 
 The following arguments are supported:
 
-* `name` - (Optional) Name of an existing firewall rule that you want to search for. Search by name is case-insensitive, but the whole resource name is required (we do not support partial matching).
 * `id` - (Optional) ID of the firewall rule you want to search for.
+* `name` - (Optional) Name of an existing firewall rule that you want to search for. Search by name is case-insensitive. The whole resource name is required if `partial_match` parameter is not set to true..
+* `partial_match` - (Optional) Whether partial matching is allowed or not when using name argument. Default value is false.
 * `datacenter_id` - (Required) The Virtual Data Center ID.
 * `server_id` - (Required) The Server ID.
 * `nic_id` - (Required) The NIC ID.
 
-Either `name` or   `id` must be provided. If none, or both are provided, the datasource will return an error.
+Either `id` or `name` must be provided. If none, or both are provided, the datasource will return an error.
 
 ## Attributes Reference
 

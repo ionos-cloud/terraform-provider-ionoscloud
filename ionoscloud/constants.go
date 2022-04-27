@@ -193,6 +193,7 @@ const (
 
 // General Constants
 const (
-	DataSource       = "data"
-	UpdatedResources = "test_updated"
+	DataSource        = "data"
+	UpdatedResources  = "test_updated"
+	DataSourcePartial = "test"
 )

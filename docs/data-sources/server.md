@@ -11,7 +11,7 @@ description: |-
 
 The **Server data source** can be used to search for and return existing servers. 
 If a single match is found, it will be returned. If your search results in multiple matches, an error will be returned.
-When this happens, please make sure that your resources have unique names.
+When this happens, please refine your search and make sure that your resources have unique names.
 
 ## Example Usage
 
@@ -31,13 +31,23 @@ data "ionoscloud_server" "example" {
 }
 ```
 
+### By Name with Partial Match 
+```hcl
+data "ionoscloud_server" "example" {
+   datacenter_id = <datacenter_id>
+   name			 = "Server Example"
+   partial_match = true
+}
+```
+
 ## Argument Reference
 
 * `datacenter_id` - (Required) Datacenter's UUID.
-* `name` - (Optional) Name of an existing server that you want to search for. Search by name is case-insensitive, but the whole resource name is required (we do not support partial matching).
 * `id` - (Optional) ID of the server you want to search for.
+* `name` - (Optional) Name of an existing server that you want to search for. Search by name is case-insensitive. The whole resource name is required if `partial_match` parameter is not set to true..
+* `partial_match` - (Optional) Whether partial matching is allowed or not when using name argument. Default value is false.
 
-`datacenter_id` and either `name` or `id` must be provided. If none, or both of `name` and `id` are provided, the datasource will return an error.
+`datacenter_id` and either `id` or `name` must be provided. If none, or both of `name` and `id` are provided, the datasource will return an error.
 
 ## Attributes Reference
 
