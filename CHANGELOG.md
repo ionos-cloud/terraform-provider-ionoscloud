@@ -1,4 +1,4 @@
-## 6.2.3(Upcoming Release)
+## 6.2.3
 
 ### Fixes
 - do not allow empty string AvailabilityZone. Only allow "AUTO", "ZONE_1", "ZONE_2", "ZONE_3"
