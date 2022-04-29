@@ -7,6 +7,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	ionoscloud "github.com/ionos-cloud/sdk-go/v6"
+	"log"
 	"strings"
 )
 
@@ -22,6 +23,12 @@ func dataSourceTargetGroup() *schema.Resource {
 				Type:        schema.TypeString,
 				Optional:    true,
 				Description: "The name of the target group.",
+			},
+			"partial_match": {
+				Type:        schema.TypeBool,
+				Description: "Whether partial matching is allowed or not when using name argument.",
+				Default:     false,
+				Optional:    true,
 			},
 			"algorithm": {
 				Type:        schema.TypeString,
@@ -153,35 +160,49 @@ func dataSourceTargetGroupRead(ctx context.Context, d *schema.ResourceData, meta
 
 	if idOk {
 		/* search by ID */
+		log.Printf("[INFO] Using data source for target group by id %s", id)
 		targetGroup, apiResponse, err = client.TargetGroupsApi.TargetgroupsFindByTargetGroupId(ctx, id).Execute()
 		logApiRequestTime(apiResponse)
 
 		if err != nil {
-			return diag.FromErr(fmt.Errorf("an error occurred while fetching the target groups %s: %s", id, err))
+			return diag.FromErr(fmt.Errorf("an error occurred while fetching the target group %s: %s", id, err))
 		}
 	} else {
 		/* search by name */
-		var targetGroups ionoscloud.TargetGroups
-
-		targetGroups, apiResponse, err := client.TargetGroupsApi.TargetgroupsGet(ctx).Depth(5).Execute()
-		logApiRequestTime(apiResponse)
-
-		if err != nil {
-			return diag.FromErr(fmt.Errorf("an error occurred while fetching target groups: %w", err))
-		}
-
 		var results []ionoscloud.TargetGroup
 
-		if targetGroups.Items != nil {
-			for _, t := range *targetGroups.Items {
-				if t.Properties.Name != nil && strings.ToLower(*t.Properties.Name) == strings.ToLower(name) {
-					tmpTargetGroup, apiResponse, err := client.TargetGroupsApi.TargetgroupsFindByTargetGroupId(ctx, *t.Id).Execute()
-					logApiRequestTime(apiResponse)
-					if err != nil {
-						return diag.FromErr(fmt.Errorf("an error occurred while fetching target group with ID %s: %w", *t.Id, err))
-					}
-					results = append(results, tmpTargetGroup)
+		partialMatch := d.Get("partial_match").(bool)
 
+		log.Printf("[INFO] Using data source for target group by name with partial_match %t and name: %s", partialMatch, name)
+
+		if partialMatch {
+			targetGroups, apiResponse, err := client.TargetGroupsApi.TargetgroupsGet(ctx).Depth(1).Filter("name", name).Execute()
+			logApiRequestTime(apiResponse)
+
+			if err != nil {
+				return diag.FromErr(fmt.Errorf("an error occurred while fetching target groups: %w", err))
+			}
+
+			results = *targetGroups.Items
+		} else {
+			targetGroups, apiResponse, err := client.TargetGroupsApi.TargetgroupsGet(ctx).Depth(1).Execute()
+			logApiRequestTime(apiResponse)
+
+			if err != nil {
+				return diag.FromErr(fmt.Errorf("an error occurred while fetching target groups: %w", err))
+			}
+
+			if targetGroups.Items != nil {
+				for _, t := range *targetGroups.Items {
+					if t.Properties.Name != nil && strings.ToLower(*t.Properties.Name) == strings.ToLower(name) {
+						tmpTargetGroup, apiResponse, err := client.TargetGroupsApi.TargetgroupsFindByTargetGroupId(ctx, *t.Id).Execute()
+						logApiRequestTime(apiResponse)
+						if err != nil {
+							return diag.FromErr(fmt.Errorf("an error occurred while fetching target group with ID %s: %w", *t.Id, err))
+						}
+						results = append(results, tmpTargetGroup)
+
+					}
 				}
 			}
 		}

@@ -82,6 +82,27 @@ func TestAccTargetGroupBasic(t *testing.T) {
 				),
 			},
 			{
+				Config: testAccDataSourceTargetGroupPartialMatchName,
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttrPair(resourceNameTargetGroupByName, "name", resourceNameTargetGroup, "name"),
+					resource.TestCheckResourceAttrPair(resourceNameTargetGroupByName, "algorithm", resourceNameTargetGroup, "algorithm"),
+					resource.TestCheckResourceAttrPair(resourceNameTargetGroupByName, "targets.0.ip", resourceNameTargetGroup, "targets.0.ip"),
+					resource.TestCheckResourceAttrPair(resourceNameTargetGroupByName, "targets.0.port", resourceNameTargetGroup, "targets.0.port"),
+					resource.TestCheckResourceAttrPair(resourceNameTargetGroupByName, "targets.0.weight", resourceNameTargetGroup, "targets.0.weight"),
+					resource.TestCheckResourceAttrPair(resourceNameTargetGroupByName, "targets.0.health_check_enabled", resourceNameTargetGroup, "targets.0.health_check_enabled"),
+					resource.TestCheckResourceAttrPair(resourceNameTargetGroupByName, "targets.0.maintenance_enabled", resourceNameTargetGroup, "targets.0.maintenance_enabled"),
+					resource.TestCheckResourceAttrPair(resourceNameTargetGroupByName, "health_check.0.check_timeout", resourceNameTargetGroup, "health_check.0.check_timeout"),
+					resource.TestCheckResourceAttrPair(resourceNameTargetGroupByName, "health_check.0.check_interval", resourceNameTargetGroup, "health_check.0.check_interval"),
+					resource.TestCheckResourceAttrPair(resourceNameTargetGroupByName, "health_check.0.retries", resourceNameTargetGroup, "health_check.0.retries"),
+					resource.TestCheckResourceAttrPair(resourceNameTargetGroupByName, "http_health_check.0.path", resourceNameTargetGroup, "http_health_check.0.path"),
+					resource.TestCheckResourceAttrPair(resourceNameTargetGroupByName, "http_health_check.0.method", resourceNameTargetGroup, "http_health_check.0.method"),
+					resource.TestCheckResourceAttrPair(resourceNameTargetGroupByName, "http_health_check.0.match_type", resourceNameTargetGroup, "http_health_check.0.match_type"),
+					resource.TestCheckResourceAttrPair(resourceNameTargetGroupByName, "http_health_check.0.response", resourceNameTargetGroup, "http_health_check.0.response"),
+					resource.TestCheckResourceAttrPair(resourceNameTargetGroupByName, "http_health_check.0.regex", resourceNameTargetGroup, "http_health_check.0.regex"),
+					resource.TestCheckResourceAttrPair(resourceNameTargetGroupByName, "http_health_check.0.negate", resourceNameTargetGroup, "http_health_check.0.negate"),
+				),
+			},
+			{
 				Config: testAccDataSourceTargetGroupMatchName,
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttrPair(resourceNameTargetGroupByName, "name", resourceNameTargetGroup, "name"),
@@ -104,6 +125,10 @@ func TestAccTargetGroupBasic(t *testing.T) {
 			},
 			{
 				Config:      testAccDataSourceTargetGroupWrongNameError,
+				ExpectError: regexp.MustCompile("no target group found with the specified criteria"),
+			},
+			{
+				Config:      testAccDataSourceTargetGroupWrongPartialNameError,
 				ExpectError: regexp.MustCompile("no target group found with the specified criteria"),
 			},
 			{
@@ -279,5 +304,19 @@ data ` + TargetGroupResource + ` ` + TargetGroupDataSourceByName + ` {
 const testAccDataSourceTargetGroupWrongNameError = testAccCheckTargetGroupConfigUpdateWithAllParameters + `
 data ` + TargetGroupResource + ` ` + TargetGroupDataSourceByName + ` {
   name			= "wrong name"
+}
+`
+
+const testAccDataSourceTargetGroupPartialMatchName = testAccCheckTargetGroupConfigUpdateWithAllParameters + `
+data ` + TargetGroupResource + ` ` + TargetGroupDataSourceByName + ` {
+  name          = "` + DataSourcePartial + `"
+  partial_match = true
+}
+`
+
+const testAccDataSourceTargetGroupWrongPartialNameError = testAccCheckTargetGroupConfigUpdateWithAllParameters + `
+data ` + TargetGroupResource + ` ` + TargetGroupDataSourceByName + ` {
+  name			= "wrong name"
+  partial_match = true
 }
 `

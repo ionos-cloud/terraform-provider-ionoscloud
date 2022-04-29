@@ -50,6 +50,16 @@ func TestAccApplicationLoadBalancerBasic(t *testing.T) {
 				),
 			},
 			{
+				Config: testAccDataSourceApplicationLoadBalancerPartialMatchName,
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttrPair(resourceNameAlb, "name", dataSourceNameAlbByName, "name"),
+					resource.TestCheckResourceAttrPair(resourceNameAlb, "listener_lan", dataSourceNameAlbByName, "listener_lan"),
+					resource.TestCheckResourceAttrPair(resourceNameAlb, "target_lan", dataSourceNameAlbByName, "target_lan"),
+					resource.TestCheckResourceAttrPair(resourceNameAlb, "ips.0", dataSourceNameAlbByName, "ips.0"),
+					resource.TestCheckResourceAttrPair(resourceNameAlb, "lb_private_ips.0", dataSourceNameAlbByName, "lb_private_ips.0"),
+				),
+			},
+			{
 				Config: testAccDataSourceApplicationLoadBalancerMatchName,
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttrPair(resourceNameAlb, "name", dataSourceNameAlbByName, "name"),
@@ -61,6 +71,10 @@ func TestAccApplicationLoadBalancerBasic(t *testing.T) {
 			},
 			{
 				Config:      testAccDataSourceApplicationLoadBalancerWrongNameError,
+				ExpectError: regexp.MustCompile("no application load balanacer found with the specified criteria"),
+			},
+			{
+				Config:      testAccDataSourceApplicationLoadBalancerWrongPartialNameError,
 				ExpectError: regexp.MustCompile("no application load balanacer found with the specified criteria"),
 			},
 			{
@@ -151,7 +165,7 @@ func testAccCheckApplicationLoadBalancerExists(n string, alb *ionoscloud.Applica
 const testAccCheckApplicationLoadBalancerConfigBasic = `
 resource ` + DatacenterResource + ` "alb_datacenter" {
   name              = "test_alb"
-  location          = "de/fkb"
+  location          = "de/txl"
   description       = "datacenter for hosting "
 }
 
@@ -179,7 +193,7 @@ resource ` + ALBResource + ` ` + ALBTestResource + ` {
 const testAccCheckApplicationLoadBalancerConfigUpdate = `
 resource ` + DatacenterResource + ` "alb_datacenter" {
   name              = "test_alb"
-  location          = "de/fkb"
+  location          = "de/txl"
   description       = "datacenter for hosting "
 }
 
@@ -230,9 +244,25 @@ data ` + ALBResource + ` ` + ALBDataSourceByName + ` {
 }
 `
 
+const testAccDataSourceApplicationLoadBalancerPartialMatchName = testAccCheckApplicationLoadBalancerConfigBasic + `
+data ` + ALBResource + ` ` + ALBDataSourceByName + ` {
+  datacenter_id = ` + DatacenterResource + `.alb_datacenter.id
+  name          = "` + DataSourcePartial + `"
+  partial_match = true
+}
+`
+
 const testAccDataSourceApplicationLoadBalancerWrongNameError = testAccCheckApplicationLoadBalancerConfigBasic + `
 data ` + ALBResource + ` ` + ALBDataSourceByName + ` {
   datacenter_id = ` + DatacenterResource + `.alb_datacenter.id
   name          = "wrong_name"
+}
+`
+
+const testAccDataSourceApplicationLoadBalancerWrongPartialNameError = testAccCheckApplicationLoadBalancerConfigBasic + `
+data ` + ALBResource + ` ` + ALBDataSourceByName + ` {
+  datacenter_id = ` + DatacenterResource + `.alb_datacenter.id
+  name          = "wrong_name"
+  partial_match = true
 }
 `

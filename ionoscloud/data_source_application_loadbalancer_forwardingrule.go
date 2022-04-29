@@ -8,6 +8,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 	ionoscloud "github.com/ionos-cloud/sdk-go/v6"
+	"log"
 	"strings"
 )
 
@@ -22,6 +23,12 @@ func dataSourceApplicationLoadBalancerForwardingRule() *schema.Resource {
 			"name": {
 				Type:        schema.TypeString,
 				Description: "The name of the Application Load Balancer forwarding rule.",
+				Optional:    true,
+			},
+			"partial_match": {
+				Type:        schema.TypeBool,
+				Description: "Whether partial matching is allowed or not when using name argument.",
+				Default:     false,
 				Optional:    true,
 			},
 			"protocol": {
@@ -175,36 +182,51 @@ func dataSourceApplicationLoadBalancerForwardingRuleRead(ctx context.Context, d 
 
 	if idOk {
 		/* search by ID */
+		log.Printf("[INFO] Using data source for application load balancer forwarding rule by id %s", id)
 		applicationLoadBalancerForwardingRule, apiResponse, err = client.ApplicationLoadBalancersApi.DatacentersApplicationloadbalancersForwardingrulesFindByForwardingRuleId(ctx, datacenterId, albId, id).Execute()
 		logApiRequestTime(apiResponse)
 		if err != nil {
-			return diag.FromErr(fmt.Errorf("an error occurred while fetching the application load balancer forwarding rule %s: %w", id, err))
+			return diag.FromErr(fmt.Errorf("an error occurred while fetching the application load balancer forwarding rule while searching by ID %s: %w", id, err))
 		}
 	} else {
 		/* search by name */
-		var applicationLoadBalancersForwardingRules ionoscloud.ApplicationLoadBalancerForwardingRules
-
-		applicationLoadBalancersForwardingRules, apiResponse, err := client.ApplicationLoadBalancersApi.DatacentersApplicationloadbalancersForwardingrulesGet(ctx, datacenterId, albId).Depth(5).Execute()
-		logApiRequestTime(apiResponse)
-
-		if err != nil {
-			return diag.FromErr(fmt.Errorf("an error occurred while fetching application loadbalancer forwarding rules: %w", err))
-		}
-
 		var results []ionoscloud.ApplicationLoadBalancerForwardingRule
 
-		if applicationLoadBalancersForwardingRules.Items != nil {
-			for _, albFr := range *applicationLoadBalancersForwardingRules.Items {
-				if albFr.Properties != nil && albFr.Properties.Name != nil && strings.ToLower(*albFr.Properties.Name) == strings.ToLower(name) {
-					tmpAlbFr, apiResponse, err := client.ApplicationLoadBalancersApi.DatacentersApplicationloadbalancersForwardingrulesFindByForwardingRuleId(ctx, datacenterId, albId, *albFr.Id).Execute()
-					logApiRequestTime(apiResponse)
-					if err != nil {
-						return diag.FromErr(fmt.Errorf("an error occurred while fetching application load balancer forwarding rule with ID %s: %w", *albFr.Id, err))
+		partialMatch := d.Get("partial_match").(bool)
+
+		log.Printf("[INFO] Using data source for application load balancer forwarding rule by name with partial_match %t and name: %s", partialMatch, name)
+
+		if partialMatch {
+			applicationLoadBalancersForwardingRules, apiResponse, err := client.ApplicationLoadBalancersApi.DatacentersApplicationloadbalancersForwardingrulesGet(ctx, datacenterId, albId).Depth(1).Filter("name", name).Execute()
+			logApiRequestTime(apiResponse)
+
+			if err != nil {
+				return diag.FromErr(fmt.Errorf("an error occurred while fetching application loadbalancer forwarding rules: %w", err))
+			}
+
+			results = *applicationLoadBalancersForwardingRules.Items
+		} else {
+			applicationLoadBalancersForwardingRules, apiResponse, err := client.ApplicationLoadBalancersApi.DatacentersApplicationloadbalancersForwardingrulesGet(ctx, datacenterId, albId).Depth(1).Execute()
+			logApiRequestTime(apiResponse)
+
+			if err != nil {
+				return diag.FromErr(fmt.Errorf("an error occurred while fetching application loadbalancer forwarding rules: %w", err))
+			}
+
+			if applicationLoadBalancersForwardingRules.Items != nil {
+				for _, albFr := range *applicationLoadBalancersForwardingRules.Items {
+					if albFr.Properties != nil && albFr.Properties.Name != nil && strings.ToLower(*albFr.Properties.Name) == strings.ToLower(name) {
+						tmpAlbFr, apiResponse, err := client.ApplicationLoadBalancersApi.DatacentersApplicationloadbalancersForwardingrulesFindByForwardingRuleId(ctx, datacenterId, albId, *albFr.Id).Execute()
+						logApiRequestTime(apiResponse)
+						if err != nil {
+							return diag.FromErr(fmt.Errorf("an error occurred while fetching application load balancer forwarding rule with ID %s: %w", *albFr.Id, err))
+						}
+						results = append(results, tmpAlbFr)
 					}
-					results = append(results, tmpAlbFr)
 				}
 			}
 		}
+
 		if results == nil || len(results) == 0 {
 			return diag.FromErr(fmt.Errorf("no application load balanacer forwarding rule found with the specified criteria: name = %s", name))
 		} else if len(results) > 1 {

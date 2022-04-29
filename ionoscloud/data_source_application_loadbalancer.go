@@ -7,6 +7,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	ionoscloud "github.com/ionos-cloud/sdk-go/v6"
+	"log"
 	"strings"
 )
 
@@ -21,6 +22,12 @@ func dataSourceApplicationLoadBalancer() *schema.Resource {
 			"name": {
 				Type:        schema.TypeString,
 				Description: "The name of the Application Load Balancer.",
+				Optional:    true,
+			},
+			"partial_match": {
+				Type:        schema.TypeBool,
+				Description: "Whether partial matching is allowed or not when using name argument.",
+				Default:     false,
 				Optional:    true,
 			},
 			"listener_lan": {
@@ -82,35 +89,49 @@ func dataSourceApplicationLoadBalancerRead(ctx context.Context, d *schema.Resour
 
 	if idOk {
 		/* search by ID */
+		log.Printf("[INFO] Using data source for application load balancer by id %s", id)
 		applicationLoadBalancer, apiResponse, err = client.ApplicationLoadBalancersApi.DatacentersApplicationloadbalancersFindByApplicationLoadBalancerId(ctx, datacenterId, id).Execute()
 		logApiRequestTime(apiResponse)
 		if err != nil {
-			return diag.FromErr(fmt.Errorf("an error occurred while fetching the application load balancer %s: %w", id, err))
+			return diag.FromErr(fmt.Errorf("an error occurred while fetching the application load balancer while searching by ID %s: %w", id, err))
 		}
 	} else {
 		/* search by name */
-		var applicationLoadBalancers ionoscloud.ApplicationLoadBalancers
-
-		applicationLoadBalancers, apiResponse, err := client.ApplicationLoadBalancersApi.DatacentersApplicationloadbalancersGet(ctx, datacenterId).Depth(5).Execute()
-		logApiRequestTime(apiResponse)
-
-		if err != nil {
-			return diag.FromErr(fmt.Errorf("an error occurred while fetching application load balancers: %w", err))
-		}
-
 		var results []ionoscloud.ApplicationLoadBalancer
 
-		if applicationLoadBalancers.Items != nil {
-			for _, alb := range *applicationLoadBalancers.Items {
-				if alb.Properties != nil && alb.Properties.Name != nil && strings.ToLower(*alb.Properties.Name) == strings.ToLower(name) {
-					tmpAlb, apiResponse, err := client.ApplicationLoadBalancersApi.DatacentersApplicationloadbalancersFindByApplicationLoadBalancerId(ctx, datacenterId, *alb.Id).Execute()
-					logApiRequestTime(apiResponse)
-					if err != nil {
-						return diag.FromErr(fmt.Errorf("an error occurred while fetching application load balancer with ID %s: %w", *alb.Id, err))
-					}
-					results = append(results, tmpAlb)
-				}
+		partialMatch := d.Get("partial_match").(bool)
 
+		log.Printf("[INFO] Using data source for application load balancer by name with partial_match %t and name: %s", partialMatch, name)
+
+		if partialMatch {
+			applicationLoadBalancers, apiResponse, err := client.ApplicationLoadBalancersApi.DatacentersApplicationloadbalancersGet(ctx, datacenterId).Depth(1).Filter("name", name).Execute()
+			logApiRequestTime(apiResponse)
+
+			if err != nil {
+				return diag.FromErr(fmt.Errorf("an error occurred while fetching application load balancers: %w", err))
+			}
+
+			results = *applicationLoadBalancers.Items
+		} else {
+			applicationLoadBalancers, apiResponse, err := client.ApplicationLoadBalancersApi.DatacentersApplicationloadbalancersGet(ctx, datacenterId).Depth(1).Execute()
+			logApiRequestTime(apiResponse)
+
+			if err != nil {
+				return diag.FromErr(fmt.Errorf("an error occurred while fetching application load balancers: %w", err))
+			}
+
+			if applicationLoadBalancers.Items != nil {
+				for _, alb := range *applicationLoadBalancers.Items {
+					if alb.Properties != nil && alb.Properties.Name != nil && strings.ToLower(*alb.Properties.Name) == strings.ToLower(name) {
+						tmpAlb, apiResponse, err := client.ApplicationLoadBalancersApi.DatacentersApplicationloadbalancersFindByApplicationLoadBalancerId(ctx, datacenterId, *alb.Id).Execute()
+						logApiRequestTime(apiResponse)
+						if err != nil {
+							return diag.FromErr(fmt.Errorf("an error occurred while fetching application load balancer with ID %s: %w", *alb.Id, err))
+						}
+						results = append(results, tmpAlb)
+					}
+
+				}
 			}
 		}
 

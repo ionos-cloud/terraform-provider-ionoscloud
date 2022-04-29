@@ -12,7 +12,7 @@ description: |-
 The **Target Group** data source can be used to search for and return an existing Application Load Balancer Target Group.
 You can provide a string for the name parameter which will be compared with provisioned Application Load Balancer Target Groups.
 If a single match is found, it will be returned. If your search results in multiple matches, an error will be returned.
-When this happens, please make sure that your resources have unique names.
+When this happens, please refine your search and make sure that your resources have unique names.
 
 ## Example Usage
 
@@ -23,7 +23,6 @@ data "ionoscloud_target_group" "example" {
 }
 ```
 
-
 ### By Name
 ```hcl
 data "ionoscloud_target_group" "example" {
@@ -31,10 +30,19 @@ data "ionoscloud_target_group" "example" {
 }
 ```
 
+### By Name with Partial Match
+```hcl
+data "ionoscloud_target_group" "example" {
+  name          = "Example"
+  partial_match = true
+}
+```
+
 ## Argument Reference
 
 * `id` - (Optional) ID of the target group you want to search for.
-* `name` - (Optional) Name of an existing target group that you want to search for. Search by name is case-insensitive, but the whole resource name is required (we do not support partial matching).
+* `name` - (Optional) Name of an existing target group that you want to search for. Search by name is case-insensitive. The whole resource name is required if `partial_match` parameter is not set to true.
+* `partial_match` - (Optional) Whether partial matching is allowed or not when using name argument. Default value is false.
 
 Either `name` or `id` must be provided. If none, or both of `name` and `id` are provided, the datasource will return an error.
 

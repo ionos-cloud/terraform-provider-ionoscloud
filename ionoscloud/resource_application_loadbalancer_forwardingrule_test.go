@@ -67,6 +67,25 @@ func TestAccApplicationLoadBalancerForwardingRuleBasic(t *testing.T) {
 				),
 			},
 			{
+				Config: testAccDataSourceApplicationLoadBalancerForwardingRulePartialMatchName,
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttrPair(dataSourceNameAlbRuleByName, "name", resourceNameAlbRule, "name"),
+					resource.TestCheckResourceAttrPair(dataSourceNameAlbRuleByName, "protocol", resourceNameAlbRule, "protocol"),
+					resource.TestCheckResourceAttrPair(dataSourceNameAlbRuleByName, "listener_ip", resourceNameAlbRule, "listener_ip"),
+					resource.TestCheckResourceAttrPair(dataSourceNameAlbRuleByName, "listener_port", resourceNameAlbRule, "listener_port"),
+					resource.TestCheckResourceAttrPair(dataSourceNameAlbRuleByName, "http_rules.0.name", resourceNameAlbRule, "http_rules.0.name"),
+					resource.TestCheckResourceAttrPair(dataSourceNameAlbRuleByName, "http_rules.0.type", resourceNameAlbRule, "http_rules.0.type"),
+					resource.TestCheckResourceAttrPair(dataSourceNameAlbRuleByName, "http_rules.0.location", resourceNameAlbRule, "http_rules.0.location"),
+					resource.TestCheckResourceAttrPair(dataSourceNameAlbRuleByName, "http_rules.0.conditions.0.type", resourceNameAlbRule, "http_rules.0.conditions.0.type"),
+					resource.TestCheckResourceAttrPair(dataSourceNameAlbRuleByName, "http_rules.0.conditions.0.condition", resourceNameAlbRule, "http_rules.0.conditions.0.condition"),
+					resource.TestCheckResourceAttrPair(dataSourceNameAlbRuleByName, "http_rules.0.conditions.0.value", resourceNameAlbRule, "http_rules.0.conditions.0.value"),
+					resource.TestCheckResourceAttrPair(dataSourceNameAlbRuleByName, "http_rules.0.name", resourceNameAlbRule, "http_rules.0.name"),
+					resource.TestCheckResourceAttrPair(dataSourceNameAlbRuleByName, "http_rules.1.type", resourceNameAlbRule, "http_rules.1.type"),
+					resource.TestCheckResourceAttrPair(dataSourceNameAlbRuleByName, "http_rules.1.conditions.0.type", resourceNameAlbRule, "http_rules.1.conditions.0.type"),
+					resource.TestCheckResourceAttrPair(dataSourceNameAlbRuleByName, "http_rules.1.conditions.0.value", resourceNameAlbRule, "http_rules.1.conditions.0.value"),
+				),
+			},
+			{
 				Config: testAccDataSourceApplicationLoadBalancerForwardingRuleMatchName,
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttrPair(dataSourceNameAlbRuleByName, "name", resourceNameAlbRule, "name"),
@@ -87,6 +106,10 @@ func TestAccApplicationLoadBalancerForwardingRuleBasic(t *testing.T) {
 			},
 			{
 				Config:      testAccDataSourceApplicationLoadBalancerForwardingRuleWrongNameError,
+				ExpectError: regexp.MustCompile("no application load balanacer forwarding rule found with the specified criteria"),
+			},
+			{
+				Config:      testAccDataSourceApplicationLoadBalancerForwardingRuleWrongPartialNameError,
 				ExpectError: regexp.MustCompile("no application load balanacer forwarding rule found with the specified criteria"),
 			},
 			{
@@ -333,5 +356,23 @@ data ` + ALBForwardingRuleResource + ` ` + ALBForwardingRuleDataSourceByName + `
   datacenter_id = ` + DatacenterResource + `.alb_datacenter.id
   application_loadbalancer_id = ` + ALBResource + `.` + ALBTestResource + `.id
   name    		=  "wrong_name"
+}
+`
+
+const testAccDataSourceApplicationLoadBalancerForwardingRulePartialMatchName = testAccCheckApplicationLoadBalancerForwardingRuleConfigBasic + `
+data ` + ALBForwardingRuleResource + ` ` + ALBForwardingRuleDataSourceByName + ` {
+  datacenter_id = ` + DatacenterResource + `.alb_datacenter.id
+  application_loadbalancer_id = ` + ALBResource + `.` + ALBTestResource + `.id
+  name          = "` + DataSourcePartial + `"
+  partial_match	=  true
+}
+`
+
+const testAccDataSourceApplicationLoadBalancerForwardingRuleWrongPartialNameError = testAccCheckApplicationLoadBalancerForwardingRuleConfigBasic + `
+data ` + ALBForwardingRuleResource + ` ` + ALBForwardingRuleDataSourceByName + ` {
+  datacenter_id = ` + DatacenterResource + `.alb_datacenter.id
+  application_loadbalancer_id = ` + ALBResource + `.` + ALBTestResource + `.id
+  name    		=  "wrong_name"
+  partial_match	=  true
 }
 `
