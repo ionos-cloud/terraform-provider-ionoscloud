@@ -30,25 +30,22 @@ func Provider() *schema.Provider {
 	provider := &schema.Provider{
 		Schema: map[string]*schema.Schema{
 			"username": {
-				Type:          schema.TypeString,
-				Optional:      true,
-				DefaultFunc:   schema.EnvDefaultFunc(ionoscloud.IonosUsernameEnvVar, nil),
-				Description:   "IonosCloud username for API operations. If token is provided, token is preferred",
-				ConflictsWith: []string{"token"},
+				Type:        schema.TypeString,
+				Optional:    true,
+				DefaultFunc: schema.EnvDefaultFunc(ionoscloud.IonosUsernameEnvVar, nil),
+				Description: "IonosCloud username for API operations. If token is provided, token is preferred",
 			},
 			"password": {
-				Type:          schema.TypeString,
-				Optional:      true,
-				DefaultFunc:   schema.EnvDefaultFunc(ionoscloud.IonosPasswordEnvVar, nil),
-				Description:   "IonosCloud password for API operations. If token is provided, token is preferred",
-				ConflictsWith: []string{"token"},
+				Type:        schema.TypeString,
+				Optional:    true,
+				DefaultFunc: schema.EnvDefaultFunc(ionoscloud.IonosPasswordEnvVar, nil),
+				Description: "IonosCloud password for API operations. If token is provided, token is preferred",
 			},
 			"token": {
-				Type:          schema.TypeString,
-				Optional:      true,
-				DefaultFunc:   schema.EnvDefaultFunc(ionoscloud.IonosTokenEnvVar, nil),
-				Description:   "IonosCloud bearer token for API operations.",
-				ConflictsWith: []string{"username", "password"},
+				Type:        schema.TypeString,
+				Optional:    true,
+				DefaultFunc: schema.EnvDefaultFunc(ionoscloud.IonosTokenEnvVar, nil),
+				Description: "IonosCloud bearer token for API operations.",
 			},
 			"endpoint": {
 				Type:        schema.TypeString,
@@ -159,11 +156,6 @@ func providerConfigure(d *schema.ResourceData, terraformVersion string) (interfa
 
 		if !passwordOk {
 			diags := diag.FromErr(fmt.Errorf("neither IonosCloud token, nor IonosCloud password has been provided"))
-			return nil, diags
-		}
-	} else {
-		if usernameOk || passwordOk {
-			diags := diag.FromErr(fmt.Errorf("only provide IonosCloud token OR IonosCloud username/password"))
 			return nil, diags
 		}
 	}

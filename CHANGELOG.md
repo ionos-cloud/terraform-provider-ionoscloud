@@ -1,10 +1,28 @@
-## 6.2.1(upcoming release)
+## 6.2.3
+
+### Fixes
+- do not allow empty string AvailabilityZone. Only allow "AUTO", "ZONE_1", "ZONE_2", "ZONE_3"
+- type field in server resource should be case-insensitive
+- remove deprecated image_name field on volume level from server resource
+- solve #266 crash on resource_volume when using image_alias with no image_password, or ssh_key_path
+
+### Features
+- added `group_ids` property for `ionoscloud_user` resource. For more details refer to the [documentation](docs/resources/user.md)
+- added `groups` property for `ionoscloud_user` data source. For more details refer to the [documentation](docs/data-sources/user.md)
+
+## 6.2.2
+
+### Fix
+- fixed error from upgrading from 6.2.0 to 6.2.1 (version compatibility issue)
+
+## 6.2.1
 
 ### Documentation
 - improved all the examples to be ready to use 
 - added units where missing
 - added example for adding a secondary NIC to an IP Failover
 - updated provider version to the latest release in main registry page
+- added details in [README.md](README.md) about testing locally
 
 ### Enhancement
 - add `allow_replace` to node pool resource, which allows the update of immutable node_pool fields will first
@@ -12,12 +30,20 @@
 - update sdk-go dependency to v6.0.2
 - update sdk-go-dbaas-postgres dependency to v1.0.2
 - update terraform-plugin-sdk to v2.12.0
+- token and username+password does not conflict anymore, all three can be set, the token having priority
+
+### Features 
+- added `backup_location` property for `ionoscloud_pg_cluster`. For more details refer to the [documentation](docs/resources/dbaas_pgsql_cluster.md)
 
 ### Fixes
 - fixed image data-source bug when `name` not provided - data-source returned 0 results
 - when you try to change an immutable field, you get an error, but before that the tf state is changed. 
 Before applying a real change you need to `apply` it back with an error again. 
 To fix, when you try to change immutable fields they will throw an error in the plan phase.
+- reintroduced in group resource the `user_id` argument, as deprecated, to provide a period of transition
+- check slice length to prevent crash
+- fixed k8s_cluster data_source bug when searching by name 
+- fix lan deletion error, when trying to delete it immediately after the deletion of the DBaaS cluster that contained it
 
 ## 6.2.0
 

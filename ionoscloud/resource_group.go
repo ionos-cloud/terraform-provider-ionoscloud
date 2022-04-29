@@ -74,12 +74,19 @@ func resourceGroup() *schema.Resource {
 				Type:     schema.TypeBool,
 				Optional: true,
 			},
+			"user_id": {
+				Type:          schema.TypeString,
+				Optional:      true,
+				ConflictsWith: []string{"user_ids"},
+				Deprecated:    "Please use user_ids for adding users to the group, since user_id will pe removed in the future",
+			},
 			"user_ids": {
 				Type:     schema.TypeSet,
 				Optional: true,
 				Elem: &schema.Schema{
 					Type: schema.TypeString,
 				},
+				ConflictsWith: []string{"user_id"},
 			},
 			"users": {
 				Type:     schema.TypeSet,
@@ -120,40 +127,41 @@ func resourceGroup() *schema.Resource {
 		},
 		Timeouts:      &resourceDefaultTimeouts,
 		SchemaVersion: 1,
-		StateUpgraders: []schema.StateUpgrader{
-			{
-				Type:    resourceGroup0().CoreConfigSchema().ImpliedType(),
-				Upgrade: resourceGroupUpgradeV0,
-				Version: 0,
-			},
-		},
+		//StateUpgraders: []schema.StateUpgrader{
+		//	{
+		//		Type:    resourceGroup0().CoreConfigSchema().ImpliedType(),
+		//		Upgrade: resourceGroupUpgradeV0,
+		//		Version: 0,
+		//	},
+		//},
 	}
 }
 
-func resourceGroup0() *schema.Resource {
-	return &schema.Resource{
-		Schema: map[string]*schema.Schema{
-			"user_id": {
-				Type:     schema.TypeString,
-				Optional: true,
-			},
-		},
-		Timeouts: &resourceDefaultTimeouts,
-	}
-}
-
-func resourceGroupUpgradeV0(_ context.Context, state map[string]interface{}, _ interface{}) (map[string]interface{}, error) {
-	oldState := state
-	var oldData string
-	if d, ok := oldState["user_id"].(string); ok {
-		oldData = d
-		var users []string
-		users = append(users, oldData)
-		state["user_ids"] = users
-	}
-
-	return state, nil
-}
+//
+//func resourceGroup0() *schema.Resource {
+//	return &schema.Resource{
+//		Schema: map[string]*schema.Schema{
+//			"user_id": {
+//				Type:     schema.TypeString,
+//				Optional: true,
+//			},
+//		},
+//		Timeouts: &resourceDefaultTimeouts,
+//	}
+//}
+//
+//func resourceGroupUpgradeV0(_ context.Context, state map[string]interface{}, _ interface{}) (map[string]interface{}, error) {
+//	oldState := state
+//	var oldData string
+//	if d, ok := oldState["user_id"].(string); ok {
+//		oldData = d
+//		var users []string
+//		users = append(users, oldData)
+//		state["user_ids"] = users
+//	}
+//
+//	return state, nil
+//}
 
 func resourceGroupCreate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	client := meta.(SdkBundle).CloudApiClient
@@ -216,13 +224,21 @@ func resourceGroupCreate(ctx context.Context, d *schema.ResourceData, meta inter
 	}
 
 	//add users to group if any is provided
+	if userVal, userOK := d.GetOk("user_id"); userOK {
+		userID := userVal.(string)
+		log.Printf("[INFO] Adding user %+v to group...", userID)
+		if err := addUserToGroup(userID, d.Id(), ctx, d, meta); err != nil {
+			return diag.FromErr(err)
+		}
+	}
+
 	if usersVal, usersOK := d.GetOk("user_ids"); usersOK {
 		usersList := usersVal.(*schema.Set)
 		if usersList.List() != nil {
 			for _, userItem := range usersList.List() {
 				userID := userItem.(string)
 				log.Printf("[INFO] Adding user %+v to group...", userID)
-				if err := addUserToGroup(userID, ctx, d, meta); err != nil {
+				if err := addUserToGroup(userID, d.Id(), ctx, d, meta); err != nil {
 					return diag.FromErr(err)
 				}
 			}
@@ -303,6 +319,28 @@ func resourceGroupUpdate(ctx context.Context, d *schema.ResourceData, meta inter
 		return diags
 	}
 
+	if d.HasChange("user_id") {
+		oldValue, newValue := d.GetChange("user_id")
+
+		userIdToAdd := newValue.(string)
+		userIdToRemove := oldValue.(string)
+
+		log.Printf("[INFO] User to add: %+v", userIdToAdd)
+		log.Printf("[INFO] User to remove: %+v", userIdToRemove)
+
+		if userIdToAdd != "" {
+			if err := addUserToGroup(userIdToAdd, d.Id(), ctx, d, meta); err != nil {
+				return diag.FromErr(err)
+			}
+		}
+
+		if userIdToRemove != "" {
+			if err := deleteUserFromGroup(userIdToRemove, d.Id(), ctx, d, meta); err != nil {
+				return diag.FromErr(err)
+			}
+		}
+	}
+
 	if d.HasChange("user_ids") {
 		oldValues, newValues := d.GetChange("user_ids")
 		oldUsersList := convertSlice(oldValues.(*schema.Set).List())
@@ -314,7 +352,7 @@ func resourceGroupUpdate(ctx context.Context, d *schema.ResourceData, meta inter
 		if newUsers != nil && len(newUsers) > 0 {
 			log.Printf("[INFO] New users to add: %+v", newUsers)
 			for _, userID := range newUsers {
-				if err := addUserToGroup(userID, ctx, d, meta); err != nil {
+				if err := addUserToGroup(userID, d.Id(), ctx, d, meta); err != nil {
 					return diag.FromErr(err)
 				}
 			}
@@ -323,7 +361,7 @@ func resourceGroupUpdate(ctx context.Context, d *schema.ResourceData, meta inter
 		if deletedUsers != nil && len(deletedUsers) > 0 {
 			log.Printf("[INFO] Users to delete: %+v", deletedUsers)
 			for _, userID := range deletedUsers {
-				if err := deleteUserFromGroup(userID, ctx, d, meta); err != nil {
+				if err := deleteUserFromGroup(userID, d.Id(), ctx, d, meta); err != nil {
 					return diag.FromErr(err)
 				}
 			}
@@ -507,20 +545,20 @@ func setGroupData(ctx context.Context, client *ionoscloud.APIClient, d *schema.R
 	return nil
 }
 
-func addUserToGroup(id string, ctx context.Context, d *schema.ResourceData, meta interface{}) error {
+func addUserToGroup(userId, groupId string, ctx context.Context, d *schema.ResourceData, meta interface{}) error {
 	client := meta.(SdkBundle).CloudApiClient
-
 	userToAdd := ionoscloud.User{
-		Id: &id,
+		Id: &userId,
 	}
-	_, apiResponse, err := client.UserManagementApi.UmGroupsUsersPost(ctx, d.Id()).User(userToAdd).Execute()
+
+	_, apiResponse, err := client.UserManagementApi.UmGroupsUsersPost(ctx, groupId).User(userToAdd).Execute()
 	logApiRequestTime(apiResponse)
 
 	if err != nil {
-		return fmt.Errorf("an error occured while adding %s user to group ID %s %w", id, d.Id(), err)
+		return fmt.Errorf("an error occured while adding %s user to group ID %s %w", userId, groupId, err)
 	}
 
-	log.Printf("[INFO] Added user %s to group %s", id, d.Id())
+	log.Printf("[INFO] Added user %s to group %s", userId, groupId)
 
 	// Wait, catching any errors
 	_, errState := getStateChangeConf(meta, d, apiResponse.Header.Get("Location"), schema.TimeoutCreate).WaitForStateContext(ctx)
@@ -531,17 +569,17 @@ func addUserToGroup(id string, ctx context.Context, d *schema.ResourceData, meta
 	return nil
 }
 
-func deleteUserFromGroup(id string, ctx context.Context, d *schema.ResourceData, meta interface{}) error {
+func deleteUserFromGroup(userId, groupId string, ctx context.Context, d *schema.ResourceData, meta interface{}) error {
 	client := meta.(SdkBundle).CloudApiClient
 
-	apiResponse, err := client.UserManagementApi.UmGroupsUsersDelete(ctx, d.Id(), id).Execute()
+	apiResponse, err := client.UserManagementApi.UmGroupsUsersDelete(ctx, groupId, userId).Execute()
 	logApiRequestTime(apiResponse)
 
 	if err != nil {
-		return fmt.Errorf("an error occured while deleting %s user from group ID %s %w", id, d.Id(), err)
+		return fmt.Errorf("an error occured while deleting %s user from group ID %s %w", userId, groupId, err)
 	}
 
-	log.Printf("[INFO] Deleted user %s from group %s", id, d.Id())
+	log.Printf("[INFO] Deleted user %s from group %s", userId, groupId)
 
 	// Wait, catching any errors
 	_, errState := getStateChangeConf(meta, d, apiResponse.Header.Get("Location"), schema.TimeoutCreate).WaitForStateContext(ctx)

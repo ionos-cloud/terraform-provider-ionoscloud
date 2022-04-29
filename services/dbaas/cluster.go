@@ -110,6 +110,11 @@ func GetDbaasPgSqlClusterDataCreate(d *schema.ResourceData) (*dbaas.CreateCluste
 		dbaasCluster.Properties.Location = &location
 	}
 
+	if backupLocation, ok := d.GetOk("backup_location"); ok {
+		backupLocation := dbaas.BackupLocation(backupLocation.(string))
+		dbaasCluster.Properties.BackupLocation = &backupLocation
+	}
+
 	if displayName, ok := d.GetOk("display_name"); ok {
 		displayName := displayName.(string)
 		dbaasCluster.Properties.DisplayName = &displayName
@@ -328,6 +333,12 @@ func SetDbaasPgSqlClusterData(d *schema.ResourceData, cluster dbaas.ClusterRespo
 	if cluster.Properties.Location != nil {
 		if err := d.Set("location", *cluster.Properties.Location); err != nil {
 			return fmt.Errorf("error while setting location property for dbaas cluster %s: %s", d.Id(), err)
+		}
+	}
+
+	if cluster.Properties.BackupLocation != nil {
+		if err := d.Set("backup_location", *cluster.Properties.BackupLocation); err != nil {
+			return fmt.Errorf("error while setting backup_location property for dbaas cluster %s: %s", d.Id(), err)
 		}
 	}
 

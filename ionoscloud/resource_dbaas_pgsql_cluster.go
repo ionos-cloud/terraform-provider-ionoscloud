@@ -92,6 +92,13 @@ func resourceDbaasPgSqlCluster() *schema.Resource {
 				Required:     true,
 				ValidateFunc: validation.All(validation.StringIsNotWhiteSpace),
 			},
+			"backup_location": {
+				Type:         schema.TypeString,
+				Description:  "The S3 location where the backups will be stored.",
+				Optional:     true,
+				Computed:     true,
+				ValidateFunc: validation.All(validation.StringInSlice([]string{"de", "eu-south-2", "eu-central-2"}, true)),
+			},
 			"display_name": {
 				Type:        schema.TypeString,
 				Description: "The friendly name of your cluster.",
@@ -182,6 +189,9 @@ func checkDBaaSClusterImmutableFields(_ context.Context, diff *schema.ResourceDi
 	}
 	if diff.HasChange("location") {
 		return fmt.Errorf("location %s", ImmutableError)
+	}
+	if diff.HasChange("backup_location") {
+		return fmt.Errorf("backup_location %s", ImmutableError)
 	}
 	if diff.HasChange("credentials") {
 		return fmt.Errorf("credentials %s", ImmutableError)
@@ -291,7 +301,7 @@ func resourceDbaasPgSqlClusterUpdate(ctx context.Context, d *schema.ResourceData
 		clusterReady, rsErr := dbaasClusterReady(ctx, client, d)
 
 		if rsErr != nil {
-			diags := diag.FromErr(fmt.Errorf("error while checking readiness status of dbaas cluster %s: %s", d.Id(), rsErr))
+			diags := diag.FromErr(fmt.Errorf("error while checking readiness status of dbaas cluster %s: %w", d.Id(), rsErr))
 			return diags
 		}
 
@@ -351,6 +361,9 @@ func resourceDbaasPgSqlClusterDelete(ctx context.Context, d *schema.ResourceData
 			return diags
 		}
 	}
+
+	// wait 15 seconds after the deletion of the cluster, for the lan to be freed
+	time.Sleep(SleepInterval * 3)
 
 	return nil
 }

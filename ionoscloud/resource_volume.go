@@ -79,9 +79,10 @@ func resourceVolume() *schema.Resource {
 				Optional: true,
 			},
 			"availability_zone": {
-				Type:     schema.TypeString,
-				Optional: true,
-				Computed: true,
+				Type:         schema.TypeString,
+				Optional:     true,
+				Computed:     true,
+				ValidateFunc: validation.All(validation.StringInSlice([]string{"AUTO", "ZONE_1", "ZONE_2", "ZONE_3"}, true)),
 			},
 			"cpu_hot_plug": {
 				Type:     schema.TypeBool,
@@ -783,7 +784,7 @@ func checkImage(ctx context.Context, client *ionoscloud.APIClient, imageInput, i
 				return image, imageAlias, isSnapshot, diags
 			}
 
-			if imagePassword == "" && len(sshKeyPath) == 0 && isSnapshot == false && img.Properties.Public != nil && *img.Properties.Public {
+			if imagePassword == "" && len(sshKeyPath) == 0 && isSnapshot == false && (img != nil && img.Properties != nil && img.Properties.Public != nil && *img.Properties.Public || imageAlias != "") {
 				diags := diag.FromErr(fmt.Errorf("either 'image_password' or 'ssh_key_path' must be provided"))
 				return image, imageAlias, isSnapshot, diags
 			}

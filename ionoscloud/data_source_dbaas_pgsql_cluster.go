@@ -9,6 +9,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 	dbaas "github.com/ionos-cloud/sdk-go-dbaas-postgres"
 	dbaasService "github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/dbaas"
+	"strings"
 )
 
 func dataSourceDbaasPgSqlCluster() *schema.Resource {
@@ -83,6 +84,11 @@ func dataSourceDbaasPgSqlCluster() *schema.Resource {
 			"location": {
 				Type:        schema.TypeString,
 				Description: "The physical location where the cluster will be created. This will be where all of your instances live. Property cannot be modified after datacenter creation (disallowed in update requests)",
+				Computed:    true,
+			},
+			"backup_location": {
+				Type:        schema.TypeString,
+				Description: "The S3 location where the backups will be stored.",
 				Computed:    true,
 			},
 			"maintenance_window": {
@@ -187,7 +193,7 @@ func dataSourceDbaasPgSqlReadCluster(ctx context.Context, d *schema.ResourceData
 
 		if clusters.Items != nil && len(*clusters.Items) > 0 {
 			for _, clusterItem := range *clusters.Items {
-				if clusterItem.Properties != nil && clusterItem.Properties.DisplayName != nil && *clusterItem.Properties.DisplayName == name.(string) {
+				if clusterItem.Properties != nil && clusterItem.Properties.DisplayName != nil && strings.EqualFold(*clusterItem.Properties.DisplayName, name.(string)) {
 					results = append(results, clusterItem)
 				}
 			}

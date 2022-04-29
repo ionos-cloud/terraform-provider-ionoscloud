@@ -22,6 +22,31 @@ resource "ionoscloud_user" "example" {
   administrator           = false
   force_sec_auth          = false
   active                  = true
+  group_ids 		          = [ ionoscloud_group.group1.id, ionoscloud_group.group2.id, ionoscloud_group.group3.id]
+}
+
+resource "ionoscloud_group" "group1" {
+  name = "group1"
+  create_datacenter = true
+  create_snapshot = true
+  reserve_ip = true
+  access_activity_log = false
+  create_k8s_cluster = true
+}
+resource "ionoscloud_group" "group2" {
+  name = "group2"
+  create_datacenter = true
+  create_snapshot = true
+  reserve_ip = true
+  access_activity_log = false
+  create_k8s_cluster = true
+}
+resource "ionoscloud_group" "group3" {
+  name = "group3"
+  create_datacenter = true
+  create_snapshot = true
+  reserve_ip = true
+  access_activity_log = false
 }
 ```
 
@@ -36,7 +61,9 @@ resource "ionoscloud_user" "example" {
 * `sec_auth_active` - (Optional)[Boolean] Indicates if secure authentication is active for the user or not. *it can not be used in create requests - can be used in update*
 * `s3_canonical_user_id` - (Computed) Canonical (S3) id of the user for a given identity
 * `active` - (Optional)[Boolean] Indicates if the user is active
+* `group_ids` - (Optional)[Set] The groups that this user will be a member of
 
+**NOTE:** Group_ids field cannot be used at the same time with user_ids field in group resource. Trying to add the same user to the same group in both ways in the same plan will result in a cyclic dependency error.
 
 ## Import
 

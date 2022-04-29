@@ -25,6 +25,11 @@ func TestAccVolumeBasic(t *testing.T) {
 		CheckDestroy:      testAccCheckVolumeDestroyCheck,
 		Steps: []resource.TestStep{
 			{
+				//added to test - #266. crash when using image_alias on volume
+				Config:      testAccCheckVolumeConfigBasicErrorNoPassOrSSHPath,
+				ExpectError: regexp.MustCompile(`either 'image_password' or 'ssh_key_path' must be provided`),
+			},
+			{
 				Config: testAccCheckVolumeConfigBasic,
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckVolumeExists(VolumeResource+"."+VolumeTestResource, &volume),
@@ -249,6 +254,41 @@ resource ` + VolumeResource + ` ` + VolumeTestResource + ` {
 	user_data = "foo"
 }`
 
+const testAccCheckVolumeConfigBasicErrorNoPassOrSSHPath = testAccCheckLanConfigBasic + `
+resource ` + ServerResource + ` ` + ServerTestResource + `{
+  name = "` + ServerTestResource + `"
+  datacenter_id = ` + DatacenterResource + `.` + DatacenterTestResource + `.id
+  cores = 1
+  ram = 1024
+  availability_zone = "ZONE_1"
+  cpu_family = "AMD_OPTERON"
+  image_name = "ubuntu:latest"
+  image_password = "K3tTj8G14a3EgKyNeeiY"
+  volume {
+    name = "system"
+    size = 5
+    disk_type = "HDD"
+  }
+  nic {
+    lan = ` + LanResource + `.` + LanTestResource + `.id
+    dhcp = true
+    firewall_active = true
+  }
+}
+resource ` + VolumeResource + ` ` + VolumeTestResource + ` {
+	datacenter_id = ` + DatacenterResource + `.` + DatacenterTestResource + `.id
+	server_id = ` + ServerResource + `.` + ServerTestResource + `.id
+	availability_zone = "ZONE_1"
+	name = "` + VolumeTestResource + `"
+	size = 5
+	disk_type = "SSD Standard"
+	bus = "VIRTIO"
+	image_name ="ubuntu:latest"
+	user_data = "foo"
+
+}`
+
+//ubuntu-21.10-server-cloudimg-amd64-20220201
 const testAccCheckVolumeConfigUpdate = testAccCheckLanConfigBasic + `
 resource ` + ServerResource + ` ` + ServerTestResource + `updated {
   name = "` + ServerTestResource + `"
