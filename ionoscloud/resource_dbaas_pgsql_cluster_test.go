@@ -207,7 +207,7 @@ func testAccCheckDbaasPgSqlClusterDestroyCheck(s *terraform.State) error {
 		_, apiResponse, err := client.ClustersApi.ClustersFindById(ctx, rs.Primary.ID).Execute()
 
 		if err != nil {
-			if errorBesideNotFound(apiResponse) {
+			if apiResponse == nil || apiResponse.StatusCode != 404 {
 				return fmt.Errorf("an error occurred while checking the destruction of dbaas cluster %s: %s", rs.Primary.ID, err)
 			}
 		} else {
