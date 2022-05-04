@@ -692,7 +692,6 @@ func resourcek8sNodePoolUpdate(ctx context.Context, d *schema.ResourceData, meta
 			publicIps := newPublicIps.([]interface{})
 
 			/* number of public IPs needs to be at least NodeCount + 1 */
-			fmt.Printf("len of public Ips %v node count req %v and get %v \n", int32(len(publicIps)), *request.Properties.NodeCount+1, int32(d.Get("node_count").(int)))
 			if len(publicIps) > 0 && int32(len(publicIps)) < *request.Properties.NodeCount+1 {
 				diags := diag.FromErr(fmt.Errorf("the number of public IPs must be at least %d", *request.Properties.NodeCount+1))
 				return diags

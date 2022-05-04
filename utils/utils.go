@@ -140,10 +140,8 @@ func TestValueInSlice(resource, attribute, value string) resource.TestCheckFunc 
 			} else if lengthOfSlice <= 0 {
 				return fmt.Errorf("returned %s slice is empty", attribute)
 			} else {
-				fmt.Printf("length of slice %v", lengthOfSlice)
 				for i := 0; i < lengthOfSlice; i++ {
 					attribute = attribute[:len(attribute)-1] + strconv.Itoa(i)
-					fmt.Printf("rs.Primary.Attributes[attribute] %v == value %s ", rs.Primary.Attributes[attribute], value)
 					if rs.Primary.Attributes[attribute] == value {
 						return nil
 					}
