@@ -159,7 +159,6 @@ func providerConfigure(d *schema.ResourceData, terraformVersion string) (interfa
 	newConfig := ionoscloud.NewConfiguration(username.(string), password.(string), token.(string), cleanedUrl)
 
 	if os.Getenv("IONOS_DEBUG") != "" {
-		fmt.Printf("debug\n")
 		newConfig.Debug = true
 	}
 	newConfig.MaxRetries = 999

@@ -711,11 +711,8 @@ func resourcek8sNodePoolUpdate(ctx context.Context, d *schema.ResourceData, meta
 		return diags
 	}
 
-	fmt.Printf("%v labels \n", d.Get("labels").(map[string]interface{}))
-
 	if d.HasChange("labels") {
 		oldLabels, newLabels := d.GetChange("labels")
-		fmt.Printf("%v labels have changed old %v new %v \n", d.Get("labels").(map[string]interface{}), oldLabels, newLabels)
 		log.Printf("[INFO] k8s pool labels changed from %+v to %+v \n", oldLabels, newLabels)
 		labels := make(map[string]string)
 		if newLabels != nil {
