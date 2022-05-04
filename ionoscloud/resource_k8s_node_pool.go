@@ -930,7 +930,7 @@ func setK8sNodePoolData(d *schema.ResourceData, nodePool *ionoscloud.KubernetesN
 			}
 		}
 
-		if nodePool.Properties.PublicIps != nil {
+		if nodePool.Properties.PublicIps != nil && len(*nodePool.Properties.PublicIps) > 0 {
 			if err := d.Set("public_ips", *nodePool.Properties.PublicIps); err != nil {
 				return err
 			}
