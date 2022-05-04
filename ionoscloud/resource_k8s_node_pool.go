@@ -713,7 +713,7 @@ func resourcek8sNodePoolUpdate(ctx context.Context, d *schema.ResourceData, meta
 
 	if d.HasChange("labels") {
 		oldLabels, newLabels := d.GetChange("labels")
-		log.Printf("[INFO] k8s pool labels changed from %+v to %+v \n", oldLabels, newLabels)
+		log.Printf("[INFO] k8s pool labels changed from %+v to %+v", oldLabels, newLabels)
 		labels := make(map[string]string)
 		if newLabels != nil {
 			for k, v := range newLabels.(map[string]interface{}) {
