@@ -428,7 +428,7 @@ resource ` + K8sNodePoolResource + ` ` + K8sNodePoolTestResource + ` {
   cores_count       = 2
   ram_size          = 2048
   storage_size      = 40
-  public_ips        = [ ionoscloud_ipblock.terraform_acctest.ips[0], ionoscloud_ipblock.terraform_acctest.ips[1]]
+  public_ips        = [ ionoscloud_ipblock.terraform_acctest.ips[0], ionoscloud_ipblock.terraform_acctest.ips[1], ionoscloud_ipblock.terraform_acctest.ips[2]]
   lans {
     id   = ` + LanResource + `.terraform_acctest.id
     dhcp = false

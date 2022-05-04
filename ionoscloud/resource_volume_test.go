@@ -37,7 +37,7 @@ func TestAccVolumeBasic(t *testing.T) {
 					resource.TestCheckResourceAttr(VolumeResource+"."+VolumeTestResource, "disk_type", "SSD Standard"),
 					resource.TestCheckResourceAttr(VolumeResource+"."+VolumeTestResource, "bus", "VIRTIO"),
 					resource.TestCheckResourceAttr(VolumeResource+"."+VolumeTestResource, "availability_zone", "ZONE_1"),
-					resource.TestCheckResourceAttr(VolumeResource+"."+VolumeTestResource, "image_name", "debian-10-genericcloud-amd64-20211011-792"),
+					resource.TestCheckResourceAttr(VolumeResource+"."+VolumeTestResource, "image_name", "debian-11-genericcloud-amd64-20220328-962"),
 					resource.TestCheckResourceAttrPair(VolumeResource+"."+VolumeTestResource, "boot_server", ServerResource+"."+ServerTestResource, "id"),
 					testImageNotNull(VolumeResource, "image")),
 			},
@@ -92,7 +92,7 @@ func TestAccVolumeBasic(t *testing.T) {
 					resource.TestCheckResourceAttr(VolumeResource+"."+VolumeTestResource, "disk_type", "SSD Standard"),
 					resource.TestCheckResourceAttr(VolumeResource+"."+VolumeTestResource, "bus", "VIRTIO"),
 					resource.TestCheckResourceAttr(VolumeResource+"."+VolumeTestResource, "availability_zone", "ZONE_1"),
-					resource.TestCheckResourceAttr(VolumeResource+"."+VolumeTestResource, "image_name", "debian-10-genericcloud-amd64-20211011-792"),
+					resource.TestCheckResourceAttr(VolumeResource+"."+VolumeTestResource, "image_name", "debian-11-genericcloud-amd64-20220328-962"),
 					resource.TestCheckResourceAttrPair(VolumeResource+"."+VolumeTestResource, "boot_server", ServerResource+"."+ServerTestResource+"updated", "id"),
 					testImageNotNull(VolumeResource, "image")),
 			},
@@ -248,7 +248,7 @@ resource ` + VolumeResource + ` ` + VolumeTestResource + ` {
 	size = 5
 	disk_type = "SSD Standard"
 	bus = "VIRTIO"
-	image_name ="debian-10-genericcloud-amd64-20211011-792"
+	image_name ="debian-11-genericcloud-amd64-20220328-962"
 	image_password = "K3tTj8G14a3EgKyNeeiY"
 	user_data = "foo"
 }`
@@ -317,7 +317,7 @@ resource ` + VolumeResource + ` ` + VolumeTestResource + ` {
 	size = 6
 	disk_type = "SSD Standard"
 	bus = "VIRTIO"
-	image_name ="debian-10-genericcloud-amd64-20211011-792"
+	image_name ="debian-11-genericcloud-amd64-20220328-962"
 	image_password = "K3tTj8G14a3EgKyNeeiYupdated"
 	user_data = "foo"
 }`

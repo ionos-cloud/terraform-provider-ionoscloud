@@ -64,7 +64,7 @@ resource ` + ServerResource + ` ` + ServerTestResource + ` {
   ram = 1024
   availability_zone = "ZONE_1"
   cpu_family = "AMD_OPTERON"
-  image_name ="debian-10-genericcloud-amd64-20211011-792"
+  image_name ="debian-11-genericcloud-amd64-20220328-962"
   image_password = "K3tTj8G14a3EgKyNeeiY"
   type = "ENTERPRISE"
   volume {
