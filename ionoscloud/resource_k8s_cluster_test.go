@@ -95,32 +95,32 @@ func TestAccK8sClusterBasic(t *testing.T) {
 	})
 }
 
-func TestAccK8sClusterPrivate(t *testing.T) {
-	var k8sCluster ionoscloud.KubernetesCluster
-
-	resource.Test(t, resource.TestCase{
-		PreCheck: func() {
-			testAccPreCheck(t)
-		},
-		ProviderFactories: testAccProviderFactories,
-		CheckDestroy:      testAccCheckK8sClusterDestroyCheck,
-		Steps: []resource.TestStep{
-			{
-				Config: testAccCheckK8sClusterConfigPrivateCluster,
-				Check: resource.ComposeTestCheckFunc(
-					testAccCheckK8sClusterExists(K8sClusterResource+"."+K8sClusterTestResource, &k8sCluster),
-					resource.TestCheckResourceAttr(K8sClusterResource+"."+K8sClusterTestResource, "name", K8sClusterTestResource),
-					resource.TestCheckResourceAttr(K8sClusterResource+"."+K8sClusterTestResource, "k8s_version", "1.20.10"),
-					resource.TestCheckResourceAttr(K8sClusterResource+"."+K8sClusterTestResource, "maintenance_window.0.day_of_the_week", "Sunday"),
-					resource.TestCheckResourceAttr(K8sClusterResource+"."+K8sClusterTestResource, "maintenance_window.0.time", "09:00:00Z"),
-					resource.TestCheckResourceAttr(K8sClusterResource+"."+K8sClusterTestResource, "api_subnet_allow_list.0", "1.2.3.4/32"),
-					resource.TestCheckResourceAttr(K8sClusterResource+"."+K8sClusterTestResource, "s3_buckets.0.name", "test_k8s_terraform_v6"),
-					resource.TestCheckResourceAttr(K8sClusterResource+"."+K8sClusterTestResource, "public", "false"),
-				),
-			},
-		},
-	})
-}
+//func TestAccK8sClusterPrivate(t *testing.T) {
+//	var k8sCluster ionoscloud.KubernetesCluster
+//
+//	resource.Test(t, resource.TestCase{
+//		PreCheck: func() {
+//			testAccPreCheck(t)
+//		},
+//		ProviderFactories: testAccProviderFactories,
+//		CheckDestroy:      testAccCheckK8sClusterDestroyCheck,
+//		Steps: []resource.TestStep{
+//			{
+//				Config: testAccCheckK8sClusterConfigPrivateCluster,
+//				Check: resource.ComposeTestCheckFunc(
+//					testAccCheckK8sClusterExists(K8sClusterResource+"."+K8sClusterTestResource, &k8sCluster),
+//					resource.TestCheckResourceAttr(K8sClusterResource+"."+K8sClusterTestResource, "name", K8sClusterTestResource),
+//					resource.TestCheckResourceAttr(K8sClusterResource+"."+K8sClusterTestResource, "k8s_version", "1.20.10"),
+//					resource.TestCheckResourceAttr(K8sClusterResource+"."+K8sClusterTestResource, "maintenance_window.0.day_of_the_week", "Sunday"),
+//					resource.TestCheckResourceAttr(K8sClusterResource+"."+K8sClusterTestResource, "maintenance_window.0.time", "09:00:00Z"),
+//					resource.TestCheckResourceAttr(K8sClusterResource+"."+K8sClusterTestResource, "api_subnet_allow_list.0", "1.2.3.4/32"),
+//					resource.TestCheckResourceAttr(K8sClusterResource+"."+K8sClusterTestResource, "s3_buckets.0.name", "test_k8s_terraform_v6"),
+//					resource.TestCheckResourceAttr(K8sClusterResource+"."+K8sClusterTestResource, "public", "false"),
+//				),
+//			},
+//		},
+//	})
+//}
 
 func testAccCheckK8sClusterDestroyCheck(s *terraform.State) error {
 	client := testAccProvider.Meta().(SdkBundle).CloudApiClient

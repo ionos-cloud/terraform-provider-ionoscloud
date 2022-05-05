@@ -970,12 +970,6 @@ func setK8sNodePoolData(d *schema.ResourceData, nodePool *ionoscloud.KubernetesN
 
 		}
 
-		if nodePool.Properties.PublicIps != nil && len(*nodePool.Properties.PublicIps) > 0 {
-			if err := d.Set("public_ips", *nodePool.Properties.PublicIps); err != nil {
-				return err
-			}
-		}
-
 		if nodePool.Properties.GatewayIp != nil {
 			if err := d.Set("gateway_ip", *nodePool.Properties.GatewayIp); err != nil {
 				return fmt.Errorf("error while setting gateway_ip property for nodepool %s: %s", d.Id(), err)
