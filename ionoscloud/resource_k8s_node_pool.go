@@ -8,6 +8,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 	ionoscloud "github.com/ionos-cloud/sdk-go/v6"
 	"log"
+	"reflect"
 	"strings"
 	"time"
 
@@ -302,6 +303,9 @@ func resourceK8sNodePool0() *schema.Resource {
 }
 
 func resourceK8sNodePoolUpgradeV0(_ context.Context, state map[string]interface{}, _ interface{}) (map[string]interface{}, error) {
+	isInt := false
+	var intType int
+
 	oldState := state
 	var oldData []interface{}
 	if d, ok := oldState["lans"].([]interface{}); ok {
@@ -310,19 +314,24 @@ func resourceK8sNodePoolUpgradeV0(_ context.Context, state map[string]interface{
 
 	var lans []interface{}
 	for index, lanId := range oldData {
-		log.Printf("oldData index %+v id %v \n\n\n", index, lanId)
-		lanEntry := make(map[string]interface{})
+		if reflect.TypeOf(lanId) == reflect.TypeOf(intType) {
+			isInt = true
+			log.Printf("oldData index %+v id %v \n\n\n", index, lanId)
+			lanEntry := make(map[string]interface{})
 
-		lanEntry["id"] = lanId
+			lanEntry["id"] = lanId
 
-		lanEntry["dhcp"] = true
+			lanEntry["dhcp"] = true
 
-		var nodePoolRoutes []interface{}
+			var nodePoolRoutes []interface{}
 
-		lanEntry["routes"] = nodePoolRoutes
-		lans = append(lans, lanEntry)
+			lanEntry["routes"] = nodePoolRoutes
+			lans = append(lans, lanEntry)
+		}
 	}
-	state["lans"] = lans
+	if isInt {
+		state["lans"] = lans
+	}
 
 	return state, nil
 }
