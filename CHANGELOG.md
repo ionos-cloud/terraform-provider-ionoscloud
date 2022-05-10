@@ -1,5 +1,7 @@
 ## 6.2.4
+### Fixes
 - fixed bug when upgrading from a v6.0.0-beta.X version to a stable one (_number is required_ error)
+- reintroduced error for image data source when finding multiple results with data source
 
 ## 6.2.3
 
