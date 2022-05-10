@@ -8,6 +8,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 	ionoscloud "github.com/ionos-cloud/sdk-go/v6"
 	"log"
+	"reflect"
 	"strings"
 	"time"
 
@@ -301,6 +302,8 @@ func resourceK8sNodePool0() *schema.Resource {
 	}
 }
 
+// resourceK8sNodePoolUpgradeV0 handles the differences that arise on lans when migrating from v5.X.X to a v6.X.X stable
+// release and ignores the upgrade from a v6.0.0-beta.X, since the structure of lans is the same
 func resourceK8sNodePoolUpgradeV0(_ context.Context, state map[string]interface{}, _ interface{}) (map[string]interface{}, error) {
 	oldState := state
 	var oldData []interface{}
@@ -309,19 +312,31 @@ func resourceK8sNodePoolUpgradeV0(_ context.Context, state map[string]interface{
 	}
 
 	var lans []interface{}
-	for index, lanId := range oldData {
-		log.Printf("oldData index %+v id %v \n\n\n", index, lanId)
-		lanEntry := make(map[string]interface{})
+	var floatType float64
 
-		lanEntry["id"] = lanId
+	for _, lanId := range oldData {
+		// this condition is for handling the migration from a v5.X.X to v6.X.X  release, when the content of lans property
+		// is a list of floats. The content is mapped to the new v6.X.X lans structure
+		if reflect.TypeOf(lanId) == reflect.TypeOf(floatType) {
 
-		lanEntry["dhcp"] = true
+			lanEntry := make(map[string]interface{})
 
-		var nodePoolRoutes []interface{}
+			lanEntry["id"] = lanId
 
-		lanEntry["routes"] = nodePoolRoutes
-		lans = append(lans, lanEntry)
+			// default value for dhcp
+			lanEntry["dhcp"] = true
+
+			var nodePoolRoutes []interface{}
+
+			// empty list for routes
+			lanEntry["routes"] = nodePoolRoutes
+			lans = append(lans, lanEntry)
+		} else {
+			// this condition is for the migration from a v6.X.X-beta.X to v6.X.X  release, when no handling is necessary since the structure of lans is the same
+			return state, nil
+		}
 	}
+
 	state["lans"] = lans
 
 	return state, nil
@@ -968,12 +983,6 @@ func setK8sNodePoolData(d *schema.ResourceData, nodePool *ionoscloud.KubernetesN
 				return fmt.Errorf("error while setting lans property for k8sNodepool %s: %s", d.Id(), err)
 			}
 
-		}
-
-		if nodePool.Properties.PublicIps != nil && len(*nodePool.Properties.PublicIps) > 0 {
-			if err := d.Set("public_ips", *nodePool.Properties.PublicIps); err != nil {
-				return err
-			}
 		}
 
 		if nodePool.Properties.GatewayIp != nil {
