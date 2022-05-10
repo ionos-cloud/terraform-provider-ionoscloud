@@ -2,6 +2,8 @@
 ### Fixes
 - fixed bug when upgrading from a v6.0.0-beta.X version to a stable one (_number is required_ error)
 - reintroduced error for image data source when finding multiple results with data source
+### Enhancement
+- update sdk-go-dbaas-postgres dependency to v1.0.3
 
 ## 6.2.3
 
