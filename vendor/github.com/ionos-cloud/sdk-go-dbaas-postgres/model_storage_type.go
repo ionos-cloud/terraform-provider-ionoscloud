@@ -15,13 +15,15 @@ import (
 	"fmt"
 )
 
-// StorageType The storage type used in your cluster.
+// StorageType The storage type used in your cluster. (Value \"SSD\" is deprecated. Use the equivalent \"SSD Premium\" instead)
 type StorageType string
 
 // List of StorageType
 const (
-	HDD StorageType = "HDD"
-	SSD StorageType = "SSD"
+	HDD          StorageType = "HDD"
+	SSD          StorageType = "SSD"
+	SSD_STANDARD StorageType = "SSD Standard"
+	SSD_PREMIUM  StorageType = "SSD Premium"
 )
 
 func (v *StorageType) UnmarshalJSON(src []byte) error {
@@ -31,7 +33,7 @@ func (v *StorageType) UnmarshalJSON(src []byte) error {
 		return err
 	}
 	enumTypeValue := StorageType(value)
-	for _, existing := range []StorageType{"HDD", "SSD"} {
+	for _, existing := range []StorageType{"HDD", "SSD", "SSD Standard", "SSD Premium"} {
 		if existing == enumTypeValue {
 			*v = enumTypeValue
 			return nil
