@@ -303,9 +303,6 @@ func resourceK8sNodePool0() *schema.Resource {
 }
 
 func resourceK8sNodePoolUpgradeV0(_ context.Context, state map[string]interface{}, _ interface{}) (map[string]interface{}, error) {
-	isInt := false
-	var intType int
-
 	oldState := state
 	var oldData []interface{}
 	if d, ok := oldState["lans"].([]interface{}); ok {
@@ -313,9 +310,13 @@ func resourceK8sNodePoolUpgradeV0(_ context.Context, state map[string]interface{
 	}
 
 	var lans []interface{}
+	var floatType float64
+	isFloat := false
+
+	log.Printf("[INFO] HERE ")
 	for index, lanId := range oldData {
-		if reflect.TypeOf(lanId) == reflect.TypeOf(intType) {
-			isInt = true
+		if reflect.TypeOf(lanId) == reflect.TypeOf(floatType) {
+			isFloat = true
 			log.Printf("oldData index %+v id %v \n\n\n", index, lanId)
 			lanEntry := make(map[string]interface{})
 
@@ -327,9 +328,11 @@ func resourceK8sNodePoolUpgradeV0(_ context.Context, state map[string]interface{
 
 			lanEntry["routes"] = nodePoolRoutes
 			lans = append(lans, lanEntry)
+		} else {
+			break
 		}
 	}
-	if isInt {
+	if isFloat {
 		state["lans"] = lans
 	}
 
