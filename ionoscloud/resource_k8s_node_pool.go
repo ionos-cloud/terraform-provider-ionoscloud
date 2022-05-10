@@ -313,11 +313,10 @@ func resourceK8sNodePoolUpgradeV0(_ context.Context, state map[string]interface{
 	var floatType float64
 	isFloat := false
 
-	log.Printf("[INFO] HERE ")
-	for index, lanId := range oldData {
+	for _, lanId := range oldData {
 		if reflect.TypeOf(lanId) == reflect.TypeOf(floatType) {
 			isFloat = true
-			log.Printf("oldData index %+v id %v \n\n\n", index, lanId)
+
 			lanEntry := make(map[string]interface{})
 
 			lanEntry["id"] = lanId
