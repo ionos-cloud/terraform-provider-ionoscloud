@@ -3,6 +3,9 @@
 - fixed bug when upgrading from a v6.0.0-beta.X version to a stable one (_number is required_ error)
 - reintroduced error for image data source when finding multiple results with data source
 
+### Documentation
+- updated multiple nics under the same IP Failover example, with a [one step example](examples/ip_failover/README.md)
+
 ## 6.2.3
 
 ### Fixes
