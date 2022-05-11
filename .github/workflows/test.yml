@@ -1,4 +1,4 @@
-name: Test suite
+name: Test suite ${{ github.event.inputs.test-tags }}
 on:
   workflow_dispatch:
     inputs:
