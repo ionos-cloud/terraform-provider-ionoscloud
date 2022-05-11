@@ -54,6 +54,7 @@ resource "ionoscloud_server" "example_A" {
     name                = "NIC A"
     lan                 = ionoscloud_lan.example.id
     dhcp                = true
+    firewall_active     = true
     ips                 = [ ionoscloud_ipblock.example.ips[0], ionoscloud_ipblock.example.ips[1] ]
   }
 }
