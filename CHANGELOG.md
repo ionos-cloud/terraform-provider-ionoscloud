@@ -5,6 +5,9 @@
 ### Enhancement
 - update sdk-go-dbaas-postgres dependency to v1.0.3
 
+### Documentation
+- updated multiple nics under the same IP Failover example, with a [one step example](examples/ip_failover/README.md)
+
 ## 6.2.3
 
 ### Fixes
