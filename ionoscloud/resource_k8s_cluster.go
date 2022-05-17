@@ -416,14 +416,14 @@ func resourcek8sClusterDelete(ctx context.Context, d *schema.ResourceData, meta 
 	for {
 		log.Printf("[INFO] Waiting for cluster %s to be deleted...", d.Id())
 
-		clusterdDeleted, dsErr := k8sClusterDeleted(ctx, client, d)
+		clusterDeleted, dsErr := k8sClusterDeleted(ctx, client, d)
 
 		if dsErr != nil {
-			diags := diag.FromErr(fmt.Errorf("error while checking deletion status of k8s cluster %s: %s", d.Id(), dsErr))
+			diags := diag.FromErr(fmt.Errorf("error while checking deletion status of k8s cluster %s: %w", d.Id(), dsErr))
 			return diags
 		}
 
-		if clusterdDeleted {
+		if clusterDeleted {
 			log.Printf("[INFO] Successfully deleted k8s cluster: %s", d.Id())
 			break
 		}
@@ -561,7 +561,7 @@ func k8sClusterDeleted(ctx context.Context, client *ionoscloud.APIClient, d *sch
 		if httpNotFound(apiResponse) {
 			return true, nil
 		}
-		return true, fmt.Errorf("error checking k8s cluster deletion status: %s", err)
+		return true, fmt.Errorf("error checking k8s cluster deletion status: %w", err)
 	}
 	return false, nil
 }

@@ -453,7 +453,7 @@ resource ` + ServerResource + ` ` + ServerTestResource + ` {
   ram = 2048
   availability_zone = "ZONE_1"
   cpu_family = "AMD_OPTERON"
-  image_name ="debian-10-genericcloud-amd64-20211011-792"
+  image_name ="ubuntu:latest"
   image_password = "K3tTj8G14a3EgKyNeeiYsasad"
   type = "ENTERPRISE"
   volume {
@@ -557,7 +557,7 @@ resource ` + ServerResource + ` ` + ServerTestResource + ` {
   ram               = 1024
   availability_zone = "ZONE_1"
   cpu_family        = "INTEL_SKYLAKE" 
-  image_name        = "Ubuntu-20.04-LTS"
+  image_name        = "ubuntu:latest"
   image_password    = "pass123456"
   volume {
     name           = "` + ServerTestResource + `"
@@ -594,7 +594,7 @@ resource ` + ServerResource + ` "webserver" {
   ram = 1024
   availability_zone = "ZONE_1"
   cpu_family = "INTEL_SKYLAKE"
-	image_name = "Ubuntu-20.04-LTS"
+	image_name = "ubuntu:latest"
 	image_password = "K3tTj8G14a3EgKyNeeiY"
   volume {
     name = "system"
@@ -691,7 +691,7 @@ resource ` + ServerResource + ` ` + ServerTestResource + ` {
   ram = 1024
   availability_zone = "ZONE_1"
   cpu_family = "AMD_OPTERON"
-  image_name ="debian-10-genericcloud-amd64-20211011-792"
+  image_name ="ubuntu:latest"
   image_password = "K3tTj8G14a3EgKyNeeiY"
   volume {
     name = "system"
@@ -729,7 +729,7 @@ resource ` + ServerResource + ` ` + ServerTestResource + ` {
   ram = 1024
   availability_zone = "ZONE_1"
   cpu_family = "AMD_OPTERON"
-  image_name ="debian-10-genericcloud-amd64-20211011-792"
+  image_name ="ubuntu:latest"
   image_password = "K3tTj8G14a3EgKyNeeiY"
   volume {
     name = "system"
