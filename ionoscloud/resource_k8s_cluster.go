@@ -68,12 +68,12 @@ func resourcek8sCluster() *schema.Resource {
 					Type: schema.TypeString,
 				},
 			},
-			"public": {
-				Type:        schema.TypeBool,
-				Description: "The indicator if the cluster is public or private. Be aware that setting it to false is currently in beta phase.",
-				Optional:    true,
-				Default:     true,
-			},
+			//"public": {
+			//	Type:        schema.TypeBool,
+			//	Description: "The indicator if the cluster is public or private. Be aware that setting it to false is currently in beta phase.",
+			//	Optional:    true,
+			//	Default:     true,
+			//},
 			"api_subnet_allow_list": {
 				Type: schema.TypeList,
 				Description: "Access to the K8s API server is restricted to these CIDRs. Cluster-internal traffic is not " +
@@ -146,8 +146,8 @@ func resourcek8sClusterCreate(ctx context.Context, d *schema.ResourceData, meta 
 		cluster.Properties.MaintenanceWindow.DayOfTheWeek = &mdVal
 	}
 
-	public := d.Get("public").(bool)
-	cluster.Properties.Public = &public
+	//public := d.Get("public").(bool)
+	//cluster.Properties.Public = &public
 
 	if apiSubnet, apiSubnetOk := d.GetOk("api_subnet_allow_list"); apiSubnetOk {
 		apiSubnet := apiSubnet.([]interface{})
@@ -508,12 +508,12 @@ func setK8sClusterData(d *schema.ResourceData, cluster *ionoscloud.KubernetesClu
 			}
 		}
 
-		if cluster.Properties.Public != nil {
-			err := d.Set("public", *cluster.Properties.Public)
-			if err != nil {
-				return fmt.Errorf("error while setting public property for cluser %s: %s", d.Id(), err)
-			}
-		}
+		//if cluster.Properties.Public != nil {
+		//	err := d.Set("public", *cluster.Properties.Public)
+		//	if err != nil {
+		//		return fmt.Errorf("error while setting public property for cluser %s: %s", d.Id(), err)
+		//	}
+		//}
 
 		if cluster.Properties.ApiSubnetAllowList != nil {
 			apiSubnetAllowLists := make([]interface{}, len(*cluster.Properties.ApiSubnetAllowList), len(*cluster.Properties.ApiSubnetAllowList))

@@ -179,11 +179,11 @@ func dataSourceK8sNodePool() *schema.Resource {
 					Type: schema.TypeString,
 				},
 			},
-			"gateway_ip": {
-				Type:        schema.TypeString,
-				Description: "Public IP address for the gateway performing source NAT for the node pool's nodes belonging to a private cluster. Required only if the node pool belongs to a private cluster.",
-				Computed:    true,
-			},
+			//"gateway_ip": {
+			//	Type:        schema.TypeString,
+			//	Description: "Public IP address for the gateway performing source NAT for the node pool's nodes belonging to a private cluster. Required only if the node pool belongs to a private cluster.",
+			//	Computed:    true,
+			//},
 		},
 		Timeouts: &resourceDefaultTimeouts,
 	}
