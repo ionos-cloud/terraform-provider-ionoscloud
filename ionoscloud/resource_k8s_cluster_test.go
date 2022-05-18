@@ -34,7 +34,7 @@ func TestAccK8sClusterBasic(t *testing.T) {
 					resource.TestCheckResourceAttr(K8sClusterResource+"."+K8sClusterTestResource, "maintenance_window.0.day_of_the_week", "Sunday"),
 					resource.TestCheckResourceAttr(K8sClusterResource+"."+K8sClusterTestResource, "maintenance_window.0.time", "09:00:00Z"),
 					resource.TestCheckResourceAttr(K8sClusterResource+"."+K8sClusterTestResource, "api_subnet_allow_list.0", "1.2.3.4/32"),
-					resource.TestCheckResourceAttr(K8sClusterResource+"."+K8sClusterTestResource, "s3_buckets.0.name", "test_k8dcguran"),
+					resource.TestCheckResourceAttr(K8sClusterResource+"."+K8sClusterTestResource, "s3_buckets.0.name", "test_k8s_terraform_v6"),
 				),
 			},
 			{
@@ -197,7 +197,7 @@ resource ` + K8sClusterResource + ` ` + K8sClusterTestResource + ` {
   }
   api_subnet_allow_list = ["1.2.3.4/32"]
   s3_buckets { 
-     name = "test_k8dcguran"
+     name = "test_k8s_terraform_v6"
   }
 }`
 
@@ -236,7 +236,7 @@ resource ` + K8sClusterResource + ` ` + K8sClusterTestResource + ` {
   }
   api_subnet_allow_list = ["1.2.3.4/32"]
   s3_buckets { 
-     name = "test_k8dcguran"
+     name = "test_k8s_terraform_v6"
   }
   //public = "false"
 }`
