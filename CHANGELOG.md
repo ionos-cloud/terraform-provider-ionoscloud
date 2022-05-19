@@ -1,3 +1,9 @@
+## 6.2.5
+### Enhancement
+- update sdk-go dependency to v6.0.3. 
+  * enable certificate pinning, by setting IONOS_PINNED_CERT env variable
+  * temporarily remove `gateway_ip` and `public` fields for k8s
+
 ## 6.2.4
 ### Fixes
 - fixed bug when upgrading from a v6.0.0-beta.X version to a stable one (_number is required_ error)

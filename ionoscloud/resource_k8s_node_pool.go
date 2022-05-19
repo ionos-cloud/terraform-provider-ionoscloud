@@ -205,12 +205,12 @@ func resourceK8sNodePool() *schema.Resource {
 					Type: schema.TypeString,
 				},
 			},
-			"gateway_ip": {
-				Type:        schema.TypeString,
-				Description: "Public IP address for the gateway performing source NAT for the node pool's nodes belonging to a private cluster. Required only if the node pool belongs to a private cluster.",
-				ForceNew:    true,
-				Optional:    true,
-			},
+			//"gateway_ip": {
+			//	Type:        schema.TypeString,
+			//	Description: "Public IP address for the gateway performing source NAT for the node pool's nodes belonging to a private cluster. Required only if the node pool belongs to a private cluster.",
+			//	ForceNew:    true,
+			//	Optional:    true,
+			//},
 			"labels": {
 				Type:     schema.TypeMap,
 				Optional: true,
@@ -491,10 +491,10 @@ func resourcek8sNodePoolCreate(ctx context.Context, d *schema.ResourceData, meta
 		k8sNodepool.Properties.PublicIps = &requestPublicIps
 	}
 
-	if gatewayIp, gatewayIpOk := d.GetOk("gateway_ip"); gatewayIpOk {
-		gatewayIp := gatewayIp.(string)
-		k8sNodepool.Properties.GatewayIp = &gatewayIp
-	}
+	//if gatewayIp, gatewayIpOk := d.GetOk("gateway_ip"); gatewayIpOk {
+	//	gatewayIp := gatewayIp.(string)
+	//	k8sNodepool.Properties.GatewayIp = &gatewayIp
+	//}
 
 	labelsProp, ok := d.GetOk("labels")
 	if ok {
@@ -985,11 +985,11 @@ func setK8sNodePoolData(d *schema.ResourceData, nodePool *ionoscloud.KubernetesN
 
 		}
 
-		if nodePool.Properties.GatewayIp != nil {
-			if err := d.Set("gateway_ip", *nodePool.Properties.GatewayIp); err != nil {
-				return fmt.Errorf("error while setting gateway_ip property for nodepool %s: %s", d.Id(), err)
-			}
-		}
+		//if nodePool.Properties.GatewayIp != nil {
+		//	if err := d.Set("gateway_ip", *nodePool.Properties.GatewayIp); err != nil {
+		//		return fmt.Errorf("error while setting gateway_ip property for nodepool %s: %s", d.Id(), err)
+		//	}
+		//}
 
 		labels := make(map[string]interface{})
 		if nodePool.Properties.Labels != nil && len(*nodePool.Properties.Labels) > 0 {

@@ -537,7 +537,7 @@ resource ` + K8sClusterResource + ` "terraform_acctest" {
     day_of_the_week = "Monday"
     time            = "09:00:00Z"
   }
-  public = "false"
+  //public = "false"
 }
 
 resource ` + K8sNodePoolResource + ` ` + K8sNodePoolTestResource + ` {
@@ -560,7 +560,7 @@ resource ` + K8sNodePoolResource + ` ` + K8sNodePoolTestResource + ` {
   cores_count       = 2
   ram_size          = 2048
   storage_size      = 40
-  gateway_ip        = ` + IpBlockResource + `.terraform_acctest.ips[0]
+  //gateway_ip        = ` + IpBlockResource + `.terraform_acctest.ips[0]
   lans {
     id   = ` + LanResource + `.terraform_acctest.id
     dhcp = true
