@@ -2,7 +2,11 @@
 ### Enhancement
 - update sdk-go dependency to v6.0.3. 
   * enable certificate pinning, by setting IONOS_PINNED_CERT env variable
-  * temporarily remove `gateway_ip` and `public` fields for k8s
+- temporarily removed `gateway_ip` and `public` fields for k8s
+- introduced error when trying to set `max_node_count` equal to `min_node_count` in `k8s_node_pool`
+
+### Fixes 
+- fixed crash when trying to disable `autoscaling` on `k8s_node_pool`
 
 ## 6.2.4
 ### Fixes
