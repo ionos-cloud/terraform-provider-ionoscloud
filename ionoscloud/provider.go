@@ -115,6 +115,7 @@ func Provider() *schema.Provider {
 			DBaaSClusterResource:  dataSourceDbaasPgSqlCluster(),
 			DBaaSVersionsResource: dataSourceDbaasPgSqlVersions(),
 			DBaaSBackupsResource:  dataSourceDbaasPgSqlBackups(),
+			ServersDataSource:     dataSourceServers(),
 		},
 	}
 

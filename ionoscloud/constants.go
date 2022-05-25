@@ -196,3 +196,5 @@ const (
 	DataSource       = "data"
 	UpdatedResources = "test_updated"
 )
+
+const ServersDataSource = "ionoscloud_servers"
