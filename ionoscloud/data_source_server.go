@@ -298,42 +298,8 @@ func setServerData(d *schema.ResourceData, server *ionoscloud.Server, token *ion
 		return nil
 	}
 
-	var cdroms []interface{}
 	if server.Entities.Cdroms != nil && server.Entities.Cdroms.Items != nil && len(*server.Entities.Cdroms.Items) > 0 {
-		for _, image := range *server.Entities.Cdroms.Items {
-			entry := make(map[string]interface{})
-
-			entry["id"] = stringOrDefault(image.Id, "")
-			entry["name"] = stringOrDefault(image.Properties.Name, "")
-			entry["description"] = stringOrDefault(image.Properties.Description, "")
-			entry["location"] = stringOrDefault(image.Properties.Location, "")
-			entry["size"] = float32OrDefault(image.Properties.Size, 0)
-			entry["cpu_hot_plug"] = boolOrDefault(image.Properties.CpuHotPlug, true)
-			entry["cpu_hot_unplug"] = boolOrDefault(image.Properties.CpuHotUnplug, true)
-			entry["ram_hot_plug"] = boolOrDefault(image.Properties.RamHotPlug, true)
-			entry["ram_hot_unplug"] = boolOrDefault(image.Properties.RamHotUnplug, true)
-			entry["nic_hot_plug"] = boolOrDefault(image.Properties.NicHotPlug, true)
-			entry["nic_hot_unplug"] = boolOrDefault(image.Properties.NicHotUnplug, true)
-			entry["disc_virtio_hot_plug"] = boolOrDefault(image.Properties.DiscVirtioHotPlug, true)
-			entry["disc_virtio_hot_unplug"] = boolOrDefault(image.Properties.DiscVirtioHotUnplug, true)
-			entry["disc_scsi_hot_plug"] = boolOrDefault(image.Properties.DiscScsiHotPlug, true)
-			entry["disc_scsi_hot_unplug"] = boolOrDefault(image.Properties.DiscScsiHotUnplug, true)
-			entry["licence_type"] = stringOrDefault(image.Properties.LicenceType, "")
-			entry["image_type"] = stringOrDefault(image.Properties.ImageType, "")
-			entry["public"] = boolOrDefault(image.Properties.Public, false)
-
-			if image.Properties.ImageAliases != nil {
-				var imageAliases []interface{}
-				for _, imageAlias := range *image.Properties.ImageAliases {
-					imageAliases = append(imageAliases, imageAlias)
-				}
-				entry["image_aliases"] = imageAliases
-			}
-
-			entry["cloud_init"] = stringOrDefault(image.Properties.CloudInit, "")
-
-			cdroms = append(cdroms, entry)
-		}
+		cdroms := setServerCDRoms(server.Entities.Cdroms.Items)
 		if err := d.Set("cdroms", cdroms); err != nil {
 			return err
 		}

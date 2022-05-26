@@ -285,7 +285,6 @@ func dataSourceServersRead(ctx context.Context, d *schema.ResourceData, meta int
 					if cdroms != nil && len(cdroms) > 0 {
 						serverEntry["cdroms"] = cdroms
 					}
-
 				}
 			}
 		}
@@ -310,7 +309,6 @@ func setVolumeProperties(volumesList []ionoscloud.Volume) []interface{} {
 		for _, volume := range volumesList {
 			volumeItemMap := SetVolumeProperties(volume)
 			utils.SetPropWithNilCheck(volumeItemMap, "id", volume.Id)
-			//volumesListMap := []map[string]interface{}{volumeItemMap}
 			volumes = append(volumes, volumeItemMap)
 		}
 	}
