@@ -4,7 +4,6 @@ import (
 	"context"
 	"errors"
 	"fmt"
-	"github.com/google/uuid"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
@@ -43,17 +42,18 @@ func dataSourceServers() *schema.Resource {
 							Type:     schema.TypeString,
 							Optional: true,
 						},
-						"type": {
-							Type:     schema.TypeString,
-							Optional: true,
-							Computed: true,
-						},
+
 						"cores": {
 							Type:     schema.TypeInt,
 							Computed: true,
 						},
 						"ram": {
 							Type:     schema.TypeInt,
+							Computed: true,
+						},
+						"type": {
+							Type:     schema.TypeString,
+							Optional: true,
 							Computed: true,
 						},
 						"availability_zone": {
@@ -87,93 +87,7 @@ func dataSourceServers() *schema.Resource {
 						"cdroms": {
 							Type:     schema.TypeList,
 							Computed: true,
-							Elem: &schema.Resource{
-								Schema: map[string]*schema.Schema{
-									"id": {
-										Type:     schema.TypeString,
-										Computed: true,
-									},
-									"name": {
-										Type:     schema.TypeString,
-										Computed: true,
-									},
-									"description": {
-										Type:     schema.TypeString,
-										Computed: true,
-									},
-									"location": {
-										Type:     schema.TypeString,
-										Computed: true,
-									},
-									"size": {
-										Type:     schema.TypeFloat,
-										Computed: true,
-									},
-									"cpu_hot_plug": {
-										Type:     schema.TypeBool,
-										Computed: true,
-									},
-									"cpu_hot_unplug": {
-										Type:     schema.TypeBool,
-										Computed: true,
-									},
-									"ram_hot_plug": {
-										Type:     schema.TypeBool,
-										Computed: true,
-									},
-									"ram_hot_unplug": {
-										Type:     schema.TypeBool,
-										Computed: true,
-									},
-									"nic_hot_plug": {
-										Type:     schema.TypeBool,
-										Computed: true,
-									},
-									"nic_hot_unplug": {
-										Type:     schema.TypeBool,
-										Computed: true,
-									},
-									"disc_virtio_hot_plug": {
-										Type:     schema.TypeBool,
-										Computed: true,
-									},
-									"disc_virtio_hot_unplug": {
-										Type:     schema.TypeBool,
-										Computed: true,
-									},
-									"disc_scsi_hot_plug": {
-										Type:     schema.TypeBool,
-										Computed: true,
-									},
-									"disc_scsi_hot_unplug": {
-										Type:     schema.TypeBool,
-										Computed: true,
-									},
-									"licence_type": {
-										Type:     schema.TypeString,
-										Computed: true,
-									},
-									"image_type": {
-										Type:     schema.TypeString,
-										Computed: true,
-									},
-									"public": {
-										Type:     schema.TypeBool,
-										Computed: true,
-									},
-									"image_aliases": {
-										Type:     schema.TypeList,
-										Computed: true,
-										Elem: &schema.Schema{
-											Type: schema.TypeString,
-										},
-									},
-									"cloud_init": {
-										Type:     schema.TypeString,
-										Computed: true,
-									},
-								},
-							},
+							Elem:     cdromsServerDSResource,
 						},
 						"volumes": {
 							Type:     schema.TypeList,
@@ -274,105 +188,7 @@ func dataSourceServers() *schema.Resource {
 						"nics": {
 							Type:     schema.TypeList,
 							Computed: true,
-							Elem: &schema.Resource{
-								Schema: map[string]*schema.Schema{
-									"id": {
-										Type:     schema.TypeString,
-										Computed: true,
-									},
-									"name": {
-										Type:     schema.TypeString,
-										Computed: true,
-									},
-									"mac": {
-										Type:     schema.TypeString,
-										Computed: true,
-									},
-									"ips": {
-										Type:     schema.TypeList,
-										Computed: true,
-										Elem: &schema.Schema{
-											Type: schema.TypeString,
-										},
-									},
-									"dhcp": {
-										Type:     schema.TypeBool,
-										Computed: true,
-									},
-									"lan": {
-										Type:     schema.TypeInt,
-										Computed: true,
-									},
-									"firewall_active": {
-										Type:     schema.TypeBool,
-										Computed: true,
-									},
-									"firewall_type": {
-										Type:     schema.TypeString,
-										Computed: true,
-									},
-									"device_number": {
-										Type:     schema.TypeInt,
-										Computed: true,
-									},
-									"pci_slot": {
-										Type:     schema.TypeInt,
-										Computed: true,
-									},
-									"firewall_rules": {
-										Type:     schema.TypeList,
-										Computed: true,
-										Elem: &schema.Resource{
-											Schema: map[string]*schema.Schema{
-												"id": {
-													Type:     schema.TypeString,
-													Computed: true,
-												},
-												"name": {
-													Type:     schema.TypeString,
-													Computed: true,
-												},
-												"protocol": {
-													Type:     schema.TypeString,
-													Computed: true,
-												},
-												"source_mac": {
-													Type:     schema.TypeString,
-													Computed: true,
-												},
-												"source_ip": {
-													Type:     schema.TypeString,
-													Computed: true,
-												},
-												"target_ip": {
-													Type:     schema.TypeString,
-													Computed: true,
-												},
-												"icmp_code": {
-													Type:     schema.TypeInt,
-													Computed: true,
-												},
-												"icmp_type": {
-													Type:     schema.TypeInt,
-													Computed: true,
-												},
-												"port_range_start": {
-													Type:     schema.TypeInt,
-													Computed: true,
-												},
-												"port_range_end": {
-													Type:     schema.TypeInt,
-													Computed: true,
-												},
-												"type": {
-													Type:     schema.TypeString,
-													Computed: true,
-												},
-											},
-										},
-									},
-								},
-							},
+							Elem:     nicServerDSResource,
 						},
 					},
 				},
@@ -430,47 +246,45 @@ func dataSourceServersRead(ctx context.Context, d *schema.ResourceData, meta int
 	if err != nil {
 		return diag.FromErr(fmt.Errorf("an error occurred while fetching servers: %w", err))
 	}
-
 	serverEntry := make(map[string]interface{})
 	var serversIntf []interface{}
-	if err != nil {
-		return diag.FromErr(err)
-	}
 
 	if d.Id() == "" {
-		resourceId := uuid.New().String()
-		d.SetId(resourceId)
+		d.SetId(datacenterId.(string))
 	}
 	for _, server := range *servers.Items {
 		serverEntry = SetServerProperties(server)
 		utils.SetPropWithNilCheck(serverEntry, "id", server.Id)
 		//todo: Add token?
 		if server.Entities != nil {
-			if server.Entities.Nics != nil {
+			if server.Entities.Nics != nil && server.Entities.Nics.Items != nil {
 				nicItems := server.Entities.Nics.Items
 				if nicItems != nil && len(*nicItems) > 0 {
-					primaryNic := (*nicItems)[0]
-					nic := SetNetworkProperties(primaryNic)
-					utils.SetPropWithNilCheck(nic, "id", primaryNic.Id)
-					networks := []map[string]interface{}{nic}
-					serverEntry["nics"] = networks
+					var nics []interface{}
+					for _, nic := range *server.Entities.Nics.Items {
+						nicMap := SetNetworkProperties(nic)
+						fw := setFirewallRules(nic)
+						nicMap["firewall_rules"] = fw
+						utils.SetPropWithNilCheck(nicMap, "id", nic.Id)
+						nics = append(nics, nicMap)
+					}
+					if len(nics) > 0 {
+						serverEntry["nics"] = nics
+					}
 				}
 			}
-			if server.Entities.Volumes != nil {
-				volumesList := server.Entities.Volumes.Items
-				if volumesList != nil && len(*volumesList) > 0 {
-					primaryVolume := (*volumesList)[0]
-					volumeItem := SetVolumeProperties(primaryVolume)
-					utils.SetPropWithNilCheck(volumeItem, "id", primaryVolume.Id)
-					volumesListMap := []map[string]interface{}{volumeItem}
-					if len(volumesListMap) > 0 {
-						serverEntry["volumes"] = volumesListMap
-					}
+			if server.Entities.Volumes != nil && server.Entities.Volumes.Items != nil {
+				volumes := setVolumeProperties(*server.Entities.Volumes.Items)
+				if volumes != nil && len(volumes) > 0 {
+					serverEntry["volumes"] = volumes
 				}
 			}
 			if server.Entities.Cdroms != nil {
 				if server.Entities.Cdroms.Items != nil && len(*server.Entities.Cdroms.Items) > 0 {
-					serverEntry["cdroms"] = setCDRoms(server.Entities.Cdroms.Items)
+					cdroms := setServerCDRoms(server.Entities.Cdroms.Items)
+					if cdroms != nil && len(cdroms) > 0 {
+						serverEntry["cdroms"] = cdroms
+					}
 
 				}
 			}
@@ -489,6 +303,47 @@ func dataSourceServersRead(ctx context.Context, d *schema.ResourceData, meta int
 	return nil
 }
 
+//setVolumeProperties returns a slice of volumes
+func setVolumeProperties(volumesList []ionoscloud.Volume) []interface{} {
+	var volumes []interface{}
+	if volumesList != nil && len(volumesList) > 0 {
+		for _, volume := range volumesList {
+			volumeItemMap := SetVolumeProperties(volume)
+			utils.SetPropWithNilCheck(volumeItemMap, "id", volume.Id)
+			//volumesListMap := []map[string]interface{}{volumeItemMap}
+			volumes = append(volumes, volumeItemMap)
+		}
+	}
+	return volumes
+}
+func setFirewallRules(nic ionoscloud.Nic) []interface{} {
+	var firewallRules []interface{}
+	if nic.Entities != nil && nic.Entities.Firewallrules != nil && nic.Entities.Firewallrules.Items != nil {
+		for _, rule := range *nic.Entities.Firewallrules.Items {
+			ruleEntry := setFirewallRuleProperties(rule)
+			firewallRules = append(firewallRules, ruleEntry)
+		}
+	}
+	return firewallRules
+}
+
+func setFirewallRuleProperties(rule ionoscloud.FirewallRule) map[string]interface{} {
+	ruleEntry := make(map[string]interface{})
+	ruleEntry["id"] = stringOrDefault(rule.Id, "")
+	if rule.Properties != nil {
+		ruleEntry["name"] = stringOrDefault(rule.Properties.Name, "")
+		ruleEntry["protocol"] = stringOrDefault(rule.Properties.Protocol, "")
+		ruleEntry["source_mac"] = stringOrDefault(rule.Properties.SourceMac, "")
+		ruleEntry["source_ip"] = stringOrDefault(rule.Properties.SourceIp, "")
+		ruleEntry["target_ip"] = stringOrDefault(rule.Properties.TargetIp, "")
+		ruleEntry["icmp_code"] = int32OrDefault(rule.Properties.IcmpCode, 0)
+		ruleEntry["icmp_type"] = int32OrDefault(rule.Properties.IcmpType, 0)
+		ruleEntry["port_range_start"] = int32OrDefault(rule.Properties.PortRangeStart, 0)
+		ruleEntry["port_range_end"] = int32OrDefault(rule.Properties.PortRangeEnd, 0)
+		ruleEntry["type"] = stringOrDefault(rule.Properties.Type, "")
+	}
+	return ruleEntry
+}
 func SetServerProperties(server ionoscloud.Server) map[string]interface{} {
 	serverMap := map[string]interface{}{}
 	if server.Properties != nil {
@@ -515,7 +370,7 @@ func SetServerProperties(server ionoscloud.Server) map[string]interface{} {
 	return serverMap
 }
 
-func setCDRoms(images *[]ionoscloud.Image) []interface{} {
+func setServerCDRoms(images *[]ionoscloud.Image) []interface{} {
 	var cdroms []interface{}
 	for _, image := range *images {
 		entry := make(map[string]interface{})

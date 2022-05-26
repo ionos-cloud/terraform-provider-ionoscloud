@@ -11,7 +11,9 @@ import (
 	"testing"
 )
 
-func TestServersBasic(t *testing.T) {
+const serverTestResource2 = ServerTestResource + "2"
+
+func TestAccDataSourceServersBasic(t *testing.T) {
 	resource.Test(t, resource.TestCase{
 		PreCheck: func() {
 			testAccPreCheck(t)
@@ -23,6 +25,54 @@ func TestServersBasic(t *testing.T) {
 				Config: testAccCheck2ServersByNameAndCores,
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttr(DataSource+"."+ServersDataSource+"."+ServerDataSourceByName, "servers.#", "1"),
+					resource.TestCheckResourceAttrPair(DataSource+"."+ServersDataSource+"."+ServerDataSourceByName, "servers.0.name",
+						ServerResource+"."+serverTestResource2, "name"),
+					resource.TestCheckResourceAttrPair(DataSource+"."+ServersDataSource+"."+ServerDataSourceByName, "servers.0.cores",
+						ServerResource+"."+serverTestResource2, "cores"),
+					resource.TestCheckResourceAttrPair(DataSource+"."+ServersDataSource+"."+ServerDataSourceByName, "servers.0.ram",
+						ServerResource+"."+serverTestResource2, "ram"),
+					resource.TestCheckResourceAttrPair(DataSource+"."+ServersDataSource+"."+ServerDataSourceByName, "servers.0.availability_zone",
+						ServerResource+"."+serverTestResource2, "availability_zone"),
+					resource.TestCheckResourceAttrPair(DataSource+"."+ServersDataSource+"."+ServerDataSourceByName, "servers.0.cpu_family",
+						ServerResource+"."+serverTestResource2, "cpu_family"),
+					resource.TestCheckResourceAttrPair(DataSource+"."+ServersDataSource+"."+ServerDataSourceByName, "servers.0.type",
+						ServerResource+"."+serverTestResource2, "type"),
+					resource.TestCheckResourceAttrPair(DataSource+"."+ServersDataSource+"."+ServerDataSourceByName, "servers.0.type",
+						ServerResource+"."+serverTestResource2, "type"),
+					resource.TestCheckResourceAttrPair(DataSource+"."+ServersDataSource+"."+ServerDataSourceByName, "servers.0.volumes.0.name",
+						ServerResource+"."+serverTestResource2, "volume.0.name"),
+					resource.TestCheckResourceAttrPair(DataSource+"."+ServersDataSource+"."+ServerDataSourceByName, "servers.0.volumes.0.size",
+						ServerResource+"."+serverTestResource2, "volume.0.size"),
+					resource.TestCheckResourceAttrPair(DataSource+"."+ServersDataSource+"."+ServerDataSourceByName, "servers.0.volumes.0.disk_type",
+						ServerResource+"."+serverTestResource2, "volume.0.disk_type"),
+					resource.TestCheckResourceAttrPair(DataSource+"."+ServersDataSource+"."+ServerDataSourceByName, "servers.0.volumes.0.bus",
+						ServerResource+"."+serverTestResource2, "volume.0.bus"),
+					resource.TestCheckResourceAttrPair(DataSource+"."+ServersDataSource+"."+ServerDataSourceByName, "servers.0.volumes.0.availability_zone",
+						ServerResource+"."+serverTestResource2, "volume.0.availability_zone"),
+					resource.TestCheckResourceAttrPair(DataSource+"."+ServersDataSource+"."+ServerDataSourceByName, "servers.0.nics.0.name",
+						ServerResource+"."+serverTestResource2, "nic.0.name"),
+					resource.TestCheckResourceAttrPair(DataSource+"."+ServersDataSource+"."+ServerDataSourceByName, "servers.0.nics.0.lan",
+						ServerResource+"."+serverTestResource2, "nic.0.lan"),
+					resource.TestCheckResourceAttrPair(DataSource+"."+ServersDataSource+"."+ServerDataSourceByName, "servers.0.nics.0.dhcp",
+						ServerResource+"."+serverTestResource2, "nic.0.dhcp"),
+					resource.TestCheckResourceAttrPair(DataSource+"."+ServersDataSource+"."+ServerDataSourceByName, "servers.0.nics.0.firewall_active",
+						ServerResource+"."+serverTestResource2, "nic.0.firewall_active"),
+					resource.TestCheckResourceAttrPair(DataSource+"."+ServersDataSource+"."+ServerDataSourceByName, "servers.0.nics.0.firewall_rules.0.name",
+						ServerResource+"."+serverTestResource2, "nic.0.firewall.0.name"),
+					resource.TestCheckResourceAttrPair(DataSource+"."+ServersDataSource+"."+ServerDataSourceByName, "servers.0.nics.0.firewall_rules.0.protocol",
+						ServerResource+"."+serverTestResource2, "nic.0.firewall.0.protocol"),
+					resource.TestCheckResourceAttrPair(DataSource+"."+ServersDataSource+"."+ServerDataSourceByName, "servers.0.nics.0.firewall_rules.0.port_range_start",
+						ServerResource+"."+serverTestResource2, "nic.0.firewall.0.port_range_start"),
+					resource.TestCheckResourceAttrPair(DataSource+"."+ServersDataSource+"."+ServerDataSourceByName, "servers.0.nics.0.firewall_rules.0.port_range_end",
+						ServerResource+"."+serverTestResource2, "nic.0.firewall.0.port_range_end"),
+					resource.TestCheckResourceAttrPair(DataSource+"."+ServersDataSource+"."+ServerDataSourceByName, "servers.0.nics.0.firewall_rules.0.source_mac",
+						ServerResource+"."+serverTestResource2, "nic.0.firewall.0.source_mac"),
+					resource.TestCheckResourceAttrPair(DataSource+"."+ServersDataSource+"."+ServerDataSourceByName, "servers.0.nics.0.firewall_rules.0.source_ip",
+						ServerResource+"."+serverTestResource2, "nic.0.firewall.0.source_ip"),
+					resource.TestCheckResourceAttrPair(DataSource+"."+ServersDataSource+"."+ServerDataSourceByName, "servers.0.nics.0.firewall_rules.0.source_ip",
+						ServerResource+"."+serverTestResource2, "nic.0.firewall.0.source_ip"),
+					resource.TestCheckResourceAttrPair(DataSource+"."+ServersDataSource+"."+ServerDataSourceByName, "servers.0.nics.0.firewall_rules.0.target_ip",
+						ServerResource+"."+serverTestResource2, "nic.0.firewall.0.target_ip"),
 				),
 			},
 			{
@@ -59,12 +109,11 @@ func testAccCheckServersDestroyCheck(s *terraform.State) error {
 		logApiRequestTime(apiResponse)
 
 		if err != nil {
-			if apiResponse == nil || apiResponse.Response != nil && apiResponse.StatusCode != 404 {
-				return fmt.Errorf("unable to fetch server %s: %s", rs.Primary.ID, err)
+			if !httpNotFound(apiResponse) {
+				return fmt.Errorf("unable to fetch server %s: %w", rs.Primary.ID, err)
 			}
 		} else {
 			return fmt.Errorf("server still exists %s", rs.Primary.ID)
-
 		}
 	}
 
@@ -108,8 +157,14 @@ resource ` + ServerResource + ` ` + ServerTestResource + ` {
   }
 }
 
-resource ` + ServerResource + ` ` + ServerTestResource + "2" + ` {
-  name = "` + ServerTestResource + "2" + `"
+resource "ionoscloud_ipblock" "webserver_ipblock" {
+  location = ` + DatacenterResource + `.` + DatacenterTestResource + `.location
+  size = 2
+  name = "webserver_ipblock"
+}
+
+resource ` + ServerResource + ` ` + serverTestResource2 + ` {
+  name = "` + serverTestResource2 + `"
   datacenter_id = ` + DatacenterResource + `.` + DatacenterTestResource + `.id
   cores = ` + noCoresTest + `
   ram = 2048
@@ -131,11 +186,21 @@ resource ` + ServerResource + ` ` + ServerTestResource + "2" + ` {
     name = "` + LanTestResource + "2" + `"
     dhcp = false
     firewall_active = false
+    firewall {
+      protocol = "TCP"
+      name = "SSH"
+      port_range_start = 22
+      port_range_end = 22
+	  source_mac = "00:0a:95:9d:68:17"
+	  source_ip = ionoscloud_ipblock.webserver_ipblock.ips[0]
+	  target_ip = ionoscloud_ipblock.webserver_ipblock.ips[1]
+	  type = "EGRESS"
+    }
   }
 }
 
 data ` + ServersDataSource + ` ` + ServerDataSourceByName + ` {
- depends_on = [` + ServerResource + `.` + ServerTestResource + "2" + `,
+ depends_on = [` + ServerResource + `.` + serverTestResource2 + `,
 	` + ServerResource + `.` + ServerTestResource + `]
   datacenter_id = ` + DatacenterResource + `.` + DatacenterTestResource + `.id
   filter {
@@ -182,11 +247,17 @@ resource ` + ServerResource + ` ` + ServerTestResource + ` {
     name = "` + LanTestResource + `"
     dhcp = false
     firewall_active = false
-  }
+  }fix duplicate,
 }
 
-resource ` + ServerResource + ` ` + ServerTestResource + "2" + ` {
-  name = "` + ServerTestResource + "2" + `"
+resource "ionoscloud_ipblock" "webserver_ipblock" {
+  location = ` + DatacenterResource + `.` + DatacenterTestResource + `.location
+  size = 2
+  name = "webserver_ipblock"
+}
+
+resource ` + ServerResource + ` ` + serverTestResource2 + ` {
+  name = "` + serverTestResource2 + `"
   datacenter_id = ` + DatacenterResource + `.` + DatacenterTestResource + `.id
   cores = ` + noCoresTest + `
   ram = 2048
@@ -208,6 +279,16 @@ resource ` + ServerResource + ` ` + ServerTestResource + "2" + ` {
     name = "` + LanTestResource + "2" + `"
     dhcp = false
     firewall_active = false
+    firewall {
+      protocol = "TCP"
+      name = "SSH"
+      port_range_start = 22
+      port_range_end = 22
+	  source_mac = "00:0a:95:9d:68:17"
+	  source_ip = ionoscloud_ipblock.webserver_ipblock.ips[0]
+	  target_ip = ionoscloud_ipblock.webserver_ipblock.ips[1]
+	  type = "EGRESS"
+    }
   }
 }
 
