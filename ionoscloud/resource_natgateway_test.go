@@ -78,7 +78,7 @@ func TestAccNatGatewayBasic(t *testing.T) {
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckNatGatewayExists(resourceNatGatewayResource, &natGateway),
 					resource.TestCheckResourceAttr(resourceNatGatewayResource, "name", UpdatedResources),
-					resource.TestCheckResourceAttr(resourceNatGatewayResource, "public_ips.#", "2"),
+					resource.TestCheckResourceAttr(NatGatewayResource, "public_ips.#", "2"),
 					resource.TestCheckResourceAttrPair(resourceNatGatewayResource, "lans.0.id", LanResource+".natgateway_lan_updated", "id"),
 					resource.TestCheckResourceAttr(resourceNatGatewayResource, "lans.0.gateway_ips.0", "10.11.2.6/24"),
 				),
@@ -241,13 +241,5 @@ const testAccDataSourceNatGatewayMatchWrongNameError = testAccCheckNatGatewayCon
 data ` + NatGatewayResource + ` ` + NatGatewayDataSourceByName + `  {
   datacenter_id = ` + DatacenterResource + `.natgateway_datacenter.id
   name			= "wrong_name"
-}
-`
-
-const testAccDataSourceNatGatewayPartialMatchWrongNameError = testAccCheckNatGatewayConfigBasic + `
-data ` + NatGatewayResource + ` ` + NatGatewayDataSourceByName + `  {
-  datacenter_id = ` + DatacenterResource + `.natgateway_datacenter.id
-  name			= "wrong_name"
-  partial_match = true
 }
 `

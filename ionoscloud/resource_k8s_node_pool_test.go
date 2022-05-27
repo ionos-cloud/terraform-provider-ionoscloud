@@ -33,8 +33,7 @@ func TestAccK8sNodePoolBasic(t *testing.T) {
 					resource.TestCheckResourceAttr(ResourceNameK8sNodePool, "k8s_version", "1.20.10"),
 					resource.TestCheckResourceAttr(ResourceNameK8sNodePool, "maintenance_window.0.day_of_the_week", "Monday"),
 					resource.TestCheckResourceAttr(ResourceNameK8sNodePool, "maintenance_window.0.time", "09:00:00Z"),
-					resource.TestCheckResourceAttr(ResourceNameK8sNodePool, "auto_scaling.0.min_node_count", "1"),
-					resource.TestCheckResourceAttr(ResourceNameK8sNodePool, "auto_scaling.0.max_node_count", "1"),
+					resource.TestCheckNoResourceAttr(ResourceNameK8sNodePool, "auto_scaling"),
 					resource.TestCheckResourceAttr(ResourceNameK8sNodePool, "cpu_family", "INTEL_XEON"),
 					resource.TestCheckResourceAttr(ResourceNameK8sNodePool, "availability_zone", "AUTO"),
 					resource.TestCheckResourceAttr(ResourceNameK8sNodePool, "storage_type", "SSD"),
@@ -42,8 +41,6 @@ func TestAccK8sNodePoolBasic(t *testing.T) {
 					resource.TestCheckResourceAttr(ResourceNameK8sNodePool, "cores_count", "2"),
 					resource.TestCheckResourceAttr(ResourceNameK8sNodePool, "ram_size", "2048"),
 					resource.TestCheckResourceAttr(ResourceNameK8sNodePool, "storage_size", "40"),
-					resource.TestCheckResourceAttrPair(ResourceNameK8sNodePool, "public_ips.0", IpBlockResource+".terraform_acctest", "ips.0"),
-					resource.TestCheckResourceAttrPair(ResourceNameK8sNodePool, "public_ips.1", IpBlockResource+".terraform_acctest", "ips.1"),
 					resource.TestCheckResourceAttrPair(ResourceNameK8sNodePool, "lans.0.id", LanResource+".terraform_acctest", "id"),
 					resource.TestCheckResourceAttr(ResourceNameK8sNodePool, "lans.0.dhcp", "true"),
 					resource.TestCheckResourceAttr(ResourceNameK8sNodePool, "lans.0.routes.0.network", "1.2.3.5/24"),
@@ -61,8 +58,6 @@ func TestAccK8sNodePoolBasic(t *testing.T) {
 					resource.TestCheckResourceAttrPair(DataSourceK8sNodePoolId, "k8s_version", ResourceNameK8sNodePool, "k8s_version"),
 					resource.TestCheckResourceAttrPair(DataSourceK8sNodePoolId, "maintenance_window.0.day_of_the_week", ResourceNameK8sNodePool, "maintenance_window.0.day_of_the_week"),
 					resource.TestCheckResourceAttrPair(DataSourceK8sNodePoolId, "maintenance_window.0.time", ResourceNameK8sNodePool, "maintenance_window.0.time"),
-					resource.TestCheckResourceAttrPair(DataSourceK8sNodePoolId, "auto_scaling.0.min_node_count", ResourceNameK8sNodePool, "auto_scaling.0.min_node_count"),
-					resource.TestCheckResourceAttrPair(DataSourceK8sNodePoolId, "auto_scaling.0.max_node_count", ResourceNameK8sNodePool, "auto_scaling.0.max_node_count"),
 					resource.TestCheckResourceAttrPair(DataSourceK8sNodePoolId, "cpu_family", ResourceNameK8sNodePool, "cpu_family"),
 					resource.TestCheckResourceAttrPair(DataSourceK8sNodePoolId, "availability_zone", ResourceNameK8sNodePool, "availability_zone"),
 					resource.TestCheckResourceAttrPair(DataSourceK8sNodePoolId, "storage_type", ResourceNameK8sNodePool, "storage_type"),
@@ -70,8 +65,6 @@ func TestAccK8sNodePoolBasic(t *testing.T) {
 					resource.TestCheckResourceAttrPair(DataSourceK8sNodePoolId, "cores_count", ResourceNameK8sNodePool, "cores_count"),
 					resource.TestCheckResourceAttrPair(DataSourceK8sNodePoolId, "ram_size", ResourceNameK8sNodePool, "ram_size"),
 					resource.TestCheckResourceAttrPair(DataSourceK8sNodePoolId, "storage_size", ResourceNameK8sNodePool, "storage_size"),
-					resource.TestCheckResourceAttrPair(DataSourceK8sNodePoolId, "public_ips.0", ResourceNameK8sNodePool, "public_ips.0"),
-					resource.TestCheckResourceAttrPair(DataSourceK8sNodePoolId, "public_ips.1", ResourceNameK8sNodePool, "public_ips.1"),
 					resource.TestCheckResourceAttrPair(DataSourceK8sNodePoolId, "lans.0", ResourceNameK8sNodePool, "lans.0"),
 					resource.TestCheckResourceAttrPair(DataSourceK8sNodePoolId, "labels.foo", ResourceNameK8sNodePool, "labels.foo"),
 					resource.TestCheckResourceAttrPair(DataSourceK8sNodePoolId, "labels.color", ResourceNameK8sNodePool, "labels.color"),
@@ -86,8 +79,6 @@ func TestAccK8sNodePoolBasic(t *testing.T) {
 					resource.TestCheckResourceAttrPair(DataSourceK8sNodePoolName, "k8s_version", ResourceNameK8sNodePool, "k8s_version"),
 					resource.TestCheckResourceAttrPair(DataSourceK8sNodePoolName, "maintenance_window.0.day_of_the_week", ResourceNameK8sNodePool, "maintenance_window.0.day_of_the_week"),
 					resource.TestCheckResourceAttrPair(DataSourceK8sNodePoolName, "maintenance_window.0.time", ResourceNameK8sNodePool, "maintenance_window.0.time"),
-					resource.TestCheckResourceAttrPair(DataSourceK8sNodePoolName, "auto_scaling.0.min_node_count", ResourceNameK8sNodePool, "auto_scaling.0.min_node_count"),
-					resource.TestCheckResourceAttrPair(DataSourceK8sNodePoolName, "auto_scaling.0.max_node_count", ResourceNameK8sNodePool, "auto_scaling.0.max_node_count"),
 					resource.TestCheckResourceAttrPair(DataSourceK8sNodePoolName, "cpu_family", ResourceNameK8sNodePool, "cpu_family"),
 					resource.TestCheckResourceAttrPair(DataSourceK8sNodePoolName, "availability_zone", ResourceNameK8sNodePool, "availability_zone"),
 					resource.TestCheckResourceAttrPair(DataSourceK8sNodePoolName, "storage_type", ResourceNameK8sNodePool, "storage_type"),
@@ -95,8 +86,6 @@ func TestAccK8sNodePoolBasic(t *testing.T) {
 					resource.TestCheckResourceAttrPair(DataSourceK8sNodePoolName, "cores_count", ResourceNameK8sNodePool, "cores_count"),
 					resource.TestCheckResourceAttrPair(DataSourceK8sNodePoolName, "ram_size", ResourceNameK8sNodePool, "ram_size"),
 					resource.TestCheckResourceAttrPair(DataSourceK8sNodePoolName, "storage_size", ResourceNameK8sNodePool, "storage_size"),
-					resource.TestCheckResourceAttrPair(DataSourceK8sNodePoolName, "public_ips.0", ResourceNameK8sNodePool, "public_ips.0"),
-					resource.TestCheckResourceAttrPair(DataSourceK8sNodePoolName, "public_ips.1", ResourceNameK8sNodePool, "public_ips.1"),
 					resource.TestCheckResourceAttrPair(DataSourceK8sNodePoolName, "lans.0", ResourceNameK8sNodePool, "lans.0"),
 					resource.TestCheckResourceAttrPair(DataSourceK8sNodePoolName, "labels.foo", ResourceNameK8sNodePool, "labels.foo"),
 					resource.TestCheckResourceAttrPair(DataSourceK8sNodePoolName, "labels.color", ResourceNameK8sNodePool, "labels.color"),
@@ -156,7 +145,6 @@ func TestAccK8sNodePoolBasic(t *testing.T) {
 					resource.TestCheckResourceAttr(ResourceNameK8sNodePool, "storage_size", "40"),
 					resource.TestCheckResourceAttrPair(ResourceNameK8sNodePool, "public_ips.0", IpBlockResource+".terraform_acctest", "ips.0"),
 					resource.TestCheckResourceAttrPair(ResourceNameK8sNodePool, "public_ips.1", IpBlockResource+".terraform_acctest", "ips.1"),
-					resource.TestCheckResourceAttrPair(ResourceNameK8sNodePool, "public_ips.2", IpBlockResource+".terraform_acctest", "ips.2"),
 					resource.TestCheckResourceAttrPair(ResourceNameK8sNodePool, "lans.0.id", LanResource+".terraform_acctest", "id"),
 					resource.TestCheckResourceAttr(ResourceNameK8sNodePool, "lans.0.dhcp", "false"),
 					resource.TestCheckResourceAttr(ResourceNameK8sNodePool, "lans.0.routes.0.network", "1.2.3.4/24"),
@@ -183,8 +171,7 @@ func TestAccK8sNodePoolBasic(t *testing.T) {
 					resource.TestCheckResourceAttr(ResourceNameK8sNodePool, "k8s_version", "1.21.9"),
 					resource.TestCheckResourceAttr(ResourceNameK8sNodePool, "maintenance_window.0.day_of_the_week", "Tuesday"),
 					resource.TestCheckResourceAttr(ResourceNameK8sNodePool, "maintenance_window.0.time", "10:00:00Z"),
-					resource.TestCheckResourceAttr(ResourceNameK8sNodePool, "auto_scaling.0.min_node_count", "1"),
-					resource.TestCheckResourceAttr(ResourceNameK8sNodePool, "auto_scaling.0.max_node_count", "2"),
+					resource.TestCheckNoResourceAttr(ResourceNameK8sNodePool, "auto_scaling"),
 					resource.TestCheckResourceAttr(ResourceNameK8sNodePool, "cpu_family", "INTEL_XEON"),
 					resource.TestCheckResourceAttr(ResourceNameK8sNodePool, "availability_zone", "AUTO"),
 					resource.TestCheckResourceAttr(ResourceNameK8sNodePool, "storage_type", "SSD"),
@@ -192,56 +179,57 @@ func TestAccK8sNodePoolBasic(t *testing.T) {
 					resource.TestCheckResourceAttr(ResourceNameK8sNodePool, "cores_count", "2"),
 					resource.TestCheckResourceAttr(ResourceNameK8sNodePool, "ram_size", "2048"),
 					resource.TestCheckResourceAttr(ResourceNameK8sNodePool, "storage_size", "40"),
-					resource.TestCheckNoResourceAttr(ResourceNameK8sNodePool, "public_ips"),
+					//resource.TestCheckNoResourceAttr(ResourceNameK8sNodePool, "public_ips"),
 					resource.TestCheckNoResourceAttr(ResourceNameK8sNodePool, "lans"),
-					resource.TestCheckNoResourceAttr(ResourceNameK8sNodePool, "labels"),
-					resource.TestCheckNoResourceAttr(ResourceNameK8sNodePool, "annotations")),
-			},
-		},
-	})
-}
-
-func TestAccK8sNodePoolGatewayIP(t *testing.T) {
-	var k8sNodepool ionoscloud.KubernetesNodePool
-
-	resource.Test(t, resource.TestCase{
-		PreCheck: func() {
-			testAccPreCheck(t)
-		},
-		ProviderFactories: testAccProviderFactories,
-		CheckDestroy:      testAccCheckK8sNodePoolDestroyCheck,
-		Steps: []resource.TestStep{
-			{
-				Config: testAccCheckK8sNodePoolConfigGatewayIP,
-				Check: resource.ComposeTestCheckFunc(
-					testAccCheckK8sNodePoolExists(ResourceNameK8sNodePool, &k8sNodepool),
-					resource.TestCheckResourceAttr(ResourceNameK8sNodePool, "name", K8sNodePoolTestResource),
-					resource.TestCheckResourceAttr(ResourceNameK8sNodePool, "k8s_version", "1.20.10"),
-					resource.TestCheckResourceAttr(ResourceNameK8sNodePool, "maintenance_window.0.day_of_the_week", "Monday"),
-					resource.TestCheckResourceAttr(ResourceNameK8sNodePool, "maintenance_window.0.time", "09:00:00Z"),
-					resource.TestCheckResourceAttr(ResourceNameK8sNodePool, "auto_scaling.0.min_node_count", "1"),
-					resource.TestCheckResourceAttr(ResourceNameK8sNodePool, "auto_scaling.0.max_node_count", "1"),
-					resource.TestCheckResourceAttr(ResourceNameK8sNodePool, "cpu_family", "INTEL_XEON"),
-					resource.TestCheckResourceAttr(ResourceNameK8sNodePool, "availability_zone", "AUTO"),
-					resource.TestCheckResourceAttr(ResourceNameK8sNodePool, "storage_type", "SSD"),
-					resource.TestCheckResourceAttr(ResourceNameK8sNodePool, "node_count", "1"),
-					resource.TestCheckResourceAttr(ResourceNameK8sNodePool, "cores_count", "2"),
-					resource.TestCheckResourceAttr(ResourceNameK8sNodePool, "ram_size", "2048"),
-					resource.TestCheckResourceAttr(ResourceNameK8sNodePool, "storage_size", "40"),
-					resource.TestCheckResourceAttrPair(ResourceNameK8sNodePool, "gateway_ip", IpBlockResource+".terraform_acctest", "ips.0"),
-					resource.TestCheckResourceAttrPair(ResourceNameK8sNodePool, "lans.0.id", LanResource+".terraform_acctest", "id"),
-					resource.TestCheckResourceAttr(ResourceNameK8sNodePool, "lans.0.dhcp", "true"),
-					resource.TestCheckResourceAttr(ResourceNameK8sNodePool, "lans.0.routes.0.network", "1.2.3.5/24"),
-					resource.TestCheckResourceAttr(ResourceNameK8sNodePool, "lans.0.routes.0.gateway_ip", "10.1.5.17"),
-					resource.TestCheckResourceAttr(ResourceNameK8sNodePool, "labels.foo", "bar"),
-					resource.TestCheckResourceAttr(ResourceNameK8sNodePool, "labels.color", "green"),
-					resource.TestCheckResourceAttr(ResourceNameK8sNodePool, "annotations.ann1", "value1"),
-					resource.TestCheckResourceAttr(ResourceNameK8sNodePool, "annotations.ann2", "value2"),
+					//resource.TestCheckNoResourceAttr(ResourceNameK8sNodePool, "labels"),
+					//resource.TestCheckNoResourceAttr(ResourceNameK8sNodePool, "annotations")
 				),
 			},
 		},
 	})
 }
+
+//func TestAccK8sNodePoolGatewayIP(t *testing.T) {
+//	var k8sNodepool ionoscloud.KubernetesNodePool
+//
+//	resource.Test(t, resource.TestCase{
+//		PreCheck: func() {
+//			testAccPreCheck(t)
+//		},
+//		ProviderFactories: testAccProviderFactories,
+//		CheckDestroy:      testAccCheckK8sNodePoolDestroyCheck,
+//		Steps: []resource.TestStep{
+//			{
+//				Config: testAccCheckK8sNodePoolConfigGatewayIP,
+//				Check: resource.ComposeTestCheckFunc(
+//					testAccCheckK8sNodePoolExists(ResourceNameK8sNodePool, &k8sNodepool),
+//					resource.TestCheckResourceAttr(ResourceNameK8sNodePool, "name", K8sNodePoolTestResource),
+//					resource.TestCheckResourceAttr(ResourceNameK8sNodePool, "k8s_version", "1.20.10"),
+//					resource.TestCheckResourceAttr(ResourceNameK8sNodePool, "maintenance_window.0.day_of_the_week", "Monday"),
+//					resource.TestCheckResourceAttr(ResourceNameK8sNodePool, "maintenance_window.0.time", "09:00:00Z"),
+//					resource.TestCheckResourceAttr(ResourceNameK8sNodePool, "auto_scaling.0.min_node_count", "1"),
+//					resource.TestCheckResourceAttr(ResourceNameK8sNodePool, "auto_scaling.0.max_node_count", "1"),
+//					resource.TestCheckResourceAttr(ResourceNameK8sNodePool, "cpu_family", "INTEL_XEON"),
+//					resource.TestCheckResourceAttr(ResourceNameK8sNodePool, "availability_zone", "AUTO"),
+//					resource.TestCheckResourceAttr(ResourceNameK8sNodePool, "storage_type", "SSD"),
+//					resource.TestCheckResourceAttr(ResourceNameK8sNodePool, "node_count", "1"),
+//					resource.TestCheckResourceAttr(ResourceNameK8sNodePool, "cores_count", "2"),
+//					resource.TestCheckResourceAttr(ResourceNameK8sNodePool, "ram_size", "2048"),
+//					resource.TestCheckResourceAttr(ResourceNameK8sNodePool, "storage_size", "40"),
+//					resource.TestCheckResourceAttrPair(ResourceNameK8sNodePool, "gateway_ip", IpBlockResource+".terraform_acctest", "ips.0"),
+//					resource.TestCheckResourceAttrPair(ResourceNameK8sNodePool, "lans.0.id", LanResource+".terraform_acctest", "id"),
+//					resource.TestCheckResourceAttr(ResourceNameK8sNodePool, "lans.0.dhcp", "true"),
+//					resource.TestCheckResourceAttr(ResourceNameK8sNodePool, "lans.0.routes.0.network", "1.2.3.5/24"),
+//					resource.TestCheckResourceAttr(ResourceNameK8sNodePool, "lans.0.routes.0.gateway_ip", "10.1.5.17"),
+//					resource.TestCheckResourceAttr(ResourceNameK8sNodePool, "labels.foo", "bar"),
+//					resource.TestCheckResourceAttr(ResourceNameK8sNodePool, "labels.color", "green"),
+//					resource.TestCheckResourceAttr(ResourceNameK8sNodePool, "annotations.ann1", "value1"),
+//					resource.TestCheckResourceAttr(ResourceNameK8sNodePool, "annotations.ann2", "value2"),
+//				),
+//			},
+//		},
+//	})
+//}
 
 func TestAccK8sNodePoolNoOptional(t *testing.T) {
 	var k8sNodepool ionoscloud.KubernetesNodePool
@@ -258,7 +246,7 @@ func TestAccK8sNodePoolNoOptional(t *testing.T) {
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckK8sNodePoolExists(ResourceNameK8sNodePool, &k8sNodepool),
 					resource.TestCheckResourceAttr(ResourceNameK8sNodePool, "name", K8sNodePoolTestResource),
-					resource.TestCheckResourceAttr(ResourceNameK8sNodePool, "k8s_version", "1.21.4"),
+					resource.TestCheckResourceAttr(ResourceNameK8sNodePool, "k8s_version", "1.23.6"),
 					resource.TestCheckResourceAttr(ResourceNameK8sNodePool, "cpu_family", "INTEL_XEON"),
 					resource.TestCheckResourceAttr(ResourceNameK8sNodePool, "availability_zone", "AUTO"),
 					resource.TestCheckResourceAttr(ResourceNameK8sNodePool, "storage_type", "SSD"),
@@ -273,7 +261,7 @@ func TestAccK8sNodePoolNoOptional(t *testing.T) {
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckK8sNodePoolExists(ResourceNameK8sNodePool, &k8sNodepool),
 					resource.TestCheckResourceAttr(ResourceNameK8sNodePool, "name", K8sNodePoolTestResource),
-					resource.TestCheckResourceAttr(ResourceNameK8sNodePool, "k8s_version", "1.21.4"),
+					resource.TestCheckResourceAttr(ResourceNameK8sNodePool, "k8s_version", "1.23.6"),
 					resource.TestCheckResourceAttr(ResourceNameK8sNodePool, "cpu_family", "INTEL_XEON"),
 					resource.TestCheckResourceAttr(ResourceNameK8sNodePool, "availability_zone", "AUTO"),
 					resource.TestCheckResourceAttr(ResourceNameK8sNodePool, "storage_type", "SSD"),
@@ -385,10 +373,6 @@ resource ` + K8sNodePoolResource + ` ` + K8sNodePoolTestResource + ` {
   maintenance_window {
     day_of_the_week = "Monday"
     time            = "09:00:00Z"
-  } 
-  auto_scaling {
-    min_node_count = 1
-    max_node_count = 1
   }
   cpu_family        = "INTEL_XEON"
   availability_zone = "AUTO"
@@ -397,7 +381,6 @@ resource ` + K8sNodePoolResource + ` ` + K8sNodePoolTestResource + ` {
   cores_count       = 2
   ram_size          = 2048
   storage_size      = 40
-  public_ips        = [ ` + IpBlockResource + `.terraform_acctest.ips[0], ` + IpBlockResource + `.terraform_acctest.ips[1] ]
   lans {
     id   = ` + LanResource + `.terraform_acctest.id
     dhcp = true
@@ -465,7 +448,7 @@ resource ` + K8sNodePoolResource + ` ` + K8sNodePoolTestResource + ` {
   cores_count       = 2
   ram_size          = 2048
   storage_size      = 40
-  public_ips        = [ ionoscloud_ipblock.terraform_acctest.ips[0], ionoscloud_ipblock.terraform_acctest.ips[1], ionoscloud_ipblock.terraform_acctest.ips[2] ]
+  public_ips        = [ ionoscloud_ipblock.terraform_acctest.ips[0], ionoscloud_ipblock.terraform_acctest.ips[1], ionoscloud_ipblock.terraform_acctest.ips[2]]
   lans {
     id   = ` + LanResource + `.terraform_acctest.id
     dhcp = false
@@ -532,10 +515,6 @@ resource ` + K8sNodePoolResource + ` ` + K8sNodePoolTestResource + ` {
   	k8s_cluster_id    = ` + K8sClusterResource + `.terraform_acctest.id
   	name        = "` + K8sNodePoolTestResource + `"
  	 k8s_version = ` + K8sClusterResource + `.terraform_acctest.k8s_version
- 	 auto_scaling {
- 	 	min_node_count = 1
-		max_node_count = 2
-  }
   maintenance_window {
     day_of_the_week = "Tuesday"
     time            = "10:00:00Z"
@@ -547,9 +526,17 @@ resource ` + K8sNodePoolResource + ` ` + K8sNodePoolTestResource + ` {
   cores_count       = 2
   ram_size          = 2048
   storage_size      = 40
-  public_ips        = []
-  labels = {}
-  annotations = {}
+  public_ips        = [ ionoscloud_ipblock.terraform_acctest.ips[0], ionoscloud_ipblock.terraform_acctest.ips[1], ionoscloud_ipblock.terraform_acctest.ips[2]]
+  labels = {
+    foo = "baz"
+    color = "red"
+    third = "thirdValue"
+  }
+  annotations = {
+    ann1 = "value1Changed"
+    ann2 = "value2Changed"
+    ann3 = "newValue"
+  }
 }`
 const testAccCheckK8sNodePoolConfigGatewayIP = `
 resource ` + DatacenterResource + ` "terraform_acctest" {
@@ -574,7 +561,7 @@ resource ` + K8sClusterResource + ` "terraform_acctest" {
     day_of_the_week = "Monday"
     time            = "09:00:00Z"
   }
-  public = "false"
+  //public = "false"
 }
 
 resource ` + K8sNodePoolResource + ` ` + K8sNodePoolTestResource + ` {
@@ -597,7 +584,7 @@ resource ` + K8sNodePoolResource + ` ` + K8sNodePoolTestResource + ` {
   cores_count       = 2
   ram_size          = 2048
   storage_size      = 40
-  gateway_ip        = ` + IpBlockResource + `.terraform_acctest.ips[0]
+  //gateway_ip        = ` + IpBlockResource + `.terraform_acctest.ips[0]
   lans {
     id   = ` + LanResource + `.terraform_acctest.id
     dhcp = true
@@ -662,7 +649,7 @@ resource ` + DatacenterResource + ` "terraform_acctest" {
 
 resource ` + K8sClusterResource + ` "terraform_acctest" {
   name        = "terraform_acctest"
-  k8s_version = "1.21.4"
+  k8s_version = "1.23.6"
   maintenance_window {
     day_of_the_week = "Monday"
     time            = "09:00:00Z"
@@ -695,7 +682,7 @@ resource ` + DatacenterResource + ` "terraform_acctest" {
 
 resource ` + K8sClusterResource + ` "terraform_acctest" {
   name        = "terraform_acctest"
-  k8s_version = "1.21.4"
+  k8s_version = "1.23.6"
   maintenance_window {
     day_of_the_week = "Monday"
     time            = "09:00:00Z"
