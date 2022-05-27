@@ -17,6 +17,8 @@ import (
 const networkLoadBalancerForwardingRuleResource = NetworkLoadBalancerForwardingRuleResource + "." + NetworkLoadBalancerForwardingRuleTestResource
 const dataSourceNetworkLoadBalancerForwardingRuleId = DataSource + "." + NetworkLoadBalancerForwardingRuleResource + "." + NetworkLoadBalancerForwardingRuleDataSourceById
 const dataSourceNetworkLoadBalancerForwardingRuleName = DataSource + "." + NetworkLoadBalancerForwardingRuleResource + "." + NetworkLoadBalancerForwardingRuleDataSourceByName
+const dataSourceNetworkLoadBalancerForwardingRuleListeenrIp = DataSource + "." + NetworkLoadBalancerForwardingRuleResource + "." + NetworkLoadBalancerForwardingRuleDataSourceByListenetIp
+const dataSourceNetworkLoadBalancerForwardingRuleProtocol = DataSource + "." + NetworkLoadBalancerForwardingRuleResource + "." + NetworkLoadBalancerForwardingRuleDataSourceByProtocol
 
 func TestAccNetworkLoadBalancerForwardingRuleBasic(t *testing.T) {
 	var networkLoadBalancerForwardingRule ionoscloud.NetworkLoadBalancerForwardingRule
@@ -114,6 +116,46 @@ func TestAccNetworkLoadBalancerForwardingRuleBasic(t *testing.T) {
 					resource.TestCheckResourceAttrPair(dataSourceNetworkLoadBalancerForwardingRuleName, "targets.0.health_check.0.check", networkLoadBalancerForwardingRuleResource, "targets.0.health_check.0.check"),
 					resource.TestCheckResourceAttrPair(dataSourceNetworkLoadBalancerForwardingRuleName, "targets.0.health_check.0.check_interval", networkLoadBalancerForwardingRuleResource, "targets.0.health_check.0.check_interval"),
 					resource.TestCheckResourceAttrPair(dataSourceNetworkLoadBalancerForwardingRuleName, "targets.0.health_check.0.maintenance", networkLoadBalancerForwardingRuleResource, "targets.0.health_check.0.maintenance"),
+				),
+			},
+			{
+				Config: testAccDataSourceNetworkLoadBalancerForwardingRuleMatchListenerIp,
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttrPair(dataSourceNetworkLoadBalancerForwardingRuleListeenrIp, "name", networkLoadBalancerForwardingRuleResource, "name"),
+					resource.TestCheckResourceAttrPair(dataSourceNetworkLoadBalancerForwardingRuleListeenrIp, "algorithm", networkLoadBalancerForwardingRuleResource, "algorithm"),
+					resource.TestCheckResourceAttrPair(dataSourceNetworkLoadBalancerForwardingRuleListeenrIp, "protocol", networkLoadBalancerForwardingRuleResource, "protocol"),
+					resource.TestCheckResourceAttrPair(dataSourceNetworkLoadBalancerForwardingRuleListeenrIp, "listener_ip", networkLoadBalancerForwardingRuleResource, "listener_ip"),
+					resource.TestCheckResourceAttrPair(dataSourceNetworkLoadBalancerForwardingRuleListeenrIp, "listener_port", networkLoadBalancerForwardingRuleResource, "listener_port"),
+					resource.TestCheckResourceAttrPair(dataSourceNetworkLoadBalancerForwardingRuleListeenrIp, "health_check.0.client_timeout", networkLoadBalancerForwardingRuleResource, "health_check.0.client_timeout"),
+					resource.TestCheckResourceAttrPair(dataSourceNetworkLoadBalancerForwardingRuleListeenrIp, "health_check.0.connect_timeout", networkLoadBalancerForwardingRuleResource, "health_check.0.connect_timeout"),
+					resource.TestCheckResourceAttrPair(dataSourceNetworkLoadBalancerForwardingRuleListeenrIp, "health_check.0.target_timeout", networkLoadBalancerForwardingRuleResource, "health_check.0.target_timeout"),
+					resource.TestCheckResourceAttrPair(dataSourceNetworkLoadBalancerForwardingRuleListeenrIp, "health_check.0.retries", networkLoadBalancerForwardingRuleResource, "health_check.0.retries"),
+					resource.TestCheckResourceAttrPair(dataSourceNetworkLoadBalancerForwardingRuleListeenrIp, "targets.0.ip", networkLoadBalancerForwardingRuleResource, "targets.0.ip"),
+					resource.TestCheckResourceAttrPair(dataSourceNetworkLoadBalancerForwardingRuleListeenrIp, "targets.0.port", networkLoadBalancerForwardingRuleResource, "targets.0.port"),
+					resource.TestCheckResourceAttrPair(dataSourceNetworkLoadBalancerForwardingRuleListeenrIp, "targets.0.weight", networkLoadBalancerForwardingRuleResource, "targets.0.weight"),
+					resource.TestCheckResourceAttrPair(dataSourceNetworkLoadBalancerForwardingRuleListeenrIp, "targets.0.health_check.0.check", networkLoadBalancerForwardingRuleResource, "targets.0.health_check.0.check"),
+					resource.TestCheckResourceAttrPair(dataSourceNetworkLoadBalancerForwardingRuleListeenrIp, "targets.0.health_check.0.check_interval", networkLoadBalancerForwardingRuleResource, "targets.0.health_check.0.check_interval"),
+					resource.TestCheckResourceAttrPair(dataSourceNetworkLoadBalancerForwardingRuleListeenrIp, "targets.0.health_check.0.maintenance", networkLoadBalancerForwardingRuleResource, "targets.0.health_check.0.maintenance"),
+				),
+			},
+			{
+				Config: testAccDataSourceNetworkLoadBalancerForwardingRuleMatchProtocol,
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttrPair(dataSourceNetworkLoadBalancerForwardingRuleProtocol, "name", networkLoadBalancerForwardingRuleResource, "name"),
+					resource.TestCheckResourceAttrPair(dataSourceNetworkLoadBalancerForwardingRuleProtocol, "algorithm", networkLoadBalancerForwardingRuleResource, "algorithm"),
+					resource.TestCheckResourceAttrPair(dataSourceNetworkLoadBalancerForwardingRuleProtocol, "protocol", networkLoadBalancerForwardingRuleResource, "protocol"),
+					resource.TestCheckResourceAttrPair(dataSourceNetworkLoadBalancerForwardingRuleProtocol, "listener_ip", networkLoadBalancerForwardingRuleResource, "listener_ip"),
+					resource.TestCheckResourceAttrPair(dataSourceNetworkLoadBalancerForwardingRuleProtocol, "listener_port", networkLoadBalancerForwardingRuleResource, "listener_port"),
+					resource.TestCheckResourceAttrPair(dataSourceNetworkLoadBalancerForwardingRuleProtocol, "health_check.0.client_timeout", networkLoadBalancerForwardingRuleResource, "health_check.0.client_timeout"),
+					resource.TestCheckResourceAttrPair(dataSourceNetworkLoadBalancerForwardingRuleProtocol, "health_check.0.connect_timeout", networkLoadBalancerForwardingRuleResource, "health_check.0.connect_timeout"),
+					resource.TestCheckResourceAttrPair(dataSourceNetworkLoadBalancerForwardingRuleProtocol, "health_check.0.target_timeout", networkLoadBalancerForwardingRuleResource, "health_check.0.target_timeout"),
+					resource.TestCheckResourceAttrPair(dataSourceNetworkLoadBalancerForwardingRuleProtocol, "health_check.0.retries", networkLoadBalancerForwardingRuleResource, "health_check.0.retries"),
+					resource.TestCheckResourceAttrPair(dataSourceNetworkLoadBalancerForwardingRuleProtocol, "targets.0.ip", networkLoadBalancerForwardingRuleResource, "targets.0.ip"),
+					resource.TestCheckResourceAttrPair(dataSourceNetworkLoadBalancerForwardingRuleProtocol, "targets.0.port", networkLoadBalancerForwardingRuleResource, "targets.0.port"),
+					resource.TestCheckResourceAttrPair(dataSourceNetworkLoadBalancerForwardingRuleProtocol, "targets.0.weight", networkLoadBalancerForwardingRuleResource, "targets.0.weight"),
+					resource.TestCheckResourceAttrPair(dataSourceNetworkLoadBalancerForwardingRuleProtocol, "targets.0.health_check.0.check", networkLoadBalancerForwardingRuleResource, "targets.0.health_check.0.check"),
+					resource.TestCheckResourceAttrPair(dataSourceNetworkLoadBalancerForwardingRuleProtocol, "targets.0.health_check.0.check_interval", networkLoadBalancerForwardingRuleResource, "targets.0.health_check.0.check_interval"),
+					resource.TestCheckResourceAttrPair(dataSourceNetworkLoadBalancerForwardingRuleProtocol, "targets.0.health_check.0.maintenance", networkLoadBalancerForwardingRuleResource, "targets.0.health_check.0.maintenance"),
 				),
 			},
 			{
@@ -325,6 +367,22 @@ data ` + NetworkLoadBalancerForwardingRuleResource + ` ` + NetworkLoadBalancerFo
   datacenter_id = ` + networkLoadBalancerForwardingRuleResource + `.datacenter_id
   networkloadbalancer_id  = ` + networkLoadBalancerForwardingRuleResource + `.networkloadbalancer_id
  name			= ` + networkLoadBalancerForwardingRuleResource + `.name
+}
+`
+
+const testAccDataSourceNetworkLoadBalancerForwardingRuleMatchProtocol = testAccCheckNetworkLoadBalancerForwardingRuleConfigBasic + `
+data ` + NetworkLoadBalancerForwardingRuleResource + ` ` + NetworkLoadBalancerForwardingRuleDataSourceByProtocol + ` {
+  datacenter_id = ` + networkLoadBalancerForwardingRuleResource + `.datacenter_id
+  networkloadbalancer_id  = ` + networkLoadBalancerForwardingRuleResource + `.networkloadbalancer_id
+  protocol			= ` + networkLoadBalancerForwardingRuleResource + `.protocol
+}
+`
+
+const testAccDataSourceNetworkLoadBalancerForwardingRuleMatchListenerIp = testAccCheckNetworkLoadBalancerForwardingRuleConfigBasic + `
+data ` + NetworkLoadBalancerForwardingRuleResource + ` ` + NetworkLoadBalancerForwardingRuleDataSourceByListenetIp + ` {
+  datacenter_id = ` + networkLoadBalancerForwardingRuleResource + `.datacenter_id
+  networkloadbalancer_id  = ` + networkLoadBalancerForwardingRuleResource + `.networkloadbalancer_id
+  listener_ip			= ` + networkLoadBalancerForwardingRuleResource + `.listener_ip
 }
 `
 

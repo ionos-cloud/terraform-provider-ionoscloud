@@ -76,9 +76,11 @@ func dataSourceNetworkLoadBalancerRead(ctx context.Context, d *schema.ResourceDa
 
 	idValue, idOk := d.GetOk("id")
 	nameValue, nameOk := d.GetOk("name")
+	targetLanValue, targetLanOk := d.GetOk("target_lan")
 
 	id := idValue.(string)
 	name := nameValue.(string)
+	targetLan := targetLanValue.(int32)
 
 	if idOk && nameOk {
 		return diag.FromErr(errors.New("id and name cannot be both specified in the same time"))
@@ -132,6 +134,16 @@ func dataSourceNetworkLoadBalancerRead(ctx context.Context, d *schema.ResourceDa
 					}
 				}
 			}
+		}
+
+		if targetLanOk && targetLan != 0 {
+			var targetLanResults []ionoscloud.NetworkLoadBalancer
+			for _, networkLoadBalancer := range results {
+				if networkLoadBalancer.Properties != nil && networkLoadBalancer.Properties.TargetLan != nil && *networkLoadBalancer.Properties.TargetLan == targetLan {
+					targetLanResults = append(targetLanResults, networkLoadBalancer)
+				}
+			}
+			results = targetLanResults
 		}
 
 		if results == nil || len(results) == 0 {

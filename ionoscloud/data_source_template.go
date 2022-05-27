@@ -6,6 +6,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	ionoscloud "github.com/ionos-cloud/sdk-go/v6"
+	"log"
 	"strings"
 )
 
@@ -53,70 +54,82 @@ func dataSourceTemplateRead(ctx context.Context, d *schema.ResourceData, meta in
 		return diags
 	}
 
+	idValue, idOk := d.GetOk("id")
 	name, nameOk := d.GetOk("name")
 	cores, coresOk := d.GetOk("cores")
 	ram, ramOk := d.GetOk("ram")
 	storageSize, storageSizeOk := d.GetOk("storage_size")
 
+	id := idValue.(string)
+
 	var results []ionoscloud.Template
-
-	if nameOk && templates.Items != nil {
-		for _, tmp := range *templates.Items {
-			if tmp.Properties != nil && tmp.Properties.Name != nil && strings.EqualFold(*tmp.Properties.Name, name.(string)) {
-				results = append(results, tmp)
-			}
-		}
-	} else if templates.Items != nil {
-		results = *templates.Items
-	}
-
-	if coresOk {
-		cores := float32(cores.(float64))
-		if results != nil {
-			var coresResults []ionoscloud.Template
-			for _, tmp := range results {
-				if tmp.Properties.Cores != nil && *tmp.Properties.Cores == cores {
-					coresResults = append(coresResults, tmp)
-				}
-			}
-			results = coresResults
-		}
-	}
-
-	if ramOk {
-		ram := float32(ram.(float64))
-		if results != nil {
-			var ramResults []ionoscloud.Template
-			for _, tmp := range results {
-				if tmp.Properties.Ram != nil && *tmp.Properties.Ram == ram {
-					ramResults = append(ramResults, tmp)
-				}
-			}
-			results = ramResults
-		}
-	}
-
-	if storageSizeOk {
-		storageSize := float32(storageSize.(float64))
-		if results != nil {
-			var storageSizeResults []ionoscloud.Template
-			for _, tmp := range results {
-				if tmp.Properties != nil && tmp.Properties.StorageSize != nil && *tmp.Properties.StorageSize == storageSize {
-					storageSizeResults = append(storageSizeResults, tmp)
-				}
-			}
-			results = storageSizeResults
-		}
-	}
-
 	var template ionoscloud.Template
 
-	if results == nil || len(results) == 0 {
-		return diag.FromErr(fmt.Errorf("no template found with the specified criteria: name = %s, cores = %v, ram = %v, storage_size = %v", name.(string), cores.(float64), ram.(float64), storageSize.(float64)))
-	} else if len(results) > 1 {
-		return diag.FromErr(fmt.Errorf("more than one template found with the specified criteria: name = %s, cores = %v, ram = %v, storage_size = %v", name.(string), cores.(float64), ram.(float64), storageSize.(float64)))
+	if idOk {
+		/* search by ID */
+		log.Printf("[INFO] Using data source for image by id %s", id)
+		template, apiResponse, err = client.TemplatesApi.TemplatesFindById(ctx, id).Execute()
+		logApiRequestTime(apiResponse)
+		if err != nil {
+			return diag.FromErr(fmt.Errorf("an error occurred while fetching the nat gateway rule %s: %s", id, err))
+		}
 	} else {
-		template = results[0]
+		if nameOk && templates.Items != nil {
+			for _, tmp := range *templates.Items {
+				if tmp.Properties != nil && tmp.Properties.Name != nil && strings.EqualFold(*tmp.Properties.Name, name.(string)) {
+					results = append(results, tmp)
+				}
+			}
+		} else if templates.Items != nil {
+			results = *templates.Items
+		}
+
+		if coresOk {
+			cores := float32(cores.(float64))
+			if results != nil {
+				var coresResults []ionoscloud.Template
+				for _, tmp := range results {
+					if tmp.Properties.Cores != nil && *tmp.Properties.Cores == cores {
+						coresResults = append(coresResults, tmp)
+					}
+				}
+				results = coresResults
+			}
+		}
+
+		if ramOk {
+			ram := float32(ram.(float64))
+			if results != nil {
+				var ramResults []ionoscloud.Template
+				for _, tmp := range results {
+					if tmp.Properties.Ram != nil && *tmp.Properties.Ram == ram {
+						ramResults = append(ramResults, tmp)
+					}
+				}
+				results = ramResults
+			}
+		}
+
+		if storageSizeOk {
+			storageSize := float32(storageSize.(float64))
+			if results != nil {
+				var storageSizeResults []ionoscloud.Template
+				for _, tmp := range results {
+					if tmp.Properties != nil && tmp.Properties.StorageSize != nil && *tmp.Properties.StorageSize == storageSize {
+						storageSizeResults = append(storageSizeResults, tmp)
+					}
+				}
+				results = storageSizeResults
+			}
+		}
+
+		if results == nil || len(results) == 0 {
+			return diag.FromErr(fmt.Errorf("no template found with the specified criteria: name = %s, cores = %v, ram = %v, storage_size = %v", name.(string), cores.(float64), ram.(float64), storageSize.(float64)))
+		} else if len(results) > 1 {
+			return diag.FromErr(fmt.Errorf("more than one template found with the specified criteria: name = %s, cores = %v, ram = %v, storage_size = %v", name.(string), cores.(float64), ram.(float64), storageSize.(float64)))
+		} else {
+			template = results[0]
+		}
 	}
 
 	if err = setTemplateData(d, &template); err != nil {

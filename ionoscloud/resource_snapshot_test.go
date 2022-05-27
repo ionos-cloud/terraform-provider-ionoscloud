@@ -94,6 +94,27 @@ func TestAccSnapshotBasic(t *testing.T) {
 				),
 			},
 			{
+				Config: testAccDataSourceSnapshotMatchingLicenceType,
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttrPair(DataSource+"."+SnapshotResource+"."+SnapshotDataSourceByLicenceType, "name", SnapshotResource+"."+SnapshotTestResource, "name"),
+					resource.TestCheckResourceAttrPair(DataSource+"."+SnapshotResource+"."+SnapshotDataSourceByLicenceType, "location", SnapshotResource+"."+SnapshotTestResource, "location"),
+					resource.TestCheckResourceAttrPair(DataSource+"."+SnapshotResource+"."+SnapshotDataSourceByLicenceType, "size", SnapshotResource+"."+SnapshotTestResource, "size"),
+					resource.TestCheckResourceAttrPair(DataSource+"."+SnapshotResource+"."+SnapshotDataSourceByLicenceType, "description", SnapshotResource+"."+SnapshotTestResource, "description"),
+					resource.TestCheckResourceAttrPair(DataSource+"."+SnapshotResource+"."+SnapshotDataSourceByLicenceType, "licence_type", SnapshotResource+"."+SnapshotTestResource, "licence_type"),
+					resource.TestCheckResourceAttrPair(DataSource+"."+SnapshotResource+"."+SnapshotDataSourceByLicenceType, "sec_auth_protection", SnapshotResource+"."+SnapshotTestResource, "sec_auth_protection"),
+					resource.TestCheckResourceAttrPair(DataSource+"."+SnapshotResource+"."+SnapshotDataSourceByLicenceType, "cpu_hot_plug", SnapshotResource+"."+SnapshotTestResource, "cpu_hot_plug"),
+					resource.TestCheckResourceAttrPair(DataSource+"."+SnapshotResource+"."+SnapshotDataSourceByLicenceType, "cpu_hot_unplug", SnapshotResource+"."+SnapshotTestResource, "cpu_hot_unplug"),
+					resource.TestCheckResourceAttrPair(DataSource+"."+SnapshotResource+"."+SnapshotDataSourceByLicenceType, "ram_hot_plug", SnapshotResource+"."+SnapshotTestResource, "ram_hot_plug"),
+					resource.TestCheckResourceAttrPair(DataSource+"."+SnapshotResource+"."+SnapshotDataSourceByLicenceType, "ram_hot_unplug", SnapshotResource+"."+SnapshotTestResource, "ram_hot_unplug"),
+					resource.TestCheckResourceAttrPair(DataSource+"."+SnapshotResource+"."+SnapshotDataSourceByLicenceType, "nic_hot_plug", SnapshotResource+"."+SnapshotTestResource, "nic_hot_plug"),
+					resource.TestCheckResourceAttrPair(DataSource+"."+SnapshotResource+"."+SnapshotDataSourceByLicenceType, "nic_hot_unplug", SnapshotResource+"."+SnapshotTestResource, "nic_hot_unplug"),
+					resource.TestCheckResourceAttrPair(DataSource+"."+SnapshotResource+"."+SnapshotDataSourceByLicenceType, "disc_virtio_hot_plug", SnapshotResource+"."+SnapshotTestResource, "disc_virtio_hot_plug"),
+					resource.TestCheckResourceAttrPair(DataSource+"."+SnapshotResource+"."+SnapshotDataSourceByLicenceType, "disc_virtio_hot_unplug", SnapshotResource+"."+SnapshotTestResource, "disc_virtio_hot_unplug"),
+					resource.TestCheckResourceAttrPair(DataSource+"."+SnapshotResource+"."+SnapshotDataSourceByLicenceType, "disc_scsi_hot_plug", SnapshotResource+"."+SnapshotTestResource, "disc_scsi_hot_plug"),
+					resource.TestCheckResourceAttrPair(DataSource+"."+SnapshotResource+"."+SnapshotDataSourceByLicenceType, "disc_scsi_hot_unplug", SnapshotResource+"."+SnapshotTestResource, "disc_scsi_hot_unplug"),
+				),
+			},
+			{
 				Config:      testAccDataSourceSnapshotWrongNameError,
 				ExpectError: regexp.MustCompile(`no snapshot found with the specified criteria`),
 			},
@@ -204,6 +225,13 @@ data ` + SnapshotResource + ` ` + SnapshotDataSourceById + ` {
 const testAccDataSourceSnapshotMatching = testAccCheckSnapshotConfigBasic + `
 data ` + SnapshotResource + ` ` + SnapshotDataSourceByName + ` {
     name = ` + SnapshotResource + `.` + SnapshotTestResource + `.name
+    location = ` + SnapshotResource + `.` + SnapshotTestResource + `.location
+    size = ` + SnapshotResource + `.` + SnapshotTestResource + `.size
+}`
+
+const testAccDataSourceSnapshotMatchingLicenceType = testAccCheckSnapshotConfigBasic + `
+data ` + SnapshotResource + ` ` + SnapshotDataSourceByName + ` {
+    licence_type = ` + SnapshotResource + `.` + SnapshotTestResource + `.licence_type
     location = ` + SnapshotResource + `.` + SnapshotTestResource + `.location
     size = ` + SnapshotResource + `.` + SnapshotTestResource + `.size
 }`

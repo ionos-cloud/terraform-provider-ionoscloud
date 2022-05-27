@@ -8,6 +8,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 	ionoscloud "github.com/ionos-cloud/sdk-go/v6"
+	"strings"
 )
 
 func dataSourceUser() *schema.Resource {
@@ -77,6 +78,16 @@ func dataSourceUserRead(ctx context.Context, d *schema.ResourceData, meta interf
 
 	id, idOk := d.GetOk("id")
 	email, emailOk := d.GetOk("email")
+	firstNameValue, firstNameOk := d.GetOk("first_name")
+	lastNameValue, lastNameOk := d.GetOk("last_name")
+	s3CanonicalIdValue, s3CanonicalIdOk := d.GetOk("s3_canonical_user_id")
+	administratorValue, administratorOk := d.GetOk("administrator")
+	// todo active flags also, but I don't know where are they
+
+	firstName := firstNameValue.(string)
+	lastName := lastNameValue.(string)
+	s3CanonicalId := s3CanonicalIdValue.(string)
+	administrator := administratorValue.(bool)
 
 	if idOk && emailOk {
 		diags := diag.FromErr(errors.New("id and email cannot be both specified in the same time"))
@@ -123,6 +134,46 @@ func dataSourceUserRead(ctx context.Context, d *schema.ResourceData, meta interf
 					results = append(results, user)
 				}
 			}
+		}
+
+		if firstNameOk && firstName != "" {
+			var firstNameResults []ionoscloud.User
+			for _, user := range results {
+				if user.Properties != nil && user.Properties.Firstname != nil && strings.EqualFold(*user.Properties.Firstname, firstName) {
+					firstNameResults = append(firstNameResults, user)
+				}
+			}
+			results = firstNameResults
+		}
+
+		if lastNameOk && lastName != "" {
+			var lastNameResults []ionoscloud.User
+			for _, user := range results {
+				if user.Properties != nil && user.Properties.Lastname != nil && strings.EqualFold(*user.Properties.Lastname, lastName) {
+					lastNameResults = append(lastNameResults, user)
+				}
+			}
+			results = lastNameResults
+		}
+
+		if s3CanonicalIdOk && s3CanonicalId != "" {
+			var s3CanonicalIdResults []ionoscloud.User
+			for _, user := range results {
+				if user.Properties != nil && user.Properties.S3CanonicalUserId != nil && strings.EqualFold(*user.Properties.S3CanonicalUserId, s3CanonicalId) {
+					s3CanonicalIdResults = append(s3CanonicalIdResults, user)
+				}
+			}
+			results = s3CanonicalIdResults
+		}
+
+		if administratorOk {
+			var administratorResults []ionoscloud.User
+			for _, user := range results {
+				if user.Properties != nil && user.Properties.Administrator != nil && *user.Properties.Administrator == administrator {
+					administratorResults = append(administratorResults, user)
+				}
+			}
+			results = administratorResults
 		}
 
 		if results == nil || len(results) == 0 {

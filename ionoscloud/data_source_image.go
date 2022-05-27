@@ -6,6 +6,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	ionoscloud "github.com/ionos-cloud/sdk-go/v6"
+	"log"
 	"strings"
 )
 
@@ -123,81 +124,109 @@ func dataSourceImageRead(ctx context.Context, d *schema.ResourceData, meta inter
 	locationValue, locationOk := d.GetOk("location")
 	versionValue, versionOk := d.GetOk("version")
 	cloudInitValue, cloudInitOk := d.GetOk("cloud_init")
+	imageAliaseValue, iamgeAliasesOk := d.GetOk("image_aliases")
+	idValue, idOk := d.GetOk("id")
 
+	id := idValue.(string)
 	name := nameValue.(string)
 	imageType := imageTypeValue.(string)
 	location := locationValue.(string)
 	version := versionValue.(string)
 	cloudInit := cloudInitValue.(string)
+	imageAlias := imageAliaseValue.(string)
 
 	var results []ionoscloud.Image
-
-	// if version value is present then concatenate name - version
-	// otherwise search by name or part of the name
-	if versionOk && nameOk && version != "" && name != "" {
-		nameVer := fmt.Sprintf("%s-%s", name, version)
-		if images.Items != nil {
-			for _, img := range *images.Items {
-				if img.Properties != nil && img.Properties.Name != nil && strings.EqualFold(*img.Properties.Name, nameVer) {
-					results = append(results, img)
-				}
-			}
-		}
-		if results == nil {
-			return diag.FromErr(fmt.Errorf("no image found with the specified criteria: name %s and version %s (%s)", name, version, nameVer))
-		}
-	} else if nameOk && name != "" {
-		if images.Items != nil {
-			for _, img := range *images.Items {
-				if img.Properties != nil && img.Properties.Name != nil && strings.Contains(strings.ToLower(*img.Properties.Name), strings.ToLower(name)) {
-					results = append(results, img)
-				}
-			}
-		}
-		if results == nil {
-			return diag.FromErr(fmt.Errorf("no image found with the specified criteria: name %s", name))
-		}
-	} else {
-		results = *images.Items
-	}
-
-	if imageTypeOk && imageType != "" {
-		var imageTypeResults []ionoscloud.Image
-		for _, img := range results {
-			if img.Properties != nil && img.Properties.ImageType != nil && strings.EqualFold(*img.Properties.ImageType, imageType) {
-				imageTypeResults = append(imageTypeResults, img)
-			}
-
-		}
-		results = imageTypeResults
-	}
-
-	if locationOk && location != "" {
-		var locationResults []ionoscloud.Image
-		for _, img := range results {
-			if img.Properties != nil && img.Properties.Location != nil && strings.EqualFold(*img.Properties.Location, location) {
-				locationResults = append(locationResults, img)
-			}
-		}
-		results = locationResults
-	}
-
-	if cloudInitOk && cloudInit != "" {
-		var cloudInitResults []ionoscloud.Image
-		for _, img := range results {
-			if img.Properties != nil && img.Properties.CloudInit != nil && strings.EqualFold(*img.Properties.CloudInit, cloudInit) {
-				cloudInitResults = append(cloudInitResults, img)
-			}
-		}
-		results = cloudInitResults
-	}
-
 	var image ionoscloud.Image
 
-	if results == nil || len(results) == 0 {
-		return diag.FromErr(fmt.Errorf("no image found with the specified criteria: name = %s, type = %s, location = %s, version = %s, cloudInit = %s", name, imageType, location, version, cloudInit))
+	if idOk {
+		/* search by ID */
+		log.Printf("[INFO] Using data source for image by id %s", id)
+		image, apiResponse, err = client.ImagesApi.ImagesFindById(ctx, id).Execute()
+		logApiRequestTime(apiResponse)
+		if err != nil {
+			return diag.FromErr(fmt.Errorf("an error occurred while fetching the nat gateway rule %s: %s", id, err))
+		}
 	} else {
-		image = results[0]
+		// if version value is present then concatenate name - version
+		// otherwise search by name or part of the name
+		if versionOk && nameOk && version != "" && name != "" {
+			nameVer := fmt.Sprintf("%s-%s", name, version)
+			if images.Items != nil {
+				for _, img := range *images.Items {
+					if img.Properties != nil && img.Properties.Name != nil && strings.EqualFold(*img.Properties.Name, nameVer) {
+						results = append(results, img)
+					}
+				}
+			}
+			if results == nil {
+				return diag.FromErr(fmt.Errorf("no image found with the specified criteria: name %s and version %s (%s)", name, version, nameVer))
+			}
+		} else if nameOk && name != "" {
+			if images.Items != nil {
+				for _, img := range *images.Items {
+					if img.Properties != nil && img.Properties.Name != nil && strings.Contains(strings.ToLower(*img.Properties.Name), strings.ToLower(name)) {
+						results = append(results, img)
+					}
+				}
+			}
+			if results == nil {
+				return diag.FromErr(fmt.Errorf("no image found with the specified criteria: name %s", name))
+			}
+		} else {
+			results = *images.Items
+		}
+
+		if imageTypeOk && imageType != "" {
+			var imageTypeResults []ionoscloud.Image
+			for _, img := range results {
+				if img.Properties != nil && img.Properties.ImageType != nil && strings.EqualFold(*img.Properties.ImageType, imageType) {
+					imageTypeResults = append(imageTypeResults, img)
+				}
+
+			}
+			results = imageTypeResults
+		}
+
+		if locationOk && location != "" {
+			var locationResults []ionoscloud.Image
+			for _, img := range results {
+				if img.Properties != nil && img.Properties.Location != nil && strings.EqualFold(*img.Properties.Location, location) {
+					locationResults = append(locationResults, img)
+				}
+			}
+			results = locationResults
+		}
+
+		if cloudInitOk && cloudInit != "" {
+			var cloudInitResults []ionoscloud.Image
+			for _, img := range results {
+				if img.Properties != nil && img.Properties.CloudInit != nil && strings.EqualFold(*img.Properties.CloudInit, cloudInit) {
+					cloudInitResults = append(cloudInitResults, img)
+				}
+			}
+			results = cloudInitResults
+		}
+
+		if iamgeAliasesOk && imageAlias != "" {
+			var imageAliasResults []ionoscloud.Image
+			for _, img := range results {
+				aliases := *img.Properties.ImageAliases
+				if img.Properties != nil && *img.Properties.ImageAliases != nil { // todo verificarea && *img.Properties.ImageAliases != nil e useless pt ca e * la slice si euy practic verific pointerul
+					for _, alias := range aliases {
+						if strings.EqualFold(alias, imageAlias) {
+							imageAliasResults = append(imageAliasResults, img)
+						}
+					}
+				}
+			}
+			results = imageAliasResults
+		}
+
+		if results == nil || len(results) == 0 {
+			return diag.FromErr(fmt.Errorf("no image found with the specified criteria: name = %s, type = %s, location = %s, version = %s, cloudInit = %s", name, imageType, location, version, cloudInit))
+		} else {
+			image = results[0]
+		}
 	}
 
 	if err := ImageSetData(d, &image); err != nil {

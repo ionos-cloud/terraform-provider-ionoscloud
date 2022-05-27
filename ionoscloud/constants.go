@@ -43,10 +43,12 @@ const (
 
 // Firewall Constants
 const (
-	FirewallResource         = "ionoscloud_firewall"
-	FirewallTestResource     = "test_firewall"
-	FirewallDataSourceById   = "test_firewall_id"
-	FirewallDataSourceByName = "test_firewall_name"
+	FirewallResource             = "ionoscloud_firewall"
+	FirewallTestResource         = "test_firewall"
+	FirewallDataSourceById       = "test_firewall_id"
+	FirewallDataSourceByName     = "test_firewall_name"
+	FirewallDataSourceByType     = "INGRESS"
+	FirewallDataSourceByProtocol = "ICMP"
 )
 
 // Lan Constants
@@ -88,6 +90,7 @@ const (
 	NatGatewayTestResource         = "test_nat_gateway"
 	NatGatewayDataSourceById       = "test_nat_gateway_id"
 	NatGatewayDataSourceByName     = "test_nat_gateway_name"
+	NatGatewayDataSourceByProtocol = "TCP"
 	NatGatewayRuleResource         = "ionoscloud_natgateway_rule"
 	NatGatewayRuleTestResource     = "test_nat_gateway"
 	NatGatewayRuleDataSourceById   = "test_nat_gateway_id"
@@ -96,14 +99,16 @@ const (
 
 // NetworkLoadBalancer Constants
 const (
-	NetworkLoadBalancerResource                       = "ionoscloud_networkloadbalancer"
-	NetworkLoadBalancerTestResource                   = "test_networkloadbalancer"
-	NetworkLoadBalancerDataSourceById                 = "test_networkloadbalancer_id"
-	NetworkLoadBalancerDataSourceByName               = "test_networkloadbalancer_name"
-	NetworkLoadBalancerForwardingRuleResource         = "ionoscloud_networkloadbalancer_forwardingrule"
-	NetworkLoadBalancerForwardingRuleTestResource     = "test_networkloadbalancer_forwardingrule"
-	NetworkLoadBalancerForwardingRuleDataSourceById   = "test_networkloadbalancer_forwardingrule_id"
-	NetworkLoadBalancerForwardingRuleDataSourceByName = "test_networkloadbalancer_forwardingrule_name"
+	NetworkLoadBalancerResource                             = "ionoscloud_networkloadbalancer"
+	NetworkLoadBalancerTestResource                         = "test_networkloadbalancer"
+	NetworkLoadBalancerDataSourceById                       = "test_networkloadbalancer_id"
+	NetworkLoadBalancerDataSourceByName                     = "test_networkloadbalancer_name"
+	NetworkLoadBalancerForwardingRuleResource               = "ionoscloud_networkloadbalancer_forwardingrule"
+	NetworkLoadBalancerForwardingRuleTestResource           = "test_networkloadbalancer_forwardingrule"
+	NetworkLoadBalancerForwardingRuleDataSourceById         = "test_networkloadbalancer_forwardingrule_id"
+	NetworkLoadBalancerForwardingRuleDataSourceByName       = "test_networkloadbalancer_forwardingrule_name"
+	NetworkLoadBalancerForwardingRuleDataSourceByListenetIp = "test_networkloadbalancer_forwardingrule_listenerr_ip"
+	NetworkLoadBalancerForwardingRuleDataSourceByProtocol   = "test_networkloadbalancer_forwardingrule_protocol"
 )
 
 // Private Crossconnect Constants
@@ -131,10 +136,11 @@ const (
 
 // Snapshot Constants
 const (
-	SnapshotResource         = "ionoscloud_snapshot"
-	SnapshotTestResource     = "test_snapshot"
-	SnapshotDataSourceById   = "test_snapshot_id"
-	SnapshotDataSourceByName = "test_snapshot_name"
+	SnapshotResource                = "ionoscloud_snapshot"
+	SnapshotTestResource            = "test_snapshot"
+	SnapshotDataSourceById          = "test_snapshot_id"
+	SnapshotDataSourceByName        = "test_snapshot_name"
+	SnapshotDataSourceByLicenceType = "test_snapshot_licence_type"
 )
 
 // User Constants

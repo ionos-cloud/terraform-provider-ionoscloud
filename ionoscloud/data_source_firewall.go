@@ -63,7 +63,7 @@ func dataSourceFirewall() *schema.Resource {
 			},
 			"type": {
 				Type:     schema.TypeString,
-				Computed: true,
+				Optional: true,
 			},
 			"datacenter_id": {
 				Type:         schema.TypeString,
@@ -94,9 +94,13 @@ func dataSourceFirewallRead(ctx context.Context, d *schema.ResourceData, meta in
 
 	idValue, idOk := d.GetOk("id")
 	nameValue, nameOk := d.GetOk("name")
+	firewallTypeValue, firewallTypeOk := d.GetOk("type")
+	protocolValue, protocolOk := d.GetOk("protocol")
 
 	id := idValue.(string)
 	name := nameValue.(string)
+	firewallType := firewallTypeValue.(string)
+	protocol := protocolValue.(string)
 
 	if idOk && nameOk {
 		return diag.FromErr(fmt.Errorf("id and name cannot be both specified in the same time"))
@@ -153,6 +157,26 @@ func dataSourceFirewallRead(ctx context.Context, d *schema.ResourceData, meta in
 					}
 				}
 			}
+		}
+
+		if firewallTypeOk && firewallType != "" {
+			var firewallTypeResults []ionoscloud.FirewallRule
+			for _, firewall := range results {
+				if firewall.Properties != nil && firewall.Properties.Type != nil && strings.EqualFold(*firewall.Properties.Type, firewallType) {
+					firewallTypeResults = append(firewallTypeResults, firewall)
+				}
+			}
+			results = firewallTypeResults
+		}
+
+		if protocolOk && protocol != "" {
+			var protocolResults []ionoscloud.FirewallRule
+			for _, firewall := range results {
+				if firewall.Properties != nil && firewall.Properties.Protocol != nil && strings.EqualFold(*firewall.Properties.Protocol, protocol) {
+					protocolResults = append(protocolResults, firewall)
+				}
+			}
+			results = protocolResults
 		}
 
 		if results == nil || len(results) == 0 {

@@ -17,6 +17,7 @@ import (
 const resourceNatGatewayRuleResource = NatGatewayRuleResource + "." + NatGatewayRuleTestResource
 const dataSourceIdNatGatewayRuleResource = DataSource + "." + NatGatewayRuleResource + "." + NatGatewayDataSourceById
 const dataSourceNameNatGatewayRuleResource = DataSource + "." + NatGatewayRuleResource + "." + NatGatewayDataSourceByName
+const dataSourceProtocolNatGatewayRuleResource = DataSource + "." + NatGatewayRuleResource + "." + NatGatewayDataSourceByProtocol
 
 func TestAccNatGatewayRuleBasic(t *testing.T) {
 	var natGatewayRule ionoscloud.NatGatewayRule
@@ -79,6 +80,19 @@ func TestAccNatGatewayRuleBasic(t *testing.T) {
 					resource.TestCheckResourceAttrPair(dataSourceNameNatGatewayRuleResource, "target_subnet", resourceNatGatewayRuleResource, "target_subnet"),
 					resource.TestCheckResourceAttrPair(dataSourceNameNatGatewayRuleResource, "target_port_range.0.start", resourceNatGatewayRuleResource, "target_port_range.0.start"),
 					resource.TestCheckResourceAttrPair(dataSourceNameNatGatewayRuleResource, "target_port_range.0.end", resourceNatGatewayRuleResource, "target_port_range.0.end"),
+				),
+			},
+			{
+				Config: fmt.Sprintf(testAccDataSourceNatGatewayRuleMatchProtocol, NatGatewayRuleTestResource),
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttrPair(dataSourceProtocolNatGatewayRuleResource, "name", resourceNatGatewayRuleResource, "name"),
+					resource.TestCheckResourceAttrPair(dataSourceProtocolNatGatewayRuleResource, "type", resourceNatGatewayRuleResource, "type"),
+					resource.TestCheckResourceAttrPair(dataSourceProtocolNatGatewayRuleResource, "protocol", resourceNatGatewayRuleResource, "protocol"),
+					resource.TestCheckResourceAttrPair(dataSourceProtocolNatGatewayRuleResource, "source_subnet", resourceNatGatewayRuleResource, "source_subnet"),
+					resource.TestCheckResourceAttrPair(dataSourceProtocolNatGatewayRuleResource, "public_ip", resourceNatGatewayRuleResource, "public_ip"),
+					resource.TestCheckResourceAttrPair(dataSourceProtocolNatGatewayRuleResource, "target_subnet", resourceNatGatewayRuleResource, "target_subnet"),
+					resource.TestCheckResourceAttrPair(dataSourceProtocolNatGatewayRuleResource, "target_port_range.0.start", resourceNatGatewayRuleResource, "target_port_range.0.start"),
+					resource.TestCheckResourceAttrPair(dataSourceProtocolNatGatewayRuleResource, "target_port_range.0.end", resourceNatGatewayRuleResource, "target_port_range.0.end"),
 				),
 			},
 			{
@@ -280,6 +294,14 @@ data ` + NatGatewayRuleResource + ` ` + NatGatewayRuleDataSourceByName + ` {
   datacenter_id = ` + DatacenterResource + `.natgateway_rule_datacenter.id
   natgateway_id = ` + NatGatewayResource + `.natgateway.id
   name			= ` + NatGatewayRuleResource + `.` + NatGatewayRuleTestResource + `.name
+}
+`
+
+const testAccDataSourceNatGatewayRuleMatchProtocol = testAccCheckNatGatewayRuleConfigBasic + `
+data ` + NatGatewayRuleResource + ` ` + NatGatewayRuleDataSourceByName + ` {
+  datacenter_id = ` + DatacenterResource + `.natgateway_rule_datacenter.id
+  natgateway_id = ` + NatGatewayResource + `.natgateway.id
+  protocol			= ` + NatGatewayRuleResource + `.` + NatGatewayRuleTestResource + `.protocol
 }
 `
 

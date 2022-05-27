@@ -28,6 +28,15 @@ func TestAccDataSourceImageBasic(t *testing.T) {
 				),
 			},
 			{
+				Config: testAccDataSourceImageBasicId,
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttr(imageTestName, "id", "9b15b535-8ba7-4e16-921c-9d6534cb53a8"),
+					resource.TestCheckResourceAttr(imageTestName, "cloud_init", "NONE"),
+					resource.TestCheckResourceAttr(imageTestName, "location", "de/fkb"),
+					resource.TestCheckResourceAttr(imageTestName, "type", "CDROM"),
+				),
+			},
+			{
 				Config:      testAccDataSourceImageWrongNameError,
 				ExpectError: regexp.MustCompile("no image found with the specified criteria"),
 			},
@@ -55,6 +64,16 @@ func TestAccDataSourceImageBasic(t *testing.T) {
 const testAccDataSourceImageBasic = `
 	data ` + ImageResource + ` ` + ImageTestResource + ` {
 	  name = "ubuntu"
+	  type = "CDROM"
+	  version = "18.04.3-live-server-amd64.iso"
+	  location = "de/fkb"
+	  cloud_init = "NONE"
+	}
+`
+
+const testAccDataSourceImageBasicId = `
+	data ` + ImageResource + ` ` + ImageTestResource + ` {
+	  id = "9b15b535-8ba7-4e16-921c-9d6534cb53a8"
 	  type = "CDROM"
 	  version = "18.04.3-live-server-amd64.iso"
 	  location = "de/fkb"

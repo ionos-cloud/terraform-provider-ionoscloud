@@ -105,9 +105,11 @@ func dataSourceNatGatewayRuleRead(ctx context.Context, d *schema.ResourceData, m
 
 	idValue, idOk := d.GetOk("id")
 	nameValue, nameOk := d.GetOk("name")
+	protocolValue, protocolOk := d.GetOk("protocol")
 
 	id := idValue.(string)
 	name := nameValue.(string)
+	protocol := protocolValue.(string)
 
 	if idOk && nameOk {
 		return diag.FromErr(errors.New("id and name cannot be both specified in the same time"))
@@ -163,6 +165,17 @@ func dataSourceNatGatewayRuleRead(ctx context.Context, d *schema.ResourceData, m
 
 				}
 			}
+		}
+
+		if protocolOk && protocol != "" {
+			var protocolResults []ionoscloud.NatGatewayRule
+			for _, natGateway := range results {
+				if natGateway.Properties != nil && natGateway.Properties.Protocol != nil && strings.EqualFold(string(*natGateway.Properties.Protocol), protocol) {
+					protocolResults = append(protocolResults, natGateway)
+				}
+
+			}
+			results = protocolResults
 		}
 
 		if results == nil || len(results) == 0 {

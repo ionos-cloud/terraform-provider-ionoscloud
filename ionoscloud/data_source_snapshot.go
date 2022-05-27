@@ -107,11 +107,13 @@ func dataSourceSnapshotRead(ctx context.Context, d *schema.ResourceData, meta in
 	nameValue, nameOk := d.GetOk("name")
 	locationValue, locationOk := d.GetOk("location")
 	sizeValue, sizeOk := d.GetOk("size")
+	licenceTypeValue, licenceTypeOk := d.GetOk("licence_type")
 
 	id := idValue.(string)
 	name := nameValue.(string)
 	location := locationValue.(string)
 	size := float32(sizeValue.(int))
+	licenceType := licenceTypeValue.(string)
 
 	if idOk && nameOk {
 		return diag.FromErr(errors.New("id and name cannot be both specified in the same time"))
@@ -185,6 +187,17 @@ func dataSourceSnapshotRead(ctx context.Context, d *schema.ResourceData, meta in
 
 			}
 			results = sizeResults
+		}
+
+		if licenceTypeOk {
+			var licenceTypeResults []ionoscloud.Snapshot
+			for _, snp := range results {
+				if snp.Properties != nil && snp.Properties.LicenceType != nil && strings.EqualFold(*snp.Properties.LicenceType, licenceType) {
+					licenceTypeResults = append(licenceTypeResults, snp)
+				}
+
+			}
+			results = licenceTypeResults
 		}
 
 		if results == nil || len(results) == 0 {

@@ -165,12 +165,19 @@ func dataSourceDbaasPgSqlCluster() *schema.Resource {
 
 func dataSourceDbaasPgSqlReadCluster(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	client := meta.(SdkBundle).DbaasClient
+	cloudClient := meta.(SdkBundle).CloudApiClient
 
 	idValue, idOk := d.GetOk("id")
 	nameValue, nameOk := d.GetOk("display_name")
+	locationValue, locationOk := d.GetOk("location")
+	dcNameValue, dcNameOk := d.GetOk("") // todo vezi care e datacenter name
+	pgVersionValue, pgVersionOk := d.GetOk("postgres_version")
 
 	id := idValue.(string)
 	name := nameValue.(string)
+	location := locationValue.(string)
+	dcName := dcNameValue.(string)
+	pgVersion := pgVersionValue.(string)
 
 	if idOk && nameOk {
 		diags := diag.FromErr(errors.New("id and display_name cannot be both specified in the same time"))
@@ -220,7 +227,47 @@ func dataSourceDbaasPgSqlReadCluster(ctx context.Context, d *schema.ResourceData
 					}
 				}
 			}
+		}
 
+		if locationOk && location != "" {
+			var locationResults []dbaas.ClusterResponse
+			for _, cluster := range results {
+				if cluster.Properties != nil && cluster.Properties.Location != nil && strings.EqualFold(string(*cluster.Properties.Location), location) {
+					locationResults = append(locationResults, cluster)
+				}
+			}
+			results = locationResults
+		}
+
+		if dcNameOk && dcName != "" {
+			var dcNameResults []dbaas.ClusterResponse
+			for _, cluster := range results {
+				if cluster.Properties != nil && cluster.Properties.Connections != nil && *(*cluster.Properties.Connections)[0].DatacenterId != "" {
+					searchedDcId := *(*cluster.Properties.Connections)[0].DatacenterId
+					datacenter, apiResponse, err := cloudClient.DataCentersApi.DatacentersFindById(ctx, searchedDcId).Execute()
+					logApiRequestTime(apiResponse)
+					if err != nil {
+						return diag.FromErr(fmt.Errorf("an error occurred while fetching the datacenter while searching by id %s %w", id, err))
+					}
+					if datacenter.Properties != nil {
+						actualDcName := datacenter.Properties.Name
+						if strings.EqualFold(*actualDcName, dcName) {
+							dcNameResults = append(dcNameResults, cluster)
+						}
+					}
+				}
+			}
+			results = dcNameResults
+		}
+
+		if pgVersionOk && pgVersion != "" {
+			var pgVersionResults []dbaas.ClusterResponse
+			for _, cluster := range results {
+				if cluster.Properties != nil && cluster.Properties.PostgresVersion != nil && strings.EqualFold(*cluster.Properties.PostgresVersion, location) {
+					pgVersionResults = append(pgVersionResults, cluster)
+				}
+			}
+			results = pgVersionResults
 		}
 
 		if results == nil || len(results) == 0 {

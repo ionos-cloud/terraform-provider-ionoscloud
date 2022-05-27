@@ -77,6 +77,32 @@ func TestAccFirewallBasic(t *testing.T) {
 				),
 			},
 			{
+				Config: testAccDataSourceFirewallMatchType,
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttrPair(DataSource+"."+FirewallResource+"."+FirewallDataSourceByType, "name", FirewallResource+"."+FirewallTestResource, "name"),
+					resource.TestCheckResourceAttrPair(DataSource+"."+FirewallResource+"."+FirewallDataSourceByType, "protocol", FirewallResource+"."+FirewallTestResource, "protocol"),
+					resource.TestCheckResourceAttrPair(DataSource+"."+FirewallResource+"."+FirewallDataSourceByType, "source_mac", FirewallResource+"."+FirewallTestResource, "source_mac"),
+					resource.TestCheckResourceAttrPair(DataSource+"."+FirewallResource+"."+FirewallDataSourceByType, "source_ip", FirewallResource+"."+FirewallTestResource, "source_ip"),
+					resource.TestCheckResourceAttrPair(DataSource+"."+FirewallResource+"."+FirewallDataSourceByType, "target_ip", FirewallResource+"."+FirewallTestResource, "target_ip"),
+					resource.TestCheckResourceAttrPair(DataSource+"."+FirewallResource+"."+FirewallDataSourceByType, "icmp_type", FirewallResource+"."+FirewallTestResource, "icmp_type"),
+					resource.TestCheckResourceAttrPair(DataSource+"."+FirewallResource+"."+FirewallDataSourceByType, "icmp_code", FirewallResource+"."+FirewallTestResource, "icmp_code"),
+					resource.TestCheckResourceAttrPair(DataSource+"."+FirewallResource+"."+FirewallDataSourceByType, "type", FirewallResource+"."+FirewallTestResource, "type"),
+				),
+			},
+			{
+				Config: testAccDataSourceFirewallMatchProtocol,
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttrPair(DataSource+"."+FirewallResource+"."+FirewallDataSourceByProtocol, "name", FirewallResource+"."+FirewallTestResource, "name"),
+					resource.TestCheckResourceAttrPair(DataSource+"."+FirewallResource+"."+FirewallDataSourceByProtocol, "protocol", FirewallResource+"."+FirewallTestResource, "protocol"),
+					resource.TestCheckResourceAttrPair(DataSource+"."+FirewallResource+"."+FirewallDataSourceByProtocol, "source_mac", FirewallResource+"."+FirewallTestResource, "source_mac"),
+					resource.TestCheckResourceAttrPair(DataSource+"."+FirewallResource+"."+FirewallDataSourceByProtocol, "source_ip", FirewallResource+"."+FirewallTestResource, "source_ip"),
+					resource.TestCheckResourceAttrPair(DataSource+"."+FirewallResource+"."+FirewallDataSourceByProtocol, "target_ip", FirewallResource+"."+FirewallTestResource, "target_ip"),
+					resource.TestCheckResourceAttrPair(DataSource+"."+FirewallResource+"."+FirewallDataSourceByProtocol, "icmp_type", FirewallResource+"."+FirewallTestResource, "icmp_type"),
+					resource.TestCheckResourceAttrPair(DataSource+"."+FirewallResource+"."+FirewallDataSourceByProtocol, "icmp_code", FirewallResource+"."+FirewallTestResource, "icmp_code"),
+					resource.TestCheckResourceAttrPair(DataSource+"."+FirewallResource+"."+FirewallDataSourceByProtocol, "type", FirewallResource+"."+FirewallTestResource, "type"),
+				),
+			},
+			{
 				Config:      testAccDataSourceFirewallMultipleResultsError,
 				ExpectError: regexp.MustCompile("more than one firewall rule found with the specified criteria name"),
 			},
@@ -499,6 +525,24 @@ data ` + FirewallResource + ` ` + FirewallDataSourceByName + ` {
   server_id = ` + ServerResource + `.` + ServerTestResource + `.id
   nic_id = ionoscloud_nic.database_nic.id
   name	= "` + FirewallTestResource + `"
+}
+`
+
+const testAccDataSourceFirewallMatchType = testAccCheckFirewallConfigBasic + `
+data ` + FirewallResource + ` ` + FirewallDataSourceByType + ` {
+  datacenter_id = ` + DatacenterResource + `.` + DatacenterTestResource + `.id
+  server_id = ` + ServerResource + `.` + ServerTestResource + `.id
+  nic_id = ionoscloud_nic.database_nic.id
+  type = "INGRESS"
+}
+`
+
+const testAccDataSourceFirewallMatchProtocol = testAccCheckFirewallConfigBasic + `
+data ` + FirewallResource + ` ` + FirewallDataSourceByProtocol + ` {
+  datacenter_id = ` + DatacenterResource + `.` + DatacenterTestResource + `.id
+  server_id = ` + ServerResource + `.` + ServerTestResource + `.id
+  nic_id = ionoscloud_nic.database_nic.id
+  protocol = "ICMP"
 }
 `
 

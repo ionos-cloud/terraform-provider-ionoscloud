@@ -158,9 +158,13 @@ func dataSourceNetworkLoadBalancerForwardingRuleRead(ctx context.Context, d *sch
 
 	idValue, idOk := d.GetOk("id")
 	nameValue, nameOk := d.GetOk("name")
+	protocolValue, protocolOk := d.GetOk("protocol")
+	listenerIpValue, listenerIpOk := d.GetOk("listener_ip")
 
 	id := idValue.(string)
 	name := nameValue.(string)
+	protocol := protocolValue.(string)
+	listenerIp := listenerIpValue.(string)
 
 	if idOk && nameOk {
 		return diag.FromErr(errors.New("id and name cannot be both specified in the same time"))
@@ -214,6 +218,28 @@ func dataSourceNetworkLoadBalancerForwardingRuleRead(ctx context.Context, d *sch
 					}
 				}
 			}
+		}
+
+		if protocolOk && protocol != "" {
+			var protocolResults []ionoscloud.NetworkLoadBalancerForwardingRule
+			for _, nlbFwRule := range results {
+				if nlbFwRule.Properties != nil && nlbFwRule.Properties.Protocol != nil && strings.EqualFold(*nlbFwRule.Properties.Protocol, protocol) {
+					protocolResults = append(protocolResults, nlbFwRule)
+				}
+
+			}
+			results = protocolResults
+		}
+
+		if listenerIpOk && listenerIp != "" {
+			var listenerIpResults []ionoscloud.NetworkLoadBalancerForwardingRule
+			for _, nlbFwRule := range results {
+				if nlbFwRule.Properties != nil && nlbFwRule.Properties.ListenerIp != nil && strings.EqualFold(*nlbFwRule.Properties.ListenerIp, listenerIp) {
+					listenerIpResults = append(listenerIpResults, nlbFwRule)
+				}
+
+			}
+			results = listenerIpResults
 		}
 
 		if results == nil || len(results) == 0 {

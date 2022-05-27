@@ -110,6 +110,10 @@ func dataSourceVolume() *schema.Resource {
 				Type:     schema.TypeString,
 				Required: true,
 			},
+			"server_id": {
+				Type:     schema.TypeString,
+				Optional: true,
+			},
 		},
 		Timeouts: &resourceDefaultTimeouts,
 	}
@@ -122,9 +126,11 @@ func dataSourceVolumeRead(ctx context.Context, d *schema.ResourceData, meta inte
 
 	idValue, idOk := d.GetOk("id")
 	nameValue, nameOk := d.GetOk("name")
+	serverIdValue, serverIdOk := d.GetOk("server_id")
 
 	id := idValue.(string)
 	name := nameValue.(string)
+	serverId := serverIdValue.(string)
 
 	if idOk && nameOk {
 		diags := diag.FromErr(errors.New("id and name cannot be both specified in the same time"))
@@ -148,6 +154,19 @@ func dataSourceVolumeRead(ctx context.Context, d *schema.ResourceData, meta inte
 			diags := diag.FromErr(fmt.Errorf("an error occurred while fetching volume with ID %s: %w", id, err))
 			return diags
 		}
+		if serverIdOk && serverId != "" {
+			volumeFromServerId, apiResponse, err := client.ServersApi.DatacentersServersVolumesFindById(ctx, datacenterId, serverId, id).Execute()
+			logApiRequestTime(apiResponse)
+			if err != nil {
+				diags := diag.FromErr(fmt.Errorf("an error occurred while fetching volumes using server id: %w", err))
+				return diags
+			}
+			if *volumeFromServerId.Properties.BootServer != serverId {
+				diags := diag.FromErr(fmt.Errorf("an error occurred while fetching volumes using server id, because server id is not the same with boot server: %w", err))
+				return diags
+			}
+		}
+		// verrificare server id == boot server
 	} else {
 		/* search by name */
 		var results []ionoscloud.Volume
@@ -166,16 +185,32 @@ func dataSourceVolumeRead(ctx context.Context, d *schema.ResourceData, meta inte
 			}
 			results = *volumes.Items
 		} else {
-			volumes, apiResponse, err := client.VolumesApi.DatacentersVolumesGet(ctx, datacenterId).Depth(1).Execute()
-			logApiRequestTime(apiResponse)
+			var volumeItems []ionoscloud.Volume
+			if serverIdOk && serverId != "" {
+				volumes, apiResponse, err := client.ServersApi.DatacentersServersVolumesGet(ctx, datacenterId, serverId).Execute()
+				logApiRequestTime(apiResponse)
+				if err != nil {
+					diags := diag.FromErr(fmt.Errorf("an error occurred while fetching volumes using server id: %w", err))
+					return diags
+				}
+				volumeItems = *volumes.Items
+			} else {
+				volumes, apiResponse, err := client.VolumesApi.DatacentersVolumesGet(ctx, datacenterId).Depth(1).Execute()
+				logApiRequestTime(apiResponse)
+				if err != nil {
+					diags := diag.FromErr(fmt.Errorf("an error occurred while fetching volumes: %w", err))
+					return diags
+				}
+				volumeItems = *volumes.Items
+			}
 
 			if err != nil {
 				diags := diag.FromErr(fmt.Errorf("an error occurred while fetching volumes: %w", err))
 				return diags
 			}
 
-			if volumes.Items != nil {
-				for _, v := range *volumes.Items {
+			if volumeItems != nil {
+				for _, v := range volumeItems {
 					if v.Properties != nil && v.Properties.Name != nil && strings.EqualFold(*v.Properties.Name, name) {
 						/* volume found */
 						volume, apiResponse, err = client.VolumesApi.DatacentersVolumesFindById(ctx, datacenterId, *v.Id).Execute()
@@ -188,7 +223,6 @@ func dataSourceVolumeRead(ctx context.Context, d *schema.ResourceData, meta inte
 					}
 				}
 			}
-
 		}
 
 		if results == nil || len(results) == 0 {
