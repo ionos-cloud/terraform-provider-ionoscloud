@@ -202,7 +202,7 @@ func TestAccK8sNodePoolBasic(t *testing.T) {
 //	})
 //}
 
-func TestAccK8sNodePoolNoOptional(t *testing.T) {
+func TestAccK8sNodePoolNoOptionalAndNodesDataSource(t *testing.T) {
 	var k8sNodepool ionoscloud.KubernetesNodePool
 
 	resource.Test(t, resource.TestCase{
@@ -239,7 +239,8 @@ func TestAccK8sNodePoolNoOptional(t *testing.T) {
 					resource.TestCheckResourceAttr(ResourceNameK8sNodePool, "node_count", "1"),
 					resource.TestCheckResourceAttr(ResourceNameK8sNodePool, "cores_count", "1"),
 					resource.TestCheckResourceAttr(ResourceNameK8sNodePool, "ram_size", "2048"),
-					resource.TestCheckResourceAttr(ResourceNameK8sNodePool, "storage_size", "40")),
+					resource.TestCheckResourceAttr(ResourceNameK8sNodePool, "storage_size", "40"),
+					resource.TestCheckResourceAttr(DataSource+"."+K8sNodePoolNodesResource+".nodes", "nodes.#", "1")),
 			},
 		},
 	})
@@ -659,4 +660,8 @@ resource ` + K8sNodePoolResource + ` ` + K8sNodePoolTestResource + ` {
   cores_count       = 1
   ram_size          = 2048
   storage_size      = 40
+}
+data ` + K8sNodePoolNodesResource + ` nodes{
+  k8s_cluster_id   = ` + K8sClusterResource + `.terraform_acctest.id
+  node_pool_id     = ` + K8sNodePoolResource + `.` + K8sNodePoolTestResource + `.id
 }`
