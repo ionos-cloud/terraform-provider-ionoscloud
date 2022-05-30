@@ -75,7 +75,10 @@ func dataSourceK8sReadNodePoolNodes(ctx context.Context, d *schema.ResourceData,
 		return diag.FromErr(fmt.Errorf("an error occurred while fetching k8s nodes: %w", err))
 	}
 	if nodesList.Items == nil {
-		return diag.FromErr(fmt.Errorf("no nodes found for nodepool with id %s ", nodePoolIdStr))
+		return diag.FromErr(fmt.Errorf("no nodes found for nodepool with id %s", nodePoolIdStr))
+	}
+	if len(*nodesList.Items) == 0 {
+		return diag.FromErr(fmt.Errorf("nodes list is empty for of nodepool with id %s", nodePoolIdStr))
 	}
 	if len(*nodesList.Items) > 0 {
 		var nodes []interface{}
@@ -85,11 +88,10 @@ func dataSourceK8sReadNodePoolNodes(ctx context.Context, d *schema.ResourceData,
 		}
 		err := d.Set("nodes", nodes)
 		if err != nil {
-			diags := diag.FromErr(fmt.Errorf("error while setting nodes: %s", err))
+			diags := diag.FromErr(fmt.Errorf("error while setting nodes: %w", err))
 			return diags
 		}
 	}
-
 	return nil
 }
 
@@ -104,6 +106,5 @@ func setK8sNodesDataToMap(node ionoscloud.KubernetesNode) map[string]interface{}
 		nodeEntry["private_ip"] = stringOrDefault(node.Properties.PrivateIP, "")
 		nodeEntry["k8s_version"] = stringOrDefault(node.Properties.K8sVersion, "")
 	}
-
 	return nodeEntry
 }

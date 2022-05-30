@@ -15,7 +15,7 @@ The **k8s Node Pool Nodes** data source can be used to search for and return a l
 ### By IDs
 ```hcl
 data "ionoscloud_k8s_node_pool_nodes" "example" {
-  node_pool_id                = <k8s_nodepool_id>
+  node_pool_id      = <k8s_nodepool_id>
   k8s_cluster_id 	= <k8s_cluster_id>
 }
 ```
@@ -27,7 +27,7 @@ data "ionoscloud_k8s_node_pool_nodes" "example" {
 * `name` - (Optional) Name of an existing node pool that you want to search for.
 * `id` - (Optional) ID of the node pool you want to search for.
 
-`k8s_cluster_id` and either `node_pool_id` must be provided.
+`k8s_cluster_id` and `node_pool_id` must be provided.
 
 ## Attributes Reference
 
@@ -36,5 +36,5 @@ The following attributes are returned by the datasource:
   * `id` - id of the node in the nodepool
   * `name` - name of the node
   * `k8s_version` - The kubernetes version
-  * `public_ip` - Public ip of the node
-  * `private_ip` - Private ip of the node
+  * `public_ip` - public ip of the node
+  * `private_ip` - private ip of the node
