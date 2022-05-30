@@ -57,7 +57,7 @@ data ionoscloud_servers example {
 * `filter` -  (Required) One or more name/value pairs to filter off of. You can use most base fields in the [server](../resources/server.md) resource. These do **NOT** include nested fields in nics or volume nested fields.
 
 
-`datacenter_id` and `filter` must be provided. If neither is provided, the datasource will return an error.
+`datacenter_id` and `filter` must be provided. If either is missing, the datasource will return an error.
 
 **NOTE:** Lookup by filter is partial. Searching for a server using filter name and value `test`, will find all servers that have `test` in the name. 
 For example, it will find servers named `test`, `test1`, `testsomething`. 
