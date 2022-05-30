@@ -2,14 +2,14 @@
 subcategory: "Managed Kubernetes"
 layout: "ionoscloud"
 page_title: "IonosCloud : ionoscloud_k8s_node_pool_nodes"
-sidebar_current: "docs-ionoscloud-datasource-k8s-node-pool"
+sidebar_current: "docs-ionoscloud-datasource-k8s-node-pool-nodes"
 description: |-
   Get information on the list of IonosCloud K8s Nodes that make a nodepool
 ---
 
 # ionoscloud\_k8s\_node\_pool\_nodes
 
-The **k8s Node Pool Nodes** data source can be used to search for and return a list of existing k8s Node Pools nodes.
+The **k8s Node Pool Nodes** data source can be used to search for and return a list of existing k8s Node Pool nodes.
 ## Example Usage
 
 ### By IDs
