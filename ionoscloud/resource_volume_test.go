@@ -138,7 +138,7 @@ func TestAccVolumeBasic(t *testing.T) {
 					resource.TestCheckResourceAttrPair(DataSource+"."+VolumeResource+"."+VolumeDataSourceByName, "disc_virtio_hot_unplug", VolumeResource+"."+VolumeTestResource, "disc_virtio_hot_unplug"),
 					resource.TestCheckResourceAttrPair(DataSource+"."+VolumeResource+"."+VolumeDataSourceByName, "device_number", VolumeResource+"."+VolumeTestResource, "device_number"),
 					resource.TestCheckResourceAttrPair(DataSource+"."+VolumeResource+"."+VolumeDataSourceByName, "boot_server", ServerResource+"."+ServerTestResource, "id"),
-					resource.TestCheckResourceAttrPair(DataSource+"."+VolumeResource+"."+VolumeDataSourceByName, "server_id", ServerResource+"."+ServerTestResource, "server_id")),
+					resource.TestCheckResourceAttrPair(DataSource+"."+VolumeResource+"."+VolumeDataSourceByName, "server_id", ServerResource+"."+ServerTestResource, "id")),
 			},
 			{
 				Config:      testAccDataSourceVolumeWrongNameError,
@@ -403,15 +403,16 @@ data ` + VolumeResource + ` ` + VolumeDataSourceByName + ` {
 var testAccDataSourceVolumeMatchServerId = testAccCheckVolumeConfigBasic + `
 data ` + VolumeResource + ` ` + VolumeDataSourceByName + ` {
   datacenter_id = ` + DatacenterResource + `.` + DatacenterTestResource + `.id
-  server_id			= ` + ServerResource + `.` + ServerTestResource + `.id
+  name			= ` + VolumeResource + `.` + VolumeTestResource + `.name
+  server_id		= ` + ServerResource + `.` + ServerTestResource + `.id
 }
 `
 
 var testAccDataSourceVolumeMatchServerIdAndVolumeId = testAccCheckVolumeConfigBasic + `
 data ` + VolumeResource + ` ` + VolumeDataSourceByName + ` {
-  datacenter_id = ` + DatacenterResource + `.` + DatacenterTestResource + `.id
-  server_id			= ` + ServerResource + `.` + ServerTestResource + `.id
+  datacenter_id     = ` + DatacenterResource + `.` + DatacenterTestResource + `.id
   id		     	= ` + VolumeResource + `.` + VolumeTestResource + `.id
+  server_id			= ` + ServerResource + `.` + ServerTestResource + `.id
 }
 `
 
