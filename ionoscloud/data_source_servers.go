@@ -342,6 +342,7 @@ func setFirewallRuleProperties(rule ionoscloud.FirewallRule) map[string]interfac
 	}
 	return ruleEntry
 }
+
 func SetServerProperties(server ionoscloud.Server) map[string]interface{} {
 	serverMap := map[string]interface{}{}
 	if server.Properties != nil {
