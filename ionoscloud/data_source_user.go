@@ -21,11 +21,11 @@ func dataSourceUser() *schema.Resource {
 			},
 			"first_name": {
 				Type:     schema.TypeString,
-				Computed: true,
+				Optional: true,
 			},
 			"last_name": {
 				Type:     schema.TypeString,
-				Computed: true,
+				Optional: true,
 			},
 			"email": {
 				Type:     schema.TypeString,
@@ -89,12 +89,12 @@ func dataSourceUserRead(ctx context.Context, d *schema.ResourceData, meta interf
 	s3CanonicalId := s3CanonicalIdValue.(string)
 	administrator := administratorValue.(bool)
 
-	if idOk && emailOk {
-		diags := diag.FromErr(errors.New("id and email cannot be both specified in the same time"))
+	if idOk && (emailOk || firstNameOk || lastNameOk || s3CanonicalIdOk || administratorOk) {
+		diags := diag.FromErr(errors.New("id and other lookup parameter cannot be both specified in the same time"))
 		return diags
 	}
-	if !idOk && !emailOk {
-		diags := diag.FromErr(errors.New("please provide either the user id or email"))
+	if !idOk && !emailOk && !firstNameOk && !lastNameOk && !s3CanonicalIdOk && !administratorOk {
+		diags := diag.FromErr(errors.New("please provide either the user id or other lookup parameter, like email or first_name"))
 		return diags
 	}
 	var user ionoscloud.User
@@ -138,12 +138,18 @@ func dataSourceUserRead(ctx context.Context, d *schema.ResourceData, meta interf
 
 		if firstNameOk && firstName != "" {
 			var firstNameResults []ionoscloud.User
-			for _, user := range results {
-				if user.Properties != nil && user.Properties.Firstname != nil && strings.EqualFold(*user.Properties.Firstname, firstName) {
-					firstNameResults = append(firstNameResults, user)
+			if results != nil {
+				for _, user := range results {
+					if user.Properties != nil && user.Properties.Firstname != nil && strings.EqualFold(*user.Properties.Firstname, firstName) {
+						firstNameResults = append(firstNameResults, user)
+					}
 				}
 			}
-			results = firstNameResults
+			if firstNameResults == nil {
+				return diag.FromErr(fmt.Errorf("no user found with the specified criteria: first name = %s", firstName))
+			} else {
+				results = firstNameResults
+			}
 		}
 
 		if lastNameOk && lastName != "" {
