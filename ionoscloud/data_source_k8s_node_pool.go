@@ -205,7 +205,6 @@ func dataSourceK8sReadNodePool(ctx context.Context, d *schema.ResourceData, meta
 	var nodePool ionoscloud.KubernetesNodePool
 	var err error
 	var apiResponse *ionoscloud.APIResponse
-
 	if idOk {
 		/* search by ID */
 		nodePool, apiResponse, err = client.KubernetesApi.K8sNodepoolsFindById(ctx, clusterId.(string), id.(string)).Execute()
