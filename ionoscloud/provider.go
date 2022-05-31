@@ -95,6 +95,7 @@ func Provider() *schema.Provider {
 			LanResource:                               dataSourceLan(),
 			PCCResource:                               dataSourcePcc(),
 			ServerResource:                            dataSourceServer(),
+			ServersDataSource:                         dataSourceServers(),
 			K8sClusterResource:                        dataSourceK8sCluster(),
 			K8sNodePoolResource:                       dataSourceK8sNodePool(),
 			K8sNodePoolNodesResource:                  dataSourceK8sNodePoolNodes(),
