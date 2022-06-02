@@ -247,7 +247,7 @@ resource ` + ServerResource + ` ` + ServerTestResource + ` {
     name = "` + LanTestResource + `"
     dhcp = false
     firewall_active = false
-  }fix duplicate,
+  },
 }
 
 resource "ionoscloud_ipblock" "webserver_ipblock" {
