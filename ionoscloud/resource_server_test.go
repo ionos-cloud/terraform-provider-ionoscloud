@@ -283,7 +283,7 @@ func TestAccServerCubeServer(t *testing.T) {
 		CheckDestroy:      testAccCheckServerDestroyCheck,
 		Steps: []resource.TestStep{
 			{
-				Config: testAccCheckCubeServer,
+				Config: testAccCheckCubeServerAndServersDataSource,
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckServerExists(ServerResource+"."+ServerTestResource, &server),
 					resource.TestCheckResourceAttr(ServerResource+"."+ServerTestResource, "name", ServerTestResource),
@@ -301,6 +301,7 @@ func TestAccServerCubeServer(t *testing.T) {
 					resource.TestCheckResourceAttr(ServerResource+"."+ServerTestResource, "nic.0.name", ServerTestResource),
 					resource.TestCheckResourceAttr(ServerResource+"."+ServerTestResource, "nic.0.dhcp", "true"),
 					resource.TestCheckResourceAttr(ServerResource+"."+ServerTestResource, "nic.0.firewall_active", "true"),
+					resource.TestCheckResourceAttr(DataSource+"."+ServersDataSource+"."+ServerDataSourceByName, "servers.#", "1"),
 				),
 			},
 		},
@@ -633,7 +634,7 @@ resource ` + ServerResource + ` ` + ServerTestResource + ` {
 }
 `
 
-const testAccCheckCubeServer = `
+const testAccCheckCubeServerAndServersDataSource = `
 data "ionoscloud_template" ` + ServerTestResource + ` {
     name = "CUBES XS"
     cores = 1
@@ -641,13 +642,13 @@ data "ionoscloud_template" ` + ServerTestResource + ` {
     storage_size = 30
 }
 
-resource "ionoscloud_datacenter" "foobar" {
+resource ` + DatacenterResource + " " + DatacenterTestResource + `{
 	name       = "volume-test"
 	location   = "de/txl"
 }
 
 resource "ionoscloud_lan" "webserver_lan" {
-  datacenter_id = ionoscloud_datacenter.foobar.id
+  datacenter_id = ` + DatacenterResource + `.` + DatacenterTestResource + `.id
   public = true
   name = "public"
 }
@@ -659,7 +660,7 @@ resource "ionoscloud_server" ` + ServerTestResource + ` {
   type              = "CUBE"
   template_uuid     = data.ionoscloud_template.` + ServerTestResource + `.id
   image_password = "K3tTj8G14a3EgKyNeeiY"  
-  datacenter_id     = ionoscloud_datacenter.foobar.id
+  datacenter_id = ` + DatacenterResource + `.` + DatacenterTestResource + `.id
   volume {
     name            = "` + ServerTestResource + `"
     licence_type    = "LINUX" 
@@ -670,6 +671,14 @@ resource "ionoscloud_server" ` + ServerTestResource + ` {
     name            = "` + ServerTestResource + `"
     dhcp            = true
     firewall_active = true
+  }
+}
+data ` + ServersDataSource + ` ` + ServerDataSourceByName + ` {
+ depends_on = [` + ServerResource + `.` + ServerTestResource + `]
+  datacenter_id = ` + DatacenterResource + `.` + DatacenterTestResource + `.id
+  filter {
+   name = "type"
+   value = "CUBE" 
   }
 }`
 

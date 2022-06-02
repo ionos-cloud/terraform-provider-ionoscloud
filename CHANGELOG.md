@@ -1,3 +1,9 @@
+## 6.2.6
+
+### Feature
+
+* adds ionoscloud_servers data source that returns a list of servers based on filters set. The filters do partial matching.
+
 ## 6.2.5
 ### Enhancement
 - update sdk-go dependency to v6.0.3. 
