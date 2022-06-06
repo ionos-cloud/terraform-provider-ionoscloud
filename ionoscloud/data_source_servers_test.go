@@ -224,6 +224,7 @@ resource ` + LanResource + ` ` + LanTestResource + ` {
   public = true
   name = "public"
 }
+
 resource ` + ServerResource + ` ` + ServerTestResource + ` {
   name = "` + ServerTestResource + `"
   datacenter_id = ` + DatacenterResource + `.` + DatacenterTestResource + `.id
@@ -247,7 +248,7 @@ resource ` + ServerResource + ` ` + ServerTestResource + ` {
     name = "` + LanTestResource + `"
     dhcp = false
     firewall_active = false
-  },
+  }
 }
 
 resource "ionoscloud_ipblock" "webserver_ipblock" {
