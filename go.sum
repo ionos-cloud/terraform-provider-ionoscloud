@@ -213,6 +213,8 @@ github.com/iancoleman/strcase v0.2.0/go.mod h1:iwCmte+B7n89clKwxIoIXy/HfoL7AsD47
 github.com/ianlancetaylor/demangle v0.0.0-20181102032728-5e5cf60278f6/go.mod h1:aSSvb/t6k1mPoxDqO4vJh6VOCGPwU4O0C2/Eqndh1Sc=
 github.com/imdario/mergo v0.3.12 h1:b6R2BslTbIEToALKP7LxUvijTsNI9TAe80pLWN2g/HU=
 github.com/imdario/mergo v0.3.12/go.mod h1:jmQim1M+e3UYxmgPu/WyfjB3N3VflVyUjjjwH0dnCYA=
+github.com/ionos-cloud/sdk-go-auth v1.0.4 h1:KiY2e3IB2N4g35ndH1frsmMLUDAI5Kcyy9fcIkqbwlI=
+github.com/ionos-cloud/sdk-go-auth v1.0.4/go.mod h1:YVinbTXBg0Kz4mNJ9BUxv9W7swXfKbquGEsyTpxXCIk=
 github.com/ionos-cloud/sdk-go-dbaas-postgres v1.0.3 h1:ahzztBNJ1IcQL+hdzhek6234P4ednkqdOgTsfB0nEfE=
 github.com/ionos-cloud/sdk-go-dbaas-postgres v1.0.3/go.mod h1:87cFAQViqjorhuafmYIDCmCTr5GiaqDB7qr09K1gdOU=
 github.com/ionos-cloud/sdk-go/v6 v6.0.3 h1:nYzA9sDUZwsDoPjy/ca9w6HeGiihOmDa6kv7QerItZA=

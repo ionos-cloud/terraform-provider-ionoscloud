@@ -180,6 +180,14 @@ const (
 	DBaaSVersionsTest                = "test_dbaas_versions"
 )
 
+// DSaaS Constants
+const (
+	DSaaSClusterResource             = "ionoscloud_dsaas_cluster"
+	DSaaSClusterTestResource         = "test_dsaas_cluster"
+	DSaaSClusterTestDataSourceById   = "test_dsaas_cluster_id"
+	DSaaSClusterTestDataSourceByName = "test_dsaas_cluster_name"
+)
+
 const (
 	ShareResource         = "ionoscloud_share"
 	shareResourceFullName = ShareResource + "." + sourceShareName

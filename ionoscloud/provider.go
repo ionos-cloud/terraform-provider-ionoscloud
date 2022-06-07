@@ -16,6 +16,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/ionos-cloud/sdk-go/v6"
 	dbaasService "github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/dbaas"
+	dsaasService "github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/dsaas"
 )
 
 var Version = "DEV"
@@ -23,6 +24,7 @@ var Version = "DEV"
 type SdkBundle struct {
 	CloudApiClient *ionoscloud.APIClient
 	DbaasClient    *dbaasService.Client
+	DSaaSClient    *dsaasService.Client
 }
 
 // Provider returns a schema.Provider for ionoscloud
@@ -117,6 +119,7 @@ func Provider() *schema.Provider {
 			DBaaSClusterResource:                      dataSourceDbaasPgSqlCluster(),
 			DBaaSVersionsResource:                     dataSourceDbaasPgSqlVersions(),
 			DBaaSBackupsResource:                      dataSourceDbaasPgSqlBackups(),
+			DSaaSClusterResource:                      dataSourceDSaaSCluster(),
 		},
 	}
 
@@ -173,12 +176,15 @@ func providerConfigure(d *schema.ResourceData, terraformVersion string) (interfa
 		"terraform-provider/%s_ionos-cloud-sdk-go/%s_hashicorp-terraform/%s_terraform-plugin-sdk/%s_os/%s_arch/%s",
 		Version, ionoscloud.Version, terraformVersion, meta.SDKVersionString(), runtime.GOOS, runtime.GOARCH)
 
-	dbaasClient := dbaasService.NewClientService(username.(string), password.(string), token.(string), cleanedUrl)
+	dbaasClient := dbaasService.NewClientService(username.(string), password.(string), token.(string), cleanedUrl, Version, terraformVersion)
 	//dbaasClient.GetConfig().HTTPClient = &http.Client{Transport: createTransport()}
+
+	dsaasClient := dsaasService.NewClientService(username.(string), password.(string), token.(string), cleanedUrl, Version, terraformVersion)
 
 	return SdkBundle{
 		CloudApiClient: newClient,
 		DbaasClient:    dbaasClient.Get(),
+		DSaaSClient:    dsaasClient.Get(),
 	}, nil
 }
 

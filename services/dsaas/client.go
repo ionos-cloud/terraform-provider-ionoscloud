@@ -1,9 +1,9 @@
-package dbaas
+package dsaas
 
 import (
 	"fmt"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/meta"
-	dbaas "github.com/ionos-cloud/sdk-go-dbaas-postgres"
+	dsaas "github.com/ionos-cloud/sdk-go-autoscaling"
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils"
 	"net/http"
 	"os"
@@ -12,41 +12,41 @@ import (
 )
 
 type Client struct {
-	dbaas.APIClient
+	dsaas.APIClient
 }
 
 type ClientConfig struct {
-	dbaas.Configuration
+	dsaas.Configuration
 }
 
-// ClientService is a wrapper around dbaas.APIClient
+// ClientService is a wrapper around dsaas.APIClient
 type ClientService interface {
 	Get() *Client
 	GetConfig() *ClientConfig
 }
 
 type clientService struct {
-	client *dbaas.APIClient
+	client *dsaas.APIClient
 }
 
 var _ ClientService = &clientService{}
 
 func NewClientService(username, password, token, url, version, terraformVersion string) ClientService {
-	newConfigDbaas := dbaas.NewConfiguration(username, password, token, url)
+	newConfigDsaas := dsaas.NewConfiguration(username, password, token, url)
 
 	if os.Getenv("IONOS_DEBUG") != "" {
-		newConfigDbaas.Debug = true
+		newConfigDsaas.Debug = true
 	}
-	newConfigDbaas.MaxRetries = 999
-	newConfigDbaas.MaxWaitTime = 4 * time.Second
+	newConfigDsaas.MaxRetries = 999
+	newConfigDsaas.MaxWaitTime = 4 * time.Second
 
-	newConfigDbaas.HTTPClient = &http.Client{Transport: utils.CreateTransport()}
-	newConfigDbaas.UserAgent = fmt.Sprintf(
-		"terraform-provider/%s_ionos-cloud-sdk-go-dbaas-postgres/%s_hashicorp-terraform/%s_terraform-plugin-sdk/%s_os/%s_arch/%s",
-		version, dbaas.Version, terraformVersion, meta.SDKVersionString(), runtime.GOOS, runtime.GOARCH)
+	newConfigDsaas.HTTPClient = &http.Client{Transport: utils.CreateTransport()}
+	newConfigDsaas.UserAgent = fmt.Sprintf(
+		"terraform-provider/%s_ionos-cloud-sdk-go-dsaas/%s_hashicorp-terraform/%s_terraform-plugin-sdk/%s_os/%s_arch/%s",
+		version, dsaas.Version, terraformVersion, meta.SDKVersionString(), runtime.GOOS, runtime.GOARCH)
 
 	return &clientService{
-		client: dbaas.NewAPIClient(newConfigDbaas),
+		client: dsaas.NewAPIClient(newConfigDsaas),
 	}
 }
 
