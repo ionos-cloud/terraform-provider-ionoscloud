@@ -1,3 +1,29 @@
+## 6.2.6
+
+### Feature
+
+* adds ionoscloud_servers data source that returns a list of servers based on filters set. The filters do partial matching.
+
+## 6.2.5
+### Enhancement
+- update sdk-go dependency to v6.0.3. 
+  * enable certificate pinning, by setting IONOS_PINNED_CERT env variable
+- temporarily removed `gateway_ip` and `public` fields for k8s
+- introduced error when trying to set `max_node_count` equal to `min_node_count` in `k8s_node_pool`
+
+### Fixes 
+- fixed crash when trying to disable `autoscaling` on `k8s_node_pool`
+
+## 6.2.4
+### Fixes
+- fixed bug when upgrading from a v6.0.0-beta.X version to a stable one (_number is required_ error)
+- reintroduced error for image data source when finding multiple results with data source
+### Enhancement
+- update sdk-go-dbaas-postgres dependency to v1.0.3
+
+### Documentation
+- updated multiple nics under the same IP Failover example, with a [one step example](examples/ip_failover/README.md)
+
 ## 6.2.3
 
 ### Fixes

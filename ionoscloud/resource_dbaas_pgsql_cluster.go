@@ -52,11 +52,10 @@ func resourceDbaasPgSqlCluster() *schema.Resource {
 				ValidateFunc: validation.All(validation.IntAtLeast(2048)),
 			},
 			"storage_type": {
-				Type:        schema.TypeString,
-				Description: "The storage type used in your cluster.",
-				Required:    true,
-
-				ValidateFunc: validation.All(validation.StringInSlice([]string{"HDD", "SSD"}, true)),
+				Type:         schema.TypeString,
+				Description:  "The storage type used in your cluster.",
+				Required:     true,
+				ValidateFunc: validation.All(validation.StringInSlice([]string{"HDD", "SSD", "SSD Premium", "SSD Standard"}, true)),
 			},
 			"connections": {
 				Type:        schema.TypeList,

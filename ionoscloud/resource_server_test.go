@@ -284,7 +284,7 @@ func TestAccServerCubeServer(t *testing.T) {
 		CheckDestroy:      testAccCheckServerDestroyCheck,
 		Steps: []resource.TestStep{
 			{
-				Config: testAccCheckCubeServer,
+				Config: testAccCheckCubeServerAndServersDataSource,
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckServerExists(ServerResource+"."+ServerTestResource, &server),
 					resource.TestCheckResourceAttr(ServerResource+"."+ServerTestResource, "name", ServerTestResource),
@@ -302,6 +302,7 @@ func TestAccServerCubeServer(t *testing.T) {
 					resource.TestCheckResourceAttr(ServerResource+"."+ServerTestResource, "nic.0.name", ServerTestResource),
 					resource.TestCheckResourceAttr(ServerResource+"."+ServerTestResource, "nic.0.dhcp", "true"),
 					resource.TestCheckResourceAttr(ServerResource+"."+ServerTestResource, "nic.0.firewall_active", "true"),
+					resource.TestCheckResourceAttr(DataSource+"."+ServersDataSource+"."+ServerDataSourceByName, "servers.#", "1"),
 				),
 			},
 		},
@@ -453,7 +454,7 @@ resource ` + ServerResource + ` ` + ServerTestResource + ` {
   ram = 2048
   availability_zone = "ZONE_1"
   cpu_family = "AMD_OPTERON"
-  image_name ="debian-10-genericcloud-amd64-20211011-792"
+  image_name ="ubuntu:latest"
   image_password = "K3tTj8G14a3EgKyNeeiYsasad"
   type = "ENTERPRISE"
   volume {
@@ -557,7 +558,7 @@ resource ` + ServerResource + ` ` + ServerTestResource + ` {
   ram               = 1024
   availability_zone = "ZONE_1"
   cpu_family        = "INTEL_SKYLAKE" 
-  image_name        = "Ubuntu-20.04-LTS"
+  image_name        = "ubuntu:latest"
   image_password    = "pass123456"
   volume {
     name           = "` + ServerTestResource + `"
@@ -594,7 +595,7 @@ resource ` + ServerResource + ` "webserver" {
   ram = 1024
   availability_zone = "ZONE_1"
   cpu_family = "INTEL_SKYLAKE"
-	image_name = "Ubuntu-20.04-LTS"
+	image_name = "ubuntu:latest"
 	image_password = "K3tTj8G14a3EgKyNeeiY"
   volume {
     name = "system"
@@ -634,7 +635,7 @@ resource ` + ServerResource + ` ` + ServerTestResource + ` {
 }
 `
 
-const testAccCheckCubeServer = `
+const testAccCheckCubeServerAndServersDataSource = `
 data "ionoscloud_template" ` + ServerTestResource + ` {
     name = "CUBES XS"
     cores = 1
@@ -642,13 +643,13 @@ data "ionoscloud_template" ` + ServerTestResource + ` {
     storage_size = 30
 }
 
-resource "ionoscloud_datacenter" "foobar" {
+resource ` + DatacenterResource + " " + DatacenterTestResource + `{
 	name       = "volume-test"
 	location   = "de/txl"
 }
 
 resource "ionoscloud_lan" "webserver_lan" {
-  datacenter_id = ionoscloud_datacenter.foobar.id
+  datacenter_id = ` + DatacenterResource + `.` + DatacenterTestResource + `.id
   public = true
   name = "public"
 }
@@ -660,7 +661,7 @@ resource "ionoscloud_server" ` + ServerTestResource + ` {
   type              = "CUBE"
   template_uuid     = data.ionoscloud_template.` + ServerTestResource + `.id
   image_password = "K3tTj8G14a3EgKyNeeiY"  
-  datacenter_id     = ionoscloud_datacenter.foobar.id
+  datacenter_id = ` + DatacenterResource + `.` + DatacenterTestResource + `.id
   volume {
     name            = "` + ServerTestResource + `"
     licence_type    = "LINUX" 
@@ -671,6 +672,14 @@ resource "ionoscloud_server" ` + ServerTestResource + ` {
     name            = "` + ServerTestResource + `"
     dhcp            = true
     firewall_active = true
+  }
+}
+data ` + ServersDataSource + ` ` + ServerDataSourceByName + ` {
+ depends_on = [` + ServerResource + `.` + ServerTestResource + `]
+  datacenter_id = ` + DatacenterResource + `.` + DatacenterTestResource + `.id
+  filter {
+   name = "type"
+   value = "CUBE" 
   }
 }`
 
@@ -691,7 +700,7 @@ resource ` + ServerResource + ` ` + ServerTestResource + ` {
   ram = 1024
   availability_zone = "ZONE_1"
   cpu_family = "AMD_OPTERON"
-  image_name ="debian-10-genericcloud-amd64-20211011-792"
+  image_name ="ubuntu:latest"
   image_password = "K3tTj8G14a3EgKyNeeiY"
   volume {
     name = "system"
@@ -729,7 +738,7 @@ resource ` + ServerResource + ` ` + ServerTestResource + ` {
   ram = 1024
   availability_zone = "ZONE_1"
   cpu_family = "AMD_OPTERON"
-  image_name ="debian-10-genericcloud-amd64-20211011-792"
+  image_name ="ubuntu:latest"
   image_password = "K3tTj8G14a3EgKyNeeiY"
   volume {
     name = "system"

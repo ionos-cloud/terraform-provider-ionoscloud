@@ -190,6 +190,8 @@ func dataSourceImageRead(ctx context.Context, d *schema.ResourceData, meta inter
 
 	if results == nil || len(results) == 0 {
 		return diag.FromErr(fmt.Errorf("no image found with the specified criteria: name = %s, type = %s, location = %s, version = %s, cloudInit = %s", name, imageType, location, version, cloudInit))
+	} else if len(results) > 1 {
+		return diag.FromErr(fmt.Errorf("more than one image found with the specified criteria name = %s", name))
 	} else {
 		image = results[0]
 	}

@@ -865,7 +865,7 @@ func resourceServerRead(ctx context.Context, d *schema.ResourceData, meta interf
 
 		networks := []map[string]interface{}{network}
 		if err := d.Set("nic", networks); err != nil {
-			diags := diag.FromErr(fmt.Errorf("[ERROR] unable saving nic to state IonosCloud Server (%s): %s", serverId, err))
+			diags := diag.FromErr(fmt.Errorf("[ERROR] unable to save nic to state IonosCloud Server (%s): %w", serverId, err))
 			return diags
 		}
 	}

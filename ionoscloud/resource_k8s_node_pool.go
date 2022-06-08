@@ -8,6 +8,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 	ionoscloud "github.com/ionos-cloud/sdk-go/v6"
 	"log"
+	"reflect"
 	"strings"
 	"time"
 
@@ -204,12 +205,12 @@ func resourceK8sNodePool() *schema.Resource {
 					Type: schema.TypeString,
 				},
 			},
-			"gateway_ip": {
-				Type:        schema.TypeString,
-				Description: "Public IP address for the gateway performing source NAT for the node pool's nodes belonging to a private cluster. Required only if the node pool belongs to a private cluster.",
-				ForceNew:    true,
-				Optional:    true,
-			},
+			//"gateway_ip": {
+			//	Type:        schema.TypeString,
+			//	Description: "Public IP address for the gateway performing source NAT for the node pool's nodes belonging to a private cluster. Required only if the node pool belongs to a private cluster.",
+			//	ForceNew:    true,
+			//	Optional:    true,
+			//},
 			"labels": {
 				Type:     schema.TypeMap,
 				Optional: true,
@@ -301,6 +302,8 @@ func resourceK8sNodePool0() *schema.Resource {
 	}
 }
 
+// resourceK8sNodePoolUpgradeV0 handles the differences that arise on lans when migrating from v5.X.X to a v6.X.X stable
+// release and ignores the upgrade from a v6.0.0-beta.X, since the structure of lans is the same
 func resourceK8sNodePoolUpgradeV0(_ context.Context, state map[string]interface{}, _ interface{}) (map[string]interface{}, error) {
 	oldState := state
 	var oldData []interface{}
@@ -309,19 +312,31 @@ func resourceK8sNodePoolUpgradeV0(_ context.Context, state map[string]interface{
 	}
 
 	var lans []interface{}
-	for index, lanId := range oldData {
-		log.Printf("oldData index %+v id %v \n\n\n", index, lanId)
-		lanEntry := make(map[string]interface{})
+	var floatType float64
 
-		lanEntry["id"] = lanId
+	for _, lanId := range oldData {
+		// this condition is for handling the migration from a v5.X.X to v6.X.X  release, when the content of lans property
+		// is a list of floats. The content is mapped to the new v6.X.X lans structure
+		if reflect.TypeOf(lanId) == reflect.TypeOf(floatType) {
 
-		lanEntry["dhcp"] = true
+			lanEntry := make(map[string]interface{})
 
-		var nodePoolRoutes []interface{}
+			lanEntry["id"] = lanId
 
-		lanEntry["routes"] = nodePoolRoutes
-		lans = append(lans, lanEntry)
+			// default value for dhcp
+			lanEntry["dhcp"] = true
+
+			var nodePoolRoutes []interface{}
+
+			// empty list for routes
+			lanEntry["routes"] = nodePoolRoutes
+			lans = append(lans, lanEntry)
+		} else {
+			// this condition is for the migration from a v6.X.X-beta.X to v6.X.X  release, when no handling is necessary since the structure of lans is the same
+			return state, nil
+		}
 	}
+
 	state["lans"] = lans
 
 	return state, nil
@@ -375,6 +390,32 @@ func getLanResourceData(lansList *schema.Set) []ionoscloud.KubernetesNodePoolLan
 	}
 	return lans
 }
+
+func getAutoscalingData(d *schema.ResourceData) (*ionoscloud.KubernetesAutoScaling, error) {
+	var autoscaling ionoscloud.KubernetesAutoScaling
+
+	asmnVal, asmnOk := d.GetOk("auto_scaling.0.min_node_count")
+	asmxnVal, asmxnOk := d.GetOk("auto_scaling.0.max_node_count")
+
+	if asmnOk && asmxnOk {
+		asmnVal := int32(asmnVal.(int))
+		asmxnVal := int32(asmxnVal.(int))
+		if asmnVal == asmxnVal {
+			return &autoscaling, fmt.Errorf("error creating k8s node pool: max_node_count cannot be equal to min_node_count")
+		}
+
+		if asmxnVal < asmnVal {
+			return &autoscaling, fmt.Errorf("error creating k8s node pool: max_node_count cannot be lower than min_node_count")
+		}
+
+		log.Printf("[INFO] Setting Autoscaling minimum node count to : %d", asmnVal)
+		autoscaling.MinNodeCount = &asmnVal
+		log.Printf("[INFO] Setting Autoscaling maximum node count to : %d", asmxnVal)
+		autoscaling.MaxNodeCount = &asmxnVal
+	}
+
+	return &autoscaling, nil
+}
 func resourcek8sNodePoolCreate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	client := meta.(SdkBundle).CloudApiClient
 
@@ -404,40 +445,6 @@ func resourcek8sNodePoolCreate(ctx context.Context, d *schema.ResourceData, meta
 		},
 	}
 
-	if _, asOk := d.GetOk("auto_scaling.0"); asOk {
-		k8sNodepool.Properties.AutoScaling = &ionoscloud.KubernetesAutoScaling{}
-	}
-
-	if asmnVal, asmnOk := d.GetOk("auto_scaling.0.min_node_count"); asmnOk {
-		log.Printf("[INFO] Setting Autoscaling minimum node count to : %d", uint32(asmnVal.(int)))
-		asmnVal := int32(asmnVal.(int))
-		k8sNodepool.Properties.AutoScaling.MinNodeCount = &asmnVal
-	}
-
-	if asmxnVal, asmxnOk := d.GetOk("auto_scaling.0.max_node_count"); asmxnOk {
-		log.Printf("[INFO] Setting Autoscaling maximum node count to : %d", uint32(asmxnVal.(int)))
-		asmxnVal := int32(asmxnVal.(int))
-		k8sNodepool.Properties.AutoScaling.MaxNodeCount = &asmxnVal
-	}
-
-	if k8sNodepool.Properties.AutoScaling != nil && k8sNodepool.Properties.AutoScaling.MinNodeCount != nil &&
-		k8sNodepool.Properties.AutoScaling.MaxNodeCount != nil && *k8sNodepool.Properties.AutoScaling.MinNodeCount != 0 &&
-		*k8sNodepool.Properties.AutoScaling.MaxNodeCount != 0 && *k8sNodepool.Properties.AutoScaling.MinNodeCount != *k8sNodepool.Properties.AutoScaling.MaxNodeCount {
-		log.Printf("[INFO] Autoscaling is on, doing some extra checks for k8s node pool")
-
-		if *k8sNodepool.Properties.NodeCount < *k8sNodepool.Properties.AutoScaling.MinNodeCount {
-			d.SetId("")
-			diags := diag.FromErr(fmt.Errorf("error creating k8s node pool: node_count cannot be lower than min_node_count"))
-			return diags
-		}
-
-		if *k8sNodepool.Properties.AutoScaling.MaxNodeCount < *k8sNodepool.Properties.AutoScaling.MinNodeCount {
-			d.SetId("")
-			diags := diag.FromErr(fmt.Errorf("error creating k8s node pool: max_node_count cannot be lower than min_node_count"))
-			return diags
-		}
-	}
-
 	if _, mwOk := d.GetOk("maintenance_window.0"); mwOk {
 		k8sNodepool.Properties.MaintenanceWindow = &ionoscloud.KubernetesMaintenanceWindow{}
 	}
@@ -451,6 +458,18 @@ func resourcek8sNodePoolCreate(ctx context.Context, d *schema.ResourceData, meta
 	if mdVal, mdOk := d.GetOk("maintenance_window.0.day_of_the_week"); mdOk {
 		mdVal := mdVal.(string)
 		k8sNodepool.Properties.MaintenanceWindow.DayOfTheWeek = &mdVal
+	}
+
+	if autoscaling, err := getAutoscalingData(d); err != nil {
+		return diag.FromErr(err)
+	} else {
+		k8sNodepool.Properties.AutoScaling = autoscaling
+	}
+
+	if k8sNodepool.Properties.AutoScaling != nil && k8sNodepool.Properties.AutoScaling.MinNodeCount != nil && *k8sNodepool.Properties.NodeCount < *k8sNodepool.Properties.AutoScaling.MinNodeCount {
+		d.SetId("")
+		diags := diag.FromErr(fmt.Errorf("error creating k8s node pool: node_count cannot be lower than min_node_count"))
+		return diags
 	}
 
 	if lansVal, lansOK := d.GetOk("lans"); lansOK {
@@ -476,10 +495,10 @@ func resourcek8sNodePoolCreate(ctx context.Context, d *schema.ResourceData, meta
 		k8sNodepool.Properties.PublicIps = &requestPublicIps
 	}
 
-	if gatewayIp, gatewayIpOk := d.GetOk("gateway_ip"); gatewayIpOk {
-		gatewayIp := gatewayIp.(string)
-		k8sNodepool.Properties.GatewayIp = &gatewayIp
-	}
+	//if gatewayIp, gatewayIpOk := d.GetOk("gateway_ip"); gatewayIpOk {
+	//	gatewayIp := gatewayIp.(string)
+	//	k8sNodepool.Properties.GatewayIp = &gatewayIp
+	//}
 
 	labelsProp, ok := d.GetOk("labels")
 	if ok {
@@ -590,47 +609,26 @@ func resourcek8sNodePoolUpdate(ctx context.Context, d *schema.ResourceData, meta
 		log.Printf("[INFO] k8s pool k8s version changed from %+v to %+v", oldk8sVersion, newk8sVersion)
 	}
 
-	if _, autoScalingOk := d.GetOk("auto_scaling.0"); autoScalingOk {
-		_, newAs := d.GetChange("auto_scaling.0")
-		if newAs.(map[string]interface{}) != nil {
-			minNodeCount := int32(d.Get("auto_scaling.0.min_node_count").(int))
-			maxNodeCount := int32(d.Get("auto_scaling.0.max_node_count").(int))
+	if autoscaling, err := getAutoscalingData(d); err != nil {
+		return diag.FromErr(err)
+	} else {
+		request.Properties.AutoScaling = autoscaling
+	}
 
-			if minNodeCount > maxNodeCount {
-				d.SetId("")
-				diags := diag.FromErr(fmt.Errorf("error updating k8s node pool: max_node_count cannot be lower than min_node_count"))
-				return diags
-			}
+	if request.Properties.AutoScaling != nil && request.Properties.AutoScaling.MinNodeCount != nil && *request.Properties.NodeCount < *request.Properties.AutoScaling.MinNodeCount {
+		d.SetId("")
+		diags := diag.FromErr(fmt.Errorf("error creating k8s node pool: node_count cannot be lower than min_node_count"))
+		return diags
+	}
 
-			if nodeCount < minNodeCount {
-				d.SetId("")
-				diags := diag.FromErr(fmt.Errorf("error updating k8s node pool: node_count cannot be lower than min_node_count"))
-				return diags
-			}
+	if d.HasChange("auto_scaling.0.min_node_count") {
+		oldMinNodes, newMinNodes := d.GetChange("auto_scaling.0.min_node_count")
+		log.Printf("[INFO] k8s node pool autoscaling min # of nodes changed from %+v to %+v", oldMinNodes, newMinNodes)
+	}
 
-			if nodeCount > maxNodeCount {
-				d.SetId("")
-				diags := diag.FromErr(fmt.Errorf("error updating k8s node pool: node_count cannot be greater than max_node_count"))
-				return diags
-			}
-
-			autoScaling := &ionoscloud.KubernetesAutoScaling{
-				MinNodeCount: &minNodeCount,
-				MaxNodeCount: &maxNodeCount,
-			}
-
-			if d.HasChange("auto_scaling.0.min_node_count") {
-				oldMinNodes, newMinNodes := d.GetChange("auto_scaling.0.min_node_count")
-				log.Printf("[INFO] k8s node pool autoscaling min # of nodes changed from %+v to %+v", oldMinNodes, newMinNodes)
-			}
-
-			if d.HasChange("auto_scaling.0.max_node_count") {
-				oldMaxNodes, newMaxNodes := d.GetChange("auto_scaling.0.max_node_count")
-				log.Printf("[INFO] k8s node pool autoscaling max # of nodes changed from %+v to %+v", oldMaxNodes, newMaxNodes)
-			}
-
-			request.Properties.AutoScaling = autoScaling
-		}
+	if d.HasChange("auto_scaling.0.max_node_count") {
+		oldMaxNodes, newMaxNodes := d.GetChange("auto_scaling.0.max_node_count")
+		log.Printf("[INFO] k8s node pool autoscaling max # of nodes changed from %+v to %+v", oldMaxNodes, newMaxNodes)
 	}
 
 	if d.HasChange("lans") {
@@ -970,17 +968,11 @@ func setK8sNodePoolData(d *schema.ResourceData, nodePool *ionoscloud.KubernetesN
 
 		}
 
-		if nodePool.Properties.PublicIps != nil && len(*nodePool.Properties.PublicIps) > 0 {
-			if err := d.Set("public_ips", *nodePool.Properties.PublicIps); err != nil {
-				return err
-			}
-		}
-
-		if nodePool.Properties.GatewayIp != nil {
-			if err := d.Set("gateway_ip", *nodePool.Properties.GatewayIp); err != nil {
-				return fmt.Errorf("error while setting gateway_ip property for nodepool %s: %s", d.Id(), err)
-			}
-		}
+		//if nodePool.Properties.GatewayIp != nil {
+		//	if err := d.Set("gateway_ip", *nodePool.Properties.GatewayIp); err != nil {
+		//		return fmt.Errorf("error while setting gateway_ip property for nodepool %s: %s", d.Id(), err)
+		//	}
+		//}
 
 		labels := make(map[string]interface{})
 		if nodePool.Properties.Labels != nil && len(*nodePool.Properties.Labels) > 0 {

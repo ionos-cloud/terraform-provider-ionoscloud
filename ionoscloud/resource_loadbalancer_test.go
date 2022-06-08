@@ -135,7 +135,7 @@ resource "ionoscloud_server" "webserver" {
   ram = 1024
   availability_zone = "ZONE_1"
   cpu_family = "AMD_OPTERON"
-  image_name = "ubuntu-16.04"
+  image_name = "ubuntu:latest"
   image_password = "K3tTj8G14a3EgKyNeeiY"
   volume {
     name = "system"
@@ -181,7 +181,7 @@ resource "ionoscloud_server" "webserver" {
   ram = 1024
   availability_zone = "ZONE_1"
   cpu_family = "AMD_OPTERON"
-  image_name = "ubuntu-16.04"
+  image_name = "ubuntu:latest"
   image_password = "K3tTj8G14a3EgKyNeeiY"
   volume {
     name = "system"

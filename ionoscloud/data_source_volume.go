@@ -142,7 +142,6 @@ func dataSourceVolumeRead(ctx context.Context, d *schema.ResourceData, meta inte
 	} else {
 		/* search by name */
 		var volumes ionoscloud.Volumes
-
 		volumes, apiResponse, err = client.VolumesApi.DatacentersVolumesGet(ctx, datacenterId.(string)).Depth(1).Execute()
 		logApiRequestTime(apiResponse)
 
