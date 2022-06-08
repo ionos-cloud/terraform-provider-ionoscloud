@@ -157,7 +157,7 @@ func testAccCheckFirewallDestroyCheck(s *terraform.State) error {
 		logApiRequestTime(apiResponse)
 
 		if err != nil {
-			if errorBesideNotFound(apiResponse) {
+			if !httpNotFound(apiResponse) {
 				return fmt.Errorf("error occurent at checking deletion of firewall %s %s", rs.Primary.ID, err)
 			}
 		} else {

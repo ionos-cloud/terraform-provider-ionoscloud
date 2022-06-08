@@ -86,7 +86,7 @@ func testAccCheckPrivateCrossConnectDestroyCheck(s *terraform.State) error {
 		logApiRequestTime(apiResponse)
 
 		if err != nil {
-			if errorBesideNotFound(apiResponse) {
+			if !httpNotFound(apiResponse) {
 				return fmt.Errorf("an error occurred while checking private cross-connect %s: %s", rs.Primary.ID, err)
 			}
 		} else {

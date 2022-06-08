@@ -61,5 +61,3 @@ require (
 	google.golang.org/grpc v1.45.0 // indirect
 	google.golang.org/protobuf v1.27.1 // indirect
 )
-
-replace github.com/ionos-cloud/sdk-go/v6 => ../../../../../sdk/alb

@@ -1179,7 +1179,7 @@ func resourceServerUpdate(ctx context.Context, d *schema.ResourceData, meta inte
 			logApiRequestTime(apiResponse)
 
 			if err != nil {
-				if errorBesideNotFound(apiResponse) {
+				if !httpNotFound(apiResponse) {
 					diags := diag.FromErr(fmt.Errorf("error occured at checking existance of firewall %s %s", firewallId, err))
 					return diags
 				} else if httpNotFound(apiResponse) {
