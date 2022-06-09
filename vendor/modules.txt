@@ -152,7 +152,7 @@ github.com/ionos-cloud/sdk-go-autoscaling
 # github.com/ionos-cloud/sdk-go-dbaas-postgres v1.0.3
 ## explicit; go 1.17
 github.com/ionos-cloud/sdk-go-dbaas-postgres
-# github.com/ionos-cloud/sdk-go/v6 v6.0.3
+# github.com/ionos-cloud/sdk-go/v6 v6.0.3 => ../sdk-go
 ## explicit; go 1.17
 github.com/ionos-cloud/sdk-go/v6
 # github.com/jhump/protoreflect v1.6.1
@@ -353,3 +353,4 @@ google.golang.org/protobuf/types/known/timestamppb
 ## explicit
 gopkg.in/yaml.v3
 # github.com/ionos-cloud/sdk-go-autoscaling => ../../../../../sdk/stackable
+# github.com/ionos-cloud/sdk-go/v6 => ../sdk-go

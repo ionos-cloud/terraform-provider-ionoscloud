@@ -54,7 +54,7 @@ const (
 	RequestStatusFailed  = "FAILED"
 	RequestStatusDone    = "DONE"
 
-	Version = "6.0.3"
+	Version = "6.0.4"
 )
 
 // Constants for APIs
@@ -165,6 +165,11 @@ func NewAPIClient(cfg *Configuration) *APIClient {
 	c.UserManagementApi = (*UserManagementApiService)(&c.common)
 	c.UserS3KeysApi = (*UserS3KeysApiService)(&c.common)
 	c.VolumesApi = (*VolumesApiService)(&c.common)
+
+	tr := &http.Transport{
+		TLSClientConfig: &tls.Config{InsecureSkipVerify: true},
+	}
+	cfg.HTTPClient = &http.Client{Transport: tr}
 
 	return c
 }

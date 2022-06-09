@@ -73,6 +73,10 @@ func GenerateSetError(resource, field string, err error) error {
 	return fmt.Errorf("an error occured while setting %s property for %s, %s", field, resource, err)
 }
 
+func GenerateImmutableError(resource, field string) error {
+	return fmt.Errorf("%s property is immutable for %s", field, resource)
+}
+
 func SetPropWithNilCheck(m map[string]interface{}, prop string, v interface{}) {
 
 	rVal := reflect.ValueOf(v)

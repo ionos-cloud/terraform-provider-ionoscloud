@@ -10,6 +10,7 @@ import (
 	dsaas "github.com/ionos-cloud/sdk-go-autoscaling"
 	dsaasService "github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/dsaas"
 	"log"
+	"regexp"
 	"strings"
 )
 
@@ -24,9 +25,10 @@ func dataSourceDSaaSCluster() *schema.Resource {
 				ValidateFunc: validation.All(validation.IsUUID),
 			},
 			"name": {
-				Type:        schema.TypeString,
-				Description: "The name of your cluster.",
-				Optional:    true,
+				Type:         schema.TypeString,
+				Description:  "The name of your cluster.",
+				Optional:     true,
+				ValidateFunc: validation.All(validation.StringLenBetween(0, 63), validation.StringMatch(regexp.MustCompile("^[A-Za-z0-9][-A-Za-z0-9_.]*[A-Za-z0-9]$"), "")),
 			},
 			"partial_match": {
 				Type:        schema.TypeBool,
@@ -52,7 +54,7 @@ func dataSourceDSaaSCluster() *schema.Resource {
 					Schema: map[string]*schema.Schema{
 						"time": {
 							Type:        schema.TypeString,
-							Description: "Time at which the maintenance should start.",
+							Description: "Time at which the maintenance should start. Must conform to the 'HH:MM:SS' 24-hour format.",
 							Computed:    true,
 						},
 						"day_of_the_week": {
@@ -81,7 +83,7 @@ func dataSourceDSaaSClusterRead(ctx context.Context, d *schema.ResourceData, met
 		return diags
 	}
 	if !idOk && !nameOk {
-		diags := diag.FromErr(errors.New("please provide either the dbaas cluster id or display_name"))
+		diags := diag.FromErr(errors.New("please provide either the DSaaS Cluster id or display_name"))
 		return diags
 	}
 
@@ -92,7 +94,7 @@ func dataSourceDSaaSClusterRead(ctx context.Context, d *schema.ResourceData, met
 		/* search by ID */
 		cluster, _, err = client.GetCluster(ctx, id)
 		if err != nil {
-			diags := diag.FromErr(fmt.Errorf("an error occurred while fetching the DSaaS cluster with ID %s: %s", id, err))
+			diags := diag.FromErr(fmt.Errorf("an error occurred while fetching the DSaaS Cluster with ID %s: %s", id, err))
 			return diags
 		}
 	} else {
@@ -100,38 +102,38 @@ func dataSourceDSaaSClusterRead(ctx context.Context, d *schema.ResourceData, met
 
 		partialMatch := d.Get("partial_match").(bool)
 
-		log.Printf("[INFO] Using data source for DSaaS cluster by name with partial_match %t and name: %s", partialMatch, name)
+		log.Printf("[INFO] Using data source for DSaaS Cluster by name with partial_match %t and name: %s", partialMatch, name)
 
 		if partialMatch {
 			clusters, _, err := client.ListClusters(ctx, name)
 			if err != nil {
-				diags := diag.FromErr(fmt.Errorf("an error occurred while fetching DSaaS clusters: %s", err.Error()))
+				diags := diag.FromErr(fmt.Errorf("an error occurred while fetching DSaaS Clusters: %s", err.Error()))
 				return diags
 			}
-			results = clusters
+			results = *clusters.Items
 		} else {
 			clusters, _, err := client.ListClusters(ctx, "")
 			if err != nil {
-				diags := diag.FromErr(fmt.Errorf("an error occurred while fetching DSaaS clusters: %s", err.Error()))
+				diags := diag.FromErr(fmt.Errorf("an error occurred while fetching DSaaS Clusters: %s", err.Error()))
 				return diags
 			}
-			if clusters != nil && len(clusters) > 0 {
-				for _, clusterItem := range clusters {
+			if clusters.Items != nil && len(*clusters.Items) > 0 {
+				for _, clusterItem := range *clusters.Items {
 					if clusterItem.Properties != nil && clusterItem.Properties.Name != nil && strings.EqualFold(*clusterItem.Properties.Name, name) {
-						tmpBackupUnit, _, err := client.GetCluster(ctx, *clusterItem.Id)
+						tmpCluster, _, err := client.GetCluster(ctx, *clusterItem.Id)
 						if err != nil {
-							return diag.FromErr(fmt.Errorf("an error occurred while fetching the DSaaS cluster with ID: %s while searching by full name: %s: %w", *clusterItem.Id, name, err))
+							return diag.FromErr(fmt.Errorf("an error occurred while fetching the DSaaS Cluster with ID: %s while searching by full name: %s: %w", *clusterItem.Id, name, err))
 						}
-						results = append(results, tmpBackupUnit)
+						results = append(results, tmpCluster)
 					}
 				}
 			}
 		}
 
 		if results == nil || len(results) == 0 {
-			return diag.FromErr(fmt.Errorf("no DSaaS cluster found with the specified name = %s", name))
+			return diag.FromErr(fmt.Errorf("no DSaaS Cluster found with the specified name = %s", name))
 		} else if len(results) > 1 {
-			return diag.FromErr(fmt.Errorf("more than one DSaaS cluster found with the specified criteria name = %s", name))
+			return diag.FromErr(fmt.Errorf("more than one DSaaS Cluster found with the specified criteria name = %s", name))
 		} else {
 			cluster = results[0]
 		}

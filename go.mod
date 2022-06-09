@@ -65,3 +65,4 @@ require (
 )
 
 replace github.com/ionos-cloud/sdk-go-autoscaling => ../../../../../sdk/stackable
+replace github.com/ionos-cloud/sdk-go/v6 => ../sdk-go

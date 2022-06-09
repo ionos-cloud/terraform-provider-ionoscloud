@@ -182,10 +182,14 @@ const (
 
 // DSaaS Constants
 const (
-	DSaaSClusterResource             = "ionoscloud_dsaas_cluster"
-	DSaaSClusterTestResource         = "test_dsaas_cluster"
-	DSaaSClusterTestDataSourceById   = "test_dsaas_cluster_id"
-	DSaaSClusterTestDataSourceByName = "test_dsaas_cluster_name"
+	DSaaSClusterResource              = "ionoscloud_dsaas_cluster"
+	DSaaSClusterTestResource          = "test_dsaas_cluster"
+	DSaaSClusterTestDataSourceById    = "test_dsaas_cluster_id"
+	DSaaSClusterTestDataSourceByName  = "test_dsaas_cluster_name"
+	DSaaSNodePoolResource             = "ionoscloud_dsaas_node_pool"
+	DSaaSNodePoolTestResource         = "test_dsaas_node_pool"
+	DSaaSNodePoolTestDataSourceById   = "test_dsaas_node_pool_id"
+	DSaaSNodePoolTestDataSourceByName = "test_dsaas_node_pool_name"
 )
 
 const (
