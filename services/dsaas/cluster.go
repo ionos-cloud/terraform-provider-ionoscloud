@@ -107,11 +107,11 @@ func GetDSaaSClusterDataUpdate(d *schema.ResourceData) (*dsaas.PatchClusterReque
 		dsaasCluster.Properties.DataPlatformVersion = &dataPlatformVersion
 	}
 
-	if _, ok := d.GetOk("maintenance_window"); ok {
+	if ok := d.HasChange("maintenance_window"); ok {
 		dsaasCluster.Properties.MaintenanceWindow = GetDSaaSMaintenanceWindowData(d)
 	}
 
-	if _, ok := d.GetOk("datacenter_id"); ok {
+	if ok := d.HasChange("datacenter_id"); ok {
 		return nil, diag.FromErr(utils.GenerateImmutableError(clusterResourceName, "datacenter_id"))
 	}
 

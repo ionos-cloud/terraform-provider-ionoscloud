@@ -24,10 +24,9 @@ func dataSourceDSaaSNodePool() *schema.Resource {
 				ValidateFunc: validation.All(validation.StringMatch(regexp.MustCompile("^[A-Za-z0-9][-A-Za-z0-9_.]*[A-Za-z0-9]$"), "")),
 			},
 			"name": {
-				Type:         schema.TypeString,
-				Description:  "The name of your node pool.",
-				Optional:     true,
-				ValidateFunc: validation.All(validation.StringLenBetween(0, 63), validation.StringMatch(regexp.MustCompile("^[A-Za-z0-9][-A-Za-z0-9_.]*[A-Za-z0-9]$"), "")),
+				Type:        schema.TypeString,
+				Description: "The name of your node pool.",
+				Optional:    true,
 			},
 			"partial_match": {
 				Type:        schema.TypeBool,
@@ -155,7 +154,7 @@ func dataSourceDSaaSReadNodePool(ctx context.Context, d *schema.ResourceData, me
 
 		log.Printf("[INFO] Using data source for DSaaS Node Pool by name with partial_match %t and name: %s", partialMatch, name)
 
-		nodePools, _, err := client.ListNodePools(ctx, "")
+		nodePools, _, err := client.ListNodePools(ctx, clusterId)
 		if err != nil {
 			diags := diag.FromErr(fmt.Errorf("an error occurred while fetching DSaaS NodePools: %s", err.Error()))
 			return diags

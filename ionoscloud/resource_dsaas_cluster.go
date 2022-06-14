@@ -25,7 +25,7 @@ func resourceDSaaSCluster() *schema.Resource {
 			"datacenter_id": {
 				Type:         schema.TypeString,
 				Description:  "The UUID of the virtual data center (VDC) the cluster is provisioned.",
-				ValidateFunc: validation.All(validation.StringLenBetween(32, 36), validation.StringMatch(regexp.MustCompile("^[0-9a-f]{8}-?[0-9a-f]{4}-?[0-9a-f]{4}-?[0-9a-f]{4}-?[0-9a-f]{12}$"), "")),
+				ValidateFunc: validation.All(validation.StringLenBetween(32, 63), validation.StringMatch(regexp.MustCompile("^[0-9a-f]{8}-?[0-9a-f]{4}-?[0-9a-f]{4}-?[0-9a-f]{4}-?[0-9a-f]{12}$"), "")),
 				Required:     true,
 			},
 			"name": {

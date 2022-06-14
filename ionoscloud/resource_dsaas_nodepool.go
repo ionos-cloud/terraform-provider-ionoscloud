@@ -24,7 +24,7 @@ func resourceDSaaSNodePool() *schema.Resource {
 		Schema: map[string]*schema.Schema{
 			"name": {
 				Type:         schema.TypeString,
-				Description:  "The name of your node pool.",
+				Description:  "The name of your node pool. Must be 63 characters or less and must be empty or begin and end with an alphanumeric character ([a-z0-9A-Z]) with dashes (-), underscores (_), dots (.), and alphanumerics between.",
 				Required:     true,
 				ValidateFunc: validation.All(validation.StringLenBetween(0, 63), validation.StringMatch(regexp.MustCompile("^[A-Za-z0-9][-A-Za-z0-9_.]*[A-Za-z0-9]$"), "")),
 			},
@@ -70,6 +70,7 @@ func resourceDSaaSNodePool() *schema.Resource {
 			"storage_size": {
 				Type:         schema.TypeInt,
 				Description:  "The size of the volume in GB. The size must be greater than 10GB.",
+				Optional:     true,
 				Computed:     true,
 				ValidateFunc: validation.All(validation.IntAtLeast(10)),
 			},
@@ -77,6 +78,7 @@ func resourceDSaaSNodePool() *schema.Resource {
 				Type:        schema.TypeList,
 				Description: "Starting time of a weekly 4 hour-long window, during which maintenance might occur in hh:mm:ss format",
 				Optional:    true,
+				Computed:    true,
 				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{
 						"time": {
@@ -118,7 +120,7 @@ func resourceDSaaSNodePool() *schema.Resource {
 			"cluster_id": {
 				Type:         schema.TypeString,
 				Required:     true,
-				Description:  "The UUID of an existing DSaaS cluster",
+				Description:  "The UUID of an existing DSaaS cluster.",
 				ValidateFunc: validation.All(validation.StringMatch(regexp.MustCompile("^[A-Za-z0-9][-A-Za-z0-9_.]*[A-Za-z0-9]$"), "")),
 			},
 		},

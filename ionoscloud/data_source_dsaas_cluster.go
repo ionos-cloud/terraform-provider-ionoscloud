@@ -22,13 +22,12 @@ func dataSourceDSaaSCluster() *schema.Resource {
 				Type:         schema.TypeString,
 				Description:  "The id of your cluster.",
 				Optional:     true,
-				ValidateFunc: validation.All(validation.IsUUID),
+				ValidateFunc: validation.All(validation.StringMatch(regexp.MustCompile("^[A-Za-z0-9][-A-Za-z0-9_.]*[A-Za-z0-9]$"), "")),
 			},
 			"name": {
-				Type:         schema.TypeString,
-				Description:  "The name of your cluster.",
-				Optional:     true,
-				ValidateFunc: validation.All(validation.StringLenBetween(0, 63), validation.StringMatch(regexp.MustCompile("^[A-Za-z0-9][-A-Za-z0-9_.]*[A-Za-z0-9]$"), "")),
+				Type:        schema.TypeString,
+				Description: "The name of your cluster.",
+				Optional:    true,
 			},
 			"partial_match": {
 				Type:        schema.TypeBool,

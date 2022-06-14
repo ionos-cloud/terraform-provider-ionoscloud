@@ -105,6 +105,11 @@ func GetDSaaSNodePoolDataCreate(d *schema.ResourceData) *dsaas.CreateNodePoolReq
 		dsaasNodePool.Properties.StorageSize = &storageSize
 	}
 
+	if storageTypeValue, ok := d.GetOk("storage_type"); ok {
+		storageType := dsaas.StorageType(storageTypeValue.(string))
+		dsaasNodePool.Properties.StorageType = &storageType
+	}
+
 	if _, ok := d.GetOk("maintenance_window"); ok {
 		dsaasNodePool.Properties.MaintenanceWindow = GetDSaaSMaintenanceWindowData(d)
 	}
@@ -134,9 +139,8 @@ func GetDSaaSNodePoolDataUpdate(d *schema.ResourceData) (*dsaas.PatchNodePoolReq
 		Properties: &dsaas.PatchNodePoolProperties{},
 	}
 
-	if _, ok := d.GetOk("name"); ok {
+	if ok := d.HasChange("name"); ok {
 		return nil, diag.FromErr(utils.GenerateImmutableError(nodePoolResourceName, "name"))
-
 	}
 
 	if nodeCountValue, ok := d.GetOk("node_count"); ok {
@@ -144,29 +148,33 @@ func GetDSaaSNodePoolDataUpdate(d *schema.ResourceData) (*dsaas.PatchNodePoolReq
 		dsaasNodePool.Properties.NodeCount = &nodeCount
 	}
 
-	if _, ok := d.GetOk("cpu_family"); ok {
+	if ok := d.HasChange("cpu_family"); ok {
 		return nil, diag.FromErr(utils.GenerateImmutableError(nodePoolResourceName, "cpu_family"))
 	}
 
-	if _, ok := d.GetOk("cores_count"); ok {
+	if ok := d.HasChange("cores_count"); ok {
 		return nil, diag.FromErr(utils.GenerateImmutableError(nodePoolResourceName, "cores_count"))
 
 	}
 
-	if _, ok := d.GetOk("ram_size"); ok {
+	if ok := d.HasChange("ram_size"); ok {
 		return nil, diag.FromErr(utils.GenerateImmutableError(nodePoolResourceName, "ram_size"))
 	}
 
-	if _, ok := d.GetOk("availability_zone"); ok {
+	if ok := d.HasChange("availability_zone"); ok {
 		return nil, diag.FromErr(utils.GenerateImmutableError(nodePoolResourceName, "availability_zone"))
 	}
 
-	if _, ok := d.GetOk("availability_zone"); ok {
+	if ok := d.HasChange("availability_zone"); ok {
 		return nil, diag.FromErr(utils.GenerateImmutableError(nodePoolResourceName, "availability_zone"))
 	}
 
-	if _, ok := d.GetOk("storage_size"); ok {
+	if ok := d.HasChange("storage_size"); ok {
 		return nil, diag.FromErr(utils.GenerateImmutableError(nodePoolResourceName, "storage_size"))
+	}
+
+	if ok := d.HasChange("storage_type"); ok {
+		return nil, diag.FromErr(utils.GenerateImmutableError(nodePoolResourceName, "storage_type"))
 	}
 
 	if _, ok := d.GetOk("maintenance_window"); ok {

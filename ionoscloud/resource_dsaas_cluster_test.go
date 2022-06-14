@@ -65,11 +65,11 @@ func TestAccDSaaSClusterBasic(t *testing.T) {
 			},
 			{
 				Config:      testAccDataSourceDSaaSClusterWrongNameError,
-				ExpectError: regexp.MustCompile("no DSaaS cluster found with the specified name"),
+				ExpectError: regexp.MustCompile("no DSaaS Cluster found with the specified name"),
 			},
 			{
 				Config:      testAccDataSourceDSaaSClusterWrongPartialNameError,
-				ExpectError: regexp.MustCompile("no DSaaS cluster found with the specified name"),
+				ExpectError: regexp.MustCompile("no DSaaS Cluster found with the specified name"),
 			},
 			{
 				Config: testAccCheckDSaaSClusterConfigUpdate,
@@ -99,7 +99,9 @@ func testAccCheckDSaaSClusterDestroyCheck(s *terraform.State) error {
 			continue
 		}
 
-		_, apiResponse, err := client.GetCluster(ctx, rs.Primary.ID)
+		clusterId := rs.Primary.ID
+
+		_, apiResponse, err := client.GetCluster(ctx, clusterId)
 
 		if err != nil {
 			if apiResponse == nil || apiResponse.StatusCode != 404 {
@@ -134,7 +136,9 @@ func testAccCheckDSaaSClusterExists(n string, cluster *dsaas.ClusterResponseData
 			defer cancel()
 		}
 
-		foundCluster, _, err := client.GetCluster(ctx, rs.Primary.ID)
+		clusterId := rs.Primary.ID
+
+		foundCluster, _, err := client.GetCluster(ctx, clusterId)
 
 		if err != nil {
 			return fmt.Errorf("an error occured while fetching DSaaS Cluster %s: %s", rs.Primary.ID, err)
@@ -169,7 +173,7 @@ resource ` + DSaaSClusterResource + ` ` + DSaaSClusterTestResource + ` {
 const testAccCheckDSaaSClusterConfigUpdate = `
 resource ` + DatacenterResource + ` "datacenter_example" {
   name        = "datacenter_example"
-  location    = "de/txl"
+  location    = "de/fkb"
   description = "Datacenter for testing DSaaS Cluster"
 }
 
@@ -198,14 +202,14 @@ data ` + DSaaSClusterResource + ` ` + DSaaSClusterTestDataSourceByName + ` {
 
 const testAccDataSourceDSaaSClusterPartialMatchByName = testAccCheckDSaaSClusterConfigBasic + `
 data ` + DSaaSClusterResource + ` ` + DSaaSClusterTestDataSourceByName + ` {
-	name = "` + DSaaSClusterTestResource + `"
+	name = "test_"
     partial_match = true
 }
 `
 
 const testAccDataSourceDSaaSClusterWrongNameError = testAccCheckDSaaSClusterConfigBasic + `
 data ` + DSaaSClusterResource + ` ` + DSaaSClusterTestDataSourceByName + ` {
-	name = "test_"
+	name = "wrong_name"
 }
 `
 
