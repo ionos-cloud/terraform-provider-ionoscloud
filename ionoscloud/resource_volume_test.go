@@ -173,7 +173,7 @@ func testAccCheckVolumeDestroyCheck(s *terraform.State) error {
 		logApiRequestTime(apiResponse)
 
 		if err != nil {
-			if errorBesideNotFound(apiResponse) {
+			if !httpNotFound(apiResponse) {
 				return fmt.Errorf("volume still exists %s - an error occurred while checking it %s", rs.Primary.ID, err)
 			}
 		} else {

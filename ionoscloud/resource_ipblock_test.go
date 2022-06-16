@@ -118,7 +118,7 @@ func testAccCheckIPBlockDestroyCheck(s *terraform.State) error {
 		logApiRequestTime(apiResponse)
 
 		if err != nil {
-			if errorBesideNotFound(apiResponse) {
+			if !httpNotFound(apiResponse) {
 				return fmt.Errorf("an error occured while checking deletion of IPBlock %s %s", rs.Primary.ID, err)
 			}
 		} else {

@@ -26,6 +26,7 @@ const (
 	IonosPasswordEnvVar   = "IONOS_PASSWORD"
 	IonosTokenEnvVar      = "IONOS_TOKEN"
 	IonosApiUrlEnvVar     = "IONOS_API_URL"
+	IonosPinnedCertEnvVar = "IONOS_PINNED_CERT"
 	DefaultIonosServerUrl = "https://api.ionos.com/cloudapi/v6"
 	DefaultIonosBasePath  = "/cloudapi/v6"
 	defaultMaxRetries     = 3
@@ -125,7 +126,7 @@ func NewConfiguration(username, password, token, hostUrl string) *Configuration 
 	cfg := &Configuration{
 		DefaultHeader:      make(map[string]string),
 		DefaultQueryParams: url.Values{},
-		UserAgent:          "ionos-cloud-sdk-go/6.2.0-beta.6",
+		UserAgent:          "ionos-cloud-sdk-go/v6.0.3",
 		Debug:              false,
 		Username:           username,
 		Password:           password,

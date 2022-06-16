@@ -156,7 +156,7 @@ func resourceShareDelete(ctx context.Context, d *schema.ResourceData, meta inter
 		apiResponse, err := client.UserManagementApi.UmGroupsSharesDelete(ctx, groupId, resourceId).Execute()
 		logApiRequestTime(apiResponse)
 		if err != nil {
-			if errorBesideNotFound(apiResponse) {
+			if !httpNotFound(apiResponse) {
 				diags := diag.FromErr(fmt.Errorf("an error occured while deleting a share %s %w", d.Id(), err))
 				return diags
 			}
