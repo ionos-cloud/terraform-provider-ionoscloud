@@ -8,7 +8,7 @@ on:
         type: string
         default: master
       test-tags:
-        description: "test tags, in the form of a list without spaces: 'all,compute,server,firewall,k8s,dbaas,natgateway,nlb,waiting_for_vdc' "
+        description: "test tags, in the form of a list without spaces: 'all,compute,k8s,dbaas,natgateway,nlb, alb, server,firewall, etc.' "
         required: false
         type: string
         default: compute

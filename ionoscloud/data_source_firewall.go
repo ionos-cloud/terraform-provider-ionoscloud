@@ -112,7 +112,7 @@ func dataSourceFirewallRead(ctx context.Context, d *schema.ResourceData, meta in
 		logApiRequestTime(apiResponse)
 
 		if err != nil {
-			return diag.FromErr(fmt.Errorf("an error occurred while fetching backup unit: %s", err.Error()))
+			return diag.FromErr(fmt.Errorf("an error occurred while fetching backup unit: %w", err))
 		}
 
 		var results []ionoscloud.FirewallRule
@@ -123,7 +123,7 @@ func dataSourceFirewallRead(ctx context.Context, d *schema.ResourceData, meta in
 					tmpFirewall, apiResponse, err := client.FirewallRulesApi.DatacentersServersNicsFirewallrulesFindById(ctx, datacenterId, serverId, nicId, *fr.Id).Execute()
 					logApiRequestTime(apiResponse)
 					if err != nil {
-						return diag.FromErr(fmt.Errorf("an error occurred while fetching firewall rule with ID %s: %s", *fr.Id, err.Error()))
+						return diag.FromErr(fmt.Errorf("an error occurred while fetching firewall rule with ID %s: %w", *fr.Id, err))
 					}
 					results = append(results, tmpFirewall)
 				}

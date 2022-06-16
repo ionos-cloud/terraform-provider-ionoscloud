@@ -254,7 +254,7 @@ func resourceGroupRead(ctx context.Context, d *schema.ResourceData, meta interfa
 	logApiRequestTime(apiResponse)
 
 	if err != nil {
-		if apiResponse != nil && apiResponse.Response != nil && apiResponse.StatusCode == 404 {
+		if httpNotFound(apiResponse) {
 			d.SetId("")
 			return nil
 		}
@@ -401,7 +401,7 @@ func resourceGroupImporter(ctx context.Context, d *schema.ResourceData, meta int
 	logApiRequestTime(apiResponse)
 
 	if err != nil {
-		if apiResponse != nil && apiResponse.Response != nil && apiResponse.StatusCode == 404 {
+		if httpNotFound(apiResponse) {
 			d.SetId("")
 			return nil, fmt.Errorf("an error occured while trying to fetch the group %q", grpId)
 		}

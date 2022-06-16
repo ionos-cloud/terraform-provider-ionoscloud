@@ -109,6 +109,7 @@ $ make testacc TAGS=server,lan
 - `natgateway` - **NAT gateway** and **NAT gateway rule** tests
 - `k8s` - **k8s cluster** and **k8s node pool** tests
 - `dbaas` - **DBaaS postgres cluster** tests
+- `alb` - **Application Load Balancer** tests
 
 ``` sh
 $ make testacc TAGS=dbaas

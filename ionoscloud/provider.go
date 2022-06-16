@@ -85,6 +85,9 @@ func Provider() *schema.Provider {
 			NetworkLoadBalancerResource: resourceNetworkLoadBalancer(),
 			NetworkLoadBalancerForwardingRuleResource: resourceNetworkLoadBalancerForwardingRule(),
 			DBaaSClusterResource:                      resourceDbaasPgSqlCluster(),
+			ALBResource:                               resourceApplicationLoadBalancer(),
+			ALBForwardingRuleResource:                 resourceApplicationLoadBalancerForwardingRule(),
+			TargetGroupResource:                       resourceTargetGroup(),
 		},
 		DataSourcesMap: map[string]*schema.Resource{
 			DatacenterResource:                        dataSourceDataCenter(),
@@ -117,6 +120,9 @@ func Provider() *schema.Provider {
 			DBaaSClusterResource:                      dataSourceDbaasPgSqlCluster(),
 			DBaaSVersionsResource:                     dataSourceDbaasPgSqlVersions(),
 			DBaaSBackupsResource:                      dataSourceDbaasPgSqlBackups(),
+			ALBResource:                               dataSourceApplicationLoadBalancer(),
+			ALBForwardingRuleResource:                 dataSourceApplicationLoadBalancerForwardingRule(),
+			TargetGroupResource:                       dataSourceTargetGroup(),
 		},
 	}
 

@@ -6,6 +6,7 @@ import (
 	"context"
 	"fmt"
 	ionoscloud "github.com/ionos-cloud/sdk-go/v6"
+	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils"
 	"regexp"
 	"testing"
 
@@ -39,7 +40,7 @@ func TestAccVolumeBasic(t *testing.T) {
 					resource.TestCheckResourceAttr(VolumeResource+"."+VolumeTestResource, "availability_zone", "ZONE_1"),
 					resource.TestCheckResourceAttrSet(VolumeResource+"."+VolumeTestResource, "image_name"),
 					resource.TestCheckResourceAttrPair(VolumeResource+"."+VolumeTestResource, "boot_server", ServerResource+"."+ServerTestResource, "id"),
-					testImageNotNull(VolumeResource, "image")),
+					utils.TestImageNotNull(VolumeResource, "image")),
 			},
 			{
 				Config: testAccDataSourceVolumeMatchId,
@@ -94,7 +95,7 @@ func TestAccVolumeBasic(t *testing.T) {
 					resource.TestCheckResourceAttr(VolumeResource+"."+VolumeTestResource, "availability_zone", "ZONE_1"),
 					resource.TestCheckResourceAttrSet(VolumeResource+"."+VolumeTestResource, "image_name"),
 					resource.TestCheckResourceAttrPair(VolumeResource+"."+VolumeTestResource, "boot_server", ServerResource+"."+ServerTestResource+"updated", "id"),
-					testImageNotNull(VolumeResource, "image")),
+					utils.TestImageNotNull(VolumeResource, "image")),
 			},
 		},
 	})
@@ -149,7 +150,7 @@ func TestAccVolumeResolveImageName(t *testing.T) {
 					resource.TestCheckResourceAttr(VolumeResource+"."+VolumeTestResource, "disk_type", "SSD Standard"),
 					resource.TestCheckResourceAttr(VolumeResource+"."+VolumeTestResource, "bus", "VIRTIO"),
 					resource.TestCheckResourceAttr(VolumeResource+"."+VolumeTestResource, "availability_zone", "ZONE_1"),
-					testImageNotNull(VolumeResource, "image"))},
+					utils.TestImageNotNull(VolumeResource, "image"))},
 		},
 	})
 }
@@ -172,7 +173,7 @@ func testAccCheckVolumeDestroyCheck(s *terraform.State) error {
 		logApiRequestTime(apiResponse)
 
 		if err != nil {
-			if apiResponse == nil || apiResponse.Response != nil && apiResponse.StatusCode != 404 {
+			if !httpNotFound(apiResponse) {
 				return fmt.Errorf("volume still exists %s - an error occurred while checking it %s", rs.Primary.ID, err)
 			}
 		} else {

@@ -106,11 +106,11 @@ func testAccCheckNatGatewayRuleDestroyCheck(s *terraform.State) error {
 		logApiRequestTime(apiResponse)
 
 		if err != nil {
-			if apiResponse == nil || apiResponse.Response != nil && apiResponse.StatusCode != 404 {
-				return fmt.Errorf("an error occured at checking deletion of nat gateway rule %s %s", rs.Primary.ID, responseBody(apiResponse))
+			if !httpNotFound(apiResponse) {
+				return fmt.Errorf("an error occured at checking deletion of nat gateway rule %s %w", rs.Primary.ID, err)
 			}
 		} else {
-			return fmt.Errorf("nat gateway rule still exists %s %s", rs.Primary.ID, err)
+			return fmt.Errorf("nat gateway rule still exists %s %w", rs.Primary.ID, err)
 		}
 	}
 

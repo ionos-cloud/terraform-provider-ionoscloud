@@ -109,7 +109,7 @@ func dataSourceLanRead(ctx context.Context, d *schema.ResourceData, meta interfa
 		lans, apiResponse, err := client.LANsApi.DatacentersLansGet(ctx, datacenterId.(string)).Depth(1).Execute()
 		logApiRequestTime(apiResponse)
 		if err != nil {
-			return diag.FromErr(fmt.Errorf("an error occurred while fetching lans: %s", err.Error()))
+			return diag.FromErr(fmt.Errorf("an error occurred while fetching lans: %w", err))
 		}
 
 		var results []ionoscloud.Lan
