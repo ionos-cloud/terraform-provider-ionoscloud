@@ -1,8 +1,19 @@
-## 6.2.6
+## 6.3.0
 
 ### Feature
+- Adds ionoscloud_servers data source that returns a list of servers based on filters set. The filters do partial matching. See docs [here](docs/data-sources/servers.md)
+- New Product: **Application Load Balancer**:
+  - `Resources`:
+    - [ionoscloud_application_loadbalancer](docs/resources/application_loadbalancer.md)
+    - [ionoscloud_application_loadbalancer_forwarding_rule](docs/resources/application_loadbalancer_forwardingrule.md)
+    - [ionoscloud_target_group](docs/resources/target_group.md)
+  - `Data Sources`:
+    - [ionoscloud_application_loadbalancer](docs/data-sources/application_loadbalancer.md)
+    - [ionoscloud_application_loadbalancer_forwarding_rule](docs/data-sources/application_loadbalancer_forwardingrule.md)
+    - [ionoscloud_target_group](docs/data-sources/target_group.md)
 
-* adds ionoscloud_servers data source that returns a list of servers based on filters set. The filters do partial matching.
+### Dependency-update
+  - updated sdk-go version from [6.0.3](https://github.com/ionos-cloud/sdk-go/releases/tag/v6.0.3) to [v6.1.0](https://github.com/ionos-cloud/sdk-go/releases/tag/v6.1.0)
 
 ## 6.2.5
 ### Enhancement
