@@ -120,6 +120,9 @@ func Provider() *schema.Provider {
 			DBaaSClusterResource:                      dataSourceDbaasPgSqlCluster(),
 			DBaaSVersionsResource:                     dataSourceDbaasPgSqlVersions(),
 			DBaaSBackupsResource:                      dataSourceDbaasPgSqlBackups(),
+			ALBResource:                               dataSourceApplicationLoadBalancer(),
+			ALBForwardingRuleResource:                 dataSourceApplicationLoadBalancerForwardingRule(),
+			TargetGroupResource:                       dataSourceTargetGroup(),
 		},
 	}
 
