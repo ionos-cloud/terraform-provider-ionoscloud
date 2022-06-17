@@ -1,3 +1,9 @@
+## 6.3.1(upcoming release)
+
+### Feature
+
+- Adds certificate [resource](docs/resources/certificate.md) and [datasource](docs/data-sources/certificate.md).
+
 ## 6.3.0
 
 ### Feature
