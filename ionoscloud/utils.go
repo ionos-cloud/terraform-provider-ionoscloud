@@ -2,14 +2,14 @@ package ionoscloud
 
 import (
 	"fmt"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
+	certmanager "github.com/ionos-cloud/sdk-cert-go"
 	ionoscloud "github.com/ionos-cloud/sdk-go/v6"
 	"log"
 	"net"
 	"net/http"
 	"strings"
 	"time"
-
-	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 )
 
 const SleepInterval = 5 * time.Second
@@ -94,7 +94,24 @@ func logApiRequestTime(resp *ionoscloud.APIResponse) {
 	}
 }
 
+func certManagerLogApiResponse(resp *certmanager.APIResponse) {
+	if resp != nil {
+		log.Printf("[DEBUG] Operation : %s",
+			resp.Operation)
+		if resp.Response != nil {
+			log.Printf("[DEBUG] response status code : %d\n", resp.StatusCode)
+		}
+	}
+}
+
 func httpNotFound(resp *ionoscloud.APIResponse) bool {
+	if resp != nil && resp.Response != nil && resp.StatusCode == http.StatusNotFound {
+		return true
+	}
+	return false
+}
+
+func certManagerHttpNotFound(resp *certmanager.APIResponse) bool {
 	if resp != nil && resp.Response != nil && resp.StatusCode == http.StatusNotFound {
 		return true
 	}

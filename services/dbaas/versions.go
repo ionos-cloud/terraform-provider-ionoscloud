@@ -42,7 +42,7 @@ func SetPgSqlVersionsData(d *schema.ResourceData, postgresVersions dbaas.Postgre
 		}
 		err := d.Set("postgres_versions", versions)
 		if err != nil {
-			diags := diag.FromErr(fmt.Errorf("error while setting postgres_versions: %s", err))
+			diags := diag.FromErr(fmt.Errorf("error while setting postgres_versions: %w", err))
 			return diags
 		}
 	}

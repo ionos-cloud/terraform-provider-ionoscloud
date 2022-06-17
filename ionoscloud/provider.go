@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/meta"
+	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/cert"
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils"
 	"log"
 	"net/http"
@@ -21,8 +22,9 @@ import (
 var Version = "DEV"
 
 type SdkBundle struct {
-	CloudApiClient *ionoscloud.APIClient
-	DbaasClient    *dbaasService.Client
+	CloudApiClient    *ionoscloud.APIClient
+	DbaasClient       *dbaasService.Client
+	CertManagerClient *cert.Client
 }
 
 // Provider returns a schema.Provider for ionoscloud
@@ -88,6 +90,7 @@ func Provider() *schema.Provider {
 			ALBResource:                               resourceApplicationLoadBalancer(),
 			ALBForwardingRuleResource:                 resourceApplicationLoadBalancerForwardingRule(),
 			TargetGroupResource:                       resourceTargetGroup(),
+			ResourceCertificate:                       resourceCertificateManager(),
 		},
 		DataSourcesMap: map[string]*schema.Resource{
 			DatacenterResource:                        dataSourceDataCenter(),
@@ -120,6 +123,7 @@ func Provider() *schema.Provider {
 			DBaaSClusterResource:                      dataSourceDbaasPgSqlCluster(),
 			DBaaSVersionsResource:                     dataSourceDbaasPgSqlVersions(),
 			DBaaSBackupsResource:                      dataSourceDbaasPgSqlBackups(),
+			ResourceCertificate:                       dataSourceCertificate(),
 			ALBResource:                               dataSourceApplicationLoadBalancer(),
 			ALBForwardingRuleResource:                 dataSourceApplicationLoadBalancerForwardingRule(),
 			TargetGroupResource:                       dataSourceTargetGroup(),
@@ -132,7 +136,7 @@ func Provider() *schema.Provider {
 
 		if terraformVersion == "" {
 			// Terraform 0.12 introduced this field to the protocol
-			// We can therefore assume that if it's missing it's 0.10 or 0.11
+			// We can therefore assume that if it's missing it is 0.10 or 0.11
 			terraformVersion = "0.11+compatible"
 		}
 
@@ -163,29 +167,45 @@ func providerConfigure(d *schema.ResourceData, terraformVersion string) (interfa
 	}
 
 	cleanedUrl := cleanURL(d.Get("endpoint").(string))
-
-	newConfig := ionoscloud.NewConfiguration(username.(string), password.(string), token.(string), cleanedUrl)
-
-	if os.Getenv("IONOS_DEBUG") != "" {
-		newConfig.Debug = true
+	clients := map[clientType]interface{}{
+		ionosClient:       NewClientByType(username.(string), password.(string), token.(string), cleanedUrl, ionosClient),
+		dbaasClient:       NewClientByType(username.(string), password.(string), token.(string), cleanedUrl, dbaasClient),
+		certManagerClient: NewClientByType(username.(string), password.(string), token.(string), cleanedUrl, certManagerClient),
 	}
-	newConfig.MaxRetries = 999
-	newConfig.WaitTime = 4 * time.Second
-	newConfig.HTTPClient = &http.Client{Transport: utils.CreateTransport()}
 
-	newClient := ionoscloud.NewAPIClient(newConfig)
-
-	newConfig.UserAgent = fmt.Sprintf(
+	apiClient := clients[ionosClient].(*ionoscloud.APIClient)
+	apiClient.GetConfig().UserAgent = fmt.Sprintf(
 		"terraform-provider/%s_ionos-cloud-sdk-go/%s_hashicorp-terraform/%s_terraform-plugin-sdk/%s_os/%s_arch/%s",
 		Version, ionoscloud.Version, terraformVersion, meta.SDKVersionString(), runtime.GOOS, runtime.GOARCH)
-
-	dbaasClient := dbaasService.NewClientService(username.(string), password.(string), token.(string), cleanedUrl)
-	//dbaasClient.GetConfig().HTTPClient = &http.Client{Transport: createTransport()}
-
 	return SdkBundle{
-		CloudApiClient: newClient,
-		DbaasClient:    dbaasClient.Get(),
+		CloudApiClient:    apiClient,
+		DbaasClient:       clients[dbaasClient].(*dbaasService.Client),
+		CertManagerClient: clients[certManagerClient].(*cert.Client),
 	}, nil
+}
+
+func NewClientByType(username, password, token, url string, clientType clientType) interface{} {
+	switch clientType {
+	case dbaasClient:
+		return dbaasService.NewClientService(username, password, token, url).Get()
+	case ionosClient:
+		{
+			newConfig := ionoscloud.NewConfiguration(username, password, token, url)
+
+			if os.Getenv("IONOS_DEBUG") != "" {
+				newConfig.Debug = true
+			}
+			newConfig.MaxRetries = 999
+			newConfig.WaitTime = 4 * time.Second
+			newConfig.HTTPClient = &http.Client{Transport: utils.CreateTransport()}
+			return ionoscloud.NewAPIClient(newConfig)
+		}
+	case certManagerClient:
+		return cert.NewClientService(username, password, token, url).Get()
+	default:
+		log.Fatalf("[ERROR] unknown client type %d", clientType)
+	}
+	return nil
 }
 
 // cleanURL makes sure trailing slash does not corrupt the state

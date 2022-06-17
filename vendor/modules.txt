@@ -146,6 +146,9 @@ github.com/hashicorp/yamux
 # github.com/iancoleman/strcase v0.2.0
 ## explicit; go 1.16
 github.com/iancoleman/strcase
+# github.com/ionos-cloud/sdk-cert-go v1.0.0 => /tmp/sdk-cert-go
+## explicit; go 1.17
+github.com/ionos-cloud/sdk-cert-go
 # github.com/ionos-cloud/sdk-go-dbaas-postgres v1.0.3
 ## explicit; go 1.17
 github.com/ionos-cloud/sdk-go-dbaas-postgres
@@ -349,3 +352,4 @@ google.golang.org/protobuf/types/known/timestamppb
 # gopkg.in/yaml.v3 v3.0.0-20200615113413-eeeca48fe776
 ## explicit
 gopkg.in/yaml.v3
+# github.com/ionos-cloud/sdk-cert-go => /tmp/sdk-cert-go

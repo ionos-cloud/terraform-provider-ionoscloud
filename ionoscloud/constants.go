@@ -218,3 +218,16 @@ const (
 )
 
 const ServersDataSource = "ionoscloud_servers"
+
+const (
+	ResourceCertificate = "ionoscloud_certificate"
+	TestCertName        = "certTest"
+)
+
+type clientType int
+
+const (
+	ionosClient clientType = iota
+	dbaasClient
+	certManagerClient
+)

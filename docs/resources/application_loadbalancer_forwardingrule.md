@@ -94,7 +94,7 @@ The following arguments are supported:
 - `listener_ip` - (Required)[string] Listening (inbound) IP.
 - `listener_port` - (Required)[int] Listening (inbound) port number; valid range is 1 to 65535.
 - `client_timeout` - (Optional)[int] The maximum time in milliseconds to wait for the client to acknowledge or send data; default is 50,000 (50 seconds).
-- `server certificates` - (Optional)[list] Array of items in that collection.
+- `server certificates` - (Optional)[list] Array of certificate ids. You can create certificates with the [certificate](certificate.md) resource.
 - `http_rules` - (Optional)[list] Array of items in that collection
   - `name` - (Required)[string] The unique name of the Application Load Balancer HTTP rule.
   - `type` - (Required)[string] Type of the Http Rule.

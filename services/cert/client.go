@@ -1,18 +1,18 @@
-package dbaas
+package cert
 
 import (
-	dbaas "github.com/ionos-cloud/sdk-go-dbaas-postgres"
+	certmanager "github.com/ionos-cloud/sdk-cert-go"
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils"
 	"net/http"
 	"os"
 )
 
 type Client struct {
-	dbaas.APIClient
+	certmanager.APIClient
 }
 
 type ClientConfig struct {
-	dbaas.Configuration
+	certmanager.Configuration
 }
 
 // ClientService is a wrapper around dbaas.APIClient
@@ -22,24 +22,22 @@ type ClientService interface {
 }
 
 type clientService struct {
-	client *dbaas.APIClient
+	client *certmanager.APIClient
 }
 
-//var _ ClientService = &clientService{}
-
 func NewClientService(username, password, token, url string) ClientService {
-	newConfigDbaas := dbaas.NewConfiguration(username, password, token, url)
+	certConfig := certmanager.NewConfiguration(username, password, token, url)
 
 	if os.Getenv(utils.IonosDebug) != "" {
-		newConfigDbaas.Debug = true
+		certConfig.Debug = true
 	}
-	newConfigDbaas.MaxRetries = utils.MaxRetries
-	newConfigDbaas.MaxWaitTime = utils.MaxWaitTime
+	certConfig.MaxRetries = utils.MaxRetries
+	certConfig.MaxWaitTime = utils.MaxWaitTime
 
-	newConfigDbaas.HTTPClient = &http.Client{Transport: utils.CreateTransport()}
+	certConfig.HTTPClient = &http.Client{Transport: utils.CreateTransport()}
 
 	return &clientService{
-		client: dbaas.NewAPIClient(newConfigDbaas),
+		client: certmanager.NewAPIClient(certConfig),
 	}
 }
 

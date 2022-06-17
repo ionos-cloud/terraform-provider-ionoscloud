@@ -5,6 +5,7 @@ go 1.17
 require (
 	github.com/hashicorp/terraform-plugin-sdk/v2 v2.12.0
 	github.com/iancoleman/strcase v0.2.0
+	github.com/ionos-cloud/sdk-cert-go v1.0.0
 	github.com/ionos-cloud/sdk-go-dbaas-postgres v1.0.3
 	github.com/ionos-cloud/sdk-go/v6 v6.1.0
 	golang.org/x/crypto v0.0.0-20210616213533-5ff15b29337e
@@ -61,3 +62,5 @@ require (
 	google.golang.org/grpc v1.45.0 // indirect
 	google.golang.org/protobuf v1.27.1 // indirect
 )
+
+replace github.com/ionos-cloud/sdk-cert-go => /tmp/sdk-cert-go
