@@ -53,7 +53,6 @@ resource "ionoscloud_dsaas_node_pool" "example" {
     ann2 			= "value2"
   }
 }
-`
 ```
 
 ## Argument reference

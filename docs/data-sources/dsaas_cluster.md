@@ -58,7 +58,7 @@ The following attributes are returned by the datasource:
 * `maintenance_window` - Starting time of a weekly 4 hour-long window, during which maintenance might occur in hh:mm:ss format
   * `time` - Time at which the maintenance should start. 
   * `day_of_the_week`
-* * `kube_config` - Kubernetes configuration
+* `kube_config` - Kubernetes configuration
 * `config` - structured kubernetes config consisting of a list with 1 item with the following fields:
   * api_version - Kubernetes API Version
   * kind - "Config"
