@@ -87,7 +87,7 @@ func resourceCertificateManagerCreate(ctx context.Context, d *schema.ResourceDat
 		name := name.(string)
 		certificatePostDto.Properties.Name = &name
 	} else {
-		diags := diag.FromErr(fmt.Errorf("name must be provided for certificate manager"))
+		diags := diag.FromErr(fmt.Errorf("name must be provided for the certificate"))
 		return diags
 	}
 
@@ -95,7 +95,7 @@ func resourceCertificateManagerCreate(ctx context.Context, d *schema.ResourceDat
 		certificate := certField.(string)
 		certificatePostDto.Properties.Certificate = &certificate
 	} else {
-		diags := diag.FromErr(fmt.Errorf("certificate must be provided for certificate manager"))
+		diags := diag.FromErr(fmt.Errorf("certificate(body) must be provided for the certificate"))
 		return diags
 	}
 
