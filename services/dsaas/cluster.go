@@ -12,6 +12,7 @@ var clusterResourceName = "DSaaS Cluster"
 
 type ClusterService interface {
 	GetCluster(ctx context.Context, clusterId string) (dsaas.ClusterResponseData, *dsaas.APIResponse, error)
+	GetClusterKubeConfig(ctx context.Context, clusterId string) (string, *dsaas.APIResponse, error)
 	ListClusters(ctx context.Context, filterName string) ([]dsaas.ClusterResponseData, *dsaas.APIResponse, error)
 	CreateCluster(ctx context.Context, cluster dsaas.CreateClusterRequest) (dsaas.ClusterResponseData, *dsaas.APIResponse, error)
 	UpdateCluster(ctx context.Context, clusterId string, cluster dsaas.PatchClusterRequest) (dsaas.ClusterResponseData, *dsaas.APIResponse, error)
@@ -25,6 +26,14 @@ func (c *Client) GetCluster(ctx context.Context, clusterId string) (dsaas.Cluste
 
 	}
 	return cluster, nil, err
+}
+
+func (c *Client) GetClusterKubeConfig(ctx context.Context, clusterId string) (string, *dsaas.APIResponse, error) {
+	kubeConfig, apiResponse, err := c.DataPlatformClusterApi.GetClusterKubeconfig(ctx, clusterId).Execute()
+	if apiResponse != nil {
+		return kubeConfig, apiResponse, err
+	}
+	return kubeConfig, nil, err
 }
 
 func (c *Client) ListClusters(ctx context.Context, filterName string) (dsaas.ClusterListResponseData, *dsaas.APIResponse, error) {

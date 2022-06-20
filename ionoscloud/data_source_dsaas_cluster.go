@@ -2,6 +2,7 @@ package ionoscloud
 
 import (
 	"context"
+	"encoding/base64"
 	"errors"
 	"fmt"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
@@ -9,6 +10,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 	dsaas "github.com/ionos-cloud/sdk-go-autoscaling"
 	dsaasService "github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/dsaas"
+	"gopkg.in/yaml.v3"
 	"log"
 	"regexp"
 	"strings"
@@ -62,6 +64,115 @@ func dataSourceDSaaSCluster() *schema.Resource {
 						},
 					},
 				},
+			},
+			"config": {
+				Type:      schema.TypeList,
+				Computed:  true,
+				Sensitive: true,
+				Elem: &schema.Resource{
+					Schema: map[string]*schema.Schema{
+						"api_version": {
+							Type:      schema.TypeString,
+							Computed:  true,
+							Sensitive: true,
+						},
+						"current_context": {
+							Type:      schema.TypeString,
+							Computed:  true,
+							Sensitive: true,
+						},
+						"kind": {
+							Type:     schema.TypeString,
+							Computed: true,
+						},
+						"users": {
+							Type:     schema.TypeList,
+							Computed: true,
+							Elem: &schema.Resource{
+								Schema: map[string]*schema.Schema{
+									"name": {
+										Type:      schema.TypeString,
+										Computed:  true,
+										Sensitive: true,
+									},
+									"user": {
+										Type:      schema.TypeMap,
+										Computed:  true,
+										Sensitive: true,
+										Elem: &schema.Schema{
+											Type: schema.TypeString,
+										},
+									},
+								},
+							},
+						},
+						"clusters": {
+							Type:     schema.TypeList,
+							Computed: true,
+							Elem: &schema.Resource{
+								Schema: map[string]*schema.Schema{
+									"name": {
+										Type:      schema.TypeString,
+										Computed:  true,
+										Sensitive: true,
+									},
+									"cluster": {
+										Type:      schema.TypeMap,
+										Computed:  true,
+										Sensitive: true,
+										Elem: &schema.Schema{
+											Type: schema.TypeString,
+										},
+									},
+								},
+							},
+						},
+						"contexts": {
+							Type:     schema.TypeList,
+							Computed: true,
+							Elem: &schema.Resource{
+								Schema: map[string]*schema.Schema{
+									"name": {
+										Type:      schema.TypeString,
+										Computed:  true,
+										Sensitive: true,
+									},
+									"context": {
+										Type:      schema.TypeMap,
+										Computed:  true,
+										Sensitive: true,
+										Elem: &schema.Schema{
+											Type: schema.TypeString,
+										},
+									},
+								},
+							},
+						},
+					},
+				},
+			},
+			"user_tokens": {
+				Type:      schema.TypeMap,
+				Sensitive: true,
+				Computed:  true,
+				Elem: &schema.Schema{
+					Type:      schema.TypeString,
+					Sensitive: true,
+				},
+			},
+			"ca_crt": {
+				Type:      schema.TypeString,
+				Sensitive: true,
+				Computed:  true,
+			},
+			"server": {
+				Type:      schema.TypeString,
+				Sensitive: true,
+				Computed:  true,
+			},
+			"kube_config": {
+				Type:     schema.TypeString,
+				Computed: true,
 			},
 		},
 		Timeouts: &resourceDefaultTimeouts,
@@ -143,6 +254,128 @@ func dataSourceDSaaSClusterRead(ctx context.Context, d *schema.ResourceData, met
 		return diag.FromErr(err)
 	}
 
+	if err = setAdditionalDSaaSClusterData(d, &cluster, client); err != nil {
+		return diag.FromErr(err)
+	}
+
 	return nil
 
+}
+
+func setAdditionalDSaaSClusterData(d *schema.ResourceData, cluster *dsaas.ClusterResponseData, client *dsaasService.Client) error {
+
+	ctx, cancel := context.WithTimeout(context.Background(), *resourceDefaultTimeouts.Default)
+
+	if cancel != nil {
+		defer cancel()
+	}
+
+	/* get and set the kubeconfig*/
+	if cluster.Id != nil {
+		kubeConfig, _, err := client.GetClusterKubeConfig(ctx, *cluster.Id)
+		if err != nil {
+			return fmt.Errorf("an error occurred while fetching the kubernetes config for cluster with ID %s: %s", *cluster.Id, err)
+		}
+
+		if err := d.Set("kube_config", kubeConfig); err != nil {
+			return err
+		}
+		fmt.Printf("KubeConfig %+v", kubeConfig)
+
+		if err := setDSaaSConfigData(d, kubeConfig); err != nil {
+			return err
+		}
+	}
+
+	return nil
+}
+
+func setDSaaSConfigData(d *schema.ResourceData, configStr string) error {
+
+	var kubeConfig KubeConfig
+	if err := yaml.Unmarshal([]byte(configStr), &kubeConfig); err != nil {
+		return err
+	}
+
+	userTokens := map[string]string{}
+
+	var server string
+	var caCrt []byte
+
+	configMap := make(map[string]interface{})
+
+	configMap["api_version"] = kubeConfig.ApiVersion
+	configMap["current_context"] = kubeConfig.CurrentContext
+	configMap["kind"] = kubeConfig.Kind
+
+	clustersList := make([]map[string]interface{}, len(kubeConfig.Clusters))
+	for i, cluster := range kubeConfig.Clusters {
+
+		/* decode ca */
+		decodedCrt := make([]byte, base64.StdEncoding.DecodedLen(len(cluster.Cluster.CaData)))
+		if _, err := base64.StdEncoding.Decode(decodedCrt, []byte(cluster.Cluster.CaData)); err != nil {
+			return err
+		}
+
+		if len(caCrt) == 0 {
+			caCrt = decodedCrt
+		}
+
+		clustersList[i] = map[string]interface{}{
+			"name": cluster.Name,
+			"cluster": map[string]string{
+				"server":                     cluster.Cluster.Server,
+				"certificate_authority_data": string(decodedCrt),
+			},
+		}
+	}
+
+	configMap["clusters"] = clustersList
+
+	contextsList := make([]map[string]interface{}, len(kubeConfig.Contexts))
+	for i, contextVal := range kubeConfig.Contexts {
+		contextsList[i] = map[string]interface{}{
+			"name": contextVal.Name,
+			"context": map[string]string{
+				"cluster": contextVal.Context.Cluster,
+				"user":    contextVal.Context.User,
+			},
+		}
+	}
+
+	configMap["contexts"] = contextsList
+
+	userList := make([]map[string]interface{}, len(kubeConfig.Users))
+	for i, user := range kubeConfig.Users {
+		userList[i] = map[string]interface{}{
+			"name": user.Name,
+			"user": map[string]interface{}{
+				"token": user.User.Token,
+			},
+		}
+
+		userTokens[user.Name] = user.User.Token
+	}
+
+	configMap["users"] = userList
+
+	configList := []map[string]interface{}{configMap}
+
+	if err := d.Set("config", configList); err != nil {
+		return err
+	}
+
+	if err := d.Set("user_tokens", userTokens); err != nil {
+		return err
+	}
+
+	if err := d.Set("server", server); err != nil {
+		return err
+	}
+
+	if err := d.Set("ca_crt", string(caCrt)); err != nil {
+		return err
+	}
+
+	return nil
 }
