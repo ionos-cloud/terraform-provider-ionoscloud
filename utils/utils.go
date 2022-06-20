@@ -2,9 +2,15 @@ package utils
 
 import (
 	"fmt"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
 	"net"
 	"net/http"
 	"reflect"
+	"regexp"
+	"strconv"
+	"strings"
 	"time"
 )
 
@@ -69,6 +75,14 @@ func DiffSliceOneWay(a, b []string) []string {
 	return diff
 }
 
+// DiffSliceOneWay returns the elements in `a` that aren't in `b`.
+func DiffSuppressCaseInsensitive(_, old, new string, _ *schema.ResourceData) bool {
+	if strings.ToLower(old) == strings.ToLower(new) {
+		return true
+	}
+	return false
+}
+
 func GenerateSetError(resource, field string, err error) error {
 	return fmt.Errorf("an error occured while setting %s property for %s, %s", field, resource, err)
 }
@@ -92,4 +106,73 @@ func SetPropWithNilCheck(m map[string]interface{}, prop string, v interface{}) {
 func GenerateEmail() string {
 	email := fmt.Sprintf("terraform_test-%d@mailinator.com", time.Now().UnixNano())
 	return email
+}
+
+func IsValidUUID(uuid string) bool {
+	r := regexp.MustCompile("^[a-fA-F0-9]{8}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-[a-fA-F0-9]{12}$")
+	return r.MatchString(uuid)
+}
+
+func TestNotEmptySlice(resource, attribute string) resource.TestCheckFunc {
+	return func(s *terraform.State) error {
+		for _, rs := range s.RootModule().Resources {
+			if rs.Type != resource {
+				continue
+			}
+
+			lengthOfSlice := rs.Primary.Attributes[attribute]
+
+			if lengthOfSlice == "0" {
+				return fmt.Errorf("returned version slice is empty")
+			}
+		}
+		return nil
+	}
+}
+
+func TestValueInSlice(resource, attribute, value string) resource.TestCheckFunc {
+	return func(s *terraform.State) error {
+		for _, rs := range s.RootModule().Resources {
+			if rs.Type != resource {
+				continue
+			}
+
+			lengthOfSlice, err := strconv.Atoi(rs.Primary.Attributes[attribute])
+
+			if err != nil {
+				return err
+			} else if lengthOfSlice <= 0 {
+				return fmt.Errorf("returned %s slice is empty", attribute)
+			} else {
+				for i := 0; i < lengthOfSlice; i++ {
+					attribute = attribute[:len(attribute)-1] + strconv.Itoa(i)
+					if rs.Primary.Attributes[attribute] == value {
+						return nil
+					}
+				}
+			}
+
+		}
+		return fmt.Errorf("value %s not in %s slice", value, attribute)
+	}
+}
+
+func TestImageNotNull(resource, attribute string) resource.TestCheckFunc {
+	return func(s *terraform.State) error {
+		for _, rs := range s.RootModule().Resources {
+			if rs.Type != resource {
+				continue
+			}
+
+			image := rs.Primary.Attributes[attribute]
+
+			if image == "" {
+				return fmt.Errorf("%s is empty, expected an UUID", attribute)
+			} else if !IsValidUUID(image) {
+				return fmt.Errorf("%s should be a valid UUID, got: %#v", attribute, image)
+			}
+
+		}
+		return nil
+	}
 }

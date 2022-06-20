@@ -1,5 +1,23 @@
 package ionoscloud
 
+// ApplicationLoadBalancer Constants
+const (
+	ALBResource         = "ionoscloud_application_loadbalancer"
+	ALBTestResource     = "test_application_loadbalancer"
+	ALBDataSourceById   = "test_application_loadbalancer_id"
+	ALBDataSourceByName = "test_application_loadbalancer_name"
+
+	ALBForwardingRuleResource         = "ionoscloud_application_loadbalancer_forwardingrule"
+	ALBForwardingRuleTestResource     = "test_application_loadbalancer_forwardingrule"
+	ALBForwardingRuleDataSourceById   = "test_application_loadbalancer_forwardingrule_id"
+	ALBForwardingRuleDataSourceByName = "test_application_loadbalancer_forwardingrule_name"
+
+	TargetGroupResource         = "ionoscloud_target_group"
+	TargetGroupTestResource     = "test_target_group"
+	TargetGroupDataSourceById   = "test_target_group_id"
+	TargetGroupDataSourceByName = "test_target_group_name"
+)
+
 // Image Constants
 const (
 	ImageResource     = "ionoscloud_image"
@@ -206,8 +224,9 @@ const (
 
 // General Constants
 const (
-	DataSource       = "data"
-	UpdatedResources = "test_updated"
+	DataSource        = "data"
+	UpdatedResources  = "test_updated"
+	DataSourcePartial = "test"
 )
 
 const ServersDataSource = "ionoscloud_servers"

@@ -29,8 +29,9 @@ func resourceFirewall() *schema.Resource {
 			},
 
 			"protocol": {
-				Type:     schema.TypeString,
-				Required: true,
+				Type:         schema.TypeString,
+				Required:     true,
+				ValidateFunc: validation.All(validation.StringIsNotWhiteSpace),
 			},
 			"source_mac": {
 				Type:     schema.TypeString,
@@ -143,7 +144,7 @@ func resourceFirewallRead(ctx context.Context, d *schema.ResourceData, meta inte
 	logApiRequestTime(apiResponse)
 
 	if err != nil {
-		if apiResponse != nil && apiResponse.Response != nil && apiResponse.StatusCode == 404 {
+		if httpNotFound(apiResponse) {
 			log.Printf("[DEBUG] could not find firewall rule datacenter_id = %s server_id = %s with id = %s", d.Get("datacenter_id").(string), d.Get("server_id").(string), d.Id())
 			d.SetId("")
 			return nil
@@ -230,7 +231,7 @@ func resourceFirewallImport(ctx context.Context, d *schema.ResourceData, meta in
 	logApiRequestTime(apiResponse)
 
 	if err != nil {
-		if apiResponse != nil && apiResponse.Response != nil && apiResponse.StatusCode == 404 {
+		if httpNotFound(apiResponse) {
 			d.SetId("")
 			return nil, fmt.Errorf("unable to find firewall rule %q", firewallId)
 		}

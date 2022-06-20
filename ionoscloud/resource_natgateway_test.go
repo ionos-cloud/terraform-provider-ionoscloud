@@ -65,7 +65,7 @@ func TestAccNatGatewayBasic(t *testing.T) {
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckNatGatewayExists(resourceNatGatewayResource, &natGateway),
 					resource.TestCheckResourceAttr(resourceNatGatewayResource, "name", UpdatedResources),
-					resource.TestCheckResourceAttr(NatGatewayResource, "public_ips.#", "2"),
+					resource.TestCheckResourceAttr(resourceNatGatewayResource, "public_ips.#", "2"),
 					resource.TestCheckResourceAttrPair(resourceNatGatewayResource, "lans.0.id", LanResource+".natgateway_lan_updated", "id"),
 					resource.TestCheckResourceAttr(resourceNatGatewayResource, "lans.0.gateway_ips.0", "10.11.2.6/24"),
 				),
@@ -91,7 +91,7 @@ func testAccCheckNatGatewayDestroyCheck(s *terraform.State) error {
 		logApiRequestTime(apiResponse)
 
 		if err != nil {
-			if apiResponse == nil || apiResponse.Response != nil && apiResponse.StatusCode != 404 {
+			if !httpNotFound(apiResponse) {
 				return fmt.Errorf("an error occured and checking deletion of nat gateway %s %s", rs.Primary.ID, responseBody(apiResponse))
 			}
 		} else {

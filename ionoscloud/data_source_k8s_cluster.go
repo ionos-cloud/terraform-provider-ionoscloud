@@ -273,7 +273,7 @@ func dataSourceK8sReadCluster(ctx context.Context, d *schema.ResourceData, meta 
 		clusters, apiResponse, err := client.KubernetesApi.K8sGet(ctx).Depth(1).Execute()
 		logApiRequestTime(apiResponse)
 		if err != nil {
-			return diag.FromErr(fmt.Errorf("an error occurred while fetching k8s clusters: %s", err.Error()))
+			return diag.FromErr(fmt.Errorf("an error occurred while fetching k8s clusters: %w", err))
 		}
 
 		if clusters.Items != nil {
@@ -284,7 +284,7 @@ func dataSourceK8sReadCluster(ctx context.Context, d *schema.ResourceData, meta 
 					tmpCluster, apiResponse, err := client.KubernetesApi.K8sFindByClusterId(ctx, *c.Id).Execute()
 					logApiRequestTime(apiResponse)
 					if err != nil {
-						return diag.FromErr(fmt.Errorf("an error occurred while fetching k8s cluster with ID %s: %s", *c.Id, err.Error()))
+						return diag.FromErr(fmt.Errorf("an error occurred while fetching k8s cluster with ID %s: %w", *c.Id, err))
 					}
 					results = append(results, tmpCluster)
 					break
