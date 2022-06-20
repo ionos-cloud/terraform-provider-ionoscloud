@@ -90,7 +90,7 @@ func Provider() *schema.Provider {
 			ALBResource:                               resourceApplicationLoadBalancer(),
 			ALBForwardingRuleResource:                 resourceApplicationLoadBalancerForwardingRule(),
 			TargetGroupResource:                       resourceTargetGroup(),
-			ResourceCertificate:                       resourceCertificateManager(),
+			CertificateResource:                       resourceCertificateManager(),
 		},
 		DataSourcesMap: map[string]*schema.Resource{
 			DatacenterResource:                        dataSourceDataCenter(),
@@ -123,7 +123,7 @@ func Provider() *schema.Provider {
 			DBaaSClusterResource:                      dataSourceDbaasPgSqlCluster(),
 			DBaaSVersionsResource:                     dataSourceDbaasPgSqlVersions(),
 			DBaaSBackupsResource:                      dataSourceDbaasPgSqlBackups(),
-			ResourceCertificate:                       dataSourceCertificate(),
+			CertificateResource:                       dataSourceCertificate(),
 			ALBResource:                               dataSourceApplicationLoadBalancer(),
 			ALBForwardingRuleResource:                 dataSourceApplicationLoadBalancerForwardingRule(),
 			TargetGroupResource:                       dataSourceTargetGroup(),
@@ -192,11 +192,11 @@ func NewClientByType(username, password, token, url string, clientType clientTyp
 		{
 			newConfig := ionoscloud.NewConfiguration(username, password, token, url)
 
-			if os.Getenv("IONOS_DEBUG") != "" {
+			if os.Getenv(utils.IonosDebug) != "" {
 				newConfig.Debug = true
 			}
-			newConfig.MaxRetries = 999
-			newConfig.WaitTime = 4 * time.Second
+			newConfig.MaxRetries = utils.MaxRetries
+			newConfig.WaitTime = utils.MaxWaitTime
 			newConfig.HTTPClient = &http.Client{Transport: utils.CreateTransport()}
 			return ionoscloud.NewAPIClient(newConfig)
 		}

@@ -75,30 +75,30 @@ func TestAccCertificateResAndDataSource(t *testing.T) {
 			{
 				Config: testAccCheckCertConfigBasic,
 				Check: resource.ComposeTestCheckFunc(
-					resource.TestCheckResourceAttrSet(ResourceCertificate+"."+TestCertName, "certificate"),
-					resource.TestCheckResourceAttrSet(ResourceCertificate+"."+TestCertName, "certificate_chain"),
-					resource.TestCheckResourceAttrSet(ResourceCertificate+"."+TestCertName, "private_key"),
-					resource.TestCheckResourceAttr(ResourceCertificate+"."+TestCertName, "name", TestCertName),
+					resource.TestCheckResourceAttrSet(CertificateResource+"."+TestCertName, "certificate"),
+					resource.TestCheckResourceAttrSet(CertificateResource+"."+TestCertName, "certificate_chain"),
+					resource.TestCheckResourceAttrSet(CertificateResource+"."+TestCertName, "private_key"),
+					resource.TestCheckResourceAttr(CertificateResource+"."+TestCertName, "name", TestCertName),
 				),
 			},
 			{
 				Config: testAccCheckCertUpdateName,
 				Check: resource.ComposeTestCheckFunc(
-					resource.TestCheckResourceAttrSet(ResourceCertificate+"."+TestCertName, "certificate"),
-					resource.TestCheckResourceAttrSet(ResourceCertificate+"."+TestCertName, "certificate_chain"),
-					resource.TestCheckResourceAttrSet(ResourceCertificate+"."+TestCertName, "private_key"),
-					resource.TestCheckResourceAttr(ResourceCertificate+"."+TestCertName, "name", TestCertName+"1"),
+					resource.TestCheckResourceAttrSet(CertificateResource+"."+TestCertName, "certificate"),
+					resource.TestCheckResourceAttrSet(CertificateResource+"."+TestCertName, "certificate_chain"),
+					resource.TestCheckResourceAttrSet(CertificateResource+"."+TestCertName, "private_key"),
+					resource.TestCheckResourceAttr(CertificateResource+"."+TestCertName, "name", TestCertName+"1"),
 				),
 			},
 			{
 				Config: testAccCheckDataSourceByName,
 				Check: resource.ComposeTestCheckFunc(
-					resource.TestCheckResourceAttrPair(ResourceCertificate+"."+TestCertName, "certificate", DataSource+"."+ResourceCertificate+"."+TestCertName, "certificate")),
+					resource.TestCheckResourceAttrPair(CertificateResource+"."+TestCertName, "certificate", DataSource+"."+CertificateResource+"."+TestCertName, "certificate")),
 			},
 			{
 				Config: testAccCheckDataSourceById,
 				Check: resource.ComposeTestCheckFunc(
-					resource.TestCheckResourceAttrPair(ResourceCertificate+"."+TestCertName, "certificate", DataSource+"."+ResourceCertificate+"."+TestCertName, "certificate")),
+					resource.TestCheckResourceAttrPair(CertificateResource+"."+TestCertName, "certificate", DataSource+"."+CertificateResource+"."+TestCertName, "certificate")),
 			},
 			{
 				Config:      testAccCheckDataSourceWrongName,
@@ -119,7 +119,7 @@ func testAccCheckCertificateDestroyCheck(s *terraform.State) error {
 
 	for _, rs := range s.RootModule().Resources {
 
-		if rs.Type != ResourceCertificate {
+		if rs.Type != CertificateResource {
 			continue
 		}
 
@@ -140,7 +140,7 @@ func testAccCheckCertificateDestroyCheck(s *terraform.State) error {
 
 const (
 	testAccCheckCertConfigBasic = `
-resource ` + ResourceCertificate + ` ` + TestCertName + ` {
+resource ` + CertificateResource + ` ` + TestCertName + ` {
 	name        	  = "` + TestCertName + `"
 	certificate 	  = <<EOT
 ` + testCertificate + `
@@ -154,7 +154,7 @@ EOT
 }
 `
 	testAccCheckCertUpdateName = `
-resource ` + ResourceCertificate + ` ` + TestCertName + ` {
+resource ` + CertificateResource + ` ` + TestCertName + ` {
 	name        	  = "` + TestCertName + `1"
 	certificate 	  = <<EOT
 ` + testCertificate + `
@@ -168,7 +168,7 @@ EOT
 }
 `
 	testAccCheckDataSourceByName = `
-resource ` + ResourceCertificate + ` ` + TestCertName + ` {
+resource ` + CertificateResource + ` ` + TestCertName + ` {
 	name        	  = "` + TestCertName + `1"
 	certificate 	  = <<EOT
 ` + testCertificate + `
@@ -180,12 +180,12 @@ EOT
 ` + privateKey + `
 EOT
 }
-` + DataSource + ` ` + ResourceCertificate + ` ` + TestCertName + ` {
+` + DataSource + ` ` + CertificateResource + ` ` + TestCertName + ` {
 name ="` + TestCertName + `1"
 }
 `
 	testAccCheckDataSourceById = `
-resource ` + ResourceCertificate + ` ` + TestCertName + ` {
+resource ` + CertificateResource + ` ` + TestCertName + ` {
 	name        	  = "` + TestCertName + `1"
 	certificate 	  = <<EOT
 ` + testCertificate + `
@@ -197,12 +197,12 @@ EOT
 ` + privateKey + `
 EOT
 }
-` + DataSource + ` ` + ResourceCertificate + ` ` + TestCertName + ` {
-id =` + ResourceCertificate + `.` + TestCertName + `.id
+` + DataSource + ` ` + CertificateResource + ` ` + TestCertName + ` {
+id =` + CertificateResource + `.` + TestCertName + `.id
 }
 `
 	testAccCheckDataSourceWrongName = `
-resource ` + ResourceCertificate + ` ` + TestCertName + ` {
+resource ` + CertificateResource + ` ` + TestCertName + ` {
 	name        	  = "` + TestCertName + `1"
 	certificate 	  = <<EOT
 ` + testCertificate + `
@@ -214,7 +214,7 @@ EOT
 ` + privateKey + `
 EOT
 }
-` + DataSource + ` ` + ResourceCertificate + ` ` + TestCertName + ` {
+` + DataSource + ` ` + CertificateResource + ` ` + TestCertName + ` {
 name ="should_not_work"
 }
 `

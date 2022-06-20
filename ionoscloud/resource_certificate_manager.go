@@ -103,7 +103,7 @@ func resourceCertificateManagerCreate(ctx context.Context, d *schema.ResourceDat
 		certChain := certificateChain.(string)
 		certificatePostDto.Properties.CertificateChain = &certChain
 	} else {
-		diags := diag.FromErr(fmt.Errorf("certificateChain must be provided for certificate manager"))
+		diags := diag.FromErr(fmt.Errorf("certificateChain must be provided for the certificate"))
 		return diags
 	}
 
@@ -111,7 +111,7 @@ func resourceCertificateManagerCreate(ctx context.Context, d *schema.ResourceDat
 		keyStr := privateKey.(string)
 		certificatePostDto.Properties.PrivateKey = &keyStr
 	} else {
-		diags := diag.FromErr(fmt.Errorf("private key must be provided for certificate manager"))
+		diags := diag.FromErr(fmt.Errorf("private key must be provided for the certificate"))
 		return diags
 	}
 	certificateDto, apiResponse, err := client.CreateCertificate(ctx, certificatePostDto)
@@ -163,7 +163,7 @@ func certReady(ctx context.Context, d *schema.ResourceData, client *cert.Client)
 	backupUnit, apiResponse, err := client.GetCertificate(ctx, d.Id())
 	certManagerLogApiResponse(apiResponse)
 	if err != nil {
-		return true, fmt.Errorf("error checking certificate status: %s", err)
+		return true, fmt.Errorf("error checking certificate status: %w", err)
 	}
 	return *backupUnit.Metadata.State == "AVAILABLE", nil
 }
@@ -226,7 +226,7 @@ func resourceCertificateManagerDelete(ctx context.Context, d *schema.ResourceDat
 		apiResponse, err := client.DeleteCertificate(ctx, d.Id())
 		certManagerLogApiResponse(apiResponse)
 		if err != nil {
-			diags := diag.FromErr(fmt.Errorf("an error occured while deleting an certificate %s %w", d.Id(), err))
+			diags := diag.FromErr(fmt.Errorf("an error occured while deleting the certificate %s %w", d.Id(), err))
 			return diags
 		}
 

@@ -39,9 +39,11 @@ func dataSourceCertificate() *schema.Resource {
 func dataSourceCertificateRead(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	client := meta.(SdkBundle).CertManagerClient
 
-	var name string
+	var name, idStr string
 	id, idOk := d.GetOk("id")
-
+	if idOk {
+		idStr = id.(string)
+	}
 	t, nameOk := d.GetOk("name")
 	if nameOk {
 		name = t.(string)
@@ -56,13 +58,13 @@ func dataSourceCertificateRead(ctx context.Context, d *schema.ResourceData, meta
 	}
 
 	if idOk {
-		certificate, apiResponse, err = client.GetCertificate(ctx, id.(string))
+		certificate, apiResponse, err = client.GetCertificate(ctx, idStr)
 		certManagerLogApiResponse(apiResponse)
 		if err != nil {
-			return diag.FromErr(fmt.Errorf("error getting certificate with id %s %s", id.(string), err))
+			return diag.FromErr(fmt.Errorf("error getting certificate with id %s %w", idStr, err))
 		}
 		if nameOk {
-			if *certificate.Properties.Name != name {
+			if certificate.Properties != nil && certificate.Properties.Name != nil && *certificate.Properties.Name != name {
 				return diag.FromErr(fmt.Errorf("name of cert (UUID=%s, name=%s) does not match expected name: %s",
 					*certificate.Id, *certificate.Properties.Name, name))
 			}
@@ -76,7 +78,7 @@ func dataSourceCertificateRead(ctx context.Context, d *schema.ResourceData, meta
 		certManagerLogApiResponse(apiResponse)
 
 		if err != nil {
-			return diag.FromErr(fmt.Errorf("an error occured while fetching certificates: %s ", err))
+			return diag.FromErr(fmt.Errorf("an error occured while fetching certificates: %w ", err))
 		}
 
 		var results []certmanager.CertificateDto

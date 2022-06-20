@@ -220,7 +220,7 @@ const (
 const ServersDataSource = "ionoscloud_servers"
 
 const (
-	ResourceCertificate = "ionoscloud_certificate"
+	CertificateResource = "ionoscloud_certificate"
 	TestCertName        = "certTest"
 )
 
