@@ -148,28 +148,10 @@ func dataSourceDSaaSReadNodePool(ctx context.Context, d *schema.ResourceData, me
 		}
 	} else {
 		/* search by name */
-		var results []dsaas.NodePoolResponseData
+		results, err := filterNodePools(ctx, d, client, name)
 
-		partialMatch := d.Get("partial_match").(bool)
-
-		log.Printf("[INFO] Using data source for DSaaS Node Pool by name with partial_match %t and name: %s", partialMatch, name)
-
-		nodePools, _, err := client.ListNodePools(ctx, clusterId)
 		if err != nil {
-			diags := diag.FromErr(fmt.Errorf("an error occurred while fetching DSaaS NodePools: %s", err.Error()))
-			return diags
-		}
-		if nodePools.Items != nil && len(*nodePools.Items) > 0 {
-			for _, nodePoolItem := range *nodePools.Items {
-				if nodePoolItem.Properties != nil && (partialMatch && strings.Contains(*nodePoolItem.Properties.Name, name) ||
-					!partialMatch && nodePoolItem.Properties.Name != nil && strings.EqualFold(*nodePoolItem.Properties.Name, name)) {
-					tmpNodePool, _, err := client.GetNodePool(ctx, clusterId, *nodePoolItem.Id)
-					if err != nil {
-						return diag.FromErr(fmt.Errorf("an error occurred while fetching the DSaaS NodePool with ID: %s while searching by full name: %s: %w", *nodePoolItem.Id, name, err))
-					}
-					results = append(results, tmpNodePool)
-				}
-			}
+			return err
 		}
 
 		if results == nil || len(results) == 0 {
@@ -186,4 +168,34 @@ func dataSourceDSaaSReadNodePool(ctx context.Context, d *schema.ResourceData, me
 	}
 
 	return nil
+}
+
+func filterNodePools(ctx context.Context, d *schema.ResourceData, client *dsaasService.Client, name string) ([]dsaas.NodePoolResponseData, diag.Diagnostics) {
+	clusterId := d.Get("cluster_id").(string)
+
+	var results []dsaas.NodePoolResponseData
+
+	partialMatch := d.Get("partial_match").(bool)
+
+	log.Printf("[INFO] Using data source for DSaaS Node Pool by name with partial_match %t and name: %s", partialMatch, name)
+
+	nodePools, _, err := client.ListNodePools(ctx, clusterId)
+	if err != nil {
+		diags := diag.FromErr(fmt.Errorf("an error occurred while fetching DSaaS NodePools: %s", err.Error()))
+		return nil, diags
+	}
+	if nodePools.Items != nil && len(*nodePools.Items) > 0 {
+		for _, nodePoolItem := range *nodePools.Items {
+			if nodePoolItem.Properties != nil && nodePoolItem.Properties.Name != nil && (partialMatch && strings.Contains(*nodePoolItem.Properties.Name, name) ||
+				!partialMatch && strings.EqualFold(*nodePoolItem.Properties.Name, name)) {
+				tmpNodePool, _, err := client.GetNodePool(ctx, clusterId, *nodePoolItem.Id)
+				if err != nil {
+					return nil, diag.FromErr(fmt.Errorf("an error occurred while fetching the DSaaS NodePool with ID: %s while searching by full name: %s: %w", *nodePoolItem.Id, name, err))
+				}
+				results = append(results, tmpNodePool)
+			}
+		}
+	}
+
+	return results, nil
 }

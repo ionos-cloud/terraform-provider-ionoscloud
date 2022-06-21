@@ -4,12 +4,12 @@ layout: "ionoscloud"
 page_title: "IonosCloud: ionoscloud_dsaas_node_pool"
 sidebar_current: "docs-resource-dsaas_node_pool"
 description: |-
-Creates and manages DSaaS Cluster objects.
+Creates and manages DSaaS Node Pool objects.
 ---
 
 # ionoscloud\_pg_cluster
 
-Manages a **DSaaS Cluster**.
+Manages a **DSaaS Node Pool**.
 
 ## Example Usage
 

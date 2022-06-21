@@ -1,15 +1,15 @@
 ---
 subcategory: "Data Stack as a Service"
 layout: "ionoscloud"
-page_title: "IonosCloud : ionoscloud_dsaas_node_pool"
-sidebar_current: "docs-dsaas_node_pool"
+page_title: "IonosCloud : ionoscloud_dsaas_cluster"
+sidebar_current: "docs-dsaas_cluster"
 description: |-
 Get information on a DSaaS Cluster.
 ---
 
 # ionoscloud\_pg_cluster
 
-The **DSaaS Cluster data source** can be used to search for and return an existing DSaaS Cluster.
+The **DSaaS Cluster Data Source** can be used to search for and return an existing DSaaS Cluster.
 If a single match is found, it will be returned. If your search results in multiple matches, an error will be returned.
 When this happens, please refine your search and make sure that your resources have unique names.
 

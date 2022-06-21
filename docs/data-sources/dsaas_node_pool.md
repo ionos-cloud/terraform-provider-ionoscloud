@@ -4,12 +4,12 @@ layout: "ionoscloud"
 page_title: "IonosCloud : ionoscloud_dsaas_node_pool"
 sidebar_current: "docs-dsaas_node_pool"
 description: |-
-Get information on a DSaaS Cluster.
+Get information on a DSaaS Node Pool.
 ---
 
-# ionoscloud\_pg_cluster
+# ionoscloud\_dsaas_node_pool
 
-The **DSaaS Cluster data source** can be used to search for and return an existing DSaaS Cluster.
+The **DSaaS Node Pool Data Source** can be used to search for and return an existing DSaaS Node Pool.
 If a single match is found, it will be returned. If your search results in multiple matches, an error will be returned.
 When this happens, please refine your search and make sure that your resources have unique names.
 

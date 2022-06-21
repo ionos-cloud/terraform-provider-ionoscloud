@@ -2,6 +2,8 @@ package dsaas
 
 import (
 	"context"
+	"fmt"
+	"github.com/google/uuid"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	dsaas "github.com/ionos-cloud/sdk-go-autoscaling"
@@ -284,6 +286,44 @@ func SetDSaaSNodePoolData(d *schema.ResourceData, nodePool dsaas.NodePoolRespons
 	if nodePool.Properties.Annotations != nil {
 		if err := d.Set("annotations", *nodePool.Properties.Annotations); err != nil {
 			return utils.GenerateSetError(nodePoolResourceName, "annotations", err)
+		}
+	}
+	return nil
+}
+
+func SetNodePoolsData(d *schema.ResourceData, results []dsaas.NodePoolResponseData) diag.Diagnostics {
+
+	resourceId := uuid.New()
+	d.SetId(resourceId.String())
+
+	if results != nil {
+		var nodePools []interface{}
+		for _, nodePool := range results {
+
+			nodePoolEntry := make(map[string]interface{})
+
+			utils.SetPropWithNilCheck(nodePoolEntry, "name", nodePool.Properties.Name)
+			utils.SetPropWithNilCheck(nodePoolEntry, "data_platform_version", nodePool.Properties.DataPlatformVersion)
+			utils.SetPropWithNilCheck(nodePoolEntry, "datacenter_id", nodePool.Properties.DatacenterId)
+			utils.SetPropWithNilCheck(nodePoolEntry, "node_count", nodePool.Properties.NodeCount)
+			utils.SetPropWithNilCheck(nodePoolEntry, "cpu_family", nodePool.Properties.CpuFamily)
+			utils.SetPropWithNilCheck(nodePoolEntry, "cores_count", nodePool.Properties.CoresCount)
+			utils.SetPropWithNilCheck(nodePoolEntry, "ram_size", nodePool.Properties.RamSize)
+			utils.SetPropWithNilCheck(nodePoolEntry, "availability_zone", nodePool.Properties.AvailabilityZone)
+			utils.SetPropWithNilCheck(nodePoolEntry, "storage_type", nodePool.Properties.StorageType)
+			utils.SetPropWithNilCheck(nodePoolEntry, "storage_size", nodePool.Properties.StorageSize)
+			utils.SetPropWithNilCheck(nodePoolEntry, "maintenance_window.0.time", nodePool.Properties.MaintenanceWindow.Time)
+			utils.SetPropWithNilCheck(nodePoolEntry, "maintenance_window.0.day_of_the_week", nodePool.Properties.MaintenanceWindow.DayOfTheWeek)
+			utils.SetPropWithNilCheck(nodePoolEntry, "labels", nodePool.Properties.Labels)
+			utils.SetPropWithNilCheck(nodePoolEntry, "annotations", nodePool.Properties.Annotations)
+
+			nodePools = append(nodePools, nodePoolEntry)
+
+		}
+		err := d.Set("node_pools", nodePools)
+		if err != nil {
+			diags := diag.FromErr(fmt.Errorf("error while setting node_pools: %s", err))
+			return diags
 		}
 	}
 	return nil
