@@ -51,15 +51,13 @@ func dataSourceCertificateRead(ctx context.Context, d *schema.ResourceData, meta
 
 	var certificate certmanager.CertificateDto
 	var err error
-	var apiResponse *certmanager.APIResponse
 
 	if !idOk && !nameOk {
 		return diag.FromErr(fmt.Errorf("either id, or name must be set"))
 	}
 
 	if idOk {
-		certificate, apiResponse, err = client.GetCertificate(ctx, idStr)
-		certManagerLogApiResponse(apiResponse)
+		certificate, _, err = client.GetCertificate(ctx, idStr)
 		if err != nil {
 			return diag.FromErr(fmt.Errorf("error getting certificate with id %s %w", idStr, err))
 		}
@@ -74,16 +72,16 @@ func dataSourceCertificateRead(ctx context.Context, d *schema.ResourceData, meta
 		}
 
 	} else {
-		certificates, apiResponse, err := client.ListCertificates(ctx)
-		certManagerLogApiResponse(apiResponse)
+		log.Printf("[INFO] Using data source for certificate with name: %s", name)
 
+		certificates, _, err := client.ListCertificates(ctx)
 		if err != nil {
 			return diag.FromErr(fmt.Errorf("an error occured while fetching certificates: %w ", err))
 		}
 
 		var results []certmanager.CertificateDto
 
-		if nameOk && certificates.Items != nil {
+		if certificates.Items != nil {
 			var certsFound []certmanager.CertificateDto
 			for _, certItem := range *certificates.Items {
 				if certItem.Properties != nil && certItem.Properties.Name != nil && *certItem.Properties.Name == name {

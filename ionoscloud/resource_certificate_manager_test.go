@@ -5,6 +5,7 @@ package ionoscloud
 import (
 	"context"
 	"fmt"
+	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/cert"
 	"regexp"
 	"testing"
 
@@ -126,7 +127,7 @@ func testAccCheckCertificateDestroyCheck(s *terraform.State) error {
 		_, apiResponse, err := client.CertificateApi.GetCertificateByUuid(ctx, rs.Primary.ID).Execute()
 
 		if err != nil {
-			if !certManagerHttpNotFound(apiResponse) {
+			if !cert.HttpNotFound(apiResponse) {
 				return fmt.Errorf("an error occurred while checking for the destruction of certificate %s: %s",
 					rs.Primary.ID, err)
 			}

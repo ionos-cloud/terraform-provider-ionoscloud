@@ -6,8 +6,8 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
-	certmanager "github.com/ionos-cloud/sdk-cert-go"
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/cert"
+	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils"
 	"log"
 	"time"
 )
@@ -79,43 +79,12 @@ func checkCertImmutableFields(_ context.Context, diff *schema.ResourceDiff, _ in
 func resourceCertificateManagerCreate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	client := meta.(SdkBundle).CertManagerClient
 
-	certificatePostDto := certmanager.CertificatePostDto{
-		Properties: &certmanager.CertificatePostPropertiesDto{},
+	certPostDto, err := cert.GetCertPostDto(d)
+	if err != nil {
+		return diag.FromErr(err)
 	}
-
-	if name, nameOk := d.GetOk("name"); nameOk {
-		name := name.(string)
-		certificatePostDto.Properties.Name = &name
-	} else {
-		diags := diag.FromErr(fmt.Errorf("name must be provided for the certificate"))
-		return diags
-	}
-
-	if certField, certOk := d.GetOk("certificate"); certOk {
-		certificate := certField.(string)
-		certificatePostDto.Properties.Certificate = &certificate
-	} else {
-		diags := diag.FromErr(fmt.Errorf("certificate(body) must be provided for the certificate"))
-		return diags
-	}
-
-	if certificateChain, ok := d.GetOk("certificate_chain"); ok {
-		certChain := certificateChain.(string)
-		certificatePostDto.Properties.CertificateChain = &certChain
-	} else {
-		diags := diag.FromErr(fmt.Errorf("certificateChain must be provided for the certificate"))
-		return diags
-	}
-
-	if privateKey, ok := d.GetOk("private_key"); ok {
-		keyStr := privateKey.(string)
-		certificatePostDto.Properties.PrivateKey = &keyStr
-	} else {
-		diags := diag.FromErr(fmt.Errorf("private key must be provided for the certificate"))
-		return diags
-	}
-	certificateDto, apiResponse, err := client.CreateCertificate(ctx, certificatePostDto)
-	certManagerLogApiResponse(apiResponse)
+	certificateDto, apiResponse, err := client.CreateCertificate(ctx, *certPostDto)
+	cert.LogApiResponse(apiResponse)
 	if err != nil {
 		d.SetId("")
 		diags := diag.FromErr(fmt.Errorf("error creating certificate: %w", err))
@@ -124,57 +93,20 @@ func resourceCertificateManagerCreate(ctx context.Context, d *schema.ResourceDat
 
 	d.SetId(*certificateDto.Id)
 
-	diagErr := waitForCertToBeReady(ctx, d, client)
-	if diagErr != nil {
-		return diagErr
+	if err = client.WaitForCertToBeReady(ctx, d); err != nil {
+		return diag.FromErr(err)
 	}
 
 	return resourceCertificateManagerRead(ctx, d, meta)
-}
-
-func waitForCertToBeReady(ctx context.Context, d *schema.ResourceData, client *cert.Client) diag.Diagnostics {
-	for {
-		log.Printf("[INFO] Waiting for certificate %s to be ready...", d.Id())
-
-		certReady, rsErr := certReady(ctx, d, client)
-		if rsErr != nil {
-			diags := diag.FromErr(fmt.Errorf("error while checking readiness status of certificate %s: %w", d.Id(), rsErr))
-			return diags
-		}
-
-		if certReady {
-			log.Printf("[INFO] certificate ready: %s", d.Id())
-			break
-		}
-
-		select {
-		case <-time.After(SleepInterval):
-			log.Printf("[INFO] trying again ...")
-		case <-ctx.Done():
-			diags := diag.FromErr(fmt.Errorf("certificate check timed out! WARNING: your certificate will still probably be created/updated " +
-				"after some time but the terraform state won't reflect that; check your Ionos Cloud account for updates"))
-			return diags
-		}
-	}
-	return nil
-}
-
-func certReady(ctx context.Context, d *schema.ResourceData, client *cert.Client) (bool, error) {
-	backupUnit, apiResponse, err := client.GetCertificate(ctx, d.Id())
-	certManagerLogApiResponse(apiResponse)
-	if err != nil {
-		return true, fmt.Errorf("error checking certificate status: %w", err)
-	}
-	return *backupUnit.Metadata.State == "AVAILABLE", nil
 }
 
 func resourceCertificateManagerRead(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	client := meta.(SdkBundle).CertManagerClient
 
 	certDto, apiResponse, err := client.GetCertificate(ctx, d.Id())
-	certManagerLogApiResponse(apiResponse)
+	cert.LogApiResponse(apiResponse)
 	if err != nil {
-		if certManagerHttpNotFound(apiResponse) {
+		if cert.HttpNotFound(apiResponse) {
 			log.Printf("[INFO] Resource %s not found: %+v", d.Id(), err)
 			d.SetId("")
 			return nil
@@ -193,26 +125,17 @@ func resourceCertificateManagerRead(ctx context.Context, d *schema.ResourceData,
 func resourceCertificateManagerUpdate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	client := meta.(SdkBundle).CertManagerClient
 
-	certificatePatchDto := certmanager.CertificatePatchDto{
-		Properties: &certmanager.CertificatePatchPropertiesDto{},
-	}
+	certPatchDto := cert.GetCertPatchDto(d)
 
-	if d.HasChange("name") {
-		_, v := d.GetChange("name")
-		vStr := v.(string)
-		certificatePatchDto.Properties.Name = &vStr
-	}
-
-	_, apiResponse, err := client.UpdateCertificate(ctx, d.Id(), certificatePatchDto)
-	certManagerLogApiResponse(apiResponse)
+	_, apiResponse, err := client.UpdateCertificate(ctx, d.Id(), *certPatchDto)
+	cert.LogApiResponse(apiResponse)
 	if err != nil {
-		diags := diag.FromErr(fmt.Errorf("an error occured while updating certificate ID %s %w", d.Id(), err))
+		diags := diag.FromErr(fmt.Errorf("an error occured while updating certificate with ID %s, %w", d.Id(), err))
 		return diags
 	}
 
-	diagErr := waitForCertToBeReady(ctx, d, client)
-	if diagErr != nil {
-		return diagErr
+	if err = client.WaitForCertToBeReady(ctx, d); err != nil {
+		return diag.FromErr(err)
 	}
 
 	return resourceCertificateManagerRead(ctx, d, meta)
@@ -222,20 +145,19 @@ func resourceCertificateManagerDelete(ctx context.Context, d *schema.ResourceDat
 	client := meta.(SdkBundle).CertManagerClient
 	deleted := false
 	for deleted != true {
-
 		apiResponse, err := client.DeleteCertificate(ctx, d.Id())
-		certManagerLogApiResponse(apiResponse)
+		cert.LogApiResponse(apiResponse)
 		if err != nil {
 			diags := diag.FromErr(fmt.Errorf("an error occured while deleting the certificate %s %w", d.Id(), err))
 			return diags
 		}
 
-		deleted, err = certDeleted(ctx, d, client)
+		deleted, err = client.IsCertDeleted(ctx, d)
 		if err != nil {
 			return diag.FromErr(err)
 		}
 		select {
-		case <-time.After(SleepInterval):
+		case <-time.After(utils.SleepInterval):
 			log.Printf("[INFO] trying again ...")
 		case <-ctx.Done():
 			diags := diag.FromErr(fmt.Errorf("certificate deletion timed out! WARNING: your certificate (%s) will still probably be deleted after some time "+
@@ -251,27 +173,14 @@ func resourceCertificateManagerDelete(ctx context.Context, d *schema.ResourceDat
 	return nil
 }
 
-func certDeleted(ctx context.Context, d *schema.ResourceData, client *cert.Client) (bool, error) {
-
-	_, apiResponse, err := client.GetCertificate(ctx, d.Id())
-
-	if err != nil {
-		if certManagerHttpNotFound(apiResponse) {
-			return true, nil
-		}
-		return true, fmt.Errorf("error checking certificate deletion status: %w", err)
-	}
-	return false, nil
-}
-
 func resourceCertificateManagerImport(ctx context.Context, d *schema.ResourceData, meta interface{}) ([]*schema.ResourceData, error) {
 	client := meta.(SdkBundle).CertManagerClient
 
 	certId := d.Id()
 	certDto, apiResponse, err := client.GetCertificate(ctx, d.Id())
-	certManagerLogApiResponse(apiResponse)
+	cert.LogApiResponse(apiResponse)
 	if err != nil {
-		if certManagerHttpNotFound(apiResponse) {
+		if cert.HttpNotFound(apiResponse) {
 			d.SetId("")
 			return nil, fmt.Errorf("unable to find cert %q", certId)
 		}

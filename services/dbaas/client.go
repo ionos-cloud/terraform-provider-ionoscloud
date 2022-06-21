@@ -25,8 +25,6 @@ type clientService struct {
 	client *dbaas.APIClient
 }
 
-//var _ ClientService = &clientService{}
-
 func NewClientService(username, password, token, url string) ClientService {
 	newConfigDbaas := dbaas.NewConfiguration(username, password, token, url)
 
