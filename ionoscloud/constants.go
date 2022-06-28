@@ -208,6 +208,10 @@ const (
 	DSaaSNodePoolTestResource         = "test_dsaas_node_pool"
 	DSaaSNodePoolTestDataSourceById   = "test_dsaas_node_pool_id"
 	DSaaSNodePoolTestDataSourceByName = "test_dsaas_node_pool_name"
+	DSaaSNodePoolsDataSource          = "ionoscloud_dsaas_node_pools"
+	DSaaSVersionsDataSource           = "ionoscloud_dsaas_versions"
+	DSaaSNodePoolsTestDataSource      = "test_dsaas_node_pools"
+	DSaaSVersionsTestDataSource       = "test_dsaas_versions"
 )
 
 const (

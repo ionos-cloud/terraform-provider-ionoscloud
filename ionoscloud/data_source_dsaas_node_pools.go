@@ -11,7 +11,7 @@ import (
 	"regexp"
 )
 
-func dataSourceNodePools() *schema.Resource {
+func dataSourceDSaaSNodePools() *schema.Resource {
 	return &schema.Resource{
 		ReadContext: dataSourceNodePoolsRead,
 		Schema: map[string]*schema.Schema{

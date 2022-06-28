@@ -6,6 +6,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
 	dsaas "github.com/ionos-cloud/sdk-go-autoscaling"
+	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils"
 	"regexp"
 	"testing"
 )
@@ -102,6 +103,32 @@ func TestAccDSaaSNodePoolBasic(t *testing.T) {
 			{
 				Config:      testAccDataSourceDSaaSNodePoolWrongPartialNameError,
 				ExpectError: regexp.MustCompile("no DSaaS NodePool found with the specified name"),
+			},
+			{
+				Config: testAccDataSourceDSaaSNodePools,
+				Check: resource.ComposeTestCheckFunc(
+					utils.TestNotEmptySlice(DataSource+"."+DSaaSNodePoolsDataSource+"."+DSaaSNodePoolsTestDataSource, "node_pools.#"),
+				),
+			},
+			{
+				Config: testAccDataSourceDSaaSNodePoolsByName,
+				Check: resource.ComposeTestCheckFunc(
+					utils.TestNotEmptySlice(DataSource+"."+DSaaSNodePoolsDataSource+"."+DSaaSNodePoolsTestDataSource, "node_pools.#"),
+				),
+			},
+			{
+				Config: testAccDataSourceDSaaSNodePoolsByNamePartialMatch,
+				Check: resource.ComposeTestCheckFunc(
+					utils.TestNotEmptySlice(DataSource+"."+DSaaSNodePoolsDataSource+"."+DSaaSNodePoolsTestDataSource, "node_pools.#"),
+				),
+			},
+			{
+				Config:      testAccDataSourceDSaaSNodePoolsByNameError,
+				ExpectError: regexp.MustCompile("no DSaaS NodePool found under cluster"),
+			},
+			{
+				Config:      testAccDataSourceDSaaSNodePoolsByNamePartialMatchError,
+				ExpectError: regexp.MustCompile("no DSaaS NodePool found under cluster"),
 			},
 			{
 				Config: testAccCheckDSaaSNodePoolConfigUpdate,
@@ -308,6 +335,40 @@ data ` + DSaaSNodePoolResource + ` ` + DSaaSNodePoolTestDataSourceByName + ` {
 const testAccDataSourceDSaaSNodePoolWrongPartialNameError = testAccCheckDSaaSNodePoolConfigBasic + `
 data ` + DSaaSNodePoolResource + ` ` + DSaaSNodePoolTestDataSourceByName + ` {
     cluster_id    = ` + DSaaSClusterResource + `.` + DSaaSClusterTestResource + `.id
+	name = "wrong_name"
+	partial_match = true
+}
+`
+const testAccDataSourceDSaaSNodePools = testAccCheckDSaaSNodePoolConfigBasic + `
+data ` + DSaaSNodePoolsDataSource + ` + ` + DSaaSNodePoolsTestDataSource + ` {
+	cluster_id    = ` + DSaaSClusterResource + `.` + DSaaSClusterTestResource + `.id
+}
+`
+
+const testAccDataSourceDSaaSNodePoolsByName = testAccCheckDSaaSNodePoolConfigBasic + `
+data ` + DSaaSNodePoolsDataSource + ` + ` + DSaaSNodePoolsTestDataSource + ` {
+	cluster_id    = ` + DSaaSClusterResource + `.` + DSaaSClusterTestResource + `.id
+	name = "` + DSaaSNodePoolTestResource + `"}
+`
+
+const testAccDataSourceDSaaSNodePoolsByNamePartialMatch = testAccCheckDSaaSNodePoolConfigBasic + `
+data ` + DSaaSNodePoolsDataSource + ` + ` + DSaaSNodePoolsTestDataSource + ` {
+	cluster_id    = ` + DSaaSClusterResource + `.` + DSaaSClusterTestResource + `.id
+	name = "test_"
+    partial_match = true
+}
+`
+
+const testAccDataSourceDSaaSNodePoolsByNameError = testAccCheckDSaaSNodePoolConfigBasic + `
+data ` + DSaaSNodePoolsDataSource + ` + ` + DSaaSNodePoolsTestDataSource + ` {
+	cluster_id    = ` + DSaaSClusterResource + `.` + DSaaSClusterTestResource + `.id
+	name = "wrong_name"
+}
+`
+
+const testAccDataSourceDSaaSNodePoolsByNamePartialMatchError = testAccCheckDSaaSNodePoolConfigBasic + `
+data ` + DSaaSNodePoolsDataSource + ` + ` + DSaaSNodePoolsTestDataSource + ` {
+	cluster_id    = ` + DSaaSClusterResource + `.` + DSaaSClusterTestResource + `.id
 	name = "wrong_name"
 	partial_match = true
 }

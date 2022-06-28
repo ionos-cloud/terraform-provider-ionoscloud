@@ -25,7 +25,7 @@ func (c *Client) GetVersions(ctx context.Context) ([]string, *dsaas.APIResponse,
 func SetVersionsData(d *schema.ResourceData, versions []string) diag.Diagnostics {
 
 	if versions != nil {
-		err := d.Set("postgres_versions", versions)
+		err := d.Set("versions", versions)
 		if err != nil {
 			diags := diag.FromErr(fmt.Errorf("error while setting Data Stack API version: %s", err))
 			return diags

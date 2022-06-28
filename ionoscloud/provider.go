@@ -129,6 +129,8 @@ func Provider() *schema.Provider {
 			TargetGroupResource:                       dataSourceTargetGroup(),
 			DSaaSClusterResource:                      dataSourceDSaaSCluster(),
 			DSaaSNodePoolResource:                     dataSourceDSaaSNodePool(),
+			DSaaSNodePoolsDataSource:                  dataSourceDSaaSNodePools(),
+			DSaaSVersionsDataSource:                   dataSourceDSaaSVersions(),
 		},
 	}
 

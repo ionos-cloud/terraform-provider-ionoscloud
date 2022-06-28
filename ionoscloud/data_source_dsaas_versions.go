@@ -10,7 +10,7 @@ import (
 
 func dataSourceDSaaSVersions() *schema.Resource {
 	return &schema.Resource{
-		ReadContext: dataSourceDDaaSReadVersions,
+		ReadContext: dataSourceDSaaSReadVersions,
 		Schema: map[string]*schema.Schema{
 			"versions": {
 				Type:        schema.TypeList,
@@ -25,7 +25,7 @@ func dataSourceDSaaSVersions() *schema.Resource {
 	}
 }
 
-func dataSourceDDaaSReadVersions(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func dataSourceDSaaSReadVersions(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	client := meta.(SdkBundle).DSaaSClient
 
 	dsaasVersions, _, err := client.GetVersions(ctx)

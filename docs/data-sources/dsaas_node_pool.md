@@ -28,7 +28,7 @@ data "ionoscloud_dsaas_node_pool" "example" {
 ```hcl
 data "ionoscloud_dsaas_node_pool" "example" {
   cluster_id    = <cluster_id>
-  display_name	= "DSaaS_Node_Pool_Example"
+  name      	= "DSaaS_Node_Pool_Example"
 }
 ```
 
@@ -37,7 +37,7 @@ data "ionoscloud_dsaas_node_pool" "example" {
 ```hcl
 data "ionoscloud_dsaas_node_pool" "example" {
   cluster_id    = <cluster_id>
-  display_name	= "_Example"
+  name      	= "_Example"
   partial_match = true
 }
 ```
