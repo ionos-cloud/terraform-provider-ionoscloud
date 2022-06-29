@@ -124,8 +124,45 @@ func resourceDSaaSNodePool() *schema.Resource {
 				ValidateFunc: validation.All(validation.StringMatch(regexp.MustCompile("^[A-Za-z0-9][-A-Za-z0-9_.]*[A-Za-z0-9]$"), "")),
 			},
 		},
-		Timeouts: &resourceDefaultTimeouts,
+		Timeouts:      &resourceDefaultTimeouts,
+		CustomizeDiff: checkDSaaSNodePoolImmutableFields,
 	}
+}
+
+func checkDSaaSNodePoolImmutableFields(_ context.Context, diff *schema.ResourceDiff, _ interface{}) error {
+	if diff.Id() == "" {
+		return nil
+	}
+
+	if diff.HasChange("name") {
+		return fmt.Errorf("name %s", ImmutableError)
+	}
+
+	if diff.HasChange("cpu_family") {
+		return fmt.Errorf("cpu_family %s", ImmutableError)
+	}
+
+	if diff.HasChange("cores_count") {
+		return fmt.Errorf("cores_count %s", ImmutableError)
+	}
+
+	if diff.HasChange("ram_size") {
+		return fmt.Errorf("ram_size %s", ImmutableError)
+	}
+
+	if diff.HasChange("availability_zone") {
+		return fmt.Errorf("availability_zone %s", ImmutableError)
+	}
+
+	if diff.HasChange("storage_size") {
+		return fmt.Errorf("storage_size %s", ImmutableError)
+	}
+
+	if diff.HasChange("storage_type") {
+		return fmt.Errorf("storage_type %s", ImmutableError)
+	}
+
+	return nil
 }
 
 func resourceDSaaSNodePoolCreate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {

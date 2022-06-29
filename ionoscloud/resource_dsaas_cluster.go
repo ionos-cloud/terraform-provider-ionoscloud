@@ -63,8 +63,25 @@ func resourceDSaaSCluster() *schema.Resource {
 				},
 			},
 		},
-		Timeouts: &resourceDefaultTimeouts,
+		CustomizeDiff: checkDSaaSClusterImmutableFields,
+		Timeouts:      &resourceDefaultTimeouts,
 	}
+}
+
+func checkDSaaSClusterImmutableFields(_ context.Context, diff *schema.ResourceDiff, _ interface{}) error {
+	if diff.Id() == "" {
+		return nil
+	}
+
+	if diff.HasChange("maintenance_window") {
+		return fmt.Errorf("maintenance_window %s", ImmutableError)
+	}
+
+	if diff.HasChange("datacenter_id") {
+		return fmt.Errorf("datacenter_id %s", ImmutableError)
+	}
+
+	return nil
 }
 
 func resourceDSaaSClusterCreate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
