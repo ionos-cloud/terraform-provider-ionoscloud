@@ -7,6 +7,7 @@ import (
 	certmanager "github.com/ionos-cloud/sdk-cert-go"
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/cert"
 	"log"
+	"strings"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 )
@@ -62,7 +63,8 @@ func dataSourceCertificateRead(ctx context.Context, d *schema.ResourceData, meta
 			return diag.FromErr(fmt.Errorf("error getting certificate with id %s %w", idStr, err))
 		}
 		if nameOk {
-			if certificate.Properties != nil && certificate.Properties.Name != nil && *certificate.Properties.Name != name {
+			if certificate.Properties != nil && certificate.Properties.Name != nil &&
+				strings.EqualFold(*certificate.Properties.Name, name) {
 				return diag.FromErr(fmt.Errorf("name of cert (UUID=%s, name=%s) does not match expected name: %s",
 					*certificate.Id, *certificate.Properties.Name, name))
 			}

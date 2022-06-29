@@ -65,11 +65,11 @@ func checkCertImmutableFields(_ context.Context, diff *schema.ResourceDiff, _ in
 	}
 
 	if diff.HasChange("certificate_chain") {
-		return fmt.Errorf("certificate %s", ImmutableError)
+		return fmt.Errorf("certificate_chain %s", ImmutableError)
 	}
 
 	if diff.HasChange("private_key") {
-		return fmt.Errorf("certificate %s", ImmutableError)
+		return fmt.Errorf("private_key %s", ImmutableError)
 	}
 
 	return nil
