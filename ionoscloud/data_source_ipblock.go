@@ -149,7 +149,20 @@ func datasourceIpBlockRead(ctx context.Context, data *schema.ResourceData, meta 
 		log.Printf("[INFO] Got ip block [Name=%s, Location=%s]", *ipBlock.Properties.Name, *ipBlock.Properties.Location)
 	} else {
 
-		var results []ionoscloud.IpBlock
+		//var results []ionoscloud.IpBlock
+		ipBlocks, apiResponse, err := client.IPBlocksApi.IpblocksGet(ctx).Depth(1).Execute()
+		logApiRequestTime(apiResponse)
+
+		if err != nil {
+			return diag.FromErr(fmt.Errorf("an error occured while fetching ipBlocks: %s ", err))
+		}
+
+		if ipBlocks.Items == nil {
+			diags := diag.FromErr(fmt.Errorf("no users found"))
+			return diags
+		}
+
+		var results = *ipBlocks.Items
 
 		partialMatch := data.Get("partial_match").(bool)
 
@@ -165,14 +178,14 @@ func datasourceIpBlockRead(ctx context.Context, data *schema.ResourceData, meta 
 
 			results = *ipBlocks.Items
 		} else {
-			ipBlocks, apiResponse, err := client.IPBlocksApi.IpblocksGet(ctx).Depth(1).Execute()
-			logApiRequestTime(apiResponse)
-
-			if err != nil {
-				return diag.FromErr(fmt.Errorf("an error occured while fetching ipBlocks: %s ", err))
-			}
-
-			results = *ipBlocks.Items
+			//ipBlocks, apiResponse, err := client.IPBlocksApi.IpblocksGet(ctx).Depth(1).Execute()
+			//logApiRequestTime(apiResponse)
+			//
+			//if err != nil {
+			//	return diag.FromErr(fmt.Errorf("an error occured while fetching ipBlocks: %s ", err))
+			//}
+			//
+			//results = *ipBlocks.Items
 
 			if nameOk && results != nil {
 				var resultsByName []ionoscloud.IpBlock
@@ -184,9 +197,9 @@ func datasourceIpBlockRead(ctx context.Context, data *schema.ResourceData, meta 
 
 				if resultsByName == nil {
 					return diag.FromErr(fmt.Errorf("no ip block found with the specified criteria: name = %s", name))
-				} else {
-					results = resultsByName
 				}
+				results = resultsByName
+
 			}
 		}
 
@@ -201,9 +214,9 @@ func datasourceIpBlockRead(ctx context.Context, data *schema.ResourceData, meta 
 			}
 			if resultsByLocation == nil {
 				return diag.FromErr(fmt.Errorf("no ip block found with the specified criteria: location = %s", location))
-			} else {
-				results = resultsByLocation
 			}
+			results = resultsByLocation
+
 		}
 
 		if results == nil || len(results) == 0 {

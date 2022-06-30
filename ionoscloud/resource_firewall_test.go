@@ -79,14 +79,22 @@ func TestAccFirewallBasic(t *testing.T) {
 			{
 				Config: testAccDataSourceFirewallMatchType,
 				Check: resource.ComposeTestCheckFunc(
-					resource.TestCheckResourceAttrPair(DataSource+"."+FirewallResource+"."+FirewallDataSourceByType, "name", FirewallResource+"."+FirewallTestResource, "name"),
-					resource.TestCheckResourceAttrPair(DataSource+"."+FirewallResource+"."+FirewallDataSourceByType, "protocol", FirewallResource+"."+FirewallTestResource, "protocol"),
-					resource.TestCheckResourceAttrPair(DataSource+"."+FirewallResource+"."+FirewallDataSourceByType, "source_mac", FirewallResource+"."+FirewallTestResource, "source_mac"),
-					resource.TestCheckResourceAttrPair(DataSource+"."+FirewallResource+"."+FirewallDataSourceByType, "source_ip", FirewallResource+"."+FirewallTestResource, "source_ip"),
-					resource.TestCheckResourceAttrPair(DataSource+"."+FirewallResource+"."+FirewallDataSourceByType, "target_ip", FirewallResource+"."+FirewallTestResource, "target_ip"),
-					resource.TestCheckResourceAttrPair(DataSource+"."+FirewallResource+"."+FirewallDataSourceByType, "icmp_type", FirewallResource+"."+FirewallTestResource, "icmp_type"),
-					resource.TestCheckResourceAttrPair(DataSource+"."+FirewallResource+"."+FirewallDataSourceByType, "icmp_code", FirewallResource+"."+FirewallTestResource, "icmp_code"),
-					resource.TestCheckResourceAttrPair(DataSource+"."+FirewallResource+"."+FirewallDataSourceByType, "type", FirewallResource+"."+FirewallTestResource, "type"),
+					resource.TestCheckResourceAttrPair(DataSource+"."+FirewallResource+"."+FirewallDataSourceByType, "name",
+						FirewallResource+"."+FirewallTestResource, "name"),
+					resource.TestCheckResourceAttrPair(DataSource+"."+FirewallResource+"."+FirewallDataSourceByType, "protocol",
+						FirewallResource+"."+FirewallTestResource, "protocol"),
+					resource.TestCheckResourceAttrPair(DataSource+"."+FirewallResource+"."+FirewallDataSourceByType, "source_mac",
+						FirewallResource+"."+FirewallTestResource, "source_mac"),
+					resource.TestCheckResourceAttrPair(DataSource+"."+FirewallResource+"."+FirewallDataSourceByType, "source_ip",
+						FirewallResource+"."+FirewallTestResource, "source_ip"),
+					resource.TestCheckResourceAttrPair(DataSource+"."+FirewallResource+"."+FirewallDataSourceByType, "target_ip",
+						FirewallResource+"."+FirewallTestResource, "target_ip"),
+					resource.TestCheckResourceAttrPair(DataSource+"."+FirewallResource+"."+FirewallDataSourceByType, "icmp_type",
+						FirewallResource+"."+FirewallTestResource, "icmp_type"),
+					resource.TestCheckResourceAttrPair(DataSource+"."+FirewallResource+"."+FirewallDataSourceByType, "icmp_code",
+						FirewallResource+"."+FirewallTestResource, "icmp_code"),
+					resource.TestCheckResourceAttrPair(DataSource+"."+FirewallResource+"."+FirewallDataSourceByType, "type",
+						FirewallResource+"."+FirewallTestResource, "type"),
 				),
 			},
 			{
@@ -533,7 +541,7 @@ data ` + FirewallResource + ` ` + FirewallDataSourceByType + ` {
   datacenter_id = ` + DatacenterResource + `.` + DatacenterTestResource + `.id
   server_id = ` + ServerResource + `.` + ServerTestResource + `.id
   nic_id = ionoscloud_nic.database_nic.id
-  type = "INGRESS"
+  type = ` + FirewallResource + `.` + FirewallTestResource + `.type
 }
 `
 
@@ -542,7 +550,7 @@ data ` + FirewallResource + ` ` + FirewallDataSourceByProtocol + ` {
   datacenter_id = ` + DatacenterResource + `.` + DatacenterTestResource + `.id
   server_id = ` + ServerResource + `.` + ServerTestResource + `.id
   nic_id = ionoscloud_nic.database_nic.id
-  protocol = "ICMP"
+  protocol = ` + FirewallResource + `.` + FirewallTestResource + `.protocol
 }
 `
 

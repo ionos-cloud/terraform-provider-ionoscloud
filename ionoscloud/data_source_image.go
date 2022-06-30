@@ -14,6 +14,11 @@ func dataSourceImage() *schema.Resource {
 	return &schema.Resource{
 		ReadContext: dataSourceImageRead,
 		Schema: map[string]*schema.Schema{
+			"id": {
+				Type:     schema.TypeString,
+				Computed: true,
+				Optional: true,
+			},
 			"name": {
 				Type:     schema.TypeString,
 				Optional: true,
@@ -104,6 +109,10 @@ func dataSourceImage() *schema.Resource {
 				Default:     false,
 				Optional:    true,
 			},
+			"image_alias": {
+				Type:     schema.TypeString,
+				Optional: true,
+			},
 		},
 		Timeouts: &resourceDefaultTimeouts,
 	}
@@ -124,7 +133,7 @@ func dataSourceImageRead(ctx context.Context, d *schema.ResourceData, meta inter
 	locationValue, locationOk := d.GetOk("location")
 	versionValue, versionOk := d.GetOk("version")
 	cloudInitValue, cloudInitOk := d.GetOk("cloud_init")
-	imageAliaseValue, iamgeAliasesOk := d.GetOk("image_aliases")
+	imageAliasValue, imageAliasOk := d.GetOk("image_alias")
 	idValue, idOk := d.GetOk("id")
 
 	id := idValue.(string)
@@ -133,7 +142,7 @@ func dataSourceImageRead(ctx context.Context, d *schema.ResourceData, meta inter
 	location := locationValue.(string)
 	version := versionValue.(string)
 	cloudInit := cloudInitValue.(string)
-	imageAlias := imageAliaseValue.(string)
+	imageAlias := imageAliasValue.(string)
 
 	var results []ionoscloud.Image
 	var image ionoscloud.Image
@@ -149,6 +158,7 @@ func dataSourceImageRead(ctx context.Context, d *schema.ResourceData, meta inter
 	} else {
 		// if version value is present then concatenate name - version
 		// otherwise search by name or part of the name
+
 		if versionOk && nameOk && version != "" && name != "" {
 			nameVer := fmt.Sprintf("%s-%s", name, version)
 			if images.Items != nil {
@@ -207,13 +217,13 @@ func dataSourceImageRead(ctx context.Context, d *schema.ResourceData, meta inter
 			results = cloudInitResults
 		}
 
-		if iamgeAliasesOk && imageAlias != "" {
+		if imageAliasOk && locationOk && imageAlias != "" && location != "" {
 			var imageAliasResults []ionoscloud.Image
 			for _, img := range results {
 				aliases := *img.Properties.ImageAliases
-				if img.Properties != nil && *img.Properties.ImageAliases != nil { // todo verificarea && *img.Properties.ImageAliases != nil e useless pt ca e * la slice si euy practic verific pointerul
+				if img.Properties != nil && *img.Properties.ImageAliases != nil {
 					for _, alias := range aliases {
-						if strings.EqualFold(alias, imageAlias) {
+						if strings.EqualFold(alias, imageAlias) && strings.EqualFold(*img.Properties.Location, location) {
 							imageAliasResults = append(imageAliasResults, img)
 						}
 					}

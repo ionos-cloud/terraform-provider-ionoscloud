@@ -47,7 +47,7 @@ func dataSourceNetworkLoadBalancer() *schema.Resource {
 			"target_lan": {
 				Type:        schema.TypeInt,
 				Description: "Id of the balanced private target LAN. (outbound)",
-				Computed:    true,
+				Optional:    true,
 			},
 			"lb_private_ips": {
 				Type: schema.TypeList,
@@ -80,12 +80,12 @@ func dataSourceNetworkLoadBalancerRead(ctx context.Context, d *schema.ResourceDa
 
 	id := idValue.(string)
 	name := nameValue.(string)
-	targetLan := targetLanValue.(int32)
+	targetLan := targetLanValue.(int)
 
-	if idOk && nameOk {
+	if idOk && (nameOk || targetLanOk) {
 		return diag.FromErr(errors.New("id and name cannot be both specified in the same time"))
 	}
-	if !idOk && !nameOk {
+	if !idOk && !nameOk && !targetLanOk {
 		return diag.FromErr(errors.New("please provide either the lan id or name"))
 	}
 	var networkLoadBalancer ionoscloud.NetworkLoadBalancer
@@ -102,7 +102,13 @@ func dataSourceNetworkLoadBalancerRead(ctx context.Context, d *schema.ResourceDa
 		}
 	} else {
 		/* search by name */
-		var results []ionoscloud.NetworkLoadBalancer
+		// var results []ionoscloud.NetworkLoadBalancer
+		networkLoadBalancers, apiResponse, err := client.NetworkLoadBalancersApi.DatacentersNetworkloadbalancersGet(ctx, datacenterId).Depth(1).Execute()
+		logApiRequestTime(apiResponse)
+		if err != nil {
+			return diag.FromErr(fmt.Errorf("an error occurred while fetching network loadbalancers: %s", err.Error()))
+		}
+		var results = *networkLoadBalancers.Items
 
 		partialMatch := d.Get("partial_match").(bool)
 
@@ -116,13 +122,14 @@ func dataSourceNetworkLoadBalancerRead(ctx context.Context, d *schema.ResourceDa
 			}
 			results = *networkLoadBalancers.Items
 		} else {
-			networkLoadBalancers, apiResponse, err := client.NetworkLoadBalancersApi.DatacentersNetworkloadbalancersGet(ctx, datacenterId).Depth(1).Execute()
-			logApiRequestTime(apiResponse)
-			if err != nil {
-				return diag.FromErr(fmt.Errorf("an error occurred while fetching network loadbalancers: %s", err.Error()))
-			}
+			//networkLoadBalancers, apiResponse, err := client.NetworkLoadBalancersApi.DatacentersNetworkloadbalancersGet(ctx, datacenterId).Depth(1).Execute()
+			//logApiRequestTime(apiResponse)
+			//if err != nil {
+			//	return diag.FromErr(fmt.Errorf("an error occurred while fetching network loadbalancers: %s", err.Error()))
+			//}
 
-			if networkLoadBalancers.Items != nil {
+			if networkLoadBalancers.Items != nil && nameOk {
+				var resultsByName []ionoscloud.NetworkLoadBalancer
 				for _, nlb := range *networkLoadBalancers.Items {
 					if nlb.Properties != nil && nlb.Properties.Name != nil && strings.EqualFold(*nlb.Properties.Name, name) {
 						tmpNetworkLoadBalancer, apiResponse, err := client.NetworkLoadBalancersApi.DatacentersNetworkloadbalancersFindByNetworkLoadBalancerId(ctx, datacenterId, *nlb.Id).Execute()
@@ -130,18 +137,28 @@ func dataSourceNetworkLoadBalancerRead(ctx context.Context, d *schema.ResourceDa
 						if err != nil {
 							return diag.FromErr(fmt.Errorf("an error occurred while fetching network loadbalancer with ID %s: %s", *nlb.Id, err.Error()))
 						}
-						results = append(results, tmpNetworkLoadBalancer)
+						// results = append(results, tmpNetworkLoadBalancer)
+						resultsByName = append(resultsByName, tmpNetworkLoadBalancer)
 					}
 				}
+				if resultsByName == nil {
+					return diag.FromErr(fmt.Errorf("no network load balancer found with the specified criteria: name = %s", name))
+				}
+				results = resultsByName
 			}
 		}
 
 		if targetLanOk && targetLan != 0 {
 			var targetLanResults []ionoscloud.NetworkLoadBalancer
-			for _, networkLoadBalancer := range results {
-				if networkLoadBalancer.Properties != nil && networkLoadBalancer.Properties.TargetLan != nil && *networkLoadBalancer.Properties.TargetLan == targetLan {
-					targetLanResults = append(targetLanResults, networkLoadBalancer)
+			if results != nil {
+				for _, networkLoadBalancer := range results {
+					if networkLoadBalancer.Properties != nil && networkLoadBalancer.Properties.TargetLan != nil && int(*networkLoadBalancer.Properties.TargetLan) == targetLan {
+						targetLanResults = append(targetLanResults, networkLoadBalancer)
+					}
 				}
+			}
+			if targetLanResults == nil {
+				return diag.FromErr(fmt.Errorf("no network load balancer found with the specified criteria: target_lan = %d", targetLan))
 			}
 			results = targetLanResults
 		}

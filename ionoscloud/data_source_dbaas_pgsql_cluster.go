@@ -158,6 +158,11 @@ func dataSourceDbaasPgSqlCluster() *schema.Resource {
 					},
 				},
 			},
+			"datacenter_name": {
+				Type:        schema.TypeString,
+				Description: "The physical location where the cluster will be created. This will be where all of your instances live. Property cannot be modified after datacenter creation (disallowed in update requests)",
+				Optional:    true,
+			},
 		},
 		Timeouts: &resourceDefaultTimeouts,
 	}
@@ -170,7 +175,7 @@ func dataSourceDbaasPgSqlReadCluster(ctx context.Context, d *schema.ResourceData
 	idValue, idOk := d.GetOk("id")
 	nameValue, nameOk := d.GetOk("display_name")
 	locationValue, locationOk := d.GetOk("location")
-	dcNameValue, dcNameOk := d.GetOk("") // todo vezi care e datacenter name
+	dcNameValue, dcNameOk := d.GetOk("datacenter_name")
 	pgVersionValue, pgVersionOk := d.GetOk("postgres_version")
 
 	id := idValue.(string)
@@ -179,11 +184,11 @@ func dataSourceDbaasPgSqlReadCluster(ctx context.Context, d *schema.ResourceData
 	dcName := dcNameValue.(string)
 	pgVersion := pgVersionValue.(string)
 
-	if idOk && nameOk {
+	if idOk && (nameOk || locationOk || dcNameOk || pgVersionOk) {
 		diags := diag.FromErr(errors.New("id and display_name cannot be both specified in the same time"))
 		return diags
 	}
-	if !idOk && !nameOk {
+	if !idOk && !nameOk && !locationOk && !dcNameOk && !pgVersionOk {
 		diags := diag.FromErr(errors.New("please provide either the dbaas cluster id or display_name"))
 		return diags
 	}
@@ -201,7 +206,13 @@ func dataSourceDbaasPgSqlReadCluster(ctx context.Context, d *schema.ResourceData
 			return diags
 		}
 	} else {
-		var results []dbaas.ClusterResponse
+		//var results []dbaas.ClusterResponse
+		clusters, _, err := client.ListClusters(ctx, "")
+		if err != nil {
+			diags := diag.FromErr(fmt.Errorf("an error occurred while fetching dbaas clusters: %s", err.Error()))
+			return diags
+		}
+		var results = *clusters.Items
 
 		partialMatch := d.Get("partial_match").(bool)
 
@@ -215,17 +226,19 @@ func dataSourceDbaasPgSqlReadCluster(ctx context.Context, d *schema.ResourceData
 			}
 			results = *clusters.Items
 		} else {
-			clusters, _, err := client.ListClusters(ctx, "")
-			if err != nil {
-				diags := diag.FromErr(fmt.Errorf("an error occurred while fetching dbaas clusters: %s", err.Error()))
-				return diags
-			}
-			if clusters.Items != nil && len(*clusters.Items) > 0 {
+			//clusters, _, err := client.ListClusters(ctx, "")
+			//if err != nil {
+			//	diags := diag.FromErr(fmt.Errorf("an error occurred while fetching dbaas clusters: %s", err.Error()))
+			//	return diags
+			//}
+			if clusters.Items != nil && len(*clusters.Items) > 0 && nameOk {
+				var nameResults []dbaas.ClusterResponse
 				for _, clusterItem := range *clusters.Items {
 					if clusterItem.Properties != nil && clusterItem.Properties.DisplayName != nil && strings.EqualFold(*clusterItem.Properties.DisplayName, name) {
-						results = append(results, clusterItem)
+						nameResults = append(nameResults, clusterItem)
 					}
 				}
+				results = nameResults
 			}
 		}
 

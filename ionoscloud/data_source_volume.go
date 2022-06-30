@@ -171,6 +171,12 @@ func dataSourceVolumeRead(ctx context.Context, d *schema.ResourceData, meta inte
 		var results []ionoscloud.Volume
 		var diags diag.Diagnostics
 
+		//volumeItems, diags := getVolumes(ctx, client, datacenterId, serverId, "")
+		//if diags != nil {
+		//	return diags
+		//}
+		//results = volumeItems
+
 		partialMatch := d.Get("partial_match").(bool)
 
 		log.Printf("[INFO] Using data source for volume by name with partial_match %t and name: %s", partialMatch, name)
@@ -181,25 +187,33 @@ func dataSourceVolumeRead(ctx context.Context, d *schema.ResourceData, meta inte
 				return diags
 			}
 		} else {
-			var volumeItems []ionoscloud.Volume
-			volumeItems, diags = getVolumes(ctx, client, datacenterId, serverId, "")
+			//var volumeItems []ionoscloud.Volume
+			//volumeItems, diags = getVolumes(ctx, client, datacenterId, serverId, "")
+			//if diags != nil {
+			//	return diags
+			//}
+
+			volumeItems, diags := getVolumes(ctx, client, datacenterId, serverId, "")
 			if diags != nil {
 				return diags
 			}
+			results = volumeItems
 
-			if volumeItems != nil {
+			if volumeItems != nil && nameOk {
+				var nameResults []ionoscloud.Volume
 				for _, v := range volumeItems {
 					if v.Properties != nil && v.Properties.Name != nil && strings.EqualFold(*v.Properties.Name, name) {
 						/* volume found */
-						volume, apiResponse, err = client.VolumesApi.DatacentersVolumesFindById(ctx, datacenterId, *v.Id).Execute()
-						logApiRequestTime(apiResponse)
-						if err != nil {
-							diags := diag.FromErr(fmt.Errorf("an error occurred while fetching volume %s: %w", *v.Id, err))
-							return diags
-						}
-						results = append(results, volume)
+						//volume, apiResponse, err = client.VolumesApi.DatacentersVolumesFindById(ctx, datacenterId, *v.Id).Execute()
+						//logApiRequestTime(apiResponse)
+						//if err != nil {
+						//	diags := diag.FromErr(fmt.Errorf("an error occurred while fetching volume %s: %w", *v.Id, err))
+						//	return diags
+						//}
+						nameResults = append(nameResults, v) // volume in place of v
 					}
 				}
+				results = nameResults
 			}
 		}
 
@@ -222,7 +236,7 @@ func dataSourceVolumeRead(ctx context.Context, d *schema.ResourceData, meta inte
 func getVolumes(ctx context.Context, client *ionoscloud.APIClient, datacenterId, serverId, name string) ([]ionoscloud.Volume, diag.Diagnostics) {
 	var results []ionoscloud.Volume
 	if serverId != "" {
-		request := client.ServersApi.DatacentersServersVolumesGet(ctx, datacenterId, serverId)
+		request := client.ServersApi.DatacentersServersVolumesGet(ctx, datacenterId, serverId).Depth(2)
 		if name != "" {
 			request = request.Filter("name", name)
 		}

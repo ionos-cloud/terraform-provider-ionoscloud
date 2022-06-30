@@ -90,7 +90,7 @@ const (
 	NatGatewayTestResource         = "test_nat_gateway"
 	NatGatewayDataSourceById       = "test_nat_gateway_id"
 	NatGatewayDataSourceByName     = "test_nat_gateway_name"
-	NatGatewayDataSourceByProtocol = "TCP"
+	NatGatewayDataSourceByProtocol = "test_nat_gateway_protocol"
 	NatGatewayRuleResource         = "ionoscloud_natgateway_rule"
 	NatGatewayRuleTestResource     = "test_nat_gateway"
 	NatGatewayRuleDataSourceById   = "test_nat_gateway_id"

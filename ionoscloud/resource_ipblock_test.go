@@ -39,7 +39,8 @@ func TestAccIPBlockBasic(t *testing.T) {
 					resource.TestCheckResourceAttr(fullIpBlockResourceName, "name", IpBlockTestResource),
 					resource.TestCheckResourceAttr(fullIpBlockResourceName, "size", "1"),
 				),
-			}, {
+			},
+			{
 				Config: testAccDataSourceIpBlockMatchId,
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttrPair(dataSourceIpBlockNameById, "name", fullIpBlockResourceName, "name"),
@@ -47,6 +48,16 @@ func TestAccIPBlockBasic(t *testing.T) {
 					resource.TestCheckResourceAttrPair(dataSourceIpBlockNameById, "size", fullIpBlockResourceName, "size"),
 					resource.TestCheckResourceAttrPair(dataSourceIpBlockNameById, "ips", fullIpBlockResourceName, "ips"),
 					resource.TestCheckResourceAttrPair(dataSourceIpBlockNameById, "ip_consumers", fullIpBlockResourceName, "ip_consumers"),
+				),
+			},
+			{
+				Config: testAccDataSourceIpBlockMatchingLocation,
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttrPair(dataSourceIpBlockNameMatchName, "name", fullIpBlockResourceName, "name"),
+					resource.TestCheckResourceAttrPair(dataSourceIpBlockNameMatchName, "location", fullIpBlockResourceName, "location"),
+					resource.TestCheckResourceAttrPair(dataSourceIpBlockNameMatchName, "size", fullIpBlockResourceName, "size"),
+					resource.TestCheckResourceAttrPair(dataSourceIpBlockNameMatchName, "ips", fullIpBlockResourceName, "ips"),
+					resource.TestCheckResourceAttrPair(dataSourceIpBlockNameMatchName, "ip_consumers", fullIpBlockResourceName, "ip_consumers"),
 				),
 			},
 			{
@@ -209,6 +220,11 @@ data ` + IpBlockResource + `  ` + IpBlockDataSourceById + ` {
 	id = ` + fullIpBlockResourceName + `.id 
 }
 `
+
+const testAccDataSourceIpBlockMatchingLocation = testAccCheckIPBlockConfigBasic + `
+data ` + IpBlockResource + ` ` + IpBlockDataSourceByName + ` {
+	location = ` + fullIpBlockResourceName + `.location 
+}`
 
 const testAccDataSourceIpBlockMatching = testAccCheckIPBlockConfigBasic + `
 data ` + IpBlockResource + ` ` + IpBlockDataSourceMatching + ` { 

@@ -56,11 +56,11 @@ func TestAccDataSourceTemplate(t *testing.T) {
 			{
 				Config: testAccDataSourceTemplateId,
 				Check: resource.ComposeTestCheckFunc(
-					resource.TestCheckResourceAttr(templateName, "id", "71dfd1ce-f2b1-4fd6-9871-3e477cedbb94"),
-					resource.TestCheckResourceAttr(templateName, "name", "CUBES M"),
-					resource.TestCheckResourceAttr(templateName, "cores", "2"),
-					resource.TestCheckResourceAttr(templateName, "ram", "4096"),
-					resource.TestCheckResourceAttr(templateName, "storage_size", "80"),
+					resource.TestCheckResourceAttr(templateName, "id", "5ae1bfbd-05f2-47f5-a736-eaca3dcce41b"),
+					resource.TestCheckResourceAttr(templateName, "name", "CUBES S"),
+					resource.TestCheckResourceAttr(templateName, "cores", "1"),
+					resource.TestCheckResourceAttr(templateName, "ram", "2048"),
+					resource.TestCheckResourceAttr(templateName, "storage_size", "50"),
 				),
 			},
 			{
@@ -106,7 +106,11 @@ data ` + TemplateResource + ` ` + TemplateTestResource + ` {
 
 const testAccDataSourceTemplateId = `
 data ` + TemplateResource + ` ` + TemplateTestResource + ` {
-	id = "71dfd1ce-f2b1-4fd6-9871-3e477cedbb94"
+	id = "5ae1bfbd-05f2-47f5-a736-eaca3dcce41b"
+	name		 = "CUBES S"
+	cores		 = 1
+	ram			 = 2048
+	storage_size = 50
 }`
 
 const testAccDataSourceTemplateStorageWrongNameError = `

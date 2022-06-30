@@ -38,12 +38,12 @@ func dataSourceNetworkLoadBalancerForwardingRule() *schema.Resource {
 			"protocol": {
 				Type:        schema.TypeString,
 				Description: "Protocol of the balancing.",
-				Computed:    true,
+				Optional:    true,
 			},
 			"listener_ip": {
 				Type:        schema.TypeString,
 				Description: "Listening IP. (inbound)",
-				Computed:    true,
+				Optional:    true,
 			},
 			"listener_port": {
 				Type:        schema.TypeInt,
@@ -166,10 +166,10 @@ func dataSourceNetworkLoadBalancerForwardingRuleRead(ctx context.Context, d *sch
 	protocol := protocolValue.(string)
 	listenerIp := listenerIpValue.(string)
 
-	if idOk && nameOk {
+	if idOk && (nameOk || protocolOk || listenerIpOk) {
 		return diag.FromErr(errors.New("id and name cannot be both specified in the same time"))
 	}
-	if !idOk && !nameOk {
+	if !idOk && !nameOk && !protocolOk && !listenerIpOk {
 		return diag.FromErr(errors.New("please provide either the lan id or name"))
 	}
 	var networkLoadBalancerForwardingRule ionoscloud.NetworkLoadBalancerForwardingRule
@@ -186,11 +186,18 @@ func dataSourceNetworkLoadBalancerForwardingRuleRead(ctx context.Context, d *sch
 		}
 	} else {
 		/* search by name */
-		var results []ionoscloud.NetworkLoadBalancerForwardingRule
+		//var results []ionoscloud.NetworkLoadBalancerForwardingRule
 
 		partialMatch := d.Get("partial_match").(bool)
 
 		log.Printf("[INFO] Using data source for network loadbalancers forwarding rule by name with partial_match %t and name: %s", partialMatch, name)
+
+		networkLoadBalancerForwardingRules, apiResponse, err := client.NetworkLoadBalancersApi.DatacentersNetworkloadbalancersForwardingrulesGet(ctx, datacenterId, networkloadbalancerId).Depth(1).Execute()
+		logApiRequestTime(apiResponse)
+		if err != nil {
+			return diag.FromErr(fmt.Errorf("an error occurred while fetching network loadbalancers forwarding rules: %s", err.Error()))
+		}
+		var results = *networkLoadBalancerForwardingRules.Items
 
 		if partialMatch {
 			networkLoadBalancerForwardingRules, apiResponse, err := client.NetworkLoadBalancersApi.DatacentersNetworkloadbalancersForwardingrulesGet(ctx, datacenterId, networkloadbalancerId).Depth(1).Filter("name", name).Execute()
@@ -200,44 +207,67 @@ func dataSourceNetworkLoadBalancerForwardingRuleRead(ctx context.Context, d *sch
 			}
 			results = *networkLoadBalancerForwardingRules.Items
 		} else {
-			networkLoadBalancerForwardingRules, apiResponse, err := client.NetworkLoadBalancersApi.DatacentersNetworkloadbalancersForwardingrulesGet(ctx, datacenterId, networkloadbalancerId).Depth(1).Execute()
-			logApiRequestTime(apiResponse)
-			if err != nil {
-				return diag.FromErr(fmt.Errorf("an error occurred while fetching network loadbalancers forwarding rules: %s", err.Error()))
-			}
+			//networkLoadBalancerForwardingRules, apiResponse, err := client.NetworkLoadBalancersApi.DatacentersNetworkloadbalancersForwardingrulesGet(ctx, datacenterId, networkloadbalancerId).Depth(1).Execute()
+			//logApiRequestTime(apiResponse)
+			//if err != nil {
+			//	return diag.FromErr(fmt.Errorf("an error occurred while fetching network loadbalancers forwarding rules: %s", err.Error()))
+			//}
 
-			if networkLoadBalancerForwardingRules.Items != nil {
-				for _, nlbfr := range *networkLoadBalancerForwardingRules.Items {
+			if results != nil && nameOk { // aici pot schimba networkLoadBalancerForwardingRules.Items cu results
+				var nameResults []ionoscloud.NetworkLoadBalancerForwardingRule
+				for _, nlbfr := range results { // aici pot schimba networkLoadBalancerForwardingRules.Items cu results
 					if nlbfr.Properties != nil && nlbfr.Properties.Name != nil && strings.EqualFold(*nlbfr.Properties.Name, name) {
-						tmpNetworkLoadBalancerForwardingRule, apiResponse, err := client.NetworkLoadBalancersApi.DatacentersNetworkloadbalancersForwardingrulesFindByForwardingRuleId(ctx, datacenterId, networkloadbalancerId, *nlbfr.Id).Depth(1).Execute()
+						tmpNetworkLoadBalancerForwardingRule, apiResponse, err := client.NetworkLoadBalancersApi.
+							DatacentersNetworkloadbalancersForwardingrulesFindByForwardingRuleId(ctx, datacenterId, networkloadbalancerId, *nlbfr.Id).Depth(1).Execute()
 						logApiRequestTime(apiResponse)
 						if err != nil {
 							return diag.FromErr(fmt.Errorf("an error occurred while fetching network loadbalancer forwarding rule with ID %s: %s", *nlbfr.Id, err.Error()))
 						}
-						results = append(results, tmpNetworkLoadBalancerForwardingRule)
+						nameResults = append(nameResults, tmpNetworkLoadBalancerForwardingRule)
 					}
 				}
+				results = nameResults
 			}
 		}
 
 		if protocolOk && protocol != "" {
 			var protocolResults []ionoscloud.NetworkLoadBalancerForwardingRule
-			for _, nlbFwRule := range results {
-				if nlbFwRule.Properties != nil && nlbFwRule.Properties.Protocol != nil && strings.EqualFold(*nlbFwRule.Properties.Protocol, protocol) {
-					protocolResults = append(protocolResults, nlbFwRule)
+			if results != nil {
+				for _, nlbFwRule := range results {
+					if nlbFwRule.Properties != nil && nlbFwRule.Properties.Protocol != nil && strings.EqualFold(*nlbFwRule.Properties.Protocol, protocol) {
+						tmpNetworkLoadBalancerForwardingRule, apiResponse, err := client.NetworkLoadBalancersApi.
+							DatacentersNetworkloadbalancersForwardingrulesFindByForwardingRuleId(ctx, datacenterId, networkloadbalancerId, *nlbFwRule.Id).Depth(1).Execute()
+						logApiRequestTime(apiResponse)
+						if err != nil {
+							return diag.FromErr(fmt.Errorf("an error occurred while fetching network loadbalancer forwarding rule with ID %s: %s", *nlbFwRule.Id, err.Error()))
+						}
+						protocolResults = append(protocolResults, tmpNetworkLoadBalancerForwardingRule)
+					}
 				}
-
+			}
+			if protocolResults == nil {
+				return diag.FromErr(fmt.Errorf("no network load balancer forwarding rule found with the specified criteria: protocol = %s", protocol))
 			}
 			results = protocolResults
 		}
 
 		if listenerIpOk && listenerIp != "" {
 			var listenerIpResults []ionoscloud.NetworkLoadBalancerForwardingRule
-			for _, nlbFwRule := range results {
-				if nlbFwRule.Properties != nil && nlbFwRule.Properties.ListenerIp != nil && strings.EqualFold(*nlbFwRule.Properties.ListenerIp, listenerIp) {
-					listenerIpResults = append(listenerIpResults, nlbFwRule)
+			if results != nil {
+				for _, nlbFwRule := range results {
+					if nlbFwRule.Properties != nil && nlbFwRule.Properties.ListenerIp != nil && strings.EqualFold(*nlbFwRule.Properties.ListenerIp, listenerIp) {
+						//tmpNetworkLoadBalancerForwardingRule, apiResponse, err := client.NetworkLoadBalancersApi.
+						//	DatacentersNetworkloadbalancersForwardingrulesFindByForwardingRuleId(ctx, datacenterId, networkloadbalancerId, *nlbFwRule.Id).Depth(1).Execute()
+						//logApiRequestTime(apiResponse)
+						//if err != nil {
+						//	return diag.FromErr(fmt.Errorf("an error occurred while fetching network loadbalancer forwarding rule with ID %s: %s", *nlbFwRule.Id, err.Error()))
+						//}
+						listenerIpResults = append(listenerIpResults, nlbFwRule)
+					}
 				}
-
+			}
+			if listenerIpResults == nil {
+				return diag.FromErr(fmt.Errorf("no network load balancer forwarding rule found with the specified criteria: listener_ip = %s", listenerIp))
 			}
 			results = listenerIpResults
 		}

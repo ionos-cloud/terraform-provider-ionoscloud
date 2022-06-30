@@ -47,7 +47,7 @@ func dataSourceSnapshot() *schema.Resource {
 			},
 			"licence_type": {
 				Type:        schema.TypeString,
-				Computed:    true,
+				Optional:    true,
 				Description: "OS type of this Snapshot",
 			},
 			"sec_auth_protection": {
@@ -115,10 +115,10 @@ func dataSourceSnapshotRead(ctx context.Context, d *schema.ResourceData, meta in
 	size := float32(sizeValue.(int))
 	licenceType := licenceTypeValue.(string)
 
-	if idOk && nameOk {
+	if idOk && (nameOk || locationOk || sizeOk || licenceTypeOk) {
 		return diag.FromErr(errors.New("id and name cannot be both specified in the same time"))
 	}
-	if !idOk && !nameOk {
+	if !idOk && !nameOk && !locationOk && !sizeOk && !licenceTypeOk {
 		return diag.FromErr(errors.New("please provide either the server id or name"))
 	}
 
@@ -135,7 +135,7 @@ func dataSourceSnapshotRead(ctx context.Context, d *schema.ResourceData, meta in
 			return diags
 		}
 	} else {
-		var results []ionoscloud.Snapshot
+		// var results []ionoscloud.Snapshot
 
 		request := client.SnapshotsApi.SnapshotsGet(ctx).Depth(1)
 
@@ -145,6 +145,7 @@ func dataSourceSnapshotRead(ctx context.Context, d *schema.ResourceData, meta in
 
 		if nameOk && partialMatch {
 			request = request.Filter("name", name)
+			log.Printf("SNAPSHOT NAMEOK = %t AND SNAPSOT PATIAL NAME = %t", nameOk, partialMatch)
 		}
 
 		snapshots, apiResponse, err := request.Execute()
@@ -155,15 +156,20 @@ func dataSourceSnapshotRead(ctx context.Context, d *schema.ResourceData, meta in
 			return diags
 		}
 
-		if partialMatch {
-			results = *snapshots.Items
-		} else {
-			if nameOk && snapshots.Items != nil {
-				for _, snp := range *snapshots.Items {
+		var results = *snapshots.Items
+
+		//if partialMatch { // nu cred ca mai e nevoie de if/ else
+		//	results = *snapshots.Items
+		//}
+		if !partialMatch {
+			if nameOk && snapshots.Items != nil { // in loc de snapshots.Items pun results
+				var nameResults []ionoscloud.Snapshot
+				for _, snp := range *snapshots.Items { // in loc de snapshots.Items pun results
 					if snp.Properties != nil && snp.Properties.Name != nil && strings.EqualFold(*snp.Properties.Name, name) {
-						results = append(results, snp)
+						nameResults = append(nameResults, snp)
 					}
 				}
+				results = nameResults
 			}
 		}
 
@@ -191,11 +197,15 @@ func dataSourceSnapshotRead(ctx context.Context, d *schema.ResourceData, meta in
 
 		if licenceTypeOk {
 			var licenceTypeResults []ionoscloud.Snapshot
-			for _, snp := range results {
-				if snp.Properties != nil && snp.Properties.LicenceType != nil && strings.EqualFold(*snp.Properties.LicenceType, licenceType) {
-					licenceTypeResults = append(licenceTypeResults, snp)
+			if results != nil {
+				for _, snp := range results {
+					if snp.Properties != nil && snp.Properties.LicenceType != nil && strings.EqualFold(*snp.Properties.LicenceType, licenceType) {
+						licenceTypeResults = append(licenceTypeResults, snp)
+					}
 				}
-
+			}
+			if licenceTypeResults == nil {
+				return diag.FromErr(fmt.Errorf("no snapshot found with the specified criteria: licence_type = %s", licenceType))
 			}
 			results = licenceTypeResults
 		}

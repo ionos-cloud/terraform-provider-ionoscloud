@@ -296,7 +296,7 @@ data ` + NetworkLoadBalancerResource + ` ` + NetworkLoadBalancerDataSourceByName
 const testAccDataSourceNetworkLoadBalancerMatchTargetLan = testAccCheckNetworkLoadBalancerConfigBasic + `
 data ` + NetworkLoadBalancerResource + ` ` + NetworkLoadBalancerDataSourceByName + ` {
   datacenter_id = ` + NetworkLoadBalancerResource + `.` + NetworkLoadBalancerTestResource + `.datacenter_id
-  name			= ` + NetworkLoadBalancerResource + `.` + NetworkLoadBalancerTestResource + `.name
+  target_lan			= ` + NetworkLoadBalancerResource + `.` + NetworkLoadBalancerTestResource + `.target_lan
 }
 `
 

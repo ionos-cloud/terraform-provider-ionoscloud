@@ -100,7 +100,8 @@ func TestAccSnapshotBasic(t *testing.T) {
 					resource.TestCheckResourceAttrPair(DataSource+"."+SnapshotResource+"."+SnapshotDataSourceByLicenceType, "location", SnapshotResource+"."+SnapshotTestResource, "location"),
 					resource.TestCheckResourceAttrPair(DataSource+"."+SnapshotResource+"."+SnapshotDataSourceByLicenceType, "size", SnapshotResource+"."+SnapshotTestResource, "size"),
 					resource.TestCheckResourceAttrPair(DataSource+"."+SnapshotResource+"."+SnapshotDataSourceByLicenceType, "description", SnapshotResource+"."+SnapshotTestResource, "description"),
-					resource.TestCheckResourceAttrPair(DataSource+"."+SnapshotResource+"."+SnapshotDataSourceByLicenceType, "licence_type", SnapshotResource+"."+SnapshotTestResource, "licence_type"),
+					resource.TestCheckResourceAttrPair(DataSource+"."+SnapshotResource+"."+SnapshotDataSourceByLicenceType, "licence_type",
+						SnapshotResource+"."+SnapshotTestResource, "licence_type"),
 					resource.TestCheckResourceAttrPair(DataSource+"."+SnapshotResource+"."+SnapshotDataSourceByLicenceType, "sec_auth_protection", SnapshotResource+"."+SnapshotTestResource, "sec_auth_protection"),
 					resource.TestCheckResourceAttrPair(DataSource+"."+SnapshotResource+"."+SnapshotDataSourceByLicenceType, "cpu_hot_plug", SnapshotResource+"."+SnapshotTestResource, "cpu_hot_plug"),
 					resource.TestCheckResourceAttrPair(DataSource+"."+SnapshotResource+"."+SnapshotDataSourceByLicenceType, "cpu_hot_unplug", SnapshotResource+"."+SnapshotTestResource, "cpu_hot_unplug"),
@@ -230,7 +231,7 @@ data ` + SnapshotResource + ` ` + SnapshotDataSourceByName + ` {
 }`
 
 const testAccDataSourceSnapshotMatchingLicenceType = testAccCheckSnapshotConfigBasic + `
-data ` + SnapshotResource + ` ` + SnapshotDataSourceByName + ` {
+data ` + SnapshotResource + ` ` + SnapshotDataSourceByLicenceType + ` {
     licence_type = ` + SnapshotResource + `.` + SnapshotTestResource + `.licence_type
     location = ` + SnapshotResource + `.` + SnapshotTestResource + `.location
     size = ` + SnapshotResource + `.` + SnapshotTestResource + `.size
