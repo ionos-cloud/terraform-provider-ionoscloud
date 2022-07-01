@@ -1,0 +1,1146 @@
+openapi: 3.0.3
+info:
+  version: 0.0.6
+  title: IONOS Cloud - Managed Data Stack Solution API
+  description: |
+    The Managed Data Stack Solution by IONOS Cloud provides a preconfigured Kubernetes cluster
+    with pre-installed and managed Stackable operators. After the provision of these Stackable operators,
+    the customer can interact with them directly
+    and build his desired application on top of the Stackable Platform.
+    
+    The Managed Data Stack Solution by IONOS Cloud can be configured through the IONOS Cloud API
+    in addition or as an alternative to the "Data Center Designer" (DCD).
+    
+    ## Getting Started
+    
+    To get your DataPlatformCluster up and running, the following steps needs to be performed.
+    
+    ### IONOS Cloud Account
+    
+    The first step is the creation of a IONOS Cloud account if not already existing.
+    
+    To register a **new account** visit [cloud.ionos.com](https://cloud.ionos.com/compute/signup).
+    
+    ### Virtual Datacenter (VDC)
+    
+    The Managed Data Stack needs a virtual datacenter (VDC) hosting the cluster.
+    This could either be a VDC that already exists, especially if you want to connect the managed DataPlatform
+    to other services already running within your VDC. Otherwise, if you want to place the Managed Data Stack in
+    a new VDC or you have not yet created a VDC, you need to do so.
+    
+    A new VDC can be created via the IONOS Cloud API, the IONOS-CLI or the DCD Web interface.
+    For more information, see the [official documentation](https://docs.ionos.com/cloud/getting-started/tutorials/data-center-basics)
+    
+    ### Get a authentication token
+    
+    To interact with this API a user specific authentication token is needed.
+    This token can be generated using the IONOS-CLI the following way:
+    
+    ```
+    ionosctl token generate
+    ```
+    
+    For more information [see](https://docs.ionos.com/cli-ionosctl/subcommands/authentication/token-generate)
+    
+    ### Create a new DataPlatformCluster
+    
+    Before using the managed Stackable solution, a new DataPlatformCluster must be created.
+    
+    To create a cluster, use the [Create DataPlatformCluster](paths./clusters.post) API endpoint.
+    
+    The provisioning of the cluster might take some time. To check the current provisioning status,
+    you can query the cluster by calling the [Get Endpoint](#/DataPlatformCluster/getCluster) with the cluster ID
+    that was presented to you in the response of the create cluster call.
+    
+    ### Add a DataPlatformNodePool
+    
+    To deploy and run a Stackable service, the cluster must have enough computational resources. The node pool
+    that is provisioned along with the cluster is reserved for the Stackable operators.
+    You may create further node pools with resources tailored to your use-case.
+    
+    To create a new node pool use the [Create DataPlatformNodepool](paths./clusters/{clusterId}/nodepools.post)
+    endpoint.
+    
+    ### Receive Kubeconfig
+    
+    Once the DataPlatformCluster is created, the kubeconfig can be accessed by the API.
+    The kubeconfig allows the interaction with the provided cluster as with any regular Kubernetes cluster.
+    
+    The kubeconfig can be downloaded with the [Get Kubeconfig](paths./clusters/{clusterId}/kubeconfig.get) endpoint
+    using the cluster ID of the created DataPlatformCluster.
+    
+    ### Create Stackable Service
+    
+    To create the desired application, the Stackable service needs to be provided,
+    using the received kubeconfig and
+    [deploy a Stackable service](https://docs.stackable.tech/home/getting_started.html#_deploying_stackable_services)
+    
+    ## Authorization
+    
+    All endpoints are secured, so only an authenticated user can access them.
+    As Authentication mechanism the default IONOS Cloud authentication mechanism
+    is used. A detailed description can be found [here](https://api.ionos.com/docs/authentication/).
+    
+    ### Basic-Auth
+    
+    The basic auth scheme uses the IONOS Cloud user credentials in form of a Basic Authentication Header
+    accordingly to [RFC7617](https://datatracker.ietf.org/doc/html/rfc7617)
+    
+    ### API-Key as Bearer Token
+    
+    The Bearer auth token used at the API-Gateway is a user related token created with the IONOS-CLI.
+    (See the [documentation](https://docs.ionos.com/cli-ionosctl/subcommands/authentication/token-generate) for details)
+    For every request to be authenticated, the token is passed as 'Authorization Bearer' header along with the request.
+
+    ### Permissions and access roles
+    
+    Currently, an admin can see and manipulate all resources in a contract.
+    A normal authenticated user can only see and manipulate resources he created.
+    
+    
+    ## Components
+    
+    The Managed Data Stack Solution by IONOS Cloud consists of two components.
+    The concept of a DataPlatformClusters and the backing DataPlatformNodePools the cluster is build on.
+    
+    ### DataPlatformCluster
+    
+    A DataPlatformCluster is the virtual instance of the customer services and operations running the managed Services like Stackable operators.
+    A DataPlatformCluster is a Kubernetes Cluster in the VDC of the customer.
+    Therefore, it's possible to integrate the cluster with other resources as vLANs e.G.
+    to shape the datacenter in the customer's need and integrate the cluster within the topology the customer wants to build.
+
+    In addition to the Kubernetes cluster a small node pool is provided which is exclusively used to run the Stackable operators.
+    
+    ### DataPlatformNodePool
+    
+    A DataPlatformNodePool represents the physical machines a DataPlatformCluster is build on top.
+    All nodes within a node pool are identical in setup.
+    The nodes of a pool are provisioned into virtual data centers at a location of your choice
+    and you can freely specify the properties of all the nodes at once before creation.
+
+    Nodes in node pools provisioned by the Managed Data Stack Solution Cloud API are readonly in the customer's VDC
+    and can only be modified or deleted via the API.
+    
+    ### References
+
+  contact:
+    url: https://ionos.com
+    name: IONOS Cloud
+
+externalDocs:
+  url: https://api.ionos.com/docs/cloud
+  description: IONOS Cloud - API documentation
+
+servers:
+  - url: https://api.ionos.com/dataplatform/v1
+    description: IONOS Cloud Dataplatform API
+
+security:
+  - tokenAuth: [ ]
+  - basicAuth: [ ]
+
+tags:
+  - name: DataPlatformCluster
+    description: |
+      IONOS Cloud allows to quickly deploy a DataPlatformCluster that runs the needed Stackable
+      operators to build a Managed Data Stack or a tailored business intelligence solution.
+      
+      The following request allows to interact with the already created clusters or creates new clusters
+      with in your virtual data center.
+
+  - name: DataPlatformNodePool
+    description: |
+      Node pools are the resources that powers the DataPlatformCluster.
+      
+      The following requests allows to alter the existing resources, add or remove new resources to the cluster.
+
+  - name: DataPlatformMetaData
+    description: Metadata about the API such as supported versions
+paths:
+  # ------------------------------- DataPlatformCluster ------------------------------------------------------------------
+  /clusters:
+    get:
+      operationId: getClusters
+      summary: List DataPlatformCluster
+      description: |
+        List all available DataPlatformCluster that can be accessed by the user.
+        
+        The user might filter the request for the name of the DataPlatformCluster.
+        If no cluster is available matching the request, the list will be empty.
+      tags:
+        - DataPlatformCluster
+      parameters:
+        - $ref: '#/components/parameters/name'
+      responses:
+        "200":
+          $ref: '#/components/responses/ClusterList'
+        "400":
+          $ref: '#/components/responses/BadRequest'
+        "401":
+          $ref: '#/components/responses/Unauthorized'
+        "403":
+          $ref: '#/components/responses/NotAllowed'
+        "500":
+          $ref: '#/components/responses/InternalError'
+    post:
+      operationId: createCluster
+      summary: Create a DataPlatformCluster
+      description: |
+        Creates a new DataPlatformCluster.
+        
+        The cluster will be provisioned in the datacenter matching the provided `datacenterID`.
+        Therefore the datacenter must be created upfront and must be accessible by the user issuing the request.
+        
+        To create a new virtual datacenter (VDC) [see](https://api.ionos.com/docs/cloud/v6/#Data-centers-post-datacenters).
+      tags:
+        - DataPlatformCluster
+      requestBody:
+        $ref: '#/components/requestBodies/CreateClusterRequestBody'
+      responses:
+        "200":
+          $ref: '#/components/responses/Cluster'
+
+        "400":
+          $ref: '#/components/responses/BadRequest'
+        "401":
+          $ref: '#/components/responses/Unauthorized'
+        "403":
+          $ref: '#/components/responses/NotAllowed'
+        "500":
+          $ref: '#/components/responses/InternalError'
+
+  /clusters/{clusterId}:
+    parameters:
+      - $ref: '#/components/parameters/clusterId'
+    get:
+      operationId: getCluster
+      summary: Retrieve a DataPlatformCluster
+      description: |
+        Retrieve the specified DataPlatformCluster by its distinct ID.
+        
+        The cluster ID can be found in the response when a cluster is created
+        or when you GET a list of all DataPlatformClusters.
+      tags:
+        - DataPlatformCluster
+      responses:
+        "200":
+          $ref: '#/components/responses/Cluster'
+
+        "400":
+          $ref: '#/components/responses/BadRequest'
+        "401":
+          $ref: '#/components/responses/Unauthorized'
+        "403":
+          $ref: '#/components/responses/NotAllowed'
+        "404":
+          $ref: '#/components/responses/NotFound'
+        "500":
+          $ref: '#/components/responses/InternalError'
+
+    patch:
+      operationId: patchCluster
+      summary: Partially modify a DataPlatformCluster
+      description: |
+        Modifies the specified DataPlatformCluster by its distinct cluster ID.
+        The fields in the request body are applied to the cluster.
+        Note that the application to the cluster itself is performed asynchronously.
+        You can check the sync state by querying the cluster with the GET method.
+        
+        The ID can be found in the response when a cluster is created
+        or when you GET a list of all DataPlatformClusters.
+      tags:
+        - DataPlatformCluster
+      requestBody:
+        $ref: '#/components/requestBodies/PatchClusterRequestBody'
+      responses:
+        "200":
+          $ref: '#/components/responses/Cluster'
+
+        "400":
+          $ref: '#/components/responses/BadRequest'
+        "401":
+          $ref: '#/components/responses/Unauthorized'
+        "403":
+          $ref: '#/components/responses/NotAllowed'
+        "404":
+          $ref: '#/components/responses/NotFound'
+        "500":
+          $ref: '#/components/responses/InternalError'
+
+    delete:
+      operationId: deleteCluster
+      summary: Delete DataPlatformCluster
+      description: |
+        Deletes the specified DataPlatformCluster by its distinct cluster ID.
+        
+        The ID can be found in the response when a cluster is created
+        or when you GET a list of all DataPlatformClusters.
+      tags:
+        - DataPlatformCluster
+      responses:
+        "200":
+          $ref: '#/components/responses/Cluster'
+
+        "400":
+          $ref: '#/components/responses/BadRequest'
+        "401":
+          $ref: '#/components/responses/Unauthorized'
+        "403":
+          $ref: '#/components/responses/NotAllowed'
+        "404":
+          $ref: '#/components/responses/NotFound'
+        "500":
+          $ref: '#/components/responses/InternalError'
+
+  /clusters/{clusterId}/kubeconfig:
+    get:
+      operationId: getClusterKubeconfig
+      summary: Read the kubeconfig
+      description: |
+        Retrieves the Kubernetes configuration file (kubeconfig)
+        for the specified DataPlatformCluster by its cluster ID.
+        
+        The ID can be found in the response when a cluster is created
+        or when you GET a list of all DataPlatformClusters.
+      tags:
+        - DataPlatformCluster
+      parameters:
+        - $ref: '#/components/parameters/clusterId'
+      responses:
+        "200":
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                type: string
+        "400":
+          $ref: '#/components/responses/BadRequest'
+        "401":
+          $ref: '#/components/responses/Unauthorized'
+        "403":
+          $ref: '#/components/responses/NotAllowed'
+        "404":
+          $ref: '#/components/responses/NotFound'
+        "500":
+          $ref: '#/components/responses/InternalError'
+
+
+  # ------------------------------- DataPlatformNodePools --------------------------------------------------------------------
+
+  /clusters/{clusterId}/nodepools:
+    parameters:
+      - $ref: '#/components/parameters/clusterId'
+    get:
+      operationId: getClusterNodepools
+      summary: List the DataPlatformNodePools of a  DataPlatformCluster
+      description: |
+        List all node pools assigned to the specified DataplatformCluster by its ID.
+        
+        The cluster ID can be found in the response when a cluster is created
+        or when you GET a list of all DataPlatformClusters.
+      tags:
+        - DataPlatformNodePool
+      responses:
+        "200":
+          $ref: '#/components/responses/NodePoolList'
+
+        "400":
+          $ref: '#/components/responses/BadRequest'
+        "401":
+          $ref: '#/components/responses/Unauthorized'
+        "403":
+          $ref: '#/components/responses/NotAllowed'
+        "404":
+          $ref: '#/components/responses/NotFound'
+        "500":
+          $ref: '#/components/responses/InternalError'
+
+    post:
+      operationId: createClusterNodepool
+      summary: Create a DataPlatformNodePool for a distinct DataPlatformCluster
+      description: |
+        Creates a new node pool and assignes the node pool resources exclusively to the defined managed cluster.
+        
+        The cluster ID can be found in the response when a cluster is created
+        or when you GET a list of all DataPlatformClusters.
+      tags:
+        - DataPlatformNodePool
+      requestBody:
+        $ref: '#/components/requestBodies/CreateNodePoolRequestBody'
+      responses:
+        "200":
+          $ref: '#/components/responses/NodePool'
+
+        "400":
+          $ref: '#/components/responses/BadRequest'
+        "401":
+          $ref: '#/components/responses/Unauthorized'
+        "403":
+          $ref: '#/components/responses/NotAllowed'
+        "404":
+          $ref: '#/components/responses/NotFound'
+        "500":
+          $ref: '#/components/responses/InternalError'
+
+  /clusters/{clusterId}/nodepools/{nodepoolId}:
+    parameters:
+      - $ref: '#/components/parameters/clusterId'
+      - $ref: '#/components/parameters/nodepoolId'
+    get:
+      operationId: getClusterNodepool
+      summary: Retrieve a DataPlatformNodePool
+      description: |
+        Retrieve a node pool belonging to a Kubernetes cluster running Stackable by using its ID.
+        
+        The cluster ID can be found in the response when a cluster is created
+        or when you GET a list of all DataPlatformClusters.
+        
+        The node pool ID can be found in the response when a node pool is created
+        or when you GET a list of all node pools assigned to a specific DataPlatformCluster.
+      tags:
+        - DataPlatformNodePool
+      responses:
+        "200":
+          $ref: '#/components/responses/NodePool'
+
+        "400":
+          $ref: '#/components/responses/BadRequest'
+        "401":
+          $ref: '#/components/responses/Unauthorized'
+        "403":
+          $ref: '#/components/responses/NotAllowed'
+        "404":
+          $ref: '#/components/responses/NotFound'
+        "500":
+          $ref: '#/components/responses/InternalError'
+
+    patch:
+      operationId: patchClusterNodepool
+      summary: Partially modify a DataPlatformNodePool
+      description: |
+        Modifies the specified node pool of a DataPlatformCluster.
+        Update selected attributes of a node pool belonging to a Kubernetes cluster running Stackable.
+        
+        The fields in the request body are applied to the cluster.
+        Note that the application to the node pool  itself is performed asynchronously.
+        You can check the sync state by querying the node pool with the GET method.
+        
+        The cluster ID can be found in the response when a cluster is created
+        or when you GET a list of all DataPlatformClusters.
+        
+        The node pool ID can be found in the response when a node pool is created
+        or when you GET a list of all node pools assigned to a specific DataPlatformCluster.
+      tags:
+        - DataPlatformNodePool
+      requestBody:
+        $ref: '#/components/requestBodies/PatchNodePoolRequestBody'
+      responses:
+        "200":
+          $ref: '#/components/responses/NodePool'
+
+        "400":
+          $ref: '#/components/responses/BadRequest'
+        "401":
+          $ref: '#/components/responses/Unauthorized'
+        "403":
+          $ref: '#/components/responses/NotAllowed'
+        "404":
+          $ref: '#/components/responses/NotFound'
+        "500":
+          $ref: '#/components/responses/InternalError'
+
+    delete:
+      operationId: deleteClusterNodepool
+      summary: Remove node pool from DataPlatformCluster.
+      description: |
+        Removes the specified node pool from the specified DataPlatformCluster and deletes the node pool afterwards.
+        
+        The cluster ID can be found in the response when a cluster is created
+        or when you GET a list of all DataPlatformClusters.
+        
+        The node pool ID can be found in the response when a node pool is created
+        or when you GET a list of all node pools assigned to a specific DataPlatformCluster.
+      tags:
+        - DataPlatformNodePool
+      responses:
+        "200":
+          $ref: '#/components/responses/NodePool'
+
+        "400":
+          $ref: '#/components/responses/BadRequest'
+        "401":
+          $ref: '#/components/responses/Unauthorized'
+        "403":
+          $ref: '#/components/responses/NotAllowed'
+        "404":
+          $ref: '#/components/responses/NotFound'
+        "500":
+          $ref: '#/components/responses/InternalError'
+
+  # --------------- DataPlatformCluster Metadata   ---------------
+  /versions:
+    get:
+      tags:
+        - DataPlatformMetaData
+      summary: Managed Data Stack API version
+      description: Retrieves all available versions of the Managed Data Stack Solution.
+      responses:
+        "200":
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/DataPlatformVersion'
+        "400":
+          $ref: '#/components/responses/BadRequest'
+        "401":
+          $ref: '#/components/responses/Unauthorized'
+        "403":
+          $ref: '#/components/responses/NotAllowed'
+        "500":
+          $ref: '#/components/responses/InternalError'
+
+
+components:
+  requestBodies:
+    CreateClusterRequestBody:
+      description: |
+        Request payload with the properties that defines a new DataPlatformCluster
+        and the credentials to interact with the PaaS API to create it.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/CreateClusterRequest'
+      required: true
+    PatchClusterRequestBody:
+      description: |
+        Request payload with the properties that shall be applied to an existing DataPlatformCluster.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/PatchClusterRequest'
+      required: true
+    CreateNodePoolRequestBody:
+      description: |
+        Request payload with the properties that defines a DataPlatformNodePool.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/CreateNodePoolRequest'
+      required: true
+    PatchNodePoolRequestBody:
+      description: |
+        Request payload with the properties that shall be applied to an existing DataPlatformNodePool.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/PatchNodePoolRequest'
+      required: true
+  responses:
+    BadRequest:
+      description: |
+        ### Bad Request
+        
+        The request send to the API was malformed.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+    Unauthorized:
+      description: |
+        ### Unauthorized
+        
+        The request is missing authorization information or the authorization information provided are expired.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+    NotAllowed:
+      description: |
+        ### Not Allowed
+        
+        The user issuing the request does not have the needed permissions.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+    NotFound:
+      description: |
+        ### Not Found
+        
+        The resource that was requested could not be found.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+    InternalError:
+      description: |
+        ### Internal Server Error
+
+        An internal error occured. We appologize for the inconvenience!
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+
+    Cluster:
+      description: |
+        The DataPlatformCluster as stored after the create or update operation was applied
+        or the DataPlatformCluster properties before the delete operation was performed.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ClusterResponseData'
+      headers:
+        ETag:
+          $ref: '#/components/headers/ETag'
+    NodePool:
+      description: |
+        The DataPlatformCluster node pool as stored after the create or update operation was applied
+        or the DataPlatformCluster node pool properties before the delete operation was performed.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/NodePoolResponseData'
+      headers:
+        ETag:
+          $ref: '#/components/headers/ETag'
+    ClusterList:
+      description: |
+        List of DataPlatformClusters the user can access
+        and that fits the filter if the filter parameter was used.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ClusterListResponseData'
+    NodePoolList:
+      description: |
+        List of all node pools assigned to a specific DataPlatformCluster
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/NodePoolListResponseData'
+
+  parameters:
+    name:
+      name: name
+      in: query
+      required: false
+      schema:
+        type: string
+        pattern: '^[-A-Za-z0-9_.]*$'
+        maxLength: 63
+      description: |
+        Response filter to list only the clusters which include the specified name.
+        The value is case insensitive and matched on the `name` property of the cluster.
+        The input is limited to 63 characters with alphanumeric character ([a-z0-9A-Z])
+        dashes (-), underscores (_), dots (.), and alphanumerics allowed.
+    clusterId:
+      description: |
+        The unique ID of the cluster. The input is limited to 63 characters and must begin and end with an alphanumeric character ([a-z0-9A-Z])
+        with dashes (-), underscores (_), dots (.), and alphanumerics between.
+      in: path
+      name: clusterId
+      required: true
+      schema:
+        type: string
+        format: uuid
+        # Uses the name validation, aka. no proper UUID validation due to a lot of tests depending on IDs like 'foo'.
+        # By limiting the max length and allowed chars a similar effect is reached while maintaining backwards compatibility
+        pattern: '^[A-Za-z0-9][-A-Za-z0-9_.]*[A-Za-z0-9]$'
+        maxLength: 36
+    nodepoolId:
+      description: |
+        The unique ID of the node pool.  The input is limited to 63 characters and must begin and end with an alphanumeric character ([a-z0-9A-Z])
+        with dashes (-), underscores (_), dots (.), and alphanumerics between.
+      in: path
+      name: nodepoolId
+      required: true
+      schema:
+        type: string
+        format: uuid
+        # Uses the name validation, aka. no proper UUID validation due to a lot of tests depending on IDs like 'foo'.
+        # By limiting the max length and allowed chars a similar effect is reached while maintaining backwards compatibility
+        pattern: '^[A-Za-z0-9][-A-Za-z0-9_.]*[A-Za-z0-9]$'
+        maxLength: 36
+
+  headers:
+    ETag:
+      description: |
+        The [RFC7232](https://datatracker.ietf.org/doc/html/rfc7232#section-2.3)
+        ETag header field in a response provides the current entity-
+        tag for the selected resource. An entity-tag is an opaque identifier for
+        different versions of a resource over time, regardless whether multiple
+        versions are valid at the same time. An entity-tag consists of an opaque
+        quoted string, possibly prefixed by a weakness indicator.
+      example: "7da7a728-f910-11e6-942a-68f728c1ba70"
+      schema:
+        type: string
+
+
+  schemas:
+    ClusterName:
+      type: string
+      description: |
+        The name of your cluster.
+        Must be 63 characters or less and must be empty or begin and end with an alphanumeric character ([a-z0-9A-Z])
+        with dashes (-), underscores (_), dots (.), and alphanumerics between.
+      pattern: '^[A-Za-z0-9][-A-Za-z0-9_.]*[A-Za-z0-9]$'
+      maxLength: 63
+      example: my-cluster
+    NodePoolName:
+      type: string
+      description: |
+        The name of your node pool.
+        Must be 63 characters or less and must be empty or begin and end with an alphanumeric character ([a-z0-9A-Z])
+        with dashes (-), underscores (_), dots (.), and alphanumerics between.
+      pattern: '^[A-Za-z0-9][-A-Za-z0-9_.]*[A-Za-z0-9]$'
+      maxLength: 63
+      example: my-node-pool
+# https://stackoverflow.com/questions/50204588/how-to-define-uuid-property-in-json-schema-and-open-api-oas#comment117275745_50204629
+    DatacenterId:
+      type: string
+      format: uuid
+      pattern: '^[0-9a-f]{8}-?[0-9a-f]{4}-?[0-9a-f]{4}-?[0-9a-f]{4}-?[0-9a-f]{12}$'
+      minLength: 32
+      maxLength: 36
+      description: |
+        The UUID of the virtual data center (VDC) the cluster is provisioned.
+
+    ErrorResponse:
+      type: object
+      additionalProperties: false
+      properties:
+        httpStatus:
+          type: integer
+          description: |
+            HTTP status code of the operation as specified
+            by [RFC 7231](https://datatracker.ietf.org/doc/html/rfc7231#section-6)
+          example: 400
+        messages:
+          type: array
+          items:
+            $ref: '#/components/schemas/ErrorMessage'
+    ErrorMessage:
+      type: object
+      additionalProperties: false
+      properties:
+        errorCode:
+          type: string
+          description: |
+            internal error code
+          example: dsaas-err-api-4711
+        message:
+          type: string
+          description: |
+            A human readable explanation of the problem.
+          example: example error message
+
+    ResourceId:
+      type: string
+      format: uuid
+      pattern: '^[0-9a-f]{8}-?[0-9a-f]{4}-?[0-9a-f]{4}-?[0-9a-f]{4}-?[0-9a-f]{12}$'
+      minLength: 32
+      maxLength: 36
+      description: |
+        The unique ID of the resource. Must conform to the UUID format.
+    DataPlatformVersion:
+      type: string
+      pattern: '^[-A-Za-z0-9_.]*$'
+      maxLength: 32
+      description: |
+        The version of the DataPlatform.
+      example: 1.0.0
+    NodeCount:
+      type: integer
+      description: |
+        The number of nodes that make up the node pool.
+      example: 2
+      minimum: 1
+    CpuFamily:
+      type: string
+      pattern: '^[-A-Za-z0-9_.]*$'
+      maxLength: 32
+      description: |
+        A valid CPU family name or `AUTO` if the platform shall choose the best fitting option.
+        Available CPU architectures can be retrieved from the datacenter resource.
+      example: AUTO
+      default: AUTO
+    CoresCount:
+      type: integer
+      description: |
+        The number of CPU cores per node.
+      example: 4
+      default: 4
+      minimum: 1
+    RamSize:
+      type: integer
+      description:
+        The RAM size for one node in MB. Must be set in multiples of 1024 MB, with a minimum size is of 2048 MB.
+      example: 4096
+      default: 4096
+      multipleOf: 1024
+      minimum: 2048
+    StorageType:
+      description: |
+        The type of hardware for the volume.
+      type: string
+      enum:
+        - HDD
+        - SSD
+      example: SSD
+      default: SSD
+    StorageSize:
+      type: integer
+      description: The size of the volume in GB. The size must be greater than 10GB.
+      example: 20
+      default: 20
+      minimum: 10
+    AvailabilityZone:
+      type: string
+      enum:
+        - AUTO
+        - ZONE_1
+        - ZONE_2
+      description: |
+        The availability zone of the virtual datacenter region where the node pool resources should be provisioned.
+      default: AUTO
+    Labels:
+      type: object
+      description: |
+        Key-value pairs attached to the node pool resource as [Kubernetes labels](https://kubernetes.io/docs/concepts/overview/working-with-objects/labels/)
+      example:
+        foo: bar
+    Annotations:
+      type: object
+      description: |
+        Key-value pairs attached to node pool resource as [Kubernetes annotations](https://kubernetes.io/docs/concepts/overview/working-with-objects/annotations/)
+      example:
+        foo: bar
+    MaintenanceWindow:
+      description: Starting time of a weekly 4 hour-long window, during which maintenance might occur in hh:mm:ss format
+      type: object
+      additionalProperties: false
+      properties:
+        time:
+          type: string
+          example: "16:30:59"
+          description: Time at which the maintenance should start. Must conform to the 'HH:MM:SS' 24-hour format.
+          # This pattern matches the "HH:MM:SS 24-hour format with leading 0" format. For more information take a look at:
+          # https://stackoverflow.com/questions/7536755/regular-expression-for-matching-hhmm-time-format
+          pattern:  '^(?:[01]\d|2[0-3]):(?:[0-5]\d):(?:[0-5]\d)$'
+        dayOfTheWeek:
+          type: string
+          enum:
+            - Monday
+            - Tuesday
+            - Wednesday
+            - Thursday
+            - Friday
+            - Saturday
+            - Sunday
+          example: Monday
+      required:
+        - time
+        - dayOfTheWeek
+    CreateClusterRequest:
+      description: Data to create a new DataPlatformCluster
+      type: object
+      additionalProperties: false
+      properties:
+        properties:
+          $ref: '#/components/schemas/CreateClusterProperties'
+    PatchClusterRequest:
+      description: Data to update selected properties of a DataPlatformCluster
+      type: object
+      additionalProperties: false
+      properties:
+        properties:
+          $ref: '#/components/schema/PatchClusterProperties'
+    CreateNodePoolRequest:
+      description: Data to create a new node pool for a DataPlatformNodePool
+      type: object
+      additionalProperties: false
+      properties:
+        properties:
+          $ref: '#/components/schema/CreateNodePoolProperties'
+    PatchNodePoolRequest:
+      description: Data to update selected properties of a node pool for a DataPlatformNodePool.
+      type: object
+      additionalProperties: false
+      properties:
+        properties:
+          $ref: '#/components/schema/PatchNodePoolProperties'
+    Metadata:
+      description: Metadata of the resource
+      type: object
+      additionalProperties: false
+      properties:
+        ETag:
+          type: string
+          description: The Entity Tag of the resource as defined in http://www.w3.org/Protocols/rfc2616/rfc2616-sec3.html#sec3.11
+          example: 123aaa5d587dcd0d58f767d464abcdef
+        createdDate:
+          type: string
+          format: date-time
+          description: The time the resource was created, ISO 8601 timestamp (UTC).
+          example: "2020-12-10T13:37:50Z"
+        createdBy:
+          type: string
+          description: The user that created the resource
+          example: john.doe@example.com
+        createdByUserId:
+          type: string
+          description: The ID of the user that created the resource
+          example: 12345693-9ae1-40c5-9b49-7c0afeabcdef
+        createdInContractNumber:
+          type: string
+          description: The creators contractNumber
+          example: 12315812
+        lastModifiedDate:
+          type: string
+          format: date-time
+          description: The last time the resource was modified, ISO 8601 timestamp (UTC).
+          example: "2020-12-11T13:37:50Z"
+        lastModifiedBy:
+          type: string
+          description: The user that last modified the resource
+          example: jane.doe@example.com
+        lastModifiedByUserId:
+          type: string
+          description: The ID of the user that last modified the resource
+          example: 98765493-9ae1-40c5-9b49-7c0afefedcba
+        state:
+          type: string
+          description: |
+            State of the resource.
+            *AVAILABLE* There are no pending modification requests for this item;
+            *BUSY* There is at least one modification request pending and all following requests will be queued;
+            *DEPLOYING* Resource state DEPLOYING - the resource is being created;
+            *FAILED* Resource state FAILED - creation of the resource failed;
+            *UPDATING* Resource state UPDATING - the resource is being updated;
+            *FAILED_UPDATING* Resource state FAILED_UPDATING - an update to the resource was not successful;
+            *DESTROYING* Resource state DESTROYING - the resource is being deleted;
+            *FAILED_DESTROYING* Resource state FAILED_DESTROYING - deletion of the resource was not successful;
+            *TERMINATED* Resource state TERMINATED - the resource was deleted.
+          enum:
+            - AVAILABLE
+            - BUSY
+            - DEPLOYING
+            - FAILED
+            - UPDATING
+            - FAILED_UPDATING
+            - DESTROYING
+            - FAILED_DESTROYING
+            - TERMINATED
+          example: AVAILABLE
+    CreateClusterProperties:
+      additionalProperties: false
+      required:
+        - name
+        - datacenterId
+      properties:
+        name:
+          $ref: '#/components/schemas/ClusterName'
+        dataPlatformVersion:
+          $ref: '#/components/schemas/DataPlatformVersion'
+        datacenterId:
+          $ref: '#/components/schemas/DatacenterId'
+        maintenanceWindow:
+          $ref: '#/components/schemas/MaintenanceWindow'
+    PatchClusterProperties:
+      additionalProperties: false
+      properties:
+        name:
+          $ref: '#/components/schemas/ClusterName'
+        dataPlatformVersion:
+          $ref: '#/components/schemas/DataPlatformVersion'
+        maintenanceWindow:
+          $ref: '#/components/schemas/MaintenanceWindow'
+    CreateNodePoolProperties:
+      additionalProperties: false
+      required:
+        - name
+        - nodeCount
+      properties:
+        name:
+          $ref: '#/components/schemas/NodePoolName'
+        nodeCount:
+          $ref: '#/components/schemas/NodeCount'
+        cpuFamily:
+          $ref: '#/components/schemas/CpuFamily'
+        coresCount:
+          $ref: '#/components/schemas/CoresCount'
+        ramSize:
+          $ref: '#/components/schemas/RamSize'
+        availabilityZone:
+          $ref: '#/components/schemas/AvailabilityZone'
+        storageType:
+          $ref: '#/components/schemas/StorageType'
+        storageSize:
+          $ref: '#/components/schemas/StorageSize'
+        maintenanceWindow:
+          $ref: '#/components/schemas/MaintenanceWindow'
+        labels:
+          $ref: '#/components/schemas/Labels'
+        annotations:
+          $ref: '#/components/schemas/Annotations'
+    PatchNodePoolProperties:
+      additionalProperties: false
+      properties:
+        nodeCount:
+          $ref: '#/components/schemas/NodeCount'
+        maintenanceWindow:
+          $ref: '#/components/schemas/MaintenanceWindow'
+        labels:
+          $ref: '#/components/schemas/Labels'
+        annotations:
+          $ref: '#/components/schemas/Annotations'
+    Cluster:
+      description: A DataPlatformCluster
+      type: object
+      additionalProperties: false
+      properties:
+        name:
+          $ref: '#/components/schemas/ClusterName'
+        dataPlatformVersion:
+          $ref: '#/components/schemas/DataPlatformVersion'
+        datacenterId:
+          $ref: '#/components/schemas/DatacenterId'
+        maintenanceWindow:
+          $ref: '#/components/schemas/MaintenanceWindow'
+    NodePool:
+      description: A DataPlatformNodePool of a DataPlatformCluster
+      type: object
+      additionalProperties: false
+      properties:
+        name:
+          $ref: '#/components/schemas/NodePoolName'
+        dataPlatformVersion:
+          $ref: '#/components/schemas/DataPlatformVersion'
+        datacenterId:
+          $ref: '#/components/schemas/DatacenterId'
+        nodeCount:
+          $ref: '#/components/schemas/NodeCount'
+        cpuFamily:
+          $ref: '#/components/schemas/CpuFamily'
+        coresCount:
+          $ref: '#/components/schemas/CoresCount'
+        ramSize:
+          $ref: '#/components/schemas/RamSize'
+        availabilityZone:
+          $ref: '#/components/schemas/AvailabilityZone'
+        storageType:
+          $ref: '#/components/schemas/StorageType'
+        storageSize:
+          $ref: '#/components/schemas/StorageSize'
+        maintenanceWindow:
+          $ref: '#/components/schemas/MaintenanceWindow'
+        labels:
+          $ref: '#/components/schemas/Labels'
+        annotations:
+          $ref: '#/components/schemas/Annotations'
+    ClusterResponseData:
+      type: object
+      additionalProperties: false
+      description: Data of a cluster
+      properties:
+        id:
+          $ref: '#/components/schemas/ResourceId'
+        type:
+          type: string
+          description: The type of the resource.
+          example: cluster
+        href:
+          type: string
+          description: URL to the object representation (absolute path).
+          example: https://api.ionos.com/dataplatform/v1/clusters/498ae72f-411f-11eb-9d07-046c59cc737e
+        metadata:
+          $ref: '#/components/schemas/Metadata'
+        properties:
+          $ref: '#/components/schemas/Cluster'
+      required:
+        - id
+        - metadata
+        - properties
+    NodePoolResponseData:
+      type: object
+      additionalProperties: false
+      description: Data of a node pool
+      properties:
+        id:
+          $ref: '#/components/schemas/ResourceId'
+        type:
+          type: string
+          description: The type of the resource.
+          example: nodepool
+        href:
+          type: string
+          description: URL to the object representation (absolute path).
+          example: https://api.ionos.com/dataplatform/v1/clusters/498ae72f-411f-11eb-9d07-046c59cc737e/nodepools/abcd7e2f-9876-1234-abcd-123459498ae7
+        metadata:
+          $ref: '#/components/schemas/Metadata'
+        properties:
+          $ref: '#/components/schemas/NodePool'
+      required:
+        - id
+        - metadata
+        - properties
+    ClusterListResponseData:
+      type: object
+      additionalProperties: false
+      description: Data of a cluster list
+      required:
+        - items
+      properties:
+        id:
+          $ref: '#/components/schemas/ResourceId'
+        type:
+          type: string
+          example: collection
+        href:
+          type: string
+          example: https://.../clusters
+        items:
+          type: array
+          items:
+            $ref: '#/components/schemas/ClusterResponseData'
+    NodePoolListResponseData:
+      type: object
+      additionalProperties: false
+      description: Data of a node pool list
+      required:
+        - items
+      properties:
+        id:
+          $ref: '#/components/schemas/ResourceId'
+        type:
+          type: string
+          example: collection
+        href:
+          type: string
+          example: https://.../clusters/.../nodepools
+        items:
+          type: array
+          items:
+            $ref: '#/components/schemas/NodePoolResponseData'
+  securitySchemes:
+    tokenAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+      description: |
+        The Bearer auth token used at the API-Gateway is a user related token created with the IONOS-CLI.
+        (See the [documentation](https://docs.ionos.com/cli-ionosctl/subcommands/authentication/token-generate) for details)
+        For every request to be authenticated, the token is passed as 'Authorization Bearer' header along with the request.
+    basicAuth:
+      type: http
+      scheme: basic
+      description: |
+        You will need to base64 encode the string containing your credentials.
+        Separate your username and password with a colon, i.e.,
+        username:password and send it as 'Authorization' request header. More
+        details: https://en.wikipedia.org/wiki/Basic_access_authentication.
