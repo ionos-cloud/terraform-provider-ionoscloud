@@ -40,7 +40,7 @@ Clone repository to: `$GOPATH/src/github.com/ionos-cloud/terraform-provider-iono
 
 ```sh
 $ mkdir -p $GOPATH/src/github.com/ionos-cloud; cd $GOPATH/src/github.com/ionos-cloud
-$ git clone git@github.com:ionos-cloud/terraform-provider-ionoscloud
+$ git clone https://github.com/ionos-cloud/terraform-provider-ionoscloud.git
 ```
 
 Enter the provider directory and build the provider
