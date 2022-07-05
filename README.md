@@ -127,4 +127,4 @@ by doing the following:
 
 Set env variable IONOS_PINNED_CERT=<insert_sha256_public_fingerprint_here>
 
-You can get the sha256 fingerprint most easily form the browser by inspecting the certificate.
+You can get the sha256 fingerprint most easily from the browser by inspecting the certificate.
