@@ -61,3 +61,6 @@ require (
 	google.golang.org/grpc v1.45.0 // indirect
 	google.golang.org/protobuf v1.27.1 // indirect
 )
+
+require github.com/ionos-cloud/sdk-go-autoscaling v1.0.0
+replace github.com/ionos-cloud/sdk-go-autoscaling => ../../../../../sdk/container-registry
