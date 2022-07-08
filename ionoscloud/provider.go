@@ -15,14 +15,16 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/ionos-cloud/sdk-go/v6"
+	crService "github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/container-registry"
 	dbaasService "github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/dbaas"
 )
 
 var Version = "DEV"
 
 type SdkBundle struct {
-	CloudApiClient *ionoscloud.APIClient
-	DbaasClient    *dbaasService.Client
+	CloudApiClient  *ionoscloud.APIClient
+	DbaasClient     *dbaasService.Client
+	ContainerClient *crService.Client
 }
 
 // Provider returns a schema.Provider for ionoscloud
@@ -182,9 +184,12 @@ func providerConfigure(d *schema.ResourceData, terraformVersion string) (interfa
 	dbaasClient := dbaasService.NewClientService(username.(string), password.(string), token.(string), cleanedUrl)
 	//dbaasClient.GetConfig().HTTPClient = &http.Client{Transport: createTransport()}
 
+	crClient := crService.NewClientService(username.(string), password.(string), token.(string), cleanedUrl, Version, terraformVersion)
+
 	return SdkBundle{
-		CloudApiClient: newClient,
-		DbaasClient:    dbaasClient.Get(),
+		CloudApiClient:  newClient,
+		DbaasClient:     dbaasClient.Get(),
+		ContainerClient: crClient.Get(),
 	}, nil
 }
 

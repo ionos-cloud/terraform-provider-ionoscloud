@@ -283,7 +283,7 @@ func resourceDbaasPgSqlClusterUpdate(ctx context.Context, d *schema.ResourceData
 		return diags
 	}
 
-	dbaasClusterResponse, _, err := client.ClustersApi.ClustersPatch(ctx, d.Id()).PatchClusterRequest(*cluster).Execute()
+	dbaasClusterResponse, _, err := client.UpdateCluster(ctx, d.Id(), *cluster)
 
 	if err != nil {
 		diags := diag.FromErr(fmt.Errorf("an error occured while updating a dbaas cluster: %s", err))
