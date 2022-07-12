@@ -22,7 +22,7 @@ func (c *Client) GetAllLocations(ctx context.Context) (cr.LocationsResponse, *cr
 	return versions, nil, err
 }
 
-func SetCRLocationsData(d *schema.ResourceData, locations *cr.LocationsResponse) diag.Diagnostics {
+func SetCRLocationsData(d *schema.ResourceData, locations cr.LocationsResponse) diag.Diagnostics {
 
 	resourceId := uuid.New()
 	d.SetId(resourceId.String())

@@ -198,6 +198,20 @@ const (
 	DBaaSVersionsTest                = "test_dbaas_versions"
 )
 
+// Container Registry Constants
+const (
+	ContainerRegistryResource                  = "ionoscloud_container_registry"
+	ContainerRegistryTestResource              = "test_container_registry"
+	ContainerRegistryTestDataSourceById        = "test_container_registry_id"
+	ContainerRegistryTestDataSourceByName      = "test_container_registry_name"
+	ContainerRegistryTokenResource             = "ionoscloud_container_registry_token"
+	ContainerRegistryTokenTestResource         = "test_container_registry_tokens"
+	ContainerRegistryTokenTestDataSourceById   = "test_container_registry_tokens_id"
+	ContainerRegistryTokenTestDataSourceByName = "test_container_registry_tokens_name"
+	ContainerRegistryLocationsResource         = "ionoscloud_container_registry_locations"
+	ContainerRegistryLocationsTest             = "test_container_registry_locations"
+)
+
 const (
 	ShareResource         = "ionoscloud_share"
 	shareResourceFullName = ShareResource + "." + sourceShareName

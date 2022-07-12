@@ -307,21 +307,20 @@ func registryReady(ctx context.Context, client *crService.Client, d *schema.Reso
 	if err != nil {
 		return true, fmt.Errorf("error checking registry status: %s", err)
 	}
-	// ToDo: Removed this part since there are still problems with the clusters being unstable (failing for a short time and then recovering)
-	//if *subjectRegistry.LifecycleStatus == "FAILED" {
-	//
-	//	time.Sleep(time.Second * 3)
-	//
-	//	subjectRegistry, _, err = client.GetRegistry(ctx, d.Id())
-	//
-	//	if err != nil {
-	//		return true, fmt.Errorf("error checking registry status: %s", err)
-	//	}
-	//
-	//	if *subjectRegistry.LifecycleStatus == "FAILED" {
-	//		return false, fmt.Errorf("registry has failed. WARNING: your k8s cluster may still recover after some time but the terraform state won't reflect that; check your Ionos Cloud account for updates")
-	//	}
-	//}
+	if *subjectRegistry.Metadata.State == "FAILED" {
+
+		time.Sleep(time.Second * 3)
+
+		subjectRegistry, _, err = client.GetRegistry(ctx, d.Id())
+
+		if err != nil {
+			return true, fmt.Errorf("error checking registry status: %s", err)
+		}
+
+		if *subjectRegistry.Metadata.State == "FAILED" {
+			return false, fmt.Errorf("registry has failed. WARNING: your registry may still recover after some time but the terraform state won't reflect that; check your Ionos Cloud account for updates")
+		}
+	}
 	return *subjectRegistry.Metadata.State == "AVAILABLE", nil
 }
 

@@ -90,6 +90,8 @@ func Provider() *schema.Provider {
 			ALBResource:                               resourceApplicationLoadBalancer(),
 			ALBForwardingRuleResource:                 resourceApplicationLoadBalancerForwardingRule(),
 			TargetGroupResource:                       resourceTargetGroup(),
+			ContainerRegistryResource:                 resourceContainerRegistry(),
+			ContainerRegistryTokenResource:            resourceContainerRegistryToken(),
 		},
 		DataSourcesMap: map[string]*schema.Resource{
 			DatacenterResource:                        dataSourceDataCenter(),
@@ -125,6 +127,9 @@ func Provider() *schema.Provider {
 			ALBResource:                               dataSourceApplicationLoadBalancer(),
 			ALBForwardingRuleResource:                 dataSourceApplicationLoadBalancerForwardingRule(),
 			TargetGroupResource:                       dataSourceTargetGroup(),
+			ContainerRegistryResource:                 dataSourceContainerRegistry(),
+			ContainerRegistryTokenResource:            dataSourceContainerRegistryToken(),
+			ContainerRegistryLocationsResource:        dataSourceContainerRegistryLocations(),
 		},
 	}
 
