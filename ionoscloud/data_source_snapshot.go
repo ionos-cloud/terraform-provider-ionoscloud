@@ -116,10 +116,10 @@ func dataSourceSnapshotRead(ctx context.Context, d *schema.ResourceData, meta in
 	licenceType := licenceTypeValue.(string)
 
 	if idOk && (nameOk || locationOk || sizeOk || licenceTypeOk) {
-		return diag.FromErr(errors.New("id and name cannot be both specified in the same time"))
+		return diag.FromErr(errors.New("id and name/licence_type/location/size cannot be both specified in the same time, choose between id or a combination of other parameters"))
 	}
 	if !idOk && !nameOk && !locationOk && !sizeOk && !licenceTypeOk {
-		return diag.FromErr(errors.New("please provide either the server id or name"))
+		return diag.FromErr(errors.New("please provide either the server id or other parameter like name or location"))
 	}
 
 	var snapshot ionoscloud.Snapshot
@@ -145,7 +145,7 @@ func dataSourceSnapshotRead(ctx context.Context, d *schema.ResourceData, meta in
 
 		if nameOk && partialMatch {
 			request = request.Filter("name", name)
-			log.Printf("SNAPSHOT NAMEOK = %t AND SNAPSOT PATIAL NAME = %t", nameOk, partialMatch)
+			// log.Printf("SNAPSHOT NAMEOK = %t AND SNAPSOT PATIAL NAME = %t", nameOk, partialMatch)
 		}
 
 		snapshots, apiResponse, err := request.Execute()

@@ -173,16 +173,15 @@ func dataSourcePccRead(ctx context.Context, d *schema.ResourceData, meta interfa
 	name := nameValue.(string)
 
 	if idOk && nameOk {
-		return diag.FromErr(errors.New("id and name cannot be both specified in the same time"))
+		return diag.FromErr(errors.New("id and name/connectable_datacenters cannot be both specified in the same time, choose between id or a combination of other parameters"))
 	}
 	if !idOk && !nameOk {
-		return diag.FromErr(errors.New("please provide either the pcc id or name"))
+		return diag.FromErr(errors.New("please provide either the pcc id or or other parameter like name or connectable_datacenters"))
 	}
 
 	var pcc ionoscloud.PrivateCrossConnect
 	var err error
 	var apiResponse *ionoscloud.APIResponse
-	var results []ionoscloud.PrivateCrossConnect
 
 	if idOk {
 		/* search by ID */
@@ -196,53 +195,63 @@ func dataSourcePccRead(ctx context.Context, d *schema.ResourceData, meta interfa
 	}
 	if nameOk {
 		/* search by name */
+		var results []ionoscloud.PrivateCrossConnect
 
-		partialMatch := d.Get("partial_match").(bool)
+		if nameOk {
+			partialMatch := d.Get("partial_match").(bool)
 
-		log.Printf("[INFO] Using data source for pcc by name with partial_match %t and name: %s", partialMatch, name)
+			log.Printf("[INFO] Using data source for pcc by name with partial_match %t and name: %s", partialMatch, name)
 
-		pccs, apiResponse, err := client.PrivateCrossConnectsApi.PccsGet(ctx).Depth(1).Execute()
-		logApiRequestTime(apiResponse)
+			//pccs, apiResponse, err := client.PrivateCrossConnectsApi.PccsGet(ctx).Depth(1).Execute()
+			//logApiRequestTime(apiResponse)
+			//
+			//if err != nil {
+			//	return diag.FromErr(fmt.Errorf("an error occured while fetching ipBlocks: %s ", err))
+			//}
+			//
+			//if pccs.Items == nil {
+			//	diags := diag.FromErr(fmt.Errorf("no users found"))
+			//	return diags
+			//}
+			//
+			//results = *pccs.Items
 
-		if err != nil {
-			return diag.FromErr(fmt.Errorf("an error occured while fetching ipBlocks: %s ", err))
-		}
+			if partialMatch {
+				pccs, apiResponse, err := client.PrivateCrossConnectsApi.PccsGet(ctx).Depth(1).Filter("name", name).Execute()
+				logApiRequestTime(apiResponse)
+				if err != nil {
+					return diag.FromErr(fmt.Errorf("an error occurred while fetching pccs: %s", err.Error()))
+				}
+				results = *pccs.Items
+			} else {
+				pccs, apiResponse, err := client.PrivateCrossConnectsApi.PccsGet(ctx).Depth(1).Execute()
+				logApiRequestTime(apiResponse)
+				if err != nil {
+					return diag.FromErr(fmt.Errorf("an error occurred while fetching pccs: %s", err.Error()))
+				}
 
-		if pccs.Items == nil {
-			diags := diag.FromErr(fmt.Errorf("no users found"))
-			return diags
-		}
-
-		results = *pccs.Items
-
-		if partialMatch {
-			pccs, apiResponse, err := client.PrivateCrossConnectsApi.PccsGet(ctx).Depth(1).Filter("name", name).Execute()
+				if pccs.Items != nil {
+					var nameResults []ionoscloud.PrivateCrossConnect
+					for _, p := range *pccs.Items {
+						if p.Properties != nil && p.Properties.Name != nil && strings.EqualFold(*p.Properties.Name, name) {
+							pcc, apiResponse, err = client.PrivateCrossConnectsApi.PccsFindById(ctx, *p.Id).Execute()
+							logApiRequestTime(apiResponse)
+							if err != nil {
+								return diag.FromErr(fmt.Errorf("an error occurred while fetching the pcc with ID %s: %s", *p.Id, err))
+							}
+							nameResults = append(nameResults, pcc)
+						}
+					}
+					results = nameResults
+				}
+			}
+		} else {
+			pccs, apiResponse, err := client.PrivateCrossConnectsApi.PccsGet(ctx).Depth(1).Execute()
 			logApiRequestTime(apiResponse)
 			if err != nil {
 				return diag.FromErr(fmt.Errorf("an error occurred while fetching pccs: %s", err.Error()))
 			}
 			results = *pccs.Items
-		} else {
-			//pccs, apiResponse, err := client.PrivateCrossConnectsApi.PccsGet(ctx).Depth(1).Execute()
-			//logApiRequestTime(apiResponse)
-			//if err != nil {
-			//	return diag.FromErr(fmt.Errorf("an error occurred while fetching pccs: %s", err.Error()))
-			//}
-
-			if pccs.Items != nil {
-				var nameResults []ionoscloud.PrivateCrossConnect
-				for _, p := range *pccs.Items {
-					if p.Properties != nil && p.Properties.Name != nil && strings.EqualFold(*p.Properties.Name, name) {
-						pcc, apiResponse, err = client.PrivateCrossConnectsApi.PccsFindById(ctx, *p.Id).Execute()
-						logApiRequestTime(apiResponse)
-						if err != nil {
-							return diag.FromErr(fmt.Errorf("an error occurred while fetching the pcc with ID %s: %s", *p.Id, err))
-						}
-						nameResults = append(nameResults, pcc)
-					}
-				}
-				results = nameResults
-			}
 		}
 
 		if connectableDatacentersOk {

@@ -41,12 +41,30 @@ data "ionoscloud_k8s_node_pool" "example" {
 }
 ```
 
+### By DaatcenterId
+```hcl
+data "ionoscloud_k8s_node_pool" "example" {
+  datacenter_id              = <datacenter_id>
+  k8s_cluster_id 	= <k8s_cluster_id>
+}
+```
+
+### By Availability Zone
+```hcl
+data "ionoscloud_k8s_node_pool" "example" {
+  availability_zone              = "ZONE_1"
+  k8s_cluster_id 	= <k8s_cluster_id>
+}
+```
+
 ## Argument Reference
 
 * `k8s_cluster_id` (Required) K8s Cluster' UUID
 * `id` - (Optional) ID of the node pool you want to search for.
 * `name` - (Optional) Name of an existing node pool that you want to search for. Search by name is case-insensitive. The whole resource name is required if `partial_match` parameter is not set to true..
 * `partial_match` - (Optional) Whether partial matching is allowed or not when using name argument. Default value is false.
+* `datacenter_id` - (Optional) The Datacenter ID of the node pool you want to search for.
+* `availability_zone` - (Optional) Availability Zone of the node pool you want to search for.
 
 `k8s_cluster_id` and either `id` or `name` must be provided. If none, or both of `name` and `id` are provided, the datasource will return an error.
 

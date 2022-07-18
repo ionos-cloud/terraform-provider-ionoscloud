@@ -15,6 +15,13 @@ When this happens, please refine your search string so that it is specific enoug
 
 ## Example Usage
 
+### By ID
+```hcl
+data "ionoscloud_template" "example" {
+	id = <template_id>
+}
+```
+
 ### By Name
 ```hcl
 data "ionoscloud_template" "example" {
@@ -45,6 +52,7 @@ data "ionoscloud_template" "example" {
 
 ## Argument Reference
 
+* `id` - (Optional) ID of the template you want to search for.
 * `name` - (Optional) The name of template. Search by name is case-insensitive. The whole resource name is required if `partial_match` parameter is not set to true..
 * `partial_match` - (Optional) Whether partial matching is allowed or not when using name argument. Default value is false.
 * `cores` - (Optional) The CPU cores count.

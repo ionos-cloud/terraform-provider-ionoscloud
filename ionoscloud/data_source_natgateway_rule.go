@@ -112,10 +112,10 @@ func dataSourceNatGatewayRuleRead(ctx context.Context, d *schema.ResourceData, m
 	protocol := protocolValue.(string)
 
 	if idOk && (nameOk || protocolOk) {
-		return diag.FromErr(errors.New("id and name cannot be both specified in the same time"))
+		return diag.FromErr(errors.New("id and name/protocol cannot be both specified in the same time"))
 	}
 	if !idOk && !nameOk && !protocolOk {
-		return diag.FromErr(errors.New("please provide either the lan id or name"))
+		return diag.FromErr(errors.New("please provide either the lan id or other parameter like name or protocol"))
 	}
 
 	var natGatewayRule ionoscloud.NatGatewayRule
@@ -132,48 +132,57 @@ func dataSourceNatGatewayRuleRead(ctx context.Context, d *schema.ResourceData, m
 		}
 	} else {
 		/* search by name */
-		//var results []ionoscloud.NatGatewayRule
+		var results []ionoscloud.NatGatewayRule
 
-		natGatewayRules, apiResponse, err := client.NATGatewaysApi.DatacentersNatgatewaysRulesGet(ctx, datacenterId, natgatewayId).Depth(1).Execute()
-		logApiRequestTime(apiResponse)
-		if err != nil {
-			return diag.FromErr(fmt.Errorf("an error occurred while fetching nat gateway rules: %s", err.Error()))
-		}
-
-		var results = *natGatewayRules.Items
-
-		partialMatch := d.Get("partial_match").(bool)
-
-		log.Printf("[INFO] Using data source for nat gateway rule by name with partial_match %t and name: %s", partialMatch, name)
-
-		if partialMatch {
-			natGatewayRules, apiResponse, err := client.NATGatewaysApi.DatacentersNatgatewaysRulesGet(ctx, datacenterId, natgatewayId).Depth(1).Filter("name", name).Execute()
-			logApiRequestTime(apiResponse)
-			if err != nil {
-				return diag.FromErr(fmt.Errorf("an error occurred while fetching nat gateway rules: %s", err.Error()))
-			}
-			results = *natGatewayRules.Items
-		} else {
+		if nameOk {
 			//natGatewayRules, apiResponse, err := client.NATGatewaysApi.DatacentersNatgatewaysRulesGet(ctx, datacenterId, natgatewayId).Depth(1).Execute()
 			//logApiRequestTime(apiResponse)
 			//if err != nil {
 			//	return diag.FromErr(fmt.Errorf("an error occurred while fetching nat gateway rules: %s", err.Error()))
 			//}
+			//
+			//var results = *natGatewayRules.Items
 
-			if natGatewayRules.Items != nil && nameOk {
-				var resultsByName []ionoscloud.NatGatewayRule
-				for _, ngr := range *natGatewayRules.Items {
-					if ngr.Properties != nil && ngr.Properties.Name != nil && strings.EqualFold(*ngr.Properties.Name, name) {
-						tmpNatGatewayRule, apiResponse, err := client.NATGatewaysApi.DatacentersNatgatewaysRulesFindByNatGatewayRuleId(ctx, datacenterId, natgatewayId, *ngr.Id).Execute()
-						logApiRequestTime(apiResponse)
-						if err != nil {
-							return diag.FromErr(fmt.Errorf("an error occurred while fetching nat gateway rule with ID %s: %s", *ngr.Id, err.Error()))
-						}
-						resultsByName = append(resultsByName, tmpNatGatewayRule)
-					}
+			partialMatch := d.Get("partial_match").(bool)
+
+			log.Printf("[INFO] Using data source for nat gateway rule by name with partial_match %t and name: %s", partialMatch, name)
+
+			if partialMatch {
+				natGatewayRules, apiResponse, err := client.NATGatewaysApi.DatacentersNatgatewaysRulesGet(ctx, datacenterId, natgatewayId).Depth(1).Filter("name", name).Execute()
+				logApiRequestTime(apiResponse)
+				if err != nil {
+					return diag.FromErr(fmt.Errorf("an error occurred while fetching nat gateway rules: %s", err.Error()))
 				}
-				results = resultsByName
+				results = *natGatewayRules.Items
+			} else {
+				natGatewayRules, apiResponse, err := client.NATGatewaysApi.DatacentersNatgatewaysRulesGet(ctx, datacenterId, natgatewayId).Depth(1).Execute()
+				logApiRequestTime(apiResponse)
+				if err != nil {
+					return diag.FromErr(fmt.Errorf("an error occurred while fetching nat gateway rules: %s", err.Error()))
+				}
+
+				if natGatewayRules.Items != nil && nameOk {
+					var resultsByName []ionoscloud.NatGatewayRule
+					for _, ngr := range *natGatewayRules.Items {
+						if ngr.Properties != nil && ngr.Properties.Name != nil && strings.EqualFold(*ngr.Properties.Name, name) {
+							tmpNatGatewayRule, apiResponse, err := client.NATGatewaysApi.DatacentersNatgatewaysRulesFindByNatGatewayRuleId(ctx, datacenterId, natgatewayId, *ngr.Id).Execute()
+							logApiRequestTime(apiResponse)
+							if err != nil {
+								return diag.FromErr(fmt.Errorf("an error occurred while fetching nat gateway rule with ID %s: %s", *ngr.Id, err.Error()))
+							}
+							resultsByName = append(resultsByName, tmpNatGatewayRule)
+						}
+					}
+					results = resultsByName
+				}
 			}
+		} else {
+			natGatewayRules, apiResponse, err := client.NATGatewaysApi.DatacentersNatgatewaysRulesGet(ctx, datacenterId, natgatewayId).Depth(1).Execute()
+			logApiRequestTime(apiResponse)
+			if err != nil {
+				return diag.FromErr(fmt.Errorf("an error occurred while fetching nat gateway rules: %s", err.Error()))
+			}
+			results = *natGatewayRules.Items
 		}
 
 		if protocolOk && protocol != "" {

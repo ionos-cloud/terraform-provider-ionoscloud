@@ -131,7 +131,6 @@ func dataSourceImageRead(ctx context.Context, d *schema.ResourceData, meta inter
 	nameValue, nameOk := d.GetOk("name")
 	imageTypeValue, imageTypeOk := d.GetOk("type")
 	locationValue, locationOk := d.GetOk("location")
-	versionValue, versionOk := d.GetOk("version")
 	cloudInitValue, cloudInitOk := d.GetOk("cloud_init")
 	imageAliasValue, imageAliasOk := d.GetOk("image_alias")
 	idValue, idOk := d.GetOk("id")
@@ -140,9 +139,16 @@ func dataSourceImageRead(ctx context.Context, d *schema.ResourceData, meta inter
 	name := nameValue.(string)
 	imageType := imageTypeValue.(string)
 	location := locationValue.(string)
-	version := versionValue.(string)
+	//version := versionValue.(string)
 	cloudInit := cloudInitValue.(string)
 	imageAlias := imageAliasValue.(string)
+
+	if idOk && (nameOk || imageTypeOk || locationOk || cloudInitOk || imageAliasOk) {
+		return diag.FromErr(fmt.Errorf("id and name/type/location/version/cloud_init/image_alias cannot be both specified in the same time, choose between id or a combination of other parameters"))
+	}
+	if !idOk && !nameOk && !imageTypeOk && !locationOk && !cloudInitOk && !imageAliasOk {
+		return diag.FromErr(fmt.Errorf("please provide either the image id or other parameter like name, type or location"))
+	}
 
 	var results []ionoscloud.Image
 	var image ionoscloud.Image
@@ -156,33 +162,45 @@ func dataSourceImageRead(ctx context.Context, d *schema.ResourceData, meta inter
 			return diag.FromErr(fmt.Errorf("an error occurred while fetching the nat gateway rule %s: %s", id, err))
 		}
 	} else {
-		// if version value is present then concatenate name - version
-		// otherwise search by name or part of the name
+		if nameOk && name != "" {
+			partialMatch := d.Get("partial_match").(bool)
 
-		if versionOk && nameOk && version != "" && name != "" {
-			nameVer := fmt.Sprintf("%s-%s", name, version)
-			if images.Items != nil {
-				for _, img := range *images.Items {
-					if img.Properties != nil && img.Properties.Name != nil && strings.EqualFold(*img.Properties.Name, nameVer) {
-						results = append(results, img)
+			log.Printf("[INFO] Using data source for iamge by name with partial_match %t and name: %s", partialMatch, name)
+
+			if partialMatch {
+				images, apiResponse, err := client.ImagesApi.ImagesGet(ctx).Depth(1).Filter("name", name).Execute()
+				logApiRequestTime(apiResponse)
+
+				if err != nil {
+					return diag.FromErr(fmt.Errorf("an error occurred while fetching images while searching by partial name: %s, %w", name, err))
+				}
+
+				results = *images.Items
+			} else {
+				//images, apiResponse, err := client.ImagesApi.ImagesGet(ctx).Execute()
+				//logApiRequestTime(apiResponse)
+				//
+				//if err != nil {
+				//	return diag.FromErr(fmt.Errorf("an error occurred while fetching images while searching by partial name: %s, %w", name, err))
+				//}
+				if images.Items != nil {
+					for _, img := range *images.Items {
+						if img.Properties != nil && img.Properties.Name != nil && strings.Contains(strings.ToLower(*img.Properties.Name), strings.ToLower(name)) {
+							results = append(results, img)
+						}
 					}
 				}
-			}
-			if results == nil {
-				return diag.FromErr(fmt.Errorf("no image found with the specified criteria: name %s and version %s (%s)", name, version, nameVer))
-			}
-		} else if nameOk && name != "" {
-			if images.Items != nil {
-				for _, img := range *images.Items {
-					if img.Properties != nil && img.Properties.Name != nil && strings.Contains(strings.ToLower(*img.Properties.Name), strings.ToLower(name)) {
-						results = append(results, img)
-					}
+				if results == nil {
+					return diag.FromErr(fmt.Errorf("no image found with the specified criteria: name %s", name))
 				}
-			}
-			if results == nil {
-				return diag.FromErr(fmt.Errorf("no image found with the specified criteria: name %s", name))
 			}
 		} else {
+			//images, apiResponse, err := client.ImagesApi.ImagesGet(ctx).Execute()
+			//logApiRequestTime(apiResponse)
+			//
+			//if err != nil {
+			//	return diag.FromErr(fmt.Errorf("an error occurred while fetching images while searching by partial name: %s, %w", name, err))
+			//}
 			results = *images.Items
 		}
 
@@ -233,7 +251,7 @@ func dataSourceImageRead(ctx context.Context, d *schema.ResourceData, meta inter
 		}
 
 		if results == nil || len(results) == 0 {
-			return diag.FromErr(fmt.Errorf("no image found with the specified criteria: name = %s, type = %s, location = %s, version = %s, cloudInit = %s", name, imageType, location, version, cloudInit))
+			return diag.FromErr(fmt.Errorf("no image found with the specified criteria: name = %s, type = %s, location = %s, cloudInit = %s", name, imageType, location, cloudInit))
 		} else if len(results) > 1 {
 			return diag.FromErr(fmt.Errorf("more than one image found with the specified criteria name = %s", name))
 		} else {

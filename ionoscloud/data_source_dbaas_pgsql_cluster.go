@@ -185,11 +185,11 @@ func dataSourceDbaasPgSqlReadCluster(ctx context.Context, d *schema.ResourceData
 	pgVersion := pgVersionValue.(string)
 
 	if idOk && (nameOk || locationOk || dcNameOk || pgVersionOk) {
-		diags := diag.FromErr(errors.New("id and display_name cannot be both specified in the same time"))
+		diags := diag.FromErr(errors.New("id and display_name/location/datacenter_name/postgres_version cannot be both specified in the same time, choose between id or a combination of other parameters"))
 		return diags
 	}
 	if !idOk && !nameOk && !locationOk && !dcNameOk && !pgVersionOk {
-		diags := diag.FromErr(errors.New("please provide either the dbaas cluster id or display_name"))
+		diags := diag.FromErr(errors.New("please provide either the dbaas cluster id or other parameter like display_name, location or postgres_version"))
 		return diags
 	}
 
@@ -206,40 +206,52 @@ func dataSourceDbaasPgSqlReadCluster(ctx context.Context, d *schema.ResourceData
 			return diags
 		}
 	} else {
-		//var results []dbaas.ClusterResponse
-		clusters, _, err := client.ListClusters(ctx, "")
-		if err != nil {
-			diags := diag.FromErr(fmt.Errorf("an error occurred while fetching dbaas clusters: %s", err.Error()))
-			return diags
-		}
-		var results = *clusters.Items
+		var results []dbaas.ClusterResponse
+		//clusters, _, err := client.ListClusters(ctx, "")
+		//if err != nil {
+		//	diags := diag.FromErr(fmt.Errorf("an error occurred while fetching dbaas clusters: %s", err.Error()))
+		//	return diags
+		//}
+		//var results = *clusters.Items
 
-		partialMatch := d.Get("partial_match").(bool)
+		//partialMatch := d.Get("partial_match").(bool)
+		//
+		//log.Printf("[INFO] Using data source for DBaaS Postgres Cluster by name with partial_match %t and name: %s", partialMatch, name)
 
-		log.Printf("[INFO] Using data source for DBaaS Postgres Cluster by name with partial_match %t and name: %s", partialMatch, name)
+		if nameOk {
+			partialMatch := d.Get("partial_match").(bool)
 
-		if partialMatch {
-			clusters, _, err := client.ListClusters(ctx, name)
+			log.Printf("[INFO] Using data source for DBaaS Postgres Cluster by name with partial_match %t and name: %s", partialMatch, name)
+			if partialMatch {
+				clusters, _, err := client.ListClusters(ctx, name)
+				if err != nil {
+					diags := diag.FromErr(fmt.Errorf("an error occurred while fetching dbaas clusters: %s", err.Error()))
+					return diags
+				}
+				results = *clusters.Items
+			} else {
+				clusters, _, err := client.ListClusters(ctx, "")
+				if err != nil {
+					diags := diag.FromErr(fmt.Errorf("an error occurred while fetching dbaas clusters: %s", err.Error()))
+					return diags
+				}
+				if clusters.Items != nil && len(*clusters.Items) > 0 && nameOk {
+					var nameResults []dbaas.ClusterResponse
+					for _, clusterItem := range *clusters.Items {
+						if clusterItem.Properties != nil && clusterItem.Properties.DisplayName != nil && strings.EqualFold(*clusterItem.Properties.DisplayName, name) {
+							nameResults = append(nameResults, clusterItem)
+						}
+					}
+					results = nameResults
+				}
+			}
+		} else {
+			clusters, _, err := client.ListClusters(ctx, "")
 			if err != nil {
 				diags := diag.FromErr(fmt.Errorf("an error occurred while fetching dbaas clusters: %s", err.Error()))
 				return diags
 			}
 			results = *clusters.Items
-		} else {
-			//clusters, _, err := client.ListClusters(ctx, "")
-			//if err != nil {
-			//	diags := diag.FromErr(fmt.Errorf("an error occurred while fetching dbaas clusters: %s", err.Error()))
-			//	return diags
-			//}
-			if clusters.Items != nil && len(*clusters.Items) > 0 && nameOk {
-				var nameResults []dbaas.ClusterResponse
-				for _, clusterItem := range *clusters.Items {
-					if clusterItem.Properties != nil && clusterItem.Properties.DisplayName != nil && strings.EqualFold(*clusterItem.Properties.DisplayName, name) {
-						nameResults = append(nameResults, clusterItem)
-					}
-				}
-				results = nameResults
-			}
 		}
 
 		if locationOk && location != "" {

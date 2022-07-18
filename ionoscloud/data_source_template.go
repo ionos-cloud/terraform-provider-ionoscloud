@@ -63,6 +63,13 @@ func dataSourceTemplateRead(ctx context.Context, d *schema.ResourceData, meta in
 
 	id := idValue.(string)
 
+	if idOk && (nameOk || coresOk || ramOk || storageSizeOk) {
+		return diag.FromErr(fmt.Errorf("id and name/cores/ram/storage_size cannot be both specified in the same time, choose between id or a combination of other parameters"))
+	}
+	if !idOk && !nameOk && !coresOk && !ramOk && !storageSizeOk {
+		return diag.FromErr(fmt.Errorf("please provide either the template id or other parameter like name, cores or ram"))
+	}
+
 	var results []ionoscloud.Template
 	var template ionoscloud.Template
 

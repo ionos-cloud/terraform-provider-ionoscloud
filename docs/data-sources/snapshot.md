@@ -42,6 +42,13 @@ data "ionoscloud_snapshot" "example" {
 ```
 Note: The size argument is in GB
 
+### By Licence Type
+```hcl
+data "ionoscloud_snapshot" "example" {
+  licence_type = "LINUX"
+}
+```
+
 ## Argument Reference
 
  * `id` - (Optional) UUID of an existing snapshot that you want to search for.

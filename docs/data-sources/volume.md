@@ -40,11 +40,20 @@ data "ionoscloud_volume" "example" {
 }
 ```
 
+### By Server ID
+```hcl
+data "ionoscloud_volume" "example" {
+  datacenter_id = <datacenter_id>
+  server_id			= <server_id>
+}
+```
+
 ## Argument Reference
 
 * `id` - (Optional) ID of the volume you want to search for.
 * `name` - (Optional) Name of an existing volume that you want to search for. Search by name is case-insensitive. The whole resource name is required if `partial_match` parameter is not set to true..
 * `partial_match` - (Optional) Whether partial matching is allowed or not when using name argument. Default value is false.
+* `server_id` - (Optional) ID of the server where you want to search a volume.
 
 Either `id` or `name` must be provided. If none, or both are provided, the datasource will return an error.
 

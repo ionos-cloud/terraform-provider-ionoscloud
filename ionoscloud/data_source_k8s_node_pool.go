@@ -215,7 +215,7 @@ func dataSourceK8sReadNodePool(ctx context.Context, d *schema.ResourceData, meta
 		return diag.FromErr(errors.New("id and name/datacenter_id/availability_zone cannot be both specified in the same time, choose between id or a combination of other parameters"))
 	}
 	if !idOk && !nameOk && !dcIdOk && !avZoneOk {
-		return diag.FromErr(errors.New("please provide either the lan id or other parameter like name or datacenter idd"))
+		return diag.FromErr(errors.New("please provide either the lan id or other parameter like name or datacenter_id"))
 	}
 
 	var nodePool ionoscloud.KubernetesNodePool
@@ -232,50 +232,59 @@ func dataSourceK8sReadNodePool(ctx context.Context, d *schema.ResourceData, meta
 		}
 	} else {
 		/* search by name */
-		//var results []ionoscloud.KubernetesNodePool
+		var results []ionoscloud.KubernetesNodePool
 
-		partialMatch := d.Get("partial_match").(bool)
+		if nameOk {
+			partialMatch := d.Get("partial_match").(bool)
 
-		log.Printf("[INFO] Using data source for k8s nodepool by name with partial_match %t and name: %s", partialMatch, name)
+			log.Printf("[INFO] Using data source for k8s nodepool by name with partial_match %t and name: %s", partialMatch, name)
 
-		nodePools, apiResponse, err := client.KubernetesApi.K8sNodepoolsGet(ctx, clusterId).Depth(1).Execute()
-		logApiRequestTime(apiResponse)
-		if err != nil {
-			return diag.FromErr(fmt.Errorf("an error occurred while fetching k8s nodepools: %s", err.Error()))
-		}
-		var results = *nodePools.Items
-
-		if partialMatch {
-			nodePools, apiResponse, err := client.KubernetesApi.K8sNodepoolsGet(ctx, clusterId).Depth(1).Filter("name", name).Execute()
-			logApiRequestTime(apiResponse)
-			if err != nil {
-				return diag.FromErr(fmt.Errorf("an error occurred while fetching k8s nodepools: %s", err.Error()))
-			}
-
-			results = *nodePools.Items
-		} else {
 			//nodePools, apiResponse, err := client.KubernetesApi.K8sNodepoolsGet(ctx, clusterId).Depth(1).Execute()
 			//logApiRequestTime(apiResponse)
 			//if err != nil {
 			//	return diag.FromErr(fmt.Errorf("an error occurred while fetching k8s nodepools: %s", err.Error()))
 			//}
+			//var results = *nodePools.Items
 
-			if results != nil && nameOk {
-				var nameResults []ionoscloud.KubernetesNodePool
-				for _, c := range results {
-					if c.Properties != nil && c.Properties.Name != nil && strings.EqualFold(*c.Properties.Name, name) {
-						tmpNodePool, apiResponse, err := client.KubernetesApi.K8sNodepoolsFindById(ctx, clusterId, *c.Id).Execute()
-						logApiRequestTime(apiResponse)
-						if err != nil {
-							return diag.FromErr(fmt.Errorf("an error occurred while fetching k8s nodepool with ID %s: %w", *c.Id, err))
-						}
-						/* lan found */
-						nameResults = append(nameResults, tmpNodePool)
-						break
-					}
+			if partialMatch {
+				nodePools, apiResponse, err := client.KubernetesApi.K8sNodepoolsGet(ctx, clusterId).Depth(1).Filter("name", name).Execute()
+				logApiRequestTime(apiResponse)
+				if err != nil {
+					return diag.FromErr(fmt.Errorf("an error occurred while fetching k8s nodepools: %s", err.Error()))
 				}
-				results = nameResults
+
+				results = *nodePools.Items
+			} else {
+				nodePools, apiResponse, err := client.KubernetesApi.K8sNodepoolsGet(ctx, clusterId).Depth(1).Execute()
+				logApiRequestTime(apiResponse)
+				if err != nil {
+					return diag.FromErr(fmt.Errorf("an error occurred while fetching k8s nodepools: %s", err.Error()))
+				}
+
+				if nodePools.Items != nil {
+					var nameResults []ionoscloud.KubernetesNodePool
+					for _, c := range *nodePools.Items {
+						if c.Properties != nil && c.Properties.Name != nil && strings.EqualFold(*c.Properties.Name, name) {
+							tmpNodePool, apiResponse, err := client.KubernetesApi.K8sNodepoolsFindById(ctx, clusterId, *c.Id).Execute()
+							logApiRequestTime(apiResponse)
+							if err != nil {
+								return diag.FromErr(fmt.Errorf("an error occurred while fetching k8s nodepool with ID %s: %w", *c.Id, err))
+							}
+							/* lan found */
+							nameResults = append(nameResults, tmpNodePool)
+							break
+						}
+					}
+					results = nameResults
+				}
 			}
+		} else {
+			nodePools, apiResponse, err := client.KubernetesApi.K8sNodepoolsGet(ctx, clusterId).Depth(1).Execute()
+			logApiRequestTime(apiResponse)
+			if err != nil {
+				return diag.FromErr(fmt.Errorf("an error occurred while fetching k8s nodepools: %s", err.Error()))
+			}
+			results = *nodePools.Items
 		}
 
 		if dcIdOk && dcId != "" {

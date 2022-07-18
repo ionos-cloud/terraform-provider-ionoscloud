@@ -133,11 +133,11 @@ func dataSourceVolumeRead(ctx context.Context, d *schema.ResourceData, meta inte
 	serverId := serverIdValue.(string)
 
 	if idOk && nameOk {
-		diags := diag.FromErr(errors.New("id and name cannot be both specified in the same time"))
+		diags := diag.FromErr(errors.New("id and name/server_id cannot be both specified in the same time, choose between id or a combination of other parameters"))
 		return diags
 	}
 	if !idOk && !nameOk {
-		diags := diag.FromErr(errors.New("please provide either the volume id or name"))
+		diags := diag.FromErr(errors.New("please provide either the volume id or other parameter like name or server_id"))
 		return diags
 	}
 	var volume ionoscloud.Volume
