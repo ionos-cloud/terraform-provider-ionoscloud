@@ -1,0 +1,1531 @@
+{
+ "openapi": "3.0.3",
+ "info": {
+  "title": "Container Registry service (CloudAPI)",
+  "description": "Container Registry service enables IONOS clients to manage docker and OCI compliant registries for use by their manage Kubernetes clusters. Use a Container Registry to ensure you have a privately accessed registry to efficiently support image pulls.",
+  "termsOfService": "https://www.ionos.de/terms-gtc/terms-enterprise-cloud/enterprise-terms/",
+  "contact": {
+   "name": "IONOS Cloud Support",
+   "url": "https://docs.ionos.com/faq/contact",
+   "email": "support@cloud.ionos.com"
+  },
+  "version": "1.0"
+ },
+ "externalDocs": {
+  "description": "More documentation",
+  "url": "https://docs.ionos.com/cloud"
+ },
+ "tags": [
+  {
+   "name": "Registries",
+   "description": "Manage container registries for storage of docker images and OCI compliant artifacts.\n\nThis operation is restricted to contract owner, admin, and users with 'accessAndManageRegistries' and Share/Edit access permissions for the data center hosting the registry."
+  },
+  {
+   "name": "Tokens",
+   "description": "Define access permissions to registry resources"
+  }
+ ],
+ "paths": {
+  "/locations": {
+   "get": {
+    "tags": [
+     "Locations"
+    ],
+    "summary": "Get container registry locations",
+    "description": "",
+    "operationId": "locationsGet",
+    "responses": {
+     "200": {
+      "description": "OK",
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/LocationsResponse"
+        }
+       }
+      }
+     }
+    },
+    "security": [
+     {
+      "tokenAuth": []
+     }
+    ]
+   }
+  },
+  "/names/{name}": {
+   "head": {
+    "tags": [
+     "Names"
+    ],
+    "summary": "Get container registry name availability",
+    "description": "Validate that the name is suitable to use for a new registry:\n- it uses only the characters \"a-z\", \"0-9\", or \"-\"\n- and starts with a letter and ends with a letter or number\n- and is between 3 to 63 characters in length\n- and is available",
+    "operationId": "namesFindByName",
+    "parameters": [
+     {
+      "name": "name",
+      "in": "path",
+      "required": true,
+      "schema": {
+       "pattern": "^[a-z][-a-z0-9]{1,61}[a-z0-9]$",
+       "type": "string"
+      }
+     }
+    ],
+    "responses": {
+     "200": {
+      "description": "OK. The registry name is valid but already in use"
+     },
+     "400": {
+      "description": "Bad Request",
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/ApiErrorResponse"
+        }
+       }
+      }
+     },
+     "404": {
+      "description": "Not found. The registry name is available and valid",
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/ApiErrorResponse"
+        }
+       }
+      }
+     }
+    },
+    "security": [
+     {
+      "tokenAuth": []
+     }
+    ]
+   }
+  },
+  "/registries": {
+   "get": {
+    "tags": [
+     "Registries"
+    ],
+    "summary": "List all container registries",
+    "description": "List all managed container registries for your account",
+    "operationId": "registriesGet",
+    "parameters": [
+     {
+      "name": "filter.name",
+      "in": "query",
+      "schema": {
+       "type": "string",
+       "example": "my-registry"
+      }
+     },
+     {
+      "name": "limit",
+      "in": "query",
+      "schema": {
+       "type": "string",
+       "default": "100"
+      }
+     },
+     {
+      "name": "nextPageToken",
+      "in": "query",
+      "schema": {
+       "type": "string"
+      }
+     }
+    ],
+    "responses": {
+     "200": {
+      "description": "OK",
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/RegistriesResponse"
+        }
+       }
+      }
+     },
+     "400": {
+      "description": "Bad Request",
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/ApiErrorResponse"
+        }
+       }
+      }
+     }
+    },
+    "security": [
+     {
+      "tokenAuth": []
+     }
+    ]
+   },
+   "post": {
+    "tags": [
+     "Registries"
+    ],
+    "summary": "Create container registry",
+    "description": "Create a registry to hold container images or OCI compliant artifacts\n- \"name\" must have passed validation\n- \"location\" must be one of the available location IDs\n- \"maintenanceWindow\" time and weekday\n- \"garbageCollectionSchedule\" time and days of the week for runs",
+    "operationId": "registriesPost",
+    "requestBody": {
+     "required": true,
+     "content": {
+      "application/json": {
+       "schema": {
+        "$ref": "#/components/schemas/PostRegistryInput"
+       }
+      }
+     }
+    },
+    "responses": {
+     "201": {
+      "description": "The created container registry is returned with 'metadata.status' set to \"BUSY\".",
+      "headers": {
+       "Location": {
+        "style": "simple",
+        "schema": {
+         "type": "string"
+        }
+       }
+      },
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/PostRegistryOutput"
+        }
+       }
+      }
+     },
+     "400": {
+      "description": "Bad Request",
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/ApiErrorResponse"
+        }
+       }
+      }
+     }
+    },
+    "security": [
+     {
+      "tokenAuth": []
+     }
+    ]
+   }
+  },
+  "/registries/{registryId}": {
+   "delete": {
+    "tags": [
+     "Registries"
+    ],
+    "summary": "Delete registry",
+    "description": "",
+    "operationId": "registriesDelete",
+    "parameters": [
+     {
+      "name": "registryId",
+      "in": "path",
+      "required": true,
+      "schema": {
+       "pattern": "^[0-9a-fA-F]{8}-([0-9a-fA-F]{4}-){3}[0-9a-fA-F]{12}$",
+       "type": "string"
+      }
+     }
+    ],
+    "responses": {
+     "204": {
+      "description": "No Content"
+     },
+     "400": {
+      "description": "Bad Request",
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/ApiErrorResponse"
+        }
+       }
+      }
+     }
+    },
+    "security": [
+     {
+      "tokenAuth": []
+     }
+    ]
+   },
+   "get": {
+    "tags": [
+     "Registries"
+    ],
+    "summary": "Get registry",
+    "description": "Get all information for a specific container registry",
+    "operationId": "registriesFindById",
+    "parameters": [
+     {
+      "name": "registryId",
+      "in": "path",
+      "required": true,
+      "schema": {
+       "pattern": "^[0-9a-fA-F]{8}-([0-9a-fA-F]{4}-){3}[0-9a-fA-F]{12}$",
+       "type": "string"
+      }
+     }
+    ],
+    "responses": {
+     "200": {
+      "description": "OK",
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/RegistryResponse"
+        }
+       }
+      }
+     },
+     "400": {
+      "description": "Bad Request",
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/ApiErrorResponse"
+        }
+       }
+      }
+     },
+     "404": {
+      "description": "Not Found",
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/ApiErrorResponse"
+        }
+       }
+      }
+     }
+    },
+    "security": [
+     {
+      "tokenAuth": []
+     }
+    ]
+   },
+   "patch": {
+    "tags": [
+     "Registries"
+    ],
+    "description": "Update the properties of a registry\n- \"maintenanceWindow\" time and weekday\n- \"garbageCollectionSchedule\" time and days of the week for runs",
+    "operationId": "registriesPatch",
+    "parameters": [
+     {
+      "name": "registryId",
+      "in": "path",
+      "required": true,
+      "schema": {
+       "pattern": "^[0-9a-fA-F]{8}-([0-9a-fA-F]{4}-){3}[0-9a-fA-F]{12}$",
+       "type": "string"
+      }
+     }
+    ],
+    "requestBody": {
+     "required": true,
+     "content": {
+      "application/json": {
+       "schema": {
+        "$ref": "#/components/schemas/PatchRegistryInput"
+       }
+      }
+     }
+    },
+    "responses": {
+     "200": {
+      "description": "OK",
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/RegistryResponse"
+        }
+       }
+      }
+     },
+     "400": {
+      "description": "Bad Request",
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/ApiErrorResponse"
+        }
+       }
+      }
+     }
+    },
+    "security": [
+     {
+      "tokenAuth": []
+     }
+    ]
+   },
+   "put": {
+    "tags": [
+     "Registries"
+    ],
+    "summary": "Create or replace container registry",
+    "description": "Create/replace a registry to hold container images or OCI compliant artifacts\n- \"name\" must have passed validation\n- \"name\" cannot be changed\n- \"location\" must be one of the available location IDs\n- \"location\" cannot be changed\n- \"maintenanceWindow\" time and weekday\n- \"garbageCollectionSchedule\" time and days of the week for runs",
+    "operationId": "registriesPut",
+    "parameters": [
+     {
+      "name": "registryId",
+      "in": "path",
+      "required": true,
+      "schema": {
+       "pattern": "^[0-9a-fA-F]{8}-([0-9a-fA-F]{4}-){3}[0-9a-fA-F]{12}$",
+       "type": "string"
+      }
+     }
+    ],
+    "requestBody": {
+     "content": {
+      "application/json": {
+       "schema": {
+        "$ref": "#/components/schemas/PutRegistryInput"
+       }
+      }
+     }
+    },
+    "responses": {
+     "201": {
+      "description": "The created container registry is returned with 'metadata.status' set to \"BUSY\".",
+      "headers": {
+       "Location": {
+        "style": "simple",
+        "schema": {
+         "type": "string"
+        }
+       }
+      },
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/PutRegistryOutput"
+        }
+       }
+      }
+     },
+     "400": {
+      "description": "Bad Request",
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/ApiErrorResponse"
+        }
+       }
+      }
+     }
+    },
+    "security": [
+     {
+      "tokenAuth": []
+     }
+    ]
+   }
+  },
+  "/registries/{registryId}/repositories/{name}": {
+   "delete": {
+    "tags": [
+     "Repositories"
+    ],
+    "summary": "Delete repository",
+    "description": "Delete all repository contents\n\n\t\tThe registry V2 API allows manifests and blobs to be deleted individually but it is not possible to remove an entire repository.\n\t\tThis operation is provided for convenience",
+    "operationId": "registriesRepositoriesDelete",
+    "parameters": [
+     {
+      "name": "registryId",
+      "in": "path",
+      "required": true,
+      "schema": {
+       "pattern": "^[0-9a-fA-F]{8}-([0-9a-fA-F]{4}-){3}[0-9a-fA-F]{12}$",
+       "type": "string"
+      }
+     },
+     {
+      "name": "name",
+      "in": "path",
+      "required": true,
+      "schema": {
+       "pattern": "^[a-z0-9]+(?:[._-][a-z0-9]+)*$",
+       "type": "string"
+      }
+     }
+    ],
+    "responses": {
+     "204": {
+      "description": "No Content"
+     }
+    },
+    "security": [
+     {
+      "tokenAuth": []
+     }
+    ]
+   }
+  },
+  "/registries/{registryId}/tokens": {
+   "get": {
+    "tags": [
+     "Tokens"
+    ],
+    "summary": "List all tokens for the container registry",
+    "description": "",
+    "operationId": "registriesTokensGet",
+    "parameters": [
+     {
+      "name": "offset",
+      "in": "query",
+      "schema": {
+       "type": "string",
+       "default": "0"
+      }
+     },
+     {
+      "name": "limit",
+      "in": "query",
+      "schema": {
+       "type": "string",
+       "default": "100"
+      }
+     },
+     {
+      "name": "registryId",
+      "in": "path",
+      "required": true,
+      "schema": {
+       "pattern": "^[0-9a-fA-F]{8}-([0-9a-fA-F]{4}-){3}[0-9a-fA-F]{12}$",
+       "type": "string"
+      }
+     }
+    ],
+    "responses": {
+     "200": {
+      "description": "OK",
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/TokensResponse"
+        }
+       }
+      }
+     },
+     "400": {
+      "description": "Bad Request",
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/ApiErrorResponse"
+        }
+       }
+      }
+     }
+    },
+    "security": [
+     {
+      "tokenAuth": []
+     }
+    ]
+   },
+   "post": {
+    "tags": [
+     "Tokens"
+    ],
+    "summary": "Create token",
+    "description": "Create a token\n- password is only available once in the POST response",
+    "operationId": "registriesTokensPost",
+    "parameters": [
+     {
+      "name": "registryId",
+      "in": "path",
+      "required": true,
+      "schema": {
+       "pattern": "^[0-9a-fA-F]{8}-([0-9a-fA-F]{4}-){3}[0-9a-fA-F]{12}$",
+       "type": "string"
+      }
+     }
+    ],
+    "requestBody": {
+     "content": {
+      "application/json": {
+       "schema": {
+        "$ref": "#/components/schemas/PostTokenInput"
+       }
+      }
+     }
+    },
+    "responses": {
+     "201": {
+      "description": "Created",
+      "headers": {
+       "Location": {
+        "style": "simple",
+        "schema": {
+         "type": "string"
+        }
+       }
+      },
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/PostTokenOutput"
+        }
+       }
+      }
+     },
+     "400": {
+      "description": "Bad Request",
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/ApiErrorResponse"
+        }
+       }
+      }
+     },
+     "409": {
+      "description": "Conflict",
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/ApiErrorResponse"
+        }
+       }
+      }
+     }
+    },
+    "security": [
+     {
+      "tokenAuth": []
+     }
+    ]
+   }
+  },
+  "/registries/{registryId}/tokens/{tokenId}": {
+   "delete": {
+    "tags": [
+     "Tokens"
+    ],
+    "summary": "Delete token",
+    "description": "",
+    "operationId": "registriesTokensDelete",
+    "parameters": [
+     {
+      "name": "registryId",
+      "in": "path",
+      "required": true,
+      "schema": {
+       "pattern": "^[0-9a-fA-F]{8}-([0-9a-fA-F]{4}-){3}[0-9a-fA-F]{12}$",
+       "type": "string"
+      }
+     },
+     {
+      "name": "tokenId",
+      "in": "path",
+      "required": true,
+      "schema": {
+       "pattern": "^[0-9a-fA-F]{8}-([0-9a-fA-F]{4}-){3}[0-9a-fA-F]{12}$",
+       "type": "string"
+      }
+     }
+    ],
+    "responses": {
+     "204": {
+      "description": "No Content"
+     },
+     "400": {
+      "description": "Bad Request",
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/ApiErrorResponse"
+        }
+       }
+      }
+     }
+    },
+    "security": [
+     {
+      "tokenAuth": []
+     }
+    ]
+   },
+   "get": {
+    "tags": [
+     "Tokens"
+    ],
+    "summary": "Get Token Information",
+    "description": "Gets all information for a specific token used to access a container registry",
+    "operationId": "registriesTokensFindById",
+    "parameters": [
+     {
+      "name": "registryId",
+      "in": "path",
+      "required": true,
+      "schema": {
+       "pattern": "^[0-9a-fA-F]{8}-([0-9a-fA-F]{4}-){3}[0-9a-fA-F]{12}$",
+       "type": "string"
+      }
+     },
+     {
+      "name": "tokenId",
+      "in": "path",
+      "required": true,
+      "schema": {
+       "pattern": "^[0-9a-fA-F]{8}-([0-9a-fA-F]{4}-){3}[0-9a-fA-F]{12}$",
+       "type": "string"
+      }
+     }
+    ],
+    "responses": {
+     "200": {
+      "description": "OK",
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/TokenResponse"
+        }
+       }
+      }
+     },
+     "400": {
+      "description": "Bad Request",
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/ApiErrorResponse"
+        }
+       }
+      }
+     },
+     "404": {
+      "description": "Not Found",
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/ApiErrorResponse"
+        }
+       }
+      }
+     }
+    },
+    "security": [
+     {
+      "tokenAuth": []
+     }
+    ]
+   },
+   "patch": {
+    "tags": [
+     "Tokens"
+    ],
+    "summary": "Update token",
+    "description": "",
+    "operationId": "registriesTokensPatch",
+    "parameters": [
+     {
+      "name": "registryId",
+      "in": "path",
+      "required": true,
+      "schema": {
+       "pattern": "^[0-9a-fA-F]{8}-([0-9a-fA-F]{4}-){3}[0-9a-fA-F]{12}$",
+       "type": "string"
+      }
+     },
+     {
+      "name": "tokenId",
+      "in": "path",
+      "required": true,
+      "schema": {
+       "pattern": "^[0-9a-fA-F]{8}-([0-9a-fA-F]{4}-){3}[0-9a-fA-F]{12}$",
+       "type": "string"
+      }
+     }
+    ],
+    "requestBody": {
+     "content": {
+      "application/json": {
+       "schema": {
+        "$ref": "#/components/schemas/PatchTokenInput"
+       }
+      }
+     }
+    },
+    "responses": {
+     "200": {
+      "description": "OK",
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/TokenResponse"
+        }
+       }
+      }
+     },
+     "400": {
+      "description": "Bad Request",
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/ApiErrorResponse"
+        }
+       }
+      }
+     }
+    },
+    "security": [
+     {
+      "tokenAuth": []
+     }
+    ]
+   },
+   "put": {
+    "tags": [
+     "Tokens"
+    ],
+    "summary": "Create or replace token",
+    "description": "Create/replace a token\n- password is only available once in the create response\n- \"name\" cannot be changed",
+    "operationId": "registriesTokensPut",
+    "parameters": [
+     {
+      "name": "registryId",
+      "in": "path",
+      "required": true,
+      "schema": {
+       "pattern": "^[0-9a-fA-F]{8}-([0-9a-fA-F]{4}-){3}[0-9a-fA-F]{12}$",
+       "type": "string"
+      }
+     },
+     {
+      "name": "tokenId",
+      "in": "path",
+      "required": true,
+      "schema": {
+       "pattern": "^[0-9a-fA-F]{8}-([0-9a-fA-F]{4}-){3}[0-9a-fA-F]{12}$",
+       "type": "string"
+      }
+     }
+    ],
+    "requestBody": {
+     "content": {
+      "application/json": {
+       "schema": {
+        "$ref": "#/components/schemas/PutTokenInput"
+       }
+      }
+     }
+    },
+    "responses": {
+     "201": {
+      "description": "Created",
+      "headers": {
+       "Location": {
+        "style": "simple",
+        "schema": {
+         "type": "string"
+        }
+       }
+      },
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/PutTokenOutput"
+        }
+       }
+      }
+     },
+     "400": {
+      "description": "Bad Request",
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/ApiErrorResponse"
+        }
+       }
+      }
+     },
+     "409": {
+      "description": "Conflict",
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/ApiErrorResponse"
+        }
+       }
+      }
+     }
+    },
+    "security": [
+     {
+      "tokenAuth": []
+     }
+    ]
+   }
+  }
+ },
+ "components": {
+  "schemas": {
+   "ApiErrorMessage": {
+    "required": [
+     "errorCode",
+     "message"
+    ],
+    "type": "object",
+    "properties": {
+     "errorCode": {
+      "type": "string",
+      "example": "123"
+     },
+     "message": {
+      "type": "string"
+     }
+    }
+   },
+   "ApiErrorResponse": {
+    "required": [
+     "httpStatus",
+     "messages"
+    ],
+    "type": "object",
+    "properties": {
+     "httpStatus": {
+      "type": "integer",
+      "example": 400
+     },
+     "messages": {
+      "type": "array",
+      "items": {
+       "$ref": "#/components/schemas/ApiErrorMessage"
+      },
+      "x-nullable": true
+     }
+    }
+   },
+   "ApiResourceMetadata": {
+    "title": "Metadata",
+    "required": [
+     "createdBy",
+     "createdByUserId",
+     "createdDate",
+     "state"
+    ],
+    "type": "object",
+    "properties": {
+     "createdByUserId": {
+      "type": "string"
+     },
+     "createdDate": {
+      "type": "string",
+      "format": "date-time"
+     },
+     "lastModifiedBy": {
+      "type": "string"
+     },
+     "lastModifiedByUserId": {
+      "type": "string"
+     },
+     "lastModifiedDate": {
+      "type": "string",
+      "format": "date-time"
+     },
+     "state": {
+      "type": "string"
+     }
+    },
+    "x-nullable": true
+   },
+   "Credentials": {
+    "required": [
+     "username",
+     "password"
+    ],
+    "type": "object",
+    "properties": {
+     "password": {
+      "type": "string",
+      "example": ""
+     },
+     "username": {
+      "type": "string",
+      "example": "push-token"
+     }
+    },
+    "x-nullable": true
+   },
+   "EnumsDay": {
+    "enum": [
+     "Wednesday",
+     "Thursday",
+     "Friday",
+     "Saturday",
+     "Sunday",
+     "Monday",
+     "Tuesday"
+    ],
+    "type": "string"
+   },
+   "Location": {
+    "type": "object",
+    "properties": {
+     "id": {
+      "type": "string",
+      "example": "de/txl"
+     }
+    }
+   },
+   "LocationsResponse": {
+    "type": "object",
+    "properties": {
+     "href": {
+      "type": "string"
+     },
+     "id": {
+      "type": "string"
+     },
+     "items": {
+      "type": "array",
+      "items": {
+       "$ref": "#/components/schemas/Location"
+      },
+      "x-nullable": true
+     },
+     "type": {
+      "type": "string"
+     }
+    }
+   },
+   "PaginationLinks": {
+    "required": [
+     "next",
+     "self",
+     "previous"
+    ],
+    "type": "object",
+    "properties": {
+     "next": {
+      "type": "string"
+     },
+     "previous": {
+      "type": "string"
+     },
+     "self": {
+      "type": "string"
+     }
+    }
+   },
+   "PatchRegistryInput": {
+    "type": "object",
+    "properties": {
+     "garbageCollectionSchedule": {
+      "$ref": "#/components/schemas/WeeklySchedule"
+     },
+     "maintenanceWindow": {
+      "$ref": "#/components/schemas/WeeklySchedule"
+     }
+    }
+   },
+   "PatchTokenInput": {
+    "type": "object",
+    "properties": {
+     "expiryDate": {
+      "type": "string",
+      "format": "date-time",
+      "x-nullable": true
+     },
+     "scopes": {
+      "type": "array",
+      "items": {
+       "$ref": "#/components/schemas/Scope"
+      },
+      "x-nullable": true
+     },
+     "status": {
+      "enum": [
+       "enabled",
+       "disabled"
+      ],
+      "type": "string"
+     }
+    }
+   },
+   "PostRegistryInput": {
+    "required": [
+     "properties"
+    ],
+    "type": "object",
+    "properties": {
+     "properties": {
+      "$ref": "#/components/schemas/PostRegistryProperties"
+     }
+    }
+   },
+   "PostRegistryOutput": {
+    "required": [
+     "metadata",
+     "properties"
+    ],
+    "type": "object",
+    "properties": {
+     "href": {
+      "type": "string"
+     },
+     "id": {
+      "type": "string"
+     },
+     "metadata": {
+      "$ref": "#/components/schemas/ApiResourceMetadata"
+     },
+     "properties": {
+      "$ref": "#/components/schemas/RegistryProperties"
+     },
+     "type": {
+      "type": "string"
+     }
+    }
+   },
+   "PostRegistryProperties": {
+    "required": [
+     "name",
+     "location"
+    ],
+    "type": "object",
+    "properties": {
+     "garbageCollectionSchedule": {
+      "$ref": "#/components/schemas/WeeklySchedule"
+     },
+     "location": {
+      "type": "string",
+      "example": "de/txl"
+     },
+     "maintenanceWindow": {
+      "$ref": "#/components/schemas/WeeklySchedule"
+     },
+     "name": {
+      "pattern": "^[a-z][-a-z0-9]{1,61}[a-z0-9]$",
+      "type": "string",
+      "example": "my-registry"
+     }
+    }
+   },
+   "PostTokenInput": {
+    "required": [
+     "properties"
+    ],
+    "type": "object",
+    "properties": {
+     "properties": {
+      "$ref": "#/components/schemas/PostTokenProperties"
+     }
+    }
+   },
+   "PostTokenOutput": {
+    "required": [
+     "metadata",
+     "properties"
+    ],
+    "type": "object",
+    "properties": {
+     "href": {
+      "type": "string"
+     },
+     "id": {
+      "type": "string"
+     },
+     "metadata": {
+      "$ref": "#/components/schemas/ApiResourceMetadata"
+     },
+     "properties": {
+      "$ref": "#/components/schemas/TokenProperties"
+     },
+     "type": {
+      "type": "string"
+     }
+    }
+   },
+   "PostTokenProperties": {
+    "required": [
+     "name"
+    ],
+    "type": "object",
+    "properties": {
+     "expiryDate": {
+      "type": "string",
+      "format": "date-time",
+      "x-nullable": true
+     },
+     "name": {
+      "minLength": 1,
+      "pattern": "^[A-Za-z][-A-Za-z0-9]{0,61}[A-Za-z0-9]$",
+      "type": "string",
+      "example": "push-token"
+     },
+     "scopes": {
+      "type": "array",
+      "items": {
+       "$ref": "#/components/schemas/Scope"
+      },
+      "x-nullable": true
+     },
+     "status": {
+      "enum": [
+       "enabled",
+       "disabled"
+      ],
+      "type": "string"
+     }
+    }
+   },
+   "PutRegistryInput": {
+    "required": [
+     "properties"
+    ],
+    "type": "object",
+    "properties": {
+     "properties": {
+      "$ref": "#/components/schemas/PostRegistryProperties"
+     }
+    }
+   },
+   "PutRegistryOutput": {
+    "required": [
+     "metadata",
+     "properties"
+    ],
+    "type": "object",
+    "properties": {
+     "href": {
+      "type": "string"
+     },
+     "id": {
+      "type": "string"
+     },
+     "metadata": {
+      "$ref": "#/components/schemas/ApiResourceMetadata"
+     },
+     "properties": {
+      "$ref": "#/components/schemas/RegistryProperties"
+     },
+     "type": {
+      "type": "string"
+     }
+    }
+   },
+   "PutTokenInput": {
+    "required": [
+     "properties"
+    ],
+    "type": "object",
+    "properties": {
+     "properties": {
+      "$ref": "#/components/schemas/PostTokenProperties"
+     }
+    }
+   },
+   "PutTokenOutput": {
+    "required": [
+     "metadata",
+     "properties"
+    ],
+    "type": "object",
+    "properties": {
+     "href": {
+      "type": "string"
+     },
+     "id": {
+      "type": "string"
+     },
+     "metadata": {
+      "$ref": "#/components/schemas/ApiResourceMetadata"
+     },
+     "properties": {
+      "$ref": "#/components/schemas/TokenProperties"
+     },
+     "type": {
+      "type": "string"
+     }
+    }
+   },
+   "RegistriesResponse": {
+    "required": [
+     "limit",
+     "nextPageToken",
+     "_links"
+    ],
+    "type": "object",
+    "properties": {
+     "_links": {
+      "$ref": "#/components/schemas/PaginationLinks"
+     },
+     "href": {
+      "type": "string"
+     },
+     "id": {
+      "type": "string"
+     },
+     "items": {
+      "type": "array",
+      "items": {
+       "$ref": "#/components/schemas/RegistryResponse"
+      },
+      "x-nullable": true
+     },
+     "limit": {
+      "type": "integer"
+     },
+     "nextPageToken": {
+      "type": "string"
+     },
+     "type": {
+      "type": "string"
+     }
+    }
+   },
+   "RegistryProperties": {
+    "required": [
+     "name",
+     "location"
+    ],
+    "type": "object",
+    "properties": {
+     "garbageCollectionSchedule": {
+      "$ref": "#/components/schemas/WeeklySchedule"
+     },
+     "hostname": {
+      "type": "string",
+      "example": "my-registry.cr.ionos.com"
+     },
+     "location": {
+      "type": "string",
+      "example": "de/txl"
+     },
+     "maintenanceWindow": {
+      "$ref": "#/components/schemas/WeeklySchedule"
+     },
+     "name": {
+      "pattern": "^[a-z][-a-z0-9]{1,61}[a-z0-9]$",
+      "type": "string",
+      "example": "my-registry"
+     },
+     "storageUsage": {
+      "$ref": "#/components/schemas/StorageUsage"
+     }
+    },
+    "x-nullable": true
+   },
+   "RegistryResponse": {
+    "required": [
+     "metadata",
+     "properties"
+    ],
+    "type": "object",
+    "properties": {
+     "href": {
+      "type": "string"
+     },
+     "id": {
+      "type": "string"
+     },
+     "metadata": {
+      "$ref": "#/components/schemas/ApiResourceMetadata"
+     },
+     "properties": {
+      "$ref": "#/components/schemas/RegistryProperties"
+     },
+     "type": {
+      "type": "string"
+     }
+    }
+   },
+   "Scope": {
+    "required": [
+     "actions",
+     "name",
+     "type"
+    ],
+    "type": "object",
+    "properties": {
+     "actions": {
+      "type": "array",
+      "items": {
+       "type": "string"
+      },
+      "x-nullable": true,
+      "example": "[\"pull\", \"push\", \"delete\"]"
+     },
+     "name": {
+      "type": "string",
+      "example": "*"
+     },
+     "type": {
+      "type": "string",
+      "example": "repository"
+     }
+    }
+   },
+   "StorageUsage": {
+    "required": [
+     "bytes"
+    ],
+    "type": "object",
+    "properties": {
+     "bytes": {
+      "type": "integer",
+      "x-nullable": true
+     },
+     "updatedAt": {
+      "type": "string",
+      "format": "date-time",
+      "x-nullable": true
+     }
+    },
+    "x-nullable": true
+   },
+   "TokenProperties": {
+    "required": [
+     "name",
+     "credentials"
+    ],
+    "type": "object",
+    "properties": {
+     "credentials": {
+      "$ref": "#/components/schemas/Credentials"
+     },
+     "expiryDate": {
+      "type": "string",
+      "format": "date-time",
+      "x-nullable": true
+     },
+     "name": {
+      "minLength": 1,
+      "pattern": "^[A-Za-z][-A-Za-z0-9]{0,61}[A-Za-z0-9]$",
+      "type": "string",
+      "example": "push-token"
+     },
+     "scopes": {
+      "type": "array",
+      "items": {
+       "$ref": "#/components/schemas/Scope"
+      },
+      "x-nullable": true
+     },
+     "status": {
+      "enum": [
+       "enabled",
+       "disabled"
+      ],
+      "type": "string"
+     }
+    },
+    "x-nullable": true
+   },
+   "TokenResponse": {
+    "required": [
+     "metadata",
+     "properties"
+    ],
+    "type": "object",
+    "properties": {
+     "href": {
+      "type": "string"
+     },
+     "id": {
+      "type": "string"
+     },
+     "metadata": {
+      "$ref": "#/components/schemas/ApiResourceMetadata"
+     },
+     "properties": {
+      "$ref": "#/components/schemas/TokenProperties"
+     },
+     "type": {
+      "type": "string"
+     }
+    }
+   },
+   "TokensResponse": {
+    "required": [
+     "limit",
+     "offset",
+     "count",
+     "total",
+     "_links"
+    ],
+    "type": "object",
+    "properties": {
+     "_links": {
+      "$ref": "#/components/schemas/PaginationLinks"
+     },
+     "count": {
+      "type": "integer"
+     },
+     "href": {
+      "type": "string"
+     },
+     "id": {
+      "type": "string"
+     },
+     "items": {
+      "type": "array",
+      "items": {
+       "$ref": "#/components/schemas/TokenResponse"
+      },
+      "x-nullable": true
+     },
+     "limit": {
+      "type": "integer"
+     },
+     "offset": {
+      "type": "integer"
+     },
+     "total": {
+      "type": "integer"
+     },
+     "type": {
+      "type": "string"
+     }
+    }
+   },
+   "WeeklySchedule": {
+    "required": [
+     "days",
+     "time"
+    ],
+    "type": "object",
+    "properties": {
+     "days": {
+      "type": "array",
+      "items": {
+       "$ref": "#/components/schemas/EnumsDay"
+      },
+      "x-nullable": true
+     },
+     "time": {
+      "type": "string",
+      "description": "UTC time of day e.g. 01:00:00 - as defined by partial-time - RFC3339",
+      "format": "time",
+      "example": "01:23:00+00:00"
+     }
+    },
+    "x-nullable": true
+   }
+  },
+  "securitySchemes": {
+   "tokenAuth": {
+    "type": "apiKey",
+    "name": "Authorization",
+    "in": "header",
+    "description": "Please provide header value as 'Bearer ' and don't forget to add 'Bearer' HTTP Authorization Scheme before the token"
+   }
+  }
+ }
+}
