@@ -39,7 +39,7 @@ func dataSourceK8sNodePool() *schema.Resource {
 			},
 			"datacenter_id": {
 				Type:        schema.TypeString,
-				Computed:    true,
+				Optional:    true,
 				Description: "The UUID of the VDC",
 			},
 			"state": {
@@ -69,7 +69,7 @@ func dataSourceK8sNodePool() *schema.Resource {
 			"availability_zone": {
 				Type:        schema.TypeString,
 				Description: "The compute availability zone in which the nodes should exist",
-				Computed:    true,
+				Optional:    true,
 			},
 			"storage_type": {
 				Type:        schema.TypeString,
@@ -187,11 +187,11 @@ func dataSourceK8sNodePool() *schema.Resource {
 					Type: schema.TypeString,
 				},
 			},
-			"gateway_ip": {
-				Type:        schema.TypeString,
-				Description: "Public IP address for the gateway performing source NAT for the node pool's nodes belonging to a private cluster. Required only if the node pool belongs to a private cluster.",
-				Computed:    true,
-			},
+			//"gateway_ip": {
+			//	Type:        schema.TypeString,
+			//	Description: "Public IP address for the gateway performing source NAT for the node pool's nodes belonging to a private cluster. Required only if the node pool belongs to a private cluster.",
+			//	Computed:    true,
+			//},
 		},
 		Timeouts: &resourceDefaultTimeouts,
 	}
@@ -203,15 +203,19 @@ func dataSourceK8sReadNodePool(ctx context.Context, d *schema.ResourceData, meta
 	clusterId := d.Get("k8s_cluster_id").(string)
 	idValue, idOk := d.GetOk("id")
 	nameValue, nameOk := d.GetOk("name")
+	dcIdValue, dcIdOk := d.GetOk("datacenter_id")
+	avZoneValue, avZoneOk := d.GetOk("availability_zone")
 
 	id := idValue.(string)
 	name := nameValue.(string)
+	dcId := dcIdValue.(string)
+	avZone := avZoneValue.(string)
 
-	if idOk && nameOk {
-		return diag.FromErr(errors.New("id and name cannot be both specified in the same time"))
+	if idOk && (nameOk || dcIdOk || avZoneOk) {
+		return diag.FromErr(errors.New("id and name/datacenter_id/availability_zone cannot be both specified in the same time, choose between id or a combination of other parameters"))
 	}
-	if !idOk && !nameOk {
-		return diag.FromErr(errors.New("please provide either the lan id or name"))
+	if !idOk && !nameOk && !dcIdOk && !avZoneOk {
+		return diag.FromErr(errors.New("please provide either the lan id or other parameter like name or datacenter_id"))
 	}
 
 	var nodePool ionoscloud.KubernetesNodePool
@@ -230,44 +234,88 @@ func dataSourceK8sReadNodePool(ctx context.Context, d *schema.ResourceData, meta
 		/* search by name */
 		var results []ionoscloud.KubernetesNodePool
 
-		partialMatch := d.Get("partial_match").(bool)
+		if nameOk {
+			partialMatch := d.Get("partial_match").(bool)
 
-		log.Printf("[INFO] Using data source for k8s nodepool by name with partial_match %t and name: %s", partialMatch, name)
+			log.Printf("[INFO] Using data source for k8s nodepool by name with partial_match %t and name: %s", partialMatch, name)
 
-		if partialMatch {
-			nodePools, apiResponse, err := client.KubernetesApi.K8sNodepoolsGet(ctx, clusterId).Depth(1).Filter("name", name).Execute()
-			logApiRequestTime(apiResponse)
-			if err != nil {
-				return diag.FromErr(fmt.Errorf("an error occurred while fetching k8s nodepools: %s", err.Error()))
+			if partialMatch {
+				nodePools, apiResponse, err := client.KubernetesApi.K8sNodepoolsGet(ctx, clusterId).Depth(1).Filter("name", name).Execute()
+				logApiRequestTime(apiResponse)
+				if err != nil {
+					return diag.FromErr(fmt.Errorf("an error occurred while fetching k8s nodepools: %s", err.Error()))
+				}
+				if len(*nodePools.Items) == 0 {
+					return diag.FromErr(fmt.Errorf("no result found with the specified criteria name with partial match: %s", name))
+				}
+				results = *nodePools.Items
+			} else {
+				nodePools, apiResponse, err := client.KubernetesApi.K8sNodepoolsGet(ctx, clusterId).Depth(1).Execute()
+				logApiRequestTime(apiResponse)
+				if err != nil {
+					return diag.FromErr(fmt.Errorf("an error occurred while fetching k8s nodepools: %s", err.Error()))
+				}
+
+				if nodePools.Items != nil {
+					var nameResults []ionoscloud.KubernetesNodePool
+					for _, c := range *nodePools.Items {
+						if c.Properties != nil && c.Properties.Name != nil && strings.EqualFold(*c.Properties.Name, name) {
+							tmpNodePool, apiResponse, err := client.KubernetesApi.K8sNodepoolsFindById(ctx, clusterId, *c.Id).Execute()
+							logApiRequestTime(apiResponse)
+							if err != nil {
+								return diag.FromErr(fmt.Errorf("an error occurred while fetching k8s nodepool with ID %s: %w", *c.Id, err))
+							}
+							/* lan found */
+							nameResults = append(nameResults, tmpNodePool)
+							break
+						}
+					}
+					if len(nameResults) == 0 {
+						return diag.FromErr(fmt.Errorf("no result found with the specified criteria name: %s", name))
+					}
+					results = nameResults
+				}
 			}
-
-			results = *nodePools.Items
 		} else {
 			nodePools, apiResponse, err := client.KubernetesApi.K8sNodepoolsGet(ctx, clusterId).Depth(1).Execute()
 			logApiRequestTime(apiResponse)
 			if err != nil {
 				return diag.FromErr(fmt.Errorf("an error occurred while fetching k8s nodepools: %s", err.Error()))
 			}
+			results = *nodePools.Items
+		}
 
-			if nodePools.Items != nil {
-				for _, c := range *nodePools.Items {
-					if c.Properties != nil && c.Properties.Name != nil && strings.EqualFold(*c.Properties.Name, name) {
-						tmpNodePool, apiResponse, err := client.KubernetesApi.K8sNodepoolsFindById(ctx, clusterId, *c.Id).Execute()
-						logApiRequestTime(apiResponse)
-						if err != nil {
-							return diag.FromErr(fmt.Errorf("an error occurred while fetching k8s nodepool with ID %s: %w", *c.Id, err))
-						}
-						/* lan found */
-						results = append(results, tmpNodePool)
-						break
+		if dcIdOk && dcId != "" {
+			var dcIdResults []ionoscloud.KubernetesNodePool
+			if results != nil {
+				for _, k8sNodepool := range results {
+					if k8sNodepool.Properties != nil && k8sNodepool.Properties.DatacenterId != nil && strings.EqualFold(*k8sNodepool.Properties.DatacenterId, dcId) {
+						dcIdResults = append(dcIdResults, k8sNodepool)
 					}
 				}
 			}
+			if dcIdResults == nil || len(dcIdResults) == 0 {
+				return diag.FromErr(fmt.Errorf("no result found with the specified criteria: datacenter_id = %s", dcId))
+			}
+			results = dcIdResults
 		}
 
-		if results == nil || len(results) == 0 {
-			return diag.FromErr(fmt.Errorf("no nodepool found with the specified name %s", name))
-		} else if len(results) > 1 {
+		if avZoneOk && avZone != "" {
+			var avZoneResults []ionoscloud.KubernetesNodePool
+			if results != nil {
+				for _, k8sNodepool := range results {
+					if k8sNodepool.Properties != nil && k8sNodepool.Properties.AvailabilityZone != nil && strings.EqualFold(*k8sNodepool.Properties.AvailabilityZone, avZone) {
+						avZoneResults = append(avZoneResults, k8sNodepool)
+					}
+				}
+			}
+			if avZoneResults == nil || len(avZoneResults) == 0 {
+				return diag.FromErr(fmt.Errorf("no result found with the specified criteria: availability_zone = %s", avZone))
+			}
+			results = avZoneResults
+		}
+
+		if len(results) > 1 {
 			return diag.FromErr(fmt.Errorf("more than one nodepool found with the specified name %s", name))
 		} else {
 			nodePool = results[0]

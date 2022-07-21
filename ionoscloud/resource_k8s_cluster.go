@@ -68,12 +68,12 @@ func resourcek8sCluster() *schema.Resource {
 					Type: schema.TypeString,
 				},
 			},
-			"public": {
-				Type:        schema.TypeBool,
-				Description: "The indicator if the cluster is public or private. Be aware that setting it to false is currently in beta phase.",
-				Optional:    true,
-				Default:     true,
-			},
+			//"public": {
+			//	Type:        schema.TypeBool,
+			//	Description: "The indicator if the cluster is public or private. Be aware that setting it to false is currently in beta phase.",
+			//	Optional:    true,
+			//	Default:     true,
+			//},
 			"api_subnet_allow_list": {
 				Type: schema.TypeList,
 				Description: "Access to the K8s API server is restricted to these CIDRs. Cluster-internal traffic is not " +
@@ -146,8 +146,8 @@ func resourcek8sClusterCreate(ctx context.Context, d *schema.ResourceData, meta 
 		cluster.Properties.MaintenanceWindow.DayOfTheWeek = &mdVal
 	}
 
-	public := d.Get("public").(bool)
-	cluster.Properties.Public = &public
+	//public := d.Get("public").(bool)
+	//cluster.Properties.Public = &public
 
 	if apiSubnet, apiSubnetOk := d.GetOk("api_subnet_allow_list"); apiSubnetOk {
 		apiSubnet := apiSubnet.([]interface{})
@@ -416,14 +416,14 @@ func resourcek8sClusterDelete(ctx context.Context, d *schema.ResourceData, meta 
 	for {
 		log.Printf("[INFO] Waiting for cluster %s to be deleted...", d.Id())
 
-		clusterdDeleted, dsErr := k8sClusterDeleted(ctx, client, d)
+		clusterDeleted, dsErr := k8sClusterDeleted(ctx, client, d)
 
 		if dsErr != nil {
-			diags := diag.FromErr(fmt.Errorf("error while checking deletion status of k8s cluster %s: %s", d.Id(), dsErr))
+			diags := diag.FromErr(fmt.Errorf("error while checking deletion status of k8s cluster %s: %w", d.Id(), dsErr))
 			return diags
 		}
 
-		if clusterdDeleted {
+		if clusterDeleted {
 			log.Printf("[INFO] Successfully deleted k8s cluster: %s", d.Id())
 			break
 		}
@@ -508,12 +508,12 @@ func setK8sClusterData(d *schema.ResourceData, cluster *ionoscloud.KubernetesClu
 			}
 		}
 
-		if cluster.Properties.Public != nil {
-			err := d.Set("public", *cluster.Properties.Public)
-			if err != nil {
-				return fmt.Errorf("error while setting public property for cluser %s: %s", d.Id(), err)
-			}
-		}
+		//if cluster.Properties.Public != nil {
+		//	err := d.Set("public", *cluster.Properties.Public)
+		//	if err != nil {
+		//		return fmt.Errorf("error while setting public property for cluser %s: %s", d.Id(), err)
+		//	}
+		//}
 
 		if cluster.Properties.ApiSubnetAllowList != nil {
 			apiSubnetAllowLists := make([]interface{}, len(*cluster.Properties.ApiSubnetAllowList), len(*cluster.Properties.ApiSubnetAllowList))
@@ -561,7 +561,7 @@ func k8sClusterDeleted(ctx context.Context, client *ionoscloud.APIClient, d *sch
 		if apiResponse != nil && apiResponse.Response != nil && apiResponse.StatusCode == 404 {
 			return true, nil
 		}
-		return true, fmt.Errorf("error checking k8s cluster deletion status: %s", err)
+		return true, fmt.Errorf("error checking k8s cluster deletion status: %w", err)
 	}
 	return false, nil
 }

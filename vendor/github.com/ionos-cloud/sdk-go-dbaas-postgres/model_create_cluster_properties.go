@@ -25,11 +25,13 @@ type CreateClusterProperties struct {
 	// The amount of memory per instance in megabytes. Has to be a multiple of 1024.
 	Ram *int32 `json:"ram"`
 	// The amount of storage per instance in megabytes.
-	StorageSize    *int32          `json:"storageSize"`
-	StorageType    *StorageType    `json:"storageType"`
-	Connections    *[]Connection   `json:"connections"`
-	Location       *Location       `json:"location"`
-	BackupLocation *BackupLocation `json:"backupLocation,omitempty"`
+	StorageSize *int32        `json:"storageSize"`
+	StorageType *StorageType  `json:"storageType"`
+	Connections *[]Connection `json:"connections"`
+	// The physical location where the cluster will be created. This will be where all of your instances live. Property cannot be modified after datacenter creation.
+	Location *string `json:"location"`
+	// The S3 location where the backups will be stored.
+	BackupLocation *string `json:"backupLocation,omitempty"`
 	// The friendly name of your cluster.
 	DisplayName         *string               `json:"displayName"`
 	MaintenanceWindow   *MaintenanceWindow    `json:"maintenanceWindow,omitempty"`
@@ -42,7 +44,7 @@ type CreateClusterProperties struct {
 // This constructor will assign default values to properties that have it defined,
 // and makes sure properties required by API are set, but the set of arguments
 // will change when the set of required properties is changed
-func NewCreateClusterProperties(postgresVersion string, instances int32, cores int32, ram int32, storageSize int32, storageType StorageType, connections []Connection, location Location, displayName string, credentials DBUser, synchronizationMode SynchronizationMode) *CreateClusterProperties {
+func NewCreateClusterProperties(postgresVersion string, instances int32, cores int32, ram int32, storageSize int32, storageType StorageType, connections []Connection, location string, displayName string, credentials DBUser, synchronizationMode SynchronizationMode) *CreateClusterProperties {
 	this := CreateClusterProperties{}
 
 	this.PostgresVersion = &postgresVersion
@@ -335,8 +337,8 @@ func (o *CreateClusterProperties) HasConnections() bool {
 }
 
 // GetLocation returns the Location field value
-// If the value is explicit nil, the zero value for Location will be returned
-func (o *CreateClusterProperties) GetLocation() *Location {
+// If the value is explicit nil, the zero value for string will be returned
+func (o *CreateClusterProperties) GetLocation() *string {
 	if o == nil {
 		return nil
 	}
@@ -348,7 +350,7 @@ func (o *CreateClusterProperties) GetLocation() *Location {
 // GetLocationOk returns a tuple with the Location field value
 // and a boolean to check if the value has been set.
 // NOTE: If the value is an explicit nil, `nil, true` will be returned
-func (o *CreateClusterProperties) GetLocationOk() (*Location, bool) {
+func (o *CreateClusterProperties) GetLocationOk() (*string, bool) {
 	if o == nil {
 		return nil, false
 	}
@@ -357,7 +359,7 @@ func (o *CreateClusterProperties) GetLocationOk() (*Location, bool) {
 }
 
 // SetLocation sets field value
-func (o *CreateClusterProperties) SetLocation(v Location) {
+func (o *CreateClusterProperties) SetLocation(v string) {
 
 	o.Location = &v
 
@@ -373,8 +375,8 @@ func (o *CreateClusterProperties) HasLocation() bool {
 }
 
 // GetBackupLocation returns the BackupLocation field value
-// If the value is explicit nil, the zero value for BackupLocation will be returned
-func (o *CreateClusterProperties) GetBackupLocation() *BackupLocation {
+// If the value is explicit nil, the zero value for string will be returned
+func (o *CreateClusterProperties) GetBackupLocation() *string {
 	if o == nil {
 		return nil
 	}
@@ -386,7 +388,7 @@ func (o *CreateClusterProperties) GetBackupLocation() *BackupLocation {
 // GetBackupLocationOk returns a tuple with the BackupLocation field value
 // and a boolean to check if the value has been set.
 // NOTE: If the value is an explicit nil, `nil, true` will be returned
-func (o *CreateClusterProperties) GetBackupLocationOk() (*BackupLocation, bool) {
+func (o *CreateClusterProperties) GetBackupLocationOk() (*string, bool) {
 	if o == nil {
 		return nil, false
 	}
@@ -395,7 +397,7 @@ func (o *CreateClusterProperties) GetBackupLocationOk() (*BackupLocation, bool) 
 }
 
 // SetBackupLocation sets field value
-func (o *CreateClusterProperties) SetBackupLocation(v BackupLocation) {
+func (o *CreateClusterProperties) SetBackupLocation(v string) {
 
 	o.BackupLocation = &v
 

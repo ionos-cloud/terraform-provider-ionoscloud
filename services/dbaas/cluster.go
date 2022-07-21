@@ -106,12 +106,12 @@ func GetDbaasPgSqlClusterDataCreate(d *schema.ResourceData) (*dbaas.CreateCluste
 	}
 
 	if location, ok := d.GetOk("location"); ok {
-		location := dbaas.Location(location.(string))
+		location := location.(string)
 		dbaasCluster.Properties.Location = &location
 	}
 
 	if backupLocation, ok := d.GetOk("backup_location"); ok {
-		backupLocation := dbaas.BackupLocation(backupLocation.(string))
+		backupLocation := backupLocation.(string)
 		dbaasCluster.Properties.BackupLocation = &backupLocation
 	}
 

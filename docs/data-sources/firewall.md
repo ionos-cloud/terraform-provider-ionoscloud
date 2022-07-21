@@ -47,6 +47,26 @@ data "ionoscloud_firewall" "example" {
 }
 ```
 
+### By Type
+```hcl
+data "ionoscloud_firewall" "example" {
+  datacenter_id   = <datacenter_id>
+  server_id       = <server_id>
+  nic_id          = <nic_id>
+  type            = "INGRESS"
+}
+```
+
+### By Protocol
+```hcl
+data "ionoscloud_firewall" "example" {
+  datacenter_id   = <datacenter_id>
+  server_id       = <server_id>
+  nic_id          = <nic_id>
+  protocol            = "ICMP"
+}
+```
+
 ## Argument Reference
 
 The following arguments are supported:
@@ -57,6 +77,8 @@ The following arguments are supported:
 * `datacenter_id` - (Required) The Virtual Data Center ID.
 * `server_id` - (Required) The Server ID.
 * `nic_id` - (Required) The NIC ID.
+* `type` - (Optional) Type of the firewall rule you want to search for.
+* `protocol` - (Optional) Protocol of the firewall rule you want to search for.
 
 Either `id` or `name` must be provided. If none, or both are provided, the datasource will return an error.
 

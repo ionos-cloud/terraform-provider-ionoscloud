@@ -40,12 +40,21 @@ data "ionoscloud_networkloadbalancer" "example" {
 }
 ```
 
+### By Target Lan
+```hcl
+data "ionoscloud_networkloadbalancer" "example" {
+  datacenter_id = ionoscloud_datacenter.example.id
+  target_lan			= <target_lan>
+}
+```
+
 ## Argument Reference
 
 * `datacenter_id` - (Required) Datacenter's UUID.
 * `id` - (Optional) ID of the network load balancer you want to search for.
 * `name` - (Optional) Name of an existing network load balancer that you want to search for. Search by name is case-insensitive. The whole resource name is required if `partial_match` parameter is not set to true..
 * `partial_match` - (Optional) Whether partial matching is allowed or not when using name argument. Default value is false.
+* `target_lan` - (Optional) Targer Lan of the network load balancer you want to search for.
 
 `datacenter_id` and either `id` or `name` must be provided. If none, or both of `name` and `id` are provided, the datasource will return an error.
 

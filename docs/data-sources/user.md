@@ -27,10 +27,42 @@ data "ionoscloud_user" "example" {
 }
 ```
 
+### By First Name
+```hcl
+data "ionoscloud_user" "example" {
+  first_name			= "example"
+}
+```
+
+### By Last Name
+```hcl
+data "ionoscloud_user" "example" {
+  last_name			= "example"
+}
+```
+
+### By S3 Canonical User ID
+```hcl
+data "ionoscloud_user" "example" {
+  s3_canonical_user_id			= <s3_canonical_user_id>
+}
+```
+
+### By Administrator
+```hcl
+data "ionoscloud_user" "example" {
+  administrator			= false
+}
+```
+
 ## Argument Reference
 
 * `email` - (Optional) Email of an existing user that you want to search for. 
 * `id` - (Optional) ID of the user you want to search for.
+* `first_name` - (Optional) First Name of the user you want to search for.
+*  `last_name` - (Optional) Last Name of the user you want to search for.
+*  `s3_canonical_user_id` - (Optional) Canonical S3 ID of the user you want to search for.
+*  `administrator` - (Optional) true if the user you want to search for is an administrator.
 
 Either `email` or `id` must be provided. If none, or both are provided, the datasource will return an error.
 

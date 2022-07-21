@@ -13,13 +13,23 @@ The **Image data source** can be used to search for and return an existing image
 
 ## Example Usage
 
+### By ID
+```hcl
+data "ionoscloud_image" "example" {
+  id                  = <image_id>
+}
+```
+
+### By Other Parameters
 ```hcl
 data "ionoscloud_image" "example" {
   type                  = "HDD"
   cloud_init            = "V1"
   location              = "us/las"
+  image_alias           = "centos:7_iso"
 }
 ```
+Note: The image_alias parameter must be used with location parameter
 
 ## Argument Reference
 
@@ -29,6 +39,7 @@ data "ionoscloud_image" "example" {
  * `type` - (Optional) The image type, HDD or CD-ROM.
  * `cloud_init` - (Optional) Cloud init compatibility ("NONE" or "V1")
  * `version` - (Optional) Version of the image (see details below). Please note that this argument is **DEPRECATED**, and we do not recommend using it since it does not assure correct results.
+ * `image_alias` and `location` - (Optional) Alias of the image you want to search for.
 
 If both "name" and "version" are provided the plugin will concatenate the two strings in this format [name]-[version].
 

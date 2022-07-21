@@ -110,6 +110,10 @@ func dataSourceVolume() *schema.Resource {
 				Type:     schema.TypeString,
 				Required: true,
 			},
+			"server_id": {
+				Type:     schema.TypeString,
+				Optional: true,
+			},
 		},
 		Timeouts: &resourceDefaultTimeouts,
 	}
@@ -122,16 +126,18 @@ func dataSourceVolumeRead(ctx context.Context, d *schema.ResourceData, meta inte
 
 	idValue, idOk := d.GetOk("id")
 	nameValue, nameOk := d.GetOk("name")
+	serverIdValue, serverIdOk := d.GetOk("server_id")
 
 	id := idValue.(string)
 	name := nameValue.(string)
+	serverId := serverIdValue.(string)
 
 	if idOk && nameOk {
-		diags := diag.FromErr(errors.New("id and name cannot be both specified in the same time"))
+		diags := diag.FromErr(errors.New("id and name/server_id cannot be both specified in the same time, choose between id or a combination of other parameters"))
 		return diags
 	}
 	if !idOk && !nameOk {
-		diags := diag.FromErr(errors.New("please provide either the volume id or name"))
+		diags := diag.FromErr(errors.New("please provide either the volume id or other parameter like name or server_id"))
 		return diags
 	}
 	var volume ionoscloud.Volume
@@ -148,52 +154,58 @@ func dataSourceVolumeRead(ctx context.Context, d *schema.ResourceData, meta inte
 			diags := diag.FromErr(fmt.Errorf("an error occurred while fetching volume with ID %s: %w", id, err))
 			return diags
 		}
+		if serverIdOk && serverId != "" {
+			volumeFromServerId, apiResponse, err := client.ServersApi.DatacentersServersVolumesFindById(ctx, datacenterId, serverId, id).Execute()
+			logApiRequestTime(apiResponse)
+			if err != nil {
+				diags := diag.FromErr(fmt.Errorf("an error occurred while fetching volumes using server id: %w", err))
+				return diags
+			}
+			if *volumeFromServerId.Properties.BootServer != serverId {
+				diags := diag.FromErr(fmt.Errorf("an error occurred while fetching volumes using server id, because server id is not the same with boot server: %w", err))
+				return diags
+			}
+		}
 	} else {
 		/* search by name */
 		var results []ionoscloud.Volume
+		var diags diag.Diagnostics
 
 		partialMatch := d.Get("partial_match").(bool)
 
 		log.Printf("[INFO] Using data source for volume by name with partial_match %t and name: %s", partialMatch, name)
 
 		if partialMatch {
-			volumes, apiResponse, err := client.VolumesApi.DatacentersVolumesGet(ctx, datacenterId).Depth(1).Filter("name", name).Execute()
-			logApiRequestTime(apiResponse)
-
-			if err != nil {
-				diags := diag.FromErr(fmt.Errorf("an error occurred while fetching volumes: %w", err))
+			results, diags = getVolumes(ctx, client, datacenterId, serverId, name)
+			if diags != nil {
 				return diags
 			}
-			results = *volumes.Items
+			if len(results) == 0 {
+				return diag.FromErr(fmt.Errorf("no result found with the specified criteria: name with partial match: %s", name))
+			}
 		} else {
-			volumes, apiResponse, err := client.VolumesApi.DatacentersVolumesGet(ctx, datacenterId).Depth(1).Execute()
-			logApiRequestTime(apiResponse)
-
-			if err != nil {
-				diags := diag.FromErr(fmt.Errorf("an error occurred while fetching volumes: %w", err))
+			volumeItems, diags := getVolumes(ctx, client, datacenterId, serverId, "")
+			if diags != nil {
 				return diags
 			}
+			results = volumeItems
 
-			if volumes.Items != nil {
-				for _, v := range *volumes.Items {
+			if volumeItems != nil && nameOk {
+				var nameResults []ionoscloud.Volume
+				for _, v := range volumeItems {
 					if v.Properties != nil && v.Properties.Name != nil && strings.EqualFold(*v.Properties.Name, name) {
 						/* volume found */
-						volume, apiResponse, err = client.VolumesApi.DatacentersVolumesFindById(ctx, datacenterId, *v.Id).Execute()
-						logApiRequestTime(apiResponse)
-						if err != nil {
-							diags := diag.FromErr(fmt.Errorf("an error occurred while fetching volume %s: %w", *v.Id, err))
-							return diags
-						}
-						results = append(results, volume)
+						nameResults = append(nameResults, v) // volume in place of v
 					}
 				}
+				if len(nameResults) == 0 {
+					return diag.FromErr(fmt.Errorf("no result found with the specified criteria: name %s", name))
+				}
+				results = nameResults
 			}
-
 		}
 
-		if results == nil || len(results) == 0 {
-			return diag.FromErr(fmt.Errorf("no volume found with the specified criteria: name = %s", name))
-		} else if len(results) > 1 {
+		if len(results) > 1 {
 			return diag.FromErr(fmt.Errorf("more than one volume found with the specified criteria: name = %s", name))
 		} else {
 			volume = results[0]
@@ -205,4 +217,35 @@ func dataSourceVolumeRead(ctx context.Context, d *schema.ResourceData, meta inte
 	}
 
 	return nil
+}
+
+func getVolumes(ctx context.Context, client *ionoscloud.APIClient, datacenterId, serverId, name string) ([]ionoscloud.Volume, diag.Diagnostics) {
+	var results []ionoscloud.Volume
+	if serverId != "" {
+		request := client.ServersApi.DatacentersServersVolumesGet(ctx, datacenterId, serverId).Depth(2)
+		if name != "" {
+			request = request.Filter("name", name)
+		}
+		volumes, apiResponse, err := request.Execute()
+		logApiRequestTime(apiResponse)
+		if err != nil {
+			diags := diag.FromErr(fmt.Errorf("an error occurred while fetching volumes using server id: %w", err))
+			return nil, diags
+		}
+		results = *volumes.Items
+	} else {
+		request := client.VolumesApi.DatacentersVolumesGet(ctx, datacenterId).Depth(1)
+		if name != "" {
+			request = request.Filter("name", name)
+		}
+		volumes, apiResponse, err := request.Execute()
+		logApiRequestTime(apiResponse)
+
+		if err != nil {
+			diags := diag.FromErr(fmt.Errorf("an error occurred while fetching volumes: %w", err))
+			return nil, diags
+		}
+		results = *volumes.Items
+	}
+	return results, nil
 }

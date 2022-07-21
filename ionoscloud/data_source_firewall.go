@@ -31,7 +31,7 @@ func dataSourceFirewall() *schema.Resource {
 			},
 			"protocol": {
 				Type:     schema.TypeString,
-				Computed: true,
+				Optional: true,
 			},
 			"source_mac": {
 				Type:     schema.TypeString,
@@ -63,7 +63,7 @@ func dataSourceFirewall() *schema.Resource {
 			},
 			"type": {
 				Type:     schema.TypeString,
-				Computed: true,
+				Optional: true,
 			},
 			"datacenter_id": {
 				Type:         schema.TypeString,
@@ -94,15 +94,19 @@ func dataSourceFirewallRead(ctx context.Context, d *schema.ResourceData, meta in
 
 	idValue, idOk := d.GetOk("id")
 	nameValue, nameOk := d.GetOk("name")
+	firewallTypeValue, firewallTypeOk := d.GetOk("type")
+	protocolValue, protocolOk := d.GetOk("protocol")
 
 	id := idValue.(string)
 	name := nameValue.(string)
+	firewallType := firewallTypeValue.(string)
+	protocol := protocolValue.(string)
 
-	if idOk && nameOk {
-		return diag.FromErr(fmt.Errorf("id and name cannot be both specified in the same time"))
+	if idOk && (nameOk || firewallTypeOk || protocolOk) {
+		return diag.FromErr(fmt.Errorf("id and name/type/protocol cannot be both specified in the same time, choose between id or a combination of other parameters"))
 	}
-	if !idOk && !nameOk {
-		return diag.FromErr(fmt.Errorf("please provide either the firewall rule id or name"))
+	if !idOk && !nameOk && !firewallTypeOk && !protocolOk {
+		return diag.FromErr(fmt.Errorf("please provide either the firewall rule id or other parameter like name, type or protocol"))
 	}
 	var firewall ionoscloud.FirewallRule
 	var err error
@@ -120,44 +124,90 @@ func dataSourceFirewallRead(ctx context.Context, d *schema.ResourceData, meta in
 		/* search by name */
 		var results []ionoscloud.FirewallRule
 
-		partialMatch := d.Get("partial_match").(bool)
+		if nameOk {
+			partialMatch := d.Get("partial_match").(bool)
 
-		log.Printf("[INFO] Using data source for backup unit by name with partial_match %t and name: %s", partialMatch, name)
+			log.Printf("[INFO] Using data source for firewall by name with partial_match %t and name: %s", partialMatch, name)
 
-		if partialMatch {
-			firewalls, apiResponse, err := client.FirewallRulesApi.DatacentersServersNicsFirewallrulesGet(ctx, datacenterId, serverId, nicId).Depth(1).Filter("name", name).Execute()
-			logApiRequestTime(apiResponse)
+			if partialMatch {
+				firewalls, apiResponse, err := client.FirewallRulesApi.DatacentersServersNicsFirewallrulesGet(ctx, datacenterId, serverId, nicId).Depth(1).Filter("name", name).Execute()
+				logApiRequestTime(apiResponse)
 
-			if err != nil {
-				return diag.FromErr(fmt.Errorf("an error occurred while fetching firewall rules while searching by partial name: %s, %w", name, err))
+				if err != nil {
+					return diag.FromErr(fmt.Errorf("an error occurred while fetching firewall rules while searching by partial name: %s, %w", name, err))
+				}
+				if len(*firewalls.Items) == 0 {
+					return diag.FromErr(fmt.Errorf("no result found with the specified criteria: name with partial match: %s", name))
+				}
+				results = *firewalls.Items
+			} else {
+				firewalls, apiResponse, err := client.FirewallRulesApi.DatacentersServersNicsFirewallrulesGet(ctx, datacenterId, serverId, nicId).Depth(1).Execute()
+				logApiRequestTime(apiResponse)
+
+				if err != nil {
+					return diag.FromErr(fmt.Errorf("an error occurred while fetching  firewall rule: %w", err))
+				}
+
+				if firewalls.Items != nil && nameOk {
+					var nameResults []ionoscloud.FirewallRule
+					for _, fr := range *firewalls.Items {
+						if fr.Properties != nil && fr.Properties.Name != nil && strings.EqualFold(*fr.Properties.Name, name) {
+							tmpFirewall, apiResponse, err := client.FirewallRulesApi.DatacentersServersNicsFirewallrulesFindById(ctx, datacenterId, serverId, nicId, *fr.Id).Execute()
+							logApiRequestTime(apiResponse)
+							if err != nil {
+								return diag.FromErr(fmt.Errorf("an error occurred while fetching firewall rule with ID %s: %w", *fr.Id, err))
+							}
+							nameResults = append(nameResults, tmpFirewall)
+						}
+					}
+					if len(nameResults) == 0 {
+						return diag.FromErr(fmt.Errorf("no result found with the specified criteria: name %s", name))
+					}
+					results = nameResults
+				}
 			}
 
-			results = *firewalls.Items
 		} else {
 			firewalls, apiResponse, err := client.FirewallRulesApi.DatacentersServersNicsFirewallrulesGet(ctx, datacenterId, serverId, nicId).Depth(1).Execute()
 			logApiRequestTime(apiResponse)
-
 			if err != nil {
-				return diag.FromErr(fmt.Errorf("an error occurred while fetching  firewall rule: %w", err))
+				diags := diag.FromErr(fmt.Errorf("an error occurred while fetching firewalls: %s", err.Error()))
+				return diags
 			}
+			results = *firewalls.Items
+		}
 
-			if firewalls.Items != nil {
-				for _, fr := range *firewalls.Items {
-					if fr.Properties != nil && fr.Properties.Name != nil && strings.EqualFold(*fr.Properties.Name, name) {
-						tmpFirewall, apiResponse, err := client.FirewallRulesApi.DatacentersServersNicsFirewallrulesFindById(ctx, datacenterId, serverId, nicId, *fr.Id).Execute()
-						logApiRequestTime(apiResponse)
-						if err != nil {
-							return diag.FromErr(fmt.Errorf("an error occurred while fetching firewall rule with ID %s: %w", *fr.Id, err))
-						}
-						results = append(results, tmpFirewall)
+		if firewallTypeOk && firewallType != "" {
+			var firewallTypeResults []ionoscloud.FirewallRule
+			if results != nil {
+				for _, firewall := range results {
+					if firewall.Properties != nil && firewall.Properties.Type != nil && strings.EqualFold(*firewall.Properties.Type, firewallType) {
+						firewallTypeResults = append(firewallTypeResults, firewall)
 					}
 				}
 			}
+			if firewallTypeResults == nil || len(firewallTypeResults) == 0 {
+				return diag.FromErr(fmt.Errorf("no result found with the specified criteria: type = %s", firewallType))
+			}
+			results = firewallTypeResults
 		}
 
-		if results == nil || len(results) == 0 {
-			return diag.FromErr(fmt.Errorf("no firewall rule found with the specified name = %s", name))
-		} else if len(results) > 1 {
+		if protocolOk && protocol != "" {
+			var protocolResults []ionoscloud.FirewallRule
+			if results != nil {
+				for _, firewall := range results {
+					if firewall.Properties != nil && firewall.Properties.Protocol != nil && strings.EqualFold(*firewall.Properties.Protocol, protocol) {
+						protocolResults = append(protocolResults, firewall)
+					}
+				}
+			}
+			if protocolResults == nil || len(protocolResults) == 0 {
+				return diag.FromErr(fmt.Errorf("no result found with the specified criteria: protocol = %s", protocol))
+			}
+			results = protocolResults
+		}
+
+		if len(results) > 1 {
 			return diag.FromErr(fmt.Errorf("more than one firewall rule found with the specified criteria name = %s", name))
 		} else {
 			firewall = results[0]

@@ -37,11 +37,29 @@ data "ionoscloud_private_crossconnect" "example" {
 }
 ```
 
+### By Connectable Datasources
+```hcl
+data "ionoscloud_private_crossconnect" "example" {
+  name     = "PCC Example"
+  connectable_datacenters {
+    id = <datacenter_id>
+    name = "Datacenter Example"
+    location = "us/las"
+  }
+  connectable_datacenters {
+    id = <datacenter_id>
+    name = "Datacenter Example 2"
+    location = "us/las"
+  }
+}
+```
+
 ## Argument Reference
 
 * `id` - (Optional) ID of the private crossconnect you want to search for.
 * `name` - (Optional) Name of an existing private crossconnect that you want to search for. Search by name is case-insensitive. The whole resource name is required if `partial_match` parameter is not set to true..
 * `partial_match` - (Optional) Whether partial matching is allowed or not when using name argument. Default value is false.
+* `connectable_datacenters` - (Optional) A list of Connectable Datacenters of the private crossconnect you want to search for.
 
 Either `id` or `name` must be provided. If none, or both are provided, the datasource will return an error.
 

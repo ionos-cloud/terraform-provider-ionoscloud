@@ -47,7 +47,7 @@ func dataSourceNetworkLoadBalancer() *schema.Resource {
 			"target_lan": {
 				Type:        schema.TypeInt,
 				Description: "Id of the balanced private target LAN. (outbound)",
-				Computed:    true,
+				Optional:    true,
 			},
 			"lb_private_ips": {
 				Type: schema.TypeList,
@@ -76,15 +76,17 @@ func dataSourceNetworkLoadBalancerRead(ctx context.Context, d *schema.ResourceDa
 
 	idValue, idOk := d.GetOk("id")
 	nameValue, nameOk := d.GetOk("name")
+	targetLanValue, targetLanOk := d.GetOk("target_lan")
 
 	id := idValue.(string)
 	name := nameValue.(string)
+	targetLan := targetLanValue.(int)
 
-	if idOk && nameOk {
-		return diag.FromErr(errors.New("id and name cannot be both specified in the same time"))
+	if idOk && (nameOk || targetLanOk) {
+		return diag.FromErr(errors.New("id and name/target_lan cannot be both specified in the same time, choose between id or a combination of other parameters"))
 	}
-	if !idOk && !nameOk {
-		return diag.FromErr(errors.New("please provide either the lan id or name"))
+	if !idOk && !nameOk && !targetLanOk {
+		return diag.FromErr(errors.New("please provide either the lan id or other parameter like  target_lan or name"))
 	}
 	var networkLoadBalancer ionoscloud.NetworkLoadBalancer
 	var err error
@@ -101,42 +103,72 @@ func dataSourceNetworkLoadBalancerRead(ctx context.Context, d *schema.ResourceDa
 	} else {
 		/* search by name */
 		var results []ionoscloud.NetworkLoadBalancer
+		if nameOk {
+			partialMatch := d.Get("partial_match").(bool)
 
-		partialMatch := d.Get("partial_match").(bool)
+			log.Printf("[INFO] Using data source for network loadbalancer by name with partial_match %t and name: %s", partialMatch, name)
 
-		log.Printf("[INFO] Using data source for network loadbalancer by name with partial_match %t and name: %s", partialMatch, name)
+			if partialMatch {
+				networkLoadBalancers, apiResponse, err := client.NetworkLoadBalancersApi.DatacentersNetworkloadbalancersGet(ctx, datacenterId).Depth(1).Filter("name", name).Execute()
+				logApiRequestTime(apiResponse)
+				if err != nil {
+					return diag.FromErr(fmt.Errorf("an error occurred while fetching network loadbalancers: %s", err.Error()))
+				}
+				if len(*networkLoadBalancers.Items) == 0 {
+					return diag.FromErr(fmt.Errorf("no result found with the specified criteria: name with partial match: %s", name))
+				}
+				results = *networkLoadBalancers.Items
+			} else {
+				networkLoadBalancers, apiResponse, err := client.NetworkLoadBalancersApi.DatacentersNetworkloadbalancersGet(ctx, datacenterId).Depth(1).Execute()
+				logApiRequestTime(apiResponse)
+				if err != nil {
+					return diag.FromErr(fmt.Errorf("an error occurred while fetching network loadbalancers: %s", err.Error()))
+				}
 
-		if partialMatch {
-			networkLoadBalancers, apiResponse, err := client.NetworkLoadBalancersApi.DatacentersNetworkloadbalancersGet(ctx, datacenterId).Depth(1).Filter("name", name).Execute()
-			logApiRequestTime(apiResponse)
-			if err != nil {
-				return diag.FromErr(fmt.Errorf("an error occurred while fetching network loadbalancers: %s", err.Error()))
+				if networkLoadBalancers.Items != nil && nameOk {
+					var resultsByName []ionoscloud.NetworkLoadBalancer
+					for _, nlb := range *networkLoadBalancers.Items {
+						if nlb.Properties != nil && nlb.Properties.Name != nil && strings.EqualFold(*nlb.Properties.Name, name) {
+							tmpNetworkLoadBalancer, apiResponse, err := client.NetworkLoadBalancersApi.DatacentersNetworkloadbalancersFindByNetworkLoadBalancerId(ctx, datacenterId, *nlb.Id).Execute()
+							logApiRequestTime(apiResponse)
+							if err != nil {
+								return diag.FromErr(fmt.Errorf("an error occurred while fetching network loadbalancer with ID %s: %s", *nlb.Id, err.Error()))
+							}
+							// results = append(results, tmpNetworkLoadBalancer)
+							resultsByName = append(resultsByName, tmpNetworkLoadBalancer)
+						}
+					}
+					if resultsByName == nil || len(resultsByName) == 0 {
+						return diag.FromErr(fmt.Errorf("no result found with the specified criteria: name = %s", name))
+					}
+					results = resultsByName
+				}
 			}
-			results = *networkLoadBalancers.Items
 		} else {
 			networkLoadBalancers, apiResponse, err := client.NetworkLoadBalancersApi.DatacentersNetworkloadbalancersGet(ctx, datacenterId).Depth(1).Execute()
 			logApiRequestTime(apiResponse)
 			if err != nil {
 				return diag.FromErr(fmt.Errorf("an error occurred while fetching network loadbalancers: %s", err.Error()))
 			}
+			results = *networkLoadBalancers.Items
+		}
 
-			if networkLoadBalancers.Items != nil {
-				for _, nlb := range *networkLoadBalancers.Items {
-					if nlb.Properties != nil && nlb.Properties.Name != nil && strings.EqualFold(*nlb.Properties.Name, name) {
-						tmpNetworkLoadBalancer, apiResponse, err := client.NetworkLoadBalancersApi.DatacentersNetworkloadbalancersFindByNetworkLoadBalancerId(ctx, datacenterId, *nlb.Id).Execute()
-						logApiRequestTime(apiResponse)
-						if err != nil {
-							return diag.FromErr(fmt.Errorf("an error occurred while fetching network loadbalancer with ID %s: %s", *nlb.Id, err.Error()))
-						}
-						results = append(results, tmpNetworkLoadBalancer)
+		if targetLanOk && targetLan != 0 {
+			var targetLanResults []ionoscloud.NetworkLoadBalancer
+			if results != nil {
+				for _, networkLoadBalancer := range results {
+					if networkLoadBalancer.Properties != nil && networkLoadBalancer.Properties.TargetLan != nil && int(*networkLoadBalancer.Properties.TargetLan) == targetLan {
+						targetLanResults = append(targetLanResults, networkLoadBalancer)
 					}
 				}
 			}
+			if targetLanResults == nil || len(targetLanResults) == 0 {
+				return diag.FromErr(fmt.Errorf("no result found with the specified criteria: target_lan = %d", targetLan))
+			}
+			results = targetLanResults
 		}
 
-		if results == nil || len(results) == 0 {
-			return diag.FromErr(fmt.Errorf("no network load balancer found with the specified criteria: name = %s", name))
-		} else if len(results) > 1 {
+		if len(results) > 1 {
 			return diag.FromErr(fmt.Errorf("more than one network load balancer found with the specified criteria: name = %s", name))
 		} else {
 			networkLoadBalancer = results[0]

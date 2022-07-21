@@ -19,9 +19,11 @@ type ClusterProperties struct {
 	// The friendly name of your cluster.
 	DisplayName *string `json:"displayName,omitempty"`
 	// The PostgreSQL version of your cluster.
-	PostgresVersion *string         `json:"postgresVersion,omitempty"`
-	Location        *Location       `json:"location,omitempty"`
-	BackupLocation  *BackupLocation `json:"backupLocation,omitempty"`
+	PostgresVersion *string `json:"postgresVersion,omitempty"`
+	// The physical location where the cluster will be created. This will be where all of your instances live. Property cannot be modified after datacenter creation.
+	Location *string `json:"location,omitempty"`
+	// The S3 location where the backups will be stored.
+	BackupLocation *string `json:"backupLocation,omitempty"`
 	// The total number of instances in the cluster (one master and n-1 standbys).
 	Instances *int32 `json:"instances,omitempty"`
 	// The amount of memory per instance in megabytes. Has to be a multiple of 1024.
@@ -131,8 +133,8 @@ func (o *ClusterProperties) HasPostgresVersion() bool {
 }
 
 // GetLocation returns the Location field value
-// If the value is explicit nil, the zero value for Location will be returned
-func (o *ClusterProperties) GetLocation() *Location {
+// If the value is explicit nil, the zero value for string will be returned
+func (o *ClusterProperties) GetLocation() *string {
 	if o == nil {
 		return nil
 	}
@@ -144,7 +146,7 @@ func (o *ClusterProperties) GetLocation() *Location {
 // GetLocationOk returns a tuple with the Location field value
 // and a boolean to check if the value has been set.
 // NOTE: If the value is an explicit nil, `nil, true` will be returned
-func (o *ClusterProperties) GetLocationOk() (*Location, bool) {
+func (o *ClusterProperties) GetLocationOk() (*string, bool) {
 	if o == nil {
 		return nil, false
 	}
@@ -153,7 +155,7 @@ func (o *ClusterProperties) GetLocationOk() (*Location, bool) {
 }
 
 // SetLocation sets field value
-func (o *ClusterProperties) SetLocation(v Location) {
+func (o *ClusterProperties) SetLocation(v string) {
 
 	o.Location = &v
 
@@ -169,8 +171,8 @@ func (o *ClusterProperties) HasLocation() bool {
 }
 
 // GetBackupLocation returns the BackupLocation field value
-// If the value is explicit nil, the zero value for BackupLocation will be returned
-func (o *ClusterProperties) GetBackupLocation() *BackupLocation {
+// If the value is explicit nil, the zero value for string will be returned
+func (o *ClusterProperties) GetBackupLocation() *string {
 	if o == nil {
 		return nil
 	}
@@ -182,7 +184,7 @@ func (o *ClusterProperties) GetBackupLocation() *BackupLocation {
 // GetBackupLocationOk returns a tuple with the BackupLocation field value
 // and a boolean to check if the value has been set.
 // NOTE: If the value is an explicit nil, `nil, true` will be returned
-func (o *ClusterProperties) GetBackupLocationOk() (*BackupLocation, bool) {
+func (o *ClusterProperties) GetBackupLocationOk() (*string, bool) {
 	if o == nil {
 		return nil, false
 	}
@@ -191,7 +193,7 @@ func (o *ClusterProperties) GetBackupLocationOk() (*BackupLocation, bool) {
 }
 
 // SetBackupLocation sets field value
-func (o *ClusterProperties) SetBackupLocation(v BackupLocation) {
+func (o *ClusterProperties) SetBackupLocation(v string) {
 
 	o.BackupLocation = &v
 

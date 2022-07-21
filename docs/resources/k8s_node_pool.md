@@ -36,7 +36,6 @@ resource "ionoscloud_ipblock" "example" {
 resource "ionoscloud_k8s_cluster" "example" {
   name                  = "k8sClusterExample"
   k8s_version           = "1.20.10"
-  public                = true
   maintenance_window {
     day_of_the_week     = "Sunday"
     time                = "09:00:00Z"
@@ -118,13 +117,12 @@ The following arguments are supported:
 - `public_ips` - (Optional)[list] A list of public IPs associated with the node pool; must have at least `node_count + 1` elements  
 - `labels` - (Optional)[map] A key/value map of labels
 - `annotations` - (Optional)[map] A key/value map of annotations
-- `gateway_ip` - (Optional)[string] Public IP address for the gateway performing source NAT for the node pool's nodes belonging to a private cluster. Required only if the node pool belongs to a private cluster.
 - `allow_replace` - (Optional)[bool] When set to true, allows the update of immutable fields by first destroying and then re-creating the node pool.
 
 ⚠️ **_Warning: `allow_replace` - lets you update immutable fields, but it first destroys and then re-creates the node pool in order to do it. Set the field to true only if you know what you are doing.
 This will cause a downtime for all pods on that nodepool. Consider adding multiple nodepools and update one after the other for downtime free nodepool upgrade._**
 
-Immutable fields list: name, cpu_family, availability_zone, cores_count, ram_size, storage_size, storage_type, gateway_ip. 
+Immutable fields list: name, cpu_family, availability_zone, cores_count, ram_size, storage_size, storage_type. 
 
 ## Import
 

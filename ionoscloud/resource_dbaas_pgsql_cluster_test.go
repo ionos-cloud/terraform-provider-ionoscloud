@@ -110,6 +110,28 @@ func TestAccDBaaSPgSqlClusterBasic(t *testing.T) {
 				),
 			},
 			{
+				Config: testAccDataSourceDBaaSPgSqlClusterMatchDcName,
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttrPair(DataSource+"."+DBaaSClusterResource+"."+DBaaSClusterTestDataSourceByName, "display_name", DBaaSClusterResource+"."+DBaaSClusterTestResource, "display_name"),
+					resource.TestCheckResourceAttrPair(DataSource+"."+DBaaSClusterResource+"."+DBaaSClusterTestDataSourceByName, "datacenter_name", DBaaSClusterResource+"."+DBaaSClusterTestResource, "datacenter_name"),
+					resource.TestCheckResourceAttrPair(DataSource+"."+DBaaSClusterResource+"."+DBaaSClusterTestDataSourceByName, "instances", DBaaSClusterResource+"."+DBaaSClusterTestResource, "instances"),
+					resource.TestCheckResourceAttrPair(DataSource+"."+DBaaSClusterResource+"."+DBaaSClusterTestDataSourceByName, "cores", DBaaSClusterResource+"."+DBaaSClusterTestResource, "cores"),
+					resource.TestCheckResourceAttrPair(DataSource+"."+DBaaSClusterResource+"."+DBaaSClusterTestDataSourceByName, "ram", DBaaSClusterResource+"."+DBaaSClusterTestResource, "ram"),
+					resource.TestCheckResourceAttrPair(DataSource+"."+DBaaSClusterResource+"."+DBaaSClusterTestDataSourceByName, "storage_size", DBaaSClusterResource+"."+DBaaSClusterTestResource, "storage_size"),
+					resource.TestCheckResourceAttrPair(DataSource+"."+DBaaSClusterResource+"."+DBaaSClusterTestDataSourceByName, "storage_type", DBaaSClusterResource+"."+DBaaSClusterTestResource, "storage_type"),
+					resource.TestCheckResourceAttrPair(DataSource+"."+DBaaSClusterResource+"."+DBaaSClusterTestDataSourceByName, "connections.datacenter_id", DBaaSClusterResource+"."+DBaaSClusterTestResource, "connections.datacenter_id"),
+					resource.TestCheckResourceAttrPair(DataSource+"."+DBaaSClusterResource+"."+DBaaSClusterTestDataSourceByName, "connections.lan_id", DBaaSClusterResource+"."+DBaaSClusterTestResource, "connections.lan_id"),
+					resource.TestCheckResourceAttrPair(DataSource+"."+DBaaSClusterResource+"."+DBaaSClusterTestDataSourceByName, "connections.cidr", DBaaSClusterResource+"."+DBaaSClusterTestResource, "connections.cidr"),
+					resource.TestCheckResourceAttrPair(DataSource+"."+DBaaSClusterResource+"."+DBaaSClusterTestDataSourceByName, "location", DBaaSClusterResource+"."+DBaaSClusterTestResource, "location"),
+					resource.TestCheckResourceAttrPair(DataSource+"."+DBaaSClusterResource+"."+DBaaSClusterTestDataSourceByName, "backup_location", DBaaSClusterResource+"."+DBaaSClusterTestResource, "backup_location"),
+					resource.TestCheckResourceAttrPair(DataSource+"."+DBaaSClusterResource+"."+DBaaSClusterTestDataSourceByName, "display_name", DBaaSClusterResource+"."+DBaaSClusterTestResource, "display_name"),
+					resource.TestCheckResourceAttrPair(DataSource+"."+DBaaSClusterResource+"."+DBaaSClusterTestDataSourceByName, "maintenance_window.day_of_the_week", DBaaSClusterResource+"."+DBaaSClusterTestResource, "maintenance_window.day_of_the_week"),
+					resource.TestCheckResourceAttrPair(DataSource+"."+DBaaSClusterResource+"."+DBaaSClusterTestDataSourceByName, "maintenance_window.time", DBaaSClusterResource+"."+DBaaSClusterTestResource, "maintenance_window.time"),
+					resource.TestCheckResourceAttrPair(DataSource+"."+DBaaSClusterResource+"."+DBaaSClusterTestDataSourceByName, "credentials.username", DBaaSClusterResource+"."+DBaaSClusterTestResource, "credentials.username"),
+					resource.TestCheckResourceAttrPair(DataSource+"."+DBaaSClusterResource+"."+DBaaSClusterTestDataSourceByName, "credentials.password", DBaaSClusterResource+"."+DBaaSClusterTestResource, "credentials.password"),
+				),
+			},
+			{
 				Config:      testAccDataSourceDBaaSPgSqlClusterWrongNameError,
 				ExpectError: regexp.MustCompile("no DBaaS cluster found with the specified name"),
 			},
@@ -505,6 +527,12 @@ data ` + DBaaSClusterResource + ` ` + DBaaSClusterTestDataSourceById + ` {
 const testAccDataSourceDBaaSPgSqlClusterMatchName = testAccCheckDbaasPgSqlClusterConfigBasic + `
 data ` + DBaaSClusterResource + ` ` + DBaaSClusterTestDataSourceByName + ` {
   display_name	= "` + DBaaSClusterTestResource + `"
+}
+`
+
+const testAccDataSourceDBaaSPgSqlClusterMatchDcName = testAccCheckDbaasPgSqlClusterConfigBasic + `
+data ` + DBaaSClusterResource + ` ` + DBaaSClusterTestDataSourceByName + ` {
+  datacenter_name	= ` + DBaaSClusterResource + `.` + DBaaSClusterTestResource + `.name
 }
 `
 

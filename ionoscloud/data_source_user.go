@@ -8,6 +8,8 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 	ionoscloud "github.com/ionos-cloud/sdk-go/v6"
+	"log"
+	"strings"
 )
 
 func dataSourceUser() *schema.Resource {
@@ -20,11 +22,11 @@ func dataSourceUser() *schema.Resource {
 			},
 			"first_name": {
 				Type:     schema.TypeString,
-				Computed: true,
+				Optional: true,
 			},
 			"last_name": {
 				Type:     schema.TypeString,
-				Computed: true,
+				Optional: true,
 			},
 			"email": {
 				Type:     schema.TypeString,
@@ -32,7 +34,7 @@ func dataSourceUser() *schema.Resource {
 			},
 			"administrator": {
 				Type:     schema.TypeBool,
-				Computed: true,
+				Optional: true,
 			},
 			"force_sec_auth": {
 				Type:     schema.TypeBool,
@@ -44,7 +46,7 @@ func dataSourceUser() *schema.Resource {
 			},
 			"s3_canonical_user_id": {
 				Type:     schema.TypeString,
-				Computed: true,
+				Optional: true,
 			},
 			"active": {
 				Type:     schema.TypeBool,
@@ -77,13 +79,24 @@ func dataSourceUserRead(ctx context.Context, d *schema.ResourceData, meta interf
 
 	id, idOk := d.GetOk("id")
 	email, emailOk := d.GetOk("email")
+	firstNameValue, firstNameOk := d.GetOk("first_name")
+	lastNameValue, lastNameOk := d.GetOk("last_name")
+	s3CanonicalIdValue, s3CanonicalIdOk := d.GetOk("s3_canonical_user_id")
+	administratorValue, administratorOk := d.GetOk("administrator")
+	// todo active flags also, but I don't know where are they
 
-	if idOk && emailOk {
-		diags := diag.FromErr(errors.New("id and email cannot be both specified in the same time"))
+	firstName := firstNameValue.(string)
+	lastName := lastNameValue.(string)
+	s3CanonicalId := s3CanonicalIdValue.(string)
+	administrator := administratorValue.(bool)
+
+	if idOk && (emailOk || firstNameOk || lastNameOk || s3CanonicalIdOk || administratorOk) {
+		diags := diag.FromErr(errors.New("id and other lookup parameter cannot be both specified in the same time"))
 		return diags
 	}
-	if !idOk && !emailOk {
-		diags := diag.FromErr(errors.New("please provide either the user id or email"))
+	if !idOk && !emailOk && !firstNameOk && !lastNameOk && !s3CanonicalIdOk && !administratorOk {
+		diags := diag.FromErr(errors.New("please provide either the user id or other lookup parameter, like email or first_name"))
+		log.Printf("ADMINISTRATOROK = %t", administratorOk)
 		return diags
 	}
 	var user ionoscloud.User
@@ -109,9 +122,16 @@ func dataSourceUserRead(ctx context.Context, d *schema.ResourceData, meta interf
 			return diags
 		}
 
-		var results []ionoscloud.User
-		if users.Items != nil {
-			for _, u := range *users.Items {
+		if users.Items == nil {
+			diags := diag.FromErr(fmt.Errorf("no users found"))
+			return diags
+		}
+
+		var results = *users.Items
+
+		if emailOk {
+			var emailResults []ionoscloud.User
+			for _, u := range results {
 				if u.Properties != nil && u.Properties.Email != nil && *u.Properties.Email == email.(string) {
 					/* user found */
 					user, apiResponse, err = client.UserManagementApi.UmUsersFindById(ctx, *u.Id).Execute()
@@ -120,9 +140,81 @@ func dataSourceUserRead(ctx context.Context, d *schema.ResourceData, meta interf
 						diags := diag.FromErr(fmt.Errorf("an error occurred while fetching user %s: %w", *u.Id, err))
 						return diags
 					}
-					results = append(results, user)
+					emailResults = append(emailResults, user)
 				}
 			}
+			if emailResults == nil || len(emailResults) == 0 {
+				return diag.FromErr(fmt.Errorf("no user found with the specified criteria: email = %s", email))
+			}
+			results = emailResults
+
+		}
+
+		if firstNameOk && firstName != "" {
+			var firstNameResults []ionoscloud.User
+			if results != nil {
+				for _, user := range results {
+					if user.Properties != nil && user.Properties.Firstname != nil && strings.EqualFold(*user.Properties.Firstname, firstName) {
+						u, apiResponse, err := client.UserManagementApi.UmUsersFindById(ctx, *user.Id).Execute()
+						logApiRequestTime(apiResponse)
+						if err != nil {
+							diags := diag.FromErr(fmt.Errorf("an error occurred while fetching user %s: %w", *u.Id, err))
+							return diags
+						}
+						firstNameResults = append(firstNameResults, u)
+					}
+				}
+			}
+			if firstNameResults == nil || len(firstNameResults) == 0 {
+				return diag.FromErr(fmt.Errorf("no user found with the specified criteria: first name = %s", firstName))
+			}
+			results = firstNameResults
+
+		}
+
+		if lastNameOk && lastName != "" {
+			var lastNameResults []ionoscloud.User
+			if results != nil {
+				for _, user := range results {
+					if user.Properties != nil && user.Properties.Lastname != nil && strings.EqualFold(*user.Properties.Lastname, lastName) {
+						lastNameResults = append(lastNameResults, user)
+					}
+				}
+			}
+			if lastNameResults == nil || len(lastNameResults) == 0 {
+				return diag.FromErr(fmt.Errorf("no user found with the specified criteria: last name = %s", lastName))
+			}
+			results = lastNameResults
+		}
+
+		if s3CanonicalIdOk && s3CanonicalId != "" {
+			var s3CanonicalIdResults []ionoscloud.User
+			if results != nil {
+				for _, user := range results {
+					if user.Properties != nil && user.Properties.S3CanonicalUserId != nil && strings.EqualFold(*user.Properties.S3CanonicalUserId, s3CanonicalId) {
+						s3CanonicalIdResults = append(s3CanonicalIdResults, user)
+					}
+				}
+			}
+			if s3CanonicalIdResults == nil || len(s3CanonicalIdResults) == 0 {
+				return diag.FromErr(fmt.Errorf("no user found with the specified criteria: s3 canonical id = %s", s3CanonicalId))
+			}
+			results = s3CanonicalIdResults
+		}
+
+		if administratorOk {
+			var administratorResults []ionoscloud.User
+			if results != nil {
+				for _, user := range results {
+					if user.Properties != nil && user.Properties.Administrator != nil && *user.Properties.Administrator == administrator {
+						administratorResults = append(administratorResults, user)
+					}
+				}
+			}
+			if administratorResults == nil || len(administratorResults) == 0 {
+				return diag.FromErr(fmt.Errorf("no user found with the specified criteria: administrator = %t", administrator))
+			}
+			results = administratorResults
 		}
 
 		if results == nil || len(results) == 0 {

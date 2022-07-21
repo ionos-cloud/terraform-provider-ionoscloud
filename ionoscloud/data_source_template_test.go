@@ -54,6 +54,16 @@ func TestAccDataSourceTemplate(t *testing.T) {
 				),
 			},
 			{
+				Config: testAccDataSourceTemplateId,
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttr(templateName, "id", "5ae1bfbd-05f2-47f5-a736-eaca3dcce41b"),
+					resource.TestCheckResourceAttr(templateName, "name", "CUBES S"),
+					resource.TestCheckResourceAttr(templateName, "cores", "1"),
+					resource.TestCheckResourceAttr(templateName, "ram", "2048"),
+					resource.TestCheckResourceAttr(templateName, "storage_size", "50"),
+				),
+			},
+			{
 				Config:      testAccDataSourceTemplateStorageWrongNameError,
 				ExpectError: regexp.MustCompile(`no template found with the specified criteria`),
 			},
@@ -92,6 +102,11 @@ data ` + TemplateResource + ` ` + TemplateTestResource + ` {
 const testAccDataSourceTemplateStorageSize = `
 data ` + TemplateResource + ` ` + TemplateTestResource + ` {
 	storage_size = 80
+}`
+
+const testAccDataSourceTemplateId = `
+data ` + TemplateResource + ` ` + TemplateTestResource + ` {
+	id = "5ae1bfbd-05f2-47f5-a736-eaca3dcce41b"
 }`
 
 const testAccDataSourceTemplateStorageWrongNameError = `

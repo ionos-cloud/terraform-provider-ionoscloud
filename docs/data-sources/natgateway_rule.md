@@ -43,6 +43,15 @@ data "ionoscloud_natgateway_rule" "example" {
 }
 ```
 
+### By Protocl
+```hcl
+data "ionoscloud_natgateway_rule" "example" {
+  datacenter_id = <datacenter_id>
+  natgateway_id = <natgateway_id>
+  protocol			= <TCP>
+}
+```
+
 ## Argument Reference
 
 * `datacenter_id` - (Required) Datacenter's UUID.

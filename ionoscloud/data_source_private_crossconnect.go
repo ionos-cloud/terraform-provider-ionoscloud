@@ -68,20 +68,20 @@ func dataSourcePcc() *schema.Resource {
 			},
 			"connectable_datacenters": {
 				Type:     schema.TypeList,
-				Computed: true,
+				Optional: true,
 				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{
 						"id": {
 							Type:     schema.TypeString,
-							Computed: true,
+							Optional: true,
 						},
 						"name": {
 							Type:     schema.TypeString,
-							Computed: true,
+							Optional: true,
 						},
 						"location": {
 							Type:     schema.TypeString,
-							Computed: true,
+							Optional: true,
 						},
 					},
 				},
@@ -167,15 +167,16 @@ func dataSourcePccRead(ctx context.Context, d *schema.ResourceData, meta interfa
 
 	idValue, idOk := d.GetOk("id")
 	nameValue, nameOk := d.GetOk("name")
+	connectableDatacentersValue, connectableDatacentersOk := d.GetOk("connectable_datacenters")
 
 	id := idValue.(string)
 	name := nameValue.(string)
 
 	if idOk && nameOk {
-		return diag.FromErr(errors.New("id and name cannot be both specified in the same time"))
+		return diag.FromErr(errors.New("id and name/connectable_datacenters cannot be both specified in the same time, choose between id or a combination of other parameters"))
 	}
 	if !idOk && !nameOk {
-		return diag.FromErr(errors.New("please provide either the pcc id or name"))
+		return diag.FromErr(errors.New("please provide either the pcc id or or other parameter like name or connectable_datacenters"))
 	}
 
 	var pcc ionoscloud.PrivateCrossConnect
@@ -196,46 +197,94 @@ func dataSourcePccRead(ctx context.Context, d *schema.ResourceData, meta interfa
 		/* search by name */
 		var results []ionoscloud.PrivateCrossConnect
 
-		partialMatch := d.Get("partial_match").(bool)
+		if nameOk {
+			partialMatch := d.Get("partial_match").(bool)
 
-		log.Printf("[INFO] Using data source for pcc by name with partial_match %t and name: %s", partialMatch, name)
+			log.Printf("[INFO] Using data source for pcc by name with partial_match %t and name: %s", partialMatch, name)
 
-		if partialMatch {
-			pccs, apiResponse, err := client.PrivateCrossConnectsApi.PccsGet(ctx).Depth(1).Filter("name", name).Execute()
-			logApiRequestTime(apiResponse)
-			if err != nil {
-				return diag.FromErr(fmt.Errorf("an error occurred while fetching pccs: %s", err.Error()))
+			if partialMatch {
+				pccs, apiResponse, err := client.PrivateCrossConnectsApi.PccsGet(ctx).Depth(1).Filter("name", name).Execute()
+				logApiRequestTime(apiResponse)
+				if err != nil {
+					return diag.FromErr(fmt.Errorf("an error occurred while fetching pccs: %s", err.Error()))
+				}
+				if len(*pccs.Items) == 0 {
+					return diag.FromErr(fmt.Errorf("no result found with the specified criteria: name with partial match: %s", name))
+				}
+				results = *pccs.Items
+			} else {
+				pccs, apiResponse, err := client.PrivateCrossConnectsApi.PccsGet(ctx).Depth(1).Execute()
+				logApiRequestTime(apiResponse)
+				if err != nil {
+					return diag.FromErr(fmt.Errorf("an error occurred while fetching pccs: %s", err.Error()))
+				}
+
+				if pccs.Items != nil {
+					var nameResults []ionoscloud.PrivateCrossConnect
+					for _, p := range *pccs.Items {
+						if p.Properties != nil && p.Properties.Name != nil && strings.EqualFold(*p.Properties.Name, name) {
+							pcc, apiResponse, err = client.PrivateCrossConnectsApi.PccsFindById(ctx, *p.Id).Execute()
+							logApiRequestTime(apiResponse)
+							if err != nil {
+								return diag.FromErr(fmt.Errorf("an error occurred while fetching the pcc with ID %s: %s", *p.Id, err))
+							}
+							nameResults = append(nameResults, pcc)
+						}
+					}
+					if len(nameResults) == 0 {
+						return diag.FromErr(fmt.Errorf("no result found with the specified criteria: name %s", name))
+					}
+					results = nameResults
+				}
 			}
-			results = *pccs.Items
 		} else {
 			pccs, apiResponse, err := client.PrivateCrossConnectsApi.PccsGet(ctx).Depth(1).Execute()
 			logApiRequestTime(apiResponse)
 			if err != nil {
 				return diag.FromErr(fmt.Errorf("an error occurred while fetching pccs: %s", err.Error()))
 			}
+			results = *pccs.Items
+		}
 
-			if pccs.Items != nil {
-				for _, p := range *pccs.Items {
-					if p.Properties != nil && p.Properties.Name != nil && strings.EqualFold(*p.Properties.Name, name) {
-						pcc, apiResponse, err = client.PrivateCrossConnectsApi.PccsFindById(ctx, *p.Id).Execute()
-						logApiRequestTime(apiResponse)
-						if err != nil {
-							return diag.FromErr(fmt.Errorf("an error occurred while fetching the pcc with ID %s: %s", *p.Id, err))
+		if connectableDatacentersOk {
+			var pccConnectableDcResults []ionoscloud.PrivateCrossConnect
+			connectableDcMap := make(map[string]ionoscloud.PrivateCrossConnect)
+			connectableDcList := connectableDatacentersValue.([]interface{})
+			givenConenctableDcs := getconnectableDcResourceData(connectableDcList)
+			for _, pcc := range results {
+				if pcc.Properties != nil && pcc.Properties.ConnectableDatacenters != nil {
+					for _, actualConnectableDc := range *pcc.Properties.ConnectableDatacenters {
+						for _, givenConnDc := range givenConenctableDcs {
+							if givenConnDc.Id != nil {
+								*givenConnDc.Id = *actualConnectableDc.Id
+								connectableDcMap[*actualConnectableDc.Id] = pcc
+							}
+							if givenConnDc.Name != nil {
+								*givenConnDc.Name = *actualConnectableDc.Name
+								connectableDcMap[*actualConnectableDc.Id] = pcc
+							}
+							if givenConnDc.Location != nil {
+								*givenConnDc.Location = *actualConnectableDc.Location
+								connectableDcMap[*actualConnectableDc.Id] = pcc
+							}
 						}
-						results = append(results, pcc)
+					}
+					for _, value := range connectableDcMap {
+						pccConnectableDcResults = append(pccConnectableDcResults, value)
 					}
 				}
 			}
+			if len(pccConnectableDcResults) == 0 {
+				return diag.FromErr(fmt.Errorf("no result found with the specified criteria: connectable datacenters %s", connectableDatacentersValue))
+			}
+			results = pccConnectableDcResults
 		}
 
-		if results == nil || len(results) == 0 {
-			return diag.FromErr(fmt.Errorf("no pcc found with the specified criteria: name = %s", name))
-		} else if len(results) > 1 {
+		if len(results) > 1 {
 			return diag.FromErr(fmt.Errorf("more than one pcc found with the specified criteria: name = %s", name))
 		} else {
 			pcc = results[0]
 		}
-
 	}
 
 	if err = setPccDataSource(d, &pcc); err != nil {
@@ -243,4 +292,32 @@ func dataSourcePccRead(ctx context.Context, d *schema.ResourceData, meta interfa
 	}
 
 	return nil
+}
+
+func getconnectableDcResourceData(connectableDcList []interface{}) []ionoscloud.ConnectableDatacenter {
+	connectableDcs := make([]ionoscloud.ConnectableDatacenter, 0)
+	if connectableDcList != nil {
+		for _, connectableDcItem := range connectableDcList {
+			connectableDcContent := connectableDcItem.(map[string]interface{})
+			connectableDc := ionoscloud.ConnectableDatacenter{}
+
+			if connectableDcID, connectableDcIDOk := connectableDcContent["id"].(string); connectableDcIDOk {
+				log.Printf("[INFO] Adding Connectable Datacenter %v to PCC...", connectableDcID)
+				connectableDc.Id = &connectableDcID
+			}
+
+			if connectableDcName, connectableDcNameOk := connectableDcContent["id"].(string); connectableDcNameOk {
+				log.Printf("[INFO] Adding Connectable Datacenter %v to PCC...", connectableDcName)
+				connectableDc.Name = &connectableDcName
+			}
+
+			if connectableDcLocation, connectableDcLocationOk := connectableDcContent["id"].(string); connectableDcLocationOk {
+				log.Printf("[INFO] Adding Connectable Datacenter %v to PCC...", connectableDcLocation)
+				connectableDc.Location = &connectableDcLocation
+			}
+
+			connectableDcs = append(connectableDcs, connectableDc)
+		}
+	}
+	return connectableDcs
 }

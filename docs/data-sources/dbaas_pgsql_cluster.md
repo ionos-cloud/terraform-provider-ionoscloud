@@ -38,11 +38,38 @@ data "ionoscloud_pg_cluster" "example" {
 }
 ```
 
+### By Location
+
+```hcl
+data "ionoscloud_pg_cluster" "example" {
+  location	= "example"
+}
+```
+
+### By Postgres Verion
+
+```hcl
+data "ionoscloud_pg_cluster" "example" {
+  postgres_version	= "example"
+}
+```
+
+### By Datacenter Name
+
+```hcl
+data "ionoscloud_pg_cluster" "example" {
+  datacenter_name	= "example"
+}
+```
+
 ## Argument Reference
 
 * `id` - (Optional) ID of the cluster you want to search for.
 * `display_name` - (Optional) Display name or an existing cluster that you want to search for. Search by name is case-insensitive. The whole resource name is required if `partial_match` parameter is not set to true..
 * `partial_match` - (Optional) Whether partial matching is allowed or not when using name argument. Default value is false.
+* `location` - (Optional) Location of the cluster you want to search for.
+* `postgres_version` - (Optional) Postgres Version of the cluster you want to search for.
+* `datacenter_name` - (Optional) Datacenter Name of the cluster you want to search for.
 
 Either `id` or `display_name` must be provided. If none, or both are provided, the datasource will return an error.
 

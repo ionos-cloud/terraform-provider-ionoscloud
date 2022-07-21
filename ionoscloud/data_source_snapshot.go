@@ -47,7 +47,7 @@ func dataSourceSnapshot() *schema.Resource {
 			},
 			"licence_type": {
 				Type:        schema.TypeString,
-				Computed:    true,
+				Optional:    true,
 				Description: "OS type of this Snapshot",
 			},
 			"sec_auth_protection": {
@@ -107,17 +107,19 @@ func dataSourceSnapshotRead(ctx context.Context, d *schema.ResourceData, meta in
 	nameValue, nameOk := d.GetOk("name")
 	locationValue, locationOk := d.GetOk("location")
 	sizeValue, sizeOk := d.GetOk("size")
+	licenceTypeValue, licenceTypeOk := d.GetOk("licence_type")
 
 	id := idValue.(string)
 	name := nameValue.(string)
 	location := locationValue.(string)
 	size := float32(sizeValue.(int))
+	licenceType := licenceTypeValue.(string)
 
-	if idOk && nameOk {
-		return diag.FromErr(errors.New("id and name cannot be both specified in the same time"))
+	if idOk && (nameOk || locationOk || sizeOk || licenceTypeOk) {
+		return diag.FromErr(errors.New("id and name/licence_type/location/size cannot be both specified in the same time, choose between id or a combination of other parameters"))
 	}
-	if !idOk && !nameOk {
-		return diag.FromErr(errors.New("please provide either the server id or name"))
+	if !idOk && !nameOk && !locationOk && !sizeOk && !licenceTypeOk {
+		return diag.FromErr(errors.New("please provide either the server id or other parameter like name or location"))
 	}
 
 	var snapshot ionoscloud.Snapshot
@@ -133,8 +135,6 @@ func dataSourceSnapshotRead(ctx context.Context, d *schema.ResourceData, meta in
 			return diags
 		}
 	} else {
-		var results []ionoscloud.Snapshot
-
 		request := client.SnapshotsApi.SnapshotsGet(ctx).Depth(1)
 
 		partialMatch := d.Get("partial_match").(bool)
@@ -153,15 +153,23 @@ func dataSourceSnapshotRead(ctx context.Context, d *schema.ResourceData, meta in
 			return diags
 		}
 
-		if partialMatch {
-			results = *snapshots.Items
-		} else {
+		if len(*snapshots.Items) == 0 {
+			return diag.FromErr(fmt.Errorf("no result found with the specified criteria: name with partial match: %s", name))
+		}
+		var results = *snapshots.Items
+
+		if !partialMatch {
 			if nameOk && snapshots.Items != nil {
-				for _, snp := range *snapshots.Items {
+				var nameResults []ionoscloud.Snapshot
+				for _, snp := range *snapshots.Items { // in loc de snapshots.Items pun results
 					if snp.Properties != nil && snp.Properties.Name != nil && strings.EqualFold(*snp.Properties.Name, name) {
-						results = append(results, snp)
+						nameResults = append(nameResults, snp)
 					}
 				}
+				if len(nameResults) == 0 {
+					return diag.FromErr(fmt.Errorf("no result found with the specified criteria: name %s", name))
+				}
+				results = nameResults
 			}
 		}
 
@@ -172,6 +180,9 @@ func dataSourceSnapshotRead(ctx context.Context, d *schema.ResourceData, meta in
 					locationResults = append(locationResults, snp)
 				}
 
+			}
+			if len(locationResults) == 0 {
+				return diag.FromErr(fmt.Errorf("no result found with the specified criteria: name %s", name))
 			}
 			results = locationResults
 		}
@@ -184,12 +195,28 @@ func dataSourceSnapshotRead(ctx context.Context, d *schema.ResourceData, meta in
 				}
 
 			}
+			if len(sizeResults) == 0 {
+				return diag.FromErr(fmt.Errorf("no result found with the specified criteria: name %s", name))
+			}
 			results = sizeResults
 		}
 
-		if results == nil || len(results) == 0 {
-			return diag.FromErr(fmt.Errorf("no snapshot found with the specified criteria: name = %s, location = %s, size = %v", name, location, size))
-		} else if len(results) > 1 {
+		if licenceTypeOk {
+			var licenceTypeResults []ionoscloud.Snapshot
+			if results != nil {
+				for _, snp := range results {
+					if snp.Properties != nil && snp.Properties.LicenceType != nil && strings.EqualFold(*snp.Properties.LicenceType, licenceType) {
+						licenceTypeResults = append(licenceTypeResults, snp)
+					}
+				}
+			}
+			if licenceTypeResults == nil || len(licenceTypeResults) == 0 {
+				return diag.FromErr(fmt.Errorf("no snapshot found with the specified criteria: licence_type = %s", licenceType))
+			}
+			results = licenceTypeResults
+		}
+
+		if len(results) > 1 {
 			return diag.FromErr(fmt.Errorf("more than one snapshot found with the specified criteria: name = %s, location = %s, size = %v", name, location, size))
 		} else {
 			snapshot = results[0]

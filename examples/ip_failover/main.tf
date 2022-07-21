@@ -3,7 +3,7 @@ terraform {
   required_providers {
     ionoscloud = {
       source = "ionos-cloud/ionoscloud"
-      version = "6.2.0"
+      version = "6.2.4"
     }
   }
 }
@@ -29,6 +29,7 @@ resource "ionoscloud_lan" "example" {
   name                  = "Lan Example"
 }
 
+# failover requires reserved IP
 resource "ionoscloud_ipblock" "example" {
   location              = ionoscloud_datacenter.example.location
   size                  = 2
@@ -54,12 +55,20 @@ resource "ionoscloud_server" "example_A" {
     lan                 = ionoscloud_lan.example.id
     dhcp                = true
     firewall_active     = true
-    ips                 = [ ionoscloud_ipblock.example.ips[0] ]
+    ips                 = [ ionoscloud_ipblock.example.ips[0], ionoscloud_ipblock.example.ips[1] ]
   }
 }
 
+resource "ionoscloud_ipfailover" "example" {
+  depends_on            = [ ionoscloud_lan.example ]
+  datacenter_id         = ionoscloud_datacenter.example.id
+  lan_id                = ionoscloud_lan.example.id
+  ip                    = ionoscloud_ipblock.example.ips[0]
+  nicuuid               = ionoscloud_server.example_A.primary_nic
+}
 
 resource "ionoscloud_server" "example_B" {
+  depends_on            = [ionoscloud_ipfailover.example]
   name                  = "Server B"
   datacenter_id         = ionoscloud_datacenter.example.id
   cores                 = 1
@@ -83,10 +92,3 @@ resource "ionoscloud_server" "example_B" {
 }
 
 
-resource "ionoscloud_ipfailover" "example" {
-  depends_on            = [ ionoscloud_lan.example ]
-  datacenter_id         = ionoscloud_datacenter.example.id
-  lan_id                = ionoscloud_lan.example.id
-  ip                    = ionoscloud_ipblock.example.ips[0]
-  nicuuid               = ionoscloud_server.example_A.primary_nic
-}

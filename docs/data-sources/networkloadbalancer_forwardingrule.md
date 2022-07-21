@@ -43,6 +43,24 @@ data "ionoscloud_networkloadbalancer_forwardingrule" "example" {
 }
 ```
 
+## By Protocol
+```hcl
+data "ionoscloud_networkloadbalancer_forwardingrule" "example" {
+    datacenter_id               = <datacenter_id>
+    networkloadbalancer_id      = <networkloadbalancer_id>
+    protocol                        = "TCP"
+}
+```
+
+## By Listener Ip
+```hcl
+data "ionoscloud_networkloadbalancer_forwardingrule" "example" {
+    datacenter_id               = <datacenter_id>
+    networkloadbalancer_id      = <networkloadbalancer_id>
+    listener_ip                        = <listener_ip>
+}
+```
+
 ## Argument Reference
 
 * `datacenter_id` - (Required) Datacenter's UUID.
@@ -50,6 +68,8 @@ data "ionoscloud_networkloadbalancer_forwardingrule" "example" {
 * `id` - (Optional) ID of the network load balancer forwarding rule you want to search for.
 * `name` - (Optional) Name of an existing network load balancer forwarding rule that you want to search for. Search by name is case-insensitive. The whole resource name is required if `partial_match` parameter is not set to true..
 * `partial_match` - (Optional) Whether partial matching is allowed or not when using name argument. Default value is false.
+* `protocol` - (Optional) Protocol of the network load balancer forwarding rule you want to search for.
+* `listener_ip` - (Optional) Listener Ip of the network load balancer forwarding rule you want to search for.
 
 Both `datacenter_id` and `networkloadbalancer_id` and either `id` or `name` must be provided. If none, or both of `name` and `id` are provided, the datasource will return an error.
 
