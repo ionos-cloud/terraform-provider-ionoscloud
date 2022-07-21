@@ -9,7 +9,7 @@ Get information on a DSaaS Node Pool.
 
 # ionoscloud\_dsaas_node_pool
 
-The **DSaaS Node Pool Data Source** can be used to search for and return an existing DSaaS Node Pool.
+The **DSaaS Node Pool Data Source** can be used to search for and return an existing DSaaS Node Pool under a DSaaS Cluster.
 If a single match is found, it will be returned. If your search results in multiple matches, an error will be returned.
 When this happens, please refine your search and make sure that your resources have unique names.
 
@@ -46,7 +46,7 @@ data "ionoscloud_dsaas_node_pool" "example" {
 
 * `cluster_id` - (Required) ID of the cluster the searched node pool is part of.
 * `id` - (Optional) ID of the node pool you want to search for.
-* `name` - (Optional) Name or an existing cluster that you want to search for. Search by name is case-insensitive. The whole resource name is required if `partial_match` parameter is not set to true..
+* `name` - (Optional) Name or an existing cluster that you want to search for. Search by name is case-insensitive. The whole resource name is required if `partial_match` parameter is not set to true.
 * `partial_match` - (Optional) Whether partial matching is allowed or not when using name argument. Default value is false.
 
 Either `id` or `display_name` must be provided. If none, or both are provided, the datasource will return an error.

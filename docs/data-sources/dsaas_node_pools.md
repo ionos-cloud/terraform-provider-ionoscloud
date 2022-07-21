@@ -9,7 +9,7 @@ Get information on a DSaaS Node Pool list under a DSaaS Cluster.
 
 # ionoscloud\_dsaas_node_pool
 
-The **DSaaS Node Pools Data Source** can be used to search for and return existing DSaaS Node Pools.
+The **DSaaS Node Pools Data Source** can be used to search for and return a list of existing DSaaS Node Pools under a DSaaS Cluster.
 
 ## Example Usage
 
