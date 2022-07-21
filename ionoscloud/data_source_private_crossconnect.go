@@ -202,25 +202,14 @@ func dataSourcePccRead(ctx context.Context, d *schema.ResourceData, meta interfa
 
 			log.Printf("[INFO] Using data source for pcc by name with partial_match %t and name: %s", partialMatch, name)
 
-			//pccs, apiResponse, err := client.PrivateCrossConnectsApi.PccsGet(ctx).Depth(1).Execute()
-			//logApiRequestTime(apiResponse)
-			//
-			//if err != nil {
-			//	return diag.FromErr(fmt.Errorf("an error occured while fetching ipBlocks: %s ", err))
-			//}
-			//
-			//if pccs.Items == nil {
-			//	diags := diag.FromErr(fmt.Errorf("no users found"))
-			//	return diags
-			//}
-			//
-			//results = *pccs.Items
-
 			if partialMatch {
 				pccs, apiResponse, err := client.PrivateCrossConnectsApi.PccsGet(ctx).Depth(1).Filter("name", name).Execute()
 				logApiRequestTime(apiResponse)
 				if err != nil {
 					return diag.FromErr(fmt.Errorf("an error occurred while fetching pccs: %s", err.Error()))
+				}
+				if len(*pccs.Items) == 0 {
+					return diag.FromErr(fmt.Errorf("no result found with the specified criteria: name with partial match: %s", name))
 				}
 				results = *pccs.Items
 			} else {
@@ -241,6 +230,9 @@ func dataSourcePccRead(ctx context.Context, d *schema.ResourceData, meta interfa
 							}
 							nameResults = append(nameResults, pcc)
 						}
+					}
+					if len(nameResults) == 0 {
+						return diag.FromErr(fmt.Errorf("no result found with the specified criteria: name %s", name))
 					}
 					results = nameResults
 				}
@@ -282,12 +274,13 @@ func dataSourcePccRead(ctx context.Context, d *schema.ResourceData, meta interfa
 					}
 				}
 			}
+			if len(pccConnectableDcResults) == 0 {
+				return diag.FromErr(fmt.Errorf("no result found with the specified criteria: connectable datacenters %s", connectableDatacentersValue))
+			}
 			results = pccConnectableDcResults
 		}
 
-		if results == nil || len(results) == 0 {
-			return diag.FromErr(fmt.Errorf("no pcc found with the specified criteria: name = %s", name))
-		} else if len(results) > 1 {
+		if len(results) > 1 {
 			return diag.FromErr(fmt.Errorf("more than one pcc found with the specified criteria: name = %s", name))
 		} else {
 			pcc = results[0]

@@ -239,20 +239,15 @@ func dataSourceK8sReadNodePool(ctx context.Context, d *schema.ResourceData, meta
 
 			log.Printf("[INFO] Using data source for k8s nodepool by name with partial_match %t and name: %s", partialMatch, name)
 
-			//nodePools, apiResponse, err := client.KubernetesApi.K8sNodepoolsGet(ctx, clusterId).Depth(1).Execute()
-			//logApiRequestTime(apiResponse)
-			//if err != nil {
-			//	return diag.FromErr(fmt.Errorf("an error occurred while fetching k8s nodepools: %s", err.Error()))
-			//}
-			//var results = *nodePools.Items
-
 			if partialMatch {
 				nodePools, apiResponse, err := client.KubernetesApi.K8sNodepoolsGet(ctx, clusterId).Depth(1).Filter("name", name).Execute()
 				logApiRequestTime(apiResponse)
 				if err != nil {
 					return diag.FromErr(fmt.Errorf("an error occurred while fetching k8s nodepools: %s", err.Error()))
 				}
-
+				if len(*nodePools.Items) == 0 {
+					return diag.FromErr(fmt.Errorf("no result found with the specified criteria name with partial match: %s", name))
+				}
 				results = *nodePools.Items
 			} else {
 				nodePools, apiResponse, err := client.KubernetesApi.K8sNodepoolsGet(ctx, clusterId).Depth(1).Execute()
@@ -275,6 +270,9 @@ func dataSourceK8sReadNodePool(ctx context.Context, d *schema.ResourceData, meta
 							break
 						}
 					}
+					if len(nameResults) == 0 {
+						return diag.FromErr(fmt.Errorf("no result found with the specified criteria name: %s", name))
+					}
 					results = nameResults
 				}
 			}
@@ -296,8 +294,8 @@ func dataSourceK8sReadNodePool(ctx context.Context, d *schema.ResourceData, meta
 					}
 				}
 			}
-			if dcIdResults == nil {
-				return diag.FromErr(fmt.Errorf("no k8s nodepool found with the specified criteria: datacenter_id = %s", dcId))
+			if dcIdResults == nil || len(dcIdResults) == 0 {
+				return diag.FromErr(fmt.Errorf("no result found with the specified criteria: datacenter_id = %s", dcId))
 			}
 			results = dcIdResults
 		}
@@ -311,15 +309,13 @@ func dataSourceK8sReadNodePool(ctx context.Context, d *schema.ResourceData, meta
 					}
 				}
 			}
-			if avZoneResults == nil {
-				return diag.FromErr(fmt.Errorf("no k8s nodepool found with the specified criteria: availability_zone = %s", avZone))
+			if avZoneResults == nil || len(avZoneResults) == 0 {
+				return diag.FromErr(fmt.Errorf("no result found with the specified criteria: availability_zone = %s", avZone))
 			}
 			results = avZoneResults
 		}
 
-		if results == nil || len(results) == 0 {
-			return diag.FromErr(fmt.Errorf("no nodepool found with the specified name %s", name))
-		} else if len(results) > 1 {
+		if len(results) > 1 {
 			return diag.FromErr(fmt.Errorf("more than one nodepool found with the specified name %s", name))
 		} else {
 			nodePool = results[0]

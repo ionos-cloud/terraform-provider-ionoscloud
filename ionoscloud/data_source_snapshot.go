@@ -135,8 +135,6 @@ func dataSourceSnapshotRead(ctx context.Context, d *schema.ResourceData, meta in
 			return diags
 		}
 	} else {
-		// var results []ionoscloud.Snapshot
-
 		request := client.SnapshotsApi.SnapshotsGet(ctx).Depth(1)
 
 		partialMatch := d.Get("partial_match").(bool)
@@ -145,7 +143,6 @@ func dataSourceSnapshotRead(ctx context.Context, d *schema.ResourceData, meta in
 
 		if nameOk && partialMatch {
 			request = request.Filter("name", name)
-			// log.Printf("SNAPSHOT NAMEOK = %t AND SNAPSOT PATIAL NAME = %t", nameOk, partialMatch)
 		}
 
 		snapshots, apiResponse, err := request.Execute()
@@ -156,18 +153,21 @@ func dataSourceSnapshotRead(ctx context.Context, d *schema.ResourceData, meta in
 			return diags
 		}
 
+		if len(*snapshots.Items) == 0 {
+			return diag.FromErr(fmt.Errorf("no result found with the specified criteria: name with partial match: %s", name))
+		}
 		var results = *snapshots.Items
 
-		//if partialMatch { // nu cred ca mai e nevoie de if/ else
-		//	results = *snapshots.Items
-		//}
 		if !partialMatch {
-			if nameOk && snapshots.Items != nil { // in loc de snapshots.Items pun results
+			if nameOk && snapshots.Items != nil {
 				var nameResults []ionoscloud.Snapshot
 				for _, snp := range *snapshots.Items { // in loc de snapshots.Items pun results
 					if snp.Properties != nil && snp.Properties.Name != nil && strings.EqualFold(*snp.Properties.Name, name) {
 						nameResults = append(nameResults, snp)
 					}
+				}
+				if len(nameResults) == 0 {
+					return diag.FromErr(fmt.Errorf("no result found with the specified criteria: name %s", name))
 				}
 				results = nameResults
 			}
@@ -181,6 +181,9 @@ func dataSourceSnapshotRead(ctx context.Context, d *schema.ResourceData, meta in
 				}
 
 			}
+			if len(locationResults) == 0 {
+				return diag.FromErr(fmt.Errorf("no result found with the specified criteria: name %s", name))
+			}
 			results = locationResults
 		}
 
@@ -191,6 +194,9 @@ func dataSourceSnapshotRead(ctx context.Context, d *schema.ResourceData, meta in
 					sizeResults = append(sizeResults, snp)
 				}
 
+			}
+			if len(sizeResults) == 0 {
+				return diag.FromErr(fmt.Errorf("no result found with the specified criteria: name %s", name))
 			}
 			results = sizeResults
 		}
@@ -204,15 +210,13 @@ func dataSourceSnapshotRead(ctx context.Context, d *schema.ResourceData, meta in
 					}
 				}
 			}
-			if licenceTypeResults == nil {
+			if licenceTypeResults == nil || len(licenceTypeResults) == 0 {
 				return diag.FromErr(fmt.Errorf("no snapshot found with the specified criteria: licence_type = %s", licenceType))
 			}
 			results = licenceTypeResults
 		}
 
-		if results == nil || len(results) == 0 {
-			return diag.FromErr(fmt.Errorf("no snapshot found with the specified criteria: name = %s, location = %s, size = %v", name, location, size))
-		} else if len(results) > 1 {
+		if len(results) > 1 {
 			return diag.FromErr(fmt.Errorf("more than one snapshot found with the specified criteria: name = %s, location = %s, size = %v", name, location, size))
 		} else {
 			snapshot = results[0]

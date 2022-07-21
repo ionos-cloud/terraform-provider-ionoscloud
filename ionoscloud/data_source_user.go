@@ -143,7 +143,7 @@ func dataSourceUserRead(ctx context.Context, d *schema.ResourceData, meta interf
 					emailResults = append(emailResults, user)
 				}
 			}
-			if emailResults == nil {
+			if emailResults == nil || len(emailResults) == 0 {
 				return diag.FromErr(fmt.Errorf("no user found with the specified criteria: email = %s", email))
 			}
 			results = emailResults
@@ -165,7 +165,7 @@ func dataSourceUserRead(ctx context.Context, d *schema.ResourceData, meta interf
 					}
 				}
 			}
-			if firstNameResults == nil {
+			if firstNameResults == nil || len(firstNameResults) == 0 {
 				return diag.FromErr(fmt.Errorf("no user found with the specified criteria: first name = %s", firstName))
 			}
 			results = firstNameResults
@@ -181,7 +181,7 @@ func dataSourceUserRead(ctx context.Context, d *schema.ResourceData, meta interf
 					}
 				}
 			}
-			if lastNameResults == nil {
+			if lastNameResults == nil || len(lastNameResults) == 0 {
 				return diag.FromErr(fmt.Errorf("no user found with the specified criteria: last name = %s", lastName))
 			}
 			results = lastNameResults
@@ -196,7 +196,7 @@ func dataSourceUserRead(ctx context.Context, d *schema.ResourceData, meta interf
 					}
 				}
 			}
-			if s3CanonicalIdResults == nil {
+			if s3CanonicalIdResults == nil || len(s3CanonicalIdResults) == 0 {
 				return diag.FromErr(fmt.Errorf("no user found with the specified criteria: s3 canonical id = %s", s3CanonicalId))
 			}
 			results = s3CanonicalIdResults
@@ -211,7 +211,7 @@ func dataSourceUserRead(ctx context.Context, d *schema.ResourceData, meta interf
 					}
 				}
 			}
-			if administratorResults == nil {
+			if administratorResults == nil || len(administratorResults) == 0 {
 				return diag.FromErr(fmt.Errorf("no user found with the specified criteria: administrator = %t", administrator))
 			}
 			results = administratorResults

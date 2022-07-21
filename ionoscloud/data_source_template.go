@@ -88,6 +88,9 @@ func dataSourceTemplateRead(ctx context.Context, d *schema.ResourceData, meta in
 					results = append(results, tmp)
 				}
 			}
+			if len(results) == 0 {
+				return diag.FromErr(fmt.Errorf("no result found with the specified criteria: name %f", name))
+			}
 		} else if templates.Items != nil {
 			results = *templates.Items
 		}
@@ -100,6 +103,9 @@ func dataSourceTemplateRead(ctx context.Context, d *schema.ResourceData, meta in
 					if tmp.Properties.Cores != nil && *tmp.Properties.Cores == cores {
 						coresResults = append(coresResults, tmp)
 					}
+				}
+				if len(coresResults) == 0 {
+					return diag.FromErr(fmt.Errorf("no result found with the specified criteria: cores %f", cores))
 				}
 				results = coresResults
 			}
@@ -114,6 +120,9 @@ func dataSourceTemplateRead(ctx context.Context, d *schema.ResourceData, meta in
 						ramResults = append(ramResults, tmp)
 					}
 				}
+				if len(ramResults) == 0 {
+					return diag.FromErr(fmt.Errorf("no result found with the specified criteria: ram %f", ram))
+				}
 				results = ramResults
 			}
 		}
@@ -127,13 +136,14 @@ func dataSourceTemplateRead(ctx context.Context, d *schema.ResourceData, meta in
 						storageSizeResults = append(storageSizeResults, tmp)
 					}
 				}
+				if len(storageSizeResults) == 0 {
+					return diag.FromErr(fmt.Errorf("no result found with the specified criteria: storage sizw %f", storageSize))
+				}
 				results = storageSizeResults
 			}
 		}
 
-		if results == nil || len(results) == 0 {
-			return diag.FromErr(fmt.Errorf("no template found with the specified criteria: name = %s, cores = %v, ram = %v, storage_size = %v", name.(string), cores.(float64), ram.(float64), storageSize.(float64)))
-		} else if len(results) > 1 {
+		if len(results) > 1 {
 			return diag.FromErr(fmt.Errorf("more than one template found with the specified criteria: name = %s, cores = %v, ram = %v, storage_size = %v", name.(string), cores.(float64), ram.(float64), storageSize.(float64)))
 		} else {
 			template = results[0]

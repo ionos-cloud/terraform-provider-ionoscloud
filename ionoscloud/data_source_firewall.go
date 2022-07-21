@@ -136,7 +136,9 @@ func dataSourceFirewallRead(ctx context.Context, d *schema.ResourceData, meta in
 				if err != nil {
 					return diag.FromErr(fmt.Errorf("an error occurred while fetching firewall rules while searching by partial name: %s, %w", name, err))
 				}
-
+				if len(*firewalls.Items) == 0 {
+					return diag.FromErr(fmt.Errorf("no result found with the specified criteria: name with partial match: %s", name))
+				}
 				results = *firewalls.Items
 			} else {
 				firewalls, apiResponse, err := client.FirewallRulesApi.DatacentersServersNicsFirewallrulesGet(ctx, datacenterId, serverId, nicId).Depth(1).Execute()
@@ -157,6 +159,9 @@ func dataSourceFirewallRead(ctx context.Context, d *schema.ResourceData, meta in
 							}
 							nameResults = append(nameResults, tmpFirewall)
 						}
+					}
+					if len(nameResults) == 0 {
+						return diag.FromErr(fmt.Errorf("no result found with the specified criteria: name %s", name))
 					}
 					results = nameResults
 				}
@@ -181,8 +186,8 @@ func dataSourceFirewallRead(ctx context.Context, d *schema.ResourceData, meta in
 					}
 				}
 			}
-			if firewallTypeResults == nil {
-				return diag.FromErr(fmt.Errorf("no firewall found with the specified criteria: type = %s", firewallType))
+			if firewallTypeResults == nil || len(firewallTypeResults) == 0 {
+				return diag.FromErr(fmt.Errorf("no result found with the specified criteria: type = %s", firewallType))
 			}
 			results = firewallTypeResults
 		}
@@ -196,15 +201,13 @@ func dataSourceFirewallRead(ctx context.Context, d *schema.ResourceData, meta in
 					}
 				}
 			}
-			if protocolResults == nil {
-				return diag.FromErr(fmt.Errorf("no firewall found with the specified criteria: protocol = %s", protocol))
+			if protocolResults == nil || len(protocolResults) == 0 {
+				return diag.FromErr(fmt.Errorf("no result found with the specified criteria: protocol = %s", protocol))
 			}
 			results = protocolResults
 		}
 
-		if results == nil || len(results) == 0 {
-			return diag.FromErr(fmt.Errorf("no firewall rule found with the specified name = %s", name))
-		} else if len(results) > 1 {
+		if len(results) > 1 {
 			return diag.FromErr(fmt.Errorf("more than one firewall rule found with the specified criteria name = %s", name))
 		} else {
 			firewall = results[0]

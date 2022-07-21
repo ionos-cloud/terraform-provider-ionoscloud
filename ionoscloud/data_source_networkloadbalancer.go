@@ -104,13 +104,6 @@ func dataSourceNetworkLoadBalancerRead(ctx context.Context, d *schema.ResourceDa
 		/* search by name */
 		var results []ionoscloud.NetworkLoadBalancer
 		if nameOk {
-			//networkLoadBalancers, apiResponse, err := client.NetworkLoadBalancersApi.DatacentersNetworkloadbalancersGet(ctx, datacenterId).Depth(1).Execute()
-			//logApiRequestTime(apiResponse)
-			//if err != nil {
-			//	return diag.FromErr(fmt.Errorf("an error occurred while fetching network loadbalancers: %s", err.Error()))
-			//}
-			//var results = *networkLoadBalancers.Items
-
 			partialMatch := d.Get("partial_match").(bool)
 
 			log.Printf("[INFO] Using data source for network loadbalancer by name with partial_match %t and name: %s", partialMatch, name)
@@ -120,6 +113,9 @@ func dataSourceNetworkLoadBalancerRead(ctx context.Context, d *schema.ResourceDa
 				logApiRequestTime(apiResponse)
 				if err != nil {
 					return diag.FromErr(fmt.Errorf("an error occurred while fetching network loadbalancers: %s", err.Error()))
+				}
+				if len(*networkLoadBalancers.Items) == 0 {
+					return diag.FromErr(fmt.Errorf("no result found with the specified criteria: name with partial match: %s", name))
 				}
 				results = *networkLoadBalancers.Items
 			} else {
@@ -142,8 +138,8 @@ func dataSourceNetworkLoadBalancerRead(ctx context.Context, d *schema.ResourceDa
 							resultsByName = append(resultsByName, tmpNetworkLoadBalancer)
 						}
 					}
-					if resultsByName == nil {
-						return diag.FromErr(fmt.Errorf("no network load balancer found with the specified criteria: name = %s", name))
+					if resultsByName == nil || len(resultsByName) == 0 {
+						return diag.FromErr(fmt.Errorf("no result found with the specified criteria: name = %s", name))
 					}
 					results = resultsByName
 				}
@@ -166,15 +162,13 @@ func dataSourceNetworkLoadBalancerRead(ctx context.Context, d *schema.ResourceDa
 					}
 				}
 			}
-			if targetLanResults == nil {
-				return diag.FromErr(fmt.Errorf("no network load balancer found with the specified criteria: target_lan = %d", targetLan))
+			if targetLanResults == nil || len(targetLanResults) == 0 {
+				return diag.FromErr(fmt.Errorf("no result found with the specified criteria: target_lan = %d", targetLan))
 			}
 			results = targetLanResults
 		}
 
-		if results == nil || len(results) == 0 {
-			return diag.FromErr(fmt.Errorf("no network load balancer found with the specified criteria: name = %s", name))
-		} else if len(results) > 1 {
+		if len(results) > 1 {
 			return diag.FromErr(fmt.Errorf("more than one network load balancer found with the specified criteria: name = %s", name))
 		} else {
 			networkLoadBalancer = results[0]

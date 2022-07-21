@@ -139,7 +139,6 @@ func dataSourceImageRead(ctx context.Context, d *schema.ResourceData, meta inter
 	name := nameValue.(string)
 	imageType := imageTypeValue.(string)
 	location := locationValue.(string)
-	//version := versionValue.(string)
 	cloudInit := cloudInitValue.(string)
 	imageAlias := imageAliasValue.(string)
 
@@ -174,15 +173,11 @@ func dataSourceImageRead(ctx context.Context, d *schema.ResourceData, meta inter
 				if err != nil {
 					return diag.FromErr(fmt.Errorf("an error occurred while fetching images while searching by partial name: %s, %w", name, err))
 				}
-
+				if len(*images.Items) == 0 {
+					return diag.FromErr(fmt.Errorf("no result found with the specified criteria name with partial match: %s", name))
+				}
 				results = *images.Items
 			} else {
-				//images, apiResponse, err := client.ImagesApi.ImagesGet(ctx).Execute()
-				//logApiRequestTime(apiResponse)
-				//
-				//if err != nil {
-				//	return diag.FromErr(fmt.Errorf("an error occurred while fetching images while searching by partial name: %s, %w", name, err))
-				//}
 				if images.Items != nil {
 					for _, img := range *images.Items {
 						if img.Properties != nil && img.Properties.Name != nil && strings.Contains(strings.ToLower(*img.Properties.Name), strings.ToLower(name)) {
@@ -190,17 +185,11 @@ func dataSourceImageRead(ctx context.Context, d *schema.ResourceData, meta inter
 						}
 					}
 				}
-				if results == nil {
+				if results == nil || len(results) == 0 {
 					return diag.FromErr(fmt.Errorf("no image found with the specified criteria: name %s", name))
 				}
 			}
 		} else {
-			//images, apiResponse, err := client.ImagesApi.ImagesGet(ctx).Execute()
-			//logApiRequestTime(apiResponse)
-			//
-			//if err != nil {
-			//	return diag.FromErr(fmt.Errorf("an error occurred while fetching images while searching by partial name: %s, %w", name, err))
-			//}
 			results = *images.Items
 		}
 
@@ -212,6 +201,9 @@ func dataSourceImageRead(ctx context.Context, d *schema.ResourceData, meta inter
 				}
 
 			}
+			if len(imageTypeResults) == 0 {
+				return diag.FromErr(fmt.Errorf("no result found with the specified criteria image type: %s", imageType))
+			}
 			results = imageTypeResults
 		}
 
@@ -221,6 +213,9 @@ func dataSourceImageRead(ctx context.Context, d *schema.ResourceData, meta inter
 				if img.Properties != nil && img.Properties.Location != nil && strings.EqualFold(*img.Properties.Location, location) {
 					locationResults = append(locationResults, img)
 				}
+			}
+			if len(locationResults) == 0 {
+				return diag.FromErr(fmt.Errorf("no result found with the specified criteria location: %s", location))
 			}
 			results = locationResults
 		}
@@ -232,27 +227,35 @@ func dataSourceImageRead(ctx context.Context, d *schema.ResourceData, meta inter
 					cloudInitResults = append(cloudInitResults, img)
 				}
 			}
+			if len(cloudInitResults) == 0 {
+				return diag.FromErr(fmt.Errorf("no result found with the specified criteria cloud init: %s", cloudInit))
+			}
 			results = cloudInitResults
 		}
 
-		if imageAliasOk && locationOk && imageAlias != "" && location != "" {
-			var imageAliasResults []ionoscloud.Image
-			for _, img := range results {
-				aliases := *img.Properties.ImageAliases
-				if img.Properties != nil && *img.Properties.ImageAliases != nil {
-					for _, alias := range aliases {
-						if strings.EqualFold(alias, imageAlias) && strings.EqualFold(*img.Properties.Location, location) {
-							imageAliasResults = append(imageAliasResults, img)
+		if imageAliasOk && imageAlias != "" {
+			if locationOk && location != "" {
+				var imageAliasResults []ionoscloud.Image
+				for _, img := range results {
+					if img.Properties != nil && *img.Properties.ImageAliases != nil {
+						aliases := *img.Properties.ImageAliases
+						for _, alias := range aliases {
+							if strings.EqualFold(alias, imageAlias) && strings.EqualFold(*img.Properties.Location, location) {
+								imageAliasResults = append(imageAliasResults, img)
+							}
 						}
 					}
 				}
+				if len(imageAliasResults) == 0 {
+					return diag.FromErr(fmt.Errorf("no result found with the specified criteria: image alias %s", imageAlias))
+				}
+				results = imageAliasResults
+			} else {
+				return diag.FromErr(fmt.Errorf("image alias should be used together with location parameter"))
 			}
-			results = imageAliasResults
 		}
 
-		if results == nil || len(results) == 0 {
-			return diag.FromErr(fmt.Errorf("no image found with the specified criteria: name = %s, type = %s, location = %s, cloudInit = %s", name, imageType, location, cloudInit))
-		} else if len(results) > 1 {
+		if len(results) > 1 {
 			return diag.FromErr(fmt.Errorf("more than one image found with the specified criteria name = %s", name))
 		} else {
 			image = results[0]

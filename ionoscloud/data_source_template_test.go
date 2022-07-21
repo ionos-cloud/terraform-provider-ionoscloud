@@ -107,10 +107,6 @@ data ` + TemplateResource + ` ` + TemplateTestResource + ` {
 const testAccDataSourceTemplateId = `
 data ` + TemplateResource + ` ` + TemplateTestResource + ` {
 	id = "5ae1bfbd-05f2-47f5-a736-eaca3dcce41b"
-	name		 = "CUBES S"
-	cores		 = 1
-	ram			 = 2048
-	storage_size = 50
 }`
 
 const testAccDataSourceTemplateStorageWrongNameError = `

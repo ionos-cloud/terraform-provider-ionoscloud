@@ -148,8 +148,6 @@ func datasourceIpBlockRead(ctx context.Context, data *schema.ResourceData, meta 
 
 		log.Printf("[INFO] Got ip block [Name=%s, Location=%s]", *ipBlock.Properties.Name, *ipBlock.Properties.Location)
 	} else {
-
-		//var results []ionoscloud.IpBlock
 		ipBlocks, apiResponse, err := client.IPBlocksApi.IpblocksGet(ctx).Depth(1).Execute()
 		logApiRequestTime(apiResponse)
 
@@ -158,7 +156,7 @@ func datasourceIpBlockRead(ctx context.Context, data *schema.ResourceData, meta 
 		}
 
 		if ipBlocks.Items == nil {
-			diags := diag.FromErr(fmt.Errorf("no users found"))
+			diags := diag.FromErr(fmt.Errorf("no ip block found"))
 			return diags
 		}
 
@@ -175,18 +173,11 @@ func datasourceIpBlockRead(ctx context.Context, data *schema.ResourceData, meta 
 			if err != nil {
 				return diag.FromErr(fmt.Errorf("an error occured while fetching ipBlocks: %s ", err))
 			}
-
+			if *ipBlocks.Items == nil || len(*ipBlocks.Items) == 0 {
+				return diag.FromErr(fmt.Errorf("no result found with the specified criteria: name with partial match = %s", name))
+			}
 			results = *ipBlocks.Items
 		} else {
-			//ipBlocks, apiResponse, err := client.IPBlocksApi.IpblocksGet(ctx).Depth(1).Execute()
-			//logApiRequestTime(apiResponse)
-			//
-			//if err != nil {
-			//	return diag.FromErr(fmt.Errorf("an error occured while fetching ipBlocks: %s ", err))
-			//}
-			//
-			//results = *ipBlocks.Items
-
 			if nameOk && results != nil {
 				var resultsByName []ionoscloud.IpBlock
 				for _, block := range results {
@@ -195,7 +186,7 @@ func datasourceIpBlockRead(ctx context.Context, data *schema.ResourceData, meta 
 					}
 				}
 
-				if resultsByName == nil {
+				if resultsByName == nil || len(resultsByName) == 0 {
 					return diag.FromErr(fmt.Errorf("no ip block found with the specified criteria: name = %s", name))
 				}
 				results = resultsByName
@@ -212,16 +203,14 @@ func datasourceIpBlockRead(ctx context.Context, data *schema.ResourceData, meta 
 					}
 				}
 			}
-			if resultsByLocation == nil {
-				return diag.FromErr(fmt.Errorf("no ip block found with the specified criteria: location = %s", location))
+			if resultsByLocation == nil || len(resultsByLocation) == 0 {
+				return diag.FromErr(fmt.Errorf("no result found with the specified criteria: location = %s", location))
 			}
 			results = resultsByLocation
 
 		}
 
-		if results == nil || len(results) == 0 {
-			return diag.FromErr(fmt.Errorf("no ip block found with the specified criteria name = %s, location = %s", name, location))
-		} else if len(results) > 1 {
+		if len(results) > 1 {
 			return diag.FromErr(fmt.Errorf("more than one ip block found with the specified criteria name = %s, location = %s", name, location))
 		} else {
 			ipBlock = results[0]

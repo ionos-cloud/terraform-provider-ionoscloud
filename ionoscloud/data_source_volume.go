@@ -171,12 +171,6 @@ func dataSourceVolumeRead(ctx context.Context, d *schema.ResourceData, meta inte
 		var results []ionoscloud.Volume
 		var diags diag.Diagnostics
 
-		//volumeItems, diags := getVolumes(ctx, client, datacenterId, serverId, "")
-		//if diags != nil {
-		//	return diags
-		//}
-		//results = volumeItems
-
 		partialMatch := d.Get("partial_match").(bool)
 
 		log.Printf("[INFO] Using data source for volume by name with partial_match %t and name: %s", partialMatch, name)
@@ -186,13 +180,10 @@ func dataSourceVolumeRead(ctx context.Context, d *schema.ResourceData, meta inte
 			if diags != nil {
 				return diags
 			}
+			if len(results) == 0 {
+				return diag.FromErr(fmt.Errorf("no result found with the specified criteria: name with partial match: %s", name))
+			}
 		} else {
-			//var volumeItems []ionoscloud.Volume
-			//volumeItems, diags = getVolumes(ctx, client, datacenterId, serverId, "")
-			//if diags != nil {
-			//	return diags
-			//}
-
 			volumeItems, diags := getVolumes(ctx, client, datacenterId, serverId, "")
 			if diags != nil {
 				return diags
@@ -204,22 +195,17 @@ func dataSourceVolumeRead(ctx context.Context, d *schema.ResourceData, meta inte
 				for _, v := range volumeItems {
 					if v.Properties != nil && v.Properties.Name != nil && strings.EqualFold(*v.Properties.Name, name) {
 						/* volume found */
-						//volume, apiResponse, err = client.VolumesApi.DatacentersVolumesFindById(ctx, datacenterId, *v.Id).Execute()
-						//logApiRequestTime(apiResponse)
-						//if err != nil {
-						//	diags := diag.FromErr(fmt.Errorf("an error occurred while fetching volume %s: %w", *v.Id, err))
-						//	return diags
-						//}
 						nameResults = append(nameResults, v) // volume in place of v
 					}
+				}
+				if len(nameResults) == 0 {
+					return diag.FromErr(fmt.Errorf("no result found with the specified criteria: name %s", name))
 				}
 				results = nameResults
 			}
 		}
 
-		if results == nil || len(results) == 0 {
-			return diag.FromErr(fmt.Errorf("no volume found with the specified criteria: name = %s", name))
-		} else if len(results) > 1 {
+		if len(results) > 1 {
 			return diag.FromErr(fmt.Errorf("more than one volume found with the specified criteria: name = %s", name))
 		} else {
 			volume = results[0]

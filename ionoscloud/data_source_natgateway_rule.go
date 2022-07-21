@@ -135,14 +135,6 @@ func dataSourceNatGatewayRuleRead(ctx context.Context, d *schema.ResourceData, m
 		var results []ionoscloud.NatGatewayRule
 
 		if nameOk {
-			//natGatewayRules, apiResponse, err := client.NATGatewaysApi.DatacentersNatgatewaysRulesGet(ctx, datacenterId, natgatewayId).Depth(1).Execute()
-			//logApiRequestTime(apiResponse)
-			//if err != nil {
-			//	return diag.FromErr(fmt.Errorf("an error occurred while fetching nat gateway rules: %s", err.Error()))
-			//}
-			//
-			//var results = *natGatewayRules.Items
-
 			partialMatch := d.Get("partial_match").(bool)
 
 			log.Printf("[INFO] Using data source for nat gateway rule by name with partial_match %t and name: %s", partialMatch, name)
@@ -152,6 +144,9 @@ func dataSourceNatGatewayRuleRead(ctx context.Context, d *schema.ResourceData, m
 				logApiRequestTime(apiResponse)
 				if err != nil {
 					return diag.FromErr(fmt.Errorf("an error occurred while fetching nat gateway rules: %s", err.Error()))
+				}
+				if len(*natGatewayRules.Items) == 0 {
+					return diag.FromErr(fmt.Errorf("no result found with the specified criteria: name with partial match: %s", name))
 				}
 				results = *natGatewayRules.Items
 			} else {
@@ -172,6 +167,9 @@ func dataSourceNatGatewayRuleRead(ctx context.Context, d *schema.ResourceData, m
 							}
 							resultsByName = append(resultsByName, tmpNatGatewayRule)
 						}
+					}
+					if len(resultsByName) == 0 {
+						return diag.FromErr(fmt.Errorf("no result found with the specified criteria: name %s", name))
 					}
 					results = resultsByName
 				}
@@ -197,12 +195,13 @@ func dataSourceNatGatewayRuleRead(ctx context.Context, d *schema.ResourceData, m
 			if protocolResults == nil {
 				return diag.FromErr(fmt.Errorf("no natgateway rule found with the specified criteria: protocolResults = %s", protocol))
 			}
+			if len(protocolResults) == 0 {
+				return diag.FromErr(fmt.Errorf("no result found with the specified criteria: protocol %s", protocol))
+			}
 			results = protocolResults
 		}
 
-		if results == nil || len(results) == 0 {
-			return diag.FromErr(fmt.Errorf("no nat gateway rule found with the specified criteria: name = %s", name))
-		} else if len(results) > 1 {
+		if len(results) > 1 {
 			return diag.FromErr(fmt.Errorf("more than one nat gateway rule found with the specified criteria: name = %s", name))
 		} else {
 			natGatewayRule = results[0]

@@ -37,7 +37,7 @@ func dataSourceDbaasPgSqlCluster() *schema.Resource {
 			"postgres_version": {
 				Type:        schema.TypeString,
 				Description: "The PostgreSQL version of your cluster.",
-				Computed:    true,
+				Optional:    true,
 			},
 			"instances": {
 				Type:        schema.TypeInt,
@@ -207,16 +207,6 @@ func dataSourceDbaasPgSqlReadCluster(ctx context.Context, d *schema.ResourceData
 		}
 	} else {
 		var results []dbaas.ClusterResponse
-		//clusters, _, err := client.ListClusters(ctx, "")
-		//if err != nil {
-		//	diags := diag.FromErr(fmt.Errorf("an error occurred while fetching dbaas clusters: %s", err.Error()))
-		//	return diags
-		//}
-		//var results = *clusters.Items
-
-		//partialMatch := d.Get("partial_match").(bool)
-		//
-		//log.Printf("[INFO] Using data source for DBaaS Postgres Cluster by name with partial_match %t and name: %s", partialMatch, name)
 
 		if nameOk {
 			partialMatch := d.Get("partial_match").(bool)
@@ -227,6 +217,9 @@ func dataSourceDbaasPgSqlReadCluster(ctx context.Context, d *schema.ResourceData
 				if err != nil {
 					diags := diag.FromErr(fmt.Errorf("an error occurred while fetching dbaas clusters: %s", err.Error()))
 					return diags
+				}
+				if len(*clusters.Items) == 0 {
+					return diag.FromErr(fmt.Errorf("no result found with the specified criteria name with partial match: %s", name))
 				}
 				results = *clusters.Items
 			} else {
@@ -241,6 +234,9 @@ func dataSourceDbaasPgSqlReadCluster(ctx context.Context, d *schema.ResourceData
 						if clusterItem.Properties != nil && clusterItem.Properties.DisplayName != nil && strings.EqualFold(*clusterItem.Properties.DisplayName, name) {
 							nameResults = append(nameResults, clusterItem)
 						}
+					}
+					if len(nameResults) == 0 {
+						return diag.FromErr(fmt.Errorf("no result found with the specified criteria name: %s", name))
 					}
 					results = nameResults
 				}
@@ -260,6 +256,9 @@ func dataSourceDbaasPgSqlReadCluster(ctx context.Context, d *schema.ResourceData
 				if cluster.Properties != nil && cluster.Properties.Location != nil && strings.EqualFold(string(*cluster.Properties.Location), location) {
 					locationResults = append(locationResults, cluster)
 				}
+			}
+			if len(locationResults) == 0 {
+				return diag.FromErr(fmt.Errorf("no result found with the specified criteria location: %s", location))
 			}
 			results = locationResults
 		}
@@ -282,6 +281,9 @@ func dataSourceDbaasPgSqlReadCluster(ctx context.Context, d *schema.ResourceData
 					}
 				}
 			}
+			if len(dcNameResults) == 0 {
+				return diag.FromErr(fmt.Errorf("no result found with the specified criteria datacenter name: %s", dcName))
+			}
 			results = dcNameResults
 		}
 
@@ -292,13 +294,14 @@ func dataSourceDbaasPgSqlReadCluster(ctx context.Context, d *schema.ResourceData
 					pgVersionResults = append(pgVersionResults, cluster)
 				}
 			}
+			if len(pgVersionResults) == 0 {
+				return diag.FromErr(fmt.Errorf("no result found with the specified criteria: postgres version: %s", pgVersion))
+			}
 			results = pgVersionResults
 		}
 
-		if results == nil || len(results) == 0 {
-			return diag.FromErr(fmt.Errorf("no DBaaS cluster found with the specified name = %s", name))
-		} else if len(results) > 1 {
-			return diag.FromErr(fmt.Errorf("more than one DBaaS cluster found with the specified criteria name = %s", name))
+		if len(results) > 1 {
+			return diag.FromErr(fmt.Errorf("more than one DBaaS cluster found with the specified criteria"))
 		} else {
 			cluster = results[0]
 		}
