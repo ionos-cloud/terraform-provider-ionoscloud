@@ -60,7 +60,7 @@ func resourceContainerRegistryToken() *schema.Resource {
 				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{
 						"actions": {
-							Type:     schema.TypeString,
+							Type:     schema.TypeList,
 							Required: true,
 							Elem: &schema.Schema{
 								Type:         schema.TypeString,
