@@ -14,7 +14,7 @@ func dataSourceContainerRegistryLocations() *schema.Resource {
 		Schema: map[string]*schema.Schema{
 			"locations": {
 				Type:        schema.TypeList,
-				Description: "list of container registry versions",
+				Description: "list of container registry locations",
 				Computed:    true,
 				Elem: &schema.Schema{
 					Type: schema.TypeString,

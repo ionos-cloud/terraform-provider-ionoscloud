@@ -63,8 +63,7 @@ func resourceContainerRegistryToken() *schema.Resource {
 							Type:     schema.TypeList,
 							Required: true,
 							Elem: &schema.Schema{
-								Type:         schema.TypeString,
-								ValidateFunc: validation.All(validation.StringInSlice([]string{"pull", "push", "delete"}, true)),
+								Type: schema.TypeString,
 							},
 						},
 						"name": {
