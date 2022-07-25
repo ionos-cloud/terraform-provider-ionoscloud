@@ -1,15 +1,15 @@
 ---
-subcategory: "Data Stack as a Service"
+subcategory: "Dataplatform"
 layout: "ionoscloud"
-page_title: "IonosCloud: ionoscloud_dsaas_cluster"
-sidebar_current: "docs-resource-dsaas_cluster"
+page_title: "IonosCloud: ionoscloud_dataplatform_cluster"
+sidebar_current: "docs-resource-dataplatform_cluster"
 description: |-
-Creates and manages DSaaS Cluster objects.
+Creates and manages Dataplatform Cluster objects.
 ---
 
 # ionoscloud\_pg_cluster
 
-Manages a **DSaaS Cluster**.
+Manages a **Dataplatform Cluster**.
 
 ## Example Usage
 
@@ -17,12 +17,12 @@ Manages a **DSaaS Cluster**.
 resource "ionoscloud_datacenter" "example" {
   name        = "Datacenter_Example"
   location    = "de/txl"
-  description = "Datacenter for testing DSaaS Cluster"
+  description = "Datacenter for testing Dataplatform Cluster"
 }
 
-resource "ionoscloud_dsaas_cluster" "example" {
+resource "ionoscloud_dataplatform_cluster" "example" {
   datacenter_id   		=  ionoscloud_datacenter.example.id
-  name 					= "DSaaS_Cluster_Example"
+  name 					= "Dataplatform_Cluster_Example"
   maintenance_window {
     day_of_the_week  	= "Sunday"
     time				= "09:00:00"
@@ -42,8 +42,8 @@ resource "ionoscloud_dsaas_cluster" "example" {
 
 ## Import
 
-Resource DSaaS Cluster can be imported using the `cluster_id`, e.g.
+Resource Dataplatform Cluster can be imported using the `cluster_id`, e.g.
 
 ```shell
-terraform import ionoscloud_dsaas_cluster.mycluser {cluster uuid}
+terraform import ionoscloud_dataplatform_cluster.mycluser {cluster uuid}
 ```

@@ -7,16 +7,16 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
-	dsaas "github.com/ionos-cloud/sdk-go-autoscaling"
-	dsaasService "github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/dsaas"
+	dataplatform "github.com/ionos-cloud/sdk-go-autoscaling"
+	dataplatformService "github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/dataplatform"
 	"log"
 	"regexp"
 	"strings"
 )
 
-func dataSourceDSaaSNodePool() *schema.Resource {
+func dataSourceDataplatformNodePool() *schema.Resource {
 	return &schema.Resource{
-		ReadContext: dataSourceDSaaSReadNodePool,
+		ReadContext: dataSourceDataplatformReadNodePool,
 		Schema: map[string]*schema.Schema{
 			"id": {
 				Type:         schema.TypeString,
@@ -112,7 +112,7 @@ func dataSourceDSaaSNodePool() *schema.Resource {
 			"cluster_id": {
 				Type:         schema.TypeString,
 				Required:     true,
-				Description:  "The UUID of an existing DSaaS cluster",
+				Description:  "The UUID of an existing Dataplatform cluster",
 				ValidateFunc: validation.All(validation.StringMatch(regexp.MustCompile("^[A-Za-z0-9][-A-Za-z0-9_.]*[A-Za-z0-9]$"), "")),
 			},
 		},
@@ -120,8 +120,8 @@ func dataSourceDSaaSNodePool() *schema.Resource {
 	}
 }
 
-func dataSourceDSaaSReadNodePool(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
-	client := meta.(SdkBundle).DSaaSClient
+func dataSourceDataplatformReadNodePool(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+	client := meta.(SdkBundle).DataplatformClient
 
 	clusterId := d.Get("cluster_id").(string)
 	idValue, idOk := d.GetOk("id")
@@ -134,17 +134,17 @@ func dataSourceDSaaSReadNodePool(ctx context.Context, d *schema.ResourceData, me
 		return diag.FromErr(errors.New("id and name cannot be both specified in the same time"))
 	}
 	if !idOk && !nameOk {
-		return diag.FromErr(errors.New("please provide either the DSaaS Node Pool id or name"))
+		return diag.FromErr(errors.New("please provide either the Dataplatform Node Pool id or name"))
 	}
 
-	var nodePool dsaas.NodePoolResponseData
+	var nodePool dataplatform.NodePoolResponseData
 	var err error
 
 	if idOk {
 		/* search by ID */
 		nodePool, _, err = client.GetNodePool(ctx, clusterId, id)
 		if err != nil {
-			return diag.FromErr(fmt.Errorf("an error occurred while fetching the DSaaS Node Pool with ID %s: %s", id, err))
+			return diag.FromErr(fmt.Errorf("an error occurred while fetching the Dataplatform Node Pool with ID %s: %s", id, err))
 		}
 	} else {
 		/* search by name */
@@ -155,33 +155,33 @@ func dataSourceDSaaSReadNodePool(ctx context.Context, d *schema.ResourceData, me
 		}
 
 		if results == nil || len(results) == 0 {
-			return diag.FromErr(fmt.Errorf("no DSaaS NodePool found with the specified name = %s", name))
+			return diag.FromErr(fmt.Errorf("no Dataplatform NodePool found with the specified name = %s", name))
 		} else if len(results) > 1 {
-			return diag.FromErr(fmt.Errorf("more than one DSaaS NodePool found with the specified criteria name = %s", name))
+			return diag.FromErr(fmt.Errorf("more than one Dataplatform NodePool found with the specified criteria name = %s", name))
 		} else {
 			nodePool = results[0]
 		}
 	}
 
-	if err = dsaasService.SetDSaaSNodePoolData(d, nodePool); err != nil {
+	if err = dataplatformService.SetDataplatformNodePoolData(d, nodePool); err != nil {
 		return diag.FromErr(err)
 	}
 
 	return nil
 }
 
-func filterNodePools(ctx context.Context, d *schema.ResourceData, client *dsaasService.Client, name string) ([]dsaas.NodePoolResponseData, diag.Diagnostics) {
+func filterNodePools(ctx context.Context, d *schema.ResourceData, client *dataplatformService.Client, name string) ([]dataplatform.NodePoolResponseData, diag.Diagnostics) {
 	clusterId := d.Get("cluster_id").(string)
 
-	var results []dsaas.NodePoolResponseData
+	var results []dataplatform.NodePoolResponseData
 
 	partialMatch := d.Get("partial_match").(bool)
 
-	log.Printf("[INFO] Using data source for DSaaS Node Pool by name with partial_match %t and name: %s", partialMatch, name)
+	log.Printf("[INFO] Using data source for Dataplatform Node Pool by name with partial_match %t and name: %s", partialMatch, name)
 
 	nodePools, _, err := client.ListNodePools(ctx, clusterId)
 	if err != nil {
-		diags := diag.FromErr(fmt.Errorf("an error occurred while fetching DSaaS NodePools: %s", err.Error()))
+		diags := diag.FromErr(fmt.Errorf("an error occurred while fetching Dataplatform NodePools: %s", err.Error()))
 		return nil, diags
 	}
 	if nodePools.Items != nil && len(*nodePools.Items) > 0 {
@@ -190,7 +190,7 @@ func filterNodePools(ctx context.Context, d *schema.ResourceData, client *dsaasS
 				!partialMatch && strings.EqualFold(*nodePoolItem.Properties.Name, name)) {
 				tmpNodePool, _, err := client.GetNodePool(ctx, clusterId, *nodePoolItem.Id)
 				if err != nil {
-					return nil, diag.FromErr(fmt.Errorf("an error occurred while fetching the DSaaS NodePool with ID: %s while searching by full name: %s: %w", *nodePoolItem.Id, name, err))
+					return nil, diag.FromErr(fmt.Errorf("an error occurred while fetching the Dataplatform NodePool with ID: %s while searching by full name: %s: %w", *nodePoolItem.Id, name, err))
 				}
 				results = append(results, tmpNodePool)
 			}

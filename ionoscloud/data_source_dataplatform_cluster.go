@@ -8,17 +8,17 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
-	dsaas "github.com/ionos-cloud/sdk-go-autoscaling"
-	dsaasService "github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/dsaas"
+	dataplatform "github.com/ionos-cloud/sdk-go-autoscaling"
+	dataplatformService "github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/dataplatform"
 	"gopkg.in/yaml.v3"
 	"log"
 	"regexp"
 	"strings"
 )
 
-func dataSourceDSaaSCluster() *schema.Resource {
+func dataSourceDataplatformCluster() *schema.Resource {
 	return &schema.Resource{
-		ReadContext: dataSourceDSaaSClusterRead,
+		ReadContext: dataSourceDataplatformClusterRead,
 		Schema: map[string]*schema.Schema{
 			"id": {
 				Type:         schema.TypeString,
@@ -179,8 +179,8 @@ func dataSourceDSaaSCluster() *schema.Resource {
 	}
 }
 
-func dataSourceDSaaSClusterRead(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
-	client := meta.(SdkBundle).DSaaSClient
+func dataSourceDataplatformClusterRead(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+	client := meta.(SdkBundle).DataplatformClient
 
 	idValue, idOk := d.GetOk("id")
 	nameValue, nameOk := d.GetOk("name")
@@ -193,38 +193,38 @@ func dataSourceDSaaSClusterRead(ctx context.Context, d *schema.ResourceData, met
 		return diags
 	}
 	if !idOk && !nameOk {
-		diags := diag.FromErr(errors.New("please provide either the DSaaS Cluster id or display_name"))
+		diags := diag.FromErr(errors.New("please provide either the Dataplatform Cluster id or display_name"))
 		return diags
 	}
 
-	var cluster dsaas.ClusterResponseData
+	var cluster dataplatform.ClusterResponseData
 	var err error
 
 	if idOk {
 		/* search by ID */
 		cluster, _, err = client.GetCluster(ctx, id)
 		if err != nil {
-			diags := diag.FromErr(fmt.Errorf("an error occurred while fetching the DSaaS Cluster with ID %s: %s", id, err))
+			diags := diag.FromErr(fmt.Errorf("an error occurred while fetching the Dataplatform Cluster with ID %s: %s", id, err))
 			return diags
 		}
 	} else {
-		var results []dsaas.ClusterResponseData
+		var results []dataplatform.ClusterResponseData
 
 		partialMatch := d.Get("partial_match").(bool)
 
-		log.Printf("[INFO] Using data source for DSaaS Cluster by name with partial_match %t and name: %s", partialMatch, name)
+		log.Printf("[INFO] Using data source for Dataplatform Cluster by name with partial_match %t and name: %s", partialMatch, name)
 
 		if partialMatch {
 			clusters, _, err := client.ListClusters(ctx, name)
 			if err != nil {
-				diags := diag.FromErr(fmt.Errorf("an error occurred while fetching DSaaS Clusters: %s", err.Error()))
+				diags := diag.FromErr(fmt.Errorf("an error occurred while fetching Dataplatform Clusters: %s", err.Error()))
 				return diags
 			}
 			results = *clusters.Items
 		} else {
 			clusters, _, err := client.ListClusters(ctx, "")
 			if err != nil {
-				diags := diag.FromErr(fmt.Errorf("an error occurred while fetching DSaaS Clusters: %s", err.Error()))
+				diags := diag.FromErr(fmt.Errorf("an error occurred while fetching Dataplatform Clusters: %s", err.Error()))
 				return diags
 			}
 			if clusters.Items != nil && len(*clusters.Items) > 0 {
@@ -232,7 +232,7 @@ func dataSourceDSaaSClusterRead(ctx context.Context, d *schema.ResourceData, met
 					if clusterItem.Properties != nil && clusterItem.Properties.Name != nil && strings.EqualFold(*clusterItem.Properties.Name, name) {
 						tmpCluster, _, err := client.GetCluster(ctx, *clusterItem.Id)
 						if err != nil {
-							return diag.FromErr(fmt.Errorf("an error occurred while fetching the DSaaS Cluster with ID: %s while searching by full name: %s: %w", *clusterItem.Id, name, err))
+							return diag.FromErr(fmt.Errorf("an error occurred while fetching the Dataplatform Cluster with ID: %s while searching by full name: %s: %w", *clusterItem.Id, name, err))
 						}
 						results = append(results, tmpCluster)
 					}
@@ -241,20 +241,20 @@ func dataSourceDSaaSClusterRead(ctx context.Context, d *schema.ResourceData, met
 		}
 
 		if results == nil || len(results) == 0 {
-			return diag.FromErr(fmt.Errorf("no DSaaS Cluster found with the specified name = %s", name))
+			return diag.FromErr(fmt.Errorf("no Dataplatform Cluster found with the specified name = %s", name))
 		} else if len(results) > 1 {
-			return diag.FromErr(fmt.Errorf("more than one DSaaS Cluster found with the specified criteria name = %s", name))
+			return diag.FromErr(fmt.Errorf("more than one Dataplatform Cluster found with the specified criteria name = %s", name))
 		} else {
 			cluster = results[0]
 		}
 
 	}
 
-	if err := dsaasService.SetDSaaSClusterData(d, cluster); err != nil {
+	if err := dataplatformService.SetDataplatformClusterData(d, cluster); err != nil {
 		return diag.FromErr(err)
 	}
 
-	if err = setAdditionalDSaaSClusterData(d, &cluster, client); err != nil {
+	if err = setAdditionalDataplatformClusterData(d, &cluster, client); err != nil {
 		return diag.FromErr(err)
 	}
 
@@ -262,7 +262,7 @@ func dataSourceDSaaSClusterRead(ctx context.Context, d *schema.ResourceData, met
 
 }
 
-func setAdditionalDSaaSClusterData(d *schema.ResourceData, cluster *dsaas.ClusterResponseData, client *dsaasService.Client) error {
+func setAdditionalDataplatformClusterData(d *schema.ResourceData, cluster *dataplatform.ClusterResponseData, client *dataplatformService.Client) error {
 
 	ctx, cancel := context.WithTimeout(context.Background(), *resourceDefaultTimeouts.Default)
 
@@ -282,7 +282,7 @@ func setAdditionalDSaaSClusterData(d *schema.ResourceData, cluster *dsaas.Cluste
 		}
 		fmt.Printf("KubeConfig %+v", kubeConfig)
 
-		if err := setDSaaSConfigData(d, kubeConfig); err != nil {
+		if err := setDataplatformConfigData(d, kubeConfig); err != nil {
 			return err
 		}
 	}
@@ -290,7 +290,7 @@ func setAdditionalDSaaSClusterData(d *schema.ResourceData, cluster *dsaas.Cluste
 	return nil
 }
 
-func setDSaaSConfigData(d *schema.ResourceData, configStr string) error {
+func setDataplatformConfigData(d *schema.ResourceData, configStr string) error {
 
 	var kubeConfig KubeConfig
 	if err := yaml.Unmarshal([]byte(configStr), &kubeConfig); err != nil {

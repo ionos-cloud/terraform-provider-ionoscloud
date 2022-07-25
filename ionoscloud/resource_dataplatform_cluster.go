@@ -6,20 +6,20 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
-	dsaasService "github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/dsaas"
+	dataplatformService "github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/dataplatform"
 	"log"
 	"regexp"
 	"time"
 )
 
-func resourceDSaaSCluster() *schema.Resource {
+func resourceDataplatformCluster() *schema.Resource {
 	return &schema.Resource{
-		CreateContext: resourceDSaaSClusterCreate,
-		ReadContext:   resourceDSaaSClusterRead,
-		UpdateContext: resourceDSaaSClusterUpdate,
-		DeleteContext: resourceDSaaSClusterDelete,
+		CreateContext: resourceDataplatformClusterCreate,
+		ReadContext:   resourceDataplatformClusterRead,
+		UpdateContext: resourceDataplatformClusterUpdate,
+		DeleteContext: resourceDataplatformClusterDelete,
 		Importer: &schema.ResourceImporter{
-			StateContext: resourceDSaaSClusterImport,
+			StateContext: resourceDataplatformClusterImport,
 		},
 		Schema: map[string]*schema.Schema{
 			"datacenter_id": {
@@ -63,12 +63,12 @@ func resourceDSaaSCluster() *schema.Resource {
 				},
 			},
 		},
-		CustomizeDiff: checkDSaaSClusterImmutableFields,
+		CustomizeDiff: checkDataplatformClusterImmutableFields,
 		Timeouts:      &resourceDefaultTimeouts,
 	}
 }
 
-func checkDSaaSClusterImmutableFields(_ context.Context, diff *schema.ResourceDiff, _ interface{}) error {
+func checkDataplatformClusterImmutableFields(_ context.Context, diff *schema.ResourceDiff, _ interface{}) error {
 	if diff.Id() == "" {
 		return nil
 	}
@@ -84,31 +84,31 @@ func checkDSaaSClusterImmutableFields(_ context.Context, diff *schema.ResourceDi
 	return nil
 }
 
-func resourceDSaaSClusterCreate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
-	client := meta.(SdkBundle).DSaaSClient
+func resourceDataplatformClusterCreate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+	client := meta.(SdkBundle).DataplatformClient
 
-	dsaasCluster := dsaasService.GetDSaaSClusterDataCreate(d)
-	dsaasClusterResponse, _, err := client.CreateCluster(ctx, *dsaasCluster)
+	dataplatformCluster := dataplatformService.GetDataplatformClusterDataCreate(d)
+	dataplatformClusterResponse, _, err := client.CreateCluster(ctx, *dataplatformCluster)
 
 	if err != nil {
-		diags := diag.FromErr(fmt.Errorf("an error occured while creating a DSaaS Cluster: %w", err))
+		diags := diag.FromErr(fmt.Errorf("an error occured while creating a Dataplatform Cluster: %w", err))
 		return diags
 	}
 
-	d.SetId(*dsaasClusterResponse.Id)
+	d.SetId(*dataplatformClusterResponse.Id)
 
 	for {
-		log.Printf("[INFO] Waiting for DSaaS Cluster %s to be ready...", d.Id())
+		log.Printf("[INFO] Waiting for Dataplatform Cluster %s to be ready...", d.Id())
 
-		clusterReady, rsErr := dsaasClusterReady(ctx, client, d)
+		clusterReady, rsErr := dataplatformClusterReady(ctx, client, d)
 
 		if rsErr != nil {
-			diags := diag.FromErr(fmt.Errorf("error while checking readiness status of DSaaS Cluster %s: %w", d.Id(), rsErr))
+			diags := diag.FromErr(fmt.Errorf("error while checking readiness status of Dataplatform Cluster %s: %w", d.Id(), rsErr))
 			return diags
 		}
 
 		if clusterReady {
-			log.Printf("[INFO] DSaaS Cluster ready: %s", d.Id())
+			log.Printf("[INFO] Dataplatform Cluster ready: %s", d.Id())
 			break
 		}
 
@@ -117,74 +117,74 @@ func resourceDSaaSClusterCreate(ctx context.Context, d *schema.ResourceData, met
 			log.Printf("[INFO] trying again ...")
 		case <-ctx.Done():
 			log.Printf("[INFO] create timed out")
-			diags := diag.FromErr(fmt.Errorf("DSaaS Cluster creation timed out! WARNING: your DSaaS Cluster (%s) will still probably be created after some time but the terraform state wont reflect that; check your Ionos Cloud account for updates", d.Id()))
+			diags := diag.FromErr(fmt.Errorf("Dataplatform Cluster creation timed out! WARNING: your Dataplatform Cluster (%s) will still probably be created after some time but the terraform state wont reflect that; check your Ionos Cloud account for updates", d.Id()))
 			return diags
 		}
 
 	}
 
-	return resourceDSaaSClusterRead(ctx, d, meta)
+	return resourceDataplatformClusterRead(ctx, d, meta)
 }
 
-func resourceDSaaSClusterRead(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func resourceDataplatformClusterRead(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 
-	client := meta.(SdkBundle).DSaaSClient
+	client := meta.(SdkBundle).DataplatformClient
 
 	clusterId := d.Id()
-	dsaasCluster, apiResponse, err := client.GetCluster(ctx, clusterId)
+	dataplatformCluster, apiResponse, err := client.GetCluster(ctx, clusterId)
 
 	if err != nil {
 		if apiResponse != nil && apiResponse.Response != nil && apiResponse.StatusCode == 404 {
 			d.SetId("")
 			return nil
 		}
-		diags := diag.FromErr(fmt.Errorf("error while fetching DSaaS Cluster %s: %w", d.Id(), err))
+		diags := diag.FromErr(fmt.Errorf("error while fetching Dataplatform Cluster %s: %w", d.Id(), err))
 		return diags
 	}
 
-	log.Printf("[INFO] Successfully retreived DSaaS Cluster %s: %+v", d.Id(), dsaasCluster)
+	log.Printf("[INFO] Successfully retreived Dataplatform Cluster %s: %+v", d.Id(), dataplatformCluster)
 
-	if err := dsaasService.SetDSaaSClusterData(d, dsaasCluster); err != nil {
+	if err := dataplatformService.SetDataplatformClusterData(d, dataplatformCluster); err != nil {
 		return diag.FromErr(err)
 	}
 
 	return nil
 }
 
-func resourceDSaaSClusterUpdate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
-	client := meta.(SdkBundle).DSaaSClient
+func resourceDataplatformClusterUpdate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+	client := meta.(SdkBundle).DataplatformClient
 
 	clusterId := d.Id()
 
-	dsaasCluster, diags := dsaasService.GetDSaaSClusterDataUpdate(d)
+	dataplatformCluster, diags := dataplatformService.GetDataplatformClusterDataUpdate(d)
 
 	if diags != nil {
 		return diags
 	}
 
-	dsaasClusterResponse, _, err := client.UpdateCluster(ctx, clusterId, *dsaasCluster)
+	dataplatformClusterResponse, _, err := client.UpdateCluster(ctx, clusterId, *dataplatformCluster)
 
 	if err != nil {
-		diags := diag.FromErr(fmt.Errorf("an error occured while updating a DSaaS Cluster: %s", err))
+		diags := diag.FromErr(fmt.Errorf("an error occured while updating a Dataplatform Cluster: %s", err))
 		return diags
 	}
 
-	d.SetId(*dsaasClusterResponse.Id)
+	d.SetId(*dataplatformClusterResponse.Id)
 
 	time.Sleep(SleepInterval)
 
 	for {
 		log.Printf("[INFO] Waiting for Cluster %s to be ready...", d.Id())
 
-		clusterReady, rsErr := dsaasClusterReady(ctx, client, d)
+		clusterReady, rsErr := dataplatformClusterReady(ctx, client, d)
 
 		if rsErr != nil {
-			diags := diag.FromErr(fmt.Errorf("error while checking readiness status of DSaaS Cluster %s: %w", d.Id(), rsErr))
+			diags := diag.FromErr(fmt.Errorf("error while checking readiness status of Dataplatform Cluster %s: %w", d.Id(), rsErr))
 			return diags
 		}
 
 		if clusterReady {
-			log.Printf("[INFO] DSaaS Cluster ready: %s", d.Id())
+			log.Printf("[INFO] Dataplatform Cluster ready: %s", d.Id())
 			break
 		}
 
@@ -193,17 +193,17 @@ func resourceDSaaSClusterUpdate(ctx context.Context, d *schema.ResourceData, met
 			log.Printf("[INFO] trying again ...")
 		case <-ctx.Done():
 			log.Printf("[INFO] create timed out")
-			diags := diag.FromErr(fmt.Errorf("DSaaS Cluster update timed out! WARNING: your DSaaS Cluster (%s) will still probably be updated after some time but the terraform state wont reflect that; check your Ionos Cloud account for updates", d.Id()))
+			diags := diag.FromErr(fmt.Errorf("Dataplatform Cluster update timed out! WARNING: your Dataplatform Cluster (%s) will still probably be updated after some time but the terraform state wont reflect that; check your Ionos Cloud account for updates", d.Id()))
 			return diags
 		}
 
 	}
 
-	return resourceDSaaSClusterRead(ctx, d, meta)
+	return resourceDataplatformClusterRead(ctx, d, meta)
 }
 
-func resourceDSaaSClusterDelete(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
-	client := meta.(SdkBundle).DSaaSClient
+func resourceDataplatformClusterDelete(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+	client := meta.(SdkBundle).DataplatformClient
 
 	clusterId := d.Id()
 
@@ -214,22 +214,22 @@ func resourceDSaaSClusterDelete(ctx context.Context, d *schema.ResourceData, met
 			d.SetId("")
 			return nil
 		}
-		diags := diag.FromErr(fmt.Errorf("error while deleting DSaaS Cluster %s: %s", d.Id(), err))
+		diags := diag.FromErr(fmt.Errorf("error while deleting Dataplatform Cluster %s: %s", d.Id(), err))
 		return diags
 	}
 
 	for {
-		log.Printf("[INFO] Waiting for DSaaS Cluster %s to be deleted...", d.Id())
+		log.Printf("[INFO] Waiting for Dataplatform Cluster %s to be deleted...", d.Id())
 
-		clusterdDeleted, dsErr := dsaasClusterDeleted(ctx, client, d)
+		clusterdDeleted, dsErr := dataplatformClusterDeleted(ctx, client, d)
 
 		if dsErr != nil {
-			diags := diag.FromErr(fmt.Errorf("error while checking deletion status of DSaaS Cluster %s: %s", d.Id(), dsErr))
+			diags := diag.FromErr(fmt.Errorf("error while checking deletion status of Dataplatform Cluster %s: %s", d.Id(), dsErr))
 			return diags
 		}
 
 		if clusterdDeleted {
-			log.Printf("[INFO] Successfully deleted DSaaS Cluster: %s", d.Id())
+			log.Printf("[INFO] Successfully deleted Dataplatform Cluster: %s", d.Id())
 			break
 		}
 
@@ -237,7 +237,7 @@ func resourceDSaaSClusterDelete(ctx context.Context, d *schema.ResourceData, met
 		case <-time.After(SleepInterval):
 			log.Printf("[INFO] trying again ...")
 		case <-ctx.Done():
-			diags := diag.FromErr(fmt.Errorf("DSaaS Cluster deletion timed out! WARNING: your DSaaS Cluster (%s) will still probably be deleted after some time but the terraform state won't reflect that; check your Ionos Cloud account for updates", d.Id()))
+			diags := diag.FromErr(fmt.Errorf("Dataplatform Cluster deletion timed out! WARNING: your Dataplatform Cluster (%s) will still probably be deleted after some time but the terraform state won't reflect that; check your Ionos Cloud account for updates", d.Id()))
 			return diags
 		}
 	}
@@ -248,37 +248,37 @@ func resourceDSaaSClusterDelete(ctx context.Context, d *schema.ResourceData, met
 	return nil
 }
 
-func resourceDSaaSClusterImport(ctx context.Context, d *schema.ResourceData, meta interface{}) ([]*schema.ResourceData, error) {
-	client := meta.(SdkBundle).DSaaSClient
+func resourceDataplatformClusterImport(ctx context.Context, d *schema.ResourceData, meta interface{}) ([]*schema.ResourceData, error) {
+	client := meta.(SdkBundle).DataplatformClient
 
 	clusterId := d.Id()
 
-	dsaasCluster, apiResponse, err := client.GetCluster(ctx, clusterId)
+	dataplatformCluster, apiResponse, err := client.GetCluster(ctx, clusterId)
 
 	if err != nil {
 		if apiResponse != nil && apiResponse.Response != nil && apiResponse.StatusCode == 404 {
 			d.SetId("")
-			return nil, fmt.Errorf("DSaaS Cluster does not exist %q", clusterId)
+			return nil, fmt.Errorf("Dataplatform Cluster does not exist %q", clusterId)
 		}
-		return nil, fmt.Errorf("an error occured while trying to fetch the import of DSaaS Cluster %q", clusterId)
+		return nil, fmt.Errorf("an error occured while trying to fetch the import of Dataplatform Cluster %q", clusterId)
 	}
 
-	log.Printf("[INFO] DSaaS Cluster found: %+v", dsaasCluster)
+	log.Printf("[INFO] Dataplatform Cluster found: %+v", dataplatformCluster)
 
-	if err := dsaasService.SetDSaaSClusterData(d, dsaasCluster); err != nil {
+	if err := dataplatformService.SetDataplatformClusterData(d, dataplatformCluster); err != nil {
 		return nil, err
 	}
 
 	return []*schema.ResourceData{d}, nil
 }
 
-func dsaasClusterReady(ctx context.Context, client *dsaasService.Client, d *schema.ResourceData) (bool, error) {
+func dataplatformClusterReady(ctx context.Context, client *dataplatformService.Client, d *schema.ResourceData) (bool, error) {
 	clusterId := d.Id()
 
 	subjectCluster, _, err := client.GetCluster(ctx, clusterId)
 
 	if err != nil {
-		return true, fmt.Errorf("error checking DSaaS Cluster status: %s", err)
+		return true, fmt.Errorf("error checking Dataplatform Cluster status: %s", err)
 	}
 	// ToDo: Removed this part since there are still problems with the clusters being unstable (failing for a short time and then recovering)
 	//if *subjectCluster.LifecycleStatus == "FAILED" {
@@ -298,7 +298,7 @@ func dsaasClusterReady(ctx context.Context, client *dsaasService.Client, d *sche
 	return *subjectCluster.Metadata.State == "AVAILABLE", nil
 }
 
-func dsaasClusterDeleted(ctx context.Context, client *dsaasService.Client, d *schema.ResourceData) (bool, error) {
+func dataplatformClusterDeleted(ctx context.Context, client *dataplatformService.Client, d *schema.ResourceData) (bool, error) {
 	clusterId := d.Id()
 
 	_, apiResponse, err := client.GetCluster(ctx, clusterId)
@@ -307,7 +307,7 @@ func dsaasClusterDeleted(ctx context.Context, client *dsaasService.Client, d *sc
 		if apiResponse != nil && apiResponse.Response != nil && apiResponse.StatusCode == 404 {
 			return true, nil
 		}
-		return true, fmt.Errorf("error checking DSaaS Cluster deletion status: %s", err)
+		return true, fmt.Errorf("error checking Dataplatform Cluster deletion status: %s", err)
 	}
 	return false, nil
 }

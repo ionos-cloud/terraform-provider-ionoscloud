@@ -1,25 +1,25 @@
-package dsaas
+package dataplatform
 
 import (
 	"context"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
-	dsaas "github.com/ionos-cloud/sdk-go-autoscaling"
+	dataplatform "github.com/ionos-cloud/sdk-go-autoscaling"
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils"
 )
 
-var clusterResourceName = "DSaaS Cluster"
+var clusterResourceName = "Dataplatform Cluster"
 
 type ClusterService interface {
-	GetCluster(ctx context.Context, clusterId string) (dsaas.ClusterResponseData, *dsaas.APIResponse, error)
-	GetClusterKubeConfig(ctx context.Context, clusterId string) (string, *dsaas.APIResponse, error)
-	ListClusters(ctx context.Context, filterName string) ([]dsaas.ClusterResponseData, *dsaas.APIResponse, error)
-	CreateCluster(ctx context.Context, cluster dsaas.CreateClusterRequest) (dsaas.ClusterResponseData, *dsaas.APIResponse, error)
-	UpdateCluster(ctx context.Context, clusterId string, cluster dsaas.PatchClusterRequest) (dsaas.ClusterResponseData, *dsaas.APIResponse, error)
-	DeleteCluster(ctx context.Context, clusterId string) (dsaas.ClusterResponseData, *dsaas.APIResponse, error)
+	GetCluster(ctx context.Context, clusterId string) (dataplatform.ClusterResponseData, *dataplatform.APIResponse, error)
+	GetClusterKubeConfig(ctx context.Context, clusterId string) (string, *dataplatform.APIResponse, error)
+	ListClusters(ctx context.Context, filterName string) ([]dataplatform.ClusterResponseData, *dataplatform.APIResponse, error)
+	CreateCluster(ctx context.Context, cluster dataplatform.CreateClusterRequest) (dataplatform.ClusterResponseData, *dataplatform.APIResponse, error)
+	UpdateCluster(ctx context.Context, clusterId string, cluster dataplatform.PatchClusterRequest) (dataplatform.ClusterResponseData, *dataplatform.APIResponse, error)
+	DeleteCluster(ctx context.Context, clusterId string) (dataplatform.ClusterResponseData, *dataplatform.APIResponse, error)
 }
 
-func (c *Client) GetCluster(ctx context.Context, clusterId string) (dsaas.ClusterResponseData, *dsaas.APIResponse, error) {
+func (c *Client) GetCluster(ctx context.Context, clusterId string) (dataplatform.ClusterResponseData, *dataplatform.APIResponse, error) {
 	cluster, apiResponse, err := c.DataPlatformClusterApi.GetCluster(ctx, clusterId).Execute()
 	if apiResponse != nil {
 		return cluster, apiResponse, err
@@ -28,7 +28,7 @@ func (c *Client) GetCluster(ctx context.Context, clusterId string) (dsaas.Cluste
 	return cluster, nil, err
 }
 
-func (c *Client) GetClusterKubeConfig(ctx context.Context, clusterId string) (string, *dsaas.APIResponse, error) {
+func (c *Client) GetClusterKubeConfig(ctx context.Context, clusterId string) (string, *dataplatform.APIResponse, error) {
 	kubeConfig, apiResponse, err := c.DataPlatformClusterApi.GetClusterKubeconfig(ctx, clusterId).Execute()
 	if apiResponse != nil {
 		return kubeConfig, apiResponse, err
@@ -36,7 +36,7 @@ func (c *Client) GetClusterKubeConfig(ctx context.Context, clusterId string) (st
 	return kubeConfig, nil, err
 }
 
-func (c *Client) ListClusters(ctx context.Context, filterName string) (dsaas.ClusterListResponseData, *dsaas.APIResponse, error) {
+func (c *Client) ListClusters(ctx context.Context, filterName string) (dataplatform.ClusterListResponseData, *dataplatform.APIResponse, error) {
 	request := c.DataPlatformClusterApi.GetClusters(ctx)
 	if filterName != "" {
 		request = request.Name(filterName)
@@ -48,7 +48,7 @@ func (c *Client) ListClusters(ctx context.Context, filterName string) (dsaas.Clu
 	return clusters, nil, err
 }
 
-func (c *Client) CreateCluster(ctx context.Context, cluster dsaas.CreateClusterRequest) (dsaas.ClusterResponseData, *dsaas.APIResponse, error) {
+func (c *Client) CreateCluster(ctx context.Context, cluster dataplatform.CreateClusterRequest) (dataplatform.ClusterResponseData, *dataplatform.APIResponse, error) {
 	clusterResponse, apiResponse, err := c.DataPlatformClusterApi.CreateCluster(ctx).CreateClusterRequest(cluster).Execute()
 	if apiResponse != nil {
 		return clusterResponse, apiResponse, err
@@ -56,7 +56,7 @@ func (c *Client) CreateCluster(ctx context.Context, cluster dsaas.CreateClusterR
 	return clusterResponse, nil, err
 }
 
-func (c *Client) UpdateCluster(ctx context.Context, clusterId string, cluster dsaas.PatchClusterRequest) (dsaas.ClusterResponseData, *dsaas.APIResponse, error) {
+func (c *Client) UpdateCluster(ctx context.Context, clusterId string, cluster dataplatform.PatchClusterRequest) (dataplatform.ClusterResponseData, *dataplatform.APIResponse, error) {
 	clusterResponse, apiResponse, err := c.DataPlatformClusterApi.PatchCluster(ctx, clusterId).PatchClusterRequest(cluster).Execute()
 	if apiResponse != nil {
 		return clusterResponse, apiResponse, err
@@ -64,7 +64,7 @@ func (c *Client) UpdateCluster(ctx context.Context, clusterId string, cluster ds
 	return clusterResponse, nil, err
 }
 
-func (c *Client) DeleteCluster(ctx context.Context, clusterId string) (dsaas.ClusterResponseData, *dsaas.APIResponse, error) {
+func (c *Client) DeleteCluster(ctx context.Context, clusterId string) (dataplatform.ClusterResponseData, *dataplatform.APIResponse, error) {
 	clusterResponse, apiResponse, err := c.DataPlatformClusterApi.DeleteCluster(ctx, clusterId).Execute()
 	if apiResponse != nil {
 		return clusterResponse, apiResponse, err
@@ -72,55 +72,55 @@ func (c *Client) DeleteCluster(ctx context.Context, clusterId string) (dsaas.Clu
 	return clusterResponse, nil, err
 }
 
-func GetDSaaSClusterDataCreate(d *schema.ResourceData) *dsaas.CreateClusterRequest {
+func GetDataplatformClusterDataCreate(d *schema.ResourceData) *dataplatform.CreateClusterRequest {
 
-	dsaasCluster := dsaas.CreateClusterRequest{
-		Properties: &dsaas.CreateClusterProperties{},
+	dataplatformCluster := dataplatform.CreateClusterRequest{
+		Properties: &dataplatform.CreateClusterProperties{},
 	}
 
 	if nameValue, ok := d.GetOk("name"); ok {
 		name := nameValue.(string)
-		dsaasCluster.Properties.Name = &name
+		dataplatformCluster.Properties.Name = &name
 	}
 
 	if datacenterIdValue, ok := d.GetOk("datacenter_id"); ok {
 		datacenterId := datacenterIdValue.(string)
-		dsaasCluster.Properties.DatacenterId = &datacenterId
+		dataplatformCluster.Properties.DatacenterId = &datacenterId
 	}
 
 	if dataPlatformVersionValue, ok := d.GetOk("data_platform_version"); ok {
 		dataPlatformVersion := dataPlatformVersionValue.(string)
-		dsaasCluster.Properties.DataPlatformVersion = &dataPlatformVersion
+		dataplatformCluster.Properties.DataPlatformVersion = &dataPlatformVersion
 	}
 
 	if _, ok := d.GetOk("maintenance_window"); ok {
-		dsaasCluster.Properties.MaintenanceWindow = GetDSaaSMaintenanceWindowData(d)
+		dataplatformCluster.Properties.MaintenanceWindow = GetDataplatformMaintenanceWindowData(d)
 	}
 
-	return &dsaasCluster
+	return &dataplatformCluster
 }
 
-func GetDSaaSClusterDataUpdate(d *schema.ResourceData) (*dsaas.PatchClusterRequest, diag.Diagnostics) {
+func GetDataplatformClusterDataUpdate(d *schema.ResourceData) (*dataplatform.PatchClusterRequest, diag.Diagnostics) {
 
-	dsaasCluster := dsaas.PatchClusterRequest{
-		Properties: &dsaas.PatchClusterProperties{},
+	dataplatformCluster := dataplatform.PatchClusterRequest{
+		Properties: &dataplatform.PatchClusterProperties{},
 	}
 
 	if nameValue, ok := d.GetOk("name"); ok {
 		name := nameValue.(string)
-		dsaasCluster.Properties.Name = &name
+		dataplatformCluster.Properties.Name = &name
 	}
 
 	if dataPlatformVersionValue, ok := d.GetOk("data_platform_version"); ok {
 		dataPlatformVersion := dataPlatformVersionValue.(string)
-		dsaasCluster.Properties.DataPlatformVersion = &dataPlatformVersion
+		dataplatformCluster.Properties.DataPlatformVersion = &dataPlatformVersion
 	}
 
-	return &dsaasCluster, nil
+	return &dataplatformCluster, nil
 }
 
-func GetDSaaSMaintenanceWindowData(d *schema.ResourceData) *dsaas.MaintenanceWindow {
-	var maintenanceWindow dsaas.MaintenanceWindow
+func GetDataplatformMaintenanceWindowData(d *schema.ResourceData) *dataplatform.MaintenanceWindow {
+	var maintenanceWindow dataplatform.MaintenanceWindow
 
 	if timeV, ok := d.GetOk("maintenance_window.0.time"); ok {
 		timeV := timeV.(string)
@@ -135,7 +135,7 @@ func GetDSaaSMaintenanceWindowData(d *schema.ResourceData) *dsaas.MaintenanceWin
 	return &maintenanceWindow
 }
 
-func SetDSaaSClusterData(d *schema.ResourceData, cluster dsaas.ClusterResponseData) error {
+func SetDataplatformClusterData(d *schema.ResourceData, cluster dataplatform.ClusterResponseData) error {
 
 	if cluster.Id != nil {
 		d.SetId(*cluster.Id)
@@ -171,7 +171,7 @@ func SetDSaaSClusterData(d *schema.ResourceData, cluster dsaas.ClusterResponseDa
 	return nil
 }
 
-func SetMaintenanceWindowProperties(maintenanceWindow dsaas.MaintenanceWindow) map[string]interface{} {
+func SetMaintenanceWindowProperties(maintenanceWindow dataplatform.MaintenanceWindow) map[string]interface{} {
 
 	maintenance := map[string]interface{}{}
 

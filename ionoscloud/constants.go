@@ -198,20 +198,20 @@ const (
 	DBaaSVersionsTest                = "test_dbaas_versions"
 )
 
-// DSaaS Constants
+// Dataplatform Constants
 const (
-	DSaaSClusterResource              = "ionoscloud_dsaas_cluster"
-	DSaaSClusterTestResource          = "test_dsaas_cluster"
-	DSaaSClusterTestDataSourceById    = "test_dsaas_cluster_id"
-	DSaaSClusterTestDataSourceByName  = "test_dsaas_cluster_name"
-	DSaaSNodePoolResource             = "ionoscloud_dsaas_node_pool"
-	DSaaSNodePoolTestResource         = "test_dsaas_node_pool"
-	DSaaSNodePoolTestDataSourceById   = "test_dsaas_node_pool_id"
-	DSaaSNodePoolTestDataSourceByName = "test_dsaas_node_pool_name"
-	DSaaSNodePoolsDataSource          = "ionoscloud_dsaas_node_pools"
-	DSaaSVersionsDataSource           = "ionoscloud_dsaas_versions"
-	DSaaSNodePoolsTestDataSource      = "test_dsaas_node_pools"
-	DSaaSVersionsTestDataSource       = "test_dsaas_versions"
+	DataplatformClusterResource              = "ionoscloud_dataplatform_cluster"
+	DataplatformClusterTestResource          = "test_dataplatform_cluster"
+	DataplatformClusterTestDataSourceById    = "test_dataplatform_cluster_id"
+	DataplatformClusterTestDataSourceByName  = "test_dataplatform_cluster_name"
+	DataplatformNodePoolResource             = "ionoscloud_dataplatform_node_pool"
+	DataplatformNodePoolTestResource         = "test_dataplatform_node_pool"
+	DataplatformNodePoolTestDataSourceById   = "test_dataplatform_node_pool_id"
+	DataplatformNodePoolTestDataSourceByName = "test_dataplatform_node_pool_name"
+	DataplatformNodePoolsDataSource          = "ionoscloud_dataplatform_node_pools"
+	DataplatformVersionsDataSource           = "ionoscloud_dataplatform_versions"
+	DataplatformNodePoolsTestDataSource      = "test_dataplatform_node_pools"
+	DataplatformVersionsTestDataSource       = "test_dataplatform_versions"
 )
 
 const (

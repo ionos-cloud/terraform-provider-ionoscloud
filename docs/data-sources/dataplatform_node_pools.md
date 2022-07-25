@@ -1,21 +1,21 @@
 ---
-subcategory: "Data Stack as a Service"
+subcategory: "Dataplatform"
 layout: "ionoscloud"
-page_title: "IonosCloud : ionoscloud_dsaas_node_pools"
-sidebar_current: "docs-dsaas_node_pools"
+page_title: "IonosCloud : ionoscloud_dataplatform_node_pools"
+sidebar_current: "docs-dataplatform_node_pools"
 description: |-
-Get information on a DSaaS Node Pool list under a DSaaS Cluster.
+Get information on a Dataplatform Node Pool list under a Dataplatform Cluster.
 ---
 
-# ionoscloud\_dsaas_node_pool
+# ionoscloud\_dataplatform_node_pool
 
-The **DSaaS Node Pools Data Source** can be used to search for and return a list of existing DSaaS Node Pools under a DSaaS Cluster.
+The **Dataplatform Node Pools Data Source** can be used to search for and return a list of existing Dataplatform Node Pools under a Dataplatform Cluster.
 
 ## Example Usage
 
 ### All Node Pools under a Cluster ID
 ```hcl
-data "ionoscloud_dsaas_node_pools" "example" {
+data "ionoscloud_dataplatform_node_pools" "example" {
   cluster_id  = <cluster_id>
 }
 ```
@@ -23,16 +23,16 @@ data "ionoscloud_dsaas_node_pools" "example" {
 ### By Name
 
 ```hcl
-data "ionoscloud_dsaas_node_pools" "example" {
+data "ionoscloud_dataplatform_node_pools" "example" {
   cluster_id    = <cluster_id>
-  name      	= "DSaaS_Node_Pool_Example"
+  name      	= "Dataplatform_Node_Pool_Example"
 }
 ```
 
 ### By Name with Partial Match
 
 ```hcl
-data "ionoscloud_dsaas_node_pools" "example" {
+data "ionoscloud_dataplatform_node_pools" "example" {
   cluster_id    = <cluster_id>
   name    	    = "_Example"
   partial_match = true
@@ -50,4 +50,4 @@ data "ionoscloud_dsaas_node_pools" "example" {
 The following attributes are returned by the datasource:
 
 * `cluster_id` - ID of the cluster the searched node pool is part of.
-* `node_pools` - List of Node Pools - See the [Node Pool](dsaas_node_pool.md) section.
+* `node_pools` - List of Node Pools - See the [Node Pool](dataplatform_node_pool.md) section.

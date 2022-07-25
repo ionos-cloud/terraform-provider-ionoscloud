@@ -15,16 +15,16 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/ionos-cloud/sdk-go/v6"
+	dataplatformService "github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/dataplatform"
 	dbaasService "github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/dbaas"
-	dsaasService "github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/dsaas"
 )
 
 var Version = "DEV"
 
 type SdkBundle struct {
-	CloudApiClient *ionoscloud.APIClient
-	DbaasClient    *dbaasService.Client
-	DSaaSClient    *dsaasService.Client
+	CloudApiClient     *ionoscloud.APIClient
+	DbaasClient        *dbaasService.Client
+	DataplatformClient *dataplatformService.Client
 }
 
 // Provider returns a schema.Provider for ionoscloud
@@ -90,8 +90,8 @@ func Provider() *schema.Provider {
 			ALBResource:                               resourceApplicationLoadBalancer(),
 			ALBForwardingRuleResource:                 resourceApplicationLoadBalancerForwardingRule(),
 			TargetGroupResource:                       resourceTargetGroup(),
-			DSaaSClusterResource:                      resourceDSaaSCluster(),
-			DSaaSNodePoolResource:                     resourceDSaaSNodePool(),
+			DataplatformClusterResource:               resourceDataplatformCluster(),
+			DataplatformNodePoolResource:              resourceDataplatformNodePool(),
 		},
 		DataSourcesMap: map[string]*schema.Resource{
 			DatacenterResource:                        dataSourceDataCenter(),
@@ -127,10 +127,10 @@ func Provider() *schema.Provider {
 			ALBResource:                               dataSourceApplicationLoadBalancer(),
 			ALBForwardingRuleResource:                 dataSourceApplicationLoadBalancerForwardingRule(),
 			TargetGroupResource:                       dataSourceTargetGroup(),
-			DSaaSClusterResource:                      dataSourceDSaaSCluster(),
-			DSaaSNodePoolResource:                     dataSourceDSaaSNodePool(),
-			DSaaSNodePoolsDataSource:                  dataSourceDSaaSNodePools(),
-			DSaaSVersionsDataSource:                   dataSourceDSaaSVersions(),
+			DataplatformClusterResource:               dataSourceDataplatformCluster(),
+			DataplatformNodePoolResource:              dataSourceDataplatformNodePool(),
+			DataplatformNodePoolsDataSource:           dataSourceDataplatformNodePools(),
+			DataplatformVersionsDataSource:            dataSourceDataplatformVersions(),
 		},
 	}
 
@@ -190,12 +190,12 @@ func providerConfigure(d *schema.ResourceData, terraformVersion string) (interfa
 	dbaasClient := dbaasService.NewClientService(username.(string), password.(string), token.(string), cleanedUrl, Version, terraformVersion)
 	//dbaasClient.GetConfig().HTTPClient = &http.Client{Transport: createTransport()}
 
-	dsaasClient := dsaasService.NewClientService(username.(string), password.(string), token.(string), cleanedUrl, Version, terraformVersion)
+	dataplatformClient := dataplatformService.NewClientService(username.(string), password.(string), token.(string), cleanedUrl, Version, terraformVersion)
 
 	return SdkBundle{
-		CloudApiClient: newClient,
-		DbaasClient:    dbaasClient.Get(),
-		DSaaSClient:    dsaasClient.Get(),
+		CloudApiClient:     newClient,
+		DbaasClient:        dbaasClient.Get(),
+		DataplatformClient: dataplatformClient.Get(),
 	}, nil
 }
 

@@ -6,19 +6,19 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
-	dsaas "github.com/ionos-cloud/sdk-go-autoscaling"
-	dsaasService "github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/dsaas"
+	dataplatform "github.com/ionos-cloud/sdk-go-autoscaling"
+	dataplatformService "github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/dataplatform"
 	"regexp"
 )
 
-func dataSourceDSaaSNodePools() *schema.Resource {
+func dataSourceDataplatformNodePools() *schema.Resource {
 	return &schema.Resource{
 		ReadContext: dataSourceNodePoolsRead,
 		Schema: map[string]*schema.Schema{
 			"cluster_id": {
 				Type:         schema.TypeString,
 				Required:     true,
-				Description:  "The UUID of an existing DSaaS cluster",
+				Description:  "The UUID of an existing Dataplatform cluster",
 				ValidateFunc: validation.All(validation.StringMatch(regexp.MustCompile("^[A-Za-z0-9][-A-Za-z0-9_.]*[A-Za-z0-9]$"), "")),
 			},
 			"name": {
@@ -131,13 +131,13 @@ func dataSourceDSaaSNodePools() *schema.Resource {
 }
 
 func dataSourceNodePoolsRead(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
-	client := meta.(SdkBundle).DSaaSClient
+	client := meta.(SdkBundle).DataplatformClient
 
 	clusterId := d.Get("cluster_id").(string)
 	nameValue, nameOk := d.GetOk("name")
 	name := nameValue.(string)
 
-	var results []dsaas.NodePoolResponseData
+	var results []dataplatform.NodePoolResponseData
 	var err diag.Diagnostics
 
 	if nameOk {
@@ -148,17 +148,17 @@ func dataSourceNodePoolsRead(ctx context.Context, d *schema.ResourceData, meta i
 	} else {
 		nodePools, _, err := client.ListNodePools(ctx, clusterId)
 		if err != nil {
-			diags := diag.FromErr(fmt.Errorf("an error occurred while fetching DSaaS NodePools: %s", err.Error()))
+			diags := diag.FromErr(fmt.Errorf("an error occurred while fetching Dataplatform NodePools: %s", err.Error()))
 			return diags
 		}
 		results = *nodePools.Items
 	}
 
 	if results == nil || len(results) == 0 {
-		return diag.FromErr(fmt.Errorf("no DSaaS NodePool found under cluster %s with the specified name = %s", clusterId, name))
+		return diag.FromErr(fmt.Errorf("no Dataplatform NodePool found under cluster %s with the specified name = %s", clusterId, name))
 	}
 
-	if err = dsaasService.SetNodePoolsData(d, results); err != nil {
+	if err = dataplatformService.SetNodePoolsData(d, results); err != nil {
 		return err
 	}
 

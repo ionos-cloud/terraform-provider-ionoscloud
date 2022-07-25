@@ -1,4 +1,4 @@
-package dsaas
+package dataplatform
 
 import (
 	"context"
@@ -6,21 +6,21 @@ import (
 	"github.com/google/uuid"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
-	dsaas "github.com/ionos-cloud/sdk-go-autoscaling"
+	dataplatform "github.com/ionos-cloud/sdk-go-autoscaling"
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils"
 )
 
-var nodePoolResourceName = "DSaaS Node Pool"
+var nodePoolResourceName = "Dataplatform Node Pool"
 
 type NodePoolService interface {
-	GetNodePool(ctx context.Context, clusterId, nodePoolId string) (dsaas.NodePoolResponseData, *dsaas.APIResponse, error)
-	ListNodePools(ctx context.Context, clusterId string) ([]dsaas.NodePoolResponseData, *dsaas.APIResponse, error)
-	CreateNodePool(ctx context.Context, clusterId string, cluster dsaas.CreateNodePoolRequest) (dsaas.NodePoolResponseData, *dsaas.APIResponse, error)
-	UpdateNodePool(ctx context.Context, clusterId, nodePoolId string, cluster dsaas.PatchNodePoolRequest) (dsaas.NodePoolResponseData, *dsaas.APIResponse, error)
-	DeleteNodePool(ctx context.Context, clusterId, nodePoolId string) (dsaas.NodePoolResponseData, *dsaas.APIResponse, error)
+	GetNodePool(ctx context.Context, clusterId, nodePoolId string) (dataplatform.NodePoolResponseData, *dataplatform.APIResponse, error)
+	ListNodePools(ctx context.Context, clusterId string) ([]dataplatform.NodePoolResponseData, *dataplatform.APIResponse, error)
+	CreateNodePool(ctx context.Context, clusterId string, cluster dataplatform.CreateNodePoolRequest) (dataplatform.NodePoolResponseData, *dataplatform.APIResponse, error)
+	UpdateNodePool(ctx context.Context, clusterId, nodePoolId string, cluster dataplatform.PatchNodePoolRequest) (dataplatform.NodePoolResponseData, *dataplatform.APIResponse, error)
+	DeleteNodePool(ctx context.Context, clusterId, nodePoolId string) (dataplatform.NodePoolResponseData, *dataplatform.APIResponse, error)
 }
 
-func (c *Client) GetNodePool(ctx context.Context, clusterId, nodePoolId string) (dsaas.NodePoolResponseData, *dsaas.APIResponse, error) {
+func (c *Client) GetNodePool(ctx context.Context, clusterId, nodePoolId string) (dataplatform.NodePoolResponseData, *dataplatform.APIResponse, error) {
 	cluster, apiResponse, err := c.DataPlatformNodePoolApi.GetClusterNodepool(ctx, clusterId, nodePoolId).Execute()
 	if apiResponse != nil {
 		return cluster, apiResponse, err
@@ -29,7 +29,7 @@ func (c *Client) GetNodePool(ctx context.Context, clusterId, nodePoolId string) 
 	return cluster, nil, err
 }
 
-func (c *Client) ListNodePools(ctx context.Context, clusterId string) (dsaas.NodePoolListResponseData, *dsaas.APIResponse, error) {
+func (c *Client) ListNodePools(ctx context.Context, clusterId string) (dataplatform.NodePoolListResponseData, *dataplatform.APIResponse, error) {
 	nodePool, apiResponse, err := c.DataPlatformNodePoolApi.GetClusterNodepools(ctx, clusterId).Execute()
 	if apiResponse != nil {
 		return nodePool, apiResponse, err
@@ -37,7 +37,7 @@ func (c *Client) ListNodePools(ctx context.Context, clusterId string) (dsaas.Nod
 	return nodePool, nil, err
 }
 
-func (c *Client) CreateNodePool(ctx context.Context, clusterId string, cluster dsaas.CreateNodePoolRequest) (dsaas.NodePoolResponseData, *dsaas.APIResponse, error) {
+func (c *Client) CreateNodePool(ctx context.Context, clusterId string, cluster dataplatform.CreateNodePoolRequest) (dataplatform.NodePoolResponseData, *dataplatform.APIResponse, error) {
 	clusterResponse, apiResponse, err := c.DataPlatformNodePoolApi.CreateClusterNodepool(ctx, clusterId).CreateNodePoolRequest(cluster).Execute()
 	if apiResponse != nil {
 		return clusterResponse, apiResponse, err
@@ -45,7 +45,7 @@ func (c *Client) CreateNodePool(ctx context.Context, clusterId string, cluster d
 	return clusterResponse, nil, err
 }
 
-func (c *Client) UpdateNodePool(ctx context.Context, clusterId, nodePoolId string, cluster dsaas.PatchNodePoolRequest) (dsaas.NodePoolResponseData, *dsaas.APIResponse, error) {
+func (c *Client) UpdateNodePool(ctx context.Context, clusterId, nodePoolId string, cluster dataplatform.PatchNodePoolRequest) (dataplatform.NodePoolResponseData, *dataplatform.APIResponse, error) {
 	clusterResponse, apiResponse, err := c.DataPlatformNodePoolApi.PatchClusterNodepool(ctx, clusterId, nodePoolId).PatchNodePoolRequest(cluster).Execute()
 	if apiResponse != nil {
 		return clusterResponse, apiResponse, err
@@ -53,7 +53,7 @@ func (c *Client) UpdateNodePool(ctx context.Context, clusterId, nodePoolId strin
 	return clusterResponse, nil, err
 }
 
-func (c *Client) DeleteNodePool(ctx context.Context, clusterId, nodePoolId string) (dsaas.NodePoolResponseData, *dsaas.APIResponse, error) {
+func (c *Client) DeleteNodePool(ctx context.Context, clusterId, nodePoolId string) (dataplatform.NodePoolResponseData, *dataplatform.APIResponse, error) {
 	clusterResponse, apiResponse, err := c.DataPlatformNodePoolApi.DeleteClusterNodepool(ctx, clusterId, nodePoolId).Execute()
 	if apiResponse != nil {
 		return clusterResponse, apiResponse, err
@@ -61,59 +61,59 @@ func (c *Client) DeleteNodePool(ctx context.Context, clusterId, nodePoolId strin
 	return clusterResponse, nil, err
 }
 
-func GetDSaaSNodePoolDataCreate(d *schema.ResourceData) *dsaas.CreateNodePoolRequest {
+func GetDataplatformNodePoolDataCreate(d *schema.ResourceData) *dataplatform.CreateNodePoolRequest {
 
-	dsaasNodePool := dsaas.CreateNodePoolRequest{
-		Properties: &dsaas.CreateNodePoolProperties{},
+	dataplatformNodePool := dataplatform.CreateNodePoolRequest{
+		Properties: &dataplatform.CreateNodePoolProperties{},
 	}
 
 	if nameValue, ok := d.GetOk("name"); ok {
 		name := nameValue.(string)
-		dsaasNodePool.Properties.Name = &name
+		dataplatformNodePool.Properties.Name = &name
 	}
 
 	if nodeCountValue, ok := d.GetOk("node_count"); ok {
 		nodeCount := int32(nodeCountValue.(int))
-		dsaasNodePool.Properties.NodeCount = &nodeCount
+		dataplatformNodePool.Properties.NodeCount = &nodeCount
 	}
 
 	if cpuFamilyValue, ok := d.GetOk("cpu_family"); ok {
 		cpuFamily := cpuFamilyValue.(string)
-		dsaasNodePool.Properties.CpuFamily = &cpuFamily
+		dataplatformNodePool.Properties.CpuFamily = &cpuFamily
 	}
 
 	if coresCountValue, ok := d.GetOk("cores_count"); ok {
 		coresCount := int32(coresCountValue.(int))
-		dsaasNodePool.Properties.CoresCount = &coresCount
+		dataplatformNodePool.Properties.CoresCount = &coresCount
 	}
 
 	if ramSizeValue, ok := d.GetOk("ram_size"); ok {
 		ramSize := int32(ramSizeValue.(int))
-		dsaasNodePool.Properties.RamSize = &ramSize
+		dataplatformNodePool.Properties.RamSize = &ramSize
 	}
 
 	if availabilityZoneValue, ok := d.GetOk("availability_zone"); ok {
-		availabilityZone := dsaas.AvailabilityZone(availabilityZoneValue.(string))
-		dsaasNodePool.Properties.AvailabilityZone = &availabilityZone
+		availabilityZone := dataplatform.AvailabilityZone(availabilityZoneValue.(string))
+		dataplatformNodePool.Properties.AvailabilityZone = &availabilityZone
 	}
 
 	if storageTypeValue, ok := d.GetOk("availability_zone"); ok {
-		storageType := dsaas.StorageType(storageTypeValue.(string))
-		dsaasNodePool.Properties.StorageType = &storageType
+		storageType := dataplatform.StorageType(storageTypeValue.(string))
+		dataplatformNodePool.Properties.StorageType = &storageType
 	}
 
 	if storageSizeValue, ok := d.GetOk("storage_size"); ok {
 		storageSize := int32(storageSizeValue.(int))
-		dsaasNodePool.Properties.StorageSize = &storageSize
+		dataplatformNodePool.Properties.StorageSize = &storageSize
 	}
 
 	if storageTypeValue, ok := d.GetOk("storage_type"); ok {
-		storageType := dsaas.StorageType(storageTypeValue.(string))
-		dsaasNodePool.Properties.StorageType = &storageType
+		storageType := dataplatform.StorageType(storageTypeValue.(string))
+		dataplatformNodePool.Properties.StorageType = &storageType
 	}
 
 	if _, ok := d.GetOk("maintenance_window"); ok {
-		dsaasNodePool.Properties.MaintenanceWindow = GetDSaaSMaintenanceWindowData(d)
+		dataplatformNodePool.Properties.MaintenanceWindow = GetDataplatformMaintenanceWindowData(d)
 	}
 
 	if labelsValue, ok := d.GetOk("labels"); ok {
@@ -121,7 +121,7 @@ func GetDSaaSNodePoolDataCreate(d *schema.ResourceData) *dsaas.CreateNodePoolReq
 		for k, v := range labelsValue.(map[string]interface{}) {
 			labels[k] = v.(string)
 		}
-		dsaasNodePool.Properties.Labels = &labels
+		dataplatformNodePool.Properties.Labels = &labels
 	}
 
 	if annotationsValue, ok := d.GetOk("annotations"); ok {
@@ -129,25 +129,25 @@ func GetDSaaSNodePoolDataCreate(d *schema.ResourceData) *dsaas.CreateNodePoolReq
 		for k, v := range annotationsValue.(map[string]interface{}) {
 			annotations[k] = v.(string)
 		}
-		dsaasNodePool.Properties.Annotations = &annotations
+		dataplatformNodePool.Properties.Annotations = &annotations
 	}
 
-	return &dsaasNodePool
+	return &dataplatformNodePool
 }
 
-func GetDSaaSNodePoolDataUpdate(d *schema.ResourceData) (*dsaas.PatchNodePoolRequest, diag.Diagnostics) {
+func GetDataplatformNodePoolDataUpdate(d *schema.ResourceData) (*dataplatform.PatchNodePoolRequest, diag.Diagnostics) {
 
-	dsaasNodePool := dsaas.PatchNodePoolRequest{
-		Properties: &dsaas.PatchNodePoolProperties{},
+	dataplatformNodePool := dataplatform.PatchNodePoolRequest{
+		Properties: &dataplatform.PatchNodePoolProperties{},
 	}
 
 	if nodeCountValue, ok := d.GetOk("node_count"); ok {
 		nodeCount := int32(nodeCountValue.(int))
-		dsaasNodePool.Properties.NodeCount = &nodeCount
+		dataplatformNodePool.Properties.NodeCount = &nodeCount
 	}
 
 	if _, ok := d.GetOk("maintenance_window"); ok {
-		dsaasNodePool.Properties.MaintenanceWindow = GetDSaaSMaintenanceWindowData(d)
+		dataplatformNodePool.Properties.MaintenanceWindow = GetDataplatformMaintenanceWindowData(d)
 	}
 
 	if labelsValue, ok := d.GetOk("labels"); ok {
@@ -155,7 +155,7 @@ func GetDSaaSNodePoolDataUpdate(d *schema.ResourceData) (*dsaas.PatchNodePoolReq
 		for k, v := range labelsValue.(map[string]interface{}) {
 			labels[k] = v.(string)
 		}
-		dsaasNodePool.Properties.Labels = &labels
+		dataplatformNodePool.Properties.Labels = &labels
 	}
 
 	if annotationsValue, ok := d.GetOk("annotations"); ok {
@@ -163,13 +163,13 @@ func GetDSaaSNodePoolDataUpdate(d *schema.ResourceData) (*dsaas.PatchNodePoolReq
 		for k, v := range annotationsValue.(map[string]interface{}) {
 			annotations[k] = v.(string)
 		}
-		dsaasNodePool.Properties.Annotations = &annotations
+		dataplatformNodePool.Properties.Annotations = &annotations
 	}
 
-	return &dsaasNodePool, nil
+	return &dataplatformNodePool, nil
 }
 
-func SetDSaaSNodePoolData(d *schema.ResourceData, nodePool dsaas.NodePoolResponseData) error {
+func SetDataplatformNodePoolData(d *schema.ResourceData, nodePool dataplatform.NodePoolResponseData) error {
 
 	if nodePool.Id != nil {
 		d.SetId(*nodePool.Id)
@@ -258,7 +258,7 @@ func SetDSaaSNodePoolData(d *schema.ResourceData, nodePool dsaas.NodePoolRespons
 	return nil
 }
 
-func SetNodePoolsData(d *schema.ResourceData, results []dsaas.NodePoolResponseData) diag.Diagnostics {
+func SetNodePoolsData(d *schema.ResourceData, results []dataplatform.NodePoolResponseData) diag.Diagnostics {
 
 	resourceId := uuid.New()
 	d.SetId(resourceId.String())

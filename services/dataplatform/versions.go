@@ -1,4 +1,4 @@
-package dsaas
+package dataplatform
 
 import (
 	"context"
@@ -6,14 +6,14 @@ import (
 	"github.com/google/uuid"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
-	dsaas "github.com/ionos-cloud/sdk-go-autoscaling"
+	dataplatform "github.com/ionos-cloud/sdk-go-autoscaling"
 )
 
 type VersionService interface {
-	GetVersions(ctx context.Context) ([]string, *dsaas.APIResponse, error)
+	GetVersions(ctx context.Context) ([]string, *dataplatform.APIResponse, error)
 }
 
-func (c *Client) GetVersions(ctx context.Context) ([]string, *dsaas.APIResponse, error) {
+func (c *Client) GetVersions(ctx context.Context) ([]string, *dataplatform.APIResponse, error) {
 	versions, apiResponse, err := c.DataPlatformMetaDataApi.VersionsGet(ctx).Execute()
 	if apiResponse != nil {
 		return versions, apiResponse, err
@@ -27,7 +27,7 @@ func SetVersionsData(d *schema.ResourceData, versions []string) diag.Diagnostics
 	if versions != nil {
 		err := d.Set("versions", versions)
 		if err != nil {
-			diags := diag.FromErr(fmt.Errorf("error while setting Data Stack API version: %s", err))
+			diags := diag.FromErr(fmt.Errorf("error while setting Dataplatform API version: %s", err))
 			return diags
 		}
 	}

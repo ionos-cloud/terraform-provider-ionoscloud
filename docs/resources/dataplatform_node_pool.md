@@ -1,15 +1,15 @@
 ---
-subcategory: "Data Stack as a Service"
+subcategory: "Dataplatform"
 layout: "ionoscloud"
-page_title: "IonosCloud: ionoscloud_dsaas_node_pool"
-sidebar_current: "docs-resource-dsaas_node_pool"
+page_title: "IonosCloud: ionoscloud_dataplatform_node_pool"
+sidebar_current: "docs-resource-dataplatform_node_pool"
 description: |-
-Creates and manages DSaaS Node Pool objects.
+Creates and manages Dataplatform Node Pool objects.
 ---
 
 # ionoscloud\_pg_cluster
 
-Manages a **DSaaS Node Pool**.
+Manages a **Dataplatform Node Pool**.
 
 ## Example Usage
 
@@ -17,12 +17,12 @@ Manages a **DSaaS Node Pool**.
 resource "ionoscloud_datacenter" "example" {
   name        = "Datacenter_Example"
   location    = "de/txl"
-  description = "Datacenter for testing DSaaS Cluster"
+  description = "Datacenter for testing Dataplatform Cluster"
 }
 
-resource "ionoscloud_dsaas_cluster" "example" {
+resource "ionoscloud_dataplatform_cluster" "example" {
   datacenter_id   		=  ionoscloud_datacenter.example.id
-  name 					= "DSaaS_Cluster_Example"
+  name 					= "Dataplatform_Cluster_Example"
   maintenance_window {
     day_of_the_week  	= "Sunday"
     time				= "09:00:00"
@@ -30,9 +30,9 @@ resource "ionoscloud_dsaas_cluster" "example" {
   data_platform_version	= "1.1.0"
 }
 
-resource "ionoscloud_dsaas_node_pool" "example" {
-  cluster_id        = ionoscloud_dsaas_cluster.example.id
-  name              = "DSaaS_Node_Pool_Example"
+resource "ionoscloud_dataplatform_node_pool" "example" {
+  cluster_id        = ionoscloud_dataplatform_cluster.example.id
+  name              = "Dataplatform_Node_Pool_Example"
   node_count        = 1
   cpu_family        = "INTEL_XEON"
   cores_count       = 1
@@ -57,7 +57,7 @@ resource "ionoscloud_dsaas_node_pool" "example" {
 
 ## Argument reference
 
-* `cluster_id` - (Required)[string] The UUID of an existing DSaaS cluster.
+* `cluster_id` - (Required)[string] The UUID of an existing Dataplatform cluster.
 * `name` - (Required)[string] The name of your node pool. Must be 63 characters or less and must be empty or begin and end with an alphanumeric character ([a-z0-9A-Z]) with dashes (-), underscores (_), dots (.), and alphanumerics between.
 * `node_count` - (Required)[int] The number of nodes that make up the node pool. Must be set with a minimum value of 1.
 * `cpu_family` - (Optional)[string] A valid CPU family name or `AUTO` if the platform shall choose the best fitting option. Available CPU architectures can be retrieved from the datacenter resource. The default value is `AUTO`.
@@ -74,8 +74,8 @@ resource "ionoscloud_dsaas_node_pool" "example" {
 
 ## Import
 
-A DSaaS Node Pool resource can be imported using its cluster's UUID as well as its own UUID, e.g.:
+A Dataplatform Node Pool resource can be imported using its cluster's UUID as well as its own UUID, e.g.:
 
 ```shell
-terraform import ionoscloud_dsaas_node_pool.mynodepool {dsaas_cluster_uuid}/{dsaas_nodepool_id}
+terraform import ionoscloud_dataplatform_node_pool.mynodepool {dataplatform_cluster_uuid}/{dataplatform_nodepool_id}
 ```

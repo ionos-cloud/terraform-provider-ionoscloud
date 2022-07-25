@@ -1,15 +1,15 @@
 ---
-subcategory: "Data Stack as a Service"
+subcategory: "Dataplatform"
 layout: "ionoscloud"
-page_title: "IonosCloud : ionoscloud_dsaas_cluster"
-sidebar_current: "docs-dsaas_cluster"
+page_title: "IonosCloud : ionoscloud_dataplatform_cluster"
+sidebar_current: "docs-dataplatform_cluster"
 description: |-
-Get information on a DSaaS Cluster.
+Get information on a Dataplatform Cluster.
 ---
 
 # ionoscloud\_pg_cluster
 
-The **DSaaS Cluster Data Source** can be used to search for and return an existing DSaaS Cluster.
+The **Dataplatform Cluster Data Source** can be used to search for and return an existing Dataplatform Cluster.
 If a single match is found, it will be returned. If your search results in multiple matches, an error will be returned.
 When this happens, please refine your search and make sure that your resources have unique names.
 
@@ -17,7 +17,7 @@ When this happens, please refine your search and make sure that your resources h
 
 ### By ID
 ```hcl
-data "ionoscloud_dsaas_cluster" "example" {
+data "ionoscloud_dataplatform_cluster" "example" {
   id	= <cluster_id>
 }
 ```
@@ -25,15 +25,15 @@ data "ionoscloud_dsaas_cluster" "example" {
 ### By Name
 
 ```hcl
-data "ionoscloud_dsaas_cluster" "example" {
-  name	= "DSaaS_Cluster_Example"
+data "ionoscloud_dataplatform_cluster" "example" {
+  name	= "Dataplatform_Cluster_Example"
 }
 ```
 
 ### By Name with Partial Match
 
 ```hcl
-data "ionoscloud_dsaas_cluster" "example" {
+data "ionoscloud_dataplatform_cluster" "example" {
   name	= "_Example"
   partial_match = true
 }
@@ -85,12 +85,12 @@ The following attributes are returned by the datasource:
 
 **NOTE**: The whole `config` node is marked as **sensitive**.
 
-## Example of accessing a DSaaS Cluster using the user's token
+## Example of accessing a Dataplatform Cluster using the user's token
 
 ```
-resource "ionoscloud_dsaas_cluster" "example" {
+resource "ionoscloud_dataplatform_cluster" "example" {
   datacenter_id   		=  ionoscloud_datacenter.example.id
-  name 					= "DSaaS_Cluster_Example"
+  name 					= "Dataplatform_Cluster_Example"
   maintenance_window {
     day_of_the_week  	= "Sunday"
     time				= "09:00:00"
@@ -98,22 +98,22 @@ resource "ionoscloud_dsaas_cluster" "example" {
   data_platform_version	= "1.1.0"
 }
 
-data "ionoscloud_dsaas_cluster" "example" {
-  name = "DSaaS_Cluster_Example"
+data "ionoscloud_dataplatform_cluster" "example" {
+  name = "Dataplatform_Cluster_Example"
 }
 
 provider "kubernetes" {
-  host = data.ionoscloud_dsaas_cluster.example.server
-  token =  data.ionoscloud_dsaas_cluster.example.user_tokens["cluster-admin"]
+  host = data.ionoscloud_dataplatform_cluster.example.server
+  token =  data.ionoscloud_dataplatform_cluster.example.user_tokens["cluster-admin"]
 }
 ```
 
 ## Example of accessing a kubernetes cluster using the token from the config
 
 ```
-resource "ionoscloud_dsaas_cluster" "example" {
+resource "ionoscloud_dataplatform_cluster" "example" {
   datacenter_id   		=  ionoscloud_datacenter.example.id
-  name 					= "DSaaS_Cluster_Example"
+  name 					= "Dataplatform_Cluster_Example"
   maintenance_window {
     day_of_the_week  	= "Sunday"
     time				= "09:00:00"
@@ -121,13 +121,13 @@ resource "ionoscloud_dsaas_cluster" "example" {
   data_platform_version	= "1.1.0"
 }
 
-data "ionoscloud_dsaas_cluster" "example" {
-  name = "DSaaS_Cluster_Example"
+data "ionoscloud_dataplatform_cluster" "example" {
+  name = "Dataplatform_Cluster_Example"
 }
 
 provider "kubernetes" {
-  host = data.ionoscloud_dsaas_cluster.example.config[0].clusters[0].cluster.server
-  token =  data.ionoscloud_dsaas_cluster.example.config[0].users[0].user.token
+  host = data.ionoscloud_dataplatform_cluster.example.config[0].clusters[0].cluster.server
+  token =  data.ionoscloud_dataplatform_cluster.example.config[0].users[0].user.token
 }
 ```
 
@@ -139,12 +139,12 @@ provider "kubernetes" {
 **NOTE**: Using `sensitive_content` for `local_file` does not show the data written to the file during the plan phase.
 
 ```
-data "ionoscloud_dsaas_cluster" "example" {
-  name = "DSaaS_Cluster_Example"
+data "ionoscloud_dataplatform_cluster" "example" {
+  name = "Dataplatform_Cluster_Example"
 }
 
 resource "local_file" "kubeconfig" {
-    sensitive_content     = yamlencode(jsondecode(data.ionoscloud_dsaas_cluster.example.kube_config))
+    sensitive_content     = yamlencode(jsondecode(data.ionoscloud_dataplatform_cluster.example.kube_config))
     filename              = "kubeconfig.yaml"
 }
 

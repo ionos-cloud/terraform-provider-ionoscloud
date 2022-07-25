@@ -1,15 +1,15 @@
 ---
-subcategory: "Data Stack as a Service"
+subcategory: "Dataplatform"
 layout: "ionoscloud"
-page_title: "IonosCloud : ionoscloud_dsaas_node_pool"
-sidebar_current: "docs-dsaas_node_pool"
+page_title: "IonosCloud : ionoscloud_dataplatform_node_pool"
+sidebar_current: "docs-dataplatform_node_pool"
 description: |-
-Get information on a DSaaS Node Pool.
+Get information on a Dataplatform Node Pool.
 ---
 
-# ionoscloud\_dsaas_node_pool
+# ionoscloud\_dataplatform_node_pool
 
-The **DSaaS Node Pool Data Source** can be used to search for and return an existing DSaaS Node Pool under a DSaaS Cluster.
+The **Dataplatform Node Pool Data Source** can be used to search for and return an existing Dataplatform Node Pool under a Dataplatform Cluster.
 If a single match is found, it will be returned. If your search results in multiple matches, an error will be returned.
 When this happens, please refine your search and make sure that your resources have unique names.
 
@@ -17,7 +17,7 @@ When this happens, please refine your search and make sure that your resources h
 
 ### By ID
 ```hcl
-data "ionoscloud_dsaas_node_pool" "example" {
+data "ionoscloud_dataplatform_node_pool" "example" {
   cluster_id  = <cluster_id>
   id	      = <node_pool_id>
 }
@@ -26,16 +26,16 @@ data "ionoscloud_dsaas_node_pool" "example" {
 ### By Name
 
 ```hcl
-data "ionoscloud_dsaas_node_pool" "example" {
+data "ionoscloud_dataplatform_node_pool" "example" {
   cluster_id    = <cluster_id>
-  name      	= "DSaaS_Node_Pool_Example"
+  name      	= "Dataplatform_Node_Pool_Example"
 }
 ```
 
 ### By Name with Partial Match
 
 ```hcl
-data "ionoscloud_dsaas_node_pool" "example" {
+data "ionoscloud_dataplatform_node_pool" "example" {
   cluster_id    = <cluster_id>
   name      	= "_Example"
   partial_match = true

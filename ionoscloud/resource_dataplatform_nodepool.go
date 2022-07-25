@@ -6,20 +6,20 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
-	dsaasService "github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/dsaas"
+	dataplatformService "github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/dataplatform"
 	"log"
 	"regexp"
 	"time"
 )
 
-func resourceDSaaSNodePool() *schema.Resource {
+func resourceDataplatformNodePool() *schema.Resource {
 	return &schema.Resource{
-		CreateContext: resourceDSaaSNodePoolCreate,
-		ReadContext:   resourceDSaaSNodePoolRead,
-		UpdateContext: resourceDSaaSNodePoolUpdate,
-		DeleteContext: resourceDSaaSNodePoolDelete,
+		CreateContext: resourceDataplatformNodePoolCreate,
+		ReadContext:   resourceDataplatformNodePoolRead,
+		UpdateContext: resourceDataplatformNodePoolUpdate,
+		DeleteContext: resourceDataplatformNodePoolDelete,
 		Importer: &schema.ResourceImporter{
-			StateContext: resourceDSaaSNodePoolImport,
+			StateContext: resourceDataplatformNodePoolImport,
 		},
 		Schema: map[string]*schema.Schema{
 			"name": {
@@ -120,16 +120,16 @@ func resourceDSaaSNodePool() *schema.Resource {
 			"cluster_id": {
 				Type:         schema.TypeString,
 				Required:     true,
-				Description:  "The UUID of an existing DSaaS cluster.",
+				Description:  "The UUID of an existing Dataplatform cluster.",
 				ValidateFunc: validation.All(validation.StringMatch(regexp.MustCompile("^[A-Za-z0-9][-A-Za-z0-9_.]*[A-Za-z0-9]$"), "")),
 			},
 		},
 		Timeouts:      &resourceDefaultTimeouts,
-		CustomizeDiff: checkDSaaSNodePoolImmutableFields,
+		CustomizeDiff: checkDataplatformNodePoolImmutableFields,
 	}
 }
 
-func checkDSaaSNodePoolImmutableFields(_ context.Context, diff *schema.ResourceDiff, _ interface{}) error {
+func checkDataplatformNodePoolImmutableFields(_ context.Context, diff *schema.ResourceDiff, _ interface{}) error {
 	if diff.Id() == "" {
 		return nil
 	}
@@ -165,33 +165,33 @@ func checkDSaaSNodePoolImmutableFields(_ context.Context, diff *schema.ResourceD
 	return nil
 }
 
-func resourceDSaaSNodePoolCreate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
-	client := meta.(SdkBundle).DSaaSClient
+func resourceDataplatformNodePoolCreate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+	client := meta.(SdkBundle).DataplatformClient
 
 	clusterId := d.Get("cluster_id").(string)
 
-	dsaasNodePool := dsaasService.GetDSaaSNodePoolDataCreate(d)
-	dsaasNodePoolResponse, _, err := client.CreateNodePool(ctx, clusterId, *dsaasNodePool)
+	dataplatformNodePool := dataplatformService.GetDataplatformNodePoolDataCreate(d)
+	dataplatformNodePoolResponse, _, err := client.CreateNodePool(ctx, clusterId, *dataplatformNodePool)
 
 	if err != nil {
-		diags := diag.FromErr(fmt.Errorf("an error occured while creating a DSaaS NodePool: %w", err))
+		diags := diag.FromErr(fmt.Errorf("an error occured while creating a Dataplatform NodePool: %w", err))
 		return diags
 	}
 
-	d.SetId(*dsaasNodePoolResponse.Id)
+	d.SetId(*dataplatformNodePoolResponse.Id)
 
 	for {
-		log.Printf("[INFO] Waiting for DSaaS Node Pool %s to be ready...", d.Id())
+		log.Printf("[INFO] Waiting for Dataplatform Node Pool %s to be ready...", d.Id())
 
-		nodePoolReady, rsErr := dsaasNodePoolReady(ctx, client, d)
+		nodePoolReady, rsErr := dataplatformNodePoolReady(ctx, client, d)
 
 		if rsErr != nil {
-			diags := diag.FromErr(fmt.Errorf("error while checking readiness status of DSaaS Node Pool %s: %w", d.Id(), rsErr))
+			diags := diag.FromErr(fmt.Errorf("error while checking readiness status of Dataplatform Node Pool %s: %w", d.Id(), rsErr))
 			return diags
 		}
 
 		if nodePoolReady {
-			log.Printf("[INFO] DSaaS Node Pool ready: %s", d.Id())
+			log.Printf("[INFO] Dataplatform Node Pool ready: %s", d.Id())
 			break
 		}
 
@@ -200,76 +200,76 @@ func resourceDSaaSNodePoolCreate(ctx context.Context, d *schema.ResourceData, me
 			log.Printf("[INFO] trying again ...")
 		case <-ctx.Done():
 			log.Printf("[INFO] create timed out")
-			diags := diag.FromErr(fmt.Errorf("DSaaS Node Pool creation timed out! WARNING: your DSaaS Node Pool (%s) will still probably be created after some time but the terraform state wont reflect that; check your Ionos Cloud account for updates", d.Id()))
+			diags := diag.FromErr(fmt.Errorf("Dataplatform Node Pool creation timed out! WARNING: your Dataplatform Node Pool (%s) will still probably be created after some time but the terraform state wont reflect that; check your Ionos Cloud account for updates", d.Id()))
 			return diags
 		}
 
 	}
 
-	return resourceDSaaSNodePoolRead(ctx, d, meta)
+	return resourceDataplatformNodePoolRead(ctx, d, meta)
 }
 
-func resourceDSaaSNodePoolRead(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
-	client := meta.(SdkBundle).DSaaSClient
+func resourceDataplatformNodePoolRead(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+	client := meta.(SdkBundle).DataplatformClient
 
 	clusterId := d.Get("cluster_id").(string)
 	nodePoolId := d.Id()
 
-	dsaasNodePool, apiResponse, err := client.GetNodePool(ctx, clusterId, nodePoolId)
+	dataplatformNodePool, apiResponse, err := client.GetNodePool(ctx, clusterId, nodePoolId)
 
 	if err != nil {
 		if apiResponse != nil && apiResponse.Response != nil && apiResponse.StatusCode == 404 {
 			d.SetId("")
 			return nil
 		}
-		diags := diag.FromErr(fmt.Errorf("error while fetching DSaaS Node Pool %s: %w", d.Id(), err))
+		diags := diag.FromErr(fmt.Errorf("error while fetching Dataplatform Node Pool %s: %w", d.Id(), err))
 		return diags
 	}
 
-	log.Printf("[INFO] Successfully retreived DSaaS Node Pool %s: %+v", d.Id(), dsaasNodePool)
+	log.Printf("[INFO] Successfully retreived Dataplatform Node Pool %s: %+v", d.Id(), dataplatformNodePool)
 
-	if err := dsaasService.SetDSaaSNodePoolData(d, dsaasNodePool); err != nil {
+	if err := dataplatformService.SetDataplatformNodePoolData(d, dataplatformNodePool); err != nil {
 		return diag.FromErr(err)
 	}
 
 	return nil
 }
 
-func resourceDSaaSNodePoolUpdate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
-	client := meta.(SdkBundle).DSaaSClient
+func resourceDataplatformNodePoolUpdate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+	client := meta.(SdkBundle).DataplatformClient
 
 	clusterId := d.Get("cluster_id").(string)
 	nodePoolId := d.Id()
 
-	dsaasNodePool, diags := dsaasService.GetDSaaSNodePoolDataUpdate(d)
+	dataplatformNodePool, diags := dataplatformService.GetDataplatformNodePoolDataUpdate(d)
 
 	if diags != nil {
 		return diags
 	}
 
-	dsaasNodePoolResponse, _, err := client.UpdateNodePool(ctx, clusterId, nodePoolId, *dsaasNodePool)
+	dataplatformNodePoolResponse, _, err := client.UpdateNodePool(ctx, clusterId, nodePoolId, *dataplatformNodePool)
 
 	if err != nil {
-		diags := diag.FromErr(fmt.Errorf("an error occured while updating a DSaaS NodePool: %s", err))
+		diags := diag.FromErr(fmt.Errorf("an error occured while updating a Dataplatform NodePool: %s", err))
 		return diags
 	}
 
-	d.SetId(*dsaasNodePoolResponse.Id)
+	d.SetId(*dataplatformNodePoolResponse.Id)
 
 	time.Sleep(SleepInterval)
 
 	for {
 		log.Printf("[INFO] Waiting for Node Pool %s to be ready...", d.Id())
 
-		nodePoolReady, rsErr := dsaasNodePoolReady(ctx, client, d)
+		nodePoolReady, rsErr := dataplatformNodePoolReady(ctx, client, d)
 
 		if rsErr != nil {
-			diags := diag.FromErr(fmt.Errorf("error while checking readiness status of DSaaS Node Pool %s: %w", d.Id(), rsErr))
+			diags := diag.FromErr(fmt.Errorf("error while checking readiness status of Dataplatform Node Pool %s: %w", d.Id(), rsErr))
 			return diags
 		}
 
 		if nodePoolReady {
-			log.Printf("[INFO] DSaaS Node Pool ready: %s", d.Id())
+			log.Printf("[INFO] Dataplatform Node Pool ready: %s", d.Id())
 			break
 		}
 
@@ -278,17 +278,17 @@ func resourceDSaaSNodePoolUpdate(ctx context.Context, d *schema.ResourceData, me
 			log.Printf("[INFO] trying again ...")
 		case <-ctx.Done():
 			log.Printf("[INFO] create timed out")
-			diags := diag.FromErr(fmt.Errorf("DSaaS Node Pool update timed out! WARNING: your DSaaS Node Pool (%s) will still probably be updated after some time but the terraform state wont reflect that; check your Ionos Cloud account for updates", d.Id()))
+			diags := diag.FromErr(fmt.Errorf("Dataplatform Node Pool update timed out! WARNING: your Dataplatform Node Pool (%s) will still probably be updated after some time but the terraform state wont reflect that; check your Ionos Cloud account for updates", d.Id()))
 			return diags
 		}
 
 	}
 
-	return resourceDSaaSNodePoolRead(ctx, d, meta)
+	return resourceDataplatformNodePoolRead(ctx, d, meta)
 }
 
-func resourceDSaaSNodePoolDelete(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
-	client := meta.(SdkBundle).DSaaSClient
+func resourceDataplatformNodePoolDelete(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+	client := meta.(SdkBundle).DataplatformClient
 
 	clusterId := d.Get("cluster_id").(string)
 	nodePoolId := d.Id()
@@ -300,22 +300,22 @@ func resourceDSaaSNodePoolDelete(ctx context.Context, d *schema.ResourceData, me
 			d.SetId("")
 			return nil
 		}
-		diags := diag.FromErr(fmt.Errorf("error while deleting DSaaS Node Pool %s: %s", d.Id(), err))
+		diags := diag.FromErr(fmt.Errorf("error while deleting Dataplatform Node Pool %s: %s", d.Id(), err))
 		return diags
 	}
 
 	for {
-		log.Printf("[INFO] Waiting for DSaaS Node Pool %s to be deleted...", d.Id())
+		log.Printf("[INFO] Waiting for Dataplatform Node Pool %s to be deleted...", d.Id())
 
-		nodePoolDeleted, dsErr := dsaasNodePoolDeleted(ctx, client, d)
+		nodePoolDeleted, dsErr := dataplatformNodePoolDeleted(ctx, client, d)
 
 		if dsErr != nil {
-			diags := diag.FromErr(fmt.Errorf("error while checking deletion status of DSaaS Node Pool %s: %s", d.Id(), dsErr))
+			diags := diag.FromErr(fmt.Errorf("error while checking deletion status of Dataplatform Node Pool %s: %s", d.Id(), dsErr))
 			return diags
 		}
 
 		if nodePoolDeleted {
-			log.Printf("[INFO] Successfully deleted DSaaS Node Pool: %s", d.Id())
+			log.Printf("[INFO] Successfully deleted Dataplatform Node Pool: %s", d.Id())
 			break
 		}
 
@@ -323,7 +323,7 @@ func resourceDSaaSNodePoolDelete(ctx context.Context, d *schema.ResourceData, me
 		case <-time.After(SleepInterval):
 			log.Printf("[INFO] trying again ...")
 		case <-ctx.Done():
-			diags := diag.FromErr(fmt.Errorf("DSaaS Node Pool deletion timed out! WARNING: your DSaaS Node Pool (%s) will still probably be deleted after some time but the terraform state won't reflect that; check your Ionos Cloud account for updates", d.Id()))
+			diags := diag.FromErr(fmt.Errorf("Dataplatform Node Pool deletion timed out! WARNING: your Dataplatform Node Pool (%s) will still probably be deleted after some time but the terraform state won't reflect that; check your Ionos Cloud account for updates", d.Id()))
 			return diags
 		}
 	}
@@ -334,32 +334,32 @@ func resourceDSaaSNodePoolDelete(ctx context.Context, d *schema.ResourceData, me
 	return nil
 }
 
-func resourceDSaaSNodePoolImport(ctx context.Context, d *schema.ResourceData, meta interface{}) ([]*schema.ResourceData, error) {
-	client := meta.(SdkBundle).DSaaSClient
+func resourceDataplatformNodePoolImport(ctx context.Context, d *schema.ResourceData, meta interface{}) ([]*schema.ResourceData, error) {
+	client := meta.(SdkBundle).DataplatformClient
 
 	clusterId := d.Get("cluster_id").(string)
 	nodePoolId := d.Id()
 
-	dsaasNodePool, apiResponse, err := client.GetNodePool(ctx, clusterId, nodePoolId)
+	dataplatformNodePool, apiResponse, err := client.GetNodePool(ctx, clusterId, nodePoolId)
 
 	if err != nil {
 		if apiResponse != nil && apiResponse.Response != nil && apiResponse.StatusCode == 404 {
 			d.SetId("")
-			return nil, fmt.Errorf("DSaaS Node Pool does not exist %q", nodePoolId)
+			return nil, fmt.Errorf("Dataplatform Node Pool does not exist %q", nodePoolId)
 		}
-		return nil, fmt.Errorf("an error occured while trying to fetch the import of DSaaS Node Pool %q", nodePoolId)
+		return nil, fmt.Errorf("an error occured while trying to fetch the import of Dataplatform Node Pool %q", nodePoolId)
 	}
 
-	log.Printf("[INFO] DSaaS Node Pool found: %+v", dsaasNodePool)
+	log.Printf("[INFO] Dataplatform Node Pool found: %+v", dataplatformNodePool)
 
-	if err := dsaasService.SetDSaaSNodePoolData(d, dsaasNodePool); err != nil {
+	if err := dataplatformService.SetDataplatformNodePoolData(d, dataplatformNodePool); err != nil {
 		return nil, err
 	}
 
 	return []*schema.ResourceData{d}, nil
 }
 
-func dsaasNodePoolReady(ctx context.Context, client *dsaasService.Client, d *schema.ResourceData) (bool, error) {
+func dataplatformNodePoolReady(ctx context.Context, client *dataplatformService.Client, d *schema.ResourceData) (bool, error) {
 
 	clusterId := d.Get("cluster_id").(string)
 	nodePoolId := d.Id()
@@ -367,7 +367,7 @@ func dsaasNodePoolReady(ctx context.Context, client *dsaasService.Client, d *sch
 	subjectNodePool, _, err := client.GetNodePool(ctx, clusterId, nodePoolId)
 
 	if err != nil {
-		return true, fmt.Errorf("error checking DSaaS Node Pool status: %s", err)
+		return true, fmt.Errorf("error checking Dataplatform Node Pool status: %s", err)
 	}
 	// ToDo: Removed this part since there are still problems with the nodePools being unstable (failing for a short time and then recovering)
 	//if *subjectNodePool.LifecycleStatus == "FAILED" {
@@ -387,7 +387,7 @@ func dsaasNodePoolReady(ctx context.Context, client *dsaasService.Client, d *sch
 	return *subjectNodePool.Metadata.State == "AVAILABLE", nil
 }
 
-func dsaasNodePoolDeleted(ctx context.Context, client *dsaasService.Client, d *schema.ResourceData) (bool, error) {
+func dataplatformNodePoolDeleted(ctx context.Context, client *dataplatformService.Client, d *schema.ResourceData) (bool, error) {
 
 	clusterId := d.Get("cluster_id").(string)
 	nodePoolId := d.Id()
@@ -398,7 +398,7 @@ func dsaasNodePoolDeleted(ctx context.Context, client *dsaasService.Client, d *s
 		if apiResponse != nil && apiResponse.Response != nil && apiResponse.StatusCode == 404 {
 			return true, nil
 		}
-		return true, fmt.Errorf("error checking DSaaS Node Pool deletion status: %s", err)
+		return true, fmt.Errorf("error checking Dataplatform Node Pool deletion status: %s", err)
 	}
 	return false, nil
 }
