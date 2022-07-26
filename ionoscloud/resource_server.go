@@ -245,6 +245,10 @@ func resourceServer() *schema.Resource {
 				MaxItems: 1,
 				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{
+						"id": {
+							Type:     schema.TypeString,
+							Computed: true,
+						},
 						"mac": {
 							Type:     schema.TypeString,
 							Computed: true,
@@ -849,7 +853,7 @@ func resourceServerRead(ctx context.Context, d *schema.ResourceData, meta interf
 		if nic.Properties.Ips != nil && len(*nic.Properties.Ips) > 0 {
 			network["ips"] = *nic.Properties.Ips
 		}
-
+		network["id"] = nic.Id
 		if firewallId, ok := d.GetOk("firewallrule_id"); ok {
 			firewall, apiResponse, err := client.FirewallRulesApi.DatacentersServersNicsFirewallrulesFindById(ctx, dcId, serverId, primarynic.(string), firewallId.(string)).Execute()
 			logApiRequestTime(apiResponse)
