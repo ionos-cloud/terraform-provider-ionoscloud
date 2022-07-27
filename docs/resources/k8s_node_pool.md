@@ -108,12 +108,12 @@ The following arguments are supported:
 - `datacenter_id` - (Required)[string] A Datacenter's UUID
 - `k8s_cluster_id`- (Required)[string] A k8s cluster's UUID
 - `cpu_family` - (Required)[string] The desired CPU Family - See the API documentation for more information. *This attribute is immutable*.
-- `availability_zone` - (Required)[string] - The desired Compute availability zone - See the API documentation for more information. *This attribute is immutable*.
-- `storage_type` -(Required)[string] - The desired storage type - SSD/HDD. *This attribute is immutable*.
-- `node_count` -(Required)[int] - The desired number of nodes in the node pool
-- `cores_count` -(Required)[int] - The CPU cores count for each node of the node pool. *This attribute is immutable*.
-- `ram_size` -(Required)[int] - The desired amount of RAM, in MB. *This attribute is immutable*.
-- `storage_size` -(Required)[int] - The size of the volume in GB. The size should be greater than 10GB. *This attribute is immutable*.
+- `availability_zone` - (Required)[string] The desired Compute availability zone - See the API documentation for more information. *This attribute is immutable*.
+- `storage_type` -(Required)[string] The desired storage type - SSD/HDD. *This attribute is immutable*.
+- `node_count` -(Required)[int] The desired number of nodes in the node pool
+- `cores_count` -(Required)[int] The CPU cores count for each node of the node pool. *This attribute is immutable*.
+- `ram_size` -(Required)[int] The desired amount of RAM, in MB. *This attribute is immutable*.
+- `storage_size` -(Required)[int] The size of the volume in GB. The size should be greater than 10GB. *This attribute is immutable*.
 - `public_ips` - (Optional)[list] A list of public IPs associated with the node pool; must have at least `node_count + 1` elements  
 - `labels` - (Optional)[map] A key/value map of labels
 - `annotations` - (Optional)[map] A key/value map of annotations

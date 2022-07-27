@@ -195,7 +195,7 @@ data ` + DatacenterResource + ` ` + DatacenterDataSourceByName + ` {
 
 const testAccDataSourceDatacenterPartialMatchName = testAccCheckDatacenterConfigBasic + `
 data ` + DatacenterResource + ` ` + DatacenterDataSourceByName + ` {
-    name = "` + DataSourcePartial + `"
+    name = "test_data"
   	partial_match = true
 }`
 
