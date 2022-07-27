@@ -94,3 +94,13 @@
     * [DBaaS Postgres Backup](../docs/data-sources/dbaas\_pgsql\_backups.md)
     * [DBaaS Postgres Cluster](../docs/data-sources/dbaas\_pgsql\_cluster.md)
     * [DBaaS Postgres Versions](../docs/data-sources/dbaas\_pgsql\_versions.md)
+
+* Application Load Balancer
+  * Resources
+    * [Application Load Balancer](../docs/resources/application_loadbalancer.md)
+    * [Application Load Balancer Forwarding Rule](../docs/resources/application_loadbalancer_forwardingrule.md)
+    * [Target Group](../docs/resources/target_group.md)
+  * Data Sources
+    * [Application Load Balancer](../docs/data-sources/application_loadbalancer.md)
+    * [Application Load Balancer Forwarding Rule](../docs/data-sources/application_loadbalancer_forwardingrule.md)
+    * [Target Group](../docs/data-sources/target_group.md)

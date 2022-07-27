@@ -90,7 +90,7 @@ resource "ionoscloud_pg_cluster" "example" {
 * `cores` - (Required)[int] The number of CPU cores per replica.
 * `ram` - (Required)[int] The amount of memory per instance in megabytes. Has to be a multiple of 1024.
 * `storage_size` - (Required)[int] The amount of storage per instance in MB. Has to be a multiple of 2048.
-* `storage_type` - (Required)[string] The storage type used in your cluster. Can have one of the following values: HDD, SSD. This attribute is immutable(disallowed in update requests).
+* `storage_type` - (Required)[string] SSD, SSD Standard, SSD Premium, or HDD. Value "SSD" is deprecated, use the equivalent "SSD Premium" instead. This attribute is immutable(disallowed in update requests).
 * `connections` - (Required)[string] Details about the network connection for your cluster.
   * `datacenter_id` - (Required)[true] The datacenter to connect your cluster to.
   * `lan_id` - (Required)[true] The LAN to connect your cluster to.

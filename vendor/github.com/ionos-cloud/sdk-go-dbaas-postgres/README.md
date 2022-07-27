@@ -1,3 +1,15 @@
+![CI](https://github.com/ionos-cloud/sdk-resources/workflows/%5B%20CI%20%5D%20DBaaS%20Postgres%20/%20Go/badge.svg)
+[![Gitter](https://img.shields.io/gitter/room/ionos-cloud/sdk-general)](https://gitter.im/ionos-cloud/sdk-general)
+[![Quality Gate Status](https://sonarcloud.io/api/project_badges/measure?project=sdk-go-dbaas-postgres&metric=alert_status)](https://sonarcloud.io/dashboard?id=sdk-go-dbaas-postgres)
+[![Bugs](https://sonarcloud.io/api/project_badges/measure?project=sdk-go-dbaas-postgres&metric=bugs)](https://sonarcloud.io/dashboard?id=sdk-go-dbaas-postgres)
+[![Maintainability Rating](https://sonarcloud.io/api/project_badges/measure?project=sdk-go-dbaas-postgres&metric=sqale_rating)](https://sonarcloud.io/dashboard?id=sdk-go-dbaas-postgres)
+[![Reliability Rating](https://sonarcloud.io/api/project_badges/measure?project=sdk-go-dbaas-postgres&metric=reliability_rating)](https://sonarcloud.io/dashboard?id=sdk-go-dbaas-postgres)
+[![Security Rating](https://sonarcloud.io/api/project_badges/measure?project=sdk-go-dbaas-postgres&metric=security_rating)](https://sonarcloud.io/dashboard?id=sdk-go-dbaas-postgres)
+[![Vulnerabilities](https://sonarcloud.io/api/project_badges/measure?project=sdk-go-dbaas-postgres&metric=vulnerabilities)](https://sonarcloud.io/dashboard?id=sdk-go-dbaas-postgres)
+[![Release](https://img.shields.io/github/v/release/ionos-cloud/sdk-go-dbaas-postgres.svg)](https://github.com/ionos-cloud/sdk-go-dbaas-postgres/releases/latest)
+[![Release Date](https://img.shields.io/github/release-date/ionos-cloud/sdk-go-dbaas-postgres.svg)](https://github.com/ionos-cloud/sdk-go-dbaas-postgres/releases/latest)
+[![Go](https://img.shields.io/github/go-mod/go-version/ionos-cloud/sdk-go-dbaas-postgres.svg)](https://github.com/ionos-cloud/sdk-go-dbaas-postgres)
+
 ![Alt text](.github/IONOS.CLOUD.BLU.svg?raw=true "Title")
 
 # Go API client for ionoscloud
@@ -181,7 +193,6 @@ Each of these functions takes a value of the given basic type and returns a poin
 * `PtrString`
 * `PtrTime`
 
-## Author
+## License
 
-
-
+SDK Go DBaaS Postgres is under the [Apache 2.0 License](LICENSE).

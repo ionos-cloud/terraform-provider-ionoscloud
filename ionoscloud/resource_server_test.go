@@ -6,6 +6,7 @@ import (
 	"context"
 	"fmt"
 	ionoscloud "github.com/ionos-cloud/sdk-go/v6"
+	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils"
 	"regexp"
 	"testing"
 
@@ -36,7 +37,7 @@ func TestAccServerBasic(t *testing.T) {
 					resource.TestCheckResourceAttr(ServerResource+"."+ServerTestResource, "ram", "1024"),
 					resource.TestCheckResourceAttr(ServerResource+"."+ServerTestResource, "availability_zone", "ZONE_1"),
 					resource.TestCheckResourceAttr(ServerResource+"."+ServerTestResource, "cpu_family", "AMD_OPTERON"),
-					testImageNotNull(ServerResource, "boot_image"),
+					utils.TestImageNotNull(ServerResource, "boot_image"),
 					resource.TestCheckResourceAttr(ServerResource+"."+ServerTestResource, "image_password", "K3tTj8G14a3EgKyNeeiY"),
 					resource.TestCheckResourceAttr(ServerResource+"."+ServerTestResource, "type", "ENTERPRISE"),
 					resource.TestCheckResourceAttr(ServerResource+"."+ServerTestResource, "volume.0.name", "system"),
@@ -174,7 +175,7 @@ func TestAccServerBasic(t *testing.T) {
 					resource.TestCheckResourceAttr(ServerResource+"."+ServerTestResource, "ram", "2048"),
 					resource.TestCheckResourceAttr(ServerResource+"."+ServerTestResource, "availability_zone", "ZONE_1"),
 					resource.TestCheckResourceAttr(ServerResource+"."+ServerTestResource, "cpu_family", "AMD_OPTERON"),
-					testImageNotNull(ServerResource, "boot_image"),
+					utils.TestImageNotNull(ServerResource, "boot_image"),
 					resource.TestCheckResourceAttr(ServerResource+"."+ServerTestResource, "image_password", "K3tTj8G14a3EgKyNeeiYsasad"),
 					resource.TestCheckResourceAttr(ServerResource+"."+ServerTestResource, "volume.0.name", UpdatedResources),
 					resource.TestCheckResourceAttr(ServerResource+"."+ServerTestResource, "type", "ENTERPRISE"),
@@ -256,7 +257,7 @@ func TestAccServerResolveImageName(t *testing.T) {
 					resource.TestCheckResourceAttr(ServerResource+"."+ServerTestResource, "ram", "1024"),
 					resource.TestCheckResourceAttr(ServerResource+"."+ServerTestResource, "availability_zone", "ZONE_1"),
 					resource.TestCheckResourceAttr(ServerResource+"."+ServerTestResource, "cpu_family", "INTEL_SKYLAKE"),
-					testImageNotNull(ServerResource, "boot_image"),
+					utils.TestImageNotNull(ServerResource, "boot_image"),
 					resource.TestCheckResourceAttr(ServerResource+"."+ServerTestResource, "image_password", "pass123456"),
 					resource.TestCheckResourceAttr(ServerResource+"."+ServerTestResource, "volume.0.name", ServerTestResource),
 					resource.TestCheckResourceAttr(ServerResource+"."+ServerTestResource, "volume.0.size", "5"),
@@ -293,7 +294,7 @@ func TestAccServerWithSnapshot(t *testing.T) {
 					resource.TestCheckResourceAttr(ServerResource+"."+ServerTestResource, "ram", "1024"),
 					resource.TestCheckResourceAttr(ServerResource+"."+ServerTestResource, "availability_zone", "ZONE_1"),
 					resource.TestCheckResourceAttr(ServerResource+"."+ServerTestResource, "cpu_family", "INTEL_SKYLAKE"),
-					testImageNotNull(ServerResource, "boot_image"),
+					utils.TestImageNotNull(ServerResource, "boot_image"),
 					resource.TestCheckResourceAttr(ServerResource+"."+ServerTestResource, "volume.0.name", ServerTestResource),
 					resource.TestCheckResourceAttr(ServerResource+"."+ServerTestResource, "volume.0.size", "5"),
 					resource.TestCheckResourceAttr(ServerResource+"."+ServerTestResource, "volume.0.disk_type", "SSD Standard"),
@@ -318,7 +319,7 @@ func TestAccServerCubeServer(t *testing.T) {
 		CheckDestroy:      testAccCheckServerDestroyCheck,
 		Steps: []resource.TestStep{
 			{
-				Config: testAccCheckCubeServer,
+				Config: testAccCheckCubeServerAndServersDataSource,
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckServerExists(ServerResource+"."+ServerTestResource, &server),
 					resource.TestCheckResourceAttr(ServerResource+"."+ServerTestResource, "name", ServerTestResource),
@@ -327,7 +328,7 @@ func TestAccServerCubeServer(t *testing.T) {
 					resource.TestCheckResourceAttrPair(ServerResource+"."+ServerTestResource, "template_uuid", "data.ionoscloud_template."+ServerTestResource, "id"),
 					resource.TestCheckResourceAttr(ServerResource+"."+ServerTestResource, "availability_zone", "ZONE_2"),
 					resource.TestCheckResourceAttr(ServerResource+"."+ServerTestResource, "type", "CUBE"),
-					testImageNotNull("ionoscloud_server", "boot_image"),
+					utils.TestImageNotNull("ionoscloud_server", "boot_image"),
 					resource.TestCheckResourceAttr(ServerResource+"."+ServerTestResource, "volume.0.name", ServerTestResource),
 					resource.TestCheckResourceAttrPair(ServerResource+"."+ServerTestResource, "volume.0.size", "data.ionoscloud_template."+ServerTestResource, "storage_size"),
 					resource.TestCheckResourceAttr(ServerResource+"."+ServerTestResource, "volume.0.disk_type", "DAS"),
@@ -336,6 +337,7 @@ func TestAccServerCubeServer(t *testing.T) {
 					resource.TestCheckResourceAttr(ServerResource+"."+ServerTestResource, "nic.0.name", ServerTestResource),
 					resource.TestCheckResourceAttr(ServerResource+"."+ServerTestResource, "nic.0.dhcp", "true"),
 					resource.TestCheckResourceAttr(ServerResource+"."+ServerTestResource, "nic.0.firewall_active", "true"),
+					resource.TestCheckResourceAttr(DataSource+"."+ServersDataSource+"."+ServerDataSourceByName, "servers.#", "1"),
 				),
 			},
 		},
@@ -361,7 +363,7 @@ func TestAccServerWithICMP(t *testing.T) {
 					resource.TestCheckResourceAttr(ServerResource+"."+ServerTestResource, "ram", "1024"),
 					resource.TestCheckResourceAttr(ServerResource+"."+ServerTestResource, "availability_zone", "ZONE_1"),
 					resource.TestCheckResourceAttr(ServerResource+"."+ServerTestResource, "cpu_family", "AMD_OPTERON"),
-					testImageNotNull(ServerResource, "boot_image"),
+					utils.TestImageNotNull(ServerResource, "boot_image"),
 					resource.TestCheckResourceAttr(ServerResource+"."+ServerTestResource, "image_password", "K3tTj8G14a3EgKyNeeiY"),
 					resource.TestCheckResourceAttr(ServerResource+"."+ServerTestResource, "volume.0.name", "system"),
 					resource.TestCheckResourceAttr(ServerResource+"."+ServerTestResource, "volume.0.size", "5"),
@@ -410,7 +412,7 @@ func testAccCheckServerDestroyCheck(s *terraform.State) error {
 		logApiRequestTime(apiResponse)
 
 		if err != nil {
-			if apiResponse == nil || apiResponse.Response != nil && apiResponse.StatusCode != 404 {
+			if !httpNotFound(apiResponse) {
 				return fmt.Errorf("unable to fetch server %s: %s", rs.Primary.ID, err)
 			}
 		} else {
@@ -487,7 +489,7 @@ resource ` + ServerResource + ` ` + ServerTestResource + ` {
   ram = 2048
   availability_zone = "ZONE_1"
   cpu_family = "AMD_OPTERON"
-  image_name ="debian-10-genericcloud-amd64-20211011-792"
+  image_name ="ubuntu:latest"
   image_password = "K3tTj8G14a3EgKyNeeiYsasad"
   type = "ENTERPRISE"
   volume {
@@ -608,7 +610,7 @@ resource ` + ServerResource + ` ` + ServerTestResource + ` {
   ram               = 1024
   availability_zone = "ZONE_1"
   cpu_family        = "INTEL_SKYLAKE" 
-  image_name        = "Ubuntu-20.04-LTS"
+  image_name        = "ubuntu:latest"
   image_password    = "pass123456"
   volume {
     name           = "` + ServerTestResource + `"
@@ -645,7 +647,7 @@ resource ` + ServerResource + ` "webserver" {
   ram = 1024
   availability_zone = "ZONE_1"
   cpu_family = "INTEL_SKYLAKE"
-	image_name = "Ubuntu-20.04-LTS"
+	image_name = "ubuntu:latest"
 	image_password = "K3tTj8G14a3EgKyNeeiY"
   volume {
     name = "system"
@@ -685,7 +687,7 @@ resource ` + ServerResource + ` ` + ServerTestResource + ` {
 }
 `
 
-const testAccCheckCubeServer = `
+const testAccCheckCubeServerAndServersDataSource = `
 data "ionoscloud_template" ` + ServerTestResource + ` {
     name = "CUBES XS"
     cores = 1
@@ -693,13 +695,13 @@ data "ionoscloud_template" ` + ServerTestResource + ` {
     storage_size = 30
 }
 
-resource "ionoscloud_datacenter" "foobar" {
+resource ` + DatacenterResource + " " + DatacenterTestResource + `{
 	name       = "volume-test"
 	location   = "de/txl"
 }
 
 resource "ionoscloud_lan" "webserver_lan" {
-  datacenter_id = ionoscloud_datacenter.foobar.id
+  datacenter_id = ` + DatacenterResource + `.` + DatacenterTestResource + `.id
   public = true
   name = "public"
 }
@@ -711,7 +713,7 @@ resource "ionoscloud_server" ` + ServerTestResource + ` {
   type              = "CUBE"
   template_uuid     = data.ionoscloud_template.` + ServerTestResource + `.id
   image_password = "K3tTj8G14a3EgKyNeeiY"  
-  datacenter_id     = ionoscloud_datacenter.foobar.id
+  datacenter_id = ` + DatacenterResource + `.` + DatacenterTestResource + `.id
   volume {
     name            = "` + ServerTestResource + `"
     licence_type    = "LINUX" 
@@ -722,6 +724,14 @@ resource "ionoscloud_server" ` + ServerTestResource + ` {
     name            = "` + ServerTestResource + `"
     dhcp            = true
     firewall_active = true
+  }
+}
+data ` + ServersDataSource + ` ` + ServerDataSourceByName + ` {
+ depends_on = [` + ServerResource + `.` + ServerTestResource + `]
+  datacenter_id = ` + DatacenterResource + `.` + DatacenterTestResource + `.id
+  filter {
+   name = "type"
+   value = "CUBE" 
   }
 }`
 
@@ -742,7 +752,7 @@ resource ` + ServerResource + ` ` + ServerTestResource + ` {
   ram = 1024
   availability_zone = "ZONE_1"
   cpu_family = "AMD_OPTERON"
-  image_name ="debian-10-genericcloud-amd64-20211011-792"
+  image_name ="ubuntu:latest"
   image_password = "K3tTj8G14a3EgKyNeeiY"
   volume {
     name = "system"
@@ -780,7 +790,7 @@ resource ` + ServerResource + ` ` + ServerTestResource + ` {
   ram = 1024
   availability_zone = "ZONE_1"
   cpu_family = "AMD_OPTERON"
-  image_name ="debian-10-genericcloud-amd64-20211011-792"
+  image_name ="ubuntu:latest"
   image_password = "K3tTj8G14a3EgKyNeeiY"
   volume {
     name = "system"

@@ -6,6 +6,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 	ionoscloud "github.com/ionos-cloud/sdk-go/v6"
+	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils"
 	"log"
 	"strings"
 
@@ -206,7 +207,7 @@ func resourceVolumeCreate(ctx context.Context, d *schema.ResourceData, meta inte
 			log.Printf("[DEBUG] Reading file %s", path)
 			publicKey, err := readPublicKey(path.(string))
 			if err != nil {
-				diags := diag.FromErr(fmt.Errorf("error fetching sshkey from file (%s) (%s)", path, err.Error()))
+				diags := diag.FromErr(fmt.Errorf("error fetching sshkey from file (%s) (%s)", path, err))
 				return diags
 			}
 			publicKeys = append(publicKeys, publicKey)
@@ -292,7 +293,7 @@ func resourceVolumeCreate(ctx context.Context, d *schema.ResourceData, meta inte
 	}
 
 	if backupUnitId, ok := d.GetOk("backup_unit_id"); ok {
-		if IsValidUUID(backupUnitId.(string)) {
+		if utils.IsValidUUID(backupUnitId.(string)) {
 			if image == "" && imageAlias == "" {
 				diags := diag.FromErr(fmt.Errorf("it is mandatory to provide either public image that has cloud-init compatibility in conjunction with backup_unit_id property "))
 				return diags
@@ -372,7 +373,7 @@ func resourceVolumeRead(ctx context.Context, d *schema.ResourceData, meta interf
 	logApiRequestTime(apiResponse)
 
 	if err != nil {
-		if apiResponse != nil && apiResponse.Response != nil && apiResponse.StatusCode == 404 {
+		if httpNotFound(apiResponse) {
 			d.SetId("")
 			return nil
 		}
@@ -503,7 +504,7 @@ func resourceVolumeImporter(ctx context.Context, d *schema.ResourceData, meta in
 	logApiRequestTime(apiResponse)
 
 	if err != nil {
-		if apiResponse != nil && apiResponse.Response != nil && apiResponse.StatusCode == 404 {
+		if httpNotFound(apiResponse) {
 			d.SetId("")
 			return nil, fmt.Errorf("volume does not exist %q", volumeId)
 		}
@@ -753,7 +754,7 @@ func checkImage(ctx context.Context, client *ionoscloud.APIClient, imageInput, i
 	isSnapshot = false
 
 	if imageInput != "" {
-		if !IsValidUUID(imageInput) {
+		if !utils.IsValidUUID(imageInput) {
 			dc, apiResponse, err := client.DataCentersApi.DatacentersFindById(ctx, dcId).Execute()
 			logApiRequestTime(apiResponse)
 			if err != nil {
@@ -792,11 +793,11 @@ func checkImage(ctx context.Context, client *ionoscloud.APIClient, imageInput, i
 			img, apiResponse, err := client.ImagesApi.ImagesFindById(ctx, imageInput).Execute()
 			logApiRequestTime(apiResponse)
 			if err != nil {
-				if apiResponse != nil && apiResponse.Response != nil && apiResponse.StatusCode == 404 {
+				if httpNotFound(apiResponse) {
 					snapshot, apiResponse, err := client.SnapshotsApi.SnapshotsFindById(ctx, imageInput).Execute()
 					logApiRequestTime(apiResponse)
 					if err != nil {
-						if apiResponse != nil && apiResponse.Response != nil && apiResponse.StatusCode == 404 {
+						if httpNotFound(apiResponse) {
 							diags := diag.FromErr(fmt.Errorf("image/snapshot %s not found: %s", imageInput, err))
 							return image, imageAlias, isSnapshot, diags
 						} else {

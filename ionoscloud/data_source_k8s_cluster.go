@@ -217,11 +217,11 @@ func dataSourceK8sCluster() *schema.Resource {
 				Type:     schema.TypeString,
 				Computed: true,
 			},
-			"public": {
-				Type:        schema.TypeBool,
-				Description: "The indicator if the cluster is public or private. Be aware that setting it to false is currently in beta phase.",
-				Computed:    true,
-			},
+			//"public": {
+			//	Type:        schema.TypeBool,
+			//	Description: "The indicator if the cluster is public or private. Be aware that setting it to false is currently in beta phase.",
+			//	Computed:    true,
+			//},
 			"api_subnet_allow_list": {
 				Type: schema.TypeList,
 				Description: "Access to the K8s API server is restricted to these CIDRs. Cluster-internal traffic is not " +
@@ -296,7 +296,7 @@ func dataSourceK8sReadCluster(ctx context.Context, d *schema.ResourceData, meta 
 			}
 
 			results = *clusters.Items
-		} else {
+		}  else {
 			clusters, apiResponse, err := client.KubernetesApi.K8sGet(ctx).Depth(1).Execute()
 			logApiRequestTime(apiResponse)
 			if err != nil {

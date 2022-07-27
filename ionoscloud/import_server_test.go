@@ -33,7 +33,7 @@ func TestAccServerImportBasic(t *testing.T) {
 }
 
 func testAccServerImportStateId(s *terraform.State) (string, error) {
-	var importID string = ""
+	var importID = ""
 
 	for _, rs := range s.RootModule().Resources {
 		if rs.Type != ServerResource {

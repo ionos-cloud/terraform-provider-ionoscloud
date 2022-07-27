@@ -1,5 +1,23 @@
 package ionoscloud
 
+// ApplicationLoadBalancer Constants
+const (
+	ALBResource         = "ionoscloud_application_loadbalancer"
+	ALBTestResource     = "test_application_loadbalancer"
+	ALBDataSourceById   = "test_application_loadbalancer_id"
+	ALBDataSourceByName = "test_application_loadbalancer_name"
+
+	ALBForwardingRuleResource         = "ionoscloud_application_loadbalancer_forwardingrule"
+	ALBForwardingRuleTestResource     = "test_application_loadbalancer_forwardingrule"
+	ALBForwardingRuleDataSourceById   = "test_application_loadbalancer_forwardingrule_id"
+	ALBForwardingRuleDataSourceByName = "test_application_loadbalancer_forwardingrule_name"
+
+	TargetGroupResource         = "ionoscloud_target_group"
+	TargetGroupTestResource     = "test_target_group"
+	TargetGroupDataSourceById   = "test_target_group_id"
+	TargetGroupDataSourceByName = "test_target_group_name"
+)
+
 // Image Constants
 const (
 	ImageResource     = "ionoscloud_image"
@@ -73,6 +91,7 @@ const (
 	K8sClusterDataSourceByName = "test_k8s_cluster_name"
 
 	K8sNodePoolResource         = "ionoscloud_k8s_node_pool"
+	K8sNodePoolNodesResource    = "ionoscloud_k8s_node_pool_nodes"
 	K8sNodePoolTestResource     = "test_k8s_node_pool"
 	K8sNodePoolDataSourceById   = "test_k8s_node_pool_id"
 	K8sNodePoolDataSourceByName = "test_k8s_node_pool_name"
@@ -197,3 +216,5 @@ const (
 	UpdatedResources  = "test_updated"
 	DataSourcePartial = "test"
 )
+
+const ServersDataSource = "ionoscloud_servers"

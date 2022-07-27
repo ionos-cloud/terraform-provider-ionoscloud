@@ -8,7 +8,7 @@ on:
         type: string
         default: master
       test-tags:
-        description: "test tags, in the form of a list without spaces: 'all,compute,server,firewall,k8s,dbaas,natgateway,nlb,waiting_for_vdc' "
+        description: "test tags, in the form of a list without spaces: 'all,compute,k8s,dbaas,natgateway,nlb, alb, server,firewall, etc.' "
         required: false
         type: string
         default: compute
@@ -38,7 +38,7 @@ jobs:
         uses: actions/checkout@v2
         with:
           ref:  ${{ github.event.inputs.branch }}
-      - name: Run tests with tags
+      - name: Run tests for ${{ github.event.inputs.test-tags }}
         if: ${{ github.event.inputs.test-tags != '' }}
         run: go test ./ionoscloud -v -failfast -timeout 240m -tags ${{ github.event.inputs.test-tags }}
       - name: Run tests without tags

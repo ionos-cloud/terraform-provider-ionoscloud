@@ -40,7 +40,7 @@ Clone repository to: `$GOPATH/src/github.com/ionos-cloud/terraform-provider-iono
 
 ```sh
 $ mkdir -p $GOPATH/src/github.com/ionos-cloud; cd $GOPATH/src/github.com/ionos-cloud
-$ git clone git@github.com:ionos-cloud/terraform-provider-ionoscloud
+$ git clone https://github.com/ionos-cloud/terraform-provider-ionoscloud.git
 ```
 
 Enter the provider directory and build the provider
@@ -109,6 +109,7 @@ $ make testacc TAGS=server,lan
 - `natgateway` - **NAT gateway** and **NAT gateway rule** tests
 - `k8s` - **k8s cluster** and **k8s node pool** tests
 - `dbaas` - **DBaaS postgres cluster** tests
+- `alb` - **Application Load Balancer** tests
 
 ``` sh
 $ make testacc TAGS=dbaas
@@ -119,3 +120,11 @@ You can also test one single resource, using one of the tags: `backup`, `datacen
 
 </details>
 
+## Certificate pinning:
+
+You can enable certificate pinning if you want to bypass the normal certificate checking procedure, 
+by doing the following: 
+
+Set env variable IONOS_PINNED_CERT=<insert_sha256_public_fingerprint_here>
+
+You can get the sha256 fingerprint most easily from the browser by inspecting the certificate.

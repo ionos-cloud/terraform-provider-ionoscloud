@@ -143,10 +143,13 @@ github.com/hashicorp/terraform-svchost
 # github.com/hashicorp/yamux v0.0.0-20200609203250-aecfd211c9ce
 ## explicit
 github.com/hashicorp/yamux
-# github.com/ionos-cloud/sdk-go-dbaas-postgres v1.0.2
+# github.com/iancoleman/strcase v0.2.0
+## explicit; go 1.16
+github.com/iancoleman/strcase
+# github.com/ionos-cloud/sdk-go-dbaas-postgres v1.0.3
 ## explicit; go 1.17
 github.com/ionos-cloud/sdk-go-dbaas-postgres
-# github.com/ionos-cloud/sdk-go/v6 v6.0.2
+# github.com/ionos-cloud/sdk-go/v6 v6.1.0
 ## explicit; go 1.17
 github.com/ionos-cloud/sdk-go/v6
 # github.com/jhump/protoreflect v1.6.1

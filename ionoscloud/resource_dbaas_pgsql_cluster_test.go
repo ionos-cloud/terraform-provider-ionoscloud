@@ -9,6 +9,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
 	dbaas "github.com/ionos-cloud/sdk-go-dbaas-postgres"
+	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils"
 	"regexp"
 	"testing"
 )
@@ -121,19 +122,19 @@ func TestAccDBaaSPgSqlClusterBasic(t *testing.T) {
 				Config: testAccDataSourceDbaasPgSqlClusterBackups,
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttrPair(DataSource+"."+DBaaSBackupsResource+"."+DBaaSBackupsTest, "cluster_backups.0.cluster_id", DataSource+"."+DBaaSBackupsResource+"."+DBaaSBackupsTest, "cluster_id"),
-					testNotEmptySlice(DBaaSBackupsResource, "cluster_backups.#"),
+					utils.TestNotEmptySlice(DBaaSBackupsResource, "cluster_backups.#"),
 				),
 			},
 			{
 				Config: testAccDataSourceDbaasPgSqlVersionsByClusterId,
 				Check: resource.ComposeTestCheckFunc(
-					testNotEmptySlice(DBaaSVersionsResource, "postgres_versions.#"),
+					utils.TestNotEmptySlice(DBaaSVersionsResource, "postgres_versions.#"),
 				),
 			},
 			{
 				Config: testAccDataSourceDbaasPgSqlAllVersions,
 				Check: resource.ComposeTestCheckFunc(
-					testNotEmptySlice(DBaaSVersionsResource, "postgres_versions.#"),
+					utils.TestNotEmptySlice(DBaaSVersionsResource, "postgres_versions.#"),
 				),
 			},
 			{

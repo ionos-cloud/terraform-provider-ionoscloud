@@ -6,7 +6,7 @@ The IonosCloud provider gives the ability to deploy and configure resources usin
 
 ### Migrating from the ProfitBricks provider
 
-Please see the [Documentation](docs/index.md#migrating-from-the-profitbricks-provider) on how to migrate from the ProfitBricks provider.
+Please see the [Documentation](../docs/index.md#migrating-from-the-profitbricks-provider) on how to migrate from the ProfitBricks provider.
 
 ### Requirements
 
@@ -67,3 +67,12 @@ _Note:_ Acceptance tests create real resources, and often cost money to run.
 ```
 $ make testacc
 ```
+
+## Certificate pinning:
+
+You can enable certificate pinning if you want to bypass the normal certificate checking procedure,
+by doing the following:
+
+Set env variable IONOS_PINNED_CERT=<insert_sha256_public_fingerprint_here>
+
+You can get the sha256 fingerprint most easily form the browser by inspecting the certificate.

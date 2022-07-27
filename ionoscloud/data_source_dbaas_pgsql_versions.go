@@ -48,7 +48,7 @@ func dataSourceDbaasPgSqlReadVersions(ctx context.Context, d *schema.ResourceDat
 	} else {
 		postgresVersions, _, err = client.GetAllVersions(ctx)
 		if err != nil {
-			diags := diag.FromErr(fmt.Errorf("an error occurred while fetching postgres versions: %s", err.Error()))
+			diags := diag.FromErr(fmt.Errorf("an error occurred while fetching postgres versions: %w", err))
 			return diags
 		}
 	}

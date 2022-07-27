@@ -1,4 +1,41 @@
-## 6.2.3(Upcoming Release)
+## 6.3.0
+
+### Feature
+- Adds ionoscloud_servers data source that returns a list of servers based on filters set. The filters do partial matching. See docs [here](docs/data-sources/servers.md)
+- New Product: **Application Load Balancer**:
+  - `Resources`:
+    - [ionoscloud_application_loadbalancer](docs/resources/application_loadbalancer.md)
+    - [ionoscloud_application_loadbalancer_forwarding_rule](docs/resources/application_loadbalancer_forwardingrule.md)
+    - [ionoscloud_target_group](docs/resources/target_group.md)
+  - `Data Sources`:
+    - [ionoscloud_application_loadbalancer](docs/data-sources/application_loadbalancer.md)
+    - [ionoscloud_application_loadbalancer_forwarding_rule](docs/data-sources/application_loadbalancer_forwardingrule.md)
+    - [ionoscloud_target_group](docs/data-sources/target_group.md)
+
+### Dependency-update
+  - updated sdk-go version from [6.0.3](https://github.com/ionos-cloud/sdk-go/releases/tag/v6.0.3) to [v6.1.0](https://github.com/ionos-cloud/sdk-go/releases/tag/v6.1.0)
+
+## 6.2.5
+### Enhancement
+- update sdk-go dependency to v6.0.3. 
+  * enable certificate pinning, by setting IONOS_PINNED_CERT env variable
+- temporarily removed `gateway_ip` and `public` fields for k8s
+- introduced error when trying to set `max_node_count` equal to `min_node_count` in `k8s_node_pool`
+
+### Fixes 
+- fixed crash when trying to disable `autoscaling` on `k8s_node_pool`
+
+## 6.2.4
+### Fixes
+- fixed bug when upgrading from a v6.0.0-beta.X version to a stable one (_number is required_ error)
+- reintroduced error for image data source when finding multiple results with data source
+### Enhancement
+- update sdk-go-dbaas-postgres dependency to v1.0.3
+
+### Documentation
+- updated multiple nics under the same IP Failover example, with a [one step example](examples/ip_failover/README.md)
+
+## 6.2.3
 
 ### Fixes
 - do not allow empty string AvailabilityZone. Only allow "AUTO", "ZONE_1", "ZONE_2", "ZONE_3"

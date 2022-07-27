@@ -121,7 +121,7 @@ func resourceNicRead(ctx context.Context, d *schema.ResourceData, meta interface
 	logApiRequestTime(apiResponse)
 
 	if err != nil {
-		if apiResponse != nil && apiResponse.Response != nil && apiResponse.StatusCode == 404 {
+		if httpNotFound(apiResponse) {
 			d.SetId("")
 			return nil
 		}
