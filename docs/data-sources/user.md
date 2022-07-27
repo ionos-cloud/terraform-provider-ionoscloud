@@ -29,12 +29,16 @@ data "ionoscloud_user" "example" {
 }
 ```
 
+### By Email from Env Variables - Current User
+data "ionoscloud_user" "example" {
+}
+
 ## Argument Reference
 
 * `email` - (Optional) Email of an existing user that you want to search for.
 * `id` - (Optional) ID of the user you want to search for.
 
-Either `email` or `id` must be provided. If none, or both are provided, the datasource will return an error.
+Either `email` or `id` can be provided. If no argument is set, the provider will search for the **email that was provided for the configuration**. If none is found, the provider will return an error.
 
 ## Attributes Reference
 
