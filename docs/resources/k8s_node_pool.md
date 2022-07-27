@@ -35,7 +35,7 @@ resource "ionoscloud_ipblock" "example" {
 
 resource "ionoscloud_k8s_cluster" "example" {
   name                  = "k8sClusterExample"
-  k8s_version           = "1.20.10"
+  k8s_version           = "1.23.9"
   maintenance_window {
     day_of_the_week     = "Sunday"
     time                = "09:00:00Z"
