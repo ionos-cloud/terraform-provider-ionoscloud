@@ -1,3 +1,8 @@
+## 6.3.1
+
+### Feature
+- When no argument is provided for user data source, try to get the email from the client configuration
+
 ## 6.3.0
 
 ### Feature
