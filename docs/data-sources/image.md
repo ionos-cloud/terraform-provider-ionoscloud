@@ -15,6 +15,8 @@ The **Image data source** can be used to search for and return an existing image
 
 ```hcl
 data "ionoscloud_image" "example" {
+  name                  = "debian-10-genericcloud"
+  partial_match         = true
   type                  = "HDD"
   cloud_init            = "V1"
   location              = "us/las"
@@ -28,9 +30,6 @@ data "ionoscloud_image" "example" {
  * `location` - (Optional) Id of the existing image's location.
  * `type` - (Optional) The image type, HDD or CD-ROM.
  * `cloud_init` - (Optional) Cloud init compatibility ("NONE" or "V1")
- * `version` - (Optional) Version of the image (see details below). Please note that this argument is **DEPRECATED**, and we do not recommend using it since it does not assure correct results.
-
-If both "name" and "version" are provided the plugin will concatenate the two strings in this format [name]-[version].
 
 ## Attributes Reference
 
@@ -53,4 +52,3 @@ If both "name" and "version" are provided the plugin will concatenate the two st
  * `image_aliases` - List of image aliases mapped for this Image
  * `cloud_init` - Cloud init compatibility
  * `type` - This indicates the type of image
- * `location` - Location of that image/snapshot.

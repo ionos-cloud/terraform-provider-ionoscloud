@@ -6,6 +6,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	ionoscloud "github.com/ionos-cloud/sdk-go/v6"
+	"log"
 	"strings"
 )
 
@@ -26,10 +27,6 @@ func dataSourceImage() *schema.Resource {
 				Optional: true,
 			},
 			"location": {
-				Type:     schema.TypeString,
-				Optional: true,
-			},
-			"version": {
 				Type:     schema.TypeString,
 				Optional: true,
 			},
@@ -121,41 +118,44 @@ func dataSourceImageRead(ctx context.Context, d *schema.ResourceData, meta inter
 	nameValue, nameOk := d.GetOk("name")
 	imageTypeValue, imageTypeOk := d.GetOk("type")
 	locationValue, locationOk := d.GetOk("location")
-	versionValue, versionOk := d.GetOk("version")
 	cloudInitValue, cloudInitOk := d.GetOk("cloud_init")
 
 	name := nameValue.(string)
 	imageType := imageTypeValue.(string)
 	location := locationValue.(string)
-	version := versionValue.(string)
 	cloudInit := cloudInitValue.(string)
 
 	var results []ionoscloud.Image
 
 	// if version value is present then concatenate name - version
 	// otherwise search by name or part of the name
-	if versionOk && nameOk && version != "" && name != "" {
-		nameVer := fmt.Sprintf("%s-%s", name, version)
-		if images.Items != nil {
-			for _, img := range *images.Items {
-				if img.Properties != nil && img.Properties.Name != nil && strings.EqualFold(*img.Properties.Name, nameVer) {
-					results = append(results, img)
+	if nameOk && name != "" {
+		partialMatch := d.Get("partial_match").(bool)
+
+		log.Printf("[INFO] Using data source for image by name with partial_match %t and name: %s", partialMatch, name)
+
+		if partialMatch {
+			images, apiResponse, err := client.ImagesApi.ImagesGet(ctx).Depth(1).Filter("name", name).Execute()
+			logApiRequestTime(apiResponse)
+
+			if err != nil {
+				return diag.FromErr(fmt.Errorf("an error occurred while fetching images while searching by partial name: %s, %w", name, err))
+			}
+			if len(*images.Items) == 0 {
+				return diag.FromErr(fmt.Errorf("no image found with the specified criteria: name (partial_match true) %s", name))
+			}
+			results = *images.Items
+		} else {
+			if images.Items != nil {
+				for _, img := range *images.Items {
+					if img.Properties != nil && img.Properties.Name != nil && strings.Contains(strings.ToLower(*img.Properties.Name), strings.ToLower(name)) {
+						results = append(results, img)
+					}
 				}
 			}
-		}
-		if results == nil {
-			return diag.FromErr(fmt.Errorf("no image found with the specified criteria: name %s and version %s (%s)", name, version, nameVer))
-		}
-	} else if nameOk && name != "" {
-		if images.Items != nil {
-			for _, img := range *images.Items {
-				if img.Properties != nil && img.Properties.Name != nil && strings.Contains(strings.ToLower(*img.Properties.Name), strings.ToLower(name)) {
-					results = append(results, img)
-				}
+			if results == nil || len(results) == 0 {
+				return diag.FromErr(fmt.Errorf("no image found with the specified criteria: name %s", name))
 			}
-		}
-		if results == nil {
-			return diag.FromErr(fmt.Errorf("no image found with the specified criteria: name %s", name))
 		}
 	} else {
 		results = *images.Items
@@ -169,6 +169,9 @@ func dataSourceImageRead(ctx context.Context, d *schema.ResourceData, meta inter
 			}
 
 		}
+		if imageTypeResults == nil || len(imageTypeResults) == 0 {
+			return diag.FromErr(fmt.Errorf("no image found with the specified criteria: type %s", imageType))
+		}
 		results = imageTypeResults
 	}
 
@@ -178,6 +181,9 @@ func dataSourceImageRead(ctx context.Context, d *schema.ResourceData, meta inter
 			if img.Properties != nil && img.Properties.Location != nil && strings.EqualFold(*img.Properties.Location, location) {
 				locationResults = append(locationResults, img)
 			}
+		}
+		if locationResults == nil || len(locationResults) == 0 {
+			return diag.FromErr(fmt.Errorf("no image found with the specified criteria: location %s", location))
 		}
 		results = locationResults
 	}
@@ -189,15 +195,18 @@ func dataSourceImageRead(ctx context.Context, d *schema.ResourceData, meta inter
 				cloudInitResults = append(cloudInitResults, img)
 			}
 		}
+		if cloudInitResults == nil || len(cloudInitResults) == 0 {
+			return diag.FromErr(fmt.Errorf("no image found with the specified criteria: cloud_init %s", cloudInit))
+		}
 		results = cloudInitResults
 	}
 
 	var image ionoscloud.Image
 
 	if results == nil || len(results) == 0 {
-		return diag.FromErr(fmt.Errorf("no image found with the specified criteria: name = %s, type = %s, location = %s, version = %s, cloudInit = %s", name, imageType, location, version, cloudInit))
+		return diag.FromErr(fmt.Errorf("no image found with the specified criteria: name = %s, type = %s, location = %s, cloudInit = %s", name, imageType, location, cloudInit))
 	} else if len(results) > 1 {
-		return diag.FromErr(fmt.Errorf("more than one image found with the specified criteria name = %s", name))
+		return diag.FromErr(fmt.Errorf("more than one image found with the specified criteria name = %s, type = %s, location = %s, cloudInit = %s", name, imageType, location, cloudInit))
 	} else {
 		image = results[0]
 	}
