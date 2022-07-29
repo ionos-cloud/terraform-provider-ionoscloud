@@ -1307,19 +1307,22 @@ func setResourceServerData(ctx context.Context, client *ionoscloud.APIClient, d 
 					firewallId = *(*nic.Entities.Firewallrules.Items)[0].Id
 				}
 			}
+			if firewallId != "" {
 
-			firewall, apiResponse, err := client.FirewallRulesApi.DatacentersServersNicsFirewallrulesFindById(ctx, datacenterId, d.Id(), nicId, firewallId).Depth(2).Execute()
-			logApiRequestTime(apiResponse)
-			if err != nil {
-				return fmt.Errorf("error, while searching for firewall rule %w", err)
+				firewall, apiResponse, err := client.FirewallRulesApi.DatacentersServersNicsFirewallrulesFindById(ctx, datacenterId, d.Id(), nicId, firewallId).Depth(2).Execute()
+				logApiRequestTime(apiResponse)
+				if err != nil {
+					return fmt.Errorf("error, while searching for firewall rule %w", err)
+				}
+
+				if firewall.Properties != nil && firewall.Properties.Name != nil {
+					log.Printf("[DEBUG] found firewall rule with name %s", *firewall.Properties.Name)
+				}
+				firewallEntry := SetFirewallProperties(firewall)
+				if len(firewallEntry) != 0 {
+					nicEntry["firewall"] = []map[string]interface{}{firewallEntry}
+				}
 			}
-
-			if firewall.Properties != nil && firewall.Properties.Name != nil {
-				log.Printf("[DEBUG] found firewall rule with name %s", *firewall.Properties.Name)
-			}
-			firewallEntry := SetFirewallProperties(firewall)
-
-			nicEntry["firewall"] = []map[string]interface{}{firewallEntry}
 
 		}
 		if len(nicEntry) != 0 {
