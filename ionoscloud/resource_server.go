@@ -992,9 +992,9 @@ func SetVolumeProperties(volume ionoscloud.Volume) map[string]interface{} {
 	return volumeMap
 }
 
-//func boolAddr(b bool) *bool {
-//	return &b
-//}
+func boolAddr(b bool) *bool { // todo remove this function
+	return &b
+}
 
 func resourceServerUpdate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	client := meta.(SdkBundle).CloudApiClient
