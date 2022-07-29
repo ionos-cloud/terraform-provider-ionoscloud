@@ -69,6 +69,7 @@ func Provider() *schema.Provider {
 			"ionoscloud_loadbalancer":   resourceLoadbalancer(),
 			NicResource:                 resourceNic(),
 			ServerResource:              resourceServer(),
+			ServerCubeResource:          resourceCubeServer(),
 			VolumeResource:              resourceVolume(),
 			GroupResource:               resourceGroup(),
 			ShareResource:               resourceShare(),
