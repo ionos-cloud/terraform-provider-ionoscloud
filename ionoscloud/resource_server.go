@@ -573,8 +573,10 @@ func resourceServerCreate(ctx context.Context, d *schema.ResourceData, meta inte
 			nic.Properties.Name = &vStr
 		}
 
-		nic.Properties.Dhcp = boolAddr(d.Get("nic.0.dhcp").(bool))
-		nic.Properties.FirewallActive = boolAddr(d.Get("nic.0.firewall_active").(bool))
+		dhcp := d.Get("nic.0.dhcp").(bool)
+		fwRule := d.Get("nic.0.firewall_active").(bool)
+		nic.Properties.Dhcp = &dhcp
+		nic.Properties.FirewallActive = &fwRule
 
 		if v, ok := d.GetOk("nic.0.firewall_type"); ok {
 			v := v.(string)
@@ -992,10 +994,6 @@ func SetVolumeProperties(volume ionoscloud.Volume) map[string]interface{} {
 	return volumeMap
 }
 
-func boolAddr(b bool) *bool { // todo remove this function
-	return &b
-}
-
 func resourceServerUpdate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	client := meta.(SdkBundle).CloudApiClient
 
@@ -1157,9 +1155,10 @@ func resourceServerUpdate(ctx context.Context, d *schema.ResourceData, meta inte
 			}
 		}
 
-		properties.Dhcp = boolAddr(d.Get("nic.0.dhcp").(bool))
-
-		properties.FirewallActive = boolAddr(d.Get("nic.0.firewall_active").(bool))
+		dhcp := d.Get("nic.0.dhcp").(bool)
+		fwRule := d.Get("nic.0.firewall_active").(bool)
+		properties.Dhcp = &dhcp
+		properties.FirewallActive = &fwRule
 
 		if v, ok := d.GetOk("nic.0.firewall_type"); ok {
 			vStr := v.(string)

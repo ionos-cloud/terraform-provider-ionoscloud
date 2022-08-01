@@ -24,7 +24,7 @@ func resourceCubeServer() *schema.Resource {
 		CustomizeDiff: checkServerImmutableFields,
 
 		Schema: map[string]*schema.Schema{
-			// Cybe Server parameters
+			// Cube Server parameters
 			"template_uuid": {
 				Type:     schema.TypeString,
 				Required: true,
@@ -339,12 +339,6 @@ func resourceCubeServer() *schema.Resource {
 func resourceCubeServerCreate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	client := meta.(SdkBundle).CloudApiClient
 
-	//server, volume, err := initializeCreateRequests(d)
-	//
-	//if err != nil {
-	//	diags := diag.FromErr(err)
-	//	return diags
-	//}
 	server := ionoscloud.Server{
 		Properties: &ionoscloud.ServerProperties{},
 	}
