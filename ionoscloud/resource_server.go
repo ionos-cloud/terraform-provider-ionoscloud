@@ -1237,6 +1237,13 @@ func setResourceServerData(ctx context.Context, client *ionoscloud.APIClient, d 
 				return fmt.Errorf("error setting cpu_family %w", err)
 			}
 		}
+
+		if server.Properties.Type != nil {
+			if err := d.Set("type", *server.Properties.Type); err != nil {
+				return fmt.Errorf("error setting type %w", err)
+			}
+		}
+
 		if server.Properties.BootCdrom != nil && server.Properties.BootCdrom.Id != nil {
 			if err := d.Set("boot_cdrom", *server.Properties.BootCdrom.Id); err != nil {
 				return fmt.Errorf("error setting boot_cdrom %w", err)
