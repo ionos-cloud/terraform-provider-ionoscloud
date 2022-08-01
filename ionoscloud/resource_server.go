@@ -30,6 +30,10 @@ func resourceServer() *schema.Resource {
 
 		Schema: map[string]*schema.Schema{
 			// Server parameters
+			"template_uuid": { // this should be removed when the deprecated version will be removed
+				Type:     schema.TypeString,
+				Optional: true,
+			},
 			"name": {
 				Type:         schema.TypeString,
 				Required:     true,
@@ -37,12 +41,12 @@ func resourceServer() *schema.Resource {
 			},
 			"cores": {
 				Type:     schema.TypeInt,
-				Required: true,
+				Optional: true, // this should be required when the deprecated version will be removed
 				Computed: true,
 			},
 			"ram": {
 				Type:     schema.TypeInt,
-				Required: true,
+				Optional: true, // this should be required when the deprecated version will be removed
 				Computed: true,
 			},
 			"availability_zone": {
@@ -120,7 +124,7 @@ func resourceServer() *schema.Resource {
 					Schema: map[string]*schema.Schema{
 						"size": {
 							Type:     schema.TypeInt,
-							Required: true,
+							Optional: true, // this should be removed when the deprecated version will be removed
 							Computed: true,
 						},
 						"disk_type": {
@@ -388,11 +392,12 @@ func checkServerImmutableFields(_ context.Context, diff *schema.ResourceDiff, _ 
 func resourceServerCreate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	client := meta.(SdkBundle).CloudApiClient
 
-	//server, volume, err := initializeCreateRequests(d)
-	server := ionoscloud.Server{
-		Properties: &ionoscloud.ServerProperties{},
+	server, volume, err := initializeCreateRequests(d)
+
+	if err != nil {
+		diags := diag.FromErr(err)
+		return diags
 	}
-	volume := ionoscloud.VolumeProperties{}
 
 	var sshKeyPath []interface{}
 	var publicKeys []string
@@ -405,12 +410,6 @@ func resourceServerCreate(ctx context.Context, d *schema.ResourceData, meta inte
 
 	serverName := d.Get("name").(string)
 	server.Properties.Name = &serverName
-
-	serverCores := d.Get("cores").(int32)
-	server.Properties.Cores = &serverCores
-
-	serverRam := d.Get("ram").(int32)
-	server.Properties.Ram = &serverRam
 
 	if v, ok := d.GetOk("availability_zone"); ok {
 		vStr := v.(string)
@@ -454,11 +453,6 @@ func resourceServerCreate(ctx context.Context, d *schema.ResourceData, meta inte
 	if v, ok := d.GetOk("volume.0.name"); ok {
 		vStr := v.(string)
 		volume.Name = &vStr
-	}
-
-	if v, ok := d.GetOk("volume.0.size"); ok {
-		vStr := v.(float32)
-		volume.Size = &vStr
 	}
 
 	if v, ok := d.GetOk("volume.0.bus"); ok {
@@ -774,6 +768,13 @@ func resourceServerRead(ctx context.Context, d *schema.ResourceData, meta interf
 		return diags
 	}
 	if server.Properties != nil {
+		if server.Properties.TemplateUuid != nil {
+			if err := d.Set("template_uuid", *server.Properties.TemplateUuid); err != nil {
+				diags := diag.FromErr(err)
+				return diags
+			}
+		}
+
 		if server.Properties.Name != nil {
 			if err := d.Set("name", *server.Properties.Name); err != nil {
 				diags := diag.FromErr(err)
@@ -995,6 +996,11 @@ func resourceServerUpdate(ctx context.Context, d *schema.ResourceData, meta inte
 	dcId := d.Get("datacenter_id").(string)
 	request := ionoscloud.ServerProperties{}
 
+	if d.HasChange("template_uuid") {
+		_, n := d.GetChange("template_uuid")
+		nStr := n.(string)
+		request.TemplateUuid = &nStr
+	}
 	if d.HasChange("name") {
 		_, n := d.GetChange("name")
 		nStr := n.(string)
@@ -1243,7 +1249,31 @@ func resourceServerDelete(ctx context.Context, d *schema.ResourceData, meta inte
 	client := meta.(SdkBundle).CloudApiClient
 	dcId := d.Get("datacenter_id").(string)
 
-	apiResponse, err := client.ServersApi.DatacentersServersDelete(ctx, dcId, d.Id()).Execute()
+	server, apiResponse, err := client.ServersApi.DatacentersServersFindById(ctx, dcId, d.Id()).Execute()
+	logApiRequestTime(apiResponse)
+
+	if err != nil {
+		diags := diag.FromErr(fmt.Errorf("error occured while fetching a server ID %s %s", d.Id(), err))
+		return diags
+	}
+
+	if server.Properties.BootVolume != nil && strings.ToLower(*server.Properties.Type) != "cube" {
+		apiResponse, err := client.VolumesApi.DatacentersVolumesDelete(ctx, dcId, *server.Properties.BootVolume.Id).Execute()
+		logApiRequestTime(apiResponse)
+
+		if err != nil {
+			diags := diag.FromErr(fmt.Errorf("error occured while delete volume %s of server ID %s %w", *server.Properties.BootVolume.Id, d.Id(), err))
+			return diags
+		}
+		// Wait, catching any errors
+		_, errState := getStateChangeConf(meta, d, apiResponse.Header.Get("Location"), schema.TimeoutDelete).WaitForStateContext(ctx)
+		if errState != nil {
+			diags := diag.FromErr(fmt.Errorf("error getting state change for volumes delete %w", errState))
+			return diags
+		}
+	}
+
+	apiResponse, err = client.ServersApi.DatacentersServersDelete(ctx, dcId, d.Id()).Execute()
 	logApiRequestTime(apiResponse)
 	if err != nil {
 		diags := diag.FromErr(fmt.Errorf("an error occured while deleting a server ID %s %w", d.Id(), err))
@@ -1438,4 +1468,67 @@ func readPublicKey(path string) (key string, err error) {
 		return "", err
 	}
 	return string(ssh.MarshalAuthorizedKey(pubKey)[:]), nil
+}
+
+// Initializes server and volume with the required attributes depending on the server type (CUBE or ENTERPRISE)
+func initializeCreateRequests(d *schema.ResourceData) (ionoscloud.Server, ionoscloud.VolumeProperties, error) {
+	server := ionoscloud.Server{
+		Properties: &ionoscloud.ServerProperties{},
+	}
+	volume := ionoscloud.VolumeProperties{}
+
+	serverType := d.Get("type").(string)
+
+	if serverType != "" {
+		server.Properties.Type = &serverType
+	}
+
+	switch strings.ToLower(serverType) {
+	case "cube":
+		if v, ok := d.GetOk("template_uuid"); ok {
+			vStr := v.(string)
+			server.Properties.TemplateUuid = &vStr
+		} else {
+			return server, volume, fmt.Errorf("template_uuid argument is required for %s type of servers\n", serverType)
+		}
+
+		if _, ok := d.GetOk("cores"); ok {
+			return server, volume, fmt.Errorf("cores argument can not be set for %s type of servers\n", serverType)
+		}
+
+		if _, ok := d.GetOk("ram"); ok {
+			return server, volume, fmt.Errorf("ram argument can not be set for %s type of servers\n", serverType)
+		}
+
+		if _, ok := d.GetOk("volume.0.size"); ok {
+			return server, volume, fmt.Errorf("volume.0.size argument can not be set for %s type of servers\n", serverType)
+		}
+	default:
+		if _, ok := d.GetOk("template_uuid"); ok {
+			return server, volume, fmt.Errorf("template_uuid argument can not be set only for %s type of servers\n", serverType)
+		}
+
+		if v, ok := d.GetOk("cores"); ok {
+			vInt := int32(v.(int))
+			server.Properties.Cores = &vInt
+		} else {
+			return server, volume, fmt.Errorf("cores argument is required for %s type of servers\n", serverType)
+		}
+
+		if v, ok := d.GetOk("ram"); ok {
+			vInt := int32(v.(int))
+			server.Properties.Ram = &vInt
+		} else {
+			return server, volume, fmt.Errorf("ram argument is required for %s type of servers\n", serverType)
+		}
+
+		if v, ok := d.GetOk("volume.0.size"); ok {
+			vInt := float32(v.(int))
+			volume.Size = &vInt
+		} else {
+			return server, volume, fmt.Errorf("volume.0.size argument is required for %s type of servers\n", serverType)
+		}
+	}
+
+	return server, volume, nil
 }
