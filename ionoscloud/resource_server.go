@@ -30,10 +30,6 @@ func resourceServer() *schema.Resource {
 
 		Schema: map[string]*schema.Schema{
 			// Server parameters
-			"template_uuid": {
-				Type:     schema.TypeString,
-				Required: true,
-			},
 			"name": {
 				Type:         schema.TypeString,
 				Required:     true,
@@ -398,11 +394,6 @@ func resourceServerCreate(ctx context.Context, d *schema.ResourceData, meta inte
 	}
 	volume := ionoscloud.VolumeProperties{}
 
-	//if err != nil {
-	//	diags := diag.FromErr(err)
-	//	return diags
-	//}
-
 	var sshKeyPath []interface{}
 	var publicKeys []string
 	var image, imageAlias, imageInput string
@@ -414,6 +405,12 @@ func resourceServerCreate(ctx context.Context, d *schema.ResourceData, meta inte
 
 	serverName := d.Get("name").(string)
 	server.Properties.Name = &serverName
+
+	serverCores := d.Get("cores").(int32)
+	server.Properties.Cores = &serverCores
+
+	serverRam := d.Get("ram").(int32)
+	server.Properties.Ram = &serverRam
 
 	if v, ok := d.GetOk("availability_zone"); ok {
 		vStr := v.(string)
@@ -457,6 +454,11 @@ func resourceServerCreate(ctx context.Context, d *schema.ResourceData, meta inte
 	if v, ok := d.GetOk("volume.0.name"); ok {
 		vStr := v.(string)
 		volume.Name = &vStr
+	}
+
+	if v, ok := d.GetOk("volume.0.size"); ok {
+		vStr := v.(float32)
+		volume.Size = &vStr
 	}
 
 	if v, ok := d.GetOk("volume.0.bus"); ok {
@@ -772,13 +774,6 @@ func resourceServerRead(ctx context.Context, d *schema.ResourceData, meta interf
 		return diags
 	}
 	if server.Properties != nil {
-		if server.Properties.TemplateUuid != nil {
-			if err := d.Set("template_uuid", *server.Properties.TemplateUuid); err != nil {
-				diags := diag.FromErr(err)
-				return diags
-			}
-		}
-
 		if server.Properties.Name != nil {
 			if err := d.Set("name", *server.Properties.Name); err != nil {
 				diags := diag.FromErr(err)
@@ -1000,11 +995,6 @@ func resourceServerUpdate(ctx context.Context, d *schema.ResourceData, meta inte
 	dcId := d.Get("datacenter_id").(string)
 	request := ionoscloud.ServerProperties{}
 
-	if d.HasChange("template_uuid") {
-		_, n := d.GetChange("template_uuid")
-		nStr := n.(string)
-		request.TemplateUuid = &nStr
-	}
 	if d.HasChange("name") {
 		_, n := d.GetChange("name")
 		nStr := n.(string)

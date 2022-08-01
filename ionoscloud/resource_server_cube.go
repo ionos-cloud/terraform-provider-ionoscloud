@@ -356,6 +356,9 @@ func resourceCubeServerCreate(ctx context.Context, d *schema.ResourceData, meta 
 	serverName := d.Get("name").(string)
 	server.Properties.Name = &serverName
 
+	templateUuid := d.Get("template_uuid").(string)
+	server.Properties.TemplateUuid = &templateUuid
+
 	if v, ok := d.GetOk("availability_zone"); ok {
 		vStr := v.(string)
 		server.Properties.AvailabilityZone = &vStr
