@@ -1045,7 +1045,7 @@ func resourceServerImport(ctx context.Context, d *schema.ResourceData, meta inte
 		return nil, err
 	}
 
-	if err := setResourceServerData(ctx, client, d, &server, false); err != nil {
+	if err := setResourceServerData(ctx, client, d, &server, true); err != nil {
 		return nil, err
 	}
 	if len(parts) > 3 {
@@ -1281,14 +1281,17 @@ func setResourceServerData(ctx context.Context, client *ionoscloud.APIClient, d 
 
 	_, primaryNicOk := d.GetOk("primary_nic")
 	_, primaryFirewallOk := d.GetOk("firewallrule_id")
-
 	// take nic and firewall from schema if set is used in resource read, else take it from entities
 	if (readFromSchema && primaryNicOk) || (!readFromSchema && server.Entities.Nics != nil && server.Entities.Nics.Items != nil && len(*server.Entities.Nics.Items) > 0 && (*server.Entities.Nics.Items)[0].Id != nil) {
 		var nicId string
-		if readFromSchema {
+		if primaryNicOk {
 			nicId = d.Get("primary_nic").(string)
-		} else {
-			nicId = *(*server.Entities.Nics.Items)[0].Id
+		} else { // this might be a terraformer import, so primary_nic might not be set
+			for _, nic := range *server.Entities.Nics.Items {
+				if nic.Properties != nil && nic.Properties.Lan != nil && *nic.Properties.Lan == 1 { // get the first lan on the server
+					nicId = *nic.Id
+				}
+			}
 		}
 
 		nic, apiResponse, err := client.NetworkInterfacesApi.DatacentersServersNicsFindById(ctx, datacenterId, d.Id(), nicId).Depth(1).Execute()
