@@ -619,7 +619,7 @@ func resourceServerRead(ctx context.Context, d *schema.ResourceData, meta interf
 		diags := diag.FromErr(fmt.Errorf("error occured while fetching a server ID %s %s", d.Id(), err))
 		return diags
 	}
-	if err := setResourceServerData(ctx, client, d, &server, false); err != nil {
+	if err := setResourceServerData(ctx, client, d, &server); err != nil {
 		return diag.FromErr(err)
 	}
 	return nil
@@ -1045,7 +1045,7 @@ func resourceServerImport(ctx context.Context, d *schema.ResourceData, meta inte
 		return nil, err
 	}
 
-	if err := setResourceServerData(ctx, client, d, &server, true); err != nil {
+	if err := setResourceServerData(ctx, client, d, &server); err != nil {
 		return nil, err
 	}
 	if len(parts) > 3 {
@@ -1200,8 +1200,7 @@ func getServerData(d *schema.ResourceData) (*ionoscloud.Server, error) {
 	return &server, nil
 }
 
-func setResourceServerData(ctx context.Context, client *ionoscloud.APIClient, d *schema.ResourceData, server *ionoscloud.Server, readFromSchema bool) error {
-	log.Printf("[DEBUG] setResourceServerData readFromSchema %t", readFromSchema)
+func setResourceServerData(ctx context.Context, client *ionoscloud.APIClient, d *schema.ResourceData, server *ionoscloud.Server) error {
 	if server.Id != nil {
 		d.SetId(*server.Id)
 	}
@@ -1289,60 +1288,55 @@ func setResourceServerData(ctx context.Context, client *ionoscloud.APIClient, d 
 	_, primaryNicOk := d.GetOk("primary_nic")
 	_, primaryFirewallOk := d.GetOk("firewallrule_id")
 	// take nic and firewall from schema if set is used in resource read, else take it from entities
-	if (readFromSchema && primaryNicOk) || (!readFromSchema && server.Entities.Nics != nil && server.Entities.Nics.Items != nil && len(*server.Entities.Nics.Items) > 0 && (*server.Entities.Nics.Items)[0].Id != nil) {
-		var nicId string
-		if primaryNicOk {
-			nicId = d.Get("primary_nic").(string)
-		} else { // this might be a terraformer import, so primary_nic might not be set
-			for _, nic := range *server.Entities.Nics.Items {
-				if nic.Properties != nil && nic.Properties.Lan != nil && *nic.Properties.Lan == 1 { // get the first lan on the server
-					nicId = *nic.Id
-				}
+	var nicId string
+	if primaryNicOk {
+		nicId = d.Get("primary_nic").(string)
+	} else if server.Entities.Nics != nil && server.Entities.Nics.Items != nil && len(*server.Entities.Nics.Items) > 0 && (*server.Entities.Nics.Items)[0].Id != nil { // this might be a terraformer import, so primary_nic might not be set
+		for _, nic := range *server.Entities.Nics.Items {
+			if nic.Properties != nil && nic.Properties.Lan != nil && *nic.Properties.Lan == 1 { // get the first lan on the server
+				nicId = *nic.Id
 			}
 		}
+	}
 
-		nic, apiResponse, err := client.NetworkInterfacesApi.DatacentersServersNicsFindById(ctx, datacenterId, d.Id(), nicId).Depth(1).Execute()
+	nic, apiResponse, err := client.NetworkInterfacesApi.DatacentersServersNicsFindById(ctx, datacenterId, d.Id(), nicId).Depth(1).Execute()
+	logApiRequestTime(apiResponse)
+	if err != nil {
+		return err
+	}
+	nicEntry := SetNetworkProperties(nic)
+
+	var firewallId string
+	if primaryFirewallOk {
+		firewallId = d.Get("firewallrule_id").(string)
+	} else {
+		if nic.HasEntities() && nic.Entities.HasFirewallrules() && nic.Entities.Firewallrules.HasItems() && len(*nic.Entities.Firewallrules.Items) > 0 {
+			firewallId = *(*nic.Entities.Firewallrules.Items)[0].Id
+		}
+	}
+	if firewallId != "" {
+
+		firewall, apiResponse, err := client.FirewallRulesApi.DatacentersServersNicsFirewallrulesFindById(ctx, datacenterId, d.Id(), nicId, firewallId).Depth(2).Execute()
 		logApiRequestTime(apiResponse)
 		if err != nil {
-			return err
-		}
-		nicEntry := SetNetworkProperties(nic)
-
-		if (readFromSchema && primaryFirewallOk) || !readFromSchema {
-			var firewallId string
-			if readFromSchema {
-				firewallId = d.Get("firewallrule_id").(string)
-			} else {
-				if nic.HasEntities() && nic.Entities.HasFirewallrules() && nic.Entities.Firewallrules.HasItems() && len(*nic.Entities.Firewallrules.Items) > 0 {
-					firewallId = *(*nic.Entities.Firewallrules.Items)[0].Id
-				}
-			}
-			if firewallId != "" {
-
-				firewall, apiResponse, err := client.FirewallRulesApi.DatacentersServersNicsFirewallrulesFindById(ctx, datacenterId, d.Id(), nicId, firewallId).Depth(2).Execute()
-				logApiRequestTime(apiResponse)
-				if err != nil {
-					return fmt.Errorf("error, while searching for firewall rule %w", err)
-				}
-
-				if firewall.Properties != nil && firewall.Properties.Name != nil {
-					log.Printf("[DEBUG] found firewall rule with name %s", *firewall.Properties.Name)
-				}
-				firewallEntry := SetFirewallProperties(firewall)
-				if len(firewallEntry) != 0 {
-					nicEntry["firewall"] = []map[string]interface{}{firewallEntry}
-				}
-			}
-
-		}
-		if len(nicEntry) != 0 {
-			nics := []map[string]interface{}{nicEntry}
-
-			if err := d.Set("nic", nics); err != nil {
-				return fmt.Errorf("error settings nics %w", err)
-			}
+			return fmt.Errorf("error, while searching for firewall rule %w", err)
 		}
 
+		if firewall.Properties != nil && firewall.Properties.Name != nil {
+			log.Printf("[DEBUG] found firewall rule with name %s", *firewall.Properties.Name)
+		}
+		firewallEntry := SetFirewallProperties(firewall)
+		if len(firewallEntry) != 0 {
+			nicEntry["firewall"] = []map[string]interface{}{firewallEntry}
+		}
+	}
+
+	if len(nicEntry) != 0 {
+		nics := []map[string]interface{}{nicEntry}
+
+		if err := d.Set("nic", nics); err != nil {
+			return fmt.Errorf("error settings nics %w", err)
+		}
 	}
 	//if token != nil {
 	//	if err := d.Set("token", *token.Token); err != nil {
