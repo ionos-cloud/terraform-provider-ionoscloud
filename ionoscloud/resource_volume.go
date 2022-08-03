@@ -736,8 +736,8 @@ func getVolumeData(d *schema.ResourceData, path string) (*ionoscloud.VolumePrope
 }
 
 // getImage is used for the entire logic for finding the image/snapshot provided by the user
-func getImage(ctx context.Context, client *ionoscloud.APIClient, d *schema.ResourceData, volume ionoscloud.VolumeProperties) (string, string, error) {
-	var image, imageName, imageAlias string
+func getImage(ctx context.Context, client *ionoscloud.APIClient, d *schema.ResourceData, volume ionoscloud.VolumeProperties) (image, imageAlias string, err error) {
+	var imageName string
 	dcId := d.Get("datacenter_id").(string)
 	isSnapshot := false
 
@@ -808,7 +808,7 @@ func getImage(ctx context.Context, client *ionoscloud.APIClient, d *schema.Resou
 			if isSnapshot == false && img.Properties.Public != nil && *img.Properties.Public == true {
 
 				if volume.ImagePassword == nil && (volume.SshKeys == nil || len(*volume.SshKeys) == 0) {
-					return image, imageAlias, fmt.Errorf("either 'image_password' or 'ssh_key_path' must be provided")
+					return image, imageAlias, fmt.Errorf("public image, either 'image_password' or 'ssh_key_path' must be provided")
 				}
 
 				dc, apiResponse, err := client.DataCentersApi.DatacentersFindById(ctx, dcId).Execute()
@@ -850,7 +850,7 @@ func getImage(ctx context.Context, client *ionoscloud.APIClient, d *schema.Resou
 				} else {
 					if isSnapshot == false && img.Properties.Public != nil && *img.Properties.Public == true {
 						if volume.ImagePassword == nil && (volume.SshKeys == nil || len(*volume.SshKeys) == 0) {
-							return image, imageAlias, fmt.Errorf("either 'image_password' or 'ssh_key_path' must be provided")
+							return image, imageAlias, fmt.Errorf("either 'image_password' or 'ssh_key_path' must be provided for imageName %s ", imageName)
 						}
 						image = imageName
 					} else {
@@ -966,6 +966,7 @@ func getImageAlias(ctx context.Context, client *ionoscloud.APIClient, imageAlias
 	return ""
 }
 
+//todo : replace this with getImage
 func checkImage(ctx context.Context, client *ionoscloud.APIClient, imageInput, imagePassword, licenceType, dcId string, sshKeyPath []interface{}) (image, imageAlias string, isSnapshot bool, diags diag.Diagnostics) {
 	isSnapshot = false
 
@@ -1002,7 +1003,7 @@ func checkImage(ctx context.Context, client *ionoscloud.APIClient, imageInput, i
 
 			if imagePassword == "" && len(sshKeyPath) == 0 && isSnapshot == false &&
 				(img != nil && img.Properties != nil && img.Properties.Public != nil && *img.Properties.Public || imageAlias != "") {
-				diags := diag.FromErr(fmt.Errorf("either 'image_password' or 'ssh_key_path' must be provided"))
+				diags := diag.FromErr(fmt.Errorf("checkImage either 'image_password' or 'ssh_key_path' must be provided"))
 				return image, imageAlias, isSnapshot, diags
 			}
 
