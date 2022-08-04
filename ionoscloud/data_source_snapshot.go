@@ -20,16 +20,19 @@ func dataSourceSnapshot() *schema.Resource {
 			"name": {
 				Type:        schema.TypeString,
 				Optional:    true,
+				Computed:    true,
 				Description: "A name of that resource",
 			},
 			"location": {
 				Type:        schema.TypeString,
 				Optional:    true,
+				Computed:    true,
 				Description: "Location of that image/snapshot",
 			},
 			"size": {
 				Type:        schema.TypeInt,
 				Optional:    true,
+				Computed:    true,
 				Description: "The size of the image in GB",
 			},
 			"description": {
