@@ -185,82 +185,23 @@ func resourceVolumeCreate(ctx context.Context, d *schema.ResourceData, meta inte
 
 	client := meta.(SdkBundle).CloudApiClient
 
-	volume := ionoscloud.Volume{
-		Properties: &ionoscloud.VolumeProperties{},
-	}
-
-	var sshKeyPath []interface{}
-	var publicKeys []string
 	var image, imageAlias string
-	var isSnapshot bool
-	var diags diag.Diagnostics
 
 	dcId := d.Get("datacenter_id").(string)
 	serverId := d.Get("server_id").(string)
-	imagePassword := d.Get("image_password").(string)
-	sshKeyPath = d.Get("ssh_key_path").([]interface{})
-	imageInput := d.Get("image_name").(string)
-	licenceType := d.Get("licence_type").(string)
 
-	if len(sshKeyPath) != 0 {
-		for _, path := range sshKeyPath {
-			log.Printf("[DEBUG] Reading file %s", path)
-			publicKey, err := readPublicKey(path.(string))
-			if err != nil {
-				diags := diag.FromErr(fmt.Errorf("error fetching sshkey from file (%s) (%s)", path, err))
-				return diags
-			}
-			publicKeys = append(publicKeys, publicKey)
-		}
-	}
-	image, imageAlias, err := getImage(ctx, client, d, *volume.Properties)
-	if imageInput != "" {
-		image, imageAlias, isSnapshot, diags = checkImage(ctx, client, imageInput, imagePassword, licenceType, dcId, sshKeyPath)
-		if diags != nil {
-			return diags
-		}
+	// create volume object with data to be used for image
+	volumeProperties, err := getVolumeData(d, "")
+	if err != nil {
+		return diag.FromErr(err)
 	}
 
-	if isSnapshot == true && (imagePassword != "" || len(publicKeys) > 0) {
-		diags := diag.FromErr(fmt.Errorf("you can't pass 'image_password' and/or 'ssh keys' when creating a volume from a snapshot"))
-		return diags
+	volume := ionoscloud.Volume{
+		Properties: volumeProperties,
 	}
-
-	if v, ok := d.GetOk("name"); ok {
-		name := v.(string)
-		volume.Properties.Name = &name
-	}
-
-	if v, ok := d.GetOk("size"); ok {
-		size := float32(v.(int))
-		volume.Properties.Size = &size
-	}
-
-	if v, ok := d.GetOk("disk_type"); ok {
-		diskType := v.(string)
-		volume.Properties.Type = &diskType
-	}
-
-	if v, ok := d.GetOk("bus"); ok {
-		bus := v.(string)
-		volume.Properties.Bus = &bus
-	}
-
-	if _, ok := d.GetOk("availability_zone"); ok {
-		raw := d.Get("availability_zone").(string)
-		volume.Properties.AvailabilityZone = &raw
-	}
-
-	if imagePassword != "" {
-		volume.Properties.ImagePassword = &imagePassword
-	} else {
-		volume.Properties.ImagePassword = nil
-	}
-
-	if licenceType != "" {
-		volume.Properties.LicenceType = &licenceType
-	} else {
-		volume.Properties.LicenceType = nil
+	image, imageAlias, err = getImage(ctx, client, d, *volume.Properties)
+	if err != nil {
+		return diag.FromErr(err)
 	}
 
 	if image != "" {
@@ -273,13 +214,6 @@ func resourceVolumeCreate(ctx context.Context, d *schema.ResourceData, meta inte
 		volume.Properties.ImageAlias = &imageAlias
 	} else {
 		volume.Properties.ImageAlias = nil
-	}
-
-	if len(publicKeys) != 0 {
-		volume.Properties.SshKeys = &publicKeys
-
-	} else {
-		volume.Properties.SshKeys = nil
 	}
 
 	if userData, ok := d.GetOk("user_data"); ok {
