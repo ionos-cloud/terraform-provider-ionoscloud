@@ -80,8 +80,9 @@ func resourceServer() *schema.Resource {
 				Optional: true,
 			},
 			"primary_nic": {
-				Type:     schema.TypeString,
-				Computed: true,
+				Type:        schema.TypeString,
+				Computed:    true,
+				Description: "Id of the primary network interface",
 			},
 			"primary_ip": {
 				Type:     schema.TypeString,
