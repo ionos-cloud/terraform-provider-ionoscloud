@@ -2,6 +2,7 @@
 
 ### Feature
 - When no argument is provided for user data source, try to get the email from the client configuration
+- Update Ionos Cloud GO SDK v6.1.2. Release notes here [v6.1.2](https://github.com/ionos-cloud/sdk-go/releases/tag/v6.1.2)
 
 ## 6.3.0
 

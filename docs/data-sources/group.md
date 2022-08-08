@@ -51,4 +51,8 @@ The following attributes are returned by the datasource:
 * `create_backup_unit` - The group will be allowed to create backup unit privilege.
 * `create_internet_access` - The group will be allowed to create internet access privilege.
 * `create_k8s_cluster` - The group will be allowed to create kubernetes cluster privilege.
+* `create_flow_log` -  The group will be allowed to create flow log.
+* `access_and_manage_monitoring`  The group will be allowed to access and manage monitoring.
+* `access_and_manage_certificates` - The group will be allowed to access and manage certificates.
+* `manage_dbaas` - Privilege for a group to manage DBaaS related functionality.
 * `users` - List of users in group.
