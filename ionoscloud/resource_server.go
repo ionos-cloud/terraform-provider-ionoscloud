@@ -124,9 +124,10 @@ func resourceServer() *schema.Resource {
 				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{
 						"size": {
-							Type:     schema.TypeInt,
-							Optional: true,
-							Computed: true,
+							Type:        schema.TypeInt,
+							Optional:    true,
+							Computed:    true,
+							Description: "The size of the volume in GB.",
 						},
 						"disk_type": {
 							Type:         schema.TypeString,
@@ -1306,6 +1307,8 @@ func setResourceServerData(ctx context.Context, client *ionoscloud.APIClient, d 
 		return err
 	}
 	nicEntry := SetNetworkProperties(nic)
+
+	nicEntry["id"] = *nic.Id
 
 	var firewallId string
 	if primaryFirewallOk {
