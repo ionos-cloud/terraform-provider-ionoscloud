@@ -8,6 +8,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 	ionoscloud "github.com/ionos-cloud/sdk-go/v6"
+	"log"
 )
 
 func dataSourceUser() *schema.Resource {
@@ -75,16 +76,25 @@ func dataSourceUser() *schema.Resource {
 func dataSourceUserRead(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	client := meta.(SdkBundle).CloudApiClient
 
-	id, idOk := d.GetOk("id")
-	email, emailOk := d.GetOk("email")
+	idValue, idOk := d.GetOk("id")
+	emailValue, emailOk := d.GetOk("email")
+
+	id := idValue.(string)
+	email := emailValue.(string)
 
 	if idOk && emailOk {
 		diags := diag.FromErr(errors.New("id and email cannot be both specified in the same time"))
 		return diags
 	}
+
 	if !idOk && !emailOk {
-		diags := diag.FromErr(errors.New("please provide either the user id or email"))
-		return diags
+		config := client.GetConfig()
+		email = config.Username
+		if email == "" {
+			diags := diag.FromErr(errors.New("please provide either the user id or email"))
+			return diags
+		}
+		log.Printf("[INFO] email got from provider configuration since none was provided")
 	}
 	var user ionoscloud.User
 	var err error
@@ -92,10 +102,10 @@ func dataSourceUserRead(ctx context.Context, d *schema.ResourceData, meta interf
 
 	if idOk {
 		/* search by ID */
-		user, apiResponse, err = client.UserManagementApi.UmUsersFindById(ctx, id.(string)).Execute()
+		user, apiResponse, err = client.UserManagementApi.UmUsersFindById(ctx, id).Execute()
 		logApiRequestTime(apiResponse)
 		if err != nil {
-			diags := diag.FromErr(fmt.Errorf("an error occurred while fetching user with ID %s: %w", id.(string), err))
+			diags := diag.FromErr(fmt.Errorf("an error occurred while fetching user with ID %s: %w", id, err))
 			return diags
 		}
 	} else {
@@ -112,7 +122,7 @@ func dataSourceUserRead(ctx context.Context, d *schema.ResourceData, meta interf
 		var results []ionoscloud.User
 		if users.Items != nil {
 			for _, u := range *users.Items {
-				if u.Properties != nil && u.Properties.Email != nil && *u.Properties.Email == email.(string) {
+				if u.Properties != nil && u.Properties.Email != nil && *u.Properties.Email == email {
 					/* user found */
 					user, apiResponse, err = client.UserManagementApi.UmUsersFindById(ctx, *u.Id).Execute()
 					logApiRequestTime(apiResponse)
@@ -126,7 +136,7 @@ func dataSourceUserRead(ctx context.Context, d *schema.ResourceData, meta interf
 		}
 
 		if results == nil || len(results) == 0 {
-			return diag.FromErr(fmt.Errorf("no user found with the specified criteria: email = %s", email.(string)))
+			return diag.FromErr(fmt.Errorf("no user found with the specified criteria: email = %s", email))
 		} else {
 			user = results[0]
 		}
