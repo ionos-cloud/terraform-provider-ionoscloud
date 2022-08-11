@@ -54,7 +54,7 @@ The following attributes are returned by the datasource:
 * `id` - The UUID of the cluster.
 * `datacenter_id` - The UUID of the virtual data center (VDC) the cluster is provisioned.
 * `name` - The name of your cluster.
-* `data_platform_version` - The version of the DataPlatform.
+* `data_platform_version` - The version of the Data Platform.
 * `maintenance_window` - Starting time of a weekly 4 hour-long window, during which maintenance might occur in hh:mm:ss format
   * `time` - Time at which the maintenance should start. 
   * `day_of_the_week`

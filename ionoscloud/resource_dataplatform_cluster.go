@@ -36,7 +36,7 @@ func resourceDataplatformCluster() *schema.Resource {
 			},
 			"data_platform_version": {
 				Type:         schema.TypeString,
-				Description:  "The version of the DataPlatform.",
+				Description:  "The version of the Data Platform.",
 				ValidateFunc: validation.All(validation.StringLenBetween(0, 32)),
 				Optional:     true,
 				Computed:     true,
