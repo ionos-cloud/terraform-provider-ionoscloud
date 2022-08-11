@@ -97,7 +97,7 @@ func GetDataplatformNodePoolDataCreate(d *schema.ResourceData) *dataplatform.Cre
 		dataplatformNodePool.Properties.AvailabilityZone = &availabilityZone
 	}
 
-	if storageTypeValue, ok := d.GetOk("availability_zone"); ok {
+	if storageTypeValue, ok := d.GetOk("storage_type"); ok {
 		storageType := dataplatform.StorageType(storageTypeValue.(string))
 		dataplatformNodePool.Properties.StorageType = &storageType
 	}
@@ -105,11 +105,6 @@ func GetDataplatformNodePoolDataCreate(d *schema.ResourceData) *dataplatform.Cre
 	if storageSizeValue, ok := d.GetOk("storage_size"); ok {
 		storageSize := int32(storageSizeValue.(int))
 		dataplatformNodePool.Properties.StorageSize = &storageSize
-	}
-
-	if storageTypeValue, ok := d.GetOk("storage_type"); ok {
-		storageType := dataplatform.StorageType(storageTypeValue.(string))
-		dataplatformNodePool.Properties.StorageType = &storageType
 	}
 
 	if _, ok := d.GetOk("maintenance_window"); ok {

@@ -73,10 +73,6 @@ func checkDataplatformClusterImmutableFields(_ context.Context, diff *schema.Res
 		return nil
 	}
 
-	if diff.HasChange("maintenance_window") {
-		return fmt.Errorf("maintenance_window %s", ImmutableError)
-	}
-
 	if diff.HasChange("datacenter_id") {
 		return fmt.Errorf("datacenter_id %s", ImmutableError)
 	}

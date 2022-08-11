@@ -116,6 +116,10 @@ func GetDataplatformClusterDataUpdate(d *schema.ResourceData) (*dataplatform.Pat
 		dataplatformCluster.Properties.DataPlatformVersion = &dataPlatformVersion
 	}
 
+	if _, ok := d.GetOk("maintenance_window"); ok {
+		dataplatformCluster.Properties.MaintenanceWindow = GetDataplatformMaintenanceWindowData(d)
+	}
+
 	return &dataplatformCluster, nil
 }
 
