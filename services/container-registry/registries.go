@@ -346,8 +346,14 @@ func GetScopes(d *schema.ResourceData) *[]cr.Scope {
 				connection := cr.Scope{}
 
 				if actions, ok := scopeContent["actions"]; ok {
-					actions := actions.([]string)
-					connection.Actions = &actions
+					actions := actions.([]interface{})
+					var actionsToAdd []string
+					if actions != nil && len(actions) > 0 {
+						for _, action := range actions {
+							actionsToAdd = append(actionsToAdd, action.(string))
+						}
+					}
+					connection.Actions = &actionsToAdd
 				}
 
 				if name, ok := scopeContent["name"]; ok {
@@ -387,12 +393,13 @@ func SetTokenData(d *schema.ResourceData, token cr.TokenResponse) error {
 		}
 	}
 
-	if token.Properties.ExpiryDate != nil {
-		timeValue := (*token.Properties.ExpiryDate).Time
-		if err := d.Set("expiry_date", timeValue.String()); err != nil {
-			return utils.GenerateSetError(resourceName, "expiry_date", err)
-		}
-	}
+	// ToDo: fix diff between expiry_date post and get
+	//if token.Properties.ExpiryDate != nil {
+	//	timeValue := (*token.Properties.ExpiryDate).Time
+	//	if err := d.Set("expiry_date", timeValue.String()); err != nil {
+	//		return utils.GenerateSetError(resourceName, "expiry_date", err)
+	//	}
+	//}
 
 	if token.Properties.Name != nil {
 		if err := d.Set("name", *token.Properties.Name); err != nil {
@@ -401,9 +408,9 @@ func SetTokenData(d *schema.ResourceData, token cr.TokenResponse) error {
 	}
 
 	if token.Properties.Scopes != nil {
-		schedule := SetScopes(*token.Properties.Scopes)
-		if err := d.Set("garbage_collection_schedule", schedule); err != nil {
-			return utils.GenerateSetError(resourceName, "garbage_collection_schedule", err)
+		scopes := SetScopes(*token.Properties.Scopes)
+		if err := d.Set("scopes", scopes); err != nil {
+			return utils.GenerateSetError(resourceName, "scopes", err)
 		}
 	}
 

@@ -24,10 +24,10 @@ func TestAccContainerRegistryBasic(t *testing.T) {
 				Config: testAccCheckContainerRegistryConfigBasic,
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckContainerRegistryExists(ContainerRegistryResource+"."+ContainerRegistryTestResource, &containerRegistry),
-					resource.TestCheckResourceAttr(ContainerRegistryResource+"."+ContainerRegistryTestResource, "garbage_collection_schedule.0.time", "10:00:00"),
+					resource.TestCheckResourceAttr(ContainerRegistryResource+"."+ContainerRegistryTestResource, "garbage_collection_schedule.0.time", "05:19:00+00:00"),
 					resource.TestCheckResourceAttr(ContainerRegistryResource+"."+ContainerRegistryTestResource, "garbage_collection_schedule.0.days.0", "Monday"),
 					resource.TestCheckResourceAttr(ContainerRegistryResource+"."+ContainerRegistryTestResource, "garbage_collection_schedule.0.days.1", "Tuesday"),
-					resource.TestCheckResourceAttr(ContainerRegistryResource+"."+ContainerRegistryTestResource, "maintenance_window.0.time", "09:00:00"),
+					resource.TestCheckResourceAttr(ContainerRegistryResource+"."+ContainerRegistryTestResource, "maintenance_window.0.time", "01:23:00+00:00"),
 					resource.TestCheckResourceAttr(ContainerRegistryResource+"."+ContainerRegistryTestResource, "maintenance_window.0.days.0", "Sunday"),
 					resource.TestCheckResourceAttr(ContainerRegistryResource+"."+ContainerRegistryTestResource, "location", "de/txl"),
 					resource.TestCheckResourceAttr(ContainerRegistryResource+"."+ContainerRegistryTestResource, "name", ContainerRegistryTestResource),
@@ -36,25 +36,25 @@ func TestAccContainerRegistryBasic(t *testing.T) {
 			{
 				Config: testAccDataSourceContainerRegistryMatchId,
 				Check: resource.ComposeTestCheckFunc(
-					resource.TestCheckResourceAttrPair(DataSource+"."+ContainerRegistryResource+"."+ContainerRegistryTestDataSourceById, "garbage_collection_schedule.0.time", ContainerRegistryResource+"."+ContainerRegistryTestDataSourceByName, "garbage_collection_schedule.0.time"),
-					resource.TestCheckResourceAttrPair(DataSource+"."+ContainerRegistryResource+"."+ContainerRegistryTestDataSourceById, "garbage_collection_schedule.0.days.0", ContainerRegistryResource+"."+ContainerRegistryTestDataSourceByName, "garbage_collection_schedule.0.days.0"),
-					resource.TestCheckResourceAttrPair(DataSource+"."+ContainerRegistryResource+"."+ContainerRegistryTestDataSourceById, "garbage_collection_schedule.0.days.1", ContainerRegistryResource+"."+ContainerRegistryTestDataSourceByName, "garbage_collection_schedule.0.days.1"),
-					resource.TestCheckResourceAttrPair(DataSource+"."+ContainerRegistryResource+"."+ContainerRegistryTestDataSourceById, "maintenance_window.0.time", ContainerRegistryResource+"."+ContainerRegistryTestDataSourceByName, "maintenance_window.0.time"),
-					resource.TestCheckResourceAttrPair(DataSource+"."+ContainerRegistryResource+"."+ContainerRegistryTestDataSourceById, "maintenance_window.0.days.0", ContainerRegistryResource+"."+ContainerRegistryTestDataSourceByName, "maintenance_window.0.days.0"),
-					resource.TestCheckResourceAttrPair(DataSource+"."+ContainerRegistryResource+"."+ContainerRegistryTestDataSourceById, "location", ContainerRegistryResource+"."+ContainerRegistryTestDataSourceByName, "location"),
-					resource.TestCheckResourceAttrPair(DataSource+"."+ContainerRegistryResource+"."+ContainerRegistryTestDataSourceById, "name", ContainerRegistryResource+"."+ContainerRegistryTestDataSourceByName, "name"),
+					resource.TestCheckResourceAttrPair(DataSource+"."+ContainerRegistryResource+"."+ContainerRegistryTestDataSourceById, "garbage_collection_schedule.0.time", ContainerRegistryResource+"."+ContainerRegistryTestResource, "garbage_collection_schedule.0.time"),
+					resource.TestCheckResourceAttrPair(DataSource+"."+ContainerRegistryResource+"."+ContainerRegistryTestDataSourceById, "garbage_collection_schedule.0.days.0", ContainerRegistryResource+"."+ContainerRegistryTestResource, "garbage_collection_schedule.0.days.0"),
+					resource.TestCheckResourceAttrPair(DataSource+"."+ContainerRegistryResource+"."+ContainerRegistryTestDataSourceById, "garbage_collection_schedule.0.days.1", ContainerRegistryResource+"."+ContainerRegistryTestResource, "garbage_collection_schedule.0.days.1"),
+					resource.TestCheckResourceAttrPair(DataSource+"."+ContainerRegistryResource+"."+ContainerRegistryTestDataSourceById, "maintenance_window.0.time", ContainerRegistryResource+"."+ContainerRegistryTestResource, "maintenance_window.0.time"),
+					resource.TestCheckResourceAttrPair(DataSource+"."+ContainerRegistryResource+"."+ContainerRegistryTestDataSourceById, "maintenance_window.0.days.0", ContainerRegistryResource+"."+ContainerRegistryTestResource, "maintenance_window.0.days.0"),
+					resource.TestCheckResourceAttrPair(DataSource+"."+ContainerRegistryResource+"."+ContainerRegistryTestDataSourceById, "location", ContainerRegistryResource+"."+ContainerRegistryTestResource, "location"),
+					resource.TestCheckResourceAttrPair(DataSource+"."+ContainerRegistryResource+"."+ContainerRegistryTestDataSourceById, "name", ContainerRegistryResource+"."+ContainerRegistryTestResource, "name"),
 				),
 			},
 			{
 				Config: testAccDataSourceContainerRegistryMatchName,
 				Check: resource.ComposeTestCheckFunc(
-					resource.TestCheckResourceAttrPair(DataSource+"."+ContainerRegistryResource+"."+ContainerRegistryTestDataSourceByName, "garbage_collection_schedule.0.time", ContainerRegistryResource+"."+ContainerRegistryTestDataSourceByName, "garbage_collection_schedule.0.time"),
-					resource.TestCheckResourceAttrPair(DataSource+"."+ContainerRegistryResource+"."+ContainerRegistryTestDataSourceByName, "garbage_collection_schedule.0.days.0", ContainerRegistryResource+"."+ContainerRegistryTestDataSourceByName, "garbage_collection_schedule.0.days.0"),
-					resource.TestCheckResourceAttrPair(DataSource+"."+ContainerRegistryResource+"."+ContainerRegistryTestDataSourceByName, "garbage_collection_schedule.0.days.1", ContainerRegistryResource+"."+ContainerRegistryTestDataSourceByName, "garbage_collection_schedule.0.days.1"),
-					resource.TestCheckResourceAttrPair(DataSource+"."+ContainerRegistryResource+"."+ContainerRegistryTestDataSourceByName, "maintenance_window.0.time", ContainerRegistryResource+"."+ContainerRegistryTestDataSourceByName, "maintenance_window.0.time"),
-					resource.TestCheckResourceAttrPair(DataSource+"."+ContainerRegistryResource+"."+ContainerRegistryTestDataSourceByName, "maintenance_window.0.days.0", ContainerRegistryResource+"."+ContainerRegistryTestDataSourceByName, "maintenance_window.0.days.0"),
-					resource.TestCheckResourceAttrPair(DataSource+"."+ContainerRegistryResource+"."+ContainerRegistryTestDataSourceByName, "location", ContainerRegistryResource+"."+ContainerRegistryTestDataSourceByName, "location"),
-					resource.TestCheckResourceAttrPair(DataSource+"."+ContainerRegistryResource+"."+ContainerRegistryTestDataSourceByName, "name", ContainerRegistryResource+"."+ContainerRegistryTestDataSourceByName, "name"),
+					resource.TestCheckResourceAttrPair(DataSource+"."+ContainerRegistryResource+"."+ContainerRegistryTestDataSourceByName, "garbage_collection_schedule.0.time", ContainerRegistryResource+"."+ContainerRegistryTestResource, "garbage_collection_schedule.0.time"),
+					resource.TestCheckResourceAttrPair(DataSource+"."+ContainerRegistryResource+"."+ContainerRegistryTestDataSourceByName, "garbage_collection_schedule.0.days.0", ContainerRegistryResource+"."+ContainerRegistryTestResource, "garbage_collection_schedule.0.days.0"),
+					resource.TestCheckResourceAttrPair(DataSource+"."+ContainerRegistryResource+"."+ContainerRegistryTestDataSourceByName, "garbage_collection_schedule.0.days.1", ContainerRegistryResource+"."+ContainerRegistryTestResource, "garbage_collection_schedule.0.days.1"),
+					resource.TestCheckResourceAttrPair(DataSource+"."+ContainerRegistryResource+"."+ContainerRegistryTestDataSourceByName, "maintenance_window.0.time", ContainerRegistryResource+"."+ContainerRegistryTestResource, "maintenance_window.0.time"),
+					resource.TestCheckResourceAttrPair(DataSource+"."+ContainerRegistryResource+"."+ContainerRegistryTestDataSourceByName, "maintenance_window.0.days.0", ContainerRegistryResource+"."+ContainerRegistryTestResource, "maintenance_window.0.days.0"),
+					resource.TestCheckResourceAttrPair(DataSource+"."+ContainerRegistryResource+"."+ContainerRegistryTestDataSourceByName, "location", ContainerRegistryResource+"."+ContainerRegistryTestResource, "location"),
+					resource.TestCheckResourceAttrPair(DataSource+"."+ContainerRegistryResource+"."+ContainerRegistryTestDataSourceByName, "name", ContainerRegistryResource+"."+ContainerRegistryTestResource, "name"),
 				),
 			},
 			{
@@ -63,13 +63,13 @@ func TestAccContainerRegistryBasic(t *testing.T) {
 			}, {
 				Config: testAccDataSourceContainerRegistryPartialMatchName,
 				Check: resource.ComposeTestCheckFunc(
-					resource.TestCheckResourceAttrPair(DataSource+"."+ContainerRegistryResource+"."+ContainerRegistryTestDataSourceByName, "garbage_collection_schedule.0.time", ContainerRegistryResource+"."+ContainerRegistryTestDataSourceByName, "garbage_collection_schedule.0.time"),
-					resource.TestCheckResourceAttrPair(DataSource+"."+ContainerRegistryResource+"."+ContainerRegistryTestDataSourceByName, "garbage_collection_schedule.0.days.0", ContainerRegistryResource+"."+ContainerRegistryTestDataSourceByName, "garbage_collection_schedule.0.days.0"),
-					resource.TestCheckResourceAttrPair(DataSource+"."+ContainerRegistryResource+"."+ContainerRegistryTestDataSourceByName, "garbage_collection_schedule.0.days.1", ContainerRegistryResource+"."+ContainerRegistryTestDataSourceByName, "garbage_collection_schedule.0.days.1"),
-					resource.TestCheckResourceAttrPair(DataSource+"."+ContainerRegistryResource+"."+ContainerRegistryTestDataSourceByName, "maintenance_window.0.time", ContainerRegistryResource+"."+ContainerRegistryTestDataSourceByName, "maintenance_window.0.time"),
-					resource.TestCheckResourceAttrPair(DataSource+"."+ContainerRegistryResource+"."+ContainerRegistryTestDataSourceByName, "maintenance_window.0.days.0", ContainerRegistryResource+"."+ContainerRegistryTestDataSourceByName, "maintenance_window.0.days.0"),
-					resource.TestCheckResourceAttrPair(DataSource+"."+ContainerRegistryResource+"."+ContainerRegistryTestDataSourceByName, "location", ContainerRegistryResource+"."+ContainerRegistryTestDataSourceByName, "location"),
-					resource.TestCheckResourceAttrPair(DataSource+"."+ContainerRegistryResource+"."+ContainerRegistryTestDataSourceByName, "name", ContainerRegistryResource+"."+ContainerRegistryTestDataSourceByName, "name"),
+					resource.TestCheckResourceAttrPair(DataSource+"."+ContainerRegistryResource+"."+ContainerRegistryTestDataSourceByName, "garbage_collection_schedule.0.time", ContainerRegistryResource+"."+ContainerRegistryTestResource, "garbage_collection_schedule.0.time"),
+					resource.TestCheckResourceAttrPair(DataSource+"."+ContainerRegistryResource+"."+ContainerRegistryTestDataSourceByName, "garbage_collection_schedule.0.days.0", ContainerRegistryResource+"."+ContainerRegistryTestResource, "garbage_collection_schedule.0.days.0"),
+					resource.TestCheckResourceAttrPair(DataSource+"."+ContainerRegistryResource+"."+ContainerRegistryTestDataSourceByName, "garbage_collection_schedule.0.days.1", ContainerRegistryResource+"."+ContainerRegistryTestResource, "garbage_collection_schedule.0.days.1"),
+					resource.TestCheckResourceAttrPair(DataSource+"."+ContainerRegistryResource+"."+ContainerRegistryTestDataSourceByName, "maintenance_window.0.time", ContainerRegistryResource+"."+ContainerRegistryTestResource, "maintenance_window.0.time"),
+					resource.TestCheckResourceAttrPair(DataSource+"."+ContainerRegistryResource+"."+ContainerRegistryTestDataSourceByName, "maintenance_window.0.days.0", ContainerRegistryResource+"."+ContainerRegistryTestResource, "maintenance_window.0.days.0"),
+					resource.TestCheckResourceAttrPair(DataSource+"."+ContainerRegistryResource+"."+ContainerRegistryTestDataSourceByName, "location", ContainerRegistryResource+"."+ContainerRegistryTestResource, "location"),
+					resource.TestCheckResourceAttrPair(DataSource+"."+ContainerRegistryResource+"."+ContainerRegistryTestDataSourceByName, "name", ContainerRegistryResource+"."+ContainerRegistryTestResource, "name"),
 				),
 			},
 			{
@@ -80,9 +80,9 @@ func TestAccContainerRegistryBasic(t *testing.T) {
 				Config: testAccCheckContainerRegistryConfigUpdate,
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckContainerRegistryExists(ContainerRegistryResource+"."+ContainerRegistryTestResource, &containerRegistry),
-					resource.TestCheckResourceAttr(ContainerRegistryResource+"."+ContainerRegistryTestResource, "garbage_collection_schedule.0.time", "11:00:00"),
+					resource.TestCheckResourceAttr(ContainerRegistryResource+"."+ContainerRegistryTestResource, "garbage_collection_schedule.0.time", "01:23:00+00:00"),
 					resource.TestCheckResourceAttr(ContainerRegistryResource+"."+ContainerRegistryTestResource, "garbage_collection_schedule.0.days.0", "Monday"),
-					resource.TestCheckResourceAttr(ContainerRegistryResource+"."+ContainerRegistryTestResource, "maintenance_window.0.time", "10:00:00"),
+					resource.TestCheckResourceAttr(ContainerRegistryResource+"."+ContainerRegistryTestResource, "maintenance_window.0.time", "02:13:00+00:00"),
 					resource.TestCheckResourceAttr(ContainerRegistryResource+"."+ContainerRegistryTestResource, "maintenance_window.0.days.0", "Saturday"),
 					resource.TestCheckResourceAttr(ContainerRegistryResource+"."+ContainerRegistryTestResource, "location", "de/txl"),
 					resource.TestCheckResourceAttr(ContainerRegistryResource+"."+ContainerRegistryTestResource, "name", ContainerRegistryTestResource),
@@ -159,12 +159,12 @@ const testAccCheckContainerRegistryConfigBasic = `
 resource ` + ContainerRegistryResource + ` ` + ContainerRegistryTestResource + ` {
    garbage_collection_schedule {
     days			 = ["Monday", "Tuesday"]
-    time             = "10:00:00"
+    time             = "05:19:00+00:00"
   }
   location           = "de/txl"
   maintenance_window {
     days			 = ["Sunday"]
-    time             = "09:00:00"
+    time             = "01:23:00+00:00"
   }
   name		         = "` + ContainerRegistryTestResource + `"
 }
@@ -174,12 +174,12 @@ const testAccCheckContainerRegistryConfigUpdate = `
 resource ` + ContainerRegistryResource + ` ` + ContainerRegistryTestResource + ` {
    garbage_collection_schedule {
     days			 = ["Monday"]
-    time             = "11:00:00"
+    time             = "01:23:00+00:00"
   }
   location           = "de/txl"
   maintenance_window {
     days			 = ["Saturday"]
-    time             = "10:00:00"
+    time             = "02:13:00+00:00"
   }
   name		         = "` + ContainerRegistryTestResource + `"
 }
@@ -199,7 +199,7 @@ data ` + ContainerRegistryResource + ` ` + ContainerRegistryTestDataSourceByName
 
 const testAccDataSourceContainerRegistryWrongNameError = testAccCheckContainerRegistryConfigBasic + `
 data ` + ContainerRegistryResource + ` ` + ContainerRegistryTestDataSourceByName + ` {
-  display_name	= "wrong_name"
+  name	= "wrong_name"
 }
 `
 
@@ -212,7 +212,7 @@ data ` + ContainerRegistryResource + ` ` + ContainerRegistryTestDataSourceByName
 
 const testAccDataSourceContainerRegistryWrongPartialNameError = testAccCheckContainerRegistryConfigBasic + `
 data ` + ContainerRegistryResource + ` ` + ContainerRegistryTestDataSourceByName + ` {
-  display_name	= "wrong_name"
+  name	= "wrong_name"
   partial_match = true
 }
 `

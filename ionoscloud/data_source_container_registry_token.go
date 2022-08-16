@@ -40,11 +40,8 @@ func dataSourceContainerRegistryToken() *schema.Resource {
 							Computed: true,
 						},
 						"password": {
-							Type:     schema.TypeList,
+							Type:     schema.TypeString,
 							Computed: true,
-							Elem: &schema.Schema{
-								Type: schema.TypeString,
-							},
 						},
 					},
 				},
@@ -59,7 +56,7 @@ func dataSourceContainerRegistryToken() *schema.Resource {
 				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{
 						"actions": {
-							Type:     schema.TypeString,
+							Type:     schema.TypeList,
 							Computed: true,
 							Elem: &schema.Schema{
 								Type: schema.TypeString,
@@ -94,7 +91,7 @@ func dataSourceContainerRegistryTokenRead(ctx context.Context, d *schema.Resourc
 
 	registryId := d.Get("registry_id").(string)
 	idValue, idOk := d.GetOk("id")
-	nameValue, nameOk := d.GetOk("display_name")
+	nameValue, nameOk := d.GetOk("name")
 
 	id := idValue.(string)
 	name := nameValue.(string)

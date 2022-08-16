@@ -131,32 +131,6 @@ func resourceContainerRegistryCreate(ctx context.Context, d *schema.ResourceData
 
 	d.SetId(*containerRegistryResponse.Id)
 
-	for {
-		log.Printf("[INFO] Waiting for registry %s to be ready...", d.Id())
-
-		registryReady, rsErr := registryReady(ctx, client, d)
-
-		if rsErr != nil {
-			diags := diag.FromErr(fmt.Errorf("error while checking readiness status of registry %s: %w", d.Id(), rsErr))
-			return diags
-		}
-
-		if registryReady {
-			log.Printf("[INFO] registry ready: %s", d.Id())
-			break
-		}
-
-		select {
-		case <-time.After(SleepInterval):
-			log.Printf("[INFO] trying again ...")
-		case <-ctx.Done():
-			log.Printf("[INFO] create timed out")
-			diags := diag.FromErr(fmt.Errorf("registry creation timed out! WARNING: your registry (%s) will still probably be created after some time but the terraform state wont reflect that; check your Ionos Cloud account for updates", d.Id()))
-			return diags
-		}
-
-	}
-
 	return resourceContainerRegistryRead(ctx, d, meta)
 }
 
@@ -202,32 +176,6 @@ func resourceContainerRegistryUpdate(ctx context.Context, d *schema.ResourceData
 
 	time.Sleep(SleepInterval)
 
-	for {
-		log.Printf("[INFO] Waiting for cluster %s to be ready...", d.Id())
-
-		clusterReady, rsErr := registryReady(ctx, client, d)
-
-		if rsErr != nil {
-			diags := diag.FromErr(fmt.Errorf("error while checking readiness status of registry %s: %w", d.Id(), rsErr))
-			return diags
-		}
-
-		if clusterReady {
-			log.Printf("[INFO] registry ready: %s", d.Id())
-			break
-		}
-
-		select {
-		case <-time.After(SleepInterval):
-			log.Printf("[INFO] trying again ...")
-		case <-ctx.Done():
-			log.Printf("[INFO] create timed out")
-			diags := diag.FromErr(fmt.Errorf("registry update timed out! WARNING: your registry (%s) will still probably be updated after some time but the terraform state wont reflect that; check your Ionos Cloud account for updates", d.Id()))
-			return diags
-		}
-
-	}
-
 	return resourceContainerRegistryRead(ctx, d, meta)
 }
 
@@ -271,9 +219,6 @@ func resourceContainerRegistryDelete(ctx context.Context, d *schema.ResourceData
 		}
 	}
 
-	// wait 15 seconds after the deletion of the cluster, for the lan to be freed
-	time.Sleep(SleepInterval * 3)
-
 	return nil
 }
 
@@ -299,29 +244,6 @@ func resourceContainerRegistryImport(ctx context.Context, d *schema.ResourceData
 	}
 
 	return []*schema.ResourceData{d}, nil
-}
-
-func registryReady(ctx context.Context, client *crService.Client, d *schema.ResourceData) (bool, error) {
-	subjectRegistry, _, err := client.GetRegistry(ctx, d.Id())
-
-	if err != nil {
-		return true, fmt.Errorf("error checking registry status: %s", err)
-	}
-	if *subjectRegistry.Metadata.State == "FAILED" {
-
-		time.Sleep(time.Second * 3)
-
-		subjectRegistry, _, err = client.GetRegistry(ctx, d.Id())
-
-		if err != nil {
-			return true, fmt.Errorf("error checking registry status: %s", err)
-		}
-
-		if *subjectRegistry.Metadata.State == "FAILED" {
-			return false, fmt.Errorf("registry has failed. WARNING: your registry may still recover after some time but the terraform state won't reflect that; check your Ionos Cloud account for updates")
-		}
-	}
-	return *subjectRegistry.Metadata.State == "AVAILABLE", nil
 }
 
 func registryDeleted(ctx context.Context, client *crService.Client, d *schema.ResourceData) (bool, error) {

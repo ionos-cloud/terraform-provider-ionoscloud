@@ -33,12 +33,8 @@ func resourceContainerRegistryToken() *schema.Resource {
 							Required: true,
 						},
 						"password": {
-							Type:     schema.TypeList,
+							Type:     schema.TypeString,
 							Required: true,
-							Elem: &schema.Schema{
-								Type:         schema.TypeString,
-								ValidateFunc: validation.All(validation.IsDayOfTheWeek(true)),
-							},
 						},
 					},
 				},
@@ -122,31 +118,31 @@ func resourceContainerRegistryTokenCreate(ctx context.Context, d *schema.Resourc
 
 	d.SetId(*registryTokenResponse.Id)
 
-	for {
-		log.Printf("[INFO] Waiting for registry token %s to be ready...", d.Id())
-
-		registryTokenReady, rsErr := registryTokenReady(ctx, client, d)
-
-		if rsErr != nil {
-			diags := diag.FromErr(fmt.Errorf("error while checking readiness status of registry token %s: %w", d.Id(), rsErr))
-			return diags
-		}
-
-		if registryTokenReady {
-			log.Printf("[INFO] registry token ready: %s", d.Id())
-			break
-		}
-
-		select {
-		case <-time.After(SleepInterval):
-			log.Printf("[INFO] trying again ...")
-		case <-ctx.Done():
-			log.Printf("[INFO] create timed out")
-			diags := diag.FromErr(fmt.Errorf("registry creation timed out! WARNING: your registry token (%s) will still probably be created after some time but the terraform state wont reflect that; check your Ionos Cloud account for updates", d.Id()))
-			return diags
-		}
-
-	}
+	//for {
+	//	log.Printf("[INFO] Waiting for registry token %s to be ready...", d.Id())
+	//
+	//	registryTokenReady, rsErr := registryTokenReady(ctx, client, d)
+	//
+	//	if rsErr != nil {
+	//		diags := diag.FromErr(fmt.Errorf("error while checking readiness status of registry token %s: %w", d.Id(), rsErr))
+	//		return diags
+	//	}
+	//
+	//	if registryTokenReady {
+	//		log.Printf("[INFO] registry token ready: %s", d.Id())
+	//		break
+	//	}
+	//
+	//	select {
+	//	case <-time.After(SleepInterval):
+	//		log.Printf("[INFO] trying again ...")
+	//	case <-ctx.Done():
+	//		log.Printf("[INFO] create timed out")
+	//		diags := diag.FromErr(fmt.Errorf("registry creation timed out! WARNING: your registry token (%s) will still probably be created after some time but the terraform state wont reflect that; check your Ionos Cloud account for updates", d.Id()))
+	//		return diags
+	//	}
+	//
+	//}
 
 	return resourceContainerRegistryTokenRead(ctx, d, meta)
 }
@@ -199,31 +195,31 @@ func resourceContainerRegistryTokenUpdate(ctx context.Context, d *schema.Resourc
 
 	time.Sleep(SleepInterval)
 
-	for {
-		log.Printf("[INFO] Waiting for cluster %s to be ready...", d.Id())
-
-		clusterReady, rsErr := registryTokenReady(ctx, client, d)
-
-		if rsErr != nil {
-			diags := diag.FromErr(fmt.Errorf("error while checking readiness status of registry token %s: %w", d.Id(), rsErr))
-			return diags
-		}
-
-		if clusterReady {
-			log.Printf("[INFO]registry token ready: %s", d.Id())
-			break
-		}
-
-		select {
-		case <-time.After(SleepInterval):
-			log.Printf("[INFO] trying again ...")
-		case <-ctx.Done():
-			log.Printf("[INFO] create timed out")
-			diags := diag.FromErr(fmt.Errorf("registry update timed out! WARNING: your registry token (%s) will still probably be updated after some time but the terraform state wont reflect that; check your Ionos Cloud account for updates", d.Id()))
-			return diags
-		}
-
-	}
+	//for {
+	//	log.Printf("[INFO] Waiting for cluster %s to be ready...", d.Id())
+	//
+	//	clusterReady, rsErr := registryTokenReady(ctx, client, d)
+	//
+	//	if rsErr != nil {
+	//		diags := diag.FromErr(fmt.Errorf("error while checking readiness status of registry token %s: %w", d.Id(), rsErr))
+	//		return diags
+	//	}
+	//
+	//	if clusterReady {
+	//		log.Printf("[INFO]registry token ready: %s", d.Id())
+	//		break
+	//	}
+	//
+	//	select {
+	//	case <-time.After(SleepInterval):
+	//		log.Printf("[INFO] trying again ...")
+	//	case <-ctx.Done():
+	//		log.Printf("[INFO] create timed out")
+	//		diags := diag.FromErr(fmt.Errorf("registry update timed out! WARNING: your registry token (%s) will still probably be updated after some time but the terraform state wont reflect that; check your Ionos Cloud account for updates", d.Id()))
+	//		return diags
+	//	}
+	//
+	//}
 
 	return resourceContainerRegistryTokenRead(ctx, d, meta)
 }
@@ -245,29 +241,29 @@ func resourceContainerRegistryTokenDelete(ctx context.Context, d *schema.Resourc
 		return diags
 	}
 
-	for {
-		log.Printf("[INFO] Waiting for cluster %s to be deleted...", d.Id())
-
-		registryTokenDeleted, dsErr := registryTokenDeleted(ctx, client, d)
-
-		if dsErr != nil {
-			diags := diag.FromErr(fmt.Errorf("error while checking deletion status of registry token %s: %s", d.Id(), dsErr))
-			return diags
-		}
-
-		if registryTokenDeleted {
-			log.Printf("[INFO] Successfully deleted registry token: %s", d.Id())
-			break
-		}
-
-		select {
-		case <-time.After(SleepInterval):
-			log.Printf("[INFO] trying again ...")
-		case <-ctx.Done():
-			diags := diag.FromErr(fmt.Errorf("registry deletion timed out! WARNING: your k8s cluster (%s) will still probably be deleted after some time but the terraform state won't reflect that; check your Ionos Cloud account for updates", d.Id()))
-			return diags
-		}
-	}
+	//for {
+	//	log.Printf("[INFO] Waiting for cluster %s to be deleted...", d.Id())
+	//
+	//	registryTokenDeleted, dsErr := registryTokenDeleted(ctx, client, d)
+	//
+	//	if dsErr != nil {
+	//		diags := diag.FromErr(fmt.Errorf("error while checking deletion status of registry token %s: %s", d.Id(), dsErr))
+	//		return diags
+	//	}
+	//
+	//	if registryTokenDeleted {
+	//		log.Printf("[INFO] Successfully deleted registry token: %s", d.Id())
+	//		break
+	//	}
+	//
+	//	select {
+	//	case <-time.After(SleepInterval):
+	//		log.Printf("[INFO] trying again ...")
+	//	case <-ctx.Done():
+	//		diags := diag.FromErr(fmt.Errorf("registry deletion timed out! WARNING: your k8s cluster (%s) will still probably be deleted after some time but the terraform state won't reflect that; check your Ionos Cloud account for updates", d.Id()))
+	//		return diags
+	//	}
+	//}
 
 	// wait 15 seconds after the deletion of the cluster, for the lan to be freed
 	time.Sleep(SleepInterval * 3)
@@ -300,45 +296,45 @@ func resourceContainerRegistryTokenImport(ctx context.Context, d *schema.Resourc
 	return []*schema.ResourceData{d}, nil
 }
 
-func registryTokenReady(ctx context.Context, client *crService.Client, d *schema.ResourceData) (bool, error) {
-	registryId := d.Get("registry_id").(string)
-	registryTokenId := d.Id()
-
-	subjectToken, _, err := client.GetToken(ctx, registryId, registryTokenId)
-
-	if err != nil {
-		return true, fmt.Errorf("error checking registry token status: %s", err)
-	}
-
-	if *subjectToken.Metadata.State == "FAILED" {
-
-		time.Sleep(time.Second * 3)
-
-		subjectToken, _, err = client.GetToken(ctx, registryId, registryTokenId)
-
-		if err != nil {
-			return true, fmt.Errorf("error checking registry token status: %s", err)
-		}
-
-		if *subjectToken.Metadata.State == "FAILED" {
-			return false, fmt.Errorf("registry has failed. WARNING: your registry token may still recover after some time but the terraform state won't reflect that; check your Ionos Cloud account for updates")
-		}
-	}
-	return *subjectToken.Metadata.State == "AVAILABLE", nil
-}
-
-func registryTokenDeleted(ctx context.Context, client *crService.Client, d *schema.ResourceData) (bool, error) {
-
-	registryId := d.Get("registry_id").(string)
-	registryTokenId := d.Id()
-
-	_, apiResponse, err := client.GetToken(ctx, registryId, registryTokenId)
-
-	if err != nil {
-		if apiResponse != nil && apiResponse.Response != nil && apiResponse.StatusCode == 404 {
-			return true, nil
-		}
-		return true, fmt.Errorf("error checking registry token deletion status: %s", err)
-	}
-	return false, nil
-}
+//func registryTokenReady(ctx context.Context, client *crService.Client, d *schema.ResourceData) (bool, error) {
+//	registryId := d.Get("registry_id").(string)
+//	registryTokenId := d.Id()
+//
+//	subjectToken, _, err := client.GetToken(ctx, registryId, registryTokenId)
+//
+//	if err != nil {
+//		return true, fmt.Errorf("error checking registry token status: %s", err)
+//	}
+//
+//	if *subjectToken.Metadata.State == "FAILED" {
+//
+//		time.Sleep(time.Second * 3)
+//
+//		subjectToken, _, err = client.GetToken(ctx, registryId, registryTokenId)
+//
+//		if err != nil {
+//			return true, fmt.Errorf("error checking registry token status: %s", err)
+//		}
+//
+//		if *subjectToken.Metadata.State == "FAILED" {
+//			return false, fmt.Errorf("registry has failed. WARNING: your registry token may still recover after some time but the terraform state won't reflect that; check your Ionos Cloud account for updates")
+//		}
+//	}
+//	return *subjectToken.Metadata.State == "AVAILABLE", nil
+//}
+//
+//func registryTokenDeleted(ctx context.Context, client *crService.Client, d *schema.ResourceData) (bool, error) {
+//
+//	registryId := d.Get("registry_id").(string)
+//	registryTokenId := d.Id()
+//
+//	_, apiResponse, err := client.GetToken(ctx, registryId, registryTokenId)
+//
+//	if err != nil {
+//		if apiResponse != nil && apiResponse.Response != nil && apiResponse.StatusCode == 404 {
+//			return true, nil
+//		}
+//		return true, fmt.Errorf("error checking registry token deletion status: %s", err)
+//	}
+//	return false, nil
+//}

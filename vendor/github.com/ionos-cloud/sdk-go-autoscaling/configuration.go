@@ -27,8 +27,8 @@ const (
 	IonosTokenEnvVar      = "IONOS_TOKEN"
 	IonosApiUrlEnvVar     = "IONOS_API_URL"
 	IonosPinnedCertEnvVar = "IONOS_PINNED_CERT"
-	DefaultIonosServerUrl = ""
-	DefaultIonosBasePath  = ""
+	DefaultIonosServerUrl = "https://api.paas-public.k8s.stg.profitbricks.net/cloudapi/v6/containerregistries"
+	DefaultIonosBasePath  = "/cloudapi/v6/containerregistries"
 	defaultMaxRetries     = 3
 	defaultWaitTime       = time.Duration(100) * time.Millisecond
 	defaultMaxWaitTime    = time.Duration(2000) * time.Millisecond
@@ -137,7 +137,7 @@ func NewConfiguration(username, password, token, hostUrl string) *Configuration 
 		Servers: ServerConfigurations{
 			{
 				URL:         getServerUrl(hostUrl),
-				Description: "No description provided",
+				Description: "Staging",
 			},
 		},
 		OperationServers: map[string]ServerConfigurations{},

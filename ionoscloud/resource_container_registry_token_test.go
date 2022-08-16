@@ -24,69 +24,67 @@ func TestAccContainerRegistryTokenBasic(t *testing.T) {
 				Config: testAccCheckContainerRegistryTokenConfigBasic,
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckContainerRegistryTokenExists(ContainerRegistryTokenResource+"."+ContainerRegistryTokenTestResource, &containerRegistryToken),
-					resource.TestCheckResourceAttr(ContainerRegistryTokenResource+"."+ContainerRegistryTokenTestResource, "garbage_collection_schedule.0.time", "10:00:00"),
-					resource.TestCheckResourceAttr(ContainerRegistryTokenResource+"."+ContainerRegistryTokenTestResource, "garbage_collection_schedule.0.days.0", "Monday"),
-					resource.TestCheckResourceAttr(ContainerRegistryTokenResource+"."+ContainerRegistryTokenTestResource, "garbage_collection_schedule.0.days.1", "Tuesday"),
-					resource.TestCheckResourceAttr(ContainerRegistryTokenResource+"."+ContainerRegistryTokenTestResource, "maintenance_window.0.time", "09:00:00"),
-					resource.TestCheckResourceAttr(ContainerRegistryTokenResource+"."+ContainerRegistryTokenTestResource, "maintenance_window.0.days.0", "Sunday"),
-					resource.TestCheckResourceAttr(ContainerRegistryTokenResource+"."+ContainerRegistryTokenTestResource, "location", "de/txl"),
+					resource.TestCheckResourceAttr(ContainerRegistryTokenResource+"."+ContainerRegistryTokenTestResource, "expiry_date", "2023-01-13T16:27:42Z"),
+					resource.TestCheckResourceAttr(ContainerRegistryTokenResource+"."+ContainerRegistryTokenTestResource, "scopes.0.actions.0", "push"),
+					resource.TestCheckResourceAttr(ContainerRegistryTokenResource+"."+ContainerRegistryTokenTestResource, "scopes.0.name", "Scope1"),
+					resource.TestCheckResourceAttr(ContainerRegistryTokenResource+"."+ContainerRegistryTokenTestResource, "scopes.0.type", "repository"),
+					resource.TestCheckResourceAttr(ContainerRegistryTokenResource+"."+ContainerRegistryTokenTestResource, "status", "enabled"),
 					resource.TestCheckResourceAttr(ContainerRegistryTokenResource+"."+ContainerRegistryTokenTestResource, "name", ContainerRegistryTokenTestResource),
 				),
 			},
 			{
 				Config: testAccDataSourceContainerRegistryTokenMatchId,
 				Check: resource.ComposeTestCheckFunc(
-					resource.TestCheckResourceAttrPair(DataSource+"."+ContainerRegistryTokenResource+"."+ContainerRegistryTokenTestDataSourceById, "garbage_collection_schedule.0.time", ContainerRegistryTokenResource+"."+ContainerRegistryTokenTestDataSourceByName, "garbage_collection_schedule.0.time"),
-					resource.TestCheckResourceAttrPair(DataSource+"."+ContainerRegistryTokenResource+"."+ContainerRegistryTokenTestDataSourceById, "garbage_collection_schedule.0.days.0", ContainerRegistryTokenResource+"."+ContainerRegistryTokenTestDataSourceByName, "garbage_collection_schedule.0.days.0"),
-					resource.TestCheckResourceAttrPair(DataSource+"."+ContainerRegistryTokenResource+"."+ContainerRegistryTokenTestDataSourceById, "garbage_collection_schedule.0.days.1", ContainerRegistryTokenResource+"."+ContainerRegistryTokenTestDataSourceByName, "garbage_collection_schedule.0.days.1"),
-					resource.TestCheckResourceAttrPair(DataSource+"."+ContainerRegistryTokenResource+"."+ContainerRegistryTokenTestDataSourceById, "maintenance_window.0.time", ContainerRegistryTokenResource+"."+ContainerRegistryTokenTestDataSourceByName, "maintenance_window.0.time"),
-					resource.TestCheckResourceAttrPair(DataSource+"."+ContainerRegistryTokenResource+"."+ContainerRegistryTokenTestDataSourceById, "maintenance_window.0.days.0", ContainerRegistryTokenResource+"."+ContainerRegistryTokenTestDataSourceByName, "maintenance_window.0.days.0"),
-					resource.TestCheckResourceAttrPair(DataSource+"."+ContainerRegistryTokenResource+"."+ContainerRegistryTokenTestDataSourceById, "location", ContainerRegistryTokenResource+"."+ContainerRegistryTokenTestDataSourceByName, "location"),
-					resource.TestCheckResourceAttrPair(DataSource+"."+ContainerRegistryTokenResource+"."+ContainerRegistryTokenTestDataSourceById, "name", ContainerRegistryTokenResource+"."+ContainerRegistryTokenTestDataSourceByName, "name"),
+					//resource.TestCheckResourceAttrPair(DataSource+"."+ContainerRegistryTokenResource+"."+ContainerRegistryTokenTestDataSourceById, "expiry_date", ContainerRegistryTokenResource+"."+ContainerRegistryTokenTestResource, "expiry_date"),
+					resource.TestCheckResourceAttrPair(DataSource+"."+ContainerRegistryTokenResource+"."+ContainerRegistryTokenTestDataSourceById, "scopes.0.actions.0", ContainerRegistryTokenResource+"."+ContainerRegistryTokenTestResource, "scopes.0.actions.0"),
+					resource.TestCheckResourceAttrPair(DataSource+"."+ContainerRegistryTokenResource+"."+ContainerRegistryTokenTestDataSourceById, "scopes.0.name", ContainerRegistryTokenResource+"."+ContainerRegistryTokenTestResource, "scopes.0.name"),
+					resource.TestCheckResourceAttrPair(DataSource+"."+ContainerRegistryTokenResource+"."+ContainerRegistryTokenTestDataSourceById, "scopes.0.type", ContainerRegistryTokenResource+"."+ContainerRegistryTokenTestResource, "scopes.0.type"),
+					resource.TestCheckResourceAttrPair(DataSource+"."+ContainerRegistryTokenResource+"."+ContainerRegistryTokenTestDataSourceById, "status", ContainerRegistryTokenResource+"."+ContainerRegistryTokenTestResource, "status"),
+					resource.TestCheckResourceAttrPair(DataSource+"."+ContainerRegistryTokenResource+"."+ContainerRegistryTokenTestDataSourceById, "name", ContainerRegistryTokenResource+"."+ContainerRegistryTokenTestResource, "name"),
 				),
 			},
 			{
 				Config: testAccDataSourceContainerRegistryTokenMatchName,
 				Check: resource.ComposeTestCheckFunc(
-					resource.TestCheckResourceAttrPair(DataSource+"."+ContainerRegistryTokenResource+"."+ContainerRegistryTokenTestDataSourceByName, "garbage_collection_schedule.0.time", ContainerRegistryTokenResource+"."+ContainerRegistryTokenTestDataSourceByName, "garbage_collection_schedule.0.time"),
-					resource.TestCheckResourceAttrPair(DataSource+"."+ContainerRegistryTokenResource+"."+ContainerRegistryTokenTestDataSourceByName, "garbage_collection_schedule.0.days.0", ContainerRegistryTokenResource+"."+ContainerRegistryTokenTestDataSourceByName, "garbage_collection_schedule.0.days.0"),
-					resource.TestCheckResourceAttrPair(DataSource+"."+ContainerRegistryTokenResource+"."+ContainerRegistryTokenTestDataSourceByName, "garbage_collection_schedule.0.days.1", ContainerRegistryTokenResource+"."+ContainerRegistryTokenTestDataSourceByName, "garbage_collection_schedule.0.days.1"),
-					resource.TestCheckResourceAttrPair(DataSource+"."+ContainerRegistryTokenResource+"."+ContainerRegistryTokenTestDataSourceByName, "maintenance_window.0.time", ContainerRegistryTokenResource+"."+ContainerRegistryTokenTestDataSourceByName, "maintenance_window.0.time"),
-					resource.TestCheckResourceAttrPair(DataSource+"."+ContainerRegistryTokenResource+"."+ContainerRegistryTokenTestDataSourceByName, "maintenance_window.0.days.0", ContainerRegistryTokenResource+"."+ContainerRegistryTokenTestDataSourceByName, "maintenance_window.0.days.0"),
-					resource.TestCheckResourceAttrPair(DataSource+"."+ContainerRegistryTokenResource+"."+ContainerRegistryTokenTestDataSourceByName, "location", ContainerRegistryTokenResource+"."+ContainerRegistryTokenTestDataSourceByName, "location"),
-					resource.TestCheckResourceAttrPair(DataSource+"."+ContainerRegistryTokenResource+"."+ContainerRegistryTokenTestDataSourceByName, "name", ContainerRegistryTokenResource+"."+ContainerRegistryTokenTestDataSourceByName, "name"),
-				),
+					//resource.TestCheckResourceAttrPair(DataSource+"."+ContainerRegistryTokenResource+"."+ContainerRegistryTestDataSourceByName, "expiry_date", ContainerRegistryTokenResource+"."+ContainerRegistryTokenTestResource, "expiry_date"),
+					resource.TestCheckResourceAttrPair(DataSource+"."+ContainerRegistryTokenResource+"."+ContainerRegistryTokenTestDataSourceByName, "scopes.0.actions.0", ContainerRegistryTokenResource+"."+ContainerRegistryTokenTestResource, "scopes.0.actions.0"),
+					resource.TestCheckResourceAttrPair(DataSource+"."+ContainerRegistryTokenResource+"."+ContainerRegistryTokenTestDataSourceByName, "scopes.0.name", ContainerRegistryTokenResource+"."+ContainerRegistryTokenTestResource, "scopes.0.name"),
+					resource.TestCheckResourceAttrPair(DataSource+"."+ContainerRegistryTokenResource+"."+ContainerRegistryTokenTestDataSourceByName, "scopes.0.type", ContainerRegistryTokenResource+"."+ContainerRegistryTokenTestResource, "scopes.0.type"),
+					resource.TestCheckResourceAttrPair(DataSource+"."+ContainerRegistryTokenResource+"."+ContainerRegistryTokenTestDataSourceByName, "status", ContainerRegistryTokenResource+"."+ContainerRegistryTokenTestResource, "status"),
+					resource.TestCheckResourceAttrPair(DataSource+"."+ContainerRegistryTokenResource+"."+ContainerRegistryTokenTestDataSourceByName, "name", ContainerRegistryTokenResource+"."+ContainerRegistryTokenTestResource, "name")),
 			},
 			{
 				Config:      testAccDataSourceContainerRegistryTokenWrongNameError,
-				ExpectError: regexp.MustCompile("no registry found with the specified criteria"),
+				ExpectError: regexp.MustCompile("no token found with the specified name"),
 			}, {
 				Config: testAccDataSourceContainerRegistryTokenPartialMatchName,
 				Check: resource.ComposeTestCheckFunc(
-					resource.TestCheckResourceAttrPair(DataSource+"."+ContainerRegistryTokenResource+"."+ContainerRegistryTokenTestDataSourceByName, "garbage_collection_schedule.0.time", ContainerRegistryTokenResource+"."+ContainerRegistryTokenTestDataSourceByName, "garbage_collection_schedule.0.time"),
-					resource.TestCheckResourceAttrPair(DataSource+"."+ContainerRegistryTokenResource+"."+ContainerRegistryTokenTestDataSourceByName, "garbage_collection_schedule.0.days.0", ContainerRegistryTokenResource+"."+ContainerRegistryTokenTestDataSourceByName, "garbage_collection_schedule.0.days.0"),
-					resource.TestCheckResourceAttrPair(DataSource+"."+ContainerRegistryTokenResource+"."+ContainerRegistryTokenTestDataSourceByName, "garbage_collection_schedule.0.days.1", ContainerRegistryTokenResource+"."+ContainerRegistryTokenTestDataSourceByName, "garbage_collection_schedule.0.days.1"),
-					resource.TestCheckResourceAttrPair(DataSource+"."+ContainerRegistryTokenResource+"."+ContainerRegistryTokenTestDataSourceByName, "maintenance_window.0.time", ContainerRegistryTokenResource+"."+ContainerRegistryTokenTestDataSourceByName, "maintenance_window.0.time"),
-					resource.TestCheckResourceAttrPair(DataSource+"."+ContainerRegistryTokenResource+"."+ContainerRegistryTokenTestDataSourceByName, "maintenance_window.0.days.0", ContainerRegistryTokenResource+"."+ContainerRegistryTokenTestDataSourceByName, "maintenance_window.0.days.0"),
-					resource.TestCheckResourceAttrPair(DataSource+"."+ContainerRegistryTokenResource+"."+ContainerRegistryTokenTestDataSourceByName, "location", ContainerRegistryTokenResource+"."+ContainerRegistryTokenTestDataSourceByName, "location"),
-					resource.TestCheckResourceAttrPair(DataSource+"."+ContainerRegistryTokenResource+"."+ContainerRegistryTokenTestDataSourceByName, "name", ContainerRegistryTokenResource+"."+ContainerRegistryTokenTestDataSourceByName, "name"),
-				),
+					//resource.TestCheckResourceAttrPair(DataSource+"."+ContainerRegistryTokenResource+"."+ContainerRegistryTestDataSourceByName, "expiry_date", ContainerRegistryTokenResource+"."+ContainerRegistryTokenTestResource, "expiry_date"),
+					resource.TestCheckResourceAttrPair(DataSource+"."+ContainerRegistryTokenResource+"."+ContainerRegistryTokenTestDataSourceByName, "scopes.0.actions.0", ContainerRegistryTokenResource+"."+ContainerRegistryTokenTestResource, "scopes.0.actions.0"),
+					resource.TestCheckResourceAttrPair(DataSource+"."+ContainerRegistryTokenResource+"."+ContainerRegistryTokenTestDataSourceByName, "scopes.0.name", ContainerRegistryTokenResource+"."+ContainerRegistryTokenTestResource, "scopes.0.name"),
+					resource.TestCheckResourceAttrPair(DataSource+"."+ContainerRegistryTokenResource+"."+ContainerRegistryTokenTestDataSourceByName, "scopes.0.type", ContainerRegistryTokenResource+"."+ContainerRegistryTokenTestResource, "scopes.0.type"),
+					resource.TestCheckResourceAttrPair(DataSource+"."+ContainerRegistryTokenResource+"."+ContainerRegistryTokenTestDataSourceByName, "status", ContainerRegistryTokenResource+"."+ContainerRegistryTokenTestResource, "status"),
+					resource.TestCheckResourceAttrPair(DataSource+"."+ContainerRegistryTokenResource+"."+ContainerRegistryTokenTestDataSourceByName, "name", ContainerRegistryTokenResource+"."+ContainerRegistryTokenTestResource, "name")),
 			},
 			{
 				Config:      testAccDataSourceContainerRegistryTokenWrongPartialNameError,
-				ExpectError: regexp.MustCompile("no registry found with the specified criteria"),
+				ExpectError: regexp.MustCompile("no token found with the specified name"),
 			},
 			{
 				Config: testAccCheckContainerRegistryTokenConfigUpdate,
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckContainerRegistryTokenExists(ContainerRegistryTokenResource+"."+ContainerRegistryTokenTestResource, &containerRegistryToken),
-					resource.TestCheckResourceAttr(ContainerRegistryTokenResource+"."+ContainerRegistryTokenTestResource, "garbage_collection_schedule.0.time", "11:00:00"),
-					resource.TestCheckResourceAttr(ContainerRegistryTokenResource+"."+ContainerRegistryTokenTestResource, "garbage_collection_schedule.0.days.0", "Monday"),
-					resource.TestCheckResourceAttr(ContainerRegistryTokenResource+"."+ContainerRegistryTokenTestResource, "maintenance_window.0.time", "10:00:00"),
-					resource.TestCheckResourceAttr(ContainerRegistryTokenResource+"."+ContainerRegistryTokenTestResource, "maintenance_window.0.days.0", "Saturday"),
-					resource.TestCheckResourceAttr(ContainerRegistryTokenResource+"."+ContainerRegistryTokenTestResource, "location", "de/txl"),
-					resource.TestCheckResourceAttr(ContainerRegistryTokenResource+"."+ContainerRegistryTokenTestResource, "name", ContainerRegistryTokenTestResource),
-				),
+					resource.TestCheckResourceAttr(ContainerRegistryTokenResource+"."+ContainerRegistryTokenTestResource, "expiry_date", "2023-01-23T16:27:42Z"),
+					resource.TestCheckResourceAttr(ContainerRegistryTokenResource+"."+ContainerRegistryTokenTestResource, "scopes.0.actions.0", "push"),
+					resource.TestCheckResourceAttr(ContainerRegistryTokenResource+"."+ContainerRegistryTokenTestResource, "scopes.0.actions.1", "pull"),
+					resource.TestCheckResourceAttr(ContainerRegistryTokenResource+"."+ContainerRegistryTokenTestResource, "scopes.0.name", "Scope1"),
+					resource.TestCheckResourceAttr(ContainerRegistryTokenResource+"."+ContainerRegistryTokenTestResource, "scopes.0.type", "repository"),
+					resource.TestCheckResourceAttr(ContainerRegistryTokenResource+"."+ContainerRegistryTokenTestResource, "scopes.1.actions.0", "push"),
+					resource.TestCheckResourceAttr(ContainerRegistryTokenResource+"."+ContainerRegistryTokenTestResource, "scopes.1.actions.1", "pull"),
+					resource.TestCheckResourceAttr(ContainerRegistryTokenResource+"."+ContainerRegistryTokenTestResource, "scopes.1.name", "Scope2"),
+					resource.TestCheckResourceAttr(ContainerRegistryTokenResource+"."+ContainerRegistryTokenTestResource, "scopes.1.type", "backup"),
+					resource.TestCheckResourceAttr(ContainerRegistryTokenResource+"."+ContainerRegistryTokenTestResource, "status", "disabled"),
+					resource.TestCheckResourceAttr(ContainerRegistryTokenResource+"."+ContainerRegistryTokenTestResource, "name", ContainerRegistryTokenTestResource)),
 			},
 		},
 	})
@@ -157,10 +155,6 @@ func testAccCheckContainerRegistryTokenExists(n string, registry *cr.TokenRespon
 
 const testAccCheckContainerRegistryTokenConfigBasic = testAccCheckContainerRegistryConfigBasic + `
 resource ` + ContainerRegistryTokenResource + ` ` + ContainerRegistryTokenTestResource + ` {
-   credentials {
-	username		 = "username"
-    password         = "password"
-  }
   expiry_date        = "2023-01-13T16:27:42Z"
   name				 = "` + ContainerRegistryTokenTestResource + `"
   scopes  {
@@ -175,10 +169,6 @@ resource ` + ContainerRegistryTokenResource + ` ` + ContainerRegistryTokenTestRe
 
 const testAccCheckContainerRegistryTokenConfigUpdate = testAccCheckContainerRegistryConfigBasic + `
 resource ` + ContainerRegistryTokenResource + ` ` + ContainerRegistryTokenTestResource + ` {
-   credentials {
-	username		 = "usernameUpdated"
-    password         = "passwordUpdated"
-  }
   expiry_date        = "2023-01-23T16:27:42Z"
   name				 = "` + ContainerRegistryTokenTestResource + `"
   scopes  {
@@ -212,7 +202,7 @@ data ` + ContainerRegistryTokenResource + ` ` + ContainerRegistryTokenTestDataSo
 
 const testAccDataSourceContainerRegistryTokenWrongNameError = testAccCheckContainerRegistryTokenConfigBasic + `
 data ` + ContainerRegistryTokenResource + ` ` + ContainerRegistryTokenTestDataSourceByName + ` {
-  display_name	= "wrong_name"
+  name	= "wrong_name"
   registry_id        = ` + ContainerRegistryResource + `.` + ContainerRegistryTestResource + `.id
 }
 `
@@ -227,7 +217,7 @@ data ` + ContainerRegistryTokenResource + ` ` + ContainerRegistryTokenTestDataSo
 
 const testAccDataSourceContainerRegistryTokenWrongPartialNameError = testAccCheckContainerRegistryTokenConfigBasic + `
 data ` + ContainerRegistryTokenResource + ` ` + ContainerRegistryTokenTestDataSourceByName + ` {
-  display_name	= "wrong_name"
+  name	= "wrong_name"
   partial_match = true
   registry_id        = ` + ContainerRegistryResource + `.` + ContainerRegistryTestResource + `.id
 }

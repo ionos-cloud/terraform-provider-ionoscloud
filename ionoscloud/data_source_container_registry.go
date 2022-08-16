@@ -101,7 +101,7 @@ func dataSourceContainerRegistryRead(ctx context.Context, d *schema.ResourceData
 	client := meta.(SdkBundle).ContainerClient
 
 	idValue, idOk := d.GetOk("id")
-	nameValue, nameOk := d.GetOk("display_name")
+	nameValue, nameOk := d.GetOk("name")
 	locationValue, locationOk := d.GetOk("location")
 
 	id := idValue.(string)
