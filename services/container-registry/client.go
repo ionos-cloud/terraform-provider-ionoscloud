@@ -15,14 +15,9 @@ type Client struct {
 	cr.APIClient
 }
 
-type ClientConfig struct {
-	cr.Configuration
-}
-
 // ClientService is a wrapper around cr.APIClient
 type ClientService interface {
 	Get() *Client
-	GetConfig() *ClientConfig
 }
 
 type clientService struct {
@@ -53,11 +48,5 @@ func NewClientService(username, password, token, url, version, terraformVersion 
 func (c clientService) Get() *Client {
 	return &Client{
 		APIClient: *c.client,
-	}
-}
-
-func (c clientService) GetConfig() *ClientConfig {
-	return &ClientConfig{
-		Configuration: *c.client.GetConfig(),
 	}
 }

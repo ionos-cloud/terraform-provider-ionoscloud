@@ -11,8 +11,8 @@ type NamesService interface {
 
 func (c *Client) GetNameAvailability(ctx context.Context, name string) (bool, *cr.APIResponse, error) {
 	apiResponse, err := c.NamesApi.NamesFindByName(ctx, name).Execute()
-	if err == nil && apiResponse != nil && apiResponse.StatusCode == 200 {
-		return true, apiResponse, nil
+	if err != nil {
+		return false, apiResponse, nil
 	}
-	return false, nil, err
+	return true, nil, err
 }
