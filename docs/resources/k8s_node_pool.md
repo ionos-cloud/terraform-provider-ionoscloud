@@ -25,6 +25,9 @@ resource "ionoscloud_lan" "example" {
   datacenter_id         = ionoscloud_datacenter.example.id
   public                = false
   name                  = "Lan Example"
+  lifecycle {
+    create_before_destroy = true
+  }
 }
 
 resource "ionoscloud_ipblock" "example" {
@@ -86,6 +89,7 @@ resource "ionoscloud_k8s_node_pool" "example" {
 }
 
 ```
+**Note:** Set `create_before_destroy` on the lan resource if you want to remove it from the nodepool during an update. This is to ensure that the nodepool is updated before the lan is destroyed.
 
 ## Argument Reference
 
