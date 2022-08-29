@@ -200,8 +200,10 @@ func getNicData(d *schema.ResourceData, path string) ionoscloud.Nic {
 		nic.Properties.Name = &vStr
 	}
 
-	nic.Properties.Dhcp = boolAddr(d.Get(path + "dhcp").(bool))
-	nic.Properties.FirewallActive = boolAddr(d.Get(path + "firewall_active").(bool))
+	dhcp := d.Get(path + "dhcp").(bool)
+	fwActive := d.Get(path + "firewall_active").(bool)
+	nic.Properties.Dhcp = &dhcp
+	nic.Properties.FirewallActive = &fwActive
 
 	if _, ok := d.GetOk("firewall_type"); ok {
 		raw := d.Get("firewall_type").(string)

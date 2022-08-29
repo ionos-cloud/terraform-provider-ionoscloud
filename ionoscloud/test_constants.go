@@ -103,3 +103,61 @@ data ` + DatacenterResource + ` ` + DatacenterDataSourceMatching + ` {
 }`
 
 const ImmutableError = "attribute is immutable, therefore not allowed in update requests"
+
+// Cube Server Constants
+const (
+	testAccCheckCubeServerConfigBasic = `
+data "ionoscloud_template" ` + ServerTestResource + ` {
+    name = "CUBES XS"
+    cores = 1
+    ram   = 1024
+    storage_size = 30
+}
+resource ` + DatacenterResource + ` ` + DatacenterTestResource + ` {
+	name       = "server-test"
+	location = "de/fra"
+}
+resource "ionoscloud_ipblock" "webserver_ipblock" {
+  location = ` + DatacenterResource + `.` + DatacenterTestResource + `.location
+  size = 4
+  name = "webserver_ipblock"
+}
+resource ` + LanResource + ` ` + LanTestResource + ` {
+  datacenter_id = ` + DatacenterResource + `.` + DatacenterTestResource + `.id
+  public = true
+  name = "public"
+}
+resource ` + ServerCubeResource + ` ` + ServerTestResource + ` {
+  template_uuid     = data.ionoscloud_template.` + ServerTestResource + `.id
+  name = "` + ServerTestResource + `"
+  datacenter_id = ` + DatacenterResource + `.` + DatacenterTestResource + `.id
+  availability_zone = "ZONE_1"
+  cpu_family = "INTEL_SKYLAKE"
+  image_name ="ubuntu:latest"
+  image_password = "K3tTj8G14a3EgKyNeeiY"
+  
+  volume {
+    name = "system"
+    licence_type    = "LINUX"
+    disk_type = "DAS"
+}
+  nic {
+    lan = ` + LanResource + `.` + LanTestResource + `.id
+    name = "system"
+    dhcp = true
+    firewall_active = true
+	firewall_type = "BIDIRECTIONAL"
+    ips            = [ ionoscloud_ipblock.webserver_ipblock.ips[0], ionoscloud_ipblock.webserver_ipblock.ips[1] ]
+    firewall {
+      protocol = "TCP"
+      name = "SSH"
+      port_range_start = 22
+      port_range_end = 22
+	  source_mac = "00:0a:95:9d:68:17"
+	  source_ip = ionoscloud_ipblock.webserver_ipblock.ips[2]
+	  target_ip = ionoscloud_ipblock.webserver_ipblock.ips[3]
+	  type = "EGRESS"
+    }
+  }
+}`
+)
