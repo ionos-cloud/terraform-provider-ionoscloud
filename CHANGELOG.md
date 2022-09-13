@@ -1,3 +1,9 @@
+## 6.3.2
+
+### Enhancement:
+- Increase go version to 1.18
+- Update dependencies to latest versions
+
 ## 6.3.1
 
 ### Feature
