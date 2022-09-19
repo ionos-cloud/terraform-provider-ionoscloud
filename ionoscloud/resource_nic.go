@@ -122,6 +122,7 @@ func resourceNicRead(ctx context.Context, d *schema.ResourceData, meta interface
 
 	if err != nil {
 		if httpNotFound(apiResponse) {
+			log.Printf("[INFO] nic resource with id %s not found", nicid)
 			d.SetId("")
 			return nil
 		}
