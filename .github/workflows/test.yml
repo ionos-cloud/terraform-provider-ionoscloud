@@ -29,14 +29,14 @@ jobs:
         os: [ubuntu-latest]
     runs-on: ${{ matrix.os }}
     steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+        with:
+          ref:  ${{ github.event.inputs.branch }}
       - name: Install Go
         uses: actions/setup-go@v3
         with:
-          go-version-file: go.mod
-      - name: Checkout code
-        uses: actions/checkout@v2
-        with:
-          ref:  ${{ github.event.inputs.branch }}
+          go-version-file: 'go.mod'
       - name: Run tests for ${{ github.event.inputs.test-tags }}
         if: ${{ github.event.inputs.test-tags != '' }}
         run: go test ./ionoscloud -v -failfast -timeout 240m -tags ${{ github.event.inputs.test-tags }}
