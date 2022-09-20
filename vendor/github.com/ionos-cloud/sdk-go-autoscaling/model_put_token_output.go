@@ -28,11 +28,11 @@ type PutTokenOutput struct {
 // This constructor will assign default values to properties that have it defined,
 // and makes sure properties required by API are set, but the set of arguments
 // will change when the set of required properties is changed
-func NewPutTokenOutput(metadata ApiResourceMetadata, properties TokenProperties) *PutTokenOutput {
+func NewPutTokenOutput(metadata NullableApiResourceMetadata, properties NullableTokenProperties) *PutTokenOutput {
 	this := PutTokenOutput{}
 
-	this.Metadata = &metadata
-	this.Properties = &properties
+	this.Metadata = metadata.value
+	this.Properties = properties.value
 
 	return &this
 }
@@ -245,13 +245,9 @@ func (o PutTokenOutput) MarshalJSON() ([]byte, error) {
 		toSerialize["id"] = o.Id
 	}
 
-	if o.Metadata != nil {
-		toSerialize["metadata"] = o.Metadata
-	}
+	toSerialize["metadata"] = o.Metadata
 
-	if o.Properties != nil {
-		toSerialize["properties"] = o.Properties
-	}
+	toSerialize["properties"] = o.Properties
 
 	if o.Type != nil {
 		toSerialize["type"] = o.Type

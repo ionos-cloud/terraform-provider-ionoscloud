@@ -26,10 +26,10 @@ type StorageUsage struct {
 // This constructor will assign default values to properties that have it defined,
 // and makes sure properties required by API are set, but the set of arguments
 // will change when the set of required properties is changed
-func NewStorageUsage(bytes int32) *StorageUsage {
+func NewStorageUsage(bytes NullableInt32) *StorageUsage {
 	this := StorageUsage{}
 
-	this.Bytes = &bytes
+	this.Bytes = bytes.value
 
 	return &this
 }
@@ -127,13 +127,9 @@ func (o *StorageUsage) HasUpdatedAt() bool {
 
 func (o StorageUsage) MarshalJSON() ([]byte, error) {
 	toSerialize := map[string]interface{}{}
-	if o.Bytes != nil {
-		toSerialize["bytes"] = o.Bytes
-	}
+	toSerialize["bytes"] = o.Bytes
 
-	if o.UpdatedAt != nil {
-		toSerialize["updatedAt"] = o.UpdatedAt
-	}
+	toSerialize["updatedAt"] = o.UpdatedAt
 
 	return json.Marshal(toSerialize)
 }

@@ -126,7 +126,7 @@ func NewConfiguration(username, password, token, hostUrl string) *Configuration 
 	cfg := &Configuration{
 		DefaultHeader:      make(map[string]string),
 		DefaultQueryParams: url.Values{},
-		UserAgent:          "ionos-cloud-sdk-go-container-registry/v6.0.0-beta.6",
+		UserAgent:          "ionos-cloud-sdk-go-dbaas-postgres/v1.0.0",
 		Debug:              false,
 		Username:           username,
 		Password:           password,

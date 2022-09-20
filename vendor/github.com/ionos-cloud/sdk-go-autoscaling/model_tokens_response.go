@@ -412,9 +412,7 @@ func (o TokensResponse) MarshalJSON() ([]byte, error) {
 		toSerialize["id"] = o.Id
 	}
 
-	if o.Items != nil {
-		toSerialize["items"] = o.Items
-	}
+	toSerialize["items"] = o.Items
 
 	if o.Limit != nil {
 		toSerialize["limit"] = o.Limit

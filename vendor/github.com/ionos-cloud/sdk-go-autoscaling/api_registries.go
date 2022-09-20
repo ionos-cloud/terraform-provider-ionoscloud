@@ -41,7 +41,7 @@ func (r ApiRegistriesDeleteRequest) Execute() (*APIResponse, error) {
 /*
  * RegistriesDelete Delete registry
  * @param ctx _context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
- * @param registryId
+ * @param registryId The unique ID of the registry
  * @return ApiRegistriesDeleteRequest
  */
 func (a *RegistriesApiService) RegistriesDelete(ctx _context.Context, registryId string) ApiRegistriesDeleteRequest {
@@ -167,7 +167,7 @@ func (r ApiRegistriesFindByIdRequest) Execute() (RegistryResponse, *APIResponse,
  * RegistriesFindById Get registry
  * Get all information for a specific container registry
  * @param ctx _context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
- * @param registryId
+ * @param registryId The unique ID of the registry
  * @return ApiRegistriesFindByIdRequest
  */
 func (a *RegistriesApiService) RegistriesFindById(ctx _context.Context, registryId string) ApiRegistriesFindByIdRequest {
@@ -476,12 +476,12 @@ func (r ApiRegistriesPatchRequest) Execute() (RegistryResponse, *APIResponse, er
 }
 
 /*
- * RegistriesPatch Method for RegistriesPatch
+ * RegistriesPatch Update the properties of a registry
  * Update the properties of a registry
 - "maintenanceWindow" time and weekday
 - "garbageCollectionSchedule" time and days of the week for runs
  * @param ctx _context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
- * @param registryId
+ * @param registryId The unique ID of the registry
  * @return ApiRegistriesPatchRequest
 */
 func (a *RegistriesApiService) RegistriesPatch(ctx _context.Context, registryId string) ApiRegistriesPatchRequest {
@@ -785,7 +785,7 @@ func (r ApiRegistriesPutRequest) Execute() (PutRegistryOutput, *APIResponse, err
 - "maintenanceWindow" time and weekday
 - "garbageCollectionSchedule" time and days of the week for runs
  * @param ctx _context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
- * @param registryId
+ * @param registryId The unique ID of the registry
  * @return ApiRegistriesPutRequest
 */
 func (a *RegistriesApiService) RegistriesPut(ctx _context.Context, registryId string) ApiRegistriesPutRequest {
@@ -821,6 +821,9 @@ func (a *RegistriesApiService) RegistriesPutExecute(r ApiRegistriesPutRequest) (
 	localVarHeaderParams := make(map[string]string)
 	localVarQueryParams := _neturl.Values{}
 	localVarFormParams := _neturl.Values{}
+	if r.putRegistryInput == nil {
+		return localVarReturnValue, nil, reportError("putRegistryInput is required and must be specified")
+	}
 
 	// to determine the Content-Type header
 	localVarHTTPContentTypes := []string{"application/json"}

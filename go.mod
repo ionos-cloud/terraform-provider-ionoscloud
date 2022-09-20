@@ -6,7 +6,7 @@ require (
 	github.com/hashicorp/terraform-plugin-sdk/v2 v2.22.0
 	github.com/iancoleman/strcase v0.2.0
 	github.com/ionos-cloud/sdk-go-dbaas-postgres v1.0.3
-	github.com/ionos-cloud/sdk-go/v6 v6.1.2
+	github.com/ionos-cloud/sdk-go/v6 v6.1.3
 	golang.org/x/crypto v0.0.0-20220517005047-85d78b3ac167
 	gopkg.in/yaml.v3 v3.0.1
 )
@@ -61,3 +61,6 @@ require (
 	google.golang.org/grpc v1.48.0 // indirect
 	google.golang.org/protobuf v1.28.1 // indirect
 )
+
+require github.com/ionos-cloud/sdk-go-autoscaling v1.0.0
+replace github.com/ionos-cloud/sdk-go-autoscaling => /tmp/sdk-go

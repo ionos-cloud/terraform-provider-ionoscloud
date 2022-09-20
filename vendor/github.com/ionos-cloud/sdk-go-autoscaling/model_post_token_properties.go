@@ -205,17 +205,13 @@ func (o *PostTokenProperties) HasStatus() bool {
 
 func (o PostTokenProperties) MarshalJSON() ([]byte, error) {
 	toSerialize := map[string]interface{}{}
-	if o.ExpiryDate != nil {
-		toSerialize["expiryDate"] = o.ExpiryDate
-	}
+	toSerialize["expiryDate"] = o.ExpiryDate
 
 	if o.Name != nil {
 		toSerialize["name"] = o.Name
 	}
 
-	if o.Scopes != nil {
-		toSerialize["scopes"] = o.Scopes
-	}
+	toSerialize["scopes"] = o.Scopes
 
 	if o.Status != nil {
 		toSerialize["status"] = o.Status

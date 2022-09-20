@@ -46,12 +46,12 @@ var LogLevelMap = map[string]LogLevel{
 	"trace": Trace,
 }
 
-// getLogLevelFromEnv - gets LogLevel type from env variable IONOS_LOGLEVEL
+// getLogLevelFromEnv - gets LogLevel type from env variable IONOS_LOG_LEVEL
 // returns Off if an invalid log level is encountered
 func getLogLevelFromEnv() LogLevel {
 	strLogLevel := "off"
-	if os.Getenv(IonosLogLevel) != "" {
-		strLogLevel = os.Getenv(IonosLogLevel)
+	if os.Getenv(IonosLogLevelEnvVar) != "" {
+		strLogLevel = os.Getenv(IonosLogLevelEnvVar)
 	}
 
 	logLevel, ok := LogLevelMap[strings.ToLower(strLogLevel)]

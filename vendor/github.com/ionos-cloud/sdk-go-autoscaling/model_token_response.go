@@ -28,11 +28,11 @@ type TokenResponse struct {
 // This constructor will assign default values to properties that have it defined,
 // and makes sure properties required by API are set, but the set of arguments
 // will change when the set of required properties is changed
-func NewTokenResponse(metadata ApiResourceMetadata, properties TokenProperties) *TokenResponse {
+func NewTokenResponse(metadata NullableApiResourceMetadata, properties NullableTokenProperties) *TokenResponse {
 	this := TokenResponse{}
 
-	this.Metadata = &metadata
-	this.Properties = &properties
+	this.Metadata = metadata.value
+	this.Properties = properties.value
 
 	return &this
 }
@@ -245,13 +245,9 @@ func (o TokenResponse) MarshalJSON() ([]byte, error) {
 		toSerialize["id"] = o.Id
 	}
 
-	if o.Metadata != nil {
-		toSerialize["metadata"] = o.Metadata
-	}
+	toSerialize["metadata"] = o.Metadata
 
-	if o.Properties != nil {
-		toSerialize["properties"] = o.Properties
-	}
+	toSerialize["properties"] = o.Properties
 
 	if o.Type != nil {
 		toSerialize["type"] = o.Type

@@ -46,7 +46,7 @@ func (r ApiNamesFindByNameRequest) Execute() (*APIResponse, error) {
 - and is between 3 to 63 characters in length
 - and is available
  * @param ctx _context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
- * @param name
+ * @param name The desired registry name
  * @return ApiNamesFindByNameRequest
 */
 func (a *NamesApiService) NamesFindByName(ctx _context.Context, name string) ApiNamesFindByNameRequest {

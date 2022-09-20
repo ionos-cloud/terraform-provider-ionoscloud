@@ -188,9 +188,9 @@ func GetWeeklySchedule(d *schema.ResourceData, property string) *cr.WeeklySchedu
 	var weeklySchedule cr.WeeklySchedule
 
 	if days, ok := d.GetOk(fmt.Sprintf("%v.0.days", property)); ok {
-		var daysToAdd []cr.EnumsDay
+		var daysToAdd []cr.Day
 		for _, day := range days.([]interface{}) {
-			daysToAdd = append(daysToAdd, cr.EnumsDay(day.(string)))
+			daysToAdd = append(daysToAdd, cr.Day(day.(string)))
 		}
 		weeklySchedule.Days = &daysToAdd
 	}

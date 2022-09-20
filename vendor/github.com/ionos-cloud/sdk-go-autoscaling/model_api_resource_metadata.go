@@ -18,6 +18,7 @@ import (
 
 // ApiResourceMetadata struct for ApiResourceMetadata
 type ApiResourceMetadata struct {
+	CreatedBy            *string    `json:"createdBy"`
 	CreatedByUserId      *string    `json:"createdByUserId"`
 	CreatedDate          *IonosTime `json:"createdDate"`
 	LastModifiedBy       *string    `json:"lastModifiedBy,omitempty"`
@@ -30,9 +31,10 @@ type ApiResourceMetadata struct {
 // This constructor will assign default values to properties that have it defined,
 // and makes sure properties required by API are set, but the set of arguments
 // will change when the set of required properties is changed
-func NewApiResourceMetadata(createdByUserId string, createdDate time.Time, state string) *ApiResourceMetadata {
+func NewApiResourceMetadata(createdBy string, createdByUserId string, createdDate time.Time, state string) *ApiResourceMetadata {
 	this := ApiResourceMetadata{}
 
+	this.CreatedBy = &createdBy
 	this.CreatedByUserId = &createdByUserId
 	this.CreatedDate = &IonosTime{createdDate}
 	this.State = &state
@@ -46,6 +48,44 @@ func NewApiResourceMetadata(createdByUserId string, createdDate time.Time, state
 func NewApiResourceMetadataWithDefaults() *ApiResourceMetadata {
 	this := ApiResourceMetadata{}
 	return &this
+}
+
+// GetCreatedBy returns the CreatedBy field value
+// If the value is explicit nil, the zero value for string will be returned
+func (o *ApiResourceMetadata) GetCreatedBy() *string {
+	if o == nil {
+		return nil
+	}
+
+	return o.CreatedBy
+
+}
+
+// GetCreatedByOk returns a tuple with the CreatedBy field value
+// and a boolean to check if the value has been set.
+// NOTE: If the value is an explicit nil, `nil, true` will be returned
+func (o *ApiResourceMetadata) GetCreatedByOk() (*string, bool) {
+	if o == nil {
+		return nil, false
+	}
+
+	return o.CreatedBy, true
+}
+
+// SetCreatedBy sets field value
+func (o *ApiResourceMetadata) SetCreatedBy(v string) {
+
+	o.CreatedBy = &v
+
+}
+
+// HasCreatedBy returns a boolean if a field has been set.
+func (o *ApiResourceMetadata) HasCreatedBy() bool {
+	if o != nil && o.CreatedBy != nil {
+		return true
+	}
+
+	return false
 }
 
 // GetCreatedByUserId returns the CreatedByUserId field value
@@ -292,6 +332,10 @@ func (o *ApiResourceMetadata) HasState() bool {
 
 func (o ApiResourceMetadata) MarshalJSON() ([]byte, error) {
 	toSerialize := map[string]interface{}{}
+	if o.CreatedBy != nil {
+		toSerialize["createdBy"] = o.CreatedBy
+	}
+
 	if o.CreatedByUserId != nil {
 		toSerialize["createdByUserId"] = o.CreatedByUserId
 	}
@@ -308,9 +352,7 @@ func (o ApiResourceMetadata) MarshalJSON() ([]byte, error) {
 		toSerialize["lastModifiedByUserId"] = o.LastModifiedByUserId
 	}
 
-	if o.LastModifiedDate != nil {
-		toSerialize["lastModifiedDate"] = o.LastModifiedDate
-	}
+	toSerialize["lastModifiedDate"] = o.LastModifiedDate
 
 	if o.State != nil {
 		toSerialize["state"] = o.State

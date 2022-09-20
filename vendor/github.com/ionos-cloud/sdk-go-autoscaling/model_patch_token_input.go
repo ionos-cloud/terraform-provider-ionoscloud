@@ -164,13 +164,9 @@ func (o *PatchTokenInput) HasStatus() bool {
 
 func (o PatchTokenInput) MarshalJSON() ([]byte, error) {
 	toSerialize := map[string]interface{}{}
-	if o.ExpiryDate != nil {
-		toSerialize["expiryDate"] = o.ExpiryDate
-	}
+	toSerialize["expiryDate"] = o.ExpiryDate
 
-	if o.Scopes != nil {
-		toSerialize["scopes"] = o.Scopes
-	}
+	toSerialize["scopes"] = o.Scopes
 
 	if o.Status != nil {
 		toSerialize["status"] = o.Status

@@ -46,8 +46,8 @@ func (r ApiRegistriesRepositoriesDeleteRequest) Execute() (*APIResponse, error) 
 		The registry V2 API allows manifests and blobs to be deleted individually but it is not possible to remove an entire repository.
 		This operation is provided for convenience
  * @param ctx _context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
- * @param registryId
- * @param name
+ * @param registryId The unique ID of the registry
+ * @param name The name of the repository
  * @return ApiRegistriesRepositoriesDeleteRequest
 */
 func (a *RepositoriesApiService) RegistriesRepositoriesDelete(ctx _context.Context, registryId string, name string) ApiRegistriesRepositoriesDeleteRequest {

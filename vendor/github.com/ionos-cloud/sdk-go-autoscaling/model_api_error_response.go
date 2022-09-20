@@ -124,9 +124,7 @@ func (o ApiErrorResponse) MarshalJSON() ([]byte, error) {
 		toSerialize["httpStatus"] = o.HttpStatus
 	}
 
-	if o.Messages != nil {
-		toSerialize["messages"] = o.Messages
-	}
+	toSerialize["messages"] = o.Messages
 
 	return json.Marshal(toSerialize)
 }

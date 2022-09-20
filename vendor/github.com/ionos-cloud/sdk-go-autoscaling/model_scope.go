@@ -160,9 +160,7 @@ func (o *Scope) HasType() bool {
 
 func (o Scope) MarshalJSON() ([]byte, error) {
 	toSerialize := map[string]interface{}{}
-	if o.Actions != nil {
-		toSerialize["actions"] = o.Actions
-	}
+	toSerialize["actions"] = o.Actions
 
 	if o.Name != nil {
 		toSerialize["name"] = o.Name

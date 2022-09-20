@@ -29,10 +29,10 @@ type TokenProperties struct {
 // This constructor will assign default values to properties that have it defined,
 // and makes sure properties required by API are set, but the set of arguments
 // will change when the set of required properties is changed
-func NewTokenProperties(credentials Credentials, name string) *TokenProperties {
+func NewTokenProperties(credentials NullableCredentials, name string) *TokenProperties {
 	this := TokenProperties{}
 
-	this.Credentials = &credentials
+	this.Credentials = credentials.value
 	this.Name = &name
 
 	return &this
@@ -245,21 +245,15 @@ func (o *TokenProperties) HasStatus() bool {
 
 func (o TokenProperties) MarshalJSON() ([]byte, error) {
 	toSerialize := map[string]interface{}{}
-	if o.Credentials != nil {
-		toSerialize["credentials"] = o.Credentials
-	}
+	toSerialize["credentials"] = o.Credentials
 
-	if o.ExpiryDate != nil {
-		toSerialize["expiryDate"] = o.ExpiryDate
-	}
+	toSerialize["expiryDate"] = o.ExpiryDate
 
 	if o.Name != nil {
 		toSerialize["name"] = o.Name
 	}
 
-	if o.Scopes != nil {
-		toSerialize["scopes"] = o.Scopes
-	}
+	toSerialize["scopes"] = o.Scopes
 
 	if o.Status != nil {
 		toSerialize["status"] = o.Status

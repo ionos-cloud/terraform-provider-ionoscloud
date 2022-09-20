@@ -17,7 +17,7 @@ import (
 
 // WeeklySchedule struct for WeeklySchedule
 type WeeklySchedule struct {
-	Days *[]EnumsDay `json:"days"`
+	Days *[]Day `json:"days"`
 	// UTC time of day e.g. 01:00:00 - as defined by partial-time - RFC3339
 	Time *string `json:"time"`
 }
@@ -26,7 +26,7 @@ type WeeklySchedule struct {
 // This constructor will assign default values to properties that have it defined,
 // and makes sure properties required by API are set, but the set of arguments
 // will change when the set of required properties is changed
-func NewWeeklySchedule(days []EnumsDay, time string) *WeeklySchedule {
+func NewWeeklySchedule(days []Day, time string) *WeeklySchedule {
 	this := WeeklySchedule{}
 
 	this.Days = &days
@@ -44,8 +44,8 @@ func NewWeeklyScheduleWithDefaults() *WeeklySchedule {
 }
 
 // GetDays returns the Days field value
-// If the value is explicit nil, the zero value for []EnumsDay will be returned
-func (o *WeeklySchedule) GetDays() *[]EnumsDay {
+// If the value is explicit nil, the zero value for []Day will be returned
+func (o *WeeklySchedule) GetDays() *[]Day {
 	if o == nil {
 		return nil
 	}
@@ -57,7 +57,7 @@ func (o *WeeklySchedule) GetDays() *[]EnumsDay {
 // GetDaysOk returns a tuple with the Days field value
 // and a boolean to check if the value has been set.
 // NOTE: If the value is an explicit nil, `nil, true` will be returned
-func (o *WeeklySchedule) GetDaysOk() (*[]EnumsDay, bool) {
+func (o *WeeklySchedule) GetDaysOk() (*[]Day, bool) {
 	if o == nil {
 		return nil, false
 	}
@@ -66,7 +66,7 @@ func (o *WeeklySchedule) GetDaysOk() (*[]EnumsDay, bool) {
 }
 
 // SetDays sets field value
-func (o *WeeklySchedule) SetDays(v []EnumsDay) {
+func (o *WeeklySchedule) SetDays(v []Day) {
 
 	o.Days = &v
 
@@ -121,9 +121,7 @@ func (o *WeeklySchedule) HasTime() bool {
 
 func (o WeeklySchedule) MarshalJSON() ([]byte, error) {
 	toSerialize := map[string]interface{}{}
-	if o.Days != nil {
-		toSerialize["days"] = o.Days
-	}
+	toSerialize["days"] = o.Days
 
 	if o.Time != nil {
 		toSerialize["time"] = o.Time

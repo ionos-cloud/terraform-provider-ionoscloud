@@ -42,8 +42,8 @@ func (r ApiRegistriesTokensDeleteRequest) Execute() (*APIResponse, error) {
 /*
  * RegistriesTokensDelete Delete token
  * @param ctx _context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
- * @param registryId
- * @param tokenId
+ * @param registryId The unique ID of the registry
+ * @param tokenId The unique ID of the token
  * @return ApiRegistriesTokensDeleteRequest
  */
 func (a *TokensApiService) RegistriesTokensDelete(ctx _context.Context, registryId string, tokenId string) ApiRegistriesTokensDeleteRequest {
@@ -172,8 +172,8 @@ func (r ApiRegistriesTokensFindByIdRequest) Execute() (TokenResponse, *APIRespon
  * RegistriesTokensFindById Get Token Information
  * Gets all information for a specific token used to access a container registry
  * @param ctx _context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
- * @param registryId
- * @param tokenId
+ * @param registryId The unique ID of the registry
+ * @param tokenId The unique ID of the token
  * @return ApiRegistriesTokensFindByIdRequest
  */
 func (a *TokensApiService) RegistriesTokensFindById(ctx _context.Context, registryId string, tokenId string) ApiRegistriesTokensFindByIdRequest {
@@ -332,7 +332,7 @@ func (r ApiRegistriesTokensGetRequest) Execute() (TokensResponse, *APIResponse, 
 /*
  * RegistriesTokensGet List all tokens for the container registry
  * @param ctx _context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
- * @param registryId
+ * @param registryId The unique ID of the registry
  * @return ApiRegistriesTokensGetRequest
  */
 func (a *TokensApiService) RegistriesTokensGet(ctx _context.Context, registryId string) ApiRegistriesTokensGetRequest {
@@ -482,8 +482,8 @@ func (r ApiRegistriesTokensPatchRequest) Execute() (TokenResponse, *APIResponse,
 /*
  * RegistriesTokensPatch Update token
  * @param ctx _context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
- * @param registryId
- * @param tokenId
+ * @param registryId The unique ID of the registry
+ * @param tokenId The unique ID of the token
  * @return ApiRegistriesTokensPatchRequest
  */
 func (a *TokensApiService) RegistriesTokensPatch(ctx _context.Context, registryId string, tokenId string) ApiRegistriesTokensPatchRequest {
@@ -521,6 +521,9 @@ func (a *TokensApiService) RegistriesTokensPatchExecute(r ApiRegistriesTokensPat
 	localVarHeaderParams := make(map[string]string)
 	localVarQueryParams := _neturl.Values{}
 	localVarFormParams := _neturl.Values{}
+	if r.patchTokenInput == nil {
+		return localVarReturnValue, nil, reportError("patchTokenInput is required and must be specified")
+	}
 
 	// to determine the Content-Type header
 	localVarHTTPContentTypes := []string{"application/json"}
@@ -632,7 +635,7 @@ func (r ApiRegistriesTokensPostRequest) Execute() (PostTokenOutput, *APIResponse
  * Create a token
 - password is only available once in the POST response
  * @param ctx _context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
- * @param registryId
+ * @param registryId The unique ID of the registry
  * @return ApiRegistriesTokensPostRequest
 */
 func (a *TokensApiService) RegistriesTokensPost(ctx _context.Context, registryId string) ApiRegistriesTokensPostRequest {
@@ -668,6 +671,9 @@ func (a *TokensApiService) RegistriesTokensPostExecute(r ApiRegistriesTokensPost
 	localVarHeaderParams := make(map[string]string)
 	localVarQueryParams := _neturl.Values{}
 	localVarFormParams := _neturl.Values{}
+	if r.postTokenInput == nil {
+		return localVarReturnValue, nil, reportError("postTokenInput is required and must be specified")
+	}
 
 	// to determine the Content-Type header
 	localVarHTTPContentTypes := []string{"application/json"}
@@ -790,8 +796,8 @@ func (r ApiRegistriesTokensPutRequest) Execute() (PutTokenOutput, *APIResponse, 
 - password is only available once in the create response
 - "name" cannot be changed
  * @param ctx _context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
- * @param registryId
- * @param tokenId
+ * @param registryId The unique ID of the registry
+ * @param tokenId The unique ID of the token
  * @return ApiRegistriesTokensPutRequest
 */
 func (a *TokensApiService) RegistriesTokensPut(ctx _context.Context, registryId string, tokenId string) ApiRegistriesTokensPutRequest {
@@ -829,6 +835,9 @@ func (a *TokensApiService) RegistriesTokensPutExecute(r ApiRegistriesTokensPutRe
 	localVarHeaderParams := make(map[string]string)
 	localVarQueryParams := _neturl.Values{}
 	localVarFormParams := _neturl.Values{}
+	if r.putTokenInput == nil {
+		return localVarReturnValue, nil, reportError("putTokenInput is required and must be specified")
+	}
 
 	// to determine the Content-Type header
 	localVarHTTPContentTypes := []string{"application/json"}

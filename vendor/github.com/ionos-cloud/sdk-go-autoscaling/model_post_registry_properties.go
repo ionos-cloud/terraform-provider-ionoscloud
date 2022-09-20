@@ -198,17 +198,13 @@ func (o *PostRegistryProperties) HasName() bool {
 
 func (o PostRegistryProperties) MarshalJSON() ([]byte, error) {
 	toSerialize := map[string]interface{}{}
-	if o.GarbageCollectionSchedule != nil {
-		toSerialize["garbageCollectionSchedule"] = o.GarbageCollectionSchedule
-	}
+	toSerialize["garbageCollectionSchedule"] = o.GarbageCollectionSchedule
 
 	if o.Location != nil {
 		toSerialize["location"] = o.Location
 	}
 
-	if o.MaintenanceWindow != nil {
-		toSerialize["maintenanceWindow"] = o.MaintenanceWindow
-	}
+	toSerialize["maintenanceWindow"] = o.MaintenanceWindow
 
 	if o.Name != nil {
 		toSerialize["name"] = o.Name

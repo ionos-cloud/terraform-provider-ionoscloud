@@ -117,13 +117,9 @@ func (o *PatchRegistryInput) HasMaintenanceWindow() bool {
 
 func (o PatchRegistryInput) MarshalJSON() ([]byte, error) {
 	toSerialize := map[string]interface{}{}
-	if o.GarbageCollectionSchedule != nil {
-		toSerialize["garbageCollectionSchedule"] = o.GarbageCollectionSchedule
-	}
+	toSerialize["garbageCollectionSchedule"] = o.GarbageCollectionSchedule
 
-	if o.MaintenanceWindow != nil {
-		toSerialize["maintenanceWindow"] = o.MaintenanceWindow
-	}
+	toSerialize["maintenanceWindow"] = o.MaintenanceWindow
 
 	return json.Marshal(toSerialize)
 }

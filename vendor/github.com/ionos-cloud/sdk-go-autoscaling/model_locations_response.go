@@ -203,9 +203,7 @@ func (o LocationsResponse) MarshalJSON() ([]byte, error) {
 		toSerialize["id"] = o.Id
 	}
 
-	if o.Items != nil {
-		toSerialize["items"] = o.Items
-	}
+	toSerialize["items"] = o.Items
 
 	if o.Type != nil {
 		toSerialize["type"] = o.Type
