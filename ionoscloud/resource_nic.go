@@ -4,11 +4,13 @@ import (
 	"context"
 	"fmt"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 	ionoscloud "github.com/ionos-cloud/sdk-go/v6"
 	"log"
 	"strings"
+	"time"
 )
 
 func resourceNic() *schema.Resource {
@@ -107,12 +109,34 @@ func resourceNicCreate(ctx context.Context, d *schema.ResourceData, meta interfa
 		diags := diag.FromErr(errState)
 		return diags
 	}
-	return resourceNicRead(ctx, d, meta)
+	//Sometimes there is an error because the nic is not found after it's created.
+	//Probably a read write consistency.
+	//We're retrying for 5 minutes until we actually find the nic.
+	var foundNic = &ionoscloud.Nic{}
+	err = resource.RetryContext(ctx, 5*time.Minute, func() *resource.RetryError {
+		var err error
+		*foundNic, apiResponse, err = client.NetworkInterfacesApi.DatacentersServersNicsFindById(ctx, dcid, srvid, *nic.Id).Execute()
+		if apiResponse.HttpNotFound() {
+			log.Printf("[INFO] Could not find nic with nic Id %s , retrying...", *nic.Id)
+			return resource.RetryableError(fmt.Errorf("could not find nic, err %w", err))
+		}
+		if err != nil {
+			resource.NonRetryableError(err)
+		}
+		return nil
+	})
+	if err != nil {
+		return diag.FromErr(err)
+	}
+	if foundNic == nil || *foundNic.Id == "" {
+		return diag.FromErr(fmt.Errorf("could not find nic with id %s after creation ", *nic.Id))
+	}
+
+	return diag.FromErr(NicSetData(d, foundNic))
 }
 
 func resourceNicRead(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	client := meta.(SdkBundle).CloudApiClient
-
 	dcid := d.Get("datacenter_id").(string)
 	srvid := d.Get("server_id").(string)
 	nicid := d.Id()
