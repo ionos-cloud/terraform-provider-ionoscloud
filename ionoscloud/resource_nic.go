@@ -110,24 +110,26 @@ func resourceNicCreate(ctx context.Context, d *schema.ResourceData, meta interfa
 		return diags
 	}
 	//Sometimes there is an error because the nic is not found after it's created.
-	//Probably a read write consistency.
-	//We're retrying for 5 minutes until we actually find the nic.
+	//Probably a read write consistency issue.
+	//We're retrying for 5 minutes. 404 - means we keep on trying.
 	var foundNic = &ionoscloud.Nic{}
 	err = resource.RetryContext(ctx, 5*time.Minute, func() *resource.RetryError {
 		var err error
 		*foundNic, apiResponse, err = client.NetworkInterfacesApi.DatacentersServersNicsFindById(ctx, dcid, srvid, *nic.Id).Execute()
 		if apiResponse.HttpNotFound() {
-			log.Printf("[INFO] Could not find nic with nic Id %s , retrying...", *nic.Id)
-			return resource.RetryableError(fmt.Errorf("could not find nic, err %w", err))
+			log.Printf("[INFO] Could not find nic with Id %s , retrying...", *nic.Id)
+			return resource.RetryableError(fmt.Errorf("could not find nic, %w", err))
 		}
 		if err != nil {
 			resource.NonRetryableError(err)
 		}
 		return nil
 	})
+
 	if err != nil {
 		return diag.FromErr(err)
 	}
+
 	if foundNic == nil || *foundNic.Id == "" {
 		return diag.FromErr(fmt.Errorf("could not find nic with id %s after creation ", *nic.Id))
 	}
@@ -145,7 +147,7 @@ func resourceNicRead(ctx context.Context, d *schema.ResourceData, meta interface
 	logApiRequestTime(apiResponse)
 
 	if err != nil {
-		if httpNotFound(apiResponse) {
+		if apiResponse.HttpNotFound() {
 			log.Printf("[INFO] nic resource with id %s not found", nicid)
 			d.SetId("")
 			return nil
@@ -326,7 +328,7 @@ func resourceNicImport(ctx context.Context, d *schema.ResourceData, meta interfa
 	logApiRequestTime(apiResponse)
 
 	if err != nil {
-		if !httpNotFound(apiResponse) {
+		if !apiResponse.HttpNotFound() {
 			d.SetId("")
 			return nil, fmt.Errorf("an error occured while trying to fetch the nic %q", nicId)
 		}
