@@ -1,4 +1,4 @@
-//go:build compute || all || s3key
+//go:build all || s3key
 
 package ionoscloud
 
