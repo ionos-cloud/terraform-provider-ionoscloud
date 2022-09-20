@@ -391,7 +391,7 @@ func resourceDbaasPgSqlClusterImport(ctx context.Context, d *schema.ResourceData
 	return []*schema.ResourceData{d}, nil
 }
 
-func dbaasClusterReady(ctx context.Context, client *dbaasService.Client, d *schema.ResourceData) (bool, error) {
+func dbaasClusterReady(ctx context.Context, client *dbaasService.PsqlClient, d *schema.ResourceData) (bool, error) {
 	subjectCluster, _, err := client.GetCluster(ctx, d.Id())
 
 	if err != nil {
@@ -415,7 +415,7 @@ func dbaasClusterReady(ctx context.Context, client *dbaasService.Client, d *sche
 	return *subjectCluster.Metadata.State == "AVAILABLE", nil
 }
 
-func dbaasClusterDeleted(ctx context.Context, client *dbaasService.Client, d *schema.ResourceData) (bool, error) {
+func dbaasClusterDeleted(ctx context.Context, client *dbaasService.PsqlClient, d *schema.ResourceData) (bool, error) {
 
 	_, apiResponse, err := client.GetCluster(ctx, d.Id())
 

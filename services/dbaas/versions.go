@@ -14,7 +14,7 @@ type VersionService interface {
 	GetAllVersions(ctx context.Context) (dbaas.PostgresVersionList, *dbaas.APIResponse, error)
 }
 
-func (c *Client) GetClusterVersions(ctx context.Context, clusterId string) (dbaas.PostgresVersionList, *dbaas.APIResponse, error) {
+func (c *PsqlClient) GetClusterVersions(ctx context.Context, clusterId string) (dbaas.PostgresVersionList, *dbaas.APIResponse, error) {
 	versions, apiResponse, err := c.ClustersApi.ClusterPostgresVersionsGet(ctx, clusterId).Execute()
 	if apiResponse != nil {
 		return versions, apiResponse, err
@@ -23,7 +23,7 @@ func (c *Client) GetClusterVersions(ctx context.Context, clusterId string) (dbaa
 	return versions, nil, err
 }
 
-func (c *Client) GetAllVersions(ctx context.Context) (dbaas.PostgresVersionList, *dbaas.APIResponse, error) {
+func (c *PsqlClient) GetAllVersions(ctx context.Context) (dbaas.PostgresVersionList, *dbaas.APIResponse, error) {
 	versions, apiResponse, err := c.ClustersApi.PostgresVersionsGet(ctx).Execute()
 	if apiResponse != nil {
 		return versions, apiResponse, err

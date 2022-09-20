@@ -14,7 +14,7 @@ type BackupService interface {
 	GetAllBackups(ctx context.Context) (dbaas.ClusterBackupList, *dbaas.APIResponse, error)
 }
 
-func (c *Client) GetClusterBackups(ctx context.Context, clusterId string) (dbaas.ClusterBackupList, *dbaas.APIResponse, error) {
+func (c *PsqlClient) GetClusterBackups(ctx context.Context, clusterId string) (dbaas.ClusterBackupList, *dbaas.APIResponse, error) {
 	backups, apiResponse, err := c.BackupsApi.ClusterBackupsGet(ctx, clusterId).Execute()
 	if apiResponse != nil {
 		return backups, apiResponse, err
@@ -23,7 +23,7 @@ func (c *Client) GetClusterBackups(ctx context.Context, clusterId string) (dbaas
 	return backups, nil, err
 }
 
-func (c *Client) GetAllBackups(ctx context.Context) (dbaas.ClusterBackupList, *dbaas.APIResponse, error) {
+func (c *PsqlClient) GetAllBackups(ctx context.Context) (dbaas.ClusterBackupList, *dbaas.APIResponse, error) {
 	backups, apiResponse, err := c.BackupsApi.ClustersBackupsGet(ctx).Execute()
 	if apiResponse != nil {
 		return backups, apiResponse, err

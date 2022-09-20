@@ -188,7 +188,10 @@ const (
 
 // DBaaS Constants
 const (
-	DBaaSClusterResource             = "ionoscloud_pg_cluster"
+	DBaaSClusterResource      = "ionoscloud_pg_cluster"
+	DBaasMongoClusterResource = "ionoscloud_mongo_cluster"
+	DBaasMongoUserResource    = "ionoscloud_mongo_user"
+	//DBaasMongoVersionResource        = "ionoscloud_mongo_versions"
 	DBaaSClusterTestResource         = "test_dbaas_cluster"
 	DBaaSClusterTestDataSourceById   = "test_dbaas_cluster_id"
 	DBaaSClusterTestDataSourceByName = "test_dbaas_cluster_name"

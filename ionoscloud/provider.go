@@ -22,7 +22,8 @@ var Version = "DEV"
 
 type SdkBundle struct {
 	CloudApiClient *ionoscloud.APIClient
-	DbaasClient    *dbaasService.Client
+	DbaasClient    *dbaasService.PsqlClient
+	MongoClient    *dbaasService.MongoClient
 }
 
 // Provider returns a schema.Provider for ionoscloud
@@ -85,6 +86,8 @@ func Provider() *schema.Provider {
 			NetworkLoadBalancerResource: resourceNetworkLoadBalancer(),
 			NetworkLoadBalancerForwardingRuleResource: resourceNetworkLoadBalancerForwardingRule(),
 			DBaaSClusterResource:                      resourceDbaasPgSqlCluster(),
+			DBaasMongoClusterResource:                 resourceDbaasMongoDBCluster(),
+			DBaasMongoUserResource:                    resourceDbaasMongoUser(),
 			ALBResource:                               resourceApplicationLoadBalancer(),
 			ALBForwardingRuleResource:                 resourceApplicationLoadBalancerForwardingRule(),
 			TargetGroupResource:                       resourceTargetGroup(),
@@ -118,11 +121,13 @@ func Provider() *schema.Provider {
 			ShareResource:                             dataSourceShare(),
 			ResourceIpFailover:                        dataSourceIpFailover(),
 			DBaaSClusterResource:                      dataSourceDbaasPgSqlCluster(),
-			DBaaSVersionsResource:                     dataSourceDbaasPgSqlVersions(),
-			DBaaSBackupsResource:                      dataSourceDbaasPgSqlBackups(),
-			ALBResource:                               dataSourceApplicationLoadBalancer(),
-			ALBForwardingRuleResource:                 dataSourceApplicationLoadBalancerForwardingRule(),
-			TargetGroupResource:                       dataSourceTargetGroup(),
+			DBaasMongoClusterResource:                 dataSourceDbaasMongoCluster(),
+			//DBaasMongoVersionResource:                 dataSourceDbaasMongoVersions(),
+			DBaaSVersionsResource:     dataSourceDbaasPgSqlVersions(),
+			DBaaSBackupsResource:      dataSourceDbaasPgSqlBackups(),
+			ALBResource:               dataSourceApplicationLoadBalancer(),
+			ALBForwardingRuleResource: dataSourceApplicationLoadBalancerForwardingRule(),
+			TargetGroupResource:       dataSourceTargetGroup(),
 		},
 	}
 
@@ -180,11 +185,13 @@ func providerConfigure(d *schema.ResourceData, terraformVersion string) (interfa
 		Version, ionoscloud.Version, terraformVersion, meta.SDKVersionString(), runtime.GOOS, runtime.GOARCH)
 
 	dbaasClient := dbaasService.NewClientService(username.(string), password.(string), token.(string), cleanedUrl)
-	//dbaasClient.GetConfig().HTTPClient = &http.Client{Transport: createTransport()}
+	mongoClient := dbaasService.NewMongoClientService(username.(string), password.(string), token.(string), cleanedUrl)
+	//dbaasClient.GetConfig().HTTPClient = &http.PsqlClient{Transport: createTransport()}
 
 	return SdkBundle{
 		CloudApiClient: newClient,
 		DbaasClient:    dbaasClient.Get(),
+		MongoClient:    mongoClient.Get(),
 	}, nil
 }
 
