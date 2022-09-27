@@ -9,7 +9,6 @@ import (
 	"time"
 )
 
-// todo here I should add the mongo.ApiClient?
 type PsqlClient struct {
 	psql.APIClient
 }
@@ -54,6 +53,7 @@ func NewClientService(username, password, token, url string) PsqlClientService {
 	if os.Getenv("IONOS_DEBUG") != "" {
 		newConfigDbaas.Debug = true
 	}
+
 	newConfigDbaas.MaxRetries = 999
 	newConfigDbaas.MaxWaitTime = 4 * time.Second
 

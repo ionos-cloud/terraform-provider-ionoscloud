@@ -1,5 +1,5 @@
-//go:build all || dbaas
-// +build all dbaas
+//go:build all || dbaas || mongo
+// +build all dbaas mongo
 
 package ionoscloud
 
@@ -93,7 +93,7 @@ func TestAccDBaaSMongoClusterBasic(t *testing.T) {
 }
 
 func testAccCheckDbaasMongoClusterDestroyCheck(s *terraform.State) error {
-	//client := testAccProvider.Meta().(SdkBundle).DbaasClient
+	//client := testAccProvider.Meta().(SdkBundle).PsqlClient
 	client := testAccProvider.Meta().(SdkBundle).MongoClient
 
 	ctx, cancel := context.WithTimeout(context.Background(), *resourceDefaultTimeouts.Default)
@@ -103,7 +103,7 @@ func testAccCheckDbaasMongoClusterDestroyCheck(s *terraform.State) error {
 	}
 
 	for _, rs := range s.RootModule().Resources {
-		//if rs.Type != DBaaSBackupsResource {
+		//if rs.Type != PsqlBackupsResource {
 		//	continue
 		//}
 

@@ -205,7 +205,7 @@ func checkDBaaSClusterImmutableFields(_ context.Context, diff *schema.ResourceDi
 
 }
 func resourceDbaasPgSqlClusterCreate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
-	client := meta.(SdkBundle).DbaasClient
+	client := meta.(SdkBundle).PsqlClient
 
 	dbaasCluster, err := dbaasService.GetDbaasPgSqlClusterDataCreate(d)
 
@@ -252,7 +252,7 @@ func resourceDbaasPgSqlClusterCreate(ctx context.Context, d *schema.ResourceData
 
 func resourceDbaasPgSqlClusterRead(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 
-	client := meta.(SdkBundle).DbaasClient
+	client := meta.(SdkBundle).PsqlClient
 
 	cluster, apiResponse, err := client.GetCluster(ctx, d.Id())
 
@@ -275,7 +275,7 @@ func resourceDbaasPgSqlClusterRead(ctx context.Context, d *schema.ResourceData, 
 }
 
 func resourceDbaasPgSqlClusterUpdate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
-	client := meta.(SdkBundle).DbaasClient
+	client := meta.(SdkBundle).PsqlClient
 
 	cluster, diags := dbaasService.GetDbaasPgSqlClusterDataUpdate(d)
 
@@ -324,7 +324,7 @@ func resourceDbaasPgSqlClusterUpdate(ctx context.Context, d *schema.ResourceData
 }
 
 func resourceDbaasPgSqlClusterDelete(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
-	client := meta.(SdkBundle).DbaasClient
+	client := meta.(SdkBundle).PsqlClient
 
 	_, apiResponse, err := client.DeleteCluster(ctx, d.Id())
 
@@ -368,7 +368,7 @@ func resourceDbaasPgSqlClusterDelete(ctx context.Context, d *schema.ResourceData
 }
 
 func resourceDbaasPgSqlClusterImport(ctx context.Context, d *schema.ResourceData, meta interface{}) ([]*schema.ResourceData, error) {
-	client := meta.(SdkBundle).DbaasClient
+	client := meta.(SdkBundle).PsqlClient
 
 	clusterId := d.Id()
 

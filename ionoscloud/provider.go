@@ -22,7 +22,7 @@ var Version = "DEV"
 
 type SdkBundle struct {
 	CloudApiClient *ionoscloud.APIClient
-	DbaasClient    *dbaasService.PsqlClient
+	PsqlClient     *dbaasService.PsqlClient
 	MongoClient    *dbaasService.MongoClient
 }
 
@@ -85,7 +85,7 @@ func Provider() *schema.Provider {
 			NatGatewayRuleResource:      resourceNatGatewayRule(),
 			NetworkLoadBalancerResource: resourceNetworkLoadBalancer(),
 			NetworkLoadBalancerForwardingRuleResource: resourceNetworkLoadBalancerForwardingRule(),
-			DBaaSClusterResource:                      resourceDbaasPgSqlCluster(),
+			PsqlClusterResource:                       resourceDbaasPgSqlCluster(),
 			DBaasMongoClusterResource:                 resourceDbaasMongoDBCluster(),
 			DBaasMongoUserResource:                    resourceDbaasMongoUser(),
 			ALBResource:                               resourceApplicationLoadBalancer(),
@@ -120,14 +120,14 @@ func Provider() *schema.Provider {
 			NicResource:                               dataSourceNIC(),
 			ShareResource:                             dataSourceShare(),
 			ResourceIpFailover:                        dataSourceIpFailover(),
-			DBaaSClusterResource:                      dataSourceDbaasPgSqlCluster(),
+			PsqlClusterResource:                       dataSourceDbaasPgSqlCluster(),
 			DBaasMongoClusterResource:                 dataSourceDbaasMongoCluster(),
-			//DBaasMongoVersionResource:                 dataSourceDbaasMongoVersions(),
-			DBaaSVersionsResource:     dataSourceDbaasPgSqlVersions(),
-			DBaaSBackupsResource:      dataSourceDbaasPgSqlBackups(),
-			ALBResource:               dataSourceApplicationLoadBalancer(),
-			ALBForwardingRuleResource: dataSourceApplicationLoadBalancerForwardingRule(),
-			TargetGroupResource:       dataSourceTargetGroup(),
+			PsqlVersionsResource:                      dataSourceDbaasPgSqlVersions(),
+			PsqlBackupsResource:                       dataSourceDbaasPgSqlBackups(),
+			ALBResource:                               dataSourceApplicationLoadBalancer(),
+			ALBForwardingRuleResource:                 dataSourceApplicationLoadBalancerForwardingRule(),
+			TargetGroupResource:                       dataSourceTargetGroup(),
+			DBaasMongoUserResource:                    dataSourceDbaasMongoUser(),
 		},
 	}
 
@@ -190,7 +190,7 @@ func providerConfigure(d *schema.ResourceData, terraformVersion string) (interfa
 
 	return SdkBundle{
 		CloudApiClient: newClient,
-		DbaasClient:    dbaasClient.Get(),
+		PsqlClient:     dbaasClient.Get(),
 		MongoClient:    mongoClient.Get(),
 	}, nil
 }

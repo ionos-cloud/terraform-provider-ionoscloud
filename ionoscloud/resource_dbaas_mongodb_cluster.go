@@ -13,20 +13,14 @@ import (
 
 func resourceDbaasMongoDBCluster() *schema.Resource {
 	return &schema.Resource{
-		CreateContext: resourceDbaasMongoDBClusterCreate,
-		ReadContext:   resourceDbaasMongoDBClusterRead,
-		//UpdateContext: resourceDbaasMongoDBClusterUpdate,
-		DeleteContext: resourceDbaasMongoDBClusterDelete,
+		CreateContext: resourceDbaasMongoClusterCreate,
+		ReadContext:   resourceDbaasMongoClusterRead,
+		//no update operation, forcenew on all fields
+		DeleteContext: resourceDbaasMongoClusterDelete,
 		Importer: &schema.ResourceImporter{
 			StateContext: resourceDbaasMongoClusterImport,
 		},
-		CustomizeDiff: checkDBaaSMongoClusterImmutableFields,
 		Schema: map[string]*schema.Schema{
-			//"mongo_cluster": {
-			//	Type:        schema.TypeString,
-			//	Optional:    true,
-			//	Description: "The ID or name of an existing Mongo Cluster.",
-			//},
 			"maintenance_window": {
 				Type:        schema.TypeList,
 				MaxItems:    1,
@@ -37,44 +31,45 @@ func resourceDbaasMongoDBCluster() *schema.Resource {
 				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{
 						"time": {
-							Type:         schema.TypeString,
-							Required:     true,
-							ValidateFunc: validation.All(validation.StringIsNotWhiteSpace),
+							Type:             schema.TypeString,
+							Required:         true,
+							ValidateDiagFunc: validation.ToDiagFunc(validation.StringIsNotWhiteSpace),
 						},
 						"day_of_the_week": {
-							Type:         schema.TypeString,
-							Required:     true,
-							ValidateFunc: validation.All(validation.IsDayOfTheWeek(true)),
+							Type:             schema.TypeString,
+							Required:         true,
+							ValidateDiagFunc: validation.ToDiagFunc(validation.IsDayOfTheWeek(true)),
 						},
 					},
 				},
 			},
 			"mongodb_version": {
-				Type:         schema.TypeString,
-				Description:  "The MongoDB version of your cluster.",
-				Required:     true,
-				ForceNew:     true,
-				ValidateFunc: validation.All(validation.StringIsNotWhiteSpace),
+				Type:             schema.TypeString,
+				Description:      "The MongoDB version of your cluster.",
+				Required:         true,
+				ForceNew:         true,
+				ValidateDiagFunc: validation.ToDiagFunc(validation.StringIsNotWhiteSpace),
 			},
 			"instances": {
-				Type:         schema.TypeInt,
-				Description:  "The total number of instances in the cluster (one master and n-1 standbys)",
-				Required:     true,
-				ForceNew:     true,
-				ValidateFunc: validation.All(validation.IntBetween(1, 5)),
+				Type:             schema.TypeInt,
+				Description:      "The total number of instances in the cluster (one master and n-1 standbys)",
+				Required:         true,
+				ForceNew:         true,
+				ValidateDiagFunc: validation.ToDiagFunc(validation.IntBetween(1, 5)),
 			},
 			"display_name": {
 				Type:        schema.TypeString,
-				Description: "The friendly name of your cluster.",
+				Description: "The name of your cluster.",
 				Required:    true,
 				ForceNew:    true,
 			},
 			"location": {
-				Type:         schema.TypeString,
-				Description:  "The physical location where the cluster will be created. This will be where all of your instances live. Property cannot be modified after datacenter creation (disallowed in update requests)",
-				Required:     true,
-				ForceNew:     true,
-				ValidateFunc: validation.All(validation.StringIsNotWhiteSpace),
+				Type: schema.TypeString,
+				Description: "The physical location where the cluster will be created. This will be where all of your instances live. " +
+					"Property cannot be modified after datacenter creation (disallowed in update requests). Available locations: de/txl, gb/lhr, es/vit",
+				Required:         true,
+				ForceNew:         true,
+				ValidateDiagFunc: validation.ToDiagFunc(validation.StringIsNotWhiteSpace),
 			},
 			"connections": {
 				Type:        schema.TypeList,
@@ -85,16 +80,16 @@ func resourceDbaasMongoDBCluster() *schema.Resource {
 				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{
 						"datacenter_id": {
-							Type:         schema.TypeString,
-							Description:  "The datacenter to connect your cluster to.",
-							Required:     true,
-							ValidateFunc: validation.All(validation.IsUUID),
+							Type:             schema.TypeString,
+							Description:      "The datacenter to connect your cluster to.",
+							Required:         true,
+							ValidateDiagFunc: validation.ToDiagFunc(validation.IsUUID),
 						},
 						"lan_id": {
-							Type:         schema.TypeString,
-							Description:  "The LAN to connect your cluster to.",
-							Required:     true,
-							ValidateFunc: validation.All(validation.StringIsNotWhiteSpace),
+							Type:             schema.TypeString,
+							Description:      "The LAN to connect your cluster to.",
+							Required:         true,
+							ValidateDiagFunc: validation.ToDiagFunc(validation.StringIsNotWhiteSpace),
 						},
 						"cidr_list": {
 							Type: schema.TypeList,
@@ -108,10 +103,11 @@ func resourceDbaasMongoDBCluster() *schema.Resource {
 				},
 			},
 			"template_id": {
-				Type:        schema.TypeString,
-				Description: "The unique ID of the template, which specifies the number of cores, storage size, and memory.",
-				Required:    true,
-				ForceNew:    true,
+				Type:             schema.TypeString,
+				Description:      "The unique ID of the template, which specifies the number of cores, storage size, and memory.",
+				Required:         true,
+				ForceNew:         true,
+				ValidateDiagFunc: validation.ToDiagFunc(validation.IsUUID),
 			},
 			"connection_string": {
 				Type:        schema.TypeString,
@@ -128,16 +124,16 @@ func resourceDbaasMongoDBCluster() *schema.Resource {
 				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{
 						"username": {
-							Type:         schema.TypeString,
-							Description:  "the username for the initial mongoDB user.",
-							Required:     true,
-							ValidateFunc: validation.All(validation.StringIsNotWhiteSpace),
+							Type:             schema.TypeString,
+							Description:      "the username for the initial mongoDB user.",
+							Required:         true,
+							ValidateDiagFunc: validation.ToDiagFunc(validation.StringIsNotWhiteSpace),
 						},
 						"password": {
-							Type:         schema.TypeString,
-							Required:     true,
-							Sensitive:    true,
-							ValidateFunc: validation.All(validation.StringIsNotWhiteSpace),
+							Type:             schema.TypeString,
+							Required:         true,
+							Sensitive:        true,
+							ValidateDiagFunc: validation.ToDiagFunc(validation.StringIsNotWhiteSpace),
 						},
 					},
 				},
@@ -147,46 +143,14 @@ func resourceDbaasMongoDBCluster() *schema.Resource {
 	}
 }
 
-func checkDBaaSMongoClusterImmutableFields(_ context.Context, diff *schema.ResourceDiff, _ interface{}) error {
-
-	//we do not want to check in case of resource creation
-	if diff.Id() == "" {
-		return nil
-	}
-	if diff.HasChange("template_id") {
-		return fmt.Errorf("template_id %s", ImmutableError)
-	}
-	if diff.HasChange("mongodb_version") {
-		return fmt.Errorf("mongodb_version %s", ImmutableError)
-	}
-	if diff.HasChange("instances") {
-		return fmt.Errorf("instances %s", ImmutableError)
-	}
-	if diff.HasChange("connections") {
-		return fmt.Errorf("connections %s", ImmutableError)
-	}
-	if diff.HasChange("location") {
-		return fmt.Errorf("location %s", ImmutableError)
-	}
-	if diff.HasChange("display_name") {
-		return fmt.Errorf("display_name %s", ImmutableError)
-	}
-	if diff.HasChange("credentials") {
-		return fmt.Errorf("credentials %s", ImmutableError)
-	}
-
-	return nil
-
-}
-
-func resourceDbaasMongoDBClusterCreate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func resourceDbaasMongoClusterCreate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	client := meta.(SdkBundle).MongoClient
 
 	cluster := dbaasService.GetDbaasMongoClusterDataCreate(d)
 
 	createdCluster, apiResponse, err := client.ClustersApi.ClustersPost(ctx).CreateClusterRequest(*cluster).Execute()
 	if err != nil {
-		if apiResponse != nil && apiResponse.Response != nil && apiResponse.StatusCode == 404 {
+		if apiResponse.HttpNotFound() {
 			d.SetId("")
 			return nil
 		}
@@ -199,7 +163,6 @@ func resourceDbaasMongoDBClusterCreate(ctx context.Context, d *schema.ResourceDa
 		log.Printf("[INFO] Waiting for mongo cluster %s to be ready...", d.Id())
 
 		clusterReady, rsErr := dbaasMongoClusterReady(ctx, client, d)
-
 		if rsErr != nil {
 			diags := diag.FromErr(fmt.Errorf("error while checking readiness status of dbaas mongo cluster %s: %w", d.Id(), rsErr))
 			return diags
@@ -221,16 +184,16 @@ func resourceDbaasMongoDBClusterCreate(ctx context.Context, d *schema.ResourceDa
 
 	}
 
-	return resourceDbaasMongoDBClusterRead(ctx, d, meta)
+	return resourceDbaasMongoClusterRead(ctx, d, meta)
 }
 
-func resourceDbaasMongoDBClusterRead(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func resourceDbaasMongoClusterRead(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	client := meta.(SdkBundle).MongoClient
 
 	cluster, apiResponse, err := client.ClustersApi.ClustersFindById(ctx, d.Id()).Execute()
 
 	if err != nil {
-		if apiResponse != nil && apiResponse.Response != nil && apiResponse.StatusCode == 404 {
+		if apiResponse.HttpNotFound() {
 			d.SetId("")
 			return nil
 		}
@@ -247,13 +210,13 @@ func resourceDbaasMongoDBClusterRead(ctx context.Context, d *schema.ResourceData
 	return nil
 }
 
-func resourceDbaasMongoDBClusterDelete(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func resourceDbaasMongoClusterDelete(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	client := meta.(SdkBundle).MongoClient
 
 	_, apiResponse, err := client.ClustersApi.ClustersDelete(ctx, d.Id()).Execute()
 
 	if err != nil {
-		if apiResponse != nil && apiResponse.Response != nil && apiResponse.StatusCode == 404 {
+		if apiResponse.HttpNotFound() {
 			d.SetId("")
 			return nil
 		}
@@ -264,10 +227,10 @@ func resourceDbaasMongoDBClusterDelete(ctx context.Context, d *schema.ResourceDa
 	for {
 		log.Printf("[INFO] Waiting for cluster %s to be deleted...", d.Id())
 
-		clusterdDeleted, dsErr := dbaasCMongolusterDeleted(ctx, client, d)
+		clusterdDeleted, dsErr := dbaasMongoClusterDeleted(ctx, client, d)
 
 		if dsErr != nil {
-			diags := diag.FromErr(fmt.Errorf("error while checking deletion status of dbaas cluster %s: %s", d.Id(), dsErr))
+			diags := diag.FromErr(fmt.Errorf("error while checking deletion status of mongo dbaas cluster %s: %s", d.Id(), dsErr))
 			return diags
 		}
 
@@ -280,7 +243,7 @@ func resourceDbaasMongoDBClusterDelete(ctx context.Context, d *schema.ResourceDa
 		case <-time.After(SleepInterval):
 			log.Printf("[INFO] trying again ...")
 		case <-ctx.Done():
-			diags := diag.FromErr(fmt.Errorf("dbaas mongo cluster deletion timed out! WARNING: your k8s cluster (%s) will still probably be deleted after some time but the terraform state won't reflect that; check your Ionos Cloud account for updates", d.Id()))
+			diags := diag.FromErr(fmt.Errorf("dbaas mongo cluster deletion timed out! WARNING: your mongo cluster (%s) will still probably be deleted after some time but the terraform state won't reflect that; check your Ionos Cloud account for updates", d.Id()))
 			return diags
 		}
 	}
@@ -299,7 +262,7 @@ func resourceDbaasMongoClusterImport(ctx context.Context, d *schema.ResourceData
 	dbaasCluster, apiResponse, err := client.ClustersApi.ClustersFindById(ctx, clusterId).Execute()
 
 	if err != nil {
-		if apiResponse != nil && apiResponse.Response != nil && apiResponse.StatusCode == 404 {
+		if apiResponse.HttpNotFound() {
 			d.SetId("")
 			return nil, fmt.Errorf("dbaas cluster does not exist %q", clusterId)
 		}
@@ -319,17 +282,17 @@ func dbaasMongoClusterReady(ctx context.Context, client *dbaasService.MongoClien
 	subjectCluster, _, err := client.ClustersApi.ClustersFindById(ctx, d.Id()).Execute()
 
 	if err != nil {
-		return true, fmt.Errorf("error checking dbaas mongo cluster status: %s", err)
+		return true, fmt.Errorf("error checking dbaas mongo cluster status: %w", err)
 	}
 	return *subjectCluster.Metadata.State == "AVAILABLE", nil
 }
 
-func dbaasCMongolusterDeleted(ctx context.Context, client *dbaasService.MongoClient, d *schema.ResourceData) (bool, error) {
+func dbaasMongoClusterDeleted(ctx context.Context, client *dbaasService.MongoClient, d *schema.ResourceData) (bool, error) {
 
 	_, apiResponse, err := client.ClustersApi.ClustersFindById(ctx, d.Id()).Execute()
 
 	if err != nil {
-		if apiResponse != nil && apiResponse.Response != nil && apiResponse.StatusCode == 404 {
+		if apiResponse.HttpNotFound() {
 			return true, nil
 		}
 		return true, fmt.Errorf("error checking dbaas mongo cluster deletion status: %s", err)

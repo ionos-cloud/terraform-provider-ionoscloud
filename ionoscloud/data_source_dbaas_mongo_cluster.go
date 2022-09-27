@@ -22,11 +22,6 @@ func dataSourceDbaasMongoCluster() *schema.Resource {
 				Optional:     true,
 				ValidateFunc: validation.All(validation.IsUUID),
 			},
-			//"mongo_cluster": {
-			//	Type:        schema.TypeString,
-			//	Description: "The ID or name of an existing Mongo Cluster.",
-			//	Optional:    true,
-			//},
 			"maintenance_window": {
 				Type:        schema.TypeList,
 				Description: "a weekly 4 hour-long window, during which maintenance might occur",
@@ -60,9 +55,10 @@ func dataSourceDbaasMongoCluster() *schema.Resource {
 				Optional:    true,
 			},
 			"location": {
-				Type:        schema.TypeString,
-				Description: "The physical location where the cluster will be created. This will be where all of your instances live. Property cannot be modified after datacenter creation (disallowed in update requests)",
-				Computed:    true,
+				Type: schema.TypeString,
+				Description: "The physical location where the cluster will be created. This will be where all of your instances live. Property cannot be modified after datacenter creation (disallowed in update requests)." +
+					"Available locations: de/txl, gb/lhr, es/vit",
+				Computed: true,
 			},
 			"connections": {
 				Type:        schema.TypeList,
@@ -126,7 +122,6 @@ func dataSourceDbaasMongoCluster() *schema.Resource {
 }
 
 func dataSourceDbaasMongoReadCluster(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
-	//client := meta.(SdkBundle).DbaasClient
 	client := meta.(SdkBundle).MongoClient
 
 	id, idOk := d.GetOk("id")
@@ -141,20 +136,17 @@ func dataSourceDbaasMongoReadCluster(ctx context.Context, d *schema.ResourceData
 		return diags
 	}
 
-	//var cluster dbaas.ClusterResponse
 	var cluster mongo.ClusterResponse
 	var err error
 
 	if idOk {
 		/* search by ID */
-		//cluster, _, err = client.GetCluster(ctx, id.(string))
 		cluster, _, err = client.ClustersApi.ClustersFindById(ctx, id.(string)).Execute()
 		if err != nil {
 			diags := diag.FromErr(fmt.Errorf("an error occurred while fetching the dbaas mongo cluster with ID %s: %s", id.(string), err))
 			return diags
 		}
 	} else {
-		//clusters, _, err := client.ListClusters(ctx, "")
 		clusters, _, err := client.ClustersApi.ClustersGet(ctx).Execute()
 
 		if err != nil {
@@ -162,7 +154,6 @@ func dataSourceDbaasMongoReadCluster(ctx context.Context, d *schema.ResourceData
 			return diags
 		}
 
-		//var results []dbaas.ClusterResponse
 		var results []mongo.ClusterResponse
 
 		if clusters.Items != nil && len(*clusters.Items) > 0 {

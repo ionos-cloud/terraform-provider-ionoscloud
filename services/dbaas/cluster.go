@@ -514,55 +514,58 @@ func SetDbaasMongoDBClusterData(d *schema.ResourceData, cluster mongo.ClusterRes
 	if cluster.Id != nil {
 		d.SetId(*cluster.Id)
 	}
-	if cluster.Properties.TemplateID != nil {
-		if err := d.Set("template_id", *cluster.Properties.TemplateID); err != nil {
-			return utils.GenerateSetError(resourceName, "template_id", err)
-		}
-	}
-	if cluster.Properties.MongoDBVersion != nil {
-		if err := d.Set("mongodb_version", *cluster.Properties.MongoDBVersion); err != nil {
-			return utils.GenerateSetError(resourceName, "mongodb_version", err)
-		}
-	}
-	if cluster.Properties.Instances != nil {
-		if err := d.Set("instances", *cluster.Properties.Instances); err != nil {
-			return utils.GenerateSetError(resourceName, "instances", err)
-		}
-	}
-	if cluster.Properties.Connections != nil && len(*cluster.Properties.Connections) > 0 {
-		var connections []interface{}
-		for _, connection := range *cluster.Properties.Connections {
-			connectionEntry := SetMongoConnectionProperties(connection)
-			connections = append(connections, connectionEntry)
-		}
-		if err := d.Set("connections", connections); err != nil {
-			return utils.GenerateSetError(resourceName, "connections", err)
-		}
-	}
+	if cluster.Properties != nil {
 
-	if cluster.Properties.Location != nil {
-		if err := d.Set("location", *cluster.Properties.Location); err != nil {
-			return fmt.Errorf("error while setting location property for psql cluster %s: %s", d.Id(), err)
+		if cluster.Properties.TemplateID != nil {
+			if err := d.Set("template_id", *cluster.Properties.TemplateID); err != nil {
+				return utils.GenerateSetError(resourceName, "template_id", err)
+			}
 		}
-	}
-	if cluster.Properties.DisplayName != nil {
-		if err := d.Set("display_name", *cluster.Properties.DisplayName); err != nil {
-			return fmt.Errorf("error while setting display_name property for psql cluster %s: %s", d.Id(), err)
+		if cluster.Properties.MongoDBVersion != nil {
+			if err := d.Set("mongodb_version", *cluster.Properties.MongoDBVersion); err != nil {
+				return utils.GenerateSetError(resourceName, "mongodb_version", err)
+			}
 		}
-	}
+		if cluster.Properties.Instances != nil {
+			if err := d.Set("instances", *cluster.Properties.Instances); err != nil {
+				return utils.GenerateSetError(resourceName, "instances", err)
+			}
+		}
+		if cluster.Properties.Connections != nil && len(*cluster.Properties.Connections) > 0 {
+			var connections []interface{}
+			for _, connection := range *cluster.Properties.Connections {
+				connectionEntry := SetMongoConnectionProperties(connection)
+				connections = append(connections, connectionEntry)
+			}
+			if err := d.Set("connections", connections); err != nil {
+				return utils.GenerateSetError(resourceName, "connections", err)
+			}
+		}
 
-	if cluster.Properties.ConnectionString != nil {
-		if err := d.Set("connection_string", *cluster.Properties.ConnectionString); err != nil {
-			return utils.GenerateSetError(resourceName, "connection_string", err)
+		if cluster.Properties.Location != nil {
+			if err := d.Set("location", *cluster.Properties.Location); err != nil {
+				return fmt.Errorf("error while setting location property for psql cluster %s: %s", d.Id(), err)
+			}
 		}
-	}
+		if cluster.Properties.DisplayName != nil {
+			if err := d.Set("display_name", *cluster.Properties.DisplayName); err != nil {
+				return fmt.Errorf("error while setting display_name property for psql cluster %s: %s", d.Id(), err)
+			}
+		}
 
-	if cluster.Properties.MaintenanceWindow != nil {
-		var maintenanceWindow []interface{}
-		maintenanceWindowEntry := SetMongoMaintenanceWindowProperties(*cluster.Properties.MaintenanceWindow)
-		maintenanceWindow = append(maintenanceWindow, maintenanceWindowEntry)
-		if err := d.Set("maintenance_window", maintenanceWindow); err != nil {
-			return utils.GenerateSetError(resourceName, "maintenance_window", err)
+		if cluster.Properties.ConnectionString != nil {
+			if err := d.Set("connection_string", *cluster.Properties.ConnectionString); err != nil {
+				return utils.GenerateSetError(resourceName, "connection_string", err)
+			}
+		}
+
+		if cluster.Properties.MaintenanceWindow != nil {
+			var maintenanceWindow []interface{}
+			maintenanceWindowEntry := SetMongoMaintenanceWindowProperties(*cluster.Properties.MaintenanceWindow)
+			maintenanceWindow = append(maintenanceWindow, maintenanceWindowEntry)
+			if err := d.Set("maintenance_window", maintenanceWindow); err != nil {
+				return utils.GenerateSetError(resourceName, "maintenance_window", err)
+			}
 		}
 	}
 
