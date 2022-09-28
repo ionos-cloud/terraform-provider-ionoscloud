@@ -3,6 +3,7 @@
 ### Enhancement:
 - Increase go version to 1.18
 - Update dependencies to latest versions
+- `ssh_key_path` will now allow the keys to be passed directly also. In the future, will be renamed to `ssh_keys`.
 
 ### Fixes
 - Reproduces rarely: sometimes the `nic` resource is not found after creation. As a fix we added a retry for 5 minutes to be able to get the NIC. The retry will keep trying if the response 
