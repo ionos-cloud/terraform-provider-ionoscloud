@@ -29,6 +29,16 @@ func TestAccServerBasic(t *testing.T) {
 		CheckDestroy:      testAccCheckServerDestroyCheck,
 		Steps: []resource.TestStep{
 			{
+				Config:      testAccCheckServerNoPwdOrSSH,
+				ExpectError: regexp.MustCompile(`either 'image_password' or 'ssh_key_path' must be provided`),
+			},
+			{
+				//ssh_key_path now accepts the ssh key directly too
+				Config: testAccCheckServerSshDirectly,
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttr(ServerResource+"."+ServerTestResource, "ssh_key_path.0", sshKey)),
+			},
+			{
 				Config: testAccCheckServerConfigBasic,
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckServerExists(ServerResource+"."+ServerTestResource, &server),
