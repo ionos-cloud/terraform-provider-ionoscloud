@@ -30,7 +30,7 @@ func TestAccK8sNodePoolBasic(t *testing.T) {
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckK8sNodePoolExists(ResourceNameK8sNodePool, &k8sNodepool),
 					resource.TestCheckResourceAttr(ResourceNameK8sNodePool, "name", K8sNodePoolTestResource),
-					resource.TestCheckResourceAttr(ResourceNameK8sNodePool, "k8s_version", "1.20.10"),
+					resource.TestCheckResourceAttr(ResourceNameK8sNodePool, "k8s_version", "1.22.11"),
 					resource.TestCheckResourceAttr(ResourceNameK8sNodePool, "maintenance_window.0.day_of_the_week", "Monday"),
 					resource.TestCheckResourceAttr(ResourceNameK8sNodePool, "maintenance_window.0.time", "09:00:00Z"),
 					resource.TestCheckNoResourceAttr(ResourceNameK8sNodePool, "auto_scaling"),
@@ -52,7 +52,7 @@ func TestAccK8sNodePoolBasic(t *testing.T) {
 				),
 			},
 			{
-				Config: testAccDataSourceProfitBricksK8sNodePoolMatchId,
+				Config: testAccDataSourceK8sNodePoolMatchId,
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttrPair(DataSourceK8sNodePoolId, "name", ResourceNameK8sNodePool, "name"),
 					resource.TestCheckResourceAttrPair(DataSourceK8sNodePoolId, "k8s_version", ResourceNameK8sNodePool, "k8s_version"),
@@ -73,7 +73,7 @@ func TestAccK8sNodePoolBasic(t *testing.T) {
 				),
 			},
 			{
-				Config: testAccDataSourceProfitBricksK8sNodePoolMatchName,
+				Config: testAccDataSourceK8sNodePoolMatchName,
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttrPair(DataSourceK8sNodePoolName, "name", ResourceNameK8sNodePool, "name"),
 					resource.TestCheckResourceAttrPair(DataSourceK8sNodePoolName, "k8s_version", ResourceNameK8sNodePool, "k8s_version"),
@@ -94,7 +94,36 @@ func TestAccK8sNodePoolBasic(t *testing.T) {
 				),
 			},
 			{
-				Config:      testAccDataSourceProfitBricksK8sNodePoolWrongNameError,
+				Config: testAccDataSourceK8sNodePoolPartialMatchName,
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttrPair(DataSourceK8sNodePoolName, "name", ResourceNameK8sNodePool, "name"),
+					resource.TestCheckResourceAttrPair(DataSourceK8sNodePoolName, "k8s_version", ResourceNameK8sNodePool, "k8s_version"),
+					resource.TestCheckResourceAttrPair(DataSourceK8sNodePoolName, "maintenance_window.0.day_of_the_week", ResourceNameK8sNodePool, "maintenance_window.0.day_of_the_week"),
+					resource.TestCheckResourceAttrPair(DataSourceK8sNodePoolName, "maintenance_window.0.time", ResourceNameK8sNodePool, "maintenance_window.0.time"),
+					resource.TestCheckResourceAttrPair(DataSourceK8sNodePoolName, "auto_scaling.0.min_node_count", ResourceNameK8sNodePool, "auto_scaling.0.min_node_count"),
+					resource.TestCheckResourceAttrPair(DataSourceK8sNodePoolName, "auto_scaling.0.max_node_count", ResourceNameK8sNodePool, "auto_scaling.0.max_node_count"),
+					resource.TestCheckResourceAttrPair(DataSourceK8sNodePoolName, "cpu_family", ResourceNameK8sNodePool, "cpu_family"),
+					resource.TestCheckResourceAttrPair(DataSourceK8sNodePoolName, "availability_zone", ResourceNameK8sNodePool, "availability_zone"),
+					resource.TestCheckResourceAttrPair(DataSourceK8sNodePoolName, "storage_type", ResourceNameK8sNodePool, "storage_type"),
+					resource.TestCheckResourceAttrPair(DataSourceK8sNodePoolName, "node_count", ResourceNameK8sNodePool, "node_count"),
+					resource.TestCheckResourceAttrPair(DataSourceK8sNodePoolName, "cores_count", ResourceNameK8sNodePool, "cores_count"),
+					resource.TestCheckResourceAttrPair(DataSourceK8sNodePoolName, "ram_size", ResourceNameK8sNodePool, "ram_size"),
+					resource.TestCheckResourceAttrPair(DataSourceK8sNodePoolName, "storage_size", ResourceNameK8sNodePool, "storage_size"),
+					resource.TestCheckResourceAttrPair(DataSourceK8sNodePoolName, "public_ips.0", ResourceNameK8sNodePool, "public_ips.0"),
+					resource.TestCheckResourceAttrPair(DataSourceK8sNodePoolName, "public_ips.1", ResourceNameK8sNodePool, "public_ips.1"),
+					resource.TestCheckResourceAttrPair(DataSourceK8sNodePoolName, "lans.0", ResourceNameK8sNodePool, "lans.0"),
+					resource.TestCheckResourceAttrPair(DataSourceK8sNodePoolName, "labels.foo", ResourceNameK8sNodePool, "labels.foo"),
+					resource.TestCheckResourceAttrPair(DataSourceK8sNodePoolName, "labels.color", ResourceNameK8sNodePool, "labels.color"),
+					resource.TestCheckResourceAttrPair(DataSourceK8sNodePoolName, "annotations.ann1", ResourceNameK8sNodePool, "annotations.ann1"),
+					resource.TestCheckResourceAttrPair(DataSourceK8sNodePoolName, "annotations.ann2", ResourceNameK8sNodePool, "annotations.ann2"),
+				),
+			},
+			{
+				Config:      testAccDataSourceK8sNodePoolWrongNameError,
+				ExpectError: regexp.MustCompile("no nodepool found with the specified name"),
+			},
+			{
+				Config:      testAccDataSourceK8sNodePoolWrongPartialNameError,
 				ExpectError: regexp.MustCompile("no nodepool found with the specified name"),
 			},
 			{
@@ -102,7 +131,7 @@ func TestAccK8sNodePoolBasic(t *testing.T) {
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckK8sNodePoolExists(ResourceNameK8sNodePool, &k8sNodepool),
 					resource.TestCheckResourceAttr(ResourceNameK8sNodePool, "name", K8sNodePoolTestResource),
-					resource.TestCheckResourceAttr(ResourceNameK8sNodePool, "k8s_version", "1.20.10"),
+					resource.TestCheckResourceAttr(ResourceNameK8sNodePool, "k8s_version", "1.22.11"),
 					resource.TestCheckResourceAttr(ResourceNameK8sNodePool, "maintenance_window.0.day_of_the_week", "Tuesday"),
 					resource.TestCheckResourceAttr(ResourceNameK8sNodePool, "maintenance_window.0.time", "10:00:00Z"),
 					resource.TestCheckResourceAttr(ResourceNameK8sNodePool, "auto_scaling.0.min_node_count", "1"),
@@ -139,7 +168,7 @@ func TestAccK8sNodePoolBasic(t *testing.T) {
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckK8sNodePoolExists(ResourceNameK8sNodePool, &k8sNodepool),
 					resource.TestCheckResourceAttr(ResourceNameK8sNodePool, "name", K8sNodePoolTestResource),
-					resource.TestCheckResourceAttr(ResourceNameK8sNodePool, "k8s_version", "1.21.9"),
+					resource.TestCheckResourceAttr(ResourceNameK8sNodePool, "k8s_version", "1.23.9"),
 					resource.TestCheckResourceAttr(ResourceNameK8sNodePool, "maintenance_window.0.day_of_the_week", "Tuesday"),
 					resource.TestCheckResourceAttr(ResourceNameK8sNodePool, "maintenance_window.0.time", "10:00:00Z"),
 					resource.TestCheckNoResourceAttr(ResourceNameK8sNodePool, "auto_scaling"),
@@ -331,7 +360,7 @@ resource ` + IpBlockResource + ` "terraform_acctest" {
 }
 resource ` + K8sClusterResource + ` "terraform_acctest" {
   name        = "terraform_acctest"
-  k8s_version = "1.20.10"
+  k8s_version = "1.22.11"
   maintenance_window {
     day_of_the_week = "Monday"
     time            = "09:00:00Z"
@@ -394,7 +423,7 @@ resource ` + IpBlockResource + ` "terraform_acctest" {
 }
 resource ` + K8sClusterResource + ` "terraform_acctest" {
 	name        = "terraform_acctest"
-	k8s_version = "1.20.14"
+	k8s_version = "1.22.12"
 	maintenance_window {
 		day_of_the_week = "Monday"
 		time            = "09:00:00Z"
@@ -476,7 +505,7 @@ resource ` + IpBlockResource + ` "terraform_acctest" {
 }
 resource ` + K8sClusterResource + ` "terraform_acctest" {
 	name        = "terraform_acctest"
-    k8s_version = "1.21.9"
+    k8s_version = "1.23.9"
 	maintenance_window {
 		day_of_the_week = "Monday"
 		time            = "09:00:00Z"
@@ -528,7 +557,7 @@ resource ` + IpBlockResource + ` "terraform_acctest" {
 }
 resource ` + K8sClusterResource + ` "terraform_acctest" {
   name        = "terraform_acctest"
-  k8s_version = "1.20.10"
+  k8s_version = "1.23.9"
   maintenance_window {
     day_of_the_week = "Monday"
     time            = "09:00:00Z"
@@ -575,24 +604,40 @@ resource ` + K8sNodePoolResource + ` ` + K8sNodePoolTestResource + ` {
   }
 }`
 
-const testAccDataSourceProfitBricksK8sNodePoolMatchId = testAccCheckK8sNodePoolConfigBasic + `
+const testAccDataSourceK8sNodePoolMatchId = testAccCheckK8sNodePoolConfigBasic + `
 data ` + K8sNodePoolResource + ` ` + K8sNodePoolDataSourceById + ` {
 	k8s_cluster_id  = ` + K8sClusterResource + `.terraform_acctest.id
 	id				= ` + K8sNodePoolResource + `.` + K8sNodePoolTestResource + `.id
 }
 `
 
-const testAccDataSourceProfitBricksK8sNodePoolMatchName = testAccCheckK8sNodePoolConfigBasic + `
+const testAccDataSourceK8sNodePoolMatchName = testAccCheckK8sNodePoolConfigBasic + `
 data ` + K8sNodePoolResource + ` ` + K8sNodePoolDataSourceByName + ` {
 	k8s_cluster_id 	= ` + K8sClusterResource + `.terraform_acctest.id
 	name			= ` + K8sNodePoolResource + `.` + K8sNodePoolTestResource + `.name
 }
 `
 
-const testAccDataSourceProfitBricksK8sNodePoolWrongNameError = testAccCheckK8sNodePoolConfigBasic + `
+const testAccDataSourceK8sNodePoolPartialMatchName = testAccCheckK8sNodePoolConfigBasic + `
+data ` + K8sNodePoolResource + ` ` + K8sNodePoolDataSourceByName + ` {
+	k8s_cluster_id 	= ` + K8sClusterResource + `.terraform_acctest.id
+	name			= "` + DataSourcePartial + `"
+    partial_match   = true
+}
+`
+
+const testAccDataSourceK8sNodePoolWrongNameError = testAccCheckK8sNodePoolConfigBasic + `
 data ` + K8sNodePoolResource + ` ` + K8sNodePoolDataSourceByName + ` {
 	k8s_cluster_id 	= ` + K8sClusterResource + `.terraform_acctest.id
 	name			= "wrong_name"
+}
+`
+
+const testAccDataSourceK8sNodePoolWrongPartialNameError = testAccCheckK8sNodePoolConfigBasic + `
+data ` + K8sNodePoolResource + ` ` + K8sNodePoolDataSourceByName + ` {
+	k8s_cluster_id 	= ` + K8sClusterResource + `.terraform_acctest.id
+	name			= "wrong_name"
+    partial_match   = true
 }
 `
 

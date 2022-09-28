@@ -41,6 +41,15 @@ func TestAccPrivateCrossConnectBasic(t *testing.T) {
 				),
 			},
 			{
+				Config: testAccDataSourcePccPartialMatchName,
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttrPair(DataSource+"."+PCCResource+"."+PCCDataSourceByName, "name", PCCResource+"."+PCCTestResource, "name"),
+					resource.TestCheckResourceAttrPair(DataSource+"."+PCCResource+"."+PCCDataSourceByName, "description", PCCResource+"."+PCCTestResource, "description"),
+					resource.TestCheckResourceAttrPair(DataSource+"."+PCCResource+"."+PCCDataSourceByName, "peers", PCCResource+"."+PCCTestResource, "peers"),
+					resource.TestCheckResourceAttrPair(DataSource+"."+PCCResource+"."+PCCDataSourceByName, "connectable_datacenters", PCCResource+"."+PCCTestResource, "connectable_datacenters"),
+				),
+			},
+			{
 				Config: testAccDataSourcePccMatchName,
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttrPair(DataSource+"."+PCCResource+"."+PCCDataSourceByName, "name", PCCResource+"."+PCCTestResource, "name"),
@@ -55,6 +64,10 @@ func TestAccPrivateCrossConnectBasic(t *testing.T) {
 			},
 			{
 				Config:      testAccDataSourcePccWrongNameError,
+				ExpectError: regexp.MustCompile(`no pcc found with the specified criteria: name`),
+			},
+			{
+				Config:      testAccDataSourcePccWrongPartialNameError,
 				ExpectError: regexp.MustCompile(`no pcc found with the specified criteria: name`),
 			},
 			{
@@ -148,9 +161,22 @@ data ` + PCCResource + ` ` + PCCDataSourceByName + ` {
 }
 `
 
+const testAccDataSourcePccPartialMatchName = testAccCheckPrivateCrossConnectConfigBasic + `
+data ` + PCCResource + ` ` + PCCDataSourceByName + ` {
+  name			= "` + DataSourcePartial + `"
+  partial_match = true
+}
+`
+
 const testAccDataSourcePccWrongNameError = testAccCheckPrivateCrossConnectConfigBasic + `
 data ` + PCCResource + ` ` + PCCDataSourceByName + ` {
   name			= "wrong_name"
+}
+`
+const testAccDataSourcePccWrongPartialNameError = testAccCheckPrivateCrossConnectConfigBasic + `
+data ` + PCCResource + ` ` + PCCDataSourceByName + ` {
+  name			= "wrong_name"
+  partial_match = true
 }
 `
 

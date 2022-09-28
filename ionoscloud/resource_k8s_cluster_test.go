@@ -29,7 +29,7 @@ func TestAccK8sClusterBasic(t *testing.T) {
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckK8sClusterExists(K8sClusterResource+"."+K8sClusterTestResource, &k8sCluster),
 					resource.TestCheckResourceAttr(K8sClusterResource+"."+K8sClusterTestResource, "name", K8sClusterTestResource),
-					resource.TestCheckResourceAttr(K8sClusterResource+"."+K8sClusterTestResource, "k8s_version", "1.20.10"),
+					resource.TestCheckResourceAttr(K8sClusterResource+"."+K8sClusterTestResource, "k8s_version", "1.22.11"),
 					//resource.TestCheckResourceAttr(K8sClusterResource+"."+K8sClusterTestResource, "public", "true"),
 					resource.TestCheckResourceAttr(K8sClusterResource+"."+K8sClusterTestResource, "maintenance_window.0.day_of_the_week", "Sunday"),
 					resource.TestCheckResourceAttr(K8sClusterResource+"."+K8sClusterTestResource, "maintenance_window.0.time", "09:00:00Z"),
@@ -50,6 +50,18 @@ func TestAccK8sClusterBasic(t *testing.T) {
 				),
 			},
 			{
+				Config: testAccDataSourceK8sClusterPartialMatchName,
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttrPair(DataSource+"."+K8sClusterResource+"."+K8sClusterDataSourceByName, "name", K8sClusterResource+"."+K8sClusterTestResource, "name"),
+					resource.TestCheckResourceAttrPair(DataSource+"."+K8sClusterResource+"."+K8sClusterDataSourceByName, "k8s_version", K8sClusterResource+"."+K8sClusterTestResource, "k8s_version"),
+					resource.TestCheckResourceAttrPair(DataSource+"."+K8sClusterResource+"."+K8sClusterDataSourceByName, "maintenance_window.0.day_of_the_week", K8sClusterResource+"."+K8sClusterTestResource, "maintenance_window.0.day_of_the_week"),
+					resource.TestCheckResourceAttrPair(DataSource+"."+K8sClusterResource+"."+K8sClusterDataSourceByName, "maintenance_window.0.time", K8sClusterResource+"."+K8sClusterTestResource, "maintenance_window.0.time"),
+					resource.TestCheckResourceAttrPair(DataSource+"."+K8sClusterResource+"."+K8sClusterDataSourceByName, "maintenance_window.0.time", K8sClusterResource+"."+K8sClusterTestResource, "maintenance_window.0.time"),
+					resource.TestCheckResourceAttrPair(DataSource+"."+K8sClusterResource+"."+K8sClusterDataSourceByName, "api_subnet_allow_list.0", K8sClusterResource+"."+K8sClusterTestResource, "api_subnet_allow_list.0"),
+					resource.TestCheckResourceAttrPair(DataSource+"."+K8sClusterResource+"."+K8sClusterDataSourceByName, "s3_buckets.0.name", K8sClusterResource+"."+K8sClusterTestResource, "s3_buckets.0.name"),
+				),
+			},
+			{
 				Config: testAccDataSourceK8sClusterMatchName,
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttrPair(DataSource+"."+K8sClusterResource+"."+K8sClusterDataSourceByName, "name", K8sClusterResource+"."+K8sClusterTestResource, "name"),
@@ -66,11 +78,15 @@ func TestAccK8sClusterBasic(t *testing.T) {
 				ExpectError: regexp.MustCompile("no cluster found with the specified name"),
 			},
 			{
+				Config:      testAccDataSourceK8sClusterWrongPartialNameError,
+				ExpectError: regexp.MustCompile("no cluster found with the specified name"),
+			},
+			{
 				Config: testAccCheckK8sClusterConfigUpdate,
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckK8sClusterExists(K8sClusterResource+"."+K8sClusterTestResource, &k8sCluster),
 					resource.TestCheckResourceAttr(K8sClusterResource+"."+K8sClusterTestResource, "name", UpdatedResources),
-					resource.TestCheckResourceAttr(K8sClusterResource+"."+K8sClusterTestResource, "k8s_version", "1.20.10"),
+					resource.TestCheckResourceAttr(K8sClusterResource+"."+K8sClusterTestResource, "k8s_version", "1.22.11"),
 					//resource.TestCheckResourceAttr(K8sClusterResource+"."+K8sClusterTestResource, "public", "true"),
 					resource.TestCheckResourceAttr(K8sClusterResource+"."+K8sClusterTestResource, "maintenance_window.0.day_of_the_week", "Monday"),
 					resource.TestCheckResourceAttr(K8sClusterResource+"."+K8sClusterTestResource, "maintenance_window.0.time", "10:30:00Z"),
@@ -84,7 +100,7 @@ func TestAccK8sClusterBasic(t *testing.T) {
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckK8sClusterExists(K8sClusterResource+"."+K8sClusterTestResource, &k8sCluster),
 					resource.TestCheckResourceAttr(K8sClusterResource+"."+K8sClusterTestResource, "name", UpdatedResources),
-					resource.TestCheckResourceAttr(K8sClusterResource+"."+K8sClusterTestResource, "k8s_version", "1.21.9"),
+					resource.TestCheckResourceAttr(K8sClusterResource+"."+K8sClusterTestResource, "k8s_version", "1.23.9"),
 					//resource.TestCheckResourceAttr(K8sClusterResource+"."+K8sClusterTestResource, "public", "true"),
 					resource.TestCheckResourceAttr(K8sClusterResource+"."+K8sClusterTestResource, "maintenance_window.0.day_of_the_week", "Monday"),
 					resource.TestCheckResourceAttr(K8sClusterResource+"."+K8sClusterTestResource, "maintenance_window.0.time", "10:30:00Z"),
@@ -110,7 +126,7 @@ func TestAccK8sClusterBasic(t *testing.T) {
 //				Check: resource.ComposeTestCheckFunc(
 //					testAccCheckK8sClusterExists(K8sClusterResource+"."+K8sClusterTestResource, &k8sCluster),
 //					resource.TestCheckResourceAttr(K8sClusterResource+"."+K8sClusterTestResource, "name", K8sClusterTestResource),
-//					resource.TestCheckResourceAttr(K8sClusterResource+"."+K8sClusterTestResource, "k8s_version", "1.20.10"),
+//					resource.TestCheckResourceAttr(K8sClusterResource+"."+K8sClusterTestResource, "k8s_version", "1.23.9"),
 //					resource.TestCheckResourceAttr(K8sClusterResource+"."+K8sClusterTestResource, "maintenance_window.0.day_of_the_week", "Sunday"),
 //					resource.TestCheckResourceAttr(K8sClusterResource+"."+K8sClusterTestResource, "maintenance_window.0.time", "09:00:00Z"),
 //					resource.TestCheckResourceAttr(K8sClusterResource+"."+K8sClusterTestResource, "api_subnet_allow_list.0", "1.2.3.4/32"),
@@ -190,7 +206,7 @@ func testAccCheckK8sClusterExists(n string, k8sCluster *ionoscloud.KubernetesClu
 const testAccCheckK8sClusterConfigBasic = `
 resource ` + K8sClusterResource + ` ` + K8sClusterTestResource + ` {
   name        = "` + K8sClusterTestResource + `"
-  k8s_version = "1.20.10"
+  k8s_version = "1.22.11"
   maintenance_window {
     day_of_the_week = "Sunday"
     time            = "09:00:00Z"
@@ -204,7 +220,7 @@ resource ` + K8sClusterResource + ` ` + K8sClusterTestResource + ` {
 const testAccCheckK8sClusterConfigUpdate = `
 resource ` + K8sClusterResource + ` ` + K8sClusterTestResource + ` {
   name        = "` + UpdatedResources + `"
-  k8s_version = "1.20.14"
+  k8s_version = "1.22.12"
   //public = "true"
   maintenance_window {
     day_of_the_week = "Monday"
@@ -217,7 +233,7 @@ resource ` + K8sClusterResource + ` ` + K8sClusterTestResource + ` {
 const testAccCheckk8sClusterConfigUpdateVersion = `
 resource ` + K8sClusterResource + ` ` + K8sClusterTestResource + ` {
   name        = "` + UpdatedResources + `"
-  k8s_version = "1.21.9"
+  k8s_version = "1.23.9"
   maintenance_window {
     day_of_the_week = "Monday"
     time            = "10:30:00Z"
@@ -229,7 +245,7 @@ resource ` + K8sClusterResource + ` ` + K8sClusterTestResource + ` {
 const testAccCheckK8sClusterConfigPrivateCluster = `
 resource ` + K8sClusterResource + ` ` + K8sClusterTestResource + ` {
   name        = "` + K8sClusterTestResource + `"
-  k8s_version = "1.21.9"
+  k8s_version = "1.23.9"
   maintenance_window {
     day_of_the_week = "Sunday"
     time            = "09:00:00Z"
@@ -253,8 +269,21 @@ data ` + K8sClusterResource + ` ` + K8sClusterDataSourceByName + `{
 }
 `
 
+const testAccDataSourceK8sClusterPartialMatchName = testAccCheckK8sClusterConfigBasic + `
+data ` + K8sClusterResource + ` ` + K8sClusterDataSourceByName + `{
+  name	= "` + DataSourcePartial + `" 
+  partial_match = true
+}
+`
+
 const testAccDataSourceK8sClusterWrongNameError = testAccCheckK8sClusterConfigBasic + `
 data ` + K8sClusterResource + ` ` + K8sClusterDataSourceByName + `{
   name	= "wrong_name"
+}
+`
+const testAccDataSourceK8sClusterWrongPartialNameError = testAccCheckK8sClusterConfigBasic + `
+data ` + K8sClusterResource + ` ` + K8sClusterDataSourceByName + `{
+  name	= "wrong_name"
+  partial_match = true
 }
 `

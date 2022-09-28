@@ -10,8 +10,6 @@ description: |-
 # ionoscloud\_user
 
 The **User data source** can be used to search for and return existing users.
-If a single match is found, it will be returned. If your search results in multiple matches, an error will be returned.
-When this happens, please refine your search string so that it is specific enough to return only one result.
 
 ## Example Usage
 
@@ -35,7 +33,7 @@ data "ionoscloud_user" "example" {
 
 ## Argument Reference
 
-* `email` - (Optional) Email of an existing user that you want to search for.
+* `email` - (Optional) Email of an existing user that you want to search for. 
 * `id` - (Optional) ID of the user you want to search for.
 
 Either `email` or `id` can be provided. If no argument is set, the provider will search for the **email that was provided for the configuration**. If none is found, the provider will return an error.

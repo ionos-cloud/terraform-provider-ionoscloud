@@ -60,6 +60,16 @@ func TestAccIPBlockBasic(t *testing.T) {
 				),
 			},
 			{
+				Config: testAccDataSourceIpBlockPartialMatchName,
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttrPair(dataSourceIpBlockNameMatchName, "name", fullIpBlockResourceName, "name"),
+					resource.TestCheckResourceAttrPair(dataSourceIpBlockNameMatchName, "location", fullIpBlockResourceName, "location"),
+					resource.TestCheckResourceAttrPair(dataSourceIpBlockNameMatchName, "size", fullIpBlockResourceName, "size"),
+					resource.TestCheckResourceAttrPair(dataSourceIpBlockNameMatchName, "ips", fullIpBlockResourceName, "ips"),
+					resource.TestCheckResourceAttrPair(dataSourceIpBlockNameMatchName, "ip_consumers", fullIpBlockResourceName, "ip_consumers"),
+				),
+			},
+			{
 				Config: testAccDataSourceIpBlockMatchName,
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttrPair(dataSourceIpBlockNameMatchName, "name", fullIpBlockResourceName, "name"),
@@ -72,6 +82,10 @@ func TestAccIPBlockBasic(t *testing.T) {
 			{
 				Config:      testAccDataSourceIpBlockMultipleResultsError,
 				ExpectError: regexp.MustCompile(`more than one ip block found with the specified criteria`),
+			},
+			{
+				Config:      testAccDataSourceIpBlockPartialNameError,
+				ExpectError: regexp.MustCompile(`no ip block found with the specified criteria`),
 			},
 			{
 				Config:      testAccDataSourceIpBlockNameError,
@@ -207,6 +221,12 @@ data ` + IpBlockResource + ` ` + IpBlockDataSourceByName + ` {
 	name = ` + fullIpBlockResourceName + `.name
 }`
 
+const testAccDataSourceIpBlockPartialMatchName = testAccCheckIPBlockConfigBasic + `
+data ` + IpBlockResource + ` ` + IpBlockDataSourceByName + ` { 
+	name = "` + DataSourcePartial + `"
+    partial_match = true
+}`
+
 const testAccDataSourceIpBlockMultipleResultsError = testAccCheckIPBlockConfigBasic + `
 resource ` + IpBlockResource + ` ` + IpBlockTestResource + `_same_name{
   location = "` + location + `"
@@ -222,6 +242,13 @@ const testAccDataSourceIpBlockNameError = testAccCheckIPBlockConfigBasic + `
 data ` + IpBlockResource + ` ` + IpBlockDataSourceByName + ` { 
 	name = ` + fullIpBlockResourceName + `.size
 }`
+
+const testAccDataSourceIpBlockPartialNameError = testAccCheckIPBlockConfigBasic + `
+data ` + IpBlockResource + ` ` + IpBlockDataSourceByName + ` { 
+	name = ` + fullIpBlockResourceName + `.size
+	partial_match = true
+}`
+
 const testAccDataSourceIpBlockMatchNameLocationError = testAccCheckIPBlockConfigBasic + `
 data ` + IpBlockResource + ` ` + IpBlockDataSourceByName + ` { 
 	name = ` + fullIpBlockResourceName + `.name

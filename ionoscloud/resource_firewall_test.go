@@ -51,6 +51,19 @@ func TestAccFirewallBasic(t *testing.T) {
 				),
 			},
 			{
+				Config: testAccDataSourceFirewallPartialMatchName,
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttrPair(DataSource+"."+FirewallResource+"."+FirewallDataSourceByName, "name", FirewallResource+"."+FirewallTestResource, "name"),
+					resource.TestCheckResourceAttrPair(DataSource+"."+FirewallResource+"."+FirewallDataSourceByName, "protocol", FirewallResource+"."+FirewallTestResource, "protocol"),
+					resource.TestCheckResourceAttrPair(DataSource+"."+FirewallResource+"."+FirewallDataSourceByName, "source_mac", FirewallResource+"."+FirewallTestResource, "source_mac"),
+					resource.TestCheckResourceAttrPair(DataSource+"."+FirewallResource+"."+FirewallDataSourceByName, "source_ip", FirewallResource+"."+FirewallTestResource, "source_ip"),
+					resource.TestCheckResourceAttrPair(DataSource+"."+FirewallResource+"."+FirewallDataSourceByName, "target_ip", FirewallResource+"."+FirewallTestResource, "target_ip"),
+					resource.TestCheckResourceAttrPair(DataSource+"."+FirewallResource+"."+FirewallDataSourceByName, "icmp_type", FirewallResource+"."+FirewallTestResource, "icmp_type"),
+					resource.TestCheckResourceAttrPair(DataSource+"."+FirewallResource+"."+FirewallDataSourceByName, "icmp_code", FirewallResource+"."+FirewallTestResource, "icmp_code"),
+					resource.TestCheckResourceAttrPair(DataSource+"."+FirewallResource+"."+FirewallDataSourceByName, "type", FirewallResource+"."+FirewallTestResource, "type"),
+				),
+			},
+			{
 				Config: testAccDataSourceFirewallMatchName,
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttrPair(DataSource+"."+FirewallResource+"."+FirewallDataSourceByName, "name", FirewallResource+"."+FirewallTestResource, "name"),
@@ -69,6 +82,10 @@ func TestAccFirewallBasic(t *testing.T) {
 			},
 			{
 				Config:      testAccDataSourceFirewallWrongNameError,
+				ExpectError: regexp.MustCompile("no firewall rule found with the specified name"),
+			},
+			{
+				Config:      testAccDataSourceFirewallWrongPartialNameError,
 				ExpectError: regexp.MustCompile("no firewall rule found with the specified name"),
 			},
 			{
@@ -466,6 +483,16 @@ data ` + FirewallResource + ` ` + FirewallDataSourceById + ` {
 }
 `
 
+const testAccDataSourceFirewallPartialMatchName = testAccCheckFirewallConfigBasic + `
+data ` + FirewallResource + ` ` + FirewallDataSourceByName + ` {
+  datacenter_id = ` + DatacenterResource + `.` + DatacenterTestResource + `.id
+  server_id = ` + ServerResource + `.` + ServerTestResource + `.id
+  nic_id = ionoscloud_nic.database_nic.id
+  name	= "` + DataSourcePartial + `"
+  partial_match = true
+}
+`
+
 const testAccDataSourceFirewallMatchName = testAccCheckFirewallConfigBasic + `
 data ` + FirewallResource + ` ` + FirewallDataSourceByName + ` {
   datacenter_id = ` + DatacenterResource + `.` + DatacenterTestResource + `.id
@@ -504,5 +531,15 @@ data ` + FirewallResource + ` ` + FirewallDataSourceByName + ` {
   server_id = ` + ServerResource + `.` + ServerTestResource + `.id
   nic_id = ionoscloud_nic.database_nic.id
   name	= "wrong_name"
+}
+`
+
+const testAccDataSourceFirewallWrongPartialNameError = testAccCheckFirewallConfigBasic + `
+data ` + FirewallResource + ` ` + FirewallDataSourceByName + ` {
+  datacenter_id = ` + DatacenterResource + `.` + DatacenterTestResource + `.id
+  server_id = ` + ServerResource + `.` + ServerTestResource + `.id
+  nic_id = ionoscloud_nic.database_nic.id
+  name	= "wrong_name"
+  partial_match = true
 }
 `

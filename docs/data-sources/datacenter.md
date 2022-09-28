@@ -12,7 +12,8 @@ description: |-
 The **Datacenter data source** can be used to search for and return an existing Virtual Data Center.
 You can provide a string for the name and location parameters which will be compared with provisioned Virtual Data Centers.
 If a single match is found, it will be returned. If your search results in multiple matches, an error will be returned.
-When this happens, please refine your search string so that it is specific enough to return only one result.
+When this happens, please refine your search and make sure that your resources have unique names.
+
 
 ## Example Usage
 
@@ -31,13 +32,23 @@ data "ionoscloud_datacenter" "example" {
 }
 ```
 
+### By Name & Location with Partial Match
+```hcl
+data "ionoscloud_datacenter" "example" {
+  name          = "Datacenter"
+  location      = "us/las"
+  partial_match = true
+}
+```
+
 ## Argument Reference
 
  * `id` - (Optional) Id of an existing Virtual Data Center that you want to search for.
- * `name` - (Optional) Name of an existing Virtual Data Center that you want to search for.
+ * `name` - (Optional) Name of an existing Virtual Data Center that you want to search for.Search by name is case-insensitive. The whole resource name is required if `partial_match` parameter is not set to true..
+ * `partial_match` - (Optional) Whether partial matching is allowed or not when using name argument. Default value is false.
  * `location` - (Optional) Id of the existing Virtual Data Center's location.
 
-Either `name`, `location` or `id` must be provided. If none, the datasource will return an error.
+Either `id`, `location` or `name` must be provided. If none, the datasource will return an error.
 
 ## Attributes Reference
 

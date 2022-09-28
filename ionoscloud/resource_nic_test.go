@@ -15,7 +15,7 @@ import (
 
 func TestAccNicBasic(t *testing.T) {
 	var nic ionoscloud.Nic
-	volumeName := "volume"
+	nicName := "test_nic"
 
 	resource.Test(t, resource.TestCase{
 		PreCheck: func() {
@@ -25,11 +25,11 @@ func TestAccNicBasic(t *testing.T) {
 		CheckDestroy:      testAccCheckNicDestroyCheck,
 		Steps: []resource.TestStep{
 			{
-				Config: fmt.Sprintf(testAccCheckNicConfigBasic, volumeName),
+				Config: fmt.Sprintf(testAccCheckNicConfigBasic, nicName),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckNICExists(fullNicResourceName, &nic),
 					resource.TestCheckResourceAttrSet(fullNicResourceName, "pci_slot"),
-					resource.TestCheckResourceAttr(fullNicResourceName, "name", volumeName),
+					resource.TestCheckResourceAttr(fullNicResourceName, "name", nicName),
 					resource.TestCheckResourceAttr(fullNicResourceName, "dhcp", "true"),
 					resource.TestCheckResourceAttrSet(fullNicResourceName, "mac"),
 					resource.TestCheckResourceAttr(fullNicResourceName, "firewall_active", "true"),
@@ -39,7 +39,7 @@ func TestAccNicBasic(t *testing.T) {
 				),
 			},
 			{
-				Config: testAccDataSourceNicMatchId,
+				Config: fmt.Sprintf(testAccDataSourceNicMatchId, nicName),
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttrPair(DataSource+"."+dataSourceNicById, "name", fullNicResourceName, "name"),
 					resource.TestCheckResourceAttrPair(DataSource+"."+dataSourceNicById, "dhcp", fullNicResourceName, "dhcp"),
@@ -52,7 +52,7 @@ func TestAccNicBasic(t *testing.T) {
 				),
 			},
 			{
-				Config: testAccDataSourceNicMatchName,
+				Config: fmt.Sprintf(testAccDataSourceNicPartialMatchName, nicName),
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttrPair(DataSource+"."+dataSourceNicById, "name", fullNicResourceName, "name"),
 					resource.TestCheckResourceAttrPair(DataSource+"."+dataSourceNicById, "dhcp", fullNicResourceName, "dhcp"),
@@ -65,15 +65,32 @@ func TestAccNicBasic(t *testing.T) {
 				),
 			},
 			{
-				Config:      testAccDataSourceNicMatchNameError,
+				Config: fmt.Sprintf(testAccDataSourceNicMatchName, nicName),
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttrPair(DataSource+"."+dataSourceNicById, "name", fullNicResourceName, "name"),
+					resource.TestCheckResourceAttrPair(DataSource+"."+dataSourceNicById, "dhcp", fullNicResourceName, "dhcp"),
+					resource.TestCheckResourceAttrPair(DataSource+"."+dataSourceNicById, "firewall_active", fullNicResourceName, "firewall_active"),
+					resource.TestCheckResourceAttrPair(DataSource+"."+dataSourceNicById, "firewall_type", fullNicResourceName, "firewall_type"),
+					resource.TestCheckResourceAttrPair(DataSource+"."+dataSourceNicById, "mac", fullNicResourceName, "mac"),
+					resource.TestCheckResourceAttrPair(DataSource+"."+dataSourceNicById, "pci_slot", fullNicResourceName, "pci_slot"),
+					resource.TestCheckResourceAttrPair(DataSource+"."+dataSourceNicById, "lan", fullNicResourceName, "lan"),
+					resource.TestCheckResourceAttrPair(DataSource+"."+dataSourceNicById, "ips", fullNicResourceName, "ips"),
+				),
+			},
+			{
+				Config:      fmt.Sprintf(testAccDataSourceNicMatchNameError, nicName),
 				ExpectError: regexp.MustCompile(`no nic found with the specified criteria: name`),
 			},
 			{
-				Config:      testAccDataSourceNicMatchIdAndNameError,
+				Config:      fmt.Sprintf(testAccDataSourceNicMatchPartialNameError, nicName),
+				ExpectError: regexp.MustCompile(`no nic found with the specified criteria: name`),
+			},
+			{
+				Config:      fmt.Sprintf(testAccDataSourceNicMatchIdAndNameError, nicName),
 				ExpectError: regexp.MustCompile(`does not match expected name`),
 			},
 			{
-				Config:      testAccDataSourceNicMultipleResultsError,
+				Config:      fmt.Sprintf(testAccDataSourceNicMultipleResultsError, nicName, nicName),
 				ExpectError: regexp.MustCompile(`more than one nic found with the specified criteria: name`),
 			},
 			{
@@ -229,11 +246,27 @@ data ` + NicResource + ` test_nic_data {
 	name = ` + fullNicResourceName + `.name 
 }`
 
+const testAccDataSourceNicPartialMatchName = testAccCheckNicConfigBasic + `
+data ` + NicResource + ` test_nic_data {
+  	datacenter_id = ` + DatacenterResource + `.` + DatacenterTestResource + `.id
+	server_id = ` + ServerResource + `.` + ServerTestResource + `.id
+	name = "` + DataSourcePartial + `"
+    partial_match = true
+}`
+
 const testAccDataSourceNicMatchNameError = testAccCheckNicConfigBasic + `
 data ` + NicResource + ` test_nic_data {
   	datacenter_id = ` + DatacenterResource + `.` + DatacenterTestResource + `.id
 	server_id = ` + ServerResource + `.` + ServerTestResource + `.id
-	name = "DoesNotExist"
+	name = "wrong_name"
+}`
+
+const testAccDataSourceNicMatchPartialNameError = testAccCheckNicConfigBasic + `
+data ` + NicResource + ` test_nic_data {
+  	datacenter_id = ` + DatacenterResource + `.` + DatacenterTestResource + `.id
+	server_id = ` + ServerResource + `.` + ServerTestResource + `.id
+	name = "wrong_name"
+    partial_match = true
 }`
 
 const testAccDataSourceNicMatchIdAndNameError = testAccCheckNicConfigBasic + `
@@ -241,7 +274,7 @@ data ` + NicResource + ` test_nic_data {
   	datacenter_id = ` + DatacenterResource + `.` + DatacenterTestResource + `.id
 	server_id = ` + ServerResource + `.` + ServerTestResource + `.id
 	id = ` + fullNicResourceName + `.id
-	name = "doesNotExist"
+	name = "wrong_name"
 }`
 
 const testAccDataSourceNicMultipleResultsError = testAccCheckNicConfigBasic + `

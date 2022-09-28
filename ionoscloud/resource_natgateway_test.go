@@ -48,6 +48,15 @@ func TestAccNatGatewayBasic(t *testing.T) {
 				),
 			},
 			{
+				Config: fmt.Sprintf(testAccDataSourceNatGatewayPartialMatchName, NatGatewayTestResource),
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttrPair(dataSourceNameNatGatewayResource, "name", resourceNatGatewayResource, "name"),
+					resource.TestCheckResourceAttrPair(dataSourceNameNatGatewayResource, "public_ips.0", resourceNatGatewayResource, "public_ips.0"),
+					resource.TestCheckResourceAttrPair(dataSourceNameNatGatewayResource, "lans.0.id", resourceNatGatewayResource, "lans.0.id"),
+					resource.TestCheckResourceAttrPair(dataSourceNameNatGatewayResource, "lans.0.gateway_ips", resourceNatGatewayResource, "lans.0.gateway_ips"),
+				),
+			},
+			{
 				Config: fmt.Sprintf(testAccDataSourceNatGatewayMatchName, NatGatewayTestResource),
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttrPair(dataSourceNameNatGatewayResource, "name", resourceNatGatewayResource, "name"),
@@ -57,7 +66,11 @@ func TestAccNatGatewayBasic(t *testing.T) {
 				),
 			},
 			{
-				Config:      testAccDataSourceNatGatewayWrongNameError,
+				Config:      testAccDataSourceNatGatewayMatchWrongNameError,
+				ExpectError: regexp.MustCompile(`no nat gateway found with the specified criteria`),
+			},
+			{
+				Config:      testAccDataSourceNatGatewayPartialMatchWrongNameError,
 				ExpectError: regexp.MustCompile(`no nat gateway found with the specified criteria`),
 			},
 			{
@@ -216,9 +229,25 @@ data ` + NatGatewayResource + ` ` + NatGatewayDataSourceByName + `  {
 }
 `
 
-const testAccDataSourceNatGatewayWrongNameError = testAccCheckNatGatewayConfigBasic + `
+const testAccDataSourceNatGatewayPartialMatchName = testAccCheckNatGatewayConfigBasic + `
+data ` + NatGatewayResource + ` ` + NatGatewayDataSourceByName + `  {
+  datacenter_id = ` + DatacenterResource + `.natgateway_datacenter.id
+  name			= "` + DataSourcePartial + `"
+  partial_match = true
+}
+`
+
+const testAccDataSourceNatGatewayMatchWrongNameError = testAccCheckNatGatewayConfigBasic + `
 data ` + NatGatewayResource + ` ` + NatGatewayDataSourceByName + `  {
   datacenter_id = ` + DatacenterResource + `.natgateway_datacenter.id
   name			= "wrong_name"
+}
+`
+
+const testAccDataSourceNatGatewayPartialMatchWrongNameError = testAccCheckNatGatewayConfigBasic + `
+data ` + NatGatewayResource + ` ` + NatGatewayDataSourceByName + `  {
+  datacenter_id = ` + DatacenterResource + `.natgateway_datacenter.id
+  name			= "wrong_name"
+  partial_match = true
 }
 `

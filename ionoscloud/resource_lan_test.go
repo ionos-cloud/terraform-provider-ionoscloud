@@ -52,11 +52,25 @@ func TestAccLanBasic(t *testing.T) {
 				),
 			},
 			{
+				Config: testAccDataSourceLanPartialMatchName,
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttrPair(DataSource+"."+LanResource+"."+LanDataSourceByName, "name", LanResource+"."+LanTestResource, "name"),
+					resource.TestCheckResourceAttrPair(DataSource+"."+LanResource+"."+LanDataSourceByName, "ip_failover.nic_uuid", LanResource+"."+LanTestResource, "ip_failover.nic_uuid"),
+					resource.TestCheckResourceAttrPair(DataSource+"."+LanResource+"."+LanDataSourceByName, "ip_failover.ip", LanResource+"."+LanTestResource, "ip_failover.ip"),
+					resource.TestCheckResourceAttrPair(DataSource+"."+LanResource+"."+LanDataSourceByName, "pcc", LanResource+"."+LanTestResource, "pcc"),
+					resource.TestCheckResourceAttrPair(DataSource+"."+LanResource+"."+LanDataSourceByName, "public", LanResource+"."+LanTestResource, "public"),
+				),
+			},
+			{
 				Config:      testAccDataSourceLanMultipleResultsError,
 				ExpectError: regexp.MustCompile(`more than one lan found with the specified criteria name`),
 			},
 			{
 				Config:      testAccDataSourceLanWrongNameError,
+				ExpectError: regexp.MustCompile(`no lan found with the specified name`),
+			},
+			{
+				Config:      testAccDataSourceLanWrongPartialNameError,
 				ExpectError: regexp.MustCompile(`no lan found with the specified name`),
 			},
 			{
@@ -156,6 +170,14 @@ data ` + LanResource + ` ` + LanDataSourceByName + ` {
 }
 `
 
+const testAccDataSourceLanPartialMatchName = testAccCheckLanConfigBasic + `
+data ` + LanResource + ` ` + LanDataSourceByName + ` {
+  datacenter_id = ` + DatacenterResource + `.` + DatacenterTestResource + `.id
+  name			= "` + DataSourcePartial + `"
+  partial_match = true
+}
+`
+
 const testAccDataSourceLanMultipleResultsError = testAccCheckLanConfigBasic + `
 resource ` + LanResource + ` ` + LanTestResource + `_multiple_results {
   datacenter_id = ` + DatacenterResource + `.` + DatacenterTestResource + `.id
@@ -173,5 +195,13 @@ const testAccDataSourceLanWrongNameError = testAccCheckLanConfigBasic + `
 data ` + LanResource + ` ` + LanDataSourceByName + ` {
   datacenter_id = ` + DatacenterResource + `.` + DatacenterTestResource + `.id
   name			= "wrong_name"
+}
+`
+
+const testAccDataSourceLanWrongPartialNameError = testAccCheckLanConfigBasic + `
+data ` + LanResource + ` ` + LanDataSourceByName + ` {
+  datacenter_id = ` + DatacenterResource + `.` + DatacenterTestResource + `.id
+  name			= "wrong_name"
+  partial_match = true
 }
 `

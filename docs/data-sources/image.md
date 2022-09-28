@@ -10,28 +10,26 @@ description: |-
 # ionoscloud\_image
 
 The **Image data source** can be used to search for and return an existing image which can then be used to provision a server.  
-If a single match is found, it will be returned. If your search results in multiple matches, an error will be returned. 
-When this happens, please refine your search string so that it is specific enough to return only one result.
 
 ## Example Usage
 
 ```hcl
 data "ionoscloud_image" "example" {
-  name        = "ubuntu"
-  type        = "CDROM"
-  location    = "de/fkb"
-  cloud_init  = "NONE"
+  name                  = "debian-10-genericcloud"
+  partial_match         = true
+  type                  = "HDD"
+  cloud_init            = "V1"
+  location              = "us/las"
 }
 ```
 
 ## Argument Reference
 
- * `name` - (Required) Name of an existing image that you want to search for.
+ * `name` - (Required) Name of an existing image that you want to search for. Search by name is case-insensitive. The whole resource name is required if `partial_match` parameter is not set to true..
+ * `partial_match` - (Optional) Whether partial matching is allowed or not when using name argument. Default value is false.
  * `location` - (Optional) Id of the existing image's location.
  * `type` - (Optional) The image type, HDD or CD-ROM.
  * `cloud_init` - (Optional) Cloud init compatibility ("NONE" or "V1")
-
-If both "name" and "version" are provided the plugin will concatenate the two strings in this format [name]-[version].
 
 ## Attributes Reference
 
@@ -54,4 +52,3 @@ If both "name" and "version" are provided the plugin will concatenate the two st
  * `image_aliases` - List of image aliases mapped for this Image
  * `cloud_init` - Cloud init compatibility
  * `type` - This indicates the type of image
- * `location` - Location of that image/snapshot.

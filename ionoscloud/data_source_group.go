@@ -7,6 +7,8 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	ionoscloud "github.com/ionos-cloud/sdk-go/v6"
+	"log"
+	"strings"
 )
 
 func dataSourceGroup() *schema.Resource {
@@ -20,6 +22,12 @@ func dataSourceGroup() *schema.Resource {
 			"name": {
 				Type:     schema.TypeString,
 				Optional: true,
+			},
+			"partial_match": {
+				Type:        schema.TypeBool,
+				Description: "Whether partial matching is allowed or not when using name argument.",
+				Default:     false,
+				Optional:    true,
 			},
 			"create_datacenter": {
 				Type:     schema.TypeBool,
@@ -118,8 +126,11 @@ func dataSourceGroup() *schema.Resource {
 func dataSourceGroupRead(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	client := meta.(SdkBundle).CloudApiClient
 
-	id, idOk := d.GetOk("id")
-	name, nameOk := d.GetOk("name")
+	idValue, idOk := d.GetOk("id")
+	nameValue, nameOk := d.GetOk("name")
+
+	id := idValue.(string)
+	name := nameValue.(string)
 
 	if idOk && nameOk {
 		diags := diag.FromErr(errors.New("id and name cannot be both specified in the same time"))
@@ -134,37 +145,51 @@ func dataSourceGroupRead(ctx context.Context, d *schema.ResourceData, meta inter
 
 	if idOk {
 		/* search by ID */
+		log.Printf("[INFO] Using data source for group by id %s", id)
+
 		var apiResponse *ionoscloud.APIResponse
-		group, apiResponse, err = client.UserManagementApi.UmGroupsFindById(ctx, id.(string)).Execute()
+		group, apiResponse, err = client.UserManagementApi.UmGroupsFindById(ctx, id).Execute()
 		logApiRequestTime(apiResponse)
 		if err != nil {
-			diags := diag.FromErr(fmt.Errorf("an error occurred while fetching group with ID %s: %s", id.(string), err))
+			diags := diag.FromErr(fmt.Errorf("an error occurred while fetching group with ID %s: %w", id, err))
 			return diags
 		}
 	} else {
 		/* search by name */
-		var groups ionoscloud.Groups
-
-		groups, apiResponse, err := client.UserManagementApi.UmGroupsGet(ctx).Depth(1).Execute()
-		logApiRequestTime(apiResponse)
-		if err != nil {
-			diags := diag.FromErr(fmt.Errorf("an error occurred while fetching groups: %w", err))
-			return diags
-		}
-
 		var results []ionoscloud.Group
 
-		if groups.Items != nil {
-			for _, g := range *groups.Items {
-				if g.Properties != nil && g.Properties.Name != nil && *g.Properties.Name == name.(string) {
-					/* group found */
-					group, apiResponse, err = client.UserManagementApi.UmGroupsFindById(ctx, *g.Id).Execute()
-					logApiRequestTime(apiResponse)
-					if err != nil {
-						diags := diag.FromErr(fmt.Errorf("an error occurred while fetching group %s: %w", *g.Id, err))
-						return diags
+		partialMatch := d.Get("partial_match").(bool)
+
+		log.Printf("[INFO] Using data source for group by name with partial_match %t and name: %s", partialMatch, name)
+
+		if partialMatch {
+			groups, apiResponse, err := client.UserManagementApi.UmGroupsGet(ctx).Depth(1).Filter("name", name).Execute()
+			logApiRequestTime(apiResponse)
+			if err != nil {
+				diags := diag.FromErr(fmt.Errorf("an error occurred while fetching groups: %w", err))
+				return diags
+			}
+			results = *groups.Items
+		} else {
+			groups, apiResponse, err := client.UserManagementApi.UmGroupsGet(ctx).Depth(1).Execute()
+			logApiRequestTime(apiResponse)
+			if err != nil {
+				diags := diag.FromErr(fmt.Errorf("an error occurred while fetching groups: %w", err))
+				return diags
+			}
+
+			if groups.Items != nil {
+				for _, g := range *groups.Items {
+					if g.Properties != nil && g.Properties.Name != nil && strings.EqualFold(*g.Properties.Name, name) {
+						/* group found */
+						group, apiResponse, err = client.UserManagementApi.UmGroupsFindById(ctx, *g.Id).Execute()
+						logApiRequestTime(apiResponse)
+						if err != nil {
+							diags := diag.FromErr(fmt.Errorf("an error occurred while fetching group %s: %w", *g.Id, err))
+							return diags
+						}
+						results = append(results, g)
 					}
-					results = append(results, g)
 				}
 			}
 		}

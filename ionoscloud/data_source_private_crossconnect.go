@@ -7,6 +7,8 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	ionoscloud "github.com/ionos-cloud/sdk-go/v6"
+	"log"
+	"strings"
 )
 
 func dataSourcePcc() *schema.Resource {
@@ -20,6 +22,12 @@ func dataSourcePcc() *schema.Resource {
 			"name": {
 				Type:     schema.TypeString,
 				Optional: true,
+			},
+			"partial_match": {
+				Type:        schema.TypeBool,
+				Description: "Whether partial matching is allowed or not when using name argument.",
+				Default:     false,
+				Optional:    true,
 			},
 			"description": {
 				Type:     schema.TypeString,
@@ -157,8 +165,11 @@ func setPccDataSource(d *schema.ResourceData, pcc *ionoscloud.PrivateCrossConnec
 func dataSourcePccRead(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	client := meta.(SdkBundle).CloudApiClient
 
-	id, idOk := d.GetOk("id")
-	name, nameOk := d.GetOk("name")
+	idValue, idOk := d.GetOk("id")
+	nameValue, nameOk := d.GetOk("name")
+
+	id := idValue.(string)
+	name := nameValue.(string)
 
 	if idOk && nameOk {
 		return diag.FromErr(errors.New("id and name cannot be both specified in the same time"))
@@ -173,32 +184,46 @@ func dataSourcePccRead(ctx context.Context, d *schema.ResourceData, meta interfa
 
 	if idOk {
 		/* search by ID */
-		pcc, apiResponse, err = client.PrivateCrossConnectsApi.PccsFindById(ctx, id.(string)).Execute()
+		log.Printf("[INFO] Using data source for pcc by id %s", id)
+
+		pcc, apiResponse, err = client.PrivateCrossConnectsApi.PccsFindById(ctx, id).Execute()
 		logApiRequestTime(apiResponse)
 		if err != nil {
-			return diag.FromErr(fmt.Errorf("an error occurred while fetching the pcc with ID %s: %w", id.(string), err))
+			return diag.FromErr(fmt.Errorf("an error occurred while fetching the pcc with ID %s: %w", id, err))
 		}
 	}
 	if nameOk {
 		/* search by name */
-		var pccs ionoscloud.PrivateCrossConnects
-		pccs, apiResponse, err := client.PrivateCrossConnectsApi.PccsGet(ctx).Depth(1).Execute()
-		logApiRequestTime(apiResponse)
-		if err != nil {
-			return diag.FromErr(fmt.Errorf("an error occurred while fetching pccs: %w", err))
-		}
-
 		var results []ionoscloud.PrivateCrossConnect
 
-		if pccs.Items != nil {
-			for _, p := range *pccs.Items {
-				if p.Properties != nil && p.Properties.Name != nil && *p.Properties.Name == name.(string) {
-					pcc, apiResponse, err = client.PrivateCrossConnectsApi.PccsFindById(ctx, *p.Id).Execute()
-					logApiRequestTime(apiResponse)
-					if err != nil {
-						return diag.FromErr(fmt.Errorf("an error occurred while fetching the pcc with ID %s: %s", *p.Id, err))
+		partialMatch := d.Get("partial_match").(bool)
+
+		log.Printf("[INFO] Using data source for pcc by name with partial_match %t and name: %s", partialMatch, name)
+
+		if partialMatch {
+			pccs, apiResponse, err := client.PrivateCrossConnectsApi.PccsGet(ctx).Depth(1).Filter("name", name).Execute()
+			logApiRequestTime(apiResponse)
+			if err != nil {
+				return diag.FromErr(fmt.Errorf("an error occurred while fetching pccs: %s", err.Error()))
+			}
+			results = *pccs.Items
+		} else {
+			pccs, apiResponse, err := client.PrivateCrossConnectsApi.PccsGet(ctx).Depth(1).Execute()
+			logApiRequestTime(apiResponse)
+			if err != nil {
+				return diag.FromErr(fmt.Errorf("an error occurred while fetching pccs: %s", err.Error()))
+			}
+
+			if pccs.Items != nil {
+				for _, p := range *pccs.Items {
+					if p.Properties != nil && p.Properties.Name != nil && strings.EqualFold(*p.Properties.Name, name) {
+						pcc, apiResponse, err = client.PrivateCrossConnectsApi.PccsFindById(ctx, *p.Id).Execute()
+						logApiRequestTime(apiResponse)
+						if err != nil {
+							return diag.FromErr(fmt.Errorf("an error occurred while fetching the pcc with ID %s: %s", *p.Id, err))
+						}
+						results = append(results, pcc)
 					}
-					results = append(results, pcc)
 				}
 			}
 		}

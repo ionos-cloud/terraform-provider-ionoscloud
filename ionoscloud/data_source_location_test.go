@@ -19,7 +19,6 @@ func TestAccDataSourceLocationBasic(t *testing.T) {
 		ProviderFactories: testAccProviderFactories,
 		Steps: []resource.TestStep{
 			{
-
 				Config: testAccDataSourceLocationBasic,
 				Check: resource.ComposeTestCheckFunc(resource.TestCheckResourceAttr(locationTestName, "id", "de/fra"),
 					resource.TestCheckResourceAttr(locationTestName, "name", "frankfurt"),
@@ -27,6 +26,16 @@ func TestAccDataSourceLocationBasic(t *testing.T) {
 			},
 			{
 				Config:      testAccDataSourceLocationWrongNameError,
+				ExpectError: regexp.MustCompile("no location found with the specified criteria"),
+			},
+			{
+				Config: testAccDataSourceLocationPartialMatch,
+				Check: resource.ComposeTestCheckFunc(resource.TestCheckResourceAttr(locationTestName, "id", "de/fra"),
+					resource.TestCheckResourceAttr(locationTestName, "name", "frankfurt"),
+				),
+			},
+			{
+				Config:      testAccDataSourceLocationWrongPartialNameError,
 				ExpectError: regexp.MustCompile("no location found with the specified criteria"),
 			},
 			{
@@ -50,6 +59,23 @@ data ` + LocationResource + ` ` + LocationTestResource + ` {
 	  feature = "SSD"
 }
 `
+
+const testAccDataSourceLocationPartialMatch = `
+data ` + LocationResource + ` ` + LocationTestResource + ` {
+	  name = "frank"
+	  feature = "SSD"
+      partial_match = true
+}
+`
+
+const testAccDataSourceLocationWrongPartialNameError = `
+data ` + LocationResource + ` ` + LocationTestResource + ` {
+	  name = "wrong_name"
+	  feature = "SSD"
+      partial_match = true
+}
+`
+
 const testAccDataSourceLocationWrongFeature = `
 data ` + LocationResource + ` ` + LocationTestResource + ` {
 	  name = "frankfurt"

@@ -10,9 +10,6 @@ description: |-
 # ionoscloud\_share
 
 The **Share data source** can be used to search for and return an existing share object.
-You need to provide the group_id and resource_id to get the group resources for the shared resource.
-If a single match is found, it will be returned. If your search results in multiple matches, an error will be returned.
-When this happens, please refine your search string so that it is specific enough to return only one result.
 
 ## Example Usage
 
@@ -28,9 +25,9 @@ data "ionoscloud_share" "example" {
 
 The following arguments are supported:
 
-* `group_id` - (Required)The ID of the specific group containing the resource to update.
-* `resource_id` - (Required)The ID of the specific resource to update.
-* `id` - (Required)The uuid of the share object
+* `group_id` - (Required) The ID of the specific group containing the resource to update.
+* `resource_id` - (Required) The ID of the specific resource to update.
+* `id` - (Required) The uuid of the share object
 
 
 `id`, `resource_id` and `group_id` must be provided. If any of them are missing, the datasource will return an error.

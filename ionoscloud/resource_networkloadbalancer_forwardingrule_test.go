@@ -77,6 +77,26 @@ func TestAccNetworkLoadBalancerForwardingRuleBasic(t *testing.T) {
 				),
 			},
 			{
+				Config: testAccDataSourceNetworkLoadBalancerForwardingRulePartialMatchName,
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttrPair(dataSourceNetworkLoadBalancerForwardingRuleName, "name", networkLoadBalancerForwardingRuleResource, "name"),
+					resource.TestCheckResourceAttrPair(dataSourceNetworkLoadBalancerForwardingRuleName, "algorithm", networkLoadBalancerForwardingRuleResource, "algorithm"),
+					resource.TestCheckResourceAttrPair(dataSourceNetworkLoadBalancerForwardingRuleName, "protocol", networkLoadBalancerForwardingRuleResource, "protocol"),
+					resource.TestCheckResourceAttrPair(dataSourceNetworkLoadBalancerForwardingRuleName, "listener_ip", networkLoadBalancerForwardingRuleResource, "listener_ip"),
+					resource.TestCheckResourceAttrPair(dataSourceNetworkLoadBalancerForwardingRuleName, "listener_port", networkLoadBalancerForwardingRuleResource, "listener_port"),
+					resource.TestCheckResourceAttrPair(dataSourceNetworkLoadBalancerForwardingRuleName, "health_check.0.client_timeout", networkLoadBalancerForwardingRuleResource, "health_check.0.client_timeout"),
+					resource.TestCheckResourceAttrPair(dataSourceNetworkLoadBalancerForwardingRuleName, "health_check.0.connect_timeout", networkLoadBalancerForwardingRuleResource, "health_check.0.connect_timeout"),
+					resource.TestCheckResourceAttrPair(dataSourceNetworkLoadBalancerForwardingRuleName, "health_check.0.target_timeout", networkLoadBalancerForwardingRuleResource, "health_check.0.target_timeout"),
+					resource.TestCheckResourceAttrPair(dataSourceNetworkLoadBalancerForwardingRuleName, "health_check.0.retries", networkLoadBalancerForwardingRuleResource, "health_check.0.retries"),
+					resource.TestCheckResourceAttrPair(dataSourceNetworkLoadBalancerForwardingRuleName, "targets.0.ip", networkLoadBalancerForwardingRuleResource, "targets.0.ip"),
+					resource.TestCheckResourceAttrPair(dataSourceNetworkLoadBalancerForwardingRuleName, "targets.0.port", networkLoadBalancerForwardingRuleResource, "targets.0.port"),
+					resource.TestCheckResourceAttrPair(dataSourceNetworkLoadBalancerForwardingRuleName, "targets.0.weight", networkLoadBalancerForwardingRuleResource, "targets.0.weight"),
+					resource.TestCheckResourceAttrPair(dataSourceNetworkLoadBalancerForwardingRuleName, "targets.0.health_check.0.check", networkLoadBalancerForwardingRuleResource, "targets.0.health_check.0.check"),
+					resource.TestCheckResourceAttrPair(dataSourceNetworkLoadBalancerForwardingRuleName, "targets.0.health_check.0.check_interval", networkLoadBalancerForwardingRuleResource, "targets.0.health_check.0.check_interval"),
+					resource.TestCheckResourceAttrPair(dataSourceNetworkLoadBalancerForwardingRuleName, "targets.0.health_check.0.maintenance", networkLoadBalancerForwardingRuleResource, "targets.0.health_check.0.maintenance"),
+				),
+			},
+			{
 				Config: testAccDataSourceNetworkLoadBalancerForwardingRuleMatchName,
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttrPair(dataSourceNetworkLoadBalancerForwardingRuleName, "name", networkLoadBalancerForwardingRuleResource, "name"),
@@ -98,6 +118,10 @@ func TestAccNetworkLoadBalancerForwardingRuleBasic(t *testing.T) {
 			},
 			{
 				Config:      testAccDataSourceNetworkLoadBalancerForwardingRuleWrongNameError,
+				ExpectError: regexp.MustCompile(`no network load balancer forwarding rule found with the specified criteria: name`),
+			},
+			{
+				Config:      testAccDataSourceNetworkLoadBalancerForwardingRuleWrongPartialNameError,
 				ExpectError: regexp.MustCompile(`no network load balancer forwarding rule found with the specified criteria: name`),
 			},
 			{
@@ -304,10 +328,28 @@ data ` + NetworkLoadBalancerForwardingRuleResource + ` ` + NetworkLoadBalancerFo
 }
 `
 
+const testAccDataSourceNetworkLoadBalancerForwardingRulePartialMatchName = testAccCheckNetworkLoadBalancerForwardingRuleConfigBasic + `
+data ` + NetworkLoadBalancerForwardingRuleResource + ` ` + NetworkLoadBalancerForwardingRuleDataSourceByName + ` {
+  datacenter_id = ` + networkLoadBalancerForwardingRuleResource + `.datacenter_id
+  networkloadbalancer_id  = ` + networkLoadBalancerForwardingRuleResource + `.networkloadbalancer_id
+  name			= "` + DataSourcePartial + `"
+  partial_match	= true
+}
+`
+
 const testAccDataSourceNetworkLoadBalancerForwardingRuleWrongNameError = testAccCheckNetworkLoadBalancerForwardingRuleConfigBasic + `
 data ` + NetworkLoadBalancerForwardingRuleResource + ` ` + NetworkLoadBalancerForwardingRuleDataSourceByName + ` {
   datacenter_id = ` + networkLoadBalancerForwardingRuleResource + `.datacenter_id
   networkloadbalancer_id  = ` + networkLoadBalancerForwardingRuleResource + `.networkloadbalancer_id
   name			= "wrong_name"
+}
+`
+
+const testAccDataSourceNetworkLoadBalancerForwardingRuleWrongPartialNameError = testAccCheckNetworkLoadBalancerForwardingRuleConfigBasic + `
+data ` + NetworkLoadBalancerForwardingRuleResource + ` ` + NetworkLoadBalancerForwardingRuleDataSourceByName + ` {
+  datacenter_id = ` + networkLoadBalancerForwardingRuleResource + `.datacenter_id
+  networkloadbalancer_id  = ` + networkLoadBalancerForwardingRuleResource + `.networkloadbalancer_id
+  name			= "wrong_name"
+  partial_match	= true
 }
 `

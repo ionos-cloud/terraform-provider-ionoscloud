@@ -10,8 +10,8 @@ description: |-
 # ionoscloud\_group
 
 The **Group data source** can be used to search for and return existing groups.
-If a single match is found, it will be returned. If your search results in multiple matches, an error will be returned. 
-When this happens, please refine your search string so that it is specific enough to return only one result.
+If a single match is found, it will be returned. If your search results in multiple matches, an error will be returned.
+When this happens, please refine your search and make sure that your resources have unique names.
 
 ## Example Usage
 
@@ -29,12 +29,21 @@ data "ionoscloud_group" "example" {
 }
 ```
 
+### By Name with Partial Match
+```hcl
+data "ionoscloud_group" "example" {
+  name			= "Group"
+  partial_match = true
+}
+```
+
 ## Argument Reference
 
-* `name` - (Optional) Name of an existing group that you want to search for.
 * `id` - (Optional) ID of the group you want to search for.
+* `name` - (Optional) Name of an existing group that you want to search for. Search by name is case-insensitive. The whole resource name is required if `partial_match` parameter is not set to true..
+* `partial_match` - (Optional) Whether partial matching is allowed or not when using name argument. Default value is false.
 
-Either `name` or `id` must be provided. If none, or both are provided, the datasource will return an error.
+Either `id` or `name` must be provided. If none, or both are provided, the datasource will return an error.
 
 ## Attributes Reference
 
