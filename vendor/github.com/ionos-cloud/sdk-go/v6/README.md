@@ -161,8 +161,8 @@ export IONOS_TOKEN="insert_here_token_saved_from_generate_command"
 
 ## Certificate pinning:
 
-You can enable certificate pinning if you want to bypass the normal certificate checking procedure, 
-by doing the following: 
+You can enable certificate pinning if you want to bypass the normal certificate checking procedure,
+by doing the following:
 
 Set env variable IONOS_PINNED_CERT=<insert_sha256_public_fingerprint_here>
 
