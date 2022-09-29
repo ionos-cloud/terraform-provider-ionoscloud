@@ -7,6 +7,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
 	"net"
 	"net/http"
+	"os"
 	"reflect"
 	"regexp"
 	"strconv"
@@ -171,4 +172,9 @@ func TestImageNotNull(resource, attribute string) resource.TestCheckFunc {
 		}
 		return nil
 	}
+}
+
+func CheckFileExists(filePath string) bool {
+	_, err := os.Open(filePath) // For read access.
+	return err == nil
 }
