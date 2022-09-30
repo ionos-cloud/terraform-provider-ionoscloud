@@ -16,7 +16,11 @@ is `not found`(404)
 - Update Ionos Cloud GO SDK v6.1.2. Release notes here [v6.1.2](https://github.com/ionos-cloud/sdk-go/releases/tag/v6.1.2)
 - Refactor server and volume creation code
 - Make maintenance_window computed
-- Adds certificate [resource](docs/resources/certificate.md) and [datasource](docs/data-sources/certificate.md).
+- New Product: **Application Load Balancer**:
+  - `Resources`:
+    - [ionoscloud_certificate](docs/resources/certificate.md)
+  - `Data Sources`: 
+    - [ionoscloud_certificate](docs/data-sources/certificate.md)
 
 ## 6.3.0
 
