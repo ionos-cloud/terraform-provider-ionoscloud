@@ -1,7 +1,21 @@
-## 6.3.1(upcoming release)
+## 6.3.2
+
+### Enhancement:
+- Increase go version to 1.18
+- Update dependencies to latest versions
+- `ssh_key_path` will now allow the keys to be passed directly also. In the future, will be renamed to `ssh_keys`.
+
+### Fixes
+- Reproduces rarely: sometimes the `nic` resource is not found after creation. As a fix we added a retry for 5 minutes to be able to get the NIC. The retry will keep trying if the response 
+is `not found`(404)
+
+## 6.3.1
 
 ### Feature
-
+- When no argument is provided for user data source, try to get the email from the client configuration
+- Update Ionos Cloud GO SDK v6.1.2. Release notes here [v6.1.2](https://github.com/ionos-cloud/sdk-go/releases/tag/v6.1.2)
+- Refactor server and volume creation code
+- Make maintenance_window computed
 - Adds certificate [resource](docs/resources/certificate.md) and [datasource](docs/data-sources/certificate.md).
 
 ## 6.3.0

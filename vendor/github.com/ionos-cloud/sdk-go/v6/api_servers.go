@@ -811,6 +811,7 @@ type ApiDatacentersServersDeleteRequest struct {
 	pretty          *bool
 	depth           *int32
 	xContractNumber *int32
+	deleteVolumes   *bool
 }
 
 func (r ApiDatacentersServersDeleteRequest) Pretty(pretty bool) ApiDatacentersServersDeleteRequest {
@@ -823,6 +824,10 @@ func (r ApiDatacentersServersDeleteRequest) Depth(depth int32) ApiDatacentersSer
 }
 func (r ApiDatacentersServersDeleteRequest) XContractNumber(xContractNumber int32) ApiDatacentersServersDeleteRequest {
 	r.xContractNumber = &xContractNumber
+	return r
+}
+func (r ApiDatacentersServersDeleteRequest) DeleteVolumes(deleteVolumes bool) ApiDatacentersServersDeleteRequest {
+	r.deleteVolumes = &deleteVolumes
 	return r
 }
 
@@ -887,6 +892,9 @@ func (a *ServersApiService) DatacentersServersDeleteExecute(r ApiDatacentersServ
 		if defaultQueryParam == "" {
 			localVarQueryParams.Add("depth", parameterToString(0, ""))
 		}
+	}
+	if r.deleteVolumes != nil {
+		localVarQueryParams.Add("deleteVolumes", parameterToString(*r.deleteVolumes, ""))
 	}
 
 	// to determine the Content-Type header

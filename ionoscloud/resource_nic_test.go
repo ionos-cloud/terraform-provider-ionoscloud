@@ -144,7 +144,7 @@ func testAccCheckNICExists(n string, nic *ionoscloud.Nic) resource.TestCheckFunc
 		logApiRequestTime(apiResponse)
 
 		if err != nil {
-			return fmt.Errorf("error occured while fetching Volume: %s", rs.Primary.ID)
+			return fmt.Errorf("error occured while fetching nic: %s %w", rs.Primary.ID, err)
 		}
 		if *foundNic.Id != rs.Primary.ID {
 			return fmt.Errorf("record not found")
@@ -173,8 +173,8 @@ resource "ionoscloud_server" "test_server" {
   ram = 1024
   availability_zone = "ZONE_1"
   cpu_family = "AMD_OPTERON"
-	image_name ="ubuntu-16.04"
-	image_password = "K3tTj8G14a3EgKyNeeiY"
+  image_name ="ubuntu:latest"
+  image_password = "K3tTj8G14a3EgKyNeeiY"
   volume {
     name = "system"
     size = 5

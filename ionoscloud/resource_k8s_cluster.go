@@ -42,6 +42,7 @@ func resourcek8sCluster() *schema.Resource {
 				Type:        schema.TypeList,
 				Description: "A maintenance window comprise of a day of the week and a time for maintenance to be allowed",
 				Optional:    true,
+				Computed:    true,
 				MaxItems:    1,
 				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{
