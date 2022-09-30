@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
-	dbaas "github.com/ionos-cloud/sdk-go-dbaas-postgres"
+	psql "github.com/ionos-cloud/sdk-go-dbaas-postgres"
 	dbaasService "github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/dbaas"
 )
 
@@ -31,11 +31,11 @@ func dataSourceDbaasPgSqlVersions() *schema.Resource {
 }
 
 func dataSourceDbaasPgSqlReadVersions(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
-	client := meta.(SdkBundle).DbaasClient
+	client := meta.(SdkBundle).PsqlClient
 
 	id, idOk := d.GetOk("cluster_id")
 
-	var postgresVersions dbaas.PostgresVersionList
+	var postgresVersions psql.PostgresVersionList
 	var err error
 
 	if idOk {

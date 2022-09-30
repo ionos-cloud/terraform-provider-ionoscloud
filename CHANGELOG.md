@@ -1,4 +1,15 @@
 ## 6.3.2
+### Feature
+- New Product: **MongoDB**:
+  - `Resources`:
+    - [ionoscloud_mongo_cluster](docs/resources/dbaas_mongo_cluster.md)
+    - [ionoscloud_mongo_user](docs/resources/dbaas_mongo_user.md)
+  - `Data Sources`:
+    - [ionoscloud_mongo_cluster](docs/data-sources/dbaas_mongo_cluster.md)
+    - [ionoscloud_mongo_user](docs/data-sources/dbaas_mongo_user.md)
+    
+⚠️ **Note:** DBaaS - MongoDB is currently in the Early Access (EA) phase. We recommend keeping usage and testing to non-production critical applications.
+      Please contact your sales representative or support for more information.
 
 ### Enhancement:
 - Increase go version to 1.18
