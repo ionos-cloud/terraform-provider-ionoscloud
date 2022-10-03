@@ -24,16 +24,16 @@ func resourceCertificateManager() *schema.Resource {
 		},
 		Schema: map[string]*schema.Schema{
 			"name": {
-				Type:         schema.TypeString,
-				Description:  "The certificate name",
-				Required:     true,
-				ValidateFunc: validation.All(validation.StringIsNotWhiteSpace),
+				Type:             schema.TypeString,
+				Description:      "The certificate name",
+				Required:         true,
+				ValidateDiagFunc: validation.ToDiagFunc(validation.StringIsNotWhiteSpace),
 			},
 			"certificate": {
 				Type:                  schema.TypeString,
 				Description:           "The certificate body in PEM format. This attribute is immutable.",
 				Required:              true,
-				ValidateFunc:          validation.All(validation.StringIsNotWhiteSpace),
+				ValidateDiagFunc:      validation.ToDiagFunc(validation.StringIsNotWhiteSpace),
 				DiffSuppressFunc:      utils.DiffWithoutNewLines,
 				DiffSuppressOnRefresh: true,
 			},
@@ -41,16 +41,16 @@ func resourceCertificateManager() *schema.Resource {
 				Type:                  schema.TypeString,
 				Description:           "The certificate chain. This attribute is immutable.",
 				Optional:              true,
-				ValidateFunc:          validation.All(validation.StringIsNotWhiteSpace),
+				ValidateDiagFunc:      validation.ToDiagFunc(validation.StringIsNotWhiteSpace),
 				DiffSuppressFunc:      utils.DiffWithoutNewLines,
 				DiffSuppressOnRefresh: true,
 			},
 			"private_key": {
-				Type:         schema.TypeString,
-				Description:  "The private key blob. This attribute is immutable.",
-				Required:     true,
-				Sensitive:    true,
-				ValidateFunc: validation.All(validation.StringIsNotWhiteSpace),
+				Type:             schema.TypeString,
+				Description:      "The private key blob. This attribute is immutable.",
+				Required:         true,
+				Sensitive:        true,
+				ValidateDiagFunc: validation.ToDiagFunc(validation.StringIsNotWhiteSpace),
 			},
 		},
 		CustomizeDiff: checkCertImmutableFields,
@@ -69,7 +69,7 @@ func checkCertImmutableFields(_ context.Context, diff *schema.ResourceDiff, _ in
 		oldV, newV := diff.GetChange("certificate")
 		old := utils.RemoveNewLines(oldV.(string))
 		newStr := utils.RemoveNewLines(newV.(string))
-		//we get extraneous newlines in the certificate, so we must check without them
+		//we get extraneous newlines in the certificate, so we must remove them before checking equality
 		if !strings.EqualFold(old, newStr) {
 			return fmt.Errorf("certificate %s", ImmutableError)
 		}
@@ -99,8 +99,7 @@ func resourceCertificateManagerCreate(ctx context.Context, d *schema.ResourceDat
 	if err != nil {
 		return diag.FromErr(err)
 	}
-	certificateDto, apiResponse, err := client.CreateCertificate(ctx, *certPostDto)
-	cert.LogApiResponse(apiResponse)
+	certificateDto, _, err := client.CreateCertificate(ctx, *certPostDto)
 	if err != nil {
 		d.SetId("")
 		diags := diag.FromErr(fmt.Errorf("error creating certificate: %w", err))
@@ -120,9 +119,8 @@ func resourceCertificateManagerRead(ctx context.Context, d *schema.ResourceData,
 	client := meta.(SdkBundle).CertManagerClient
 
 	certDto, apiResponse, err := client.GetCertificate(ctx, d.Id())
-	cert.LogApiResponse(apiResponse)
 	if err != nil {
-		if cert.HttpNotFound(apiResponse) {
+		if apiResponse.HttpNotFound() {
 			log.Printf("[INFO] Resource %s not found: %+v", d.Id(), err)
 			d.SetId("")
 			return nil
@@ -143,8 +141,7 @@ func resourceCertificateManagerUpdate(ctx context.Context, d *schema.ResourceDat
 
 	certPatchDto := cert.GetCertPatchDto(d)
 
-	_, apiResponse, err := client.UpdateCertificate(ctx, d.Id(), *certPatchDto)
-	cert.LogApiResponse(apiResponse)
+	_, _, err := client.UpdateCertificate(ctx, d.Id(), *certPatchDto)
 	if err != nil {
 		diags := diag.FromErr(fmt.Errorf("an error occured while updating certificate with ID %s, %w", d.Id(), err))
 		return diags
@@ -161,8 +158,7 @@ func resourceCertificateManagerDelete(ctx context.Context, d *schema.ResourceDat
 	client := meta.(SdkBundle).CertManagerClient
 	deleted := false
 	for deleted != true {
-		apiResponse, err := client.DeleteCertificate(ctx, d.Id())
-		cert.LogApiResponse(apiResponse)
+		_, err := client.DeleteCertificate(ctx, d.Id())
 		if err != nil {
 			diags := diag.FromErr(fmt.Errorf("an error occured while deleting the certificate %s %w", d.Id(), err))
 			return diags
@@ -194,9 +190,8 @@ func resourceCertificateManagerImport(ctx context.Context, d *schema.ResourceDat
 
 	certId := d.Id()
 	certDto, apiResponse, err := client.GetCertificate(ctx, d.Id())
-	cert.LogApiResponse(apiResponse)
 	if err != nil {
-		if cert.HttpNotFound(apiResponse) {
+		if apiResponse.HttpNotFound() {
 			d.SetId("")
 			return nil, fmt.Errorf("unable to find cert %q", certId)
 		}

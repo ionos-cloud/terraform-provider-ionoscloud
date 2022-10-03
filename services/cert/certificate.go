@@ -7,7 +7,6 @@ import (
 	certmanager "github.com/ionos-cloud/sdk-go-cert-manager"
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils"
 	"log"
-	"net/http"
 	"strings"
 	"time"
 )
@@ -22,7 +21,7 @@ type CertificateService interface {
 
 func (c *Client) GetCertificate(ctx context.Context, certId string) (certmanager.CertificateDto, *certmanager.APIResponse, error) {
 	cert, apiResponse, err := c.CertificatesApi.CertificatesGetById(ctx, certId).Execute()
-	LogApiResponse(apiResponse)
+	apiResponse.LogInfo()
 	if apiResponse != nil {
 		return cert, apiResponse, err
 
@@ -32,7 +31,7 @@ func (c *Client) GetCertificate(ctx context.Context, certId string) (certmanager
 
 func (c *Client) ListCertificates(ctx context.Context) (certmanager.CertificateCollectionDto, *certmanager.APIResponse, error) {
 	certs, apiResponse, err := c.CertificatesApi.CertificatesGet(ctx).Execute()
-	LogApiResponse(apiResponse)
+	apiResponse.LogInfo()
 	if apiResponse != nil {
 		return certs, apiResponse, err
 	}
@@ -41,7 +40,7 @@ func (c *Client) ListCertificates(ctx context.Context) (certmanager.CertificateC
 
 func (c *Client) CreateCertificate(ctx context.Context, certPostDto certmanager.CertificatePostDto) (certmanager.CertificateDto, *certmanager.APIResponse, error) {
 	certResponse, apiResponse, err := c.CertificatesApi.CertificatesPost(ctx).CertificatePostDto(certPostDto).Execute()
-	LogApiResponse(apiResponse)
+	apiResponse.LogInfo()
 	if apiResponse != nil {
 		return certResponse, apiResponse, err
 	}
@@ -50,7 +49,7 @@ func (c *Client) CreateCertificate(ctx context.Context, certPostDto certmanager.
 
 func (c *Client) UpdateCertificate(ctx context.Context, certId string, certPatch certmanager.CertificatePatchDto) (certmanager.CertificateDto, *certmanager.APIResponse, error) {
 	certResponse, apiResponse, err := c.CertificatesApi.CertificatesPatch(ctx, certId).CertificatePatchDto(certPatch).Execute()
-	LogApiResponse(apiResponse)
+	apiResponse.LogInfo()
 	if apiResponse != nil {
 		return certResponse, apiResponse, err
 	}
@@ -59,7 +58,7 @@ func (c *Client) UpdateCertificate(ctx context.Context, certId string, certPatch
 
 func (c *Client) DeleteCertificate(ctx context.Context, certId string) (*certmanager.APIResponse, error) {
 	apiResponse, err := c.CertificatesApi.CertificatesDelete(ctx, certId).Execute()
-	LogApiResponse(apiResponse)
+	apiResponse.LogInfo()
 	if apiResponse != nil {
 		return apiResponse, err
 	}
@@ -67,7 +66,8 @@ func (c *Client) DeleteCertificate(ctx context.Context, certId string) (*certman
 }
 
 func (c *Client) IsCertReady(ctx context.Context, d *schema.ResourceData) (bool, error) {
-	cert, _, err := c.GetCertificate(ctx, d.Id())
+	cert, apiResponse, err := c.GetCertificate(ctx, d.Id())
+	apiResponse.LogInfo()
 	if err != nil {
 		return true, fmt.Errorf("error checking certificate status: %w", err)
 	}
@@ -102,7 +102,7 @@ func (c *Client) WaitForCertToBeReady(ctx context.Context, d *schema.ResourceDat
 func (c *Client) IsCertDeleted(ctx context.Context, d *schema.ResourceData) (bool, error) {
 	_, apiResponse, err := c.GetCertificate(ctx, d.Id())
 	if err != nil {
-		if HttpNotFound(apiResponse) {
+		if apiResponse.HttpNotFound() {
 			return true, nil
 		}
 		return true, fmt.Errorf("error checking certificate deletion status: %w", err)
@@ -110,26 +110,26 @@ func (c *Client) IsCertDeleted(ctx context.Context, d *schema.ResourceData) (boo
 	return false, nil
 }
 
-func SetCertificateData(d *schema.ResourceData, applicationLoadBalancer *certmanager.CertificateDto) error {
-	if applicationLoadBalancer.Id != nil {
-		d.SetId(*applicationLoadBalancer.Id)
+func SetCertificateData(d *schema.ResourceData, cert *certmanager.CertificateDto) error {
+	if cert.Id != nil {
+		d.SetId(*cert.Id)
 	}
 
-	if applicationLoadBalancer.Properties != nil {
-		if applicationLoadBalancer.Properties.Name != nil {
-			err := d.Set("name", *applicationLoadBalancer.Properties.Name)
+	if cert.Properties != nil {
+		if cert.Properties.Name != nil {
+			err := d.Set("name", *cert.Properties.Name)
 			if err != nil {
 				return fmt.Errorf("error while setting name property for certificate %s: %w", d.Id(), err)
 			}
 		}
-		if applicationLoadBalancer.Properties.Certificate != nil {
-			err := d.Set("certificate", *applicationLoadBalancer.Properties.Certificate)
+		if cert.Properties.Certificate != nil {
+			err := d.Set("certificate", *cert.Properties.Certificate)
 			if err != nil {
 				return fmt.Errorf("error while setting certificate property for certificate %s: %w", d.Id(), err)
 			}
 		}
-		if applicationLoadBalancer.Properties.CertificateChain != nil {
-			err := d.Set("certificate_chain", *applicationLoadBalancer.Properties.CertificateChain)
+		if cert.Properties.CertificateChain != nil {
+			err := d.Set("certificate_chain", *cert.Properties.CertificateChain)
 			if err != nil {
 				return fmt.Errorf("error while setting certificate_chain property for certificate %s: %w", d.Id(), err)
 			}
@@ -162,14 +162,14 @@ func GetCertPostDto(d *schema.ResourceData) (*certmanager.CertificatePostDto, er
 		certChain := certificateChain.(string)
 		certificatePostDto.Properties.CertificateChain = &certChain
 	} else {
-		return nil, fmt.Errorf("certificateChain must be provided for the certificate")
+		return nil, fmt.Errorf("certificate_chain must be provided for the certificate")
 	}
 
 	if privateKey, ok := d.GetOk("private_key"); ok {
 		keyStr := privateKey.(string)
 		certificatePostDto.Properties.PrivateKey = &keyStr
 	} else {
-		return nil, fmt.Errorf("private key must be provided for the certificate")
+		return nil, fmt.Errorf("private_key must be provided for the certificate")
 	}
 
 	return &certificatePostDto, nil
@@ -187,20 +187,4 @@ func GetCertPatchDto(d *schema.ResourceData) *certmanager.CertificatePatchDto {
 	}
 
 	return &certificatePatchDto
-}
-
-func LogApiResponse(resp *certmanager.APIResponse) {
-	if resp != nil {
-		log.Printf("[DEBUG] Operation : %s",
-			resp.Operation)
-		if resp.Response != nil {
-			log.Printf("[DEBUG] response status code : %d\n", resp.StatusCode)
-		}
-	}
-}
-func HttpNotFound(resp *certmanager.APIResponse) bool {
-	if resp != nil && resp.Response != nil && resp.StatusCode == http.StatusNotFound {
-		return true
-	}
-	return false
 }

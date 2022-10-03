@@ -232,6 +232,7 @@ type clientType int
 
 const (
 	ionosClient clientType = iota
-	dbaasClient
+	psqlClient
 	certManagerClient
+	mongoClient
 )
