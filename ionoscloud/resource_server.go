@@ -410,17 +410,7 @@ func resourceServerCreate(ctx context.Context, d *schema.ResourceData, meta inte
 		diags := diag.FromErr(err)
 		return diags
 	}
-	if v, ok := d.GetOk("availability_zone"); ok {
-		vStr := v.(string)
-		serverReq.Properties.AvailabilityZone = &vStr
-	}
 
-	if v, ok := d.GetOk("cpu_family"); ok {
-		if v.(string) != "" {
-			vStr := v.(string)
-			serverReq.Properties.CpuFamily = &vStr
-		}
-	}
 	// create volume object with data to be used for image
 	volume, err := getVolumeData(d, "volume.0.")
 
@@ -1109,15 +1099,18 @@ func SetCdromProperties(image ionoscloud.Image) map[string]interface{} {
 
 // Initializes server with the required attributes depending on the server type (CUBE or ENTERPRISE)
 func initializeCreateRequests(d *schema.ResourceData) (ionoscloud.Server, error) {
-	// create server object
-	server := ionoscloud.NewServer(*ionoscloud.NewServerPropertiesWithDefaults())
 
 	serverType := d.Get("type").(string)
+
+	// create server object and populate with common attributes
+	server, err := getServerData(d)
+	if err != nil {
+		return *server, err
+	}
 
 	if serverType != "" {
 		server.Properties.Type = &serverType
 	}
-
 	switch strings.ToLower(serverType) {
 	case "cube":
 		if v, ok := d.GetOk("template_uuid"); ok {
@@ -1139,11 +1132,6 @@ func initializeCreateRequests(d *schema.ResourceData) (ionoscloud.Server, error)
 			return *server, fmt.Errorf("volume.0.size argument can not be set for %s type of servers\n", serverType)
 		}
 	default: //enterprise
-		var err error
-		server, err = getServerData(d)
-		if err != nil {
-			return *server, err
-		}
 		if _, ok := d.GetOk("template_uuid"); ok {
 			return *server, fmt.Errorf("template_uuid argument can not be set only for %s type of servers\n", serverType)
 		}
@@ -1170,9 +1158,7 @@ func initializeCreateRequests(d *schema.ResourceData) (ionoscloud.Server, error)
 }
 
 func getServerData(d *schema.ResourceData) (*ionoscloud.Server, error) {
-	server := ionoscloud.Server{
-		Properties: &ionoscloud.ServerProperties{},
-	}
+	server := ionoscloud.NewServer(*ionoscloud.NewServerPropertiesWithDefaults())
 
 	if v, ok := d.GetOk("availability_zone"); ok {
 		vStr := v.(string)
@@ -1181,12 +1167,6 @@ func getServerData(d *schema.ResourceData) (*ionoscloud.Server, error) {
 
 	serverName := d.Get("name").(string)
 	server.Properties.Name = &serverName
-
-	serverCores := int32(d.Get("cores").(int))
-	server.Properties.Cores = &serverCores
-
-	serverRam := int32(d.Get("ram").(int))
-	server.Properties.Ram = &serverRam
 
 	if v, ok := d.GetOk("cpu_family"); ok {
 		if v.(string) != "" {
@@ -1207,7 +1187,7 @@ func getServerData(d *schema.ResourceData) (*ionoscloud.Server, error) {
 		}
 	}
 
-	return &server, nil
+	return server, nil
 }
 
 func setResourceServerData(ctx context.Context, client *ionoscloud.APIClient, d *schema.ResourceData, server *ionoscloud.Server) error {
