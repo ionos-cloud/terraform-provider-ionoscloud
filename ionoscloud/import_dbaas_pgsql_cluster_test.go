@@ -21,7 +21,7 @@ func TestAccDbaasPgSqlClusterImportBasic(t *testing.T) {
 				Config: testAccCheckDbaasPgSqlClusterConfigBasic,
 			},
 			{
-				ResourceName:            DBaaSClusterResource + "." + DBaaSClusterTestResource,
+				ResourceName:            PsqlClusterResource + "." + DBaaSClusterTestResource,
 				ImportState:             true,
 				ImportStateVerify:       true,
 				ImportStateVerifyIgnore: []string{"credentials"},
