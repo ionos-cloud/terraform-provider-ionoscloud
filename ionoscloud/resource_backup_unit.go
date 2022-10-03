@@ -41,7 +41,7 @@ func resourceBackupUnit() *schema.Resource {
 				Description:      "The e-mail address you want assigned to the backup unit.",
 				Required:         true,
 				ValidateFunc:     validation.All(validation.StringIsNotWhiteSpace),
-				DiffSuppressFunc: DiffToLower,
+				DiffSuppressFunc: utils.DiffToLower,
 			},
 			"login": {
 				Type:        schema.TypeString,

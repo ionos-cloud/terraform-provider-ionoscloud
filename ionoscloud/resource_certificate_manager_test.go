@@ -111,7 +111,6 @@ func TestAccCertificateResAndDataSource(t *testing.T) {
 
 func testAccCheckCertificateDestroyCheck(s *terraform.State) error {
 	client := testAccProvider.Meta().(SdkBundle).CertManagerClient
-
 	ctx, cancel := context.WithTimeout(context.Background(), *resourceDefaultTimeouts.Default)
 
 	if cancel != nil {
@@ -124,7 +123,7 @@ func testAccCheckCertificateDestroyCheck(s *terraform.State) error {
 			continue
 		}
 
-		_, apiResponse, err := client.CertificateApi.GetCertificateByUuid(ctx, rs.Primary.ID).Execute()
+		_, apiResponse, err := client.GetCertificate(ctx, rs.Primary.ID)
 
 		if err != nil {
 			if !cert.HttpNotFound(apiResponse) {

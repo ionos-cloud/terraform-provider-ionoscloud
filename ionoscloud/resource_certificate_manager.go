@@ -9,6 +9,7 @@ import (
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/cert"
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils"
 	"log"
+	"strings"
 	"time"
 )
 
@@ -29,16 +30,20 @@ func resourceCertificateManager() *schema.Resource {
 				ValidateFunc: validation.All(validation.StringIsNotWhiteSpace),
 			},
 			"certificate": {
-				Type:         schema.TypeString,
-				Description:  "The certificate body in PEM format. This attribute is immutable.",
-				Required:     true,
-				ValidateFunc: validation.All(validation.StringIsNotWhiteSpace),
+				Type:                  schema.TypeString,
+				Description:           "The certificate body in PEM format. This attribute is immutable.",
+				Required:              true,
+				ValidateFunc:          validation.All(validation.StringIsNotWhiteSpace),
+				DiffSuppressFunc:      utils.DiffWithoutNewLines,
+				DiffSuppressOnRefresh: true,
 			},
 			"certificate_chain": {
-				Type:         schema.TypeString,
-				Description:  "The certificate chain. This attribute is immutable.",
-				Optional:     true,
-				ValidateFunc: validation.All(validation.StringIsNotWhiteSpace),
+				Type:                  schema.TypeString,
+				Description:           "The certificate chain. This attribute is immutable.",
+				Optional:              true,
+				ValidateFunc:          validation.All(validation.StringIsNotWhiteSpace),
+				DiffSuppressFunc:      utils.DiffWithoutNewLines,
+				DiffSuppressOnRefresh: true,
 			},
 			"private_key": {
 				Type:         schema.TypeString,
@@ -61,11 +66,22 @@ func checkCertImmutableFields(_ context.Context, diff *schema.ResourceDiff, _ in
 	}
 
 	if diff.HasChange("certificate") {
-		return fmt.Errorf("certificate %s", ImmutableError)
+		oldV, newV := diff.GetChange("certificate")
+		old := utils.RemoveNewLines(oldV.(string))
+		newStr := utils.RemoveNewLines(newV.(string))
+		//we get extraneous newlines in the certificate, so we must check without them
+		if !strings.EqualFold(old, newStr) {
+			return fmt.Errorf("certificate %s", ImmutableError)
+		}
 	}
 
 	if diff.HasChange("certificate_chain") {
-		return fmt.Errorf("certificate_chain %s", ImmutableError)
+		oldV, newV := diff.GetChange("certificate_chain")
+		old := utils.RemoveNewLines(oldV.(string))
+		newStr := utils.RemoveNewLines(newV.(string))
+		if !strings.EqualFold(old, newStr) {
+			return fmt.Errorf("certificate_chain %s", ImmutableError)
+		}
 	}
 
 	if diff.HasChange("private_key") {

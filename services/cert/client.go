@@ -1,7 +1,7 @@
 package cert
 
 import (
-	certmanager "github.com/ionos-cloud/sdk-cert-go"
+	certmanager "github.com/ionos-cloud/sdk-go-cert-manager"
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils"
 	"net/http"
 	"os"

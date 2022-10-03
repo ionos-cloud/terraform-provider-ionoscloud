@@ -4,10 +4,11 @@ import (
 	"context"
 	"fmt"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
-	certmanager "github.com/ionos-cloud/sdk-cert-go"
+	certmanager "github.com/ionos-cloud/sdk-go-cert-manager"
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils"
 	"log"
 	"net/http"
+	"strings"
 	"time"
 )
 
@@ -20,7 +21,7 @@ type CertificateService interface {
 }
 
 func (c *Client) GetCertificate(ctx context.Context, certId string) (certmanager.CertificateDto, *certmanager.APIResponse, error) {
-	cert, apiResponse, err := c.CertificateApi.GetCertificateByUuid(ctx, certId).Execute()
+	cert, apiResponse, err := c.CertificatesApi.CertificatesGetById(ctx, certId).Execute()
 	LogApiResponse(apiResponse)
 	if apiResponse != nil {
 		return cert, apiResponse, err
@@ -30,7 +31,7 @@ func (c *Client) GetCertificate(ctx context.Context, certId string) (certmanager
 }
 
 func (c *Client) ListCertificates(ctx context.Context) (certmanager.CertificateCollectionDto, *certmanager.APIResponse, error) {
-	certs, apiResponse, err := c.CertificateApi.GetCertificates(ctx).Execute()
+	certs, apiResponse, err := c.CertificatesApi.CertificatesGet(ctx).Execute()
 	LogApiResponse(apiResponse)
 	if apiResponse != nil {
 		return certs, apiResponse, err
@@ -39,7 +40,7 @@ func (c *Client) ListCertificates(ctx context.Context) (certmanager.CertificateC
 }
 
 func (c *Client) CreateCertificate(ctx context.Context, certPostDto certmanager.CertificatePostDto) (certmanager.CertificateDto, *certmanager.APIResponse, error) {
-	certResponse, apiResponse, err := c.CertificateApi.AddCertificate(ctx).CertificatePostDto(certPostDto).Execute()
+	certResponse, apiResponse, err := c.CertificatesApi.CertificatesPost(ctx).CertificatePostDto(certPostDto).Execute()
 	LogApiResponse(apiResponse)
 	if apiResponse != nil {
 		return certResponse, apiResponse, err
@@ -48,7 +49,7 @@ func (c *Client) CreateCertificate(ctx context.Context, certPostDto certmanager.
 }
 
 func (c *Client) UpdateCertificate(ctx context.Context, certId string, certPatch certmanager.CertificatePatchDto) (certmanager.CertificateDto, *certmanager.APIResponse, error) {
-	certResponse, apiResponse, err := c.CertificateApi.PatchCertificateByUuid(ctx, certId).CertificatePatchDto(certPatch).Execute()
+	certResponse, apiResponse, err := c.CertificatesApi.CertificatesPatch(ctx, certId).CertificatePatchDto(certPatch).Execute()
 	LogApiResponse(apiResponse)
 	if apiResponse != nil {
 		return certResponse, apiResponse, err
@@ -57,7 +58,7 @@ func (c *Client) UpdateCertificate(ctx context.Context, certId string, certPatch
 }
 
 func (c *Client) DeleteCertificate(ctx context.Context, certId string) (*certmanager.APIResponse, error) {
-	apiResponse, err := c.CertificateApi.DeleteCertificateByUuid(ctx, certId).Execute()
+	apiResponse, err := c.CertificatesApi.CertificatesDelete(ctx, certId).Execute()
 	LogApiResponse(apiResponse)
 	if apiResponse != nil {
 		return apiResponse, err
@@ -70,7 +71,7 @@ func (c *Client) IsCertReady(ctx context.Context, d *schema.ResourceData) (bool,
 	if err != nil {
 		return true, fmt.Errorf("error checking certificate status: %w", err)
 	}
-	return *cert.Metadata.State == utils.Available, nil
+	return strings.EqualFold(*cert.Metadata.State, utils.Available), nil
 }
 
 func (c *Client) WaitForCertToBeReady(ctx context.Context, d *schema.ResourceData) error {

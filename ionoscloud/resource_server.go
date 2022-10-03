@@ -71,7 +71,7 @@ func resourceServer() *schema.Resource {
 				Type:             schema.TypeString,
 				Optional:         true,
 				Computed:         true,
-				DiffSuppressFunc: DiffToLower,
+				DiffSuppressFunc: utils.DiffToLower,
 			},
 			"boot_image": {
 				Type:     schema.TypeString,
@@ -303,7 +303,7 @@ func resourceServer() *schema.Resource {
 									"protocol": {
 										Type:             schema.TypeString,
 										Required:         true,
-										DiffSuppressFunc: DiffToLower,
+										DiffSuppressFunc: utils.DiffToLower,
 										ValidateDiagFunc: validation.ToDiagFunc(validation.StringIsNotWhiteSpace),
 									},
 									"source_mac": {

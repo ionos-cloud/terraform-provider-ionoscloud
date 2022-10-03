@@ -4,7 +4,7 @@ import (
 	"context"
 	"fmt"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
-	certmanager "github.com/ionos-cloud/sdk-cert-go"
+	certmanager "github.com/ionos-cloud/sdk-go-cert-manager"
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/cert"
 	"log"
 	"strings"
