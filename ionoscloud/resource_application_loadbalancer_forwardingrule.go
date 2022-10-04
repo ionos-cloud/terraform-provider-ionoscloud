@@ -125,14 +125,14 @@ func resourceApplicationLoadBalancerForwardingRule() *schema.Resource {
 										Description:      "Type of the HTTP rule condition.",
 										Required:         true,
 										ValidateFunc:     validation.All(validation.StringInSlice([]string{"HEADER", "PATH", "QUERY", "METHOD", "HOST", "COOKIE", "SOURCE_IP"}, true)),
-										DiffSuppressFunc: utils.DiffSuppressCaseInsensitive,
+										DiffSuppressFunc: utils.DiffToLower,
 									},
 									"condition": {
 										Type:             schema.TypeString,
 										Description:      "Matching rule for the HTTP rule condition attribute; mandatory for HEADER, PATH, QUERY, METHOD, HOST, and COOKIE types; must be null when type is SOURCE_IP.",
 										Optional:         true,
 										ValidateFunc:     validation.All(validation.StringInSlice([]string{"EXISTS", "CONTAINS", "EQUALS", "MATCHES", "STARTS_WITH", "ENDS_WITH"}, true)),
-										DiffSuppressFunc: utils.DiffSuppressCaseInsensitive,
+										DiffSuppressFunc: utils.DiffToLower,
 									},
 									"negate": {
 										Type:        schema.TypeBool,

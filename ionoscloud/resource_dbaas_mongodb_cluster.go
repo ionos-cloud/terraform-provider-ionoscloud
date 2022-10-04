@@ -7,6 +7,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 	dbaasService "github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/dbaas"
+	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils"
 	"log"
 	"time"
 )
@@ -174,7 +175,7 @@ func resourceDbaasMongoClusterCreate(ctx context.Context, d *schema.ResourceData
 		}
 
 		select {
-		case <-time.After(SleepInterval):
+		case <-time.After(utils.SleepInterval):
 			log.Printf("[INFO] trying again ...")
 		case <-ctx.Done():
 			log.Printf("[INFO] create timed out")
@@ -240,7 +241,7 @@ func resourceDbaasMongoClusterDelete(ctx context.Context, d *schema.ResourceData
 		}
 
 		select {
-		case <-time.After(SleepInterval):
+		case <-time.After(utils.SleepInterval):
 			log.Printf("[INFO] trying again ...")
 		case <-ctx.Done():
 			diags := diag.FromErr(fmt.Errorf("dbaas mongo cluster deletion timed out! WARNING: your mongo cluster (%s) will still probably be deleted after some time but the terraform state won't reflect that; check your Ionos Cloud account for updates", d.Id()))
@@ -249,7 +250,7 @@ func resourceDbaasMongoClusterDelete(ctx context.Context, d *schema.ResourceData
 	}
 
 	// wait 15 seconds after the deletion of the cluster, for the lan to be freed
-	time.Sleep(SleepInterval * 3)
+	time.Sleep(utils.SleepInterval * 3)
 
 	return nil
 }

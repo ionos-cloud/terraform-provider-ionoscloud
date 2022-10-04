@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
+	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils"
 	"log"
 	"strings"
 	"time"
@@ -191,7 +192,7 @@ func resourceS3KeyDelete(ctx context.Context, d *schema.ResourceData, meta inter
 		}
 
 		select {
-		case <-time.After(SleepInterval):
+		case <-time.After(utils.SleepInterval):
 			log.Printf("[INFO] trying again ...")
 		case <-ctx.Done():
 			log.Printf("[INFO] delete timed out")

@@ -47,13 +47,12 @@ type mongoClientService struct {
 var _ PsqlClientService = &clientService{}
 var _ MongoClientService = &mongoClientService{}
 
-func NewClientService(username, password, token, url string) PsqlClientService {
+func NewPsqlClientService(username, password, token, url string) PsqlClientService {
 	newConfigDbaas := psql.NewConfiguration(username, password, token, url)
 
-	if os.Getenv("IONOS_DEBUG") != "" {
+	if os.Getenv(utils.IonosDebug) != "" {
 		newConfigDbaas.Debug = true
 	}
-
 	newConfigDbaas.MaxRetries = 999
 	newConfigDbaas.MaxWaitTime = 4 * time.Second
 

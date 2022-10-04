@@ -6,6 +6,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 	ionoscloud "github.com/ionos-cloud/sdk-go/v6"
+	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils"
 	"log"
 	"time"
 
@@ -217,7 +218,7 @@ func resourcek8sClusterCreate(ctx context.Context, d *schema.ResourceData, meta 
 		}
 
 		select {
-		case <-time.After(SleepInterval):
+		case <-time.After(utils.SleepInterval):
 			log.Printf("[INFO] trying again ...")
 		case <-ctx.Done():
 			log.Printf("[INFO] create timed out")
@@ -386,7 +387,7 @@ func resourcek8sClusterUpdate(ctx context.Context, d *schema.ResourceData, meta 
 		}
 
 		select {
-		case <-time.After(SleepInterval):
+		case <-time.After(utils.SleepInterval):
 			log.Printf("[INFO] trying again ...")
 		case <-ctx.Done():
 			diags := diag.FromErr(fmt.Errorf("k8s cluster update timed out! WARNING: your k8s cluster will still probably be created after some time but the terraform state won't reflect that; check your Ionos Cloud account for updates"))
@@ -430,7 +431,7 @@ func resourcek8sClusterDelete(ctx context.Context, d *schema.ResourceData, meta 
 		}
 
 		select {
-		case <-time.After(SleepInterval):
+		case <-time.After(utils.SleepInterval):
 			log.Printf("[INFO] trying again ...")
 		case <-ctx.Done():
 			diags := diag.FromErr(fmt.Errorf("k8s cluster deletion timed out! WARNING: your k8s cluster will still probably be deleted after some time but the terraform state won't reflect that; check your Ionos Cloud account for updates"))

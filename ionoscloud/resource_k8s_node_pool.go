@@ -7,6 +7,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 	ionoscloud "github.com/ionos-cloud/sdk-go/v6"
+	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils"
 	"log"
 	"reflect"
 	"strings"
@@ -549,7 +550,7 @@ func resourcek8sNodePoolCreate(ctx context.Context, d *schema.ResourceData, meta
 		}
 
 		select {
-		case <-time.After(SleepInterval):
+		case <-time.After(utils.SleepInterval):
 			log.Printf("[INFO] trying again ...")
 		case <-ctx.Done():
 			log.Printf("[INFO] timed out")
@@ -767,7 +768,7 @@ func resourcek8sNodePoolUpdate(ctx context.Context, d *schema.ResourceData, meta
 		}
 
 		select {
-		case <-time.After(SleepInterval):
+		case <-time.After(utils.SleepInterval):
 			log.Printf("[DEBUG] retrying ...")
 		case <-ctx.Done():
 			diags := diag.FromErr(fmt.Errorf("k8s node pool update timed out! WARNING: your k8s node pool will still probably be updated after some time but the terraform state won't reflect that; check your Ionos Cloud account for updates"))
@@ -809,7 +810,7 @@ func resourcek8sNodePoolDelete(ctx context.Context, d *schema.ResourceData, meta
 		}
 
 		select {
-		case <-time.After(SleepInterval):
+		case <-time.After(utils.SleepInterval):
 			log.Printf("[DEBUG] retrying ...")
 		case <-ctx.Done():
 			diags := diag.FromErr(fmt.Errorf("k8s node pool deletion timed out! WARNING: your k8s node pool will still probably be deleted after some time but the terraform state won't reflect that; check your Ionos Cloud account for updates"))
@@ -833,7 +834,6 @@ func resourceK8sNodepoolImport(ctx context.Context, d *schema.ResourceData, meta
 	npId := parts[1]
 
 	client := meta.(SdkBundle).CloudApiClient
-
 	k8sNodepool, apiResponse, err := client.KubernetesApi.K8sNodepoolsFindById(ctx, clusterId, npId).Execute()
 	logApiRequestTime(apiResponse)
 

@@ -76,14 +76,6 @@ func DiffSliceOneWay(a, b []string) []string {
 	return diff
 }
 
-// DiffSliceOneWay returns the elements in `a` that aren't in `b`.
-func DiffSuppressCaseInsensitive(_, old, new string, _ *schema.ResourceData) bool {
-	if strings.ToLower(old) == strings.ToLower(new) {
-		return true
-	}
-	return false
-}
-
 func GenerateSetError(resource, field string, err error) error {
 	return fmt.Errorf("an error occured while setting %s property for %s, %s", field, resource, err)
 }
@@ -177,4 +169,21 @@ func TestImageNotNull(resource, attribute string) resource.TestCheckFunc {
 func CheckFileExists(filePath string) bool {
 	_, err := os.Open(filePath) // For read access.
 	return err == nil
+}
+
+//DiffWithoutNewLines terraform suppress differences between newlines
+func DiffWithoutNewLines(_, old, new string, _ *schema.ResourceData) bool {
+	old = RemoveNewLines(old)
+	new = RemoveNewLines(new)
+	return strings.EqualFold(old, new)
+}
+
+func RemoveNewLines(s string) string {
+	newlines := regexp.MustCompile(`(?:\r\n?|\n)*\z`)
+	return newlines.ReplaceAllString(s, "")
+}
+
+//DiffToLower terraform suppress differences between lower and upper
+func DiffToLower(_, old, new string, _ *schema.ResourceData) bool {
+	return strings.EqualFold(old, new)
 }

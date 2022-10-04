@@ -53,7 +53,7 @@ const (
 	RequestStatusFailed  = "FAILED"
 	RequestStatusDone    = "DONE"
 
-	Version = "6.1.2"
+	Version = "6.1.3"
 )
 
 // Constants for APIs
@@ -174,7 +174,7 @@ func NewAPIClient(cfg *Configuration) *APIClient {
 	return c
 }
 
-//AddPinnedCert - enables pinning of the sha256 public fingerprint to the http client's transport
+// AddPinnedCert - enables pinning of the sha256 public fingerprint to the http client's transport
 func AddPinnedCert(transport *http.Transport, pkFingerprint string) {
 	if pkFingerprint != "" {
 		transport.DialTLSContext = addPinnedCertVerification([]byte(pkFingerprint), new(tls.Config))
@@ -1100,9 +1100,9 @@ type GenericOpenAPIError struct {
 	model      interface{}
 }
 
-//NewGenericOpenAPIError - constructor for GenericOpenAPIError
-func NewGenericOpenAPIError(message string, body []byte, model interface{}, statusCode int) *GenericOpenAPIError {
-	return &GenericOpenAPIError{
+// NewGenericOpenAPIError - constructor for GenericOpenAPIError
+func NewGenericOpenAPIError(message string, body []byte, model interface{}, statusCode int) GenericOpenAPIError {
+	return GenericOpenAPIError{
 		statusCode: statusCode,
 		body:       body,
 		error:      message,
