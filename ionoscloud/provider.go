@@ -186,7 +186,7 @@ func providerConfigure(d *schema.ResourceData, terraformVersion string) (interfa
 	return SdkBundle{
 		CloudApiClient:    apiClient,
 		PsqlClient:        clients[psqlClient].(*dbaasService.PsqlClient),
-		MongoClient:       clients[psqlClient].(*dbaasService.MongoClient),
+		MongoClient:       clients[mongoClient].(*dbaasService.MongoClient),
 		CertManagerClient: clients[certManagerClient].(*cert.Client),
 	}, nil
 }
