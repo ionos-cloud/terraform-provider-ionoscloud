@@ -9,6 +9,7 @@ import (
 	ionoscloud "github.com/ionos-cloud/sdk-go/v6"
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils"
 	"log"
+	"strings"
 	"time"
 )
 
@@ -285,7 +286,7 @@ func privateCrossConnectReady(ctx context.Context, client *ionoscloud.APIClient,
 	if err != nil {
 		return true, fmt.Errorf("error checking PCC status: %s", err)
 	}
-	return *rsp.Metadata.State == utils.Available, nil
+	return strings.EqualFold(*rsp.Metadata.State, utils.Available), nil
 }
 
 func privateCrossConnectDeleted(ctx context.Context, client *ionoscloud.APIClient, d *schema.ResourceData) (bool, error) {

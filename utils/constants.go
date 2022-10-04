@@ -13,4 +13,4 @@ const MaxWaitTime = 4 * time.Second
 
 const SleepInterval = 5 * time.Second
 
-const Available = "Available"
+const Available = "AVAILABLE"

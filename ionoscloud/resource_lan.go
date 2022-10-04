@@ -311,7 +311,7 @@ func lanAvailable(ctx context.Context, client *ionoscloud.APIClient, d *schema.R
 		return false, fmt.Errorf("could not retrieve state of lan %s", d.Id())
 	}
 
-	return *rsp.Metadata.State == utils.Available, nil
+	return strings.EqualFold(*rsp.Metadata.State, utils.Available), nil
 }
 
 func lanDeleted(ctx context.Context, client *ionoscloud.APIClient, d *schema.ResourceData) (bool, error) {

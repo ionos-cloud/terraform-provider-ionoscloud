@@ -8,6 +8,7 @@ import (
 	ionoscloud "github.com/ionos-cloud/sdk-go/v6"
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils"
 	"log"
+	"strings"
 	"time"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
@@ -280,7 +281,7 @@ func backupUnitReady(client *ionoscloud.APIClient, d *schema.ResourceData, c con
 	if err != nil {
 		return true, fmt.Errorf("error checking backup unit status: %s", err)
 	}
-	return *backupUnit.Metadata.State == utils.Available, nil
+	return strings.EqualFold(*backupUnit.Metadata.State, utils.Available), nil
 }
 
 func backupUnitDeleted(client *ionoscloud.APIClient, d *schema.ResourceData, c context.Context) (bool, error) {
