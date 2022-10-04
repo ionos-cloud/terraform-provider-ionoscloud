@@ -9,6 +9,7 @@ import (
 	dbaasService "github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/dbaas"
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils"
 	"log"
+	"strings"
 	"time"
 )
 
@@ -413,7 +414,7 @@ func dbaasClusterReady(ctx context.Context, client *dbaasService.PsqlClient, d *
 	//		return false, fmt.Errorf("dbaas cluster has failed. WARNING: your k8s cluster may still recover after some time but the terraform state won't reflect that; check your Ionos Cloud account for updates")
 	//	}
 	//}
-	return *subjectCluster.Metadata.State == utils.Available, nil
+	return strings.EqualFold(string(*subjectCluster.Metadata.State), utils.Available), nil
 }
 
 func dbaasClusterDeleted(ctx context.Context, client *dbaasService.PsqlClient, d *schema.ResourceData) (bool, error) {
