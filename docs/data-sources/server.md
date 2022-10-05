@@ -46,11 +46,11 @@ The following attributes are returned by the datasource:
 * `template_uuid` - The UUID of the template for creating a CUBE server; the available templates for CUBE servers can be found on the templates resource
 * `id` - The id of that resource
 * `name` - The name of that resource
-* `type` - Server usages: ENTERPRISE or CUBE
+* `type` - Server usages: [ENTERPRISE](https://docs.ionos.com/cloud/compute-engine/virtual-servers/virtual-servers) or [CUBE](https://docs.ionos.com/cloud/compute-engine/virtual-servers/cloud-cubes)
 * `vm_state`- Status of the virtual Machine
 * `datacenter_id` - The id of the datacenter
 * `cores` - The total number of cores for the server
-* `cpu_family` - CPU architecture on which server gets provisione
+* `cpu_family` - CPU architecture on which server gets provisioned; not all CPU architectures are available in all datacenter regions; available CPU architectures can be retrieved from the datacenter resource.
 * `ram` - The amount of memory for the server in MB
 * `availability_zone` - The availability zone in which the server should exist
 * `vm_state` - Status of the virtual Machine
