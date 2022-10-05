@@ -119,7 +119,7 @@ func testAccCheckMongoUserExists(n string, user *mongo.User) resource.TestCheckF
 var testAccCheckMongoUserConfigBasic = `
 resource ` + DatacenterResource + ` "datacenter_example" {
   name        = "datacenter_example"
-  location    = "de/txl"
+  location    = "de/fra"
   description = "Datacenter for testing dbaas cluster"
 }
 
