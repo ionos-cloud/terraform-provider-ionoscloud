@@ -31,6 +31,9 @@ is `not found`(404)
 - Fix cube server creation. Some attributes were not populated - name, boot_cdrom, availability_zone
 - Crash on update of k8s version when we have a value without `.`
 
+### Documentation
+- add links to documentation for `cube` and `enterprise` fields
+
 ## 6.3.1
 
 ### Feature

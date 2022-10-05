@@ -131,9 +131,9 @@ resource "ionoscloud_server" "example" {
 - `cores` - (Optional)[integer] Number of server CPU cores.
 - `ram` - (Optional)[integer] The amount of memory for the server in MB.
 - `image_name` - (Optional)[string] The name, ID or alias of the image. May also be a snapshot ID. It is required if `licence_type` is not provided. Attribute is immutable.
-- `availability_zone` - (Optional)[string] The availability zone in which the server should exist. This property is immutable.
+- `availability_zone` - (Optional)[string] The availability zone in which the server should exist. E.g: `AUTO`, `ZONE_1`, `ZONE_2`. This property is immutable.
 - `licence_type` - (Optional)[string] Sets the OS type of the server.
-- `cpu_family` - (Optional)[string] Sets the CPU type. "AMD_OPTERON", "INTEL_XEON" or "INTEL_SKYLAKE".
+- `cpu_family` - (Optional)[string] CPU architecture on which server gets provisioned; not all CPU architectures are available in all datacenter regions; available CPU architectures can be retrieved from the datacenter resource. E.g.: "AMD_OPTERON", "INTEL_XEON" or "INTEL_SKYLAKE".
 - `volume` - (Required) See the [Volume](volume.md) section.
 - `nic` - (Required) See the [Nic](nic.md) section.
 - `boot_volume` - (Computed) The associated boot volume.
@@ -144,7 +144,7 @@ resource "ionoscloud_server" "example" {
 - `firewallrule_id` - (Computed) The associated firewall rule.
 - `ssh_key_path` - (Optional)[list] List of paths to files containing a public SSH key that will be injected into IonosCloud provided Linux images.  Also accepts ssh keys directly. Required for IonosCloud Linux images. Required if `image_password` is not provided.
 - `image_password` - (Optional)[string] Required if `ssh_key_path` is not provided.
-- `type` - (Optional)[string] server usages: ENTERPRISE or CUBE. This property is immutable.
+- `type` - (Optional)[string] Server usages: [ENTERPRISE](https://docs.ionos.com/cloud/compute-engine/virtual-servers/virtual-servers) or [CUBE](https://docs.ionos.com/cloud/compute-engine/virtual-servers/cloud-cubes). This property is immutable.
 
 > **⚠ WARNING** 
 > 
