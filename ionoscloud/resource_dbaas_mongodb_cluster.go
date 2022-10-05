@@ -9,6 +9,7 @@ import (
 	dbaasService "github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/dbaas"
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils"
 	"log"
+	"strings"
 	"time"
 )
 
@@ -285,7 +286,7 @@ func dbaasMongoClusterReady(ctx context.Context, client *dbaasService.MongoClien
 	if err != nil {
 		return true, fmt.Errorf("error checking dbaas mongo cluster status: %w", err)
 	}
-	return *subjectCluster.Metadata.State == "AVAILABLE", nil
+	return strings.EqualFold(string(*subjectCluster.Metadata.State), utils.Available), nil
 }
 
 func dbaasMongoClusterDeleted(ctx context.Context, client *dbaasService.MongoClient, d *schema.ResourceData) (bool, error) {

@@ -145,7 +145,7 @@ func TestAccDBaaSPgSqlClusterBasic(t *testing.T) {
 					resource.TestCheckResourceAttr(PsqlClusterResource+"."+DBaaSClusterTestResource, "ram", "3072"),
 					resource.TestCheckResourceAttr(PsqlClusterResource+"."+DBaaSClusterTestResource, "storage_size", "3072"),
 					resource.TestCheckResourceAttr(PsqlClusterResource+"."+DBaaSClusterTestResource, "storage_type", "HDD"),
-					resource.TestCheckNoResourceAttr(PsqlClusterResource+"."+DBaaSClusterTestResource, "connections"),
+					resource.TestCheckNoResourceAttr(PsqlClusterResource+"."+DBaaSClusterTestResource, "connections.%"),
 					resource.TestCheckResourceAttrPair(PsqlClusterResource+"."+DBaaSClusterTestResource, "location", DatacenterResource+".datacenter_example_update", "location"),
 					resource.TestCheckResourceAttr(PsqlClusterResource+"."+DBaaSClusterTestResource, "backup_location", "de"),
 					resource.TestCheckResourceAttr(PsqlClusterResource+"."+DBaaSClusterTestResource, "display_name", UpdatedResources),
@@ -168,7 +168,7 @@ func TestAccDBaaSPgSqlClusterBasic(t *testing.T) {
 
 func TestAccDBaaSPgSqlClusterAdditionalParameters(t *testing.T) {
 	var dbaasCluster psql.ClusterResponse
-	t.Skip()
+	//t.Skip()
 	resource.Test(t, resource.TestCase{
 		PreCheck: func() {
 			testAccPreCheck(t)
