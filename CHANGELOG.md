@@ -29,6 +29,7 @@ Please contact your sales representative or support for more information.
 - Reproduces rarely: sometimes the `nic` resource is not found after creation. As a fix we added a retry for 5 minutes to be able to get the NIC. The retry will keep trying if the response 
 is `not found`(404)
 - Fix cube server creation. Some attributes were not populated - name, boot_cdrom, availability_zone
+- Crash on update of k8s version when we have a value without `.`
 
 ## 6.3.1
 
