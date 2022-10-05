@@ -30,14 +30,19 @@ func responseBody(resp *ionoscloud.APIResponse) string {
 // DiffBasedOnVersion used for k8 node pool and cluster
 func DiffBasedOnVersion(_, old, new string, _ *schema.ResourceData) bool {
 	var oldMajor, oldMinor string
+	var newMajor, newMinor string
 	if old != "" {
 		oldSplit := strings.Split(old, ".")
-		oldMajor = oldSplit[0]
-		oldMinor = oldSplit[1]
+		if len(oldSplit) > 1 {
+			oldMajor = oldSplit[0]
+			oldMinor = oldSplit[1]
+		}
 
 		newSplit := strings.Split(new, ".")
-		newMajor := newSplit[0]
-		newMinor := newSplit[1]
+		if len(newSplit) > 1 {
+			newMajor = newSplit[0]
+			newMinor = newSplit[1]
+		}
 
 		if oldMajor == newMajor && oldMinor == newMinor {
 			return true
