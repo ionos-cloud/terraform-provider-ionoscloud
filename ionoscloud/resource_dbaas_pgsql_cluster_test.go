@@ -168,7 +168,7 @@ func TestAccDBaaSPgSqlClusterBasic(t *testing.T) {
 
 func TestAccDBaaSPgSqlClusterAdditionalParameters(t *testing.T) {
 	var dbaasCluster psql.ClusterResponse
-	//t.Skip()
+	t.Skip()
 	resource.Test(t, resource.TestCase{
 		PreCheck: func() {
 			testAccPreCheck(t)
