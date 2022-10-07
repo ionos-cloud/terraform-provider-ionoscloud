@@ -2,6 +2,7 @@ package ionoscloud
 
 import (
 	"context"
+	"encoding/json"
 	"fmt"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
@@ -17,7 +18,7 @@ func resourceCubeServer() *schema.Resource {
 	return &schema.Resource{
 		CreateContext: resourceCubeServerCreate,
 		ReadContext:   resourceCubeServerRead,
-		UpdateContext: resourceServerUpdate,
+		UpdateContext: resourceCubeServerUpdate,
 		DeleteContext: resourceCubeServerDelete,
 		Importer: &schema.ResourceImporter{
 			StateContext: resourceCubeServerImport,
@@ -852,6 +853,266 @@ func resourceCubeServerRead(ctx context.Context, d *schema.ResourceData, meta in
 	}
 
 	return nil
+}
+
+func resourceCubeServerUpdate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+	client := meta.(SdkBundle).CloudApiClient
+
+	dcId := d.Get("datacenter_id").(string)
+	request := ionoscloud.ServerProperties{}
+
+	if d.HasChange("template_uuid") {
+		_, n := d.GetChange("template_uuid")
+		nStr := n.(string)
+		request.TemplateUuid = &nStr
+	}
+	if d.HasChange("name") {
+		_, n := d.GetChange("name")
+		nStr := n.(string)
+		request.Name = &nStr
+	}
+	//if d.HasChange("cores") {
+	//	_, n := d.GetChange("cores")
+	//	nInt := int32(n.(int))
+	//	request.Cores = &nInt
+	//}
+	//if d.HasChange("ram") {
+	//	_, n := d.GetChange("ram")
+	//	nInt := int32(n.(int))
+	//	request.Ram = &nInt
+	//}
+	//if d.HasChange("type") {
+	//	serverType, ok := d.GetOk("type")
+	//	nStr := serverType.(string)
+	//	request.Type = &nStr
+	//}
+
+	//if v, ok := d.GetOk("type"); ok {
+	//	serverType := v.(string)
+	//	request.Type = &serverType
+	//}
+
+	if d.HasChange("cpu_family") {
+		_, n := d.GetChange("cpu_family")
+		nStr := n.(string)
+		request.CpuFamily = &nStr
+	}
+
+	if d.HasChange("boot_cdrom") {
+		_, n := d.GetChange("boot_cdrom")
+		bootCdrom := n.(string)
+
+		if utils.IsValidUUID(bootCdrom) {
+
+			request.BootCdrom = &ionoscloud.ResourceReference{
+				Id: &bootCdrom,
+			}
+
+		} else {
+			diags := diag.FromErr(fmt.Errorf("boot_volume has to be a valid UUID, got: %s", bootCdrom))
+			return diags
+		}
+		/* todo: figure out a way of sending a nil bootCdrom to the API (the sdk's omitempty doesn't let us) */
+	}
+
+	server, apiResponse, err := client.ServersApi.DatacentersServersPatch(ctx, dcId, d.Id()).Server(request).Depth(3).Execute()
+	logApiRequestTime(apiResponse)
+
+	if err != nil {
+		diags := diag.FromErr(fmt.Errorf("error occured while updating server ID %s: %s", d.Id(), err))
+		return diags
+	}
+
+	_, errState := getStateChangeConf(meta, d, apiResponse.Header.Get("Location"), schema.TimeoutUpdate).WaitForStateContext(ctx)
+	if errState != nil {
+		diags := diag.FromErr(errState)
+		return diags
+	}
+	// Volume stuff
+	if d.HasChange("volume") {
+		bootVolume := d.Get("boot_volume").(string)
+		_, apiResponse, err := client.ServersApi.DatacentersServersVolumesFindById(ctx, dcId, d.Id(), bootVolume).Execute()
+		logApiRequestTime(apiResponse)
+
+		if err != nil {
+			volume := ionoscloud.Volume{
+				Id: &bootVolume,
+			}
+			_, apiResponse, err := client.ServersApi.DatacentersServersVolumesPost(ctx, dcId, d.Id()).Volume(volume).Execute()
+			logApiRequestTime(apiResponse)
+			if err != nil {
+				diags := diag.FromErr(fmt.Errorf("an error occured while attaching a volume dcId: %s server_id: %s ID: %s Response: %s", dcId, d.Id(), bootVolume, err))
+				return diags
+			}
+
+			// Wait, catching any errors
+			_, errState = getStateChangeConf(meta, d, apiResponse.Header.Get("Location"), schema.TimeoutCreate).WaitForStateContext(ctx)
+			if errState != nil {
+				diags := diag.FromErr(fmt.Errorf("an error occured while waiting for a state change for dcId: %s server_id: %s ID: %s %w", dcId, d.Id(), bootVolume, err))
+				return diags
+			}
+		}
+
+		properties := ionoscloud.VolumeProperties{}
+
+		if v, ok := d.GetOk("volume.0.name"); ok {
+			vStr := v.(string)
+			properties.Name = &vStr
+		}
+
+		//if v, ok := d.GetOk("volume.0.size"); ok {
+		//	vInt := float32(v.(int))
+		//	properties.Size = &vInt
+		//}
+
+		if v, ok := d.GetOk("volume.0.bus"); ok {
+			vStr := v.(string)
+			properties.Bus = &vStr
+		}
+
+		_, apiResponse, err = client.VolumesApi.DatacentersVolumesPatch(ctx, d.Get("datacenter_id").(string), bootVolume).Volume(properties).Execute()
+		logApiRequestTime(apiResponse)
+
+		if err != nil {
+			diags := diag.FromErr(fmt.Errorf("error patching volume (%s) (%s)", d.Id(), err))
+			return diags
+		}
+
+		// Wait, catching any errors
+		_, errState := getStateChangeConf(meta, d, apiResponse.Header.Get("Location"), schema.TimeoutUpdate).WaitForStateContext(ctx)
+		if errState != nil {
+			diags := diag.FromErr(errState)
+			return diags
+		}
+	}
+
+	// Nic stuff
+	if d.HasChange("nic") {
+		nic := &ionoscloud.Nic{}
+		for _, n := range *server.Entities.Nics.Items {
+			nicStr := d.Get("primary_nic").(string)
+			if *n.Id == nicStr {
+				nic = &n
+				break
+			}
+		}
+
+		lan := int32(d.Get("nic.0.lan").(int))
+		properties := ionoscloud.NicProperties{
+			Lan: &lan,
+		}
+
+		if v, ok := d.GetOk("nic.0.name"); ok {
+			vStr := v.(string)
+			properties.Name = &vStr
+		}
+
+		if v, ok := d.GetOk("nic.0.ips"); ok {
+			raw := v.([]interface{})
+			if raw != nil && len(raw) > 0 {
+				ips := make([]string, 0)
+				for _, rawIp := range raw {
+					ip := rawIp.(string)
+					ips = append(ips, ip)
+				}
+				if ips != nil && len(ips) > 0 {
+					properties.Ips = &ips
+				}
+			}
+		}
+
+		dhcp := d.Get("nic.0.dhcp").(bool)
+		fwRule := d.Get("nic.0.firewall_active").(bool)
+		properties.Dhcp = &dhcp
+		properties.FirewallActive = &fwRule
+
+		if v, ok := d.GetOk("nic.0.firewall_type"); ok {
+			vStr := v.(string)
+			properties.FirewallType = &vStr
+		}
+
+		if d.HasChange("nic.0.firewall") {
+
+			firewallId := d.Get("firewallrule_id").(string)
+			update := true
+			if firewallId == "" {
+				update = false
+			}
+
+			firewall, diags := getFirewallData(d, "nic.0.firewall.0.", update)
+			if diags != nil {
+				return diags
+			}
+
+			_, apiResponse, err := client.FirewallRulesApi.DatacentersServersNicsFirewallrulesFindById(ctx, dcId, *server.Id, *nic.Id, firewallId).Execute()
+			logApiRequestTime(apiResponse)
+
+			if err != nil {
+				if !httpNotFound(apiResponse) {
+					diags := diag.FromErr(fmt.Errorf("error occured at checking existance of firewall %s %s", firewallId, err))
+					return diags
+				} else if httpNotFound(apiResponse) {
+					diags := diag.FromErr(fmt.Errorf("firewall does not exist %s", firewallId))
+					return diags
+				}
+			}
+			if update == false {
+
+				firewall, apiResponse, err = client.FirewallRulesApi.DatacentersServersNicsFirewallrulesPost(ctx, dcId, *server.Id, *nic.Id).Firewallrule(firewall).Execute()
+			} else {
+				firewall, apiResponse, err = client.FirewallRulesApi.DatacentersServersNicsFirewallrulesPatch(ctx, dcId, *server.Id, *nic.Id, firewallId).Firewallrule(*firewall.Properties).Execute()
+
+			}
+			logApiRequestTime(apiResponse)
+			if err != nil {
+				diags := diag.FromErr(fmt.Errorf("an error occured while running firewall rule dcId: %s server_id: %s nic_id %s ID: %s Response: %s", dcId, *server.Id, *nic.Id, firewallId, err))
+				return diags
+			}
+
+			// Wait, catching any errors
+			_, errState = getStateChangeConf(meta, d, apiResponse.Header.Get("Location"), schema.TimeoutCreate).WaitForStateContext(ctx)
+			if errState != nil {
+				diags := diag.FromErr(fmt.Errorf("an error occured while waiting for state change dcId: %s server_id: %s nic_id %s ID: %s Response: %w", dcId, *server.Id, *nic.Id, firewallId, errState))
+				return diags
+			}
+
+			if firewallId == "" && firewall.Id != nil {
+				if err := d.Set("firewallrule_id", firewall.Id); err != nil {
+					diags := diag.FromErr(err)
+					return diags
+				}
+			}
+
+			nic.Entities = &ionoscloud.NicEntities{
+				Firewallrules: &ionoscloud.FirewallRules{
+					Items: &[]ionoscloud.FirewallRule{
+						firewall,
+					},
+				},
+			}
+
+		}
+		mProp, _ := json.Marshal(properties)
+
+		log.Printf("[DEBUG] Updating props: %s", string(mProp))
+
+		_, apiResponse, err := client.NetworkInterfacesApi.DatacentersServersNicsPatch(ctx, d.Get("datacenter_id").(string), *server.Id, *nic.Id).Nic(properties).Execute()
+		logApiRequestTime(apiResponse)
+		if err != nil {
+			diags := diag.FromErr(fmt.Errorf("error updating nic (%s)", err))
+			return diags
+		}
+
+		// Wait, catching any errors
+		_, errState := getStateChangeConf(meta, d, apiResponse.Header.Get("Location"), schema.TimeoutUpdate).WaitForStateContext(ctx)
+		if errState != nil {
+			diags := diag.FromErr(fmt.Errorf("error getting state change for nics patch %w", errState))
+			return diags
+		}
+
+	}
+
+	return resourceCubeServerRead(ctx, d, meta)
 }
 
 func SetCubeVolumeProperties(volume ionoscloud.Volume) map[string]interface{} {
