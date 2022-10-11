@@ -4,11 +4,13 @@ import (
 	"context"
 	"fmt"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 	ionoscloud "github.com/ionos-cloud/sdk-go/v6"
 	"log"
 	"strings"
+	"time"
 )
 
 func resourceNic() *schema.Resource {
@@ -107,12 +109,36 @@ func resourceNicCreate(ctx context.Context, d *schema.ResourceData, meta interfa
 		diags := diag.FromErr(errState)
 		return diags
 	}
-	return resourceNicRead(ctx, d, meta)
+	//Sometimes there is an error because the nic is not found after it's created.
+	//Probably a read write consistency issue.
+	//We're retrying for 5 minutes. 404 - means we keep on trying.
+	var foundNic = &ionoscloud.Nic{}
+	err = resource.RetryContext(ctx, 5*time.Minute, func() *resource.RetryError {
+		var err error
+		*foundNic, apiResponse, err = client.NetworkInterfacesApi.DatacentersServersNicsFindById(ctx, dcid, srvid, *nic.Id).Execute()
+		if apiResponse.HttpNotFound() {
+			log.Printf("[INFO] Could not find nic with Id %s , retrying...", *nic.Id)
+			return resource.RetryableError(fmt.Errorf("could not find nic, %w", err))
+		}
+		if err != nil {
+			resource.NonRetryableError(err)
+		}
+		return nil
+	})
+
+	if err != nil {
+		return diag.FromErr(err)
+	}
+
+	if foundNic == nil || *foundNic.Id == "" {
+		return diag.FromErr(fmt.Errorf("could not find nic with id %s after creation ", *nic.Id))
+	}
+
+	return diag.FromErr(NicSetData(d, foundNic))
 }
 
 func resourceNicRead(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	client := meta.(SdkBundle).CloudApiClient
-
 	dcid := d.Get("datacenter_id").(string)
 	srvid := d.Get("server_id").(string)
 	nicid := d.Id()
@@ -121,7 +147,8 @@ func resourceNicRead(ctx context.Context, d *schema.ResourceData, meta interface
 	logApiRequestTime(apiResponse)
 
 	if err != nil {
-		if httpNotFound(apiResponse) {
+		if apiResponse.HttpNotFound() {
+			log.Printf("[INFO] nic resource with id %s not found", nicid)
 			d.SetId("")
 			return nil
 		}
@@ -205,8 +232,8 @@ func getNicData(d *schema.ResourceData, path string) ionoscloud.Nic {
 	nic.Properties.Dhcp = &dhcp
 	nic.Properties.FirewallActive = &fwActive
 
-	if _, ok := d.GetOk("firewall_type"); ok {
-		raw := d.Get("firewall_type").(string)
+	if _, ok := d.GetOk(path + "firewall_type"); ok {
+		raw := d.Get(path + "firewall_type").(string)
 		nic.Properties.FirewallType = &raw
 	}
 
@@ -303,7 +330,7 @@ func resourceNicImport(ctx context.Context, d *schema.ResourceData, meta interfa
 	logApiRequestTime(apiResponse)
 
 	if err != nil {
-		if !httpNotFound(apiResponse) {
+		if !apiResponse.HttpNotFound() {
 			d.SetId("")
 			return nil, fmt.Errorf("an error occured while trying to fetch the nic %q", nicId)
 		}

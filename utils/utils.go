@@ -7,6 +7,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
 	"net"
 	"net/http"
+	"os"
 	"reflect"
 	"regexp"
 	"strconv"
@@ -73,14 +74,6 @@ func DiffSliceOneWay(a, b []string) []string {
 		}
 	}
 	return diff
-}
-
-// DiffSliceOneWay returns the elements in `a` that aren't in `b`.
-func DiffSuppressCaseInsensitive(_, old, new string, _ *schema.ResourceData) bool {
-	if strings.ToLower(old) == strings.ToLower(new) {
-		return true
-	}
-	return false
 }
 
 func GenerateSetError(resource, field string, err error) error {
@@ -171,4 +164,26 @@ func TestImageNotNull(resource, attribute string) resource.TestCheckFunc {
 		}
 		return nil
 	}
+}
+
+func CheckFileExists(filePath string) bool {
+	_, err := os.Open(filePath) // For read access.
+	return err == nil
+}
+
+//DiffWithoutNewLines terraform suppress differences between newlines
+func DiffWithoutNewLines(_, old, new string, _ *schema.ResourceData) bool {
+	old = RemoveNewLines(old)
+	new = RemoveNewLines(new)
+	return strings.EqualFold(old, new)
+}
+
+func RemoveNewLines(s string) string {
+	newlines := regexp.MustCompile(`(?:\r\n?|\n)*\z`)
+	return newlines.ReplaceAllString(s, "")
+}
+
+//DiffToLower terraform suppress differences between lower and upper
+func DiffToLower(_, old, new string, _ *schema.ResourceData) bool {
+	return strings.EqualFold(old, new)
 }

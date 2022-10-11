@@ -29,6 +29,16 @@ func TestAccServerBasic(t *testing.T) {
 		CheckDestroy:      testAccCheckServerDestroyCheck,
 		Steps: []resource.TestStep{
 			{
+				Config:      testAccCheckServerNoPwdOrSSH,
+				ExpectError: regexp.MustCompile(`either 'image_password' or 'ssh_key_path' must be provided`),
+			},
+			{
+				//ssh_key_path now accepts the ssh key directly too
+				Config: testAccCheckServerSshDirectly,
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttr(ServerResource+"."+ServerTestResource, "ssh_key_path.0", sshKey)),
+			},
+			{
 				Config: testAccCheckServerConfigBasic,
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckServerExists(ServerResource+"."+ServerTestResource, &server),
@@ -50,6 +60,7 @@ func TestAccServerBasic(t *testing.T) {
 					resource.TestCheckResourceAttr(ServerResource+"."+ServerTestResource, "nic.0.name", "system"),
 					resource.TestCheckResourceAttr(ServerResource+"."+ServerTestResource, "nic.0.dhcp", "true"),
 					resource.TestCheckResourceAttr(ServerResource+"."+ServerTestResource, "nic.0.firewall_active", "true"),
+					resource.TestCheckResourceAttrPair(ServerResource+"."+ServerTestResource, "nic.0.id", ServerResource+"."+ServerTestResource, "primary_nic"),
 					resource.TestCheckResourceAttr(ServerResource+"."+ServerTestResource, "nic.0.firewall_type", "BIDIRECTIONAL"),
 					resource.TestCheckResourceAttrPair(ServerResource+"."+ServerTestResource, "nic.0.ips.0", "ionoscloud_ipblock.webserver_ipblock", "ips.0"),
 					resource.TestCheckResourceAttrPair(ServerResource+"."+ServerTestResource, "nic.0.ips.1", "ionoscloud_ipblock.webserver_ipblock", "ips.1"),

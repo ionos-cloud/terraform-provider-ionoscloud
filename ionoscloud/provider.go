@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/meta"
+	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/cert"
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils"
 	"log"
 	"net/http"
@@ -21,8 +22,10 @@ import (
 var Version = "DEV"
 
 type SdkBundle struct {
-	CloudApiClient *ionoscloud.APIClient
-	DbaasClient    *dbaasService.Client
+	CloudApiClient    *ionoscloud.APIClient
+	PsqlClient        *dbaasService.PsqlClient
+	MongoClient       *dbaasService.MongoClient
+	CertManagerClient *cert.Client
 }
 
 // Provider returns a schema.Provider for ionoscloud
@@ -60,7 +63,6 @@ func Provider() *schema.Provider {
 				Deprecated: "Timeout is used instead of this functionality",
 			},
 		},
-
 		ResourcesMap: map[string]*schema.Resource{
 			DatacenterResource:          resourceDatacenter(),
 			IpBlockResource:             resourceIPBlock(),
@@ -85,10 +87,13 @@ func Provider() *schema.Provider {
 			NatGatewayRuleResource:      resourceNatGatewayRule(),
 			NetworkLoadBalancerResource: resourceNetworkLoadBalancer(),
 			NetworkLoadBalancerForwardingRuleResource: resourceNetworkLoadBalancerForwardingRule(),
-			DBaaSClusterResource:                      resourceDbaasPgSqlCluster(),
+			PsqlClusterResource:                       resourceDbaasPgSqlCluster(),
+			DBaasMongoClusterResource:                 resourceDbaasMongoDBCluster(),
+			DBaasMongoUserResource:                    resourceDbaasMongoUser(),
 			ALBResource:                               resourceApplicationLoadBalancer(),
 			ALBForwardingRuleResource:                 resourceApplicationLoadBalancerForwardingRule(),
 			TargetGroupResource:                       resourceTargetGroup(),
+			CertificateResource:                       resourceCertificateManager(),
 		},
 		DataSourcesMap: map[string]*schema.Resource{
 			DatacenterResource:                        dataSourceDataCenter(),
@@ -119,12 +124,15 @@ func Provider() *schema.Provider {
 			NicResource:                               dataSourceNIC(),
 			ShareResource:                             dataSourceShare(),
 			ResourceIpFailover:                        dataSourceIpFailover(),
-			DBaaSClusterResource:                      dataSourceDbaasPgSqlCluster(),
-			DBaaSVersionsResource:                     dataSourceDbaasPgSqlVersions(),
-			DBaaSBackupsResource:                      dataSourceDbaasPgSqlBackups(),
+			PsqlClusterResource:                       dataSourceDbaasPgSqlCluster(),
+			DBaasMongoClusterResource:                 dataSourceDbaasMongoCluster(),
+			PsqlVersionsResource:                      dataSourceDbaasPgSqlVersions(),
+			PsqlBackupsResource:                       dataSourceDbaasPgSqlBackups(),
 			ALBResource:                               dataSourceApplicationLoadBalancer(),
 			ALBForwardingRuleResource:                 dataSourceApplicationLoadBalancerForwardingRule(),
 			TargetGroupResource:                       dataSourceTargetGroup(),
+			DBaasMongoUserResource:                    dataSourceDbaasMongoUser(),
+			CertificateResource:                       dataSourceCertificate(),
 		},
 	}
 
@@ -134,7 +142,7 @@ func Provider() *schema.Provider {
 
 		if terraformVersion == "" {
 			// Terraform 0.12 introduced this field to the protocol
-			// We can therefore assume that if it's missing it's 0.10 or 0.11
+			// We can therefore assume that if it's missing it is 0.10 or 0.11
 			terraformVersion = "0.11+compatible"
 		}
 
@@ -165,29 +173,50 @@ func providerConfigure(d *schema.ResourceData, terraformVersion string) (interfa
 	}
 
 	cleanedUrl := cleanURL(d.Get("endpoint").(string))
-
-	newConfig := ionoscloud.NewConfiguration(username.(string), password.(string), token.(string), cleanedUrl)
-
-	if os.Getenv("IONOS_DEBUG") != "" {
-		newConfig.Debug = true
+	clients := map[clientType]interface{}{
+		ionosClient:       NewClientByType(username.(string), password.(string), token.(string), cleanedUrl, ionosClient),
+		psqlClient:        NewClientByType(username.(string), password.(string), token.(string), cleanedUrl, psqlClient),
+		certManagerClient: NewClientByType(username.(string), password.(string), token.(string), cleanedUrl, certManagerClient),
+		mongoClient:       NewClientByType(username.(string), password.(string), token.(string), cleanedUrl, mongoClient),
 	}
-	newConfig.MaxRetries = 999
-	newConfig.WaitTime = 4 * time.Second
-	newConfig.HTTPClient = &http.Client{Transport: utils.CreateTransport()}
 
-	newClient := ionoscloud.NewAPIClient(newConfig)
-
-	newConfig.UserAgent = fmt.Sprintf(
+	apiClient := clients[ionosClient].(*ionoscloud.APIClient)
+	apiClient.GetConfig().UserAgent = fmt.Sprintf(
 		"terraform-provider/%s_ionos-cloud-sdk-go/%s_hashicorp-terraform/%s_terraform-plugin-sdk/%s_os/%s_arch/%s",
 		Version, ionoscloud.Version, terraformVersion, meta.SDKVersionString(), runtime.GOOS, runtime.GOARCH)
 
-	dbaasClient := dbaasService.NewClientService(username.(string), password.(string), token.(string), cleanedUrl)
-	//dbaasClient.GetConfig().HTTPClient = &http.Client{Transport: createTransport()}
-
 	return SdkBundle{
-		CloudApiClient: newClient,
-		DbaasClient:    dbaasClient.Get(),
+		CloudApiClient:    apiClient,
+		PsqlClient:        clients[psqlClient].(*dbaasService.PsqlClient),
+		MongoClient:       clients[mongoClient].(*dbaasService.MongoClient),
+		CertManagerClient: clients[certManagerClient].(*cert.Client),
 	}, nil
+}
+
+func NewClientByType(username, password, token, url string, clientType clientType) interface{} {
+	switch clientType {
+	case ionosClient:
+		{
+			newConfig := ionoscloud.NewConfiguration(username, password, token, url)
+
+			if os.Getenv(utils.IonosDebug) != "" {
+				newConfig.Debug = true
+			}
+			newConfig.MaxRetries = utils.MaxRetries
+			newConfig.WaitTime = utils.MaxWaitTime
+			newConfig.HTTPClient = &http.Client{Transport: utils.CreateTransport()}
+			return ionoscloud.NewAPIClient(newConfig)
+		}
+	case psqlClient:
+		return dbaasService.NewPsqlClientService(username, password, token, url).Get()
+	case mongoClient:
+		return dbaasService.NewMongoClientService(username, password, token, url).Get()
+	case certManagerClient:
+		return cert.NewClientService(username, password, token, url).Get()
+	default:
+		log.Fatalf("[ERROR] unknown client type %d", clientType)
+	}
+	return nil
 }
 
 // cleanURL makes sure trailing slash does not corrupt the state

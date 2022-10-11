@@ -7,7 +7,9 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 	dbaasService "github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/dbaas"
+	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils"
 	"log"
+	"strings"
 	"time"
 )
 
@@ -178,7 +180,6 @@ func resourceDbaasPgSqlCluster() *schema.Resource {
 	}
 }
 func checkDBaaSClusterImmutableFields(_ context.Context, diff *schema.ResourceDiff, _ interface{}) error {
-
 	//we do not want to check in case of resource creation
 	if diff.Id() == "" {
 		return nil
@@ -204,8 +205,9 @@ func checkDBaaSClusterImmutableFields(_ context.Context, diff *schema.ResourceDi
 	return nil
 
 }
+
 func resourceDbaasPgSqlClusterCreate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
-	client := meta.(SdkBundle).DbaasClient
+	client := meta.(SdkBundle).PsqlClient
 
 	dbaasCluster, err := dbaasService.GetDbaasPgSqlClusterDataCreate(d)
 
@@ -237,7 +239,7 @@ func resourceDbaasPgSqlClusterCreate(ctx context.Context, d *schema.ResourceData
 		}
 
 		select {
-		case <-time.After(SleepInterval):
+		case <-time.After(utils.SleepInterval):
 			log.Printf("[INFO] trying again ...")
 		case <-ctx.Done():
 			log.Printf("[INFO] create timed out")
@@ -252,7 +254,7 @@ func resourceDbaasPgSqlClusterCreate(ctx context.Context, d *schema.ResourceData
 
 func resourceDbaasPgSqlClusterRead(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 
-	client := meta.(SdkBundle).DbaasClient
+	client := meta.(SdkBundle).PsqlClient
 
 	cluster, apiResponse, err := client.GetCluster(ctx, d.Id())
 
@@ -275,7 +277,7 @@ func resourceDbaasPgSqlClusterRead(ctx context.Context, d *schema.ResourceData, 
 }
 
 func resourceDbaasPgSqlClusterUpdate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
-	client := meta.(SdkBundle).DbaasClient
+	client := meta.(SdkBundle).PsqlClient
 
 	cluster, diags := dbaasService.GetDbaasPgSqlClusterDataUpdate(d)
 
@@ -292,7 +294,7 @@ func resourceDbaasPgSqlClusterUpdate(ctx context.Context, d *schema.ResourceData
 
 	d.SetId(*dbaasClusterResponse.Id)
 
-	time.Sleep(SleepInterval)
+	time.Sleep(utils.SleepInterval)
 
 	for {
 		log.Printf("[INFO] Waiting for cluster %s to be ready...", d.Id())
@@ -310,7 +312,7 @@ func resourceDbaasPgSqlClusterUpdate(ctx context.Context, d *schema.ResourceData
 		}
 
 		select {
-		case <-time.After(SleepInterval):
+		case <-time.After(utils.SleepInterval):
 			log.Printf("[INFO] trying again ...")
 		case <-ctx.Done():
 			log.Printf("[INFO] create timed out")
@@ -324,7 +326,7 @@ func resourceDbaasPgSqlClusterUpdate(ctx context.Context, d *schema.ResourceData
 }
 
 func resourceDbaasPgSqlClusterDelete(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
-	client := meta.(SdkBundle).DbaasClient
+	client := meta.(SdkBundle).PsqlClient
 
 	_, apiResponse, err := client.DeleteCluster(ctx, d.Id())
 
@@ -353,7 +355,7 @@ func resourceDbaasPgSqlClusterDelete(ctx context.Context, d *schema.ResourceData
 		}
 
 		select {
-		case <-time.After(SleepInterval):
+		case <-time.After(utils.SleepInterval):
 			log.Printf("[INFO] trying again ...")
 		case <-ctx.Done():
 			diags := diag.FromErr(fmt.Errorf("dbaas cluster deletion timed out! WARNING: your k8s cluster (%s) will still probably be deleted after some time but the terraform state won't reflect that; check your Ionos Cloud account for updates", d.Id()))
@@ -362,13 +364,13 @@ func resourceDbaasPgSqlClusterDelete(ctx context.Context, d *schema.ResourceData
 	}
 
 	// wait 15 seconds after the deletion of the cluster, for the lan to be freed
-	time.Sleep(SleepInterval * 3)
+	time.Sleep(utils.SleepInterval * 3)
 
 	return nil
 }
 
 func resourceDbaasPgSqlClusterImport(ctx context.Context, d *schema.ResourceData, meta interface{}) ([]*schema.ResourceData, error) {
-	client := meta.(SdkBundle).DbaasClient
+	client := meta.(SdkBundle).PsqlClient
 
 	clusterId := d.Id()
 
@@ -391,7 +393,7 @@ func resourceDbaasPgSqlClusterImport(ctx context.Context, d *schema.ResourceData
 	return []*schema.ResourceData{d}, nil
 }
 
-func dbaasClusterReady(ctx context.Context, client *dbaasService.Client, d *schema.ResourceData) (bool, error) {
+func dbaasClusterReady(ctx context.Context, client *dbaasService.PsqlClient, d *schema.ResourceData) (bool, error) {
 	subjectCluster, _, err := client.GetCluster(ctx, d.Id())
 
 	if err != nil {
@@ -412,10 +414,10 @@ func dbaasClusterReady(ctx context.Context, client *dbaasService.Client, d *sche
 	//		return false, fmt.Errorf("dbaas cluster has failed. WARNING: your k8s cluster may still recover after some time but the terraform state won't reflect that; check your Ionos Cloud account for updates")
 	//	}
 	//}
-	return *subjectCluster.Metadata.State == "AVAILABLE", nil
+	return strings.EqualFold(string(*subjectCluster.Metadata.State), utils.Available), nil
 }
 
-func dbaasClusterDeleted(ctx context.Context, client *dbaasService.Client, d *schema.ResourceData) (bool, error) {
+func dbaasClusterDeleted(ctx context.Context, client *dbaasService.PsqlClient, d *schema.ResourceData) (bool, error) {
 
 	_, apiResponse, err := client.GetCluster(ctx, d.Id())
 

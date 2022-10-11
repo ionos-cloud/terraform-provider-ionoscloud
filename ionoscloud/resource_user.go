@@ -35,7 +35,7 @@ func resourceUser() *schema.Resource {
 				Type:             schema.TypeString,
 				Required:         true,
 				ValidateFunc:     validation.All(validation.StringIsNotWhiteSpace),
-				DiffSuppressFunc: DiffToLower,
+				DiffSuppressFunc: utils.DiffToLower,
 			},
 			"password": {
 				Type:         schema.TypeString,

@@ -38,6 +38,10 @@ func TestAccGroupBasic(t *testing.T) {
 					resource.TestCheckResourceAttr(GroupResource+"."+GroupTestResource, "create_backup_unit", "true"),
 					resource.TestCheckResourceAttr(GroupResource+"."+GroupTestResource, "create_internet_access", "true"),
 					resource.TestCheckResourceAttr(GroupResource+"."+GroupTestResource, "create_k8s_cluster", "true"),
+					resource.TestCheckResourceAttr(GroupResource+"."+GroupTestResource, "create_flow_log", "true"),
+					resource.TestCheckResourceAttr(GroupResource+"."+GroupTestResource, "access_and_manage_monitoring", "true"),
+					resource.TestCheckResourceAttr(GroupResource+"."+GroupTestResource, "access_and_manage_certificates", "true"),
+					resource.TestCheckResourceAttr(GroupResource+"."+GroupTestResource, "manage_dbaas", "true"),
 					utils.TestNotEmptySlice(GroupResource, "users")),
 			},
 			{
@@ -53,6 +57,8 @@ func TestAccGroupBasic(t *testing.T) {
 					resource.TestCheckResourceAttrPair(DataSource+"."+GroupResource+"."+GroupDataSourceById, "create_backup_unit", GroupResource+"."+GroupTestResource, "create_backup_unit"),
 					resource.TestCheckResourceAttrPair(DataSource+"."+GroupResource+"."+GroupDataSourceById, "create_internet_access", GroupResource+"."+GroupTestResource, "create_internet_access"),
 					resource.TestCheckResourceAttrPair(DataSource+"."+GroupResource+"."+GroupDataSourceById, "create_k8s_cluster", GroupResource+"."+GroupTestResource, "create_k8s_cluster"),
+					resource.TestCheckResourceAttrPair(DataSource+"."+GroupResource+"."+GroupDataSourceById, "manage_dbaas", GroupResource+"."+GroupTestResource, "manage_dbaas"),
+
 					utils.TestNotEmptySlice(DataSource+"."+GroupResource, "users"),
 				),
 			},
@@ -69,6 +75,11 @@ func TestAccGroupBasic(t *testing.T) {
 					resource.TestCheckResourceAttrPair(DataSource+"."+GroupResource+"."+GroupDataSourceByName, "create_backup_unit", GroupResource+"."+GroupTestResource, "create_backup_unit"),
 					resource.TestCheckResourceAttrPair(DataSource+"."+GroupResource+"."+GroupDataSourceByName, "create_internet_access", GroupResource+"."+GroupTestResource, "create_internet_access"),
 					resource.TestCheckResourceAttrPair(DataSource+"."+GroupResource+"."+GroupDataSourceByName, "create_k8s_cluster", GroupResource+"."+GroupTestResource, "create_k8s_cluster"),
+					resource.TestCheckResourceAttrPair(DataSource+"."+GroupResource+"."+GroupDataSourceByName, "create_flow_log", GroupResource+"."+GroupTestResource, "create_flow_log"),
+					resource.TestCheckResourceAttrPair(DataSource+"."+GroupResource+"."+GroupDataSourceByName, "access_and_manage_monitoring", GroupResource+"."+GroupTestResource, "access_and_manage_monitoring"),
+					resource.TestCheckResourceAttrPair(DataSource+"."+GroupResource+"."+GroupDataSourceByName, "access_and_manage_certificates", GroupResource+"."+GroupTestResource, "access_and_manage_certificates"),
+					resource.TestCheckResourceAttrPair(DataSource+"."+GroupResource+"."+GroupDataSourceByName, "manage_dbaas", GroupResource+"."+GroupTestResource, "manage_dbaas"),
+
 					utils.TestNotEmptySlice(DataSource+"."+GroupResource, "users"),
 				),
 			},
@@ -110,6 +121,10 @@ func TestAccGroupBasic(t *testing.T) {
 					resource.TestCheckResourceAttr(GroupResource+"."+GroupTestResource, "create_backup_unit", "false"),
 					resource.TestCheckResourceAttr(GroupResource+"."+GroupTestResource, "create_internet_access", "false"),
 					resource.TestCheckResourceAttr(GroupResource+"."+GroupTestResource, "create_k8s_cluster", "false"),
+					resource.TestCheckResourceAttr(GroupResource+"."+GroupTestResource, "create_flow_log", "false"),
+					resource.TestCheckResourceAttr(GroupResource+"."+GroupTestResource, "access_and_manage_monitoring", "false"),
+					resource.TestCheckResourceAttr(GroupResource+"."+GroupTestResource, "access_and_manage_certificates", "false"),
+					resource.TestCheckResourceAttr(GroupResource+"."+GroupTestResource, "manage_dbaas", "false"),
 					resource.TestCheckResourceAttrPair(GroupResource+".test_user_id", "users.0.id", UserResource+"."+UserTestResource+"3", "id"),
 					utils.TestNotEmptySlice(GroupResource, "users")),
 			},
@@ -127,6 +142,10 @@ func TestAccGroupBasic(t *testing.T) {
 					resource.TestCheckResourceAttr(GroupResource+"."+GroupTestResource, "create_backup_unit", "false"),
 					resource.TestCheckResourceAttr(GroupResource+"."+GroupTestResource, "create_internet_access", "false"),
 					resource.TestCheckResourceAttr(GroupResource+"."+GroupTestResource, "create_k8s_cluster", "false"),
+					resource.TestCheckResourceAttr(GroupResource+"."+GroupTestResource, "create_flow_log", "false"),
+					resource.TestCheckResourceAttr(GroupResource+"."+GroupTestResource, "access_and_manage_monitoring", "false"),
+					resource.TestCheckResourceAttr(GroupResource+"."+GroupTestResource, "access_and_manage_certificates", "false"),
+					resource.TestCheckResourceAttr(GroupResource+"."+GroupTestResource, "manage_dbaas", "false"),
 					resource.TestCheckResourceAttrPair(GroupResource+".test_user_id", "users.0.id", UserResource+"."+UserTestResource+"3", "id"),
 					utils.TestNotEmptySlice(GroupResource, "users")),
 			},
@@ -237,6 +256,10 @@ resource ` + GroupResource + ` ` + GroupTestResource + ` {
   create_backup_unit = true
   create_internet_access = true
   create_k8s_cluster = true
+  create_flow_log = true
+  access_and_manage_monitoring = true
+  access_and_manage_certificates = true
+  manage_dbaas = true
   user_ids = [` + UserResource + `.` + UserTestResource + `.id, ` + UserResource + `.` + UserTestResource + `2.id]
 }
 `
@@ -312,6 +335,10 @@ resource ` + GroupResource + ` "test_user_id" {
   create_backup_unit = false
   create_internet_access = false
   create_k8s_cluster = false
+  create_flow_log = false
+  access_and_manage_monitoring = false
+  access_and_manage_certificates = false
+  manage_dbaas = false
   user_id = ` + UserResource + `.` + UserTestResource + `3.id
 }
 
