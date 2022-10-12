@@ -8,6 +8,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 	ionoscloud "github.com/ionos-cloud/sdk-go/v6"
+	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils"
 )
 
 func dataSourceCubeServer() *schema.Resource {
@@ -19,9 +20,9 @@ func dataSourceCubeServer() *schema.Resource {
 				Optional: true,
 			},
 			"datacenter_id": {
-				Type:         schema.TypeString,
-				Required:     true,
-				ValidateFunc: validation.All(validation.StringIsNotWhiteSpace),
+				Type:             schema.TypeString,
+				Required:         true,
+				ValidateDiagFunc: validation.ToDiagFunc(validation.StringIsNotWhiteSpace),
 			},
 			"id": {
 				Type:     schema.TypeString,
@@ -31,11 +32,6 @@ func dataSourceCubeServer() *schema.Resource {
 				Type:     schema.TypeString,
 				Optional: true,
 			},
-			//"type": {
-			//	Type:     schema.TypeString,
-			//	Optional: true,
-			//	Computed: true,
-			//},
 			"availability_zone": {
 				Type:     schema.TypeString,
 				Computed: true,
@@ -193,24 +189,6 @@ func setCubeServerData(d *schema.ResourceData, server *ionoscloud.Server, token 
 			}
 		}
 
-		//if server.Properties.Cores != nil {
-		//	if err := d.Set("cores", *server.Properties.Cores); err != nil {
-		//		return err
-		//	}
-		//}
-		//
-		//if server.Properties.Ram != nil {
-		//	if err := d.Set("ram", *server.Properties.Ram); err != nil {
-		//		return err
-		//	}
-		//}
-
-		//if server.Properties.Type != nil {
-		//	if err := d.Set("type", *server.Properties.Type); err != nil {
-		//		return err
-		//	}
-		//}
-
 		if server.Properties.AvailabilityZone != nil {
 			if err := d.Set("availability_zone", *server.Properties.AvailabilityZone); err != nil {
 				return err
@@ -266,7 +244,6 @@ func setCubeServerData(d *schema.ResourceData, server *ionoscloud.Server, token 
 			entry["id"] = stringOrDefault(volume.Id, "")
 			entry["name"] = stringOrDefault(volume.Properties.Name, "")
 			entry["type"] = stringOrDefault(volume.Properties.Type, "")
-			//entry["size"] = float32OrDefault(volume.Properties.Size, 0)
 			entry["availability_zone"] = stringOrDefault(volume.Properties.AvailabilityZone, "")
 			entry["image_name"] = stringOrDefault(volume.Properties.Image, "")
 			entry["image_password"] = stringOrDefault(volume.Properties.ImagePassword, "")
@@ -301,58 +278,21 @@ func setCubeServerData(d *schema.ResourceData, server *ionoscloud.Server, token 
 		}
 	}
 
-	var nics []interface{}
-	if server.Entities.Nics != nil && server.Entities.Nics.Items != nil && len(*server.Entities.Nics.Items) > 0 {
-		for _, nic := range *server.Entities.Nics.Items {
-			entry := make(map[string]interface{})
-
-			entry["id"] = stringOrDefault(nic.Id, "")
-			entry["name"] = stringOrDefault(nic.Properties.Name, "")
-			entry["mac"] = stringOrDefault(nic.Properties.Mac, "")
-
-			if nic.Properties.Ips != nil {
-				var ips []interface{}
-				for _, ip := range *nic.Properties.Ips {
-					ips = append(ips, ip)
+	var nicsIntf []interface{}
+	if server.Entities != nil {
+		if server.Entities.Nics != nil && server.Entities.Nics.Items != nil {
+			nicItems := server.Entities.Nics.Items
+			if nicItems != nil && len(*nicItems) > 0 {
+				var nics []interface{}
+				for _, nic := range *server.Entities.Nics.Items {
+					nicMap := SetNetworkProperties(nic)
+					fw := setFirewallRules(nic)
+					nicMap["firewall_rules"] = fw
+					utils.SetPropWithNilCheck(nicMap, "id", nic.Id)
+					nics = append(nics, nicMap)
 				}
-				entry["ips"] = ips
+				nicsIntf = nics
 			}
-
-			entry["dhcp"] = boolOrDefault(nic.Properties.Dhcp, false)
-			entry["lan"] = int32OrDefault(nic.Properties.Lan, 0)
-			entry["firewall_active"] = boolOrDefault(nic.Properties.FirewallActive, false)
-			entry["firewall_type"] = stringOrDefault(nic.Properties.FirewallType, "")
-			entry["device_number"] = int32OrDefault(nic.Properties.DeviceNumber, 0)
-			entry["pci_slot"] = int32OrDefault(nic.Properties.PciSlot, 0)
-
-			if nic.Entities != nil && nic.Entities.Firewallrules != nil && nic.Entities.Firewallrules.Items != nil {
-				var firewallRules []interface{}
-				for _, rule := range *nic.Entities.Firewallrules.Items {
-					ruleEntry := make(map[string]interface{})
-
-					ruleEntry["id"] = stringOrDefault(rule.Id, "")
-					if rule.Properties != nil {
-						ruleEntry["name"] = stringOrDefault(rule.Properties.Name, "")
-						ruleEntry["protocol"] = stringOrDefault(rule.Properties.Protocol, "")
-						ruleEntry["source_mac"] = stringOrDefault(rule.Properties.SourceMac, "")
-						ruleEntry["source_ip"] = stringOrDefault(rule.Properties.SourceIp, "")
-						ruleEntry["target_ip"] = stringOrDefault(rule.Properties.TargetIp, "")
-						ruleEntry["icmp_code"] = int32OrDefault(rule.Properties.IcmpCode, 0)
-						ruleEntry["icmp_type"] = int32OrDefault(rule.Properties.IcmpType, 0)
-						ruleEntry["port_range_start"] = int32OrDefault(rule.Properties.PortRangeStart, 0)
-						ruleEntry["port_range_end"] = int32OrDefault(rule.Properties.PortRangeEnd, 0)
-						ruleEntry["type"] = stringOrDefault(rule.Properties.Type, "")
-					}
-					firewallRules = append(firewallRules, ruleEntry)
-				}
-				entry["firewall_rules"] = firewallRules
-			}
-
-			nics = append(nics, entry)
-		}
-
-		if err := d.Set("nics", nics); err != nil {
-			return err
 		}
 	}
 
@@ -360,6 +300,14 @@ func setCubeServerData(d *schema.ResourceData, server *ionoscloud.Server, token 
 		if err := d.Set("token", *token.Token); err != nil {
 			return err
 		}
+	}
+
+	if nicsIntf == nil || len(nicsIntf) == 0 {
+		return fmt.Errorf("no nics found for criteria, please check your filter configuration")
+	}
+	err := d.Set("nics", nicsIntf)
+	if err != nil {
+		return fmt.Errorf("error while setting nics: %w", err)
 	}
 
 	return nil

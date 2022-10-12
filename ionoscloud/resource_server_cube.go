@@ -10,7 +10,6 @@ import (
 	ionoscloud "github.com/ionos-cloud/sdk-go/v6"
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils"
 	"log"
-	"strconv"
 	"strings"
 )
 
@@ -32,15 +31,15 @@ func resourceCubeServer() *schema.Resource {
 				Required: true,
 			},
 			"name": {
-				Type:         schema.TypeString,
-				Required:     true,
-				ValidateFunc: validation.All(validation.StringIsNotWhiteSpace),
+				Type:             schema.TypeString,
+				Required:         true,
+				ValidateDiagFunc: validation.ToDiagFunc(validation.StringIsNotWhiteSpace),
 			},
 			"availability_zone": {
-				Type:         schema.TypeString,
-				Optional:     true,
-				Computed:     true,
-				ValidateFunc: validation.All(validation.StringInSlice([]string{"AUTO", "ZONE_1", "ZONE_2"}, true)),
+				Type:             schema.TypeString,
+				Optional:         true,
+				Computed:         true,
+				ValidateDiagFunc: validation.ToDiagFunc(validation.StringInSlice([]string{"AUTO", "ZONE_1", "ZONE_2"}, true)),
 			},
 			"boot_volume": {
 				Type:     schema.TypeString,
@@ -73,10 +72,10 @@ func resourceCubeServer() *schema.Resource {
 				Computed: true,
 			},
 			"datacenter_id": {
-				Type:         schema.TypeString,
-				Required:     true,
-				ForceNew:     true,
-				ValidateFunc: validation.All(validation.StringIsNotWhiteSpace),
+				Type:             schema.TypeString,
+				Required:         true,
+				ForceNew:         true,
+				ValidateDiagFunc: validation.ToDiagFunc(validation.StringIsNotWhiteSpace),
 			},
 			"image_password": {
 				Type:          schema.TypeString,
@@ -104,9 +103,9 @@ func resourceCubeServer() *schema.Resource {
 				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{
 						"disk_type": {
-							Type:         schema.TypeString,
-							Required:     true,
-							ValidateFunc: validation.All(validation.StringIsNotWhiteSpace),
+							Type:             schema.TypeString,
+							Required:         true,
+							ValidateDiagFunc: validation.ToDiagFunc(validation.StringIsNotWhiteSpace),
 						},
 						"image_password": {
 							Type:          schema.TypeString,
@@ -158,10 +157,10 @@ func resourceCubeServer() *schema.Resource {
 							Optional: true,
 						},
 						"availability_zone": {
-							Type:         schema.TypeString,
-							Optional:     true,
-							Computed:     true,
-							ValidateFunc: validation.All(validation.StringInSlice([]string{"AUTO", "ZONE_1", "ZONE_2", "ZONE_3"}, true)),
+							Type:             schema.TypeString,
+							Optional:         true,
+							Computed:         true,
+							ValidateDiagFunc: validation.ToDiagFunc(validation.StringInSlice([]string{"AUTO", "ZONE_1", "ZONE_2", "ZONE_3"}, true)),
 						},
 						"cpu_hot_plug": {
 							Type:     schema.TypeBool,
@@ -273,8 +272,8 @@ func resourceCubeServer() *schema.Resource {
 									"protocol": {
 										Type:             schema.TypeString,
 										Required:         true,
-										DiffSuppressFunc: DiffToLower,
-										ValidateFunc:     validation.All(validation.StringIsNotWhiteSpace),
+										DiffSuppressFunc: utils.DiffToLower,
+										ValidateDiagFunc: validation.ToDiagFunc(validation.StringIsNotWhiteSpace),
 									},
 									"source_mac": {
 										Type:     schema.TypeString,
@@ -291,22 +290,22 @@ func resourceCubeServer() *schema.Resource {
 									"port_range_start": {
 										Type:     schema.TypeInt,
 										Optional: true,
-										ValidateFunc: func(v interface{}, k string) (ws []string, errors []error) {
+										ValidateDiagFunc: validation.ToDiagFunc(func(v interface{}, k string) (ws []string, errors []error) {
 											if v.(int) < 1 && v.(int) > 65534 {
 												errors = append(errors, fmt.Errorf("port start range must be between 1 and 65534"))
 											}
 											return
-										},
+										}),
 									},
 									"port_range_end": {
 										Type:     schema.TypeInt,
 										Optional: true,
-										ValidateFunc: func(v interface{}, k string) (ws []string, errors []error) {
+										ValidateDiagFunc: validation.ToDiagFunc(func(v interface{}, k string) (ws []string, errors []error) {
 											if v.(int) < 1 && v.(int) > 65534 {
 												errors = append(errors, fmt.Errorf("port end range must be between 1 and 65534"))
 											}
 											return
-										},
+										}),
 									},
 									"icmp_type": {
 										Type:     schema.TypeString,
@@ -505,121 +504,40 @@ func resourceCubeServerCreate(ctx context.Context, d *schema.ResourceData, meta 
 		primaryNic = &(*server.Entities.Nics.Items)[0]
 	}
 	// Nic Arguments
+	nic := ionoscloud.Nic{
+		Properties: &ionoscloud.NicProperties{},
+	}
 	if _, ok := d.GetOk("nic"); ok {
-		lanInt := int32(d.Get("nic.0.lan").(int))
-		nic := ionoscloud.Nic{Properties: &ionoscloud.NicProperties{
-			Lan: &lanInt,
-		}}
+		nic = getNicData(d, "nic.0.")
+	}
 
-		if v, ok := d.GetOk("nic.0.name"); ok {
-			vStr := v.(string)
-			nic.Properties.Name = &vStr
+	server.Entities.Nics = &ionoscloud.Nics{
+		Items: &[]ionoscloud.Nic{
+			nic,
+		},
+	}
+	primaryNic = &(*server.Entities.Nics.Items)[0]
+	log.Printf("[DEBUG] dhcp nic after %t", *nic.Properties.Dhcp)
+	log.Printf("[DEBUG] dhcp %t", *primaryNic.Properties.Dhcp)
+
+	firewall := ionoscloud.FirewallRule{
+		Properties: &ionoscloud.FirewallruleProperties{},
+	}
+	if _, ok := d.GetOk("nic.0.firewall"); ok {
+		var diags diag.Diagnostics
+		firewall, diags = getFirewallData(d, "nic.0.firewall.0.", false)
+		if diags != nil {
+			return diags
 		}
-
-		dhcp := d.Get("nic.0.dhcp").(bool)
-		fwActive := d.Get("nic.0.firewall_active").(bool)
-		nic.Properties.Dhcp = &dhcp
-		nic.Properties.FirewallActive = &fwActive
-
-		if v, ok := d.GetOk("nic.0.firewall_type"); ok {
-			v := v.(string)
-			nic.Properties.FirewallType = &v
-		}
-
-		if v, ok := d.GetOk("nic.0.ips"); ok {
-			raw := v.([]interface{})
-			if raw != nil && len(raw) > 0 {
-				var ips []string
-				for _, rawIp := range raw {
-					ip := rawIp.(string)
-					ips = append(ips, ip)
-				}
-				if ips != nil && len(ips) > 0 {
-					nic.Properties.Ips = &ips
-				}
-			}
-		}
-
-		log.Printf("[DEBUG] dhcp nic before %t", *nic.Properties.Dhcp)
-
-		server.Entities.Nics = &ionoscloud.Nics{
-			Items: &[]ionoscloud.Nic{
-				nic,
+		(*server.Entities.Nics.Items)[0].Entities = &ionoscloud.NicEntities{
+			Firewallrules: &ionoscloud.FirewallRules{
+				Items: &[]ionoscloud.FirewallRule{
+					firewall,
+				},
 			},
 		}
-		primaryNic = &(*server.Entities.Nics.Items)[0]
-		log.Printf("[DEBUG] dhcp nic after %t", *nic.Properties.Dhcp)
-		log.Printf("[DEBUG] dhcp %t", *primaryNic.Properties.Dhcp)
-
-		if _, ok := d.GetOk("nic.0.firewall"); ok {
-			protocolStr := d.Get("nic.0.firewall.0.protocol").(string)
-			firewall := ionoscloud.FirewallRule{
-				Properties: &ionoscloud.FirewallruleProperties{
-					Protocol: &protocolStr,
-				},
-			}
-
-			if v, ok := d.GetOk("nic.0.firewall.0.name"); ok {
-				vStr := v.(string)
-				firewall.Properties.Name = &vStr
-			}
-
-			if v, ok := d.GetOk("nic.0.firewall.0.source_mac"); ok {
-				val := v.(string)
-				firewall.Properties.SourceMac = &val
-			}
-
-			if v, ok := d.GetOk("nic.0.firewall.0.source_ip"); ok {
-				val := v.(string)
-				firewall.Properties.SourceIp = &val
-			}
-
-			if v, ok := d.GetOk("nic.0.firewall.0.target_ip"); ok {
-				val := v.(string)
-				firewall.Properties.TargetIp = &val
-			}
-
-			if v, ok := d.GetOk("nic.0.firewall.0.port_range_start"); ok {
-				val := int32(v.(int))
-				firewall.Properties.PortRangeStart = &val
-			}
-
-			if v, ok := d.GetOk("nic.0.firewall.0.port_range_end"); ok {
-				val := int32(v.(int))
-				firewall.Properties.PortRangeEnd = &val
-			}
-
-			if v, ok := d.GetOk("nic.0.firewall.0.icmp_type"); ok {
-				tempIcmpType := v.(string)
-				if tempIcmpType != "" {
-					i, _ := strconv.Atoi(tempIcmpType)
-					iInt32 := int32(i)
-					firewall.Properties.IcmpType = &iInt32
-				}
-			}
-			if v, ok := d.GetOk("nic.0.firewall.0.icmp_code"); ok {
-				tempIcmpCode := v.(string)
-				if tempIcmpCode != "" {
-					i, _ := strconv.Atoi(tempIcmpCode)
-					iInt32 := int32(i)
-					firewall.Properties.IcmpCode = &iInt32
-				}
-			}
-
-			if v, ok := d.GetOk("nic.0.firewall.0.type"); ok {
-				val := v.(string)
-				firewall.Properties.Type = &val
-			}
-
-			primaryNic.Entities = &ionoscloud.NicEntities{
-				Firewallrules: &ionoscloud.FirewallRules{
-					Items: &[]ionoscloud.FirewallRule{
-						firewall,
-					},
-				},
-			}
-		}
 	}
+
 	if primaryNic != nil && primaryNic.Properties != nil && primaryNic.Properties.Ips != nil {
 		if len(*primaryNic.Properties.Ips) == 0 {
 			*primaryNic.Properties.Ips = nil
@@ -728,13 +646,6 @@ func resourceCubeServerRead(ctx context.Context, d *schema.ResourceData, meta in
 				return diags
 			}
 		}
-
-		//if server.Properties.Type != nil {
-		//	if err := d.Set("type", *server.Properties.Type); err != nil {
-		//		diags := diag.FromErr(err)
-		//		return diags
-		//	}
-		//}
 
 		if server.Properties.AvailabilityZone != nil {
 			if err := d.Set("availability_zone", *server.Properties.AvailabilityZone); err != nil {
@@ -871,26 +782,6 @@ func resourceCubeServerUpdate(ctx context.Context, d *schema.ResourceData, meta 
 		nStr := n.(string)
 		request.Name = &nStr
 	}
-	//if d.HasChange("cores") {
-	//	_, n := d.GetChange("cores")
-	//	nInt := int32(n.(int))
-	//	request.Cores = &nInt
-	//}
-	//if d.HasChange("ram") {
-	//	_, n := d.GetChange("ram")
-	//	nInt := int32(n.(int))
-	//	request.Ram = &nInt
-	//}
-	//if d.HasChange("type") {
-	//	serverType, ok := d.GetOk("type")
-	//	nStr := serverType.(string)
-	//	request.Type = &nStr
-	//}
-
-	//if v, ok := d.GetOk("type"); ok {
-	//	serverType := v.(string)
-	//	request.Type = &serverType
-	//}
 
 	if d.HasChange("cpu_family") {
 		_, n := d.GetChange("cpu_family")
@@ -959,11 +850,6 @@ func resourceCubeServerUpdate(ctx context.Context, d *schema.ResourceData, meta 
 			vStr := v.(string)
 			properties.Name = &vStr
 		}
-
-		//if v, ok := d.GetOk("volume.0.size"); ok {
-		//	vInt := float32(v.(int))
-		//	properties.Size = &vInt
-		//}
 
 		if v, ok := d.GetOk("volume.0.bus"); ok {
 			vStr := v.(string)
@@ -1121,7 +1007,6 @@ func SetCubeVolumeProperties(volume ionoscloud.Volume) map[string]interface{} {
 	if volume.Properties != nil {
 		utils.SetPropWithNilCheck(volumeMap, "name", volume.Properties.Name)
 		utils.SetPropWithNilCheck(volumeMap, "disk_type", volume.Properties.Type)
-		//utils.SetPropWithNilCheck(volumeMap, "size", volume.Properties.Size)
 		utils.SetPropWithNilCheck(volumeMap, "licence_type", volume.Properties.LicenceType)
 		utils.SetPropWithNilCheck(volumeMap, "bus", volume.Properties.Bus)
 		utils.SetPropWithNilCheck(volumeMap, "availability_zone", volume.Properties.AvailabilityZone)
@@ -1154,7 +1039,7 @@ func resourceCubeServerDelete(ctx context.Context, d *schema.ResourceData, meta 
 	// Wait, catching any errors
 	_, errState := getStateChangeConf(meta, d, apiResponse.Header.Get("Location"), schema.TimeoutDelete).WaitForStateContext(ctx)
 	if errState != nil {
-		diags := diag.FromErr(fmt.Errorf("error getting state change for datacenter delete %w", errState))
+		diags := diag.FromErr(fmt.Errorf("error getting state change for cube server delete %w", errState))
 		return diags
 	}
 
@@ -1212,18 +1097,6 @@ func resourceCubeServerImport(ctx context.Context, d *schema.ResourceData, meta 
 				return nil, fmt.Errorf("error setting template uuid %w", err)
 			}
 		}
-
-		//if server.Properties.Cores != nil {
-		//	if err := d.Set("cores", *server.Properties.Cores); err != nil {
-		//		return nil, fmt.Errorf("error setting cores %w", err)
-		//	}
-		//}
-		//
-		//if server.Properties.Ram != nil {
-		//	if err := d.Set("ram", *server.Properties.Ram); err != nil {
-		//		return nil, fmt.Errorf("error setting ram %w", err)
-		//	}
-		//}
 
 		if server.Properties.AvailabilityZone != nil {
 			if err := d.Set("availability_zone", *server.Properties.AvailabilityZone); err != nil {
@@ -1311,7 +1184,6 @@ func resourceCubeServerImport(ctx context.Context, d *schema.ResourceData, meta 
 			if volumeObj.Properties != nil {
 				utils.SetPropWithNilCheck(volumeItem, "name", volumeObj.Properties.Name)
 				utils.SetPropWithNilCheck(volumeItem, "disk_type", volumeObj.Properties.Type)
-				//utils.SetPropWithNilCheck(volumeItem, "size", volumeObj.Properties.Size)
 				utils.SetPropWithNilCheck(volumeItem, "licence_type", volumeObj.Properties.LicenceType)
 				utils.SetPropWithNilCheck(volumeItem, "bus", volumeObj.Properties.Bus)
 				utils.SetPropWithNilCheck(volumeItem, "availability_zone", volumeObj.Properties.AvailabilityZone)
@@ -1332,5 +1204,3 @@ func resourceCubeServerImport(ctx context.Context, d *schema.ResourceData, meta 
 
 	return []*schema.ResourceData{d}, nil
 }
-
-// nu are cores, ram si volume.size cube sererul

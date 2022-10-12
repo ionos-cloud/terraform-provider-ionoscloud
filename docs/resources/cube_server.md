@@ -1,10 +1,10 @@
 ---
 subcategory: "Compute Engine"
 layout: "ionoscloud"
-page_title: "IonosCloud: server"
+page_title: "IonosCloud: cube server"
 sidebar_current: "docs-resource-server"
 description: |-
-  Creates and manages IonosCloud Server objects.
+  Creates and manages IonosCloud Cube Server objects.
 ---
 
 # ionoscloud_cube_server
@@ -33,11 +33,10 @@ resource "ionoscloud_lan" "example" {
   name              = "Lan Example"
 }
 
-resource "ionoscloud_server" "example" {
+resource "ionoscloud_cube_server" "example" {
   name              = "Server Example"
   availability_zone = "ZONE_2"
   image_name        = "ubuntu:latest"
-  type              = "CUBE"
   template_uuid     = data.ionoscloud_template.example.id
   image_password    = "K3tTj8G14a3EgKyNeeiY"  
   datacenter_id     = ionoscloud_datacenter.example.id

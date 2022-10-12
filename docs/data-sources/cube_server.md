@@ -1,15 +1,15 @@
 ---
 subcategory: "Compute Engine"
 layout: "ionoscloud"
-page_title: "IonosCloud : ionoscloud_server"
+page_title: "IonosCloud : ionoscloud_cube_server"
 sidebar_current: "docs-ionoscloud-datasource-server"
 description: |-
-  Get information on a Ionos Cloud Servers
+  Get information on a Ionos Cloud Cube Servers
 ---
 
 # ionoscloud\_cube\_server
 
-The **Server data source** can be used to search for and return existing servers. 
+The **Cube Server data source** can be used to search for and return existing servers. 
 If a single match is found, it will be returned. If your search results in multiple matches, an error will be returned.
 When this happens, please refine your search string so that it is specific enough to return only one result.
 
