@@ -49,6 +49,22 @@ func SetPgSqlClusterBackupData(d *schema.ResourceData, clusterBackups *dbaas.Clu
 				backupEntry["cluster_id"] = *backup.Properties.ClusterId
 			}
 
+			if backup.Properties.Size != nil {
+				backupEntry["size"] = *backup.Properties.Size
+			}
+
+			if backup.Properties.Location != nil {
+				backupEntry["location"] = *backup.Properties.Location
+			}
+
+			if backup.Properties.Version != nil {
+				backupEntry["version"] = *backup.Properties.Version
+			}
+
+			if backup.Properties.IsActive != nil {
+				backupEntry["is_active"] = *backup.Properties.IsActive
+			}
+
 			if backup.Type != nil {
 				backupEntry["type"] = *backup.Type
 			}

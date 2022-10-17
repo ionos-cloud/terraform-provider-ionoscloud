@@ -36,6 +36,26 @@ func dataSourceDbaasPgSqlBackups() *schema.Resource {
 							Type:     schema.TypeString,
 							Computed: true,
 						},
+						"size": {
+							Type:        schema.TypeInt,
+							Description: "Size of all base backups including the wal size in MB.",
+							Computed:    true,
+						},
+						"location": {
+							Type:        schema.TypeString,
+							Description: "The S3 location where the backups will be stored.",
+							Computed:    true,
+						},
+						"version": {
+							Type:        schema.TypeString,
+							Description: "The PostgreSQL version this backup was created from.",
+							Computed:    true,
+						},
+						"is_active": {
+							Type:        schema.TypeBool,
+							Description: "Whether a cluster currently backs up data to this backup.",
+							Computed:    true,
+						},
 						"metadata": {
 							Type:        schema.TypeList,
 							Description: "Metadata of the resource",

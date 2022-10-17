@@ -36,6 +36,10 @@ The following attributes are returned by the datasource:
     * `id` - The unique ID of the resource.
     * `cluster_id` - The unique ID of the cluster
     * `display_name` - The friendly name of your cluster.
+    * `size` - The size of all base backups including the wal size in MB.
+    * `location` - The S3 location where the backups will be stored.
+    * `version` - The PostgreSQL version this backup was created from.
+    * `is_active` - Whether a cluster currently backs up data to this backup.
     * `type`
     * `metadata` - Metadata of the resource.
         * `created_date` - The ISO 8601 creation timestamp.
