@@ -56,6 +56,11 @@ func dataSourceDbaasPgSqlBackups() *schema.Resource {
 							Description: "Whether a cluster currently backs up data to this backup.",
 							Computed:    true,
 						},
+						"earliest_recovery_target_time": {
+							Type:        schema.TypeString,
+							Description: "The oldest available timestamp to which you can restore.",
+							Computed:    true,
+						},
 						"metadata": {
 							Type:        schema.TypeList,
 							Description: "Metadata of the resource",

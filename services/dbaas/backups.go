@@ -65,6 +65,10 @@ func SetPgSqlClusterBackupData(d *schema.ResourceData, clusterBackups *dbaas.Clu
 				backupEntry["is_active"] = *backup.Properties.IsActive
 			}
 
+			if backup.Properties.EarliestRecoveryTargetTime != nil {
+				backupEntry["earliest_recovery_target_time"] = (*backup.Properties.EarliestRecoveryTargetTime).String()
+			}
+
 			if backup.Type != nil {
 				backupEntry["type"] = *backup.Type
 			}
