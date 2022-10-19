@@ -101,7 +101,6 @@ func TestAccDBaaSPgSqlClusterBasic(t *testing.T) {
 					resource.TestCheckResourceAttrSet(DataSource+"."+PsqlBackupsResource+"."+PsqlBackupsTest, "cluster_backups.0.location"),
 					resource.TestCheckResourceAttrSet(DataSource+"."+PsqlBackupsResource+"."+PsqlBackupsTest, "cluster_backups.0.version"),
 					resource.TestCheckResourceAttrSet(DataSource+"."+PsqlBackupsResource+"."+PsqlBackupsTest, "cluster_backups.0.is_active"),
-					resource.TestCheckResourceAttrSet(DataSource+"."+PsqlBackupsResource+"."+PsqlBackupsTest, "cluster_backups.0.earliest_recovery_target_time"),
 					utils.TestNotEmptySlice(PsqlBackupsResource, "cluster_backups.#"),
 				),
 			},

@@ -45,6 +45,10 @@ func SetPgSqlClusterBackupData(d *schema.ResourceData, clusterBackups *dbaas.Clu
 				backupEntry["id"] = *backup.Id
 			}
 
+			if backup.Properties == nil {
+				return diag.FromErr(fmt.Errorf("backup properties do not exist."))
+			}
+
 			if backup.Properties.ClusterId != nil {
 				backupEntry["cluster_id"] = *backup.Properties.ClusterId
 			}

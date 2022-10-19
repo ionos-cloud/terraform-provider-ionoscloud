@@ -48,3 +48,5 @@ The following attributes are returned by the datasource:
         * `last_modified_date` - The ISO 8601 modified timestamp.
         * `last_modified_by`
         * `last_modified_by_user_id`
+
+**NOTE:** If the `earliestRecoveryTargetTime` is missing in your backup, the cluster from where you want to restore wasn't able to do a base backup. This can happen, when you e.g. quickly delete a newly created cluster, since the base backup will be triggered up to a minute after the cluster is available.
