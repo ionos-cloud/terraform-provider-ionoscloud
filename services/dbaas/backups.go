@@ -45,8 +45,32 @@ func SetPgSqlClusterBackupData(d *schema.ResourceData, clusterBackups *dbaas.Clu
 				backupEntry["id"] = *backup.Id
 			}
 
+			if backup.Properties == nil {
+				return diag.FromErr(fmt.Errorf("backup properties do not exist."))
+			}
+
 			if backup.Properties.ClusterId != nil {
 				backupEntry["cluster_id"] = *backup.Properties.ClusterId
+			}
+
+			if backup.Properties.Size != nil {
+				backupEntry["size"] = *backup.Properties.Size
+			}
+
+			if backup.Properties.Location != nil {
+				backupEntry["location"] = *backup.Properties.Location
+			}
+
+			if backup.Properties.Version != nil {
+				backupEntry["version"] = *backup.Properties.Version
+			}
+
+			if backup.Properties.IsActive != nil {
+				backupEntry["is_active"] = *backup.Properties.IsActive
+			}
+
+			if backup.Properties.EarliestRecoveryTargetTime != nil {
+				backupEntry["earliest_recovery_target_time"] = (*backup.Properties.EarliestRecoveryTargetTime).String()
 			}
 
 			if backup.Type != nil {
