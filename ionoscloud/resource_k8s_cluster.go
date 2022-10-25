@@ -90,7 +90,6 @@ func resourcek8sCluster() *schema.Resource {
 				Type:        schema.TypeList,
 				Description: "List of S3 bucket configured for K8s usage. For now it contains only an S3 bucket used to store K8s API audit logs.",
 				Optional:    true,
-				Computed:    true,
 				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{
 						"name": {
