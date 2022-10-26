@@ -1,4 +1,4 @@
-## 6.3.2
+## 6.3.3
 ### Fixes
 - Removing an s3_buckets block from an ionoscloud_k8s_cluster resource now trigger a change in terraform plan
 
