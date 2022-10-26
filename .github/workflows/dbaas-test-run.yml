@@ -1,4 +1,4 @@
-#This workflow will run every day, running terraform dbaas tests
+#This workflow will run every two days, running terraform dbaas tests
 name: Every 2 days dbaas test run
 on:
   schedule:
