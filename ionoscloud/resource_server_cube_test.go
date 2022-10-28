@@ -219,7 +219,7 @@ func TestAccCubeServerResolveImageName(t *testing.T) {
 	})
 }
 
-//func TestAccCubeServerWithSnapshot(t *testing.T) {
+//func TestAccCubeServerWithSnapshot(t *testing.T) { // todo for now is a vdc problem and the snapshot with a das volume when is deleting but the state remains procesing
 //	var server ionoscloud.Server
 //
 //	resource.Test(t, resource.TestCase{
