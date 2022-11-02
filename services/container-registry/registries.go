@@ -4,7 +4,7 @@ import (
 	"context"
 	"fmt"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
-	cr "github.com/ionos-cloud/sdk-go-autoscaling"
+	cr "github.com/ionos-cloud/sdk-go-container-registry"
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils"
 	"time"
 )
@@ -157,10 +157,6 @@ func GetRegistryDataCreate(d *schema.ResourceData) *cr.PostRegistryInput {
 		registry.Properties.Location = &location
 	}
 
-	if _, ok := d.GetOk("maintenance_window"); ok {
-		registry.Properties.MaintenanceWindow = GetWeeklySchedule(d, "maintenance_window")
-	}
-
 	if name, ok := d.GetOk("name"); ok {
 		name := name.(string)
 		registry.Properties.Name = &name
@@ -177,9 +173,9 @@ func GetRegistryDataUpdate(d *schema.ResourceData) *cr.PatchRegistryInput {
 		registry.GarbageCollectionSchedule = GetWeeklySchedule(d, "garbage_collection_schedule")
 	}
 
-	if _, ok := d.GetOk("maintenance_window"); ok {
-		registry.MaintenanceWindow = GetWeeklySchedule(d, "maintenance_window")
-	}
+	//if _, ok := d.GetOk("maintenance_window"); ok {
+	//	registry.MaintenanceWindow = GetWeeklySchedule(d, "maintenance_window")
+	//}
 
 	return &registry
 }
@@ -229,15 +225,6 @@ func SetRegistryData(d *schema.ResourceData, registry cr.RegistryResponse) error
 	if registry.Properties.Location != nil {
 		if err := d.Set("location", *registry.Properties.Location); err != nil {
 			return utils.GenerateSetError(resourceName, "location", err)
-		}
-	}
-
-	if registry.Properties.MaintenanceWindow != nil {
-		var schedule []interface{}
-		scheduleEntry := SetWeeklySchedule(*registry.Properties.MaintenanceWindow)
-		schedule = append(schedule, scheduleEntry)
-		if err := d.Set("maintenance_window", schedule); err != nil {
-			return utils.GenerateSetError(resourceName, "maintenance_window", err)
 		}
 	}
 
@@ -393,13 +380,12 @@ func SetTokenData(d *schema.ResourceData, token cr.TokenResponse) error {
 		}
 	}
 
-	// ToDo: fix diff between expiry_date post and get
-	//if token.Properties.ExpiryDate != nil {
-	//	timeValue := (*token.Properties.ExpiryDate).Time
-	//	if err := d.Set("expiry_date", timeValue.String()); err != nil {
-	//		return utils.GenerateSetError(resourceName, "expiry_date", err)
-	//	}
-	//}
+	if token.Properties.ExpiryDate != nil {
+		timeValue := (*token.Properties.ExpiryDate).Time
+		if err := d.Set("expiry_date", timeValue.String()); err != nil {
+			return utils.GenerateSetError(resourceName, "expiry_date", err)
+		}
+	}
 
 	if token.Properties.Name != nil {
 		if err := d.Set("name", *token.Properties.Name); err != nil {
@@ -460,11 +446,10 @@ func SetScopes(scopes []cr.Scope) []interface{} {
 
 func convertToIonosTime(targetTime string) (*cr.IonosTime, error) {
 	var ionosTime cr.IonosTime
-	layout := "2006-01-02T15:04:05Z"
+	layout := "2006-01-02 15:04:05Z"
 	convertedTime, err := time.Parse(layout, targetTime)
 	if err != nil {
 		return nil, fmt.Errorf("an error occured while converting recovery_target_time to time.Time: %s", err)
-
 	}
 	ionosTime.Time = convertedTime
 	return &ionosTime, nil

@@ -20,11 +20,7 @@ resource "ionoscloud_container_registry" "example" {
         days			 = ["Monday", "Tuesday"]
         time             = "10:00:00"
     }
-  location               = "de/txl"
-    maintenance_window {
-        days			 = ["Sunday"]
-        time             = "09:00:00"
-    }
+  location               = "de/fra"
     name		         = "container-registry-example"
 }
 
@@ -33,7 +29,7 @@ resource "ionoscloud_container_registry_token" "example" {
         username	   = "username"
         password       = "password"
     }
-    expiry_date        = "2023-01-13T16:27:42Z"
+    expiry_date        = "2023-01-13 16:27:42Z"
     name			   = "container-registry-token-example"
     scopes  {
         actions		   = ["push"]

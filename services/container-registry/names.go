@@ -2,7 +2,7 @@ package container_registry
 
 import (
 	"context"
-	cr "github.com/ionos-cloud/sdk-go-autoscaling"
+	cr "github.com/ionos-cloud/sdk-go-container-registry"
 )
 
 type NamesService interface {
@@ -10,7 +10,7 @@ type NamesService interface {
 }
 
 func (c *Client) GetNameAvailability(ctx context.Context, name string) (bool, *cr.APIResponse, error) {
-	apiResponse, err := c.NamesApi.NamesFindByName(ctx, name).Execute()
+	apiResponse, err := c.NamesApi.NamesCheckUsage(ctx, name).Execute()
 	if err != nil {
 		return false, apiResponse, nil
 	}

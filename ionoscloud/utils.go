@@ -69,6 +69,18 @@ func DiffCidr(_, old, new string, _ *schema.ResourceData) bool {
 	return false
 }
 
+//DiffExpiryDate terraform suppress differences between layout and default +0000 UTC time format
+func DiffExpiryDate(_, old, new string, _ *schema.ResourceData) bool {
+	layout := "2006-01-02 15:04:05Z"
+	oldTimeString := strings.Split(old, " +")
+	oldTime, oldTimeErr := time.Parse(layout, oldTimeString[0]+"Z")
+	newTime, newTimeErr := time.Parse(layout, new)
+	if oldTimeErr == nil && newTimeErr == nil && newTime.Equal(oldTime) {
+		return true
+	}
+	return false
+}
+
 // VerifyUnavailableIPs used for DBaaS cluster to check the provided IPs
 func VerifyUnavailableIPs(val interface{}, key string) (warns []string, errs []error) {
 	v := val.(string)

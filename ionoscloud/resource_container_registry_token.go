@@ -40,9 +40,10 @@ func resourceContainerRegistryToken() *schema.Resource {
 				},
 			},
 			"expiry_date": {
-				Type:     schema.TypeString,
-				Optional: true,
-				Computed: true,
+				Type:             schema.TypeString,
+				Optional:         true,
+				Computed:         true,
+				DiffSuppressFunc: DiffExpiryDate,
 			},
 			"name": {
 				Type:         schema.TypeString,

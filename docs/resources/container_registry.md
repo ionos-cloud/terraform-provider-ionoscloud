@@ -20,11 +20,7 @@ resource "ionoscloud_container_registry" "example" {
         days			 = ["Monday", "Tuesday"]
         time             = "10:00:00"
     }
-  location               = "de/txl"
-    maintenance_window {
-        days			 = ["Sunday"]
-        time             = "09:00:00"
-    }
+  location               = "de/fra"
     name		         = "container-registry-example"
 }
 
@@ -39,7 +35,6 @@ The following arguments are supported:
     * `time` - (Required)[string]
     * `days` - (Required)[list] Elements of list must have one of the values: `Saturday`, `Sunday`, `Monday`, `Tuesday`,  `Wednesday`,  `Thursday`,  `Friday` 
 * `location` - (Required)[string]
-* `maintenance_window` - (Optional)[Map]
     * `time` - (Required)[string]
     * `days` - (Required)[list] Elements of list must have one of the values: `Saturday`, `Sunday`, `Monday`, `Tuesday`,  `Wednesday`,  `Thursday`,  `Friday`
 

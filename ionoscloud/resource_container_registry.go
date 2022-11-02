@@ -54,29 +54,6 @@ func resourceContainerRegistry() *schema.Resource {
 				Required:     true,
 				ValidateFunc: validation.All(validation.StringIsNotWhiteSpace),
 			},
-			"maintenance_window": {
-				Type:     schema.TypeList,
-				MaxItems: 1,
-				Optional: true,
-				Computed: true,
-				Elem: &schema.Resource{
-					Schema: map[string]*schema.Schema{
-						"time": {
-							Type:         schema.TypeString,
-							Required:     true,
-							ValidateFunc: validation.All(validation.StringIsNotWhiteSpace),
-						},
-						"days": {
-							Type:     schema.TypeList,
-							Required: true,
-							Elem: &schema.Schema{
-								Type:         schema.TypeString,
-								ValidateFunc: validation.All(validation.IsDayOfTheWeek(true)),
-							},
-						},
-					},
-				},
-			},
 			"name": {
 				Type:         schema.TypeString,
 				Required:     true,
