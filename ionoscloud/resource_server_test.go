@@ -648,10 +648,10 @@ resource ` + ServerResource + ` ` + ServerTestResource + ` {
 
 const testAccCheckCubeServerAndServersDataSource = `
 data "ionoscloud_template" ` + ServerTestResource + ` {
-    name = "CUBES XS"
-    cores = 1
-    ram   = 1024
-    storage_size = 30
+   name = "CUBES XS"
+   cores = 1
+   ram   = 1024
+   storage_size = 30
 }
 
 resource ` + DatacenterResource + " " + DatacenterTestResource + `{
@@ -660,38 +660,38 @@ resource ` + DatacenterResource + " " + DatacenterTestResource + `{
 }
 
 resource "ionoscloud_lan" "webserver_lan" {
-  datacenter_id = ` + DatacenterResource + `.` + DatacenterTestResource + `.id
-  public = true
-  name = "public"
+ datacenter_id = ` + DatacenterResource + `.` + DatacenterTestResource + `.id
+ public = true
+ name = "public"
 }
 
 resource "ionoscloud_server" ` + ServerTestResource + ` {
-  name              = "` + ServerTestResource + `"
-  availability_zone = "ZONE_2"
-  image_name        = "ubuntu:latest"
-  type              = "CUBE"
-  template_uuid     = data.ionoscloud_template.` + ServerTestResource + `.id
-  image_password = "K3tTj8G14a3EgKyNeeiY"  
-  datacenter_id = ` + DatacenterResource + `.` + DatacenterTestResource + `.id
-  volume {
-    name            = "` + ServerTestResource + `"
-    licence_type    = "LINUX" 
-    disk_type = "DAS"
+ name              = "` + ServerTestResource + `"
+ availability_zone = "ZONE_2"
+ image_name        = "ubuntu:latest"
+ type              = "CUBE"
+ template_uuid     = data.ionoscloud_template.` + ServerTestResource + `.id
+ image_password = "K3tTj8G14a3EgKyNeeiY"
+ datacenter_id = ` + DatacenterResource + `.` + DatacenterTestResource + `.id
+ volume {
+   name            = "` + ServerTestResource + `"
+   licence_type    = "LINUX"
+   disk_type = "DAS"
 	}
-  nic {
-    lan             = ionoscloud_lan.webserver_lan.id
-    name            = "` + ServerTestResource + `"
-    dhcp            = true
-    firewall_active = true
-  }
+ nic {
+   lan             = ionoscloud_lan.webserver_lan.id
+   name            = "` + ServerTestResource + `"
+   dhcp            = true
+   firewall_active = true
+ }
 }
 data ` + ServersDataSource + ` ` + ServerDataSourceByName + ` {
- depends_on = [` + ServerResource + `.` + ServerTestResource + `]
-  datacenter_id = ` + DatacenterResource + `.` + DatacenterTestResource + `.id
-  filter {
-   name = "type"
-   value = "CUBE" 
-  }
+depends_on = [` + ServerResource + `.` + ServerTestResource + `]
+ datacenter_id = ` + DatacenterResource + `.` + DatacenterTestResource + `.id
+ filter {
+  name = "type"
+  value = "CUBE"
+ }
 }`
 
 const testAccCheckServerNoFirewall = `

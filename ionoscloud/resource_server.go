@@ -40,12 +40,12 @@ func resourceServer() *schema.Resource {
 			},
 			"cores": {
 				Type:     schema.TypeInt,
-				Optional: true,
+				Optional: true, // this should be required when the deprecated version will be removed
 				Computed: true,
 			},
 			"ram": {
 				Type:     schema.TypeInt,
-				Optional: true,
+				Optional: true, // this should be required when the deprecated version will be removed
 				Computed: true,
 			},
 			"availability_zone": {
@@ -698,10 +698,6 @@ func SetVolumeProperties(volume ionoscloud.Volume) map[string]interface{} {
 	return volumeMap
 }
 
-func boolAddr(b bool) *bool {
-	return &b
-}
-
 func resourceServerUpdate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	client := meta.(SdkBundle).CloudApiClient
 
@@ -861,9 +857,10 @@ func resourceServerUpdate(ctx context.Context, d *schema.ResourceData, meta inte
 			}
 		}
 
-		properties.Dhcp = boolAddr(d.Get("nic.0.dhcp").(bool))
-
-		properties.FirewallActive = boolAddr(d.Get("nic.0.firewall_active").(bool))
+		dhcp := d.Get("nic.0.dhcp").(bool)
+		fwRule := d.Get("nic.0.firewall_active").(bool)
+		properties.Dhcp = &dhcp
+		properties.FirewallActive = &fwRule
 
 		if v, ok := d.GetOk("nic.0.firewall_type"); ok {
 			vStr := v.(string)
