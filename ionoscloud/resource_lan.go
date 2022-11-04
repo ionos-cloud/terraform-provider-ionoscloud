@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
+	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils"
 	"log"
 	"strings"
 	"time"
@@ -126,7 +127,7 @@ func resourceLanCreate(ctx context.Context, d *schema.ResourceData, meta interfa
 		}
 
 		select {
-		case <-time.After(SleepInterval):
+		case <-time.After(utils.SleepInterval):
 			log.Printf("[INFO] trying again ...")
 		case <-ctx.Done():
 			log.Printf("[INFO] lan creation timed out")
@@ -310,7 +311,7 @@ func lanAvailable(ctx context.Context, client *ionoscloud.APIClient, d *schema.R
 		return false, fmt.Errorf("could not retrieve state of lan %s", d.Id())
 	}
 
-	return *rsp.Metadata.State == "AVAILABLE", nil
+	return strings.EqualFold(*rsp.Metadata.State, utils.Available), nil
 }
 
 func lanDeleted(ctx context.Context, client *ionoscloud.APIClient, d *schema.ResourceData) (bool, error) {
@@ -348,7 +349,7 @@ func waitForLanDeletion(ctx context.Context, client *ionoscloud.APIClient, d *sc
 		}
 
 		select {
-		case <-time.After(SleepInterval):
+		case <-time.After(utils.SleepInterval):
 			log.Printf("[INFO] trying again ...")
 		case <-ctx.Done():
 			log.Printf("[INFO] lan deletion timed out")
@@ -392,7 +393,7 @@ func waitForLanNicsDeletion(ctx context.Context, client *ionoscloud.APIClient, d
 		}
 
 		select {
-		case <-time.After(SleepInterval):
+		case <-time.After(utils.SleepInterval):
 			log.Printf("[INFO] trying again ...")
 		case <-ctx.Done():
 			log.Printf("[INFO] nics deletion check timed out")

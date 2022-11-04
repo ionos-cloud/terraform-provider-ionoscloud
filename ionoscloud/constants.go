@@ -136,6 +136,7 @@ const (
 // Server Constants
 const (
 	ServerResource         = "ionoscloud_server"
+	ServerCubeResource     = "ionoscloud_cube_server"
 	ServerTestResource     = "test_server"
 	ServerDataSourceById   = "test_server_id"
 	ServerDataSourceByName = "test_server_name"
@@ -188,14 +189,18 @@ const (
 
 // DBaaS Constants
 const (
-	DBaaSClusterResource             = "ionoscloud_pg_cluster"
 	DBaaSClusterTestResource         = "test_dbaas_cluster"
 	DBaaSClusterTestDataSourceById   = "test_dbaas_cluster_id"
 	DBaaSClusterTestDataSourceByName = "test_dbaas_cluster_name"
-	DBaaSBackupsResource             = "ionoscloud_pg_backups"
-	DBaaSBackupsTest                 = "test_dbaas_backups"
-	DBaaSVersionsResource            = "ionoscloud_pg_versions"
-	DBaaSVersionsTest                = "test_dbaas_versions"
+
+	PsqlClusterResource  = "ionoscloud_pg_cluster"
+	PsqlBackupsResource  = "ionoscloud_pg_backups"
+	PsqlBackupsTest      = "test_dbaas_backups"
+	PsqlVersionsResource = "ionoscloud_pg_versions"
+	PsqlVersionsTest     = "test_dbaas_versions"
+
+	DBaasMongoClusterResource = "ionoscloud_mongo_cluster"
+	DBaasMongoUserResource    = "ionoscloud_mongo_user"
 )
 
 // Container Registry Constants
@@ -232,3 +237,17 @@ const (
 )
 
 const ServersDataSource = "ionoscloud_servers"
+
+const (
+	CertificateResource = "ionoscloud_certificate"
+	TestCertName        = "certTest"
+)
+
+type clientType int
+
+const (
+	ionosClient clientType = iota
+	psqlClient
+	certManagerClient
+	mongoClient
+)

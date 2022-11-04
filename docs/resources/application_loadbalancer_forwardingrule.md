@@ -80,6 +80,14 @@ resource "ionoscloud_application_loadbalancer_forwardingrule" "example" {
             value               = "10.12.120.224/24"
         }
     }
+    server_certificates = [ ionoscloud_certificate.cert.id ]
+}
+#optionally you can add a certificate to the application load balancer
+resource "ionoscloud_certificate" "cert" {
+  name = "add_name_here"
+  certificate = "${file("path_to_cert")}"
+  certificate_chain = "${file("path_to_cert_chain")}"
+  private_key = "${file("path_to_private_key")}"
 }
 ```
 
@@ -94,7 +102,7 @@ The following arguments are supported:
 - `listener_ip` - (Required)[string] Listening (inbound) IP.
 - `listener_port` - (Required)[int] Listening (inbound) port number; valid range is 1 to 65535.
 - `client_timeout` - (Optional)[int] The maximum time in milliseconds to wait for the client to acknowledge or send data; default is 50,000 (50 seconds).
-- `server certificates` - (Optional)[list] Array of items in that collection.
+- `server_certificates` - (Optional)[list] Array of certificate ids. You can create certificates with the [certificate](certificate.md) resource.
 - `http_rules` - (Optional)[list] Array of items in that collection
   - `name` - (Required)[string] The unique name of the Application Load Balancer HTTP rule.
   - `type` - (Required)[string] Type of the Http Rule.

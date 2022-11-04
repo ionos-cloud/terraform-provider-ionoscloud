@@ -29,31 +29,30 @@ func resourceServer() *schema.Resource {
 		CustomizeDiff: checkServerImmutableFields,
 
 		Schema: map[string]*schema.Schema{
-			// Server parameters
 			"template_uuid": {
 				Type:     schema.TypeString,
 				Optional: true,
 			},
 			"name": {
-				Type:         schema.TypeString,
-				Required:     true,
-				ValidateFunc: validation.All(validation.StringIsNotWhiteSpace),
+				Type:             schema.TypeString,
+				Required:         true,
+				ValidateDiagFunc: validation.ToDiagFunc(validation.StringIsNotWhiteSpace),
 			},
 			"cores": {
 				Type:     schema.TypeInt,
-				Optional: true,
+				Optional: true, // this should be required when the deprecated version will be removed
 				Computed: true,
 			},
 			"ram": {
 				Type:     schema.TypeInt,
-				Optional: true,
+				Optional: true, // this should be required when the deprecated version will be removed
 				Computed: true,
 			},
 			"availability_zone": {
-				Type:         schema.TypeString,
-				Optional:     true,
-				Computed:     true,
-				ValidateFunc: validation.All(validation.StringInSlice([]string{"AUTO", "ZONE_1", "ZONE_2"}, true)),
+				Type:             schema.TypeString,
+				Optional:         true,
+				Computed:         true,
+				ValidateDiagFunc: validation.ToDiagFunc(validation.StringInSlice([]string{"AUTO", "ZONE_1", "ZONE_2"}, true)),
 			},
 			"boot_volume": {
 				Type:     schema.TypeString,
@@ -72,7 +71,10 @@ func resourceServer() *schema.Resource {
 				Type:             schema.TypeString,
 				Optional:         true,
 				Computed:         true,
-				DiffSuppressFunc: DiffToLower,
+				Description:      "server usages: ENTERPRISE or CUBE",
+				DiffSuppressFunc: utils.DiffToLower,
+				//to do: add in next release
+				//ValidateDiagFunc: validation.ToDiagFunc(validation.StringInSlice([]string{"CUBE", "ENTERPRISE"}, true)),
 			},
 			"boot_image": {
 				Type:     schema.TypeString,
@@ -93,10 +95,10 @@ func resourceServer() *schema.Resource {
 				Computed: true,
 			},
 			"datacenter_id": {
-				Type:         schema.TypeString,
-				Required:     true,
-				ForceNew:     true,
-				ValidateFunc: validation.All(validation.StringIsNotWhiteSpace),
+				Type:             schema.TypeString,
+				Required:         true,
+				ForceNew:         true,
+				ValidateDiagFunc: validation.ToDiagFunc(validation.StringIsNotWhiteSpace),
 			},
 			"image_password": {
 				Type:          schema.TypeString,
@@ -116,6 +118,7 @@ func resourceServer() *schema.Resource {
 				ConflictsWith: []string{"volume.0.ssh_key_path"},
 				Optional:      true,
 				Computed:      true,
+				Deprecated:    "Will be renamed to ssk_keys in the future, to allow users to set both the ssh key path or directly the ssh key",
 			},
 			"volume": {
 				Type:     schema.TypeList,
@@ -130,9 +133,9 @@ func resourceServer() *schema.Resource {
 							Description: "The size of the volume in GB.",
 						},
 						"disk_type": {
-							Type:         schema.TypeString,
-							Required:     true,
-							ValidateFunc: validation.All(validation.StringIsNotWhiteSpace),
+							Type:             schema.TypeString,
+							Required:         true,
+							ValidateDiagFunc: validation.ToDiagFunc(validation.StringIsNotWhiteSpace),
 						},
 						"image_password": {
 							Type:          schema.TypeString,
@@ -184,10 +187,10 @@ func resourceServer() *schema.Resource {
 							Optional: true,
 						},
 						"availability_zone": {
-							Type:         schema.TypeString,
-							Optional:     true,
-							Computed:     true,
-							ValidateFunc: validation.All(validation.StringInSlice([]string{"AUTO", "ZONE_1", "ZONE_2", "ZONE_3"}, true)),
+							Type:             schema.TypeString,
+							Optional:         true,
+							Computed:         true,
+							ValidateDiagFunc: validation.ToDiagFunc(validation.StringInSlice([]string{"AUTO", "ZONE_1", "ZONE_2", "ZONE_3"}, true)),
 						},
 						"cpu_hot_plug": {
 							Type:     schema.TypeBool,
@@ -303,8 +306,8 @@ func resourceServer() *schema.Resource {
 									"protocol": {
 										Type:             schema.TypeString,
 										Required:         true,
-										DiffSuppressFunc: DiffToLower,
-										ValidateFunc:     validation.All(validation.StringIsNotWhiteSpace),
+										DiffSuppressFunc: utils.DiffToLower,
+										ValidateDiagFunc: validation.ToDiagFunc(validation.StringIsNotWhiteSpace),
 									},
 									"source_mac": {
 										Type:     schema.TypeString,
@@ -321,22 +324,22 @@ func resourceServer() *schema.Resource {
 									"port_range_start": {
 										Type:     schema.TypeInt,
 										Optional: true,
-										ValidateFunc: func(v interface{}, k string) (ws []string, errors []error) {
+										ValidateDiagFunc: validation.ToDiagFunc(func(v interface{}, k string) (ws []string, errors []error) {
 											if v.(int) < 1 && v.(int) > 65534 {
 												errors = append(errors, fmt.Errorf("port start range must be between 1 and 65534"))
 											}
 											return
-										},
+										}),
 									},
 									"port_range_end": {
 										Type:     schema.TypeInt,
 										Optional: true,
-										ValidateFunc: func(v interface{}, k string) (ws []string, errors []error) {
+										ValidateDiagFunc: validation.ToDiagFunc(func(v interface{}, k string) (ws []string, errors []error) {
 											if v.(int) < 1 && v.(int) > 65534 {
 												errors = append(errors, fmt.Errorf("port end range must be between 1 and 65534"))
 											}
 											return
-										},
+										}),
 									},
 									"icmp_type": {
 										Type:     schema.TypeString,
@@ -410,17 +413,7 @@ func resourceServerCreate(ctx context.Context, d *schema.ResourceData, meta inte
 		diags := diag.FromErr(err)
 		return diags
 	}
-	if v, ok := d.GetOk("availability_zone"); ok {
-		vStr := v.(string)
-		serverReq.Properties.AvailabilityZone = &vStr
-	}
 
-	if v, ok := d.GetOk("cpu_family"); ok {
-		if v.(string) != "" {
-			vStr := v.(string)
-			serverReq.Properties.CpuFamily = &vStr
-		}
-	}
 	// create volume object with data to be used for image
 	volume, err := getVolumeData(d, "volume.0.")
 
@@ -705,10 +698,6 @@ func SetVolumeProperties(volume ionoscloud.Volume) map[string]interface{} {
 	return volumeMap
 }
 
-func boolAddr(b bool) *bool {
-	return &b
-}
-
 func resourceServerUpdate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	client := meta.(SdkBundle).CloudApiClient
 
@@ -868,9 +857,10 @@ func resourceServerUpdate(ctx context.Context, d *schema.ResourceData, meta inte
 			}
 		}
 
-		properties.Dhcp = boolAddr(d.Get("nic.0.dhcp").(bool))
-
-		properties.FirewallActive = boolAddr(d.Get("nic.0.firewall_active").(bool))
+		dhcp := d.Get("nic.0.dhcp").(bool)
+		fwRule := d.Get("nic.0.firewall_active").(bool)
+		properties.Dhcp = &dhcp
+		properties.FirewallActive = &fwRule
 
 		if v, ok := d.GetOk("nic.0.firewall_type"); ok {
 			vStr := v.(string)
@@ -1060,15 +1050,23 @@ func resourceServerImport(ctx context.Context, d *schema.ResourceData, meta inte
 	return []*schema.ResourceData{d}, nil
 }
 
-// Reads public key from file and returns key string iff valid
-func readPublicKey(path string) (key string, err error) {
-	bytes, err := ioutil.ReadFile(path)
-	if err != nil {
-		return "", err
+// Reads public key from file or directly provided and returns key string if valid
+func readPublicKey(pathOrKey string) (string, error) {
+	var bytes []byte
+	var err error
+	if utils.CheckFileExists(pathOrKey) {
+		bytes, err = ioutil.ReadFile(pathOrKey)
+		if err != nil {
+
+			return "", err
+		}
+	} else {
+		log.Printf("[DEBUG] error opening file, key must have been provided directly %s ", pathOrKey)
+		bytes = []byte(pathOrKey)
 	}
 	pubKey, _, _, _, err := ssh.ParseAuthorizedKey(bytes)
 	if err != nil {
-		return "", err
+		return "", fmt.Errorf("error for public key %s, check if path is correct or key is in correct format", pathOrKey)
 	}
 	return string(ssh.MarshalAuthorizedKey(pubKey)[:]), nil
 }
@@ -1101,15 +1099,18 @@ func SetCdromProperties(image ionoscloud.Image) map[string]interface{} {
 
 // Initializes server with the required attributes depending on the server type (CUBE or ENTERPRISE)
 func initializeCreateRequests(d *schema.ResourceData) (ionoscloud.Server, error) {
-	// create server object
-	server := ionoscloud.NewServer(*ionoscloud.NewServerPropertiesWithDefaults())
 
 	serverType := d.Get("type").(string)
+
+	// create server object and populate with common attributes
+	server, err := getServerData(d)
+	if err != nil {
+		return *server, err
+	}
 
 	if serverType != "" {
 		server.Properties.Type = &serverType
 	}
-
 	switch strings.ToLower(serverType) {
 	case "cube":
 		if v, ok := d.GetOk("template_uuid"); ok {
@@ -1131,11 +1132,6 @@ func initializeCreateRequests(d *schema.ResourceData) (ionoscloud.Server, error)
 			return *server, fmt.Errorf("volume.0.size argument can not be set for %s type of servers\n", serverType)
 		}
 	default: //enterprise
-		var err error
-		server, err = getServerData(d)
-		if err != nil {
-			return *server, err
-		}
 		if _, ok := d.GetOk("template_uuid"); ok {
 			return *server, fmt.Errorf("template_uuid argument can not be set only for %s type of servers\n", serverType)
 		}
@@ -1162,9 +1158,7 @@ func initializeCreateRequests(d *schema.ResourceData) (ionoscloud.Server, error)
 }
 
 func getServerData(d *schema.ResourceData) (*ionoscloud.Server, error) {
-	server := ionoscloud.Server{
-		Properties: &ionoscloud.ServerProperties{},
-	}
+	server := ionoscloud.NewServer(*ionoscloud.NewServerPropertiesWithDefaults())
 
 	if v, ok := d.GetOk("availability_zone"); ok {
 		vStr := v.(string)
@@ -1173,12 +1167,6 @@ func getServerData(d *schema.ResourceData) (*ionoscloud.Server, error) {
 
 	serverName := d.Get("name").(string)
 	server.Properties.Name = &serverName
-
-	serverCores := int32(d.Get("cores").(int))
-	server.Properties.Cores = &serverCores
-
-	serverRam := int32(d.Get("ram").(int))
-	server.Properties.Ram = &serverRam
 
 	if v, ok := d.GetOk("cpu_family"); ok {
 		if v.(string) != "" {
@@ -1199,7 +1187,7 @@ func getServerData(d *schema.ResourceData) (*ionoscloud.Server, error) {
 		}
 	}
 
-	return &server, nil
+	return server, nil
 }
 
 func setResourceServerData(ctx context.Context, client *ionoscloud.APIClient, d *schema.ResourceData, server *ionoscloud.Server) error {

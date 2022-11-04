@@ -5,7 +5,9 @@ import (
 	"fmt"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
+	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils"
 	"log"
+	"strings"
 	"time"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
@@ -196,7 +198,7 @@ func resourceSnapshotDelete(ctx context.Context, d *schema.ResourceData, meta in
 		return diags
 	}
 
-	for *rsp.Metadata.State != "AVAILABLE" {
+	for !strings.EqualFold(*rsp.Metadata.State, utils.Available) {
 		time.Sleep(30 * time.Second)
 		_, apiResponse, err := client.SnapshotsApi.SnapshotsFindById(ctx, d.Id()).Execute()
 		logApiRequestTime(apiResponse)
@@ -216,7 +218,7 @@ func resourceSnapshotDelete(ctx context.Context, d *schema.ResourceData, meta in
 		return diags
 	}
 
-	for *dc.Metadata.State != "AVAILABLE" {
+	for !strings.EqualFold(*dc.Metadata.State, utils.Available) {
 		time.Sleep(30 * time.Second)
 		_, apiResponse, err := client.DataCentersApi.DatacentersFindById(ctx, dcId).Execute()
 		logApiRequestTime(apiResponse)

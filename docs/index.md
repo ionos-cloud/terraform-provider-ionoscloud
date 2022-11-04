@@ -122,18 +122,18 @@ export TF_VAR_ionos_password="password"
 
 In the default mode, the Terraform provider returns only HTTP client errors. These usually consist only of the HTTP status code. There is no clear description of the problem. But if you want to see the API call error messages as well, you need to set the SDK and Terraform provider environment variables.
 
-You can enable logging now using the `IONOS_LOGLEVEL` env variable. Allowed values: `off`, debug and trace. Defaults to off.
+You can enable logging now using the `IONOS_LOG_LEVEL` env variable. Allowed values: `off`, `debug` and `trace`. Defaults to `off`.
 
-Note: We recommend you only use `trace` level for debugging purposes. Disable it in your production environments because it can log sensitive data. It logs the full request and response without encryption, even for an HTTPS call.
+⚠️ **Note:** We recommend you only use `trace` level for debugging purposes. Disable it in your production environments because it can log sensitive data. It logs the full request and response without encryption, even for an HTTPS call.
 Verbose request and response logging can also significantly impact your application’s performance.
 
 ```bash
-$ export IONOS_LOGLEVEL=debug
+$ export IONOS_LOG_LEVEL=debug
 ```
 
-⚠️ **Note:** IONOS_DEBUG is now deprecated and will be removed in a future release.
+⚠️ **Note:** `IONOS_DEBUG` is now deprecated and will be removed in a future release.
 
-Note: We recommend you only use IONOS_DEBUG for debugging purposes. Disable it in your production environments because it can log sensitive data. It logs the full request and response without encryption, even for an HTTPS call.
+⚠️ **Note:** We recommend you only use `IONOS_DEBUG` for debugging purposes. Disable it in your production environments because it can log sensitive data. It logs the full request and response without encryption, even for an HTTPS call.
 Verbose request and response logging can also significantly impact your application’s performance.
 
 ```bash

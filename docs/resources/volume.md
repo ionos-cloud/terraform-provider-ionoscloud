@@ -100,7 +100,7 @@ resource "ionoscloud_volume" "example" {
 * `disk_type` - (Required)[string] The volume type: HDD or SSD. This property is immutable.
 * `bus` - (Optional)[Boolean] The bus type of the volume: VIRTIO or IDE.
 * `size` -  (Required)[integer] The size of the volume in GB.
-* `ssh_key_path` -  (Optional)[list] List of paths to files containing a public SSH key that will be injected into IonosCloud provided Linux images. Required for IonosCloud Linux images. Required if `image_password` is not provided.
+* `ssh_key_path` -  (Optional)[list] List of paths to files containing a public SSH key that will be injected into IonosCloud provided Linux images. Also accepts ssh keys directly. Required for IonosCloud Linux images. Required if `image_password` is not provided.
 * `sshkey` - (Computed) The associated public SSH key.
 * `image_password` - (Optional)[string] Required if `sshkey_path` is not provided.
 * `image_name` - (Optional)[string] The name, ID or alias of the image. May also be a snapshot ID. It is required if `licence_type` is not provided. Attribute is immutable.
