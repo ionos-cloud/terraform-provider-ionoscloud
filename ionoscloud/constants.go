@@ -250,4 +250,5 @@ const (
 	psqlClient
 	certManagerClient
 	mongoClient
+	containerRegistryClient
 )

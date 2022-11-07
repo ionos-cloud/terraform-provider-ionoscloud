@@ -7,6 +7,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 	crService "github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/container-registry"
+	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils"
 	"log"
 	"regexp"
 	"time"
@@ -151,7 +152,7 @@ func resourceContainerRegistryUpdate(ctx context.Context, d *schema.ResourceData
 
 	d.SetId(*containerRegistryResponse.Id)
 
-	time.Sleep(SleepInterval)
+	time.Sleep(utils.SleepInterval)
 
 	return resourceContainerRegistryRead(ctx, d, meta)
 }
@@ -188,7 +189,7 @@ func resourceContainerRegistryDelete(ctx context.Context, d *schema.ResourceData
 		}
 
 		select {
-		case <-time.After(SleepInterval):
+		case <-time.After(utils.SleepInterval):
 			log.Printf("[INFO] trying again ...")
 		case <-ctx.Done():
 			diags := diag.FromErr(fmt.Errorf("registry deletion timed out! WARNING: your k8s cluster (%s) will still probably be deleted after some time but the terraform state won't reflect that; check your Ionos Cloud account for updates", d.Id()))

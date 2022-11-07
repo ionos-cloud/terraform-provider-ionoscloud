@@ -7,6 +7,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 	crService "github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/container-registry"
+	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils"
 	"log"
 	"regexp"
 	"time"
@@ -194,7 +195,7 @@ func resourceContainerRegistryTokenUpdate(ctx context.Context, d *schema.Resourc
 
 	d.SetId(*registryTokenResponse.Id)
 
-	time.Sleep(SleepInterval)
+	time.Sleep(utils.SleepInterval)
 
 	//for {
 	//	log.Printf("[INFO] Waiting for cluster %s to be ready...", d.Id())
@@ -267,7 +268,7 @@ func resourceContainerRegistryTokenDelete(ctx context.Context, d *schema.Resourc
 	//}
 
 	// wait 15 seconds after the deletion of the cluster, for the lan to be freed
-	time.Sleep(SleepInterval * 3)
+	time.Sleep(utils.SleepInterval * 3)
 
 	return nil
 }

@@ -9,6 +9,9 @@ Get information on a Container Registry Token
 
 # ionoscloud_container_registry_token
 
+⚠️ **Note:** Container Registry is currently in the Early Access (EA) phase. We recommend keeping usage and testing to non-production critical applications.
+Please contact your sales representative or support for more information.
+
 The **Container Registry Token data source** can be used to search for and return an existing Container Registry Token.
 You can provide a string for the name parameter which will be compared with provisioned Container Registry Token.
 If a single match is found, it will be returned. If your search results in multiple matches, an error will be returned.

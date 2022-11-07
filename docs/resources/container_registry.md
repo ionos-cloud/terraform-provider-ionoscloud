@@ -9,6 +9,9 @@ Creates and manages IonosCloud Container Registry.
 
 # ionoscloud_container_registry
 
+⚠️ **Note:** Container Registry is currently in the Early Access (EA) phase. We recommend keeping usage and testing to non-production critical applications.
+Please contact your sales representative or support for more information.
+
 Manages an **Container Registry** on IonosCloud.
 
 ## Example Usage

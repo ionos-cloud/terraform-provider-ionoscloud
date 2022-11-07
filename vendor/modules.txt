@@ -155,14 +155,13 @@ github.com/iancoleman/strcase
 # github.com/ionos-cloud/sdk-go-cert-manager v1.0.0
 ## explicit; go 1.17
 github.com/ionos-cloud/sdk-go-cert-manager
+# github.com/ionos-cloud/sdk-go-container-registry v1.0.0
+## explicit; go 1.18
+github.com/ionos-cloud/sdk-go-container-registry
 # github.com/ionos-cloud/sdk-go-dbaas-mongo v1.0.0
 ## explicit; go 1.18
 github.com/ionos-cloud/sdk-go-dbaas-mongo
 # github.com/ionos-cloud/sdk-go-dbaas-postgres v1.0.4
-# github.com/ionos-cloud/sdk-go-container-registry v1.0.0
-## explicit; go 1.18
-github.com/ionos-cloud/sdk-go-container-registry
-# github.com/ionos-cloud/sdk-go-dbaas-postgres v1.0.3
 ## explicit; go 1.17
 github.com/ionos-cloud/sdk-go-dbaas-postgres
 # github.com/ionos-cloud/sdk-go/v6 v6.1.3
