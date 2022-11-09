@@ -160,6 +160,10 @@ const (
 // User Constants
 const (
 	UserResource         = "ionoscloud_user"
+	// Used for tests where we need fresh user creation, e.g the tests in which we create the user
+	// and also add it to a group in the same time.
+	NewUserName          = "new_test_user"
+	NewUserResource      = "new_test_user_resource"
 	UserTestResource     = "test_user"
 	UserDataSourceById   = "test_user_id"
 	UserDataSourceByName = "test_user_name"
