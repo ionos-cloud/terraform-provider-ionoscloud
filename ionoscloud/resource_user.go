@@ -115,18 +115,6 @@ func resourceUserCreate(ctx context.Context, d *schema.ResourceData, meta interf
 		diags := diag.FromErr(fmt.Errorf("sec_auth_active attribute is not allowed in create requests"))
 		return diags
 	}
-	if groupsVal, groupsOk := d.GetOk("group_ids"); groupsOk {
-		groupsList := groupsVal.(*schema.Set).List()
-		log.Printf("[INFO] Adding group_ids %+v ", groupsList)
-		if groupsList != nil {
-			for _, groupsItem := range groupsList {
-				groupId := groupsItem.(string)
-				if err := addUserToGroup(d.Id(), groupId, ctx, d, meta); err != nil {
-					return diag.FromErr(err)
-				}
-			}
-		}
-	}
 
 	rsp, apiResponse, err := client.UserManagementApi.UmUsersPost(ctx).User(request).Execute()
 	logApiRequestTime(apiResponse)
@@ -148,6 +136,21 @@ func resourceUserCreate(ctx context.Context, d *schema.ResourceData, meta interf
 		diags := diag.FromErr(errState)
 		return diags
 	}
+
+	// Add the user to the specified groups, if any.
+	if groupsVal, groupsOk := d.GetOk("group_ids"); groupsOk {
+		groupsList := groupsVal.(*schema.Set).List()
+		log.Printf("[INFO] Adding group_ids %+v ", groupsList)
+		if groupsList != nil {
+			for _, groupsItem := range groupsList {
+				groupId := groupsItem.(string)
+				if err := addUserToGroup(d.Id(), groupId, ctx, d, meta); err != nil {
+					return diag.FromErr(err)
+				}
+			}
+		}
+	}
+
 	return resourceUserRead(ctx, d, meta)
 }
 
