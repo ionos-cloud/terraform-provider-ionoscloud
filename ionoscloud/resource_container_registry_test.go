@@ -99,8 +99,8 @@ func testAccCheckContainerRegistryDestroyCheck(s *terraform.State) error {
 		_, apiResponse, err := client.GetRegistry(ctx, rs.Primary.ID)
 
 		if err != nil {
-			if apiResponse == nil || apiResponse.StatusCode != 404 {
-				return fmt.Errorf("an error occurred while checking the destruction of the container registry %s: %s", rs.Primary.ID, err)
+			if !apiResponse.HttpNotFound() {
+				return fmt.Errorf("an error occurred while checking the destruction of the container registry %s: %w", rs.Primary.ID, err)
 			}
 		} else {
 			return fmt.Errorf("container registry %s still exists", rs.Primary.ID)

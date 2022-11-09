@@ -8,8 +8,8 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 	ionoscloud "github.com/ionos-cloud/sdk-go/v6"
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils"
-	"io/ioutil"
 	"log"
+	"os"
 	"strconv"
 	"strings"
 
@@ -1055,7 +1055,7 @@ func readPublicKey(pathOrKey string) (string, error) {
 	var bytes []byte
 	var err error
 	if utils.CheckFileExists(pathOrKey) {
-		bytes, err = ioutil.ReadFile(pathOrKey)
+		bytes, err = os.ReadFile(pathOrKey)
 		if err != nil {
 
 			return "", err

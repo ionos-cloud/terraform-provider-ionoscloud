@@ -17,16 +17,14 @@ Manages an **Container Registry** on IonosCloud.
 ## Example Usage
 
 ```hcl
-
 resource "ionoscloud_container_registry" "example" {
-    garbage_collection_schedule {
-        days			 = ["Monday", "Tuesday"]
-        time             = "10:00:00"
-    }
+  garbage_collection_schedule {
+    days			 = ["Monday", "Tuesday"]
+    time             = "05:19:00+00:00"
+  }
   location               = "de/fra"
-    name		         = "container-registry-example"
+  name		         = "container-registry-example"
 }
-
 ```
 
 ## Argument Reference

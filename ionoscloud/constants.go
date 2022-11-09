@@ -165,7 +165,7 @@ const (
 	UserDataSourceByName = "test_user_name"
 )
 
-//Ip Block constants
+// Ip Block constants
 const (
 	IpBlockResource           = "ionoscloud_ipblock"
 	IpBlockTestResource       = "test_ip_block"

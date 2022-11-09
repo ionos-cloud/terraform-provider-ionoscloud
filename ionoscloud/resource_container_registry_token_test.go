@@ -6,6 +6,7 @@ package ionoscloud
 import (
 	"context"
 	"fmt"
+	"os"
 	"regexp"
 	"testing"
 
@@ -16,7 +17,7 @@ import (
 
 func TestAccContainerRegistryTokenBasic(t *testing.T) {
 	var containerRegistryToken cr.TokenResponse
-
+	defer removeTestFile()
 	resource.Test(t, resource.TestCase{
 		PreCheck: func() {
 			testAccPreCheck(t)
@@ -157,6 +158,11 @@ func testAccCheckContainerRegistryTokenExists(n string, registry *cr.TokenRespon
 	}
 }
 
+func removeTestFile() {
+	os.Remove(testFileName)
+}
+
+const testFileName = "pass.txt"
 const testAccCheckContainerRegistryTokenConfigBasic = testAccCheckContainerRegistryConfigBasic + `
 resource ` + ContainerRegistryTokenResource + ` ` + ContainerRegistryTokenTestResource + ` {
   expiry_date        = "2023-01-13 16:27:42Z"
@@ -168,6 +174,7 @@ resource ` + ContainerRegistryTokenResource + ` ` + ContainerRegistryTokenTestRe
   }
   status	         = "enabled"
   registry_id        = ` + ContainerRegistryResource + `.` + ContainerRegistryTestResource + `.id
+  save_password_to_file = "` + testFileName + `"
 }
 `
 

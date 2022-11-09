@@ -124,7 +124,7 @@ func dataSourceContainerRegistryRead(ctx context.Context, d *schema.ResourceData
 		/* search by ID */
 		registry, _, err = client.GetRegistry(ctx, id)
 		if err != nil {
-			diags := diag.FromErr(fmt.Errorf("an error occurred while fetching the registry with ID %s: %s", id, err))
+			diags := diag.FromErr(fmt.Errorf("an error occurred while fetching the registry with ID %s: %w", id, err))
 			return diags
 		}
 	} else {
@@ -132,7 +132,7 @@ func dataSourceContainerRegistryRead(ctx context.Context, d *schema.ResourceData
 
 		registries, _, err := client.ListRegistries(ctx)
 		if err != nil {
-			diags := diag.FromErr(fmt.Errorf("an error occurred while fetching container registries: %s", err.Error()))
+			diags := diag.FromErr(fmt.Errorf("an error occurred while fetching container registries: %w", err))
 			return diags
 		}
 

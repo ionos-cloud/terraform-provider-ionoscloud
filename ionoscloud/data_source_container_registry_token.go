@@ -39,10 +39,6 @@ func dataSourceContainerRegistryToken() *schema.Resource {
 							Type:     schema.TypeString,
 							Computed: true,
 						},
-						"password": {
-							Type:     schema.TypeString,
-							Computed: true,
-						},
 					},
 				},
 			},
@@ -147,8 +143,14 @@ func dataSourceContainerRegistryTokenRead(ctx context.Context, d *schema.Resourc
 		token = results[0]
 
 	}
+	if token.Id != nil {
+		d.SetId(*token.Id)
+	}
+	if token.Properties == nil {
+		return diag.FromErr(fmt.Errorf("no token properties found with the specified id = %s", *token.Id))
+	}
 
-	if err := crService.SetTokenData(d, token); err != nil {
+	if err := crService.SetTokenData(d, *token.Properties); err != nil {
 		return diag.FromErr(err)
 	}
 

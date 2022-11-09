@@ -10,7 +10,6 @@ import (
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils"
 	"log"
 	"regexp"
-	"time"
 )
 
 func resourceContainerRegistryToken() *schema.Resource {
@@ -22,7 +21,6 @@ func resourceContainerRegistryToken() *schema.Resource {
 		Importer: &schema.ResourceImporter{
 			StateContext: resourceContainerRegistryTokenImport,
 		},
-		CustomizeDiff: checkContainerRegistryTokenImmutableFields,
 		Schema: map[string]*schema.Schema{
 			"credentials": {
 				Type:     schema.TypeList,
@@ -47,9 +45,10 @@ func resourceContainerRegistryToken() *schema.Resource {
 				DiffSuppressFunc: DiffExpiryDate,
 			},
 			"name": {
-				Type:         schema.TypeString,
-				Required:     true,
-				ValidateFunc: validation.All(validation.StringMatch(regexp.MustCompile("^[a-z][-a-z0-9]{1,61}[a-z0-9]$"), "")),
+				Type:             schema.TypeString,
+				Required:         true,
+				ValidateDiagFunc: validation.ToDiagFunc(validation.StringMatch(regexp.MustCompile("^[a-z][-a-z0-9]{1,61}[a-z0-9]$"), "")),
+				ForceNew:         true,
 			},
 			"scopes": {
 				Type:     schema.TypeList,
@@ -63,6 +62,7 @@ func resourceContainerRegistryToken() *schema.Resource {
 							Elem: &schema.Schema{
 								Type: schema.TypeString,
 							},
+							Description: "Example: [\"pull\", \"push\", \"delete\"]",
 						},
 						"name": {
 							Type:     schema.TypeString,
@@ -76,77 +76,59 @@ func resourceContainerRegistryToken() *schema.Resource {
 				},
 			},
 			"status": {
-				Type:         schema.TypeString,
-				Optional:     true,
-				Computed:     true,
-				ValidateFunc: validation.All(validation.StringInSlice([]string{"enabled", "disabled"}, true)),
+				Type:             schema.TypeString,
+				Optional:         true,
+				Computed:         true,
+				ValidateDiagFunc: validation.ToDiagFunc(validation.StringInSlice([]string{"enabled", "disabled"}, true)),
+				Description:      "Can be one of enabled, disabled",
 			},
 			"registry_id": {
-				Type:     schema.TypeString,
-				Required: true,
+				Type:             schema.TypeString,
+				Required:         true,
+				ValidateDiagFunc: validation.ToDiagFunc(validation.StringMatch(regexp.MustCompile("^[0-9a-fA-F]{8}-([0-9a-fA-F]{4}-){3}[0-9a-fA-F]{12}$"), "")),
+			},
+			"save_password_to_file": {
+				Type:             schema.TypeString,
+				Optional:         true,
+				Description:      "Saves password to file. Only works on create. Takes as argument a file name, or a file path",
+				ValidateDiagFunc: validation.ToDiagFunc(validation.StringIsNotWhiteSpace),
 			},
 		},
 		Timeouts: &resourceDefaultTimeouts,
 	}
 }
-func checkContainerRegistryTokenImmutableFields(_ context.Context, diff *schema.ResourceDiff, _ interface{}) error {
 
-	//we do not want to check in case of resource creation
-	if diff.Id() == "" {
-		return nil
-	}
-	if diff.HasChange("name") {
-		return fmt.Errorf("name %s", ImmutableError)
-	}
-	return nil
-
-}
 func resourceContainerRegistryTokenCreate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	client := meta.(SdkBundle).ContainerClient
 
 	registryId := d.Get("registry_id").(string)
-
+	fileStr := d.Get("save_password_to_file").(string)
 	registryToken, err := crService.GetTokenDataCreate(d)
 
 	if err != nil {
 		return diag.FromErr(err)
 	}
 	registryTokenResponse, _, err := client.CreateTokens(ctx, registryId, *registryToken)
-
 	if err != nil {
-		diags := diag.FromErr(fmt.Errorf("an error occured while creating the registry token: %w", err))
-		return diags
+		return diag.FromErr(fmt.Errorf("an error occured while creating the registry token: %w", err))
 	}
 
 	d.SetId(*registryTokenResponse.Id)
 
-	//for {
-	//	log.Printf("[INFO] Waiting for registry token %s to be ready...", d.Id())
-	//
-	//	registryTokenReady, rsErr := registryTokenReady(ctx, client, d)
-	//
-	//	if rsErr != nil {
-	//		diags := diag.FromErr(fmt.Errorf("error while checking readiness status of registry token %s: %w", d.Id(), rsErr))
-	//		return diags
-	//	}
-	//
-	//	if registryTokenReady {
-	//		log.Printf("[INFO] registry token ready: %s", d.Id())
-	//		break
-	//	}
-	//
-	//	select {
-	//	case <-time.After(SleepInterval):
-	//		log.Printf("[INFO] trying again ...")
-	//	case <-ctx.Done():
-	//		log.Printf("[INFO] create timed out")
-	//		diags := diag.FromErr(fmt.Errorf("registry creation timed out! WARNING: your registry token (%s) will still probably be created after some time but the terraform state wont reflect that; check your Ionos Cloud account for updates", d.Id()))
-	//		return diags
-	//	}
-	//
-	//}
+	if registryTokenResponse.Properties == nil {
+		return diag.FromErr(fmt.Errorf("no token properties found with the specified id = %s", *registryTokenResponse.Id))
+	}
 
-	return resourceContainerRegistryTokenRead(ctx, d, meta)
+	if fileStr != "" {
+		if err := utils.WriteToFile(fileStr, *registryTokenResponse.Properties.Credentials.Password); err != nil {
+			return diag.FromErr(err)
+		}
+	}
+
+	if err = crService.SetTokenData(d, *registryTokenResponse.Properties); err != nil {
+		return diag.FromErr(err)
+	}
+	return nil
 }
 
 func resourceContainerRegistryTokenRead(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
@@ -158,7 +140,7 @@ func resourceContainerRegistryTokenRead(ctx context.Context, d *schema.ResourceD
 	registryToken, apiResponse, err := client.GetToken(ctx, registryId, registryTokenId)
 
 	if err != nil {
-		if apiResponse != nil && apiResponse.Response != nil && apiResponse.StatusCode == 404 {
+		if apiResponse.HttpNotFound() {
 			d.SetId("")
 			return nil
 		}
@@ -167,8 +149,14 @@ func resourceContainerRegistryTokenRead(ctx context.Context, d *schema.ResourceD
 	}
 
 	log.Printf("[INFO] Successfully retreived registry token %s: %+v", d.Id(), registryToken)
+	if registryToken.Id != nil {
+		d.SetId(*registryToken.Id)
+	}
+	if registryToken.Properties == nil {
+		return diag.FromErr(fmt.Errorf("no token properties found with the specified id = %s", *registryToken.Id))
+	}
 
-	if err := crService.SetTokenData(d, registryToken); err != nil {
+	if err := crService.SetTokenData(d, *registryToken.Properties); err != nil {
 		return diag.FromErr(err)
 	}
 
@@ -181,7 +169,6 @@ func resourceContainerRegistryTokenUpdate(ctx context.Context, d *schema.Resourc
 	registryId := d.Get("registry_id").(string)
 	registryTokenId := d.Id()
 	registryToken, err := crService.GetTokenDataUpdate(d)
-
 	if err != nil {
 		return diag.FromErr(err)
 	}
@@ -189,39 +176,13 @@ func resourceContainerRegistryTokenUpdate(ctx context.Context, d *schema.Resourc
 	registryTokenResponse, _, err := client.PatchToken(ctx, registryId, registryTokenId, *registryToken)
 
 	if err != nil {
-		diags := diag.FromErr(fmt.Errorf("an error occured while updating a registry token: %s", err))
+		diags := diag.FromErr(fmt.Errorf("an error occured while updating a registry token: %w", err))
 		return diags
 	}
 
 	d.SetId(*registryTokenResponse.Id)
 
-	time.Sleep(utils.SleepInterval)
-
-	//for {
-	//	log.Printf("[INFO] Waiting for cluster %s to be ready...", d.Id())
-	//
-	//	clusterReady, rsErr := registryTokenReady(ctx, client, d)
-	//
-	//	if rsErr != nil {
-	//		diags := diag.FromErr(fmt.Errorf("error while checking readiness status of registry token %s: %w", d.Id(), rsErr))
-	//		return diags
-	//	}
-	//
-	//	if clusterReady {
-	//		log.Printf("[INFO]registry token ready: %s", d.Id())
-	//		break
-	//	}
-	//
-	//	select {
-	//	case <-time.After(SleepInterval):
-	//		log.Printf("[INFO] trying again ...")
-	//	case <-ctx.Done():
-	//		log.Printf("[INFO] create timed out")
-	//		diags := diag.FromErr(fmt.Errorf("registry update timed out! WARNING: your registry token (%s) will still probably be updated after some time but the terraform state wont reflect that; check your Ionos Cloud account for updates", d.Id()))
-	//		return diags
-	//	}
-	//
-	//}
+	//time.Sleep(utils.SleepInterval)
 
 	return resourceContainerRegistryTokenRead(ctx, d, meta)
 }
@@ -235,40 +196,13 @@ func resourceContainerRegistryTokenDelete(ctx context.Context, d *schema.Resourc
 	apiResponse, err := client.DeleteToken(ctx, registryId, registryTokenId)
 
 	if err != nil {
-		if apiResponse != nil && apiResponse.Response != nil && apiResponse.StatusCode == 404 {
+		if apiResponse.HttpNotFound() {
 			d.SetId("")
 			return nil
 		}
-		diags := diag.FromErr(fmt.Errorf("error while deleting registry token %s: %s", registryTokenId, err))
+		diags := diag.FromErr(fmt.Errorf("error while deleting registry token %s: %w", registryTokenId, err))
 		return diags
 	}
-
-	//for {
-	//	log.Printf("[INFO] Waiting for cluster %s to be deleted...", d.Id())
-	//
-	//	registryTokenDeleted, dsErr := registryTokenDeleted(ctx, client, d)
-	//
-	//	if dsErr != nil {
-	//		diags := diag.FromErr(fmt.Errorf("error while checking deletion status of registry token %s: %s", d.Id(), dsErr))
-	//		return diags
-	//	}
-	//
-	//	if registryTokenDeleted {
-	//		log.Printf("[INFO] Successfully deleted registry token: %s", d.Id())
-	//		break
-	//	}
-	//
-	//	select {
-	//	case <-time.After(SleepInterval):
-	//		log.Printf("[INFO] trying again ...")
-	//	case <-ctx.Done():
-	//		diags := diag.FromErr(fmt.Errorf("registry deletion timed out! WARNING: your k8s cluster (%s) will still probably be deleted after some time but the terraform state won't reflect that; check your Ionos Cloud account for updates", d.Id()))
-	//		return diags
-	//	}
-	//}
-
-	// wait 15 seconds after the deletion of the cluster, for the lan to be freed
-	time.Sleep(utils.SleepInterval * 3)
 
 	return nil
 }
@@ -282,7 +216,7 @@ func resourceContainerRegistryTokenImport(ctx context.Context, d *schema.Resourc
 	registryToken, apiResponse, err := client.GetToken(ctx, registryId, registryTokenId)
 
 	if err != nil {
-		if apiResponse != nil && apiResponse.Response != nil && apiResponse.StatusCode == 404 {
+		if apiResponse.HttpNotFound() {
 			d.SetId("")
 			return nil, fmt.Errorf("registry does not exist %q", registryTokenId)
 		}
@@ -291,7 +225,14 @@ func resourceContainerRegistryTokenImport(ctx context.Context, d *schema.Resourc
 
 	log.Printf("[INFO] registry token found: %+v", registryToken)
 
-	if err := crService.SetTokenData(d, registryToken); err != nil {
+	if registryToken.Id != nil {
+		d.SetId(*registryToken.Id)
+	}
+	if registryToken.Properties == nil {
+		return nil, fmt.Errorf("no token properties found with the specified id = %s", *registryToken.Id)
+	}
+
+	if err := crService.SetTokenData(d, *registryToken.Properties); err != nil {
 		return nil, err
 	}
 

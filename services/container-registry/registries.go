@@ -27,119 +27,85 @@ type RegistriesService interface {
 
 func (c *Client) ListRegistries(ctx context.Context) (cr.RegistriesResponse, *cr.APIResponse, error) {
 	registry, apiResponse, err := c.RegistriesApi.RegistriesGet(ctx).Execute()
-	if apiResponse != nil {
-		return registry, apiResponse, err
-
-	}
-	return registry, nil, err
+	apiResponse.LogInfo()
+	return registry, apiResponse, err
 }
 
 func (c *Client) CreateRegistry(ctx context.Context, registryInput cr.PostRegistryInput) (cr.PostRegistryOutput, *cr.APIResponse, error) {
 	registry, apiResponse, err := c.RegistriesApi.RegistriesPost(ctx).PostRegistryInput(registryInput).Execute()
-	if apiResponse != nil {
-		return registry, apiResponse, err
-
-	}
-	return registry, nil, err
+	apiResponse.LogInfo()
+	return registry, apiResponse, err
 }
 
 func (c *Client) DeleteRegistry(ctx context.Context, registryId string) (*cr.APIResponse, error) {
 	apiResponse, err := c.RegistriesApi.RegistriesDelete(ctx, registryId).Execute()
-	if apiResponse != nil {
-		return apiResponse, err
-
-	}
-	return nil, err
+	apiResponse.LogInfo()
+	return apiResponse, err
 }
 
 func (c *Client) GetRegistry(ctx context.Context, registryId string) (cr.RegistryResponse, *cr.APIResponse, error) {
 	registries, apiResponse, err := c.RegistriesApi.RegistriesFindById(ctx, registryId).Execute()
-	if apiResponse != nil {
-		return registries, apiResponse, err
-
-	}
-	return registries, nil, err
+	apiResponse.LogInfo()
+	return registries, apiResponse, err
 }
 
 func (c *Client) PatchRegistry(ctx context.Context, registryId string, registryInput cr.PatchRegistryInput) (cr.RegistryResponse, *cr.APIResponse, error) {
 	registries, apiResponse, err := c.RegistriesApi.RegistriesPatch(ctx, registryId).PatchRegistryInput(registryInput).Execute()
-	if apiResponse != nil {
-		return registries, apiResponse, err
-
-	}
-	return registries, nil, err
+	apiResponse.LogInfo()
+	return registries, apiResponse, err
 }
 
 func (c *Client) PutRegistry(ctx context.Context, registryId string, registryInput cr.PutRegistryInput) (cr.PutRegistryOutput, *cr.APIResponse, error) {
 	registries, apiResponse, err := c.RegistriesApi.RegistriesPut(ctx, registryId).PutRegistryInput(registryInput).Execute()
-	if apiResponse != nil {
-		return registries, apiResponse, err
-
-	}
-	return registries, nil, err
+	apiResponse.LogInfo()
+	return registries, apiResponse, err
 }
 
 func (c *Client) DeleteRepositories(ctx context.Context, registryId, repositoryId string) (*cr.APIResponse, error) {
 	apiResponse, err := c.RepositoriesApi.RegistriesRepositoriesDelete(ctx, registryId, repositoryId).Execute()
-	if apiResponse != nil {
-		return apiResponse, err
-
-	}
-	return nil, err
+	apiResponse.LogInfo()
+	return apiResponse, err
 }
 
 func (c *Client) ListTokens(ctx context.Context, registryId string) (cr.TokensResponse, *cr.APIResponse, error) {
 	tokens, apiResponse, err := c.TokensApi.RegistriesTokensGet(ctx, registryId).Execute()
-	if apiResponse != nil {
-		return tokens, apiResponse, err
+	apiResponse.LogInfo()
+	return tokens, apiResponse, err
 
-	}
-	return tokens, nil, err
 }
 
 func (c *Client) CreateTokens(ctx context.Context, registryId string, tokenInput cr.PostTokenInput) (cr.PostTokenOutput, *cr.APIResponse, error) {
 	token, apiResponse, err := c.TokensApi.RegistriesTokensPost(ctx, registryId).PostTokenInput(tokenInput).Execute()
-	if apiResponse != nil {
-		return token, apiResponse, err
+	apiResponse.LogInfo()
+	return token, apiResponse, err
 
-	}
-	return token, nil, err
 }
 
 func (c *Client) DeleteToken(ctx context.Context, registryId, tokenId string) (*cr.APIResponse, error) {
 	apiResponse, err := c.TokensApi.RegistriesTokensDelete(ctx, registryId, tokenId).Execute()
-	if apiResponse != nil {
-		return apiResponse, err
-
-	}
-	return nil, err
+	apiResponse.LogInfo()
+	return apiResponse, err
 }
 
 func (c *Client) GetToken(ctx context.Context, registryId, tokenId string) (cr.TokenResponse, *cr.APIResponse, error) {
 	token, apiResponse, err := c.TokensApi.RegistriesTokensFindById(ctx, registryId, tokenId).Execute()
-	if apiResponse != nil {
-		return token, apiResponse, err
+	apiResponse.LogInfo()
+	return token, apiResponse, err
 
-	}
-	return token, nil, err
 }
 
 func (c *Client) PatchToken(ctx context.Context, registryId, tokenId string, tokenInput cr.PatchTokenInput) (cr.TokenResponse, *cr.APIResponse, error) {
 	token, apiResponse, err := c.TokensApi.RegistriesTokensPatch(ctx, registryId, tokenId).PatchTokenInput(tokenInput).Execute()
-	if apiResponse != nil {
-		return token, apiResponse, err
+	apiResponse.LogInfo()
+	return token, apiResponse, err
 
-	}
-	return token, nil, err
 }
 
 func (c *Client) PutToken(ctx context.Context, registryId, tokenId string, tokenInput cr.PutTokenInput) (cr.PutTokenOutput, *cr.APIResponse, error) {
 	token, apiResponse, err := c.TokensApi.RegistriesTokensPut(ctx, registryId, tokenId).PutTokenInput(tokenInput).Execute()
-	if apiResponse != nil {
-		return token, apiResponse, err
+	apiResponse.LogInfo()
+	return token, apiResponse, err
 
-	}
-	return token, nil, err
 }
 
 func GetRegistryDataCreate(d *schema.ResourceData) *cr.PostRegistryInput {
@@ -191,9 +157,9 @@ func GetWeeklySchedule(d *schema.ResourceData, property string) *cr.WeeklySchedu
 		weeklySchedule.Days = &daysToAdd
 	}
 
-	if time, ok := d.GetOk(fmt.Sprintf("%v.0.time", property)); ok {
-		time := time.(string)
-		weeklySchedule.Time = &time
+	if timeField, ok := d.GetOk(fmt.Sprintf("%v.0.time", property)); ok {
+		timeStr := timeField.(string)
+		weeklySchedule.Time = &timeStr
 	}
 
 	return &weeklySchedule
@@ -261,7 +227,9 @@ func SetStorageUsage(storageUsage cr.StorageUsage) map[string]interface{} {
 	storage := map[string]interface{}{}
 
 	utils.SetPropWithNilCheck(storage, "bytes", storageUsage.Bytes)
-	utils.SetPropWithNilCheck(storage, "updated_at", storageUsage.UpdatedAt)
+	if storageUsage.UpdatedAt != nil {
+		utils.SetPropWithNilCheck(storage, "updated_at", storageUsage.UpdatedAt.String())
+	}
 
 	return storage
 }
@@ -363,46 +331,42 @@ func GetScopes(d *schema.ResourceData) *[]cr.Scope {
 
 }
 
-func SetTokenData(d *schema.ResourceData, token cr.TokenResponse) error {
+func SetTokenData(d *schema.ResourceData, tokenProps cr.TokenProperties) error {
 
-	resourceName := "registry token"
+	regToken := "registry token "
 
-	if token.Id != nil {
-		d.SetId(*token.Id)
-	}
-
-	if token.Properties.Credentials != nil {
+	if tokenProps.Credentials != nil {
 		var credentials []interface{}
-		credentialsEntry := SetCredentials(*token.Properties.Credentials)
+		credentialsEntry := SetCredentials(*tokenProps.Credentials)
 		credentials = append(credentials, credentialsEntry)
 		if err := d.Set("credentials", credentials); err != nil {
-			return utils.GenerateSetError(resourceName, "credentials", err)
+			return utils.GenerateSetError(regToken, "credentials", err)
 		}
 	}
 
-	if token.Properties.ExpiryDate != nil {
-		timeValue := (*token.Properties.ExpiryDate).Time
+	if tokenProps.ExpiryDate != nil {
+		timeValue := (*tokenProps.ExpiryDate).Time
 		if err := d.Set("expiry_date", timeValue.String()); err != nil {
-			return utils.GenerateSetError(resourceName, "expiry_date", err)
+			return utils.GenerateSetError(regToken, "expiry_date", err)
 		}
 	}
 
-	if token.Properties.Name != nil {
-		if err := d.Set("name", *token.Properties.Name); err != nil {
-			return utils.GenerateSetError(resourceName, "name", err)
+	if tokenProps.Name != nil {
+		if err := d.Set("name", *tokenProps.Name); err != nil {
+			return utils.GenerateSetError(regToken, "name", err)
 		}
 	}
 
-	if token.Properties.Scopes != nil {
-		scopes := SetScopes(*token.Properties.Scopes)
+	if tokenProps.Scopes != nil {
+		scopes := SetScopes(*tokenProps.Scopes)
 		if err := d.Set("scopes", scopes); err != nil {
-			return utils.GenerateSetError(resourceName, "scopes", err)
+			return utils.GenerateSetError(regToken, "scopes", err)
 		}
 	}
 
-	if token.Properties.Status != nil {
-		if err := d.Set("status", *token.Properties.Status); err != nil {
-			return utils.GenerateSetError(resourceName, "status", err)
+	if tokenProps.Status != nil {
+		if err := d.Set("status", *tokenProps.Status); err != nil {
+			return utils.GenerateSetError(regToken, "status", err)
 		}
 	}
 
@@ -414,7 +378,6 @@ func SetCredentials(credentials cr.Credentials) map[string]interface{} {
 	credentialsEntry := map[string]interface{}{}
 
 	utils.SetPropWithNilCheck(credentialsEntry, "username", credentials.Username)
-	utils.SetPropWithNilCheck(credentialsEntry, "password", credentials.Password)
 
 	return credentialsEntry
 }
@@ -449,7 +412,7 @@ func convertToIonosTime(targetTime string) (*cr.IonosTime, error) {
 	layout := "2006-01-02 15:04:05Z"
 	convertedTime, err := time.Parse(layout, targetTime)
 	if err != nil {
-		return nil, fmt.Errorf("an error occured while converting recovery_target_time to time.Time: %s", err)
+		return nil, fmt.Errorf("an error occured while converting from IonosTime to time.Time: %w", err)
 	}
 	ionosTime.Time = convertedTime
 	return &ionosTime, nil

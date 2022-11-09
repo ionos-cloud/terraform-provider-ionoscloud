@@ -61,7 +61,6 @@ The following attributes are returned by the datasource:
 * `name` - The name of the container registry token.
 * `credentials` 
     * `username`
-    * `password`
 * `expiry-date`
 * `scopes`
   * `actions`

@@ -22,7 +22,6 @@ func resourceContainerRegistry() *schema.Resource {
 		Importer: &schema.ResourceImporter{
 			StateContext: resourceContainerRegistryImport,
 		},
-		CustomizeDiff: checkContainerRegistryImmutableFields,
 		Schema: map[string]*schema.Schema{
 			"garbage_collection_schedule": {
 				Type:     schema.TypeList,
@@ -32,15 +31,16 @@ func resourceContainerRegistry() *schema.Resource {
 				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{
 						"time": {
-							Type:     schema.TypeString,
-							Required: true,
+							Type:        schema.TypeString,
+							Required:    true,
+							Description: "UTC time of day e.g. 01:00:00 - as defined by partial-time - RFC3339",
 						},
 						"days": {
 							Type:     schema.TypeList,
 							Required: true,
 							Elem: &schema.Schema{
-								Type:         schema.TypeString,
-								ValidateFunc: validation.All(validation.IsDayOfTheWeek(true)),
+								Type:             schema.TypeString,
+								ValidateDiagFunc: validation.ToDiagFunc(validation.IsDayOfTheWeek(true)),
 							},
 						},
 					},
@@ -51,14 +51,16 @@ func resourceContainerRegistry() *schema.Resource {
 				Computed: true,
 			},
 			"location": {
-				Type:         schema.TypeString,
-				Required:     true,
-				ValidateFunc: validation.All(validation.StringIsNotWhiteSpace),
+				Type:             schema.TypeString,
+				Required:         true,
+				ValidateDiagFunc: validation.ToDiagFunc(validation.StringIsNotWhiteSpace),
+				ForceNew:         true,
 			},
 			"name": {
-				Type:         schema.TypeString,
-				Required:     true,
-				ValidateFunc: validation.All(validation.StringMatch(regexp.MustCompile("^[a-z][-a-z0-9]{1,61}[a-z0-9]$"), "")),
+				Type:             schema.TypeString,
+				Required:         true,
+				ValidateDiagFunc: validation.ToDiagFunc(validation.StringMatch(regexp.MustCompile("^[a-z][-a-z0-9]{1,61}[a-z0-9]$"), "")),
+				ForceNew:         true,
 			},
 			"storage_usage": {
 				Type:     schema.TypeList,
@@ -80,21 +82,7 @@ func resourceContainerRegistry() *schema.Resource {
 		Timeouts: &resourceDefaultTimeouts,
 	}
 }
-func checkContainerRegistryImmutableFields(_ context.Context, diff *schema.ResourceDiff, _ interface{}) error {
 
-	//we do not want to check in case of resource creation
-	if diff.Id() == "" {
-		return nil
-	}
-	if diff.HasChange("name") {
-		return fmt.Errorf("name %s", ImmutableError)
-	}
-	if diff.HasChange("location") {
-		return fmt.Errorf("location %s", ImmutableError)
-	}
-	return nil
-
-}
 func resourceContainerRegistryCreate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	client := meta.(SdkBundle).ContainerClient
 
@@ -119,7 +107,7 @@ func resourceContainerRegistryRead(ctx context.Context, d *schema.ResourceData, 
 	registry, apiResponse, err := client.GetRegistry(ctx, d.Id())
 
 	if err != nil {
-		if apiResponse != nil && apiResponse.Response != nil && apiResponse.StatusCode == 404 {
+		if apiResponse.HttpNotFound() {
 			d.SetId("")
 			return nil
 		}
@@ -165,21 +153,21 @@ func resourceContainerRegistryDelete(ctx context.Context, d *schema.ResourceData
 	apiResponse, err := client.DeleteRegistry(ctx, registryId)
 
 	if err != nil {
-		if apiResponse != nil && apiResponse.Response != nil && apiResponse.StatusCode == 404 {
+		if apiResponse.HttpNotFound() {
 			d.SetId("")
 			return nil
 		}
-		diags := diag.FromErr(fmt.Errorf("error while deleting registry %s: %s", registryId, err))
+		diags := diag.FromErr(fmt.Errorf("error while deleting registry %s: %w", registryId, err))
 		return diags
 	}
 
 	for {
-		log.Printf("[INFO] Waiting for cluster %s to be deleted...", d.Id())
+		log.Printf("[INFO] Waiting for container registry %s to be deleted...", d.Id())
 
 		registryDeleted, dsErr := registryDeleted(ctx, client, d)
 
 		if dsErr != nil {
-			diags := diag.FromErr(fmt.Errorf("error while checking deletion status of registry %s: %s", d.Id(), dsErr))
+			diags := diag.FromErr(fmt.Errorf("error while checking deletion status of registry %s: %w", d.Id(), dsErr))
 			return diags
 		}
 
@@ -192,7 +180,7 @@ func resourceContainerRegistryDelete(ctx context.Context, d *schema.ResourceData
 		case <-time.After(utils.SleepInterval):
 			log.Printf("[INFO] trying again ...")
 		case <-ctx.Done():
-			diags := diag.FromErr(fmt.Errorf("registry deletion timed out! WARNING: your k8s cluster (%s) will still probably be deleted after some time but the terraform state won't reflect that; check your Ionos Cloud account for updates", d.Id()))
+			diags := diag.FromErr(fmt.Errorf("registry deletion timed out! WARNING: your container registry (%s) will still probably be deleted after some time but the terraform state won't reflect that; check your Ionos Cloud account for updates", d.Id()))
 			return diags
 		}
 	}
@@ -208,7 +196,7 @@ func resourceContainerRegistryImport(ctx context.Context, d *schema.ResourceData
 	containerRegistry, apiResponse, err := client.GetRegistry(ctx, registryId)
 
 	if err != nil {
-		if apiResponse != nil && apiResponse.Response != nil && apiResponse.StatusCode == 404 {
+		if apiResponse.HttpNotFound() {
 			d.SetId("")
 			return nil, fmt.Errorf("registry does not exist %q", registryId)
 		}
@@ -229,10 +217,11 @@ func registryDeleted(ctx context.Context, client *crService.Client, d *schema.Re
 	_, apiResponse, err := client.GetRegistry(ctx, d.Id())
 
 	if err != nil {
-		if apiResponse != nil && apiResponse.Response != nil && apiResponse.StatusCode == 404 {
+		if apiResponse.HttpNotFound() {
+			log.Printf("[DEBUG] Container registry not found %s", d.Id())
 			return true, nil
 		}
-		return true, fmt.Errorf("error checking registry deletion status: %s", err)
+		return true, fmt.Errorf("error checking registry deletion status: %w", err)
 	}
 	return false, nil
 }
