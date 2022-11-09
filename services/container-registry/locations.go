@@ -15,11 +15,8 @@ type LocationsService interface {
 
 func (c *Client) GetAllLocations(ctx context.Context) (cr.LocationsResponse, *cr.APIResponse, error) {
 	versions, apiResponse, err := c.LocationsApi.LocationsGet(ctx).Execute()
-	if apiResponse != nil {
-		return versions, apiResponse, err
-
-	}
-	return versions, nil, err
+	apiResponse.LogInfo()
+	return versions, apiResponse, err
 }
 
 func SetCRLocationsData(d *schema.ResourceData, locations cr.LocationsResponse) diag.Diagnostics {
@@ -34,7 +31,7 @@ func SetCRLocationsData(d *schema.ResourceData, locations cr.LocationsResponse) 
 		}
 		err := d.Set("locations", locationList)
 		if err != nil {
-			diags := diag.FromErr(fmt.Errorf("error while setting locations: %s", err))
+			diags := diag.FromErr(fmt.Errorf("error while setting locations: %w", err))
 			return diags
 		}
 

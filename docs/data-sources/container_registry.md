@@ -4,7 +4,7 @@ layout: "ionoscloud"
 page_title: "IonosCloud : ionoscloud_container_registry"
 sidebar_current: "docs-ionoscloud_container_registry"
 description: |-
-Get information on a Container Registry
+  Get information on a Container Registry
 ---
 
 # ionoscloud_container_registry
@@ -22,21 +22,21 @@ When this happens, please refine your search and make sure that your resources h
 ### By Id
 ```hcl
 data "ionoscloud_container_registry" "example" {
-  id			= <registry_id>
+  id  = <registry_id>
 }
 ```
 
 ### By Name
 ```hcl
 data "ionoscloud_container_registry" "example" {
-  name			= "container-registry-example"
+  name  = "container-registry-example"
 }
 ```
 
 ### By Name with Partial Match
 ```hcl
 data "ionoscloud_container_registry" "example" {
-  name			= "-example"
+  name          = "-example"
   partial_match = true
 }
 ```

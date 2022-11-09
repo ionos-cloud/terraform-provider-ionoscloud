@@ -4,7 +4,7 @@ layout: "ionoscloud"
 page_title: "IonosCloud : ionoscloud_container_registry_token"
 sidebar_current: "docs-ionoscloud_container_registry_token"
 description: |-
-Get information on a Container Registry Token
+  Get information on a Container Registry Token
 ---
 
 # ionoscloud_container_registry_token
@@ -23,15 +23,15 @@ When this happens, please refine your search and make sure that your resources h
 ```hcl
 data "ionoscloud_container_registry_token" "example" {
   registry_id = ionoscloud_container_registry.example.id
-  id			= <token_id>
+  id          = <token_id>
 }
 ```
 
 ### By Name
 ```hcl
 data "ionoscloud_container_registry_token" "example" {
-  registry_id   = ionoscloud_container_registry.example.id
-  name			= "container-registry-token-example"
+  registry_id = ionoscloud_container_registry.example.id
+  name        = "container-registry-token-example"
 }
 ```
 
@@ -39,7 +39,7 @@ data "ionoscloud_container_registry_token" "example" {
 ```hcl
 data "ionoscloud_container_registry_token" "example" {
   registry_id   = ionoscloud_container_registry.example.id
-  name			= "-example"
+  name          = "-example"
   partial_match = true
 }
 ```
