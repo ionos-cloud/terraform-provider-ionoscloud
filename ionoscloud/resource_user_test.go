@@ -108,6 +108,15 @@ func TestAccUserBasic(t *testing.T) {
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttr(UserResource+"."+UserTestResource, "group_ids.#", "0")),
 			},
+			{
+				Config: testAccCheckNewUserGroup,
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttr(UserResource+"."+NewUserResource, "group_ids.#", "1"),
+					resource.TestCheckResourceAttr(DataSource+"."+UserResource+"."+UserDataSourceById, "groups.#", "1"),
+					resource.TestCheckTypeSetElemNestedAttrs(DataSource+"."+UserResource+"."+UserDataSourceById, "groups.*", map[string]string{
+						"name": "group1",
+					})),
+			},
 		},
 	})
 }
@@ -367,6 +376,35 @@ resource "ionoscloud_group" "group3" {
 
 data ` + UserResource + ` ` + UserDataSourceById + ` {
 	id = ionoscloud_user.` + UserTestResource + `.id
+}
+`
+
+// Test in which we create the user and in the same time we add the user to a specific group. The
+// difference between this test and the other group-related tests is that, for this test, the user
+// is new. For the other user-group-related tests, we are operating on a user that already exists.
+var testAccCheckNewUserGroup = `
+resource ` + UserResource + ` ` + NewUserResource + ` {
+ first_name 	= "` + NewUserName + `"
+ last_name 		= "` + NewUserName + `"
+ email 			= "` + utils.GenerateEmail() + `"
+ password 		= "abc123-321CBAupdated"
+ administrator  = false
+ force_sec_auth = false
+ active  		= false
+ group_ids 		= [ ionoscloud_group.group1.id]
+}
+
+resource "ionoscloud_group" "group1" {
+  name = "group1"
+  create_datacenter = true
+  create_snapshot = true
+  reserve_ip = true
+  access_activity_log = false
+  create_k8s_cluster = true
+}
+
+data ` + UserResource + ` ` + UserDataSourceById + ` {
+	id = ionoscloud_user.` + NewUserResource + `.id
 }
 `
 
