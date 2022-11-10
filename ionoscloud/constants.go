@@ -205,12 +205,14 @@ const (
 
 // Container Registry Constants
 const (
+	//ContainerRegistryTestResource needs to be with -, do not change
+	ContainerRegistryTestResource      = "test-container-registry"
+	ContainerRegistryTokenTestResource = "test-container-registry-token"
+
 	ContainerRegistryResource                  = "ionoscloud_container_registry"
-	ContainerRegistryTestResource              = "test_container_registry"
 	ContainerRegistryTestDataSourceById        = "test_container_registry_id"
 	ContainerRegistryTestDataSourceByName      = "test_container_registry_name"
 	ContainerRegistryTokenResource             = "ionoscloud_container_registry_token"
-	ContainerRegistryTokenTestResource         = "test_container_registry_token"
 	ContainerRegistryTokenTestDataSourceById   = "test_container_registry_token_id"
 	ContainerRegistryTokenTestDataSourceByName = "test_container_registry_token_name"
 	ContainerRegistryLocationsResource         = "ionoscloud_container_registry_locations"

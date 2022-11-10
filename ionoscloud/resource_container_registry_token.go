@@ -173,16 +173,11 @@ func resourceContainerRegistryTokenUpdate(ctx context.Context, d *schema.Resourc
 		return diag.FromErr(err)
 	}
 
-	registryTokenResponse, _, err := client.PatchToken(ctx, registryId, registryTokenId, *registryToken)
-
+	_, _, err = client.PatchToken(ctx, registryId, registryTokenId, *registryToken)
 	if err != nil {
 		diags := diag.FromErr(fmt.Errorf("an error occured while updating a registry token: %w", err))
 		return diags
 	}
-
-	d.SetId(*registryTokenResponse.Id)
-
-	//time.Sleep(utils.SleepInterval)
 
 	return resourceContainerRegistryTokenRead(ctx, d, meta)
 }

@@ -131,16 +131,11 @@ func resourceContainerRegistryUpdate(ctx context.Context, d *schema.ResourceData
 
 	registryId := d.Id()
 
-	containerRegistryResponse, _, err := client.PatchRegistry(ctx, registryId, *containerRegistry)
-
+	_, _, err := client.PatchRegistry(ctx, registryId, *containerRegistry)
 	if err != nil {
 		diags := diag.FromErr(fmt.Errorf("an error occured while updating a registry: %s", err))
 		return diags
 	}
-
-	d.SetId(*containerRegistryResponse.Id)
-
-	time.Sleep(utils.SleepInterval)
 
 	return resourceContainerRegistryRead(ctx, d, meta)
 }
