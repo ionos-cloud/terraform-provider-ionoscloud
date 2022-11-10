@@ -55,9 +55,24 @@ func TestAccContainerRegistryBasic(t *testing.T) {
 				),
 			},
 			{
+				Config: testAccDataSourceContainerRegistryMatchNameAndLocation,
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttrPair(DataSource+"."+ContainerRegistryResource+"."+ContainerRegistryTestDataSourceByName, "garbage_collection_schedule.0.time", ContainerRegistryResource+"."+ContainerRegistryTestResource, "garbage_collection_schedule.0.time"),
+					resource.TestCheckResourceAttrPair(DataSource+"."+ContainerRegistryResource+"."+ContainerRegistryTestDataSourceByName, "garbage_collection_schedule.0.days.0", ContainerRegistryResource+"."+ContainerRegistryTestResource, "garbage_collection_schedule.0.days.0"),
+					resource.TestCheckResourceAttrPair(DataSource+"."+ContainerRegistryResource+"."+ContainerRegistryTestDataSourceByName, "garbage_collection_schedule.0.days.1", ContainerRegistryResource+"."+ContainerRegistryTestResource, "garbage_collection_schedule.0.days.1"),
+					resource.TestCheckResourceAttrPair(DataSource+"."+ContainerRegistryResource+"."+ContainerRegistryTestDataSourceByName, "location", ContainerRegistryResource+"."+ContainerRegistryTestResource, "location"),
+					resource.TestCheckResourceAttrPair(DataSource+"."+ContainerRegistryResource+"."+ContainerRegistryTestDataSourceByName, "name", ContainerRegistryResource+"."+ContainerRegistryTestResource, "name"),
+				),
+			},
+			{
 				Config:      testAccDataSourceContainerRegistryWrongNameError,
 				ExpectError: regexp.MustCompile("no registry found with the specified criteria: name ="),
-			}, {
+			},
+			{
+				Config:      testAccDataSourceContainerRegistryWrongLocationErr,
+				ExpectError: regexp.MustCompile("no registry found with the specified criteria: location ="),
+			},
+			{
 				Config: testAccDataSourceContainerRegistryPartialMatchName,
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttrPair(DataSource+"."+ContainerRegistryResource+"."+ContainerRegistryTestDataSourceByName, "garbage_collection_schedule.0.time", ContainerRegistryResource+"."+ContainerRegistryTestResource, "garbage_collection_schedule.0.time"),
@@ -80,6 +95,14 @@ func TestAccContainerRegistryBasic(t *testing.T) {
 					resource.TestCheckResourceAttr(ContainerRegistryResource+"."+ContainerRegistryTestResource, "location", "de/fra"),
 					resource.TestCheckResourceAttr(ContainerRegistryResource+"."+ContainerRegistryTestResource, "name", ContainerRegistryTestResource),
 				),
+			},
+			{
+				Config:      testAccDataSourceCRTokenNameMultipleRegsFound,
+				ExpectError: regexp.MustCompile("more than one registry found with the specified criteria: name ="),
+			},
+			{
+				Config:      testAccDataSourceCRTokenLocationMultipleRegsFound,
+				ExpectError: regexp.MustCompile("more than one registry found with the specified criteria: name =  location = de/fra"),
 			},
 		},
 	})
@@ -182,12 +205,27 @@ data ` + ContainerRegistryResource + ` ` + ContainerRegistryTestDataSourceByName
 }
 `
 
+const testAccDataSourceContainerRegistryMatchNameAndLocation = testAccCheckContainerRegistryConfigBasic + `
+data ` + ContainerRegistryResource + ` ` + ContainerRegistryTestDataSourceByName + ` {
+  name	   = "` + ContainerRegistryTestResource + `"
+  location = "de/fra" 
+}
+`
+const testAccDataSourceContainerRegistryWrongIdError = testAccCheckContainerRegistryConfigBasic + `
+data ` + ContainerRegistryResource + ` ` + ContainerRegistryTestDataSourceByName + ` {
+  id	= "wrong_id"
+}
+`
 const testAccDataSourceContainerRegistryWrongNameError = testAccCheckContainerRegistryConfigBasic + `
 data ` + ContainerRegistryResource + ` ` + ContainerRegistryTestDataSourceByName + ` {
   name	= "wrong_name"
 }
 `
-
+const testAccDataSourceContainerRegistryWrongLocationErr = testAccCheckContainerRegistryConfigBasic + `
+data ` + ContainerRegistryResource + ` ` + ContainerRegistryTestDataSourceByName + ` {
+  location	= "de/txl"
+}
+`
 const testAccDataSourceContainerRegistryPartialMatchName = testAccCheckContainerRegistryConfigBasic + `
 data ` + ContainerRegistryResource + ` ` + ContainerRegistryTestDataSourceByName + ` {
   name	= "test"
@@ -199,5 +237,35 @@ const testAccDataSourceContainerRegistryWrongPartialNameError = testAccCheckCont
 data ` + ContainerRegistryResource + ` ` + ContainerRegistryTestDataSourceByName + ` {
   name	= "wrong_name"
   partial_match = true
+}
+`
+const testAccDataSourceCRTokenNameMultipleRegsFound = testAccCheckContainerRegistryConfigBasic + `
+resource ` + ContainerRegistryResource + ` ` + ContainerRegistryTestResource + `1 {
+   garbage_collection_schedule {
+    days			 = ["Monday", "Tuesday"]
+    time             = "05:19:00+00:00"
+  }
+  location           = "de/fra"
+  name		         = "` + ContainerRegistryTestResource + `1"
+}
+data ` + ContainerRegistryResource + ` ` + ContainerRegistryTestDataSourceByName + ` {
+depends_on = [ ` + ContainerRegistryResource + `.` + ContainerRegistryTestResource + `]
+  partial_match = true
+  name	= "` + ContainerRegistryTestResource + `"
+}
+`
+
+const testAccDataSourceCRTokenLocationMultipleRegsFound = testAccCheckContainerRegistryConfigBasic + `
+resource ` + ContainerRegistryResource + ` ` + ContainerRegistryTestResource + `1 {
+   garbage_collection_schedule {
+    days			 = ["Monday", "Tuesday"]
+    time             = "05:19:00+00:00"
+  }
+  location           = "de/fra"
+  name		         = "` + ContainerRegistryTestResource + `1"
+}
+data ` + ContainerRegistryResource + ` ` + ContainerRegistryTestDataSourceByName + ` {
+depends_on = [ ` + ContainerRegistryResource + `.` + ContainerRegistryTestResource + `]
+  location	= "de/fra"
 }
 `

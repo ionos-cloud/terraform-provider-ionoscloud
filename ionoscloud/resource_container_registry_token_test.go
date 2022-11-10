@@ -61,7 +61,8 @@ func TestAccContainerRegistryTokenBasic(t *testing.T) {
 			{
 				Config:      testAccDataSourceContainerRegistryTokenWrongNameError,
 				ExpectError: regexp.MustCompile("no token found with the specified name"),
-			}, {
+			},
+			{
 				Config: testAccDataSourceContainerRegistryTokenPartialMatchName,
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttrPair(DataSource+"."+ContainerRegistryTokenResource+"."+ContainerRegistryTokenTestDataSourceByName, "expiry_date", ContainerRegistryTokenResource+"."+ContainerRegistryTokenTestResource, "expiry_date"),
@@ -90,6 +91,10 @@ func TestAccContainerRegistryTokenBasic(t *testing.T) {
 					resource.TestCheckResourceAttr(ContainerRegistryTokenResource+"."+ContainerRegistryTokenTestResource, "scopes.1.type", "backup"),
 					resource.TestCheckResourceAttr(ContainerRegistryTokenResource+"."+ContainerRegistryTokenTestResource, "status", "disabled"),
 					resource.TestCheckResourceAttr(ContainerRegistryTokenResource+"."+ContainerRegistryTokenTestResource, "name", ContainerRegistryTokenTestResource)),
+			},
+			{
+				Config:      testAccDataSourceContainerRegistryTokenMultipleTokensFound,
+				ExpectError: regexp.MustCompile("more than one registry found with the specified criteria"),
 			},
 		},
 	})
@@ -211,6 +216,14 @@ data ` + ContainerRegistryTokenResource + ` ` + ContainerRegistryTokenTestDataSo
 }
 `
 
+const testAccDataSourceContainerRegistryTokenMatchNameAndLocation = testAccCheckContainerRegistryTokenConfigBasic + `
+data ` + ContainerRegistryTokenResource + ` ` + ContainerRegistryTokenTestDataSourceByName + ` {
+  location = "` + ContainerRegistryTokenResource + `.` + ContainerRegistryTestResource + `.location
+  name	= "` + ContainerRegistryTokenTestResource + `"
+  registry_id        = ` + ContainerRegistryResource + `.` + ContainerRegistryTestResource + `.id
+}
+`
+
 const testAccDataSourceContainerRegistryTokenWrongNameError = testAccCheckContainerRegistryTokenConfigBasic + `
 data ` + ContainerRegistryTokenResource + ` ` + ContainerRegistryTokenTestDataSourceByName + ` {
   name	= "wrong_name"
@@ -229,6 +242,26 @@ data ` + ContainerRegistryTokenResource + ` ` + ContainerRegistryTokenTestDataSo
 const testAccDataSourceContainerRegistryTokenWrongPartialNameError = testAccCheckContainerRegistryTokenConfigBasic + `
 data ` + ContainerRegistryTokenResource + ` ` + ContainerRegistryTokenTestDataSourceByName + ` {
   name	= "wrong_name"
+  partial_match = true
+  registry_id        = ` + ContainerRegistryResource + `.` + ContainerRegistryTestResource + `.id
+}
+`
+
+const testAccDataSourceContainerRegistryTokenMultipleTokensFound = testAccCheckContainerRegistryTokenConfigBasic + `
+resource ` + ContainerRegistryTokenResource + ` ` + ContainerRegistryTokenTestResource + `1 {
+  expiry_date        = "2023-01-13 16:27:42Z"
+  name				 = "` + ContainerRegistryTokenTestResource + `1"
+  scopes  {
+    actions			 = ["push"]
+    name             = "Scope1"
+    type             = "repository"
+  }
+  status	         = "enabled"
+  registry_id        = ` + ContainerRegistryResource + `.` + ContainerRegistryTestResource + `.id
+  save_password_to_file = "` + testFileName + `"
+}
+data ` + ContainerRegistryTokenResource + ` ` + ContainerRegistryTokenTestDataSourceByName + ` {
+  name	= "` + ContainerRegistryTokenTestResource + `"
   partial_match = true
   registry_id        = ` + ContainerRegistryResource + `.` + ContainerRegistryTestResource + `.id
 }
