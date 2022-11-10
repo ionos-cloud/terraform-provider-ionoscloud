@@ -139,10 +139,6 @@ func GetRegistryDataUpdate(d *schema.ResourceData) *cr.PatchRegistryInput {
 		registry.GarbageCollectionSchedule = GetWeeklySchedule(d, "garbage_collection_schedule")
 	}
 
-	//if _, ok := d.GetOk("maintenance_window"); ok {
-	//	registry.MaintenanceWindow = GetWeeklySchedule(d, "maintenance_window")
-	//}
-
 	return &registry
 }
 

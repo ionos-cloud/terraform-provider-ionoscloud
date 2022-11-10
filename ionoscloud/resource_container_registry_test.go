@@ -56,7 +56,7 @@ func TestAccContainerRegistryBasic(t *testing.T) {
 			},
 			{
 				Config:      testAccDataSourceContainerRegistryWrongNameError,
-				ExpectError: regexp.MustCompile("no registry found with the specified criteria"),
+				ExpectError: regexp.MustCompile("no registry found with the specified criteria: name ="),
 			}, {
 				Config: testAccDataSourceContainerRegistryPartialMatchName,
 				Check: resource.ComposeTestCheckFunc(
@@ -69,7 +69,7 @@ func TestAccContainerRegistryBasic(t *testing.T) {
 			},
 			{
 				Config:      testAccDataSourceContainerRegistryWrongPartialNameError,
-				ExpectError: regexp.MustCompile("no registry found with the specified criteria"),
+				ExpectError: regexp.MustCompile("no registry found with the specified criteria: name ="),
 			},
 			{
 				Config: testAccCheckContainerRegistryConfigUpdate,
