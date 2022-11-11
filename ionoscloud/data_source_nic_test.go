@@ -10,7 +10,7 @@ import (
 	"testing"
 )
 
-//unit test
+// unit test
 func Test_dataSourceNicRead(t *testing.T) {
 	id := "id"
 	mac := "testMac"

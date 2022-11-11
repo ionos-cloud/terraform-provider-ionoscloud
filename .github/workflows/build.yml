@@ -19,3 +19,10 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}  # Needed to get PR information, if any
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+      - name: Check code is formatted
+        run: |
+          if [ "$(gofmt -s -l . | wc -l)" -gt 0 ]; then
+            echo "Found code needing formating, please run gofmt -s -w before creating the PR"
+            exit 1;
+          fi
+        if: matrix.os == 'ubuntu-latest'

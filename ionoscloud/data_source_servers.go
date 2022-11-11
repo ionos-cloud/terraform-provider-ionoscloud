@@ -302,7 +302,7 @@ func dataSourceServersRead(ctx context.Context, d *schema.ResourceData, meta int
 	return nil
 }
 
-//setVolumePropertiesToSlice returns a slice of volumes
+// setVolumePropertiesToSlice returns a slice of volumes
 func setVolumePropertiesToSlice(volumesList []ionoscloud.Volume) []interface{} {
 	var volumes []interface{}
 	if volumesList != nil && len(volumesList) > 0 {
