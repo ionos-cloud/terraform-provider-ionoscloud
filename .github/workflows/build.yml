@@ -1,4 +1,4 @@
-name: Build
+name: Sonarcloud and gofmt
 on:
   push:
     branches:
@@ -19,9 +19,10 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}  # Needed to get PR information, if any
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
-      - name: Check code is formatted
+      - name: Check code is formatted properly
         run: |
-          if [ "$(gofmt -s -l . | wc -l)" -gt 0 ]; then
-            echo "Found code needing formating, please run gofmt -s -w before creating the PR"
+          if [ "$(gofmt -l -s . | grep -v vendor | wc -l)" -gt 0 ]; then
+            echo "Found code in need of formatting, please run 'gofmt -s -w' before creating the PR on the files below"
+            gofmt -l -s . | grep -v vendor
             exit 1;
           fi
