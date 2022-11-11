@@ -8,6 +8,7 @@ import (
 	"net"
 	"net/http"
 	"strings"
+	"time"
 )
 
 func convertSlice(slice []interface{}) []string {
@@ -57,6 +58,18 @@ func DiffCidr(_, old, new string, _ *schema.ResourceData) bool {
 	newIp := net.ParseIP(new)
 	// if new is an ip and old is a cidr, suppress
 	if err == nil && newIp != nil && oldIp != nil && newIp.Equal(oldIp) {
+		return true
+	}
+	return false
+}
+
+//DiffExpiryDate terraform suppress differences between layout and default +0000 UTC time format
+func DiffExpiryDate(_, old, new string, _ *schema.ResourceData) bool {
+	layout := "2006-01-02 15:04:05Z"
+	oldTimeString := strings.Split(old, " +")
+	oldTime, oldTimeErr := time.Parse(layout, oldTimeString[0]+"Z")
+	newTime, newTimeErr := time.Parse(layout, new)
+	if oldTimeErr == nil && newTimeErr == nil && newTime.Equal(oldTime) {
 		return true
 	}
 	return false

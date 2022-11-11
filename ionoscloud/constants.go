@@ -169,7 +169,7 @@ const (
 	UserDataSourceByName = "test_user_name"
 )
 
-//Ip Block constants
+// Ip Block constants
 const (
 	IpBlockResource           = "ionoscloud_ipblock"
 	IpBlockTestResource       = "test_ip_block"
@@ -207,6 +207,22 @@ const (
 	DBaasMongoUserResource    = "ionoscloud_mongo_user"
 )
 
+// Container Registry Constants
+const (
+	//ContainerRegistryTestResource needs to be with -, do not change
+	ContainerRegistryTestResource      = "test-container-registry"
+	ContainerRegistryTokenTestResource = "test-container-registry-token"
+
+	ContainerRegistryResource                  = "ionoscloud_container_registry"
+	ContainerRegistryTestDataSourceById        = "test_container_registry_id"
+	ContainerRegistryTestDataSourceByName      = "test_container_registry_name"
+	ContainerRegistryTokenResource             = "ionoscloud_container_registry_token"
+	ContainerRegistryTokenTestDataSourceById   = "test_container_registry_token_id"
+	ContainerRegistryTokenTestDataSourceByName = "test_container_registry_token_name"
+	ContainerRegistryLocationsResource         = "ionoscloud_container_registry_locations"
+	ContainerRegistryLocationsTest             = "test_container_registry_locations"
+)
+
 const (
 	ShareResource         = "ionoscloud_share"
 	shareResourceFullName = ShareResource + "." + sourceShareName
@@ -240,4 +256,5 @@ const (
 	psqlClient
 	certManagerClient
 	mongoClient
+	containerRegistryClient
 )

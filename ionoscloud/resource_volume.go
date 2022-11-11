@@ -900,7 +900,7 @@ func getImageAlias(ctx context.Context, client *ionoscloud.APIClient, imageAlias
 	return ""
 }
 
-//todo : replace this with getImage
+// todo : replace this with getImage
 func checkImage(ctx context.Context, client *ionoscloud.APIClient, imageInput, imagePassword, licenceType, dcId string, sshKeyPath []interface{}) (image, imageAlias string, isSnapshot bool, diags diag.Diagnostics) {
 	isSnapshot = false
 

@@ -3,20 +3,21 @@ package ionoscloud
 import (
 	"context"
 	"fmt"
-	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
-	"github.com/hashicorp/terraform-plugin-sdk/v2/meta"
-	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/cert"
-	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils"
 	"log"
 	"net/http"
 	"os"
 	"runtime"
 	"time"
 
+	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/meta"
 	"github.com/ionos-cloud/sdk-go/v6"
+	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/cert"
+	crService "github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/container-registry"
 	dbaasService "github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/dbaas"
+	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils"
 )
 
 var Version = "DEV"
@@ -26,6 +27,16 @@ type SdkBundle struct {
 	PsqlClient        *dbaasService.PsqlClient
 	MongoClient       *dbaasService.MongoClient
 	CertManagerClient *cert.Client
+	ContainerClient   *crService.Client
+}
+
+type ClientOptions struct {
+	Username         string
+	Password         string
+	Token            string
+	Url              string
+	Version          string
+	TerraformVersion string
 }
 
 // Provider returns a schema.Provider for ionoscloud
@@ -94,6 +105,8 @@ func Provider() *schema.Provider {
 			ALBForwardingRuleResource:                 resourceApplicationLoadBalancerForwardingRule(),
 			TargetGroupResource:                       resourceTargetGroup(),
 			CertificateResource:                       resourceCertificateManager(),
+			ContainerRegistryResource:                 resourceContainerRegistry(),
+			ContainerRegistryTokenResource:            resourceContainerRegistryToken(),
 		},
 		DataSourcesMap: map[string]*schema.Resource{
 			DatacenterResource:                        dataSourceDataCenter(),
@@ -133,6 +146,9 @@ func Provider() *schema.Provider {
 			TargetGroupResource:                       dataSourceTargetGroup(),
 			DBaasMongoUserResource:                    dataSourceDbaasMongoUser(),
 			CertificateResource:                       dataSourceCertificate(),
+			ContainerRegistryResource:                 dataSourceContainerRegistry(),
+			ContainerRegistryTokenResource:            dataSourceContainerRegistryToken(),
+			ContainerRegistryLocationsResource:        dataSourceContainerRegistryLocations(),
 		},
 	}
 
@@ -156,6 +172,7 @@ func Provider() *schema.Provider {
 
 func providerConfigure(d *schema.ResourceData, terraformVersion string) (interface{}, diag.Diagnostics) {
 
+	var clientOpts ClientOptions
 	username, usernameOk := d.GetOk("username")
 	password, passwordOk := d.GetOk("password")
 	token, tokenOk := d.GetOk("token")
@@ -173,11 +190,19 @@ func providerConfigure(d *schema.ResourceData, terraformVersion string) (interfa
 	}
 
 	cleanedUrl := cleanURL(d.Get("endpoint").(string))
+	clientOpts.Username = username.(string)
+	clientOpts.Password = password.(string)
+	clientOpts.Token = token.(string)
+	clientOpts.Url = cleanedUrl
+	clientOpts.Version = ionoscloud.Version
+	clientOpts.TerraformVersion = terraformVersion
+
 	clients := map[clientType]interface{}{
-		ionosClient:       NewClientByType(username.(string), password.(string), token.(string), cleanedUrl, ionosClient),
-		psqlClient:        NewClientByType(username.(string), password.(string), token.(string), cleanedUrl, psqlClient),
-		certManagerClient: NewClientByType(username.(string), password.(string), token.(string), cleanedUrl, certManagerClient),
-		mongoClient:       NewClientByType(username.(string), password.(string), token.(string), cleanedUrl, mongoClient),
+		ionosClient:             NewClientByType(clientOpts, ionosClient),
+		psqlClient:              NewClientByType(clientOpts, psqlClient),
+		certManagerClient:       NewClientByType(clientOpts, certManagerClient),
+		mongoClient:             NewClientByType(clientOpts, mongoClient),
+		containerRegistryClient: NewClientByType(clientOpts, containerRegistryClient),
 	}
 
 	apiClient := clients[ionosClient].(*ionoscloud.APIClient)
@@ -190,14 +215,15 @@ func providerConfigure(d *schema.ResourceData, terraformVersion string) (interfa
 		PsqlClient:        clients[psqlClient].(*dbaasService.PsqlClient),
 		MongoClient:       clients[mongoClient].(*dbaasService.MongoClient),
 		CertManagerClient: clients[certManagerClient].(*cert.Client),
+		ContainerClient:   clients[containerRegistryClient].(*crService.Client),
 	}, nil
 }
 
-func NewClientByType(username, password, token, url string, clientType clientType) interface{} {
+func NewClientByType(clientOpts ClientOptions, clientType clientType) interface{} {
 	switch clientType {
 	case ionosClient:
 		{
-			newConfig := ionoscloud.NewConfiguration(username, password, token, url)
+			newConfig := ionoscloud.NewConfiguration(clientOpts.Username, clientOpts.Password, clientOpts.Token, clientOpts.Url)
 
 			if os.Getenv(utils.IonosDebug) != "" {
 				newConfig.Debug = true
@@ -208,11 +234,13 @@ func NewClientByType(username, password, token, url string, clientType clientTyp
 			return ionoscloud.NewAPIClient(newConfig)
 		}
 	case psqlClient:
-		return dbaasService.NewPsqlClientService(username, password, token, url).Get()
+		return dbaasService.NewPsqlClientService(clientOpts.Username, clientOpts.Password, clientOpts.Token, clientOpts.Url, clientOpts.Version, clientOpts.Username).Get()
 	case mongoClient:
-		return dbaasService.NewMongoClientService(username, password, token, url).Get()
+		return dbaasService.NewMongoClientService(clientOpts.Username, clientOpts.Password, clientOpts.Token, clientOpts.Url, clientOpts.Version, clientOpts.TerraformVersion).Get()
 	case certManagerClient:
-		return cert.NewClientService(username, password, token, url).Get()
+		return cert.NewClientService(clientOpts.Username, clientOpts.Password, clientOpts.Token, clientOpts.Url, clientOpts.Version, clientOpts.TerraformVersion).Get()
+	case containerRegistryClient:
+		return crService.NewClientService(clientOpts.Username, clientOpts.Password, clientOpts.Token, clientOpts.Url, clientOpts.Version, clientOpts.TerraformVersion).Get()
 	default:
 		log.Fatalf("[ERROR] unknown client type %d", clientType)
 	}
