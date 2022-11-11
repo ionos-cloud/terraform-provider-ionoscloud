@@ -21,9 +21,8 @@ jobs:
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
       - name: Check code is formatted properly
         run: |
-          UNFORMATTED_FILES=$(find . -not -path "./vendor/*" -name "*.go" | xargs gofmt -s -l)
-          if [ "$(UNFORMATTED_FILES | wc -l)" -gt 0 ]; then
+          if [ "$(find . -not -path "./vendor/*" -name "*.go" | xargs gofmt -s -l | wc -l)" -gt 0 ]; then
             echo "Found code in need of formatting, please run 'gofmt -s -w' before creating the PR on the files below"
-            gofmt -l -s . | grep -v vendor
+            find . -not -path "./vendor/*" -name "*.go" | xargs gofmt -s -l
             exit 1;
           fi
