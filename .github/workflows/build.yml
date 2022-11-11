@@ -19,6 +19,11 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}  # Needed to get PR information, if any
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+  gofmt:
+    name: "Run gofmt check"
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
       - name: Check code is formatted properly
         uses: Jerome1337/gofmt-action@v1.0.4
         with:
