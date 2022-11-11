@@ -25,4 +25,3 @@ jobs:
             echo "Found code needing formating, please run gofmt -s -w before creating the PR"
             exit 1;
           fi
-        if: matrix.os == 'ubuntu-latest'
