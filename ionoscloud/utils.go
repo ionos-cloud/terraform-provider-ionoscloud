@@ -52,7 +52,7 @@ func DiffBasedOnVersion(_, old, new string, _ *schema.ResourceData) bool {
 	return false
 }
 
-//DiffCidr terraform suppress differences between ip and cidr
+// DiffCidr terraform suppress differences between ip and cidr
 func DiffCidr(_, old, new string, _ *schema.ResourceData) bool {
 	oldIp, _, err := net.ParseCIDR(old)
 	newIp := net.ParseIP(new)
@@ -63,7 +63,7 @@ func DiffCidr(_, old, new string, _ *schema.ResourceData) bool {
 	return false
 }
 
-//DiffExpiryDate terraform suppress differences between layout and default +0000 UTC time format
+// DiffExpiryDate terraform suppress differences between layout and default +0000 UTC time format
 func DiffExpiryDate(_, old, new string, _ *schema.ResourceData) bool {
 	layout := "2006-01-02 15:04:05Z"
 	oldTimeString := strings.Split(old, " +")
@@ -107,7 +107,7 @@ func httpNotFound(resp *ionoscloud.APIResponse) bool {
 	return false
 }
 
-//used for the datasource, when the nic is a member of the server object
+// used for the datasource, when the nic is a member of the server object
 var nicServerDSResource = &schema.Resource{
 	Schema: map[string]*schema.Schema{
 		"id": {
@@ -161,7 +161,7 @@ var nicServerDSResource = &schema.Resource{
 	},
 }
 
-//used for the datasource, when the firewall is a member of the server object
+// used for the datasource, when the firewall is a member of the server object
 var firewallServerDSResource = &schema.Resource{
 	Schema: map[string]*schema.Schema{
 		"id": {
@@ -211,7 +211,7 @@ var firewallServerDSResource = &schema.Resource{
 	},
 }
 
-//used for the datasource, when the cdrom is a member of the server object
+// used for the datasource, when the cdrom is a member of the server object
 var cdromsServerDSResource = &schema.Resource{
 	Schema: map[string]*schema.Schema{
 		"id": {
