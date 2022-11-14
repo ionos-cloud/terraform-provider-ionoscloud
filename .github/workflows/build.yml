@@ -23,7 +23,17 @@ jobs:
     name: "Run gofmt check"
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v3
+      -
+        name: Checkout
+        uses: actions/checkout@v3
+      -
+        name: Unshallow
+        run: git fetch --prune --unshallow
+      -
+        name: Set up Go
+        uses: actions/setup-go@v3
+        with:
+          go-version-file: 'go.mod'
       - name: Check code is formatted properly
         uses: Jerome1337/gofmt-action@v1.0.4
         with:
