@@ -637,20 +637,6 @@ func resourceServerRead(ctx context.Context, d *schema.ResourceData, meta interf
 		return diag.FromErr(err)
 	}
 
-	// Fetch the labels for this server.
-	labelsResponse, apiResponse, err := client.LabelsApi.DatacentersServersLabelsGet(ctx, dcId, serverId).Depth(1).Execute()
-	logApiRequestTime(apiResponse)
-	if err != nil {
-		return diag.FromErr(fmt.Errorf("error occured while fetching labels for server ID: %s, datacenter ID: %s", serverId, dcId))
-	}
-	labels, err := processLabelsData(labelsResponse)
-	if err != nil {
-		return diag.FromErr(err)
-	}
-
-	if err := d.Set("label", labels); err != nil {
-		return diag.FromErr(err)
-	}
 	return nil
 }
 
@@ -1398,6 +1384,21 @@ func setResourceServerData(ctx context.Context, client *ionoscloud.APIClient, d 
 			return fmt.Errorf("error settings nics %w", err)
 		}
 	}
+
+	// Fetch the labels for this server.
+	labelsResponse, apiResponse, err := client.LabelsApi.DatacentersServersLabelsGet(ctx, datacenterId, d.Id()).Depth(1).Execute()
+	logApiRequestTime(apiResponse)
+	if err != nil {
+		return fmt.Errorf("error occured while fetching labels for server with ID: %s, datacenter ID: %s", d.Id(), datacenterId)
+	}
+	labels, err := processLabelsData(labelsResponse)
+	if err != nil {
+		return err
+	}
+	if err := d.Set("label", labels); err != nil {
+		return err
+	}
+
 	//if token != nil {
 	//	if err := d.Set("token", *token.Token); err != nil {
 	//		return err
