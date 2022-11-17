@@ -77,12 +77,12 @@ func dataSourceDbaasMongoCluster() *schema.Resource {
 							Computed:    true,
 						},
 						"cidr_list": {
-							Type: schema.TypeList,
-							Description: "The list of IPs and subnet for your cluster.\n          Note the following unavailable IP ranges:\n          10.233.64.0/18\n          10.233.0.0/18\n          10.233.114.0/24 		\n example: [192.168.1.100/24, 192.168.1.101/24]",
+							Type:     schema.TypeList,
 							Computed: true,
 							Elem: &schema.Schema{
 								Type: schema.TypeString,
 							},
+							Description: "The list of IPs and subnet for your cluster.\n          Note the following unavailable IP ranges:\n          10.233.64.0/18\n          10.233.0.0/18\n          10.233.114.0/24 		\n example: [192.168.1.100/24, 192.168.1.101/24]",
 						},
 					},
 				},

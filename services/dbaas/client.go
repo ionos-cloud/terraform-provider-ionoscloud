@@ -1,11 +1,14 @@
 package dbaas
 
 import (
+	"fmt"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/meta"
 	mongo "github.com/ionos-cloud/sdk-go-dbaas-mongo"
 	psql "github.com/ionos-cloud/sdk-go-dbaas-postgres"
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils"
 	"net/http"
 	"os"
+	"runtime"
 	"time"
 )
 
@@ -47,7 +50,7 @@ type mongoClientService struct {
 var _ PsqlClientService = &clientService{}
 var _ MongoClientService = &mongoClientService{}
 
-func NewPsqlClientService(username, password, token, url string) PsqlClientService {
+func NewPsqlClientService(username, password, token, url, version, terraformVersion string) PsqlClientService {
 	newConfigDbaas := psql.NewConfiguration(username, password, token, url)
 
 	if os.Getenv(utils.IonosDebug) != "" {
@@ -57,13 +60,16 @@ func NewPsqlClientService(username, password, token, url string) PsqlClientServi
 	newConfigDbaas.MaxWaitTime = 4 * time.Second
 
 	newConfigDbaas.HTTPClient = &http.Client{Transport: utils.CreateTransport()}
+	newConfigDbaas.UserAgent = fmt.Sprintf(
+		"terraform-provider/%s_ionos-cloud-sdk-go-dbaas-postgres/%s_hashicorp-terraform/%s_terraform-plugin-sdk/%s_os/%s_arch/%s",
+		version, psql.Version, terraformVersion, meta.SDKVersionString(), runtime.GOOS, runtime.GOARCH)
 
 	return &clientService{
 		client: psql.NewAPIClient(newConfigDbaas),
 	}
 }
 
-func NewMongoClientService(username, password, token, url string) MongoClientService {
+func NewMongoClientService(username, password, token, url, version, terraformVersion string) MongoClientService {
 	newConfigDbaas := mongo.NewConfiguration(username, password, token, url)
 
 	if os.Getenv("IONOS_DEBUG") != "" {
@@ -73,6 +79,9 @@ func NewMongoClientService(username, password, token, url string) MongoClientSer
 	newConfigDbaas.MaxWaitTime = 4 * time.Second
 
 	newConfigDbaas.HTTPClient = &http.Client{Transport: utils.CreateTransport()}
+	newConfigDbaas.UserAgent = fmt.Sprintf(
+		"terraform-provider/%s_ionos-cloud-sdk-go-dbaas-mongo/%s_hashicorp-terraform/%s_terraform-plugin-sdk/%s_os/%s_arch/%s",
+		version, mongo.Version, terraformVersion, meta.SDKVersionString(), runtime.GOOS, runtime.GOARCH)
 
 	return &mongoClientService{
 		client: mongo.NewAPIClient(newConfigDbaas),

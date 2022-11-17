@@ -288,7 +288,6 @@ resource ` + VolumeResource + ` ` + VolumeTestResource + ` {
 
 }`
 
-//ubuntu-21.10-server-cloudimg-amd64-20220201
 const testAccCheckVolumeConfigUpdate = testAccCheckLanConfigBasic + `
 resource ` + ServerResource + ` ` + ServerTestResource + `updated {
   name = "` + ServerTestResource + `"

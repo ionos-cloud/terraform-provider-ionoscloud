@@ -10,7 +10,7 @@ import (
 	"testing"
 )
 
-//mocked server, that responds with jsonResponse to whatever we send to it
+// mocked server, that responds with jsonResponse to whatever we send to it
 func createMockServer(jsonResponse string) *httptest.Server {
 	ts := httptest.NewTLSServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		w.Header().Set("Content-Type", "application/json")
@@ -22,7 +22,7 @@ func createMockServer(jsonResponse string) *httptest.Server {
 	return ts
 }
 
-//we need to connect the mocked server to our httpClient, so we inject a mocked client into cfg
+// we need to connect the mocked server to our httpClient, so we inject a mocked client into cfg
 func getMockedClient(jsonResponse string) interface{} {
 	ts := createMockServer(jsonResponse)
 

@@ -1,6 +1,18 @@
 ## 6.3.3
+### Feature
+- New Product: **ContainerRegistry**:
+  - `Resources`:
+    - [ionoscloud_container_registry](docs/resources/container_registry.md)
+    - [ionoscloud_container_registry_token](docs/resources/container_registry_token.md)
+  - `Data Sources`:
+    - [ionoscloud_container_registry](docs/data-sources/container_registry.md)
+    - [ionoscloud_container_registry_token](docs/data-sources/container_registry_token.md)
+    - [ionoscloud_container_registry_locations](docs/data-sources/container_registry_locations.md)
+     
+⚠️ **Note:** Container Registry is currently in the Early Access (EA) phase. We recommend keeping usage and testing to non-production critical applications.
+Please contact your sales representative or support for more information.
 ### Fixes
-- Fixes #326, now removing a s3_buckets block from an ionoscloud_k8s_cluster resource now trigger a change in terraform plan.
+- Fixes #326, removing a s3_buckets block from an `ionoscloud_k8s_cluster` resource will now trigger a change in terraform plan.
 
 ## 6.3.2
 ### Feature
