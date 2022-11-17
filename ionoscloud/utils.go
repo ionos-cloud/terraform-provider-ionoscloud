@@ -327,8 +327,12 @@ func getLabels(labelsData interface{}) []map[string]string {
 				labelValue := labelData["value"].(string)
 				label := map[string]string{"key": labelKey, "value": labelValue}
 				labels = append(labels, label)
+			} else {
+				log.Printf("[WARNING] couldn't convert the labels data to a format that can be used for API requests\n")
 			}
 		}
+	} else {
+		log.Printf("[WARNING] couldn't convert the labels data to a format that can be used for API requests\n")
 	}
 	return labels
 }
