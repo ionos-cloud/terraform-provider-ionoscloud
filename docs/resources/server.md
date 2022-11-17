@@ -143,12 +143,14 @@ resource "ionoscloud_server" "example" {
 - `primary_ip` - (Computed) The associated IP address.
 - `firewallrule_id` - (Computed) The associated firewall rule.
 - `ssh_key_path` - (Optional)[list] List of paths to files containing a public SSH key that will be injected into IonosCloud provided Linux images.  Also accepts ssh keys directly. Required for IonosCloud Linux images. Required if `image_password` is not provided.
+- `ssh_keys` - (Optional)[list] List of paths to files containing a public SSH key that will be injected into IonosCloud provided Linux images.  Also accepts ssh keys directly. Required for IonosCloud Linux images. Required if `image_password` is not provided.
 - `image_password` - (Optional)[string] Required if `ssh_key_path` is not provided.
 - `type` - (Optional)[string] Server usages: [ENTERPRISE](https://docs.ionos.com/cloud/compute-engine/virtual-servers/virtual-servers) or [CUBE](https://docs.ionos.com/cloud/compute-engine/virtual-servers/cloud-cubes). This property is immutable.
 
 > **⚠ WARNING** 
 > 
 > Image_name under volume level is deprecated, please use image_name under server level
+> ssh_key_path and ssh_keys fields are immutable.
 
 
 > **⚠ WARNING**

@@ -115,10 +115,20 @@ func resourceServer() *schema.Resource {
 			"ssh_key_path": {
 				Type:          schema.TypeList,
 				Elem:          &schema.Schema{Type: schema.TypeString},
-				ConflictsWith: []string{"volume.0.ssh_key_path"},
+				ConflictsWith: []string{"volume.0.ssh_key_path", "ssh_keys"},
 				Optional:      true,
 				Computed:      true,
-				Deprecated:    "Will be renamed to ssk_keys in the future, to allow users to set both the ssh key path or directly the ssh key",
+				ForceNew:      true,
+				Deprecated:    "Will be renamed to ssh_keys in the future, to allow users to set both the ssh key path or directly the ssh key",
+			},
+			"ssh_keys": {
+				Type:          schema.TypeList,
+				Elem:          &schema.Schema{Type: schema.TypeString},
+				ConflictsWith: []string{"volume.0.ssh_key_path", "ssh_key_path"},
+				Optional:      true,
+				Computed:      true,
+				ForceNew:      true,
+				Description:   "Public SSH keys are set on the image as authorized keys for appropriate SSH login to the instance using the corresponding private key. This field may only be set in creation requests. When reading, it always returns null. SSH keys are only supported if a public Linux image is used for the volume creation.",
 			},
 			"volume": {
 				Type:     schema.TypeList,
@@ -160,15 +170,48 @@ func resourceServer() *schema.Resource {
 							Optional:   true,
 							Deprecated: "Please use ssh_key_path under server level",
 							Computed:   true,
+							ForceNew:   true,
 							DiffSuppressFunc: func(k, old, new string, d *schema.ResourceData) bool {
 								if k == "volume.0.ssh_key_path.#" {
 									if d.Get("ssh_key_path.#") == new {
 										return true
 									}
+									//if d.Get("ssh_keys.#") == new {
+									//	return true
+									//}
 								}
 
 								sshKeyPath := d.Get("volume.0.ssh_key_path").([]interface{})
 								oldSshKeyPath := d.Get("ssh_key_path").([]interface{})
+								//oldSshKeys := d.Get("ssh_keys").([]interface{})
+
+								difKeypath := utils.DiffSlice(convertSlice(sshKeyPath), convertSlice(oldSshKeyPath))
+								//difKeys := utils.DiffSlice(convertSlice(sshKeyPath), convertSlice(oldSshKeys))
+								//if len(difKeys) == 0 {
+								//	return true
+								//}
+								if len(difKeypath) == 0 {
+									return true
+								}
+
+								return false
+							},
+						},
+						"ssh_keys": {
+							Type:       schema.TypeList,
+							Elem:       &schema.Schema{Type: schema.TypeString},
+							Optional:   true,
+							Deprecated: "Please use ssh_keys under server level",
+							Computed:   true,
+							DiffSuppressFunc: func(k, old, new string, d *schema.ResourceData) bool {
+								if k == "volume.0.ssh_keys.#" {
+									if d.Get("ssh_keys.#") == new {
+										return true
+									}
+								}
+
+								sshKeyPath := d.Get("volume.0.ssh_keys").([]interface{})
+								oldSshKeyPath := d.Get("ssh_keys").([]interface{})
 
 								if len(utils.DiffSlice(convertSlice(sshKeyPath), convertSlice(oldSshKeyPath))) == 0 {
 									return true
@@ -398,6 +441,7 @@ func checkServerImmutableFields(_ context.Context, diff *schema.ResourceDiff, _ 
 	return nil
 
 }
+
 func resourceServerCreate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	client := meta.(SdkBundle).CloudApiClient
 
@@ -673,7 +717,7 @@ func SetVolumeProperties(volume ionoscloud.Volume) map[string]interface{} {
 			for _, sshKey := range *volume.Properties.SshKeys {
 				sshKeys = append(sshKeys, sshKey)
 			}
-			volumeMap["ssh_keys"] = sshKeys
+			volumeMap["ssh_keys"] = sshKeys //////////////////////////////////////////////////////
 		}
 
 		utils.SetPropWithNilCheck(volumeMap, "image_password", volume.Properties.ImagePassword)

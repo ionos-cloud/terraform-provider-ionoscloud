@@ -122,6 +122,7 @@ resource "ionoscloud_volume" "example" {
 * `boot_server` - (Computed)[string] The UUID of the attached server.
 > **⚠ WARNING**
 >
+> ssh_key_path and ssh_keys fields are immutable.
 > If you want to create a **CUBE** server, the type of the inline volume must be set to **DAS**. In this case, you can not set the `size` argument since it is taken from the `template_uuid` you set in the server.
 
 
