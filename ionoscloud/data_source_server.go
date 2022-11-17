@@ -178,6 +178,11 @@ func dataSourceServer() *schema.Resource {
 				Computed: true,
 				Elem:     nicServerDSResource,
 			},
+			"labels": {
+				Type:     schema.TypeList,
+				Computed: true,
+				Elem:     labelDataSource,
+			},
 		},
 		Timeouts: &resourceDefaultTimeouts,
 	}
@@ -486,6 +491,20 @@ func dataSourceServerRead(ctx context.Context, d *schema.ResourceData, meta inte
 	}
 
 	if err = setServerData(d, &server, &token); err != nil {
+		return diag.FromErr(err)
+	}
+
+	// Labels logic
+	labelsResponse, apiResponse, err := client.LabelsApi.DatacentersServersLabelsGet(ctx, datacenterId.(string), d.Id()).Depth(1).Execute()
+	logApiRequestTime(apiResponse)
+	if err != nil {
+		return diag.FromErr(fmt.Errorf("error occured while fetching labels for server with ID: %s, datacenter ID: %s", d.Id(), datacenterId.(string)))
+	}
+	labels, err := processLabelsData(labelsResponse, true)
+	if err != nil {
+		return diag.FromErr(err)
+	}
+	if err := d.Set("labels", labels); err != nil {
 		return diag.FromErr(err)
 	}
 

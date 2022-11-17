@@ -1391,7 +1391,7 @@ func setResourceServerData(ctx context.Context, client *ionoscloud.APIClient, d 
 	if err != nil {
 		return fmt.Errorf("error occured while fetching labels for server with ID: %s, datacenter ID: %s", d.Id(), datacenterId)
 	}
-	labels, err := processLabelsData(labelsResponse)
+	labels, err := processLabelsData(labelsResponse, false)
 	if err != nil {
 		return err
 	}
