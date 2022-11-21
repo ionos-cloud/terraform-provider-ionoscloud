@@ -360,7 +360,7 @@ func resourceServer() *schema.Resource {
 				},
 			},
 			"label": {
-				Type:     schema.TypeList,
+				Type:     schema.TypeSet,
 				Optional: true,
 				Elem:     labelResource,
 			},

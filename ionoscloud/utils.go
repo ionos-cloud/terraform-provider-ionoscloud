@@ -334,9 +334,10 @@ var labelDataSource = &schema.Resource{
 
 // Convert labels data fetched from the resource data into an actual list of objects that can be
 // used for requests.
-func getLabels(labelsData interface{}) []map[string]string {
+func getLabels(labelsSet interface{}) []map[string]string {
 	var labels []map[string]string
-	if labelsData, ok := labelsData.([]interface{}); ok {
+	if labelsSet, ok := labelsSet.(*schema.Set); ok {
+		labelsData := labelsSet.List()
 		labels = make([]map[string]string, 0, len(labelsData))
 		for _, labelData := range labelsData {
 			if labelData, ok := labelData.(map[string]interface{}); ok {
