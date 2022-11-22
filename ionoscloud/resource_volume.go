@@ -639,41 +639,32 @@ func getVolumeData(d *schema.ResourceData, path string) (*ionoscloud.VolumePrope
 		volume.Name = &vStr
 	}
 
-	var sshkeyPath []interface{}
+	var sshKeys []interface{}
 
 	if v, ok := d.GetOk(path + "ssh_key_path"); ok {
-		sshkeyPath = v.([]interface{})
-		if err := d.Set("ssh_key_path", v.([]interface{})); err != nil {
+		sshKeys = v.([]interface{})
+		if err := d.Set("ssh_key_path", sshKeys); err != nil {
 			return nil, err
 		}
 	} else if v, ok := d.GetOk("ssh_key_path"); ok {
-		sshkeyPath = v.([]interface{})
-		if err := d.Set("ssh_key_path", v.([]interface{})); err != nil {
+		sshKeys = v.([]interface{})
+		if err := d.Set("ssh_key_path", sshKeys); err != nil {
 			return nil, err
 		}
 	} else {
 		if err := d.Set("ssh_key_path", [][]string{}); err != nil {
 			return nil, err
 		}
-		//if err := d.Set("ssh_keys", [][]string{}); err != nil {
-		//	return nil, err
-		//}
 	}
-	//else if v, ok := d.GetOk("ssh_keys"); ok { AR VENI PRIMUL ELSE IF MAI SUS
-	//	sshkeyPath = v.([]interface{})
-	//	if err := d.Set("ssh_key_path", v.([]interface{})); err != nil {
-	//		return nil, err
-	//	}
-	//}
 
 	if v, ok := d.GetOk(path + "ssh_keys"); ok {
-		sshkeyPath = v.([]interface{})
-		if err := d.Set("ssh_keys", v.([]interface{})); err != nil {
+		sshKeys = v.([]interface{})
+		if err := d.Set("ssh_keys", sshKeys); err != nil {
 			return nil, err
 		}
 	} else if v, ok := d.GetOk("ssh_keys"); ok {
-		sshkeyPath = v.([]interface{})
-		if err := d.Set("ssh_keys", v.([]interface{})); err != nil {
+		sshKeys = v.([]interface{})
+		if err := d.Set("ssh_keys", sshKeys); err != nil {
 			return nil, err
 		}
 	} else {
@@ -682,9 +673,9 @@ func getVolumeData(d *schema.ResourceData, path string) (*ionoscloud.VolumePrope
 		}
 	}
 
-	if len(sshkeyPath) != 0 {
+	if len(sshKeys) != 0 {
 		var publicKeys []string
-		for _, path := range sshkeyPath {
+		for _, path := range sshKeys {
 			log.Printf("[DEBUG] Reading file %s", path)
 			publicKey, err := readPublicKey(path.(string))
 			if err != nil {

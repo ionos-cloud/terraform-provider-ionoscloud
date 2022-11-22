@@ -176,20 +176,12 @@ func resourceServer() *schema.Resource {
 									if d.Get("ssh_key_path.#") == new {
 										return true
 									}
-									//if d.Get("ssh_keys.#") == new {
-									//	return true
-									//}
 								}
 
 								sshKeyPath := d.Get("volume.0.ssh_key_path").([]interface{})
 								oldSshKeyPath := d.Get("ssh_key_path").([]interface{})
-								//oldSshKeys := d.Get("ssh_keys").([]interface{})
 
 								difKeypath := utils.DiffSlice(convertSlice(sshKeyPath), convertSlice(oldSshKeyPath))
-								//difKeys := utils.DiffSlice(convertSlice(sshKeyPath), convertSlice(oldSshKeys))
-								//if len(difKeys) == 0 {
-								//	return true
-								//}
 								if len(difKeypath) == 0 {
 									return true
 								}
@@ -210,10 +202,10 @@ func resourceServer() *schema.Resource {
 									}
 								}
 
-								sshKeyPath := d.Get("volume.0.ssh_keys").([]interface{})
-								oldSshKeyPath := d.Get("ssh_keys").([]interface{})
+								sshKeys := d.Get("volume.0.ssh_keys").([]interface{})
+								oldSshKeys := d.Get("ssh_keys").([]interface{})
 
-								if len(utils.DiffSlice(convertSlice(sshKeyPath), convertSlice(oldSshKeyPath))) == 0 {
+								if len(utils.DiffSlice(convertSlice(sshKeys), convertSlice(oldSshKeys))) == 0 {
 									return true
 								}
 
@@ -717,7 +709,7 @@ func SetVolumeProperties(volume ionoscloud.Volume) map[string]interface{} {
 			for _, sshKey := range *volume.Properties.SshKeys {
 				sshKeys = append(sshKeys, sshKey)
 			}
-			volumeMap["ssh_keys"] = sshKeys //////////////////////////////////////////////////////
+			volumeMap["ssh_keys"] = sshKeys
 		}
 
 		utils.SetPropWithNilCheck(volumeMap, "image_password", volume.Properties.ImagePassword)
