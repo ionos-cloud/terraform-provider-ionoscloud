@@ -1,3 +1,7 @@
+## 6.3.3(upcoming release)
+### Feature: 
+ - Add update for mongo database resources
+
 ## 6.3.3
 ### Feature
 - New Product: **ContainerRegistry**:
@@ -95,7 +99,7 @@ is `not found`(404)
 - update sdk-go-dbaas-postgres dependency to v1.0.3
 
 ### Documentation
-- updated multiple nics under the same IP Failover example, with a [one step example](examples/ip_failover/README.md)
+- updated multiple nics under the same IP Failover example, with a [one_step example](examples/ip_failover/README.md)
 
 ## 6.2.3
 
