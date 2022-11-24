@@ -537,18 +537,10 @@ func resourceServerCreate(ctx context.Context, d *schema.ResourceData, meta inte
 		return diags
 	}
 
-	labels := getLabels(d.Get("label"))
-	for _, label := range labels {
-		labelKey := label["key"]
-		labelValue := label["value"]
-		labelResource := ionoscloud.LabelResource{
-			Properties: &ionoscloud.LabelResourceProperties{Key: &labelKey, Value: &labelValue},
-		}
-		_, apiResponse, err := client.LabelsApi.DatacentersServersLabelsPost(ctx, datacenterId, *postServer.Id).Label(labelResource).Execute()
-		logApiRequestTime(apiResponse)
-		if err != nil {
-			return diag.FromErr(fmt.Errorf("error creating label: (%w)", err))
-		}
+	// Logic for labels creation
+	ls := LabelsService{ctx: ctx, client: client}
+	if err := ls.datacentersServersLabelsCreate(datacenterId, *postServer.Id, getLabels(d.Get("label"))); err != nil {
+		return diag.FromErr(err)
 	}
 
 	// get additional data for schema
@@ -969,38 +961,19 @@ func resourceServerUpdate(ctx context.Context, d *schema.ResourceData, meta inte
 
 	}
 
-	// Labels logic
+	// Labels logic for update
 	if d.HasChanges("label") {
+		ls := LabelsService{ctx: ctx, client: client}
 		oldLabelsData, newLabelsData := d.GetChange("label")
 
 		// Delete the old labels.
-		oldLabels := getLabels(oldLabelsData)
-		for _, oldLabel := range oldLabels {
-			oldLabelKey := oldLabel["key"]
-			apiResponse, err := client.LabelsApi.DatacentersServersLabelsDelete(ctx, dcId, d.Id(), oldLabelKey).Execute()
-			logApiRequestTime(apiResponse)
-			if err != nil {
-				if httpNotFound(apiResponse) {
-					log.Printf("[WARNING] label with key %s has been already removed from server %s\n", oldLabelKey, d.Id())
-				} else {
-					return diag.FromErr(fmt.Errorf("[label update] an error occured while deleting label with key: %s, server ID: %s", oldLabelKey, d.Id()))
-				}
-			}
+		if err := ls.datacentersServersLabelsDelete(dcId, d.Id(), getLabels(oldLabelsData)); err != nil {
+			return diag.FromErr(err)
 		}
 
 		// Create the new labels.
-		newLabels := getLabels(newLabelsData)
-		for _, newLabel := range newLabels {
-			newLabelKey := newLabel["key"]
-			newLabelValue := newLabel["value"]
-			newLabelResource := ionoscloud.LabelResource{
-				Properties: &ionoscloud.LabelResourceProperties{Key: &newLabelKey, Value: &newLabelValue},
-			}
-			_, apiResponse, err := client.LabelsApi.DatacentersServersLabelsPost(ctx, dcId, d.Id()).Label(newLabelResource).Execute()
-			logApiRequestTime(apiResponse)
-			if err != nil {
-				return diag.FromErr(fmt.Errorf("error creating label: (%w)", err))
-			}
+		if err := ls.datacentersServersLabelsCreate(dcId, d.Id(), getLabels(newLabelsData)); err != nil {
+			return diag.FromErr(err)
 		}
 	}
 	return resourceServerRead(ctx, d, meta)
@@ -1386,13 +1359,9 @@ func setResourceServerData(ctx context.Context, client *ionoscloud.APIClient, d 
 		}
 	}
 
-	// Fetch the labels for this server.
-	labelsResponse, apiResponse, err := client.LabelsApi.DatacentersServersLabelsGet(ctx, datacenterId, d.Id()).Depth(1).Execute()
-	logApiRequestTime(apiResponse)
-	if err != nil {
-		return fmt.Errorf("error occured while fetching labels for server with ID: %s, datacenter ID: %s", d.Id(), datacenterId)
-	}
-	labels, err := processLabelsData(labelsResponse, false)
+	// Labels logic
+	ls := LabelsService{ctx: ctx, client: client}
+	labels, err := ls.datacentersServersLabelsGet(datacenterId, d.Id(), false)
 	if err != nil {
 		return err
 	}

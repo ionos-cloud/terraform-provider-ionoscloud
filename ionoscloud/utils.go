@@ -1,7 +1,6 @@
 package ionoscloud
 
 import (
-	"errors"
 	"fmt"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	ionoscloud "github.com/ionos-cloud/sdk-go/v6"
@@ -299,83 +298,4 @@ var cdromsServerDSResource = &schema.Resource{
 			Computed: true,
 		},
 	},
-}
-
-// Labels utils
-var labelResource = &schema.Resource{
-	Schema: map[string]*schema.Schema{
-		"key": {
-			Type:     schema.TypeString,
-			Required: true,
-		},
-		"value": {
-			Type:     schema.TypeString,
-			Required: true,
-		},
-	},
-}
-
-var labelDataSource = &schema.Resource{
-	Schema: map[string]*schema.Schema{
-		"id": {
-			Type:     schema.TypeString,
-			Computed: true,
-		},
-		"key": {
-			Type:     schema.TypeString,
-			Computed: true,
-		},
-		"value": {
-			Type:     schema.TypeString,
-			Computed: true,
-		},
-	},
-}
-
-// Convert labels data fetched from the resource data into an actual list of objects that can be
-// used for requests.
-func getLabels(labelsSet interface{}) []map[string]string {
-	var labels []map[string]string
-	if labelsSet, ok := labelsSet.(*schema.Set); ok {
-		labelsData := labelsSet.List()
-		labels = make([]map[string]string, 0, len(labelsData))
-		for _, labelData := range labelsData {
-			if labelData, ok := labelData.(map[string]interface{}); ok {
-				labelKey := labelData["key"].(string)
-				labelValue := labelData["value"].(string)
-				label := map[string]string{"key": labelKey, "value": labelValue}
-				labels = append(labels, label)
-			} else {
-				log.Printf("[WARNING] couldn't convert the labels data to a format that can be used for API requests\n")
-			}
-		}
-	} else {
-		log.Printf("[WARNING] couldn't convert the labels data to a format that can be used for API requests\n")
-	}
-	return labels
-}
-
-// Process the labels data fetched using the API and convert it a list of labels that can be
-// used to set the resource data.
-func processLabelsData(labelsData ionoscloud.LabelResources, isDataSource bool) ([]interface{}, error) {
-	if labelsData.Items == nil {
-		return nil, errors.New("expected a list of labels from the API but received nil instead")
-	}
-	labels := make([]interface{}, 0, len(*labelsData.Items))
-	for _, labelData := range *labelsData.Items {
-		entry := make(map[string]string)
-		if labelData.Properties == nil || labelData.Properties.Key == nil || labelData.Properties.Value == nil {
-			return nil, errors.New("expected valid label properties from the API but received nil instead")
-		}
-		entry["key"] = *labelData.Properties.Key
-		entry["value"] = *labelData.Properties.Value
-		if isDataSource {
-			if labelData.Id == nil {
-				return nil, errors.New("expected valid label ID from the API but received nil instead")
-			}
-			entry["id"] = *labelData.Id
-		}
-		labels = append(labels, entry)
-	}
-	return labels, nil
 }

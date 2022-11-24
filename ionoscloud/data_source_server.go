@@ -495,12 +495,8 @@ func dataSourceServerRead(ctx context.Context, d *schema.ResourceData, meta inte
 	}
 
 	// Labels logic
-	labelsResponse, apiResponse, err := client.LabelsApi.DatacentersServersLabelsGet(ctx, datacenterId.(string), d.Id()).Depth(1).Execute()
-	logApiRequestTime(apiResponse)
-	if err != nil {
-		return diag.FromErr(fmt.Errorf("error occured while fetching labels for server with ID: %s, datacenter ID: %s", d.Id(), datacenterId.(string)))
-	}
-	labels, err := processLabelsData(labelsResponse, true)
+	ls := LabelsService{ctx: ctx, client: client}
+	labels, err := ls.datacentersServersLabelsGet(datacenterId.(string), d.Id(), true)
 	if err != nil {
 		return diag.FromErr(err)
 	}
