@@ -539,7 +539,7 @@ func resourceServerCreate(ctx context.Context, d *schema.ResourceData, meta inte
 
 	// Logic for labels creation
 	ls := LabelsService{ctx: ctx, client: client}
-	if err := ls.datacentersServersLabelsCreate(datacenterId, *postServer.Id, getLabels(d.Get("label"))); err != nil {
+	if err := ls.datacentersServersLabelsCreate(datacenterId, *postServer.Id, d.Get("label")); err != nil {
 		return diag.FromErr(err)
 	}
 
@@ -967,12 +967,12 @@ func resourceServerUpdate(ctx context.Context, d *schema.ResourceData, meta inte
 		oldLabelsData, newLabelsData := d.GetChange("label")
 
 		// Delete the old labels.
-		if err := ls.datacentersServersLabelsDelete(dcId, d.Id(), getLabels(oldLabelsData)); err != nil {
+		if err := ls.datacentersServersLabelsDelete(dcId, d.Id(), oldLabelsData); err != nil {
 			return diag.FromErr(err)
 		}
 
 		// Create the new labels.
-		if err := ls.datacentersServersLabelsCreate(dcId, d.Id(), getLabels(newLabelsData)); err != nil {
+		if err := ls.datacentersServersLabelsCreate(dcId, d.Id(), newLabelsData); err != nil {
 			return diag.FromErr(err)
 		}
 	}

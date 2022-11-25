@@ -59,59 +59,44 @@ func (ls *LabelsService) datacentersServersLabelsGet(datacenterId, serverId stri
 	return labels, nil
 }
 
-func (ls *LabelsService) datacentersServersLabelsCreate(datacenterId, serverId string, labels []Label) error {
-	for _, label := range labels {
-		labelKey := label["key"]
-		labelValue := label["value"]
-		labelResource := ionoscloud.LabelResource{
-			Properties: &ionoscloud.LabelResourceProperties{Key: &labelKey, Value: &labelValue},
-		}
-		_, apiResponse, err := ls.client.LabelsApi.DatacentersServersLabelsPost(ls.ctx, datacenterId, serverId).Label(labelResource).Execute()
-		apiResponse.LogInfo()
-		if err != nil {
-			return fmt.Errorf("error occured while creating label for server with ID: %s, datacenter ID: %s, error: (%w)", serverId, datacenterId, err)
-		}
-	}
-	return nil
-}
-
-func (ls *LabelsService) datacentersServersLabelsDelete(datacenterId, serverId string, labels []Label) error {
-	for _, label := range labels {
-		labelKey := label["key"]
-		apiResponse, err := ls.client.LabelsApi.DatacentersServersLabelsDelete(ls.ctx, datacenterId, serverId, labelKey).Execute()
-		apiResponse.LogInfo()
-		if err != nil {
-			if httpNotFound(apiResponse) {
-				log.Printf("[WARNING] label with key %s has been already removed from server %s\n", labelKey, serverId)
-			} else {
-				return fmt.Errorf("[label update] an error occured while deleting label with key: %s, server ID: %s, error: %w", labelKey, serverId, err)
+func (ls *LabelsService) datacentersServersLabelsCreate(datacenterId, serverId string, labelsData interface{}) error {
+	if labelsData, ok := labelsData.(*schema.Set); ok {
+		for _, labelData := range labelsData.List() {
+			if label, ok := labelData.(map[string]interface{}); ok {
+				labelKey := label["key"].(string)
+				labelValue := label["value"].(string)
+				labelResource := ionoscloud.LabelResource{
+					Properties: &ionoscloud.LabelResourceProperties{Key: &labelKey, Value: &labelValue},
+				}
+				_, apiResponse, err := ls.client.LabelsApi.DatacentersServersLabelsPost(ls.ctx, datacenterId, serverId).Label(labelResource).Execute()
+				apiResponse.LogInfo()
+				if err != nil {
+					return fmt.Errorf("error occured while creating label for server with ID: %s, datacenter ID: %s, error: (%w)", serverId, datacenterId, err)
+				}
 			}
 		}
 	}
 	return nil
 }
 
-// Convert labels data fetched from the resource data into an actual list of objects that can be
-// used for requests.
-func getLabels(labelsSet interface{}) []Label {
-	var labels []Label
-	if labelsSet, ok := labelsSet.(*schema.Set); ok {
-		labelsData := labelsSet.List()
-		labels = make([]Label, 0, len(labelsData))
-		for _, labelData := range labelsData {
-			if labelData, ok := labelData.(map[string]interface{}); ok {
-				labelKey := labelData["key"].(string)
-				labelValue := labelData["value"].(string)
-				label := Label{"key": labelKey, "value": labelValue}
-				labels = append(labels, label)
-			} else {
-				log.Printf("[WARNING] couldn't convert the labels data to a format that can be used for API requests\n")
+func (ls *LabelsService) datacentersServersLabelsDelete(datacenterId, serverId string, labelsData interface{}) error {
+	if labelsData, ok := labelsData.(*schema.Set); ok {
+		for _, labelData := range labelsData.List() {
+			if label, ok := labelData.(map[string]interface{}); ok {
+				labelKey := label["key"].(string)
+				apiResponse, err := ls.client.LabelsApi.DatacentersServersLabelsDelete(ls.ctx, datacenterId, serverId, labelKey).Execute()
+				apiResponse.LogInfo()
+				if err != nil {
+					if httpNotFound(apiResponse) {
+						log.Printf("[WARNING] label with key %s has been already removed from server %s\n", labelKey, serverId)
+					} else {
+						return fmt.Errorf("[label update] an error occured while deleting label with key: %s, server ID: %s, error: %w", labelKey, serverId, err)
+					}
+				}
 			}
 		}
-	} else {
-		log.Printf("[WARNING] couldn't convert the labels data to a format that can be used for API requests\n")
 	}
-	return labels
+	return nil
 }
 
 // Process the labels data fetched using the API and convert it a list of labels that can be
