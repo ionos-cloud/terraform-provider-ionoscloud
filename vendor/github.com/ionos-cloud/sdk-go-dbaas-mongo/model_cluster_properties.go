@@ -26,7 +26,7 @@ type ClusterProperties struct {
 	Instances         *int32             `json:"instances,omitempty"`
 	Connections       *[]Connection      `json:"connections,omitempty"`
 	MaintenanceWindow *MaintenanceWindow `json:"maintenanceWindow,omitempty"`
-	// The unique ID of the template, which specifies the number of cores, storage size, and memory.
+	// The unique ID of the template, which specifies the number of cores, storage size, and memory. You cannot downgrade to a smaller template or minor edition (e.g. from business to playground). To get a list of all templates to confirm the changes use the /templates endpoint.
 	TemplateID *string `json:"templateID,omitempty"`
 	// The connection string for your cluster.
 	ConnectionString *string `json:"connectionString,omitempty"`

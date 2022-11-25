@@ -23,6 +23,7 @@ const (
 	COLLECTION ResourceType = "collection"
 	CLUSTER    ResourceType = "cluster"
 	USER       ResourceType = "user"
+	SNAPSHOT   ResourceType = "snapshot"
 )
 
 func (v *ResourceType) UnmarshalJSON(src []byte) error {
@@ -32,7 +33,7 @@ func (v *ResourceType) UnmarshalJSON(src []byte) error {
 		return err
 	}
 	enumTypeValue := ResourceType(value)
-	for _, existing := range []ResourceType{"collection", "cluster", "user"} {
+	for _, existing := range []ResourceType{"collection", "cluster", "user", "snapshot"} {
 		if existing == enumTypeValue {
 			*v = enumTypeValue
 			return nil

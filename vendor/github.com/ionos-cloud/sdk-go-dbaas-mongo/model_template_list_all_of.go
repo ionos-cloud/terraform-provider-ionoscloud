@@ -16,6 +16,9 @@ import (
 
 // TemplateListAllOf struct for TemplateListAllOf
 type TemplateListAllOf struct {
+	Type *ResourceType `json:"type,omitempty"`
+	// The unique ID of the resource.
+	Id    *string             `json:"id,omitempty"`
 	Items *[]TemplateResponse `json:"items,omitempty"`
 }
 
@@ -35,6 +38,82 @@ func NewTemplateListAllOf() *TemplateListAllOf {
 func NewTemplateListAllOfWithDefaults() *TemplateListAllOf {
 	this := TemplateListAllOf{}
 	return &this
+}
+
+// GetType returns the Type field value
+// If the value is explicit nil, the zero value for ResourceType will be returned
+func (o *TemplateListAllOf) GetType() *ResourceType {
+	if o == nil {
+		return nil
+	}
+
+	return o.Type
+
+}
+
+// GetTypeOk returns a tuple with the Type field value
+// and a boolean to check if the value has been set.
+// NOTE: If the value is an explicit nil, `nil, true` will be returned
+func (o *TemplateListAllOf) GetTypeOk() (*ResourceType, bool) {
+	if o == nil {
+		return nil, false
+	}
+
+	return o.Type, true
+}
+
+// SetType sets field value
+func (o *TemplateListAllOf) SetType(v ResourceType) {
+
+	o.Type = &v
+
+}
+
+// HasType returns a boolean if a field has been set.
+func (o *TemplateListAllOf) HasType() bool {
+	if o != nil && o.Type != nil {
+		return true
+	}
+
+	return false
+}
+
+// GetId returns the Id field value
+// If the value is explicit nil, the zero value for string will be returned
+func (o *TemplateListAllOf) GetId() *string {
+	if o == nil {
+		return nil
+	}
+
+	return o.Id
+
+}
+
+// GetIdOk returns a tuple with the Id field value
+// and a boolean to check if the value has been set.
+// NOTE: If the value is an explicit nil, `nil, true` will be returned
+func (o *TemplateListAllOf) GetIdOk() (*string, bool) {
+	if o == nil {
+		return nil, false
+	}
+
+	return o.Id, true
+}
+
+// SetId sets field value
+func (o *TemplateListAllOf) SetId(v string) {
+
+	o.Id = &v
+
+}
+
+// HasId returns a boolean if a field has been set.
+func (o *TemplateListAllOf) HasId() bool {
+	if o != nil && o.Id != nil {
+		return true
+	}
+
+	return false
 }
 
 // GetItems returns the Items field value
@@ -77,6 +156,14 @@ func (o *TemplateListAllOf) HasItems() bool {
 
 func (o TemplateListAllOf) MarshalJSON() ([]byte, error) {
 	toSerialize := map[string]interface{}{}
+	if o.Type != nil {
+		toSerialize["type"] = o.Type
+	}
+
+	if o.Id != nil {
+		toSerialize["id"] = o.Id
+	}
+
 	if o.Items != nil {
 		toSerialize["items"] = o.Items
 	}

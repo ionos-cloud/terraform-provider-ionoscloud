@@ -188,7 +188,7 @@ func GetDbaasPgSqlClusterDataCreate(d *schema.ResourceData) (*psql.CreateCluster
 	return &dbaasCluster, nil
 }
 
-func GetDbaasMongoClusterDataCreate(d *schema.ResourceData) *mongo.CreateClusterRequest {
+func SetMongoClusterCreateProperties(d *schema.ResourceData) *mongo.CreateClusterRequest {
 
 	dbaasCluster := mongo.CreateClusterRequest{
 		Properties: &mongo.CreateClusterProperties{},
@@ -227,6 +227,43 @@ func GetDbaasMongoClusterDataCreate(d *schema.ResourceData) *mongo.CreateCluster
 	}
 
 	return &dbaasCluster
+}
+
+func SetMongoClusterPatchProperties(d *schema.ResourceData) *mongo.PatchClusterRequest {
+
+	patchRequest := mongo.PatchClusterRequest{
+		Properties: mongo.NewPatchClusterProperties(),
+	}
+
+	if d.HasChange("display_name") {
+		_, name := d.GetChange("display_name")
+		nameStr := name.(string)
+		patchRequest.Properties.DisplayName = &nameStr
+	}
+
+	if d.HasChange("instances") {
+		_, instances := d.GetChange("instances")
+		instancesInt := int32(instances.(int))
+		patchRequest.Properties.Instances = &instancesInt
+	}
+
+	if d.HasChange("template_id") {
+		_, template := d.GetChange("template_id")
+		templateStr := template.(string)
+		patchRequest.Properties.TemplateID = &templateStr
+	}
+	if d.HasChange("connections") {
+		patchRequest.Properties.Connections = GetDbaasMongoClusterConnectionsData(d)
+	}
+	if d.HasChange("maintenance_window") {
+		_, mWin := d.GetChange("maintenance_window")
+		if mWin != nil {
+			mWinVal := GetDbaasMongoClusterMaintenanceWindowData(d)
+			patchRequest.Properties.MaintenanceWindow = mWinVal
+		}
+	}
+
+	return &patchRequest
 }
 
 func GetDbaasPgSqlClusterDataUpdate(d *schema.ResourceData) (*psql.PatchClusterRequest, diag.Diagnostics) {

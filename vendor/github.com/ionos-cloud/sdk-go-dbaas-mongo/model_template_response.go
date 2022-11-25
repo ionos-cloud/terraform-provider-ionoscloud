@@ -18,6 +18,10 @@ import (
 type TemplateResponse struct {
 	// The unique template ID.
 	Id *string `json:"id,omitempty"`
+	// The name of the template.
+	Name *string `json:"name,omitempty"`
+	// The edition of the template (e.g. enterprise)
+	Edition *string `json:"edition,omitempty"`
 	// The number of CPU cores.
 	Cores *int32 `json:"cores,omitempty"`
 	// The amount of memory in GB.
@@ -76,6 +80,82 @@ func (o *TemplateResponse) SetId(v string) {
 // HasId returns a boolean if a field has been set.
 func (o *TemplateResponse) HasId() bool {
 	if o != nil && o.Id != nil {
+		return true
+	}
+
+	return false
+}
+
+// GetName returns the Name field value
+// If the value is explicit nil, the zero value for string will be returned
+func (o *TemplateResponse) GetName() *string {
+	if o == nil {
+		return nil
+	}
+
+	return o.Name
+
+}
+
+// GetNameOk returns a tuple with the Name field value
+// and a boolean to check if the value has been set.
+// NOTE: If the value is an explicit nil, `nil, true` will be returned
+func (o *TemplateResponse) GetNameOk() (*string, bool) {
+	if o == nil {
+		return nil, false
+	}
+
+	return o.Name, true
+}
+
+// SetName sets field value
+func (o *TemplateResponse) SetName(v string) {
+
+	o.Name = &v
+
+}
+
+// HasName returns a boolean if a field has been set.
+func (o *TemplateResponse) HasName() bool {
+	if o != nil && o.Name != nil {
+		return true
+	}
+
+	return false
+}
+
+// GetEdition returns the Edition field value
+// If the value is explicit nil, the zero value for string will be returned
+func (o *TemplateResponse) GetEdition() *string {
+	if o == nil {
+		return nil
+	}
+
+	return o.Edition
+
+}
+
+// GetEditionOk returns a tuple with the Edition field value
+// and a boolean to check if the value has been set.
+// NOTE: If the value is an explicit nil, `nil, true` will be returned
+func (o *TemplateResponse) GetEditionOk() (*string, bool) {
+	if o == nil {
+		return nil, false
+	}
+
+	return o.Edition, true
+}
+
+// SetEdition sets field value
+func (o *TemplateResponse) SetEdition(v string) {
+
+	o.Edition = &v
+
+}
+
+// HasEdition returns a boolean if a field has been set.
+func (o *TemplateResponse) HasEdition() bool {
+	if o != nil && o.Edition != nil {
 		return true
 	}
 
@@ -200,6 +280,14 @@ func (o TemplateResponse) MarshalJSON() ([]byte, error) {
 	toSerialize := map[string]interface{}{}
 	if o.Id != nil {
 		toSerialize["id"] = o.Id
+	}
+
+	if o.Name != nil {
+		toSerialize["name"] = o.Name
+	}
+
+	if o.Edition != nil {
+		toSerialize["edition"] = o.Edition
 	}
 
 	if o.Cores != nil {

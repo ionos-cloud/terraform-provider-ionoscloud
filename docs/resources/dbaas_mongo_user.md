@@ -35,32 +35,43 @@ resource ionoscloud_mongo_cluster "example_mongo_cluster" {
     time             = "09:00:00"
   }
   mongodb_version = "5.0"
-  instances          = 3
+  instances          = 1
   display_name = "example_mongo_cluster"
   location = ionoscloud_datacenter.datacenter_example.location
   connections   {
     datacenter_id   =  ionoscloud_datacenter.datacenter_example.id
     lan_id          =  ionoscloud_lan.lan_example.id
-    cidr_list            =  ["192.168.1.108/24", "192.168.1.109/24", "192.168.1.110/24"]
+    cidr_list            =  ["192.168.1.108/24"]
   }
   template_id = "6b78ea06-ee0e-4689-998c-fc9c46e781f6"
-
   credentials {
     username = "username"
-    password = "password"
+    password = random_password.cluster_password.result
   }
 }
-resource ionoscloud_mongo_user "example_mongo_user" {
+
+resource "random_password" "cluster_password" {
+  length           = 16
+  special          = true
+  override_special = "!#$%&*()-_=+[]{}<>:?"
+}
+
+resource "random_password" "user_password" {
+  length           = 16
+  special          = true
+  override_special = "!#$%&*()-_=+[]{}<>:?"
+}
+
+resource ionoscloud_mongo_user example_mongo_user {
   cluster_id = ionoscloud_mongo_cluster.example_mongo_cluster.id
   username = "myUser"
-  database = "db1"
-  password = "abc123-321CBA"
+  password = random_password.user_password.result
   roles {
     role = "read"
     database = "db1"
   }
   roles {
-    role = "readAnyDatabase"
+    role = "readWrite"
     database = "db2"
   }
 }
@@ -73,7 +84,7 @@ resource ionoscloud_mongo_user "example_mongo_user" {
 * `database` - (Required)[string] The user database to use for authentication. Updates to the value of the field force the cluster to be re-created.
 * `password` - (Required)[string] User password. Updates to the value of the field force the cluster to be re-created.
 * `roles` - (Required)[string] a list of mongodb user roles. Updates to the value of the field force the cluster to be re-created.
-    * `role` - (Required)[true] Mongodb user role. Examples: read, readWrite, readAnyDatabase.
+    * `role` - (Required)[true] Mongodb user role. Examples: read, readWrite, readAnyDatabase, readWriteAnyDatabase, dbAdmin, dbAdminAnyDatabase and clusterMonitor.
     * `database` - (Required)[true] Database on which to apply the role.
 
 **NOTE:** MongoDb users do not support update at the moment. Changing any attribute will result in the user being re-created.

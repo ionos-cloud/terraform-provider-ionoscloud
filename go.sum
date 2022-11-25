@@ -207,6 +207,8 @@ github.com/ionos-cloud/sdk-go-container-registry v1.0.0 h1:03FKtFfHdOPZdXxRAFWgi
 github.com/ionos-cloud/sdk-go-container-registry v1.0.0/go.mod h1:AtjqGZWAvd5J1rRR0wHhZ8nMrR/yJm45z8KB3p8rrvs=
 github.com/ionos-cloud/sdk-go-dbaas-mongo v1.0.0 h1:Wc01Tnlhi/t4VgMdO9bcm/v1wMa0SzSvcDTgkfK3k9I=
 github.com/ionos-cloud/sdk-go-dbaas-mongo v1.0.0/go.mod h1:XxUpRByvuEnYSTCMeJGt1Ia7JID7+gFo8tTGw1BfbNE=
+github.com/ionos-cloud/sdk-go-dbaas-mongo v1.1.0 h1:fGJaBwATfxnRRTd2ZHefqIOQnPGPfOtJn0MOU2Xd+tM=
+github.com/ionos-cloud/sdk-go-dbaas-mongo v1.1.0/go.mod h1:XxUpRByvuEnYSTCMeJGt1Ia7JID7+gFo8tTGw1BfbNE=
 github.com/ionos-cloud/sdk-go-dbaas-postgres v1.0.4 h1:RCEBhgOgE55H33s/Rsgv4vcr3HYx7nDtRocM4yFnC5U=
 github.com/ionos-cloud/sdk-go-dbaas-postgres v1.0.4/go.mod h1:87cFAQViqjorhuafmYIDCmCTr5GiaqDB7qr09K1gdOU=
 github.com/ionos-cloud/sdk-go/v6 v6.1.3 h1:vb6yqdpiqaytvreM0bsn2pXw+1YDvEk2RKSmBAQvgDQ=

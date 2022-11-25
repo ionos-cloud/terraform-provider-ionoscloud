@@ -8,13 +8,19 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 	mongo "github.com/ionos-cloud/sdk-go-dbaas-mongo"
+	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/dbaas"
+	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils"
 	"log"
+	"strings"
 )
+
+// todo: remove once mongo removes this field
+const defaultMongoDatabase = "admin"
 
 func resourceDbaasMongoUser() *schema.Resource {
 	return &schema.Resource{
-		// no update defined, forcenew on all fields
 		CreateContext: resourceDbaasMongoUserCreate,
+		UpdateContext: resourceDbaasMongoUserUpdate,
 		ReadContext:   resourceDbaasMongoUserRead,
 		DeleteContext: resourceDbaasMongoUserDelete,
 		Importer: &schema.ResourceImporter{
@@ -27,41 +33,29 @@ func resourceDbaasMongoUser() *schema.Resource {
 				ForceNew: true,
 			},
 			"username": {
-				Type:        schema.TypeString,
-				Required:    true,
-				ForceNew:    true,
-				Description: "The user database uses for authentication",
-			},
-			"database": {
-				Type:             schema.TypeString,
-				Required:         true,
-				ForceNew:         true,
-				Description:      "The user database to use for authentication",
-				ValidateDiagFunc: validation.ToDiagFunc(validation.StringIsNotWhiteSpace),
+				Type:     schema.TypeString,
+				Required: true,
+				ForceNew: true,
 			},
 			"password": {
 				Type:             schema.TypeString,
 				Required:         true,
-				ValidateDiagFunc: validation.ToDiagFunc(validation.StringIsNotWhiteSpace),
+				ValidateDiagFunc: validation.ToDiagFunc(validation.StringLenBetween(10, 100)),
 				Sensitive:        true,
-				ForceNew:         true,
 			},
 			"roles": {
 				Type:     schema.TypeList,
 				Optional: true,
-				ForceNew: true,
 				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{
 						"role": {
 							Type:        schema.TypeString,
 							Optional:    true,
 							Description: "A list of mongodb user roles. Examples: read, readWrite, readAnyDatabase",
-							ForceNew:    true,
 						},
 						"database": {
 							Type:     schema.TypeString,
 							Optional: true,
-							ForceNew: true,
 						},
 					},
 				},
@@ -85,11 +79,6 @@ func resourceDbaasMongoUserCreate(ctx context.Context, d *schema.ResourceData, m
 	if d.Get("username") != nil {
 		username = d.Get("username").(string)
 		request.Properties.Username = &username
-	}
-	database := ""
-	if d.Get("database") != nil {
-		database = d.Get("database").(string)
-		request.Properties.Database = &database
 	}
 	if d.Get("password") != nil {
 		password := d.Get("password").(string)
@@ -119,8 +108,76 @@ func resourceDbaasMongoUserCreate(ctx context.Context, d *schema.ResourceData, m
 		return diags
 	}
 
-	var user = &mongo.User{}
-	err = resource.RetryContext(ctx, *resourceDefaultTimeouts.Create, func() *resource.RetryError {
+	user, err := waitForUserToBeReady(ctx, client, clusterId, defaultMongoDatabase, username)
+	if err != nil {
+		return diag.FromErr(fmt.Errorf("creating %w", err))
+	}
+
+	if user.Properties != nil && user.Properties.Username != nil {
+		d.SetId(clusterId + *user.Properties.Username)
+	}
+
+	return diag.FromErr(setUserMongoData(d, &user))
+}
+
+func resourceDbaasMongoUserUpdate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+	client := meta.(SdkBundle).MongoClient
+	request := mongo.PatchUserRequest{
+		Properties: mongo.NewPatchUserProperties(),
+	}
+
+	var clusterId string
+	if d.Get("cluster_id") != nil {
+		clusterId = d.Get("cluster_id").(string)
+	}
+	username := ""
+	if d.Get("username") != nil {
+		username = d.Get("username").(string)
+	}
+
+	if d.HasChange("password") {
+		_, password := d.GetChange("password")
+		pwdStr := password.(string)
+		request.Properties.Password = &pwdStr
+	}
+	if d.HasChange("roles") {
+		_, rolesIntf := d.GetChange("roles")
+		roles := make([]mongo.UserRoles, 0)
+		rolesValue := rolesIntf.([]interface{})
+		if rolesValue != nil {
+			for _, role := range rolesValue {
+				roleVal := role.(map[string]interface{})
+				roleStr := roleVal["role"].(string)
+				roleDb := roleVal["database"].(string)
+				mongoRole := mongo.UserRoles{
+					Role:     &roleStr,
+					Database: &roleDb,
+				}
+				roles = append(roles, mongoRole)
+			}
+		}
+		request.Properties.Roles = &roles
+	}
+
+	_, _, err := client.UsersApi.ClustersUsersPatch(ctx, clusterId, defaultMongoDatabase, username).PatchUserRequest(request).Execute()
+	if err != nil {
+		diags := diag.FromErr(fmt.Errorf("while updating a user to mongoDB cluster %s: %w", clusterId, err))
+		return diags
+	}
+
+	user, err := waitForUserToBeReady(ctx, client, clusterId, defaultMongoDatabase, username)
+	if err != nil {
+		return diag.FromErr(fmt.Errorf("updating %w", err))
+	}
+
+	return diag.FromErr(setUserMongoData(d, &user))
+}
+
+// waitForUserToBeReady - keeps retrying until user is in 'available' state, or context deadline is reached
+func waitForUserToBeReady(ctx context.Context, client *dbaas.MongoClient, clusterId, database, username string) (mongo.User, error) {
+	var user = mongo.NewUser()
+	err := resource.RetryContext(ctx, *resourceDefaultTimeouts.Update, func() *resource.RetryError {
+
 		var err error
 		var apiResponse *mongo.APIResponse
 		*user, apiResponse, err = client.UsersApi.ClustersUsersFindById(ctx, clusterId, database, username).Execute()
@@ -131,36 +188,26 @@ func resourceDbaasMongoUserCreate(ctx context.Context, d *schema.ResourceData, m
 		if err != nil {
 			resource.NonRetryableError(err)
 		}
-		if user != nil && user.Metadata != nil && *user.Metadata.State != "AVAILABLE" {
-			log.Printf("[INFO] user is still getting created, is in state %s", *user.Metadata.State)
-			return resource.RetryableError(fmt.Errorf("user is still getting created, is in state %s", *user.Metadata.State))
+
+		if user != nil && user.Metadata != nil && user.Metadata.State != nil && !strings.EqualFold(*user.Metadata.State, utils.Available) {
+			log.Printf("[INFO] mongo user %s is still in state %s", username, *user.Metadata.State)
+			return resource.RetryableError(fmt.Errorf("user is still in state %s", *user.Metadata.State))
 		}
 		return nil
 	})
-
-	if err != nil {
-		return diag.FromErr(err)
-	}
-
 	if user == nil || user.Properties == nil || *user.Properties.Username == "" {
-		return diag.FromErr(fmt.Errorf("could not find username %s with database %s in cluster %s after creation ", username, database, clusterId))
+		return *user, fmt.Errorf("could not find username %s with database %s in cluster %s", username, database, clusterId)
 	}
-
-	if user.Properties != nil && user.Properties.Username != nil && user.Properties.Database != nil {
-		d.SetId(clusterId + *user.Properties.Username + *user.Properties.Database)
-	}
-
-	return diag.FromErr(setUserMongoData(d, user))
+	return *user, err
 }
 
 func resourceDbaasMongoUserRead(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	client := meta.(SdkBundle).MongoClient
 
 	clusterId := d.Get("cluster_id").(string)
-	database := d.Get("database").(string)
 	username := d.Get("username").(string)
 
-	user, apiResponse, err := client.UsersApi.ClustersUsersFindById(ctx, clusterId, database, username).Execute()
+	user, apiResponse, err := client.UsersApi.ClustersUsersFindById(ctx, clusterId, defaultMongoDatabase, username).Execute()
 
 	if err != nil {
 		if apiResponse != nil && apiResponse.Response != nil && apiResponse.StatusCode == 404 {
@@ -182,9 +229,8 @@ func resourceDbaasMongoUserDelete(ctx context.Context, d *schema.ResourceData, m
 	client := meta.(SdkBundle).MongoClient
 
 	clusterId := d.Get("cluster_id").(string)
-	database := d.Get("database").(string)
 	username := d.Get("username").(string)
-	_, _, err := client.UsersApi.ClustersUsersDelete(ctx, clusterId, database, username).Execute()
+	_, _, err := client.UsersApi.ClustersUsersDelete(ctx, clusterId, defaultMongoDatabase, username).Execute()
 	if err != nil {
 		diags := diag.FromErr(err)
 		return diags
@@ -195,9 +241,9 @@ func resourceDbaasMongoUserDelete(ctx context.Context, d *schema.ResourceData, m
 		var err error
 		var apiResponse *mongo.APIResponse
 		var user = mongo.User{}
-		user, apiResponse, err = client.UsersApi.ClustersUsersFindById(ctx, clusterId, database, username).Execute()
+		user, apiResponse, err = client.UsersApi.ClustersUsersFindById(ctx, clusterId, defaultMongoDatabase, username).Execute()
 		if apiResponse.HttpNotFound() {
-			log.Printf("[INFO] Deleted successfuly user %s with database %s in cluster %s", username, database, clusterId)
+			log.Printf("[INFO] Deleted successfuly user %s with database %s in cluster %s", username, defaultMongoDatabase, clusterId)
 			return nil
 		}
 		if err != nil {
@@ -224,13 +270,12 @@ func resourceDbaasMongoUserImporter(ctx context.Context, d *schema.ResourceData,
 	userId := d.Id()
 
 	clusterId := d.Get("cluster_id").(string)
-	database := d.Get("database").(string)
 	username := d.Get("username").(string)
 
-	user, apiResponse, err := client.UsersApi.ClustersUsersFindById(ctx, clusterId, database, username).Execute()
+	user, apiResponse, err := client.UsersApi.ClustersUsersFindById(ctx, clusterId, defaultMongoDatabase, username).Execute()
 
 	if err != nil {
-		if apiResponse != nil && apiResponse.Response != nil && apiResponse.StatusCode == 404 {
+		if apiResponse.HttpNotFound() {
 			d.SetId("")
 			return nil, fmt.Errorf("an error occured while trying to fetch the mongodb user %q", userId)
 		}
@@ -250,11 +295,6 @@ func setUserMongoData(d *schema.ResourceData, user *mongo.User) error {
 	if user.Properties != nil {
 		if user.Properties.Username != nil {
 			if err := d.Set("username", *user.Properties.Username); err != nil {
-				return err
-			}
-		}
-		if user.Properties.Database != nil {
-			if err := d.Set("database", *user.Properties.Database); err != nil {
 				return err
 			}
 		}
