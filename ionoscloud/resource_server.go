@@ -966,13 +966,15 @@ func resourceServerUpdate(ctx context.Context, d *schema.ResourceData, meta inte
 		ls := LabelsService{ctx: ctx, client: client}
 		oldLabelsData, newLabelsData := d.GetChange("label")
 
-		// Delete the old labels.
-		if err := ls.datacentersServersLabelsDelete(dcId, d.Id(), oldLabelsData); err != nil {
+		// Make some differences to see exactly what labels need to be added/removed.
+		labelsToBeCreated := newLabelsData.(*schema.Set).Difference(oldLabelsData.(*schema.Set))
+		labelsToBeDeleted := oldLabelsData.(*schema.Set).Difference(newLabelsData.(*schema.Set))
+
+		if err := ls.datacentersServersLabelsDelete(dcId, d.Id(), labelsToBeDeleted); err != nil {
 			return diag.FromErr(err)
 		}
 
-		// Create the new labels.
-		if err := ls.datacentersServersLabelsCreate(dcId, d.Id(), newLabelsData); err != nil {
+		if err := ls.datacentersServersLabelsCreate(dcId, d.Id(), labelsToBeCreated); err != nil {
 			return diag.FromErr(err)
 		}
 	}
