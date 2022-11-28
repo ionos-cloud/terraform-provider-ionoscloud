@@ -7,7 +7,7 @@ description: |-
 Get information on a Dataplatform Cluster.
 ---
 
-# ionoscloud\_pg_cluster
+# ionoscloud_dataplatform_cluster
 
 The **Dataplatform Cluster Data Source** can be used to search for and return an existing Dataplatform Cluster.
 If a single match is found, it will be returned. If your search results in multiple matches, an error will be returned.

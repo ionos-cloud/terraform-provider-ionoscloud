@@ -7,7 +7,7 @@ description: |-
 Creates and manages Dataplatform Cluster objects.
 ---
 
-# ionoscloud\_pg_cluster
+# ionoscloud_dataplatform_cluster
 
 Manages a **Dataplatform Cluster**.
 

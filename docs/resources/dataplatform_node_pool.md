@@ -7,7 +7,7 @@ description: |-
 Creates and manages Dataplatform Node Pool objects.
 ---
 
-# ionoscloud\_pg_cluster
+# ionoscloud_dataplatform_node_pool
 
 Manages a **Dataplatform Node Pool**.
 
