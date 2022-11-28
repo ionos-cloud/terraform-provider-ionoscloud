@@ -7,7 +7,7 @@ description: |-
 Get information on a Dataplatform Node Pool list under a Dataplatform Cluster.
 ---
 
-# ionoscloud\_dataplatform_node_pool
+# ionoscloud\_dataplatform_node_pools
 
 The **Dataplatform Node Pools Data Source** can be used to search for and return a list of existing Dataplatform Node Pools under a Dataplatform Cluster.
 
