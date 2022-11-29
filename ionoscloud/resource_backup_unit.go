@@ -6,7 +6,9 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 	ionoscloud "github.com/ionos-cloud/sdk-go/v6"
+	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils"
 	"log"
+	"strings"
 	"time"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
@@ -40,7 +42,7 @@ func resourceBackupUnit() *schema.Resource {
 				Description:      "The e-mail address you want assigned to the backup unit.",
 				Required:         true,
 				ValidateFunc:     validation.All(validation.StringIsNotWhiteSpace),
-				DiffSuppressFunc: DiffToLower,
+				DiffSuppressFunc: utils.DiffToLower,
 			},
 			"login": {
 				Type:        schema.TypeString,
@@ -186,7 +188,7 @@ func waitForUnitToBeReady(ctx context.Context, d *schema.ResourceData, client *i
 		}
 
 		select {
-		case <-time.After(SleepInterval):
+		case <-time.After(utils.SleepInterval):
 			log.Printf("[INFO] trying again ...")
 		case <-ctx.Done():
 			diags := diag.FromErr(fmt.Errorf("backup unit readiness check timed out! WARNING: your backup unit will still probably be created/updated " +
@@ -228,7 +230,7 @@ func resourceBackupUnitDelete(ctx context.Context, d *schema.ResourceData, meta 
 		}
 
 		select {
-		case <-time.After(SleepInterval):
+		case <-time.After(utils.SleepInterval):
 			log.Printf("[INFO] trying again ...")
 		case <-ctx.Done():
 			diags := diag.FromErr(fmt.Errorf("backup unit deletion timed out! WARNING: your backup unit will still probably be deleted " +
@@ -279,7 +281,7 @@ func backupUnitReady(client *ionoscloud.APIClient, d *schema.ResourceData, c con
 	if err != nil {
 		return true, fmt.Errorf("error checking backup unit status: %s", err)
 	}
-	return *backupUnit.Metadata.State == "AVAILABLE", nil
+	return strings.EqualFold(*backupUnit.Metadata.State, utils.Available), nil
 }
 
 func backupUnitDeleted(client *ionoscloud.APIClient, d *schema.ResourceData, c context.Context) (bool, error) {

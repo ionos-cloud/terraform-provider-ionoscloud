@@ -1,7 +1,68 @@
+## 6.3.3(upcoming release)
+### Feature: 
+ - Add update for mongo database resources
+
+## 6.3.3
+### Feature
+- New Product: **ContainerRegistry**:
+  - `Resources`:
+    - [ionoscloud_container_registry](docs/resources/container_registry.md)
+    - [ionoscloud_container_registry_token](docs/resources/container_registry_token.md)
+  - `Data Sources`:
+    - [ionoscloud_container_registry](docs/data-sources/container_registry.md)
+    - [ionoscloud_container_registry_token](docs/data-sources/container_registry_token.md)
+    - [ionoscloud_container_registry_locations](docs/data-sources/container_registry_locations.md)
+     
+⚠️ **Note:** Container Registry is currently in the Early Access (EA) phase. We recommend keeping usage and testing to non-production critical applications.
+Please contact your sales representative or support for more information.
+### Fixes
+- Fixes #326, now removing a s3_buckets block from an ionoscloud_k8s_cluster resource triggers a change in the terraform plan.
+- Fixes user creation bug, now user creation works properly when `group_ids` is specified in the plan.
+
+## 6.3.2
+### Feature
+- New Product: **MongoDB**:
+  - `Resources`:
+    - [ionoscloud_mongo_cluster](docs/resources/dbaas_mongo_cluster.md)
+    - [ionoscloud_mongo_user](docs/resources/dbaas_mongo_user.md)
+  - `Data Sources`:
+    - [ionoscloud_mongo_cluster](docs/data-sources/dbaas_mongo_cluster.md)
+    - [ionoscloud_mongo_user](docs/data-sources/dbaas_mongo_user.md)
+
+⚠️ **Note:** DBaaS - MongoDB is currently in the Early Access (EA) phase. We recommend keeping usage and testing to non-production critical applications.
+Please contact your sales representative or support for more information.
+
+- New Product: **Certificate Manager**:
+  - `Resources`:
+    - [ionoscloud_certificate](docs/resources/certificate.md)
+  - `Data Sources`:
+    - [ionoscloud_certificate](docs/data-sources/certificate.md)
+
+
+### Enhancement:
+- Increase go version to 1.18
+- Update dependencies to latest versions
+- Update Ionos Cloud GO SDK v6.1.3. Release notes here [v6.1.3](https://github.com/ionos-cloud/sdk-go/releases/tag/v6.1.3)
+- Update SDK GO DBaaS Postgres to v1.0.4. Release notes here [v1.0.4](https://github.com/ionos-cloud/sdk-go-dbaas-postgres/releases/tag/v1.0.4)
+- `ssh_key_path` will now allow the keys to be passed directly also. In the future, will be renamed to `ssh_keys`.
+
+### Fixes
+- Reproduces rarely: sometimes the `nic` resource is not found after creation. As a fix we added a retry for 5 minutes to be able to get the NIC. The retry will keep trying if the response 
+is `not found`(404)
+- Fix cube server creation. Some attributes were not populated - name, boot_cdrom, availability_zone
+- Crash on update of k8s version when we have a value without `.`
+
+### Documentation
+- add links to documentation for `cube` and `enterprise` fields
+
 ## 6.3.1
 
 ### Feature
 - When no argument is provided for user data source, try to get the email from the client configuration
+- Update Ionos Cloud GO SDK v6.1.2. Release notes here [v6.1.2](https://github.com/ionos-cloud/sdk-go/releases/tag/v6.1.2)
+- Refactor server and volume creation code
+- Make maintenance_window computed
+
 
 ## 6.3.0
 
@@ -38,7 +99,7 @@
 - update sdk-go-dbaas-postgres dependency to v1.0.3
 
 ### Documentation
-- updated multiple nics under the same IP Failover example, with a [one step example](examples/ip_failover/README.md)
+- updated multiple nics under the same IP Failover example, with a [one_step example](examples/ip_failover/README.md)
 
 ## 6.2.3
 

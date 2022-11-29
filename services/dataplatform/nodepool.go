@@ -6,7 +6,7 @@ import (
 	"github.com/google/uuid"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
-	dataplatform "github.com/ionos-cloud/sdk-go-autoscaling"
+	dataplatform "github.com/ionos-cloud/sdk-go-dataplatform"
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils"
 )
 
@@ -22,43 +22,32 @@ type NodePoolService interface {
 
 func (c *Client) GetNodePool(ctx context.Context, clusterId, nodePoolId string) (dataplatform.NodePoolResponseData, *dataplatform.APIResponse, error) {
 	cluster, apiResponse, err := c.DataPlatformNodePoolApi.GetClusterNodepool(ctx, clusterId, nodePoolId).Execute()
-	if apiResponse != nil {
-		return cluster, apiResponse, err
-
-	}
-	return cluster, nil, err
+	apiResponse.LogInfo()
+	return cluster, apiResponse, err
 }
 
 func (c *Client) ListNodePools(ctx context.Context, clusterId string) (dataplatform.NodePoolListResponseData, *dataplatform.APIResponse, error) {
 	nodePool, apiResponse, err := c.DataPlatformNodePoolApi.GetClusterNodepools(ctx, clusterId).Execute()
-	if apiResponse != nil {
-		return nodePool, apiResponse, err
-	}
-	return nodePool, nil, err
+	apiResponse.LogInfo()
+	return nodePool, apiResponse, err
 }
 
 func (c *Client) CreateNodePool(ctx context.Context, clusterId string, cluster dataplatform.CreateNodePoolRequest) (dataplatform.NodePoolResponseData, *dataplatform.APIResponse, error) {
 	clusterResponse, apiResponse, err := c.DataPlatformNodePoolApi.CreateClusterNodepool(ctx, clusterId).CreateNodePoolRequest(cluster).Execute()
-	if apiResponse != nil {
-		return clusterResponse, apiResponse, err
-	}
-	return clusterResponse, nil, err
+	apiResponse.LogInfo()
+	return clusterResponse, apiResponse, err
 }
 
 func (c *Client) UpdateNodePool(ctx context.Context, clusterId, nodePoolId string, cluster dataplatform.PatchNodePoolRequest) (dataplatform.NodePoolResponseData, *dataplatform.APIResponse, error) {
 	clusterResponse, apiResponse, err := c.DataPlatformNodePoolApi.PatchClusterNodepool(ctx, clusterId, nodePoolId).PatchNodePoolRequest(cluster).Execute()
-	if apiResponse != nil {
-		return clusterResponse, apiResponse, err
-	}
-	return clusterResponse, nil, err
+	apiResponse.LogInfo()
+	return clusterResponse, apiResponse, err
 }
 
 func (c *Client) DeleteNodePool(ctx context.Context, clusterId, nodePoolId string) (dataplatform.NodePoolResponseData, *dataplatform.APIResponse, error) {
 	clusterResponse, apiResponse, err := c.DataPlatformNodePoolApi.DeleteClusterNodepool(ctx, clusterId, nodePoolId).Execute()
-	if apiResponse != nil {
-		return clusterResponse, apiResponse, err
-	}
-	return clusterResponse, nil, err
+	apiResponse.LogInfo()
+	return clusterResponse, apiResponse, err
 }
 
 func GetDataplatformNodePoolDataCreate(d *schema.ResourceData) *dataplatform.CreateNodePoolRequest {
@@ -284,7 +273,7 @@ func SetNodePoolsData(d *schema.ResourceData, results []dataplatform.NodePoolRes
 		}
 		err := d.Set("node_pools", nodePools)
 		if err != nil {
-			diags := diag.FromErr(fmt.Errorf("error while setting node_pools: %s", err))
+			diags := diag.FromErr(fmt.Errorf("error while setting node_pools: %w", err))
 			return diags
 		}
 	}

@@ -3,7 +3,7 @@ package dataplatform
 import (
 	"fmt"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/meta"
-	dataplatform "github.com/ionos-cloud/sdk-go-autoscaling"
+	dataplatform "github.com/ionos-cloud/sdk-go-dataplatform"
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils"
 	"net/http"
 	"os"

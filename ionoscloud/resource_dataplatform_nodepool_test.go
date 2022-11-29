@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
-	dataplatform "github.com/ionos-cloud/sdk-go-autoscaling"
+	dataplatform "github.com/ionos-cloud/sdk-go-dataplatform"
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils"
 	"regexp"
 	"testing"
@@ -173,7 +173,7 @@ func testAccCheckDataplatformNodePoolDestroyCheck(s *terraform.State) error {
 
 		if err != nil {
 			if apiResponse == nil || apiResponse.StatusCode != 404 {
-				return fmt.Errorf("an error occurred while checking the destruction of Dataplatform Node Pool %s: %s", rs.Primary.ID, err)
+				return fmt.Errorf("an error occurred while checking the destruction of Dataplatform Node Pool %s: %w", rs.Primary.ID, err)
 			}
 		} else {
 			return fmt.Errorf("Dataplatform NodePool %s still exists", rs.Primary.ID)
@@ -210,7 +210,7 @@ func testAccCheckDataplatformNodePoolExists(n string, nodePool *dataplatform.Nod
 		foundNodePool, _, err := client.GetNodePool(ctx, clusterId, nodePoolId)
 
 		if err != nil {
-			return fmt.Errorf("an error occured while fetching Dataplatform Node Pool %s: %s", rs.Primary.ID, err)
+			return fmt.Errorf("an error occured while fetching Dataplatform Node Pool %s: %w", rs.Primary.ID, err)
 		}
 		if *foundNodePool.Id != rs.Primary.ID {
 			return fmt.Errorf("record not found")
@@ -229,13 +229,13 @@ resource ` + DatacenterResource + ` "datacenter_example" {
 }
 
 resource ` + DataplatformClusterResource + ` ` + DataplatformClusterTestResource + ` {
-	datacenter_id   		=  ` + DatacenterResource + `.datacenter_example.id
-  	name 					= "` + DataplatformNodePoolTestResource + `"
-  	maintenance_window {
-    	day_of_the_week  	= "Sunday"
-    	time				= "09:00:00"
-  	}
-  	data_platform_version	= "1.1.0"
+  datacenter_id   		=  ` + DatacenterResource + `.datacenter_example.id
+  name 					= "` + DataplatformNodePoolTestResource + `"
+  maintenance_window {
+   	day_of_the_week  	= "Sunday"
+   	time				= "09:00:00"
+  }
+  data_platform_version	= "1.1.0"
 }
 
 resource ` + DataplatformNodePoolResource + ` ` + DataplatformNodePoolTestResource + ` {
@@ -271,13 +271,13 @@ resource ` + DatacenterResource + ` "datacenter_example" {
 }
 
 resource ` + DataplatformClusterResource + ` ` + DataplatformClusterTestResource + ` {
-	datacenter_id   		=  ` + DatacenterResource + `.datacenter_example.id
-  	name 					= "` + UpdatedResources + `"
-  	maintenance_window {
-    	day_of_the_week  	= "Saturday"
-    	time				= "10:00:00"
-  	}
-  	data_platform_version	= "1.1.0"
+  datacenter_id   		=  ` + DatacenterResource + `.datacenter_example.id
+  name 					= "` + UpdatedResources + `"
+  maintenance_window {
+  	day_of_the_week  	= "Saturday"
+   	time				= "10:00:00"
+  }
+  data_platform_version	= "1.1.0"
 }
 
 resource ` + DataplatformNodePoolResource + ` ` + DataplatformNodePoolTestResource + ` {
@@ -305,38 +305,38 @@ resource ` + DataplatformNodePoolResource + ` ` + DataplatformNodePoolTestResour
 
 const testAccDataSourceDataplatformNodePoolMatchById = testAccCheckDataplatformNodePoolConfigBasic + `
 data ` + DataplatformNodePoolResource + ` ` + DataplatformNodePoolTestDataSourceById + ` {
-  	cluster_id    = ` + DataplatformClusterResource + `.` + DataplatformClusterTestResource + `.id	
-	id = ` + DataplatformNodePoolResource + `.` + DataplatformNodePoolTestResource + `.id
+  cluster_id    = ` + DataplatformClusterResource + `.` + DataplatformClusterTestResource + `.id	
+  id = ` + DataplatformNodePoolResource + `.` + DataplatformNodePoolTestResource + `.id
 }
 `
 
 const testAccDataSourceDataplatformNodePoolMatchByName = testAccCheckDataplatformNodePoolConfigBasic + `
 data ` + DataplatformNodePoolResource + ` ` + DataplatformNodePoolTestDataSourceByName + ` {
-    cluster_id    = ` + DataplatformClusterResource + `.` + DataplatformClusterTestResource + `.id
-	name = "` + DataplatformNodePoolTestResource + `"
+  cluster_id    = ` + DataplatformClusterResource + `.` + DataplatformClusterTestResource + `.id
+  name = "` + DataplatformNodePoolTestResource + `"
 }
 `
 
 const testAccDataSourceDataplatformNodePoolPartialMatchByName = testAccCheckDataplatformNodePoolConfigBasic + `
 data ` + DataplatformNodePoolResource + ` ` + DataplatformNodePoolTestDataSourceByName + ` {
-	cluster_id    = ` + DataplatformClusterResource + `.` + DataplatformClusterTestResource + `.id
-	name = "test_"
-    partial_match = true
+  cluster_id    = ` + DataplatformClusterResource + `.` + DataplatformClusterTestResource + `.id
+  name = "test_"
+  partial_match = true
 }
 `
 
 const testAccDataSourceDataplatformNodePoolWrongNameError = testAccCheckDataplatformNodePoolConfigBasic + `
 data ` + DataplatformNodePoolResource + ` ` + DataplatformNodePoolTestDataSourceByName + ` {
-	cluster_id    = ` + DataplatformClusterResource + `.` + DataplatformClusterTestResource + `.id
-	name = "wrong_name"
+  cluster_id    = ` + DataplatformClusterResource + `.` + DataplatformClusterTestResource + `.id
+  name = "wrong_name"
 }
 `
 
 const testAccDataSourceDataplatformNodePoolWrongPartialNameError = testAccCheckDataplatformNodePoolConfigBasic + `
 data ` + DataplatformNodePoolResource + ` ` + DataplatformNodePoolTestDataSourceByName + ` {
-    cluster_id    = ` + DataplatformClusterResource + `.` + DataplatformClusterTestResource + `.id
-	name = "wrong_name"
-	partial_match = true
+  cluster_id    = ` + DataplatformClusterResource + `.` + DataplatformClusterTestResource + `.id
+  name = "wrong_name"
+  partial_match = true
 }
 `
 const testAccDataSourceDataplatformNodePools = testAccCheckDataplatformNodePoolConfigBasic + `
@@ -347,29 +347,29 @@ data ` + DataplatformNodePoolsDataSource + ` + ` + DataplatformNodePoolsTestData
 
 const testAccDataSourceDataplatformNodePoolsByName = testAccCheckDataplatformNodePoolConfigBasic + `
 data ` + DataplatformNodePoolsDataSource + ` + ` + DataplatformNodePoolsTestDataSource + ` {
-	cluster_id    = ` + DataplatformClusterResource + `.` + DataplatformClusterTestResource + `.id
-	name = "` + DataplatformNodePoolTestResource + `"}
+  cluster_id    = ` + DataplatformClusterResource + `.` + DataplatformClusterTestResource + `.id
+  name = "` + DataplatformNodePoolTestResource + `"}
 `
 
 const testAccDataSourceDataplatformNodePoolsByNamePartialMatch = testAccCheckDataplatformNodePoolConfigBasic + `
 data ` + DataplatformNodePoolsDataSource + ` + ` + DataplatformNodePoolsTestDataSource + ` {
-	cluster_id    = ` + DataplatformClusterResource + `.` + DataplatformClusterTestResource + `.id
-	name = "test_"
-    partial_match = true
+  cluster_id    = ` + DataplatformClusterResource + `.` + DataplatformClusterTestResource + `.id
+  name = "test_"
+  partial_match = true
 }
 `
 
 const testAccDataSourceDataplatformNodePoolsByNameError = testAccCheckDataplatformNodePoolConfigBasic + `
 data ` + DataplatformNodePoolsDataSource + ` + ` + DataplatformNodePoolsTestDataSource + ` {
-	cluster_id    = ` + DataplatformClusterResource + `.` + DataplatformClusterTestResource + `.id
-	name = "wrong_name"
+  cluster_id    = ` + DataplatformClusterResource + `.` + DataplatformClusterTestResource + `.id
+  name = "wrong_name"
 }
 `
 
 const testAccDataSourceDataplatformNodePoolsByNamePartialMatchError = testAccCheckDataplatformNodePoolConfigBasic + `
 data ` + DataplatformNodePoolsDataSource + ` + ` + DataplatformNodePoolsTestDataSource + ` {
-	cluster_id    = ` + DataplatformClusterResource + `.` + DataplatformClusterTestResource + `.id
-	name = "wrong_name"
-	partial_match = true
+  cluster_id    = ` + DataplatformClusterResource + `.` + DataplatformClusterTestResource + `.id
+  name = "wrong_name"
+  partial_match = true
 }
 `

@@ -7,6 +7,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 	dataplatformService "github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/dataplatform"
+	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils"
 	"log"
 	"regexp"
 	"time"
@@ -23,23 +24,24 @@ func resourceDataplatformCluster() *schema.Resource {
 		},
 		Schema: map[string]*schema.Schema{
 			"datacenter_id": {
-				Type:         schema.TypeString,
-				Description:  "The UUID of the virtual data center (VDC) the cluster is provisioned.",
-				ValidateFunc: validation.All(validation.StringLenBetween(32, 63), validation.StringMatch(regexp.MustCompile("^[0-9a-f]{8}-?[0-9a-f]{4}-?[0-9a-f]{4}-?[0-9a-f]{4}-?[0-9a-f]{12}$"), "")),
-				Required:     true,
+				Type:        schema.TypeString,
+				Description: "The UUID of the virtual data center (VDC) the cluster is provisioned.",
+				ValidateDiagFunc: validation.ToDiagFunc(validation.All(validation.StringLenBetween(32, 63),
+					validation.StringMatch(regexp.MustCompile("^[0-9a-f]{8}-?[0-9a-f]{4}-?[0-9a-f]{4}-?[0-9a-f]{4}-?[0-9a-f]{12}$"), ""))),
+				Required: true,
 			},
 			"name": {
-				Type:         schema.TypeString,
-				Description:  "The name of your cluster. Must be 63 characters or less and must be empty or begin and end with an alphanumeric character ([a-z0-9A-Z]) with dashes (-), underscores (_), dots (.), and alphanumerics between.",
-				ValidateFunc: validation.All(validation.StringLenBetween(0, 63), validation.StringMatch(regexp.MustCompile("^[A-Za-z0-9][-A-Za-z0-9_.]*[A-Za-z0-9]$"), "")),
-				Required:     true,
+				Type:             schema.TypeString,
+				Description:      "The name of your cluster. Must be 63 characters or less and must be empty or begin and end with an alphanumeric character ([a-z0-9A-Z]) with dashes (-), underscores (_), dots (.), and alphanumerics between.",
+				ValidateDiagFunc: validation.ToDiagFunc(validation.All(validation.StringLenBetween(0, 63), validation.StringMatch(regexp.MustCompile("^[A-Za-z0-9][-A-Za-z0-9_.]*[A-Za-z0-9]$"), ""))),
+				Required:         true,
 			},
 			"data_platform_version": {
-				Type:         schema.TypeString,
-				Description:  "The version of the Data Platform.",
-				ValidateFunc: validation.All(validation.StringLenBetween(0, 32)),
-				Optional:     true,
-				Computed:     true,
+				Type:             schema.TypeString,
+				Description:      "The version of the Data Platform.",
+				ValidateDiagFunc: validation.ToDiagFunc(validation.StringLenBetween(0, 32)),
+				Optional:         true,
+				Computed:         true,
 			},
 			"maintenance_window": {
 				Type:        schema.TypeList,
@@ -49,15 +51,15 @@ func resourceDataplatformCluster() *schema.Resource {
 				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{
 						"time": {
-							Type:         schema.TypeString,
-							Description:  "Time at which the maintenance should start.",
-							ValidateFunc: validation.All(validation.StringMatch(regexp.MustCompile("^(?:[01]\\d|2[0-3]):(?:[0-5]\\d):(?:[0-5]\\d)$"), "")),
-							Required:     true,
+							Type:             schema.TypeString,
+							Description:      "Time at which the maintenance should start.",
+							ValidateDiagFunc: validation.ToDiagFunc(validation.StringMatch(regexp.MustCompile("^(?:[01]\\d|2[0-3]):(?:[0-5]\\d):(?:[0-5]\\d)$"), "")),
+							Required:         true,
 						},
 						"day_of_the_week": {
-							Type:         schema.TypeString,
-							ValidateFunc: validation.All(validation.IsDayOfTheWeek(true)),
-							Required:     true,
+							Type:             schema.TypeString,
+							ValidateDiagFunc: validation.ToDiagFunc(validation.IsDayOfTheWeek(true)),
+							Required:         true,
 						},
 					},
 				},
@@ -109,7 +111,7 @@ func resourceDataplatformClusterCreate(ctx context.Context, d *schema.ResourceDa
 		}
 
 		select {
-		case <-time.After(SleepInterval):
+		case <-time.After(utils.SleepInterval):
 			log.Printf("[INFO] trying again ...")
 		case <-ctx.Done():
 			log.Printf("[INFO] create timed out")
@@ -167,7 +169,7 @@ func resourceDataplatformClusterUpdate(ctx context.Context, d *schema.ResourceDa
 
 	d.SetId(*dataplatformClusterResponse.Id)
 
-	time.Sleep(SleepInterval)
+	time.Sleep(utils.SleepInterval)
 
 	for {
 		log.Printf("[INFO] Waiting for Cluster %s to be ready...", d.Id())
@@ -185,7 +187,7 @@ func resourceDataplatformClusterUpdate(ctx context.Context, d *schema.ResourceDa
 		}
 
 		select {
-		case <-time.After(SleepInterval):
+		case <-time.After(utils.SleepInterval):
 			log.Printf("[INFO] trying again ...")
 		case <-ctx.Done():
 			log.Printf("[INFO] create timed out")
@@ -230,7 +232,7 @@ func resourceDataplatformClusterDelete(ctx context.Context, d *schema.ResourceDa
 		}
 
 		select {
-		case <-time.After(SleepInterval):
+		case <-time.After(utils.SleepInterval):
 			log.Printf("[INFO] trying again ...")
 		case <-ctx.Done():
 			diags := diag.FromErr(fmt.Errorf("Dataplatform Cluster deletion timed out! WARNING: your Dataplatform Cluster (%s) will still probably be deleted after some time but the terraform state won't reflect that; check your Ionos Cloud account for updates", d.Id()))
@@ -239,7 +241,7 @@ func resourceDataplatformClusterDelete(ctx context.Context, d *schema.ResourceDa
 	}
 
 	// wait 15 seconds after the deletion of the Cluster, for the lan to be freed
-	time.Sleep(SleepInterval * 3)
+	time.Sleep(utils.SleepInterval * 3)
 
 	return nil
 }

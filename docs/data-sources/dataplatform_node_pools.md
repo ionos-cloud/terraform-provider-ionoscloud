@@ -4,7 +4,7 @@ layout: "ionoscloud"
 page_title: "IonosCloud : ionoscloud_dataplatform_node_pools"
 sidebar_current: "docs-dataplatform_node_pools"
 description: |-
-Get information on a Dataplatform Node Pool list under a Dataplatform Cluster.
+  Get information on a Dataplatform Node Pool list under a Dataplatform Cluster.
 ---
 
 # ionoscloud\_dataplatform_node_pools

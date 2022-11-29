@@ -4,7 +4,7 @@ layout: "ionoscloud"
 page_title: "IonosCloud: ionoscloud_dataplatform_node_pool"
 sidebar_current: "docs-resource-dataplatform_node_pool"
 description: |-
-Creates and manages Dataplatform Node Pool objects.
+  Creates and manages Dataplatform Node Pool objects.
 ---
 
 # ionoscloud_dataplatform_node_pool

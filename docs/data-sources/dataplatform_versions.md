@@ -4,7 +4,7 @@ layout: "ionoscloud"
 page_title: "IonosCloud : ionoscloud_dataplatform_versions"
 sidebar_current: "docs-dataplatform_versions"
 description: |-
-Get information on Managed Dataplatform API versions.
+  Get information on Managed Dataplatform API versions.
 ---
 
 # ionoscloud\_dataplatform_versions

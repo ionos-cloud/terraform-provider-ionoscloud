@@ -7,7 +7,9 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 	ionoscloud "github.com/ionos-cloud/sdk-go/v6"
+	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils"
 	"log"
+	"strings"
 	"time"
 )
 
@@ -230,7 +232,7 @@ func resourcePrivateCrossConnectDelete(ctx context.Context, d *schema.ResourceDa
 		}
 
 		select {
-		case <-time.After(SleepInterval):
+		case <-time.After(utils.SleepInterval):
 			log.Printf("[INFO] trying again ...")
 		case <-ctx.Done():
 			log.Printf("[INFO] delete timed out")
@@ -284,7 +286,7 @@ func privateCrossConnectReady(ctx context.Context, client *ionoscloud.APIClient,
 	if err != nil {
 		return true, fmt.Errorf("error checking PCC status: %s", err)
 	}
-	return *rsp.Metadata.State == "AVAILABLE", nil
+	return strings.EqualFold(*rsp.Metadata.State, utils.Available), nil
 }
 
 func privateCrossConnectDeleted(ctx context.Context, client *ionoscloud.APIClient, d *schema.ResourceData) (bool, error) {
@@ -317,7 +319,7 @@ func waitForPCCToBeReady(ctx context.Context, d *schema.ResourceData, client *io
 		}
 
 		select {
-		case <-time.After(SleepInterval):
+		case <-time.After(utils.SleepInterval):
 			log.Printf("[INFO] trying again ...")
 		case <-ctx.Done():
 			log.Printf("[INFO] update timed out")

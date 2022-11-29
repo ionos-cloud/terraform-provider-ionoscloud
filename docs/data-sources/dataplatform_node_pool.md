@@ -4,7 +4,7 @@ layout: "ionoscloud"
 page_title: "IonosCloud : ionoscloud_dataplatform_node_pool"
 sidebar_current: "docs-dataplatform_node_pool"
 description: |-
-Get information on a Dataplatform Node Pool.
+  Get information on a Dataplatform Node Pool.
 ---
 
 # ionoscloud\_dataplatform_node_pool

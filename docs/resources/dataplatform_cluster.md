@@ -4,7 +4,7 @@ layout: "ionoscloud"
 page_title: "IonosCloud: ionoscloud_dataplatform_cluster"
 sidebar_current: "docs-resource-dataplatform_cluster"
 description: |-
-Creates and manages Dataplatform Cluster objects.
+  Creates and manages Dataplatform Cluster objects.
 ---
 
 # ionoscloud_dataplatform_cluster

@@ -8,7 +8,7 @@ import (
 	"fmt"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
-	dataplatform "github.com/ionos-cloud/sdk-go-autoscaling"
+	dataplatform "github.com/ionos-cloud/sdk-go-dataplatform"
 	"regexp"
 	"testing"
 )
@@ -104,8 +104,8 @@ func testAccCheckDataplatformClusterDestroyCheck(s *terraform.State) error {
 		_, apiResponse, err := client.GetCluster(ctx, clusterId)
 
 		if err != nil {
-			if apiResponse == nil || apiResponse.StatusCode != 404 {
-				return fmt.Errorf("an error occurred while checking the destruction of Dataplatform cluster %s: %s", rs.Primary.ID, err)
+			if !apiResponse.HttpNotFound() {
+				return fmt.Errorf("an error occurred while checking the destruction of Dataplatform cluster %s: %w", rs.Primary.ID, err)
 			}
 		} else {
 			return fmt.Errorf("Dataplatform cluster %s still exists", rs.Primary.ID)
@@ -141,7 +141,7 @@ func testAccCheckDataplatformClusterExists(n string, cluster *dataplatform.Clust
 		foundCluster, _, err := client.GetCluster(ctx, clusterId)
 
 		if err != nil {
-			return fmt.Errorf("an error occured while fetching Dataplatform Cluster %s: %s", rs.Primary.ID, err)
+			return fmt.Errorf("an error occured while fetching Dataplatform Cluster %s: %w", rs.Primary.ID, err)
 		}
 		if *foundCluster.Id != rs.Primary.ID {
 			return fmt.Errorf("record not found")
@@ -160,13 +160,13 @@ resource ` + DatacenterResource + ` "datacenter_example" {
 }
 
 resource ` + DataplatformClusterResource + ` ` + DataplatformClusterTestResource + ` {
-	datacenter_id   		=  ` + DatacenterResource + `.datacenter_example.id
-  	name 					= "` + DataplatformClusterTestResource + `"
-  	maintenance_window {
-    	day_of_the_week  	= "Sunday"
-    	time				= "09:00:00"
-  	}
-  	data_platform_version	= "1.1.0"
+  datacenter_id   		=  ` + DatacenterResource + `.datacenter_example.id
+  name 					= "` + DataplatformClusterTestResource + `"
+  maintenance_window {
+  	day_of_the_week  	= "Sunday"
+   	time				= "09:00:00"
+  }
+  data_platform_version	= "1.1.0"
 }
 `
 
@@ -178,44 +178,44 @@ resource ` + DatacenterResource + ` "datacenter_example" {
 }
 
 resource ` + DataplatformClusterResource + ` ` + DataplatformClusterTestResource + ` {
-	datacenter_id   		=  ` + DatacenterResource + `.datacenter_example.id
-  	name 					= "` + UpdatedResources + `"
-  	maintenance_window {
-    	day_of_the_week  	= "Saturday"
-    	time				= "10:00:00"
-  	}
-  	data_platform_version	= "1.1.0"
+  datacenter_id   		=  ` + DatacenterResource + `.datacenter_example.id
+  name 					= "` + UpdatedResources + `"
+  maintenance_window {
+   	day_of_the_week  	= "Saturday"
+   	time				= "10:00:00"
+  }
+  data_platform_version	= "1.1.0"
 }
 `
 
 const testAccDataSourceDataplatformClusterMatchById = testAccCheckDataplatformClusterConfigBasic + `
-data ` + DataplatformClusterResource + ` ` + DataplatformClusterTestDataSourceById + ` {
-	id = ` + DataplatformClusterResource + `.` + DataplatformClusterTestResource + `.id
+  data ` + DataplatformClusterResource + ` ` + DataplatformClusterTestDataSourceById + ` {
+  id = ` + DataplatformClusterResource + `.` + DataplatformClusterTestResource + `.id
 }
 `
 
 const testAccDataSourceDataplatformClusterMatchByName = testAccCheckDataplatformClusterConfigBasic + `
-data ` + DataplatformClusterResource + ` ` + DataplatformClusterTestDataSourceByName + ` {
-	name = "` + DataplatformClusterTestResource + `"
+  data ` + DataplatformClusterResource + ` ` + DataplatformClusterTestDataSourceByName + ` {
+  name = "` + DataplatformClusterTestResource + `"
 }
 `
 
 const testAccDataSourceDataplatformClusterPartialMatchByName = testAccCheckDataplatformClusterConfigBasic + `
-data ` + DataplatformClusterResource + ` ` + DataplatformClusterTestDataSourceByName + ` {
-	name = "test_"
-    partial_match = true
+  data ` + DataplatformClusterResource + ` ` + DataplatformClusterTestDataSourceByName + ` {
+  name = "test_"
+  partial_match = true
 }
 `
 
 const testAccDataSourceDataplatformClusterWrongNameError = testAccCheckDataplatformClusterConfigBasic + `
-data ` + DataplatformClusterResource + ` ` + DataplatformClusterTestDataSourceByName + ` {
-	name = "wrong_name"
+ data ` + DataplatformClusterResource + ` ` + DataplatformClusterTestDataSourceByName + ` {
+  name = "wrong_name"
 }
 `
 
 const testAccDataSourceDataplatformClusterWrongPartialNameError = testAccCheckDataplatformClusterConfigBasic + `
-data ` + DataplatformClusterResource + ` ` + DataplatformClusterTestDataSourceByName + ` {
-	name = "wrong_name"
-	partial_match = true
+  data ` + DataplatformClusterResource + ` ` + DataplatformClusterTestDataSourceByName + ` {
+  name = "wrong_name"
+  partial_match = true
 }
 `

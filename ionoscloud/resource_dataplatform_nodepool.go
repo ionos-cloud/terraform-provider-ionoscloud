@@ -7,6 +7,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 	dataplatformService "github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/dataplatform"
+	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils"
 	"log"
 	"regexp"
 	"time"
@@ -23,10 +24,10 @@ func resourceDataplatformNodePool() *schema.Resource {
 		},
 		Schema: map[string]*schema.Schema{
 			"name": {
-				Type:         schema.TypeString,
-				Description:  "The name of your node pool. Must be 63 characters or less and must be empty or begin and end with an alphanumeric character ([a-z0-9A-Z]) with dashes (-), underscores (_), dots (.), and alphanumerics between.",
-				Required:     true,
-				ValidateFunc: validation.All(validation.StringLenBetween(0, 63), validation.StringMatch(regexp.MustCompile("^[A-Za-z0-9][-A-Za-z0-9_.]*[A-Za-z0-9]$"), "")),
+				Type:             schema.TypeString,
+				Description:      "The name of your node pool. Must be 63 characters or less and must be empty or begin and end with an alphanumeric character ([a-z0-9A-Z]) with dashes (-), underscores (_), dots (.), and alphanumerics between.",
+				Required:         true,
+				ValidateDiagFunc: validation.ToDiagFunc(validation.All(validation.StringLenBetween(0, 63), validation.StringMatch(regexp.MustCompile("^[A-Za-z0-9][-A-Za-z0-9_.]*[A-Za-z0-9]$"), ""))),
 			},
 			"node_count": {
 				Type:        schema.TypeInt,
@@ -40,39 +41,39 @@ func resourceDataplatformNodePool() *schema.Resource {
 				Computed:    true,
 			},
 			"cores_count": {
-				Type:         schema.TypeInt,
-				Description:  "The number of CPU cores per node.",
-				Optional:     true,
-				Computed:     true,
-				ValidateFunc: validation.All(validation.IntAtLeast(1)),
+				Type:             schema.TypeInt,
+				Description:      "The number of CPU cores per node.",
+				Optional:         true,
+				Computed:         true,
+				ValidateDiagFunc: validation.ToDiagFunc(validation.IntAtLeast(1)),
 			},
 			"ram_size": {
-				Type:         schema.TypeInt,
-				Description:  "The RAM size for one node in MB. Must be set in multiples of 1024 MB, with a minimum size is of 2048 MB.",
-				Optional:     true,
-				Computed:     true,
-				ValidateFunc: validation.All(validation.IntAtLeast(2048), validation.IntDivisibleBy(1024)),
+				Type:             schema.TypeInt,
+				Description:      "The RAM size for one node in MB. Must be set in multiples of 1024 MB, with a minimum size is of 2048 MB.",
+				Optional:         true,
+				Computed:         true,
+				ValidateDiagFunc: validation.ToDiagFunc(validation.All(validation.IntAtLeast(2048), validation.IntDivisibleBy(1024))),
 			},
 			"availability_zone": {
-				Type:         schema.TypeString,
-				Description:  "The availability zone of the virtual datacenter region where the node pool resources should be provisioned.",
-				Optional:     true,
-				Computed:     true,
-				ValidateFunc: validation.All(validation.StringInSlice([]string{"AUTO", "ZONE_1", "ZONE_2"}, true)),
+				Type:             schema.TypeString,
+				Description:      "The availability zone of the virtual datacenter region where the node pool resources should be provisioned.",
+				Optional:         true,
+				Computed:         true,
+				ValidateDiagFunc: validation.ToDiagFunc(validation.StringInSlice([]string{"AUTO", "ZONE_1", "ZONE_2"}, true)),
 			},
 			"storage_type": {
-				Type:         schema.TypeString,
-				Description:  "The type of hardware for the volume.",
-				Optional:     true,
-				Computed:     true,
-				ValidateFunc: validation.All(validation.StringInSlice([]string{"HDD", "SSD"}, true)),
+				Type:             schema.TypeString,
+				Description:      "The type of hardware for the volume.",
+				Optional:         true,
+				Computed:         true,
+				ValidateDiagFunc: validation.ToDiagFunc(validation.StringInSlice([]string{"HDD", "SSD"}, true)),
 			},
 			"storage_size": {
-				Type:         schema.TypeInt,
-				Description:  "The size of the volume in GB. The size must be greater than 10GB.",
-				Optional:     true,
-				Computed:     true,
-				ValidateFunc: validation.All(validation.IntAtLeast(10)),
+				Type:             schema.TypeInt,
+				Description:      "The size of the volume in GB. The size must be greater than 10GB.",
+				Optional:         true,
+				Computed:         true,
+				ValidateDiagFunc: validation.ToDiagFunc(validation.IntAtLeast(10)),
 			},
 			"maintenance_window": {
 				Type:        schema.TypeList,
@@ -82,15 +83,15 @@ func resourceDataplatformNodePool() *schema.Resource {
 				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{
 						"time": {
-							Type:         schema.TypeString,
-							Description:  "Time at which the maintenance should start.",
-							ValidateFunc: validation.All(validation.StringMatch(regexp.MustCompile("^(?:[01]\\d|2[0-3]):(?:[0-5]\\d):(?:[0-5]\\d)$"), "")),
-							Required:     true,
+							Type:             schema.TypeString,
+							Description:      "Time at which the maintenance should start.",
+							ValidateDiagFunc: validation.ToDiagFunc(validation.StringMatch(regexp.MustCompile("^(?:[01]\\d|2[0-3]):(?:[0-5]\\d):(?:[0-5]\\d)$"), "")),
+							Required:         true,
 						},
 						"day_of_the_week": {
-							Type:         schema.TypeString,
-							ValidateFunc: validation.All(validation.IsDayOfTheWeek(true)),
-							Required:     true,
+							Type:             schema.TypeString,
+							ValidateDiagFunc: validation.ToDiagFunc(validation.IsDayOfTheWeek(true)),
+							Required:         true,
 						},
 					},
 				},
@@ -118,10 +119,10 @@ func resourceDataplatformNodePool() *schema.Resource {
 				Computed:    true,
 			},
 			"cluster_id": {
-				Type:         schema.TypeString,
-				Required:     true,
-				Description:  "The UUID of an existing Dataplatform cluster.",
-				ValidateFunc: validation.All(validation.StringMatch(regexp.MustCompile("^[A-Za-z0-9][-A-Za-z0-9_.]*[A-Za-z0-9]$"), "")),
+				Type:             schema.TypeString,
+				Required:         true,
+				Description:      "The UUID of an existing Dataplatform cluster.",
+				ValidateDiagFunc: validation.ToDiagFunc(validation.StringMatch(regexp.MustCompile("^[A-Za-z0-9][-A-Za-z0-9_.]*[A-Za-z0-9]$"), "")),
 			},
 		},
 		Timeouts:      &resourceDefaultTimeouts,
@@ -196,7 +197,7 @@ func resourceDataplatformNodePoolCreate(ctx context.Context, d *schema.ResourceD
 		}
 
 		select {
-		case <-time.After(SleepInterval):
+		case <-time.After(utils.SleepInterval):
 			log.Printf("[INFO] trying again ...")
 		case <-ctx.Done():
 			log.Printf("[INFO] create timed out")
@@ -250,13 +251,13 @@ func resourceDataplatformNodePoolUpdate(ctx context.Context, d *schema.ResourceD
 	dataplatformNodePoolResponse, _, err := client.UpdateNodePool(ctx, clusterId, nodePoolId, *dataplatformNodePool)
 
 	if err != nil {
-		diags := diag.FromErr(fmt.Errorf("an error occured while updating a Dataplatform NodePool: %s", err))
+		diags := diag.FromErr(fmt.Errorf("an error occured while updating a Dataplatform NodePool: %w", err))
 		return diags
 	}
 
 	d.SetId(*dataplatformNodePoolResponse.Id)
-
-	time.Sleep(SleepInterval)
+	//todo is this necessary
+	time.Sleep(utils.SleepInterval)
 
 	for {
 		log.Printf("[INFO] Waiting for Node Pool %s to be ready...", d.Id())
@@ -274,11 +275,11 @@ func resourceDataplatformNodePoolUpdate(ctx context.Context, d *schema.ResourceD
 		}
 
 		select {
-		case <-time.After(SleepInterval):
+		case <-time.After(utils.SleepInterval):
 			log.Printf("[INFO] trying again ...")
 		case <-ctx.Done():
 			log.Printf("[INFO] create timed out")
-			diags := diag.FromErr(fmt.Errorf("Dataplatform Node Pool update timed out! WARNING: your Dataplatform Node Pool (%s) will still probably be updated after some time but the terraform state wont reflect that; check your Ionos Cloud account for updates", d.Id()))
+			diags := diag.FromErr(fmt.Errorf("dataplatform Node Pool update timed out! WARNING: your Dataplatform Node Pool (%s) will still probably be updated after some time but the terraform state wont reflect that; check your Ionos Cloud account for updates", d.Id()))
 			return diags
 		}
 
@@ -296,11 +297,11 @@ func resourceDataplatformNodePoolDelete(ctx context.Context, d *schema.ResourceD
 	_, apiResponse, err := client.DeleteNodePool(ctx, clusterId, nodePoolId)
 
 	if err != nil {
-		if apiResponse != nil && apiResponse.Response != nil && apiResponse.StatusCode == 404 {
+		if apiResponse.HttpNotFound() {
 			d.SetId("")
 			return nil
 		}
-		diags := diag.FromErr(fmt.Errorf("error while deleting Dataplatform Node Pool %s: %s", d.Id(), err))
+		diags := diag.FromErr(fmt.Errorf("error while deleting Dataplatform Node Pool %s: %w", d.Id(), err))
 		return diags
 	}
 
@@ -310,7 +311,7 @@ func resourceDataplatformNodePoolDelete(ctx context.Context, d *schema.ResourceD
 		nodePoolDeleted, dsErr := dataplatformNodePoolDeleted(ctx, client, d)
 
 		if dsErr != nil {
-			diags := diag.FromErr(fmt.Errorf("error while checking deletion status of Dataplatform Node Pool %s: %s", d.Id(), dsErr))
+			diags := diag.FromErr(fmt.Errorf("error while checking deletion status of Dataplatform Node Pool %s: %w", d.Id(), dsErr))
 			return diags
 		}
 
@@ -320,7 +321,7 @@ func resourceDataplatformNodePoolDelete(ctx context.Context, d *schema.ResourceD
 		}
 
 		select {
-		case <-time.After(SleepInterval):
+		case <-time.After(utils.SleepInterval):
 			log.Printf("[INFO] trying again ...")
 		case <-ctx.Done():
 			diags := diag.FromErr(fmt.Errorf("Dataplatform Node Pool deletion timed out! WARNING: your Dataplatform Node Pool (%s) will still probably be deleted after some time but the terraform state won't reflect that; check your Ionos Cloud account for updates", d.Id()))
@@ -329,7 +330,7 @@ func resourceDataplatformNodePoolDelete(ctx context.Context, d *schema.ResourceD
 	}
 
 	// wait 15 seconds after the deletion of the Node Pool, for the lan to be freed
-	time.Sleep(SleepInterval * 3)
+	time.Sleep(utils.SleepInterval * 3)
 
 	return nil
 }
@@ -343,9 +344,9 @@ func resourceDataplatformNodePoolImport(ctx context.Context, d *schema.ResourceD
 	dataplatformNodePool, apiResponse, err := client.GetNodePool(ctx, clusterId, nodePoolId)
 
 	if err != nil {
-		if apiResponse != nil && apiResponse.Response != nil && apiResponse.StatusCode == 404 {
+		if apiResponse.HttpNotFound() {
 			d.SetId("")
-			return nil, fmt.Errorf("Dataplatform Node Pool does not exist %q", nodePoolId)
+			return nil, fmt.Errorf("dataplatform Node Pool does not exist %q", nodePoolId)
 		}
 		return nil, fmt.Errorf("an error occured while trying to fetch the import of Dataplatform Node Pool %q", nodePoolId)
 	}
@@ -367,7 +368,7 @@ func dataplatformNodePoolReady(ctx context.Context, client *dataplatformService.
 	subjectNodePool, _, err := client.GetNodePool(ctx, clusterId, nodePoolId)
 
 	if err != nil {
-		return true, fmt.Errorf("error checking Dataplatform Node Pool status: %s", err)
+		return true, fmt.Errorf("error checking Dataplatform Node Pool status: %w", err)
 	}
 	// ToDo: Removed this part since there are still problems with the nodePools being unstable (failing for a short time and then recovering)
 	//if *subjectNodePool.LifecycleStatus == "FAILED" {
@@ -395,10 +396,10 @@ func dataplatformNodePoolDeleted(ctx context.Context, client *dataplatformServic
 	_, apiResponse, err := client.GetNodePool(ctx, clusterId, nodePoolId)
 
 	if err != nil {
-		if apiResponse != nil && apiResponse.Response != nil && apiResponse.StatusCode == 404 {
+		if apiResponse.HttpNotFound() {
 			return true, nil
 		}
-		return true, fmt.Errorf("error checking Dataplatform Node Pool deletion status: %s", err)
+		return true, fmt.Errorf("checking Dataplatform Node Pool deletion status: %w", err)
 	}
 	return false, nil
 }

@@ -4,7 +4,7 @@ layout: "ionoscloud"
 page_title: "IonosCloud : ionoscloud_dataplatform_cluster"
 sidebar_current: "docs-dataplatform_cluster"
 description: |-
-Get information on a Dataplatform Cluster.
+  Get information on a Dataplatform Cluster.
 ---
 
 # ionoscloud_dataplatform_cluster

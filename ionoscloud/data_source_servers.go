@@ -274,7 +274,7 @@ func dataSourceServersRead(ctx context.Context, d *schema.ResourceData, meta int
 				}
 			}
 			if server.Entities.Volumes != nil && server.Entities.Volumes.Items != nil {
-				volumes := setVolumeProperties(*server.Entities.Volumes.Items)
+				volumes := setVolumePropertiesToSlice(*server.Entities.Volumes.Items)
 				if volumes != nil && len(volumes) > 0 {
 					serverEntry["volumes"] = volumes
 				}
@@ -302,8 +302,8 @@ func dataSourceServersRead(ctx context.Context, d *schema.ResourceData, meta int
 	return nil
 }
 
-//setVolumeProperties returns a slice of volumes
-func setVolumeProperties(volumesList []ionoscloud.Volume) []interface{} {
+// setVolumePropertiesToSlice returns a slice of volumes
+func setVolumePropertiesToSlice(volumesList []ionoscloud.Volume) []interface{} {
 	var volumes []interface{}
 	if volumesList != nil && len(volumesList) > 0 {
 		for _, volume := range volumesList {
