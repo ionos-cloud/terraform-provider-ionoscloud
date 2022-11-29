@@ -115,7 +115,7 @@ func resourceServer() *schema.Resource {
 			"ssh_key_path": {
 				Type:          schema.TypeList,
 				Elem:          &schema.Schema{Type: schema.TypeString},
-				ConflictsWith: []string{"volume.0.ssh_key_path", "ssh_keys"},
+				ConflictsWith: []string{"volume.0.ssh_key_path", "volume.0.ssh_keys", "ssh_keys"},
 				Optional:      true,
 				Computed:      true,
 				ForceNew:      true,
@@ -124,7 +124,7 @@ func resourceServer() *schema.Resource {
 			"ssh_keys": {
 				Type:          schema.TypeList,
 				Elem:          &schema.Schema{Type: schema.TypeString},
-				ConflictsWith: []string{"volume.0.ssh_key_path", "ssh_key_path"},
+				ConflictsWith: []string{"volume.0.ssh_key_path", "volume.0.ssh_keys", "ssh_key_path"},
 				Optional:      true,
 				Computed:      true,
 				ForceNew:      true,
@@ -165,12 +165,13 @@ func resourceServer() *schema.Resource {
 							Computed: true,
 						},
 						"ssh_key_path": {
-							Type:       schema.TypeList,
-							Elem:       &schema.Schema{Type: schema.TypeString},
-							Optional:   true,
-							Deprecated: "Please use ssh_key_path under server level",
-							Computed:   true,
-							ForceNew:   true,
+							Type:        schema.TypeList,
+							Elem:        &schema.Schema{Type: schema.TypeString},
+							Optional:    true,
+							Deprecated:  "Please use ssh_key_path under server level",
+							Description: "Public SSH keys are set on the image as authorized keys for appropriate SSH login to the instance using the corresponding private key. This field may only be set in creation requests. When reading, it always returns null. SSH keys are only supported if a public Linux image is used for the volume creation.",
+							Computed:    true,
+							ForceNew:    true,
 							DiffSuppressFunc: func(k, old, new string, d *schema.ResourceData) bool {
 								if k == "volume.0.ssh_key_path.#" {
 									if d.Get("ssh_key_path.#") == new {
@@ -190,11 +191,12 @@ func resourceServer() *schema.Resource {
 							},
 						},
 						"ssh_keys": {
-							Type:       schema.TypeList,
-							Elem:       &schema.Schema{Type: schema.TypeString},
-							Optional:   true,
-							Deprecated: "Please use ssh_keys under server level",
-							Computed:   true,
+							Type:        schema.TypeList,
+							Elem:        &schema.Schema{Type: schema.TypeString},
+							Optional:    true,
+							Deprecated:  "Please use ssh_keys under server level",
+							Computed:    true,
+							Description: "Public SSH keys are set on the image as authorized keys for appropriate SSH login to the instance using the corresponding private key. This field may only be set in creation requests. When reading, it always returns null. SSH keys are only supported if a public Linux image is used for the volume creation.",
 							DiffSuppressFunc: func(k, old, new string, d *schema.ResourceData) bool {
 								if k == "volume.0.ssh_keys.#" {
 									if d.Get("ssh_keys.#") == new {
