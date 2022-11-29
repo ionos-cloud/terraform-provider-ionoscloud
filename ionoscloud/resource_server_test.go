@@ -376,6 +376,7 @@ func TestAccServerWithLabels(t *testing.T) {
 		PreCheck: func() {
 			testAccPreCheck(t)
 		},
+		ExternalProviders: randomProviderVersion343(),
 		ProviderFactories: testAccProviderFactories,
 		CheckDestroy:      testAccCheckServerDestroyCheck,
 		Steps: []resource.TestStep{
@@ -835,16 +836,10 @@ data ` + ServerResource + ` ` + ServerDataSourceById + ` {
 }
 `
 
-const (
-	testAccCheckServerUpdateLabels = `
+const testAccCheckServerUpdateLabels = `
 resource ` + DatacenterResource + ` ` + DatacenterTestResource + ` {
 	name       = "server-test"
 	location = "us/las"
-}
-resource "ionoscloud_ipblock" "webserver_ipblock" {
-  location = ` + DatacenterResource + `.` + DatacenterTestResource + `.location
-  size = 4
-  name = "webserver_ipblock"
 }
 resource ` + LanResource + ` ` + LanTestResource + ` {
   datacenter_id = ` + DatacenterResource + `.` + DatacenterTestResource + `.id
@@ -859,7 +854,6 @@ resource ` + ServerResource + ` ` + ServerTestResource + ` {
   availability_zone = "ZONE_1"
   cpu_family = "AMD_OPTERON"
   image_name ="ubuntu:latest"
-  image_password = "K3tTj8G14a3EgKyNeeiY"
   type = "ENTERPRISE"
   volume {
     name = "system"
@@ -868,24 +862,12 @@ resource ` + ServerResource + ` ` + ServerTestResource + ` {
     user_data = "foo"
     bus = "VIRTIO"
     availability_zone = "ZONE_1"
-}
+  }
   nic {
     lan = ` + LanResource + `.` + LanTestResource + `.id
     name = "system"
     dhcp = true
-    firewall_active = true
-	firewall_type = "BIDIRECTIONAL"
-    ips            = [ ionoscloud_ipblock.webserver_ipblock.ips[0], ionoscloud_ipblock.webserver_ipblock.ips[1] ]
-    firewall {
-      protocol = "TCP"
-      name = "SSH"
-      port_range_start = 22
-      port_range_end = 22
-	  source_mac = "00:0a:95:9d:68:17"
-	  source_ip = ionoscloud_ipblock.webserver_ipblock.ips[2]
-	  target_ip = ionoscloud_ipblock.webserver_ipblock.ips[3]
-	  type = "EGRESS"
-    }
+    firewall_active = false
   }
   label {
     key = "updatedlabelkey0"
@@ -896,18 +878,11 @@ resource ` + ServerResource + ` ` + ServerTestResource + ` {
     value = "updatedlabelvalue1"
   }
 }`
-)
 
-const (
-	testAccCheckServerDeleteLabels = `
+const testAccCheckServerDeleteLabels = `
 resource ` + DatacenterResource + ` ` + DatacenterTestResource + ` {
 	name       = "server-test"
 	location = "us/las"
-}
-resource "ionoscloud_ipblock" "webserver_ipblock" {
-  location = ` + DatacenterResource + `.` + DatacenterTestResource + `.location
-  size = 4
-  name = "webserver_ipblock"
 }
 resource ` + LanResource + ` ` + LanTestResource + ` {
   datacenter_id = ` + DatacenterResource + `.` + DatacenterTestResource + `.id
@@ -922,7 +897,6 @@ resource ` + ServerResource + ` ` + ServerTestResource + ` {
   availability_zone = "ZONE_1"
   cpu_family = "AMD_OPTERON"
   image_name ="ubuntu:latest"
-  image_password = "K3tTj8G14a3EgKyNeeiY"
   type = "ENTERPRISE"
   volume {
     name = "system"
@@ -936,19 +910,6 @@ resource ` + ServerResource + ` ` + ServerTestResource + ` {
     lan = ` + LanResource + `.` + LanTestResource + `.id
     name = "system"
     dhcp = true
-    firewall_active = true
-	firewall_type = "BIDIRECTIONAL"
-    ips            = [ ionoscloud_ipblock.webserver_ipblock.ips[0], ionoscloud_ipblock.webserver_ipblock.ips[1] ]
-    firewall {
-      protocol = "TCP"
-      name = "SSH"
-      port_range_start = 22
-      port_range_end = 22
-	  source_mac = "00:0a:95:9d:68:17"
-	  source_ip = ionoscloud_ipblock.webserver_ipblock.ips[2]
-	  target_ip = ionoscloud_ipblock.webserver_ipblock.ips[3]
-	  type = "EGRESS"
-    }
+    firewall_active = false
   }
 }`
-)
