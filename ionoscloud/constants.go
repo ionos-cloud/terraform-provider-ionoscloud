@@ -273,4 +273,5 @@ const (
 	certManagerClient
 	mongoClient
 	containerRegistryClient
+	dataplatformClient
 )

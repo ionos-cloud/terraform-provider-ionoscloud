@@ -97,7 +97,7 @@ func GetDataplatformNodePoolDataCreate(d *schema.ResourceData) *dataplatform.Cre
 	}
 
 	if _, ok := d.GetOk("maintenance_window"); ok {
-		dataplatformNodePool.Properties.MaintenanceWindow = GetDataplatformMaintenanceWindowData(d)
+		dataplatformNodePool.Properties.MaintenanceWindow = setMaintenanceWindowData(d)
 	}
 
 	if labelsValue, ok := d.GetOk("labels"); ok {
@@ -131,7 +131,7 @@ func GetDataplatformNodePoolDataUpdate(d *schema.ResourceData) (*dataplatform.Pa
 	}
 
 	if _, ok := d.GetOk("maintenance_window"); ok {
-		dataplatformNodePool.Properties.MaintenanceWindow = GetDataplatformMaintenanceWindowData(d)
+		dataplatformNodePool.Properties.MaintenanceWindow = setMaintenanceWindowData(d)
 	}
 
 	if labelsValue, ok := d.GetOk("labels"); ok {

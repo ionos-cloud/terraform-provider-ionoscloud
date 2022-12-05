@@ -29,8 +29,6 @@ type clientService struct {
 	client *dataplatform.APIClient
 }
 
-var _ ClientService = &clientService{}
-
 func NewClientService(username, password, token, url, version, terraformVersion string) ClientService {
 	newConfigDataplatform := dataplatform.NewConfiguration(username, password, token, url)
 

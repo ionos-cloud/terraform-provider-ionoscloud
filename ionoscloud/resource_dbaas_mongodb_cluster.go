@@ -160,7 +160,7 @@ func resourceDbaasMongoClusterCreate(ctx context.Context, d *schema.ResourceData
 
 	_, err = waitForClusterToBeReady(ctx, client, d.Id())
 	if err != nil {
-		return diag.FromErr(fmt.Errorf("updating %w ", err))
+		return diag.FromErr(fmt.Errorf("create %w ", err))
 	}
 
 	return resourceDbaasMongoClusterRead(ctx, d, meta)
@@ -183,7 +183,7 @@ func resourceDbaasMongoClusterUpdate(ctx context.Context, d *schema.ResourceData
 
 	_, err = waitForClusterToBeReady(ctx, client, d.Id())
 	if err != nil {
-		return diag.FromErr(fmt.Errorf("creating %w", err))
+		return diag.FromErr(fmt.Errorf("update %w", err))
 	}
 
 	return resourceDbaasMongoClusterRead(ctx, d, meta)

@@ -10,7 +10,6 @@ import (
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils"
 	"log"
 	"regexp"
-	"time"
 )
 
 func resourceDataplatformCluster() *schema.Resource {
@@ -85,40 +84,18 @@ func checkDataplatformClusterImmutableFields(_ context.Context, diff *schema.Res
 func resourceDataplatformClusterCreate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	client := meta.(SdkBundle).DataplatformClient
 
-	dataplatformCluster := dataplatformService.GetDataplatformClusterDataCreate(d)
-	dataplatformClusterResponse, _, err := client.CreateCluster(ctx, *dataplatformCluster)
+	id, _, err := client.CreateResource(ctx, d)
 
 	if err != nil {
-		diags := diag.FromErr(fmt.Errorf("an error occured while creating a Dataplatform Cluster: %w", err))
+		diags := diag.FromErr(fmt.Errorf("while creating a Dataplatform Cluster: %w", err))
 		return diags
 	}
 
-	d.SetId(*dataplatformClusterResponse.Id)
+	d.SetId(id)
 
-	for {
-		log.Printf("[INFO] Waiting for Dataplatform Cluster %s to be ready...", d.Id())
-
-		clusterReady, rsErr := dataplatformClusterReady(ctx, client, d)
-
-		if rsErr != nil {
-			diags := diag.FromErr(fmt.Errorf("error while checking readiness status of Dataplatform Cluster %s: %w", d.Id(), rsErr))
-			return diags
-		}
-
-		if clusterReady {
-			log.Printf("[INFO] Dataplatform Cluster ready: %s", d.Id())
-			break
-		}
-
-		select {
-		case <-time.After(utils.SleepInterval):
-			log.Printf("[INFO] trying again ...")
-		case <-ctx.Done():
-			log.Printf("[INFO] create timed out")
-			diags := diag.FromErr(fmt.Errorf("Dataplatform Cluster creation timed out! WARNING: your Dataplatform Cluster (%s) will still probably be created after some time but the terraform state wont reflect that; check your Ionos Cloud account for updates", d.Id()))
-			return diags
-		}
-
+	err = client.WaitForClusterToBeReady(ctx, id)
+	if err != nil {
+		return diag.FromErr(fmt.Errorf("waitforCluster %w", err))
 	}
 
 	return resourceDataplatformClusterRead(ctx, d, meta)
@@ -129,10 +106,10 @@ func resourceDataplatformClusterRead(ctx context.Context, d *schema.ResourceData
 	client := meta.(SdkBundle).DataplatformClient
 
 	clusterId := d.Id()
-	dataplatformCluster, apiResponse, err := client.GetCluster(ctx, clusterId)
+	dataplatformCluster, apiResponse, err := client.GetClusterById(ctx, clusterId)
 
 	if err != nil {
-		if apiResponse != nil && apiResponse.Response != nil && apiResponse.StatusCode == 404 {
+		if apiResponse.HttpNotFound() {
 			d.SetId("")
 			return nil
 		}
@@ -154,47 +131,16 @@ func resourceDataplatformClusterUpdate(ctx context.Context, d *schema.ResourceDa
 
 	clusterId := d.Id()
 
-	dataplatformCluster, diags := dataplatformService.GetDataplatformClusterDataUpdate(d)
-
-	if diags != nil {
-		return diags
-	}
-
-	dataplatformClusterResponse, _, err := client.UpdateCluster(ctx, clusterId, *dataplatformCluster)
+	_, err := client.UpdateResource(ctx, clusterId, d)
 
 	if err != nil {
 		diags := diag.FromErr(fmt.Errorf("an error occured while updating a Dataplatform Cluster: %s", err))
 		return diags
 	}
 
-	d.SetId(*dataplatformClusterResponse.Id)
-
-	time.Sleep(utils.SleepInterval)
-
-	for {
-		log.Printf("[INFO] Waiting for Cluster %s to be ready...", d.Id())
-
-		clusterReady, rsErr := dataplatformClusterReady(ctx, client, d)
-
-		if rsErr != nil {
-			diags := diag.FromErr(fmt.Errorf("error while checking readiness status of Dataplatform Cluster %s: %w", d.Id(), rsErr))
-			return diags
-		}
-
-		if clusterReady {
-			log.Printf("[INFO] Dataplatform Cluster ready: %s", d.Id())
-			break
-		}
-
-		select {
-		case <-time.After(utils.SleepInterval):
-			log.Printf("[INFO] trying again ...")
-		case <-ctx.Done():
-			log.Printf("[INFO] create timed out")
-			diags := diag.FromErr(fmt.Errorf("Dataplatform Cluster update timed out! WARNING: your Dataplatform Cluster (%s) will still probably be updated after some time but the terraform state wont reflect that; check your Ionos Cloud account for updates", d.Id()))
-			return diags
-		}
-
+	err = client.WaitForClusterToBeReady(ctx, clusterId)
+	if err != nil {
+		return diag.FromErr(fmt.Errorf("waitforCluster update %w", err))
 	}
 
 	return resourceDataplatformClusterRead(ctx, d, meta)
@@ -205,10 +151,10 @@ func resourceDataplatformClusterDelete(ctx context.Context, d *schema.ResourceDa
 
 	clusterId := d.Id()
 
-	_, apiResponse, err := client.DeleteCluster(ctx, clusterId)
+	apiResponse, err := client.DeleteResource(ctx, clusterId)
 
 	if err != nil {
-		if apiResponse != nil && apiResponse.Response != nil && apiResponse.StatusCode == 404 {
+		if apiResponse.HttpNotFound() {
 			d.SetId("")
 			return nil
 		}
@@ -216,32 +162,10 @@ func resourceDataplatformClusterDelete(ctx context.Context, d *schema.ResourceDa
 		return diags
 	}
 
-	for {
-		log.Printf("[INFO] Waiting for Dataplatform Cluster %s to be deleted...", d.Id())
-
-		clusterdDeleted, dsErr := dataplatformClusterDeleted(ctx, client, d)
-
-		if dsErr != nil {
-			diags := diag.FromErr(fmt.Errorf("error while checking deletion status of Dataplatform Cluster %s: %s", d.Id(), dsErr))
-			return diags
-		}
-
-		if clusterdDeleted {
-			log.Printf("[INFO] Successfully deleted Dataplatform Cluster: %s", d.Id())
-			break
-		}
-
-		select {
-		case <-time.After(utils.SleepInterval):
-			log.Printf("[INFO] trying again ...")
-		case <-ctx.Done():
-			diags := diag.FromErr(fmt.Errorf("Dataplatform Cluster deletion timed out! WARNING: your Dataplatform Cluster (%s) will still probably be deleted after some time but the terraform state won't reflect that; check your Ionos Cloud account for updates", d.Id()))
-			return diags
-		}
+	err = utils.WaitForResourceToBeDeleted(ctx, clusterId, client.DoesResourceExist)
+	if err != nil {
+		diag.FromErr(fmt.Errorf("while deleting %w", err))
 	}
-
-	// wait 15 seconds after the deletion of the Cluster, for the lan to be freed
-	time.Sleep(utils.SleepInterval * 3)
 
 	return nil
 }
@@ -251,12 +175,12 @@ func resourceDataplatformClusterImport(ctx context.Context, d *schema.ResourceDa
 
 	clusterId := d.Id()
 
-	dataplatformCluster, apiResponse, err := client.GetCluster(ctx, clusterId)
+	dataplatformCluster, apiResponse, err := client.GetClusterById(ctx, clusterId)
 
 	if err != nil {
-		if apiResponse != nil && apiResponse.Response != nil && apiResponse.StatusCode == 404 {
+		if apiResponse.HttpNotFound() {
 			d.SetId("")
-			return nil, fmt.Errorf("Dataplatform Cluster does not exist %q", clusterId)
+			return nil, fmt.Errorf("dataplatform Cluster does not exist %q", clusterId)
 		}
 		return nil, fmt.Errorf("an error occured while trying to fetch the import of Dataplatform Cluster %q", clusterId)
 	}
@@ -268,44 +192,4 @@ func resourceDataplatformClusterImport(ctx context.Context, d *schema.ResourceDa
 	}
 
 	return []*schema.ResourceData{d}, nil
-}
-
-func dataplatformClusterReady(ctx context.Context, client *dataplatformService.Client, d *schema.ResourceData) (bool, error) {
-	clusterId := d.Id()
-
-	subjectCluster, _, err := client.GetCluster(ctx, clusterId)
-
-	if err != nil {
-		return true, fmt.Errorf("error checking Dataplatform Cluster status: %s", err)
-	}
-	// ToDo: Removed this part since there are still problems with the clusters being unstable (failing for a short time and then recovering)
-	//if *subjectCluster.LifecycleStatus == "FAILED" {
-	//
-	//	time.Sleep(time.Second * 3)
-	//
-	//	subjectCluster, _, err = client.GetCluster(ctx, d.Id())
-	//
-	//	if err != nil {
-	//		return true, fmt.Errorf("error checking dbaas cluster status: %s", err)
-	//	}
-	//
-	//	if *subjectCluster.LifecycleStatus == "FAILED" {
-	//		return false, fmt.Errorf("dbaas cluster has failed. WARNING: your k8s cluster may still recover after some time but the terraform state won't reflect that; check your Ionos Cloud account for updates")
-	//	}
-	//}
-	return *subjectCluster.Metadata.State == "AVAILABLE", nil
-}
-
-func dataplatformClusterDeleted(ctx context.Context, client *dataplatformService.Client, d *schema.ResourceData) (bool, error) {
-	clusterId := d.Id()
-
-	_, apiResponse, err := client.GetCluster(ctx, clusterId)
-
-	if err != nil {
-		if apiResponse != nil && apiResponse.Response != nil && apiResponse.StatusCode == 404 {
-			return true, nil
-		}
-		return true, fmt.Errorf("error checking Dataplatform Cluster deletion status: %s", err)
-	}
-	return false, nil
 }

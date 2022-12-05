@@ -189,11 +189,11 @@ func dataSourceDataplatformClusterRead(ctx context.Context, d *schema.ResourceDa
 	name := nameValue.(string)
 
 	if idOk && nameOk {
-		diags := diag.FromErr(errors.New("id and display_name cannot be both specified in the same time"))
+		diags := diag.FromErr(errors.New("id and name cannot be both specified in the same time"))
 		return diags
 	}
 	if !idOk && !nameOk {
-		diags := diag.FromErr(errors.New("please provide either the Dataplatform Cluster id or display_name"))
+		diags := diag.FromErr(errors.New("please provide either the Dataplatform Cluster id or name"))
 		return diags
 	}
 
@@ -202,9 +202,9 @@ func dataSourceDataplatformClusterRead(ctx context.Context, d *schema.ResourceDa
 
 	if idOk {
 		/* search by ID */
-		cluster, _, err = client.GetCluster(ctx, id)
+		cluster, _, err = client.GetClusterById(ctx, id)
 		if err != nil {
-			diags := diag.FromErr(fmt.Errorf("an error occurred while fetching the Dataplatform Cluster with ID %s: %s", id, err))
+			diags := diag.FromErr(fmt.Errorf("an error occurred while fetching the Dataplatform Cluster with ID %s: %w", id, err))
 			return diags
 		}
 	} else {
@@ -217,20 +217,20 @@ func dataSourceDataplatformClusterRead(ctx context.Context, d *schema.ResourceDa
 		if partialMatch {
 			clusters, _, err := client.ListClusters(ctx, name)
 			if err != nil {
-				diags := diag.FromErr(fmt.Errorf("an error occurred while fetching Dataplatform Clusters: %s", err.Error()))
+				diags := diag.FromErr(fmt.Errorf("an error occurred while fetching Dataplatform Clusters: %w", err))
 				return diags
 			}
 			results = *clusters.Items
 		} else {
 			clusters, _, err := client.ListClusters(ctx, "")
 			if err != nil {
-				diags := diag.FromErr(fmt.Errorf("an error occurred while fetching Dataplatform Clusters: %s", err.Error()))
+				diags := diag.FromErr(fmt.Errorf("an error occurred while fetching Dataplatform Clusters: %w", err))
 				return diags
 			}
 			if clusters.Items != nil && len(*clusters.Items) > 0 {
 				for _, clusterItem := range *clusters.Items {
 					if clusterItem.Properties != nil && clusterItem.Properties.Name != nil && strings.EqualFold(*clusterItem.Properties.Name, name) {
-						tmpCluster, _, err := client.GetCluster(ctx, *clusterItem.Id)
+						tmpCluster, _, err := client.GetClusterById(ctx, *clusterItem.Id)
 						if err != nil {
 							return diag.FromErr(fmt.Errorf("an error occurred while fetching the Dataplatform Cluster with ID: %s while searching by full name: %s: %w", *clusterItem.Id, name, err))
 						}
@@ -254,7 +254,7 @@ func dataSourceDataplatformClusterRead(ctx context.Context, d *schema.ResourceDa
 		return diag.FromErr(err)
 	}
 
-	if err = setAdditionalDataplatformClusterData(d, &cluster, client); err != nil {
+	if err = setAdditionalDataplatformClusterData(ctx, d, &cluster, client); err != nil {
 		return diag.FromErr(err)
 	}
 
@@ -262,25 +262,18 @@ func dataSourceDataplatformClusterRead(ctx context.Context, d *schema.ResourceDa
 
 }
 
-func setAdditionalDataplatformClusterData(d *schema.ResourceData, cluster *dataplatform.ClusterResponseData, client *dataplatformService.Client) error {
+func setAdditionalDataplatformClusterData(ctx context.Context, d *schema.ResourceData, cluster *dataplatform.ClusterResponseData, client *dataplatformService.Client) error {
 
-	ctx, cancel := context.WithTimeout(context.Background(), *resourceDefaultTimeouts.Default)
-
-	if cancel != nil {
-		defer cancel()
-	}
-
-	/* get and set the kubeconfig*/
+	/* get from api and set in schema the kubeconfig*/
 	if cluster.Id != nil {
 		kubeConfig, _, err := client.GetClusterKubeConfig(ctx, *cluster.Id)
 		if err != nil {
-			return fmt.Errorf("an error occurred while fetching the kubernetes config for cluster with ID %s: %s", *cluster.Id, err)
+			return fmt.Errorf("an error occurred while fetching the kubernetes config for cluster with ID %s: %w", *cluster.Id, err)
 		}
 
 		if err := d.Set("kube_config", kubeConfig); err != nil {
 			return err
 		}
-		fmt.Printf("KubeConfig %+v", kubeConfig)
 
 		if err := setDataplatformConfigData(d, kubeConfig); err != nil {
 			return err

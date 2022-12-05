@@ -30,7 +30,7 @@ func TestAccDataplatformClusterBasic(t *testing.T) {
 					resource.TestCheckResourceAttr(DataplatformClusterResource+"."+DataplatformClusterTestResource, "name", DataplatformClusterTestResource),
 					resource.TestCheckResourceAttr(DataplatformClusterResource+"."+DataplatformClusterTestResource, "maintenance_window.0.time", "09:00:00"),
 					resource.TestCheckResourceAttr(DataplatformClusterResource+"."+DataplatformClusterTestResource, "maintenance_window.0.day_of_the_week", "Sunday"),
-					resource.TestCheckResourceAttr(DataplatformClusterResource+"."+DataplatformClusterTestResource, "data_platform_version", "1.1.0"),
+					resource.TestCheckResourceAttr(DataplatformClusterResource+"."+DataplatformClusterTestResource, "data_platform_version", "22.09"),
 				),
 			},
 			{
@@ -78,7 +78,7 @@ func TestAccDataplatformClusterBasic(t *testing.T) {
 					resource.TestCheckResourceAttr(DataplatformClusterResource+"."+DataplatformClusterTestResource, "name", UpdatedResources),
 					resource.TestCheckResourceAttr(DataplatformClusterResource+"."+DataplatformClusterTestResource, "maintenance_window.0.time", "10:00:00"),
 					resource.TestCheckResourceAttr(DataplatformClusterResource+"."+DataplatformClusterTestResource, "maintenance_window.0.day_of_the_week", "Saturday"),
-					resource.TestCheckResourceAttr(DataplatformClusterResource+"."+DataplatformClusterTestResource, "data_platform_version", "1.1.0"),
+					resource.TestCheckResourceAttr(DataplatformClusterResource+"."+DataplatformClusterTestResource, "data_platform_version", "22.09"),
 				),
 			},
 		},
@@ -101,7 +101,7 @@ func testAccCheckDataplatformClusterDestroyCheck(s *terraform.State) error {
 
 		clusterId := rs.Primary.ID
 
-		_, apiResponse, err := client.GetCluster(ctx, clusterId)
+		_, apiResponse, err := client.GetClusterById(ctx, clusterId)
 
 		if err != nil {
 			if !apiResponse.HttpNotFound() {
@@ -138,7 +138,7 @@ func testAccCheckDataplatformClusterExists(n string, cluster *dataplatform.Clust
 
 		clusterId := rs.Primary.ID
 
-		foundCluster, _, err := client.GetCluster(ctx, clusterId)
+		foundCluster, _, err := client.GetClusterById(ctx, clusterId)
 
 		if err != nil {
 			return fmt.Errorf("an error occured while fetching Dataplatform Cluster %s: %w", rs.Primary.ID, err)
@@ -155,7 +155,7 @@ func testAccCheckDataplatformClusterExists(n string, cluster *dataplatform.Clust
 const testAccCheckDataplatformClusterConfigBasic = `
 resource ` + DatacenterResource + ` "datacenter_example" {
   name        = "datacenter_example"
-  location    = "de/fkb"
+  location    = "de/fra"
   description = "Datacenter for testing Dataplatform Cluster"
 }
 
@@ -166,14 +166,14 @@ resource ` + DataplatformClusterResource + ` ` + DataplatformClusterTestResource
   	day_of_the_week  	= "Sunday"
    	time				= "09:00:00"
   }
-  data_platform_version	= "1.1.0"
+  data_platform_version	= "22.09"
 }
 `
 
 const testAccCheckDataplatformClusterConfigUpdate = `
 resource ` + DatacenterResource + ` "datacenter_example" {
   name        = "datacenter_example"
-  location    = "de/fkb"
+  location    = "de/fra"
   description = "Datacenter for testing Dataplatform Cluster"
 }
 
@@ -184,7 +184,7 @@ resource ` + DataplatformClusterResource + ` ` + DataplatformClusterTestResource
    	day_of_the_week  	= "Saturday"
    	time				= "10:00:00"
   }
-  data_platform_version	= "1.1.0"
+  data_platform_version	= "22.09"
 }
 `
 

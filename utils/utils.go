@@ -1,6 +1,7 @@
 package utils
 
 import (
+	"context"
 	"fmt"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
@@ -208,4 +209,43 @@ func RemoveNewLines(s string) string {
 // DiffToLower terraform suppress differences between lower and upper
 func DiffToLower(_, old, new string, _ *schema.ResourceData) bool {
 	return strings.EqualFold(old, new)
+}
+
+// ResourceCreator - Creates ionoscloud resource, returns id of resource created
+type ResourceCreator interface {
+	CreateResource(ctx context.Context, resource interface{}) (id string, apiResponseInfo ApiResponseInfo, err error)
+}
+
+type ResourceUpdater interface {
+	UpdateResource(ctx context.Context, id string, d *schema.ResourceData) (apiResponseInfo ApiResponseInfo, err error)
+}
+type ResourceDeleter interface {
+	DeleteResource(ctx context.Context, id string) (ApiResponseInfo, error)
+}
+
+// ApiResponseInfo - interface over different ApiResponse types from sdks
+type ApiResponseInfo interface {
+	HttpNotFound() bool
+	LogInfo()
+}
+
+// ResourceExistsFunc polls api to see if resource exists based on id
+type ResourceExistsFunc func(ctx context.Context, id string) (ApiResponseInfo, error)
+
+// WaitForResourceToBeDeleted - keeps retrying until resource is not found(404), or until ctx is cancelled
+func WaitForResourceToBeDeleted(ctx context.Context, id string, fn ResourceExistsFunc) error {
+	err := resource.RetryContext(ctx, 60*time.Minute, func() *resource.RetryError {
+		var err error
+		var apiResponse ApiResponseInfo
+		apiResponse, err = fn(ctx, id)
+		if apiResponse.HttpNotFound() {
+			return nil
+		}
+		if err != nil {
+			resource.NonRetryableError(err)
+		}
+
+		return resource.RetryableError(fmt.Errorf("resource with id %s found, still trying ", id))
+	})
+	return err
 }

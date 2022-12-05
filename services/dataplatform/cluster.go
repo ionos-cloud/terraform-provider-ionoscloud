@@ -2,38 +2,41 @@ package dataplatform
 
 import (
 	"context"
-	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
+	"fmt"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	dataplatform "github.com/ionos-cloud/sdk-go-dataplatform"
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils"
+	"log"
+	"strings"
+	"time"
 )
 
 var clusterResourceName = "Dataplatform Cluster"
 
 type ClusterService interface {
-	GetCluster(ctx context.Context, clusterId string) (dataplatform.ClusterResponseData, *dataplatform.APIResponse, error)
+	GetById(ctx context.Context, id string) (dataplatform.ClusterResponseData, *dataplatform.APIResponse, error)
 	GetClusterKubeConfig(ctx context.Context, clusterId string) (string, *dataplatform.APIResponse, error)
 	ListClusters(ctx context.Context, filterName string) ([]dataplatform.ClusterResponseData, *dataplatform.APIResponse, error)
-	CreateCluster(ctx context.Context, cluster dataplatform.CreateClusterRequest) (dataplatform.ClusterResponseData, *dataplatform.APIResponse, error)
-	UpdateCluster(ctx context.Context, clusterId string, cluster dataplatform.PatchClusterRequest) (dataplatform.ClusterResponseData, *dataplatform.APIResponse, error)
-	DeleteCluster(ctx context.Context, clusterId string) (dataplatform.ClusterResponseData, *dataplatform.APIResponse, error)
 }
 
-func (c *Client) GetCluster(ctx context.Context, clusterId string) (dataplatform.ClusterResponseData, *dataplatform.APIResponse, error) {
-	cluster, apiResponse, err := c.DataPlatformClusterApi.GetCluster(ctx, clusterId).Execute()
-	if apiResponse != nil {
-		return cluster, apiResponse, err
+func (c *Client) GetClusterById(ctx context.Context, id string) (dataplatform.ClusterResponseData, *dataplatform.APIResponse, error) {
+	cluster, apiResponse, err := c.DataPlatformClusterApi.GetCluster(ctx, id).Execute()
+	apiResponse.LogInfo()
+	return cluster, apiResponse, err
+}
 
-	}
-	return cluster, nil, err
+// DoesResourceExist - returns apiResponse to check if resource still exists. To be used with WaitForResourceToBeDeleted
+func (c *Client) DoesResourceExist(ctx context.Context, id string) (utils.ApiResponseInfo, error) {
+	_, apiResponse, err := c.DataPlatformClusterApi.GetCluster(ctx, id).Execute()
+	apiResponse.LogInfo()
+	return apiResponse, err
 }
 
 func (c *Client) GetClusterKubeConfig(ctx context.Context, clusterId string) (string, *dataplatform.APIResponse, error) {
 	kubeConfig, apiResponse, err := c.DataPlatformClusterApi.GetClusterKubeconfig(ctx, clusterId).Execute()
-	if apiResponse != nil {
-		return kubeConfig, apiResponse, err
-	}
-	return kubeConfig, nil, err
+	apiResponse.LogInfo()
+	return kubeConfig, apiResponse, err
 }
 
 func (c *Client) ListClusters(ctx context.Context, filterName string) (dataplatform.ClusterListResponseData, *dataplatform.APIResponse, error) {
@@ -42,37 +45,63 @@ func (c *Client) ListClusters(ctx context.Context, filterName string) (dataplatf
 		request = request.Name(filterName)
 	}
 	clusters, apiResponse, err := c.DataPlatformClusterApi.GetClustersExecute(request)
-	if apiResponse != nil {
-		return clusters, apiResponse, err
-	}
-	return clusters, nil, err
+	apiResponse.LogInfo()
+	return clusters, apiResponse, err
 }
 
-func (c *Client) CreateCluster(ctx context.Context, cluster dataplatform.CreateClusterRequest) (dataplatform.ClusterResponseData, *dataplatform.APIResponse, error) {
-	clusterResponse, apiResponse, err := c.DataPlatformClusterApi.CreateCluster(ctx).CreateClusterRequest(cluster).Execute()
-	if apiResponse != nil {
-		return clusterResponse, apiResponse, err
+// CreateResource - creates the request from the schema and sends it to the API. returns the id of the create resource,
+// the apiResponse, or an error if an error occurred
+func (c *Client) CreateResource(ctx context.Context, d *schema.ResourceData) (id string, responseInfo utils.ApiResponseInfo, err error) {
+	createRequest := setCreateClusterRequestProperties(d)
+	clusterResponse, apiResponse, err := c.DataPlatformClusterApi.CreateCluster(ctx).CreateClusterRequest(*createRequest).Execute()
+	apiResponse.LogInfo()
+	if err != nil {
+		return "", apiResponse, err
 	}
-	return clusterResponse, nil, err
+	return *clusterResponse.Id, apiResponse, err
 }
 
-func (c *Client) UpdateCluster(ctx context.Context, clusterId string, cluster dataplatform.PatchClusterRequest) (dataplatform.ClusterResponseData, *dataplatform.APIResponse, error) {
-	clusterResponse, apiResponse, err := c.DataPlatformClusterApi.PatchCluster(ctx, clusterId).PatchClusterRequest(cluster).Execute()
-	if apiResponse != nil {
-		return clusterResponse, apiResponse, err
-	}
-	return clusterResponse, nil, err
+func (c *Client) UpdateResource(ctx context.Context, id string, d *schema.ResourceData) (utils.ApiResponseInfo, error) {
+	cluster := setPatchClusterRequestProperties(d)
+	_, apiResponse, err := c.DataPlatformClusterApi.PatchCluster(ctx, id).PatchClusterRequest(*cluster).Execute()
+	apiResponse.LogInfo()
+	return apiResponse, err
 }
 
-func (c *Client) DeleteCluster(ctx context.Context, clusterId string) (dataplatform.ClusterResponseData, *dataplatform.APIResponse, error) {
-	clusterResponse, apiResponse, err := c.DataPlatformClusterApi.DeleteCluster(ctx, clusterId).Execute()
-	if apiResponse != nil {
-		return clusterResponse, apiResponse, err
-	}
-	return clusterResponse, nil, err
+func (c *Client) DeleteResource(ctx context.Context, id string) (utils.ApiResponseInfo, error) {
+	_, apiResponse, err := c.DataPlatformClusterApi.DeleteCluster(ctx, id).Execute()
+	apiResponse.LogInfo()
+	return apiResponse, err
 }
 
-func GetDataplatformClusterDataCreate(d *schema.ResourceData) *dataplatform.CreateClusterRequest {
+// WaitForClusterToBeReady - keeps retrying until cluster is in 'available' state, or context deadline is reached
+func (c *Client) WaitForClusterToBeReady(ctx context.Context, clusterId string) error {
+	var clusterRequest = dataplatform.NewClusterResponseDataWithDefaults()
+	err := resource.RetryContext(ctx, 60*time.Minute, func() *resource.RetryError {
+		var err error
+		var apiResponse *dataplatform.APIResponse
+		*clusterRequest, apiResponse, err = c.GetClusterById(ctx, clusterId)
+		if apiResponse.HttpNotFound() {
+			log.Printf("[INFO] Could not find cluster %s retrying...", clusterId)
+			return resource.RetryableError(fmt.Errorf("could not find cluster %s, %w, retrying", clusterId, err))
+		}
+		if err != nil {
+			resource.NonRetryableError(err)
+		}
+
+		if clusterRequest != nil && clusterRequest.Metadata != nil && !strings.EqualFold(*clusterRequest.Metadata.State, utils.Available) {
+			log.Printf("[INFO] dataplatform cluster %s is still in state %s", clusterId, *clusterRequest.Metadata.State)
+			return resource.RetryableError(fmt.Errorf(" dataplatform cluster is still in state %s", *clusterRequest.Metadata.State))
+		}
+		return nil
+	})
+	if clusterRequest == nil || clusterRequest.Properties == nil || *clusterRequest.Properties.DatacenterId == "" {
+		return fmt.Errorf("could not find dataplatform cluster %s", clusterId)
+	}
+	return err
+}
+
+func setCreateClusterRequestProperties(d *schema.ResourceData) *dataplatform.CreateClusterRequest {
 
 	dataplatformCluster := dataplatform.CreateClusterRequest{
 		Properties: &dataplatform.CreateClusterProperties{},
@@ -94,13 +123,13 @@ func GetDataplatformClusterDataCreate(d *schema.ResourceData) *dataplatform.Crea
 	}
 
 	if _, ok := d.GetOk("maintenance_window"); ok {
-		dataplatformCluster.Properties.MaintenanceWindow = GetDataplatformMaintenanceWindowData(d)
+		dataplatformCluster.Properties.MaintenanceWindow = setMaintenanceWindowData(d)
 	}
 
 	return &dataplatformCluster
 }
 
-func GetDataplatformClusterDataUpdate(d *schema.ResourceData) (*dataplatform.PatchClusterRequest, diag.Diagnostics) {
+func setPatchClusterRequestProperties(d *schema.ResourceData) *dataplatform.PatchClusterRequest {
 
 	dataplatformCluster := dataplatform.PatchClusterRequest{
 		Properties: &dataplatform.PatchClusterProperties{},
@@ -117,13 +146,13 @@ func GetDataplatformClusterDataUpdate(d *schema.ResourceData) (*dataplatform.Pat
 	}
 
 	if _, ok := d.GetOk("maintenance_window"); ok {
-		dataplatformCluster.Properties.MaintenanceWindow = GetDataplatformMaintenanceWindowData(d)
+		dataplatformCluster.Properties.MaintenanceWindow = setMaintenanceWindowData(d)
 	}
 
-	return &dataplatformCluster, nil
+	return &dataplatformCluster
 }
 
-func GetDataplatformMaintenanceWindowData(d *schema.ResourceData) *dataplatform.MaintenanceWindow {
+func setMaintenanceWindowData(d *schema.ResourceData) *dataplatform.MaintenanceWindow {
 	var maintenanceWindow dataplatform.MaintenanceWindow
 
 	if timeV, ok := d.GetOk("maintenance_window.0.time"); ok {
