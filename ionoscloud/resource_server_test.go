@@ -178,6 +178,7 @@ func TestAccServerBasic(t *testing.T) {
 		},
 	})
 }
+
 func TestAccServerBootCdromNoImage(t *testing.T) {
 	var server ionoscloud.Server
 
@@ -362,6 +363,64 @@ func TestAccServerWithICMP(t *testing.T) {
 					resource.TestCheckResourceAttr(ServerResource+"."+ServerTestResource, "nic.0.firewall.0.name", ServerTestResource),
 					resource.TestCheckResourceAttr(ServerResource+"."+ServerTestResource, "nic.0.firewall.0.icmp_type", "12"),
 					resource.TestCheckResourceAttr(ServerResource+"."+ServerTestResource, "nic.0.firewall.0.icmp_code", "0"),
+				),
+			},
+		},
+	})
+}
+
+func TestAccServerWithLabels(t *testing.T) {
+	var server ionoscloud.Server
+
+	resource.Test(t, resource.TestCase{
+		PreCheck: func() {
+			testAccPreCheck(t)
+		},
+		ExternalProviders: randomProviderVersion343(),
+		ProviderFactories: testAccProviderFactories,
+		CheckDestroy:      testAccCheckServerDestroyCheck,
+		Steps: []resource.TestStep{
+			// Clean server creation using labels in configuration.
+			{
+				Config: testAccCheckServerCreationWithLabels,
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckServerExists(ServerResource+"."+ServerTestResource, &server),
+					resource.TestCheckResourceAttr(ServerResource+"."+ServerTestResource, "label.#", "2"),
+					resource.TestCheckResourceAttr(ServerResource+"."+ServerTestResource, "label.0.key", "labelkey0"),
+					resource.TestCheckResourceAttr(ServerResource+"."+ServerTestResource, "label.0.value", "labelvalue0"),
+					resource.TestCheckResourceAttr(ServerResource+"."+ServerTestResource, "label.1.key", "labelkey1"),
+					resource.TestCheckResourceAttr(ServerResource+"."+ServerTestResource, "label.1.value", "labelvalue1"),
+				),
+			},
+			// Check that labels are present in the server data source.
+			{
+				Config: testAccCheckDataSourceServerWithLabels,
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttr(DataSource+"."+ServerResource+"."+ServerDataSourceById, "labels.#", "2"),
+					resource.TestCheckResourceAttr(DataSource+"."+ServerResource+"."+ServerDataSourceById, "labels.0.key", "labelkey0"),
+					resource.TestCheckResourceAttr(DataSource+"."+ServerResource+"."+ServerDataSourceById, "labels.0.value", "labelvalue0"),
+					resource.TestCheckResourceAttr(DataSource+"."+ServerResource+"."+ServerDataSourceById, "labels.1.key", "labelkey1"),
+					resource.TestCheckResourceAttr(DataSource+"."+ServerResource+"."+ServerDataSourceById, "labels.1.value", "labelvalue1"),
+				),
+			},
+			// Update server labels.
+			{
+				Config: testAccCheckServerUpdateLabels,
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckServerExists(ServerResource+"."+ServerTestResource, &server),
+					resource.TestCheckResourceAttr(ServerResource+"."+ServerTestResource, "label.#", "2"),
+					resource.TestCheckResourceAttr(ServerResource+"."+ServerTestResource, "label.0.key", "updatedlabelkey0"),
+					resource.TestCheckResourceAttr(ServerResource+"."+ServerTestResource, "label.0.value", "updatedlabelvalue0"),
+					resource.TestCheckResourceAttr(ServerResource+"."+ServerTestResource, "label.1.key", "updatedlabelkey1"),
+					resource.TestCheckResourceAttr(ServerResource+"."+ServerTestResource, "label.1.value", "updatedlabelvalue1"),
+				),
+			},
+			// Delete server labels.
+			{
+				Config: testAccCheckServerDeleteLabels,
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckServerExists(ServerResource+"."+ServerTestResource, &server),
+					resource.TestCheckResourceAttr(ServerResource+"."+ServerTestResource, "label.#", "0"),
 				),
 			},
 		},
@@ -768,4 +827,89 @@ resource ` + ServerResource + ` ` + ServerTestResource + ` {
       icmp_code        = "0"
 	  }
     }
+}`
+
+const testAccCheckDataSourceServerWithLabels = testAccCheckServerCreationWithLabels + `
+data ` + ServerResource + ` ` + ServerDataSourceById + ` {
+  datacenter_id = ` + DatacenterResource + `.` + DatacenterTestResource + `.id
+  id			= ` + ServerResource + `.` + ServerTestResource + `.id
+}
+`
+
+const testAccCheckServerUpdateLabels = `
+resource ` + DatacenterResource + ` ` + DatacenterTestResource + ` {
+	name       = "server-test"
+	location = "us/las"
+}
+resource ` + LanResource + ` ` + LanTestResource + ` {
+  datacenter_id = ` + DatacenterResource + `.` + DatacenterTestResource + `.id
+  public = true
+  name = "public"
+}
+resource ` + ServerResource + ` ` + ServerTestResource + ` {
+  name = "` + ServerTestResource + `"
+  datacenter_id = ` + DatacenterResource + `.` + DatacenterTestResource + `.id
+  cores = 1
+  ram = 1024
+  availability_zone = "ZONE_1"
+  cpu_family = "AMD_OPTERON"
+  image_name ="ubuntu:latest"
+  type = "ENTERPRISE"
+  volume {
+    name = "system"
+    size = 5
+    disk_type = "SSD Standard"
+    user_data = "foo"
+    bus = "VIRTIO"
+    availability_zone = "ZONE_1"
+  }
+  nic {
+    lan = ` + LanResource + `.` + LanTestResource + `.id
+    name = "system"
+    dhcp = true
+    firewall_active = false
+  }
+  label {
+    key = "updatedlabelkey0"
+    value = "updatedlabelvalue0"
+  }
+  label {
+    key = "updatedlabelkey1"
+    value = "updatedlabelvalue1"
+  }
+}`
+
+const testAccCheckServerDeleteLabels = `
+resource ` + DatacenterResource + ` ` + DatacenterTestResource + ` {
+	name       = "server-test"
+	location = "us/las"
+}
+resource ` + LanResource + ` ` + LanTestResource + ` {
+  datacenter_id = ` + DatacenterResource + `.` + DatacenterTestResource + `.id
+  public = true
+  name = "public"
+}
+resource ` + ServerResource + ` ` + ServerTestResource + ` {
+  name = "` + ServerTestResource + `"
+  datacenter_id = ` + DatacenterResource + `.` + DatacenterTestResource + `.id
+  cores = 1
+  ram = 1024
+  availability_zone = "ZONE_1"
+  cpu_family = "AMD_OPTERON"
+  image_name ="ubuntu:latest"
+  type = "ENTERPRISE"
+  volume {
+    name = "system"
+    size = 5
+    disk_type = "SSD Standard"
+    user_data = "foo"
+    bus = "VIRTIO"
+    availability_zone = "ZONE_1"
+}
+  nic {
+    lan = ` + LanResource + `.` + LanTestResource + `.id
+    name = "system"
+    dhcp = true
+    firewall_active = false
+  }
 }`

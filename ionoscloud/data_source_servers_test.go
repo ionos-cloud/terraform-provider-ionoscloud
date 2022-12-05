@@ -79,6 +79,16 @@ func TestAccDataSourceServersBasic(t *testing.T) {
 				Config: testAccCheck2ServersByCpuFamily,
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttr(DataSource+"."+ServersDataSource+"."+ServerDataSourceByName, "servers.#", "2"),
+					// Check server labels.
+					resource.TestCheckResourceAttr(DataSource+"."+ServersDataSource+"."+ServerDataSourceByName, "servers.0.labels.#", "2"),
+					resource.TestCheckResourceAttr(DataSource+"."+ServersDataSource+"."+ServerDataSourceByName, "servers.0.labels.0.key", "labelkey0"),
+					resource.TestCheckResourceAttr(DataSource+"."+ServersDataSource+"."+ServerDataSourceByName, "servers.0.labels.0.value", "labelvalue0"),
+					resource.TestCheckResourceAttr(DataSource+"."+ServersDataSource+"."+ServerDataSourceByName, "servers.0.labels.1.key", "labelkey1"),
+					resource.TestCheckResourceAttr(DataSource+"."+ServersDataSource+"."+ServerDataSourceByName, "servers.0.labels.1.value", "labelvalue1"),
+					resource.TestCheckResourceAttr(DataSource+"."+ServersDataSource+"."+ServerDataSourceByName, "servers.1.labels.0.key", "labelkey0"),
+					resource.TestCheckResourceAttr(DataSource+"."+ServersDataSource+"."+ServerDataSourceByName, "servers.1.labels.0.value", "labelvalue0"),
+					resource.TestCheckResourceAttr(DataSource+"."+ServersDataSource+"."+ServerDataSourceByName, "servers.1.labels.1.key", "labelkey1"),
+					resource.TestCheckResourceAttr(DataSource+"."+ServersDataSource+"."+ServerDataSourceByName, "servers.1.labels.1.value", "labelvalue1"),
 				),
 			},
 			{
@@ -249,6 +259,14 @@ resource ` + ServerResource + ` ` + ServerTestResource + ` {
     dhcp = false
     firewall_active = false
   }
+  label {
+    key = "labelkey0"
+    value = "labelvalue0"
+  }
+  label {
+    key = "labelkey1"
+    value = "labelvalue1"
+  }
 }
 
 resource "ionoscloud_ipblock" "webserver_ipblock" {
@@ -290,6 +308,14 @@ resource ` + ServerResource + ` ` + serverTestResource2 + ` {
 	  target_ip = ionoscloud_ipblock.webserver_ipblock.ips[1]
 	  type = "EGRESS"
     }
+  }
+  label {
+    key = "labelkey0"
+    value = "labelvalue0"
+  }
+  label {
+    key = "labelkey1"
+    value = "labelvalue1"
   }
 }
 

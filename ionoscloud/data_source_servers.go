@@ -190,6 +190,11 @@ func dataSourceServers() *schema.Resource {
 							Computed: true,
 							Elem:     nicServerDSResource,
 						},
+						"labels": {
+							Type:     schema.TypeList,
+							Computed: true,
+							Elem:     labelDataSource,
+						},
 					},
 				},
 			},
@@ -287,6 +292,17 @@ func dataSourceServersRead(ctx context.Context, d *schema.ResourceData, meta int
 					}
 				}
 			}
+
+			if server.Id == nil {
+				return diag.FromErr(fmt.Errorf("expected a valid server ID from the API but received nil instead"))
+			}
+			// Labels logic
+			ls := LabelsService{ctx: ctx, client: client}
+			labels, err := ls.datacentersServersLabelsGet(datacenterId.(string), *server.Id, true)
+			if err != nil {
+				return diag.FromErr(err)
+			}
+			serverEntry["labels"] = labels
 		}
 		serversIntf = append(serversIntf, serverEntry)
 	}

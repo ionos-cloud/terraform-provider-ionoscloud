@@ -68,17 +68,25 @@ resource "ionoscloud_server" "example" {
         firewall_active   = true
         firewall_type     = "BIDIRECTIONAL"
         ips               = [ ionoscloud_ipblock.example.ips[0], ionoscloud_ipblock.example.ips[1] ]
-    firewall {
-        protocol          = "TCP"
-        name              = "SSH"
-        port_range_start  = 22
-        port_range_end    = 22
-        source_mac        = "00:0a:95:9d:68:17"
-        source_ip         = ionoscloud_ipblock.example.ips[2]
-        target_ip         = ionoscloud_ipblock.example.ips[3]
-        type              = "EGRESS"
+        firewall {
+          protocol          = "TCP"
+          name              = "SSH"
+          port_range_start  = 22
+          port_range_end    = 22
+          source_mac        = "00:0a:95:9d:68:17"
+          source_ip         = ionoscloud_ipblock.example.ips[2]
+          target_ip         = ionoscloud_ipblock.example.ips[3]
+          type              = "EGRESS" 
+        }
     }
-  }
+    label {
+        key = "labelkey1"
+        value = "labelvalue1"
+    }
+    label {
+        key = "labelkey2"
+        value = "labelvalue2"
+    }
 }
                        
 ```
@@ -145,6 +153,7 @@ resource "ionoscloud_server" "example" {
 - `ssh_key_path` - (Optional)[list] List of paths to files containing a public SSH key that will be injected into IonosCloud provided Linux images.  Also accepts ssh keys directly. Required for IonosCloud Linux images. Required if `image_password` is not provided.
 - `image_password` - (Optional)[string] Required if `ssh_key_path` is not provided.
 - `type` - (Optional)[string] Server usages: [ENTERPRISE](https://docs.ionos.com/cloud/compute-engine/virtual-servers/virtual-servers) or [CUBE](https://docs.ionos.com/cloud/compute-engine/virtual-servers/cloud-cubes). This property is immutable.
+- `label` - (Optional) A label can be seen as an object with only two required fields: `key` and `value`, both of the `string` type. Please check the example presented above to see how a `label` can be used in the plan. A server can have multiple labels.
 
 > **⚠ WARNING** 
 > 
