@@ -1,4 +1,4 @@
-package container_registry
+package containerregistry
 
 import (
 	"context"
@@ -14,7 +14,7 @@ type LocationsService interface {
 }
 
 func (c *Client) GetAllLocations(ctx context.Context) (cr.LocationsResponse, *cr.APIResponse, error) {
-	versions, apiResponse, err := c.LocationsApi.LocationsGet(ctx).Execute()
+	versions, apiResponse, err := c.sdkClient.LocationsApi.LocationsGet(ctx).Execute()
 	apiResponse.LogInfo()
 	return versions, apiResponse, err
 }

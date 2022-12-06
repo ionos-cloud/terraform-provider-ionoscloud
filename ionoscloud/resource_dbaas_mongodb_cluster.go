@@ -147,7 +147,7 @@ func resourceDbaasMongoClusterCreate(ctx context.Context, d *schema.ResourceData
 
 	cluster := dbaas.SetMongoClusterCreateProperties(d)
 
-	createdCluster, apiResponse, err := client.ClustersApi.ClustersPost(ctx).CreateClusterRequest(*cluster).Execute()
+	createdCluster, apiResponse, err := client.CreateCluster(ctx, *cluster)
 	if err != nil {
 		if apiResponse.HttpNotFound() {
 			d.SetId("")
@@ -171,7 +171,7 @@ func resourceDbaasMongoClusterUpdate(ctx context.Context, d *schema.ResourceData
 	clusterId := d.Id()
 	patchRequest := dbaas.SetMongoClusterPatchProperties(d)
 
-	_, apiResponse, err := client.ClustersApi.ClustersPatch(ctx, clusterId).PatchClusterRequest(*patchRequest).Execute()
+	_, apiResponse, err := client.UpdateCluster(ctx, clusterId, *patchRequest)
 	if err != nil {
 		if apiResponse.HttpNotFound() {
 			d.SetId("")
@@ -195,7 +195,7 @@ func waitForClusterToBeReady(ctx context.Context, client *dbaas.MongoClient, clu
 	err := resource.RetryContext(ctx, *resourceDefaultTimeouts.Update, func() *resource.RetryError {
 		var err error
 		var apiResponse *mongo.APIResponse
-		*clusterRequest, apiResponse, err = client.ClustersApi.ClustersFindById(ctx, clusterId).Execute()
+		*clusterRequest, apiResponse, err = client.GetCluster(ctx, clusterId)
 		apiResponse.LogInfo()
 		if apiResponse.HttpNotFound() {
 			log.Printf("[INFO] Could not find cluster %s retrying...", clusterId)
@@ -220,7 +220,7 @@ func waitForClusterToBeReady(ctx context.Context, client *dbaas.MongoClient, clu
 func resourceDbaasMongoClusterRead(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	client := meta.(SdkBundle).MongoClient
 
-	cluster, apiResponse, err := client.ClustersApi.ClustersFindById(ctx, d.Id()).Execute()
+	cluster, apiResponse, err := client.GetCluster(ctx, d.Id())
 
 	if err != nil {
 		if apiResponse.HttpNotFound() {
@@ -243,7 +243,7 @@ func resourceDbaasMongoClusterRead(ctx context.Context, d *schema.ResourceData, 
 func resourceDbaasMongoClusterDelete(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	client := meta.(SdkBundle).MongoClient
 
-	_, apiResponse, err := client.ClustersApi.ClustersDelete(ctx, d.Id()).Execute()
+	_, apiResponse, err := client.DeleteCluster(ctx, d.Id())
 
 	if err != nil {
 		if apiResponse.HttpNotFound() {
@@ -290,7 +290,7 @@ func resourceDbaasMongoClusterImport(ctx context.Context, d *schema.ResourceData
 
 	clusterId := d.Id()
 
-	dbaasCluster, apiResponse, err := client.ClustersApi.ClustersFindById(ctx, clusterId).Execute()
+	dbaasCluster, apiResponse, err := client.GetCluster(ctx, clusterId)
 
 	if err != nil {
 		if apiResponse.HttpNotFound() {
@@ -311,7 +311,7 @@ func resourceDbaasMongoClusterImport(ctx context.Context, d *schema.ResourceData
 
 func dbaasMongoClusterDeleted(ctx context.Context, client *dbaas.MongoClient, d *schema.ResourceData) (bool, error) {
 
-	_, apiResponse, err := client.ClustersApi.ClustersFindById(ctx, d.Id()).Execute()
+	_, apiResponse, err := client.GetCluster(ctx, d.Id())
 
 	if err != nil {
 		if apiResponse.HttpNotFound() {
