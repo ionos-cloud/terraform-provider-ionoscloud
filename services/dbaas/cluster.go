@@ -11,22 +11,6 @@ import (
 	"time"
 )
 
-type ClusterService interface {
-	GetCluster(ctx context.Context, clusterId string) (psql.ClusterResponse, *psql.APIResponse, error)
-	ListClusters(ctx context.Context, filterName string) (psql.ClusterList, *psql.APIResponse, error)
-	CreateCluster(ctx context.Context, cluster psql.CreateClusterRequest) (psql.ClusterResponse, *psql.APIResponse, error)
-	UpdateCluster(ctx context.Context, clusterId string, cluster psql.PatchClusterRequest) (psql.ClusterResponse, *psql.APIResponse, error)
-	DeleteCluster(ctx context.Context, clusterId string) (psql.ClusterResponse, *psql.APIResponse, error)
-}
-
-type MongoClusterService interface {
-	GetCluster(ctx context.Context, clusterId string) (mongo.ClusterResponse, *mongo.APIResponse, error)
-	ListClusters(ctx context.Context, filterName string) (mongo.ClusterList, *mongo.APIResponse, error)
-	CreateCluster(ctx context.Context, cluster mongo.CreateClusterRequest) (mongo.ClusterResponse, *mongo.APIResponse, error)
-	//UpdateCluster(ctx context.Context, clusterId string, cluster psql.PatchClusterRequest) (psql.ClusterResponse, *psql.APIResponse, error)
-	DeleteCluster(ctx context.Context, clusterId string) (mongo.ClusterResponse, *mongo.APIResponse, error)
-}
-
 func (c *PsqlClient) GetCluster(ctx context.Context, clusterId string) (psql.ClusterResponse, *psql.APIResponse, error) {
 	cluster, apiResponse, err := c.sdkClient.ClustersApi.ClustersFindById(ctx, clusterId).Execute()
 	if apiResponse != nil {

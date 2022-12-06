@@ -9,11 +9,6 @@ import (
 	dbaas "github.com/ionos-cloud/sdk-go-dbaas-postgres"
 )
 
-type VersionService interface {
-	GetClusterVersions(ctx context.Context, clusterId string) (dbaas.PostgresVersionList, *dbaas.APIResponse, error)
-	GetAllVersions(ctx context.Context) (dbaas.PostgresVersionList, *dbaas.APIResponse, error)
-}
-
 func (c *PsqlClient) GetClusterVersions(ctx context.Context, clusterId string) (dbaas.PostgresVersionList, *dbaas.APIResponse, error) {
 	versions, apiResponse, err := c.sdkClient.ClustersApi.ClusterPostgresVersionsGet(ctx, clusterId).Execute()
 	if apiResponse != nil {

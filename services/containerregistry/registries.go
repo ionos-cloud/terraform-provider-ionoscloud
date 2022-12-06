@@ -9,22 +9,6 @@ import (
 	"time"
 )
 
-type RegistriesService interface {
-	ListRegistries(ctx context.Context) (cr.RegistriesResponse, *cr.APIResponse, error)
-	CreateRegistry(ctx context.Context, registryInput cr.PostRegistryInput) (cr.PostRegistryOutput, *cr.APIResponse, error)
-	DeleteRegistry(ctx context.Context, registryId string) (*cr.APIResponse, error)
-	GetRegistry(ctx context.Context, registryId string) (cr.RegistryResponse, *cr.APIResponse, error)
-	PatchRegistry(ctx context.Context, registryId string, registryInput cr.PatchRegistryInput) (cr.RegistryResponse, *cr.APIResponse, error)
-	PutRegistry(ctx context.Context, registryId string, registryInput cr.PutRegistryInput) (cr.PutRegistryOutput, *cr.APIResponse, error)
-	DeleteRepositories(ctx context.Context, registryId, repositoryId string) (*cr.APIResponse, error)
-	ListTokens(ctx context.Context, registryId string) (cr.TokensResponse, *cr.APIResponse, error)
-	CreateTokens(ctx context.Context, registryId string, tokenInput cr.PostTokenInput) (cr.PostTokenOutput, *cr.APIResponse, error)
-	DeleteToken(ctx context.Context, registryId, tokenId string) (*cr.APIResponse, error)
-	GetToken(ctx context.Context, registryId, tokenId string) (cr.TokenResponse, *cr.APIResponse, error)
-	PatchToken(ctx context.Context, registryId, tokenId string, tokenInput cr.PatchTokenInput) (cr.TokenResponse, *cr.APIResponse, error)
-	PutToken(ctx context.Context, registryId, tokenId string, tokenInput cr.PutTokenInput) (cr.PutTokenOutput, *cr.APIResponse, error)
-}
-
 func (c *Client) ListRegistries(ctx context.Context) (cr.RegistriesResponse, *cr.APIResponse, error) {
 	registry, apiResponse, err := c.sdkClient.RegistriesApi.RegistriesGet(ctx).Execute()
 	apiResponse.LogInfo()
