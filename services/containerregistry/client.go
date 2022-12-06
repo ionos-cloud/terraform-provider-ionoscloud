@@ -1,4 +1,4 @@
-package container_registry
+package containerregistry
 
 import (
 	"fmt"
@@ -12,21 +12,10 @@ import (
 )
 
 type Client struct {
-	cr.APIClient
+	sdkClient *cr.APIClient
 }
 
-// ClientService is a wrapper around cr.APIClient
-type ClientService interface {
-	Get() *Client
-}
-
-type clientService struct {
-	client *cr.APIClient
-}
-
-var _ ClientService = &clientService{}
-
-func NewClientService(username, password, token, url, version, terraformVersion string) ClientService {
+func NewClientService(username, password, token, url, version, terraformVersion string) *Client {
 	newConfigregistry := cr.NewConfiguration(username, password, token, url)
 
 	if os.Getenv("IONOS_DEBUG") != "" {
@@ -40,13 +29,7 @@ func NewClientService(username, password, token, url, version, terraformVersion 
 		"terraform-provider/%s_ionos-cloud-sdk-go-container-cr/%s_hashicorp-terraform/%s_terraform-plugin-sdk/%s_os/%s_arch/%s",
 		version, cr.Version, terraformVersion, meta.SDKVersionString(), runtime.GOOS, runtime.GOARCH)
 
-	return &clientService{
-		client: cr.NewAPIClient(newConfigregistry),
-	}
-}
-
-func (c clientService) Get() *Client {
 	return &Client{
-		APIClient: *c.client,
+		sdkClient: cr.NewAPIClient(newConfigregistry),
 	}
 }

@@ -259,7 +259,6 @@ func dataSourceDataplatformClusterRead(ctx context.Context, d *schema.ResourceDa
 	}
 
 	return nil
-
 }
 
 func setAdditionalDataplatformClusterData(ctx context.Context, d *schema.ResourceData, cluster *dataplatform.ClusterResponseData, client *dataplatformService.Client) error {

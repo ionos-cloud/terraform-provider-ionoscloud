@@ -8,46 +8,75 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	dataplatform "github.com/ionos-cloud/sdk-go-dataplatform"
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils"
+	"log"
+	"strings"
 )
 
 var nodePoolResourceName = "Dataplatform Node Pool"
 
-type NodePoolService interface {
-	GetNodePool(ctx context.Context, clusterId, nodePoolId string) (dataplatform.NodePoolResponseData, *dataplatform.APIResponse, error)
-	ListNodePools(ctx context.Context, clusterId string) ([]dataplatform.NodePoolResponseData, *dataplatform.APIResponse, error)
-	CreateNodePool(ctx context.Context, clusterId string, cluster dataplatform.CreateNodePoolRequest) (dataplatform.NodePoolResponseData, *dataplatform.APIResponse, error)
-	UpdateNodePool(ctx context.Context, clusterId, nodePoolId string, cluster dataplatform.PatchNodePoolRequest) (dataplatform.NodePoolResponseData, *dataplatform.APIResponse, error)
-	DeleteNodePool(ctx context.Context, clusterId, nodePoolId string) (dataplatform.NodePoolResponseData, *dataplatform.APIResponse, error)
-}
-
 func (c *Client) GetNodePool(ctx context.Context, clusterId, nodePoolId string) (dataplatform.NodePoolResponseData, *dataplatform.APIResponse, error) {
-	cluster, apiResponse, err := c.DataPlatformNodePoolApi.GetClusterNodepool(ctx, clusterId, nodePoolId).Execute()
+	cluster, apiResponse, err := c.sdkClient.DataPlatformNodePoolApi.GetClusterNodepool(ctx, clusterId, nodePoolId).Execute()
 	apiResponse.LogInfo()
 	return cluster, apiResponse, err
 }
 
+func (c *Client) IsNodePoolDeleted(ctx context.Context, d *schema.ResourceData) (bool, error) {
+	clusterId, ok := d.GetOk("cluster_id")
+	if !ok {
+		return false, fmt.Errorf("could not get cluster_id from schema")
+	}
+	clusterIdStr := clusterId.(string)
+	nodePoolId := d.Id()
+	_, apiResponse, err := c.sdkClient.DataPlatformNodePoolApi.GetClusterNodepool(ctx, clusterIdStr, nodePoolId).Execute()
+	apiResponse.LogInfo()
+	return apiResponse.HttpNotFound(), err
+}
+
 func (c *Client) ListNodePools(ctx context.Context, clusterId string) (dataplatform.NodePoolListResponseData, *dataplatform.APIResponse, error) {
-	nodePool, apiResponse, err := c.DataPlatformNodePoolApi.GetClusterNodepools(ctx, clusterId).Execute()
+	nodePool, apiResponse, err := c.sdkClient.DataPlatformNodePoolApi.GetClusterNodepools(ctx, clusterId).Execute()
 	apiResponse.LogInfo()
 	return nodePool, apiResponse, err
 }
 
-func (c *Client) CreateNodePool(ctx context.Context, clusterId string, cluster dataplatform.CreateNodePoolRequest) (dataplatform.NodePoolResponseData, *dataplatform.APIResponse, error) {
-	clusterResponse, apiResponse, err := c.DataPlatformNodePoolApi.CreateClusterNodepool(ctx, clusterId).CreateNodePoolRequest(cluster).Execute()
+func (c *Client) CreateNodePool(ctx context.Context, clusterId string, d *schema.ResourceData) (dataplatform.NodePoolResponseData, *dataplatform.APIResponse, error) {
+	dataplatformNodePool := GetDataplatformNodePoolDataCreate(d)
+	clusterResponse, apiResponse, err := c.sdkClient.DataPlatformNodePoolApi.CreateClusterNodepool(ctx, clusterId).CreateNodePoolRequest(*dataplatformNodePool).Execute()
 	apiResponse.LogInfo()
 	return clusterResponse, apiResponse, err
 }
 
-func (c *Client) UpdateNodePool(ctx context.Context, clusterId, nodePoolId string, cluster dataplatform.PatchNodePoolRequest) (dataplatform.NodePoolResponseData, *dataplatform.APIResponse, error) {
-	clusterResponse, apiResponse, err := c.DataPlatformNodePoolApi.PatchClusterNodepool(ctx, clusterId, nodePoolId).PatchNodePoolRequest(cluster).Execute()
+func (c *Client) UpdateNodePool(ctx context.Context, clusterId, nodePoolId string, d *schema.ResourceData) (dataplatform.NodePoolResponseData, utils.ApiResponseInfo, error) {
+	dataplatformNodePool := GetDataplatformNodePoolDataUpdate(d)
+	clusterResponse, apiResponse, err := c.sdkClient.DataPlatformNodePoolApi.PatchClusterNodepool(ctx, clusterId, nodePoolId).PatchNodePoolRequest(*dataplatformNodePool).Execute()
 	apiResponse.LogInfo()
 	return clusterResponse, apiResponse, err
 }
 
 func (c *Client) DeleteNodePool(ctx context.Context, clusterId, nodePoolId string) (dataplatform.NodePoolResponseData, *dataplatform.APIResponse, error) {
-	clusterResponse, apiResponse, err := c.DataPlatformNodePoolApi.DeleteClusterNodepool(ctx, clusterId, nodePoolId).Execute()
+	clusterResponse, apiResponse, err := c.sdkClient.DataPlatformNodePoolApi.DeleteClusterNodepool(ctx, clusterId, nodePoolId).Execute()
 	apiResponse.LogInfo()
 	return clusterResponse, apiResponse, err
+}
+func (c *Client) IsNodePoolReady(ctx context.Context, d *schema.ResourceData) (bool, error) {
+	clusterId, ok := d.GetOk("cluster_id")
+	if !ok {
+		return false, fmt.Errorf("could not get cluster_id from schema")
+	}
+	clusterIdStr := clusterId.(string)
+	subjectNodePool, _, err := c.GetNodePool(ctx, clusterIdStr, d.Id())
+	if err != nil {
+		return true, fmt.Errorf("checking Dataplatform Node Pool status: %w", err)
+	}
+	log.Printf("[DEBUG] dataplatform cluster nodepool state %s", *subjectNodePool.Metadata.State)
+	if subjectNodePool.Metadata == nil || subjectNodePool.Metadata.State == nil {
+		return false, fmt.Errorf("expected nodepool metadata, got empty for id %s", d.Id())
+	}
+
+	if strings.ContainsAny(*subjectNodePool.Metadata.State, "FAILED") {
+		return false, fmt.Errorf("nodepool id %s is in failed state", d.Id())
+	}
+
+	return strings.EqualFold(*subjectNodePool.Metadata.State, utils.Available), nil
 }
 
 func GetDataplatformNodePoolDataCreate(d *schema.ResourceData) *dataplatform.CreateNodePoolRequest {
@@ -119,7 +148,7 @@ func GetDataplatformNodePoolDataCreate(d *schema.ResourceData) *dataplatform.Cre
 	return &dataplatformNodePool
 }
 
-func GetDataplatformNodePoolDataUpdate(d *schema.ResourceData) (*dataplatform.PatchNodePoolRequest, diag.Diagnostics) {
+func GetDataplatformNodePoolDataUpdate(d *schema.ResourceData) *dataplatform.PatchNodePoolRequest {
 
 	dataplatformNodePool := dataplatform.PatchNodePoolRequest{
 		Properties: &dataplatform.PatchNodePoolProperties{},
@@ -150,7 +179,7 @@ func GetDataplatformNodePoolDataUpdate(d *schema.ResourceData) (*dataplatform.Pa
 		dataplatformNodePool.Properties.Annotations = &annotations
 	}
 
-	return &dataplatformNodePool, nil
+	return &dataplatformNodePool
 }
 
 func SetDataplatformNodePoolData(d *schema.ResourceData, nodePool dataplatform.NodePoolResponseData) error {

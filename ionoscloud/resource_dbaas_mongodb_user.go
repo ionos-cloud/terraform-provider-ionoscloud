@@ -102,7 +102,7 @@ func resourceDbaasMongoUserCreate(ctx context.Context, d *schema.ResourceData, m
 		request.Properties.Roles = &roles
 	}
 
-	_, _, err := client.UsersApi.ClustersUsersPost(ctx, clusterId).User(request).Execute()
+	_, err := client.CreateUser(ctx, clusterId, request)
 	if err != nil {
 		diags := diag.FromErr(fmt.Errorf("an error occurred while adding a user to mongoDB: %w", err))
 		return diags
@@ -134,7 +134,6 @@ func resourceDbaasMongoUserUpdate(ctx context.Context, d *schema.ResourceData, m
 	if d.Get("username") != nil {
 		username = d.Get("username").(string)
 	}
-
 	if d.HasChange("password") {
 		_, password := d.GetChange("password")
 		pwdStr := password.(string)
@@ -159,7 +158,7 @@ func resourceDbaasMongoUserUpdate(ctx context.Context, d *schema.ResourceData, m
 		request.Properties.Roles = &roles
 	}
 
-	_, _, err := client.UsersApi.ClustersUsersPatch(ctx, clusterId, defaultMongoDatabase, username).PatchUserRequest(request).Execute()
+	_, err := client.UpdateUser(ctx, clusterId, username, request)
 	if err != nil {
 		diags := diag.FromErr(fmt.Errorf("while updating a user to mongoDB cluster %s: %w", clusterId, err))
 		return diags
@@ -179,8 +178,8 @@ func waitForUserToBeReady(ctx context.Context, client *dbaas.MongoClient, cluste
 	err := resource.RetryContext(ctx, *resourceDefaultTimeouts.Update, func() *resource.RetryError {
 
 		var err error
-		var apiResponse *mongo.APIResponse
-		*user, apiResponse, err = client.UsersApi.ClustersUsersFindById(ctx, clusterId, database, username).Execute()
+		var apiResponse utils.ApiResponseInfo
+		*user, apiResponse, err = client.FindUserByUsername(ctx, clusterId, username)
 		if apiResponse.HttpNotFound() {
 			log.Printf("[INFO] Could not find username %s with database %s in cluster %s, retrying...", username, database, clusterId)
 			return resource.RetryableError(fmt.Errorf("could not find username %s with database %s in cluster %s, %w", username, database, clusterId, err))
@@ -207,10 +206,10 @@ func resourceDbaasMongoUserRead(ctx context.Context, d *schema.ResourceData, met
 	clusterId := d.Get("cluster_id").(string)
 	username := d.Get("username").(string)
 
-	user, apiResponse, err := client.UsersApi.ClustersUsersFindById(ctx, clusterId, defaultMongoDatabase, username).Execute()
+	user, apiResponse, err := client.FindUserByUsername(ctx, clusterId, username)
 
 	if err != nil {
-		if apiResponse != nil && apiResponse.Response != nil && apiResponse.StatusCode == 404 {
+		if apiResponse.HttpNotFound() {
 			d.SetId("")
 			return nil
 		}
@@ -230,7 +229,7 @@ func resourceDbaasMongoUserDelete(ctx context.Context, d *schema.ResourceData, m
 
 	clusterId := d.Get("cluster_id").(string)
 	username := d.Get("username").(string)
-	_, _, err := client.UsersApi.ClustersUsersDelete(ctx, clusterId, defaultMongoDatabase, username).Execute()
+	_, err := client.DeleteUser(ctx, clusterId, username)
 	if err != nil {
 		diags := diag.FromErr(err)
 		return diags
@@ -239,9 +238,9 @@ func resourceDbaasMongoUserDelete(ctx context.Context, d *schema.ResourceData, m
 	// Wait, catching any errors
 	err = resource.RetryContext(ctx, *resourceDefaultTimeouts.Create, func() *resource.RetryError {
 		var err error
-		var apiResponse *mongo.APIResponse
+		var apiResponse utils.ApiResponseInfo
 		var user = mongo.User{}
-		user, apiResponse, err = client.UsersApi.ClustersUsersFindById(ctx, clusterId, defaultMongoDatabase, username).Execute()
+		user, apiResponse, err = client.FindUserByUsername(ctx, clusterId, username)
 		if apiResponse.HttpNotFound() {
 			log.Printf("[INFO] Deleted successfuly user %s with database %s in cluster %s", username, defaultMongoDatabase, clusterId)
 			return nil
@@ -272,7 +271,7 @@ func resourceDbaasMongoUserImporter(ctx context.Context, d *schema.ResourceData,
 	clusterId := d.Get("cluster_id").(string)
 	username := d.Get("username").(string)
 
-	user, apiResponse, err := client.UsersApi.ClustersUsersFindById(ctx, clusterId, defaultMongoDatabase, username).Execute()
+	user, apiResponse, err := client.FindUserByUsername(ctx, clusterId, username)
 
 	if err != nil {
 		if apiResponse.HttpNotFound() {

@@ -79,7 +79,7 @@ func testAccCheckMongoUserDestroyCheck(s *terraform.State) error {
 		}
 		clusterId := rs.Primary.Attributes["cluster_id"]
 		username := rs.Primary.Attributes["username"]
-		_, apiResponse, err := client.UsersApi.ClustersUsersFindById(ctx, clusterId, defaultMongoDatabase, username).Execute()
+		_, apiResponse, err := client.FindUserByUsername(ctx, clusterId, username)
 		apiResponse.LogInfo()
 		if err != nil {
 			if !apiResponse.HttpNotFound() {
@@ -114,7 +114,7 @@ func testAccCheckMongoUserExists(n string, user *mongo.User) resource.TestCheckF
 
 		clusterId := rs.Primary.Attributes["cluster_id"]
 		username := rs.Primary.Attributes["username"]
-		foundUser, apiResponse, err := client.UsersApi.ClustersUsersFindById(ctx, clusterId, defaultMongoDatabase, username).Execute()
+		foundUser, apiResponse, err := client.FindUserByUsername(ctx, clusterId, username)
 		apiResponse.LogInfo()
 		if err != nil {
 			return fmt.Errorf("error occured while fetching User: %s %w", rs.Primary.ID, err)

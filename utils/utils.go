@@ -17,6 +17,8 @@ import (
 	"time"
 )
 
+const DefaultTimeout = 60 * time.Minute
+
 // CreateTransport - creates customizable transport for http clients
 func CreateTransport() *http.Transport {
 	dialer := &net.Dialer{
@@ -211,41 +213,46 @@ func DiffToLower(_, old, new string, _ *schema.ResourceData) bool {
 	return strings.EqualFold(old, new)
 }
 
-// ResourceCreator - Creates ionoscloud resource, returns id of resource created
-type ResourceCreator interface {
-	CreateResource(ctx context.Context, resource interface{}) (id string, apiResponseInfo ApiResponseInfo, err error)
-}
-
-type ResourceUpdater interface {
-	UpdateResource(ctx context.Context, id string, d *schema.ResourceData) (apiResponseInfo ApiResponseInfo, err error)
-}
-type ResourceDeleter interface {
-	DeleteResource(ctx context.Context, id string) (ApiResponseInfo, error)
-}
-
 // ApiResponseInfo - interface over different ApiResponse types from sdks
 type ApiResponseInfo interface {
 	HttpNotFound() bool
 	LogInfo()
 }
 
-// ResourceExistsFunc polls api to see if resource exists based on id
-type ResourceExistsFunc func(ctx context.Context, id string) (ApiResponseInfo, error)
+// ResourceReadyFunc polls api to see if resource exists based on id
+type ResourceReadyFunc func(ctx context.Context, d *schema.ResourceData) (bool, error)
 
-// WaitForResourceToBeDeleted - keeps retrying until resource is not found(404), or until ctx is cancelled
-func WaitForResourceToBeDeleted(ctx context.Context, id string, fn ResourceExistsFunc) error {
-	err := resource.RetryContext(ctx, 60*time.Minute, func() *resource.RetryError {
-		var err error
-		var apiResponse ApiResponseInfo
-		apiResponse, err = fn(ctx, id)
-		if apiResponse.HttpNotFound() {
+// WaitForResourceToBeReady - keeps retrying until resource is ready(true is returned), or until err is thrown, or ctx is cancelled
+func WaitForResourceToBeReady(ctx context.Context, d *schema.ResourceData, fn ResourceReadyFunc) error {
+	err := resource.RetryContext(ctx, DefaultTimeout, func() *resource.RetryError {
+		isReady, err := fn(ctx, d)
+		if isReady == true {
 			return nil
 		}
 		if err != nil {
 			resource.NonRetryableError(err)
 		}
+		log.Printf("[DEBUG] resource with id %s not ready, still trying ", d.Id())
+		return resource.RetryableError(fmt.Errorf("resource with id %s not ready, still trying ", d.Id()))
+	})
+	return err
+}
 
-		return resource.RetryableError(fmt.Errorf("resource with id %s found, still trying ", id))
+// IsResourceDeletedFunc polls api to see if resource exists based on id
+type IsResourceDeletedFunc func(ctx context.Context, d *schema.ResourceData) (bool, error)
+
+// WaitForResourceToBeDeleted - keeps retrying until resource is not found(404), or until ctx is cancelled
+func WaitForResourceToBeDeleted(ctx context.Context, d *schema.ResourceData, fn IsResourceDeletedFunc) error {
+	err := resource.RetryContext(ctx, DefaultTimeout, func() *resource.RetryError {
+		isDeleted, err := fn(ctx, d)
+		if isDeleted {
+			return nil
+		}
+		if err != nil {
+			resource.NonRetryableError(err)
+		}
+		log.Printf("[DEBUG] resource with id %s still has not been deleted", d.Id())
+		return resource.RetryableError(fmt.Errorf("resource with id %s found, still trying ", d.Id()))
 	})
 	return err
 }

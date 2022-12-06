@@ -11,24 +11,10 @@ import (
 )
 
 type Client struct {
-	certmanager.APIClient
+	sdkClient *certmanager.APIClient
 }
 
-type ClientConfig struct {
-	certmanager.Configuration
-}
-
-// ClientService is a wrapper around dbaas.APIClient
-type ClientService interface {
-	Get() *Client
-	GetConfig() *ClientConfig
-}
-
-type clientService struct {
-	client *certmanager.APIClient
-}
-
-func NewClientService(username, password, token, url, version, terraformVersion string) ClientService {
+func NewClientService(username, password, token, url, version, terraformVersion string) *Client {
 	certConfig := certmanager.NewConfiguration(username, password, token, url)
 
 	if os.Getenv(utils.IonosDebug) != "" {
@@ -42,19 +28,7 @@ func NewClientService(username, password, token, url, version, terraformVersion 
 		"terraform-provider/%s_ionos-cloud-sdk-go-cert-manager/%s_hashicorp-terraform/%s_terraform-plugin-sdk/%s_os/%s_arch/%s",
 		version, certmanager.Version, terraformVersion, meta.SDKVersionString(), runtime.GOOS, runtime.GOARCH)
 
-	return &clientService{
-		client: certmanager.NewAPIClient(certConfig),
-	}
-}
-
-func (c clientService) Get() *Client {
 	return &Client{
-		APIClient: *c.client,
-	}
-}
-
-func (c clientService) GetConfig() *ClientConfig {
-	return &ClientConfig{
-		Configuration: *c.client.GetConfig(),
+		sdkClient: certmanager.NewAPIClient(certConfig),
 	}
 }

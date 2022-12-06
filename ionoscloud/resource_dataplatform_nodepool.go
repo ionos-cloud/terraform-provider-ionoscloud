@@ -10,7 +10,6 @@ import (
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils"
 	"log"
 	"regexp"
-	"time"
 )
 
 func resourceDataplatformNodePool() *schema.Resource {
@@ -28,6 +27,7 @@ func resourceDataplatformNodePool() *schema.Resource {
 				Description:      "The name of your node pool. Must be 63 characters or less and must be empty or begin and end with an alphanumeric character ([a-z0-9A-Z]) with dashes (-), underscores (_), dots (.), and alphanumerics between.",
 				Required:         true,
 				ValidateDiagFunc: validation.ToDiagFunc(validation.All(validation.StringLenBetween(0, 63), validation.StringMatch(regexp.MustCompile("^[A-Za-z0-9][-A-Za-z0-9_.]*[A-Za-z0-9]$"), ""))),
+				ForceNew:         true,
 			},
 			"node_count": {
 				Type:        schema.TypeInt,
@@ -39,6 +39,7 @@ func resourceDataplatformNodePool() *schema.Resource {
 				Description: "A valid CPU family name or `AUTO` if the platform shall choose the best fitting option. Available CPU architectures can be retrieved from the datacenter resource.",
 				Optional:    true,
 				Computed:    true,
+				ForceNew:    true,
 			},
 			"cores_count": {
 				Type:             schema.TypeInt,
@@ -46,6 +47,7 @@ func resourceDataplatformNodePool() *schema.Resource {
 				Optional:         true,
 				Computed:         true,
 				ValidateDiagFunc: validation.ToDiagFunc(validation.IntAtLeast(1)),
+				ForceNew:         true,
 			},
 			"ram_size": {
 				Type:             schema.TypeInt,
@@ -53,6 +55,7 @@ func resourceDataplatformNodePool() *schema.Resource {
 				Optional:         true,
 				Computed:         true,
 				ValidateDiagFunc: validation.ToDiagFunc(validation.All(validation.IntAtLeast(2048), validation.IntDivisibleBy(1024))),
+				ForceNew:         true,
 			},
 			"availability_zone": {
 				Type:             schema.TypeString,
@@ -60,6 +63,7 @@ func resourceDataplatformNodePool() *schema.Resource {
 				Optional:         true,
 				Computed:         true,
 				ValidateDiagFunc: validation.ToDiagFunc(validation.StringInSlice([]string{"AUTO", "ZONE_1", "ZONE_2"}, true)),
+				ForceNew:         true,
 			},
 			"storage_type": {
 				Type:             schema.TypeString,
@@ -67,6 +71,7 @@ func resourceDataplatformNodePool() *schema.Resource {
 				Optional:         true,
 				Computed:         true,
 				ValidateDiagFunc: validation.ToDiagFunc(validation.StringInSlice([]string{"HDD", "SSD"}, true)),
+				ForceNew:         true,
 			},
 			"storage_size": {
 				Type:             schema.TypeInt,
@@ -74,6 +79,7 @@ func resourceDataplatformNodePool() *schema.Resource {
 				Optional:         true,
 				Computed:         true,
 				ValidateDiagFunc: validation.ToDiagFunc(validation.IntAtLeast(10)),
+				ForceNew:         true,
 			},
 			"maintenance_window": {
 				Type:        schema.TypeList,
@@ -125,45 +131,8 @@ func resourceDataplatformNodePool() *schema.Resource {
 				ValidateDiagFunc: validation.ToDiagFunc(validation.StringMatch(regexp.MustCompile("^[A-Za-z0-9][-A-Za-z0-9_.]*[A-Za-z0-9]$"), "")),
 			},
 		},
-		Timeouts:      &resourceDefaultTimeouts,
-		CustomizeDiff: checkDataplatformNodePoolImmutableFields,
+		Timeouts: &resourceDefaultTimeouts,
 	}
-}
-
-func checkDataplatformNodePoolImmutableFields(_ context.Context, diff *schema.ResourceDiff, _ interface{}) error {
-	if diff.Id() == "" {
-		return nil
-	}
-
-	if diff.HasChange("name") {
-		return fmt.Errorf("name %s", ImmutableError)
-	}
-
-	if diff.HasChange("cpu_family") {
-		return fmt.Errorf("cpu_family %s", ImmutableError)
-	}
-
-	if diff.HasChange("cores_count") {
-		return fmt.Errorf("cores_count %s", ImmutableError)
-	}
-
-	if diff.HasChange("ram_size") {
-		return fmt.Errorf("ram_size %s", ImmutableError)
-	}
-
-	if diff.HasChange("availability_zone") {
-		return fmt.Errorf("availability_zone %s", ImmutableError)
-	}
-
-	if diff.HasChange("storage_size") {
-		return fmt.Errorf("storage_size %s", ImmutableError)
-	}
-
-	if diff.HasChange("storage_type") {
-		return fmt.Errorf("storage_type %s", ImmutableError)
-	}
-
-	return nil
 }
 
 func resourceDataplatformNodePoolCreate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
@@ -171,40 +140,17 @@ func resourceDataplatformNodePoolCreate(ctx context.Context, d *schema.ResourceD
 
 	clusterId := d.Get("cluster_id").(string)
 
-	dataplatformNodePool := dataplatformService.GetDataplatformNodePoolDataCreate(d)
-	dataplatformNodePoolResponse, _, err := client.CreateNodePool(ctx, clusterId, *dataplatformNodePool)
-
+	dataplatformNodePoolResponse, _, err := client.CreateNodePool(ctx, clusterId, d)
 	if err != nil {
 		diags := diag.FromErr(fmt.Errorf("an error occured while creating a Dataplatform NodePool: %w", err))
 		return diags
 	}
 
 	d.SetId(*dataplatformNodePoolResponse.Id)
-
-	for {
-		log.Printf("[INFO] Waiting for Dataplatform Node Pool %s to be ready...", d.Id())
-
-		nodePoolReady, rsErr := dataplatformNodePoolReady(ctx, client, d)
-
-		if rsErr != nil {
-			diags := diag.FromErr(fmt.Errorf("error while checking readiness status of Dataplatform Node Pool %s: %w", d.Id(), rsErr))
-			return diags
-		}
-
-		if nodePoolReady {
-			log.Printf("[INFO] Dataplatform Node Pool ready: %s", d.Id())
-			break
-		}
-
-		select {
-		case <-time.After(utils.SleepInterval):
-			log.Printf("[INFO] trying again ...")
-		case <-ctx.Done():
-			log.Printf("[INFO] create timed out")
-			diags := diag.FromErr(fmt.Errorf("Dataplatform Node Pool creation timed out! WARNING: your Dataplatform Node Pool (%s) will still probably be created after some time but the terraform state wont reflect that; check your Ionos Cloud account for updates", d.Id()))
-			return diags
-		}
-
+	err = utils.WaitForResourceToBeReady(ctx, d, client.IsNodePoolReady)
+	if err != nil {
+		diags := diag.FromErr(fmt.Errorf(" while dataplaform nodepool waiting to be ready: %w", err))
+		return diags
 	}
 
 	return resourceDataplatformNodePoolRead(ctx, d, meta)
@@ -242,49 +188,18 @@ func resourceDataplatformNodePoolUpdate(ctx context.Context, d *schema.ResourceD
 	clusterId := d.Get("cluster_id").(string)
 	nodePoolId := d.Id()
 
-	dataplatformNodePool, diags := dataplatformService.GetDataplatformNodePoolDataUpdate(d)
-
-	if diags != nil {
-		return diags
-	}
-
-	dataplatformNodePoolResponse, _, err := client.UpdateNodePool(ctx, clusterId, nodePoolId, *dataplatformNodePool)
-
+	dataplatformNodePoolResponse, _, err := client.UpdateNodePool(ctx, clusterId, nodePoolId, d)
 	if err != nil {
 		diags := diag.FromErr(fmt.Errorf("an error occured while updating a Dataplatform NodePool: %w", err))
 		return diags
 	}
 
 	d.SetId(*dataplatformNodePoolResponse.Id)
-	//todo is this necessary
-	time.Sleep(utils.SleepInterval)
 
-	for {
-		log.Printf("[INFO] Waiting for Node Pool %s to be ready...", d.Id())
-
-		nodePoolReady, rsErr := dataplatformNodePoolReady(ctx, client, d)
-
-		if rsErr != nil {
-			diags := diag.FromErr(fmt.Errorf("error while checking readiness status of Dataplatform Node Pool %s: %w", d.Id(), rsErr))
-			return diags
-		}
-
-		if nodePoolReady {
-			log.Printf("[INFO] Dataplatform Node Pool ready: %s", d.Id())
-			break
-		}
-
-		select {
-		case <-time.After(utils.SleepInterval):
-			log.Printf("[INFO] trying again ...")
-		case <-ctx.Done():
-			log.Printf("[INFO] create timed out")
-			diags := diag.FromErr(fmt.Errorf("dataplatform Node Pool update timed out! WARNING: your Dataplatform Node Pool (%s) will still probably be updated after some time but the terraform state wont reflect that; check your Ionos Cloud account for updates", d.Id()))
-			return diags
-		}
-
+	err = utils.WaitForResourceToBeReady(ctx, d, client.IsNodePoolReady)
+	if err != nil {
+		diag.FromErr(fmt.Errorf("waiting until ready %w", err))
 	}
-
 	return resourceDataplatformNodePoolRead(ctx, d, meta)
 }
 
@@ -295,7 +210,6 @@ func resourceDataplatformNodePoolDelete(ctx context.Context, d *schema.ResourceD
 	nodePoolId := d.Id()
 
 	_, apiResponse, err := client.DeleteNodePool(ctx, clusterId, nodePoolId)
-
 	if err != nil {
 		if apiResponse.HttpNotFound() {
 			d.SetId("")
@@ -304,33 +218,10 @@ func resourceDataplatformNodePoolDelete(ctx context.Context, d *schema.ResourceD
 		diags := diag.FromErr(fmt.Errorf("error while deleting Dataplatform Node Pool %s: %w", d.Id(), err))
 		return diags
 	}
-
-	for {
-		log.Printf("[INFO] Waiting for Dataplatform Node Pool %s to be deleted...", d.Id())
-
-		nodePoolDeleted, dsErr := dataplatformNodePoolDeleted(ctx, client, d)
-
-		if dsErr != nil {
-			diags := diag.FromErr(fmt.Errorf("error while checking deletion status of Dataplatform Node Pool %s: %w", d.Id(), dsErr))
-			return diags
-		}
-
-		if nodePoolDeleted {
-			log.Printf("[INFO] Successfully deleted Dataplatform Node Pool: %s", d.Id())
-			break
-		}
-
-		select {
-		case <-time.After(utils.SleepInterval):
-			log.Printf("[INFO] trying again ...")
-		case <-ctx.Done():
-			diags := diag.FromErr(fmt.Errorf("Dataplatform Node Pool deletion timed out! WARNING: your Dataplatform Node Pool (%s) will still probably be deleted after some time but the terraform state won't reflect that; check your Ionos Cloud account for updates", d.Id()))
-			return diags
-		}
+	err = utils.WaitForResourceToBeDeleted(ctx, d, client.IsNodePoolDeleted)
+	if err != nil {
+		diag.FromErr(fmt.Errorf("deleting %w", err))
 	}
-
-	// wait 15 seconds after the deletion of the Node Pool, for the lan to be freed
-	time.Sleep(utils.SleepInterval * 3)
 
 	return nil
 }
@@ -358,48 +249,4 @@ func resourceDataplatformNodePoolImport(ctx context.Context, d *schema.ResourceD
 	}
 
 	return []*schema.ResourceData{d}, nil
-}
-
-func dataplatformNodePoolReady(ctx context.Context, client *dataplatformService.Client, d *schema.ResourceData) (bool, error) {
-
-	clusterId := d.Get("cluster_id").(string)
-	nodePoolId := d.Id()
-
-	subjectNodePool, _, err := client.GetNodePool(ctx, clusterId, nodePoolId)
-
-	if err != nil {
-		return true, fmt.Errorf("error checking Dataplatform Node Pool status: %w", err)
-	}
-	// ToDo: Removed this part since there are still problems with the nodePools being unstable (failing for a short time and then recovering)
-	//if *subjectNodePool.LifecycleStatus == "FAILED" {
-	//
-	//	time.Sleep(time.Second * 3)
-	//
-	//	subjectNodePool, _, err = client.GetNodePool(ctx, d.Id())
-	//
-	//	if err != nil {
-	//		return true, fmt.Errorf("error checking dbaas nodePool status: %s", err)
-	//	}
-	//
-	//	if *subjectNodePool.LifecycleStatus == "FAILED" {
-	//		return false, fmt.Errorf("dbaas nodePool has failed. WARNING: your k8s nodePool may still recover after some time but the terraform state won't reflect that; check your Ionos Cloud account for updates")
-	//	}
-	//}
-	return *subjectNodePool.Metadata.State == "AVAILABLE", nil
-}
-
-func dataplatformNodePoolDeleted(ctx context.Context, client *dataplatformService.Client, d *schema.ResourceData) (bool, error) {
-
-	clusterId := d.Get("cluster_id").(string)
-	nodePoolId := d.Id()
-
-	_, apiResponse, err := client.GetNodePool(ctx, clusterId, nodePoolId)
-
-	if err != nil {
-		if apiResponse.HttpNotFound() {
-			return true, nil
-		}
-		return true, fmt.Errorf("checking Dataplatform Node Pool deletion status: %w", err)
-	}
-	return false, nil
 }

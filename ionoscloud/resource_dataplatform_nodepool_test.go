@@ -172,7 +172,7 @@ func testAccCheckDataplatformNodePoolDestroyCheck(s *terraform.State) error {
 		_, apiResponse, err := client.GetNodePool(ctx, clusterId, nodePoolId)
 
 		if err != nil {
-			if apiResponse == nil || apiResponse.StatusCode != 404 {
+			if !apiResponse.HttpNotFound() {
 				return fmt.Errorf("an error occurred while checking the destruction of Dataplatform Node Pool %s: %w", rs.Primary.ID, err)
 			}
 		} else {
@@ -224,7 +224,7 @@ func testAccCheckDataplatformNodePoolExists(n string, nodePool *dataplatform.Nod
 const testAccCheckDataplatformNodePoolConfigBasic = `
 resource ` + DatacenterResource + ` "datacenter_example" {
   name        = "datacenter_example"
-  location    = "de/fkb"
+  location    = "de/fra"
   description = "Datacenter for testing Dataplatform NodePool"
 }
 
@@ -235,7 +235,7 @@ resource ` + DataplatformClusterResource + ` ` + DataplatformClusterTestResource
    	day_of_the_week  	= "Sunday"
    	time				= "09:00:00"
   }
-  data_platform_version	= "1.1.0"
+  data_platform_version	= "22.09"
 }
 
 resource ` + DataplatformNodePoolResource + ` ` + DataplatformNodePoolTestResource + ` {
@@ -266,7 +266,7 @@ resource ` + DataplatformNodePoolResource + ` ` + DataplatformNodePoolTestResour
 const testAccCheckDataplatformNodePoolConfigUpdate = `
 resource ` + DatacenterResource + ` "datacenter_example" {
   name        = "datacenter_example"
-  location    = "de/fkb"
+  location    = "de/fra"
   description = "Datacenter for testing Dataplatform NodePool"
 }
 
@@ -277,7 +277,7 @@ resource ` + DataplatformClusterResource + ` ` + DataplatformClusterTestResource
   	day_of_the_week  	= "Saturday"
    	time				= "10:00:00"
   }
-  data_platform_version	= "1.1.0"
+  data_platform_version	= "22.09"
 }
 
 resource ` + DataplatformNodePoolResource + ` ` + DataplatformNodePoolTestResource + ` {

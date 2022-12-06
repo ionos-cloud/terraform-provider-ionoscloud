@@ -11,25 +11,12 @@ import (
 	"time"
 )
 
+// Client - wrapper over sdk client, to allow for service layer
 type Client struct {
-	dataplatform.APIClient
+	sdkClient dataplatform.APIClient
 }
 
-type ClientConfig struct {
-	dataplatform.Configuration
-}
-
-// ClientService is a wrapper around dataplatform.APIClient
-type ClientService interface {
-	Get() *Client
-	GetConfig() *ClientConfig
-}
-
-type clientService struct {
-	client *dataplatform.APIClient
-}
-
-func NewClientService(username, password, token, url, version, terraformVersion string) ClientService {
+func NewClientService(username, password, token, url, version, terraformVersion string) *Client {
 	newConfigDataplatform := dataplatform.NewConfiguration(username, password, token, url)
 
 	if os.Getenv("IONOS_DEBUG") != "" {
@@ -43,19 +30,5 @@ func NewClientService(username, password, token, url, version, terraformVersion 
 		"terraform-provider/%s_ionos-cloud-sdk-go-dataplatform/%s_hashicorp-terraform/%s_terraform-plugin-sdk/%s_os/%s_arch/%s",
 		version, dataplatform.Version, terraformVersion, meta.SDKVersionString(), runtime.GOOS, runtime.GOARCH)
 
-	return &clientService{
-		client: dataplatform.NewAPIClient(newConfigDataplatform),
-	}
-}
-
-func (c clientService) Get() *Client {
-	return &Client{
-		APIClient: *c.client,
-	}
-}
-
-func (c clientService) GetConfig() *ClientConfig {
-	return &ClientConfig{
-		Configuration: *c.client.GetConfig(),
-	}
+	return &Client{sdkClient: *dataplatform.NewAPIClient(newConfigDataplatform)}
 }

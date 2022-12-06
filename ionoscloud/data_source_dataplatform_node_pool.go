@@ -144,14 +144,13 @@ func dataSourceDataplatformReadNodePool(ctx context.Context, d *schema.ResourceD
 		/* search by ID */
 		nodePool, _, err = client.GetNodePool(ctx, clusterId, id)
 		if err != nil {
-			return diag.FromErr(fmt.Errorf("an error occurred while fetching the Dataplatform Node Pool with ID %s: %s", id, err))
+			return diag.FromErr(fmt.Errorf("an error occurred while fetching the Dataplatform Node Pool with ID %s: %w", id, err))
 		}
 	} else {
 		/* search by name */
-		results, err := filterNodePools(ctx, d, client, name)
-
-		if err != nil {
-			return err
+		results, diagErr := filterNodePools(ctx, d, client, name)
+		if diagErr != nil {
+			return diagErr
 		}
 
 		if results == nil || len(results) == 0 {
@@ -181,7 +180,7 @@ func filterNodePools(ctx context.Context, d *schema.ResourceData, client *datapl
 
 	nodePools, _, err := client.ListNodePools(ctx, clusterId)
 	if err != nil {
-		diags := diag.FromErr(fmt.Errorf("an error occurred while fetching Dataplatform NodePools: %s", err.Error()))
+		diags := diag.FromErr(fmt.Errorf("an error occurred while fetching Dataplatform NodePools: %w", err))
 		return nil, diags
 	}
 	if nodePools.Items != nil && len(*nodePools.Items) > 0 {

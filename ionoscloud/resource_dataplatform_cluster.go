@@ -84,7 +84,7 @@ func checkDataplatformClusterImmutableFields(_ context.Context, diff *schema.Res
 func resourceDataplatformClusterCreate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	client := meta.(SdkBundle).DataplatformClient
 
-	id, _, err := client.CreateResource(ctx, d)
+	id, _, err := client.CreateCluster(ctx, d)
 
 	if err != nil {
 		diags := diag.FromErr(fmt.Errorf("while creating a Dataplatform Cluster: %w", err))
@@ -93,9 +93,10 @@ func resourceDataplatformClusterCreate(ctx context.Context, d *schema.ResourceDa
 
 	d.SetId(id)
 
-	err = client.WaitForClusterToBeReady(ctx, id)
+	err = utils.WaitForResourceToBeReady(ctx, d, client.IsClusterReady)
 	if err != nil {
-		return diag.FromErr(fmt.Errorf("waitforCluster %w", err))
+		diags := diag.FromErr(fmt.Errorf("while dataplaform cluster waiting to be ready: %w", err))
+		return diags
 	}
 
 	return resourceDataplatformClusterRead(ctx, d, meta)
@@ -131,7 +132,7 @@ func resourceDataplatformClusterUpdate(ctx context.Context, d *schema.ResourceDa
 
 	clusterId := d.Id()
 
-	_, err := client.UpdateResource(ctx, clusterId, d)
+	_, err := client.UpdateCLuster(ctx, clusterId, d)
 
 	if err != nil {
 		diags := diag.FromErr(fmt.Errorf("an error occured while updating a Dataplatform Cluster: %s", err))
@@ -151,7 +152,7 @@ func resourceDataplatformClusterDelete(ctx context.Context, d *schema.ResourceDa
 
 	clusterId := d.Id()
 
-	apiResponse, err := client.DeleteResource(ctx, clusterId)
+	apiResponse, err := client.DeleteCluster(ctx, clusterId)
 
 	if err != nil {
 		if apiResponse.HttpNotFound() {
@@ -162,7 +163,7 @@ func resourceDataplatformClusterDelete(ctx context.Context, d *schema.ResourceDa
 		return diags
 	}
 
-	err = utils.WaitForResourceToBeDeleted(ctx, clusterId, client.DoesResourceExist)
+	err = utils.WaitForResourceToBeDeleted(ctx, d, client.IsClusterDeleted)
 	if err != nil {
 		diag.FromErr(fmt.Errorf("while deleting %w", err))
 	}
