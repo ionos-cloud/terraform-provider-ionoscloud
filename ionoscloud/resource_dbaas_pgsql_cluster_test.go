@@ -6,12 +6,13 @@ package ionoscloud
 import (
 	"context"
 	"fmt"
+	"regexp"
+	"testing"
+
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
 	psql "github.com/ionos-cloud/sdk-go-dbaas-postgres"
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils"
-	"regexp"
-	"testing"
 )
 
 func TestAccDBaaSPgSqlClusterBasic(t *testing.T) {
@@ -21,6 +22,7 @@ func TestAccDBaaSPgSqlClusterBasic(t *testing.T) {
 		PreCheck: func() {
 			testAccPreCheck(t)
 		},
+		ExternalProviders: randomProviderVersion343(),
 		ProviderFactories: testAccProviderFactories,
 		CheckDestroy:      testAccCheckDbaasPgSqlClusterDestroyCheck,
 		Steps: []resource.TestStep{
@@ -43,7 +45,8 @@ func TestAccDBaaSPgSqlClusterBasic(t *testing.T) {
 					resource.TestCheckResourceAttr(PsqlClusterResource+"."+DBaaSClusterTestResource, "maintenance_window.0.time", "09:00:00"),
 					resource.TestCheckResourceAttr(PsqlClusterResource+"."+DBaaSClusterTestResource, "maintenance_window.0.day_of_the_week", "Sunday"),
 					resource.TestCheckResourceAttr(PsqlClusterResource+"."+DBaaSClusterTestResource, "credentials.0.username", "username"),
-					resource.TestCheckResourceAttr(PsqlClusterResource+"."+DBaaSClusterTestResource, "credentials.0.password", "password"),
+					//resource.TestCheckResourceAttr(PsqlClusterResource+"."+DBaaSClusterTestResource, "credentials.0.password", "password"),
+					resource.TestCheckResourceAttrPair(PsqlClusterResource+"."+DBaaSClusterTestResource, "credentials.0.password", RandomPassword+".cluster_password", "result"),
 					resource.TestCheckResourceAttr(PsqlClusterResource+"."+DBaaSClusterTestResource, "synchronization_mode", "ASYNCHRONOUS"),
 				),
 			},
@@ -135,7 +138,7 @@ func TestAccDBaaSPgSqlClusterBasic(t *testing.T) {
 					resource.TestCheckResourceAttr(PsqlClusterResource+"."+DBaaSClusterTestResource, "maintenance_window.0.time", "10:00:00"),
 					resource.TestCheckResourceAttr(PsqlClusterResource+"."+DBaaSClusterTestResource, "maintenance_window.0.day_of_the_week", "Saturday"),
 					resource.TestCheckResourceAttr(PsqlClusterResource+"."+DBaaSClusterTestResource, "credentials.0.username", "username"),
-					resource.TestCheckResourceAttr(PsqlClusterResource+"."+DBaaSClusterTestResource, "credentials.0.password", "password"),
+					resource.TestCheckResourceAttrPair(PsqlClusterResource+"."+DBaaSClusterTestResource, "credentials.0.password", RandomPassword+".cluster_password", "result"),
 					resource.TestCheckResourceAttr(PsqlClusterResource+"."+DBaaSClusterTestResource, "synchronization_mode", "ASYNCHRONOUS"),
 				),
 			},
@@ -156,7 +159,7 @@ func TestAccDBaaSPgSqlClusterBasic(t *testing.T) {
 					resource.TestCheckResourceAttr(PsqlClusterResource+"."+DBaaSClusterTestResource, "maintenance_window.0.time", "10:00:00"),
 					resource.TestCheckResourceAttr(PsqlClusterResource+"."+DBaaSClusterTestResource, "maintenance_window.0.day_of_the_week", "Saturday"),
 					resource.TestCheckResourceAttr(PsqlClusterResource+"."+DBaaSClusterTestResource, "credentials.0.username", "username"),
-					resource.TestCheckResourceAttr(PsqlClusterResource+"."+DBaaSClusterTestResource, "credentials.0.password", "password"),
+					resource.TestCheckResourceAttrPair(PsqlClusterResource+"."+DBaaSClusterTestResource, "credentials.0.password", RandomPassword+".cluster_password", "result"),
 					resource.TestCheckResourceAttr(PsqlClusterResource+"."+DBaaSClusterTestResource, "synchronization_mode", "ASYNCHRONOUS"),
 				),
 			},
@@ -302,9 +305,15 @@ resource ` + PsqlClusterResource + ` ` + DBaaSClusterTestResource + ` {
   }
   credentials {
   	username = "username"
-	password = "password"
+	password = ` + RandomPassword + `.cluster_password.result
   }
   synchronization_mode = "ASYNCHRONOUS"
+}
+
+resource ` + RandomPassword + ` "cluster_password" {
+  length           = 16
+  special          = true
+  override_special = "!#$%&*()-_=+[]{}<>:?"
 }
 `
 
@@ -355,9 +364,15 @@ resource ` + PsqlClusterResource + ` ` + DBaaSClusterTestResource + ` {
   }
   credentials {
   	username = "username"
-	password = "password"
+	password = ` + RandomPassword + `.cluster_password.result
   }
   synchronization_mode = "ASYNCHRONOUS"
+}
+
+resource ` + RandomPassword + ` "cluster_password" {
+  length           = 16
+  special          = true
+  override_special = "!#$%&*()-_=+[]{}<>:?"
 }
 `
 
@@ -403,9 +418,15 @@ resource ` + PsqlClusterResource + ` ` + DBaaSClusterTestResource + ` {
   }
   credentials {
   	username = "username"
-	password = "password"
+	password = ` + RandomPassword + `.cluster_password.result
   }
   synchronization_mode = "ASYNCHRONOUS"
+}
+
+resource ` + RandomPassword + ` "cluster_password" {
+  length           = 16
+  special          = true
+  override_special = "!#$%&*()-_=+[]{}<>:?"
 }
 `
 const testAccCheckDbaasPgSqlClusterConfigUpdateRemoveDBaaS = `
@@ -467,14 +488,20 @@ resource ` + PsqlClusterResource + ` ` + DBaaSClusterTestResource + ` {
   }
   credentials {
   	username = "username"
-	password = "password"
+	password = ` + RandomPassword + `.cluster_password.result
   }
   synchronization_mode = "ASYNCHRONOUS"
   from_backup {
 	backup_id = "f767c6e5-747c-11ec-9bb6-4aa52b3d55f1-4oymiqu-12"
     recovery_target_time = "2022-01-13T16:27:42Z"
   }
-}`
+}
+resource ` + RandomPassword + ` "cluster_password" {
+  length           = 16
+  special          = true
+  override_special = "!#$%&*()-_=+[]{}<>:?"
+}
+`
 
 const testAccDataSourceDBaaSPgSqlClusterMatchId = testAccCheckDbaasPgSqlClusterConfigBasic + `
 data ` + PsqlClusterResource + ` ` + DBaaSClusterTestDataSourceById + ` {

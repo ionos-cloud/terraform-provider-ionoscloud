@@ -4,8 +4,14 @@ const (
 	testAccCheckBackupUnitConfigBasic = `
 resource ` + BackupUnitResource + ` ` + BackupUnitTestResource + ` {
 	name        = "` + BackupUnitTestResource + `"
-	password    = "DemoPassword123$"
+	password    = ` + RandomPassword + `.backup_unit_password.result
 	email       = "example@ionoscloud.com"
+}
+
+resource ` + RandomPassword + ` "backup_unit_password" {
+  length           = 16
+  special          = true
+  override_special = "!#$%&*()-_=+[]{}<>:?"
 }
 `
 )

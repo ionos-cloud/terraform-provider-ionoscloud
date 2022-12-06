@@ -21,6 +21,7 @@ func TestAccGroupBasic(t *testing.T) {
 		PreCheck: func() {
 			testAccPreCheck(t)
 		},
+		ExternalProviders: randomProviderVersion343(),
 		ProviderFactories: testAccProviderFactories,
 		CheckDestroy:      testAccCheckGroupDestroyCheck,
 		Steps: []resource.TestStep{
@@ -226,7 +227,7 @@ resource ` + UserResource + ` ` + UserTestResource + ` {
   first_name = "user"
   last_name = "test"
   email = "` + utils.GenerateEmail() + `"
-  password = "abc123-321CBA"
+  password = ` + RandomPassword + `.user1_password.result
   administrator = false
   force_sec_auth= false
   active = false
@@ -236,10 +237,22 @@ resource ` + UserResource + ` ` + UserTestResource + `2 {
   first_name = "user"
   last_name = "test"
   email = "` + utils.GenerateEmail() + `"
-  password = "abc123-321CBA"
+  password = ` + RandomPassword + `.user2_password.result
   administrator = false
   force_sec_auth= false
   active = false
+}
+
+resource ` + RandomPassword + ` "user1_password" {
+  length           = 16
+  special          = true
+  override_special = "!#$%&*()-_=+[]{}<>:?"
+}
+
+resource ` + RandomPassword + ` "user2_password" {
+  length           = 16
+  special          = true
+  override_special = "!#$%&*()-_=+[]{}<>:?"
 }
 
 `
@@ -318,7 +331,7 @@ resource ` + UserResource + ` ` + UserTestResource + `3 {
   first_name = "user"
   last_name = "test"
   email = "` + utils.GenerateEmail() + `"
-  password = "abc123-321CBA"
+  password = ` + RandomPassword + `.user3_password.result
   administrator = false
   force_sec_auth= false
   active = false
@@ -355,6 +368,12 @@ resource ` + GroupResource + ` ` + GroupTestResource + ` {
   create_k8s_cluster = false
   user_ids = [` + UserResource + `.` + UserTestResource + `.id, ` + UserResource + `.` + UserTestResource + `3.id]
 }
+
+resource ` + RandomPassword + ` "user3_password" {
+  length           = 16
+  special          = true
+  override_special = "!#$%&*()-_=+[]{}<>:?"
+}
 `
 
 var testAccCheckGroupUpdateMigrateToUserIds = testAccCheckGroupCreateUsers + `
@@ -362,7 +381,7 @@ resource ` + UserResource + ` ` + UserTestResource + `3 {
   first_name = "user"
   last_name = "test"
   email = "` + utils.GenerateEmail() + `"
-  password = "abc123-321CBA"
+  password = ` + RandomPassword + `.user3_password.result
   administrator = false
   force_sec_auth= false
   active = false
@@ -395,6 +414,11 @@ resource ` + GroupResource + ` ` + GroupTestResource + ` {
   create_k8s_cluster = false
   user_ids = [` + UserResource + `.` + UserTestResource + `.id, ` + UserResource + `.` + UserTestResource + `3.id]
 }
+resource ` + RandomPassword + ` "user3_password" {
+  length           = 16
+  special          = true
+  override_special = "!#$%&*()-_=+[]{}<>:?"
+}
 `
 
 var testAccCheckGroupBothUserArgumentsError = testAccCheckGroupCreateUsers + `
@@ -402,7 +426,7 @@ resource ` + UserResource + ` ` + UserTestResource + `3 {
   first_name = "user"
   last_name = "test"
   email = "` + utils.GenerateEmail() + `"
-  password = "abc123-321CBA"
+  password = ` + RandomPassword + `.user3_password.result
   administrator = false
   force_sec_auth= false
   active = false
@@ -435,5 +459,10 @@ resource ` + GroupResource + ` ` + GroupTestResource + ` {
   create_k8s_cluster = false
   user_ids = [` + UserResource + `.` + UserTestResource + `.id, ` + UserResource + `.` + UserTestResource + `3.id]
   user_id = ` + UserResource + `.` + UserTestResource + `.id
+}
+resource ` + RandomPassword + ` "user3_password" {
+  length           = 16
+  special          = true
+  override_special = "!#$%&*()-_=+[]{}<>:?"
 }
 `
