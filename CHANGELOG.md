@@ -1,6 +1,7 @@
-## 6.3.3(upcoming release)
-### Feature: 
+## 6.3.4(upcoming release)
+### Feature:
  - Add update for mongo database resources
+ - Add labels for servers
 
 ## 6.3.3
 ### Feature
