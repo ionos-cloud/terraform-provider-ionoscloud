@@ -91,7 +91,6 @@ func TestAccUserBasic(t *testing.T) {
 					resource.TestCheckResourceAttr(UserResource+"."+UserTestResource, "force_sec_auth", "false"),
 					resource.TestCheckResourceAttr(UserResource+"."+UserTestResource, "active", "false"),
 					resource.TestCheckResourceAttrPair(UserResource+"."+UserTestResource, "password", RandomPassword+".user_password_updated", "result"),
-					//resource.TestCheckResourceAttr(UserResource+"."+UserTestResource, "password", RandomPassword+".user_password.result"+"Updated"),
 				),
 			},
 			{

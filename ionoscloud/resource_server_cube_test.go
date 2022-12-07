@@ -23,6 +23,7 @@ func TestAccCubeServerBasic(t *testing.T) {
 		PreCheck: func() {
 			testAccPreCheck(t)
 		},
+		ExternalProviders: randomProviderVersion343(),
 		ProviderFactories: testAccProviderFactories,
 		CheckDestroy:      testAccCheckCubeServerDestroyCheck,
 		Steps: []resource.TestStep{
@@ -34,7 +35,7 @@ func TestAccCubeServerBasic(t *testing.T) {
 					resource.TestCheckResourceAttr(ServerCubeResource+"."+ServerTestResource, "availability_zone", "ZONE_1"),
 					resource.TestCheckResourceAttr(ServerCubeResource+"."+ServerTestResource, "cpu_family", "INTEL_SKYLAKE"),
 					utils.TestImageNotNull(ServerCubeResource, "boot_image"),
-					resource.TestCheckResourceAttr(ServerCubeResource+"."+ServerTestResource, "image_password", "K3tTj8G14a3EgKyNeeiY"),
+					resource.TestCheckResourceAttrPair(ServerCubeResource+"."+ServerTestResource, "password", RandomPassword+".server_image_password", "result"),
 					resource.TestCheckResourceAttr(ServerCubeResource+"."+ServerTestResource, "volume.0.name", "system"),
 					resource.TestCheckResourceAttr(ServerCubeResource+"."+ServerTestResource, "volume.0.disk_type", "DAS"),
 					resource.TestCheckResourceAttr(ServerCubeResource+"."+ServerTestResource, "volume.0.bus", "VIRTIO"),
@@ -127,7 +128,7 @@ func TestAccCubeServerBasic(t *testing.T) {
 					resource.TestCheckResourceAttr(ServerCubeResource+"."+ServerTestResource, "availability_zone", "ZONE_1"),
 					resource.TestCheckResourceAttr(ServerCubeResource+"."+ServerTestResource, "cpu_family", "INTEL_SKYLAKE"),
 					utils.TestImageNotNull(ServerCubeResource, "boot_image"),
-					resource.TestCheckResourceAttr(ServerCubeResource+"."+ServerTestResource, "image_password", "K3tTj8G14a3EgKyNeeiY"),
+					resource.TestCheckResourceAttrPair(ServerResource+"."+ServerTestResource, "password", RandomPassword+".server_image_password_updated", "result"),
 					resource.TestCheckResourceAttr(ServerCubeResource+"."+ServerTestResource, "volume.0.name", ServerTestResource),
 					resource.TestCheckResourceAttr(ServerCubeResource+"."+ServerTestResource, "volume.0.disk_type", "DAS"),
 					resource.TestCheckResourceAttr(ServerCubeResource+"."+ServerTestResource, "volume.0.bus", "VIRTIO"),
@@ -192,6 +193,7 @@ func TestAccCubeServerResolveImageName(t *testing.T) {
 		PreCheck: func() {
 			testAccPreCheck(t)
 		},
+		ExternalProviders: randomProviderVersion343(),
 		ProviderFactories: testAccProviderFactories,
 		CheckDestroy:      testAccCheckCubeServerDestroyCheck,
 		Steps: []resource.TestStep{
@@ -203,7 +205,7 @@ func TestAccCubeServerResolveImageName(t *testing.T) {
 					resource.TestCheckResourceAttr(ServerCubeResource+"."+ServerTestResource, "availability_zone", "ZONE_1"),
 					resource.TestCheckResourceAttr(ServerCubeResource+"."+ServerTestResource, "cpu_family", "INTEL_SKYLAKE"),
 					utils.TestImageNotNull(ServerCubeResource, "boot_image"),
-					resource.TestCheckResourceAttr(ServerCubeResource+"."+ServerTestResource, "image_password", "pass123456"),
+					resource.TestCheckResourceAttrPair(ServerCubeResource+"."+ServerTestResource, "password", RandomPassword+".server_image_password", "result"),
 					resource.TestCheckResourceAttr(ServerCubeResource+"."+ServerTestResource, "volume.0.name", ServerTestResource),
 					resource.TestCheckResourceAttr(ServerCubeResource+"."+ServerTestResource, "volume.0.disk_type", "DAS"),
 					resource.TestCheckResourceAttrPair(ServerCubeResource+"."+ServerTestResource, "nic.0.lan", LanResource+"."+LanTestResource, "id"),
@@ -226,6 +228,7 @@ func TestAccCubeServerResolveImageName(t *testing.T) {
 //		PreCheck: func() {
 //			testAccPreCheck(t)
 //		},
+//      ExternalProviders: randomProviderVersion343(),
 //		ProviderFactories: testAccProviderFactories,
 //		CheckDestroy:      testAccCheckCubeServerDestroyCheck,
 //		Steps: []resource.TestStep{
@@ -258,6 +261,7 @@ func TestAccCubeServerWithICMP(t *testing.T) {
 		PreCheck: func() {
 			testAccPreCheck(t)
 		},
+		ExternalProviders: randomProviderVersion343(),
 		ProviderFactories: testAccProviderFactories,
 		CheckDestroy:      testAccCheckCubeServerDestroyCheck,
 		Steps: []resource.TestStep{
@@ -269,7 +273,7 @@ func TestAccCubeServerWithICMP(t *testing.T) {
 					resource.TestCheckResourceAttr(ServerCubeResource+"."+ServerTestResource, "availability_zone", "ZONE_1"),
 					resource.TestCheckResourceAttr(ServerCubeResource+"."+ServerTestResource, "cpu_family", "INTEL_SKYLAKE"),
 					utils.TestImageNotNull(ServerCubeResource, "boot_image"),
-					resource.TestCheckResourceAttr(ServerCubeResource+"."+ServerTestResource, "image_password", "K3tTj8G14a3EgKyNeeiY"),
+					resource.TestCheckResourceAttrPair(ServerCubeResource+"."+ServerTestResource, "password", RandomPassword+".server_image_password", "result"),
 					resource.TestCheckResourceAttr(ServerCubeResource+"."+ServerTestResource, "volume.0.name", "system"),
 					resource.TestCheckResourceAttr(ServerCubeResource+"."+ServerTestResource, "volume.0.disk_type", "DAS"),
 					resource.TestCheckResourceAttrPair(ServerCubeResource+"."+ServerTestResource, "nic.0.lan", LanResource+"."+LanTestResource, "id"),
@@ -393,7 +397,7 @@ resource ` + ServerCubeResource + ` ` + ServerTestResource + ` {
   availability_zone = "ZONE_1"
   cpu_family = "INTEL_SKYLAKE"
   image_name ="ubuntu:latest"
-  image_password = "K3tTj8G14a3EgKyNeeiY"
+  image_password = ` + RandomPassword + `.server_image_password_updated.result
   template_uuid     = data.ionoscloud_template.` + ServerTestResource + `.id
 
   volume {
@@ -419,7 +423,13 @@ resource ` + ServerCubeResource + ` ` + ServerTestResource + ` {
 	  type = "EGRESS"
     }
   }
-}`
+}
+resource ` + RandomPassword + ` "server_image_password_updated" {
+  length           = 16
+  special          = true
+  override_special = "!#$%&*()-_=+[]{}<>:?"
+}
+`
 
 const testAccDataSourceCubeServerMatchId = testAccCheckCubeServerConfigBasic + `
 data ` + ServerCubeResource + ` ` + ServerDataSourceById + ` {
@@ -507,7 +517,7 @@ resource ` + ServerCubeResource + ` ` + ServerTestResource + ` {
   availability_zone = "ZONE_1"
   cpu_family        = "INTEL_SKYLAKE" 
   image_name        = "ubuntu:latest"
-  image_password    = "pass123456"
+  image_password    = ` + RandomPassword + `.server_image_password.result
   volume {
     name           = "` + ServerTestResource + `"
     disk_type      = "DAS"
@@ -523,7 +533,13 @@ resource ` + ServerCubeResource + ` ` + ServerTestResource + ` {
       port_range_end   = 22
     }
   }
-}`
+}
+resource ` + RandomPassword + ` "server_image_password" {
+  length           = 16
+  special          = true
+  override_special = "!#$%&*()-_=+[]{}<>:?"
+}
+`
 
 const testAccCheckCubeServerWithSnapshot = `
 data "ionoscloud_template" ` + ServerTestResource + ` {
@@ -549,7 +565,7 @@ resource ` + ServerCubeResource + ` "webserver" {
   availability_zone = "ZONE_1"
   cpu_family = "INTEL_SKYLAKE"
   image_name = "ubuntu:latest"
-  image_password = "K3tTj8G14a3EgKyNeeiY"
+  image_password = ` + RandomPassword + `.server_image_password.result
   volume {
     name = "system"
     disk_type = "DAS"
@@ -583,6 +599,11 @@ resource ` + ServerCubeResource + ` ` + ServerTestResource + ` {
     firewall_active = true
   }
 }
+resource ` + RandomPassword + ` "server_image_password" {
+  length           = 16
+  special          = true
+  override_special = "!#$%&*()-_=+[]{}<>:?"
+}
 `
 
 const testAccCheckCubeServerNoFirewall = `
@@ -609,7 +630,7 @@ resource ` + ServerCubeResource + ` ` + ServerTestResource + ` {
   availability_zone = "ZONE_1"
   cpu_family = "INTEL_SKYLAKE"
   image_name ="ubuntu:latest"
-  image_password = "K3tTj8G14a3EgKyNeeiY"
+  image_password = ` + RandomPassword + `.server_image_password.result
   volume {
     name = "system"
 	disk_type = "DAS"
@@ -626,7 +647,13 @@ resource ` + ServerCubeResource + ` ` + ServerTestResource + ` {
       icmp_code        = "1"
 	  }
   }
-}`
+}
+resource ` + RandomPassword + ` "server_image_password" {
+  length           = 16
+  special          = true
+  override_special = "!#$%&*()-_=+[]{}<>:?"
+}
+`
 
 const testAccCheckCubeServerICMP = `
 data "ionoscloud_template" ` + ServerTestResource + ` {
@@ -652,7 +679,7 @@ resource ` + ServerCubeResource + ` ` + ServerTestResource + ` {
   availability_zone = "ZONE_1"
   cpu_family = "INTEL_SKYLAKE"
   image_name ="ubuntu:latest"
-  image_password = "K3tTj8G14a3EgKyNeeiY"
+  image_password = ` + RandomPassword + `.server_image_password.result
   volume {
     name = "system"
 	licence_type    = "LINUX"
@@ -670,6 +697,10 @@ resource ` + ServerCubeResource + ` ` + ServerTestResource + ` {
       icmp_code        = "0"
 	  }
     }
-}`
-
-// INTEL_XEON
+}
+resource ` + RandomPassword + ` "server_image_password" {
+  length           = 16
+  special          = true
+  override_special = "!#$%&*()-_=+[]{}<>:?"
+}
+`

@@ -45,7 +45,6 @@ func TestAccDBaaSPgSqlClusterBasic(t *testing.T) {
 					resource.TestCheckResourceAttr(PsqlClusterResource+"."+DBaaSClusterTestResource, "maintenance_window.0.time", "09:00:00"),
 					resource.TestCheckResourceAttr(PsqlClusterResource+"."+DBaaSClusterTestResource, "maintenance_window.0.day_of_the_week", "Sunday"),
 					resource.TestCheckResourceAttr(PsqlClusterResource+"."+DBaaSClusterTestResource, "credentials.0.username", "username"),
-					//resource.TestCheckResourceAttr(PsqlClusterResource+"."+DBaaSClusterTestResource, "credentials.0.password", "password"),
 					resource.TestCheckResourceAttrPair(PsqlClusterResource+"."+DBaaSClusterTestResource, "credentials.0.password", RandomPassword+".cluster_password", "result"),
 					resource.TestCheckResourceAttr(PsqlClusterResource+"."+DBaaSClusterTestResource, "synchronization_mode", "ASYNCHRONOUS"),
 				),

@@ -51,7 +51,7 @@ resource "ionoscloud_server" "example" {
     availability_zone     = "ZONE_1"
     cpu_family            = "AMD_OPTERON"
     image_name            = data.ionoscloud_image.example.id
-    image_password        = "K3tTj8G14a3EgKyNeeiY"
+    image_password        = random_password.server_image_password.result
     type                  = "ENTERPRISE"
     volume {
         name              = "system"
@@ -88,7 +88,12 @@ resource "ionoscloud_server" "example" {
         value = "labelvalue2"
     }
 }
-                       
+resource "random_password" "server_image_password" {
+  length           = 16
+  special          = true
+  override_special = "!#$%&*()-_=+[]{}<>:?"
+}
+                  
 ```
 
 ### CUBE Server
@@ -115,7 +120,7 @@ resource "ionoscloud_server" "example" {
   image_name        = "ubuntu:latest"
   type              = "CUBE"
   template_uuid     = data.ionoscloud_template.example.id
-  image_password    = "K3tTj8G14a3EgKyNeeiY"  
+  image_password    = random_password.server_image_password.result
   datacenter_id     = ionoscloud_datacenter.example.id
   volume {
     name            = "Volume Example"
@@ -129,6 +134,12 @@ resource "ionoscloud_server" "example" {
     firewall_active = true
   }
 }
+resource "random_password" "server_image_password" {
+  length           = 16
+  special          = true
+  override_special = "!#$%&*()-_=+[]{}<>:?"
+}
+
 ```
 
 ## Argument reference

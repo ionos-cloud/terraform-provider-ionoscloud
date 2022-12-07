@@ -159,8 +159,7 @@ resource ` + ServerResource + ` ` + ServerTestResource + ` {
 }`
 )
 
-const (
-	testAccCheckServerConfigBasic = `
+const testAccCheckServerConfigBasic = `
 resource ` + DatacenterResource + ` ` + DatacenterTestResource + ` {
 	name       = "server-test"
 	location = "us/las"
@@ -183,7 +182,7 @@ resource ` + ServerResource + ` ` + ServerTestResource + ` {
   availability_zone = "ZONE_1"
   cpu_family = "AMD_OPTERON"
   image_name ="ubuntu:latest"
-  image_password = "K3tTj8G14a3EgKyNeeiY"
+  image_password = ` + RandomPassword + `.server_image_password.result
   type = "ENTERPRISE"
   volume {
     name = "system"
@@ -211,8 +210,13 @@ resource ` + ServerResource + ` ` + ServerTestResource + ` {
 	  type = "EGRESS"
     }
   }
-}`
-)
+}
+resource ` + RandomPassword + ` "server_image_password" {
+  length           = 16
+  special          = true
+  override_special = "!#$%&*()-_=+[]{}<>:?"
+}
+`
 
 const testAccDataSourceDatacenterWrongNameError = testAccCheckDatacenterConfigBasic + `
 data ` + DatacenterResource + ` ` + DatacenterDataSourceMatching + ` {
@@ -223,8 +227,7 @@ data ` + DatacenterResource + ` ` + DatacenterDataSourceMatching + ` {
 const ImmutableError = "attribute is immutable, therefore not allowed in update requests"
 
 // Cube Server Constants
-const (
-	testAccCheckCubeServerConfigBasic = `
+const testAccCheckCubeServerConfigBasic = `
 data "ionoscloud_template" ` + ServerTestResource + ` {
     name = "CUBES XS"
     cores = 1
@@ -252,7 +255,7 @@ resource ` + ServerCubeResource + ` ` + ServerTestResource + ` {
   availability_zone = "ZONE_1"
   cpu_family = "INTEL_SKYLAKE"
   image_name ="ubuntu:latest"
-  image_password = "K3tTj8G14a3EgKyNeeiY"
+  image_password = ` + RandomPassword + `.server_image_password.result
   
   volume {
     name = "system"
@@ -277,8 +280,13 @@ resource ` + ServerCubeResource + ` ` + ServerTestResource + ` {
 	  type = "EGRESS"
     }
   }
-}`
-)
+}
+resource ` + RandomPassword + ` "server_image_password" {
+  length           = 16
+  special          = true
+  override_special = "!#$%&*()-_=+[]{}<>:?"
+}
+`
 
 const testAccCheckServerCreationWithLabels = `
 resource ` + DatacenterResource + ` ` + DatacenterTestResource + ` {
