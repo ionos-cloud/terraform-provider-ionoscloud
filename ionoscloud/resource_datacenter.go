@@ -144,7 +144,7 @@ func resourceDatacenterRead(ctx context.Context, d *schema.ResourceData, meta in
 			d.SetId("")
 			return nil
 		}
-		diags := diag.FromErr(fmt.Errorf("error while fetching a data center ID %s %s", d.Id(), err))
+		diags := diag.FromErr(fmt.Errorf("error while fetching a data center ID %s %w", d.Id(), err))
 		return diags
 	}
 
@@ -187,7 +187,7 @@ func resourceDatacenterUpdate(ctx context.Context, d *schema.ResourceData, meta 
 	logApiRequestTime(apiResponse)
 
 	if err != nil {
-		diags := diag.FromErr(fmt.Errorf("an error occured while update the data center ID %s %s", d.Id(), err))
+		diags := diag.FromErr(fmt.Errorf("an error occured while update the data center ID %s %w", d.Id(), err))
 		return diags
 	}
 
@@ -259,42 +259,42 @@ func setDatacenterData(d *schema.ResourceData, datacenter *ionoscloud.Datacenter
 		if datacenter.Properties.Location != nil {
 			err := d.Set("location", *datacenter.Properties.Location)
 			if err != nil {
-				return fmt.Errorf("error while setting location property for datacenter %s: %s", d.Id(), err)
+				return fmt.Errorf("error while setting location property for datacenter %s: %w", d.Id(), err)
 			}
 		}
 
 		if datacenter.Properties.Description != nil {
 			err := d.Set("description", *datacenter.Properties.Description)
 			if err != nil {
-				return fmt.Errorf("error while setting description property for datacenter %s: %s", d.Id(), err)
+				return fmt.Errorf("error while setting description property for datacenter %s: %w", d.Id(), err)
 			}
 		}
 
 		if datacenter.Properties.Name != nil {
 			err := d.Set("name", *datacenter.Properties.Name)
 			if err != nil {
-				return fmt.Errorf("error while setting name property for datacenter %s: %s", d.Id(), err)
+				return fmt.Errorf("error while setting name property for datacenter %s: %w", d.Id(), err)
 			}
 		}
 
 		if datacenter.Properties.Version != nil {
 			err := d.Set("version", *datacenter.Properties.Version)
 			if err != nil {
-				return fmt.Errorf("error while setting version property for datacenter %s: %s", d.Id(), err)
+				return fmt.Errorf("error while setting version property for datacenter %s: %w", d.Id(), err)
 			}
 		}
 
 		if datacenter.Properties.Features != nil && len(*datacenter.Properties.Features) > 0 {
 			err := d.Set("features", *datacenter.Properties.Features)
 			if err != nil {
-				return fmt.Errorf("error while setting features property for datacenter %s: %s", d.Id(), err)
+				return fmt.Errorf("error while setting features property for datacenter %s: %w", d.Id(), err)
 			}
 		}
 
 		if datacenter.Properties.SecAuthProtection != nil {
 			err := d.Set("sec_auth_protection", *datacenter.Properties.SecAuthProtection)
 			if err != nil {
-				return fmt.Errorf("error while setting sec_auth_protection property for datacenter %s: %s", d.Id(), err)
+				return fmt.Errorf("error while setting sec_auth_protection property for datacenter %s: %w", d.Id(), err)
 			}
 		}
 
@@ -323,7 +323,7 @@ func setDatacenterData(d *schema.ResourceData, datacenter *ionoscloud.Datacenter
 
 				if len(cpuArchitectures) > 0 {
 					if err := d.Set("cpu_architecture", cpuArchitectures); err != nil {
-						return fmt.Errorf("error while setting cpu_architecture property for datacenter %s: %s", d.Id(), err)
+						return fmt.Errorf("error while setting cpu_architecture property for datacenter %s: %w", d.Id(), err)
 					}
 				}
 			}

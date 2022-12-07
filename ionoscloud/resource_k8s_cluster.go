@@ -194,7 +194,7 @@ func resourcek8sClusterCreate(ctx context.Context, d *schema.ResourceData, meta 
 
 	if err != nil {
 		d.SetId("")
-		diags := diag.FromErr(fmt.Errorf("error creating k8s cluster: %s", err))
+		diags := diag.FromErr(fmt.Errorf("error creating k8s cluster: %w", err))
 		return diags
 	}
 
@@ -207,7 +207,7 @@ func resourcek8sClusterCreate(ctx context.Context, d *schema.ResourceData, meta 
 		clusterReady, rsErr := k8sClusterReady(ctx, client, d)
 
 		if rsErr != nil {
-			diags := diag.FromErr(fmt.Errorf("error while checking readiness status of k8s cluster %s: %s", d.Id(), rsErr))
+			diags := diag.FromErr(fmt.Errorf("error while checking readiness status of k8s cluster %s: %w", d.Id(), rsErr))
 			return diags
 		}
 
@@ -241,7 +241,7 @@ func resourcek8sClusterRead(ctx context.Context, d *schema.ResourceData, meta in
 			d.SetId("")
 			return nil
 		}
-		diags := diag.FromErr(fmt.Errorf("error while fetching k8s cluster %s: %s", d.Id(), err))
+		diags := diag.FromErr(fmt.Errorf("error while fetching k8s cluster %s: %w", d.Id(), err))
 		return diags
 	}
 
@@ -366,7 +366,7 @@ func resourcek8sClusterUpdate(ctx context.Context, d *schema.ResourceData, meta 
 			d.SetId("")
 			return nil
 		}
-		diags := diag.FromErr(fmt.Errorf("error while updating k8s cluster: %s", err))
+		diags := diag.FromErr(fmt.Errorf("error while updating k8s cluster: %w", err))
 		return diags
 	}
 
@@ -376,7 +376,7 @@ func resourcek8sClusterUpdate(ctx context.Context, d *schema.ResourceData, meta 
 		clusterReady, rsErr := k8sClusterReady(ctx, client, d)
 
 		if rsErr != nil {
-			diags := diag.FromErr(fmt.Errorf("error while checking readiness status of k8s cluster %s: %s", d.Id(), rsErr))
+			diags := diag.FromErr(fmt.Errorf("error while checking readiness status of k8s cluster %s: %w", d.Id(), rsErr))
 			return diags
 		}
 
@@ -410,7 +410,7 @@ func resourcek8sClusterDelete(ctx context.Context, d *schema.ResourceData, meta 
 			d.SetId("")
 			return nil
 		}
-		diags := diag.FromErr(fmt.Errorf("error while deleting k8s cluster %s: %s", d.Id(), err))
+		diags := diag.FromErr(fmt.Errorf("error while deleting k8s cluster %s: %w", d.Id(), err))
 		return diags
 	}
 
@@ -512,7 +512,7 @@ func setK8sClusterData(d *schema.ResourceData, cluster *ionoscloud.KubernetesClu
 		//if cluster.Properties.Public != nil {
 		//	err := d.Set("public", *cluster.Properties.Public)
 		//	if err != nil {
-		//		return fmt.Errorf("error while setting public property for cluser %s: %s", d.Id(), err)
+		//		return fmt.Errorf("error while setting public property for cluser %s: %w", d.Id(), err)
 		//	}
 		//}
 
@@ -522,7 +522,7 @@ func setK8sClusterData(d *schema.ResourceData, cluster *ionoscloud.KubernetesClu
 				apiSubnetAllowLists[i] = apiSubnetAllowList
 			}
 			if err := d.Set("api_subnet_allow_list", apiSubnetAllowLists); err != nil {
-				return fmt.Errorf("error while setting api_subnet_allow_list property for cluser %s: %s", d.Id(), err)
+				return fmt.Errorf("error while setting api_subnet_allow_list property for cluser %s: %w", d.Id(), err)
 			}
 		}
 
@@ -534,7 +534,7 @@ func setK8sClusterData(d *schema.ResourceData, cluster *ionoscloud.KubernetesClu
 				s3Buckets[i] = s3BucketEntry
 			}
 			if err := d.Set("s3_buckets", s3Buckets); err != nil {
-				return fmt.Errorf("error while setting s3_buckets property for cluser %s: %s", d.Id(), err)
+				return fmt.Errorf("error while setting s3_buckets property for cluser %s: %w", d.Id(), err)
 			}
 		}
 
@@ -548,7 +548,7 @@ func k8sClusterReady(ctx context.Context, client *ionoscloud.APIClient, d *schem
 	logApiRequestTime(apiResponse)
 
 	if err != nil {
-		return true, fmt.Errorf("error checking k8s cluster status: %s", err)
+		return true, fmt.Errorf("error checking k8s cluster status: %w", err)
 	}
 	return *subjectCluster.Metadata.State == "ACTIVE", nil
 }

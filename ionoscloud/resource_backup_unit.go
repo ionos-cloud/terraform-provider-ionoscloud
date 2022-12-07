@@ -279,7 +279,7 @@ func backupUnitReady(client *ionoscloud.APIClient, d *schema.ResourceData, c con
 	logApiRequestTime(apiResponse)
 
 	if err != nil {
-		return true, fmt.Errorf("error checking backup unit status: %s", err)
+		return true, fmt.Errorf("error checking backup unit status: %w", err)
 	}
 	return strings.EqualFold(*backupUnit.Metadata.State, utils.Available), nil
 }
@@ -292,7 +292,7 @@ func backupUnitDeleted(client *ionoscloud.APIClient, d *schema.ResourceData, c c
 		if httpNotFound(apiResponse) {
 			return true, nil
 		}
-		return true, fmt.Errorf("error checking backup unit deletion status: %s", err)
+		return true, fmt.Errorf("error checking backup unit deletion status: %w", err)
 	}
 	return false, nil
 }
@@ -323,7 +323,7 @@ func setBackupUnitData(d *schema.ResourceData, backupUnit *ionoscloud.BackupUnit
 			(*contractResources.Items)[0].Properties.ContractNumber != nil {
 			err := d.Set("login", fmt.Sprintf("%s-%d", *backupUnit.Properties.Name, *(*contractResources.Items)[0].Properties.ContractNumber))
 			if err != nil {
-				return fmt.Errorf("error while setting login property for backup unit %s: %s", d.Id(), err)
+				return fmt.Errorf("error while setting login property for backup unit %s: %w", d.Id(), err)
 			}
 		} else {
 			if contractResources.Items == nil || len(*contractResources.Items) == 0 {

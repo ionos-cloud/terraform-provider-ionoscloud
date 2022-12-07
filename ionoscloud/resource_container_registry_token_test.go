@@ -118,7 +118,7 @@ func testAccCheckContainerRegistryTokenDestroyCheck(s *terraform.State) error {
 
 		if err != nil {
 			if apiResponse == nil || apiResponse.StatusCode != 404 {
-				return fmt.Errorf("an error occurred while checking the destruction of the container registry token %s: %s", rs.Primary.ID, err)
+				return fmt.Errorf("an error occurred while checking the destruction of the container registry token %s: %w", rs.Primary.ID, err)
 			}
 		} else {
 			return fmt.Errorf("container registry token %s still exists", rs.Primary.ID)
@@ -152,7 +152,7 @@ func testAccCheckContainerRegistryTokenExists(n string, registry *cr.TokenRespon
 		foundToken, _, err := client.GetToken(ctx, rs.Primary.Attributes["registry_id"], rs.Primary.ID)
 
 		if err != nil {
-			return fmt.Errorf("an error occured while fetching container registry token %s: %s", rs.Primary.ID, err)
+			return fmt.Errorf("an error occured while fetching container registry token %s: %w", rs.Primary.ID, err)
 		}
 		if *foundToken.Id != rs.Primary.ID {
 			return fmt.Errorf("record not found")

@@ -113,7 +113,7 @@ func testAccCheckNetworkLoadBalancerDestroyCheck(s *terraform.State) error {
 				return fmt.Errorf("an error occured while checking deletion of network loadbalancer %s %s", rs.Primary.ID, responseBody(apiResponse))
 			}
 		} else {
-			return fmt.Errorf("network loadbalancer still exists %s %s", rs.Primary.ID, err)
+			return fmt.Errorf("network loadbalancer still exists %s %w", rs.Primary.ID, err)
 		}
 	}
 

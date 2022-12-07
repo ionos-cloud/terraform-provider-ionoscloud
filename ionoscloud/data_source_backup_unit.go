@@ -72,7 +72,7 @@ func dataSourceBackupUnitRead(ctx context.Context, d *schema.ResourceData, meta 
 		logApiRequestTime(apiResponse)
 
 		if err != nil {
-			return diag.FromErr(fmt.Errorf("an error occurred while fetching backup unit: %s", err))
+			return diag.FromErr(fmt.Errorf("an error occurred while fetching backup unit: %w", err))
 		}
 
 		var results []ionoscloud.BackupUnit

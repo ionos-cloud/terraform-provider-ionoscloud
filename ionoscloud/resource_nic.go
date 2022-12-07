@@ -93,7 +93,7 @@ func resourceNicCreate(ctx context.Context, d *schema.ResourceData, meta interfa
 	logApiRequestTime(apiResponse)
 
 	if err != nil {
-		diags := diag.FromErr(fmt.Errorf("error occured while creating a nic: %s", err))
+		diags := diag.FromErr(fmt.Errorf("error occured while creating a nic: %w", err))
 		return diags
 	}
 	if nic.Id != nil {
@@ -152,7 +152,7 @@ func resourceNicRead(ctx context.Context, d *schema.ResourceData, meta interface
 			d.SetId("")
 			return nil
 		}
-		diags := diag.FromErr(fmt.Errorf("error occured while fetching a nic ID %s %s", d.Id(), err))
+		diags := diag.FromErr(fmt.Errorf("error occured while fetching a nic ID %s %w", d.Id(), err))
 		return diags
 	}
 
@@ -175,7 +175,7 @@ func resourceNicUpdate(ctx context.Context, d *schema.ResourceData, meta interfa
 	_, apiResponse, err := client.NetworkInterfacesApi.DatacentersServersNicsPatch(ctx, dcId, srvId, nicId).Nic(*nic.Properties).Execute()
 	logApiRequestTime(apiResponse)
 	if err != nil {
-		diags := diag.FromErr(fmt.Errorf("error occured while updating a nic: %s", err))
+		diags := diag.FromErr(fmt.Errorf("error occured while updating a nic: %w", err))
 		return diags
 	}
 
