@@ -188,7 +188,7 @@ func resourceNatGatewayRuleCreate(ctx context.Context, d *schema.ResourceData, m
 
 	if err != nil {
 		d.SetId("")
-		diags := diag.FromErr(fmt.Errorf("error creating nat gateway rule: %s \n ApiError %w", err, responseBody(apiResponse)))
+		diags := diag.FromErr(fmt.Errorf("error creating nat gateway rule: %w \n ApiError %s", err, responseBody(apiResponse)))
 		return diags
 	}
 

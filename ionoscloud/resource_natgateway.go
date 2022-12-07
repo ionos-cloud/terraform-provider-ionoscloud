@@ -146,7 +146,7 @@ func resourceNatGatewayCreate(ctx context.Context, d *schema.ResourceData, meta 
 
 	if err != nil {
 		d.SetId("")
-		diags := diag.FromErr(fmt.Errorf("error creating natGateway: %s, %w", err, responseBody(apiResponse)))
+		diags := diag.FromErr(fmt.Errorf("error creating natGateway: %w, %s", err, responseBody(apiResponse)))
 		return diags
 	}
 

@@ -246,7 +246,7 @@ func resourceNetworkLoadBalancerForwardingRuleCreate(ctx context.Context, d *sch
 
 	if err != nil {
 		d.SetId("")
-		diags := diag.FromErr(fmt.Errorf("error creating network loadbalancer: %s \n ApiError: %w", err, responseBody(apiResponse)))
+		diags := diag.FromErr(fmt.Errorf("error creating network loadbalancer: %w \n ApiError: %s", err, responseBody(apiResponse)))
 		return diags
 	}
 

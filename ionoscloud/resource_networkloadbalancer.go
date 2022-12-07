@@ -130,7 +130,7 @@ func resourceNetworkLoadBalancerCreate(ctx context.Context, d *schema.ResourceDa
 
 	if err != nil {
 		d.SetId("")
-		diags := diag.FromErr(fmt.Errorf("error creating network loadbalancer: %s, %w", err, responseBody(apiResponse)))
+		diags := diag.FromErr(fmt.Errorf("error creating network loadbalancer: %w, %s", err, responseBody(apiResponse)))
 		return diags
 	}
 
