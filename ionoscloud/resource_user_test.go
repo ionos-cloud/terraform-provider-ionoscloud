@@ -236,8 +236,6 @@ resource ` + UserResource + ` ` + UserTestResource + ` {
  last_name = "` + UpdatedResources + `"
  email = "` + utils.GenerateEmail() + `"
  password 		= ` + RandomPassword + `.user_password_updated.result
-#password = ` + RandomPassword + `.user_password.result Updated
- #password = join("Updated", ` + RandomPassword + `.user_password_updated.result)
  administrator = false
  force_sec_auth= false
  active  = false
