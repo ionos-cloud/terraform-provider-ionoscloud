@@ -196,6 +196,7 @@ func resourceServer() *schema.Resource {
 							Optional:    true,
 							Deprecated:  "Please use ssh_keys under server level",
 							Computed:    true,
+							ForceNew:    true,
 							Description: "Public SSH keys are set on the image as authorized keys for appropriate SSH login to the instance using the corresponding private key. This field may only be set in creation requests. When reading, it always returns null. SSH keys are only supported if a public Linux image is used for the volume creation.",
 							DiffSuppressFunc: func(k, old, new string, d *schema.ResourceData) bool {
 								if k == "volume.0.ssh_keys.#" {
