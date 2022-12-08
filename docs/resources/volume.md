@@ -88,8 +88,14 @@ resource "ionoscloud_volume" "example" {
   disk_type               = "SSD Standard"
   bus                     = "VIRTIO"
   image_name              = data.ionoscloud_image.example.id
-  image_password          = "K3tTj8G14a3EgKyNeeiY"
+  image_password          = random_password.volume_image_password.result
   user_data               = "foo"
+}
+
+resource "random_password" "volume_image_password" {
+  length           = 16
+  special          = true
+  override_special = "!#$%&*()-_=+[]{}<>:?"
 }
 ```
 

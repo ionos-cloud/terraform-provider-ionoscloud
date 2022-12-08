@@ -49,7 +49,7 @@ func TestAccServerBasic(t *testing.T) {
 					resource.TestCheckResourceAttr(ServerResource+"."+ServerTestResource, "availability_zone", "ZONE_1"),
 					resource.TestCheckResourceAttr(ServerResource+"."+ServerTestResource, "cpu_family", "AMD_OPTERON"),
 					utils.TestImageNotNull(ServerResource, "boot_image"),
-					resource.TestCheckResourceAttrPair(ServerResource+"."+ServerTestResource, "password", RandomPassword+".server_image_password", "result"),
+					resource.TestCheckResourceAttrPair(ServerResource+"."+ServerTestResource, "image_password", RandomPassword+".server_image_password", "result"),
 					resource.TestCheckResourceAttr(ServerResource+"."+ServerTestResource, "type", "ENTERPRISE"),
 					resource.TestCheckResourceAttr(ServerResource+"."+ServerTestResource, "volume.0.name", "system"),
 					resource.TestCheckResourceAttr(ServerResource+"."+ServerTestResource, "volume.0.size", "5"),
@@ -153,7 +153,7 @@ func TestAccServerBasic(t *testing.T) {
 					resource.TestCheckResourceAttr(ServerResource+"."+ServerTestResource, "availability_zone", "ZONE_1"),
 					resource.TestCheckResourceAttr(ServerResource+"."+ServerTestResource, "cpu_family", "AMD_OPTERON"),
 					utils.TestImageNotNull(ServerResource, "boot_image"),
-					resource.TestCheckResourceAttrPair(ServerResource+"."+ServerTestResource, "password", RandomPassword+".server_image_password_updated", "result"),
+					resource.TestCheckResourceAttrPair(ServerResource+"."+ServerTestResource, "image_password", RandomPassword+".server_image_password_updated", "result"),
 					resource.TestCheckResourceAttr(ServerResource+"."+ServerTestResource, "volume.0.name", UpdatedResources),
 					resource.TestCheckResourceAttr(ServerResource+"."+ServerTestResource, "type", "ENTERPRISE"),
 					resource.TestCheckResourceAttr(ServerResource+"."+ServerTestResource, "volume.0.size", "6"),
@@ -237,7 +237,7 @@ func TestAccServerResolveImageName(t *testing.T) {
 					resource.TestCheckResourceAttr(ServerResource+"."+ServerTestResource, "availability_zone", "ZONE_1"),
 					resource.TestCheckResourceAttr(ServerResource+"."+ServerTestResource, "cpu_family", "INTEL_SKYLAKE"),
 					utils.TestImageNotNull(ServerResource, "boot_image"),
-					resource.TestCheckResourceAttrPair(ServerResource+"."+ServerTestResource, "password", RandomPassword+".server_image_password", "result"),
+					resource.TestCheckResourceAttrPair(ServerResource+"."+ServerTestResource, "image_password", RandomPassword+".server_image_password", "result"),
 					resource.TestCheckResourceAttr(ServerResource+"."+ServerTestResource, "volume.0.name", ServerTestResource),
 					resource.TestCheckResourceAttr(ServerResource+"."+ServerTestResource, "volume.0.size", "5"),
 					resource.TestCheckResourceAttr(ServerResource+"."+ServerTestResource, "volume.0.disk_type", "SSD Standard"),
@@ -346,7 +346,7 @@ func TestAccServerWithICMP(t *testing.T) {
 					resource.TestCheckResourceAttr(ServerResource+"."+ServerTestResource, "availability_zone", "ZONE_1"),
 					resource.TestCheckResourceAttr(ServerResource+"."+ServerTestResource, "cpu_family", "AMD_OPTERON"),
 					utils.TestImageNotNull(ServerResource, "boot_image"),
-					resource.TestCheckResourceAttrPair(ServerResource+"."+ServerTestResource, "password", RandomPassword+".server_image_password", "result"),
+					resource.TestCheckResourceAttrPair(ServerResource+"."+ServerTestResource, "image_password", RandomPassword+".server_image_password", "result"),
 					resource.TestCheckResourceAttr(ServerResource+"."+ServerTestResource, "volume.0.name", "system"),
 					resource.TestCheckResourceAttr(ServerResource+"."+ServerTestResource, "volume.0.size", "5"),
 					resource.TestCheckResourceAttr(ServerResource+"."+ServerTestResource, "volume.0.disk_type", "HDD"),
@@ -560,8 +560,7 @@ resource ` + ServerResource + ` ` + ServerTestResource + ` {
 }
 resource ` + RandomPassword + ` "server_image_password_updated" {
   length           = 16
-  special          = true
-  override_special = "!#$%&*()-_=+[]{}<>:?"
+  special          = false
 }
 `
 
@@ -660,8 +659,7 @@ resource ` + ServerResource + ` ` + ServerTestResource + ` {
 }
 resource ` + RandomPassword + ` "server_image_password" {
   length           = 16
-  special          = true
-  override_special = "!#$%&*()-_=+[]{}<>:?"
+  special          = false
 }
 `
 
@@ -722,8 +720,7 @@ resource ` + ServerResource + ` ` + ServerTestResource + ` {
 }
 resource ` + RandomPassword + ` "server_image_password" {
   length           = 16
-  special          = true
-  override_special = "!#$%&*()-_=+[]{}<>:?"
+  special          = false
 }
 `
 
@@ -776,8 +773,7 @@ depends_on = [` + ServerResource + `.` + ServerTestResource + `]
 }
 resource ` + RandomPassword + ` "server_image_password" {
   length           = 16
-  special          = true
-  override_special = "!#$%&*()-_=+[]{}<>:?"
+  special          = false
 }
 `
 
@@ -820,8 +816,7 @@ resource ` + ServerResource + ` ` + ServerTestResource + ` {
 }
 resource ` + RandomPassword + ` "server_image_password" {
   length           = 16
-  special          = true
-  override_special = "!#$%&*()-_=+[]{}<>:?"
+  special          = false
 }
 `
 
@@ -864,8 +859,7 @@ resource ` + ServerResource + ` ` + ServerTestResource + ` {
 }
 resource ` + RandomPassword + ` "server_image_password" {
   length           = 16
-  special          = true
-  override_special = "!#$%&*()-_=+[]{}<>:?"
+  special          = false
 }
 `
 

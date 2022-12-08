@@ -213,8 +213,7 @@ resource ` + ServerResource + ` ` + ServerTestResource + ` {
 }
 resource ` + RandomPassword + ` "server_image_password" {
   length           = 16
-  special          = true
-  override_special = "!#$%&*()-_=+[]{}<>:?"
+  special          = false
 }
 `
 
@@ -253,7 +252,6 @@ resource ` + ServerCubeResource + ` ` + ServerTestResource + ` {
   name = "` + ServerTestResource + `"
   datacenter_id = ` + DatacenterResource + `.` + DatacenterTestResource + `.id
   availability_zone = "ZONE_1"
-  cpu_family = "INTEL_SKYLAKE"
   image_name ="ubuntu:latest"
   image_password = ` + RandomPassword + `.server_image_password.result
   
@@ -283,8 +281,7 @@ resource ` + ServerCubeResource + ` ` + ServerTestResource + ` {
 }
 resource ` + RandomPassword + ` "server_image_password" {
   length           = 16
-  special          = true
-  override_special = "!#$%&*()-_=+[]{}<>:?"
+  special          = false
 }
 `
 

@@ -33,9 +33,8 @@ func TestAccCubeServerBasic(t *testing.T) {
 					testAccCheckCubeServerExists(ServerCubeResource+"."+ServerTestResource, &server),
 					resource.TestCheckResourceAttr(ServerCubeResource+"."+ServerTestResource, "name", ServerTestResource),
 					resource.TestCheckResourceAttr(ServerCubeResource+"."+ServerTestResource, "availability_zone", "ZONE_1"),
-					resource.TestCheckResourceAttr(ServerCubeResource+"."+ServerTestResource, "cpu_family", "INTEL_SKYLAKE"),
 					utils.TestImageNotNull(ServerCubeResource, "boot_image"),
-					resource.TestCheckResourceAttrPair(ServerCubeResource+"."+ServerTestResource, "password", RandomPassword+".server_image_password", "result"),
+					resource.TestCheckResourceAttrPair(ServerCubeResource+"."+ServerTestResource, "image_password", RandomPassword+".server_image_password", "result"),
 					resource.TestCheckResourceAttr(ServerCubeResource+"."+ServerTestResource, "volume.0.name", "system"),
 					resource.TestCheckResourceAttr(ServerCubeResource+"."+ServerTestResource, "volume.0.disk_type", "DAS"),
 					resource.TestCheckResourceAttr(ServerCubeResource+"."+ServerTestResource, "volume.0.bus", "VIRTIO"),
@@ -63,7 +62,6 @@ func TestAccCubeServerBasic(t *testing.T) {
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttrPair(DataSource+"."+ServerCubeResource+"."+ServerDataSourceById, "name", ServerCubeResource+"."+ServerTestResource, "name"),
 					resource.TestCheckResourceAttrPair(DataSource+"."+ServerCubeResource+"."+ServerDataSourceById, "availability_zone", ServerCubeResource+"."+ServerTestResource, "availability_zone"),
-					resource.TestCheckResourceAttrPair(DataSource+"."+ServerCubeResource+"."+ServerDataSourceById, "cpu_family", ServerCubeResource+"."+ServerTestResource, "cpu_family"),
 					resource.TestCheckResourceAttrPair(DataSource+"."+ServerCubeResource+"."+ServerDataSourceById, "type", ServerCubeResource+"."+ServerTestResource, "type"),
 					resource.TestCheckResourceAttrPair(DataSource+"."+ServerCubeResource+"."+ServerDataSourceById, "volumes.0.name", ServerCubeResource+"."+ServerTestResource, "volume.0.name"),
 					resource.TestCheckResourceAttrPair(DataSource+"."+ServerCubeResource+"."+ServerDataSourceById, "volumes.0.type", ServerCubeResource+"."+ServerTestResource, "volume.0.disk_type"),
@@ -92,7 +90,6 @@ func TestAccCubeServerBasic(t *testing.T) {
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttrPair(DataSource+"."+ServerCubeResource+"."+ServerDataSourceByName, "name", ServerCubeResource+"."+ServerTestResource, "name"),
 					resource.TestCheckResourceAttrPair(DataSource+"."+ServerCubeResource+"."+ServerDataSourceByName, "availability_zone", ServerCubeResource+"."+ServerTestResource, "availability_zone"),
-					resource.TestCheckResourceAttrPair(DataSource+"."+ServerCubeResource+"."+ServerDataSourceByName, "cpu_family", ServerCubeResource+"."+ServerTestResource, "cpu_family"),
 					resource.TestCheckResourceAttrPair(DataSource+"."+ServerCubeResource+"."+ServerDataSourceByName, "type", ServerCubeResource+"."+ServerTestResource, "type"),
 					resource.TestCheckResourceAttrPair(DataSource+"."+ServerCubeResource+"."+ServerDataSourceByName, "volumes.0.name", ServerCubeResource+"."+ServerTestResource, "volume.0.name"),
 					resource.TestCheckResourceAttrPair(DataSource+"."+ServerCubeResource+"."+ServerDataSourceByName, "volumes.0.type", ServerCubeResource+"."+ServerTestResource, "volume.0.disk_type"),
@@ -126,9 +123,8 @@ func TestAccCubeServerBasic(t *testing.T) {
 					testAccCheckCubeServerExists(ServerCubeResource+"."+ServerTestResource, &server),
 					resource.TestCheckResourceAttr(ServerCubeResource+"."+ServerTestResource, "name", UpdatedResources),
 					resource.TestCheckResourceAttr(ServerCubeResource+"."+ServerTestResource, "availability_zone", "ZONE_1"),
-					resource.TestCheckResourceAttr(ServerCubeResource+"."+ServerTestResource, "cpu_family", "INTEL_SKYLAKE"),
 					utils.TestImageNotNull(ServerCubeResource, "boot_image"),
-					resource.TestCheckResourceAttrPair(ServerResource+"."+ServerTestResource, "password", RandomPassword+".server_image_password_updated", "result"),
+					resource.TestCheckResourceAttrPair(ServerCubeResource+"."+ServerTestResource, "image_password", RandomPassword+".server_image_password_updated", "result"),
 					resource.TestCheckResourceAttr(ServerCubeResource+"."+ServerTestResource, "volume.0.name", ServerTestResource),
 					resource.TestCheckResourceAttr(ServerCubeResource+"."+ServerTestResource, "volume.0.disk_type", "DAS"),
 					resource.TestCheckResourceAttr(ServerCubeResource+"."+ServerTestResource, "volume.0.bus", "VIRTIO"),
@@ -169,7 +165,6 @@ func TestAccCubeServerBasic(t *testing.T) {
 //					testAccCheckCubeServerExists(ServerCubeResource+"."+ServerTestResource, &server),
 //					resource.TestCheckResourceAttr(ServerCubeResource+"."+ServerTestResource, "name", ServerTestResource),
 //					resource.TestCheckResourceAttr(ServerCubeResource+"."+ServerTestResource, "availability_zone", "ZONE_1"),
-//					resource.TestCheckResourceAttr(ServerCubeResource+"."+ServerTestResource, "cpu_family", "INTEL_SKYLAKE"),
 //					resource.TestCheckResourceAttr(ServerCubeResource+"."+ServerTestResource, "volume.0.name", ServerTestResource),
 //					resource.TestCheckResourceAttr(ServerCubeResource+"."+ServerTestResource, "volume.0.disk_type", "DAS"),
 //					resource.TestCheckResourceAttr(ServerCubeResource+"."+ServerTestResource, "volume.0.licence_type", "OTHER"),
@@ -203,9 +198,8 @@ func TestAccCubeServerResolveImageName(t *testing.T) {
 					testAccCheckServerExists(ServerCubeResource+"."+ServerTestResource, &server),
 					resource.TestCheckResourceAttr(ServerCubeResource+"."+ServerTestResource, "name", ServerTestResource),
 					resource.TestCheckResourceAttr(ServerCubeResource+"."+ServerTestResource, "availability_zone", "ZONE_1"),
-					resource.TestCheckResourceAttr(ServerCubeResource+"."+ServerTestResource, "cpu_family", "INTEL_SKYLAKE"),
 					utils.TestImageNotNull(ServerCubeResource, "boot_image"),
-					resource.TestCheckResourceAttrPair(ServerCubeResource+"."+ServerTestResource, "password", RandomPassword+".server_image_password", "result"),
+					resource.TestCheckResourceAttrPair(ServerCubeResource+"."+ServerTestResource, "image_password", RandomPassword+".server_image_password", "result"),
 					resource.TestCheckResourceAttr(ServerCubeResource+"."+ServerTestResource, "volume.0.name", ServerTestResource),
 					resource.TestCheckResourceAttr(ServerCubeResource+"."+ServerTestResource, "volume.0.disk_type", "DAS"),
 					resource.TestCheckResourceAttrPair(ServerCubeResource+"."+ServerTestResource, "nic.0.lan", LanResource+"."+LanTestResource, "id"),
@@ -228,7 +222,7 @@ func TestAccCubeServerResolveImageName(t *testing.T) {
 //		PreCheck: func() {
 //			testAccPreCheck(t)
 //		},
-//      ExternalProviders: randomProviderVersion343(),
+//		ExternalProviders: randomProviderVersion343(),
 //		ProviderFactories: testAccProviderFactories,
 //		CheckDestroy:      testAccCheckCubeServerDestroyCheck,
 //		Steps: []resource.TestStep{
@@ -237,13 +231,9 @@ func TestAccCubeServerResolveImageName(t *testing.T) {
 //				Check: resource.ComposeTestCheckFunc(
 //					testAccCheckCubeServerExists(ServerCubeResource+"."+ServerTestResource, &server),
 //					resource.TestCheckResourceAttr(ServerCubeResource+"."+ServerTestResource, "name", ServerTestResource),
-//					//resource.TestCheckResourceAttr(ServerCubeResource+"."+ServerTestResource, "cores", "1"),
-//					//resource.TestCheckResourceAttr(ServerCubeResource+"."+ServerTestResource, "ram", "1024"),
 //					resource.TestCheckResourceAttr(ServerCubeResource+"."+ServerTestResource, "availability_zone", "ZONE_1"),
-//					resource.TestCheckResourceAttr(ServerCubeResource+"."+ServerTestResource, "cpu_family", "INTEL_SKYLAKE"),
 //					utils.TestImageNotNull(ServerCubeResource, "boot_image"),
 //					resource.TestCheckResourceAttr(ServerCubeResource+"."+ServerTestResource, "volume.0.name", ServerTestResource),
-//					//resource.TestCheckResourceAttr(ServerCubeResource+"."+ServerTestResource, "volume.0.size", "5"),
 //					resource.TestCheckResourceAttr(ServerCubeResource+"."+ServerTestResource, "volume.0.disk_type", "DAS"),
 //					resource.TestCheckResourceAttrPair(ServerCubeResource+"."+ServerTestResource, "nic.0.lan", LanResource+"."+LanTestResource, "id"),
 //					resource.TestCheckResourceAttr(ServerCubeResource+"."+ServerTestResource, "nic.0.dhcp", "true"),
@@ -271,9 +261,8 @@ func TestAccCubeServerWithICMP(t *testing.T) {
 					testAccCheckCubeServerExists(ServerCubeResource+"."+ServerTestResource, &server),
 					resource.TestCheckResourceAttr(ServerCubeResource+"."+ServerTestResource, "name", ServerTestResource),
 					resource.TestCheckResourceAttr(ServerCubeResource+"."+ServerTestResource, "availability_zone", "ZONE_1"),
-					resource.TestCheckResourceAttr(ServerCubeResource+"."+ServerTestResource, "cpu_family", "INTEL_SKYLAKE"),
 					utils.TestImageNotNull(ServerCubeResource, "boot_image"),
-					resource.TestCheckResourceAttrPair(ServerCubeResource+"."+ServerTestResource, "password", RandomPassword+".server_image_password", "result"),
+					resource.TestCheckResourceAttrPair(ServerCubeResource+"."+ServerTestResource, "image_password", RandomPassword+".server_image_password", "result"),
 					resource.TestCheckResourceAttr(ServerCubeResource+"."+ServerTestResource, "volume.0.name", "system"),
 					resource.TestCheckResourceAttr(ServerCubeResource+"."+ServerTestResource, "volume.0.disk_type", "DAS"),
 					resource.TestCheckResourceAttrPair(ServerCubeResource+"."+ServerTestResource, "nic.0.lan", LanResource+"."+LanTestResource, "id"),
@@ -395,7 +384,6 @@ resource ` + ServerCubeResource + ` ` + ServerTestResource + ` {
   name = "` + UpdatedResources + `"
   datacenter_id = ` + DatacenterResource + `.` + DatacenterTestResource + `.id
   availability_zone = "ZONE_1"
-  cpu_family = "INTEL_SKYLAKE"
   image_name ="ubuntu:latest"
   image_password = ` + RandomPassword + `.server_image_password_updated.result
   template_uuid     = data.ionoscloud_template.` + ServerTestResource + `.id
@@ -426,8 +414,7 @@ resource ` + ServerCubeResource + ` ` + ServerTestResource + ` {
 }
 resource ` + RandomPassword + ` "server_image_password_updated" {
   length           = 16
-  special          = true
-  override_special = "!#$%&*()-_=+[]{}<>:?"
+  special          = false
 }
 `
 
@@ -473,7 +460,6 @@ resource ` + ServerCubeResource + ` ` + ServerTestResource + ` {
   name = "` + ServerTestResource + `"
   datacenter_id = ` + DatacenterResource + `.` + DatacenterTestResource + `.id
   availability_zone = "ZONE_1"
-  cpu_family = "INTEL_SKYLAKE"
   boot_cdrom = "` + bootCdromImageIdCube + `" 
   volume {
     name = "` + ServerTestResource + `"
@@ -515,7 +501,6 @@ resource ` + ServerCubeResource + ` ` + ServerTestResource + ` {
   name              = "` + ServerTestResource + `"
   datacenter_id     = ` + DatacenterResource + `.` + DatacenterTestResource + `.id
   availability_zone = "ZONE_1"
-  cpu_family        = "INTEL_SKYLAKE" 
   image_name        = "ubuntu:latest"
   image_password    = ` + RandomPassword + `.server_image_password.result
   volume {
@@ -536,8 +521,7 @@ resource ` + ServerCubeResource + ` ` + ServerTestResource + ` {
 }
 resource ` + RandomPassword + ` "server_image_password" {
   length           = 16
-  special          = true
-  override_special = "!#$%&*()-_=+[]{}<>:?"
+  special          = false
 }
 `
 
@@ -563,7 +547,6 @@ resource ` + ServerCubeResource + ` "webserver" {
   name = "webserver"
   datacenter_id = ` + DatacenterResource + `.` + DatacenterTestResource + `.id
   availability_zone = "ZONE_1"
-  cpu_family = "INTEL_SKYLAKE"
   image_name = "ubuntu:latest"
   image_password = ` + RandomPassword + `.server_image_password.result
   volume {
@@ -587,7 +570,6 @@ resource ` + ServerCubeResource + ` ` + ServerTestResource + ` {
   template_uuid     = data.ionoscloud_template.` + ServerTestResource + `.id
   datacenter_id = ` + DatacenterResource + `.` + DatacenterTestResource + `.id
   availability_zone = "ZONE_1"
-  cpu_family = "INTEL_SKYLAKE"
   image_name = "terraform_snapshot"
   volume {
     name = "` + ServerTestResource + `"
@@ -601,8 +583,7 @@ resource ` + ServerCubeResource + ` ` + ServerTestResource + ` {
 }
 resource ` + RandomPassword + ` "server_image_password" {
   length           = 16
-  special          = true
-  override_special = "!#$%&*()-_=+[]{}<>:?"
+  special          = false
 }
 `
 
@@ -628,7 +609,6 @@ resource ` + ServerCubeResource + ` ` + ServerTestResource + ` {
   name = "` + ServerTestResource + `"
   datacenter_id = ` + DatacenterResource + `.` + DatacenterTestResource + `.id
   availability_zone = "ZONE_1"
-  cpu_family = "INTEL_SKYLAKE"
   image_name ="ubuntu:latest"
   image_password = ` + RandomPassword + `.server_image_password.result
   volume {
@@ -650,8 +630,7 @@ resource ` + ServerCubeResource + ` ` + ServerTestResource + ` {
 }
 resource ` + RandomPassword + ` "server_image_password" {
   length           = 16
-  special          = true
-  override_special = "!#$%&*()-_=+[]{}<>:?"
+  special          = false
 }
 `
 
@@ -677,7 +656,6 @@ resource ` + ServerCubeResource + ` ` + ServerTestResource + ` {
   name = "` + ServerTestResource + `"
   datacenter_id = ` + DatacenterResource + `.` + DatacenterTestResource + `.id
   availability_zone = "ZONE_1"
-  cpu_family = "INTEL_SKYLAKE"
   image_name ="ubuntu:latest"
   image_password = ` + RandomPassword + `.server_image_password.result
   volume {
@@ -700,7 +678,6 @@ resource ` + ServerCubeResource + ` ` + ServerTestResource + ` {
 }
 resource ` + RandomPassword + ` "server_image_password" {
   length           = 16
-  special          = true
-  override_special = "!#$%&*()-_=+[]{}<>:?"
+  special          = false
 }
 `
