@@ -221,7 +221,7 @@ func testAccCheckDbaasPgSqlClusterDestroyCheck(s *terraform.State) error {
 			continue
 		}
 
-		_, apiResponse, err := client.ClustersApi.ClustersFindById(ctx, rs.Primary.ID).Execute()
+		_, apiResponse, err := client.GetCluster(ctx, rs.Primary.ID)
 
 		if err != nil {
 			if apiResponse == nil || apiResponse.StatusCode != 404 {
@@ -256,7 +256,7 @@ func testAccCheckDbaasPgSqlClusterExists(n string, cluster *psql.ClusterResponse
 			defer cancel()
 		}
 
-		foundCluster, _, err := client.ClustersApi.ClustersFindById(ctx, rs.Primary.ID).Execute()
+		foundCluster, _, err := client.GetCluster(ctx, rs.Primary.ID)
 
 		if err != nil {
 			return fmt.Errorf("an error occured while fetching k8s Cluster %s: %s", rs.Primary.ID, err)

@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
-	crService "github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/container-registry"
+	crService "github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/containerregistry"
 )
 
 func dataSourceContainerRegistryLocations() *schema.Resource {

@@ -65,6 +65,11 @@ func resourceVolume() *schema.Resource {
 				Elem:     &schema.Schema{Type: schema.TypeString},
 				Optional: true,
 			},
+			"ssh_keys": {
+				Type:     schema.TypeList,
+				Elem:     &schema.Schema{Type: schema.TypeString},
+				Optional: true,
+			},
 			"sshkey": {
 				Type:     schema.TypeString,
 				Computed: true,
@@ -634,16 +639,16 @@ func getVolumeData(d *schema.ResourceData, path string) (*ionoscloud.VolumePrope
 		volume.Name = &vStr
 	}
 
-	var sshkeyPath []interface{}
+	var sshKeys []interface{}
 
 	if v, ok := d.GetOk(path + "ssh_key_path"); ok {
-		sshkeyPath = v.([]interface{})
-		if err := d.Set("ssh_key_path", v.([]interface{})); err != nil {
+		sshKeys = v.([]interface{})
+		if err := d.Set("ssh_key_path", sshKeys); err != nil {
 			return nil, err
 		}
 	} else if v, ok := d.GetOk("ssh_key_path"); ok {
-		sshkeyPath = v.([]interface{})
-		if err := d.Set("ssh_key_path", v.([]interface{})); err != nil {
+		sshKeys = v.([]interface{})
+		if err := d.Set("ssh_key_path", sshKeys); err != nil {
 			return nil, err
 		}
 	} else {
@@ -652,9 +657,25 @@ func getVolumeData(d *schema.ResourceData, path string) (*ionoscloud.VolumePrope
 		}
 	}
 
-	if len(sshkeyPath) != 0 {
+	if v, ok := d.GetOk(path + "ssh_keys"); ok {
+		sshKeys = v.([]interface{})
+		if err := d.Set("ssh_keys", sshKeys); err != nil {
+			return nil, err
+		}
+	} else if v, ok := d.GetOk("ssh_keys"); ok {
+		sshKeys = v.([]interface{})
+		if err := d.Set("ssh_keys", sshKeys); err != nil {
+			return nil, err
+		}
+	} else {
+		if err := d.Set("ssh_keys", [][]string{}); err != nil {
+			return nil, err
+		}
+	}
+
+	if len(sshKeys) != 0 {
 		var publicKeys []string
-		for _, path := range sshkeyPath {
+		for _, path := range sshKeys {
 			log.Printf("[DEBUG] Reading file %s", path)
 			publicKey, err := readPublicKey(path.(string))
 			if err != nil {
@@ -717,7 +738,7 @@ func getImage(ctx context.Context, client *ionoscloud.APIClient, d *schema.Resou
 
 			if volume.ImagePassword == nil && (volume.SshKeys == nil || len(*volume.SshKeys) == 0) && isSnapshot == false &&
 				(img == nil || (img.Properties.Public != nil && *img.Properties.Public)) {
-				return image, imageAlias, fmt.Errorf("either 'image_password' or 'ssh_key_path' must be provided")
+				return image, imageAlias, fmt.Errorf("either 'image_password' or 'ssh_key_path'/'ssh_keys' must be provided")
 			}
 		} else {
 			img, apiResponse, err := client.ImagesApi.ImagesFindById(ctx, imageName).Execute()
@@ -742,7 +763,7 @@ func getImage(ctx context.Context, client *ionoscloud.APIClient, d *schema.Resou
 			if isSnapshot == false && img.Properties.Public != nil && *img.Properties.Public == true {
 
 				if volume.ImagePassword == nil && (volume.SshKeys == nil || len(*volume.SshKeys) == 0) {
-					return image, imageAlias, fmt.Errorf("public image, either 'image_password' or 'ssh_key_path' must be provided")
+					return image, imageAlias, fmt.Errorf("public image, either 'image_password' or 'ssh_key_path'/'ssh_keys' must be provided")
 				}
 
 				dc, apiResponse, err := client.DataCentersApi.DatacentersFindById(ctx, dcId).Execute()
@@ -784,7 +805,7 @@ func getImage(ctx context.Context, client *ionoscloud.APIClient, d *schema.Resou
 				} else {
 					if isSnapshot == false && img.Properties.Public != nil && *img.Properties.Public == true {
 						if volume.ImagePassword == nil && (volume.SshKeys == nil || len(*volume.SshKeys) == 0) {
-							return image, imageAlias, fmt.Errorf("either 'image_password' or 'ssh_key_path' must be provided for imageName %s ", imageName)
+							return image, imageAlias, fmt.Errorf("either 'image_password' or 'ssh_key_path'/'ssh_keys' must be provided for imageName %s ", imageName)
 						}
 						image = imageName
 					} else {
@@ -937,7 +958,7 @@ func checkImage(ctx context.Context, client *ionoscloud.APIClient, imageInput, i
 
 			if imagePassword == "" && len(sshKeyPath) == 0 && isSnapshot == false &&
 				(img != nil && img.Properties != nil && img.Properties.Public != nil && *img.Properties.Public || imageAlias != "") {
-				diags := diag.FromErr(fmt.Errorf("checkImage either 'image_password' or 'ssh_key_path' must be provided"))
+				diags := diag.FromErr(fmt.Errorf("checkImage either 'image_password' or 'ssh_key_path'/'ssh_keys' must be provided"))
 				return image, imageAlias, isSnapshot, diags
 			}
 

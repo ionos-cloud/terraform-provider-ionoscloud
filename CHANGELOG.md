@@ -3,6 +3,9 @@
  - Add update for mongo database resources
  - Add labels for servers
 
+### Refactor:
+- Refactor services, add generic `WaitForResourceToBeReady` and `WaitForResourceToBeDeleted` methods
+
 ## 6.3.3
 ### Feature
 - New Product: **ContainerRegistry**:

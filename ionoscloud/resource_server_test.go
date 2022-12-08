@@ -5,13 +5,14 @@ package ionoscloud
 import (
 	"context"
 	"fmt"
-	ionoscloud "github.com/ionos-cloud/sdk-go/v6"
-	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils"
 	"regexp"
 	"testing"
 
+	ionoscloud "github.com/ionos-cloud/sdk-go/v6"
+
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
+	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils"
 )
 
 const bootCdromImageId = "83f21679-3321-11eb-a681-1e659523cb7b"
@@ -31,13 +32,22 @@ func TestAccServerBasic(t *testing.T) {
 		Steps: []resource.TestStep{
 			{
 				Config:      testAccCheckServerNoPwdOrSSH,
-				ExpectError: regexp.MustCompile(`either 'image_password' or 'ssh_key_path' must be provided`),
+				ExpectError: regexp.MustCompile(`either 'image_password' or 'ssh_key_path'/'ssh_keys' must be provided`),
 			},
 			{
 				//ssh_key_path now accepts the ssh key directly too
 				Config: testAccCheckServerSshDirectly,
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttr(ServerResource+"."+ServerTestResource, "ssh_key_path.0", sshKey)),
+			},
+			{
+				Config: testAccCheckServerSshKeysDirectly,
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttr(ServerResource+"."+ServerTestResource, "ssh_keys.0", sshKey)),
+			},
+			{
+				Config:      testAccCheckServerSshKeysAndKeyPath,
+				ExpectError: regexp.MustCompile(`"ssh_keys": conflicts with ssh_key_path`),
 			},
 			{
 				Config: testAccCheckServerConfigBasic,
