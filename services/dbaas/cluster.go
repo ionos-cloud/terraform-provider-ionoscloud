@@ -53,6 +53,12 @@ func (c *MongoClient) ListClusters(ctx context.Context, filterName string) (mong
 	return clusters, nil, err
 }
 
+func (c *MongoClient) GetTemplates(ctx context.Context) (mongo.TemplateList, *mongo.APIResponse, error) {
+	templates, apiResponse, err := c.sdkClient.TemplatesApi.TemplatesGet(ctx).Execute()
+	apiResponse.LogInfo()
+	return templates, apiResponse, err
+}
+
 func (c *PsqlClient) CreateCluster(ctx context.Context, cluster psql.CreateClusterRequest) (psql.ClusterResponse, *psql.APIResponse, error) {
 	clusterResponse, apiResponse, err := c.sdkClient.ClustersApi.ClustersPost(ctx).CreateClusterRequest(cluster).Execute()
 	if apiResponse != nil {
@@ -640,6 +646,45 @@ func SetMongoMaintenanceWindowProperties(maintenanceWindow mongo.MaintenanceWind
 	utils.SetPropWithNilCheck(maintenance, "day_of_the_week", maintenanceWindow.DayOfTheWeek)
 
 	return maintenance
+}
+
+func SetMongoDBTemplateData(d *schema.ResourceData, template mongo.TemplateResponse) error {
+	resourceName := "dbaas mongo template"
+
+	if template.Id != nil {
+		d.SetId(*template.Id)
+	}
+	if template.Name != nil {
+		field := "name"
+		if err := d.Set(field, *template.Name); err != nil {
+			return utils.GenerateSetError(resourceName, field, err)
+		}
+	}
+	if template.Edition != nil {
+		field := "edition"
+		if err := d.Set(field, *template.Edition); err != nil {
+			return utils.GenerateSetError(resourceName, field, err)
+		}
+	}
+	if template.Cores != nil {
+		field := "cores"
+		if err := d.Set(field, *template.Cores); err != nil {
+			return utils.GenerateSetError(resourceName, field, err)
+		}
+	}
+	if template.Ram != nil {
+		field := "ram"
+		if err := d.Set(field, *template.Ram); err != nil {
+			return utils.GenerateSetError(resourceName, field, err)
+		}
+	}
+	if template.StorageSize != nil {
+		field := "storage_size"
+		if err := d.Set(field, *template.StorageSize); err != nil {
+			return utils.GenerateSetError(resourceName, field, err)
+		}
+	}
+	return nil
 }
 
 // todo: remove once mongo removes this field

@@ -139,6 +139,7 @@ func Provider() *schema.Provider {
 			ResourceIpFailover:                        dataSourceIpFailover(),
 			PsqlClusterResource:                       dataSourceDbaasPgSqlCluster(),
 			DBaasMongoClusterResource:                 dataSourceDbaasMongoCluster(),
+			DBaaSMongoTemplateResource:                dataSourceDbassMongoTemplate(),
 			PsqlVersionsResource:                      dataSourceDbaasPgSqlVersions(),
 			PsqlBackupsResource:                       dataSourceDbaasPgSqlBackups(),
 			ALBResource:                               dataSourceApplicationLoadBalancer(),
