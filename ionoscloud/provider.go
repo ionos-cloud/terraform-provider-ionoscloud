@@ -15,7 +15,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/meta"
 	"github.com/ionos-cloud/sdk-go/v6"
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/cert"
-	crService "github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/container-registry"
+	crService "github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/containerregistry"
 	dbaasService "github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/dbaas"
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils"
 )
@@ -234,13 +234,13 @@ func NewClientByType(clientOpts ClientOptions, clientType clientType) interface{
 			return ionoscloud.NewAPIClient(newConfig)
 		}
 	case psqlClient:
-		return dbaasService.NewPsqlClientService(clientOpts.Username, clientOpts.Password, clientOpts.Token, clientOpts.Url, clientOpts.Version, clientOpts.Username).Get()
+		return dbaasService.NewPsqlClient(clientOpts.Username, clientOpts.Password, clientOpts.Token, clientOpts.Url, clientOpts.Version, clientOpts.Username)
 	case mongoClient:
-		return dbaasService.NewMongoClientService(clientOpts.Username, clientOpts.Password, clientOpts.Token, clientOpts.Url, clientOpts.Version, clientOpts.TerraformVersion).Get()
+		return dbaasService.NewMongoClient(clientOpts.Username, clientOpts.Password, clientOpts.Token, clientOpts.Url, clientOpts.Version, clientOpts.TerraformVersion)
 	case certManagerClient:
-		return cert.NewClientService(clientOpts.Username, clientOpts.Password, clientOpts.Token, clientOpts.Url, clientOpts.Version, clientOpts.TerraformVersion).Get()
+		return cert.NewClient(clientOpts.Username, clientOpts.Password, clientOpts.Token, clientOpts.Url, clientOpts.Version, clientOpts.TerraformVersion)
 	case containerRegistryClient:
-		return crService.NewClientService(clientOpts.Username, clientOpts.Password, clientOpts.Token, clientOpts.Url, clientOpts.Version, clientOpts.TerraformVersion).Get()
+		return crService.NewClient(clientOpts.Username, clientOpts.Password, clientOpts.Token, clientOpts.Url, clientOpts.Version, clientOpts.TerraformVersion)
 	default:
 		log.Fatalf("[ERROR] unknown client type %d", clientType)
 	}
@@ -346,8 +346,8 @@ var resourceTargetStates = []string{
 
 // resourceDefaultTimeouts sets default value for each Timeout type
 var resourceDefaultTimeouts = schema.ResourceTimeout{
-	Create:  schema.DefaultTimeout(60 * time.Minute),
-	Update:  schema.DefaultTimeout(60 * time.Minute),
-	Delete:  schema.DefaultTimeout(60 * time.Minute),
-	Default: schema.DefaultTimeout(60 * time.Minute),
+	Create:  schema.DefaultTimeout(utils.DefaultTimeout),
+	Update:  schema.DefaultTimeout(utils.DefaultTimeout),
+	Delete:  schema.DefaultTimeout(utils.DefaultTimeout),
+	Default: schema.DefaultTimeout(utils.DefaultTimeout),
 }

@@ -1,6 +1,7 @@
 package utils
 
 import (
+	"context"
 	"fmt"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
@@ -15,6 +16,8 @@ import (
 	"strings"
 	"time"
 )
+
+const DefaultTimeout = 60 * time.Minute
 
 // CreateTransport - creates customizable transport for http clients
 func CreateTransport() *http.Transport {
@@ -204,4 +207,48 @@ func RemoveNewLines(s string) string {
 // DiffToLower terraform suppress differences between lower and upper
 func DiffToLower(_, old, new string, _ *schema.ResourceData) bool {
 	return strings.EqualFold(old, new)
+}
+
+// ApiResponseInfo - interface over different ApiResponse types from sdks
+type ApiResponseInfo interface {
+	HttpNotFound() bool
+	LogInfo()
+}
+
+// ResourceReadyFunc polls api to see if resource exists based on id
+type ResourceReadyFunc func(ctx context.Context, d *schema.ResourceData) (bool, error)
+
+// WaitForResourceToBeReady - keeps retrying until resource is ready(true is returned), or until err is thrown, or ctx is cancelled
+func WaitForResourceToBeReady(ctx context.Context, d *schema.ResourceData, fn ResourceReadyFunc) error {
+	err := resource.RetryContext(ctx, DefaultTimeout, func() *resource.RetryError {
+		isReady, err := fn(ctx, d)
+		if isReady == true {
+			return nil
+		}
+		if err != nil {
+			resource.NonRetryableError(err)
+		}
+		log.Printf("[DEBUG] resource with id %s not ready, still trying ", d.Id())
+		return resource.RetryableError(fmt.Errorf("resource with id %s not ready, still trying ", d.Id()))
+	})
+	return err
+}
+
+// IsResourceDeletedFunc polls api to see if resource exists based on id
+type IsResourceDeletedFunc func(ctx context.Context, d *schema.ResourceData) (bool, error)
+
+// WaitForResourceToBeDeleted - keeps retrying until resource is not found(404), or until ctx is cancelled
+func WaitForResourceToBeDeleted(ctx context.Context, d *schema.ResourceData, fn IsResourceDeletedFunc) error {
+	err := resource.RetryContext(ctx, DefaultTimeout, func() *resource.RetryError {
+		isDeleted, err := fn(ctx, d)
+		if isDeleted {
+			return nil
+		}
+		if err != nil {
+			resource.NonRetryableError(err)
+		}
+		log.Printf("[DEBUG] resource with id %s still has not been deleted", d.Id())
+		return resource.RetryableError(fmt.Errorf("resource with id %s found, still trying ", d.Id()))
+	})
+	return err
 }
