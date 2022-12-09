@@ -250,7 +250,7 @@ func resourceDbaasMongoClusterDelete(ctx context.Context, d *schema.ResourceData
 			d.SetId("")
 			return nil
 		}
-		diags := diag.FromErr(fmt.Errorf("error while deleting mongo dbaas cluster %s: %s", d.Id(), err))
+		diags := diag.FromErr(fmt.Errorf("error while deleting mongo dbaas cluster %s: %w", d.Id(), err))
 		return diags
 	}
 

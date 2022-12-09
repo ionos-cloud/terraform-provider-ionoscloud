@@ -223,7 +223,7 @@ func testAccCheckDbaasPgSqlClusterDestroyCheck(s *terraform.State) error {
 
 		if err != nil {
 			if apiResponse == nil || apiResponse.StatusCode != 404 {
-				return fmt.Errorf("an error occurred while checking the destruction of psql cluster %s: %s", rs.Primary.ID, err)
+				return fmt.Errorf("an error occurred while checking the destruction of psql cluster %s: %w", rs.Primary.ID, err)
 			}
 		} else {
 			return fmt.Errorf("k8s cluster %s still exists", rs.Primary.ID)
@@ -257,7 +257,7 @@ func testAccCheckDbaasPgSqlClusterExists(n string, cluster *psql.ClusterResponse
 		foundCluster, _, err := client.GetCluster(ctx, rs.Primary.ID)
 
 		if err != nil {
-			return fmt.Errorf("an error occured while fetching k8s Cluster %s: %s", rs.Primary.ID, err)
+			return fmt.Errorf("an error occured while fetching k8s Cluster %s: %w", rs.Primary.ID, err)
 		}
 		if *foundCluster.Id != rs.Primary.ID {
 			return fmt.Errorf("record not found")

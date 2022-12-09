@@ -284,7 +284,7 @@ func privateCrossConnectReady(ctx context.Context, client *ionoscloud.APIClient,
 	logApiRequestTime(apiResponse)
 
 	if err != nil {
-		return true, fmt.Errorf("error checking PCC status: %s", err)
+		return true, fmt.Errorf("error checking PCC status: %w", err)
 	}
 	return strings.EqualFold(*rsp.Metadata.State, utils.Available), nil
 }
@@ -297,7 +297,7 @@ func privateCrossConnectDeleted(ctx context.Context, client *ionoscloud.APIClien
 		if httpNotFound(apiResponse) {
 			return true, nil
 		}
-		return true, fmt.Errorf("error checking PCC deletion status: %s", err)
+		return true, fmt.Errorf("error checking PCC deletion status: %w", err)
 	}
 	return false, nil
 }

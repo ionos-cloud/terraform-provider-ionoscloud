@@ -182,7 +182,7 @@ func resourceUserUpdate(ctx context.Context, d *schema.ResourceData, meta interf
 	foundUser, apiResponse, err := client.UserManagementApi.UmUsersFindById(ctx, d.Id()).Execute()
 	logApiRequestTime(apiResponse)
 	if err != nil {
-		diags := diag.FromErr(fmt.Errorf("an error occured while fetching a User ID %s %s", d.Id(), err))
+		diags := diag.FromErr(fmt.Errorf("an error occured while fetching a User ID %s %w", d.Id(), err))
 		return diags
 	}
 
@@ -266,7 +266,7 @@ func resourceUserUpdate(ctx context.Context, d *schema.ResourceData, meta interf
 	_, apiResponse, err = client.UserManagementApi.UmUsersPut(ctx, d.Id()).User(userReq).Execute()
 	logApiRequestTime(apiResponse)
 	if err != nil {
-		diags := diag.FromErr(fmt.Errorf("an error occured while patching a user ID %s %s", d.Id(), err))
+		diags := diag.FromErr(fmt.Errorf("an error occured while patching a user ID %s %w", d.Id(), err))
 		return diags
 	}
 

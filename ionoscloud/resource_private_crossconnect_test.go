@@ -87,7 +87,7 @@ func testAccCheckPrivateCrossConnectDestroyCheck(s *terraform.State) error {
 
 		if err != nil {
 			if !httpNotFound(apiResponse) {
-				return fmt.Errorf("an error occurred while checking private cross-connect %s: %s", rs.Primary.ID, err)
+				return fmt.Errorf("an error occurred while checking private cross-connect %s: %w", rs.Primary.ID, err)
 			}
 		} else {
 			return fmt.Errorf("unable to fetch private cross-connect %s %s", rs.Primary.ID, err)

@@ -43,7 +43,7 @@ func dataSourceResourceRead(ctx context.Context, d *schema.ResourceData, meta in
 		result, apiResponse, err := client.UserManagementApi.UmResourcesFindByTypeAndId(ctx, resourceType, resourceId).Execute()
 		logApiRequestTime(apiResponse)
 		if err != nil {
-			return diag.FromErr(fmt.Errorf("an error occured while fetching resource by type %s", err))
+			return diag.FromErr(fmt.Errorf("an error occured while fetching resource by type %w", err))
 		}
 		results = append(results, result)
 

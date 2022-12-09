@@ -436,7 +436,7 @@ func GetDbaasClusterFromBackupData(d *schema.ResourceData) (*psql.CreateRestoreR
 		layout := "2006-01-02T15:04:05Z"
 		convertedTime, err := time.Parse(layout, targetTime)
 		if err != nil {
-			return nil, fmt.Errorf("an error occured while converting recovery_target_time to time.Time: %s", err)
+			return nil, fmt.Errorf("an error occured while converting recovery_target_time to time.Time: %w", err)
 
 		}
 		ionosTime.Time = convertedTime
@@ -503,19 +503,19 @@ func SetDbaasPgSqlClusterData(d *schema.ResourceData, cluster psql.ClusterRespon
 
 	if cluster.Properties.Location != nil {
 		if err := d.Set("location", *cluster.Properties.Location); err != nil {
-			return fmt.Errorf("error while setting location property for psql cluster %s: %s", d.Id(), err)
+			return fmt.Errorf("error while setting location property for psql cluster %s: %w", d.Id(), err)
 		}
 	}
 
 	if cluster.Properties.BackupLocation != nil {
 		if err := d.Set("backup_location", *cluster.Properties.BackupLocation); err != nil {
-			return fmt.Errorf("error while setting backup_location property for psql cluster %s: %s", d.Id(), err)
+			return fmt.Errorf("error while setting backup_location property for psql cluster %s: %w", d.Id(), err)
 		}
 	}
 
 	if cluster.Properties.DisplayName != nil {
 		if err := d.Set("display_name", *cluster.Properties.DisplayName); err != nil {
-			return fmt.Errorf("error while setting display_name property for psql cluster %s: %s", d.Id(), err)
+			return fmt.Errorf("error while setting display_name property for psql cluster %s: %w", d.Id(), err)
 		}
 	}
 
@@ -530,7 +530,7 @@ func SetDbaasPgSqlClusterData(d *schema.ResourceData, cluster psql.ClusterRespon
 
 	if cluster.Properties.SynchronizationMode != nil {
 		if err := d.Set("synchronization_mode", *cluster.Properties.SynchronizationMode); err != nil {
-			return fmt.Errorf("error while setting SynchronizationMode property for psql cluster %s: %s", d.Id(), err)
+			return fmt.Errorf("error while setting SynchronizationMode property for psql cluster %s: %w", d.Id(), err)
 		}
 	}
 
@@ -574,12 +574,12 @@ func SetDbaasMongoDBClusterData(d *schema.ResourceData, cluster mongo.ClusterRes
 
 		if cluster.Properties.Location != nil {
 			if err := d.Set("location", *cluster.Properties.Location); err != nil {
-				return fmt.Errorf("error while setting location property for psql cluster %s: %s", d.Id(), err)
+				return fmt.Errorf("error while setting location property for psql cluster %s: %w", d.Id(), err)
 			}
 		}
 		if cluster.Properties.DisplayName != nil {
 			if err := d.Set("display_name", *cluster.Properties.DisplayName); err != nil {
-				return fmt.Errorf("error while setting display_name property for psql cluster %s: %s", d.Id(), err)
+				return fmt.Errorf("error while setting display_name property for psql cluster %s: %w", d.Id(), err)
 			}
 		}
 

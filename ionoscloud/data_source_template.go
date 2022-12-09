@@ -49,7 +49,7 @@ func dataSourceTemplateRead(ctx context.Context, d *schema.ResourceData, meta in
 	logApiRequestTime(apiResponse)
 
 	if err != nil {
-		diags := diag.FromErr(fmt.Errorf("an error occured while fetching IonosCloud templates %s ", err))
+		diags := diag.FromErr(fmt.Errorf("an error occured while fetching IonosCloud templates %w ", err))
 		return diags
 	}
 
@@ -133,7 +133,7 @@ func setTemplateData(d *schema.ResourceData, template *ionoscloud.Template) erro
 		if template.Properties.Name != nil {
 			err := d.Set("name", *template.Properties.Name)
 			if err != nil {
-				return fmt.Errorf("error while setting name property for image %s: %s", d.Id(), err)
+				return fmt.Errorf("error while setting name property for image %s: %w", d.Id(), err)
 			}
 		}
 

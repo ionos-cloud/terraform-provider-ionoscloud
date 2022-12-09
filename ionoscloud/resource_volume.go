@@ -250,7 +250,7 @@ func resourceVolumeCreate(ctx context.Context, d *schema.ResourceData, meta inte
 	logApiRequestTime(apiResponse)
 
 	if err != nil {
-		diags := diag.FromErr(fmt.Errorf("an error occured while creating a volume: %s", err))
+		diags := diag.FromErr(fmt.Errorf("an error occured while creating a volume: %w", err))
 		return diags
 	}
 
@@ -316,7 +316,7 @@ func resourceVolumeRead(ctx context.Context, d *schema.ResourceData, meta interf
 			d.SetId("")
 			return nil
 		}
-		diags := diag.FromErr(fmt.Errorf("error occured while fetching volume with ID %s: %s", d.Id(), err))
+		diags := diag.FromErr(fmt.Errorf("error occured while fetching volume with ID %s: %w", d.Id(), err))
 		return diags
 	}
 
@@ -363,7 +363,7 @@ func resourceVolumeUpdate(ctx context.Context, d *schema.ResourceData, meta inte
 	logApiRequestTime(apiResponse)
 
 	if err != nil {
-		diags := diag.FromErr(fmt.Errorf("an error occured while updating volume with ID %s: %s", d.Id(), err))
+		diags := diag.FromErr(fmt.Errorf("an error occured while updating volume with ID %s: %w", d.Id(), err))
 		return diags
 
 	}
@@ -376,7 +376,7 @@ func resourceVolumeUpdate(ctx context.Context, d *schema.ResourceData, meta inte
 	}
 
 	if apiResponse != nil && apiResponse.Response != nil && apiResponse.StatusCode > 299 {
-		diags := diag.FromErr(fmt.Errorf("an error occured while updating a volume ID %s %s", d.Id(), err))
+		diags := diag.FromErr(fmt.Errorf("an error occured while updating a volume ID %s %w", d.Id(), err))
 		return diags
 	}
 
@@ -411,7 +411,7 @@ func resourceVolumeDelete(ctx context.Context, d *schema.ResourceData, meta inte
 	apiResponse, err := client.VolumesApi.DatacentersVolumesDelete(ctx, dcId, d.Id()).Execute()
 	logApiRequestTime(apiResponse)
 	if err != nil {
-		diags := diag.FromErr(fmt.Errorf("an error occured while deleting a volume ID %s %s", d.Id(), err))
+		diags := diag.FromErr(fmt.Errorf("an error occured while deleting a volume ID %s %w", d.Id(), err))
 		return diags
 
 	}
@@ -477,119 +477,119 @@ func setVolumeData(d *schema.ResourceData, volume *ionoscloud.Volume) error {
 	if volume.Properties.Name != nil {
 		err := d.Set("name", *volume.Properties.Name)
 		if err != nil {
-			return fmt.Errorf("error while setting name property for volume %s: %s", d.Id(), err)
+			return fmt.Errorf("error while setting name property for volume %s: %w", d.Id(), err)
 		}
 	}
 
 	if volume.Properties.Type != nil {
 		err := d.Set("disk_type", *volume.Properties.Type)
 		if err != nil {
-			return fmt.Errorf("error while setting type property for volume %s: %s", d.Id(), err)
+			return fmt.Errorf("error while setting type property for volume %s: %w", d.Id(), err)
 		}
 	}
 
 	if volume.Properties.Size != nil {
 		err := d.Set("size", *volume.Properties.Size)
 		if err != nil {
-			return fmt.Errorf("error while setting size property for volume %s: %s", d.Id(), err)
+			return fmt.Errorf("error while setting size property for volume %s: %w", d.Id(), err)
 		}
 	}
 
 	if volume.Properties.Bus != nil {
 		err := d.Set("bus", *volume.Properties.Bus)
 		if err != nil {
-			return fmt.Errorf("error while setting bus property for volume %s: %s", d.Id(), err)
+			return fmt.Errorf("error while setting bus property for volume %s: %w", d.Id(), err)
 		}
 	}
 
 	if volume.Properties.Image != nil {
 		err := d.Set("image", *volume.Properties.Image)
 		if err != nil {
-			return fmt.Errorf("error while setting image property for volume %s: %s", d.Id(), err)
+			return fmt.Errorf("error while setting image property for volume %s: %w", d.Id(), err)
 		}
 	}
 
 	if volume.Properties.ImageAlias != nil {
 		err := d.Set("image_alias", *volume.Properties.ImageAlias)
 		if err != nil {
-			return fmt.Errorf("error while setting image_alias property for volume %s: %s", d.Id(), err)
+			return fmt.Errorf("error while setting image_alias property for volume %s: %w", d.Id(), err)
 		}
 	}
 
 	if volume.Properties.AvailabilityZone != nil {
 		err := d.Set("availability_zone", *volume.Properties.AvailabilityZone)
 		if err != nil {
-			return fmt.Errorf("error while setting availability_zone property for volume %s: %s", d.Id(), err)
+			return fmt.Errorf("error while setting availability_zone property for volume %s: %w", d.Id(), err)
 		}
 	}
 
 	if volume.Properties.CpuHotPlug != nil {
 		err := d.Set("cpu_hot_plug", *volume.Properties.CpuHotPlug)
 		if err != nil {
-			return fmt.Errorf("error while setting cpu_hot_plug property for volume %s: %s", d.Id(), err)
+			return fmt.Errorf("error while setting cpu_hot_plug property for volume %s: %w", d.Id(), err)
 		}
 	}
 
 	if volume.Properties.RamHotPlug != nil {
 		err := d.Set("ram_hot_plug", *volume.Properties.RamHotPlug)
 		if err != nil {
-			return fmt.Errorf("error while setting ram_hot_plug property for volume %s: %s", d.Id(), err)
+			return fmt.Errorf("error while setting ram_hot_plug property for volume %s: %w", d.Id(), err)
 		}
 	}
 
 	if volume.Properties.NicHotPlug != nil {
 		err := d.Set("nic_hot_plug", *volume.Properties.NicHotPlug)
 		if err != nil {
-			return fmt.Errorf("error while setting nic_hot_plug property for volume %s: %s", d.Id(), err)
+			return fmt.Errorf("error while setting nic_hot_plug property for volume %s: %w", d.Id(), err)
 		}
 	}
 
 	if volume.Properties.NicHotUnplug != nil {
 		err := d.Set("nic_hot_unplug", *volume.Properties.NicHotUnplug)
 		if err != nil {
-			return fmt.Errorf("error while setting nic_hot_unplug property for volume %s: %s", d.Id(), err)
+			return fmt.Errorf("error while setting nic_hot_unplug property for volume %s: %w", d.Id(), err)
 		}
 	}
 
 	if volume.Properties.DiscVirtioHotPlug != nil {
 		err := d.Set("disc_virtio_hot_plug", *volume.Properties.DiscVirtioHotPlug)
 		if err != nil {
-			return fmt.Errorf("error while setting disc_virtio_hot_plug property for volume %s: %s", d.Id(), err)
+			return fmt.Errorf("error while setting disc_virtio_hot_plug property for volume %s: %w", d.Id(), err)
 		}
 	}
 
 	if volume.Properties.DiscVirtioHotUnplug != nil {
 		err := d.Set("disc_virtio_hot_unplug", *volume.Properties.DiscVirtioHotUnplug)
 		if err != nil {
-			return fmt.Errorf("error while setting disc_virtio_hot_unplug property for volume %s: %s", d.Id(), err)
+			return fmt.Errorf("error while setting disc_virtio_hot_unplug property for volume %s: %w", d.Id(), err)
 		}
 	}
 
 	if volume.Properties.BackupunitId != nil {
 		err := d.Set("backup_unit_id", *volume.Properties.BackupunitId)
 		if err != nil {
-			return fmt.Errorf("error while setting backup_unit_id property for volume %s: %s", d.Id(), err)
+			return fmt.Errorf("error while setting backup_unit_id property for volume %s: %w", d.Id(), err)
 		}
 	}
 
 	if volume.Properties.UserData != nil {
 		err := d.Set("user_data", *volume.Properties.UserData)
 		if err != nil {
-			return fmt.Errorf("error while setting user_data property for volume %s: %s", d.Id(), err)
+			return fmt.Errorf("error while setting user_data property for volume %s: %w", d.Id(), err)
 		}
 	}
 
 	if volume.Properties.DeviceNumber != nil {
 		err := d.Set("device_number", *volume.Properties.DeviceNumber)
 		if err != nil {
-			return fmt.Errorf("error while setting device_number property for volume %s: %s", d.Id(), err)
+			return fmt.Errorf("error while setting device_number property for volume %s: %w", d.Id(), err)
 		}
 	}
 
 	if volume.Properties.BootServer != nil {
 		err := d.Set("boot_server", *volume.Properties.BootServer)
 		if err != nil {
-			return fmt.Errorf("error while setting boot_server property for volume %s: %s", d.Id(), err)
+			return fmt.Errorf("error while setting boot_server property for volume %s: %w", d.Id(), err)
 		}
 	}
 	return nil
@@ -837,7 +837,7 @@ func resolveImageName(ctx context.Context, client *ionoscloud.APIClient, imageNa
 	logApiRequestTime(apiResponse)
 
 	if err != nil {
-		log.Print(fmt.Errorf("error while fetching the list of images %s", err))
+		log.Print(fmt.Errorf("error while fetching the list of images %w", err))
 		return nil, err
 	}
 
@@ -871,7 +871,7 @@ func getSnapshotId(ctx context.Context, client *ionoscloud.APIClient, snapshotNa
 	logApiRequestTime(apiResponse)
 
 	if err != nil {
-		log.Print(fmt.Errorf("error while fetching the list of snapshots %s", err))
+		log.Print(fmt.Errorf("error while fetching the list of snapshots %w", err))
 	}
 
 	if len(*snapshots.Items) > 0 {
@@ -903,7 +903,7 @@ func getImageAlias(ctx context.Context, client *ionoscloud.APIClient, imageAlias
 	logApiRequestTime(apiResponse)
 
 	if err != nil {
-		log.Print(fmt.Errorf("error while fetching the list of locations %s", err))
+		log.Print(fmt.Errorf("error while fetching the list of locations %w", err))
 	}
 
 	if len(*locations.Properties.ImageAliases) > 0 {
@@ -1014,7 +1014,7 @@ func resolveVolumeImageName(ctx context.Context, client *ionoscloud.APIClient, i
 	logApiRequestTime(apiResponse)
 
 	if err != nil {
-		log.Print(fmt.Errorf("error while fetching the list of images %s", err))
+		log.Print(fmt.Errorf("error while fetching the list of images %w", err))
 		return nil, err
 	}
 

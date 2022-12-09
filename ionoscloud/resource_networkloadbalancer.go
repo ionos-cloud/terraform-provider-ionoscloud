@@ -130,7 +130,7 @@ func resourceNetworkLoadBalancerCreate(ctx context.Context, d *schema.ResourceDa
 
 	if err != nil {
 		d.SetId("")
-		diags := diag.FromErr(fmt.Errorf("error creating network loadbalancer: %s, %s", err, responseBody(apiResponse)))
+		diags := diag.FromErr(fmt.Errorf("error creating network loadbalancer: %w, %s", err, responseBody(apiResponse)))
 		return diags
 	}
 
@@ -261,7 +261,7 @@ func resourceNetworkLoadBalancerDelete(ctx context.Context, d *schema.ResourceDa
 	logApiRequestTime(apiResponse)
 
 	if err != nil {
-		diags := diag.FromErr(fmt.Errorf("an error occured while deleting a network loadbalancer %s %s", d.Id(), err))
+		diags := diag.FromErr(fmt.Errorf("an error occured while deleting a network loadbalancer %s %w", d.Id(), err))
 		return diags
 	}
 

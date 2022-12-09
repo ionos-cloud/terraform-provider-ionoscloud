@@ -424,3 +424,6 @@ resource ` + ServerResource + ` ` + ServerTestResource + ` {
     value = "labelvalue1"
   }
 }`
+
+const K8sVersion = "1.23.12"
+const UpgradedK8sVersion = "1.24.6"
