@@ -13,44 +13,14 @@ import (
 )
 
 type PsqlClient struct {
-	psql.APIClient
+	sdkClient *psql.APIClient
 }
 
 type MongoClient struct {
-	mongo.APIClient
+	sdkClient *mongo.APIClient
 }
 
-type PsqlClientConfig struct {
-	psql.Configuration
-}
-
-type MongoClientConfig struct {
-	mongo.Configuration
-}
-
-// PsqlClientService is a wrapper around psql.APIClient
-type PsqlClientService interface {
-	Get() *PsqlClient
-	GetConfig() *PsqlClientConfig
-}
-
-type MongoClientService interface {
-	Get() *MongoClient
-	GetConfig() *MongoClientConfig
-}
-
-type clientService struct {
-	client *psql.APIClient
-}
-
-type mongoClientService struct {
-	client *mongo.APIClient
-}
-
-var _ PsqlClientService = &clientService{}
-var _ MongoClientService = &mongoClientService{}
-
-func NewPsqlClientService(username, password, token, url, version, terraformVersion string) PsqlClientService {
+func NewPsqlClient(username, password, token, url, version, terraformVersion string) *PsqlClient {
 	newConfigDbaas := psql.NewConfiguration(username, password, token, url)
 
 	if os.Getenv(utils.IonosDebug) != "" {
@@ -64,12 +34,12 @@ func NewPsqlClientService(username, password, token, url, version, terraformVers
 		"terraform-provider/%s_ionos-cloud-sdk-go-dbaas-postgres/%s_hashicorp-terraform/%s_terraform-plugin-sdk/%s_os/%s_arch/%s",
 		version, psql.Version, terraformVersion, meta.SDKVersionString(), runtime.GOOS, runtime.GOARCH)
 
-	return &clientService{
-		client: psql.NewAPIClient(newConfigDbaas),
+	return &PsqlClient{
+		sdkClient: psql.NewAPIClient(newConfigDbaas),
 	}
 }
 
-func NewMongoClientService(username, password, token, url, version, terraformVersion string) MongoClientService {
+func NewMongoClient(username, password, token, url, version, terraformVersion string) *MongoClient {
 	newConfigDbaas := mongo.NewConfiguration(username, password, token, url)
 
 	if os.Getenv("IONOS_DEBUG") != "" {
@@ -83,31 +53,7 @@ func NewMongoClientService(username, password, token, url, version, terraformVer
 		"terraform-provider/%s_ionos-cloud-sdk-go-dbaas-mongo/%s_hashicorp-terraform/%s_terraform-plugin-sdk/%s_os/%s_arch/%s",
 		version, mongo.Version, terraformVersion, meta.SDKVersionString(), runtime.GOOS, runtime.GOARCH)
 
-	return &mongoClientService{
-		client: mongo.NewAPIClient(newConfigDbaas),
-	}
-}
-
-func (c clientService) Get() *PsqlClient {
-	return &PsqlClient{
-		APIClient: *c.client,
-	}
-}
-
-func (c clientService) GetConfig() *PsqlClientConfig {
-	return &PsqlClientConfig{
-		Configuration: *c.client.GetConfig(),
-	}
-}
-
-func (c mongoClientService) Get() *MongoClient {
 	return &MongoClient{
-		*c.client,
-	}
-}
-
-func (c mongoClientService) GetConfig() *MongoClientConfig {
-	return &MongoClientConfig{
-		Configuration: *c.client.GetConfig(),
+		sdkClient: mongo.NewAPIClient(newConfigDbaas),
 	}
 }

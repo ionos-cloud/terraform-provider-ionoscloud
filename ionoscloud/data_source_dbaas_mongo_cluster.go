@@ -141,13 +141,13 @@ func dataSourceDbaasMongoReadCluster(ctx context.Context, d *schema.ResourceData
 
 	if idOk {
 		/* search by ID */
-		cluster, _, err = client.ClustersApi.ClustersFindById(ctx, id.(string)).Execute()
+		cluster, _, err = client.GetCluster(ctx, id.(string))
 		if err != nil {
 			diags := diag.FromErr(fmt.Errorf("an error occurred while fetching the dbaas mongo cluster with ID %s: %s", id.(string), err))
 			return diags
 		}
 	} else {
-		clusters, _, err := client.ClustersApi.ClustersGet(ctx).Execute()
+		clusters, _, err := client.ListClusters(ctx, "")
 
 		if err != nil {
 			diags := diag.FromErr(fmt.Errorf("an error occurred while fetching dbaas mongo clusters: %w", err))

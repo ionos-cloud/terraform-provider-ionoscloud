@@ -6,21 +6,11 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	certmanager "github.com/ionos-cloud/sdk-go-cert-manager"
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils"
-	"log"
 	"strings"
-	"time"
 )
 
-type CertificateService interface {
-	GetCertificate(ctx context.Context, certId string) (certmanager.CertificateDto, *certmanager.APIResponse, error)
-	ListCertificates(ctx context.Context, filterName string) (certmanager.CertificateDto, *certmanager.APIResponse, error)
-	CreateCertificate(ctx context.Context, certPostDto certmanager.CertificatePostDto) (certmanager.CertificateDto, *certmanager.APIResponse, error)
-	UpdateCertificate(ctx context.Context, certPostDto certmanager.CertificatePatchDto) (certmanager.CertificateDto, *certmanager.APIResponse, error)
-	DeleteCertificate(ctx context.Context, certIf string) (*certmanager.APIResponse, error)
-}
-
 func (c *Client) GetCertificate(ctx context.Context, certId string) (certmanager.CertificateDto, *certmanager.APIResponse, error) {
-	cert, apiResponse, err := c.CertificatesApi.CertificatesGetById(ctx, certId).Execute()
+	cert, apiResponse, err := c.sdkClient.CertificatesApi.CertificatesGetById(ctx, certId).Execute()
 	apiResponse.LogInfo()
 	if apiResponse != nil {
 		return cert, apiResponse, err
@@ -30,7 +20,7 @@ func (c *Client) GetCertificate(ctx context.Context, certId string) (certmanager
 }
 
 func (c *Client) ListCertificates(ctx context.Context) (certmanager.CertificateCollectionDto, *certmanager.APIResponse, error) {
-	certs, apiResponse, err := c.CertificatesApi.CertificatesGet(ctx).Execute()
+	certs, apiResponse, err := c.sdkClient.CertificatesApi.CertificatesGet(ctx).Execute()
 	apiResponse.LogInfo()
 	if apiResponse != nil {
 		return certs, apiResponse, err
@@ -39,7 +29,7 @@ func (c *Client) ListCertificates(ctx context.Context) (certmanager.CertificateC
 }
 
 func (c *Client) CreateCertificate(ctx context.Context, certPostDto certmanager.CertificatePostDto) (certmanager.CertificateDto, *certmanager.APIResponse, error) {
-	certResponse, apiResponse, err := c.CertificatesApi.CertificatesPost(ctx).CertificatePostDto(certPostDto).Execute()
+	certResponse, apiResponse, err := c.sdkClient.CertificatesApi.CertificatesPost(ctx).CertificatePostDto(certPostDto).Execute()
 	apiResponse.LogInfo()
 	if apiResponse != nil {
 		return certResponse, apiResponse, err
@@ -48,7 +38,7 @@ func (c *Client) CreateCertificate(ctx context.Context, certPostDto certmanager.
 }
 
 func (c *Client) UpdateCertificate(ctx context.Context, certId string, certPatch certmanager.CertificatePatchDto) (certmanager.CertificateDto, *certmanager.APIResponse, error) {
-	certResponse, apiResponse, err := c.CertificatesApi.CertificatesPatch(ctx, certId).CertificatePatchDto(certPatch).Execute()
+	certResponse, apiResponse, err := c.sdkClient.CertificatesApi.CertificatesPatch(ctx, certId).CertificatePatchDto(certPatch).Execute()
 	apiResponse.LogInfo()
 	if apiResponse != nil {
 		return certResponse, apiResponse, err
@@ -57,7 +47,7 @@ func (c *Client) UpdateCertificate(ctx context.Context, certId string, certPatch
 }
 
 func (c *Client) DeleteCertificate(ctx context.Context, certId string) (*certmanager.APIResponse, error) {
-	apiResponse, err := c.CertificatesApi.CertificatesDelete(ctx, certId).Execute()
+	apiResponse, err := c.sdkClient.CertificatesApi.CertificatesDelete(ctx, certId).Execute()
 	apiResponse.LogInfo()
 	if apiResponse != nil {
 		return apiResponse, err
@@ -72,31 +62,6 @@ func (c *Client) IsCertReady(ctx context.Context, d *schema.ResourceData) (bool,
 		return true, fmt.Errorf("error checking certificate status: %w", err)
 	}
 	return strings.EqualFold(*cert.Metadata.State, utils.Available), nil
-}
-
-func (c *Client) WaitForCertToBeReady(ctx context.Context, d *schema.ResourceData) error {
-	for {
-		log.Printf("[INFO] Waiting for certificate %s to be ready...", d.Id())
-
-		certReady, rsErr := c.IsCertReady(ctx, d)
-		if rsErr != nil {
-			return fmt.Errorf("error while checking readiness status of certificate %s: %w", d.Id(), rsErr)
-		}
-
-		if certReady {
-			log.Printf("[INFO] certificate ready: %s", d.Id())
-			break
-		}
-
-		select {
-		case <-time.After(utils.SleepInterval):
-			log.Printf("[INFO] trying again ...")
-		case <-ctx.Done():
-			return fmt.Errorf("certificate check timed out! WARNING: your certificate will still probably be created/updated " +
-				"after some time but the terraform state won't reflect that; check your Ionos Cloud account for updates")
-		}
-	}
-	return nil
 }
 
 func (c *Client) IsCertDeleted(ctx context.Context, d *schema.ResourceData) (bool, error) {

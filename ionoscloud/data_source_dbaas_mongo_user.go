@@ -80,7 +80,7 @@ func dataSourceDbaasMongoReadUser(ctx context.Context, d *schema.ResourceData, m
 	var user mongo.User
 	var err error
 
-	users, _, err := client.UsersApi.ClustersUsersGet(ctx, clusterId).Execute()
+	users, _, err := client.GetUsers(ctx, clusterId)
 
 	if err != nil {
 		diags := diag.FromErr(fmt.Errorf("an error occurred while fetching dbaas mongo users: %w", err))
