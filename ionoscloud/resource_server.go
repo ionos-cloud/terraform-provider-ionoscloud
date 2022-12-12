@@ -4,16 +4,16 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
-	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
-	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
-	ionoscloud "github.com/ionos-cloud/sdk-go/v6"
-	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils"
 	"log"
 	"os"
 	"strconv"
 	"strings"
 
+	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
+	ionoscloud "github.com/ionos-cloud/sdk-go/v6"
+	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils"
 	"golang.org/x/crypto/ssh"
 )
 
@@ -398,6 +398,11 @@ func resourceServer() *schema.Resource {
 					},
 				},
 			},
+			"label": {
+				Type:     schema.TypeSet,
+				Optional: true,
+				Elem:     labelResource,
+			},
 		},
 		Timeouts: &resourceDefaultTimeouts,
 	}
@@ -439,6 +444,7 @@ func checkServerImmutableFields(_ context.Context, diff *schema.ResourceDiff, _ 
 
 func resourceServerCreate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	client := meta.(SdkBundle).CloudApiClient
+	datacenterId := d.Get("datacenter_id").(string)
 
 	nic := ionoscloud.Nic{
 		Properties: &ionoscloud.NicProperties{},
@@ -545,7 +551,7 @@ func resourceServerCreate(ctx context.Context, d *schema.ResourceData, meta inte
 		}
 	}
 
-	postServer, apiResponse, err := client.ServersApi.DatacentersServersPost(ctx, d.Get("datacenter_id").(string)).Server(serverReq).Execute()
+	postServer, apiResponse, err := client.ServersApi.DatacentersServersPost(ctx, datacenterId).Server(serverReq).Execute()
 	logApiRequestTime(apiResponse)
 
 	if err != nil {
@@ -570,8 +576,14 @@ func resourceServerCreate(ctx context.Context, d *schema.ResourceData, meta inte
 		return diags
 	}
 
+	// Logic for labels creation
+	ls := LabelsService{ctx: ctx, client: client}
+	if err := ls.datacentersServersLabelsCreate(datacenterId, *postServer.Id, d.Get("label")); err != nil {
+		return diag.FromErr(err)
+	}
+
 	// get additional data for schema
-	serverReq, apiResponse, err = client.ServersApi.DatacentersServersFindById(ctx, d.Get("datacenter_id").(string), *postServer.Id).Depth(3).Execute()
+	serverReq, apiResponse, err = client.ServersApi.DatacentersServersFindById(ctx, datacenterId, *postServer.Id).Depth(3).Execute()
 	logApiRequestTime(apiResponse)
 
 	if err != nil {
@@ -579,7 +591,7 @@ func resourceServerCreate(ctx context.Context, d *schema.ResourceData, meta inte
 		return diags
 	}
 	firstNicItem := (*serverReq.Entities.Nics.Items)[0]
-	firewallRules, apiResponse, err := client.FirewallRulesApi.DatacentersServersNicsFirewallrulesGet(ctx, d.Get("datacenter_id").(string),
+	firewallRules, apiResponse, err := client.FirewallRulesApi.DatacentersServersNicsFirewallrulesGet(ctx, datacenterId,
 		*serverReq.Id, *firstNicItem.Id).Execute()
 	logApiRequestTime(apiResponse)
 
@@ -650,12 +662,13 @@ func resourceServerRead(ctx context.Context, d *schema.ResourceData, meta interf
 			d.SetId("")
 			return nil
 		}
-		diags := diag.FromErr(fmt.Errorf("error occured while fetching a server ID %s %s", d.Id(), err))
+		diags := diag.FromErr(fmt.Errorf("error occured while fetching a server ID %s %w", d.Id(), err))
 		return diags
 	}
 	if err := setResourceServerData(ctx, client, d, &server); err != nil {
 		return diag.FromErr(err)
 	}
+
 	return nil
 }
 
@@ -794,7 +807,7 @@ func resourceServerUpdate(ctx context.Context, d *schema.ResourceData, meta inte
 	logApiRequestTime(apiResponse)
 
 	if err != nil {
-		diags := diag.FromErr(fmt.Errorf("error occured while updating server ID %s: %s", d.Id(), err))
+		diags := diag.FromErr(fmt.Errorf("error occured while updating server ID %s: %w", d.Id(), err))
 		return diags
 	}
 
@@ -987,6 +1000,23 @@ func resourceServerUpdate(ctx context.Context, d *schema.ResourceData, meta inte
 
 	}
 
+	// Labels logic for update
+	if d.HasChanges("label") {
+		ls := LabelsService{ctx: ctx, client: client}
+		oldLabelsData, newLabelsData := d.GetChange("label")
+
+		// Make some differences to see exactly what labels need to be added/removed.
+		labelsToBeCreated := newLabelsData.(*schema.Set).Difference(oldLabelsData.(*schema.Set))
+		labelsToBeDeleted := oldLabelsData.(*schema.Set).Difference(newLabelsData.(*schema.Set))
+
+		if err := ls.datacentersServersLabelsDelete(dcId, d.Id(), labelsToBeDeleted); err != nil {
+			return diag.FromErr(err)
+		}
+
+		if err := ls.datacentersServersLabelsCreate(dcId, d.Id(), labelsToBeCreated); err != nil {
+			return diag.FromErr(err)
+		}
+	}
 	return resourceServerRead(ctx, d, meta)
 }
 
@@ -998,7 +1028,7 @@ func resourceServerDelete(ctx context.Context, d *schema.ResourceData, meta inte
 	logApiRequestTime(apiResponse)
 
 	if err != nil {
-		diags := diag.FromErr(fmt.Errorf("error occured while fetching a server ID %s %s", d.Id(), err))
+		diags := diag.FromErr(fmt.Errorf("error occured while fetching a server ID %s %w", d.Id(), err))
 		return diags
 	}
 
@@ -1057,7 +1087,7 @@ func resourceServerImport(ctx context.Context, d *schema.ResourceData, meta inte
 			d.SetId("")
 			return nil, fmt.Errorf("unable to find server %q", serverId)
 		}
-		return nil, fmt.Errorf("error occured while fetching a server ID %s %s", d.Id(), err)
+		return nil, fmt.Errorf("error occured while fetching a server ID %s %w", d.Id(), err)
 	}
 
 	d.SetId(*server.Id)
@@ -1369,6 +1399,17 @@ func setResourceServerData(ctx context.Context, client *ionoscloud.APIClient, d 
 			return fmt.Errorf("error settings nics %w", err)
 		}
 	}
+
+	// Labels logic
+	ls := LabelsService{ctx: ctx, client: client}
+	labels, err := ls.datacentersServersLabelsGet(datacenterId, d.Id(), false)
+	if err != nil {
+		return err
+	}
+	if err := d.Set("label", labels); err != nil {
+		return err
+	}
+
 	//if token != nil {
 	//	if err := d.Set("token", *token.Token); err != nil {
 	//		return err

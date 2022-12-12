@@ -138,7 +138,7 @@ func setLocationData(d *schema.ResourceData, location *ionoscloud.Location) erro
 
 		if len(cpuArchitectures) > 0 {
 			if err := d.Set("cpu_architecture", cpuArchitectures); err != nil {
-				return fmt.Errorf("error while setting cpu_architecture property for datacenter %s: %s", d.Id(), err)
+				return fmt.Errorf("error while setting cpu_architecture property for datacenter %s: %w", d.Id(), err)
 			}
 		}
 
@@ -149,7 +149,7 @@ func setLocationData(d *schema.ResourceData, location *ionoscloud.Location) erro
 
 		if len(imageAliases) > 0 {
 			if err := d.Set("image_aliases", imageAliases); err != nil {
-				return fmt.Errorf("error while setting image_aliases property for datacenter %s: %s", d.Id(), err)
+				return fmt.Errorf("error while setting image_aliases property for datacenter %s: %w", d.Id(), err)
 			}
 		}
 	}

@@ -110,7 +110,7 @@ func dataSourceNatGatewayRead(ctx context.Context, d *schema.ResourceData, meta 
 					tmpNatGateway, apiResponse, err := client.NATGatewaysApi.DatacentersNatgatewaysFindByNatGatewayId(ctx, datacenterId.(string), *ng.Id).Execute()
 					logApiRequestTime(apiResponse)
 					if err != nil {
-						return diag.FromErr(fmt.Errorf("an error occurred while fetching nat gateway with ID %s: %s", *ng.Id, err.Error()))
+						return diag.FromErr(fmt.Errorf("an error occurred while fetching nat gateway with ID %s: %w", *ng.Id, err))
 					}
 					natGateway = tmpNatGateway
 					results = append(results, natGateway)

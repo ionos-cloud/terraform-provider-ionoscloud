@@ -14,75 +14,33 @@ import (
 	"encoding/json"
 )
 
-// UserProperties Mongodb user properties.
-type UserProperties struct {
-	Username *string      `json:"username"`
-	Password *string      `json:"password"`
+// PatchUserProperties MongoDB database user patch request properties.
+type PatchUserProperties struct {
+	Password *string      `json:"password,omitempty"`
 	Roles    *[]UserRoles `json:"roles,omitempty"`
 }
 
-// NewUserProperties instantiates a new UserProperties object
+// NewPatchUserProperties instantiates a new PatchUserProperties object
 // This constructor will assign default values to properties that have it defined,
 // and makes sure properties required by API are set, but the set of arguments
 // will change when the set of required properties is changed
-func NewUserProperties(username string, password string) *UserProperties {
-	this := UserProperties{}
-
-	this.Username = &username
-	this.Password = &password
+func NewPatchUserProperties() *PatchUserProperties {
+	this := PatchUserProperties{}
 
 	return &this
 }
 
-// NewUserPropertiesWithDefaults instantiates a new UserProperties object
+// NewPatchUserPropertiesWithDefaults instantiates a new PatchUserProperties object
 // This constructor will only assign default values to properties that have it defined,
 // but it doesn't guarantee that properties required by API are set
-func NewUserPropertiesWithDefaults() *UserProperties {
-	this := UserProperties{}
+func NewPatchUserPropertiesWithDefaults() *PatchUserProperties {
+	this := PatchUserProperties{}
 	return &this
-}
-
-// GetUsername returns the Username field value
-// If the value is explicit nil, the zero value for string will be returned
-func (o *UserProperties) GetUsername() *string {
-	if o == nil {
-		return nil
-	}
-
-	return o.Username
-
-}
-
-// GetUsernameOk returns a tuple with the Username field value
-// and a boolean to check if the value has been set.
-// NOTE: If the value is an explicit nil, `nil, true` will be returned
-func (o *UserProperties) GetUsernameOk() (*string, bool) {
-	if o == nil {
-		return nil, false
-	}
-
-	return o.Username, true
-}
-
-// SetUsername sets field value
-func (o *UserProperties) SetUsername(v string) {
-
-	o.Username = &v
-
-}
-
-// HasUsername returns a boolean if a field has been set.
-func (o *UserProperties) HasUsername() bool {
-	if o != nil && o.Username != nil {
-		return true
-	}
-
-	return false
 }
 
 // GetPassword returns the Password field value
 // If the value is explicit nil, the zero value for string will be returned
-func (o *UserProperties) GetPassword() *string {
+func (o *PatchUserProperties) GetPassword() *string {
 	if o == nil {
 		return nil
 	}
@@ -94,7 +52,7 @@ func (o *UserProperties) GetPassword() *string {
 // GetPasswordOk returns a tuple with the Password field value
 // and a boolean to check if the value has been set.
 // NOTE: If the value is an explicit nil, `nil, true` will be returned
-func (o *UserProperties) GetPasswordOk() (*string, bool) {
+func (o *PatchUserProperties) GetPasswordOk() (*string, bool) {
 	if o == nil {
 		return nil, false
 	}
@@ -103,14 +61,14 @@ func (o *UserProperties) GetPasswordOk() (*string, bool) {
 }
 
 // SetPassword sets field value
-func (o *UserProperties) SetPassword(v string) {
+func (o *PatchUserProperties) SetPassword(v string) {
 
 	o.Password = &v
 
 }
 
 // HasPassword returns a boolean if a field has been set.
-func (o *UserProperties) HasPassword() bool {
+func (o *PatchUserProperties) HasPassword() bool {
 	if o != nil && o.Password != nil {
 		return true
 	}
@@ -120,7 +78,7 @@ func (o *UserProperties) HasPassword() bool {
 
 // GetRoles returns the Roles field value
 // If the value is explicit nil, the zero value for []UserRoles will be returned
-func (o *UserProperties) GetRoles() *[]UserRoles {
+func (o *PatchUserProperties) GetRoles() *[]UserRoles {
 	if o == nil {
 		return nil
 	}
@@ -132,7 +90,7 @@ func (o *UserProperties) GetRoles() *[]UserRoles {
 // GetRolesOk returns a tuple with the Roles field value
 // and a boolean to check if the value has been set.
 // NOTE: If the value is an explicit nil, `nil, true` will be returned
-func (o *UserProperties) GetRolesOk() (*[]UserRoles, bool) {
+func (o *PatchUserProperties) GetRolesOk() (*[]UserRoles, bool) {
 	if o == nil {
 		return nil, false
 	}
@@ -141,14 +99,14 @@ func (o *UserProperties) GetRolesOk() (*[]UserRoles, bool) {
 }
 
 // SetRoles sets field value
-func (o *UserProperties) SetRoles(v []UserRoles) {
+func (o *PatchUserProperties) SetRoles(v []UserRoles) {
 
 	o.Roles = &v
 
 }
 
 // HasRoles returns a boolean if a field has been set.
-func (o *UserProperties) HasRoles() bool {
+func (o *PatchUserProperties) HasRoles() bool {
 	if o != nil && o.Roles != nil {
 		return true
 	}
@@ -156,12 +114,8 @@ func (o *UserProperties) HasRoles() bool {
 	return false
 }
 
-func (o UserProperties) MarshalJSON() ([]byte, error) {
+func (o PatchUserProperties) MarshalJSON() ([]byte, error) {
 	toSerialize := map[string]interface{}{}
-	if o.Username != nil {
-		toSerialize["username"] = o.Username
-	}
-
 	if o.Password != nil {
 		toSerialize["password"] = o.Password
 	}
@@ -173,38 +127,38 @@ func (o UserProperties) MarshalJSON() ([]byte, error) {
 	return json.Marshal(toSerialize)
 }
 
-type NullableUserProperties struct {
-	value *UserProperties
+type NullablePatchUserProperties struct {
+	value *PatchUserProperties
 	isSet bool
 }
 
-func (v NullableUserProperties) Get() *UserProperties {
+func (v NullablePatchUserProperties) Get() *PatchUserProperties {
 	return v.value
 }
 
-func (v *NullableUserProperties) Set(val *UserProperties) {
+func (v *NullablePatchUserProperties) Set(val *PatchUserProperties) {
 	v.value = val
 	v.isSet = true
 }
 
-func (v NullableUserProperties) IsSet() bool {
+func (v NullablePatchUserProperties) IsSet() bool {
 	return v.isSet
 }
 
-func (v *NullableUserProperties) Unset() {
+func (v *NullablePatchUserProperties) Unset() {
 	v.value = nil
 	v.isSet = false
 }
 
-func NewNullableUserProperties(val *UserProperties) *NullableUserProperties {
-	return &NullableUserProperties{value: val, isSet: true}
+func NewNullablePatchUserProperties(val *PatchUserProperties) *NullablePatchUserProperties {
+	return &NullablePatchUserProperties{value: val, isSet: true}
 }
 
-func (v NullableUserProperties) MarshalJSON() ([]byte, error) {
+func (v NullablePatchUserProperties) MarshalJSON() ([]byte, error) {
 	return json.Marshal(v.value)
 }
 
-func (v *NullableUserProperties) UnmarshalJSON(src []byte) error {
+func (v *NullablePatchUserProperties) UnmarshalJSON(src []byte) error {
 	v.isSet = true
 	return json.Unmarshal(src, &v.value)
 }

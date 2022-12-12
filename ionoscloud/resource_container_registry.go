@@ -6,7 +6,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
-	crService "github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/container-registry"
+	crService "github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/containerregistry"
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils"
 	"log"
 	"regexp"
@@ -133,7 +133,7 @@ func resourceContainerRegistryUpdate(ctx context.Context, d *schema.ResourceData
 
 	_, _, err := client.PatchRegistry(ctx, registryId, *containerRegistry)
 	if err != nil {
-		diags := diag.FromErr(fmt.Errorf("an error occured while updating a registry: %s", err))
+		diags := diag.FromErr(fmt.Errorf("an error occured while updating a registry: %w", err))
 		return diags
 	}
 

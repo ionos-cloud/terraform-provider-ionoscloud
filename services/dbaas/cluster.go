@@ -11,24 +11,8 @@ import (
 	"time"
 )
 
-type ClusterService interface {
-	GetCluster(ctx context.Context, clusterId string) (psql.ClusterResponse, *psql.APIResponse, error)
-	ListClusters(ctx context.Context, filterName string) (psql.ClusterList, *psql.APIResponse, error)
-	CreateCluster(ctx context.Context, cluster psql.CreateClusterRequest) (psql.ClusterResponse, *psql.APIResponse, error)
-	UpdateCluster(ctx context.Context, clusterId string, cluster psql.PatchClusterRequest) (psql.ClusterResponse, *psql.APIResponse, error)
-	DeleteCluster(ctx context.Context, clusterId string) (psql.ClusterResponse, *psql.APIResponse, error)
-}
-
-type MongoClusterService interface {
-	GetCluster(ctx context.Context, clusterId string) (mongo.ClusterResponse, *mongo.APIResponse, error)
-	ListClusters(ctx context.Context, filterName string) (mongo.ClusterList, *mongo.APIResponse, error)
-	CreateCluster(ctx context.Context, cluster mongo.CreateClusterRequest) (mongo.ClusterResponse, *mongo.APIResponse, error)
-	//UpdateCluster(ctx context.Context, clusterId string, cluster psql.PatchClusterRequest) (psql.ClusterResponse, *psql.APIResponse, error)
-	DeleteCluster(ctx context.Context, clusterId string) (mongo.ClusterResponse, *mongo.APIResponse, error)
-}
-
 func (c *PsqlClient) GetCluster(ctx context.Context, clusterId string) (psql.ClusterResponse, *psql.APIResponse, error) {
-	cluster, apiResponse, err := c.ClustersApi.ClustersFindById(ctx, clusterId).Execute()
+	cluster, apiResponse, err := c.sdkClient.ClustersApi.ClustersFindById(ctx, clusterId).Execute()
 	if apiResponse != nil {
 		return cluster, apiResponse, err
 
@@ -37,7 +21,7 @@ func (c *PsqlClient) GetCluster(ctx context.Context, clusterId string) (psql.Clu
 }
 
 func (c *MongoClient) GetCluster(ctx context.Context, clusterId string) (mongo.ClusterResponse, *mongo.APIResponse, error) {
-	cluster, apiResponse, err := c.ClustersApi.ClustersFindById(ctx, clusterId).Execute()
+	cluster, apiResponse, err := c.sdkClient.ClustersApi.ClustersFindById(ctx, clusterId).Execute()
 	if apiResponse != nil {
 		return cluster, apiResponse, err
 
@@ -46,11 +30,11 @@ func (c *MongoClient) GetCluster(ctx context.Context, clusterId string) (mongo.C
 }
 
 func (c *PsqlClient) ListClusters(ctx context.Context, filterName string) (psql.ClusterList, *psql.APIResponse, error) {
-	request := c.ClustersApi.ClustersGet(ctx)
+	request := c.sdkClient.ClustersApi.ClustersGet(ctx)
 	if filterName != "" {
 		request = request.FilterName(filterName)
 	}
-	clusters, apiResponse, err := c.ClustersApi.ClustersGetExecute(request)
+	clusters, apiResponse, err := c.sdkClient.ClustersApi.ClustersGetExecute(request)
 	if apiResponse != nil {
 		return clusters, apiResponse, err
 	}
@@ -58,11 +42,11 @@ func (c *PsqlClient) ListClusters(ctx context.Context, filterName string) (psql.
 }
 
 func (c *MongoClient) ListClusters(ctx context.Context, filterName string) (mongo.ClusterList, *mongo.APIResponse, error) {
-	request := c.ClustersApi.ClustersGet(ctx)
+	request := c.sdkClient.ClustersApi.ClustersGet(ctx)
 	if filterName != "" {
 		request = request.FilterName(filterName)
 	}
-	clusters, apiResponse, err := c.ClustersApi.ClustersGetExecute(request)
+	clusters, apiResponse, err := c.sdkClient.ClustersApi.ClustersGetExecute(request)
 	if apiResponse != nil {
 		return clusters, apiResponse, err
 	}
@@ -70,7 +54,7 @@ func (c *MongoClient) ListClusters(ctx context.Context, filterName string) (mong
 }
 
 func (c *PsqlClient) CreateCluster(ctx context.Context, cluster psql.CreateClusterRequest) (psql.ClusterResponse, *psql.APIResponse, error) {
-	clusterResponse, apiResponse, err := c.ClustersApi.ClustersPost(ctx).CreateClusterRequest(cluster).Execute()
+	clusterResponse, apiResponse, err := c.sdkClient.ClustersApi.ClustersPost(ctx).CreateClusterRequest(cluster).Execute()
 	if apiResponse != nil {
 		return clusterResponse, apiResponse, err
 	}
@@ -78,7 +62,15 @@ func (c *PsqlClient) CreateCluster(ctx context.Context, cluster psql.CreateClust
 }
 
 func (c *MongoClient) CreateCluster(ctx context.Context, cluster mongo.CreateClusterRequest) (mongo.ClusterResponse, *mongo.APIResponse, error) {
-	clusterResponse, apiResponse, err := c.ClustersApi.ClustersPost(ctx).CreateClusterRequest(cluster).Execute()
+	clusterResponse, apiResponse, err := c.sdkClient.ClustersApi.ClustersPost(ctx).CreateClusterRequest(cluster).Execute()
+	if apiResponse != nil {
+		return clusterResponse, apiResponse, err
+	}
+	return clusterResponse, nil, err
+}
+
+func (c *MongoClient) UpdateCluster(ctx context.Context, clusterId string, cluster mongo.PatchClusterRequest) (mongo.ClusterResponse, *mongo.APIResponse, error) {
+	clusterResponse, apiResponse, err := c.sdkClient.ClustersApi.ClustersPatch(ctx, clusterId).PatchClusterRequest(cluster).Execute()
 	if apiResponse != nil {
 		return clusterResponse, apiResponse, err
 	}
@@ -86,7 +78,7 @@ func (c *MongoClient) CreateCluster(ctx context.Context, cluster mongo.CreateClu
 }
 
 func (c *PsqlClient) UpdateCluster(ctx context.Context, clusterId string, cluster psql.PatchClusterRequest) (psql.ClusterResponse, *psql.APIResponse, error) {
-	clusterResponse, apiResponse, err := c.ClustersApi.ClustersPatch(ctx, clusterId).PatchClusterRequest(cluster).Execute()
+	clusterResponse, apiResponse, err := c.sdkClient.ClustersApi.ClustersPatch(ctx, clusterId).PatchClusterRequest(cluster).Execute()
 	if apiResponse != nil {
 		return clusterResponse, apiResponse, err
 	}
@@ -94,7 +86,7 @@ func (c *PsqlClient) UpdateCluster(ctx context.Context, clusterId string, cluste
 }
 
 func (c *PsqlClient) DeleteCluster(ctx context.Context, clusterId string) (psql.ClusterResponse, *psql.APIResponse, error) {
-	clusterResponse, apiResponse, err := c.ClustersApi.ClustersDelete(ctx, clusterId).Execute()
+	clusterResponse, apiResponse, err := c.sdkClient.ClustersApi.ClustersDelete(ctx, clusterId).Execute()
 	if apiResponse != nil {
 		return clusterResponse, apiResponse, err
 	}
@@ -102,7 +94,8 @@ func (c *PsqlClient) DeleteCluster(ctx context.Context, clusterId string) (psql.
 }
 
 func (c *MongoClient) DeleteCluster(ctx context.Context, clusterId string) (mongo.ClusterResponse, *mongo.APIResponse, error) {
-	clusterResponse, apiResponse, err := c.ClustersApi.ClustersDelete(ctx, clusterId).Execute()
+	clusterResponse, apiResponse, err := c.sdkClient.ClustersApi.ClustersDelete(ctx, clusterId).Execute()
+	apiResponse.LogInfo()
 	if apiResponse != nil {
 		return clusterResponse, apiResponse, err
 	}
@@ -188,7 +181,7 @@ func GetDbaasPgSqlClusterDataCreate(d *schema.ResourceData) (*psql.CreateCluster
 	return &dbaasCluster, nil
 }
 
-func GetDbaasMongoClusterDataCreate(d *schema.ResourceData) *mongo.CreateClusterRequest {
+func SetMongoClusterCreateProperties(d *schema.ResourceData) *mongo.CreateClusterRequest {
 
 	dbaasCluster := mongo.CreateClusterRequest{
 		Properties: &mongo.CreateClusterProperties{},
@@ -227,6 +220,43 @@ func GetDbaasMongoClusterDataCreate(d *schema.ResourceData) *mongo.CreateCluster
 	}
 
 	return &dbaasCluster
+}
+
+func SetMongoClusterPatchProperties(d *schema.ResourceData) *mongo.PatchClusterRequest {
+
+	patchRequest := mongo.PatchClusterRequest{
+		Properties: mongo.NewPatchClusterProperties(),
+	}
+
+	if d.HasChange("display_name") {
+		_, name := d.GetChange("display_name")
+		nameStr := name.(string)
+		patchRequest.Properties.DisplayName = &nameStr
+	}
+
+	if d.HasChange("instances") {
+		_, instances := d.GetChange("instances")
+		instancesInt := int32(instances.(int))
+		patchRequest.Properties.Instances = &instancesInt
+	}
+
+	if d.HasChange("template_id") {
+		_, template := d.GetChange("template_id")
+		templateStr := template.(string)
+		patchRequest.Properties.TemplateID = &templateStr
+	}
+	if d.HasChange("connections") {
+		patchRequest.Properties.Connections = GetDbaasMongoClusterConnectionsData(d)
+	}
+	if d.HasChange("maintenance_window") {
+		_, mWin := d.GetChange("maintenance_window")
+		if mWin != nil {
+			mWinVal := GetDbaasMongoClusterMaintenanceWindowData(d)
+			patchRequest.Properties.MaintenanceWindow = mWinVal
+		}
+	}
+
+	return &patchRequest
 }
 
 func GetDbaasPgSqlClusterDataUpdate(d *schema.ResourceData) (*psql.PatchClusterRequest, diag.Diagnostics) {
@@ -406,7 +436,7 @@ func GetDbaasClusterFromBackupData(d *schema.ResourceData) (*psql.CreateRestoreR
 		layout := "2006-01-02T15:04:05Z"
 		convertedTime, err := time.Parse(layout, targetTime)
 		if err != nil {
-			return nil, fmt.Errorf("an error occured while converting recovery_target_time to time.Time: %s", err)
+			return nil, fmt.Errorf("an error occured while converting recovery_target_time to time.Time: %w", err)
 
 		}
 		ionosTime.Time = convertedTime
@@ -473,19 +503,19 @@ func SetDbaasPgSqlClusterData(d *schema.ResourceData, cluster psql.ClusterRespon
 
 	if cluster.Properties.Location != nil {
 		if err := d.Set("location", *cluster.Properties.Location); err != nil {
-			return fmt.Errorf("error while setting location property for psql cluster %s: %s", d.Id(), err)
+			return fmt.Errorf("error while setting location property for psql cluster %s: %w", d.Id(), err)
 		}
 	}
 
 	if cluster.Properties.BackupLocation != nil {
 		if err := d.Set("backup_location", *cluster.Properties.BackupLocation); err != nil {
-			return fmt.Errorf("error while setting backup_location property for psql cluster %s: %s", d.Id(), err)
+			return fmt.Errorf("error while setting backup_location property for psql cluster %s: %w", d.Id(), err)
 		}
 	}
 
 	if cluster.Properties.DisplayName != nil {
 		if err := d.Set("display_name", *cluster.Properties.DisplayName); err != nil {
-			return fmt.Errorf("error while setting display_name property for psql cluster %s: %s", d.Id(), err)
+			return fmt.Errorf("error while setting display_name property for psql cluster %s: %w", d.Id(), err)
 		}
 	}
 
@@ -500,7 +530,7 @@ func SetDbaasPgSqlClusterData(d *schema.ResourceData, cluster psql.ClusterRespon
 
 	if cluster.Properties.SynchronizationMode != nil {
 		if err := d.Set("synchronization_mode", *cluster.Properties.SynchronizationMode); err != nil {
-			return fmt.Errorf("error while setting SynchronizationMode property for psql cluster %s: %s", d.Id(), err)
+			return fmt.Errorf("error while setting SynchronizationMode property for psql cluster %s: %w", d.Id(), err)
 		}
 	}
 
@@ -544,12 +574,12 @@ func SetDbaasMongoDBClusterData(d *schema.ResourceData, cluster mongo.ClusterRes
 
 		if cluster.Properties.Location != nil {
 			if err := d.Set("location", *cluster.Properties.Location); err != nil {
-				return fmt.Errorf("error while setting location property for psql cluster %s: %s", d.Id(), err)
+				return fmt.Errorf("error while setting location property for psql cluster %s: %w", d.Id(), err)
 			}
 		}
 		if cluster.Properties.DisplayName != nil {
 			if err := d.Set("display_name", *cluster.Properties.DisplayName); err != nil {
-				return fmt.Errorf("error while setting display_name property for psql cluster %s: %s", d.Id(), err)
+				return fmt.Errorf("error while setting display_name property for psql cluster %s: %w", d.Id(), err)
 			}
 		}
 
@@ -611,3 +641,6 @@ func SetMongoMaintenanceWindowProperties(maintenanceWindow mongo.MaintenanceWind
 
 	return maintenance
 }
+
+// todo: remove once mongo removes this field
+const DefaultMongoDatabase = "admin"

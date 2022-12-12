@@ -89,7 +89,7 @@ func testAccCheckLanDestroyCheck(s *terraform.State) error {
 
 		if err != nil {
 			if !httpNotFound(apiResponse) {
-				return fmt.Errorf("an error occurred while looking for lan %s: %s", rs.Primary.ID, err)
+				return fmt.Errorf("an error occurred while looking for lan %s: %w", rs.Primary.ID, err)
 			}
 		} else {
 			return fmt.Errorf("LAN still exists %s", rs.Primary.ID)

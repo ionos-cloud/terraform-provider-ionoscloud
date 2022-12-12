@@ -192,7 +192,7 @@ func testAccCheckApplicationLoadBalancerForwardingRuleDestroyCheck(s *terraform.
 				return fmt.Errorf("an error occured and checking deletion of application loadbalancer forwarding rule %s %s", rs.Primary.ID, responseBody(apiResponse))
 			}
 		} else {
-			return fmt.Errorf("application loadbalancer still exists %s %s", rs.Primary.ID, err)
+			return fmt.Errorf("application loadbalancer still exists %s %w", rs.Primary.ID, err)
 		}
 	}
 

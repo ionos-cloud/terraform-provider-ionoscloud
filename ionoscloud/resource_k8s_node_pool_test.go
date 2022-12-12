@@ -30,10 +30,10 @@ func TestAccK8sNodePoolBasic(t *testing.T) {
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckK8sNodePoolExists(ResourceNameK8sNodePool, &k8sNodepool),
 					resource.TestCheckResourceAttr(ResourceNameK8sNodePool, "name", K8sNodePoolTestResource),
-					resource.TestCheckResourceAttr(ResourceNameK8sNodePool, "k8s_version", "1.20.10"),
+					resource.TestCheckResourceAttr(ResourceNameK8sNodePool, "k8s_version", K8sVersion),
 					resource.TestCheckResourceAttr(ResourceNameK8sNodePool, "maintenance_window.0.day_of_the_week", "Monday"),
 					resource.TestCheckResourceAttr(ResourceNameK8sNodePool, "maintenance_window.0.time", "09:00:00Z"),
-					resource.TestCheckNoResourceAttr(ResourceNameK8sNodePool, "auto_scaling"),
+					resource.TestCheckResourceAttr(ResourceNameK8sNodePool, "auto_scaling.#", "0"),
 					resource.TestCheckResourceAttr(ResourceNameK8sNodePool, "cpu_family", "INTEL_XEON"),
 					resource.TestCheckResourceAttr(ResourceNameK8sNodePool, "availability_zone", "AUTO"),
 					resource.TestCheckResourceAttr(ResourceNameK8sNodePool, "storage_type", "SSD"),
@@ -102,7 +102,7 @@ func TestAccK8sNodePoolBasic(t *testing.T) {
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckK8sNodePoolExists(ResourceNameK8sNodePool, &k8sNodepool),
 					resource.TestCheckResourceAttr(ResourceNameK8sNodePool, "name", K8sNodePoolTestResource),
-					resource.TestCheckResourceAttr(ResourceNameK8sNodePool, "k8s_version", "1.20.10"),
+					resource.TestCheckResourceAttr(ResourceNameK8sNodePool, "k8s_version", K8sVersion),
 					resource.TestCheckResourceAttr(ResourceNameK8sNodePool, "maintenance_window.0.day_of_the_week", "Tuesday"),
 					resource.TestCheckResourceAttr(ResourceNameK8sNodePool, "maintenance_window.0.time", "10:00:00Z"),
 					resource.TestCheckResourceAttr(ResourceNameK8sNodePool, "auto_scaling.0.min_node_count", "1"),
@@ -139,10 +139,10 @@ func TestAccK8sNodePoolBasic(t *testing.T) {
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckK8sNodePoolExists(ResourceNameK8sNodePool, &k8sNodepool),
 					resource.TestCheckResourceAttr(ResourceNameK8sNodePool, "name", K8sNodePoolTestResource),
-					resource.TestCheckResourceAttr(ResourceNameK8sNodePool, "k8s_version", "1.21.9"),
+					resource.TestCheckResourceAttr(ResourceNameK8sNodePool, "k8s_version", UpgradedK8sVersion),
 					resource.TestCheckResourceAttr(ResourceNameK8sNodePool, "maintenance_window.0.day_of_the_week", "Tuesday"),
 					resource.TestCheckResourceAttr(ResourceNameK8sNodePool, "maintenance_window.0.time", "10:00:00Z"),
-					resource.TestCheckNoResourceAttr(ResourceNameK8sNodePool, "auto_scaling"),
+					resource.TestCheckResourceAttr(ResourceNameK8sNodePool, "auto_scaling.#", "0"),
 					resource.TestCheckResourceAttr(ResourceNameK8sNodePool, "cpu_family", "INTEL_XEON"),
 					resource.TestCheckResourceAttr(ResourceNameK8sNodePool, "availability_zone", "AUTO"),
 					resource.TestCheckResourceAttr(ResourceNameK8sNodePool, "storage_type", "SSD"),
@@ -151,7 +151,7 @@ func TestAccK8sNodePoolBasic(t *testing.T) {
 					resource.TestCheckResourceAttr(ResourceNameK8sNodePool, "ram_size", "2048"),
 					resource.TestCheckResourceAttr(ResourceNameK8sNodePool, "storage_size", "40"),
 					//resource.TestCheckNoResourceAttr(ResourceNameK8sNodePool, "public_ips"),
-					resource.TestCheckNoResourceAttr(ResourceNameK8sNodePool, "lans"),
+					resource.TestCheckResourceAttr(ResourceNameK8sNodePool, "lans.#", "0"),
 					//resource.TestCheckNoResourceAttr(ResourceNameK8sNodePool, "labels"),
 					//resource.TestCheckNoResourceAttr(ResourceNameK8sNodePool, "annotations")
 				),
@@ -175,7 +175,7 @@ func TestAccK8sNodePoolBasic(t *testing.T) {
 //				Check: resource.ComposeTestCheckFunc(
 //					testAccCheckK8sNodePoolExists(ResourceNameK8sNodePool, &k8sNodepool),
 //					resource.TestCheckResourceAttr(ResourceNameK8sNodePool, "name", K8sNodePoolTestResource),
-//					resource.TestCheckResourceAttr(ResourceNameK8sNodePool, "k8s_version", "1.20.10"),
+//					resource.TestCheckResourceAttr(ResourceNameK8sNodePool, "k8s_version", K8sVersion),
 //					resource.TestCheckResourceAttr(ResourceNameK8sNodePool, "maintenance_window.0.day_of_the_week", "Monday"),
 //					resource.TestCheckResourceAttr(ResourceNameK8sNodePool, "maintenance_window.0.time", "09:00:00Z"),
 //					resource.TestCheckResourceAttr(ResourceNameK8sNodePool, "auto_scaling.0.min_node_count", "1"),
@@ -217,7 +217,7 @@ func TestAccK8sNodePoolNoOptionalAndNodesDataSource(t *testing.T) {
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckK8sNodePoolExists(ResourceNameK8sNodePool, &k8sNodepool),
 					resource.TestCheckResourceAttr(ResourceNameK8sNodePool, "name", K8sNodePoolTestResource),
-					resource.TestCheckResourceAttr(ResourceNameK8sNodePool, "k8s_version", "1.23.6"),
+					resource.TestCheckResourceAttr(ResourceNameK8sNodePool, "k8s_version", K8sVersion),
 					resource.TestCheckResourceAttr(ResourceNameK8sNodePool, "cpu_family", "INTEL_XEON"),
 					resource.TestCheckResourceAttr(ResourceNameK8sNodePool, "availability_zone", "AUTO"),
 					resource.TestCheckResourceAttr(ResourceNameK8sNodePool, "storage_type", "SSD"),
@@ -232,7 +232,7 @@ func TestAccK8sNodePoolNoOptionalAndNodesDataSource(t *testing.T) {
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckK8sNodePoolExists(ResourceNameK8sNodePool, &k8sNodepool),
 					resource.TestCheckResourceAttr(ResourceNameK8sNodePool, "name", K8sNodePoolTestResource),
-					resource.TestCheckResourceAttr(ResourceNameK8sNodePool, "k8s_version", "1.23.6"),
+					resource.TestCheckResourceAttr(ResourceNameK8sNodePool, "k8s_version", K8sVersion),
 					resource.TestCheckResourceAttr(ResourceNameK8sNodePool, "cpu_family", "INTEL_XEON"),
 					resource.TestCheckResourceAttr(ResourceNameK8sNodePool, "availability_zone", "AUTO"),
 					resource.TestCheckResourceAttr(ResourceNameK8sNodePool, "storage_type", "SSD"),
@@ -265,7 +265,7 @@ func testAccCheckK8sNodePoolDestroyCheck(s *terraform.State) error {
 
 		if err != nil {
 			if !httpNotFound(apiResponse) {
-				return fmt.Errorf("an error occurred while checking the destruction of k8s node pool %s: %s", rs.Primary.ID, err)
+				return fmt.Errorf("an error occurred while checking the destruction of k8s node pool %s: %w", rs.Primary.ID, err)
 			}
 		} else {
 			return fmt.Errorf("k8s node pool %s still exists", rs.Primary.ID)
@@ -331,7 +331,7 @@ resource ` + IpBlockResource + ` "terraform_acctest" {
 }
 resource ` + K8sClusterResource + ` "terraform_acctest" {
   name        = "terraform_acctest"
-  k8s_version = "1.20.10"
+  k8s_version = "` + K8sVersion + `"
   maintenance_window {
     day_of_the_week = "Monday"
     time            = "09:00:00Z"
@@ -394,7 +394,7 @@ resource ` + IpBlockResource + ` "terraform_acctest" {
 }
 resource ` + K8sClusterResource + ` "terraform_acctest" {
 	name        = "terraform_acctest"
-	k8s_version = "1.20.14"
+	k8s_version = "` + K8sVersion + `"
 	maintenance_window {
 		day_of_the_week = "Monday"
 		time            = "09:00:00Z"
@@ -476,7 +476,7 @@ resource ` + IpBlockResource + ` "terraform_acctest" {
 }
 resource ` + K8sClusterResource + ` "terraform_acctest" {
 	name        = "terraform_acctest"
-    k8s_version = "1.21.9"
+    k8s_version = "` + UpgradedK8sVersion + `"
 	maintenance_window {
 		day_of_the_week = "Monday"
 		time            = "09:00:00Z"
@@ -528,7 +528,7 @@ resource ` + IpBlockResource + ` "terraform_acctest" {
 }
 resource ` + K8sClusterResource + ` "terraform_acctest" {
   name        = "terraform_acctest"
-  k8s_version = "1.20.10"
+  k8s_version = ` + K8sVersion + `
   maintenance_window {
     day_of_the_week = "Monday"
     time            = "09:00:00Z"
@@ -605,7 +605,7 @@ resource ` + DatacenterResource + ` "terraform_acctest" {
 
 resource ` + K8sClusterResource + ` "terraform_acctest" {
   name        = "terraform_acctest"
-  k8s_version = "1.23.6"
+  k8s_version = "` + K8sVersion + `"
   maintenance_window {
     day_of_the_week = "Monday"
     time            = "09:00:00Z"
@@ -638,7 +638,7 @@ resource ` + DatacenterResource + ` "terraform_acctest" {
 
 resource ` + K8sClusterResource + ` "terraform_acctest" {
   name        = "terraform_acctest"
-  k8s_version = "1.23.6"
+  k8s_version = "` + K8sVersion + `"
   maintenance_window {
     day_of_the_week = "Monday"
     time            = "09:00:00Z"

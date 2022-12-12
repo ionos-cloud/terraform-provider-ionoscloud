@@ -4,9 +4,11 @@ import (
 	"context"
 	"fmt"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
-	dbaasService "github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/dbaas"
+	mongo "github.com/ionos-cloud/sdk-go-dbaas-mongo"
+	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/dbaas"
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils"
 	"log"
 	"strings"
@@ -17,7 +19,7 @@ func resourceDbaasMongoDBCluster() *schema.Resource {
 	return &schema.Resource{
 		CreateContext: resourceDbaasMongoClusterCreate,
 		ReadContext:   resourceDbaasMongoClusterRead,
-		//no update operation, forcenew on all fields
+		UpdateContext: resourceDbaasMongoClusterUpdate,
 		DeleteContext: resourceDbaasMongoClusterDelete,
 		Importer: &schema.ResourceImporter{
 			StateContext: resourceDbaasMongoClusterImport,
@@ -29,7 +31,6 @@ func resourceDbaasMongoDBCluster() *schema.Resource {
 				Description: "a weekly 4 hour-long window, during which maintenance might occur",
 				Optional:    true,
 				Computed:    true,
-				ForceNew:    true,
 				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{
 						"time": {
@@ -56,14 +57,12 @@ func resourceDbaasMongoDBCluster() *schema.Resource {
 				Type:             schema.TypeInt,
 				Description:      "The total number of instances in the cluster (one master and n-1 standbys)",
 				Required:         true,
-				ForceNew:         true,
-				ValidateDiagFunc: validation.ToDiagFunc(validation.IntBetween(1, 5)),
+				ValidateDiagFunc: validation.ToDiagFunc(validation.IntBetween(1, 7)),
 			},
 			"display_name": {
 				Type:        schema.TypeString,
 				Description: "The name of your cluster.",
 				Required:    true,
-				ForceNew:    true,
 			},
 			"location": {
 				Type: schema.TypeString,
@@ -76,9 +75,8 @@ func resourceDbaasMongoDBCluster() *schema.Resource {
 			"connections": {
 				Type:        schema.TypeList,
 				MaxItems:    1,
-				Description: "Details about the network connection for your cluster.",
 				Required:    true,
-				ForceNew:    true,
+				Description: "Details about the network connection for your cluster.",
 				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{
 						"datacenter_id": {
@@ -105,17 +103,16 @@ func resourceDbaasMongoDBCluster() *schema.Resource {
 				},
 			},
 			"template_id": {
-				Type:             schema.TypeString,
-				Description:      "The unique ID of the template, which specifies the number of cores, storage size, and memory.",
+				Type: schema.TypeString,
+				Description: "The unique ID of the template, which specifies the number of cores, storage size, and memory. " +
+					"You cannot downgrade to a smaller template or minor edition (e.g. from business to playground).",
 				Required:         true,
-				ForceNew:         true,
 				ValidateDiagFunc: validation.ToDiagFunc(validation.IsUUID),
 			},
 			"connection_string": {
 				Type:        schema.TypeString,
 				Description: "The connection string for your cluster.",
 				Computed:    true,
-				ForceNew:    true,
 			},
 			"credentials": {
 				Type:        schema.TypeList,
@@ -148,64 +145,95 @@ func resourceDbaasMongoDBCluster() *schema.Resource {
 func resourceDbaasMongoClusterCreate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	client := meta.(SdkBundle).MongoClient
 
-	cluster := dbaasService.GetDbaasMongoClusterDataCreate(d)
+	cluster := dbaas.SetMongoClusterCreateProperties(d)
 
-	createdCluster, apiResponse, err := client.ClustersApi.ClustersPost(ctx).CreateClusterRequest(*cluster).Execute()
+	createdCluster, apiResponse, err := client.CreateCluster(ctx, *cluster)
 	if err != nil {
 		if apiResponse.HttpNotFound() {
 			d.SetId("")
 			return nil
 		}
-		diags := diag.FromErr(fmt.Errorf("error while fetching dbaas mongo cluster %s: %w", d.Id(), err))
+		diags := diag.FromErr(fmt.Errorf("create error while fetching dbaas mongo cluster %s: %w", d.Id(), err))
 		return diags
 	}
 	d.SetId(*createdCluster.Id)
 
-	for {
-		log.Printf("[INFO] Waiting for mongo cluster %s to be ready...", d.Id())
-
-		clusterReady, rsErr := dbaasMongoClusterReady(ctx, client, d)
-		if rsErr != nil {
-			diags := diag.FromErr(fmt.Errorf("error while checking readiness status of dbaas mongo cluster %s: %w", d.Id(), rsErr))
-			return diags
-		}
-
-		if clusterReady {
-			log.Printf("[INFO] dbaas mongo cluster ready: %s", d.Id())
-			break
-		}
-
-		select {
-		case <-time.After(utils.SleepInterval):
-			log.Printf("[INFO] trying again ...")
-		case <-ctx.Done():
-			log.Printf("[INFO] create timed out")
-			diags := diag.FromErr(fmt.Errorf("dbaas mongo cluster creation timed out! WARNING: your dbaas cluster (%s) will still probably be created after some time but the terraform state wont reflect that; check your Ionos Cloud account for updates", d.Id()))
-			return diags
-		}
-
+	_, err = waitForClusterToBeReady(ctx, client, d.Id())
+	if err != nil {
+		return diag.FromErr(fmt.Errorf("updating %w ", err))
 	}
 
 	return resourceDbaasMongoClusterRead(ctx, d, meta)
 }
 
+func resourceDbaasMongoClusterUpdate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+	client := meta.(SdkBundle).MongoClient
+	clusterId := d.Id()
+	patchRequest := dbaas.SetMongoClusterPatchProperties(d)
+
+	_, apiResponse, err := client.UpdateCluster(ctx, clusterId, *patchRequest)
+	if err != nil {
+		if apiResponse.HttpNotFound() {
+			d.SetId("")
+			return nil
+		}
+		diags := diag.FromErr(fmt.Errorf("update error while fetching dbaas mongo cluster %s: %w", d.Id(), err))
+		return diags
+	}
+
+	_, err = waitForClusterToBeReady(ctx, client, d.Id())
+	if err != nil {
+		return diag.FromErr(fmt.Errorf("creating %w", err))
+	}
+
+	return resourceDbaasMongoClusterRead(ctx, d, meta)
+}
+
+// waitForClusterToBeReady - keeps retrying until cluster is in 'available' state, or context deadline is reached
+func waitForClusterToBeReady(ctx context.Context, client *dbaas.MongoClient, clusterId string) (mongo.ClusterResponse, error) {
+	var clusterRequest = mongo.NewClusterResponse()
+	err := resource.RetryContext(ctx, *resourceDefaultTimeouts.Update, func() *resource.RetryError {
+		var err error
+		var apiResponse *mongo.APIResponse
+		*clusterRequest, apiResponse, err = client.GetCluster(ctx, clusterId)
+		apiResponse.LogInfo()
+		if apiResponse.HttpNotFound() {
+			log.Printf("[INFO] Could not find cluster %s retrying...", clusterId)
+			return resource.RetryableError(fmt.Errorf("could not find cluster %s, %w, retrying", clusterId, err))
+		}
+		if err != nil {
+			resource.NonRetryableError(err)
+		}
+
+		if clusterRequest != nil && clusterRequest.Metadata != nil && !strings.EqualFold(string(*clusterRequest.Metadata.State), utils.Available) {
+			log.Printf("[INFO] mongo cluster %s is still in state %s", clusterId, *clusterRequest.Metadata.State)
+			return resource.RetryableError(fmt.Errorf("clusterRequest is still in state %s", *clusterRequest.Metadata.State))
+		}
+		return nil
+	})
+	if clusterRequest == nil || clusterRequest.Properties == nil || *clusterRequest.Properties.DisplayName == "" {
+		return *clusterRequest, fmt.Errorf("could not find cluster %s", clusterId)
+	}
+	return *clusterRequest, err
+}
+
 func resourceDbaasMongoClusterRead(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	client := meta.(SdkBundle).MongoClient
 
-	cluster, apiResponse, err := client.ClustersApi.ClustersFindById(ctx, d.Id()).Execute()
+	cluster, apiResponse, err := client.GetCluster(ctx, d.Id())
 
 	if err != nil {
 		if apiResponse.HttpNotFound() {
 			d.SetId("")
 			return nil
 		}
-		diags := diag.FromErr(fmt.Errorf("error while fetching dbaas mongo cluster %s: %w", d.Id(), err))
+		diags := diag.FromErr(fmt.Errorf("read error while fetching dbaas mongo cluster %s: %w", d.Id(), err))
 		return diags
 	}
 
 	log.Printf("[INFO] Successfully retreived cluster %s: %+v", d.Id(), cluster)
 
-	if err := dbaasService.SetDbaasMongoDBClusterData(d, cluster); err != nil {
+	if err := dbaas.SetDbaasMongoDBClusterData(d, cluster); err != nil {
 		return diag.FromErr(err)
 	}
 
@@ -215,14 +243,14 @@ func resourceDbaasMongoClusterRead(ctx context.Context, d *schema.ResourceData, 
 func resourceDbaasMongoClusterDelete(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	client := meta.(SdkBundle).MongoClient
 
-	_, apiResponse, err := client.ClustersApi.ClustersDelete(ctx, d.Id()).Execute()
+	_, apiResponse, err := client.DeleteCluster(ctx, d.Id())
 
 	if err != nil {
 		if apiResponse.HttpNotFound() {
 			d.SetId("")
 			return nil
 		}
-		diags := diag.FromErr(fmt.Errorf("error while deleting mongo dbaas cluster %s: %s", d.Id(), err))
+		diags := diag.FromErr(fmt.Errorf("error while deleting mongo dbaas cluster %s: %w", d.Id(), err))
 		return diags
 	}
 
@@ -245,7 +273,8 @@ func resourceDbaasMongoClusterDelete(ctx context.Context, d *schema.ResourceData
 		case <-time.After(utils.SleepInterval):
 			log.Printf("[INFO] trying again ...")
 		case <-ctx.Done():
-			diags := diag.FromErr(fmt.Errorf("dbaas mongo cluster deletion timed out! WARNING: your mongo cluster (%s) will still probably be deleted after some time but the terraform state won't reflect that; check your Ionos Cloud account for updates", d.Id()))
+			diags := diag.FromErr(fmt.Errorf("dbaas mongo cluster deletion timed out! WARNING: your mongo cluster (%s) "+
+				"will still probably be deleted after some time but the terraform state won't reflect that; check your Ionos Cloud account for updates", d.Id()))
 			return diags
 		}
 	}
@@ -261,7 +290,7 @@ func resourceDbaasMongoClusterImport(ctx context.Context, d *schema.ResourceData
 
 	clusterId := d.Id()
 
-	dbaasCluster, apiResponse, err := client.ClustersApi.ClustersFindById(ctx, clusterId).Execute()
+	dbaasCluster, apiResponse, err := client.GetCluster(ctx, clusterId)
 
 	if err != nil {
 		if apiResponse.HttpNotFound() {
@@ -273,31 +302,22 @@ func resourceDbaasMongoClusterImport(ctx context.Context, d *schema.ResourceData
 
 	log.Printf("[INFO] dbaas cluster found: %+v", dbaasCluster)
 
-	if err := dbaasService.SetDbaasMongoDBClusterData(d, dbaasCluster); err != nil {
+	if err := dbaas.SetDbaasMongoDBClusterData(d, dbaasCluster); err != nil {
 		return nil, err
 	}
 
 	return []*schema.ResourceData{d}, nil
 }
 
-func dbaasMongoClusterReady(ctx context.Context, client *dbaasService.MongoClient, d *schema.ResourceData) (bool, error) {
-	subjectCluster, _, err := client.ClustersApi.ClustersFindById(ctx, d.Id()).Execute()
+func dbaasMongoClusterDeleted(ctx context.Context, client *dbaas.MongoClient, d *schema.ResourceData) (bool, error) {
 
-	if err != nil {
-		return true, fmt.Errorf("error checking dbaas mongo cluster status: %w", err)
-	}
-	return strings.EqualFold(string(*subjectCluster.Metadata.State), utils.Available), nil
-}
-
-func dbaasMongoClusterDeleted(ctx context.Context, client *dbaasService.MongoClient, d *schema.ResourceData) (bool, error) {
-
-	_, apiResponse, err := client.ClustersApi.ClustersFindById(ctx, d.Id()).Execute()
+	_, apiResponse, err := client.GetCluster(ctx, d.Id())
 
 	if err != nil {
 		if apiResponse.HttpNotFound() {
 			return true, nil
 		}
-		return true, fmt.Errorf("error checking dbaas mongo cluster deletion status: %s", err)
+		return true, fmt.Errorf("error checking dbaas mongo cluster deletion status: %w", err)
 	}
 	return false, nil
 }

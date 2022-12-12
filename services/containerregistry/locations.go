@@ -1,4 +1,4 @@
-package container_registry
+package containerregistry
 
 import (
 	"context"
@@ -9,12 +9,8 @@ import (
 	cr "github.com/ionos-cloud/sdk-go-container-registry"
 )
 
-type LocationsService interface {
-	GetAllLocations(ctx context.Context) (cr.LocationsResponse, *cr.APIResponse, error)
-}
-
 func (c *Client) GetAllLocations(ctx context.Context) (cr.LocationsResponse, *cr.APIResponse, error) {
-	versions, apiResponse, err := c.LocationsApi.LocationsGet(ctx).Execute()
+	versions, apiResponse, err := c.sdkClient.LocationsApi.LocationsGet(ctx).Execute()
 	apiResponse.LogInfo()
 	return versions, apiResponse, err
 }

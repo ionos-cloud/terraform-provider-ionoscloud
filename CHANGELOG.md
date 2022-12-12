@@ -1,3 +1,11 @@
+## 6.3.4(upcoming release)
+### Feature:
+ - Add update for mongo database resources
+ - Add labels for servers
+
+### Refactor:
+- Refactor services, add generic `WaitForResourceToBeReady` and `WaitForResourceToBeDeleted` methods
+
 ## 6.3.3
 ### Feature
 - New Product: **ContainerRegistry**:
@@ -12,7 +20,8 @@
 ⚠️ **Note:** Container Registry is currently in the Early Access (EA) phase. We recommend keeping usage and testing to non-production critical applications.
 Please contact your sales representative or support for more information.
 ### Fixes
-- Fixes #326, removing a s3_buckets block from an `ionoscloud_k8s_cluster` resource will now trigger a change in terraform plan.
+- Fixes #326, now removing a s3_buckets block from an ionoscloud_k8s_cluster resource triggers a change in the terraform plan.
+- Fixes user creation bug, now user creation works properly when `group_ids` is specified in the plan.
 
 ## 6.3.2
 ### Feature
@@ -94,7 +103,7 @@ is `not found`(404)
 - update sdk-go-dbaas-postgres dependency to v1.0.3
 
 ### Documentation
-- updated multiple nics under the same IP Failover example, with a [one step example](examples/ip_failover/README.md)
+- updated multiple nics under the same IP Failover example, with a [one_step example](examples/ip_failover/README.md)
 
 ## 6.2.3
 

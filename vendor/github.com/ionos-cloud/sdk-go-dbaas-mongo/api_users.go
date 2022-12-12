@@ -451,6 +451,161 @@ func (a *UsersApiService) ClustersUsersGetExecute(r ApiClustersUsersGetRequest) 
 	return localVarReturnValue, localVarAPIResponse, nil
 }
 
+type ApiClustersUsersPatchRequest struct {
+	ctx              _context.Context
+	ApiService       *UsersApiService
+	clusterId        string
+	database         string
+	username         string
+	patchUserRequest *PatchUserRequest
+}
+
+func (r ApiClustersUsersPatchRequest) PatchUserRequest(patchUserRequest PatchUserRequest) ApiClustersUsersPatchRequest {
+	r.patchUserRequest = &patchUserRequest
+	return r
+}
+
+func (r ApiClustersUsersPatchRequest) Execute() (User, *APIResponse, error) {
+	return r.ApiService.ClustersUsersPatchExecute(r)
+}
+
+/*
+ * ClustersUsersPatch Patch a MongoDB User by ID
+ * Patches a MongoDB user specified by its ID.
+ * @param ctx _context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+ * @param clusterId The unique ID of the cluster.
+ * @param database The authentication database.
+ * @param username The authentication username.
+ * @return ApiClustersUsersPatchRequest
+ */
+func (a *UsersApiService) ClustersUsersPatch(ctx _context.Context, clusterId string, database string, username string) ApiClustersUsersPatchRequest {
+	return ApiClustersUsersPatchRequest{
+		ApiService: a,
+		ctx:        ctx,
+		clusterId:  clusterId,
+		database:   database,
+		username:   username,
+	}
+}
+
+/*
+ * Execute executes the request
+ * @return User
+ */
+func (a *UsersApiService) ClustersUsersPatchExecute(r ApiClustersUsersPatchRequest) (User, *APIResponse, error) {
+	var (
+		localVarHTTPMethod   = _nethttp.MethodPatch
+		localVarPostBody     interface{}
+		localVarFormFileName string
+		localVarFileName     string
+		localVarFileBytes    []byte
+		localVarReturnValue  User
+	)
+
+	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "UsersApiService.ClustersUsersPatch")
+	if err != nil {
+		return localVarReturnValue, nil, GenericOpenAPIError{error: err.Error()}
+	}
+
+	localVarPath := localBasePath + "/clusters/{clusterId}/users/{database}/{username}"
+	localVarPath = strings.Replace(localVarPath, "{"+"clusterId"+"}", _neturl.PathEscape(parameterToString(r.clusterId, "")), -1)
+	localVarPath = strings.Replace(localVarPath, "{"+"database"+"}", _neturl.PathEscape(parameterToString(r.database, "")), -1)
+	localVarPath = strings.Replace(localVarPath, "{"+"username"+"}", _neturl.PathEscape(parameterToString(r.username, "")), -1)
+
+	localVarHeaderParams := make(map[string]string)
+	localVarQueryParams := _neturl.Values{}
+	localVarFormParams := _neturl.Values{}
+	if r.patchUserRequest == nil {
+		return localVarReturnValue, nil, reportError("patchUserRequest is required and must be specified")
+	}
+
+	// to determine the Content-Type header
+	localVarHTTPContentTypes := []string{"application/json"}
+
+	// set Content-Type header
+	localVarHTTPContentType := selectHeaderContentType(localVarHTTPContentTypes)
+	if localVarHTTPContentType != "" {
+		localVarHeaderParams["Content-Type"] = localVarHTTPContentType
+	}
+
+	// to determine the Accept header
+	localVarHTTPHeaderAccepts := []string{"application/json"}
+
+	// set Accept header
+	localVarHTTPHeaderAccept := selectHeaderAccept(localVarHTTPHeaderAccepts)
+	if localVarHTTPHeaderAccept != "" {
+		localVarHeaderParams["Accept"] = localVarHTTPHeaderAccept
+	}
+	// body params
+	localVarPostBody = r.patchUserRequest
+	if r.ctx != nil {
+		// API Key Authentication
+		if auth, ok := r.ctx.Value(ContextAPIKeys).(map[string]APIKey); ok {
+			if apiKey, ok := auth["tokenAuth"]; ok {
+				var key string
+				if apiKey.Prefix != "" {
+					key = apiKey.Prefix + " " + apiKey.Key
+				} else {
+					key = apiKey.Key
+				}
+				localVarHeaderParams["Authorization"] = key
+			}
+		}
+	}
+	req, err := a.client.prepareRequest(r.ctx, localVarPath, localVarHTTPMethod, localVarPostBody, localVarHeaderParams, localVarQueryParams, localVarFormParams, localVarFormFileName, localVarFileName, localVarFileBytes)
+	if err != nil {
+		return localVarReturnValue, nil, err
+	}
+
+	localVarHTTPResponse, err := a.client.callAPI(req)
+
+	localVarAPIResponse := &APIResponse{
+		Response:   localVarHTTPResponse,
+		Method:     localVarHTTPMethod,
+		RequestURL: localVarPath,
+		Operation:  "ClustersUsersPatch",
+	}
+
+	if err != nil || localVarHTTPResponse == nil {
+		return localVarReturnValue, localVarAPIResponse, err
+	}
+
+	localVarBody, err := _ioutil.ReadAll(localVarHTTPResponse.Body)
+	localVarHTTPResponse.Body.Close()
+	localVarAPIResponse.Payload = localVarBody
+	if err != nil {
+		return localVarReturnValue, localVarAPIResponse, err
+	}
+
+	if localVarHTTPResponse.StatusCode >= 300 {
+		newErr := GenericOpenAPIError{
+			statusCode: localVarHTTPResponse.StatusCode,
+			body:       localVarBody,
+			error:      fmt.Sprintf("%s: %s", localVarHTTPResponse.Status, string(localVarBody)),
+		}
+		var v ErrorResponse
+		err = a.client.decode(&v, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
+		if err != nil {
+			newErr.error = err.Error()
+			return localVarReturnValue, localVarAPIResponse, newErr
+		}
+		newErr.model = v
+		return localVarReturnValue, localVarAPIResponse, newErr
+	}
+
+	err = a.client.decode(&localVarReturnValue, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
+	if err != nil {
+		newErr := GenericOpenAPIError{
+			statusCode: localVarHTTPResponse.StatusCode,
+			body:       localVarBody,
+			error:      err.Error(),
+		}
+		return localVarReturnValue, localVarAPIResponse, newErr
+	}
+
+	return localVarReturnValue, localVarAPIResponse, nil
+}
+
 type ApiClustersUsersPostRequest struct {
 	ctx        _context.Context
 	ApiService *UsersApiService

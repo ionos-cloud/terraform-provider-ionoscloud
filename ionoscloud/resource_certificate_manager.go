@@ -10,7 +10,6 @@ import (
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils"
 	"log"
 	"strings"
-	"time"
 )
 
 func resourceCertificateManager() *schema.Resource {
@@ -108,7 +107,7 @@ func resourceCertificateManagerCreate(ctx context.Context, d *schema.ResourceDat
 
 	d.SetId(*certificateDto.Id)
 
-	if err = client.WaitForCertToBeReady(ctx, d); err != nil {
+	if err = utils.WaitForResourceToBeReady(ctx, d, client.IsCertReady); err != nil {
 		return diag.FromErr(err)
 	}
 
@@ -147,7 +146,7 @@ func resourceCertificateManagerUpdate(ctx context.Context, d *schema.ResourceDat
 		return diags
 	}
 
-	if err = client.WaitForCertToBeReady(ctx, d); err != nil {
+	if err = utils.WaitForResourceToBeReady(ctx, d, client.IsCertReady); err != nil {
 		return diag.FromErr(err)
 	}
 
@@ -156,26 +155,16 @@ func resourceCertificateManagerUpdate(ctx context.Context, d *schema.ResourceDat
 
 func resourceCertificateManagerDelete(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	client := meta.(SdkBundle).CertManagerClient
-	deleted := false
-	for deleted != true {
-		_, err := client.DeleteCertificate(ctx, d.Id())
-		if err != nil {
-			diags := diag.FromErr(fmt.Errorf("an error occured while deleting the certificate %s %w", d.Id(), err))
-			return diags
-		}
 
-		deleted, err = client.IsCertDeleted(ctx, d)
-		if err != nil {
-			return diag.FromErr(err)
-		}
-		select {
-		case <-time.After(utils.SleepInterval):
-			log.Printf("[INFO] trying again ...")
-		case <-ctx.Done():
-			diags := diag.FromErr(fmt.Errorf("certificate deletion timed out! WARNING: your certificate (%s) will still probably be deleted after some time "+
-				"but the terraform state won't reflect that; check your Ionos Cloud account for updates", d.Id()))
-			return diags
-		}
+	_, err := client.DeleteCertificate(ctx, d.Id())
+	if err != nil {
+		diags := diag.FromErr(fmt.Errorf("an error occured while deleting the certificate %s %w", d.Id(), err))
+		return diags
+	}
+
+	err = utils.WaitForResourceToBeDeleted(ctx, d, client.IsCertDeleted)
+	if err != nil {
+		return diag.FromErr(fmt.Errorf("deleting %w", err))
 	}
 
 	log.Printf("[INFO] Successfully deleted certificate: %s", d.Id())

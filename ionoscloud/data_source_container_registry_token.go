@@ -7,7 +7,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	cr "github.com/ionos-cloud/sdk-go-container-registry"
-	crService "github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/container-registry"
+	crService "github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/containerregistry"
 	"log"
 	"strings"
 )
@@ -116,7 +116,7 @@ func dataSourceContainerRegistryTokenRead(ctx context.Context, d *schema.Resourc
 
 		tokens, _, err := client.ListTokens(ctx, registryId)
 		if err != nil {
-			diags := diag.FromErr(fmt.Errorf("an error occurred while fetching registry tokens: %s", err.Error()))
+			diags := diag.FromErr(fmt.Errorf("an error occurred while fetching registry tokens: %w", err))
 			return diags
 		}
 

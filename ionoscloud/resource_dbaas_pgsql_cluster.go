@@ -288,7 +288,7 @@ func resourceDbaasPgSqlClusterUpdate(ctx context.Context, d *schema.ResourceData
 	dbaasClusterResponse, _, err := client.UpdateCluster(ctx, d.Id(), *cluster)
 
 	if err != nil {
-		diags := diag.FromErr(fmt.Errorf("an error occured while updating a dbaas cluster: %s", err))
+		diags := diag.FromErr(fmt.Errorf("an error occured while updating a dbaas cluster: %w", err))
 		return diags
 	}
 
@@ -335,7 +335,7 @@ func resourceDbaasPgSqlClusterDelete(ctx context.Context, d *schema.ResourceData
 			d.SetId("")
 			return nil
 		}
-		diags := diag.FromErr(fmt.Errorf("error while deleting dbaas cluster %s: %s", d.Id(), err))
+		diags := diag.FromErr(fmt.Errorf("error while deleting dbaas cluster %s: %w", d.Id(), err))
 		return diags
 	}
 
@@ -397,7 +397,7 @@ func dbaasClusterReady(ctx context.Context, client *dbaasService.PsqlClient, d *
 	subjectCluster, _, err := client.GetCluster(ctx, d.Id())
 
 	if err != nil {
-		return true, fmt.Errorf("error checking dbaas cluster status: %s", err)
+		return true, fmt.Errorf("error checking dbaas cluster status: %w", err)
 	}
 	// ToDo: Removed this part since there are still problems with the clusters being unstable (failing for a short time and then recovering)
 	//if *subjectCluster.LifecycleStatus == "FAILED" {
@@ -407,7 +407,7 @@ func dbaasClusterReady(ctx context.Context, client *dbaasService.PsqlClient, d *
 	//	subjectCluster, _, err = client.GetCluster(ctx, d.Id())
 	//
 	//	if err != nil {
-	//		return true, fmt.Errorf("error checking dbaas cluster status: %s", err)
+	//		return true, fmt.Errorf("error checking dbaas cluster status: %w", err)
 	//	}
 	//
 	//	if *subjectCluster.LifecycleStatus == "FAILED" {
@@ -425,7 +425,7 @@ func dbaasClusterDeleted(ctx context.Context, client *dbaasService.PsqlClient, d
 		if apiResponse != nil && apiResponse.Response != nil && apiResponse.StatusCode == 404 {
 			return true, nil
 		}
-		return true, fmt.Errorf("error checking dbaas cluster deletion status: %s", err)
+		return true, fmt.Errorf("error checking dbaas cluster deletion status: %w", err)
 	}
 	return false, nil
 }
