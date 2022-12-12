@@ -16,7 +16,7 @@ const (
 resource ` + DatacenterResource + ` ` + DatacenterTestResource + ` {
 	name       = "` + DatacenterTestResource + `"
 	location = "us/las"
-	
+	description = "Test Datacenter Description"
 	sec_auth_protection = false
 }`
 )
@@ -204,7 +204,7 @@ resource ` + ServerResource + ` ` + ServerTestResource + ` {
   }
 }`
 
-const estAccCheckServerSshKeysAndKeyPath = `
+const testAccCheckServerSshKeysAndKeyPathErr = `
 resource ` + DatacenterResource + ` ` + DatacenterTestResource + ` {
 	name       = "server-test"
 	location = "us/las"
