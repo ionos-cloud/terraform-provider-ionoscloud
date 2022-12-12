@@ -44,7 +44,7 @@ resource "ionoscloud_server" "example_A" {
   availability_zone     = "ZONE_1"
   cpu_family            = "AMD_OPTERON"
   image_name            = data.ionoscloud_image.example.id
-  image_password        = "K3tTj8G14a3EgKyNeeiY"
+  image_password        = random_password.server_A_image_password.result
   volume {
     name                = "system"
     size                = 14
@@ -57,6 +57,11 @@ resource "ionoscloud_server" "example_A" {
     firewall_active     = true
     ips                 = [ ionoscloud_ipblock.example.ips[0], ionoscloud_ipblock.example.ips[1] ]
   }
+}
+resource "random_password" "server_A_image_password" {
+  length           = 16
+  special          = true
+  override_special = "!#$%&*()-_=+[]{}<>:?"
 }
 
 resource "ionoscloud_ipfailover" "example" {
@@ -76,7 +81,7 @@ resource "ionoscloud_server" "example_B" {
   availability_zone     = "ZONE_1"
   cpu_family            = "AMD_OPTERON"
   image_name            = data.ionoscloud_image.example.id
-  image_password        = "K3tTj8G14a3EgKyNeeiY"
+  image_password        = random_password.server_B_image_password.result
   volume {
     name                = "system"
     size                = 14
@@ -89,6 +94,12 @@ resource "ionoscloud_server" "example_B" {
     firewall_active     = true
     ips                 = [ ionoscloud_ipblock.example.ips[0] ]
   }
+}
+
+resource "random_password" "server_B_image_password" {
+  length           = 16
+  special          = true
+  override_special = "!#$%&*()-_=+[]{}<>:?"
 }
 
 

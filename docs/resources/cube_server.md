@@ -38,7 +38,7 @@ resource "ionoscloud_cube_server" "example" {
   availability_zone = "ZONE_2"
   image_name        = "ubuntu:latest"
   template_uuid     = data.ionoscloud_template.example.id
-  image_password    = "K3tTj8G14a3EgKyNeeiY"  
+  image_password    = random_password.server_image_password.result
   datacenter_id     = ionoscloud_datacenter.example.id
   volume {
     name            = "Volume Example"
@@ -51,6 +51,11 @@ resource "ionoscloud_cube_server" "example" {
     dhcp            = true
     firewall_active = true
   }
+}
+resource "random_password" "server_image_password" {
+  length           = 16
+  special          = true
+  override_special = "!#$%&*()-_=+[]{}<>:?"
 }
 ```
 

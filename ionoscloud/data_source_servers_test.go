@@ -18,6 +18,7 @@ func TestAccDataSourceServersBasic(t *testing.T) {
 		PreCheck: func() {
 			testAccPreCheck(t)
 		},
+		ExternalProviders: randomProviderVersion343(),
 		ProviderFactories: testAccProviderFactories,
 		CheckDestroy:      testAccCheckServersDestroyCheck,
 		Steps: []resource.TestStep{
@@ -149,7 +150,7 @@ resource ` + ServerResource + ` ` + ServerTestResource + ` {
   availability_zone = "ZONE_1"
   cpu_family = "AMD_OPTERON"
   image_name ="ubuntu:latest"
-  image_password = "K3tTj8G14a3EgKyNeeiYsasad"
+  image_password = ` + RandomPassword + `.server_image_password.result
   type = "ENTERPRISE"
   volume {
     name = "` + VolumeTestResource + `"
@@ -181,7 +182,7 @@ resource ` + ServerResource + ` ` + serverTestResource2 + ` {
   availability_zone = "ZONE_1"
   cpu_family = "AMD_OPTERON"
   image_name ="ubuntu:latest"
-  image_password = "K3tTj8G14a3EgKyNeeiYsasad1"
+  image_password = ` + RandomPassword + `.server2_image_password.result
   type = "ENTERPRISE"
   volume {
     name = "` + VolumeTestResource + "2" + `"
@@ -207,6 +208,15 @@ resource ` + ServerResource + ` ` + serverTestResource2 + ` {
 	  type = "EGRESS"
     }
   }
+}
+
+resource ` + RandomPassword + ` "server_image_password" {
+  length           = 16
+  special          = false
+}
+resource ` + RandomPassword + ` "server2_image_password" {
+  length           = 16
+  special          = false
 }
 
 data ` + ServersDataSource + ` ` + ServerDataSourceByName + ` {
@@ -243,7 +253,7 @@ resource ` + ServerResource + ` ` + ServerTestResource + ` {
   availability_zone = "ZONE_1"
   cpu_family = "` + cpuFamilyTest + `" 
   image_name ="ubuntu:latest"
-  image_password = "K3tTj8G14a3EgKyNeeiYsasad"
+  image_password = ` + RandomPassword + `.server_image_password.result
   type = "ENTERPRISE"
   volume {
     name = "` + VolumeTestResource + `"
@@ -283,7 +293,7 @@ resource ` + ServerResource + ` ` + serverTestResource2 + ` {
   availability_zone = "ZONE_1"
   cpu_family = "` + cpuFamilyTest + `" 
   image_name ="ubuntu:latest"
-  image_password = "K3tTj8G14a3EgKyNeeiYsasad1"
+  image_password = ` + RandomPassword + `.server2_image_password.result
   type = "ENTERPRISE"
   volume {
     name = "` + VolumeTestResource + "2" + `"
@@ -319,6 +329,15 @@ resource ` + ServerResource + ` ` + serverTestResource2 + ` {
   }
 }
 
+resource ` + RandomPassword + ` "server_image_password" {
+  length           = 16
+  special          = false
+}
+resource ` + RandomPassword + ` "server2_image_password" {
+  length           = 16
+  special          = false
+}
+
 data ` + ServersDataSource + ` ` + ServerDataSourceByName + ` {
  depends_on = [` + ServerResource + `.` + ServerTestResource + "2" + `,
 	` + ServerResource + `.` + ServerTestResource + `]
@@ -348,7 +367,7 @@ resource ` + ServerResource + ` ` + ServerTestResource + ` {
   availability_zone = "ZONE_1"
   cpu_family = "` + cpuFamilyTest + `"
   image_name ="ubuntu:latest"
-  image_password = "K3tTj8G14a3EgKyNeeiYsasad"
+  image_password = ` + RandomPassword + `.server_image_password.result
   type = "ENTERPRISE"
   volume {
     name = "` + VolumeTestResource + `"
@@ -374,7 +393,7 @@ resource ` + ServerResource + ` ` + ServerTestResource + "2" + ` {
   availability_zone = "ZONE_1"
   cpu_family = "` + cpuFamilyTest + `"
   image_name ="ubuntu:latest"
-  image_password = "K3tTj8G14a3EgKyNeeiYsasad1"
+  image_password = ` + RandomPassword + `.server2_image_password.result
   type = "ENTERPRISE"
   volume {
     name = "` + VolumeTestResource + "2" + `"
@@ -390,6 +409,15 @@ resource ` + ServerResource + ` ` + ServerTestResource + "2" + ` {
     dhcp = false
     firewall_active = false
   }
+}
+
+resource ` + RandomPassword + ` "server_image_password" {
+  length           = 16
+  special          = false
+}
+resource ` + RandomPassword + ` "server2_image_password" {
+  length           = 16
+  special          = false
 }
 
 data ` + ServersDataSource + ` ` + ServerDataSourceByName + ` {

@@ -35,7 +35,7 @@ resource "ionoscloud_server" "example" {
   availability_zone     = "ZONE_1"
   cpu_family            = "AMD_OPTERON"
   image_name            = "Ubuntu-20.04"
-  image_password        = "K3tTj8G14a3EgKyNeeiY"
+  image_password        = random_password.server_image_password.result
   volume {
     name                = "system"
     size                = 14
@@ -53,6 +53,12 @@ resource "ionoscloud_loadbalancer" "example" {
   nic_ids               = [ ionoscloud_server.example.primary_nic ]
   name                  = "Load Balancer Example"
   dhcp                  = true
+}
+
+resource "random_password" "server_image_password" {
+  length           = 16
+  special          = true
+  override_special = "!#$%&*()-_=+[]{}<>:?"
 }
 ```
 

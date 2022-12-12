@@ -30,6 +30,7 @@ func TestAccLanIPFailoverBasic(t *testing.T) {
 		PreCheck: func() {
 			testAccPreCheck(t)
 		},
+		ExternalProviders: randomProviderVersion343(),
 		ProviderFactories: testAccProviderFactories,
 		CheckDestroy:      testAccCheckLanIPFailoverDestroyCheck,
 		Steps: []resource.TestStep{
@@ -181,7 +182,7 @@ resource "ionoscloud_server" "webserver" {
   availability_zone = "ZONE_1"
   cpu_family = "AMD_OPTERON"
   image_name = "ubuntu:latest"
-  image_password = "K3tTj8G14a3EgKyNeeiY"
+  image_password = ` + RandomPassword + `.server_image_password.result
   volume {
     name = "system"
     size = 15
@@ -200,6 +201,11 @@ resource "ionoscloud_ipfailover" "failover-test" {
   lan_id="${ionoscloud_lan.webserver_lan1.id}"
   ip ="${ionoscloud_ipblock.webserver_ip.ips[0]}"
   nicuuid= "${ionoscloud_server.webserver.primary_nic}"
+}
+
+resource ` + RandomPassword + ` "server_image_password" {
+  length           = 16
+  special          = false
 }
 `
 
@@ -229,7 +235,7 @@ resource "ionoscloud_server" "webserver" {
   availability_zone = "ZONE_1"
   cpu_family = "AMD_OPTERON"
   image_name = "ubuntu:latest"
-  image_password = "K3tTj8G14a3EgKyNeeiY"
+  image_password = ` + RandomPassword + `.server_image_password.result
   volume {
     name = "system"
     size = 15
@@ -241,6 +247,11 @@ resource "ionoscloud_server" "webserver" {
     firewall_active = true
      ips =["${ionoscloud_ipblock.webserver_ip.ips[0]}"]
   }
+}
+
+resource ` + RandomPassword + ` "server_image_password" {
+  length           = 16
+  special          = false
 }
 `
 

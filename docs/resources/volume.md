@@ -49,7 +49,7 @@ resource "ionoscloud_server" "example" {
     availability_zone     = "ZONE_1"
     cpu_family            = "AMD_OPTERON"
     image_name            = data.ionoscloud_image.example.id
-    image_password        = "K3tTj8G14a3EgKyNeeiY"
+    image_password        = random_password.server_image_password.result
     type                  = "ENTERPRISE"
     volume {
         name              = "system"
@@ -90,6 +90,12 @@ resource "ionoscloud_volume" "example" {
   image_name              = data.ionoscloud_image.example.id
   image_password          = random_password.volume_image_password.result
   user_data               = "foo"
+}
+
+resource "random_password" "server_image_password" {
+  length           = 16
+  special          = true
+  override_special = "!#$%&*()-_=+[]{}<>:?"
 }
 
 resource "random_password" "volume_image_password" {
