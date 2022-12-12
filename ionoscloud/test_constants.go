@@ -16,7 +16,7 @@ const (
 resource ` + DatacenterResource + ` ` + DatacenterTestResource + ` {
 	name       = "` + DatacenterTestResource + `"
 	location = "us/las"
-	
+	description = "Test Datacenter Description"
 	sec_auth_protection = false
 }`
 )
