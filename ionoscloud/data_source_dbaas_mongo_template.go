@@ -54,7 +54,7 @@ func dataSourceDbassMongoTemplate() *schema.Resource {
 				Computed:    true,
 			},
 		},
-		// TODO -- check if I need to add Timeouts here.
+		Timeouts: &resourceDefaultTimeouts,
 	}
 }
 
@@ -65,10 +65,10 @@ func dataSourceDbassMongoTemplateRead(ctx context.Context, d *schema.ResourceDat
 
 	// Initial checks.
 	if idOk && nameOk {
-		return diag.FromErr(fmt.Errorf("name and ID cannot be both specified at the same time."))
+		return diag.FromErr(fmt.Errorf("name and ID cannot be both specified at the same time"))
 	}
 	if !idOk && !nameOk {
-		return diag.FromErr(fmt.Errorf("please provide a template ID or name."))
+		return diag.FromErr(fmt.Errorf("please provide a template ID or name"))
 	}
 
 	retrievedTemplates, _, err := client.GetTemplates(ctx)
@@ -78,7 +78,7 @@ func dataSourceDbassMongoTemplateRead(ctx context.Context, d *schema.ResourceDat
 
 	var templates []mongo.TemplateResponse
 	partialMatch := d.Get("partial_match").(bool)
-	if retrievedTemplates.Items != nil && len(*retrievedTemplates.Items) > 0 {
+	if retrievedTemplates.Items != nil {
 		for _, retrievedTemplate := range *retrievedTemplates.Items {
 			// Filter using the template ID or name.
 			if (idOk && matchesId(retrievedTemplate, id.(string))) || (nameOk && matchesName(retrievedTemplate, name.(string), partialMatch)) {
