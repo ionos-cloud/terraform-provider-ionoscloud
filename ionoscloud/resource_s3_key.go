@@ -213,7 +213,7 @@ func s3KeyDeleted(ctx context.Context, client *ionoscloud.APIClient, d *schema.R
 		if httpNotFound(apiResponse) {
 			return true, nil
 		}
-		return true, fmt.Errorf("error checking S3 key deletion status: %s", err)
+		return true, fmt.Errorf("error checking S3 key deletion status: %w", err)
 	}
 	return false, nil
 }
@@ -224,7 +224,7 @@ func s3Ready(ctx context.Context, client *ionoscloud.APIClient, d *schema.Resour
 	logApiRequestTime(apiResponse)
 
 	if err != nil {
-		return true, fmt.Errorf("error checking S3 Key status: %s", err)
+		return true, fmt.Errorf("error checking S3 Key status: %w", err)
 	}
 	active := d.Get("active").(bool)
 	return *rsp.Properties.Active == active, nil

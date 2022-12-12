@@ -102,7 +102,7 @@ func dataSourceDataCenterRead(ctx context.Context, d *schema.ResourceData, meta 
 		datacenter, apiResponse, err = client.DataCentersApi.DatacentersFindById(ctx, id.(string)).Execute()
 		logApiRequestTime(apiResponse)
 		if err != nil {
-			return diag.FromErr(fmt.Errorf("error getting datacenter with id %s %s", id.(string), err))
+			return diag.FromErr(fmt.Errorf("error getting datacenter with id %s %w", id.(string), err))
 		}
 		if nameOk {
 			if *datacenter.Properties.Name != name {
@@ -125,7 +125,7 @@ func dataSourceDataCenterRead(ctx context.Context, d *schema.ResourceData, meta 
 		logApiRequestTime(apiResponse)
 
 		if err != nil {
-			return diag.FromErr(fmt.Errorf("an error occured while fetching datacenters: %s ", err))
+			return diag.FromErr(fmt.Errorf("an error occured while fetching datacenters: %w ", err))
 		}
 
 		var results []ionoscloud.Datacenter

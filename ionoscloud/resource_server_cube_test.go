@@ -310,7 +310,7 @@ func testAccCheckCubeServerDestroyCheck(s *terraform.State) error {
 
 		if err != nil {
 			if !httpNotFound(apiResponse) {
-				return fmt.Errorf("unable to fetch server %s: %s", rs.Primary.ID, err)
+				return fmt.Errorf("unable to fetch server %s: %w", rs.Primary.ID, err)
 			}
 		} else {
 			return fmt.Errorf("server still exists %s", rs.Primary.ID)

@@ -46,7 +46,7 @@ func TestAccServerBasic(t *testing.T) {
 					resource.TestCheckResourceAttr(ServerResource+"."+ServerTestResource, "ssh_keys.0", sshKey)),
 			},
 			{
-				Config:      testAccCheckServerSshKeysAndKeyPath,
+				Config:      testAccCheckServerSshKeysAndKeyPathErr,
 				ExpectError: regexp.MustCompile(`"ssh_keys": conflicts with ssh_key_path`),
 			},
 			{
@@ -463,7 +463,7 @@ func testAccCheckServerDestroyCheck(s *terraform.State) error {
 
 		if err != nil {
 			if !httpNotFound(apiResponse) {
-				return fmt.Errorf("unable to fetch server %s: %s", rs.Primary.ID, err)
+				return fmt.Errorf("unable to fetch server %s: %w", rs.Primary.ID, err)
 			}
 		} else {
 			return fmt.Errorf("server still exists %s", rs.Primary.ID)

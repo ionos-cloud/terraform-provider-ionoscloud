@@ -662,7 +662,7 @@ func resourceServerRead(ctx context.Context, d *schema.ResourceData, meta interf
 			d.SetId("")
 			return nil
 		}
-		diags := diag.FromErr(fmt.Errorf("error occured while fetching a server ID %s %s", d.Id(), err))
+		diags := diag.FromErr(fmt.Errorf("error occured while fetching a server ID %s %w", d.Id(), err))
 		return diags
 	}
 	if err := setResourceServerData(ctx, client, d, &server); err != nil {
@@ -807,7 +807,7 @@ func resourceServerUpdate(ctx context.Context, d *schema.ResourceData, meta inte
 	logApiRequestTime(apiResponse)
 
 	if err != nil {
-		diags := diag.FromErr(fmt.Errorf("error occured while updating server ID %s: %s", d.Id(), err))
+		diags := diag.FromErr(fmt.Errorf("error occured while updating server ID %s: %w", d.Id(), err))
 		return diags
 	}
 
@@ -1028,7 +1028,7 @@ func resourceServerDelete(ctx context.Context, d *schema.ResourceData, meta inte
 	logApiRequestTime(apiResponse)
 
 	if err != nil {
-		diags := diag.FromErr(fmt.Errorf("error occured while fetching a server ID %s %s", d.Id(), err))
+		diags := diag.FromErr(fmt.Errorf("error occured while fetching a server ID %s %w", d.Id(), err))
 		return diags
 	}
 
@@ -1087,7 +1087,7 @@ func resourceServerImport(ctx context.Context, d *schema.ResourceData, meta inte
 			d.SetId("")
 			return nil, fmt.Errorf("unable to find server %q", serverId)
 		}
-		return nil, fmt.Errorf("error occured while fetching a server ID %s %s", d.Id(), err)
+		return nil, fmt.Errorf("error occured while fetching a server ID %s %w", d.Id(), err)
 	}
 
 	d.SetId(*server.Id)

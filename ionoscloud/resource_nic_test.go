@@ -112,7 +112,7 @@ func testAccCheckNicDestroyCheck(s *terraform.State) error {
 
 		if err != nil {
 			if !httpNotFound(apiResponse) {
-				return fmt.Errorf("an error occurred while checking the destruction of nic %s: %s", rs.Primary.ID, err)
+				return fmt.Errorf("an error occurred while checking the destruction of nic %s: %w", rs.Primary.ID, err)
 			}
 		} else {
 			return fmt.Errorf("nic %s still exists", rs.Primary.ID)

@@ -298,7 +298,7 @@ func resourceStateRefreshFunc(meta interface{}, path string) resource.StateRefre
 		request, apiResponse, err := client.GetRequestStatus(context.Background(), path)
 		logApiRequestTime(apiResponse)
 		if err != nil {
-			return nil, "", fmt.Errorf("request failed with following error: %s", err)
+			return nil, "", fmt.Errorf("request failed with following error: %w", err)
 		}
 		if request != nil && request.Metadata != nil && request.Metadata.Status != nil {
 			if *request.Metadata.Status == "FAILED" {

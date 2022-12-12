@@ -22,7 +22,7 @@ const (
 resource ` + DatacenterResource + ` ` + DatacenterTestResource + ` {
 	name       = "` + DatacenterTestResource + `"
 	location = "us/las"
-	
+	description = "Test Datacenter Description"
 	sec_auth_protection = false
 }`
 )
@@ -210,7 +210,7 @@ resource ` + ServerResource + ` ` + ServerTestResource + ` {
   }
 }`
 
-const estAccCheckServerSshKeysAndKeyPath = `
+const testAccCheckServerSshKeysAndKeyPathErr = `
 resource ` + DatacenterResource + ` ` + DatacenterTestResource + ` {
 	name       = "server-test"
 	location = "us/las"
@@ -437,3 +437,6 @@ resource ` + ServerResource + ` ` + ServerTestResource + ` {
     value = "labelvalue1"
   }
 }`
+
+const K8sVersion = "1.23.12"
+const UpgradedK8sVersion = "1.24.6"

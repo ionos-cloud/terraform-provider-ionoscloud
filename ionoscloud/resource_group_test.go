@@ -175,7 +175,7 @@ func testAccCheckGroupDestroyCheck(s *terraform.State) error {
 
 		if err != nil {
 			if apiResponse == nil || apiResponse.Response != nil && apiResponse.StatusCode != 404 {
-				return fmt.Errorf("an error occurred while checking the destruction of group %s: %s", rs.Primary.ID, err)
+				return fmt.Errorf("an error occurred while checking the destruction of group %s: %w", rs.Primary.ID, err)
 			}
 		} else {
 			return fmt.Errorf("group %s still exists", rs.Primary.ID)

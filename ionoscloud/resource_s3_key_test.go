@@ -67,7 +67,7 @@ func testAccChecks3KeyDestroyCheck(s *terraform.State) error {
 
 		if err != nil {
 			if !httpNotFound(apiResponse) {
-				return fmt.Errorf("an error occurred while fetching s3 key %s: %s", rs.Primary.ID, err)
+				return fmt.Errorf("an error occurred while fetching s3 key %s: %w", rs.Primary.ID, err)
 			}
 		} else {
 			return fmt.Errorf("s3 Key still exists %s", rs.Primary.ID)
