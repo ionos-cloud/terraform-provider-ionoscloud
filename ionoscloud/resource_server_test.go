@@ -45,7 +45,7 @@ func TestAccServerBasic(t *testing.T) {
 					resource.TestCheckResourceAttr(ServerResource+"."+ServerTestResource, "ssh_keys.0", sshKey)),
 			},
 			{
-				Config:      testAccCheckServerSshKeysAndKeyPath,
+				Config:      testAccCheckServerSshKeysAndKeyPathErr,
 				ExpectError: regexp.MustCompile(`"ssh_keys": conflicts with ssh_key_path`),
 			},
 			{

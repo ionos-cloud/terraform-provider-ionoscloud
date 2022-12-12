@@ -204,7 +204,7 @@ resource ` + ServerResource + ` ` + ServerTestResource + ` {
   }
 }`
 
-const estAccCheckServerSshKeysAndKeyPath = `
+const testAccCheckServerSshKeysAndKeyPathErr = `
 resource ` + DatacenterResource + ` ` + DatacenterTestResource + ` {
 	name       = "server-test"
 	location = "us/las"
