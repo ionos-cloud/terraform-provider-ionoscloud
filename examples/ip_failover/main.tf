@@ -60,8 +60,7 @@ resource "ionoscloud_server" "example_A" {
 }
 resource "random_password" "server_A_image_password" {
   length           = 16
-  special          = true
-  override_special = "!#$%&*()-_=+[]{}<>:?"
+  special          = false
 }
 
 resource "ionoscloud_ipfailover" "example" {
@@ -98,8 +97,7 @@ resource "ionoscloud_server" "example_B" {
 
 resource "random_password" "server_B_image_password" {
   length           = 16
-  special          = true
-  override_special = "!#$%&*()-_=+[]{}<>:?"
+  special          = false
 }
 
 

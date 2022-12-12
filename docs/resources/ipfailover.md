@@ -64,8 +64,7 @@ resource "ionoscloud_ipfailover" "example" {
 }
 resource "random_password" "server_image_password" {
   length           = 16
-  special          = true
-  override_special = "!#$%&*()-_=+[]{}<>:?"
+  special          = false
 }
 ```
 
