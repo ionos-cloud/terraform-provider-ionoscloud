@@ -784,7 +784,7 @@ func resourcek8sNodePoolDelete(ctx context.Context, d *schema.ResourceData, meta
 		nodepoolDeleted, dsErr := k8sNodepoolDeleted(ctx, client, d)
 
 		if dsErr != nil {
-			diags := diag.FromErr(fmt.Errorf("error while checking deletion status of k8s node pool %s: %s", d.Id(), dsErr))
+			diags := diag.FromErr(fmt.Errorf("error while checking deletion status of k8s node pool %s: %w", d.Id(), dsErr))
 			return diags
 		}
 

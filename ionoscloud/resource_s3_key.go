@@ -182,7 +182,7 @@ func resourceS3KeyDelete(ctx context.Context, d *schema.ResourceData, meta inter
 		s3KeyDeleted, dsErr := s3KeyDeleted(ctx, client, d)
 
 		if dsErr != nil {
-			diags := diag.FromErr(fmt.Errorf("error while checking deletion status of S3 key %s: %s", d.Id(), dsErr))
+			diags := diag.FromErr(fmt.Errorf("error while checking deletion status of S3 key %s: %w", d.Id(), dsErr))
 			return diags
 		}
 

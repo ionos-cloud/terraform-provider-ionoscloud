@@ -1356,6 +1356,10 @@ func setResourceServerData(ctx context.Context, client *ionoscloud.APIClient, d 
 				nicId = *nic.Id
 			}
 		}
+		// if no nics found until now, get the first one from entities
+		if nicId == "" {
+			nicId = *(*server.Entities.Nics.Items)[0].Id
+		}
 	}
 
 	nic, apiResponse, err := client.NetworkInterfacesApi.DatacentersServersNicsFindById(ctx, datacenterId, d.Id(), nicId).Depth(1).Execute()
