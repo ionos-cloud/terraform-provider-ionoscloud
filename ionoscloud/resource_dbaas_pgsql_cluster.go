@@ -345,7 +345,7 @@ func resourceDbaasPgSqlClusterDelete(ctx context.Context, d *schema.ResourceData
 		clusterdDeleted, dsErr := dbaasClusterDeleted(ctx, client, d)
 
 		if dsErr != nil {
-			diags := diag.FromErr(fmt.Errorf("error while checking deletion status of dbaas cluster %s: %s", d.Id(), dsErr))
+			diags := diag.FromErr(fmt.Errorf("error while checking deletion status of dbaas cluster %s: %w", d.Id(), dsErr))
 			return diags
 		}
 

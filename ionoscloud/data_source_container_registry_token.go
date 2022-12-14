@@ -108,7 +108,7 @@ func dataSourceContainerRegistryTokenRead(ctx context.Context, d *schema.Resourc
 		/* search by ID */
 		token, _, err = client.GetToken(ctx, registryId, id)
 		if err != nil {
-			diags := diag.FromErr(fmt.Errorf("an error occurred while fetching the token with ID %s: %s", id, err))
+			diags := diag.FromErr(fmt.Errorf("an error occurred while fetching the token with ID %s: %w", id, err))
 			return diags
 		}
 	} else {

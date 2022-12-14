@@ -279,7 +279,7 @@ func resourceVolumeCreate(ctx context.Context, d *schema.ResourceData, meta inte
 	sErr := d.Set("server_id", serverId)
 
 	if sErr != nil {
-		diags := diag.FromErr(fmt.Errorf("error while setting serverId %s: %s", serverId, sErr))
+		diags := diag.FromErr(fmt.Errorf("error while setting serverId %s: %w", serverId, sErr))
 		return diags
 	}
 
@@ -974,14 +974,14 @@ func checkImage(ctx context.Context, client *ionoscloud.APIClient, imageInput, i
 							diags := diag.FromErr(fmt.Errorf("image/snapshot %s not found: %s", imageInput, err))
 							return image, imageAlias, isSnapshot, diags
 						} else {
-							diags := diag.FromErr(fmt.Errorf("an error occured while fetching snapshot %s: %s", imageInput, err))
+							diags := diag.FromErr(fmt.Errorf("an error occured while fetching snapshot %s: %w", imageInput, err))
 							return image, imageAlias, isSnapshot, diags
 						}
 					}
 					image = *snapshot.Id
 					isSnapshot = true
 				} else {
-					diags := diag.FromErr(fmt.Errorf("error fetching image %s: %s", imageInput, err))
+					diags := diag.FromErr(fmt.Errorf("error fetching image %s: %w", imageInput, err))
 					return image, imageAlias, isSnapshot, diags
 				}
 			} else {

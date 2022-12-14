@@ -196,7 +196,7 @@ func dataSourcePccRead(ctx context.Context, d *schema.ResourceData, meta interfa
 					pcc, apiResponse, err = client.PrivateCrossConnectsApi.PccsFindById(ctx, *p.Id).Execute()
 					logApiRequestTime(apiResponse)
 					if err != nil {
-						return diag.FromErr(fmt.Errorf("an error occurred while fetching the pcc with ID %s: %s", *p.Id, err))
+						return diag.FromErr(fmt.Errorf("an error occurred while fetching the pcc with ID %s: %w", *p.Id, err))
 					}
 					results = append(results, pcc)
 				}

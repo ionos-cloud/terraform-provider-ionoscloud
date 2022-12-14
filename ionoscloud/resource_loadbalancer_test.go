@@ -63,7 +63,7 @@ func testAccCheckLoadbalancerDestroyCheck(s *terraform.State) error {
 
 		if err != nil {
 			if !httpNotFound(apiResponse) {
-				return fmt.Errorf("an error occurred while checking the destruction of load balancer %s: %s",
+				return fmt.Errorf("an error occurred while checking the destruction of load balancer %s: %w",
 					rs.Primary.ID, err)
 			}
 		} else {

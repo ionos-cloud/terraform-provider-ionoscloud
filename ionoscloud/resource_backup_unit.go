@@ -308,14 +308,14 @@ func setBackupUnitData(d *schema.ResourceData, backupUnit *ionoscloud.BackupUnit
 		if backupUnit.Properties.Name != nil {
 			epErr := d.Set("name", *backupUnit.Properties.Name)
 			if epErr != nil {
-				return fmt.Errorf("error while setting name property for backup unit %s: %s", d.Id(), epErr)
+				return fmt.Errorf("error while setting name property for backup unit %s: %w", d.Id(), epErr)
 			}
 		}
 
 		if backupUnit.Properties.Email != nil {
 			epErr := d.Set("email", *backupUnit.Properties.Email)
 			if epErr != nil {
-				return fmt.Errorf("error while setting email property for backup unit %s: %s", d.Id(), epErr)
+				return fmt.Errorf("error while setting email property for backup unit %s: %w", d.Id(), epErr)
 			}
 		}
 

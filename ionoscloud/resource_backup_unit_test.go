@@ -94,7 +94,7 @@ func testAccCheckBackupUnitDestroyCheck(s *terraform.State) error {
 
 		if err != nil {
 			if !httpNotFound(apiResponse) {
-				return fmt.Errorf("an error occurred while checking for the destruction of backup unit %s: %s",
+				return fmt.Errorf("an error occurred while checking for the destruction of backup unit %s: %w",
 					rs.Primary.ID, err)
 			}
 		} else {
