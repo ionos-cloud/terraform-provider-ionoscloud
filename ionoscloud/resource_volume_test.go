@@ -28,7 +28,7 @@ func TestAccVolumeBasic(t *testing.T) {
 			{
 				//added to test - #266. crash when using image_alias on volume
 				Config:      testAccCheckVolumeConfigBasicErrorNoPassOrSSHPath,
-				ExpectError: regexp.MustCompile(`either 'image_password' or 'ssh_key_path' must be provided`),
+				ExpectError: regexp.MustCompile(`either 'image_password' or 'ssh_key_path'/'ssh_keys' must be provided`),
 			},
 			{
 				Config: testAccCheckVolumeConfigBasic,
