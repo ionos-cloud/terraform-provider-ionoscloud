@@ -1351,9 +1351,12 @@ func setResourceServerData(ctx context.Context, client *ionoscloud.APIClient, d 
 	if primaryNicOk {
 		nicId = d.Get("primary_nic").(string)
 	} else if server.Entities.Nics != nil && server.Entities.Nics.Items != nil && len(*server.Entities.Nics.Items) > 0 && (*server.Entities.Nics.Items)[0].Id != nil {
-		// this might be a terraformer import, so primary_nic might not be set
-		// if no nics found until now, get the first one from entities
-		nicId = *(*server.Entities.Nics.Items)[0].Id
+		lastNicIndex := len(*server.Entities.Nics.Items) - 1
+		if (*server.Entities.Nics.Items)[lastNicIndex].Id != nil {
+			// this might be a terraformer import, so primary_nic might not be set
+			// if no nics found until now, get the last one from the list of nics.
+			nicId = *(*server.Entities.Nics.Items)[lastNicIndex].Id
+		}
 	}
 
 	nic, apiResponse, err := client.NetworkInterfacesApi.DatacentersServersNicsFindById(ctx, datacenterId, d.Id(), nicId).Depth(1).Execute()
