@@ -425,5 +425,17 @@ resource ` + ServerResource + ` ` + ServerTestResource + ` {
   }
 }`
 
+const resourceRandomUUID = `
+resource "random_uuid" "uuid" {
+}
+`
+
+const resourceRandomString = `
+resource "random_string" "simple_string" {
+	length = 16
+	special = false
+}
+`
+
 const K8sVersion = "1.23.12"
 const UpgradedK8sVersion = "1.24.6"

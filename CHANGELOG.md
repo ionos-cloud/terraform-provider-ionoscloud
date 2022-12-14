@@ -2,6 +2,7 @@
 ### Feature:
  - Add update for mongo database resources
  - Add labels for servers
+ - Add data source for DBaaS Mongo Templates
 
 ### Refactor:
 - Refactor services, add generic `WaitForResourceToBeReady` and `WaitForResourceToBeDeleted` methods
