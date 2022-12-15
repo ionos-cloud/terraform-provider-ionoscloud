@@ -519,11 +519,7 @@ resource ` + ServerCubeResource + ` ` + ServerTestResource + ` {
     }
   }
 }
-resource ` + RandomPassword + ` "server_image_password" {
-  length           = 16
-  special          = false
-}
-`
+` + ServerImagePassword
 
 const testAccCheckCubeServerWithSnapshot = `
 data "ionoscloud_template" ` + ServerTestResource + ` {
@@ -581,11 +577,7 @@ resource ` + ServerCubeResource + ` ` + ServerTestResource + ` {
     firewall_active = true
   }
 }
-resource ` + RandomPassword + ` "server_image_password" {
-  length           = 16
-  special          = false
-}
-`
+` + ServerImagePassword
 
 const testAccCheckCubeServerNoFirewall = `
 data "ionoscloud_template" ` + ServerTestResource + ` {
@@ -628,11 +620,7 @@ resource ` + ServerCubeResource + ` ` + ServerTestResource + ` {
 	  }
   }
 }
-resource ` + RandomPassword + ` "server_image_password" {
-  length           = 16
-  special          = false
-}
-`
+` + ServerImagePassword
 
 const testAccCheckCubeServerICMP = `
 data "ionoscloud_template" ` + ServerTestResource + ` {
@@ -676,8 +664,4 @@ resource ` + ServerCubeResource + ` ` + ServerTestResource + ` {
 	  }
     }
 }
-resource ` + RandomPassword + ` "server_image_password" {
-  length           = 16
-  special          = false
-}
-`
+` + ServerImagePassword

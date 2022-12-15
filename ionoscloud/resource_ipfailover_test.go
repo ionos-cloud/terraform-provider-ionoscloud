@@ -202,12 +202,7 @@ resource "ionoscloud_ipfailover" "failover-test" {
   ip ="${ionoscloud_ipblock.webserver_ip.ips[0]}"
   nicuuid= "${ionoscloud_server.webserver.primary_nic}"
 }
-
-resource ` + RandomPassword + ` "server_image_password" {
-  length           = 16
-  special          = false
-}
-`
+` + ServerImagePassword
 
 const testAccCheckLanIPFailoverConfigUpdate = `
 resource "ionoscloud_datacenter" "foobar" {
@@ -248,12 +243,7 @@ resource "ionoscloud_server" "webserver" {
      ips =["${ionoscloud_ipblock.webserver_ip.ips[0]}"]
   }
 }
-
-resource ` + RandomPassword + ` "server_image_password" {
-  length           = 16
-  special          = false
-}
-`
+` + ServerImagePassword
 
 var testAccDataSourceIpFailoverConfigBasic = testAccCheckLanIPFailoverConfig + `
 data ` + ResourceIpFailover + " " + ipfailoverName + `{

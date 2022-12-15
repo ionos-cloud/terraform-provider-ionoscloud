@@ -260,11 +260,7 @@ resource ` + VolumeResource + ` ` + VolumeTestResource + ` {
 	image_password = ` + RandomPassword + `.server_image_password.result
 	user_data = "foo"
 }
-resource ` + RandomPassword + ` "server_image_password" {
-  length           = 16
-  special          = false
-}
-`
+` + ServerImagePassword
 
 const testAccCheckVolumeConfigBasicErrorNoPassOrSSHPath = testAccCheckLanConfigBasic + `
 resource ` + ServerResource + ` ` + ServerTestResource + `{
@@ -298,11 +294,7 @@ resource ` + VolumeResource + ` ` + VolumeTestResource + ` {
 	image_name ="ubuntu:latest"
 	user_data = "foo"
 }
-resource ` + RandomPassword + ` "server_image_password" {
-  length           = 16
-  special          = false
-}
-`
+` + ServerImagePassword
 
 const testAccCheckVolumeConfigUpdate = testAccCheckLanConfigBasic + `
 resource ` + ServerResource + ` ` + ServerTestResource + `updated {
@@ -337,15 +329,11 @@ resource ` + VolumeResource + ` ` + VolumeTestResource + ` {
 	image_password = ` + RandomPassword + `.server_image_password_updated.result
 	user_data = "foo"
 }
-resource ` + RandomPassword + ` "server_image_password" {
-  length           = 16
-  special          = false
-}
 resource ` + RandomPassword + ` "server_image_password_updated" {
   length           = 16
   special          = false
 }
-`
+` + ServerImagePassword
 
 var testAccDataSourceVolumeMatchId = testAccCheckVolumeConfigBasic + `
 data ` + VolumeResource + ` ` + VolumeDataSourceById + ` {
@@ -397,11 +385,7 @@ resource ` + VolumeResource + ` ` + VolumeTestResource + ` {
   disk_type      = "HDD"
   licence_type   = "unknown"
 }
-resource ` + RandomPassword + ` "server_image_password" {
-  length           = 16
-  special          = false
-}
-`
+` + ServerImagePassword
 
 const testAccCheckVolumeConfigNoPasswordUpdate = testAccCheckLanConfigBasic + `
 resource ` + ServerResource + ` ` + ServerTestResource + ` {
@@ -432,11 +416,7 @@ resource ` + VolumeResource + ` ` + VolumeTestResource + ` {
   disk_type      = "HDD"
   licence_type   = "other"
 }
-resource ` + RandomPassword + ` "server_image_password" {
-  length           = 16
-  special          = false
-}
-`
+` + ServerImagePassword
 
 const testAccCheckVolumeResolveImageName = testAccCheckLanConfigBasic + `
 resource ` + ServerResource + ` ` + ServerTestResource + ` {
@@ -470,8 +450,4 @@ resource ` + VolumeResource + ` ` + VolumeTestResource + ` {
   image_name = "ubuntu:latest"
   image_password = ` + RandomPassword + `.server_image_password.result
 }
-resource ` + RandomPassword + ` "server_image_password" {
-  length           = 16
-  special          = false
-}
-`
+` + ServerImagePassword

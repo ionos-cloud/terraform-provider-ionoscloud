@@ -330,6 +330,13 @@ data ` + DatacenterResource + ` ` + DatacenterDataSourceMatching + ` {
 
 const ImmutableError = "attribute is immutable, therefore not allowed in update requests"
 
+const ServerImagePassword = `
+resource ` + RandomPassword + ` "server_image_password" {
+  length           = 16
+  special          = false
+}
+`
+
 // Cube Server Constants
 const testAccCheckCubeServerConfigBasic = `
 data "ionoscloud_template" ` + ServerTestResource + ` {

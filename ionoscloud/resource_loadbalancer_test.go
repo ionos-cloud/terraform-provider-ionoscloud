@@ -202,10 +202,7 @@ resource "ionoscloud_server" "webserver" {
   }
 }
 
-resource ` + RandomPassword + ` "server_image_password" {
-  length           = 16
-  special          = false
-}
+` + ServerImagePassword + `
 
 resource "ionoscloud_nic" "database_nic2" {
   datacenter_id = "${ionoscloud_datacenter.foobar.id}"

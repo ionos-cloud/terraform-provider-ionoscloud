@@ -187,12 +187,7 @@ resource "ionoscloud_server" "test_server" {
     firewall_active = true
   }
 }
-
-resource ` + RandomPassword + ` "server_image_password" {
-  length           = 16
-  special          = false
-}
-`
+` + ServerImagePassword
 
 const testAccCheckNicConfigBasic = testCreateDataCenterAndServer + `
 resource ` + NicResource + ` "database_nic" {

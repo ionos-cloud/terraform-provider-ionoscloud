@@ -210,10 +210,7 @@ resource ` + ServerResource + ` ` + serverTestResource2 + ` {
   }
 }
 
-resource ` + RandomPassword + ` "server_image_password" {
-  length           = 16
-  special          = false
-}
+` + ServerImagePassword + `
 resource ` + RandomPassword + ` "server2_image_password" {
   length           = 16
   special          = false
@@ -329,10 +326,7 @@ resource ` + ServerResource + ` ` + serverTestResource2 + ` {
   }
 }
 
-resource ` + RandomPassword + ` "server_image_password" {
-  length           = 16
-  special          = false
-}
+` + ServerImagePassword + `
 resource ` + RandomPassword + ` "server2_image_password" {
   length           = 16
   special          = false
@@ -411,10 +405,7 @@ resource ` + ServerResource + ` ` + ServerTestResource + "2" + ` {
   }
 }
 
-resource ` + RandomPassword + ` "server_image_password" {
-  length           = 16
-  special          = false
-}
+` + ServerImagePassword + `
 resource ` + RandomPassword + ` "server2_image_password" {
   length           = 16
   special          = false

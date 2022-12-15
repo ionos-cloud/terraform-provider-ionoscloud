@@ -228,10 +228,7 @@ resource ` + ServerResource + ` ` + ServerTestResource + ` {
   }
 }
 
-resource ` + RandomPassword + ` "server_image_password" {
-  length           = 16
-  special          = false
-}
+` + ServerImagePassword + `
 
 resource "ionoscloud_nic" "database_nic" {
   datacenter_id = ` + DatacenterResource + `.` + DatacenterTestResource + `.id
