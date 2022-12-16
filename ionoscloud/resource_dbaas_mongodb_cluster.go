@@ -4,14 +4,11 @@ import (
 	"context"
 	"fmt"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
-	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
-	mongo "github.com/ionos-cloud/sdk-go-dbaas-mongo"
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/dbaas"
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils"
 	"log"
-	"strings"
 	"time"
 )
 
@@ -158,7 +155,7 @@ func resourceDbaasMongoClusterCreate(ctx context.Context, d *schema.ResourceData
 	}
 	d.SetId(*createdCluster.Id)
 
-	_, err = waitForClusterToBeReady(ctx, client, d.Id())
+	err = utils.WaitForResourceToBeReady(ctx, d, client.IsClusterReady)
 	if err != nil {
 		return diag.FromErr(fmt.Errorf("updating %w ", err))
 	}
@@ -181,40 +178,12 @@ func resourceDbaasMongoClusterUpdate(ctx context.Context, d *schema.ResourceData
 		return diags
 	}
 
-	_, err = waitForClusterToBeReady(ctx, client, d.Id())
+	err = utils.WaitForResourceToBeReady(ctx, d, client.IsClusterReady)
 	if err != nil {
-		return diag.FromErr(fmt.Errorf("creating %w", err))
+		return diag.FromErr(fmt.Errorf("failed checking if ready %w", err))
 	}
 
 	return resourceDbaasMongoClusterRead(ctx, d, meta)
-}
-
-// waitForClusterToBeReady - keeps retrying until cluster is in 'available' state, or context deadline is reached
-func waitForClusterToBeReady(ctx context.Context, client *dbaas.MongoClient, clusterId string) (mongo.ClusterResponse, error) {
-	var clusterRequest = mongo.NewClusterResponse()
-	err := resource.RetryContext(ctx, *resourceDefaultTimeouts.Update, func() *resource.RetryError {
-		var err error
-		var apiResponse *mongo.APIResponse
-		*clusterRequest, apiResponse, err = client.GetCluster(ctx, clusterId)
-		apiResponse.LogInfo()
-		if apiResponse.HttpNotFound() {
-			log.Printf("[INFO] Could not find cluster %s retrying...", clusterId)
-			return resource.RetryableError(fmt.Errorf("could not find cluster %s, %w, retrying", clusterId, err))
-		}
-		if err != nil {
-			resource.NonRetryableError(err)
-		}
-
-		if clusterRequest != nil && clusterRequest.Metadata != nil && !strings.EqualFold(string(*clusterRequest.Metadata.State), utils.Available) {
-			log.Printf("[INFO] mongo cluster %s is still in state %s", clusterId, *clusterRequest.Metadata.State)
-			return resource.RetryableError(fmt.Errorf("clusterRequest is still in state %s", *clusterRequest.Metadata.State))
-		}
-		return nil
-	})
-	if clusterRequest == nil || clusterRequest.Properties == nil || *clusterRequest.Properties.DisplayName == "" {
-		return *clusterRequest, fmt.Errorf("could not find cluster %s", clusterId)
-	}
-	return *clusterRequest, err
 }
 
 func resourceDbaasMongoClusterRead(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
@@ -254,31 +223,10 @@ func resourceDbaasMongoClusterDelete(ctx context.Context, d *schema.ResourceData
 		return diags
 	}
 
-	for {
-		log.Printf("[INFO] Waiting for cluster %s to be deleted...", d.Id())
-
-		clusterdDeleted, dsErr := dbaasMongoClusterDeleted(ctx, client, d)
-
-		if dsErr != nil {
-			diags := diag.FromErr(fmt.Errorf("error while checking deletion status of mongo dbaas cluster %s: %w", d.Id(), dsErr))
-			return diags
-		}
-
-		if clusterdDeleted {
-			log.Printf("[INFO] Successfully deleted dbaas mongo cluster: %s", d.Id())
-			break
-		}
-
-		select {
-		case <-time.After(utils.SleepInterval):
-			log.Printf("[INFO] trying again ...")
-		case <-ctx.Done():
-			diags := diag.FromErr(fmt.Errorf("dbaas mongo cluster deletion timed out! WARNING: your mongo cluster (%s) "+
-				"will still probably be deleted after some time but the terraform state won't reflect that; check your Ionos Cloud account for updates", d.Id()))
-			return diags
-		}
+	err = utils.WaitForResourceToBeReady(ctx, d, client.IsClusterDeleted)
+	if err != nil {
+		return diag.FromErr(fmt.Errorf("failed checking if deleted %w", err))
 	}
-
 	// wait 15 seconds after the deletion of the cluster, for the lan to be freed
 	time.Sleep(utils.SleepInterval * 3)
 
@@ -307,17 +255,4 @@ func resourceDbaasMongoClusterImport(ctx context.Context, d *schema.ResourceData
 	}
 
 	return []*schema.ResourceData{d}, nil
-}
-
-func dbaasMongoClusterDeleted(ctx context.Context, client *dbaas.MongoClient, d *schema.ResourceData) (bool, error) {
-
-	_, apiResponse, err := client.GetCluster(ctx, d.Id())
-
-	if err != nil {
-		if apiResponse.HttpNotFound() {
-			return true, nil
-		}
-		return true, fmt.Errorf("error checking dbaas mongo cluster deletion status: %w", err)
-	}
-	return false, nil
 }
