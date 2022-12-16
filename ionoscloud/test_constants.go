@@ -316,11 +316,7 @@ resource ` + ServerResource + ` ` + ServerTestResource + ` {
     }
   }
 }
-resource ` + RandomPassword + ` "server_image_password" {
-  length           = 16
-  special          = false
-}
-`
+` + ServerImagePassword
 
 const testAccDataSourceDatacenterWrongNameError = testAccCheckDatacenterConfigBasic + `
 data ` + DatacenterResource + ` ` + DatacenterDataSourceMatching + ` {
@@ -332,6 +328,13 @@ const ImmutableError = "attribute is immutable, therefore not allowed in update 
 
 const ServerImagePassword = `
 resource ` + RandomPassword + ` "server_image_password" {
+  length           = 16
+  special          = false
+}
+`
+
+const ServerImagePasswordUpdated = `
+resource ` + RandomPassword + ` "server_image_password_updated" {
   length           = 16
   special          = false
 }
@@ -391,11 +394,7 @@ resource ` + ServerCubeResource + ` ` + ServerTestResource + ` {
     }
   }
 }
-resource ` + RandomPassword + ` "server_image_password" {
-  length           = 16
-  special          = false
-}
-`
+` + ServerImagePassword
 
 const testAccCheckServerCreationWithLabels = `
 resource ` + DatacenterResource + ` ` + DatacenterTestResource + ` {

@@ -168,12 +168,7 @@ resource "ionoscloud_loadbalancer" "loadbalancer" {
   name = "%s"
   dhcp = true
 }
-
-resource ` + RandomPassword + ` "server_image_password_updated" {
-  length           = 16
-  special          = false
-}
-`
+` + ServerImagePasswordUpdated
 
 const testAccCheckLoadbalancerConfigUpdate = `
 resource "ionoscloud_datacenter" "foobar" {

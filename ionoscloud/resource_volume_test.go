@@ -329,11 +329,7 @@ resource ` + VolumeResource + ` ` + VolumeTestResource + ` {
 	image_password = ` + RandomPassword + `.server_image_password_updated.result
 	user_data = "foo"
 }
-resource ` + RandomPassword + ` "server_image_password_updated" {
-  length           = 16
-  special          = false
-}
-` + ServerImagePassword
+` + ServerImagePassword + ServerImagePasswordUpdated
 
 var testAccDataSourceVolumeMatchId = testAccCheckVolumeConfigBasic + `
 data ` + VolumeResource + ` ` + VolumeDataSourceById + ` {

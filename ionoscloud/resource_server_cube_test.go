@@ -412,11 +412,7 @@ resource ` + ServerCubeResource + ` ` + ServerTestResource + ` {
     }
   }
 }
-resource ` + RandomPassword + ` "server_image_password_updated" {
-  length           = 16
-  special          = false
-}
-`
+` + ServerImagePasswordUpdated
 
 const testAccDataSourceCubeServerMatchId = testAccCheckCubeServerConfigBasic + `
 data ` + ServerCubeResource + ` ` + ServerDataSourceById + ` {
