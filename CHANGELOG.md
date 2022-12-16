@@ -3,9 +3,13 @@
  - Add update for mongo database resources
  - Add labels for servers
  - Add data source for DBaaS Mongo Templates
+ - Update mongo sdk to v1.2.0
 
 ### Refactor:
 - Refactor services, add generic `WaitForResourceToBeReady` and `WaitForResourceToBeDeleted` methods
+
+## Fixes
+ - Fix mongo user tests to check for cluster state instead of user state which was removed
 
 ## 6.3.3
 ### Feature
