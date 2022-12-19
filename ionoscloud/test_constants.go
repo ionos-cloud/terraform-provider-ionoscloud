@@ -4,8 +4,14 @@ const (
 	testAccCheckBackupUnitConfigBasic = `
 resource ` + BackupUnitResource + ` ` + BackupUnitTestResource + ` {
 	name        = "` + BackupUnitTestResource + `"
-	password    = "DemoPassword123$"
+	password    = ` + RandomPassword + `.backup_unit_password.result
 	email       = "example@ionoscloud.com"
+}
+
+resource ` + RandomPassword + ` "backup_unit_password" {
+  length           = 16
+  special          = true
+  override_special = "!#$%&*()-_=+[]{}<>:?"
 }
 `
 )
@@ -281,7 +287,7 @@ resource ` + ServerResource + ` ` + ServerTestResource + ` {
   availability_zone = "ZONE_1"
   cpu_family = "AMD_OPTERON"
   image_name ="ubuntu:latest"
-  image_password = "K3tTj8G14a3EgKyNeeiY"
+  image_password = ` + RandomPassword + `.server_image_password.result
   type = "ENTERPRISE"
   volume {
     name = "system"
@@ -309,7 +315,8 @@ resource ` + ServerResource + ` ` + ServerTestResource + ` {
 	  type = "EGRESS"
     }
   }
-}`
+}
+` + ServerImagePassword
 
 const testAccDataSourceDatacenterWrongNameError = testAccCheckDatacenterConfigBasic + `
 data ` + DatacenterResource + ` ` + DatacenterDataSourceMatching + ` {
@@ -319,9 +326,22 @@ data ` + DatacenterResource + ` ` + DatacenterDataSourceMatching + ` {
 
 const ImmutableError = "attribute is immutable, therefore not allowed in update requests"
 
+const ServerImagePassword = `
+resource ` + RandomPassword + ` "server_image_password" {
+  length           = 16
+  special          = false
+}
+`
+
+const ServerImagePasswordUpdated = `
+resource ` + RandomPassword + ` "server_image_password_updated" {
+  length           = 16
+  special          = false
+}
+`
+
 // Cube Server Constants
-const (
-	testAccCheckCubeServerConfigBasic = `
+const testAccCheckCubeServerConfigBasic = `
 data "ionoscloud_template" ` + ServerTestResource + ` {
     name = "CUBES XS"
     cores = 1
@@ -347,9 +367,8 @@ resource ` + ServerCubeResource + ` ` + ServerTestResource + ` {
   name = "` + ServerTestResource + `"
   datacenter_id = ` + DatacenterResource + `.` + DatacenterTestResource + `.id
   availability_zone = "ZONE_1"
-  cpu_family = "INTEL_SKYLAKE"
   image_name ="ubuntu:latest"
-  image_password = "K3tTj8G14a3EgKyNeeiY"
+  image_password = ` + RandomPassword + `.server_image_password.result
   
   volume {
     name = "system"
@@ -374,8 +393,8 @@ resource ` + ServerCubeResource + ` ` + ServerTestResource + ` {
 	  type = "EGRESS"
     }
   }
-}`
-)
+}
+` + ServerImagePassword
 
 const testAccCheckServerCreationWithLabels = `
 resource ` + DatacenterResource + ` ` + DatacenterTestResource + ` {

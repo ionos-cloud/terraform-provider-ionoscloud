@@ -6,6 +6,7 @@
 
 ### Refactor:
 - Refactor services, add generic `WaitForResourceToBeReady` and `WaitForResourceToBeDeleted` methods
+- Removed hard coded passwords from docs and tests and replaced with dynamically generated passwords
 
 ## 6.3.3
 ### Feature

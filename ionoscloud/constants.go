@@ -242,6 +242,7 @@ const (
 	DataSource        = "data"
 	UpdatedResources  = "test_updated"
 	DataSourcePartial = "test"
+	RandomPassword    = "random_password"
 )
 
 const ServersDataSource = "ionoscloud_servers"

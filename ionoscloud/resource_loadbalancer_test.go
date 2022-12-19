@@ -21,6 +21,7 @@ func TestAccLoadbalancerBasic(t *testing.T) {
 		PreCheck: func() {
 			testAccPreCheck(t)
 		},
+		ExternalProviders: randomProviderVersion343(),
 		ProviderFactories: testAccProviderFactories,
 		CheckDestroy:      testAccCheckLoadbalancerDestroyCheck,
 		Steps: []resource.TestStep{
@@ -136,7 +137,7 @@ resource "ionoscloud_server" "webserver" {
   availability_zone = "ZONE_1"
   cpu_family = "AMD_OPTERON"
   image_name = "ubuntu:latest"
-  image_password = "K3tTj8G14a3EgKyNeeiY"
+  image_password = ` + RandomPassword + `.server_image_password_updated.result
   volume {
     name = "system"
     size = 14
@@ -166,7 +167,8 @@ resource "ionoscloud_loadbalancer" "loadbalancer" {
   nic_ids = ["${ionoscloud_nic.database_nic.id}"]
   name = "%s"
   dhcp = true
-}`
+}
+` + ServerImagePasswordUpdated
 
 const testAccCheckLoadbalancerConfigUpdate = `
 resource "ionoscloud_datacenter" "foobar" {
@@ -182,7 +184,7 @@ resource "ionoscloud_server" "webserver" {
   availability_zone = "ZONE_1"
   cpu_family = "AMD_OPTERON"
   image_name = "ubuntu:latest"
-  image_password = "K3tTj8G14a3EgKyNeeiY"
+  image_password = ` + RandomPassword + `.server_image_password.result
   volume {
     name = "system"
     size = 14
@@ -195,17 +197,7 @@ resource "ionoscloud_server" "webserver" {
   }
 }
 
-resource "ionoscloud_nic" "database_nic1" {
-  datacenter_id = "${ionoscloud_datacenter.foobar.id}"
-  server_id = "${ionoscloud_server.webserver.id}"
-  lan = "2"
-  dhcp = true
-  firewall_active = true
-  name = "updated"
-  lifecycle {
-    ignore_changes = [ lan ]
-  }
-}
+` + ServerImagePassword + `
 
 resource "ionoscloud_nic" "database_nic2" {
   datacenter_id = "${ionoscloud_datacenter.foobar.id}"
@@ -219,9 +211,9 @@ resource "ionoscloud_nic" "database_nic2" {
   }
 }
 
-resource "ionoscloud_loadbalancer" "example" {
+resource "ionoscloud_loadbalancer" "loadbalancer" {
   datacenter_id = "${ionoscloud_datacenter.foobar.id}"
-  nic_ids = ["${ionoscloud_nic.database_nic1.id}","${ionoscloud_nic.database_nic2.id}"]
+  nic_ids = ["${ionoscloud_nic.database_nic2.id}"]
   name = "updated"
   dhcp = true
 }`

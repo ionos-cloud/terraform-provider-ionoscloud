@@ -18,7 +18,7 @@ resource "ionoscloud_user" "example1" {
   first_name              = "user1"
   last_name               = "user1"
   email                   = <unique_email>
-  password                = "abc123-321CBA"
+  password                = random_password.user1_password.result
   administrator           = false
   force_sec_auth          = false
 }
@@ -27,7 +27,7 @@ resource "ionoscloud_user" "example2" {
   first_name              = "user2"
   last_name               = "user2"
   email                   = <unique_email>
-  password                = "abc123-321CBA"
+  password                = random_password.user2_password.result
   administrator           = false
   force_sec_auth          = false
 }
@@ -48,6 +48,18 @@ resource "ionoscloud_group" "example" {
   access_and_manage_certificates = true
   manage_dbaas                   = true
   user_ids                = [ ionoscloud_user.example1.id, ionoscloud_user.example2.id ] 
+}
+
+resource "random_password" "user1_password" {
+  length           = 16
+  special          = true
+  override_special = "!#$%&*()-_=+[]{}<>:?"
+}
+
+resource "random_password" "user2_password" {
+  length           = 16
+  special          = true
+  override_special = "!#$%&*()-_=+[]{}<>:?"
 }
 ```
 

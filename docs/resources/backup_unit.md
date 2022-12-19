@@ -16,8 +16,13 @@ Manages a **Backup Unit** on IonosCloud.
 ```hcl
 resource "ionoscloud_backup_unit" "example" {
   name        = "Backup Unit Example"
-  password    = "pass12345"
+  password    = random_password.backup_unit_password.result
   email       = "example@example-domain.com"
+}
+resource "random_password" "backup_unit_password" {
+  length           = 16
+  special          = true
+  override_special = "!#$%&*()-_=+[]{}<>:?"
 }
 ```
 

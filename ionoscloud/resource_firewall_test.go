@@ -20,6 +20,7 @@ func TestAccFirewallBasic(t *testing.T) {
 		PreCheck: func() {
 			testAccPreCheck(t)
 		},
+		ExternalProviders: randomProviderVersion343(),
 		ProviderFactories: testAccProviderFactories,
 		CheckDestroy:      testAccCheckFirewallDestroyCheck,
 		Steps: []resource.TestStep{
@@ -214,7 +215,7 @@ resource ` + ServerResource + ` ` + ServerTestResource + ` {
   availability_zone = "ZONE_1"
   cpu_family = "AMD_OPTERON"
   image_name = "ubuntu:latest"
-  image_password = "K3tTj8G14a3EgKyNeeiY"
+  image_password = ` + RandomPassword + `.server_image_password.result
   volume {
     name = "system"
     size = 14
@@ -226,6 +227,8 @@ resource ` + ServerResource + ` ` + ServerTestResource + ` {
     firewall_active = true
   }
 }
+
+` + ServerImagePassword + `
 
 resource "ionoscloud_nic" "database_nic" {
   datacenter_id = ` + DatacenterResource + `.` + DatacenterTestResource + `.id

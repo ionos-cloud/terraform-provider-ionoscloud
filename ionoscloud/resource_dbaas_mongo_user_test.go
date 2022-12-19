@@ -21,6 +21,7 @@ func TestAccUserMongoBasic(t *testing.T) {
 		PreCheck: func() {
 			testAccPreCheck(t)
 		},
+		ExternalProviders: randomProviderVersion343(),
 		ProviderFactories: testAccProviderFactories,
 		CheckDestroy:      testAccCheckMongoUserDestroyCheck,
 		Steps: []resource.TestStep{
@@ -157,14 +158,20 @@ resource ` + DBaasMongoClusterResource + ` ` + DBaaSClusterTestResource + ` {
   
   credentials {
   	username = "username"
-	password = "password"
+	password = ` + RandomPassword + `.user_password.result
   }
+}
+
+resource ` + RandomPassword + ` "user_password" {
+  length           = 16
+  special          = true
+  override_special = "!#$%&*()-_=+[]{}<>:?"
 }
 
 resource ` + DBaasMongoUserResource + ` ` + UserTestResource + ` {
   cluster_id = ` + DBaasMongoClusterResource + `.` + DBaaSClusterTestResource + `.id 
   username = "` + UserTestResource + `"
-  password = "abc123-321CBA"
+  password = ` + RandomPassword + `.user_password.result
   roles {
     role = "read"
     database = "db1"
@@ -206,19 +213,31 @@ resource ` + DBaasMongoClusterResource + ` ` + DBaaSClusterTestResource + ` {
   
   credentials {
   	username = "username"
-	password = "password"
+	password = ` + RandomPassword + `.user_password.result
   }
 }
 
 resource ` + DBaasMongoUserResource + ` ` + UserTestResource + ` {
   cluster_id = ` + DBaasMongoClusterResource + `.` + DBaaSClusterTestResource + `.id 
   username = "` + UserTestResource + `"
-  password = "abc123-321CBAupdated"
+  password = ` + RandomPassword + `.user_password_updated.result
   roles {
     role = "readWrite"
     database = "db1"
   }
-}`
+}
+resource ` + RandomPassword + ` "user_password" {
+  length           = 16
+  special          = true
+  override_special = "!#$%&*()-_=+[]{}<>:?"
+}
+
+resource ` + RandomPassword + ` "user_password_updated" {
+  length           = 16
+  special          = true
+  override_special = "!#$%&*()-_=+[]{}<>:?"
+}
+`
 
 var testAccDataSourceMongoUserMatchId = testAccCheckMongoUserConfigBasic + `
 data ` + DBaasMongoUserResource + ` ` + UserDataSourceById + ` {

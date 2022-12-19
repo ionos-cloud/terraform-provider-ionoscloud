@@ -73,13 +73,18 @@ resource "ionoscloud_pg_cluster" "example" {
   }
   credentials {
     username              = "username"
-    password              = "password"
+    password              = random_password.cluster_password.result
   }
   synchronization_mode    = "ASYNCHRONOUS"
   from_backup {
     backup_id             = <backup_uuid>
     recovery_target_time  = "2021-12-06T13:54:08Z"
   }
+}
+resource "random_password" "cluster_password" {
+  length           = 16
+  special          = true
+  override_special = "!#$%&*()-_=+[]{}<>:?"
 }
 ```
 

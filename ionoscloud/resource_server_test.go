@@ -26,6 +26,7 @@ func TestAccServerBasic(t *testing.T) {
 		PreCheck: func() {
 			testAccPreCheck(t)
 		},
+		ExternalProviders: randomProviderVersion343(),
 		ProviderFactories: testAccProviderFactories,
 		CheckDestroy:      testAccCheckServerDestroyCheck,
 		Steps: []resource.TestStep{
@@ -58,7 +59,7 @@ func TestAccServerBasic(t *testing.T) {
 					resource.TestCheckResourceAttr(ServerResource+"."+ServerTestResource, "availability_zone", "ZONE_1"),
 					resource.TestCheckResourceAttr(ServerResource+"."+ServerTestResource, "cpu_family", "AMD_OPTERON"),
 					utils.TestImageNotNull(ServerResource, "boot_image"),
-					resource.TestCheckResourceAttr(ServerResource+"."+ServerTestResource, "image_password", "K3tTj8G14a3EgKyNeeiY"),
+					resource.TestCheckResourceAttrPair(ServerResource+"."+ServerTestResource, "image_password", RandomPassword+".server_image_password", "result"),
 					resource.TestCheckResourceAttr(ServerResource+"."+ServerTestResource, "type", "ENTERPRISE"),
 					resource.TestCheckResourceAttr(ServerResource+"."+ServerTestResource, "volume.0.name", "system"),
 					resource.TestCheckResourceAttr(ServerResource+"."+ServerTestResource, "volume.0.size", "5"),
@@ -162,7 +163,7 @@ func TestAccServerBasic(t *testing.T) {
 					resource.TestCheckResourceAttr(ServerResource+"."+ServerTestResource, "availability_zone", "ZONE_1"),
 					resource.TestCheckResourceAttr(ServerResource+"."+ServerTestResource, "cpu_family", "AMD_OPTERON"),
 					utils.TestImageNotNull(ServerResource, "boot_image"),
-					resource.TestCheckResourceAttr(ServerResource+"."+ServerTestResource, "image_password", "K3tTj8G14a3EgKyNeeiYsasad"),
+					resource.TestCheckResourceAttrPair(ServerResource+"."+ServerTestResource, "image_password", RandomPassword+".server_image_password_updated", "result"),
 					resource.TestCheckResourceAttr(ServerResource+"."+ServerTestResource, "volume.0.name", UpdatedResources),
 					resource.TestCheckResourceAttr(ServerResource+"."+ServerTestResource, "type", "ENTERPRISE"),
 					resource.TestCheckResourceAttr(ServerResource+"."+ServerTestResource, "volume.0.size", "6"),
@@ -232,6 +233,7 @@ func TestAccServerResolveImageName(t *testing.T) {
 		PreCheck: func() {
 			testAccPreCheck(t)
 		},
+		ExternalProviders: randomProviderVersion343(),
 		ProviderFactories: testAccProviderFactories,
 		CheckDestroy:      testAccCheckServerDestroyCheck,
 		Steps: []resource.TestStep{
@@ -245,7 +247,7 @@ func TestAccServerResolveImageName(t *testing.T) {
 					resource.TestCheckResourceAttr(ServerResource+"."+ServerTestResource, "availability_zone", "ZONE_1"),
 					resource.TestCheckResourceAttr(ServerResource+"."+ServerTestResource, "cpu_family", "INTEL_SKYLAKE"),
 					utils.TestImageNotNull(ServerResource, "boot_image"),
-					resource.TestCheckResourceAttr(ServerResource+"."+ServerTestResource, "image_password", "pass123456"),
+					resource.TestCheckResourceAttrPair(ServerResource+"."+ServerTestResource, "image_password", RandomPassword+".server_image_password", "result"),
 					resource.TestCheckResourceAttr(ServerResource+"."+ServerTestResource, "volume.0.name", ServerTestResource),
 					resource.TestCheckResourceAttr(ServerResource+"."+ServerTestResource, "volume.0.size", "5"),
 					resource.TestCheckResourceAttr(ServerResource+"."+ServerTestResource, "volume.0.disk_type", "SSD Standard"),
@@ -269,11 +271,12 @@ func TestAccServerWithSnapshot(t *testing.T) {
 		PreCheck: func() {
 			testAccPreCheck(t)
 		},
+		ExternalProviders: randomProviderVersion343(),
 		ProviderFactories: testAccProviderFactories,
 		CheckDestroy:      testAccCheckServerDestroyCheck,
 		Steps: []resource.TestStep{
 			{
-				Config: fmt.Sprintf(testAccCheckServerWithSnapshot),
+				Config: testAccCheckServerWithSnapshot,
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckServerExists(ServerResource+"."+ServerTestResource, &server),
 					resource.TestCheckResourceAttr(ServerResource+"."+ServerTestResource, "name", ServerTestResource),
@@ -302,6 +305,7 @@ func TestAccServerCubeServer(t *testing.T) {
 		PreCheck: func() {
 			testAccPreCheck(t)
 		},
+		ExternalProviders: randomProviderVersion343(),
 		ProviderFactories: testAccProviderFactories,
 		CheckDestroy:      testAccCheckServerDestroyCheck,
 		Steps: []resource.TestStep{
@@ -338,6 +342,7 @@ func TestAccServerWithICMP(t *testing.T) {
 		PreCheck: func() {
 			testAccPreCheck(t)
 		},
+		ExternalProviders: randomProviderVersion343(),
 		ProviderFactories: testAccProviderFactories,
 		CheckDestroy:      testAccCheckServerDestroyCheck,
 		Steps: []resource.TestStep{
@@ -351,7 +356,7 @@ func TestAccServerWithICMP(t *testing.T) {
 					resource.TestCheckResourceAttr(ServerResource+"."+ServerTestResource, "availability_zone", "ZONE_1"),
 					resource.TestCheckResourceAttr(ServerResource+"."+ServerTestResource, "cpu_family", "AMD_OPTERON"),
 					utils.TestImageNotNull(ServerResource, "boot_image"),
-					resource.TestCheckResourceAttr(ServerResource+"."+ServerTestResource, "image_password", "K3tTj8G14a3EgKyNeeiY"),
+					resource.TestCheckResourceAttrPair(ServerResource+"."+ServerTestResource, "image_password", RandomPassword+".server_image_password", "result"),
 					resource.TestCheckResourceAttr(ServerResource+"."+ServerTestResource, "volume.0.name", "system"),
 					resource.TestCheckResourceAttr(ServerResource+"."+ServerTestResource, "volume.0.size", "5"),
 					resource.TestCheckResourceAttr(ServerResource+"."+ServerTestResource, "volume.0.disk_type", "HDD"),
@@ -535,7 +540,7 @@ resource ` + ServerResource + ` ` + ServerTestResource + ` {
   availability_zone = "ZONE_1"
   cpu_family = "AMD_OPTERON"
   image_name ="ubuntu:latest"
-  image_password = "K3tTj8G14a3EgKyNeeiYsasad"
+  image_password = ` + RandomPassword + `.server_image_password_updated.result
   type = "ENTERPRISE"
   volume {
     name = "` + UpdatedResources + `"
@@ -562,7 +567,8 @@ resource ` + ServerResource + ` ` + ServerTestResource + ` {
 	  type = "INGRESS"
     }
   }
-}`
+}
+` + ServerImagePasswordUpdated
 
 const testAccDataSourceServerMatchId = testAccCheckServerConfigBasic + `
 data ` + ServerResource + ` ` + ServerDataSourceById + ` {
@@ -639,7 +645,7 @@ resource ` + ServerResource + ` ` + ServerTestResource + ` {
   availability_zone = "ZONE_1"
   cpu_family        = "INTEL_SKYLAKE" 
   image_name        = "ubuntu:latest"
-  image_password    = "pass123456"
+  image_password    = ` + RandomPassword + `.server_image_password.result
   volume {
     name           = "` + ServerTestResource + `"
     size              = 5
@@ -656,7 +662,12 @@ resource ` + ServerResource + ` ` + ServerTestResource + ` {
       port_range_end   = 22
     }
   }
-}`
+}
+resource ` + RandomPassword + ` "server_image_password" {
+  length           = 16
+  special          = false
+}
+`
 
 const testAccCheckServerWithSnapshot = `
 resource ` + DatacenterResource + ` ` + DatacenterTestResource + ` {
@@ -676,7 +687,7 @@ resource ` + ServerResource + ` "webserver" {
   availability_zone = "ZONE_1"
   cpu_family = "INTEL_SKYLAKE"
 	image_name = "ubuntu:latest"
-	image_password = "K3tTj8G14a3EgKyNeeiY"
+	image_password = ` + RandomPassword + `.server_image_password.result
   volume {
     name = "system"
     size = 5
@@ -713,6 +724,10 @@ resource ` + ServerResource + ` ` + ServerTestResource + ` {
     firewall_active = true
   }
 }
+resource ` + RandomPassword + ` "server_image_password" {
+  length           = 16
+  special          = false
+}
 `
 
 const testAccCheckCubeServerAndServersDataSource = `
@@ -740,7 +755,7 @@ resource "ionoscloud_server" ` + ServerTestResource + ` {
  image_name        = "ubuntu:latest"
  type              = "CUBE"
  template_uuid     = data.ionoscloud_template.` + ServerTestResource + `.id
- image_password = "K3tTj8G14a3EgKyNeeiY"
+ image_password = ` + RandomPassword + `.server_image_password.result
  datacenter_id = ` + DatacenterResource + `.` + DatacenterTestResource + `.id
  volume {
    name            = "` + ServerTestResource + `"
@@ -761,7 +776,12 @@ depends_on = [` + ServerResource + `.` + ServerTestResource + `]
   name = "type"
   value = "CUBE"
  }
-}`
+}
+resource ` + RandomPassword + ` "server_image_password" {
+  length           = 16
+  special          = false
+}
+`
 
 const testAccCheckServerNoFirewall = `
 resource ` + DatacenterResource + ` ` + DatacenterTestResource + ` {
@@ -781,7 +801,7 @@ resource ` + ServerResource + ` ` + ServerTestResource + ` {
   availability_zone = "ZONE_1"
   cpu_family = "AMD_OPTERON"
   image_name ="ubuntu:latest"
-  image_password = "K3tTj8G14a3EgKyNeeiY"
+  image_password = ` + RandomPassword + `.server_image_password.result
   volume {
     name = "system"
     size = 5
@@ -799,7 +819,12 @@ resource ` + ServerResource + ` ` + ServerTestResource + ` {
       icmp_code        = "1"
 	  }
   }
-}`
+}
+resource ` + RandomPassword + ` "server_image_password" {
+  length           = 16
+  special          = false
+}
+`
 
 const testAccCheckServerICMP = `
 resource ` + DatacenterResource + ` ` + DatacenterTestResource + ` {
@@ -819,7 +844,7 @@ resource ` + ServerResource + ` ` + ServerTestResource + ` {
   availability_zone = "ZONE_1"
   cpu_family = "AMD_OPTERON"
   image_name ="ubuntu:latest"
-  image_password = "K3tTj8G14a3EgKyNeeiY"
+  image_password = ` + RandomPassword + `.server_image_password.result
   volume {
     name = "system"
     size = 5
@@ -837,7 +862,12 @@ resource ` + ServerResource + ` ` + ServerTestResource + ` {
       icmp_code        = "0"
 	  }
     }
-}`
+}
+resource ` + RandomPassword + ` "server_image_password" {
+  length           = 16
+  special          = false
+}
+`
 
 const testAccCheckDataSourceServerWithLabels = testAccCheckServerCreationWithLabels + `
 data ` + ServerResource + ` ` + ServerDataSourceById + ` {
