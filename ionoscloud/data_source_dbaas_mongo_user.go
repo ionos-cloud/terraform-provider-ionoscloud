@@ -8,6 +8,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 	mongo "github.com/ionos-cloud/sdk-go-dbaas-mongo"
+	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/dbaas"
 	"strings"
 )
 
@@ -105,7 +106,7 @@ func dataSourceDbaasMongoReadUser(ctx context.Context, d *schema.ResourceData, m
 		user = results[0]
 	}
 
-	if err := setUserMongoData(d, &user); err != nil {
+	if err := dbaas.SetUserMongoData(d, &user); err != nil {
 		return diag.FromErr(err)
 	}
 	if user.Properties != nil && user.Properties.Username != nil {

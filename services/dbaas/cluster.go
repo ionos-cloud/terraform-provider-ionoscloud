@@ -8,6 +8,8 @@ import (
 	mongo "github.com/ionos-cloud/sdk-go-dbaas-mongo"
 	psql "github.com/ionos-cloud/sdk-go-dbaas-postgres"
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils"
+	"log"
+	"strings"
 	"time"
 )
 
@@ -106,6 +108,32 @@ func (c *MongoClient) DeleteCluster(ctx context.Context, clusterId string) (mong
 		return clusterResponse, apiResponse, err
 	}
 	return clusterResponse, nil, err
+}
+
+func (c *MongoClient) IsClusterReady(ctx context.Context, d *schema.ResourceData) (bool, error) {
+	cluster, apiResponse, err := c.sdkClient.ClustersApi.ClustersFindById(ctx, d.Id()).Execute()
+	apiResponse.LogInfo()
+	if err != nil {
+		return true, fmt.Errorf("check failed for cluster status: %w", err)
+	}
+
+	if cluster.Metadata == nil || cluster.Metadata.State == nil {
+		return false, fmt.Errorf("cluster metadata or state is empty for id %s", d.Id())
+	}
+
+	log.Printf("[INFO] state of the cluster %s ", string(*cluster.Metadata.State))
+	return strings.EqualFold(string(*cluster.Metadata.State), utils.Available), nil
+}
+
+func (c *MongoClient) IsClusterDeleted(ctx context.Context, d *schema.ResourceData) (bool, error) {
+	_, apiResponse, err := c.sdkClient.ClustersApi.ClustersFindById(ctx, d.Id()).Execute()
+	if err != nil {
+		if apiResponse.HttpNotFound() {
+			return true, nil
+		}
+		return true, fmt.Errorf("check failed for cluster deletion status: %w", err)
+	}
+	return false, nil
 }
 
 func GetDbaasPgSqlClusterDataCreate(d *schema.ResourceData) (*psql.CreateClusterRequest, error) {
@@ -686,6 +714,3 @@ func SetMongoDBTemplateData(d *schema.ResourceData, template mongo.TemplateRespo
 	}
 	return nil
 }
-
-// todo: remove once mongo removes this field
-const DefaultMongoDatabase = "admin"
