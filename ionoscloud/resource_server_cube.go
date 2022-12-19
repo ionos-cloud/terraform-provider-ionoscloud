@@ -49,11 +49,6 @@ func resourceCubeServer() *schema.Resource {
 				Type:     schema.TypeString,
 				Optional: true,
 			},
-			"cpu_family": {
-				Type:     schema.TypeString,
-				Optional: true,
-				Computed: true,
-			},
 			"boot_image": {
 				Type:     schema.TypeString,
 				Computed: true,
@@ -359,13 +354,6 @@ func resourceCubeServerCreate(ctx context.Context, d *schema.ResourceData, meta 
 		server.Properties.AvailabilityZone = &vStr
 	}
 
-	if v, ok := d.GetOk("cpu_family"); ok {
-		if v.(string) != "" {
-			vStr := v.(string)
-			server.Properties.CpuFamily = &vStr
-		}
-	}
-
 	serverType := "CUBE"
 	server.Properties.Type = &serverType
 
@@ -653,13 +641,6 @@ func resourceCubeServerRead(ctx context.Context, d *schema.ResourceData, meta in
 				return diags
 			}
 		}
-
-		if server.Properties.CpuFamily != nil {
-			if err := d.Set("cpu_family", *server.Properties.CpuFamily); err != nil {
-				diags := diag.FromErr(err)
-				return diags
-			}
-		}
 	}
 
 	if server.Entities != nil && server.Entities.Volumes != nil && server.Entities.Volumes.Items != nil && len(*server.Entities.Volumes.Items) > 0 &&
@@ -781,12 +762,6 @@ func resourceCubeServerUpdate(ctx context.Context, d *schema.ResourceData, meta 
 		_, n := d.GetChange("name")
 		nStr := n.(string)
 		request.Name = &nStr
-	}
-
-	if d.HasChange("cpu_family") {
-		_, n := d.GetChange("cpu_family")
-		nStr := n.(string)
-		request.CpuFamily = &nStr
 	}
 
 	if d.HasChange("boot_cdrom") {
@@ -1101,12 +1076,6 @@ func resourceCubeServerImport(ctx context.Context, d *schema.ResourceData, meta 
 		if server.Properties.AvailabilityZone != nil {
 			if err := d.Set("availability_zone", *server.Properties.AvailabilityZone); err != nil {
 				return nil, fmt.Errorf("error setting availability_zone %w", err)
-			}
-		}
-
-		if server.Properties.CpuFamily != nil {
-			if err := d.Set("cpu_family", *server.Properties.CpuFamily); err != nil {
-				return nil, fmt.Errorf("error setting cpu_family %w", err)
 			}
 		}
 	}

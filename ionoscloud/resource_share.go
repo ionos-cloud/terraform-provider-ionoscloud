@@ -53,9 +53,9 @@ func resourceShareCreate(ctx context.Context, d *schema.ResourceData, meta inter
 		Properties: &ionoscloud.GroupShareProperties{},
 	}
 
-	tempSharePrivilege := d.Get("edit_privilege").(bool)
+	tempSharePrivilege := d.Get("share_privilege").(bool)
 	request.Properties.SharePrivilege = &tempSharePrivilege
-	tempEditPrivilege := d.Get("share_privilege").(bool)
+	tempEditPrivilege := d.Get("edit_privilege").(bool)
 	request.Properties.EditPrivilege = &tempEditPrivilege
 
 	rsp, apiResponse, err := client.UserManagementApi.UmGroupsSharesPost(ctx, d.Get("group_id").(string), d.Get("resource_id").(string)).Resource(request).Execute()
