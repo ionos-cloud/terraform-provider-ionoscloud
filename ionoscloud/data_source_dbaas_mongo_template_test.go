@@ -1,3 +1,5 @@
+//go:build all || dbaas || mongo
+
 package ionoscloud
 
 import (
