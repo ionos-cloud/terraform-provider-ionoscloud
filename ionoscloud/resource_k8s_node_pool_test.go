@@ -239,8 +239,7 @@ func TestAccK8sNodePoolNoOptionalAndNodesDataSource(t *testing.T) {
 					resource.TestCheckResourceAttr(ResourceNameK8sNodePool, "node_count", "1"),
 					resource.TestCheckResourceAttr(ResourceNameK8sNodePool, "cores_count", "1"),
 					resource.TestCheckResourceAttr(ResourceNameK8sNodePool, "ram_size", "2048"),
-					resource.TestCheckResourceAttr(ResourceNameK8sNodePool, "storage_size", "40"),
-					resource.TestCheckResourceAttr(DataSource+"."+K8sNodePoolNodesResource+".nodes", "nodes.#", "1")),
+					resource.TestCheckResourceAttr(ResourceNameK8sNodePool, "storage_size", "40")),
 			},
 		},
 	})
