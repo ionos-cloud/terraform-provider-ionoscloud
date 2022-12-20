@@ -3,13 +3,15 @@
  - Add update for mongo database resources
  - Add labels for servers
  - Add data source for DBaaS Mongo Templates
+ - Update mongo sdk to v1.2.0
 
 ### Refactor:
 - Refactor services, add generic `WaitForResourceToBeReady` and `WaitForResourceToBeDeleted` methods
 - Removed hard coded passwords from docs and tests and replaced with dynamically generated passwords
 
-### Fixes
-- Fixes creating share resource edit and share privileges mix up
+## Fixes
+ - Fix mongo user tests to check for cluster state instead of user state which was removed
+ - Fixes creating share resource edit and share privileges mix up
 
 ## 6.3.3
 ### Feature

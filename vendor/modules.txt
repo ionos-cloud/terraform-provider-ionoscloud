@@ -158,7 +158,7 @@ github.com/ionos-cloud/sdk-go-cert-manager
 # github.com/ionos-cloud/sdk-go-container-registry v1.0.0
 ## explicit; go 1.18
 github.com/ionos-cloud/sdk-go-container-registry
-# github.com/ionos-cloud/sdk-go-dbaas-mongo v1.1.0
+# github.com/ionos-cloud/sdk-go-dbaas-mongo v1.2.0
 ## explicit; go 1.18
 github.com/ionos-cloud/sdk-go-dbaas-mongo
 # github.com/ionos-cloud/sdk-go-dbaas-postgres v1.0.4
