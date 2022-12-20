@@ -11,6 +11,7 @@
 
 ## Fixes
  - Fix mongo user tests to check for cluster state instead of user state which was removed
+ - Fixes creating share resource edit and share privileges mix up
 
 ## 6.3.3
 ### Feature
