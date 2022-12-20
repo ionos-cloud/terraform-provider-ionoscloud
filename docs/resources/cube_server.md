@@ -66,7 +66,6 @@ resource "random_password" "server_image_password" {
 - `image_name` - (Optional)[string] The name, ID or alias of the image. May also be a snapshot ID. It is required if `licence_type` is not provided. Attribute is immutable.
 - `availability_zone` - (Optional)[string] The availability zone in which the server should exist. This property is immutable.
 - `licence_type` - (Optional)[string] Sets the OS type of the server.
-- `cpu_family` - (Optional)[string] Sets the CPU type. "AMD_OPTERON", "INTEL_XEON" or "INTEL_SKYLAKE".
 - `volume` - (Required) See the [Volume](volume.md) section.
 - `nic` - (Required) See the [Nic](nic.md) section.
 - `boot_volume` - (Computed) The associated boot volume.
