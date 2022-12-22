@@ -26,10 +26,10 @@ func resourcek8sCluster() *schema.Resource {
 
 		Schema: map[string]*schema.Schema{
 			"name": {
-				Type:         schema.TypeString,
-				Description:  "The desired name for the cluster",
-				Required:     true,
-				ValidateFunc: validation.All(validation.StringIsNotWhiteSpace),
+				Type:             schema.TypeString,
+				Description:      "The desired name for the cluster",
+				Required:         true,
+				ValidateDiagFunc: validation.ToDiagFunc(validation.StringIsNotWhiteSpace),
 			},
 			"k8s_version": {
 				Type:             schema.TypeString,
@@ -47,16 +47,16 @@ func resourcek8sCluster() *schema.Resource {
 				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{
 						"time": {
-							Type:         schema.TypeString,
-							Description:  "A clock time in the day when maintenance is allowed",
-							Required:     true,
-							ValidateFunc: validation.All(validation.StringIsNotWhiteSpace),
+							Type:             schema.TypeString,
+							Description:      "A clock time in the day when maintenance is allowed",
+							Required:         true,
+							ValidateDiagFunc: validation.ToDiagFunc(validation.StringIsNotWhiteSpace),
 						},
 						"day_of_the_week": {
-							Type:         schema.TypeString,
-							Description:  "Day of the week when maintenance is allowed",
-							Required:     true,
-							ValidateFunc: validation.All(validation.StringIsNotWhiteSpace),
+							Type:             schema.TypeString,
+							Description:      "Day of the week when maintenance is allowed",
+							Required:         true,
+							ValidateDiagFunc: validation.ToDiagFunc(validation.StringIsNotWhiteSpace),
 						},
 					},
 				},
@@ -64,7 +64,6 @@ func resourcek8sCluster() *schema.Resource {
 			"viable_node_pool_versions": {
 				Type:        schema.TypeList,
 				Description: "List of versions that may be used for node pools under this cluster",
-				Optional:    true,
 				Computed:    true,
 				Elem: &schema.Schema{
 					Type: schema.TypeString,

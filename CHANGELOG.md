@@ -12,6 +12,7 @@
 ## Fixes
  - Fix mongo user tests to check for cluster state instead of user state which was removed
  - Fixes creating share resource edit and share privileges mix up
+ - `viable_node_pool_versions`  in k8s cluster is no longer optional, is only computed
 
 ## 6.3.3
 ### Feature
