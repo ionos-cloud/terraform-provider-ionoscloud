@@ -223,7 +223,7 @@ func resourceDbaasMongoClusterDelete(ctx context.Context, d *schema.ResourceData
 		return diags
 	}
 
-	err = utils.WaitForResourceToBeReady(ctx, d, client.IsClusterDeleted)
+	err = utils.WaitForResourceToBeDeleted(ctx, d, client.IsClusterDeleted)
 	if err != nil {
 		return diag.FromErr(fmt.Errorf("failed checking if deleted %w", err))
 	}

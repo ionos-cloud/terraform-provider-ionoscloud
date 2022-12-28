@@ -11,9 +11,9 @@ import (
 )
 
 func (c *MongoClient) CreateUser(ctx context.Context, clusterId string, user mongo.User) (mongo.User, utils.ApiResponseInfo, error) {
-	user, apiResponse, err := c.sdkClient.UsersApi.ClustersUsersPost(ctx, clusterId).User(user).Execute()
+	userResp, apiResponse, err := c.sdkClient.UsersApi.ClustersUsersPost(ctx, clusterId).User(user).Execute()
 	apiResponse.LogInfo()
-	return user, apiResponse, err
+	return userResp, apiResponse, err
 }
 
 func (c *MongoClient) UpdateUser(ctx context.Context, clusterId, username string, patchUserReq mongo.PatchUserRequest) (mongo.User, utils.ApiResponseInfo, error) {
@@ -77,7 +77,7 @@ func (c *MongoClient) IsUserDeleted(ctx context.Context, d *schema.ResourceData)
 		if apiResponse.HttpNotFound() {
 			return true, nil
 		}
-		return true, fmt.Errorf("error checking user deletion status: %w", err)
+		return false, fmt.Errorf("error checking user deletion status: %w", err)
 	}
 	return false, nil
 }
