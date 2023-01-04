@@ -363,9 +363,26 @@ func TestAccServerWithICMP(t *testing.T) {
 					resource.TestCheckResourceAttrPair(ServerResource+"."+ServerTestResource, "nic.0.lan", LanResource+"."+LanTestResource, "id"),
 					resource.TestCheckResourceAttr(ServerResource+"."+ServerTestResource, "nic.0.name", "system"),
 					resource.TestCheckResourceAttr(ServerResource+"."+ServerTestResource, "nic.0.dhcp", "true"),
-					resource.TestCheckResourceAttr(ServerResource+"."+ServerTestResource, "nic.0.firewall_active", "false"),
-					resource.TestCheckResourceAttr(ServerResource+"."+ServerTestResource, "nic.0.firewall.0.icmp_type", "10"),
-					resource.TestCheckResourceAttr(ServerResource+"."+ServerTestResource, "nic.0.firewall.0.icmp_code", "1"),
+				),
+			},
+			{
+				Config: testAccCheckSeparateFirewall,
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckServerExists(ServerResource+"."+ServerTestResource, &server),
+					resource.TestCheckResourceAttr(ServerResource+"."+ServerTestResource, "name", ServerTestResource),
+					resource.TestCheckResourceAttr(ServerResource+"."+ServerTestResource, "cores", "1"),
+					resource.TestCheckResourceAttr(ServerResource+"."+ServerTestResource, "ram", "1024"),
+					resource.TestCheckResourceAttr(ServerResource+"."+ServerTestResource, "availability_zone", "ZONE_1"),
+					resource.TestCheckResourceAttr(ServerResource+"."+ServerTestResource, "cpu_family", "AMD_OPTERON"),
+					utils.TestImageNotNull(ServerResource, "boot_image"),
+					resource.TestCheckResourceAttrPair(ServerResource+"."+ServerTestResource, "image_password", RandomPassword+".server_image_password", "result"),
+					resource.TestCheckResourceAttr(ServerResource+"."+ServerTestResource, "volume.0.name", "system"),
+					resource.TestCheckResourceAttr(ServerResource+"."+ServerTestResource, "volume.0.size", "5"),
+					resource.TestCheckResourceAttr(ServerResource+"."+ServerTestResource, "volume.0.disk_type", "HDD"),
+					resource.TestCheckResourceAttrPair(ServerResource+"."+ServerTestResource, "nic.0.lan", LanResource+"."+LanTestResource, "id"),
+					resource.TestCheckResourceAttr(FirewallResource+"."+FirewallTestResource, "name", "allow-icmp"),
+					resource.TestCheckResourceAttr(FirewallResource+"."+FirewallTestResource, "protocol", "ICMP"),
+					resource.TestCheckResourceAttr(FirewallResource+"."+FirewallTestResource, "type", "INGRESS"),
 				),
 			},
 			{
@@ -378,6 +395,9 @@ func TestAccServerWithICMP(t *testing.T) {
 					resource.TestCheckResourceAttr(ServerResource+"."+ServerTestResource, "nic.0.firewall.0.name", ServerTestResource),
 					resource.TestCheckResourceAttr(ServerResource+"."+ServerTestResource, "nic.0.firewall.0.icmp_type", "12"),
 					resource.TestCheckResourceAttr(ServerResource+"."+ServerTestResource, "nic.0.firewall.0.icmp_code", "0"),
+					resource.TestCheckResourceAttr(FirewallResource+"."+FirewallTestResource, "name", "allow-icmp"),
+					resource.TestCheckResourceAttr(FirewallResource+"."+FirewallTestResource, "protocol", "ICMP"),
+					resource.TestCheckResourceAttr(FirewallResource+"."+FirewallTestResource, "type", "INGRESS"),
 				),
 			},
 		},
@@ -812,13 +832,51 @@ resource ` + ServerResource + ` ` + ServerTestResource + ` {
     name = "system"
     dhcp = true
     firewall_active = false
-    firewall {
-      protocol         = "ICMP"
-      name             = "` + ServerTestResource + `"
-      icmp_type        = "10"
-      icmp_code        = "1"
-	  }
   }
+}
+resource ` + RandomPassword + ` "server_image_password" {
+  length           = 16
+  special          = false
+}
+`
+const testAccCheckSeparateFirewall = `
+resource ` + DatacenterResource + ` ` + DatacenterTestResource + ` {
+	name       = "server-test"
+	location = "us/las"
+}
+resource ` + LanResource + ` ` + LanTestResource + ` {
+  datacenter_id = ` + DatacenterResource + `.` + DatacenterTestResource + `.id
+  public = true
+  name = "public"
+}
+resource ` + ServerResource + ` ` + ServerTestResource + ` {
+  name = "` + ServerTestResource + `"
+  datacenter_id = ` + DatacenterResource + `.` + DatacenterTestResource + `.id
+  cores = 1
+  ram = 1024
+  availability_zone = "ZONE_1"
+  cpu_family = "AMD_OPTERON"
+  image_name ="ubuntu:latest"
+  image_password = ` + RandomPassword + `.server_image_password.result
+  volume {
+    name = "system"
+    size = 5
+	disk_type = "HDD"
+}
+  nic {
+    lan             = ` + LanResource + `.` + LanTestResource + `.id
+    name 			= "system"
+    dhcp            = true
+    firewall_active = true
+    }
+}
+resource ` + FirewallResource + ` ` + FirewallTestResource + ` {
+  datacenter_id = ` + DatacenterResource + `.` + DatacenterTestResource + `.id
+  server_id           = ` + ServerResource + `.` + ServerTestResource + `.id
+  nic_id              = ` + ServerResource + `.` + ServerTestResource + `.nic[0].id
+  protocol            = "ICMP"
+  name                = "allow-icmp"
+  type                = "INGRESS"
 }
 resource ` + RandomPassword + ` "server_image_password" {
   length           = 16
@@ -862,6 +920,14 @@ resource ` + ServerResource + ` ` + ServerTestResource + ` {
       icmp_code        = "0"
 	  }
     }
+}
+resource ` + FirewallResource + ` ` + FirewallTestResource + ` {
+  datacenter_id = ` + DatacenterResource + `.` + DatacenterTestResource + `.id
+  server_id           = ` + ServerResource + `.` + ServerTestResource + `.id
+  nic_id              = ` + ServerResource + `.` + ServerTestResource + `.nic[0].id
+  protocol            = "ICMP"
+  name                = "allow-icmp"
+  type                = "INGRESS"
 }
 resource ` + RandomPassword + ` "server_image_password" {
   length           = 16

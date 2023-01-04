@@ -1371,10 +1371,6 @@ func setResourceServerData(ctx context.Context, client *ionoscloud.APIClient, d 
 	var firewallId string
 	if primaryFirewallOk {
 		firewallId = d.Get("firewallrule_id").(string)
-	} else {
-		if nic.HasEntities() && nic.Entities.HasFirewallrules() && nic.Entities.Firewallrules.HasItems() && len(*nic.Entities.Firewallrules.Items) > 0 {
-			firewallId = *(*nic.Entities.Firewallrules.Items)[0].Id
-		}
 	}
 	if firewallId != "" {
 
