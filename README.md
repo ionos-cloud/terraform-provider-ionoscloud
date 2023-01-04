@@ -8,7 +8,8 @@
 [![Vulnerabilities](https://sonarcloud.io/api/project_badges/measure?project=terraform-provider&metric=vulnerabilities)](https://sonarcloud.io/dashboard?id=terraform-provider)
 [![Release](https://img.shields.io/github/v/release/ionos-cloud/terraform-provider-ionoscloud.svg)](https://github.com/ionos-cloud/terraform-provider-ionoscloud/releases/latest)
 [![Release Date](https://img.shields.io/github/release-date/ionos-cloud/terraform-provider-ionoscloud.svg)](https://github.com/ionos-cloud/terraform-provider-ionoscloud/releases/latest)
-[![Daily compute-engine test run](https://github.com/ionos-cloud/terraform-provider-ionoscloud/actions/workflows/daily-test-run.yml/badge.svg)](https://github.com/ionos-cloud/terraform-provider-ionoscloud/actions/workflows/daily-test-run.yml)
+[![Compute-engine test run](https://github.com/ionos-cloud/terraform-provider-ionoscloud/actions/workflows/compute-test-run.yml/badge.svg)](https://github.com/ionos-cloud/terraform-provider-ionoscloud/actions/workflows/compute-test-run.yml)
+[![DBaaS test run](https://github.com/ionos-cloud/terraform-provider-ionoscloud/actions/workflows/dbaas-test-run.yml/badge.svg)](https://github.com/ionos-cloud/terraform-provider-ionoscloud/actions/workflows/dbaas-test-run.yml)
 [![Go](https://img.shields.io/github/go-mod/go-version/ionos-cloud/terraform-provider-ionoscloud.svg)](https://github.com/ionos-cloud/terraform-provider-ionoscloud)
 
 ![Alt text](.github/IONOS.CLOUD.BLU.svg?raw=true "Title")
