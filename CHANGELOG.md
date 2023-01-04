@@ -11,6 +11,7 @@
 
 ## Fixes
  - Fix mongo user tests to check for cluster state instead of user state which was removed
+ - defining a separate firewall rule for server should not set firewall_id inside server resource, as it moves the firewall resource inside the server on re-apply
  - Fixes creating share resource edit and share privileges mix up
  - `viable_node_pool_versions`  in k8s cluster is no longer optional, is only computed
 
