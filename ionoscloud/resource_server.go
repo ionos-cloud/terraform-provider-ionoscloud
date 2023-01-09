@@ -1070,8 +1070,8 @@ func resourceServerDelete(ctx context.Context, d *schema.ResourceData, meta inte
 func resourceServerImport(ctx context.Context, d *schema.ResourceData, meta interface{}) ([]*schema.ResourceData, error) {
 	parts := strings.Split(d.Id(), "/")
 
-	if len(parts) != 2 || parts[0] == "" || parts[1] == "" {
-		return nil, fmt.Errorf("invalid import id %q. Expecting {datacenter}/{server}", d.Id())
+	if len(parts) < 2 || parts[0] == "" || parts[1] == "" {
+		return nil, fmt.Errorf("invalid import id %q. Expecting {datacenter UUID}/{server UUID}", d.Id())
 	}
 
 	datacenterId := parts[0]
@@ -1089,31 +1089,49 @@ func resourceServerImport(ctx context.Context, d *schema.ResourceData, meta inte
 		}
 		return nil, fmt.Errorf("error occured while fetching a server ID %s %w", d.Id(), err)
 	}
-
+	var primaryNic ionoscloud.Nic
 	d.SetId(*server.Id)
-
-	firstNicItem := (*server.Entities.Nics.Items)[0]
-	if server.Entities != nil && server.Entities.Nics != nil && firstNicItem.Properties != nil &&
-		firstNicItem.Properties.Ips != nil &&
-		len(*firstNicItem.Properties.Ips) > 0 {
-		log.Printf("[DEBUG] set primary_ip to %s", (*firstNicItem.Properties.Ips)[0])
-		if err := d.Set("primary_ip", (*firstNicItem.Properties.Ips)[0]); err != nil {
-			return nil, fmt.Errorf("error while setting primary ip %s: %w", d.Id(), err)
+	primaryNicId := ""
+	//first we try to get primary nic from parts, then if that fails, we get it from entities.
+	if len(parts) > 2 {
+		primaryNicId = parts[2]
+		if err := d.Set("primary_nic", primaryNicId); err != nil {
+			return nil, fmt.Errorf("error setting primary_nic id %w", err)
+		}
+	} else {
+		if server.Entities != nil && server.Entities.Nics != nil && len(*server.Entities.Nics.Items) > 0 {
+			primaryNic = (*server.Entities.Nics.Items)[0]
+		}
+	}
+	if primaryNicId != "" {
+		if server.Entities != nil && server.Entities.Nics != nil && server.Entities.Nics.Items != nil {
+			for _, nic := range *server.Entities.Nics.Items {
+				if *nic.Id == primaryNicId {
+					primaryNic = nic
+					break
+				}
+			}
 		}
 	}
 
+	log.Printf("[DEBUG] set primary_ip to %s", (*primaryNic.Properties.Ips)[0])
+	if err := d.Set("primary_ip", (*primaryNic.Properties.Ips)[0]); err != nil {
+		return nil, fmt.Errorf("error while setting primary ip %s: %w", d.Id(), err)
+	}
 	if err := d.Set("datacenter_id", datacenterId); err != nil {
 		return nil, err
 	}
 
-	if err := setResourceServerData(ctx, client, d, &server); err != nil {
-		return nil, err
-	}
 	if len(parts) > 3 {
 		if err := d.Set("firewallrule_id", parts[3]); err != nil {
 			return nil, fmt.Errorf("error setting firewallrule_id %w", err)
 		}
 	}
+
+	if err := setResourceServerData(ctx, client, d, &server); err != nil {
+		return nil, err
+	}
+
 	d.SetId(parts[1])
 
 	return []*schema.ResourceData{d}, nil
