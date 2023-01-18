@@ -16,19 +16,12 @@ type BackupService interface {
 
 func (c *PsqlClient) GetClusterBackups(ctx context.Context, clusterId string) (dbaas.ClusterBackupList, *dbaas.APIResponse, error) {
 	backups, apiResponse, err := c.sdkClient.BackupsApi.ClusterBackupsGet(ctx, clusterId).Execute()
-	if apiResponse != nil {
-		return backups, apiResponse, err
-
-	}
-	return backups, nil, err
+	return backups, apiResponse, err
 }
 
 func (c *PsqlClient) GetAllBackups(ctx context.Context) (dbaas.ClusterBackupList, *dbaas.APIResponse, error) {
 	backups, apiResponse, err := c.sdkClient.BackupsApi.ClustersBackupsGet(ctx).Execute()
-	if apiResponse != nil {
-		return backups, apiResponse, err
-	}
-	return backups, nil, err
+	return backups, apiResponse, err
 }
 
 func SetPgSqlClusterBackupData(d *schema.ResourceData, clusterBackups *dbaas.ClusterBackupList) diag.Diagnostics {

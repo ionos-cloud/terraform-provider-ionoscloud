@@ -11,19 +11,12 @@ import (
 
 func (c *PsqlClient) GetClusterVersions(ctx context.Context, clusterId string) (dbaas.PostgresVersionList, *dbaas.APIResponse, error) {
 	versions, apiResponse, err := c.sdkClient.ClustersApi.ClusterPostgresVersionsGet(ctx, clusterId).Execute()
-	if apiResponse != nil {
-		return versions, apiResponse, err
-
-	}
-	return versions, nil, err
+	return versions, apiResponse, err
 }
 
 func (c *PsqlClient) GetAllVersions(ctx context.Context) (dbaas.PostgresVersionList, *dbaas.APIResponse, error) {
 	versions, apiResponse, err := c.sdkClient.ClustersApi.PostgresVersionsGet(ctx).Execute()
-	if apiResponse != nil {
-		return versions, apiResponse, err
-	}
-	return versions, nil, err
+	return versions, apiResponse, err
 }
 
 func SetPgSqlVersionsData(d *schema.ResourceData, postgresVersions dbaas.PostgresVersionList) diag.Diagnostics {

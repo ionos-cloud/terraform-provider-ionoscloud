@@ -185,7 +185,7 @@ Resource Server can be imported using the `resource id` and the `datacenter id`,
 ```shell
 terraform import ionoscloud_server.myserver {datacenter uuid}/{server uuid}
 ```
-Optionally, you can pass `primary_nic` and `firewallrule_id` so terraform will know to import aso the first nic and firewall rule(if it exists on the server):
+Optionally, you can pass `primary_nic` and `firewallrule_id` so terraform will know to import also the first nic and firewall rule (if it exists on the server):
 ```shell
 terraform import ionoscloud_server.myserver {datacenter uuid}/{server uuid}/{primary nic id}/{firewall rule id}
 ```
