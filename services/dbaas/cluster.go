@@ -15,11 +15,7 @@ import (
 
 func (c *PsqlClient) GetCluster(ctx context.Context, clusterId string) (psql.ClusterResponse, *psql.APIResponse, error) {
 	cluster, apiResponse, err := c.sdkClient.ClustersApi.ClustersFindById(ctx, clusterId).Execute()
-	if apiResponse != nil {
-		return cluster, apiResponse, err
-
-	}
-	return cluster, nil, err
+	return cluster, apiResponse, err
 }
 
 func (c *MongoClient) GetCluster(ctx context.Context, clusterId string) (mongo.ClusterResponse, *mongo.APIResponse, error) {
@@ -34,10 +30,7 @@ func (c *PsqlClient) ListClusters(ctx context.Context, filterName string) (psql.
 		request = request.FilterName(filterName)
 	}
 	clusters, apiResponse, err := c.sdkClient.ClustersApi.ClustersGetExecute(request)
-	if apiResponse != nil {
-		return clusters, apiResponse, err
-	}
-	return clusters, nil, err
+	return clusters, apiResponse, err
 }
 
 func (c *MongoClient) ListClusters(ctx context.Context, filterName string) (mongo.ClusterList, *mongo.APIResponse, error) {
@@ -47,10 +40,7 @@ func (c *MongoClient) ListClusters(ctx context.Context, filterName string) (mong
 	}
 	clusters, apiResponse, err := c.sdkClient.ClustersApi.ClustersGetExecute(request)
 	apiResponse.LogInfo()
-	if apiResponse != nil {
-		return clusters, apiResponse, err
-	}
-	return clusters, nil, err
+	return clusters, apiResponse, err
 }
 
 func (c *MongoClient) GetTemplates(ctx context.Context) (mongo.TemplateList, *mongo.APIResponse, error) {
@@ -78,18 +68,12 @@ func (c *MongoClient) UpdateCluster(ctx context.Context, clusterId string, clust
 
 func (c *PsqlClient) UpdateCluster(ctx context.Context, clusterId string, cluster psql.PatchClusterRequest) (psql.ClusterResponse, *psql.APIResponse, error) {
 	clusterResponse, apiResponse, err := c.sdkClient.ClustersApi.ClustersPatch(ctx, clusterId).PatchClusterRequest(cluster).Execute()
-	if apiResponse != nil {
-		return clusterResponse, apiResponse, err
-	}
-	return clusterResponse, nil, err
+	return clusterResponse, apiResponse, err
 }
 
 func (c *PsqlClient) DeleteCluster(ctx context.Context, clusterId string) (psql.ClusterResponse, *psql.APIResponse, error) {
 	clusterResponse, apiResponse, err := c.sdkClient.ClustersApi.ClustersDelete(ctx, clusterId).Execute()
-	if apiResponse != nil {
-		return clusterResponse, apiResponse, err
-	}
-	return clusterResponse, nil, err
+	return clusterResponse, apiResponse, err
 }
 
 func (c *MongoClient) DeleteCluster(ctx context.Context, clusterId string) (mongo.ClusterResponse, *mongo.APIResponse, error) {
