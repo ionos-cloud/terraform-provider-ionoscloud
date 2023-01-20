@@ -35,7 +35,7 @@ resource "ionoscloud_server" "example" {
     availability_zone     = "ZONE_1"
     cpu_family            = "AMD_OPTERON"
     image_name            = "Ubuntu-20.04"
-    image_password        = "K3tTj8G14a3EgKyNeeiY"
+    image_password        = random_password.server_image_password.result
     volume {
       name                = "system"
       size                = 14
@@ -58,6 +58,10 @@ resource "ionoscloud_nic" "example" {
     firewall_type         = "INGRESS"
     ips                   = [ ionoscloud_ipblock.example.ips[0], ionoscloud_ipblock.example.ips[1] ]
 }
+resource "random_password" "server_image_password" {
+  length           = 16
+  special          = false
+}
 ```
 
 ## Argument reference
@@ -70,6 +74,7 @@ resource "ionoscloud_nic" "example" {
 - `ips` - (Optional)[list] Collection of IP addresses assigned to a nic. Explicitly assigned public IPs need to come from reserved IP blocks, Passing value null or empty array will assign an IP address automatically.
 - `firewall_active` - (Optional)[Boolean] If this resource is set to true and is nested under a server resource firewall, with open SSH port, resource must be nested under the NIC.
 - `firewall_type` - (Optional) [String] The type of firewall rules that will be allowed on the NIC. If it is not specified it will take the default value INGRESS
+- `id` - (Computed) The ID of the NIC.
 - `mac` - (Computed) The MAC address of the NIC.
 * `device_number`- (Computed) The Logical Unit Number (LUN) of the storage volume. Null if this NIC was created from CloudAPI and no DCD changes were done on the Datacenter.
 * `pci_slot`- (Computed) The PCI slot number of the Nic.

@@ -96,9 +96,10 @@ func dataSourceBackupUnitRead(ctx context.Context, d *schema.ResourceData, meta 
 			backupUnits, apiResponse, err := client.BackupUnitsApi.BackupunitsGet(ctx).Depth(1).Execute()
 			logApiRequestTime(apiResponse)
 
-			if err != nil {
-				return diag.FromErr(fmt.Errorf("an error occurred while fetching backup unit: %s", err.Error()))
-			}
+		if err != nil {
+			return diag.FromErr(fmt.Errorf("an error occurred while fetching backup unit: %s", err.Error()))
+		}
+
 
 			if backupUnits.Items != nil {
 				for _, bu := range *backupUnits.Items {

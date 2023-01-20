@@ -30,6 +30,7 @@ func TestAccLanIPFailoverBasic(t *testing.T) {
 		PreCheck: func() {
 			testAccPreCheck(t)
 		},
+		ExternalProviders: randomProviderVersion343(),
 		ProviderFactories: testAccProviderFactories,
 		CheckDestroy:      testAccCheckLanIPFailoverDestroyCheck,
 		Steps: []resource.TestStep{
@@ -130,7 +131,7 @@ func testAccCheckLanIPFailoverDestroyCheck(s *terraform.State) error {
 		logApiRequestTime(apiResponse)
 
 		if err != nil {
-			if apiResponse == nil || apiResponse.Response != nil && apiResponse.StatusCode != 404 {
+			if !httpNotFound(apiResponse) {
 				return fmt.Errorf("an error occured while fetching a Lan ID %s %s", rs.Primary.Attributes["lan_id"], err)
 			}
 		} else {
@@ -181,7 +182,7 @@ resource "ionoscloud_server" "webserver" {
   availability_zone = "ZONE_1"
   cpu_family = "AMD_OPTERON"
   image_name = "ubuntu:latest"
-  image_password = "K3tTj8G14a3EgKyNeeiY"
+  image_password = ` + RandomPassword + `.server_image_password.result
   volume {
     name = "system"
     size = 15
@@ -201,7 +202,7 @@ resource "ionoscloud_ipfailover" "failover-test" {
   ip ="${ionoscloud_ipblock.webserver_ip.ips[0]}"
   nicuuid= "${ionoscloud_server.webserver.primary_nic}"
 }
-`
+` + ServerImagePassword
 
 const testAccCheckLanIPFailoverConfigUpdate = `
 resource "ionoscloud_datacenter" "foobar" {
@@ -229,7 +230,7 @@ resource "ionoscloud_server" "webserver" {
   availability_zone = "ZONE_1"
   cpu_family = "AMD_OPTERON"
   image_name = "ubuntu:latest"
-  image_password = "K3tTj8G14a3EgKyNeeiY"
+  image_password = ` + RandomPassword + `.server_image_password.result
   volume {
     name = "system"
     size = 15
@@ -242,7 +243,7 @@ resource "ionoscloud_server" "webserver" {
      ips =["${ionoscloud_ipblock.webserver_ip.ips[0]}"]
   }
 }
-`
+` + ServerImagePassword
 
 var testAccDataSourceIpFailoverConfigBasic = testAccCheckLanIPFailoverConfig + `
 data ` + ResourceIpFailover + " " + ipfailoverName + `{

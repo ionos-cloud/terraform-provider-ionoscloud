@@ -53,9 +53,9 @@ func resourceShareCreate(ctx context.Context, d *schema.ResourceData, meta inter
 		Properties: &ionoscloud.GroupShareProperties{},
 	}
 
-	tempSharePrivilege := d.Get("edit_privilege").(bool)
+	tempSharePrivilege := d.Get("share_privilege").(bool)
 	request.Properties.SharePrivilege = &tempSharePrivilege
-	tempEditPrivilege := d.Get("share_privilege").(bool)
+	tempEditPrivilege := d.Get("edit_privilege").(bool)
 	request.Properties.EditPrivilege = &tempEditPrivilege
 
 	rsp, apiResponse, err := client.UserManagementApi.UmGroupsSharesPost(ctx, d.Get("group_id").(string), d.Get("resource_id").(string)).Resource(request).Execute()
@@ -87,7 +87,7 @@ func resourceShareRead(ctx context.Context, d *schema.ResourceData, meta interfa
 	rsp, apiResponse, err := client.UserManagementApi.UmGroupsSharesFindByResourceId(ctx, d.Get("group_id").(string), d.Get("resource_id").(string)).Execute()
 	logApiRequestTime(apiResponse)
 	if err != nil {
-		if apiResponse != nil && apiResponse.Response != nil && apiResponse.StatusCode == 404 {
+		if httpNotFound(apiResponse) {
 			d.SetId("")
 			return nil
 		}
@@ -146,7 +146,7 @@ func resourceShareDelete(ctx context.Context, d *schema.ResourceData, meta inter
 	apiResponse, err := client.UserManagementApi.UmGroupsSharesDelete(ctx, groupId, resourceId).Execute()
 	logApiRequestTime(apiResponse)
 	if err != nil {
-		if apiResponse != nil && apiResponse.Response != nil && apiResponse.StatusCode == 404 {
+		if httpNotFound(apiResponse) {
 			diags := diag.FromErr(err)
 			return diags
 		}
@@ -156,7 +156,7 @@ func resourceShareDelete(ctx context.Context, d *schema.ResourceData, meta inter
 		apiResponse, err := client.UserManagementApi.UmGroupsSharesDelete(ctx, groupId, resourceId).Execute()
 		logApiRequestTime(apiResponse)
 		if err != nil {
-			if apiResponse == nil || apiResponse.Response != nil && apiResponse.StatusCode != 404 {
+			if !httpNotFound(apiResponse) {
 				diags := diag.FromErr(fmt.Errorf("an error occured while deleting a share %s %w", d.Id(), err))
 				return diags
 			}
@@ -191,7 +191,7 @@ func resourceShareImporter(ctx context.Context, d *schema.ResourceData, meta int
 	logApiRequestTime(apiResponse)
 
 	if err != nil {
-		if apiResponse != nil && apiResponse.Response != nil && apiResponse.StatusCode == 404 {
+		if httpNotFound(apiResponse) {
 			d.SetId("")
 			return nil, fmt.Errorf("an error occured while trying to fetch the share of resource %q for group %q", rscId, grpId)
 		}

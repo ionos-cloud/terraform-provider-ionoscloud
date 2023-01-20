@@ -6,18 +6,18 @@ The IonosCloud provider gives the ability to deploy and configure resources usin
 
 ### Migrating from the ProfitBricks provider
 
-Please see the [Documentation](docs/index.md#migrating-from-the-profitbricks-provider) on how to migrate from the ProfitBricks provider.
+Please see the [Documentation](../docs/index.md#migrating-from-the-profitbricks-provider) on how to migrate from the ProfitBricks provider.
 
 ### Requirements
 
 * [Terraform](https://www.terraform.io/downloads.html) 0.12.x
-* [Go](https://golang.org/doc/install) 1.13 (to build the provider plugin)
+* [Go](https://golang.org/doc/install) 1.18 (to build the provider plugin)
 
 **NOTE:** In order to use a specific version of this provider, please include the following block at the beginning of your terraform config files [details](https://www.terraform.io/docs/configuration/terraform.html#specifying-a-required-terraform-version):
 
 ```
 provider "ionoscloud" {
-  version = "~> 6.2.0"
+  version = "~> 6.3.0"
 }
 ```
 
@@ -43,7 +43,7 @@ See the [IonosCloud Provider documentation](https://registry.terraform.io/provid
 
 ### Developing the Provider
 
-If you wish to work on the provider, you'll first need [Go](http://www.golang.org) installed on your machine (version 1.13+ is _required_). You'll also need to correctly setup a [GOPATH](http://golang.org/doc/code.html#GOPATH), as well as adding `$GOPATH/bin` to your `$PATH`.
+If you wish to work on the provider, you'll first need [Go](http://www.golang.org) installed on your machine (version 1.18+ is _required_). You'll also need to correctly setup a [GOPATH](http://golang.org/doc/code.html#GOPATH), as well as adding `$GOPATH/bin` to your `$PATH`.
 
 To compile the provider, run `make build`. This will build the provider and put the provider binary in the `$GOPATH/bin` directory.
 
@@ -66,4 +66,47 @@ _Note:_ Acceptance tests create real resources, and often cost money to run.
 
 ```
 $ make testacc
+```
+
+## Certificate pinning:
+
+You can enable certificate pinning if you want to bypass the normal certificate checking procedure,
+by doing the following:
+
+Set env variable IONOS_PINNED_CERT=<insert_sha256_public_fingerprint_here>
+
+You can get the sha256 fingerprint most easily form the browser by inspecting the certificate.
+
+## Debugging
+
+In the default mode, the Terraform provider returns only HTTP client errors. These usually consist only of the HTTP status code. There is no clear description of the problem. But if you want to see the API call error messages as well, you need to set the SDK and Terraform provider environment variables.
+
+You can enable logging now using the `IONOS_LOG_LEVEL` env variable. Allowed values: `off`, `debug` and `trace`. Defaults to `off`.
+
+⚠️ **Note:** We recommend you only use `trace` level for debugging purposes. Disable it in your production environments because it can log sensitive data. It logs the full request and response without encryption, even for an HTTPS call.
+Verbose request and response logging can also significantly impact your application’s performance.
+
+```bash
+$ export IONOS_LOG_LEVEL=debug
+```
+
+⚠️ **Note:** `IONOS_DEBUG` is now deprecated and will be removed in a future release.
+
+⚠️ **Note:** We recommend you only use `IONOS_DEBUG` for debugging purposes. Disable it in your production environments because it can log sensitive data. It logs the full request and response without encryption, even for an HTTPS call.
+Verbose request and response logging can also significantly impact your application’s performance.
+
+```bash
+$ export TF_LOG=debug
+$ export IONOS_DEBUG=true
+$ terraform apply
+```
+now you can see the response body incl. api error message:
+```json
+{
+  "httpStatus" : 422,
+  "messages" : [ {
+    "errorCode" : "200",
+    "message" : "[VDC-yy-xxxx] Operation cannot be executed since this Kubernetes Nodepool is already marked for deletion. Current state of the resource is FAILED_DESTROYING."
+  }]
+}
 ```

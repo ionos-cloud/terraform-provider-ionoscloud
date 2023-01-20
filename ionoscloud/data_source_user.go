@@ -77,14 +77,15 @@ func dataSourceUser() *schema.Resource {
 func dataSourceUserRead(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	client := meta.(SdkBundle).CloudApiClient
 
-	id, idOk := d.GetOk("id")
-	email, emailOk := d.GetOk("email")
+	idValue, idOk := d.GetOk("id")
+	emailValue, emailOk := d.GetOk("email")
 	firstNameValue, firstNameOk := d.GetOk("first_name")
 	lastNameValue, lastNameOk := d.GetOk("last_name")
 	s3CanonicalIdValue, s3CanonicalIdOk := d.GetOk("s3_canonical_user_id")
 	administratorValue, administratorOk := d.GetOk("administrator")
-	// todo active flags also, but I don't know where are they
 
+	id := idValue.(string)
+	email := emailValue.(string)
 	firstName := firstNameValue.(string)
 	lastName := lastNameValue.(string)
 	s3CanonicalId := s3CanonicalIdValue.(string)
@@ -95,9 +96,17 @@ func dataSourceUserRead(ctx context.Context, d *schema.ResourceData, meta interf
 		return diags
 	}
 	if !idOk && !emailOk && !firstNameOk && !lastNameOk && !s3CanonicalIdOk && !administratorOk {
-		diags := diag.FromErr(errors.New("please provide either the user id or other lookup parameter, like email or first_name"))
-		log.Printf("ADMINISTRATOROK = %t", administratorOk)
-		return diags
+		config := client.GetConfig()
+		email = config.Username
+		if email == "" {
+			diags := diag.FromErr(errors.New("please provide either the user id or other lookup parameter, like email or first_name"))
+			return diags
+		}
+		log.Printf("[INFO] email got from provider configuration since none was provided")
+
+		//diags := diag.FromErr(errors.New("please provide either the user id or other lookup parameter, like email or first_name"))
+		//log.Printf("ADMINISTRATOROK = %t", administratorOk)
+		//return diags
 	}
 	var user ionoscloud.User
 	var err error
@@ -105,10 +114,10 @@ func dataSourceUserRead(ctx context.Context, d *schema.ResourceData, meta interf
 
 	if idOk {
 		/* search by ID */
-		user, apiResponse, err = client.UserManagementApi.UmUsersFindById(ctx, id.(string)).Execute()
+		user, apiResponse, err = client.UserManagementApi.UmUsersFindById(ctx, id).Execute()
 		logApiRequestTime(apiResponse)
 		if err != nil {
-			diags := diag.FromErr(fmt.Errorf("an error occurred while fetching user with ID %s: %w", id.(string), err))
+			diags := diag.FromErr(fmt.Errorf("an error occurred while fetching user with ID %s: %w", id, err))
 			return diags
 		}
 	} else {
@@ -132,7 +141,7 @@ func dataSourceUserRead(ctx context.Context, d *schema.ResourceData, meta interf
 		if emailOk {
 			var emailResults []ionoscloud.User
 			for _, u := range results {
-				if u.Properties != nil && u.Properties.Email != nil && *u.Properties.Email == email.(string) {
+				if u.Properties != nil && u.Properties.Email != nil && *u.Properties.Email == email {
 					/* user found */
 					user, apiResponse, err = client.UserManagementApi.UmUsersFindById(ctx, *u.Id).Execute()
 					logApiRequestTime(apiResponse)
@@ -218,7 +227,7 @@ func dataSourceUserRead(ctx context.Context, d *schema.ResourceData, meta interf
 		}
 
 		if results == nil || len(results) == 0 {
-			return diag.FromErr(fmt.Errorf("no user found with the specified criteria: email = %s", email.(string)))
+			return diag.FromErr(fmt.Errorf("no user found with the specified criteria: email = %s", email))
 		} else {
 			user = results[0]
 		}

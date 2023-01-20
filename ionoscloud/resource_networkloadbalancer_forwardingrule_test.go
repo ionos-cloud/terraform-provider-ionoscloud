@@ -218,11 +218,11 @@ func testAccCheckNetworkLoadBalancerForwardingRuleDestroyCheck(s *terraform.Stat
 		logApiRequestTime(apiResponse)
 
 		if err != nil {
-			if apiResponse == nil || apiResponse.Response != nil && apiResponse.StatusCode != 404 {
-				return fmt.Errorf("an error occured at checking deletion of forwarding rule %s %s", rs.Primary.ID, err)
+			if !httpNotFound(apiResponse) {
+				return fmt.Errorf("an error occured at checking deletion of forwarding rule %s %w", rs.Primary.ID, err)
 			}
 		} else {
-			return fmt.Errorf("network loadbalancer forwarding rule still exists %s %s", rs.Primary.ID, err)
+			return fmt.Errorf("network loadbalancer forwarding rule still exists %s %w", rs.Primary.ID, err)
 		}
 	}
 

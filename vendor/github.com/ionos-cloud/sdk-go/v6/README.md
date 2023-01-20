@@ -53,6 +53,8 @@ go get github.com/ionos-cloud/sdk-go/v6@latest
 | `IONOS_PASSWORD`     | Specify the password used to login, to authenticate against the IONOS Cloud API                                                                                                                                                |
 | `IONOS_TOKEN`        | Specify the token used to login, if a token is being used instead of username and password                                                                                                                                     |
 | `IONOS_API_URL`      | Specify the API URL. It will overwrite the API endpoint default value `api.ionos.com`. Note: the host URL does not contain the `/cloudapi/v6` path, so it should _not_ be included in the `IONOS_API_URL` environment variable |
+| `IONOS_LOGLEVEL`     | Specify the Log Level used to log messages. Possible values: Off, Debug, Trace |
+| `IONOS_PINNED_CERT`  | Specify the SHA-256 public fingerprint here, enables certificate pinning                                                                                                                                                       |
 
 ⚠️ **_Note: To overwrite the api endpoint - `api.ionos.com`, the environment variable `$IONOS_API_URL` can be set, and used with `NewConfigurationFromEnv()` function._**
 
@@ -157,6 +159,15 @@ export IONOS_TOKEN="insert_here_token_saved_from_generate_command"
     }
 ```
 
+## Certificate pinning:
+
+You can enable certificate pinning if you want to bypass the normal certificate checking procedure,
+by doing the following:
+
+Set env variable IONOS_PINNED_CERT=<insert_sha256_public_fingerprint_here>
+
+You can get the sha256 fingerprint most easily from the browser by inspecting the certificate.
+
 ### Depth
 
 Many of the _List_ or _Get_ operations will accept an optional _depth_ argument. Setting this to a value between 0 and 5 affects the amount of data that is returned. The details returned vary depending on the resource being queried, but it generally follows this pattern. By default, the SDK sets the _depth_ argument to the maximum value.
@@ -208,7 +219,35 @@ requestProperties.SetURL("https://api.ionos.com/cloudapi/v6")
 
 ## Debugging
 
+You can now inject any logger that implements Printf as a logger
+instead of using the default sdk logger.
+There are now Loglevels that you can set: `Off`, `Debug` and `Trace`.
+`Off` - does not show any logs
+`Debug` - regular logs, no sensitive information
+`Trace` - we recommend you only set this field for debugging purposes. Disable it in your production environments because it can log sensitive data.
+          It logs the full request and response without encryption, even for an HTTPS call. Verbose request and response logging can also significantly impact your application's performance.
+
+
+```golang
+package main
+import "github.com/ionos-cloud/sdk-go/v6"
+import "github.com/sirupsen/logrus"
+func main() {
+    // create your configuration. replace username, password, token and url with correct values, or use NewConfigurationFromEnv()
+    // if you have set your env variables as explained above
+    cfg := ionoscloud.NewConfiguration("username", "password", "token", "hostUrl")
+    // enable request and response logging. this is the most verbose loglevel
+    cfg.LogLevel = Trace
+    // inject your own logger that implements Printf
+    cfg.Logger = logrus.New()
+    // create you api client with the configuration
+    apiClient := ionoscloud.NewAPIClient(cfg)
+}
+```
+
 If you want to see the API call request and response messages, you need to set the Debug field in the Configuration struct:
+
+⚠️ **_Note: the field `Debug` is now deprecated and will be replaced with `LogLevel` in the future.
 
 ```golang
 package main
@@ -240,6 +279,24 @@ All URIs are relative to *https://api.ionos.com/cloudapi/v6*
 Class | Method | HTTP request | Description
 ------------- | ------------- | ------------- | -------------
 DefaultApi | [**ApiInfoGet**](docs/api/DefaultApi.md#apiinfoget) | **Get** / | Display API information
+ApplicationLoadBalancersApi | [**DatacentersApplicationloadbalancersDelete**](docs/api/ApplicationLoadBalancersApi.md#datacentersapplicationloadbalancersdelete) | **Delete** /datacenters/{datacenterId}/applicationloadbalancers/{applicationLoadBalancerId} | Delete Application Load Balancers
+ApplicationLoadBalancersApi | [**DatacentersApplicationloadbalancersFindByApplicationLoadBalancerId**](docs/api/ApplicationLoadBalancersApi.md#datacentersapplicationloadbalancersfindbyapplicationloadbalancerid) | **Get** /datacenters/{datacenterId}/applicationloadbalancers/{applicationLoadBalancerId} | Retrieve Application Load Balancers
+ApplicationLoadBalancersApi | [**DatacentersApplicationloadbalancersFlowlogsDelete**](docs/api/ApplicationLoadBalancersApi.md#datacentersapplicationloadbalancersflowlogsdelete) | **Delete** /datacenters/{datacenterId}/applicationloadbalancers/{applicationLoadBalancerId}/flowlogs/{flowLogId} | Delete ALB Flow Logs
+ApplicationLoadBalancersApi | [**DatacentersApplicationloadbalancersFlowlogsFindByFlowLogId**](docs/api/ApplicationLoadBalancersApi.md#datacentersapplicationloadbalancersflowlogsfindbyflowlogid) | **Get** /datacenters/{datacenterId}/applicationloadbalancers/{applicationLoadBalancerId}/flowlogs/{flowLogId} | Retrieve ALB Flow Logs
+ApplicationLoadBalancersApi | [**DatacentersApplicationloadbalancersFlowlogsGet**](docs/api/ApplicationLoadBalancersApi.md#datacentersapplicationloadbalancersflowlogsget) | **Get** /datacenters/{datacenterId}/applicationloadbalancers/{applicationLoadBalancerId}/flowlogs | List ALB Flow Logs
+ApplicationLoadBalancersApi | [**DatacentersApplicationloadbalancersFlowlogsPatch**](docs/api/ApplicationLoadBalancersApi.md#datacentersapplicationloadbalancersflowlogspatch) | **Patch** /datacenters/{datacenterId}/applicationloadbalancers/{applicationLoadBalancerId}/flowlogs/{flowLogId} | Partially modify ALB Flow Logs
+ApplicationLoadBalancersApi | [**DatacentersApplicationloadbalancersFlowlogsPost**](docs/api/ApplicationLoadBalancersApi.md#datacentersapplicationloadbalancersflowlogspost) | **Post** /datacenters/{datacenterId}/applicationloadbalancers/{applicationLoadBalancerId}/flowlogs | Create ALB Flow Logs
+ApplicationLoadBalancersApi | [**DatacentersApplicationloadbalancersFlowlogsPut**](docs/api/ApplicationLoadBalancersApi.md#datacentersapplicationloadbalancersflowlogsput) | **Put** /datacenters/{datacenterId}/applicationloadbalancers/{applicationLoadBalancerId}/flowlogs/{flowLogId} | Modify ALB Flow Logs
+ApplicationLoadBalancersApi | [**DatacentersApplicationloadbalancersForwardingrulesDelete**](docs/api/ApplicationLoadBalancersApi.md#datacentersapplicationloadbalancersforwardingrulesdelete) | **Delete** /datacenters/{datacenterId}/applicationloadbalancers/{applicationLoadBalancerId}/forwardingrules/{forwardingRuleId} | Delete ALB forwarding rules
+ApplicationLoadBalancersApi | [**DatacentersApplicationloadbalancersForwardingrulesFindByForwardingRuleId**](docs/api/ApplicationLoadBalancersApi.md#datacentersapplicationloadbalancersforwardingrulesfindbyforwardingruleid) | **Get** /datacenters/{datacenterId}/applicationloadbalancers/{applicationLoadBalancerId}/forwardingrules/{forwardingRuleId} | Retrieve ALB forwarding rules
+ApplicationLoadBalancersApi | [**DatacentersApplicationloadbalancersForwardingrulesGet**](docs/api/ApplicationLoadBalancersApi.md#datacentersapplicationloadbalancersforwardingrulesget) | **Get** /datacenters/{datacenterId}/applicationloadbalancers/{applicationLoadBalancerId}/forwardingrules | List ALB forwarding rules
+ApplicationLoadBalancersApi | [**DatacentersApplicationloadbalancersForwardingrulesPatch**](docs/api/ApplicationLoadBalancersApi.md#datacentersapplicationloadbalancersforwardingrulespatch) | **Patch** /datacenters/{datacenterId}/applicationloadbalancers/{applicationLoadBalancerId}/forwardingrules/{forwardingRuleId} | Partially modify ALB forwarding rules
+ApplicationLoadBalancersApi | [**DatacentersApplicationloadbalancersForwardingrulesPost**](docs/api/ApplicationLoadBalancersApi.md#datacentersapplicationloadbalancersforwardingrulespost) | **Post** /datacenters/{datacenterId}/applicationloadbalancers/{applicationLoadBalancerId}/forwardingrules | Create ALB forwarding rules
+ApplicationLoadBalancersApi | [**DatacentersApplicationloadbalancersForwardingrulesPut**](docs/api/ApplicationLoadBalancersApi.md#datacentersapplicationloadbalancersforwardingrulesput) | **Put** /datacenters/{datacenterId}/applicationloadbalancers/{applicationLoadBalancerId}/forwardingrules/{forwardingRuleId} | Modify ALB forwarding rules
+ApplicationLoadBalancersApi | [**DatacentersApplicationloadbalancersGet**](docs/api/ApplicationLoadBalancersApi.md#datacentersapplicationloadbalancersget) | **Get** /datacenters/{datacenterId}/applicationloadbalancers | List Application Load Balancers
+ApplicationLoadBalancersApi | [**DatacentersApplicationloadbalancersPatch**](docs/api/ApplicationLoadBalancersApi.md#datacentersapplicationloadbalancerspatch) | **Patch** /datacenters/{datacenterId}/applicationloadbalancers/{applicationLoadBalancerId} | Partially modify Application Load Balancers
+ApplicationLoadBalancersApi | [**DatacentersApplicationloadbalancersPost**](docs/api/ApplicationLoadBalancersApi.md#datacentersapplicationloadbalancerspost) | **Post** /datacenters/{datacenterId}/applicationloadbalancers | Create Application Load Balancers
+ApplicationLoadBalancersApi | [**DatacentersApplicationloadbalancersPut**](docs/api/ApplicationLoadBalancersApi.md#datacentersapplicationloadbalancersput) | **Put** /datacenters/{datacenterId}/applicationloadbalancers/{applicationLoadBalancerId} | Modify Application Load Balancers
 BackupUnitsApi | [**BackupunitsDelete**](docs/api/BackupUnitsApi.md#backupunitsdelete) | **Delete** /backupunits/{backupunitId} | Delete backup units
 BackupUnitsApi | [**BackupunitsFindById**](docs/api/BackupUnitsApi.md#backupunitsfindbyid) | **Get** /backupunits/{backupunitId} | Retrieve backup units
 BackupUnitsApi | [**BackupunitsGet**](docs/api/BackupUnitsApi.md#backupunitsget) | **Get** /backupunits | List backup units
@@ -420,6 +477,12 @@ SnapshotsApi | [**SnapshotsFindById**](docs/api/SnapshotsApi.md#snapshotsfindbyi
 SnapshotsApi | [**SnapshotsGet**](docs/api/SnapshotsApi.md#snapshotsget) | **Get** /snapshots | List snapshots
 SnapshotsApi | [**SnapshotsPatch**](docs/api/SnapshotsApi.md#snapshotspatch) | **Patch** /snapshots/{snapshotId} | Partially modify snapshots
 SnapshotsApi | [**SnapshotsPut**](docs/api/SnapshotsApi.md#snapshotsput) | **Put** /snapshots/{snapshotId} | Modify snapshots
+TargetGroupsApi | [**TargetGroupsDelete**](docs/api/TargetGroupsApi.md#targetgroupsdelete) | **Delete** /targetgroups/{targetGroupId} | Remove target groups
+TargetGroupsApi | [**TargetgroupsFindByTargetGroupId**](docs/api/TargetGroupsApi.md#targetgroupsfindbytargetgroupid) | **Get** /targetgroups/{targetGroupId} | Retrieve target groups
+TargetGroupsApi | [**TargetgroupsGet**](docs/api/TargetGroupsApi.md#targetgroupsget) | **Get** /targetgroups | List target groups
+TargetGroupsApi | [**TargetgroupsPatch**](docs/api/TargetGroupsApi.md#targetgroupspatch) | **Patch** /targetgroups/{targetGroupId} | Partially modify target groups
+TargetGroupsApi | [**TargetgroupsPost**](docs/api/TargetGroupsApi.md#targetgroupspost) | **Post** /targetgroups | Create target groups
+TargetGroupsApi | [**TargetgroupsPut**](docs/api/TargetGroupsApi.md#targetgroupsput) | **Put** /targetgroups/{targetGroupId} | Modify target groups
 TemplatesApi | [**TemplatesFindById**](docs/api/TemplatesApi.md#templatesfindbyid) | **Get** /templates/{templateId} | Retrieve Cubes Templates
 TemplatesApi | [**TemplatesGet**](docs/api/TemplatesApi.md#templatesget) | **Get** /templates | List Cubes Templates
 UserManagementApi | [**UmGroupsDelete**](docs/api/UserManagementApi.md#umgroupsdelete) | **Delete** /um/groups/{groupId} | Delete groups
@@ -469,6 +532,17 @@ All URIs are relative to *https://api.ionos.com/cloudapi/v6*
 <details >
 <summary title="Click to toggle">API models list</summary>
 
+ - [ApplicationLoadBalancer](docs/models/ApplicationLoadBalancer)
+ - [ApplicationLoadBalancerEntities](docs/models/ApplicationLoadBalancerEntities)
+ - [ApplicationLoadBalancerForwardingRule](docs/models/ApplicationLoadBalancerForwardingRule)
+ - [ApplicationLoadBalancerForwardingRuleProperties](docs/models/ApplicationLoadBalancerForwardingRuleProperties)
+ - [ApplicationLoadBalancerForwardingRulePut](docs/models/ApplicationLoadBalancerForwardingRulePut)
+ - [ApplicationLoadBalancerForwardingRules](docs/models/ApplicationLoadBalancerForwardingRules)
+ - [ApplicationLoadBalancerHttpRule](docs/models/ApplicationLoadBalancerHttpRule)
+ - [ApplicationLoadBalancerHttpRuleCondition](docs/models/ApplicationLoadBalancerHttpRuleCondition)
+ - [ApplicationLoadBalancerProperties](docs/models/ApplicationLoadBalancerProperties)
+ - [ApplicationLoadBalancerPut](docs/models/ApplicationLoadBalancerPut)
+ - [ApplicationLoadBalancers](docs/models/ApplicationLoadBalancers)
  - [AttachedVolumes](docs/models/AttachedVolumes)
  - [BackupUnit](docs/models/BackupUnit)
  - [BackupUnitProperties](docs/models/BackupUnitProperties)
@@ -620,6 +694,13 @@ All URIs are relative to *https://api.ionos.com/cloudapi/v6*
  - [Snapshot](docs/models/Snapshot)
  - [SnapshotProperties](docs/models/SnapshotProperties)
  - [Snapshots](docs/models/Snapshots)
+ - [TargetGroup](docs/models/TargetGroup)
+ - [TargetGroupHealthCheck](docs/models/TargetGroupHealthCheck)
+ - [TargetGroupHttpHealthCheck](docs/models/TargetGroupHttpHealthCheck)
+ - [TargetGroupProperties](docs/models/TargetGroupProperties)
+ - [TargetGroupPut](docs/models/TargetGroupPut)
+ - [TargetGroupTarget](docs/models/TargetGroupTarget)
+ - [TargetGroups](docs/models/TargetGroups)
  - [TargetPortRange](docs/models/TargetPortRange)
  - [Template](docs/models/Template)
  - [TemplateProperties](docs/models/TemplateProperties)

@@ -55,6 +55,10 @@ data "ionoscloud_user" "example" {
 }
 ```
 
+### By Email from Env Variables - Current User
+data "ionoscloud_user" "example" {
+}
+
 ## Argument Reference
 
 * `email` - (Optional) Email of an existing user that you want to search for. 
@@ -64,7 +68,7 @@ data "ionoscloud_user" "example" {
 *  `s3_canonical_user_id` - (Optional) Canonical S3 ID of the user you want to search for.
 *  `administrator` - (Optional) true if the user you want to search for is an administrator.
 
-Either `email` or `id` must be provided. If none, or both are provided, the datasource will return an error.
+Either `email` or `id` can be provided. If no argument is set, the provider will search for the **email that was provided for the configuration**. If none is found, the provider will return an error.
 
 ## Attributes Reference
 

@@ -112,7 +112,7 @@ func resourceIPBlockCreate(ctx context.Context, d *schema.ResourceData, meta int
 	logApiRequestTime(apiResponse)
 
 	if err != nil {
-		diags := diag.FromErr(fmt.Errorf("an error occured while reserving an ip block: %s", err))
+		diags := diag.FromErr(fmt.Errorf("an error occured while reserving an ip block: %w", err))
 		return diags
 	}
 	d.SetId(*ipblock.Id)
@@ -138,11 +138,11 @@ func resourceIPBlockRead(ctx context.Context, d *schema.ResourceData, meta inter
 	logApiRequestTime(apiResponse)
 
 	if err != nil {
-		if apiResponse != nil && apiResponse.Response != nil && apiResponse.StatusCode == 404 {
+		if httpNotFound(apiResponse) {
 			d.SetId("")
 			return nil
 		}
-		diags := diag.FromErr(fmt.Errorf("an error occured while fetching an ip block ID %s %s", d.Id(), err))
+		diags := diag.FromErr(fmt.Errorf("an error occured while fetching an ip block ID %s %w", d.Id(), err))
 		return diags
 	}
 
@@ -169,7 +169,7 @@ func resourceIPBlockUpdate(ctx context.Context, d *schema.ResourceData, meta int
 	logApiRequestTime(apiResponse)
 
 	if err != nil {
-		diags := diag.FromErr(fmt.Errorf("an error occured while updating an ip block ID %s %s", d.Id(), err))
+		diags := diag.FromErr(fmt.Errorf("an error occured while updating an ip block ID %s %w", d.Id(), err))
 		return diags
 	}
 
@@ -183,7 +183,7 @@ func resourceIPBlockDelete(ctx context.Context, d *schema.ResourceData, meta int
 	apiResponse, err := client.IPBlocksApi.IpblocksDelete(ctx, d.Id()).Execute()
 	logApiRequestTime(apiResponse)
 	if err != nil {
-		diags := diag.FromErr(fmt.Errorf("an error occured while releasing an ipblock ID: %s %s", d.Id(), err))
+		diags := diag.FromErr(fmt.Errorf("an error occured while releasing an ipblock ID: %s %w", d.Id(), err))
 		return diags
 	}
 
@@ -207,7 +207,7 @@ func resourceIpBlockImporter(ctx context.Context, d *schema.ResourceData, meta i
 	logApiRequestTime(apiResponse)
 
 	if err != nil {
-		if apiResponse != nil && apiResponse.Response != nil && apiResponse.StatusCode == 404 {
+		if httpNotFound(apiResponse) {
 			d.SetId("")
 			return nil, fmt.Errorf("an error occured while trying to fetch the ipBlock %q", ipBlockId)
 		}

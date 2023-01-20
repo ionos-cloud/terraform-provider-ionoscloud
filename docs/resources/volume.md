@@ -49,7 +49,7 @@ resource "ionoscloud_server" "example" {
     availability_zone     = "ZONE_1"
     cpu_family            = "AMD_OPTERON"
     image_name            = data.ionoscloud_image.example.id
-    image_password        = "K3tTj8G14a3EgKyNeeiY"
+    image_password        = random_password.server_image_password.result
     type                  = "ENTERPRISE"
     volume {
         name              = "system"
@@ -88,8 +88,29 @@ resource "ionoscloud_volume" "example" {
   disk_type               = "SSD Standard"
   bus                     = "VIRTIO"
   image_name              = data.ionoscloud_image.example.id
-  image_password          = "K3tTj8G14a3EgKyNeeiY"
+  image_password          = random_password.volume_image_password.result
   user_data               = "foo"
+}
+
+resource "ionoscloud_volume" "example" {
+  datacenter_id           = ionoscloud_datacenter.example.id
+  server_id               = ionoscloud_server.example.id
+  name                    = "Another Volume Example"
+  availability_zone       = "ZONE_1"
+  size                    = 5
+  disk_type               = "SSD Standard"
+  bus                     = "VIRTIO"
+  licence_type            = "OTHER"
+}
+
+resource "random_password" "server_image_password" {
+  length           = 16
+  special          = false
+}
+
+resource "random_password" "volume_image_password" {
+  length           = 16
+  special          = false
 }
 ```
 
@@ -100,7 +121,8 @@ resource "ionoscloud_volume" "example" {
 * `disk_type` - (Required)[string] The volume type: HDD or SSD. This property is immutable.
 * `bus` - (Optional)[Boolean] The bus type of the volume: VIRTIO or IDE.
 * `size` -  (Required)[integer] The size of the volume in GB.
-* `ssh_key_path` -  (Optional)[list] List of paths to files containing a public SSH key that will be injected into IonosCloud provided Linux images. Required for IonosCloud Linux images. Required if `image_password` is not provided.
+* `ssh_key_path` -  (Optional)[list] List of absolute paths to files containing a public SSH key that will be injected into IonosCloud provided Linux images. Also accepts ssh keys directly. Required for IonosCloud Linux images. Required if `image_password` is not provided. This property is immutable.
+* `ssh_keys` -  (Optional)[list] List of absolute paths to files containing a public SSH key that will be injected into IonosCloud provided Linux images. Also accepts ssh keys directly. Required for IonosCloud Linux images. Required if `image_password` is not provided. This property is immutable.
 * `sshkey` - (Computed) The associated public SSH key.
 * `image_password` - (Optional)[string] Required if `sshkey_path` is not provided.
 * `image_name` - (Optional)[string] The name, ID or alias of the image. May also be a snapshot ID. It is required if `licence_type` is not provided. Attribute is immutable.
@@ -122,6 +144,7 @@ resource "ionoscloud_volume" "example" {
 * `boot_server` - (Computed)[string] The UUID of the attached server.
 > **⚠ WARNING**
 >
+> ssh_key_path and ssh_keys fields are immutable.
 > If you want to create a **CUBE** server, the type of the inline volume must be set to **DAS**. In this case, you can not set the `size` argument since it is taken from the `template_uuid` you set in the server.
 
 

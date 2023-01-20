@@ -5,23 +5,12 @@ package ionoscloud
 import (
 	"context"
 	"encoding/json"
-	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	ionoscloud "github.com/ionos-cloud/sdk-go/v6"
 	"log"
 	"testing"
 )
 
-func TestAccDataSourceNic(t *testing.T) {
-	resource.Test(t, resource.TestCase{
-		PreCheck: func() {
-			testAccPreCheck(t)
-		},
-		ProviderFactories: testAccProviderFactories,
-		Steps:             []resource.TestStep{},
-	})
-}
-
-//unit test
+// unit test
 func Test_dataSourceNicRead(t *testing.T) {
 	id := "id"
 	mac := "testMac"

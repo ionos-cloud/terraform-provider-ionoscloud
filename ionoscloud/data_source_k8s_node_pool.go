@@ -228,7 +228,7 @@ func dataSourceK8sReadNodePool(ctx context.Context, d *schema.ResourceData, meta
 		nodePool, apiResponse, err = client.KubernetesApi.K8sNodepoolsFindById(ctx, clusterId, id).Execute()
 		logApiRequestTime(apiResponse)
 		if err != nil {
-			return diag.FromErr(fmt.Errorf("an error occurred while fetching the k8s nodepool with ID %s: %s", id, err))
+			return diag.FromErr(fmt.Errorf("an error occurred while fetching the k8s nodePool with ID %s: %w", id.(string), err))
 		}
 	} else {
 		/* search by name */
@@ -320,7 +320,6 @@ func dataSourceK8sReadNodePool(ctx context.Context, d *schema.ResourceData, meta
 		} else {
 			nodePool = results[0]
 		}
-
 	}
 
 	if err = setK8sNodePoolData(d, &nodePool); err != nil {

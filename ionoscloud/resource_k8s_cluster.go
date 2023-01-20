@@ -6,6 +6,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 	ionoscloud "github.com/ionos-cloud/sdk-go/v6"
+	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils"
 	"log"
 	"time"
 
@@ -25,10 +26,10 @@ func resourcek8sCluster() *schema.Resource {
 
 		Schema: map[string]*schema.Schema{
 			"name": {
-				Type:         schema.TypeString,
-				Description:  "The desired name for the cluster",
-				Required:     true,
-				ValidateFunc: validation.All(validation.StringIsNotWhiteSpace),
+				Type:             schema.TypeString,
+				Description:      "The desired name for the cluster",
+				Required:         true,
+				ValidateDiagFunc: validation.ToDiagFunc(validation.StringIsNotWhiteSpace),
 			},
 			"k8s_version": {
 				Type:             schema.TypeString,
@@ -41,20 +42,21 @@ func resourcek8sCluster() *schema.Resource {
 				Type:        schema.TypeList,
 				Description: "A maintenance window comprise of a day of the week and a time for maintenance to be allowed",
 				Optional:    true,
+				Computed:    true,
 				MaxItems:    1,
 				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{
 						"time": {
-							Type:         schema.TypeString,
-							Description:  "A clock time in the day when maintenance is allowed",
-							Required:     true,
-							ValidateFunc: validation.All(validation.StringIsNotWhiteSpace),
+							Type:             schema.TypeString,
+							Description:      "A clock time in the day when maintenance is allowed",
+							Required:         true,
+							ValidateDiagFunc: validation.ToDiagFunc(validation.StringIsNotWhiteSpace),
 						},
 						"day_of_the_week": {
-							Type:         schema.TypeString,
-							Description:  "Day of the week when maintenance is allowed",
-							Required:     true,
-							ValidateFunc: validation.All(validation.StringIsNotWhiteSpace),
+							Type:             schema.TypeString,
+							Description:      "Day of the week when maintenance is allowed",
+							Required:         true,
+							ValidateDiagFunc: validation.ToDiagFunc(validation.StringIsNotWhiteSpace),
 						},
 					},
 				},
@@ -62,7 +64,6 @@ func resourcek8sCluster() *schema.Resource {
 			"viable_node_pool_versions": {
 				Type:        schema.TypeList,
 				Description: "List of versions that may be used for node pools under this cluster",
-				Optional:    true,
 				Computed:    true,
 				Elem: &schema.Schema{
 					Type: schema.TypeString,
@@ -88,7 +89,6 @@ func resourcek8sCluster() *schema.Resource {
 				Type:        schema.TypeList,
 				Description: "List of S3 bucket configured for K8s usage. For now it contains only an S3 bucket used to store K8s API audit logs.",
 				Optional:    true,
-				Computed:    true,
 				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{
 						"name": {
@@ -193,7 +193,7 @@ func resourcek8sClusterCreate(ctx context.Context, d *schema.ResourceData, meta 
 
 	if err != nil {
 		d.SetId("")
-		diags := diag.FromErr(fmt.Errorf("error creating k8s cluster: %s", err))
+		diags := diag.FromErr(fmt.Errorf("error creating k8s cluster: %w", err))
 		return diags
 	}
 
@@ -206,7 +206,7 @@ func resourcek8sClusterCreate(ctx context.Context, d *schema.ResourceData, meta 
 		clusterReady, rsErr := k8sClusterReady(ctx, client, d)
 
 		if rsErr != nil {
-			diags := diag.FromErr(fmt.Errorf("error while checking readiness status of k8s cluster %s: %s", d.Id(), rsErr))
+			diags := diag.FromErr(fmt.Errorf("error while checking readiness status of k8s cluster %s: %w", d.Id(), rsErr))
 			return diags
 		}
 
@@ -216,7 +216,7 @@ func resourcek8sClusterCreate(ctx context.Context, d *schema.ResourceData, meta 
 		}
 
 		select {
-		case <-time.After(SleepInterval):
+		case <-time.After(utils.SleepInterval):
 			log.Printf("[INFO] trying again ...")
 		case <-ctx.Done():
 			log.Printf("[INFO] create timed out")
@@ -236,11 +236,11 @@ func resourcek8sClusterRead(ctx context.Context, d *schema.ResourceData, meta in
 	logApiRequestTime(apiResponse)
 
 	if err != nil {
-		if apiResponse != nil && apiResponse.Response != nil && apiResponse.StatusCode == 404 {
+		if httpNotFound(apiResponse) {
 			d.SetId("")
 			return nil
 		}
-		diags := diag.FromErr(fmt.Errorf("error while fetching k8s cluster %s: %s", d.Id(), err))
+		diags := diag.FromErr(fmt.Errorf("error while fetching k8s cluster %s: %w", d.Id(), err))
 		return diags
 	}
 
@@ -361,11 +361,11 @@ func resourcek8sClusterUpdate(ctx context.Context, d *schema.ResourceData, meta 
 	logApiRequestTime(apiResponse)
 
 	if err != nil {
-		if apiResponse != nil && apiResponse.Response != nil && apiResponse.StatusCode == 404 {
+		if httpNotFound(apiResponse) {
 			d.SetId("")
 			return nil
 		}
-		diags := diag.FromErr(fmt.Errorf("error while updating k8s cluster: %s", err))
+		diags := diag.FromErr(fmt.Errorf("error while updating k8s cluster: %w", err))
 		return diags
 	}
 
@@ -375,7 +375,7 @@ func resourcek8sClusterUpdate(ctx context.Context, d *schema.ResourceData, meta 
 		clusterReady, rsErr := k8sClusterReady(ctx, client, d)
 
 		if rsErr != nil {
-			diags := diag.FromErr(fmt.Errorf("error while checking readiness status of k8s cluster %s: %s", d.Id(), rsErr))
+			diags := diag.FromErr(fmt.Errorf("error while checking readiness status of k8s cluster %s: %w", d.Id(), rsErr))
 			return diags
 		}
 
@@ -385,7 +385,7 @@ func resourcek8sClusterUpdate(ctx context.Context, d *schema.ResourceData, meta 
 		}
 
 		select {
-		case <-time.After(SleepInterval):
+		case <-time.After(utils.SleepInterval):
 			log.Printf("[INFO] trying again ...")
 		case <-ctx.Done():
 			diags := diag.FromErr(fmt.Errorf("k8s cluster update timed out! WARNING: your k8s cluster will still probably be created after some time but the terraform state won't reflect that; check your Ionos Cloud account for updates"))
@@ -405,11 +405,11 @@ func resourcek8sClusterDelete(ctx context.Context, d *schema.ResourceData, meta 
 	logApiRequestTime(apiResponse)
 
 	if err != nil {
-		if apiResponse != nil && apiResponse.Response != nil && apiResponse.StatusCode == 404 {
+		if httpNotFound(apiResponse) {
 			d.SetId("")
 			return nil
 		}
-		diags := diag.FromErr(fmt.Errorf("error while deleting k8s cluster %s: %s", d.Id(), err))
+		diags := diag.FromErr(fmt.Errorf("error while deleting k8s cluster %s: %w", d.Id(), err))
 		return diags
 	}
 
@@ -429,7 +429,7 @@ func resourcek8sClusterDelete(ctx context.Context, d *schema.ResourceData, meta 
 		}
 
 		select {
-		case <-time.After(SleepInterval):
+		case <-time.After(utils.SleepInterval):
 			log.Printf("[INFO] trying again ...")
 		case <-ctx.Done():
 			diags := diag.FromErr(fmt.Errorf("k8s cluster deletion timed out! WARNING: your k8s cluster will still probably be deleted after some time but the terraform state won't reflect that; check your Ionos Cloud account for updates"))
@@ -451,7 +451,7 @@ func resourceK8sClusterImport(ctx context.Context, d *schema.ResourceData, meta 
 	logApiRequestTime(apiResponse)
 
 	if err != nil {
-		if apiResponse != nil && apiResponse.Response != nil && apiResponse.StatusCode == 404 {
+		if httpNotFound(apiResponse) {
 			d.SetId("")
 			return nil, fmt.Errorf("unable to find k8s cluster %q", clusterId)
 		}
@@ -511,7 +511,7 @@ func setK8sClusterData(d *schema.ResourceData, cluster *ionoscloud.KubernetesClu
 		//if cluster.Properties.Public != nil {
 		//	err := d.Set("public", *cluster.Properties.Public)
 		//	if err != nil {
-		//		return fmt.Errorf("error while setting public property for cluser %s: %s", d.Id(), err)
+		//		return fmt.Errorf("error while setting public property for cluser %s: %w", d.Id(), err)
 		//	}
 		//}
 
@@ -521,7 +521,7 @@ func setK8sClusterData(d *schema.ResourceData, cluster *ionoscloud.KubernetesClu
 				apiSubnetAllowLists[i] = apiSubnetAllowList
 			}
 			if err := d.Set("api_subnet_allow_list", apiSubnetAllowLists); err != nil {
-				return fmt.Errorf("error while setting api_subnet_allow_list property for cluser %s: %s", d.Id(), err)
+				return fmt.Errorf("error while setting api_subnet_allow_list property for cluser %s: %w", d.Id(), err)
 			}
 		}
 
@@ -533,7 +533,7 @@ func setK8sClusterData(d *schema.ResourceData, cluster *ionoscloud.KubernetesClu
 				s3Buckets[i] = s3BucketEntry
 			}
 			if err := d.Set("s3_buckets", s3Buckets); err != nil {
-				return fmt.Errorf("error while setting s3_buckets property for cluser %s: %s", d.Id(), err)
+				return fmt.Errorf("error while setting s3_buckets property for cluser %s: %w", d.Id(), err)
 			}
 		}
 
@@ -547,7 +547,7 @@ func k8sClusterReady(ctx context.Context, client *ionoscloud.APIClient, d *schem
 	logApiRequestTime(apiResponse)
 
 	if err != nil {
-		return true, fmt.Errorf("error checking k8s cluster status: %s", err)
+		return true, fmt.Errorf("error checking k8s cluster status: %w", err)
 	}
 	return *subjectCluster.Metadata.State == "ACTIVE", nil
 }
@@ -558,7 +558,7 @@ func k8sClusterDeleted(ctx context.Context, client *ionoscloud.APIClient, d *sch
 	logApiRequestTime(apiResponse)
 
 	if err != nil {
-		if apiResponse != nil && apiResponse.Response != nil && apiResponse.StatusCode == 404 {
+		if httpNotFound(apiResponse) {
 			return true, nil
 		}
 		return true, fmt.Errorf("error checking k8s cluster deletion status: %w", err)

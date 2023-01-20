@@ -21,6 +21,7 @@ func TestAccGroupBasic(t *testing.T) {
 		PreCheck: func() {
 			testAccPreCheck(t)
 		},
+		ExternalProviders: randomProviderVersion343(),
 		ProviderFactories: testAccProviderFactories,
 		CheckDestroy:      testAccCheckGroupDestroyCheck,
 		Steps: []resource.TestStep{
@@ -38,7 +39,11 @@ func TestAccGroupBasic(t *testing.T) {
 					resource.TestCheckResourceAttr(GroupResource+"."+GroupTestResource, "create_backup_unit", "true"),
 					resource.TestCheckResourceAttr(GroupResource+"."+GroupTestResource, "create_internet_access", "true"),
 					resource.TestCheckResourceAttr(GroupResource+"."+GroupTestResource, "create_k8s_cluster", "true"),
-					testNotEmptySlice(GroupResource, "users")),
+					resource.TestCheckResourceAttr(GroupResource+"."+GroupTestResource, "create_flow_log", "true"),
+					resource.TestCheckResourceAttr(GroupResource+"."+GroupTestResource, "access_and_manage_monitoring", "true"),
+					resource.TestCheckResourceAttr(GroupResource+"."+GroupTestResource, "access_and_manage_certificates", "true"),
+					resource.TestCheckResourceAttr(GroupResource+"."+GroupTestResource, "manage_dbaas", "true"),
+					utils.TestNotEmptySlice(GroupResource, "users")),
 			},
 			{
 				Config: testAccDataSourceGroupMatchId,
@@ -53,7 +58,9 @@ func TestAccGroupBasic(t *testing.T) {
 					resource.TestCheckResourceAttrPair(DataSource+"."+GroupResource+"."+GroupDataSourceById, "create_backup_unit", GroupResource+"."+GroupTestResource, "create_backup_unit"),
 					resource.TestCheckResourceAttrPair(DataSource+"."+GroupResource+"."+GroupDataSourceById, "create_internet_access", GroupResource+"."+GroupTestResource, "create_internet_access"),
 					resource.TestCheckResourceAttrPair(DataSource+"."+GroupResource+"."+GroupDataSourceById, "create_k8s_cluster", GroupResource+"."+GroupTestResource, "create_k8s_cluster"),
-					testNotEmptySlice(DataSource+"."+GroupResource, "users"),
+					resource.TestCheckResourceAttrPair(DataSource+"."+GroupResource+"."+GroupDataSourceById, "manage_dbaas", GroupResource+"."+GroupTestResource, "manage_dbaas"),
+
+					utils.TestNotEmptySlice(DataSource+"."+GroupResource, "users"),
 				),
 			},
 			{
@@ -69,7 +76,12 @@ func TestAccGroupBasic(t *testing.T) {
 					resource.TestCheckResourceAttrPair(DataSource+"."+GroupResource+"."+GroupDataSourceByName, "create_backup_unit", GroupResource+"."+GroupTestResource, "create_backup_unit"),
 					resource.TestCheckResourceAttrPair(DataSource+"."+GroupResource+"."+GroupDataSourceByName, "create_internet_access", GroupResource+"."+GroupTestResource, "create_internet_access"),
 					resource.TestCheckResourceAttrPair(DataSource+"."+GroupResource+"."+GroupDataSourceByName, "create_k8s_cluster", GroupResource+"."+GroupTestResource, "create_k8s_cluster"),
-					testNotEmptySlice(DataSource+"."+GroupResource, "users"),
+					resource.TestCheckResourceAttrPair(DataSource+"."+GroupResource+"."+GroupDataSourceByName, "create_flow_log", GroupResource+"."+GroupTestResource, "create_flow_log"),
+					resource.TestCheckResourceAttrPair(DataSource+"."+GroupResource+"."+GroupDataSourceByName, "access_and_manage_monitoring", GroupResource+"."+GroupTestResource, "access_and_manage_monitoring"),
+					resource.TestCheckResourceAttrPair(DataSource+"."+GroupResource+"."+GroupDataSourceByName, "access_and_manage_certificates", GroupResource+"."+GroupTestResource, "access_and_manage_certificates"),
+					resource.TestCheckResourceAttrPair(DataSource+"."+GroupResource+"."+GroupDataSourceByName, "manage_dbaas", GroupResource+"."+GroupTestResource, "manage_dbaas"),
+
+					utils.TestNotEmptySlice(DataSource+"."+GroupResource, "users"),
 				),
 			},
 			{
@@ -85,7 +97,7 @@ func TestAccGroupBasic(t *testing.T) {
 					resource.TestCheckResourceAttrPair(DataSource+"."+GroupResource+"."+GroupDataSourceByName, "create_backup_unit", GroupResource+"."+GroupTestResource, "create_backup_unit"),
 					resource.TestCheckResourceAttrPair(DataSource+"."+GroupResource+"."+GroupDataSourceByName, "create_internet_access", GroupResource+"."+GroupTestResource, "create_internet_access"),
 					resource.TestCheckResourceAttrPair(DataSource+"."+GroupResource+"."+GroupDataSourceByName, "create_k8s_cluster", GroupResource+"."+GroupTestResource, "create_k8s_cluster"),
-					testNotEmptySlice(DataSource+"."+GroupResource, "users"),
+					utils.TestNotEmptySlice(DataSource+"."+GroupResource, "users"),
 				),
 			},
 			{
@@ -114,8 +126,12 @@ func TestAccGroupBasic(t *testing.T) {
 					resource.TestCheckResourceAttr(GroupResource+"."+GroupTestResource, "create_backup_unit", "false"),
 					resource.TestCheckResourceAttr(GroupResource+"."+GroupTestResource, "create_internet_access", "false"),
 					resource.TestCheckResourceAttr(GroupResource+"."+GroupTestResource, "create_k8s_cluster", "false"),
+					resource.TestCheckResourceAttr(GroupResource+"."+GroupTestResource, "create_flow_log", "false"),
+					resource.TestCheckResourceAttr(GroupResource+"."+GroupTestResource, "access_and_manage_monitoring", "false"),
+					resource.TestCheckResourceAttr(GroupResource+"."+GroupTestResource, "access_and_manage_certificates", "false"),
+					resource.TestCheckResourceAttr(GroupResource+"."+GroupTestResource, "manage_dbaas", "false"),
 					resource.TestCheckResourceAttrPair(GroupResource+".test_user_id", "users.0.id", UserResource+"."+UserTestResource+"3", "id"),
-					testNotEmptySlice(GroupResource, "users")),
+					utils.TestNotEmptySlice(GroupResource, "users")),
 			},
 			{
 				Config: testAccCheckGroupUpdateMigrateToUserIds,
@@ -131,8 +147,12 @@ func TestAccGroupBasic(t *testing.T) {
 					resource.TestCheckResourceAttr(GroupResource+"."+GroupTestResource, "create_backup_unit", "false"),
 					resource.TestCheckResourceAttr(GroupResource+"."+GroupTestResource, "create_internet_access", "false"),
 					resource.TestCheckResourceAttr(GroupResource+"."+GroupTestResource, "create_k8s_cluster", "false"),
+					resource.TestCheckResourceAttr(GroupResource+"."+GroupTestResource, "create_flow_log", "false"),
+					resource.TestCheckResourceAttr(GroupResource+"."+GroupTestResource, "access_and_manage_monitoring", "false"),
+					resource.TestCheckResourceAttr(GroupResource+"."+GroupTestResource, "access_and_manage_certificates", "false"),
+					resource.TestCheckResourceAttr(GroupResource+"."+GroupTestResource, "manage_dbaas", "false"),
 					resource.TestCheckResourceAttrPair(GroupResource+".test_user_id", "users.0.id", UserResource+"."+UserTestResource+"3", "id"),
-					testNotEmptySlice(GroupResource, "users")),
+					utils.TestNotEmptySlice(GroupResource, "users")),
 			},
 			{
 				Config:      testAccCheckGroupBothUserArgumentsError,
@@ -159,7 +179,7 @@ func testAccCheckGroupDestroyCheck(s *terraform.State) error {
 
 		if err != nil {
 			if apiResponse == nil || apiResponse.Response != nil && apiResponse.StatusCode != 404 {
-				return fmt.Errorf("an error occurred while checking the destruction of group %s: %s", rs.Primary.ID, err)
+				return fmt.Errorf("an error occurred while checking the destruction of group %s: %w", rs.Primary.ID, err)
 			}
 		} else {
 			return fmt.Errorf("group %s still exists", rs.Primary.ID)
@@ -211,7 +231,7 @@ resource ` + UserResource + ` ` + UserTestResource + ` {
   first_name = "user"
   last_name = "test"
   email = "` + utils.GenerateEmail() + `"
-  password = "abc123-321CBA"
+  password = ` + RandomPassword + `.user1_password.result
   administrator = false
   force_sec_auth= false
   active = false
@@ -221,10 +241,22 @@ resource ` + UserResource + ` ` + UserTestResource + `2 {
   first_name = "user"
   last_name = "test"
   email = "` + utils.GenerateEmail() + `"
-  password = "abc123-321CBA"
+  password = ` + RandomPassword + `.user2_password.result
   administrator = false
   force_sec_auth= false
   active = false
+}
+
+resource ` + RandomPassword + ` "user1_password" {
+  length           = 16
+  special          = true
+  override_special = "!#$%&*()-_=+[]{}<>:?"
+}
+
+resource ` + RandomPassword + ` "user2_password" {
+  length           = 16
+  special          = true
+  override_special = "!#$%&*()-_=+[]{}<>:?"
 }
 
 `
@@ -241,6 +273,10 @@ resource ` + GroupResource + ` ` + GroupTestResource + ` {
   create_backup_unit = true
   create_internet_access = true
   create_k8s_cluster = true
+  create_flow_log = true
+  access_and_manage_monitoring = true
+  access_and_manage_certificates = true
+  manage_dbaas = true
   user_ids = [` + UserResource + `.` + UserTestResource + `.id, ` + UserResource + `.` + UserTestResource + `2.id]
 }
 `
@@ -313,7 +349,7 @@ resource ` + UserResource + ` ` + UserTestResource + `3 {
   first_name = "user"
   last_name = "test"
   email = "` + utils.GenerateEmail() + `"
-  password = "abc123-321CBA"
+  password = ` + RandomPassword + `.user3_password.result
   administrator = false
   force_sec_auth= false
   active = false
@@ -330,6 +366,10 @@ resource ` + GroupResource + ` "test_user_id" {
   create_backup_unit = false
   create_internet_access = false
   create_k8s_cluster = false
+  create_flow_log = false
+  access_and_manage_monitoring = false
+  access_and_manage_certificates = false
+  manage_dbaas = false
   user_id = ` + UserResource + `.` + UserTestResource + `3.id
 }
 
@@ -346,6 +386,12 @@ resource ` + GroupResource + ` ` + GroupTestResource + ` {
   create_k8s_cluster = false
   user_ids = [` + UserResource + `.` + UserTestResource + `.id, ` + UserResource + `.` + UserTestResource + `3.id]
 }
+
+resource ` + RandomPassword + ` "user3_password" {
+  length           = 16
+  special          = true
+  override_special = "!#$%&*()-_=+[]{}<>:?"
+}
 `
 
 var testAccCheckGroupUpdateMigrateToUserIds = testAccCheckGroupCreateUsers + `
@@ -353,7 +399,7 @@ resource ` + UserResource + ` ` + UserTestResource + `3 {
   first_name = "user"
   last_name = "test"
   email = "` + utils.GenerateEmail() + `"
-  password = "abc123-321CBA"
+  password = ` + RandomPassword + `.user3_password.result
   administrator = false
   force_sec_auth= false
   active = false
@@ -386,6 +432,11 @@ resource ` + GroupResource + ` ` + GroupTestResource + ` {
   create_k8s_cluster = false
   user_ids = [` + UserResource + `.` + UserTestResource + `.id, ` + UserResource + `.` + UserTestResource + `3.id]
 }
+resource ` + RandomPassword + ` "user3_password" {
+  length           = 16
+  special          = true
+  override_special = "!#$%&*()-_=+[]{}<>:?"
+}
 `
 
 var testAccCheckGroupBothUserArgumentsError = testAccCheckGroupCreateUsers + `
@@ -393,7 +444,7 @@ resource ` + UserResource + ` ` + UserTestResource + `3 {
   first_name = "user"
   last_name = "test"
   email = "` + utils.GenerateEmail() + `"
-  password = "abc123-321CBA"
+  password = ` + RandomPassword + `.user3_password.result
   administrator = false
   force_sec_auth= false
   active = false
@@ -426,5 +477,10 @@ resource ` + GroupResource + ` ` + GroupTestResource + ` {
   create_k8s_cluster = false
   user_ids = [` + UserResource + `.` + UserTestResource + `.id, ` + UserResource + `.` + UserTestResource + `3.id]
   user_id = ` + UserResource + `.` + UserTestResource + `.id
+}
+resource ` + RandomPassword + ` "user3_password" {
+  length           = 16
+  special          = true
+  override_special = "!#$%&*()-_=+[]{}<>:?"
 }
 `

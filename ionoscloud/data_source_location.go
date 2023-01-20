@@ -95,7 +95,7 @@ func dataSourceLocationRead(ctx context.Context, d *schema.ResourceData, meta in
 	logApiRequestTime(apiResponse)
 
 	if err != nil {
-		return diag.FromErr(fmt.Errorf("an error occurred while fetching locations: %s", err.Error()))
+		return diag.FromErr(fmt.Errorf("an error occurred while fetching locations: %w", err))
 	}
 
 	var results []ionoscloud.Location
@@ -166,7 +166,7 @@ func setLocationData(d *schema.ResourceData, location *ionoscloud.Location) erro
 
 		if len(cpuArchitectures) > 0 {
 			if err := d.Set("cpu_architecture", cpuArchitectures); err != nil {
-				return fmt.Errorf("error while setting cpu_architecture property for datacenter %s: %s", d.Id(), err)
+				return fmt.Errorf("error while setting cpu_architecture property for datacenter %s: %w", d.Id(), err)
 			}
 		}
 
@@ -177,7 +177,7 @@ func setLocationData(d *schema.ResourceData, location *ionoscloud.Location) erro
 
 		if len(imageAliases) > 0 {
 			if err := d.Set("image_aliases", imageAliases); err != nil {
-				return fmt.Errorf("error while setting image_aliases property for location %s: %s", d.Id(), err)
+				return fmt.Errorf("error while setting image_aliases property for datacenter %s: %w", d.Id(), err)
 			}
 		}
 	}

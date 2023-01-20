@@ -3,26 +3,40 @@ package ionoscloud
 import (
 	"context"
 	"fmt"
-	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
-	"github.com/hashicorp/terraform-plugin-sdk/v2/meta"
-	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils"
 	"log"
 	"net/http"
 	"os"
 	"runtime"
 	"time"
 
+	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/meta"
 	"github.com/ionos-cloud/sdk-go/v6"
+	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/cert"
+	crService "github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/containerregistry"
 	dbaasService "github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/dbaas"
+	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils"
 )
 
 var Version = "DEV"
 
 type SdkBundle struct {
-	CloudApiClient *ionoscloud.APIClient
-	DbaasClient    *dbaasService.Client
+	CloudApiClient    *ionoscloud.APIClient
+	PsqlClient        *dbaasService.PsqlClient
+	MongoClient       *dbaasService.MongoClient
+	CertManagerClient *cert.Client
+	ContainerClient   *crService.Client
+}
+
+type ClientOptions struct {
+	Username         string
+	Password         string
+	Token            string
+	Url              string
+	Version          string
+	TerraformVersion string
 }
 
 // Provider returns a schema.Provider for ionoscloud
@@ -60,7 +74,6 @@ func Provider() *schema.Provider {
 				Deprecated: "Timeout is used instead of this functionality",
 			},
 		},
-
 		ResourcesMap: map[string]*schema.Resource{
 			DatacenterResource:          resourceDatacenter(),
 			IpBlockResource:             resourceIPBlock(),
@@ -69,6 +82,7 @@ func Provider() *schema.Provider {
 			"ionoscloud_loadbalancer":   resourceLoadbalancer(),
 			NicResource:                 resourceNic(),
 			ServerResource:              resourceServer(),
+			ServerCubeResource:          resourceCubeServer(),
 			VolumeResource:              resourceVolume(),
 			GroupResource:               resourceGroup(),
 			ShareResource:               resourceShare(),
@@ -84,37 +98,58 @@ func Provider() *schema.Provider {
 			NatGatewayRuleResource:      resourceNatGatewayRule(),
 			NetworkLoadBalancerResource: resourceNetworkLoadBalancer(),
 			NetworkLoadBalancerForwardingRuleResource: resourceNetworkLoadBalancerForwardingRule(),
-			DBaaSClusterResource:                      resourceDbaasPgSqlCluster(),
+			PsqlClusterResource:                       resourceDbaasPgSqlCluster(),
+			DBaasMongoClusterResource:                 resourceDbaasMongoDBCluster(),
+			DBaasMongoUserResource:                    resourceDbaasMongoUser(),
+			ALBResource:                               resourceApplicationLoadBalancer(),
+			ALBForwardingRuleResource:                 resourceApplicationLoadBalancerForwardingRule(),
+			TargetGroupResource:                       resourceTargetGroup(),
+			CertificateResource:                       resourceCertificateManager(),
+			ContainerRegistryResource:                 resourceContainerRegistry(),
+			ContainerRegistryTokenResource:            resourceContainerRegistryToken(),
 		},
 		DataSourcesMap: map[string]*schema.Resource{
-			DatacenterResource:          dataSourceDataCenter(),
-			LocationResource:            dataSourceLocation(),
-			ImageResource:               dataSourceImage(),
-			ResourceResource:            dataSourceResource(),
-			SnapshotResource:            dataSourceSnapshot(),
-			LanResource:                 dataSourceLan(),
-			PCCResource:                 dataSourcePcc(),
-			ServerResource:              dataSourceServer(),
-			K8sClusterResource:          dataSourceK8sCluster(),
-			K8sNodePoolResource:         dataSourceK8sNodePool(),
-			NatGatewayResource:          dataSourceNatGateway(),
-			NatGatewayRuleResource:      dataSourceNatGatewayRule(),
-			NetworkLoadBalancerResource: dataSourceNetworkLoadBalancer(),
+			DatacenterResource:                        dataSourceDataCenter(),
+			LocationResource:                          dataSourceLocation(),
+			ImageResource:                             dataSourceImage(),
+			ResourceResource:                          dataSourceResource(),
+			SnapshotResource:                          dataSourceSnapshot(),
+			LanResource:                               dataSourceLan(),
+			PCCResource:                               dataSourcePcc(),
+			ServerResource:                            dataSourceServer(),
+			ServerCubeResource:                        dataSourceCubeServer(),
+			ServersDataSource:                         dataSourceServers(),
+			K8sClusterResource:                        dataSourceK8sCluster(),
+			K8sNodePoolResource:                       dataSourceK8sNodePool(),
+			K8sNodePoolNodesResource:                  dataSourceK8sNodePoolNodes(),
+			NatGatewayResource:                        dataSourceNatGateway(),
+			NatGatewayRuleResource:                    dataSourceNatGatewayRule(),
+			NetworkLoadBalancerResource:               dataSourceNetworkLoadBalancer(),
 			NetworkLoadBalancerForwardingRuleResource: dataSourceNetworkLoadBalancerForwardingRule(),
-			TemplateResource:      dataSourceTemplate(),
-			BackupUnitResource:    dataSourceBackupUnit(),
-			FirewallResource:      dataSourceFirewall(),
-			S3KeyResource:         dataSourceS3Key(),
-			GroupResource:         dataSourceGroup(),
-			UserResource:          dataSourceUser(),
-			IpBlockResource:       dataSourceIpBlock(),
-			VolumeResource:        dataSourceVolume(),
-			NicResource:           dataSourceNIC(),
-			ShareResource:         dataSourceShare(),
-			ResourceIpFailover:    dataSourceIpFailover(),
-			DBaaSClusterResource:  dataSourceDbaasPgSqlCluster(),
-			DBaaSVersionsResource: dataSourceDbaasPgSqlVersions(),
-			DBaaSBackupsResource:  dataSourceDbaasPgSqlBackups(),
+			TemplateResource:                          dataSourceTemplate(),
+			BackupUnitResource:                        dataSourceBackupUnit(),
+			FirewallResource:                          dataSourceFirewall(),
+			S3KeyResource:                             dataSourceS3Key(),
+			GroupResource:                             dataSourceGroup(),
+			UserResource:                              dataSourceUser(),
+			IpBlockResource:                           dataSourceIpBlock(),
+			VolumeResource:                            dataSourceVolume(),
+			NicResource:                               dataSourceNIC(),
+			ShareResource:                             dataSourceShare(),
+			ResourceIpFailover:                        dataSourceIpFailover(),
+			PsqlClusterResource:                       dataSourceDbaasPgSqlCluster(),
+			DBaasMongoClusterResource:                 dataSourceDbaasMongoCluster(),
+			DBaaSMongoTemplateResource:                dataSourceDbassMongoTemplate(),
+			PsqlVersionsResource:                      dataSourceDbaasPgSqlVersions(),
+			PsqlBackupsResource:                       dataSourceDbaasPgSqlBackups(),
+			ALBResource:                               dataSourceApplicationLoadBalancer(),
+			ALBForwardingRuleResource:                 dataSourceApplicationLoadBalancerForwardingRule(),
+			TargetGroupResource:                       dataSourceTargetGroup(),
+			DBaasMongoUserResource:                    dataSourceDbaasMongoUser(),
+			CertificateResource:                       dataSourceCertificate(),
+			ContainerRegistryResource:                 dataSourceContainerRegistry(),
+			ContainerRegistryTokenResource:            dataSourceContainerRegistryToken(),
+			ContainerRegistryLocationsResource:        dataSourceContainerRegistryLocations(),
 		},
 	}
 
@@ -124,7 +159,7 @@ func Provider() *schema.Provider {
 
 		if terraformVersion == "" {
 			// Terraform 0.12 introduced this field to the protocol
-			// We can therefore assume that if it's missing it's 0.10 or 0.11
+			// We can therefore assume that if it's missing it is 0.10 or 0.11
 			terraformVersion = "0.11+compatible"
 		}
 
@@ -138,6 +173,7 @@ func Provider() *schema.Provider {
 
 func providerConfigure(d *schema.ResourceData, terraformVersion string) (interface{}, diag.Diagnostics) {
 
+	var clientOpts ClientOptions
 	username, usernameOk := d.GetOk("username")
 	password, passwordOk := d.GetOk("password")
 	token, tokenOk := d.GetOk("token")
@@ -155,29 +191,61 @@ func providerConfigure(d *schema.ResourceData, terraformVersion string) (interfa
 	}
 
 	cleanedUrl := cleanURL(d.Get("endpoint").(string))
+	clientOpts.Username = username.(string)
+	clientOpts.Password = password.(string)
+	clientOpts.Token = token.(string)
+	clientOpts.Url = cleanedUrl
+	clientOpts.Version = ionoscloud.Version
+	clientOpts.TerraformVersion = terraformVersion
 
-	newConfig := ionoscloud.NewConfiguration(username.(string), password.(string), token.(string), cleanedUrl)
-
-	if os.Getenv("IONOS_DEBUG") != "" {
-		newConfig.Debug = true
+	clients := map[clientType]interface{}{
+		ionosClient:             NewClientByType(clientOpts, ionosClient),
+		psqlClient:              NewClientByType(clientOpts, psqlClient),
+		certManagerClient:       NewClientByType(clientOpts, certManagerClient),
+		mongoClient:             NewClientByType(clientOpts, mongoClient),
+		containerRegistryClient: NewClientByType(clientOpts, containerRegistryClient),
 	}
-	newConfig.MaxRetries = 999
-	newConfig.WaitTime = 4 * time.Second
-	newConfig.HTTPClient = &http.Client{Transport: utils.CreateTransport()}
 
-	newClient := ionoscloud.NewAPIClient(newConfig)
-
-	newConfig.UserAgent = fmt.Sprintf(
+	apiClient := clients[ionosClient].(*ionoscloud.APIClient)
+	apiClient.GetConfig().UserAgent = fmt.Sprintf(
 		"terraform-provider/%s_ionos-cloud-sdk-go/%s_hashicorp-terraform/%s_terraform-plugin-sdk/%s_os/%s_arch/%s",
 		Version, ionoscloud.Version, terraformVersion, meta.SDKVersionString(), runtime.GOOS, runtime.GOARCH)
 
-	dbaasClient := dbaasService.NewClientService(username.(string), password.(string), token.(string), cleanedUrl)
-	//dbaasClient.GetConfig().HTTPClient = &http.Client{Transport: createTransport()}
-
 	return SdkBundle{
-		CloudApiClient: newClient,
-		DbaasClient:    dbaasClient.Get(),
+		CloudApiClient:    apiClient,
+		PsqlClient:        clients[psqlClient].(*dbaasService.PsqlClient),
+		MongoClient:       clients[mongoClient].(*dbaasService.MongoClient),
+		CertManagerClient: clients[certManagerClient].(*cert.Client),
+		ContainerClient:   clients[containerRegistryClient].(*crService.Client),
 	}, nil
+}
+
+func NewClientByType(clientOpts ClientOptions, clientType clientType) interface{} {
+	switch clientType {
+	case ionosClient:
+		{
+			newConfig := ionoscloud.NewConfiguration(clientOpts.Username, clientOpts.Password, clientOpts.Token, clientOpts.Url)
+
+			if os.Getenv(utils.IonosDebug) != "" {
+				newConfig.Debug = true
+			}
+			newConfig.MaxRetries = utils.MaxRetries
+			newConfig.WaitTime = utils.MaxWaitTime
+			newConfig.HTTPClient = &http.Client{Transport: utils.CreateTransport()}
+			return ionoscloud.NewAPIClient(newConfig)
+		}
+	case psqlClient:
+		return dbaasService.NewPsqlClient(clientOpts.Username, clientOpts.Password, clientOpts.Token, clientOpts.Url, clientOpts.Version, clientOpts.Username)
+	case mongoClient:
+		return dbaasService.NewMongoClient(clientOpts.Username, clientOpts.Password, clientOpts.Token, clientOpts.Url, clientOpts.Version, clientOpts.TerraformVersion)
+	case certManagerClient:
+		return cert.NewClient(clientOpts.Username, clientOpts.Password, clientOpts.Token, clientOpts.Url, clientOpts.Version, clientOpts.TerraformVersion)
+	case containerRegistryClient:
+		return crService.NewClient(clientOpts.Username, clientOpts.Password, clientOpts.Token, clientOpts.Url, clientOpts.Version, clientOpts.TerraformVersion)
+	default:
+		log.Fatalf("[ERROR] unknown client type %d", clientType)
+	}
+	return nil
 }
 
 // cleanURL makes sure trailing slash does not corrupt the state
@@ -231,7 +299,7 @@ func resourceStateRefreshFunc(meta interface{}, path string) resource.StateRefre
 		request, apiResponse, err := client.GetRequestStatus(context.Background(), path)
 		logApiRequestTime(apiResponse)
 		if err != nil {
-			return nil, "", fmt.Errorf("request failed with following error: %s", err)
+			return nil, "", fmt.Errorf("request failed with following error: %w", err)
 		}
 		if request != nil && request.Metadata != nil && request.Metadata.Status != nil {
 			if *request.Metadata.Status == "FAILED" {
@@ -279,8 +347,8 @@ var resourceTargetStates = []string{
 
 // resourceDefaultTimeouts sets default value for each Timeout type
 var resourceDefaultTimeouts = schema.ResourceTimeout{
-	Create:  schema.DefaultTimeout(60 * time.Minute),
-	Update:  schema.DefaultTimeout(60 * time.Minute),
-	Delete:  schema.DefaultTimeout(60 * time.Minute),
-	Default: schema.DefaultTimeout(60 * time.Minute),
+	Create:  schema.DefaultTimeout(utils.DefaultTimeout),
+	Update:  schema.DefaultTimeout(utils.DefaultTimeout),
+	Delete:  schema.DefaultTimeout(utils.DefaultTimeout),
+	Default: schema.DefaultTimeout(utils.DefaultTimeout),
 }

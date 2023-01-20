@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 	ionoscloud "github.com/ionos-cloud/sdk-go/v6"
 	"log"
 	"strings"
@@ -21,9 +22,10 @@ func resourceNatGateway() *schema.Resource {
 		},
 		Schema: map[string]*schema.Schema{
 			"name": {
-				Type:        schema.TypeString,
-				Description: "Name of the NAT gateway",
-				Required:    true,
+				Type:         schema.TypeString,
+				Description:  "Name of the NAT gateway",
+				Required:     true,
+				ValidateFunc: validation.All(validation.StringIsNotWhiteSpace),
 			},
 			"public_ips": {
 				Type:        schema.TypeSet,
@@ -59,9 +61,10 @@ func resourceNatGateway() *schema.Resource {
 				},
 			},
 			"datacenter_id": {
-				Type:     schema.TypeString,
-				Required: true,
-				ForceNew: true,
+				Type:         schema.TypeString,
+				Required:     true,
+				ForceNew:     true,
+				ValidateFunc: validation.All(validation.StringIsNotWhiteSpace),
 			},
 		},
 		Timeouts: &resourceDefaultTimeouts,
@@ -143,7 +146,7 @@ func resourceNatGatewayCreate(ctx context.Context, d *schema.ResourceData, meta 
 
 	if err != nil {
 		d.SetId("")
-		diags := diag.FromErr(fmt.Errorf("error creating natGateway: %s, %s", err, responseBody(apiResponse)))
+		diags := diag.FromErr(fmt.Errorf("error creating natGateway: %w, %s", err, responseBody(apiResponse)))
 		return diags
 	}
 
@@ -173,7 +176,7 @@ func resourceNatGatewayRead(ctx context.Context, d *schema.ResourceData, meta in
 
 	if err != nil {
 		log.Printf("[INFO] Resource %s not found: %+v", d.Id(), err)
-		if apiResponse != nil && apiResponse.Response != nil && apiResponse.StatusCode == 404 {
+		if httpNotFound(apiResponse) {
 			d.SetId("")
 			return nil
 		}
@@ -260,7 +263,7 @@ func resourceNatGatewayUpdate(ctx context.Context, d *schema.ResourceData, meta 
 	logApiRequestTime(apiResponse)
 
 	if err != nil {
-		diags := diag.FromErr(fmt.Errorf("an error occured while updating a nat gateway ID %s %s", d.Id(), err))
+		diags := diag.FromErr(fmt.Errorf("an error occured while updating a nat gateway ID %s %w", d.Id(), err))
 		return diags
 	}
 
@@ -282,7 +285,7 @@ func resourceNatGatewayDelete(ctx context.Context, d *schema.ResourceData, meta 
 	logApiRequestTime(apiResponse)
 
 	if err != nil {
-		diags := diag.FromErr(fmt.Errorf("an error occured while deleting a nat gateway %s %s", d.Id(), err))
+		diags := diag.FromErr(fmt.Errorf("an error occured while deleting a nat gateway %s %w", d.Id(), err))
 		return diags
 	}
 
@@ -314,7 +317,7 @@ func resourceNatGatewayImport(ctx context.Context, d *schema.ResourceData, meta 
 
 	if err != nil {
 		log.Printf("[INFO] Resource %s not found: %+v", d.Id(), err)
-		if apiResponse != nil && apiResponse.Response != nil && apiResponse.StatusCode == 404 {
+		if httpNotFound(apiResponse) {
 			d.SetId("")
 			return nil, fmt.Errorf("unable to find nat gateway  %q", natGatewayId)
 		}
@@ -342,14 +345,14 @@ func setNatGatewayData(d *schema.ResourceData, natGateway *ionoscloud.NatGateway
 		if natGateway.Properties.Name != nil {
 			err := d.Set("name", *natGateway.Properties.Name)
 			if err != nil {
-				return fmt.Errorf("error while setting name property for nat gateway %s: %s", d.Id(), err)
+				return fmt.Errorf("error while setting name property for nat gateway %s: %w", d.Id(), err)
 			}
 		}
 
 		if natGateway.Properties.PublicIps != nil {
 			err := d.Set("public_ips", *natGateway.Properties.PublicIps)
 			if err != nil {
-				return fmt.Errorf("error while setting public_ips property for nat gateway %s: %s", d.Id(), err)
+				return fmt.Errorf("error while setting public_ips property for nat gateway %s: %w", d.Id(), err)
 			}
 		}
 
@@ -376,7 +379,7 @@ func setNatGatewayData(d *schema.ResourceData, natGateway *ionoscloud.NatGateway
 
 			if len(natGatewayLans) > 0 {
 				if err := d.Set("lans", natGatewayLans); err != nil {
-					return fmt.Errorf("error while setting lans property for nat gateway %s: %s", d.Id(), err)
+					return fmt.Errorf("error while setting lans property for nat gateway %s: %w", d.Id(), err)
 				}
 			}
 		}

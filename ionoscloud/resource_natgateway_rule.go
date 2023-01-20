@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 	ionoscloud "github.com/ionos-cloud/sdk-go/v6"
 	"log"
 	"strings"
@@ -21,9 +22,10 @@ func resourceNatGatewayRule() *schema.Resource {
 		},
 		Schema: map[string]*schema.Schema{
 			"name": {
-				Type:        schema.TypeString,
-				Description: "Name of the NAT gateway rule",
-				Required:    true,
+				Type:         schema.TypeString,
+				Description:  "Name of the NAT gateway rule",
+				Required:     true,
+				ValidateFunc: validation.All(validation.StringIsNotWhiteSpace),
 			},
 			"type": {
 				Type:        schema.TypeString,
@@ -42,14 +44,16 @@ func resourceNatGatewayRule() *schema.Resource {
 				Type: schema.TypeString,
 				Description: "Source subnet of the NAT gateway rule. For SNAT rules it specifies which packets this " +
 					"translation rule applies to based on the packets source IP address.",
-				Required: true,
+				Required:     true,
+				ValidateFunc: validation.All(validation.StringIsNotWhiteSpace),
 			},
 			"public_ip": {
 				Type: schema.TypeString,
 				Description: "Public IP address of the NAT gateway rule. Specifies the address used for masking outgoing " +
 					"packets source address field. Should be one of the customer reserved IP address already " +
 					"configured on the NAT gateway resource",
-				Required: true,
+				Required:     true,
+				ValidateFunc: validation.All(validation.StringIsNotWhiteSpace),
 			},
 			"target_subnet": {
 				Type: schema.TypeString,
@@ -85,14 +89,16 @@ func resourceNatGatewayRule() *schema.Resource {
 				},
 			},
 			"datacenter_id": {
-				Type:     schema.TypeString,
-				Required: true,
-				ForceNew: true,
+				Type:         schema.TypeString,
+				Required:     true,
+				ForceNew:     true,
+				ValidateFunc: validation.All(validation.StringIsNotWhiteSpace),
 			},
 			"natgateway_id": {
-				Type:     schema.TypeString,
-				Required: true,
-				ForceNew: true,
+				Type:         schema.TypeString,
+				Required:     true,
+				ForceNew:     true,
+				ValidateFunc: validation.All(validation.StringIsNotWhiteSpace),
 			},
 		},
 		Timeouts: &resourceDefaultTimeouts,
@@ -182,7 +188,7 @@ func resourceNatGatewayRuleCreate(ctx context.Context, d *schema.ResourceData, m
 
 	if err != nil {
 		d.SetId("")
-		diags := diag.FromErr(fmt.Errorf("error creating nat gateway rule: %s \n ApiError %s", err, responseBody(apiResponse)))
+		diags := diag.FromErr(fmt.Errorf("error creating nat gateway rule: %w \n ApiError %s", err, responseBody(apiResponse)))
 		return diags
 	}
 
@@ -213,7 +219,7 @@ func resourceNatGatewayRuleRead(ctx context.Context, d *schema.ResourceData, met
 
 	if err != nil {
 		log.Printf("[INFO] Resource %s not found: %+v", d.Id(), err)
-		if apiResponse != nil && apiResponse.Response != nil && apiResponse.StatusCode == 404 {
+		if httpNotFound(apiResponse) {
 			d.SetId("")
 			return nil
 		}
@@ -336,7 +342,7 @@ func resourceNatGatewayRuleDelete(ctx context.Context, d *schema.ResourceData, m
 	logApiRequestTime(apiResponse)
 
 	if err != nil {
-		diags := diag.FromErr(fmt.Errorf("an error occured while deleting a nat gateway rule %s %s", d.Id(), err))
+		diags := diag.FromErr(fmt.Errorf("an error occured while deleting a nat gateway rule %s %w", d.Id(), err))
 		return diags
 	}
 
@@ -369,7 +375,7 @@ func resourceNatGatewayRuleImport(ctx context.Context, d *schema.ResourceData, m
 
 	if err != nil {
 		log.Printf("[INFO] Resource %s not found: %+v", d.Id(), err)
-		if apiResponse != nil && apiResponse.Response != nil && apiResponse.StatusCode == 404 {
+		if httpNotFound(apiResponse) {
 			d.SetId("")
 			return nil, fmt.Errorf("unable to find nat gateway rule %q", natGatewayRuleId)
 		}
@@ -400,42 +406,42 @@ func setNatGatewayRuleData(d *schema.ResourceData, natGatewayRule *ionoscloud.Na
 		if natGatewayRule.Properties.Name != nil {
 			err := d.Set("name", *natGatewayRule.Properties.Name)
 			if err != nil {
-				return fmt.Errorf("error while setting name property for nat gateway %s: %s", d.Id(), err)
+				return fmt.Errorf("error while setting name property for nat gateway %s: %w", d.Id(), err)
 			}
 		}
 
 		if natGatewayRule.Properties.Type != nil {
 			err := d.Set("type", *natGatewayRule.Properties.Type)
 			if err != nil {
-				return fmt.Errorf("error while setting type property for nat gateway %s: %s", d.Id(), err)
+				return fmt.Errorf("error while setting type property for nat gateway %s: %w", d.Id(), err)
 			}
 		}
 
 		if natGatewayRule.Properties.Protocol != nil {
 			err := d.Set("protocol", *natGatewayRule.Properties.Protocol)
 			if err != nil {
-				return fmt.Errorf("error while setting protocol property for nat gateway %s: %s", d.Id(), err)
+				return fmt.Errorf("error while setting protocol property for nat gateway %s: %w", d.Id(), err)
 			}
 		}
 
 		if natGatewayRule.Properties.SourceSubnet != nil {
 			err := d.Set("source_subnet", *natGatewayRule.Properties.SourceSubnet)
 			if err != nil {
-				return fmt.Errorf("error while setting source_subnet property for nat gateway %s: %s", d.Id(), err)
+				return fmt.Errorf("error while setting source_subnet property for nat gateway %s: %w", d.Id(), err)
 			}
 		}
 
 		if natGatewayRule.Properties.PublicIp != nil {
 			err := d.Set("public_ip", *natGatewayRule.Properties.PublicIp)
 			if err != nil {
-				return fmt.Errorf("error while setting public_ip property for nat gateway %s: %s", d.Id(), err)
+				return fmt.Errorf("error while setting public_ip property for nat gateway %s: %w", d.Id(), err)
 			}
 		}
 
 		if natGatewayRule.Properties.TargetSubnet != nil {
 			err := d.Set("target_subnet", *natGatewayRule.Properties.TargetSubnet)
 			if err != nil {
-				return fmt.Errorf("error while setting target_subnet property for nat gateway %s: %s", d.Id(), err)
+				return fmt.Errorf("error while setting target_subnet property for nat gateway %s: %w", d.Id(), err)
 			}
 		}
 
@@ -447,7 +453,7 @@ func setNatGatewayRuleData(d *schema.ResourceData, natGatewayRule *ionoscloud.Na
 			},
 			})
 			if err != nil {
-				return fmt.Errorf("error while setting target_port_range property for nat gateway %s: %s", d.Id(), err)
+				return fmt.Errorf("error while setting target_port_range property for nat gateway %s: %w", d.Id(), err)
 			}
 		}
 	}

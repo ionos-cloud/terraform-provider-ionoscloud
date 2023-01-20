@@ -20,6 +20,7 @@ func TestAccFirewallBasic(t *testing.T) {
 		PreCheck: func() {
 			testAccPreCheck(t)
 		},
+		ExternalProviders: randomProviderVersion343(),
 		ProviderFactories: testAccProviderFactories,
 		CheckDestroy:      testAccCheckFirewallDestroyCheck,
 		Steps: []resource.TestStep{
@@ -208,11 +209,11 @@ func testAccCheckFirewallDestroyCheck(s *terraform.State) error {
 		logApiRequestTime(apiResponse)
 
 		if err != nil {
-			if apiResponse != nil && apiResponse.Response != nil && apiResponse.StatusCode != 404 {
-				return fmt.Errorf("error occurent at checking deletion of firewall %s %s", rs.Primary.ID, err)
+			if !httpNotFound(apiResponse) {
+				return fmt.Errorf("error occurent at checking deletion of firewall %s %w", rs.Primary.ID, err)
 			}
 		} else {
-			return fmt.Errorf("firewall still exists %s %s", rs.Primary.ID, err)
+			return fmt.Errorf("firewall still exists %s %w", rs.Primary.ID, err)
 		}
 	}
 
@@ -265,7 +266,7 @@ resource ` + ServerResource + ` ` + ServerTestResource + ` {
   availability_zone = "ZONE_1"
   cpu_family = "AMD_OPTERON"
   image_name = "ubuntu:latest"
-  image_password = "K3tTj8G14a3EgKyNeeiY"
+  image_password = ` + RandomPassword + `.server_image_password.result
   volume {
     name = "system"
     size = 14
@@ -277,6 +278,8 @@ resource ` + ServerResource + ` ` + ServerTestResource + ` {
     firewall_active = true
   }
 }
+
+` + ServerImagePassword + `
 
 resource "ionoscloud_nic" "database_nic" {
   datacenter_id = ` + DatacenterResource + `.` + DatacenterTestResource + `.id

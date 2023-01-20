@@ -5,13 +5,13 @@ package ionoscloud
 import (
 	"context"
 	"fmt"
-	ionoscloud "github.com/ionos-cloud/sdk-go/v6"
-	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils"
 	"regexp"
 	"testing"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
+	ionoscloud "github.com/ionos-cloud/sdk-go/v6"
+	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils"
 )
 
 func TestAccUserBasic(t *testing.T) {
@@ -21,6 +21,7 @@ func TestAccUserBasic(t *testing.T) {
 		PreCheck: func() {
 			testAccPreCheck(t)
 		},
+		ExternalProviders: randomProviderVersion343(),
 		ProviderFactories: testAccProviderFactories,
 		CheckDestroy:      testAccCheckUserDestroyCheck,
 		Steps: []resource.TestStep{
@@ -34,6 +35,7 @@ func TestAccUserBasic(t *testing.T) {
 					resource.TestCheckResourceAttr(UserResource+"."+UserTestResource, "administrator", "false"),
 					resource.TestCheckResourceAttr(UserResource+"."+UserTestResource, "force_sec_auth", "true"),
 					resource.TestCheckResourceAttr(UserResource+"."+UserTestResource, "active", "true"),
+					resource.TestCheckResourceAttrPair(UserResource+"."+UserTestResource, "password", RandomPassword+".user_password", "result"),
 				),
 			},
 			{
@@ -128,6 +130,7 @@ func TestAccUserBasic(t *testing.T) {
 					resource.TestCheckResourceAttr(UserResource+"."+UserTestResource, "administrator", "false"),
 					resource.TestCheckResourceAttr(UserResource+"."+UserTestResource, "force_sec_auth", "false"),
 					resource.TestCheckResourceAttr(UserResource+"."+UserTestResource, "active", "true"),
+					resource.TestCheckResourceAttrPair(UserResource+"."+UserTestResource, "password", RandomPassword+".user_password", "result"),
 				),
 			},
 			{
@@ -138,7 +141,9 @@ func TestAccUserBasic(t *testing.T) {
 					resource.TestCheckResourceAttrSet(UserResource+"."+UserTestResource, "email"),
 					resource.TestCheckResourceAttr(UserResource+"."+UserTestResource, "administrator", "false"),
 					resource.TestCheckResourceAttr(UserResource+"."+UserTestResource, "force_sec_auth", "false"),
-					resource.TestCheckResourceAttr(UserResource+"."+UserTestResource, "active", "false")),
+					resource.TestCheckResourceAttr(UserResource+"."+UserTestResource, "active", "false"),
+					resource.TestCheckResourceAttrPair(UserResource+"."+UserTestResource, "password", RandomPassword+".user_password_updated", "result"),
+				),
 			},
 			{
 				Config: testAccCheckUserMultipleGroups,
@@ -160,6 +165,15 @@ func TestAccUserBasic(t *testing.T) {
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttr(UserResource+"."+UserTestResource, "group_ids.#", "0")),
 			},
+			{
+				Config: testAccCheckNewUserGroup,
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttr(UserResource+"."+NewUserResource, "group_ids.#", "1"),
+					resource.TestCheckResourceAttr(DataSource+"."+UserResource+"."+UserDataSourceById, "groups.#", "1"),
+					resource.TestCheckTypeSetElemNestedAttrs(DataSource+"."+UserResource+"."+UserDataSourceById, "groups.*", map[string]string{
+						"name": "group1",
+					})),
+			},
 		},
 	})
 }
@@ -180,7 +194,7 @@ func testAccCheckUserDestroyCheck(s *terraform.State) error {
 		logApiRequestTime(apiResponse)
 
 		if err != nil {
-			if apiResponse == nil || apiResponse.Response != nil && apiResponse.StatusCode != 404 {
+			if !httpNotFound(apiResponse) {
 				return fmt.Errorf("user still exists %s - an error occurred while checking it %s", rs.Primary.ID, err)
 			}
 		} else {
@@ -227,44 +241,69 @@ func testAccCheckUserExists(n string, user *ionoscloud.User) resource.TestCheckF
 }
 
 var testAccCheckUserConfigBasic = `
+resource ` + RandomPassword + ` "user_password" {
+  length           = 16
+  special          = true
+  override_special = "!#$%&*()-_=+[]{}<>:?"
+}
+
 resource ` + UserResource + ` ` + UserTestResource + ` {
   first_name = "` + UserTestResource + `"
   last_name = "` + UserTestResource + `"
   email = "` + utils.GenerateEmail() + `"
-  password = "abc123-321CBA"
-  administrator = false
+  password =  ` + RandomPassword + `.user_password.result
+  administrator = true
   force_sec_auth= true
   active  = true
-}`
+}
+`
 
 var testAccCheckUserConfigUpdateForceSec = `
+resource ` + RandomPassword + ` "user_password" {
+  length           = 16
+  special          = true
+  override_special = "!#$%&*()-_=+[]{}<>:?"
+}
+
 resource ` + UserResource + ` ` + UserTestResource + ` {
  first_name = "` + UserTestResource + `"
  last_name = "` + UserTestResource + `"
  email = "` + utils.GenerateEmail() + `"
- password = "abc123-321CBA"
- administrator = false
+ password = ` + RandomPassword + `.user_password.result
+ administrator = true
  force_sec_auth= false
  active  = true
 }`
 
 var testAccCheckUserConfigUpdate = `
+resource ` + RandomPassword + ` "user_password_updated" {
+  length           = 16
+  special          = true
+  override_special = "!#$%&*()-_=+[]{}<>:?"
+}
+
 resource ` + UserResource + ` ` + UserTestResource + ` {
  first_name = "` + UpdatedResources + `"
  last_name = "` + UpdatedResources + `"
  email = "` + utils.GenerateEmail() + `"
- password = "abc123-321CBAupdated"
+ password 		= ` + RandomPassword + `.user_password_updated.result
  administrator = false
  force_sec_auth= false
  active  = false
 }`
 
 var testAccCheckUserMultipleGroups = `
+resource ` + RandomPassword + ` "user_password_updated" {
+  length           = 16
+  special          = true
+  override_special = "!#$%&*()-_=+[]{}<>:?"
+}
+
 resource ` + UserResource + ` ` + UserTestResource + ` {
  first_name 	= "` + UpdatedResources + `"
  last_name 		= "` + UpdatedResources + `"
  email 			= "` + utils.GenerateEmail() + `"
- password 		= "abc123-321CBAupdated"
+ password 		= ` + RandomPassword + `.user_password_updated.result
  administrator  = false
  force_sec_auth = false
  active  		= false
@@ -301,11 +340,17 @@ data ` + UserResource + ` ` + UserDataSourceById + ` {
 `
 
 var testAccCheckUserMultipleGroups1Element = `
+resource ` + RandomPassword + ` "user_password_updated" {
+  length           = 16
+  special          = true
+  override_special = "!#$%&*()-_=+[]{}<>:?"
+}
+
 resource ` + UserResource + ` ` + UserTestResource + ` {
  first_name 	= "` + UpdatedResources + `"
  last_name 		= "` + UpdatedResources + `"
  email 			= "` + utils.GenerateEmail() + `"
- password 		= "abc123-321CBAupdated"
+ password 		= ` + RandomPassword + `.user_password_updated.result
  administrator  = false
  force_sec_auth = false
  active  		= false
@@ -342,11 +387,17 @@ data ` + UserResource + ` ` + UserDataSourceById + ` {
 `
 
 var testAccCheckUserRemoveAllGroups = `
+resource ` + RandomPassword + ` "user_password_updated" {
+  length           = 16
+  special          = true
+  override_special = "!#$%&*()-_=+[]{}<>:?"
+}
+
 resource ` + UserResource + ` ` + UserTestResource + ` {
  first_name 	= "` + UpdatedResources + `"
  last_name 		= "` + UpdatedResources + `"
  email 			= "` + utils.GenerateEmail() + `"
- password 		= "abc123-321CBAupdated"
+ password 		= ` + RandomPassword + `.user_password_updated.result
  administrator  = false
  force_sec_auth = false
  active  		= false
@@ -382,11 +433,17 @@ data ` + UserResource + ` ` + UserDataSourceById + ` {
 `
 
 var testAccCheckUserWrongGroupId = `
+resource ` + RandomPassword + ` "user_password_updated" {
+  length           = 16
+  special          = true
+  override_special = "!#$%&*()-_=+[]{}<>:?"
+}
+
 resource ` + UserResource + ` ` + UserTestResource + ` {
  first_name 	= "` + UpdatedResources + `"
  last_name 		= "` + UpdatedResources + `"
  email 			= "` + utils.GenerateEmail() + `"
- password 		= "abc123-321CBAupdated"
+ password 		= ` + RandomPassword + `.user_password_updated.result
  administrator  = false
  force_sec_auth = false
  active  		= false
@@ -419,6 +476,41 @@ resource "ionoscloud_group" "group3" {
 
 data ` + UserResource + ` ` + UserDataSourceById + ` {
 	id = ionoscloud_user.` + UserTestResource + `.id
+}
+`
+
+// Test in which we create the user and in the same time we add the user to a specific group. The
+// difference between this test and the other group-related tests is that, for this test, the user
+// is new. For the other user-group-related tests, we are operating on a user that already exists.
+var testAccCheckNewUserGroup = `
+resource ` + RandomPassword + ` "user_password_updated" {
+  length           = 16
+  special          = true
+  override_special = "!#$%&*()-_=+[]{}<>:?"
+}
+
+resource ` + UserResource + ` ` + NewUserResource + ` {
+ first_name 	= "` + NewUserName + `"
+ last_name 		= "` + NewUserName + `"
+ email 			= "` + utils.GenerateEmail() + `"
+ password 		= ` + RandomPassword + `.user_password_updated.result
+ administrator  = false
+ force_sec_auth = false
+ active  		= false
+ group_ids 		= [ ionoscloud_group.group1.id]
+}
+
+resource "ionoscloud_group" "group1" {
+  name = "group1"
+  create_datacenter = true
+  create_snapshot = true
+  reserve_ip = true
+  access_activity_log = false
+  create_k8s_cluster = true
+}
+
+data ` + UserResource + ` ` + UserDataSourceById + ` {
+	id = ionoscloud_user.` + NewUserResource + `.id
 }
 `
 

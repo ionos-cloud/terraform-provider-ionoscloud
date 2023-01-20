@@ -1,4 +1,4 @@
-//go:build compute || all || s3key
+//go:build all || s3key
 
 package ionoscloud
 
@@ -31,7 +31,7 @@ func TestAccS3KeyImportBasic(t *testing.T) {
 }
 
 func testAccS3KeyImportStateID(s *terraform.State) (string, error) {
-	var importID string = ""
+	var importID = ""
 
 	for _, rs := range s.RootModule().Resources {
 		if rs.Type != S3KeyResource {

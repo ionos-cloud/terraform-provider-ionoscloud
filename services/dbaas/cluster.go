@@ -5,68 +5,112 @@ import (
 	"fmt"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
-	dbaas "github.com/ionos-cloud/sdk-go-dbaas-postgres"
+	mongo "github.com/ionos-cloud/sdk-go-dbaas-mongo"
+	psql "github.com/ionos-cloud/sdk-go-dbaas-postgres"
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils"
+	"log"
+	"strings"
 	"time"
 )
 
-type ClusterService interface {
-	GetCluster(ctx context.Context, clusterId string) (dbaas.ClusterResponse, *dbaas.APIResponse, error)
-	ListClusters(ctx context.Context, filterName string) (dbaas.ClusterList, *dbaas.APIResponse, error)
-	CreateCluster(ctx context.Context, cluster dbaas.CreateClusterRequest) (dbaas.ClusterResponse, *dbaas.APIResponse, error)
-	UpdateCluster(ctx context.Context, clusterId string, cluster dbaas.PatchClusterRequest) (dbaas.ClusterResponse, *dbaas.APIResponse, error)
-	DeleteCluster(ctx context.Context, clusterId string) (dbaas.ClusterResponse, *dbaas.APIResponse, error)
+func (c *PsqlClient) GetCluster(ctx context.Context, clusterId string) (psql.ClusterResponse, *psql.APIResponse, error) {
+	cluster, apiResponse, err := c.sdkClient.ClustersApi.ClustersFindById(ctx, clusterId).Execute()
+	return cluster, apiResponse, err
 }
 
-func (c *Client) GetCluster(ctx context.Context, clusterId string) (dbaas.ClusterResponse, *dbaas.APIResponse, error) {
-	cluster, apiResponse, err := c.ClustersApi.ClustersFindById(ctx, clusterId).Execute()
-	if apiResponse != nil {
-		return cluster, apiResponse, err
-
-	}
-	return cluster, nil, err
+func (c *MongoClient) GetCluster(ctx context.Context, clusterId string) (mongo.ClusterResponse, *mongo.APIResponse, error) {
+	cluster, apiResponse, err := c.sdkClient.ClustersApi.ClustersFindById(ctx, clusterId).Execute()
+	apiResponse.LogInfo()
+	return cluster, apiResponse, err
 }
 
-func (c *Client) ListClusters(ctx context.Context, filterName string) (dbaas.ClusterList, *dbaas.APIResponse, error) {
-	request := c.ClustersApi.ClustersGet(ctx)
+func (c *PsqlClient) ListClusters(ctx context.Context, filterName string) (psql.ClusterList, *psql.APIResponse, error) {
+	request := c.sdkClient.ClustersApi.ClustersGet(ctx)
 	if filterName != "" {
 		request = request.FilterName(filterName)
 	}
-	clusters, apiResponse, err := c.ClustersApi.ClustersGetExecute(request)
-	if apiResponse != nil {
-		return clusters, apiResponse, err
-	}
-	return clusters, nil, err
+	clusters, apiResponse, err := c.sdkClient.ClustersApi.ClustersGetExecute(request)
+	return clusters, apiResponse, err
 }
 
-func (c *Client) CreateCluster(ctx context.Context, cluster dbaas.CreateClusterRequest) (dbaas.ClusterResponse, *dbaas.APIResponse, error) {
-	clusterResponse, apiResponse, err := c.ClustersApi.ClustersPost(ctx).CreateClusterRequest(cluster).Execute()
-	if apiResponse != nil {
-		return clusterResponse, apiResponse, err
+func (c *MongoClient) ListClusters(ctx context.Context, filterName string) (mongo.ClusterList, *mongo.APIResponse, error) {
+	request := c.sdkClient.ClustersApi.ClustersGet(ctx)
+	if filterName != "" {
+		request = request.FilterName(filterName)
 	}
-	return clusterResponse, nil, err
+	clusters, apiResponse, err := c.sdkClient.ClustersApi.ClustersGetExecute(request)
+	apiResponse.LogInfo()
+	return clusters, apiResponse, err
 }
 
-func (c *Client) UpdateCluster(ctx context.Context, clusterId string, cluster dbaas.PatchClusterRequest) (dbaas.ClusterResponse, *dbaas.APIResponse, error) {
-	clusterResponse, apiResponse, err := c.ClustersApi.ClustersPatch(ctx, clusterId).PatchClusterRequest(cluster).Execute()
-	if apiResponse != nil {
-		return clusterResponse, apiResponse, err
-	}
-	return clusterResponse, nil, err
+func (c *MongoClient) GetTemplates(ctx context.Context) (mongo.TemplateList, *mongo.APIResponse, error) {
+	templates, apiResponse, err := c.sdkClient.TemplatesApi.TemplatesGet(ctx).Execute()
+	apiResponse.LogInfo()
+	return templates, apiResponse, err
 }
 
-func (c *Client) DeleteCluster(ctx context.Context, clusterId string) (dbaas.ClusterResponse, *dbaas.APIResponse, error) {
-	clusterResponse, apiResponse, err := c.ClustersApi.ClustersDelete(ctx, clusterId).Execute()
-	if apiResponse != nil {
-		return clusterResponse, apiResponse, err
-	}
-	return clusterResponse, nil, err
+func (c *PsqlClient) CreateCluster(ctx context.Context, cluster psql.CreateClusterRequest) (psql.ClusterResponse, *psql.APIResponse, error) {
+	clusterResponse, apiResponse, err := c.sdkClient.ClustersApi.ClustersPost(ctx).CreateClusterRequest(cluster).Execute()
+	return clusterResponse, apiResponse, err
 }
 
-func GetDbaasPgSqlClusterDataCreate(d *schema.ResourceData) (*dbaas.CreateClusterRequest, error) {
+func (c *MongoClient) CreateCluster(ctx context.Context, cluster mongo.CreateClusterRequest) (mongo.ClusterResponse, *mongo.APIResponse, error) {
+	clusterResponse, apiResponse, err := c.sdkClient.ClustersApi.ClustersPost(ctx).CreateClusterRequest(cluster).Execute()
+	apiResponse.LogInfo()
+	return clusterResponse, apiResponse, err
+}
 
-	dbaasCluster := dbaas.CreateClusterRequest{
-		Properties: &dbaas.CreateClusterProperties{},
+func (c *MongoClient) UpdateCluster(ctx context.Context, clusterId string, cluster mongo.PatchClusterRequest) (mongo.ClusterResponse, *mongo.APIResponse, error) {
+	clusterResponse, apiResponse, err := c.sdkClient.ClustersApi.ClustersPatch(ctx, clusterId).PatchClusterRequest(cluster).Execute()
+	apiResponse.LogInfo()
+	return clusterResponse, apiResponse, err
+}
+
+func (c *PsqlClient) UpdateCluster(ctx context.Context, clusterId string, cluster psql.PatchClusterRequest) (psql.ClusterResponse, *psql.APIResponse, error) {
+	clusterResponse, apiResponse, err := c.sdkClient.ClustersApi.ClustersPatch(ctx, clusterId).PatchClusterRequest(cluster).Execute()
+	return clusterResponse, apiResponse, err
+}
+
+func (c *PsqlClient) DeleteCluster(ctx context.Context, clusterId string) (psql.ClusterResponse, *psql.APIResponse, error) {
+	clusterResponse, apiResponse, err := c.sdkClient.ClustersApi.ClustersDelete(ctx, clusterId).Execute()
+	return clusterResponse, apiResponse, err
+}
+
+func (c *MongoClient) DeleteCluster(ctx context.Context, clusterId string) (mongo.ClusterResponse, *mongo.APIResponse, error) {
+	clusterResponse, apiResponse, err := c.sdkClient.ClustersApi.ClustersDelete(ctx, clusterId).Execute()
+	apiResponse.LogInfo()
+	return clusterResponse, apiResponse, err
+}
+
+func (c *MongoClient) IsClusterReady(ctx context.Context, d *schema.ResourceData) (bool, error) {
+	cluster, _, err := c.GetCluster(ctx, d.Id())
+	if err != nil {
+		return true, fmt.Errorf("check failed for cluster status: %w", err)
+	}
+
+	if cluster.Metadata == nil || cluster.Metadata.State == nil {
+		return false, fmt.Errorf("cluster metadata or state is empty for id %s", d.Id())
+	}
+
+	log.Printf("[INFO] state of the cluster %s ", string(*cluster.Metadata.State))
+	return strings.EqualFold(string(*cluster.Metadata.State), utils.Available), nil
+}
+
+func (c *MongoClient) IsClusterDeleted(ctx context.Context, d *schema.ResourceData) (bool, error) {
+	_, apiResponse, err := c.GetCluster(ctx, d.Id())
+	if err != nil {
+		if apiResponse.HttpNotFound() {
+			return true, nil
+		}
+		return false, fmt.Errorf("check failed for cluster deletion status: %w", err)
+	}
+	return false, nil
+}
+
+func GetDbaasPgSqlClusterDataCreate(d *schema.ResourceData) (*psql.CreateClusterRequest, error) {
+
+	dbaasCluster := psql.CreateClusterRequest{
+		Properties: &psql.CreateClusterProperties{},
 	}
 
 	if postgresVersion, ok := d.GetOk("postgres_version"); ok {
@@ -95,7 +139,7 @@ func GetDbaasPgSqlClusterDataCreate(d *schema.ResourceData) (*dbaas.CreateCluste
 	}
 
 	if storageType, ok := d.GetOk("storage_type"); ok {
-		storageType := dbaas.StorageType(storageType.(string))
+		storageType := psql.StorageType(storageType.(string))
 		dbaasCluster.Properties.StorageType = &storageType
 	}
 
@@ -127,7 +171,7 @@ func GetDbaasPgSqlClusterDataCreate(d *schema.ResourceData) (*dbaas.CreateCluste
 	dbaasCluster.Properties.Credentials = GetDbaasClusterCredentialsData(d)
 
 	if synchronizationMode, ok := d.GetOk("synchronization_mode"); ok {
-		synchronizationMode := dbaas.SynchronizationMode(synchronizationMode.(string))
+		synchronizationMode := psql.SynchronizationMode(synchronizationMode.(string))
 		dbaasCluster.Properties.SynchronizationMode = &synchronizationMode
 	}
 
@@ -142,10 +186,88 @@ func GetDbaasPgSqlClusterDataCreate(d *schema.ResourceData) (*dbaas.CreateCluste
 	return &dbaasCluster, nil
 }
 
-func GetDbaasPgSqlClusterDataUpdate(d *schema.ResourceData) (*dbaas.PatchClusterRequest, diag.Diagnostics) {
+func SetMongoClusterCreateProperties(d *schema.ResourceData) *mongo.CreateClusterRequest {
 
-	dbaasCluster := dbaas.PatchClusterRequest{
-		Properties: &dbaas.PatchClusterProperties{},
+	dbaasCluster := mongo.CreateClusterRequest{
+		Properties: &mongo.CreateClusterProperties{},
+	}
+
+	if templateId, ok := d.GetOk("template_id"); ok {
+		templateId := templateId.(string)
+		dbaasCluster.Properties.TemplateID = &templateId
+	}
+
+	if mongoVersion, ok := d.GetOk("mongodb_version"); ok {
+		mongoVersion := mongoVersion.(string)
+		dbaasCluster.Properties.MongoDBVersion = &mongoVersion
+	}
+
+	if instances, ok := d.GetOk("instances"); ok {
+		instances := instances.(int)
+		mongoInstances := int32(instances)
+		dbaasCluster.Properties.Instances = &mongoInstances
+	}
+
+	dbaasCluster.Properties.Connections = GetDbaasMongoClusterConnectionsData(d)
+
+	if location, ok := d.GetOk("location"); ok {
+		location := location.(string)
+		dbaasCluster.Properties.Location = &location
+	}
+
+	if displayName, ok := d.GetOk("display_name"); ok {
+		displayName := displayName.(string)
+		dbaasCluster.Properties.DisplayName = &displayName
+	}
+
+	if _, ok := d.GetOk("maintenance_window"); ok {
+		dbaasCluster.Properties.MaintenanceWindow = GetDbaasMongoClusterMaintenanceWindowData(d)
+	}
+
+	return &dbaasCluster
+}
+
+func SetMongoClusterPatchProperties(d *schema.ResourceData) *mongo.PatchClusterRequest {
+
+	patchRequest := mongo.PatchClusterRequest{
+		Properties: mongo.NewPatchClusterProperties(),
+	}
+
+	if d.HasChange("display_name") {
+		_, name := d.GetChange("display_name")
+		nameStr := name.(string)
+		patchRequest.Properties.DisplayName = &nameStr
+	}
+
+	if d.HasChange("instances") {
+		_, instances := d.GetChange("instances")
+		instancesInt := int32(instances.(int))
+		patchRequest.Properties.Instances = &instancesInt
+	}
+
+	if d.HasChange("template_id") {
+		_, template := d.GetChange("template_id")
+		templateStr := template.(string)
+		patchRequest.Properties.TemplateID = &templateStr
+	}
+	if d.HasChange("connections") {
+		patchRequest.Properties.Connections = GetDbaasMongoClusterConnectionsData(d)
+	}
+	if d.HasChange("maintenance_window") {
+		_, mWin := d.GetChange("maintenance_window")
+		if mWin != nil {
+			mWinVal := GetDbaasMongoClusterMaintenanceWindowData(d)
+			patchRequest.Properties.MaintenanceWindow = mWinVal
+		}
+	}
+
+	return &patchRequest
+}
+
+func GetDbaasPgSqlClusterDataUpdate(d *schema.ResourceData) (*psql.PatchClusterRequest, diag.Diagnostics) {
+
+	dbaasCluster := psql.PatchClusterRequest{
+		Properties: &psql.PatchClusterProperties{},
 	}
 
 	if postgresVersion, ok := d.GetOk("postgres_version"); ok {
@@ -185,15 +307,15 @@ func GetDbaasPgSqlClusterDataUpdate(d *schema.ResourceData) (*dbaas.PatchCluster
 	return &dbaasCluster, nil
 }
 
-func GetDbaasClusterConnectionsData(d *schema.ResourceData) *[]dbaas.Connection {
-	connections := make([]dbaas.Connection, 0)
+func GetDbaasClusterConnectionsData(d *schema.ResourceData) *[]psql.Connection {
+	connections := make([]psql.Connection, 0)
 
 	if vdcValue, ok := d.GetOk("connections"); ok {
 		vdcValue := vdcValue.([]interface{})
 		if vdcValue != nil {
 			for vdcIndex := range vdcValue {
 
-				connection := dbaas.Connection{}
+				connection := psql.Connection{}
 
 				if datacenterId, ok := d.GetOk(fmt.Sprintf("connections.%d.datacenter_id", vdcIndex)); ok {
 					datacenterId := datacenterId.(string)
@@ -219,8 +341,46 @@ func GetDbaasClusterConnectionsData(d *schema.ResourceData) *[]dbaas.Connection 
 	return &connections
 }
 
-func GetDbaasClusterMaintenanceWindowData(d *schema.ResourceData) *dbaas.MaintenanceWindow {
-	var maintenanceWindow dbaas.MaintenanceWindow
+func GetDbaasMongoClusterConnectionsData(d *schema.ResourceData) *[]mongo.Connection {
+	connections := make([]mongo.Connection, 0)
+
+	if vdcValue, ok := d.GetOk("connections"); ok {
+		vdcValue := vdcValue.([]interface{})
+		if vdcValue != nil {
+			for vdcIndex := range vdcValue {
+
+				connection := mongo.Connection{}
+
+				if datacenterId, ok := d.GetOk(fmt.Sprintf("connections.%d.datacenter_id", vdcIndex)); ok {
+					datacenterId := datacenterId.(string)
+					connection.DatacenterId = &datacenterId
+				}
+
+				if lanId, ok := d.GetOk(fmt.Sprintf("connections.%d.lan_id", vdcIndex)); ok {
+					lanId := lanId.(string)
+					connection.LanId = &lanId
+				}
+
+				if cidrList, ok := d.GetOk(fmt.Sprintf("connections.%d.cidr_list", vdcIndex)); ok {
+					cidrList := cidrList.([]interface{})
+					var list []string
+					for _, cidr := range cidrList {
+						list = append(list, cidr.(string))
+					}
+					connection.CidrList = &list
+				}
+
+				connections = append(connections, connection)
+			}
+		}
+
+	}
+
+	return &connections
+}
+
+func GetDbaasClusterMaintenanceWindowData(d *schema.ResourceData) *psql.MaintenanceWindow {
+	var maintenanceWindow psql.MaintenanceWindow
 
 	if timeV, ok := d.GetOk("maintenance_window.0.time"); ok {
 		timeV := timeV.(string)
@@ -228,15 +388,31 @@ func GetDbaasClusterMaintenanceWindowData(d *schema.ResourceData) *dbaas.Mainten
 	}
 
 	if dayOfTheWeek, ok := d.GetOk("maintenance_window.0.day_of_the_week"); ok {
-		dayOfTheWeek := dbaas.DayOfTheWeek(dayOfTheWeek.(string))
+		dayOfTheWeek := psql.DayOfTheWeek(dayOfTheWeek.(string))
 		maintenanceWindow.DayOfTheWeek = &dayOfTheWeek
 	}
 
 	return &maintenanceWindow
 }
 
-func GetDbaasClusterCredentialsData(d *schema.ResourceData) *dbaas.DBUser {
-	var user dbaas.DBUser
+func GetDbaasMongoClusterMaintenanceWindowData(d *schema.ResourceData) *mongo.MaintenanceWindow {
+	var maintenanceWindow mongo.MaintenanceWindow
+
+	if timeV, ok := d.GetOk("maintenance_window.0.time"); ok {
+		timeV := timeV.(string)
+		maintenanceWindow.Time = &timeV
+	}
+
+	if dayOfTheWeek, ok := d.GetOk("maintenance_window.0.day_of_the_week"); ok {
+		dayOfTheWeek := mongo.DayOfTheWeek(dayOfTheWeek.(string))
+		maintenanceWindow.DayOfTheWeek = &dayOfTheWeek
+	}
+
+	return &maintenanceWindow
+}
+
+func GetDbaasClusterCredentialsData(d *schema.ResourceData) *psql.DBUser {
+	var user psql.DBUser
 
 	if username, ok := d.GetOk("credentials.0.username"); ok {
 		username := username.(string)
@@ -251,8 +427,8 @@ func GetDbaasClusterCredentialsData(d *schema.ResourceData) *dbaas.DBUser {
 	return &user
 }
 
-func GetDbaasClusterFromBackupData(d *schema.ResourceData) (*dbaas.CreateRestoreRequest, error) {
-	var restore dbaas.CreateRestoreRequest
+func GetDbaasClusterFromBackupData(d *schema.ResourceData) (*psql.CreateRestoreRequest, error) {
+	var restore psql.CreateRestoreRequest
 
 	if backupId, ok := d.GetOk("from_backup.0.backup_id"); ok {
 		backupId := backupId.(string)
@@ -260,12 +436,12 @@ func GetDbaasClusterFromBackupData(d *schema.ResourceData) (*dbaas.CreateRestore
 	}
 
 	if targetTime, ok := d.GetOk("from_backup.0.recovery_target_time"); ok {
-		var ionosTime dbaas.IonosTime
+		var ionosTime psql.IonosTime
 		targetTime := targetTime.(string)
 		layout := "2006-01-02T15:04:05Z"
 		convertedTime, err := time.Parse(layout, targetTime)
 		if err != nil {
-			return nil, fmt.Errorf("an error occured while converting recovery_target_time to time.Time: %s", err)
+			return nil, fmt.Errorf("an error occured while converting recovery_target_time to time.Time: %w", err)
 
 		}
 		ionosTime.Time = convertedTime
@@ -275,9 +451,9 @@ func GetDbaasClusterFromBackupData(d *schema.ResourceData) (*dbaas.CreateRestore
 	return &restore, nil
 }
 
-func SetDbaasPgSqlClusterData(d *schema.ResourceData, cluster dbaas.ClusterResponse) error {
+func SetDbaasPgSqlClusterData(d *schema.ResourceData, cluster psql.ClusterResponse) error {
 
-	resourceName := "dbaas cluster"
+	resourceName := "psql cluster"
 
 	if cluster.Id != nil {
 		d.SetId(*cluster.Id)
@@ -332,19 +508,19 @@ func SetDbaasPgSqlClusterData(d *schema.ResourceData, cluster dbaas.ClusterRespo
 
 	if cluster.Properties.Location != nil {
 		if err := d.Set("location", *cluster.Properties.Location); err != nil {
-			return fmt.Errorf("error while setting location property for dbaas cluster %s: %s", d.Id(), err)
+			return fmt.Errorf("error while setting location property for psql cluster %s: %w", d.Id(), err)
 		}
 	}
 
 	if cluster.Properties.BackupLocation != nil {
 		if err := d.Set("backup_location", *cluster.Properties.BackupLocation); err != nil {
-			return fmt.Errorf("error while setting backup_location property for dbaas cluster %s: %s", d.Id(), err)
+			return fmt.Errorf("error while setting backup_location property for psql cluster %s: %w", d.Id(), err)
 		}
 	}
 
 	if cluster.Properties.DisplayName != nil {
 		if err := d.Set("display_name", *cluster.Properties.DisplayName); err != nil {
-			return fmt.Errorf("error while setting display_name property for dbaas cluster %s: %s", d.Id(), err)
+			return fmt.Errorf("error while setting display_name property for psql cluster %s: %w", d.Id(), err)
 		}
 	}
 
@@ -359,14 +535,79 @@ func SetDbaasPgSqlClusterData(d *schema.ResourceData, cluster dbaas.ClusterRespo
 
 	if cluster.Properties.SynchronizationMode != nil {
 		if err := d.Set("synchronization_mode", *cluster.Properties.SynchronizationMode); err != nil {
-			return fmt.Errorf("error while setting SynchronizationMode property for dbaas cluster %s: %s", d.Id(), err)
+			return fmt.Errorf("error while setting SynchronizationMode property for psql cluster %s: %w", d.Id(), err)
 		}
 	}
 
 	return nil
 }
 
-func SetConnectionProperties(vdcConnection dbaas.Connection) map[string]interface{} {
+func SetDbaasMongoDBClusterData(d *schema.ResourceData, cluster mongo.ClusterResponse) error {
+
+	resourceName := "dbaas mongo cluster"
+
+	if cluster.Id != nil {
+		d.SetId(*cluster.Id)
+	}
+	if cluster.Properties != nil {
+
+		if cluster.Properties.TemplateID != nil {
+			if err := d.Set("template_id", *cluster.Properties.TemplateID); err != nil {
+				return utils.GenerateSetError(resourceName, "template_id", err)
+			}
+		}
+		if cluster.Properties.MongoDBVersion != nil {
+			if err := d.Set("mongodb_version", *cluster.Properties.MongoDBVersion); err != nil {
+				return utils.GenerateSetError(resourceName, "mongodb_version", err)
+			}
+		}
+		if cluster.Properties.Instances != nil {
+			if err := d.Set("instances", *cluster.Properties.Instances); err != nil {
+				return utils.GenerateSetError(resourceName, "instances", err)
+			}
+		}
+		if cluster.Properties.Connections != nil && len(*cluster.Properties.Connections) > 0 {
+			var connections []interface{}
+			for _, connection := range *cluster.Properties.Connections {
+				connectionEntry := SetMongoConnectionProperties(connection)
+				connections = append(connections, connectionEntry)
+			}
+			if err := d.Set("connections", connections); err != nil {
+				return utils.GenerateSetError(resourceName, "connections", err)
+			}
+		}
+
+		if cluster.Properties.Location != nil {
+			if err := d.Set("location", *cluster.Properties.Location); err != nil {
+				return fmt.Errorf("error while setting location property for psql cluster %s: %w", d.Id(), err)
+			}
+		}
+		if cluster.Properties.DisplayName != nil {
+			if err := d.Set("display_name", *cluster.Properties.DisplayName); err != nil {
+				return fmt.Errorf("error while setting display_name property for psql cluster %s: %w", d.Id(), err)
+			}
+		}
+
+		if cluster.Properties.ConnectionString != nil {
+			if err := d.Set("connection_string", *cluster.Properties.ConnectionString); err != nil {
+				return utils.GenerateSetError(resourceName, "connection_string", err)
+			}
+		}
+
+		if cluster.Properties.MaintenanceWindow != nil {
+			var maintenanceWindow []interface{}
+			maintenanceWindowEntry := SetMongoMaintenanceWindowProperties(*cluster.Properties.MaintenanceWindow)
+			maintenanceWindow = append(maintenanceWindow, maintenanceWindowEntry)
+			if err := d.Set("maintenance_window", maintenanceWindow); err != nil {
+				return utils.GenerateSetError(resourceName, "maintenance_window", err)
+			}
+		}
+	}
+
+	return nil
+}
+
+func SetConnectionProperties(vdcConnection psql.Connection) map[string]interface{} {
 
 	connection := map[string]interface{}{}
 
@@ -377,7 +618,7 @@ func SetConnectionProperties(vdcConnection dbaas.Connection) map[string]interfac
 	return connection
 }
 
-func SetMaintenanceWindowProperties(maintenanceWindow dbaas.MaintenanceWindow) map[string]interface{} {
+func SetMaintenanceWindowProperties(maintenanceWindow psql.MaintenanceWindow) map[string]interface{} {
 
 	maintenance := map[string]interface{}{}
 
@@ -385,4 +626,62 @@ func SetMaintenanceWindowProperties(maintenanceWindow dbaas.MaintenanceWindow) m
 	utils.SetPropWithNilCheck(maintenance, "day_of_the_week", maintenanceWindow.DayOfTheWeek)
 
 	return maintenance
+}
+
+func SetMongoConnectionProperties(vdcConnection mongo.Connection) map[string]interface{} {
+	connection := map[string]interface{}{}
+
+	utils.SetPropWithNilCheck(connection, "datacenter_id", vdcConnection.DatacenterId)
+	utils.SetPropWithNilCheck(connection, "lan_id", vdcConnection.LanId)
+	utils.SetPropWithNilCheck(connection, "cidr_list", vdcConnection.CidrList)
+
+	return connection
+}
+
+func SetMongoMaintenanceWindowProperties(maintenanceWindow mongo.MaintenanceWindow) map[string]interface{} {
+	maintenance := map[string]interface{}{}
+
+	utils.SetPropWithNilCheck(maintenance, "time", maintenanceWindow.Time)
+	utils.SetPropWithNilCheck(maintenance, "day_of_the_week", maintenanceWindow.DayOfTheWeek)
+
+	return maintenance
+}
+
+func SetMongoDBTemplateData(d *schema.ResourceData, template mongo.TemplateResponse) error {
+	resourceName := "dbaas mongo template"
+
+	if template.Id != nil {
+		d.SetId(*template.Id)
+	}
+	if template.Name != nil {
+		field := "name"
+		if err := d.Set(field, *template.Name); err != nil {
+			return utils.GenerateSetError(resourceName, field, err)
+		}
+	}
+	if template.Edition != nil {
+		field := "edition"
+		if err := d.Set(field, *template.Edition); err != nil {
+			return utils.GenerateSetError(resourceName, field, err)
+		}
+	}
+	if template.Cores != nil {
+		field := "cores"
+		if err := d.Set(field, *template.Cores); err != nil {
+			return utils.GenerateSetError(resourceName, field, err)
+		}
+	}
+	if template.Ram != nil {
+		field := "ram"
+		if err := d.Set(field, *template.Ram); err != nil {
+			return utils.GenerateSetError(resourceName, field, err)
+		}
+	}
+	if template.StorageSize != nil {
+		field := "storage_size"
+		if err := d.Set(field, *template.StorageSize); err != nil {
+			return utils.GenerateSetError(resourceName, field, err)
+		}
+	}
+	return nil
 }

@@ -120,9 +120,20 @@ export TF_VAR_ionos_password="password"
 
 ## Debugging
 
-In the default mode, the Terraform provider returns only HTTP client errors. These usually consist only of the HTTP status code. There is no clear description of the problem. But if you want to see the API call error messages as well, you need to tell the SDK and Terraform provider environment variables.
+In the default mode, the Terraform provider returns only HTTP client errors. These usually consist only of the HTTP status code. There is no clear description of the problem. But if you want to see the API call error messages as well, you need to set the SDK and Terraform provider environment variables.
 
-Note: We recommend you only use IONOS_DEBUG for debugging purposes. Disable it in your production environments because it can log sensitive data. It logs the full request and response without encryption, even for an HTTPS call.
+You can enable logging now using the `IONOS_LOG_LEVEL` env variable. Allowed values: `off`, `debug` and `trace`. Defaults to `off`.
+
+⚠️ **Note:** We recommend you only use `trace` level for debugging purposes. Disable it in your production environments because it can log sensitive data. It logs the full request and response without encryption, even for an HTTPS call.
+Verbose request and response logging can also significantly impact your application’s performance.
+
+```bash
+$ export IONOS_LOG_LEVEL=debug
+```
+
+⚠️ **Note:** `IONOS_DEBUG` is now deprecated and will be removed in a future release.
+
+⚠️ **Note:** We recommend you only use `IONOS_DEBUG` for debugging purposes. Disable it in your production environments because it can log sensitive data. It logs the full request and response without encryption, even for an HTTPS call.
 Verbose request and response logging can also significantly impact your application’s performance.
 
 ```bash
@@ -208,7 +219,7 @@ resource "ionoscloud_server" "example" {
     availability_zone     = "ZONE_1"
     cpu_family            = "AMD_OPTERON"
     image_name            = data.ionoscloud_image.example.id
-    image_password        = "K3tTj8G14a3EgKyNeeiY"
+    image_password        = random_password.server_image_password.result
     type                  = "ENTERPRISE"
     volume {
         name              = "system"
@@ -243,6 +254,10 @@ resource "ionoscloud_server" "example" {
     }
 }
 
+resource "random_password" "server_image_password" {
+  length           = 16
+  special          = false
+}
 ```
 
 Valid units of time should be expressed in "s", "m", "h" for "seconds", "minutes", and "hours" respectively.

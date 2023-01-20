@@ -5,7 +5,9 @@ import (
 	"fmt"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
+	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils"
 	"log"
+	"strings"
 	"time"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
@@ -120,7 +122,7 @@ func resourceSnapshotCreate(ctx context.Context, d *schema.ResourceData, meta in
 	rsp, apiResponse, err := client.VolumesApi.DatacentersVolumesCreateSnapshotPost(ctx, dcId, volumeId).Name(name).Execute()
 	logApiRequestTime(apiResponse)
 	if err != nil {
-		diags := diag.FromErr(fmt.Errorf("an error occured while creating a snapshot: %s ", err))
+		diags := diag.FromErr(fmt.Errorf("an error occured while creating a snapshot: %w ", err))
 		return diags
 	}
 
@@ -146,11 +148,11 @@ func resourceSnapshotRead(ctx context.Context, d *schema.ResourceData, meta inte
 	logApiRequestTime(apiResponse)
 
 	if err != nil {
-		if apiResponse != nil && apiResponse.Response != nil && apiResponse.StatusCode == 404 {
+		if httpNotFound(apiResponse) {
 			d.SetId("")
 			return nil
 		}
-		diags := diag.FromErr(fmt.Errorf("error occured while fetching a snapshot ID %s %s", d.Id(), err))
+		diags := diag.FromErr(fmt.Errorf("error occured while fetching a snapshot ID %s %w", d.Id(), err))
 		return diags
 	}
 
@@ -192,17 +194,17 @@ func resourceSnapshotDelete(ctx context.Context, d *schema.ResourceData, meta in
 	rsp, apiResponse, err := client.SnapshotsApi.SnapshotsFindById(ctx, d.Id()).Execute()
 	logApiRequestTime(apiResponse)
 	if err != nil {
-		diags := diag.FromErr(fmt.Errorf("an error occured while fetching a snapshot ID %s %s", d.Id(), err))
+		diags := diag.FromErr(fmt.Errorf("an error occured while fetching a snapshot ID %s %w", d.Id(), err))
 		return diags
 	}
 
-	for *rsp.Metadata.State != "AVAILABLE" {
+	for !strings.EqualFold(*rsp.Metadata.State, utils.Available) {
 		time.Sleep(30 * time.Second)
 		_, apiResponse, err := client.SnapshotsApi.SnapshotsFindById(ctx, d.Id()).Execute()
 		logApiRequestTime(apiResponse)
 
 		if err != nil {
-			diags := diag.FromErr(fmt.Errorf("an error occured while fetching a snapshot ID %s %s", d.Id(), err))
+			diags := diag.FromErr(fmt.Errorf("an error occured while fetching a snapshot ID %s %w", d.Id(), err))
 			return diags
 		}
 	}
@@ -216,7 +218,7 @@ func resourceSnapshotDelete(ctx context.Context, d *schema.ResourceData, meta in
 		return diags
 	}
 
-	for *dc.Metadata.State != "AVAILABLE" {
+	for !strings.EqualFold(*dc.Metadata.State, utils.Available) {
 		time.Sleep(30 * time.Second)
 		_, apiResponse, err := client.DataCentersApi.DatacentersFindById(ctx, dcId).Execute()
 		logApiRequestTime(apiResponse)
@@ -230,7 +232,7 @@ func resourceSnapshotDelete(ctx context.Context, d *schema.ResourceData, meta in
 	apiResponse, err = client.SnapshotsApi.SnapshotsDelete(ctx, d.Id()).Execute()
 	logApiRequestTime(apiResponse)
 	if err != nil {
-		diags := diag.FromErr(fmt.Errorf("an error occured while deleting a snapshot ID %s %s", d.Id(), err))
+		diags := diag.FromErr(fmt.Errorf("an error occured while deleting a snapshot ID %s %w", d.Id(), err))
 		return diags
 	}
 
@@ -253,7 +255,7 @@ func resourceSnapshotImport(ctx context.Context, d *schema.ResourceData, meta in
 	logApiRequestTime(apiResponse)
 
 	if err != nil {
-		if apiResponse != nil && apiResponse.Response != nil && apiResponse.StatusCode == 404 {
+		if httpNotFound(apiResponse) {
 			d.SetId("")
 			return nil, fmt.Errorf("unable to find snapshot %q", snapshotId)
 		}

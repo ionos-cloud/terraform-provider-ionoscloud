@@ -14,21 +14,14 @@ type BackupService interface {
 	GetAllBackups(ctx context.Context) (dbaas.ClusterBackupList, *dbaas.APIResponse, error)
 }
 
-func (c *Client) GetClusterBackups(ctx context.Context, clusterId string) (dbaas.ClusterBackupList, *dbaas.APIResponse, error) {
-	backups, apiResponse, err := c.BackupsApi.ClusterBackupsGet(ctx, clusterId).Execute()
-	if apiResponse != nil {
-		return backups, apiResponse, err
-
-	}
-	return backups, nil, err
+func (c *PsqlClient) GetClusterBackups(ctx context.Context, clusterId string) (dbaas.ClusterBackupList, *dbaas.APIResponse, error) {
+	backups, apiResponse, err := c.sdkClient.BackupsApi.ClusterBackupsGet(ctx, clusterId).Execute()
+	return backups, apiResponse, err
 }
 
-func (c *Client) GetAllBackups(ctx context.Context) (dbaas.ClusterBackupList, *dbaas.APIResponse, error) {
-	backups, apiResponse, err := c.BackupsApi.ClustersBackupsGet(ctx).Execute()
-	if apiResponse != nil {
-		return backups, apiResponse, err
-	}
-	return backups, nil, err
+func (c *PsqlClient) GetAllBackups(ctx context.Context) (dbaas.ClusterBackupList, *dbaas.APIResponse, error) {
+	backups, apiResponse, err := c.sdkClient.BackupsApi.ClustersBackupsGet(ctx).Execute()
+	return backups, apiResponse, err
 }
 
 func SetPgSqlClusterBackupData(d *schema.ResourceData, clusterBackups *dbaas.ClusterBackupList) diag.Diagnostics {
@@ -45,8 +38,32 @@ func SetPgSqlClusterBackupData(d *schema.ResourceData, clusterBackups *dbaas.Clu
 				backupEntry["id"] = *backup.Id
 			}
 
+			if backup.Properties == nil {
+				return diag.FromErr(fmt.Errorf("backup properties do not exist."))
+			}
+
 			if backup.Properties.ClusterId != nil {
 				backupEntry["cluster_id"] = *backup.Properties.ClusterId
+			}
+
+			if backup.Properties.Size != nil {
+				backupEntry["size"] = *backup.Properties.Size
+			}
+
+			if backup.Properties.Location != nil {
+				backupEntry["location"] = *backup.Properties.Location
+			}
+
+			if backup.Properties.Version != nil {
+				backupEntry["version"] = *backup.Properties.Version
+			}
+
+			if backup.Properties.IsActive != nil {
+				backupEntry["is_active"] = *backup.Properties.IsActive
+			}
+
+			if backup.Properties.EarliestRecoveryTargetTime != nil {
+				backupEntry["earliest_recovery_target_time"] = (*backup.Properties.EarliestRecoveryTargetTime).String()
 			}
 
 			if backup.Type != nil {
@@ -71,7 +88,7 @@ func SetPgSqlClusterBackupData(d *schema.ResourceData, clusterBackups *dbaas.Clu
 		}
 		err := d.Set("cluster_backups", backups)
 		if err != nil {
-			diags := diag.FromErr(fmt.Errorf("error while setting cluster_backups: %s", err))
+			diags := diag.FromErr(fmt.Errorf("error while setting cluster_backups: %w", err))
 			return diags
 		}
 	}

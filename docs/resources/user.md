@@ -18,7 +18,7 @@ resource "ionoscloud_user" "example" {
   first_name              = "example"
   last_name               = "example"
   email                   = <unique_email>
-  password                = "abc123-321CBA"
+  password                = random_password.user_password.result
   administrator           = false
   force_sec_auth          = false
   active                  = true
@@ -47,6 +47,12 @@ resource "ionoscloud_group" "group3" {
   create_snapshot = true
   reserve_ip = true
   access_activity_log = false
+}
+
+resource "random_password" "user_password" {
+  length           = 16
+  special          = true
+  override_special = "!#$%&*()-_=+[]{}<>:?"
 }
 ```
 

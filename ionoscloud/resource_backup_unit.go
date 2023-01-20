@@ -6,7 +6,9 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 	ionoscloud "github.com/ionos-cloud/sdk-go/v6"
+	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils"
 	"log"
+	"strings"
 	"time"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
@@ -40,7 +42,7 @@ func resourceBackupUnit() *schema.Resource {
 				Description:      "The e-mail address you want assigned to the backup unit.",
 				Required:         true,
 				ValidateFunc:     validation.All(validation.StringIsNotWhiteSpace),
-				DiffSuppressFunc: DiffToLower,
+				DiffSuppressFunc: utils.DiffToLower,
 			},
 			"login": {
 				Type:        schema.TypeString,
@@ -94,7 +96,7 @@ func resourceBackupUnitRead(ctx context.Context, d *schema.ResourceData, meta in
 	logApiRequestTime(apiResponse)
 
 	if err != nil {
-		if apiResponse != nil && apiResponse.Response != nil && apiResponse.StatusCode == 404 {
+		if httpNotFound(apiResponse) {
 			d.SetId("")
 			return nil
 		}
@@ -154,7 +156,7 @@ func resourceBackupUnitUpdate(ctx context.Context, d *schema.ResourceData, meta 
 	logApiRequestTime(apiResponse)
 
 	if err != nil {
-		if apiResponse != nil && apiResponse.Response != nil && apiResponse.StatusCode == 404 {
+		if httpNotFound(apiResponse) {
 			d.SetId("")
 			return nil
 		}
@@ -186,7 +188,7 @@ func waitForUnitToBeReady(ctx context.Context, d *schema.ResourceData, client *i
 		}
 
 		select {
-		case <-time.After(SleepInterval):
+		case <-time.After(utils.SleepInterval):
 			log.Printf("[INFO] trying again ...")
 		case <-ctx.Done():
 			diags := diag.FromErr(fmt.Errorf("backup unit readiness check timed out! WARNING: your backup unit will still probably be created/updated " +
@@ -204,7 +206,7 @@ func resourceBackupUnitDelete(ctx context.Context, d *schema.ResourceData, meta 
 	logApiRequestTime(apiResponse)
 
 	if err != nil {
-		if apiResponse != nil && apiResponse.Response != nil && apiResponse.StatusCode == 404 {
+		if httpNotFound(apiResponse) {
 			d.SetId("")
 			return nil
 		}
@@ -228,7 +230,7 @@ func resourceBackupUnitDelete(ctx context.Context, d *schema.ResourceData, meta 
 		}
 
 		select {
-		case <-time.After(SleepInterval):
+		case <-time.After(utils.SleepInterval):
 			log.Printf("[INFO] trying again ...")
 		case <-ctx.Done():
 			diags := diag.FromErr(fmt.Errorf("backup unit deletion timed out! WARNING: your backup unit will still probably be deleted " +
@@ -249,7 +251,7 @@ func resourceBackupUnitImport(ctx context.Context, d *schema.ResourceData, meta 
 	logApiRequestTime(apiResponse)
 
 	if err != nil {
-		if apiResponse != nil && apiResponse.Response != nil && apiResponse.StatusCode == 404 {
+		if httpNotFound(apiResponse) {
 			d.SetId("")
 			return nil, fmt.Errorf("unable to find Backup Unit %q", buId)
 		}
@@ -277,9 +279,9 @@ func backupUnitReady(client *ionoscloud.APIClient, d *schema.ResourceData, c con
 	logApiRequestTime(apiResponse)
 
 	if err != nil {
-		return true, fmt.Errorf("error checking backup unit status: %s", err)
+		return true, fmt.Errorf("error checking backup unit status: %w", err)
 	}
-	return *backupUnit.Metadata.State == "AVAILABLE", nil
+	return strings.EqualFold(*backupUnit.Metadata.State, utils.Available), nil
 }
 
 func backupUnitDeleted(client *ionoscloud.APIClient, d *schema.ResourceData, c context.Context) (bool, error) {
@@ -287,10 +289,10 @@ func backupUnitDeleted(client *ionoscloud.APIClient, d *schema.ResourceData, c c
 	logApiRequestTime(apiResponse)
 
 	if err != nil {
-		if apiResponse != nil && apiResponse.Response != nil && apiResponse.StatusCode == 404 {
+		if httpNotFound(apiResponse) {
 			return true, nil
 		}
-		return true, fmt.Errorf("error checking backup unit deletion status: %s", err)
+		return true, fmt.Errorf("error checking backup unit deletion status: %w", err)
 	}
 	return false, nil
 }
@@ -306,14 +308,14 @@ func setBackupUnitData(d *schema.ResourceData, backupUnit *ionoscloud.BackupUnit
 		if backupUnit.Properties.Name != nil {
 			epErr := d.Set("name", *backupUnit.Properties.Name)
 			if epErr != nil {
-				return fmt.Errorf("error while setting name property for backup unit %s: %s", d.Id(), epErr)
+				return fmt.Errorf("error while setting name property for backup unit %s: %w", d.Id(), epErr)
 			}
 		}
 
 		if backupUnit.Properties.Email != nil {
 			epErr := d.Set("email", *backupUnit.Properties.Email)
 			if epErr != nil {
-				return fmt.Errorf("error while setting email property for backup unit %s: %s", d.Id(), epErr)
+				return fmt.Errorf("error while setting email property for backup unit %s: %w", d.Id(), epErr)
 			}
 		}
 
@@ -321,7 +323,7 @@ func setBackupUnitData(d *schema.ResourceData, backupUnit *ionoscloud.BackupUnit
 			(*contractResources.Items)[0].Properties.ContractNumber != nil {
 			err := d.Set("login", fmt.Sprintf("%s-%d", *backupUnit.Properties.Name, *(*contractResources.Items)[0].Properties.ContractNumber))
 			if err != nil {
-				return fmt.Errorf("error while setting login property for backup unit %s: %s", d.Id(), err)
+				return fmt.Errorf("error while setting login property for backup unit %s: %w", d.Id(), err)
 			}
 		} else {
 			if contractResources.Items == nil || len(*contractResources.Items) == 0 {

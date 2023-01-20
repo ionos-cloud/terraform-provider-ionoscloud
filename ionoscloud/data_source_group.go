@@ -65,6 +65,27 @@ func dataSourceGroup() *schema.Resource {
 				Type:     schema.TypeBool,
 				Computed: true,
 			},
+			"create_flow_log": {
+				Type:        schema.TypeBool,
+				Description: "Create Flow Logs privilege.",
+				Computed:    true,
+			},
+			"access_and_manage_monitoring": {
+				Type: schema.TypeBool,
+				Description: "Privilege for a group to access and manage monitoring related functionality " +
+					"(access metrics, CRUD on alarms, alarm-actions etc) using Monotoring-as-a-Service (MaaS).",
+				Computed: true,
+			},
+			"access_and_manage_certificates": {
+				Type:        schema.TypeBool,
+				Description: "Privilege for a group to access and manage certificates.",
+				Computed:    true,
+			},
+			"manage_dbaas": {
+				Type:        schema.TypeBool,
+				Description: "Privilege for a group to manage DBaaS related functionality",
+				Computed:    true,
+			},
 			"users": {
 				Type:     schema.TypeSet,
 				Computed: true,
@@ -130,7 +151,7 @@ func dataSourceGroupRead(ctx context.Context, d *schema.ResourceData, meta inter
 		group, apiResponse, err = client.UserManagementApi.UmGroupsFindById(ctx, id).Execute()
 		logApiRequestTime(apiResponse)
 		if err != nil {
-			diags := diag.FromErr(fmt.Errorf("an error occurred while fetching group with ID %s: %w", id, err))
+			diags := diag.FromErr(fmt.Errorf("an error occurred while fetching group with ID %s: %w", id.(string), err))
 			return diags
 		}
 	} else {

@@ -1,0 +1,27 @@
+#This workflow will run every two days, running terraform compute-engine tests
+name: Every 2 days compute-engine test run
+on:
+  schedule:
+    # At 09:00:00am, every 2 days between Monday and Friday, every month
+    - cron: '0 09 */2 * MON-FRI'
+
+jobs:
+  test:
+    env:
+      IONOS_USERNAME: ${{ secrets.IONOS_VDC_USER_GO_V6 }}
+      IONOS_PASSWORD: ${{ secrets.IONOS_VDC_PASSWORD_GO_V6 }}
+      TF_ACC: true
+      TF_LOG: debug
+    strategy:
+      matrix:
+        os: [ubuntu-latest]
+    runs-on: ${{ matrix.os }}
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+      - name: Install Go
+        uses: actions/setup-go@v3
+        with:
+          go-version-file: 'go.mod'
+      - name: Run tests with compute tag
+        run: go test ./ionoscloud -v -failfast -timeout 240m -tags compute

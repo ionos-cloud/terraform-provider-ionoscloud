@@ -169,8 +169,8 @@ func dataSourceDbaasPgSqlCluster() *schema.Resource {
 }
 
 func dataSourceDbaasPgSqlReadCluster(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
-	client := meta.(SdkBundle).DbaasClient
 	cloudClient := meta.(SdkBundle).CloudApiClient
+	client := meta.(SdkBundle).PsqlClient
 
 	idValue, idOk := d.GetOk("id")
 	nameValue, nameOk := d.GetOk("display_name")

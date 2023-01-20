@@ -35,7 +35,7 @@ func resourceUser() *schema.Resource {
 				Type:             schema.TypeString,
 				Required:         true,
 				ValidateFunc:     validation.All(validation.StringIsNotWhiteSpace),
-				DiffSuppressFunc: DiffToLower,
+				DiffSuppressFunc: utils.DiffToLower,
 			},
 			"password": {
 				Type:         schema.TypeString,
@@ -115,18 +115,6 @@ func resourceUserCreate(ctx context.Context, d *schema.ResourceData, meta interf
 		diags := diag.FromErr(fmt.Errorf("sec_auth_active attribute is not allowed in create requests"))
 		return diags
 	}
-	if groupsVal, groupsOk := d.GetOk("group_ids"); groupsOk {
-		groupsList := groupsVal.(*schema.Set).List()
-		log.Printf("[INFO] Adding group_ids %+v ", groupsList)
-		if groupsList != nil {
-			for _, groupsItem := range groupsList {
-				groupId := groupsItem.(string)
-				if err := addUserToGroup(d.Id(), groupId, ctx, d, meta); err != nil {
-					return diag.FromErr(err)
-				}
-			}
-		}
-	}
 
 	rsp, apiResponse, err := client.UserManagementApi.UmUsersPost(ctx).User(request).Execute()
 	logApiRequestTime(apiResponse)
@@ -148,6 +136,21 @@ func resourceUserCreate(ctx context.Context, d *schema.ResourceData, meta interf
 		diags := diag.FromErr(errState)
 		return diags
 	}
+
+	// Add the user to the specified groups, if any.
+	if groupsVal, groupsOk := d.GetOk("group_ids"); groupsOk {
+		groupsList := groupsVal.(*schema.Set).List()
+		log.Printf("[INFO] Adding group_ids %+v ", groupsList)
+		if groupsList != nil {
+			for _, groupsItem := range groupsList {
+				groupId := groupsItem.(string)
+				if err := addUserToGroup(d.Id(), groupId, ctx, d, meta); err != nil {
+					return diag.FromErr(err)
+				}
+			}
+		}
+	}
+
 	return resourceUserRead(ctx, d, meta)
 }
 
@@ -179,7 +182,7 @@ func resourceUserUpdate(ctx context.Context, d *schema.ResourceData, meta interf
 	foundUser, apiResponse, err := client.UserManagementApi.UmUsersFindById(ctx, d.Id()).Execute()
 	logApiRequestTime(apiResponse)
 	if err != nil {
-		diags := diag.FromErr(fmt.Errorf("an error occured while fetching a User ID %s %s", d.Id(), err))
+		diags := diag.FromErr(fmt.Errorf("an error occured while fetching a User ID %s %w", d.Id(), err))
 		return diags
 	}
 
@@ -263,7 +266,7 @@ func resourceUserUpdate(ctx context.Context, d *schema.ResourceData, meta interf
 	_, apiResponse, err = client.UserManagementApi.UmUsersPut(ctx, d.Id()).User(userReq).Execute()
 	logApiRequestTime(apiResponse)
 	if err != nil {
-		diags := diag.FromErr(fmt.Errorf("an error occured while patching a user ID %s %s", d.Id(), err))
+		diags := diag.FromErr(fmt.Errorf("an error occured while patching a user ID %s %w", d.Id(), err))
 		return diags
 	}
 

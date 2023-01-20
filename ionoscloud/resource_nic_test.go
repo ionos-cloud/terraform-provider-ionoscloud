@@ -21,6 +21,7 @@ func TestAccNicBasic(t *testing.T) {
 		PreCheck: func() {
 			testAccPreCheck(t)
 		},
+		ExternalProviders: randomProviderVersion343(),
 		ProviderFactories: testAccProviderFactories,
 		CheckDestroy:      testAccCheckNicDestroyCheck,
 		Steps: []resource.TestStep{
@@ -128,7 +129,7 @@ func testAccCheckNicDestroyCheck(s *terraform.State) error {
 
 		if err != nil {
 			if !httpNotFound(apiResponse) {
-				return fmt.Errorf("an error occurred while checking the destruction of nic %s: %s", rs.Primary.ID, err)
+				return fmt.Errorf("an error occurred while checking the destruction of nic %s: %w", rs.Primary.ID, err)
 			}
 		} else {
 			return fmt.Errorf("nic %s still exists", rs.Primary.ID)
@@ -161,7 +162,7 @@ func testAccCheckNICExists(n string, nic *ionoscloud.Nic) resource.TestCheckFunc
 		logApiRequestTime(apiResponse)
 
 		if err != nil {
-			return fmt.Errorf("error occured while fetching Volume: %s", rs.Primary.ID)
+			return fmt.Errorf("error occured while fetching nic: %s %w", rs.Primary.ID, err)
 		}
 		if *foundNic.Id != rs.Primary.ID {
 			return fmt.Errorf("record not found")
@@ -190,8 +191,8 @@ resource "ionoscloud_server" "test_server" {
   ram = 1024
   availability_zone = "ZONE_1"
   cpu_family = "AMD_OPTERON"
-	image_name ="ubuntu-16.04"
-	image_password = "K3tTj8G14a3EgKyNeeiY"
+  image_name ="ubuntu:latest"
+  image_password = ` + RandomPassword + `.server_image_password.result
   volume {
     name = "system"
     size = 5
@@ -203,7 +204,7 @@ resource "ionoscloud_server" "test_server" {
     firewall_active = true
   }
 }
-`
+` + ServerImagePassword
 
 const testAccCheckNicConfigBasic = testCreateDataCenterAndServer + `
 resource ` + NicResource + ` "database_nic" {

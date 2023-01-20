@@ -6,6 +6,7 @@ import (
 	"context"
 	"fmt"
 	ionoscloud "github.com/ionos-cloud/sdk-go/v6"
+	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils"
 	"regexp"
 	"testing"
 
@@ -20,13 +21,14 @@ func TestAccVolumeBasic(t *testing.T) {
 		PreCheck: func() {
 			testAccPreCheck(t)
 		},
+		ExternalProviders: randomProviderVersion343(),
 		ProviderFactories: testAccProviderFactories,
 		CheckDestroy:      testAccCheckVolumeDestroyCheck,
 		Steps: []resource.TestStep{
 			{
 				//added to test - #266. crash when using image_alias on volume
 				Config:      testAccCheckVolumeConfigBasicErrorNoPassOrSSHPath,
-				ExpectError: regexp.MustCompile(`either 'image_password' or 'ssh_key_path' must be provided`),
+				ExpectError: regexp.MustCompile(`either 'image_password' or 'ssh_key_path'/'ssh_keys' must be provided`),
 			},
 			{
 				Config: testAccCheckVolumeConfigBasic,
@@ -39,7 +41,8 @@ func TestAccVolumeBasic(t *testing.T) {
 					resource.TestCheckResourceAttr(VolumeResource+"."+VolumeTestResource, "availability_zone", "ZONE_1"),
 					resource.TestCheckResourceAttrSet(VolumeResource+"."+VolumeTestResource, "image_name"),
 					resource.TestCheckResourceAttrPair(VolumeResource+"."+VolumeTestResource, "boot_server", ServerResource+"."+ServerTestResource, "id"),
-					testImageNotNull(VolumeResource, "image")),
+					resource.TestCheckResourceAttrPair(VolumeResource+"."+VolumeTestResource, "image_password", RandomPassword+".server_image_password", "result"),
+					utils.TestImageNotNull(VolumeResource, "image")),
 			},
 			{
 				Config: testAccDataSourceVolumeMatchId,
@@ -97,7 +100,8 @@ func TestAccVolumeBasic(t *testing.T) {
 					resource.TestCheckResourceAttrPair(DataSource+"."+VolumeResource+"."+VolumeDataSourceByName, "disc_virtio_hot_plug", VolumeResource+"."+VolumeTestResource, "disc_virtio_hot_plug"),
 					resource.TestCheckResourceAttrPair(DataSource+"."+VolumeResource+"."+VolumeDataSourceByName, "disc_virtio_hot_unplug", VolumeResource+"."+VolumeTestResource, "disc_virtio_hot_unplug"),
 					resource.TestCheckResourceAttrPair(DataSource+"."+VolumeResource+"."+VolumeDataSourceByName, "device_number", VolumeResource+"."+VolumeTestResource, "device_number"),
-					resource.TestCheckResourceAttrPair(DataSource+"."+VolumeResource+"."+VolumeDataSourceByName, "boot_server", ServerResource+"."+ServerTestResource, "id")),
+					resource.TestCheckResourceAttrPair(DataSource+"."+VolumeResource+"."+VolumeDataSourceByName, "boot_server", ServerResource+"."+ServerTestResource, "id"),
+				),
 			},
 			{
 				Config: testAccDataSourceVolumeMatchServerId,
@@ -159,7 +163,8 @@ func TestAccVolumeBasic(t *testing.T) {
 					resource.TestCheckResourceAttr(VolumeResource+"."+VolumeTestResource, "availability_zone", "ZONE_1"),
 					resource.TestCheckResourceAttrSet(VolumeResource+"."+VolumeTestResource, "image_name"),
 					resource.TestCheckResourceAttrPair(VolumeResource+"."+VolumeTestResource, "boot_server", ServerResource+"."+ServerTestResource+"updated", "id"),
-					testImageNotNull(VolumeResource, "image")),
+					resource.TestCheckResourceAttrPair(VolumeResource+"."+VolumeTestResource, "image_password", RandomPassword+".server_image_password_updated", "result"),
+					utils.TestImageNotNull(VolumeResource, "image")),
 			},
 		},
 	})
@@ -172,6 +177,7 @@ func TestAccVolumeNoPassword(t *testing.T) {
 		PreCheck: func() {
 			testAccPreCheck(t)
 		},
+		ExternalProviders: randomProviderVersion343(),
 		ProviderFactories: testAccProviderFactories,
 		CheckDestroy:      testAccCheckVolumeDestroyCheck,
 		Steps: []resource.TestStep{
@@ -202,6 +208,7 @@ func TestAccVolumeResolveImageName(t *testing.T) {
 		PreCheck: func() {
 			testAccPreCheck(t)
 		},
+		ExternalProviders: randomProviderVersion343(),
 		ProviderFactories: testAccProviderFactories,
 		CheckDestroy:      testAccCheckVolumeDestroyCheck,
 		Steps: []resource.TestStep{
@@ -214,7 +221,8 @@ func TestAccVolumeResolveImageName(t *testing.T) {
 					resource.TestCheckResourceAttr(VolumeResource+"."+VolumeTestResource, "disk_type", "SSD Standard"),
 					resource.TestCheckResourceAttr(VolumeResource+"."+VolumeTestResource, "bus", "VIRTIO"),
 					resource.TestCheckResourceAttr(VolumeResource+"."+VolumeTestResource, "availability_zone", "ZONE_1"),
-					testImageNotNull(VolumeResource, "image"))},
+					resource.TestCheckResourceAttrPair(VolumeResource+"."+VolumeTestResource, "image_password", RandomPassword+".server_image_password", "result"),
+					utils.TestImageNotNull(VolumeResource, "image"))},
 		},
 	})
 }
@@ -237,7 +245,7 @@ func testAccCheckVolumeDestroyCheck(s *terraform.State) error {
 		logApiRequestTime(apiResponse)
 
 		if err != nil {
-			if apiResponse == nil || apiResponse.Response != nil && apiResponse.StatusCode != 404 {
+			if !httpNotFound(apiResponse) {
 				return fmt.Errorf("volume still exists %s - an error occurred while checking it %s", rs.Primary.ID, err)
 			}
 		} else {
@@ -293,7 +301,7 @@ resource ` + ServerResource + ` ` + ServerTestResource + `{
   availability_zone = "ZONE_1"
   cpu_family = "AMD_OPTERON"
   image_name = "ubuntu:latest"
-  image_password = "K3tTj8G14a3EgKyNeeiY"
+  image_password = ` + RandomPassword + `.server_image_password.result
   volume {
     name = "system"
     size = 5
@@ -314,9 +322,10 @@ resource ` + VolumeResource + ` ` + VolumeTestResource + ` {
 	disk_type = "SSD Standard"
 	bus = "VIRTIO"
 	image_name ="ubuntu:latest"
-	image_password = "K3tTj8G14a3EgKyNeeiY"
+	image_password = ` + RandomPassword + `.server_image_password.result
 	user_data = "foo"
-}`
+}
+` + ServerImagePassword
 
 const testAccCheckVolumeConfigBasicErrorNoPassOrSSHPath = testAccCheckLanConfigBasic + `
 resource ` + ServerResource + ` ` + ServerTestResource + `{
@@ -327,7 +336,7 @@ resource ` + ServerResource + ` ` + ServerTestResource + `{
   availability_zone = "ZONE_1"
   cpu_family = "AMD_OPTERON"
   image_name = "ubuntu:latest"
-  image_password = "K3tTj8G14a3EgKyNeeiY"
+  image_password = ` + RandomPassword + `.server_image_password.result
   volume {
     name = "system"
     size = 5
@@ -349,10 +358,9 @@ resource ` + VolumeResource + ` ` + VolumeTestResource + ` {
 	bus = "VIRTIO"
 	image_name ="ubuntu:latest"
 	user_data = "foo"
+}
+` + ServerImagePassword
 
-}`
-
-//ubuntu-21.10-server-cloudimg-amd64-20220201
 const testAccCheckVolumeConfigUpdate = testAccCheckLanConfigBasic + `
 resource ` + ServerResource + ` ` + ServerTestResource + `updated {
   name = "` + ServerTestResource + `"
@@ -362,7 +370,7 @@ resource ` + ServerResource + ` ` + ServerTestResource + `updated {
   availability_zone = "ZONE_1"
   cpu_family = "AMD_OPTERON"
   image_name = "ubuntu:latest"
-  image_password = "K3tTj8G14a3EgKyNeeiY"
+  image_password = ` + RandomPassword + `.server_image_password.result
   volume {
     name = "system"
     size = 5
@@ -383,9 +391,10 @@ resource ` + VolumeResource + ` ` + VolumeTestResource + ` {
 	disk_type = "SSD Standard"
 	bus = "VIRTIO"
 	image_name ="ubuntu:latest"
-	image_password = "K3tTj8G14a3EgKyNeeiYupdated"
+	image_password = ` + RandomPassword + `.server_image_password_updated.result
 	user_data = "foo"
-}`
+}
+` + ServerImagePassword + ServerImagePasswordUpdated
 
 var testAccDataSourceVolumeMatchId = testAccCheckVolumeConfigBasic + `
 data ` + VolumeResource + ` ` + VolumeDataSourceById + ` {
@@ -450,7 +459,7 @@ resource ` + ServerResource + ` ` + ServerTestResource + ` {
   availability_zone = "ZONE_1"
   cpu_family = "AMD_OPTERON"
   image_name = "ubuntu:latest"
-  image_password = "K3tTj8G14a3EgKyNeeiY"
+  image_password =  ` + RandomPassword + `.server_image_password.result
   volume {
     name = "system"
     size = 5
@@ -469,7 +478,8 @@ resource ` + VolumeResource + ` ` + VolumeTestResource + ` {
   size           = 4
   disk_type      = "HDD"
   licence_type   = "unknown"
-}`
+}
+` + ServerImagePassword
 
 const testAccCheckVolumeConfigNoPasswordUpdate = testAccCheckLanConfigBasic + `
 resource ` + ServerResource + ` ` + ServerTestResource + ` {
@@ -480,7 +490,7 @@ resource ` + ServerResource + ` ` + ServerTestResource + ` {
   availability_zone = "ZONE_1"
   cpu_family = "AMD_OPTERON"
   image_name = "ubuntu:latest"
-  image_password = "K3tTj8G14a3EgKyNeeiY"
+  image_password = ` + RandomPassword + `.server_image_password.result
   volume {
     name = "system"
     size = 5
@@ -499,7 +509,8 @@ resource ` + VolumeResource + ` ` + VolumeTestResource + ` {
   size           = 5
   disk_type      = "HDD"
   licence_type   = "other"
-}`
+}
+` + ServerImagePassword
 
 const testAccCheckVolumeResolveImageName = testAccCheckLanConfigBasic + `
 resource ` + ServerResource + ` ` + ServerTestResource + ` {
@@ -510,7 +521,7 @@ resource ` + ServerResource + ` ` + ServerTestResource + ` {
   availability_zone = "ZONE_1"
   cpu_family = "AMD_OPTERON"
   image_name = "ubuntu:latest"
-  image_password = "K3tTj8G14a3EgKyNeeiY"
+  image_password = ` + RandomPassword + `.server_image_password.result
   volume {
     name = "system"
     size = 5
@@ -531,6 +542,6 @@ resource ` + VolumeResource + ` ` + VolumeTestResource + ` {
   disk_type = "SSD Standard"
   bus = "VIRTIO"
   image_name = "ubuntu:latest"
-  image_password = "K3tTj8G14a3EgKyNeeiY"
+  image_password = ` + RandomPassword + `.server_image_password.result
 }
-`
+` + ServerImagePassword
