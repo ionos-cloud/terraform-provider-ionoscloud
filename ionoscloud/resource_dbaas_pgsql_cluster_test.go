@@ -97,7 +97,7 @@ func TestAccDBaaSPgSqlClusterBasic(t *testing.T) {
 				ExpectError: regexp.MustCompile("no DBaaS cluster found with the specified name"),
 			},
 			{
-				PreConfig: SleepUntilBackupIsReady,
+				PreConfig: sleepUntilBackupIsReady,
 				Config:    testAccDataSourceDbaasPgSqlClusterBackups,
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttrPair(DataSource+"."+PsqlBackupsResource+"."+PsqlBackupsTest, "cluster_backups.0.cluster_id", DataSource+"."+PsqlBackupsResource+"."+PsqlBackupsTest, "cluster_id"),
@@ -174,10 +174,11 @@ func TestAccDBaaSPgSqlClusterBasic(t *testing.T) {
 	})
 }
 
-// SleepUntilBackupIsReady waits 30s until backup is ready
-func SleepUntilBackupIsReady() {
+// sleepUntilBackupIsReady waits 30s until backup is ready
+func sleepUntilBackupIsReady() {
 	time.Sleep(60 * time.Second)
 }
+
 func TestAccDBaaSPgSqlClusterAdditionalParameters(t *testing.T) {
 	var dbaasCluster psql.ClusterResponse
 	t.Skip()
