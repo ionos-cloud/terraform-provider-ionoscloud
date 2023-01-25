@@ -96,8 +96,6 @@ func dataSourceUserRead(ctx context.Context, d *schema.ResourceData, meta interf
 		return diags
 	}
 	if !idOk && !emailOk && !firstNameOk && !lastNameOk && !s3CanonicalIdOk && !administratorOk {
-		config := client.GetConfig()
-		email = config.Username
 		if email == "" {
 			diags := diag.FromErr(errors.New("please provide either the user id or other lookup parameter, like email or first_name"))
 			return diags

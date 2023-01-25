@@ -134,7 +134,7 @@ func dataSourceSnapshotRead(ctx context.Context, d *schema.ResourceData, meta in
 		snapshot, apiResponse, err = client.SnapshotsApi.SnapshotsFindById(ctx, id).Execute()
 		logApiRequestTime(apiResponse)
 		if err != nil {
-			diags := diag.FromErr(fmt.Errorf("an error occurred while fetching the snapshot with ID %s: %w", id.(string), err))
+			diags := diag.FromErr(fmt.Errorf("an error occurred while fetching the snapshot with ID %s: %w", id, err))
 			return diags
 		}
 	} else {

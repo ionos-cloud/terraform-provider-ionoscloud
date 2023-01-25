@@ -128,7 +128,7 @@ func dataSourceNatGatewayRuleRead(ctx context.Context, d *schema.ResourceData, m
 		natGatewayRule, apiResponse, err = client.NATGatewaysApi.DatacentersNatgatewaysRulesFindByNatGatewayRuleId(ctx, datacenterId, natgatewayId, id).Execute()
 		logApiRequestTime(apiResponse)
 		if err != nil {
-			return diag.FromErr(fmt.Errorf("an error occurred while fetching the nat gateway rule %s: %w", id.(string), err))
+			return diag.FromErr(fmt.Errorf("an error occurred while fetching the nat gateway rule %s: %w", id, err))
 		}
 	} else {
 		/* search by name */

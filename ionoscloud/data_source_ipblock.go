@@ -129,7 +129,7 @@ func datasourceIpBlockRead(ctx context.Context, data *schema.ResourceData, meta 
 		ipBlock, apiResponse, err = client.IPBlocksApi.IpblocksFindById(ctx, id).Execute()
 		logApiRequestTime(apiResponse)
 		if err != nil {
-			return diag.FromErr(fmt.Errorf("error getting ip block with id %s %w", id.(string), err))
+			return diag.FromErr(fmt.Errorf("error getting ip block with id %s %w", id, err))
 		}
 
 		if nameOk {

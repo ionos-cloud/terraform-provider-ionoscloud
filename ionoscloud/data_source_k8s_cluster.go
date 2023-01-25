@@ -276,7 +276,7 @@ func dataSourceK8sReadCluster(ctx context.Context, d *schema.ResourceData, meta 
 		cluster, apiResponse, err = client.KubernetesApi.K8sFindByClusterId(ctx, id).Execute()
 		logApiRequestTime(apiResponse)
 		if err != nil {
-			return diag.FromErr(fmt.Errorf("an error occurred while fetching the k8s cluster with ID %s: %w", id.(string), err))
+			return diag.FromErr(fmt.Errorf("an error occurred while fetching the k8s cluster with ID %s: %w", id, err))
 		}
 	} else {
 		/* search by name */

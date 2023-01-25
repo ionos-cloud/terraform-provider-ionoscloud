@@ -114,7 +114,7 @@ func dataSourceDataCenterRead(ctx context.Context, d *schema.ResourceData, meta 
 		datacenter, apiResponse, err = client.DataCentersApi.DatacentersFindById(ctx, id).Execute()
 		logApiRequestTime(apiResponse)
 		if err != nil {
-			return diag.FromErr(fmt.Errorf("error getting datacenter with id %s %w", id.(string), err))
+			return diag.FromErr(fmt.Errorf("error getting datacenter with id %s %w", id, err))
 		}
 		if nameOk {
 			if datacenter.Properties != nil && datacenter.Properties.Name != nil && (!strings.EqualFold(*datacenter.Properties.Name, name) || !strings.Contains(*datacenter.Properties.Name, name)) {

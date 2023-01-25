@@ -60,7 +60,7 @@ func TestAccDataSourceImageBasic(t *testing.T) {
 			},
 			{
 				Config:      testAccDataSourceImageWrongType,
-				ExpectError: regexp.MustCompile("no image found with the specified criteria"),
+				ExpectError: regexp.MustCompile("no result found with the specified criteria image type: wrong_type"),
 			},
 			//{
 			//	Config:      testAccDataSourceImageWrongVersion,
@@ -68,11 +68,11 @@ func TestAccDataSourceImageBasic(t *testing.T) {
 			//},
 			{
 				Config:      testAccDataSourceImageWrongLocation,
-				ExpectError: regexp.MustCompile("no image found with the specified criteria"),
+				ExpectError: regexp.MustCompile("no result found with the specified criteria location: wrong_location"),
 			},
 			{
 				Config:      testAccDataSourceImageWrongCloudInit,
-				ExpectError: regexp.MustCompile("no image found with the specified criteria"),
+				ExpectError: regexp.MustCompile("no result found with the specified criteria cloud init: wrong_cloud_init"),
 			},
 		},
 	})

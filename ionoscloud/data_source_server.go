@@ -520,7 +520,7 @@ func dataSourceServerRead(ctx context.Context, d *schema.ResourceData, meta inte
 
 	// Labels logic
 	ls := LabelsService{ctx: ctx, client: client}
-	labels, err := ls.datacentersServersLabelsGet(datacenterId.(string), d.Id(), true)
+	labels, err := ls.datacentersServersLabelsGet(datacenterId, d.Id(), true)
 	if err != nil {
 		return diag.FromErr(err)
 	}
