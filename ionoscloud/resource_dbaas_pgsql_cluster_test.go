@@ -8,6 +8,7 @@ import (
 	"fmt"
 	"regexp"
 	"testing"
+	"time"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
@@ -96,7 +97,8 @@ func TestAccDBaaSPgSqlClusterBasic(t *testing.T) {
 				ExpectError: regexp.MustCompile("no DBaaS cluster found with the specified name"),
 			},
 			{
-				Config: testAccDataSourceDbaasPgSqlClusterBackups,
+				PreConfig: sleepUntilBackupIsReady,
+				Config:    testAccDataSourceDbaasPgSqlClusterBackups,
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttrPair(DataSource+"."+PsqlBackupsResource+"."+PsqlBackupsTest, "cluster_backups.0.cluster_id", DataSource+"."+PsqlBackupsResource+"."+PsqlBackupsTest, "cluster_id"),
 					resource.TestCheckResourceAttrSet(DataSource+"."+PsqlBackupsResource+"."+PsqlBackupsTest, "cluster_backups.0.size"),
@@ -170,6 +172,11 @@ func TestAccDBaaSPgSqlClusterBasic(t *testing.T) {
 			},
 		},
 	})
+}
+
+// sleepUntilBackupIsReady waits 30s until backup is ready
+func sleepUntilBackupIsReady() {
+	time.Sleep(60 * time.Second)
 }
 
 func TestAccDBaaSPgSqlClusterAdditionalParameters(t *testing.T) {
