@@ -1,9 +1,9 @@
-#This workflow will run every two days, running terraform dbaas tests
+#This workflow will trigger every week on Tuesday, running terraform dbaas tests
 name: Every 2 days dbaas test run
 on:
   schedule:
-    # At 09:00:00am, every 2 days between Tuesday and Friday, every month
-    - cron: '0 09 */2 * TUE-FRI'
+    # At 09:00:00 - UTC, every week on Tuesday.
+    - cron: '0 09 * * TUE'
 
 jobs:
   test:

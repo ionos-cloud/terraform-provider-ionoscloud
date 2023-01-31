@@ -1,9 +1,9 @@
-#This workflow will run every two days, running terraform compute-engine tests
+#This workflow will trigger every week, running terraform compute-engine tests
 name: Every 2 days compute-engine test run
 on:
   schedule:
-    # At 09:00:00am, every 2 days between Monday and Friday, every month
-    - cron: '0 09 */2 * MON-FRI'
+    # At 09:00:00 - UTC, every week on Wednesday.
+    - cron: '0 09 * * WED'
 
 jobs:
   test:

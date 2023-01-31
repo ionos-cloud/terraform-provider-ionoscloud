@@ -157,7 +157,7 @@ func resourceDbaasMongoClusterCreate(ctx context.Context, d *schema.ResourceData
 
 	err = utils.WaitForResourceToBeReady(ctx, d, client.IsClusterReady)
 	if err != nil {
-		return diag.FromErr(fmt.Errorf("updating %w ", err))
+		return diag.FromErr(fmt.Errorf("creating %w ", err))
 	}
 
 	return resourceDbaasMongoClusterRead(ctx, d, meta)
