@@ -9,9 +9,6 @@ description: |-
 
 # ionoscloud_container_registry
 
-⚠️ **Note:** Container Registry is currently in the Early Access (EA) phase. We recommend keeping usage and testing to non-production critical applications.
-Please contact your sales representative or support for more information.
-
 The **Container Registry data source** can be used to search for and return an existing Container Registry.
 You can provide a string for the name parameter which will be compared with provisioned Container Registry.
 If a single match is found, it will be returned. If your search results in multiple matches, an error will be returned.
