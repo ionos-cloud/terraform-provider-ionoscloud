@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
-	psql "github.com/ionos-cloud/sdk-go-dbaas-postgres"
+	psql "github.com/ionos-cloud/sdk-go-bundle/products/dbaas/psql"
 	dbaasService "github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/dbaas"
 )
 

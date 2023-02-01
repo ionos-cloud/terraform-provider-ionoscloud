@@ -3,7 +3,7 @@ package utils
 import "time"
 
 // IonosDebug - env variable, set to true to enable debug
-const IonosDebug = "IONOS_DEBUG"
+const IonosDebug = "IONOS_LOG_LEVEl"
 
 // MaxRetries - number of retries in case of rate-limit
 const MaxRetries = 999

@@ -3,7 +3,8 @@ package ionoscloud
 import (
 	"fmt"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
-	ionoscloud "github.com/ionos-cloud/sdk-go/v6"
+	"github.com/ionos-cloud/sdk-go-bundle/common"
+	ionoscloud "github.com/ionos-cloud/sdk-go-bundle/products/compute"
 	"log"
 	"net/http"
 	"net/http/httptest"
@@ -26,7 +27,7 @@ func createMockServer(jsonResponse string) *httptest.Server {
 func getMockedClient(jsonResponse string) interface{} {
 	ts := createMockServer(jsonResponse)
 
-	cfg := ionoscloud.NewConfiguration("", "", "", ts.URL)
+	cfg := common.NewConfiguration("", "", "", ts.URL)
 	cfg.HTTPClient = ts.Client()
 
 	return SdkBundle{

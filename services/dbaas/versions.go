@@ -6,20 +6,21 @@ import (
 	"github.com/google/uuid"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
-	dbaas "github.com/ionos-cloud/sdk-go-dbaas-postgres"
+	"github.com/ionos-cloud/sdk-go-bundle/common"
+	"github.com/ionos-cloud/sdk-go-bundle/products/dbaas/psql"
 )
 
-func (c *PsqlClient) GetClusterVersions(ctx context.Context, clusterId string) (dbaas.PostgresVersionList, *dbaas.APIResponse, error) {
+func (c *PsqlClient) GetClusterVersions(ctx context.Context, clusterId string) (psql.PostgresVersionList, *common.APIResponse, error) {
 	versions, apiResponse, err := c.sdkClient.ClustersApi.ClusterPostgresVersionsGet(ctx, clusterId).Execute()
 	return versions, apiResponse, err
 }
 
-func (c *PsqlClient) GetAllVersions(ctx context.Context) (dbaas.PostgresVersionList, *dbaas.APIResponse, error) {
+func (c *PsqlClient) GetAllVersions(ctx context.Context) (psql.PostgresVersionList, *common.APIResponse, error) {
 	versions, apiResponse, err := c.sdkClient.ClustersApi.PostgresVersionsGet(ctx).Execute()
 	return versions, apiResponse, err
 }
 
-func SetPgSqlVersionsData(d *schema.ResourceData, postgresVersions dbaas.PostgresVersionList) diag.Diagnostics {
+func SetPgSqlVersionsData(d *schema.ResourceData, postgresVersions psql.PostgresVersionList) diag.Diagnostics {
 
 	if postgresVersions.Data != nil {
 		var versions []string

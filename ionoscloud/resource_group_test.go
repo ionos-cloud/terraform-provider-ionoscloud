@@ -5,7 +5,7 @@ package ionoscloud
 import (
 	"context"
 	"fmt"
-	ionoscloud "github.com/ionos-cloud/sdk-go/v6"
+	ionoscloud "github.com/ionos-cloud/sdk-go-bundle/products/compute"
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils"
 	"regexp"
 	"testing"

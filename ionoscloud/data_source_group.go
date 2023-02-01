@@ -6,7 +6,8 @@ import (
 	"fmt"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
-	ionoscloud "github.com/ionos-cloud/sdk-go/v6"
+	"github.com/ionos-cloud/sdk-go-bundle/common"
+	ionoscloud "github.com/ionos-cloud/sdk-go-bundle/products/compute"
 )
 
 func dataSourceGroup() *schema.Resource {
@@ -134,7 +135,7 @@ func dataSourceGroupRead(ctx context.Context, d *schema.ResourceData, meta inter
 
 	if idOk {
 		/* search by ID */
-		var apiResponse *ionoscloud.APIResponse
+		var apiResponse *common.APIResponse
 		group, apiResponse, err = client.UserManagementApi.UmGroupsFindById(ctx, id.(string)).Execute()
 		logApiRequestTime(apiResponse)
 		if err != nil {

@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
-	ionoscloud "github.com/ionos-cloud/sdk-go/v6"
+	ionoscloud "github.com/ionos-cloud/sdk-go-bundle/products/compute"
 	"log"
 )
 
@@ -67,15 +67,8 @@ func dataSourceLocationRead(ctx context.Context, d *schema.ResourceData, meta in
 		return diag.FromErr(fmt.Errorf("either 'name' or 'feature' must be provided"))
 	}
 
-	request := client.LocationsApi.LocationsGet(ctx).Depth(1)
-
-	if featureOk {
-		request = request.Filter("features", feature.(string))
-	}
-
-	locations, apiResponse, err := request.Execute()
+	locations, apiResponse, err := client.LocationsApi.LocationsGet(ctx).Depth(1).Filter("features", feature.(string)).Execute()
 	logApiRequestTime(apiResponse)
-
 	if err != nil {
 		return diag.FromErr(fmt.Errorf("an error occurred while fetching locations: %w", err))
 	}

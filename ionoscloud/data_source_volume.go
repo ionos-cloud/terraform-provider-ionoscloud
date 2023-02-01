@@ -6,7 +6,8 @@ import (
 	"fmt"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
-	ionoscloud "github.com/ionos-cloud/sdk-go/v6"
+	"github.com/ionos-cloud/sdk-go-bundle/common"
+	ionoscloud "github.com/ionos-cloud/sdk-go-bundle/products/compute"
 )
 
 func dataSourceVolume() *schema.Resource {
@@ -128,7 +129,7 @@ func dataSourceVolumeRead(ctx context.Context, d *schema.ResourceData, meta inte
 	}
 	var volume ionoscloud.Volume
 	var err error
-	var apiResponse *ionoscloud.APIResponse
+	var apiResponse *common.APIResponse
 
 	if idOk {
 		/* search by ID */

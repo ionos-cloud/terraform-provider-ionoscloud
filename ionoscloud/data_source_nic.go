@@ -6,7 +6,8 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
-	ionoscloud "github.com/ionos-cloud/sdk-go/v6"
+	"github.com/ionos-cloud/sdk-go-bundle/common"
+	ionoscloud "github.com/ionos-cloud/sdk-go-bundle/products/compute"
 )
 
 func dataSourceNIC() *schema.Resource {
@@ -154,7 +155,7 @@ func dataSourceNicRead(ctx context.Context, data *schema.ResourceData, meta inte
 	}
 	var nic ionoscloud.Nic
 	var err error
-	var apiResponse *ionoscloud.APIResponse
+	var apiResponse *common.APIResponse
 
 	if !idOk && !nameOk {
 		return diag.FromErr(fmt.Errorf("either id, or name must be set"))

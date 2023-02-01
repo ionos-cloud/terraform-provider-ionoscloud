@@ -3,7 +3,7 @@ package ionoscloud
 import (
 	"fmt"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
-	ionoscloud "github.com/ionos-cloud/sdk-go/v6"
+	"github.com/ionos-cloud/sdk-go-bundle/common"
 	"log"
 	"net"
 	"net/http"
@@ -19,7 +19,7 @@ func convertSlice(slice []interface{}) []string {
 	return s
 }
 
-func responseBody(resp *ionoscloud.APIResponse) string {
+func responseBody(resp *common.APIResponse) string {
 	ret := "<nil>"
 	if resp != nil {
 		ret = string(resp.Payload)
@@ -90,7 +90,7 @@ func VerifyUnavailableIPs(val interface{}, key string) (warns []string, errs []e
 	return
 }
 
-func logApiRequestTime(resp *ionoscloud.APIResponse) {
+func logApiRequestTime(resp *common.APIResponse) {
 	if resp != nil {
 		log.Printf("[DEBUG] Request time : %s for operation : %s",
 			resp.RequestTime, resp.Operation)
@@ -100,7 +100,7 @@ func logApiRequestTime(resp *ionoscloud.APIResponse) {
 	}
 }
 
-func httpNotFound(resp *ionoscloud.APIResponse) bool {
+func httpNotFound(resp *common.APIResponse) bool {
 	if resp != nil && resp.Response != nil && resp.StatusCode == http.StatusNotFound {
 		return true
 	}

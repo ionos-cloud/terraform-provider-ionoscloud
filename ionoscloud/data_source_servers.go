@@ -8,7 +8,8 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 	"github.com/iancoleman/strcase"
-	ionoscloud "github.com/ionos-cloud/sdk-go/v6"
+	"github.com/ionos-cloud/sdk-go-bundle/common"
+	ionoscloud "github.com/ionos-cloud/sdk-go-bundle/products/compute"
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils"
 	"log"
 )
@@ -239,11 +240,11 @@ func dataSourceServersRead(ctx context.Context, d *schema.ResourceData, meta int
 		//we want to convert for example cpu_family to cpuFamily
 		name := strcase.ToLowerCamel(filter["name"].(string))
 		value := filter["value"].(string)
-		req = req.Filter(name, value)
+		req.Filter(name, value)
 		log.Printf("[INFO] Adding filter with name %s and value %s \n", name, value)
 	}
 	var err error
-	var apiResponse *ionoscloud.APIResponse
+	var apiResponse *common.APIResponse
 
 	/* search by whatever filter is set above */
 	servers, apiResponse, err := req.Execute()

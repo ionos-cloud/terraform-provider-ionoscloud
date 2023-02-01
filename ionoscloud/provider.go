@@ -3,9 +3,9 @@ package ionoscloud
 import (
 	"context"
 	"fmt"
+	"github.com/ionos-cloud/sdk-go-bundle/common"
 	"log"
 	"net/http"
-	"os"
 	"runtime"
 	"time"
 
@@ -13,7 +13,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/meta"
-	"github.com/ionos-cloud/sdk-go/v6"
+	"github.com/ionos-cloud/sdk-go-bundle/products/compute"
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/cert"
 	crService "github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/containerregistry"
 	dbaasService "github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/dbaas"
@@ -23,7 +23,7 @@ import (
 var Version = "DEV"
 
 type SdkBundle struct {
-	CloudApiClient    *ionoscloud.APIClient
+	CloudApiClient    *compute.APIClient
 	PsqlClient        *dbaasService.PsqlClient
 	MongoClient       *dbaasService.MongoClient
 	CertManagerClient *cert.Client
@@ -46,25 +46,25 @@ func Provider() *schema.Provider {
 			"username": {
 				Type:        schema.TypeString,
 				Optional:    true,
-				DefaultFunc: schema.EnvDefaultFunc(ionoscloud.IonosUsernameEnvVar, nil),
+				DefaultFunc: schema.EnvDefaultFunc(common.IonosUsernameEnvVar, nil),
 				Description: "IonosCloud username for API operations. If token is provided, token is preferred",
 			},
 			"password": {
 				Type:        schema.TypeString,
 				Optional:    true,
-				DefaultFunc: schema.EnvDefaultFunc(ionoscloud.IonosPasswordEnvVar, nil),
+				DefaultFunc: schema.EnvDefaultFunc(common.IonosPasswordEnvVar, nil),
 				Description: "IonosCloud password for API operations. If token is provided, token is preferred",
 			},
 			"token": {
 				Type:        schema.TypeString,
 				Optional:    true,
-				DefaultFunc: schema.EnvDefaultFunc(ionoscloud.IonosTokenEnvVar, nil),
+				DefaultFunc: schema.EnvDefaultFunc(common.IonosTokenEnvVar, nil),
 				Description: "IonosCloud bearer token for API operations.",
 			},
 			"endpoint": {
 				Type:        schema.TypeString,
 				Optional:    true,
-				DefaultFunc: schema.EnvDefaultFunc(ionoscloud.IonosApiUrlEnvVar, ""),
+				DefaultFunc: schema.EnvDefaultFunc(common.IonosApiUrlEnvVar, ""),
 				Description: "IonosCloud REST API URL.",
 			},
 			"retries": {
@@ -195,7 +195,7 @@ func providerConfigure(d *schema.ResourceData, terraformVersion string) (interfa
 	clientOpts.Password = password.(string)
 	clientOpts.Token = token.(string)
 	clientOpts.Url = cleanedUrl
-	clientOpts.Version = ionoscloud.Version
+	clientOpts.Version = compute.Version
 	clientOpts.TerraformVersion = terraformVersion
 
 	clients := map[clientType]interface{}{
@@ -206,10 +206,10 @@ func providerConfigure(d *schema.ResourceData, terraformVersion string) (interfa
 		containerRegistryClient: NewClientByType(clientOpts, containerRegistryClient),
 	}
 
-	apiClient := clients[ionosClient].(*ionoscloud.APIClient)
+	apiClient := clients[ionosClient].(*compute.APIClient)
 	apiClient.GetConfig().UserAgent = fmt.Sprintf(
 		"terraform-provider/%s_ionos-cloud-sdk-go/%s_hashicorp-terraform/%s_terraform-plugin-sdk/%s_os/%s_arch/%s",
-		Version, ionoscloud.Version, terraformVersion, meta.SDKVersionString(), runtime.GOOS, runtime.GOARCH)
+		Version, compute.Version, terraformVersion, meta.SDKVersionString(), runtime.GOOS, runtime.GOARCH)
 
 	return SdkBundle{
 		CloudApiClient:    apiClient,
@@ -224,15 +224,12 @@ func NewClientByType(clientOpts ClientOptions, clientType clientType) interface{
 	switch clientType {
 	case ionosClient:
 		{
-			newConfig := ionoscloud.NewConfiguration(clientOpts.Username, clientOpts.Password, clientOpts.Token, clientOpts.Url)
+			newConfig := common.NewConfiguration(clientOpts.Username, clientOpts.Password, clientOpts.Token, clientOpts.Url)
 
-			if os.Getenv(utils.IonosDebug) != "" {
-				newConfig.Debug = true
-			}
 			newConfig.MaxRetries = utils.MaxRetries
 			newConfig.WaitTime = utils.MaxWaitTime
 			newConfig.HTTPClient = &http.Client{Transport: utils.CreateTransport()}
-			return ionoscloud.NewAPIClient(newConfig)
+			return compute.NewAPIClient(newConfig)
 		}
 	case psqlClient:
 		return dbaasService.NewPsqlClient(clientOpts.Username, clientOpts.Password, clientOpts.Token, clientOpts.Url, clientOpts.Version, clientOpts.Username)

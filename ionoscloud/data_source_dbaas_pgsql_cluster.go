@@ -7,7 +7,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
-	dbaas "github.com/ionos-cloud/sdk-go-dbaas-postgres"
+	dbaas "github.com/ionos-cloud/sdk-go-bundle/products/dbaas/psql"
 	dbaasService "github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/dbaas"
 	"strings"
 )

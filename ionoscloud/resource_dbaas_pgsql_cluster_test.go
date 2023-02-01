@@ -12,7 +12,7 @@ import (
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
-	psql "github.com/ionos-cloud/sdk-go-dbaas-postgres"
+	psql "github.com/ionos-cloud/sdk-go-bundle/products/dbaas/psql"
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils"
 )
 

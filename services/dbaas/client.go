@@ -3,8 +3,9 @@ package dbaas
 import (
 	"fmt"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/meta"
+	"github.com/ionos-cloud/sdk-go-bundle/common"
+	"github.com/ionos-cloud/sdk-go-bundle/products/dbaas/psql"
 	mongo "github.com/ionos-cloud/sdk-go-dbaas-mongo"
-	psql "github.com/ionos-cloud/sdk-go-dbaas-postgres"
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils"
 	"net/http"
 	"os"
@@ -21,11 +22,8 @@ type MongoClient struct {
 }
 
 func NewPsqlClient(username, password, token, url, version, terraformVersion string) *PsqlClient {
-	newConfigDbaas := psql.NewConfiguration(username, password, token, url)
+	newConfigDbaas := common.NewConfiguration(username, password, token, url)
 
-	if os.Getenv(utils.IonosDebug) != "" {
-		newConfigDbaas.Debug = true
-	}
 	newConfigDbaas.MaxRetries = 999
 	newConfigDbaas.MaxWaitTime = 4 * time.Second
 

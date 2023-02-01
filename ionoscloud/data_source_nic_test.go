@@ -5,7 +5,7 @@ package ionoscloud
 import (
 	"context"
 	"encoding/json"
-	ionoscloud "github.com/ionos-cloud/sdk-go/v6"
+	ionoscloud "github.com/ionos-cloud/sdk-go-bundle/products/compute"
 	"log"
 	"testing"
 )

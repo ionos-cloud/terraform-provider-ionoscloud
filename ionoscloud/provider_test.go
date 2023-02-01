@@ -2,14 +2,13 @@ package ionoscloud
 
 import (
 	"context"
+	"github.com/ionos-cloud/sdk-go-bundle/common"
 	"os"
 	"testing"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
-	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
-	ionoscloud "github.com/ionos-cloud/sdk-go/v6"
-
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
 )
 
 var testAccProvider *schema.Provider
@@ -39,12 +38,12 @@ func TestProvider_impl(t *testing.T) {
 }
 
 func testAccPreCheck(t *testing.T) {
-	pbUsername := os.Getenv(ionoscloud.IonosUsernameEnvVar)
-	pbPassword := os.Getenv(ionoscloud.IonosPasswordEnvVar)
-	pbToken := os.Getenv(ionoscloud.IonosTokenEnvVar)
+	pbUsername := os.Getenv(common.IonosUsernameEnvVar)
+	pbPassword := os.Getenv(common.IonosPasswordEnvVar)
+	pbToken := os.Getenv(common.IonosTokenEnvVar)
 	if pbToken == "" {
 		if pbUsername == "" || pbPassword == "" {
-			t.Fatalf("%s/%s or %s must be set for acceptance tests", ionoscloud.IonosUsernameEnvVar, ionoscloud.IonosPasswordEnvVar, ionoscloud.IonosTokenEnvVar)
+			t.Fatalf("%s/%s or %s must be set for acceptance tests", common.IonosUsernameEnvVar, common.IonosPasswordEnvVar, common.IonosTokenEnvVar)
 		}
 	}
 

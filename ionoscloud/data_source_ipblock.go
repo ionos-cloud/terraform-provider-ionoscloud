@@ -6,7 +6,8 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
-	ionoscloud "github.com/ionos-cloud/sdk-go/v6"
+	"github.com/ionos-cloud/sdk-go-bundle/common"
+	ionoscloud "github.com/ionos-cloud/sdk-go-bundle/products/compute"
 	"log"
 )
 
@@ -106,7 +107,7 @@ func datasourceIpBlockRead(ctx context.Context, data *schema.ResourceData, meta 
 	var ipBlock ionoscloud.IpBlock
 	var err error
 	client := meta.(SdkBundle).CloudApiClient
-	var apiResponse *ionoscloud.APIResponse
+	var apiResponse *common.APIResponse
 
 	if !idOk && !nameOk && !locationOk {
 		return diag.FromErr(fmt.Errorf("either id, location or name must be set"))

@@ -7,7 +7,8 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
-	ionoscloud "github.com/ionos-cloud/sdk-go/v6"
+	"github.com/ionos-cloud/sdk-go-bundle/common"
+	ionoscloud "github.com/ionos-cloud/sdk-go-bundle/products/compute"
 	"log"
 	"strings"
 )
@@ -178,7 +179,7 @@ func dataSourceApplicationLoadBalancerForwardingRuleRead(ctx context.Context, d 
 
 	var applicationLoadBalancerForwardingRule ionoscloud.ApplicationLoadBalancerForwardingRule
 	var err error
-	var apiResponse *ionoscloud.APIResponse
+	var apiResponse *common.APIResponse
 
 	if idOk {
 		/* search by ID */
@@ -199,7 +200,6 @@ func dataSourceApplicationLoadBalancerForwardingRuleRead(ctx context.Context, d 
 		if partialMatch {
 			applicationLoadBalancersForwardingRules, apiResponse, err := client.ApplicationLoadBalancersApi.DatacentersApplicationloadbalancersForwardingrulesGet(ctx, datacenterId, albId).Depth(1).Filter("name", name).Execute()
 			logApiRequestTime(apiResponse)
-
 			if err != nil {
 				return diag.FromErr(fmt.Errorf("an error occurred while fetching application loadbalancer forwarding rules: %w", err))
 			}

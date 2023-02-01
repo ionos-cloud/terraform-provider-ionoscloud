@@ -4,7 +4,8 @@ import (
 	"context"
 	"fmt"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
-	ionoscloud "github.com/ionos-cloud/sdk-go/v6"
+	"github.com/ionos-cloud/sdk-go-bundle/common"
+	ionoscloud "github.com/ionos-cloud/sdk-go-bundle/products/compute"
 	"log"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
@@ -92,7 +93,7 @@ func dataSourceDataCenterRead(ctx context.Context, d *schema.ResourceData, meta 
 
 	var datacenter ionoscloud.Datacenter
 	var err error
-	var apiResponse *ionoscloud.APIResponse
+	var apiResponse *common.APIResponse
 
 	if !idOk && !nameOk && !locationOk {
 		return diag.FromErr(fmt.Errorf("either id, location or name must be set"))
