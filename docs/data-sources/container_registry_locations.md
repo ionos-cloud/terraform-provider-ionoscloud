@@ -11,9 +11,6 @@ description: |-
 
 The **Container Registry Locations data source** can be used to get a list of Container Registry Locations
 
-⚠️ **Note:** Container Registry is currently in the Early Access (EA) phase. We recommend keeping usage and testing to non-production critical applications.
-Please contact your sales representative or support for more information.
-
 ## Example Usage
 
 ```hcl
