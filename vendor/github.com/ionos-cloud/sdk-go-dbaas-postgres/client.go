@@ -1,7 +1,7 @@
 /*
- * IONOS DBaaS REST API
+ * IONOS DBaaS PostgreSQL REST API
  *
- * An enterprise-grade Database is provided as a Service (DBaaS) solution that can be managed through a browser-based \"Data Center Designer\" (DCD) tool or via an easy to use API.  The API allows you to create additional database clusters or modify existing ones. It is designed to allow users to leverage the same power and flexibility found within the DCD visual tool. Both tools are consistent with their concepts and lend well to making the experience smooth and intuitive.
+ * An enterprise-grade Database is provided as a Service (DBaaS) solution that can be managed through a browser-based \"Data Center Designer\" (DCD) tool or via an easy to use API.  The API allows you to create additional PostgreSQL database clusters or modify existing ones. It is designed to allow users to leverage the same power and flexibility found within the DCD visual tool. Both tools are consistent with their concepts and lend well to making the experience smooth and intuitive.
  *
  * API version: 1.0.0
  */
@@ -22,7 +22,6 @@ import (
 	"errors"
 	"fmt"
 	"io"
-	"log"
 	"mime/multipart"
 	"net"
 	"net/http"
@@ -45,19 +44,16 @@ var (
 	xmlCheck  = regexp.MustCompile(`(?i:(?:application|text)/xml)`)
 )
 
-const DepthParam = "depth"
-const DefaultDepth = "10"
-
 const (
 	RequestStatusQueued  = "QUEUED"
 	RequestStatusRunning = "RUNNING"
 	RequestStatusFailed  = "FAILED"
 	RequestStatusDone    = "DONE"
 
-	Version = "1.0.4"
+	Version = "1.0.6"
 )
 
-// APIClient manages communication with the IONOS DBaaS REST API API v1.0.0
+// APIClient manages communication with the IONOS DBaaS PostgreSQL REST API API v1.0.0
 // In most cases there should be only one, shared, APIClient.
 type APIClient struct {
 	cfg    *Configuration
@@ -108,7 +104,7 @@ func NewAPIClient(cfg *Configuration) *APIClient {
 	return c
 }
 
-//AddPinnedCert - enables pinning of the sha256 public fingerprint to the http client's transport
+// AddPinnedCert - enables pinning of the sha256 public fingerprint to the http client's transport
 func AddPinnedCert(transport *http.Transport, pkFingerprint string) {
 	if pkFingerprint != "" {
 		transport.DialTLSContext = addPinnedCertVerification([]byte(pkFingerprint), new(tls.Config))
@@ -270,26 +266,29 @@ func (c *APIClient) callAPI(request *http.Request) (*http.Response, error) {
 			}
 		}
 
-		if c.cfg.Debug {
+		if c.cfg.Debug || c.cfg.LogLevel.Satisfies(Trace) {
 			dump, err := httputil.DumpRequestOut(clonedRequest, true)
-			if err != nil {
-				return nil, err
+			if err == nil {
+				c.cfg.Logger.Printf(" DumpRequestOut : %s\n", string(dump))
+			} else {
+				c.cfg.Logger.Printf(" DumpRequestOut err: %+v", err)
 			}
-			log.Printf("\ntry no: %d\n", retryCount)
-			log.Printf("%s\n", string(dump))
+			c.cfg.Logger.Printf("\n try no: %d\n", retryCount)
 		}
 
+		clonedRequest.Close = true
 		resp, err = c.cfg.HTTPClient.Do(clonedRequest)
 		if err != nil {
 			return resp, err
 		}
 
-		if c.cfg.Debug {
+		if c.cfg.Debug || c.cfg.LogLevel.Satisfies(Trace) {
 			dump, err := httputil.DumpResponse(resp, true)
-			if err != nil {
-				return resp, err
+			if err == nil {
+				c.cfg.Logger.Printf("\n DumpResponse : %s\n", string(dump))
+			} else {
+				c.cfg.Logger.Printf(" DumpResponse err %+v", err)
 			}
-			log.Printf("\n%s\n", string(dump))
 		}
 
 		var backoffTime time.Duration
@@ -316,8 +315,8 @@ func (c *APIClient) callAPI(request *http.Request) (*http.Response, error) {
 		}
 
 		if retryCount >= c.GetConfig().MaxRetries {
-			if c.cfg.Debug {
-				log.Printf("number of maximum retries exceeded (%d retries)\n", c.cfg.MaxRetries)
+			if c.cfg.Debug || c.cfg.LogLevel.Satisfies(Debug) {
+				c.cfg.Logger.Printf(" Number of maximum retries exceeded (%d retries)\n", c.cfg.MaxRetries)
 			}
 			break
 		} else {
@@ -332,8 +331,8 @@ func (c *APIClient) backOff(t time.Duration) {
 	if t > c.GetConfig().MaxWaitTime {
 		t = c.GetConfig().MaxWaitTime
 	}
-	if c.cfg.Debug {
-		log.Printf("sleeping %s before retrying request\n", t.String())
+	if c.cfg.Debug || c.cfg.LogLevel.Satisfies(Debug) {
+		c.cfg.Logger.Printf(" Sleeping %s before retrying request\n", t.String())
 	}
 	time.Sleep(t)
 }
@@ -451,11 +450,6 @@ func (c *APIClient) prepareRequest(
 		for _, iv := range v {
 			query.Add(k, iv)
 		}
-	}
-
-	// Adding default depth if needed
-	if query.Get(DepthParam) == "" {
-		query.Add(DepthParam, DefaultDepth)
 	}
 
 	// Encode the parameters.
@@ -693,7 +687,7 @@ type GenericOpenAPIError struct {
 	model      interface{}
 }
 
-//NewGenericOpenAPIError - constructor for GenericOpenAPIError
+// NewGenericOpenAPIError - constructor for GenericOpenAPIError
 func NewGenericOpenAPIError(message string, body []byte, model interface{}, statusCode int) *GenericOpenAPIError {
 	return &GenericOpenAPIError{
 		statusCode: statusCode,

@@ -1,7 +1,7 @@
 /*
- * IONOS DBaaS REST API
+ * IONOS DBaaS PostgreSQL REST API
  *
- * An enterprise-grade Database is provided as a Service (DBaaS) solution that can be managed through a browser-based \"Data Center Designer\" (DCD) tool or via an easy to use API.  The API allows you to create additional database clusters or modify existing ones. It is designed to allow users to leverage the same power and flexibility found within the DCD visual tool. Both tools are consistent with their concepts and lend well to making the experience smooth and intuitive.
+ * An enterprise-grade Database is provided as a Service (DBaaS) solution that can be managed through a browser-based \"Data Center Designer\" (DCD) tool or via an easy to use API.  The API allows you to create additional PostgreSQL database clusters or modify existing ones. It is designed to allow users to leverage the same power and flexibility found within the DCD visual tool. Both tools are consistent with their concepts and lend well to making the experience smooth and intuitive.
  *
  * API version: 1.0.0
  */
@@ -15,6 +15,29 @@ import (
 	"strings"
 	"time"
 )
+
+// ToPtr - returns a pointer to the given value.
+func ToPtr[T any](v T) *T {
+	return &v
+}
+
+// ToValue - returns the value of the pointer passed in
+func ToValue[T any](ptr *T) T {
+	return *ptr
+}
+
+// ToValueDefault - returns the value of the pointer passed in, or the default type value if the pointer is nil
+func ToValueDefault[T any](ptr *T) T {
+	var defaultVal T
+	if ptr == nil {
+		return defaultVal
+	}
+	return *ptr
+}
+
+func SliceToValueDefault[T any](ptrSlice *[]T) []T {
+	return append([]T{}, *ptrSlice...)
+}
 
 // PtrBool - returns a pointer to given boolean value.
 func PtrBool(v bool) *bool { return &v }

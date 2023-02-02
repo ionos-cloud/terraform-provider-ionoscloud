@@ -1,3 +1,11 @@
+## 6.3.5
+### Feature:
+  - Rewrite a part of the psql service to use new functionality.
+  - Add `dns_name` to `ionoscloud_pg_cluster` datasource and resource
+### Dependency update
+ - Update `go` to version 1.19
+ - Update `sdk-go-dbaas-postgres` to latest version
+
 ## 6.3.4
 ### Feature:
  - Add update for mongo database resources
