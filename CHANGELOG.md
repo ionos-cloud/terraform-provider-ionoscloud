@@ -1,3 +1,7 @@
+## 6.3.5
+### Feature:
+- Removed EA note for container registry and dbaas mongo docs
+
 ## 6.3.4
 ### Feature:
  - Add update for mongo database resources
