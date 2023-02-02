@@ -4,7 +4,7 @@
 - Add `dns_name` to `ionoscloud_pg_cluster` datasource and resource
 ### Dependency update
 - Update `go` to version 1.19
-- Update `sdk-go-dbaas-postgres` to latest version
+- Update `sdk-go-dbaas-postgres` to [v1.0.6](https://github.com/ionos-cloud/sdk-go-dbaas-postgres/releases/tag/v1.0.6)
 
 ## 6.3.5
 ### Feature:
