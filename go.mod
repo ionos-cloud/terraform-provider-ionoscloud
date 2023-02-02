@@ -5,11 +5,11 @@ go 1.18
 require (
 	github.com/hashicorp/terraform-plugin-sdk/v2 v2.22.0
 	github.com/iancoleman/strcase v0.2.0
-	github.com/ionos-cloud/sdk-go-bundle/products/dbaas/psql v0.1.0
-	github.com/ionos-cloud/sdk-go-cert-manager v1.0.0
-	github.com/ionos-cloud/sdk-go-container-registry v1.0.0
-	github.com/ionos-cloud/sdk-go-dbaas-mongo v1.2.0
 	github.com/ionos-cloud/sdk-go-bundle/products/compute v0.1.0
+	github.com/ionos-cloud/sdk-go-bundle/products/containerregistry v0.1.0
+	github.com/ionos-cloud/sdk-go-bundle/products/cert v0.1.0
+	github.com/ionos-cloud/sdk-go-bundle/products/dbaas/psql v0.1.0
+	github.com/ionos-cloud/sdk-go-bundle/products/dbaas/mongo v0.1.0
 	golang.org/x/crypto v0.0.0-20220517005047-85d78b3ac167
 	gopkg.in/yaml.v3 v3.0.1
 )

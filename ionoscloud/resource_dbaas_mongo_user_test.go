@@ -6,7 +6,7 @@ package ionoscloud
 import (
 	"context"
 	"fmt"
-	mongo "github.com/ionos-cloud/sdk-go-dbaas-mongo"
+	mongo "github.com/ionos-cloud/sdk-go-bundle/products/dbaas/mongo"
 	"regexp"
 	"testing"
 

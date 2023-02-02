@@ -155,21 +155,21 @@ github.com/iancoleman/strcase
 # github.com/ionos-cloud/sdk-go-bundle/common v0.1.0
 ## explicit; go 1.19
 github.com/ionos-cloud/sdk-go-bundle/common
+# github.com/ionos-cloud/sdk-go-bundle/products/cert v0.1.0
+## explicit; go 1.19
+github.com/ionos-cloud/sdk-go-bundle/products/cert
 # github.com/ionos-cloud/sdk-go-bundle/products/compute v0.1.0
 ## explicit; go 1.19
 github.com/ionos-cloud/sdk-go-bundle/products/compute
+# github.com/ionos-cloud/sdk-go-bundle/products/containerregistry v0.1.0
+## explicit; go 1.19
+github.com/ionos-cloud/sdk-go-bundle/products/containerregistry
+# github.com/ionos-cloud/sdk-go-bundle/products/dbaas/mongo v0.1.0
+## explicit; go 1.19
+github.com/ionos-cloud/sdk-go-bundle/products/dbaas/mongo
 # github.com/ionos-cloud/sdk-go-bundle/products/dbaas/psql v0.1.0
 ## explicit; go 1.19
 github.com/ionos-cloud/sdk-go-bundle/products/dbaas/psql
-# github.com/ionos-cloud/sdk-go-cert-manager v1.0.0
-## explicit; go 1.17
-github.com/ionos-cloud/sdk-go-cert-manager
-# github.com/ionos-cloud/sdk-go-container-registry v1.0.0
-## explicit; go 1.18
-github.com/ionos-cloud/sdk-go-container-registry
-# github.com/ionos-cloud/sdk-go-dbaas-mongo v1.2.0
-## explicit; go 1.18
-github.com/ionos-cloud/sdk-go-dbaas-mongo
 # github.com/jhump/protoreflect v1.6.1
 ## explicit; go 1.14
 # github.com/mattn/go-colorable v0.1.12

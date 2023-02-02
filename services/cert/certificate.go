@@ -4,36 +4,37 @@ import (
 	"context"
 	"fmt"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
-	certmanager "github.com/ionos-cloud/sdk-go-cert-manager"
+	"github.com/ionos-cloud/sdk-go-bundle/common"
+	certmanager "github.com/ionos-cloud/sdk-go-bundle/products/cert"
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils"
 	"strings"
 )
 
-func (c *Client) GetCertificate(ctx context.Context, certId string) (certmanager.CertificateDto, *certmanager.APIResponse, error) {
+func (c *Client) GetCertificate(ctx context.Context, certId string) (certmanager.CertificateDto, *common.APIResponse, error) {
 	cert, apiResponse, err := c.sdkClient.CertificatesApi.CertificatesGetById(ctx, certId).Execute()
 	apiResponse.LogInfo()
 	return cert, apiResponse, err
 }
 
-func (c *Client) ListCertificates(ctx context.Context) (certmanager.CertificateCollectionDto, *certmanager.APIResponse, error) {
+func (c *Client) ListCertificates(ctx context.Context) (certmanager.CertificateCollectionDto, *common.APIResponse, error) {
 	certs, apiResponse, err := c.sdkClient.CertificatesApi.CertificatesGet(ctx).Execute()
 	apiResponse.LogInfo()
 	return certs, apiResponse, err
 }
 
-func (c *Client) CreateCertificate(ctx context.Context, certPostDto certmanager.CertificatePostDto) (certmanager.CertificateDto, *certmanager.APIResponse, error) {
+func (c *Client) CreateCertificate(ctx context.Context, certPostDto certmanager.CertificatePostDto) (certmanager.CertificateDto, *common.APIResponse, error) {
 	certResponse, apiResponse, err := c.sdkClient.CertificatesApi.CertificatesPost(ctx).CertificatePostDto(certPostDto).Execute()
 	apiResponse.LogInfo()
 	return certResponse, apiResponse, err
 }
 
-func (c *Client) UpdateCertificate(ctx context.Context, certId string, certPatch certmanager.CertificatePatchDto) (certmanager.CertificateDto, *certmanager.APIResponse, error) {
+func (c *Client) UpdateCertificate(ctx context.Context, certId string, certPatch certmanager.CertificatePatchDto) (certmanager.CertificateDto, *common.APIResponse, error) {
 	certResponse, apiResponse, err := c.sdkClient.CertificatesApi.CertificatesPatch(ctx, certId).CertificatePatchDto(certPatch).Execute()
 	apiResponse.LogInfo()
 	return certResponse, apiResponse, err
 }
 
-func (c *Client) DeleteCertificate(ctx context.Context, certId string) (*certmanager.APIResponse, error) {
+func (c *Client) DeleteCertificate(ctx context.Context, certId string) (*common.APIResponse, error) {
 	apiResponse, err := c.sdkClient.CertificatesApi.CertificatesDelete(ctx, certId).Execute()
 	apiResponse.LogInfo()
 	return apiResponse, err
