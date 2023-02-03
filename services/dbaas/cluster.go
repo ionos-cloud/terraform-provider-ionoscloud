@@ -15,6 +15,7 @@ import (
 
 func (c *PsqlClient) GetCluster(ctx context.Context, clusterId string) (psql.ClusterResponse, *psql.APIResponse, error) {
 	cluster, apiResponse, err := c.sdkClient.ClustersApi.ClustersFindById(ctx, clusterId).Execute()
+	apiResponse.LogInfo()
 	return cluster, apiResponse, err
 }
 
@@ -30,6 +31,7 @@ func (c *PsqlClient) ListClusters(ctx context.Context, filterName string) (psql.
 		request = request.FilterName(filterName)
 	}
 	clusters, apiResponse, err := c.sdkClient.ClustersApi.ClustersGetExecute(request)
+	apiResponse.LogInfo()
 	return clusters, apiResponse, err
 }
 
@@ -51,6 +53,7 @@ func (c *MongoClient) GetTemplates(ctx context.Context) (mongo.TemplateList, *mo
 
 func (c *PsqlClient) CreateCluster(ctx context.Context, cluster psql.CreateClusterRequest) (psql.ClusterResponse, *psql.APIResponse, error) {
 	clusterResponse, apiResponse, err := c.sdkClient.ClustersApi.ClustersPost(ctx).CreateClusterRequest(cluster).Execute()
+	apiResponse.LogInfo()
 	return clusterResponse, apiResponse, err
 }
 
@@ -68,11 +71,13 @@ func (c *MongoClient) UpdateCluster(ctx context.Context, clusterId string, clust
 
 func (c *PsqlClient) UpdateCluster(ctx context.Context, clusterId string, cluster psql.PatchClusterRequest) (psql.ClusterResponse, *psql.APIResponse, error) {
 	clusterResponse, apiResponse, err := c.sdkClient.ClustersApi.ClustersPatch(ctx, clusterId).PatchClusterRequest(cluster).Execute()
+	apiResponse.LogInfo()
 	return clusterResponse, apiResponse, err
 }
 
 func (c *PsqlClient) DeleteCluster(ctx context.Context, clusterId string) (psql.ClusterResponse, *psql.APIResponse, error) {
 	clusterResponse, apiResponse, err := c.sdkClient.ClustersApi.ClustersDelete(ctx, clusterId).Execute()
+	apiResponse.LogInfo()
 	return clusterResponse, apiResponse, err
 }
 
@@ -80,6 +85,30 @@ func (c *MongoClient) DeleteCluster(ctx context.Context, clusterId string) (mong
 	clusterResponse, apiResponse, err := c.sdkClient.ClustersApi.ClustersDelete(ctx, clusterId).Execute()
 	apiResponse.LogInfo()
 	return clusterResponse, apiResponse, err
+}
+func (c *PsqlClient) IsClusterReady(ctx context.Context, d *schema.ResourceData) (bool, error) {
+	cluster, _, err := c.GetCluster(ctx, d.Id())
+	if err != nil {
+		return true, fmt.Errorf("check failed for cluster status: %w", err)
+	}
+
+	if cluster.Metadata == nil || cluster.Metadata.State == nil {
+		return false, fmt.Errorf("cluster metadata or state is empty for id %s", d.Id())
+	}
+
+	log.Printf("[INFO] state of the cluster %s ", string(*cluster.Metadata.State))
+	return strings.EqualFold(string(*cluster.Metadata.State), utils.Available), nil
+}
+
+func (c *PsqlClient) IsClusterDeleted(ctx context.Context, d *schema.ResourceData) (bool, error) {
+	_, apiResponse, err := c.GetCluster(ctx, d.Id())
+	if err != nil {
+		if apiResponse.HttpNotFound() {
+			return true, nil
+		}
+		return false, fmt.Errorf("check failed for psql cluster deletion status: %w", err)
+	}
+	return false, nil
 }
 
 func (c *MongoClient) IsClusterReady(ctx context.Context, d *schema.ResourceData) (bool, error) {
@@ -459,6 +488,10 @@ func SetDbaasPgSqlClusterData(d *schema.ResourceData, cluster psql.ClusterRespon
 		d.SetId(*cluster.Id)
 	}
 
+	if cluster.Properties == nil {
+		return fmt.Errorf("cluster properties should not be empty for id %s", *cluster.Id)
+	}
+
 	if cluster.Properties.PostgresVersion != nil {
 		if err := d.Set("postgres_version", *cluster.Properties.PostgresVersion); err != nil {
 			return utils.GenerateSetError(resourceName, "postgres_version", err)
@@ -536,6 +569,12 @@ func SetDbaasPgSqlClusterData(d *schema.ResourceData, cluster psql.ClusterRespon
 	if cluster.Properties.SynchronizationMode != nil {
 		if err := d.Set("synchronization_mode", *cluster.Properties.SynchronizationMode); err != nil {
 			return fmt.Errorf("error while setting SynchronizationMode property for psql cluster %s: %w", d.Id(), err)
+		}
+	}
+
+	if cluster.Properties.DnsName != nil {
+		if err := d.Set("dns_name", *cluster.Properties.DnsName); err != nil {
+			return utils.GenerateSetError(resourceName, "dns_name", err)
 		}
 	}
 

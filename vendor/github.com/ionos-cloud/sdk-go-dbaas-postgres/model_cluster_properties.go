@@ -1,7 +1,7 @@
 /*
- * IONOS DBaaS REST API
+ * IONOS DBaaS PostgreSQL REST API
  *
- * An enterprise-grade Database is provided as a Service (DBaaS) solution that can be managed through a browser-based \"Data Center Designer\" (DCD) tool or via an easy to use API.  The API allows you to create additional database clusters or modify existing ones. It is designed to allow users to leverage the same power and flexibility found within the DCD visual tool. Both tools are consistent with their concepts and lend well to making the experience smooth and intuitive.
+ * An enterprise-grade Database is provided as a Service (DBaaS) solution that can be managed through a browser-based \"Data Center Designer\" (DCD) tool or via an easy to use API.  The API allows you to create additional PostgreSQL database clusters or modify existing ones. It is designed to allow users to leverage the same power and flexibility found within the DCD visual tool. Both tools are consistent with their concepts and lend well to making the experience smooth and intuitive.
  *
  * API version: 1.0.0
  */
@@ -22,6 +22,8 @@ type ClusterProperties struct {
 	PostgresVersion *string `json:"postgresVersion,omitempty"`
 	// The physical location where the cluster will be created. This will be where all of your instances live. Property cannot be modified after datacenter creation.
 	Location *string `json:"location,omitempty"`
+	// The DNS name pointing to your cluster.
+	DnsName *string `json:"dnsName,omitempty"`
 	// The S3 location where the backups will be stored.
 	BackupLocation *string `json:"backupLocation,omitempty"`
 	// The total number of instances in the cluster (one master and n-1 standbys).
@@ -164,6 +166,44 @@ func (o *ClusterProperties) SetLocation(v string) {
 // HasLocation returns a boolean if a field has been set.
 func (o *ClusterProperties) HasLocation() bool {
 	if o != nil && o.Location != nil {
+		return true
+	}
+
+	return false
+}
+
+// GetDnsName returns the DnsName field value
+// If the value is explicit nil, the zero value for string will be returned
+func (o *ClusterProperties) GetDnsName() *string {
+	if o == nil {
+		return nil
+	}
+
+	return o.DnsName
+
+}
+
+// GetDnsNameOk returns a tuple with the DnsName field value
+// and a boolean to check if the value has been set.
+// NOTE: If the value is an explicit nil, `nil, true` will be returned
+func (o *ClusterProperties) GetDnsNameOk() (*string, bool) {
+	if o == nil {
+		return nil, false
+	}
+
+	return o.DnsName, true
+}
+
+// SetDnsName sets field value
+func (o *ClusterProperties) SetDnsName(v string) {
+
+	o.DnsName = &v
+
+}
+
+// HasDnsName returns a boolean if a field has been set.
+func (o *ClusterProperties) HasDnsName() bool {
+	if o != nil && o.DnsName != nil {
 		return true
 	}
 
@@ -524,6 +564,10 @@ func (o ClusterProperties) MarshalJSON() ([]byte, error) {
 
 	if o.Location != nil {
 		toSerialize["location"] = o.Location
+	}
+
+	if o.DnsName != nil {
+		toSerialize["dnsName"] = o.DnsName
 	}
 
 	if o.BackupLocation != nil {

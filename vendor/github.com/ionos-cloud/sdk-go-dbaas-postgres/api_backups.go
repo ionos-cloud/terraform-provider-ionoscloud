@@ -1,7 +1,7 @@
 /*
- * IONOS DBaaS REST API
+ * IONOS DBaaS PostgreSQL REST API
  *
- * An enterprise-grade Database is provided as a Service (DBaaS) solution that can be managed through a browser-based \"Data Center Designer\" (DCD) tool or via an easy to use API.  The API allows you to create additional database clusters or modify existing ones. It is designed to allow users to leverage the same power and flexibility found within the DCD visual tool. Both tools are consistent with their concepts and lend well to making the experience smooth and intuitive.
+ * An enterprise-grade Database is provided as a Service (DBaaS) solution that can be managed through a browser-based \"Data Center Designer\" (DCD) tool or via an easy to use API.  The API allows you to create additional PostgreSQL database clusters or modify existing ones. It is designed to allow users to leverage the same power and flexibility found within the DCD visual tool. Both tools are consistent with their concepts and lend well to making the experience smooth and intuitive.
  *
  * API version: 1.0.0
  */
@@ -174,13 +174,14 @@ func (r ApiClustersBackupsFindByIdRequest) Execute() (BackupResponse, *APIRespon
 }
 
 /*
- * ClustersBackupsFindById Fetch a cluster backup
- * Retrieve a PostgreSQL cluster backup by using its ID. This value can be
+  - ClustersBackupsFindById Fetch a cluster backup
+  - Retrieve a PostgreSQL cluster backup by using its ID. This value can be
+
 found when you GET a list of PostgreSQL cluster backups.
 
- * @param ctx _context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
- * @param backupId The unique ID of the backup.
- * @return ApiClustersBackupsFindByIdRequest
+  - @param ctx _context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+  - @param backupId The unique ID of the backup.
+  - @return ApiClustersBackupsFindByIdRequest
 */
 func (a *BackupsApiService) ClustersBackupsFindById(ctx _context.Context, backupId string) ApiClustersBackupsFindByIdRequest {
 	return ApiClustersBackupsFindByIdRequest{

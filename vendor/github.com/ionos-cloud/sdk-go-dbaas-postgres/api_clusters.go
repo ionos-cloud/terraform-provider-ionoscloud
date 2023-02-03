@@ -1,7 +1,7 @@
 /*
- * IONOS DBaaS REST API
+ * IONOS DBaaS PostgreSQL REST API
  *
- * An enterprise-grade Database is provided as a Service (DBaaS) solution that can be managed through a browser-based \"Data Center Designer\" (DCD) tool or via an easy to use API.  The API allows you to create additional database clusters or modify existing ones. It is designed to allow users to leverage the same power and flexibility found within the DCD visual tool. Both tools are consistent with their concepts and lend well to making the experience smooth and intuitive.
+ * An enterprise-grade Database is provided as a Service (DBaaS) solution that can be managed through a browser-based \"Data Center Designer\" (DCD) tool or via an easy to use API.  The API allows you to create additional PostgreSQL database clusters or modify existing ones. It is designed to allow users to leverage the same power and flexibility found within the DCD visual tool. Both tools are consistent with their concepts and lend well to making the experience smooth and intuitive.
  *
  * API version: 1.0.0
  */
@@ -38,13 +38,14 @@ func (r ApiClusterPostgresVersionsGetRequest) Execute() (PostgresVersionList, *A
 }
 
 /*
- * ClusterPostgresVersionsGet List PostgreSQL versions
- * Retrieves a list of all PostgreSQL versions available for this cluster
+  - ClusterPostgresVersionsGet List PostgreSQL versions
+  - Retrieves a list of all PostgreSQL versions available for this cluster
+
 including the current version.
 
- * @param ctx _context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
- * @param clusterId The unique ID of the cluster.
- * @return ApiClusterPostgresVersionsGetRequest
+  - @param ctx _context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+  - @param clusterId The unique ID of the cluster.
+  - @return ApiClusterPostgresVersionsGetRequest
 */
 func (a *ClustersApiService) ClusterPostgresVersionsGet(ctx _context.Context, clusterId string) ApiClusterPostgresVersionsGetRequest {
 	return ApiClusterPostgresVersionsGetRequest{
@@ -312,14 +313,15 @@ func (r ApiClustersFindByIdRequest) Execute() (ClusterResponse, *APIResponse, er
 }
 
 /*
- * ClustersFindById Fetch a cluster
- * You can retrieve a PostgreSQL cluster by using its ID. This value can be
+  - ClustersFindById Fetch a cluster
+  - You can retrieve a PostgreSQL cluster by using its ID. This value can be
+
 found in the response body when a PostgreSQL cluster is created or when
 you GET a list of PostgreSQL clusters.
 
- * @param ctx _context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
- * @param clusterId The unique ID of the cluster.
- * @return ApiClustersFindByIdRequest
+  - @param ctx _context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+  - @param clusterId The unique ID of the cluster.
+  - @return ApiClustersFindByIdRequest
 */
 func (a *ClustersApiService) ClustersFindById(ctx _context.Context, clusterId string) ApiClustersFindByIdRequest {
 	return ApiClustersFindByIdRequest{
@@ -744,13 +746,14 @@ func (r ApiClustersPostRequest) Execute() (ClusterResponse, *APIResponse, error)
 }
 
 /*
- * ClustersPost Create a cluster
- * Creates a new PostgreSQL cluster.
+  - ClustersPost Create a cluster
+  - Creates a new PostgreSQL cluster.
+
 If the `fromBackup` field is populated, the new cluster will be created
 based on the given backup.
 
- * @param ctx _context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
- * @return ApiClustersPostRequest
+  - @param ctx _context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+  - @return ApiClustersPostRequest
 */
 func (a *ClustersApiService) ClustersPost(ctx _context.Context) ApiClustersPostRequest {
 	return ApiClustersPostRequest{
