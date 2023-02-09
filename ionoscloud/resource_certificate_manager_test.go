@@ -126,7 +126,7 @@ func testAccCheckCertificateDestroyCheck(s *terraform.State) error {
 
 		if err != nil {
 			if !apiResponse.HttpNotFound() {
-				return fmt.Errorf("an error occurred while checking for the destruction of certificate %s: %s",
+				return fmt.Errorf("an error occurred while checking for the destruction of certificate %s: %w",
 					rs.Primary.ID, err)
 			}
 		} else {

@@ -2,51 +2,116 @@ package dbaas
 
 import (
 	"context"
+	"fmt"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	mongo "github.com/ionos-cloud/sdk-go-dbaas-mongo"
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils"
+	"log"
+	"strings"
 )
 
-func (c *MongoClient) CreateUser(ctx context.Context, clusterId string, user mongo.User) (*mongo.APIResponse, error) {
-	_, apiResponse, err := c.sdkClient.UsersApi.ClustersUsersPost(ctx, clusterId).User(user).Execute()
+func (c *MongoClient) CreateUser(ctx context.Context, clusterId string, user mongo.User) (mongo.User, utils.ApiResponseInfo, error) {
+	userResp, apiResponse, err := c.sdkClient.UsersApi.ClustersUsersPost(ctx, clusterId).User(user).Execute()
 	apiResponse.LogInfo()
-	if apiResponse != nil {
-		return apiResponse, err
-	}
-	return nil, err
+	return userResp, apiResponse, err
 }
 
-func (c *MongoClient) UpdateUser(ctx context.Context, clusterId, username string, patchUserReq mongo.PatchUserRequest) (*mongo.APIResponse, error) {
-	_, apiResponse, err := c.sdkClient.UsersApi.ClustersUsersPatch(ctx, clusterId, "admin", username).PatchUserRequest(patchUserReq).Execute()
+func (c *MongoClient) UpdateUser(ctx context.Context, clusterId, username string, patchUserReq mongo.PatchUserRequest) (mongo.User, utils.ApiResponseInfo, error) {
+	user, apiResponse, err := c.sdkClient.UsersApi.ClustersUsersPatch(ctx, clusterId, username).PatchUserRequest(patchUserReq).Execute()
 	apiResponse.LogInfo()
-	if apiResponse != nil {
-		return apiResponse, err
-	}
-	return nil, err
+	return user, apiResponse, err
 }
 
-func (c *MongoClient) GetUsers(ctx context.Context, clusterId string) (mongo.UsersList, *mongo.APIResponse, error) {
+func (c *MongoClient) GetUsers(ctx context.Context, clusterId string) (mongo.UsersList, utils.ApiResponseInfo, error) {
 	users, apiResponse, err := c.sdkClient.UsersApi.ClustersUsersGet(ctx, clusterId).Execute()
 	apiResponse.LogInfo()
-	if apiResponse != nil {
-		return users, apiResponse, err
-	}
-	return users, nil, err
+	return users, apiResponse, err
 }
 
 func (c *MongoClient) FindUserByUsername(ctx context.Context, clusterId, username string) (mongo.User, utils.ApiResponseInfo, error) {
-	user, apiResponse, err := c.sdkClient.UsersApi.ClustersUsersFindById(ctx, clusterId, "admin", username).Execute()
+	user, apiResponse, err := c.sdkClient.UsersApi.ClustersUsersFindById(ctx, clusterId, username).Execute()
 	apiResponse.LogInfo()
-	if apiResponse != nil {
-		return user, apiResponse, err
-	}
-	return user, nil, err
+	return user, apiResponse, err
 }
 
 func (c *MongoClient) DeleteUser(ctx context.Context, clusterId, username string) (utils.ApiResponseInfo, error) {
-	_, apiResponse, err := c.sdkClient.UsersApi.ClustersUsersDelete(ctx, clusterId, "admin", username).Execute()
+	_, apiResponse, err := c.sdkClient.UsersApi.ClustersUsersDelete(ctx, clusterId, username).Execute()
 	apiResponse.LogInfo()
-	if apiResponse != nil {
-		return apiResponse, err
+	return apiResponse, err
+}
+
+// IsUserReady - checks the cluster, as it will move to busy while the user is created or updated
+// There is no metadata state on the user
+func (c *MongoClient) IsUserReady(ctx context.Context, d *schema.ResourceData) (bool, error) {
+	clusterIdIf, idOk := d.GetOk("cluster_id")
+	usernameIf, _ := d.GetOk("username")
+	username := usernameIf.(string)
+	clusterId := clusterIdIf.(string)
+	if !idOk {
+		return false, fmt.Errorf("id missing from schema for cluster with id %s", d.Id())
 	}
-	return nil, err
+	cluster, apiResponse, err := c.sdkClient.ClustersApi.ClustersFindById(ctx, clusterId).Execute()
+	apiResponse.LogInfo()
+	if err != nil {
+		return true, fmt.Errorf("error checking cluster status: %w", err)
+	}
+	if cluster.Metadata == nil || cluster.Metadata.State == nil {
+		log.Printf("cluster metadata or state is empty for cluster %s in cluster %s ", username, clusterId)
+		return false, fmt.Errorf("cluster metadata or state is empty for id %s", d.Id())
+	}
+	log.Printf("[INFO] state of the cluster %s ", string(*cluster.Metadata.State))
+	return strings.EqualFold(string(*cluster.Metadata.State), utils.Available), nil
+}
+
+func (c *MongoClient) IsUserDeleted(ctx context.Context, d *schema.ResourceData) (bool, error) {
+	clusterIdIf, idOk := d.GetOk("cluster_id")
+	usernameIf, nameOk := d.GetOk("username")
+	if !nameOk {
+		return false, fmt.Errorf("username missing from schema for user with id %s", d.Id())
+	}
+	if !idOk {
+		return false, fmt.Errorf("id missing from schema for user with id %s", d.Id())
+	}
+	_, apiResponse, err := c.sdkClient.UsersApi.ClustersUsersFindById(ctx, clusterIdIf.(string), usernameIf.(string)).Execute()
+	if err != nil {
+		if apiResponse.HttpNotFound() {
+			return true, nil
+		}
+		return false, fmt.Errorf("error checking user deletion status: %w", err)
+	}
+	return false, nil
+}
+
+func SetUserMongoData(d *schema.ResourceData, user *mongo.User) error {
+	if user.Properties != nil {
+		if user.Properties.Username != nil {
+			if err := d.Set("username", *user.Properties.Username); err != nil {
+				return err
+			}
+		}
+
+		if user.Properties.Roles != nil && len(*user.Properties.Roles) > 0 {
+			userRoles := make([]interface{}, len(*user.Properties.Roles))
+			for index, user := range *user.Properties.Roles {
+				userEntry := make(map[string]interface{})
+
+				if user.Role != nil {
+					userEntry["role"] = *user.Role
+				}
+
+				if user.Database != nil {
+					userEntry["database"] = user.Database
+				}
+				userRoles[index] = userEntry
+			}
+
+			if len(userRoles) > 0 {
+				if err := d.Set("roles", userRoles); err != nil {
+					return fmt.Errorf("error setting user roles for user (%w)", err)
+				}
+			}
+		}
+	}
+	return nil
+
 }

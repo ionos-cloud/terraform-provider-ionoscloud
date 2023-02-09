@@ -219,7 +219,7 @@ resource "ionoscloud_server" "example" {
     availability_zone     = "ZONE_1"
     cpu_family            = "AMD_OPTERON"
     image_name            = data.ionoscloud_image.example.id
-    image_password        = "K3tTj8G14a3EgKyNeeiY"
+    image_password        = random_password.server_image_password.result
     type                  = "ENTERPRISE"
     volume {
         name              = "system"
@@ -254,6 +254,10 @@ resource "ionoscloud_server" "example" {
     }
 }
 
+resource "random_password" "server_image_password" {
+  length           = 16
+  special          = false
+}
 ```
 
 Valid units of time should be expressed in "s", "m", "h" for "seconds", "minutes", and "hours" respectively.

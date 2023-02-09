@@ -49,7 +49,6 @@ The following attributes are returned by the datasource:
 * `type` - Server usages: CUBE
 * `vm_state`- Status of the virtual Machine
 * `datacenter_id` - The id of the datacenter
-* `cpu_family` - CPU architecture on which server gets provisione
 * `availability_zone` - The availability zone in which the server should exist
 * `vm_state` - Status of the virtual Machine
 * `boot_cdrom`

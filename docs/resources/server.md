@@ -51,7 +51,7 @@ resource "ionoscloud_server" "example" {
     availability_zone     = "ZONE_1"
     cpu_family            = "AMD_OPTERON"
     image_name            = data.ionoscloud_image.example.id
-    image_password        = "K3tTj8G14a3EgKyNeeiY"
+    image_password        = random_password.server_image_password.result
     type                  = "ENTERPRISE"
     volume {
         name              = "system"
@@ -68,19 +68,31 @@ resource "ionoscloud_server" "example" {
         firewall_active   = true
         firewall_type     = "BIDIRECTIONAL"
         ips               = [ ionoscloud_ipblock.example.ips[0], ionoscloud_ipblock.example.ips[1] ]
-    firewall {
-        protocol          = "TCP"
-        name              = "SSH"
-        port_range_start  = 22
-        port_range_end    = 22
-        source_mac        = "00:0a:95:9d:68:17"
-        source_ip         = ionoscloud_ipblock.example.ips[2]
-        target_ip         = ionoscloud_ipblock.example.ips[3]
-        type              = "EGRESS"
+        firewall {
+          protocol          = "TCP"
+          name              = "SSH"
+          port_range_start  = 22
+          port_range_end    = 22
+          source_mac        = "00:0a:95:9d:68:17"
+          source_ip         = ionoscloud_ipblock.example.ips[2]
+          target_ip         = ionoscloud_ipblock.example.ips[3]
+          type              = "EGRESS" 
+        }
     }
-  }
+    label {
+        key = "labelkey1"
+        value = "labelvalue1"
+    }
+    label {
+        key = "labelkey2"
+        value = "labelvalue2"
+    }
 }
-                       
+resource "random_password" "server_image_password" {
+  length           = 16
+  special          = false
+}
+                  
 ```
 
 ### CUBE Server
@@ -107,7 +119,7 @@ resource "ionoscloud_server" "example" {
   image_name        = "ubuntu:latest"
   type              = "CUBE"
   template_uuid     = data.ionoscloud_template.example.id
-  image_password    = "K3tTj8G14a3EgKyNeeiY"  
+  image_password    = random_password.server_image_password.result
   datacenter_id     = ionoscloud_datacenter.example.id
   volume {
     name            = "Volume Example"
@@ -121,6 +133,11 @@ resource "ionoscloud_server" "example" {
     firewall_active = true
   }
 }
+resource "random_password" "server_image_password" {
+  length           = 16
+  special          = false
+}
+
 ```
 
 ## Argument reference
@@ -142,13 +159,16 @@ resource "ionoscloud_server" "example" {
 - `primary_nic` - (Computed) The associated NIC.
 - `primary_ip` - (Computed) The associated IP address.
 - `firewallrule_id` - (Computed) The associated firewall rule.
-- `ssh_key_path` - (Optional)[list] List of paths to files containing a public SSH key that will be injected into IonosCloud provided Linux images.  Also accepts ssh keys directly. Required for IonosCloud Linux images. Required if `image_password` is not provided.
+- `ssh_key_path` - (Optional)[list] List of absolute paths to files containing a public SSH key that will be injected into IonosCloud provided Linux images.  Also accepts ssh keys directly. Required for IonosCloud Linux images. Required if `image_password` is not provided. This property is immutable.
+- `ssh_keys` - (Optional)[list] Immutable List of absolute paths to files containing a public SSH key that will be injected into IonosCloud provided Linux images.  Also accepts ssh keys directly. Required for IonosCloud Linux images. Required if `image_password` is not provided. This property is immutable.
 - `image_password` - (Optional)[string] Required if `ssh_key_path` is not provided.
 - `type` - (Optional)[string] Server usages: [ENTERPRISE](https://docs.ionos.com/cloud/compute-engine/virtual-servers/virtual-servers) or [CUBE](https://docs.ionos.com/cloud/compute-engine/virtual-servers/cloud-cubes). This property is immutable.
+- `label` - (Optional) A label can be seen as an object with only two required fields: `key` and `value`, both of the `string` type. Please check the example presented above to see how a `label` can be used in the plan. A server can have multiple labels.
 
 > **⚠ WARNING** 
 > 
 > Image_name under volume level is deprecated, please use image_name under server level
+> ssh_key_path and ssh_keys fields are immutable.
 
 
 > **⚠ WARNING**
@@ -160,10 +180,14 @@ resource "ionoscloud_server" "example" {
 
 ## Import
 
-Resource Server can be imported using the `resource id` and the `datacenter id`, e.g.
+Resource Server can be imported using the `resource id` and the `datacenter id`, e.g.. Passing only resource id and datacenter id means that the first nic found linked to the server will be attached to it.
 
 ```shell
 terraform import ionoscloud_server.myserver {datacenter uuid}/{server uuid}
+```
+Optionally, you can pass `primary_nic` and `firewallrule_id` so terraform will know to import also the first nic and firewall rule (if it exists on the server):
+```shell
+terraform import ionoscloud_server.myserver {datacenter uuid}/{server uuid}/{primary nic id}/{firewall rule id}
 ```
 
 ## Notes

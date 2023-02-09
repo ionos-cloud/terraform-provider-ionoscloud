@@ -18,6 +18,7 @@ func TestAccDataSourceServersBasic(t *testing.T) {
 		PreCheck: func() {
 			testAccPreCheck(t)
 		},
+		ExternalProviders: randomProviderVersion343(),
 		ProviderFactories: testAccProviderFactories,
 		CheckDestroy:      testAccCheckServersDestroyCheck,
 		Steps: []resource.TestStep{
@@ -79,6 +80,16 @@ func TestAccDataSourceServersBasic(t *testing.T) {
 				Config: testAccCheck2ServersByCpuFamily,
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttr(DataSource+"."+ServersDataSource+"."+ServerDataSourceByName, "servers.#", "2"),
+					// Check server labels.
+					resource.TestCheckResourceAttr(DataSource+"."+ServersDataSource+"."+ServerDataSourceByName, "servers.0.labels.#", "2"),
+					resource.TestCheckResourceAttr(DataSource+"."+ServersDataSource+"."+ServerDataSourceByName, "servers.0.labels.0.key", "labelkey0"),
+					resource.TestCheckResourceAttr(DataSource+"."+ServersDataSource+"."+ServerDataSourceByName, "servers.0.labels.0.value", "labelvalue0"),
+					resource.TestCheckResourceAttr(DataSource+"."+ServersDataSource+"."+ServerDataSourceByName, "servers.0.labels.1.key", "labelkey1"),
+					resource.TestCheckResourceAttr(DataSource+"."+ServersDataSource+"."+ServerDataSourceByName, "servers.0.labels.1.value", "labelvalue1"),
+					resource.TestCheckResourceAttr(DataSource+"."+ServersDataSource+"."+ServerDataSourceByName, "servers.1.labels.0.key", "labelkey0"),
+					resource.TestCheckResourceAttr(DataSource+"."+ServersDataSource+"."+ServerDataSourceByName, "servers.1.labels.0.value", "labelvalue0"),
+					resource.TestCheckResourceAttr(DataSource+"."+ServersDataSource+"."+ServerDataSourceByName, "servers.1.labels.1.key", "labelkey1"),
+					resource.TestCheckResourceAttr(DataSource+"."+ServersDataSource+"."+ServerDataSourceByName, "servers.1.labels.1.value", "labelvalue1"),
 				),
 			},
 			{
@@ -139,7 +150,7 @@ resource ` + ServerResource + ` ` + ServerTestResource + ` {
   availability_zone = "ZONE_1"
   cpu_family = "AMD_OPTERON"
   image_name ="ubuntu:latest"
-  image_password = "K3tTj8G14a3EgKyNeeiYsasad"
+  image_password = ` + RandomPassword + `.server_image_password.result
   type = "ENTERPRISE"
   volume {
     name = "` + VolumeTestResource + `"
@@ -171,7 +182,7 @@ resource ` + ServerResource + ` ` + serverTestResource2 + ` {
   availability_zone = "ZONE_1"
   cpu_family = "AMD_OPTERON"
   image_name ="ubuntu:latest"
-  image_password = "K3tTj8G14a3EgKyNeeiYsasad1"
+  image_password = ` + RandomPassword + `.server2_image_password.result
   type = "ENTERPRISE"
   volume {
     name = "` + VolumeTestResource + "2" + `"
@@ -197,6 +208,12 @@ resource ` + ServerResource + ` ` + serverTestResource2 + ` {
 	  type = "EGRESS"
     }
   }
+}
+
+` + ServerImagePassword + `
+resource ` + RandomPassword + ` "server2_image_password" {
+  length           = 16
+  special          = false
 }
 
 data ` + ServersDataSource + ` ` + ServerDataSourceByName + ` {
@@ -233,7 +250,7 @@ resource ` + ServerResource + ` ` + ServerTestResource + ` {
   availability_zone = "ZONE_1"
   cpu_family = "` + cpuFamilyTest + `" 
   image_name ="ubuntu:latest"
-  image_password = "K3tTj8G14a3EgKyNeeiYsasad"
+  image_password = ` + RandomPassword + `.server_image_password.result
   type = "ENTERPRISE"
   volume {
     name = "` + VolumeTestResource + `"
@@ -248,6 +265,14 @@ resource ` + ServerResource + ` ` + ServerTestResource + ` {
     name = "` + LanTestResource + `"
     dhcp = false
     firewall_active = false
+  }
+  label {
+    key = "labelkey0"
+    value = "labelvalue0"
+  }
+  label {
+    key = "labelkey1"
+    value = "labelvalue1"
   }
 }
 
@@ -265,7 +290,7 @@ resource ` + ServerResource + ` ` + serverTestResource2 + ` {
   availability_zone = "ZONE_1"
   cpu_family = "` + cpuFamilyTest + `" 
   image_name ="ubuntu:latest"
-  image_password = "K3tTj8G14a3EgKyNeeiYsasad1"
+  image_password = ` + RandomPassword + `.server2_image_password.result
   type = "ENTERPRISE"
   volume {
     name = "` + VolumeTestResource + "2" + `"
@@ -291,6 +316,20 @@ resource ` + ServerResource + ` ` + serverTestResource2 + ` {
 	  type = "EGRESS"
     }
   }
+  label {
+    key = "labelkey0"
+    value = "labelvalue0"
+  }
+  label {
+    key = "labelkey1"
+    value = "labelvalue1"
+  }
+}
+
+` + ServerImagePassword + `
+resource ` + RandomPassword + ` "server2_image_password" {
+  length           = 16
+  special          = false
 }
 
 data ` + ServersDataSource + ` ` + ServerDataSourceByName + ` {
@@ -322,7 +361,7 @@ resource ` + ServerResource + ` ` + ServerTestResource + ` {
   availability_zone = "ZONE_1"
   cpu_family = "` + cpuFamilyTest + `"
   image_name ="ubuntu:latest"
-  image_password = "K3tTj8G14a3EgKyNeeiYsasad"
+  image_password = ` + RandomPassword + `.server_image_password.result
   type = "ENTERPRISE"
   volume {
     name = "` + VolumeTestResource + `"
@@ -348,7 +387,7 @@ resource ` + ServerResource + ` ` + ServerTestResource + "2" + ` {
   availability_zone = "ZONE_1"
   cpu_family = "` + cpuFamilyTest + `"
   image_name ="ubuntu:latest"
-  image_password = "K3tTj8G14a3EgKyNeeiYsasad1"
+  image_password = ` + RandomPassword + `.server2_image_password.result
   type = "ENTERPRISE"
   volume {
     name = "` + VolumeTestResource + "2" + `"
@@ -364,6 +403,12 @@ resource ` + ServerResource + ` ` + ServerTestResource + "2" + ` {
     dhcp = false
     firewall_active = false
   }
+}
+
+` + ServerImagePassword + `
+resource ` + RandomPassword + ` "server2_image_password" {
+  length           = 16
+  special          = false
 }
 
 data ` + ServersDataSource + ` ` + ServerDataSourceByName + ` {

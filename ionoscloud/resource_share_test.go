@@ -74,7 +74,7 @@ func testAccCheckShareDestroyCheck(s *terraform.State) error {
 
 		if err != nil {
 			if !httpNotFound(apiResponse) {
-				return fmt.Errorf("an error occurred while checking the destruction of resource %s in group %s: %s", resourceId, grpId, err)
+				return fmt.Errorf("an error occurred while checking the destruction of resource %s in group %s: %w", resourceId, grpId, err)
 			}
 		} else {
 			return fmt.Errorf("share for resource %s still exists in group %s", resourceId, grpId)

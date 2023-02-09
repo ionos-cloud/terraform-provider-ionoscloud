@@ -65,6 +65,11 @@ func resourceVolume() *schema.Resource {
 				Elem:     &schema.Schema{Type: schema.TypeString},
 				Optional: true,
 			},
+			"ssh_keys": {
+				Type:     schema.TypeList,
+				Elem:     &schema.Schema{Type: schema.TypeString},
+				Optional: true,
+			},
 			"sshkey": {
 				Type:     schema.TypeString,
 				Computed: true,
@@ -245,7 +250,7 @@ func resourceVolumeCreate(ctx context.Context, d *schema.ResourceData, meta inte
 	logApiRequestTime(apiResponse)
 
 	if err != nil {
-		diags := diag.FromErr(fmt.Errorf("an error occured while creating a volume: %s", err))
+		diags := diag.FromErr(fmt.Errorf("an error occured while creating a volume: %w", err))
 		return diags
 	}
 
@@ -274,7 +279,7 @@ func resourceVolumeCreate(ctx context.Context, d *schema.ResourceData, meta inte
 	sErr := d.Set("server_id", serverId)
 
 	if sErr != nil {
-		diags := diag.FromErr(fmt.Errorf("error while setting serverId %s: %s", serverId, sErr))
+		diags := diag.FromErr(fmt.Errorf("error while setting serverId %s: %w", serverId, sErr))
 		return diags
 	}
 
@@ -311,7 +316,7 @@ func resourceVolumeRead(ctx context.Context, d *schema.ResourceData, meta interf
 			d.SetId("")
 			return nil
 		}
-		diags := diag.FromErr(fmt.Errorf("error occured while fetching volume with ID %s: %s", d.Id(), err))
+		diags := diag.FromErr(fmt.Errorf("error occured while fetching volume with ID %s: %w", d.Id(), err))
 		return diags
 	}
 
@@ -358,7 +363,7 @@ func resourceVolumeUpdate(ctx context.Context, d *schema.ResourceData, meta inte
 	logApiRequestTime(apiResponse)
 
 	if err != nil {
-		diags := diag.FromErr(fmt.Errorf("an error occured while updating volume with ID %s: %s", d.Id(), err))
+		diags := diag.FromErr(fmt.Errorf("an error occured while updating volume with ID %s: %w", d.Id(), err))
 		return diags
 
 	}
@@ -371,7 +376,7 @@ func resourceVolumeUpdate(ctx context.Context, d *schema.ResourceData, meta inte
 	}
 
 	if apiResponse != nil && apiResponse.Response != nil && apiResponse.StatusCode > 299 {
-		diags := diag.FromErr(fmt.Errorf("an error occured while updating a volume ID %s %s", d.Id(), err))
+		diags := diag.FromErr(fmt.Errorf("an error occured while updating a volume ID %s %w", d.Id(), err))
 		return diags
 	}
 
@@ -406,7 +411,7 @@ func resourceVolumeDelete(ctx context.Context, d *schema.ResourceData, meta inte
 	apiResponse, err := client.VolumesApi.DatacentersVolumesDelete(ctx, dcId, d.Id()).Execute()
 	logApiRequestTime(apiResponse)
 	if err != nil {
-		diags := diag.FromErr(fmt.Errorf("an error occured while deleting a volume ID %s %s", d.Id(), err))
+		diags := diag.FromErr(fmt.Errorf("an error occured while deleting a volume ID %s %w", d.Id(), err))
 		return diags
 
 	}
@@ -472,119 +477,119 @@ func setVolumeData(d *schema.ResourceData, volume *ionoscloud.Volume) error {
 	if volume.Properties.Name != nil {
 		err := d.Set("name", *volume.Properties.Name)
 		if err != nil {
-			return fmt.Errorf("error while setting name property for volume %s: %s", d.Id(), err)
+			return fmt.Errorf("error while setting name property for volume %s: %w", d.Id(), err)
 		}
 	}
 
 	if volume.Properties.Type != nil {
 		err := d.Set("disk_type", *volume.Properties.Type)
 		if err != nil {
-			return fmt.Errorf("error while setting type property for volume %s: %s", d.Id(), err)
+			return fmt.Errorf("error while setting type property for volume %s: %w", d.Id(), err)
 		}
 	}
 
 	if volume.Properties.Size != nil {
 		err := d.Set("size", *volume.Properties.Size)
 		if err != nil {
-			return fmt.Errorf("error while setting size property for volume %s: %s", d.Id(), err)
+			return fmt.Errorf("error while setting size property for volume %s: %w", d.Id(), err)
 		}
 	}
 
 	if volume.Properties.Bus != nil {
 		err := d.Set("bus", *volume.Properties.Bus)
 		if err != nil {
-			return fmt.Errorf("error while setting bus property for volume %s: %s", d.Id(), err)
+			return fmt.Errorf("error while setting bus property for volume %s: %w", d.Id(), err)
 		}
 	}
 
 	if volume.Properties.Image != nil {
 		err := d.Set("image", *volume.Properties.Image)
 		if err != nil {
-			return fmt.Errorf("error while setting image property for volume %s: %s", d.Id(), err)
+			return fmt.Errorf("error while setting image property for volume %s: %w", d.Id(), err)
 		}
 	}
 
 	if volume.Properties.ImageAlias != nil {
 		err := d.Set("image_alias", *volume.Properties.ImageAlias)
 		if err != nil {
-			return fmt.Errorf("error while setting image_alias property for volume %s: %s", d.Id(), err)
+			return fmt.Errorf("error while setting image_alias property for volume %s: %w", d.Id(), err)
 		}
 	}
 
 	if volume.Properties.AvailabilityZone != nil {
 		err := d.Set("availability_zone", *volume.Properties.AvailabilityZone)
 		if err != nil {
-			return fmt.Errorf("error while setting availability_zone property for volume %s: %s", d.Id(), err)
+			return fmt.Errorf("error while setting availability_zone property for volume %s: %w", d.Id(), err)
 		}
 	}
 
 	if volume.Properties.CpuHotPlug != nil {
 		err := d.Set("cpu_hot_plug", *volume.Properties.CpuHotPlug)
 		if err != nil {
-			return fmt.Errorf("error while setting cpu_hot_plug property for volume %s: %s", d.Id(), err)
+			return fmt.Errorf("error while setting cpu_hot_plug property for volume %s: %w", d.Id(), err)
 		}
 	}
 
 	if volume.Properties.RamHotPlug != nil {
 		err := d.Set("ram_hot_plug", *volume.Properties.RamHotPlug)
 		if err != nil {
-			return fmt.Errorf("error while setting ram_hot_plug property for volume %s: %s", d.Id(), err)
+			return fmt.Errorf("error while setting ram_hot_plug property for volume %s: %w", d.Id(), err)
 		}
 	}
 
 	if volume.Properties.NicHotPlug != nil {
 		err := d.Set("nic_hot_plug", *volume.Properties.NicHotPlug)
 		if err != nil {
-			return fmt.Errorf("error while setting nic_hot_plug property for volume %s: %s", d.Id(), err)
+			return fmt.Errorf("error while setting nic_hot_plug property for volume %s: %w", d.Id(), err)
 		}
 	}
 
 	if volume.Properties.NicHotUnplug != nil {
 		err := d.Set("nic_hot_unplug", *volume.Properties.NicHotUnplug)
 		if err != nil {
-			return fmt.Errorf("error while setting nic_hot_unplug property for volume %s: %s", d.Id(), err)
+			return fmt.Errorf("error while setting nic_hot_unplug property for volume %s: %w", d.Id(), err)
 		}
 	}
 
 	if volume.Properties.DiscVirtioHotPlug != nil {
 		err := d.Set("disc_virtio_hot_plug", *volume.Properties.DiscVirtioHotPlug)
 		if err != nil {
-			return fmt.Errorf("error while setting disc_virtio_hot_plug property for volume %s: %s", d.Id(), err)
+			return fmt.Errorf("error while setting disc_virtio_hot_plug property for volume %s: %w", d.Id(), err)
 		}
 	}
 
 	if volume.Properties.DiscVirtioHotUnplug != nil {
 		err := d.Set("disc_virtio_hot_unplug", *volume.Properties.DiscVirtioHotUnplug)
 		if err != nil {
-			return fmt.Errorf("error while setting disc_virtio_hot_unplug property for volume %s: %s", d.Id(), err)
+			return fmt.Errorf("error while setting disc_virtio_hot_unplug property for volume %s: %w", d.Id(), err)
 		}
 	}
 
 	if volume.Properties.BackupunitId != nil {
 		err := d.Set("backup_unit_id", *volume.Properties.BackupunitId)
 		if err != nil {
-			return fmt.Errorf("error while setting backup_unit_id property for volume %s: %s", d.Id(), err)
+			return fmt.Errorf("error while setting backup_unit_id property for volume %s: %w", d.Id(), err)
 		}
 	}
 
 	if volume.Properties.UserData != nil {
 		err := d.Set("user_data", *volume.Properties.UserData)
 		if err != nil {
-			return fmt.Errorf("error while setting user_data property for volume %s: %s", d.Id(), err)
+			return fmt.Errorf("error while setting user_data property for volume %s: %w", d.Id(), err)
 		}
 	}
 
 	if volume.Properties.DeviceNumber != nil {
 		err := d.Set("device_number", *volume.Properties.DeviceNumber)
 		if err != nil {
-			return fmt.Errorf("error while setting device_number property for volume %s: %s", d.Id(), err)
+			return fmt.Errorf("error while setting device_number property for volume %s: %w", d.Id(), err)
 		}
 	}
 
 	if volume.Properties.BootServer != nil {
 		err := d.Set("boot_server", *volume.Properties.BootServer)
 		if err != nil {
-			return fmt.Errorf("error while setting boot_server property for volume %s: %s", d.Id(), err)
+			return fmt.Errorf("error while setting boot_server property for volume %s: %w", d.Id(), err)
 		}
 	}
 	return nil
@@ -634,16 +639,16 @@ func getVolumeData(d *schema.ResourceData, path string) (*ionoscloud.VolumePrope
 		volume.Name = &vStr
 	}
 
-	var sshkeyPath []interface{}
+	var sshKeys []interface{}
 
 	if v, ok := d.GetOk(path + "ssh_key_path"); ok {
-		sshkeyPath = v.([]interface{})
-		if err := d.Set("ssh_key_path", v.([]interface{})); err != nil {
+		sshKeys = v.([]interface{})
+		if err := d.Set("ssh_key_path", sshKeys); err != nil {
 			return nil, err
 		}
 	} else if v, ok := d.GetOk("ssh_key_path"); ok {
-		sshkeyPath = v.([]interface{})
-		if err := d.Set("ssh_key_path", v.([]interface{})); err != nil {
+		sshKeys = v.([]interface{})
+		if err := d.Set("ssh_key_path", sshKeys); err != nil {
 			return nil, err
 		}
 	} else {
@@ -652,9 +657,25 @@ func getVolumeData(d *schema.ResourceData, path string) (*ionoscloud.VolumePrope
 		}
 	}
 
-	if len(sshkeyPath) != 0 {
+	if v, ok := d.GetOk(path + "ssh_keys"); ok {
+		sshKeys = v.([]interface{})
+		if err := d.Set("ssh_keys", sshKeys); err != nil {
+			return nil, err
+		}
+	} else if v, ok := d.GetOk("ssh_keys"); ok {
+		sshKeys = v.([]interface{})
+		if err := d.Set("ssh_keys", sshKeys); err != nil {
+			return nil, err
+		}
+	} else {
+		if err := d.Set("ssh_keys", [][]string{}); err != nil {
+			return nil, err
+		}
+	}
+
+	if len(sshKeys) != 0 {
 		var publicKeys []string
-		for _, path := range sshkeyPath {
+		for _, path := range sshKeys {
 			log.Printf("[DEBUG] Reading file %s", path)
 			publicKey, err := readPublicKey(path.(string))
 			if err != nil {
@@ -717,7 +738,7 @@ func getImage(ctx context.Context, client *ionoscloud.APIClient, d *schema.Resou
 
 			if volume.ImagePassword == nil && (volume.SshKeys == nil || len(*volume.SshKeys) == 0) && isSnapshot == false &&
 				(img == nil || (img.Properties.Public != nil && *img.Properties.Public)) {
-				return image, imageAlias, fmt.Errorf("either 'image_password' or 'ssh_key_path' must be provided")
+				return image, imageAlias, fmt.Errorf("either 'image_password' or 'ssh_key_path'/'ssh_keys' must be provided")
 			}
 		} else {
 			img, apiResponse, err := client.ImagesApi.ImagesFindById(ctx, imageName).Execute()
@@ -742,7 +763,7 @@ func getImage(ctx context.Context, client *ionoscloud.APIClient, d *schema.Resou
 			if isSnapshot == false && img.Properties.Public != nil && *img.Properties.Public == true {
 
 				if volume.ImagePassword == nil && (volume.SshKeys == nil || len(*volume.SshKeys) == 0) {
-					return image, imageAlias, fmt.Errorf("public image, either 'image_password' or 'ssh_key_path' must be provided")
+					return image, imageAlias, fmt.Errorf("public image, either 'image_password' or 'ssh_key_path'/'ssh_keys' must be provided")
 				}
 
 				dc, apiResponse, err := client.DataCentersApi.DatacentersFindById(ctx, dcId).Execute()
@@ -784,7 +805,7 @@ func getImage(ctx context.Context, client *ionoscloud.APIClient, d *schema.Resou
 				} else {
 					if isSnapshot == false && img.Properties.Public != nil && *img.Properties.Public == true {
 						if volume.ImagePassword == nil && (volume.SshKeys == nil || len(*volume.SshKeys) == 0) {
-							return image, imageAlias, fmt.Errorf("either 'image_password' or 'ssh_key_path' must be provided for imageName %s ", imageName)
+							return image, imageAlias, fmt.Errorf("either 'image_password' or 'ssh_key_path'/'ssh_keys' must be provided for imageName %s ", imageName)
 						}
 						image = imageName
 					} else {
@@ -816,7 +837,7 @@ func resolveImageName(ctx context.Context, client *ionoscloud.APIClient, imageNa
 	logApiRequestTime(apiResponse)
 
 	if err != nil {
-		log.Print(fmt.Errorf("error while fetching the list of images %s", err))
+		log.Print(fmt.Errorf("error while fetching the list of images %w", err))
 		return nil, err
 	}
 
@@ -850,7 +871,7 @@ func getSnapshotId(ctx context.Context, client *ionoscloud.APIClient, snapshotNa
 	logApiRequestTime(apiResponse)
 
 	if err != nil {
-		log.Print(fmt.Errorf("error while fetching the list of snapshots %s", err))
+		log.Print(fmt.Errorf("error while fetching the list of snapshots %w", err))
 	}
 
 	if len(*snapshots.Items) > 0 {
@@ -882,7 +903,7 @@ func getImageAlias(ctx context.Context, client *ionoscloud.APIClient, imageAlias
 	logApiRequestTime(apiResponse)
 
 	if err != nil {
-		log.Print(fmt.Errorf("error while fetching the list of locations %s", err))
+		log.Print(fmt.Errorf("error while fetching the list of locations %w", err))
 	}
 
 	if len(*locations.Properties.ImageAliases) > 0 {
@@ -937,7 +958,7 @@ func checkImage(ctx context.Context, client *ionoscloud.APIClient, imageInput, i
 
 			if imagePassword == "" && len(sshKeyPath) == 0 && isSnapshot == false &&
 				(img != nil && img.Properties != nil && img.Properties.Public != nil && *img.Properties.Public || imageAlias != "") {
-				diags := diag.FromErr(fmt.Errorf("checkImage either 'image_password' or 'ssh_key_path' must be provided"))
+				diags := diag.FromErr(fmt.Errorf("checkImage either 'image_password' or 'ssh_key_path'/'ssh_keys' must be provided"))
 				return image, imageAlias, isSnapshot, diags
 			}
 
@@ -953,14 +974,14 @@ func checkImage(ctx context.Context, client *ionoscloud.APIClient, imageInput, i
 							diags := diag.FromErr(fmt.Errorf("image/snapshot %s not found: %s", imageInput, err))
 							return image, imageAlias, isSnapshot, diags
 						} else {
-							diags := diag.FromErr(fmt.Errorf("an error occured while fetching snapshot %s: %s", imageInput, err))
+							diags := diag.FromErr(fmt.Errorf("an error occured while fetching snapshot %s: %w", imageInput, err))
 							return image, imageAlias, isSnapshot, diags
 						}
 					}
 					image = *snapshot.Id
 					isSnapshot = true
 				} else {
-					diags := diag.FromErr(fmt.Errorf("error fetching image %s: %s", imageInput, err))
+					diags := diag.FromErr(fmt.Errorf("error fetching image %s: %w", imageInput, err))
 					return image, imageAlias, isSnapshot, diags
 				}
 			} else {
@@ -993,7 +1014,7 @@ func resolveVolumeImageName(ctx context.Context, client *ionoscloud.APIClient, i
 	logApiRequestTime(apiResponse)
 
 	if err != nil {
-		log.Print(fmt.Errorf("error while fetching the list of images %s", err))
+		log.Print(fmt.Errorf("error while fetching the list of images %w", err))
 		return nil, err
 	}
 

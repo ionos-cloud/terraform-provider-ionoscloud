@@ -224,6 +224,9 @@ type ResourceReadyFunc func(ctx context.Context, d *schema.ResourceData) (bool, 
 
 // WaitForResourceToBeReady - keeps retrying until resource is ready(true is returned), or until err is thrown, or ctx is cancelled
 func WaitForResourceToBeReady(ctx context.Context, d *schema.ResourceData, fn ResourceReadyFunc) error {
+	if d.Id() == "" {
+		return fmt.Errorf("resource with id %s not ready, still trying ", d.Id())
+	}
 	err := resource.RetryContext(ctx, DefaultTimeout, func() *resource.RetryError {
 		isReady, err := fn(ctx, d)
 		if isReady == true {
@@ -243,6 +246,7 @@ type IsResourceDeletedFunc func(ctx context.Context, d *schema.ResourceData) (bo
 
 // WaitForResourceToBeDeleted - keeps retrying until resource is not found(404), or until ctx is cancelled
 func WaitForResourceToBeDeleted(ctx context.Context, d *schema.ResourceData, fn IsResourceDeletedFunc) error {
+
 	err := resource.RetryContext(ctx, DefaultTimeout, func() *resource.RetryError {
 		isDeleted, err := fn(ctx, d)
 		if isDeleted {

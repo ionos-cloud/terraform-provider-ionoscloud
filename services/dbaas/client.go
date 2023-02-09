@@ -39,7 +39,7 @@ func NewPsqlClientService(username, password, token, url, version, terraformVers
 	}
 }
 
-func NewMongoClientService(username, password, token, url, version, terraformVersion string) *MongoClient {
+func NewMongoClientService(username, password, token, url, version, terraformVersion string) MongoClientService {
 	newConfigDbaas := mongo.NewConfiguration(username, password, token, url)
 
 	if os.Getenv("IONOS_DEBUG") != "" {

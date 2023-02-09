@@ -90,7 +90,7 @@ func resourceGroup() *schema.Resource {
 				Type:          schema.TypeString,
 				Optional:      true,
 				ConflictsWith: []string{"user_ids"},
-				Deprecated:    "Please use user_ids for adding users to the group, since user_id will pe removed in the future",
+				Deprecated:    "Please use user_ids for adding users to the group, since user_id will be removed in the future",
 			},
 			"user_ids": {
 				Type:     schema.TypeSet,

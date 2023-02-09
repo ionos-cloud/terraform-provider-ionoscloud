@@ -20,6 +20,7 @@ func TestAccBackupUnitBasic(t *testing.T) {
 		PreCheck: func() {
 			testAccPreCheck(t)
 		},
+		ExternalProviders: randomProviderVersion343(),
 		ProviderFactories: testAccProviderFactories,
 		CheckDestroy:      testAccCheckBackupUnitDestroyCheck,
 		Steps: []resource.TestStep{
@@ -29,7 +30,7 @@ func TestAccBackupUnitBasic(t *testing.T) {
 					testAccCheckBackupUnitExists(BackupUnitResource+"."+BackupUnitTestResource, &backupUnit),
 					resource.TestCheckResourceAttr(BackupUnitResource+"."+BackupUnitTestResource, "name", BackupUnitTestResource),
 					resource.TestCheckResourceAttr(BackupUnitResource+"."+BackupUnitTestResource, "email", "example@ionoscloud.com"),
-					resource.TestCheckResourceAttr(BackupUnitResource+"."+BackupUnitTestResource, "password", "DemoPassword123$"),
+					resource.TestCheckResourceAttrPair(BackupUnitResource+"."+BackupUnitTestResource, "password", RandomPassword+".backup_unit_password", "result"),
 				),
 			},
 			{
@@ -58,7 +59,7 @@ func TestAccBackupUnitBasic(t *testing.T) {
 					testAccCheckBackupUnitExists(BackupUnitResource+"."+BackupUnitTestResource, &backupUnit),
 					resource.TestCheckResourceAttr(BackupUnitResource+"."+BackupUnitTestResource, "name", BackupUnitTestResource),
 					resource.TestCheckResourceAttr(BackupUnitResource+"."+BackupUnitTestResource, "email", "example@ionoscloud.com"),
-					resource.TestCheckResourceAttr(BackupUnitResource+"."+BackupUnitTestResource, "password", "DemoPassword1234$Updated"),
+					resource.TestCheckResourceAttrPair(BackupUnitResource+"."+BackupUnitTestResource, "password", RandomPassword+".backup_unit_password_updated", "result"),
 				),
 			},
 			{
@@ -67,7 +68,7 @@ func TestAccBackupUnitBasic(t *testing.T) {
 					testAccCheckBackupUnitExists(BackupUnitResource+"."+BackupUnitTestResource, &backupUnit),
 					resource.TestCheckResourceAttr(BackupUnitResource+"."+BackupUnitTestResource, "name", BackupUnitTestResource),
 					resource.TestCheckResourceAttr(BackupUnitResource+"."+BackupUnitTestResource, "email", "example-updated@ionoscloud.com"),
-					resource.TestCheckResourceAttr(BackupUnitResource+"."+BackupUnitTestResource, "password", "DemoPassword1234$Updated"),
+					resource.TestCheckResourceAttrPair(BackupUnitResource+"."+BackupUnitTestResource, "password", RandomPassword+".backup_unit_password_updated", "result"),
 				),
 			},
 		},
@@ -94,7 +95,7 @@ func testAccCheckBackupUnitDestroyCheck(s *terraform.State) error {
 
 		if err != nil {
 			if !httpNotFound(apiResponse) {
-				return fmt.Errorf("an error occurred while checking for the destruction of backup unit %s: %s",
+				return fmt.Errorf("an error occurred while checking for the destruction of backup unit %s: %w",
 					rs.Primary.ID, err)
 			}
 		} else {
@@ -143,16 +144,26 @@ func testAccCheckBackupUnitExists(n string, backupUnit *ionoscloud.BackupUnit) r
 const testAccCheckBackupUnitConfigUpdatePassword = `
 resource ` + BackupUnitResource + ` ` + BackupUnitTestResource + ` {
 	name        = "` + BackupUnitTestResource + `"
-	password    = "DemoPassword1234$Updated"
+	password    = ` + RandomPassword + `.backup_unit_password_updated.result
 	email       = "example@ionoscloud.com"
+}
+resource ` + RandomPassword + ` "backup_unit_password_updated" {
+  length           = 16
+  special          = true
+  override_special = "!#$%&*()-_=+[]{}<>:?"
 }
 `
 
 const testAccCheckBackupUnitConfigUpdateEmail = `
 resource ` + BackupUnitResource + ` ` + BackupUnitTestResource + ` {
 	name        = "` + BackupUnitTestResource + `"
-	password    = "DemoPassword1234$Updated"
+	password    = ` + RandomPassword + `.backup_unit_password_updated.result
 	email       = "example-updated@ionoscloud.com"
+}
+resource ` + RandomPassword + ` "backup_unit_password_updated" {
+  length           = 16
+  special          = true
+  override_special = "!#$%&*()-_=+[]{}<>:?"
 }
 `
 const testAccDataSourceBackupUnitMatchId = testAccCheckBackupUnitConfigBasic + `
@@ -164,8 +175,13 @@ data ` + BackupUnitResource + ` ` + BackupUnitDataSourceById + ` {
 const testAccDataSourceBackupUnitMatchName = testAccCheckBackupUnitConfigBasic + `
 resource ` + BackupUnitResource + ` ` + BackupUnitTestResource + `similar {
 	name        = "similar` + BackupUnitTestResource + `"
-	password    = "DemoPassword1234$Updated"
+	password    = ` + RandomPassword + `.backup_unit_password_updated.result
 	email       = "example-updated@ionoscloud.com"
+}
+resource ` + RandomPassword + ` "backup_unit_password_updated" {
+  length           = 16
+  special          = true
+  override_special = "!#$%&*()-_=+[]{}<>:?"
 }
 
 data ` + BackupUnitResource + ` ` + BackupUnitDataSourceByName + ` {

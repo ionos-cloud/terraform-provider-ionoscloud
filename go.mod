@@ -7,7 +7,7 @@ require (
 	github.com/iancoleman/strcase v0.2.0
 	github.com/ionos-cloud/sdk-go-cert-manager v1.0.0
 	github.com/ionos-cloud/sdk-go-container-registry v1.0.0
-	github.com/ionos-cloud/sdk-go-dbaas-mongo v1.1.0
+	github.com/ionos-cloud/sdk-go-dbaas-mongo v1.2.0
 	github.com/ionos-cloud/sdk-go-dbaas-postgres v1.0.4
 	github.com/ionos-cloud/sdk-go/v6 v6.1.3
 	golang.org/x/crypto v0.0.0-20220517005047-85d78b3ac167

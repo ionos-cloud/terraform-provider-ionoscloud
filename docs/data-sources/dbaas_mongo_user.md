@@ -13,9 +13,6 @@ The **DbaaS Mongo User data source** can be used to search for and return an exi
 If a single match is found, it will be returned. If your search results in multiple matches, an error will be returned.
 When this happens, please refine your search string so that it is specific enough to return only one result.
 
-⚠️ **Note:** DBaaS - MongoDB is currently in the Early Access (EA) phase. We recommend keeping usage and testing to non-production critical applications. 
-Please contact your sales representative or support for more information.
-
 ## Example Usage
 
 ### By display_name

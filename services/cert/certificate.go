@@ -12,54 +12,40 @@ import (
 func (c *Client) GetCertificate(ctx context.Context, certId string) (certmanager.CertificateDto, *certmanager.APIResponse, error) {
 	cert, apiResponse, err := c.sdkClient.CertificatesApi.CertificatesGetById(ctx, certId).Execute()
 	apiResponse.LogInfo()
-	if apiResponse != nil {
-		return cert, apiResponse, err
-
-	}
-	return cert, nil, err
+	return cert, apiResponse, err
 }
 
 func (c *Client) ListCertificates(ctx context.Context) (certmanager.CertificateCollectionDto, *certmanager.APIResponse, error) {
 	certs, apiResponse, err := c.sdkClient.CertificatesApi.CertificatesGet(ctx).Execute()
 	apiResponse.LogInfo()
-	if apiResponse != nil {
-		return certs, apiResponse, err
-	}
-	return certs, nil, err
+	return certs, apiResponse, err
 }
 
 func (c *Client) CreateCertificate(ctx context.Context, certPostDto certmanager.CertificatePostDto) (certmanager.CertificateDto, *certmanager.APIResponse, error) {
 	certResponse, apiResponse, err := c.sdkClient.CertificatesApi.CertificatesPost(ctx).CertificatePostDto(certPostDto).Execute()
 	apiResponse.LogInfo()
-	if apiResponse != nil {
-		return certResponse, apiResponse, err
-	}
-	return certResponse, nil, err
+	return certResponse, apiResponse, err
 }
 
 func (c *Client) UpdateCertificate(ctx context.Context, certId string, certPatch certmanager.CertificatePatchDto) (certmanager.CertificateDto, *certmanager.APIResponse, error) {
 	certResponse, apiResponse, err := c.sdkClient.CertificatesApi.CertificatesPatch(ctx, certId).CertificatePatchDto(certPatch).Execute()
 	apiResponse.LogInfo()
-	if apiResponse != nil {
-		return certResponse, apiResponse, err
-	}
-	return certResponse, nil, err
+	return certResponse, apiResponse, err
 }
 
 func (c *Client) DeleteCertificate(ctx context.Context, certId string) (*certmanager.APIResponse, error) {
 	apiResponse, err := c.sdkClient.CertificatesApi.CertificatesDelete(ctx, certId).Execute()
 	apiResponse.LogInfo()
-	if apiResponse != nil {
-		return apiResponse, err
-	}
-	return nil, err
+	return apiResponse, err
 }
 
 func (c *Client) IsCertReady(ctx context.Context, d *schema.ResourceData) (bool, error) {
-	cert, apiResponse, err := c.GetCertificate(ctx, d.Id())
-	apiResponse.LogInfo()
+	cert, _, err := c.GetCertificate(ctx, d.Id())
 	if err != nil {
 		return true, fmt.Errorf("error checking certificate status: %w", err)
+	}
+	if cert.Metadata == nil || cert.Metadata.State == nil {
+		return false, fmt.Errorf("cert metadata or state is empty for id %s", d.Id())
 	}
 	return strings.EqualFold(*cert.Metadata.State, utils.Available), nil
 }
@@ -70,7 +56,7 @@ func (c *Client) IsCertDeleted(ctx context.Context, d *schema.ResourceData) (boo
 		if apiResponse.HttpNotFound() {
 			return true, nil
 		}
-		return true, fmt.Errorf("error checking certificate deletion status: %w", err)
+		return false, fmt.Errorf("error checking certificate deletion status: %w", err)
 	}
 	return false, nil
 }

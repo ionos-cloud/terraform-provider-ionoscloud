@@ -25,16 +25,16 @@ func resourceDbaasPgSqlCluster() *schema.Resource {
 		CustomizeDiff: checkDBaaSClusterImmutableFields,
 		Schema: map[string]*schema.Schema{
 			"postgres_version": {
-				Type:         schema.TypeString,
-				Description:  "The PostgreSQL version of your cluster.",
-				Required:     true,
-				ValidateFunc: validation.All(validation.StringIsNotWhiteSpace),
+				Type:             schema.TypeString,
+				Description:      "The PostgreSQL version of your cluster.",
+				Required:         true,
+				ValidateDiagFunc: validation.ToDiagFunc(validation.StringIsNotWhiteSpace),
 			},
 			"instances": {
-				Type:         schema.TypeInt,
-				Description:  "The total number of instances in the cluster (one master and n-1 standbys)",
-				Required:     true,
-				ValidateFunc: validation.All(validation.IntBetween(1, 5)),
+				Type:             schema.TypeInt,
+				Description:      "The total number of instances in the cluster (one master and n-1 standbys)",
+				Required:         true,
+				ValidateDiagFunc: validation.ToDiagFunc(validation.IntBetween(1, 5)),
 			},
 			"cores": {
 				Type:        schema.TypeInt,
@@ -42,22 +42,22 @@ func resourceDbaasPgSqlCluster() *schema.Resource {
 				Required:    true,
 			},
 			"ram": {
-				Type:         schema.TypeInt,
-				Description:  "The amount of memory per instance in megabytes. Has to be a multiple of 1024.",
-				Required:     true,
-				ValidateFunc: validation.All(validation.IntAtLeast(2048), validation.IntDivisibleBy(1024)),
+				Type:             schema.TypeInt,
+				Description:      "The amount of memory per instance in megabytes. Has to be a multiple of 1024.",
+				Required:         true,
+				ValidateDiagFunc: validation.ToDiagFunc(validation.All(validation.IntAtLeast(2048), validation.IntDivisibleBy(1024))),
 			},
 			"storage_size": {
-				Type:         schema.TypeInt,
-				Description:  "The amount of storage per instance in megabytes. Has to be a multiple of 2048.",
-				Required:     true,
-				ValidateFunc: validation.All(validation.IntAtLeast(2048)),
+				Type:             schema.TypeInt,
+				Description:      "The amount of storage per instance in megabytes. Has to be a multiple of 2048.",
+				Required:         true,
+				ValidateDiagFunc: validation.ToDiagFunc(validation.IntAtLeast(2048)),
 			},
 			"storage_type": {
-				Type:         schema.TypeString,
-				Description:  "The storage type used in your cluster.",
-				Required:     true,
-				ValidateFunc: validation.All(validation.StringInSlice([]string{"HDD", "SSD", "SSD Premium", "SSD Standard"}, true)),
+				Type:             schema.TypeString,
+				Description:      "The storage type used in your cluster.",
+				Required:         true,
+				ValidateDiagFunc: validation.ToDiagFunc(validation.StringInSlice([]string{"HDD", "SSD", "SSD Premium", "SSD Standard"}, true)),
 			},
 			"connections": {
 				Type:        schema.TypeList,
@@ -67,16 +67,16 @@ func resourceDbaasPgSqlCluster() *schema.Resource {
 				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{
 						"datacenter_id": {
-							Type:         schema.TypeString,
-							Description:  "The datacenter to connect your cluster to.",
-							Required:     true,
-							ValidateFunc: validation.All(validation.IsUUID),
+							Type:             schema.TypeString,
+							Description:      "The datacenter to connect your cluster to.",
+							Required:         true,
+							ValidateDiagFunc: validation.ToDiagFunc(validation.IsUUID),
 						},
 						"lan_id": {
-							Type:         schema.TypeString,
-							Description:  "The LAN to connect your cluster to.",
-							Required:     true,
-							ValidateFunc: validation.All(validation.StringIsNotWhiteSpace),
+							Type:             schema.TypeString,
+							Description:      "The LAN to connect your cluster to.",
+							Required:         true,
+							ValidateDiagFunc: validation.ToDiagFunc(validation.StringIsNotWhiteSpace),
 						},
 						"cidr": {
 							Type:         schema.TypeString,
@@ -88,17 +88,17 @@ func resourceDbaasPgSqlCluster() *schema.Resource {
 				},
 			},
 			"location": {
-				Type:         schema.TypeString,
-				Description:  "The physical location where the cluster will be created. This will be where all of your instances live. Property cannot be modified after datacenter creation (disallowed in update requests)",
-				Required:     true,
-				ValidateFunc: validation.All(validation.StringIsNotWhiteSpace),
+				Type:             schema.TypeString,
+				Description:      "The physical location where the cluster will be created. This will be where all of your instances live. Property cannot be modified after datacenter creation (disallowed in update requests)",
+				Required:         true,
+				ValidateDiagFunc: validation.ToDiagFunc(validation.StringIsNotWhiteSpace),
 			},
 			"backup_location": {
-				Type:         schema.TypeString,
-				Description:  "The S3 location where the backups will be stored.",
-				Optional:     true,
-				Computed:     true,
-				ValidateFunc: validation.All(validation.StringInSlice([]string{"de", "eu-south-2", "eu-central-2"}, true)),
+				Type:             schema.TypeString,
+				Description:      "The S3 location where the backups will be stored.",
+				Optional:         true,
+				Computed:         true,
+				ValidateDiagFunc: validation.ToDiagFunc(validation.StringInSlice([]string{"de", "eu-south-2", "eu-central-2"}, true)),
 			},
 			"display_name": {
 				Type:        schema.TypeString,
@@ -114,14 +114,14 @@ func resourceDbaasPgSqlCluster() *schema.Resource {
 				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{
 						"time": {
-							Type:         schema.TypeString,
-							Required:     true,
-							ValidateFunc: validation.All(validation.StringIsNotWhiteSpace),
+							Type:             schema.TypeString,
+							Required:         true,
+							ValidateDiagFunc: validation.ToDiagFunc(validation.StringIsNotWhiteSpace),
 						},
 						"day_of_the_week": {
-							Type:         schema.TypeString,
-							Required:     true,
-							ValidateFunc: validation.All(validation.IsDayOfTheWeek(true)),
+							Type:             schema.TypeString,
+							Required:         true,
+							ValidateDiagFunc: validation.ToDiagFunc(validation.IsDayOfTheWeek(true)),
 						},
 					},
 				},
@@ -134,25 +134,25 @@ func resourceDbaasPgSqlCluster() *schema.Resource {
 				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{
 						"username": {
-							Type:         schema.TypeString,
-							Description:  "the username for the initial postgres user. some system usernames are restricted (e.g. \"postgres\", \"admin\", \"standby\")",
-							Required:     true,
-							ValidateFunc: validation.All(validation.StringIsNotWhiteSpace),
+							Type:             schema.TypeString,
+							Description:      "the username for the initial postgres user. some system usernames are restricted (e.g. \"postgres\", \"admin\", \"standby\")",
+							Required:         true,
+							ValidateDiagFunc: validation.ToDiagFunc(validation.StringIsNotWhiteSpace),
 						},
 						"password": {
-							Type:         schema.TypeString,
-							Required:     true,
-							Sensitive:    true,
-							ValidateFunc: validation.All(validation.StringIsNotWhiteSpace),
+							Type:             schema.TypeString,
+							Required:         true,
+							Sensitive:        true,
+							ValidateDiagFunc: validation.ToDiagFunc(validation.StringIsNotWhiteSpace),
 						},
 					},
 				},
 			},
 			"synchronization_mode": {
-				Type:         schema.TypeString,
-				Description:  "Represents different modes of replication.",
-				Required:     true,
-				ValidateFunc: validation.All(validation.StringInSlice([]string{"ASYNCHRONOUS", "SYNCHRONOUS", "STRICTLY_SYNCHRONOUS"}, false)),
+				Type:             schema.TypeString,
+				Description:      "Represents different modes of replication.",
+				Required:         true,
+				ValidateDiagFunc: validation.ToDiagFunc(validation.StringInSlice([]string{"ASYNCHRONOUS", "SYNCHRONOUS", "STRICTLY_SYNCHRONOUS"}, false)),
 			},
 			"from_backup": {
 				Type:        schema.TypeList,
@@ -162,10 +162,10 @@ func resourceDbaasPgSqlCluster() *schema.Resource {
 				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{
 						"backup_id": {
-							Type:         schema.TypeString,
-							Description:  "The unique ID of the backup you want to restore.",
-							Required:     true,
-							ValidateFunc: validation.All(validation.StringIsNotWhiteSpace),
+							Type:             schema.TypeString,
+							Description:      "The unique ID of the backup you want to restore.",
+							Required:         true,
+							ValidateDiagFunc: validation.ToDiagFunc(validation.StringIsNotWhiteSpace),
 						},
 						"recovery_target_time": {
 							Type:        schema.TypeString,
@@ -288,7 +288,7 @@ func resourceDbaasPgSqlClusterUpdate(ctx context.Context, d *schema.ResourceData
 	dbaasClusterResponse, _, err := client.UpdateCluster(ctx, d.Id(), *cluster)
 
 	if err != nil {
-		diags := diag.FromErr(fmt.Errorf("an error occured while updating a dbaas cluster: %s", err))
+		diags := diag.FromErr(fmt.Errorf("an error occured while updating a dbaas cluster: %w", err))
 		return diags
 	}
 
@@ -335,7 +335,7 @@ func resourceDbaasPgSqlClusterDelete(ctx context.Context, d *schema.ResourceData
 			d.SetId("")
 			return nil
 		}
-		diags := diag.FromErr(fmt.Errorf("error while deleting dbaas cluster %s: %s", d.Id(), err))
+		diags := diag.FromErr(fmt.Errorf("error while deleting dbaas cluster %s: %w", d.Id(), err))
 		return diags
 	}
 
@@ -345,7 +345,7 @@ func resourceDbaasPgSqlClusterDelete(ctx context.Context, d *schema.ResourceData
 		clusterdDeleted, dsErr := dbaasClusterDeleted(ctx, client, d)
 
 		if dsErr != nil {
-			diags := diag.FromErr(fmt.Errorf("error while checking deletion status of dbaas cluster %s: %s", d.Id(), dsErr))
+			diags := diag.FromErr(fmt.Errorf("error while checking deletion status of dbaas cluster %s: %w", d.Id(), dsErr))
 			return diags
 		}
 
@@ -397,7 +397,7 @@ func dbaasClusterReady(ctx context.Context, client *dbaasService.PsqlClient, d *
 	subjectCluster, _, err := client.GetCluster(ctx, d.Id())
 
 	if err != nil {
-		return true, fmt.Errorf("error checking dbaas cluster status: %s", err)
+		return true, fmt.Errorf("error checking dbaas cluster status: %w", err)
 	}
 	// ToDo: Removed this part since there are still problems with the clusters being unstable (failing for a short time and then recovering)
 	//if *subjectCluster.LifecycleStatus == "FAILED" {
@@ -407,7 +407,7 @@ func dbaasClusterReady(ctx context.Context, client *dbaasService.PsqlClient, d *
 	//	subjectCluster, _, err = client.GetCluster(ctx, d.Id())
 	//
 	//	if err != nil {
-	//		return true, fmt.Errorf("error checking dbaas cluster status: %s", err)
+	//		return true, fmt.Errorf("error checking dbaas cluster status: %w", err)
 	//	}
 	//
 	//	if *subjectCluster.LifecycleStatus == "FAILED" {
@@ -425,7 +425,7 @@ func dbaasClusterDeleted(ctx context.Context, client *dbaasService.PsqlClient, d
 		if apiResponse != nil && apiResponse.Response != nil && apiResponse.StatusCode == 404 {
 			return true, nil
 		}
-		return true, fmt.Errorf("error checking dbaas cluster deletion status: %s", err)
+		return true, fmt.Errorf("error checking dbaas cluster deletion status: %w", err)
 	}
 	return false, nil
 }

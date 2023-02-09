@@ -246,7 +246,7 @@ func resourceNetworkLoadBalancerForwardingRuleCreate(ctx context.Context, d *sch
 
 	if err != nil {
 		d.SetId("")
-		diags := diag.FromErr(fmt.Errorf("error creating network loadbalancer: %s \n ApiError: %s", err, responseBody(apiResponse)))
+		diags := diag.FromErr(fmt.Errorf("error creating network loadbalancer: %w \n ApiError: %s", err, responseBody(apiResponse)))
 		return diags
 	}
 
@@ -477,7 +477,7 @@ func resourceNetworkLoadBalancerForwardingRuleDelete(ctx context.Context, d *sch
 	logApiRequestTime(apiResponse)
 
 	if err != nil {
-		diags := diag.FromErr(fmt.Errorf("an error occured while deleting a network loadbalancer forwarding rule %s %s", d.Id(), err))
+		diags := diag.FromErr(fmt.Errorf("an error occured while deleting a network loadbalancer forwarding rule %s %w", d.Id(), err))
 		return diags
 	}
 

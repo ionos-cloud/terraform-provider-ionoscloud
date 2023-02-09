@@ -165,7 +165,7 @@ func dataSourceTargetGroupRead(ctx context.Context, d *schema.ResourceData, meta
 		logApiRequestTime(apiResponse)
 
 		if err != nil {
-			return diag.FromErr(fmt.Errorf("an error occurred while fetching the target group %s: %s", id, err))
+			return diag.FromErr(fmt.Errorf("an error occurred while fetching the target group %s: %w", id, err))
 		}
 	} else {
 		/* search by name */

@@ -182,7 +182,7 @@ func resourceS3KeyDelete(ctx context.Context, d *schema.ResourceData, meta inter
 		s3KeyDeleted, dsErr := s3KeyDeleted(ctx, client, d)
 
 		if dsErr != nil {
-			diags := diag.FromErr(fmt.Errorf("error while checking deletion status of S3 key %s: %s", d.Id(), dsErr))
+			diags := diag.FromErr(fmt.Errorf("error while checking deletion status of S3 key %s: %w", d.Id(), dsErr))
 			return diags
 		}
 
@@ -213,7 +213,7 @@ func s3KeyDeleted(ctx context.Context, client *ionoscloud.APIClient, d *schema.R
 		if httpNotFound(apiResponse) {
 			return true, nil
 		}
-		return true, fmt.Errorf("error checking S3 key deletion status: %s", err)
+		return true, fmt.Errorf("error checking S3 key deletion status: %w", err)
 	}
 	return false, nil
 }
@@ -224,7 +224,7 @@ func s3Ready(ctx context.Context, client *ionoscloud.APIClient, d *schema.Resour
 	logApiRequestTime(apiResponse)
 
 	if err != nil {
-		return true, fmt.Errorf("error checking S3 Key status: %s", err)
+		return true, fmt.Errorf("error checking S3 Key status: %w", err)
 	}
 	active := d.Get("active").(bool)
 	return *rsp.Properties.Active == active, nil

@@ -95,7 +95,7 @@ func SetPgSqlClusterBackupData(d *schema.ResourceData, clusterBackups *dbaas.Clu
 		}
 		err := d.Set("cluster_backups", backups)
 		if err != nil {
-			diags := diag.FromErr(fmt.Errorf("error while setting cluster_backups: %s", err))
+			diags := diag.FromErr(fmt.Errorf("error while setting cluster_backups: %w", err))
 			return diags
 		}
 	}

@@ -38,7 +38,7 @@ resource "ionoscloud_cube_server" "example" {
   availability_zone = "ZONE_2"
   image_name        = "ubuntu:latest"
   template_uuid     = data.ionoscloud_template.example.id
-  image_password    = "K3tTj8G14a3EgKyNeeiY"  
+  image_password    = random_password.server_image_password.result
   datacenter_id     = ionoscloud_datacenter.example.id
   volume {
     name            = "Volume Example"
@@ -52,6 +52,10 @@ resource "ionoscloud_cube_server" "example" {
     firewall_active = true
   }
 }
+resource "random_password" "server_image_password" {
+  length           = 16
+  special          = false
+}
 ```
 
 ## Argument reference
@@ -62,7 +66,6 @@ resource "ionoscloud_cube_server" "example" {
 - `image_name` - (Optional)[string] The name, ID or alias of the image. May also be a snapshot ID. It is required if `licence_type` is not provided. Attribute is immutable.
 - `availability_zone` - (Optional)[string] The availability zone in which the server should exist. This property is immutable.
 - `licence_type` - (Optional)[string] Sets the OS type of the server.
-- `cpu_family` - (Optional)[string] Sets the CPU type. "AMD_OPTERON", "INTEL_XEON" or "INTEL_SKYLAKE".
 - `volume` - (Required) See the [Volume](volume.md) section.
 - `nic` - (Required) See the [Nic](nic.md) section.
 - `boot_volume` - (Computed) The associated boot volume.

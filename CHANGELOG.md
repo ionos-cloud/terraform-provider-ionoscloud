@@ -1,6 +1,35 @@
-## 6.3.3(upcoming release)
-### Feature: 
+## 6.3.5
+### Feature:
+- Removed EA note for container registry and dbaas mongo docs
+
+## 6.3.4
+### Feature:
  - Add update for mongo database resources
+ - Add update for mongo cluster and user
+ - Add labels for servers
+ - Add data source for DBaaS Mongo Templates
+ - Update mongo sdk to v1.2.0
+ - Added server ssh_keys tests
+
+### Refactor:
+- Refactor services, add generic `WaitForResourceToBeReady` and `WaitForResourceToBeDeleted` methods
+- Removed hard coded passwords from docs and tests and replaced with dynamically generated passwords
+- Remove useless checks from services
+
+## Fixes
+ - Fix mongo user tests to check for cluster state instead of user state which was removed
+ - Defining a separate firewall rule for server should not set firewall_id inside server resource, as it moves the firewall resource inside the server on re-apply
+ - Fixes creating share resource edit and share privileges mix up
+ - `viable_node_pool_versions`  in k8s cluster is no longer optional, is only computed
+ - Allow server import with nic and firewallId : `terraform import ionoscloud_server.myserver {datacenter uuid}/{server uuid}/{primary nic id}/{firewall rule id}`
+ - Mongo tests update mongo version
+ - Change the way in which we set the NIC data
+ - Allow server import with nic and firewall ids
+ - Typo in group resource
+ - Readme fix link to test suite, dbaas test use correct checking function
+ - Make viable_node_pool_versions only computed
+ - K8s nodepool test
+ - Mix up share and edit privileges on create
 
 ## 6.3.3
 ### Feature

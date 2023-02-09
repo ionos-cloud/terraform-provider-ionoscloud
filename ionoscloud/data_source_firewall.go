@@ -102,7 +102,7 @@ func dataSourceFirewallRead(ctx context.Context, d *schema.ResourceData, meta in
 		firewall, apiResponse, err = client.FirewallRulesApi.DatacentersServersNicsFirewallrulesFindById(ctx, datacenterId, serverId, nicId, id.(string)).Execute()
 		logApiRequestTime(apiResponse)
 		if err != nil {
-			return diag.FromErr(fmt.Errorf("an error occurred while fetching the firewall rule %s: %s", id.(string), err))
+			return diag.FromErr(fmt.Errorf("an error occurred while fetching the firewall rule %s: %w", id.(string), err))
 		}
 	} else {
 		/* search by name */

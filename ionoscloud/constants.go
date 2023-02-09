@@ -203,8 +203,10 @@ const (
 	PsqlVersionsResource = "ionoscloud_pg_versions"
 	PsqlVersionsTest     = "test_dbaas_versions"
 
-	DBaasMongoClusterResource = "ionoscloud_mongo_cluster"
-	DBaasMongoUserResource    = "ionoscloud_mongo_user"
+	DBaasMongoClusterResource        = "ionoscloud_mongo_cluster"
+	DBaasMongoUserResource           = "ionoscloud_mongo_user"
+	DBaaSMongoTemplateResource       = "ionoscloud_mongo_template"
+	DBaaSMongoTemplateTestDataSource = "test_dbaas_mongo_template"
 )
 
 // Container Registry Constants
@@ -256,6 +258,7 @@ const (
 	DataSource        = "data"
 	UpdatedResources  = "test_updated"
 	DataSourcePartial = "test"
+	RandomPassword    = "random_password"
 )
 
 const ServersDataSource = "ionoscloud_servers"

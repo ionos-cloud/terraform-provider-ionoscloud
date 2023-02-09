@@ -4,16 +4,16 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
-	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
-	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
-	ionoscloud "github.com/ionos-cloud/sdk-go/v6"
-	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils"
 	"log"
 	"os"
 	"strconv"
 	"strings"
 
+	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
+	ionoscloud "github.com/ionos-cloud/sdk-go/v6"
+	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils"
 	"golang.org/x/crypto/ssh"
 )
 
@@ -115,10 +115,20 @@ func resourceServer() *schema.Resource {
 			"ssh_key_path": {
 				Type:          schema.TypeList,
 				Elem:          &schema.Schema{Type: schema.TypeString},
-				ConflictsWith: []string{"volume.0.ssh_key_path"},
+				ConflictsWith: []string{"volume.0.ssh_key_path", "volume.0.ssh_keys", "ssh_keys"},
 				Optional:      true,
 				Computed:      true,
-				Deprecated:    "Will be renamed to ssk_keys in the future, to allow users to set both the ssh key path or directly the ssh key",
+				ForceNew:      true,
+				Deprecated:    "Will be renamed to ssh_keys in the future, to allow users to set both the ssh key path or directly the ssh key",
+			},
+			"ssh_keys": {
+				Type:          schema.TypeList,
+				Elem:          &schema.Schema{Type: schema.TypeString},
+				ConflictsWith: []string{"volume.0.ssh_key_path", "volume.0.ssh_keys", "ssh_key_path"},
+				Optional:      true,
+				Computed:      true,
+				ForceNew:      true,
+				Description:   "Public SSH keys are set on the image as authorized keys for appropriate SSH login to the instance using the corresponding private key. This field may only be set in creation requests. When reading, it always returns null. SSH keys are only supported if a public Linux image is used for the volume creation.",
 			},
 			"volume": {
 				Type:     schema.TypeList,
@@ -155,11 +165,13 @@ func resourceServer() *schema.Resource {
 							Computed: true,
 						},
 						"ssh_key_path": {
-							Type:       schema.TypeList,
-							Elem:       &schema.Schema{Type: schema.TypeString},
-							Optional:   true,
-							Deprecated: "Please use ssh_key_path under server level",
-							Computed:   true,
+							Type:        schema.TypeList,
+							Elem:        &schema.Schema{Type: schema.TypeString},
+							Optional:    true,
+							Deprecated:  "Please use ssh_key_path under server level",
+							Description: "Public SSH keys are set on the image as authorized keys for appropriate SSH login to the instance using the corresponding private key. This field may only be set in creation requests. When reading, it always returns null. SSH keys are only supported if a public Linux image is used for the volume creation.",
+							Computed:    true,
+							ForceNew:    true,
 							DiffSuppressFunc: func(k, old, new string, d *schema.ResourceData) bool {
 								if k == "volume.0.ssh_key_path.#" {
 									if d.Get("ssh_key_path.#") == new {
@@ -170,7 +182,33 @@ func resourceServer() *schema.Resource {
 								sshKeyPath := d.Get("volume.0.ssh_key_path").([]interface{})
 								oldSshKeyPath := d.Get("ssh_key_path").([]interface{})
 
-								if len(utils.DiffSlice(convertSlice(sshKeyPath), convertSlice(oldSshKeyPath))) == 0 {
+								difKeypath := utils.DiffSlice(convertSlice(sshKeyPath), convertSlice(oldSshKeyPath))
+								if len(difKeypath) == 0 {
+									return true
+								}
+
+								return false
+							},
+						},
+						"ssh_keys": {
+							Type:        schema.TypeList,
+							Elem:        &schema.Schema{Type: schema.TypeString},
+							Optional:    true,
+							Deprecated:  "Please use ssh_keys under server level",
+							Computed:    true,
+							ForceNew:    true,
+							Description: "Public SSH keys are set on the image as authorized keys for appropriate SSH login to the instance using the corresponding private key. This field may only be set in creation requests. When reading, it always returns null. SSH keys are only supported if a public Linux image is used for the volume creation.",
+							DiffSuppressFunc: func(k, old, new string, d *schema.ResourceData) bool {
+								if k == "volume.0.ssh_keys.#" {
+									if d.Get("ssh_keys.#") == new {
+										return true
+									}
+								}
+
+								sshKeys := d.Get("volume.0.ssh_keys").([]interface{})
+								oldSshKeys := d.Get("ssh_keys").([]interface{})
+
+								if len(utils.DiffSlice(convertSlice(sshKeys), convertSlice(oldSshKeys))) == 0 {
 									return true
 								}
 
@@ -360,6 +398,11 @@ func resourceServer() *schema.Resource {
 					},
 				},
 			},
+			"label": {
+				Type:     schema.TypeSet,
+				Optional: true,
+				Elem:     labelResource,
+			},
 		},
 		Timeouts: &resourceDefaultTimeouts,
 	}
@@ -398,8 +441,10 @@ func checkServerImmutableFields(_ context.Context, diff *schema.ResourceDiff, _ 
 	return nil
 
 }
+
 func resourceServerCreate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	client := meta.(SdkBundle).CloudApiClient
+	datacenterId := d.Get("datacenter_id").(string)
 
 	nic := ionoscloud.Nic{
 		Properties: &ionoscloud.NicProperties{},
@@ -506,7 +551,7 @@ func resourceServerCreate(ctx context.Context, d *schema.ResourceData, meta inte
 		}
 	}
 
-	postServer, apiResponse, err := client.ServersApi.DatacentersServersPost(ctx, d.Get("datacenter_id").(string)).Server(serverReq).Execute()
+	postServer, apiResponse, err := client.ServersApi.DatacentersServersPost(ctx, datacenterId).Server(serverReq).Execute()
 	logApiRequestTime(apiResponse)
 
 	if err != nil {
@@ -531,8 +576,14 @@ func resourceServerCreate(ctx context.Context, d *schema.ResourceData, meta inte
 		return diags
 	}
 
+	// Logic for labels creation
+	ls := LabelsService{ctx: ctx, client: client}
+	if err := ls.datacentersServersLabelsCreate(datacenterId, *postServer.Id, d.Get("label")); err != nil {
+		return diag.FromErr(err)
+	}
+
 	// get additional data for schema
-	serverReq, apiResponse, err = client.ServersApi.DatacentersServersFindById(ctx, d.Get("datacenter_id").(string), *postServer.Id).Depth(3).Execute()
+	serverReq, apiResponse, err = client.ServersApi.DatacentersServersFindById(ctx, datacenterId, *postServer.Id).Depth(3).Execute()
 	logApiRequestTime(apiResponse)
 
 	if err != nil {
@@ -540,7 +591,7 @@ func resourceServerCreate(ctx context.Context, d *schema.ResourceData, meta inte
 		return diags
 	}
 	firstNicItem := (*serverReq.Entities.Nics.Items)[0]
-	firewallRules, apiResponse, err := client.FirewallRulesApi.DatacentersServersNicsFirewallrulesGet(ctx, d.Get("datacenter_id").(string),
+	firewallRules, apiResponse, err := client.FirewallRulesApi.DatacentersServersNicsFirewallrulesGet(ctx, datacenterId,
 		*serverReq.Id, *firstNicItem.Id).Execute()
 	logApiRequestTime(apiResponse)
 
@@ -611,12 +662,13 @@ func resourceServerRead(ctx context.Context, d *schema.ResourceData, meta interf
 			d.SetId("")
 			return nil
 		}
-		diags := diag.FromErr(fmt.Errorf("error occured while fetching a server ID %s %s", d.Id(), err))
+		diags := diag.FromErr(fmt.Errorf("error occured while fetching a server ID %s %w", d.Id(), err))
 		return diags
 	}
 	if err := setResourceServerData(ctx, client, d, &server); err != nil {
 		return diag.FromErr(err)
 	}
+
 	return nil
 }
 
@@ -755,7 +807,7 @@ func resourceServerUpdate(ctx context.Context, d *schema.ResourceData, meta inte
 	logApiRequestTime(apiResponse)
 
 	if err != nil {
-		diags := diag.FromErr(fmt.Errorf("error occured while updating server ID %s: %s", d.Id(), err))
+		diags := diag.FromErr(fmt.Errorf("error occured while updating server ID %s: %w", d.Id(), err))
 		return diags
 	}
 
@@ -948,6 +1000,23 @@ func resourceServerUpdate(ctx context.Context, d *schema.ResourceData, meta inte
 
 	}
 
+	// Labels logic for update
+	if d.HasChanges("label") {
+		ls := LabelsService{ctx: ctx, client: client}
+		oldLabelsData, newLabelsData := d.GetChange("label")
+
+		// Make some differences to see exactly what labels need to be added/removed.
+		labelsToBeCreated := newLabelsData.(*schema.Set).Difference(oldLabelsData.(*schema.Set))
+		labelsToBeDeleted := oldLabelsData.(*schema.Set).Difference(newLabelsData.(*schema.Set))
+
+		if err := ls.datacentersServersLabelsDelete(dcId, d.Id(), labelsToBeDeleted); err != nil {
+			return diag.FromErr(err)
+		}
+
+		if err := ls.datacentersServersLabelsCreate(dcId, d.Id(), labelsToBeCreated); err != nil {
+			return diag.FromErr(err)
+		}
+	}
 	return resourceServerRead(ctx, d, meta)
 }
 
@@ -959,7 +1028,7 @@ func resourceServerDelete(ctx context.Context, d *schema.ResourceData, meta inte
 	logApiRequestTime(apiResponse)
 
 	if err != nil {
-		diags := diag.FromErr(fmt.Errorf("error occured while fetching a server ID %s %s", d.Id(), err))
+		diags := diag.FromErr(fmt.Errorf("error occured while fetching a server ID %s %w", d.Id(), err))
 		return diags
 	}
 
@@ -1001,8 +1070,8 @@ func resourceServerDelete(ctx context.Context, d *schema.ResourceData, meta inte
 func resourceServerImport(ctx context.Context, d *schema.ResourceData, meta interface{}) ([]*schema.ResourceData, error) {
 	parts := strings.Split(d.Id(), "/")
 
-	if len(parts) != 2 || parts[0] == "" || parts[1] == "" {
-		return nil, fmt.Errorf("invalid import id %q. Expecting {datacenter}/{server}", d.Id())
+	if len(parts) < 2 || parts[0] == "" || parts[1] == "" {
+		return nil, fmt.Errorf("invalid import id %q. Expecting {datacenter UUID}/{server UUID}", d.Id())
 	}
 
 	datacenterId := parts[0]
@@ -1018,33 +1087,51 @@ func resourceServerImport(ctx context.Context, d *schema.ResourceData, meta inte
 			d.SetId("")
 			return nil, fmt.Errorf("unable to find server %q", serverId)
 		}
-		return nil, fmt.Errorf("error occured while fetching a server ID %s %s", d.Id(), err)
+		return nil, fmt.Errorf("error occured while fetching a server ID %s %w", d.Id(), err)
 	}
-
+	var primaryNic ionoscloud.Nic
 	d.SetId(*server.Id)
-
-	firstNicItem := (*server.Entities.Nics.Items)[0]
-	if server.Entities != nil && server.Entities.Nics != nil && firstNicItem.Properties != nil &&
-		firstNicItem.Properties.Ips != nil &&
-		len(*firstNicItem.Properties.Ips) > 0 {
-		log.Printf("[DEBUG] set primary_ip to %s", (*firstNicItem.Properties.Ips)[0])
-		if err := d.Set("primary_ip", (*firstNicItem.Properties.Ips)[0]); err != nil {
-			return nil, fmt.Errorf("error while setting primary ip %s: %w", d.Id(), err)
+	primaryNicId := ""
+	//first we try to get primary nic from parts, then if that fails, we get it from entities.
+	if len(parts) > 2 {
+		primaryNicId = parts[2]
+		if err := d.Set("primary_nic", primaryNicId); err != nil {
+			return nil, fmt.Errorf("error setting primary_nic id %w", err)
+		}
+	} else {
+		if server.Entities != nil && server.Entities.Nics != nil && len(*server.Entities.Nics.Items) > 0 {
+			primaryNic = (*server.Entities.Nics.Items)[0]
+		}
+	}
+	if primaryNicId != "" {
+		if server.Entities != nil && server.Entities.Nics != nil && server.Entities.Nics.Items != nil {
+			for _, nic := range *server.Entities.Nics.Items {
+				if *nic.Id == primaryNicId {
+					primaryNic = nic
+					break
+				}
+			}
 		}
 	}
 
+	log.Printf("[DEBUG] set primary_ip to %s", (*primaryNic.Properties.Ips)[0])
+	if err := d.Set("primary_ip", (*primaryNic.Properties.Ips)[0]); err != nil {
+		return nil, fmt.Errorf("error while setting primary ip %s: %w", d.Id(), err)
+	}
 	if err := d.Set("datacenter_id", datacenterId); err != nil {
 		return nil, err
 	}
 
-	if err := setResourceServerData(ctx, client, d, &server); err != nil {
-		return nil, err
-	}
 	if len(parts) > 3 {
 		if err := d.Set("firewallrule_id", parts[3]); err != nil {
 			return nil, fmt.Errorf("error setting firewallrule_id %w", err)
 		}
 	}
+
+	if err := setResourceServerData(ctx, client, d, &server); err != nil {
+		return nil, err
+	}
+
 	d.SetId(parts[1])
 
 	return []*schema.ResourceData{d}, nil
@@ -1281,11 +1368,12 @@ func setResourceServerData(ctx context.Context, client *ionoscloud.APIClient, d 
 	var nicId string
 	if primaryNicOk {
 		nicId = d.Get("primary_nic").(string)
-	} else if server.Entities.Nics != nil && server.Entities.Nics.Items != nil && len(*server.Entities.Nics.Items) > 0 && (*server.Entities.Nics.Items)[0].Id != nil { // this might be a terraformer import, so primary_nic might not be set
-		for _, nic := range *server.Entities.Nics.Items {
-			if nic.Properties != nil && nic.Properties.Lan != nil && *nic.Properties.Lan == 1 { // get the first lan on the server
-				nicId = *nic.Id
-			}
+	} else if server.Entities.Nics != nil && server.Entities.Nics.Items != nil && len(*server.Entities.Nics.Items) > 0 && (*server.Entities.Nics.Items)[0].Id != nil {
+		lastNicIndex := len(*server.Entities.Nics.Items) - 1
+		if (*server.Entities.Nics.Items)[lastNicIndex].Id != nil {
+			// this might be a terraformer import, so primary_nic might not be set
+			// if no nics found until now, get the last one from the list of nics.
+			nicId = *(*server.Entities.Nics.Items)[lastNicIndex].Id
 		}
 	}
 
@@ -1301,10 +1389,6 @@ func setResourceServerData(ctx context.Context, client *ionoscloud.APIClient, d 
 	var firewallId string
 	if primaryFirewallOk {
 		firewallId = d.Get("firewallrule_id").(string)
-	} else {
-		if nic.HasEntities() && nic.Entities.HasFirewallrules() && nic.Entities.Firewallrules.HasItems() && len(*nic.Entities.Firewallrules.Items) > 0 {
-			firewallId = *(*nic.Entities.Firewallrules.Items)[0].Id
-		}
 	}
 	if firewallId != "" {
 
@@ -1330,6 +1414,17 @@ func setResourceServerData(ctx context.Context, client *ionoscloud.APIClient, d 
 			return fmt.Errorf("error settings nics %w", err)
 		}
 	}
+
+	// Labels logic
+	ls := LabelsService{ctx: ctx, client: client}
+	labels, err := ls.datacentersServersLabelsGet(datacenterId, d.Id(), false)
+	if err != nil {
+		return err
+	}
+	if err := d.Set("label", labels); err != nil {
+		return err
+	}
+
 	//if token != nil {
 	//	if err := d.Set("token", *token.Token); err != nil {
 	//		return err

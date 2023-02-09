@@ -4,18 +4,13 @@ import (
 	"context"
 	"fmt"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
-	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 	mongo "github.com/ionos-cloud/sdk-go-dbaas-mongo"
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/dbaas"
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils"
 	"log"
-	"strings"
 )
-
-// todo: remove once mongo removes this field
-const defaultMongoDatabase = "admin"
 
 func resourceDbaasMongoUser() *schema.Resource {
 	return &schema.Resource{
@@ -102,22 +97,22 @@ func resourceDbaasMongoUserCreate(ctx context.Context, d *schema.ResourceData, m
 		request.Properties.Roles = &roles
 	}
 
-	_, err := client.CreateUser(ctx, clusterId, request)
+	user, _, err := client.CreateUser(ctx, clusterId, request)
 	if err != nil {
 		diags := diag.FromErr(fmt.Errorf("an error occurred while adding a user to mongoDB: %w", err))
 		return diags
-	}
-
-	user, err := waitForUserToBeReady(ctx, client, clusterId, defaultMongoDatabase, username)
-	if err != nil {
-		return diag.FromErr(fmt.Errorf("creating %w", err))
 	}
 
 	if user.Properties != nil && user.Properties.Username != nil {
 		d.SetId(clusterId + *user.Properties.Username)
 	}
 
-	return diag.FromErr(setUserMongoData(d, &user))
+	err = utils.WaitForResourceToBeReady(ctx, d, client.IsUserReady)
+	if err != nil {
+		return diag.FromErr(fmt.Errorf("updating %w", err))
+	}
+
+	return diag.FromErr(dbaas.SetUserMongoData(d, &user))
 }
 
 func resourceDbaasMongoUserUpdate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
@@ -158,13 +153,13 @@ func resourceDbaasMongoUserUpdate(ctx context.Context, d *schema.ResourceData, m
 		request.Properties.Roles = &roles
 	}
 
-	_, err := client.UpdateUser(ctx, clusterId, username, request)
+	_, _, err := client.UsersApi.ClustersUsersPatch(ctx, clusterId, defaultMongoDatabase, username).PatchUserRequest(request).Execute()
 	if err != nil {
 		diags := diag.FromErr(fmt.Errorf("while updating a user to mongoDB cluster %s: %w", clusterId, err))
 		return diags
 	}
 
-	user, err := waitForUserToBeReady(ctx, client, clusterId, defaultMongoDatabase, username)
+	err = utils.WaitForResourceToBeReady(ctx, d, client.IsUserReady)
 	if err != nil {
 		return diag.FromErr(fmt.Errorf("updating %w", err))
 	}
@@ -178,8 +173,8 @@ func waitForUserToBeReady(ctx context.Context, client *dbaas.MongoClient, cluste
 	err := resource.RetryContext(ctx, *resourceDefaultTimeouts.Update, func() *resource.RetryError {
 
 		var err error
-		var apiResponse utils.ApiResponseInfo
-		*user, apiResponse, err = client.FindUserByUsername(ctx, clusterId, username)
+		var apiResponse *mongo.APIResponse
+		*user, apiResponse, err = client.UsersApi.ClustersUsersFindById(ctx, clusterId, database, username).Execute()
 		if apiResponse.HttpNotFound() {
 			log.Printf("[INFO] Could not find username %s with database %s in cluster %s, retrying...", username, database, clusterId)
 			return resource.RetryableError(fmt.Errorf("could not find username %s with database %s in cluster %s, %w", username, database, clusterId, err))
@@ -206,7 +201,7 @@ func resourceDbaasMongoUserRead(ctx context.Context, d *schema.ResourceData, met
 	clusterId := d.Get("cluster_id").(string)
 	username := d.Get("username").(string)
 
-	user, apiResponse, err := client.FindUserByUsername(ctx, clusterId, username)
+	user, apiResponse, err := client.UsersApi.ClustersUsersFindById(ctx, clusterId, defaultMongoDatabase, username).Execute()
 
 	if err != nil {
 		if apiResponse.HttpNotFound() {
@@ -217,7 +212,7 @@ func resourceDbaasMongoUserRead(ctx context.Context, d *schema.ResourceData, met
 		return diags
 	}
 
-	if err := setUserMongoData(d, &user); err != nil {
+	if err := dbaas.SetUserMongoData(d, &user); err != nil {
 		return diag.FromErr(err)
 	}
 
@@ -238,9 +233,9 @@ func resourceDbaasMongoUserDelete(ctx context.Context, d *schema.ResourceData, m
 	// Wait, catching any errors
 	err = resource.RetryContext(ctx, *resourceDefaultTimeouts.Create, func() *resource.RetryError {
 		var err error
-		var apiResponse utils.ApiResponseInfo
+		var apiResponse *mongo.APIResponse
 		var user = mongo.User{}
-		user, apiResponse, err = client.FindUserByUsername(ctx, clusterId, username)
+		user, apiResponse, err = client.UsersApi.ClustersUsersFindById(ctx, clusterId, defaultMongoDatabase, username).Execute()
 		if apiResponse.HttpNotFound() {
 			log.Printf("[INFO] Deleted successfuly user %s with database %s in cluster %s", username, defaultMongoDatabase, clusterId)
 			return nil
@@ -255,7 +250,7 @@ func resourceDbaasMongoUserDelete(ctx context.Context, d *schema.ResourceData, m
 	})
 
 	if err != nil {
-		return diag.FromErr(err)
+		return diag.FromErr(fmt.Errorf("user deleted %w ", err))
 	}
 
 	d.SetId("")
@@ -281,45 +276,11 @@ func resourceDbaasMongoUserImporter(ctx context.Context, d *schema.ResourceData,
 		return nil, fmt.Errorf("mongodb user does not exist %q", userId)
 	}
 
-	if err := setUserMongoData(d, &user); err != nil {
+	if err := dbaas.SetUserMongoData(d, &user); err != nil {
 		return nil, err
 	}
 
 	log.Printf("[INFO] user found: %+v", user)
 
 	return []*schema.ResourceData{d}, nil
-}
-
-func setUserMongoData(d *schema.ResourceData, user *mongo.User) error {
-	if user.Properties != nil {
-		if user.Properties.Username != nil {
-			if err := d.Set("username", *user.Properties.Username); err != nil {
-				return err
-			}
-		}
-
-		if user.Properties.Roles != nil && len(*user.Properties.Roles) > 0 {
-			userRoles := make([]interface{}, len(*user.Properties.Roles))
-			for index, user := range *user.Properties.Roles {
-				userEntry := make(map[string]interface{})
-
-				if user.Role != nil {
-					userEntry["role"] = *user.Role
-				}
-
-				if user.Database != nil {
-					userEntry["database"] = user.Database
-				}
-				userRoles[index] = userEntry
-			}
-
-			if len(userRoles) > 0 {
-				if err := d.Set("roles", userRoles); err != nil {
-					return fmt.Errorf("error setting user roles for user (%w)", err)
-				}
-			}
-		}
-	}
-	return nil
-
 }

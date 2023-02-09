@@ -20,6 +20,7 @@ func TestAccDBaaSMongoClusterBasic(t *testing.T) {
 		PreCheck: func() {
 			testAccPreCheck(t)
 		},
+		ExternalProviders: randomProviderVersion343(),
 		ProviderFactories: testAccProviderFactories,
 		CheckDestroy:      testAccCheckDbaasMongoClusterDestroyCheck,
 		Steps: []resource.TestStep{
@@ -38,7 +39,7 @@ func TestAccDBaaSMongoClusterBasic(t *testing.T) {
 					resource.TestCheckResourceAttr(DBaasMongoClusterResource+"."+DBaaSClusterTestResource, "connections.0.cidr_list.0", "192.168.1.108/24"),
 					resource.TestCheckResourceAttr(DBaasMongoClusterResource+"."+DBaaSClusterTestResource, "template_id", "33457e53-1f8b-4ed2-8a12-2d42355aa759"),
 					resource.TestCheckResourceAttr(DBaasMongoClusterResource+"."+DBaaSClusterTestResource, "credentials.0.username", "username"),
-					resource.TestCheckResourceAttr(DBaasMongoClusterResource+"."+DBaaSClusterTestResource, "credentials.0.password", "password"),
+					resource.TestCheckResourceAttrPair(DBaasMongoClusterResource+"."+DBaaSClusterTestResource, "credentials.0.password", RandomPassword+".dbaas_mongo_cluster_password", "result"),
 				),
 			},
 			{
@@ -92,7 +93,7 @@ func TestAccDBaaSMongoClusterBasic(t *testing.T) {
 					resource.TestCheckResourceAttr(DBaasMongoClusterResource+"."+DBaaSClusterTestResource, "connections.0.cidr_list.0", "192.168.1.108/24"),
 					resource.TestCheckResourceAttr(DBaasMongoClusterResource+"."+DBaaSClusterTestResource, "template_id", "6b78ea06-ee0e-4689-998c-fc9c46e781f6"),
 					resource.TestCheckResourceAttr(DBaasMongoClusterResource+"."+DBaaSClusterTestResource, "credentials.0.username", "username"),
-					resource.TestCheckResourceAttr(DBaasMongoClusterResource+"."+DBaaSClusterTestResource, "credentials.0.password", "password"),
+					resource.TestCheckResourceAttrPair(DBaasMongoClusterResource+"."+DBaaSClusterTestResource, "credentials.0.password", RandomPassword+".dbaas_mongo_cluster_password", "result"),
 				),
 			},
 			{
@@ -107,7 +108,7 @@ func TestAccDBaaSMongoClusterBasic(t *testing.T) {
 					resource.TestCheckResourceAttrPair(DBaasMongoClusterResource+"."+DBaaSClusterTestResource, "location", DatacenterResource+".datacenter_example", "location"),
 					resource.TestCheckResourceAttr(DBaasMongoClusterResource+"."+DBaaSClusterTestResource, "template_id", "6b78ea06-ee0e-4689-998c-fc9c46e781f6"),
 					resource.TestCheckResourceAttr(DBaasMongoClusterResource+"."+DBaaSClusterTestResource, "credentials.0.username", "username"),
-					resource.TestCheckResourceAttr(DBaasMongoClusterResource+"."+DBaaSClusterTestResource, "credentials.0.password", "password"),
+					resource.TestCheckResourceAttrPair(DBaasMongoClusterResource+"."+DBaaSClusterTestResource, "credentials.0.password", RandomPassword+".dbaas_mongo_cluster_password", "result"),
 				),
 			},
 			{
@@ -208,8 +209,14 @@ resource ` + DBaasMongoClusterResource + ` ` + DBaaSClusterTestResource + ` {
   template_id = "33457e53-1f8b-4ed2-8a12-2d42355aa759"
   credentials {
   	username = "username"
-	password = "password"
+	password = ` + RandomPassword + `.dbaas_mongo_cluster_password.result
   }
+}
+
+resource ` + RandomPassword + ` "dbaas_mongo_cluster_password" {
+  length           = 16
+  special          = true
+  override_special = "!#$%&*()-_=+[]{}<>:?"
 }
 `
 
@@ -256,8 +263,13 @@ resource ` + DBaasMongoClusterResource + ` ` + DBaaSClusterTestResource + ` {
   
   credentials {
   	username = "username"
-	password = "password"
+	password = ` + RandomPassword + `.dbaas_mongo_cluster_password.result
   }
+}
+resource ` + RandomPassword + ` "dbaas_mongo_cluster_password" {
+  length           = 16
+  special          = true
+  override_special = "!#$%&*()-_=+[]{}<>:?"
 }
 `
 
@@ -292,8 +304,13 @@ resource ` + DBaasMongoClusterResource + ` ` + DBaaSClusterTestResource + ` {
   
   credentials {
   	username = "username"
-	password = "password"
+	password = ` + RandomPassword + `.dbaas_mongo_cluster_password.result
   }
+}
+resource ` + RandomPassword + ` "dbaas_mongo_cluster_password" {
+  length           = 16
+  special          = true
+  override_special = "!#$%&*()-_=+[]{}<>:?"
 }
 `
 

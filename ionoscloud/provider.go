@@ -143,6 +143,7 @@ func Provider() *schema.Provider {
 			ResourceIpFailover:                        dataSourceIpFailover(),
 			PsqlClusterResource:                       dataSourceDbaasPgSqlCluster(),
 			DBaasMongoClusterResource:                 dataSourceDbaasMongoCluster(),
+			DBaaSMongoTemplateResource:                dataSourceDbassMongoTemplate(),
 			PsqlVersionsResource:                      dataSourceDbaasPgSqlVersions(),
 			PsqlBackupsResource:                       dataSourceDbaasPgSqlBackups(),
 			ALBResource:                               dataSourceApplicationLoadBalancer(),
@@ -232,11 +233,11 @@ func NewClientByType(clientOpts ClientOptions, clientType clientType) interface{
 			return ionoscloud.NewAPIClient(newConfig)
 		}
 	case psqlClient:
-		return dbaasService.NewPsqlClientService(clientOpts.Username, clientOpts.Password, clientOpts.Token, clientOpts.Url, clientOpts.Version, clientOpts.Username)
+		return dbaasService.NewPsqlClientService(clientOpts.Username, clientOpts.Password, clientOpts.Token, clientOpts.Url, clientOpts.Version, clientOpts.Username).Get()
 	case mongoClient:
-		return dbaasService.NewMongoClientService(clientOpts.Username, clientOpts.Password, clientOpts.Token, clientOpts.Url, clientOpts.Version, clientOpts.TerraformVersion)
+		return dbaasService.NewMongoClientService(clientOpts.Username, clientOpts.Password, clientOpts.Token, clientOpts.Url, clientOpts.Version, clientOpts.TerraformVersion).Get()
 	case certManagerClient:
-		return cert.NewClientService(clientOpts.Username, clientOpts.Password, clientOpts.Token, clientOpts.Url, clientOpts.Version, clientOpts.TerraformVersion)
+		return cert.NewClientService(clientOpts.Username, clientOpts.Password, clientOpts.Token, clientOpts.Url, clientOpts.Version, clientOpts.TerraformVersion).Get()
 	case containerRegistryClient:
 		return crService.NewClientService(clientOpts.Username, clientOpts.Password, clientOpts.Token, clientOpts.Url, clientOpts.Version, clientOpts.TerraformVersion)
 	case dataplatformClient:
@@ -298,7 +299,7 @@ func resourceStateRefreshFunc(meta interface{}, path string) resource.StateRefre
 		request, apiResponse, err := client.GetRequestStatus(context.Background(), path)
 		logApiRequestTime(apiResponse)
 		if err != nil {
-			return nil, "", fmt.Errorf("request failed with following error: %s", err)
+			return nil, "", fmt.Errorf("request failed with following error: %w", err)
 		}
 		if request != nil && request.Metadata != nil && request.Metadata.Status != nil {
 			if *request.Metadata.Status == "FAILED" {

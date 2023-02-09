@@ -49,11 +49,6 @@ func resourceCubeServer() *schema.Resource {
 				Type:     schema.TypeString,
 				Optional: true,
 			},
-			"cpu_family": {
-				Type:     schema.TypeString,
-				Optional: true,
-				Computed: true,
-			},
 			"boot_image": {
 				Type:     schema.TypeString,
 				Computed: true,
@@ -359,13 +354,6 @@ func resourceCubeServerCreate(ctx context.Context, d *schema.ResourceData, meta 
 		server.Properties.AvailabilityZone = &vStr
 	}
 
-	if v, ok := d.GetOk("cpu_family"); ok {
-		if v.(string) != "" {
-			vStr := v.(string)
-			server.Properties.CpuFamily = &vStr
-		}
-	}
-
 	serverType := "CUBE"
 	server.Properties.Type = &serverType
 
@@ -578,7 +566,7 @@ func resourceCubeServerCreate(ctx context.Context, d *schema.ResourceData, meta 
 		*createdServer.Id, *(*createdServer.Entities.Nics.Items)[0].Id).Execute()
 	logApiRequestTime(apiResponse)
 	if err != nil {
-		diags := diag.FromErr(fmt.Errorf("an error occurred while fetching firewall rules: %s", err))
+		diags := diag.FromErr(fmt.Errorf("an error occurred while fetching firewall rules: %w", err))
 		return diags
 	}
 
@@ -594,7 +582,7 @@ func resourceCubeServerCreate(ctx context.Context, d *schema.ResourceData, meta 
 	if (*createdServer.Entities.Nics.Items)[0].Id != nil {
 		err := d.Set("primary_nic", *(*createdServer.Entities.Nics.Items)[0].Id)
 		if err != nil {
-			diags := diag.FromErr(fmt.Errorf("error while setting primary nic %s: %s", d.Id(), err))
+			diags := diag.FromErr(fmt.Errorf("error while setting primary nic %s: %w", d.Id(), err))
 			return diags
 		}
 	}
@@ -629,7 +617,7 @@ func resourceCubeServerRead(ctx context.Context, d *schema.ResourceData, meta in
 			d.SetId("")
 			return nil
 		}
-		diags := diag.FromErr(fmt.Errorf("error occured while fetching a server ID %s %s", d.Id(), err))
+		diags := diag.FromErr(fmt.Errorf("error occured while fetching a server ID %s %w", d.Id(), err))
 		return diags
 	}
 	if server.Properties != nil {
@@ -649,13 +637,6 @@ func resourceCubeServerRead(ctx context.Context, d *schema.ResourceData, meta in
 
 		if server.Properties.AvailabilityZone != nil {
 			if err := d.Set("availability_zone", *server.Properties.AvailabilityZone); err != nil {
-				diags := diag.FromErr(err)
-				return diags
-			}
-		}
-
-		if server.Properties.CpuFamily != nil {
-			if err := d.Set("cpu_family", *server.Properties.CpuFamily); err != nil {
 				diags := diag.FromErr(err)
 				return diags
 			}
@@ -783,12 +764,6 @@ func resourceCubeServerUpdate(ctx context.Context, d *schema.ResourceData, meta 
 		request.Name = &nStr
 	}
 
-	if d.HasChange("cpu_family") {
-		_, n := d.GetChange("cpu_family")
-		nStr := n.(string)
-		request.CpuFamily = &nStr
-	}
-
 	if d.HasChange("boot_cdrom") {
 		_, n := d.GetChange("boot_cdrom")
 		bootCdrom := n.(string)
@@ -810,7 +785,7 @@ func resourceCubeServerUpdate(ctx context.Context, d *schema.ResourceData, meta 
 	logApiRequestTime(apiResponse)
 
 	if err != nil {
-		diags := diag.FromErr(fmt.Errorf("error occured while updating server ID %s: %s", d.Id(), err))
+		diags := diag.FromErr(fmt.Errorf("error occured while updating server ID %s: %w", d.Id(), err))
 		return diags
 	}
 
@@ -1067,7 +1042,7 @@ func resourceCubeServerImport(ctx context.Context, d *schema.ResourceData, meta 
 			d.SetId("")
 			return nil, fmt.Errorf("unable to find server %q", serverId)
 		}
-		return nil, fmt.Errorf("error occured while fetching a server ID %s %s", d.Id(), err)
+		return nil, fmt.Errorf("error occured while fetching a server ID %s %w", d.Id(), err)
 	}
 
 	d.SetId(*server.Id)
@@ -1101,12 +1076,6 @@ func resourceCubeServerImport(ctx context.Context, d *schema.ResourceData, meta 
 		if server.Properties.AvailabilityZone != nil {
 			if err := d.Set("availability_zone", *server.Properties.AvailabilityZone); err != nil {
 				return nil, fmt.Errorf("error setting availability_zone %w", err)
-			}
-		}
-
-		if server.Properties.CpuFamily != nil {
-			if err := d.Set("cpu_family", *server.Properties.CpuFamily); err != nil {
-				return nil, fmt.Errorf("error setting cpu_family %w", err)
 			}
 		}
 	}

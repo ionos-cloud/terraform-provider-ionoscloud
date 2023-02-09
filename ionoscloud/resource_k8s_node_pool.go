@@ -510,7 +510,7 @@ func resourcek8sNodePoolCreate(ctx context.Context, d *schema.ResourceData, meta
 	logApiRequestTime(apiResponse)
 	if err != nil {
 		d.SetId("")
-		diags := diag.FromErr(fmt.Errorf("error creating k8s node pool: %s", err))
+		diags := diag.FromErr(fmt.Errorf("error creating k8s node pool: %w", err))
 		return diags
 	}
 
@@ -732,7 +732,7 @@ func resourcek8sNodePoolUpdate(ctx context.Context, d *schema.ResourceData, meta
 			d.SetId("")
 			return nil
 		}
-		diags := diag.FromErr(fmt.Errorf("error while updating k8s node pool %s: %s", d.Id(), err))
+		diags := diag.FromErr(fmt.Errorf("error while updating k8s node pool %s: %w", d.Id(), err))
 		return diags
 	}
 
@@ -742,7 +742,7 @@ func resourcek8sNodePoolUpdate(ctx context.Context, d *schema.ResourceData, meta
 		nodepoolReady, rsErr := k8sNodepoolReady(ctx, client, d)
 
 		if rsErr != nil {
-			diags := diag.FromErr(fmt.Errorf("error while checking readiness status of k8s node pool %s: %s", d.Id(), rsErr))
+			diags := diag.FromErr(fmt.Errorf("error while checking readiness status of k8s node pool %s: %w", d.Id(), rsErr))
 			return diags
 		}
 
@@ -774,7 +774,7 @@ func resourcek8sNodePoolDelete(ctx context.Context, d *schema.ResourceData, meta
 			d.SetId("")
 			return nil
 		}
-		diags := diag.FromErr(fmt.Errorf("error while deleting k8s node pool %s: %s", d.Id(), err))
+		diags := diag.FromErr(fmt.Errorf("error while deleting k8s node pool %s: %w", d.Id(), err))
 		return diags
 	}
 
@@ -784,7 +784,7 @@ func resourcek8sNodePoolDelete(ctx context.Context, d *schema.ResourceData, meta
 		nodepoolDeleted, dsErr := k8sNodepoolDeleted(ctx, client, d)
 
 		if dsErr != nil {
-			diags := diag.FromErr(fmt.Errorf("error while checking deletion status of k8s node pool %s: %s", d.Id(), dsErr))
+			diags := diag.FromErr(fmt.Errorf("error while checking deletion status of k8s node pool %s: %w", d.Id(), dsErr))
 			return diags
 		}
 
@@ -947,14 +947,14 @@ func setK8sNodePoolData(d *schema.ResourceData, nodePool *ionoscloud.KubernetesN
 			nodePoolLans := getK8sNodePoolLans(*nodePool.Properties.Lans)
 
 			if err := d.Set("lans", nodePoolLans); err != nil {
-				return fmt.Errorf("error while setting lans property for k8sNodepool %s: %s", d.Id(), err)
+				return fmt.Errorf("error while setting lans property for k8sNodepool %s: %w", d.Id(), err)
 			}
 
 		}
 
 		//if nodePool.Properties.GatewayIp != nil {
 		//	if err := d.Set("gateway_ip", *nodePool.Properties.GatewayIp); err != nil {
-		//		return fmt.Errorf("error while setting gateway_ip property for nodepool %s: %s", d.Id(), err)
+		//		return fmt.Errorf("error while setting gateway_ip property for nodepool %s: %w", d.Id(), err)
 		//	}
 		//}
 
@@ -966,7 +966,7 @@ func setK8sNodePoolData(d *schema.ResourceData, nodePool *ionoscloud.KubernetesN
 		}
 
 		if err := d.Set("labels", labels); err != nil {
-			return fmt.Errorf("error while setting the labels property for k8sNodepool %s: %s", d.Id(), err)
+			return fmt.Errorf("error while setting the labels property for k8sNodepool %s: %w", d.Id(), err)
 
 		}
 
@@ -978,7 +978,7 @@ func setK8sNodePoolData(d *schema.ResourceData, nodePool *ionoscloud.KubernetesN
 		}
 
 		if err := d.Set("annotations", annotations); err != nil {
-			return fmt.Errorf("error while setting the annotations property for k8sNodepool %s: %s", d.Id(), err)
+			return fmt.Errorf("error while setting the annotations property for k8sNodepool %s: %w", d.Id(), err)
 		}
 
 	}
@@ -989,7 +989,7 @@ func k8sNodepoolReady(ctx context.Context, client *ionoscloud.APIClient, d *sche
 	subjectNodepool, apiResponse, err := client.KubernetesApi.K8sNodepoolsFindById(ctx, d.Get("k8s_cluster_id").(string), d.Id()).Execute()
 	logApiRequestTime(apiResponse)
 	if err != nil {
-		return true, fmt.Errorf("error checking k8s node pool status: %s", err)
+		return true, fmt.Errorf("error checking k8s node pool status: %w", err)
 	}
 	return *subjectNodepool.Metadata.State == "ACTIVE", nil
 }
@@ -1002,7 +1002,7 @@ func k8sNodepoolDeleted(ctx context.Context, client *ionoscloud.APIClient, d *sc
 		if httpNotFound(apiResponse) {
 			return true, nil
 		}
-		return true, fmt.Errorf("error checking k8s node pool deletion status: %s", err)
+		return true, fmt.Errorf("error checking k8s node pool deletion status: %w", err)
 	}
 	return false, nil
 }

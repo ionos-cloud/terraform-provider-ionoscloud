@@ -41,7 +41,7 @@ resource "ionoscloud_server" "example" {
   availability_zone     = "ZONE_1"
   cpu_family            = "AMD_OPTERON"
   image_name            = "Ubuntu-20.04"
-  image_password        = "K3tTj8G14a3EgKyNeeiY"
+  image_password        = random_password.server_image_password.result
   volume {
     name                = "system"
     size                = 14
@@ -61,6 +61,10 @@ resource "ionoscloud_ipfailover" "example" {
   lan_id                = ionoscloud_lan.example.id
   ip                    = ionoscloud_ipblock.example.ips[0]
   nicuuid               = ionoscloud_server.example.primary_nic
+}
+resource "random_password" "server_image_password" {
+  length           = 16
+  special          = false
 }
 ```
 

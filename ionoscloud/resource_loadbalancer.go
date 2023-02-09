@@ -171,7 +171,7 @@ func resourceLoadbalancerUpdate(ctx context.Context, d *schema.ResourceData, met
 		_, apiResponse, err := client.LoadBalancersApi.DatacentersLoadbalancersPatch(ctx, d.Get("datacenter_id").(string), d.Id()).Loadbalancer(*properties).Execute()
 		logApiRequestTime(apiResponse)
 		if err != nil {
-			diags := diag.FromErr(fmt.Errorf("error while updating loadbalancer %s: %s ", d.Id(), err))
+			diags := diag.FromErr(fmt.Errorf("error while updating loadbalancer %s: %w ", d.Id(), err))
 			return diags
 		}
 	}
