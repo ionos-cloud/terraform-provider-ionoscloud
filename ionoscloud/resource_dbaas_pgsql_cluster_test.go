@@ -48,6 +48,7 @@ func TestAccDBaaSPgSqlClusterBasic(t *testing.T) {
 					resource.TestCheckResourceAttr(PsqlClusterResource+"."+DBaaSClusterTestResource, "credentials.0.username", "username"),
 					resource.TestCheckResourceAttrPair(PsqlClusterResource+"."+DBaaSClusterTestResource, "credentials.0.password", RandomPassword+".cluster_password", "result"),
 					resource.TestCheckResourceAttr(PsqlClusterResource+"."+DBaaSClusterTestResource, "synchronization_mode", "ASYNCHRONOUS"),
+					resource.TestCheckResourceAttrSet(PsqlClusterResource+"."+DBaaSClusterTestResource, "dns_name"),
 				),
 			},
 			{
@@ -69,6 +70,8 @@ func TestAccDBaaSPgSqlClusterBasic(t *testing.T) {
 					resource.TestCheckResourceAttrPair(DataSource+"."+PsqlClusterResource+"."+DBaaSClusterTestDataSourceById, "maintenance_window.time", PsqlClusterResource+"."+DBaaSClusterTestResource, "maintenance_window.time"),
 					resource.TestCheckResourceAttrPair(DataSource+"."+PsqlClusterResource+"."+DBaaSClusterTestDataSourceById, "credentials.username", PsqlClusterResource+"."+DBaaSClusterTestResource, "credentials.username"),
 					resource.TestCheckResourceAttrPair(DataSource+"."+PsqlClusterResource+"."+DBaaSClusterTestDataSourceById, "credentials.password", PsqlClusterResource+"."+DBaaSClusterTestResource, "credentials.password"),
+					resource.TestCheckResourceAttrSet(DataSource+"."+PsqlClusterResource+"."+DBaaSClusterTestDataSourceById, "dns_name"),
+					resource.TestCheckResourceAttrPair(DataSource+"."+PsqlClusterResource+"."+DBaaSClusterTestDataSourceById, "dns_name", PsqlClusterResource+"."+DBaaSClusterTestResource, "dns_name"),
 				),
 			},
 			{
@@ -174,7 +177,7 @@ func TestAccDBaaSPgSqlClusterBasic(t *testing.T) {
 	})
 }
 
-// sleepUntilBackupIsReady waits 30s until backup is ready
+// sleepUntilBackupIsReady waits 60s until backup is ready
 func sleepUntilBackupIsReady() {
 	time.Sleep(60 * time.Second)
 }
@@ -186,6 +189,7 @@ func TestAccDBaaSPgSqlClusterAdditionalParameters(t *testing.T) {
 		PreCheck: func() {
 			testAccPreCheck(t)
 		},
+		ExternalProviders: randomProviderVersion343(),
 		ProviderFactories: testAccProviderFactories,
 		CheckDestroy:      testAccCheckDbaasPgSqlClusterDestroyCheck,
 		Steps: []resource.TestStep{
@@ -229,7 +233,6 @@ func testAccCheckDbaasPgSqlClusterDestroyCheck(s *terraform.State) error {
 		}
 
 		_, apiResponse, err := client.GetCluster(ctx, rs.Primary.ID)
-
 		if err != nil {
 			if apiResponse == nil || apiResponse.StatusCode != 404 {
 				return fmt.Errorf("an error occurred while checking the destruction of psql cluster %s: %w", rs.Primary.ID, err)

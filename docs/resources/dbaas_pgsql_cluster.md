@@ -113,7 +113,8 @@ resource "random_password" "cluster_password" {
 * `from_backup` - (Optional)[string] The unique ID of the backup you want to restore. This attribute is immutable(disallowed in update requests).
   * `backup_id` - (Required)[string] The PostgreSQL version of your cluster.
   * `recovery_target_time` - (Optional)[string] If this value is supplied as ISO 8601 timestamp, the backup will be replayed up until the given timestamp. If empty, the backup will be applied completely.
-    
+* `dns_name` - (Computed) The DNS name pointing to your cluster.
+
 ## Import
 
 Resource DbaaS Postgres Cluster can be imported using the `cluster_id`, e.g.

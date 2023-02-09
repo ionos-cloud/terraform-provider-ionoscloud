@@ -62,5 +62,6 @@ The following attributes are returned by the datasource:
 * `synchronization_mode` - Represents different modes of replication. 
 * `from_backup` - The unique ID of the backup you want to restore.
   * `backup_id` - The PostgreSQL version of your cluster.
-  * `recovery_target_time` - If this value is supplied as ISO 8601 timestamp, the backup will be replayed up until the given timestamp. 
+  * `recovery_target_time` - If this value is supplied as ISO 8601 timestamp, the backup will be replayed up until the given timestamp.
+* `dns_name` - The DNS name pointing to your cluster.
   

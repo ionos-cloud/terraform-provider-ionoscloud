@@ -151,6 +151,11 @@ func dataSourceDbaasPgSqlCluster() *schema.Resource {
 					},
 				},
 			},
+			"dns_name": {
+				Type:        schema.TypeString,
+				Description: "The DNS name pointing to your cluster",
+				Computed:    true,
+			},
 		},
 		Timeouts: &resourceDefaultTimeouts,
 	}

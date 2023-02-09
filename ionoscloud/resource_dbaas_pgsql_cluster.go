@@ -9,7 +9,6 @@ import (
 	dbaasService "github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/dbaas"
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils"
 	"log"
-	"strings"
 	"time"
 )
 
@@ -175,6 +174,11 @@ func resourceDbaasPgSqlCluster() *schema.Resource {
 					},
 				},
 			},
+			"dns_name": {
+				Type:        schema.TypeString,
+				Description: "The DNS name pointing to your cluster",
+				Computed:    true,
+			},
 		},
 		Timeouts: &resourceDefaultTimeouts,
 	}
@@ -217,36 +221,15 @@ func resourceDbaasPgSqlClusterCreate(ctx context.Context, d *schema.ResourceData
 	dbaasClusterResponse, _, err := client.CreateCluster(ctx, *dbaasCluster)
 
 	if err != nil {
-		diags := diag.FromErr(fmt.Errorf("an error occured while creating a dbaas cluster: %w", err))
+		diags := diag.FromErr(fmt.Errorf("an error occured while creating a DBaaS psql cluster: %w", err))
 		return diags
 	}
 
 	d.SetId(*dbaasClusterResponse.Id)
 
-	for {
-		log.Printf("[INFO] Waiting for cluster %s to be ready...", d.Id())
-
-		clusterReady, rsErr := dbaasClusterReady(ctx, client, d)
-
-		if rsErr != nil {
-			diags := diag.FromErr(fmt.Errorf("error while checking readiness status of dbaas cluster %s: %w", d.Id(), rsErr))
-			return diags
-		}
-
-		if clusterReady {
-			log.Printf("[INFO] dbaas cluster ready: %s", d.Id())
-			break
-		}
-
-		select {
-		case <-time.After(utils.SleepInterval):
-			log.Printf("[INFO] trying again ...")
-		case <-ctx.Done():
-			log.Printf("[INFO] create timed out")
-			diags := diag.FromErr(fmt.Errorf("dbaas cluster creation timed out! WARNING: your dbaas cluster (%s) will still probably be created after some time but the terraform state wont reflect that; check your Ionos Cloud account for updates", d.Id()))
-			return diags
-		}
-
+	err = utils.WaitForResourceToBeReady(ctx, d, client.IsClusterReady)
+	if err != nil {
+		return diag.FromErr(fmt.Errorf("creating psql %w ", err))
 	}
 
 	return resourceDbaasPgSqlClusterRead(ctx, d, meta)
@@ -259,7 +242,7 @@ func resourceDbaasPgSqlClusterRead(ctx context.Context, d *schema.ResourceData, 
 	cluster, apiResponse, err := client.GetCluster(ctx, d.Id())
 
 	if err != nil {
-		if apiResponse != nil && apiResponse.Response != nil && apiResponse.StatusCode == 404 {
+		if apiResponse.HttpNotFound() {
 			d.SetId("")
 			return nil
 		}
@@ -296,30 +279,9 @@ func resourceDbaasPgSqlClusterUpdate(ctx context.Context, d *schema.ResourceData
 
 	time.Sleep(utils.SleepInterval)
 
-	for {
-		log.Printf("[INFO] Waiting for cluster %s to be ready...", d.Id())
-
-		clusterReady, rsErr := dbaasClusterReady(ctx, client, d)
-
-		if rsErr != nil {
-			diags := diag.FromErr(fmt.Errorf("error while checking readiness status of dbaas cluster %s: %w", d.Id(), rsErr))
-			return diags
-		}
-
-		if clusterReady {
-			log.Printf("[INFO] dbaas cluster ready: %s", d.Id())
-			break
-		}
-
-		select {
-		case <-time.After(utils.SleepInterval):
-			log.Printf("[INFO] trying again ...")
-		case <-ctx.Done():
-			log.Printf("[INFO] create timed out")
-			diags := diag.FromErr(fmt.Errorf("dbaas cluster update timed out! WARNING: your dbaas cluster (%s) will still probably be updated after some time but the terraform state wont reflect that; check your Ionos Cloud account for updates", d.Id()))
-			return diags
-		}
-
+	err = utils.WaitForResourceToBeReady(ctx, d, client.IsClusterReady)
+	if err != nil {
+		return diag.FromErr(fmt.Errorf("creating psql %w ", err))
 	}
 
 	return resourceDbaasPgSqlClusterRead(ctx, d, meta)
@@ -331,7 +293,7 @@ func resourceDbaasPgSqlClusterDelete(ctx context.Context, d *schema.ResourceData
 	_, apiResponse, err := client.DeleteCluster(ctx, d.Id())
 
 	if err != nil {
-		if apiResponse != nil && apiResponse.Response != nil && apiResponse.StatusCode == 404 {
+		if apiResponse.HttpNotFound() {
 			d.SetId("")
 			return nil
 		}
@@ -339,28 +301,9 @@ func resourceDbaasPgSqlClusterDelete(ctx context.Context, d *schema.ResourceData
 		return diags
 	}
 
-	for {
-		log.Printf("[INFO] Waiting for cluster %s to be deleted...", d.Id())
-
-		clusterdDeleted, dsErr := dbaasClusterDeleted(ctx, client, d)
-
-		if dsErr != nil {
-			diags := diag.FromErr(fmt.Errorf("error while checking deletion status of dbaas cluster %s: %w", d.Id(), dsErr))
-			return diags
-		}
-
-		if clusterdDeleted {
-			log.Printf("[INFO] Successfully deleted dbaas cluster: %s", d.Id())
-			break
-		}
-
-		select {
-		case <-time.After(utils.SleepInterval):
-			log.Printf("[INFO] trying again ...")
-		case <-ctx.Done():
-			diags := diag.FromErr(fmt.Errorf("dbaas cluster deletion timed out! WARNING: your k8s cluster (%s) will still probably be deleted after some time but the terraform state won't reflect that; check your Ionos Cloud account for updates", d.Id()))
-			return diags
-		}
+	err = utils.WaitForResourceToBeDeleted(ctx, d, client.IsClusterDeleted)
+	if err != nil {
+		return diag.FromErr(fmt.Errorf("failed checking if deleted %w", err))
 	}
 
 	// wait 15 seconds after the deletion of the cluster, for the lan to be freed
@@ -377,7 +320,7 @@ func resourceDbaasPgSqlClusterImport(ctx context.Context, d *schema.ResourceData
 	dbaasCluster, apiResponse, err := client.GetCluster(ctx, clusterId)
 
 	if err != nil {
-		if apiResponse != nil && apiResponse.Response != nil && apiResponse.StatusCode == 404 {
+		if apiResponse.HttpNotFound() {
 			d.SetId("")
 			return nil, fmt.Errorf("dbaas cluster does not exist %q", clusterId)
 		}
@@ -391,41 +334,4 @@ func resourceDbaasPgSqlClusterImport(ctx context.Context, d *schema.ResourceData
 	}
 
 	return []*schema.ResourceData{d}, nil
-}
-
-func dbaasClusterReady(ctx context.Context, client *dbaasService.PsqlClient, d *schema.ResourceData) (bool, error) {
-	subjectCluster, _, err := client.GetCluster(ctx, d.Id())
-
-	if err != nil {
-		return true, fmt.Errorf("error checking dbaas cluster status: %w", err)
-	}
-	// ToDo: Removed this part since there are still problems with the clusters being unstable (failing for a short time and then recovering)
-	//if *subjectCluster.LifecycleStatus == "FAILED" {
-	//
-	//	time.Sleep(time.Second * 3)
-	//
-	//	subjectCluster, _, err = client.GetCluster(ctx, d.Id())
-	//
-	//	if err != nil {
-	//		return true, fmt.Errorf("error checking dbaas cluster status: %w", err)
-	//	}
-	//
-	//	if *subjectCluster.LifecycleStatus == "FAILED" {
-	//		return false, fmt.Errorf("dbaas cluster has failed. WARNING: your k8s cluster may still recover after some time but the terraform state won't reflect that; check your Ionos Cloud account for updates")
-	//	}
-	//}
-	return strings.EqualFold(string(*subjectCluster.Metadata.State), utils.Available), nil
-}
-
-func dbaasClusterDeleted(ctx context.Context, client *dbaasService.PsqlClient, d *schema.ResourceData) (bool, error) {
-
-	_, apiResponse, err := client.GetCluster(ctx, d.Id())
-
-	if err != nil {
-		if apiResponse != nil && apiResponse.Response != nil && apiResponse.StatusCode == 404 {
-			return true, nil
-		}
-		return true, fmt.Errorf("error checking dbaas cluster deletion status: %w", err)
-	}
-	return false, nil
 }
