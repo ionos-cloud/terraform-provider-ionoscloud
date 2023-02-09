@@ -128,6 +128,20 @@ This will cause a downtime for all pods on that nodepool. Consider adding multip
 
 Immutable fields list: name, cpu_family, availability_zone, cores_count, ram_size, storage_size, storage_type. 
 
+⚠️ **Note**:
+
+Be careful when using `auto_scaling` since the number of nodes can change. Because of that, when running
+`terraform plan`, Terraform will think that an update is required (since `node_count` from the `tf` plan will be different
+from the number of nodes set by the scheduler). To avoid that, you can use:
+```hcl
+lifecycle {
+    ignore_changes = [
+      node_count
+    ]
+  }
+```
+This will also ignore the manual changes for `node_count` made in the `tf` plan.
+You can read more details about the `ignore_changes` attribute [here](https://developer.hashicorp.com/terraform/language/meta-arguments/lifecycle).
 ## Import
 
 A Kubernetes Node Pool resource can be imported using its Kubernetes cluster's uuid as well as its own UUID, both of which you can retrieve from the cloud API: `resource id`, e.g.:
