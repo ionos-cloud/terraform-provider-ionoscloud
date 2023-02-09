@@ -1,5 +1,4 @@
 //go:build all || dataplatform
-// +build all dataplatform
 
 package ionoscloud
 
@@ -30,7 +29,7 @@ func TestAccDataplatformClusterBasic(t *testing.T) {
 					resource.TestCheckResourceAttr(DataplatformClusterResource+"."+DataplatformClusterTestResource, "name", DataplatformClusterTestResource),
 					resource.TestCheckResourceAttr(DataplatformClusterResource+"."+DataplatformClusterTestResource, "maintenance_window.0.time", "09:00:00"),
 					resource.TestCheckResourceAttr(DataplatformClusterResource+"."+DataplatformClusterTestResource, "maintenance_window.0.day_of_the_week", "Sunday"),
-					resource.TestCheckResourceAttr(DataplatformClusterResource+"."+DataplatformClusterTestResource, "data_platform_version", "22.09"),
+					resource.TestCheckResourceAttr(DataplatformClusterResource+"."+DataplatformClusterTestResource, "data_platform_version", DataPlatformVersion),
 				),
 			},
 			{
@@ -78,7 +77,7 @@ func TestAccDataplatformClusterBasic(t *testing.T) {
 					resource.TestCheckResourceAttr(DataplatformClusterResource+"."+DataplatformClusterTestResource, "name", UpdatedResources),
 					resource.TestCheckResourceAttr(DataplatformClusterResource+"."+DataplatformClusterTestResource, "maintenance_window.0.time", "10:00:00"),
 					resource.TestCheckResourceAttr(DataplatformClusterResource+"."+DataplatformClusterTestResource, "maintenance_window.0.day_of_the_week", "Saturday"),
-					resource.TestCheckResourceAttr(DataplatformClusterResource+"."+DataplatformClusterTestResource, "data_platform_version", "22.09"),
+					resource.TestCheckResourceAttr(DataplatformClusterResource+"."+DataplatformClusterTestResource, "data_platform_version", DataPlatformVersion),
 				),
 			},
 		},
@@ -166,7 +165,7 @@ resource ` + DataplatformClusterResource + ` ` + DataplatformClusterTestResource
   	day_of_the_week  	= "Sunday"
    	time				= "09:00:00"
   }
-  data_platform_version	= "22.09"
+  data_platform_version	= ` + DataPlatformVersion + `
 }
 `
 
@@ -184,7 +183,7 @@ resource ` + DataplatformClusterResource + ` ` + DataplatformClusterTestResource
    	day_of_the_week  	= "Saturday"
    	time				= "10:00:00"
   }
-  data_platform_version	= "22.09"
+  data_platform_version	= ` + DataPlatformVersion + `
 }
 `
 
