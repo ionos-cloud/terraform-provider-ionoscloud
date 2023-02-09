@@ -174,13 +174,14 @@ func (r ApiClustersBackupsFindByIdRequest) Execute() (BackupResponse, *APIRespon
 }
 
 /*
- * ClustersBackupsFindById Fetch a cluster backup
- * Retrieve a PostgreSQL cluster backup by using its ID. This value can be
+  - ClustersBackupsFindById Fetch a cluster backup
+  - Retrieve a PostgreSQL cluster backup by using its ID. This value can be
+
 found when you GET a list of PostgreSQL cluster backups.
 
- * @param ctx _context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
- * @param backupId The unique ID of the backup.
- * @return ApiClustersBackupsFindByIdRequest
+  - @param ctx _context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+  - @param backupId The unique ID of the backup.
+  - @return ApiClustersBackupsFindByIdRequest
 */
 func (a *BackupsApiService) ClustersBackupsFindById(ctx _context.Context, backupId string) ApiClustersBackupsFindByIdRequest {
 	return ApiClustersBackupsFindByIdRequest{

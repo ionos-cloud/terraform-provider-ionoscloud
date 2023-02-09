@@ -153,7 +153,7 @@ func resourceDbaasMongoUserUpdate(ctx context.Context, d *schema.ResourceData, m
 		request.Properties.Roles = &roles
 	}
 
-	_, _, err := client.UsersApi.ClustersUsersPatch(ctx, clusterId, defaultMongoDatabase, username).PatchUserRequest(request).Execute()
+	user, _, err := client.UpdateUser(ctx, clusterId, username, request)
 	if err != nil {
 		diags := diag.FromErr(fmt.Errorf("while updating a user to mongoDB cluster %s: %w", clusterId, err))
 		return diags
@@ -164,35 +164,7 @@ func resourceDbaasMongoUserUpdate(ctx context.Context, d *schema.ResourceData, m
 		return diag.FromErr(fmt.Errorf("updating %w", err))
 	}
 
-	return diag.FromErr(setUserMongoData(d, &user))
-}
-
-// waitForUserToBeReady - keeps retrying until user is in 'available' state, or context deadline is reached
-func waitForUserToBeReady(ctx context.Context, client *dbaas.MongoClient, clusterId, database, username string) (mongo.User, error) {
-	var user = mongo.NewUser()
-	err := resource.RetryContext(ctx, *resourceDefaultTimeouts.Update, func() *resource.RetryError {
-
-		var err error
-		var apiResponse *mongo.APIResponse
-		*user, apiResponse, err = client.UsersApi.ClustersUsersFindById(ctx, clusterId, database, username).Execute()
-		if apiResponse.HttpNotFound() {
-			log.Printf("[INFO] Could not find username %s with database %s in cluster %s, retrying...", username, database, clusterId)
-			return resource.RetryableError(fmt.Errorf("could not find username %s with database %s in cluster %s, %w", username, database, clusterId, err))
-		}
-		if err != nil {
-			resource.NonRetryableError(err)
-		}
-
-		if user != nil && user.Metadata != nil && user.Metadata.State != nil && !strings.EqualFold(*user.Metadata.State, utils.Available) {
-			log.Printf("[INFO] mongo user %s is still in state %s", username, *user.Metadata.State)
-			return resource.RetryableError(fmt.Errorf("user is still in state %s", *user.Metadata.State))
-		}
-		return nil
-	})
-	if user == nil || user.Properties == nil || *user.Properties.Username == "" {
-		return *user, fmt.Errorf("could not find username %s with database %s in cluster %s", username, database, clusterId)
-	}
-	return *user, err
+	return diag.FromErr(dbaas.SetUserMongoData(d, &user))
 }
 
 func resourceDbaasMongoUserRead(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
@@ -201,7 +173,7 @@ func resourceDbaasMongoUserRead(ctx context.Context, d *schema.ResourceData, met
 	clusterId := d.Get("cluster_id").(string)
 	username := d.Get("username").(string)
 
-	user, apiResponse, err := client.UsersApi.ClustersUsersFindById(ctx, clusterId, defaultMongoDatabase, username).Execute()
+	user, apiResponse, err := client.FindUserByUsername(ctx, clusterId, username)
 
 	if err != nil {
 		if apiResponse.HttpNotFound() {
@@ -231,26 +203,13 @@ func resourceDbaasMongoUserDelete(ctx context.Context, d *schema.ResourceData, m
 	}
 
 	// Wait, catching any errors
-	err = resource.RetryContext(ctx, *resourceDefaultTimeouts.Create, func() *resource.RetryError {
-		var err error
-		var apiResponse *mongo.APIResponse
-		var user = mongo.User{}
-		user, apiResponse, err = client.UsersApi.ClustersUsersFindById(ctx, clusterId, defaultMongoDatabase, username).Execute()
-		if apiResponse.HttpNotFound() {
-			log.Printf("[INFO] Deleted successfuly user %s with database %s in cluster %s", username, defaultMongoDatabase, clusterId)
-			return nil
-		}
-		if err != nil {
-			resource.NonRetryableError(err)
-		}
-		if user.Properties != nil && user.Properties.Username != nil && *user.Properties.Username == username {
-			return resource.RetryableError(fmt.Errorf("user still found, retrying"))
-		}
-		return resource.NonRetryableError(fmt.Errorf("unexpected error"))
-	})
+	err = utils.WaitForResourceToBeDeleted(ctx, d, client.IsUserDeleted)
+	if err != nil {
+		return diag.FromErr(fmt.Errorf("user deleted %w", err))
+	}
 
 	if err != nil {
-		return diag.FromErr(fmt.Errorf("user deleted %w ", err))
+		return diag.FromErr(fmt.Errorf("user deleted %w", err))
 	}
 
 	d.SetId("")
