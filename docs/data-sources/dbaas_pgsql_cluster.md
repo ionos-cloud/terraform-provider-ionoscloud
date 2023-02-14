@@ -32,7 +32,7 @@ data "ionoscloud_pg_cluster" "example" {
 
 ## Argument Reference
 
-* `display_name` - (Optional) Display name or an existing cluster that you want to search for.
+* `display_name` - (Optional) Display Name of an existing cluster that you want to search for.
 * `id` - (Optional) ID of the cluster you want to search for.
 
 Either `display_name` or `id` must be provided. If none, or both are provided, the datasource will return an error.

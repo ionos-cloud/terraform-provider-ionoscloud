@@ -12,7 +12,6 @@ description: |-
 ⚠️ **Note:** Data Platform is currently in the Early Access (EA) phase.
 We recommend keeping usage and testing to non-production critical applications.
 Please contact your sales representative or support for more information.
-Manages a **Dataplatform Node Pool**.
 
 The **Dataplatform Cluster Data Source** can be used to search for and return an existing Dataplatform Cluster.
 If a single match is found, it will be returned. If your search results in multiple matches, an error will be returned.
@@ -47,17 +46,17 @@ data "ionoscloud_dataplatform_cluster" "example" {
 ## Argument Reference
 
 * `id` - (Optional) ID of the cluster you want to search for.
-* `name` - (Optional) Name or an existing cluster that you want to search for. Search by name is case-insensitive. The whole resource name is required if `partial_match` parameter is not set to true..
+* `name` - (Optional) Name of an existing cluster that you want to search for. Search by name is case-insensitive. The whole resource name is required if `partial_match` parameter is not set to true.
 * `partial_match` - (Optional) Whether partial matching is allowed or not when using name argument. Default value is false.
 
-Either `id` or `display_name` must be provided. If none, or both are provided, the datasource will return an error.
+Either `id` or `name` must be provided. If none, or both are provided, the datasource will return an error.
 
 ## Attributes Reference
 
 The following attributes are returned by the datasource:
 
 * `id` - The UUID of the cluster.
-* `datacenter_id` - The UUID of the virtual data center (VDC) the cluster is provisioned.
+* `datacenter_id` - The UUID of the virtual data center (VDC) in which the cluster is provisioned.
 * `name` - The name of your cluster.
 * `data_platform_version` - The version of the Data Platform.
 * `maintenance_window` - Starting time of a weekly 4 hour-long window, during which maintenance might occur in hh:mm:ss format

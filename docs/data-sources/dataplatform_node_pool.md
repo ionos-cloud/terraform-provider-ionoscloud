@@ -46,10 +46,10 @@ data "ionoscloud_dataplatform_node_pool" "example" {
 
 * `cluster_id` - (Required) ID of the cluster the searched node pool is part of.
 * `id` - (Optional) ID of the node pool you want to search for.
-* `name` - (Optional) Name or an existing cluster that you want to search for. Search by name is case-insensitive. The whole resource name is required if `partial_match` parameter is not set to true.
+* `name` - (Optional) Name of an existing cluster that you want to search for. Search by name is case-insensitive. The whole resource name is required if `partial_match` parameter is not set to true.
 * `partial_match` - (Optional) Whether partial matching is allowed or not when using name argument. Default value is false.
 
-Either `id` or `display_name` must be provided. If none, or both are provided, the datasource will return an error.
+Either `id` or `name` must be provided. If none, or both are provided, the datasource will return an error.
 
 ## Attributes Reference
 

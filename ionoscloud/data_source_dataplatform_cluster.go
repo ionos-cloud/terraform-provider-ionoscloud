@@ -21,10 +21,10 @@ func dataSourceDataplatformCluster() *schema.Resource {
 		ReadContext: dataSourceDataplatformClusterRead,
 		Schema: map[string]*schema.Schema{
 			"id": {
-				Type:         schema.TypeString,
-				Description:  "The id of your cluster.",
-				Optional:     true,
-				ValidateFunc: validation.All(validation.StringMatch(regexp.MustCompile("^[A-Za-z0-9][-A-Za-z0-9_.]*[A-Za-z0-9]$"), "")),
+				Type:             schema.TypeString,
+				Description:      "The id of your cluster.",
+				Optional:         true,
+				ValidateDiagFunc: validation.ToDiagFunc(validation.StringMatch(regexp.MustCompile("^[A-Za-z0-9][-A-Za-z0-9_.]*[A-Za-z0-9]$"), "")),
 			},
 			"name": {
 				Type:        schema.TypeString,
@@ -220,7 +220,9 @@ func dataSourceDataplatformClusterRead(ctx context.Context, d *schema.ResourceDa
 				diags := diag.FromErr(fmt.Errorf("an error occurred while fetching Dataplatform Clusters: %w", err))
 				return diags
 			}
-			results = *clusters.Items
+			if clusters.Items != nil {
+				results = *clusters.Items
+			}
 		} else {
 			clusters, _, err := client.ListClusters(ctx, "")
 			if err != nil {
@@ -229,12 +231,11 @@ func dataSourceDataplatformClusterRead(ctx context.Context, d *schema.ResourceDa
 			}
 			if clusters.Items != nil && len(*clusters.Items) > 0 {
 				for _, clusterItem := range *clusters.Items {
+					if len(results) > 1 {
+						break
+					}
 					if clusterItem.Properties != nil && clusterItem.Properties.Name != nil && strings.EqualFold(*clusterItem.Properties.Name, name) {
-						tmpCluster, _, err := client.GetClusterById(ctx, *clusterItem.Id)
-						if err != nil {
-							return diag.FromErr(fmt.Errorf("an error occurred while fetching the Dataplatform Cluster with ID: %s while searching by full name: %s: %w", *clusterItem.Id, name, err))
-						}
-						results = append(results, tmpCluster)
+						results = append(results, clusterItem)
 					}
 				}
 			}

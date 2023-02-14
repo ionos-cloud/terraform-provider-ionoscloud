@@ -16,10 +16,10 @@ func dataSourceDataplatformNodePools() *schema.Resource {
 		ReadContext: dataSourceNodePoolsRead,
 		Schema: map[string]*schema.Schema{
 			"cluster_id": {
-				Type:         schema.TypeString,
-				Required:     true,
-				Description:  "The UUID of an existing Dataplatform cluster",
-				ValidateFunc: validation.All(validation.StringMatch(regexp.MustCompile("^[A-Za-z0-9][-A-Za-z0-9_.]*[A-Za-z0-9]$"), "")),
+				Type:             schema.TypeString,
+				Required:         true,
+				Description:      "The UUID of an existing Dataplatform cluster",
+				ValidateDiagFunc: validation.ToDiagFunc(validation.StringMatch(regexp.MustCompile("^[A-Za-z0-9][-A-Za-z0-9_.]*[A-Za-z0-9]$"), "")),
 			},
 			"name": {
 				Type:        schema.TypeString,
