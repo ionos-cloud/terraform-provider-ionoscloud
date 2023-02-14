@@ -8,7 +8,9 @@ description: |-
 ---
 
 # ionoscloud_dataplatform_node_pool
-
+⚠️ **Note:** Data Platform is currently in the Early Access (EA) phase.
+We recommend keeping usage and testing to non-production critical applications.
+Please contact your sales representative or support for more information.
 Manages a **Dataplatform Node Pool**.
 
 ## Example Usage

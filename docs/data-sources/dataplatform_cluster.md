@@ -9,6 +9,11 @@ description: |-
 
 # ionoscloud_dataplatform_cluster
 
+⚠️ **Note:** Data Platform is currently in the Early Access (EA) phase.
+We recommend keeping usage and testing to non-production critical applications.
+Please contact your sales representative or support for more information.
+Manages a **Dataplatform Node Pool**.
+
 The **Dataplatform Cluster Data Source** can be used to search for and return an existing Dataplatform Cluster.
 If a single match is found, it will be returned. If your search results in multiple matches, an error will be returned.
 When this happens, please refine your search and make sure that your resources have unique names.

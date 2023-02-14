@@ -19,9 +19,9 @@ func dataSourceDataplatformNodePool() *schema.Resource {
 		ReadContext: dataSourceDataplatformReadNodePool,
 		Schema: map[string]*schema.Schema{
 			"id": {
-				Type:         schema.TypeString,
-				Optional:     true,
-				ValidateFunc: validation.All(validation.StringMatch(regexp.MustCompile("^[A-Za-z0-9][-A-Za-z0-9_.]*[A-Za-z0-9]$"), "")),
+				Type:             schema.TypeString,
+				Optional:         true,
+				ValidateDiagFunc: validation.ToDiagFunc(validation.StringMatch(regexp.MustCompile("^[A-Za-z0-9][-A-Za-z0-9_.]*[A-Za-z0-9]$"), "")),
 			},
 			"name": {
 				Type:        schema.TypeString,
@@ -110,10 +110,10 @@ func dataSourceDataplatformNodePool() *schema.Resource {
 				Elem:        &schema.Schema{Type: schema.TypeString},
 			},
 			"cluster_id": {
-				Type:         schema.TypeString,
-				Required:     true,
-				Description:  "The UUID of an existing Dataplatform cluster",
-				ValidateFunc: validation.All(validation.StringMatch(regexp.MustCompile("^[A-Za-z0-9][-A-Za-z0-9_.]*[A-Za-z0-9]$"), "")),
+				Type:             schema.TypeString,
+				Required:         true,
+				Description:      "The UUID of an existing Dataplatform cluster",
+				ValidateDiagFunc: validation.ToDiagFunc(validation.StringMatch(regexp.MustCompile("^[A-Za-z0-9][-A-Za-z0-9_.]*[A-Za-z0-9]$"), "")),
 			},
 		},
 		Timeouts: &resourceDefaultTimeouts,
