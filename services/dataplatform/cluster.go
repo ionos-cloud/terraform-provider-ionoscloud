@@ -3,7 +3,6 @@ package dataplatform
 import (
 	"context"
 	"fmt"
-	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	dataplatform "github.com/ionos-cloud/sdk-go-dataplatform"
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils"
@@ -77,33 +76,6 @@ func (c *Client) DeleteCluster(ctx context.Context, id string) (utils.ApiRespons
 	_, apiResponse, err := c.sdkClient.DataPlatformClusterApi.DeleteCluster(ctx, id).Execute()
 	apiResponse.LogInfo()
 	return apiResponse, err
-}
-
-// WaitForClusterToBeReady - keeps retrying until cluster is in 'available' state, or context deadline is reached
-func (c *Client) WaitForClusterToBeReady(ctx context.Context, clusterId string) error {
-	var clusterRequest = dataplatform.NewClusterResponseDataWithDefaults()
-	err := resource.RetryContext(ctx, utils.DefaultTimeout, func() *resource.RetryError {
-		var err error
-		var apiResponse *dataplatform.APIResponse
-		*clusterRequest, apiResponse, err = c.GetClusterById(ctx, clusterId)
-		if apiResponse.HttpNotFound() {
-			log.Printf("[INFO] Could not find cluster %s retrying...", clusterId)
-			return resource.RetryableError(fmt.Errorf("could not find cluster %s, %w, retrying", clusterId, err))
-		}
-		if err != nil {
-			resource.NonRetryableError(err)
-		}
-
-		if clusterRequest != nil && clusterRequest.Metadata != nil && !strings.EqualFold(*clusterRequest.Metadata.State, utils.Available) {
-			log.Printf("[INFO] dataplatform cluster %s is still in state %s", clusterId, *clusterRequest.Metadata.State)
-			return resource.RetryableError(fmt.Errorf(" dataplatform cluster is still in state %s", *clusterRequest.Metadata.State))
-		}
-		return nil
-	})
-	if clusterRequest == nil || clusterRequest.Properties == nil || *clusterRequest.Properties.DatacenterId == "" {
-		return fmt.Errorf("could not find dataplatform cluster %s", clusterId)
-	}
-	return err
 }
 
 func setCreateClusterRequestProperties(d *schema.ResourceData) *dataplatform.CreateClusterRequest {

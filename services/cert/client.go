@@ -14,7 +14,7 @@ type Client struct {
 	sdkClient *certmanager.APIClient
 }
 
-func NewClientService(username, password, token, url, version, terraformVersion string) *Client {
+func NewClient(username, password, token, url, version, terraformVersion string) *Client {
 	certConfig := certmanager.NewConfiguration(username, password, token, url)
 
 	if os.Getenv(utils.IonosDebug) != "" {

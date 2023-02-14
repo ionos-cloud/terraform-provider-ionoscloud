@@ -28,6 +28,7 @@ func resourceDataplatformCluster() *schema.Resource {
 				ValidateDiagFunc: validation.ToDiagFunc(validation.All(validation.StringLenBetween(32, 63),
 					validation.StringMatch(regexp.MustCompile("^[0-9a-f]{8}-?[0-9a-f]{4}-?[0-9a-f]{4}-?[0-9a-f]{4}-?[0-9a-f]{12}$"), ""))),
 				Required: true,
+				ForceNew: true,
 			},
 			"name": {
 				Type:             schema.TypeString,
@@ -64,21 +65,8 @@ func resourceDataplatformCluster() *schema.Resource {
 				},
 			},
 		},
-		CustomizeDiff: checkDataplatformClusterImmutableFields,
-		Timeouts:      &resourceDefaultTimeouts,
+		Timeouts: &resourceDefaultTimeouts,
 	}
-}
-
-func checkDataplatformClusterImmutableFields(_ context.Context, diff *schema.ResourceDiff, _ interface{}) error {
-	if diff.Id() == "" {
-		return nil
-	}
-
-	if diff.HasChange("datacenter_id") {
-		return fmt.Errorf("datacenter_id %s", ImmutableError)
-	}
-
-	return nil
 }
 
 func resourceDataplatformClusterCreate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
@@ -139,7 +127,7 @@ func resourceDataplatformClusterUpdate(ctx context.Context, d *schema.ResourceDa
 		return diags
 	}
 
-	err = client.WaitForClusterToBeReady(ctx, clusterId)
+	err = utils.WaitForResourceToBeReady(ctx, d, client.IsClusterReady)
 	if err != nil {
 		return diag.FromErr(fmt.Errorf("waitforCluster update %w", err))
 	}

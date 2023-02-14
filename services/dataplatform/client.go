@@ -16,7 +16,7 @@ type Client struct {
 	sdkClient dataplatform.APIClient
 }
 
-func NewClientService(username, password, token, url, version, terraformVersion string) *Client {
+func NewClient(username, password, token, url, version, terraformVersion string) *Client {
 	newConfigDataplatform := dataplatform.NewConfiguration(username, password, token, url)
 
 	if os.Getenv("IONOS_DEBUG") != "" {

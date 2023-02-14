@@ -20,7 +20,7 @@ type MongoClient struct {
 	sdkClient *mongo.APIClient
 }
 
-func NewPsqlClientService(username, password, token, url, version, terraformVersion string) *PsqlClient {
+func NewPsqlClient(username, password, token, url, version, terraformVersion string) *PsqlClient {
 	newConfigDbaas := psql.NewConfiguration(username, password, token, url)
 
 	if os.Getenv(utils.IonosDebug) != "" {
@@ -39,7 +39,7 @@ func NewPsqlClientService(username, password, token, url, version, terraformVers
 	}
 }
 
-func NewMongoClientService(username, password, token, url, version, terraformVersion string) *MongoClient {
+func NewMongoClient(username, password, token, url, version, terraformVersion string) *MongoClient {
 	newConfigDbaas := mongo.NewConfiguration(username, password, token, url)
 
 	if os.Getenv("IONOS_DEBUG") != "" {

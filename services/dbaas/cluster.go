@@ -41,10 +41,8 @@ func (c *MongoClient) ListClusters(ctx context.Context, filterName string) (mong
 		request = request.FilterName(filterName)
 	}
 	clusters, apiResponse, err := c.sdkClient.ClustersApi.ClustersGetExecute(request)
-	if apiResponse != nil {
-		return clusters, apiResponse, err
-	}
-	return clusters, nil, err
+	apiResponse.LogInfo()
+	return clusters, apiResponse, err
 }
 
 func (c *MongoClient) GetTemplates(ctx context.Context) (mongo.TemplateList, *mongo.APIResponse, error) {
