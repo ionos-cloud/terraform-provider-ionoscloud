@@ -27,14 +27,14 @@ resource "ionoscloud_dataplatform_cluster" "example" {
     day_of_the_week  	= "Sunday"
     time				= "09:00:00"
   }
-  data_platform_version	= "1.1.0"
+  data_platform_version	= "22.11"
 }
 
 resource "ionoscloud_dataplatform_node_pool" "example" {
   cluster_id        = ionoscloud_dataplatform_cluster.example.id
   name              = "Dataplatform_Node_Pool_Example"
   node_count        = 1
-  cpu_family        = "INTEL_XEON"
+  cpu_family        = "INTEL_SKYLAKE"
   cores_count       = 1
   ram_size          = 2048
   availability_zone = "AUTO"

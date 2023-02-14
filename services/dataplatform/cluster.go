@@ -14,8 +14,7 @@ import (
 var clusterResourceName = "Dataplatform Cluster"
 
 func (c *Client) IsClusterReady(ctx context.Context, d *schema.ResourceData) (bool, error) {
-	cluster, apiResponse, err := c.sdkClient.DataPlatformClusterApi.GetCluster(ctx, d.Id()).Execute()
-	apiResponse.LogInfo()
+	cluster, _, err := c.GetClusterById(ctx, d.Id())
 	if err != nil {
 		return false, err
 	}

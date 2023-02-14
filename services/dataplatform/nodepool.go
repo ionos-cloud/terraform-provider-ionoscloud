@@ -67,12 +67,12 @@ func (c *Client) IsNodePoolReady(ctx context.Context, d *schema.ResourceData) (b
 	if err != nil {
 		return true, fmt.Errorf("checking Dataplatform Node Pool status: %w", err)
 	}
-	log.Printf("[DEBUG] dataplatform cluster nodepool state %s", *subjectNodePool.Metadata.State)
+
 	if subjectNodePool.Metadata == nil || subjectNodePool.Metadata.State == nil {
 		return false, fmt.Errorf("expected nodepool metadata, got empty for id %s", d.Id())
 	}
-
-	if strings.ContainsAny(*subjectNodePool.Metadata.State, "FAILED") {
+	log.Printf("[DEBUG] dataplatform cluster nodepool state %s", *subjectNodePool.Metadata.State)
+	if strings.EqualFold(*subjectNodePool.Metadata.State, "FAILED") {
 		return false, fmt.Errorf("nodepool id %s is in failed state", d.Id())
 	}
 
@@ -279,30 +279,37 @@ func SetNodePoolsData(d *schema.ResourceData, results []dataplatform.NodePoolRes
 	if results != nil {
 		var nodePools []interface{}
 		for _, nodePool := range results {
-
 			nodePoolEntry := make(map[string]interface{})
-
-			utils.SetPropWithNilCheck(nodePoolEntry, "name", nodePool.Properties.Name)
-			utils.SetPropWithNilCheck(nodePoolEntry, "data_platform_version", nodePool.Properties.DataPlatformVersion)
-			utils.SetPropWithNilCheck(nodePoolEntry, "datacenter_id", nodePool.Properties.DatacenterId)
-			utils.SetPropWithNilCheck(nodePoolEntry, "node_count", nodePool.Properties.NodeCount)
-			utils.SetPropWithNilCheck(nodePoolEntry, "cpu_family", nodePool.Properties.CpuFamily)
-			utils.SetPropWithNilCheck(nodePoolEntry, "cores_count", nodePool.Properties.CoresCount)
-			utils.SetPropWithNilCheck(nodePoolEntry, "ram_size", nodePool.Properties.RamSize)
-			utils.SetPropWithNilCheck(nodePoolEntry, "availability_zone", nodePool.Properties.AvailabilityZone)
-			utils.SetPropWithNilCheck(nodePoolEntry, "storage_type", nodePool.Properties.StorageType)
-			utils.SetPropWithNilCheck(nodePoolEntry, "storage_size", nodePool.Properties.StorageSize)
-			utils.SetPropWithNilCheck(nodePoolEntry, "maintenance_window.0.time", nodePool.Properties.MaintenanceWindow.Time)
-			utils.SetPropWithNilCheck(nodePoolEntry, "maintenance_window.0.day_of_the_week", nodePool.Properties.MaintenanceWindow.DayOfTheWeek)
-			utils.SetPropWithNilCheck(nodePoolEntry, "labels", nodePool.Properties.Labels)
-			utils.SetPropWithNilCheck(nodePoolEntry, "annotations", nodePool.Properties.Annotations)
-
+			if nodePool.Properties != nil {
+				utils.SetPropWithNilCheck(nodePoolEntry, "name", nodePool.Properties.Name)
+				utils.SetPropWithNilCheck(nodePoolEntry, "data_platform_version", nodePool.Properties.DataPlatformVersion)
+				utils.SetPropWithNilCheck(nodePoolEntry, "datacenter_id", nodePool.Properties.DatacenterId)
+				utils.SetPropWithNilCheck(nodePoolEntry, "node_count", nodePool.Properties.NodeCount)
+				utils.SetPropWithNilCheck(nodePoolEntry, "cpu_family", nodePool.Properties.CpuFamily)
+				utils.SetPropWithNilCheck(nodePoolEntry, "cores_count", nodePool.Properties.CoresCount)
+				utils.SetPropWithNilCheck(nodePoolEntry, "ram_size", nodePool.Properties.RamSize)
+				utils.SetPropWithNilCheck(nodePoolEntry, "availability_zone", nodePool.Properties.AvailabilityZone)
+				utils.SetPropWithNilCheck(nodePoolEntry, "storage_type", nodePool.Properties.StorageType)
+				utils.SetPropWithNilCheck(nodePoolEntry, "storage_size", nodePool.Properties.StorageSize)
+				if nodePool.Properties.MaintenanceWindow != nil {
+					var maintenanceWindow []interface{}
+					maintenanceWindowEntry := SetMaintenanceWindowProperties(*nodePool.Properties.MaintenanceWindow)
+					maintenanceWindow = append(maintenanceWindow, maintenanceWindowEntry)
+					utils.SetPropWithNilCheck(nodePoolEntry, "maintenance_window", maintenanceWindow)
+				}
+				utils.SetPropWithNilCheck(nodePoolEntry, "labels", nodePool.Properties.Labels)
+				utils.SetPropWithNilCheck(nodePoolEntry, "annotations", nodePool.Properties.Annotations)
+			}
 			nodePools = append(nodePools, nodePoolEntry)
-
 		}
+
+		if nodePools == nil || len(nodePools) == 0 {
+			return diag.FromErr(fmt.Errorf("no nodepools found for criteria, please check your filter configuration"))
+		}
+
 		err := d.Set("node_pools", nodePools)
 		if err != nil {
-			diags := diag.FromErr(fmt.Errorf("error while setting node_pools: %w", err))
+			diags := diag.FromErr(fmt.Errorf("while setting node_pools: %w", err))
 			return diags
 		}
 	}

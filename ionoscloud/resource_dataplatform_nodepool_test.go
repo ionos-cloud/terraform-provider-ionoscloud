@@ -29,7 +29,7 @@ func TestAccDataplatformNodePoolBasic(t *testing.T) {
 					testAccCheckDataplatformNodePoolExists(DataplatformNodePoolResource+"."+DataplatformNodePoolTestResource, &DataplatformNodePool),
 					resource.TestCheckResourceAttr(DataplatformNodePoolResource+"."+DataplatformNodePoolTestResource, "name", DataplatformNodePoolTestResource),
 					resource.TestCheckResourceAttr(DataplatformNodePoolResource+"."+DataplatformNodePoolTestResource, "node_count", "1"),
-					resource.TestCheckResourceAttr(DataplatformNodePoolResource+"."+DataplatformNodePoolTestResource, "cpu_family", "INTEL_XEON"),
+					resource.TestCheckResourceAttr(DataplatformNodePoolResource+"."+DataplatformNodePoolTestResource, "cpu_family", "INTEL_SKYLAKE"),
 					resource.TestCheckResourceAttr(DataplatformNodePoolResource+"."+DataplatformNodePoolTestResource, "cores_count", "1"),
 					resource.TestCheckResourceAttr(DataplatformNodePoolResource+"."+DataplatformNodePoolTestResource, "ram_size", "2048"),
 					resource.TestCheckResourceAttr(DataplatformNodePoolResource+"."+DataplatformNodePoolTestResource, "availability_zone", "AUTO"),
@@ -138,7 +138,7 @@ func TestAccDataplatformNodePoolBasic(t *testing.T) {
 					testAccCheckDataplatformNodePoolExists(DataplatformNodePoolResource+"."+DataplatformNodePoolTestResource, &DataplatformNodePool),
 					resource.TestCheckResourceAttr(DataplatformNodePoolResource+"."+DataplatformNodePoolTestResource, "name", DataplatformNodePoolTestResource),
 					resource.TestCheckResourceAttr(DataplatformNodePoolResource+"."+DataplatformNodePoolTestResource, "node_count", "2"),
-					resource.TestCheckResourceAttr(DataplatformNodePoolResource+"."+DataplatformNodePoolTestResource, "cpu_family", "INTEL_XEON"),
+					resource.TestCheckResourceAttr(DataplatformNodePoolResource+"."+DataplatformNodePoolTestResource, "cpu_family", "INTEL_SKYLAKE"),
 					resource.TestCheckResourceAttr(DataplatformNodePoolResource+"."+DataplatformNodePoolTestResource, "cores_count", "1"),
 					resource.TestCheckResourceAttr(DataplatformNodePoolResource+"."+DataplatformNodePoolTestResource, "ram_size", "2048"),
 					resource.TestCheckResourceAttr(DataplatformNodePoolResource+"."+DataplatformNodePoolTestResource, "availability_zone", "AUTO"),
@@ -244,7 +244,7 @@ resource ` + DataplatformNodePoolResource + ` ` + DataplatformNodePoolTestResour
   cluster_id    	= ` + DataplatformClusterResource + `.` + DataplatformClusterTestResource + `.id
   name        		= "` + DataplatformNodePoolTestResource + `"
   node_count        = 1
-  cpu_family        = "INTEL_XEON"
+  cpu_family        = "INTEL_SKYLAKE"
   cores_count       = 1
   ram_size          = 2048
   availability_zone = "AUTO"
@@ -286,7 +286,7 @@ resource ` + DataplatformNodePoolResource + ` ` + DataplatformNodePoolTestResour
   cluster_id    = ` + DataplatformClusterResource + `.` + DataplatformClusterTestResource + `.id
   name        = "` + DataplatformNodePoolTestResource + `"
   node_count        = 2
-  cpu_family        = "INTEL_XEON"
+  cpu_family        = "INTEL_SKYLAKE"
   cores_count       = 1
   ram_size          = 2048
   availability_zone = "AUTO"
@@ -342,19 +342,20 @@ data ` + DataplatformNodePoolResource + ` ` + DataplatformNodePoolTestDataSource
 }
 `
 const testAccDataSourceDataplatformNodePools = testAccCheckDataplatformNodePoolConfigBasic + `
-data ` + DataplatformNodePoolsDataSource + ` + ` + DataplatformNodePoolsTestDataSource + ` {
+data ` + DataplatformNodePoolsDataSource + ` ` + DataplatformNodePoolsTestDataSource + ` {
 	cluster_id    = ` + DataplatformClusterResource + `.` + DataplatformClusterTestResource + `.id
 }
 `
 
 const testAccDataSourceDataplatformNodePoolsByName = testAccCheckDataplatformNodePoolConfigBasic + `
-data ` + DataplatformNodePoolsDataSource + ` + ` + DataplatformNodePoolsTestDataSource + ` {
+data ` + DataplatformNodePoolsDataSource + ` ` + DataplatformNodePoolsTestDataSource + ` {
   cluster_id    = ` + DataplatformClusterResource + `.` + DataplatformClusterTestResource + `.id
-  name = "` + DataplatformNodePoolTestResource + `"}
+  name = "` + DataplatformNodePoolTestResource + `"
+}
 `
 
 const testAccDataSourceDataplatformNodePoolsByNamePartialMatch = testAccCheckDataplatformNodePoolConfigBasic + `
-data ` + DataplatformNodePoolsDataSource + ` + ` + DataplatformNodePoolsTestDataSource + ` {
+data ` + DataplatformNodePoolsDataSource + ` ` + DataplatformNodePoolsTestDataSource + ` {
   cluster_id    = ` + DataplatformClusterResource + `.` + DataplatformClusterTestResource + `.id
   name = "test_"
   partial_match = true
@@ -362,14 +363,14 @@ data ` + DataplatformNodePoolsDataSource + ` + ` + DataplatformNodePoolsTestData
 `
 
 const testAccDataSourceDataplatformNodePoolsByNameError = testAccCheckDataplatformNodePoolConfigBasic + `
-data ` + DataplatformNodePoolsDataSource + ` + ` + DataplatformNodePoolsTestDataSource + ` {
+data ` + DataplatformNodePoolsDataSource + ` ` + DataplatformNodePoolsTestDataSource + ` {
   cluster_id    = ` + DataplatformClusterResource + `.` + DataplatformClusterTestResource + `.id
   name = "wrong_name"
 }
 `
 
 const testAccDataSourceDataplatformNodePoolsByNamePartialMatchError = testAccCheckDataplatformNodePoolConfigBasic + `
-data ` + DataplatformNodePoolsDataSource + ` + ` + DataplatformNodePoolsTestDataSource + ` {
+data ` + DataplatformNodePoolsDataSource + ` ` + DataplatformNodePoolsTestDataSource + ` {
   cluster_id    = ` + DataplatformClusterResource + `.` + DataplatformClusterTestResource + `.id
   name = "wrong_name"
   partial_match = true
