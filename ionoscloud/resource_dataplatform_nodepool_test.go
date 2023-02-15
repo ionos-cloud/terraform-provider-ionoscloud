@@ -237,7 +237,7 @@ resource ` + DataplatformClusterResource + ` ` + DataplatformClusterTestResource
    	day_of_the_week  	= "Sunday"
    	time				= "09:00:00"
   }
-  data_platform_version	= ` + DataPlatformVersion + `
+  version	= ` + DataPlatformVersion + `
 }
 
 resource ` + DataplatformNodePoolResource + ` ` + DataplatformNodePoolTestResource + ` {
@@ -279,7 +279,7 @@ resource ` + DataplatformClusterResource + ` ` + DataplatformClusterTestResource
   	day_of_the_week  	= "Saturday"
    	time				= "10:00:00"
   }
-  data_platform_version	= ` + DataPlatformVersion + `
+  version	= ` + DataPlatformVersion + `
 }
 
 resource ` + DataplatformNodePoolResource + ` ` + DataplatformNodePoolTestResource + ` {

@@ -36,7 +36,7 @@ func resourceDataplatformCluster() *schema.Resource {
 				ValidateDiagFunc: validation.ToDiagFunc(validation.All(validation.StringLenBetween(0, 63), validation.StringMatch(regexp.MustCompile("^[A-Za-z0-9][-A-Za-z0-9_.]*[A-Za-z0-9]$"), ""))),
 				Required:         true,
 			},
-			"data_platform_version": {
+			"version": {
 				Type:             schema.TypeString,
 				Description:      "The version of the Data Platform.",
 				ValidateDiagFunc: validation.ToDiagFunc(validation.StringLenBetween(0, 32)),

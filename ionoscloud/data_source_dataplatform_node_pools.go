@@ -47,7 +47,7 @@ func dataSourceDataplatformNodePools() *schema.Resource {
 							Description: "The name of your node pool.",
 							Computed:    true,
 						},
-						"data_platform_version": {
+						"version": {
 							Type:        schema.TypeString,
 							Description: "The version of the Data Platform.",
 							Computed:    true,

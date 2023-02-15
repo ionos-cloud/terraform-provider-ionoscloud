@@ -195,8 +195,8 @@ func SetDataplatformNodePoolData(d *schema.ResourceData, nodePool dataplatform.N
 	}
 
 	if nodePool.Properties.DataPlatformVersion != nil {
-		if err := d.Set("data_platform_version", *nodePool.Properties.DataPlatformVersion); err != nil {
-			return utils.GenerateSetError(nodePoolResourceName, "data_platform_version", err)
+		if err := d.Set("version", *nodePool.Properties.DataPlatformVersion); err != nil {
+			return utils.GenerateSetError(nodePoolResourceName, "version", err)
 		}
 	}
 
@@ -282,7 +282,7 @@ func SetNodePoolsData(d *schema.ResourceData, results []dataplatform.NodePoolRes
 			nodePoolEntry := make(map[string]interface{})
 			if nodePool.Properties != nil {
 				utils.SetPropWithNilCheck(nodePoolEntry, "name", nodePool.Properties.Name)
-				utils.SetPropWithNilCheck(nodePoolEntry, "data_platform_version", nodePool.Properties.DataPlatformVersion)
+				utils.SetPropWithNilCheck(nodePoolEntry, "version", nodePool.Properties.DataPlatformVersion)
 				utils.SetPropWithNilCheck(nodePoolEntry, "datacenter_id", nodePool.Properties.DatacenterId)
 				utils.SetPropWithNilCheck(nodePoolEntry, "node_count", nodePool.Properties.NodeCount)
 				utils.SetPropWithNilCheck(nodePoolEntry, "cpu_family", nodePool.Properties.CpuFamily)

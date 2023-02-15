@@ -94,7 +94,7 @@ func setCreateClusterRequestProperties(d *schema.ResourceData) *dataplatform.Cre
 		dataplatformCluster.Properties.DatacenterId = &datacenterId
 	}
 
-	if dataPlatformVersionValue, ok := d.GetOk("data_platform_version"); ok {
+	if dataPlatformVersionValue, ok := d.GetOk("version"); ok {
 		dataPlatformVersion := dataPlatformVersionValue.(string)
 		dataplatformCluster.Properties.DataPlatformVersion = &dataPlatformVersion
 	}
@@ -117,7 +117,7 @@ func setPatchClusterRequestProperties(d *schema.ResourceData) *dataplatform.Patc
 		dataplatformCluster.Properties.Name = &name
 	}
 
-	if dataPlatformVersionValue, ok := d.GetOk("data_platform_version"); ok {
+	if dataPlatformVersionValue, ok := d.GetOk("version"); ok {
 		dataPlatformVersion := dataPlatformVersionValue.(string)
 		dataplatformCluster.Properties.DataPlatformVersion = &dataPlatformVersion
 	}
@@ -158,8 +158,8 @@ func SetDataplatformClusterData(d *schema.ResourceData, cluster dataplatform.Clu
 	}
 
 	if cluster.Properties.DataPlatformVersion != nil {
-		if err := d.Set("data_platform_version", *cluster.Properties.DataPlatformVersion); err != nil {
-			return utils.GenerateSetError(clusterResourceName, "data_platform_version", err)
+		if err := d.Set("version", *cluster.Properties.DataPlatformVersion); err != nil {
+			return utils.GenerateSetError(clusterResourceName, "version", err)
 		}
 	}
 

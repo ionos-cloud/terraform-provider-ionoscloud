@@ -114,7 +114,7 @@ func resourceDataplatformNodePool() *schema.Resource {
 				Optional:    true,
 				Elem:        &schema.Schema{Type: schema.TypeString},
 			},
-			"data_platform_version": {
+			"version": {
 				Type:        schema.TypeString,
 				Description: "The version of the Data Platform.",
 				Computed:    true,

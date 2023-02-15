@@ -29,7 +29,7 @@ func TestAccDataplatformClusterBasic(t *testing.T) {
 					resource.TestCheckResourceAttr(DataplatformClusterResource+"."+DataplatformClusterTestResource, "name", DataplatformClusterTestResource),
 					resource.TestCheckResourceAttr(DataplatformClusterResource+"."+DataplatformClusterTestResource, "maintenance_window.0.time", "09:00:00"),
 					resource.TestCheckResourceAttr(DataplatformClusterResource+"."+DataplatformClusterTestResource, "maintenance_window.0.day_of_the_week", "Sunday"),
-					resource.TestCheckResourceAttr(DataplatformClusterResource+"."+DataplatformClusterTestResource, "data_platform_version", DataPlatformVersion),
+					resource.TestCheckResourceAttr(DataplatformClusterResource+"."+DataplatformClusterTestResource, "version", DataPlatformVersion),
 				),
 			},
 			{
@@ -38,7 +38,7 @@ func TestAccDataplatformClusterBasic(t *testing.T) {
 					resource.TestCheckResourceAttrPair(DataSource+"."+DataplatformClusterResource+"."+DataplatformClusterTestDataSourceById, "name", DataplatformClusterResource+"."+DataplatformClusterTestResource, "name"),
 					resource.TestCheckResourceAttrPair(DataSource+"."+DataplatformClusterResource+"."+DataplatformClusterTestDataSourceById, "maintenance_window.0.time", DataplatformClusterResource+"."+DataplatformClusterTestResource, "maintenance_window.0.time"),
 					resource.TestCheckResourceAttrPair(DataSource+"."+DataplatformClusterResource+"."+DataplatformClusterTestDataSourceById, "maintenance_window.0.day_of_the_week", DataplatformClusterResource+"."+DataplatformClusterTestResource, "maintenance_window.0.day_of_the_week"),
-					resource.TestCheckResourceAttrPair(DataSource+"."+DataplatformClusterResource+"."+DataplatformClusterTestDataSourceById, "data_platform_version", DataplatformClusterResource+"."+DataplatformClusterTestResource, "data_platform_version"),
+					resource.TestCheckResourceAttrPair(DataSource+"."+DataplatformClusterResource+"."+DataplatformClusterTestDataSourceById, "version", DataplatformClusterResource+"."+DataplatformClusterTestResource, "version"),
 					resource.TestCheckResourceAttrPair(DataSource+"."+DataplatformClusterResource+"."+DataplatformClusterTestDataSourceById, "datacenter_id", DataplatformClusterResource+"."+DataplatformClusterTestResource, "datacenter_id"),
 				),
 			},
@@ -48,7 +48,7 @@ func TestAccDataplatformClusterBasic(t *testing.T) {
 					resource.TestCheckResourceAttrPair(DataSource+"."+DataplatformClusterResource+"."+DataplatformClusterTestDataSourceByName, "name", DataplatformClusterResource+"."+DataplatformClusterTestResource, "name"),
 					resource.TestCheckResourceAttrPair(DataSource+"."+DataplatformClusterResource+"."+DataplatformClusterTestDataSourceByName, "maintenance_window.0.time", DataplatformClusterResource+"."+DataplatformClusterTestResource, "maintenance_window.0.time"),
 					resource.TestCheckResourceAttrPair(DataSource+"."+DataplatformClusterResource+"."+DataplatformClusterTestDataSourceByName, "maintenance_window.0.day_of_the_week", DataplatformClusterResource+"."+DataplatformClusterTestResource, "maintenance_window.0.day_of_the_week"),
-					resource.TestCheckResourceAttrPair(DataSource+"."+DataplatformClusterResource+"."+DataplatformClusterTestDataSourceByName, "data_platform_version", DataplatformClusterResource+"."+DataplatformClusterTestResource, "data_platform_version"),
+					resource.TestCheckResourceAttrPair(DataSource+"."+DataplatformClusterResource+"."+DataplatformClusterTestDataSourceByName, "version", DataplatformClusterResource+"."+DataplatformClusterTestResource, "version"),
 					resource.TestCheckResourceAttrPair(DataSource+"."+DataplatformClusterResource+"."+DataplatformClusterTestDataSourceByName, "datacenter_id", DataplatformClusterResource+"."+DataplatformClusterTestResource, "datacenter_id"),
 				),
 			},
@@ -58,7 +58,7 @@ func TestAccDataplatformClusterBasic(t *testing.T) {
 					resource.TestCheckResourceAttrPair(DataSource+"."+DataplatformClusterResource+"."+DataplatformClusterTestDataSourceByName, "name", DataplatformClusterResource+"."+DataplatformClusterTestResource, "name"),
 					resource.TestCheckResourceAttrPair(DataSource+"."+DataplatformClusterResource+"."+DataplatformClusterTestDataSourceByName, "maintenance_window.0.time", DataplatformClusterResource+"."+DataplatformClusterTestResource, "maintenance_window.0.time"),
 					resource.TestCheckResourceAttrPair(DataSource+"."+DataplatformClusterResource+"."+DataplatformClusterTestDataSourceByName, "maintenance_window.0.day_of_the_week", DataplatformClusterResource+"."+DataplatformClusterTestResource, "maintenance_window.0.day_of_the_week"),
-					resource.TestCheckResourceAttrPair(DataSource+"."+DataplatformClusterResource+"."+DataplatformClusterTestDataSourceByName, "data_platform_version", DataplatformClusterResource+"."+DataplatformClusterTestResource, "data_platform_version"),
+					resource.TestCheckResourceAttrPair(DataSource+"."+DataplatformClusterResource+"."+DataplatformClusterTestDataSourceByName, "version", DataplatformClusterResource+"."+DataplatformClusterTestResource, "version"),
 					resource.TestCheckResourceAttrPair(DataSource+"."+DataplatformClusterResource+"."+DataplatformClusterTestDataSourceByName, "datacenter_id", DataplatformClusterResource+"."+DataplatformClusterTestResource, "datacenter_id"),
 				),
 			},
@@ -77,7 +77,7 @@ func TestAccDataplatformClusterBasic(t *testing.T) {
 					resource.TestCheckResourceAttr(DataplatformClusterResource+"."+DataplatformClusterTestResource, "name", UpdatedResources),
 					resource.TestCheckResourceAttr(DataplatformClusterResource+"."+DataplatformClusterTestResource, "maintenance_window.0.time", "10:00:00"),
 					resource.TestCheckResourceAttr(DataplatformClusterResource+"."+DataplatformClusterTestResource, "maintenance_window.0.day_of_the_week", "Saturday"),
-					resource.TestCheckResourceAttr(DataplatformClusterResource+"."+DataplatformClusterTestResource, "data_platform_version", DataPlatformVersion),
+					resource.TestCheckResourceAttr(DataplatformClusterResource+"."+DataplatformClusterTestResource, "version", DataPlatformVersion),
 				),
 			},
 		},
@@ -165,7 +165,7 @@ resource ` + DataplatformClusterResource + ` ` + DataplatformClusterTestResource
   	day_of_the_week  	= "Sunday"
    	time				= "09:00:00"
   }
-  data_platform_version	= ` + DataPlatformVersion + `
+  version	= ` + DataPlatformVersion + `
 }
 `
 
@@ -183,7 +183,7 @@ resource ` + DataplatformClusterResource + ` ` + DataplatformClusterTestResource
     day_of_the_week  	= "Saturday"
     time				= "10:00:00"
   }
-  data_platform_version	= ` + DataPlatformVersion + `
+  version	= ` + DataPlatformVersion + `
 }
 `
 

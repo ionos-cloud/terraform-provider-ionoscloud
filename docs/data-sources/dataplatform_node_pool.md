@@ -59,7 +59,7 @@ The following attributes are returned by the datasource:
 * `datacenter_id` - The UUID of the virtual data center (VDC) the cluster is provisioned.
 * `id` - ID of your node pool.
 * `name` - The name of your node pool
-* `data_platform_version` - The version of the Data Platform.
+* `version` - The version of the Data Platform.
 * `node_count` - The number of nodes that make up the node pool.
 * `cpu_family` - A CPU family.
 * `cores_count` - The number of CPU cores per node. 

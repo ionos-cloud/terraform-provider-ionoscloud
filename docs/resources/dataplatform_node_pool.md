@@ -28,7 +28,7 @@ resource "ionoscloud_dataplatform_cluster" "example" {
     day_of_the_week  	= "Sunday"
     time				= "09:00:00"
   }
-  data_platform_version	= "22.11"
+  version	= "22.11"
 }
 
 resource "ionoscloud_dataplatform_node_pool" "example" {

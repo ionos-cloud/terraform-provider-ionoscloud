@@ -37,7 +37,7 @@ func dataSourceDataplatformCluster() *schema.Resource {
 				Default:     false,
 				Optional:    true,
 			},
-			"data_platform_version": {
+			"version": {
 				Type:        schema.TypeString,
 				Description: "The version of the Data Platform.",
 				Computed:    true,
