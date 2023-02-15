@@ -4,89 +4,89 @@ import (
 	"context"
 	"fmt"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
-	"github.com/ionos-cloud/sdk-go-bundle/common"
 	cr "github.com/ionos-cloud/sdk-go-bundle/products/containerregistry"
+	"github.com/ionos-cloud/sdk-go-bundle/shared"
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils"
 	"time"
 )
 
-func (c *Client) ListRegistries(ctx context.Context) (cr.RegistriesResponse, *common.APIResponse, error) {
+func (c *Client) ListRegistries(ctx context.Context) (cr.RegistriesResponse, *shared.APIResponse, error) {
 	registry, apiResponse, err := c.sdkClient.RegistriesApi.RegistriesGet(ctx).Execute()
 	apiResponse.LogInfo()
 	return registry, apiResponse, err
 }
 
-func (c *Client) CreateRegistry(ctx context.Context, registryInput cr.PostRegistryInput) (cr.PostRegistryOutput, *common.APIResponse, error) {
+func (c *Client) CreateRegistry(ctx context.Context, registryInput cr.PostRegistryInput) (cr.PostRegistryOutput, *shared.APIResponse, error) {
 	registry, apiResponse, err := c.sdkClient.RegistriesApi.RegistriesPost(ctx).PostRegistryInput(registryInput).Execute()
 	apiResponse.LogInfo()
 	return registry, apiResponse, err
 }
 
-func (c *Client) DeleteRegistry(ctx context.Context, registryId string) (*common.APIResponse, error) {
+func (c *Client) DeleteRegistry(ctx context.Context, registryId string) (*shared.APIResponse, error) {
 	apiResponse, err := c.sdkClient.RegistriesApi.RegistriesDelete(ctx, registryId).Execute()
 	apiResponse.LogInfo()
 	return apiResponse, err
 }
 
-func (c *Client) GetRegistry(ctx context.Context, registryId string) (cr.RegistryResponse, *common.APIResponse, error) {
+func (c *Client) GetRegistry(ctx context.Context, registryId string) (cr.RegistryResponse, *shared.APIResponse, error) {
 	registries, apiResponse, err := c.sdkClient.RegistriesApi.RegistriesFindById(ctx, registryId).Execute()
 	apiResponse.LogInfo()
 	return registries, apiResponse, err
 }
 
-func (c *Client) PatchRegistry(ctx context.Context, registryId string, registryInput cr.PatchRegistryInput) (cr.RegistryResponse, *common.APIResponse, error) {
+func (c *Client) PatchRegistry(ctx context.Context, registryId string, registryInput cr.PatchRegistryInput) (cr.RegistryResponse, *shared.APIResponse, error) {
 	registries, apiResponse, err := c.sdkClient.RegistriesApi.RegistriesPatch(ctx, registryId).PatchRegistryInput(registryInput).Execute()
 	apiResponse.LogInfo()
 	return registries, apiResponse, err
 }
 
-func (c *Client) PutRegistry(ctx context.Context, registryId string, registryInput cr.PutRegistryInput) (cr.PutRegistryOutput, *common.APIResponse, error) {
+func (c *Client) PutRegistry(ctx context.Context, registryId string, registryInput cr.PutRegistryInput) (cr.PutRegistryOutput, *shared.APIResponse, error) {
 	registries, apiResponse, err := c.sdkClient.RegistriesApi.RegistriesPut(ctx, registryId).PutRegistryInput(registryInput).Execute()
 	apiResponse.LogInfo()
 	return registries, apiResponse, err
 }
 
-func (c *Client) DeleteRepositories(ctx context.Context, registryId, repositoryId string) (*common.APIResponse, error) {
+func (c *Client) DeleteRepositories(ctx context.Context, registryId, repositoryId string) (*shared.APIResponse, error) {
 	apiResponse, err := c.sdkClient.RepositoriesApi.RegistriesRepositoriesDelete(ctx, registryId, repositoryId).Execute()
 	apiResponse.LogInfo()
 	return apiResponse, err
 }
 
-func (c *Client) ListTokens(ctx context.Context, registryId string) (cr.TokensResponse, *common.APIResponse, error) {
+func (c *Client) ListTokens(ctx context.Context, registryId string) (cr.TokensResponse, *shared.APIResponse, error) {
 	tokens, apiResponse, err := c.sdkClient.TokensApi.RegistriesTokensGet(ctx, registryId).Execute()
 	apiResponse.LogInfo()
 	return tokens, apiResponse, err
 
 }
 
-func (c *Client) CreateTokens(ctx context.Context, registryId string, tokenInput cr.PostTokenInput) (cr.PostTokenOutput, *common.APIResponse, error) {
+func (c *Client) CreateTokens(ctx context.Context, registryId string, tokenInput cr.PostTokenInput) (cr.PostTokenOutput, *shared.APIResponse, error) {
 	token, apiResponse, err := c.sdkClient.TokensApi.RegistriesTokensPost(ctx, registryId).PostTokenInput(tokenInput).Execute()
 	apiResponse.LogInfo()
 	return token, apiResponse, err
 
 }
 
-func (c *Client) DeleteToken(ctx context.Context, registryId, tokenId string) (*common.APIResponse, error) {
+func (c *Client) DeleteToken(ctx context.Context, registryId, tokenId string) (*shared.APIResponse, error) {
 	apiResponse, err := c.sdkClient.TokensApi.RegistriesTokensDelete(ctx, registryId, tokenId).Execute()
 	apiResponse.LogInfo()
 	return apiResponse, err
 }
 
-func (c *Client) GetToken(ctx context.Context, registryId, tokenId string) (cr.TokenResponse, *common.APIResponse, error) {
+func (c *Client) GetToken(ctx context.Context, registryId, tokenId string) (cr.TokenResponse, *shared.APIResponse, error) {
 	token, apiResponse, err := c.sdkClient.TokensApi.RegistriesTokensFindById(ctx, registryId, tokenId).Execute()
 	apiResponse.LogInfo()
 	return token, apiResponse, err
 
 }
 
-func (c *Client) PatchToken(ctx context.Context, registryId, tokenId string, tokenInput cr.PatchTokenInput) (cr.TokenResponse, *common.APIResponse, error) {
+func (c *Client) PatchToken(ctx context.Context, registryId, tokenId string, tokenInput cr.PatchTokenInput) (cr.TokenResponse, *shared.APIResponse, error) {
 	token, apiResponse, err := c.sdkClient.TokensApi.RegistriesTokensPatch(ctx, registryId, tokenId).PatchTokenInput(tokenInput).Execute()
 	apiResponse.LogInfo()
 	return token, apiResponse, err
 
 }
 
-func (c *Client) PutToken(ctx context.Context, registryId, tokenId string, tokenInput cr.PutTokenInput) (cr.PutTokenOutput, *common.APIResponse, error) {
+func (c *Client) PutToken(ctx context.Context, registryId, tokenId string, tokenInput cr.PutTokenInput) (cr.PutTokenOutput, *shared.APIResponse, error) {
 	token, apiResponse, err := c.sdkClient.TokensApi.RegistriesTokensPut(ctx, registryId, tokenId).PutTokenInput(tokenInput).Execute()
 	apiResponse.LogInfo()
 	return token, apiResponse, err

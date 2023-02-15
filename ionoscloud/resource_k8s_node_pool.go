@@ -6,8 +6,8 @@ import (
 	"fmt"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
-	"github.com/ionos-cloud/sdk-go-bundle/common"
 	ionoscloud "github.com/ionos-cloud/sdk-go-bundle/products/compute"
+	"github.com/ionos-cloud/sdk-go-bundle/shared"
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils"
 	"log"
 	"reflect"
@@ -823,7 +823,7 @@ func resourceK8sNodepoolImport(ctx context.Context, d *schema.ResourceData, meta
 	logApiRequestTime(apiResponse)
 
 	if err != nil {
-		if _, ok := err.(common.GenericOpenAPIError); ok {
+		if _, ok := err.(shared.GenericOpenAPIError); ok {
 			if httpNotFound(apiResponse) {
 				d.SetId("")
 				return nil, fmt.Errorf("unable to find k8s node pool %q", npId)

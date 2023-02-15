@@ -8,8 +8,8 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 	"github.com/iancoleman/strcase"
-	"github.com/ionos-cloud/sdk-go-bundle/common"
 	ionoscloud "github.com/ionos-cloud/sdk-go-bundle/products/compute"
+	"github.com/ionos-cloud/sdk-go-bundle/shared"
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils"
 	"log"
 )
@@ -244,7 +244,7 @@ func dataSourceServersRead(ctx context.Context, d *schema.ResourceData, meta int
 		log.Printf("[INFO] Adding filter with name %s and value %s \n", name, value)
 	}
 	var err error
-	var apiResponse *common.APIResponse
+	var apiResponse *shared.APIResponse
 
 	/* search by whatever filter is set above */
 	servers, apiResponse, err := req.Execute()

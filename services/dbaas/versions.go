@@ -6,16 +6,16 @@ import (
 	"github.com/google/uuid"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
-	"github.com/ionos-cloud/sdk-go-bundle/common"
 	"github.com/ionos-cloud/sdk-go-bundle/products/dbaas/psql"
+	"github.com/ionos-cloud/sdk-go-bundle/shared"
 )
 
-func (c *PsqlClient) GetClusterVersions(ctx context.Context, clusterId string) (psql.PostgresVersionList, *common.APIResponse, error) {
+func (c *PsqlClient) GetClusterVersions(ctx context.Context, clusterId string) (psql.PostgresVersionList, *shared.APIResponse, error) {
 	versions, apiResponse, err := c.sdkClient.ClustersApi.ClusterPostgresVersionsGet(ctx, clusterId).Execute()
 	return versions, apiResponse, err
 }
 
-func (c *PsqlClient) GetAllVersions(ctx context.Context) (psql.PostgresVersionList, *common.APIResponse, error) {
+func (c *PsqlClient) GetAllVersions(ctx context.Context) (psql.PostgresVersionList, *shared.APIResponse, error) {
 	versions, apiResponse, err := c.sdkClient.ClustersApi.PostgresVersionsGet(ctx).Execute()
 	return versions, apiResponse, err
 }

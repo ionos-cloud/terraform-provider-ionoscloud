@@ -3,8 +3,8 @@ package containerregistry
 import (
 	"fmt"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/meta"
-	"github.com/ionos-cloud/sdk-go-bundle/common"
 	cr "github.com/ionos-cloud/sdk-go-bundle/products/containerregistry"
+	"github.com/ionos-cloud/sdk-go-bundle/shared"
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils"
 	"net/http"
 	"runtime"
@@ -16,7 +16,7 @@ type Client struct {
 }
 
 func NewClient(username, password, token, url, version, terraformVersion string) *Client {
-	newConfigRegistry := common.NewConfiguration(username, password, token, url)
+	newConfigRegistry := shared.NewConfiguration(username, password, token, url)
 
 	newConfigRegistry.MaxRetries = 999
 	newConfigRegistry.MaxWaitTime = 4 * time.Second

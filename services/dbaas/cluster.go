@@ -5,27 +5,27 @@ import (
 	"fmt"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
-	"github.com/ionos-cloud/sdk-go-bundle/common"
-	mongo "github.com/ionos-cloud/sdk-go-bundle/products/dbaas/mongo"
+	"github.com/ionos-cloud/sdk-go-bundle/products/dbaas/mongo"
 	"github.com/ionos-cloud/sdk-go-bundle/products/dbaas/psql"
+	"github.com/ionos-cloud/sdk-go-bundle/shared"
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils"
 	"log"
 	"strings"
 	"time"
 )
 
-func (c *PsqlClient) GetCluster(ctx context.Context, clusterId string) (psql.ClusterResponse, *common.APIResponse, error) {
+func (c *PsqlClient) GetCluster(ctx context.Context, clusterId string) (psql.ClusterResponse, *shared.APIResponse, error) {
 	cluster, apiResponse, err := c.sdkClient.ClustersApi.ClustersFindById(ctx, clusterId).Execute()
 	return cluster, apiResponse, err
 }
 
-func (c *MongoClient) GetCluster(ctx context.Context, clusterId string) (mongo.ClusterResponse, *common.APIResponse, error) {
+func (c *MongoClient) GetCluster(ctx context.Context, clusterId string) (mongo.ClusterResponse, *shared.APIResponse, error) {
 	cluster, apiResponse, err := c.sdkClient.ClustersApi.ClustersFindById(ctx, clusterId).Execute()
 	apiResponse.LogInfo()
 	return cluster, apiResponse, err
 }
 
-func (c *PsqlClient) ListClusters(ctx context.Context, filterName string) (psql.ClusterList, *common.APIResponse, error) {
+func (c *PsqlClient) ListClusters(ctx context.Context, filterName string) (psql.ClusterList, *shared.APIResponse, error) {
 	request := c.sdkClient.ClustersApi.ClustersGet(ctx)
 	if filterName != "" {
 		request = request.FilterName(filterName)
@@ -34,7 +34,7 @@ func (c *PsqlClient) ListClusters(ctx context.Context, filterName string) (psql.
 	return clusters, apiResponse, err
 }
 
-func (c *MongoClient) ListClusters(ctx context.Context, filterName string) (mongo.ClusterList, *common.APIResponse, error) {
+func (c *MongoClient) ListClusters(ctx context.Context, filterName string) (mongo.ClusterList, *shared.APIResponse, error) {
 	request := c.sdkClient.ClustersApi.ClustersGet(ctx)
 	if filterName != "" {
 		request = request.FilterName(filterName)
@@ -44,40 +44,40 @@ func (c *MongoClient) ListClusters(ctx context.Context, filterName string) (mong
 	return clusters, apiResponse, err
 }
 
-func (c *MongoClient) GetTemplates(ctx context.Context) (mongo.TemplateList, *common.APIResponse, error) {
+func (c *MongoClient) GetTemplates(ctx context.Context) (mongo.TemplateList, *shared.APIResponse, error) {
 	templates, apiResponse, err := c.sdkClient.TemplatesApi.TemplatesGet(ctx).Execute()
 	apiResponse.LogInfo()
 	return templates, apiResponse, err
 }
 
-func (c *PsqlClient) CreateCluster(ctx context.Context, cluster psql.CreateClusterRequest) (psql.ClusterResponse, *common.APIResponse, error) {
+func (c *PsqlClient) CreateCluster(ctx context.Context, cluster psql.CreateClusterRequest) (psql.ClusterResponse, *shared.APIResponse, error) {
 	clusterResponse, apiResponse, err := c.sdkClient.ClustersApi.ClustersPost(ctx).CreateClusterRequest(cluster).Execute()
 	return clusterResponse, apiResponse, err
 }
 
-func (c *MongoClient) CreateCluster(ctx context.Context, cluster mongo.CreateClusterRequest) (mongo.ClusterResponse, *common.APIResponse, error) {
+func (c *MongoClient) CreateCluster(ctx context.Context, cluster mongo.CreateClusterRequest) (mongo.ClusterResponse, *shared.APIResponse, error) {
 	clusterResponse, apiResponse, err := c.sdkClient.ClustersApi.ClustersPost(ctx).CreateClusterRequest(cluster).Execute()
 	apiResponse.LogInfo()
 	return clusterResponse, apiResponse, err
 }
 
-func (c *MongoClient) UpdateCluster(ctx context.Context, clusterId string, cluster mongo.PatchClusterRequest) (mongo.ClusterResponse, *common.APIResponse, error) {
+func (c *MongoClient) UpdateCluster(ctx context.Context, clusterId string, cluster mongo.PatchClusterRequest) (mongo.ClusterResponse, *shared.APIResponse, error) {
 	clusterResponse, apiResponse, err := c.sdkClient.ClustersApi.ClustersPatch(ctx, clusterId).PatchClusterRequest(cluster).Execute()
 	apiResponse.LogInfo()
 	return clusterResponse, apiResponse, err
 }
 
-func (c *PsqlClient) UpdateCluster(ctx context.Context, clusterId string, cluster psql.PatchClusterRequest) (psql.ClusterResponse, *common.APIResponse, error) {
+func (c *PsqlClient) UpdateCluster(ctx context.Context, clusterId string, cluster psql.PatchClusterRequest) (psql.ClusterResponse, *shared.APIResponse, error) {
 	clusterResponse, apiResponse, err := c.sdkClient.ClustersApi.ClustersPatch(ctx, clusterId).PatchClusterRequest(cluster).Execute()
 	return clusterResponse, apiResponse, err
 }
 
-func (c *PsqlClient) DeleteCluster(ctx context.Context, clusterId string) (psql.ClusterResponse, *common.APIResponse, error) {
+func (c *PsqlClient) DeleteCluster(ctx context.Context, clusterId string) (psql.ClusterResponse, *shared.APIResponse, error) {
 	clusterResponse, apiResponse, err := c.sdkClient.ClustersApi.ClustersDelete(ctx, clusterId).Execute()
 	return clusterResponse, apiResponse, err
 }
 
-func (c *MongoClient) DeleteCluster(ctx context.Context, clusterId string) (mongo.ClusterResponse, *common.APIResponse, error) {
+func (c *MongoClient) DeleteCluster(ctx context.Context, clusterId string) (mongo.ClusterResponse, *shared.APIResponse, error) {
 	clusterResponse, apiResponse, err := c.sdkClient.ClustersApi.ClustersDelete(ctx, clusterId).Execute()
 	apiResponse.LogInfo()
 	return clusterResponse, apiResponse, err

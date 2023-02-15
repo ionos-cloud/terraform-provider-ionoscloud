@@ -7,8 +7,8 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
-	"github.com/ionos-cloud/sdk-go-bundle/common"
 	ionoscloud "github.com/ionos-cloud/sdk-go-bundle/products/compute"
+	"github.com/ionos-cloud/sdk-go-bundle/shared"
 )
 
 func dataSourceK8sNodePool() *schema.Resource {
@@ -205,7 +205,7 @@ func dataSourceK8sReadNodePool(ctx context.Context, d *schema.ResourceData, meta
 	}
 	var nodePool ionoscloud.KubernetesNodePool
 	var err error
-	var apiResponse *common.APIResponse
+	var apiResponse *shared.APIResponse
 	if idOk {
 		/* search by ID */
 		nodePool, apiResponse, err = client.KubernetesApi.K8sNodepoolsFindById(ctx, clusterId.(string), id.(string)).Execute()

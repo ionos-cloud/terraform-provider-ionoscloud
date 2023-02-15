@@ -3,8 +3,8 @@ package cert
 import (
 	"fmt"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/meta"
-	"github.com/ionos-cloud/sdk-go-bundle/common"
 	certmanager "github.com/ionos-cloud/sdk-go-bundle/products/cert"
+	"github.com/ionos-cloud/sdk-go-bundle/shared"
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils"
 	"net/http"
 	"runtime"
@@ -15,7 +15,7 @@ type Client struct {
 }
 
 func NewClient(username, password, token, url, version, terraformVersion string) *Client {
-	certConfig := common.NewConfiguration(username, password, token, url)
+	certConfig := shared.NewConfiguration(username, password, token, url)
 
 	certConfig.MaxRetries = utils.MaxRetries
 	certConfig.MaxWaitTime = utils.MaxWaitTime

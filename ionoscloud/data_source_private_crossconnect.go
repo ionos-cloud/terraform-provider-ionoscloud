@@ -6,8 +6,8 @@ import (
 	"fmt"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
-	"github.com/ionos-cloud/sdk-go-bundle/common"
 	ionoscloud "github.com/ionos-cloud/sdk-go-bundle/products/compute"
+	"github.com/ionos-cloud/sdk-go-bundle/shared"
 )
 
 func dataSourcePcc() *schema.Resource {
@@ -170,7 +170,7 @@ func dataSourcePccRead(ctx context.Context, d *schema.ResourceData, meta interfa
 
 	var pcc ionoscloud.PrivateCrossConnect
 	var err error
-	var apiResponse *common.APIResponse
+	var apiResponse *shared.APIResponse
 
 	if idOk {
 		/* search by ID */

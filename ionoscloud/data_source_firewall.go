@@ -6,8 +6,8 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
-	"github.com/ionos-cloud/sdk-go-bundle/common"
 	ionoscloud "github.com/ionos-cloud/sdk-go-bundle/products/compute"
+	"github.com/ionos-cloud/sdk-go-bundle/shared"
 )
 
 func dataSourceFirewall() *schema.Resource {
@@ -96,7 +96,7 @@ func dataSourceFirewallRead(ctx context.Context, d *schema.ResourceData, meta in
 	}
 	var firewall ionoscloud.FirewallRule
 	var err error
-	var apiResponse *common.APIResponse
+	var apiResponse *shared.APIResponse
 
 	if idOk {
 		/* search by ID */

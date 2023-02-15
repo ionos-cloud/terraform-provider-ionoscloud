@@ -3,7 +3,7 @@ package ionoscloud
 import (
 	"context"
 	"fmt"
-	"github.com/ionos-cloud/sdk-go-bundle/common"
+	"github.com/ionos-cloud/sdk-go-bundle/shared"
 	"log"
 	"net/http"
 	"runtime"
@@ -46,25 +46,25 @@ func Provider() *schema.Provider {
 			"username": {
 				Type:        schema.TypeString,
 				Optional:    true,
-				DefaultFunc: schema.EnvDefaultFunc(common.IonosUsernameEnvVar, nil),
+				DefaultFunc: schema.EnvDefaultFunc(shared.IonosUsernameEnvVar, nil),
 				Description: "IonosCloud username for API operations. If token is provided, token is preferred",
 			},
 			"password": {
 				Type:        schema.TypeString,
 				Optional:    true,
-				DefaultFunc: schema.EnvDefaultFunc(common.IonosPasswordEnvVar, nil),
+				DefaultFunc: schema.EnvDefaultFunc(shared.IonosPasswordEnvVar, nil),
 				Description: "IonosCloud password for API operations. If token is provided, token is preferred",
 			},
 			"token": {
 				Type:        schema.TypeString,
 				Optional:    true,
-				DefaultFunc: schema.EnvDefaultFunc(common.IonosTokenEnvVar, nil),
+				DefaultFunc: schema.EnvDefaultFunc(shared.IonosTokenEnvVar, nil),
 				Description: "IonosCloud bearer token for API operations.",
 			},
 			"endpoint": {
 				Type:        schema.TypeString,
 				Optional:    true,
-				DefaultFunc: schema.EnvDefaultFunc(common.IonosApiUrlEnvVar, ""),
+				DefaultFunc: schema.EnvDefaultFunc(shared.IonosApiUrlEnvVar, ""),
 				Description: "IonosCloud REST API URL.",
 			},
 			"retries": {
@@ -224,7 +224,7 @@ func NewClientByType(clientOpts ClientOptions, clientType clientType) interface{
 	switch clientType {
 	case ionosClient:
 		{
-			newConfig := common.NewConfiguration(clientOpts.Username, clientOpts.Password, clientOpts.Token, clientOpts.Url)
+			newConfig := shared.NewConfiguration(clientOpts.Username, clientOpts.Password, clientOpts.Token, clientOpts.Url)
 
 			newConfig.MaxRetries = utils.MaxRetries
 			newConfig.WaitTime = utils.MaxWaitTime

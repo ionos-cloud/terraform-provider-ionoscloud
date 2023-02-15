@@ -6,11 +6,11 @@ import (
 	"github.com/google/uuid"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
-	"github.com/ionos-cloud/sdk-go-bundle/common"
 	cr "github.com/ionos-cloud/sdk-go-bundle/products/containerregistry"
+	"github.com/ionos-cloud/sdk-go-bundle/shared"
 )
 
-func (c *Client) GetAllLocations(ctx context.Context) (cr.LocationsResponse, *common.APIResponse, error) {
+func (c *Client) GetAllLocations(ctx context.Context) (cr.LocationsResponse, *shared.APIResponse, error) {
 	versions, apiResponse, err := c.sdkClient.LocationsApi.LocationsGet(ctx).Execute()
 	apiResponse.LogInfo()
 	return versions, apiResponse, err

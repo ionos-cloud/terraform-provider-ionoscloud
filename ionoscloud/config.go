@@ -3,8 +3,8 @@ package ionoscloud
 import (
 	"fmt"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/meta"
-	"github.com/ionos-cloud/sdk-go-bundle/common"
 	ionoscloud "github.com/ionos-cloud/sdk-go-bundle/products/compute"
+	"github.com/ionos-cloud/sdk-go-bundle/shared"
 	"log"
 	"runtime"
 )
@@ -22,9 +22,9 @@ type Config struct {
 func (c *Config) Client(terraformVersion string) (*ionoscloud.APIClient, error) {
 	var client *ionoscloud.APIClient
 	if c.Token != "" {
-		client = ionoscloud.NewAPIClient(common.NewConfiguration("", "", c.Token, c.Endpoint))
+		client = ionoscloud.NewAPIClient(shared.NewConfiguration("", "", c.Token, c.Endpoint))
 	} else {
-		client = ionoscloud.NewAPIClient(common.NewConfiguration(c.Username, c.Password, "", c.Endpoint))
+		client = ionoscloud.NewAPIClient(shared.NewConfiguration(c.Username, c.Password, "", c.Endpoint))
 	}
 
 	client.GetConfig().UserAgent = fmt.Sprintf(

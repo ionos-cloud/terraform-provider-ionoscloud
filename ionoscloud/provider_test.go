@@ -2,7 +2,7 @@ package ionoscloud
 
 import (
 	"context"
-	"github.com/ionos-cloud/sdk-go-bundle/common"
+	"github.com/ionos-cloud/sdk-go-bundle/shared"
 	"os"
 	"testing"
 
@@ -38,12 +38,12 @@ func TestProvider_impl(t *testing.T) {
 }
 
 func testAccPreCheck(t *testing.T) {
-	pbUsername := os.Getenv(common.IonosUsernameEnvVar)
-	pbPassword := os.Getenv(common.IonosPasswordEnvVar)
-	pbToken := os.Getenv(common.IonosTokenEnvVar)
+	pbUsername := os.Getenv(shared.IonosUsernameEnvVar)
+	pbPassword := os.Getenv(shared.IonosPasswordEnvVar)
+	pbToken := os.Getenv(shared.IonosTokenEnvVar)
 	if pbToken == "" {
 		if pbUsername == "" || pbPassword == "" {
-			t.Fatalf("%s/%s or %s must be set for acceptance tests", common.IonosUsernameEnvVar, common.IonosPasswordEnvVar, common.IonosTokenEnvVar)
+			t.Fatalf("%s/%s or %s must be set for acceptance tests", shared.IonosUsernameEnvVar, shared.IonosPasswordEnvVar, shared.IonosTokenEnvVar)
 		}
 	}
 
