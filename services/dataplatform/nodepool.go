@@ -65,7 +65,7 @@ func (c *Client) IsNodePoolReady(ctx context.Context, d *schema.ResourceData) (b
 	clusterIdStr := clusterId.(string)
 	subjectNodePool, _, err := c.GetNodePool(ctx, clusterIdStr, d.Id())
 	if err != nil {
-		return true, fmt.Errorf("checking Dataplatform Node Pool status: %w", err)
+		return false, fmt.Errorf("checking Dataplatform Node Pool status: %w", err)
 	}
 
 	if subjectNodePool.Metadata == nil || subjectNodePool.Metadata.State == nil {

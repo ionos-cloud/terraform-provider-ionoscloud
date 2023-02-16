@@ -24,7 +24,7 @@ func resourceDataplatformCluster() *schema.Resource {
 		Schema: map[string]*schema.Schema{
 			"datacenter_id": {
 				Type:        schema.TypeString,
-				Description: "The UUID of the virtual data center (VDC) the cluster is provisioned.",
+				Description: "The UUID of the virtual data center (VDC) in which the cluster is provisioned",
 				ValidateDiagFunc: validation.ToDiagFunc(validation.All(validation.StringLenBetween(32, 63),
 					validation.StringMatch(regexp.MustCompile("^[0-9a-f]{8}-?[0-9a-f]{4}-?[0-9a-f]{4}-?[0-9a-f]{4}-?[0-9a-f]{12}$"), ""))),
 				Required: true,
@@ -120,7 +120,7 @@ func resourceDataplatformClusterUpdate(ctx context.Context, d *schema.ResourceDa
 
 	clusterId := d.Id()
 
-	_, err := client.UpdateCLuster(ctx, clusterId, d)
+	_, err := client.UpdateCluster(ctx, clusterId, d)
 
 	if err != nil {
 		diags := diag.FromErr(fmt.Errorf("an error occured while updating a Dataplatform Cluster: %s", err))

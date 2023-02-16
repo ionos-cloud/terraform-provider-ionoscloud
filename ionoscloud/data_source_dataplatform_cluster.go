@@ -44,7 +44,7 @@ func dataSourceDataplatformCluster() *schema.Resource {
 			},
 			"datacenter_id": {
 				Type:        schema.TypeString,
-				Description: "The UUID of the virtual data center (VDC) the cluster is provisioned.",
+				Description: "The UUID of the virtual data center (VDC) in which the cluster is provisioned",
 				Computed:    true,
 			},
 			"maintenance_window": {

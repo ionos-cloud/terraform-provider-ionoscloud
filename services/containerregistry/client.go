@@ -8,7 +8,6 @@ import (
 	"net/http"
 	"os"
 	"runtime"
-	"time"
 )
 
 type Client struct {
@@ -21,8 +20,8 @@ func NewClient(username, password, token, url, version, terraformVersion string)
 	if os.Getenv("IONOS_DEBUG") != "" {
 		newConfigRegistry.Debug = true
 	}
-	newConfigRegistry.MaxRetries = 999
-	newConfigRegistry.MaxWaitTime = 4 * time.Second
+	newConfigRegistry.MaxRetries = utils.MaxRetries
+	newConfigRegistry.MaxWaitTime = utils.MaxWaitTime
 
 	newConfigRegistry.HTTPClient = &http.Client{Transport: utils.CreateTransport()}
 	newConfigRegistry.UserAgent = fmt.Sprintf(

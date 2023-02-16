@@ -8,7 +8,6 @@ import (
 	"net/http"
 	"os"
 	"runtime"
-	"time"
 )
 
 // Client - wrapper over sdk client, to allow for service layer
@@ -22,8 +21,8 @@ func NewClient(username, password, token, url, version, terraformVersion string)
 	if os.Getenv("IONOS_DEBUG") != "" {
 		newConfigDataplatform.Debug = true
 	}
-	newConfigDataplatform.MaxRetries = 999
-	newConfigDataplatform.MaxWaitTime = 4 * time.Second
+	newConfigDataplatform.MaxRetries = utils.MaxRetries
+	newConfigDataplatform.MaxWaitTime = utils.MaxWaitTime
 
 	newConfigDataplatform.HTTPClient = &http.Client{Transport: utils.CreateTransport()}
 	newConfigDataplatform.UserAgent = fmt.Sprintf(

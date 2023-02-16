@@ -41,7 +41,7 @@ func dataSourceDataplatformNodePool() *schema.Resource {
 			},
 			"datacenter_id": {
 				Type:        schema.TypeString,
-				Description: "The UUID of the virtual data center (VDC) the cluster is provisioned.",
+				Description: "The UUID of the virtual data center (VDC) in which the node pool is provisioned",
 				Computed:    true,
 			},
 			"node_count": {
@@ -187,11 +187,10 @@ func filterNodePools(ctx context.Context, d *schema.ResourceData, client *datapl
 		for _, nodePoolItem := range *nodePools.Items {
 			if nodePoolItem.Properties != nil && nodePoolItem.Properties.Name != nil && (partialMatch && strings.Contains(*nodePoolItem.Properties.Name, name) ||
 				!partialMatch && strings.EqualFold(*nodePoolItem.Properties.Name, name)) {
-				tmpNodePool, _, err := client.GetNodePool(ctx, clusterId, *nodePoolItem.Id)
-				if err != nil {
-					return nil, diag.FromErr(fmt.Errorf("an error occurred while fetching the Dataplatform NodePool with ID: %s while searching by full name: %s: %w", *nodePoolItem.Id, name, err))
+				if len(results) > 1 {
+					break
 				}
-				results = append(results, tmpNodePool)
+				results = append(results, nodePoolItem)
 			}
 		}
 	}

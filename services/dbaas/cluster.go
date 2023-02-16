@@ -53,6 +53,7 @@ func (c *MongoClient) GetTemplates(ctx context.Context) (mongo.TemplateList, *mo
 
 func (c *PsqlClient) CreateCluster(ctx context.Context, cluster psql.CreateClusterRequest) (psql.ClusterResponse, *psql.APIResponse, error) {
 	clusterResponse, apiResponse, err := c.sdkClient.ClustersApi.ClustersPost(ctx).CreateClusterRequest(cluster).Execute()
+	apiResponse.LogInfo()
 	return clusterResponse, apiResponse, err
 }
 

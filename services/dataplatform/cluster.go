@@ -65,7 +65,7 @@ func (c *Client) CreateCluster(ctx context.Context, d *schema.ResourceData) (id 
 	return *clusterResponse.Id, apiResponse, err
 }
 
-func (c *Client) UpdateCLuster(ctx context.Context, id string, d *schema.ResourceData) (utils.ApiResponseInfo, error) {
+func (c *Client) UpdateCluster(ctx context.Context, id string, d *schema.ResourceData) (utils.ApiResponseInfo, error) {
 	cluster := setPatchClusterRequestProperties(d)
 	_, apiResponse, err := c.sdkClient.DataPlatformClusterApi.PatchCluster(ctx, id).PatchClusterRequest(*cluster).Execute()
 	apiResponse.LogInfo()

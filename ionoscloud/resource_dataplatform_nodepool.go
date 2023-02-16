@@ -121,7 +121,7 @@ func resourceDataplatformNodePool() *schema.Resource {
 			},
 			"datacenter_id": {
 				Type:        schema.TypeString,
-				Description: "The UUID of the virtual data center (VDC) the cluster is provisioned.",
+				Description: "The UUID of the virtual data center (VDC) in which the nodepool is provisioned",
 				Computed:    true,
 			},
 			"cluster_id": {
