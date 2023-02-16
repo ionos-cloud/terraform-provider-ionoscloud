@@ -19,9 +19,7 @@ func TestAccDataSourceDataplatformVersions(t *testing.T) {
 		Steps: []resource.TestStep{
 			{
 				Config: testAccDataSourceDataplatformVersions,
-				Check: resource.ComposeTestCheckFunc(
-					utils.TestNotEmptySlice(DataSource+"."+DataplatformVersionsDataSource+"."+DataplatformVersionsTestDataSource, "versions.#"),
-				),
+				Check:  resource.ComposeTestCheckFunc(utils.TestNotEmptySlice(DataSource+"."+DataplatformVersionsDataSource+"."+DataplatformVersionsTestDataSource, "versions.#")),
 			},
 		},
 	})

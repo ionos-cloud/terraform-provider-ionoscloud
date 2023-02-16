@@ -34,7 +34,7 @@ func dataSourceDataplatformNodePools() *schema.Resource {
 			},
 			"node_pools": {
 				Type:        schema.TypeList,
-				Description: "list of servers",
+				Description: "list of node pools",
 				Computed:    true,
 				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{
@@ -148,14 +148,20 @@ func dataSourceNodePoolsRead(ctx context.Context, d *schema.ResourceData, meta i
 	} else {
 		nodePools, _, err := client.ListNodePools(ctx, clusterId)
 		if err != nil {
-			diags := diag.FromErr(fmt.Errorf("an error occurred while fetching Dataplatform NodePools: %s", err.Error()))
+			diags := diag.FromErr(fmt.Errorf("an error occurred while fetching Dataplatform NodePools: %w", err))
 			return diags
 		}
-		results = *nodePools.Items
+		if nodePools.Items != nil {
+			results = *nodePools.Items
+		}
 	}
 
 	if results == nil || len(results) == 0 {
-		return diag.FromErr(fmt.Errorf("no Dataplatform NodePool found under cluster %s with the specified name = %s", clusterId, name))
+		err := fmt.Errorf("no Dataplatform NodePool found under cluster %s", clusterId)
+		if nameOk {
+			err = fmt.Errorf("%w with the specified name = %s", err, name)
+		}
+		return diag.FromErr(err)
 	}
 
 	if err = dataplatformService.SetNodePoolsData(d, results); err != nil {

@@ -18,7 +18,7 @@ func (c *Client) IsClusterReady(ctx context.Context, d *schema.ResourceData) (bo
 		return false, err
 	}
 	if cluster.Metadata == nil || cluster.Metadata.State == nil {
-		return false, fmt.Errorf("expected metadata, got empty for id %s", d.Id())
+		return false, fmt.Errorf("expected metadata, got empty for cluster id %s", d.Id())
 	}
 	log.Printf("[DEBUG] dataplatform cluster state %s", *cluster.Metadata.State)
 	return strings.EqualFold(*cluster.Metadata.State, utils.Available), nil
@@ -30,7 +30,7 @@ func (c *Client) GetClusterById(ctx context.Context, id string) (dataplatform.Cl
 	return cluster, apiResponse, err
 }
 
-// IsClusterDeleted - returns apiResponse to check if resource still exists. To be used with WaitForResourceToBeDeleted
+// IsClusterDeleted - checks if resource still exists. To be used with WaitForResourceToBeDeleted
 func (c *Client) IsClusterDeleted(ctx context.Context, d *schema.ResourceData) (bool, error) {
 	_, apiResponse, err := c.sdkClient.DataPlatformClusterApi.GetCluster(ctx, d.Id()).Execute()
 	apiResponse.LogInfo()

@@ -259,7 +259,7 @@ func SetDataplatformNodePoolData(d *schema.ResourceData, nodePool dataplatform.N
 
 	if nodePool.Properties.Labels != nil {
 		if err := d.Set("labels", *nodePool.Properties.Labels); err != nil {
-			return utils.GenerateSetError(nodePoolResourceName, "storage_size", err)
+			return utils.GenerateSetError(nodePoolResourceName, "labels", err)
 		}
 	}
 
@@ -309,7 +309,7 @@ func SetNodePoolsData(d *schema.ResourceData, results []dataplatform.NodePoolRes
 
 		err := d.Set("node_pools", nodePools)
 		if err != nil {
-			diags := diag.FromErr(fmt.Errorf("while setting node_pools: %w", err))
+			diags := diag.FromErr(fmt.Errorf("an error occured while setting node_pools: %w", err))
 			return diags
 		}
 	}

@@ -32,7 +32,7 @@ func resourceDataplatformCluster() *schema.Resource {
 			},
 			"name": {
 				Type:             schema.TypeString,
-				Description:      "The name of your cluster. Must be 63 characters or less and must be empty or begin and end with an alphanumeric character ([a-z0-9A-Z]) with dashes (-), underscores (_), dots (.), and alphanumerics between.",
+				Description:      "The name of your cluster. Must be 63 characters or less and must be empty or begin and end with an alphanumeric character ([a-z0-9A-Z]) with dashes (-), underscores (_), dots (.), and alphanumerics in-between.",
 				ValidateDiagFunc: validation.ToDiagFunc(validation.All(validation.StringLenBetween(0, 63), validation.StringMatch(regexp.MustCompile("^[A-Za-z0-9][-A-Za-z0-9_.]*[A-Za-z0-9]$"), ""))),
 				Required:         true,
 			},
@@ -75,7 +75,7 @@ func resourceDataplatformClusterCreate(ctx context.Context, d *schema.ResourceDa
 	id, _, err := client.CreateCluster(ctx, d)
 
 	if err != nil {
-		diags := diag.FromErr(fmt.Errorf("while creating a Dataplatform Cluster: %w", err))
+		diags := diag.FromErr(fmt.Errorf("an error occured  while creating a Dataplatform Cluster: %w", err))
 		return diags
 	}
 
@@ -83,7 +83,7 @@ func resourceDataplatformClusterCreate(ctx context.Context, d *schema.ResourceDa
 
 	err = utils.WaitForResourceToBeReady(ctx, d, client.IsClusterReady)
 	if err != nil {
-		diags := diag.FromErr(fmt.Errorf("while dataplaform cluster waiting to be ready: %w", err))
+		diags := diag.FromErr(fmt.Errorf("an error occured  while dataplaform cluster waiting to be ready: %w", err))
 		return diags
 	}
 
@@ -153,7 +153,7 @@ func resourceDataplatformClusterDelete(ctx context.Context, d *schema.ResourceDa
 
 	err = utils.WaitForResourceToBeDeleted(ctx, d, client.IsClusterDeleted)
 	if err != nil {
-		diag.FromErr(fmt.Errorf("while deleting %w", err))
+		diag.FromErr(fmt.Errorf("an error occured while deleting %w", err))
 	}
 
 	return nil

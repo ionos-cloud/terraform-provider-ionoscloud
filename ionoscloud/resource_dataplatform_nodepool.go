@@ -24,7 +24,7 @@ func resourceDataplatformNodePool() *schema.Resource {
 		Schema: map[string]*schema.Schema{
 			"name": {
 				Type:             schema.TypeString,
-				Description:      "The name of your node pool. Must be 63 characters or less and must be empty or begin and end with an alphanumeric character ([a-z0-9A-Z]) with dashes (-), underscores (_), dots (.), and alphanumerics between.",
+				Description:      "The name of your node pool. Must be 63 characters or less and must be empty or begin and end with an alphanumeric character ([a-z0-9A-Z]) with dashes (-), underscores (_), dots (.), and alphanumerics in-between.",
 				Required:         true,
 				ValidateDiagFunc: validation.ToDiagFunc(validation.All(validation.StringLenBetween(0, 63), validation.StringMatch(regexp.MustCompile("^[A-Za-z0-9][-A-Za-z0-9_.]*[A-Za-z0-9]$"), ""))),
 				ForceNew:         true,
@@ -149,7 +149,7 @@ func resourceDataplatformNodePoolCreate(ctx context.Context, d *schema.ResourceD
 	d.SetId(*dataplatformNodePoolResponse.Id)
 	err = utils.WaitForResourceToBeReady(ctx, d, client.IsNodePoolReady)
 	if err != nil {
-		diags := diag.FromErr(fmt.Errorf(" while dataplaform nodepool waiting to be ready: %w", err))
+		diags := diag.FromErr(fmt.Errorf("an error occured while dataplaform nodepool waiting to be ready: %w", err))
 		return diags
 	}
 
@@ -165,7 +165,7 @@ func resourceDataplatformNodePoolRead(ctx context.Context, d *schema.ResourceDat
 	dataplatformNodePool, apiResponse, err := client.GetNodePool(ctx, clusterId, nodePoolId)
 
 	if err != nil {
-		if apiResponse != nil && apiResponse.Response != nil && apiResponse.StatusCode == 404 {
+		if apiResponse.HttpNotFound() {
 			d.SetId("")
 			return nil
 		}
@@ -198,7 +198,7 @@ func resourceDataplatformNodePoolUpdate(ctx context.Context, d *schema.ResourceD
 
 	err = utils.WaitForResourceToBeReady(ctx, d, client.IsNodePoolReady)
 	if err != nil {
-		diag.FromErr(fmt.Errorf("waiting until ready %w", err))
+		diag.FromErr(fmt.Errorf("an error occured waiting until ready %w", err))
 	}
 	return resourceDataplatformNodePoolRead(ctx, d, meta)
 }

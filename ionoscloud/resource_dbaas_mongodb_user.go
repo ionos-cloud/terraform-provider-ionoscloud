@@ -155,7 +155,7 @@ func resourceDbaasMongoUserUpdate(ctx context.Context, d *schema.ResourceData, m
 
 	user, _, err := client.UpdateUser(ctx, clusterId, username, request)
 	if err != nil {
-		diags := diag.FromErr(fmt.Errorf("while updating a user to mongoDB cluster %s: %w", clusterId, err))
+		diags := diag.FromErr(fmt.Errorf("an error occured while updating a user to mongoDB cluster %s: %w", clusterId, err))
 		return diags
 	}
 
