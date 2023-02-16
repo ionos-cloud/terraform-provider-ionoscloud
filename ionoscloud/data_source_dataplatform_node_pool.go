@@ -99,13 +99,13 @@ func dataSourceDataplatformNodePool() *schema.Resource {
 			},
 			"labels": {
 				Type:        schema.TypeMap,
-				Description: "Key-value pairs attached to the node pool resource as [Kubernetes labels](https://kubernetes.io/docs/concepts/overview/working-with-objects/labels/)",
+				Description: "Key-value pairs attached to the node pool resource as kubernetes labels",
 				Computed:    true,
 				Elem:        &schema.Schema{Type: schema.TypeString},
 			},
 			"annotations": {
 				Type:        schema.TypeMap,
-				Description: "Key-value pairs attached to node pool resource as [Kubernetes annotations](https://kubernetes.io/docs/concepts/overview/working-with-objects/annotations/)",
+				Description: "Key-value pairs attached to node pool resource as kubernetes annotations",
 				Computed:    true,
 				Elem:        &schema.Schema{Type: schema.TypeString},
 			},
