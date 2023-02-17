@@ -6,6 +6,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	ionoscloud "github.com/ionos-cloud/sdk-go/v6"
+	"log"
 	"strings"
 )
 
@@ -14,6 +15,10 @@ func dataSourceImage() *schema.Resource {
 		ReadContext: dataSourceImageRead,
 		Schema: map[string]*schema.Schema{
 			"name": {
+				Type:     schema.TypeString,
+				Optional: true,
+			},
+			"image_alias": {
 				Type:     schema.TypeString,
 				Optional: true,
 			},
@@ -117,13 +122,14 @@ func dataSourceImageRead(ctx context.Context, d *schema.ResourceData, meta inter
 	locationValue, locationOk := d.GetOk("location")
 	versionValue, versionOk := d.GetOk("version")
 	cloudInitValue, cloudInitOk := d.GetOk("cloud_init")
+	imgAliasVal, imgAliasOk := d.GetOk("image_alias")
 
 	name := nameValue.(string)
 	imageType := imageTypeValue.(string)
 	location := locationValue.(string)
 	version := versionValue.(string)
 	cloudInit := cloudInitValue.(string)
-
+	imgAlias := imgAliasVal.(string)
 	var results []ionoscloud.Image
 
 	// if version value is present then concatenate name - version
@@ -158,18 +164,31 @@ func dataSourceImageRead(ctx context.Context, d *schema.ResourceData, meta inter
 	if imageTypeOk && imageType != "" {
 		var imageTypeResults []ionoscloud.Image
 		for _, img := range results {
-			if img.Properties != nil && img.Properties.ImageType != nil && strings.ToLower(*img.Properties.ImageType) == strings.ToLower(imageType) {
+			if img.Properties != nil && img.Properties.ImageType != nil && strings.EqualFold(*img.Properties.ImageType, imageType) {
 				imageTypeResults = append(imageTypeResults, img)
 			}
 
 		}
 		results = imageTypeResults
 	}
+	if imgAliasOk && imgAlias != "" {
+		var imageAliasResults []ionoscloud.Image
+		for _, img := range results {
+			if img.Properties != nil {
+				for _, imgAliasIdx := range *img.Properties.ImageAliases {
+					if strings.EqualFold(imgAliasIdx, imgAlias) {
+						imageAliasResults = append(imageAliasResults, img)
+					}
+				}
+			}
+		}
+		results = imageAliasResults
+	}
 
 	if locationOk && location != "" {
 		var locationResults []ionoscloud.Image
 		for _, img := range results {
-			if img.Properties != nil && img.Properties.Location != nil && strings.ToLower(*img.Properties.Location) == strings.ToLower(location) {
+			if img.Properties != nil && img.Properties.Location != nil && strings.EqualFold(*img.Properties.Location, location) {
 				locationResults = append(locationResults, img)
 			}
 		}
@@ -179,7 +198,7 @@ func dataSourceImageRead(ctx context.Context, d *schema.ResourceData, meta inter
 	if cloudInitOk && cloudInit != "" {
 		var cloudInitResults []ionoscloud.Image
 		for _, img := range results {
-			if img.Properties != nil && img.Properties.CloudInit != nil && strings.ToLower(*img.Properties.CloudInit) == strings.ToLower(cloudInit) {
+			if img.Properties != nil && img.Properties.CloudInit != nil && strings.EqualFold(*img.Properties.CloudInit, cloudInit) {
 				cloudInitResults = append(cloudInitResults, img)
 			}
 		}
@@ -189,9 +208,14 @@ func dataSourceImageRead(ctx context.Context, d *schema.ResourceData, meta inter
 	var image ionoscloud.Image
 
 	if results == nil || len(results) == 0 {
-		return diag.FromErr(fmt.Errorf("no image found with the specified criteria: name = %s, type = %s, location = %s, version = %s, cloudInit = %s", name, imageType, location, version, cloudInit))
+		return diag.FromErr(fmt.Errorf("no image found with the specified criteria: name = %s, type = %s, location = %s, version = %s, cloudInit = %s, imageAlias = %s", name, imageType, location, version, cloudInit, imgAlias))
 	} else if len(results) > 1 {
-		return diag.FromErr(fmt.Errorf("more than one image found with the specified criteria name = %s", name))
+		for _, result := range results {
+			if result.Properties != nil {
+				log.Printf("[DEBUG] found image %s in location %s", *result.Properties.Name, *result.Properties.Location)
+			}
+		}
+		return diag.FromErr(fmt.Errorf("more than one image found, enable debug to learn more. Criteria used name = %s, type = %s, location = %s, version = %s, cloudInit = %s, imageAlias = %s", name, imageType, location, version, cloudInit, imgAlias))
 	} else {
 		image = results[0]
 	}
