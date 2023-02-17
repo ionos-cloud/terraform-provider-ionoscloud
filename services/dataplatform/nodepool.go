@@ -188,6 +188,10 @@ func SetDataplatformNodePoolData(d *schema.ResourceData, nodePool dataplatform.N
 		d.SetId(*nodePool.Id)
 	}
 
+	if nodePool.Properties == nil {
+		return fmt.Errorf("node pool properties should not be empty for ID %s", *nodePool.Id)
+	}
+
 	if nodePool.Properties.Name != nil {
 		if err := d.Set("name", *nodePool.Properties.Name); err != nil {
 			return utils.GenerateSetError(nodePoolResourceName, "name", err)
