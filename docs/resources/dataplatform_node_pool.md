@@ -59,7 +59,7 @@ resource "ionoscloud_dataplatform_node_pool" "example" {
 ## Argument reference
 
 * `cluster_id` - (Required)[string] The UUID of an existing Dataplatform cluster.
-* `name` - (Required)[string] The name of your node pool. Must be 63 characters or less and must be empty or begin and end with an alphanumeric character ([a-z0-9A-Z]) with dashes (-), underscores (_), dots (.), and alphanumerics between.
+* `name` - (Required)[string] The name of your node pool. Must be 63 characters or less and must be empty or begin and end with an alphanumeric character ([a-z0-9A-Z]). It can contain dashes (-), underscores (_), dots (.), and alphanumerics in-between.
 * `node_count` - (Required)[int] The number of nodes that make up the node pool. Must be set with a minimum value of 1.
 * `cpu_family` - (Optional)[string] A valid CPU family name or `AUTO` if the platform shall choose the best fitting option. Available CPU architectures can be retrieved from the datacenter resource. The default value is `AUTO`.
 * `cores_count` - (Optional)[int] The number of CPU cores per node. Must be set with a minimum value of 1. The default value is `4`.

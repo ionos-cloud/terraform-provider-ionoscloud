@@ -24,7 +24,7 @@ func resourceDataplatformNodePool() *schema.Resource {
 		Schema: map[string]*schema.Schema{
 			"name": {
 				Type:             schema.TypeString,
-				Description:      "The name of your node pool. Must be 63 characters or less and must be empty or begin and end with an alphanumeric character ([a-z0-9A-Z]) with dashes (-), underscores (_), dots (.), and alphanumerics in-between.",
+				Description:      "The name of your cluster. Must be 63 characters or less and must be empty or begin and end with an alphanumeric character ([a-z0-9A-Z]). It can contain dashes (-), underscores (_), dots (.), and alphanumerics in-between.",
 				Required:         true,
 				ValidateDiagFunc: validation.ToDiagFunc(validation.All(validation.StringLenBetween(0, 63), validation.StringMatch(regexp.MustCompile("^[A-Za-z0-9][-A-Za-z0-9_.]*[A-Za-z0-9]$"), ""))),
 				ForceNew:         true,
