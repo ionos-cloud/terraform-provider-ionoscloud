@@ -20,7 +20,6 @@ func (c *PsqlClient) GetAllVersions(ctx context.Context) (dbaas.PostgresVersionL
 }
 
 func SetPgSqlVersionsData(d *schema.ResourceData, postgresVersions dbaas.PostgresVersionList) diag.Diagnostics {
-
 	if postgresVersions.Data != nil {
 		var versions []string
 		for _, version := range *postgresVersions.Data {

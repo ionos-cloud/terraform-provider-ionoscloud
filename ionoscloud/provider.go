@@ -16,6 +16,7 @@ import (
 	"github.com/ionos-cloud/sdk-go/v6"
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/cert"
 	crService "github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/containerregistry"
+	dataplatformService "github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/dataplatform"
 	dbaasService "github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/dbaas"
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils"
 )
@@ -23,11 +24,12 @@ import (
 var Version = "DEV"
 
 type SdkBundle struct {
-	CloudApiClient    *ionoscloud.APIClient
-	PsqlClient        *dbaasService.PsqlClient
-	MongoClient       *dbaasService.MongoClient
-	CertManagerClient *cert.Client
-	ContainerClient   *crService.Client
+	CloudApiClient     *ionoscloud.APIClient
+	PsqlClient         *dbaasService.PsqlClient
+	MongoClient        *dbaasService.MongoClient
+	CertManagerClient  *cert.Client
+	ContainerClient    *crService.Client
+	DataplatformClient *dataplatformService.Client
 }
 
 type ClientOptions struct {
@@ -107,6 +109,8 @@ func Provider() *schema.Provider {
 			CertificateResource:                       resourceCertificateManager(),
 			ContainerRegistryResource:                 resourceContainerRegistry(),
 			ContainerRegistryTokenResource:            resourceContainerRegistryToken(),
+			DataplatformClusterResource:               resourceDataplatformCluster(),
+			DataplatformNodePoolResource:              resourceDataplatformNodePool(),
 		},
 		DataSourcesMap: map[string]*schema.Resource{
 			DatacenterResource:                        dataSourceDataCenter(),
@@ -150,6 +154,10 @@ func Provider() *schema.Provider {
 			ContainerRegistryResource:                 dataSourceContainerRegistry(),
 			ContainerRegistryTokenResource:            dataSourceContainerRegistryToken(),
 			ContainerRegistryLocationsResource:        dataSourceContainerRegistryLocations(),
+			DataplatformClusterResource:               dataSourceDataplatformCluster(),
+			DataplatformNodePoolResource:              dataSourceDataplatformNodePool(),
+			DataplatformNodePoolsDataSource:           dataSourceDataplatformNodePools(),
+			DataplatformVersionsDataSource:            dataSourceDataplatformVersions(),
 		},
 	}
 
@@ -198,25 +206,13 @@ func providerConfigure(d *schema.ResourceData, terraformVersion string) (interfa
 	clientOpts.Version = ionoscloud.Version
 	clientOpts.TerraformVersion = terraformVersion
 
-	clients := map[clientType]interface{}{
-		ionosClient:             NewClientByType(clientOpts, ionosClient),
-		psqlClient:              NewClientByType(clientOpts, psqlClient),
-		certManagerClient:       NewClientByType(clientOpts, certManagerClient),
-		mongoClient:             NewClientByType(clientOpts, mongoClient),
-		containerRegistryClient: NewClientByType(clientOpts, containerRegistryClient),
-	}
-
-	apiClient := clients[ionosClient].(*ionoscloud.APIClient)
-	apiClient.GetConfig().UserAgent = fmt.Sprintf(
-		"terraform-provider/%s_ionos-cloud-sdk-go/%s_hashicorp-terraform/%s_terraform-plugin-sdk/%s_os/%s_arch/%s",
-		Version, ionoscloud.Version, terraformVersion, meta.SDKVersionString(), runtime.GOOS, runtime.GOARCH)
-
 	return SdkBundle{
-		CloudApiClient:    apiClient,
-		PsqlClient:        clients[psqlClient].(*dbaasService.PsqlClient),
-		MongoClient:       clients[mongoClient].(*dbaasService.MongoClient),
-		CertManagerClient: clients[certManagerClient].(*cert.Client),
-		ContainerClient:   clients[containerRegistryClient].(*crService.Client),
+		CloudApiClient:     NewClientByType(clientOpts, ionosClient).(*ionoscloud.APIClient),
+		PsqlClient:         NewClientByType(clientOpts, psqlClient).(*dbaasService.PsqlClient),
+		MongoClient:        NewClientByType(clientOpts, mongoClient).(*dbaasService.MongoClient),
+		CertManagerClient:  NewClientByType(clientOpts, certManagerClient).(*cert.Client),
+		ContainerClient:    NewClientByType(clientOpts, containerRegistryClient).(*crService.Client),
+		DataplatformClient: NewClientByType(clientOpts, dataplatformClient).(*dataplatformService.Client),
 	}, nil
 }
 
@@ -225,7 +221,9 @@ func NewClientByType(clientOpts ClientOptions, clientType clientType) interface{
 	case ionosClient:
 		{
 			newConfig := ionoscloud.NewConfiguration(clientOpts.Username, clientOpts.Password, clientOpts.Token, clientOpts.Url)
-
+			newConfig.UserAgent = fmt.Sprintf(
+				"terraform-provider/%s_ionos-cloud-sdk-go/%s_hashicorp-terraform/%s_terraform-plugin-sdk/%s_os/%s_arch/%s",
+				Version, ionoscloud.Version, clientOpts.TerraformVersion, meta.SDKVersionString(), runtime.GOOS, runtime.GOARCH)
 			if os.Getenv(utils.IonosDebug) != "" {
 				newConfig.Debug = true
 			}
@@ -242,6 +240,8 @@ func NewClientByType(clientOpts ClientOptions, clientType clientType) interface{
 		return cert.NewClient(clientOpts.Username, clientOpts.Password, clientOpts.Token, clientOpts.Url, clientOpts.Version, clientOpts.TerraformVersion)
 	case containerRegistryClient:
 		return crService.NewClient(clientOpts.Username, clientOpts.Password, clientOpts.Token, clientOpts.Url, clientOpts.Version, clientOpts.TerraformVersion)
+	case dataplatformClient:
+		return dataplatformService.NewClient(clientOpts.Username, clientOpts.Password, clientOpts.Token, clientOpts.Url, clientOpts.Version, clientOpts.TerraformVersion)
 	default:
 		log.Fatalf("[ERROR] unknown client type %d", clientType)
 	}

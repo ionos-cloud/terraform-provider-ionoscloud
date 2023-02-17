@@ -155,7 +155,7 @@ func resourceDbaasMongoUserUpdate(ctx context.Context, d *schema.ResourceData, m
 
 	user, _, err := client.UpdateUser(ctx, clusterId, username, request)
 	if err != nil {
-		diags := diag.FromErr(fmt.Errorf("while updating a user to mongoDB cluster %s: %w", clusterId, err))
+		diags := diag.FromErr(fmt.Errorf("an error occured while updating a user to mongoDB cluster %s: %w", clusterId, err))
 		return diags
 	}
 
@@ -174,6 +174,7 @@ func resourceDbaasMongoUserRead(ctx context.Context, d *schema.ResourceData, met
 	username := d.Get("username").(string)
 
 	user, apiResponse, err := client.FindUserByUsername(ctx, clusterId, username)
+
 	if err != nil {
 		if apiResponse.HttpNotFound() {
 			d.SetId("")
@@ -204,7 +205,11 @@ func resourceDbaasMongoUserDelete(ctx context.Context, d *schema.ResourceData, m
 	// Wait, catching any errors
 	err = utils.WaitForResourceToBeDeleted(ctx, d, client.IsUserDeleted)
 	if err != nil {
-		return diag.FromErr(fmt.Errorf("user deleted %w ", err))
+		return diag.FromErr(fmt.Errorf("user deleted %w", err))
+	}
+
+	if err != nil {
+		return diag.FromErr(fmt.Errorf("user deleted %w", err))
 	}
 
 	d.SetId("")

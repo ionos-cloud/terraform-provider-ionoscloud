@@ -1,7 +1,21 @@
 ## 6.3.6
-### Feature:
+### Feature
 - Rewrite a part of the psql service to use new functionality.
 - Add `dns_name` to `ionoscloud_pg_cluster` datasource and resource
+- New Product: **DataPlatform**:
+  - `Resources`:
+    - [ionoscloud_dataplatform_cluster](docs/resources/dataplatform_cluster.md)
+    - [ionoscloud_dataplatform_node_pool](docs/resources/dataplatform_node_pool.md)
+  - `Data Sources`:
+    - [ionoscloud_dataplatform_cluster](docs/data-sources/dataplatform_cluster.md)
+    - [ionoscloud_dataplatform_node_pool](docs/data-sources/dataplatform_node_pool.md)
+    - [ionoscloud_dataplatform_node_pools](docs/data-sources/dataplatform_node_pools.md):
+    - [ionoscloud_dataplatform_versions](docs/data-sources/dataplatform_versions.md):
+
+⚠️ **Note:** Data Platform is currently in the Early Access (EA) phase.
+We recommend keeping usage and testing to non-production critical applications.
+Please contact your sales representative or support for more information.
+
 ### Dependency update
 - Update `go` to version 1.19
 - Update `sdk-go-dbaas-postgres` to [v1.0.6](https://github.com/ionos-cloud/sdk-go-dbaas-postgres/releases/tag/v1.0.6)

@@ -9,7 +9,6 @@ import (
 	"net/http"
 	"os"
 	"runtime"
-	"time"
 )
 
 type PsqlClient struct {
@@ -26,8 +25,8 @@ func NewPsqlClient(username, password, token, url, version, terraformVersion str
 	if os.Getenv(utils.IonosDebug) != "" {
 		newConfigDbaas.Debug = true
 	}
-	newConfigDbaas.MaxRetries = 999
-	newConfigDbaas.MaxWaitTime = 4 * time.Second
+	newConfigDbaas.MaxRetries = utils.MaxRetries
+	newConfigDbaas.MaxWaitTime = utils.MaxWaitTime
 
 	newConfigDbaas.HTTPClient = &http.Client{Transport: utils.CreateTransport()}
 	newConfigDbaas.UserAgent = fmt.Sprintf(
@@ -45,8 +44,8 @@ func NewMongoClient(username, password, token, url, version, terraformVersion st
 	if os.Getenv("IONOS_DEBUG") != "" {
 		newConfigDbaas.Debug = true
 	}
-	newConfigDbaas.MaxRetries = 999
-	newConfigDbaas.MaxWaitTime = 4 * time.Second
+	newConfigDbaas.MaxRetries = utils.MaxRetries
+	newConfigDbaas.MaxWaitTime = utils.MaxWaitTime
 
 	newConfigDbaas.HTTPClient = &http.Client{Transport: utils.CreateTransport()}
 	newConfigDbaas.UserAgent = fmt.Sprintf(

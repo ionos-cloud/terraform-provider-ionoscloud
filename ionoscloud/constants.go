@@ -225,6 +225,24 @@ const (
 	ContainerRegistryLocationsTest             = "test_container_registry_locations"
 )
 
+// Dataplatform Constants
+const (
+	DataplatformClusterResource              = "ionoscloud_dataplatform_cluster"
+	DataplatformClusterTestResource          = "test_dataplatform_cluster"
+	DataplatformClusterTestDataSourceById    = "test_dataplatform_cluster_id"
+	DataplatformClusterTestDataSourceByName  = "test_dataplatform_cluster_name"
+	DataplatformNodePoolResource             = "ionoscloud_dataplatform_node_pool"
+	DataplatformNodePoolTestResource         = "test_dataplatform_node_pool"
+	DataplatformNodePoolTestDataSourceById   = "test_dataplatform_node_pool_id"
+	DataplatformNodePoolTestDataSourceByName = "test_dataplatform_node_pool_name"
+	DataplatformNodePoolsDataSource          = "ionoscloud_dataplatform_node_pools"
+	DataplatformVersionsDataSource           = "ionoscloud_dataplatform_versions"
+	DataplatformNodePoolsTestDataSource      = "test_dataplatform_node_pools"
+	DataplatformVersionsTestDataSource       = "test_dataplatform_versions"
+	// DataPlatformVersion anything lower than 22.11 throws a 500 ISE
+	DataPlatformVersion = "22.11"
+)
+
 const (
 	ShareResource         = "ionoscloud_share"
 	shareResourceFullName = ShareResource + "." + sourceShareName
@@ -260,4 +278,5 @@ const (
 	certManagerClient
 	mongoClient
 	containerRegistryClient
+	dataplatformClient
 )

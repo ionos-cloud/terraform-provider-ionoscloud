@@ -12,6 +12,7 @@ require (
 	github.com/ionos-cloud/sdk-go/v6 v6.1.3
 	golang.org/x/crypto v0.0.0-20220517005047-85d78b3ac167
 	gopkg.in/yaml.v3 v3.0.1
+	github.com/ionos-cloud/sdk-go-dataplatform v1.0.0
 )
 
 require (
@@ -64,3 +65,4 @@ require (
 	google.golang.org/grpc v1.48.0 // indirect
 	google.golang.org/protobuf v1.28.1 // indirect
 )
+
