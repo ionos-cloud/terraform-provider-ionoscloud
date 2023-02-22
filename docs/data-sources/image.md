@@ -60,7 +60,7 @@ If both "name" and "version" are provided the plugin will concatenate the two st
  * `disc_virtio_hot_unplug` - Is capable of Virt-IO drive hot unplug (no reboot required)
  * `disc_scsi_hot_plug` - Is capable of SCSI drive hot plug (no reboot required)
  * `disc_scsi_hot_unplug` - Is capable of SCSI drive hot unplug (no reboot required)
- * `license_type` - OS type of this Image
+ * `licence_type` - OS type of this Image
  * `public` - Indicates if the image is part of the public repository or not
  * `image_aliases` - List of image aliases mapped for this Image
  * `cloud_init` - Cloud init compatibility

@@ -82,7 +82,7 @@ func dataSourceImage() *schema.Resource {
 				Type:     schema.TypeBool,
 				Computed: true,
 			},
-			"license_type": {
+			"licence_type": {
 				Type:     schema.TypeString,
 				Computed: true,
 			},
@@ -314,7 +314,7 @@ func ImageSetData(d *schema.ResourceData, image *ionoscloud.Image) error {
 		}
 
 		if image.Properties.LicenceType != nil {
-			if err := d.Set("license_type", *image.Properties.LicenceType); err != nil {
+			if err := d.Set("licence_type", *image.Properties.LicenceType); err != nil {
 				return err
 			}
 		}
