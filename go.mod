@@ -7,12 +7,12 @@ require (
 	github.com/iancoleman/strcase v0.2.0
 	github.com/ionos-cloud/sdk-go-cert-manager v1.0.0
 	github.com/ionos-cloud/sdk-go-container-registry v1.0.0
+	github.com/ionos-cloud/sdk-go-dataplatform v1.0.0
 	github.com/ionos-cloud/sdk-go-dbaas-mongo v1.2.0
 	github.com/ionos-cloud/sdk-go-dbaas-postgres v1.0.6
 	github.com/ionos-cloud/sdk-go/v6 v6.1.3
 	golang.org/x/crypto v0.0.0-20220517005047-85d78b3ac167
 	gopkg.in/yaml.v3 v3.0.1
-	github.com/ionos-cloud/sdk-go-dataplatform v1.0.0
 )
 
 require (
@@ -58,11 +58,10 @@ require (
 	github.com/zclconf/go-cty v1.11.0 // indirect
 	golang.org/x/net v0.0.0-20211112202133-69e39bad7dc2 // indirect
 	golang.org/x/oauth2 v0.0.0-20211104180415-d3ed0bb246c8 // indirect
-	golang.org/x/sys v0.0.0-20220503163025-988cb79eb6c6 // indirect
-	golang.org/x/text v0.3.7 // indirect
+	golang.org/x/sys v0.0.0-20220722155257-8c9f86f7a55f // indirect
+	golang.org/x/text v0.3.8 // indirect
 	google.golang.org/appengine v1.6.7 // indirect
 	google.golang.org/genproto v0.0.0-20200904004341-0bd0a958aa1d // indirect
 	google.golang.org/grpc v1.48.0 // indirect
 	google.golang.org/protobuf v1.28.1 // indirect
 )
-
