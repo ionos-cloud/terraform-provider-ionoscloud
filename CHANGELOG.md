@@ -23,6 +23,9 @@ Please contact your sales representative or support for more information.
 ### Documentation
 - Update documentation for K8s node pools
 - Update documentation for `ionoscloud_image` to clarify what type of search is done.
+- Improve documentation for `endpoint` field
+## Fixes
+- Throw error on `404` for mongo cluster creation.
 
 ## 6.3.5
 ### Feature:

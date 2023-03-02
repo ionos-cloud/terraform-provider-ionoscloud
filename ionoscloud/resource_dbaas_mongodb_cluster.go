@@ -144,13 +144,10 @@ func resourceDbaasMongoClusterCreate(ctx context.Context, d *schema.ResourceData
 
 	cluster := dbaas.SetMongoClusterCreateProperties(d)
 
-	createdCluster, apiResponse, err := client.CreateCluster(ctx, *cluster)
+	createdCluster, _, err := client.CreateCluster(ctx, *cluster)
 	if err != nil {
-		if apiResponse.HttpNotFound() {
-			d.SetId("")
-			return nil
-		}
-		diags := diag.FromErr(fmt.Errorf("create error while fetching dbaas mongo cluster %s: %w", d.Id(), err))
+		d.SetId("")
+		diags := diag.FromErr(fmt.Errorf("create error for dbaas mongo cluster %s: %w", d.Id(), err))
 		return diags
 	}
 	d.SetId(*createdCluster.Id)
