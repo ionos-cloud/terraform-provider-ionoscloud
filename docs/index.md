@@ -111,6 +111,8 @@ provider "ionoscloud" {
 }
 ```
 
+⚠️ **Note:** It's not usually necessary to set `endpoint` field. The SDKs the terraform use know how to route requests to the correct endpoints in the API. 
+
 You can either explicitly write them in the .tf file or use var.name as in the example above. For setting the var.name, environment variables can be used. The environment variables must be in the format TF_VAR_name and this will be checked last for a value. For example:
 
 ```bash
@@ -192,7 +194,7 @@ The following arguments are supported:
 
 - `password` - (Required) If omitted, the `IONOS_PASSWORD` environment variable is used.
 
-- `endpoint` - (Optional) If omitted, the `IONOS_API_URL` environment variable is used, or it defaults to the current Cloud API release.
+- `endpoint` - (Optional) If omitted, the `IONOS_API_URL` environment variable is used, or it defaults to the current Cloud API release. Usually not necessary to be set, SDks know internally how to route requests to to the API.
 
 - `retries` - (Deprecated) Number of retries while waiting for a resource to be provisioned. Default value is 50. **Note**: This argument has been deprecated and replaced by the implementation of resource timeouts described below.
 
