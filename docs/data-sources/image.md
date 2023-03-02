@@ -4,15 +4,14 @@ layout: "ionoscloud"
 page_title: "IonosCloud: image"
 sidebar_current: "docs-datasource-image"
 description: |-
-  Get information on a IonosCloud Images
+  Get information on a IonosCloud Image
 ---
 
 # ionoscloud\_image
 
 The **Image data source** can be used to search for and return an existing image which can then be used to provision a server.  
 If a single match is found, it will be returned. If your search results in multiple matches, an error will be returned. 
-When this happens, please refine your search string so that it is specific enough to return only one result.
-
+When this happens, please refine your search string so that it is specific enough to return only one result. In case multiple matches are found, enable debug(`TF_LOG=debug`) to show the name and location of the images.
 ## Example Usage
 
 ```hcl
@@ -23,13 +22,25 @@ data "ionoscloud_image" "example" {
   cloud_init  = "NONE"
 }
 ```
+Finds an image that contains `ubuntu` in it's name, in location `de/fkb`, that does not support `cloud_init` and is of type `CDROM`.
+## Example Usage
+
+```hcl
+data "ionoscloud_image" "example" {
+  image_alias        = "ubuntu:latest"
+  location           = "de/txl"
+}
+```
+
+Finds an image with alias `ubuntu:latest` in location `de/txl`. Uses exact matching on both fields.
 
 ## Argument Reference
 
- * `name` - (Required) Name of an existing image that you want to search for.
- * `location` - (Optional) Id of the existing image's location.
- * `type` - (Optional) The image type, HDD or CD-ROM.
- * `cloud_init` - (Optional) Cloud init compatibility ("NONE" or "V1")
+ * `name` - (Required) Name of an existing image that you want to search for. Partial match.
+ * `location` - (Optional) Id of the existing image's location. Exact match. Possible values: `de/fra`, `de/txl`, `gb/lhr`, `es/vit`, `us/ewr`, `us/las`
+ * `type` - (Optional) The image type, HDD or CD-ROM. Exact match.
+ * `cloud_init` - (Optional) Cloud init compatibility ("NONE" or "V1"). Exact match.
+ * `image_alias` - (Optional) Image alias of the image you are searching for. Exact match. E.g. =`centos:latest`, `ubuntu:latest`
 
 If both "name" and "version" are provided the plugin will concatenate the two strings in this format [name]-[version].
 
@@ -49,7 +60,7 @@ If both "name" and "version" are provided the plugin will concatenate the two st
  * `disc_virtio_hot_unplug` - Is capable of Virt-IO drive hot unplug (no reboot required)
  * `disc_scsi_hot_plug` - Is capable of SCSI drive hot plug (no reboot required)
  * `disc_scsi_hot_unplug` - Is capable of SCSI drive hot unplug (no reboot required)
- * `license_type` - OS type of this Image
+ * `licence_type` - OS type of this Image
  * `public` - Indicates if the image is part of the public repository or not
  * `image_aliases` - List of image aliases mapped for this Image
  * `cloud_init` - Cloud init compatibility

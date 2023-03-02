@@ -2,6 +2,7 @@
 ### Feature
 - Rewrite a part of the psql service to use new functionality.
 - Add `dns_name` to `ionoscloud_pg_cluster` datasource and resource
+- Add option to search for images in the `ionoscloud_image` data source using `image_alias`. Search will be performed with exact match.
 - New Product: **DataPlatform**:
   - `Resources`:
     - [ionoscloud_dataplatform_cluster](docs/resources/dataplatform_cluster.md)
@@ -21,6 +22,7 @@ Please contact your sales representative or support for more information.
 - Update `sdk-go-dbaas-postgres` to [v1.0.6](https://github.com/ionos-cloud/sdk-go-dbaas-postgres/releases/tag/v1.0.6)
 ### Documentation
 - Update documentation for K8s node pools
+- Update documentation for `ionoscloud_image` to clarify what type of search is done.
 - Improve documentation for `endpoint` field
 ## Fixes
 - Throw error on `404` for mongo cluster creation.

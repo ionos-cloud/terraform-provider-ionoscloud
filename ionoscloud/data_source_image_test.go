@@ -19,6 +19,23 @@ func TestAccDataSourceImageBasic(t *testing.T) {
 		ProviderFactories: testAccProviderFactories,
 		Steps: []resource.TestStep{
 			{
+				Config: testDataSourceImageAliasLocation,
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttr(imageTestName, "cloud_init", "V1"),
+					resource.TestCheckResourceAttr(imageTestName, "location", "de/txl"),
+					resource.TestCheckResourceAttr(imageTestName, "name", "CentOS-7-GenericCloud-2211"),
+					resource.TestCheckResourceAttr(imageTestName, "type", "HDD"),
+				),
+			},
+			{
+				Config:      testDataSourceImageAliasMultipleError,
+				ExpectError: regexp.MustCompile("more than one image found, enable debug to learn more"),
+			},
+			{
+				Config:      testAccDataSourceWrongAliasError,
+				ExpectError: regexp.MustCompile("no image found with the specified criteria"),
+			},
+			{
 				Config: testAccDataSourceImageBasic,
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttr(imageTestName, "cloud_init", "NONE"),
@@ -51,6 +68,20 @@ func TestAccDataSourceImageBasic(t *testing.T) {
 	})
 
 }
+
+const testDataSourceImageAliasLocation = `data ` + ImageResource + ` ` + ImageTestResource + ` {
+  image_alias           = "centos:latest"
+  location              = "de/txl"
+}`
+
+const testDataSourceImageAliasMultipleError = `data ` + ImageResource + ` ` + ImageTestResource + ` {
+  image_alias           = "centos:latest"
+}`
+
+const testAccDataSourceWrongAliasError = `data ` + ImageResource + ` ` + ImageTestResource + ` {
+  image_alias           = "doesNotExist"
+  location              = "de/txl"
+}`
 
 const testAccDataSourceImageBasic = `
 	data ` + ImageResource + ` ` + ImageTestResource + ` {
