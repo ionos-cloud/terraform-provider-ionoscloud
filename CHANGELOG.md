@@ -21,6 +21,9 @@ Please contact your sales representative or support for more information.
 - Update `sdk-go-dbaas-postgres` to [v1.0.6](https://github.com/ionos-cloud/sdk-go-dbaas-postgres/releases/tag/v1.0.6)
 ### Documentation
 - Update documentation for K8s node pools
+- Improve documentation for `endpoint` field
+## Fixes
+- Throw error on `404` for mongo cluster creation.
 
 ## 6.3.5
 ### Feature:
