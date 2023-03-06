@@ -388,7 +388,7 @@ func (r ApiUmGroupsGetRequest) XContractNumber(xContractNumber int32) ApiUmGroup
 // Filters query parameters limit results to those containing a matching value for a specific property.
 func (r ApiUmGroupsGetRequest) Filter(key string, value string) ApiUmGroupsGetRequest {
 	filterKey := fmt.Sprintf(FilterQueryParam, key)
-	r.filters[filterKey] = []string{value}
+	r.filters[filterKey] = append(r.filters[filterKey], value)
 	return r
 }
 
@@ -956,7 +956,7 @@ func (r ApiUmGroupsResourcesGetRequest) XContractNumber(xContractNumber int32) A
 // Filters query parameters limit results to those containing a matching value for a specific property.
 func (r ApiUmGroupsResourcesGetRequest) Filter(key string, value string) ApiUmGroupsResourcesGetRequest {
 	filterKey := fmt.Sprintf(FilterQueryParam, key)
-	r.filters[filterKey] = []string{value}
+	r.filters[filterKey] = append(r.filters[filterKey], value)
 	return r
 }
 
@@ -1507,7 +1507,7 @@ func (r ApiUmGroupsSharesGetRequest) XContractNumber(xContractNumber int32) ApiU
 // Filters query parameters limit results to those containing a matching value for a specific property.
 func (r ApiUmGroupsSharesGetRequest) Filter(key string, value string) ApiUmGroupsSharesGetRequest {
 	filterKey := fmt.Sprintf(FilterQueryParam, key)
-	r.filters[filterKey] = []string{value}
+	r.filters[filterKey] = append(r.filters[filterKey], value)
 	return r
 }
 
@@ -2255,7 +2255,7 @@ func (r ApiUmGroupsUsersGetRequest) XContractNumber(xContractNumber int32) ApiUm
 // Filters query parameters limit results to those containing a matching value for a specific property.
 func (r ApiUmGroupsUsersGetRequest) Filter(key string, value string) ApiUmGroupsUsersGetRequest {
 	filterKey := fmt.Sprintf(FilterQueryParam, key)
-	r.filters[filterKey] = []string{value}
+	r.filters[filterKey] = append(r.filters[filterKey], value)
 	return r
 }
 
@@ -3004,7 +3004,7 @@ func (r ApiUmResourcesGetRequest) XContractNumber(xContractNumber int32) ApiUmRe
 // Filters query parameters limit results to those containing a matching value for a specific property.
 func (r ApiUmResourcesGetRequest) Filter(key string, value string) ApiUmResourcesGetRequest {
 	filterKey := fmt.Sprintf(FilterQueryParam, key)
-	r.filters[filterKey] = []string{value}
+	r.filters[filterKey] = append(r.filters[filterKey], value)
 	return r
 }
 
@@ -3553,7 +3553,7 @@ func (r ApiUmUsersGetRequest) Limit(limit int32) ApiUmUsersGetRequest {
 // Filters query parameters limit results to those containing a matching value for a specific property.
 func (r ApiUmUsersGetRequest) Filter(key string, value string) ApiUmUsersGetRequest {
 	filterKey := fmt.Sprintf(FilterQueryParam, key)
-	r.filters[filterKey] = []string{value}
+	r.filters[filterKey] = append(r.filters[filterKey], value)
 	return r
 }
 
@@ -3775,7 +3775,7 @@ func (r ApiUmUsersGroupsGetRequest) XContractNumber(xContractNumber int32) ApiUm
 // Filters query parameters limit results to those containing a matching value for a specific property.
 func (r ApiUmUsersGroupsGetRequest) Filter(key string, value string) ApiUmUsersGroupsGetRequest {
 	filterKey := fmt.Sprintf(FilterQueryParam, key)
-	r.filters[filterKey] = []string{value}
+	r.filters[filterKey] = append(r.filters[filterKey], value)
 	return r
 }
 
@@ -3984,7 +3984,7 @@ func (r ApiUmUsersOwnsGetRequest) XContractNumber(xContractNumber int32) ApiUmUs
 // Filters query parameters limit results to those containing a matching value for a specific property.
 func (r ApiUmUsersOwnsGetRequest) Filter(key string, value string) ApiUmUsersOwnsGetRequest {
 	filterKey := fmt.Sprintf(FilterQueryParam, key)
-	r.filters[filterKey] = []string{value}
+	r.filters[filterKey] = append(r.filters[filterKey], value)
 	return r
 }
 

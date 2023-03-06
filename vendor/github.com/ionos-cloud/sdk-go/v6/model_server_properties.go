@@ -24,6 +24,8 @@ type ServerProperties struct {
 	Cores *int32 `json:"cores"`
 	// The memory size for the server in MB, such as 2048. Size must be specified in multiples of 256 MB with a minimum of 256 MB; however, if you set ramHotPlug to TRUE then you must use a minimum of 1024 MB. If you set the RAM size more than 240GB, then ramHotPlug will be set to FALSE and can not be set to TRUE unless RAM size not set to less than 240GB.
 	Ram *int32 `json:"ram"`
+	// The placement group ID that belongs to this server; Requires system privileges
+	PlacementGroupId *string `json:"placementGroupId,omitempty"`
 	// The availability zone in which the server should be provisioned.
 	AvailabilityZone *string `json:"availabilityZone,omitempty"`
 	// Status of the virtual machine.
@@ -203,6 +205,44 @@ func (o *ServerProperties) SetRam(v int32) {
 // HasRam returns a boolean if a field has been set.
 func (o *ServerProperties) HasRam() bool {
 	if o != nil && o.Ram != nil {
+		return true
+	}
+
+	return false
+}
+
+// GetPlacementGroupId returns the PlacementGroupId field value
+// If the value is explicit nil, the zero value for string will be returned
+func (o *ServerProperties) GetPlacementGroupId() *string {
+	if o == nil {
+		return nil
+	}
+
+	return o.PlacementGroupId
+
+}
+
+// GetPlacementGroupIdOk returns a tuple with the PlacementGroupId field value
+// and a boolean to check if the value has been set.
+// NOTE: If the value is an explicit nil, `nil, true` will be returned
+func (o *ServerProperties) GetPlacementGroupIdOk() (*string, bool) {
+	if o == nil {
+		return nil, false
+	}
+
+	return o.PlacementGroupId, true
+}
+
+// SetPlacementGroupId sets field value
+func (o *ServerProperties) SetPlacementGroupId(v string) {
+
+	o.PlacementGroupId = &v
+
+}
+
+// HasPlacementGroupId returns a boolean if a field has been set.
+func (o *ServerProperties) HasPlacementGroupId() bool {
+	if o != nil && o.PlacementGroupId != nil {
 		return true
 	}
 
@@ -450,6 +490,9 @@ func (o ServerProperties) MarshalJSON() ([]byte, error) {
 	}
 	if o.Ram != nil {
 		toSerialize["ram"] = o.Ram
+	}
+	if o.PlacementGroupId != nil {
+		toSerialize["placementGroupId"] = o.PlacementGroupId
 	}
 	if o.AvailabilityZone != nil {
 		toSerialize["availabilityZone"] = o.AvailabilityZone

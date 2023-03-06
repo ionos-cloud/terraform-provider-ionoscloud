@@ -388,7 +388,7 @@ func (r ApiK8sGetRequest) XContractNumber(xContractNumber int32) ApiK8sGetReques
 // Filters query parameters limit results to those containing a matching value for a specific property.
 func (r ApiK8sGetRequest) Filter(key string, value string) ApiK8sGetRequest {
 	filterKey := fmt.Sprintf(FilterQueryParam, key)
-	r.filters[filterKey] = []string{value}
+	r.filters[filterKey] = append(r.filters[filterKey], value)
 	return r
 }
 
@@ -594,7 +594,7 @@ func (r ApiK8sKubeconfigGetRequest) XContractNumber(xContractNumber int32) ApiK8
 // Filters query parameters limit results to those containing a matching value for a specific property.
 func (r ApiK8sKubeconfigGetRequest) Filter(key string, value string) ApiK8sKubeconfigGetRequest {
 	filterKey := fmt.Sprintf(FilterQueryParam, key)
-	r.filters[filterKey] = []string{value}
+	r.filters[filterKey] = append(r.filters[filterKey], value)
 	return r
 }
 
@@ -1145,7 +1145,7 @@ func (r ApiK8sNodepoolsGetRequest) XContractNumber(xContractNumber int32) ApiK8s
 // Filters query parameters limit results to those containing a matching value for a specific property.
 func (r ApiK8sNodepoolsGetRequest) Filter(key string, value string) ApiK8sNodepoolsGetRequest {
 	filterKey := fmt.Sprintf(FilterQueryParam, key)
-	r.filters[filterKey] = []string{value}
+	r.filters[filterKey] = append(r.filters[filterKey], value)
 	return r
 }
 
@@ -1705,7 +1705,7 @@ func (r ApiK8sNodepoolsNodesGetRequest) XContractNumber(xContractNumber int32) A
 // Filters query parameters limit results to those containing a matching value for a specific property.
 func (r ApiK8sNodepoolsNodesGetRequest) Filter(key string, value string) ApiK8sNodepoolsNodesGetRequest {
 	filterKey := fmt.Sprintf(FilterQueryParam, key)
-	r.filters[filterKey] = []string{value}
+	r.filters[filterKey] = append(r.filters[filterKey], value)
 	return r
 }
 
@@ -2803,7 +2803,7 @@ type ApiK8sVersionsDefaultGetRequest struct {
 // Filters query parameters limit results to those containing a matching value for a specific property.
 func (r ApiK8sVersionsDefaultGetRequest) Filter(key string, value string) ApiK8sVersionsDefaultGetRequest {
 	filterKey := fmt.Sprintf(FilterQueryParam, key)
-	r.filters[filterKey] = []string{value}
+	r.filters[filterKey] = append(r.filters[filterKey], value)
 	return r
 }
 
@@ -2973,7 +2973,7 @@ type ApiK8sVersionsGetRequest struct {
 // Filters query parameters limit results to those containing a matching value for a specific property.
 func (r ApiK8sVersionsGetRequest) Filter(key string, value string) ApiK8sVersionsGetRequest {
 	filterKey := fmt.Sprintf(FilterQueryParam, key)
-	r.filters[filterKey] = []string{value}
+	r.filters[filterKey] = append(r.filters[filterKey], value)
 	return r
 }
 

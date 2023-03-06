@@ -404,7 +404,7 @@ func (r ApiLocationsGetRequest) XContractNumber(xContractNumber int32) ApiLocati
 // Filters query parameters limit results to those containing a matching value for a specific property.
 func (r ApiLocationsGetRequest) Filter(key string, value string) ApiLocationsGetRequest {
 	filterKey := fmt.Sprintf(FilterQueryParam, key)
-	r.filters[filterKey] = []string{value}
+	r.filters[filterKey] = append(r.filters[filterKey], value)
 	return r
 }
 
