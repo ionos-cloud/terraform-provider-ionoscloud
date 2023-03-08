@@ -8,6 +8,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 	ionoscloud "github.com/ionos-cloud/sdk-go/v6"
+	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils"
 	"log"
 	"strings"
 	"time"
@@ -38,10 +39,15 @@ func resourceNic() *schema.Resource {
 				Default:  true,
 			},
 			"ips": {
-				Type:     schema.TypeList,
-				Elem:     &schema.Schema{Type: schema.TypeString},
-				Computed: true,
-				Optional: true,
+				Type: schema.TypeList,
+				Elem: &schema.Schema{
+					Type: schema.TypeString,
+					//ValidateDiagFunc: validation.ToDiagFunc(validation.IsIPAddress),
+					DiffSuppressFunc: utils.DiffEmptyIps,
+				},
+				Computed:    true,
+				Optional:    true,
+				Description: "Collection of IP addresses assigned to a nic. Explicitly assigned public IPs need to come from reserved IP blocks, Passing value null or empty array will assign an IP address automatically.",
 			},
 			"firewall_active": {
 				Type:     schema.TypeBool,
@@ -242,8 +248,10 @@ func getNicData(d *schema.ResourceData, path string) ionoscloud.Nic {
 		if raw != nil && len(raw) > 0 {
 			ips := make([]string, 0)
 			for _, rawIp := range raw {
-				ip := rawIp.(string)
-				ips = append(ips, ip)
+				if rawIp != nil {
+					ip := rawIp.(string)
+					ips = append(ips, ip)
+				}
 			}
 			if ips != nil && len(ips) > 0 {
 				nic.Properties.Ips = &ips
