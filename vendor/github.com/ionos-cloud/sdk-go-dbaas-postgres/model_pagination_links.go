@@ -14,7 +14,7 @@ import (
 	"encoding/json"
 )
 
-// PaginationLinks URLs to navigate the different pages. As of now we always only return a single page.
+// PaginationLinks URLs to navigate the different pages.
 type PaginationLinks struct {
 	// URL (with offset and limit parameters) of the previous page; only present if offset is greater than 0.
 	Prev *string `json:"prev,omitempty"`

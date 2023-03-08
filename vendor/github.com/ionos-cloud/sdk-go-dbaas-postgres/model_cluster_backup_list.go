@@ -20,11 +20,11 @@ type ClusterBackupList struct {
 	// The unique ID of the resource.
 	Id    *string           `json:"id,omitempty"`
 	Items *[]BackupResponse `json:"items,omitempty"`
-	// The offset specified in the request (if none was specified, the default offset is 0) (not implemented yet).
+	// The offset specified in the request (if none was specified, the default offset is 0).
 	Offset *int32 `json:"offset,omitempty"`
-	// The limit specified in the request (if none was specified, use the endpoint's default pagination limit) (not implemented yet, always return number of items).
+	// The limit specified in the request (if none was specified, the default limit is 100).
 	Limit *int32           `json:"limit,omitempty"`
-	Links *PaginationLinks `json:"_links,omitempty"`
+	Links *PaginationLinks `json:"links,omitempty"`
 }
 
 // NewClusterBackupList instantiates a new ClusterBackupList object
@@ -34,6 +34,11 @@ type ClusterBackupList struct {
 func NewClusterBackupList() *ClusterBackupList {
 	this := ClusterBackupList{}
 
+	var offset int32 = 0
+	this.Offset = &offset
+	var limit int32 = 100
+	this.Limit = &limit
+
 	return &this
 }
 
@@ -42,6 +47,10 @@ func NewClusterBackupList() *ClusterBackupList {
 // but it doesn't guarantee that properties required by API are set
 func NewClusterBackupListWithDefaults() *ClusterBackupList {
 	this := ClusterBackupList{}
+	var offset int32 = 0
+	this.Offset = &offset
+	var limit int32 = 100
+	this.Limit = &limit
 	return &this
 }
 
@@ -296,7 +305,7 @@ func (o ClusterBackupList) MarshalJSON() ([]byte, error) {
 	}
 
 	if o.Links != nil {
-		toSerialize["_links"] = o.Links
+		toSerialize["links"] = o.Links
 	}
 
 	return json.Marshal(toSerialize)

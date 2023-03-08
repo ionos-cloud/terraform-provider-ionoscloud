@@ -23,6 +23,7 @@ const (
 	AVAILABLE  State = "AVAILABLE"
 	BUSY       State = "BUSY"
 	DESTROYING State = "DESTROYING"
+	DEGRADED   State = "DEGRADED"
 	FAILED     State = "FAILED"
 	UNKNOWN    State = "UNKNOWN"
 )
@@ -34,7 +35,7 @@ func (v *State) UnmarshalJSON(src []byte) error {
 		return err
 	}
 	enumTypeValue := State(value)
-	for _, existing := range []State{"AVAILABLE", "BUSY", "DESTROYING", "FAILED", "UNKNOWN"} {
+	for _, existing := range []State{"AVAILABLE", "BUSY", "DESTROYING", "DEGRADED", "FAILED", "UNKNOWN"} {
 		if existing == enumTypeValue {
 			*v = enumTypeValue
 			return nil
