@@ -311,8 +311,7 @@ func resourceServer() *schema.Resource {
 						"ips": {
 							Type: schema.TypeList,
 							Elem: &schema.Schema{
-								Type: schema.TypeString,
-								//ValidateDiagFunc: validation.ToDiagFunc(validation.IsIPAddress),
+								Type:             schema.TypeString,
 								DiffSuppressFunc: utils.DiffEmptyIps,
 							},
 							Description: "Collection of IP addresses assigned to a nic. Explicitly assigned public IPs need to come from reserved IP blocks, Passing value null or empty array will assign an IP address automatically.",
@@ -588,7 +587,7 @@ func resourceServerCreate(ctx context.Context, d *schema.ResourceData, meta inte
 	}
 
 	// get additional data for schema
-	serverReq, apiResponse, err = client.ServersApi.DatacentersServersFindById(ctx, datacenterId, *postServer.Id).Depth(3).Execute() // aici vine nic cu ip cu o valoare (ex: 162.222.201.98) care se da de la api
+	serverReq, apiResponse, err = client.ServersApi.DatacentersServersFindById(ctx, datacenterId, *postServer.Id).Depth(3).Execute()
 	logApiRequestTime(apiResponse)
 
 	if err != nil {

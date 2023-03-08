@@ -41,8 +41,7 @@ func resourceNic() *schema.Resource {
 			"ips": {
 				Type: schema.TypeList,
 				Elem: &schema.Schema{
-					Type: schema.TypeString,
-					//ValidateDiagFunc: validation.ToDiagFunc(validation.IsIPAddress),
+					Type:             schema.TypeString,
 					DiffSuppressFunc: utils.DiffEmptyIps,
 				},
 				Computed:    true,
