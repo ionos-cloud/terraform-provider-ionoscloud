@@ -50,7 +50,7 @@ const (
 	RequestStatusFailed  = "FAILED"
 	RequestStatusDone    = "DONE"
 
-	Version = "1.0.6"
+	Version = "1.1.1"
 )
 
 // APIClient manages communication with the IONOS DBaaS PostgreSQL REST API API v1.0.0
