@@ -213,6 +213,14 @@ func DiffToLower(_, old, new string, _ *schema.ResourceData) bool {
 	return strings.EqualFold(old, new)
 }
 
+// DiffEmptyIps suppress difference when empty value for array is overwritten by API and assigned an actual IP address
+func DiffEmptyIps(_, old, new string, _ *schema.ResourceData) bool {
+	if old != "" && new == "" {
+		return true
+	}
+	return false
+}
+
 // ApiResponseInfo - interface over different ApiResponse types from sdks
 type ApiResponseInfo interface {
 	HttpNotFound() bool

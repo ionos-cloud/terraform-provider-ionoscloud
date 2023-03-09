@@ -309,10 +309,14 @@ func resourceServer() *schema.Resource {
 							Optional: true,
 						},
 						"ips": {
-							Type:     schema.TypeList,
-							Elem:     &schema.Schema{Type: schema.TypeString},
-							Computed: true,
-							Optional: true,
+							Type: schema.TypeList,
+							Elem: &schema.Schema{
+								Type:             schema.TypeString,
+								DiffSuppressFunc: utils.DiffEmptyIps,
+							},
+							Description: "Collection of IP addresses assigned to a nic. Explicitly assigned public IPs need to come from reserved IP blocks, Passing value null or empty array will assign an IP address automatically.",
+							Computed:    true,
+							Optional:    true,
 						},
 						"firewall_active": {
 							Type:     schema.TypeBool,
@@ -900,8 +904,10 @@ func resourceServerUpdate(ctx context.Context, d *schema.ResourceData, meta inte
 			if raw != nil && len(raw) > 0 {
 				ips := make([]string, 0)
 				for _, rawIp := range raw {
-					ip := rawIp.(string)
-					ips = append(ips, ip)
+					if rawIp != nil {
+						ip := rawIp.(string)
+						ips = append(ips, ip)
+					}
 				}
 				if ips != nil && len(ips) > 0 {
 					properties.Ips = &ips

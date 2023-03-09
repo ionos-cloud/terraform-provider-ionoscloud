@@ -26,6 +26,7 @@ Please contact your sales representative or support for more information.
 - Improve documentation for `endpoint` field
 ## Fixes
 - Throw error on `404` for mongo cluster creation.
+- Solves  #372 crash when ips field in nic resource is a list with an empty string
 
 ## 6.3.5
 ### Feature:
