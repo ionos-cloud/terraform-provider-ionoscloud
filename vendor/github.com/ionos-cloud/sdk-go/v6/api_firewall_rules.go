@@ -425,7 +425,7 @@ func (r ApiDatacentersServersNicsFirewallrulesGetRequest) Limit(limit int32) Api
 // Filters query parameters limit results to those containing a matching value for a specific property.
 func (r ApiDatacentersServersNicsFirewallrulesGetRequest) Filter(key string, value string) ApiDatacentersServersNicsFirewallrulesGetRequest {
 	filterKey := fmt.Sprintf(FilterQueryParam, key)
-	r.filters[filterKey] = []string{value}
+	r.filters[filterKey] = append(r.filters[filterKey], value)
 	return r
 }
 

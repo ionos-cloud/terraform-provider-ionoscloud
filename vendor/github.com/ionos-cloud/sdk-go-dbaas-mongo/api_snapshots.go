@@ -1,7 +1,7 @@
 /*
  * IONOS DBaaS MongoDB REST API
  *
- * With IONOS Cloud Database as a Service, you have the ability to quickly set up and manage a MongoDB database. You can also delete clusters, manage backups and users via the API.   MongoDB is an open source, cross-platform, document-oriented database program. Classified as a NoSQL database program, it uses JSON-like documents with optional schemas.  The MongoDB API allows you to create additional database clusters or modify existing ones. Both tools, the Data Center Designer (DCD) and the API use the same concepts consistently and are well suited for smooth and intuitive use.
+ * With IONOS Cloud Database as a Service, you have the ability to quickly set up and manage a MongoDB database. You can also delete clusters, manage backups and users via the API.  MongoDB is an open source, cross-platform, document-oriented database program. Classified as a NoSQL database program, it uses JSON-like documents with optional schemas.  The MongoDB API allows you to create additional database clusters or modify existing ones. Both tools, the Data Center Designer (DCD) and the API use the same concepts consistently and are well suited for smooth and intuitive use.
  *
  * API version: 1.0.0
  */
@@ -31,6 +31,17 @@ type ApiClustersSnapshotsGetRequest struct {
 	ctx        _context.Context
 	ApiService *SnapshotsApiService
 	clusterId  string
+	limit      *int32
+	offset     *int32
+}
+
+func (r ApiClustersSnapshotsGetRequest) Limit(limit int32) ApiClustersSnapshotsGetRequest {
+	r.limit = &limit
+	return r
+}
+func (r ApiClustersSnapshotsGetRequest) Offset(offset int32) ApiClustersSnapshotsGetRequest {
+	r.offset = &offset
+	return r
 }
 
 func (r ApiClustersSnapshotsGetRequest) Execute() (SnapshotList, *APIResponse, error) {
@@ -78,6 +89,12 @@ func (a *SnapshotsApiService) ClustersSnapshotsGetExecute(r ApiClustersSnapshots
 	localVarQueryParams := _neturl.Values{}
 	localVarFormParams := _neturl.Values{}
 
+	if r.limit != nil {
+		localVarQueryParams.Add("limit", parameterToString(*r.limit, ""))
+	}
+	if r.offset != nil {
+		localVarQueryParams.Add("offset", parameterToString(*r.offset, ""))
+	}
 	// to determine the Content-Type header
 	localVarHTTPContentTypes := []string{}
 

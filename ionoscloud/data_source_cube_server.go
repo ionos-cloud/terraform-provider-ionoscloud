@@ -7,6 +7,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
+	mongo "github.com/ionos-cloud/sdk-go-dbaas-mongo"
 	ionoscloud "github.com/ionos-cloud/sdk-go/v6"
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils"
 )
@@ -241,12 +242,12 @@ func setCubeServerData(d *schema.ResourceData, server *ionoscloud.Server, token 
 		for _, volume := range *server.Entities.Volumes.Items {
 			entry := make(map[string]interface{})
 
-			entry["id"] = stringOrDefault(volume.Id, "")
-			entry["name"] = stringOrDefault(volume.Properties.Name, "")
-			entry["type"] = stringOrDefault(volume.Properties.Type, "")
-			entry["availability_zone"] = stringOrDefault(volume.Properties.AvailabilityZone, "")
-			entry["image_name"] = stringOrDefault(volume.Properties.Image, "")
-			entry["image_password"] = stringOrDefault(volume.Properties.ImagePassword, "")
+			entry["id"] = mongo.ToValueDefault(volume.Id)
+			entry["name"] = mongo.ToValueDefault(volume.Properties.Name)
+			entry["type"] = mongo.ToValueDefault(volume.Properties.Type)
+			entry["availability_zone"] = mongo.ToValueDefault(volume.Properties.AvailabilityZone)
+			entry["image_name"] = mongo.ToValueDefault(volume.Properties.Image)
+			entry["image_password"] = mongo.ToValueDefault(volume.Properties.ImagePassword)
 
 			if volume.Properties.SshKeys != nil && len(*volume.Properties.SshKeys) > 0 {
 				var sshKeys []interface{}
@@ -256,8 +257,8 @@ func setCubeServerData(d *schema.ResourceData, server *ionoscloud.Server, token 
 				entry["ssh_keys"] = sshKeys
 			}
 
-			entry["bus"] = stringOrDefault(volume.Properties.Bus, "")
-			entry["licence_type"] = stringOrDefault(volume.Properties.LicenceType, "")
+			entry["bus"] = mongo.ToValueDefault(volume.Properties.Bus)
+			entry["licence_type"] = mongo.ToValueDefault(volume.Properties.LicenceType)
 			entry["cpu_hot_plug"] = boolOrDefault(volume.Properties.CpuHotPlug, true)
 			entry["ram_hot_plug"] = boolOrDefault(volume.Properties.RamHotPlug, true)
 			entry["nic_hot_plug"] = boolOrDefault(volume.Properties.NicHotPlug, true)
@@ -266,9 +267,9 @@ func setCubeServerData(d *schema.ResourceData, server *ionoscloud.Server, token 
 			entry["disc_virtio_hot_unplug"] = boolOrDefault(volume.Properties.DiscVirtioHotUnplug, true)
 			entry["device_number"] = int64OrDefault(volume.Properties.DeviceNumber, 0)
 			entry["pci_slot"] = int32OrDefault(volume.Properties.PciSlot, 0)
-			entry["backup_unit_id"] = stringOrDefault(volume.Properties.BackupunitId, "")
-			entry["user_data"] = stringOrDefault(volume.Properties.UserData, "")
-			entry["boot_server"] = stringOrDefault(volume.Properties.BootServer, "")
+			entry["backup_unit_id"] = mongo.ToValueDefault(volume.Properties.BackupunitId)
+			entry["user_data"] = mongo.ToValueDefault(volume.Properties.UserData)
+			entry["boot_server"] = mongo.ToValueDefault(volume.Properties.BootServer)
 
 			volumes = append(volumes, entry)
 		}

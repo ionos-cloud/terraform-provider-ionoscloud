@@ -616,7 +616,7 @@ func (r ApiDatacentersVolumesGetRequest) Limit(limit int32) ApiDatacentersVolume
 // Filters query parameters limit results to those containing a matching value for a specific property.
 func (r ApiDatacentersVolumesGetRequest) Filter(key string, value string) ApiDatacentersVolumesGetRequest {
 	filterKey := fmt.Sprintf(FilterQueryParam, key)
-	r.filters[filterKey] = []string{value}
+	r.filters[filterKey] = append(r.filters[filterKey], value)
 	return r
 }
 

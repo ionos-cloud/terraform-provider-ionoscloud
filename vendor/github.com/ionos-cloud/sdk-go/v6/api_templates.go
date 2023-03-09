@@ -198,7 +198,7 @@ func (r ApiTemplatesGetRequest) Depth(depth int32) ApiTemplatesGetRequest {
 // Filters query parameters limit results to those containing a matching value for a specific property.
 func (r ApiTemplatesGetRequest) Filter(key string, value string) ApiTemplatesGetRequest {
 	filterKey := fmt.Sprintf(FilterQueryParam, key)
-	r.filters[filterKey] = []string{value}
+	r.filters[filterKey] = append(r.filters[filterKey], value)
 	return r
 }
 

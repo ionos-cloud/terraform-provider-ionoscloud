@@ -397,7 +397,7 @@ func (r ApiUmUsersS3keysGetRequest) XContractNumber(xContractNumber int32) ApiUm
 // Filters query parameters limit results to those containing a matching value for a specific property.
 func (r ApiUmUsersS3keysGetRequest) Filter(key string, value string) ApiUmUsersS3keysGetRequest {
 	filterKey := fmt.Sprintf(FilterQueryParam, key)
-	r.filters[filterKey] = []string{value}
+	r.filters[filterKey] = append(r.filters[filterKey], value)
 	return r
 }
 
@@ -961,7 +961,7 @@ func (r ApiUmUsersS3ssourlGetRequest) XContractNumber(xContractNumber int32) Api
 // Filters query parameters limit results to those containing a matching value for a specific property.
 func (r ApiUmUsersS3ssourlGetRequest) Filter(key string, value string) ApiUmUsersS3ssourlGetRequest {
 	filterKey := fmt.Sprintf(FilterQueryParam, key)
-	r.filters[filterKey] = []string{value}
+	r.filters[filterKey] = append(r.filters[filterKey], value)
 	return r
 }
 
