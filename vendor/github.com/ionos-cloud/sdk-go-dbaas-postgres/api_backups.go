@@ -31,6 +31,17 @@ type ApiClusterBackupsGetRequest struct {
 	ctx        _context.Context
 	ApiService *BackupsApiService
 	clusterId  string
+	limit      *int32
+	offset     *int32
+}
+
+func (r ApiClusterBackupsGetRequest) Limit(limit int32) ApiClusterBackupsGetRequest {
+	r.limit = &limit
+	return r
+}
+func (r ApiClusterBackupsGetRequest) Offset(offset int32) ApiClusterBackupsGetRequest {
+	r.offset = &offset
+	return r
 }
 
 func (r ApiClusterBackupsGetRequest) Execute() (ClusterBackupList, *APIResponse, error) {
@@ -78,6 +89,12 @@ func (a *BackupsApiService) ClusterBackupsGetExecute(r ApiClusterBackupsGetReque
 	localVarQueryParams := _neturl.Values{}
 	localVarFormParams := _neturl.Values{}
 
+	if r.limit != nil {
+		localVarQueryParams.Add("limit", parameterToString(*r.limit, ""))
+	}
+	if r.offset != nil {
+		localVarQueryParams.Add("offset", parameterToString(*r.offset, ""))
+	}
 	// to determine the Content-Type header
 	localVarHTTPContentTypes := []string{}
 
@@ -305,6 +322,17 @@ func (a *BackupsApiService) ClustersBackupsFindByIdExecute(r ApiClustersBackupsF
 type ApiClustersBackupsGetRequest struct {
 	ctx        _context.Context
 	ApiService *BackupsApiService
+	limit      *int32
+	offset     *int32
+}
+
+func (r ApiClustersBackupsGetRequest) Limit(limit int32) ApiClustersBackupsGetRequest {
+	r.limit = &limit
+	return r
+}
+func (r ApiClustersBackupsGetRequest) Offset(offset int32) ApiClustersBackupsGetRequest {
+	r.offset = &offset
+	return r
 }
 
 func (r ApiClustersBackupsGetRequest) Execute() (ClusterBackupList, *APIResponse, error) {
@@ -349,6 +377,12 @@ func (a *BackupsApiService) ClustersBackupsGetExecute(r ApiClustersBackupsGetReq
 	localVarQueryParams := _neturl.Values{}
 	localVarFormParams := _neturl.Values{}
 
+	if r.limit != nil {
+		localVarQueryParams.Add("limit", parameterToString(*r.limit, ""))
+	}
+	if r.offset != nil {
+		localVarQueryParams.Add("offset", parameterToString(*r.offset, ""))
+	}
 	// to determine the Content-Type header
 	localVarHTTPContentTypes := []string{}
 

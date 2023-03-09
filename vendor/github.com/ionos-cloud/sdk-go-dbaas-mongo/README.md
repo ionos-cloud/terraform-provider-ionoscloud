@@ -5,9 +5,6 @@ MongoDB is an open source, cross-platform, document-oriented database program. C
 
 The MongoDB API allows you to create additional database clusters or modify existing ones. Both tools, the Data Center Designer (DCD) and the API use the same concepts consistently and are well suited for smooth and intuitive use.
 
-⚠️ **Note:**: DBaaS - MongoDB is currently in the Early Access (EA) phase. We recommend keeping usage and testing to non-production critical applications. Please contact your sales representative or support for more information.
-
-
 ### Example
 
 ```golang

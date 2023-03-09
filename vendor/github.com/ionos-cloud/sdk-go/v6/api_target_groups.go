@@ -398,7 +398,7 @@ func (r ApiTargetgroupsGetRequest) Limit(limit int32) ApiTargetgroupsGetRequest 
 // Filters query parameters limit results to those containing a matching value for a specific property.
 func (r ApiTargetgroupsGetRequest) Filter(key string, value string) ApiTargetgroupsGetRequest {
 	filterKey := fmt.Sprintf(FilterQueryParam, key)
-	r.filters[filterKey] = []string{value}
+	r.filters[filterKey] = append(r.filters[filterKey], value)
 	return r
 }
 

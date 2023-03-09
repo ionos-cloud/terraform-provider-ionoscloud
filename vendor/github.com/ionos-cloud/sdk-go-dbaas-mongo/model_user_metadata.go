@@ -1,7 +1,7 @@
 /*
  * IONOS DBaaS MongoDB REST API
  *
- * With IONOS Cloud Database as a Service, you have the ability to quickly set up and manage a MongoDB database. You can also delete clusters, manage backups and users via the API.   MongoDB is an open source, cross-platform, document-oriented database program. Classified as a NoSQL database program, it uses JSON-like documents with optional schemas.  The MongoDB API allows you to create additional database clusters or modify existing ones. Both tools, the Data Center Designer (DCD) and the API use the same concepts consistently and are well suited for smooth and intuitive use.
+ * With IONOS Cloud Database as a Service, you have the ability to quickly set up and manage a MongoDB database. You can also delete clusters, manage backups and users via the API.  MongoDB is an open source, cross-platform, document-oriented database program. Classified as a NoSQL database program, it uses JSON-like documents with optional schemas.  The MongoDB API allows you to create additional database clusters or modify existing ones. Both tools, the Data Center Designer (DCD) and the API use the same concepts consistently and are well suited for smooth and intuitive use.
  *
  * API version: 1.0.0
  */
@@ -23,8 +23,6 @@ type UserMetadata struct {
 	CreatedBy *string `json:"createdBy,omitempty"`
 	// The ID of the user who created the resource.
 	CreatedByUserId *string `json:"createdByUserId,omitempty"`
-	// The user state.
-	State *string `json:"state,omitempty"`
 }
 
 // NewUserMetadata instantiates a new UserMetadata object
@@ -166,44 +164,6 @@ func (o *UserMetadata) HasCreatedByUserId() bool {
 	return false
 }
 
-// GetState returns the State field value
-// If the value is explicit nil, the zero value for string will be returned
-func (o *UserMetadata) GetState() *string {
-	if o == nil {
-		return nil
-	}
-
-	return o.State
-
-}
-
-// GetStateOk returns a tuple with the State field value
-// and a boolean to check if the value has been set.
-// NOTE: If the value is an explicit nil, `nil, true` will be returned
-func (o *UserMetadata) GetStateOk() (*string, bool) {
-	if o == nil {
-		return nil, false
-	}
-
-	return o.State, true
-}
-
-// SetState sets field value
-func (o *UserMetadata) SetState(v string) {
-
-	o.State = &v
-
-}
-
-// HasState returns a boolean if a field has been set.
-func (o *UserMetadata) HasState() bool {
-	if o != nil && o.State != nil {
-		return true
-	}
-
-	return false
-}
-
 func (o UserMetadata) MarshalJSON() ([]byte, error) {
 	toSerialize := map[string]interface{}{}
 	if o.CreatedDate != nil {
@@ -216,10 +176,6 @@ func (o UserMetadata) MarshalJSON() ([]byte, error) {
 
 	if o.CreatedByUserId != nil {
 		toSerialize["createdByUserId"] = o.CreatedByUserId
-	}
-
-	if o.State != nil {
-		toSerialize["state"] = o.State
 	}
 
 	return json.Marshal(toSerialize)

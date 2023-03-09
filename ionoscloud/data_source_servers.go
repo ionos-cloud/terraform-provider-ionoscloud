@@ -8,6 +8,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 	"github.com/iancoleman/strcase"
+	mongo "github.com/ionos-cloud/sdk-go-dbaas-mongo"
 	ionoscloud "github.com/ionos-cloud/sdk-go/v6"
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils"
 	"log"
@@ -343,18 +344,18 @@ func setFirewallRules(nic ionoscloud.Nic) []interface{} {
 
 func setFirewallRuleProperties(rule ionoscloud.FirewallRule) map[string]interface{} {
 	ruleEntry := make(map[string]interface{})
-	ruleEntry["id"] = stringOrDefault(rule.Id, "")
+	ruleEntry["id"] = mongo.ToValueDefault(rule.Id)
 	if rule.Properties != nil {
-		ruleEntry["name"] = stringOrDefault(rule.Properties.Name, "")
-		ruleEntry["protocol"] = stringOrDefault(rule.Properties.Protocol, "")
-		ruleEntry["source_mac"] = stringOrDefault(rule.Properties.SourceMac, "")
-		ruleEntry["source_ip"] = stringOrDefault(rule.Properties.SourceIp, "")
-		ruleEntry["target_ip"] = stringOrDefault(rule.Properties.TargetIp, "")
+		ruleEntry["name"] = mongo.ToValueDefault(rule.Properties.Name)
+		ruleEntry["protocol"] = mongo.ToValueDefault(rule.Properties.Protocol)
+		ruleEntry["source_mac"] = mongo.ToValueDefault(rule.Properties.SourceMac)
+		ruleEntry["source_ip"] = mongo.ToValueDefault(rule.Properties.SourceIp)
+		ruleEntry["target_ip"] = mongo.ToValueDefault(rule.Properties.TargetIp)
 		ruleEntry["icmp_code"] = int32OrDefault(rule.Properties.IcmpCode, 0)
 		ruleEntry["icmp_type"] = int32OrDefault(rule.Properties.IcmpType, 0)
 		ruleEntry["port_range_start"] = int32OrDefault(rule.Properties.PortRangeStart, 0)
 		ruleEntry["port_range_end"] = int32OrDefault(rule.Properties.PortRangeEnd, 0)
-		ruleEntry["type"] = stringOrDefault(rule.Properties.Type, "")
+		ruleEntry["type"] = mongo.ToValueDefault(rule.Properties.Type)
 	}
 	return ruleEntry
 }
@@ -390,10 +391,10 @@ func setServerCDRoms(images *[]ionoscloud.Image) []interface{} {
 	for _, image := range *images {
 		entry := make(map[string]interface{})
 
-		entry["id"] = stringOrDefault(image.Id, "")
-		entry["name"] = stringOrDefault(image.Properties.Name, "")
-		entry["description"] = stringOrDefault(image.Properties.Description, "")
-		entry["location"] = stringOrDefault(image.Properties.Location, "")
+		entry["id"] = mongo.ToValueDefault(image.Id)
+		entry["name"] = mongo.ToValueDefault(image.Properties.Name)
+		entry["description"] = mongo.ToValueDefault(image.Properties.Description)
+		entry["location"] = mongo.ToValueDefault(image.Properties.Location)
 		entry["size"] = float32OrDefault(image.Properties.Size, 0)
 		entry["cpu_hot_plug"] = boolOrDefault(image.Properties.CpuHotPlug, true)
 		entry["cpu_hot_unplug"] = boolOrDefault(image.Properties.CpuHotUnplug, true)
@@ -405,8 +406,8 @@ func setServerCDRoms(images *[]ionoscloud.Image) []interface{} {
 		entry["disc_virtio_hot_unplug"] = boolOrDefault(image.Properties.DiscVirtioHotUnplug, true)
 		entry["disc_scsi_hot_plug"] = boolOrDefault(image.Properties.DiscScsiHotPlug, true)
 		entry["disc_scsi_hot_unplug"] = boolOrDefault(image.Properties.DiscScsiHotUnplug, true)
-		entry["licence_type"] = stringOrDefault(image.Properties.LicenceType, "")
-		entry["image_type"] = stringOrDefault(image.Properties.ImageType, "")
+		entry["licence_type"] = mongo.ToValueDefault(image.Properties.LicenceType)
+		entry["image_type"] = mongo.ToValueDefault(image.Properties.ImageType)
 		entry["public"] = boolOrDefault(image.Properties.Public, false)
 
 		if image.Properties.ImageAliases != nil {
@@ -417,7 +418,7 @@ func setServerCDRoms(images *[]ionoscloud.Image) []interface{} {
 			entry["image_aliases"] = imageAliases
 		}
 
-		entry["cloud_init"] = stringOrDefault(image.Properties.CloudInit, "")
+		entry["cloud_init"] = mongo.ToValueDefault(image.Properties.CloudInit)
 
 		cdroms = append(cdroms, entry)
 	}

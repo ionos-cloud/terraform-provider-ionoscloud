@@ -7,6 +7,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
+	mongo "github.com/ionos-cloud/sdk-go-dbaas-mongo"
 	ionoscloud "github.com/ionos-cloud/sdk-go/v6"
 )
 
@@ -195,13 +196,6 @@ func boolOrDefault(p *bool, d bool) bool {
 	return d
 }
 
-func stringOrDefault(s *string, d string) string {
-	if s != nil {
-		return *s
-	}
-	return d
-}
-
 func int32OrDefault(i *int32, d int32) int32 {
 	if i != nil {
 		return *i
@@ -315,13 +309,13 @@ func setServerData(d *schema.ResourceData, server *ionoscloud.Server, token *ion
 		for _, volume := range *server.Entities.Volumes.Items {
 			entry := make(map[string]interface{})
 
-			entry["id"] = stringOrDefault(volume.Id, "")
-			entry["name"] = stringOrDefault(volume.Properties.Name, "")
-			entry["type"] = stringOrDefault(volume.Properties.Type, "")
+			entry["id"] = mongo.ToValueDefault(volume.Id)
+			entry["name"] = mongo.ToValueDefault(volume.Properties.Name)
+			entry["type"] = mongo.ToValueDefault(volume.Properties.Type)
 			entry["size"] = float32OrDefault(volume.Properties.Size, 0)
-			entry["availability_zone"] = stringOrDefault(volume.Properties.AvailabilityZone, "")
-			entry["image_name"] = stringOrDefault(volume.Properties.Image, "")
-			entry["image_password"] = stringOrDefault(volume.Properties.ImagePassword, "")
+			entry["availability_zone"] = mongo.ToValueDefault(volume.Properties.AvailabilityZone)
+			entry["image_name"] = mongo.ToValueDefault(volume.Properties.Image)
+			entry["image_password"] = mongo.ToValueDefault(volume.Properties.ImagePassword)
 
 			if volume.Properties.SshKeys != nil && len(*volume.Properties.SshKeys) > 0 {
 				var sshKeys []interface{}
@@ -331,8 +325,8 @@ func setServerData(d *schema.ResourceData, server *ionoscloud.Server, token *ion
 				entry["ssh_keys"] = sshKeys
 			}
 
-			entry["bus"] = stringOrDefault(volume.Properties.Bus, "")
-			entry["licence_type"] = stringOrDefault(volume.Properties.LicenceType, "")
+			entry["bus"] = mongo.ToValueDefault(volume.Properties.Bus)
+			entry["licence_type"] = mongo.ToValueDefault(volume.Properties.LicenceType)
 			entry["cpu_hot_plug"] = boolOrDefault(volume.Properties.CpuHotPlug, true)
 			entry["ram_hot_plug"] = boolOrDefault(volume.Properties.RamHotPlug, true)
 			entry["nic_hot_plug"] = boolOrDefault(volume.Properties.NicHotPlug, true)
@@ -341,9 +335,9 @@ func setServerData(d *schema.ResourceData, server *ionoscloud.Server, token *ion
 			entry["disc_virtio_hot_unplug"] = boolOrDefault(volume.Properties.DiscVirtioHotUnplug, true)
 			entry["device_number"] = int64OrDefault(volume.Properties.DeviceNumber, 0)
 			entry["pci_slot"] = int32OrDefault(volume.Properties.PciSlot, 0)
-			entry["backup_unit_id"] = stringOrDefault(volume.Properties.BackupunitId, "")
-			entry["user_data"] = stringOrDefault(volume.Properties.UserData, "")
-			entry["boot_server"] = stringOrDefault(volume.Properties.BootServer, "")
+			entry["backup_unit_id"] = mongo.ToValueDefault(volume.Properties.BackupunitId)
+			entry["user_data"] = mongo.ToValueDefault(volume.Properties.UserData)
+			entry["boot_server"] = mongo.ToValueDefault(volume.Properties.BootServer)
 
 			volumes = append(volumes, entry)
 		}
@@ -358,9 +352,9 @@ func setServerData(d *schema.ResourceData, server *ionoscloud.Server, token *ion
 		for _, nic := range *server.Entities.Nics.Items {
 			entry := make(map[string]interface{})
 
-			entry["id"] = stringOrDefault(nic.Id, "")
-			entry["name"] = stringOrDefault(nic.Properties.Name, "")
-			entry["mac"] = stringOrDefault(nic.Properties.Mac, "")
+			entry["id"] = mongo.ToValueDefault(nic.Id)
+			entry["name"] = mongo.ToValueDefault(nic.Properties.Name)
+			entry["mac"] = mongo.ToValueDefault(nic.Properties.Mac)
 
 			if nic.Properties.Ips != nil {
 				var ips []interface{}
@@ -373,7 +367,7 @@ func setServerData(d *schema.ResourceData, server *ionoscloud.Server, token *ion
 			entry["dhcp"] = boolOrDefault(nic.Properties.Dhcp, false)
 			entry["lan"] = int32OrDefault(nic.Properties.Lan, 0)
 			entry["firewall_active"] = boolOrDefault(nic.Properties.FirewallActive, false)
-			entry["firewall_type"] = stringOrDefault(nic.Properties.FirewallType, "")
+			entry["firewall_type"] = mongo.ToValueDefault(nic.Properties.FirewallType)
 			entry["device_number"] = int32OrDefault(nic.Properties.DeviceNumber, 0)
 			entry["pci_slot"] = int32OrDefault(nic.Properties.PciSlot, 0)
 
@@ -382,18 +376,18 @@ func setServerData(d *schema.ResourceData, server *ionoscloud.Server, token *ion
 				for _, rule := range *nic.Entities.Firewallrules.Items {
 					ruleEntry := make(map[string]interface{})
 
-					ruleEntry["id"] = stringOrDefault(rule.Id, "")
+					ruleEntry["id"] = mongo.ToValueDefault(rule.Id)
 					if rule.Properties != nil {
-						ruleEntry["name"] = stringOrDefault(rule.Properties.Name, "")
-						ruleEntry["protocol"] = stringOrDefault(rule.Properties.Protocol, "")
-						ruleEntry["source_mac"] = stringOrDefault(rule.Properties.SourceMac, "")
-						ruleEntry["source_ip"] = stringOrDefault(rule.Properties.SourceIp, "")
-						ruleEntry["target_ip"] = stringOrDefault(rule.Properties.TargetIp, "")
+						ruleEntry["name"] = mongo.ToValueDefault(rule.Properties.Name)
+						ruleEntry["protocol"] = mongo.ToValueDefault(rule.Properties.Protocol)
+						ruleEntry["source_mac"] = mongo.ToValueDefault(rule.Properties.SourceMac)
+						ruleEntry["source_ip"] = mongo.ToValueDefault(rule.Properties.SourceIp)
+						ruleEntry["target_ip"] = mongo.ToValueDefault(rule.Properties.TargetIp)
 						ruleEntry["icmp_code"] = int32OrDefault(rule.Properties.IcmpCode, 0)
 						ruleEntry["icmp_type"] = int32OrDefault(rule.Properties.IcmpType, 0)
 						ruleEntry["port_range_start"] = int32OrDefault(rule.Properties.PortRangeStart, 0)
 						ruleEntry["port_range_end"] = int32OrDefault(rule.Properties.PortRangeEnd, 0)
-						ruleEntry["type"] = stringOrDefault(rule.Properties.Type, "")
+						ruleEntry["type"] = mongo.ToValueDefault(rule.Properties.Type)
 					}
 					firewallRules = append(firewallRules, ruleEntry)
 				}

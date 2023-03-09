@@ -292,7 +292,7 @@ func (r ApiRequestsGetRequest) Limit(limit int32) ApiRequestsGetRequest {
 // Filters query parameters limit results to those containing a matching value for a specific property.
 func (r ApiRequestsGetRequest) Filter(key string, value string) ApiRequestsGetRequest {
 	filterKey := fmt.Sprintf(FilterQueryParam, key)
-	r.filters[filterKey] = []string{value}
+	r.filters[filterKey] = append(r.filters[filterKey], value)
 	return r
 }
 
@@ -547,7 +547,7 @@ func (r ApiRequestsStatusGetRequest) XContractNumber(xContractNumber int32) ApiR
 // Filters query parameters limit results to those containing a matching value for a specific property.
 func (r ApiRequestsStatusGetRequest) Filter(key string, value string) ApiRequestsStatusGetRequest {
 	filterKey := fmt.Sprintf(FilterQueryParam, key)
-	r.filters[filterKey] = []string{value}
+	r.filters[filterKey] = append(r.filters[filterKey], value)
 	return r
 }
 

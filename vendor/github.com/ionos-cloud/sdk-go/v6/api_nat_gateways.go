@@ -737,7 +737,7 @@ func (r ApiDatacentersNatgatewaysFlowlogsGetRequest) Limit(limit int32) ApiDatac
 // Filters query parameters limit results to those containing a matching value for a specific property.
 func (r ApiDatacentersNatgatewaysFlowlogsGetRequest) Filter(key string, value string) ApiDatacentersNatgatewaysFlowlogsGetRequest {
 	filterKey := fmt.Sprintf(FilterQueryParam, key)
-	r.filters[filterKey] = []string{value}
+	r.filters[filterKey] = append(r.filters[filterKey], value)
 	return r
 }
 
@@ -1507,7 +1507,7 @@ func (r ApiDatacentersNatgatewaysGetRequest) XContractNumber(xContractNumber int
 // Filters query parameters limit results to those containing a matching value for a specific property.
 func (r ApiDatacentersNatgatewaysGetRequest) Filter(key string, value string) ApiDatacentersNatgatewaysGetRequest {
 	filterKey := fmt.Sprintf(FilterQueryParam, key)
-	r.filters[filterKey] = []string{value}
+	r.filters[filterKey] = append(r.filters[filterKey], value)
 	return r
 }
 
@@ -2626,7 +2626,7 @@ func (r ApiDatacentersNatgatewaysRulesGetRequest) XContractNumber(xContractNumbe
 // Filters query parameters limit results to those containing a matching value for a specific property.
 func (r ApiDatacentersNatgatewaysRulesGetRequest) Filter(key string, value string) ApiDatacentersNatgatewaysRulesGetRequest {
 	filterKey := fmt.Sprintf(FilterQueryParam, key)
-	r.filters[filterKey] = []string{value}
+	r.filters[filterKey] = append(r.filters[filterKey], value)
 	return r
 }
 

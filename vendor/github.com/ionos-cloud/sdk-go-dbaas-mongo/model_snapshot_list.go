@@ -1,7 +1,7 @@
 /*
  * IONOS DBaaS MongoDB REST API
  *
- * With IONOS Cloud Database as a Service, you have the ability to quickly set up and manage a MongoDB database. You can also delete clusters, manage backups and users via the API.   MongoDB is an open source, cross-platform, document-oriented database program. Classified as a NoSQL database program, it uses JSON-like documents with optional schemas.  The MongoDB API allows you to create additional database clusters or modify existing ones. Both tools, the Data Center Designer (DCD) and the API use the same concepts consistently and are well suited for smooth and intuitive use.
+ * With IONOS Cloud Database as a Service, you have the ability to quickly set up and manage a MongoDB database. You can also delete clusters, manage backups and users via the API.  MongoDB is an open source, cross-platform, document-oriented database program. Classified as a NoSQL database program, it uses JSON-like documents with optional schemas.  The MongoDB API allows you to create additional database clusters or modify existing ones. Both tools, the Data Center Designer (DCD) and the API use the same concepts consistently and are well suited for smooth and intuitive use.
  *
  * API version: 1.0.0
  */
@@ -20,11 +20,11 @@ type SnapshotList struct {
 	// The unique ID of the resource.
 	Id    *string             `json:"id,omitempty"`
 	Items *[]SnapshotResponse `json:"items,omitempty"`
-	// The offset specified in the request (if none was specified, the default offset is 0) (not implemented yet).
+	// The offset specified in the request (if none was specified, the default offset is 0).
 	Offset *int32 `json:"offset,omitempty"`
-	// The limit specified in the request (if none was specified, use the endpoint's default pagination limit) (not implemented yet, always return number of items).
+	// The limit specified in the request (if none was specified, the default limit is 100).
 	Limit *int32           `json:"limit,omitempty"`
-	Links *PaginationLinks `json:"_links,omitempty"`
+	Links *PaginationLinks `json:"links,omitempty"`
 }
 
 // NewSnapshotList instantiates a new SnapshotList object
@@ -34,6 +34,11 @@ type SnapshotList struct {
 func NewSnapshotList() *SnapshotList {
 	this := SnapshotList{}
 
+	var offset int32 = 0
+	this.Offset = &offset
+	var limit int32 = 100
+	this.Limit = &limit
+
 	return &this
 }
 
@@ -42,6 +47,10 @@ func NewSnapshotList() *SnapshotList {
 // but it doesn't guarantee that properties required by API are set
 func NewSnapshotListWithDefaults() *SnapshotList {
 	this := SnapshotList{}
+	var offset int32 = 0
+	this.Offset = &offset
+	var limit int32 = 100
+	this.Limit = &limit
 	return &this
 }
 
@@ -296,7 +305,7 @@ func (o SnapshotList) MarshalJSON() ([]byte, error) {
 	}
 
 	if o.Links != nil {
-		toSerialize["_links"] = o.Links
+		toSerialize["links"] = o.Links
 	}
 
 	return json.Marshal(toSerialize)
