@@ -445,9 +445,19 @@ func (a *ClustersApiService) ClustersFindByIdExecute(r ApiClustersFindByIdReques
 type ApiClustersGetRequest struct {
 	ctx        _context.Context
 	ApiService *ClustersApiService
+	limit      *int32
+	offset     *int32
 	filterName *string
 }
 
+func (r ApiClustersGetRequest) Limit(limit int32) ApiClustersGetRequest {
+	r.limit = &limit
+	return r
+}
+func (r ApiClustersGetRequest) Offset(offset int32) ApiClustersGetRequest {
+	r.offset = &offset
+	return r
+}
 func (r ApiClustersGetRequest) FilterName(filterName string) ApiClustersGetRequest {
 	r.filterName = &filterName
 	return r
@@ -495,6 +505,12 @@ func (a *ClustersApiService) ClustersGetExecute(r ApiClustersGetRequest) (Cluste
 	localVarQueryParams := _neturl.Values{}
 	localVarFormParams := _neturl.Values{}
 
+	if r.limit != nil {
+		localVarQueryParams.Add("limit", parameterToString(*r.limit, ""))
+	}
+	if r.offset != nil {
+		localVarQueryParams.Add("offset", parameterToString(*r.offset, ""))
+	}
 	if r.filterName != nil {
 		localVarQueryParams.Add("filter.name", parameterToString(*r.filterName, ""))
 	}
