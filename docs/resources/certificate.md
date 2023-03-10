@@ -7,7 +7,7 @@ description: |-
   Creates and manages a certificate.
 ---
 
-# ionoscloud\_ionoscloud_certificate
+# ionoscloud_certificate
 
 Manages a **Certificate** on IonosCloud.
 

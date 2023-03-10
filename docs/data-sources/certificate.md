@@ -7,7 +7,7 @@ description: |-
   Get Information on a certificate
 ---
 
-# ionoscloud\_ionoscloud_certificate
+# ionoscloud_certificate
 
 The **Certificate data source** can be used to search for and return an existing certificate.
 You can provide a string for either id or name parameters which will be compared with provisioned certificates.
