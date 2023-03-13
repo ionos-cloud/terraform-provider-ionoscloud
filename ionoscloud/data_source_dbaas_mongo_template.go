@@ -107,14 +107,16 @@ func matchesId(template mongo.TemplateResponse, templateId string) bool {
 
 // Check if a template has a specific name, also supports partial matching.
 func matchesName(template mongo.TemplateResponse, name string, partialMatch bool) bool {
-	if template.Name != nil {
-		if partialMatch {
-			if strings.Contains(*template.Name, name) {
-				return true
-			}
-		} else {
-			if *template.Name == name {
-				return true
+	if template.Properties != nil {
+		if template.Properties.Name != nil {
+			if partialMatch {
+				if strings.Contains(*template.Properties.Name, name) {
+					return true
+				}
+			} else {
+				if *template.Properties.Name == name {
+					return true
+				}
 			}
 		}
 	}

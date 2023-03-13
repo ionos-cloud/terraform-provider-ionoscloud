@@ -14,7 +14,7 @@ import (
 	"encoding/json"
 )
 
-// TemplateList The list of MongoDB templates.
+// TemplateList List of MongoDB templates.
 type TemplateList struct {
 	Type *ResourceType `json:"type,omitempty"`
 	// The unique ID of the resource.

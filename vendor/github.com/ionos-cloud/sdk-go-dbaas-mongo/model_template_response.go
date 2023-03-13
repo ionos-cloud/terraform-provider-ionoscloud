@@ -14,20 +14,13 @@ import (
 	"encoding/json"
 )
 
-// TemplateResponse A MongoDB template item.
+// TemplateResponse A MongoDB template.
 type TemplateResponse struct {
-	// The unique template ID.
-	Id *string `json:"id,omitempty"`
-	// The name of the template.
-	Name *string `json:"name,omitempty"`
-	// The edition of the template (e.g. enterprise)
-	Edition *string `json:"edition,omitempty"`
-	// The number of CPU cores.
-	Cores *int32 `json:"cores,omitempty"`
-	// The amount of memory in GB.
-	Ram *int32 `json:"ram,omitempty"`
-	// The amount of storage size in GB.
-	StorageSize *int32 `json:"storageSize,omitempty"`
+	Type *ResourceType `json:"type,omitempty"`
+	// The unique ID of the resource.
+	Id         *string             `json:"id,omitempty"`
+	Metadata   *Metadata           `json:"metadata,omitempty"`
+	Properties *TemplateProperties `json:"properties,omitempty"`
 }
 
 // NewTemplateResponse instantiates a new TemplateResponse object
@@ -46,6 +39,44 @@ func NewTemplateResponse() *TemplateResponse {
 func NewTemplateResponseWithDefaults() *TemplateResponse {
 	this := TemplateResponse{}
 	return &this
+}
+
+// GetType returns the Type field value
+// If the value is explicit nil, the zero value for ResourceType will be returned
+func (o *TemplateResponse) GetType() *ResourceType {
+	if o == nil {
+		return nil
+	}
+
+	return o.Type
+
+}
+
+// GetTypeOk returns a tuple with the Type field value
+// and a boolean to check if the value has been set.
+// NOTE: If the value is an explicit nil, `nil, true` will be returned
+func (o *TemplateResponse) GetTypeOk() (*ResourceType, bool) {
+	if o == nil {
+		return nil, false
+	}
+
+	return o.Type, true
+}
+
+// SetType sets field value
+func (o *TemplateResponse) SetType(v ResourceType) {
+
+	o.Type = &v
+
+}
+
+// HasType returns a boolean if a field has been set.
+func (o *TemplateResponse) HasType() bool {
+	if o != nil && o.Type != nil {
+		return true
+	}
+
+	return false
 }
 
 // GetId returns the Id field value
@@ -86,190 +117,76 @@ func (o *TemplateResponse) HasId() bool {
 	return false
 }
 
-// GetName returns the Name field value
-// If the value is explicit nil, the zero value for string will be returned
-func (o *TemplateResponse) GetName() *string {
+// GetMetadata returns the Metadata field value
+// If the value is explicit nil, the zero value for Metadata will be returned
+func (o *TemplateResponse) GetMetadata() *Metadata {
 	if o == nil {
 		return nil
 	}
 
-	return o.Name
+	return o.Metadata
 
 }
 
-// GetNameOk returns a tuple with the Name field value
+// GetMetadataOk returns a tuple with the Metadata field value
 // and a boolean to check if the value has been set.
 // NOTE: If the value is an explicit nil, `nil, true` will be returned
-func (o *TemplateResponse) GetNameOk() (*string, bool) {
+func (o *TemplateResponse) GetMetadataOk() (*Metadata, bool) {
 	if o == nil {
 		return nil, false
 	}
 
-	return o.Name, true
+	return o.Metadata, true
 }
 
-// SetName sets field value
-func (o *TemplateResponse) SetName(v string) {
+// SetMetadata sets field value
+func (o *TemplateResponse) SetMetadata(v Metadata) {
 
-	o.Name = &v
+	o.Metadata = &v
 
 }
 
-// HasName returns a boolean if a field has been set.
-func (o *TemplateResponse) HasName() bool {
-	if o != nil && o.Name != nil {
+// HasMetadata returns a boolean if a field has been set.
+func (o *TemplateResponse) HasMetadata() bool {
+	if o != nil && o.Metadata != nil {
 		return true
 	}
 
 	return false
 }
 
-// GetEdition returns the Edition field value
-// If the value is explicit nil, the zero value for string will be returned
-func (o *TemplateResponse) GetEdition() *string {
+// GetProperties returns the Properties field value
+// If the value is explicit nil, the zero value for TemplateProperties will be returned
+func (o *TemplateResponse) GetProperties() *TemplateProperties {
 	if o == nil {
 		return nil
 	}
 
-	return o.Edition
+	return o.Properties
 
 }
 
-// GetEditionOk returns a tuple with the Edition field value
+// GetPropertiesOk returns a tuple with the Properties field value
 // and a boolean to check if the value has been set.
 // NOTE: If the value is an explicit nil, `nil, true` will be returned
-func (o *TemplateResponse) GetEditionOk() (*string, bool) {
+func (o *TemplateResponse) GetPropertiesOk() (*TemplateProperties, bool) {
 	if o == nil {
 		return nil, false
 	}
 
-	return o.Edition, true
+	return o.Properties, true
 }
 
-// SetEdition sets field value
-func (o *TemplateResponse) SetEdition(v string) {
+// SetProperties sets field value
+func (o *TemplateResponse) SetProperties(v TemplateProperties) {
 
-	o.Edition = &v
-
-}
-
-// HasEdition returns a boolean if a field has been set.
-func (o *TemplateResponse) HasEdition() bool {
-	if o != nil && o.Edition != nil {
-		return true
-	}
-
-	return false
-}
-
-// GetCores returns the Cores field value
-// If the value is explicit nil, the zero value for int32 will be returned
-func (o *TemplateResponse) GetCores() *int32 {
-	if o == nil {
-		return nil
-	}
-
-	return o.Cores
+	o.Properties = &v
 
 }
 
-// GetCoresOk returns a tuple with the Cores field value
-// and a boolean to check if the value has been set.
-// NOTE: If the value is an explicit nil, `nil, true` will be returned
-func (o *TemplateResponse) GetCoresOk() (*int32, bool) {
-	if o == nil {
-		return nil, false
-	}
-
-	return o.Cores, true
-}
-
-// SetCores sets field value
-func (o *TemplateResponse) SetCores(v int32) {
-
-	o.Cores = &v
-
-}
-
-// HasCores returns a boolean if a field has been set.
-func (o *TemplateResponse) HasCores() bool {
-	if o != nil && o.Cores != nil {
-		return true
-	}
-
-	return false
-}
-
-// GetRam returns the Ram field value
-// If the value is explicit nil, the zero value for int32 will be returned
-func (o *TemplateResponse) GetRam() *int32 {
-	if o == nil {
-		return nil
-	}
-
-	return o.Ram
-
-}
-
-// GetRamOk returns a tuple with the Ram field value
-// and a boolean to check if the value has been set.
-// NOTE: If the value is an explicit nil, `nil, true` will be returned
-func (o *TemplateResponse) GetRamOk() (*int32, bool) {
-	if o == nil {
-		return nil, false
-	}
-
-	return o.Ram, true
-}
-
-// SetRam sets field value
-func (o *TemplateResponse) SetRam(v int32) {
-
-	o.Ram = &v
-
-}
-
-// HasRam returns a boolean if a field has been set.
-func (o *TemplateResponse) HasRam() bool {
-	if o != nil && o.Ram != nil {
-		return true
-	}
-
-	return false
-}
-
-// GetStorageSize returns the StorageSize field value
-// If the value is explicit nil, the zero value for int32 will be returned
-func (o *TemplateResponse) GetStorageSize() *int32 {
-	if o == nil {
-		return nil
-	}
-
-	return o.StorageSize
-
-}
-
-// GetStorageSizeOk returns a tuple with the StorageSize field value
-// and a boolean to check if the value has been set.
-// NOTE: If the value is an explicit nil, `nil, true` will be returned
-func (o *TemplateResponse) GetStorageSizeOk() (*int32, bool) {
-	if o == nil {
-		return nil, false
-	}
-
-	return o.StorageSize, true
-}
-
-// SetStorageSize sets field value
-func (o *TemplateResponse) SetStorageSize(v int32) {
-
-	o.StorageSize = &v
-
-}
-
-// HasStorageSize returns a boolean if a field has been set.
-func (o *TemplateResponse) HasStorageSize() bool {
-	if o != nil && o.StorageSize != nil {
+// HasProperties returns a boolean if a field has been set.
+func (o *TemplateResponse) HasProperties() bool {
+	if o != nil && o.Properties != nil {
 		return true
 	}
 
@@ -278,28 +195,20 @@ func (o *TemplateResponse) HasStorageSize() bool {
 
 func (o TemplateResponse) MarshalJSON() ([]byte, error) {
 	toSerialize := map[string]interface{}{}
+	if o.Type != nil {
+		toSerialize["type"] = o.Type
+	}
+
 	if o.Id != nil {
 		toSerialize["id"] = o.Id
 	}
 
-	if o.Name != nil {
-		toSerialize["name"] = o.Name
+	if o.Metadata != nil {
+		toSerialize["metadata"] = o.Metadata
 	}
 
-	if o.Edition != nil {
-		toSerialize["edition"] = o.Edition
-	}
-
-	if o.Cores != nil {
-		toSerialize["cores"] = o.Cores
-	}
-
-	if o.Ram != nil {
-		toSerialize["ram"] = o.Ram
-	}
-
-	if o.StorageSize != nil {
-		toSerialize["storageSize"] = o.StorageSize
+	if o.Properties != nil {
+		toSerialize["properties"] = o.Properties
 	}
 
 	return json.Marshal(toSerialize)

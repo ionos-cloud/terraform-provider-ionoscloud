@@ -1,3 +1,9 @@
+## 6.3.7 (upcoming release)
+### Dependency update
+- Update `sdk-go-dbaas-mongo` to [v1.0.6](https://github.com/ionos-cloud/sdk-go-dbaas-mongo/releases/tag/v1.2.2)
+## Fixes
+- Update code to work with new mongo version
+
 ## 6.3.6
 ### Feature
 - Rewrite a part of the psql service to use new functionality.
