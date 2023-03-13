@@ -3,6 +3,7 @@ package ionoscloud
 import (
 	"context"
 	"fmt"
+	"log"
 	"strings"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
@@ -17,10 +18,10 @@ func dataSourceDbassMongoTemplate() *schema.Resource {
 		ReadContext: dataSourceDbassMongoTemplateRead,
 		Schema: map[string]*schema.Schema{
 			"id": {
-				Type:         schema.TypeString,
-				Description:  "The unique ID of the template.",
-				ValidateFunc: validation.IsUUID,
-				Optional:     true,
+				Type:             schema.TypeString,
+				Description:      "The unique ID of the template.",
+				ValidateDiagFunc: validation.ToDiagFunc(validation.IsUUID),
+				Optional:         true,
 			},
 			"name": {
 				Type:        schema.TypeString,
@@ -70,7 +71,6 @@ func dataSourceDbassMongoTemplateRead(ctx context.Context, d *schema.ResourceDat
 	if !idOk && !nameOk {
 		return diag.FromErr(fmt.Errorf("please provide a template ID or name"))
 	}
-
 	retrievedTemplates, _, err := client.GetTemplates(ctx)
 	if err != nil {
 		return diag.FromErr(fmt.Errorf("an error occurred while fetching dbaas mongo templates: %w", err))
@@ -81,7 +81,8 @@ func dataSourceDbassMongoTemplateRead(ctx context.Context, d *schema.ResourceDat
 	if retrievedTemplates.Items != nil {
 		for _, retrievedTemplate := range *retrievedTemplates.Items {
 			// Filter using the template ID or name.
-			if (idOk && matchesId(retrievedTemplate, id.(string))) || (nameOk && matchesName(retrievedTemplate, name.(string), partialMatch)) {
+			if (idOk && *retrievedTemplate.Id == id.(string)) ||
+				(nameOk && matchesName(retrievedTemplate, name.(string), partialMatch)) {
 				templates = append(templates, retrievedTemplate)
 			}
 		}
@@ -97,28 +98,16 @@ func dataSourceDbassMongoTemplateRead(ctx context.Context, d *schema.ResourceDat
 	return nil
 }
 
-// Check if a template has a specific ID.
-func matchesId(template mongo.TemplateResponse, templateId string) bool {
-	if template.Id != nil && *template.Id == templateId {
-		return true
-	}
-	return false
-}
-
-// Check if a template has a specific name, also supports partial matching.
+// matchesName checks if a template has a specific name. allows for partial matching if partialMatch is true
 func matchesName(template mongo.TemplateResponse, name string, partialMatch bool) bool {
-	if template.Properties != nil {
-		if template.Properties.Name != nil {
-			if partialMatch {
-				if strings.Contains(*template.Properties.Name, name) {
-					return true
-				}
-			} else {
-				if *template.Properties.Name == name {
-					return true
-				}
-			}
-		}
+	if template.Properties == nil || template.Properties.Name == nil {
+		log.Printf("[WARNING] template %s missing properties, or name", *template.Id)
+		return false
 	}
-	return false
+
+	if partialMatch {
+		return strings.Contains(*template.Properties.Name, name)
+	}
+
+	return *template.Properties.Name == name
 }
