@@ -692,34 +692,36 @@ func SetMongoDBTemplateData(d *schema.ResourceData, template mongo.TemplateRespo
 	if template.Id != nil {
 		d.SetId(*template.Id)
 	}
-	if template.Name != nil {
-		field := "name"
-		if err := d.Set(field, *template.Name); err != nil {
-			return utils.GenerateSetError(resourceName, field, err)
+	if template.Properties != nil {
+		if template.Properties.Name != nil {
+			field := "name"
+			if err := d.Set(field, *template.Properties.Name); err != nil {
+				return utils.GenerateSetError(resourceName, field, err)
+			}
 		}
-	}
-	if template.Edition != nil {
-		field := "edition"
-		if err := d.Set(field, *template.Edition); err != nil {
-			return utils.GenerateSetError(resourceName, field, err)
+		if template.Properties.Edition != nil {
+			field := "edition"
+			if err := d.Set(field, *template.Properties.Edition); err != nil {
+				return utils.GenerateSetError(resourceName, field, err)
+			}
 		}
-	}
-	if template.Cores != nil {
-		field := "cores"
-		if err := d.Set(field, *template.Cores); err != nil {
-			return utils.GenerateSetError(resourceName, field, err)
+		if template.Properties.Cores != nil {
+			field := "cores"
+			if err := d.Set(field, *template.Properties.Cores); err != nil {
+				return utils.GenerateSetError(resourceName, field, err)
+			}
 		}
-	}
-	if template.Ram != nil {
-		field := "ram"
-		if err := d.Set(field, *template.Ram); err != nil {
-			return utils.GenerateSetError(resourceName, field, err)
+		if template.Properties.Ram != nil {
+			field := "ram"
+			if err := d.Set(field, *template.Properties.Ram); err != nil {
+				return utils.GenerateSetError(resourceName, field, err)
+			}
 		}
-	}
-	if template.StorageSize != nil {
-		field := "storage_size"
-		if err := d.Set(field, *template.StorageSize); err != nil {
-			return utils.GenerateSetError(resourceName, field, err)
+		if template.Properties.StorageSize != nil {
+			field := "storage_size"
+			if err := d.Set(field, *template.Properties.StorageSize); err != nil {
+				return utils.GenerateSetError(resourceName, field, err)
+			}
 		}
 	}
 	return nil

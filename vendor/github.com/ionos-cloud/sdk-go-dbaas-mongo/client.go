@@ -50,7 +50,7 @@ const (
 	RequestStatusFailed  = "FAILED"
 	RequestStatusDone    = "DONE"
 
-	Version = "1.2.1"
+	Version = "1.2.2"
 )
 
 // APIClient manages communication with the IONOS DBaaS MongoDB REST API API v1.0.0
