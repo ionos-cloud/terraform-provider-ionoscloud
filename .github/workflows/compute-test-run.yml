@@ -1,5 +1,5 @@
 #This workflow will trigger every week, running terraform compute-engine tests
-name: Every 2 days compute-engine test run
+name: Weekly compute-engine test run
 on:
   schedule:
     # At 09:00:00 - UTC, every week on Wednesday.
@@ -19,6 +19,9 @@ jobs:
     steps:
       - name: Checkout code
         uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
+          ref: master
       - name: Install Go
         uses: actions/setup-go@v3
         with:
