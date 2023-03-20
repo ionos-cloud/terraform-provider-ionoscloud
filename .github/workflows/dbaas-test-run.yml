@@ -1,5 +1,5 @@
 #This workflow will trigger every week on Tuesday, running terraform dbaas tests
-name: Weekly dbaas test run
+name: Weekly DBaaS test run
 on:
   schedule:
     # At 09:00:00 - UTC, every week on Tuesday.

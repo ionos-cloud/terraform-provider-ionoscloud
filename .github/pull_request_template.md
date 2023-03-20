@@ -1,4 +1,4 @@
-## What does this fix or feature implement?
+## What does this fix or implement?
 
 <!-- Enter details of the change here. Include additional tests that have been done, reference to the issue for tracking, etc. -->
 
