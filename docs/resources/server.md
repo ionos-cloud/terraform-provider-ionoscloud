@@ -164,6 +164,7 @@ resource "random_password" "server_image_password" {
 - `image_password` - (Optional)[string] Required if `ssh_key_path` is not provided.
 - `type` - (Optional)[string] Server usages: [ENTERPRISE](https://docs.ionos.com/cloud/compute-engine/virtual-servers/virtual-servers) or [CUBE](https://docs.ionos.com/cloud/compute-engine/virtual-servers/cloud-cubes). This property is immutable.
 - `label` - (Optional) A label can be seen as an object with only two required fields: `key` and `value`, both of the `string` type. Please check the example presented above to see how a `label` can be used in the plan. A server can have multiple labels.
+- `delete_volumes` - (Optional) [bool] deleting all the volumes of a server even if no boot_volume provided
 
 > **⚠ WARNING** 
 > 

@@ -216,6 +216,45 @@ func TestAccServerBasic(t *testing.T) {
 	})
 }
 
+func TestAccServerNoBootVolumeBasic(t *testing.T) {
+	var server ionoscloud.Server
+
+	resource.Test(t, resource.TestCase{
+		PreCheck: func() {
+			testAccPreCheck(t)
+		},
+		ExternalProviders: randomProviderVersion343(),
+		ProviderFactories: testAccProviderFactories,
+		CheckDestroy:      testAccCheckServerDestroyCheck,
+		Steps: []resource.TestStep{
+			{
+				Config: testAccCheckServerConfigNoBootVolume,
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckServerExists(ServerResource+"."+ServerTestResource, &server),
+					resource.TestCheckResourceAttr(ServerResource+"."+ServerTestResource, "name", ServerTestResource),
+					resource.TestCheckResourceAttr(ServerResource+"."+ServerTestResource, "cores", "2"),
+					resource.TestCheckResourceAttr(ServerResource+"."+ServerTestResource, "ram", "2048"),
+					resource.TestCheckResourceAttr(ServerResource+"."+ServerTestResource, "availability_zone", "ZONE_1"),
+					resource.TestCheckResourceAttr(ServerResource+"."+ServerTestResource, "cpu_family", "AMD_OPTERON"),
+					resource.TestCheckResourceAttr(ServerResource+"."+ServerTestResource, "type", "ENTERPRISE"),
+					resource.TestCheckResourceAttr(ServerResource+"."+ServerTestResource, "volume.0.name", "system"),
+					resource.TestCheckResourceAttr(ServerResource+"."+ServerTestResource, "volume.0.size", "6"),
+					resource.TestCheckResourceAttr(ServerResource+"."+ServerTestResource, "volume.0.disk_type", "SSD Standard"),
+					resource.TestCheckResourceAttr(ServerResource+"."+ServerTestResource, "volume.0.bus", "VIRTIO"),
+					resource.TestCheckResourceAttr(ServerResource+"."+ServerTestResource, "volume.0.availability_zone", "ZONE_1"),
+					resource.TestCheckResourceAttr(ServerResource+"."+ServerTestResource, "volume.0.licence_type", "UNKNOWN"),
+					resource.TestCheckResourceAttrPair(ServerResource+"."+ServerTestResource, "nic.0.lan", LanResource+"."+LanTestResource, "id"),
+					resource.TestCheckResourceAttr(ServerResource+"."+ServerTestResource, "nic.0.name", "system"),
+					resource.TestCheckResourceAttr(ServerResource+"."+ServerTestResource, "nic.0.dhcp", "true"),
+					resource.TestCheckResourceAttr(ServerResource+"."+ServerTestResource, "nic.0.firewall_active", "true"),
+					resource.TestCheckResourceAttrPair(ServerResource+"."+ServerTestResource, "nic.0.id", ServerResource+"."+ServerTestResource, "primary_nic"),
+					resource.TestCheckResourceAttr(ServerResource+"."+ServerTestResource, "nic.0.firewall_type", "INGRESS"),
+				),
+			},
+		},
+	})
+}
+
 func TestAccServerBootCdromNoImage(t *testing.T) {
 	var server ionoscloud.Server
 
@@ -1045,3 +1084,42 @@ resource ` + ServerResource + ` ` + ServerTestResource + ` {
     firewall_active = false
   }
 }`
+
+const testAccCheckServerConfigNoBootVolume = `
+resource ` + DatacenterResource + ` ` + DatacenterTestResource + ` {
+	name       = "server-test"
+	location = "us/las"
+}
+
+resource ` + LanResource + ` ` + LanTestResource + ` {
+  datacenter_id = ` + DatacenterResource + `.` + DatacenterTestResource + `.id
+  public = true
+  name = "public"
+}
+
+resource ` + ServerResource + ` ` + ServerTestResource + ` {
+  name = "` + ServerTestResource + `"
+  datacenter_id = ` + DatacenterResource + `.` + DatacenterTestResource + `.id
+  cores = 2
+  ram = 2048
+  availability_zone = "ZONE_1"
+  cpu_family = "AMD_OPTERON"
+  type = "ENTERPRISE"
+  delete_volumes = true
+  volume {
+    name = "system"
+    size = 6
+    licence_type = "UNKNOWN"
+    disk_type = "SSD Standard"
+    bus = "VIRTIO"
+    availability_zone = "ZONE_1"
+}
+  nic {
+    lan = ` + LanResource + `.` + LanTestResource + `.id
+    name = "system"
+    dhcp = true
+    firewall_active = true
+	firewall_type = "INGRESS"
+  }
+}
+`
