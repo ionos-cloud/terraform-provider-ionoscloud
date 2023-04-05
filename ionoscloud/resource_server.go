@@ -1056,12 +1056,21 @@ func resourceServerDelete(ctx context.Context, d *schema.ResourceData, meta inte
 	client := meta.(SdkBundle).CloudApiClient
 	dcId := d.Get("datacenter_id").(string)
 
-	server, apiResponse, err := client.ServersApi.DatacentersServersFindById(ctx, dcId, d.Id()).Execute()
+	server, apiResponse, err := client.ServersApi.DatacentersServersFindById(ctx, dcId, d.Id()).Depth(2).Execute()
 	logApiRequestTime(apiResponse)
 
 	if err != nil {
 		diags := diag.FromErr(fmt.Errorf("error occured while fetching a server ID %s %w", d.Id(), err))
 		return diags
+	}
+
+	if deleteVolumes, ok := d.GetOk("delete_volumes"); ok {
+		if deleteVolumes.(bool) {
+			diags := deleteAllVolumes(ctx, d, client, &server)
+			if diags != nil {
+				return diags
+			}
+		}
 	}
 
 	if server.Properties.BootVolume != nil && strings.ToLower(*server.Properties.Type) != "cube" {
@@ -1071,15 +1080,6 @@ func resourceServerDelete(ctx context.Context, d *schema.ResourceData, meta inte
 		if err != nil {
 			diags := diag.FromErr(fmt.Errorf("error occured while delete volume %s of server ID %s %w", *server.Properties.BootVolume.Id, d.Id(), err))
 			return diags
-		}
-
-		if deleteVolumes, ok := d.GetOk("delete_volumes"); ok {
-			if deleteVolumes.(bool) {
-				diags := deleteAllVolumes(ctx, d, client, &server)
-				if diags != nil {
-					return diags
-				}
-			}
 		}
 
 		// Wait, catching any errors

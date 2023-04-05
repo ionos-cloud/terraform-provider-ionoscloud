@@ -13,7 +13,7 @@ func main() {
 
 	//set this to true to enable cli debugging your provider, by running headless and setting TF_REATTACH_PROVIDERS on the terraform terminal
 	//this will enable you to debug when running plans from cli.
-	flag.BoolVar(&debugMode, "debuggable", false, "set to true to run the provider with support for debuggers like delve/goland")
+	flag.BoolVar(&debugMode, "debuggable", true, "set to true to run the provider with support for debuggers like delve/goland")
 	flag.Parse()
 
 	if debugMode {
