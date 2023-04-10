@@ -50,7 +50,7 @@ func resourceShareCreate(ctx context.Context, d *schema.ResourceData, meta inter
 	client := meta.(SdkBundle).CloudApiClient
 
 	request := ionoscloud.GroupShare{
-		Properties: &ionoscloud.GroupShareProperties{},
+		Properties: ionoscloud.GroupShareProperties{},
 	}
 
 	tempSharePrivilege := d.Get("share_privilege").(bool)
@@ -113,7 +113,7 @@ func resourceShareUpdate(ctx context.Context, d *schema.ResourceData, meta inter
 	tempEditPrivilege := d.Get("edit_privilege").(bool)
 
 	shareReq := ionoscloud.GroupShare{
-		Properties: &ionoscloud.GroupShareProperties{
+		Properties: ionoscloud.GroupShareProperties{
 			EditPrivilege:  &tempEditPrivilege,
 			SharePrivilege: &tempSharePrivilege,
 		},

@@ -172,7 +172,7 @@ func resourceNicUpdate(ctx context.Context, d *schema.ResourceData, meta interfa
 
 	nic := getNicData(d, "")
 
-	_, apiResponse, err := client.NetworkInterfacesApi.DatacentersServersNicsPatch(ctx, dcId, srvId, nicId).Nic(*nic.Properties).Execute()
+	_, apiResponse, err := client.NetworkInterfacesApi.DatacentersServersNicsPatch(ctx, dcId, srvId, nicId).Nic(nic.Properties).Execute()
 	logApiRequestTime(apiResponse)
 	if err != nil {
 		diags := diag.FromErr(fmt.Errorf("error occured while updating a nic: %w", err))
@@ -216,11 +216,11 @@ func resourceNicDelete(ctx context.Context, d *schema.ResourceData, meta interfa
 func getNicData(d *schema.ResourceData, path string) ionoscloud.Nic {
 
 	nic := ionoscloud.Nic{
-		Properties: &ionoscloud.NicProperties{},
+		Properties: ionoscloud.NicProperties{},
 	}
 
 	lanInt := int32(d.Get(path + "lan").(int))
-	nic.Properties.Lan = &lanInt
+	nic.Properties.Lan = lanInt
 
 	if v, ok := d.GetOk(path + "name"); ok {
 		vStr := v.(string)
@@ -246,7 +246,7 @@ func getNicData(d *schema.ResourceData, path string) ionoscloud.Nic {
 				ips = append(ips, ip)
 			}
 			if ips != nil && len(ips) > 0 {
-				nic.Properties.Ips = &ips
+				nic.Properties.Ips = ips
 			}
 		}
 	}
@@ -263,52 +263,48 @@ func NicSetData(d *schema.ResourceData, nic *ionoscloud.Nic) error {
 		d.SetId(*nic.Id)
 	}
 
-	if nic.Properties != nil {
-		log.Printf("[INFO] LAN ON NIC: %d", nic.Properties.Lan)
-		if nic.Properties.Dhcp != nil {
-			if err := d.Set("dhcp", *nic.Properties.Dhcp); err != nil {
-				return fmt.Errorf("error setting dhcp %w", err)
-			}
+	log.Printf("[INFO] LAN ON NIC: %d", nic.Properties.Lan)
+	if nic.Properties.Dhcp != nil {
+		if err := d.Set("dhcp", *nic.Properties.Dhcp); err != nil {
+			return fmt.Errorf("error setting dhcp %w", err)
 		}
-		if nic.Properties.Lan != nil {
-			if err := d.Set("lan", *nic.Properties.Lan); err != nil {
-				return fmt.Errorf("error setting lan %w", err)
-			}
+	}
+	if err := d.Set("lan", nic.Properties.Lan); err != nil {
+		return fmt.Errorf("error setting lan %w", err)
+	}
+	if nic.Properties.Name != nil {
+		if err := d.Set("name", *nic.Properties.Name); err != nil {
+			return fmt.Errorf("error setting name %w", err)
 		}
-		if nic.Properties.Name != nil {
-			if err := d.Set("name", *nic.Properties.Name); err != nil {
-				return fmt.Errorf("error setting name %w", err)
-			}
+	}
+	if nic.Properties.Ips != nil && len(nic.Properties.Ips) > 0 {
+		if err := d.Set("ips", nic.Properties.Ips); err != nil {
+			return fmt.Errorf("error setting ips %w", err)
 		}
-		if nic.Properties.Ips != nil && len(*nic.Properties.Ips) > 0 {
-			if err := d.Set("ips", *nic.Properties.Ips); err != nil {
-				return fmt.Errorf("error setting ips %w", err)
-			}
+	}
+	if nic.Properties.FirewallActive != nil {
+		if err := d.Set("firewall_active", *nic.Properties.FirewallActive); err != nil {
+			return fmt.Errorf("error setting firewall_active %w", err)
 		}
-		if nic.Properties.FirewallActive != nil {
-			if err := d.Set("firewall_active", *nic.Properties.FirewallActive); err != nil {
-				return fmt.Errorf("error setting firewall_active %w", err)
-			}
+	}
+	if nic.Properties.FirewallType != nil {
+		if err := d.Set("firewall_type", *nic.Properties.FirewallType); err != nil {
+			return fmt.Errorf("error setting firewall_type %w", err)
 		}
-		if nic.Properties.FirewallType != nil {
-			if err := d.Set("firewall_type", *nic.Properties.FirewallType); err != nil {
-				return fmt.Errorf("error setting firewall_type %w", err)
-			}
+	}
+	if nic.Properties.Mac != nil {
+		if err := d.Set("mac", *nic.Properties.Mac); err != nil {
+			return fmt.Errorf("error setting mac %w", err)
 		}
-		if nic.Properties.Mac != nil {
-			if err := d.Set("mac", *nic.Properties.Mac); err != nil {
-				return fmt.Errorf("error setting mac %w", err)
-			}
+	}
+	if nic.Properties.DeviceNumber != nil {
+		if err := d.Set("device_number", *nic.Properties.DeviceNumber); err != nil {
+			return fmt.Errorf("error setting device_number %w", err)
 		}
-		if nic.Properties.DeviceNumber != nil {
-			if err := d.Set("device_number", *nic.Properties.DeviceNumber); err != nil {
-				return fmt.Errorf("error setting device_number %w", err)
-			}
-		}
-		if nic.Properties.PciSlot != nil {
-			if err := d.Set("pci_slot", *nic.Properties.PciSlot); err != nil {
-				return fmt.Errorf("error setting pci_slot %w", err)
-			}
+	}
+	if nic.Properties.PciSlot != nil {
+		if err := d.Set("pci_slot", *nic.Properties.PciSlot); err != nil {
+			return fmt.Errorf("error setting pci_slot %w", err)
 		}
 	}
 

@@ -75,7 +75,7 @@ func resourceS3KeyCreate(ctx context.Context, d *schema.ResourceData, meta inter
 
 	active := d.Get("active").(bool)
 	s3Key := ionoscloud.S3Key{
-		Properties: &ionoscloud.S3KeyProperties{
+		Properties: ionoscloud.S3KeyProperties{
 			Active: &active,
 		},
 	}
@@ -114,7 +114,7 @@ func resourceS3KeyRead(ctx context.Context, d *schema.ResourceData, meta interfa
 
 	log.Printf("[INFO] Successfully retrieved S3 key %+v \n", *s3Key.Id)
 
-	if s3Key.HasProperties() && s3Key.Properties.HasActive() {
+	if s3Key.Properties.HasActive() {
 		log.Printf("[INFO] Successfully retrieved S3 key with status: %t", *s3Key.Properties.Active)
 	}
 
@@ -129,7 +129,7 @@ func resourceS3KeyUpdate(ctx context.Context, d *schema.ResourceData, meta inter
 	client := meta.(SdkBundle).CloudApiClient
 
 	request := ionoscloud.S3Key{}
-	request.Properties = &ionoscloud.S3KeyProperties{}
+	request.Properties = ionoscloud.S3KeyProperties{}
 
 	log.Printf("[INFO] Attempting to update S3 key %s", d.Id())
 

@@ -156,8 +156,8 @@ func dataSourceGroupRead(ctx context.Context, d *schema.ResourceData, meta inter
 		var results []ionoscloud.Group
 
 		if groups.Items != nil {
-			for _, g := range *groups.Items {
-				if g.Properties != nil && g.Properties.Name != nil && *g.Properties.Name == name.(string) {
+			for _, g := range groups.Items {
+				if g.Properties.Name != nil && *g.Properties.Name == name.(string) {
 					/* group found */
 					group, apiResponse, err = client.UserManagementApi.UmGroupsFindById(ctx, *g.Id).Execute()
 					logApiRequestTime(apiResponse)

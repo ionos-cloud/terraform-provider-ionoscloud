@@ -119,18 +119,18 @@ func datasourceIpBlockRead(ctx context.Context, data *schema.ResourceData, meta 
 			return diag.FromErr(fmt.Errorf("error getting ip block with id %s %w", id.(string), err))
 		}
 		if nameOk {
-			if ipBlock.Properties != nil && *ipBlock.Properties.Name != name {
+			if *ipBlock.Properties.Name != name {
 				return diag.FromErr(fmt.Errorf("name of ip block (UUID=%s, name=%s) does not match expected name: %s",
 					*ipBlock.Id, *ipBlock.Properties.Name, name))
 			}
 		}
 		if locationOk {
-			if ipBlock.Properties != nil && *ipBlock.Properties.Location != location {
+			if ipBlock.Properties.Location != location {
 				return diag.FromErr(fmt.Errorf("location of ip block (UUID=%s, location=%s) does not match expected location: %s",
-					*ipBlock.Id, *ipBlock.Properties.Location, location))
+					*ipBlock.Id, ipBlock.Properties.Location, location))
 			}
 		}
-		log.Printf("[INFO] Got ip block [Name=%s, Location=%s]", *ipBlock.Properties.Name, *ipBlock.Properties.Location)
+		log.Printf("[INFO] Got ip block [Name=%s, Location=%s]", *ipBlock.Properties.Name, ipBlock.Properties.Location)
 	} else {
 
 		ipBlocks, apiResponse, err := client.IPBlocksApi.IpblocksGet(ctx).Depth(1).Execute()
@@ -143,8 +143,8 @@ func datasourceIpBlockRead(ctx context.Context, data *schema.ResourceData, meta 
 		var results []ionoscloud.IpBlock
 
 		if nameOk && ipBlocks.Items != nil {
-			for _, block := range *ipBlocks.Items {
-				if block.Properties != nil && block.Properties.Name != nil && *block.Properties.Name == name {
+			for _, block := range ipBlocks.Items {
+				if block.Properties.Name != nil && *block.Properties.Name == name {
 					results = append(results, block)
 				}
 			}
@@ -158,15 +158,15 @@ func datasourceIpBlockRead(ctx context.Context, data *schema.ResourceData, meta 
 			if results != nil {
 				var locationResults []ionoscloud.IpBlock
 				for _, block := range results {
-					if block.Properties != nil && block.Properties.Location != nil && *block.Properties.Location == location {
+					if block.Properties.Location == location {
 						locationResults = append(locationResults, block)
 					}
 				}
 				results = locationResults
 			} else if ipBlocks.Items != nil {
 				/* find the first ipblock matching the location */
-				for _, block := range *ipBlocks.Items {
-					if block.Properties != nil && block.Properties.Location != nil && *block.Properties.Location == location {
+				for _, block := range ipBlocks.Items {
+					if block.Properties.Location == location {
 						results = append(results, block)
 					}
 				}

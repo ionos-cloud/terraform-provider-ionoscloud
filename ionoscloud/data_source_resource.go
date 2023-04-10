@@ -62,7 +62,7 @@ func dataSourceResourceRead(ctx context.Context, d *schema.ResourceData, meta in
 		if err != nil {
 			return diag.FromErr(fmt.Errorf("an error occured while fetching resources by type %w", err))
 		}
-		results = *items.Items
+		results = items.Items
 		if len(results) > 0 && results[0].Type != nil {
 			err = d.Set("resource_type", results[0].Type)
 			if err != nil {
@@ -77,7 +77,7 @@ func dataSourceResourceRead(ctx context.Context, d *schema.ResourceData, meta in
 		if err != nil {
 			return diag.FromErr(fmt.Errorf("an error occured while fetching resources %w", err))
 		}
-		results = *items.Items
+		results = items.Items
 	}
 
 	if len(results) == 0 {

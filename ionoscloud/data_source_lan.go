@@ -57,13 +57,13 @@ func dataSourceLan() *schema.Resource {
 	}
 }
 
-func convertIpFailoverList(ips *[]ionoscloud.IPFailover) []interface{} {
+func convertIpFailoverList(ips []ionoscloud.IPFailover) []interface{} {
 	if ips == nil {
 		return make([]interface{}, 0)
 	}
 
-	ret := make([]interface{}, len(*ips), len(*ips))
-	for i, ip := range *ips {
+	ret := make([]interface{}, len(ips), len(ips))
+	for i, ip := range ips {
 		entry := make(map[string]interface{})
 
 		entry["ip"] = ip.Ip
@@ -116,8 +116,8 @@ func dataSourceLanRead(ctx context.Context, d *schema.ResourceData, meta interfa
 		var results []ionoscloud.Lan
 
 		if lans.Items != nil {
-			for _, l := range *lans.Items {
-				if l.Properties != nil && l.Properties.Name != nil && *l.Properties.Name == name.(string) {
+			for _, l := range lans.Items {
+				if l.Properties.Name != nil && *l.Properties.Name == name.(string) {
 					/* lan found */
 					lan, apiResponse, err = client.LANsApi.DatacentersLansFindById(ctx, datacenterId.(string), *l.Id).Execute()
 					logApiRequestTime(apiResponse)

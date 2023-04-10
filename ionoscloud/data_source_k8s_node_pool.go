@@ -226,8 +226,8 @@ func dataSourceK8sReadNodePool(ctx context.Context, d *schema.ResourceData, meta
 		if nodePools.Items != nil {
 			var results []ionoscloud.KubernetesNodePool
 
-			for _, c := range *nodePools.Items {
-				if c.Properties != nil && c.Properties.Name != nil && *c.Properties.Name == name.(string) {
+			for _, c := range nodePools.Items {
+				if c.Properties.Name == name.(string) {
 					tmpNodePool, apiResponse, err := client.KubernetesApi.K8sNodepoolsFindById(ctx, clusterId.(string), *c.Id).Execute()
 					logApiRequestTime(apiResponse)
 					if err != nil {
@@ -259,8 +259,8 @@ func dataSourceK8sReadNodePool(ctx context.Context, d *schema.ResourceData, meta
 		}
 	}
 
-	if nodePool.Properties.AvailableUpgradeVersions != nil && len(*nodePool.Properties.AvailableUpgradeVersions) > 0 {
-		if err := d.Set("available_upgrade_versions", *nodePool.Properties.AvailableUpgradeVersions); err != nil {
+	if nodePool.Properties.AvailableUpgradeVersions != nil && len(nodePool.Properties.AvailableUpgradeVersions) > 0 {
+		if err := d.Set("available_upgrade_versions", nodePool.Properties.AvailableUpgradeVersions); err != nil {
 			return diag.FromErr(err)
 		}
 	}

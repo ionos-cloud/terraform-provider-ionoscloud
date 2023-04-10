@@ -136,8 +136,8 @@ func dataSourceNatGatewayRuleRead(ctx context.Context, d *schema.ResourceData, m
 
 		var results []ionoscloud.NatGatewayRule
 		if natGatewayRules.Items != nil {
-			for _, ngr := range *natGatewayRules.Items {
-				if ngr.Properties != nil && ngr.Properties.Name != nil && strings.EqualFold(*ngr.Properties.Name, name.(string)) {
+			for _, ngr := range natGatewayRules.Items {
+				if strings.EqualFold(ngr.Properties.Name, name.(string)) {
 					tmpNatGatewayRule, apiResponse, err := client.NATGatewaysApi.DatacentersNatgatewaysRulesFindByNatGatewayRuleId(ctx, datacenterId.(string), natgatewayId.(string), *ngr.Id).Execute()
 					logApiRequestTime(apiResponse)
 					if err != nil {

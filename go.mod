@@ -5,7 +5,7 @@ go 1.18
 require (
 	github.com/hashicorp/terraform-plugin-sdk/v2 v2.22.0
 	github.com/iancoleman/strcase v0.2.0
-	github.com/ionos-cloud/sdk-go-bundle/products/cert v0.1.1
+	github.com/ionos-cloud/sdk-go-bundle/products/cert v0.1.0
 	github.com/ionos-cloud/sdk-go-bundle/products/compute v0.1.0
 	github.com/ionos-cloud/sdk-go-bundle/products/containerregistry v0.1.0
 	github.com/ionos-cloud/sdk-go-bundle/products/dbaas/mongo v0.1.0
@@ -14,7 +14,7 @@ require (
 	gopkg.in/yaml.v3 v3.0.1
 )
 
-require github.com/ionos-cloud/sdk-go-bundle/shared v0.1.0 // indirect
+require github.com/ionos-cloud/sdk-go-bundle/shared v0.1.1
 
 require (
 	github.com/agext/levenshtein v1.2.3 // indirect
@@ -57,12 +57,14 @@ require (
 	github.com/vmihailenco/msgpack/v4 v4.3.12 // indirect
 	github.com/vmihailenco/tagparser v0.1.1 // indirect
 	github.com/zclconf/go-cty v1.11.0 // indirect
-	golang.org/x/net v0.0.0-20211112202133-69e39bad7dc2 // indirect
-	golang.org/x/oauth2 v0.0.0-20211104180415-d3ed0bb246c8 // indirect
-	golang.org/x/sys v0.0.0-20220503163025-988cb79eb6c6 // indirect
-	golang.org/x/text v0.3.7 // indirect
+	golang.org/x/net v0.8.0 // indirect
+	golang.org/x/oauth2 v0.6.0 // indirect
+	golang.org/x/sys v0.6.0 // indirect
+	golang.org/x/text v0.8.0 // indirect
 	google.golang.org/appengine v1.6.7 // indirect
 	google.golang.org/genproto v0.0.0-20200904004341-0bd0a958aa1d // indirect
 	google.golang.org/grpc v1.48.0 // indirect
 	google.golang.org/protobuf v1.28.1 // indirect
 )
+
+replace github.com/ionos-cloud/sdk-go-bundle/shared => /home/cristian/surse/sdks/sdk-go-bundle/shared

@@ -183,8 +183,8 @@ func dataSourceNicRead(ctx context.Context, data *schema.ResourceData, meta inte
 		var results []ionoscloud.Nic
 
 		if nameOk && nics.Items != nil {
-			for _, tempNic := range *nics.Items {
-				if tempNic.Properties != nil && tempNic.Properties.Name != nil && *tempNic.Properties.Name == name {
+			for _, tempNic := range nics.Items {
+				if tempNic.Properties.Name != nil && *tempNic.Properties.Name == name {
 					results = append(results, tempNic)
 				}
 			}

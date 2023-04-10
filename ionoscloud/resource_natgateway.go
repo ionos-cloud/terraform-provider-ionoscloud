@@ -77,8 +77,8 @@ func resourceNatGatewayCreate(ctx context.Context, d *schema.ResourceData, meta 
 	name := d.Get("name").(string)
 
 	natGateway := ionoscloud.NatGateway{
-		Properties: &ionoscloud.NatGatewayProperties{
-			Name: &name,
+		Properties: ionoscloud.NatGatewayProperties{
+			Name: name,
 		},
 	}
 
@@ -89,7 +89,7 @@ func resourceNatGatewayCreate(ctx context.Context, d *schema.ResourceData, meta 
 			for _, publicIp := range publicIpsVal {
 				publicIps = append(publicIps, publicIp.(string))
 			}
-			natGateway.Properties.PublicIps = &publicIps
+			natGateway.Properties.PublicIps = publicIps
 		} else {
 			diags := diag.FromErr(fmt.Errorf("you must provide public_ips for nat gateway resource \n"))
 			return diags
@@ -106,7 +106,7 @@ func resourceNatGatewayCreate(ctx context.Context, d *schema.ResourceData, meta 
 				addLan := false
 				if lanID, lanIdOk := d.GetOk(fmt.Sprintf("lans.%d.id", lanIndex)); lanIdOk {
 					lanID := int32(lanID.(int))
-					lan.Id = &lanID
+					lan.Id = lanID
 					addLan = true
 				}
 				if lanGatewayIps, lanGatewayIpsOk := d.GetOk(fmt.Sprintf("lans.%d.gateway_ips", lanIndex)); lanGatewayIpsOk {
@@ -116,7 +116,7 @@ func resourceNatGatewayCreate(ctx context.Context, d *schema.ResourceData, meta 
 						for idx := range lanGatewayIps {
 							gatewayIps[idx] = fmt.Sprint(lanGatewayIps[idx])
 						}
-						lan.GatewayIps = &gatewayIps
+						lan.GatewayIps = gatewayIps
 					}
 				}
 				if addLan {
@@ -130,7 +130,7 @@ func resourceNatGatewayCreate(ctx context.Context, d *schema.ResourceData, meta 
 
 			if updateLans == true {
 				log.Printf("[INFO] NatGateway LANs set to %+v", lans)
-				natGateway.Properties.Lans = &lans
+				natGateway.Properties.Lans = lans
 			} else {
 				diags := diag.FromErr(fmt.Errorf("you must provide lans for the nat gateway resource \n"))
 				return diags
@@ -195,7 +195,7 @@ func resourceNatGatewayRead(ctx context.Context, d *schema.ResourceData, meta in
 func resourceNatGatewayUpdate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	client := meta.(SdkBundle).CloudApiClient
 	request := ionoscloud.NatGateway{
-		Properties: &ionoscloud.NatGatewayProperties{},
+		Properties: ionoscloud.NatGatewayProperties{},
 	}
 
 	dcId := d.Get("datacenter_id").(string)
@@ -203,7 +203,7 @@ func resourceNatGatewayUpdate(ctx context.Context, d *schema.ResourceData, meta 
 	if d.HasChange("name") {
 		_, v := d.GetChange("name")
 		vStr := v.(string)
-		request.Properties.Name = &vStr
+		request.Properties.Name = vStr
 	}
 
 	if d.HasChange("public_ips") {
@@ -215,7 +215,7 @@ func resourceNatGatewayUpdate(ctx context.Context, d *schema.ResourceData, meta 
 			for _, publicIp := range publicIpsVal {
 				publicIps = append(publicIps, publicIp.(string))
 			}
-			request.Properties.PublicIps = &publicIps
+			request.Properties.PublicIps = publicIps
 		}
 	}
 
@@ -230,7 +230,7 @@ func resourceNatGatewayUpdate(ctx context.Context, d *schema.ResourceData, meta 
 				addLan := false
 				if lanID, lanIdOk := d.GetOk(fmt.Sprintf("lans.%d.id", lanIndex)); lanIdOk {
 					lanID := int32(lanID.(int))
-					lan.Id = &lanID
+					lan.Id = lanID
 					addLan = true
 				}
 				if lanGatewayIps, lanGatewayIpsOk := d.GetOk(fmt.Sprintf("lans.%d.gateway_ips", lanIndex)); lanGatewayIpsOk {
@@ -240,7 +240,7 @@ func resourceNatGatewayUpdate(ctx context.Context, d *schema.ResourceData, meta 
 						for _, lanGatewayIp := range lanGatewayIps {
 							gatewayIps = append(gatewayIps, lanGatewayIp.(string))
 						}
-						lan.GatewayIps = &gatewayIps
+						lan.GatewayIps = gatewayIps
 					}
 				}
 				if addLan {
@@ -254,12 +254,12 @@ func resourceNatGatewayUpdate(ctx context.Context, d *schema.ResourceData, meta 
 
 			if updateLans == true {
 				log.Printf("[INFO] nat gateway  LANs changed from %+v to %+v", oldLANs, newLANs)
-				request.Properties.Lans = &lans
+				request.Properties.Lans = lans
 			}
 		}
 	}
 
-	_, apiResponse, err := client.NATGatewaysApi.DatacentersNatgatewaysPatch(ctx, dcId, d.Id()).NatGatewayProperties(*request.Properties).Execute()
+	_, apiResponse, err := client.NATGatewaysApi.DatacentersNatgatewaysPatch(ctx, dcId, d.Id()).NatGatewayProperties(request.Properties).Execute()
 	logApiRequestTime(apiResponse)
 
 	if err != nil {
@@ -341,46 +341,40 @@ func setNatGatewayData(d *schema.ResourceData, natGateway *ionoscloud.NatGateway
 		d.SetId(*natGateway.Id)
 	}
 
-	if natGateway.Properties != nil {
-		if natGateway.Properties.Name != nil {
-			err := d.Set("name", *natGateway.Properties.Name)
-			if err != nil {
-				return fmt.Errorf("error while setting name property for nat gateway %s: %w", d.Id(), err)
+	err := d.Set("name", natGateway.Properties.Name)
+	if err != nil {
+		return fmt.Errorf("error while setting name property for nat gateway %s: %w", d.Id(), err)
+	}
+
+	if natGateway.Properties.PublicIps != nil {
+		err := d.Set("public_ips", natGateway.Properties.PublicIps)
+		if err != nil {
+			return fmt.Errorf("error while setting public_ips property for nat gateway %s: %w", d.Id(), err)
+		}
+	}
+
+	if natGateway.Properties.Lans != nil && len(natGateway.Properties.Lans) > 0 {
+		var natGatewayLans []interface{}
+		for _, lan := range natGateway.Properties.Lans {
+			lanEntry := make(map[string]interface{})
+
+			lanEntry["id"] = lan.Id
+
+			if len(lan.GatewayIps) > 0 {
+				var gatewayIps []interface{}
+				for _, gatewayIp := range lan.GatewayIps {
+					gatewayIps = append(gatewayIps, gatewayIp)
+				}
+				lanEntry["gateway_ips"] = gatewayIps
+
 			}
+
+			natGatewayLans = append(natGatewayLans, lanEntry)
 		}
 
-		if natGateway.Properties.PublicIps != nil {
-			err := d.Set("public_ips", *natGateway.Properties.PublicIps)
-			if err != nil {
-				return fmt.Errorf("error while setting public_ips property for nat gateway %s: %w", d.Id(), err)
-			}
-		}
-
-		if natGateway.Properties.Lans != nil && len(*natGateway.Properties.Lans) > 0 {
-			var natGatewayLans []interface{}
-			for _, lan := range *natGateway.Properties.Lans {
-				lanEntry := make(map[string]interface{})
-
-				if lan.Id != nil {
-					lanEntry["id"] = *lan.Id
-				}
-
-				if len(*lan.GatewayIps) > 0 {
-					var gatewayIps []interface{}
-					for _, gatewayIp := range *lan.GatewayIps {
-						gatewayIps = append(gatewayIps, gatewayIp)
-					}
-					lanEntry["gateway_ips"] = gatewayIps
-
-				}
-
-				natGatewayLans = append(natGatewayLans, lanEntry)
-			}
-
-			if len(natGatewayLans) > 0 {
-				if err := d.Set("lans", natGatewayLans); err != nil {
-					return fmt.Errorf("error while setting lans property for nat gateway %s: %w", d.Id(), err)
-				}
+		if len(natGatewayLans) > 0 {
+			if err := d.Set("lans", natGatewayLans); err != nil {
+				return fmt.Errorf("error while setting lans property for nat gateway %s: %w", d.Id(), err)
 			}
 		}
 	}

@@ -274,101 +274,99 @@ func resourceSnapshotImport(ctx context.Context, d *schema.ResourceData, meta in
 func setSnapshotData(d *schema.ResourceData, snapshot *ionoscloud.Snapshot) error {
 	d.SetId(*snapshot.Id)
 
-	if snapshot.Properties != nil {
-		if snapshot.Properties.Name != nil {
-			if err := d.Set("name", *snapshot.Properties.Name); err != nil {
-				return err
-			}
+	if snapshot.Properties.Name != nil {
+		if err := d.Set("name", *snapshot.Properties.Name); err != nil {
+			return err
 		}
+	}
 
-		if snapshot.Properties.Location != nil {
-			if err := d.Set("location", *snapshot.Properties.Location); err != nil {
-				return err
-			}
+	if snapshot.Properties.Location != nil {
+		if err := d.Set("location", *snapshot.Properties.Location); err != nil {
+			return err
 		}
+	}
 
-		if snapshot.Properties.Size != nil {
-			if err := d.Set("size", *snapshot.Properties.Size); err != nil {
-				return err
-			}
+	if snapshot.Properties.Size != nil {
+		if err := d.Set("size", *snapshot.Properties.Size); err != nil {
+			return err
 		}
+	}
 
-		if snapshot.Properties.Description != nil {
-			if err := d.Set("description", *snapshot.Properties.Description); err != nil {
-				return err
-			}
+	if snapshot.Properties.Description != nil {
+		if err := d.Set("description", *snapshot.Properties.Description); err != nil {
+			return err
 		}
+	}
 
-		if snapshot.Properties.LicenceType != nil {
-			if err := d.Set("licence_type", *snapshot.Properties.LicenceType); err != nil {
-				return err
-			}
+	if snapshot.Properties.LicenceType != nil {
+		if err := d.Set("licence_type", *snapshot.Properties.LicenceType); err != nil {
+			return err
 		}
+	}
 
-		if snapshot.Properties.SecAuthProtection != nil {
-			if err := d.Set("sec_auth_protection", *snapshot.Properties.SecAuthProtection); err != nil {
-				return err
-			}
+	if snapshot.Properties.SecAuthProtection != nil {
+		if err := d.Set("sec_auth_protection", *snapshot.Properties.SecAuthProtection); err != nil {
+			return err
 		}
+	}
 
-		if snapshot.Properties.CpuHotPlug != nil {
-			if err := d.Set("cpu_hot_plug", *snapshot.Properties.CpuHotPlug); err != nil {
-				return err
-			}
+	if snapshot.Properties.CpuHotPlug != nil {
+		if err := d.Set("cpu_hot_plug", *snapshot.Properties.CpuHotPlug); err != nil {
+			return err
 		}
+	}
 
-		if snapshot.Properties.CpuHotUnplug != nil {
-			if err := d.Set("cpu_hot_unplug", *snapshot.Properties.CpuHotUnplug); err != nil {
-				return err
-			}
+	if snapshot.Properties.CpuHotUnplug != nil {
+		if err := d.Set("cpu_hot_unplug", *snapshot.Properties.CpuHotUnplug); err != nil {
+			return err
 		}
+	}
 
-		if snapshot.Properties.RamHotPlug != nil {
-			if err := d.Set("ram_hot_plug", *snapshot.Properties.RamHotPlug); err != nil {
-				return err
-			}
+	if snapshot.Properties.RamHotPlug != nil {
+		if err := d.Set("ram_hot_plug", *snapshot.Properties.RamHotPlug); err != nil {
+			return err
 		}
+	}
 
-		if snapshot.Properties.RamHotUnplug != nil {
-			if err := d.Set("ram_hot_unplug", *snapshot.Properties.RamHotUnplug); err != nil {
-				return err
-			}
+	if snapshot.Properties.RamHotUnplug != nil {
+		if err := d.Set("ram_hot_unplug", *snapshot.Properties.RamHotUnplug); err != nil {
+			return err
 		}
+	}
 
-		if snapshot.Properties.NicHotPlug != nil {
-			if err := d.Set("nic_hot_plug", *snapshot.Properties.NicHotPlug); err != nil {
-				return err
-			}
+	if snapshot.Properties.NicHotPlug != nil {
+		if err := d.Set("nic_hot_plug", *snapshot.Properties.NicHotPlug); err != nil {
+			return err
 		}
+	}
 
-		if snapshot.Properties.NicHotUnplug != nil {
-			if err := d.Set("nic_hot_unplug", *snapshot.Properties.NicHotUnplug); err != nil {
-				return err
-			}
+	if snapshot.Properties.NicHotUnplug != nil {
+		if err := d.Set("nic_hot_unplug", *snapshot.Properties.NicHotUnplug); err != nil {
+			return err
 		}
+	}
 
-		if snapshot.Properties.DiscVirtioHotPlug != nil {
-			if err := d.Set("disc_virtio_hot_plug", *snapshot.Properties.DiscVirtioHotPlug); err != nil {
-				return err
-			}
+	if snapshot.Properties.DiscVirtioHotPlug != nil {
+		if err := d.Set("disc_virtio_hot_plug", *snapshot.Properties.DiscVirtioHotPlug); err != nil {
+			return err
 		}
+	}
 
-		if snapshot.Properties.DiscVirtioHotUnplug != nil {
-			if err := d.Set("disc_virtio_hot_unplug", *snapshot.Properties.DiscVirtioHotUnplug); err != nil {
-				return err
-			}
+	if snapshot.Properties.DiscVirtioHotUnplug != nil {
+		if err := d.Set("disc_virtio_hot_unplug", *snapshot.Properties.DiscVirtioHotUnplug); err != nil {
+			return err
 		}
+	}
 
-		if snapshot.Properties.DiscScsiHotPlug != nil {
-			if err := d.Set("disc_scsi_hot_plug", *snapshot.Properties.DiscVirtioHotUnplug); err != nil {
-				return err
-			}
+	if snapshot.Properties.DiscScsiHotPlug != nil {
+		if err := d.Set("disc_scsi_hot_plug", *snapshot.Properties.DiscVirtioHotUnplug); err != nil {
+			return err
 		}
+	}
 
-		if snapshot.Properties.DiscScsiHotUnplug != nil {
-			if err := d.Set("disc_scsi_hot_unplug", *snapshot.Properties.DiscVirtioHotUnplug); err != nil {
-				return err
-			}
+	if snapshot.Properties.DiscScsiHotUnplug != nil {
+		if err := d.Set("disc_scsi_hot_unplug", *snapshot.Properties.DiscVirtioHotUnplug); err != nil {
+			return err
 		}
 	}
 	return nil

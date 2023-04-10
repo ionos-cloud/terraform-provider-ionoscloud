@@ -135,8 +135,8 @@ func dataSourceSnapshotRead(ctx context.Context, d *schema.ResourceData, meta in
 		}
 
 		if snapshots.Items != nil {
-			for _, snp := range *snapshots.Items {
-				if snp.Properties != nil && snp.Properties.Name != nil && *snp.Properties.Name == name.(string) {
+			for _, snp := range snapshots.Items {
+				if snp.Properties.Name != nil && *snp.Properties.Name == name.(string) {
 					results = append(results, snp)
 				}
 			}
@@ -156,7 +156,7 @@ func dataSourceSnapshotRead(ctx context.Context, d *schema.ResourceData, meta in
 		if sizeOk {
 			var sizeResults []ionoscloud.Snapshot
 			for _, snp := range results {
-				if snp.Properties != nil && snp.Properties.Size != nil && *snp.Properties.Size == float32(size.(int)) {
+				if snp.Properties.Size != nil && *snp.Properties.Size == float32(size.(int)) {
 					sizeResults = append(sizeResults, snp)
 				}
 

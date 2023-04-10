@@ -119,8 +119,8 @@ func dataSourceFirewallRead(ctx context.Context, d *schema.ResourceData, meta in
 		var results []ionoscloud.FirewallRule
 
 		if firewalls.Items != nil {
-			for _, fr := range *firewalls.Items {
-				if fr.Properties != nil && fr.Properties.Name != nil && *fr.Properties.Name == name.(string) {
+			for _, fr := range firewalls.Items {
+				if fr.Properties.Name != nil && *fr.Properties.Name == name.(string) {
 					tmpFirewall, apiResponse, err := client.FirewallRulesApi.DatacentersServersNicsFirewallrulesFindById(ctx, datacenterId, serverId, nicId, *fr.Id).Execute()
 					logApiRequestTime(apiResponse)
 					if err != nil {

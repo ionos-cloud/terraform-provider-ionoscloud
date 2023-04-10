@@ -111,7 +111,7 @@ func dataSourceApplicationLoadBalancerRead(ctx context.Context, d *schema.Resour
 				return diag.FromErr(fmt.Errorf("an error occurred while fetching application load balancers: %w", err))
 			}
 
-			results = *applicationLoadBalancers.Items
+			results = applicationLoadBalancers.Items
 		} else {
 			applicationLoadBalancers, apiResponse, err := client.ApplicationLoadBalancersApi.DatacentersApplicationloadbalancersGet(ctx, datacenterId).Depth(1).Execute()
 			logApiRequestTime(apiResponse)
@@ -121,8 +121,8 @@ func dataSourceApplicationLoadBalancerRead(ctx context.Context, d *schema.Resour
 			}
 
 			if applicationLoadBalancers.Items != nil {
-				for _, alb := range *applicationLoadBalancers.Items {
-					if alb.Properties != nil && alb.Properties.Name != nil && strings.ToLower(*alb.Properties.Name) == strings.ToLower(name) {
+				for _, alb := range applicationLoadBalancers.Items {
+					if strings.ToLower(alb.Properties.Name) == strings.ToLower(name) {
 						tmpAlb, apiResponse, err := client.ApplicationLoadBalancersApi.DatacentersApplicationloadbalancersFindByApplicationLoadBalancerId(ctx, datacenterId, *alb.Id).Execute()
 						logApiRequestTime(apiResponse)
 						if err != nil {

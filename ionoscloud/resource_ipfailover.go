@@ -60,7 +60,7 @@ func resourceLanIPFailoverCreate(ctx context.Context, d *schema.ResourceData, me
 
 	properties := &ionoscloud.LanProperties{}
 
-	properties.IpFailover = &[]ionoscloud.IPFailover{
+	properties.IpFailover = []ionoscloud.IPFailover{
 		{
 			Ip:      &ip,
 			NicUuid: &nicUuid,
@@ -101,8 +101,8 @@ func resourceLanIPFailoverRead(ctx context.Context, d *schema.ResourceData, meta
 	}
 
 	failoverSlice := lan.Properties.IpFailover
-	if lan.Properties != nil && failoverSlice != nil && len(*failoverSlice) > 0 {
-		firstFailover := (*failoverSlice)[0]
+	if failoverSlice != nil && len(failoverSlice) > 0 {
+		firstFailover := (failoverSlice)[0]
 		if firstFailover.Ip != nil {
 			err := d.Set("ip", firstFailover.Ip)
 			if err != nil {
@@ -144,7 +144,7 @@ func resourceLanIPFailoverUpdate(ctx context.Context, d *schema.ResourceData, me
 	ip := d.Get("ip").(string)
 	nicUuid := d.Get("nicuuid").(string)
 
-	properties.IpFailover = &[]ionoscloud.IPFailover{
+	properties.IpFailover = []ionoscloud.IPFailover{
 		{
 			Ip:      &ip,
 			NicUuid: &nicUuid,
@@ -175,7 +175,7 @@ func resourceLanIPFailoverDelete(ctx context.Context, d *schema.ResourceData, me
 
 	//remove the failover group
 	properties := &ionoscloud.LanProperties{
-		IpFailover: &[]ionoscloud.IPFailover{},
+		IpFailover: []ionoscloud.IPFailover{},
 	}
 
 	_, apiResponse, err := client.LANsApi.DatacentersLansPatch(ctx, dcid, lanid).Lan(*properties).Execute()
@@ -237,8 +237,8 @@ func resourceIpFailoverImporter(ctx context.Context, d *schema.ResourceData, met
 	}
 
 	failoverSlice := lan.Properties.IpFailover
-	if lan.Properties != nil && failoverSlice != nil && len(*failoverSlice) > 0 {
-		firstFailover := (*failoverSlice)[0]
+	if failoverSlice != nil && len(failoverSlice) > 0 {
+		firstFailover := (failoverSlice)[0]
 		if firstFailover.Ip != nil {
 			err := d.Set("ip", firstFailover.Ip)
 			if err != nil {

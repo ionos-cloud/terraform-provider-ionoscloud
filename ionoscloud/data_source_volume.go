@@ -153,8 +153,8 @@ func dataSourceVolumeRead(ctx context.Context, d *schema.ResourceData, meta inte
 
 		var results []ionoscloud.Volume
 		if volumes.Items != nil {
-			for _, v := range *volumes.Items {
-				if v.Properties != nil && v.Properties.Name != nil && *v.Properties.Name == name.(string) {
+			for _, v := range volumes.Items {
+				if v.Properties.Name != nil && *v.Properties.Name == name.(string) {
 					/* volume found */
 					volume, apiResponse, err = client.VolumesApi.DatacentersVolumesFindById(ctx, datacenterId.(string), *v.Id).Execute()
 					logApiRequestTime(apiResponse)

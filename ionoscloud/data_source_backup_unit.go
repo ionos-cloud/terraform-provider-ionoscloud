@@ -62,9 +62,7 @@ func dataSourceBackupUnitRead(ctx context.Context, d *schema.ResourceData, meta 
 		if err != nil {
 			return diag.FromErr(fmt.Errorf("an error occurred while fetching the backup unit %s: %w", id.(string), err))
 		}
-		if backupUnit.Properties != nil {
-			log.Printf("[INFO] Got backupUnit [Name=%s] [Id=%s]", *backupUnit.Properties.Name, *backupUnit.Id)
-		}
+		log.Printf("[INFO] Got backupUnit [Name=%s] [Id=%s]", backupUnit.Properties.Name, *backupUnit.Id)
 	} else {
 		/* search by name */
 		var backupUnits ionoscloud.BackupUnits
@@ -78,8 +76,8 @@ func dataSourceBackupUnitRead(ctx context.Context, d *schema.ResourceData, meta 
 
 		var results []ionoscloud.BackupUnit
 		if backupUnits.Items != nil {
-			for _, bu := range *backupUnits.Items {
-				if bu.Properties != nil && bu.Properties.Name != nil && *bu.Properties.Name == name.(string) {
+			for _, bu := range backupUnits.Items {
+				if bu.Properties.Name == name.(string) {
 					tmpBackupUnit, apiResponse, err := client.BackupUnitsApi.BackupunitsFindById(ctx, *bu.Id).Execute()
 					logApiRequestTime(apiResponse)
 					if err != nil {

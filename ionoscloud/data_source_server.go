@@ -233,70 +233,68 @@ func setServerData(d *schema.ResourceData, server *ionoscloud.Server, token *ion
 		}
 	}
 
-	if server.Properties != nil {
-		if server.Properties.TemplateUuid != nil {
-			if err := d.Set("template_uuid", *server.Properties.TemplateUuid); err != nil {
-				return err
-			}
+	if server.Properties.TemplateUuid != nil {
+		if err := d.Set("template_uuid", *server.Properties.TemplateUuid); err != nil {
+			return err
 		}
+	}
 
-		if server.Properties.Name != nil {
-			if err := d.Set("name", *server.Properties.Name); err != nil {
-				return err
-			}
+	if server.Properties.Name != nil {
+		if err := d.Set("name", *server.Properties.Name); err != nil {
+			return err
 		}
+	}
 
-		if server.Properties.Cores != nil {
-			if err := d.Set("cores", *server.Properties.Cores); err != nil {
-				return err
-			}
+	if server.Properties.Cores != nil {
+		if err := d.Set("cores", *server.Properties.Cores); err != nil {
+			return err
 		}
+	}
 
-		if server.Properties.Ram != nil {
-			if err := d.Set("ram", *server.Properties.Ram); err != nil {
-				return err
-			}
+	if server.Properties.Ram != nil {
+		if err := d.Set("ram", *server.Properties.Ram); err != nil {
+			return err
 		}
+	}
 
-		if server.Properties.Type != nil {
-			if err := d.Set("type", *server.Properties.Type); err != nil {
-				return err
-			}
+	if server.Properties.Type != nil {
+		if err := d.Set("type", *server.Properties.Type); err != nil {
+			return err
 		}
+	}
 
-		if server.Properties.AvailabilityZone != nil {
-			if err := d.Set("availability_zone", *server.Properties.AvailabilityZone); err != nil {
-				return err
-			}
+	if server.Properties.AvailabilityZone != nil {
+		if err := d.Set("availability_zone", *server.Properties.AvailabilityZone); err != nil {
+			return err
 		}
+	}
 
-		if server.Properties.VmState != nil {
-			if err := d.Set("vm_state", *server.Properties.VmState); err != nil {
-				return err
-			}
+	if server.Properties.VmState != nil {
+		if err := d.Set("vm_state", *server.Properties.VmState); err != nil {
+			return err
 		}
+	}
 
-		if server.Properties.CpuFamily != nil {
-			if err := d.Set("cpu_family", *server.Properties.CpuFamily); err != nil {
-				return err
-			}
+	if server.Properties.CpuFamily != nil {
+		if err := d.Set("cpu_family", *server.Properties.CpuFamily); err != nil {
+			return err
 		}
-		if server.Properties.BootCdrom != nil && server.Properties.BootCdrom.Id != nil {
-			if err := d.Set("boot_cdrom", *server.Properties.BootCdrom.Id); err != nil {
-				return err
-			}
+	}
+	if server.Properties.BootCdrom != nil {
+		if err := d.Set("boot_cdrom", server.Properties.BootCdrom.Id); err != nil {
+			return err
 		}
+	}
 
-		if server.Properties.BootVolume != nil && server.Properties.BootVolume.Id != nil {
-			if err := d.Set("boot_volume", *server.Properties.BootVolume.Id); err != nil {
-				return err
-			}
+	if server.Properties.BootVolume != nil {
+		if err := d.Set("boot_volume", server.Properties.BootVolume.Id); err != nil {
+			return err
 		}
-		if server.Entities != nil && server.Entities.Volumes != nil && server.Entities.Volumes.Items != nil && len(*server.Entities.Volumes.Items) > 0 &&
-			(*server.Entities.Volumes.Items)[0].Properties.Image != nil {
-			if err := d.Set("boot_image", *(*server.Entities.Volumes.Items)[0].Properties.Image); err != nil {
-				return err
-			}
+	}
+	if server.Entities != nil && server.Entities.Volumes != nil && server.Entities.Volumes.Items != nil && len(server.Entities.Volumes.Items) > 0 &&
+		(server.Entities.Volumes.Items)[0].Properties.Image != nil {
+		if err := d.Set("boot_image", *(server.Entities.Volumes.Items)[0].Properties.Image); err != nil {
+			return err
 		}
 	}
 
@@ -304,7 +302,7 @@ func setServerData(d *schema.ResourceData, server *ionoscloud.Server, token *ion
 		return nil
 	}
 
-	if server.Entities.Cdroms != nil && server.Entities.Cdroms.Items != nil && len(*server.Entities.Cdroms.Items) > 0 {
+	if server.Entities.Cdroms != nil && server.Entities.Cdroms.Items != nil && len(server.Entities.Cdroms.Items) > 0 {
 		cdroms := setServerCDRoms(server.Entities.Cdroms.Items)
 		if err := d.Set("cdroms", cdroms); err != nil {
 			return err
@@ -312,21 +310,21 @@ func setServerData(d *schema.ResourceData, server *ionoscloud.Server, token *ion
 	}
 
 	var volumes []interface{}
-	if server.Entities.Volumes != nil && server.Entities.Volumes.Items != nil && len(*server.Entities.Volumes.Items) > 0 {
-		for _, volume := range *server.Entities.Volumes.Items {
+	if server.Entities.Volumes != nil && server.Entities.Volumes.Items != nil && len(server.Entities.Volumes.Items) > 0 {
+		for _, volume := range server.Entities.Volumes.Items {
 			entry := make(map[string]interface{})
 
 			entry["id"] = stringOrDefault(volume.Id, "")
 			entry["name"] = stringOrDefault(volume.Properties.Name, "")
 			entry["type"] = stringOrDefault(volume.Properties.Type, "")
-			entry["size"] = float32OrDefault(volume.Properties.Size, 0)
+			entry["size"] = volume.Properties.Size
 			entry["availability_zone"] = stringOrDefault(volume.Properties.AvailabilityZone, "")
 			entry["image_name"] = stringOrDefault(volume.Properties.Image, "")
 			entry["image_password"] = stringOrDefault(volume.Properties.ImagePassword, "")
 
-			if volume.Properties.SshKeys != nil && len(*volume.Properties.SshKeys) > 0 {
+			if volume.Properties.SshKeys != nil && len(volume.Properties.SshKeys) > 0 {
 				var sshKeys []interface{}
-				for _, sshKey := range *volume.Properties.SshKeys {
+				for _, sshKey := range volume.Properties.SshKeys {
 					sshKeys = append(sshKeys, sshKey)
 				}
 				entry["ssh_keys"] = sshKeys
@@ -355,8 +353,8 @@ func setServerData(d *schema.ResourceData, server *ionoscloud.Server, token *ion
 	}
 
 	var nics []interface{}
-	if server.Entities.Nics != nil && server.Entities.Nics.Items != nil && len(*server.Entities.Nics.Items) > 0 {
-		for _, nic := range *server.Entities.Nics.Items {
+	if server.Entities.Nics != nil && server.Entities.Nics.Items != nil && len(server.Entities.Nics.Items) > 0 {
+		for _, nic := range server.Entities.Nics.Items {
 			entry := make(map[string]interface{})
 
 			entry["id"] = stringOrDefault(nic.Id, "")
@@ -365,14 +363,14 @@ func setServerData(d *schema.ResourceData, server *ionoscloud.Server, token *ion
 
 			if nic.Properties.Ips != nil {
 				var ips []interface{}
-				for _, ip := range *nic.Properties.Ips {
+				for _, ip := range nic.Properties.Ips {
 					ips = append(ips, ip)
 				}
 				entry["ips"] = ips
 			}
 
 			entry["dhcp"] = boolOrDefault(nic.Properties.Dhcp, false)
-			entry["lan"] = int32OrDefault(nic.Properties.Lan, 0)
+			entry["lan"] = nic.Properties.Lan
 			entry["firewall_active"] = boolOrDefault(nic.Properties.FirewallActive, false)
 			entry["firewall_type"] = stringOrDefault(nic.Properties.FirewallType, "")
 			entry["device_number"] = int32OrDefault(nic.Properties.DeviceNumber, 0)
@@ -380,22 +378,33 @@ func setServerData(d *schema.ResourceData, server *ionoscloud.Server, token *ion
 
 			if nic.Entities != nil && nic.Entities.Firewallrules != nil && nic.Entities.Firewallrules.Items != nil {
 				var firewallRules []interface{}
-				for _, rule := range *nic.Entities.Firewallrules.Items {
+				for _, rule := range nic.Entities.Firewallrules.Items {
 					ruleEntry := make(map[string]interface{})
 
 					ruleEntry["id"] = stringOrDefault(rule.Id, "")
-					if rule.Properties != nil {
-						ruleEntry["name"] = stringOrDefault(rule.Properties.Name, "")
-						ruleEntry["protocol"] = stringOrDefault(rule.Properties.Protocol, "")
-						ruleEntry["source_mac"] = stringOrDefault(rule.Properties.SourceMac, "")
-						ruleEntry["source_ip"] = stringOrDefault(rule.Properties.SourceIp, "")
-						ruleEntry["target_ip"] = stringOrDefault(rule.Properties.TargetIp, "")
-						ruleEntry["icmp_code"] = int32OrDefault(rule.Properties.IcmpCode, 0)
-						ruleEntry["icmp_type"] = int32OrDefault(rule.Properties.IcmpType, 0)
-						ruleEntry["port_range_start"] = int32OrDefault(rule.Properties.PortRangeStart, 0)
-						ruleEntry["port_range_end"] = int32OrDefault(rule.Properties.PortRangeEnd, 0)
-						ruleEntry["type"] = stringOrDefault(rule.Properties.Type, "")
+
+					ruleEntry["name"] = stringOrDefault(rule.Properties.Name, "")
+					ruleEntry["protocol"] = rule.Properties.Protocol
+					if rule.Properties.SourceMac.IsSet() {
+						ruleEntry["source_mac"] = stringOrDefault(rule.Properties.SourceMac.Get(), "")
 					}
+					if rule.Properties.SourceIp.IsSet() {
+						ruleEntry["source_ip"] = stringOrDefault(rule.Properties.SourceIp.Get(), "")
+					}
+					if rule.Properties.TargetIp.IsSet() {
+
+						ruleEntry["target_ip"] = stringOrDefault(rule.Properties.TargetIp.Get(), "")
+					}
+					if rule.Properties.IcmpCode.IsSet() {
+
+						ruleEntry["icmp_code"] = int32OrDefault(rule.Properties.IcmpCode.Get(), 0)
+					}
+					if rule.Properties.IcmpType.IsSet() {
+						ruleEntry["icmp_type"] = int32OrDefault(rule.Properties.IcmpType.Get(), 0)
+					}
+					ruleEntry["port_range_start"] = int32OrDefault(rule.Properties.PortRangeStart, 0)
+					ruleEntry["port_range_end"] = int32OrDefault(rule.Properties.PortRangeEnd, 0)
+					ruleEntry["type"] = stringOrDefault(rule.Properties.Type, "")
 					firewallRules = append(firewallRules, ruleEntry)
 				}
 				entry["firewall_rules"] = firewallRules
@@ -457,8 +466,8 @@ func dataSourceServerRead(ctx context.Context, d *schema.ResourceData, meta inte
 		var results []ionoscloud.Server
 
 		if servers.Items != nil {
-			for _, s := range *servers.Items {
-				if s.Properties != nil && s.Properties.Name != nil && *s.Properties.Name == name.(string) {
+			for _, s := range servers.Items {
+				if s.Properties.Name != nil && *s.Properties.Name == name.(string) {
 					/* server found */
 					server, apiResponse, err = client.ServersApi.DatacentersServersFindById(ctx, datacenterId.(string), *s.Id).Depth(4).Execute()
 					logApiRequestTime(apiResponse)

@@ -77,12 +77,12 @@ func dataSourceK8sReadNodePoolNodes(ctx context.Context, d *schema.ResourceData,
 	if nodesList.Items == nil {
 		return diag.FromErr(fmt.Errorf("no nodes found for nodepool with id %s", nodePoolIdStr))
 	}
-	if len(*nodesList.Items) == 0 {
+	if len(nodesList.Items) == 0 {
 		return diag.FromErr(fmt.Errorf("nodes list is empty for of nodepool with id %s", nodePoolIdStr))
 	}
-	if len(*nodesList.Items) > 0 {
+	if len(nodesList.Items) > 0 {
 		var nodes []interface{}
-		for _, node := range *nodesList.Items {
+		for _, node := range nodesList.Items {
 			nodeMap := setK8sNodesDataToMap(node)
 			nodes = append(nodes, nodeMap)
 		}
@@ -100,11 +100,9 @@ func setK8sNodesDataToMap(node ionoscloud.KubernetesNode) map[string]interface{}
 	if node.Id != nil {
 		nodeEntry["id"] = stringOrDefault(node.Id, "")
 	}
-	if node.Properties != nil {
-		nodeEntry["name"] = stringOrDefault(node.Properties.Name, "")
-		nodeEntry["public_ip"] = stringOrDefault(node.Properties.PublicIP, "")
-		nodeEntry["private_ip"] = stringOrDefault(node.Properties.PrivateIP, "")
-		nodeEntry["k8s_version"] = stringOrDefault(node.Properties.K8sVersion, "")
-	}
+	nodeEntry["name"] = node.Properties.Name
+	nodeEntry["public_ip"] = stringOrDefault(node.Properties.PublicIP, "")
+	nodeEntry["private_ip"] = stringOrDefault(node.Properties.PrivateIP, "")
+	nodeEntry["k8s_version"] = node.Properties.K8sVersion
 	return nodeEntry
 }

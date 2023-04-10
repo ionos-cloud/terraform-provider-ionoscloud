@@ -122,8 +122,8 @@ func dataSourceUserRead(ctx context.Context, d *schema.ResourceData, meta interf
 
 		var results []ionoscloud.User
 		if users.Items != nil {
-			for _, u := range *users.Items {
-				if u.Properties != nil && u.Properties.Email != nil && *u.Properties.Email == email {
+			for _, u := range users.Items {
+				if u.Properties.Email != nil && *u.Properties.Email == email {
 					/* user found */
 					user, apiResponse, err = client.UserManagementApi.UmUsersFindById(ctx, *u.Id).Execute()
 					logApiRequestTime(apiResponse)
@@ -164,9 +164,9 @@ func setUsersForGroup(ctx context.Context, d *schema.ResourceData, user *ionoscl
 	}
 
 	groupEntries := make([]interface{}, 0)
-	if groups.Items != nil && len(*groups.Items) > 0 {
-		groupEntries = make([]interface{}, len(*groups.Items))
-		for groupIndex, group := range *groups.Items {
+	if groups.Items != nil && len(groups.Items) > 0 {
+		groupEntries = make([]interface{}, len(groups.Items))
+		for groupIndex, group := range groups.Items {
 			groupEntry := make(map[string]interface{})
 
 			if group.Id != nil {

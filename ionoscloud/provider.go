@@ -23,7 +23,7 @@ import (
 var Version = "DEV"
 
 type SdkBundle struct {
-	CloudApiClient    *compute.APIClient
+	CloudApiClient    *ionoscloud.APIClient
 	PsqlClient        *dbaasService.PsqlClient
 	MongoClient       *dbaasService.MongoClient
 	CertManagerClient *cert.Client
@@ -195,7 +195,7 @@ func providerConfigure(d *schema.ResourceData, terraformVersion string) (interfa
 	clientOpts.Password = password.(string)
 	clientOpts.Token = token.(string)
 	clientOpts.Url = cleanedUrl
-	clientOpts.Version = compute.Version
+	clientOpts.Version = ionoscloud.Version
 	clientOpts.TerraformVersion = terraformVersion
 
 	clients := map[clientType]interface{}{
@@ -206,10 +206,10 @@ func providerConfigure(d *schema.ResourceData, terraformVersion string) (interfa
 		containerRegistryClient: NewClientByType(clientOpts, containerRegistryClient),
 	}
 
-	apiClient := clients[ionosClient].(*compute.APIClient)
+	apiClient := clients[ionosClient].(*ionoscloud.APIClient)
 	apiClient.GetConfig().UserAgent = fmt.Sprintf(
 		"terraform-provider/%s_ionos-cloud-sdk-go/%s_hashicorp-terraform/%s_terraform-plugin-sdk/%s_os/%s_arch/%s",
-		Version, compute.Version, terraformVersion, meta.SDKVersionString(), runtime.GOOS, runtime.GOARCH)
+		Version, ionoscloud.Version, terraformVersion, meta.SDKVersionString(), runtime.GOOS, runtime.GOARCH)
 
 	return SdkBundle{
 		CloudApiClient:    apiClient,
@@ -229,7 +229,7 @@ func NewClientByType(clientOpts ClientOptions, clientType clientType) interface{
 			newConfig.MaxRetries = utils.MaxRetries
 			newConfig.WaitTime = utils.MaxWaitTime
 			newConfig.HTTPClient = &http.Client{Transport: utils.CreateTransport()}
-			return compute.NewAPIClient(newConfig)
+			return ionoscloud.NewAPIClient(newConfig)
 		}
 	case psqlClient:
 		return dbaasService.NewPsqlClient(clientOpts.Username, clientOpts.Password, clientOpts.Token, clientOpts.Url, clientOpts.Version, clientOpts.Username)

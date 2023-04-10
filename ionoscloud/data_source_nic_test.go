@@ -23,12 +23,12 @@ func Test_dataSourceNicRead(t *testing.T) {
 		Type:     nil,
 		Href:     nil,
 		Metadata: nil,
-		Properties: &ionoscloud.NicProperties{
+		Properties: ionoscloud.NicProperties{
 			Name:           &testName,
 			Mac:            &mac,
 			Ips:            nil,
 			Dhcp:           &dhcp,
-			Lan:            nil,
+			Lan:            0,
 			FirewallActive: &firewallActive,
 			FirewallType:   &firewallType,
 			DeviceNumber:   nil,

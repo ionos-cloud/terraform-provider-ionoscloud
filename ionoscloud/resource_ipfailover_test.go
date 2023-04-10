@@ -96,7 +96,7 @@ func testAccCheckLanIPFailoverGroupExists(n string, _ *ionoscloud.Lan, _ *ionosc
 			return fmt.Errorf("lan %s has no failover groups", lanId)
 		}
 		found := false
-		for _, fo := range *lan.Properties.IpFailover {
+		for _, fo := range lan.Properties.IpFailover {
 			if *fo.NicUuid == nicUuid {
 				found = true
 			}
@@ -137,7 +137,7 @@ func testAccCheckLanIPFailoverDestroyCheck(s *terraform.State) error {
 		} else {
 			found := false
 			if lan.Properties.IpFailover != nil {
-				for _, fo := range *lan.Properties.IpFailover {
+				for _, fo := range lan.Properties.IpFailover {
 					if *fo.NicUuid == nicUuid {
 						found = true
 					}

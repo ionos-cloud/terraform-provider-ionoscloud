@@ -447,10 +447,10 @@ func resourceServerCreate(ctx context.Context, d *schema.ResourceData, meta inte
 	datacenterId := d.Get("datacenter_id").(string)
 
 	nic := ionoscloud.Nic{
-		Properties: &ionoscloud.NicProperties{},
+		Properties: ionoscloud.NicProperties{},
 	}
 	firewall := ionoscloud.FirewallRule{
-		Properties: &ionoscloud.FirewallruleProperties{},
+		Properties: ionoscloud.FirewallruleProperties{},
 	}
 
 	serverReq, err := initializeCreateRequests(d)
@@ -467,7 +467,7 @@ func resourceServerCreate(ctx context.Context, d *schema.ResourceData, meta inte
 	}
 
 	// get image and imageAlias
-	image, imageAlias, err := getImage(ctx, client, d, *volume)
+	image, imageAlias, err := getImage(ctx, client, d, volume)
 	if err != nil {
 		return diag.FromErr(err)
 	}
@@ -510,7 +510,7 @@ func resourceServerCreate(ctx context.Context, d *schema.ResourceData, meta inte
 	// add volume object to serverReq
 	serverReq.Entities = &ionoscloud.ServerEntities{
 		Volumes: &ionoscloud.AttachedVolumes{
-			Items: &[]ionoscloud.Volume{
+			Items: []ionoscloud.Volume{
 				{
 					Properties: volume,
 				},
@@ -524,7 +524,7 @@ func resourceServerCreate(ctx context.Context, d *schema.ResourceData, meta inte
 	}
 
 	serverReq.Entities.Nics = &ionoscloud.Nics{
-		Items: &[]ionoscloud.Nic{
+		Items: []ionoscloud.Nic{
 			nic,
 		},
 	}
@@ -536,18 +536,18 @@ func resourceServerCreate(ctx context.Context, d *schema.ResourceData, meta inte
 		if diags != nil {
 			return diags
 		}
-		(*serverReq.Entities.Nics.Items)[0].Entities = &ionoscloud.NicEntities{
+		(serverReq.Entities.Nics.Items)[0].Entities = &ionoscloud.NicEntities{
 			Firewallrules: &ionoscloud.FirewallRules{
-				Items: &[]ionoscloud.FirewallRule{
+				Items: []ionoscloud.FirewallRule{
 					firewall,
 				},
 			},
 		}
 	}
 
-	if (*serverReq.Entities.Nics.Items)[0].Properties.Ips != nil {
-		if len(*(*serverReq.Entities.Nics.Items)[0].Properties.Ips) == 0 {
-			*(*serverReq.Entities.Nics.Items)[0].Properties.Ips = nil
+	if (serverReq.Entities.Nics.Items)[0].Properties.Ips != nil {
+		if len((serverReq.Entities.Nics.Items)[0].Properties.Ips) == 0 {
+			(serverReq.Entities.Nics.Items)[0].Properties.Ips = nil
 		}
 	}
 
@@ -590,7 +590,7 @@ func resourceServerCreate(ctx context.Context, d *schema.ResourceData, meta inte
 		diags := diag.FromErr(fmt.Errorf("error fetching server: %w", err))
 		return diags
 	}
-	firstNicItem := (*serverReq.Entities.Nics.Items)[0]
+	firstNicItem := (serverReq.Entities.Nics.Items)[0]
 	firewallRules, apiResponse, err := client.FirewallRulesApi.DatacentersServersNicsFirewallrulesGet(ctx, datacenterId,
 		*serverReq.Id, *firstNicItem.Id).Execute()
 	logApiRequestTime(apiResponse)
@@ -601,8 +601,8 @@ func resourceServerCreate(ctx context.Context, d *schema.ResourceData, meta inte
 	}
 
 	if firewallRules.Items != nil {
-		if len(*firewallRules.Items) > 0 {
-			if err := d.Set("firewallrule_id", *(*firewallRules.Items)[0].Id); err != nil {
+		if len(firewallRules.Items) > 0 {
+			if err := d.Set("firewallrule_id", *(firewallRules.Items)[0].Id); err != nil {
 				diags := diag.FromErr(err)
 				return diags
 			}
@@ -618,32 +618,29 @@ func resourceServerCreate(ctx context.Context, d *schema.ResourceData, meta inte
 	}
 
 	firstNicProps := firstNicItem.Properties
-	if firstNicProps != nil {
-		firstNicIps := firstNicProps.Ips
-		if firstNicIps != nil &&
-			len(*firstNicIps) > 0 {
-			log.Printf("[DEBUG] set primary_ip to %s", (*firstNicIps)[0])
-			if err := d.Set("primary_ip", (*firstNicIps)[0]); err != nil {
-				diags := diag.FromErr(fmt.Errorf("error while setting primary ip %s: %w", d.Id(), err))
-				return diags
-			}
+	firstNicIps := firstNicProps.Ips
+	if firstNicIps != nil &&
+		len(firstNicIps) > 0 {
+		log.Printf("[DEBUG] set primary_ip to %s", (firstNicIps)[0])
+		if err := d.Set("primary_ip", (firstNicIps)[0]); err != nil {
+			diags := diag.FromErr(fmt.Errorf("error while setting primary ip %s: %w", d.Id(), err))
+			return diags
 		}
+	}
 
-		volumeItems := serverReq.Entities.Volumes.Items
-		firstVolumeItem := (*volumeItems)[0]
-		if firstNicProps.Ips != nil &&
-			len(*firstNicIps) > 0 &&
-			volumeItems != nil &&
-			len(*volumeItems) > 0 &&
-			firstVolumeItem.Properties != nil &&
-			firstVolumeItem.Properties.ImagePassword != nil {
+	volumeItems := serverReq.Entities.Volumes.Items
+	firstVolumeItem := (volumeItems)[0]
+	if firstNicProps.Ips != nil &&
+		len(firstNicIps) > 0 &&
+		volumeItems != nil &&
+		len(volumeItems) > 0 &&
+		firstVolumeItem.Properties.ImagePassword != nil {
 
-			d.SetConnInfo(map[string]string{
-				"type":     "ssh",
-				"host":     (*firstNicIps)[0],
-				"password": *firstVolumeItem.Properties.ImagePassword,
-			})
-		}
+		d.SetConnInfo(map[string]string{
+			"type":     "ssh",
+			"host":     (firstNicIps)[0],
+			"password": *firstVolumeItem.Properties.ImagePassword,
+		})
 	}
 	return resourceServerRead(ctx, d, meta)
 }
@@ -675,17 +672,15 @@ func resourceServerRead(ctx context.Context, d *schema.ResourceData, meta interf
 func SetNetworkProperties(nic ionoscloud.Nic) map[string]interface{} {
 
 	network := map[string]interface{}{}
-	if nic.Properties != nil {
-		utils.SetPropWithNilCheck(network, "dhcp", nic.Properties.Dhcp)
-		utils.SetPropWithNilCheck(network, "firewall_active", nic.Properties.FirewallActive)
-		utils.SetPropWithNilCheck(network, "firewall_type", nic.Properties.FirewallType)
-		utils.SetPropWithNilCheck(network, "lan", nic.Properties.Lan)
-		utils.SetPropWithNilCheck(network, "name", nic.Properties.Name)
-		utils.SetPropWithNilCheck(network, "ips", nic.Properties.Ips)
-		utils.SetPropWithNilCheck(network, "mac", nic.Properties.Mac)
-		if nic.Properties.Ips != nil && len(*nic.Properties.Ips) > 0 {
-			network["ips"] = *nic.Properties.Ips
-		}
+	utils.SetPropWithNilCheck(network, "dhcp", nic.Properties.Dhcp)
+	utils.SetPropWithNilCheck(network, "firewall_active", nic.Properties.FirewallActive)
+	utils.SetPropWithNilCheck(network, "firewall_type", nic.Properties.FirewallType)
+	utils.SetPropWithNilCheck(network, "lan", nic.Properties.Lan)
+	utils.SetPropWithNilCheck(network, "name", nic.Properties.Name)
+	utils.SetPropWithNilCheck(network, "ips", nic.Properties.Ips)
+	utils.SetPropWithNilCheck(network, "mac", nic.Properties.Mac)
+	if nic.Properties.Ips != nil && len(nic.Properties.Ips) > 0 {
+		network["ips"] = nic.Properties.Ips
 	}
 	return network
 }
@@ -697,21 +692,25 @@ func SetFirewallProperties(firewall ionoscloud.FirewallRule) map[string]interfac
 		"protocol": *firewall.Properties.Protocol,
 		"name":     *firewall.Properties.Name,
 	*/
-	if firewall.Properties != nil {
-		utils.SetPropWithNilCheck(fw, "protocol", firewall.Properties.Protocol)
-		utils.SetPropWithNilCheck(fw, "name", firewall.Properties.Name)
-		utils.SetPropWithNilCheck(fw, "source_mac", firewall.Properties.SourceMac)
-		utils.SetPropWithNilCheck(fw, "source_ip", firewall.Properties.SourceIp)
-		utils.SetPropWithNilCheck(fw, "target_ip", firewall.Properties.TargetIp)
-		utils.SetPropWithNilCheck(fw, "port_range_start", firewall.Properties.PortRangeStart)
-		utils.SetPropWithNilCheck(fw, "port_range_end", firewall.Properties.PortRangeEnd)
-		utils.SetPropWithNilCheck(fw, "type", firewall.Properties.Type)
-		if firewall.Properties.IcmpType != nil {
-			fw["icmp_type"] = strconv.Itoa(int(*firewall.Properties.IcmpType))
-		}
-		if firewall.Properties.IcmpCode != nil {
-			fw["icmp_code"] = strconv.Itoa(int(*firewall.Properties.IcmpCode))
-		}
+	utils.SetPropWithNilCheck(fw, "protocol", firewall.Properties.Protocol)
+	utils.SetPropWithNilCheck(fw, "name", firewall.Properties.Name)
+	if firewall.Properties.SourceMac.IsSet() {
+		utils.SetPropWithNilCheck(fw, "source_mac", firewall.Properties.SourceMac.Get())
+	}
+	if firewall.Properties.SourceIp.IsSet() {
+		utils.SetPropWithNilCheck(fw, "source_ip", firewall.Properties.SourceIp.Get())
+	}
+	if firewall.Properties.TargetIp.IsSet() {
+		utils.SetPropWithNilCheck(fw, "source_ip", firewall.Properties.TargetIp.Get())
+	}
+	utils.SetPropWithNilCheck(fw, "port_range_start", firewall.Properties.PortRangeStart)
+	utils.SetPropWithNilCheck(fw, "port_range_end", firewall.Properties.PortRangeEnd)
+	utils.SetPropWithNilCheck(fw, "type", firewall.Properties.Type)
+	if firewall.Properties.IcmpType.IsSet() {
+		fw["icmp_type"] = strconv.Itoa(int(*firewall.Properties.IcmpType.Get()))
+	}
+	if firewall.Properties.IcmpCode.IsSet() {
+		fw["icmp_code"] = strconv.Itoa(int(*firewall.Properties.IcmpCode.Get()))
 	}
 	return fw
 }
@@ -719,34 +718,32 @@ func SetFirewallProperties(firewall ionoscloud.FirewallRule) map[string]interfac
 func SetVolumeProperties(volume ionoscloud.Volume) map[string]interface{} {
 
 	volumeMap := map[string]interface{}{}
-	if volume.Properties != nil {
-		if volume.Properties.SshKeys != nil && len(*volume.Properties.SshKeys) > 0 {
-			var sshKeys []interface{}
-			for _, sshKey := range *volume.Properties.SshKeys {
-				sshKeys = append(sshKeys, sshKey)
-			}
-			volumeMap["ssh_keys"] = sshKeys
+	if volume.Properties.SshKeys != nil && len(volume.Properties.SshKeys) > 0 {
+		var sshKeys []interface{}
+		for _, sshKey := range volume.Properties.SshKeys {
+			sshKeys = append(sshKeys, sshKey)
 		}
-
-		utils.SetPropWithNilCheck(volumeMap, "image_password", volume.Properties.ImagePassword)
-		utils.SetPropWithNilCheck(volumeMap, "name", volume.Properties.Name)
-
-		utils.SetPropWithNilCheck(volumeMap, "size", volume.Properties.Size)
-		utils.SetPropWithNilCheck(volumeMap, "disk_type", volume.Properties.Type)
-		utils.SetPropWithNilCheck(volumeMap, "licence_type", volume.Properties.LicenceType)
-		utils.SetPropWithNilCheck(volumeMap, "bus", volume.Properties.Bus)
-		utils.SetPropWithNilCheck(volumeMap, "availability_zone", volume.Properties.AvailabilityZone)
-		utils.SetPropWithNilCheck(volumeMap, "cpu_hot_plug", volume.Properties.CpuHotPlug)
-		utils.SetPropWithNilCheck(volumeMap, "ram_hot_plug", volume.Properties.RamHotPlug)
-		utils.SetPropWithNilCheck(volumeMap, "nic_hot_plug", volume.Properties.NicHotPlug)
-		utils.SetPropWithNilCheck(volumeMap, "nic_hot_unplug", volume.Properties.NicHotUnplug)
-		utils.SetPropWithNilCheck(volumeMap, "disc_virtio_hot_plug", volume.Properties.DiscVirtioHotPlug)
-		utils.SetPropWithNilCheck(volumeMap, "disc_virtio_hot_unplug", volume.Properties.DiscVirtioHotUnplug)
-		utils.SetPropWithNilCheck(volumeMap, "device_number", volume.Properties.DeviceNumber)
-		utils.SetPropWithNilCheck(volumeMap, "user_data", volume.Properties.UserData)
-		utils.SetPropWithNilCheck(volumeMap, "backup_unit_id", volume.Properties.BackupunitId)
-		utils.SetPropWithNilCheck(volumeMap, "boot_server", volume.Properties.BootServer)
+		volumeMap["ssh_keys"] = sshKeys
 	}
+
+	utils.SetPropWithNilCheck(volumeMap, "image_password", volume.Properties.ImagePassword)
+	utils.SetPropWithNilCheck(volumeMap, "name", volume.Properties.Name)
+
+	utils.SetPropWithNilCheck(volumeMap, "size", volume.Properties.Size)
+	utils.SetPropWithNilCheck(volumeMap, "disk_type", volume.Properties.Type)
+	utils.SetPropWithNilCheck(volumeMap, "licence_type", volume.Properties.LicenceType)
+	utils.SetPropWithNilCheck(volumeMap, "bus", volume.Properties.Bus)
+	utils.SetPropWithNilCheck(volumeMap, "availability_zone", volume.Properties.AvailabilityZone)
+	utils.SetPropWithNilCheck(volumeMap, "cpu_hot_plug", volume.Properties.CpuHotPlug)
+	utils.SetPropWithNilCheck(volumeMap, "ram_hot_plug", volume.Properties.RamHotPlug)
+	utils.SetPropWithNilCheck(volumeMap, "nic_hot_plug", volume.Properties.NicHotPlug)
+	utils.SetPropWithNilCheck(volumeMap, "nic_hot_unplug", volume.Properties.NicHotUnplug)
+	utils.SetPropWithNilCheck(volumeMap, "disc_virtio_hot_plug", volume.Properties.DiscVirtioHotPlug)
+	utils.SetPropWithNilCheck(volumeMap, "disc_virtio_hot_unplug", volume.Properties.DiscVirtioHotUnplug)
+	utils.SetPropWithNilCheck(volumeMap, "device_number", volume.Properties.DeviceNumber)
+	utils.SetPropWithNilCheck(volumeMap, "user_data", volume.Properties.UserData)
+	utils.SetPropWithNilCheck(volumeMap, "backup_unit_id", volume.Properties.BackupunitId)
+	utils.SetPropWithNilCheck(volumeMap, "boot_server", volume.Properties.BootServer)
 	return volumeMap
 }
 
@@ -794,7 +791,7 @@ func resourceServerUpdate(ctx context.Context, d *schema.ResourceData, meta inte
 
 		if utils.IsValidUUID(bootCdrom) {
 			request.BootCdrom = &ionoscloud.ResourceReference{
-				Id: &bootCdrom,
+				Id: bootCdrom,
 			}
 		} else {
 			diags := diag.FromErr(fmt.Errorf("boot_cdrom has to be a valid UUID, got: %s", bootCdrom))
@@ -850,7 +847,7 @@ func resourceServerUpdate(ctx context.Context, d *schema.ResourceData, meta inte
 
 		if v, ok := d.GetOk("volume.0.size"); ok {
 			vInt := float32(v.(int))
-			properties.Size = &vInt
+			properties.Size = vInt
 		}
 
 		if v, ok := d.GetOk("volume.0.bus"); ok {
@@ -877,7 +874,7 @@ func resourceServerUpdate(ctx context.Context, d *schema.ResourceData, meta inte
 	// Nic stuff
 	if d.HasChange("nic") {
 		nic := &ionoscloud.Nic{}
-		for _, n := range *server.Entities.Nics.Items {
+		for _, n := range server.Entities.Nics.Items {
 			nicStr := d.Get("primary_nic").(string)
 			if *n.Id == nicStr {
 				nic = &n
@@ -887,7 +884,7 @@ func resourceServerUpdate(ctx context.Context, d *schema.ResourceData, meta inte
 
 		lan := int32(d.Get("nic.0.lan").(int))
 		properties := ionoscloud.NicProperties{
-			Lan: &lan,
+			Lan: lan,
 		}
 
 		if v, ok := d.GetOk("nic.0.name"); ok {
@@ -904,7 +901,7 @@ func resourceServerUpdate(ctx context.Context, d *schema.ResourceData, meta inte
 					ips = append(ips, ip)
 				}
 				if ips != nil && len(ips) > 0 {
-					properties.Ips = &ips
+					properties.Ips = ips
 				}
 			}
 		}
@@ -948,7 +945,7 @@ func resourceServerUpdate(ctx context.Context, d *schema.ResourceData, meta inte
 
 				firewall, apiResponse, err = client.FirewallRulesApi.DatacentersServersNicsFirewallrulesPost(ctx, dcId, *server.Id, *nic.Id).Firewallrule(firewall).Execute()
 			} else {
-				firewall, apiResponse, err = client.FirewallRulesApi.DatacentersServersNicsFirewallrulesPatch(ctx, dcId, *server.Id, *nic.Id, firewallId).Firewallrule(*firewall.Properties).Execute()
+				firewall, apiResponse, err = client.FirewallRulesApi.DatacentersServersNicsFirewallrulesPatch(ctx, dcId, *server.Id, *nic.Id, firewallId).Firewallrule(firewall.Properties).Execute()
 
 			}
 			logApiRequestTime(apiResponse)
@@ -973,7 +970,7 @@ func resourceServerUpdate(ctx context.Context, d *schema.ResourceData, meta inte
 
 			nic.Entities = &ionoscloud.NicEntities{
 				Firewallrules: &ionoscloud.FirewallRules{
-					Items: &[]ionoscloud.FirewallRule{
+					Items: []ionoscloud.FirewallRule{
 						firewall,
 					},
 				},
@@ -1033,11 +1030,11 @@ func resourceServerDelete(ctx context.Context, d *schema.ResourceData, meta inte
 	}
 
 	if server.Properties.BootVolume != nil && strings.ToLower(*server.Properties.Type) != "cube" {
-		apiResponse, err := client.VolumesApi.DatacentersVolumesDelete(ctx, dcId, *server.Properties.BootVolume.Id).Execute()
+		apiResponse, err := client.VolumesApi.DatacentersVolumesDelete(ctx, dcId, server.Properties.BootVolume.Id).Execute()
 		logApiRequestTime(apiResponse)
 
 		if err != nil {
-			diags := diag.FromErr(fmt.Errorf("error occured while delete volume %s of server ID %s %w", *server.Properties.BootVolume.Id, d.Id(), err))
+			diags := diag.FromErr(fmt.Errorf("error occured while delete volume %s of server ID %s %w", server.Properties.BootVolume.Id, d.Id(), err))
 			return diags
 		}
 		// Wait, catching any errors
@@ -1099,13 +1096,13 @@ func resourceServerImport(ctx context.Context, d *schema.ResourceData, meta inte
 			return nil, fmt.Errorf("error setting primary_nic id %w", err)
 		}
 	} else {
-		if server.Entities != nil && server.Entities.Nics != nil && len(*server.Entities.Nics.Items) > 0 {
-			primaryNic = (*server.Entities.Nics.Items)[0]
+		if server.Entities != nil && server.Entities.Nics != nil && len(server.Entities.Nics.Items) > 0 {
+			primaryNic = (server.Entities.Nics.Items)[0]
 		}
 	}
 	if primaryNicId != "" {
 		if server.Entities != nil && server.Entities.Nics != nil && server.Entities.Nics.Items != nil {
-			for _, nic := range *server.Entities.Nics.Items {
+			for _, nic := range server.Entities.Nics.Items {
 				if *nic.Id == primaryNicId {
 					primaryNic = nic
 					break
@@ -1114,8 +1111,8 @@ func resourceServerImport(ctx context.Context, d *schema.ResourceData, meta inte
 		}
 	}
 
-	log.Printf("[DEBUG] set primary_ip to %s", (*primaryNic.Properties.Ips)[0])
-	if err := d.Set("primary_ip", (*primaryNic.Properties.Ips)[0]); err != nil {
+	log.Printf("[DEBUG] set primary_ip to %s", (primaryNic.Properties.Ips)[0])
+	if err := d.Set("primary_ip", (primaryNic.Properties.Ips)[0]); err != nil {
 		return nil, fmt.Errorf("error while setting primary ip %s: %w", d.Id(), err)
 	}
 	if err := d.Set("datacenter_id", datacenterId); err != nil {
@@ -1161,25 +1158,23 @@ func readPublicKey(pathOrKey string) (string, error) {
 func SetCdromProperties(image ionoscloud.Image) map[string]interface{} {
 
 	cdrom := make(map[string]interface{})
-	if image.Properties != nil {
-		utils.SetPropWithNilCheck(cdrom, "name", image.Properties.Name)
-		utils.SetPropWithNilCheck(cdrom, "description", image.Properties.Description)
-		utils.SetPropWithNilCheck(cdrom, "location", image.Properties.Location)
-		utils.SetPropWithNilCheck(cdrom, "size", image.Properties.Size)
-		utils.SetPropWithNilCheck(cdrom, "cpu_hot_plug", image.Properties.CpuHotPlug)
-		utils.SetPropWithNilCheck(cdrom, "cpu_hot_unplug", image.Properties.CpuHotUnplug)
-		utils.SetPropWithNilCheck(cdrom, "ram_hot_plug", image.Properties.RamHotPlug)
-		utils.SetPropWithNilCheck(cdrom, "ram_hot_unplug", image.Properties.RamHotUnplug)
-		utils.SetPropWithNilCheck(cdrom, "nic_hot_plug", image.Properties.NicHotPlug)
-		utils.SetPropWithNilCheck(cdrom, "nic_hot_unplug", image.Properties.NicHotUnplug)
-		utils.SetPropWithNilCheck(cdrom, "disc_virtio_hot_plug", image.Properties.DiscVirtioHotPlug)
-		utils.SetPropWithNilCheck(cdrom, "disc_virtio_hot_unplug", image.Properties.DiscVirtioHotUnplug)
-		utils.SetPropWithNilCheck(cdrom, "disc_scsi_hot_plug", image.Properties.DiscScsiHotPlug)
-		utils.SetPropWithNilCheck(cdrom, "disc_scsi_hot_unplug", image.Properties.DiscScsiHotUnplug)
-		utils.SetPropWithNilCheck(cdrom, "licence_type", image.Properties.LicenceType)
-		utils.SetPropWithNilCheck(cdrom, "image_type", image.Properties.ImageType)
-		utils.SetPropWithNilCheck(cdrom, "public", image.Properties.Public)
-	}
+	utils.SetPropWithNilCheck(cdrom, "name", image.Properties.Name)
+	utils.SetPropWithNilCheck(cdrom, "description", image.Properties.Description)
+	utils.SetPropWithNilCheck(cdrom, "location", image.Properties.Location)
+	utils.SetPropWithNilCheck(cdrom, "size", image.Properties.Size)
+	utils.SetPropWithNilCheck(cdrom, "cpu_hot_plug", image.Properties.CpuHotPlug)
+	utils.SetPropWithNilCheck(cdrom, "cpu_hot_unplug", image.Properties.CpuHotUnplug)
+	utils.SetPropWithNilCheck(cdrom, "ram_hot_plug", image.Properties.RamHotPlug)
+	utils.SetPropWithNilCheck(cdrom, "ram_hot_unplug", image.Properties.RamHotUnplug)
+	utils.SetPropWithNilCheck(cdrom, "nic_hot_plug", image.Properties.NicHotPlug)
+	utils.SetPropWithNilCheck(cdrom, "nic_hot_unplug", image.Properties.NicHotUnplug)
+	utils.SetPropWithNilCheck(cdrom, "disc_virtio_hot_plug", image.Properties.DiscVirtioHotPlug)
+	utils.SetPropWithNilCheck(cdrom, "disc_virtio_hot_unplug", image.Properties.DiscVirtioHotUnplug)
+	utils.SetPropWithNilCheck(cdrom, "disc_scsi_hot_plug", image.Properties.DiscScsiHotPlug)
+	utils.SetPropWithNilCheck(cdrom, "disc_scsi_hot_unplug", image.Properties.DiscScsiHotUnplug)
+	utils.SetPropWithNilCheck(cdrom, "licence_type", image.Properties.LicenceType)
+	utils.SetPropWithNilCheck(cdrom, "image_type", image.Properties.ImageType)
+	utils.SetPropWithNilCheck(cdrom, "public", image.Properties.Public)
 
 	return cdrom
 }
@@ -1266,7 +1261,7 @@ func getServerData(d *schema.ResourceData) (*ionoscloud.Server, error) {
 		bootCdrom := d.Get("boot_cdrom").(string)
 		if utils.IsValidUUID(bootCdrom) {
 			server.Properties.BootCdrom = &ionoscloud.ResourceReference{
-				Id: &bootCdrom,
+				Id: bootCdrom,
 			}
 
 		} else {
@@ -1283,60 +1278,58 @@ func setResourceServerData(ctx context.Context, client *ionoscloud.APIClient, d 
 	}
 
 	datacenterId := d.Get("datacenter_id").(string)
-	if server.Properties != nil {
-		if server.Properties.Name != nil {
-			if err := d.Set("name", *server.Properties.Name); err != nil {
-				return fmt.Errorf("error setting name %w", err)
-			}
+	if server.Properties.Name != nil {
+		if err := d.Set("name", *server.Properties.Name); err != nil {
+			return fmt.Errorf("error setting name %w", err)
 		}
+	}
 
-		if server.Properties.Cores != nil {
-			if err := d.Set("cores", *server.Properties.Cores); err != nil {
-				return fmt.Errorf("error setting cores %w", err)
-			}
+	if server.Properties.Cores != nil {
+		if err := d.Set("cores", *server.Properties.Cores); err != nil {
+			return fmt.Errorf("error setting cores %w", err)
 		}
+	}
 
-		if server.Properties.Ram != nil {
-			if err := d.Set("ram", *server.Properties.Ram); err != nil {
-				return fmt.Errorf("error setting ram %w", err)
-			}
+	if server.Properties.Ram != nil {
+		if err := d.Set("ram", *server.Properties.Ram); err != nil {
+			return fmt.Errorf("error setting ram %w", err)
 		}
+	}
 
-		if server.Properties.AvailabilityZone != nil {
-			if err := d.Set("availability_zone", *server.Properties.AvailabilityZone); err != nil {
-				return fmt.Errorf("error setting availability_zone %w", err)
-			}
+	if server.Properties.AvailabilityZone != nil {
+		if err := d.Set("availability_zone", *server.Properties.AvailabilityZone); err != nil {
+			return fmt.Errorf("error setting availability_zone %w", err)
 		}
+	}
 
-		if server.Properties.CpuFamily != nil {
-			if err := d.Set("cpu_family", *server.Properties.CpuFamily); err != nil {
-				return fmt.Errorf("error setting cpu_family %w", err)
-			}
+	if server.Properties.CpuFamily != nil {
+		if err := d.Set("cpu_family", *server.Properties.CpuFamily); err != nil {
+			return fmt.Errorf("error setting cpu_family %w", err)
 		}
+	}
 
-		if server.Properties.Type != nil {
-			if err := d.Set("type", *server.Properties.Type); err != nil {
-				return fmt.Errorf("error setting type %w", err)
-			}
+	if server.Properties.Type != nil {
+		if err := d.Set("type", *server.Properties.Type); err != nil {
+			return fmt.Errorf("error setting type %w", err)
 		}
+	}
 
-		if server.Properties.BootCdrom != nil && server.Properties.BootCdrom.Id != nil {
-			if err := d.Set("boot_cdrom", *server.Properties.BootCdrom.Id); err != nil {
-				return fmt.Errorf("error setting boot_cdrom %w", err)
-			}
+	if server.Properties.BootCdrom != nil {
+		if err := d.Set("boot_cdrom", server.Properties.BootCdrom.Id); err != nil {
+			return fmt.Errorf("error setting boot_cdrom %w", err)
 		}
+	}
 
-		if server.Properties.BootVolume != nil && server.Properties.BootVolume.Id != nil {
-			if err := d.Set("boot_volume", *server.Properties.BootVolume.Id); err != nil {
-				return fmt.Errorf("error setting bootVolume %w", err)
-			}
+	if server.Properties.BootVolume != nil {
+		if err := d.Set("boot_volume", server.Properties.BootVolume.Id); err != nil {
+			return fmt.Errorf("error setting bootVolume %w", err)
 		}
+	}
 
-		if server.Entities != nil && server.Entities.Volumes != nil && server.Entities.Volumes.Items != nil && len(*server.Entities.Volumes.Items) > 0 &&
-			(*server.Entities.Volumes.Items)[0].Properties != nil && (*server.Entities.Volumes.Items)[0].Properties.Image != nil {
-			if err := d.Set("boot_image", *(*server.Entities.Volumes.Items)[0].Properties.Image); err != nil {
-				return fmt.Errorf("error setting boot_image %w", err)
-			}
+	if server.Entities != nil && server.Entities.Volumes != nil && server.Entities.Volumes.Items != nil && len(server.Entities.Volumes.Items) > 0 &&
+		(server.Entities.Volumes.Items)[0].Properties.Image != nil {
+		if err := d.Set("boot_image", *(server.Entities.Volumes.Items)[0].Properties.Image); err != nil {
+			return fmt.Errorf("error setting boot_image %w", err)
 		}
 	}
 
@@ -1345,7 +1338,7 @@ func setResourceServerData(ctx context.Context, client *ionoscloud.APIClient, d 
 	}
 
 	if server.Properties.BootVolume != nil {
-		volume, apiResponse, err := client.ServersApi.DatacentersServersVolumesFindById(ctx, datacenterId, d.Id(), *server.Properties.BootVolume.Id).Execute()
+		volume, apiResponse, err := client.ServersApi.DatacentersServersVolumesFindById(ctx, datacenterId, d.Id(), server.Properties.BootVolume.Id).Execute()
 		logApiRequestTime(apiResponse)
 		if err == nil {
 			var volumes []interface{}
@@ -1368,12 +1361,12 @@ func setResourceServerData(ctx context.Context, client *ionoscloud.APIClient, d 
 	var nicId string
 	if primaryNicOk {
 		nicId = d.Get("primary_nic").(string)
-	} else if server.Entities.Nics != nil && server.Entities.Nics.Items != nil && len(*server.Entities.Nics.Items) > 0 && (*server.Entities.Nics.Items)[0].Id != nil {
-		lastNicIndex := len(*server.Entities.Nics.Items) - 1
-		if (*server.Entities.Nics.Items)[lastNicIndex].Id != nil {
+	} else if server.Entities.Nics != nil && server.Entities.Nics.Items != nil && len(server.Entities.Nics.Items) > 0 && (server.Entities.Nics.Items)[0].Id != nil {
+		lastNicIndex := len(server.Entities.Nics.Items) - 1
+		if (server.Entities.Nics.Items)[lastNicIndex].Id != nil {
 			// this might be a terraformer import, so primary_nic might not be set
 			// if no nics found until now, get the last one from the list of nics.
-			nicId = *(*server.Entities.Nics.Items)[lastNicIndex].Id
+			nicId = *(server.Entities.Nics.Items)[lastNicIndex].Id
 		}
 	}
 
@@ -1398,7 +1391,7 @@ func setResourceServerData(ctx context.Context, client *ionoscloud.APIClient, d 
 			return fmt.Errorf("error, while searching for firewall rule %w", err)
 		}
 
-		if firewall.Properties != nil && firewall.Properties.Name != nil {
+		if firewall.Properties.Name != nil {
 			log.Printf("[DEBUG] found firewall rule with name %s", *firewall.Properties.Name)
 		}
 		firewallEntry := SetFirewallProperties(firewall)

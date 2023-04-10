@@ -112,14 +112,12 @@ func dataSourceDataCenterRead(ctx context.Context, d *schema.ResourceData, meta 
 			}
 		}
 		if locationOk {
-			if *datacenter.Properties.Location != location {
+			if datacenter.Properties.Location != location {
 				return diag.FromErr(fmt.Errorf("location of dc (UUID=%s, location=%s) does not match expected location: %s",
-					*datacenter.Id, *datacenter.Properties.Location, location))
+					*datacenter.Id, datacenter.Properties.Location, location))
 			}
 		}
-		if datacenter.Properties != nil {
-			log.Printf("[INFO] Got dc [Name=%s, Location=%s]", *datacenter.Properties.Name, *datacenter.Properties.Location)
-		}
+		log.Printf("[INFO] Got dc [Name=%s, Location=%s]", *datacenter.Properties.Name, datacenter.Properties.Location)
 
 	} else {
 		datacenters, apiResponse, err := client.DataCentersApi.DatacentersGet(ctx).Depth(1).Execute()
@@ -133,8 +131,8 @@ func dataSourceDataCenterRead(ctx context.Context, d *schema.ResourceData, meta 
 
 		if nameOk && datacenters.Items != nil {
 			var resultsByDatacenter []ionoscloud.Datacenter
-			for _, dc := range *datacenters.Items {
-				if dc.Properties != nil && dc.Properties.Name != nil && *dc.Properties.Name == name {
+			for _, dc := range datacenters.Items {
+				if dc.Properties.Name != nil && *dc.Properties.Name == name {
 					resultsByDatacenter = append(resultsByDatacenter, dc)
 				}
 			}
@@ -150,14 +148,14 @@ func dataSourceDataCenterRead(ctx context.Context, d *schema.ResourceData, meta 
 			var resultsByLocation []ionoscloud.Datacenter
 			if results != nil {
 				for _, dc := range results {
-					if dc.Properties.Location != nil && *dc.Properties.Location == location {
+					if dc.Properties.Location == location {
 						resultsByLocation = append(resultsByLocation, dc)
 					}
 				}
 			} else if datacenters.Items != nil {
 				/* find the first datacenter matching the location */
-				for _, dc := range *datacenters.Items {
-					if dc.Properties.Location != nil && *dc.Properties.Location == location {
+				for _, dc := range datacenters.Items {
+					if dc.Properties.Location == location {
 						resultsByLocation = append(resultsByLocation, dc)
 					}
 				}

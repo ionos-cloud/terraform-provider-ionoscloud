@@ -68,8 +68,8 @@ func resourceLan() *schema.Resource {
 func resourceLanCreate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	client := meta.(SdkBundle).CloudApiClient
 	public := d.Get("public").(bool)
-	request := ionoscloud.LanPost{
-		Properties: &ionoscloud.LanPropertiesPost{
+	request := ionoscloud.Lan{
+		Properties: ionoscloud.LanProperties{
 			Public: &public,
 		},
 	}
@@ -272,26 +272,24 @@ func resourceLanImport(ctx context.Context, d *schema.ResourceData, meta interfa
 func setLanData(d *schema.ResourceData, lan *ionoscloud.Lan) error {
 	d.SetId(*lan.Id)
 
-	if lan.Properties != nil {
-		if lan.Properties.Name != nil {
-			if err := d.Set("name", *lan.Properties.Name); err != nil {
-				return err
-			}
+	if lan.Properties.Name != nil {
+		if err := d.Set("name", *lan.Properties.Name); err != nil {
+			return err
 		}
-		if lan.Properties.IpFailover != nil && len(*lan.Properties.IpFailover) > 0 {
-			if err := d.Set("ip_failover", convertIpFailoverList(lan.Properties.IpFailover)); err != nil {
-				return err
-			}
+	}
+	if lan.Properties.IpFailover != nil && len(lan.Properties.IpFailover) > 0 {
+		if err := d.Set("ip_failover", convertIpFailoverList(lan.Properties.IpFailover)); err != nil {
+			return err
 		}
-		if lan.Properties.Pcc != nil {
-			if err := d.Set("pcc", *lan.Properties.Pcc); err != nil {
-				return err
-			}
+	}
+	if lan.Properties.Pcc != nil {
+		if err := d.Set("pcc", *lan.Properties.Pcc); err != nil {
+			return err
 		}
-		if lan.Properties.Public != nil {
-			if err := d.Set("public", *lan.Properties.Public); err != nil {
-				return err
-			}
+	}
+	if lan.Properties.Public != nil {
+		if err := d.Set("public", *lan.Properties.Public); err != nil {
+			return err
 		}
 	}
 
@@ -369,7 +367,7 @@ func lanNicsDeleted(ctx context.Context, client *ionoscloud.APIClient, d *schema
 		return false, fmt.Errorf("an error occured while searching for nics in datacenter with id: %s for lan with: id %s %w", dcId, d.Id(), err)
 	}
 
-	if nics.Items != nil && len(*nics.Items) > 0 {
+	if nics.Items != nil && len(nics.Items) > 0 {
 		log.Printf("[INFO] there are still nics under LAN  with id %s", d.Id())
 		return false, nil
 	}

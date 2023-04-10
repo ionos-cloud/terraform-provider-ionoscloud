@@ -183,7 +183,7 @@ func dataSourceTargetGroupRead(ctx context.Context, d *schema.ResourceData, meta
 				return diag.FromErr(fmt.Errorf("an error occurred while fetching target groups: %w", err))
 			}
 
-			results = *targetGroups.Items
+			results = targetGroups.Items
 		} else {
 			targetGroups, apiResponse, err := client.TargetGroupsApi.TargetgroupsGet(ctx).Depth(1).Execute()
 			logApiRequestTime(apiResponse)
@@ -193,8 +193,8 @@ func dataSourceTargetGroupRead(ctx context.Context, d *schema.ResourceData, meta
 			}
 
 			if targetGroups.Items != nil {
-				for _, t := range *targetGroups.Items {
-					if t.Properties.Name != nil && strings.ToLower(*t.Properties.Name) == strings.ToLower(name) {
+				for _, t := range targetGroups.Items {
+					if strings.ToLower(t.Properties.Name) == strings.ToLower(name) {
 						tmpTargetGroup, apiResponse, err := client.TargetGroupsApi.TargetgroupsFindByTargetGroupId(ctx, *t.Id).Execute()
 						logApiRequestTime(apiResponse)
 						if err != nil {

@@ -80,7 +80,7 @@ func resourceUser() *schema.Resource {
 func resourceUserCreate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	client := meta.(SdkBundle).CloudApiClient
 	request := ionoscloud.UserPost{
-		Properties: &ionoscloud.UserPropertiesPost{},
+		Properties: ionoscloud.UserPropertiesPost{},
 	}
 
 	log.Printf("[DEBUG] NAME %s", d.Get("first_name"))
@@ -187,17 +187,15 @@ func resourceUserUpdate(ctx context.Context, d *schema.ResourceData, meta interf
 	}
 
 	userReq := ionoscloud.UserPut{
-		Properties: &ionoscloud.UserPropertiesPut{},
+		Properties: ionoscloud.UserPropertiesPut{},
 	}
 	//this is a PUT, so we first fill everything, then we change what has been modified
-	if foundUser.Properties != nil {
-		userReq.Properties.Firstname = foundUser.Properties.Firstname
-		userReq.Properties.Lastname = foundUser.Properties.Lastname
-		userReq.Properties.Email = foundUser.Properties.Email
-		userReq.Properties.Active = foundUser.Properties.Active
-		userReq.Properties.Administrator = foundUser.Properties.Administrator
-		userReq.Properties.ForceSecAuth = foundUser.Properties.ForceSecAuth
-	}
+	userReq.Properties.Firstname = foundUser.Properties.Firstname
+	userReq.Properties.Lastname = foundUser.Properties.Lastname
+	userReq.Properties.Email = foundUser.Properties.Email
+	userReq.Properties.Active = foundUser.Properties.Active
+	userReq.Properties.Administrator = foundUser.Properties.Administrator
+	userReq.Properties.ForceSecAuth = foundUser.Properties.ForceSecAuth
 
 	if d.HasChange("first_name") {
 		_, newValue := d.GetChange("first_name")
@@ -330,50 +328,48 @@ func resourceUserImporter(ctx context.Context, d *schema.ResourceData, meta inte
 func setUserData(d *schema.ResourceData, user *ionoscloud.User) error {
 	d.SetId(*user.Id)
 
-	if user.Properties != nil {
-		if user.Properties.Firstname != nil {
-			if err := d.Set("first_name", *user.Properties.Firstname); err != nil {
-				return err
-			}
+	if user.Properties.Firstname != nil {
+		if err := d.Set("first_name", *user.Properties.Firstname); err != nil {
+			return err
 		}
+	}
 
-		if user.Properties.Lastname != nil {
-			if err := d.Set("last_name", *user.Properties.Lastname); err != nil {
-				return err
-			}
+	if user.Properties.Lastname != nil {
+		if err := d.Set("last_name", *user.Properties.Lastname); err != nil {
+			return err
 		}
-		if user.Properties.Email != nil {
-			if err := d.Set("email", *user.Properties.Email); err != nil {
-				return err
-			}
+	}
+	if user.Properties.Email != nil {
+		if err := d.Set("email", *user.Properties.Email); err != nil {
+			return err
 		}
-		if user.Properties.Administrator != nil {
-			if err := d.Set("administrator", *user.Properties.Administrator); err != nil {
-				return err
-			}
+	}
+	if user.Properties.Administrator != nil {
+		if err := d.Set("administrator", *user.Properties.Administrator); err != nil {
+			return err
 		}
-		if user.Properties.ForceSecAuth != nil {
-			if err := d.Set("force_sec_auth", *user.Properties.ForceSecAuth); err != nil {
-				return err
-			}
+	}
+	if user.Properties.ForceSecAuth != nil {
+		if err := d.Set("force_sec_auth", *user.Properties.ForceSecAuth); err != nil {
+			return err
 		}
+	}
 
-		if user.Properties.SecAuthActive != nil {
-			if err := d.Set("sec_auth_active", *user.Properties.SecAuthActive); err != nil {
-				return err
-			}
+	if user.Properties.SecAuthActive != nil {
+		if err := d.Set("sec_auth_active", *user.Properties.SecAuthActive); err != nil {
+			return err
 		}
+	}
 
-		if user.Properties.S3CanonicalUserId != nil {
-			if err := d.Set("s3_canonical_user_id", *user.Properties.S3CanonicalUserId); err != nil {
-				return err
-			}
+	if user.Properties.S3CanonicalUserId != nil {
+		if err := d.Set("s3_canonical_user_id", *user.Properties.S3CanonicalUserId); err != nil {
+			return err
 		}
+	}
 
-		if user.Properties.Active != nil {
-			if err := d.Set("active", *user.Properties.Active); err != nil {
-				return err
-			}
+	if user.Properties.Active != nil {
+		if err := d.Set("active", *user.Properties.Active); err != nil {
+			return err
 		}
 	}
 

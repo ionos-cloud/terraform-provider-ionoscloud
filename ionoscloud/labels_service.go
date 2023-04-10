@@ -66,7 +66,7 @@ func (ls *LabelsService) datacentersServersLabelsCreate(datacenterId, serverId s
 				labelKey := label["key"].(string)
 				labelValue := label["value"].(string)
 				labelResource := ionoscloud.LabelResource{
-					Properties: &ionoscloud.LabelResourceProperties{Key: &labelKey, Value: &labelValue},
+					Properties: ionoscloud.LabelResourceProperties{Key: &labelKey, Value: &labelValue},
 				}
 				_, apiResponse, err := ls.client.LabelsApi.DatacentersServersLabelsPost(ls.ctx, datacenterId, serverId).Label(labelResource).Execute()
 				apiResponse.LogInfo()
@@ -105,10 +105,10 @@ func processLabelsData(labelsData ionoscloud.LabelResources, isDataSource bool) 
 	if labelsData.Items == nil {
 		return nil, errors.New("expected a list of labels from the API but received nil instead")
 	}
-	labels := make([]Label, 0, len(*labelsData.Items))
-	for _, labelData := range *labelsData.Items {
+	labels := make([]Label, 0, len(labelsData.Items))
+	for _, labelData := range labelsData.Items {
 		entry := make(Label)
-		if labelData.Properties == nil || labelData.Properties.Key == nil || labelData.Properties.Value == nil {
+		if labelData.Properties.Key == nil || labelData.Properties.Value == nil {
 			return nil, errors.New("expected valid label properties from the API but received nil instead")
 		}
 		entry["key"] = *labelData.Properties.Key
