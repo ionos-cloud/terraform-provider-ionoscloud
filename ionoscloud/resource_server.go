@@ -130,11 +130,6 @@ func resourceServer() *schema.Resource {
 				ForceNew:      true,
 				Description:   "Public SSH keys are set on the image as authorized keys for appropriate SSH login to the instance using the corresponding private key. This field may only be set in creation requests. When reading, it always returns null. SSH keys are only supported if a public Linux image is used for the volume creation.",
 			},
-			"delete_volumes": {
-				Type:     schema.TypeBool,
-				Optional: true,
-				Default:  false,
-			},
 			"volume": {
 				Type:     schema.TypeList,
 				Required: true,
@@ -1031,23 +1026,29 @@ func resourceServerUpdate(ctx context.Context, d *schema.ResourceData, meta inte
 	return resourceServerRead(ctx, d, meta)
 }
 
-func deleteAllVolumes(ctx context.Context, d *schema.ResourceData, client *ionoscloud.APIClient, server *ionoscloud.Server) diag.Diagnostics {
+func deleteAllVolumes(ctx context.Context, d *schema.ResourceData, meta interface{}, client *ionoscloud.APIClient, server *ionoscloud.Server) diag.Diagnostics {
 	dcId := d.Get("datacenter_id").(string)
 
-	if entities, ok := server.GetEntitiesOk(); ok {
-		if volumes, ok := entities.GetVolumesOk(); ok {
-			if volumes.Items != nil {
-				for _, volume := range *volumes.Items {
-					apiResponse, err := client.VolumesApi.DatacentersVolumesDelete(ctx, dcId, *volume.GetId()).Execute()
-					logApiRequestTime(apiResponse)
+	if server.Entities == nil || server.Entities.Volumes == nil || server.Entities.Volumes.Items == nil {
+		return nil
+	}
 
-					if err != nil {
-						diags := diag.FromErr(fmt.Errorf("error occured while deleting remaining volume %s of server ID %s %w", *server.Properties.BootVolume.Id, d.Id(), err))
-						return diags
-					}
-				}
-			}
+	volumes := server.Entities.Volumes.Items
+	for _, volume := range *volumes {
+		apiResponse, err := client.VolumesApi.DatacentersVolumesDelete(ctx, dcId, *volume.Id).Execute()
+		logApiRequestTime(apiResponse)
+		if err != nil {
+			diags := diag.FromErr(fmt.Errorf("error occured while deleting remaining volume %s of server ID %s %w", *volume.Id, d.Id(), err))
+			return diags
 		}
+
+		// Wait, catching any errors
+		_, errState := getStateChangeConf(meta, d, apiResponse.Header.Get("Location"), schema.TimeoutDelete).WaitForStateContext(ctx)
+		if errState != nil {
+			diags := diag.FromErr(fmt.Errorf("error getting state change for volumes delete %w", errState))
+			return diags
+		}
+
 	}
 	return nil
 }
@@ -1064,28 +1065,9 @@ func resourceServerDelete(ctx context.Context, d *schema.ResourceData, meta inte
 		return diags
 	}
 
-	if deleteVolumes, ok := d.GetOk("delete_volumes"); ok {
-		if deleteVolumes.(bool) {
-			diags := deleteAllVolumes(ctx, d, client, &server)
-			if diags != nil {
-				return diags
-			}
-		}
-	}
-
-	if server.Properties.BootVolume != nil && strings.ToLower(*server.Properties.Type) != "cube" {
-		apiResponse, err := client.VolumesApi.DatacentersVolumesDelete(ctx, dcId, *server.Properties.BootVolume.Id).Execute()
-		logApiRequestTime(apiResponse)
-
-		if err != nil {
-			diags := diag.FromErr(fmt.Errorf("error occured while delete volume %s of server ID %s %w", *server.Properties.BootVolume.Id, d.Id(), err))
-			return diags
-		}
-
-		// Wait, catching any errors
-		_, errState := getStateChangeConf(meta, d, apiResponse.Header.Get("Location"), schema.TimeoutDelete).WaitForStateContext(ctx)
-		if errState != nil {
-			diags := diag.FromErr(fmt.Errorf("error getting state change for volumes delete %w", errState))
+	if strings.ToLower(*server.Properties.Type) != "cube" {
+		diags := deleteAllVolumes(ctx, d, meta, client, &server)
+		if diags != nil {
 			return diags
 		}
 	}
