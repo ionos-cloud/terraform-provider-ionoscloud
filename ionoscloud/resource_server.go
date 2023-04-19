@@ -694,22 +694,22 @@ func SetFirewallProperties(firewall ionoscloud.FirewallRule) map[string]interfac
 	*/
 	utils.SetPropWithNilCheck(fw, "protocol", firewall.Properties.Protocol)
 	utils.SetPropWithNilCheck(fw, "name", firewall.Properties.Name)
-	if firewall.Properties.SourceMac.IsSet() {
+	if firewall.Properties.SourceMac.IsSet() && firewall.Properties.SourceMac.Get() != nil {
 		utils.SetPropWithNilCheck(fw, "source_mac", firewall.Properties.SourceMac.Get())
 	}
-	if firewall.Properties.SourceIp.IsSet() {
+	if firewall.Properties.SourceIp.IsSet() && firewall.Properties.SourceIp.Get() != nil {
 		utils.SetPropWithNilCheck(fw, "source_ip", firewall.Properties.SourceIp.Get())
 	}
-	if firewall.Properties.TargetIp.IsSet() {
-		utils.SetPropWithNilCheck(fw, "source_ip", firewall.Properties.TargetIp.Get())
+	if firewall.Properties.TargetIp.IsSet() && firewall.Properties.TargetIp.Get() != nil {
+		utils.SetPropWithNilCheck(fw, "target_ip", firewall.Properties.TargetIp.Get())
 	}
 	utils.SetPropWithNilCheck(fw, "port_range_start", firewall.Properties.PortRangeStart)
 	utils.SetPropWithNilCheck(fw, "port_range_end", firewall.Properties.PortRangeEnd)
 	utils.SetPropWithNilCheck(fw, "type", firewall.Properties.Type)
-	if firewall.Properties.IcmpType.IsSet() {
+	if firewall.Properties.IcmpType.IsSet() && firewall.Properties.IcmpType.Get() != nil {
 		fw["icmp_type"] = strconv.Itoa(int(*firewall.Properties.IcmpType.Get()))
 	}
-	if firewall.Properties.IcmpCode.IsSet() {
+	if firewall.Properties.IcmpCode.IsSet() && firewall.Properties.IcmpCode.Get() != nil {
 		fw["icmp_code"] = strconv.Itoa(int(*firewall.Properties.IcmpCode.Get()))
 	}
 	return fw

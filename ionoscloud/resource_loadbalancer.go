@@ -124,10 +124,11 @@ func resourceLoadbalancerRead(ctx context.Context, d *schema.ResourceData, meta 
 			return diags
 		}
 	}
-
-	if err := d.Set("ip", lb.Properties.Ip); err != nil {
-		diags := diag.FromErr(fmt.Errorf(""))
-		return diags
+	if lb.Properties.Ip.IsSet() && lb.Properties.Ip.Get() != nil {
+		if err := d.Set("ip", lb.Properties.Ip.Get()); err != nil {
+			diags := diag.FromErr(fmt.Errorf(""))
+			return diags
+		}
 	}
 
 	if lb.Properties.Dhcp != nil {
@@ -286,7 +287,7 @@ func resourceLoadbalancerImporter(ctx context.Context, d *schema.ResourceData, m
 		}
 	}
 
-	if loadbalancer.Properties.Ip.IsSet() {
+	if loadbalancer.Properties.Ip.IsSet() && loadbalancer.Properties.Ip.Get() != nil {
 		if err := d.Set("ip", loadbalancer.Properties.Ip.Get()); err != nil {
 			return nil, err
 		}

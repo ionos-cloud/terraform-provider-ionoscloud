@@ -342,21 +342,21 @@ func setFirewallData(d *schema.ResourceData, firewall *ionoscloud.FirewallRule) 
 		}
 	}
 
-	if firewall.Properties.SourceMac.IsSet() {
+	if firewall.Properties.SourceMac.IsSet() && firewall.Properties.SourceMac.Get() != nil {
 		err := d.Set("source_mac", *firewall.Properties.SourceMac.Get())
 		if err != nil {
 			return fmt.Errorf("error while setting source_mac property for firewall %s: %w", d.Id(), err)
 		}
 	}
 
-	if firewall.Properties.SourceIp.IsSet() {
+	if firewall.Properties.SourceIp.IsSet() && firewall.Properties.SourceIp.Get() != nil {
 		err := d.Set("source_ip", *firewall.Properties.SourceIp.Get())
 		if err != nil {
 			return fmt.Errorf("error while setting source_ip property for firewall %s: %w", d.Id(), err)
 		}
 	}
 
-	if firewall.Properties.TargetIp.IsSet() {
+	if firewall.Properties.TargetIp.IsSet() && firewall.Properties.TargetIp.Get() != nil {
 		err := d.Set("target_ip", *firewall.Properties.TargetIp.Get())
 		if err != nil {
 			return fmt.Errorf("error while setting target_ip property for firewall %s: %w", d.Id(), err)
@@ -377,14 +377,14 @@ func setFirewallData(d *schema.ResourceData, firewall *ionoscloud.FirewallRule) 
 		}
 	}
 
-	if firewall.Properties.IcmpType.IsSet() {
+	if firewall.Properties.IcmpType.IsSet() && firewall.Properties.IcmpType.Get() != nil {
 		err := d.Set("icmp_type", strconv.Itoa(int(*firewall.Properties.IcmpType.Get())))
 		if err != nil {
 			return fmt.Errorf("error while setting icmp_type property for firewall %s: %w", d.Id(), err)
 		}
 	}
 
-	if firewall.Properties.IcmpCode.IsSet() {
+	if firewall.Properties.IcmpCode.IsSet() && firewall.Properties.IcmpCode.Get() != nil {
 		err := d.Set("icmp_code", strconv.Itoa(int(*firewall.Properties.IcmpCode.Get())))
 		if err != nil {
 			return fmt.Errorf("error while setting icmp_code property for firewall %s: %w", d.Id(), err)
