@@ -243,6 +243,13 @@ const (
 	DataPlatformVersion = "22.11"
 )
 
+// DNSaaS Constants
+const (
+	DNSRecordDataSource = "ionoscloud_dns_record"
+	DNSRecordResource   = "ionoscloud_dns_record"
+	DNSZoneDataSource   = "ionoscloud_dns_zone"
+	DNSZoneResource     = "ionoscloud_dns_zone"
+)
 const (
 	ShareResource         = "ionoscloud_share"
 	shareResourceFullName = ShareResource + "." + sourceShareName
@@ -279,4 +286,5 @@ const (
 	mongoClient
 	containerRegistryClient
 	dataplatformClient
+	dnsaasClient
 )

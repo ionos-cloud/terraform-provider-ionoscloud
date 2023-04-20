@@ -18,6 +18,7 @@ import (
 	crService "github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/containerregistry"
 	dataplatformService "github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/dataplatform"
 	dbaasService "github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/dbaas"
+	dnsaasService "github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/dnsaas"
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils"
 )
 
@@ -30,6 +31,7 @@ type SdkBundle struct {
 	CertManagerClient  *cert.Client
 	ContainerClient    *crService.Client
 	DataplatformClient *dataplatformService.Client
+	DNSaaSClient       *dnsaasService.Client
 }
 
 type ClientOptions struct {
@@ -111,6 +113,8 @@ func Provider() *schema.Provider {
 			ContainerRegistryTokenResource:            resourceContainerRegistryToken(),
 			DataplatformClusterResource:               resourceDataplatformCluster(),
 			DataplatformNodePoolResource:              resourceDataplatformNodePool(),
+			DNSZoneResource:                           resourceDNSaaSZone(),
+			DNSRecordResource:                         resourceDNSaaSRecord(),
 		},
 		DataSourcesMap: map[string]*schema.Resource{
 			DatacenterResource:                        dataSourceDataCenter(),
@@ -158,6 +162,8 @@ func Provider() *schema.Provider {
 			DataplatformNodePoolResource:              dataSourceDataplatformNodePool(),
 			DataplatformNodePoolsDataSource:           dataSourceDataplatformNodePools(),
 			DataplatformVersionsDataSource:            dataSourceDataplatformVersions(),
+			DNSZoneDataSource:                         dataSourceDNSaaSZone(),
+			DNSRecordDataSource:                       dataSourceDNSaaSRecord(),
 		},
 	}
 
@@ -199,12 +205,21 @@ func providerConfigure(d *schema.ResourceData, terraformVersion string) (interfa
 	}
 
 	cleanedUrl := cleanURL(d.Get("endpoint").(string))
+
+	// Standard client configuration
 	clientOpts.Username = username.(string)
 	clientOpts.Password = password.(string)
 	clientOpts.Token = token.(string)
 	clientOpts.Url = cleanedUrl
 	clientOpts.Version = ionoscloud.Version
 	clientOpts.TerraformVersion = terraformVersion
+
+	// DNSaaS client configuration
+	dnsaasClientOpts := clientOpts
+	// TODO -- Make sure that this is in the right place / this is the right approach.
+	// Another option would be to let the user define the endpoint inside the provider configuration
+	// in the tf plan, but not sure if this is elegant.
+	dnsaasClientOpts.Url = "dns.de-fra.ionos.com"
 
 	return SdkBundle{
 		CloudApiClient:     NewClientByType(clientOpts, ionosClient).(*ionoscloud.APIClient),
@@ -213,6 +228,7 @@ func providerConfigure(d *schema.ResourceData, terraformVersion string) (interfa
 		CertManagerClient:  NewClientByType(clientOpts, certManagerClient).(*cert.Client),
 		ContainerClient:    NewClientByType(clientOpts, containerRegistryClient).(*crService.Client),
 		DataplatformClient: NewClientByType(clientOpts, dataplatformClient).(*dataplatformService.Client),
+		DNSaaSClient:       NewClientByType(dnsaasClientOpts, dnsaasClient).(*dnsaasService.Client),
 	}, nil
 }
 
@@ -242,6 +258,8 @@ func NewClientByType(clientOpts ClientOptions, clientType clientType) interface{
 		return crService.NewClient(clientOpts.Username, clientOpts.Password, clientOpts.Token, clientOpts.Url, clientOpts.Version, clientOpts.TerraformVersion)
 	case dataplatformClient:
 		return dataplatformService.NewClient(clientOpts.Username, clientOpts.Password, clientOpts.Token, clientOpts.Url, clientOpts.Version, clientOpts.TerraformVersion)
+	case dnsaasClient:
+		return dnsaasService.NewClient(clientOpts.Username, clientOpts.Password, clientOpts.Token, clientOpts.Url, clientOpts.Version, clientOpts.TerraformVersion)
 	default:
 		log.Fatalf("[ERROR] unknown client type %d", clientType)
 	}
