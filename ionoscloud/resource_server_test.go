@@ -50,6 +50,26 @@ func TestAccServerBasic(t *testing.T) {
 				ExpectError: regexp.MustCompile(`"ssh_keys": conflicts with ssh_key_path`),
 			},
 			{
+				Config: testAccCheckServerNoNic,
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttr(ServerResource+"."+ServerTestResource, "name", ServerTestResource),
+					resource.TestCheckResourceAttr(ServerResource+"."+ServerTestResource, "cores", "1"),
+					resource.TestCheckResourceAttr(ServerResource+"."+ServerTestResource, "ram", "1024"),
+					resource.TestCheckResourceAttr(ServerResource+"."+ServerTestResource, "availability_zone", "ZONE_1"),
+					resource.TestCheckResourceAttr(ServerResource+"."+ServerTestResource, "cpu_family", "AMD_OPTERON"),
+				),
+			},
+			{
+				Config: testAccCheckServerNoNicUpdate,
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttr(ServerResource+"."+ServerTestResource, "name", ServerTestResource),
+					resource.TestCheckResourceAttr(ServerResource+"."+ServerTestResource, "cores", "2"),
+					resource.TestCheckResourceAttr(ServerResource+"."+ServerTestResource, "ram", "2048"),
+					resource.TestCheckResourceAttr(ServerResource+"."+ServerTestResource, "availability_zone", "ZONE_1"),
+					resource.TestCheckResourceAttr(ServerResource+"."+ServerTestResource, "cpu_family", "AMD_OPTERON"),
+				),
+			},
+			{
 				Config: testAccCheckServerConfigEmptyNicIps,
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckServerExists(ServerResource+"."+ServerTestResource, &server),

@@ -152,7 +152,7 @@ resource "random_password" "server_image_password" {
 - `licence_type` - (Optional)[string] Sets the OS type of the server.
 - `cpu_family` - (Optional)[string] CPU architecture on which server gets provisioned; not all CPU architectures are available in all datacenter regions; available CPU architectures can be retrieved from the datacenter resource. E.g.: "AMD_OPTERON", "INTEL_XEON" or "INTEL_SKYLAKE".
 - `volume` - (Required) See the [Volume](volume.md) section.
-- `nic` - (Required) See the [Nic](nic.md) section.
+- `nic` - (Optional) See the [Nic](nic.md) section.
 - `boot_volume` - (Computed) The associated boot volume.
 - `boot_cdrom` - (Optional)[string] The associated boot drive, if any.
 - `boot_image` - (Optional)[string] The image or snapshot UUID / name. May also be an image alias. It is required if `licence_type` is not provided.

@@ -49,6 +49,78 @@ resource ` + PCCResource + ` ` + PCCTestResource + ` {
 // Server Constants
 
 const (
+	testAccCheckServerNoNic = `
+resource ` + DatacenterResource + ` ` + DatacenterTestResource + ` {
+	name       = "server-test"
+	location = "us/las"
+}
+resource "ionoscloud_ipblock" "webserver_ipblock" {
+  location = ` + DatacenterResource + `.` + DatacenterTestResource + `.location
+  size = 4
+  name = "webserver_ipblock"
+}
+resource ` + LanResource + ` ` + LanTestResource + ` {
+  datacenter_id = ` + DatacenterResource + `.` + DatacenterTestResource + `.id
+  public = true
+  name = "public"
+}
+resource ` + ServerResource + ` ` + ServerTestResource + ` {
+  name = "` + ServerTestResource + `"
+  datacenter_id = ` + DatacenterResource + `.` + DatacenterTestResource + `.id
+  cores = 1
+  ram = 1024
+  availability_zone = "ZONE_1"
+  cpu_family = "AMD_OPTERON"
+  image_name ="ubuntu:latest"
+  ssh_key_path = ["` + sshKey + `"]
+  type = "ENTERPRISE"
+  volume {
+    name = "system"
+    size = 5
+    disk_type = "SSD Standard"
+    user_data = "foo"
+    bus = "VIRTIO"
+    availability_zone = "ZONE_1"
+  }
+}`
+
+	testAccCheckServerNoNicUpdate = `
+resource ` + DatacenterResource + ` ` + DatacenterTestResource + ` {
+	name       = "server-test"
+	location = "us/las"
+}
+resource "ionoscloud_ipblock" "webserver_ipblock" {
+  location = ` + DatacenterResource + `.` + DatacenterTestResource + `.location
+  size = 4
+  name = "webserver_ipblock"
+}
+resource ` + LanResource + ` ` + LanTestResource + ` {
+  datacenter_id = ` + DatacenterResource + `.` + DatacenterTestResource + `.id
+  public = true
+  name = "public"
+}
+resource ` + ServerResource + ` ` + ServerTestResource + ` {
+  name = "` + ServerTestResource + `"
+  datacenter_id = ` + DatacenterResource + `.` + DatacenterTestResource + `.id
+  cores = 2
+  ram = 2048
+  availability_zone = "ZONE_1"
+  cpu_family = "AMD_OPTERON"
+  image_name ="ubuntu:latest"
+  ssh_key_path = ["` + sshKey + `"]
+  type = "ENTERPRISE"
+  volume {
+    name = "system"
+    size = 5
+    disk_type = "SSD Standard"
+    user_data = "foo"
+    bus = "VIRTIO"
+    availability_zone = "ZONE_1"
+  }
+}`
+)
+
+const (
 	testAccCheckServerNoPwdOrSSH = `
 resource ` + DatacenterResource + ` ` + DatacenterTestResource + ` {
 	name       = "server-test"
@@ -80,24 +152,6 @@ resource ` + ServerResource + ` ` + ServerTestResource + ` {
     user_data = "foo"
     bus = "VIRTIO"
     availability_zone = "ZONE_1"
-  }
-  nic {
-    lan = ` + LanResource + `.` + LanTestResource + `.id
-    name = "system"
-    dhcp = true
-    firewall_active = true
-	firewall_type = "BIDIRECTIONAL"
-    ips            = [ ionoscloud_ipblock.webserver_ipblock.ips[0], ionoscloud_ipblock.webserver_ipblock.ips[1] ]
-    firewall {
-      protocol = "TCP"
-      name = "SSH"
-      port_range_start = 22
-      port_range_end = 22
-	  source_mac = "00:0a:95:9d:68:17"
-	  source_ip = ionoscloud_ipblock.webserver_ipblock.ips[2]
-	  target_ip = ionoscloud_ipblock.webserver_ipblock.ips[3]
-	  type = "EGRESS"
-    }
   }
 }`
 )
@@ -137,24 +191,6 @@ resource ` + ServerResource + ` ` + ServerTestResource + ` {
     bus = "VIRTIO"
     availability_zone = "ZONE_1"
   }
-  nic {
-    lan = ` + LanResource + `.` + LanTestResource + `.id
-    name = "system"
-    dhcp = true
-    firewall_active = true
-	firewall_type = "BIDIRECTIONAL"
-    ips            = [ ionoscloud_ipblock.webserver_ipblock.ips[0], ionoscloud_ipblock.webserver_ipblock.ips[1] ]
-    firewall {
-      protocol = "TCP"
-      name = "SSH"
-      port_range_start = 22
-      port_range_end = 22
-	  source_mac = "00:0a:95:9d:68:17"
-	  source_ip = ionoscloud_ipblock.webserver_ipblock.ips[2]
-	  target_ip = ionoscloud_ipblock.webserver_ipblock.ips[3]
-	  type = "EGRESS"
-    }
-  }
 }`
 
 const testAccCheckServerSshKeysDirectly = `
@@ -189,24 +225,6 @@ resource ` + ServerResource + ` ` + ServerTestResource + ` {
     user_data = "foo"
     bus = "VIRTIO"
     availability_zone = "ZONE_1"
-  }
-  nic {
-    lan = ` + LanResource + `.` + LanTestResource + `.id
-    name = "system"
-    dhcp = true
-    firewall_active = true
-	firewall_type = "BIDIRECTIONAL"
-    ips            = [ ionoscloud_ipblock.webserver_ipblock.ips[0], ionoscloud_ipblock.webserver_ipblock.ips[1] ]
-    firewall {
-      protocol = "TCP"
-      name = "SSH"
-      port_range_start = 22
-      port_range_end = 22
-	  source_mac = "00:0a:95:9d:68:17"
-	  source_ip = ionoscloud_ipblock.webserver_ipblock.ips[2]
-	  target_ip = ionoscloud_ipblock.webserver_ipblock.ips[3]
-	  type = "EGRESS"
-    }
   }
 }`
 
@@ -243,24 +261,6 @@ resource ` + ServerResource + ` ` + ServerTestResource + ` {
     user_data = "foo"
     bus = "VIRTIO"
     availability_zone = "ZONE_1"
-  }
-  nic {
-    lan = ` + LanResource + `.` + LanTestResource + `.id
-    name = "system"
-    dhcp = true
-    firewall_active = true
-	firewall_type = "BIDIRECTIONAL"
-    ips            = [ ionoscloud_ipblock.webserver_ipblock.ips[0], ionoscloud_ipblock.webserver_ipblock.ips[1] ]
-    firewall {
-      protocol = "TCP"
-      name = "SSH"
-      port_range_start = 22
-      port_range_end = 22
-	  source_mac = "00:0a:95:9d:68:17"
-	  source_ip = ionoscloud_ipblock.webserver_ipblock.ips[2]
-	  target_ip = ionoscloud_ipblock.webserver_ipblock.ips[3]
-	  type = "EGRESS"
-    }
   }
 }`
 
