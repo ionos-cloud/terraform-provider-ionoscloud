@@ -571,35 +571,39 @@ func testAccCheckServerAndVolumesDestroyed(dcName string) resource.TestCheckFunc
 		client := testAccProvider.Meta().(SdkBundle).CloudApiClient
 
 		ctx, cancel := context.WithTimeout(context.Background(), *resourceDefaultTimeouts.Default)
-		if cancel != nil {
-			defer cancel()
-		}
+		defer cancel()
 
-		rs, ok := s.RootModule().Resources[dcName]
+		datacenterResourceState, ok := s.RootModule().Resources[dcName]
 		if !ok {
-			return fmt.Errorf("can not get server resource with id: %s", rs.Primary.ID)
+			return fmt.Errorf("can not get data center resource named: %s", dcName)
 		}
 
-		dcId := rs.Primary.ID
+		dcId := datacenterResourceState.Primary.ID
 
-		_, apiResponse, err := client.ServersApi.DatacentersServersFindById(ctx, dcId, rs.Primary.ID).Execute()
+		// Since we are creating only ONE server in the data center, we can use
+		// DatacentersServersGet to check if the server was deleted properly.
+		servers, apiResponse, err := client.ServersApi.DatacentersServersGet(ctx, dcId).Execute()
 		logApiRequestTime(apiResponse)
-
-		if err != nil {
-			if !httpNotFound(apiResponse) {
-				return fmt.Errorf("unable to fetch server %s: %w", rs.Primary.ID, err)
+		if err == nil {
+			if serverItems, ok := servers.GetItemsOk(); ok {
+				if len(*serverItems) > 0 {
+					return fmt.Errorf("server still exists for data center with ID: %s", dcId)
+				}
 			}
 		} else {
-			return fmt.Errorf("server still exists %s", rs.Primary.ID)
-
+			return err
 		}
 
 		volumes, apiResponse, err := client.VolumesApi.DatacentersVolumesGet(ctx, dcId).Execute()
 		logApiRequestTime(apiResponse)
-		if volItems, ok := volumes.GetItemsOk(); ok {
-			if len(*volItems) > 0 {
-				return fmt.Errorf("volumes still exists for datacener %s", dcId)
+		if err == nil {
+			if volItems, ok := volumes.GetItemsOk(); ok {
+				if len(*volItems) > 0 {
+					return fmt.Errorf("volumes still exists for data center with ID: %s", dcId)
+				}
 			}
+		} else {
+			return err
 		}
 		return nil
 	}
