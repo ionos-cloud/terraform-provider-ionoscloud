@@ -216,6 +216,52 @@ func TestAccServerBasic(t *testing.T) {
 	})
 }
 
+// issue #379
+func TestAccServerNoBootVolumeBasic(t *testing.T) {
+	var server ionoscloud.Server
+
+	resource.Test(t, resource.TestCase{
+		PreCheck: func() {
+			testAccPreCheck(t)
+		},
+		ExternalProviders: randomProviderVersion343(),
+		ProviderFactories: testAccProviderFactories,
+		CheckDestroy:      testAccCheckServerDestroyCheck,
+		Steps: []resource.TestStep{
+			{
+				Config: testAccCheckServerConfigNoBootVolume,
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckServerExists(ServerResource+"."+ServerTestResource, &server),
+					resource.TestCheckResourceAttr(ServerResource+"."+ServerTestResource, "name", ServerTestResource),
+					resource.TestCheckResourceAttr(ServerResource+"."+ServerTestResource, "cores", "2"),
+					resource.TestCheckResourceAttr(ServerResource+"."+ServerTestResource, "ram", "2048"),
+					resource.TestCheckResourceAttr(ServerResource+"."+ServerTestResource, "availability_zone", "ZONE_1"),
+					resource.TestCheckResourceAttr(ServerResource+"."+ServerTestResource, "cpu_family", "AMD_OPTERON"),
+					resource.TestCheckResourceAttr(ServerResource+"."+ServerTestResource, "type", "ENTERPRISE"),
+					resource.TestCheckResourceAttr(ServerResource+"."+ServerTestResource, "volume.0.name", "system"),
+					resource.TestCheckResourceAttr(ServerResource+"."+ServerTestResource, "volume.0.size", "6"),
+					resource.TestCheckResourceAttr(ServerResource+"."+ServerTestResource, "volume.0.disk_type", "SSD Standard"),
+					resource.TestCheckResourceAttr(ServerResource+"."+ServerTestResource, "volume.0.bus", "VIRTIO"),
+					resource.TestCheckResourceAttr(ServerResource+"."+ServerTestResource, "volume.0.availability_zone", "AUTO"),
+					resource.TestCheckResourceAttr(ServerResource+"."+ServerTestResource, "volume.0.licence_type", "UNKNOWN"),
+					resource.TestCheckResourceAttrPair(ServerResource+"."+ServerTestResource, "nic.0.lan", LanResource+"."+LanTestResource, "id"),
+					resource.TestCheckResourceAttr(ServerResource+"."+ServerTestResource, "nic.0.name", "system"),
+					resource.TestCheckResourceAttr(ServerResource+"."+ServerTestResource, "nic.0.dhcp", "true"),
+					resource.TestCheckResourceAttr(ServerResource+"."+ServerTestResource, "nic.0.firewall_active", "true"),
+					resource.TestCheckResourceAttrPair(ServerResource+"."+ServerTestResource, "nic.0.id", ServerResource+"."+ServerTestResource, "primary_nic"),
+					resource.TestCheckResourceAttr(ServerResource+"."+ServerTestResource, "nic.0.firewall_type", "INGRESS"),
+				),
+			},
+			{
+				Config: testAccCheckServerConfigNoBootVolumeRemoveServer,
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckServerAndVolumesDestroyed(DatacenterResource + "." + DatacenterTestResource),
+				),
+			},
+		},
+	})
+}
+
 func TestAccServerBootCdromNoImage(t *testing.T) {
 	var server ionoscloud.Server
 
@@ -520,14 +566,57 @@ func testAccCheckServerDestroyCheck(s *terraform.State) error {
 	return nil
 }
 
-func testAccCheckServerExists(n string, server *ionoscloud.Server) resource.TestCheckFunc {
+func testAccCheckServerAndVolumesDestroyed(dcName string) resource.TestCheckFunc {
 	return func(s *terraform.State) error {
 		client := testAccProvider.Meta().(SdkBundle).CloudApiClient
 
-		rs, ok := s.RootModule().Resources[n]
+		ctx, cancel := context.WithTimeout(context.Background(), *resourceDefaultTimeouts.Default)
+		defer cancel()
+
+		datacenterResourceState, ok := s.RootModule().Resources[dcName]
+		if !ok {
+			return fmt.Errorf("can not get data center resource named: %s", dcName)
+		}
+
+		dcId := datacenterResourceState.Primary.ID
+
+		// Since we are creating only ONE server in the data center, we can use
+		// DatacentersServersGet to check if the server was deleted properly.
+		servers, apiResponse, err := client.ServersApi.DatacentersServersGet(ctx, dcId).Execute()
+		logApiRequestTime(apiResponse)
+		if err == nil {
+			if serverItems, ok := servers.GetItemsOk(); ok {
+				if len(*serverItems) > 0 {
+					return fmt.Errorf("server still exists for data center with ID: %s", dcId)
+				}
+			}
+		} else {
+			return err
+		}
+
+		volumes, apiResponse, err := client.VolumesApi.DatacentersVolumesGet(ctx, dcId).Execute()
+		logApiRequestTime(apiResponse)
+		if err == nil {
+			if volItems, ok := volumes.GetItemsOk(); ok {
+				if len(*volItems) > 0 {
+					return fmt.Errorf("volumes still exists for data center with ID: %s", dcId)
+				}
+			}
+		} else {
+			return err
+		}
+		return nil
+	}
+}
+
+func testAccCheckServerExists(serverName string, server *ionoscloud.Server) resource.TestCheckFunc {
+	return func(s *terraform.State) error {
+		client := testAccProvider.Meta().(SdkBundle).CloudApiClient
+
+		rs, ok := s.RootModule().Resources[serverName]
 
 		if !ok {
-			return fmt.Errorf("testAccCheckServerExists: Not found: %s", n)
+			return fmt.Errorf("testAccCheckServerExists: Not found: %s", serverName)
 		}
 
 		if rs.Primary.ID == "" {
@@ -1045,3 +1134,59 @@ resource ` + ServerResource + ` ` + ServerTestResource + ` {
     firewall_active = false
   }
 }`
+
+const testAccCheckServerConfigNoBootVolume = `
+resource ` + DatacenterResource + ` ` + DatacenterTestResource + ` {
+	name       = "server-test"
+	location = "us/las"
+}
+
+resource ` + LanResource + ` ` + LanTestResource + ` {
+  datacenter_id = ` + DatacenterResource + `.` + DatacenterTestResource + `.id
+  public = true
+  name = "public"
+}
+
+resource ` + ServerResource + ` ` + ServerTestResource + ` {
+  name = "` + ServerTestResource + `"
+  datacenter_id = ` + DatacenterResource + `.` + DatacenterTestResource + `.id
+  cores = 2
+  ram = 2048
+  availability_zone = "ZONE_1"
+  cpu_family = "AMD_OPTERON"
+  type = "ENTERPRISE"
+  
+  volume {
+    name = "system"
+    size = 6
+    licence_type = "UNKNOWN"
+    disk_type = "SSD Standard"
+    bus = "VIRTIO"
+    availability_zone = "AUTO"
+  }
+  nic {
+    lan = ` + LanResource + `.` + LanTestResource + `.id
+    name = "system"
+    dhcp = true
+    firewall_active = true
+	firewall_type = "INGRESS"
+  }
+}
+
+resource "ionoscloud_volume" "exampleVol1" {
+  datacenter_id           = ` + DatacenterResource + `.` + DatacenterTestResource + `.id
+  server_id               = ` + ServerResource + `.` + ServerTestResource + `.id
+  name                    = "Another Volume Example"
+  availability_zone       = "ZONE_1"
+  size                    = 5
+  disk_type               = "SSD Standard"
+  bus                     = "VIRTIO"
+  licence_type            = "OTHER"
+}
+`
+const testAccCheckServerConfigNoBootVolumeRemoveServer = `
+resource ` + DatacenterResource + ` ` + DatacenterTestResource + ` {
+	name       = "server-test"
+	location = "us/las"
+}
+`
