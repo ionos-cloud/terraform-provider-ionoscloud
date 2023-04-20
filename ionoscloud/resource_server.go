@@ -1057,6 +1057,7 @@ func resourceServerDelete(ctx context.Context, d *schema.ResourceData, meta inte
 	client := meta.(SdkBundle).CloudApiClient
 	dcId := d.Get("datacenter_id").(string)
 
+	// A bigger depth is required since we need all volumes items.
 	server, apiResponse, err := client.ServersApi.DatacentersServersFindById(ctx, dcId, d.Id()).Depth(2).Execute()
 	logApiRequestTime(apiResponse)
 
