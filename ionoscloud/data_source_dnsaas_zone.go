@@ -46,6 +46,7 @@ func dataSourceZoneRead(ctx context.Context, d *schema.ResourceData, meta interf
 	client := meta.(SdkBundle).DNSaaSClient
 	idValue, idOk := d.GetOk("id")
 	nameValue, nameOk := d.GetOk("name")
+	partialMatch := d.Get("partial_match").(bool)
 
 	id := idValue.(string)
 	name := nameValue.(string)
@@ -55,6 +56,9 @@ func dataSourceZoneRead(ctx context.Context, d *schema.ResourceData, meta interf
 	}
 	if !idOk && !nameOk {
 		return diag.FromErr(fmt.Errorf("please provide either the DNS Zone ID or name"))
+	}
+	if partialMatch && !nameOk {
+		return diag.FromErr(fmt.Errorf("partial_match can only be used together with the name attribute"))
 	}
 
 	var zone dnsaas.ZoneResponse
@@ -67,7 +71,6 @@ func dataSourceZoneRead(ctx context.Context, d *schema.ResourceData, meta interf
 		}
 	} else {
 		var results []dnsaas.ZoneResponse
-		partialMatch := d.Get("partial_match").(bool)
 		log.Printf("[INFO] Populating data source for DNS Zone using name %s and partial_match %t", name, partialMatch)
 
 		if partialMatch {

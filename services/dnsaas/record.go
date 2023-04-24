@@ -55,6 +55,10 @@ func (c *Client) SetRecordData(d *schema.ResourceData, record dnsaas.RecordRespo
 		d.SetId(*record.Id)
 	}
 
+	if record.Properties == nil {
+		return fmt.Errorf("expected properties in the record response for the record with ID: %s, but received 'nil' instead", *record.Id)
+	}
+
 	if record.Properties.Name != nil {
 		if err := d.Set("name", *record.Properties.Name); err != nil {
 			return utils.GenerateSetError(recordResourceName, "name", err)

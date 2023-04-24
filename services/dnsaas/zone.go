@@ -57,6 +57,10 @@ func (c *Client) SetZoneData(d *schema.ResourceData, zone dnsaas.ZoneResponse) e
 		d.SetId(*zone.Id)
 	}
 
+	if zone.Properties == nil {
+		return fmt.Errorf("expected properties in the zone response for the zone with ID: %s, but received 'nil' instead", *zone.Id)
+	}
+
 	if zone.Properties.ZoneName != nil {
 		if err := d.Set("name", *zone.Properties.ZoneName); err != nil {
 			return utils.GenerateSetError(zoneResourceName, "name", err)

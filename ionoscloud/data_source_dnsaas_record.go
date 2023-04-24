@@ -58,6 +58,7 @@ func dataSourceDNSaaSRecord() *schema.Resource {
 
 func dataSourceRecordRead(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	client := meta.(SdkBundle).DNSaaSClient
+	partialMatch := d.Get("partial_match").(bool)
 	zoneId := d.Get("zone_id").(string)
 	idValue, idOk := d.GetOk("id")
 	nameValue, nameOk := d.GetOk("name")
@@ -70,6 +71,9 @@ func dataSourceRecordRead(ctx context.Context, d *schema.ResourceData, meta inte
 	if !idOk && !nameOk {
 		return diag.FromErr(fmt.Errorf("please provide either the DNS Record ID or name"))
 	}
+	if partialMatch && !nameOk {
+		return diag.FromErr(fmt.Errorf("partial_match can only be used together with the name attribute"))
+	}
 
 	var record dnsaas.RecordResponse
 	var err error
@@ -81,7 +85,6 @@ func dataSourceRecordRead(ctx context.Context, d *schema.ResourceData, meta inte
 		}
 	} else {
 		var results []dnsaas.RecordResponse
-		partialMatch := d.Get("partial_match").(bool)
 		log.Printf("[INFO] Populating data source for DNS Record using name: %s and partial_match: %t", recordName, partialMatch)
 		if partialMatch {
 			// By default, when providing the name as a filter, for the GET requests, partial match
