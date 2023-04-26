@@ -116,7 +116,7 @@ func setZoneCreateRequest(d *schema.ResourceData) *dnsaas.ZoneCreateRequest {
 		request.Properties.Description = &description
 	}
 
-	if enabledValue, ok := d.GetOk("enabled"); ok {
+	if enabledValue, ok := d.GetOkExists("enabled"); ok {
 		enabled := enabledValue.(bool)
 		request.Properties.Enabled = &enabled
 	}
@@ -138,7 +138,7 @@ func setZonePutRequest(d *schema.ResourceData) *dnsaas.ZoneUpdateRequest {
 		request.Properties.Description = &description
 	}
 
-	if enabledValue, ok := d.GetOk("enabled"); ok {
+	if enabledValue, ok := d.GetOkExists("enabled"); ok {
 		enabled := enabledValue.(bool)
 		request.Properties.Enabled = &enabled
 	}

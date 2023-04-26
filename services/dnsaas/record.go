@@ -146,7 +146,7 @@ func setRecordPutRequest(d *schema.ResourceData) *dnsaas.RecordUpdateRequest {
 		request.Properties.Priority = &castedPriority
 	}
 
-	if enabledValue, ok := d.GetOk("enabled"); ok {
+	if enabledValue, ok := d.GetOkExists("enabled"); ok {
 		enabled := enabledValue.(bool)
 		request.Properties.Enabled = &enabled
 	}
@@ -186,7 +186,7 @@ func setRecordCreateRequest(d *schema.ResourceData) *dnsaas.RecordCreateRequest 
 		request.Properties.Priority = &castedPriority
 	}
 
-	if enabledValue, ok := d.GetOk("enabled"); ok {
+	if enabledValue, ok := d.GetOkExists("enabled"); ok {
 		enabled := enabledValue.(bool)
 		request.Properties.Enabled = &enabled
 	}
