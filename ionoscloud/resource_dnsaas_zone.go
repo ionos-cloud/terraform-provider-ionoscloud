@@ -30,7 +30,6 @@ func resourceDNSaaSZone() *schema.Resource {
 			"enabled": {
 				Type:     schema.TypeBool,
 				Optional: true,
-				Default:  true,
 			},
 		},
 		Timeouts: &resourceDefaultTimeouts,

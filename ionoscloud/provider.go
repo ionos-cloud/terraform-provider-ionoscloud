@@ -214,13 +214,6 @@ func providerConfigure(d *schema.ResourceData, terraformVersion string) (interfa
 	clientOpts.Version = ionoscloud.Version
 	clientOpts.TerraformVersion = terraformVersion
 
-	// DNSaaS client configuration
-	dnsaasClientOpts := clientOpts
-	// TODO -- Make sure that this is in the right place / this is the right approach.
-	// Another option would be to let the user define the endpoint inside the provider configuration
-	// in the tf plan, but not sure if this is elegant.
-	dnsaasClientOpts.Url = "dns.de-fra.ionos.com"
-
 	return SdkBundle{
 		CloudApiClient:     NewClientByType(clientOpts, ionosClient).(*ionoscloud.APIClient),
 		PsqlClient:         NewClientByType(clientOpts, psqlClient).(*dbaasService.PsqlClient),
@@ -228,7 +221,7 @@ func providerConfigure(d *schema.ResourceData, terraformVersion string) (interfa
 		CertManagerClient:  NewClientByType(clientOpts, certManagerClient).(*cert.Client),
 		ContainerClient:    NewClientByType(clientOpts, containerRegistryClient).(*crService.Client),
 		DataplatformClient: NewClientByType(clientOpts, dataplatformClient).(*dataplatformService.Client),
-		DNSaaSClient:       NewClientByType(dnsaasClientOpts, dnsaasClient).(*dnsaasService.Client),
+		DNSaaSClient:       NewClientByType(clientOpts, dnsaasClient).(*dnsaasService.Client),
 	}, nil
 }
 
