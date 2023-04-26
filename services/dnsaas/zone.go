@@ -61,6 +61,10 @@ func (c *Client) SetZoneData(d *schema.ResourceData, zone dnsaas.ZoneResponse) e
 		return fmt.Errorf("expected properties in the zone response for the zone with ID: %s, but received 'nil' instead", *zone.Id)
 	}
 
+	if zone.Metadata == nil {
+		return fmt.Errorf("expected metadata in the response for the zone with ID: %s, but received 'nil' instead", *zone.Id)
+	}
+
 	if zone.Properties.ZoneName != nil {
 		if err := d.Set("name", *zone.Properties.ZoneName); err != nil {
 			return utils.GenerateSetError(zoneResourceName, "name", err)
@@ -76,6 +80,12 @@ func (c *Client) SetZoneData(d *schema.ResourceData, zone dnsaas.ZoneResponse) e
 	if zone.Properties.Enabled != nil {
 		if err := d.Set("enabled", *zone.Properties.Enabled); err != nil {
 			return utils.GenerateSetError(zoneResourceName, "enabled", err)
+		}
+	}
+
+	if zone.Metadata.Nameservers != nil {
+		if err := d.Set("nameservers", *zone.Metadata.Nameservers); err != nil {
+			return utils.GenerateSetError(zoneResourceName, "nameservers", err)
 		}
 	}
 

@@ -38,6 +38,14 @@ func dataSourceDNSaaSZone() *schema.Resource {
 				Type:     schema.TypeBool,
 				Computed: true,
 			},
+			"nameservers": {
+				Type:        schema.TypeList,
+				Description: "A list of available name servers.",
+				Computed:    true,
+				Elem: &schema.Schema{
+					Type: schema.TypeString,
+				},
+			},
 		},
 	}
 }
