@@ -7,6 +7,7 @@ import (
 	"log"
 	"net"
 	"net/http"
+	"strconv"
 	"strings"
 	"time"
 )
@@ -29,24 +30,33 @@ func responseBody(resp *ionoscloud.APIResponse) string {
 }
 
 // DiffBasedOnVersion used for k8 node pool and cluster
+// ignores downgrades of the patch versions.
 func DiffBasedOnVersion(_, old, new string, _ *schema.ResourceData) bool {
 	var oldMajor, oldMinor string
 	var newMajor, newMinor string
+	var oldPatchInt, newPatchInt int
 	if old != "" {
 		oldSplit := strings.Split(old, ".")
-		if len(oldSplit) > 1 {
+		if len(oldSplit) > 2 {
 			oldMajor = oldSplit[0]
 			oldMinor = oldSplit[1]
+			oldPatchInt, _ = strconv.Atoi(oldSplit[2])
 		}
 
 		newSplit := strings.Split(new, ".")
-		if len(newSplit) > 1 {
+		if len(newSplit) > 2 {
 			newMajor = newSplit[0]
 			newMinor = newSplit[1]
+			newPatchInt, _ = strconv.Atoi(newSplit[2])
 		}
 
 		if oldMajor == newMajor && oldMinor == newMinor {
-			return true
+			//this is a downgrade of the patch version that we will ignore
+			// it may happen either manually, or after a maintenance window
+			if oldPatchInt > newPatchInt {
+				log.Printf("[WARN] Downgrade is not supported on k8s from %d to %d", oldPatchInt, newPatchInt)
+				return true
+			}
 		}
 	}
 	return false
