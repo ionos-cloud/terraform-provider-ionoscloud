@@ -3,6 +3,8 @@
 - Update `sdk-go-dbaas-mongo` to [v1.0.6](https://github.com/ionos-cloud/sdk-go-dbaas-mongo/releases/tag/v1.2.2)
 ## Fixes
 - Update code to work with new mongo version
+- Ignore downgrades of `k8s_version` patch level.
+- Allow upgrades of `k8s_version` patch level.
 
 ## 6.3.6
 ### Feature
