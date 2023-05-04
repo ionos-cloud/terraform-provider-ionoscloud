@@ -57,3 +57,4 @@ The following attributes are returned by the datasource:
 * `name` - The name of the DNS Zone.
 * `description` - The description of the DNS Zone.
 * `enabled` - Indicates if the DNS Zone is activated or not.
+* `nameservers` - A list of available name servers.

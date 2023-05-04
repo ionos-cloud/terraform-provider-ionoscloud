@@ -35,6 +35,7 @@ func resourceDNSaaSRecord() *schema.Resource {
 			"ttl": {
 				Type:     schema.TypeInt,
 				Optional: true,
+				Computed: true,
 			},
 			"priority": {
 				Type:     schema.TypeInt,
@@ -43,6 +44,7 @@ func resourceDNSaaSRecord() *schema.Resource {
 			"enabled": {
 				Type:     schema.TypeBool,
 				Optional: true,
+				Computed: true,
 			},
 			"zone_id": {
 				Type: schema.TypeString,

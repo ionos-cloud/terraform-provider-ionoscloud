@@ -30,6 +30,7 @@ func resourceDNSaaSZone() *schema.Resource {
 			"enabled": {
 				Type:     schema.TypeBool,
 				Optional: true,
+				Computed: true,
 			},
 			"nameservers": {
 				Type:        schema.TypeList,
@@ -88,7 +89,7 @@ func zoneUpdate(ctx context.Context, d *schema.ResourceData, meta interface{}) d
 
 	_, err := client.UpdateZone(ctx, zoneId, d)
 	if err != nil {
-		return diag.FromErr(fmt.Errorf("an error occured while updating the DNS Zone with ID: %s, error: %w", err))
+		return diag.FromErr(fmt.Errorf("an error occured while updating the DNS Zone with ID: %s, error: %w", zoneId, err))
 	}
 
 	err = utils.WaitForResourceToBeReady(ctx, d, client.IsZoneCreated)

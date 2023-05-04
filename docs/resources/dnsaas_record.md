@@ -40,9 +40,9 @@ resource "ionoscloud_dns_record" "recordexample" {
 * `name` - (Required)[string] The name of the DNS Record.
 * `type` - (Required)[string] The type of the DNS Record, can have one of these values: `A, AAAA, CNAME, ALIAS, MX, NS, SRV, TXT, CAA, SSHFP, TLSA, SMIMEA, DS, HTTPS, SVCB, OPENPGPKEY, CERT, URI, RP, LOC`
 * `content` - (Required)[string] The content of the DNS Record.
-* `ttl` - (Optional)[int] Time to live for the DNS Record.
+* `ttl` - (Optional)[int] Time to live for the DNS Record. Default is `3600`.
 * `priority` - (Optional)[int] The priority for the DNS Record.
-* `enabled` - (Optional)[bool] Indicates if the DNS Record is active or not.
+* `enabled` - (Optional)[bool] Indicates if the DNS Record is active or not. Default is `true`.
 * `zone_id` - (Required)[string] The DNS Zone ID in which the DNS Record will be created.
 
 ## Import

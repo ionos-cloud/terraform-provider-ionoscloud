@@ -29,7 +29,7 @@ resource "ionoscloud_dns_zone" "example" {
 
 * `name` - (Required)[string] The name of the DNS Zone.
 * `description` - (Optional)[string] The description for the DNS Zone.
-* `enabled` - (Optional)[bool] Indicates if the DNS Zone is active or not.
+* `enabled` - (Optional)[bool] Indicates if the DNS Zone is active or not. Default is `true`.
 
 ## Import
 
