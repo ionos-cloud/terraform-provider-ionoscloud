@@ -4,6 +4,8 @@
 ## Fixes
 - Log levels need to be shown and filtered correctly when set with `TF_LOG`. Also change `WARNING` log levels to `WARN`.
 - Update code to work with new mongo version
+- Ignore downgrades of `k8s_version` patch level.
+- Allow upgrades of `k8s_version` patch level.
 
 ## 6.3.6
 ### Feature
