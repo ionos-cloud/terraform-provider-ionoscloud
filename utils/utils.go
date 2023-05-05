@@ -6,6 +6,8 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
+	"github.com/iancoleman/strcase"
+	"github.com/mitchellh/mapstructure"
 	"log"
 	"net"
 	"net/http"
@@ -267,4 +269,98 @@ func WaitForResourceToBeDeleted(ctx context.Context, d *schema.ResourceData, fn 
 		return resource.RetryableError(fmt.Errorf("resource with id %s found, still trying ", d.Id()))
 	})
 	return err
+}
+
+func DifferenceSlices[T comparable](a []T, b []T) []T {
+	set := make([]T, 0)
+	for _, v := range a {
+		if !Contains(b, v) {
+			set = append(set, v)
+		}
+	}
+	return set
+}
+
+// IntersectSlices has complexity: O(n^2)
+func IntersectSlices[T comparable](a []T, b []T) []T {
+	set := make([]T, 0)
+	for _, v := range a {
+		if Contains(b, v) {
+			set = append(set, v)
+		}
+	}
+	return set
+}
+
+func ToAnyList[T any](input []T) []any {
+	list := make([]any, len(input))
+	for i, v := range input {
+		list[i] = v
+	}
+	return list
+}
+
+func DeleteFromSlice[T comparable](collection []T, el T) []T {
+	idx := FindIndex(collection, el)
+	if idx > -1 {
+		return append(collection[:idx], collection[idx+1:]...)
+	}
+	return collection
+}
+
+func FindIndex[T comparable](collection []T, el T) int {
+	for i := range collection {
+		if reflect.DeepEqual(collection[i], el) {
+			return i
+		}
+	}
+	return -1
+}
+
+func Contains[T comparable](b []T, e T) bool {
+	for _, v := range b {
+		if reflect.DeepEqual(e, v) {
+			return true
+		}
+	}
+	return false
+}
+
+// DecodeInterfaceToStruct can decode from interface{}, or from []interface
+// will turn "" into nil values
+// takes snake_case fields and decodes them into camelcase fields of struct
+// used to decode values from TypeList and TypeSet of schema(`d`) directly into sdk structs
+func DecodeInterfaceToStruct(input, output interface{}) error {
+	config := mapstructure.DecoderConfig{
+		DecodeHook:       PointerEmptyToNil(),
+		ErrorUnused:      false,
+		ErrorUnset:       false,
+		ZeroFields:       false,
+		WeaklyTypedInput: false,
+		MatchName:        IsSnakeEqualToCamelCase,
+		Result:           &output,
+	}
+	customDecoder, err := mapstructure.NewDecoder(&config)
+	if err != nil {
+		return err
+	}
+	log.Printf("[DEBUG] rawdata to decode %s \n", input)
+	err = customDecoder.Decode(input)
+	if err != nil {
+		return err
+	}
+	return err
+}
+
+func IsSnakeEqualToCamelCase(a, b string) bool {
+	return strings.EqualFold(strcase.ToCamel(a), b)
+}
+
+func PointerEmptyToNil() mapstructure.DecodeHookFuncType {
+	return func(f reflect.Type, t reflect.Type, data interface{}) (interface{}, error) {
+		if f.Kind() == reflect.String && data == "" {
+			return nil, nil
+		}
+		return data, nil
+	}
 }
