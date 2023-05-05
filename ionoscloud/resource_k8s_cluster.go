@@ -33,7 +33,7 @@ func resourcek8sCluster() *schema.Resource {
 			},
 			"k8s_version": {
 				Type:             schema.TypeString,
-				Description:      "The desired Kubernetes Version. For supported values, please check the API documentation. Downgrades are not supported. Downgrades are not supported. The provider will ignore downgrades of patch level.",
+				Description:      "The desired Kubernetes Version. For supported values, please check the API documentation. Downgrades are not supported. The provider will ignore downgrades of patch level.",
 				Optional:         true,
 				Computed:         true,
 				DiffSuppressFunc: DiffBasedOnVersion,
