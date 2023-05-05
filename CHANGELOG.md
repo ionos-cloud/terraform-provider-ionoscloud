@@ -2,6 +2,7 @@
 ### Dependency update
 - Update `sdk-go-dbaas-mongo` to [v1.0.6](https://github.com/ionos-cloud/sdk-go-dbaas-mongo/releases/tag/v1.2.2)
 ## Fixes
+- Log levels need to be shown and filtered correctly when set with `TF_LOG`. Also change `WARNING` log levels to `WARN`.
 - Update code to work with new mongo version
 
 ## 6.3.6
