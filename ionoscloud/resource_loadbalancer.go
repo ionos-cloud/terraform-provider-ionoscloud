@@ -189,7 +189,7 @@ func resourceLoadbalancerUpdate(ctx context.Context, d *schema.ResourceData, met
 				if httpNotFound(apiResponse) {
 					/* 404 - nic was not found - in case the nic is removed, VDC removes the nic from load balancers
 					that contain it, behind the scenes - therefore our call will yield 404 */
-					log.Printf("[WARNING] nic ID %s already removed from load balancer %s\n", o.(string), d.Id())
+					log.Printf("[WARN] nic ID %s already removed from load balancer %s\n", o.(string), d.Id())
 				} else {
 					diags := diag.FromErr(fmt.Errorf("[load balancer update] an error occured while deleting a balanced nic: %w", err))
 					return diags

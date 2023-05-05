@@ -101,7 +101,7 @@ func dataSourceDbassMongoTemplateRead(ctx context.Context, d *schema.ResourceDat
 // matchesName checks if a template has a specific name. allows for partial matching if partialMatch is true
 func matchesName(template mongo.TemplateResponse, name string, partialMatch bool) bool {
 	if template.Properties == nil || template.Properties.Name == nil {
-		log.Printf("[WARNING] template %s missing properties, or name", *template.Id)
+		log.Printf("[WARN] template %s missing properties, or name", *template.Id)
 		return false
 	}
 
