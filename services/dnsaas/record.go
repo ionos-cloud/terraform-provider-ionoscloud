@@ -59,6 +59,10 @@ func (c *Client) SetRecordData(d *schema.ResourceData, record dnsaas.RecordRespo
 		return fmt.Errorf("expected properties in the record response for the record with ID: %s, but received 'nil' instead", *record.Id)
 	}
 
+	if record.Metadata == nil {
+		return fmt.Errorf("expected metadata in the response for the record with ID: %s, but received 'nil' instead", *record.Id)
+	}
+
 	if record.Properties.Name != nil {
 		if err := d.Set("name", *record.Properties.Name); err != nil {
 			return utils.GenerateSetError(recordResourceName, "name", err)
@@ -89,6 +93,12 @@ func (c *Client) SetRecordData(d *schema.ResourceData, record dnsaas.RecordRespo
 		}
 	}
 
+	if record.Metadata.Fqdn != nil {
+		if err := d.Set("fqdn", *record.Metadata.Fqdn); err != nil {
+			return utils.GenerateSetError(recordResourceName, "fqdn", err)
+		}
+	}
+
 	return nil
 }
 
@@ -106,11 +116,11 @@ func (c *Client) IsRecordDeleted(ctx context.Context, d *schema.ResourceData) (b
 	return apiResponse.HttpNotFound(), err
 }
 
-func (c *Client) UpdateRecord(ctx context.Context, zoneId, recordId string, d *schema.ResourceData) (utils.ApiResponseInfo, error) {
+func (c *Client) UpdateRecord(ctx context.Context, zoneId, recordId string, d *schema.ResourceData) (dnsaas.RecordResponse, utils.ApiResponseInfo, error) {
 	request := setRecordPutRequest(d)
-	_, apiResponse, err := c.sdkClient.RecordsApi.ZonesRecordsPut(ctx, zoneId, recordId).RecordUpdateRequest(*request).Execute()
+	recordResponse, apiResponse, err := c.sdkClient.RecordsApi.ZonesRecordsPut(ctx, zoneId, recordId).RecordUpdateRequest(*request).Execute()
 	apiResponse.LogInfo()
-	return apiResponse, err
+	return recordResponse, apiResponse, err
 }
 
 func setRecordPutRequest(d *schema.ResourceData) *dnsaas.RecordUpdateRequest {

@@ -51,6 +51,11 @@ func dataSourceDNSaaSRecord() *schema.Resource {
 				Type:     schema.TypeBool,
 				Computed: true,
 			},
+			"fqdn": {
+				Type:        schema.TypeString,
+				Description: "Fully qualified domain name",
+				Computed:    true,
+			},
 		},
 		Timeouts: &resourceDefaultTimeouts,
 	}

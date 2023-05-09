@@ -12,14 +12,11 @@ import (
 
 var zoneResourceName = "DNS Zone"
 
-func (c *Client) CreateZone(ctx context.Context, d *schema.ResourceData) (id string, responseInfo utils.ApiResponseInfo, err error) {
+func (c *Client) CreateZone(ctx context.Context, d *schema.ResourceData) (zoneResponse dnsaas.ZoneResponse, responseInfo utils.ApiResponseInfo, err error) {
 	request := setZoneCreateRequest(d)
 	responseData, apiResponse, err := c.sdkClient.ZonesApi.ZonesPost(ctx).ZoneCreateRequest(*request).Execute()
 	apiResponse.LogInfo()
-	if err != nil {
-		return "", apiResponse, err
-	}
-	return *responseData.Id, apiResponse, err
+	return responseData, apiResponse, err
 }
 
 func (c *Client) IsZoneCreated(ctx context.Context, d *schema.ResourceData) (bool, error) {
@@ -92,11 +89,11 @@ func (c *Client) SetZoneData(d *schema.ResourceData, zone dnsaas.ZoneResponse) e
 	return nil
 }
 
-func (c *Client) UpdateZone(ctx context.Context, id string, d *schema.ResourceData) (utils.ApiResponseInfo, error) {
+func (c *Client) UpdateZone(ctx context.Context, id string, d *schema.ResourceData) (dnsaas.ZoneResponse, utils.ApiResponseInfo, error) {
 	request := setZonePutRequest(d)
-	_, apiResponse, err := c.sdkClient.ZonesApi.ZonesPut(ctx, id).ZoneUpdateRequest(*request).Execute()
+	zoneResponse, apiResponse, err := c.sdkClient.ZonesApi.ZonesPut(ctx, id).ZoneUpdateRequest(*request).Execute()
 	apiResponse.LogInfo()
-	return apiResponse, err
+	return zoneResponse, apiResponse, err
 }
 
 func (c *Client) DeleteZone(ctx context.Context, id string) (utils.ApiResponseInfo, error) {

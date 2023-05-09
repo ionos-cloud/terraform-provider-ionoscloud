@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
+	dnsaas "github.com/ionos-cloud/sdk-go-dnsaas"
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils"
 	"log"
 )
@@ -47,17 +48,19 @@ func resourceDNSaaSZone() *schema.Resource {
 
 func zoneCreate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	client := meta.(SdkBundle).DNSaaSClient
-	id, _, err := client.CreateZone(ctx, d)
+	zoneResponse, _, err := client.CreateZone(ctx, d)
 
 	if err != nil {
 		return diag.FromErr(fmt.Errorf("an error occured while creating a DNS Zone: %w", err))
 	}
-	d.SetId(id)
-	err = utils.WaitForResourceToBeReady(ctx, d, client.IsZoneCreated)
-	if err != nil {
-		return diag.FromErr(fmt.Errorf("an error occured while waiting for DNS Zone with ID: %s to be ready, error: %w", id, err))
+	if zoneResponse.Metadata.State != nil {
+		if *zoneResponse.Metadata.State == dnsaas.FAILED {
+			// This is a temporary error message since right now the API is not returning errors that we can work with.
+			return diag.FromErr(fmt.Errorf("zone creation has failed, this can happen if the data in the request is not correct, " +
+				"please check again the values defined in the plan"))
+		}
 	}
-
+	d.SetId(*zoneResponse.Id)
 	return zoneRead(ctx, d, meta)
 }
 
@@ -87,14 +90,16 @@ func zoneUpdate(ctx context.Context, d *schema.ResourceData, meta interface{}) d
 	client := meta.(SdkBundle).DNSaaSClient
 	zoneId := d.Id()
 
-	_, err := client.UpdateZone(ctx, zoneId, d)
+	zoneResponse, _, err := client.UpdateZone(ctx, zoneId, d)
 	if err != nil {
 		return diag.FromErr(fmt.Errorf("an error occured while updating the DNS Zone with ID: %s, error: %w", zoneId, err))
 	}
-
-	err = utils.WaitForResourceToBeReady(ctx, d, client.IsZoneCreated)
-	if err != nil {
-		return diag.FromErr(fmt.Errorf("an error occured while waiting for DNS Zone with ID: %s to be ready, error: %w", zoneId, err))
+	if zoneResponse.Metadata.State != nil {
+		if *zoneResponse.Metadata.State == dnsaas.FAILED {
+			// This is a temporary error message since right now the API is not returning errors that we can work with.
+			return diag.FromErr(fmt.Errorf("zone update has failed, this can happen if the data in the request is not correct, " +
+				"please check again the values defined in the plan"))
+		}
 	}
 	return nil
 }

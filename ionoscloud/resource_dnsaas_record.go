@@ -3,11 +3,13 @@ package ionoscloud
 import (
 	"context"
 	"fmt"
-	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
-	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
-	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils"
 	"log"
 	"strings"
+
+	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
+	dnsaas "github.com/ionos-cloud/sdk-go-dnsaas"
+	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils"
 )
 
 func resourceDNSaaSRecord() *schema.Resource {
@@ -46,6 +48,11 @@ func resourceDNSaaSRecord() *schema.Resource {
 				Optional: true,
 				Computed: true,
 			},
+			"fqdn": {
+				Type:        schema.TypeString,
+				Description: "Fully qualified domain name",
+				Computed:    true,
+			},
 			"zone_id": {
 				Type: schema.TypeString,
 				// This should be required, changing this would require adding extra checks in the
@@ -65,11 +72,17 @@ func recordCreate(ctx context.Context, d *schema.ResourceData, meta interface{})
 	if err != nil {
 		return diag.FromErr(fmt.Errorf("an error occured while creating a record for the DNS zone with ID: %s, error: %w", zoneId, err))
 	}
-	d.SetId(*recordResponse.Id)
-	err = utils.WaitForResourceToBeReady(ctx, d, client.IsRecordCreated)
-	if err != nil {
-		return diag.FromErr(fmt.Errorf("an error occured while waiting for the DNS record to be ready, zone ID: %s, error: %w", zoneId, err))
+	if recordResponse.Metadata == nil {
+		return diag.FromErr(fmt.Errorf("expected metadata in the response for the record with ID: %s, but received 'nil' instead", *recordResponse.Id))
 	}
+	if recordResponse.Metadata.State != nil {
+		if *recordResponse.Metadata.State == dnsaas.FAILED {
+			// This is a temporary error message since right now the API is not returning errors that we can work with.
+			return diag.FromErr(fmt.Errorf("record creation has failed, this can happen if the data in the request is not correct, " +
+				"please check again the values defined in the plan"))
+		}
+	}
+	d.SetId(*recordResponse.Id)
 	return recordRead(ctx, d, meta)
 }
 
@@ -98,13 +111,16 @@ func recordUpdate(ctx context.Context, d *schema.ResourceData, meta interface{})
 	zoneId := d.Get("zone_id").(string)
 	recordId := d.Id()
 
-	_, err := client.UpdateRecord(ctx, zoneId, recordId, d)
+	recordResponse, _, err := client.UpdateRecord(ctx, zoneId, recordId, d)
 	if err != nil {
 		return diag.FromErr(fmt.Errorf("an error occured while updating the DNS Record with ID: %s, zone ID: %s, error: %w", recordId, zoneId, err))
 	}
-	err = utils.WaitForResourceToBeReady(ctx, d, client.IsRecordCreated)
-	if err != nil {
-		return diag.FromErr(fmt.Errorf("an error occured while waiting for the DNS Record with ID: %s to be ready, zone ID: %s, error: %w", recordId, zoneId, err))
+	if recordResponse.Metadata.State != nil {
+		if *recordResponse.Metadata.State == dnsaas.FAILED {
+			// This is a temporary error message since right now the API is not returning errors that we can work with.
+			return diag.FromErr(fmt.Errorf("record update has failed, this can happen if the data in the request is not correct, " +
+				"please check again the values defined in the plan"))
+		}
 	}
 	return recordRead(ctx, d, meta)
 }
