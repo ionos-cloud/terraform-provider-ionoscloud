@@ -2,16 +2,22 @@ package ionoscloud
 
 import (
 	"context"
+	"fmt"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	ionoscloud "github.com/ionos-cloud/sdk-go/v6"
+	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils"
 	"log"
+	"strconv"
 )
 
 type FirewallService struct {
-	client *ionoscloud.APIClient
+	client     *ionoscloud.APIClient
+	meta       interface{}
+	schemaData *schema.ResourceData
 }
 
-func (fs *FirewallService) firewallsGet(ctx context.Context, datacenterId, serverId, nicId string) ([]ionoscloud.FirewallRule, error) {
-	firewallRules, apiResponse, err := fs.client.FirewallRulesApi.DatacentersServersNicsFirewallrulesGet(ctx, datacenterId, serverId, nicId).Depth(1).Execute()
+func (fs *FirewallService) firewallsGet(ctx context.Context, datacenterId, serverId, nicId string, depth int32) ([]ionoscloud.FirewallRule, error) {
+	firewallRules, apiResponse, err := fs.client.FirewallRulesApi.DatacentersServersNicsFirewallrulesGet(ctx, datacenterId, serverId, nicId).Depth(depth).Execute()
 	logApiRequestTime(apiResponse)
 	if err != nil {
 		return nil, err
@@ -23,8 +29,8 @@ func (fs *FirewallService) firewallsGet(ctx context.Context, datacenterId, serve
 	return *firewallRules.Items, nil
 }
 
-func (fs *FirewallService) firewallFindById(ctx context.Context, datacenterId, serverId, nicId, fwId string) (*ionoscloud.FirewallRule, *ionoscloud.APIResponse, error) {
-	firewallRule, apiResponse, err := fs.client.FirewallRulesApi.DatacentersServersNicsFirewallrulesFindById(ctx, datacenterId, serverId, nicId, fwId).Depth(1).Execute()
+func (fs *FirewallService) firewallFindById(ctx context.Context, datacenterId, serverId, nicId, firewallId string) (*ionoscloud.FirewallRule, *ionoscloud.APIResponse, error) {
+	firewallRule, apiResponse, err := fs.client.FirewallRulesApi.DatacentersServersNicsFirewallrulesFindById(ctx, datacenterId, serverId, nicId, firewallId).Depth(1).Execute()
 	logApiRequestTime(apiResponse)
 	if err != nil {
 		return nil, apiResponse, err
@@ -35,3 +41,92 @@ func (fs *FirewallService) firewallFindById(ctx context.Context, datacenterId, s
 	}
 	return &firewallRule, apiResponse, nil
 }
+
+func (fs *FirewallService) deleteFirewallRule(ctx context.Context, datacenterId, serverId, nicId, firewallId string) (*ionoscloud.APIResponse, error) {
+	apiResponse, err := fs.client.FirewallRulesApi.DatacentersServersNicsFirewallrulesDelete(ctx, datacenterId, serverId, nicId, firewallId).Execute()
+	apiResponse.LogInfo()
+	if err != nil {
+		return apiResponse, err
+	}
+	// Wait, catching any errors
+	_, errState := getStateChangeConf(fs.meta, fs.schemaData, apiResponse.Header.Get("Location"), schema.TimeoutDelete).WaitForStateContext(ctx)
+	if errState != nil {
+		return apiResponse, fmt.Errorf("an error occured while waiting for state change dcId: %s server_id: %s nic_id %s ID: %s Response: %w", datacenterId, serverId, nicId, firewallId, errState)
+	}
+	return apiResponse, nil
+}
+
+func (fs *FirewallService) createFirewallRule(ctx context.Context, datacenterId, serverId, nicId string, firewallrule ionoscloud.FirewallRule) (*ionoscloud.FirewallRule, *ionoscloud.APIResponse, error) {
+	firewall, apiResponse, err := fs.client.FirewallRulesApi.DatacentersServersNicsFirewallrulesPost(ctx, datacenterId, serverId, nicId).Firewallrule(firewallrule).Execute()
+	apiResponse.LogInfo()
+	if err != nil {
+		return nil, apiResponse, fmt.Errorf("an error occured while creating firewall rule for dcId: %s server_id: %s nic_id ID: %s Response: (%w)", datacenterId, serverId, nicId, err)
+	}
+	// Wait, catching any errors
+	_, errState := getStateChangeConf(fs.meta, fs.schemaData, apiResponse.Header.Get("Location"), schema.TimeoutCreate).WaitForStateContext(ctx)
+	if errState != nil {
+		return nil, apiResponse, fmt.Errorf("an error occured while waiting for state change dcId: %s server_id: %s nic_id ID: %s Response: (%w)", datacenterId, serverId, nicId, errState)
+	}
+	return &firewall, apiResponse, nil
+}
+
+func SetFirewallProperties(firewall ionoscloud.FirewallRule) map[string]interface{} {
+
+	fw := map[string]interface{}{}
+	/*
+		"protocol": *firewall.Properties.Protocol,
+		"name":     *firewall.Properties.Name,
+	*/
+	if firewall.Properties != nil {
+		utils.SetPropWithNilCheck(fw, "protocol", firewall.Properties.Protocol)
+		utils.SetPropWithNilCheck(fw, "name", firewall.Properties.Name)
+		utils.SetPropWithNilCheck(fw, "source_mac", firewall.Properties.SourceMac)
+		utils.SetPropWithNilCheck(fw, "source_ip", firewall.Properties.SourceIp)
+		utils.SetPropWithNilCheck(fw, "target_ip", firewall.Properties.TargetIp)
+		utils.SetPropWithNilCheck(fw, "port_range_start", firewall.Properties.PortRangeStart)
+		utils.SetPropWithNilCheck(fw, "port_range_end", firewall.Properties.PortRangeEnd)
+		utils.SetPropWithNilCheck(fw, "type", firewall.Properties.Type)
+		if firewall.Properties.IcmpType != nil {
+			fw["icmp_type"] = strconv.Itoa(int(*firewall.Properties.IcmpType))
+		}
+		if firewall.Properties.IcmpCode != nil {
+			fw["icmp_code"] = strconv.Itoa(int(*firewall.Properties.IcmpCode))
+		}
+	}
+	return fw
+}
+
+func GetChangesInFirewallRules(oldValues, newValues []interface{}) ([]ionoscloud.FirewallruleProperties, []ionoscloud.FirewallruleProperties, error) {
+	onlyOld := utils.DifferenceSlices(oldValues, newValues)
+	onlyNew := utils.DifferenceSlices(newValues, oldValues)
+	oldFwSlice := make([]ionoscloud.FirewallruleProperties, len(onlyOld))
+	newFwSlice := make([]ionoscloud.FirewallruleProperties, len(onlyNew))
+	err := utils.DecodeInterfaceToStruct(onlyNew, newFwSlice)
+	if err != nil {
+		return nil, nil, fmt.Errorf("could not decode from %s to new values of FirewallRules %w", newValues, err)
+	}
+	err = utils.DecodeInterfaceToStruct(onlyOld, oldFwSlice)
+	if err != nil {
+		return nil, nil, fmt.Errorf("could not decode from %s to values of FirewallRules %w", oldValues, err)
+	}
+	return oldFwSlice, newFwSlice, nil
+}
+
+//
+//func CreateFirewallRules(newFwSlice []ionoscloud.FirewallruleProperties) ([]ionoscloud.FirewallRule, error) {
+//	firewallRules := []ionoscloud.FirewallRule{}
+//	// create updated rules
+//	for _, ruleProp := range newFwSlice {
+//		fwRule := ionoscloud.FirewallRule{
+//			Properties: &ruleProp,
+//		}
+//			firewall, _, err := createFirewallRule(meta, d, ctx, dcId, *server.Id, *nic.Id, fwRule)
+//			if err != nil {
+//				return nil, err
+//			}
+//			firewallRules = append(firewallRules, *firewall)
+//			fwRuleIdsString = append(fwRuleIdsString, *firewall.Id)
+//		}
+//	}
+//	return firewallRules, nil
+//}

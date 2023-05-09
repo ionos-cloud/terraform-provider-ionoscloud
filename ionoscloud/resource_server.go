@@ -6,7 +6,7 @@ import (
 	"fmt"
 	"log"
 	"os"
-	"strconv"
+	"reflect"
 	"strings"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
@@ -544,19 +544,18 @@ func resourceServerCreate(ctx context.Context, d *schema.ResourceData, meta inte
 							Items: &[]ionoscloud.FirewallRule{},
 						},
 					}
+
 					if firewallRules.([]interface{}) != nil && len(firewallRules.([]interface{})) > 0 {
-						fwRulesSet := firewallRules.([]interface{})
-						fwRuleProperties := make([]ionoscloud.FirewallruleProperties, len(fwRulesSet))
+						fwRulesIntf := firewallRules.([]interface{})
 
-						//log.Printf("[DEBUG] firewallRules %s \n", fwRulesSet.GoString())
-
-						err = utils.DecodeInterfaceToStruct(fwRulesSet, fwRuleProperties)
+						fwRulesProperties := make([]ionoscloud.FirewallruleProperties, len(fwRulesIntf))
+						err = utils.DecodeInterfaceToStruct(fwRulesIntf, fwRulesProperties)
 						if err != nil {
-							return diag.FromErr(fmt.Errorf("could not decode from %s to slice of FirewallRules %w", fwRulesSet, err))
+							return diag.FromErr(fmt.Errorf("could not decode from %s to slice of FirewallRules %w", fwRulesIntf, err))
 						}
-						for idx := range fwRuleProperties {
+						for idx := range fwRulesProperties {
 							firewall := ionoscloud.FirewallRule{
-								Properties: &fwRuleProperties[idx],
+								Properties: &fwRulesProperties[idx],
 							}
 							fwRules = append(fwRules, firewall)
 						}
@@ -598,38 +597,38 @@ func resourceServerCreate(ctx context.Context, d *schema.ResourceData, meta inte
 	}
 
 	// get additional data for schema
-	serverReq, apiResponse, err = client.ServersApi.DatacentersServersFindById(ctx, datacenterId, *postServer.Id).Depth(3).Execute()
+	foundServer, apiResponse, err := client.ServersApi.DatacentersServersFindById(ctx, datacenterId, *postServer.Id).Depth(4).Execute()
 	logApiRequestTime(apiResponse)
 
 	if err != nil {
 		diags := diag.FromErr(fmt.Errorf("error fetching server: %w", err))
 		return diags
 	}
-	if serverReq.Entities.Nics.Items != nil {
-		if len(*serverReq.Entities.Nics.Items) > 0 {
-
-			firstNicItem := (*serverReq.Entities.Nics.Items)[0]
-			firewallRules, apiResponse, err := client.FirewallRulesApi.DatacentersServersNicsFirewallrulesGet(ctx, datacenterId,
-				*serverReq.Id, *firstNicItem.Id).Execute()
-			logApiRequestTime(apiResponse)
-			if err != nil {
-				diags := diag.FromErr(fmt.Errorf("an error occurred while fetching firewall rules: %w", err))
-				return diags
-			}
+	if foundServer.Entities.Nics.Items != nil {
+		if len(*foundServer.Entities.Nics.Items) > 0 {
+			foundFirstNic := (*foundServer.Entities.Nics.Items)[0]
 			var rules []string
+			if foundFirstNic.Entities != nil && foundFirstNic.Entities.Firewallrules != nil && foundFirstNic.Entities.Firewallrules.Items != nil {
+				sentFirstNic := (*serverReq.Entities.Nics.Items)[0]
 
-			if firewallRules.Items != nil {
-				items := *(firewallRules.Items)
+				if sentFirstNic.Entities != nil && sentFirstNic.Entities.Firewallrules != nil && sentFirstNic.Entities.Firewallrules.Items != nil {
+					sentItems := *(*serverReq.Entities.Nics.Items)[0].Entities.Firewallrules.Items
+					foundItems := *foundFirstNic.Entities.Firewallrules.Items
+					if len(sentItems) > 0 {
 
-				if len(items) > 0 {
-					if err := d.Set("firewallrule_id", *(items)[0].Id); err != nil {
-						diags := diag.FromErr(err)
-						return diags
-					}
-					if len(items) > 0 {
-						//we get rules in the opposite order of creation
-						for idx := len(items) - 1; idx >= 0; idx-- {
-							rules = append(rules, *items[idx].Id)
+						if err := d.Set("firewallrule_id", *(foundItems)[0].Id); err != nil {
+							diags := diag.FromErr(err)
+							return diags
+						}
+						if len(sentItems) > 0 {
+							//keep order of rules
+							for _, rule := range sentItems {
+								for _, foundRule := range foundItems {
+									if reflect.DeepEqual(rule.Properties, foundRule.Properties) {
+										rules = append(rules, *foundRule.Id)
+									}
+								}
+							}
 						}
 					}
 				}
@@ -638,14 +637,14 @@ func resourceServerCreate(ctx context.Context, d *schema.ResourceData, meta inte
 				diags := diag.FromErr(err)
 				return diags
 			}
-			if firstNicItem.Id != nil {
-				err := d.Set("primary_nic", *firstNicItem.Id)
+			if foundFirstNic.Id != nil {
+				err := d.Set("primary_nic", *foundFirstNic.Id)
 				if err != nil {
 					diags := diag.FromErr(fmt.Errorf("error while setting primary nic %s: %w", d.Id(), err))
 					return diags
 				}
 			}
-			firstNicProps := firstNicItem.Properties
+			firstNicProps := foundFirstNic.Properties
 			if firstNicProps != nil {
 				firstNicIps := firstNicProps.Ips
 				if firstNicIps != nil &&
@@ -719,32 +718,6 @@ func SetNetworkProperties(nic ionoscloud.Nic) map[string]interface{} {
 		}
 	}
 	return network
-}
-
-func SetFirewallProperties(firewall ionoscloud.FirewallRule) map[string]interface{} {
-
-	fw := map[string]interface{}{}
-	/*
-		"protocol": *firewall.Properties.Protocol,
-		"name":     *firewall.Properties.Name,
-	*/
-	if firewall.Properties != nil {
-		utils.SetPropWithNilCheck(fw, "protocol", firewall.Properties.Protocol)
-		utils.SetPropWithNilCheck(fw, "name", firewall.Properties.Name)
-		utils.SetPropWithNilCheck(fw, "source_mac", firewall.Properties.SourceMac)
-		utils.SetPropWithNilCheck(fw, "source_ip", firewall.Properties.SourceIp)
-		utils.SetPropWithNilCheck(fw, "target_ip", firewall.Properties.TargetIp)
-		utils.SetPropWithNilCheck(fw, "port_range_start", firewall.Properties.PortRangeStart)
-		utils.SetPropWithNilCheck(fw, "port_range_end", firewall.Properties.PortRangeEnd)
-		utils.SetPropWithNilCheck(fw, "type", firewall.Properties.Type)
-		if firewall.Properties.IcmpType != nil {
-			fw["icmp_type"] = strconv.Itoa(int(*firewall.Properties.IcmpType))
-		}
-		if firewall.Properties.IcmpCode != nil {
-			fw["icmp_code"] = strconv.Itoa(int(*firewall.Properties.IcmpCode))
-		}
-	}
-	return fw
 }
 
 func SetVolumeProperties(volume ionoscloud.Volume) map[string]interface{} {
@@ -959,67 +932,44 @@ func resourceServerUpdate(ctx context.Context, d *schema.ResourceData, meta inte
 		}
 		firstNicFirewallPath := "nic.0.firewall"
 		if d.HasChange(firstNicFirewallPath) {
-
 			oldValues, newValues := d.GetChange(firstNicFirewallPath)
-			oldValSlice := oldValues.([]interface{})
-			newValSlice := newValues.([]interface{})
-			onlyOld := utils.DifferenceSlices(oldValSlice, newValSlice)
-			onlyNew := utils.DifferenceSlices(newValSlice, oldValSlice)
-			oldFwSlice := make([]ionoscloud.FirewallruleProperties, len(onlyOld))
-			newFwSlice := make([]ionoscloud.FirewallruleProperties, len(onlyNew))
+			oldFwSlice, newFwSlice, err := GetChangesInFirewallRules(oldValues.([]interface{}), newValues.([]interface{}))
+			if err != nil {
+				return diag.FromErr(fmt.Errorf("could not get changes for FirewallRules %w", err))
+			}
+
+			firewallId := d.Get("firewallrule_id").(string)
 			firewallRuleIds := d.Get("firewallrule_ids").([]interface{})
 			fwRuleIdsString := convertSlice(firewallRuleIds)
-			err = utils.DecodeInterfaceToStruct(onlyNew, newFwSlice)
-			if err != nil {
-				return diag.FromErr(fmt.Errorf("could not decode from %s to slice of FirewallRules %w", newValSlice, err))
-			}
-			err = utils.DecodeInterfaceToStruct(onlyOld, oldFwSlice)
-			if err != nil {
-				return diag.FromErr(fmt.Errorf("could not decode from %s to slice of FirewallRules %w", oldValSlice, err))
-			}
-			firewallId := d.Get("firewallrule_id").(string)
-			if nic != nil && nic.Id != nil {
-				_, apiResponse, err := client.FirewallRulesApi.DatacentersServersNicsFirewallrulesFindById(ctx, dcId, *server.Id, *nic.Id, firewallId).Execute()
-				logApiRequestTime(apiResponse)
-				if err != nil {
-					if !httpNotFound(apiResponse) {
-						diags := diag.FromErr(fmt.Errorf("error occured at checking existence of firewall %s %s", firewallId, err))
-						return diags
-					}
-				}
-				var firewalls ionoscloud.FirewallRules
 
-				firewalls, apiResponse, err = client.FirewallRulesApi.DatacentersServersNicsFirewallrulesGet(ctx, dcId, *server.Id, *nic.Id).Depth(1).Execute()
-				logApiRequestTime(apiResponse)
+			if nic != nil && nic.Id != nil {
+				fs := FirewallService{client: client, meta: meta, schemaData: d}
+				//_, apiResponse, err := fs.firewallFindById(ctx, dcId, *server.Id, *nic.Id, firewallId)
+				//if err != nil {
+				//	if !httpNotFound(apiResponse) {
+				//		diags := diag.FromErr(fmt.Errorf("error occured at checking existence of firewall %s %w", firewallId, err))
+				//		return diags
+				//	}
+				//}
+
+				firewalls, err := fs.firewallsGet(ctx, dcId, *server.Id, *nic.Id, 1)
 				if err != nil {
 					return diag.FromErr(fmt.Errorf("an error occurred while fetching firewall rules: for dcId: %s server_id: %s nic_id %s `%w`", dcId, *server.Id, *nic.Id, err))
 				}
-
 				//delete old rules
-				if nic != nil && nic.Id != nil {
-					for _, ruleProp := range oldFwSlice {
-						for _, item := range *firewalls.Items {
-							if strings.EqualFold(*ruleProp.Name, *item.Properties.Name) {
-								if firewallId == *item.Id {
-									firewallId = ""
-								}
-								apiResponse, err = client.FirewallRulesApi.DatacentersServersNicsFirewallrulesDelete(ctx, dcId, *server.Id, *nic.Id, *item.Id).Execute()
-								if err != nil {
-									return diag.FromErr(fmt.Errorf("an error occured while deleting firewall rule for dcId: %s server_id: %s nic_id %s ID: %s `%w`", dcId, *server.Id, *nic.Id, *item.Id, err))
-								}
-								// Wait, catching any errors
-								_, errState = getStateChangeConf(meta, d, apiResponse.Header.Get("Location"), schema.TimeoutDelete).WaitForStateContext(ctx)
-								if errState != nil {
-									diags := diag.FromErr(fmt.Errorf("an error occured while waiting for state change dcId: %s server_id: %s nic_id %s ID: %s Response: %w", dcId, *server.Id, *nic.Id, firewallId, errState))
-									return diags
-								}
-								//if firewallRuleIds.Contains(*item.Id) {
-								//	firewallRuleIds.Remove(*item.Id)
-								//}
-								if utils.Contains(fwRuleIdsString, *item.Id) {
-									//remove it
-									fwRuleIdsString = utils.DeleteFromSlice(fwRuleIdsString, *item.Id)
-								}
+				for _, ruleProp := range oldFwSlice {
+					for _, item := range firewalls {
+						if strings.EqualFold(*ruleProp.Name, *item.Properties.Name) {
+							if firewallId == *item.Id {
+								firewallId = ""
+							}
+							apiResponse, err = fs.deleteFirewallRule(ctx, dcId, *server.Id, *nic.Id, *item.Id)
+							if err != nil {
+								return diag.FromErr(fmt.Errorf("an error occured while deleting firewall rule for dcId: %s server_id: %s nic_id %s ID: %s `%w`", dcId, *server.Id, *nic.Id, *item.Id, err))
+							}
+
+							if utils.Contains(fwRuleIdsString, *item.Id) {
+								fwRuleIdsString = utils.DeleteFromSlice(fwRuleIdsString, *item.Id)
 							}
 						}
 					}
@@ -1033,19 +983,14 @@ func resourceServerUpdate(ctx context.Context, d *schema.ResourceData, meta inte
 					Properties: &ruleProp,
 				}
 				if nic != nil && nic.Id != nil {
-					firewall, apiResponse, err := client.FirewallRulesApi.DatacentersServersNicsFirewallrulesPost(ctx, dcId, *server.Id, *nic.Id).Firewallrule(fwRule).Execute()
+					fs := FirewallService{client: client, meta: meta, schemaData: d}
+					firewall, _, err := fs.createFirewallRule(ctx, dcId, *server.Id, *nic.Id, fwRule)
 					if err != nil {
-						return diag.FromErr(fmt.Errorf("an error occured while creating firewall rule for server %s `%w`", *server.Id, err))
+						return diag.FromErr(err)
 					}
-					// Wait, catching any errors
-					_, errState = getStateChangeConf(meta, d, apiResponse.Header.Get("Location"), schema.TimeoutCreate).WaitForStateContext(ctx)
-					if errState != nil {
-						diags := diag.FromErr(fmt.Errorf("an error occured while waiting for state change dcId: %s server_id: %s nic_id %s ID: %s Response: %w", dcId, *server.Id, *nic.Id, firewallId, errState))
-						return diags
-					}
-					firewallRules = append(firewallRules, firewall)
+					firewallRules = append(firewallRules, *firewall)
 					fwRuleIdsString = append(fwRuleIdsString, *firewall.Id)
-				} else { //if the nic does not exist, just fw rule to the list to be created below with the nic
+				} else { //if the nic does not exist, just fw add rule to the list to be created below with the nic
 					firewallRules = append(firewallRules, fwRule)
 				}
 			}
@@ -1060,11 +1005,6 @@ func resourceServerUpdate(ctx context.Context, d *schema.ResourceData, meta inte
 				return diags
 			}
 			if len(firewallRules) > 0 {
-				//ruleIds := make([]string, len(firewallRules))
-				//for idx, rule := range firewallRules {
-				//	ruleIds[idx] = *rule.Id
-				//}
-
 				nic.Entities = &ionoscloud.NicEntities{
 					Firewallrules: &ionoscloud.FirewallRules{
 						Items: &firewallRules,
@@ -1096,8 +1036,8 @@ func resourceServerUpdate(ctx context.Context, d *schema.ResourceData, meta inte
 		}
 
 		if createdNic.Id != nil {
-			fs := FirewallService{client: client}
-			fwRules, err := fs.firewallsGet(ctx, d.Get("datacenter_id").(string), *server.Id, *createdNic.Id)
+			fs := FirewallService{client: client, meta: meta, schemaData: d}
+			fwRules, err := fs.firewallsGet(ctx, d.Get("datacenter_id").(string), *server.Id, *createdNic.Id, 1)
 			if err != nil {
 				diags := diag.FromErr(fmt.Errorf("an error occurred while fetching firewall rules: %w", err))
 				return diags
@@ -1521,7 +1461,7 @@ func setResourceServerData(ctx context.Context, client *ionoscloud.APIClient, d 
 	if nic.Properties != nil {
 		nicEntry := SetNetworkProperties(nic)
 		nicEntry["id"] = *nic.Id
-		fs := FirewallService{client: client}
+		fs := FirewallService{client: client, schemaData: d}
 		firewallRuleIds := d.Get("firewallrule_ids").([]interface{})
 		var fwRulesEntries []map[string]interface{}
 

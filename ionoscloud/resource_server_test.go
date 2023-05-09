@@ -434,8 +434,8 @@ func TestAccServerResolveImageName(t *testing.T) {
 	})
 }
 
-// also tests creating 2 fw rules inline
-func TestAccServerWithSnapshotAnd2FwRulesInline(t *testing.T) {
+// also tests creating 5 fw rules inline
+func TestAccServerWithSnapshotAnd5FwRulesInline(t *testing.T) {
 	var server ionoscloud.Server
 
 	resource.Test(t, resource.TestCase{
@@ -462,7 +462,7 @@ func TestAccServerWithSnapshotAnd2FwRulesInline(t *testing.T) {
 					resource.TestCheckResourceAttrPair(ServerResource+"."+ServerTestResource, "nic.0.lan", LanResource+"."+LanTestResource, "id"),
 					resource.TestCheckResourceAttr(ServerResource+"."+ServerTestResource, "nic.0.dhcp", "true"),
 					resource.TestCheckResourceAttr(ServerResource+"."+ServerTestResource, "nic.0.firewall_active", "true"),
-					resource.TestCheckResourceAttr(ServerResource+"."+"webserver", "nic.0.firewall.#", "2"),
+					resource.TestCheckResourceAttr(ServerResource+"."+"webserver", "nic.0.firewall.#", "5"),
 				),
 			},
 		},
@@ -1131,8 +1131,39 @@ resource ` + ServerResource + ` "webserver" {
       port_range_start = 23
       port_range_end   = 23
     }
+    firewall {
+      protocol         = "TCP"
+      name             = "` + ServerTestResource + `3"
+      type             = "INGRESS"
+      port_range_start = 24
+      port_range_end   = 24
+    }
+    firewall {
+      protocol         = "TCP"
+      name             = "` + ServerTestResource + `4"
+      type             = "INGRESS"
+      port_range_start = 25
+      port_range_end   = 25
+    }
+	firewall {
+      protocol         = "TCP"
+      name             = "` + ServerTestResource + `5"
+      type             = "INGRESS"
+      port_range_start = 26
+      port_range_end   = 26
+    }
   }
 }
+resource ` + FirewallResource + ` ` + FirewallTestResource + ` {
+  datacenter_id = ` + DatacenterResource + `.` + DatacenterTestResource + `.id
+  server_id        = ` + ServerResource + `.webserver.id
+  nic_id           = ` + ServerResource + `.webserver.nic[0].id
+  protocol         = "TCP"
+  name             = "external_rule"
+  port_range_start = 28
+  port_range_end   = 28
+}
+
 resource ` + SnapshotResource + ` "test_snapshot" {
   datacenter_id = ` + DatacenterResource + `.` + DatacenterTestResource + `.id
   volume_id = ` + ServerResource + `.webserver.boot_volume
