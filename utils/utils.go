@@ -336,7 +336,7 @@ func DecodeInterfaceToStruct(input, output interface{}) error {
 		ErrorUnused:      false,
 		ErrorUnset:       false,
 		ZeroFields:       false,
-		WeaklyTypedInput: false,
+		WeaklyTypedInput: true,
 		MatchName:        IsSnakeEqualToCamelCase,
 		Result:           &output,
 	}

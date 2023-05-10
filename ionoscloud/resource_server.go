@@ -553,9 +553,10 @@ func resourceServerCreate(ctx context.Context, d *schema.ResourceData, meta inte
 						if err != nil {
 							return diag.FromErr(fmt.Errorf("could not decode from %s to slice of FirewallRules %w", fwRulesIntf, err))
 						}
-						for idx := range fwRulesProperties {
+						for _, prop := range fwRulesProperties {
+							FwPropUnsetSetFieldIfNotSetInSchema(&prop, fwRulesPath, d)
 							firewall := ionoscloud.FirewallRule{
-								Properties: &fwRulesProperties[idx],
+								Properties: &prop,
 							}
 							fwRules = append(fwRules, firewall)
 						}
@@ -944,13 +945,6 @@ func resourceServerUpdate(ctx context.Context, d *schema.ResourceData, meta inte
 
 			if nic != nil && nic.Id != nil {
 				fs := FirewallService{client: client, meta: meta, schemaData: d}
-				//_, apiResponse, err := fs.firewallFindById(ctx, dcId, *server.Id, *nic.Id, firewallId)
-				//if err != nil {
-				//	if !httpNotFound(apiResponse) {
-				//		diags := diag.FromErr(fmt.Errorf("error occured at checking existence of firewall %s %w", firewallId, err))
-				//		return diags
-				//	}
-				//}
 
 				firewalls, err := fs.firewallsGet(ctx, dcId, *server.Id, *nic.Id, 1)
 				if err != nil {
@@ -979,6 +973,8 @@ func resourceServerUpdate(ctx context.Context, d *schema.ResourceData, meta inte
 			firewallRules := []ionoscloud.FirewallRule{}
 			// create updated rules
 			for _, ruleProp := range newFwSlice {
+				FwPropUnsetSetFieldIfNotSetInSchema(&ruleProp, firstNicFirewallPath, d)
+
 				fwRule := ionoscloud.FirewallRule{
 					Properties: &ruleProp,
 				}

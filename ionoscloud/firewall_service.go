@@ -112,21 +112,17 @@ func GetChangesInFirewallRules(oldValues, newValues []interface{}) ([]ionoscloud
 	return oldFwSlice, newFwSlice, nil
 }
 
-//
-//func CreateFirewallRules(newFwSlice []ionoscloud.FirewallruleProperties) ([]ionoscloud.FirewallRule, error) {
-//	firewallRules := []ionoscloud.FirewallRule{}
-//	// create updated rules
-//	for _, ruleProp := range newFwSlice {
-//		fwRule := ionoscloud.FirewallRule{
-//			Properties: &ruleProp,
-//		}
-//			firewall, _, err := createFirewallRule(meta, d, ctx, dcId, *server.Id, *nic.Id, fwRule)
-//			if err != nil {
-//				return nil, err
-//			}
-//			firewallRules = append(firewallRules, *firewall)
-//			fwRuleIdsString = append(fwRuleIdsString, *firewall.Id)
-//		}
-//	}
-//	return firewallRules, nil
-//}
+// FwPropUnsetSetFieldIfNotSetInSchema will only set the in32 types if they actually exist in the schema
+// mutates fwProp
+func FwPropUnsetSetFieldIfNotSetInSchema(fwProp *ionoscloud.FirewallruleProperties, path string, d *schema.ResourceData) {
+	if *fwProp.PortRangeStart == 0 {
+		if _, isSet := d.GetOkExists(path + ".port_range_start"); isSet != true {
+			fwProp.PortRangeStart = nil
+		}
+	}
+	if *fwProp.PortRangeEnd == 0 {
+		if _, isSet := d.GetOkExists(path + ".port_range_end"); isSet != true {
+			fwProp.PortRangeEnd = nil
+		}
+	}
+}
