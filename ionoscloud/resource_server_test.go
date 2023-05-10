@@ -396,7 +396,7 @@ func TestAccServerBootCdromNoImageAndInlineFwRules(t *testing.T) {
 	})
 }
 
-func TestAccServerResolveImageName(t *testing.T) {
+func TestAccServerResolveImageNameAdd5FwRulesOnUpdate(t *testing.T) {
 	var server ionoscloud.Server
 
 	resource.Test(t, resource.TestCase{
@@ -424,10 +424,36 @@ func TestAccServerResolveImageName(t *testing.T) {
 					resource.TestCheckResourceAttrPair(ServerResource+"."+ServerTestResource, "nic.0.lan", LanResource+"."+LanTestResource, "id"),
 					resource.TestCheckResourceAttr(ServerResource+"."+ServerTestResource, "nic.0.dhcp", "true"),
 					resource.TestCheckResourceAttr(ServerResource+"."+ServerTestResource, "nic.0.firewall_active", "true"),
+				),
+			},
+			{
+				Config: testAccCheckServerResolveImageName5fwRules,
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckServerExists(ServerResource+"."+ServerTestResource, &server),
+					resource.TestCheckResourceAttr(ServerResource+"."+ServerTestResource, "name", ServerTestResource),
+					resource.TestCheckResourceAttr(ServerResource+"."+ServerTestResource, "cores", "1"),
+					resource.TestCheckResourceAttr(ServerResource+"."+ServerTestResource, "ram", "1024"),
+					resource.TestCheckResourceAttr(ServerResource+"."+ServerTestResource, "availability_zone", "ZONE_1"),
+					resource.TestCheckResourceAttr(ServerResource+"."+ServerTestResource, "cpu_family", "INTEL_SKYLAKE"),
+					utils.TestImageNotNull(ServerResource, "boot_image"),
+					resource.TestCheckResourceAttrPair(ServerResource+"."+ServerTestResource, "image_password", RandomPassword+".server_image_password", "result"),
+					resource.TestCheckResourceAttr(ServerResource+"."+ServerTestResource, "volume.0.name", ServerTestResource),
+					resource.TestCheckResourceAttr(ServerResource+"."+ServerTestResource, "volume.0.size", "5"),
+					resource.TestCheckResourceAttr(ServerResource+"."+ServerTestResource, "volume.0.disk_type", "SSD Standard"),
+					resource.TestCheckResourceAttrPair(ServerResource+"."+ServerTestResource, "nic.0.lan", LanResource+"."+LanTestResource, "id"),
+					resource.TestCheckResourceAttr(ServerResource+"."+ServerTestResource, "nic.0.dhcp", "true"),
+					resource.TestCheckResourceAttr(ServerResource+"."+ServerTestResource, "nic.0.firewall_active", "true"),
+					resource.TestCheckResourceAttr(ServerResource+"."+ServerTestResource, "nic.0.firewall.#", "5"),
 					resource.TestCheckResourceAttr(ServerResource+"."+ServerTestResource, "nic.0.firewall.0.protocol", "TCP"),
-					resource.TestCheckResourceAttr(ServerResource+"."+ServerTestResource, "nic.0.firewall.0.name", ServerTestResource),
+					resource.TestCheckResourceAttr(ServerResource+"."+ServerTestResource, "nic.0.firewall.0.name", "test_server"),
 					resource.TestCheckResourceAttr(ServerResource+"."+ServerTestResource, "nic.0.firewall.0.port_range_start", "22"),
 					resource.TestCheckResourceAttr(ServerResource+"."+ServerTestResource, "nic.0.firewall.0.port_range_end", "22"),
+					resource.TestCheckResourceAttr(ServerResource+"."+ServerTestResource, "nic.0.firewall.1.port_range_start", "23"),
+					resource.TestCheckResourceAttr(ServerResource+"."+ServerTestResource, "nic.0.firewall.1.port_range_end", "23"),
+					resource.TestCheckResourceAttr(ServerResource+"."+ServerTestResource, "nic.0.firewall.2.port_range_start", "24"),
+					resource.TestCheckResourceAttr(ServerResource+"."+ServerTestResource, "nic.0.firewall.2.port_range_end", "24"),
+					resource.TestCheckResourceAttr(ServerResource+"."+ServerTestResource, "nic.0.firewall.3.port_range_start", "25"),
+					resource.TestCheckResourceAttr(ServerResource+"."+ServerTestResource, "nic.0.firewall.3.port_range_end", "25"),
 				),
 			},
 		},
@@ -1075,11 +1101,76 @@ resource ` + ServerResource + ` ` + ServerTestResource + ` {
     lan             = ` + LanResource + `.` + LanTestResource + `.id
     dhcp            = true
     firewall_active = true
+  }
+}
+resource ` + RandomPassword + ` "server_image_password" {
+  length           = 16
+  special          = false
+}
+`
+
+const testAccCheckServerResolveImageName5fwRules = `
+resource ` + DatacenterResource + ` ` + DatacenterTestResource + ` {
+  name        = "test_server"
+  location    = "de/fra"
+  description = "Test datacenter done by TF"
+}
+resource ` + LanResource + ` ` + LanTestResource + ` {
+  datacenter_id = ` + DatacenterResource + `.` + DatacenterTestResource + `.id
+  public        = true
+}
+resource ` + ServerResource + ` ` + ServerTestResource + ` {
+  name              = "` + ServerTestResource + `"
+  datacenter_id     = ` + DatacenterResource + `.` + DatacenterTestResource + `.id
+  cores             = 1
+  ram               = 1024
+  availability_zone = "ZONE_1"
+  cpu_family        = "INTEL_SKYLAKE" 
+  image_name        = "ubuntu:latest"
+  image_password    = ` + RandomPassword + `.server_image_password.result
+  volume {
+    name           = "` + ServerTestResource + `"
+    size              = 5
+    disk_type      = "SSD Standard"
+  }
+  nic {
+    lan             = ` + LanResource + `.` + LanTestResource + `.id
+    dhcp            = true
+    firewall_active = true
     firewall {
       protocol         = "TCP"
       name             = "` + ServerTestResource + `"
+      type             = "INGRESS"
       port_range_start = 22
       port_range_end   = 22
+    }
+    firewall {
+      protocol         = "TCP"
+      name             = "` + ServerTestResource + `2"
+      type             = "INGRESS"
+      port_range_start = 23
+      port_range_end   = 23
+    }
+    firewall {
+      protocol         = "TCP"
+      name             = "` + ServerTestResource + `3"
+      type             = "INGRESS"
+      port_range_start = 24
+      port_range_end   = 24
+    }
+    firewall {
+      protocol         = "TCP"
+      name             = "` + ServerTestResource + `4"
+      type             = "INGRESS"
+      port_range_start = 25
+      port_range_end   = 25
+    }
+	firewall {
+      protocol         = "TCP"
+      name             = "` + ServerTestResource + `5"
+      type             = "INGRESS"
+      port_range_start = 26
+      port_range_end   = 26
     }
   }
 }
