@@ -1,7 +1,9 @@
 ## 6.3.7 (upcoming release)
+### Features
+- Add `inline_volume_ids` computed field.
 ### Dependency update
 - Update `sdk-go-dbaas-mongo` to [v1.0.6](https://github.com/ionos-cloud/sdk-go-dbaas-mongo/releases/tag/v1.2.2)
-## Fixes
+### Fixes
 - Log levels need to be shown and filtered correctly when set with `TF_LOG`. Also change `WARNING` log levels to `WARN`.
 - Update code to work with new mongo version
 - Ignore downgrades of `k8s_version` patch level.
