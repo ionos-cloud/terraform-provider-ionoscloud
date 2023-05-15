@@ -7,7 +7,7 @@ description: |-
   Get information on a DNS Record.
 ---
 
-# ionoscloud_dns_zone
+# ionoscloud_dns_record
 
 ⚠️ **Note:** DNSaaS is currently in the Early Access (EA) phase.
 We recommend keeping usage and testing to non-production critical applications.

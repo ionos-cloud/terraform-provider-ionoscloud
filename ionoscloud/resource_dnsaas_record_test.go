@@ -1,3 +1,5 @@
+//go:build all || dnsaas
+
 package ionoscloud
 
 import (
