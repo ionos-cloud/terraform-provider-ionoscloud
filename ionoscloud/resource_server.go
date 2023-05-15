@@ -407,6 +407,22 @@ func resourceServer() *schema.Resource {
 				Optional: true,
 				Elem:     labelResource,
 			},
+			// When deleting the server, we need to delete the volume that was defined INSIDE the
+			// server resource. The only way to know which volume was defined INSIDE the server
+			// resource is to save the volume ID in this list.
+			// NOTE: In the current version, v6.3.6, it is required to define one volume (and only
+			// one) inside the server resource, but in the future we consider the possibility of
+			// adding more volumes within the server resource, in which case the current code should
+			// be revised as changes should also be made for the update function, as the list of
+			// inline_volume_ids can be modified.
+			"inline_volume_ids": {
+				Type:        schema.TypeList,
+				Description: "A list that contains the IDs for the volumes defined inside the server resource.",
+				Computed:    true,
+				Elem: &schema.Schema{
+					Type: schema.TypeString,
+				},
+			},
 		},
 		Timeouts: &resourceDefaultTimeouts,
 	}
@@ -647,6 +663,18 @@ func resourceServerCreate(ctx context.Context, d *schema.ResourceData, meta inte
 				"host":     (*firstNicIps)[0],
 				"password": *firstVolumeItem.Properties.ImagePassword,
 			})
+		}
+	}
+
+	// Set inline volumes
+	if serverReq.Entities.Volumes != nil && serverReq.Entities.Volumes.Items != nil {
+		var inlineVolumeIds []string
+		for _, volume := range *serverReq.Entities.Volumes.Items {
+			inlineVolumeIds = append(inlineVolumeIds, *volume.Id)
+		}
+
+		if err := d.Set("inline_volume_ids", inlineVolumeIds); err != nil {
+			return diag.FromErr(utils.GenerateSetError("server", "inline_volume_ids", err))
 		}
 	}
 	return resourceServerRead(ctx, d, meta)
@@ -1026,19 +1054,15 @@ func resourceServerUpdate(ctx context.Context, d *schema.ResourceData, meta inte
 	return resourceServerRead(ctx, d, meta)
 }
 
-func deleteAllVolumes(ctx context.Context, d *schema.ResourceData, meta interface{}, client *ionoscloud.APIClient, server *ionoscloud.Server) diag.Diagnostics {
+func deleteInlineVolumes(ctx context.Context, d *schema.ResourceData, meta interface{}, client *ionoscloud.APIClient) diag.Diagnostics {
 	dcId := d.Get("datacenter_id").(string)
 
-	if server.Entities == nil || server.Entities.Volumes == nil || server.Entities.Volumes.Items == nil {
-		return nil
-	}
-
-	volumes := server.Entities.Volumes.Items
-	for _, volume := range *volumes {
-		apiResponse, err := client.VolumesApi.DatacentersVolumesDelete(ctx, dcId, *volume.Id).Execute()
+	volumeIds := d.Get("inline_volume_ids").([]interface{})
+	for _, volumeId := range volumeIds {
+		apiResponse, err := client.VolumesApi.DatacentersVolumesDelete(ctx, dcId, volumeId.(string)).Execute()
 		logApiRequestTime(apiResponse)
 		if err != nil {
-			diags := diag.FromErr(fmt.Errorf("error occured while deleting remaining volume %s of server ID %s %w", *volume.Id, d.Id(), err))
+			diags := diag.FromErr(fmt.Errorf("error occured while deleting volume with ID: %s of server ID %s %w", volumeId.(string), d.Id(), err))
 			return diags
 		}
 
@@ -1067,7 +1091,7 @@ func resourceServerDelete(ctx context.Context, d *schema.ResourceData, meta inte
 	}
 
 	if strings.ToLower(*server.Properties.Type) != "cube" {
-		diags := deleteAllVolumes(ctx, d, meta, client, &server)
+		diags := deleteInlineVolumes(ctx, d, meta, client)
 		if diags != nil {
 			return diags
 		}
