@@ -22,6 +22,7 @@ jobs:
     env:
       IONOS_USERNAME: ${{ secrets.IONOS_VDC_USER_GO_V6 }}
       IONOS_PASSWORD: ${{ secrets.IONOS_VDC_PASSWORD_GO_V6 }}
+      IONOS_TOKEN: ${{ secrets.IONOS_VDC_TOKEN_GO_V6 }}
       TF_ACC: true
       TF_LOG: ${{ github.event.inputs.tf-log }}
     strategy:
