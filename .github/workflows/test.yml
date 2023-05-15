@@ -6,17 +6,17 @@ on:
         description: "branch on which to run tests: master, release/v5"
         required: true
         type: string
-        default: master
+        default: "master"
       test-tags:
         description: "test tags, in the form of a list without spaces: 'all,compute,k8s,dbaas,natgateway,nlb, alb, server,firewall, etc.' "
         required: false
         type: string
-        default: compute
+        default: "compute"
       tf-log:
         description: "terraform logs, accepted values: off, trace, debug, info, warn or error"
         required: false
         type: string
-        default: off
+        default: "error"
 jobs:
   test:
     env:
