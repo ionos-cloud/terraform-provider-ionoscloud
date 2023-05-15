@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 	dnsaas "github.com/ionos-cloud/sdk-go-dnsaas"
 	"log"
 	"strings"
@@ -15,9 +16,10 @@ func dataSourceDNSaaSZone() *schema.Resource {
 		ReadContext: dataSourceZoneRead,
 		Schema: map[string]*schema.Schema{
 			"id": {
-				Type:        schema.TypeString,
-				Description: "The ID of your DNS Zone.",
-				Optional:    true,
+				Type:             schema.TypeString,
+				Description:      "The ID of your DNS Zone.",
+				ValidateDiagFunc: validation.ToDiagFunc(validation.IsUUID),
+				Optional:         true,
 			},
 			"name": {
 				Type:        schema.TypeString,
@@ -88,11 +90,7 @@ func dataSourceZoneRead(ctx context.Context, d *schema.ResourceData, meta interf
 			if err != nil {
 				return diag.FromErr(fmt.Errorf("an error occured while fetching DNS Zones: %w", err))
 			}
-			if zones.Items != nil {
-				results = *zones.Items
-			} else {
-				return diag.FromErr(fmt.Errorf("expected items representing DNS Zones, got 'nil' instead"))
-			}
+			results = *zones.Items
 		} else {
 			// In order to have an exact name match, we must retrieve all the DNS Zones and then
 			// build a list of exact matches based on the response, there is no other way since using
@@ -101,19 +99,15 @@ func dataSourceZoneRead(ctx context.Context, d *schema.ResourceData, meta interf
 			if err != nil {
 				return diag.FromErr(fmt.Errorf("an error occured while fetching DNS Zones: %w", err))
 			}
-			if zones.Items != nil {
-				for _, zoneItem := range *zones.Items {
-					// Since each zone has a unique name, there is no need to keep on searching if
-					// we already found the required zone.
-					if len(results) == 1 {
-						break
-					}
-					if zoneItem.Properties != nil && zoneItem.Properties.ZoneName != nil && strings.EqualFold(*zoneItem.Properties.ZoneName, name) {
-						results = append(results, zoneItem)
-					}
+			for _, zoneItem := range *zones.Items {
+				// Since each zone has a unique name, there is no need to keep on searching if
+				// we already found the required zone.
+				if len(results) == 1 {
+					break
 				}
-			} else {
-				return diag.FromErr(fmt.Errorf("expected items representing DNS Zones, got 'nil' instead"))
+				if zoneItem.Properties != nil && zoneItem.Properties.ZoneName != nil && strings.EqualFold(*zoneItem.Properties.ZoneName, name) {
+					results = append(results, zoneItem)
+				}
 			}
 		}
 		if results == nil || len(results) == 0 {

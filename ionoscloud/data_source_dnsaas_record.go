@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 	dnsaas "github.com/ionos-cloud/sdk-go-dnsaas"
 	"log"
 	"strings"
@@ -15,9 +16,10 @@ func dataSourceDNSaaSRecord() *schema.Resource {
 		ReadContext: dataSourceRecordRead,
 		Schema: map[string]*schema.Schema{
 			"id": {
-				Type:        schema.TypeString,
-				Description: "The ID of your DNS Record.",
-				Optional:    true,
+				Type:             schema.TypeString,
+				Description:      "The ID of your DNS Record.",
+				ValidateDiagFunc: validation.ToDiagFunc(validation.IsUUID),
+				Optional:         true,
 			},
 			"name": {
 				Type:        schema.TypeString,
@@ -31,9 +33,10 @@ func dataSourceDNSaaSRecord() *schema.Resource {
 				Optional:    true,
 			},
 			"zone_id": {
-				Type:        schema.TypeString,
-				Description: "The UUID of an existing DNS Zone",
-				Required:    true,
+				Type:             schema.TypeString,
+				Description:      "The UUID of an existing DNS Zone",
+				ValidateDiagFunc: validation.ToDiagFunc(validation.IsUUID),
+				Required:         true,
 			},
 			"type": {
 				Type:     schema.TypeString,
@@ -98,11 +101,7 @@ func dataSourceRecordRead(ctx context.Context, d *schema.ResourceData, meta inte
 			if err != nil {
 				return diag.FromErr(fmt.Errorf("an error occured while fetching DNS Records: %w", err))
 			}
-			if records.Items != nil {
-				results = *records.Items
-			} else {
-				return diag.FromErr(fmt.Errorf("expected items representing DNS Records, got 'nil' instead"))
-			}
+			results = *records.Items
 		} else {
 			// In order to have an exact name match, we must retrieve all the DNS Records and then
 			// build a list of exact matches based on the response, there is no other way since using
@@ -111,19 +110,15 @@ func dataSourceRecordRead(ctx context.Context, d *schema.ResourceData, meta inte
 			if err != nil {
 				return diag.FromErr(fmt.Errorf("an error occured while fetching DNS Records: %w", err))
 			}
-			if records.Items != nil {
-				for _, recordItem := range *records.Items {
-					// Since each record has a unique name, there is no need to keep on searching if
-					// we already found the required record.
-					if len(results) == 1 {
-						break
-					}
-					if recordItem.Properties != nil && recordItem.Properties.Name != nil && strings.EqualFold(*recordItem.Properties.Name, recordName) {
-						results = append(results, recordItem)
-					}
+			for _, recordItem := range *records.Items {
+				// Since each record has a unique name, there is no need to keep on searching if
+				// we already found the required record.
+				if len(results) == 1 {
+					break
 				}
-			} else {
-				return diag.FromErr(fmt.Errorf("expected items representing DNS Records, got 'nil' instead"))
+				if recordItem.Properties != nil && recordItem.Properties.Name != nil && strings.EqualFold(*recordItem.Properties.Name, recordName) {
+					results = append(results, recordItem)
+				}
 			}
 		}
 		if results == nil || len(results) == 0 {
