@@ -548,12 +548,13 @@ func resourceServerCreate(ctx context.Context, d *schema.ResourceData, meta inte
 						fwRulesProperties := make([]ionoscloud.FirewallruleProperties, len(fwRulesIntf))
 						err = utils.DecodeInterfaceToStruct(fwRulesIntf, fwRulesProperties)
 						if err != nil {
-							return diag.FromErr(fmt.Errorf("could not decode from %s to slice of FirewallRules %w", fwRulesIntf, err))
+							return diag.FromErr(fmt.Errorf("could not decode from %s to slice of firewall rules %w", fwRulesIntf, err))
 						}
-						for _, prop := range fwRulesProperties {
-							FwPropUnsetSetFieldIfNotSetInSchema(&prop, fwRulesPath, d)
+						for idx := range fwRulesProperties {
+							FwPropUnsetSetFieldIfNotSetInSchema(&fwRulesProperties[idx], fwRulesPath, d)
+							//tempProperty := fwRulesProperties[idx]
 							firewall := ionoscloud.FirewallRule{
-								Properties: &prop,
+								Properties: &fwRulesProperties[idx],
 							}
 							fwRules = append(fwRules, firewall)
 						}
@@ -885,8 +886,8 @@ func resourceServerUpdate(ctx context.Context, d *schema.ResourceData, meta inte
 		}
 
 		nic := &ionoscloud.Nic{}
+		nicStr := d.Get("primary_nic").(string)
 		for _, n := range *server.Entities.Nics.Items {
-			nicStr := d.Get("primary_nic").(string)
 			if *n.Id == nicStr {
 				nic = &n
 				break
@@ -933,7 +934,7 @@ func resourceServerUpdate(ctx context.Context, d *schema.ResourceData, meta inte
 			oldValues, newValues := d.GetChange(firstNicFirewallPath)
 			oldFwSlice, newFwSlice, err := GetChangesInFirewallRules(oldValues.([]interface{}), newValues.([]interface{}))
 			if err != nil {
-				return diag.FromErr(fmt.Errorf("could not get changes for FirewallRules %w", err))
+				return diag.FromErr(fmt.Errorf("could not get changes for firewall rules %w", err))
 			}
 
 			firewallId := d.Get("firewallrule_id").(string)
@@ -945,22 +946,23 @@ func resourceServerUpdate(ctx context.Context, d *schema.ResourceData, meta inte
 
 				firewalls, err := fs.firewallsGet(ctx, dcId, *server.Id, *nic.Id, 1)
 				if err != nil {
-					return diag.FromErr(fmt.Errorf("an error occurred while fetching firewall rules: for dcId: %s server_id: %s nic_id %s `%w`", dcId, *server.Id, *nic.Id, err))
+					return diag.FromErr(fmt.Errorf("an error occurred while fetching firewall rules: for dcId: %s, server_id: %s, nic_id %s, (%w)", dcId, *server.Id, *nic.Id, err))
 				}
 				//delete old rules
 				for _, ruleProp := range oldFwSlice {
-					for _, item := range firewalls {
-						if strings.EqualFold(*ruleProp.Name, *item.Properties.Name) {
-							if firewallId == *item.Id {
+					for _, firewall := range firewalls {
+						if strings.EqualFold(*ruleProp.Name, *firewall.Properties.Name) {
+							//if firewallId is in the rules deleted, unset it
+							if firewallId == *firewall.Id {
 								firewallId = ""
 							}
-							apiResponse, err = fs.deleteFirewallRule(ctx, dcId, *server.Id, *nic.Id, *item.Id)
+							apiResponse, err = fs.deleteFirewallRule(ctx, dcId, *server.Id, *nic.Id, *firewall.Id)
 							if err != nil {
-								return diag.FromErr(fmt.Errorf("an error occured while deleting firewall rule for dcId: %s server_id: %s nic_id %s ID: %s `%w`", dcId, *server.Id, *nic.Id, *item.Id, err))
+								return diag.FromErr(fmt.Errorf("an error occured while deleting firewall rule for dcId: %s, server_id: %s, nic_id %s, ID: %s, (%w)", dcId, *server.Id, *nic.Id, *firewall.Id, err))
 							}
 
-							if utils.Contains(fwRuleIdsString, *item.Id) {
-								fwRuleIdsString = utils.DeleteFromSlice(fwRuleIdsString, *item.Id)
+							if utils.Contains(fwRuleIdsString, *firewall.Id) {
+								fwRuleIdsString = utils.DeleteFromSlice(fwRuleIdsString, *firewall.Id)
 							}
 						}
 					}
@@ -1072,6 +1074,33 @@ func resourceServerUpdate(ctx context.Context, d *schema.ResourceData, meta inte
 	return resourceServerRead(ctx, d, meta)
 }
 
+func deleteAllVolumes(ctx context.Context, d *schema.ResourceData, meta interface{}, client *ionoscloud.APIClient, server *ionoscloud.Server) diag.Diagnostics {
+	dcId := d.Get("datacenter_id").(string)
+
+	if server.Entities == nil || server.Entities.Volumes == nil || server.Entities.Volumes.Items == nil {
+		return nil
+	}
+
+	volumes := server.Entities.Volumes.Items
+	for _, volume := range *volumes {
+		apiResponse, err := client.VolumesApi.DatacentersVolumesDelete(ctx, dcId, *volume.Id).Execute()
+		logApiRequestTime(apiResponse)
+		if err != nil {
+			diags := diag.FromErr(fmt.Errorf("error occured while deleting remaining volume %s of server ID %s %w", *volume.Id, d.Id(), err))
+			return diags
+		}
+
+		// Wait, catching any errors
+		_, errState := getStateChangeConf(meta, d, apiResponse.Header.Get("Location"), schema.TimeoutDelete).WaitForStateContext(ctx)
+		if errState != nil {
+			diags := diag.FromErr(fmt.Errorf("error getting state change for volumes delete %w", errState))
+			return diags
+		}
+
+	}
+	return nil
+}
+
 func resourceServerDelete(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	client := meta.(SdkBundle).CloudApiClient
 	dcId := d.Get("datacenter_id").(string)
@@ -1107,33 +1136,6 @@ func resourceServerDelete(ctx context.Context, d *schema.ResourceData, meta inte
 	}
 
 	d.SetId("")
-	return nil
-}
-
-func deleteAllVolumes(ctx context.Context, d *schema.ResourceData, meta interface{}, client *ionoscloud.APIClient, server *ionoscloud.Server) diag.Diagnostics {
-	dcId := d.Get("datacenter_id").(string)
-
-	if server.Entities == nil || server.Entities.Volumes == nil || server.Entities.Volumes.Items == nil {
-		return nil
-	}
-
-	volumes := server.Entities.Volumes.Items
-	for _, volume := range *volumes {
-		apiResponse, err := client.VolumesApi.DatacentersVolumesDelete(ctx, dcId, *volume.Id).Execute()
-		logApiRequestTime(apiResponse)
-		if err != nil {
-			diags := diag.FromErr(fmt.Errorf("error occured while deleting remaining volume %s of server ID %s %w", *volume.Id, d.Id(), err))
-			return diags
-		}
-
-		// Wait, catching any errors
-		_, errState := getStateChangeConf(meta, d, apiResponse.Header.Get("Location"), schema.TimeoutDelete).WaitForStateContext(ctx)
-		if errState != nil {
-			diags := diag.FromErr(fmt.Errorf("error getting state change for volumes delete %w", errState))
-			return diags
-		}
-
-	}
 	return nil
 }
 

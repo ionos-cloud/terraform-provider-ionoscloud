@@ -850,8 +850,8 @@ func resourceCubeServerUpdate(ctx context.Context, d *schema.ResourceData, meta 
 	// Nic stuff
 	if d.HasChange("nic") {
 		nic := &ionoscloud.Nic{}
+		nicStr := d.Get("primary_nic").(string)
 		for _, n := range *server.Entities.Nics.Items {
-			nicStr := d.Get("primary_nic").(string)
 			if *n.Id == nicStr {
 				nic = &n
 				break
