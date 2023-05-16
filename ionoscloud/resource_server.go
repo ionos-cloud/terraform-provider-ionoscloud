@@ -1196,6 +1196,11 @@ func resourceServerImport(ctx context.Context, d *schema.ResourceData, meta inte
 		if err := d.Set("firewallrule_id", parts[3]); err != nil {
 			return nil, fmt.Errorf("error setting firewallrule_id %w", err)
 		}
+		var rules []string
+		rules = append(rules, parts[3])
+		if err := d.Set("firewallrule_ids", rules); err != nil {
+			return nil, utils.GenerateSetError(ServerResource, "firewallrule_ids", err)
+		}
 	}
 
 	if err := setResourceServerData(ctx, client, d, &server); err != nil {
