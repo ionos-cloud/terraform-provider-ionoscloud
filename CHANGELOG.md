@@ -4,7 +4,6 @@
 ## Fixes
 - Update code to work with new mongo version
 ### Features
-- `nic` field inside server is not optional
 - `firewall` list inside server now allows multiple firewall rules to be defined inline
 
 ## 6.3.6
