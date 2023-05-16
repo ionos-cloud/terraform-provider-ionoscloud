@@ -401,7 +401,7 @@ func resourceServer() *schema.Resource {
 									"type": {
 										Type:     schema.TypeString,
 										Optional: true,
-										Default:  "INGRESS",
+										Computed: true,
 									},
 								},
 							},
@@ -456,10 +456,6 @@ func checkServerImmutableFields(_ context.Context, diff *schema.ResourceDiff, _ 
 func resourceServerCreate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	client := meta.(SdkBundle).CloudApiClient
 	datacenterId := d.Get("datacenter_id").(string)
-
-	nic := ionoscloud.Nic{
-		Properties: &ionoscloud.NicProperties{},
-	}
 
 	serverReq, err := initializeCreateRequests(d)
 	if err != nil {
@@ -534,7 +530,7 @@ func resourceServerCreate(ctx context.Context, d *schema.ResourceData, meta inte
 		if nics.([]interface{}) != nil {
 			for nicIndex := range nics.([]interface{}) {
 				nicPath := fmt.Sprintf("nic.%d.", nicIndex)
-				nic = getNicData(d, nicPath)
+				nic := getNicData(d, nicPath)
 				*serverReq.Entities.Nics.Items = append(*serverReq.Entities.Nics.Items, nic)
 				fwRulesPath := nicPath + "firewall"
 				if firewallRules, ok := d.GetOk(fwRulesPath); ok {
@@ -613,18 +609,18 @@ func resourceServerCreate(ctx context.Context, d *schema.ResourceData, meta inte
 				sentFirstNic := (*serverReq.Entities.Nics.Items)[0]
 
 				if sentFirstNic.Entities != nil && sentFirstNic.Entities.Firewallrules != nil && sentFirstNic.Entities.Firewallrules.Items != nil {
-					sentItems := *(*serverReq.Entities.Nics.Items)[0].Entities.Firewallrules.Items
-					foundItems := *foundFirstNic.Entities.Firewallrules.Items
-					if len(sentItems) > 0 {
+					sentRules := *sentFirstNic.Entities.Firewallrules.Items
+					foundRules := *foundFirstNic.Entities.Firewallrules.Items
+					if len(sentRules) > 0 {
 
-						if err := d.Set("firewallrule_id", *(foundItems)[0].Id); err != nil {
+						if err := d.Set("firewallrule_id", *(foundRules)[0].Id); err != nil {
 							diags := diag.FromErr(err)
 							return diags
 						}
-						if len(sentItems) > 0 {
+						if len(sentRules) > 0 {
 							//keep order of rules
-							for _, rule := range sentItems {
-								for _, foundRule := range foundItems {
+							for _, rule := range sentRules {
+								for _, foundRule := range foundRules {
 									if reflect.DeepEqual(rule.Properties, foundRule.Properties) {
 										rules = append(rules, *foundRule.Id)
 									}

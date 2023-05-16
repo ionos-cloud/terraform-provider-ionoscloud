@@ -51,7 +51,7 @@ func (fs *FirewallService) deleteFirewallRule(ctx context.Context, datacenterId,
 	// Wait, catching any errors
 	_, errState := getStateChangeConf(fs.meta, fs.schemaData, apiResponse.Header.Get("Location"), schema.TimeoutDelete).WaitForStateContext(ctx)
 	if errState != nil {
-		return apiResponse, fmt.Errorf("an error occured while waiting for state change dcId: %s server_id: %s nic_id %s ID: %s Response: %w", datacenterId, serverId, nicId, firewallId, errState)
+		return apiResponse, fmt.Errorf("an error occured while waiting for state change dcId: %s, server_id: %s, nic_id: %s, ID: %s, Response: (%w)", datacenterId, serverId, nicId, firewallId, errState)
 	}
 	return apiResponse, nil
 }
@@ -60,12 +60,12 @@ func (fs *FirewallService) createFirewallRule(ctx context.Context, datacenterId,
 	firewall, apiResponse, err := fs.client.FirewallRulesApi.DatacentersServersNicsFirewallrulesPost(ctx, datacenterId, serverId, nicId).Firewallrule(firewallrule).Execute()
 	apiResponse.LogInfo()
 	if err != nil {
-		return nil, apiResponse, fmt.Errorf("an error occured while creating firewall rule for dcId: %s server_id: %s nic_id ID: %s Response: (%w)", datacenterId, serverId, nicId, err)
+		return nil, apiResponse, fmt.Errorf("an error occured while creating firewall rule for dcId: %s, server_id: %s, nic_id: %s, Response: (%w)", datacenterId, serverId, nicId, err)
 	}
 	// Wait, catching any errors
 	_, errState := getStateChangeConf(fs.meta, fs.schemaData, apiResponse.Header.Get("Location"), schema.TimeoutCreate).WaitForStateContext(ctx)
 	if errState != nil {
-		return nil, apiResponse, fmt.Errorf("an error occured while waiting for state change dcId: %s server_id: %s nic_id ID: %s Response: (%w)", datacenterId, serverId, nicId, errState)
+		return nil, apiResponse, fmt.Errorf("an error occured while waiting for state change dcId: %s, server_id: %s, nic_id: %s, Response: (%w)", datacenterId, serverId, nicId, errState)
 	}
 	return &firewall, apiResponse, nil
 }
@@ -103,11 +103,11 @@ func GetChangesInFirewallRules(oldValues, newValues []interface{}) ([]ionoscloud
 	newFwSlice := make([]ionoscloud.FirewallruleProperties, len(onlyNew))
 	err := utils.DecodeInterfaceToStruct(onlyNew, newFwSlice)
 	if err != nil {
-		return nil, nil, fmt.Errorf("could not decode from %s to new values of FirewallRules %w", newValues, err)
+		return nil, nil, fmt.Errorf("could not decode from %s to new values of firewall rules %w", newValues, err)
 	}
 	err = utils.DecodeInterfaceToStruct(onlyOld, oldFwSlice)
 	if err != nil {
-		return nil, nil, fmt.Errorf("could not decode from %s to values of FirewallRules %w", oldValues, err)
+		return nil, nil, fmt.Errorf("could not decode from %s to values of firewall rules %w", oldValues, err)
 	}
 	return oldFwSlice, newFwSlice, nil
 }
