@@ -3,6 +3,9 @@
 - Update `sdk-go-dbaas-mongo` to [v1.0.6](https://github.com/ionos-cloud/sdk-go-dbaas-mongo/releases/tag/v1.2.2)
 ## Fixes
 - Update code to work with new mongo version
+### Features
+- `nic` field inside server is not optional
+- `firewall` list inside server now allows multiple firewall rules to be defined inline
 
 ## 6.3.6
 ### Feature
