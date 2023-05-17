@@ -88,7 +88,7 @@ func (ls *LabelsService) datacentersServersLabelsDelete(datacenterId, serverId s
 				apiResponse.LogInfo()
 				if err != nil {
 					if httpNotFound(apiResponse) {
-						log.Printf("[WARNING] label with key %s has been already removed from server %s\n", labelKey, serverId)
+						log.Printf("[WARN] label with key %s has been already removed from server %s\n", labelKey, serverId)
 					} else {
 						return fmt.Errorf("[label update] an error occured while deleting label with key: %s, server ID: %s, error: %w", labelKey, serverId, err)
 					}

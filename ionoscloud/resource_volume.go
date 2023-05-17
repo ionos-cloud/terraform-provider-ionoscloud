@@ -722,7 +722,7 @@ func getImage(ctx context.Context, client *ionoscloud.APIClient, d *schema.Resou
 			}
 			// if no image id was found with that name we look for a matching snapshot
 			if image == "" {
-				log.Printf("[*****] looking for a snapshot with id %s\n", imageName)
+				log.Printf("[DEBUG] looking for a snapshot with id %s\n", imageName)
 				image = getSnapshotId(ctx, client, imageName)
 				if image != "" {
 					isSnapshot = true
