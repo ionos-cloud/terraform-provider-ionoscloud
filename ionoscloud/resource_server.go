@@ -692,9 +692,9 @@ func resourceServerCreate(ctx context.Context, d *schema.ResourceData, meta inte
 	}
 
 	// Set inline volumes
-	if serverReq.Entities.Volumes != nil && serverReq.Entities.Volumes.Items != nil {
+	if foundServer.Entities.Volumes != nil && foundServer.Entities.Volumes.Items != nil {
 		var inlineVolumeIds []string
-		for _, volume := range *serverReq.Entities.Volumes.Items {
+		for _, volume := range *foundServer.Entities.Volumes.Items {
 			inlineVolumeIds = append(inlineVolumeIds, *volume.Id)
 		}
 
