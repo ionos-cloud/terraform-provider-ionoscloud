@@ -987,14 +987,6 @@ func resourceServerUpdate(ctx context.Context, d *schema.ResourceData, meta inte
 
 					oldId := onlyOld[idx].(map[string]interface{})["id"].(string)
 
-					//for _, newIntf := range onlyNew {
-					//	//do not delete if the id in the old rule is present in the new rules to be updated
-					//	if oldId == newIntf.(map[string]interface{})["id"].(string) {
-					//		deleteRule = false
-					//		break
-					//	}
-					//}
-
 					if deleteRule := !utils.IsValueInSliceOfMap(onlyNew, "id", oldId); deleteRule {
 						//if firewallId is in the rules deleted, unset it
 						if firewallId == oldId {
