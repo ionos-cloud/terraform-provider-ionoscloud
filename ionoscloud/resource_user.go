@@ -7,6 +7,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 	ionoscloud "github.com/ionos-cloud/sdk-go/v6"
+	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/slice"
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils"
 	"log"
 )
@@ -241,8 +242,8 @@ func resourceUserUpdate(ctx context.Context, d *schema.ResourceData, meta interf
 		oldGroupsList := convertSlice(oldValues.(*schema.Set).List())
 		newGroupsList := convertSlice(newValues.(*schema.Set).List())
 
-		newGroups := utils.DiffSliceOneWay(newGroupsList, oldGroupsList)
-		deletedGroups := utils.DiffSliceOneWay(oldGroupsList, newGroupsList)
+		newGroups := slice.DiffOneWay(newGroupsList, oldGroupsList)
+		deletedGroups := slice.DiffOneWay(oldGroupsList, newGroupsList)
 
 		if newGroups != nil && len(newGroups) > 0 {
 			log.Printf("[INFO] New groups to add: %+v", newGroups)

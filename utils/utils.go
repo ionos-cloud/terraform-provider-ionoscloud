@@ -39,49 +39,6 @@ func CreateTransport() *http.Transport {
 	}
 }
 
-func DiffSlice(slice1 []string, slice2 []string) []string {
-	var diff []string
-
-	// Loop two times, first to find slice1 strings not in slice2,
-	// second loop to find slice2 strings not in slice1
-	for i := 0; i < 2; i++ {
-		for _, s1 := range slice1 {
-			found := false
-			for _, s2 := range slice2 {
-				if s1 == s2 {
-					found = true
-					break
-				}
-			}
-			// String not found. We add it to return slice
-			if !found {
-				diff = append(diff, s1)
-			}
-		}
-		// Swap the slices, only if it was the first loop
-		if i == 0 {
-			slice1, slice2 = slice2, slice1
-		}
-	}
-
-	return diff
-}
-
-// DiffSliceOneWay returns the elements in `a` that aren't in `b`.
-func DiffSliceOneWay(a, b []string) []string {
-	mb := make(map[string]struct{}, len(b))
-	for _, x := range b {
-		mb[x] = struct{}{}
-	}
-	var diff []string
-	for _, x := range a {
-		if _, found := mb[x]; !found {
-			diff = append(diff, x)
-		}
-	}
-	return diff
-}
-
 func GenerateSetError(resource, field string, err error) error {
 	return fmt.Errorf("occured while setting %s property for %s, %w", field, resource, err)
 }
@@ -271,61 +228,6 @@ func WaitForResourceToBeDeleted(ctx context.Context, d *schema.ResourceData, fn 
 	return err
 }
 
-func DifferenceSlices[T comparable](a []T, b []T) []T {
-	set := make([]T, 0)
-	for _, v := range a {
-		if !Contains(b, v) {
-			set = append(set, v)
-		}
-	}
-	return set
-}
-
-// IntersectSlices has complexity: O(n^2)
-func IntersectSlices[T comparable](a []T, b []T) []T {
-	set := make([]T, 0)
-	for _, v := range a {
-		if Contains(b, v) {
-			set = append(set, v)
-		}
-	}
-	return set
-}
-
-func ToAnyList[T any](input []T) []any {
-	list := make([]any, len(input))
-	for i, v := range input {
-		list[i] = v
-	}
-	return list
-}
-
-func DeleteFromSlice[T comparable](collection []T, el T) []T {
-	idx := FindIndex(collection, el)
-	if idx > -1 {
-		return append(collection[:idx], collection[idx+1:]...)
-	}
-	return collection
-}
-
-func FindIndex[T comparable](collection []T, el T) int {
-	for i := range collection {
-		if reflect.DeepEqual(collection[i], el) {
-			return i
-		}
-	}
-	return -1
-}
-
-func Contains[T comparable](b []T, e T) bool {
-	for _, v := range b {
-		if reflect.DeepEqual(e, v) {
-			return true
-		}
-	}
-	return false
-}
-
 // DecodeInterfaceToStruct can decode from interface{}, or from []interface
 // will turn "" into nil values
 // takes snake_case fields and decodes them into camelcase fields of struct
@@ -363,4 +265,15 @@ func PointerEmptyToNil() mapstructure.DecodeHookFuncType {
 		}
 		return data, nil
 	}
+}
+
+// checks if value['1'] of key[`id`] is present inside a slice of maps[string]interface{}
+func IsValueInSliceOfMap[T comparable](sliceOfMaps []interface{}, key string, value T) bool {
+	for _, mmap := range sliceOfMaps {
+		//do not delete if the id in the old rule is present in the new rules to be updated
+		if value == mmap.(map[string]interface{})[key] {
+			return true
+		}
+	}
+	return false
 }

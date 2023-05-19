@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	ionoscloud "github.com/ionos-cloud/sdk-go/v6"
+	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/slice"
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils"
 	"log"
 	"strconv"
@@ -70,13 +71,23 @@ func (fs *FirewallService) createFirewallRule(ctx context.Context, datacenterId,
 	return &firewall, apiResponse, nil
 }
 
+func (fs *FirewallService) updateFirewallRule(ctx context.Context, datacenterId, serverId, nicId, id string, firewallrule ionoscloud.FirewallRule) (*ionoscloud.FirewallRule, *ionoscloud.APIResponse, error) {
+	firewall, apiResponse, err := fs.client.FirewallRulesApi.DatacentersServersNicsFirewallrulesPut(ctx, datacenterId, serverId, nicId, id).Firewallrule(firewallrule).Execute()
+	apiResponse.LogInfo()
+	if err != nil {
+		return nil, apiResponse, fmt.Errorf("an error occured while updating firewall rule for dcId: %s, server_id: %s, nic_id: %s, id %s, Response: (%w)", datacenterId, serverId, nicId, id, err)
+	}
+	// Wait, catching any errors
+	_, errState := getStateChangeConf(fs.meta, fs.schemaData, apiResponse.Header.Get("Location"), schema.TimeoutUpdate).WaitForStateContext(ctx)
+	if errState != nil {
+		return nil, apiResponse, fmt.Errorf("an error occured while waiting for state change dcId: %s, server_id: %s, nic_id: %s, Response: (%w)", datacenterId, serverId, nicId, errState)
+	}
+	return &firewall, apiResponse, nil
+}
+
 func SetFirewallProperties(firewall ionoscloud.FirewallRule) map[string]interface{} {
 
 	fw := map[string]interface{}{}
-	/*
-		"protocol": *firewall.Properties.Protocol,
-		"name":     *firewall.Properties.Name,
-	*/
 	if firewall.Properties != nil {
 		utils.SetPropWithNilCheck(fw, "protocol", firewall.Properties.Protocol)
 		utils.SetPropWithNilCheck(fw, "name", firewall.Properties.Name)
@@ -97,8 +108,8 @@ func SetFirewallProperties(firewall ionoscloud.FirewallRule) map[string]interfac
 }
 
 func GetChangesInFirewallRules(oldValues, newValues []interface{}) ([]ionoscloud.FirewallruleProperties, []ionoscloud.FirewallruleProperties, error) {
-	onlyOld := utils.DifferenceSlices(oldValues, newValues)
-	onlyNew := utils.DifferenceSlices(newValues, oldValues)
+	onlyOld := slice.Difference(oldValues, newValues)
+	onlyNew := slice.Difference(newValues, oldValues)
 	oldFwSlice := make([]ionoscloud.FirewallruleProperties, len(onlyOld))
 	newFwSlice := make([]ionoscloud.FirewallruleProperties, len(onlyNew))
 	err := utils.DecodeInterfaceToStruct(onlyNew, newFwSlice)

@@ -1,4 +1,6 @@
 ## 6.3.7 (upcoming release)
+### Enhancement:
+- Increase go version to 1.20
 ### Features
 - Add `inline_volume_ids` computed field.
 ### Dependency update
