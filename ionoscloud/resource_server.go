@@ -635,7 +635,6 @@ func resourceServerCreate(ctx context.Context, d *schema.ResourceData, meta inte
 					sentRules := *sentFirstNic.Entities.Firewallrules.Items
 					foundRules := *foundFirstNic.Entities.Firewallrules.Items
 					if len(sentRules) > 0 {
-
 						if err := d.Set("firewallrule_id", *(foundRules)[0].Id); err != nil {
 							diags := diag.FromErr(err)
 							return diags
@@ -658,6 +657,7 @@ func resourceServerCreate(ctx context.Context, d *schema.ResourceData, meta inte
 				diags := diag.FromErr(err)
 				return diags
 			}
+
 			if foundFirstNic.Id != nil {
 				err := d.Set("primary_nic", *foundFirstNic.Id)
 				if err != nil {
@@ -1520,6 +1520,11 @@ func setResourceServerData(ctx context.Context, client *ionoscloud.APIClient, d 
 			firewallEntry["id"] = *firewall.Id
 			if firewallEntry != nil && len(firewallEntry) != 0 {
 				fwRulesEntries = append(fwRulesEntries, firewallEntry)
+			}
+		}
+		if len(firewallRuleIds) == 0 {
+			if err := d.Set("firewallrule_id", ""); err != nil {
+				return err
 			}
 		}
 		if fwRulesEntries != nil && len(fwRulesEntries) > 0 {
