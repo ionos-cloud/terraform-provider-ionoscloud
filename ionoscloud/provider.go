@@ -13,12 +13,12 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/meta"
-	"github.com/ionos-cloud/sdk-go/v6"
+	ionoscloud "github.com/ionos-cloud/sdk-go/v6"
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/cert"
 	crService "github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/containerregistry"
 	dataplatformService "github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/dataplatform"
 	dbaasService "github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/dbaas"
-	dnsaasService "github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/dnsaas"
+	dnsService "github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/dns"
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils"
 )
 
@@ -31,7 +31,7 @@ type SdkBundle struct {
 	CertManagerClient  *cert.Client
 	ContainerClient    *crService.Client
 	DataplatformClient *dataplatformService.Client
-	DNSaaSClient       *dnsaasService.Client
+	DNSClient          *dnsService.Client
 }
 
 type ClientOptions struct {
@@ -113,8 +113,8 @@ func Provider() *schema.Provider {
 			ContainerRegistryTokenResource:            resourceContainerRegistryToken(),
 			DataplatformClusterResource:               resourceDataplatformCluster(),
 			DataplatformNodePoolResource:              resourceDataplatformNodePool(),
-			DNSZoneResource:                           resourceDNSaaSZone(),
-			DNSRecordResource:                         resourceDNSaaSRecord(),
+			DNSZoneResource:                           resourceDNSZone(),
+			DNSRecordResource:                         resourceDNSRecord(),
 		},
 		DataSourcesMap: map[string]*schema.Resource{
 			DatacenterResource:                        dataSourceDataCenter(),
@@ -162,8 +162,8 @@ func Provider() *schema.Provider {
 			DataplatformNodePoolResource:              dataSourceDataplatformNodePool(),
 			DataplatformNodePoolsDataSource:           dataSourceDataplatformNodePools(),
 			DataplatformVersionsDataSource:            dataSourceDataplatformVersions(),
-			DNSZoneDataSource:                         dataSourceDNSaaSZone(),
-			DNSRecordDataSource:                       dataSourceDNSaaSRecord(),
+			DNSZoneDataSource:                         dataSourceDNSZone(),
+			DNSRecordDataSource:                       dataSourceDNSRecord(),
 		},
 	}
 
@@ -221,7 +221,7 @@ func providerConfigure(d *schema.ResourceData, terraformVersion string) (interfa
 		CertManagerClient:  NewClientByType(clientOpts, certManagerClient).(*cert.Client),
 		ContainerClient:    NewClientByType(clientOpts, containerRegistryClient).(*crService.Client),
 		DataplatformClient: NewClientByType(clientOpts, dataplatformClient).(*dataplatformService.Client),
-		DNSaaSClient:       NewClientByType(clientOpts, dnsaasClient).(*dnsaasService.Client),
+		DNSClient:          NewClientByType(clientOpts, dnsClient).(*dnsService.Client),
 	}, nil
 }
 
@@ -251,8 +251,8 @@ func NewClientByType(clientOpts ClientOptions, clientType clientType) interface{
 		return crService.NewClient(clientOpts.Username, clientOpts.Password, clientOpts.Token, clientOpts.Url, clientOpts.Version, clientOpts.TerraformVersion)
 	case dataplatformClient:
 		return dataplatformService.NewClient(clientOpts.Username, clientOpts.Password, clientOpts.Token, clientOpts.Url, clientOpts.Version, clientOpts.TerraformVersion)
-	case dnsaasClient:
-		return dnsaasService.NewClient(clientOpts.Username, clientOpts.Password, clientOpts.Token, clientOpts.Url, clientOpts.Version, clientOpts.TerraformVersion)
+	case dnsClient:
+		return dnsService.NewClient(clientOpts.Username, clientOpts.Password, clientOpts.Token, clientOpts.Url, clientOpts.Version, clientOpts.TerraformVersion)
 	default:
 		log.Fatalf("[ERROR] unknown client type %d", clientType)
 	}
