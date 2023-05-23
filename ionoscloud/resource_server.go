@@ -1031,8 +1031,8 @@ func resourceServerUpdate(ctx context.Context, d *schema.ResourceData, meta inte
 					firewallRules = append(firewallRules, fwRule)
 				}
 			}
-			if firewallId != "" {
-				if err := d.Set("firewallrule_id", firewallId); err != nil {
+			if len(fwRuleIdsString) > 0 {
+				if err := d.Set("firewallrule_id", fwRuleIdsString[0]); err != nil {
 					diags := diag.FromErr(err)
 					return diags
 				}
