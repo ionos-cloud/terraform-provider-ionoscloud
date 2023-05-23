@@ -1,4 +1,6 @@
 ## 6.3.7 (upcoming release)
+### Enhancement:
+- Increase go version to 1.20
 ### Features
 - Add `inline_volume_ids` computed field.
 ### Dependency update
@@ -6,6 +8,8 @@
 ### Fixes
 - Log levels need to be shown and filtered correctly when set with `TF_LOG`. Also change `WARNING` log levels to `WARN`.
 - Update code to work with new mongo version
+### Features
+- `firewall` list inside server now allows multiple firewall rules to be defined inline
 - Ignore downgrades of `k8s_version` patch level.
 - Allow upgrades of `k8s_version` patch level.
 

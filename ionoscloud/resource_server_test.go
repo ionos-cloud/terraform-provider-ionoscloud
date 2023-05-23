@@ -262,7 +262,8 @@ func TestAccServerNoBootVolumeBasic(t *testing.T) {
 	})
 }
 
-func TestAccServerBootCdromNoImage(t *testing.T) {
+// tests server with no cdromimage and with multiple firewall rules inline
+func TestAccServerBootCdromNoImageAndInlineFwRules(t *testing.T) {
 	var server ionoscloud.Server
 
 	resource.Test(t, resource.TestCase{
@@ -292,13 +293,114 @@ func TestAccServerBootCdromNoImage(t *testing.T) {
 					resource.TestCheckResourceAttr(ServerResource+"."+ServerTestResource, "nic.0.firewall.0.name", ServerTestResource),
 					resource.TestCheckResourceAttr(ServerResource+"."+ServerTestResource, "nic.0.firewall.0.port_range_start", "22"),
 					resource.TestCheckResourceAttr(ServerResource+"."+ServerTestResource, "nic.0.firewall.0.port_range_end", "22"),
+					resource.TestCheckResourceAttr(ServerResource+"."+ServerTestResource, "nic.0.firewall.#", "1"),
+				),
+			},
+			{
+				Config: testAccCheckServerConfig2Fw,
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckServerExists(ServerResource+"."+ServerTestResource, &server),
+					resource.TestCheckResourceAttr(ServerResource+"."+ServerTestResource, "name", ServerTestResource),
+					resource.TestCheckResourceAttr(ServerResource+"."+ServerTestResource, "cores", "1"),
+					resource.TestCheckResourceAttr(ServerResource+"."+ServerTestResource, "ram", "1024"),
+					resource.TestCheckResourceAttr(ServerResource+"."+ServerTestResource, "availability_zone", "ZONE_1"),
+					resource.TestCheckResourceAttr(ServerResource+"."+ServerTestResource, "cpu_family", "INTEL_SKYLAKE"),
+					resource.TestCheckResourceAttr(ServerResource+"."+ServerTestResource, "volume.0.name", ServerTestResource),
+					resource.TestCheckResourceAttr(ServerResource+"."+ServerTestResource, "volume.0.size", "5"),
+					resource.TestCheckResourceAttr(ServerResource+"."+ServerTestResource, "volume.0.disk_type", "SSD Standard"),
+					resource.TestCheckResourceAttr(ServerResource+"."+ServerTestResource, "volume.0.licence_type", "OTHER"),
+					resource.TestCheckResourceAttrPair(ServerResource+"."+ServerTestResource, "nic.0.lan", LanResource+"."+LanTestResource, "id"),
+					resource.TestCheckResourceAttr(ServerResource+"."+ServerTestResource, "nic.0.dhcp", "true"),
+					resource.TestCheckResourceAttr(ServerResource+"."+ServerTestResource, "nic.0.firewall_active", "true"),
+					resource.TestCheckResourceAttr(ServerResource+"."+ServerTestResource, "nic.0.firewall.0.protocol", "TCP"),
+					resource.TestCheckResourceAttr(ServerResource+"."+ServerTestResource, "nic.0.firewall.0.name", ServerTestResource),
+					resource.TestCheckResourceAttr(ServerResource+"."+ServerTestResource, "nic.0.firewall.0.port_range_start", "25"),
+					resource.TestCheckResourceAttr(ServerResource+"."+ServerTestResource, "nic.0.firewall.0.port_range_end", "25"),
+					resource.TestCheckResourceAttr(ServerResource+"."+ServerTestResource, "nic.0.firewall.0.source_mac", "00:0a:95:9d:68:17"),
+					resource.TestCheckResourceAttrPair(ServerResource+"."+ServerTestResource, "nic.0.firewall.0.source_ip", "ionoscloud_ipblock.webserver_ipblock", "ips.0"),
+					resource.TestCheckResourceAttrPair(ServerResource+"."+ServerTestResource, "nic.0.firewall.0.target_ip", "ionoscloud_ipblock.webserver_ipblock", "ips.1"),
+					resource.TestCheckResourceAttr(ServerResource+"."+ServerTestResource, "nic.0.firewall.0.port_range_end", "25"),
+					resource.TestCheckResourceAttr(ServerResource+"."+ServerTestResource, "nic.0.firewall.1.name", ServerTestResource+"2"),
+					resource.TestCheckResourceAttr(ServerResource+"."+ServerTestResource, "nic.0.firewall.1.port_range_start", "23"),
+					resource.TestCheckResourceAttr(ServerResource+"."+ServerTestResource, "nic.0.firewall.1.port_range_end", "23"),
+					resource.TestCheckResourceAttr(ServerResource+"."+ServerTestResource, "nic.0.firewall.#", "2"),
+				),
+			},
+			{
+				Config: testAccCheckServerConfig3Fw,
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckServerExists(ServerResource+"."+ServerTestResource, &server),
+					resource.TestCheckResourceAttr(ServerResource+"."+ServerTestResource, "name", ServerTestResource),
+					resource.TestCheckResourceAttr(ServerResource+"."+ServerTestResource, "cores", "1"),
+					resource.TestCheckResourceAttr(ServerResource+"."+ServerTestResource, "ram", "1024"),
+					resource.TestCheckResourceAttr(ServerResource+"."+ServerTestResource, "availability_zone", "ZONE_1"),
+					resource.TestCheckResourceAttr(ServerResource+"."+ServerTestResource, "cpu_family", "INTEL_SKYLAKE"),
+					resource.TestCheckResourceAttr(ServerResource+"."+ServerTestResource, "volume.0.name", ServerTestResource),
+					resource.TestCheckResourceAttr(ServerResource+"."+ServerTestResource, "volume.0.size", "5"),
+					resource.TestCheckResourceAttr(ServerResource+"."+ServerTestResource, "volume.0.disk_type", "SSD Standard"),
+					resource.TestCheckResourceAttr(ServerResource+"."+ServerTestResource, "volume.0.licence_type", "OTHER"),
+					resource.TestCheckResourceAttrPair(ServerResource+"."+ServerTestResource, "nic.0.lan", LanResource+"."+LanTestResource, "id"),
+					resource.TestCheckResourceAttr(ServerResource+"."+ServerTestResource, "nic.0.dhcp", "true"),
+					resource.TestCheckResourceAttr(ServerResource+"."+ServerTestResource, "nic.0.firewall_active", "true"),
+					resource.TestCheckResourceAttr(ServerResource+"."+ServerTestResource, "nic.0.firewall.0.protocol", "TCP"),
+					resource.TestCheckResourceAttr(ServerResource+"."+ServerTestResource, "nic.0.firewall.#", "3"),
+					resource.TestCheckResourceAttr(ServerResource+"."+ServerTestResource, "nic.0.firewall.0.name", ServerTestResource),
+					resource.TestCheckResourceAttr(ServerResource+"."+ServerTestResource, "nic.0.firewall.1.name", ServerTestResource+"2"),
+					resource.TestCheckResourceAttr(ServerResource+"."+ServerTestResource, "nic.0.firewall.1.port_range_start", "23"),
+					resource.TestCheckResourceAttr(ServerResource+"."+ServerTestResource, "nic.0.firewall.1.port_range_end", "23"),
+					resource.TestCheckResourceAttr(ServerResource+"."+ServerTestResource, "nic.0.firewall.2.name", ServerTestResource+"3"),
+					resource.TestCheckResourceAttr(ServerResource+"."+ServerTestResource, "nic.0.firewall.2.port_range_start", "44"),
+					resource.TestCheckResourceAttr(ServerResource+"."+ServerTestResource, "nic.0.firewall.2.port_range_end", "44"),
+				),
+			},
+			{
+				Config: testAccCheckServerConfigRemove2FwRules,
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckServerExists(ServerResource+"."+ServerTestResource, &server),
+					resource.TestCheckResourceAttr(ServerResource+"."+ServerTestResource, "name", ServerTestResource),
+					resource.TestCheckResourceAttr(ServerResource+"."+ServerTestResource, "cores", "1"),
+					resource.TestCheckResourceAttr(ServerResource+"."+ServerTestResource, "ram", "1024"),
+					resource.TestCheckResourceAttr(ServerResource+"."+ServerTestResource, "availability_zone", "ZONE_1"),
+					resource.TestCheckResourceAttr(ServerResource+"."+ServerTestResource, "cpu_family", "INTEL_SKYLAKE"),
+					resource.TestCheckResourceAttr(ServerResource+"."+ServerTestResource, "volume.0.name", ServerTestResource),
+					resource.TestCheckResourceAttr(ServerResource+"."+ServerTestResource, "volume.0.size", "5"),
+					resource.TestCheckResourceAttr(ServerResource+"."+ServerTestResource, "volume.0.disk_type", "SSD Standard"),
+					resource.TestCheckResourceAttr(ServerResource+"."+ServerTestResource, "volume.0.licence_type", "OTHER"),
+					resource.TestCheckResourceAttrPair(ServerResource+"."+ServerTestResource, "nic.0.lan", LanResource+"."+LanTestResource, "id"),
+					resource.TestCheckResourceAttr(ServerResource+"."+ServerTestResource, "nic.0.dhcp", "true"),
+					resource.TestCheckResourceAttr(ServerResource+"."+ServerTestResource, "nic.0.firewall_active", "true"),
+					resource.TestCheckResourceAttr(ServerResource+"."+ServerTestResource, "nic.0.firewall.0.protocol", "TCP"),
+					resource.TestCheckResourceAttr(ServerResource+"."+ServerTestResource, "nic.0.firewall.#", "1"),
+					resource.TestCheckResourceAttr(ServerResource+"."+ServerTestResource, "nic.0.firewall.0.name", ServerTestResource+"3"),
+					resource.TestCheckResourceAttr(ServerResource+"."+ServerTestResource, "nic.0.firewall.0.port_range_start", "44"),
+					resource.TestCheckResourceAttr(ServerResource+"."+ServerTestResource, "nic.0.firewall.0.port_range_end", "44"),
+				),
+			},
+			{
+				Config: testAccCheckServerConfigRemoveAllFwRules,
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckServerExists(ServerResource+"."+ServerTestResource, &server),
+					resource.TestCheckResourceAttr(ServerResource+"."+ServerTestResource, "name", ServerTestResource),
+					resource.TestCheckResourceAttr(ServerResource+"."+ServerTestResource, "cores", "1"),
+					resource.TestCheckResourceAttr(ServerResource+"."+ServerTestResource, "ram", "1024"),
+					resource.TestCheckResourceAttr(ServerResource+"."+ServerTestResource, "availability_zone", "ZONE_1"),
+					resource.TestCheckResourceAttr(ServerResource+"."+ServerTestResource, "cpu_family", "INTEL_SKYLAKE"),
+					resource.TestCheckResourceAttr(ServerResource+"."+ServerTestResource, "volume.0.name", ServerTestResource),
+					resource.TestCheckResourceAttr(ServerResource+"."+ServerTestResource, "volume.0.size", "5"),
+					resource.TestCheckResourceAttr(ServerResource+"."+ServerTestResource, "volume.0.disk_type", "SSD Standard"),
+					resource.TestCheckResourceAttr(ServerResource+"."+ServerTestResource, "volume.0.licence_type", "OTHER"),
+					resource.TestCheckResourceAttrPair(ServerResource+"."+ServerTestResource, "nic.0.lan", LanResource+"."+LanTestResource, "id"),
+					resource.TestCheckResourceAttr(ServerResource+"."+ServerTestResource, "nic.0.dhcp", "true"),
+					resource.TestCheckResourceAttr(ServerResource+"."+ServerTestResource, "nic.0.firewall_active", "true"),
+					resource.TestCheckResourceAttr(ServerResource+"."+ServerTestResource, "nic.0.firewall.#", "0"),
 				),
 			},
 		},
 	})
 }
 
-func TestAccServerResolveImageName(t *testing.T) {
+// create and updates 5 inline rules after the server is created
+func TestAccServerResolveImageNameAdd5FwRulesOnUpdate(t *testing.T) {
 	var server ionoscloud.Server
 
 	resource.Test(t, resource.TestCase{
@@ -326,17 +428,92 @@ func TestAccServerResolveImageName(t *testing.T) {
 					resource.TestCheckResourceAttrPair(ServerResource+"."+ServerTestResource, "nic.0.lan", LanResource+"."+LanTestResource, "id"),
 					resource.TestCheckResourceAttr(ServerResource+"."+ServerTestResource, "nic.0.dhcp", "true"),
 					resource.TestCheckResourceAttr(ServerResource+"."+ServerTestResource, "nic.0.firewall_active", "true"),
-					resource.TestCheckResourceAttr(ServerResource+"."+ServerTestResource, "nic.0.firewall.0.protocol", "TCP"),
-					resource.TestCheckResourceAttr(ServerResource+"."+ServerTestResource, "nic.0.firewall.0.name", ServerTestResource),
-					resource.TestCheckResourceAttr(ServerResource+"."+ServerTestResource, "nic.0.firewall.0.port_range_start", "22"),
-					resource.TestCheckResourceAttr(ServerResource+"."+ServerTestResource, "nic.0.firewall.0.port_range_end", "22"),
+				),
+			},
+			{
+				Config: testAccCheckServerResolveImageName5fwRules,
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckServerExists(ServerResource+"."+ServerTestResource, &server),
+					resource.TestCheckResourceAttr(ServerResource+"."+ServerTestResource, "name", ServerTestResource),
+					resource.TestCheckResourceAttr(ServerResource+"."+ServerTestResource, "cores", "1"),
+					resource.TestCheckResourceAttr(ServerResource+"."+ServerTestResource, "ram", "1024"),
+					resource.TestCheckResourceAttr(ServerResource+"."+ServerTestResource, "availability_zone", "ZONE_1"),
+					resource.TestCheckResourceAttr(ServerResource+"."+ServerTestResource, "cpu_family", "INTEL_SKYLAKE"),
+					utils.TestImageNotNull(ServerResource, "boot_image"),
+					resource.TestCheckResourceAttrPair(ServerResource+"."+ServerTestResource, "image_password", RandomPassword+".server_image_password", "result"),
+					resource.TestCheckResourceAttr(ServerResource+"."+ServerTestResource, "volume.0.name", ServerTestResource),
+					resource.TestCheckResourceAttr(ServerResource+"."+ServerTestResource, "volume.0.size", "5"),
+					resource.TestCheckResourceAttr(ServerResource+"."+ServerTestResource, "volume.0.disk_type", "SSD Standard"),
+					resource.TestCheckResourceAttrPair(ServerResource+"."+ServerTestResource, "nic.0.lan", LanResource+"."+LanTestResource, "id"),
+					resource.TestCheckResourceAttr(ServerResource+"."+ServerTestResource, "nic.0.dhcp", "true"),
+					resource.TestCheckResourceAttr(ServerResource+"."+ServerTestResource, "nic.0.firewall_active", "true"),
+					resource.TestCheckResourceAttr(ServerResource+"."+ServerTestResource, "nic.0.firewall.#", "5"),
+					resource.TestCheckResourceAttr(ServerResource+"."+ServerTestResource, "nic.0.firewall.0.protocol", "ICMP"),
+					resource.TestCheckResourceAttr(ServerResource+"."+ServerTestResource, "nic.0.firewall.0.name", "test_server"),
+					resource.TestCheckResourceAttr(ServerResource+"."+ServerTestResource, "nic.0.firewall.1.name", "test_server2"),
+					resource.TestCheckResourceAttr(ServerResource+"."+ServerTestResource, "nic.0.firewall.2.name", "test_server3"),
+					resource.TestCheckResourceAttr(ServerResource+"."+ServerTestResource, "nic.0.firewall.3.name", "test_server4"),
+					resource.TestCheckResourceAttr(ServerResource+"."+ServerTestResource, "nic.0.firewall.4.name", "test_server5"),
+					resource.TestCheckResourceAttr(ServerResource+"."+ServerTestResource, "nic.0.firewall.0.icmp_code", "4"),
+					resource.TestCheckResourceAttr(ServerResource+"."+ServerTestResource, "nic.0.firewall.0.icmp_type", "5"),
+					resource.TestCheckResourceAttr(ServerResource+"."+ServerTestResource, "nic.0.firewall.1.port_range_start", "23"),
+					resource.TestCheckResourceAttr(ServerResource+"."+ServerTestResource, "nic.0.firewall.1.port_range_end", "23"),
+					resource.TestCheckResourceAttr(ServerResource+"."+ServerTestResource, "nic.0.firewall.2.port_range_start", "24"),
+					resource.TestCheckResourceAttr(ServerResource+"."+ServerTestResource, "nic.0.firewall.2.port_range_end", "24"),
+					resource.TestCheckResourceAttr(ServerResource+"."+ServerTestResource, "nic.0.firewall.3.port_range_start", "25"),
+					resource.TestCheckResourceAttr(ServerResource+"."+ServerTestResource, "nic.0.firewall.3.port_range_end", "25"),
+					resource.TestCheckResourceAttr(ServerResource+"."+ServerTestResource, "nic.0.firewall.4.port_range_start", "26"),
+					resource.TestCheckResourceAttr(ServerResource+"."+ServerTestResource, "nic.0.firewall.4.type", "INGRESS"),
+					resource.TestCheckResourceAttr(ServerResource+"."+ServerTestResource, "nic.0.firewall.4.port_range_end", "26"),
+				),
+			},
+			{
+				Config: testAccCheckServerResolveImageName5fwRulesUpdate,
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckServerExists(ServerResource+"."+ServerTestResource, &server),
+					resource.TestCheckResourceAttr(ServerResource+"."+ServerTestResource, "name", ServerTestResource),
+					resource.TestCheckResourceAttr(ServerResource+"."+ServerTestResource, "cores", "1"),
+					resource.TestCheckResourceAttr(ServerResource+"."+ServerTestResource, "ram", "1024"),
+					resource.TestCheckResourceAttr(ServerResource+"."+ServerTestResource, "availability_zone", "ZONE_1"),
+					resource.TestCheckResourceAttr(ServerResource+"."+ServerTestResource, "cpu_family", "INTEL_SKYLAKE"),
+					utils.TestImageNotNull(ServerResource, "boot_image"),
+					resource.TestCheckResourceAttrPair(ServerResource+"."+ServerTestResource, "image_password", RandomPassword+".server_image_password", "result"),
+					resource.TestCheckResourceAttr(ServerResource+"."+ServerTestResource, "volume.0.name", ServerTestResource),
+					resource.TestCheckResourceAttr(ServerResource+"."+ServerTestResource, "volume.0.size", "5"),
+					resource.TestCheckResourceAttr(ServerResource+"."+ServerTestResource, "volume.0.disk_type", "SSD Standard"),
+					resource.TestCheckResourceAttrPair(ServerResource+"."+ServerTestResource, "nic.0.lan", LanResource+"."+LanTestResource, "id"),
+					resource.TestCheckResourceAttr(ServerResource+"."+ServerTestResource, "nic.0.dhcp", "true"),
+					resource.TestCheckResourceAttr(ServerResource+"."+ServerTestResource, "nic.0.firewall_active", "true"),
+					resource.TestCheckResourceAttr(ServerResource+"."+ServerTestResource, "nic.0.firewall.#", "5"),
+					resource.TestCheckResourceAttr(ServerResource+"."+ServerTestResource, "nic.0.firewall.0.protocol", "ICMP"),
+					resource.TestCheckResourceAttr(ServerResource+"."+ServerTestResource, "nic.0.firewall.0.name", "test_server"),
+					resource.TestCheckResourceAttr(ServerResource+"."+ServerTestResource, "nic.0.firewall.1.name", "test_server2"),
+					resource.TestCheckResourceAttr(ServerResource+"."+ServerTestResource, "nic.0.firewall.2.name", "test_server3"),
+					resource.TestCheckResourceAttr(ServerResource+"."+ServerTestResource, "nic.0.firewall.3.name", "test_server4"),
+					resource.TestCheckResourceAttr(ServerResource+"."+ServerTestResource, "nic.0.firewall.4.name", "test_server5"),
+					resource.TestCheckResourceAttr(ServerResource+"."+ServerTestResource, "nic.0.firewall.0.icmp_code", "5"),
+					resource.TestCheckResourceAttr(ServerResource+"."+ServerTestResource, "nic.0.firewall.0.icmp_type", "6"),
+					resource.TestCheckResourceAttr(ServerResource+"."+ServerTestResource, "nic.0.firewall.1.port_range_start", "24"),
+					resource.TestCheckResourceAttr(ServerResource+"."+ServerTestResource, "nic.0.firewall.1.port_range_end", "24"),
+					resource.TestCheckResourceAttr(ServerResource+"."+ServerTestResource, "nic.0.firewall.2.port_range_start", "25"),
+					resource.TestCheckResourceAttr(ServerResource+"."+ServerTestResource, "nic.0.firewall.2.port_range_end", "25"),
+					resource.TestCheckResourceAttr(ServerResource+"."+ServerTestResource, "nic.0.firewall.3.port_range_start", "26"),
+					resource.TestCheckResourceAttr(ServerResource+"."+ServerTestResource, "nic.0.firewall.3.port_range_end", "26"),
+					resource.TestCheckResourceAttr(ServerResource+"."+ServerTestResource, "nic.0.firewall.4.port_range_start", "27"),
+					resource.TestCheckResourceAttr(ServerResource+"."+ServerTestResource, "nic.0.firewall.4.port_range_end", "27"),
+					resource.TestCheckResourceAttr(ServerResource+"."+ServerTestResource, "nic.0.firewall.0.type", "INGRESS"),
+					resource.TestCheckResourceAttr(ServerResource+"."+ServerTestResource, "nic.0.firewall.1.type", "INGRESS"),
+					resource.TestCheckResourceAttr(ServerResource+"."+ServerTestResource, "nic.0.firewall.2.type", "INGRESS"),
+					resource.TestCheckResourceAttr(ServerResource+"."+ServerTestResource, "nic.0.firewall.3.type", "INGRESS"),
+					resource.TestCheckResourceAttr(ServerResource+"."+ServerTestResource, "nic.0.firewall.4.type", "EGRESS"),
 				),
 			},
 		},
 	})
 }
 
-func TestAccServerWithSnapshot(t *testing.T) {
+// also tests creating 5 fw rules inline
+func TestAccServerWithSnapshotAnd5FwRulesInline(t *testing.T) {
 	var server ionoscloud.Server
 
 	resource.Test(t, resource.TestCase{
@@ -363,6 +540,7 @@ func TestAccServerWithSnapshot(t *testing.T) {
 					resource.TestCheckResourceAttrPair(ServerResource+"."+ServerTestResource, "nic.0.lan", LanResource+"."+LanTestResource, "id"),
 					resource.TestCheckResourceAttr(ServerResource+"."+ServerTestResource, "nic.0.dhcp", "true"),
 					resource.TestCheckResourceAttr(ServerResource+"."+ServerTestResource, "nic.0.firewall_active", "true"),
+					resource.TestCheckResourceAttr(ServerResource+"."+"webserver", "nic.0.firewall.#", "5"),
 				),
 			},
 		},
@@ -735,6 +913,72 @@ resource ` + LanResource + ` ` + LanTestResource + ` {
   public = true
   name = "public"
 }
+
+resource ` + FirewallResource + ` ` + FirewallTestResource + ` {
+  datacenter_id = ` + DatacenterResource + `.` + DatacenterTestResource + `.id
+  server_id        = ` + ServerResource + `.` + ServerTestResource + `.id
+  nic_id           = ` + ServerResource + `.` + ServerTestResource + `.nic[0].id
+  protocol         = "TCP"
+  name             = "SSH"
+  port_range_start = 28
+  port_range_end   = 28
+}
+
+resource ` + ServerResource + ` ` + ServerTestResource + ` {
+  name = "` + ServerTestResource + `"
+  datacenter_id = ` + DatacenterResource + `.` + DatacenterTestResource + `.id
+  cores = 1
+  ram = 1024
+  availability_zone = "ZONE_1"
+  cpu_family = "INTEL_SKYLAKE"
+  boot_cdrom = "` + bootCdromImageId + `" 
+  volume {
+    name = "` + ServerTestResource + `"
+    size = 5
+    disk_type = "SSD Standard"
+	licence_type = "OTHER"
+  }
+  nic {
+    lan = ` + LanResource + `.` + LanTestResource + `.id
+    dhcp = true
+    firewall_active = true 
+	firewall {
+      protocol = "TCP"
+      type = "EGRESS"
+      name = "` + ServerTestResource + `"
+      port_range_start = 22
+      port_range_end = 22
+    }
+  }
+}`
+
+const testAccCheckServerConfig2Fw = `
+resource ` + DatacenterResource + ` ` + DatacenterTestResource + ` {
+	name       = "server-test"
+	location   = "de/fra"
+}
+resource ` + LanResource + ` ` + LanTestResource + ` {
+  datacenter_id = ` + DatacenterResource + `.` + DatacenterTestResource + `.id
+  public = true
+  name = "public"
+}
+
+resource ` + FirewallResource + ` ` + FirewallTestResource + ` {
+  datacenter_id = ` + DatacenterResource + `.` + DatacenterTestResource + `.id
+  server_id        = ` + ServerResource + `.` + ServerTestResource + `.id
+  nic_id           = ` + ServerResource + `.` + ServerTestResource + `.nic[0].id
+  protocol         = "TCP"
+  name             = "SSH"
+  port_range_start = 28
+  port_range_end   = 28
+}
+
+resource "ionoscloud_ipblock" "webserver_ipblock" {
+  location = ` + DatacenterResource + `.` + DatacenterTestResource + `.location
+  size = 2
+  name = "webserver_ipblock"
+}
+
 resource ` + ServerResource + ` ` + ServerTestResource + ` {
   name = "` + ServerTestResource + `"
   datacenter_id = ` + DatacenterResource + `.` + DatacenterTestResource + `.id
@@ -756,9 +1000,137 @@ resource ` + ServerResource + ` ` + ServerTestResource + ` {
 	firewall {
       protocol = "TCP"
       name = "` + ServerTestResource + `"
-      port_range_start = 22
-      port_range_end = 22
+	  type = "EGRESS"
+      port_range_start = 25
+      port_range_end = 25
+	  source_mac = "00:0a:95:9d:68:17"
+	  source_ip = ionoscloud_ipblock.webserver_ipblock.ips[0]
+	  target_ip = ionoscloud_ipblock.webserver_ipblock.ips[1]
     }
+	firewall {
+      protocol = "TCP"
+      name = "` + ServerTestResource + `2"
+      port_range_start = 23
+      port_range_end = 23
+    }
+  }
+}`
+
+const testAccCheckServerConfig3Fw = `
+resource ` + DatacenterResource + ` ` + DatacenterTestResource + ` {
+	name       = "server-test"
+	location   = "de/fra"
+}
+resource ` + LanResource + ` ` + LanTestResource + ` {
+  datacenter_id = ` + DatacenterResource + `.` + DatacenterTestResource + `.id
+  public = true
+  name = "public"
+}
+resource ` + ServerResource + ` ` + ServerTestResource + ` {
+  name = "` + ServerTestResource + `"
+  datacenter_id = ` + DatacenterResource + `.` + DatacenterTestResource + `.id
+  cores = 1
+  ram = 1024
+  availability_zone = "ZONE_1"
+  cpu_family = "INTEL_SKYLAKE"
+  boot_cdrom = "` + bootCdromImageId + `" 
+  volume {
+    name = "` + ServerTestResource + `"
+    size = 5
+    disk_type = "SSD Standard"
+	licence_type = "OTHER"
+  }
+  nic {
+    lan = ` + LanResource + `.` + LanTestResource + `.id
+    dhcp = true
+    firewall_active = true 
+	firewall {
+      protocol = "TCP"
+      name = "` + ServerTestResource + `"
+      type = "EGRESS"
+      port_range_start = 25
+      port_range_end = 25
+    }
+	firewall {
+      protocol = "TCP"
+      name = "` + ServerTestResource + `2"
+      port_range_start = 23
+      port_range_end = 23
+    }
+	firewall {
+      protocol = "TCP"
+      name = "` + ServerTestResource + `3"
+      port_range_start = 44
+      port_range_end = 44
+    }
+  }
+}`
+
+const testAccCheckServerConfigRemove2FwRules = `
+resource ` + DatacenterResource + ` ` + DatacenterTestResource + ` {
+	name       = "server-test"
+	location   = "de/fra"
+}
+resource ` + LanResource + ` ` + LanTestResource + ` {
+  datacenter_id = ` + DatacenterResource + `.` + DatacenterTestResource + `.id
+  public = true
+  name = "public"
+}
+resource ` + ServerResource + ` ` + ServerTestResource + ` {
+  name = "` + ServerTestResource + `"
+  datacenter_id = ` + DatacenterResource + `.` + DatacenterTestResource + `.id
+  cores = 1
+  ram = 1024
+  availability_zone = "ZONE_1"
+  cpu_family = "INTEL_SKYLAKE"
+  boot_cdrom = "` + bootCdromImageId + `" 
+  volume {
+    name = "` + ServerTestResource + `"
+    size = 5
+    disk_type = "SSD Standard"
+	licence_type = "OTHER"
+  }
+  nic {
+    lan = ` + LanResource + `.` + LanTestResource + `.id
+    dhcp = true
+    firewall_active = true 
+	firewall {
+      protocol = "TCP"
+      name = "` + ServerTestResource + `3"
+      port_range_start = 44
+      port_range_end = 44
+    }
+  }
+}`
+
+const testAccCheckServerConfigRemoveAllFwRules = `
+resource ` + DatacenterResource + ` ` + DatacenterTestResource + ` {
+	name       = "server-test"
+	location   = "de/fra"
+}
+resource ` + LanResource + ` ` + LanTestResource + ` {
+  datacenter_id = ` + DatacenterResource + `.` + DatacenterTestResource + `.id
+  public = true
+  name = "public"
+}
+resource ` + ServerResource + ` ` + ServerTestResource + ` {
+  name = "` + ServerTestResource + `"
+  datacenter_id = ` + DatacenterResource + `.` + DatacenterTestResource + `.id
+  cores = 1
+  ram = 1024
+  availability_zone = "ZONE_1"
+  cpu_family = "INTEL_SKYLAKE"
+  boot_cdrom = "` + bootCdromImageId + `" 
+  volume {
+    name = "` + ServerTestResource + `"
+    size = 5
+    disk_type = "SSD Standard"
+	licence_type = "OTHER"
+  }
+  nic {
+    lan = ` + LanResource + `.` + LanTestResource + `.id
+    dhcp = true
+    firewall_active = true
   }
 }`
 
@@ -790,11 +1162,147 @@ resource ` + ServerResource + ` ` + ServerTestResource + ` {
     lan             = ` + LanResource + `.` + LanTestResource + `.id
     dhcp            = true
     firewall_active = true
+  }
+}
+resource ` + RandomPassword + ` "server_image_password" {
+  length           = 16
+  special          = false
+}
+`
+
+const testAccCheckServerResolveImageName5fwRules = `
+resource ` + DatacenterResource + ` ` + DatacenterTestResource + ` {
+  name        = "test_server"
+  location    = "de/fra"
+  description = "Test datacenter done by TF"
+}
+resource ` + LanResource + ` ` + LanTestResource + ` {
+  datacenter_id = ` + DatacenterResource + `.` + DatacenterTestResource + `.id
+  public        = true
+}
+resource ` + ServerResource + ` ` + ServerTestResource + ` {
+  name              = "` + ServerTestResource + `"
+  datacenter_id     = ` + DatacenterResource + `.` + DatacenterTestResource + `.id
+  cores             = 1
+  ram               = 1024
+  availability_zone = "ZONE_1"
+  cpu_family        = "INTEL_SKYLAKE" 
+  image_name        = "ubuntu:latest"
+  image_password    = ` + RandomPassword + `.server_image_password.result
+  volume {
+    name           = "` + ServerTestResource + `"
+    size              = 5
+    disk_type      = "SSD Standard"
+  }
+  nic {
+    lan             = ` + LanResource + `.` + LanTestResource + `.id
+    dhcp            = true
+    firewall_active = true
+    firewall {
+      protocol         = "ICMP"
+      name             = "` + ServerTestResource + `"
+      type             = "INGRESS"
+      icmp_code        = 4
+      icmp_type        = 5
+    }
     firewall {
       protocol         = "TCP"
+      name             = "` + ServerTestResource + `2"
+      type             = "INGRESS"
+      port_range_start = 23
+      port_range_end   = 23
+    }
+    firewall {
+      protocol         = "TCP"
+      name             = "` + ServerTestResource + `3"
+      type             = "INGRESS"
+      port_range_start = 24
+      port_range_end   = 24
+    }
+    firewall {
+      protocol         = "TCP"
+      name             = "` + ServerTestResource + `4"
+      type             = "INGRESS"
+      port_range_start = 25
+      port_range_end   = 25
+    }
+	firewall {
+      protocol         = "TCP"
+      name             = "` + ServerTestResource + `5"
+      type             = "INGRESS"
+      port_range_start = 26
+      port_range_end   = 26
+    }
+  }
+}
+resource ` + RandomPassword + ` "server_image_password" {
+  length           = 16
+  special          = false
+}
+`
+
+const testAccCheckServerResolveImageName5fwRulesUpdate = `
+resource ` + DatacenterResource + ` ` + DatacenterTestResource + ` {
+  name        = "test_server"
+  location    = "de/fra"
+  description = "Test datacenter done by TF"
+}
+resource ` + LanResource + ` ` + LanTestResource + ` {
+  datacenter_id = ` + DatacenterResource + `.` + DatacenterTestResource + `.id
+  public        = true
+}
+resource ` + ServerResource + ` ` + ServerTestResource + ` {
+  name              = "` + ServerTestResource + `"
+  datacenter_id     = ` + DatacenterResource + `.` + DatacenterTestResource + `.id
+  cores             = 1
+  ram               = 1024
+  availability_zone = "ZONE_1"
+  cpu_family        = "INTEL_SKYLAKE" 
+  image_name        = "ubuntu:latest"
+  image_password    = ` + RandomPassword + `.server_image_password.result
+  volume {
+    name           = "` + ServerTestResource + `"
+    size              = 5
+    disk_type      = "SSD Standard"
+  }
+  nic {
+    lan             = ` + LanResource + `.` + LanTestResource + `.id
+    dhcp            = true
+    firewall_active = true
+    firewall {
+      protocol         = "ICMP"
       name             = "` + ServerTestResource + `"
-      port_range_start = 22
-      port_range_end   = 22
+      type             = "INGRESS"
+      icmp_code        = 5
+      icmp_type        = 6
+    }
+    firewall {
+      protocol         = "TCP"
+      name             = "` + ServerTestResource + `2"
+      type             = "INGRESS"
+      port_range_start = 24
+      port_range_end   = 24
+    }
+    firewall {
+      protocol         = "TCP"
+      name             = "` + ServerTestResource + `3"
+      type             = "INGRESS"
+      port_range_start = 25
+      port_range_end   = 25
+    }
+    firewall {
+      protocol         = "TCP"
+      name             = "` + ServerTestResource + `4"
+      type             = "INGRESS"
+      port_range_start = 26
+      port_range_end   = 26
+    }
+	firewall {
+      protocol         = "TCP"
+      name             = "` + ServerTestResource + `5"
+      type             = "EGRESS"
+      port_range_start = 27
+      port_range_end   = 27
     }
   }
 }
@@ -832,8 +1340,53 @@ resource ` + ServerResource + ` "webserver" {
     lan = ` + LanResource + `.` + LanTestResource + `.id
     dhcp = true
     firewall_active = true
+    firewall {
+      protocol         = "TCP"
+      name             = "` + ServerTestResource + `"
+      port_range_start = 22
+      type             = "EGRESS"
+      port_range_end   = 22
+    }
+    firewall {
+      protocol         = "TCP"
+      name             = "` + ServerTestResource + `2"
+      type             = "INGRESS"
+      port_range_start = 23
+      port_range_end   = 23
+    }
+    firewall {
+      protocol         = "TCP"
+      name             = "` + ServerTestResource + `3"
+      type             = "INGRESS"
+      port_range_start = 24
+      port_range_end   = 24
+    }
+    firewall {
+      protocol         = "TCP"
+      name             = "` + ServerTestResource + `4"
+      type             = "INGRESS"
+      port_range_start = 25
+      port_range_end   = 25
+    }
+	firewall {
+      protocol         = "TCP"
+      name             = "` + ServerTestResource + `5"
+      type             = "INGRESS"
+      port_range_start = 26
+      port_range_end   = 26
+    }
   }
 }
+resource ` + FirewallResource + ` ` + FirewallTestResource + ` {
+  datacenter_id = ` + DatacenterResource + `.` + DatacenterTestResource + `.id
+  server_id        = ` + ServerResource + `.webserver.id
+  nic_id           = ` + ServerResource + `.webserver.nic[0].id
+  protocol         = "TCP"
+  name             = "external_rule"
+  port_range_start = 28
+  port_range_end   = 28
+}
+
 resource ` + SnapshotResource + ` "test_snapshot" {
   datacenter_id = ` + DatacenterResource + `.` + DatacenterTestResource + `.id
   volume_id = ` + ServerResource + `.webserver.boot_volume
