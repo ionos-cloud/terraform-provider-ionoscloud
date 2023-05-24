@@ -8,14 +8,16 @@ import (
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	dns "github.com/ionos-cloud/sdk-go-dns"
+	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/internal/uuidgen"
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils"
 )
 
 var recordResourceName = "DNS Record"
 
 func (c *Client) CreateRecord(ctx context.Context, zoneId string, d *schema.ResourceData) (recordResponse dns.RecordResponse, responseInfo utils.ApiResponseInfo, err error) {
-	request := setRecordCreateRequest(d)
-	recordResponse, apiResponse, err := c.sdkClient.RecordsApi.ZonesRecordsPost(ctx, zoneId).RecordCreateRequest(*request).Execute()
+	recordUuid := uuidgen.ResourceUuid()
+	request := setRecordPutRequest(d)
+	recordResponse, apiResponse, err := c.sdkClient.RecordsApi.ZonesRecordsPut(ctx, zoneId, recordUuid.String()).RecordUpdateRequest(*request).Execute()
 	apiResponse.LogInfo()
 	return recordResponse, apiResponse, err
 }

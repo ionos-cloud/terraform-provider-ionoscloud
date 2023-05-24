@@ -9,6 +9,9 @@ github.com/apparentlymart/go-textseg/v13/textseg
 github.com/fatih/color
 # github.com/go-test/deep v1.0.6
 ## explicit; go 1.13
+# github.com/gofrs/uuid/v5 v5.0.0
+## explicit; go 1.19
+github.com/gofrs/uuid/v5
 # github.com/golang/protobuf v1.5.2
 ## explicit; go 1.9
 github.com/golang/protobuf/jsonpb
