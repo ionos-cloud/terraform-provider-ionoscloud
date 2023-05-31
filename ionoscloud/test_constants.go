@@ -76,7 +76,7 @@ resource ` + ServerResource + ` ` + ServerTestResource + ` {
   volume {
     name = "system"
     size = 5
-    disk_type = "HDD"
+    disk_type = "SSD Standard"
     user_data = "foo"
     bus = "VIRTIO"
     availability_zone = "ZONE_1"
@@ -132,7 +132,7 @@ resource ` + ServerResource + ` ` + ServerTestResource + ` {
   volume {
     name = "system"
     size = 5
-    disk_type = "HDD"
+    disk_type = "SSD Standard"
     user_data = "foo"
     bus = "VIRTIO"
     availability_zone = "AUTO"
@@ -185,7 +185,7 @@ resource ` + ServerResource + ` ` + ServerTestResource + ` {
   volume {
     name = "system"
     size = 5
-    disk_type = "HDD"
+    disk_type = "SSD Standard"
     user_data = "foo"
     bus = "VIRTIO"
     availability_zone = "AUTO"
@@ -239,7 +239,7 @@ resource ` + ServerResource + ` ` + ServerTestResource + ` {
   volume {
     name = "system"
     size = 5
-    disk_type = "HDD"
+    disk_type = "SSD Standard"
     user_data = "foo"
     bus = "VIRTIO"
     availability_zone = "AUTO"
@@ -292,7 +292,7 @@ resource ` + ServerResource + ` ` + ServerTestResource + ` {
   volume {
     name = "system"
     size = 5
-    disk_type = "HDD"
+    disk_type = "SSD Standard"
     user_data = "foo"
     bus = "VIRTIO"
     availability_zone = "AUTO"
@@ -347,7 +347,7 @@ resource ` + ServerResource + ` ` + ServerTestResource + ` {
   volume {
     name = "system"
     size = 5
-    disk_type = "HDD"
+    disk_type = "SSD Standard"
     user_data = "foo"
     bus = "VIRTIO"
     availability_zone = "AUTO"
@@ -528,7 +528,7 @@ resource ` + ServerResource + ` ` + ServerTestResource + ` {
   volume {
     name = "system"
     size = 5
-    disk_type = "HDD"
+    disk_type = "SSD Standard"
     user_data = "foo"
     bus = "VIRTIO"
     availability_zone = "AUTO"
@@ -563,7 +563,7 @@ resource ` + ServerResource + ` ` + ServerTestResource + ` {
   volume {
     name = "system"
     size = 5
-    disk_type = "HDD"
+    disk_type = "SSD Standard"
     user_data = "foo"
     bus = "VIRTIO"
     availability_zone = "AUTO"
