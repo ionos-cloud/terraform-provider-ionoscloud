@@ -12,6 +12,7 @@
 - `firewall` list inside server now allows multiple firewall rules to be defined inline
 - Ignore downgrades of `k8s_version` patch level.
 - Allow upgrades of `k8s_version` patch level.
+- Make `nic` list in `ionoscloud_server` resource optional
 
 ## 6.3.6
 ### Feature

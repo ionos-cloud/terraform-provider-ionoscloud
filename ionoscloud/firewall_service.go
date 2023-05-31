@@ -3,6 +3,7 @@ package ionoscloud
 import (
 	"context"
 	"fmt"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	ionoscloud "github.com/ionos-cloud/sdk-go/v6"
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/slice"
@@ -107,7 +108,7 @@ func SetFirewallProperties(firewall ionoscloud.FirewallRule) map[string]interfac
 	return fw
 }
 
-func GetChangesInFirewallRules(oldValues, newValues []interface{}) ([]ionoscloud.FirewallruleProperties, []ionoscloud.FirewallruleProperties, error) {
+func GetChangesInFirewallRuleProperties(oldValues, newValues []interface{}) ([]ionoscloud.FirewallruleProperties, []ionoscloud.FirewallruleProperties, error) {
 	onlyOld := slice.Difference(oldValues, newValues)
 	onlyNew := slice.Difference(newValues, oldValues)
 	oldFwSlice := make([]ionoscloud.FirewallruleProperties, len(onlyOld))
@@ -136,4 +137,95 @@ func FwPropUnsetSetFieldIfNotSetInSchema(fwProp *ionoscloud.FirewallruleProperti
 			fwProp.PortRangeEnd = nil
 		}
 	}
+}
+
+// GetModifiedFirewallRules - checks in schema and returns modified firewall rules as a slice of ionoscloud.FirewallRule and also returns a slice of firewall rule ids
+func (fs *FirewallService) GetModifiedFirewallRules(ctx context.Context, dcId, serverId, nicId, path string) (firewallRules []ionoscloud.FirewallRule, firewallRuleIds []string, diags diag.Diagnostics) {
+	if fs.schemaData.HasChange(path) {
+		oldValues, newValues := fs.schemaData.GetChange(path)
+		oldValuesIntf := oldValues.([]interface{})
+		newValuesIntf := newValues.([]interface{})
+		onlyOld := slice.Difference(oldValuesIntf, newValuesIntf)
+		onlyNew := slice.Difference(newValuesIntf, oldValuesIntf)
+		oldFirewalls, newFirewalls, err := GetChangesInFirewallRuleProperties(onlyOld, onlyNew)
+		if err != nil {
+			return firewallRules, []string{}, diag.FromErr(fmt.Errorf("could not get changes for firewall rules %w", err))
+		}
+
+		firewallRuleIdsIntf := fs.schemaData.Get("firewallrule_ids").([]interface{})
+		firewallRuleIds = convertSlice(firewallRuleIdsIntf)
+
+		if nicId != "" {
+			//delete old rules
+			for idx := range oldFirewalls {
+				//we need the id, but we can't get it from oldFirewalls because it's only the property
+				oldId := onlyOld[idx].(map[string]interface{})["id"].(string)
+
+				if deleteRule := !utils.IsValueInSliceOfMap(onlyNew, "id", oldId); deleteRule {
+					_, err = fs.deleteFirewallRule(ctx, dcId, serverId, nicId, oldId)
+					if err != nil {
+						return firewallRules, []string{}, diag.FromErr(fmt.Errorf("an error occured while deleting firewall prop for dcId: %s, server_id: %s, "+
+							"nic_id %s, ID: %s, (%w)", dcId, serverId, nicId, oldId, err))
+					}
+
+					if slice.Contains(firewallRuleIds, oldId) {
+						firewallRuleIds = slice.DeleteFrom(firewallRuleIds, oldId)
+					}
+				}
+			}
+		}
+
+		// create updated rules
+		for idx, prop := range newFirewalls {
+			FwPropUnsetSetFieldIfNotSetInSchema(&prop, path, fs.schemaData)
+
+			fwRule := ionoscloud.FirewallRule{
+				Properties: &prop,
+			}
+			if nicId != "" {
+				var firewall *ionoscloud.FirewallRule
+				if id, ok := onlyNew[idx].(map[string]interface{})["id"]; ok && id != "" {
+					//do not send protocol, it's an update
+					fwRule.Properties.Protocol = nil
+					firewall, _, err = fs.updateFirewallRule(ctx, dcId, serverId, nicId, id.(string), fwRule)
+				} else {
+					firewall, _, err = fs.createFirewallRule(ctx, dcId, serverId, nicId, fwRule)
+					firewallRuleIds = append(firewallRuleIds, *firewall.Id)
+				}
+				if err != nil {
+					return firewallRules, []string{}, diag.FromErr(err)
+				}
+				firewallRules = append(firewallRules, *firewall)
+			} else { //if the nic does not exist, just fw add prop to the list to be created below with the nic
+				firewallRules = append(firewallRules, fwRule)
+
+			}
+		}
+	}
+	return firewallRules, firewallRuleIds, nil
+}
+
+func (fs *FirewallService) AddToMapIfRuleExists(ctx context.Context, datacenterId, serverId, nicId, ruleId string) (map[string]interface{}, error) {
+	var firewallEntry map[string]interface{}
+	if datacenterId == "" || serverId == "" || nicId == "" || ruleId == "" {
+		log.Printf("[DEBUG] Cannot search for firewall rules without dcId %s, serverId %s, nicId %s, ruleId %s", datacenterId, serverId, nicId, ruleId)
+		return firewallEntry, nil
+	}
+
+	firewall, apiResponse, err := fs.firewallFindById(ctx, datacenterId, serverId, nicId, ruleId)
+	if err != nil {
+		if !apiResponse.HttpNotFound() {
+			return firewallEntry, fmt.Errorf("error, while searching for firewall rule with id %s (%w)", ruleId, err)
+		}
+	}
+	if firewall == nil {
+		return firewallEntry, nil
+	}
+	if firewall.Properties != nil && firewall.Properties.Name != nil {
+		log.Printf("[DEBUG] found firewall rule with name %s", *firewall.Properties.Name)
+	}
+	firewallEntry = SetFirewallProperties(*firewall)
+	firewallEntry["id"] = *firewall.Id
+
+	return firewallEntry, nil
 }

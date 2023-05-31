@@ -69,14 +69,14 @@ resource ` + ServerResource + ` ` + ServerTestResource + ` {
   datacenter_id = ` + DatacenterResource + `.` + DatacenterTestResource + `.id
   cores = 1
   ram = 1024
-  availability_zone = "ZONE_1"
+  availability_zone = "AUTO"
   cpu_family = "AMD_OPTERON"
   image_name ="ubuntu:latest"
   type = "ENTERPRISE"
   volume {
     name = "system"
     size = 5
-    disk_type = "SSD Standard"
+    disk_type = "HDD"
     user_data = "foo"
     bus = "VIRTIO"
     availability_zone = "ZONE_1"
@@ -124,7 +124,7 @@ resource ` + ServerResource + ` ` + ServerTestResource + ` {
   datacenter_id = ` + DatacenterResource + `.` + DatacenterTestResource + `.id
   cores = 1
   ram = 1024
-  availability_zone = "ZONE_1"
+  availability_zone = "AUTO"
   cpu_family = "AMD_OPTERON"
   image_name ="ubuntu:latest"
   ssh_key_path = ["` + sshKey + `"]
@@ -132,10 +132,10 @@ resource ` + ServerResource + ` ` + ServerTestResource + ` {
   volume {
     name = "system"
     size = 5
-    disk_type = "SSD Standard"
+    disk_type = "HDD"
     user_data = "foo"
     bus = "VIRTIO"
-    availability_zone = "ZONE_1"
+    availability_zone = "AUTO"
   }
   nic {
     lan = ` + LanResource + `.` + LanTestResource + `.id
@@ -177,7 +177,7 @@ resource ` + ServerResource + ` ` + ServerTestResource + ` {
   datacenter_id = ` + DatacenterResource + `.` + DatacenterTestResource + `.id
   cores = 1
   ram = 1024
-  availability_zone = "ZONE_1"
+  availability_zone = "AUTO"
   cpu_family = "AMD_OPTERON"
   image_name ="ubuntu:latest"
   ssh_keys = ["` + sshKey + `"]
@@ -185,10 +185,10 @@ resource ` + ServerResource + ` ` + ServerTestResource + ` {
   volume {
     name = "system"
     size = 5
-    disk_type = "SSD Standard"
+    disk_type = "HDD"
     user_data = "foo"
     bus = "VIRTIO"
-    availability_zone = "ZONE_1"
+    availability_zone = "AUTO"
   }
   nic {
     lan = ` + LanResource + `.` + LanTestResource + `.id
@@ -230,7 +230,7 @@ resource ` + ServerResource + ` ` + ServerTestResource + ` {
   datacenter_id = ` + DatacenterResource + `.` + DatacenterTestResource + `.id
   cores = 1
   ram = 1024
-  availability_zone = "ZONE_1"
+  availability_zone = "AUTO"
   cpu_family = "AMD_OPTERON"
   image_name ="ubuntu:latest"
   ssh_keys = ["` + sshKey + `"]
@@ -239,10 +239,10 @@ resource ` + ServerResource + ` ` + ServerTestResource + ` {
   volume {
     name = "system"
     size = 5
-    disk_type = "SSD Standard"
+    disk_type = "HDD"
     user_data = "foo"
     bus = "VIRTIO"
-    availability_zone = "ZONE_1"
+    availability_zone = "AUTO"
   }
   nic {
     lan = ` + LanResource + `.` + LanTestResource + `.id
@@ -284,7 +284,7 @@ resource ` + ServerResource + ` ` + ServerTestResource + ` {
   datacenter_id = ` + DatacenterResource + `.` + DatacenterTestResource + `.id
   cores = 1
   ram = 1024
-  availability_zone = "ZONE_1"
+  availability_zone = "AUTO"
   cpu_family = "AMD_OPTERON"
   image_name ="ubuntu:latest"
   image_password = ` + RandomPassword + `.server_image_password.result
@@ -292,10 +292,10 @@ resource ` + ServerResource + ` ` + ServerTestResource + ` {
   volume {
     name = "system"
     size = 5
-    disk_type = "SSD Standard"
+    disk_type = "HDD"
     user_data = "foo"
     bus = "VIRTIO"
-    availability_zone = "ZONE_1"
+    availability_zone = "AUTO"
 }
   nic {
     lan = ` + LanResource + `.` + LanTestResource + `.id
@@ -339,7 +339,7 @@ resource ` + ServerResource + ` ` + ServerTestResource + ` {
   datacenter_id = ` + DatacenterResource + `.` + DatacenterTestResource + `.id
   cores = 1
   ram = 1024
-  availability_zone = "ZONE_1"
+  availability_zone = "AUTO"
   cpu_family = "AMD_OPTERON"
   image_name ="ubuntu:latest"
   image_password = ` + RandomPassword + `.server_image_password.result
@@ -347,10 +347,10 @@ resource ` + ServerResource + ` ` + ServerTestResource + ` {
   volume {
     name = "system"
     size = 5
-    disk_type = "SSD Standard"
+    disk_type = "HDD"
     user_data = "foo"
     bus = "VIRTIO"
-    availability_zone = "ZONE_1"
+    availability_zone = "AUTO"
   }
   nic {
     lan = ` + LanResource + `.` + LanTestResource + `.id
@@ -363,7 +363,7 @@ resource ` + ServerResource + ` ` + ServerTestResource + ` {
       protocol = "TCP"
       name = "SSH"
       port_range_start = 22
-      port_range_end = 22
+      port_range_end = 23
 	  source_mac = "00:0a:95:9d:68:17"
 	  source_ip = ionoscloud_ipblock.webserver_ipblock.ips[2]
 	  target_ip = ionoscloud_ipblock.webserver_ipblock.ips[3]
@@ -498,6 +498,78 @@ resource ` + ServerResource + ` ` + ServerTestResource + ` {
     value = "labelvalue1"
   }
 }`
+
+const (
+	testAccCheckServerNoNic = `
+resource ` + DatacenterResource + ` ` + DatacenterTestResource + ` {
+  name       = "server-test"
+  location = "us/las"
+}
+resource "ionoscloud_ipblock" "webserver_ipblock" {
+  location = ` + DatacenterResource + `.` + DatacenterTestResource + `.location
+  size = 4
+  name = "webserver_ipblock"
+}
+resource ` + LanResource + ` ` + LanTestResource + ` {
+  datacenter_id = ` + DatacenterResource + `.` + DatacenterTestResource + `.id
+  public = true
+  name = "public"
+}
+resource ` + ServerResource + ` ` + ServerTestResource + ` {
+  name = "` + ServerTestResource + `"
+  datacenter_id = ` + DatacenterResource + `.` + DatacenterTestResource + `.id
+  cores = 1
+  ram = 1024
+  availability_zone = "AUTO"
+  cpu_family = "AMD_OPTERON"
+  image_name ="ubuntu:latest"
+  ssh_key_path = ["` + sshKey + `"]
+  type = "ENTERPRISE"
+  volume {
+    name = "system"
+    size = 5
+    disk_type = "HDD"
+    user_data = "foo"
+    bus = "VIRTIO"
+    availability_zone = "AUTO"
+  }
+}`
+
+	testAccCheckServerNoNicUpdate = `
+resource ` + DatacenterResource + ` ` + DatacenterTestResource + ` {
+	name       = "server-test"
+	location = "us/las"
+}
+resource "ionoscloud_ipblock" "webserver_ipblock" {
+  location = ` + DatacenterResource + `.` + DatacenterTestResource + `.location
+  size = 4
+  name = "webserver_ipblock"
+}
+resource ` + LanResource + ` ` + LanTestResource + ` {
+  datacenter_id = ` + DatacenterResource + `.` + DatacenterTestResource + `.id
+  public = true
+  name = "public"
+}
+resource ` + ServerResource + ` ` + ServerTestResource + ` {
+  name = "` + ServerTestResource + `"
+  datacenter_id = ` + DatacenterResource + `.` + DatacenterTestResource + `.id
+  cores = 2
+  ram = 2048
+  availability_zone = "AUTO"
+  cpu_family = "AMD_OPTERON"
+  image_name ="ubuntu:latest"
+  ssh_key_path = ["` + sshKey + `"]
+  type = "ENTERPRISE"
+  volume {
+    name = "system"
+    size = 5
+    disk_type = "HDD"
+    user_data = "foo"
+    bus = "VIRTIO"
+    availability_zone = "AUTO"
+  }
+}`
+)
 
 const resourceRandomUUID = `
 resource "random_uuid" "uuid" {
