@@ -1559,7 +1559,7 @@ resource ` + ServerResource + ` ` + ServerTestResource + ` {
   volume {
     name = "system"
     size = 5
-	disk_type = "SSD Standard"
+	disk_type = "HDD"
 }
   nic {
     lan = ` + LanResource + `.` + LanTestResource + `.id
@@ -1595,7 +1595,7 @@ resource ` + ServerResource + ` ` + ServerTestResource + ` {
   volume {
     name = "system"
     size = 5
-	disk_type = "SSD Standard"
+	disk_type = "HDD"
 }
   nic {
     lan             = ` + LanResource + `.` + LanTestResource + `.id
@@ -1640,7 +1640,7 @@ resource ` + ServerResource + ` ` + ServerTestResource + ` {
   volume {
     name = "system"
     size = 5
-	disk_type = "SSD Standard"
+	disk_type = "HDD"
 }
   nic {
     lan             = ` + LanResource + `.` + LanTestResource + `.id
@@ -1781,7 +1781,7 @@ resource ` + ServerResource + ` ` + ServerTestResource + ` {
     licence_type = "UNKNOWN"
     disk_type = "SSD Standard"
     bus = "VIRTIO"
-    availability_zone = "ZONE_1"
+    availability_zone = "AUTO"
   }
   nic {
     lan = ` + LanResource + `.` + LanTestResource + `.id

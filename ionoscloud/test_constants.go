@@ -69,7 +69,7 @@ resource ` + ServerResource + ` ` + ServerTestResource + ` {
   datacenter_id = ` + DatacenterResource + `.` + DatacenterTestResource + `.id
   cores = 1
   ram = 1024
-  availability_zone = "AUTO"
+  availability_zone = "ZONE_!"
   cpu_family = "AMD_OPTERON"
   image_name ="ubuntu:latest"
   type = "ENTERPRISE"
@@ -124,7 +124,7 @@ resource ` + ServerResource + ` ` + ServerTestResource + ` {
   datacenter_id = ` + DatacenterResource + `.` + DatacenterTestResource + `.id
   cores = 1
   ram = 1024
-  availability_zone = "AUTO"
+  availability_zone = "ZONE_1"
   cpu_family = "AMD_OPTERON"
   image_name ="ubuntu:latest"
   ssh_key_path = ["` + sshKey + `"]
@@ -135,7 +135,7 @@ resource ` + ServerResource + ` ` + ServerTestResource + ` {
     disk_type = "SSD Standard"
     user_data = "foo"
     bus = "VIRTIO"
-    availability_zone = "AUTO"
+    availability_zone = "ZONE_!"
   }
   nic {
     lan = ` + LanResource + `.` + LanTestResource + `.id
@@ -177,7 +177,7 @@ resource ` + ServerResource + ` ` + ServerTestResource + ` {
   datacenter_id = ` + DatacenterResource + `.` + DatacenterTestResource + `.id
   cores = 1
   ram = 1024
-  availability_zone = "AUTO"
+  availability_zone = "ZONE_!"
   cpu_family = "AMD_OPTERON"
   image_name ="ubuntu:latest"
   ssh_keys = ["` + sshKey + `"]
@@ -188,7 +188,7 @@ resource ` + ServerResource + ` ` + ServerTestResource + ` {
     disk_type = "SSD Standard"
     user_data = "foo"
     bus = "VIRTIO"
-    availability_zone = "AUTO"
+    availability_zone = "ZONE_!"
   }
   nic {
     lan = ` + LanResource + `.` + LanTestResource + `.id
@@ -230,7 +230,7 @@ resource ` + ServerResource + ` ` + ServerTestResource + ` {
   datacenter_id = ` + DatacenterResource + `.` + DatacenterTestResource + `.id
   cores = 1
   ram = 1024
-  availability_zone = "AUTO"
+  availability_zone = "ZONE_!"
   cpu_family = "AMD_OPTERON"
   image_name ="ubuntu:latest"
   ssh_keys = ["` + sshKey + `"]
@@ -242,7 +242,7 @@ resource ` + ServerResource + ` ` + ServerTestResource + ` {
     disk_type = "SSD Standard"
     user_data = "foo"
     bus = "VIRTIO"
-    availability_zone = "AUTO"
+    availability_zone = "ZONE_!"
   }
   nic {
     lan = ` + LanResource + `.` + LanTestResource + `.id
@@ -284,7 +284,7 @@ resource ` + ServerResource + ` ` + ServerTestResource + ` {
   datacenter_id = ` + DatacenterResource + `.` + DatacenterTestResource + `.id
   cores = 1
   ram = 1024
-  availability_zone = "AUTO"
+  availability_zone = "ZONE_!"
   cpu_family = "AMD_OPTERON"
   image_name ="ubuntu:latest"
   image_password = ` + RandomPassword + `.server_image_password.result
@@ -295,7 +295,7 @@ resource ` + ServerResource + ` ` + ServerTestResource + ` {
     disk_type = "SSD Standard"
     user_data = "foo"
     bus = "VIRTIO"
-    availability_zone = "AUTO"
+    availability_zone = "ZONE_!"
 }
   nic {
     lan = ` + LanResource + `.` + LanTestResource + `.id
@@ -339,7 +339,7 @@ resource ` + ServerResource + ` ` + ServerTestResource + ` {
   datacenter_id = ` + DatacenterResource + `.` + DatacenterTestResource + `.id
   cores = 1
   ram = 1024
-  availability_zone = "AUTO"
+  availability_zone = "ZONE_!"
   cpu_family = "AMD_OPTERON"
   image_name ="ubuntu:latest"
   image_password = ` + RandomPassword + `.server_image_password.result
@@ -350,7 +350,7 @@ resource ` + ServerResource + ` ` + ServerTestResource + ` {
     disk_type = "SSD Standard"
     user_data = "foo"
     bus = "VIRTIO"
-    availability_zone = "AUTO"
+    availability_zone = "ZONE_!"
   }
   nic {
     lan = ` + LanResource + `.` + LanTestResource + `.id
@@ -520,7 +520,7 @@ resource ` + ServerResource + ` ` + ServerTestResource + ` {
   datacenter_id = ` + DatacenterResource + `.` + DatacenterTestResource + `.id
   cores = 1
   ram = 1024
-  availability_zone = "AUTO"
+  availability_zone = "ZONE_!"
   cpu_family = "AMD_OPTERON"
   image_name ="ubuntu:latest"
   ssh_key_path = ["` + sshKey + `"]
@@ -531,7 +531,7 @@ resource ` + ServerResource + ` ` + ServerTestResource + ` {
     disk_type = "SSD Standard"
     user_data = "foo"
     bus = "VIRTIO"
-    availability_zone = "AUTO"
+    availability_zone = "ZONE_!"
   }
 }`
 
@@ -555,7 +555,7 @@ resource ` + ServerResource + ` ` + ServerTestResource + ` {
   datacenter_id = ` + DatacenterResource + `.` + DatacenterTestResource + `.id
   cores = 2
   ram = 2048
-  availability_zone = "AUTO"
+  availability_zone = "ZONE_!"
   cpu_family = "AMD_OPTERON"
   image_name ="ubuntu:latest"
   ssh_key_path = ["` + sshKey + `"]
@@ -566,7 +566,7 @@ resource ` + ServerResource + ` ` + ServerTestResource + ` {
     disk_type = "SSD Standard"
     user_data = "foo"
     bus = "VIRTIO"
-    availability_zone = "AUTO"
+    availability_zone = "ZONE_!"
   }
 }`
 )
