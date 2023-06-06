@@ -3,7 +3,7 @@
  *
  * DNS API Specification
  *
- * API version: 1.0.0
+ * API version: 1.2.0
  * Contact: support@cloud.ionos.com
  */
 
@@ -16,40 +16,44 @@ import (
 	"time"
 )
 
-// RecordMetadata struct for RecordMetadata
-type RecordMetadata struct {
-	// The date of the last change formatted as yyyy-MM-dd'T'HH:mm:ss.SSS'Z'
+// MetadataWithStateFqdnZoneId struct for MetadataWithStateFqdnZoneId
+type MetadataWithStateFqdnZoneId struct {
+	// The date of the last change formatted as yyyy-MM-dd'T'HH:mm:ss.SSS'Z'.
 	LastModifiedDate *IonosTime `json:"lastModifiedDate,omitempty"`
-	// The date of the record creation formatted as yyyy-MM-dd'T'HH:mm:ss.SSS'Z'
+	// The date of creation of the zone formatted as yyyy-MM-dd'T'HH:mm:ss.SSS'Z'.
 	CreatedDate *IonosTime         `json:"createdDate,omitempty"`
-	State       *ProvisioningState `json:"state,omitempty"`
+	State       *ProvisioningState `json:"state"`
 	// A fully qualified domain name. FQDN consists of two parts - the hostname and the domain name.
-	Fqdn *string `json:"fqdn,omitempty"`
+	Fqdn *string `json:"fqdn"`
 	// The ID (UUID) of the DNS zone of which record belongs to.
-	ZoneId *string `json:"zoneId,omitempty"`
+	ZoneId *string `json:"zoneId"`
 }
 
-// NewRecordMetadata instantiates a new RecordMetadata object
+// NewMetadataWithStateFqdnZoneId instantiates a new MetadataWithStateFqdnZoneId object
 // This constructor will assign default values to properties that have it defined,
 // and makes sure properties required by API are set, but the set of arguments
 // will change when the set of required properties is changed
-func NewRecordMetadata() *RecordMetadata {
-	this := RecordMetadata{}
+func NewMetadataWithStateFqdnZoneId(state ProvisioningState, fqdn string, zoneId string) *MetadataWithStateFqdnZoneId {
+	this := MetadataWithStateFqdnZoneId{}
+
+	this.State = &state
+	this.Fqdn = &fqdn
+	this.ZoneId = &zoneId
 
 	return &this
 }
 
-// NewRecordMetadataWithDefaults instantiates a new RecordMetadata object
+// NewMetadataWithStateFqdnZoneIdWithDefaults instantiates a new MetadataWithStateFqdnZoneId object
 // This constructor will only assign default values to properties that have it defined,
 // but it doesn't guarantee that properties required by API are set
-func NewRecordMetadataWithDefaults() *RecordMetadata {
-	this := RecordMetadata{}
+func NewMetadataWithStateFqdnZoneIdWithDefaults() *MetadataWithStateFqdnZoneId {
+	this := MetadataWithStateFqdnZoneId{}
 	return &this
 }
 
 // GetLastModifiedDate returns the LastModifiedDate field value
 // If the value is explicit nil, the zero value for time.Time will be returned
-func (o *RecordMetadata) GetLastModifiedDate() *time.Time {
+func (o *MetadataWithStateFqdnZoneId) GetLastModifiedDate() *time.Time {
 	if o == nil {
 		return nil
 	}
@@ -64,7 +68,7 @@ func (o *RecordMetadata) GetLastModifiedDate() *time.Time {
 // GetLastModifiedDateOk returns a tuple with the LastModifiedDate field value
 // and a boolean to check if the value has been set.
 // NOTE: If the value is an explicit nil, `nil, true` will be returned
-func (o *RecordMetadata) GetLastModifiedDateOk() (*time.Time, bool) {
+func (o *MetadataWithStateFqdnZoneId) GetLastModifiedDateOk() (*time.Time, bool) {
 	if o == nil {
 		return nil, false
 	}
@@ -77,14 +81,14 @@ func (o *RecordMetadata) GetLastModifiedDateOk() (*time.Time, bool) {
 }
 
 // SetLastModifiedDate sets field value
-func (o *RecordMetadata) SetLastModifiedDate(v time.Time) {
+func (o *MetadataWithStateFqdnZoneId) SetLastModifiedDate(v time.Time) {
 
 	o.LastModifiedDate = &IonosTime{v}
 
 }
 
 // HasLastModifiedDate returns a boolean if a field has been set.
-func (o *RecordMetadata) HasLastModifiedDate() bool {
+func (o *MetadataWithStateFqdnZoneId) HasLastModifiedDate() bool {
 	if o != nil && o.LastModifiedDate != nil {
 		return true
 	}
@@ -94,7 +98,7 @@ func (o *RecordMetadata) HasLastModifiedDate() bool {
 
 // GetCreatedDate returns the CreatedDate field value
 // If the value is explicit nil, the zero value for time.Time will be returned
-func (o *RecordMetadata) GetCreatedDate() *time.Time {
+func (o *MetadataWithStateFqdnZoneId) GetCreatedDate() *time.Time {
 	if o == nil {
 		return nil
 	}
@@ -109,7 +113,7 @@ func (o *RecordMetadata) GetCreatedDate() *time.Time {
 // GetCreatedDateOk returns a tuple with the CreatedDate field value
 // and a boolean to check if the value has been set.
 // NOTE: If the value is an explicit nil, `nil, true` will be returned
-func (o *RecordMetadata) GetCreatedDateOk() (*time.Time, bool) {
+func (o *MetadataWithStateFqdnZoneId) GetCreatedDateOk() (*time.Time, bool) {
 	if o == nil {
 		return nil, false
 	}
@@ -122,14 +126,14 @@ func (o *RecordMetadata) GetCreatedDateOk() (*time.Time, bool) {
 }
 
 // SetCreatedDate sets field value
-func (o *RecordMetadata) SetCreatedDate(v time.Time) {
+func (o *MetadataWithStateFqdnZoneId) SetCreatedDate(v time.Time) {
 
 	o.CreatedDate = &IonosTime{v}
 
 }
 
 // HasCreatedDate returns a boolean if a field has been set.
-func (o *RecordMetadata) HasCreatedDate() bool {
+func (o *MetadataWithStateFqdnZoneId) HasCreatedDate() bool {
 	if o != nil && o.CreatedDate != nil {
 		return true
 	}
@@ -139,7 +143,7 @@ func (o *RecordMetadata) HasCreatedDate() bool {
 
 // GetState returns the State field value
 // If the value is explicit nil, the zero value for ProvisioningState will be returned
-func (o *RecordMetadata) GetState() *ProvisioningState {
+func (o *MetadataWithStateFqdnZoneId) GetState() *ProvisioningState {
 	if o == nil {
 		return nil
 	}
@@ -151,7 +155,7 @@ func (o *RecordMetadata) GetState() *ProvisioningState {
 // GetStateOk returns a tuple with the State field value
 // and a boolean to check if the value has been set.
 // NOTE: If the value is an explicit nil, `nil, true` will be returned
-func (o *RecordMetadata) GetStateOk() (*ProvisioningState, bool) {
+func (o *MetadataWithStateFqdnZoneId) GetStateOk() (*ProvisioningState, bool) {
 	if o == nil {
 		return nil, false
 	}
@@ -160,14 +164,14 @@ func (o *RecordMetadata) GetStateOk() (*ProvisioningState, bool) {
 }
 
 // SetState sets field value
-func (o *RecordMetadata) SetState(v ProvisioningState) {
+func (o *MetadataWithStateFqdnZoneId) SetState(v ProvisioningState) {
 
 	o.State = &v
 
 }
 
 // HasState returns a boolean if a field has been set.
-func (o *RecordMetadata) HasState() bool {
+func (o *MetadataWithStateFqdnZoneId) HasState() bool {
 	if o != nil && o.State != nil {
 		return true
 	}
@@ -177,7 +181,7 @@ func (o *RecordMetadata) HasState() bool {
 
 // GetFqdn returns the Fqdn field value
 // If the value is explicit nil, the zero value for string will be returned
-func (o *RecordMetadata) GetFqdn() *string {
+func (o *MetadataWithStateFqdnZoneId) GetFqdn() *string {
 	if o == nil {
 		return nil
 	}
@@ -189,7 +193,7 @@ func (o *RecordMetadata) GetFqdn() *string {
 // GetFqdnOk returns a tuple with the Fqdn field value
 // and a boolean to check if the value has been set.
 // NOTE: If the value is an explicit nil, `nil, true` will be returned
-func (o *RecordMetadata) GetFqdnOk() (*string, bool) {
+func (o *MetadataWithStateFqdnZoneId) GetFqdnOk() (*string, bool) {
 	if o == nil {
 		return nil, false
 	}
@@ -198,14 +202,14 @@ func (o *RecordMetadata) GetFqdnOk() (*string, bool) {
 }
 
 // SetFqdn sets field value
-func (o *RecordMetadata) SetFqdn(v string) {
+func (o *MetadataWithStateFqdnZoneId) SetFqdn(v string) {
 
 	o.Fqdn = &v
 
 }
 
 // HasFqdn returns a boolean if a field has been set.
-func (o *RecordMetadata) HasFqdn() bool {
+func (o *MetadataWithStateFqdnZoneId) HasFqdn() bool {
 	if o != nil && o.Fqdn != nil {
 		return true
 	}
@@ -215,7 +219,7 @@ func (o *RecordMetadata) HasFqdn() bool {
 
 // GetZoneId returns the ZoneId field value
 // If the value is explicit nil, the zero value for string will be returned
-func (o *RecordMetadata) GetZoneId() *string {
+func (o *MetadataWithStateFqdnZoneId) GetZoneId() *string {
 	if o == nil {
 		return nil
 	}
@@ -227,7 +231,7 @@ func (o *RecordMetadata) GetZoneId() *string {
 // GetZoneIdOk returns a tuple with the ZoneId field value
 // and a boolean to check if the value has been set.
 // NOTE: If the value is an explicit nil, `nil, true` will be returned
-func (o *RecordMetadata) GetZoneIdOk() (*string, bool) {
+func (o *MetadataWithStateFqdnZoneId) GetZoneIdOk() (*string, bool) {
 	if o == nil {
 		return nil, false
 	}
@@ -236,14 +240,14 @@ func (o *RecordMetadata) GetZoneIdOk() (*string, bool) {
 }
 
 // SetZoneId sets field value
-func (o *RecordMetadata) SetZoneId(v string) {
+func (o *MetadataWithStateFqdnZoneId) SetZoneId(v string) {
 
 	o.ZoneId = &v
 
 }
 
 // HasZoneId returns a boolean if a field has been set.
-func (o *RecordMetadata) HasZoneId() bool {
+func (o *MetadataWithStateFqdnZoneId) HasZoneId() bool {
 	if o != nil && o.ZoneId != nil {
 		return true
 	}
@@ -251,7 +255,7 @@ func (o *RecordMetadata) HasZoneId() bool {
 	return false
 }
 
-func (o RecordMetadata) MarshalJSON() ([]byte, error) {
+func (o MetadataWithStateFqdnZoneId) MarshalJSON() ([]byte, error) {
 	toSerialize := map[string]interface{}{}
 	if o.LastModifiedDate != nil {
 		toSerialize["lastModifiedDate"] = o.LastModifiedDate
@@ -276,38 +280,38 @@ func (o RecordMetadata) MarshalJSON() ([]byte, error) {
 	return json.Marshal(toSerialize)
 }
 
-type NullableRecordMetadata struct {
-	value *RecordMetadata
+type NullableMetadataWithStateFqdnZoneId struct {
+	value *MetadataWithStateFqdnZoneId
 	isSet bool
 }
 
-func (v NullableRecordMetadata) Get() *RecordMetadata {
+func (v NullableMetadataWithStateFqdnZoneId) Get() *MetadataWithStateFqdnZoneId {
 	return v.value
 }
 
-func (v *NullableRecordMetadata) Set(val *RecordMetadata) {
+func (v *NullableMetadataWithStateFqdnZoneId) Set(val *MetadataWithStateFqdnZoneId) {
 	v.value = val
 	v.isSet = true
 }
 
-func (v NullableRecordMetadata) IsSet() bool {
+func (v NullableMetadataWithStateFqdnZoneId) IsSet() bool {
 	return v.isSet
 }
 
-func (v *NullableRecordMetadata) Unset() {
+func (v *NullableMetadataWithStateFqdnZoneId) Unset() {
 	v.value = nil
 	v.isSet = false
 }
 
-func NewNullableRecordMetadata(val *RecordMetadata) *NullableRecordMetadata {
-	return &NullableRecordMetadata{value: val, isSet: true}
+func NewNullableMetadataWithStateFqdnZoneId(val *MetadataWithStateFqdnZoneId) *NullableMetadataWithStateFqdnZoneId {
+	return &NullableMetadataWithStateFqdnZoneId{value: val, isSet: true}
 }
 
-func (v NullableRecordMetadata) MarshalJSON() ([]byte, error) {
+func (v NullableMetadataWithStateFqdnZoneId) MarshalJSON() ([]byte, error) {
 	return json.Marshal(v.value)
 }
 
-func (v *NullableRecordMetadata) UnmarshalJSON(src []byte) error {
+func (v *NullableMetadataWithStateFqdnZoneId) UnmarshalJSON(src []byte) error {
 	v.isSet = true
 	return json.Unmarshal(src, &v.value)
 }

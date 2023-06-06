@@ -3,7 +3,7 @@
  *
  * DNS API Specification
  *
- * API version: 1.0.0
+ * API version: 1.2.0
  * Contact: support@cloud.ionos.com
  */
 
@@ -15,34 +15,34 @@ import (
 	"encoding/json"
 )
 
-// ErrorResponse struct for ErrorResponse
-type ErrorResponse struct {
+// Error struct for Error
+type Error struct {
 	// HTTP status code of the operation as specified by [RFC 7231](https://datatracker.ietf.org/doc/html/rfc7231#section-6).
-	HttpStatus *int32          `json:"httpStatus,omitempty"`
-	Messages   *[]ErrorMessage `json:"messages,omitempty"`
+	HttpStatus *int32           `json:"httpStatus,omitempty"`
+	Messages   *[]ErrorMessages `json:"messages,omitempty"`
 }
 
-// NewErrorResponse instantiates a new ErrorResponse object
+// NewError instantiates a new Error object
 // This constructor will assign default values to properties that have it defined,
 // and makes sure properties required by API are set, but the set of arguments
 // will change when the set of required properties is changed
-func NewErrorResponse() *ErrorResponse {
-	this := ErrorResponse{}
+func NewError() *Error {
+	this := Error{}
 
 	return &this
 }
 
-// NewErrorResponseWithDefaults instantiates a new ErrorResponse object
+// NewErrorWithDefaults instantiates a new Error object
 // This constructor will only assign default values to properties that have it defined,
 // but it doesn't guarantee that properties required by API are set
-func NewErrorResponseWithDefaults() *ErrorResponse {
-	this := ErrorResponse{}
+func NewErrorWithDefaults() *Error {
+	this := Error{}
 	return &this
 }
 
 // GetHttpStatus returns the HttpStatus field value
 // If the value is explicit nil, the zero value for int32 will be returned
-func (o *ErrorResponse) GetHttpStatus() *int32 {
+func (o *Error) GetHttpStatus() *int32 {
 	if o == nil {
 		return nil
 	}
@@ -54,7 +54,7 @@ func (o *ErrorResponse) GetHttpStatus() *int32 {
 // GetHttpStatusOk returns a tuple with the HttpStatus field value
 // and a boolean to check if the value has been set.
 // NOTE: If the value is an explicit nil, `nil, true` will be returned
-func (o *ErrorResponse) GetHttpStatusOk() (*int32, bool) {
+func (o *Error) GetHttpStatusOk() (*int32, bool) {
 	if o == nil {
 		return nil, false
 	}
@@ -63,14 +63,14 @@ func (o *ErrorResponse) GetHttpStatusOk() (*int32, bool) {
 }
 
 // SetHttpStatus sets field value
-func (o *ErrorResponse) SetHttpStatus(v int32) {
+func (o *Error) SetHttpStatus(v int32) {
 
 	o.HttpStatus = &v
 
 }
 
 // HasHttpStatus returns a boolean if a field has been set.
-func (o *ErrorResponse) HasHttpStatus() bool {
+func (o *Error) HasHttpStatus() bool {
 	if o != nil && o.HttpStatus != nil {
 		return true
 	}
@@ -79,8 +79,8 @@ func (o *ErrorResponse) HasHttpStatus() bool {
 }
 
 // GetMessages returns the Messages field value
-// If the value is explicit nil, the zero value for []ErrorMessage will be returned
-func (o *ErrorResponse) GetMessages() *[]ErrorMessage {
+// If the value is explicit nil, the zero value for []ErrorMessages will be returned
+func (o *Error) GetMessages() *[]ErrorMessages {
 	if o == nil {
 		return nil
 	}
@@ -92,7 +92,7 @@ func (o *ErrorResponse) GetMessages() *[]ErrorMessage {
 // GetMessagesOk returns a tuple with the Messages field value
 // and a boolean to check if the value has been set.
 // NOTE: If the value is an explicit nil, `nil, true` will be returned
-func (o *ErrorResponse) GetMessagesOk() (*[]ErrorMessage, bool) {
+func (o *Error) GetMessagesOk() (*[]ErrorMessages, bool) {
 	if o == nil {
 		return nil, false
 	}
@@ -101,14 +101,14 @@ func (o *ErrorResponse) GetMessagesOk() (*[]ErrorMessage, bool) {
 }
 
 // SetMessages sets field value
-func (o *ErrorResponse) SetMessages(v []ErrorMessage) {
+func (o *Error) SetMessages(v []ErrorMessages) {
 
 	o.Messages = &v
 
 }
 
 // HasMessages returns a boolean if a field has been set.
-func (o *ErrorResponse) HasMessages() bool {
+func (o *Error) HasMessages() bool {
 	if o != nil && o.Messages != nil {
 		return true
 	}
@@ -116,7 +116,7 @@ func (o *ErrorResponse) HasMessages() bool {
 	return false
 }
 
-func (o ErrorResponse) MarshalJSON() ([]byte, error) {
+func (o Error) MarshalJSON() ([]byte, error) {
 	toSerialize := map[string]interface{}{}
 	if o.HttpStatus != nil {
 		toSerialize["httpStatus"] = o.HttpStatus
@@ -129,38 +129,38 @@ func (o ErrorResponse) MarshalJSON() ([]byte, error) {
 	return json.Marshal(toSerialize)
 }
 
-type NullableErrorResponse struct {
-	value *ErrorResponse
+type NullableError struct {
+	value *Error
 	isSet bool
 }
 
-func (v NullableErrorResponse) Get() *ErrorResponse {
+func (v NullableError) Get() *Error {
 	return v.value
 }
 
-func (v *NullableErrorResponse) Set(val *ErrorResponse) {
+func (v *NullableError) Set(val *Error) {
 	v.value = val
 	v.isSet = true
 }
 
-func (v NullableErrorResponse) IsSet() bool {
+func (v NullableError) IsSet() bool {
 	return v.isSet
 }
 
-func (v *NullableErrorResponse) Unset() {
+func (v *NullableError) Unset() {
 	v.value = nil
 	v.isSet = false
 }
 
-func NewNullableErrorResponse(val *ErrorResponse) *NullableErrorResponse {
-	return &NullableErrorResponse{value: val, isSet: true}
+func NewNullableError(val *Error) *NullableError {
+	return &NullableError{value: val, isSet: true}
 }
 
-func (v NullableErrorResponse) MarshalJSON() ([]byte, error) {
+func (v NullableError) MarshalJSON() ([]byte, error) {
 	return json.Marshal(v.value)
 }
 
-func (v *NullableErrorResponse) UnmarshalJSON(src []byte) error {
+func (v *NullableError) UnmarshalJSON(src []byte) error {
 	v.isSet = true
 	return json.Unmarshal(src, &v.value)
 }

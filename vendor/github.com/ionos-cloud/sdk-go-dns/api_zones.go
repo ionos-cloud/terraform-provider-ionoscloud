@@ -3,7 +3,7 @@
  *
  * DNS API Specification
  *
- * API version: 1.0.0
+ * API version: 1.2.0
  * Contact: support@cloud.ionos.com
  */
 
@@ -141,7 +141,7 @@ func (a *ZonesApiService) ZonesDeleteExecute(r ApiZonesDeleteRequest) (*APIRespo
 			error:      fmt.Sprintf("%s: %s", localVarHTTPResponse.Status, string(localVarBody)),
 		}
 		if localVarHTTPResponse.StatusCode == 400 {
-			var v ErrorResponse
+			var v Error
 			err = a.client.decode(&v, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
 			if err != nil {
 				newErr.error = err.Error()
@@ -150,7 +150,7 @@ func (a *ZonesApiService) ZonesDeleteExecute(r ApiZonesDeleteRequest) (*APIRespo
 			newErr.model = v
 		}
 		if localVarHTTPResponse.StatusCode == 401 {
-			var v ErrorResponse
+			var v Error
 			err = a.client.decode(&v, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
 			if err != nil {
 				newErr.error = err.Error()
@@ -159,7 +159,7 @@ func (a *ZonesApiService) ZonesDeleteExecute(r ApiZonesDeleteRequest) (*APIRespo
 			newErr.model = v
 		}
 		if localVarHTTPResponse.StatusCode == 403 {
-			var v ErrorResponse
+			var v Error
 			err = a.client.decode(&v, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
 			if err != nil {
 				newErr.error = err.Error()
@@ -168,7 +168,7 @@ func (a *ZonesApiService) ZonesDeleteExecute(r ApiZonesDeleteRequest) (*APIRespo
 			newErr.model = v
 		}
 		if localVarHTTPResponse.StatusCode == 404 {
-			var v ErrorResponse
+			var v Error
 			err = a.client.decode(&v, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
 			if err != nil {
 				newErr.error = err.Error()
@@ -177,7 +177,7 @@ func (a *ZonesApiService) ZonesDeleteExecute(r ApiZonesDeleteRequest) (*APIRespo
 			newErr.model = v
 		}
 		if localVarHTTPResponse.StatusCode == 500 {
-			var v ErrorResponse
+			var v Error
 			err = a.client.decode(&v, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
 			if err != nil {
 				newErr.error = err.Error()
@@ -197,7 +197,7 @@ type ApiZonesFindByIdRequest struct {
 	zoneId     string
 }
 
-func (r ApiZonesFindByIdRequest) Execute() (ZoneResponse, *APIResponse, error) {
+func (r ApiZonesFindByIdRequest) Execute() (ZoneRead, *APIResponse, error) {
 	return r.ApiService.ZonesFindByIdExecute(r)
 }
 
@@ -218,16 +218,16 @@ func (a *ZonesApiService) ZonesFindById(ctx _context.Context, zoneId string) Api
 
 /*
  * Execute executes the request
- * @return ZoneResponse
+ * @return ZoneRead
  */
-func (a *ZonesApiService) ZonesFindByIdExecute(r ApiZonesFindByIdRequest) (ZoneResponse, *APIResponse, error) {
+func (a *ZonesApiService) ZonesFindByIdExecute(r ApiZonesFindByIdRequest) (ZoneRead, *APIResponse, error) {
 	var (
 		localVarHTTPMethod   = _nethttp.MethodGet
 		localVarPostBody     interface{}
 		localVarFormFileName string
 		localVarFileName     string
 		localVarFileBytes    []byte
-		localVarReturnValue  ZoneResponse
+		localVarReturnValue  ZoneRead
 	)
 
 	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "ZonesApiService.ZonesFindById")
@@ -306,7 +306,7 @@ func (a *ZonesApiService) ZonesFindByIdExecute(r ApiZonesFindByIdRequest) (ZoneR
 			error:      fmt.Sprintf("%s: %s", localVarHTTPResponse.Status, string(localVarBody)),
 		}
 		if localVarHTTPResponse.StatusCode == 400 {
-			var v ErrorResponse
+			var v Error
 			err = a.client.decode(&v, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
 			if err != nil {
 				newErr.error = err.Error()
@@ -315,7 +315,7 @@ func (a *ZonesApiService) ZonesFindByIdExecute(r ApiZonesFindByIdRequest) (ZoneR
 			newErr.model = v
 		}
 		if localVarHTTPResponse.StatusCode == 401 {
-			var v ErrorResponse
+			var v Error
 			err = a.client.decode(&v, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
 			if err != nil {
 				newErr.error = err.Error()
@@ -324,7 +324,7 @@ func (a *ZonesApiService) ZonesFindByIdExecute(r ApiZonesFindByIdRequest) (ZoneR
 			newErr.model = v
 		}
 		if localVarHTTPResponse.StatusCode == 403 {
-			var v ErrorResponse
+			var v Error
 			err = a.client.decode(&v, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
 			if err != nil {
 				newErr.error = err.Error()
@@ -333,7 +333,7 @@ func (a *ZonesApiService) ZonesFindByIdExecute(r ApiZonesFindByIdRequest) (ZoneR
 			newErr.model = v
 		}
 		if localVarHTTPResponse.StatusCode == 404 {
-			var v ErrorResponse
+			var v Error
 			err = a.client.decode(&v, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
 			if err != nil {
 				newErr.error = err.Error()
@@ -342,7 +342,7 @@ func (a *ZonesApiService) ZonesFindByIdExecute(r ApiZonesFindByIdRequest) (ZoneR
 			newErr.model = v
 		}
 		if localVarHTTPResponse.StatusCode == 500 {
-			var v ErrorResponse
+			var v Error
 			err = a.client.decode(&v, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
 			if err != nil {
 				newErr.error = err.Error()
@@ -392,7 +392,7 @@ func (r ApiZonesGetRequest) Limit(limit int32) ApiZonesGetRequest {
 	return r
 }
 
-func (r ApiZonesGetRequest) Execute() (ZonesResponse, *APIResponse, error) {
+func (r ApiZonesGetRequest) Execute() (ZoneReadList, *APIResponse, error) {
 	return r.ApiService.ZonesGetExecute(r)
 }
 
@@ -411,16 +411,16 @@ func (a *ZonesApiService) ZonesGet(ctx _context.Context) ApiZonesGetRequest {
 
 /*
  * Execute executes the request
- * @return ZonesResponse
+ * @return ZoneReadList
  */
-func (a *ZonesApiService) ZonesGetExecute(r ApiZonesGetRequest) (ZonesResponse, *APIResponse, error) {
+func (a *ZonesApiService) ZonesGetExecute(r ApiZonesGetRequest) (ZoneReadList, *APIResponse, error) {
 	var (
 		localVarHTTPMethod   = _nethttp.MethodGet
 		localVarPostBody     interface{}
 		localVarFormFileName string
 		localVarFileName     string
 		localVarFileBytes    []byte
-		localVarReturnValue  ZonesResponse
+		localVarReturnValue  ZoneReadList
 	)
 
 	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "ZonesApiService.ZonesGet")
@@ -510,7 +510,7 @@ func (a *ZonesApiService) ZonesGetExecute(r ApiZonesGetRequest) (ZonesResponse, 
 			error:      fmt.Sprintf("%s: %s", localVarHTTPResponse.Status, string(localVarBody)),
 		}
 		if localVarHTTPResponse.StatusCode == 400 {
-			var v ErrorResponse
+			var v Error
 			err = a.client.decode(&v, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
 			if err != nil {
 				newErr.error = err.Error()
@@ -519,7 +519,7 @@ func (a *ZonesApiService) ZonesGetExecute(r ApiZonesGetRequest) (ZonesResponse, 
 			newErr.model = v
 		}
 		if localVarHTTPResponse.StatusCode == 401 {
-			var v ErrorResponse
+			var v Error
 			err = a.client.decode(&v, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
 			if err != nil {
 				newErr.error = err.Error()
@@ -528,7 +528,7 @@ func (a *ZonesApiService) ZonesGetExecute(r ApiZonesGetRequest) (ZonesResponse, 
 			newErr.model = v
 		}
 		if localVarHTTPResponse.StatusCode == 500 {
-			var v ErrorResponse
+			var v Error
 			err = a.client.decode(&v, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
 			if err != nil {
 				newErr.error = err.Error()
@@ -553,17 +553,17 @@ func (a *ZonesApiService) ZonesGetExecute(r ApiZonesGetRequest) (ZonesResponse, 
 }
 
 type ApiZonesPostRequest struct {
-	ctx               _context.Context
-	ApiService        *ZonesApiService
-	zoneCreateRequest *ZoneCreateRequest
+	ctx        _context.Context
+	ApiService *ZonesApiService
+	zoneCreate *ZoneCreate
 }
 
-func (r ApiZonesPostRequest) ZoneCreateRequest(zoneCreateRequest ZoneCreateRequest) ApiZonesPostRequest {
-	r.zoneCreateRequest = &zoneCreateRequest
+func (r ApiZonesPostRequest) ZoneCreate(zoneCreate ZoneCreate) ApiZonesPostRequest {
+	r.zoneCreate = &zoneCreate
 	return r
 }
 
-func (r ApiZonesPostRequest) Execute() (ZoneResponse, *APIResponse, error) {
+func (r ApiZonesPostRequest) Execute() (ZoneRead, *APIResponse, error) {
 	return r.ApiService.ZonesPostExecute(r)
 }
 
@@ -582,16 +582,16 @@ func (a *ZonesApiService) ZonesPost(ctx _context.Context) ApiZonesPostRequest {
 
 /*
  * Execute executes the request
- * @return ZoneResponse
+ * @return ZoneRead
  */
-func (a *ZonesApiService) ZonesPostExecute(r ApiZonesPostRequest) (ZoneResponse, *APIResponse, error) {
+func (a *ZonesApiService) ZonesPostExecute(r ApiZonesPostRequest) (ZoneRead, *APIResponse, error) {
 	var (
 		localVarHTTPMethod   = _nethttp.MethodPost
 		localVarPostBody     interface{}
 		localVarFormFileName string
 		localVarFileName     string
 		localVarFileBytes    []byte
-		localVarReturnValue  ZoneResponse
+		localVarReturnValue  ZoneRead
 	)
 
 	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "ZonesApiService.ZonesPost")
@@ -604,8 +604,8 @@ func (a *ZonesApiService) ZonesPostExecute(r ApiZonesPostRequest) (ZoneResponse,
 	localVarHeaderParams := make(map[string]string)
 	localVarQueryParams := _neturl.Values{}
 	localVarFormParams := _neturl.Values{}
-	if r.zoneCreateRequest == nil {
-		return localVarReturnValue, nil, reportError("zoneCreateRequest is required and must be specified")
+	if r.zoneCreate == nil {
+		return localVarReturnValue, nil, reportError("zoneCreate is required and must be specified")
 	}
 
 	// to determine the Content-Type header
@@ -626,7 +626,7 @@ func (a *ZonesApiService) ZonesPostExecute(r ApiZonesPostRequest) (ZoneResponse,
 		localVarHeaderParams["Accept"] = localVarHTTPHeaderAccept
 	}
 	// body params
-	localVarPostBody = r.zoneCreateRequest
+	localVarPostBody = r.zoneCreate
 	if r.ctx != nil {
 		// API Key Authentication
 		if auth, ok := r.ctx.Value(ContextAPIKeys).(map[string]APIKey); ok {
@@ -674,7 +674,7 @@ func (a *ZonesApiService) ZonesPostExecute(r ApiZonesPostRequest) (ZoneResponse,
 			error:      fmt.Sprintf("%s: %s", localVarHTTPResponse.Status, string(localVarBody)),
 		}
 		if localVarHTTPResponse.StatusCode == 400 {
-			var v ErrorResponse
+			var v Error
 			err = a.client.decode(&v, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
 			if err != nil {
 				newErr.error = err.Error()
@@ -683,7 +683,7 @@ func (a *ZonesApiService) ZonesPostExecute(r ApiZonesPostRequest) (ZoneResponse,
 			newErr.model = v
 		}
 		if localVarHTTPResponse.StatusCode == 401 {
-			var v ErrorResponse
+			var v Error
 			err = a.client.decode(&v, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
 			if err != nil {
 				newErr.error = err.Error()
@@ -692,7 +692,7 @@ func (a *ZonesApiService) ZonesPostExecute(r ApiZonesPostRequest) (ZoneResponse,
 			newErr.model = v
 		}
 		if localVarHTTPResponse.StatusCode == 403 {
-			var v ErrorResponse
+			var v Error
 			err = a.client.decode(&v, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
 			if err != nil {
 				newErr.error = err.Error()
@@ -701,7 +701,7 @@ func (a *ZonesApiService) ZonesPostExecute(r ApiZonesPostRequest) (ZoneResponse,
 			newErr.model = v
 		}
 		if localVarHTTPResponse.StatusCode == 500 {
-			var v ErrorResponse
+			var v Error
 			err = a.client.decode(&v, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
 			if err != nil {
 				newErr.error = err.Error()
@@ -726,18 +726,18 @@ func (a *ZonesApiService) ZonesPostExecute(r ApiZonesPostRequest) (ZoneResponse,
 }
 
 type ApiZonesPutRequest struct {
-	ctx               _context.Context
-	ApiService        *ZonesApiService
-	zoneId            string
-	zoneUpdateRequest *ZoneUpdateRequest
+	ctx        _context.Context
+	ApiService *ZonesApiService
+	zoneId     string
+	zoneEnsure *ZoneEnsure
 }
 
-func (r ApiZonesPutRequest) ZoneUpdateRequest(zoneUpdateRequest ZoneUpdateRequest) ApiZonesPutRequest {
-	r.zoneUpdateRequest = &zoneUpdateRequest
+func (r ApiZonesPutRequest) ZoneEnsure(zoneEnsure ZoneEnsure) ApiZonesPutRequest {
+	r.zoneEnsure = &zoneEnsure
 	return r
 }
 
-func (r ApiZonesPutRequest) Execute() (ZoneResponse, *APIResponse, error) {
+func (r ApiZonesPutRequest) Execute() (ZoneRead, *APIResponse, error) {
 	return r.ApiService.ZonesPutExecute(r)
 }
 
@@ -758,16 +758,16 @@ func (a *ZonesApiService) ZonesPut(ctx _context.Context, zoneId string) ApiZones
 
 /*
  * Execute executes the request
- * @return ZoneResponse
+ * @return ZoneRead
  */
-func (a *ZonesApiService) ZonesPutExecute(r ApiZonesPutRequest) (ZoneResponse, *APIResponse, error) {
+func (a *ZonesApiService) ZonesPutExecute(r ApiZonesPutRequest) (ZoneRead, *APIResponse, error) {
 	var (
 		localVarHTTPMethod   = _nethttp.MethodPut
 		localVarPostBody     interface{}
 		localVarFormFileName string
 		localVarFileName     string
 		localVarFileBytes    []byte
-		localVarReturnValue  ZoneResponse
+		localVarReturnValue  ZoneRead
 	)
 
 	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "ZonesApiService.ZonesPut")
@@ -781,8 +781,8 @@ func (a *ZonesApiService) ZonesPutExecute(r ApiZonesPutRequest) (ZoneResponse, *
 	localVarHeaderParams := make(map[string]string)
 	localVarQueryParams := _neturl.Values{}
 	localVarFormParams := _neturl.Values{}
-	if r.zoneUpdateRequest == nil {
-		return localVarReturnValue, nil, reportError("zoneUpdateRequest is required and must be specified")
+	if r.zoneEnsure == nil {
+		return localVarReturnValue, nil, reportError("zoneEnsure is required and must be specified")
 	}
 
 	// to determine the Content-Type header
@@ -803,7 +803,7 @@ func (a *ZonesApiService) ZonesPutExecute(r ApiZonesPutRequest) (ZoneResponse, *
 		localVarHeaderParams["Accept"] = localVarHTTPHeaderAccept
 	}
 	// body params
-	localVarPostBody = r.zoneUpdateRequest
+	localVarPostBody = r.zoneEnsure
 	if r.ctx != nil {
 		// API Key Authentication
 		if auth, ok := r.ctx.Value(ContextAPIKeys).(map[string]APIKey); ok {
@@ -851,7 +851,7 @@ func (a *ZonesApiService) ZonesPutExecute(r ApiZonesPutRequest) (ZoneResponse, *
 			error:      fmt.Sprintf("%s: %s", localVarHTTPResponse.Status, string(localVarBody)),
 		}
 		if localVarHTTPResponse.StatusCode == 400 {
-			var v ErrorResponse
+			var v Error
 			err = a.client.decode(&v, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
 			if err != nil {
 				newErr.error = err.Error()
@@ -860,7 +860,7 @@ func (a *ZonesApiService) ZonesPutExecute(r ApiZonesPutRequest) (ZoneResponse, *
 			newErr.model = v
 		}
 		if localVarHTTPResponse.StatusCode == 401 {
-			var v ErrorResponse
+			var v Error
 			err = a.client.decode(&v, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
 			if err != nil {
 				newErr.error = err.Error()
@@ -869,7 +869,7 @@ func (a *ZonesApiService) ZonesPutExecute(r ApiZonesPutRequest) (ZoneResponse, *
 			newErr.model = v
 		}
 		if localVarHTTPResponse.StatusCode == 403 {
-			var v ErrorResponse
+			var v Error
 			err = a.client.decode(&v, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
 			if err != nil {
 				newErr.error = err.Error()
@@ -878,7 +878,7 @@ func (a *ZonesApiService) ZonesPutExecute(r ApiZonesPutRequest) (ZoneResponse, *
 			newErr.model = v
 		}
 		if localVarHTTPResponse.StatusCode == 404 {
-			var v ErrorResponse
+			var v Error
 			err = a.client.decode(&v, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
 			if err != nil {
 				newErr.error = err.Error()
@@ -887,7 +887,7 @@ func (a *ZonesApiService) ZonesPutExecute(r ApiZonesPutRequest) (ZoneResponse, *
 			newErr.model = v
 		}
 		if localVarHTTPResponse.StatusCode == 500 {
-			var v ErrorResponse
+			var v Error
 			err = a.client.decode(&v, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
 			if err != nil {
 				newErr.error = err.Error()

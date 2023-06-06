@@ -120,7 +120,7 @@ func zoneDelete(ctx context.Context, d *schema.ResourceData, meta interface{}) d
 
 	err = utils.WaitForResourceToBeDeleted(ctx, d, client.IsZoneDeleted)
 	if err != nil {
-		diag.FromErr(fmt.Errorf("an error occured while waiting for the DNS Zone with ID: %s to be deleted, error: %w", zoneId, err))
+		return diag.FromErr(fmt.Errorf("an error occured while waiting for the DNS Zone with ID: %s to be deleted, error: %w", zoneId, err))
 	}
 	return nil
 }

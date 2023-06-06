@@ -3,7 +3,7 @@
  *
  * DNS API Specification
  *
- * API version: 1.0.0
+ * API version: 1.2.0
  * Contact: support@cloud.ionos.com
  */
 
@@ -51,10 +51,10 @@ const (
 	RequestStatusFailed  = "FAILED"
 	RequestStatusDone    = "DONE"
 
-	Version = "1.0.0"
+	Version = "1.1.0"
 )
 
-// APIClient manages communication with the IONOS Cloud - DNS API API v1.0.0
+// APIClient manages communication with the IONOS Cloud - DNS API API v1.2.0
 // In most cases there should be only one, shared, APIClient.
 type APIClient struct {
 	cfg    *Configuration

@@ -3,7 +3,7 @@
  *
  * DNS API Specification
  *
- * API version: 1.0.0
+ * API version: 1.2.0
  * Contact: support@cloud.ionos.com
  */
 
@@ -16,15 +16,15 @@ import (
 	"fmt"
 )
 
-// ProvisioningState The list of possible provisioning states in which DNS resource could be at the specific time.
+// ProvisioningState The list of possible provisioning states in which DNS resource could be at the specific time. * AVAILABLE - resource exists and is healthy. * PROVISIONING - resource is being created or updated. * DESTROYING - delete command was issued, the resource is being deleted. * FAILED - creation of the resource failed.
 type ProvisioningState string
 
-// List of provisioningState
+// List of ProvisioningState
 const (
-	PROVISIONING   ProvisioningState = "PROVISIONING"
-	DEPROVISIONING ProvisioningState = "DEPROVISIONING"
-	CREATED        ProvisioningState = "CREATED"
-	FAILED         ProvisioningState = "FAILED"
+	PROVISIONING ProvisioningState = "PROVISIONING"
+	DESTROYING   ProvisioningState = "DESTROYING"
+	AVAILABLE    ProvisioningState = "AVAILABLE"
+	FAILED       ProvisioningState = "FAILED"
 )
 
 func (v *ProvisioningState) UnmarshalJSON(src []byte) error {
@@ -34,7 +34,7 @@ func (v *ProvisioningState) UnmarshalJSON(src []byte) error {
 		return err
 	}
 	enumTypeValue := ProvisioningState(value)
-	for _, existing := range []ProvisioningState{"PROVISIONING", "DEPROVISIONING", "CREATED", "FAILED"} {
+	for _, existing := range []ProvisioningState{"PROVISIONING", "DESTROYING", "AVAILABLE", "FAILED"} {
 		if existing == enumTypeValue {
 			*v = enumTypeValue
 			return nil
@@ -44,7 +44,7 @@ func (v *ProvisioningState) UnmarshalJSON(src []byte) error {
 	return fmt.Errorf("%+v is not a valid ProvisioningState", value)
 }
 
-// Ptr returns reference to provisioningState value
+// Ptr returns reference to ProvisioningState value
 func (v ProvisioningState) Ptr() *ProvisioningState {
 	return &v
 }

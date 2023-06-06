@@ -72,7 +72,7 @@ func dataSourceZoneRead(ctx context.Context, d *schema.ResourceData, meta interf
 		return diag.FromErr(fmt.Errorf("partial_match can only be used together with the name attribute"))
 	}
 
-	var zone dns.ZoneResponse
+	var zone dns.ZoneRead
 	var err error
 
 	if idOk {
@@ -81,7 +81,7 @@ func dataSourceZoneRead(ctx context.Context, d *schema.ResourceData, meta interf
 			return diag.FromErr(fmt.Errorf("an error occured while fetching the DNS Zone with ID: %s, error: %w", id, err))
 		}
 	} else {
-		var results []dns.ZoneResponse
+		var results []dns.ZoneRead
 		log.Printf("[INFO] Populating data source for DNS Zone using name %s and partial_match %t", name, partialMatch)
 
 		if partialMatch {

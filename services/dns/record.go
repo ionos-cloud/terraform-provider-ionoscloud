@@ -14,10 +14,10 @@ import (
 
 var recordResourceName = "DNS Record"
 
-func (c *Client) CreateRecord(ctx context.Context, zoneId string, d *schema.ResourceData) (recordResponse dns.RecordResponse, responseInfo utils.ApiResponseInfo, err error) {
+func (c *Client) CreateRecord(ctx context.Context, zoneId string, d *schema.ResourceData) (recordResponse dns.RecordRead, responseInfo utils.ApiResponseInfo, err error) {
 	recordUuid := uuidgen.ResourceUuid()
 	request := setRecordPutRequest(d)
-	recordResponse, apiResponse, err := c.sdkClient.RecordsApi.ZonesRecordsPut(ctx, zoneId, recordUuid.String()).RecordUpdateRequest(*request).Execute()
+	recordResponse, apiResponse, err := c.sdkClient.RecordsApi.ZonesRecordsPut(ctx, zoneId, recordUuid.String()).RecordEnsure(*request).Execute()
 	apiResponse.LogInfo()
 	return recordResponse, apiResponse, err
 }
@@ -34,16 +34,16 @@ func (c *Client) IsRecordCreated(ctx context.Context, d *schema.ResourceData) (b
 	}
 	log.Printf("[DEBUG] record state: %s", *record.Metadata.State)
 
-	return strings.EqualFold((string)(*record.Metadata.State), (string)(dns.CREATED)), nil
+	return strings.EqualFold((string)(*record.Metadata.State), (string)(dns.AVAILABLE)), nil
 }
 
-func (c *Client) GetRecordById(ctx context.Context, zoneId, recordId string) (dns.RecordResponse, *dns.APIResponse, error) {
+func (c *Client) GetRecordById(ctx context.Context, zoneId, recordId string) (dns.RecordRead, *dns.APIResponse, error) {
 	record, apiResponse, err := c.sdkClient.RecordsApi.ZonesRecordsFindById(ctx, zoneId, recordId).Execute()
 	apiResponse.LogInfo()
 	return record, apiResponse, err
 }
 
-func (c *Client) ListRecords(ctx context.Context, zoneId, recordName string) (dns.RecordsResponse, *dns.APIResponse, error) {
+func (c *Client) ListRecords(ctx context.Context, zoneId, recordName string) (dns.RecordReadList, *dns.APIResponse, error) {
 	request := c.sdkClient.RecordsApi.RecordsGet(ctx)
 	if recordName != "" {
 		request = request.FilterName(recordName)
@@ -53,7 +53,7 @@ func (c *Client) ListRecords(ctx context.Context, zoneId, recordName string) (dn
 	return records, apiResponse, err
 }
 
-func (c *Client) SetRecordData(d *schema.ResourceData, record dns.RecordResponse) error {
+func (c *Client) SetRecordData(d *schema.ResourceData, record dns.RecordRead) error {
 	if record.Id != nil {
 		d.SetId(*record.Id)
 	}
@@ -119,16 +119,16 @@ func (c *Client) IsRecordDeleted(ctx context.Context, d *schema.ResourceData) (b
 	return apiResponse.HttpNotFound(), err
 }
 
-func (c *Client) UpdateRecord(ctx context.Context, zoneId, recordId string, d *schema.ResourceData) (dns.RecordResponse, utils.ApiResponseInfo, error) {
+func (c *Client) UpdateRecord(ctx context.Context, zoneId, recordId string, d *schema.ResourceData) (dns.RecordRead, utils.ApiResponseInfo, error) {
 	request := setRecordPutRequest(d)
-	recordResponse, apiResponse, err := c.sdkClient.RecordsApi.ZonesRecordsPut(ctx, zoneId, recordId).RecordUpdateRequest(*request).Execute()
+	recordResponse, apiResponse, err := c.sdkClient.RecordsApi.ZonesRecordsPut(ctx, zoneId, recordId).RecordEnsure(*request).Execute()
 	apiResponse.LogInfo()
 	return recordResponse, apiResponse, err
 }
 
-func setRecordPutRequest(d *schema.ResourceData) *dns.RecordUpdateRequest {
-	request := dns.RecordUpdateRequest{
-		Properties: &dns.RecordProperties{},
+func setRecordPutRequest(d *schema.ResourceData) *dns.RecordEnsure {
+	request := dns.RecordEnsure{
+		Properties: &dns.Record{},
 	}
 
 	if nameValue, ok := d.GetOk("name"); ok {
@@ -138,8 +138,7 @@ func setRecordPutRequest(d *schema.ResourceData) *dns.RecordUpdateRequest {
 
 	if typeValue, ok := d.GetOk("type"); ok {
 		typeString := typeValue.(string)
-		recordType := (dns.RecordType)(typeString)
-		request.Properties.Type = &recordType
+		request.Properties.Type = &typeString
 	}
 
 	if contentValue, ok := d.GetOk("content"); ok {
@@ -166,9 +165,9 @@ func setRecordPutRequest(d *schema.ResourceData) *dns.RecordUpdateRequest {
 	return &request
 }
 
-func setRecordCreateRequest(d *schema.ResourceData) *dns.RecordCreateRequest {
-	request := dns.RecordCreateRequest{
-		Properties: &dns.RecordProperties{},
+func setRecordCreateRequest(d *schema.ResourceData) *dns.RecordCreate {
+	request := dns.RecordCreate{
+		Properties: &dns.Record{},
 	}
 
 	if nameValue, ok := d.GetOk("name"); ok {
@@ -178,8 +177,7 @@ func setRecordCreateRequest(d *schema.ResourceData) *dns.RecordCreateRequest {
 
 	if typeValue, ok := d.GetOk("type"); ok {
 		typeString := typeValue.(string)
-		recordType := (dns.RecordType)(typeString)
-		request.Properties.Type = &recordType
+		request.Properties.Type = &typeString
 	}
 
 	if contentValue, ok := d.GetOk("content"); ok {

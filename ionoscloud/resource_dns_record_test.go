@@ -13,7 +13,7 @@ import (
 )
 
 func TestAccDNSRecord(t *testing.T) {
-	var Record dns.RecordResponse
+	var Record dns.RecordRead
 
 	resource.Test(t, resource.TestCase{
 		PreCheck: func() {
@@ -124,7 +124,7 @@ func testAccDNSRecordDestroyCheck(s *terraform.State) error {
 	return nil
 }
 
-func testAccDNSRecordExistenceCheck(path string, record *dns.RecordResponse) resource.TestCheckFunc {
+func testAccDNSRecordExistenceCheck(path string, record *dns.RecordRead) resource.TestCheckFunc {
 	return func(s *terraform.State) error {
 		client := testAccProvider.Meta().(SdkBundle).DNSClient
 		rs, ok := s.RootModule().Resources[path]

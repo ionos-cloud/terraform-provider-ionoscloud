@@ -3,7 +3,7 @@
  *
  * DNS API Specification
  *
- * API version: 1.0.0
+ * API version: 1.2.0
  * Contact: support@cloud.ionos.com
  */
 
@@ -15,11 +15,12 @@ import (
 	"encoding/json"
 )
 
-// RecordProperties struct for RecordProperties
-type RecordProperties struct {
-	Name    *string     `json:"name"`
-	Type    *RecordType `json:"type"`
-	Content *string     `json:"content"`
+// Record struct for Record
+type Record struct {
+	Name *string `json:"name"`
+	// Holds supported DNS resource record types. In the DNS context a record is a DNS resource record.
+	Type    *string `json:"type"`
+	Content *string `json:"content"`
 	// Time to live for the record, recommended 3600.
 	Ttl *int32 `json:"ttl,omitempty"`
 	// Priority value is between 0 and 65535. Priority is mandatory for MX, SRV and URI record types and ignored for all other types.
@@ -28,12 +29,12 @@ type RecordProperties struct {
 	Enabled *bool `json:"enabled,omitempty"`
 }
 
-// NewRecordProperties instantiates a new RecordProperties object
+// NewRecord instantiates a new Record object
 // This constructor will assign default values to properties that have it defined,
 // and makes sure properties required by API are set, but the set of arguments
 // will change when the set of required properties is changed
-func NewRecordProperties(name string, type_ RecordType, content string) *RecordProperties {
-	this := RecordProperties{}
+func NewRecord(name string, type_ string, content string) *Record {
+	this := Record{}
 
 	this.Name = &name
 	this.Type = &type_
@@ -46,11 +47,11 @@ func NewRecordProperties(name string, type_ RecordType, content string) *RecordP
 	return &this
 }
 
-// NewRecordPropertiesWithDefaults instantiates a new RecordProperties object
+// NewRecordWithDefaults instantiates a new Record object
 // This constructor will only assign default values to properties that have it defined,
 // but it doesn't guarantee that properties required by API are set
-func NewRecordPropertiesWithDefaults() *RecordProperties {
-	this := RecordProperties{}
+func NewRecordWithDefaults() *Record {
+	this := Record{}
 	var ttl int32 = 3600
 	this.Ttl = &ttl
 	var enabled bool = true
@@ -60,7 +61,7 @@ func NewRecordPropertiesWithDefaults() *RecordProperties {
 
 // GetName returns the Name field value
 // If the value is explicit nil, the zero value for string will be returned
-func (o *RecordProperties) GetName() *string {
+func (o *Record) GetName() *string {
 	if o == nil {
 		return nil
 	}
@@ -72,7 +73,7 @@ func (o *RecordProperties) GetName() *string {
 // GetNameOk returns a tuple with the Name field value
 // and a boolean to check if the value has been set.
 // NOTE: If the value is an explicit nil, `nil, true` will be returned
-func (o *RecordProperties) GetNameOk() (*string, bool) {
+func (o *Record) GetNameOk() (*string, bool) {
 	if o == nil {
 		return nil, false
 	}
@@ -81,14 +82,14 @@ func (o *RecordProperties) GetNameOk() (*string, bool) {
 }
 
 // SetName sets field value
-func (o *RecordProperties) SetName(v string) {
+func (o *Record) SetName(v string) {
 
 	o.Name = &v
 
 }
 
 // HasName returns a boolean if a field has been set.
-func (o *RecordProperties) HasName() bool {
+func (o *Record) HasName() bool {
 	if o != nil && o.Name != nil {
 		return true
 	}
@@ -97,8 +98,8 @@ func (o *RecordProperties) HasName() bool {
 }
 
 // GetType returns the Type field value
-// If the value is explicit nil, the zero value for RecordType will be returned
-func (o *RecordProperties) GetType() *RecordType {
+// If the value is explicit nil, the zero value for string will be returned
+func (o *Record) GetType() *string {
 	if o == nil {
 		return nil
 	}
@@ -110,7 +111,7 @@ func (o *RecordProperties) GetType() *RecordType {
 // GetTypeOk returns a tuple with the Type field value
 // and a boolean to check if the value has been set.
 // NOTE: If the value is an explicit nil, `nil, true` will be returned
-func (o *RecordProperties) GetTypeOk() (*RecordType, bool) {
+func (o *Record) GetTypeOk() (*string, bool) {
 	if o == nil {
 		return nil, false
 	}
@@ -119,14 +120,14 @@ func (o *RecordProperties) GetTypeOk() (*RecordType, bool) {
 }
 
 // SetType sets field value
-func (o *RecordProperties) SetType(v RecordType) {
+func (o *Record) SetType(v string) {
 
 	o.Type = &v
 
 }
 
 // HasType returns a boolean if a field has been set.
-func (o *RecordProperties) HasType() bool {
+func (o *Record) HasType() bool {
 	if o != nil && o.Type != nil {
 		return true
 	}
@@ -136,7 +137,7 @@ func (o *RecordProperties) HasType() bool {
 
 // GetContent returns the Content field value
 // If the value is explicit nil, the zero value for string will be returned
-func (o *RecordProperties) GetContent() *string {
+func (o *Record) GetContent() *string {
 	if o == nil {
 		return nil
 	}
@@ -148,7 +149,7 @@ func (o *RecordProperties) GetContent() *string {
 // GetContentOk returns a tuple with the Content field value
 // and a boolean to check if the value has been set.
 // NOTE: If the value is an explicit nil, `nil, true` will be returned
-func (o *RecordProperties) GetContentOk() (*string, bool) {
+func (o *Record) GetContentOk() (*string, bool) {
 	if o == nil {
 		return nil, false
 	}
@@ -157,14 +158,14 @@ func (o *RecordProperties) GetContentOk() (*string, bool) {
 }
 
 // SetContent sets field value
-func (o *RecordProperties) SetContent(v string) {
+func (o *Record) SetContent(v string) {
 
 	o.Content = &v
 
 }
 
 // HasContent returns a boolean if a field has been set.
-func (o *RecordProperties) HasContent() bool {
+func (o *Record) HasContent() bool {
 	if o != nil && o.Content != nil {
 		return true
 	}
@@ -174,7 +175,7 @@ func (o *RecordProperties) HasContent() bool {
 
 // GetTtl returns the Ttl field value
 // If the value is explicit nil, the zero value for int32 will be returned
-func (o *RecordProperties) GetTtl() *int32 {
+func (o *Record) GetTtl() *int32 {
 	if o == nil {
 		return nil
 	}
@@ -186,7 +187,7 @@ func (o *RecordProperties) GetTtl() *int32 {
 // GetTtlOk returns a tuple with the Ttl field value
 // and a boolean to check if the value has been set.
 // NOTE: If the value is an explicit nil, `nil, true` will be returned
-func (o *RecordProperties) GetTtlOk() (*int32, bool) {
+func (o *Record) GetTtlOk() (*int32, bool) {
 	if o == nil {
 		return nil, false
 	}
@@ -195,14 +196,14 @@ func (o *RecordProperties) GetTtlOk() (*int32, bool) {
 }
 
 // SetTtl sets field value
-func (o *RecordProperties) SetTtl(v int32) {
+func (o *Record) SetTtl(v int32) {
 
 	o.Ttl = &v
 
 }
 
 // HasTtl returns a boolean if a field has been set.
-func (o *RecordProperties) HasTtl() bool {
+func (o *Record) HasTtl() bool {
 	if o != nil && o.Ttl != nil {
 		return true
 	}
@@ -212,7 +213,7 @@ func (o *RecordProperties) HasTtl() bool {
 
 // GetPriority returns the Priority field value
 // If the value is explicit nil, the zero value for int32 will be returned
-func (o *RecordProperties) GetPriority() *int32 {
+func (o *Record) GetPriority() *int32 {
 	if o == nil {
 		return nil
 	}
@@ -224,7 +225,7 @@ func (o *RecordProperties) GetPriority() *int32 {
 // GetPriorityOk returns a tuple with the Priority field value
 // and a boolean to check if the value has been set.
 // NOTE: If the value is an explicit nil, `nil, true` will be returned
-func (o *RecordProperties) GetPriorityOk() (*int32, bool) {
+func (o *Record) GetPriorityOk() (*int32, bool) {
 	if o == nil {
 		return nil, false
 	}
@@ -233,14 +234,14 @@ func (o *RecordProperties) GetPriorityOk() (*int32, bool) {
 }
 
 // SetPriority sets field value
-func (o *RecordProperties) SetPriority(v int32) {
+func (o *Record) SetPriority(v int32) {
 
 	o.Priority = &v
 
 }
 
 // HasPriority returns a boolean if a field has been set.
-func (o *RecordProperties) HasPriority() bool {
+func (o *Record) HasPriority() bool {
 	if o != nil && o.Priority != nil {
 		return true
 	}
@@ -250,7 +251,7 @@ func (o *RecordProperties) HasPriority() bool {
 
 // GetEnabled returns the Enabled field value
 // If the value is explicit nil, the zero value for bool will be returned
-func (o *RecordProperties) GetEnabled() *bool {
+func (o *Record) GetEnabled() *bool {
 	if o == nil {
 		return nil
 	}
@@ -262,7 +263,7 @@ func (o *RecordProperties) GetEnabled() *bool {
 // GetEnabledOk returns a tuple with the Enabled field value
 // and a boolean to check if the value has been set.
 // NOTE: If the value is an explicit nil, `nil, true` will be returned
-func (o *RecordProperties) GetEnabledOk() (*bool, bool) {
+func (o *Record) GetEnabledOk() (*bool, bool) {
 	if o == nil {
 		return nil, false
 	}
@@ -271,14 +272,14 @@ func (o *RecordProperties) GetEnabledOk() (*bool, bool) {
 }
 
 // SetEnabled sets field value
-func (o *RecordProperties) SetEnabled(v bool) {
+func (o *Record) SetEnabled(v bool) {
 
 	o.Enabled = &v
 
 }
 
 // HasEnabled returns a boolean if a field has been set.
-func (o *RecordProperties) HasEnabled() bool {
+func (o *Record) HasEnabled() bool {
 	if o != nil && o.Enabled != nil {
 		return true
 	}
@@ -286,7 +287,7 @@ func (o *RecordProperties) HasEnabled() bool {
 	return false
 }
 
-func (o RecordProperties) MarshalJSON() ([]byte, error) {
+func (o Record) MarshalJSON() ([]byte, error) {
 	toSerialize := map[string]interface{}{}
 	if o.Name != nil {
 		toSerialize["name"] = o.Name
@@ -315,38 +316,38 @@ func (o RecordProperties) MarshalJSON() ([]byte, error) {
 	return json.Marshal(toSerialize)
 }
 
-type NullableRecordProperties struct {
-	value *RecordProperties
+type NullableRecord struct {
+	value *Record
 	isSet bool
 }
 
-func (v NullableRecordProperties) Get() *RecordProperties {
+func (v NullableRecord) Get() *Record {
 	return v.value
 }
 
-func (v *NullableRecordProperties) Set(val *RecordProperties) {
+func (v *NullableRecord) Set(val *Record) {
 	v.value = val
 	v.isSet = true
 }
 
-func (v NullableRecordProperties) IsSet() bool {
+func (v NullableRecord) IsSet() bool {
 	return v.isSet
 }
 
-func (v *NullableRecordProperties) Unset() {
+func (v *NullableRecord) Unset() {
 	v.value = nil
 	v.isSet = false
 }
 
-func NewNullableRecordProperties(val *RecordProperties) *NullableRecordProperties {
-	return &NullableRecordProperties{value: val, isSet: true}
+func NewNullableRecord(val *Record) *NullableRecord {
+	return &NullableRecord{value: val, isSet: true}
 }
 
-func (v NullableRecordProperties) MarshalJSON() ([]byte, error) {
+func (v NullableRecord) MarshalJSON() ([]byte, error) {
 	return json.Marshal(v.value)
 }
 
-func (v *NullableRecordProperties) UnmarshalJSON(src []byte) error {
+func (v *NullableRecord) UnmarshalJSON(src []byte) error {
 	v.isSet = true
 	return json.Unmarshal(src, &v.value)
 }

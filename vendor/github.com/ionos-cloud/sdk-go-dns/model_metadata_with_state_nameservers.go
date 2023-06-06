@@ -3,7 +3,7 @@
  *
  * DNS API Specification
  *
- * API version: 1.0.0
+ * API version: 1.2.0
  * Contact: support@cloud.ionos.com
  */
 
@@ -16,38 +16,41 @@ import (
 	"time"
 )
 
-// ZoneResponseMetadata struct for ZoneResponseMetadata
-type ZoneResponseMetadata struct {
+// MetadataWithStateNameservers struct for MetadataWithStateNameservers
+type MetadataWithStateNameservers struct {
 	// The date of the last change formatted as yyyy-MM-dd'T'HH:mm:ss.SSS'Z'.
 	LastModifiedDate *IonosTime `json:"lastModifiedDate,omitempty"`
 	// The date of creation of the zone formatted as yyyy-MM-dd'T'HH:mm:ss.SSS'Z'.
 	CreatedDate *IonosTime         `json:"createdDate,omitempty"`
-	State       *ProvisioningState `json:"state,omitempty"`
+	State       *ProvisioningState `json:"state"`
 	// The list of nameservers associated to the zone
-	Nameservers *[]string `json:"nameservers,omitempty"`
+	Nameservers *[]string `json:"nameservers"`
 }
 
-// NewZoneResponseMetadata instantiates a new ZoneResponseMetadata object
+// NewMetadataWithStateNameservers instantiates a new MetadataWithStateNameservers object
 // This constructor will assign default values to properties that have it defined,
 // and makes sure properties required by API are set, but the set of arguments
 // will change when the set of required properties is changed
-func NewZoneResponseMetadata() *ZoneResponseMetadata {
-	this := ZoneResponseMetadata{}
+func NewMetadataWithStateNameservers(state ProvisioningState, nameservers []string) *MetadataWithStateNameservers {
+	this := MetadataWithStateNameservers{}
+
+	this.State = &state
+	this.Nameservers = &nameservers
 
 	return &this
 }
 
-// NewZoneResponseMetadataWithDefaults instantiates a new ZoneResponseMetadata object
+// NewMetadataWithStateNameserversWithDefaults instantiates a new MetadataWithStateNameservers object
 // This constructor will only assign default values to properties that have it defined,
 // but it doesn't guarantee that properties required by API are set
-func NewZoneResponseMetadataWithDefaults() *ZoneResponseMetadata {
-	this := ZoneResponseMetadata{}
+func NewMetadataWithStateNameserversWithDefaults() *MetadataWithStateNameservers {
+	this := MetadataWithStateNameservers{}
 	return &this
 }
 
 // GetLastModifiedDate returns the LastModifiedDate field value
 // If the value is explicit nil, the zero value for time.Time will be returned
-func (o *ZoneResponseMetadata) GetLastModifiedDate() *time.Time {
+func (o *MetadataWithStateNameservers) GetLastModifiedDate() *time.Time {
 	if o == nil {
 		return nil
 	}
@@ -62,7 +65,7 @@ func (o *ZoneResponseMetadata) GetLastModifiedDate() *time.Time {
 // GetLastModifiedDateOk returns a tuple with the LastModifiedDate field value
 // and a boolean to check if the value has been set.
 // NOTE: If the value is an explicit nil, `nil, true` will be returned
-func (o *ZoneResponseMetadata) GetLastModifiedDateOk() (*time.Time, bool) {
+func (o *MetadataWithStateNameservers) GetLastModifiedDateOk() (*time.Time, bool) {
 	if o == nil {
 		return nil, false
 	}
@@ -75,14 +78,14 @@ func (o *ZoneResponseMetadata) GetLastModifiedDateOk() (*time.Time, bool) {
 }
 
 // SetLastModifiedDate sets field value
-func (o *ZoneResponseMetadata) SetLastModifiedDate(v time.Time) {
+func (o *MetadataWithStateNameservers) SetLastModifiedDate(v time.Time) {
 
 	o.LastModifiedDate = &IonosTime{v}
 
 }
 
 // HasLastModifiedDate returns a boolean if a field has been set.
-func (o *ZoneResponseMetadata) HasLastModifiedDate() bool {
+func (o *MetadataWithStateNameservers) HasLastModifiedDate() bool {
 	if o != nil && o.LastModifiedDate != nil {
 		return true
 	}
@@ -92,7 +95,7 @@ func (o *ZoneResponseMetadata) HasLastModifiedDate() bool {
 
 // GetCreatedDate returns the CreatedDate field value
 // If the value is explicit nil, the zero value for time.Time will be returned
-func (o *ZoneResponseMetadata) GetCreatedDate() *time.Time {
+func (o *MetadataWithStateNameservers) GetCreatedDate() *time.Time {
 	if o == nil {
 		return nil
 	}
@@ -107,7 +110,7 @@ func (o *ZoneResponseMetadata) GetCreatedDate() *time.Time {
 // GetCreatedDateOk returns a tuple with the CreatedDate field value
 // and a boolean to check if the value has been set.
 // NOTE: If the value is an explicit nil, `nil, true` will be returned
-func (o *ZoneResponseMetadata) GetCreatedDateOk() (*time.Time, bool) {
+func (o *MetadataWithStateNameservers) GetCreatedDateOk() (*time.Time, bool) {
 	if o == nil {
 		return nil, false
 	}
@@ -120,14 +123,14 @@ func (o *ZoneResponseMetadata) GetCreatedDateOk() (*time.Time, bool) {
 }
 
 // SetCreatedDate sets field value
-func (o *ZoneResponseMetadata) SetCreatedDate(v time.Time) {
+func (o *MetadataWithStateNameservers) SetCreatedDate(v time.Time) {
 
 	o.CreatedDate = &IonosTime{v}
 
 }
 
 // HasCreatedDate returns a boolean if a field has been set.
-func (o *ZoneResponseMetadata) HasCreatedDate() bool {
+func (o *MetadataWithStateNameservers) HasCreatedDate() bool {
 	if o != nil && o.CreatedDate != nil {
 		return true
 	}
@@ -137,7 +140,7 @@ func (o *ZoneResponseMetadata) HasCreatedDate() bool {
 
 // GetState returns the State field value
 // If the value is explicit nil, the zero value for ProvisioningState will be returned
-func (o *ZoneResponseMetadata) GetState() *ProvisioningState {
+func (o *MetadataWithStateNameservers) GetState() *ProvisioningState {
 	if o == nil {
 		return nil
 	}
@@ -149,7 +152,7 @@ func (o *ZoneResponseMetadata) GetState() *ProvisioningState {
 // GetStateOk returns a tuple with the State field value
 // and a boolean to check if the value has been set.
 // NOTE: If the value is an explicit nil, `nil, true` will be returned
-func (o *ZoneResponseMetadata) GetStateOk() (*ProvisioningState, bool) {
+func (o *MetadataWithStateNameservers) GetStateOk() (*ProvisioningState, bool) {
 	if o == nil {
 		return nil, false
 	}
@@ -158,14 +161,14 @@ func (o *ZoneResponseMetadata) GetStateOk() (*ProvisioningState, bool) {
 }
 
 // SetState sets field value
-func (o *ZoneResponseMetadata) SetState(v ProvisioningState) {
+func (o *MetadataWithStateNameservers) SetState(v ProvisioningState) {
 
 	o.State = &v
 
 }
 
 // HasState returns a boolean if a field has been set.
-func (o *ZoneResponseMetadata) HasState() bool {
+func (o *MetadataWithStateNameservers) HasState() bool {
 	if o != nil && o.State != nil {
 		return true
 	}
@@ -175,7 +178,7 @@ func (o *ZoneResponseMetadata) HasState() bool {
 
 // GetNameservers returns the Nameservers field value
 // If the value is explicit nil, the zero value for []string will be returned
-func (o *ZoneResponseMetadata) GetNameservers() *[]string {
+func (o *MetadataWithStateNameservers) GetNameservers() *[]string {
 	if o == nil {
 		return nil
 	}
@@ -187,7 +190,7 @@ func (o *ZoneResponseMetadata) GetNameservers() *[]string {
 // GetNameserversOk returns a tuple with the Nameservers field value
 // and a boolean to check if the value has been set.
 // NOTE: If the value is an explicit nil, `nil, true` will be returned
-func (o *ZoneResponseMetadata) GetNameserversOk() (*[]string, bool) {
+func (o *MetadataWithStateNameservers) GetNameserversOk() (*[]string, bool) {
 	if o == nil {
 		return nil, false
 	}
@@ -196,14 +199,14 @@ func (o *ZoneResponseMetadata) GetNameserversOk() (*[]string, bool) {
 }
 
 // SetNameservers sets field value
-func (o *ZoneResponseMetadata) SetNameservers(v []string) {
+func (o *MetadataWithStateNameservers) SetNameservers(v []string) {
 
 	o.Nameservers = &v
 
 }
 
 // HasNameservers returns a boolean if a field has been set.
-func (o *ZoneResponseMetadata) HasNameservers() bool {
+func (o *MetadataWithStateNameservers) HasNameservers() bool {
 	if o != nil && o.Nameservers != nil {
 		return true
 	}
@@ -211,7 +214,7 @@ func (o *ZoneResponseMetadata) HasNameservers() bool {
 	return false
 }
 
-func (o ZoneResponseMetadata) MarshalJSON() ([]byte, error) {
+func (o MetadataWithStateNameservers) MarshalJSON() ([]byte, error) {
 	toSerialize := map[string]interface{}{}
 	if o.LastModifiedDate != nil {
 		toSerialize["lastModifiedDate"] = o.LastModifiedDate
@@ -232,38 +235,38 @@ func (o ZoneResponseMetadata) MarshalJSON() ([]byte, error) {
 	return json.Marshal(toSerialize)
 }
 
-type NullableZoneResponseMetadata struct {
-	value *ZoneResponseMetadata
+type NullableMetadataWithStateNameservers struct {
+	value *MetadataWithStateNameservers
 	isSet bool
 }
 
-func (v NullableZoneResponseMetadata) Get() *ZoneResponseMetadata {
+func (v NullableMetadataWithStateNameservers) Get() *MetadataWithStateNameservers {
 	return v.value
 }
 
-func (v *NullableZoneResponseMetadata) Set(val *ZoneResponseMetadata) {
+func (v *NullableMetadataWithStateNameservers) Set(val *MetadataWithStateNameservers) {
 	v.value = val
 	v.isSet = true
 }
 
-func (v NullableZoneResponseMetadata) IsSet() bool {
+func (v NullableMetadataWithStateNameservers) IsSet() bool {
 	return v.isSet
 }
 
-func (v *NullableZoneResponseMetadata) Unset() {
+func (v *NullableMetadataWithStateNameservers) Unset() {
 	v.value = nil
 	v.isSet = false
 }
 
-func NewNullableZoneResponseMetadata(val *ZoneResponseMetadata) *NullableZoneResponseMetadata {
-	return &NullableZoneResponseMetadata{value: val, isSet: true}
+func NewNullableMetadataWithStateNameservers(val *MetadataWithStateNameservers) *NullableMetadataWithStateNameservers {
+	return &NullableMetadataWithStateNameservers{value: val, isSet: true}
 }
 
-func (v NullableZoneResponseMetadata) MarshalJSON() ([]byte, error) {
+func (v NullableMetadataWithStateNameservers) MarshalJSON() ([]byte, error) {
 	return json.Marshal(v.value)
 }
 
-func (v *NullableZoneResponseMetadata) UnmarshalJSON(src []byte) error {
+func (v *NullableMetadataWithStateNameservers) UnmarshalJSON(src []byte) error {
 	v.isSet = true
 	return json.Unmarshal(src, &v.value)
 }

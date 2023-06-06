@@ -84,7 +84,7 @@ func dataSourceRecordRead(ctx context.Context, d *schema.ResourceData, meta inte
 		return diag.FromErr(fmt.Errorf("partial_match can only be used together with the name attribute"))
 	}
 
-	var record dns.RecordResponse
+	var record dns.RecordRead
 	var err error
 
 	if idOk {
@@ -93,7 +93,7 @@ func dataSourceRecordRead(ctx context.Context, d *schema.ResourceData, meta inte
 			return diag.FromErr(fmt.Errorf("an error occured while fetching the DNS Record with ID: %s, DNS Zone ID: %s, error: %w", recordId, zoneId, err))
 		}
 	} else {
-		var results []dns.RecordResponse
+		var results []dns.RecordRead
 		log.Printf("[INFO] Populating data source for DNS Record using name: %s and partial_match: %t", recordName, partialMatch)
 		if partialMatch {
 			// By default, when providing the name as a filter, for the GET requests, partial match
