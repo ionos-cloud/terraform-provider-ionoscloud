@@ -1018,17 +1018,10 @@ func resourceServerUpdate(ctx context.Context, d *schema.ResourceData, meta inte
 				}
 			}
 		}
-
-		if len(fwRuleIds) > 0 {
-			if err := d.Set("firewallrule_id", fwRuleIds[0]); err != nil {
-				diags := diag.FromErr(err)
-				return diags
-			}
-			if err := d.Set("firewallrule_ids", slice.ToAnyList(fwRuleIds)); err != nil {
-				diags := diag.FromErr(err)
-				return diags
-			}
+		if err := setFirewallRulesInSchema(d, fwRuleIds); err != nil {
+			return diag.FromErr(err)
 		}
+
 		_, primaryNicOk := d.GetOk("primary_nic")
 		if createdNic.Id != nil && !updateNic && !primaryNicOk {
 			if err := d.Set("primary_nic", *createdNic.Id); err != nil {
@@ -1175,14 +1168,12 @@ func resourceServerImport(ctx context.Context, d *schema.ResourceData, meta inte
 	}
 
 	if len(parts) > 3 {
-		if err := d.Set("firewallrule_id", parts[3]); err != nil {
-			return nil, fmt.Errorf("error setting firewallrule_id %w", err)
-		}
 		var rules []string
 		rules = append(rules, parts[3])
-		if err := d.Set("firewallrule_ids", rules); err != nil {
-			return nil, utils.GenerateSetError(ServerResource, "firewallrule_ids", err)
+		if err = setFirewallRulesInSchema(d, rules); err != nil {
+			return nil, err
 		}
+
 	}
 
 	if err := setResourceServerData(ctx, client, d, &server); err != nil {

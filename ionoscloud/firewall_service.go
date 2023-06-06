@@ -229,3 +229,16 @@ func (fs *FirewallService) AddToMapIfRuleExists(ctx context.Context, datacenterI
 
 	return firewallEntry, nil
 }
+
+func setFirewallRulesInSchema(d *schema.ResourceData, firewallRuleIds []string) error {
+	if len(firewallRuleIds) == 0 {
+		return nil
+	}
+	if err := d.Set("firewallrule_id", firewallRuleIds[0]); err != nil {
+		return utils.GenerateSetError(ServerResource, "firewallrule_id", err)
+	}
+	if err := d.Set("firewallrule_ids", slice.ToAnyList(firewallRuleIds)); err != nil {
+		return utils.GenerateSetError(ServerResource, "firewallrule_ids", err)
+	}
+	return nil
+}
