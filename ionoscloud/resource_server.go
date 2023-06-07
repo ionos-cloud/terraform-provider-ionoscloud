@@ -915,118 +915,128 @@ func resourceServerUpdate(ctx context.Context, d *schema.ResourceData, meta inte
 
 	// Nic stuff
 	if d.HasChange("nic") {
-		updateNic := true
-		primaryNic := d.Get("primary_nic").(string)
-		if primaryNic == "" {
-			updateNic = false
-		}
-
-		nic := &ionoscloud.Nic{}
-		for _, n := range *server.Entities.Nics.Items {
-			if *n.Id == primaryNic {
-				nic = &n
-				break
-			}
-		}
-
-		lan := int32(d.Get("nic.0.lan").(int))
-		nicProperties := ionoscloud.NicProperties{
-			Lan: &lan,
-		}
-
-		if v, ok := d.GetOk("nic.0.name"); ok {
-			vStr := v.(string)
-			nicProperties.Name = &vStr
-		}
-
-		if v, ok := d.GetOk("nic.0.ips"); ok {
-			raw := v.([]interface{})
-			if raw != nil && len(raw) > 0 {
-				ips := make([]string, 0)
-				for _, rawIp := range raw {
-					if rawIp != nil {
-						ip := rawIp.(string)
-						ips = append(ips, ip)
-					}
-				}
-				if ips != nil && len(ips) > 0 {
-					nicProperties.Ips = &ips
-				}
-			}
-		}
-
-		dhcp := d.Get("nic.0.dhcp").(bool)
-		fwRule := d.Get("nic.0.firewall_active").(bool)
-		nicProperties.Dhcp = &dhcp
-		nicProperties.FirewallActive = &fwRule
-
-		if v, ok := d.GetOk("nic.0.firewall_type"); ok {
-			vStr := v.(string)
-			nicProperties.FirewallType = &vStr
-		}
-		firstNicFirewallPath := "nic.0.firewall"
-		fs := FirewallService{client: client, meta: meta, schemaData: d}
-		nicId := ""
-		if nic != nil && nic.Id != nil {
-			nicId = *nic.Id
-		}
-		firewallRules, fwRuleIds, diagResp := fs.GetModifiedFirewallRules(ctx, dcId, *server.Id, nicId, firstNicFirewallPath)
-		if diagResp != nil {
-			return diagResp
-		}
-		if len(firewallRules) > 0 {
-			nic.Entities = &ionoscloud.NicEntities{
-				Firewallrules: &ionoscloud.FirewallRules{
-					Items: &firewallRules,
-				},
-			}
-		}
-		mProp, _ := json.Marshal(nicProperties)
-		log.Printf("[DEBUG] Updating props: %s", string(mProp))
-		var createdNic ionoscloud.Nic
-		if !updateNic {
-			nic.Properties = &nicProperties
-			createdNic, apiResponse, err = client.NetworkInterfacesApi.DatacentersServersNicsPost(ctx, d.Get("datacenter_id").(string), *server.Id).Nic(*nic).Execute()
-		} else {
-			_, apiResponse, err = client.NetworkInterfacesApi.DatacentersServersNicsPatch(ctx, d.Get("datacenter_id").(string), *server.Id, *nic.Id).Nic(nicProperties).Execute()
-		}
-		logApiRequestTime(apiResponse)
-		if err != nil {
-			diags := diag.FromErr(fmt.Errorf("error updating nic (%s)", err))
-			return diags
-		}
-
-		// Wait, catching any errors
-		_, errState := getStateChangeConf(meta, d, apiResponse.Header.Get("Location"), schema.TimeoutUpdate).WaitForStateContext(ctx)
-		if errState != nil {
-			diags := diag.FromErr(fmt.Errorf("error getting state change for nics patch %w", errState))
-			return diags
-		}
-
-		if createdNic.Id != nil {
-			fs := FirewallService{client: client, meta: meta, schemaData: d}
-			fwRules, err := fs.firewallsGet(ctx, d.Get("datacenter_id").(string), *server.Id, *createdNic.Id, 1)
-			if err != nil {
-				diags := diag.FromErr(fmt.Errorf("an error occurred while fetching firewall rules: %w", err))
-				return diags
-			}
-			if len(fwRules) > 0 {
-				for _, rule := range fwRules {
-					if !slice.Contains(fwRuleIds, *rule.Id) {
-						fwRuleIds = append(fwRuleIds, *rule.Id)
-					}
-				}
-			}
-		}
-		if err := setFirewallRulesInSchema(d, fwRuleIds); err != nil {
-			return diag.FromErr(err)
-		}
-
-		_, primaryNicOk := d.GetOk("primary_nic")
-		if createdNic.Id != nil && !updateNic && !primaryNicOk {
-			if err := d.Set("primary_nic", *createdNic.Id); err != nil {
+		_, nicIntf := d.GetChange("nic")
+		newNics := nicIntf.([]interface{})
+		if len(newNics) == 0 {
+			err = d.Set("nic", nil)
+			if err := d.Set("primary_nic", ""); err != nil {
 				diags := diag.FromErr(err)
 				return diags
+			}
+		} else {
+			updateNic := true
+			primaryNic := d.Get("primary_nic").(string)
+			if primaryNic == "" {
+				updateNic = false
+			}
+
+			nic := &ionoscloud.Nic{}
+			for _, n := range *server.Entities.Nics.Items {
+				if *n.Id == primaryNic {
+					nic = &n
+					break
+				}
+			}
+
+			lan := int32(d.Get("nic.0.lan").(int))
+			nicProperties := ionoscloud.NicProperties{
+				Lan: &lan,
+			}
+
+			if v, ok := d.GetOk("nic.0.name"); ok {
+				vStr := v.(string)
+				nicProperties.Name = &vStr
+			}
+
+			if v, ok := d.GetOk("nic.0.ips"); ok {
+				raw := v.([]interface{})
+				if raw != nil && len(raw) > 0 {
+					ips := make([]string, 0)
+					for _, rawIp := range raw {
+						if rawIp != nil {
+							ip := rawIp.(string)
+							ips = append(ips, ip)
+						}
+					}
+					if ips != nil && len(ips) > 0 {
+						nicProperties.Ips = &ips
+					}
+				}
+			}
+
+			dhcp := d.Get("nic.0.dhcp").(bool)
+			fwRule := d.Get("nic.0.firewall_active").(bool)
+			nicProperties.Dhcp = &dhcp
+			nicProperties.FirewallActive = &fwRule
+
+			if v, ok := d.GetOk("nic.0.firewall_type"); ok {
+				vStr := v.(string)
+				nicProperties.FirewallType = &vStr
+			}
+			firstNicFirewallPath := "nic.0.firewall"
+			fs := FirewallService{client: client, meta: meta, schemaData: d}
+			nicId := ""
+			if nic != nil && nic.Id != nil {
+				nicId = *nic.Id
+			}
+			firewallRules, fwRuleIds, diagResp := fs.GetModifiedFirewallRules(ctx, dcId, *server.Id, nicId, firstNicFirewallPath)
+			if diagResp != nil {
+				return diagResp
+			}
+			if len(firewallRules) > 0 {
+				nic.Entities = &ionoscloud.NicEntities{
+					Firewallrules: &ionoscloud.FirewallRules{
+						Items: &firewallRules,
+					},
+				}
+			}
+			mProp, _ := json.Marshal(nicProperties)
+			log.Printf("[DEBUG] Updating props: %s", string(mProp))
+			var createdNic ionoscloud.Nic
+			if !updateNic {
+				nic.Properties = &nicProperties
+				createdNic, apiResponse, err = client.NetworkInterfacesApi.DatacentersServersNicsPost(ctx, d.Get("datacenter_id").(string), *server.Id).Nic(*nic).Execute()
+			} else {
+				_, apiResponse, err = client.NetworkInterfacesApi.DatacentersServersNicsPatch(ctx, d.Get("datacenter_id").(string), *server.Id, *nic.Id).Nic(nicProperties).Execute()
+			}
+			logApiRequestTime(apiResponse)
+			if err != nil {
+				diags := diag.FromErr(fmt.Errorf("error updating nic (%s)", err))
+				return diags
+			}
+
+			// Wait, catching any errors
+			_, errState := getStateChangeConf(meta, d, apiResponse.Header.Get("Location"), schema.TimeoutUpdate).WaitForStateContext(ctx)
+			if errState != nil {
+				diags := diag.FromErr(fmt.Errorf("error getting state change for nics patch %w", errState))
+				return diags
+			}
+
+			if createdNic.Id != nil {
+				fs := FirewallService{client: client, meta: meta, schemaData: d}
+				fwRules, err := fs.firewallsGet(ctx, d.Get("datacenter_id").(string), *server.Id, *createdNic.Id, 1)
+				if err != nil {
+					diags := diag.FromErr(fmt.Errorf("an error occurred while fetching firewall rules: %w", err))
+					return diags
+				}
+				if len(fwRules) > 0 {
+					for _, rule := range fwRules {
+						if !slice.Contains(fwRuleIds, *rule.Id) {
+							fwRuleIds = append(fwRuleIds, *rule.Id)
+						}
+					}
+				}
+			}
+			if err := setFirewallRulesInSchema(d, fwRuleIds); err != nil {
+				return diag.FromErr(err)
+			}
+
+			_, primaryNicOk := d.GetOk("primary_nic")
+			if createdNic.Id != nil && !updateNic && !primaryNicOk {
+				if err := d.Set("primary_nic", *createdNic.Id); err != nil {
+					diags := diag.FromErr(err)
+					return diags
+				}
 			}
 		}
 	}
@@ -1415,13 +1425,6 @@ func setResourceServerData(ctx context.Context, client *ionoscloud.APIClient, d 
 	var nicId string
 	if primaryNicOk {
 		nicId = d.Get("primary_nic").(string)
-	} else if server.Entities.Nics != nil && server.Entities.Nics.Items != nil && len(*server.Entities.Nics.Items) > 0 && (*server.Entities.Nics.Items)[0].Id != nil {
-		lastNicIndex := len(*server.Entities.Nics.Items) - 1
-		if (*server.Entities.Nics.Items)[lastNicIndex].Id != nil {
-			// this might be a terraformer import, so primary_nic might not be set
-			// if no nics found until now, get the last one from the list of nics.
-			nicId = *(*server.Entities.Nics.Items)[lastNicIndex].Id
-		}
 	}
 	nic, apiResponse, err := client.NetworkInterfacesApi.DatacentersServersNicsFindById(ctx, datacenterId, d.Id(), nicId).Depth(2).Execute()
 	logApiRequestTime(apiResponse)
