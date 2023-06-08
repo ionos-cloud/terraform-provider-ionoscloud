@@ -176,7 +176,7 @@ func (fs *FirewallService) GetModifiedFirewallRules(ctx context.Context, dcId, s
 		}
 
 		// create updated rules
-		for idx, _ := range newFirewalls {
+		for idx := range newFirewalls {
 			FwPropUnsetSetFieldIfNotSetInSchema(&newFirewalls[idx], path, fs.schemaData)
 			prop := newFirewalls[idx]
 			fwRule := ionoscloud.FirewallRule{
