@@ -7,7 +7,6 @@ import (
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/slice"
 	"log"
 	"os"
-	"reflect"
 	"strings"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
@@ -627,34 +626,24 @@ func resourceServerCreate(ctx context.Context, d *schema.ResourceData, meta inte
 	if foundServer.Entities.Nics.Items != nil {
 		if len(*foundServer.Entities.Nics.Items) > 0 {
 			foundFirstNic := (*foundServer.Entities.Nics.Items)[0]
-			var rules []string
+			var orderedRuleIds []string
 			if foundFirstNic.Entities != nil && foundFirstNic.Entities.Firewallrules != nil && foundFirstNic.Entities.Firewallrules.Items != nil {
 				sentFirstNic := (*serverReq.Entities.Nics.Items)[0]
 
 				if sentFirstNic.Entities != nil && sentFirstNic.Entities.Firewallrules != nil && sentFirstNic.Entities.Firewallrules.Items != nil {
 					sentRules := *sentFirstNic.Entities.Firewallrules.Items
 					foundRules := *foundFirstNic.Entities.Firewallrules.Items
-					if len(sentRules) > 0 {
-						if err := d.Set("firewallrule_id", *(foundRules)[0].Id); err != nil {
+					orderedRuleIds = extractOrderedFirewallIds(foundRules, sentRules)
+					if len(orderedRuleIds) > 0 {
+						if err := d.Set("firewallrule_id", orderedRuleIds[0]); err != nil {
 							diags := diag.FromErr(err)
 							return diags
-						}
-						if len(sentRules) > 0 {
-							//keep order of rules
-							for _, rule := range sentRules {
-								for _, foundRule := range foundRules {
-									//we need deepEqual here, because the structures contain pointers and cannot be compared using the stricter `==`
-									if reflect.DeepEqual(rule.Properties, foundRule.Properties) {
-										rules = append(rules, *foundRule.Id)
-									}
-								}
-							}
 						}
 					}
 				}
 			}
-			if len(rules) > 0 {
-				if err := d.Set("firewallrule_ids", rules); err != nil {
+			if len(orderedRuleIds) > 0 {
+				if err := d.Set("firewallrule_ids", orderedRuleIds); err != nil {
 					diags := diag.FromErr(err)
 					return diags
 				}
@@ -974,7 +963,7 @@ func resourceServerUpdate(ctx context.Context, d *schema.ResourceData, meta inte
 				nicProperties.FirewallType = &vStr
 			}
 			firstNicFirewallPath := "nic.0.firewall"
-			fs := FirewallService{client: client, meta: meta, schemaData: d}
+			fs := FirewallService{client: client, meta: meta, d: d}
 			nicId := ""
 			if nic != nil && nic.Id != nil {
 				nicId = *nic.Id
@@ -1011,21 +1000,14 @@ func resourceServerUpdate(ctx context.Context, d *schema.ResourceData, meta inte
 				diags := diag.FromErr(fmt.Errorf("error getting state change for nics patch %w", errState))
 				return diags
 			}
-
-			if createdNic.Id != nil {
-				fs := FirewallService{client: client, meta: meta, schemaData: d}
-				fwRules, err := fs.firewallsGet(ctx, d.Get("datacenter_id").(string), *server.Id, *createdNic.Id, 1)
+			if !updateNic {
+				fs := FirewallService{client: client, meta: meta, d: d}
+				foundRules, err := fs.firewallsGet(ctx, d.Get("datacenter_id").(string), *server.Id, *createdNic.Id, 1)
 				if err != nil {
 					diags := diag.FromErr(fmt.Errorf("an error occurred while fetching firewall rules: %w", err))
 					return diags
 				}
-				if len(fwRules) > 0 {
-					for _, rule := range fwRules {
-						if !slice.Contains(fwRuleIds, *rule.Id) {
-							fwRuleIds = append(fwRuleIds, *rule.Id)
-						}
-					}
-				}
+				fwRuleIds = extractOrderedFirewallIds(foundRules, firewallRules)
 			}
 			if err := setFirewallRulesInSchema(d, fwRuleIds); err != nil {
 				return diag.FromErr(err)
@@ -1438,7 +1420,7 @@ func setResourceServerData(ctx context.Context, client *ionoscloud.APIClient, d 
 	if nic.Properties != nil {
 		nicEntry = SetNetworkProperties(nic)
 		nicEntry["id"] = *nic.Id
-		fs := FirewallService{client: client, schemaData: d}
+		fs := FirewallService{client: client, d: d}
 
 		for _, id := range firewallRuleIds {
 			firewallEntry, err := fs.AddToMapIfRuleExists(ctx, datacenterId, d.Id(), nicId, id.(string))

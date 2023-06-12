@@ -9,13 +9,14 @@ import (
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/slice"
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils"
 	"log"
+	"reflect"
 	"strconv"
 )
 
 type FirewallService struct {
-	client     *ionoscloud.APIClient
-	meta       interface{}
-	schemaData *schema.ResourceData
+	client *ionoscloud.APIClient
+	meta   interface{}
+	d      *schema.ResourceData
 }
 
 func (fs *FirewallService) firewallsGet(ctx context.Context, datacenterId, serverId, nicId string, depth int32) ([]ionoscloud.FirewallRule, error) {
@@ -51,7 +52,7 @@ func (fs *FirewallService) deleteFirewallRule(ctx context.Context, datacenterId,
 		return apiResponse, err
 	}
 	// Wait, catching any errors
-	_, errState := getStateChangeConf(fs.meta, fs.schemaData, apiResponse.Header.Get("Location"), schema.TimeoutDelete).WaitForStateContext(ctx)
+	_, errState := getStateChangeConf(fs.meta, fs.d, apiResponse.Header.Get("Location"), schema.TimeoutDelete).WaitForStateContext(ctx)
 	if errState != nil {
 		return apiResponse, fmt.Errorf("an error occured while waiting for state change dcId: %s, server_id: %s, nic_id: %s, ID: %s, Response: (%w)", datacenterId, serverId, nicId, firewallId, errState)
 	}
@@ -65,7 +66,7 @@ func (fs *FirewallService) createFirewallRule(ctx context.Context, datacenterId,
 		return nil, apiResponse, fmt.Errorf("an error occured while creating firewall rule for dcId: %s, server_id: %s, nic_id: %s, Response: (%w)", datacenterId, serverId, nicId, err)
 	}
 	// Wait, catching any errors
-	_, errState := getStateChangeConf(fs.meta, fs.schemaData, apiResponse.Header.Get("Location"), schema.TimeoutCreate).WaitForStateContext(ctx)
+	_, errState := getStateChangeConf(fs.meta, fs.d, apiResponse.Header.Get("Location"), schema.TimeoutCreate).WaitForStateContext(ctx)
 	if errState != nil {
 		return nil, apiResponse, fmt.Errorf("an error occured while waiting for state change dcId: %s, server_id: %s, nic_id: %s, Response: (%w)", datacenterId, serverId, nicId, errState)
 	}
@@ -79,7 +80,7 @@ func (fs *FirewallService) updateFirewallRule(ctx context.Context, datacenterId,
 		return nil, apiResponse, fmt.Errorf("an error occured while updating firewall rule for dcId: %s, server_id: %s, nic_id: %s, id %s, Response: (%w)", datacenterId, serverId, nicId, id, err)
 	}
 	// Wait, catching any errors
-	_, errState := getStateChangeConf(fs.meta, fs.schemaData, apiResponse.Header.Get("Location"), schema.TimeoutUpdate).WaitForStateContext(ctx)
+	_, errState := getStateChangeConf(fs.meta, fs.d, apiResponse.Header.Get("Location"), schema.TimeoutUpdate).WaitForStateContext(ctx)
 	if errState != nil {
 		return nil, apiResponse, fmt.Errorf("an error occured while waiting for state change dcId: %s, server_id: %s, nic_id: %s, Response: (%w)", datacenterId, serverId, nicId, errState)
 	}
@@ -141,8 +142,9 @@ func FwPropUnsetSetFieldIfNotSetInSchema(fwProp *ionoscloud.FirewallruleProperti
 
 // GetModifiedFirewallRules - checks in schema and returns modified firewall rules as a slice of ionoscloud.FirewallRule and also returns a slice of firewall rule ids
 func (fs *FirewallService) GetModifiedFirewallRules(ctx context.Context, dcId, serverId, nicId, path string) (firewallRules []ionoscloud.FirewallRule, firewallRuleIds []string, diags diag.Diagnostics) {
-	if fs.schemaData.HasChange(path) {
-		oldValues, newValues := fs.schemaData.GetChange(path)
+	firewallRuleIds = []string{}
+	if fs.d.HasChange(path) {
+		oldValues, newValues := fs.d.GetChange(path)
 		oldValuesIntf := oldValues.([]interface{})
 		newValuesIntf := newValues.([]interface{})
 		onlyOld := slice.Difference(oldValuesIntf, newValuesIntf)
@@ -152,7 +154,7 @@ func (fs *FirewallService) GetModifiedFirewallRules(ctx context.Context, dcId, s
 			return firewallRules, []string{}, diag.FromErr(fmt.Errorf("could not get changes for firewall rules %w", err))
 		}
 
-		firewallRuleIdsIntf := fs.schemaData.Get("firewallrule_ids").([]interface{})
+		firewallRuleIdsIntf := fs.d.Get("firewallrule_ids").([]interface{})
 		firewallRuleIds = convertSlice(firewallRuleIdsIntf)
 
 		if nicId != "" {
@@ -177,7 +179,7 @@ func (fs *FirewallService) GetModifiedFirewallRules(ctx context.Context, dcId, s
 
 		// create updated rules
 		for idx := range newFirewalls {
-			FwPropUnsetSetFieldIfNotSetInSchema(&newFirewalls[idx], path, fs.schemaData)
+			FwPropUnsetSetFieldIfNotSetInSchema(&newFirewalls[idx], path, fs.d)
 			prop := newFirewalls[idx]
 			fwRule := ionoscloud.FirewallRule{
 				Properties: &prop,
@@ -188,13 +190,17 @@ func (fs *FirewallService) GetModifiedFirewallRules(ctx context.Context, dcId, s
 					//do not send protocol, it's an update
 					fwRule.Properties.Protocol = nil
 					firewall, _, err = fs.updateFirewallRule(ctx, dcId, serverId, nicId, id.(string), fwRule)
+					if err != nil {
+						return firewallRules, []string{}, diag.FromErr(err)
+					}
 				} else {
 					firewall, _, err = fs.createFirewallRule(ctx, dcId, serverId, nicId, fwRule)
+					if err != nil {
+						return firewallRules, []string{}, diag.FromErr(err)
+					}
 					firewallRuleIds = append(firewallRuleIds, *firewall.Id)
 				}
-				if err != nil {
-					return firewallRules, []string{}, diag.FromErr(err)
-				}
+
 				firewallRules = append(firewallRules, *firewall)
 			} else { //if the nic does not exist, just fw add prop to the list to be created below with the nic
 				firewallRules = append(firewallRules, fwRule)
@@ -241,4 +247,23 @@ func setFirewallRulesInSchema(d *schema.ResourceData, firewallRuleIds []string) 
 		return utils.GenerateSetError(ServerResource, "firewallrule_ids", err)
 	}
 	return nil
+}
+
+func extractOrderedFirewallIds(foundRules, sentRules []ionoscloud.FirewallRule) []string {
+	var ruleIds = []string{}
+
+	if len(sentRules) == 0 || len(foundRules) == 0 {
+		return []string{}
+	}
+
+	//keep order of ruleIds
+	for _, rule := range sentRules {
+		for _, foundRule := range foundRules {
+			//we need deepEqual here, because the structures contain pointers and cannot be compared using the stricter `==`
+			if reflect.DeepEqual(rule.Properties, foundRule.Properties) {
+				ruleIds = append(ruleIds, *foundRule.Id)
+			}
+		}
+	}
+	return ruleIds
 }
