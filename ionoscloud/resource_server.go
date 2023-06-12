@@ -1381,7 +1381,7 @@ func setResourceServerData(ctx context.Context, client *ionoscloud.APIClient, d 
 	}
 
 	if server.Entities == nil {
-		return nil
+		return fmt.Errorf("server entities cannot be empty for %s", d.Id())
 	}
 
 	if server.Properties != nil && server.Properties.BootVolume != nil {
@@ -1424,11 +1424,11 @@ func setResourceServerData(ctx context.Context, client *ionoscloud.APIClient, d 
 
 		for _, id := range firewallRuleIds {
 			firewallEntry, err := fs.AddToMapIfRuleExists(ctx, datacenterId, d.Id(), nicId, id.(string))
-			if firewallEntry != nil && len(firewallEntry) != 0 {
-				fwRulesEntries = append(fwRulesEntries, firewallEntry)
-			}
 			if err != nil {
 				return err
+			}
+			if firewallEntry != nil && len(firewallEntry) != 0 {
+				fwRulesEntries = append(fwRulesEntries, firewallEntry)
 			}
 		}
 	}
