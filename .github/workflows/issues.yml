@@ -9,9 +9,11 @@ jobs:
 
     steps:
       - name: Git Issue Details
+        env:
+          TITLE: ${{ github.event.issue.title }}
         run: |
           echo "Issue creator: ${{ github.event.issue.user.login }}"
-          echo "Issue title: ${{ github.event.issue.title }}"
+          echo "Issue title: $ISSUE_TITLE"
           echo "Issue number: ${{ github.event.issue.number }}"
           echo "Issue url: ${{ github.event.issue.html_url }}"
       - name: Google Chat Notification
@@ -37,7 +39,7 @@ jobs:
                                    {
                                      "keyValue": {
                                           "topLabel": "Title",
-                                          "content": "${{ github.event.issue.title }}"
+                                          "content": "$ISSUE_TITLE"
                                       }
                                    },
                                    {
