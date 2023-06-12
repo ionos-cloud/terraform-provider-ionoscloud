@@ -10,7 +10,7 @@ jobs:
     steps:
       - name: Git Issue Details
         env:
-          TITLE: ${{ github.event.issue.title }}
+          ISSUE_TITLE: ${{ github.event.issue.title }}
         run: |
           echo "Issue creator: ${{ github.event.issue.user.login }}"
           echo "Issue title: $ISSUE_TITLE"
