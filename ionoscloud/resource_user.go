@@ -239,8 +239,8 @@ func resourceUserUpdate(ctx context.Context, d *schema.ResourceData, meta interf
 
 	if d.HasChange("group_ids") {
 		oldValues, newValues := d.GetChange("group_ids")
-		oldGroupsList := convertSlice(oldValues.(*schema.Set).List())
-		newGroupsList := convertSlice(newValues.(*schema.Set).List())
+		oldGroupsList := slice.AnyToString(oldValues.(*schema.Set).List())
+		newGroupsList := slice.AnyToString(newValues.(*schema.Set).List())
 
 		newGroups := slice.DiffOneWay(newGroupsList, oldGroupsList)
 		deletedGroups := slice.DiffOneWay(oldGroupsList, newGroupsList)

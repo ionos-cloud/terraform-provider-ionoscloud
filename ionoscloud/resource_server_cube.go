@@ -136,10 +136,9 @@ func resourceCubeServer() *schema.Resource {
 								sshKeyPath := d.Get("volume.0.ssh_key_path").([]interface{})
 								oldSshKeyPath := d.Get("ssh_key_path").([]interface{})
 
-								if len(slice.Diff(convertSlice(sshKeyPath), convertSlice(oldSshKeyPath))) == 0 {
+								if len(slice.DiffString(slice.AnyToString(sshKeyPath), slice.AnyToString(oldSshKeyPath))) == 0 {
 									return true
 								}
-
 								return false
 							},
 						},

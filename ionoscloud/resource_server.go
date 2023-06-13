@@ -191,7 +191,7 @@ func resourceServer() *schema.Resource {
 								sshKeyPath := d.Get("volume.0.ssh_key_path").([]interface{})
 								oldSshKeyPath := d.Get("ssh_key_path").([]interface{})
 
-								difKeypath := slice.Diff(convertSlice(sshKeyPath), convertSlice(oldSshKeyPath))
+								difKeypath := slice.DiffString(slice.AnyToString(sshKeyPath), slice.AnyToString(oldSshKeyPath))
 								if len(difKeypath) == 0 {
 									return true
 								}
@@ -217,7 +217,7 @@ func resourceServer() *schema.Resource {
 								sshKeys := d.Get("volume.0.ssh_keys").([]interface{})
 								oldSshKeys := d.Get("ssh_keys").([]interface{})
 
-								if len(slice.Diff(convertSlice(sshKeys), convertSlice(oldSshKeys))) == 0 {
+								if len(slice.DiffString(slice.AnyToString(sshKeys), slice.AnyToString(oldSshKeys))) == 0 {
 									return true
 								}
 
@@ -968,7 +968,7 @@ func resourceServerUpdate(ctx context.Context, d *schema.ResourceData, meta inte
 			if nic != nil && nic.Id != nil {
 				nicId = *nic.Id
 			}
-			firewallRules, fwRuleIds, diagResp := fs.GetModifiedFirewallRules(ctx, dcId, *server.Id, nicId, firstNicFirewallPath)
+			firewallRules, fwRuleIds, diagResp := fs.GetModifiedFirewallRulesFromSchema(ctx, dcId, *server.Id, nicId, firstNicFirewallPath)
 			if diagResp != nil {
 				return diagResp
 			}

@@ -109,20 +109,20 @@ func SetFirewallProperties(firewall ionoscloud.FirewallRule) map[string]interfac
 	return fw
 }
 
+// GetChangesInFirewallRuleProperties - receives old new values from schema as interface and returns firewall properties
+// the schema testAccDataSourceContainerRegistryTokenMatchNameAndLocation contain duplicates between the old and new values
 func GetChangesInFirewallRuleProperties(oldValues, newValues []interface{}) ([]ionoscloud.FirewallruleProperties, []ionoscloud.FirewallruleProperties, error) {
-	onlyOld := slice.Difference(oldValues, newValues)
-	onlyNew := slice.Difference(newValues, oldValues)
-	oldFwSlice := make([]ionoscloud.FirewallruleProperties, len(onlyOld))
-	newFwSlice := make([]ionoscloud.FirewallruleProperties, len(onlyNew))
-	err := utils.DecodeInterfaceToStruct(onlyNew, newFwSlice)
+	oldFirewallProperties := make([]ionoscloud.FirewallruleProperties, len(oldValues))
+	newFirewallProperties := make([]ionoscloud.FirewallruleProperties, len(newValues))
+	err := utils.DecodeInterfaceToStruct(newValues, newFirewallProperties)
 	if err != nil {
 		return nil, nil, fmt.Errorf("could not decode from %s to new values of firewall rules %w", newValues, err)
 	}
-	err = utils.DecodeInterfaceToStruct(onlyOld, oldFwSlice)
+	err = utils.DecodeInterfaceToStruct(oldValues, oldFirewallProperties)
 	if err != nil {
 		return nil, nil, fmt.Errorf("could not decode from %s to values of firewall rules %w", oldValues, err)
 	}
-	return oldFwSlice, newFwSlice, nil
+	return oldFirewallProperties, newFirewallProperties, nil
 }
 
 // FwPropUnsetSetFieldIfNotSetInSchema will only set the in32 types if they actually exist in the schema
@@ -140,8 +140,8 @@ func FwPropUnsetSetFieldIfNotSetInSchema(fwProp *ionoscloud.FirewallruleProperti
 	}
 }
 
-// GetModifiedFirewallRules - checks in schema and returns modified firewall rules as a slice of ionoscloud.FirewallRule and also returns a slice of firewall rule ids
-func (fs *FirewallService) GetModifiedFirewallRules(ctx context.Context, dcId, serverId, nicId, path string) (firewallRules []ionoscloud.FirewallRule, firewallRuleIds []string, diags diag.Diagnostics) {
+// GetModifiedFirewallRulesFromSchema - checks in schema and returns modified firewall rules as a slice of ionoscloud.FirewallRule and also returns a slice of firewall rule ids
+func (fs *FirewallService) GetModifiedFirewallRulesFromSchema(ctx context.Context, dcId, serverId, nicId, path string) (firewallRules []ionoscloud.FirewallRule, firewallRuleIds []string, diags diag.Diagnostics) {
 	firewallRuleIds = []string{}
 	if fs.d.HasChange(path) {
 		oldValues, newValues := fs.d.GetChange(path)
@@ -151,11 +151,11 @@ func (fs *FirewallService) GetModifiedFirewallRules(ctx context.Context, dcId, s
 		onlyNew := slice.Difference(newValuesIntf, oldValuesIntf)
 		oldFirewalls, newFirewalls, err := GetChangesInFirewallRuleProperties(onlyOld, onlyNew)
 		if err != nil {
-			return firewallRules, []string{}, diag.FromErr(fmt.Errorf("could not get changes for firewall rules %w", err))
+			return firewallRules, firewallRuleIds, diag.FromErr(fmt.Errorf("could not get changes for firewall rules %w", err))
 		}
 
 		firewallRuleIdsIntf := fs.d.Get("firewallrule_ids").([]interface{})
-		firewallRuleIds = convertSlice(firewallRuleIdsIntf)
+		firewallRuleIds = slice.AnyToString(firewallRuleIdsIntf)
 
 		if nicId != "" {
 			//delete old rules
@@ -200,11 +200,9 @@ func (fs *FirewallService) GetModifiedFirewallRules(ctx context.Context, dcId, s
 					}
 					firewallRuleIds = append(firewallRuleIds, *firewall.Id)
 				}
-
 				firewallRules = append(firewallRules, *firewall)
 			} else { //if the nic does not exist, just fw add prop to the list to be created below with the nic
 				firewallRules = append(firewallRules, fwRule)
-
 			}
 		}
 	}

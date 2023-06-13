@@ -72,7 +72,7 @@ func DiffOneWay(a, b []string) []string {
 	return diff
 }
 
-func Diff(slice1 []string, slice2 []string) []string {
+func DiffString(slice1 []string, slice2 []string) []string {
 	var diff []string
 
 	// Loop two times, first to find slice1 strings not in slice2,
@@ -98,4 +98,12 @@ func Diff(slice1 []string, slice2 []string) []string {
 	}
 
 	return diff
+}
+
+func AnyToString(slice []any) []string {
+	s := make([]string, len(slice))
+	for i, v := range slice {
+		s[i] = v.(string)
+	}
+	return s
 }
