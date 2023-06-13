@@ -18,7 +18,7 @@ import (
 
 // StorageUsage struct for StorageUsage
 type StorageUsage struct {
-	Bytes     *int32     `json:"bytes"`
+	Bytes     *int64     `json:"bytes"`
 	UpdatedAt *IonosTime `json:"updatedAt,omitempty"`
 }
 
@@ -26,7 +26,7 @@ type StorageUsage struct {
 // This constructor will assign default values to properties that have it defined,
 // and makes sure properties required by API are set, but the set of arguments
 // will change when the set of required properties is changed
-func NewStorageUsage(bytes NullableInt32) *StorageUsage {
+func NewStorageUsage(bytes NullableInt64) *StorageUsage {
 	this := StorageUsage{}
 
 	this.Bytes = bytes.value
@@ -43,8 +43,8 @@ func NewStorageUsageWithDefaults() *StorageUsage {
 }
 
 // GetBytes returns the Bytes field value
-// If the value is explicit nil, the zero value for int32 will be returned
-func (o *StorageUsage) GetBytes() *int32 {
+// If the value is explicit nil, the zero value for int64 will be returned
+func (o *StorageUsage) GetBytes() *int64 {
 	if o == nil {
 		return nil
 	}
@@ -56,7 +56,7 @@ func (o *StorageUsage) GetBytes() *int32 {
 // GetBytesOk returns a tuple with the Bytes field value
 // and a boolean to check if the value has been set.
 // NOTE: If the value is an explicit nil, `nil, true` will be returned
-func (o *StorageUsage) GetBytesOk() (*int32, bool) {
+func (o *StorageUsage) GetBytesOk() (*int64, bool) {
 	if o == nil {
 		return nil, false
 	}
@@ -65,7 +65,7 @@ func (o *StorageUsage) GetBytesOk() (*int32, bool) {
 }
 
 // SetBytes sets field value
-func (o *StorageUsage) SetBytes(v int32) {
+func (o *StorageUsage) SetBytes(v int64) {
 
 	o.Bytes = &v
 

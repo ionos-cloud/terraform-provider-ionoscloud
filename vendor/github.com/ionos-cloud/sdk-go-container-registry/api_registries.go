@@ -303,11 +303,11 @@ func (a *RegistriesApiService) RegistriesFindByIdExecute(r ApiRegistriesFindById
 }
 
 type ApiRegistriesGetRequest struct {
-	ctx           _context.Context
-	ApiService    *RegistriesApiService
-	filterName    *string
-	limit         *string
-	nextPageToken *string
+	ctx             _context.Context
+	ApiService      *RegistriesApiService
+	filterName      *string
+	limit           *string
+	paginationToken *string
 }
 
 func (r ApiRegistriesGetRequest) FilterName(filterName string) ApiRegistriesGetRequest {
@@ -318,8 +318,8 @@ func (r ApiRegistriesGetRequest) Limit(limit string) ApiRegistriesGetRequest {
 	r.limit = &limit
 	return r
 }
-func (r ApiRegistriesGetRequest) NextPageToken(nextPageToken string) ApiRegistriesGetRequest {
-	r.nextPageToken = &nextPageToken
+func (r ApiRegistriesGetRequest) PaginationToken(paginationToken string) ApiRegistriesGetRequest {
+	r.paginationToken = &paginationToken
 	return r
 }
 
@@ -371,8 +371,8 @@ func (a *RegistriesApiService) RegistriesGetExecute(r ApiRegistriesGetRequest) (
 	if r.limit != nil {
 		localVarQueryParams.Add("limit", parameterToString(*r.limit, ""))
 	}
-	if r.nextPageToken != nil {
-		localVarQueryParams.Add("nextPageToken", parameterToString(*r.nextPageToken, ""))
+	if r.paginationToken != nil {
+		localVarQueryParams.Add("pagination.token", parameterToString(*r.paginationToken, ""))
 	}
 	// to determine the Content-Type header
 	localVarHTTPContentTypes := []string{}

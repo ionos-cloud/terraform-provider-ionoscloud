@@ -16,10 +16,10 @@ import (
 
 // LanPropertiesPost struct for LanPropertiesPost
 type LanPropertiesPost struct {
-	// The name of the  resource.
-	Name *string `json:"name,omitempty"`
 	// IP failover configurations for lan
 	IpFailover *[]IPFailover `json:"ipFailover,omitempty"`
+	// The name of the  resource.
+	Name *string `json:"name,omitempty"`
 	// The unique identifier of the private Cross-Connect the LAN is connected to, if any.
 	Pcc *string `json:"pcc,omitempty"`
 	// This LAN faces the public Internet.
@@ -44,46 +44,8 @@ func NewLanPropertiesPostWithDefaults() *LanPropertiesPost {
 	return &this
 }
 
-// GetName returns the Name field value
-// If the value is explicit nil, the zero value for string will be returned
-func (o *LanPropertiesPost) GetName() *string {
-	if o == nil {
-		return nil
-	}
-
-	return o.Name
-
-}
-
-// GetNameOk returns a tuple with the Name field value
-// and a boolean to check if the value has been set.
-// NOTE: If the value is an explicit nil, `nil, true` will be returned
-func (o *LanPropertiesPost) GetNameOk() (*string, bool) {
-	if o == nil {
-		return nil, false
-	}
-
-	return o.Name, true
-}
-
-// SetName sets field value
-func (o *LanPropertiesPost) SetName(v string) {
-
-	o.Name = &v
-
-}
-
-// HasName returns a boolean if a field has been set.
-func (o *LanPropertiesPost) HasName() bool {
-	if o != nil && o.Name != nil {
-		return true
-	}
-
-	return false
-}
-
 // GetIpFailover returns the IpFailover field value
-// If the value is explicit nil, the zero value for []IPFailover will be returned
+// If the value is explicit nil, nil is returned
 func (o *LanPropertiesPost) GetIpFailover() *[]IPFailover {
 	if o == nil {
 		return nil
@@ -120,8 +82,46 @@ func (o *LanPropertiesPost) HasIpFailover() bool {
 	return false
 }
 
+// GetName returns the Name field value
+// If the value is explicit nil, nil is returned
+func (o *LanPropertiesPost) GetName() *string {
+	if o == nil {
+		return nil
+	}
+
+	return o.Name
+
+}
+
+// GetNameOk returns a tuple with the Name field value
+// and a boolean to check if the value has been set.
+// NOTE: If the value is an explicit nil, `nil, true` will be returned
+func (o *LanPropertiesPost) GetNameOk() (*string, bool) {
+	if o == nil {
+		return nil, false
+	}
+
+	return o.Name, true
+}
+
+// SetName sets field value
+func (o *LanPropertiesPost) SetName(v string) {
+
+	o.Name = &v
+
+}
+
+// HasName returns a boolean if a field has been set.
+func (o *LanPropertiesPost) HasName() bool {
+	if o != nil && o.Name != nil {
+		return true
+	}
+
+	return false
+}
+
 // GetPcc returns the Pcc field value
-// If the value is explicit nil, the zero value for string will be returned
+// If the value is explicit nil, nil is returned
 func (o *LanPropertiesPost) GetPcc() *string {
 	if o == nil {
 		return nil
@@ -159,7 +159,7 @@ func (o *LanPropertiesPost) HasPcc() bool {
 }
 
 // GetPublic returns the Public field value
-// If the value is explicit nil, the zero value for bool will be returned
+// If the value is explicit nil, nil is returned
 func (o *LanPropertiesPost) GetPublic() *bool {
 	if o == nil {
 		return nil
@@ -198,18 +198,22 @@ func (o *LanPropertiesPost) HasPublic() bool {
 
 func (o LanPropertiesPost) MarshalJSON() ([]byte, error) {
 	toSerialize := map[string]interface{}{}
-	if o.Name != nil {
-		toSerialize["name"] = o.Name
-	}
 	if o.IpFailover != nil {
 		toSerialize["ipFailover"] = o.IpFailover
 	}
+
+	if o.Name != nil {
+		toSerialize["name"] = o.Name
+	}
+
 	if o.Pcc != nil {
 		toSerialize["pcc"] = o.Pcc
 	}
+
 	if o.Public != nil {
 		toSerialize["public"] = o.Public
 	}
+
 	return json.Marshal(toSerialize)
 }
 
