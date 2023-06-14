@@ -1,7 +1,15 @@
 ## 6.4.0
+### Enhancement:
+- Increase go version to 1.20
 ### Features
 - Add `inline_volume_ids` computed field.
-- Add support for DNS.
+- New Product: **DNS**:
+  - `Resources`:
+    - [ionoscloud_dns_zone](docs/resources/dns_zone.md)
+    - [ionoscloud_dns_record](docs/resources/dns_record.md)
+  - `Data Sources`:
+    - [ionoscloud_dns_zone](docs/data-sources/dns_zone.md)
+    - [ionoscloud_dns_record](docs/data-sources/dns_record.md)
 ### Dependency update
 - Update `sdk-go-dbaas-mongo` to [v1.0.6](https://github.com/ionos-cloud/sdk-go-dbaas-mongo/releases/tag/v1.2.2)
 - Update `sdk-go-container-registry` to [v1.0.1](https://github.com/ionos-cloud/sdk-go-container-registry/releases/tag/v1.0.1)
