@@ -1,4 +1,4 @@
-## 6.3.7 (upcoming release)
+## 6.4.0
 ### Features
 - Add `inline_volume_ids` computed field.
 - Add support for DNS.
