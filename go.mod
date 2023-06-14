@@ -3,7 +3,8 @@ module github.com/ionos-cloud/terraform-provider-ionoscloud/v6
 go 1.19
 
 require (
-	github.com/hashicorp/terraform-plugin-sdk/v2 v2.26.1
+	github.com/gofrs/uuid/v5 v5.0.0
+	github.com/hashicorp/terraform-plugin-sdk/v2 v2.25.0
 	github.com/iancoleman/strcase v0.2.0
 	github.com/ionos-cloud/sdk-go-cert-manager v1.0.1
 	github.com/ionos-cloud/sdk-go-container-registry v1.0.1
