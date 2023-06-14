@@ -351,7 +351,7 @@ resource ` + ServerResource + ` ` + ServerTestResource + ` {
     user_data = "foo"
     bus = "VIRTIO"
     availability_zone = "ZONE_1"
-  }
+}
   nic {
     lan = ` + LanResource + `.` + LanTestResource + `.id
     name = "system"
