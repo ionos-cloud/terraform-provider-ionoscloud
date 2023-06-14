@@ -43,6 +43,9 @@ github.com/cloudflare/circl/sign/ed448
 github.com/fatih/color
 # github.com/go-test/deep v1.0.6
 ## explicit; go 1.13
+# github.com/gofrs/uuid/v5 v5.0.0
+## explicit; go 1.19
+github.com/gofrs/uuid/v5
 # github.com/golang/protobuf v1.5.3
 ## explicit; go 1.9
 github.com/golang/protobuf/jsonpb
@@ -151,13 +154,11 @@ github.com/hashicorp/terraform-plugin-log/internal/hclogutils
 github.com/hashicorp/terraform-plugin-log/internal/logging
 github.com/hashicorp/terraform-plugin-log/tflog
 github.com/hashicorp/terraform-plugin-log/tfsdklog
-# github.com/hashicorp/terraform-plugin-sdk/v2 v2.26.1
-## explicit; go 1.19
+# github.com/hashicorp/terraform-plugin-sdk/v2 v2.25.0
+## explicit; go 1.18
 github.com/hashicorp/terraform-plugin-sdk/v2/diag
-github.com/hashicorp/terraform-plugin-sdk/v2/helper/id
 github.com/hashicorp/terraform-plugin-sdk/v2/helper/logging
 github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource
-github.com/hashicorp/terraform-plugin-sdk/v2/helper/retry
 github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema
 github.com/hashicorp/terraform-plugin-sdk/v2/helper/structure
 github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation
@@ -200,8 +201,11 @@ github.com/ionos-cloud/sdk-go-dbaas-mongo
 # github.com/ionos-cloud/sdk-go-dbaas-postgres v1.1.1
 ## explicit; go 1.19
 github.com/ionos-cloud/sdk-go-dbaas-postgres
-# github.com/ionos-cloud/sdk-go/v6 v6.1.4
-## explicit; go 1.17
+# github.com/ionos-cloud/sdk-go-dns v1.1.1
+## explicit; go 1.18
+github.com/ionos-cloud/sdk-go-dns
+# github.com/ionos-cloud/sdk-go/v6 v6.1.7
+## explicit; go 1.19
 github.com/ionos-cloud/sdk-go/v6
 # github.com/jhump/protoreflect v1.6.1
 ## explicit; go 1.14
