@@ -17,25 +17,23 @@ import (
 
 // RegistriesResponse struct for RegistriesResponse
 type RegistriesResponse struct {
-	Links         *PaginationLinks    `json:"_links"`
-	Href          *string             `json:"href,omitempty"`
-	Id            *string             `json:"id,omitempty"`
-	Items         *[]RegistryResponse `json:"items,omitempty"`
-	Limit         *int32              `json:"limit"`
-	NextPageToken *string             `json:"nextPageToken"`
-	Type          *string             `json:"type,omitempty"`
+	Links      *PaginationLinks    `json:"_links"`
+	Href       *string             `json:"href,omitempty"`
+	Id         *string             `json:"id,omitempty"`
+	Items      *[]RegistryResponse `json:"items,omitempty"`
+	Pagination *Pagination         `json:"pagination"`
+	Type       *string             `json:"type,omitempty"`
 }
 
 // NewRegistriesResponse instantiates a new RegistriesResponse object
 // This constructor will assign default values to properties that have it defined,
 // and makes sure properties required by API are set, but the set of arguments
 // will change when the set of required properties is changed
-func NewRegistriesResponse(links PaginationLinks, limit int32, nextPageToken string) *RegistriesResponse {
+func NewRegistriesResponse(links PaginationLinks, pagination Pagination) *RegistriesResponse {
 	this := RegistriesResponse{}
 
 	this.Links = &links
-	this.Limit = &limit
-	this.NextPageToken = &nextPageToken
+	this.Pagination = &pagination
 
 	return &this
 }
@@ -200,76 +198,38 @@ func (o *RegistriesResponse) HasItems() bool {
 	return false
 }
 
-// GetLimit returns the Limit field value
-// If the value is explicit nil, the zero value for int32 will be returned
-func (o *RegistriesResponse) GetLimit() *int32 {
+// GetPagination returns the Pagination field value
+// If the value is explicit nil, the zero value for Pagination will be returned
+func (o *RegistriesResponse) GetPagination() *Pagination {
 	if o == nil {
 		return nil
 	}
 
-	return o.Limit
+	return o.Pagination
 
 }
 
-// GetLimitOk returns a tuple with the Limit field value
+// GetPaginationOk returns a tuple with the Pagination field value
 // and a boolean to check if the value has been set.
 // NOTE: If the value is an explicit nil, `nil, true` will be returned
-func (o *RegistriesResponse) GetLimitOk() (*int32, bool) {
+func (o *RegistriesResponse) GetPaginationOk() (*Pagination, bool) {
 	if o == nil {
 		return nil, false
 	}
 
-	return o.Limit, true
+	return o.Pagination, true
 }
 
-// SetLimit sets field value
-func (o *RegistriesResponse) SetLimit(v int32) {
+// SetPagination sets field value
+func (o *RegistriesResponse) SetPagination(v Pagination) {
 
-	o.Limit = &v
-
-}
-
-// HasLimit returns a boolean if a field has been set.
-func (o *RegistriesResponse) HasLimit() bool {
-	if o != nil && o.Limit != nil {
-		return true
-	}
-
-	return false
-}
-
-// GetNextPageToken returns the NextPageToken field value
-// If the value is explicit nil, the zero value for string will be returned
-func (o *RegistriesResponse) GetNextPageToken() *string {
-	if o == nil {
-		return nil
-	}
-
-	return o.NextPageToken
+	o.Pagination = &v
 
 }
 
-// GetNextPageTokenOk returns a tuple with the NextPageToken field value
-// and a boolean to check if the value has been set.
-// NOTE: If the value is an explicit nil, `nil, true` will be returned
-func (o *RegistriesResponse) GetNextPageTokenOk() (*string, bool) {
-	if o == nil {
-		return nil, false
-	}
-
-	return o.NextPageToken, true
-}
-
-// SetNextPageToken sets field value
-func (o *RegistriesResponse) SetNextPageToken(v string) {
-
-	o.NextPageToken = &v
-
-}
-
-// HasNextPageToken returns a boolean if a field has been set.
-func (o *RegistriesResponse) HasNextPageToken() bool {
-	if o != nil && o.NextPageToken != nil {
+// HasPagination returns a boolean if a field has been set.
+func (o *RegistriesResponse) HasPagination() bool {
+	if o != nil && o.Pagination != nil {
 		return true
 	}
 
@@ -330,12 +290,8 @@ func (o RegistriesResponse) MarshalJSON() ([]byte, error) {
 
 	toSerialize["items"] = o.Items
 
-	if o.Limit != nil {
-		toSerialize["limit"] = o.Limit
-	}
-
-	if o.NextPageToken != nil {
-		toSerialize["nextPageToken"] = o.NextPageToken
+	if o.Pagination != nil {
+		toSerialize["pagination"] = o.Pagination
 	}
 
 	if o.Type != nil {
