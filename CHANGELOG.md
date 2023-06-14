@@ -3,6 +3,7 @@
 - Increase go version to 1.20
 ### Features
 - Add `inline_volume_ids` computed field.
+- Add support for DNS.
 ### Dependency update
 - Update `sdk-go-dbaas-mongo` to [v1.0.6](https://github.com/ionos-cloud/sdk-go-dbaas-mongo/releases/tag/v1.2.2)
 ### Fixes

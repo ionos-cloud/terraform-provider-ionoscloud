@@ -9,6 +9,9 @@ github.com/apparentlymart/go-textseg/v13/textseg
 github.com/fatih/color
 # github.com/go-test/deep v1.0.6
 ## explicit; go 1.13
+# github.com/gofrs/uuid/v5 v5.0.0
+## explicit; go 1.19
+github.com/gofrs/uuid/v5
 # github.com/golang/protobuf v1.5.2
 ## explicit; go 1.9
 github.com/golang/protobuf/jsonpb
@@ -166,6 +169,9 @@ github.com/ionos-cloud/sdk-go-dbaas-mongo
 # github.com/ionos-cloud/sdk-go-dbaas-postgres v1.1.1
 ## explicit; go 1.19
 github.com/ionos-cloud/sdk-go-dbaas-postgres
+# github.com/ionos-cloud/sdk-go-dns v1.1.1
+## explicit; go 1.18
+github.com/ionos-cloud/sdk-go-dns
 # github.com/ionos-cloud/sdk-go/v6 v6.1.4
 ## explicit; go 1.17
 github.com/ionos-cloud/sdk-go/v6

@@ -3,9 +3,10 @@ package main
 import (
 	"context"
 	"flag"
+	"log"
+
 	"github.com/hashicorp/terraform-plugin-sdk/v2/plugin"
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/ionoscloud"
-	"log"
 )
 
 func main() {
