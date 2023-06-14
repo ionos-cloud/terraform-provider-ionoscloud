@@ -51,7 +51,7 @@ const (
 	RequestStatusFailed  = "FAILED"
 	RequestStatusDone    = "DONE"
 
-	Version = "1.1.0"
+	Version = "v1.1.1"
 )
 
 // APIClient manages communication with the IONOS Cloud - DNS API API v1.2.0

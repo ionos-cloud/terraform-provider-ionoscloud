@@ -14,7 +14,6 @@ package ionoscloud
 import (
 	"encoding/json"
 	"reflect"
-	"strings"
 	"time"
 )
 
@@ -754,11 +753,6 @@ func (t *IonosTime) UnmarshalJSON(data []byte) error {
 	}
 	if str[len(str)-1] == '"' {
 		str = str[:len(str)-1]
-	}
-	if !strings.Contains(str, "Z") {
-		/* forcefully adding timezone suffix to be able to parse the
-		 * string using RFC3339 */
-		str += "Z"
 	}
 	tt, err := time.Parse(time.RFC3339, str)
 	if err != nil {

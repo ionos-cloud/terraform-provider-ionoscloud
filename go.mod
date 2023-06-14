@@ -11,7 +11,7 @@ require (
 	github.com/ionos-cloud/sdk-go-dataplatform v1.0.0
 	github.com/ionos-cloud/sdk-go-dbaas-mongo v1.2.2
 	github.com/ionos-cloud/sdk-go-dbaas-postgres v1.1.1
-	github.com/ionos-cloud/sdk-go-dns v1.1.0
+	github.com/ionos-cloud/sdk-go-dns v1.1.1
 	github.com/ionos-cloud/sdk-go/v6 v6.1.4
 	golang.org/x/crypto v0.7.0
 	gopkg.in/yaml.v3 v3.0.1
