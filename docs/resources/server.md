@@ -21,7 +21,7 @@ This resource will create an operational server. After this section completes, t
 data "ionoscloud_image" "example" {
     type                  = "HDD"
     cloud_init            = "V1"
-    location              = "us/las"
+    image_alias           = "ubuntu:latest"
 }
 
 resource "ionoscloud_datacenter" "example" {
