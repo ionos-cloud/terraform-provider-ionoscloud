@@ -852,7 +852,6 @@ func resourceServerUpdate(ctx context.Context, d *schema.ResourceData, meta inte
 	// Volume stuff
 	if d.HasChange("volume") {
 		bootVolume := d.Get("boot_volume").(string)
-
 		_, apiResponse, err := client.ServersApi.DatacentersServersVolumesFindById(ctx, dcId, d.Id(), bootVolume).Execute()
 		logApiRequestTime(apiResponse)
 
