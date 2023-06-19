@@ -16,7 +16,7 @@ Manages **Snapshots** on IonosCloud.
 ```hcl
 data "ionoscloud_image" "example" {
     type                  = "HDD"
-    cloud_init            = "V1"
+    image_alias           = "ubuntu:latest"
     location              = "us/las"
 }
 
