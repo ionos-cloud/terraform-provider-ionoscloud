@@ -351,7 +351,7 @@ resource ` + ServerResource + ` ` + ServerTestResource + ` {
     user_data = "foo"
     bus = "VIRTIO"
     availability_zone = "ZONE_1"
-  }
+}
   nic {
     lan = ` + LanResource + `.` + LanTestResource + `.id
     name = "system"
@@ -585,3 +585,52 @@ resource "random_string" "simple_string" {
 
 const K8sVersion = "1.23.12"
 const UpgradedK8sVersion = "1.24.6"
+
+// DNS test constants: configs, attributes and values.
+
+// DNS Zones constants
+const zoneNameAttribute = "name"
+const zoneNameValue = "test.com"
+const zoneDescriptionAttribute = "description"
+const zoneDescriptionValue = "test description"
+const zoneUpdatedDescriptionValue = "updated description"
+const zoneEnabledAttribute = "enabled"
+const zoneEnabledValue = "true"
+const zoneupdatedEnabledValue = "false"
+
+const DNSZoneConfig = `
+resource ` + DNSZoneResource + ` ` + DNSZoneTestResourceName + ` {
+	` + zoneNameAttribute + ` = "` + zoneNameValue + `"
+	` + zoneDescriptionAttribute + ` = "` + zoneDescriptionValue + `"
+    ` + zoneEnabledAttribute + ` = ` + zoneEnabledValue + `
+}
+`
+
+// DNS Records constants
+const recordNameAttribute = "name"
+const recordNameValue = "testrecord"
+const recordTypeAttribute = "type"
+const recordTypeValue = "CNAME"
+const recordContentAttribute = "content"
+const recordContentValue = "1.2.3.4"
+const recordUpdatedContentValue = "4.3.2.1"
+const recordTtlAttribute = "ttl"
+const recordTtlValue = "2000"
+const recordUpdatedTtlValue = "3600"
+const recordPriorityAttribute = "priority"
+const recordPriorityValue = "1024"
+const recordEnabledAttribute = "enabled"
+const recordEnabledValue = "true"
+const recordUpdatedEnabledValue = "false"
+
+const DNSRecordConfig = DNSZoneConfig + `
+resource ` + DNSRecordResource + ` ` + DNSRecordTestResourceName + ` {
+	zone_id = ` + DNSZoneResource + `.` + DNSZoneTestResourceName + `.id
+	` + recordNameAttribute + ` = "` + recordNameValue + `"
+	` + recordTypeAttribute + ` = "` + recordTypeValue + `"
+	` + recordContentAttribute + ` = "` + recordContentValue + `"
+	` + recordTtlAttribute + ` = ` + recordTtlValue + `
+	` + recordPriorityAttribute + ` = ` + recordPriorityValue + `
+	` + recordEnabledAttribute + ` = ` + recordEnabledValue + `
+}
+`

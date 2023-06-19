@@ -16,22 +16,23 @@ import (
 
 // NicProperties struct for NicProperties
 type NicProperties struct {
-	// The name of the  resource.
-	Name *string `json:"name,omitempty"`
-	// The MAC address of the NIC.
-	Mac *string `json:"mac,omitempty"`
-	// Collection of IP addresses, assigned to the NIC. Explicitly assigned public IPs need to come from reserved IP blocks. Passing value null or empty array will assign an IP address automatically.
-	Ips *[]string `json:"ips,omitempty"`
+	// The Logical Unit Number (LUN) of the storage volume. Null if this NIC was created using Cloud API and no DCD changes were performed on the Datacenter.
+	DeviceNumber *int32 `json:"deviceNumber,omitempty"`
 	// Indicates if the NIC will reserve an IP using DHCP.
 	Dhcp *bool `json:"dhcp,omitempty"`
-	// The LAN ID the NIC will be on. If the LAN ID does not exist, it will be implicitly created.
-	Lan *int32 `json:"lan"`
 	// Activate or deactivate the firewall. By default, an active firewall without any defined rules will block all incoming network traffic except for the firewall rules that explicitly allows certain protocols, IP addresses and ports.
 	FirewallActive *bool `json:"firewallActive,omitempty"`
 	// The type of firewall rules that will be allowed on the NIC. If not specified, the default INGRESS value is used.
 	FirewallType *string `json:"firewallType,omitempty"`
-	// The Logical Unit Number (LUN) of the storage volume. Null if this NIC was created using Cloud API and no DCD changes were performed on the Datacenter.
-	DeviceNumber *int32 `json:"deviceNumber,omitempty"`
+	// Collection of IP addresses, assigned to the NIC. Explicitly assigned public IPs need to come from reserved IP blocks. Passing value null or empty array will assign an IP address automatically.
+	// to set this field to `nil` in order to be marshalled, the explicit nil address `Nil[]string` can be used, or the setter `SetIpsNil`
+	Ips *[]string `json:"ips,omitempty"`
+	// The LAN ID the NIC will be on. If the LAN ID does not exist, it will be implicitly created.
+	Lan *int32 `json:"lan"`
+	// The MAC address of the NIC.
+	Mac *string `json:"mac,omitempty"`
+	// The name of the  resource.
+	Name *string `json:"name,omitempty"`
 	// The PCI slot number for the NIC.
 	PciSlot *int32 `json:"pciSlot,omitempty"`
 	// The vnet ID that belongs to this NIC; Requires system privileges
@@ -45,6 +46,8 @@ type NicProperties struct {
 func NewNicProperties(lan int32) *NicProperties {
 	this := NicProperties{}
 
+	var dhcp bool = true
+	this.Dhcp = &dhcp
 	this.Lan = &lan
 
 	return &this
@@ -55,117 +58,43 @@ func NewNicProperties(lan int32) *NicProperties {
 // but it doesn't guarantee that properties required by API are set
 func NewNicPropertiesWithDefaults() *NicProperties {
 	this := NicProperties{}
+	var dhcp bool = true
+	this.Dhcp = &dhcp
 	return &this
 }
 
-// GetName returns the Name field value
-// If the value is explicit nil, the zero value for string will be returned
-func (o *NicProperties) GetName() *string {
+// GetDeviceNumber returns the DeviceNumber field value
+// If the value is explicit nil, nil is returned
+func (o *NicProperties) GetDeviceNumber() *int32 {
 	if o == nil {
 		return nil
 	}
 
-	return o.Name
+	return o.DeviceNumber
 
 }
 
-// GetNameOk returns a tuple with the Name field value
+// GetDeviceNumberOk returns a tuple with the DeviceNumber field value
 // and a boolean to check if the value has been set.
 // NOTE: If the value is an explicit nil, `nil, true` will be returned
-func (o *NicProperties) GetNameOk() (*string, bool) {
+func (o *NicProperties) GetDeviceNumberOk() (*int32, bool) {
 	if o == nil {
 		return nil, false
 	}
 
-	return o.Name, true
+	return o.DeviceNumber, true
 }
 
-// SetName sets field value
-func (o *NicProperties) SetName(v string) {
+// SetDeviceNumber sets field value
+func (o *NicProperties) SetDeviceNumber(v int32) {
 
-	o.Name = &v
-
-}
-
-// HasName returns a boolean if a field has been set.
-func (o *NicProperties) HasName() bool {
-	if o != nil && o.Name != nil {
-		return true
-	}
-
-	return false
-}
-
-// GetMac returns the Mac field value
-// If the value is explicit nil, the zero value for string will be returned
-func (o *NicProperties) GetMac() *string {
-	if o == nil {
-		return nil
-	}
-
-	return o.Mac
+	o.DeviceNumber = &v
 
 }
 
-// GetMacOk returns a tuple with the Mac field value
-// and a boolean to check if the value has been set.
-// NOTE: If the value is an explicit nil, `nil, true` will be returned
-func (o *NicProperties) GetMacOk() (*string, bool) {
-	if o == nil {
-		return nil, false
-	}
-
-	return o.Mac, true
-}
-
-// SetMac sets field value
-func (o *NicProperties) SetMac(v string) {
-
-	o.Mac = &v
-
-}
-
-// HasMac returns a boolean if a field has been set.
-func (o *NicProperties) HasMac() bool {
-	if o != nil && o.Mac != nil {
-		return true
-	}
-
-	return false
-}
-
-// GetIps returns the Ips field value
-// If the value is explicit nil, the zero value for []string will be returned
-func (o *NicProperties) GetIps() *[]string {
-	if o == nil {
-		return nil
-	}
-
-	return o.Ips
-
-}
-
-// GetIpsOk returns a tuple with the Ips field value
-// and a boolean to check if the value has been set.
-// NOTE: If the value is an explicit nil, `nil, true` will be returned
-func (o *NicProperties) GetIpsOk() (*[]string, bool) {
-	if o == nil {
-		return nil, false
-	}
-
-	return o.Ips, true
-}
-
-// SetIps sets field value
-func (o *NicProperties) SetIps(v []string) {
-
-	o.Ips = &v
-
-}
-
-// HasIps returns a boolean if a field has been set.
-func (o *NicProperties) HasIps() bool {
-	if o != nil && o.Ips != nil {
+// HasDeviceNumber returns a boolean if a field has been set.
+func (o *NicProperties) HasDeviceNumber() bool {
+	if o != nil && o.DeviceNumber != nil {
 		return true
 	}
 
@@ -173,7 +102,7 @@ func (o *NicProperties) HasIps() bool {
 }
 
 // GetDhcp returns the Dhcp field value
-// If the value is explicit nil, the zero value for bool will be returned
+// If the value is explicit nil, nil is returned
 func (o *NicProperties) GetDhcp() *bool {
 	if o == nil {
 		return nil
@@ -210,46 +139,8 @@ func (o *NicProperties) HasDhcp() bool {
 	return false
 }
 
-// GetLan returns the Lan field value
-// If the value is explicit nil, the zero value for int32 will be returned
-func (o *NicProperties) GetLan() *int32 {
-	if o == nil {
-		return nil
-	}
-
-	return o.Lan
-
-}
-
-// GetLanOk returns a tuple with the Lan field value
-// and a boolean to check if the value has been set.
-// NOTE: If the value is an explicit nil, `nil, true` will be returned
-func (o *NicProperties) GetLanOk() (*int32, bool) {
-	if o == nil {
-		return nil, false
-	}
-
-	return o.Lan, true
-}
-
-// SetLan sets field value
-func (o *NicProperties) SetLan(v int32) {
-
-	o.Lan = &v
-
-}
-
-// HasLan returns a boolean if a field has been set.
-func (o *NicProperties) HasLan() bool {
-	if o != nil && o.Lan != nil {
-		return true
-	}
-
-	return false
-}
-
 // GetFirewallActive returns the FirewallActive field value
-// If the value is explicit nil, the zero value for bool will be returned
+// If the value is explicit nil, nil is returned
 func (o *NicProperties) GetFirewallActive() *bool {
 	if o == nil {
 		return nil
@@ -287,7 +178,7 @@ func (o *NicProperties) HasFirewallActive() bool {
 }
 
 // GetFirewallType returns the FirewallType field value
-// If the value is explicit nil, the zero value for string will be returned
+// If the value is explicit nil, nil is returned
 func (o *NicProperties) GetFirewallType() *string {
 	if o == nil {
 		return nil
@@ -324,38 +215,152 @@ func (o *NicProperties) HasFirewallType() bool {
 	return false
 }
 
-// GetDeviceNumber returns the DeviceNumber field value
-// If the value is explicit nil, the zero value for int32 will be returned
-func (o *NicProperties) GetDeviceNumber() *int32 {
+// GetIps returns the Ips field value
+// If the value is explicit nil, nil is returned
+func (o *NicProperties) GetIps() *[]string {
 	if o == nil {
 		return nil
 	}
 
-	return o.DeviceNumber
+	return o.Ips
 
 }
 
-// GetDeviceNumberOk returns a tuple with the DeviceNumber field value
+// GetIpsOk returns a tuple with the Ips field value
 // and a boolean to check if the value has been set.
 // NOTE: If the value is an explicit nil, `nil, true` will be returned
-func (o *NicProperties) GetDeviceNumberOk() (*int32, bool) {
+func (o *NicProperties) GetIpsOk() (*[]string, bool) {
 	if o == nil {
 		return nil, false
 	}
 
-	return o.DeviceNumber, true
+	return o.Ips, true
 }
 
-// SetDeviceNumber sets field value
-func (o *NicProperties) SetDeviceNumber(v int32) {
+// SetIps sets field value
+func (o *NicProperties) SetIps(v []string) {
 
-	o.DeviceNumber = &v
+	o.Ips = &v
 
 }
 
-// HasDeviceNumber returns a boolean if a field has been set.
-func (o *NicProperties) HasDeviceNumber() bool {
-	if o != nil && o.DeviceNumber != nil {
+// HasIps returns a boolean if a field has been set.
+func (o *NicProperties) HasIps() bool {
+	if o != nil && o.Ips != nil {
+		return true
+	}
+
+	return false
+}
+
+// GetLan returns the Lan field value
+// If the value is explicit nil, nil is returned
+func (o *NicProperties) GetLan() *int32 {
+	if o == nil {
+		return nil
+	}
+
+	return o.Lan
+
+}
+
+// GetLanOk returns a tuple with the Lan field value
+// and a boolean to check if the value has been set.
+// NOTE: If the value is an explicit nil, `nil, true` will be returned
+func (o *NicProperties) GetLanOk() (*int32, bool) {
+	if o == nil {
+		return nil, false
+	}
+
+	return o.Lan, true
+}
+
+// SetLan sets field value
+func (o *NicProperties) SetLan(v int32) {
+
+	o.Lan = &v
+
+}
+
+// HasLan returns a boolean if a field has been set.
+func (o *NicProperties) HasLan() bool {
+	if o != nil && o.Lan != nil {
+		return true
+	}
+
+	return false
+}
+
+// GetMac returns the Mac field value
+// If the value is explicit nil, nil is returned
+func (o *NicProperties) GetMac() *string {
+	if o == nil {
+		return nil
+	}
+
+	return o.Mac
+
+}
+
+// GetMacOk returns a tuple with the Mac field value
+// and a boolean to check if the value has been set.
+// NOTE: If the value is an explicit nil, `nil, true` will be returned
+func (o *NicProperties) GetMacOk() (*string, bool) {
+	if o == nil {
+		return nil, false
+	}
+
+	return o.Mac, true
+}
+
+// SetMac sets field value
+func (o *NicProperties) SetMac(v string) {
+
+	o.Mac = &v
+
+}
+
+// HasMac returns a boolean if a field has been set.
+func (o *NicProperties) HasMac() bool {
+	if o != nil && o.Mac != nil {
+		return true
+	}
+
+	return false
+}
+
+// GetName returns the Name field value
+// If the value is explicit nil, nil is returned
+func (o *NicProperties) GetName() *string {
+	if o == nil {
+		return nil
+	}
+
+	return o.Name
+
+}
+
+// GetNameOk returns a tuple with the Name field value
+// and a boolean to check if the value has been set.
+// NOTE: If the value is an explicit nil, `nil, true` will be returned
+func (o *NicProperties) GetNameOk() (*string, bool) {
+	if o == nil {
+		return nil, false
+	}
+
+	return o.Name, true
+}
+
+// SetName sets field value
+func (o *NicProperties) SetName(v string) {
+
+	o.Name = &v
+
+}
+
+// HasName returns a boolean if a field has been set.
+func (o *NicProperties) HasName() bool {
+	if o != nil && o.Name != nil {
 		return true
 	}
 
@@ -363,7 +368,7 @@ func (o *NicProperties) HasDeviceNumber() bool {
 }
 
 // GetPciSlot returns the PciSlot field value
-// If the value is explicit nil, the zero value for int32 will be returned
+// If the value is explicit nil, nil is returned
 func (o *NicProperties) GetPciSlot() *int32 {
 	if o == nil {
 		return nil
@@ -401,7 +406,7 @@ func (o *NicProperties) HasPciSlot() bool {
 }
 
 // GetVnet returns the Vnet field value
-// If the value is explicit nil, the zero value for string will be returned
+// If the value is explicit nil, nil is returned
 func (o *NicProperties) GetVnet() *string {
 	if o == nil {
 		return nil
@@ -440,34 +445,45 @@ func (o *NicProperties) HasVnet() bool {
 
 func (o NicProperties) MarshalJSON() ([]byte, error) {
 	toSerialize := map[string]interface{}{}
-	if o.Name != nil {
-		toSerialize["name"] = o.Name
+	if o.DeviceNumber != nil {
+		toSerialize["deviceNumber"] = o.DeviceNumber
 	}
-	if o.Mac != nil {
-		toSerialize["mac"] = o.Mac
-	}
-	toSerialize["ips"] = o.Ips
+
 	if o.Dhcp != nil {
 		toSerialize["dhcp"] = o.Dhcp
+	}
+
+	if o.FirewallActive != nil {
+		toSerialize["firewallActive"] = o.FirewallActive
+	}
+
+	if o.FirewallType != nil {
+		toSerialize["firewallType"] = o.FirewallType
+	}
+
+	if o.Ips != nil {
+		toSerialize["ips"] = o.Ips
 	}
 	if o.Lan != nil {
 		toSerialize["lan"] = o.Lan
 	}
-	if o.FirewallActive != nil {
-		toSerialize["firewallActive"] = o.FirewallActive
+
+	if o.Mac != nil {
+		toSerialize["mac"] = o.Mac
 	}
-	if o.FirewallType != nil {
-		toSerialize["firewallType"] = o.FirewallType
+
+	if o.Name != nil {
+		toSerialize["name"] = o.Name
 	}
-	if o.DeviceNumber != nil {
-		toSerialize["deviceNumber"] = o.DeviceNumber
-	}
+
 	if o.PciSlot != nil {
 		toSerialize["pciSlot"] = o.PciSlot
 	}
+
 	if o.Vnet != nil {
 		toSerialize["vnet"] = o.Vnet
 	}
+
 	return json.Marshal(toSerialize)
 }
 

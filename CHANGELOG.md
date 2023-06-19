@@ -1,15 +1,24 @@
-## 6.3.7 (upcoming release)
+## 6.4.0
 ### Enhancement:
 - Increase go version to 1.20
 ### Features
 - Add `inline_volume_ids` computed field.
+- New Product: **DNS**:
+  - `Resources`:
+    - [ionoscloud_dns_zone](docs/resources/dns_zone.md)
+    - [ionoscloud_dns_record](docs/resources/dns_record.md)
+  - `Data Sources`:
+    - [ionoscloud_dns_zone](docs/data-sources/dns_zone.md)
+    - [ionoscloud_dns_record](docs/data-sources/dns_record.md)
 ### Dependency update
 - Update `sdk-go-dbaas-mongo` to [v1.0.6](https://github.com/ionos-cloud/sdk-go-dbaas-mongo/releases/tag/v1.2.2)
+- Update `sdk-go-container-registry` to [v1.0.1](https://github.com/ionos-cloud/sdk-go-container-registry/releases/tag/v1.0.1)
+- Update `sdk-go` to [v6.1.7](https://github.com/ionos-cloud/sdk-go/releases/tag/v6.1.7)
+- Update `sdk-go-cert-manager` to [v1.0.1](https://github.com/ionos-cloud/sdk-go-cert-manager/releases/tag/v1.0.1)
+- Update `terraform-plugin-sdk` to [v2.26.1](https://github.com/hashicorp/terraform-plugin-sdk/releases/tag/v2.26.1)
 ### Fixes
 - Log levels need to be shown and filtered correctly when set with `TF_LOG`. Also change `WARNING` log levels to `WARN`.
 - Update code to work with new mongo version
-### Features
-- `firewall` list inside server now allows multiple firewall rules to be defined inline
 - Ignore downgrades of `k8s_version` patch level.
 - Allow upgrades of `k8s_version` patch level.
 - Make `nic` list in `ionoscloud_server` resource optional
