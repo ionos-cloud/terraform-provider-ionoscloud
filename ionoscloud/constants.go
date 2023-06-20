@@ -274,6 +274,13 @@ const (
 	RandomPassword    = "random_password"
 )
 
+// LaaS Constants
+
+const (
+	LaaSPipelineDataSource = "ionoscloud_laas_pipeline"
+	LaaSPipelineResource   = "ionoscloud_laas_pipeline"
+)
+
 const ServersDataSource = "ionoscloud_servers"
 
 const (
@@ -291,4 +298,5 @@ const (
 	containerRegistryClient
 	dataplatformClient
 	dnsClient
+	laasClient
 )

@@ -19,6 +19,7 @@ import (
 	dataplatformService "github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/dataplatform"
 	dbaasService "github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/dbaas"
 	dnsService "github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/dns"
+	laasService "github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/laas"
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils"
 )
 
@@ -32,6 +33,7 @@ type SdkBundle struct {
 	ContainerClient    *crService.Client
 	DataplatformClient *dataplatformService.Client
 	DNSClient          *dnsService.Client
+	LaaSClient         *laasService.Client
 }
 
 type ClientOptions struct {
@@ -115,6 +117,7 @@ func Provider() *schema.Provider {
 			DataplatformNodePoolResource:              resourceDataplatformNodePool(),
 			DNSZoneResource:                           resourceDNSZone(),
 			DNSRecordResource:                         resourceDNSRecord(),
+			LaaSPipelineResource:                      resourceLaaSPipeline(),
 		},
 		DataSourcesMap: map[string]*schema.Resource{
 			DatacenterResource:                        dataSourceDataCenter(),
@@ -164,6 +167,7 @@ func Provider() *schema.Provider {
 			DataplatformVersionsDataSource:            dataSourceDataplatformVersions(),
 			DNSZoneDataSource:                         dataSourceDNSZone(),
 			DNSRecordDataSource:                       dataSourceDNSRecord(),
+			LaaSPipelineDataSource:                    dataSourceLaaSPipeline(),
 		},
 	}
 
@@ -222,6 +226,7 @@ func providerConfigure(d *schema.ResourceData, terraformVersion string) (interfa
 		ContainerClient:    NewClientByType(clientOpts, containerRegistryClient).(*crService.Client),
 		DataplatformClient: NewClientByType(clientOpts, dataplatformClient).(*dataplatformService.Client),
 		DNSClient:          NewClientByType(clientOpts, dnsClient).(*dnsService.Client),
+		LaaSClient:         NewClientByType(clientOpts, laasClient).(*laasService.Client),
 	}, nil
 }
 
@@ -253,6 +258,8 @@ func NewClientByType(clientOpts ClientOptions, clientType clientType) interface{
 		return dataplatformService.NewClient(clientOpts.Username, clientOpts.Password, clientOpts.Token, clientOpts.Url, clientOpts.Version, clientOpts.TerraformVersion)
 	case dnsClient:
 		return dnsService.NewClient(clientOpts.Username, clientOpts.Password, clientOpts.Token, clientOpts.Url, clientOpts.Version, clientOpts.TerraformVersion)
+	case laasClient:
+		return laasService.NewClient(clientOpts.Username, clientOpts.Password, clientOpts.Token, clientOpts.Url, clientOpts.Version, clientOpts.TerraformVersion)
 	default:
 		log.Fatalf("[ERROR] unknown client type %d", clientType)
 	}
