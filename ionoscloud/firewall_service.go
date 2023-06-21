@@ -257,6 +257,11 @@ func extractOrderedFirewallIds(foundRules, sentRules []ionoscloud.FirewallRule) 
 	//keep order of ruleIds
 	for _, rule := range sentRules {
 		for _, foundRule := range foundRules {
+			// computed, make equal for comparison
+			if rule.Properties != nil &&
+				foundRule.Properties != nil && foundRule.Properties.IpVersion != nil {
+				rule.Properties.IpVersion = foundRule.Properties.IpVersion
+			}
 			//we need deepEqual here, because the structures contain pointers and cannot be compared using the stricter `==`
 			if reflect.DeepEqual(rule.Properties, foundRule.Properties) {
 				ruleIds = append(ruleIds, *foundRule.Id)
