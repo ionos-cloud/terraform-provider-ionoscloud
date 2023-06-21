@@ -1,3 +1,9 @@
+## 6.4.2
+### Fixes
+- Fix `ssh_keys` field upgrade `ionoscloud_server` from `6.3.3` to higher versions should not replace server. `ssh_keys` and `ssh_key_path` fields no longer forceNew. 
+`ssh_keys` is no longer computed.
+
+
 ## 6.4.1
 ### Fixes
 - Fix `inline_volume_ids` field upgrade for `ionoscloud_server`
