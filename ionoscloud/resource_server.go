@@ -844,6 +844,7 @@ func resourceServerUpdate(ctx context.Context, d *schema.ResourceData, meta inte
 		diags := diag.FromErr(errState)
 		return diags
 	}
+
 	// Volume stuff
 	if d.HasChange("volume") {
 		bootVolume := d.Get("boot_volume").(string)
@@ -1320,6 +1321,20 @@ func getServerData(d *schema.ResourceData) (*ionoscloud.Server, error) {
 func setResourceServerData(ctx context.Context, client *ionoscloud.APIClient, d *schema.ResourceData, server *ionoscloud.Server) error {
 	if server.Id != nil {
 		d.SetId(*server.Id)
+	}
+
+	// takes care of an upgrade from a version that does not have inline_volume_ids(pre 6.4.0)
+	// to one that has it(>6.4.0)
+	if _, ok := d.GetOk("inline_volume_ids"); !ok {
+		if bootVolumeItf, ok := d.GetOk("boot_volume"); ok {
+			bootVolume := bootVolumeItf.(string)
+			var inlineVolumeIds []string
+			inlineVolumeIds = append(inlineVolumeIds, bootVolume)
+			if err := d.Set("inline_volume_ids", inlineVolumeIds); err != nil {
+				return utils.GenerateSetError("server", "inline_volume_ids", err)
+			}
+		}
+
 	}
 
 	datacenterId := d.Get("datacenter_id").(string)

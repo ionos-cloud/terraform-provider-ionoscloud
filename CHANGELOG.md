@@ -1,3 +1,10 @@
+## 6.4.1
+### Fixes
+- Fix `inline_volume_ids` field upgrade for `ionoscloud_server`
+
+### Docs
+- Fix `ionoscloud_image` examples
+
 ## 6.4.0
 ### Enhancement:
 - Increase go version to 1.20
