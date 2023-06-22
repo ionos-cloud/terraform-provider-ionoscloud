@@ -1322,6 +1322,11 @@ func setResourceServerData(ctx context.Context, client *ionoscloud.APIClient, d 
 	if server.Id != nil {
 		d.SetId(*server.Id)
 	}
+	// takes care of an upgrade from a version that does not have firewallrule_ids(pre 6.4.2)
+	// to one that has it(>=6.4.2)
+	if err := setFwRuleIdsInSchemaInCaseOfUpdate(d); err != nil {
+		return err
+	}
 
 	// takes care of an upgrade from a version that does not have inline_volume_ids(pre 6.4.0)
 	// to one that has it(>6.4.0)
@@ -1334,7 +1339,6 @@ func setResourceServerData(ctx context.Context, client *ionoscloud.APIClient, d 
 				return utils.GenerateSetError("server", "inline_volume_ids", err)
 			}
 		}
-
 	}
 
 	datacenterId := d.Get("datacenter_id").(string)

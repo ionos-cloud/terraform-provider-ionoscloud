@@ -293,3 +293,17 @@ func extractOrderedFirewallIds(foundRules, sentRules []ionoscloud.FirewallRule) 
 	}
 	return ruleIds
 }
+
+func setFwRuleIdsInSchemaInCaseOfUpdate(d *schema.ResourceData) error {
+	if _, ok := d.GetOk("firewallrule_ids"); !ok {
+		if fwRuleItf, ok := d.GetOk("firewallrule_id"); ok {
+			firewallRule := fwRuleItf.(string)
+			var firewallRuleIds []string
+			firewallRuleIds = append(firewallRuleIds, firewallRule)
+			if err := d.Set("firewallrule_ids", firewallRuleIds); err != nil {
+				return utils.GenerateSetError("server", "firewallrule_ids", err)
+			}
+		}
+	}
+	return nil
+}
