@@ -188,6 +188,7 @@ func (fs *FirewallService) GetModifiedFirewallRulesFromSchema(ctx context.Contex
 				var firewall *ionoscloud.FirewallRule
 				if id, ok := onlyNew[idx].(map[string]interface{})["id"]; ok && id != "" {
 					//do not send protocol, it's an update
+					*fwRule.Properties = SetNullableFields(*fwRule.Properties)
 					fwRule.Properties.Protocol = nil
 					firewall, _, err = fs.updateFirewallRule(ctx, dcId, serverId, nicId, id.(string), fwRule)
 					if err != nil {
@@ -207,6 +208,28 @@ func (fs *FirewallService) GetModifiedFirewallRulesFromSchema(ctx context.Contex
 		}
 	}
 	return firewallRules, firewallRuleIds, nil
+}
+
+func SetNullableFields(prop ionoscloud.FirewallruleProperties) ionoscloud.FirewallruleProperties {
+	if prop.SourceIp == nil {
+		prop.SetSourceIpNil()
+	}
+	if prop.SourceMac == nil {
+		prop.SetSourceMacNil()
+	}
+	if prop.IpVersion == nil {
+		prop.SetIpVersionNil()
+	}
+	if prop.TargetIp == nil {
+		prop.SetTargetIpNil()
+	}
+	if prop.IcmpCode == nil {
+		prop.SetIcmpCodeNil()
+	}
+	if prop.IcmpType == nil {
+		prop.SetIcmpTypeNil()
+	}
+	return prop
 }
 
 func (fs *FirewallService) AddToMapIfRuleExists(ctx context.Context, datacenterId, serverId, nicId, ruleId string) (map[string]interface{}, error) {
