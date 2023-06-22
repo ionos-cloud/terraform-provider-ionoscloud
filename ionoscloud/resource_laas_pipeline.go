@@ -43,6 +43,7 @@ func resourceLaaSPipeline() *schema.Resource {
 						"protocol": {
 							Type:         schema.TypeString,
 							Required:     true,
+							Description:  "Protocol to use as intake. Possible values are: http, tcp.",
 							ValidateFunc: validation.StringInSlice([]string{"http", "tcp"}, false),
 						},
 						"public": {
@@ -50,8 +51,9 @@ func resourceLaaSPipeline() *schema.Resource {
 							Computed: true,
 						},
 						"destinations": {
-							Type:     schema.TypeSet,
-							Computed: true,
+							Type:        schema.TypeSet,
+							Computed:    true,
+							Description: "The internal output stream to send logs to. Possible values are: loki.",
 							Elem: &schema.Resource{
 								Schema: map[string]*schema.Schema{
 									"type": {
@@ -80,7 +82,10 @@ func pipelineCreate(ctx context.Context, d *schema.ResourceData, meta interface{
 	if err != nil {
 		return diag.FromErr(fmt.Errorf("an error occured while waiting for the pipeline with ID: %s to become available: %w", *pipelineResponse.Id, err))
 	}
-	return pipelineRead(ctx, d, meta)
+	if err := client.SetPipelineData(d, pipelineResponse); err != nil {
+		return diag.FromErr(err)
+	}
+	return nil
 }
 
 func pipelineRead(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
@@ -130,7 +135,7 @@ func pipelineUpdate(ctx context.Context, d *schema.ResourceData, meta interface{
 	client := meta.(SdkBundle).LaaSClient
 	pipelineId := d.Id()
 
-	_, _, err := client.UpdatePipeline(ctx, pipelineId, d)
+	pipelineResponse, _, err := client.UpdatePipeline(ctx, pipelineId, d)
 	if err != nil {
 		return diag.FromErr(fmt.Errorf("an error occured while updating the LaaS pipeline with ID: %s, error: %w", pipelineId, err))
 	}
@@ -138,7 +143,10 @@ func pipelineUpdate(ctx context.Context, d *schema.ResourceData, meta interface{
 	if err != nil {
 		return diag.FromErr(fmt.Errorf("an error occured while waiting for the LaaS pipeline with ID: %s to become available: %w", pipelineId, err))
 	}
-	return pipelineRead(ctx, d, meta)
+	if err := client.SetPipelineData(d, pipelineResponse); err != nil {
+		return diag.FromErr(err)
+	}
+	return nil
 }
 
 func pipelineImport(ctx context.Context, d *schema.ResourceData, meta interface{}) ([]*schema.ResourceData, error) {

@@ -29,7 +29,7 @@ func (c *Client) IsPipelineAvailable(ctx context.Context, d *schema.ResourceData
 		return false, fmt.Errorf("expected metadata, got empty for pipeline with ID: %s", pipelineId)
 	}
 	log.Printf("[DEBUG] pipeline status: %s", *pipeline.Metadata.Status)
-	return strings.EqualFold(*pipeline.Metadata.Status, "AVAILABLE"), nil
+	return strings.EqualFold(*pipeline.Metadata.Status, utils.Available), nil
 }
 
 func (c *Client) UpdatePipeline(ctx context.Context, id string, d *schema.ResourceData) (laas.Pipeline, utils.ApiResponseInfo, error) {
@@ -122,9 +122,7 @@ func setPipelinePatchRequest(d *schema.ResourceData) *laas.PatchRequest {
 }
 
 func (c *Client) SetPipelineData(d *schema.ResourceData, pipeline laas.Pipeline) error {
-	if pipeline.Id != nil {
-		d.SetId(*pipeline.Id)
-	}
+	d.SetId(*pipeline.Id)
 
 	if pipeline.Properties == nil {
 		return fmt.Errorf("expected properties in the response for the LaaS pipeline with ID: %s, but received 'nil' instead", *pipeline.Id)
