@@ -120,6 +120,7 @@ func resourceServer() *schema.Resource {
 				Computed:      true,
 				ForceNew:      true,
 				Deprecated:    "Will be renamed to ssh_keys in the future, to allow users to set both the ssh key path or directly the ssh key",
+				Description:   "Immutable List of absolute or relative paths to files containing public SSH key that will be injected into IonosCloud provided Linux images. Does not support `~` expansion to homedir in the given path. Public SSH keys are set on the image as authorized keys for appropriate SSH login to the instance using the corresponding private key. This field may only be set in creation requests. When reading, it always returns null. SSH keys are only supported if a public Linux image is used for the volume creation. This property is immutable.",
 			},
 			"ssh_keys": {
 				Type:          schema.TypeList,
@@ -127,6 +128,22 @@ func resourceServer() *schema.Resource {
 				ConflictsWith: []string{"volume.0.ssh_key_path", "volume.0.ssh_keys", "ssh_key_path"},
 				Optional:      true,
 				Description:   "Public SSH keys are set on the image as authorized keys for appropriate SSH login to the instance using the corresponding private key. This field may only be set in creation requests. When reading, it always returns null. SSH keys are only supported if a public Linux image is used for the volume creation.",
+				DiffSuppressFunc: func(k, old, new string, d *schema.ResourceData) bool {
+					if k == "ssh_keys.#" {
+						if d.Get("volume.0.ssh_keys.#") == new {
+							return true
+						}
+					}
+
+					sshKeys := d.Get("volume.0.ssh_keys").([]interface{})
+					oldSshKeys := d.Get("ssh_keys").([]interface{})
+
+					if len(utils.DiffSlice(convertSlice(sshKeys), convertSlice(oldSshKeys))) == 0 {
+						return true
+					}
+
+					return false
+				},
 			},
 			"volume": {
 				Type:     schema.TypeList,

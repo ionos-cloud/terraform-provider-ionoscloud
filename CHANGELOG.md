@@ -7,9 +7,11 @@
 ## 6.4.1
 ### Fixes
 - Fix `inline_volume_ids` field upgrade for `ionoscloud_server`
+- Fix `ssh_keys` suppress diff on upgrade for `ionoscloud_server` when having `volume.0.ssh_keys`
 
 ### Docs
 - Fix `ionoscloud_image` examples
+- Improve docs for `ssh_keys` and `ssh_key_path`
 
 ## 6.4.0
 ### Enhancement:
