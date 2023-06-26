@@ -5,19 +5,23 @@ import (
 	"errors"
 	"fmt"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 	ionoscloud "github.com/ionos-cloud/sdk-go/v6"
 	"log"
+	"regexp"
 )
 
 var labelResource = &schema.Resource{
 	Schema: map[string]*schema.Schema{
 		"key": {
-			Type:     schema.TypeString,
-			Required: true,
+			Type:             schema.TypeString,
+			Required:         true,
+			ValidateDiagFunc: validation.ToDiagFunc(validation.StringMatch(regexp.MustCompile("^[a-z0-9]*$"), "Invalid label key, please provide only lower case alphabets (a-z), or numeric (0-9) characters")),
 		},
 		"value": {
-			Type:     schema.TypeString,
-			Required: true,
+			Type:             schema.TypeString,
+			ValidateDiagFunc: validation.ToDiagFunc(validation.StringMatch(regexp.MustCompile("^[a-z0-9]*$"), "Invalid label value, please provide only lower case alphabets (a-z), or numeric (0-9) characters")),
+			Required:         true,
 		},
 	},
 }

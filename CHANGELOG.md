@@ -7,6 +7,7 @@
 ## 6.4.1
 ### Fixes
 - Fix `inline_volume_ids` field upgrade for `ionoscloud_server`
+- Add validation to `label` `key` and `value` fields for `ionoscloud_server` resource
 
 ### Docs
 - Fix `ionoscloud_image` examples
