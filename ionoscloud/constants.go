@@ -274,11 +274,11 @@ const (
 	RandomPassword    = "random_password"
 )
 
-// LaaS Constants
+// Logging Service Constants
 
 const (
-	LaaSPipelineDataSource = "ionoscloud_laas_pipeline"
-	LaaSPipelineResource   = "ionoscloud_laas_pipeline"
+	LoggingPipelineDataSource = "ionoscloud_logging_pipeline"
+	LoggingPipelineResource   = "ionoscloud_logging_pipeline"
 )
 
 const ServersDataSource = "ionoscloud_servers"
@@ -298,5 +298,5 @@ const (
 	containerRegistryClient
 	dataplatformClient
 	dnsClient
-	laasClient
+	loggingClient
 )
