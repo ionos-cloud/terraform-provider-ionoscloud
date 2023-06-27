@@ -345,8 +345,9 @@ func resourceServer() *schema.Resource {
 							Computed: true,
 						},
 						"firewall": {
-							Type:     schema.TypeList,
-							Optional: true,
+							Description: "Firewall rules created in the server resource. The rules can also be created as separate resources outside the server resource",
+							Type:        schema.TypeList,
+							Optional:    true,
 							Elem: &schema.Resource{
 								Schema: map[string]*schema.Schema{
 									"id": {

@@ -1,3 +1,7 @@
+## 6.4.2
+- Make `nic` list in `ionoscloud_server` resource optional
+- Make `firewall` list in `ionoscloud_server` resource optional and allow multiple inline firewall rules in the list
+
 ## 6.4.1
 ### Fixes
 - Fix `inline_volume_ids` field upgrade for `ionoscloud_server`
@@ -28,7 +32,6 @@
 - Update code to work with new mongo version
 - Ignore downgrades of `k8s_version` patch level.
 - Allow upgrades of `k8s_version` patch level.
-- Make `nic` list in `ionoscloud_server` resource optional
 
 ## 6.3.6
 ### Feature
