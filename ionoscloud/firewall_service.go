@@ -184,8 +184,8 @@ func (fs *FirewallService) GetModifiedFirewallRulesFromSchema(ctx context.Contex
 			fwRule := ionoscloud.FirewallRule{
 				Properties: &prop,
 			}
+			var firewall *ionoscloud.FirewallRule
 			if nicId != "" {
-				var firewall *ionoscloud.FirewallRule
 				if id, ok := onlyNew[idx].(map[string]interface{})["id"]; ok && id != "" {
 					//do not send protocol, it's an update
 					*fwRule.Properties = SetNullableFields(*fwRule.Properties)
@@ -201,10 +201,8 @@ func (fs *FirewallService) GetModifiedFirewallRulesFromSchema(ctx context.Contex
 					}
 					firewallRuleIds = append(firewallRuleIds, *firewall.Id)
 				}
-				firewallRules = append(firewallRules, *firewall)
-			} else { //if the nic does not exist, just fw add prop to the list to be created below with the nic
-				firewallRules = append(firewallRules, fwRule)
 			}
+			firewallRules = append(firewallRules, fwRule)
 		}
 	}
 	return firewallRules, firewallRuleIds, nil
