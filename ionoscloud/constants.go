@@ -277,8 +277,10 @@ const (
 // Logging Service Constants
 
 const (
-	LoggingPipelineDataSource = "ionoscloud_logging_pipeline"
-	LoggingPipelineResource   = "ionoscloud_logging_pipeline"
+	LoggingPipelineDataSource         = "ionoscloud_logging_pipeline"
+	LoggingPipelineResource           = "ionoscloud_logging_pipeline"
+	LoggingPipelineTestResourceName   = "test_logging_pipeline"
+	LoggingPipelineTestDataSourceName = "test_logging_pipeline_data_source"
 )
 
 const ServersDataSource = "ionoscloud_servers"
