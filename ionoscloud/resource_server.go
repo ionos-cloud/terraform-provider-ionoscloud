@@ -644,7 +644,7 @@ func resourceServerCreate(ctx context.Context, d *schema.ResourceData, meta inte
 				}
 			}
 			if len(orderedRuleIds) > 0 {
-				if err := d.Set("firewallrule_ids", orderedRuleIds); err != nil {
+				if err := setFirewallRulesInSchema(d, orderedRuleIds); err != nil {
 					diags := diag.FromErr(err)
 					return diags
 				}
@@ -657,21 +657,21 @@ func resourceServerCreate(ctx context.Context, d *schema.ResourceData, meta inte
 					return diags
 				}
 			}
-			firstNicProps := foundFirstNic.Properties
-			if firstNicProps != nil {
-				firstNicIps := firstNicProps.Ips
+			sentFirstNicProps := (*serverReq.Entities.Nics.Items)[0].Properties
+			if sentFirstNicProps != nil {
+				firstNicIps := sentFirstNicProps.Ips
 				if firstNicIps != nil &&
 					len(*firstNicIps) > 0 {
 					log.Printf("[DEBUG] set primary_ip to %s", (*firstNicIps)[0])
 					if err := d.Set("primary_ip", (*firstNicIps)[0]); err != nil {
-						diags := diag.FromErr(fmt.Errorf("error while setting primary ip %s: %w", d.Id(), err))
+						diags := diag.FromErr(utils.GenerateSetError("ionoscloud_server", "primary_ip", err))
 						return diags
 					}
 				}
 
 				volumeItems := serverReq.Entities.Volumes.Items
 				firstVolumeItem := (*volumeItems)[0]
-				if firstNicProps.Ips != nil &&
+				if sentFirstNicProps.Ips != nil &&
 					len(*firstNicIps) > 0 &&
 					volumeItems != nil &&
 					len(*volumeItems) > 0 &&
@@ -1106,6 +1106,7 @@ func resourceServerDelete(ctx context.Context, d *schema.ResourceData, meta inte
 	return nil
 }
 
+// resourceServerImport can be either ionoscloud_server.myserver {datacenter uuid}/{server uuid} or  ionoscloud_server.myserver {datacenter uuid}/{server uuid}/{primary nic id}/{firewall rule id}
 func resourceServerImport(ctx context.Context, d *schema.ResourceData, meta interface{}) ([]*schema.ResourceData, error) {
 	parts := strings.Split(d.Id(), "/")
 

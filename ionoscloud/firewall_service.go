@@ -109,18 +109,17 @@ func SetFirewallProperties(firewall ionoscloud.FirewallRule) map[string]interfac
 	return fw
 }
 
-// GetChangesInFirewallRuleProperties - receives old new values from schema as interface and returns firewall properties
-// the schema testAccDataSourceContainerRegistryTokenMatchNameAndLocation contain duplicates between the old and new values
+// GetChangesInFirewallRuleProperties - receives old and new values as slice of interfaces from schema, decodes and returns firewall properties
 func GetChangesInFirewallRuleProperties(oldValues, newValues []interface{}) ([]ionoscloud.FirewallruleProperties, []ionoscloud.FirewallruleProperties, error) {
 	oldFirewallProperties := make([]ionoscloud.FirewallruleProperties, len(oldValues))
 	newFirewallProperties := make([]ionoscloud.FirewallruleProperties, len(newValues))
 	err := utils.DecodeInterfaceToStruct(newValues, newFirewallProperties)
 	if err != nil {
-		return nil, nil, fmt.Errorf("could not decode from %s to new values of firewall rules %w", newValues, err)
+		return nil, nil, fmt.Errorf("could not decode from %+v to new values of firewall rules %w", newValues, err)
 	}
 	err = utils.DecodeInterfaceToStruct(oldValues, oldFirewallProperties)
 	if err != nil {
-		return nil, nil, fmt.Errorf("could not decode from %s to values of firewall rules %w", oldValues, err)
+		return nil, nil, fmt.Errorf("could not decode from %+v to values of firewall rules %w", oldValues, err)
 	}
 	return oldFirewallProperties, newFirewallProperties, nil
 }
