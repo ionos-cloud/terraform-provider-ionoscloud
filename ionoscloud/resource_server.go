@@ -914,6 +914,10 @@ func resourceServerUpdate(ctx context.Context, d *schema.ResourceData, meta inte
 				diags := diag.FromErr(err)
 				return diags
 			}
+			if err := d.Set("primary_ip", ""); err != nil {
+				diags := diag.FromErr(err)
+				return diags
+			}
 		} else {
 			updateNic := true
 			primaryNic := d.Get("primary_nic").(string)
@@ -1423,56 +1427,56 @@ func setResourceServerData(ctx context.Context, client *ionoscloud.APIClient, d 
 		}
 	}
 
-	_, primaryNicOk := d.GetOk("primary_nic")
 	// take nic and firewall from schema if set is used in resource read, else take it from entities
 	var nicId string
-	if primaryNicOk {
-		nicId = d.Get("primary_nic").(string)
-	}
-	nic, apiResponse, err := client.NetworkInterfacesApi.DatacentersServersNicsFindById(ctx, datacenterId, d.Id(), nicId).Depth(2).Execute()
-	logApiRequestTime(apiResponse)
-	if err != nil {
-		return err
-	}
 	firewallRuleIds := d.Get("firewallrule_ids").([]interface{})
-	var nicEntry map[string]interface{}
-	var fwRulesEntries []map[string]interface{}
 
-	if nic.Properties != nil {
-		nicEntry = SetNetworkProperties(nic)
-		nicEntry["id"] = *nic.Id
-		fs := FirewallService{client: client, d: d}
+	if nicIntf, primaryNicOk := d.GetOk("primary_nic"); primaryNicOk {
+		nicId = nicIntf.(string)
 
-		for _, id := range firewallRuleIds {
-			firewallEntry, err := fs.AddToMapIfRuleExists(ctx, datacenterId, d.Id(), nicId, id.(string))
-			if err != nil {
-				return err
-			}
-			if firewallEntry != nil && len(firewallEntry) != 0 {
-				fwRulesEntries = append(fwRulesEntries, firewallEntry)
+		nic, apiResponse, err := client.NetworkInterfacesApi.DatacentersServersNicsFindById(ctx, datacenterId, d.Id(), nicId).Depth(2).Execute()
+		logApiRequestTime(apiResponse)
+		if err != nil {
+			return err
+		}
+		var nicEntry map[string]interface{}
+		var fwRulesEntries []map[string]interface{}
+
+		if nic.Properties != nil {
+			nicEntry = SetNetworkProperties(nic)
+			nicEntry["id"] = *nic.Id
+			fs := FirewallService{client: client, d: d}
+
+			for _, id := range firewallRuleIds {
+				firewallEntry, err := fs.AddToMapIfRuleExists(ctx, datacenterId, d.Id(), nicId, id.(string))
+				if err != nil {
+					return err
+				}
+				if firewallEntry != nil && len(firewallEntry) != 0 {
+					fwRulesEntries = append(fwRulesEntries, firewallEntry)
+				}
 			}
 		}
+		nics := []map[string]interface{}{}
+		if fwRulesEntries != nil {
+			nicEntry["firewall"] = fwRulesEntries
+		}
+		if len(nicEntry) > 0 {
+			nics = []map[string]interface{}{nicEntry}
+		}
+		if err := d.Set("nic", nics); err != nil {
+			return fmt.Errorf("error settings nics %w", err)
+		}
 	}
-	nics := []map[string]interface{}{}
-	if fwRulesEntries != nil {
-		nicEntry["firewall"] = fwRulesEntries
-	}
-	if len(nicEntry) > 0 {
-		nics = []map[string]interface{}{nicEntry}
-	}
-	if err := d.Set("nic", nics); err != nil {
-		return fmt.Errorf("error settings nics %w", err)
-	}
-
 	if len(firewallRuleIds) == 0 {
 		if err := d.Set("firewallrule_id", ""); err != nil {
 			return err
 		}
-		if err := d.Set("firewallrule_ids", firewallRuleIds); err != nil {
-			return err
-		}
 	}
-	// Labels logic
+	if err := d.Set("firewallrule_ids", firewallRuleIds); err != nil {
+		return err
+	}
+
 	ls := LabelsService{ctx: ctx, client: client}
 	labels, err := ls.datacentersServersLabelsGet(datacenterId, d.Id(), false)
 	if err != nil {
