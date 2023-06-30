@@ -17,7 +17,7 @@
 ## API 
 
 * Compute Engine
-  * [Resources](./resources-header.md)
+  * Resources
     * [Datacenter](../docs/resources/datacenter.md)
     * [Firewall Rule](../docs/resources/firewall.md)
     * [IpBlock](../docs/resources/ipblock.md)
@@ -29,7 +29,7 @@
     * [Server](../docs/resources/server.md)
     * [Snapshot](../docs/resources/snapshot.md)
     * [Volume](../docs/resources/volume.md)
-  * [Data Sources](./data-sources-header.md)
+  * Data Sources
     * [Datacenter](../docs/data-sources/datacenter.md)
     * [Firewall Rule](../docs/data-sources/firewall.md)
     * [Image](../docs/data-sources/image.md)
@@ -45,42 +45,42 @@
     * [Volume](../docs/data-sources/volume.md)
 
 * Managed Kubernetes
-  * [Resources](./resources-header.md)
+  * Resources
     * [Kubernetes Cluster](../docs/resources/k8s_cluster.md)
     * [Kubernetes NodePool](../docs/resources/k8s_node_pool.md)
-  * [Data Sources](./data-sources-header.md)
+  * Data Sources
     * [Kubernetes Cluster](../docs/data-sources/k8s_cluster.md)
     * [Kubernetes NodePool](../docs/data-sources/k8s_node_pool.md)
 
 * NAT Gateway
-  * [Resources](./resources-header.md)
+  * Resources
     * [NAT Gateway](../docs/resources/natgateway.md)
     * [NAT Gateway Rule](../docs/resources/natgateway_rule.md)
-  * [Data Sources](./data-sources-header.md)
+  * Data Sources
     * [NAT Gateway](../docs/data-sources/natgateway.md)
     * [NAT Gateway Rule](../docs/data-sources/natgateway_rule.md)
 
 * Network Load Balancer
-  * [Resources](./resources-header.md)
+  * Resources
     * [Network Load Balancer](../docs/resources/networkloadbalancer.md)
     * [Network Load Balancer Forwarding Rule](../docs/resources/networkloadbalancer_forwardingrule.md)
-  * [Data Sources](./data-sources-header.md)
+  * Data Sources
     * [Network Load Balancer](../docs/data-sources/networkloadbalancer.md)
     * [Network Load Balancer Forwarding Rule](../docs/data-sources/networkloadbalancer_forwardingrule.md)
 
 * Managed Backup
-  * [Resources](./resources-header.md)
+  * Resources
     * [Backup Unit](../docs/resources/backup_unit.md)
-  * [Data Sources](./data-sources-header.md)
+  * Data Sources
     * [Backup Unit](../docs/data-sources/backup_unit.md)
 
 * User Management
-  * [Resources](./resources-header.md)
+  * Resources
     * [Group](../docs/resources/group.md)
     * [S3 Key](../docs/resources/s3_key.md)
     * [Share](../docs/resources/share.md)
     * [User](../docs/resources/user.md)
-  * [Data Sources](./data-sources-header.md)
+  * Data Sources
     * [Group](../docs/data-sources/group.md)
     * [Resource](../docs/data-sources/resource.md)
     * [S3 Key](../docs/data-sources/s3_key.md)
@@ -88,18 +88,18 @@
     * [User](../docs/data-sources/user.md)
 
 * Database as a Service - Postgres
-  * [Resources](./resources-header.md)
+  * Resources
     * [DBaaS Postgres Cluster](../docs/resources/dbaas_pgsql_cluster.md)
-  * [Data Sources](./data-sources-header.md)
+  * Data Sources
     * [DBaaS Postgres Backup](../docs/data-sources/dbaas_pgsql_backups.md)
     * [DBaaS Postgres Cluster](../docs/data-sources/dbaas_pgsql_cluster.md)
     * [DBaaS Postgres Versions](../docs/data-sources/dbaas_pgsql_versions.md)
 
 * Database as a Service - MongoDB
-  * [Resources](./resources-header.md)
+  * Resources
     * [DBaaS MongoDB Cluster](../docs/resources/dbaas_mongo_cluster.md)
     * [DBaaS MongoDB User](../docs/resources/dbaas_mongo_user.md)
-  * [Data Sources](./data-sources-header.md)
+  * Data Sources
     * [DBaaS MongoDB Cluster](../docs/data-sources/dbaas_mongo_cluster.md)
     * [DBaaS MongoDB Template](../docs/data-sources/dbaas_mongo_template.md)
     * [DBaaS MongoDB User](../docs/data-sources/dbaas_mongo_user.md)
@@ -115,19 +115,19 @@
     * [Target Group](../docs/data-sources/target_group.md)
 
 * Container Registry
-  * [Resources](./resources-header.md)
+  * Resources
     * [Container Registry](../docs/resources/container_registry.md)
     * [Container Registry Token](../docs/resources/container_registry_token.md)
-  * [Data Sources](./data-sources-header.md)
+  * Data Sources
     * [Container Registry](../docs/data-sources/container_registry.md)
     * [Container Registry Token](../docs/data-sources/container_registry_token.md)
     * [Container Registry Locations](../docs/data-sources/container_registry_locations.md)
 
 * Data Platform
-  * [Resources](./resources-header.md)
+  * Resources
     * [Data Platform Cluster](../docs/resources/dataplatform_cluster.md)
     * [Data Platform Node Pool](../docs/resources/dataplatform_node_pool.md)
-  * [Data Sources](./data-sources-header.md)
+  * Data Sources
     * [Data Platform Cluster](../docs/data-sources/dataplatform_cluster.md)
     * [Data Platform Node Pool](../docs/data-sources/dataplatform_node_pool.md)
     * [Data Platform Node Pools](../docs/data-sources/dataplatform_node_pools.md)
@@ -135,9 +135,9 @@
 
 
 * Cloud DNS
-  * [Resources](./resources-header.md)
+  * Resources
     * [DNS Record](../docs/resources/dns_record.md)
     * [DNS Zone](../docs/resources/dns_zone.md)
-  * [Data Sources](./data-sources-header.md)
+  * Data Sources
     * [DNS Record](../docs/data-sources/dns_record.md)
     * [DNS Zone](../docs/data-sources/dns_zone.md)
