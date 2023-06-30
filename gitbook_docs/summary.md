@@ -17,7 +17,7 @@
 ## API 
 
 * Compute Engine
-  * [Resources](compute-engine/resources/README.md)
+  * [Resources](./resources-header.md)
     * [Datacenter](../docs/resources/datacenter.md)
     * [Firewall Rule](../docs/resources/firewall.md)
     * [IpBlock](../docs/resources/ipblock.md)
@@ -25,11 +25,11 @@
     * [Lan](../docs/resources/lan.md)
     * [LoadBalancer](../docs/resources/loadbalancer.md)
     * [Nic](../docs/resources/nic.md)
-    * [Private Cross Connect](../docs/resources/private\_crossconnect.md)
+    * [Private Cross Connect](../docs/resources/private_crossconnect.md)
     * [Server](../docs/resources/server.md)
     * [Snapshot](../docs/resources/snapshot.md)
     * [Volume](../docs/resources/volume.md)
-  * [Data Sources](compute-engine/data-sources/README.md)
+  * [Data Sources](./data-sources-header.md)
     * [Datacenter](../docs/data-sources/datacenter.md)
     * [Firewall Rule](../docs/data-sources/firewall.md)
     * [Image](../docs/data-sources/image.md)
@@ -38,62 +38,71 @@
     * [Lan](../docs/data-sources/lan.md)
     * [Location](../docs/data-sources/location.md)
     * [Nic](../docs/data-sources/nic.md)
-    * [Private Cross Connect](../docs/data-sources/private\_crossconnect.md)
+    * [Private Cross Connect](../docs/data-sources/private_crossconnect.md)
     * [Server](../docs/data-sources/server.md)
     * [Snapshot](../docs/data-sources/snapshot.md)
     * [Template](../docs/data-sources/template.md)
     * [Volume](../docs/data-sources/volume.md)
 
 * Managed Kubernetes
-  * [Resources](managed-kubernetes/resources/README.md)
-    * [Kubernetes Cluster](../docs/resources/k8s\_cluster.md)
-    * [Kubernetes NodePool](../docs/resources/k8s\_node\_pool.md)
-  * [Data Sources](managed-kubernetes/data-sources/README.md)
-    * [Kubernetes Cluster](../docs/data-sources/k8s\_cluster.md)
-    * [Kubernetes NodePool](../docs/data-sources/k8s\_node\_pool.md)
+  * [Resources](./resources-header.md)
+    * [Kubernetes Cluster](../docs/resources/k8s_cluster.md)
+    * [Kubernetes NodePool](../docs/resources/k8s_node_pool.md)
+  * [Data Sources](./data-sources-header.md)
+    * [Kubernetes Cluster](../docs/data-sources/k8s_cluster.md)
+    * [Kubernetes NodePool](../docs/data-sources/k8s_node_pool.md)
 
 * NAT Gateway
-  * [Resources](nat-gateway/resources/README.md)
+  * [Resources](./resources-header.md)
     * [NAT Gateway](../docs/resources/natgateway.md)
-    * [NAT Gateway Rule](../docs/resources/natgateway\_rule.md)
-  * [Data Sources](nat-gateway/data-sources/README.md)
+    * [NAT Gateway Rule](../docs/resources/natgateway_rule.md)
+  * [Data Sources](./data-sources-header.md)
     * [NAT Gateway](../docs/data-sources/natgateway.md)
-    * [NAT Gateway Rule](../docs/data-sources/natgateway\_rule.md)
+    * [NAT Gateway Rule](../docs/data-sources/natgateway_rule.md)
 
 * Network Load Balancer
-  * [Resources](network-load-balancer/resources/README.md)
+  * [Resources](./resources-header.md)
     * [Network Load Balancer](../docs/resources/networkloadbalancer.md)
-    * [Network Load Balancer Forwarding Rule](../docs/resources/networkloadbalancer\_forwardingrule.md)
-  * [Data Sources](network-load-balancer/data-sources/README.md)
+    * [Network Load Balancer Forwarding Rule](../docs/resources/networkloadbalancer_forwardingrule.md)
+  * [Data Sources](./data-sources-header.md)
     * [Network Load Balancer](../docs/data-sources/networkloadbalancer.md)
-    * [Network Load Balancer Forwarding Rule](../docs/data-sources/networkloadbalancer\_forwardingrule.md)
+    * [Network Load Balancer Forwarding Rule](../docs/data-sources/networkloadbalancer_forwardingrule.md)
 
 * Managed Backup
-  * [Resources](managed-backup/resources/README.md)
-    * [Backup Unit](../docs/resources/backup\_unit.md)
-  * [Data Sources](managed-backup/data-sources/README.md)
-    * [Backup Unit](../docs/data-sources/backup\_unit.md)
+  * [Resources](./resources-header.md)
+    * [Backup Unit](../docs/resources/backup_unit.md)
+  * [Data Sources](./data-sources-header.md)
+    * [Backup Unit](../docs/data-sources/backup_unit.md)
 
 * User Management
-  * [Resources](user-management/resources/README.md)
+  * [Resources](./resources-header.md)
     * [Group](../docs/resources/group.md)
-    * [S3 Key](../docs/resources/s3\_key.md)
+    * [S3 Key](../docs/resources/s3_key.md)
     * [Share](../docs/resources/share.md)
     * [User](../docs/resources/user.md)
-  * [Data Sources](user-management/data-sources/README.md)
+  * [Data Sources](./data-sources-header.md)
     * [Group](../docs/data-sources/group.md)
     * [Resource](../docs/data-sources/resource.md)
-    * [S3 Key](../docs/data-sources/s3\_key.md)
+    * [S3 Key](../docs/data-sources/s3_key.md)
     * [Share](../docs/data-sources/share.md)
     * [User](../docs/data-sources/user.md)
 
 * Database as a Service - Postgres
-  * [Resources](database-as-a-service-postgres/resources/README.md)
-    * [DBaaS Postgres Cluster](../docs/resources/dbaas\_pgsql\_cluster.md)
-  * [Data Sources](database-as-a-service-postgres/data-sources/README.md)
-    * [DBaaS Postgres Backup](../docs/data-sources/dbaas\_pgsql\_backups.md)
-    * [DBaaS Postgres Cluster](../docs/data-sources/dbaas\_pgsql\_cluster.md)
-    * [DBaaS Postgres Versions](../docs/data-sources/dbaas\_pgsql\_versions.md)
+  * [Resources](./resources-header.md)
+    * [DBaaS Postgres Cluster](../docs/resources/dbaas_pgsql_cluster.md)
+  * [Data Sources](./data-sources-header.md)
+    * [DBaaS Postgres Backup](../docs/data-sources/dbaas_pgsql_backups.md)
+    * [DBaaS Postgres Cluster](../docs/data-sources/dbaas_pgsql_cluster.md)
+    * [DBaaS Postgres Versions](../docs/data-sources/dbaas_pgsql_versions.md)
+
+* Database as a Service - MongoDB
+  * [Resources](./resources-header.md)
+    * [DBaaS MongoDB Cluster](../docs/resources/dbaas_mongo_cluster.md)
+    * [DBaaS MongoDB User](../docs/resources/dbaas_mongo_user.md)
+  * [Data Sources](./data-sources-header.md)
+    * [DBaaS MongoDB Cluster](../docs/data-sources/dbaas_mongo_cluster.md)
+    * [DBaaS MongoDB Template](../docs/data-sources/dbaas_mongo_template.md)
+    * [DBaaS MongoDB User](../docs/data-sources/dbaas_mongo_user.md)
 
 * Application Load Balancer
   * Resources
@@ -104,3 +113,31 @@
     * [Application Load Balancer](../docs/data-sources/application_loadbalancer.md)
     * [Application Load Balancer Forwarding Rule](../docs/data-sources/application_loadbalancer_forwardingrule.md)
     * [Target Group](../docs/data-sources/target_group.md)
+
+* Container Registry
+  * [Resources](./resources-header.md)
+    * [Container Registry](../docs/resources/container_registry.md)
+    * [Container Registry Token](../docs/resources/container_registry_token.md)
+  * [Data Sources](./data-sources-header.md)
+    * [Container Registry](../docs/data-sources/container_registry.md)
+    * [Container Registry Token](../docs/data-sources/container_registry_token.md)
+    * [Container Registry Locations](../docs/data-sources/container_registry_locations.md)
+
+* Data Platform
+  * [Resources](./resources-header.md)
+    * [Data Platform Cluster](../docs/resources/dataplatform_cluster.md)
+    * [Data Platform Node Pool](../docs/resources/dataplatform_node_pool.md)
+  * [Data Sources](./data-sources-header.md)
+    * [Data Platform Cluster](../docs/data-sources/dataplatform_cluster.md)
+    * [Data Platform Node Pool](../docs/data-sources/dataplatform_node_pool.md)
+    * [Data Platform Node Pools](../docs/data-sources/dataplatform_node_pools.md)
+    * [Data Platform Versions](../docs/data-sources/dataplatform_versions.md)
+
+
+* Cloud DNS
+  * [Resources](./resources-header.md)
+    * [DNS Record](../docs/resources/dns_record.md)
+    * [DNS Zone](../docs/resources/dns_zone.md)
+  * [Data Sources](./data-sources-header.md)
+    * [DNS Record](../docs/data-sources/dns_record.md)
+    * [DNS Zone](../docs/data-sources/dns_zone.md)
