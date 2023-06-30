@@ -73,7 +73,7 @@ func setPipelinePostRequest(d *schema.ResourceData) *logging.CreateRequest {
 
 	var logs []logging.CreateRequestPipeline
 	if logsValue, ok := d.GetOk("log"); ok {
-		for _, logData := range logsValue.(*schema.Set).List() {
+		for _, logData := range logsValue.([]interface{}) {
 			if log, ok := logData.(map[string]interface{}); ok {
 				// Populate the log entry.
 				logSource := log["source"].(string)
@@ -86,7 +86,7 @@ func setPipelinePostRequest(d *schema.ResourceData) *logging.CreateRequest {
 
 				// Logic for destinations.
 				var destinations []logging.Destination
-				for _, destinationData := range log["destinations"].(*schema.Set).List() {
+				for _, destinationData := range log["destinations"].([]interface{}) {
 					if destination, ok := destinationData.(map[string]interface{}); ok {
 						destinationType := destination["type"].(string)
 						retentionInDays := int32(destination["retention_in_days"].(int))
@@ -117,7 +117,7 @@ func setPipelinePatchRequest(d *schema.ResourceData) *logging.PatchRequest {
 
 	var logs []logging.PatchRequestPipeline
 	if logsValue, ok := d.GetOk("log"); ok {
-		for _, logData := range logsValue.(*schema.Set).List() {
+		for _, logData := range logsValue.([]interface{}) {
 			if log, ok := logData.(map[string]interface{}); ok {
 				// Populate the log entry.
 				logSource := log["source"].(string)
@@ -130,7 +130,7 @@ func setPipelinePatchRequest(d *schema.ResourceData) *logging.PatchRequest {
 
 				// Logic for destinations.
 				var destinations []logging.Destination
-				for _, destinationData := range log["destinations"].(*schema.Set).List() {
+				for _, destinationData := range log["destinations"].([]interface{}) {
 					if destination, ok := destinationData.(map[string]interface{}); ok {
 						destinationType := destination["type"].(string)
 						retentionInDays := int32(destination["retention_in_days"].(int))

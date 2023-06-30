@@ -25,7 +25,7 @@ func resourceLoggingPipeline() *schema.Resource {
 				Required: true,
 			},
 			"log": {
-				Type:     schema.TypeSet,
+				Type:     schema.TypeList,
 				Required: true,
 				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{
@@ -51,7 +51,7 @@ func resourceLoggingPipeline() *schema.Resource {
 							Computed: true,
 						},
 						"destinations": {
-							Type:        schema.TypeSet,
+							Type:        schema.TypeList,
 							Optional:    true,
 							Computed:    true,
 							Description: "The internal output stream to send logs to. Possible values are: loki.",
