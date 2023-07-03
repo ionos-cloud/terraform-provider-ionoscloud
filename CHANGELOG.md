@@ -4,6 +4,10 @@
 `ssh_keys` is no longer computed.
 - Fix `ssh_keys` suppress diff on upgrade for `ionoscloud_server` when having `volume.0.ssh_keys`
 - Add validation to `label` `key` and `value` fields for `ionoscloud_server` resource
+- Fix gitbook references
+
+### Docs
+- Add new products to Gitbook docs
 
 ## 6.4.1
 ### Fixes
