@@ -1,3 +1,8 @@
+## 6.4.3
+
+### Documentation
+- improve example for `ionoscloud_private_crossconnect`
+
 ## 6.4.2
 ### Fixes
 - Fix `ssh_keys` field upgrade `ionoscloud_server` from `6.3.3` to higher versions should not replace server. `ssh_keys` and `ssh_key_path` fields no longer forceNew. 
