@@ -573,7 +573,6 @@ func resourceServerCreate(ctx context.Context, d *schema.ResourceData, meta inte
 						}
 						for idx := range fwRulesProperties {
 							FwPropUnsetSetFieldIfNotSetInSchema(&fwRulesProperties[idx], fwRulesPath, d)
-							//tempProperty := fwRulesProperties[idx]
 							firewall := ionoscloud.FirewallRule{
 								Properties: &fwRulesProperties[idx],
 							}
@@ -1330,7 +1329,7 @@ func setResourceServerData(ctx context.Context, client *ionoscloud.APIClient, d 
 	}
 	// takes care of an upgrade from a version that does not have firewallrule_ids(pre 6.4.2)
 	// to one that has it(>=6.4.2)
-	if err := setFwRuleIdsInSchemaInCaseOfUpdate(d); err != nil {
+	if err := setFwRuleIdsInSchema(d); err != nil {
 		return err
 	}
 
