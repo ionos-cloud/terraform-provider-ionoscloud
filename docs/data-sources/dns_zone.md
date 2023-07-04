@@ -1,5 +1,5 @@
 ---
-subcategory: "DNS as a Service"
+subcategory: "Cloud DNS"
 layout: "ionoscloud"
 page_title: "IonosCloud : ionoscloud_dns_zone"
 sidebar_current: "docs-dns_zone"
@@ -9,7 +9,7 @@ description: |-
 
 # ionoscloud_dns_zone
 
-⚠️ **Note:** DNS is currently in the Early Access (EA) phase.
+⚠️ **Note:** Cloud DNS is currently in the Early Access (EA) phase.
 We recommend keeping usage and testing to non-production critical applications.
 Please contact your sales representative or support for more information.
 

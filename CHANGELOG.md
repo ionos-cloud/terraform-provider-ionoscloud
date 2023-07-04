@@ -1,6 +1,17 @@
-## 6.4.2
+## 6.4.3
 - Make `nic` list in `ionoscloud_server` resource optional
 - Make `firewall` list in `ionoscloud_server` resource optional and allow multiple inline firewall rules in the list
+
+## 6.4.2
+### Fixes
+- Fix `ssh_keys` field upgrade `ionoscloud_server` from `6.3.3` to higher versions should not replace server. `ssh_keys` and `ssh_key_path` fields no longer forceNew. 
+`ssh_keys` is no longer computed.
+- Fix `ssh_keys` suppress diff on upgrade for `ionoscloud_server` when having `volume.0.ssh_keys`
+- Add validation to `label` `key` and `value` fields for `ionoscloud_server` resource
+- Fix gitbook references
+
+### Docs
+- Add new products to Gitbook docs
 
 ## 6.4.1
 ### Fixes
@@ -8,6 +19,7 @@
 
 ### Docs
 - Fix `ionoscloud_image` examples
+- Improve docs for `ssh_keys` and `ssh_key_path`
 
 ## 6.4.0
 ### Enhancement:
