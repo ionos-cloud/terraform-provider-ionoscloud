@@ -141,3 +141,9 @@
   * Data Sources
     * [DNS Record](../docs/data-sources/dns_record.md)
     * [DNS Zone](../docs/data-sources/dns_zone.md)
+
+* Logging Service
+  * Resources
+    * [Logging Pipeline](../docs/resources/logging_pipeline.md)
+  * Data Sources
+    * [Logging Pipeline](../docs/data-sources/logging_pipeline.md)
