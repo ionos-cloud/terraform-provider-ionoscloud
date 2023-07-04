@@ -569,7 +569,7 @@ func resourceServerCreate(ctx context.Context, d *schema.ResourceData, meta inte
 						fwRulesProperties := make([]ionoscloud.FirewallruleProperties, len(fwRulesIntf))
 						err = utils.DecodeInterfaceToStruct(fwRulesIntf, fwRulesProperties)
 						if err != nil {
-							return diag.FromErr(fmt.Errorf("could not decode from %s to slice of firewall rules %w", fwRulesIntf, err))
+							return diag.FromErr(fmt.Errorf("could not decode from %+v to slice of firewall rules %w", fwRulesIntf, err))
 						}
 						for idx := range fwRulesProperties {
 							FwPropUnsetSetFieldIfNotSetInSchema(&fwRulesProperties[idx], fwRulesPath, d)
