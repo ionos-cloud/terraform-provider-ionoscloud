@@ -13,7 +13,7 @@ Manages a **Private Cross Connect** on IonosCloud.
 
 ## Example Usage
 
-To connect two datacenters, we need 2 lans defined one in each datacenter. After, we reference the pcc through which we want the connection to be made established.
+To connect two datacenters we need 2 lans defined, one in each datacenter. After, we reference the pcc through which we want the connection to be established.
 
 ```hcl
 resource ionoscloud_private_crossconnect PCCTestResource {

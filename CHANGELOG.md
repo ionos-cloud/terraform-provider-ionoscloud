@@ -1,7 +1,7 @@
 ## 6.4.3
 
 ### Documentation
-- improve example for `ionoscloud_private_crossconnect`
+- Improve example for `ionoscloud_private_crossconnect`
 
 ## 6.4.2
 ### Fixes
