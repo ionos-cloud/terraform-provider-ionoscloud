@@ -147,7 +147,7 @@ func resourceServer() *schema.Resource {
 					sshKeys := d.Get("volume.0.ssh_keys").([]interface{})
 					oldSshKeys := d.Get("ssh_keys").([]interface{})
 
-					if len(utils.DiffSlice(convertSlice(sshKeys), convertSlice(oldSshKeys))) == 0 {
+					if len(utils.DiffSlice(slice.AnyToString(sshKeys), slice.AnyToString(oldSshKeys))) == 0 {
 						return true
 					}
 
