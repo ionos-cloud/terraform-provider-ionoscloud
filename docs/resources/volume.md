@@ -19,7 +19,8 @@ A primary volume will be created with the server. If there is a need for additio
 data "ionoscloud_image" "example" {
     type                  = "HDD"
     cloud_init            = "V1"
-    location              = "us/las"
+    location              = ionoscloud_datacenter.example.location
+    image_alias           = "ubuntu:latest"
 }
 
 resource "ionoscloud_datacenter" "example" {
@@ -79,7 +80,7 @@ resource "ionoscloud_server" "example" {
   }
 }
 
-resource "ionoscloud_volume" "example" {
+resource "ionoscloud_volume" "example1" {
   datacenter_id           = ionoscloud_datacenter.example.id
   server_id               = ionoscloud_server.example.id
   name                    = "Volume Example"
@@ -92,7 +93,7 @@ resource "ionoscloud_volume" "example" {
   user_data               = "foo"
 }
 
-resource "ionoscloud_volume" "example" {
+resource "ionoscloud_volume" "example2" {
   datacenter_id           = ionoscloud_datacenter.example.id
   server_id               = ionoscloud_server.example.id
   name                    = "Another Volume Example"
