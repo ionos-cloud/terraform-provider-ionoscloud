@@ -137,22 +137,23 @@ func resourceServer() *schema.Resource {
 				ConflictsWith: []string{"volume.0.ssh_key_path", "volume.0.ssh_keys", "ssh_key_path"},
 				Optional:      true,
 				Description:   "Public SSH keys are set on the image as authorized keys for appropriate SSH login to the instance using the corresponding private key. This field may only be set in creation requests. When reading, it always returns null. SSH keys are only supported if a public Linux image is used for the volume creation.",
-				DiffSuppressFunc: func(k, old, new string, d *schema.ResourceData) bool {
-					if k == "ssh_keys.#" {
-						if d.Get("volume.0.ssh_keys.#") == new {
-							return true
-						}
-					}
-
-					sshKeys := d.Get("volume.0.ssh_keys").([]interface{})
-					oldSshKeys := d.Get("ssh_keys").([]interface{})
-
-					if len(utils.DiffSlice(slice.AnyToString(sshKeys), slice.AnyToString(oldSshKeys))) == 0 {
-						return true
-					}
-
-					return false
-				},
+				//todo: remove as test servervassic fails
+				//DiffSuppressFunc: func(k, old, new string, d *schema.ResourceData) bool {
+				//	if k == "ssh_keys.#" {
+				//		if d.Get("volume.0.ssh_keys.#") == new {
+				//			return true
+				//		}
+				//	}
+				//
+				//	sshKeys := d.Get("volume.0.ssh_keys").([]interface{})
+				//	oldSshKeys := d.Get("ssh_keys").([]interface{})
+				//
+				//	if len(utils.DiffSlice(slice.AnyToString(sshKeys), slice.AnyToString(oldSshKeys))) == 0 {
+				//		return true
+				//	}
+				//
+				//	return false
+				//},
 			},
 			"volume": {
 				Type:     schema.TypeList,
@@ -919,9 +920,23 @@ func resourceServerUpdate(ctx context.Context, d *schema.ResourceData, meta inte
 
 	// Nic stuff
 	if d.HasChange("nic") {
-		_, nicIntf := d.GetChange("nic")
-		newNics := nicIntf.([]interface{})
-		if len(newNics) == 0 {
+		oldNics, newNics := d.GetChange("nic")
+
+		var deleteNic = false
+		var createNic = false
+		if (len(oldNics.([]any)) > 0) && (len(newNics.([]any)) == 0) {
+			deleteNic = true
+		}
+		if (len(newNics.([]any)) > 0) && (len(oldNics.([]any)) == 0) {
+			createNic = true
+		}
+		if deleteNic {
+			apiResponse, err = client.NetworkInterfacesApi.DatacentersServersNicsDelete(ctx, d.Get("datacenter_id").(string), *server.Id, d.Get("primary_nic").(string)).Execute()
+			logApiRequestTime(apiResponse)
+			if err != nil {
+				diags := diag.FromErr(fmt.Errorf("error deleting nic (%w)", err))
+				return diags
+			}
 			err = d.Set("nic", nil)
 			if err := d.Set("primary_nic", ""); err != nil {
 				diags := diag.FromErr(err)
@@ -931,13 +946,12 @@ func resourceServerUpdate(ctx context.Context, d *schema.ResourceData, meta inte
 				diags := diag.FromErr(err)
 				return diags
 			}
-		} else {
-			updateNic := true
-			primaryNic := d.Get("primary_nic").(string)
-			if primaryNic == "" {
-				updateNic = false
+			if err := d.Set("primary_nic", ""); err != nil {
+				diags := diag.FromErr(err)
+				return diags
 			}
-
+		} else {
+			primaryNic := d.Get("primary_nic").(string)
 			nic := &ionoscloud.Nic{}
 			for _, n := range *server.Entities.Nics.Items {
 				if *n.Id == primaryNic {
@@ -1001,15 +1015,15 @@ func resourceServerUpdate(ctx context.Context, d *schema.ResourceData, meta inte
 			mProp, _ := json.Marshal(nicProperties)
 			log.Printf("[DEBUG] Updating props: %s", string(mProp))
 			var createdNic ionoscloud.Nic
-			if !updateNic {
+			if createNic {
 				nic.Properties = &nicProperties
 				createdNic, apiResponse, err = client.NetworkInterfacesApi.DatacentersServersNicsPost(ctx, d.Get("datacenter_id").(string), *server.Id).Nic(*nic).Execute()
-			} else {
+			} else if nic.Id != nil {
 				_, apiResponse, err = client.NetworkInterfacesApi.DatacentersServersNicsPatch(ctx, d.Get("datacenter_id").(string), *server.Id, *nic.Id).Nic(nicProperties).Execute()
 			}
 			logApiRequestTime(apiResponse)
 			if err != nil {
-				diags := diag.FromErr(fmt.Errorf("error updating nic (%s)", err))
+				diags := diag.FromErr(fmt.Errorf("error nic (%w)", err))
 				return diags
 			}
 
@@ -1019,7 +1033,7 @@ func resourceServerUpdate(ctx context.Context, d *schema.ResourceData, meta inte
 				diags := diag.FromErr(fmt.Errorf("error getting state change for nics patch %w", errState))
 				return diags
 			}
-			if !updateNic {
+			if createNic {
 				fs := FirewallService{client: client, meta: meta, d: d}
 				foundRules, err := fs.firewallsGet(ctx, d.Get("datacenter_id").(string), *server.Id, *createdNic.Id, 1)
 				if err != nil {
@@ -1032,14 +1046,14 @@ func resourceServerUpdate(ctx context.Context, d *schema.ResourceData, meta inte
 				return diag.FromErr(err)
 			}
 
-			_, primaryNicOk := d.GetOk("primary_nic")
-			if createdNic.Id != nil && !updateNic && !primaryNicOk {
+			if createdNic.Id != nil && createNic {
 				if err := d.Set("primary_nic", *createdNic.Id); err != nil {
 					diags := diag.FromErr(err)
 					return diags
 				}
 			}
 		}
+
 	}
 
 	// Labels logic for update
