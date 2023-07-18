@@ -97,25 +97,6 @@ func dataSourceDbaasMongoCluster() *schema.Resource {
 				Description: "The connection string for your cluster.",
 				Computed:    true,
 			},
-			"credentials": {
-				Type:        schema.TypeList,
-				Description: "Credentials for the database user to be created.",
-				Computed:    true,
-				Elem: &schema.Resource{
-					Schema: map[string]*schema.Schema{
-						"username": {
-							Type:        schema.TypeString,
-							Description: "the username for the initial mongoDB user.",
-							Computed:    true,
-						},
-						"password": {
-							Type:      schema.TypeString,
-							Computed:  true,
-							Sensitive: true,
-						},
-					},
-				},
-			},
 		},
 		Timeouts: &resourceDefaultTimeouts,
 	}
