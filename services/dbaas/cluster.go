@@ -87,13 +87,22 @@ func (c *MongoClient) DeleteCluster(ctx context.Context, clusterId string) (mong
 	return clusterResponse, apiResponse, err
 }
 func (c *PsqlClient) IsClusterReady(ctx context.Context, d *schema.ResourceData) (bool, error) {
-	cluster, _, err := c.GetCluster(ctx, d.Id())
+	var clusterId string
+	// This can be called from the users service, in which case the cluster_id is defined inside
+	// the user resource, hence this if since the ID can be obtained in different ways depending on
+	// the caller.
+	if clusterIdIntf, ok := d.GetOk("cluster_id"); ok {
+		clusterId = clusterIdIntf.(string)
+	} else {
+		clusterId = d.Id()
+	}
+	cluster, _, err := c.GetCluster(ctx, clusterId)
 	if err != nil {
 		return true, fmt.Errorf("check failed for cluster status: %w", err)
 	}
 
 	if cluster.Metadata == nil || cluster.Metadata.State == nil {
-		return false, fmt.Errorf("cluster metadata or state is empty for id %s", d.Id())
+		return false, fmt.Errorf("cluster metadata or state is empty for id %s", clusterId)
 	}
 
 	log.Printf("[INFO] state of the cluster %s ", string(*cluster.Metadata.State))

@@ -198,6 +198,8 @@ const (
 	DBaaSClusterTestDataSourceByName = "test_dbaas_cluster_name"
 
 	PsqlClusterResource  = "ionoscloud_pg_cluster"
+	PsqlDatabaseResource = "ionoscloud_pg_database"
+	PsqlUserResource     = "ionoscloud_pg_user"
 	PsqlBackupsResource  = "ionoscloud_pg_backups"
 	PsqlBackupsTest      = "test_dbaas_backups"
 	PsqlVersionsResource = "ionoscloud_pg_versions"

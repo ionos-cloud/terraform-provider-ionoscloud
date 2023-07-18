@@ -198,7 +198,7 @@ github.com/ionos-cloud/sdk-go-dataplatform
 # github.com/ionos-cloud/sdk-go-dbaas-mongo v1.2.2
 ## explicit; go 1.18
 github.com/ionos-cloud/sdk-go-dbaas-mongo
-# github.com/ionos-cloud/sdk-go-dbaas-postgres v1.1.1
+# github.com/ionos-cloud/sdk-go-dbaas-postgres v1.1.2
 ## explicit; go 1.19
 github.com/ionos-cloud/sdk-go-dbaas-postgres
 # github.com/ionos-cloud/sdk-go-dns v1.1.1
