@@ -1001,7 +1001,7 @@ func resourceServerUpdate(ctx context.Context, d *schema.ResourceData, meta inte
 			if nic != nil && nic.Id != nil {
 				nicId = *nic.Id
 			}
-			firewallRules, fwRuleIds, diagResp := fs.GetModifiedFirewallRulesFromSchema(ctx, dcId, *server.Id, nicId, firstNicFirewallPath)
+			firewallRules, fwRuleIds, diagResp := fs.GetAndUpdateFirewallRules(ctx, dcId, *server.Id, nicId, firstNicFirewallPath)
 			if diagResp != nil {
 				return diagResp
 			}
