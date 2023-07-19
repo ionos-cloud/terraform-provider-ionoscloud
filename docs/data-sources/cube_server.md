@@ -55,6 +55,8 @@ The following attributes are returned by the datasource:
 * `boot_volume`
 * `boot_image`
 * `token`
+* `cores`
+* `ram`
 * `cdroms` - list of
   * `id` - Id of the attached cdrom
   * `name` - The name of the attached cdrom
