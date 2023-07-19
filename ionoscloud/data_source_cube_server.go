@@ -163,6 +163,14 @@ func dataSourceCubeServer() *schema.Resource {
 				Computed: true,
 				Elem:     nicServerDSResource,
 			},
+			"ram": {
+				Type:     schema.TypeInt,
+				Computed: true,
+			},
+			"cores": {
+				Type:     schema.TypeInt,
+				Computed: true,
+			},
 		},
 		Timeouts: &resourceDefaultTimeouts,
 	}
@@ -186,6 +194,16 @@ func setCubeServerData(d *schema.ResourceData, server *ionoscloud.Server, token 
 
 		if server.Properties.Name != nil {
 			if err := d.Set("name", *server.Properties.Name); err != nil {
+				return err
+			}
+		}
+		if server.Properties.Cores != nil {
+			if err := d.Set("cores", *server.Properties.Cores); err != nil {
+				return err
+			}
+		}
+		if server.Properties.Ram != nil {
+			if err := d.Set("ram", *server.Properties.Ram); err != nil {
 				return err
 			}
 		}
