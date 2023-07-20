@@ -50,7 +50,4 @@ The following attributes are returned by the datasource:
 * `maintenance_window` - A weekly 4 hour-long window, during which maintenance might occur.  Updates to the value of the field force the cluster to be re-created.
     * `time` 
     * `day_of_the_week`
-* `credentials` - Credentials for the database user to be created. This attribute is immutable(disallowed in update requests). Updates to the value of the field force the cluster to be re-created.
-    * `username` -  The username for the initial mongoDB user.
-    * `password`
 * `connection_string` - The physical location where the cluster will be created. This will be where all of your instances live. Updates to the value of the field force the cluster to be re-created. Available locations: de/txl, gb/lhr, es/vit"
