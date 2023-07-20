@@ -70,7 +70,7 @@ func dataSourceDbaasPgSqlReadDatabases(ctx context.Context, d *schema.ResourceDa
 	var databases []interface{}
 	for _, retrievedDatabase := range *retrievedDatabases.Items {
 		if retrievedDatabase.Properties == nil {
-			log.Printf("[INFO] 'nil' values in the response for the database with ID: %s, cluster ID: %s, skipping this databas since there is not enough information to set in the state")
+			log.Printf("[INFO] 'nil' values in the response for the database with ID: %s, cluster ID: %s, skipping this database since there is not enough information to set in the state", *retrievedDatabase.Id, clusterId)
 			continue
 		}
 		database := make(map[string]interface{})
