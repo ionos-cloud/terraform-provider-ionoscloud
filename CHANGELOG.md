@@ -5,6 +5,7 @@
 
 ### Fixes
 - Remove unpopulated `credentials` field from mongodb cluster data source.
+- Add `ram` and `cores` fields to cube server data source.
 
 ## 6.4.2
 ### Fixes
