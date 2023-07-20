@@ -155,18 +155,19 @@ func SetUserMongoData(d *schema.ResourceData, user *mongo.User) error {
 }
 
 func SetUserPgSqlData(d *schema.ResourceData, user *pgsql.UserResource) error {
+	resourceName := "PgSQL user"
 	d.SetId(*user.Id)
 	if user.Properties == nil {
 		return fmt.Errorf("expected properties in the response for the PgSql user with ID: %s, but received 'nil' instead", *user.Id)
 	}
 	if user.Properties.Username != nil {
 		if err := d.Set("username", *user.Properties.Username); err != nil {
-			return err
+			return utils.GenerateSetError(resourceName, "username", err)
 		}
 	}
 	if user.Properties.System != nil {
 		if err := d.Set("is_system_user", *user.Properties.System); err != nil {
-			return err
+			return utils.GenerateSetError(resourceName, "is_system_user", err)
 		}
 	}
 	return nil

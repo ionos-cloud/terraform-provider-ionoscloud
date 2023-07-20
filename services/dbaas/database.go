@@ -26,19 +26,26 @@ func (c *PsqlClient) FindDatabaseByName(ctx context.Context, clusterId, name str
 	return database, apiResponse, err
 }
 
+func (c *PsqlClient) GetDatabases(ctx context.Context, clusterId string) (pgsql.DatabaseList, utils.ApiResponseInfo, error) {
+	databases, apiResponse, err := c.sdkClient.DatabasesApi.DatabasesList(ctx, clusterId).Execute()
+	apiResponse.LogInfo()
+	return databases, apiResponse, err
+}
+
 func SetDatabasePgSqlData(d *schema.ResourceData, database *pgsql.DatabaseResource) error {
+	resourceName := "PgSQL database"
 	d.SetId(*database.Id)
 	if database.Properties == nil {
 		return fmt.Errorf("expected properties in the response for the PgSql database with ID: %s, but received 'nil' instead", *database.Id)
 	}
 	if database.Properties.Name != nil {
 		if err := d.Set("name", *database.Properties.Name); err != nil {
-			return err
+			return utils.GenerateSetError(resourceName, "name", err)
 		}
 	}
 	if database.Properties.Owner != nil {
 		if err := d.Set("owner", *database.Properties.Owner); err != nil {
-			return err
+			return utils.GenerateSetError(resourceName, "owner", err)
 		}
 	}
 	return nil

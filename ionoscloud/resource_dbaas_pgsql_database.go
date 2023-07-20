@@ -21,11 +21,8 @@ func resourceDbaasPgSqlDatabase() *schema.Resource {
 		},
 		Schema: map[string]*schema.Schema{
 			"cluster_id": {
-				Type:     schema.TypeString,
-				Required: true,
-				// TODO -- not sure if ForceNew makes sense here since there is no way to modify
-				// the database, so the update method will be empty
-				ForceNew:         true,
+				Type:             schema.TypeString,
+				Required:         true,
 				ValidateDiagFunc: validation.ToDiagFunc(validation.IsUUID),
 			},
 			"name": {
@@ -58,8 +55,7 @@ func resourceDbaasPgSqlDatabaseCreate(ctx context.Context, d *schema.ResourceDat
 	if err != nil {
 		return diag.FromErr(fmt.Errorf("an error occured while creating the PgSql database named: %s inside the cluster with ID: %s, error: %w", name, clusterId, err))
 	}
-	d.SetId(*database.Id)
-	return resourceDbaasPgSqlDatabaseRead(ctx, d, meta)
+	return diag.FromErr(dbaas.SetDatabasePgSqlData(d, &database))
 }
 
 func resourceDbaasPgSqlDatabaseUpdate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
@@ -92,8 +88,7 @@ func resourceDbaasPgSqlDatabaseDelete(ctx context.Context, d *schema.ResourceDat
 	name := d.Get("name").(string)
 	_, err := client.DeleteDatabase(ctx, clusterId, name)
 	if err != nil {
-		diags := diag.FromErr(err)
-		return diags
+		return diag.FromErr(err)
 	}
 	return nil
 }

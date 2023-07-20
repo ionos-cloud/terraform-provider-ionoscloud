@@ -69,7 +69,7 @@ func resourceDbaasPgSqlUserCreate(ctx context.Context, d *schema.ResourceData, m
 
 	user, _, err := client.CreateUser(ctx, clusterId, request)
 	if err != nil {
-		return diag.FromErr(fmt.Errorf("an error occured while adding an user to the PgSql cluster with ID: %s, error: %w", clusterId, err))
+		return diag.FromErr(fmt.Errorf("an error occured while adding the user: %s to the PgSql cluster with ID: %s, error: %w", username, clusterId, err))
 	}
 	d.SetId(*user.Id)
 	// Wait for the cluster to be ready again (when creating/updating the user, the cluster enters
@@ -78,7 +78,7 @@ func resourceDbaasPgSqlUserCreate(ctx context.Context, d *schema.ResourceData, m
 	if err != nil {
 		return diag.FromErr(fmt.Errorf("error while waiting for PgSql cluster with ID: %s to be ready, error: %w", clusterId, err))
 	}
-	return resourceDbaasPgSqlUserRead(ctx, d, meta)
+	return diag.FromErr(dbaas.SetUserPgSqlData(d, &user))
 }
 
 func resourceDbaasPgSqlUserUpdate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
@@ -97,7 +97,7 @@ func resourceDbaasPgSqlUserUpdate(ctx context.Context, d *schema.ResourceData, m
 		request.Properties.Password = &password
 	}
 
-	_, _, err := client.UpdateUser(ctx, clusterId, username, request)
+	user, _, err := client.UpdateUser(ctx, clusterId, username, request)
 	if err != nil {
 		return diag.FromErr(fmt.Errorf("an error occured while updating a PgSql user, username: %s, cluster ID: %s, error: %w", username, clusterId, err))
 	}
@@ -105,9 +105,9 @@ func resourceDbaasPgSqlUserUpdate(ctx context.Context, d *schema.ResourceData, m
 	// 'BUSY' state).
 	err = utils.WaitForResourceToBeReady(ctx, d, client.IsClusterReady)
 	if err != nil {
-		return diag.FromErr(fmt.Errorf("error while waiting for PgSql cluster with ID: %s to be ready, error: %w", clusterId, err))
+		return diag.FromErr(fmt.Errorf("error while waiting for PgSql cluster with ID: %s to be ready after user: %s update, error: %w", clusterId, username, err))
 	}
-	return resourceDbaasPgSqlUserRead(ctx, d, meta)
+	return diag.FromErr(dbaas.SetUserPgSqlData(d, &user))
 }
 
 func resourceDbaasPgSqlUserRead(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {

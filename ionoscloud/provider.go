@@ -153,6 +153,7 @@ func Provider() *schema.Provider {
 			PsqlClusterResource:                       dataSourceDbaasPgSqlCluster(),
 			PsqlUserResource:                          dataSourceDbaasPgSqlUser(),
 			PsqlDatabaseResource:                      dataSourceDbaasPgSqlDatabase(),
+			PsqlDatabasesResource:                     dataSourceDbaasPgSqlDatabases(),
 			DBaasMongoClusterResource:                 dataSourceDbaasMongoCluster(),
 			DBaaSMongoTemplateResource:                dataSourceDbassMongoTemplate(),
 			PsqlVersionsResource:                      dataSourceDbaasPgSqlVersions(),
