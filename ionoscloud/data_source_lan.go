@@ -51,6 +51,10 @@ func dataSourceLan() *schema.Resource {
 				Type:     schema.TypeBool,
 				Computed: true,
 			},
+			"ipv6_cidr_block": {
+				Type:     schema.TypeString,
+				Optional: true,
+			},
 		},
 		Timeouts: &resourceDefaultTimeouts,
 	}
