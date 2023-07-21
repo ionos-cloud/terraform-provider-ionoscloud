@@ -96,6 +96,75 @@ func pgSqlUserDestroyCheck(s *terraform.State) error {
 	return nil
 }
 
+// Attributes
+const usernameAttribute = "username"
+const passwordAttribute = "password"
+const isSystemUserAttribute = "is_system_user"
+
+// Values
+const usernameValue = "testusername"
+const isSystemUserValue = "false"
+
+// Configurations
+const PgSqlUserConfig = `
+resource ` + DatacenterResource + ` "datacenter_example" {
+  name        = "datacenter_example"
+  location    = "de/txl"
+  description = "Datacenter for testing DBaaS PgSql user"
+}
+
+resource ` + LanResource + ` "lan_example" {
+  datacenter_id = ` + DatacenterResource + `.datacenter_example.id 
+  public        = false
+  name          = "lan_example"
+}
+
+resource ` + PsqlClusterResource + ` ` + DBaaSClusterTestResource + ` {
+  postgres_version   = 12
+  instances          = 1
+  cores              = 1
+  ram                = 2048
+  storage_size       = 2048
+  storage_type       = "HDD"
+  connections   {
+	datacenter_id   =  ` + DatacenterResource + `.datacenter_example.id 
+    lan_id          =  ` + LanResource + `.lan_example.id 
+    cidr            =  "192.168.1.100/24"
+  }
+  location = ` + DatacenterResource + `.datacenter_example.location
+  backup_location = "de"
+  display_name = "` + DBaaSClusterTestResource + `"
+  maintenance_window {
+    day_of_the_week  = "Sunday"
+    time             = "09:00:00"
+  }
+  credentials {
+  	username = "username"
+	password = ` + RandomPassword + `.cluster_password.result
+  }
+  synchronization_mode = "ASYNCHRONOUS"
+}
+
+resource ` + PsqlUserResource + ` ` + UserTestResource + ` {
+  ` + clusterIdAttribute + ` = ` + PsqlClusterResource + `.` + DBaaSClusterTestResource + `.id 
+  ` + usernameAttribute + ` = "` + usernameValue + `"
+  ` + passwordAttribute + ` = ` + RandomPassword + `.user_password.result
+  ` + isSystemUserAttribute + ` = ` + isSystemUserValue + `
+}
+
+resource ` + RandomPassword + ` "cluster_password" {
+  length           = 16
+  special          = true
+  override_special = "!#$%&*()-_=+[]{}<>:?"
+}
+
+resource ` + RandomPassword + ` "user_password" {
+  length           = 16
+  special          = true
+  override_special = "!#$%&*()-_=+[]{}<>:?"
+}
+`
+
 const PgSqlUserDataSource = PgSqlUserConfig + `
 data ` + PsqlUserResource + ` ` + UserDataSourceByName + ` {
   ` + clusterIdAttribute + ` = ` + PsqlClusterResource + `.` + DBaaSClusterTestResource + `.id  

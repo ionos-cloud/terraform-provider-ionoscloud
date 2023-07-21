@@ -15,7 +15,6 @@ import (
 
 func TestAccPgSqlDatabase(t *testing.T) {
 	var database pgsql.DatabaseResource
-	var user pgsql.UserResource
 
 	resource.Test(t, resource.TestCase{
 		PreCheck: func() {
@@ -25,23 +24,12 @@ func TestAccPgSqlDatabase(t *testing.T) {
 		ProviderFactories: testAccProviderFactories,
 		CheckDestroy:      pgSqlDatabaseDestroyCheck,
 		Steps: []resource.TestStep{
-			// Adding this extra step in order to make sure that the owner user is created before creating
-			// the database, otherwise the database will not find the owner and the creation will fail.
-			{
-				Config: PgSqlUserConfig,
-				Check: resource.ComposeTestCheckFunc(
-					pgSqlUserExistsCheck(PsqlUserResource+"."+UserTestResource, &user),
-					resource.TestCheckResourceAttr(PsqlUserResource+"."+UserTestResource, usernameAttribute, usernameValue),
-					resource.TestCheckResourceAttrSet(PsqlUserResource+"."+UserTestResource, passwordAttribute),
-					resource.TestCheckResourceAttr(PsqlUserResource+"."+UserTestResource, isSystemUserAttribute, isSystemUserValue),
-				),
-			},
 			{
 				Config: PgSqlDatabaseConfig,
 				Check: resource.ComposeTestCheckFunc(
-					pgSqlDatabaseExistsCheck(PsqlDatabasesResource+"."+PsqlDatabaseTestResource, &database),
+					pgSqlDatabaseExistsCheck(PsqlDatabaseResource+"."+PsqlDatabaseTestResource, &database),
 					resource.TestCheckResourceAttr(PsqlDatabaseResource+"."+PsqlDatabaseTestResource, databaseNameAttribute, databaseNameValue),
-					resource.TestCheckResourceAttr(PsqlDatabaseResource+"."+PsqlDatabaseTestResource, databaseOwnerAttribute, isSystemUserValue),
+					resource.TestCheckResourceAttr(PsqlDatabaseResource+"."+PsqlDatabaseTestResource, databaseOwnerAttribute, databaseOwnerValue),
 				),
 			},
 			{
@@ -57,6 +45,8 @@ func TestAccPgSqlDatabase(t *testing.T) {
 			},
 			{
 				Config: PgSqlAllDatabasesDataSource,
+				// Check only the length since there are some databases that already exist in the
+				// cluster.
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttr(DataSource+"."+PsqlDatabasesResource+"."+PsqlDatabasesDataSource, databasesAttribute+".#", "4"),
 				),
@@ -65,9 +55,10 @@ func TestAccPgSqlDatabase(t *testing.T) {
 				Config: PgSqlAllDatabasesFilterByOwnerDataSource,
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttr(DataSource+"."+PsqlDatabasesResource+"."+PsqlDatabasesDataSource, databasesAttribute+".#", "1"),
+					resource.TestCheckResourceAttr(DataSource+"."+PsqlDatabasesResource+"."+PsqlDatabasesDataSource, databasesAttribute+".0.name", databaseNameValue),
+					resource.TestCheckResourceAttr(DataSource+"."+PsqlDatabasesResource+"."+PsqlDatabasesDataSource, databasesAttribute+".0.owner", databaseOwnerValue),
 				),
 			},
-			// TODO -- Solve the dangling resource error
 		},
 	})
 }
@@ -102,7 +93,7 @@ func pgSqlDatabaseDestroyCheck(s *terraform.State) error {
 	defer cancel()
 
 	for _, rs := range s.RootModule().Resources {
-		if rs.Type != PsqlDatabasesResource {
+		if rs.Type != PsqlDatabaseResource {
 			continue
 		}
 		clusterId := rs.Primary.Attributes["cluster_id"]
@@ -124,35 +115,35 @@ func pgSqlDatabaseDestroyCheck(s *terraform.State) error {
 
 const PgSqlDatabaseConfig = PgSqlUserConfig + `
 resource ` + PsqlDatabaseResource + ` ` + PsqlDatabaseTestResource + ` {
-  ` + clusterIdAttribute + ` = ` + PsqlClusterResource + `.` + DBaaSClusterTestResource + `.id 
+  ` + clusterIdAttribute + ` = ` + PsqlClusterResource + `.` + DBaaSClusterTestResource + `.id  
   ` + databaseNameAttribute + ` = "` + databaseNameValue + `"
-  ` + databaseOwnerAttribute + ` = "` + databaseOwnerValue + `"
+  ` + databaseOwnerAttribute + ` = ` + PsqlUserResource + `.` + UserTestResource + `.username
 }
 `
 
 const PgSqlDatabaseDataSource = PgSqlDatabaseConfig + `
 data ` + PsqlDatabaseResource + ` ` + PsqlDatabaseDataSourceByName + ` {
-  ` + clusterIdAttribute + ` = ` + PsqlClusterResource + `.` + DBaaSClusterTestResource + `.id  
-  ` + databaseNameAttribute + ` = ` + PsqlDatabaseResource + `.` + PsqlDatabaseDataSourceByName + `.name
+  ` + clusterIdAttribute + ` = ` + PsqlClusterResource + `.` + DBaaSClusterTestResource + `.id   
+  ` + databaseNameAttribute + ` = ` + PsqlDatabaseResource + `.` + PsqlDatabaseTestResource + `.name
 }
 `
 
 const PgSqlDatabaseDataSourceWrongName = PgSqlDatabaseConfig + `
 data ` + PsqlDatabaseResource + ` ` + PsqlDatabaseDataSourceByName + ` {
-  ` + clusterIdAttribute + ` = ` + PsqlClusterResource + `.` + DBaaSClusterTestResource + `.id  
+  ` + clusterIdAttribute + ` = ` + PsqlClusterResource + `.` + DBaaSClusterTestResource + `.id   
   ` + databaseNameAttribute + ` = "nonexistent"
 }
 `
 
 const PgSqlAllDatabasesDataSource = PgSqlDatabaseConfig + `
 data ` + PsqlDatabasesResource + ` ` + PsqlDatabasesDataSource + ` {
-  ` + clusterIdAttribute + ` = ` + PsqlClusterResource + `.` + DBaaSClusterTestResource + `.id  
+  ` + clusterIdAttribute + ` = ` + PsqlClusterResource + `.` + DBaaSClusterTestResource + `.id   
 }
 `
 
 const PgSqlAllDatabasesFilterByOwnerDataSource = PgSqlDatabaseConfig + `
 data ` + PsqlDatabasesResource + ` ` + PsqlDatabasesDataSource + ` {
-  ` + clusterIdAttribute + ` = ` + PsqlClusterResource + `.` + DBaaSClusterTestResource + `.id
+  ` + clusterIdAttribute + ` = ` + PsqlClusterResource + `.` + DBaaSClusterTestResource + `.id 
   ` + databaseOwnerAttribute + ` = "` + databaseOwnerValue + `"
 }
 `
