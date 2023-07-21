@@ -50,7 +50,7 @@ const (
 	RequestStatusFailed  = "FAILED"
 	RequestStatusDone    = "DONE"
 
-	Version = "1.1.1"
+	Version = "1.1.2"
 )
 
 // APIClient manages communication with the IONOS DBaaS PostgreSQL REST API API v1.0.0
@@ -65,11 +65,15 @@ type APIClient struct {
 
 	ClustersApi *ClustersApiService
 
+	DatabasesApi *DatabasesApiService
+
 	LogsApi *LogsApiService
 
 	MetadataApi *MetadataApiService
 
 	RestoresApi *RestoresApiService
+
+	UsersApi *UsersApiService
 }
 
 type service struct {
@@ -97,9 +101,11 @@ func NewAPIClient(cfg *Configuration) *APIClient {
 	// API Services
 	c.BackupsApi = (*BackupsApiService)(&c.common)
 	c.ClustersApi = (*ClustersApiService)(&c.common)
+	c.DatabasesApi = (*DatabasesApiService)(&c.common)
 	c.LogsApi = (*LogsApiService)(&c.common)
 	c.MetadataApi = (*MetadataApiService)(&c.common)
 	c.RestoresApi = (*RestoresApiService)(&c.common)
+	c.UsersApi = (*UsersApiService)(&c.common)
 
 	return c
 }
@@ -297,6 +303,9 @@ func (c *APIClient) callAPI(request *http.Request) (*http.Response, error) {
 		case http.StatusServiceUnavailable,
 			http.StatusGatewayTimeout,
 			http.StatusBadGateway:
+			if request.Method == http.MethodPost {
+				return resp, err
+			}
 			backoffTime = c.GetConfig().WaitTime
 
 		case http.StatusTooManyRequests:

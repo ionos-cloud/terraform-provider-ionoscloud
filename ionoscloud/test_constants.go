@@ -616,3 +616,8 @@ resource ` + LoggingPipelineResource + ` ` + LoggingPipelineTestResourceName + `
 	` + pipelineLog + `
 }
 `
+
+// DBaaS PgSQL constants
+
+// Attributes
+const clusterIdAttribute = "cluster_id"
