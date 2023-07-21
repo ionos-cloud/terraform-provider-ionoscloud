@@ -24,10 +24,6 @@ func dataSourceDbaasPgSqlDatabases() *schema.Resource {
 				Optional:    true,
 				Description: "Filter for this data source, using this you can retrieve all databases that belong to a specific user.",
 			},
-			"test": {
-				Type:     schema.TypeString,
-				Computed: true,
-			},
 			"databases": {
 				Type:        schema.TypeList,
 				Description: "The list of databases",

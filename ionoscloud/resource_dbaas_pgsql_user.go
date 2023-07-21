@@ -148,15 +148,6 @@ func resourceDbaaSPgSqlUserDelete(ctx context.Context, d *schema.ResourceData, m
 	return nil
 }
 
-// TODO -- make this in the proper way, the current implementation is not working because of this error:
-// Error: Cannot import non-existent remote object.
-// While attempting to import an existing object to "ionoscloud_pg_user.exampleuser", the provider detected that no object exists with the given id.
-// Only pre-existing objects can be imported; check
-// │ that the id is correct and that it is associated with the provider's configured region or endpoint,
-// or use "terraform apply" to create a new remote object for this resource.
-// From the error it looks like I'm trying to import a user that doesn't exist, but the user exists. I also debugged a little bit
-// and it seems like the user is retrieved properly. I think that Terraform is bothered by the fact that the name is used to retrieve
-// the user, not the ID.
 func resourceDbaasPgSqlUserImporter(ctx context.Context, d *schema.ResourceData, meta interface{}) ([]*schema.ResourceData, error) {
 	parts := strings.Split(d.Id(), "/")
 	if len(parts) != 2 {
@@ -175,6 +166,9 @@ func resourceDbaasPgSqlUserImporter(ctx context.Context, d *schema.ResourceData,
 	}
 	if err := dbaas.SetUserPgSqlData(d, &user); err != nil {
 		return nil, err
+	}
+	if err := d.Set("cluster_id", clusterId); err != nil {
+		return nil, utils.GenerateSetError("PgSQL user", "cluster_id", err)
 	}
 	return []*schema.ResourceData{d}, nil
 }

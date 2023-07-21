@@ -8,6 +8,8 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 	pgsql "github.com/ionos-cloud/sdk-go-dbaas-postgres"
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/dbaas"
+	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils"
+	"strings"
 )
 
 func resourceDbaasPgSqlDatabase() *schema.Resource {
@@ -93,7 +95,27 @@ func resourceDbaasPgSqlDatabaseDelete(ctx context.Context, d *schema.ResourceDat
 	return nil
 }
 
-// TODO -- Finish this
 func resourceDbaasPgSqlDatabaseImporter(ctx context.Context, d *schema.ResourceData, meta interface{}) ([]*schema.ResourceData, error) {
-	return nil, nil
+	parts := strings.Split(d.Id(), "/")
+	if len(parts) != 2 {
+		return nil, fmt.Errorf("invalid import format: %s, expecting the following format: {clusterID}/{databaseName}", d.Id())
+	}
+	clusterId := parts[0]
+	name := parts[1]
+	client := meta.(SdkBundle).PsqlClient
+	database, apiResponse, err := client.FindDatabaseByName(ctx, clusterId, name)
+	if err != nil {
+		if apiResponse.HttpNotFound() {
+			d.SetId("")
+			return nil, fmt.Errorf("unable to find PgSql database: %s, cluster ID: %s", name, clusterId)
+		}
+		return nil, fmt.Errorf("error occured while fetching PgSql database: %s, cluster ID: %s, error: %w", name, clusterId, err)
+	}
+	if err := dbaas.SetDatabasePgSqlData(d, &database); err != nil {
+		return nil, err
+	}
+	if err := d.Set("cluster_id", clusterId); err != nil {
+		return nil, utils.GenerateSetError("PgSQL database", "cluster_id", err)
+	}
+	return []*schema.ResourceData{d}, nil
 }
