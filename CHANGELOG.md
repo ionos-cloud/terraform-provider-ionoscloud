@@ -1,8 +1,3 @@
-## 6.4.4
-
-## Features
-- Add support for PgSQL User & Databases
-
 ## 6.4.3
 
 ### Documentation
