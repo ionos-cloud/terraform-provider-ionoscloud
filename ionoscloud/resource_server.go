@@ -946,10 +946,6 @@ func resourceServerUpdate(ctx context.Context, d *schema.ResourceData, meta inte
 				diags := diag.FromErr(err)
 				return diags
 			}
-			if err := d.Set("primary_nic", ""); err != nil {
-				diags := diag.FromErr(err)
-				return diags
-			}
 		} else {
 			primaryNic := d.Get("primary_nic").(string)
 			nic := &ionoscloud.Nic{}
@@ -1504,6 +1500,7 @@ func setResourceServerData(ctx context.Context, client *ionoscloud.APIClient, d 
 		return err
 	}
 
+	// Labels logic
 	ls := LabelsService{ctx: ctx, client: client}
 	labels, err := ls.datacentersServersLabelsGet(datacenterId, d.Id(), false)
 	if err != nil {
