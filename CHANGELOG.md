@@ -1,7 +1,10 @@
 ## 6.4.4
 
-## Features
+### Features
 - Add support for PgSQL User & Databases
+
+### Dependency update
+- Update `sdk-go-dbaas-postgres` to version 1.1.2
 
 ## 6.4.3
 
