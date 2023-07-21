@@ -16,15 +16,15 @@ import (
 
 // ClusterBackupList List of backups.
 type ClusterBackupList struct {
-	Type *ResourceType `json:"type,omitempty"`
-	// The unique ID of the resource.
-	Id    *string           `json:"id,omitempty"`
-	Items *[]BackupResponse `json:"items,omitempty"`
 	// The offset specified in the request (if none was specified, the default offset is 0).
 	Offset *int32 `json:"offset,omitempty"`
 	// The limit specified in the request (if none was specified, the default limit is 100).
 	Limit *int32           `json:"limit,omitempty"`
 	Links *PaginationLinks `json:"links,omitempty"`
+	Type  *ResourceType    `json:"type,omitempty"`
+	// The unique ID of the resource.
+	Id    *string           `json:"id,omitempty"`
+	Items *[]BackupResponse `json:"items,omitempty"`
 }
 
 // NewClusterBackupList instantiates a new ClusterBackupList object
@@ -52,120 +52,6 @@ func NewClusterBackupListWithDefaults() *ClusterBackupList {
 	var limit int32 = 100
 	this.Limit = &limit
 	return &this
-}
-
-// GetType returns the Type field value
-// If the value is explicit nil, the zero value for ResourceType will be returned
-func (o *ClusterBackupList) GetType() *ResourceType {
-	if o == nil {
-		return nil
-	}
-
-	return o.Type
-
-}
-
-// GetTypeOk returns a tuple with the Type field value
-// and a boolean to check if the value has been set.
-// NOTE: If the value is an explicit nil, `nil, true` will be returned
-func (o *ClusterBackupList) GetTypeOk() (*ResourceType, bool) {
-	if o == nil {
-		return nil, false
-	}
-
-	return o.Type, true
-}
-
-// SetType sets field value
-func (o *ClusterBackupList) SetType(v ResourceType) {
-
-	o.Type = &v
-
-}
-
-// HasType returns a boolean if a field has been set.
-func (o *ClusterBackupList) HasType() bool {
-	if o != nil && o.Type != nil {
-		return true
-	}
-
-	return false
-}
-
-// GetId returns the Id field value
-// If the value is explicit nil, the zero value for string will be returned
-func (o *ClusterBackupList) GetId() *string {
-	if o == nil {
-		return nil
-	}
-
-	return o.Id
-
-}
-
-// GetIdOk returns a tuple with the Id field value
-// and a boolean to check if the value has been set.
-// NOTE: If the value is an explicit nil, `nil, true` will be returned
-func (o *ClusterBackupList) GetIdOk() (*string, bool) {
-	if o == nil {
-		return nil, false
-	}
-
-	return o.Id, true
-}
-
-// SetId sets field value
-func (o *ClusterBackupList) SetId(v string) {
-
-	o.Id = &v
-
-}
-
-// HasId returns a boolean if a field has been set.
-func (o *ClusterBackupList) HasId() bool {
-	if o != nil && o.Id != nil {
-		return true
-	}
-
-	return false
-}
-
-// GetItems returns the Items field value
-// If the value is explicit nil, the zero value for []BackupResponse will be returned
-func (o *ClusterBackupList) GetItems() *[]BackupResponse {
-	if o == nil {
-		return nil
-	}
-
-	return o.Items
-
-}
-
-// GetItemsOk returns a tuple with the Items field value
-// and a boolean to check if the value has been set.
-// NOTE: If the value is an explicit nil, `nil, true` will be returned
-func (o *ClusterBackupList) GetItemsOk() (*[]BackupResponse, bool) {
-	if o == nil {
-		return nil, false
-	}
-
-	return o.Items, true
-}
-
-// SetItems sets field value
-func (o *ClusterBackupList) SetItems(v []BackupResponse) {
-
-	o.Items = &v
-
-}
-
-// HasItems returns a boolean if a field has been set.
-func (o *ClusterBackupList) HasItems() bool {
-	if o != nil && o.Items != nil {
-		return true
-	}
-
-	return false
 }
 
 // GetOffset returns the Offset field value
@@ -282,20 +168,122 @@ func (o *ClusterBackupList) HasLinks() bool {
 	return false
 }
 
+// GetType returns the Type field value
+// If the value is explicit nil, the zero value for ResourceType will be returned
+func (o *ClusterBackupList) GetType() *ResourceType {
+	if o == nil {
+		return nil
+	}
+
+	return o.Type
+
+}
+
+// GetTypeOk returns a tuple with the Type field value
+// and a boolean to check if the value has been set.
+// NOTE: If the value is an explicit nil, `nil, true` will be returned
+func (o *ClusterBackupList) GetTypeOk() (*ResourceType, bool) {
+	if o == nil {
+		return nil, false
+	}
+
+	return o.Type, true
+}
+
+// SetType sets field value
+func (o *ClusterBackupList) SetType(v ResourceType) {
+
+	o.Type = &v
+
+}
+
+// HasType returns a boolean if a field has been set.
+func (o *ClusterBackupList) HasType() bool {
+	if o != nil && o.Type != nil {
+		return true
+	}
+
+	return false
+}
+
+// GetId returns the Id field value
+// If the value is explicit nil, the zero value for string will be returned
+func (o *ClusterBackupList) GetId() *string {
+	if o == nil {
+		return nil
+	}
+
+	return o.Id
+
+}
+
+// GetIdOk returns a tuple with the Id field value
+// and a boolean to check if the value has been set.
+// NOTE: If the value is an explicit nil, `nil, true` will be returned
+func (o *ClusterBackupList) GetIdOk() (*string, bool) {
+	if o == nil {
+		return nil, false
+	}
+
+	return o.Id, true
+}
+
+// SetId sets field value
+func (o *ClusterBackupList) SetId(v string) {
+
+	o.Id = &v
+
+}
+
+// HasId returns a boolean if a field has been set.
+func (o *ClusterBackupList) HasId() bool {
+	if o != nil && o.Id != nil {
+		return true
+	}
+
+	return false
+}
+
+// GetItems returns the Items field value
+// If the value is explicit nil, the zero value for []BackupResponse will be returned
+func (o *ClusterBackupList) GetItems() *[]BackupResponse {
+	if o == nil {
+		return nil
+	}
+
+	return o.Items
+
+}
+
+// GetItemsOk returns a tuple with the Items field value
+// and a boolean to check if the value has been set.
+// NOTE: If the value is an explicit nil, `nil, true` will be returned
+func (o *ClusterBackupList) GetItemsOk() (*[]BackupResponse, bool) {
+	if o == nil {
+		return nil, false
+	}
+
+	return o.Items, true
+}
+
+// SetItems sets field value
+func (o *ClusterBackupList) SetItems(v []BackupResponse) {
+
+	o.Items = &v
+
+}
+
+// HasItems returns a boolean if a field has been set.
+func (o *ClusterBackupList) HasItems() bool {
+	if o != nil && o.Items != nil {
+		return true
+	}
+
+	return false
+}
+
 func (o ClusterBackupList) MarshalJSON() ([]byte, error) {
 	toSerialize := map[string]interface{}{}
-	if o.Type != nil {
-		toSerialize["type"] = o.Type
-	}
-
-	if o.Id != nil {
-		toSerialize["id"] = o.Id
-	}
-
-	if o.Items != nil {
-		toSerialize["items"] = o.Items
-	}
-
 	if o.Offset != nil {
 		toSerialize["offset"] = o.Offset
 	}
@@ -306,6 +294,18 @@ func (o ClusterBackupList) MarshalJSON() ([]byte, error) {
 
 	if o.Links != nil {
 		toSerialize["links"] = o.Links
+	}
+
+	if o.Type != nil {
+		toSerialize["type"] = o.Type
+	}
+
+	if o.Id != nil {
+		toSerialize["id"] = o.Id
+	}
+
+	if o.Items != nil {
+		toSerialize["items"] = o.Items
 	}
 
 	return json.Marshal(toSerialize)

@@ -634,3 +634,62 @@ resource ` + DNSRecordResource + ` ` + DNSRecordTestResourceName + ` {
 	` + recordEnabledAttribute + ` = ` + recordEnabledValue + `
 }
 `
+
+// Logging Pipeline constants
+// Attributes
+const pipelineNameAttribute = "name"
+const pipelineLogAttribute = "log"
+const pipelineLogSourceAttribute = "source"
+const pipelineLogTagAttribute = "tag"
+const pipelineLogProtocolAttribute = "protocol"
+const pipelineLogDestinationAttribute = "destinations"
+const pipelineLogDestinationTypeAttribute = "type"
+const pipelineLogDestinationRetentionAttribute = "retention_in_days"
+
+// Values
+const pipelineNameValue = "testpipeline"
+const pipelineLogSourceValue = "kubernetes"
+const pipelineLogTagValue = "testtag"
+const pipelineLogProtocolValue = "http"
+const pipelineLogDestinationTypeValue = "loki"
+const pipelineLogDestinationRetentionValue = "7"
+const pipelineLogDestination = pipelineLogDestinationAttribute + `{
+	` + pipelineLogDestinationTypeAttribute + ` = "` + pipelineLogDestinationTypeValue + `"
+	` + pipelineLogDestinationRetentionAttribute + ` = "` + pipelineLogDestinationRetentionValue + `"
+}`
+const pipelineLog = pipelineLogAttribute + `{
+	` + pipelineLogSourceAttribute + ` = "` + pipelineLogSourceValue + `"
+	` + pipelineLogTagAttribute + ` = "` + pipelineLogTagValue + `"
+	` + pipelineLogProtocolAttribute + ` = "` + pipelineLogProtocolValue + `"
+	` + pipelineLogDestination + `
+}`
+
+// Update values
+const pipelineNameUpdatedValue = "updatedtestpipeline"
+const pipelineLogSourceUpdatedValue = "docker"
+const pipelineLogTagUpdatedValue = "updatedtesttag"
+const pipelineLogProtocolUpdatedValue = "tcp"
+const pipelineLogDestinationRetentionUpdatedValue = "14"
+const pipelineLogDestinationUpdated = pipelineLogDestinationAttribute + `{
+	` + pipelineLogDestinationTypeAttribute + ` = "` + pipelineLogDestinationTypeValue + `"
+	` + pipelineLogDestinationRetentionAttribute + ` = "` + pipelineLogDestinationRetentionUpdatedValue + `"
+}`
+const pipelineLogUpdated = pipelineLogAttribute + `{
+	` + pipelineLogSourceAttribute + ` = "` + pipelineLogSourceUpdatedValue + `"
+	` + pipelineLogTagAttribute + ` = "` + pipelineLogTagUpdatedValue + `"
+	` + pipelineLogProtocolAttribute + ` = "` + pipelineLogProtocolUpdatedValue + `"
+	` + pipelineLogDestinationUpdated + `
+}`
+
+// Standard configuration
+const LoggingPipelineConfig = `
+resource ` + LoggingPipelineResource + ` ` + LoggingPipelineTestResourceName + ` {
+	` + pipelineNameAttribute + ` = "` + pipelineNameValue + `"
+	` + pipelineLog + `
+}
+`
+
+// DBaaS PgSQL constants
+
+// Attributes
+const clusterIdAttribute = "cluster_id"

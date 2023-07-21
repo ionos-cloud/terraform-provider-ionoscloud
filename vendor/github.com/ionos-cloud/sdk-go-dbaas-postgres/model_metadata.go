@@ -15,17 +15,22 @@ import (
 	"time"
 )
 
-// Metadata Metadata of the resource.
+// Metadata struct for Metadata
 type Metadata struct {
-	// The ISO 8601 creation timestamp.
-	CreatedDate     *IonosTime `json:"createdDate,omitempty"`
-	CreatedBy       *string    `json:"createdBy,omitempty"`
-	CreatedByUserId *string    `json:"createdByUserId,omitempty"`
-	// The ISO 8601 modified timestamp.
-	LastModifiedDate     *IonosTime `json:"lastModifiedDate,omitempty"`
-	LastModifiedBy       *string    `json:"lastModifiedBy,omitempty"`
-	LastModifiedByUserId *string    `json:"lastModifiedByUserId,omitempty"`
-	State                *State     `json:"state,omitempty"`
+	// The URN of an IAM user.
+	CreatedBy *string `json:"createdBy,omitempty"`
+	// The ID of an IAM user.
+	CreatedByUserId *string `json:"createdByUserId,omitempty"`
+	// An ISO 8601 timestamp.
+	CreatedDate *IonosTime `json:"createdDate,omitempty"`
+	// The URN of an IAM user.
+	LastModifiedBy *string `json:"lastModifiedBy,omitempty"`
+	// The ID of an IAM user.
+	LastModifiedByUserId *string `json:"lastModifiedByUserId,omitempty"`
+	// An ISO 8601 timestamp.
+	LastModifiedDate *IonosTime `json:"lastModifiedDate,omitempty"`
+	// The URN of the resource.
+	ResourceURN *string `json:"resourceURN,omitempty"`
 }
 
 // NewMetadata instantiates a new Metadata object
@@ -44,51 +49,6 @@ func NewMetadata() *Metadata {
 func NewMetadataWithDefaults() *Metadata {
 	this := Metadata{}
 	return &this
-}
-
-// GetCreatedDate returns the CreatedDate field value
-// If the value is explicit nil, the zero value for time.Time will be returned
-func (o *Metadata) GetCreatedDate() *time.Time {
-	if o == nil {
-		return nil
-	}
-
-	if o.CreatedDate == nil {
-		return nil
-	}
-	return &o.CreatedDate.Time
-
-}
-
-// GetCreatedDateOk returns a tuple with the CreatedDate field value
-// and a boolean to check if the value has been set.
-// NOTE: If the value is an explicit nil, `nil, true` will be returned
-func (o *Metadata) GetCreatedDateOk() (*time.Time, bool) {
-	if o == nil {
-		return nil, false
-	}
-
-	if o.CreatedDate == nil {
-		return nil, false
-	}
-	return &o.CreatedDate.Time, true
-
-}
-
-// SetCreatedDate sets field value
-func (o *Metadata) SetCreatedDate(v time.Time) {
-
-	o.CreatedDate = &IonosTime{v}
-
-}
-
-// HasCreatedDate returns a boolean if a field has been set.
-func (o *Metadata) HasCreatedDate() bool {
-	if o != nil && o.CreatedDate != nil {
-		return true
-	}
-
-	return false
 }
 
 // GetCreatedBy returns the CreatedBy field value
@@ -167,45 +127,45 @@ func (o *Metadata) HasCreatedByUserId() bool {
 	return false
 }
 
-// GetLastModifiedDate returns the LastModifiedDate field value
+// GetCreatedDate returns the CreatedDate field value
 // If the value is explicit nil, the zero value for time.Time will be returned
-func (o *Metadata) GetLastModifiedDate() *time.Time {
+func (o *Metadata) GetCreatedDate() *time.Time {
 	if o == nil {
 		return nil
 	}
 
-	if o.LastModifiedDate == nil {
+	if o.CreatedDate == nil {
 		return nil
 	}
-	return &o.LastModifiedDate.Time
+	return &o.CreatedDate.Time
 
 }
 
-// GetLastModifiedDateOk returns a tuple with the LastModifiedDate field value
+// GetCreatedDateOk returns a tuple with the CreatedDate field value
 // and a boolean to check if the value has been set.
 // NOTE: If the value is an explicit nil, `nil, true` will be returned
-func (o *Metadata) GetLastModifiedDateOk() (*time.Time, bool) {
+func (o *Metadata) GetCreatedDateOk() (*time.Time, bool) {
 	if o == nil {
 		return nil, false
 	}
 
-	if o.LastModifiedDate == nil {
+	if o.CreatedDate == nil {
 		return nil, false
 	}
-	return &o.LastModifiedDate.Time, true
+	return &o.CreatedDate.Time, true
 
 }
 
-// SetLastModifiedDate sets field value
-func (o *Metadata) SetLastModifiedDate(v time.Time) {
+// SetCreatedDate sets field value
+func (o *Metadata) SetCreatedDate(v time.Time) {
 
-	o.LastModifiedDate = &IonosTime{v}
+	o.CreatedDate = &IonosTime{v}
 
 }
 
-// HasLastModifiedDate returns a boolean if a field has been set.
-func (o *Metadata) HasLastModifiedDate() bool {
-	if o != nil && o.LastModifiedDate != nil {
+// HasCreatedDate returns a boolean if a field has been set.
+func (o *Metadata) HasCreatedDate() bool {
+	if o != nil && o.CreatedDate != nil {
 		return true
 	}
 
@@ -288,38 +248,83 @@ func (o *Metadata) HasLastModifiedByUserId() bool {
 	return false
 }
 
-// GetState returns the State field value
-// If the value is explicit nil, the zero value for State will be returned
-func (o *Metadata) GetState() *State {
+// GetLastModifiedDate returns the LastModifiedDate field value
+// If the value is explicit nil, the zero value for time.Time will be returned
+func (o *Metadata) GetLastModifiedDate() *time.Time {
 	if o == nil {
 		return nil
 	}
 
-	return o.State
+	if o.LastModifiedDate == nil {
+		return nil
+	}
+	return &o.LastModifiedDate.Time
 
 }
 
-// GetStateOk returns a tuple with the State field value
+// GetLastModifiedDateOk returns a tuple with the LastModifiedDate field value
 // and a boolean to check if the value has been set.
 // NOTE: If the value is an explicit nil, `nil, true` will be returned
-func (o *Metadata) GetStateOk() (*State, bool) {
+func (o *Metadata) GetLastModifiedDateOk() (*time.Time, bool) {
 	if o == nil {
 		return nil, false
 	}
 
-	return o.State, true
-}
-
-// SetState sets field value
-func (o *Metadata) SetState(v State) {
-
-	o.State = &v
+	if o.LastModifiedDate == nil {
+		return nil, false
+	}
+	return &o.LastModifiedDate.Time, true
 
 }
 
-// HasState returns a boolean if a field has been set.
-func (o *Metadata) HasState() bool {
-	if o != nil && o.State != nil {
+// SetLastModifiedDate sets field value
+func (o *Metadata) SetLastModifiedDate(v time.Time) {
+
+	o.LastModifiedDate = &IonosTime{v}
+
+}
+
+// HasLastModifiedDate returns a boolean if a field has been set.
+func (o *Metadata) HasLastModifiedDate() bool {
+	if o != nil && o.LastModifiedDate != nil {
+		return true
+	}
+
+	return false
+}
+
+// GetResourceURN returns the ResourceURN field value
+// If the value is explicit nil, the zero value for string will be returned
+func (o *Metadata) GetResourceURN() *string {
+	if o == nil {
+		return nil
+	}
+
+	return o.ResourceURN
+
+}
+
+// GetResourceURNOk returns a tuple with the ResourceURN field value
+// and a boolean to check if the value has been set.
+// NOTE: If the value is an explicit nil, `nil, true` will be returned
+func (o *Metadata) GetResourceURNOk() (*string, bool) {
+	if o == nil {
+		return nil, false
+	}
+
+	return o.ResourceURN, true
+}
+
+// SetResourceURN sets field value
+func (o *Metadata) SetResourceURN(v string) {
+
+	o.ResourceURN = &v
+
+}
+
+// HasResourceURN returns a boolean if a field has been set.
+func (o *Metadata) HasResourceURN() bool {
+	if o != nil && o.ResourceURN != nil {
 		return true
 	}
 
@@ -328,10 +333,6 @@ func (o *Metadata) HasState() bool {
 
 func (o Metadata) MarshalJSON() ([]byte, error) {
 	toSerialize := map[string]interface{}{}
-	if o.CreatedDate != nil {
-		toSerialize["createdDate"] = o.CreatedDate
-	}
-
 	if o.CreatedBy != nil {
 		toSerialize["createdBy"] = o.CreatedBy
 	}
@@ -340,8 +341,8 @@ func (o Metadata) MarshalJSON() ([]byte, error) {
 		toSerialize["createdByUserId"] = o.CreatedByUserId
 	}
 
-	if o.LastModifiedDate != nil {
-		toSerialize["lastModifiedDate"] = o.LastModifiedDate
+	if o.CreatedDate != nil {
+		toSerialize["createdDate"] = o.CreatedDate
 	}
 
 	if o.LastModifiedBy != nil {
@@ -352,8 +353,12 @@ func (o Metadata) MarshalJSON() ([]byte, error) {
 		toSerialize["lastModifiedByUserId"] = o.LastModifiedByUserId
 	}
 
-	if o.State != nil {
-		toSerialize["state"] = o.State
+	if o.LastModifiedDate != nil {
+		toSerialize["lastModifiedDate"] = o.LastModifiedDate
+	}
+
+	if o.ResourceURN != nil {
+		toSerialize["resourceURN"] = o.ResourceURN
 	}
 
 	return json.Marshal(toSerialize)
