@@ -292,7 +292,7 @@ func extractOrderedFirewallIds(foundRules, sentRules []ionoscloud.FirewallRule) 
 	return ruleIds
 }
 
-func setFwRuleIdsInSchema(d *schema.ResourceData) error {
+func setFwRuleIdsInSchemaInCaseOfProviderUpdate(d *schema.ResourceData) error {
 	if _, ok := d.GetOk("firewallrule_ids"); !ok {
 		if fwRuleItf, ok := d.GetOk("firewallrule_id"); ok {
 			firewallRule := fwRuleItf.(string)

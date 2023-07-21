@@ -1353,7 +1353,7 @@ func setResourceServerData(ctx context.Context, client *ionoscloud.APIClient, d 
 	}
 	// takes care of an upgrade from a version that does not have firewallrule_ids(pre 6.4.2)
 	// to one that has it(>=6.4.2)
-	if err := setFwRuleIdsInSchema(d); err != nil {
+	if err := setFwRuleIdsInSchemaInCaseOfProviderUpdate(d); err != nil {
 		return err
 	}
 
