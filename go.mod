@@ -13,8 +13,8 @@ require (
 	github.com/ionos-cloud/sdk-go-dbaas-postgres v1.1.1
 	github.com/ionos-cloud/sdk-go-dns v1.1.1
 	github.com/ionos-cloud/sdk-go-logging v1.0.0
-	github.com/ionos-cloud/sdk-go/v6 v6.1.7
-	golang.org/x/crypto v0.10.0
+	github.com/ionos-cloud/sdk-go/v6 v6.1.8
+	golang.org/x/crypto v0.11.0
 	gopkg.in/yaml.v3 v3.0.1
 )
 
@@ -62,12 +62,12 @@ require (
 	github.com/vmihailenco/tagparser/v2 v2.0.0 // indirect
 	github.com/zclconf/go-cty v1.13.2 // indirect
 	golang.org/x/mod v0.10.0 // indirect
-	golang.org/x/net v0.11.0 // indirect
-	golang.org/x/oauth2 v0.8.0 // indirect
-	golang.org/x/sys v0.9.0 // indirect
-	golang.org/x/text v0.10.0 // indirect
+	golang.org/x/net v0.12.0 // indirect
+	golang.org/x/oauth2 v0.10.0 // indirect
+	golang.org/x/sys v0.10.0 // indirect
+	golang.org/x/text v0.11.0 // indirect
 	google.golang.org/appengine v1.6.7 // indirect
 	google.golang.org/genproto/googleapis/rpc v0.0.0-20230530153820-e85fd2cbaebc // indirect
 	google.golang.org/grpc v1.55.0 // indirect
-	google.golang.org/protobuf v1.30.0 // indirect
+	google.golang.org/protobuf v1.31.0 // indirect
 )
