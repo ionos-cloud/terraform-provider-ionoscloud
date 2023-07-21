@@ -1,6 +1,6 @@
 module github.com/ionos-cloud/terraform-provider-ionoscloud/v6
 
-go 1.19
+go 1.20
 
 require (
 	github.com/gofrs/uuid/v5 v5.0.0

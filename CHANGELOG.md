@@ -1,3 +1,8 @@
+## 6.4.5
+### Features
+- Make `nic` list in `ionoscloud_server` resource optional
+- Make `firewall` list in `ionoscloud_server` resource optional and allow multiple inline firewall rules in the list
+
 ## 6.4.4
 
 ### Features

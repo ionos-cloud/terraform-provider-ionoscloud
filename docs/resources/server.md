@@ -152,15 +152,17 @@ resource "random_password" "server_image_password" {
 - `licence_type` - (Optional)[string] Sets the OS type of the server.
 - `cpu_family` - (Optional)[string] CPU architecture on which server gets provisioned; not all CPU architectures are available in all datacenter regions; available CPU architectures can be retrieved from the datacenter resource. E.g.: "AMD_OPTERON", "INTEL_XEON" or "INTEL_SKYLAKE".
 - `volume` - (Required) See the [Volume](volume.md) section.
-- `nic` - (Required) See the [Nic](nic.md) section.
+- `nic` - (Optional) See the [Nic](nic.md) section.
+- `firewall` - (Optional) Allows to define firewall rules inline in the server. See the [Firewall](firewall.md) section.
 - `boot_volume` - (Computed) The associated boot volume.
 - `boot_cdrom` - (Optional)[string] The associated boot drive, if any.
 - `boot_image` - (Optional)[string] The image or snapshot UUID / name. May also be an image alias. It is required if `licence_type` is not provided.
 - `primary_nic` - (Computed) The associated NIC.
 - `primary_ip` - (Computed) The associated IP address.
 - `firewallrule_id` - (Computed) The associated firewall rule.
+- `firewallrule_ids` - (Computed) The associated firewall rules.
 - `ssh_key_path` - (Optional)[list] List of absolute paths to files containing a public SSH key that will be injected into IonosCloud provided Linux images.  Also accepts ssh keys directly. Required for IonosCloud Linux images. Required if `image_password` is not provided. Does not support `~` expansion to homedir in the given path. This property is immutable.
-- `ssh_keys` - (Optional)[list] "Immutable List of absolute or relative paths to files containing public SSH key that will be injected into IonosCloud provided Linux images. Also accepts ssh keys directly. Public SSH keys are set on the image as authorized keys for appropriate SSH login to the instance using the corresponding private key. This field may only be set in creation requests. When reading, it always returns null. SSH keys are only supported if a public Linux image is used for the volume creation. Does not support `~` expansion to homedir in the given path.",
+- `ssh_keys` - (Optional)[list] Immutable List of absolute or relative paths to files containing public SSH key that will be injected into IonosCloud provided Linux images. Also accepts ssh keys directly. Public SSH keys are set on the image as authorized keys for appropriate SSH login to the instance using the corresponding private key. This field may only be set in creation requests. When reading, it always returns null. SSH keys are only supported if a public Linux image is used for the volume creation. Does not support `~` expansion to homedir in the given path.
 - `image_password` - (Optional)[string] Required if `ssh_key_path` is not provided.
 - `type` - (Optional)[string] Server usages: [ENTERPRISE](https://docs.ionos.com/cloud/compute-engine/virtual-servers/virtual-servers) or [CUBE](https://docs.ionos.com/cloud/compute-engine/virtual-servers/cloud-cubes). This property is immutable.
 - `label` - (Optional) A label can be seen as an object with only two required fields: `key` and `value`, both of the `string` type. Please check the example presented above to see how a `label` can be used in the plan. A server can have multiple labels.
@@ -194,3 +196,9 @@ terraform import ionoscloud_server.myserver {datacenter uuid}/{server uuid}/{pri
 ## Notes
 
 Please note that for any secondary volume, you need to set the **licence_type** property to **UNKNOWN**
+
+⚠️ **Note:** Important for deleting an `firewall` rule from within a list of inline resources defined on the same nic. There is one limitation to removing one firewall rule
+from the middle of the list of `firewall` rules. Terraform will actually modify the existing rules and delete the last one.
+More details [here](https://github.com/hashicorp/terraform/issues/14275). There is a workaround described in the issue 
+that involves moving the resources in the list prior to deletion.
+`terraform state mv <resource-name>.<resource-id>[<i>] <resource-name>.<resource-id>[<j>]`
