@@ -4,12 +4,13 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"strings"
+
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 	dbaas "github.com/ionos-cloud/sdk-go-dbaas-postgres"
 	dbaasService "github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/dbaas"
-	"strings"
 )
 
 func dataSourceDbaasPgSqlCluster() *schema.Resource {

@@ -3,14 +3,15 @@ package dbaas
 import (
 	"context"
 	"fmt"
+	"log"
+	"strings"
+	"time"
+
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	mongo "github.com/ionos-cloud/sdk-go-dbaas-mongo"
 	psql "github.com/ionos-cloud/sdk-go-dbaas-postgres"
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils"
-	"log"
-	"strings"
-	"time"
 )
 
 func (c *PsqlClient) GetCluster(ctx context.Context, clusterId string) (psql.ClusterResponse, *psql.APIResponse, error) {

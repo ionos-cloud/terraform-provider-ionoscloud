@@ -3,13 +3,14 @@ package dataplatform
 import (
 	"context"
 	"fmt"
+	"log"
+	"strings"
+
 	"github.com/google/uuid"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	dataplatform "github.com/ionos-cloud/sdk-go-dataplatform"
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils"
-	"log"
-	"strings"
 )
 
 var nodePoolResourceName = "Dataplatform Node Pool"

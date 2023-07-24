@@ -2,13 +2,14 @@ package dbaas
 
 import (
 	"fmt"
+	"net/http"
+	"os"
+	"runtime"
+
 	"github.com/hashicorp/terraform-plugin-sdk/v2/meta"
 	mongo "github.com/ionos-cloud/sdk-go-dbaas-mongo"
 	psql "github.com/ionos-cloud/sdk-go-dbaas-postgres"
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils"
-	"net/http"
-	"os"
-	"runtime"
 )
 
 type PsqlClient struct {

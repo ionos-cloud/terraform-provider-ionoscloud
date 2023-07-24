@@ -3,11 +3,12 @@ package logging
 import (
 	"context"
 	"fmt"
+	"log"
+	"strings"
+
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	logging "github.com/ionos-cloud/sdk-go-logging"
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils"
-	"log"
-	"strings"
 )
 
 var pipelineResourceName = "Logging Pipeline"
