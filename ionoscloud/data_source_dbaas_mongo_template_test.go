@@ -4,6 +4,7 @@ package ionoscloud
 
 import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
+	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils/constant"
 	"regexp"
 	"testing"
 )
@@ -61,7 +62,7 @@ func TestAccDataSourceDBaaSMongoTemplate(t *testing.T) {
 }
 
 const invalidMissingBothIdAndName = `
-data ` + DBaaSMongoTemplateResource + ` ` + DBaaSMongoTemplateTestDataSource + ` {
+data ` + constant.DBaaSMongoTemplateResource + ` ` + constant.DBaaSMongoTemplateTestDataSource + ` {
 }`
 
 // We are looking for an UUID that doesn't exist. Usually, simply generating a value wouldn't be
@@ -69,41 +70,41 @@ data ` + DBaaSMongoTemplateResource + ` ` + DBaaSMongoTemplateTestDataSource + `
 // that the UUID consists of several characters, the probability of generating an UUID that already
 // exists is very small, so we don't need any additional check.
 const invalidProvidingBothIdAndName = resourceRandomUUID + resourceRandomString + `
-data ` + DBaaSMongoTemplateResource + ` ` + DBaaSMongoTemplateTestDataSource + ` {
+data ` + constant.DBaaSMongoTemplateResource + ` ` + constant.DBaaSMongoTemplateTestDataSource + ` {
 	id = random_uuid.uuid.result
 	name = random_string.simple_string.result
 }`
 
 const invalidGetByIdNonExistentTemplate = resourceRandomUUID + `
-data ` + DBaaSMongoTemplateResource + ` ` + DBaaSMongoTemplateTestDataSource + ` {
+data ` + constant.DBaaSMongoTemplateResource + ` ` + constant.DBaaSMongoTemplateTestDataSource + ` {
 	id = random_uuid.uuid.result
 }`
 
 const invalidGetByNameNonExistentTemplate = resourceRandomString + `
-data ` + DBaaSMongoTemplateResource + ` ` + DBaaSMongoTemplateTestDataSource + ` {
+data ` + constant.DBaaSMongoTemplateResource + ` ` + constant.DBaaSMongoTemplateTestDataSource + ` {
 	name = random_string.simple_string.result
 }`
 
 const invalidGetByNameMultipleTemplates = `
-data ` + DBaaSMongoTemplateResource + ` ` + DBaaSMongoTemplateTestDataSource + ` {
+data ` + constant.DBaaSMongoTemplateResource + ` ` + constant.DBaaSMongoTemplateTestDataSource + ` {
 	name = "MongoDB"
 	partial_match = true
 }`
 
-const dataSourceAccess = DataSource + "." + DBaaSMongoTemplateResource + "." + DBaaSMongoTemplateTestDataSource
+const dataSourceAccess = constant.DataSource + "." + constant.DBaaSMongoTemplateResource + "." + constant.DBaaSMongoTemplateTestDataSource
 
 const validGetById = `
-data ` + DBaaSMongoTemplateResource + ` ` + DBaaSMongoTemplateTestDataSource + ` {
+data ` + constant.DBaaSMongoTemplateResource + ` ` + constant.DBaaSMongoTemplateTestDataSource + ` {
 	id = "3a199f09-9699-4493-a858-82d9f55a382e"
 }`
 
 const validGetByName = `
-data ` + DBaaSMongoTemplateResource + ` ` + DBaaSMongoTemplateTestDataSource + ` {
+data ` + constant.DBaaSMongoTemplateResource + ` ` + constant.DBaaSMongoTemplateTestDataSource + ` {
 	name = "MongoDB Business 4XL"
 }`
 
 const validGetByNamePartialMatch = `
-data ` + DBaaSMongoTemplateResource + ` ` + DBaaSMongoTemplateTestDataSource + ` {
+data ` + constant.DBaaSMongoTemplateResource + ` ` + constant.DBaaSMongoTemplateTestDataSource + ` {
 	name = "Business 4XL"
 	partial_match = true
 }`

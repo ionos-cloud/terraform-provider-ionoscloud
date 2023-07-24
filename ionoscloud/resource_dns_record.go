@@ -3,6 +3,7 @@ package ionoscloud
 import (
 	"context"
 	"fmt"
+	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services"
 	"log"
 	"strings"
 
@@ -65,7 +66,7 @@ func resourceDNSRecord() *schema.Resource {
 }
 
 func recordCreate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
-	client := meta.(SdkBundle).DNSClient
+	client := meta.(services.SdkBundle).DNSClient
 	zoneId := d.Get("zone_id").(string)
 
 	recordResponse, _, err := client.CreateRecord(ctx, zoneId, d)
@@ -87,7 +88,7 @@ func recordCreate(ctx context.Context, d *schema.ResourceData, meta interface{})
 }
 
 func recordRead(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
-	client := meta.(SdkBundle).DNSClient
+	client := meta.(services.SdkBundle).DNSClient
 	zoneId := d.Get("zone_id").(string)
 	recordId := d.Id()
 
@@ -107,7 +108,7 @@ func recordRead(ctx context.Context, d *schema.ResourceData, meta interface{}) d
 }
 
 func recordUpdate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
-	client := meta.(SdkBundle).DNSClient
+	client := meta.(services.SdkBundle).DNSClient
 	zoneId := d.Get("zone_id").(string)
 	recordId := d.Id()
 
@@ -126,7 +127,7 @@ func recordUpdate(ctx context.Context, d *schema.ResourceData, meta interface{})
 }
 
 func recordDelete(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
-	client := meta.(SdkBundle).DNSClient
+	client := meta.(services.SdkBundle).DNSClient
 	zoneId := d.Get("zone_id").(string)
 	recordId := d.Id()
 
@@ -146,7 +147,7 @@ func recordDelete(ctx context.Context, d *schema.ResourceData, meta interface{})
 }
 
 func recordImport(ctx context.Context, d *schema.ResourceData, meta interface{}) ([]*schema.ResourceData, error) {
-	client := meta.(SdkBundle).DNSClient
+	client := meta.(services.SdkBundle).DNSClient
 
 	// Split the string provided in order to get the IDs for both zone and record.
 	parts := strings.Split(d.Id(), "/")

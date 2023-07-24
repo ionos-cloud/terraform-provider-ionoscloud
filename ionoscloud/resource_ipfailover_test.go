@@ -6,6 +6,8 @@ import (
 	"context"
 	"fmt"
 	ionoscloud "github.com/ionos-cloud/sdk-go/v6"
+	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services"
+	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils/constant"
 	"testing"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
@@ -43,11 +45,11 @@ func TestAccLanIPFailoverBasic(t *testing.T) {
 			{
 				Config: testAccDataSourceIpFailoverConfigBasic,
 				Check: resource.ComposeTestCheckFunc(
-					resource.TestCheckResourceAttrSet(ipfailoverResourceFullName, "id"),
-					resource.TestCheckResourceAttrPair(ipfailoverResourceFullName, "id", DataSource+"."+ResourceIpFailover+"."+ipfailoverName, "id"),
-					resource.TestCheckResourceAttrPair(ipfailoverResourceFullName, "nicuuid", DataSource+"."+ResourceIpFailover+"."+ipfailoverName, "nicuuid"),
-					resource.TestCheckResourceAttrPair(ipfailoverResourceFullName, "lan_id", DataSource+"."+ResourceIpFailover+"."+ipfailoverName, "lan_id"),
-					resource.TestCheckResourceAttrPair(ipfailoverResourceFullName, "datacenter_id", DataSource+"."+ResourceIpFailover+"."+ipfailoverName, "datacenter_id"),
+					resource.TestCheckResourceAttrSet(constant.IpfailoverResourceFullName, "id"),
+					resource.TestCheckResourceAttrPair(constant.IpfailoverResourceFullName, "id", constant.DataSource+"."+constant.ResourceIpFailover+"."+constant.IpfailoverName, "id"),
+					resource.TestCheckResourceAttrPair(constant.IpfailoverResourceFullName, "nicuuid", constant.DataSource+"."+constant.ResourceIpFailover+"."+constant.IpfailoverName, "nicuuid"),
+					resource.TestCheckResourceAttrPair(constant.IpfailoverResourceFullName, "lan_id", constant.DataSource+"."+constant.ResourceIpFailover+"."+constant.IpfailoverName, "lan_id"),
+					resource.TestCheckResourceAttrPair(constant.IpfailoverResourceFullName, "datacenter_id", constant.DataSource+"."+constant.ResourceIpFailover+"."+constant.IpfailoverName, "datacenter_id"),
 				),
 			},
 			{
@@ -65,7 +67,7 @@ func TestAccLanIPFailoverBasic(t *testing.T) {
 
 func testAccCheckLanIPFailoverGroupExists(n string, _ *ionoscloud.Lan, _ *ionoscloud.IPFailover) resource.TestCheckFunc {
 	return func(s *terraform.State) error {
-		client := testAccProvider.Meta().(SdkBundle).CloudApiClient
+		client := testAccProvider.Meta().(services.SdkBundle).CloudApiClient
 
 		rs, ok := s.RootModule().Resources[n]
 		if !ok {
@@ -110,7 +112,7 @@ func testAccCheckLanIPFailoverGroupExists(n string, _ *ionoscloud.Lan, _ *ionosc
 }
 
 func testAccCheckLanIPFailoverDestroyCheck(s *terraform.State) error {
-	client := testAccProvider.Meta().(SdkBundle).CloudApiClient
+	client := testAccProvider.Meta().(services.SdkBundle).CloudApiClient
 
 	ctx, cancel := context.WithTimeout(context.Background(), *resourceDefaultTimeouts.Default)
 
@@ -182,7 +184,7 @@ resource "ionoscloud_server" "webserver" {
   availability_zone = "ZONE_1"
   cpu_family = "AMD_OPTERON"
   image_name = "ubuntu:latest"
-  image_password = ` + RandomPassword + `.server_image_password.result
+  image_password = ` + constant.RandomPassword + `.server_image_password.result
   volume {
     name = "system"
     size = 15
@@ -230,7 +232,7 @@ resource "ionoscloud_server" "webserver" {
   availability_zone = "ZONE_1"
   cpu_family = "AMD_OPTERON"
   image_name = "ubuntu:latest"
-  image_password = ` + RandomPassword + `.server_image_password.result
+  image_password = ` + constant.RandomPassword + `.server_image_password.result
   volume {
     name = "system"
     size = 15
@@ -246,8 +248,8 @@ resource "ionoscloud_server" "webserver" {
 ` + ServerImagePassword
 
 var testAccDataSourceIpFailoverConfigBasic = testAccCheckLanIPFailoverConfig + `
-data ` + ResourceIpFailover + " " + ipfailoverName + `{
+data ` + constant.ResourceIpFailover + " " + constant.IpfailoverName + `{
   datacenter_id = "${ionoscloud_datacenter.foobar.id}"
-  id		    = ` + ipfailoverResourceFullName + `.id
+  id		    = ` + constant.IpfailoverResourceFullName + `.id
 }
 `

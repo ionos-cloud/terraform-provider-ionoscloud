@@ -5,6 +5,7 @@ package ionoscloud
 
 import (
 	"fmt"
+	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils/constant"
 
 	"testing"
 
@@ -19,7 +20,7 @@ func TestAccNatGatewayRuleImportBasic(t *testing.T) {
 		CheckDestroy:      testAccCheckNatGatewayRuleDestroyCheck,
 		Steps: []resource.TestStep{
 			{
-				Config: fmt.Sprintf(testAccCheckNatGatewayRuleConfigBasic, NatGatewayRuleTestResource),
+				Config: fmt.Sprintf(testAccCheckNatGatewayRuleConfigBasic, constant.NatGatewayRuleTestResource),
 			},
 
 			{
@@ -36,7 +37,7 @@ func testAccNatGatewayRuleImportStateId(s *terraform.State) (string, error) {
 	var importID = ""
 
 	for _, rs := range s.RootModule().Resources {
-		if rs.Type != NatGatewayRuleResource {
+		if rs.Type != constant.NatGatewayRuleResource {
 			continue
 		}
 

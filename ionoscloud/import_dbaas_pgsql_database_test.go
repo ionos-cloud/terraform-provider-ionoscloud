@@ -5,6 +5,7 @@ package ionoscloud
 
 import (
 	"fmt"
+	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils/constant"
 	"testing"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
@@ -24,7 +25,7 @@ func TestAccPgSqlDatabaseImport(t *testing.T) {
 				Config: PgSqlDatabaseConfig,
 			},
 			{
-				ResourceName:      PsqlDatabaseResource + "." + PsqlDatabaseTestResource,
+				ResourceName:      constant.PsqlDatabaseResource + "." + constant.PsqlDatabaseTestResource,
 				ImportStateIdFunc: PgSqlDatabaseImportStateId,
 				ImportState:       true,
 				ImportStateVerify: true,
@@ -37,7 +38,7 @@ func PgSqlDatabaseImportStateId(s *terraform.State) (string, error) {
 	var importID = ""
 
 	for _, rs := range s.RootModule().Resources {
-		if rs.Type != PsqlDatabaseResource {
+		if rs.Type != constant.PsqlDatabaseResource {
 			continue
 		}
 

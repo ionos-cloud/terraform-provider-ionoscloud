@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
+	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services"
 	dataplatformService "github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/dataplatform"
 )
 
@@ -26,7 +27,7 @@ func dataSourceDataplatformVersions() *schema.Resource {
 }
 
 func dataSourceDataplatformReadVersions(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
-	client := meta.(SdkBundle).DataplatformClient
+	client := meta.(services.SdkBundle).DataplatformClient
 
 	dataplatformVersions, _, err := client.GetVersions(ctx)
 	if err != nil {

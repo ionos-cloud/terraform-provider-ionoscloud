@@ -8,6 +8,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 	mongo "github.com/ionos-cloud/sdk-go-dbaas-mongo"
 	ionoscloud "github.com/ionos-cloud/sdk-go/v6"
+	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services"
 )
 
 func dataSourceK8sNodePoolNodes() *schema.Resource {
@@ -65,7 +66,7 @@ func dataSourceK8sNodePoolNodes() *schema.Resource {
 }
 
 func dataSourceK8sReadNodePoolNodes(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
-	client := meta.(SdkBundle).CloudApiClient
+	client := meta.(services.SdkBundle).CloudApiClient
 	clusterId := d.Get("k8s_cluster_id")
 	nodePoolId := d.Get("node_pool_id")
 	nodePoolIdStr := nodePoolId.(string)

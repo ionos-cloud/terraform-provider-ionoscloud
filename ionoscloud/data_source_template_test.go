@@ -4,11 +4,12 @@ package ionoscloud
 
 import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
+	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils/constant"
 	"regexp"
 	"testing"
 )
 
-const templateName = DataSource + "." + TemplateResource + "." + TemplateTestResource
+const templateName = constant.DataSource + "." + constant.TemplateResource + "." + constant.TemplateTestResource
 
 func TestAccDataSourceTemplate(t *testing.T) {
 	resource.Test(t, resource.TestCase{
@@ -75,27 +76,27 @@ func TestAccDataSourceTemplate(t *testing.T) {
 }
 
 const testAccDataSourceTemplateName = `
-data ` + TemplateResource + ` ` + TemplateTestResource + ` {
+data ` + constant.TemplateResource + ` ` + constant.TemplateTestResource + ` {
 	name = "CUBES S"
 }`
 
 const testAccDataSourceTemplateCores = `
-data ` + TemplateResource + ` ` + TemplateTestResource + ` {
+data ` + constant.TemplateResource + ` ` + constant.TemplateTestResource + ` {
 	cores = 6
 }`
 
 const testAccDataSourceTemplateRam = `
-data ` + TemplateResource + ` ` + TemplateTestResource + ` {
+data ` + constant.TemplateResource + ` ` + constant.TemplateTestResource + ` {
 	ram = 49152
 }`
 
 const testAccDataSourceTemplateStorageSize = `
-data ` + TemplateResource + ` ` + TemplateTestResource + ` {
+data ` + constant.TemplateResource + ` ` + constant.TemplateTestResource + ` {
 	storage_size = 80
 }`
 
 const testAccDataSourceTemplateStorageWrongNameError = `
-data ` + TemplateResource + ` ` + TemplateTestResource + ` {
+data ` + constant.TemplateResource + ` ` + constant.TemplateTestResource + ` {
 	name		 = "CUBES S"
 	cores		 = 6
 	ram			 = 16384
@@ -103,7 +104,7 @@ data ` + TemplateResource + ` ` + TemplateTestResource + ` {
 }`
 
 const testAccDataSourceTemplateStorageWrongCores = `
-data ` + TemplateResource + ` ` + TemplateTestResource + ` {
+data ` + constant.TemplateResource + ` ` + constant.TemplateTestResource + ` {
 	name		 = "CUBES XL"
 	cores		 = 1
 	ram			 = 16384
@@ -111,7 +112,7 @@ data ` + TemplateResource + ` ` + TemplateTestResource + ` {
 }`
 
 const testAccDataSourceTemplateStorageWrongRam = `
-data ` + TemplateResource + ` ` + TemplateTestResource + ` {
+data ` + constant.TemplateResource + ` ` + constant.TemplateTestResource + ` {
 	name		 = "CUBES XL"
 	cores		 = 6
 	ram			 = 2048
@@ -119,7 +120,7 @@ data ` + TemplateResource + ` ` + TemplateTestResource + ` {
 }`
 
 const testAccDataSourceTemplateStorageWrongStorage = `
-data ` + TemplateResource + ` ` + TemplateTestResource + ` {
+data ` + constant.TemplateResource + ` ` + constant.TemplateTestResource + ` {
 	name		 = "CUBES XL"
 	cores		 = 6
 	ram			 = 16384

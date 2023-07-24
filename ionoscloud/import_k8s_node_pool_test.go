@@ -5,6 +5,7 @@ package ionoscloud
 
 import (
 	"fmt"
+	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils/constant"
 	"testing"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
@@ -22,7 +23,7 @@ func TestAccK8sNodePoolImportBasic(t *testing.T) {
 				Config: testAccCheckK8sNodePoolConfigBasic,
 			},
 			{
-				ResourceName:            ResourceNameK8sNodePool,
+				ResourceName:            constant.ResourceNameK8sNodePool,
 				ImportStateIdFunc:       testAccK8sNodePoolImportStateID,
 				ImportState:             true,
 				ImportStateVerify:       true,
@@ -36,7 +37,7 @@ func testAccK8sNodePoolImportStateID(s *terraform.State) (string, error) {
 	importID := ""
 
 	for _, rs := range s.RootModule().Resources {
-		if rs.Type != K8sNodePoolResource {
+		if rs.Type != constant.K8sNodePoolResource {
 			continue
 		}
 

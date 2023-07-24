@@ -6,6 +6,8 @@ import (
 	"context"
 	"fmt"
 	ionoscloud "github.com/ionos-cloud/sdk-go/v6"
+	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services"
+	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils/constant"
 	"regexp"
 	"testing"
 
@@ -13,9 +15,9 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
 )
 
-var resourceNameAlbRule = ALBForwardingRuleResource + "." + ALBForwardingRuleTestResource
-var dataSourceNameAlbRuleById = DataSource + "." + ALBForwardingRuleResource + "." + ALBForwardingRuleDataSourceById
-var dataSourceNameAlbRuleByName = DataSource + "." + ALBForwardingRuleResource + "." + ALBForwardingRuleDataSourceByName
+var resourceNameAlbRule = constant.ALBForwardingRuleResource + "." + constant.ALBForwardingRuleTestResource
+var dataSourceNameAlbRuleById = constant.DataSource + "." + constant.ALBForwardingRuleResource + "." + constant.ALBForwardingRuleDataSourceById
+var dataSourceNameAlbRuleByName = constant.DataSource + "." + constant.ALBForwardingRuleResource + "." + constant.ALBForwardingRuleDataSourceByName
 
 func TestAccApplicationLoadBalancerForwardingRuleBasic(t *testing.T) {
 	var applicationLoadBalancerForwardingRule ionoscloud.ApplicationLoadBalancerForwardingRule
@@ -31,7 +33,7 @@ func TestAccApplicationLoadBalancerForwardingRuleBasic(t *testing.T) {
 				Config: testAccCheckApplicationLoadBalancerForwardingRuleConfigBasic,
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckApplicationLoadBalancerForwardingRuleExists(resourceNameAlbRule, &applicationLoadBalancerForwardingRule),
-					resource.TestCheckResourceAttr(resourceNameAlbRule, "name", ALBForwardingRuleTestResource),
+					resource.TestCheckResourceAttr(resourceNameAlbRule, "name", constant.ALBForwardingRuleTestResource),
 					resource.TestCheckResourceAttr(resourceNameAlbRule, "protocol", "HTTP"),
 					resource.TestCheckResourceAttr(resourceNameAlbRule, "listener_ip", "10.12.118.224"),
 					resource.TestCheckResourceAttr(resourceNameAlbRule, "listener_port", "8080"),
@@ -116,7 +118,7 @@ func TestAccApplicationLoadBalancerForwardingRuleBasic(t *testing.T) {
 				Config: testAccCheckApplicationLoadBalancerForwardingRuleConfigUpdate,
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckApplicationLoadBalancerForwardingRuleExists(resourceNameAlbRule, &applicationLoadBalancerForwardingRule),
-					resource.TestCheckResourceAttr(resourceNameAlbRule, "name", ALBForwardingRuleTestResource),
+					resource.TestCheckResourceAttr(resourceNameAlbRule, "name", constant.ALBForwardingRuleTestResource),
 					resource.TestCheckResourceAttr(resourceNameAlbRule, "protocol", "HTTP"),
 					resource.TestCheckResourceAttr(resourceNameAlbRule, "listener_ip", "10.12.118.224"),
 					resource.TestCheckResourceAttr(resourceNameAlbRule, "listener_port", "8080"),
@@ -136,7 +138,7 @@ func TestAccApplicationLoadBalancerForwardingRuleBasic(t *testing.T) {
 			{
 				Config: testAccCheckApplicationLoadBalancerForwardingRuleConfigUpdateAgain,
 				Check: resource.ComposeTestCheckFunc(
-					resource.TestCheckResourceAttr(resourceNameAlbRule, "name", UpdatedResources),
+					resource.TestCheckResourceAttr(resourceNameAlbRule, "name", constant.UpdatedResources),
 					resource.TestCheckResourceAttr(resourceNameAlbRule, "protocol", "HTTP"),
 					resource.TestCheckResourceAttr(resourceNameAlbRule, "listener_ip", "10.12.119.224"),
 					resource.TestCheckResourceAttr(resourceNameAlbRule, "listener_port", "8081"),
@@ -168,7 +170,7 @@ func TestAccApplicationLoadBalancerForwardingRuleBasic(t *testing.T) {
 }
 
 func testAccCheckApplicationLoadBalancerForwardingRuleDestroyCheck(s *terraform.State) error {
-	client := testAccProvider.Meta().(SdkBundle).CloudApiClient
+	client := testAccProvider.Meta().(services.SdkBundle).CloudApiClient
 	ctx, cancel := context.WithTimeout(context.Background(), *resourceDefaultTimeouts.Delete)
 
 	if cancel != nil {
@@ -176,7 +178,7 @@ func testAccCheckApplicationLoadBalancerForwardingRuleDestroyCheck(s *terraform.
 	}
 
 	for _, rs := range s.RootModule().Resources {
-		if rs.Type != ALBForwardingRuleResource {
+		if rs.Type != constant.ALBForwardingRuleResource {
 			continue
 		}
 
@@ -201,7 +203,7 @@ func testAccCheckApplicationLoadBalancerForwardingRuleDestroyCheck(s *terraform.
 
 func testAccCheckApplicationLoadBalancerForwardingRuleExists(n string, alb *ionoscloud.ApplicationLoadBalancerForwardingRule) resource.TestCheckFunc {
 	return func(s *terraform.State) error {
-		client := testAccProvider.Meta().(SdkBundle).CloudApiClient
+		client := testAccProvider.Meta().(services.SdkBundle).CloudApiClient
 		rs, ok := s.RootModule().Resources[n]
 
 		if !ok {
@@ -240,10 +242,10 @@ func testAccCheckApplicationLoadBalancerForwardingRuleExists(n string, alb *iono
 }
 
 const testAccCheckApplicationLoadBalancerForwardingRuleConfigBasic = testAccCheckApplicationLoadBalancerConfigUpdate + testAccCheckTargetGroupConfigBasic + `
-resource ` + ALBForwardingRuleResource + ` ` + ALBForwardingRuleTestResource + ` {
- datacenter_id = ` + DatacenterResource + `.alb_datacenter.id
- application_loadbalancer_id = ` + ALBResource + `.` + ALBTestResource + `.id
- name = "` + ALBForwardingRuleTestResource + `"
+resource ` + constant.ALBForwardingRuleResource + ` ` + constant.ALBForwardingRuleTestResource + ` {
+ datacenter_id = ` + constant.DatacenterResource + `.alb_datacenter.id
+ application_loadbalancer_id = ` + constant.ALBResource + `.` + constant.ALBTestResource + `.id
+ name = "` + constant.ALBForwardingRuleTestResource + `"
  protocol = "HTTP"
  listener_ip = "10.12.118.224"
  listener_port = 8080
@@ -269,10 +271,10 @@ resource ` + ALBForwardingRuleResource + ` ` + ALBForwardingRuleTestResource + `
 }`
 
 const testAccCheckApplicationLoadBalancerForwardingRuleConfigUpdate = testAccCheckApplicationLoadBalancerConfigUpdate + testAccCheckTargetGroupConfigBasic + `
-resource ` + ALBForwardingRuleResource + ` ` + ALBForwardingRuleTestResource + ` {
- datacenter_id = ` + DatacenterResource + `.alb_datacenter.id
- application_loadbalancer_id = ` + ALBResource + `.` + ALBTestResource + `.id
- name = "` + ALBForwardingRuleTestResource + `"
+resource ` + constant.ALBForwardingRuleResource + ` ` + constant.ALBForwardingRuleTestResource + ` {
+ datacenter_id = ` + constant.DatacenterResource + `.alb_datacenter.id
+ application_loadbalancer_id = ` + constant.ALBResource + `.` + constant.ALBTestResource + `.id
+ name = "` + constant.ALBForwardingRuleTestResource + `"
  protocol = "HTTP"
  listener_ip = "10.12.118.224"
  listener_port = 8080
@@ -295,10 +297,10 @@ resource ` + ALBForwardingRuleResource + ` ` + ALBForwardingRuleTestResource + `
 }`
 
 const testAccCheckApplicationLoadBalancerForwardingRuleConfigUpdateAgain = testAccCheckApplicationLoadBalancerConfigUpdate + `
-resource ` + ALBForwardingRuleResource + ` ` + ALBForwardingRuleTestResource + ` {
- datacenter_id = ` + DatacenterResource + `.alb_datacenter.id
- application_loadbalancer_id = ` + ALBResource + `.` + ALBTestResource + `.id
- name = "` + UpdatedResources + `"
+resource ` + constant.ALBForwardingRuleResource + ` ` + constant.ALBForwardingRuleTestResource + ` {
+ datacenter_id = ` + constant.DatacenterResource + `.alb_datacenter.id
+ application_loadbalancer_id = ` + constant.ALBResource + `.` + constant.ALBTestResource + `.id
+ name = "` + constant.UpdatedResources + `"
  protocol = "HTTP"
  listener_ip = "10.12.119.224"
  listener_port = 8081
@@ -336,42 +338,42 @@ resource ` + ALBForwardingRuleResource + ` ` + ALBForwardingRuleTestResource + `
 }`
 
 const testAccDataSourceApplicationLoadBalancerForwardingRuleMatchId = testAccCheckApplicationLoadBalancerForwardingRuleConfigBasic + `
-data ` + ALBForwardingRuleResource + ` ` + ALBForwardingRuleDataSourceById + ` {
-  datacenter_id = ` + DatacenterResource + `.alb_datacenter.id
-  application_loadbalancer_id = ` + ALBResource + `.` + ALBTestResource + `.id
-  id			= ` + ALBForwardingRuleResource + `.` + ALBForwardingRuleTestResource + `.id
+data ` + constant.ALBForwardingRuleResource + ` ` + constant.ALBForwardingRuleDataSourceById + ` {
+  datacenter_id = ` + constant.DatacenterResource + `.alb_datacenter.id
+  application_loadbalancer_id = ` + constant.ALBResource + `.` + constant.ALBTestResource + `.id
+  id			= ` + constant.ALBForwardingRuleResource + `.` + constant.ALBForwardingRuleTestResource + `.id
 }
 `
 
 const testAccDataSourceApplicationLoadBalancerForwardingRuleMatchName = testAccCheckApplicationLoadBalancerForwardingRuleConfigBasic + `
-data ` + ALBForwardingRuleResource + ` ` + ALBForwardingRuleDataSourceByName + ` {
-  datacenter_id = ` + DatacenterResource + `.alb_datacenter.id
-  application_loadbalancer_id = ` + ALBResource + `.` + ALBTestResource + `.id
-  name    		= ` + ALBForwardingRuleResource + `.` + ALBForwardingRuleTestResource + `.name
+data ` + constant.ALBForwardingRuleResource + ` ` + constant.ALBForwardingRuleDataSourceByName + ` {
+  datacenter_id = ` + constant.DatacenterResource + `.alb_datacenter.id
+  application_loadbalancer_id = ` + constant.ALBResource + `.` + constant.ALBTestResource + `.id
+  name    		= ` + constant.ALBForwardingRuleResource + `.` + constant.ALBForwardingRuleTestResource + `.name
 }
 `
 
 const testAccDataSourceApplicationLoadBalancerForwardingRuleWrongNameError = testAccCheckApplicationLoadBalancerForwardingRuleConfigBasic + `
-data ` + ALBForwardingRuleResource + ` ` + ALBForwardingRuleDataSourceByName + ` {
-  datacenter_id = ` + DatacenterResource + `.alb_datacenter.id
-  application_loadbalancer_id = ` + ALBResource + `.` + ALBTestResource + `.id
+data ` + constant.ALBForwardingRuleResource + ` ` + constant.ALBForwardingRuleDataSourceByName + ` {
+  datacenter_id = ` + constant.DatacenterResource + `.alb_datacenter.id
+  application_loadbalancer_id = ` + constant.ALBResource + `.` + constant.ALBTestResource + `.id
   name    		=  "wrong_name"
 }
 `
 
 const testAccDataSourceApplicationLoadBalancerForwardingRulePartialMatchName = testAccCheckApplicationLoadBalancerForwardingRuleConfigBasic + `
-data ` + ALBForwardingRuleResource + ` ` + ALBForwardingRuleDataSourceByName + ` {
-  datacenter_id = ` + DatacenterResource + `.alb_datacenter.id
-  application_loadbalancer_id = ` + ALBResource + `.` + ALBTestResource + `.id
-  name          = "` + DataSourcePartial + `"
+data ` + constant.ALBForwardingRuleResource + ` ` + constant.ALBForwardingRuleDataSourceByName + ` {
+  datacenter_id = ` + constant.DatacenterResource + `.alb_datacenter.id
+  application_loadbalancer_id = ` + constant.ALBResource + `.` + constant.ALBTestResource + `.id
+  name          = "` + constant.DataSourcePartial + `"
   partial_match	=  true
 }
 `
 
 const testAccDataSourceApplicationLoadBalancerForwardingRuleWrongPartialNameError = testAccCheckApplicationLoadBalancerForwardingRuleConfigBasic + `
-data ` + ALBForwardingRuleResource + ` ` + ALBForwardingRuleDataSourceByName + ` {
-  datacenter_id = ` + DatacenterResource + `.alb_datacenter.id
-  application_loadbalancer_id = ` + ALBResource + `.` + ALBTestResource + `.id
+data ` + constant.ALBForwardingRuleResource + ` ` + constant.ALBForwardingRuleDataSourceByName + ` {
+  datacenter_id = ` + constant.DatacenterResource + `.alb_datacenter.id
+  application_loadbalancer_id = ` + constant.ALBResource + `.` + constant.ALBTestResource + `.id
   name    		=  "wrong_name"
   partial_match	=  true
 }

@@ -5,6 +5,8 @@ package ionoscloud
 import (
 	"context"
 	"fmt"
+	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services"
+	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils/constant"
 	"regexp"
 	"testing"
 
@@ -75,30 +77,30 @@ func TestAccCertificateResAndDataSource(t *testing.T) {
 			{
 				Config: testAccCheckCertConfigBasic,
 				Check: resource.ComposeTestCheckFunc(
-					resource.TestCheckResourceAttrSet(CertificateResource+"."+TestCertName, "certificate"),
-					resource.TestCheckResourceAttrSet(CertificateResource+"."+TestCertName, "certificate_chain"),
-					resource.TestCheckResourceAttrSet(CertificateResource+"."+TestCertName, "private_key"),
-					resource.TestCheckResourceAttr(CertificateResource+"."+TestCertName, "name", TestCertName),
+					resource.TestCheckResourceAttrSet(constant.CertificateResource+"."+constant.TestCertName, "certificate"),
+					resource.TestCheckResourceAttrSet(constant.CertificateResource+"."+constant.TestCertName, "certificate_chain"),
+					resource.TestCheckResourceAttrSet(constant.CertificateResource+"."+constant.TestCertName, "private_key"),
+					resource.TestCheckResourceAttr(constant.CertificateResource+"."+constant.TestCertName, "name", constant.TestCertName),
 				),
 			},
 			{
 				Config: testAccCheckCertUpdateName,
 				Check: resource.ComposeTestCheckFunc(
-					resource.TestCheckResourceAttrSet(CertificateResource+"."+TestCertName, "certificate"),
-					resource.TestCheckResourceAttrSet(CertificateResource+"."+TestCertName, "certificate_chain"),
-					resource.TestCheckResourceAttrSet(CertificateResource+"."+TestCertName, "private_key"),
-					resource.TestCheckResourceAttr(CertificateResource+"."+TestCertName, "name", TestCertName+"1"),
+					resource.TestCheckResourceAttrSet(constant.CertificateResource+"."+constant.TestCertName, "certificate"),
+					resource.TestCheckResourceAttrSet(constant.CertificateResource+"."+constant.TestCertName, "certificate_chain"),
+					resource.TestCheckResourceAttrSet(constant.CertificateResource+"."+constant.TestCertName, "private_key"),
+					resource.TestCheckResourceAttr(constant.CertificateResource+"."+constant.TestCertName, "name", constant.TestCertName+"1"),
 				),
 			},
 			{
 				Config: testAccCheckDataSourceByName,
 				Check: resource.ComposeTestCheckFunc(
-					resource.TestCheckResourceAttrPair(CertificateResource+"."+TestCertName, "certificate", DataSource+"."+CertificateResource+"."+TestCertName, "certificate")),
+					resource.TestCheckResourceAttrPair(constant.CertificateResource+"."+constant.TestCertName, "certificate", constant.DataSource+"."+constant.CertificateResource+"."+constant.TestCertName, "certificate")),
 			},
 			{
 				Config: testAccCheckDataSourceById,
 				Check: resource.ComposeTestCheckFunc(
-					resource.TestCheckResourceAttrPair(CertificateResource+"."+TestCertName, "certificate", DataSource+"."+CertificateResource+"."+TestCertName, "certificate")),
+					resource.TestCheckResourceAttrPair(constant.CertificateResource+"."+constant.TestCertName, "certificate", constant.DataSource+"."+constant.CertificateResource+"."+constant.TestCertName, "certificate")),
 			},
 			{
 				Config:      testAccCheckDataSourceWrongName,
@@ -109,7 +111,7 @@ func TestAccCertificateResAndDataSource(t *testing.T) {
 }
 
 func testAccCheckCertificateDestroyCheck(s *terraform.State) error {
-	client := testAccProvider.Meta().(SdkBundle).CertManagerClient
+	client := testAccProvider.Meta().(services.SdkBundle).CertManagerClient
 	ctx, cancel := context.WithTimeout(context.Background(), *resourceDefaultTimeouts.Default)
 
 	if cancel != nil {
@@ -118,7 +120,7 @@ func testAccCheckCertificateDestroyCheck(s *terraform.State) error {
 
 	for _, rs := range s.RootModule().Resources {
 
-		if rs.Type != CertificateResource {
+		if rs.Type != constant.CertificateResource {
 			continue
 		}
 
@@ -139,8 +141,8 @@ func testAccCheckCertificateDestroyCheck(s *terraform.State) error {
 
 const (
 	testAccCheckCertConfigBasic = `
-resource ` + CertificateResource + ` ` + TestCertName + ` {
-	name        	  = "` + TestCertName + `"
+resource ` + constant.CertificateResource + ` ` + constant.TestCertName + ` {
+	name        	  = "` + constant.TestCertName + `"
 	certificate 	  = <<EOT
 ` + testCertificate + `
 EOT
@@ -153,8 +155,8 @@ EOT
 }
 `
 	testAccCheckCertUpdateName = `
-resource ` + CertificateResource + ` ` + TestCertName + ` {
-	name        	  = "` + TestCertName + `1"
+resource ` + constant.CertificateResource + ` ` + constant.TestCertName + ` {
+	name        	  = "` + constant.TestCertName + `1"
 	certificate 	  = <<EOT
 ` + testCertificate + `
 EOT
@@ -167,8 +169,8 @@ EOT
 }
 `
 	testAccCheckDataSourceByName = `
-resource ` + CertificateResource + ` ` + TestCertName + ` {
-	name        	  = "` + TestCertName + `1"
+resource ` + constant.CertificateResource + ` ` + constant.TestCertName + ` {
+	name        	  = "` + constant.TestCertName + `1"
 	certificate 	  = <<EOT
 ` + testCertificate + `
 EOT
@@ -179,13 +181,13 @@ EOT
 ` + privateKey + `
 EOT
 }
-` + DataSource + ` ` + CertificateResource + ` ` + TestCertName + ` {
-name ="` + TestCertName + `1"
+` + constant.DataSource + ` ` + constant.CertificateResource + ` ` + constant.TestCertName + ` {
+name ="` + constant.TestCertName + `1"
 }
 `
 	testAccCheckDataSourceById = `
-resource ` + CertificateResource + ` ` + TestCertName + ` {
-	name        	  = "` + TestCertName + `1"
+resource ` + constant.CertificateResource + ` ` + constant.TestCertName + ` {
+	name        	  = "` + constant.TestCertName + `1"
 	certificate 	  = <<EOT
 ` + testCertificate + `
 EOT
@@ -196,13 +198,13 @@ EOT
 ` + privateKey + `
 EOT
 }
-` + DataSource + ` ` + CertificateResource + ` ` + TestCertName + ` {
-id =` + CertificateResource + `.` + TestCertName + `.id
+` + constant.DataSource + ` ` + constant.CertificateResource + ` ` + constant.TestCertName + ` {
+id =` + constant.CertificateResource + `.` + constant.TestCertName + `.id
 }
 `
 	testAccCheckDataSourceWrongName = `
-resource ` + CertificateResource + ` ` + TestCertName + ` {
-	name        	  = "` + TestCertName + `1"
+resource ` + constant.CertificateResource + ` ` + constant.TestCertName + ` {
+	name        	  = "` + constant.TestCertName + `1"
 	certificate 	  = <<EOT
 ` + testCertificate + `
 EOT
@@ -213,7 +215,7 @@ EOT
 ` + privateKey + `
 EOT
 }
-` + DataSource + ` ` + CertificateResource + ` ` + TestCertName + ` {
+` + constant.DataSource + ` ` + constant.CertificateResource + ` ` + constant.TestCertName + ` {
 name ="should_not_work"
 }
 `

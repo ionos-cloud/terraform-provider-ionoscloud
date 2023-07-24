@@ -3,13 +3,14 @@
 package ionoscloud
 
 import (
+	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils/constant"
 	"regexp"
 	"testing"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 )
 
-const locationTestName = DataSource + "." + LocationResource + "." + LocationTestResource
+const locationTestName = constant.DataSource + "." + constant.LocationResource + "." + constant.LocationTestResource
 
 func TestAccDataSourceLocationBasic(t *testing.T) {
 	resource.Test(t, resource.TestCase{
@@ -39,19 +40,19 @@ func TestAccDataSourceLocationBasic(t *testing.T) {
 }
 
 const testAccDataSourceLocationBasic = `
-data ` + LocationResource + ` ` + LocationTestResource + ` {
+data ` + constant.LocationResource + ` ` + constant.LocationTestResource + ` {
 	  name = "frankfurt"
 	  feature = "SSD"
 }
 `
 const testAccDataSourceLocationWrongNameError = `
-data ` + LocationResource + ` ` + LocationTestResource + ` {
+data ` + constant.LocationResource + ` ` + constant.LocationTestResource + ` {
 	  name = "wrong_name"
 	  feature = "SSD"
 }
 `
 const testAccDataSourceLocationWrongFeature = `
-data ` + LocationResource + ` ` + LocationTestResource + ` {
+data ` + constant.LocationResource + ` ` + constant.LocationTestResource + ` {
 	  name = "frankfurt"
 	  feature = "wrong_feature"
 }

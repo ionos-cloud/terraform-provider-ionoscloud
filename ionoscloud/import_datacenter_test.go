@@ -4,6 +4,7 @@ package ionoscloud
 
 import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
+	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils/constant"
 	"testing"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
@@ -20,7 +21,7 @@ func TestAccDataCenterImportBasic(t *testing.T) {
 			},
 
 			{
-				ResourceName:      DatacenterResource + "." + DatacenterTestResource,
+				ResourceName:      constant.DatacenterResource + "." + constant.DatacenterTestResource,
 				ImportStateIdFunc: testAccDatacenterImportStateId,
 				ImportState:       true,
 				ImportStateVerify: true,
@@ -33,7 +34,7 @@ func testAccDatacenterImportStateId(s *terraform.State) (string, error) {
 	importID := ""
 
 	for _, rs := range s.RootModule().Resources {
-		if rs.Type != DatacenterResource {
+		if rs.Type != constant.DatacenterResource {
 			continue
 		}
 

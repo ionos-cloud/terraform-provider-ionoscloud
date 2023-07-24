@@ -7,6 +7,8 @@ import (
 	"context"
 	"fmt"
 	ionoscloud "github.com/ionos-cloud/sdk-go/v6"
+	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services"
+	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils/constant"
 	"regexp"
 	"testing"
 
@@ -14,9 +16,9 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
 )
 
-const networkLoadBalancerForwardingRuleResource = NetworkLoadBalancerForwardingRuleResource + "." + NetworkLoadBalancerForwardingRuleTestResource
-const dataSourceNetworkLoadBalancerForwardingRuleId = DataSource + "." + NetworkLoadBalancerForwardingRuleResource + "." + NetworkLoadBalancerForwardingRuleDataSourceById
-const dataSourceNetworkLoadBalancerForwardingRuleName = DataSource + "." + NetworkLoadBalancerForwardingRuleResource + "." + NetworkLoadBalancerForwardingRuleDataSourceByName
+const networkLoadBalancerForwardingRuleResource = constant.NetworkLoadBalancerForwardingRuleResource + "." + constant.NetworkLoadBalancerForwardingRuleTestResource
+const dataSourceNetworkLoadBalancerForwardingRuleId = constant.DataSource + "." + constant.NetworkLoadBalancerForwardingRuleResource + "." + constant.NetworkLoadBalancerForwardingRuleDataSourceById
+const dataSourceNetworkLoadBalancerForwardingRuleName = constant.DataSource + "." + constant.NetworkLoadBalancerForwardingRuleResource + "." + constant.NetworkLoadBalancerForwardingRuleDataSourceByName
 
 func TestAccNetworkLoadBalancerForwardingRuleBasic(t *testing.T) {
 	var networkLoadBalancerForwardingRule ionoscloud.NetworkLoadBalancerForwardingRule
@@ -32,7 +34,7 @@ func TestAccNetworkLoadBalancerForwardingRuleBasic(t *testing.T) {
 				Config: testAccCheckNetworkLoadBalancerForwardingRuleConfigBasic,
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckNetworkLoadBalancerForwardingRuleExists(networkLoadBalancerForwardingRuleResource, &networkLoadBalancerForwardingRule),
-					resource.TestCheckResourceAttr(networkLoadBalancerForwardingRuleResource, "name", NetworkLoadBalancerForwardingRuleTestResource),
+					resource.TestCheckResourceAttr(networkLoadBalancerForwardingRuleResource, "name", constant.NetworkLoadBalancerForwardingRuleTestResource),
 					resource.TestCheckResourceAttr(networkLoadBalancerForwardingRuleResource, "algorithm", "SOURCE_IP"),
 					resource.TestCheckResourceAttr(networkLoadBalancerForwardingRuleResource, "protocol", "TCP"),
 					resource.TestCheckResourceAttr(networkLoadBalancerForwardingRuleResource, "listener_ip", "10.12.118.224"),
@@ -103,7 +105,7 @@ func TestAccNetworkLoadBalancerForwardingRuleBasic(t *testing.T) {
 			{
 				Config: testAccCheckNetworkLoadBalancerForwardingRuleConfigUpdate,
 				Check: resource.ComposeTestCheckFunc(
-					resource.TestCheckResourceAttr(networkLoadBalancerForwardingRuleResource, "name", UpdatedResources),
+					resource.TestCheckResourceAttr(networkLoadBalancerForwardingRuleResource, "name", constant.UpdatedResources),
 					resource.TestCheckResourceAttr(networkLoadBalancerForwardingRuleResource, "algorithm", "ROUND_ROBIN"),
 					resource.TestCheckResourceAttr(networkLoadBalancerForwardingRuleResource, "protocol", "HTTP"),
 					resource.TestCheckResourceAttr(networkLoadBalancerForwardingRuleResource, "listener_ip", "10.12.119.224"),
@@ -133,7 +135,7 @@ func TestAccNetworkLoadBalancerForwardingRuleBasic(t *testing.T) {
 }
 
 func testAccCheckNetworkLoadBalancerForwardingRuleDestroyCheck(s *terraform.State) error {
-	client := testAccProvider.Meta().(SdkBundle).CloudApiClient
+	client := testAccProvider.Meta().(services.SdkBundle).CloudApiClient
 
 	ctx, cancel := context.WithTimeout(context.Background(), *resourceDefaultTimeouts.Delete)
 
@@ -142,7 +144,7 @@ func testAccCheckNetworkLoadBalancerForwardingRuleDestroyCheck(s *terraform.Stat
 	}
 
 	for _, rs := range s.RootModule().Resources {
-		if rs.Type != NetworkLoadBalancerForwardingRuleResource {
+		if rs.Type != constant.NetworkLoadBalancerForwardingRuleResource {
 			continue
 		}
 
@@ -163,7 +165,7 @@ func testAccCheckNetworkLoadBalancerForwardingRuleDestroyCheck(s *terraform.Stat
 
 func testAccCheckNetworkLoadBalancerForwardingRuleExists(n string, networkLoadBalancerForwardingRule *ionoscloud.NetworkLoadBalancerForwardingRule) resource.TestCheckFunc {
 	return func(s *terraform.State) error {
-		client := testAccProvider.Meta().(SdkBundle).CloudApiClient
+		client := testAccProvider.Meta().(services.SdkBundle).CloudApiClient
 		rs, ok := s.RootModule().Resources[n]
 
 		if !ok {
@@ -197,10 +199,10 @@ func testAccCheckNetworkLoadBalancerForwardingRuleExists(n string, networkLoadBa
 }
 
 const testAccCheckNetworkLoadBalancerForwardingRuleConfigBasic = testAccCheckNetworkLoadBalancerConfigBasic + `
-resource ` + NetworkLoadBalancerForwardingRuleResource + ` ` + NetworkLoadBalancerForwardingRuleTestResource + ` {
-  	datacenter_id = ` + NetworkLoadBalancerResource + `.` + NetworkLoadBalancerTestResource + `.datacenter_id
- 	networkloadbalancer_id = ` + NetworkLoadBalancerResource + `.` + NetworkLoadBalancerTestResource + `.id
- 	name = "` + NetworkLoadBalancerForwardingRuleTestResource + `"
+resource ` + constant.NetworkLoadBalancerForwardingRuleResource + ` ` + constant.NetworkLoadBalancerForwardingRuleTestResource + ` {
+  	datacenter_id = ` + constant.NetworkLoadBalancerResource + `.` + constant.NetworkLoadBalancerTestResource + `.datacenter_id
+ 	networkloadbalancer_id = ` + constant.NetworkLoadBalancerResource + `.` + constant.NetworkLoadBalancerTestResource + `.id
+ 	name = "` + constant.NetworkLoadBalancerForwardingRuleTestResource + `"
  	algorithm = "SOURCE_IP"
  	protocol = "TCP"
  	listener_ip = "10.12.118.224"
@@ -232,10 +234,10 @@ variable IPs{
 `
 
 const testAccCheckNetworkLoadBalancerForwardingRuleConfigUpdate = testAccCheckNetworkLoadBalancerConfigUpdate + `
-resource ` + NetworkLoadBalancerForwardingRuleResource + ` ` + NetworkLoadBalancerForwardingRuleTestResource + ` {
-	datacenter_id = ` + NetworkLoadBalancerResource + `.` + NetworkLoadBalancerTestResource + `.datacenter_id
-	networkloadbalancer_id = ` + NetworkLoadBalancerResource + `.` + NetworkLoadBalancerTestResource + `.id
-	name = "` + UpdatedResources + `"
+resource ` + constant.NetworkLoadBalancerForwardingRuleResource + ` ` + constant.NetworkLoadBalancerForwardingRuleTestResource + ` {
+	datacenter_id = ` + constant.NetworkLoadBalancerResource + `.` + constant.NetworkLoadBalancerTestResource + `.datacenter_id
+	networkloadbalancer_id = ` + constant.NetworkLoadBalancerResource + `.` + constant.NetworkLoadBalancerTestResource + `.id
+	name = "` + constant.UpdatedResources + `"
 	algorithm = "ROUND_ROBIN"
 	protocol = "HTTP"
 	listener_ip = "10.12.119.224"
@@ -289,7 +291,7 @@ resource ` + NetworkLoadBalancerForwardingRuleResource + ` ` + NetworkLoadBalanc
 }
 `
 const testAccDataSourceNetworkLoadBalancerForwardingRuleMatchId = testAccCheckNetworkLoadBalancerForwardingRuleConfigBasic + `
-data ` + NetworkLoadBalancerForwardingRuleResource + ` ` + NetworkLoadBalancerForwardingRuleDataSourceById + ` {
+data ` + constant.NetworkLoadBalancerForwardingRuleResource + ` ` + constant.NetworkLoadBalancerForwardingRuleDataSourceById + ` {
   datacenter_id = ` + networkLoadBalancerForwardingRuleResource + `.datacenter_id
   networkloadbalancer_id  = ` + networkLoadBalancerForwardingRuleResource + `.networkloadbalancer_id
   id			= ` + networkLoadBalancerForwardingRuleResource + `.id
@@ -297,7 +299,7 @@ data ` + NetworkLoadBalancerForwardingRuleResource + ` ` + NetworkLoadBalancerFo
 `
 
 const testAccDataSourceNetworkLoadBalancerForwardingRuleMatchName = testAccCheckNetworkLoadBalancerForwardingRuleConfigBasic + `
-data ` + NetworkLoadBalancerForwardingRuleResource + ` ` + NetworkLoadBalancerForwardingRuleDataSourceByName + ` {
+data ` + constant.NetworkLoadBalancerForwardingRuleResource + ` ` + constant.NetworkLoadBalancerForwardingRuleDataSourceByName + ` {
   datacenter_id = ` + networkLoadBalancerForwardingRuleResource + `.datacenter_id
   networkloadbalancer_id  = ` + networkLoadBalancerForwardingRuleResource + `.networkloadbalancer_id
  name			= ` + networkLoadBalancerForwardingRuleResource + `.name
@@ -305,7 +307,7 @@ data ` + NetworkLoadBalancerForwardingRuleResource + ` ` + NetworkLoadBalancerFo
 `
 
 const testAccDataSourceNetworkLoadBalancerForwardingRuleWrongNameError = testAccCheckNetworkLoadBalancerForwardingRuleConfigBasic + `
-data ` + NetworkLoadBalancerForwardingRuleResource + ` ` + NetworkLoadBalancerForwardingRuleDataSourceByName + ` {
+data ` + constant.NetworkLoadBalancerForwardingRuleResource + ` ` + constant.NetworkLoadBalancerForwardingRuleDataSourceByName + ` {
   datacenter_id = ` + networkLoadBalancerForwardingRuleResource + `.datacenter_id
   networkloadbalancer_id  = ` + networkLoadBalancerForwardingRuleResource + `.networkloadbalancer_id
   name			= "wrong_name"

@@ -4,6 +4,7 @@ package ionoscloud
 
 import (
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils"
+	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils/constant"
 	"testing"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
@@ -23,7 +24,7 @@ func TestAccUserImportBasic(t *testing.T) {
 			},
 
 			{
-				ResourceName:            UserResource + "." + UserTestResource,
+				ResourceName:            constant.UserResource + "." + constant.UserTestResource,
 				ImportStateIdFunc:       testAccUserImportStateId,
 				ImportState:             true,
 				ImportStateVerify:       true,
@@ -37,7 +38,7 @@ func testAccUserImportStateId(s *terraform.State) (string, error) {
 	importID := ""
 
 	for _, rs := range s.RootModule().Resources {
-		if rs.Type != UserResource {
+		if rs.Type != constant.UserResource {
 			continue
 		}
 
@@ -48,9 +49,9 @@ func testAccUserImportStateId(s *terraform.State) (string, error) {
 }
 
 var testAccImportUserConfigBasic = `
-resource ` + UserResource + ` ` + UserTestResource + ` {
-  first_name = "` + UserTestResource + `"
-  last_name = "` + UserTestResource + `"
+resource ` + constant.UserResource + ` ` + constant.UserTestResource + ` {
+  first_name = "` + constant.UserTestResource + `"
+  last_name = "` + constant.UserTestResource + `"
   email = "` + utils.GenerateEmail() + `"
   password = "abc123-321CBA"
   administrator = true

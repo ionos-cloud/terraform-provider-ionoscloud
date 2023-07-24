@@ -3,6 +3,7 @@ package ionoscloud
 import (
 	"context"
 	"fmt"
+	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services"
 	"log"
 	"strings"
 
@@ -66,7 +67,7 @@ func dataSourceDNSRecord() *schema.Resource {
 }
 
 func dataSourceRecordRead(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
-	client := meta.(SdkBundle).DNSClient
+	client := meta.(services.SdkBundle).DNSClient
 	partialMatch := d.Get("partial_match").(bool)
 	zoneId := d.Get("zone_id").(string)
 	idValue, idOk := d.GetOk("id")

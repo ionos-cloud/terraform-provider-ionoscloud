@@ -7,11 +7,13 @@ import (
 	"fmt"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
+	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services"
+	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils/constant"
 	"regexp"
 	"testing"
 )
 
-const serverTestResource2 = ServerTestResource + "2"
+const serverTestResource2 = constant.ServerTestResource + "2"
 
 func TestAccDataSourceServersBasic(t *testing.T) {
 	t.Skip("problem with 500 error thrown by backend")
@@ -26,71 +28,71 @@ func TestAccDataSourceServersBasic(t *testing.T) {
 			{
 				Config: testAccCheck2ServersByNameAndCores,
 				Check: resource.ComposeTestCheckFunc(
-					resource.TestCheckResourceAttr(DataSource+"."+ServersDataSource+"."+ServerDataSourceByName, "servers.#", "1"),
-					resource.TestCheckResourceAttrPair(DataSource+"."+ServersDataSource+"."+ServerDataSourceByName, "servers.0.name",
-						ServerResource+"."+serverTestResource2, "name"),
-					resource.TestCheckResourceAttrPair(DataSource+"."+ServersDataSource+"."+ServerDataSourceByName, "servers.0.cores",
-						ServerResource+"."+serverTestResource2, "cores"),
-					resource.TestCheckResourceAttrPair(DataSource+"."+ServersDataSource+"."+ServerDataSourceByName, "servers.0.ram",
-						ServerResource+"."+serverTestResource2, "ram"),
-					resource.TestCheckResourceAttrPair(DataSource+"."+ServersDataSource+"."+ServerDataSourceByName, "servers.0.availability_zone",
-						ServerResource+"."+serverTestResource2, "availability_zone"),
-					resource.TestCheckResourceAttrPair(DataSource+"."+ServersDataSource+"."+ServerDataSourceByName, "servers.0.cpu_family",
-						ServerResource+"."+serverTestResource2, "cpu_family"),
-					resource.TestCheckResourceAttrPair(DataSource+"."+ServersDataSource+"."+ServerDataSourceByName, "servers.0.type",
-						ServerResource+"."+serverTestResource2, "type"),
-					resource.TestCheckResourceAttrPair(DataSource+"."+ServersDataSource+"."+ServerDataSourceByName, "servers.0.type",
-						ServerResource+"."+serverTestResource2, "type"),
-					resource.TestCheckResourceAttrPair(DataSource+"."+ServersDataSource+"."+ServerDataSourceByName, "servers.0.volumes.0.name",
-						ServerResource+"."+serverTestResource2, "volume.0.name"),
-					resource.TestCheckResourceAttrPair(DataSource+"."+ServersDataSource+"."+ServerDataSourceByName, "servers.0.volumes.0.size",
-						ServerResource+"."+serverTestResource2, "volume.0.size"),
-					resource.TestCheckResourceAttrPair(DataSource+"."+ServersDataSource+"."+ServerDataSourceByName, "servers.0.volumes.0.disk_type",
-						ServerResource+"."+serverTestResource2, "volume.0.disk_type"),
-					resource.TestCheckResourceAttrPair(DataSource+"."+ServersDataSource+"."+ServerDataSourceByName, "servers.0.volumes.0.bus",
-						ServerResource+"."+serverTestResource2, "volume.0.bus"),
-					resource.TestCheckResourceAttrPair(DataSource+"."+ServersDataSource+"."+ServerDataSourceByName, "servers.0.volumes.0.availability_zone",
-						ServerResource+"."+serverTestResource2, "volume.0.availability_zone"),
-					resource.TestCheckResourceAttrPair(DataSource+"."+ServersDataSource+"."+ServerDataSourceByName, "servers.0.nics.0.name",
-						ServerResource+"."+serverTestResource2, "nic.0.name"),
-					resource.TestCheckResourceAttrPair(DataSource+"."+ServersDataSource+"."+ServerDataSourceByName, "servers.0.nics.0.lan",
-						ServerResource+"."+serverTestResource2, "nic.0.lan"),
-					resource.TestCheckResourceAttrPair(DataSource+"."+ServersDataSource+"."+ServerDataSourceByName, "servers.0.nics.0.dhcp",
-						ServerResource+"."+serverTestResource2, "nic.0.dhcp"),
-					resource.TestCheckResourceAttrPair(DataSource+"."+ServersDataSource+"."+ServerDataSourceByName, "servers.0.nics.0.firewall_active",
-						ServerResource+"."+serverTestResource2, "nic.0.firewall_active"),
-					resource.TestCheckResourceAttrPair(DataSource+"."+ServersDataSource+"."+ServerDataSourceByName, "servers.0.nics.0.firewall_rules.0.name",
-						ServerResource+"."+serverTestResource2, "nic.0.firewall.0.name"),
-					resource.TestCheckResourceAttrPair(DataSource+"."+ServersDataSource+"."+ServerDataSourceByName, "servers.0.nics.0.firewall_rules.0.protocol",
-						ServerResource+"."+serverTestResource2, "nic.0.firewall.0.protocol"),
-					resource.TestCheckResourceAttrPair(DataSource+"."+ServersDataSource+"."+ServerDataSourceByName, "servers.0.nics.0.firewall_rules.0.port_range_start",
-						ServerResource+"."+serverTestResource2, "nic.0.firewall.0.port_range_start"),
-					resource.TestCheckResourceAttrPair(DataSource+"."+ServersDataSource+"."+ServerDataSourceByName, "servers.0.nics.0.firewall_rules.0.port_range_end",
-						ServerResource+"."+serverTestResource2, "nic.0.firewall.0.port_range_end"),
-					resource.TestCheckResourceAttrPair(DataSource+"."+ServersDataSource+"."+ServerDataSourceByName, "servers.0.nics.0.firewall_rules.0.source_mac",
-						ServerResource+"."+serverTestResource2, "nic.0.firewall.0.source_mac"),
-					resource.TestCheckResourceAttrPair(DataSource+"."+ServersDataSource+"."+ServerDataSourceByName, "servers.0.nics.0.firewall_rules.0.source_ip",
-						ServerResource+"."+serverTestResource2, "nic.0.firewall.0.source_ip"),
-					resource.TestCheckResourceAttrPair(DataSource+"."+ServersDataSource+"."+ServerDataSourceByName, "servers.0.nics.0.firewall_rules.0.source_ip",
-						ServerResource+"."+serverTestResource2, "nic.0.firewall.0.source_ip"),
-					resource.TestCheckResourceAttrPair(DataSource+"."+ServersDataSource+"."+ServerDataSourceByName, "servers.0.nics.0.firewall_rules.0.target_ip",
-						ServerResource+"."+serverTestResource2, "nic.0.firewall.0.target_ip"),
+					resource.TestCheckResourceAttr(constant.DataSource+"."+constant.ServersDataSource+"."+constant.ServerDataSourceByName, "servers.#", "1"),
+					resource.TestCheckResourceAttrPair(constant.DataSource+"."+constant.ServersDataSource+"."+constant.ServerDataSourceByName, "servers.0.name",
+						constant.ServerResource+"."+serverTestResource2, "name"),
+					resource.TestCheckResourceAttrPair(constant.DataSource+"."+constant.ServersDataSource+"."+constant.ServerDataSourceByName, "servers.0.cores",
+						constant.ServerResource+"."+serverTestResource2, "cores"),
+					resource.TestCheckResourceAttrPair(constant.DataSource+"."+constant.ServersDataSource+"."+constant.ServerDataSourceByName, "servers.0.ram",
+						constant.ServerResource+"."+serverTestResource2, "ram"),
+					resource.TestCheckResourceAttrPair(constant.DataSource+"."+constant.ServersDataSource+"."+constant.ServerDataSourceByName, "servers.0.availability_zone",
+						constant.ServerResource+"."+serverTestResource2, "availability_zone"),
+					resource.TestCheckResourceAttrPair(constant.DataSource+"."+constant.ServersDataSource+"."+constant.ServerDataSourceByName, "servers.0.cpu_family",
+						constant.ServerResource+"."+serverTestResource2, "cpu_family"),
+					resource.TestCheckResourceAttrPair(constant.DataSource+"."+constant.ServersDataSource+"."+constant.ServerDataSourceByName, "servers.0.type",
+						constant.ServerResource+"."+serverTestResource2, "type"),
+					resource.TestCheckResourceAttrPair(constant.DataSource+"."+constant.ServersDataSource+"."+constant.ServerDataSourceByName, "servers.0.type",
+						constant.ServerResource+"."+serverTestResource2, "type"),
+					resource.TestCheckResourceAttrPair(constant.DataSource+"."+constant.ServersDataSource+"."+constant.ServerDataSourceByName, "servers.0.volumes.0.name",
+						constant.ServerResource+"."+serverTestResource2, "volume.0.name"),
+					resource.TestCheckResourceAttrPair(constant.DataSource+"."+constant.ServersDataSource+"."+constant.ServerDataSourceByName, "servers.0.volumes.0.size",
+						constant.ServerResource+"."+serverTestResource2, "volume.0.size"),
+					resource.TestCheckResourceAttrPair(constant.DataSource+"."+constant.ServersDataSource+"."+constant.ServerDataSourceByName, "servers.0.volumes.0.disk_type",
+						constant.ServerResource+"."+serverTestResource2, "volume.0.disk_type"),
+					resource.TestCheckResourceAttrPair(constant.DataSource+"."+constant.ServersDataSource+"."+constant.ServerDataSourceByName, "servers.0.volumes.0.bus",
+						constant.ServerResource+"."+serverTestResource2, "volume.0.bus"),
+					resource.TestCheckResourceAttrPair(constant.DataSource+"."+constant.ServersDataSource+"."+constant.ServerDataSourceByName, "servers.0.volumes.0.availability_zone",
+						constant.ServerResource+"."+serverTestResource2, "volume.0.availability_zone"),
+					resource.TestCheckResourceAttrPair(constant.DataSource+"."+constant.ServersDataSource+"."+constant.ServerDataSourceByName, "servers.0.nics.0.name",
+						constant.ServerResource+"."+serverTestResource2, "nic.0.name"),
+					resource.TestCheckResourceAttrPair(constant.DataSource+"."+constant.ServersDataSource+"."+constant.ServerDataSourceByName, "servers.0.nics.0.lan",
+						constant.ServerResource+"."+serverTestResource2, "nic.0.lan"),
+					resource.TestCheckResourceAttrPair(constant.DataSource+"."+constant.ServersDataSource+"."+constant.ServerDataSourceByName, "servers.0.nics.0.dhcp",
+						constant.ServerResource+"."+serverTestResource2, "nic.0.dhcp"),
+					resource.TestCheckResourceAttrPair(constant.DataSource+"."+constant.ServersDataSource+"."+constant.ServerDataSourceByName, "servers.0.nics.0.firewall_active",
+						constant.ServerResource+"."+serverTestResource2, "nic.0.firewall_active"),
+					resource.TestCheckResourceAttrPair(constant.DataSource+"."+constant.ServersDataSource+"."+constant.ServerDataSourceByName, "servers.0.nics.0.firewall_rules.0.name",
+						constant.ServerResource+"."+serverTestResource2, "nic.0.firewall.0.name"),
+					resource.TestCheckResourceAttrPair(constant.DataSource+"."+constant.ServersDataSource+"."+constant.ServerDataSourceByName, "servers.0.nics.0.firewall_rules.0.protocol",
+						constant.ServerResource+"."+serverTestResource2, "nic.0.firewall.0.protocol"),
+					resource.TestCheckResourceAttrPair(constant.DataSource+"."+constant.ServersDataSource+"."+constant.ServerDataSourceByName, "servers.0.nics.0.firewall_rules.0.port_range_start",
+						constant.ServerResource+"."+serverTestResource2, "nic.0.firewall.0.port_range_start"),
+					resource.TestCheckResourceAttrPair(constant.DataSource+"."+constant.ServersDataSource+"."+constant.ServerDataSourceByName, "servers.0.nics.0.firewall_rules.0.port_range_end",
+						constant.ServerResource+"."+serverTestResource2, "nic.0.firewall.0.port_range_end"),
+					resource.TestCheckResourceAttrPair(constant.DataSource+"."+constant.ServersDataSource+"."+constant.ServerDataSourceByName, "servers.0.nics.0.firewall_rules.0.source_mac",
+						constant.ServerResource+"."+serverTestResource2, "nic.0.firewall.0.source_mac"),
+					resource.TestCheckResourceAttrPair(constant.DataSource+"."+constant.ServersDataSource+"."+constant.ServerDataSourceByName, "servers.0.nics.0.firewall_rules.0.source_ip",
+						constant.ServerResource+"."+serverTestResource2, "nic.0.firewall.0.source_ip"),
+					resource.TestCheckResourceAttrPair(constant.DataSource+"."+constant.ServersDataSource+"."+constant.ServerDataSourceByName, "servers.0.nics.0.firewall_rules.0.source_ip",
+						constant.ServerResource+"."+serverTestResource2, "nic.0.firewall.0.source_ip"),
+					resource.TestCheckResourceAttrPair(constant.DataSource+"."+constant.ServersDataSource+"."+constant.ServerDataSourceByName, "servers.0.nics.0.firewall_rules.0.target_ip",
+						constant.ServerResource+"."+serverTestResource2, "nic.0.firewall.0.target_ip"),
 				),
 			},
 			{
 				Config: testAccCheck2ServersByCpuFamily,
 				Check: resource.ComposeTestCheckFunc(
-					resource.TestCheckResourceAttr(DataSource+"."+ServersDataSource+"."+ServerDataSourceByName, "servers.#", "2"),
+					resource.TestCheckResourceAttr(constant.DataSource+"."+constant.ServersDataSource+"."+constant.ServerDataSourceByName, "servers.#", "2"),
 					// Check server labels.
-					resource.TestCheckResourceAttr(DataSource+"."+ServersDataSource+"."+ServerDataSourceByName, "servers.0.labels.#", "2"),
-					resource.TestCheckResourceAttr(DataSource+"."+ServersDataSource+"."+ServerDataSourceByName, "servers.0.labels.0.key", "labelkey0"),
-					resource.TestCheckResourceAttr(DataSource+"."+ServersDataSource+"."+ServerDataSourceByName, "servers.0.labels.0.value", "labelvalue0"),
-					resource.TestCheckResourceAttr(DataSource+"."+ServersDataSource+"."+ServerDataSourceByName, "servers.0.labels.1.key", "labelkey1"),
-					resource.TestCheckResourceAttr(DataSource+"."+ServersDataSource+"."+ServerDataSourceByName, "servers.0.labels.1.value", "labelvalue1"),
-					resource.TestCheckResourceAttr(DataSource+"."+ServersDataSource+"."+ServerDataSourceByName, "servers.1.labels.0.key", "labelkey0"),
-					resource.TestCheckResourceAttr(DataSource+"."+ServersDataSource+"."+ServerDataSourceByName, "servers.1.labels.0.value", "labelvalue0"),
-					resource.TestCheckResourceAttr(DataSource+"."+ServersDataSource+"."+ServerDataSourceByName, "servers.1.labels.1.key", "labelkey1"),
-					resource.TestCheckResourceAttr(DataSource+"."+ServersDataSource+"."+ServerDataSourceByName, "servers.1.labels.1.value", "labelvalue1"),
+					resource.TestCheckResourceAttr(constant.DataSource+"."+constant.ServersDataSource+"."+constant.ServerDataSourceByName, "servers.0.labels.#", "2"),
+					resource.TestCheckResourceAttr(constant.DataSource+"."+constant.ServersDataSource+"."+constant.ServerDataSourceByName, "servers.0.labels.0.key", "labelkey0"),
+					resource.TestCheckResourceAttr(constant.DataSource+"."+constant.ServersDataSource+"."+constant.ServerDataSourceByName, "servers.0.labels.0.value", "labelvalue0"),
+					resource.TestCheckResourceAttr(constant.DataSource+"."+constant.ServersDataSource+"."+constant.ServerDataSourceByName, "servers.0.labels.1.key", "labelkey1"),
+					resource.TestCheckResourceAttr(constant.DataSource+"."+constant.ServersDataSource+"."+constant.ServerDataSourceByName, "servers.0.labels.1.value", "labelvalue1"),
+					resource.TestCheckResourceAttr(constant.DataSource+"."+constant.ServersDataSource+"."+constant.ServerDataSourceByName, "servers.1.labels.0.key", "labelkey0"),
+					resource.TestCheckResourceAttr(constant.DataSource+"."+constant.ServersDataSource+"."+constant.ServerDataSourceByName, "servers.1.labels.0.value", "labelvalue0"),
+					resource.TestCheckResourceAttr(constant.DataSource+"."+constant.ServersDataSource+"."+constant.ServerDataSourceByName, "servers.1.labels.1.key", "labelkey1"),
+					resource.TestCheckResourceAttr(constant.DataSource+"."+constant.ServersDataSource+"."+constant.ServerDataSourceByName, "servers.1.labels.1.value", "labelvalue1"),
 				),
 			},
 			{
@@ -102,7 +104,7 @@ func TestAccDataSourceServersBasic(t *testing.T) {
 }
 
 func testAccCheckServersDestroyCheck(s *terraform.State) error {
-	client := testAccProvider.Meta().(SdkBundle).CloudApiClient
+	client := testAccProvider.Meta().(services.SdkBundle).CloudApiClient
 
 	ctx, cancel := context.WithTimeout(context.Background(), *resourceDefaultTimeouts.Default)
 
@@ -111,7 +113,7 @@ func testAccCheckServersDestroyCheck(s *terraform.State) error {
 	}
 
 	for _, rs := range s.RootModule().Resources {
-		if rs.Type != ServerResource {
+		if rs.Type != constant.ServerResource {
 			continue
 		}
 
@@ -133,28 +135,28 @@ func testAccCheckServersDestroyCheck(s *terraform.State) error {
 }
 
 const testAccCheck2ServersByNameAndCores = `
-resource ` + DatacenterResource + ` ` + DatacenterTestResource + ` {
+resource ` + constant.DatacenterResource + ` ` + constant.DatacenterTestResource + ` {
 	name       = "server-test"
 	location = "us/las"
 }
 
-resource ` + LanResource + ` ` + LanTestResource + ` {
-  datacenter_id = ` + DatacenterResource + `.` + DatacenterTestResource + `.id
+resource ` + constant.LanResource + ` ` + constant.LanTestResource + ` {
+  datacenter_id = ` + constant.DatacenterResource + `.` + constant.DatacenterTestResource + `.id
   public = true
   name = "public"
 }
-resource ` + ServerResource + ` ` + ServerTestResource + ` {
-  name = "` + ServerTestResource + `"
-  datacenter_id = ` + DatacenterResource + `.` + DatacenterTestResource + `.id
+resource ` + constant.ServerResource + ` ` + constant.ServerTestResource + ` {
+  name = "` + constant.ServerTestResource + `"
+  datacenter_id = ` + constant.DatacenterResource + `.` + constant.DatacenterTestResource + `.id
   cores = 2
   ram = 2048
   availability_zone = "ZONE_1"
   cpu_family = "AMD_OPTERON"
   image_name ="ubuntu:latest"
-  image_password = ` + RandomPassword + `.server_image_password.result
+  image_password = ` + constant.RandomPassword + `.server_image_password.result
   type = "ENTERPRISE"
   volume {
-    name = "` + VolumeTestResource + `"
+    name = "` + constant.VolumeTestResource + `"
     size = 6
     disk_type = "SSD Standard"
     user_data = "foo"
@@ -162,31 +164,31 @@ resource ` + ServerResource + ` ` + ServerTestResource + ` {
     availability_zone = "ZONE_1"
 	}
   nic {
-    lan = ` + LanResource + `.` + LanTestResource + `.id
-    name = "` + LanTestResource + `"
+    lan = ` + constant.LanResource + `.` + constant.LanTestResource + `.id
+    name = "` + constant.LanTestResource + `"
     dhcp = false
     firewall_active = false
   }
 }
 
 resource "ionoscloud_ipblock" "webserver_ipblock" {
-  location = ` + DatacenterResource + `.` + DatacenterTestResource + `.location
+  location = ` + constant.DatacenterResource + `.` + constant.DatacenterTestResource + `.location
   size = 2
   name = "webserver_ipblock"
 }
 
-resource ` + ServerResource + ` ` + serverTestResource2 + ` {
+resource ` + constant.ServerResource + ` ` + serverTestResource2 + ` {
   name = "` + serverTestResource2 + `"
-  datacenter_id = ` + DatacenterResource + `.` + DatacenterTestResource + `.id
+  datacenter_id = ` + constant.DatacenterResource + `.` + constant.DatacenterTestResource + `.id
   cores = ` + noCoresTest + `
   ram = 2048
   availability_zone = "ZONE_1"
   cpu_family = "AMD_OPTERON"
   image_name ="ubuntu:latest"
-  image_password = ` + RandomPassword + `.server2_image_password.result
+  image_password = ` + constant.RandomPassword + `.server2_image_password.result
   type = "ENTERPRISE"
   volume {
-    name = "` + VolumeTestResource + "2" + `"
+    name = "` + constant.VolumeTestResource + "2" + `"
     size = 6
     disk_type = "SSD Standard"
     user_data = "foo"
@@ -195,7 +197,7 @@ resource ` + ServerResource + ` ` + serverTestResource2 + ` {
 	}
   nic {
     lan = 1
-    name = "` + LanTestResource + "2" + `"
+    name = "` + constant.LanTestResource + "2" + `"
     dhcp = false
     firewall_active = false
     firewall {
@@ -212,15 +214,15 @@ resource ` + ServerResource + ` ` + serverTestResource2 + ` {
 }
 
 ` + ServerImagePassword + `
-resource ` + RandomPassword + ` "server2_image_password" {
+resource ` + constant.RandomPassword + ` "server2_image_password" {
   length           = 16
   special          = false
 }
 
-data ` + ServersDataSource + ` ` + ServerDataSourceByName + ` {
- depends_on = [` + ServerResource + `.` + serverTestResource2 + `,
-	` + ServerResource + `.` + ServerTestResource + `]
-  datacenter_id = ` + DatacenterResource + `.` + DatacenterTestResource + `.id
+data ` + constant.ServersDataSource + ` ` + constant.ServerDataSourceByName + ` {
+ depends_on = [` + constant.ServerResource + `.` + serverTestResource2 + `,
+	` + constant.ServerResource + `.` + constant.ServerTestResource + `]
+  datacenter_id = ` + constant.DatacenterResource + `.` + constant.DatacenterTestResource + `.id
   filter {
    name = "name"
    value = "${ionoscloud_server.test_server2.name}" 
@@ -232,29 +234,29 @@ data ` + ServersDataSource + ` ` + ServerDataSourceByName + ` {
 } `
 
 const testAccCheck2ServersByCpuFamily = `
-resource ` + DatacenterResource + ` ` + DatacenterTestResource + ` {
+resource ` + constant.DatacenterResource + ` ` + constant.DatacenterTestResource + ` {
 	name       = "server-test"
 	location = "us/las"
 }
 
-resource ` + LanResource + ` ` + LanTestResource + ` {
-  datacenter_id = ` + DatacenterResource + `.` + DatacenterTestResource + `.id
+resource ` + constant.LanResource + ` ` + constant.LanTestResource + ` {
+  datacenter_id = ` + constant.DatacenterResource + `.` + constant.DatacenterTestResource + `.id
   public = true
   name = "public"
 }
 
-resource ` + ServerResource + ` ` + ServerTestResource + ` {
-  name = "` + ServerTestResource + `"
-  datacenter_id = ` + DatacenterResource + `.` + DatacenterTestResource + `.id
+resource ` + constant.ServerResource + ` ` + constant.ServerTestResource + ` {
+  name = "` + constant.ServerTestResource + `"
+  datacenter_id = ` + constant.DatacenterResource + `.` + constant.DatacenterTestResource + `.id
   cores = 2
   ram = 2048
   availability_zone = "ZONE_1"
   cpu_family = "` + cpuFamilyTest + `" 
   image_name ="ubuntu:latest"
-  image_password = ` + RandomPassword + `.server_image_password.result
+  image_password = ` + constant.RandomPassword + `.server_image_password.result
   type = "ENTERPRISE"
   volume {
-    name = "` + VolumeTestResource + `"
+    name = "` + constant.VolumeTestResource + `"
     size = 6
     disk_type = "SSD Standard"
     user_data = "foo"
@@ -262,8 +264,8 @@ resource ` + ServerResource + ` ` + ServerTestResource + ` {
     availability_zone = "ZONE_1"
 	}
   nic {
-    lan = ` + LanResource + `.` + LanTestResource + `.id
-    name = "` + LanTestResource + `"
+    lan = ` + constant.LanResource + `.` + constant.LanTestResource + `.id
+    name = "` + constant.LanTestResource + `"
     dhcp = false
     firewall_active = false
   }
@@ -278,23 +280,23 @@ resource ` + ServerResource + ` ` + ServerTestResource + ` {
 }
 
 resource "ionoscloud_ipblock" "webserver_ipblock" {
-  location = ` + DatacenterResource + `.` + DatacenterTestResource + `.location
+  location = ` + constant.DatacenterResource + `.` + constant.DatacenterTestResource + `.location
   size = 2
   name = "webserver_ipblock"
 }
 
-resource ` + ServerResource + ` ` + serverTestResource2 + ` {
+resource ` + constant.ServerResource + ` ` + serverTestResource2 + ` {
   name = "` + serverTestResource2 + `"
-  datacenter_id = ` + DatacenterResource + `.` + DatacenterTestResource + `.id
+  datacenter_id = ` + constant.DatacenterResource + `.` + constant.DatacenterTestResource + `.id
   cores = ` + noCoresTest + `
   ram = 2048
   availability_zone = "ZONE_1"
   cpu_family = "` + cpuFamilyTest + `" 
   image_name ="ubuntu:latest"
-  image_password = ` + RandomPassword + `.server2_image_password.result
+  image_password = ` + constant.RandomPassword + `.server2_image_password.result
   type = "ENTERPRISE"
   volume {
-    name = "` + VolumeTestResource + "2" + `"
+    name = "` + constant.VolumeTestResource + "2" + `"
     size = 6
     disk_type = "SSD Standard"
     user_data = "foo"
@@ -303,7 +305,7 @@ resource ` + ServerResource + ` ` + serverTestResource2 + ` {
 	}
   nic {
     lan = 1
-    name = "` + LanTestResource + "2" + `"
+    name = "` + constant.LanTestResource + "2" + `"
     dhcp = false
     firewall_active = false
     firewall {
@@ -328,15 +330,15 @@ resource ` + ServerResource + ` ` + serverTestResource2 + ` {
 }
 
 ` + ServerImagePassword + `
-resource ` + RandomPassword + ` "server2_image_password" {
+resource ` + constant.RandomPassword + ` "server2_image_password" {
   length           = 16
   special          = false
 }
 
-data ` + ServersDataSource + ` ` + ServerDataSourceByName + ` {
- depends_on = [` + ServerResource + `.` + ServerTestResource + "2" + `,
-	` + ServerResource + `.` + ServerTestResource + `]
-  datacenter_id = ` + DatacenterResource + `.` + DatacenterTestResource + `.id
+data ` + constant.ServersDataSource + ` ` + constant.ServerDataSourceByName + ` {
+ depends_on = [` + constant.ServerResource + `.` + constant.ServerTestResource + "2" + `,
+	` + constant.ServerResource + `.` + constant.ServerTestResource + `]
+  datacenter_id = ` + constant.DatacenterResource + `.` + constant.DatacenterTestResource + `.id
   filter {
    name = "cpu_family"
    value = "` + cpuFamilyTest + `" 
@@ -344,28 +346,28 @@ data ` + ServersDataSource + ` ` + ServerDataSourceByName + ` {
 } `
 
 const testAccCheck2ServersBadFilter = `
-resource ` + DatacenterResource + ` ` + DatacenterTestResource + ` {
+resource ` + constant.DatacenterResource + ` ` + constant.DatacenterTestResource + ` {
 	name       = "server-test"
 	location = "us/las"
 }
 
-resource ` + LanResource + ` ` + LanTestResource + ` {
-  datacenter_id = ` + DatacenterResource + `.` + DatacenterTestResource + `.id
+resource ` + constant.LanResource + ` ` + constant.LanTestResource + ` {
+  datacenter_id = ` + constant.DatacenterResource + `.` + constant.DatacenterTestResource + `.id
   public = true
   name = "public"
 }
-resource ` + ServerResource + ` ` + ServerTestResource + ` {
-  name = "` + ServerTestResource + `"
-  datacenter_id = ` + DatacenterResource + `.` + DatacenterTestResource + `.id
+resource ` + constant.ServerResource + ` ` + constant.ServerTestResource + ` {
+  name = "` + constant.ServerTestResource + `"
+  datacenter_id = ` + constant.DatacenterResource + `.` + constant.DatacenterTestResource + `.id
   cores = 2
   ram = 2048
   availability_zone = "ZONE_1"
   cpu_family = "` + cpuFamilyTest + `"
   image_name ="ubuntu:latest"
-  image_password = ` + RandomPassword + `.server_image_password.result
+  image_password = ` + constant.RandomPassword + `.server_image_password.result
   type = "ENTERPRISE"
   volume {
-    name = "` + VolumeTestResource + `"
+    name = "` + constant.VolumeTestResource + `"
     size = 6
     disk_type = "SSD Standard"
     user_data = "foo"
@@ -373,25 +375,25 @@ resource ` + ServerResource + ` ` + ServerTestResource + ` {
     availability_zone = "ZONE_1"
 	}
   nic {
-    lan = ` + LanResource + `.` + LanTestResource + `.id
-    name = "` + LanTestResource + `"
+    lan = ` + constant.LanResource + `.` + constant.LanTestResource + `.id
+    name = "` + constant.LanTestResource + `"
     dhcp = false
     firewall_active = false
   }
 }
 
-resource ` + ServerResource + ` ` + ServerTestResource + "2" + ` {
-  name = "` + ServerTestResource + "2" + `"
-  datacenter_id = ` + DatacenterResource + `.` + DatacenterTestResource + `.id
+resource ` + constant.ServerResource + ` ` + constant.ServerTestResource + "2" + ` {
+  name = "` + constant.ServerTestResource + "2" + `"
+  datacenter_id = ` + constant.DatacenterResource + `.` + constant.DatacenterTestResource + `.id
   cores = ` + noCoresTest + `
   ram = 2048
   availability_zone = "ZONE_1"
   cpu_family = "` + cpuFamilyTest + `"
   image_name ="ubuntu:latest"
-  image_password = ` + RandomPassword + `.server2_image_password.result
+  image_password = ` + constant.RandomPassword + `.server2_image_password.result
   type = "ENTERPRISE"
   volume {
-    name = "` + VolumeTestResource + "2" + `"
+    name = "` + constant.VolumeTestResource + "2" + `"
     size = 6
     disk_type = "SSD Standard"
     user_data = "foo"
@@ -400,22 +402,22 @@ resource ` + ServerResource + ` ` + ServerTestResource + "2" + ` {
 	}
   nic {
     lan = 1
-    name = "` + LanTestResource + "2" + `"
+    name = "` + constant.LanTestResource + "2" + `"
     dhcp = false
     firewall_active = false
   }
 }
 
 ` + ServerImagePassword + `
-resource ` + RandomPassword + ` "server2_image_password" {
+resource ` + constant.RandomPassword + ` "server2_image_password" {
   length           = 16
   special          = false
 }
 
-data ` + ServersDataSource + ` ` + ServerDataSourceByName + ` {
- depends_on = [` + ServerResource + `.` + ServerTestResource + "2" + `,
-	` + ServerResource + `.` + ServerTestResource + `]
-  datacenter_id = ` + DatacenterResource + `.` + DatacenterTestResource + `.id
+data ` + constant.ServersDataSource + ` ` + constant.ServerDataSourceByName + ` {
+ depends_on = [` + constant.ServerResource + `.` + constant.ServerTestResource + "2" + `,
+	` + constant.ServerResource + `.` + constant.ServerTestResource + `]
+  datacenter_id = ` + constant.DatacenterResource + `.` + constant.DatacenterTestResource + `.id
   filter {
    name = "cpu_family"
    value = "doesNotExist" 

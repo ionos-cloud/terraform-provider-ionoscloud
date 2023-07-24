@@ -4,6 +4,7 @@ package ionoscloud
 
 import (
 	"fmt"
+	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils/constant"
 
 	"testing"
 
@@ -36,7 +37,7 @@ func testAccApplicationLoadBalancerImportStateId(s *terraform.State) (string, er
 	importID := ""
 
 	for _, rs := range s.RootModule().Resources {
-		if rs.Type != ALBResource {
+		if rs.Type != constant.ALBResource {
 			continue
 		}
 

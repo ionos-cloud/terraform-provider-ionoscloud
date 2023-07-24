@@ -7,6 +7,8 @@ import (
 	"context"
 	"fmt"
 	mongo "github.com/ionos-cloud/sdk-go-dbaas-mongo"
+	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services"
+	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils/constant"
 	"regexp"
 	"testing"
 
@@ -28,24 +30,24 @@ func TestAccUserMongoBasic(t *testing.T) {
 			{
 				Config: testAccCheckMongoUserConfigBasic,
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheckMongoUserExists(DBaasMongoUserResource+"."+UserTestResource, &user),
-					resource.TestCheckResourceAttr(DBaasMongoUserResource+"."+UserTestResource, "username", UserTestResource),
-					resource.TestCheckResourceAttrSet(DBaasMongoUserResource+"."+UserTestResource, "password"),
-					resource.TestCheckResourceAttr(DBaasMongoUserResource+"."+UserTestResource, "roles.#", "2"),
+					testAccCheckMongoUserExists(constant.DBaasMongoUserResource+"."+constant.UserTestResource, &user),
+					resource.TestCheckResourceAttr(constant.DBaasMongoUserResource+"."+constant.UserTestResource, "username", constant.UserTestResource),
+					resource.TestCheckResourceAttrSet(constant.DBaasMongoUserResource+"."+constant.UserTestResource, "password"),
+					resource.TestCheckResourceAttr(constant.DBaasMongoUserResource+"."+constant.UserTestResource, "roles.#", "2"),
 				),
 			},
 			{
 				Config: testAccDataSourceMongoUserMatchId,
 				Check: resource.ComposeTestCheckFunc(
-					resource.TestCheckResourceAttrPair(DataSource+"."+DBaasMongoUserResource+"."+UserDataSourceById, "username", DBaasMongoUserResource+"."+UserTestResource, "username"),
-					resource.TestCheckResourceAttrPair(DataSource+"."+DBaasMongoUserResource+"."+UserDataSourceById, "roles.#", DBaasMongoUserResource+"."+UserTestResource, "roles.#"),
+					resource.TestCheckResourceAttrPair(constant.DataSource+"."+constant.DBaasMongoUserResource+"."+constant.UserDataSourceById, "username", constant.DBaasMongoUserResource+"."+constant.UserTestResource, "username"),
+					resource.TestCheckResourceAttrPair(constant.DataSource+"."+constant.DBaasMongoUserResource+"."+constant.UserDataSourceById, "roles.#", constant.DBaasMongoUserResource+"."+constant.UserTestResource, "roles.#"),
 				),
 			},
 			{
 				Config: testAccDataSourceMongoUserMatchUsername,
 				Check: resource.ComposeTestCheckFunc(
-					resource.TestCheckResourceAttrPair(DataSource+"."+DBaasMongoUserResource+"."+UserDataSourceById, "username", DBaasMongoUserResource+"."+UserTestResource, "username"),
-					resource.TestCheckResourceAttrPair(DataSource+"."+DBaasMongoUserResource+"."+UserDataSourceById, "roles.#", DBaasMongoUserResource+"."+UserTestResource, "roles.#"),
+					resource.TestCheckResourceAttrPair(constant.DataSource+"."+constant.DBaasMongoUserResource+"."+constant.UserDataSourceById, "username", constant.DBaasMongoUserResource+"."+constant.UserTestResource, "username"),
+					resource.TestCheckResourceAttrPair(constant.DataSource+"."+constant.DBaasMongoUserResource+"."+constant.UserDataSourceById, "roles.#", constant.DBaasMongoUserResource+"."+constant.UserTestResource, "roles.#"),
 				),
 			},
 			{
@@ -55,11 +57,11 @@ func TestAccUserMongoBasic(t *testing.T) {
 			{
 				Config: testAccCheckMongoUserConfigUpdated,
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheckMongoUserExists(DBaasMongoUserResource+"."+UserTestResource, &user),
-					resource.TestCheckResourceAttr(DBaasMongoUserResource+"."+UserTestResource, "username", UserTestResource),
-					resource.TestCheckResourceAttrSet(DBaasMongoUserResource+"."+UserTestResource, "password"),
-					resource.TestCheckResourceAttr(DBaasMongoUserResource+"."+UserTestResource, "roles.#", "1"),
-					resource.TestCheckResourceAttr(DBaasMongoUserResource+"."+UserTestResource, "roles.0.role", "readWrite"),
+					testAccCheckMongoUserExists(constant.DBaasMongoUserResource+"."+constant.UserTestResource, &user),
+					resource.TestCheckResourceAttr(constant.DBaasMongoUserResource+"."+constant.UserTestResource, "username", constant.UserTestResource),
+					resource.TestCheckResourceAttrSet(constant.DBaasMongoUserResource+"."+constant.UserTestResource, "password"),
+					resource.TestCheckResourceAttr(constant.DBaasMongoUserResource+"."+constant.UserTestResource, "roles.#", "1"),
+					resource.TestCheckResourceAttr(constant.DBaasMongoUserResource+"."+constant.UserTestResource, "roles.0.role", "readWrite"),
 				),
 			},
 		},
@@ -67,7 +69,7 @@ func TestAccUserMongoBasic(t *testing.T) {
 }
 
 func testAccCheckMongoUserDestroyCheck(s *terraform.State) error {
-	client := testAccProvider.Meta().(SdkBundle).MongoClient
+	client := testAccProvider.Meta().(services.SdkBundle).MongoClient
 
 	ctx, cancel := context.WithTimeout(context.Background(), *resourceDefaultTimeouts.Delete)
 	if cancel != nil {
@@ -75,7 +77,7 @@ func testAccCheckMongoUserDestroyCheck(s *terraform.State) error {
 	}
 
 	for _, rs := range s.RootModule().Resources {
-		if rs.Type != DBaasMongoUserResource {
+		if rs.Type != constant.DBaasMongoUserResource {
 			continue
 		}
 		clusterId := rs.Primary.Attributes["cluster_id"]
@@ -96,7 +98,7 @@ func testAccCheckMongoUserDestroyCheck(s *terraform.State) error {
 
 func testAccCheckMongoUserExists(n string, user *mongo.User) resource.TestCheckFunc {
 	return func(s *terraform.State) error {
-		client := testAccProvider.Meta().(SdkBundle).MongoClient
+		client := testAccProvider.Meta().(services.SdkBundle).MongoClient
 		rs, ok := s.RootModule().Resources[n]
 
 		if !ok {
@@ -128,50 +130,50 @@ func testAccCheckMongoUserExists(n string, user *mongo.User) resource.TestCheckF
 }
 
 var testAccCheckMongoUserConfigBasic = `
-resource ` + DatacenterResource + ` "datacenter_example" {
+resource ` + constant.DatacenterResource + ` "datacenter_example" {
   name        = "datacenter_example"
   location    = "de/fra"
   description = "Datacenter for testing dbaas cluster"
 }
 
-resource ` + LanResource + ` "lan_example" {
-  datacenter_id = ` + DatacenterResource + `.datacenter_example.id 
+resource ` + constant.LanResource + ` "lan_example" {
+  datacenter_id = ` + constant.DatacenterResource + `.datacenter_example.id 
   public        = false
   name          = "lan_example"
 }
 
-resource ` + DBaasMongoClusterResource + ` ` + DBaaSClusterTestResource + ` {
+resource ` + constant.DBaasMongoClusterResource + ` ` + constant.DBaaSClusterTestResource + ` {
   maintenance_window {
     day_of_the_week  = "Sunday"
     time             = "09:00:00"
   }
   mongodb_version = "5.0"
   instances          = 3
-  display_name = "` + DBaaSClusterTestResource + `"
-  location = ` + DatacenterResource + `.datacenter_example.location
+  display_name = "` + constant.DBaaSClusterTestResource + `"
+  location = ` + constant.DatacenterResource + `.datacenter_example.location
   connections   {
-	datacenter_id   =  ` + DatacenterResource + `.datacenter_example.id 
-    lan_id          =  ` + LanResource + `.lan_example.id 
+	datacenter_id   =  ` + constant.DatacenterResource + `.datacenter_example.id 
+    lan_id          =  ` + constant.LanResource + `.lan_example.id 
     cidr_list            =  ["192.168.1.108/24", "192.168.1.109/24", "192.168.1.110/24"]
   }
   template_id = "6b78ea06-ee0e-4689-998c-fc9c46e781f6"
   
   credentials {
   	username = "username"
-	password = ` + RandomPassword + `.user_password.result
+	password = ` + constant.RandomPassword + `.user_password.result
   }
 }
 
-resource ` + RandomPassword + ` "user_password" {
+resource ` + constant.RandomPassword + ` "user_password" {
   length           = 16
   special          = true
   override_special = "!#$%&*()-_=+[]{}<>:?"
 }
 
-resource ` + DBaasMongoUserResource + ` ` + UserTestResource + ` {
-  cluster_id = ` + DBaasMongoClusterResource + `.` + DBaaSClusterTestResource + `.id 
-  username = "` + UserTestResource + `"
-  password = ` + RandomPassword + `.user_password.result
+resource ` + constant.DBaasMongoUserResource + ` ` + constant.UserTestResource + ` {
+  cluster_id = ` + constant.DBaasMongoClusterResource + `.` + constant.DBaaSClusterTestResource + `.id 
+  username = "` + constant.UserTestResource + `"
+  password = ` + constant.RandomPassword + `.user_password.result
   roles {
     role = "read"
     database = "db1"
@@ -183,56 +185,56 @@ resource ` + DBaasMongoUserResource + ` ` + UserTestResource + ` {
 }`
 
 var testAccCheckMongoUserConfigUpdated = `
-resource ` + DatacenterResource + ` "datacenter_example" {
+resource ` + constant.DatacenterResource + ` "datacenter_example" {
   name        = "datacenter_example"
   location    = "de/fra"
   description = "Datacenter for testing dbaas cluster"
 }
 
-resource ` + LanResource + ` "lan_example" {
-  datacenter_id = ` + DatacenterResource + `.datacenter_example.id 
+resource ` + constant.LanResource + ` "lan_example" {
+  datacenter_id = ` + constant.DatacenterResource + `.datacenter_example.id 
   public        = false
   name          = "lan_example"
 }
 
-resource ` + DBaasMongoClusterResource + ` ` + DBaaSClusterTestResource + ` {
+resource ` + constant.DBaasMongoClusterResource + ` ` + constant.DBaaSClusterTestResource + ` {
   maintenance_window {
     day_of_the_week  = "Sunday"
     time             = "09:00:00"
   }
   mongodb_version = "5.0"
   instances          = 3
-  display_name = "` + DBaaSClusterTestResource + `"
-  location = ` + DatacenterResource + `.datacenter_example.location
+  display_name = "` + constant.DBaaSClusterTestResource + `"
+  location = ` + constant.DatacenterResource + `.datacenter_example.location
   connections   {
-	datacenter_id   =  ` + DatacenterResource + `.datacenter_example.id 
-    lan_id          =  ` + LanResource + `.lan_example.id 
+	datacenter_id   =  ` + constant.DatacenterResource + `.datacenter_example.id 
+    lan_id          =  ` + constant.LanResource + `.lan_example.id 
     cidr_list            =  ["192.168.1.108/24", "192.168.1.109/24", "192.168.1.110/24"]
   }
   template_id = "6b78ea06-ee0e-4689-998c-fc9c46e781f6"
   
   credentials {
   	username = "username"
-	password = ` + RandomPassword + `.user_password.result
+	password = ` + constant.RandomPassword + `.user_password.result
   }
 }
 
-resource ` + DBaasMongoUserResource + ` ` + UserTestResource + ` {
-  cluster_id = ` + DBaasMongoClusterResource + `.` + DBaaSClusterTestResource + `.id 
-  username = "` + UserTestResource + `"
-  password = ` + RandomPassword + `.user_password_updated.result
+resource ` + constant.DBaasMongoUserResource + ` ` + constant.UserTestResource + ` {
+  cluster_id = ` + constant.DBaasMongoClusterResource + `.` + constant.DBaaSClusterTestResource + `.id 
+  username = "` + constant.UserTestResource + `"
+  password = ` + constant.RandomPassword + `.user_password_updated.result
   roles {
     role = "readWrite"
     database = "db1"
   }
 }
-resource ` + RandomPassword + ` "user_password" {
+resource ` + constant.RandomPassword + ` "user_password" {
   length           = 16
   special          = true
   override_special = "!#$%&*()-_=+[]{}<>:?"
 }
 
-resource ` + RandomPassword + ` "user_password_updated" {
+resource ` + constant.RandomPassword + ` "user_password_updated" {
   length           = 16
   special          = true
   override_special = "!#$%&*()-_=+[]{}<>:?"
@@ -240,22 +242,22 @@ resource ` + RandomPassword + ` "user_password_updated" {
 `
 
 var testAccDataSourceMongoUserMatchId = testAccCheckMongoUserConfigBasic + `
-data ` + DBaasMongoUserResource + ` ` + UserDataSourceById + ` {
-  cluster_id = ` + DBaasMongoUserResource + `.` + UserTestResource + `.cluster_id
-  username = ` + DBaasMongoUserResource + `.` + UserTestResource + `.username
+data ` + constant.DBaasMongoUserResource + ` ` + constant.UserDataSourceById + ` {
+  cluster_id = ` + constant.DBaasMongoUserResource + `.` + constant.UserTestResource + `.cluster_id
+  username = ` + constant.DBaasMongoUserResource + `.` + constant.UserTestResource + `.username
 }
 `
 
 var testAccDataSourceMongoUserMatchUsername = testAccCheckMongoUserConfigBasic + `
-data ` + DBaasMongoUserResource + ` ` + UserDataSourceById + ` {
-  cluster_id = ` + DBaasMongoUserResource + `.` + UserTestResource + `.cluster_id
-  username = ` + DBaasMongoUserResource + `.` + UserTestResource + `.username
+data ` + constant.DBaasMongoUserResource + ` ` + constant.UserDataSourceById + ` {
+  cluster_id = ` + constant.DBaasMongoUserResource + `.` + constant.UserTestResource + `.cluster_id
+  username = ` + constant.DBaasMongoUserResource + `.` + constant.UserTestResource + `.username
 }
 `
 
 var testAccDataSourceMongoUserWrongUsername = testAccCheckMongoUserConfigBasic + `
-data ` + DBaasMongoUserResource + ` ` + UserDataSourceById + ` {
-  cluster_id = ` + DBaasMongoUserResource + `.` + UserTestResource + `.cluster_id
+data ` + constant.DBaasMongoUserResource + ` ` + constant.UserDataSourceById + ` {
+  cluster_id = ` + constant.DBaasMongoUserResource + `.` + constant.UserTestResource + `.cluster_id
   username = "willnotwork"
 }
 `

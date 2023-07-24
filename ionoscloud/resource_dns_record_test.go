@@ -8,6 +8,8 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
 	dns "github.com/ionos-cloud/sdk-go-dns"
+	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services"
+	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils/constant"
 	"regexp"
 	"testing"
 )
@@ -25,45 +27,45 @@ func TestAccDNSRecord(t *testing.T) {
 			{
 				Config: DNSRecordConfig,
 				Check: resource.ComposeTestCheckFunc(
-					testAccDNSRecordExistenceCheck(DNSRecordResource+"."+DNSRecordTestResourceName, &Record),
-					resource.TestCheckResourceAttr(DNSRecordResource+"."+DNSRecordTestResourceName, recordNameAttribute, recordNameValue),
-					resource.TestCheckResourceAttr(DNSRecordResource+"."+DNSRecordTestResourceName, recordTypeAttribute, recordTypeValue),
-					resource.TestCheckResourceAttr(DNSRecordResource+"."+DNSRecordTestResourceName, recordContentAttribute, recordContentValue),
-					resource.TestCheckResourceAttr(DNSRecordResource+"."+DNSRecordTestResourceName, recordTtlAttribute, recordTtlValue),
-					resource.TestCheckResourceAttr(DNSRecordResource+"."+DNSRecordTestResourceName, recordEnabledAttribute, recordEnabledValue),
+					testAccDNSRecordExistenceCheck(constant.DNSRecordResource+"."+constant.DNSRecordTestResourceName, &Record),
+					resource.TestCheckResourceAttr(constant.DNSRecordResource+"."+constant.DNSRecordTestResourceName, recordNameAttribute, recordNameValue),
+					resource.TestCheckResourceAttr(constant.DNSRecordResource+"."+constant.DNSRecordTestResourceName, recordTypeAttribute, recordTypeValue),
+					resource.TestCheckResourceAttr(constant.DNSRecordResource+"."+constant.DNSRecordTestResourceName, recordContentAttribute, recordContentValue),
+					resource.TestCheckResourceAttr(constant.DNSRecordResource+"."+constant.DNSRecordTestResourceName, recordTtlAttribute, recordTtlValue),
+					resource.TestCheckResourceAttr(constant.DNSRecordResource+"."+constant.DNSRecordTestResourceName, recordEnabledAttribute, recordEnabledValue),
 				),
 			},
 			{
 				Config: DNSRecordDataSourceMatchById,
 				Check: resource.ComposeTestCheckFunc(
-					testAccDNSRecordExistenceCheck(DNSRecordResource+"."+DNSRecordTestResourceName, &Record),
-					resource.TestCheckResourceAttr(DNSRecordResource+"."+DNSRecordTestResourceName, recordNameAttribute, recordNameValue),
-					resource.TestCheckResourceAttr(DNSRecordResource+"."+DNSRecordTestResourceName, recordTypeAttribute, recordTypeValue),
-					resource.TestCheckResourceAttr(DNSRecordResource+"."+DNSRecordTestResourceName, recordContentAttribute, recordContentValue),
-					resource.TestCheckResourceAttr(DNSRecordResource+"."+DNSRecordTestResourceName, recordTtlAttribute, recordTtlValue),
-					resource.TestCheckResourceAttr(DNSRecordResource+"."+DNSRecordTestResourceName, recordEnabledAttribute, recordEnabledValue),
+					testAccDNSRecordExistenceCheck(constant.DNSRecordResource+"."+constant.DNSRecordTestResourceName, &Record),
+					resource.TestCheckResourceAttr(constant.DNSRecordResource+"."+constant.DNSRecordTestResourceName, recordNameAttribute, recordNameValue),
+					resource.TestCheckResourceAttr(constant.DNSRecordResource+"."+constant.DNSRecordTestResourceName, recordTypeAttribute, recordTypeValue),
+					resource.TestCheckResourceAttr(constant.DNSRecordResource+"."+constant.DNSRecordTestResourceName, recordContentAttribute, recordContentValue),
+					resource.TestCheckResourceAttr(constant.DNSRecordResource+"."+constant.DNSRecordTestResourceName, recordTtlAttribute, recordTtlValue),
+					resource.TestCheckResourceAttr(constant.DNSRecordResource+"."+constant.DNSRecordTestResourceName, recordEnabledAttribute, recordEnabledValue),
 				),
 			},
 			{
 				Config: DNSRecordDataSourceMatchByName,
 				Check: resource.ComposeTestCheckFunc(
-					testAccDNSRecordExistenceCheck(DNSRecordResource+"."+DNSRecordTestResourceName, &Record),
-					resource.TestCheckResourceAttr(DNSRecordResource+"."+DNSRecordTestResourceName, recordNameAttribute, recordNameValue),
-					resource.TestCheckResourceAttr(DNSRecordResource+"."+DNSRecordTestResourceName, recordTypeAttribute, recordTypeValue),
-					resource.TestCheckResourceAttr(DNSRecordResource+"."+DNSRecordTestResourceName, recordContentAttribute, recordContentValue),
-					resource.TestCheckResourceAttr(DNSRecordResource+"."+DNSRecordTestResourceName, recordTtlAttribute, recordTtlValue),
-					resource.TestCheckResourceAttr(DNSRecordResource+"."+DNSRecordTestResourceName, recordEnabledAttribute, recordEnabledValue),
+					testAccDNSRecordExistenceCheck(constant.DNSRecordResource+"."+constant.DNSRecordTestResourceName, &Record),
+					resource.TestCheckResourceAttr(constant.DNSRecordResource+"."+constant.DNSRecordTestResourceName, recordNameAttribute, recordNameValue),
+					resource.TestCheckResourceAttr(constant.DNSRecordResource+"."+constant.DNSRecordTestResourceName, recordTypeAttribute, recordTypeValue),
+					resource.TestCheckResourceAttr(constant.DNSRecordResource+"."+constant.DNSRecordTestResourceName, recordContentAttribute, recordContentValue),
+					resource.TestCheckResourceAttr(constant.DNSRecordResource+"."+constant.DNSRecordTestResourceName, recordTtlAttribute, recordTtlValue),
+					resource.TestCheckResourceAttr(constant.DNSRecordResource+"."+constant.DNSRecordTestResourceName, recordEnabledAttribute, recordEnabledValue),
 				),
 			},
 			{
 				Config: DNSRecordDataSourceMatchByNamePartialMatch,
 				Check: resource.ComposeTestCheckFunc(
-					testAccDNSRecordExistenceCheck(DNSRecordResource+"."+DNSRecordTestResourceName, &Record),
-					resource.TestCheckResourceAttr(DNSRecordResource+"."+DNSRecordTestResourceName, recordNameAttribute, recordNameValue),
-					resource.TestCheckResourceAttr(DNSRecordResource+"."+DNSRecordTestResourceName, recordTypeAttribute, recordTypeValue),
-					resource.TestCheckResourceAttr(DNSRecordResource+"."+DNSRecordTestResourceName, recordContentAttribute, recordContentValue),
-					resource.TestCheckResourceAttr(DNSRecordResource+"."+DNSRecordTestResourceName, recordTtlAttribute, recordTtlValue),
-					resource.TestCheckResourceAttr(DNSRecordResource+"."+DNSRecordTestResourceName, recordEnabledAttribute, recordEnabledValue),
+					testAccDNSRecordExistenceCheck(constant.DNSRecordResource+"."+constant.DNSRecordTestResourceName, &Record),
+					resource.TestCheckResourceAttr(constant.DNSRecordResource+"."+constant.DNSRecordTestResourceName, recordNameAttribute, recordNameValue),
+					resource.TestCheckResourceAttr(constant.DNSRecordResource+"."+constant.DNSRecordTestResourceName, recordTypeAttribute, recordTypeValue),
+					resource.TestCheckResourceAttr(constant.DNSRecordResource+"."+constant.DNSRecordTestResourceName, recordContentAttribute, recordContentValue),
+					resource.TestCheckResourceAttr(constant.DNSRecordResource+"."+constant.DNSRecordTestResourceName, recordTtlAttribute, recordTtlValue),
+					resource.TestCheckResourceAttr(constant.DNSRecordResource+"."+constant.DNSRecordTestResourceName, recordEnabledAttribute, recordEnabledValue),
 				),
 			},
 			{
@@ -89,12 +91,12 @@ func TestAccDNSRecord(t *testing.T) {
 			{
 				Config: DNSRecordConfigUpdate,
 				Check: resource.ComposeTestCheckFunc(
-					testAccDNSRecordExistenceCheck(DNSRecordResource+"."+DNSRecordTestResourceName, &Record),
-					resource.TestCheckResourceAttr(DNSRecordResource+"."+DNSRecordTestResourceName, recordNameAttribute, recordNameValue),
-					resource.TestCheckResourceAttr(DNSRecordResource+"."+DNSRecordTestResourceName, recordTypeAttribute, recordTypeValue),
-					resource.TestCheckResourceAttr(DNSRecordResource+"."+DNSRecordTestResourceName, recordContentAttribute, recordUpdatedContentValue),
-					resource.TestCheckResourceAttr(DNSRecordResource+"."+DNSRecordTestResourceName, recordTtlAttribute, recordUpdatedTtlValue),
-					resource.TestCheckResourceAttr(DNSRecordResource+"."+DNSRecordTestResourceName, recordEnabledAttribute, recordUpdatedEnabledValue),
+					testAccDNSRecordExistenceCheck(constant.DNSRecordResource+"."+constant.DNSRecordTestResourceName, &Record),
+					resource.TestCheckResourceAttr(constant.DNSRecordResource+"."+constant.DNSRecordTestResourceName, recordNameAttribute, recordNameValue),
+					resource.TestCheckResourceAttr(constant.DNSRecordResource+"."+constant.DNSRecordTestResourceName, recordTypeAttribute, recordTypeValue),
+					resource.TestCheckResourceAttr(constant.DNSRecordResource+"."+constant.DNSRecordTestResourceName, recordContentAttribute, recordUpdatedContentValue),
+					resource.TestCheckResourceAttr(constant.DNSRecordResource+"."+constant.DNSRecordTestResourceName, recordTtlAttribute, recordUpdatedTtlValue),
+					resource.TestCheckResourceAttr(constant.DNSRecordResource+"."+constant.DNSRecordTestResourceName, recordEnabledAttribute, recordUpdatedEnabledValue),
 				),
 			},
 		},
@@ -102,12 +104,12 @@ func TestAccDNSRecord(t *testing.T) {
 }
 
 func testAccDNSRecordDestroyCheck(s *terraform.State) error {
-	client := testAccProvider.Meta().(SdkBundle).DNSClient
+	client := testAccProvider.Meta().(services.SdkBundle).DNSClient
 	ctx, cancel := context.WithTimeout(context.Background(), *resourceDefaultTimeouts.Default)
 	defer cancel()
 
 	for _, rs := range s.RootModule().Resources {
-		if rs.Type != DNSRecordResource {
+		if rs.Type != constant.DNSRecordResource {
 			continue
 		}
 		zoneId := rs.Primary.Attributes["zone_id"]
@@ -126,7 +128,7 @@ func testAccDNSRecordDestroyCheck(s *terraform.State) error {
 
 func testAccDNSRecordExistenceCheck(path string, record *dns.RecordRead) resource.TestCheckFunc {
 	return func(s *terraform.State) error {
-		client := testAccProvider.Meta().(SdkBundle).DNSClient
+		client := testAccProvider.Meta().(services.SdkBundle).DNSClient
 		rs, ok := s.RootModule().Resources[path]
 
 		if !ok {
@@ -149,67 +151,67 @@ func testAccDNSRecordExistenceCheck(path string, record *dns.RecordRead) resourc
 }
 
 const DNSRecordDataSourceMatchById = DNSRecordConfig + `
-` + DataSource + ` ` + DNSRecordResource + ` ` + DNSRecordTestDataSourceName + ` {
-	zone_id = ` + DNSRecordResource + `.` + DNSRecordTestResourceName + `.zone_id
-	id = ` + DNSRecordResource + `.` + DNSRecordTestResourceName + `.id
+` + constant.DataSource + ` ` + constant.DNSRecordResource + ` ` + constant.DNSRecordTestDataSourceName + ` {
+	zone_id = ` + constant.DNSRecordResource + `.` + constant.DNSRecordTestResourceName + `.zone_id
+	id = ` + constant.DNSRecordResource + `.` + constant.DNSRecordTestResourceName + `.id
 }
 `
 
 const DNSRecordDataSourceMatchByName = DNSRecordConfig + `
-` + DataSource + ` ` + DNSRecordResource + ` ` + DNSRecordTestDataSourceName + ` {
-	zone_id = ` + DNSRecordResource + `.` + DNSRecordTestResourceName + `.zone_id
-	name = ` + DNSRecordResource + `.` + DNSRecordTestResourceName + `.name
+` + constant.DataSource + ` ` + constant.DNSRecordResource + ` ` + constant.DNSRecordTestDataSourceName + ` {
+	zone_id = ` + constant.DNSRecordResource + `.` + constant.DNSRecordTestResourceName + `.zone_id
+	name = ` + constant.DNSRecordResource + `.` + constant.DNSRecordTestResourceName + `.name
 }
 `
 
 var DNSRecordDataSourceMatchByNamePartialMatch = DNSRecordConfig + `
-` + DataSource + ` ` + DNSRecordResource + ` ` + DNSRecordTestDataSourceName + ` {
-	zone_id = ` + DNSRecordResource + `.` + DNSRecordTestResourceName + `.zone_id
+` + constant.DataSource + ` ` + constant.DNSRecordResource + ` ` + constant.DNSRecordTestDataSourceName + ` {
+	zone_id = ` + constant.DNSRecordResource + `.` + constant.DNSRecordTestResourceName + `.zone_id
 	name = "` + recordNameValue[:4] + `"
 	partial_match = true
 }
 `
 
 const DNSRecordDataSourceInvalidBothIDAndName = DNSRecordConfig + `
-` + DataSource + ` ` + DNSRecordResource + ` ` + DNSRecordTestDataSourceName + ` {
-	zone_id = ` + DNSRecordResource + `.` + DNSRecordTestResourceName + `.zone_id
-	name = ` + DNSRecordResource + `.` + DNSRecordTestResourceName + `.name
-	id = ` + DNSRecordResource + `.` + DNSRecordTestResourceName + `.id
+` + constant.DataSource + ` ` + constant.DNSRecordResource + ` ` + constant.DNSRecordTestDataSourceName + ` {
+	zone_id = ` + constant.DNSRecordResource + `.` + constant.DNSRecordTestResourceName + `.zone_id
+	name = ` + constant.DNSRecordResource + `.` + constant.DNSRecordTestResourceName + `.name
+	id = ` + constant.DNSRecordResource + `.` + constant.DNSRecordTestResourceName + `.id
 }
 `
 
 const DNSRecordDataSourceInvalidNoIDNoName = DNSRecordConfig + `
-` + DataSource + ` ` + DNSRecordResource + ` ` + DNSRecordTestDataSourceName + ` {
-	zone_id = ` + DNSRecordResource + `.` + DNSRecordTestResourceName + `.zone_id
+` + constant.DataSource + ` ` + constant.DNSRecordResource + ` ` + constant.DNSRecordTestDataSourceName + ` {
+	zone_id = ` + constant.DNSRecordResource + `.` + constant.DNSRecordTestResourceName + `.zone_id
 }
 `
 
 const DNSRecordDataSourceInvalidPartialMatchUsedWithID = DNSRecordConfig + `
-` + DataSource + ` ` + DNSRecordResource + ` ` + DNSRecordTestDataSourceName + ` {
-	zone_id = ` + DNSRecordResource + `.` + DNSRecordTestResourceName + `.zone_id
-	id = ` + DNSRecordResource + `.` + DNSRecordTestResourceName + `.id
+` + constant.DataSource + ` ` + constant.DNSRecordResource + ` ` + constant.DNSRecordTestDataSourceName + ` {
+	zone_id = ` + constant.DNSRecordResource + `.` + constant.DNSRecordTestResourceName + `.zone_id
+	id = ` + constant.DNSRecordResource + `.` + constant.DNSRecordTestResourceName + `.id
 	partial_match = true
 }
 `
 
 const DNSRecordDataSourceWrongNameError = DNSRecordConfig + `
-` + DataSource + ` ` + DNSRecordResource + ` ` + DNSRecordTestDataSourceName + ` {
-	zone_id = ` + DNSRecordResource + `.` + DNSRecordTestResourceName + `.zone_id
+` + constant.DataSource + ` ` + constant.DNSRecordResource + ` ` + constant.DNSRecordTestDataSourceName + ` {
+	zone_id = ` + constant.DNSRecordResource + `.` + constant.DNSRecordTestResourceName + `.zone_id
 	name = "nonexistent"
 }
 `
 
 const DNSRecordDataSourceWrongPartialNameError = DNSRecordConfig + `
-` + DataSource + ` ` + DNSRecordResource + ` ` + DNSRecordTestDataSourceName + ` {
-	zone_id = ` + DNSRecordResource + `.` + DNSRecordTestResourceName + `.zone_id
+` + constant.DataSource + ` ` + constant.DNSRecordResource + ` ` + constant.DNSRecordTestDataSourceName + ` {
+	zone_id = ` + constant.DNSRecordResource + `.` + constant.DNSRecordTestResourceName + `.zone_id
 	name = "nonexistent"
 	partial_match = true
 }
 `
 
 const DNSRecordConfigUpdate = DNSZoneConfig + `
-resource ` + DNSRecordResource + ` ` + DNSRecordTestResourceName + ` {
-	zone_id = ` + DNSZoneResource + `.` + DNSZoneTestResourceName + `.id
+resource ` + constant.DNSRecordResource + ` ` + constant.DNSRecordTestResourceName + ` {
+	zone_id = ` + constant.DNSZoneResource + `.` + constant.DNSZoneTestResourceName + `.id
 	` + recordNameAttribute + ` = "` + recordNameValue + `"
 	` + recordTypeAttribute + ` = "` + recordTypeValue + `"
 	` + recordContentAttribute + ` = "` + recordUpdatedContentValue + `"

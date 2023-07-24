@@ -6,6 +6,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	validation "github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
+	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services"
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils"
 	"log"
 )
@@ -80,7 +81,7 @@ func resourceLoggingPipeline() *schema.Resource {
 }
 
 func pipelineCreate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
-	client := meta.(SdkBundle).LoggingClient
+	client := meta.(services.SdkBundle).LoggingClient
 	pipelineResponse, _, err := client.CreatePipeline(ctx, d)
 	if err != nil {
 		return diag.FromErr(fmt.Errorf("an error occured while creating a Logging pipeline: %w", err))
@@ -97,7 +98,7 @@ func pipelineCreate(ctx context.Context, d *schema.ResourceData, meta interface{
 }
 
 func pipelineRead(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
-	client := meta.(SdkBundle).LoggingClient
+	client := meta.(services.SdkBundle).LoggingClient
 	pipelineId := d.Id()
 	pipeline, apiResponse, err := client.GetPipelineById(ctx, pipelineId)
 
@@ -120,7 +121,7 @@ func pipelineRead(ctx context.Context, d *schema.ResourceData, meta interface{})
 }
 
 func pipelineDelete(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
-	client := meta.(SdkBundle).LoggingClient
+	client := meta.(services.SdkBundle).LoggingClient
 	pipelineId := d.Id()
 
 	apiResponse, err := client.DeletePipeline(ctx, pipelineId)
@@ -140,7 +141,7 @@ func pipelineDelete(ctx context.Context, d *schema.ResourceData, meta interface{
 }
 
 func pipelineUpdate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
-	client := meta.(SdkBundle).LoggingClient
+	client := meta.(services.SdkBundle).LoggingClient
 	pipelineId := d.Id()
 
 	pipelineResponse, _, err := client.UpdatePipeline(ctx, pipelineId, d)

@@ -4,6 +4,7 @@ package ionoscloud
 
 import (
 	"fmt"
+	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils/constant"
 
 	"testing"
 
@@ -24,7 +25,7 @@ func TestAccFirewallImportBasic(t *testing.T) {
 			},
 
 			{
-				ResourceName:      FirewallResource + "." + FirewallTestResource,
+				ResourceName:      constant.FirewallResource + "." + constant.FirewallTestResource,
 				ImportStateIdFunc: testAccFirewallImportStateId,
 				ImportState:       true,
 				ImportStateVerify: true,
@@ -37,7 +38,7 @@ func testAccFirewallImportStateId(s *terraform.State) (string, error) {
 	var importID = ""
 
 	for _, rs := range s.RootModule().Resources {
-		if rs.Type != FirewallResource {
+		if rs.Type != constant.FirewallResource {
 			continue
 		}
 

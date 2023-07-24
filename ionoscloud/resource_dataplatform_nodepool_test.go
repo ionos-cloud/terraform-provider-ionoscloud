@@ -8,7 +8,9 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
 	dataplatform "github.com/ionos-cloud/sdk-go-dataplatform"
+	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services"
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils"
+	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils/constant"
 	"regexp"
 	"testing"
 )
@@ -26,76 +28,76 @@ func TestAccDataplatformNodePoolBasic(t *testing.T) {
 			{
 				Config: testAccCheckDataplatformNodePoolConfigBasic,
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheckDataplatformNodePoolExists(DataplatformNodePoolResource+"."+DataplatformNodePoolTestResource, &DataplatformNodePool),
-					resource.TestCheckResourceAttr(DataplatformNodePoolResource+"."+DataplatformNodePoolTestResource, "name", DataplatformNodePoolTestResource),
-					resource.TestCheckResourceAttr(DataplatformNodePoolResource+"."+DataplatformNodePoolTestResource, "node_count", "1"),
-					resource.TestCheckResourceAttr(DataplatformNodePoolResource+"."+DataplatformNodePoolTestResource, "cpu_family", "INTEL_SKYLAKE"),
-					resource.TestCheckResourceAttr(DataplatformNodePoolResource+"."+DataplatformNodePoolTestResource, "cores_count", "1"),
-					resource.TestCheckResourceAttr(DataplatformNodePoolResource+"."+DataplatformNodePoolTestResource, "ram_size", "2048"),
-					resource.TestCheckResourceAttr(DataplatformNodePoolResource+"."+DataplatformNodePoolTestResource, "availability_zone", "AUTO"),
-					resource.TestCheckResourceAttr(DataplatformNodePoolResource+"."+DataplatformNodePoolTestResource, "storage_type", "HDD"),
-					resource.TestCheckResourceAttr(DataplatformNodePoolResource+"."+DataplatformNodePoolTestResource, "storage_size", "10"),
-					resource.TestCheckResourceAttr(DataplatformNodePoolResource+"."+DataplatformNodePoolTestResource, "maintenance_window.0.time", "09:00:00"),
-					resource.TestCheckResourceAttr(DataplatformNodePoolResource+"."+DataplatformNodePoolTestResource, "labels.foo", "bar"),
-					resource.TestCheckResourceAttr(DataplatformNodePoolResource+"."+DataplatformNodePoolTestResource, "labels.color", "green"),
-					resource.TestCheckResourceAttr(DataplatformNodePoolResource+"."+DataplatformNodePoolTestResource, "annotations.ann1", "value1"),
-					resource.TestCheckResourceAttr(DataplatformNodePoolResource+"."+DataplatformNodePoolTestResource, "annotations.ann2", "value2"),
+					testAccCheckDataplatformNodePoolExists(constant.DataplatformNodePoolResource+"."+constant.DataplatformNodePoolTestResource, &DataplatformNodePool),
+					resource.TestCheckResourceAttr(constant.DataplatformNodePoolResource+"."+constant.DataplatformNodePoolTestResource, "name", constant.DataplatformNodePoolTestResource),
+					resource.TestCheckResourceAttr(constant.DataplatformNodePoolResource+"."+constant.DataplatformNodePoolTestResource, "node_count", "1"),
+					resource.TestCheckResourceAttr(constant.DataplatformNodePoolResource+"."+constant.DataplatformNodePoolTestResource, "cpu_family", "INTEL_SKYLAKE"),
+					resource.TestCheckResourceAttr(constant.DataplatformNodePoolResource+"."+constant.DataplatformNodePoolTestResource, "cores_count", "1"),
+					resource.TestCheckResourceAttr(constant.DataplatformNodePoolResource+"."+constant.DataplatformNodePoolTestResource, "ram_size", "2048"),
+					resource.TestCheckResourceAttr(constant.DataplatformNodePoolResource+"."+constant.DataplatformNodePoolTestResource, "availability_zone", "AUTO"),
+					resource.TestCheckResourceAttr(constant.DataplatformNodePoolResource+"."+constant.DataplatformNodePoolTestResource, "storage_type", "HDD"),
+					resource.TestCheckResourceAttr(constant.DataplatformNodePoolResource+"."+constant.DataplatformNodePoolTestResource, "storage_size", "10"),
+					resource.TestCheckResourceAttr(constant.DataplatformNodePoolResource+"."+constant.DataplatformNodePoolTestResource, "maintenance_window.0.time", "09:00:00"),
+					resource.TestCheckResourceAttr(constant.DataplatformNodePoolResource+"."+constant.DataplatformNodePoolTestResource, "labels.foo", "bar"),
+					resource.TestCheckResourceAttr(constant.DataplatformNodePoolResource+"."+constant.DataplatformNodePoolTestResource, "labels.color", "green"),
+					resource.TestCheckResourceAttr(constant.DataplatformNodePoolResource+"."+constant.DataplatformNodePoolTestResource, "annotations.ann1", "value1"),
+					resource.TestCheckResourceAttr(constant.DataplatformNodePoolResource+"."+constant.DataplatformNodePoolTestResource, "annotations.ann2", "value2"),
 				),
 			},
 			{
 				Config: testAccDataSourceDataplatformNodePoolMatchById,
 				Check: resource.ComposeTestCheckFunc(
-					resource.TestCheckResourceAttrPair(DataSource+"."+DataplatformNodePoolResource+"."+DataplatformNodePoolTestDataSourceById, "name", DataplatformNodePoolResource+"."+DataplatformNodePoolTestResource, "name"),
-					resource.TestCheckResourceAttrPair(DataSource+"."+DataplatformNodePoolResource+"."+DataplatformNodePoolTestDataSourceById, "node_count", DataplatformNodePoolResource+"."+DataplatformNodePoolTestResource, "node_count"),
-					resource.TestCheckResourceAttrPair(DataSource+"."+DataplatformNodePoolResource+"."+DataplatformNodePoolTestDataSourceById, "cpu_family", DataplatformNodePoolResource+"."+DataplatformNodePoolTestResource, "cpu_family"),
-					resource.TestCheckResourceAttrPair(DataSource+"."+DataplatformNodePoolResource+"."+DataplatformNodePoolTestDataSourceById, "cores_count", DataplatformNodePoolResource+"."+DataplatformNodePoolTestResource, "cores_count"),
-					resource.TestCheckResourceAttrPair(DataSource+"."+DataplatformNodePoolResource+"."+DataplatformNodePoolTestDataSourceById, "ram_size", DataplatformNodePoolResource+"."+DataplatformNodePoolTestResource, "ram_size"),
-					resource.TestCheckResourceAttrPair(DataSource+"."+DataplatformNodePoolResource+"."+DataplatformNodePoolTestDataSourceById, "availability_zone", DataplatformNodePoolResource+"."+DataplatformNodePoolTestResource, "availability_zone"),
-					resource.TestCheckResourceAttrPair(DataSource+"."+DataplatformNodePoolResource+"."+DataplatformNodePoolTestDataSourceById, "storage_type", DataplatformNodePoolResource+"."+DataplatformNodePoolTestResource, "storage_type"),
-					resource.TestCheckResourceAttrPair(DataSource+"."+DataplatformNodePoolResource+"."+DataplatformNodePoolTestDataSourceById, "storage_size", DataplatformNodePoolResource+"."+DataplatformNodePoolTestResource, "storage_size"),
-					resource.TestCheckResourceAttrPair(DataSource+"."+DataplatformNodePoolResource+"."+DataplatformNodePoolTestDataSourceById, "maintenance_window.0.time", DataplatformNodePoolResource+"."+DataplatformNodePoolTestResource, "maintenance_window.0.time"),
-					resource.TestCheckResourceAttrPair(DataSource+"."+DataplatformNodePoolResource+"."+DataplatformNodePoolTestDataSourceById, "maintenance_window.0.day_of_the_week", DataplatformNodePoolResource+"."+DataplatformNodePoolTestResource, "maintenance_window.0.day_of_the_week"),
-					resource.TestCheckResourceAttrPair(DataSource+"."+DataplatformNodePoolResource+"."+DataplatformNodePoolTestDataSourceById, "labels.foo", DataplatformNodePoolResource+"."+DataplatformNodePoolTestResource, "labels.foo"),
-					resource.TestCheckResourceAttrPair(DataSource+"."+DataplatformNodePoolResource+"."+DataplatformNodePoolTestDataSourceById, "labels.color", DataplatformNodePoolResource+"."+DataplatformNodePoolTestResource, "labels.color"),
-					resource.TestCheckResourceAttrPair(DataSource+"."+DataplatformNodePoolResource+"."+DataplatformNodePoolTestDataSourceById, "annotations.ann1", DataplatformNodePoolResource+"."+DataplatformNodePoolTestResource, "annotations.ann1"),
-					resource.TestCheckResourceAttrPair(DataSource+"."+DataplatformNodePoolResource+"."+DataplatformNodePoolTestDataSourceById, "annotations.ann2", DataplatformNodePoolResource+"."+DataplatformNodePoolTestResource, "annotations.ann2"),
+					resource.TestCheckResourceAttrPair(constant.DataSource+"."+constant.DataplatformNodePoolResource+"."+constant.DataplatformNodePoolTestDataSourceById, "name", constant.DataplatformNodePoolResource+"."+constant.DataplatformNodePoolTestResource, "name"),
+					resource.TestCheckResourceAttrPair(constant.DataSource+"."+constant.DataplatformNodePoolResource+"."+constant.DataplatformNodePoolTestDataSourceById, "node_count", constant.DataplatformNodePoolResource+"."+constant.DataplatformNodePoolTestResource, "node_count"),
+					resource.TestCheckResourceAttrPair(constant.DataSource+"."+constant.DataplatformNodePoolResource+"."+constant.DataplatformNodePoolTestDataSourceById, "cpu_family", constant.DataplatformNodePoolResource+"."+constant.DataplatformNodePoolTestResource, "cpu_family"),
+					resource.TestCheckResourceAttrPair(constant.DataSource+"."+constant.DataplatformNodePoolResource+"."+constant.DataplatformNodePoolTestDataSourceById, "cores_count", constant.DataplatformNodePoolResource+"."+constant.DataplatformNodePoolTestResource, "cores_count"),
+					resource.TestCheckResourceAttrPair(constant.DataSource+"."+constant.DataplatformNodePoolResource+"."+constant.DataplatformNodePoolTestDataSourceById, "ram_size", constant.DataplatformNodePoolResource+"."+constant.DataplatformNodePoolTestResource, "ram_size"),
+					resource.TestCheckResourceAttrPair(constant.DataSource+"."+constant.DataplatformNodePoolResource+"."+constant.DataplatformNodePoolTestDataSourceById, "availability_zone", constant.DataplatformNodePoolResource+"."+constant.DataplatformNodePoolTestResource, "availability_zone"),
+					resource.TestCheckResourceAttrPair(constant.DataSource+"."+constant.DataplatformNodePoolResource+"."+constant.DataplatformNodePoolTestDataSourceById, "storage_type", constant.DataplatformNodePoolResource+"."+constant.DataplatformNodePoolTestResource, "storage_type"),
+					resource.TestCheckResourceAttrPair(constant.DataSource+"."+constant.DataplatformNodePoolResource+"."+constant.DataplatformNodePoolTestDataSourceById, "storage_size", constant.DataplatformNodePoolResource+"."+constant.DataplatformNodePoolTestResource, "storage_size"),
+					resource.TestCheckResourceAttrPair(constant.DataSource+"."+constant.DataplatformNodePoolResource+"."+constant.DataplatformNodePoolTestDataSourceById, "maintenance_window.0.time", constant.DataplatformNodePoolResource+"."+constant.DataplatformNodePoolTestResource, "maintenance_window.0.time"),
+					resource.TestCheckResourceAttrPair(constant.DataSource+"."+constant.DataplatformNodePoolResource+"."+constant.DataplatformNodePoolTestDataSourceById, "maintenance_window.0.day_of_the_week", constant.DataplatformNodePoolResource+"."+constant.DataplatformNodePoolTestResource, "maintenance_window.0.day_of_the_week"),
+					resource.TestCheckResourceAttrPair(constant.DataSource+"."+constant.DataplatformNodePoolResource+"."+constant.DataplatformNodePoolTestDataSourceById, "labels.foo", constant.DataplatformNodePoolResource+"."+constant.DataplatformNodePoolTestResource, "labels.foo"),
+					resource.TestCheckResourceAttrPair(constant.DataSource+"."+constant.DataplatformNodePoolResource+"."+constant.DataplatformNodePoolTestDataSourceById, "labels.color", constant.DataplatformNodePoolResource+"."+constant.DataplatformNodePoolTestResource, "labels.color"),
+					resource.TestCheckResourceAttrPair(constant.DataSource+"."+constant.DataplatformNodePoolResource+"."+constant.DataplatformNodePoolTestDataSourceById, "annotations.ann1", constant.DataplatformNodePoolResource+"."+constant.DataplatformNodePoolTestResource, "annotations.ann1"),
+					resource.TestCheckResourceAttrPair(constant.DataSource+"."+constant.DataplatformNodePoolResource+"."+constant.DataplatformNodePoolTestDataSourceById, "annotations.ann2", constant.DataplatformNodePoolResource+"."+constant.DataplatformNodePoolTestResource, "annotations.ann2"),
 				),
 			},
 			{
 				Config: testAccDataSourceDataplatformNodePoolMatchByName,
 				Check: resource.ComposeTestCheckFunc(
-					resource.TestCheckResourceAttrPair(DataSource+"."+DataplatformNodePoolResource+"."+DataplatformNodePoolTestDataSourceByName, "name", DataplatformNodePoolResource+"."+DataplatformNodePoolTestResource, "name"),
-					resource.TestCheckResourceAttrPair(DataSource+"."+DataplatformNodePoolResource+"."+DataplatformNodePoolTestDataSourceByName, "node_count", DataplatformNodePoolResource+"."+DataplatformNodePoolTestResource, "node_count"),
-					resource.TestCheckResourceAttrPair(DataSource+"."+DataplatformNodePoolResource+"."+DataplatformNodePoolTestDataSourceByName, "cpu_family", DataplatformNodePoolResource+"."+DataplatformNodePoolTestResource, "cpu_family"),
-					resource.TestCheckResourceAttrPair(DataSource+"."+DataplatformNodePoolResource+"."+DataplatformNodePoolTestDataSourceByName, "cores_count", DataplatformNodePoolResource+"."+DataplatformNodePoolTestResource, "cores_count"),
-					resource.TestCheckResourceAttrPair(DataSource+"."+DataplatformNodePoolResource+"."+DataplatformNodePoolTestDataSourceByName, "ram_size", DataplatformNodePoolResource+"."+DataplatformNodePoolTestResource, "ram_size"),
-					resource.TestCheckResourceAttrPair(DataSource+"."+DataplatformNodePoolResource+"."+DataplatformNodePoolTestDataSourceByName, "availability_zone", DataplatformNodePoolResource+"."+DataplatformNodePoolTestResource, "availability_zone"),
-					resource.TestCheckResourceAttrPair(DataSource+"."+DataplatformNodePoolResource+"."+DataplatformNodePoolTestDataSourceByName, "storage_type", DataplatformNodePoolResource+"."+DataplatformNodePoolTestResource, "storage_type"),
-					resource.TestCheckResourceAttrPair(DataSource+"."+DataplatformNodePoolResource+"."+DataplatformNodePoolTestDataSourceByName, "storage_size", DataplatformNodePoolResource+"."+DataplatformNodePoolTestResource, "storage_size"),
-					resource.TestCheckResourceAttrPair(DataSource+"."+DataplatformNodePoolResource+"."+DataplatformNodePoolTestDataSourceByName, "maintenance_window.0.time", DataplatformNodePoolResource+"."+DataplatformNodePoolTestResource, "maintenance_window.0.time"),
-					resource.TestCheckResourceAttrPair(DataSource+"."+DataplatformNodePoolResource+"."+DataplatformNodePoolTestDataSourceByName, "maintenance_window.0.day_of_the_week", DataplatformNodePoolResource+"."+DataplatformNodePoolTestResource, "maintenance_window.0.day_of_the_week"),
-					resource.TestCheckResourceAttrPair(DataSource+"."+DataplatformNodePoolResource+"."+DataplatformNodePoolTestDataSourceByName, "labels.foo", DataplatformNodePoolResource+"."+DataplatformNodePoolTestResource, "labels.foo"),
-					resource.TestCheckResourceAttrPair(DataSource+"."+DataplatformNodePoolResource+"."+DataplatformNodePoolTestDataSourceByName, "labels.color", DataplatformNodePoolResource+"."+DataplatformNodePoolTestResource, "labels.color"),
-					resource.TestCheckResourceAttrPair(DataSource+"."+DataplatformNodePoolResource+"."+DataplatformNodePoolTestDataSourceByName, "annotations.ann1", DataplatformNodePoolResource+"."+DataplatformNodePoolTestResource, "annotations.ann1"),
-					resource.TestCheckResourceAttrPair(DataSource+"."+DataplatformNodePoolResource+"."+DataplatformNodePoolTestDataSourceByName, "annotations.ann2", DataplatformNodePoolResource+"."+DataplatformNodePoolTestResource, "annotations.ann2")),
+					resource.TestCheckResourceAttrPair(constant.DataSource+"."+constant.DataplatformNodePoolResource+"."+constant.DataplatformNodePoolTestDataSourceByName, "name", constant.DataplatformNodePoolResource+"."+constant.DataplatformNodePoolTestResource, "name"),
+					resource.TestCheckResourceAttrPair(constant.DataSource+"."+constant.DataplatformNodePoolResource+"."+constant.DataplatformNodePoolTestDataSourceByName, "node_count", constant.DataplatformNodePoolResource+"."+constant.DataplatformNodePoolTestResource, "node_count"),
+					resource.TestCheckResourceAttrPair(constant.DataSource+"."+constant.DataplatformNodePoolResource+"."+constant.DataplatformNodePoolTestDataSourceByName, "cpu_family", constant.DataplatformNodePoolResource+"."+constant.DataplatformNodePoolTestResource, "cpu_family"),
+					resource.TestCheckResourceAttrPair(constant.DataSource+"."+constant.DataplatformNodePoolResource+"."+constant.DataplatformNodePoolTestDataSourceByName, "cores_count", constant.DataplatformNodePoolResource+"."+constant.DataplatformNodePoolTestResource, "cores_count"),
+					resource.TestCheckResourceAttrPair(constant.DataSource+"."+constant.DataplatformNodePoolResource+"."+constant.DataplatformNodePoolTestDataSourceByName, "ram_size", constant.DataplatformNodePoolResource+"."+constant.DataplatformNodePoolTestResource, "ram_size"),
+					resource.TestCheckResourceAttrPair(constant.DataSource+"."+constant.DataplatformNodePoolResource+"."+constant.DataplatformNodePoolTestDataSourceByName, "availability_zone", constant.DataplatformNodePoolResource+"."+constant.DataplatformNodePoolTestResource, "availability_zone"),
+					resource.TestCheckResourceAttrPair(constant.DataSource+"."+constant.DataplatformNodePoolResource+"."+constant.DataplatformNodePoolTestDataSourceByName, "storage_type", constant.DataplatformNodePoolResource+"."+constant.DataplatformNodePoolTestResource, "storage_type"),
+					resource.TestCheckResourceAttrPair(constant.DataSource+"."+constant.DataplatformNodePoolResource+"."+constant.DataplatformNodePoolTestDataSourceByName, "storage_size", constant.DataplatformNodePoolResource+"."+constant.DataplatformNodePoolTestResource, "storage_size"),
+					resource.TestCheckResourceAttrPair(constant.DataSource+"."+constant.DataplatformNodePoolResource+"."+constant.DataplatformNodePoolTestDataSourceByName, "maintenance_window.0.time", constant.DataplatformNodePoolResource+"."+constant.DataplatformNodePoolTestResource, "maintenance_window.0.time"),
+					resource.TestCheckResourceAttrPair(constant.DataSource+"."+constant.DataplatformNodePoolResource+"."+constant.DataplatformNodePoolTestDataSourceByName, "maintenance_window.0.day_of_the_week", constant.DataplatformNodePoolResource+"."+constant.DataplatformNodePoolTestResource, "maintenance_window.0.day_of_the_week"),
+					resource.TestCheckResourceAttrPair(constant.DataSource+"."+constant.DataplatformNodePoolResource+"."+constant.DataplatformNodePoolTestDataSourceByName, "labels.foo", constant.DataplatformNodePoolResource+"."+constant.DataplatformNodePoolTestResource, "labels.foo"),
+					resource.TestCheckResourceAttrPair(constant.DataSource+"."+constant.DataplatformNodePoolResource+"."+constant.DataplatformNodePoolTestDataSourceByName, "labels.color", constant.DataplatformNodePoolResource+"."+constant.DataplatformNodePoolTestResource, "labels.color"),
+					resource.TestCheckResourceAttrPair(constant.DataSource+"."+constant.DataplatformNodePoolResource+"."+constant.DataplatformNodePoolTestDataSourceByName, "annotations.ann1", constant.DataplatformNodePoolResource+"."+constant.DataplatformNodePoolTestResource, "annotations.ann1"),
+					resource.TestCheckResourceAttrPair(constant.DataSource+"."+constant.DataplatformNodePoolResource+"."+constant.DataplatformNodePoolTestDataSourceByName, "annotations.ann2", constant.DataplatformNodePoolResource+"."+constant.DataplatformNodePoolTestResource, "annotations.ann2")),
 			},
 			{
 				Config: testAccDataSourceDataplatformNodePoolPartialMatchByName,
 				Check: resource.ComposeTestCheckFunc(
-					resource.TestCheckResourceAttrPair(DataSource+"."+DataplatformNodePoolResource+"."+DataplatformNodePoolTestDataSourceByName, "name", DataplatformNodePoolResource+"."+DataplatformNodePoolTestResource, "name"),
-					resource.TestCheckResourceAttrPair(DataSource+"."+DataplatformNodePoolResource+"."+DataplatformNodePoolTestDataSourceByName, "node_count", DataplatformNodePoolResource+"."+DataplatformNodePoolTestResource, "node_count"),
-					resource.TestCheckResourceAttrPair(DataSource+"."+DataplatformNodePoolResource+"."+DataplatformNodePoolTestDataSourceByName, "cpu_family", DataplatformNodePoolResource+"."+DataplatformNodePoolTestResource, "cpu_family"),
-					resource.TestCheckResourceAttrPair(DataSource+"."+DataplatformNodePoolResource+"."+DataplatformNodePoolTestDataSourceByName, "cores_count", DataplatformNodePoolResource+"."+DataplatformNodePoolTestResource, "cores_count"),
-					resource.TestCheckResourceAttrPair(DataSource+"."+DataplatformNodePoolResource+"."+DataplatformNodePoolTestDataSourceByName, "ram_size", DataplatformNodePoolResource+"."+DataplatformNodePoolTestResource, "ram_size"),
-					resource.TestCheckResourceAttrPair(DataSource+"."+DataplatformNodePoolResource+"."+DataplatformNodePoolTestDataSourceByName, "availability_zone", DataplatformNodePoolResource+"."+DataplatformNodePoolTestResource, "availability_zone"),
-					resource.TestCheckResourceAttrPair(DataSource+"."+DataplatformNodePoolResource+"."+DataplatformNodePoolTestDataSourceByName, "storage_type", DataplatformNodePoolResource+"."+DataplatformNodePoolTestResource, "storage_type"),
-					resource.TestCheckResourceAttrPair(DataSource+"."+DataplatformNodePoolResource+"."+DataplatformNodePoolTestDataSourceByName, "storage_size", DataplatformNodePoolResource+"."+DataplatformNodePoolTestResource, "storage_size"),
-					resource.TestCheckResourceAttrPair(DataSource+"."+DataplatformNodePoolResource+"."+DataplatformNodePoolTestDataSourceByName, "maintenance_window.0.time", DataplatformNodePoolResource+"."+DataplatformNodePoolTestResource, "maintenance_window.0.time"),
-					resource.TestCheckResourceAttrPair(DataSource+"."+DataplatformNodePoolResource+"."+DataplatformNodePoolTestDataSourceByName, "maintenance_window.0.day_of_the_week", DataplatformNodePoolResource+"."+DataplatformNodePoolTestResource, "maintenance_window.0.day_of_the_week"),
-					resource.TestCheckResourceAttrPair(DataSource+"."+DataplatformNodePoolResource+"."+DataplatformNodePoolTestDataSourceByName, "labels.foo", DataplatformNodePoolResource+"."+DataplatformNodePoolTestResource, "labels.foo"),
-					resource.TestCheckResourceAttrPair(DataSource+"."+DataplatformNodePoolResource+"."+DataplatformNodePoolTestDataSourceByName, "labels.color", DataplatformNodePoolResource+"."+DataplatformNodePoolTestResource, "labels.color"),
-					resource.TestCheckResourceAttrPair(DataSource+"."+DataplatformNodePoolResource+"."+DataplatformNodePoolTestDataSourceByName, "annotations.ann1", DataplatformNodePoolResource+"."+DataplatformNodePoolTestResource, "annotations.ann1"),
-					resource.TestCheckResourceAttrPair(DataSource+"."+DataplatformNodePoolResource+"."+DataplatformNodePoolTestDataSourceByName, "annotations.ann2", DataplatformNodePoolResource+"."+DataplatformNodePoolTestResource, "annotations.ann2"),
+					resource.TestCheckResourceAttrPair(constant.DataSource+"."+constant.DataplatformNodePoolResource+"."+constant.DataplatformNodePoolTestDataSourceByName, "name", constant.DataplatformNodePoolResource+"."+constant.DataplatformNodePoolTestResource, "name"),
+					resource.TestCheckResourceAttrPair(constant.DataSource+"."+constant.DataplatformNodePoolResource+"."+constant.DataplatformNodePoolTestDataSourceByName, "node_count", constant.DataplatformNodePoolResource+"."+constant.DataplatformNodePoolTestResource, "node_count"),
+					resource.TestCheckResourceAttrPair(constant.DataSource+"."+constant.DataplatformNodePoolResource+"."+constant.DataplatformNodePoolTestDataSourceByName, "cpu_family", constant.DataplatformNodePoolResource+"."+constant.DataplatformNodePoolTestResource, "cpu_family"),
+					resource.TestCheckResourceAttrPair(constant.DataSource+"."+constant.DataplatformNodePoolResource+"."+constant.DataplatformNodePoolTestDataSourceByName, "cores_count", constant.DataplatformNodePoolResource+"."+constant.DataplatformNodePoolTestResource, "cores_count"),
+					resource.TestCheckResourceAttrPair(constant.DataSource+"."+constant.DataplatformNodePoolResource+"."+constant.DataplatformNodePoolTestDataSourceByName, "ram_size", constant.DataplatformNodePoolResource+"."+constant.DataplatformNodePoolTestResource, "ram_size"),
+					resource.TestCheckResourceAttrPair(constant.DataSource+"."+constant.DataplatformNodePoolResource+"."+constant.DataplatformNodePoolTestDataSourceByName, "availability_zone", constant.DataplatformNodePoolResource+"."+constant.DataplatformNodePoolTestResource, "availability_zone"),
+					resource.TestCheckResourceAttrPair(constant.DataSource+"."+constant.DataplatformNodePoolResource+"."+constant.DataplatformNodePoolTestDataSourceByName, "storage_type", constant.DataplatformNodePoolResource+"."+constant.DataplatformNodePoolTestResource, "storage_type"),
+					resource.TestCheckResourceAttrPair(constant.DataSource+"."+constant.DataplatformNodePoolResource+"."+constant.DataplatformNodePoolTestDataSourceByName, "storage_size", constant.DataplatformNodePoolResource+"."+constant.DataplatformNodePoolTestResource, "storage_size"),
+					resource.TestCheckResourceAttrPair(constant.DataSource+"."+constant.DataplatformNodePoolResource+"."+constant.DataplatformNodePoolTestDataSourceByName, "maintenance_window.0.time", constant.DataplatformNodePoolResource+"."+constant.DataplatformNodePoolTestResource, "maintenance_window.0.time"),
+					resource.TestCheckResourceAttrPair(constant.DataSource+"."+constant.DataplatformNodePoolResource+"."+constant.DataplatformNodePoolTestDataSourceByName, "maintenance_window.0.day_of_the_week", constant.DataplatformNodePoolResource+"."+constant.DataplatformNodePoolTestResource, "maintenance_window.0.day_of_the_week"),
+					resource.TestCheckResourceAttrPair(constant.DataSource+"."+constant.DataplatformNodePoolResource+"."+constant.DataplatformNodePoolTestDataSourceByName, "labels.foo", constant.DataplatformNodePoolResource+"."+constant.DataplatformNodePoolTestResource, "labels.foo"),
+					resource.TestCheckResourceAttrPair(constant.DataSource+"."+constant.DataplatformNodePoolResource+"."+constant.DataplatformNodePoolTestDataSourceByName, "labels.color", constant.DataplatformNodePoolResource+"."+constant.DataplatformNodePoolTestResource, "labels.color"),
+					resource.TestCheckResourceAttrPair(constant.DataSource+"."+constant.DataplatformNodePoolResource+"."+constant.DataplatformNodePoolTestDataSourceByName, "annotations.ann1", constant.DataplatformNodePoolResource+"."+constant.DataplatformNodePoolTestResource, "annotations.ann1"),
+					resource.TestCheckResourceAttrPair(constant.DataSource+"."+constant.DataplatformNodePoolResource+"."+constant.DataplatformNodePoolTestDataSourceByName, "annotations.ann2", constant.DataplatformNodePoolResource+"."+constant.DataplatformNodePoolTestResource, "annotations.ann2"),
 				),
 			},
 			{
@@ -109,19 +111,19 @@ func TestAccDataplatformNodePoolBasic(t *testing.T) {
 			{
 				Config: testAccDataSourceDataplatformNodePools,
 				Check: resource.ComposeTestCheckFunc(
-					utils.TestNotEmptySlice(DataSource+"."+DataplatformNodePoolsDataSource+"."+DataplatformNodePoolsTestDataSource, "node_pools.#"),
+					utils.TestNotEmptySlice(constant.DataSource+"."+constant.DataplatformNodePoolsDataSource+"."+constant.DataplatformNodePoolsTestDataSource, "node_pools.#"),
 				),
 			},
 			{
 				Config: testAccDataSourceDataplatformNodePoolsByName,
 				Check: resource.ComposeTestCheckFunc(
-					utils.TestNotEmptySlice(DataSource+"."+DataplatformNodePoolsDataSource+"."+DataplatformNodePoolsTestDataSource, "node_pools.#"),
+					utils.TestNotEmptySlice(constant.DataSource+"."+constant.DataplatformNodePoolsDataSource+"."+constant.DataplatformNodePoolsTestDataSource, "node_pools.#"),
 				),
 			},
 			{
 				Config: testAccDataSourceDataplatformNodePoolsByNamePartialMatch,
 				Check: resource.ComposeTestCheckFunc(
-					utils.TestNotEmptySlice(DataSource+"."+DataplatformNodePoolsDataSource+"."+DataplatformNodePoolsTestDataSource, "node_pools.#"),
+					utils.TestNotEmptySlice(constant.DataSource+"."+constant.DataplatformNodePoolsDataSource+"."+constant.DataplatformNodePoolsTestDataSource, "node_pools.#"),
 				),
 			},
 			{
@@ -135,19 +137,19 @@ func TestAccDataplatformNodePoolBasic(t *testing.T) {
 			{
 				Config: testAccCheckDataplatformNodePoolConfigUpdate,
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheckDataplatformNodePoolExists(DataplatformNodePoolResource+"."+DataplatformNodePoolTestResource, &DataplatformNodePool),
-					resource.TestCheckResourceAttr(DataplatformNodePoolResource+"."+DataplatformNodePoolTestResource, "name", DataplatformNodePoolTestResource),
-					resource.TestCheckResourceAttr(DataplatformNodePoolResource+"."+DataplatformNodePoolTestResource, "node_count", "2"),
-					resource.TestCheckResourceAttr(DataplatformNodePoolResource+"."+DataplatformNodePoolTestResource, "cpu_family", "INTEL_SKYLAKE"),
-					resource.TestCheckResourceAttr(DataplatformNodePoolResource+"."+DataplatformNodePoolTestResource, "cores_count", "1"),
-					resource.TestCheckResourceAttr(DataplatformNodePoolResource+"."+DataplatformNodePoolTestResource, "ram_size", "2048"),
-					resource.TestCheckResourceAttr(DataplatformNodePoolResource+"."+DataplatformNodePoolTestResource, "availability_zone", "AUTO"),
-					resource.TestCheckResourceAttr(DataplatformNodePoolResource+"."+DataplatformNodePoolTestResource, "storage_type", "HDD"),
-					resource.TestCheckResourceAttr(DataplatformNodePoolResource+"."+DataplatformNodePoolTestResource, "storage_size", "10"),
-					resource.TestCheckResourceAttr(DataplatformNodePoolResource+"."+DataplatformNodePoolTestResource, "maintenance_window.0.time", "10:00:00"),
-					resource.TestCheckResourceAttr(DataplatformNodePoolResource+"."+DataplatformNodePoolTestResource, "maintenance_window.0.day_of_the_week", "Sunday"),
-					resource.TestCheckResourceAttr(DataplatformNodePoolResource+"."+DataplatformNodePoolTestResource, "labels.foo", "bar"),
-					resource.TestCheckResourceAttr(DataplatformNodePoolResource+"."+DataplatformNodePoolTestResource, "annotations.ann1", "value1"),
+					testAccCheckDataplatformNodePoolExists(constant.DataplatformNodePoolResource+"."+constant.DataplatformNodePoolTestResource, &DataplatformNodePool),
+					resource.TestCheckResourceAttr(constant.DataplatformNodePoolResource+"."+constant.DataplatformNodePoolTestResource, "name", constant.DataplatformNodePoolTestResource),
+					resource.TestCheckResourceAttr(constant.DataplatformNodePoolResource+"."+constant.DataplatformNodePoolTestResource, "node_count", "2"),
+					resource.TestCheckResourceAttr(constant.DataplatformNodePoolResource+"."+constant.DataplatformNodePoolTestResource, "cpu_family", "INTEL_SKYLAKE"),
+					resource.TestCheckResourceAttr(constant.DataplatformNodePoolResource+"."+constant.DataplatformNodePoolTestResource, "cores_count", "1"),
+					resource.TestCheckResourceAttr(constant.DataplatformNodePoolResource+"."+constant.DataplatformNodePoolTestResource, "ram_size", "2048"),
+					resource.TestCheckResourceAttr(constant.DataplatformNodePoolResource+"."+constant.DataplatformNodePoolTestResource, "availability_zone", "AUTO"),
+					resource.TestCheckResourceAttr(constant.DataplatformNodePoolResource+"."+constant.DataplatformNodePoolTestResource, "storage_type", "HDD"),
+					resource.TestCheckResourceAttr(constant.DataplatformNodePoolResource+"."+constant.DataplatformNodePoolTestResource, "storage_size", "10"),
+					resource.TestCheckResourceAttr(constant.DataplatformNodePoolResource+"."+constant.DataplatformNodePoolTestResource, "maintenance_window.0.time", "10:00:00"),
+					resource.TestCheckResourceAttr(constant.DataplatformNodePoolResource+"."+constant.DataplatformNodePoolTestResource, "maintenance_window.0.day_of_the_week", "Sunday"),
+					resource.TestCheckResourceAttr(constant.DataplatformNodePoolResource+"."+constant.DataplatformNodePoolTestResource, "labels.foo", "bar"),
+					resource.TestCheckResourceAttr(constant.DataplatformNodePoolResource+"."+constant.DataplatformNodePoolTestResource, "annotations.ann1", "value1"),
 				),
 			},
 		},
@@ -155,7 +157,7 @@ func TestAccDataplatformNodePoolBasic(t *testing.T) {
 }
 
 func testAccCheckDataplatformNodePoolDestroyCheck(s *terraform.State) error {
-	client := testAccProvider.Meta().(SdkBundle).DataplatformClient
+	client := testAccProvider.Meta().(services.SdkBundle).DataplatformClient
 
 	ctx, cancel := context.WithTimeout(context.Background(), *resourceDefaultTimeouts.Default)
 
@@ -164,7 +166,7 @@ func testAccCheckDataplatformNodePoolDestroyCheck(s *terraform.State) error {
 	}
 
 	for _, rs := range s.RootModule().Resources {
-		if rs.Type != DataplatformNodePoolResource {
+		if rs.Type != constant.DataplatformNodePoolResource {
 			continue
 		}
 
@@ -188,7 +190,7 @@ func testAccCheckDataplatformNodePoolDestroyCheck(s *terraform.State) error {
 
 func testAccCheckDataplatformNodePoolExists(n string, nodePool *dataplatform.NodePoolResponseData) resource.TestCheckFunc {
 	return func(s *terraform.State) error {
-		client := testAccProvider.Meta().(SdkBundle).DataplatformClient
+		client := testAccProvider.Meta().(services.SdkBundle).DataplatformClient
 
 		rs, ok := s.RootModule().Resources[n]
 
@@ -224,25 +226,25 @@ func testAccCheckDataplatformNodePoolExists(n string, nodePool *dataplatform.Nod
 }
 
 const testAccCheckDataplatformNodePoolConfigBasic = `
-resource ` + DatacenterResource + ` "datacenter_example" {
+resource ` + constant.DatacenterResource + ` "datacenter_example" {
   name        = "datacenter_example"
   location    = "de/fra"
   description = "Datacenter for testing Dataplatform NodePool"
 }
 
-resource ` + DataplatformClusterResource + ` ` + DataplatformClusterTestResource + ` {
-  datacenter_id   		=  ` + DatacenterResource + `.datacenter_example.id
-  name 					= "` + DataplatformNodePoolTestResource + `"
+resource ` + constant.DataplatformClusterResource + ` ` + constant.DataplatformClusterTestResource + ` {
+  datacenter_id   		=  ` + constant.DatacenterResource + `.datacenter_example.id
+  name 					= "` + constant.DataplatformNodePoolTestResource + `"
   maintenance_window {
    	day_of_the_week  	= "Sunday"
    	time				= "09:00:00"
   }
-  version	= ` + DataPlatformVersion + `
+  version	= ` + constant.DataPlatformVersion + `
 }
 
-resource ` + DataplatformNodePoolResource + ` ` + DataplatformNodePoolTestResource + ` {
-  cluster_id    	= ` + DataplatformClusterResource + `.` + DataplatformClusterTestResource + `.id
-  name        		= "` + DataplatformNodePoolTestResource + `"
+resource ` + constant.DataplatformNodePoolResource + ` ` + constant.DataplatformNodePoolTestResource + ` {
+  cluster_id    	= ` + constant.DataplatformClusterResource + `.` + constant.DataplatformClusterTestResource + `.id
+  name        		= "` + constant.DataplatformNodePoolTestResource + `"
   node_count        = 1
   cpu_family        = "INTEL_SKYLAKE"
   cores_count       = 1
@@ -266,25 +268,25 @@ resource ` + DataplatformNodePoolResource + ` ` + DataplatformNodePoolTestResour
 `
 
 const testAccCheckDataplatformNodePoolConfigUpdate = `
-resource ` + DatacenterResource + ` "datacenter_example" {
+resource ` + constant.DatacenterResource + ` "datacenter_example" {
   name        = "datacenter_example"
   location    = "de/fra"
   description = "Datacenter for testing Dataplatform NodePool"
 }
 
-resource ` + DataplatformClusterResource + ` ` + DataplatformClusterTestResource + ` {
-  datacenter_id   		=  ` + DatacenterResource + `.datacenter_example.id
-  name 					= "` + UpdatedResources + `"
+resource ` + constant.DataplatformClusterResource + ` ` + constant.DataplatformClusterTestResource + ` {
+  datacenter_id   		=  ` + constant.DatacenterResource + `.datacenter_example.id
+  name 					= "` + constant.UpdatedResources + `"
   maintenance_window {
   	day_of_the_week  	= "Saturday"
    	time				= "10:00:00"
   }
-  version	= ` + DataPlatformVersion + `
+  version	= ` + constant.DataPlatformVersion + `
 }
 
-resource ` + DataplatformNodePoolResource + ` ` + DataplatformNodePoolTestResource + ` {
-  cluster_id    = ` + DataplatformClusterResource + `.` + DataplatformClusterTestResource + `.id
-  name        = "` + DataplatformNodePoolTestResource + `"
+resource ` + constant.DataplatformNodePoolResource + ` ` + constant.DataplatformNodePoolTestResource + ` {
+  cluster_id    = ` + constant.DataplatformClusterResource + `.` + constant.DataplatformClusterTestResource + `.id
+  name        = "` + constant.DataplatformNodePoolTestResource + `"
   node_count        = 2
   cpu_family        = "INTEL_SKYLAKE"
   cores_count       = 1
@@ -306,72 +308,72 @@ resource ` + DataplatformNodePoolResource + ` ` + DataplatformNodePoolTestResour
 `
 
 const testAccDataSourceDataplatformNodePoolMatchById = testAccCheckDataplatformNodePoolConfigBasic + `
-data ` + DataplatformNodePoolResource + ` ` + DataplatformNodePoolTestDataSourceById + ` {
-  cluster_id    = ` + DataplatformClusterResource + `.` + DataplatformClusterTestResource + `.id	
-  id = ` + DataplatformNodePoolResource + `.` + DataplatformNodePoolTestResource + `.id
+data ` + constant.DataplatformNodePoolResource + ` ` + constant.DataplatformNodePoolTestDataSourceById + ` {
+  cluster_id    = ` + constant.DataplatformClusterResource + `.` + constant.DataplatformClusterTestResource + `.id	
+  id = ` + constant.DataplatformNodePoolResource + `.` + constant.DataplatformNodePoolTestResource + `.id
 }
 `
 
 const testAccDataSourceDataplatformNodePoolMatchByName = testAccCheckDataplatformNodePoolConfigBasic + `
-data ` + DataplatformNodePoolResource + ` ` + DataplatformNodePoolTestDataSourceByName + ` {
-  cluster_id    = ` + DataplatformClusterResource + `.` + DataplatformClusterTestResource + `.id
-  name = "` + DataplatformNodePoolTestResource + `"
+data ` + constant.DataplatformNodePoolResource + ` ` + constant.DataplatformNodePoolTestDataSourceByName + ` {
+  cluster_id    = ` + constant.DataplatformClusterResource + `.` + constant.DataplatformClusterTestResource + `.id
+  name = "` + constant.DataplatformNodePoolTestResource + `"
 }
 `
 
 const testAccDataSourceDataplatformNodePoolPartialMatchByName = testAccCheckDataplatformNodePoolConfigBasic + `
-data ` + DataplatformNodePoolResource + ` ` + DataplatformNodePoolTestDataSourceByName + ` {
-  cluster_id    = ` + DataplatformClusterResource + `.` + DataplatformClusterTestResource + `.id
+data ` + constant.DataplatformNodePoolResource + ` ` + constant.DataplatformNodePoolTestDataSourceByName + ` {
+  cluster_id    = ` + constant.DataplatformClusterResource + `.` + constant.DataplatformClusterTestResource + `.id
   name = "test_"
   partial_match = true
 }
 `
 
 const testAccDataSourceDataplatformNodePoolWrongNameError = testAccCheckDataplatformNodePoolConfigBasic + `
-data ` + DataplatformNodePoolResource + ` ` + DataplatformNodePoolTestDataSourceByName + ` {
-  cluster_id    = ` + DataplatformClusterResource + `.` + DataplatformClusterTestResource + `.id
+data ` + constant.DataplatformNodePoolResource + ` ` + constant.DataplatformNodePoolTestDataSourceByName + ` {
+  cluster_id    = ` + constant.DataplatformClusterResource + `.` + constant.DataplatformClusterTestResource + `.id
   name = "wrong_name"
 }
 `
 
 const testAccDataSourceDataplatformNodePoolWrongPartialNameError = testAccCheckDataplatformNodePoolConfigBasic + `
-data ` + DataplatformNodePoolResource + ` ` + DataplatformNodePoolTestDataSourceByName + ` {
-  cluster_id    = ` + DataplatformClusterResource + `.` + DataplatformClusterTestResource + `.id
+data ` + constant.DataplatformNodePoolResource + ` ` + constant.DataplatformNodePoolTestDataSourceByName + ` {
+  cluster_id    = ` + constant.DataplatformClusterResource + `.` + constant.DataplatformClusterTestResource + `.id
   name = "wrong_name"
   partial_match = true
 }
 `
 const testAccDataSourceDataplatformNodePools = testAccCheckDataplatformNodePoolConfigBasic + `
-data ` + DataplatformNodePoolsDataSource + ` ` + DataplatformNodePoolsTestDataSource + ` {
-	cluster_id    = ` + DataplatformClusterResource + `.` + DataplatformClusterTestResource + `.id
+data ` + constant.DataplatformNodePoolsDataSource + ` ` + constant.DataplatformNodePoolsTestDataSource + ` {
+	cluster_id    = ` + constant.DataplatformClusterResource + `.` + constant.DataplatformClusterTestResource + `.id
 }
 `
 
 const testAccDataSourceDataplatformNodePoolsByName = testAccCheckDataplatformNodePoolConfigBasic + `
-data ` + DataplatformNodePoolsDataSource + ` ` + DataplatformNodePoolsTestDataSource + ` {
-  cluster_id    = ` + DataplatformClusterResource + `.` + DataplatformClusterTestResource + `.id
-  name = "` + DataplatformNodePoolTestResource + `"
+data ` + constant.DataplatformNodePoolsDataSource + ` ` + constant.DataplatformNodePoolsTestDataSource + ` {
+  cluster_id    = ` + constant.DataplatformClusterResource + `.` + constant.DataplatformClusterTestResource + `.id
+  name = "` + constant.DataplatformNodePoolTestResource + `"
 }
 `
 
 const testAccDataSourceDataplatformNodePoolsByNamePartialMatch = testAccCheckDataplatformNodePoolConfigBasic + `
-data ` + DataplatformNodePoolsDataSource + ` ` + DataplatformNodePoolsTestDataSource + ` {
-  cluster_id    = ` + DataplatformClusterResource + `.` + DataplatformClusterTestResource + `.id
+data ` + constant.DataplatformNodePoolsDataSource + ` ` + constant.DataplatformNodePoolsTestDataSource + ` {
+  cluster_id    = ` + constant.DataplatformClusterResource + `.` + constant.DataplatformClusterTestResource + `.id
   name = "test_"
   partial_match = true
 }
 `
 
 const testAccDataSourceDataplatformNodePoolsByNameError = testAccCheckDataplatformNodePoolConfigBasic + `
-data ` + DataplatformNodePoolsDataSource + ` ` + DataplatformNodePoolsTestDataSource + ` {
-  cluster_id    = ` + DataplatformClusterResource + `.` + DataplatformClusterTestResource + `.id
+data ` + constant.DataplatformNodePoolsDataSource + ` ` + constant.DataplatformNodePoolsTestDataSource + ` {
+  cluster_id    = ` + constant.DataplatformClusterResource + `.` + constant.DataplatformClusterTestResource + `.id
   name = "wrong_name"
 }
 `
 
 const testAccDataSourceDataplatformNodePoolsByNamePartialMatchError = testAccCheckDataplatformNodePoolConfigBasic + `
-data ` + DataplatformNodePoolsDataSource + ` ` + DataplatformNodePoolsTestDataSource + ` {
-  cluster_id    = ` + DataplatformClusterResource + `.` + DataplatformClusterTestResource + `.id
+data ` + constant.DataplatformNodePoolsDataSource + ` ` + constant.DataplatformNodePoolsTestDataSource + ` {
+  cluster_id    = ` + constant.DataplatformClusterResource + `.` + constant.DataplatformClusterTestResource + `.id
   name = "wrong_name"
   partial_match = true
 }

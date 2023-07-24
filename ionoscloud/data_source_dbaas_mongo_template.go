@@ -3,6 +3,7 @@ package ionoscloud
 import (
 	"context"
 	"fmt"
+	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services"
 	"log"
 	"strings"
 
@@ -60,7 +61,7 @@ func dataSourceDbassMongoTemplate() *schema.Resource {
 }
 
 func dataSourceDbassMongoTemplateRead(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
-	client := meta.(SdkBundle).MongoClient
+	client := meta.(services.SdkBundle).MongoClient
 	id, idOk := d.GetOk("id")
 	name, nameOk := d.GetOk("name")
 

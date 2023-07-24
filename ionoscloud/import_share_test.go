@@ -4,6 +4,7 @@ package ionoscloud
 
 import (
 	"fmt"
+	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils/constant"
 	"testing"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
@@ -23,7 +24,7 @@ func TestAccShareImportBasic(t *testing.T) {
 			},
 
 			{
-				ResourceName:      fmt.Sprintf("%s.%s", ShareResource, resourceName),
+				ResourceName:      fmt.Sprintf("%s.%s", constant.ShareResource, resourceName),
 				ImportStateIdFunc: testAccShareImportStateId,
 				ImportState:       true,
 				ImportStateVerify: true,
@@ -36,7 +37,7 @@ func testAccShareImportStateId(s *terraform.State) (string, error) {
 	importID := ""
 
 	for _, rs := range s.RootModule().Resources {
-		if rs.Type != ShareResource {
+		if rs.Type != constant.ShareResource {
 			continue
 		}
 

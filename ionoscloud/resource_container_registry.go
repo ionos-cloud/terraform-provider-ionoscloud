@@ -6,8 +6,9 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
+	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services"
 	crService "github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/containerregistry"
-	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils"
+	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils/constant"
 	"log"
 	"regexp"
 	"time"
@@ -84,7 +85,7 @@ func resourceContainerRegistry() *schema.Resource {
 }
 
 func resourceContainerRegistryCreate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
-	client := meta.(SdkBundle).ContainerClient
+	client := meta.(services.SdkBundle).ContainerClient
 
 	containerRegistry := crService.GetRegistryDataCreate(d)
 
@@ -102,7 +103,7 @@ func resourceContainerRegistryCreate(ctx context.Context, d *schema.ResourceData
 
 func resourceContainerRegistryRead(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 
-	client := meta.(SdkBundle).ContainerClient
+	client := meta.(services.SdkBundle).ContainerClient
 
 	registry, apiResponse, err := client.GetRegistry(ctx, d.Id())
 
@@ -125,7 +126,7 @@ func resourceContainerRegistryRead(ctx context.Context, d *schema.ResourceData, 
 }
 
 func resourceContainerRegistryUpdate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
-	client := meta.(SdkBundle).ContainerClient
+	client := meta.(services.SdkBundle).ContainerClient
 
 	containerRegistry := crService.GetRegistryDataUpdate(d)
 
@@ -141,7 +142,7 @@ func resourceContainerRegistryUpdate(ctx context.Context, d *schema.ResourceData
 }
 
 func resourceContainerRegistryDelete(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
-	client := meta.(SdkBundle).ContainerClient
+	client := meta.(services.SdkBundle).ContainerClient
 
 	registryId := d.Id()
 
@@ -172,7 +173,7 @@ func resourceContainerRegistryDelete(ctx context.Context, d *schema.ResourceData
 		}
 
 		select {
-		case <-time.After(utils.SleepInterval):
+		case <-time.After(constant.SleepInterval):
 			log.Printf("[INFO] trying again ...")
 		case <-ctx.Done():
 			diags := diag.FromErr(fmt.Errorf("registry deletion timed out! WARNING: your container registry (%s) will still probably be deleted after some time but the terraform state won't reflect that; check your Ionos Cloud account for updates", d.Id()))
@@ -184,7 +185,7 @@ func resourceContainerRegistryDelete(ctx context.Context, d *schema.ResourceData
 }
 
 func resourceContainerRegistryImport(ctx context.Context, d *schema.ResourceData, meta interface{}) ([]*schema.ResourceData, error) {
-	client := meta.(SdkBundle).ContainerClient
+	client := meta.(services.SdkBundle).ContainerClient
 
 	registryId := d.Id()
 

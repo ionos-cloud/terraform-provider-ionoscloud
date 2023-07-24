@@ -7,6 +7,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	cr "github.com/ionos-cloud/sdk-go-container-registry"
+	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services"
 	crService "github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/containerregistry"
 	"log"
 	"strings"
@@ -83,7 +84,7 @@ func dataSourceContainerRegistryToken() *schema.Resource {
 }
 
 func dataSourceContainerRegistryTokenRead(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
-	client := meta.(SdkBundle).ContainerClient
+	client := meta.(services.SdkBundle).ContainerClient
 
 	registryId := d.Get("registry_id").(string)
 	idValue, idOk := d.GetOk("id")

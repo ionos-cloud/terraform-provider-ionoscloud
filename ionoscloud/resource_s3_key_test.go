@@ -6,7 +6,9 @@ import (
 	"context"
 	"fmt"
 	ionoscloud "github.com/ionos-cloud/sdk-go/v6"
+	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services"
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils"
+	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils/constant"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
@@ -26,18 +28,18 @@ func TestAccS3KeyBasic(t *testing.T) {
 			{
 				Config: testAccChecks3KeyConfigBasic,
 				Check: resource.ComposeTestCheckFunc(
-					testAccChecks3KeyExists(S3KeyResource+"."+S3KeyTestResource, &s3Key),
-					resource.TestCheckResourceAttrSet(S3KeyResource+"."+S3KeyTestResource, "secret_key"),
-					resource.TestCheckResourceAttr(S3KeyResource+"."+S3KeyTestResource, "active", "true"),
+					testAccChecks3KeyExists(constant.S3KeyResource+"."+constant.S3KeyTestResource, &s3Key),
+					resource.TestCheckResourceAttrSet(constant.S3KeyResource+"."+constant.S3KeyTestResource, "secret_key"),
+					resource.TestCheckResourceAttr(constant.S3KeyResource+"."+constant.S3KeyTestResource, "active", "true"),
 				),
 			},
 			{
 				Config: testAccDataSourceS3KeyMatchId,
 				Check: resource.ComposeTestCheckFunc(
-					resource.TestCheckResourceAttrSet(S3KeyResource+"."+S3KeyTestResource, "id"),
-					resource.TestCheckResourceAttrPair(S3KeyResource+"."+S3KeyTestResource, "id", DataSource+"."+S3KeyResource+"."+S3KeyDataSourceById, "id"),
-					resource.TestCheckResourceAttrPair(S3KeyResource+"."+S3KeyTestResource, "secret", DataSource+"."+S3KeyResource+"."+S3KeyDataSourceById, "secret"),
-					resource.TestCheckResourceAttrPair(S3KeyResource+"."+S3KeyTestResource, "active", DataSource+"."+S3KeyResource+"."+S3KeyDataSourceById, "active"),
+					resource.TestCheckResourceAttrSet(constant.S3KeyResource+"."+constant.S3KeyTestResource, "id"),
+					resource.TestCheckResourceAttrPair(constant.S3KeyResource+"."+constant.S3KeyTestResource, "id", constant.DataSource+"."+constant.S3KeyResource+"."+constant.S3KeyDataSourceById, "id"),
+					resource.TestCheckResourceAttrPair(constant.S3KeyResource+"."+constant.S3KeyTestResource, "secret", constant.DataSource+"."+constant.S3KeyResource+"."+constant.S3KeyDataSourceById, "secret"),
+					resource.TestCheckResourceAttrPair(constant.S3KeyResource+"."+constant.S3KeyTestResource, "active", constant.DataSource+"."+constant.S3KeyResource+"."+constant.S3KeyDataSourceById, "active"),
 				),
 			},
 			//{
@@ -54,10 +56,10 @@ func TestAccS3KeyBasic(t *testing.T) {
 
 func testAccChecks3KeyDestroyCheck(s *terraform.State) error {
 
-	client := testAccProvider.Meta().(SdkBundle).CloudApiClient
+	client := testAccProvider.Meta().(services.SdkBundle).CloudApiClient
 
 	for _, rs := range s.RootModule().Resources {
-		if rs.Type != S3KeyResource {
+		if rs.Type != constant.S3KeyResource {
 			continue
 		}
 
@@ -80,7 +82,7 @@ func testAccChecks3KeyDestroyCheck(s *terraform.State) error {
 func testAccChecks3KeyExists(n string, s3Key *ionoscloud.S3Key) resource.TestCheckFunc {
 	return func(s *terraform.State) error {
 
-		client := testAccProvider.Meta().(SdkBundle).CloudApiClient
+		client := testAccProvider.Meta().(services.SdkBundle).CloudApiClient
 
 		rs, ok := s.RootModule().Resources[n]
 
@@ -111,7 +113,7 @@ func testAccChecks3KeyExists(n string, s3Key *ionoscloud.S3Key) resource.TestChe
 }
 
 var testAccChecks3KeyConfigBasic = `
-resource ` + UserResource + ` "example" {
+resource ` + constant.UserResource + ` "example" {
   first_name = "terraform"
   last_name = "test"
   email = "` + utils.GenerateEmail() + `"
@@ -120,8 +122,8 @@ resource ` + UserResource + ` "example" {
   force_sec_auth= false
 }
 
-resource ` + S3KeyResource + ` ` + S3KeyTestResource + ` {
-  user_id    = ` + UserResource + `.example.id
+resource ` + constant.S3KeyResource + ` ` + constant.S3KeyTestResource + ` {
+  user_id    = ` + constant.UserResource + `.example.id
   active     = true
 }`
 
@@ -144,8 +146,8 @@ resource ` + S3KeyResource + ` ` + S3KeyTestResource + ` {
 //	 active     = true
 //	}`
 var testAccDataSourceS3KeyMatchId = testAccChecks3KeyConfigBasic + `
-data ` + S3KeyResource + ` ` + S3KeyDataSourceById + ` {
-user_id    	= ` + UserResource + `.example.id
-id			= ` + S3KeyResource + `.` + S3KeyTestResource + `.id
+data ` + constant.S3KeyResource + ` ` + constant.S3KeyDataSourceById + ` {
+user_id    	= ` + constant.UserResource + `.example.id
+id			= ` + constant.S3KeyResource + `.` + constant.S3KeyTestResource + `.id
 }
 `

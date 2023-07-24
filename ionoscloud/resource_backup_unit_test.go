@@ -6,6 +6,8 @@ import (
 	"context"
 	"fmt"
 	ionoscloud "github.com/ionos-cloud/sdk-go/v6"
+	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services"
+	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils/constant"
 	"regexp"
 	"testing"
 
@@ -27,26 +29,26 @@ func TestAccBackupUnitBasic(t *testing.T) {
 			{
 				Config: testAccCheckBackupUnitConfigBasic,
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheckBackupUnitExists(BackupUnitResource+"."+BackupUnitTestResource, &backupUnit),
-					resource.TestCheckResourceAttr(BackupUnitResource+"."+BackupUnitTestResource, "name", BackupUnitTestResource),
-					resource.TestCheckResourceAttr(BackupUnitResource+"."+BackupUnitTestResource, "email", "example@ionoscloud.com"),
-					resource.TestCheckResourceAttrPair(BackupUnitResource+"."+BackupUnitTestResource, "password", RandomPassword+".backup_unit_password", "result"),
+					testAccCheckBackupUnitExists(constant.BackupUnitResource+"."+constant.BackupUnitTestResource, &backupUnit),
+					resource.TestCheckResourceAttr(constant.BackupUnitResource+"."+constant.BackupUnitTestResource, "name", constant.BackupUnitTestResource),
+					resource.TestCheckResourceAttr(constant.BackupUnitResource+"."+constant.BackupUnitTestResource, "email", "example@ionoscloud.com"),
+					resource.TestCheckResourceAttrPair(constant.BackupUnitResource+"."+constant.BackupUnitTestResource, "password", constant.RandomPassword+".backup_unit_password", "result"),
 				),
 			},
 			{
 				Config: testAccDataSourceBackupUnitMatchId,
 				Check: resource.ComposeTestCheckFunc(
-					resource.TestCheckResourceAttrPair(DataSource+"."+BackupUnitResource+"."+BackupUnitDataSourceById, "name", BackupUnitResource+"."+BackupUnitTestResource, "name"),
-					resource.TestCheckResourceAttrPair(DataSource+"."+BackupUnitResource+"."+BackupUnitDataSourceById, "email", BackupUnitResource+"."+BackupUnitTestResource, "email"),
-					resource.TestCheckResourceAttrPair(DataSource+"."+BackupUnitResource+"."+BackupUnitDataSourceById, "login", BackupUnitResource+"."+BackupUnitTestResource, "login"),
+					resource.TestCheckResourceAttrPair(constant.DataSource+"."+constant.BackupUnitResource+"."+constant.BackupUnitDataSourceById, "name", constant.BackupUnitResource+"."+constant.BackupUnitTestResource, "name"),
+					resource.TestCheckResourceAttrPair(constant.DataSource+"."+constant.BackupUnitResource+"."+constant.BackupUnitDataSourceById, "email", constant.BackupUnitResource+"."+constant.BackupUnitTestResource, "email"),
+					resource.TestCheckResourceAttrPair(constant.DataSource+"."+constant.BackupUnitResource+"."+constant.BackupUnitDataSourceById, "login", constant.BackupUnitResource+"."+constant.BackupUnitTestResource, "login"),
 				),
 			},
 			{
 				Config: testAccDataSourceBackupUnitMatchName,
 				Check: resource.ComposeTestCheckFunc(
-					resource.TestCheckResourceAttrPair(DataSource+"."+BackupUnitResource+"."+BackupUnitDataSourceByName, "name", BackupUnitResource+"."+BackupUnitTestResource, "name"),
-					resource.TestCheckResourceAttrPair(DataSource+"."+BackupUnitResource+"."+BackupUnitDataSourceByName, "email", BackupUnitResource+"."+BackupUnitTestResource, "email"),
-					resource.TestCheckResourceAttrPair(DataSource+"."+BackupUnitResource+"."+BackupUnitDataSourceByName, "login", BackupUnitResource+"."+BackupUnitTestResource, "login"),
+					resource.TestCheckResourceAttrPair(constant.DataSource+"."+constant.BackupUnitResource+"."+constant.BackupUnitDataSourceByName, "name", constant.BackupUnitResource+"."+constant.BackupUnitTestResource, "name"),
+					resource.TestCheckResourceAttrPair(constant.DataSource+"."+constant.BackupUnitResource+"."+constant.BackupUnitDataSourceByName, "email", constant.BackupUnitResource+"."+constant.BackupUnitTestResource, "email"),
+					resource.TestCheckResourceAttrPair(constant.DataSource+"."+constant.BackupUnitResource+"."+constant.BackupUnitDataSourceByName, "login", constant.BackupUnitResource+"."+constant.BackupUnitTestResource, "login"),
 				),
 			},
 			{
@@ -56,19 +58,19 @@ func TestAccBackupUnitBasic(t *testing.T) {
 			{
 				Config: testAccCheckBackupUnitConfigUpdatePassword,
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheckBackupUnitExists(BackupUnitResource+"."+BackupUnitTestResource, &backupUnit),
-					resource.TestCheckResourceAttr(BackupUnitResource+"."+BackupUnitTestResource, "name", BackupUnitTestResource),
-					resource.TestCheckResourceAttr(BackupUnitResource+"."+BackupUnitTestResource, "email", "example@ionoscloud.com"),
-					resource.TestCheckResourceAttrPair(BackupUnitResource+"."+BackupUnitTestResource, "password", RandomPassword+".backup_unit_password_updated", "result"),
+					testAccCheckBackupUnitExists(constant.BackupUnitResource+"."+constant.BackupUnitTestResource, &backupUnit),
+					resource.TestCheckResourceAttr(constant.BackupUnitResource+"."+constant.BackupUnitTestResource, "name", constant.BackupUnitTestResource),
+					resource.TestCheckResourceAttr(constant.BackupUnitResource+"."+constant.BackupUnitTestResource, "email", "example@ionoscloud.com"),
+					resource.TestCheckResourceAttrPair(constant.BackupUnitResource+"."+constant.BackupUnitTestResource, "password", constant.RandomPassword+".backup_unit_password_updated", "result"),
 				),
 			},
 			{
 				Config: testAccCheckBackupUnitConfigUpdateEmail,
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheckBackupUnitExists(BackupUnitResource+"."+BackupUnitTestResource, &backupUnit),
-					resource.TestCheckResourceAttr(BackupUnitResource+"."+BackupUnitTestResource, "name", BackupUnitTestResource),
-					resource.TestCheckResourceAttr(BackupUnitResource+"."+BackupUnitTestResource, "email", "example-updated@ionoscloud.com"),
-					resource.TestCheckResourceAttrPair(BackupUnitResource+"."+BackupUnitTestResource, "password", RandomPassword+".backup_unit_password_updated", "result"),
+					testAccCheckBackupUnitExists(constant.BackupUnitResource+"."+constant.BackupUnitTestResource, &backupUnit),
+					resource.TestCheckResourceAttr(constant.BackupUnitResource+"."+constant.BackupUnitTestResource, "name", constant.BackupUnitTestResource),
+					resource.TestCheckResourceAttr(constant.BackupUnitResource+"."+constant.BackupUnitTestResource, "email", "example-updated@ionoscloud.com"),
+					resource.TestCheckResourceAttrPair(constant.BackupUnitResource+"."+constant.BackupUnitTestResource, "password", constant.RandomPassword+".backup_unit_password_updated", "result"),
 				),
 			},
 		},
@@ -76,7 +78,7 @@ func TestAccBackupUnitBasic(t *testing.T) {
 }
 
 func testAccCheckBackupUnitDestroyCheck(s *terraform.State) error {
-	client := testAccProvider.Meta().(SdkBundle).CloudApiClient
+	client := testAccProvider.Meta().(services.SdkBundle).CloudApiClient
 
 	ctx, cancel := context.WithTimeout(context.Background(), *resourceDefaultTimeouts.Default)
 
@@ -86,7 +88,7 @@ func testAccCheckBackupUnitDestroyCheck(s *terraform.State) error {
 
 	for _, rs := range s.RootModule().Resources {
 
-		if rs.Type != BackupUnitResource {
+		if rs.Type != constant.BackupUnitResource {
 			continue
 		}
 
@@ -108,7 +110,7 @@ func testAccCheckBackupUnitDestroyCheck(s *terraform.State) error {
 
 func testAccCheckBackupUnitExists(n string, backupUnit *ionoscloud.BackupUnit) resource.TestCheckFunc {
 	return func(s *terraform.State) error {
-		client := testAccProvider.Meta().(SdkBundle).CloudApiClient
+		client := testAccProvider.Meta().(services.SdkBundle).CloudApiClient
 
 		rs, ok := s.RootModule().Resources[n]
 
@@ -142,12 +144,12 @@ func testAccCheckBackupUnitExists(n string, backupUnit *ionoscloud.BackupUnit) r
 }
 
 const testAccCheckBackupUnitConfigUpdatePassword = `
-resource ` + BackupUnitResource + ` ` + BackupUnitTestResource + ` {
-	name        = "` + BackupUnitTestResource + `"
-	password    = ` + RandomPassword + `.backup_unit_password_updated.result
+resource ` + constant.BackupUnitResource + ` ` + constant.BackupUnitTestResource + ` {
+	name        = "` + constant.BackupUnitTestResource + `"
+	password    = ` + constant.RandomPassword + `.backup_unit_password_updated.result
 	email       = "example@ionoscloud.com"
 }
-resource ` + RandomPassword + ` "backup_unit_password_updated" {
+resource ` + constant.RandomPassword + ` "backup_unit_password_updated" {
   length           = 16
   special          = true
   override_special = "!#$%&*()-_=+[]{}<>:?"
@@ -155,42 +157,42 @@ resource ` + RandomPassword + ` "backup_unit_password_updated" {
 `
 
 const testAccCheckBackupUnitConfigUpdateEmail = `
-resource ` + BackupUnitResource + ` ` + BackupUnitTestResource + ` {
-	name        = "` + BackupUnitTestResource + `"
-	password    = ` + RandomPassword + `.backup_unit_password_updated.result
+resource ` + constant.BackupUnitResource + ` ` + constant.BackupUnitTestResource + ` {
+	name        = "` + constant.BackupUnitTestResource + `"
+	password    = ` + constant.RandomPassword + `.backup_unit_password_updated.result
 	email       = "example-updated@ionoscloud.com"
 }
-resource ` + RandomPassword + ` "backup_unit_password_updated" {
+resource ` + constant.RandomPassword + ` "backup_unit_password_updated" {
   length           = 16
   special          = true
   override_special = "!#$%&*()-_=+[]{}<>:?"
 }
 `
 const testAccDataSourceBackupUnitMatchId = testAccCheckBackupUnitConfigBasic + `
-data ` + BackupUnitResource + ` ` + BackupUnitDataSourceById + ` {
-  id			= ` + BackupUnitResource + `.` + BackupUnitTestResource + `.id
+data ` + constant.BackupUnitResource + ` ` + constant.BackupUnitDataSourceById + ` {
+  id			= ` + constant.BackupUnitResource + `.` + constant.BackupUnitTestResource + `.id
 }
 `
 
 const testAccDataSourceBackupUnitMatchName = testAccCheckBackupUnitConfigBasic + `
-resource ` + BackupUnitResource + ` ` + BackupUnitTestResource + `similar {
-	name        = "similar` + BackupUnitTestResource + `"
-	password    = ` + RandomPassword + `.backup_unit_password_updated.result
+resource ` + constant.BackupUnitResource + ` ` + constant.BackupUnitTestResource + `similar {
+	name        = "similar` + constant.BackupUnitTestResource + `"
+	password    = ` + constant.RandomPassword + `.backup_unit_password_updated.result
 	email       = "example-updated@ionoscloud.com"
 }
-resource ` + RandomPassword + ` "backup_unit_password_updated" {
+resource ` + constant.RandomPassword + ` "backup_unit_password_updated" {
   length           = 16
   special          = true
   override_special = "!#$%&*()-_=+[]{}<>:?"
 }
 
-data ` + BackupUnitResource + ` ` + BackupUnitDataSourceByName + ` {
-  name			= "` + BackupUnitTestResource + `"
+data ` + constant.BackupUnitResource + ` ` + constant.BackupUnitDataSourceByName + ` {
+  name			= "` + constant.BackupUnitTestResource + `"
 }
 `
 
 const testAccDataSourceBackupUnitMatchWrongNameError = testAccCheckBackupUnitConfigBasic + `
-data ` + BackupUnitResource + ` ` + BackupUnitDataSourceByName + ` {
+data ` + constant.BackupUnitResource + ` ` + constant.BackupUnitDataSourceByName + ` {
   name			= "wrong_name"
 }
 `

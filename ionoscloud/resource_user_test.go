@@ -5,6 +5,8 @@ package ionoscloud
 import (
 	"context"
 	"fmt"
+	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services"
+	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils/constant"
 	"regexp"
 	"testing"
 
@@ -28,40 +30,40 @@ func TestAccUserBasic(t *testing.T) {
 			{
 				Config: testAccCheckUserConfigBasic,
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheckUserExists(UserResource+"."+UserTestResource, &user),
-					resource.TestCheckResourceAttr(UserResource+"."+UserTestResource, "first_name", UserTestResource),
-					resource.TestCheckResourceAttr(UserResource+"."+UserTestResource, "last_name", UserTestResource),
-					resource.TestCheckResourceAttrSet(UserResource+"."+UserTestResource, "email"),
-					resource.TestCheckResourceAttr(UserResource+"."+UserTestResource, "administrator", "true"),
-					resource.TestCheckResourceAttr(UserResource+"."+UserTestResource, "force_sec_auth", "true"),
-					resource.TestCheckResourceAttr(UserResource+"."+UserTestResource, "active", "true"),
-					resource.TestCheckResourceAttrPair(UserResource+"."+UserTestResource, "password", RandomPassword+".user_password", "result"),
+					testAccCheckUserExists(constant.UserResource+"."+constant.UserTestResource, &user),
+					resource.TestCheckResourceAttr(constant.UserResource+"."+constant.UserTestResource, "first_name", constant.UserTestResource),
+					resource.TestCheckResourceAttr(constant.UserResource+"."+constant.UserTestResource, "last_name", constant.UserTestResource),
+					resource.TestCheckResourceAttrSet(constant.UserResource+"."+constant.UserTestResource, "email"),
+					resource.TestCheckResourceAttr(constant.UserResource+"."+constant.UserTestResource, "administrator", "true"),
+					resource.TestCheckResourceAttr(constant.UserResource+"."+constant.UserTestResource, "force_sec_auth", "true"),
+					resource.TestCheckResourceAttr(constant.UserResource+"."+constant.UserTestResource, "active", "true"),
+					resource.TestCheckResourceAttrPair(constant.UserResource+"."+constant.UserTestResource, "password", constant.RandomPassword+".user_password", "result"),
 				),
 			},
 			{
 				Config: testAccDataSourceUserMatchId,
 				Check: resource.ComposeTestCheckFunc(
-					resource.TestCheckResourceAttrPair(DataSource+"."+UserResource+"."+UserDataSourceById, "first_name", UserResource+"."+UserTestResource, "first_name"),
-					resource.TestCheckResourceAttrPair(DataSource+"."+UserResource+"."+UserDataSourceById, "last_name", UserResource+"."+UserTestResource, "last_name"),
-					resource.TestCheckResourceAttrPair(DataSource+"."+UserResource+"."+UserDataSourceById, "email", UserResource+"."+UserTestResource, "email"),
-					resource.TestCheckResourceAttrPair(DataSource+"."+UserResource+"."+UserDataSourceById, "administrator", UserResource+"."+UserTestResource, "administrator"),
-					resource.TestCheckResourceAttrPair(DataSource+"."+UserResource+"."+UserDataSourceById, "force_sec_auth", UserResource+"."+UserTestResource, "force_sec_auth"),
-					resource.TestCheckResourceAttrPair(DataSource+"."+UserResource+"."+UserDataSourceById, "sec_auth_active", UserResource+"."+UserTestResource, "sec_auth_active"),
-					resource.TestCheckResourceAttrPair(DataSource+"."+UserResource+"."+UserDataSourceById, "s3_canonical_user_id", UserResource+"."+UserTestResource, "s3_canonical_user_id"),
-					resource.TestCheckResourceAttrPair(DataSource+"."+UserResource+"."+UserDataSourceById, "active", UserResource+"."+UserTestResource, "active"),
+					resource.TestCheckResourceAttrPair(constant.DataSource+"."+constant.UserResource+"."+constant.UserDataSourceById, "first_name", constant.UserResource+"."+constant.UserTestResource, "first_name"),
+					resource.TestCheckResourceAttrPair(constant.DataSource+"."+constant.UserResource+"."+constant.UserDataSourceById, "last_name", constant.UserResource+"."+constant.UserTestResource, "last_name"),
+					resource.TestCheckResourceAttrPair(constant.DataSource+"."+constant.UserResource+"."+constant.UserDataSourceById, "email", constant.UserResource+"."+constant.UserTestResource, "email"),
+					resource.TestCheckResourceAttrPair(constant.DataSource+"."+constant.UserResource+"."+constant.UserDataSourceById, "administrator", constant.UserResource+"."+constant.UserTestResource, "administrator"),
+					resource.TestCheckResourceAttrPair(constant.DataSource+"."+constant.UserResource+"."+constant.UserDataSourceById, "force_sec_auth", constant.UserResource+"."+constant.UserTestResource, "force_sec_auth"),
+					resource.TestCheckResourceAttrPair(constant.DataSource+"."+constant.UserResource+"."+constant.UserDataSourceById, "sec_auth_active", constant.UserResource+"."+constant.UserTestResource, "sec_auth_active"),
+					resource.TestCheckResourceAttrPair(constant.DataSource+"."+constant.UserResource+"."+constant.UserDataSourceById, "s3_canonical_user_id", constant.UserResource+"."+constant.UserTestResource, "s3_canonical_user_id"),
+					resource.TestCheckResourceAttrPair(constant.DataSource+"."+constant.UserResource+"."+constant.UserDataSourceById, "active", constant.UserResource+"."+constant.UserTestResource, "active"),
 				),
 			},
 			{
 				Config: testAccDataSourceUserMatchEmail,
 				Check: resource.ComposeTestCheckFunc(
-					resource.TestCheckResourceAttrPair(DataSource+"."+UserResource+"."+UserDataSourceByName, "first_name", UserResource+"."+UserTestResource, "first_name"),
-					resource.TestCheckResourceAttrPair(DataSource+"."+UserResource+"."+UserDataSourceByName, "last_name", UserResource+"."+UserTestResource, "last_name"),
-					resource.TestCheckResourceAttrPair(DataSource+"."+UserResource+"."+UserDataSourceByName, "email", UserResource+"."+UserTestResource, "email"),
-					resource.TestCheckResourceAttrPair(DataSource+"."+UserResource+"."+UserDataSourceByName, "administrator", UserResource+"."+UserTestResource, "administrator"),
-					resource.TestCheckResourceAttrPair(DataSource+"."+UserResource+"."+UserDataSourceByName, "force_sec_auth", UserResource+"."+UserTestResource, "force_sec_auth"),
-					resource.TestCheckResourceAttrPair(DataSource+"."+UserResource+"."+UserDataSourceByName, "sec_auth_active", UserResource+"."+UserTestResource, "sec_auth_active"),
-					resource.TestCheckResourceAttrPair(DataSource+"."+UserResource+"."+UserDataSourceByName, "s3_canonical_user_id", UserResource+"."+UserTestResource, "s3_canonical_user_id"),
-					resource.TestCheckResourceAttrPair(DataSource+"."+UserResource+"."+UserDataSourceByName, "active", UserResource+"."+UserTestResource, "active"),
+					resource.TestCheckResourceAttrPair(constant.DataSource+"."+constant.UserResource+"."+constant.UserDataSourceByName, "first_name", constant.UserResource+"."+constant.UserTestResource, "first_name"),
+					resource.TestCheckResourceAttrPair(constant.DataSource+"."+constant.UserResource+"."+constant.UserDataSourceByName, "last_name", constant.UserResource+"."+constant.UserTestResource, "last_name"),
+					resource.TestCheckResourceAttrPair(constant.DataSource+"."+constant.UserResource+"."+constant.UserDataSourceByName, "email", constant.UserResource+"."+constant.UserTestResource, "email"),
+					resource.TestCheckResourceAttrPair(constant.DataSource+"."+constant.UserResource+"."+constant.UserDataSourceByName, "administrator", constant.UserResource+"."+constant.UserTestResource, "administrator"),
+					resource.TestCheckResourceAttrPair(constant.DataSource+"."+constant.UserResource+"."+constant.UserDataSourceByName, "force_sec_auth", constant.UserResource+"."+constant.UserTestResource, "force_sec_auth"),
+					resource.TestCheckResourceAttrPair(constant.DataSource+"."+constant.UserResource+"."+constant.UserDataSourceByName, "sec_auth_active", constant.UserResource+"."+constant.UserTestResource, "sec_auth_active"),
+					resource.TestCheckResourceAttrPair(constant.DataSource+"."+constant.UserResource+"."+constant.UserDataSourceByName, "s3_canonical_user_id", constant.UserResource+"."+constant.UserTestResource, "s3_canonical_user_id"),
+					resource.TestCheckResourceAttrPair(constant.DataSource+"."+constant.UserResource+"."+constant.UserDataSourceByName, "active", constant.UserResource+"."+constant.UserTestResource, "active"),
 				),
 			},
 			{
@@ -71,54 +73,54 @@ func TestAccUserBasic(t *testing.T) {
 			{
 				Config: testAccCheckUserConfigUpdateForceSec,
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheckUserExists(UserResource+"."+UserTestResource, &user),
-					resource.TestCheckResourceAttr(UserResource+"."+UserTestResource, "first_name", UserTestResource),
-					resource.TestCheckResourceAttr(UserResource+"."+UserTestResource, "last_name", UserTestResource),
-					resource.TestCheckResourceAttrSet(UserResource+"."+UserTestResource, "email"),
-					resource.TestCheckResourceAttr(UserResource+"."+UserTestResource, "administrator", "true"),
-					resource.TestCheckResourceAttr(UserResource+"."+UserTestResource, "force_sec_auth", "false"),
-					resource.TestCheckResourceAttr(UserResource+"."+UserTestResource, "active", "true"),
-					resource.TestCheckResourceAttrPair(UserResource+"."+UserTestResource, "password", RandomPassword+".user_password", "result"),
+					testAccCheckUserExists(constant.UserResource+"."+constant.UserTestResource, &user),
+					resource.TestCheckResourceAttr(constant.UserResource+"."+constant.UserTestResource, "first_name", constant.UserTestResource),
+					resource.TestCheckResourceAttr(constant.UserResource+"."+constant.UserTestResource, "last_name", constant.UserTestResource),
+					resource.TestCheckResourceAttrSet(constant.UserResource+"."+constant.UserTestResource, "email"),
+					resource.TestCheckResourceAttr(constant.UserResource+"."+constant.UserTestResource, "administrator", "true"),
+					resource.TestCheckResourceAttr(constant.UserResource+"."+constant.UserTestResource, "force_sec_auth", "false"),
+					resource.TestCheckResourceAttr(constant.UserResource+"."+constant.UserTestResource, "active", "true"),
+					resource.TestCheckResourceAttrPair(constant.UserResource+"."+constant.UserTestResource, "password", constant.RandomPassword+".user_password", "result"),
 				),
 			},
 			{
 				Config: testAccCheckUserConfigUpdate,
 				Check: resource.ComposeTestCheckFunc(
-					resource.TestCheckResourceAttr(UserResource+"."+UserTestResource, "first_name", UpdatedResources),
-					resource.TestCheckResourceAttr(UserResource+"."+UserTestResource, "last_name", UpdatedResources),
-					resource.TestCheckResourceAttrSet(UserResource+"."+UserTestResource, "email"),
-					resource.TestCheckResourceAttr(UserResource+"."+UserTestResource, "administrator", "false"),
-					resource.TestCheckResourceAttr(UserResource+"."+UserTestResource, "force_sec_auth", "false"),
-					resource.TestCheckResourceAttr(UserResource+"."+UserTestResource, "active", "false"),
-					resource.TestCheckResourceAttrPair(UserResource+"."+UserTestResource, "password", RandomPassword+".user_password_updated", "result"),
+					resource.TestCheckResourceAttr(constant.UserResource+"."+constant.UserTestResource, "first_name", constant.UpdatedResources),
+					resource.TestCheckResourceAttr(constant.UserResource+"."+constant.UserTestResource, "last_name", constant.UpdatedResources),
+					resource.TestCheckResourceAttrSet(constant.UserResource+"."+constant.UserTestResource, "email"),
+					resource.TestCheckResourceAttr(constant.UserResource+"."+constant.UserTestResource, "administrator", "false"),
+					resource.TestCheckResourceAttr(constant.UserResource+"."+constant.UserTestResource, "force_sec_auth", "false"),
+					resource.TestCheckResourceAttr(constant.UserResource+"."+constant.UserTestResource, "active", "false"),
+					resource.TestCheckResourceAttrPair(constant.UserResource+"."+constant.UserTestResource, "password", constant.RandomPassword+".user_password_updated", "result"),
 				),
 			},
 			{
 				Config: testAccCheckUserMultipleGroups,
 				Check: resource.ComposeTestCheckFunc(
-					resource.TestCheckResourceAttr(UserResource+"."+UserTestResource, "group_ids.#", "3"),
-					resource.TestCheckResourceAttr(DataSource+"."+UserResource+"."+UserDataSourceById, "groups.#", "3"),
-					resource.TestCheckTypeSetElemNestedAttrs(DataSource+"."+UserResource+"."+UserDataSourceById, "groups.*", map[string]string{
+					resource.TestCheckResourceAttr(constant.UserResource+"."+constant.UserTestResource, "group_ids.#", "3"),
+					resource.TestCheckResourceAttr(constant.DataSource+"."+constant.UserResource+"."+constant.UserDataSourceById, "groups.#", "3"),
+					resource.TestCheckTypeSetElemNestedAttrs(constant.DataSource+"."+constant.UserResource+"."+constant.UserDataSourceById, "groups.*", map[string]string{
 						"name": "group1",
 					}),
-					resource.TestCheckTypeSetElemNestedAttrs(DataSource+"."+UserResource+"."+UserDataSourceById, "groups.*", map[string]string{
+					resource.TestCheckTypeSetElemNestedAttrs(constant.DataSource+"."+constant.UserResource+"."+constant.UserDataSourceById, "groups.*", map[string]string{
 						"name": "group2",
 					}),
-					resource.TestCheckTypeSetElemNestedAttrs(DataSource+"."+UserResource+"."+UserDataSourceById, "groups.*", map[string]string{
+					resource.TestCheckTypeSetElemNestedAttrs(constant.DataSource+"."+constant.UserResource+"."+constant.UserDataSourceById, "groups.*", map[string]string{
 						"name": "group3",
 					})),
 			},
 			{
 				Config: testAccCheckUserRemoveAllGroups,
 				Check: resource.ComposeTestCheckFunc(
-					resource.TestCheckResourceAttr(UserResource+"."+UserTestResource, "group_ids.#", "0")),
+					resource.TestCheckResourceAttr(constant.UserResource+"."+constant.UserTestResource, "group_ids.#", "0")),
 			},
 			{
 				Config: testAccCheckNewUserGroup,
 				Check: resource.ComposeTestCheckFunc(
-					resource.TestCheckResourceAttr(UserResource+"."+NewUserResource, "group_ids.#", "1"),
-					resource.TestCheckResourceAttr(DataSource+"."+UserResource+"."+UserDataSourceById, "groups.#", "1"),
-					resource.TestCheckTypeSetElemNestedAttrs(DataSource+"."+UserResource+"."+UserDataSourceById, "groups.*", map[string]string{
+					resource.TestCheckResourceAttr(constant.UserResource+"."+constant.NewUserResource, "group_ids.#", "1"),
+					resource.TestCheckResourceAttr(constant.DataSource+"."+constant.UserResource+"."+constant.UserDataSourceById, "groups.#", "1"),
+					resource.TestCheckTypeSetElemNestedAttrs(constant.DataSource+"."+constant.UserResource+"."+constant.UserDataSourceById, "groups.*", map[string]string{
 						"name": "group1",
 					})),
 			},
@@ -127,7 +129,7 @@ func TestAccUserBasic(t *testing.T) {
 }
 
 func testAccCheckUserDestroyCheck(s *terraform.State) error {
-	client := testAccProvider.Meta().(SdkBundle).CloudApiClient
+	client := testAccProvider.Meta().(services.SdkBundle).CloudApiClient
 
 	ctx, cancel := context.WithTimeout(context.Background(), *resourceDefaultTimeouts.Delete)
 	if cancel != nil {
@@ -135,7 +137,7 @@ func testAccCheckUserDestroyCheck(s *terraform.State) error {
 	}
 
 	for _, rs := range s.RootModule().Resources {
-		if rs.Type != UserResource {
+		if rs.Type != constant.UserResource {
 			continue
 		}
 		_, apiResponse, err := client.UserManagementApi.UmUsersFindById(ctx, rs.Primary.ID).Execute()
@@ -155,7 +157,7 @@ func testAccCheckUserDestroyCheck(s *terraform.State) error {
 
 func testAccCheckUserExists(n string, user *ionoscloud.User) resource.TestCheckFunc {
 	return func(s *terraform.State) error {
-		client := testAccProvider.Meta().(SdkBundle).CloudApiClient
+		client := testAccProvider.Meta().(services.SdkBundle).CloudApiClient
 		rs, ok := s.RootModule().Resources[n]
 
 		if !ok {
@@ -189,17 +191,17 @@ func testAccCheckUserExists(n string, user *ionoscloud.User) resource.TestCheckF
 }
 
 var testAccCheckUserConfigBasic = `
-resource ` + RandomPassword + ` "user_password" {
+resource ` + constant.RandomPassword + ` "user_password" {
   length           = 16
   special          = true
   override_special = "!#$%&*()-_=+[]{}<>:?"
 }
 
-resource ` + UserResource + ` ` + UserTestResource + ` {
-  first_name = "` + UserTestResource + `"
-  last_name = "` + UserTestResource + `"
+resource ` + constant.UserResource + ` ` + constant.UserTestResource + ` {
+  first_name = "` + constant.UserTestResource + `"
+  last_name = "` + constant.UserTestResource + `"
   email = "` + utils.GenerateEmail() + `"
-  password =  ` + RandomPassword + `.user_password.result
+  password =  ` + constant.RandomPassword + `.user_password.result
   administrator = true
   force_sec_auth= true
   active  = true
@@ -207,52 +209,52 @@ resource ` + UserResource + ` ` + UserTestResource + ` {
 `
 
 var testAccCheckUserConfigUpdateForceSec = `
-resource ` + RandomPassword + ` "user_password" {
+resource ` + constant.RandomPassword + ` "user_password" {
   length           = 16
   special          = true
   override_special = "!#$%&*()-_=+[]{}<>:?"
 }
 
-resource ` + UserResource + ` ` + UserTestResource + ` {
- first_name = "` + UserTestResource + `"
- last_name = "` + UserTestResource + `"
+resource ` + constant.UserResource + ` ` + constant.UserTestResource + ` {
+ first_name = "` + constant.UserTestResource + `"
+ last_name = "` + constant.UserTestResource + `"
  email = "` + utils.GenerateEmail() + `"
- password = ` + RandomPassword + `.user_password.result
+ password = ` + constant.RandomPassword + `.user_password.result
  administrator = true
  force_sec_auth= false
  active  = true
 }`
 
 var testAccCheckUserConfigUpdate = `
-resource ` + RandomPassword + ` "user_password_updated" {
+resource ` + constant.RandomPassword + ` "user_password_updated" {
   length           = 16
   special          = true
   override_special = "!#$%&*()-_=+[]{}<>:?"
 }
 
-resource ` + UserResource + ` ` + UserTestResource + ` {
- first_name = "` + UpdatedResources + `"
- last_name = "` + UpdatedResources + `"
+resource ` + constant.UserResource + ` ` + constant.UserTestResource + ` {
+ first_name = "` + constant.UpdatedResources + `"
+ last_name = "` + constant.UpdatedResources + `"
  email = "` + utils.GenerateEmail() + `"
- password 		= ` + RandomPassword + `.user_password_updated.result
+ password 		= ` + constant.RandomPassword + `.user_password_updated.result
  administrator = false
  force_sec_auth= false
  active  = false
 }`
 
 var testAccCheckUserMultipleGroups = `
-resource ` + RandomPassword + ` "user_password_updated" {
+resource ` + constant.RandomPassword + ` "user_password_updated" {
   length           = 16
   special          = true
   override_special = "!#$%&*()-_=+[]{}<>:?"
 }
 
-resource ` + UserResource + ` ` + UserTestResource + ` {
- first_name 	= "` + UpdatedResources + `"
- last_name 		= "` + UpdatedResources + `"
+resource ` + constant.UserResource + ` ` + constant.UserTestResource + ` {
+ first_name 	= "` + constant.UpdatedResources + `"
+ last_name 		= "` + constant.UpdatedResources + `"
  email 			= "` + utils.GenerateEmail() + `"
- password 		= ` + RandomPassword + `.user_password_updated.result
- #password       = ` + RandomPassword + `.user_password.result Updated
+ password 		= ` + constant.RandomPassword + `.user_password_updated.result
+ #password       = ` + constant.RandomPassword + `.user_password.result Updated
  administrator  = false
  force_sec_auth = false
  active  		= false
@@ -283,23 +285,23 @@ resource "ionoscloud_group" "group3" {
   access_activity_log = false
 }
 
-data ` + UserResource + ` ` + UserDataSourceById + ` {
-	id = ionoscloud_user.` + UserTestResource + `.id
+data ` + constant.UserResource + ` ` + constant.UserDataSourceById + ` {
+	id = ionoscloud_user.` + constant.UserTestResource + `.id
 }
 `
 
 var testAccCheckUserMultipleGroups1Element = `
-resource ` + RandomPassword + ` "user_password_updated" {
+resource ` + constant.RandomPassword + ` "user_password_updated" {
   length           = 16
   special          = true
   override_special = "!#$%&*()-_=+[]{}<>:?"
 }
 
-resource ` + UserResource + ` ` + UserTestResource + ` {
- first_name 	= "` + UpdatedResources + `"
- last_name 		= "` + UpdatedResources + `"
+resource ` + constant.UserResource + ` ` + constant.UserTestResource + ` {
+ first_name 	= "` + constant.UpdatedResources + `"
+ last_name 		= "` + constant.UpdatedResources + `"
  email 			= "` + utils.GenerateEmail() + `"
- password 		= ` + RandomPassword + `.user_password_updated.result
+ password 		= ` + constant.RandomPassword + `.user_password_updated.result
  administrator  = false
  force_sec_auth = false
  active  		= false
@@ -330,23 +332,23 @@ resource "ionoscloud_group" "group3" {
   access_activity_log = false
 }
 
-data ` + UserResource + ` ` + UserDataSourceById + ` {
-	id = ionoscloud_user.` + UserTestResource + `.id
+data ` + constant.UserResource + ` ` + constant.UserDataSourceById + ` {
+	id = ionoscloud_user.` + constant.UserTestResource + `.id
 }
 `
 
 var testAccCheckUserRemoveAllGroups = `
-resource ` + RandomPassword + ` "user_password_updated" {
+resource ` + constant.RandomPassword + ` "user_password_updated" {
   length           = 16
   special          = true
   override_special = "!#$%&*()-_=+[]{}<>:?"
 }
 
-resource ` + UserResource + ` ` + UserTestResource + ` {
- first_name 	= "` + UpdatedResources + `"
- last_name 		= "` + UpdatedResources + `"
+resource ` + constant.UserResource + ` ` + constant.UserTestResource + ` {
+ first_name 	= "` + constant.UpdatedResources + `"
+ last_name 		= "` + constant.UpdatedResources + `"
  email 			= "` + utils.GenerateEmail() + `"
- password 		= ` + RandomPassword + `.user_password_updated.result
+ password 		= ` + constant.RandomPassword + `.user_password_updated.result
  administrator  = false
  force_sec_auth = false
  active  		= false
@@ -376,23 +378,23 @@ resource "ionoscloud_group" "group3" {
   access_activity_log = false
 }
 
-data ` + UserResource + ` ` + UserDataSourceById + ` {
-	id = ionoscloud_user.` + UserTestResource + `.id
+data ` + constant.UserResource + ` ` + constant.UserDataSourceById + ` {
+	id = ionoscloud_user.` + constant.UserTestResource + `.id
 }
 `
 
 var testAccCheckUserWrongGroupId = `
-resource ` + RandomPassword + ` "user_password_updated" {
+resource ` + constant.RandomPassword + ` "user_password_updated" {
   length           = 16
   special          = true
   override_special = "!#$%&*()-_=+[]{}<>:?"
 }
 
-resource ` + UserResource + ` ` + UserTestResource + ` {
- first_name 	= "` + UpdatedResources + `"
- last_name 		= "` + UpdatedResources + `"
+resource ` + constant.UserResource + ` ` + constant.UserTestResource + ` {
+ first_name 	= "` + constant.UpdatedResources + `"
+ last_name 		= "` + constant.UpdatedResources + `"
  email 			= "` + utils.GenerateEmail() + `"
- password 		= ` + RandomPassword + `.user_password_updated.result
+ password 		= ` + constant.RandomPassword + `.user_password_updated.result
  administrator  = false
  force_sec_auth = false
  active  		= false
@@ -423,8 +425,8 @@ resource "ionoscloud_group" "group3" {
   access_activity_log = false
 }
 
-data ` + UserResource + ` ` + UserDataSourceById + ` {
-	id = ionoscloud_user.` + UserTestResource + `.id
+data ` + constant.UserResource + ` ` + constant.UserDataSourceById + ` {
+	id = ionoscloud_user.` + constant.UserTestResource + `.id
 }
 `
 
@@ -432,17 +434,17 @@ data ` + UserResource + ` ` + UserDataSourceById + ` {
 // difference between this test and the other group-related tests is that, for this test, the user
 // is new. For the other user-group-related tests, we are operating on a user that already exists.
 var testAccCheckNewUserGroup = `
-resource ` + RandomPassword + ` "user_password_updated" {
+resource ` + constant.RandomPassword + ` "user_password_updated" {
   length           = 16
   special          = true
   override_special = "!#$%&*()-_=+[]{}<>:?"
 }
 
-resource ` + UserResource + ` ` + NewUserResource + ` {
- first_name 	= "` + NewUserName + `"
- last_name 		= "` + NewUserName + `"
+resource ` + constant.UserResource + ` ` + constant.NewUserResource + ` {
+ first_name 	= "` + constant.NewUserName + `"
+ last_name 		= "` + constant.NewUserName + `"
  email 			= "` + utils.GenerateEmail() + `"
- password 		= ` + RandomPassword + `.user_password_updated.result
+ password 		= ` + constant.RandomPassword + `.user_password_updated.result
  administrator  = false
  force_sec_auth = false
  active  		= false
@@ -458,25 +460,25 @@ resource "ionoscloud_group" "group1" {
   create_k8s_cluster = true
 }
 
-data ` + UserResource + ` ` + UserDataSourceById + ` {
-	id = ionoscloud_user.` + NewUserResource + `.id
+data ` + constant.UserResource + ` ` + constant.UserDataSourceById + ` {
+	id = ionoscloud_user.` + constant.NewUserResource + `.id
 }
 `
 
 var testAccDataSourceUserMatchId = testAccCheckUserConfigBasic + `
-data ` + UserResource + ` ` + UserDataSourceById + ` {
-  id			= ` + UserResource + `.` + UserTestResource + `.id
+data ` + constant.UserResource + ` ` + constant.UserDataSourceById + ` {
+  id			= ` + constant.UserResource + `.` + constant.UserTestResource + `.id
 }
 `
 
 var testAccDataSourceUserMatchEmail = testAccCheckUserConfigBasic + `
-data ` + UserResource + ` ` + UserDataSourceByName + ` {
-  email			= ` + UserResource + `.` + UserTestResource + `.email
+data ` + constant.UserResource + ` ` + constant.UserDataSourceByName + ` {
+  email			= ` + constant.UserResource + `.` + constant.UserTestResource + `.email
 }
 `
 
 var testAccDataSourceUserWrongEmail = testAccCheckUserConfigBasic + `
-data ` + UserResource + ` ` + UserDataSourceByName + ` {
+data ` + constant.UserResource + ` ` + constant.UserDataSourceByName + ` {
   email			= "wrong_email"
 }
 `

@@ -4,6 +4,7 @@ package ionoscloud
 
 import (
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils"
+	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils/constant"
 	"testing"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
@@ -23,7 +24,7 @@ func TestAccGroupImportBasic(t *testing.T) {
 			},
 
 			{
-				ResourceName:            GroupResource + "." + GroupTestResource,
+				ResourceName:            constant.GroupResource + "." + constant.GroupTestResource,
 				ImportStateIdFunc:       testAccGroupImportStateId,
 				ImportState:             true,
 				ImportStateVerify:       true,
@@ -37,7 +38,7 @@ func testAccGroupImportStateId(s *terraform.State) (string, error) {
 	importID := ""
 
 	for _, rs := range s.RootModule().Resources {
-		if rs.Type != GroupResource {
+		if rs.Type != constant.GroupResource {
 			continue
 		}
 
@@ -48,7 +49,7 @@ func testAccGroupImportStateId(s *terraform.State) (string, error) {
 }
 
 var testAccImportGroupConfigBasic = `
-resource ` + UserResource + ` ` + UserTestResource + ` {
+resource ` + constant.UserResource + ` ` + constant.UserTestResource + ` {
   first_name = "user"
   last_name = "test"
   email = "` + utils.GenerateEmail() + `"
@@ -58,8 +59,8 @@ resource ` + UserResource + ` ` + UserTestResource + ` {
   active = false
 }
 
-resource ` + GroupResource + ` ` + GroupTestResource + ` {
-  name = "` + GroupTestResource + `"
+resource ` + constant.GroupResource + ` ` + constant.GroupTestResource + ` {
+  name = "` + constant.GroupTestResource + `"
   create_datacenter = true
   create_snapshot = true
   reserve_ip = true
@@ -69,6 +70,6 @@ resource ` + GroupResource + ` ` + GroupTestResource + ` {
   create_backup_unit = true
   create_internet_access = true
   create_k8s_cluster = true
-  user_ids = [` + UserResource + `.` + UserTestResource + `.id]
+  user_ids = [` + constant.UserResource + `.` + constant.UserTestResource + `.id]
 }
 `

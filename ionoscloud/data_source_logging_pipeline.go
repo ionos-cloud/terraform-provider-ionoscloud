@@ -7,6 +7,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 	logging "github.com/ionos-cloud/sdk-go-logging"
+	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services"
 	"strings"
 )
 
@@ -78,7 +79,7 @@ func dataSourceLoggingPipeline() *schema.Resource {
 }
 
 func dataSourcePipelineRead(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
-	client := meta.(SdkBundle).LoggingClient
+	client := meta.(services.SdkBundle).LoggingClient
 	idValue, idOk := d.GetOk("id")
 	nameValue, nameOk := d.GetOk("name")
 	id := idValue.(string)

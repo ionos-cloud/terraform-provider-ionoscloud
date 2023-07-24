@@ -4,6 +4,7 @@ package ionoscloud
 
 import (
 	"fmt"
+	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils/constant"
 
 	"testing"
 
@@ -22,7 +23,7 @@ func TestAccServerImportBasic(t *testing.T) {
 				Config: testAccCheckServerConfigBasic,
 			},
 			{
-				ResourceName:            ServerResource + "." + ServerTestResource,
+				ResourceName:            constant.ServerResource + "." + constant.ServerTestResource,
 				ImportStateIdFunc:       testAccServerImportStateIdWithNicAndFw,
 				ImportState:             true,
 				ImportStateVerify:       true,
@@ -44,7 +45,7 @@ func TestAccServerWithLabelsImport(t *testing.T) {
 				Config: testAccCheckServerCreationWithLabels,
 			},
 			{
-				ResourceName:            ServerResource + "." + ServerTestResource,
+				ResourceName:            constant.ServerResource + "." + constant.ServerTestResource,
 				ImportStateIdFunc:       testAccServerImportStateId,
 				ImportState:             true,
 				ImportStateVerify:       true,
@@ -57,7 +58,7 @@ func testAccServerImportStateId(s *terraform.State) (string, error) {
 	var importID = ""
 
 	for _, rs := range s.RootModule().Resources {
-		if rs.Type != ServerResource {
+		if rs.Type != constant.ServerResource {
 			continue
 		}
 
@@ -73,7 +74,7 @@ func testAccServerImportStateIdWithNicAndFw(s *terraform.State) (string, error) 
 	var importID = ""
 
 	for _, rs := range s.RootModule().Resources {
-		if rs.Type != ServerResource {
+		if rs.Type != constant.ServerResource {
 			continue
 		}
 
@@ -92,12 +93,12 @@ func testAccServerImportStateIdWithNicAndFw(s *terraform.State) (string, error) 
 }
 
 const testAccCheckServerImport = `
-resource ` + DatacenterResource + ` ` + DatacenterTestResource + ` {
+resource ` + constant.DatacenterResource + ` ` + constant.DatacenterTestResource + ` {
 	name       = "server-test"
 	location = "us/las"
 }
-resource ` + LanResource + ` ` + LanTestResource + ` {
-  datacenter_id = ` + DatacenterResource + `.` + DatacenterTestResource + `.id
+resource ` + constant.LanResource + ` ` + constant.LanTestResource + ` {
+  datacenter_id = ` + constant.DatacenterResource + `.` + constant.DatacenterTestResource + `.id
   public = true
   name = "public"
 }
@@ -105,9 +106,9 @@ resource "random_password" "image_password" {
   length = 16
   special = false
 }
-resource ` + ServerResource + ` ` + ServerTestResource + ` {
-  name = "` + ServerTestResource + `"
-  datacenter_id = ` + DatacenterResource + `.` + DatacenterTestResource + `.id
+resource ` + constant.ServerResource + ` ` + constant.ServerTestResource + ` {
+  name = "` + constant.ServerTestResource + `"
+  datacenter_id = ` + constant.DatacenterResource + `.` + constant.DatacenterTestResource + `.id
   cores = 1
   ram = 1024
   availability_zone = "ZONE_1"
@@ -124,7 +125,7 @@ resource ` + ServerResource + ` ` + ServerTestResource + ` {
     availability_zone = "ZONE_1"
 }
   nic {
-    lan = ` + LanResource + `.` + LanTestResource + `.id
+    lan = ` + constant.LanResource + `.` + constant.LanTestResource + `.id
     name = "system"
     dhcp = true
     firewall_active = false

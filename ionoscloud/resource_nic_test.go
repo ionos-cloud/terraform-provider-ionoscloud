@@ -6,6 +6,8 @@ import (
 	"context"
 	"fmt"
 	ionoscloud "github.com/ionos-cloud/sdk-go/v6"
+	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services"
+	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils/constant"
 	"regexp"
 	"testing"
 
@@ -28,41 +30,41 @@ func TestAccNicBasic(t *testing.T) {
 			{
 				Config: fmt.Sprintf(testAccCheckNicConfigBasic, volumeName),
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheckNICExists(fullNicResourceName, &nic),
-					resource.TestCheckResourceAttrSet(fullNicResourceName, "pci_slot"),
-					resource.TestCheckResourceAttr(fullNicResourceName, "name", volumeName),
-					resource.TestCheckResourceAttr(fullNicResourceName, "dhcp", "true"),
-					resource.TestCheckResourceAttrSet(fullNicResourceName, "mac"),
-					resource.TestCheckResourceAttr(fullNicResourceName, "firewall_active", "true"),
-					resource.TestCheckResourceAttr(fullNicResourceName, "firewall_type", "INGRESS"),
-					resource.TestCheckResourceAttrPair(fullNicResourceName, "ips.0", "ionoscloud_ipblock.test_server", "ips.0"),
-					resource.TestCheckResourceAttrPair(fullNicResourceName, "ips.1", "ionoscloud_ipblock.test_server", "ips.1"),
+					testAccCheckNICExists(constant.FullNicResourceName, &nic),
+					resource.TestCheckResourceAttrSet(constant.FullNicResourceName, "pci_slot"),
+					resource.TestCheckResourceAttr(constant.FullNicResourceName, "name", volumeName),
+					resource.TestCheckResourceAttr(constant.FullNicResourceName, "dhcp", "true"),
+					resource.TestCheckResourceAttrSet(constant.FullNicResourceName, "mac"),
+					resource.TestCheckResourceAttr(constant.FullNicResourceName, "firewall_active", "true"),
+					resource.TestCheckResourceAttr(constant.FullNicResourceName, "firewall_type", "INGRESS"),
+					resource.TestCheckResourceAttrPair(constant.FullNicResourceName, "ips.0", "ionoscloud_ipblock.test_server", "ips.0"),
+					resource.TestCheckResourceAttrPair(constant.FullNicResourceName, "ips.1", "ionoscloud_ipblock.test_server", "ips.1"),
 				),
 			},
 			{
 				Config: testAccDataSourceNicMatchId,
 				Check: resource.ComposeTestCheckFunc(
-					resource.TestCheckResourceAttrPair(DataSource+"."+dataSourceNicById, "name", fullNicResourceName, "name"),
-					resource.TestCheckResourceAttrPair(DataSource+"."+dataSourceNicById, "dhcp", fullNicResourceName, "dhcp"),
-					resource.TestCheckResourceAttrPair(DataSource+"."+dataSourceNicById, "firewall_active", fullNicResourceName, "firewall_active"),
-					resource.TestCheckResourceAttrPair(DataSource+"."+dataSourceNicById, "firewall_type", fullNicResourceName, "firewall_type"),
-					resource.TestCheckResourceAttrPair(DataSource+"."+dataSourceNicById, "mac", fullNicResourceName, "mac"),
-					resource.TestCheckResourceAttrPair(DataSource+"."+dataSourceNicById, "pci_slot", fullNicResourceName, "pci_slot"),
-					resource.TestCheckResourceAttrPair(DataSource+"."+dataSourceNicById, "lan", fullNicResourceName, "lan"),
-					resource.TestCheckResourceAttrPair(DataSource+"."+dataSourceNicById, "ips", fullNicResourceName, "ips"),
+					resource.TestCheckResourceAttrPair(constant.DataSource+"."+dataSourceNicById, "name", constant.FullNicResourceName, "name"),
+					resource.TestCheckResourceAttrPair(constant.DataSource+"."+dataSourceNicById, "dhcp", constant.FullNicResourceName, "dhcp"),
+					resource.TestCheckResourceAttrPair(constant.DataSource+"."+dataSourceNicById, "firewall_active", constant.FullNicResourceName, "firewall_active"),
+					resource.TestCheckResourceAttrPair(constant.DataSource+"."+dataSourceNicById, "firewall_type", constant.FullNicResourceName, "firewall_type"),
+					resource.TestCheckResourceAttrPair(constant.DataSource+"."+dataSourceNicById, "mac", constant.FullNicResourceName, "mac"),
+					resource.TestCheckResourceAttrPair(constant.DataSource+"."+dataSourceNicById, "pci_slot", constant.FullNicResourceName, "pci_slot"),
+					resource.TestCheckResourceAttrPair(constant.DataSource+"."+dataSourceNicById, "lan", constant.FullNicResourceName, "lan"),
+					resource.TestCheckResourceAttrPair(constant.DataSource+"."+dataSourceNicById, "ips", constant.FullNicResourceName, "ips"),
 				),
 			},
 			{
 				Config: testAccDataSourceNicMatchName,
 				Check: resource.ComposeTestCheckFunc(
-					resource.TestCheckResourceAttrPair(DataSource+"."+dataSourceNicById, "name", fullNicResourceName, "name"),
-					resource.TestCheckResourceAttrPair(DataSource+"."+dataSourceNicById, "dhcp", fullNicResourceName, "dhcp"),
-					resource.TestCheckResourceAttrPair(DataSource+"."+dataSourceNicById, "firewall_active", fullNicResourceName, "firewall_active"),
-					resource.TestCheckResourceAttrPair(DataSource+"."+dataSourceNicById, "firewall_type", fullNicResourceName, "firewall_type"),
-					resource.TestCheckResourceAttrPair(DataSource+"."+dataSourceNicById, "mac", fullNicResourceName, "mac"),
-					resource.TestCheckResourceAttrPair(DataSource+"."+dataSourceNicById, "pci_slot", fullNicResourceName, "pci_slot"),
-					resource.TestCheckResourceAttrPair(DataSource+"."+dataSourceNicById, "lan", fullNicResourceName, "lan"),
-					resource.TestCheckResourceAttrPair(DataSource+"."+dataSourceNicById, "ips", fullNicResourceName, "ips"),
+					resource.TestCheckResourceAttrPair(constant.DataSource+"."+dataSourceNicById, "name", constant.FullNicResourceName, "name"),
+					resource.TestCheckResourceAttrPair(constant.DataSource+"."+dataSourceNicById, "dhcp", constant.FullNicResourceName, "dhcp"),
+					resource.TestCheckResourceAttrPair(constant.DataSource+"."+dataSourceNicById, "firewall_active", constant.FullNicResourceName, "firewall_active"),
+					resource.TestCheckResourceAttrPair(constant.DataSource+"."+dataSourceNicById, "firewall_type", constant.FullNicResourceName, "firewall_type"),
+					resource.TestCheckResourceAttrPair(constant.DataSource+"."+dataSourceNicById, "mac", constant.FullNicResourceName, "mac"),
+					resource.TestCheckResourceAttrPair(constant.DataSource+"."+dataSourceNicById, "pci_slot", constant.FullNicResourceName, "pci_slot"),
+					resource.TestCheckResourceAttrPair(constant.DataSource+"."+dataSourceNicById, "lan", constant.FullNicResourceName, "lan"),
+					resource.TestCheckResourceAttrPair(constant.DataSource+"."+dataSourceNicById, "ips", constant.FullNicResourceName, "ips"),
 				),
 			},
 			{
@@ -80,10 +82,10 @@ func TestAccNicBasic(t *testing.T) {
 			{
 				Config: testAccCheckNicConfigUpdate,
 				Check: resource.ComposeTestCheckFunc(
-					resource.TestCheckResourceAttr(fullNicResourceName, "name", "updated"),
-					resource.TestCheckResourceAttr(fullNicResourceName, "dhcp", "false"),
-					resource.TestCheckResourceAttr(fullNicResourceName, "firewall_active", "false"),
-					resource.TestCheckResourceAttr(fullNicResourceName, "firewall_type", "BIDIRECTIONAL"),
+					resource.TestCheckResourceAttr(constant.FullNicResourceName, "name", "updated"),
+					resource.TestCheckResourceAttr(constant.FullNicResourceName, "dhcp", "false"),
+					resource.TestCheckResourceAttr(constant.FullNicResourceName, "firewall_active", "false"),
+					resource.TestCheckResourceAttr(constant.FullNicResourceName, "firewall_type", "BIDIRECTIONAL"),
 				),
 			},
 		},
@@ -91,7 +93,7 @@ func TestAccNicBasic(t *testing.T) {
 }
 
 func testAccCheckNicDestroyCheck(s *terraform.State) error {
-	client := testAccProvider.Meta().(SdkBundle).CloudApiClient
+	client := testAccProvider.Meta().(services.SdkBundle).CloudApiClient
 
 	ctx, cancel := context.WithTimeout(context.Background(), *resourceDefaultTimeouts.Delete)
 	if cancel != nil {
@@ -99,7 +101,7 @@ func testAccCheckNicDestroyCheck(s *terraform.State) error {
 	}
 
 	for _, rs := range s.RootModule().Resources {
-		if rs.Type != NicResource {
+		if rs.Type != constant.NicResource {
 			continue
 		}
 
@@ -124,7 +126,7 @@ func testAccCheckNicDestroyCheck(s *terraform.State) error {
 
 func testAccCheckNICExists(n string, nic *ionoscloud.Nic) resource.TestCheckFunc {
 	return func(s *terraform.State) error {
-		client := testAccProvider.Meta().(SdkBundle).CloudApiClient
+		client := testAccProvider.Meta().(services.SdkBundle).CloudApiClient
 
 		rs, ok := s.RootModule().Resources[n]
 		if !ok {
@@ -175,7 +177,7 @@ resource "ionoscloud_server" "test_server" {
   availability_zone = "ZONE_1"
   cpu_family = "AMD_OPTERON"
   image_name ="ubuntu:latest"
-  image_password = ` + RandomPassword + `.server_image_password.result
+  image_password = ` + constant.RandomPassword + `.server_image_password.result
   volume {
     name = "system"
     size = 5
@@ -190,9 +192,9 @@ resource "ionoscloud_server" "test_server" {
 ` + ServerImagePassword
 
 const testAccCheckNicConfigBasic = testCreateDataCenterAndServer + `
-resource ` + NicResource + ` "database_nic" {
-  datacenter_id = ` + DatacenterResource + `.` + DatacenterTestResource + `.id
-  server_id = ` + ServerResource + `.` + ServerTestResource + `.id
+resource ` + constant.NicResource + ` "database_nic" {
+  datacenter_id = ` + constant.DatacenterResource + `.` + constant.DatacenterTestResource + `.id
+  server_id = ` + constant.ServerResource + `.` + constant.ServerTestResource + `.id
   lan = 2
   firewall_active = true
   firewall_type = "INGRESS"
@@ -202,9 +204,9 @@ resource ` + NicResource + ` "database_nic" {
 `
 
 const testAccCheckNicConfigUpdate = testCreateDataCenterAndServer + `
-resource ` + NicResource + ` "database_nic" {
-  datacenter_id = ` + DatacenterResource + `.` + DatacenterTestResource + `.id
-  server_id = ` + ServerResource + `.` + ServerTestResource + `.id
+resource ` + constant.NicResource + ` "database_nic" {
+  datacenter_id = ` + constant.DatacenterResource + `.` + constant.DatacenterTestResource + `.id
+  server_id = ` + constant.ServerResource + `.` + constant.ServerTestResource + `.id
   lan = 2
   dhcp = false
   firewall_active = false
@@ -213,35 +215,35 @@ resource ` + NicResource + ` "database_nic" {
   name = "updated"
 }
 `
-const dataSourceNicById = NicResource + ".test_nic_data"
+const dataSourceNicById = constant.NicResource + ".test_nic_data"
 
 const testAccDataSourceNicMatchId = testAccCheckNicConfigBasic + `
-data ` + NicResource + ` test_nic_data {
-  datacenter_id = ` + DatacenterResource + `.` + DatacenterTestResource + `.id
-  server_id = ` + ServerResource + `.` + ServerTestResource + `.id
-  id = ` + fullNicResourceName + `.id
+data ` + constant.NicResource + ` test_nic_data {
+  datacenter_id = ` + constant.DatacenterResource + `.` + constant.DatacenterTestResource + `.id
+  server_id = ` + constant.ServerResource + `.` + constant.ServerTestResource + `.id
+  id = ` + constant.FullNicResourceName + `.id
 }
 `
 
 const testAccDataSourceNicMatchName = testAccCheckNicConfigBasic + `
-data ` + NicResource + ` test_nic_data {
-  	datacenter_id = ` + DatacenterResource + `.` + DatacenterTestResource + `.id
-	server_id = ` + ServerResource + `.` + ServerTestResource + `.id
-	name = ` + fullNicResourceName + `.name 
+data ` + constant.NicResource + ` test_nic_data {
+  	datacenter_id = ` + constant.DatacenterResource + `.` + constant.DatacenterTestResource + `.id
+	server_id = ` + constant.ServerResource + `.` + constant.ServerTestResource + `.id
+	name = ` + constant.FullNicResourceName + `.name 
 }`
 
 const testAccDataSourceNicMatchNameError = testAccCheckNicConfigBasic + `
-data ` + NicResource + ` test_nic_data {
-  	datacenter_id = ` + DatacenterResource + `.` + DatacenterTestResource + `.id
-	server_id = ` + ServerResource + `.` + ServerTestResource + `.id
+data ` + constant.NicResource + ` test_nic_data {
+  	datacenter_id = ` + constant.DatacenterResource + `.` + constant.DatacenterTestResource + `.id
+	server_id = ` + constant.ServerResource + `.` + constant.ServerTestResource + `.id
 	name = "DoesNotExist"
 }`
 
 const testAccDataSourceNicMatchIdAndNameError = testAccCheckNicConfigBasic + `
-data ` + NicResource + ` test_nic_data {
-  	datacenter_id = ` + DatacenterResource + `.` + DatacenterTestResource + `.id
-	server_id = ` + ServerResource + `.` + ServerTestResource + `.id
-	id = ` + fullNicResourceName + `.id
+data ` + constant.NicResource + ` test_nic_data {
+  	datacenter_id = ` + constant.DatacenterResource + `.` + constant.DatacenterTestResource + `.id
+	server_id = ` + constant.ServerResource + `.` + constant.ServerTestResource + `.id
+	id = ` + constant.FullNicResourceName + `.id
 	name = "doesNotExist"
 }`
 
@@ -252,9 +254,9 @@ resource "ionoscloud_ipblock" "test_server_multiple_results" {
   name = "test_server_ipblock"
 }
 
-resource ` + NicResource + ` "database_nic_multiple_results" {
-  datacenter_id = ` + DatacenterResource + `.` + DatacenterTestResource + `.id
-  server_id = ` + ServerResource + `.` + ServerTestResource + `.id
+resource ` + constant.NicResource + ` "database_nic_multiple_results" {
+  datacenter_id = ` + constant.DatacenterResource + `.` + constant.DatacenterTestResource + `.id
+  server_id = ` + constant.ServerResource + `.` + constant.ServerTestResource + `.id
   lan = 2
   firewall_active = true
   firewall_type = "INGRESS"
@@ -262,8 +264,8 @@ resource ` + NicResource + ` "database_nic_multiple_results" {
   name = "%s"
 }
 
-data ` + NicResource + ` test_nic_data {
-  	datacenter_id = ` + DatacenterResource + `.` + DatacenterTestResource + `.id
-	server_id = ` + ServerResource + `.` + ServerTestResource + `.id
-	name = ` + fullNicResourceName + `.name 
+data ` + constant.NicResource + ` test_nic_data {
+  	datacenter_id = ` + constant.DatacenterResource + `.` + constant.DatacenterTestResource + `.id
+	server_id = ` + constant.ServerResource + `.` + constant.ServerTestResource + `.id
+	name = ` + constant.FullNicResourceName + `.name 
 }`

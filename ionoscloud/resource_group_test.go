@@ -6,7 +6,9 @@ import (
 	"context"
 	"fmt"
 	ionoscloud "github.com/ionos-cloud/sdk-go/v6"
+	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services"
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils"
+	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils/constant"
 	"regexp"
 	"testing"
 
@@ -28,76 +30,76 @@ func TestAccGroupBasic(t *testing.T) {
 			{
 				Config: testAccCheckGroupConfigBasic,
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheckGroupExists(GroupResource+"."+GroupTestResource, &group),
-					resource.TestCheckResourceAttr(GroupResource+"."+GroupTestResource, "name", GroupTestResource),
-					resource.TestCheckResourceAttr(GroupResource+"."+GroupTestResource, "create_datacenter", "true"),
-					resource.TestCheckResourceAttr(GroupResource+"."+GroupTestResource, "create_snapshot", "true"),
-					resource.TestCheckResourceAttr(GroupResource+"."+GroupTestResource, "reserve_ip", "true"),
-					resource.TestCheckResourceAttr(GroupResource+"."+GroupTestResource, "access_activity_log", "true"),
-					resource.TestCheckResourceAttr(GroupResource+"."+GroupTestResource, "create_pcc", "true"),
-					resource.TestCheckResourceAttr(GroupResource+"."+GroupTestResource, "s3_privilege", "true"),
-					resource.TestCheckResourceAttr(GroupResource+"."+GroupTestResource, "create_backup_unit", "true"),
-					resource.TestCheckResourceAttr(GroupResource+"."+GroupTestResource, "create_internet_access", "true"),
-					resource.TestCheckResourceAttr(GroupResource+"."+GroupTestResource, "create_k8s_cluster", "true"),
-					resource.TestCheckResourceAttr(GroupResource+"."+GroupTestResource, "create_flow_log", "true"),
-					resource.TestCheckResourceAttr(GroupResource+"."+GroupTestResource, "access_and_manage_monitoring", "true"),
-					resource.TestCheckResourceAttr(GroupResource+"."+GroupTestResource, "access_and_manage_certificates", "true"),
-					resource.TestCheckResourceAttr(GroupResource+"."+GroupTestResource, "manage_dbaas", "true"),
-					utils.TestNotEmptySlice(GroupResource, "users")),
+					testAccCheckGroupExists(constant.GroupResource+"."+constant.GroupTestResource, &group),
+					resource.TestCheckResourceAttr(constant.GroupResource+"."+constant.GroupTestResource, "name", constant.GroupTestResource),
+					resource.TestCheckResourceAttr(constant.GroupResource+"."+constant.GroupTestResource, "create_datacenter", "true"),
+					resource.TestCheckResourceAttr(constant.GroupResource+"."+constant.GroupTestResource, "create_snapshot", "true"),
+					resource.TestCheckResourceAttr(constant.GroupResource+"."+constant.GroupTestResource, "reserve_ip", "true"),
+					resource.TestCheckResourceAttr(constant.GroupResource+"."+constant.GroupTestResource, "access_activity_log", "true"),
+					resource.TestCheckResourceAttr(constant.GroupResource+"."+constant.GroupTestResource, "create_pcc", "true"),
+					resource.TestCheckResourceAttr(constant.GroupResource+"."+constant.GroupTestResource, "s3_privilege", "true"),
+					resource.TestCheckResourceAttr(constant.GroupResource+"."+constant.GroupTestResource, "create_backup_unit", "true"),
+					resource.TestCheckResourceAttr(constant.GroupResource+"."+constant.GroupTestResource, "create_internet_access", "true"),
+					resource.TestCheckResourceAttr(constant.GroupResource+"."+constant.GroupTestResource, "create_k8s_cluster", "true"),
+					resource.TestCheckResourceAttr(constant.GroupResource+"."+constant.GroupTestResource, "create_flow_log", "true"),
+					resource.TestCheckResourceAttr(constant.GroupResource+"."+constant.GroupTestResource, "access_and_manage_monitoring", "true"),
+					resource.TestCheckResourceAttr(constant.GroupResource+"."+constant.GroupTestResource, "access_and_manage_certificates", "true"),
+					resource.TestCheckResourceAttr(constant.GroupResource+"."+constant.GroupTestResource, "manage_dbaas", "true"),
+					utils.TestNotEmptySlice(constant.GroupResource, "users")),
 			},
 			{
 				Config: testAccDataSourceGroupMatchId,
 				Check: resource.ComposeTestCheckFunc(
-					resource.TestCheckResourceAttrPair(DataSource+"."+GroupResource+"."+GroupDataSourceById, "name", GroupResource+"."+GroupTestResource, "name"),
-					resource.TestCheckResourceAttrPair(DataSource+"."+GroupResource+"."+GroupDataSourceById, "create_datacenter", GroupResource+"."+GroupTestResource, "create_datacenter"),
-					resource.TestCheckResourceAttrPair(DataSource+"."+GroupResource+"."+GroupDataSourceById, "create_snapshot", GroupResource+"."+GroupTestResource, "create_snapshot"),
-					resource.TestCheckResourceAttrPair(DataSource+"."+GroupResource+"."+GroupDataSourceById, "reserve_ip", GroupResource+"."+GroupTestResource, "reserve_ip"),
-					resource.TestCheckResourceAttrPair(DataSource+"."+GroupResource+"."+GroupDataSourceById, "access_activity_log", GroupResource+"."+GroupTestResource, "access_activity_log"),
-					resource.TestCheckResourceAttrPair(DataSource+"."+GroupResource+"."+GroupDataSourceById, "create_pcc", GroupResource+"."+GroupTestResource, "create_pcc"),
-					resource.TestCheckResourceAttrPair(DataSource+"."+GroupResource+"."+GroupDataSourceById, "s3_privilege", GroupResource+"."+GroupTestResource, "s3_privilege"),
-					resource.TestCheckResourceAttrPair(DataSource+"."+GroupResource+"."+GroupDataSourceById, "create_backup_unit", GroupResource+"."+GroupTestResource, "create_backup_unit"),
-					resource.TestCheckResourceAttrPair(DataSource+"."+GroupResource+"."+GroupDataSourceById, "create_internet_access", GroupResource+"."+GroupTestResource, "create_internet_access"),
-					resource.TestCheckResourceAttrPair(DataSource+"."+GroupResource+"."+GroupDataSourceById, "create_k8s_cluster", GroupResource+"."+GroupTestResource, "create_k8s_cluster"),
-					resource.TestCheckResourceAttrPair(DataSource+"."+GroupResource+"."+GroupDataSourceById, "manage_dbaas", GroupResource+"."+GroupTestResource, "manage_dbaas"),
+					resource.TestCheckResourceAttrPair(constant.DataSource+"."+constant.GroupResource+"."+constant.GroupDataSourceById, "name", constant.GroupResource+"."+constant.GroupTestResource, "name"),
+					resource.TestCheckResourceAttrPair(constant.DataSource+"."+constant.GroupResource+"."+constant.GroupDataSourceById, "create_datacenter", constant.GroupResource+"."+constant.GroupTestResource, "create_datacenter"),
+					resource.TestCheckResourceAttrPair(constant.DataSource+"."+constant.GroupResource+"."+constant.GroupDataSourceById, "create_snapshot", constant.GroupResource+"."+constant.GroupTestResource, "create_snapshot"),
+					resource.TestCheckResourceAttrPair(constant.DataSource+"."+constant.GroupResource+"."+constant.GroupDataSourceById, "reserve_ip", constant.GroupResource+"."+constant.GroupTestResource, "reserve_ip"),
+					resource.TestCheckResourceAttrPair(constant.DataSource+"."+constant.GroupResource+"."+constant.GroupDataSourceById, "access_activity_log", constant.GroupResource+"."+constant.GroupTestResource, "access_activity_log"),
+					resource.TestCheckResourceAttrPair(constant.DataSource+"."+constant.GroupResource+"."+constant.GroupDataSourceById, "create_pcc", constant.GroupResource+"."+constant.GroupTestResource, "create_pcc"),
+					resource.TestCheckResourceAttrPair(constant.DataSource+"."+constant.GroupResource+"."+constant.GroupDataSourceById, "s3_privilege", constant.GroupResource+"."+constant.GroupTestResource, "s3_privilege"),
+					resource.TestCheckResourceAttrPair(constant.DataSource+"."+constant.GroupResource+"."+constant.GroupDataSourceById, "create_backup_unit", constant.GroupResource+"."+constant.GroupTestResource, "create_backup_unit"),
+					resource.TestCheckResourceAttrPair(constant.DataSource+"."+constant.GroupResource+"."+constant.GroupDataSourceById, "create_internet_access", constant.GroupResource+"."+constant.GroupTestResource, "create_internet_access"),
+					resource.TestCheckResourceAttrPair(constant.DataSource+"."+constant.GroupResource+"."+constant.GroupDataSourceById, "create_k8s_cluster", constant.GroupResource+"."+constant.GroupTestResource, "create_k8s_cluster"),
+					resource.TestCheckResourceAttrPair(constant.DataSource+"."+constant.GroupResource+"."+constant.GroupDataSourceById, "manage_dbaas", constant.GroupResource+"."+constant.GroupTestResource, "manage_dbaas"),
 
-					utils.TestNotEmptySlice(DataSource+"."+GroupResource, "users"),
+					utils.TestNotEmptySlice(constant.DataSource+"."+constant.GroupResource, "users"),
 				),
 			},
 			{
 				Config: testAccDataSourceGroupMatchName,
 				Check: resource.ComposeTestCheckFunc(
-					resource.TestCheckResourceAttrPair(DataSource+"."+GroupResource+"."+GroupDataSourceByName, "name", GroupResource+"."+GroupTestResource, "name"),
-					resource.TestCheckResourceAttrPair(DataSource+"."+GroupResource+"."+GroupDataSourceByName, "create_datacenter", GroupResource+"."+GroupTestResource, "create_datacenter"),
-					resource.TestCheckResourceAttrPair(DataSource+"."+GroupResource+"."+GroupDataSourceByName, "create_snapshot", GroupResource+"."+GroupTestResource, "create_snapshot"),
-					resource.TestCheckResourceAttrPair(DataSource+"."+GroupResource+"."+GroupDataSourceByName, "reserve_ip", GroupResource+"."+GroupTestResource, "reserve_ip"),
-					resource.TestCheckResourceAttrPair(DataSource+"."+GroupResource+"."+GroupDataSourceByName, "access_activity_log", GroupResource+"."+GroupTestResource, "access_activity_log"),
-					resource.TestCheckResourceAttrPair(DataSource+"."+GroupResource+"."+GroupDataSourceByName, "create_pcc", GroupResource+"."+GroupTestResource, "create_pcc"),
-					resource.TestCheckResourceAttrPair(DataSource+"."+GroupResource+"."+GroupDataSourceByName, "s3_privilege", GroupResource+"."+GroupTestResource, "s3_privilege"),
-					resource.TestCheckResourceAttrPair(DataSource+"."+GroupResource+"."+GroupDataSourceByName, "create_backup_unit", GroupResource+"."+GroupTestResource, "create_backup_unit"),
-					resource.TestCheckResourceAttrPair(DataSource+"."+GroupResource+"."+GroupDataSourceByName, "create_internet_access", GroupResource+"."+GroupTestResource, "create_internet_access"),
-					resource.TestCheckResourceAttrPair(DataSource+"."+GroupResource+"."+GroupDataSourceByName, "create_k8s_cluster", GroupResource+"."+GroupTestResource, "create_k8s_cluster"),
-					resource.TestCheckResourceAttrPair(DataSource+"."+GroupResource+"."+GroupDataSourceByName, "create_flow_log", GroupResource+"."+GroupTestResource, "create_flow_log"),
-					resource.TestCheckResourceAttrPair(DataSource+"."+GroupResource+"."+GroupDataSourceByName, "access_and_manage_monitoring", GroupResource+"."+GroupTestResource, "access_and_manage_monitoring"),
-					resource.TestCheckResourceAttrPair(DataSource+"."+GroupResource+"."+GroupDataSourceByName, "access_and_manage_certificates", GroupResource+"."+GroupTestResource, "access_and_manage_certificates"),
-					resource.TestCheckResourceAttrPair(DataSource+"."+GroupResource+"."+GroupDataSourceByName, "manage_dbaas", GroupResource+"."+GroupTestResource, "manage_dbaas"),
+					resource.TestCheckResourceAttrPair(constant.DataSource+"."+constant.GroupResource+"."+constant.GroupDataSourceByName, "name", constant.GroupResource+"."+constant.GroupTestResource, "name"),
+					resource.TestCheckResourceAttrPair(constant.DataSource+"."+constant.GroupResource+"."+constant.GroupDataSourceByName, "create_datacenter", constant.GroupResource+"."+constant.GroupTestResource, "create_datacenter"),
+					resource.TestCheckResourceAttrPair(constant.DataSource+"."+constant.GroupResource+"."+constant.GroupDataSourceByName, "create_snapshot", constant.GroupResource+"."+constant.GroupTestResource, "create_snapshot"),
+					resource.TestCheckResourceAttrPair(constant.DataSource+"."+constant.GroupResource+"."+constant.GroupDataSourceByName, "reserve_ip", constant.GroupResource+"."+constant.GroupTestResource, "reserve_ip"),
+					resource.TestCheckResourceAttrPair(constant.DataSource+"."+constant.GroupResource+"."+constant.GroupDataSourceByName, "access_activity_log", constant.GroupResource+"."+constant.GroupTestResource, "access_activity_log"),
+					resource.TestCheckResourceAttrPair(constant.DataSource+"."+constant.GroupResource+"."+constant.GroupDataSourceByName, "create_pcc", constant.GroupResource+"."+constant.GroupTestResource, "create_pcc"),
+					resource.TestCheckResourceAttrPair(constant.DataSource+"."+constant.GroupResource+"."+constant.GroupDataSourceByName, "s3_privilege", constant.GroupResource+"."+constant.GroupTestResource, "s3_privilege"),
+					resource.TestCheckResourceAttrPair(constant.DataSource+"."+constant.GroupResource+"."+constant.GroupDataSourceByName, "create_backup_unit", constant.GroupResource+"."+constant.GroupTestResource, "create_backup_unit"),
+					resource.TestCheckResourceAttrPair(constant.DataSource+"."+constant.GroupResource+"."+constant.GroupDataSourceByName, "create_internet_access", constant.GroupResource+"."+constant.GroupTestResource, "create_internet_access"),
+					resource.TestCheckResourceAttrPair(constant.DataSource+"."+constant.GroupResource+"."+constant.GroupDataSourceByName, "create_k8s_cluster", constant.GroupResource+"."+constant.GroupTestResource, "create_k8s_cluster"),
+					resource.TestCheckResourceAttrPair(constant.DataSource+"."+constant.GroupResource+"."+constant.GroupDataSourceByName, "create_flow_log", constant.GroupResource+"."+constant.GroupTestResource, "create_flow_log"),
+					resource.TestCheckResourceAttrPair(constant.DataSource+"."+constant.GroupResource+"."+constant.GroupDataSourceByName, "access_and_manage_monitoring", constant.GroupResource+"."+constant.GroupTestResource, "access_and_manage_monitoring"),
+					resource.TestCheckResourceAttrPair(constant.DataSource+"."+constant.GroupResource+"."+constant.GroupDataSourceByName, "access_and_manage_certificates", constant.GroupResource+"."+constant.GroupTestResource, "access_and_manage_certificates"),
+					resource.TestCheckResourceAttrPair(constant.DataSource+"."+constant.GroupResource+"."+constant.GroupDataSourceByName, "manage_dbaas", constant.GroupResource+"."+constant.GroupTestResource, "manage_dbaas"),
 
-					utils.TestNotEmptySlice(DataSource+"."+GroupResource, "users"),
+					utils.TestNotEmptySlice(constant.DataSource+"."+constant.GroupResource, "users"),
 				),
 			},
 			{
 				Config: testAccDataSourceGroupMatchName,
 				Check: resource.ComposeTestCheckFunc(
-					resource.TestCheckResourceAttrPair(DataSource+"."+GroupResource+"."+GroupDataSourceByName, "name", GroupResource+"."+GroupTestResource, "name"),
-					resource.TestCheckResourceAttrPair(DataSource+"."+GroupResource+"."+GroupDataSourceByName, "create_datacenter", GroupResource+"."+GroupTestResource, "create_datacenter"),
-					resource.TestCheckResourceAttrPair(DataSource+"."+GroupResource+"."+GroupDataSourceByName, "create_snapshot", GroupResource+"."+GroupTestResource, "create_snapshot"),
-					resource.TestCheckResourceAttrPair(DataSource+"."+GroupResource+"."+GroupDataSourceByName, "reserve_ip", GroupResource+"."+GroupTestResource, "reserve_ip"),
-					resource.TestCheckResourceAttrPair(DataSource+"."+GroupResource+"."+GroupDataSourceByName, "access_activity_log", GroupResource+"."+GroupTestResource, "access_activity_log"),
-					resource.TestCheckResourceAttrPair(DataSource+"."+GroupResource+"."+GroupDataSourceByName, "create_pcc", GroupResource+"."+GroupTestResource, "create_pcc"),
-					resource.TestCheckResourceAttrPair(DataSource+"."+GroupResource+"."+GroupDataSourceByName, "s3_privilege", GroupResource+"."+GroupTestResource, "s3_privilege"),
-					resource.TestCheckResourceAttrPair(DataSource+"."+GroupResource+"."+GroupDataSourceByName, "create_backup_unit", GroupResource+"."+GroupTestResource, "create_backup_unit"),
-					resource.TestCheckResourceAttrPair(DataSource+"."+GroupResource+"."+GroupDataSourceByName, "create_internet_access", GroupResource+"."+GroupTestResource, "create_internet_access"),
-					resource.TestCheckResourceAttrPair(DataSource+"."+GroupResource+"."+GroupDataSourceByName, "create_k8s_cluster", GroupResource+"."+GroupTestResource, "create_k8s_cluster"),
-					utils.TestNotEmptySlice(DataSource+"."+GroupResource, "users"),
+					resource.TestCheckResourceAttrPair(constant.DataSource+"."+constant.GroupResource+"."+constant.GroupDataSourceByName, "name", constant.GroupResource+"."+constant.GroupTestResource, "name"),
+					resource.TestCheckResourceAttrPair(constant.DataSource+"."+constant.GroupResource+"."+constant.GroupDataSourceByName, "create_datacenter", constant.GroupResource+"."+constant.GroupTestResource, "create_datacenter"),
+					resource.TestCheckResourceAttrPair(constant.DataSource+"."+constant.GroupResource+"."+constant.GroupDataSourceByName, "create_snapshot", constant.GroupResource+"."+constant.GroupTestResource, "create_snapshot"),
+					resource.TestCheckResourceAttrPair(constant.DataSource+"."+constant.GroupResource+"."+constant.GroupDataSourceByName, "reserve_ip", constant.GroupResource+"."+constant.GroupTestResource, "reserve_ip"),
+					resource.TestCheckResourceAttrPair(constant.DataSource+"."+constant.GroupResource+"."+constant.GroupDataSourceByName, "access_activity_log", constant.GroupResource+"."+constant.GroupTestResource, "access_activity_log"),
+					resource.TestCheckResourceAttrPair(constant.DataSource+"."+constant.GroupResource+"."+constant.GroupDataSourceByName, "create_pcc", constant.GroupResource+"."+constant.GroupTestResource, "create_pcc"),
+					resource.TestCheckResourceAttrPair(constant.DataSource+"."+constant.GroupResource+"."+constant.GroupDataSourceByName, "s3_privilege", constant.GroupResource+"."+constant.GroupTestResource, "s3_privilege"),
+					resource.TestCheckResourceAttrPair(constant.DataSource+"."+constant.GroupResource+"."+constant.GroupDataSourceByName, "create_backup_unit", constant.GroupResource+"."+constant.GroupTestResource, "create_backup_unit"),
+					resource.TestCheckResourceAttrPair(constant.DataSource+"."+constant.GroupResource+"."+constant.GroupDataSourceByName, "create_internet_access", constant.GroupResource+"."+constant.GroupTestResource, "create_internet_access"),
+					resource.TestCheckResourceAttrPair(constant.DataSource+"."+constant.GroupResource+"."+constant.GroupDataSourceByName, "create_k8s_cluster", constant.GroupResource+"."+constant.GroupTestResource, "create_k8s_cluster"),
+					utils.TestNotEmptySlice(constant.DataSource+"."+constant.GroupResource, "users"),
 				),
 			},
 			{
@@ -111,44 +113,44 @@ func TestAccGroupBasic(t *testing.T) {
 			{
 				Config: testAccCheckGroupConfigUpdate,
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheckGroupExists(GroupResource+"."+GroupTestResource, &group),
-					resource.TestCheckResourceAttr(GroupResource+"."+GroupTestResource, "name", UpdatedResources),
-					resource.TestCheckResourceAttr(GroupResource+"."+GroupTestResource, "create_datacenter", "false"),
-					resource.TestCheckResourceAttr(GroupResource+"."+GroupTestResource, "create_snapshot", "false"),
-					resource.TestCheckResourceAttr(GroupResource+"."+GroupTestResource, "reserve_ip", "false"),
-					resource.TestCheckResourceAttr(GroupResource+"."+GroupTestResource, "access_activity_log", "false"),
-					resource.TestCheckResourceAttr(GroupResource+"."+GroupTestResource, "create_pcc", "false"),
-					resource.TestCheckResourceAttr(GroupResource+"."+GroupTestResource, "s3_privilege", "false"),
-					resource.TestCheckResourceAttr(GroupResource+"."+GroupTestResource, "create_backup_unit", "false"),
-					resource.TestCheckResourceAttr(GroupResource+"."+GroupTestResource, "create_internet_access", "false"),
-					resource.TestCheckResourceAttr(GroupResource+"."+GroupTestResource, "create_k8s_cluster", "false"),
-					resource.TestCheckResourceAttr(GroupResource+"."+GroupTestResource, "create_flow_log", "false"),
-					resource.TestCheckResourceAttr(GroupResource+"."+GroupTestResource, "access_and_manage_monitoring", "false"),
-					resource.TestCheckResourceAttr(GroupResource+"."+GroupTestResource, "access_and_manage_certificates", "false"),
-					resource.TestCheckResourceAttr(GroupResource+"."+GroupTestResource, "manage_dbaas", "false"),
-					resource.TestCheckResourceAttrPair(GroupResource+".test_user_id", "users.0.id", UserResource+"."+UserTestResource+"3", "id"),
-					utils.TestNotEmptySlice(GroupResource, "users")),
+					testAccCheckGroupExists(constant.GroupResource+"."+constant.GroupTestResource, &group),
+					resource.TestCheckResourceAttr(constant.GroupResource+"."+constant.GroupTestResource, "name", constant.UpdatedResources),
+					resource.TestCheckResourceAttr(constant.GroupResource+"."+constant.GroupTestResource, "create_datacenter", "false"),
+					resource.TestCheckResourceAttr(constant.GroupResource+"."+constant.GroupTestResource, "create_snapshot", "false"),
+					resource.TestCheckResourceAttr(constant.GroupResource+"."+constant.GroupTestResource, "reserve_ip", "false"),
+					resource.TestCheckResourceAttr(constant.GroupResource+"."+constant.GroupTestResource, "access_activity_log", "false"),
+					resource.TestCheckResourceAttr(constant.GroupResource+"."+constant.GroupTestResource, "create_pcc", "false"),
+					resource.TestCheckResourceAttr(constant.GroupResource+"."+constant.GroupTestResource, "s3_privilege", "false"),
+					resource.TestCheckResourceAttr(constant.GroupResource+"."+constant.GroupTestResource, "create_backup_unit", "false"),
+					resource.TestCheckResourceAttr(constant.GroupResource+"."+constant.GroupTestResource, "create_internet_access", "false"),
+					resource.TestCheckResourceAttr(constant.GroupResource+"."+constant.GroupTestResource, "create_k8s_cluster", "false"),
+					resource.TestCheckResourceAttr(constant.GroupResource+"."+constant.GroupTestResource, "create_flow_log", "false"),
+					resource.TestCheckResourceAttr(constant.GroupResource+"."+constant.GroupTestResource, "access_and_manage_monitoring", "false"),
+					resource.TestCheckResourceAttr(constant.GroupResource+"."+constant.GroupTestResource, "access_and_manage_certificates", "false"),
+					resource.TestCheckResourceAttr(constant.GroupResource+"."+constant.GroupTestResource, "manage_dbaas", "false"),
+					resource.TestCheckResourceAttrPair(constant.GroupResource+".test_user_id", "users.0.id", constant.UserResource+"."+constant.UserTestResource+"3", "id"),
+					utils.TestNotEmptySlice(constant.GroupResource, "users")),
 			},
 			{
 				Config: testAccCheckGroupUpdateMigrateToUserIds,
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheckGroupExists(GroupResource+"."+GroupTestResource, &group),
-					resource.TestCheckResourceAttr(GroupResource+"."+GroupTestResource, "name", UpdatedResources),
-					resource.TestCheckResourceAttr(GroupResource+"."+GroupTestResource, "create_datacenter", "false"),
-					resource.TestCheckResourceAttr(GroupResource+"."+GroupTestResource, "create_snapshot", "false"),
-					resource.TestCheckResourceAttr(GroupResource+"."+GroupTestResource, "reserve_ip", "false"),
-					resource.TestCheckResourceAttr(GroupResource+"."+GroupTestResource, "access_activity_log", "false"),
-					resource.TestCheckResourceAttr(GroupResource+"."+GroupTestResource, "create_pcc", "false"),
-					resource.TestCheckResourceAttr(GroupResource+"."+GroupTestResource, "s3_privilege", "false"),
-					resource.TestCheckResourceAttr(GroupResource+"."+GroupTestResource, "create_backup_unit", "false"),
-					resource.TestCheckResourceAttr(GroupResource+"."+GroupTestResource, "create_internet_access", "false"),
-					resource.TestCheckResourceAttr(GroupResource+"."+GroupTestResource, "create_k8s_cluster", "false"),
-					resource.TestCheckResourceAttr(GroupResource+"."+GroupTestResource, "create_flow_log", "false"),
-					resource.TestCheckResourceAttr(GroupResource+"."+GroupTestResource, "access_and_manage_monitoring", "false"),
-					resource.TestCheckResourceAttr(GroupResource+"."+GroupTestResource, "access_and_manage_certificates", "false"),
-					resource.TestCheckResourceAttr(GroupResource+"."+GroupTestResource, "manage_dbaas", "false"),
-					resource.TestCheckResourceAttrPair(GroupResource+".test_user_id", "users.0.id", UserResource+"."+UserTestResource+"3", "id"),
-					utils.TestNotEmptySlice(GroupResource, "users")),
+					testAccCheckGroupExists(constant.GroupResource+"."+constant.GroupTestResource, &group),
+					resource.TestCheckResourceAttr(constant.GroupResource+"."+constant.GroupTestResource, "name", constant.UpdatedResources),
+					resource.TestCheckResourceAttr(constant.GroupResource+"."+constant.GroupTestResource, "create_datacenter", "false"),
+					resource.TestCheckResourceAttr(constant.GroupResource+"."+constant.GroupTestResource, "create_snapshot", "false"),
+					resource.TestCheckResourceAttr(constant.GroupResource+"."+constant.GroupTestResource, "reserve_ip", "false"),
+					resource.TestCheckResourceAttr(constant.GroupResource+"."+constant.GroupTestResource, "access_activity_log", "false"),
+					resource.TestCheckResourceAttr(constant.GroupResource+"."+constant.GroupTestResource, "create_pcc", "false"),
+					resource.TestCheckResourceAttr(constant.GroupResource+"."+constant.GroupTestResource, "s3_privilege", "false"),
+					resource.TestCheckResourceAttr(constant.GroupResource+"."+constant.GroupTestResource, "create_backup_unit", "false"),
+					resource.TestCheckResourceAttr(constant.GroupResource+"."+constant.GroupTestResource, "create_internet_access", "false"),
+					resource.TestCheckResourceAttr(constant.GroupResource+"."+constant.GroupTestResource, "create_k8s_cluster", "false"),
+					resource.TestCheckResourceAttr(constant.GroupResource+"."+constant.GroupTestResource, "create_flow_log", "false"),
+					resource.TestCheckResourceAttr(constant.GroupResource+"."+constant.GroupTestResource, "access_and_manage_monitoring", "false"),
+					resource.TestCheckResourceAttr(constant.GroupResource+"."+constant.GroupTestResource, "access_and_manage_certificates", "false"),
+					resource.TestCheckResourceAttr(constant.GroupResource+"."+constant.GroupTestResource, "manage_dbaas", "false"),
+					resource.TestCheckResourceAttrPair(constant.GroupResource+".test_user_id", "users.0.id", constant.UserResource+"."+constant.UserTestResource+"3", "id"),
+					utils.TestNotEmptySlice(constant.GroupResource, "users")),
 			},
 			{
 				Config:      testAccCheckGroupBothUserArgumentsError,
@@ -159,7 +161,7 @@ func TestAccGroupBasic(t *testing.T) {
 }
 
 func testAccCheckGroupDestroyCheck(s *terraform.State) error {
-	client := testAccProvider.Meta().(SdkBundle).CloudApiClient
+	client := testAccProvider.Meta().(services.SdkBundle).CloudApiClient
 	ctx, cancel := context.WithTimeout(context.Background(), *resourceDefaultTimeouts.Default)
 
 	if cancel != nil {
@@ -167,7 +169,7 @@ func testAccCheckGroupDestroyCheck(s *terraform.State) error {
 	}
 	for _, rs := range s.RootModule().Resources {
 
-		if rs.Type != GroupResource {
+		if rs.Type != constant.GroupResource {
 			continue
 		}
 		_, apiResponse, err := client.UserManagementApi.UmGroupsFindById(ctx, rs.Primary.ID).Execute()
@@ -188,7 +190,7 @@ func testAccCheckGroupDestroyCheck(s *terraform.State) error {
 
 func testAccCheckGroupExists(n string, group *ionoscloud.Group) resource.TestCheckFunc {
 	return func(s *terraform.State) error {
-		client := testAccProvider.Meta().(SdkBundle).CloudApiClient
+		client := testAccProvider.Meta().(services.SdkBundle).CloudApiClient
 
 		rs, ok := s.RootModule().Resources[n]
 
@@ -223,33 +225,33 @@ func testAccCheckGroupExists(n string, group *ionoscloud.Group) resource.TestChe
 }
 
 var testAccCheckGroupCreateUsers = `
-resource ` + UserResource + ` ` + UserTestResource + ` {
+resource ` + constant.UserResource + ` ` + constant.UserTestResource + ` {
   first_name = "user"
   last_name = "test"
   email = "` + utils.GenerateEmail() + `"
-  password = ` + RandomPassword + `.user1_password.result
+  password = ` + constant.RandomPassword + `.user1_password.result
   administrator = false
   force_sec_auth= false
   active = false
 }
 
-resource ` + UserResource + ` ` + UserTestResource + `2 {
+resource ` + constant.UserResource + ` ` + constant.UserTestResource + `2 {
   first_name = "user"
   last_name = "test"
   email = "` + utils.GenerateEmail() + `"
-  password = ` + RandomPassword + `.user2_password.result
+  password = ` + constant.RandomPassword + `.user2_password.result
   administrator = false
   force_sec_auth= false
   active = false
 }
 
-resource ` + RandomPassword + ` "user1_password" {
+resource ` + constant.RandomPassword + ` "user1_password" {
   length           = 16
   special          = true
   override_special = "!#$%&*()-_=+[]{}<>:?"
 }
 
-resource ` + RandomPassword + ` "user2_password" {
+resource ` + constant.RandomPassword + ` "user2_password" {
   length           = 16
   special          = true
   override_special = "!#$%&*()-_=+[]{}<>:?"
@@ -258,8 +260,8 @@ resource ` + RandomPassword + ` "user2_password" {
 `
 
 var testAccCheckGroupConfigBasic = testAccCheckGroupCreateUsers + `
-resource ` + GroupResource + ` ` + GroupTestResource + ` {
-  name = "` + GroupTestResource + `"
+resource ` + constant.GroupResource + ` ` + constant.GroupTestResource + ` {
+  name = "` + constant.GroupTestResource + `"
   create_datacenter = true
   create_snapshot = true
   reserve_ip = true
@@ -273,19 +275,19 @@ resource ` + GroupResource + ` ` + GroupTestResource + ` {
   access_and_manage_monitoring = true
   access_and_manage_certificates = true
   manage_dbaas = true
-  user_ids = [` + UserResource + `.` + UserTestResource + `.id, ` + UserResource + `.` + UserTestResource + `2.id]
+  user_ids = [` + constant.UserResource + `.` + constant.UserTestResource + `.id, ` + constant.UserResource + `.` + constant.UserTestResource + `2.id]
 }
 `
 
 var testAccDataSourceGroupMatchId = testAccCheckGroupConfigBasic + `
-data ` + GroupResource + ` ` + GroupDataSourceById + ` {
-  id			= ` + GroupResource + `.` + GroupTestResource + `.id
+data ` + constant.GroupResource + ` ` + constant.GroupDataSourceById + ` {
+  id			= ` + constant.GroupResource + `.` + constant.GroupTestResource + `.id
 }
 `
 
 var testAccDataSourceGroupMatchName = testAccCheckGroupConfigBasic + `
-resource ` + GroupResource + ` ` + GroupTestResource + `similar {
-  name = "similar` + GroupTestResource + `"
+resource ` + constant.GroupResource + ` ` + constant.GroupTestResource + `similar {
+  name = "similar` + constant.GroupTestResource + `"
   create_datacenter = true
   create_snapshot = true
   reserve_ip = true
@@ -296,14 +298,14 @@ resource ` + GroupResource + ` ` + GroupTestResource + `similar {
   create_internet_access = true
   create_k8s_cluster = true
 }
-data ` + GroupResource + ` ` + GroupDataSourceByName + ` {
-  name			= "` + GroupTestResource + `"
+data ` + constant.GroupResource + ` ` + constant.GroupDataSourceByName + ` {
+  name			= "` + constant.GroupTestResource + `"
 }
 `
 
 var testAccDataSourceGroupMultipleResultsError = testAccCheckGroupConfigBasic + `
-resource ` + GroupResource + ` ` + GroupTestResource + `_multiple_results {
-  name = "` + GroupTestResource + `"
+resource ` + constant.GroupResource + ` ` + constant.GroupTestResource + `_multiple_results {
+  name = "` + constant.GroupTestResource + `"
   create_datacenter = true
   create_snapshot = true
   reserve_ip = true
@@ -315,30 +317,30 @@ resource ` + GroupResource + ` ` + GroupTestResource + `_multiple_results {
   create_k8s_cluster = true
 }
 
-data ` + GroupResource + ` ` + GroupDataSourceByName + ` {
-  name			= "` + GroupTestResource + `"
+data ` + constant.GroupResource + ` ` + constant.GroupDataSourceByName + ` {
+  name			= "` + constant.GroupTestResource + `"
 }
 `
 
 var testAccDataSourceGroupWrongNameError = testAccCheckGroupConfigBasic + `
-data ` + GroupResource + ` ` + GroupDataSourceByName + ` {
+data ` + constant.GroupResource + ` ` + constant.GroupDataSourceByName + ` {
   name			= "wrong_name"
 }
 `
 
 var testAccCheckGroupConfigUpdate = testAccCheckGroupCreateUsers + `
-resource ` + UserResource + ` ` + UserTestResource + `3 {
+resource ` + constant.UserResource + ` ` + constant.UserTestResource + `3 {
   first_name = "user"
   last_name = "test"
   email = "` + utils.GenerateEmail() + `"
-  password = ` + RandomPassword + `.user3_password.result
+  password = ` + constant.RandomPassword + `.user3_password.result
   administrator = false
   force_sec_auth= false
   active = false
 }
 
-resource ` + GroupResource + ` "test_user_id" {
-  name = "` + GroupTestResource + `"
+resource ` + constant.GroupResource + ` "test_user_id" {
+  name = "` + constant.GroupTestResource + `"
   create_datacenter = false
   create_snapshot = false
   reserve_ip = false
@@ -352,11 +354,11 @@ resource ` + GroupResource + ` "test_user_id" {
   access_and_manage_monitoring = false
   access_and_manage_certificates = false
   manage_dbaas = false
-  user_id = ` + UserResource + `.` + UserTestResource + `3.id
+  user_id = ` + constant.UserResource + `.` + constant.UserTestResource + `3.id
 }
 
-resource ` + GroupResource + ` ` + GroupTestResource + ` {
-  name = "` + UpdatedResources + `"
+resource ` + constant.GroupResource + ` ` + constant.GroupTestResource + ` {
+  name = "` + constant.UpdatedResources + `"
   create_datacenter = false
   create_snapshot = false
   reserve_ip = false
@@ -366,10 +368,10 @@ resource ` + GroupResource + ` ` + GroupTestResource + ` {
   create_backup_unit = false
   create_internet_access = false
   create_k8s_cluster = false
-  user_ids = [` + UserResource + `.` + UserTestResource + `.id, ` + UserResource + `.` + UserTestResource + `3.id]
+  user_ids = [` + constant.UserResource + `.` + constant.UserTestResource + `.id, ` + constant.UserResource + `.` + constant.UserTestResource + `3.id]
 }
 
-resource ` + RandomPassword + ` "user3_password" {
+resource ` + constant.RandomPassword + ` "user3_password" {
   length           = 16
   special          = true
   override_special = "!#$%&*()-_=+[]{}<>:?"
@@ -377,18 +379,18 @@ resource ` + RandomPassword + ` "user3_password" {
 `
 
 var testAccCheckGroupUpdateMigrateToUserIds = testAccCheckGroupCreateUsers + `
-resource ` + UserResource + ` ` + UserTestResource + `3 {
+resource ` + constant.UserResource + ` ` + constant.UserTestResource + `3 {
   first_name = "user"
   last_name = "test"
   email = "` + utils.GenerateEmail() + `"
-  password = ` + RandomPassword + `.user3_password.result
+  password = ` + constant.RandomPassword + `.user3_password.result
   administrator = false
   force_sec_auth= false
   active = false
 }
 
-resource ` + GroupResource + ` "test_user_id" {
-  name = "` + GroupTestResource + `"
+resource ` + constant.GroupResource + ` "test_user_id" {
+  name = "` + constant.GroupTestResource + `"
   create_datacenter = false
   create_snapshot = false
   reserve_ip = false
@@ -398,11 +400,11 @@ resource ` + GroupResource + ` "test_user_id" {
   create_backup_unit = false
   create_internet_access = false
   create_k8s_cluster = false
-  user_ids = [` + UserResource + `.` + UserTestResource + `3.id]
+  user_ids = [` + constant.UserResource + `.` + constant.UserTestResource + `3.id]
 }
 
-resource ` + GroupResource + ` ` + GroupTestResource + ` {
-  name = "` + UpdatedResources + `"
+resource ` + constant.GroupResource + ` ` + constant.GroupTestResource + ` {
+  name = "` + constant.UpdatedResources + `"
   create_datacenter = false
   create_snapshot = false
   reserve_ip = false
@@ -412,9 +414,9 @@ resource ` + GroupResource + ` ` + GroupTestResource + ` {
   create_backup_unit = false
   create_internet_access = false
   create_k8s_cluster = false
-  user_ids = [` + UserResource + `.` + UserTestResource + `.id, ` + UserResource + `.` + UserTestResource + `3.id]
+  user_ids = [` + constant.UserResource + `.` + constant.UserTestResource + `.id, ` + constant.UserResource + `.` + constant.UserTestResource + `3.id]
 }
-resource ` + RandomPassword + ` "user3_password" {
+resource ` + constant.RandomPassword + ` "user3_password" {
   length           = 16
   special          = true
   override_special = "!#$%&*()-_=+[]{}<>:?"
@@ -422,18 +424,18 @@ resource ` + RandomPassword + ` "user3_password" {
 `
 
 var testAccCheckGroupBothUserArgumentsError = testAccCheckGroupCreateUsers + `
-resource ` + UserResource + ` ` + UserTestResource + `3 {
+resource ` + constant.UserResource + ` ` + constant.UserTestResource + `3 {
   first_name = "user"
   last_name = "test"
   email = "` + utils.GenerateEmail() + `"
-  password = ` + RandomPassword + `.user3_password.result
+  password = ` + constant.RandomPassword + `.user3_password.result
   administrator = false
   force_sec_auth= false
   active = false
 }
 
-resource ` + GroupResource + ` "test_user_id" {
-  name = "` + GroupTestResource + `"
+resource ` + constant.GroupResource + ` "test_user_id" {
+  name = "` + constant.GroupTestResource + `"
   create_datacenter = false
   create_snapshot = false
   reserve_ip = false
@@ -443,11 +445,11 @@ resource ` + GroupResource + ` "test_user_id" {
   create_backup_unit = false
   create_internet_access = false
   create_k8s_cluster = false
-  user_ids = [` + UserResource + `.` + UserTestResource + `3.id]
+  user_ids = [` + constant.UserResource + `.` + constant.UserTestResource + `3.id]
 }
 
-resource ` + GroupResource + ` ` + GroupTestResource + ` {
-  name = "` + UpdatedResources + `"
+resource ` + constant.GroupResource + ` ` + constant.GroupTestResource + ` {
+  name = "` + constant.UpdatedResources + `"
   create_datacenter = false
   create_snapshot = false
   reserve_ip = false
@@ -457,10 +459,10 @@ resource ` + GroupResource + ` ` + GroupTestResource + ` {
   create_backup_unit = false
   create_internet_access = false
   create_k8s_cluster = false
-  user_ids = [` + UserResource + `.` + UserTestResource + `.id, ` + UserResource + `.` + UserTestResource + `3.id]
-  user_id = ` + UserResource + `.` + UserTestResource + `.id
+  user_ids = [` + constant.UserResource + `.` + constant.UserTestResource + `.id, ` + constant.UserResource + `.` + constant.UserTestResource + `3.id]
+  user_id = ` + constant.UserResource + `.` + constant.UserTestResource + `.id
 }
-resource ` + RandomPassword + ` "user3_password" {
+resource ` + constant.RandomPassword + ` "user3_password" {
   length           = 16
   special          = true
   override_special = "!#$%&*()-_=+[]{}<>:?"

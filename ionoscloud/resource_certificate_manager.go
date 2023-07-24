@@ -6,6 +6,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
+	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services"
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/cert"
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils"
 	"log"
@@ -92,7 +93,7 @@ func checkCertImmutableFields(_ context.Context, diff *schema.ResourceDiff, _ in
 }
 
 func resourceCertificateManagerCreate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
-	client := meta.(SdkBundle).CertManagerClient
+	client := meta.(services.SdkBundle).CertManagerClient
 
 	certPostDto, err := cert.GetCertPostDto(d)
 	if err != nil {
@@ -115,7 +116,7 @@ func resourceCertificateManagerCreate(ctx context.Context, d *schema.ResourceDat
 }
 
 func resourceCertificateManagerRead(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
-	client := meta.(SdkBundle).CertManagerClient
+	client := meta.(services.SdkBundle).CertManagerClient
 
 	certDto, apiResponse, err := client.GetCertificate(ctx, d.Id())
 	if err != nil {
@@ -136,7 +137,7 @@ func resourceCertificateManagerRead(ctx context.Context, d *schema.ResourceData,
 }
 
 func resourceCertificateManagerUpdate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
-	client := meta.(SdkBundle).CertManagerClient
+	client := meta.(services.SdkBundle).CertManagerClient
 
 	certPatchDto := cert.GetCertPatchDto(d)
 
@@ -154,7 +155,7 @@ func resourceCertificateManagerUpdate(ctx context.Context, d *schema.ResourceDat
 }
 
 func resourceCertificateManagerDelete(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
-	client := meta.(SdkBundle).CertManagerClient
+	client := meta.(services.SdkBundle).CertManagerClient
 
 	_, err := client.DeleteCertificate(ctx, d.Id())
 	if err != nil {
@@ -175,7 +176,7 @@ func resourceCertificateManagerDelete(ctx context.Context, d *schema.ResourceDat
 }
 
 func resourceCertificateManagerImport(ctx context.Context, d *schema.ResourceData, meta interface{}) ([]*schema.ResourceData, error) {
-	client := meta.(SdkBundle).CertManagerClient
+	client := meta.(services.SdkBundle).CertManagerClient
 
 	certId := d.Id()
 	certDto, apiResponse, err := client.GetCertificate(ctx, d.Id())
