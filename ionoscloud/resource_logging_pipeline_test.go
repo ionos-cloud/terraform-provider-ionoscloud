@@ -1,3 +1,5 @@
+//go:build all || logging
+
 package ionoscloud
 
 import (
