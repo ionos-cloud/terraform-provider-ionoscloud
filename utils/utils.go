@@ -16,6 +16,8 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
+	"github.com/iancoleman/strcase"
+	"github.com/mitchellh/mapstructure"
 )
 
 const DefaultTimeout = 60 * time.Minute
@@ -268,4 +270,54 @@ func WaitForResourceToBeDeleted(ctx context.Context, d *schema.ResourceData, fn 
 		return resource.RetryableError(fmt.Errorf("resource with id %s found, still trying ", d.Id()))
 	})
 	return err
+}
+
+// DecodeInterfaceToStruct can decode from interface{}, or from []interface
+// will turn "" into nil values
+// takes snake_case fields and decodes them into camelcase fields of struct
+// used to decode values from TypeList and TypeSet of schema(`d`) directly into sdk structs
+func DecodeInterfaceToStruct(input, output interface{}) error {
+	config := mapstructure.DecoderConfig{
+		DecodeHook:       PointerEmptyToNil(),
+		ErrorUnused:      false,
+		ErrorUnset:       false,
+		ZeroFields:       false,
+		WeaklyTypedInput: true,
+		MatchName:        IsSnakeEqualToCamelCase,
+		Result:           &output,
+	}
+	customDecoder, err := mapstructure.NewDecoder(&config)
+	if err != nil {
+		return err
+	}
+	log.Printf("[DEBUG] rawdata to decode %s \n", input)
+	err = customDecoder.Decode(input)
+	if err != nil {
+		return err
+	}
+	return err
+}
+
+func IsSnakeEqualToCamelCase(a, b string) bool {
+	return strings.EqualFold(strcase.ToCamel(a), b)
+}
+
+func PointerEmptyToNil() mapstructure.DecodeHookFuncType {
+	return func(f reflect.Type, t reflect.Type, data interface{}) (interface{}, error) {
+		if f.Kind() == reflect.String && data == "" {
+			return nil, nil
+		}
+		return data, nil
+	}
+}
+
+// checks if value['1'] of key[`id`] is present inside a slice of maps[string]interface{}
+func IsValueInSliceOfMap[T comparable](sliceOfMaps []interface{}, key string, value T) bool {
+	for _, mmap := range sliceOfMaps {
+		//do not delete if the id in the old rule is present in the new rules to be updated
+		if value == mmap.(map[string]interface{})[key] {
+			return true
+		}
+	}
+	return false
 }

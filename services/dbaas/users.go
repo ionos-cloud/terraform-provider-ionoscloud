@@ -8,6 +8,7 @@ import (
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	mongo "github.com/ionos-cloud/sdk-go-dbaas-mongo"
+	pgsql "github.com/ionos-cloud/sdk-go-dbaas-postgres"
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils"
 )
 
@@ -17,8 +18,20 @@ func (c *MongoClient) CreateUser(ctx context.Context, clusterId string, user mon
 	return userResp, apiResponse, err
 }
 
+func (c *PsqlClient) CreateUser(ctx context.Context, clusterId string, user pgsql.User) (pgsql.UserResource, utils.ApiResponseInfo, error) {
+	userResp, apiResponse, err := c.sdkClient.UsersApi.UsersPost(ctx, clusterId).User(user).Execute()
+	apiResponse.LogInfo()
+	return userResp, apiResponse, err
+}
+
 func (c *MongoClient) UpdateUser(ctx context.Context, clusterId, username string, patchUserReq mongo.PatchUserRequest) (mongo.User, utils.ApiResponseInfo, error) {
 	user, apiResponse, err := c.sdkClient.UsersApi.ClustersUsersPatch(ctx, clusterId, username).PatchUserRequest(patchUserReq).Execute()
+	apiResponse.LogInfo()
+	return user, apiResponse, err
+}
+
+func (c *PsqlClient) UpdateUser(ctx context.Context, clusterId, username string, patchUserReq pgsql.UsersPatchRequest) (pgsql.UserResource, utils.ApiResponseInfo, error) {
+	user, apiResponse, err := c.sdkClient.UsersApi.UsersPatch(ctx, clusterId, username).UsersPatchRequest(patchUserReq).Execute()
 	apiResponse.LogInfo()
 	return user, apiResponse, err
 }
@@ -35,8 +48,20 @@ func (c *MongoClient) FindUserByUsername(ctx context.Context, clusterId, usernam
 	return user, apiResponse, err
 }
 
+func (c *PsqlClient) FindUserByUsername(ctx context.Context, clusterId, username string) (pgsql.UserResource, utils.ApiResponseInfo, error) {
+	user, apiResponse, err := c.sdkClient.UsersApi.UsersGet(ctx, clusterId, username).Execute()
+	apiResponse.LogInfo()
+	return user, apiResponse, err
+}
+
 func (c *MongoClient) DeleteUser(ctx context.Context, clusterId, username string) (utils.ApiResponseInfo, error) {
 	_, apiResponse, err := c.sdkClient.UsersApi.ClustersUsersDelete(ctx, clusterId, username).Execute()
+	apiResponse.LogInfo()
+	return apiResponse, err
+}
+
+func (c *PsqlClient) DeleteUser(ctx context.Context, clusterId, username string) (utils.ApiResponseInfo, error) {
+	apiResponse, err := c.sdkClient.UsersApi.UsersDelete(ctx, clusterId, username).Execute()
 	apiResponse.LogInfo()
 	return apiResponse, err
 }
@@ -83,6 +108,20 @@ func (c *MongoClient) IsUserDeleted(ctx context.Context, d *schema.ResourceData)
 	return false, nil
 }
 
+func (c *PsqlClient) IsUserDeleted(ctx context.Context, d *schema.ResourceData) (bool, error) {
+	clusterId := d.Get("cluster_id").(string)
+	username := d.Get("username").(string)
+
+	_, apiResponse, err := c.sdkClient.UsersApi.UsersGet(ctx, clusterId, username).Execute()
+	if err != nil {
+		if apiResponse.HttpNotFound() {
+			return true, nil
+		}
+		return false, fmt.Errorf("error checking user deletion status: %w", err)
+	}
+	return false, nil
+}
+
 func SetUserMongoData(d *schema.ResourceData, user *mongo.User) error {
 	if user.Properties != nil {
 		if user.Properties.Username != nil {
@@ -114,5 +153,23 @@ func SetUserMongoData(d *schema.ResourceData, user *mongo.User) error {
 		}
 	}
 	return nil
+}
 
+func SetUserPgSqlData(d *schema.ResourceData, user *pgsql.UserResource) error {
+	resourceName := "PgSQL user"
+	d.SetId(*user.Id)
+	if user.Properties == nil {
+		return fmt.Errorf("expected properties in the response for the PgSql user with ID: %s, but received 'nil' instead", *user.Id)
+	}
+	if user.Properties.Username != nil {
+		if err := d.Set("username", *user.Properties.Username); err != nil {
+			return utils.GenerateSetError(resourceName, "username", err)
+		}
+	}
+	if user.Properties.System != nil {
+		if err := d.Set("is_system_user", *user.Properties.System); err != nil {
+			return utils.GenerateSetError(resourceName, "is_system_user", err)
+		}
+	}
+	return nil
 }

@@ -13,14 +13,6 @@ import (
 	ionoscloud "github.com/ionos-cloud/sdk-go/v6"
 )
 
-func convertSlice(slice []interface{}) []string {
-	s := make([]string, len(slice))
-	for i, v := range slice {
-		s[i] = v.(string)
-	}
-	return s
-}
-
 func responseBody(resp *ionoscloud.APIResponse) string {
 	ret := "<nil>"
 	if resp != nil {

@@ -19,7 +19,7 @@ type ClusterResponse struct {
 	Type *ResourceType `json:"type,omitempty"`
 	// The unique ID of the resource.
 	Id         *string            `json:"id,omitempty"`
-	Metadata   *Metadata          `json:"metadata,omitempty"`
+	Metadata   *ClusterMetadata   `json:"metadata,omitempty"`
 	Properties *ClusterProperties `json:"properties,omitempty"`
 }
 
@@ -118,8 +118,8 @@ func (o *ClusterResponse) HasId() bool {
 }
 
 // GetMetadata returns the Metadata field value
-// If the value is explicit nil, the zero value for Metadata will be returned
-func (o *ClusterResponse) GetMetadata() *Metadata {
+// If the value is explicit nil, the zero value for ClusterMetadata will be returned
+func (o *ClusterResponse) GetMetadata() *ClusterMetadata {
 	if o == nil {
 		return nil
 	}
@@ -131,7 +131,7 @@ func (o *ClusterResponse) GetMetadata() *Metadata {
 // GetMetadataOk returns a tuple with the Metadata field value
 // and a boolean to check if the value has been set.
 // NOTE: If the value is an explicit nil, `nil, true` will be returned
-func (o *ClusterResponse) GetMetadataOk() (*Metadata, bool) {
+func (o *ClusterResponse) GetMetadataOk() (*ClusterMetadata, bool) {
 	if o == nil {
 		return nil, false
 	}
@@ -140,7 +140,7 @@ func (o *ClusterResponse) GetMetadataOk() (*Metadata, bool) {
 }
 
 // SetMetadata sets field value
-func (o *ClusterResponse) SetMetadata(v Metadata) {
+func (o *ClusterResponse) SetMetadata(v ClusterMetadata) {
 
 	o.Metadata = &v
 

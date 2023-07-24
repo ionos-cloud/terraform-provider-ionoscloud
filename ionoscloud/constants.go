@@ -197,11 +197,18 @@ const (
 	DBaaSClusterTestDataSourceById   = "test_dbaas_cluster_id"
 	DBaaSClusterTestDataSourceByName = "test_dbaas_cluster_name"
 
-	PsqlClusterResource  = "ionoscloud_pg_cluster"
-	PsqlBackupsResource  = "ionoscloud_pg_backups"
-	PsqlBackupsTest      = "test_dbaas_backups"
-	PsqlVersionsResource = "ionoscloud_pg_versions"
-	PsqlVersionsTest     = "test_dbaas_versions"
+	// PgSql constants
+	PsqlClusterResource          = "ionoscloud_pg_cluster"
+	PsqlDatabaseResource         = "ionoscloud_pg_database"
+	PsqlDatabasesResource        = "ionoscloud_pg_databases"
+	PsqlDatabaseTestResource     = "test_database"
+	PsqlDatabaseDataSourceByName = "test_database_name"
+	PsqlDatabasesDataSource      = "test_databases"
+	PsqlUserResource             = "ionoscloud_pg_user"
+	PsqlBackupsResource          = "ionoscloud_pg_backups"
+	PsqlBackupsTest              = "test_dbaas_backups"
+	PsqlVersionsResource         = "ionoscloud_pg_versions"
+	PsqlVersionsTest             = "test_dbaas_versions"
 
 	DBaasMongoClusterResource        = "ionoscloud_mongo_cluster"
 	DBaasMongoUserResource           = "ionoscloud_mongo_user"

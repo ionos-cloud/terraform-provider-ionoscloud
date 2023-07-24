@@ -16,7 +16,7 @@ import (
 
 // PatchClusterRequest Request payload to change a cluster.
 type PatchClusterRequest struct {
-	Metadata   *Metadata               `json:"metadata,omitempty"`
+	Metadata   *ClusterMetadata        `json:"metadata,omitempty"`
 	Properties *PatchClusterProperties `json:"properties,omitempty"`
 }
 
@@ -39,8 +39,8 @@ func NewPatchClusterRequestWithDefaults() *PatchClusterRequest {
 }
 
 // GetMetadata returns the Metadata field value
-// If the value is explicit nil, the zero value for Metadata will be returned
-func (o *PatchClusterRequest) GetMetadata() *Metadata {
+// If the value is explicit nil, the zero value for ClusterMetadata will be returned
+func (o *PatchClusterRequest) GetMetadata() *ClusterMetadata {
 	if o == nil {
 		return nil
 	}
@@ -52,7 +52,7 @@ func (o *PatchClusterRequest) GetMetadata() *Metadata {
 // GetMetadataOk returns a tuple with the Metadata field value
 // and a boolean to check if the value has been set.
 // NOTE: If the value is an explicit nil, `nil, true` will be returned
-func (o *PatchClusterRequest) GetMetadataOk() (*Metadata, bool) {
+func (o *PatchClusterRequest) GetMetadataOk() (*ClusterMetadata, bool) {
 	if o == nil {
 		return nil, false
 	}
@@ -61,7 +61,7 @@ func (o *PatchClusterRequest) GetMetadataOk() (*Metadata, bool) {
 }
 
 // SetMetadata sets field value
-func (o *PatchClusterRequest) SetMetadata(v Metadata) {
+func (o *PatchClusterRequest) SetMetadata(v ClusterMetadata) {
 
 	o.Metadata = &v
 

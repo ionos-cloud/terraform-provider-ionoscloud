@@ -48,7 +48,7 @@ func TestAccServerWithLabelsImport(t *testing.T) {
 				ImportStateIdFunc:       testAccServerImportStateId,
 				ImportState:             true,
 				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{"image_password", "ssh_key_path.#", "image_name", "volume.0.user_data", "volume.0.backup_unit_id", "firewallrule_id", "primary_nic", "inline_volume_ids"},
+				ImportStateVerifyIgnore: []string{"image_password", "ssh_key_path.#", "image_name", "volume.0.user_data", "volume.0.backup_unit_id", "firewallrule_id", "primary_nic", "inline_volume_ids", "primary_ip"},
 			},
 		},
 	})
@@ -62,7 +62,9 @@ func testAccServerImportStateId(s *terraform.State) (string, error) {
 		}
 
 		importID = fmt.Sprintf("%s/%s", rs.Primary.Attributes["datacenter_id"], rs.Primary.Attributes["id"])
-
+		if rs.Primary.Attributes["primary_nic"] != "" {
+			importID = fmt.Sprintf("%s/%s", importID, rs.Primary.Attributes["primary_nic"])
+		}
 	}
 
 	return importID, nil

@@ -181,8 +181,7 @@ func resourceDbaasMongoUserRead(ctx context.Context, d *schema.ResourceData, met
 			d.SetId("")
 			return nil
 		}
-		diags := diag.FromErr(fmt.Errorf("an error occured while fetching a User ID %s %w", d.Id(), err))
-		return diags
+		return diag.FromErr(fmt.Errorf("an error occured while fetching a User ID %s %w", d.Id(), err))
 	}
 
 	if err := dbaas.SetUserMongoData(d, &user); err != nil {

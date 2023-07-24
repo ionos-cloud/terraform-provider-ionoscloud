@@ -14,32 +14,32 @@ import (
 	"encoding/json"
 )
 
-// PostgresVersionListData struct for PostgresVersionListData
-type PostgresVersionListData struct {
+// PostgresVersionListDataInner struct for PostgresVersionListDataInner
+type PostgresVersionListDataInner struct {
 	Name *string `json:"name,omitempty"`
 }
 
-// NewPostgresVersionListData instantiates a new PostgresVersionListData object
+// NewPostgresVersionListDataInner instantiates a new PostgresVersionListDataInner object
 // This constructor will assign default values to properties that have it defined,
 // and makes sure properties required by API are set, but the set of arguments
 // will change when the set of required properties is changed
-func NewPostgresVersionListData() *PostgresVersionListData {
-	this := PostgresVersionListData{}
+func NewPostgresVersionListDataInner() *PostgresVersionListDataInner {
+	this := PostgresVersionListDataInner{}
 
 	return &this
 }
 
-// NewPostgresVersionListDataWithDefaults instantiates a new PostgresVersionListData object
+// NewPostgresVersionListDataInnerWithDefaults instantiates a new PostgresVersionListDataInner object
 // This constructor will only assign default values to properties that have it defined,
 // but it doesn't guarantee that properties required by API are set
-func NewPostgresVersionListDataWithDefaults() *PostgresVersionListData {
-	this := PostgresVersionListData{}
+func NewPostgresVersionListDataInnerWithDefaults() *PostgresVersionListDataInner {
+	this := PostgresVersionListDataInner{}
 	return &this
 }
 
 // GetName returns the Name field value
 // If the value is explicit nil, the zero value for string will be returned
-func (o *PostgresVersionListData) GetName() *string {
+func (o *PostgresVersionListDataInner) GetName() *string {
 	if o == nil {
 		return nil
 	}
@@ -51,7 +51,7 @@ func (o *PostgresVersionListData) GetName() *string {
 // GetNameOk returns a tuple with the Name field value
 // and a boolean to check if the value has been set.
 // NOTE: If the value is an explicit nil, `nil, true` will be returned
-func (o *PostgresVersionListData) GetNameOk() (*string, bool) {
+func (o *PostgresVersionListDataInner) GetNameOk() (*string, bool) {
 	if o == nil {
 		return nil, false
 	}
@@ -60,14 +60,14 @@ func (o *PostgresVersionListData) GetNameOk() (*string, bool) {
 }
 
 // SetName sets field value
-func (o *PostgresVersionListData) SetName(v string) {
+func (o *PostgresVersionListDataInner) SetName(v string) {
 
 	o.Name = &v
 
 }
 
 // HasName returns a boolean if a field has been set.
-func (o *PostgresVersionListData) HasName() bool {
+func (o *PostgresVersionListDataInner) HasName() bool {
 	if o != nil && o.Name != nil {
 		return true
 	}
@@ -75,7 +75,7 @@ func (o *PostgresVersionListData) HasName() bool {
 	return false
 }
 
-func (o PostgresVersionListData) MarshalJSON() ([]byte, error) {
+func (o PostgresVersionListDataInner) MarshalJSON() ([]byte, error) {
 	toSerialize := map[string]interface{}{}
 	if o.Name != nil {
 		toSerialize["name"] = o.Name
@@ -84,38 +84,38 @@ func (o PostgresVersionListData) MarshalJSON() ([]byte, error) {
 	return json.Marshal(toSerialize)
 }
 
-type NullablePostgresVersionListData struct {
-	value *PostgresVersionListData
+type NullablePostgresVersionListDataInner struct {
+	value *PostgresVersionListDataInner
 	isSet bool
 }
 
-func (v NullablePostgresVersionListData) Get() *PostgresVersionListData {
+func (v NullablePostgresVersionListDataInner) Get() *PostgresVersionListDataInner {
 	return v.value
 }
 
-func (v *NullablePostgresVersionListData) Set(val *PostgresVersionListData) {
+func (v *NullablePostgresVersionListDataInner) Set(val *PostgresVersionListDataInner) {
 	v.value = val
 	v.isSet = true
 }
 
-func (v NullablePostgresVersionListData) IsSet() bool {
+func (v NullablePostgresVersionListDataInner) IsSet() bool {
 	return v.isSet
 }
 
-func (v *NullablePostgresVersionListData) Unset() {
+func (v *NullablePostgresVersionListDataInner) Unset() {
 	v.value = nil
 	v.isSet = false
 }
 
-func NewNullablePostgresVersionListData(val *PostgresVersionListData) *NullablePostgresVersionListData {
-	return &NullablePostgresVersionListData{value: val, isSet: true}
+func NewNullablePostgresVersionListDataInner(val *PostgresVersionListDataInner) *NullablePostgresVersionListDataInner {
+	return &NullablePostgresVersionListDataInner{value: val, isSet: true}
 }
 
-func (v NullablePostgresVersionListData) MarshalJSON() ([]byte, error) {
+func (v NullablePostgresVersionListDataInner) MarshalJSON() ([]byte, error) {
 	return json.Marshal(v.value)
 }
 
-func (v *NullablePostgresVersionListData) UnmarshalJSON(src []byte) error {
+func (v *NullablePostgresVersionListDataInner) UnmarshalJSON(src []byte) error {
 	v.isSet = true
 	return json.Unmarshal(src, &v.value)
 }

@@ -11,6 +11,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 	ionoscloud "github.com/ionos-cloud/sdk-go/v6"
+	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/slice"
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils"
 )
 
@@ -136,10 +137,9 @@ func resourceCubeServer() *schema.Resource {
 								sshKeyPath := d.Get("volume.0.ssh_key_path").([]interface{})
 								oldSshKeyPath := d.Get("ssh_key_path").([]interface{})
 
-								if len(utils.DiffSlice(convertSlice(sshKeyPath), convertSlice(oldSshKeyPath))) == 0 {
+								if len(slice.DiffString(slice.AnyToString(sshKeyPath), slice.AnyToString(oldSshKeyPath))) == 0 {
 									return true
 								}
-
 								return false
 							},
 						},
@@ -851,8 +851,8 @@ func resourceCubeServerUpdate(ctx context.Context, d *schema.ResourceData, meta 
 	// Nic stuff
 	if d.HasChange("nic") {
 		nic := &ionoscloud.Nic{}
+		nicStr := d.Get("primary_nic").(string)
 		for _, n := range *server.Entities.Nics.Items {
-			nicStr := d.Get("primary_nic").(string)
 			if *n.Id == nicStr {
 				nic = &n
 				break

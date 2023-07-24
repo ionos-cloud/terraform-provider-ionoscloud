@@ -1,3 +1,16 @@
+## 6.4.5
+### Features
+- Make `nic` list in `ionoscloud_server` resource optional
+- Make `firewall` list in `ionoscloud_server` resource optional and allow multiple inline firewall rules in the list
+
+## 6.4.4
+
+### Features
+- Add support for PgSQL User & Databases
+
+### Dependency update
+- Update `sdk-go-dbaas-postgres` to version 1.1.2
+
 ## 6.4.3
 
 ### Documentation
@@ -5,6 +18,7 @@
 
 ### Fixes
 - Remove unpopulated `credentials` field from mongodb cluster data source.
+- Add `ram` and `cores` fields to cube server data source.
 
 ## 6.4.2
 ### Fixes

@@ -52,6 +52,8 @@ The following attributes are returned by the datasource:
 * `availability_zone` - The availability zone in which the server should exist
 * `vm_state` - Status of the virtual Machine
 * `boot_cdrom`
+* `ram`
+* `cores`
 * `boot_volume`
 * `boot_image`
 * `token`
