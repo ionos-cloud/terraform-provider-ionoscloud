@@ -332,6 +332,14 @@ func resourceServer() *schema.Resource {
 							Type:     schema.TypeBool,
 							Optional: true,
 						},
+						"dhcpv6": {
+							Type:     schema.TypeBool,
+							Optional: true,
+						},
+						"ipv6_cidr_block": {
+							Type:     schema.TypeString,
+							Optional: true,
+						},
 						"ips": {
 							Type: schema.TypeList,
 							Elem: &schema.Schema{
@@ -341,6 +349,12 @@ func resourceServer() *schema.Resource {
 							Description: "Collection of IP addresses assigned to a nic. Explicitly assigned public IPs need to come from reserved IP blocks, Passing value null or empty array will assign an IP address automatically.",
 							Computed:    true,
 							Optional:    true,
+						},
+						"ipv6_ips": {
+							Type:     schema.TypeList,
+							Elem:     &schema.Schema{Type: schema.TypeString},
+							Optional: true,
+							Computed: true,
 						},
 						"firewall_active": {
 							Type:     schema.TypeBool,
