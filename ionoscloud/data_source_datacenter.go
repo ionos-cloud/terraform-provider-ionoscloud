@@ -3,9 +3,10 @@ package ionoscloud
 import (
 	"context"
 	"fmt"
+	"log"
+
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	ionoscloud "github.com/ionos-cloud/sdk-go/v6"
-	"log"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 )

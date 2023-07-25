@@ -2,12 +2,13 @@ package cert
 
 import (
 	"fmt"
-	"github.com/hashicorp/terraform-plugin-sdk/v2/meta"
-	certmanager "github.com/ionos-cloud/sdk-go-cert-manager"
-	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils"
 	"net/http"
 	"os"
 	"runtime"
+
+	"github.com/hashicorp/terraform-plugin-sdk/v2/meta"
+	certmanager "github.com/ionos-cloud/sdk-go-cert-manager"
+	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils"
 )
 
 type Client struct {

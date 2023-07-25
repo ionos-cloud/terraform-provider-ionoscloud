@@ -5,11 +5,12 @@ package ionoscloud
 import (
 	"context"
 	"fmt"
+	"regexp"
+	"testing"
+
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
 	logging "github.com/ionos-cloud/sdk-go-logging"
-	"regexp"
-	"testing"
 )
 
 func TestAccLoggingPipeline(t *testing.T) {
