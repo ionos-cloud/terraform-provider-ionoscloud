@@ -249,8 +249,10 @@ func getNicData(d *schema.ResourceData, path string) ionoscloud.Nic {
 	}
 
 	dhcp := d.Get(path + "dhcp").(bool)
+	dhcpv6 := d.Get(path + "dhcpv6").(bool)
 	fwActive := d.Get(path + "firewall_active").(bool)
 	nic.Properties.Dhcp = &dhcp
+	nic.Properties.Dhcpv6 = &dhcpv6
 	nic.Properties.FirewallActive = &fwActive
 
 	if _, ok := d.GetOk(path + "firewall_type"); ok {
@@ -270,6 +272,22 @@ func getNicData(d *schema.ResourceData, path string) ionoscloud.Nic {
 			}
 			if ips != nil && len(ips) > 0 {
 				nic.Properties.Ips = &ips
+			}
+		}
+	}
+
+	if v, ok := d.GetOk(path + "ipv6_ips"); ok {
+		raw := v.([]interface{})
+		if raw != nil && len(raw) > 0 {
+			ipv6_ips := make([]string, 0)
+			for _, rawIpv6 := range raw {
+				if rawIpv6 != nil {
+					ip := rawIpv6.(string)
+					ipv6_ips = append(ipv6_ips, ip)
+				}
+			}
+			if ipv6_ips != nil && len(ipv6_ips) > 0 {
+				nic.Properties.Ipv6Ips = &ipv6_ips
 			}
 		}
 	}
