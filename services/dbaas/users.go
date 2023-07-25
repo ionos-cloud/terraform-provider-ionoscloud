@@ -3,12 +3,13 @@ package dbaas
 import (
 	"context"
 	"fmt"
+	"log"
+	"strings"
+
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	mongo "github.com/ionos-cloud/sdk-go-dbaas-mongo"
 	pgsql "github.com/ionos-cloud/sdk-go-dbaas-postgres"
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils"
-	"log"
-	"strings"
 )
 
 func (c *MongoClient) CreateUser(ctx context.Context, clusterId string, user mongo.User) (mongo.User, utils.ApiResponseInfo, error) {

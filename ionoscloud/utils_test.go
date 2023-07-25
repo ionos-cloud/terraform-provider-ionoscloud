@@ -1,8 +1,9 @@
 package ionoscloud
 
 import (
-	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils"
 	"testing"
+
+	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils"
 )
 
 func TestSetPropWithNilCheck(t *testing.T) {

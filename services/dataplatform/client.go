@@ -2,12 +2,13 @@ package dataplatform
 
 import (
 	"fmt"
-	"github.com/hashicorp/terraform-plugin-sdk/v2/meta"
-	dataplatform "github.com/ionos-cloud/sdk-go-dataplatform"
-	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils"
 	"net/http"
 	"os"
 	"runtime"
+
+	"github.com/hashicorp/terraform-plugin-sdk/v2/meta"
+	dataplatform "github.com/ionos-cloud/sdk-go-dataplatform"
+	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils"
 )
 
 // Client - wrapper over sdk client, to allow for service layer
