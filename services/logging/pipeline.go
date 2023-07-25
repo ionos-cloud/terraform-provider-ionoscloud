@@ -6,6 +6,8 @@ import (
 	"log"
 	"strings"
 
+	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils/constant"
+
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	logging "github.com/ionos-cloud/sdk-go-logging"
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils"
@@ -30,7 +32,7 @@ func (c *Client) IsPipelineAvailable(ctx context.Context, d *schema.ResourceData
 		return false, fmt.Errorf("expected metadata, got empty for pipeline with ID: %s", pipelineId)
 	}
 	log.Printf("[DEBUG] pipeline status: %s", *pipeline.Metadata.Status)
-	return strings.EqualFold(*pipeline.Metadata.Status, utils.Available), nil
+	return strings.EqualFold(*pipeline.Metadata.Status, constant.Available), nil
 }
 
 func (c *Client) UpdatePipeline(ctx context.Context, id string, d *schema.ResourceData) (logging.Pipeline, utils.ApiResponseInfo, error) {

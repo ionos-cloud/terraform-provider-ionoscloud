@@ -3,10 +3,11 @@
 package ionoscloud
 
 import (
-	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
-	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils/constant"
 	"regexp"
 	"testing"
+
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
+	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils/constant"
 )
 
 const templateName = constant.DataSource + "." + constant.TemplateResource + "." + constant.TemplateTestResource

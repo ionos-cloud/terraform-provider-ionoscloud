@@ -6,13 +6,14 @@ package ionoscloud
 import (
 	"context"
 	"fmt"
+	"regexp"
+	"testing"
+
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
 	cr "github.com/ionos-cloud/sdk-go-container-registry"
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services"
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils/constant"
-	"regexp"
-	"testing"
 )
 
 func TestAccContainerRegistryBasic(t *testing.T) {

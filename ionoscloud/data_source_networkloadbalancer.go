@@ -6,6 +6,8 @@ import (
 	"fmt"
 	"strings"
 
+	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services"
+
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	ionoscloud "github.com/ionos-cloud/sdk-go/v6"
@@ -64,7 +66,7 @@ func dataSourceNetworkLoadBalancer() *schema.Resource {
 }
 
 func dataSourceNetworkLoadBalancerRead(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
-	client := meta.(SdkBundle).CloudApiClient
+	client := meta.(services.SdkBundle).CloudApiClient
 
 	datacenterId, dcIdOk := d.GetOk("datacenter_id")
 	if !dcIdOk {

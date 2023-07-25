@@ -3,6 +3,10 @@ package firewallSvc
 import (
 	"context"
 	"fmt"
+	"log"
+	"reflect"
+	"strconv"
+
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	ionoscloud "github.com/ionos-cloud/sdk-go/v6"
@@ -10,9 +14,6 @@ import (
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/slice"
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils"
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils/constant"
-	"log"
-	"reflect"
-	"strconv"
 )
 
 type Service struct {

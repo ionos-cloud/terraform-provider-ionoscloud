@@ -3,6 +3,11 @@ package ionoscloud
 import (
 	"context"
 	"fmt"
+	"log"
+	"net/http"
+	"os"
+	"runtime"
+
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/meta"
@@ -16,10 +21,6 @@ import (
 	loggingService "github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/logging"
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils"
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils/constant"
-	"log"
-	"net/http"
-	"os"
-	"runtime"
 )
 
 var Version = "DEV"
